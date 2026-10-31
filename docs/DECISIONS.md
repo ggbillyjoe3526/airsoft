@@ -179,6 +179,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   Valorant's shapes and Breath of the Wild's soft light and rim light only; clean surfaces; a vibrant palette with no
   dominant colour; no grass. The target picture is project files `concepts/art-direction/06-valorant-botw-v3.jpg`.
   `docs/ART.md` is rewritten to it at the start of 0.1 Dev 2; 0.1 Dev 1's look is unchanged.
+- **The art direction is game-wide and is about colour and look, not content (owner, 2026-10-31).** "Just because
+  something isn't in the art direction doesn't mean it can't appear." Depot, Woodland and every later map use the same
+  look, as shared code (`LookConfig`, the shared light): `docs/ART.md` › A map in the look.
+- **The graphics scale a long way (owner, 2026-10-31).** Low holds 60 FPS on a reasonably modern low-powered gaming PC
+  (it was a low-spec laptop); Ultra gets as close to ray- or path-traced light as Godot allows, for a card like his RTX
+  5090: SDFGI bounce light, screen-space reflections over probes, volumetric haze, contact-hardening shadows.
+  Temporal smoothing stays off on every preset (it smears BB streaks). `data/graphics.md`, `docs/ART.md` › Light.
 - **The owner's six reference pictures are the art direction target (owner, 2026-10-18).** Plywood barricades with
   zone letters, coloured containers, hard cases, floodlight masts and towers, in day, golden-hour and night light,
   with first-person arms and toy replicas: `docs/ART.md` › The target, pictures in `docs/art/references/`. Where they

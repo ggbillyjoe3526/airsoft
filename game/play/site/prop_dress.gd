@@ -8,7 +8,7 @@ extends Node3D
 ## caster); shelving casts none, its rack's backing box still does. Scenery only: no collider, no nav cell; the blocks'
 ## boxes are still what BBs and bodies meet.
 
-var _material: StandardMaterial3D = null
+var _material: ShaderMaterial = null
 var _views: Dictionary[StringName, Array] = {} # each model's MultiMeshInstance3Ds, a chunk each
 var _meshes: Dictionary[StringName, Mesh] = {}
 var _placed: Dictionary[StringName, PropLayout.Placed] = {}
@@ -32,10 +32,7 @@ static func build(map: MapData, cfg: PropDressConfig) -> PropDress:
 		return null
 	var dress := PropDress.new()
 	dress.name = "Props"
-	dress._material = StandardMaterial3D.new()
-	dress._material.vertex_color_use_as_albedo = true
-	dress._material.roughness = cfg.roughness
-	dress._material.metallic = cfg.metallic
+	dress._material = LookMaterials.vertex_colour(cfg.roughness, cfg.metallic)
 	dress._placed = placed
 	dress._meshes = meshes
 	for model: StringName in placed:

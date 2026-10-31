@@ -40,6 +40,15 @@ const SSAO_ADAPTIVE := "rendering/environment/ssao/adaptive_target"
 const SSAO_BLUR := "rendering/environment/ssao/blur_passes"
 const SSAO_FADE_FROM := "rendering/environment/ssao/fadeout_from"
 const SSAO_FADE_TO := "rendering/environment/ssao/fadeout_to"
+const SSIL_ADAPTIVE := "rendering/environment/ssil/adaptive_target"
+const SSIL_BLUR := "rendering/environment/ssil/blur_passes"
+const SSIL_FADE_FROM := "rendering/environment/ssil/fadeout_from"
+const SSIL_FADE_TO := "rendering/environment/ssil/fadeout_to"
+## Each GlobalIllumination as the screen-space bounce's quality and whether it is drawn at half size: Screen (High)
+## medium at half size, Scene (Ultra) high at full size with SDFGI at full resolution.
+const SSIL_QUALITY: Array[int] = [RenderingServer.ENV_SSIL_QUALITY_LOW, RenderingServer.ENV_SSIL_QUALITY_MEDIUM,
+		RenderingServer.ENV_SSIL_QUALITY_HIGH]
+const SSIL_HALF: Array[bool] = [true, true, false]
 
 
 ## The process's graphics: the RenderingServer's few global settings, which it can't be asked for, each sent only when
@@ -60,6 +69,10 @@ class Server:
 	var shadow_size: int = ProjectSettings.get_setting(SHADOW_SIZE) as int
 	var soft_shadows: int = ProjectSettings.get_setting(SOFT_SHADOWS) as int
 	var ssao_half: bool = ProjectSettings.get_setting(SSAO_HALF) as bool
+	## The global illumination's and the volumetric fog's quality as last sent (GlobalIllumination, -1 never sent; the
+	## fog's froxel grid, zero never sent).
+	var gi_quality: int = -1
+	var fog_grid: Vector2i = Vector2i.ZERO
 	## The values last drawn (`apply_settings`), or null before the first.
 	var drawn: GraphicsQuality = null
 
@@ -74,6 +87,30 @@ class Server:
 			return
 		soft_shadows = quality
 		RenderingServer.directional_soft_shadow_filter_set_quality(quality as RenderingServer.ShadowQuality)
+
+	## The bounce light's quality for `gi` (SSIL_QUALITY, SSIL_HALF) and, for Scene, SDFGI's rays and frames from
+	## `look`.
+	func set_gi_quality(gi: GraphicsQuality.GlobalIllumination, look: LookConfig) -> void:
+		if gi == gi_quality:
+			return
+		gi_quality = gi
+		RenderingServer.environment_set_ssil_quality(SSIL_QUALITY[gi] as RenderingServer.EnvironmentSSILQuality,
+				SSIL_HALF[gi], ProjectSettings.get_setting(SSIL_ADAPTIVE) as float,
+				ProjectSettings.get_setting(SSIL_BLUR) as int, ProjectSettings.get_setting(SSIL_FADE_FROM) as float,
+				ProjectSettings.get_setting(SSIL_FADE_TO) as float)
+		var scene := gi == GraphicsQuality.GlobalIllumination.SCENE
+		RenderingServer.gi_set_use_half_resolution(not scene)
+		if scene:
+			RenderingServer.environment_set_sdfgi_ray_count(look.sdfgi_rays)
+			RenderingServer.environment_set_sdfgi_frames_to_converge(look.sdfgi_converge)
+			RenderingServer.environment_set_sdfgi_frames_to_update_light(look.sdfgi_update)
+
+	## The volumetric fog's froxel grid (cells across, deep).
+	func set_fog_grid(grid: Vector2i) -> void:
+		if grid == fog_grid:
+			return
+		fog_grid = grid
+		RenderingServer.environment_set_volumetric_fog_volume_size(grid.x, grid.y)
 
 	func set_ssao_half(half: bool) -> void:
 		if half == ssao_half:
@@ -197,7 +234,8 @@ static func apply_picture(values: GraphicsQuality, viewport: Viewport) -> void:
 		viewport.screen_space_aa = screen_aa
 
 
-## The match's sun (shadows on, their range), its ambient occlusion (on, and half or full size), the wind dust's share,
+## The match's sun (shadows on, their range, contact-hardening on Softest), its ambient occlusion (on, and half or full
+## size), its global illumination, reflections, glow and volumetric fog (FieldLighting.set_effects), the wind dust's share,
 ## the kicked dust (on with any wind dust), the level's baked light (a new mesh only when it changes) and a wood's
 ## dressing (WoodsView: its parts by Mesh detail, its fireflies and motes by the wind dust's share), from `values`
 ## (already drawable). Any of `lighting`, `dust`, `level`, `kicked` and `woods` may be null.
@@ -211,6 +249,13 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 		lighting.environment.ssao_enabled = ao and lighting.ssao_allowed()
 		if ao:
 			to.set_ssao_half(values.ambient_occlusion == GraphicsQuality.AmbientOcclusion.HALF)
+		var look := lighting.look()
+		if values.global_illumination != GraphicsQuality.GlobalIllumination.OFF:
+			to.set_gi_quality(values.global_illumination, look)
+		if values.volumetric_fog:
+			to.set_fog_grid(Vector2i(look.fog_volume_size, look.fog_volume_depth))
+		lighting.set_effects(values.global_illumination, values.reflections, values.glow, values.volumetric_fog,
+				values.sun_shadows and values.shadow_softness == GraphicsQuality.ShadowSoftness.SOFTEST)
 	if dust != null:
 		dust.set_share(values.wind_dust / PERCENT)
 	if level != null:

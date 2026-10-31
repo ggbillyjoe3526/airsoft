@@ -2216,6 +2216,9 @@ msgstr "Shadows"
 msgid "GRAPHICS_LIGHT_AND_DETAIL"
 msgstr "Light and detail"
 
+msgid "GRAPHICS_EFFECTS"
+msgstr "Light effects"
+
 msgid "GRAPHICS_PRESET"
 msgstr "PRESET"
 
@@ -2339,6 +2342,21 @@ msgstr "MESH DETAIL"
 msgid "GRAPHICS_WIND_DUST"
 msgstr "WIND DUST"
 
+msgid "GRAPHICS_GLOBAL_ILLUMINATION"
+msgstr "BOUNCE LIGHT"
+
+msgid "GRAPHICS_REFLECTIONS"
+msgstr "REFLECTIONS"
+
+msgid "GRAPHICS_GLOW"
+msgstr "GLOW"
+
+msgid "GRAPHICS_VOLUMETRIC_FOG"
+msgstr "VOLUMETRIC HAZE"
+
+msgid "GRAPHICS_GLOBAL_ILLUMINATION_NOTE"
+msgstr "Light bouncing off the field. Screen: what you see. Scene: the whole field, sky light included."
+
 msgid "GRAPHICS_DRAWS"
 msgstr "Draws %d × %d."
 
@@ -2419,6 +2437,15 @@ msgstr "8×"
 
 msgid "GRAPHICS_CHOICE_16X"
 msgstr "16×"
+
+msgid "GRAPHICS_CHOICE_SCREEN"
+msgstr "Screen"
+
+msgid "GRAPHICS_CHOICE_SCENE"
+msgstr "Scene"
+
+msgid "GRAPHICS_CHOICE_PROBES"
+msgstr "Probes"
 
 msgid "GRAPHICS_CHOICE_LOW"
 msgstr "Low"

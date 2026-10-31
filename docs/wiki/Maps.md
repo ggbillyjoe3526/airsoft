@@ -15,14 +15,14 @@ colours, with the finished models coming later ([Roadmap](Roadmap)).
 **An indoor airsoft hall**, 108 by 72 metres under one roof, in 5v5 or 6v6. Alpha starts at the east end and Beta in
 the west in Elimination, and the teams swap ends at half time.
 
-![Depot's Chrono hall, under the roof lamps](images/depot-chrono-hall.jpg)
+![Depot's Chrono hall under the violet ceiling and its lamps](images/depot-chrono-hall.jpg)
 
 - **Three lanes** wind from end to end between plywood rooms and racking you can't enter: the **Shoot House** and
   the **Lounge** to the north, the open **Chrono hall** in the middle, the **Huts** and the **Box yard** to the
   south. No lane runs straight; each bends round the dead space.
 - **Links** join the lanes: open cuts and galleries, two tight alleys, and two **tunnels**, one in each half. The
   tunnels are unlit and bend twice: dark, but never pitch black.
-- **The roof:** a dark steel ceiling on red trusses, with rows of lamps. A BB fired up stops at the ceiling.
+- **The roof:** a violet ceiling on crimson trusses, with rows of glowing lamps. A BB fired up stops at the ceiling.
 - **Long sight lines** down the Chrono hall and the yards: bots on Depot see 55 metres, further than on other fields.
 - **The Box** sits in the Box yard: a roofed container you can fight inside, and container rows with ports guard
   B site.
@@ -34,12 +34,14 @@ the west in Elimination, and the teams swap ends at half time.
 - **Doors:** some of the plywood rooms and huts have green [doors](#doors), some starting open and some shut.
 - **Attack / Defend** puts two flagpoles at the defenders' end, **A** on A site and **B** on B site; the attackers
   raise either ([Modes](Modes#attack--defend)).
+- **The look:** clean painted surfaces in soft, stylised light, with crimson, violet, yellow, teal, green and cream
+  spread over the hall so the team colours stay the loudest.
 - **Props:** the drums, barrels, the Lounge's sofa and the racking are free CC0 models: teal drums four to a pallet,
-  raspberry steel barrels in pairs, and shelving stocked with cartons on every rack. Each fills the space its block
-  did, so what you see is what stops a BB. The walls, crates and containers are still plain blocks in the site's
-  colours until the final models.
+  crimson steel barrels in pairs, a violet sofa, and steel shelving stocked with cartons on every rack. Each fills the
+  space its block did, so what you see is what stops a BB. The walls, crates and containers are still plain blocks in
+  the site's colours until the final models.
 
-![A dark tunnel between two lanes](images/depot-tunnel.jpg)
+![The West tunnel, lit only from its ends](images/depot-tunnel.jpg)
 
 ### Areas
 

@@ -28,29 +28,29 @@ enum Canvas {
 	&"sofa": Canvas.FABRIC, &"backing": Canvas.PAINT,
 }
 @export var paints: Dictionary[StringName, Color] = {
-	&"slab": Color(0.56, 0.54, 0.5), &"dock": Color(0.6, 0.58, 0.54), &"gravel": Color(0.56, 0.54, 0.5),
-	&"ground": Color(0.52, 0.47, 0.39), &"wall_outer": Color(0.84, 0.8, 0.72), &"wall_inner": Color(0.88, 0.85, 0.79),
-	&"container": Color(0.5, 0.5, 0.5), &"container_box": Color(0.38, 0.42, 0.27), &"hoarding": Color(0.36, 0.4, 0.43),
-	&"plywood": Color(0.82, 0.75, 0.56), &"crate": Color(0.72, 0.65, 0.47), &"precast": Color(0.72, 0.7, 0.66),
-	&"wrapped": Color(0.88, 0.9, 0.92), &"rack": Color(0.3, 0.33, 0.38), &"gabion": Color(0.68, 0.65, 0.6),
-	&"toilet": Color(0.24, 0.44, 0.36), &"ibc": Color(0.9, 0.9, 0.86), &"generator": Color(0.74, 0.6, 0.16),
-	&"sandbags": Color(0.62, 0.55, 0.4), &"skip": Color(0.74, 0.6, 0.16), &"ramp": Color(0.56, 0.57, 0.58),
-	&"timber": Color(0.62, 0.55, 0.4), &"frame": Color(1.0, 1.0, 1.0), &"steel": Color(0.5, 0.5, 0.48),
-	&"hazard": Color(0.86, 0.72, 0.12), &"net": Color(0.29, 0.31, 0.22), &"flag": Color(0.74, 0.6, 0.16),
-	&"coping": Color(0.7, 0.68, 0.64), &"sail": Color(0.9, 0.86, 0.76), &"default": Color(0.6, 0.6, 0.6),
-	# Depot's hall (DR1), MapStyle's colours: tan fibre drums, olive-grey barrels, raspberry pillars, teal netting, a
-	# plum sofa, each off both team hues.
-	&"drum": Color(0.16, 0.5, 0.48), &"barrel": Color(0.6, 0.14, 0.38), &"pillar": Color(0.62, 0.16, 0.4),
-	&"netting": Color(0.2, 0.55, 0.53), &"sofa": Color(0.42, 0.31, 0.48), &"backing": Color(0.16, 0.17, 0.18),
+	&"slab": Color8(0x7c, 0x76, 0x70), &"dock": Color8(0xd2, 0xce, 0xc8), &"gravel": Color8(0xb9, 0xb4, 0xae),
+	&"ground": Color8(0xb9, 0xae, 0x98), &"wall_outer": Color8(0xec, 0xe2, 0xcf), &"wall_inner": Color8(0xf4, 0xec, 0xda),
+	&"container": Color(0.5, 0.5, 0.5), &"container_box": Color8(0x76, 0x58, 0xaa), &"hoarding": Color8(0x2a, 0x9c, 0x90),
+	&"plywood": Color8(0xdc, 0xca, 0xa8), &"crate": Color8(0xc2, 0xb6, 0x98), &"precast": Color8(0xd2, 0xce, 0xc8),
+	&"wrapped": Color8(0xf4, 0xec, 0xda), &"rack": Color8(0x6c, 0x6a, 0x7a), &"gabion": Color8(0xb9, 0xb4, 0xae),
+	&"toilet": Color8(0x58, 0x90, 0x4e), &"ibc": Color8(0xf4, 0xec, 0xda), &"generator": Color8(0xe4, 0xca, 0x46),
+	&"sandbags": Color8(0xa0, 0x94, 0x7c), &"skip": Color8(0xe4, 0xca, 0x46), &"ramp": Color8(0x8c, 0x8a, 0x96),
+	&"timber": Color8(0xa0, 0x94, 0x7c), &"frame": Color(1.0, 1.0, 1.0), &"steel": Color8(0x6c, 0x6a, 0x7a),
+	&"hazard": Color8(0xe4, 0xca, 0x46), &"net": Color8(0x58, 0x90, 0x4e), &"flag": Color8(0xe4, 0xca, 0x46),
+	&"coping": Color8(0xd2, 0xce, 0xc8), &"sail": Color8(0xf4, 0xec, 0xda), &"default": Color8(0xb9, 0xb4, 0xae),
+	# Depot's hall (DR1) in the look's six site colours (LookConfig.palette), each off both team hues: teal drums,
+	# crimson barrels, yellow pillars, green netting, a violet sofa; the shelving's backing in the look's ink.
+	&"drum": Color8(0x2a, 0x9c, 0x90), &"barrel": Color8(0xc2, 0x38, 0x74), &"pillar": Color8(0xe4, 0xca, 0x46),
+	&"netting": Color8(0x58, 0x90, 0x4e), &"sofa": Color8(0x76, 0x58, 0xaa), &"backing": Color8(0x3a, 0x2f, 0x5a),
 }
 @export var accents: Dictionary[StringName, Color] = {
-	&"dock": Color(0.86, 0.72, 0.12), &"gravel": Color(0.42, 0.39, 0.35), &"wall_outer": Color(0.55, 0.56, 0.52),
-	&"wall_inner": Color(0.66, 0.6, 0.48), &"hoarding": Color(0.86, 0.72, 0.12), &"precast": Color(0.86, 0.72, 0.12),
-	&"rack": Color(0.74, 0.6, 0.16), &"gabion": Color(0.55, 0.5, 0.43), &"toilet": Color(0.86, 0.86, 0.82),
-	&"ibc": Color(0.62, 0.63, 0.62), &"generator": Color(0.15, 0.15, 0.15), &"hazard": Color(0.07, 0.07, 0.07),
+	&"dock": Color8(0xe4, 0xca, 0x46), &"gravel": Color8(0xa0, 0x9a, 0x92), &"wall_outer": Color8(0x76, 0x58, 0xaa),
+	&"wall_inner": Color8(0x2a, 0x9c, 0x90), &"hoarding": Color8(0xe4, 0xca, 0x46), &"precast": Color8(0xe4, 0xca, 0x46),
+	&"rack": Color8(0xe4, 0xca, 0x46), &"gabion": Color8(0x8c, 0x84, 0x78), &"toilet": Color8(0xf4, 0xec, 0xda),
+	&"ibc": Color8(0x8c, 0x8a, 0x96), &"generator": Color8(0x3a, 0x2f, 0x5a), &"hazard": Color8(0x3a, 0x2f, 0x5a),
 }
 @export var bands: Dictionary[StringName, Vector2] = {
-	&"wall_outer": Vector2(-1.0, 1.0), &"wall_inner": Vector2(-1.0, 0.9), &"precast": Vector2(0.86, 1.03),
+	&"wall_outer": Vector2(-1.0, 1.2), &"wall_inner": Vector2(-1.0, 0.9), &"precast": Vector2(0.86, 1.03),
 	&"generator": Vector2(0.35, 0.7), &"hoarding": Vector2(-1.0, 0.3),
 }
 ## The colours the canvases draw their marks in (sRGB): grass in the slab's joints, paint chips, rust at a container's
@@ -59,25 +59,25 @@ enum Canvas {
 ## lines. SiteSurface.MARKS gives the shader's order.
 @export var marks: Dictionary[StringName, Color] = {
 	&"tuft": Color(0.63, 0.68, 0.48), &"chip": Color(0.77, 0.75, 0.74), &"rust_foot": Color(0.7, 0.67, 0.61),
-	&"chevron": Color(0.94, 0.93, 0.92), &"stripe": Color(0.29, 0.29, 0.29), &"wire": Color(0.81, 0.82, 0.81),
-	&"carton": Color(0.81, 0.74, 0.63), &"slat_gap": Color(0.38, 0.35, 0.31), &"slat": Color(0.8, 0.72, 0.61),
-	&"goods_olive": Color(0.58, 0.61, 0.48), &"goods_tan": Color(0.77, 0.72, 0.62), &"pallet": Color(0.51, 0.52, 0.53),
-	&"grass": Color(0.7, 0.72, 0.57), &"dirt_foot": Color(0.68, 0.65, 0.6),
-	&"bay_line": Color(0.86, 0.72, 0.12),
+	&"chevron": Color8(0xf4, 0xec, 0xda), &"stripe": Color8(0x3a, 0x2f, 0x5a), &"wire": Color8(0xd2, 0xce, 0xc8),
+	&"carton": Color8(0xc2, 0xb6, 0x98), &"slat_gap": Color8(0x61, 0x59, 0x4f), &"slat": Color8(0xdc, 0xca, 0xa8),
+	&"goods_olive": Color8(0x58, 0x90, 0x4e), &"goods_tan": Color8(0xdc, 0xca, 0xa8), &"pallet": Color8(0x8c, 0x8a, 0x96),
+	&"grass": Color8(0xb3, 0xb8, 0x91), &"dirt_foot": Color(0.68, 0.65, 0.6),
+	&"bay_line": Color8(0xe4, 0xca, 0x46),
 }
 ## Roughness and metalness; a finish not listed is 0.8 and 0.
 @export var finishes_pbr: Dictionary[StringName, Vector2] = {
-	&"slab": Vector2(0.85, 0.0), &"dock": Vector2(0.85, 0.0), &"gravel": Vector2(0.9, 0.0),
+	&"slab": Vector2(0.62, 0.0), &"dock": Vector2(0.7, 0.0), &"gravel": Vector2(0.9, 0.0),
 	&"ground": Vector2(0.95, 0.0), &"wall_outer": Vector2(0.85, 0.0), &"wall_inner": Vector2(0.85, 0.0),
-	&"container": Vector2(0.5, 0.15), &"container_box": Vector2(0.5, 0.15), &"hoarding": Vector2(0.5, 0.2),
+	&"container": Vector2(0.45, 0.1), &"container_box": Vector2(0.45, 0.1), &"hoarding": Vector2(0.5, 0.1),
 	&"plywood": Vector2(0.85, 0.0), &"crate": Vector2(0.85, 0.0), &"precast": Vector2(0.85, 0.0),
-	&"wrapped": Vector2(0.3, 0.0), &"rack": Vector2(0.5, 0.4), &"gabion": Vector2(0.9, 0.0),
-	&"toilet": Vector2(0.55, 0.0), &"ibc": Vector2(0.4, 0.0), &"generator": Vector2(0.5, 0.2),
-	&"sandbags": Vector2(0.97, 0.0), &"skip": Vector2(0.5, 0.3), &"ramp": Vector2(0.45, 0.7),
-	&"timber": Vector2(0.85, 0.0), &"frame": Vector2(0.5, 0.4), &"steel": Vector2(0.4, 0.7),
+	&"wrapped": Vector2(0.3, 0.0), &"rack": Vector2(0.5, 0.2), &"gabion": Vector2(0.9, 0.0),
+	&"toilet": Vector2(0.55, 0.0), &"ibc": Vector2(0.4, 0.0), &"generator": Vector2(0.5, 0.1),
+	&"sandbags": Vector2(0.97, 0.0), &"skip": Vector2(0.5, 0.1), &"ramp": Vector2(0.45, 0.4),
+	&"timber": Vector2(0.85, 0.0), &"frame": Vector2(0.5, 0.2), &"steel": Vector2(0.4, 0.4),
 	&"hazard": Vector2(0.6, 0.0), &"net": Vector2(1.0, 0.0), &"flag": Vector2(1.0, 0.0),
-	&"coping": Vector2(0.8, 0.0), &"sail": Vector2(1.0, 0.0), &"drum": Vector2(0.8, 0.0), &"barrel": Vector2(0.45, 0.6),
-	&"pillar": Vector2(0.4, 0.6), &"netting": Vector2(1.0, 0.0), &"sofa": Vector2(0.95, 0.0),
+	&"coping": Vector2(0.8, 0.0), &"sail": Vector2(1.0, 0.0), &"drum": Vector2(0.6, 0.0), &"barrel": Vector2(0.4, 0.2),
+	&"pillar": Vector2(0.45, 0.1), &"netting": Vector2(1.0, 0.0), &"sofa": Vector2(0.95, 0.0),
 }
 ## The finish of each block kind; a kind not listed is `default`. Floors, walls, containers and barriers pick among
 ## theirs by shape (`finish_of`).
@@ -97,13 +97,13 @@ enum Canvas {
 @export var low_barrier_length: float = 2.0
 @export var box_wall_to: float = 1.0
 
-## Container paint (after docs/ART.md's oxide red, navy, olive, mustard, teal and slate, each kept off the teams' hues:
-## crimson, a greyed navy, olive, mustard, teal and slate), each unit of a long or stacked container
+## Container paint (the look's six site colours, docs/ART.md › Colour: crimson, violet, yellow, teal, green and cream,
+## each kept off the teams' hues), each unit of a long or stacked container
 ## its own: a container longer than `container_split` m splits into units about `container_unit` long, one taller than
 ## a unit into tiers `container_tier` tall.
 @export var container_paint: Array[Color] = [
-	Color(0.5, 0.15, 0.3), Color(0.3, 0.33, 0.38), Color(0.38, 0.42, 0.27), Color(0.78, 0.66, 0.2),
-	Color(0.2, 0.44, 0.44), Color(0.45, 0.5, 0.55),
+	Color8(0xc2, 0x38, 0x74), Color8(0x76, 0x58, 0xaa), Color8(0xe4, 0xca, 0x46), Color8(0x2a, 0x9c, 0x90),
+	Color8(0x58, 0x90, 0x4e), Color8(0xf4, 0xec, 0xda),
 ]
 @export var container_unit: float = 6.1
 @export var container_split: float = 7.0
@@ -131,8 +131,14 @@ enum Canvas {
 @export var ply_depth: float = 0.8
 @export var ply_luma: float = 0.142
 ## The lighter bevel on every box edge within this many metres of it (the "CS edge highlight"), this much lighter.
-@export var edge_width: float = 0.02
-@export var edge_light: float = 0.16
+@export var edge_width: float = 0.04
+@export var edge_light: float = 0.3
+## The look's clean surfaces (docs/ART.md › Surfaces): how much wear and grain the canvases show (0 clean painted, 1
+## the old worn site: stains, chips, rust, grime and photo grain), and the soft vertical gradient on every side,
+## `gradient` darker at its foot, full paint `gradient_height` m up.
+@export_range(0.0, 1.0) var grit: float = 0.0
+@export var gradient: float = 0.22
+@export var gradient_height: float = 2.6
 ## Puddles (the map's own) are drawn into a mask this many pixels a metre.
 @export var wet_pixels: float = 4.0
 
@@ -180,8 +186,8 @@ enum Canvas {
 @export var flag_pole: float = 2.4
 ## Stencils: their paint (sRGB, with alpha), the light paint on a wall darker than `stencil_light_below` (its paint's
 ## luminance), and how far (m) they stand off the wall.
-@export var stencil_paint: Color = Color(0.16, 0.16, 0.17, 0.88)
-@export var stencil_light: Color = Color(0.9, 0.89, 0.85, 0.9)
+@export var stencil_paint: Color = Color(Color8(0x3a, 0x2f, 0x5a), 0.92)
+@export var stencil_light: Color = Color(Color8(0xf4, 0xec, 0xda), 0.92)
 @export var stencil_light_below: float = 0.45
 @export var stencil_off: float = 0.006
 

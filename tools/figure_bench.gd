@@ -43,6 +43,7 @@ func _run() -> void:
 	if at >= 0 and at + 1 < args.size():
 		seconds = args[at + 1].to_float()
 	var play := PlayTuning.load_default()
+	play.look.push_globals()
 	var tuning := SimTuning.load_default()
 	var map := MapData.load_map("depot", play.map_style, tuning.rounds.team_size)
 	if not map.ok():
@@ -54,7 +55,7 @@ func _run() -> void:
 	var level := MapLevel.new()
 	field.add_child(level)
 	level.build(map, play.map_style, tuning.body)
-	field.add_child(FieldLighting.build(play.lighting))
+	field.add_child(FieldLighting.build(play.lighting, play.look))
 	var spawn := map.ends[0].spawns[0]
 	var eye := spawn.position + Vector3.UP * tuning.body.stand_eye_height if far else \
 			Vector3.UP * tuning.body.stand_eye_height

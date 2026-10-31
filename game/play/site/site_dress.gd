@@ -283,10 +283,7 @@ func _lay_bags(map: MapData, look: SiteLook) -> void:
 	for i in placed.size():
 		mm.set_instance_transform(i, placed[i])
 		mm.set_instance_color(i, Color(shades[i], shades[i], shades[i]))
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = look.paints[&"sandbags"]
-	mat.vertex_color_use_as_albedo = true
-	mat.roughness = (look.finishes_pbr[&"sandbags"] as Vector2).x
+	var mat := LookMaterials.vertex_colour((look.finishes_pbr[&"sandbags"] as Vector2).x, 0.0, look.paints[&"sandbags"])
 	_bags = MultiMeshInstance3D.new()
 	_bags.name = "Sandbags"
 	_bags.multimesh = mm

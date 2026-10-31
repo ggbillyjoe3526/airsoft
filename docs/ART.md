@@ -1,52 +1,47 @@
 # Art bible
 
-The look every visual change is measured against. Read it before changing how anything looks; the owner's art pass
-(`docs/ROADMAP.md` › Build order, step 28) and Depot's rework (steps 25 and 28) build to it.
+The look every visual change is measured against, on every map: Depot, Woodland and every map after them (owner,
+2026-10-31). Read it before changing how anything looks. The look is shared code, so a new map gets it by using the
+shared light and palette (A map in the look, below), not by copying a map's settings.
 
 ## The target
 
-The owner's six reference pictures (owner, 2026-10-18) are the target look, and his arm and hand study the target
-for arms and hands (Arms and hands, below). They live in
-[`docs/art/references/`](art/references/); the original PNGs are in the project's shared files (not the repository)
-under `art/references/`.
+**Stylised, Valorant-led, with BOTW's soft light** (owner, 2026-10-29; game-wide 2026-10-31). The approved picture is
+`concepts/art-direction/06-valorant-botw-v3.jpg` in the project's shared files, with its notes beside it. It sets the
+**colour and the look, not what may appear** (owner, 2026-10-31): its containers, bunting and sky are examples, and
+anything that suits a map can appear in it, drawn in this look.
 
-| Picture | What it shows |
-|---|---|
-| [`depot-day-pistol.jpg`](art/references/depot-day-pistol.jpg) | Midday, pistol in two bare hands. Zone "2" and "A" barricades, a camo-netted tower with a player in it, the aircraft fuselage, an IBC tank, a traffic cone, bunting |
-| [`depot-day-figures.jpg`](art/references/depot-day-figures.jpg) | Midday, pistol. Three players at range in cover, the "A1" wall, stacked containers, a walkway, the tower, a city skyline |
-| [`depot-tower-wide.jpg`](art/references/depot-tower-wide.jpg) | No replica. The concrete watch tower marked "A1", a yellow-railed walkway, Jersey barriers, hard cases, floodlight masts |
-| [`warehouse-interior-aeg.jpg`](art/references/warehouse-interior-aeg.jpg) | Midday under an open steel roof with shade sails. AEG in gloved hands with a hi-vis sleeve band, containers on mezzanines |
-| [`depot-sunset-aeg.jpg`](art/references/depot-sunset-aeg.jpg) | Golden hour. AEG, the "B" wall, blue drums, blue and red containers, a timber watch tower with a flag, wet ground |
-| [`depot-night-aeg.jpg`](art/references/depot-night-aeg.jpg) | Night. AEG, cool moonlight and warm floods, the "B" wall, a red container, hazard-striped posts, wet ground |
-| [`arm-hand-anatomy.jpg`](art/references/arm-hand-anatomy.jpg) | Arm and hand study: bones, muscles, skin, veins and tendons, hand range of motion, and natural grips on everyday objects |
+- **Forms:** Valorant's chunky, clean shapes with real proportions. Every shape reads at a glance; detail comes from
+  form, bevels and lit edges, never from texture noise.
+- **Light:** only BOTW's light, not its world: soft cel bands, the shade a cool violet rather than grey or black, and a
+  warm rim where an edge meets the light. No meadows, mountains or grass on Depot.
+- **Surfaces:** clean. Flat paint with a soft vertical gradient and a lighter bevel on edges; seams, panels, screws,
+  joints and stencils stay. No stains, chips, rust, grime or photo grain.
+- **Colour:** vibrant, never neutral or desaturated, but no one colour dominant: the six site colours spread evenly
+  over a map (Colour, below). The team colours stay the strongest blue and orange on screen.
+- **Not:** Fortnite-cartoony (no chibi proportions, no outlines), dirty, neutral, or green- or blue-heavy.
+- **Still true:** toy replicas and no gore (BBs leave dust, never marks or blood); a warm weekend site, not a base;
+  airsoft, not military.
 
-What still holds from before, and what the pictures confirm:
-
-- **Stylised and readable.** Counter-Strike and Valorant, not Call of Duty or Battlefield: clean shapes, good
-  materials and light, a little grit (art direction v3, `docs/DECISIONS.md` › Art direction and graphics).
-- **Toy replicas, no gore.** BBs leave dust, never marks or blood.
-- **A warm, sunny weekend site,** not a base: plywood, concrete and painted steel, built by a site crew.
-- **Quality levels.** Low keeps its cost: the look is built for Medium, High and Custom, and Low draws figures at
-  their middle detail.
-
-The pictures set the look, the props and the light. They don't change a field's layout: Depot's routes and cover come
-from its map data and the field checklist (step 24).
+The owner's six reference pictures of 2026-10-18 (`docs/art/references/`) set the earlier semi-realistic target. They
+still show the kind of field kit an airsoft site has, but not its look: where they and this section differ, this
+section wins. His arm and hand study (`arm-hand-anatomy.jpg`) is still the target for arms and hands.
 
 ## The field kit
 
-The props that make a site read as an airsoft site. Each is one of the four material families below.
+The kind of props that make a site read as an airsoft site: a list of ideas, not a limit (owner, 2026-10-31). Each is
+drawn in the look (Surfaces, Colour).
 
 - **Plywood and OSB barricades.** The main cover: tall sheet walls on timber frames with visible screws and edge
   battens, and plywood crates. A pale tan, with darker knots and OSB flecks, kept off Beta's orange hue (owner,
   2026-10-23).
 - **Zone letters and arrows.** Big stencilled letters and numbers ("A", "B", "A1", "2") with an arrow on the walls that
   face a route. They name a field's zones, so they match the minimap's names and the bots' callouts; they are never
-  decoration. Charcoal stencil paint with soft overspray.
-- **Shipping containers.** Stacked one or two high, some open with a walkway inside. Oxide red, navy and olive
-  (Colour and readability), each with the site's white chevron mark, the same on every container whatever its
-  colour.
+  decoration. Ink stencil paint, crisp.
+- **Shipping containers.** Stacked one or two high, some open with a walkway inside, in the six site colours (Colour),
+  each with the site's white chevron mark, the same on every container whatever its colour.
 - **Hard cases.** Olive polymer cases with black latches, stacked on pallets, some under an olive tarp.
-- **Drums and tanks.** Steel drums (blue and olive in the pictures) and white IBC tanks in a steel cage, on pallets.
+- **Drums and tanks.** Steel drums (crimson and teal on Depot) and cream IBC tanks in a steel cage, on pallets.
 - **Sandbags and Jersey barriers.** Sandbags along wall tops and tower parapets; concrete barriers with a yellow
   band.
 - **Fabric overhead.** Camo netting over towers and nests, cream shade sails, tarps, bunting along perimeter walls.
@@ -82,43 +77,85 @@ Woodland's look in placeholders (WL4, `WoodsView` from `WoodsConfig`), until the
 - **Colours** are greens, browns and greys, every one more than 20 degrees from a team's hue or greyer than 0.3
   (tested by day and night); the leaf plum #7d3b52 sits 22 degrees from HC Beta.
 
-## Colour and readability
+## Colour
 
-- **The field** is warm concrete greys, sand, cream and off-white for the ground and walls, tan plywood for cover,
-  and olive for cases and tarps.
-- **Site colours** (container red, olive, mustard yellow, slate, teal) go on containers, skips, drums and paint. The
-  container red is an oxide or brick red, darker and duller than Beta orange, so it never reads as a team; its exact
-  value is tuned side by side with a Beta figure when Depot is dressed (step 28).
-- **Team colours** (Alpha blue, Beta orange) appear **only** on players and the flag, never on props (owner,
-  2026-10-18, on the references). No orange on any prop: cones and safety paint are yellow. A blue prop (a container,
-  drum or tarp) is a navy or steel blue, darker and duller than Alpha's. Flags and bunting that aren't the objective
-  use site colours.
-- **Readability beats detail.** Silhouettes first, then value contrast, then colour. A figure is always lighter or
-  darker than what is behind it. Shaded sides stay warm, never black. Golden hour and night tint the light, never a
-  team colour: a Beta figure stays orange against a sunset sky, an Alpha figure stays blue under moonlight.
+The look's palette is `LookConfig.palette` (`game/config/look_config.gd`, in `play_tuning.tres`), sRGB:
 
-## Material families
+| Name | Hex | Use |
+|---|---|---|
+| crimson | `#c23874` | site colour: containers, barrels, trusses |
+| violet | `#7658aa` | site colour: containers, wall bands, the sofa |
+| yellow | `#e4ca46` | site colour, and all safety paint (lines, hazard stripes, pillars, cones) |
+| teal | `#2a9c90` | site colour: containers, drums, inner wall bands |
+| green | `#58904e` | site colour: containers, netting, cases |
+| cream | `#f4ecda` | site colour: containers, walls, sails, film |
+| concrete | `#d2cec8` | precast, docks, light concrete |
+| floor | `#b9b4ae` | an outdoor slab |
+| plywood | `#dccaa8` | plywood barricades |
+| timber | `#a0947c` | timber, sandbags |
+| crate | `#c2b698` | crates, cartons |
+| steel | `#6c6a7a` | steel, racking, ramps |
+| ink | `#3a2f5a` | stencils, hazard stripes' dark, a shelf's backing |
+| slab | `#7c7670` | Depot's hall floor, darker than `floor` so the cover stands off it |
+| sand, pebble, stone | `#b9ae98`, `#a09a92`, `#8c8478` | open ground, gravel, gabion stone |
+| plaster | `#ece2cf` | outer walls |
+| grey | `#8c8a96` | ramps, pallets, IBC frames, the barrels' lids |
+| ceiling | `#524a72` | a roof's underside |
+| umber, moss | `#61594f`, `#b3b891` | the gaps between slats, the sofa's feet; grass on open ground |
 
-Four families carry the whole game, and every asset is one of them.
+- **Spread the six evenly.** No site colour covers much more of a map than another; big repeated props (racking,
+  walls) take a neutral (steel, plywood, cream) so they never make one colour dominate.
+- **Team colours** (Alpha blue, Beta orange) appear **only** on players and the flag, never on props. No palette colour
+  or prop paint is within 20° of a team's hue unless it is dull (greyer than 0.3): tested for the palette
+  (`tests/unit/test_look.gd`), Depot's paint (`test_site_dress.gd`) and the props (`test_props.gd`). Safety paint is
+  yellow, never orange.
+- **Readability beats detail.** Silhouettes first, then value, then colour. A figure is always lighter or darker than
+  what is behind it. Shade is violet, never black. Night and golden hour tint the light, never a team colour.
 
-- **Toy polymer.** Replicas, hard cases, cones, IBC tanks. Matte, roughness 0.5–0.6, zero metalness, a faint uniform
-  sheen from the environment map. Saturated, clean colour, with a hairline lighter edge on every bevel.
-- **Painted steel.** Containers, drums, masts, walkways and railings. Roughness 0.35–0.45, metalness 0.6–0.8, picks up
-  the sky in the environment map. Paint chips only where a BB would hit (plate centres, rail tops), never rust.
-- **Fabric and rubber.** Sandbags, netting, sails, tarps, bunting, clothing, gloves. Roughness 0.9–1.0, no specular.
-  Folds and seams are drawn as geometry and as a 1–2 shade darker vertex-colour band, never as texture noise.
-- **Site surfaces** (concrete, block, plywood and OSB, corrugated). Procedural canvases with a low-frequency tint
-  variation so no two metres repeat. Dirt only as a foot-of-wall grime band and a soft baked occlusion in corners.
+## Surfaces
 
-## Edges and wear
+Every surface is clean paint in the shared light. A material gives a colour (or a vertex colour), a roughness and a
+metalness; the light does the rest.
 
-- **Edges** are what make the game look stylised instead of flat. Every box a player sees within 10 m has a 5–12 mm
-  bevel or chamfer with a lighter vertex colour on the bevel face (the "CS edge highlight"). Nothing has a razor edge,
-  and nothing has a decal that pretends to be geometry.
-- **Wear** is restrained and friendly: scuffed polymer on grip edges, a worn rail top, weathered plywood, faded
-  stencils, lane paint on the floor. No battle damage, no blood, no bullet holes (BBs leave dust, never marks).
+- **Paint, polymer and fabric** are matte (roughness 0.8 to 1.0, metalness 0). **Painted steel** (containers,
+  drums, pillars) is semi-gloss (roughness 0.4 to 0.5) with at most 0.2 metalness, so it keeps its colour under the
+  cel light and gets the look's small soft highlight. A hall floor is a little smooth (0.6), so the probes give it a
+  faint reflection of the room.
+- **The vertical gradient.** Every side is up to 22 % darker at its foot, full paint 2.6 m up
+  (`SiteLook.gradient`), the way the approved picture grounds its walls and cover.
+- **The lit edge.** Every box a player sees has a lighter bevel (30 % lighter, 4 cm), the "CS edge highlight".
+- **Grit is zero.** `SiteLook.grit` scales every stain, chip, rust foot, grime band and photo grain from the old site
+  dress; the look draws it at 0, which also leaves the photo textures unloaded.
+- **Marks that stay:** zone stencils in ink, joints, seams, screws, sheet panels, bay lines and hazard stripes in
+  yellow and ink, the white chevron on containers.
 
 ## Light
+
+**The shared light** (`game/play/look/look_light.gdshaderinc`, values in `LookConfig`'s Light group) is one `light()`
+for every material in the look: soft cel bands (the lit band from a 0.1 cosine, 0.08 soft, with a gentle 14 % step
+half way up), the sun's far side lit in the look's violet `#9d93bc` instead of falling to black, a warm rim
+(`#fff9eb`, 22 %) on an edge seen against the light, and a small soft highlight on smooth paint. Its values are global
+shader uniforms (`project.godot` [shader_globals], pushed by `LookConfig.push_globals` at the start of a match), so
+tuning it once changes every map; the colours are sent linear, since a colour global reaches the shader unconverted. Ambient light, bounce light and reflections are the engine's and come on top.
+
+**The grade** (LookConfig's Picture group) is on every preset: AgX with its contrast at 1.35, then 1.14 saturation and
+1.03 contrast, so the palette stays vibrant without pushing the team colours off.
+
+**The graphics scale the light, never the look** (owner, 2026-10-31). Low draws the same shared light, palette and
+grade with none of the dearer effects; each preset up adds real light on top (`data/graphics.md`):
+
+| Effect | Low | Medium | High | Ultra |
+|---|---|---|---|---|
+| Sun shadows | off (a contact disc) | 2048 | 4096 | 8192, contact-hardening (the sun 0.6° wide) |
+| Ambient occlusion | off | off | half | full |
+| Bounce light | off | off | screen (SSIL) | scene (SDFGI with occlusion, plus SSIL at full size) |
+| Reflections | sky | probes | probes | probes and screen-space |
+| Glow | off | on | on | on |
+| Volumetric haze | off | off | off | on, lit by the sun and the bounce light |
+
+The reflection probes (`AreaProbes`) are one over the field and one in each named area of 60 m² or more (24 at most),
+box-projected from eye height and captured once at the start; under a roof they are interiors. Volumetric haze is
+faint (density 0.006) so it gives light depth without hiding a player.
 
 Three lighting presets, each shared by every map that uses it and each as readable as the others.
 
@@ -147,6 +184,24 @@ weather, not to every match.
 
 The environment map that gives polymer and steel their sheen is **the game's own sky**, so the look stays consistent at
 every quality level, and a night or golden-hour sky changes everything at once.
+
+## A map in the look
+
+Woodland and every new map take the look this way (Depot did, AD1):
+
+1. **Draw every surface in the shared light.** A shader includes `look_light.gdshaderinc`; a vertex-coloured model
+   uses `LookMaterials.vertex_colour`. A `StandardMaterial3D` doesn't get the look's shade or rim.
+2. **Paint from the palette.** Every colour a map paints is a palette entry: a new colour goes into the palette
+   first, then into the map's paint. Spread the six site colours evenly and put big repeated props on a neutral. CC0
+   models are recoloured into it (`tools/props/build_props.py` writes vertex colours). `tests/unit/test_look.gd` holds
+   Depot's paint, stencils, roof and props to the palette; a new map adds its own to that test (Woodland's CC0
+   recipes join when it moves onto the look).
+3. **Keep surfaces clean.** No noise, stains or photo grain; the gradient and lit edges carry the shape.
+4. **Light it with a preset.** The map's `lighting` overrides tune the sun, fill and exposure; a roofed map's sun hangs
+   nearly overhead (Depot). Check it on Low and on Ultra: Low must read as well, Ultra only adds light.
+5. **Name its areas.** The reflection probes go in its named areas, so a map with them gets its probes for free.
+6. **Picture it.** `tools/eye_pictures.gd` renders it at eye height on any preset (`preset=ultra`), with the Vulkan
+   renderer under xvfb (lavapipe in a cloud session: slow, but every effect draws).
 
 ## Arms and hands
 
@@ -188,6 +243,11 @@ arms, figures and replicas use (steps 23 and 28).
   less at range (owner, 2026-10-18). The budgets are in `docs/CC0_ASSETS.md` › Size limits.
 
 ## Where it lives in the code
+
+The look (AD1): `LookConfig` (`game/config/look_config.gd`, PlayTuning's `look`) holds the light's values, the grade,
+the effects' strengths and the palette; `game/play/look/` holds the shared light (`look_light.gdshaderinc`), the
+vertex-colour shader and `LookMaterials`, and `AreaProbes`; `FieldLighting.set_effects` and `GraphicsApply.apply_field`
+switch the effects by the Graphics rows. The site surface, the roof, the CC0 props and the sandbags are drawn in it.
 
 Depot's temporary site dress (DD1, until the owner's models; Depot and the range, by day):
 

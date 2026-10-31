@@ -3,7 +3,10 @@
 // centre and its finish's slot, CUSTOM1 = its half size and flags. COLOR is the baked light (white without a bake),
 // or a detail's own paint (FLAG_TINT). Noise comes from two small tiling textures, never per-pixel octaves.
 shader_type spatial;
-render_mode blend_mix, cull_back, diffuse_burley, specular_schlick_ggx;
+render_mode blend_mix, cull_back;
+
+// the game's shared light (docs/ART.md › Light)
+#include "res://game/play/look/look_light.gdshaderinc"
 
 const int CONCRETE = 0;
 const int BLOCK = 1;
@@ -76,6 +79,12 @@ uniform float edge_width = 0.02;
 uniform float edge_light = 0.16;
 // Low mesh detail: no photo relief, no corrugation or stones in relief, flat stones.
 uniform bool low = false;
+// How much wear and grain the canvases show (SiteLook.grit): 1 the old worn site, 0 the look's clean painted surfaces
+// (joints, seams, panels and marks stay; stains, chips, rust, grime and photo grain go).
+uniform float grit = 1.0;
+// The look's soft vertical gradient: a side this much darker at the ground, full paint `gradient_height` m up.
+uniform float gradient = 0.0;
+uniform float gradient_height = 2.6;
 
 varying vec3 wpos;
 varying vec3 wnrm;
@@ -103,6 +112,11 @@ float fbm(vec2 p) {
 
 vec2 cells(vec2 p) {
 	return texture(cells_tex, p * 0.125).rg;
+}
+
+// A grain or wear factor `v` (1 = none) as the look's grit shows it.
+float gr(float v) {
+	return mix(1.0, v, grit);
 }
 
 // The face's world coordinates: (along, up) on a side, (x, z) on a top, and which axis runs along it.
@@ -161,23 +175,25 @@ void fragment() {
 	bool in_band = !top && h > band.x && h < band.y;
 
 	if (mode == CONCRETE || mode == PRECAST) {
-		float mid = fbm(c * 1.4);
-		col = paint * (0.84 + 0.24 * low_f) * (0.94 + 0.1 * mid);
-		float stain = smoothstep(0.58, 0.78, fbm(c * 0.35 + 7.0));
+		float mid = grit > 0.0 ? fbm(c * 1.4) : 0.5;
+		col = paint * gr((0.84 + 0.24 * low_f) * (0.94 + 0.1 * mid));
+		float stain = grit > 0.0 ? smoothstep(0.58, 0.78, fbm(c * 0.35 + 7.0)) * grit : 0.0;
 		col *= 1.0 - 0.16 * stain;
 		r -= 0.08 * stain;
 		if (mode == CONCRETE) {
 			vec2 uv = c / slab_set.x;
-			float t = dot(texture(slab_col, uv).rgb, vec3(0.299, 0.587, 0.114));
-			col *= mix(1.0, t / slab_set.w, slab_set.y);
-			if (!low) {
-				n = photo_relief(slab_nrm, uv, n, along, top, slab_set.z);
+			if (grit > 0.0) {
+				float t = dot(texture(slab_col, uv).rgb, vec3(0.299, 0.587, 0.114));
+				col *= mix(1.0, t / slab_set.w, slab_set.y * grit);
+				if (!low) {
+					n = photo_relief(slab_nrm, uv, n, along, top, slab_set.z);
+				}
 			}
 			if (top && joint > 0.0 && (flags & FLAG_HAZARD) == 0) {
 				vec2 g = abs(fract(c / joint + 0.5) - 0.5) * joint;
 				float j = min(g.x, g.y);
-				col *= mix(0.55, 1.0, smoothstep(0.006, 0.018, j));
-				float tuft = step(0.8, fbm(c * 3.1 + 4.0)) * (1.0 - smoothstep(0.0, 0.05, j));
+				col *= mix(mix(0.82, 0.55, grit), 1.0, smoothstep(0.006, 0.018, j));
+				float tuft = grit > 0.0 ? step(0.8, fbm(c * 3.1 + 4.0)) * (1.0 - smoothstep(0.0, 0.05, j)) * grit : 0.0;
 				col = mix(col, marks[MARK_TUFT], tuft * 0.8);
 			}
 			if (top && line_count > 0 && (flags & FLAG_HAZARD) == 0) {
@@ -188,14 +204,14 @@ void fragment() {
 					on = max(on, 1.0 - smoothstep(-fwidth(e), fwidth(e), e));
 				}
 				if (on > 0.0) {
-					float worn = smoothstep(0.55, 0.8, fbm(c * 2.3 + 11.0));
-					col = mix(col, marks[MARK_BAY_LINE] * (0.88 + 0.16 * low_f), on * 0.92 * (1.0 - 0.4 * worn));
+					float worn = grit > 0.0 ? smoothstep(0.55, 0.8, fbm(c * 2.3 + 11.0)) * grit : 0.0;
+					col = mix(col, marks[MARK_BAY_LINE] * gr(0.88 + 0.16 * low_f), on * 0.92 * (1.0 - 0.4 * worn));
 					r = mix(r, 0.6, on);
 				}
 			}
 			float below = 2.0 * box_h.y - h;
 			if ((flags & FLAG_HAZARD) != 0 && !top && below > hazard_lip.x && below < hazard_lip.y) {
-				col = mix(marks[MARK_STRIPE], accent, step(0.5, fract((c.x + c.y) / 0.5))) * (0.9 + 0.15 * low_f);
+				col = mix(marks[MARK_STRIPE], accent, step(0.5, fract((c.x + c.y) / 0.5))) * gr(0.9 + 0.15 * low_f);
 				r = 0.55;
 			}
 			if (top && wet_rect.z > 0.0) {
@@ -204,7 +220,7 @@ void fragment() {
 				r = mix(r, 0.03, wet);
 			}
 		} else if (in_band) {
-			col = accent * (0.9 + 0.15 * low_f);
+			col = accent * gr(0.9 + 0.15 * low_f);
 			r = 0.6;
 		}
 	} else if (mode == BLOCK) {
@@ -213,13 +229,15 @@ void fragment() {
 		vec2 fb = fract(b);
 		float mm = min(min(fb.x, 1.0 - fb.x) * 0.45, min(fb.y, 1.0 - fb.y) * 0.225);
 		float blk = fbm(floor(b) * 0.731);
-		col = paint * (0.93 + 0.1 * blk) * (0.88 + 0.18 * low_f);
-		col *= mix(0.8, 1.0, smoothstep(0.003, 0.01, mm));
-		col *= 1.0 - 0.08 * smoothstep(0.62, 0.9, fbm(vec2(c.x * 5.0, c.y * 0.25)));
+		col = paint * gr((0.93 + 0.1 * blk) * (0.88 + 0.18 * low_f));
+		col *= mix(mix(0.9, 0.8, grit), 1.0, smoothstep(0.003, 0.01, mm));
+		if (grit > 0.0) {
+			col *= 1.0 - 0.08 * grit * smoothstep(0.62, 0.9, fbm(vec2(c.x * 5.0, c.y * 0.25)));
+		}
 		if (top) {
-			col = paint * 0.82 * (0.9 + 0.15 * fbm(c * 9.0));
+			col = paint * 0.82 * gr(0.9 + 0.15 * fbm(c * 9.0));
 		} else if (in_band) {
-			col = accent * (0.92 + 0.1 * low_f);
+			col = accent * gr(0.92 + 0.1 * low_f);
 		}
 	} else if (mode == CORRUGATED) {
 		float ph = fract(c.x / 0.28);
@@ -231,11 +249,13 @@ void fragment() {
 		} else {
 			col *= 1.0 - 0.06 * slope * slope;
 		}
-		col *= 0.9 + 0.14 * low_f;
-		float chip = smoothstep(0.86, 0.9, fbm(c * 6.0 + 3.0));
-		col = mix(col, marks[MARK_CHIP], chip * 0.4);
-		col *= 1.0 - 0.12 * smoothstep(0.6, 0.85, fbm(vec2(c.x * 2.2, c.y * 0.2)));
-		col = mix(col, marks[MARK_RUST_FOOT], (1.0 - smoothstep(0.0, 0.7, wpos.y)) * 0.35);
+		col *= gr(0.9 + 0.14 * low_f);
+		if (grit > 0.0) {
+			float chip = smoothstep(0.86, 0.9, fbm(c * 6.0 + 3.0)) * grit;
+			col = mix(col, marks[MARK_CHIP], chip * 0.4);
+			col *= 1.0 - 0.12 * grit * smoothstep(0.6, 0.85, fbm(vec2(c.x * 2.2, c.y * 0.2)));
+		}
+		col = mix(col, marks[MARK_RUST_FOOT], (1.0 - smoothstep(0.0, 0.7, wpos.y)) * 0.35 * grit);
 		if ((flags & FLAG_CHEVRON) != 0 && !top) {
 			// the site's white chevron, centred on each unit's side
 			float len_ = max(box_h.x, box_h.z) * 2.0;
@@ -251,7 +271,9 @@ void fragment() {
 				q.y += 0.06;
 				float s = abs(q.y + 1.15 * abs(q.x) - 0.35);
 				float mark = (1.0 - smoothstep(0.13, 0.15, s)) * (1.0 - smoothstep(0.62, 0.64, abs(q.x)));
-				mark *= 0.75 + 0.25 * step(0.35, fbm(q * 14.0));
+				if (grit > 0.0) {
+					mark *= gr(0.75 + 0.25 * step(0.35, fbm(q * 14.0)));
+				}
 				col = mix(col, marks[MARK_CHEVRON], mark);
 			}
 		}
@@ -263,10 +285,13 @@ void fragment() {
 		}
 	} else if (mode == PLYWOOD) {
 		vec2 uv = c / ply_set.x;
-		float t = dot(texture(ply_col, uv).rgb, vec3(0.299, 0.587, 0.114));
-		col = paint * mix(1.0, t / ply_set.w, ply_set.y) * (0.9 + 0.14 * low_f);
-		if (!low) {
-			n = photo_relief(ply_nrm, uv, n, along, top, ply_set.z);
+		col = paint * gr(0.9 + 0.14 * low_f);
+		if (grit > 0.0) {
+			float t = dot(texture(ply_col, uv).rgb, vec3(0.299, 0.587, 0.114));
+			col *= mix(1.0, t / ply_set.w, ply_set.y * grit);
+			if (!low) {
+				n = photo_relief(ply_nrm, uv, n, along, top, ply_set.z);
+			}
 		}
 		if (!top) {
 			vec2 sheet = vec2(1.22, 2.44);
@@ -277,16 +302,16 @@ void fragment() {
 					+ (1.0 - smoothstep(0.012, 0.02, length(vec2(sc.x * 0.3, g.y))));
 			col *= 1.0 - 0.5 * clamp(screw, 0.0, 1.0);
 		}
-		col = mix(col, col * vec3(0.78, 0.76, 0.74), (1.0 - smoothstep(0.0, 0.5, h)) * 0.6);
+		col = mix(col, col * vec3(0.78, 0.76, 0.74), (1.0 - smoothstep(0.0, 0.5, h)) * 0.6 * grit);
 	} else if (mode == OSB) {
 		vec2 cl = cells(c * vec2(9.0, 4.0));
 		float f = cl.x;
 		float id = cl.y;
-		col = paint * (0.88 + 0.18 * id) * (0.94 + 0.08 * low_f);
-		col *= mix(1.0, 0.88, smoothstep(0.9, 1.0, f));
+		col = paint * gr((0.88 + 0.18 * id) * (0.94 + 0.08 * low_f));
+		col *= mix(1.0, mix(0.94, 0.88, grit), smoothstep(0.9, 1.0, f));
 	} else if (mode == TIMBER) {
 		float grain = fbm(vec2(c.x * 3.0, c.y * 40.0)) * 0.5 + fbm(c * vec2(1.5, 90.0)) * 0.5;
-		col = paint * (0.85 + 0.2 * grain);
+		col = paint * mix(0.95 + 0.06 * grain, 0.85 + 0.2 * grain, grit);
 	} else if (mode == GRAVEL || mode == GABION) {
 		float sc = mode == GRAVEL ? 18.0 : 16.0;
 		vec2 cl = cells(c * sc);
@@ -368,12 +393,12 @@ void fragment() {
 			col *= 0.93 + 0.1 * cells(c * 9.0).y;
 			col *= 0.94 + 0.1 * fbm(c * 0.6);
 		} else if (mode == FABRIC) {
-			col = paint * (0.86 + 0.14 * fbm(c * 90.0)) * (0.88 + 0.2 * low_f);
+			col = paint * gr((0.86 + 0.14 * fbm(c * 90.0)) * (0.88 + 0.2 * low_f));
 		} else {
-			col = paint * (0.9 + 0.14 * low_f);
-			float chip = smoothstep(0.86, 0.9, fbm(c * 7.0 + 5.0));
+			col = paint * gr(0.9 + 0.14 * low_f);
+			float chip = grit > 0.0 ? smoothstep(0.86, 0.9, fbm(c * 7.0 + 5.0)) * grit : 0.0;
 			col = mix(col, paint * 0.6 + vec3(0.18), chip * 0.5);
-			col = mix(col, marks[MARK_DIRT_FOOT], (1.0 - smoothstep(0.0, 0.45, h)) * 0.3);
+			col = mix(col, marks[MARK_DIRT_FOOT], (1.0 - smoothstep(0.0, 0.45, h)) * 0.3 * grit);
 			if (in_band) {
 				col = (flags & FLAG_HAZARD) != 0 ? mix(marks[MARK_STRIPE], accent, step(0.5, fract((c.x + c.y) / 0.4))) : accent;
 			}
@@ -387,9 +412,10 @@ void fragment() {
 		float e = an.x > 0.7 ? min(d.y, d.z) : (an.y > 0.7 ? min(d.x, d.z) : min(d.x, d.y));
 		col *= 1.0 + edge_light * (1.0 - smoothstep(edge_width * 0.2, edge_width, e));
 	}
-	// a soft darkening at a side's foot, where the bake doesn't reach
+	// a soft darkening at a side's foot, where the bake doesn't reach, and the look's smooth vertical gradient
 	if (!top && mode != GROUND) {
-		col *= mix(0.7, 1.0, smoothstep(0.0, 0.35, wpos.y));
+		col *= mix(mix(0.88, 0.7, grit), 1.0, smoothstep(0.0, 0.35, wpos.y));
+		col *= mix(1.0 - gradient, 1.0, clamp(h / gradient_height, 0.0, 1.0));
 	}
 
 	ALBEDO = col * ((flags & FLAG_TINT) != 0 ? vec3(1.0) : tint_in);

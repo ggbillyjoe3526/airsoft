@@ -50,6 +50,13 @@ const BUILT_IN: Dictionary[StringName, Array] = {
 	GraphicsQuality.MESH_DETAIL: ["GRAPHICS_MESH_DETAIL", "low, medium, high, ultra", "1", "all", "low", "medium",
 			"high", "ultra"],
 	GraphicsQuality.WIND_DUST: ["GRAPHICS_WIND_DUST", "0–100 %", "0", "all", "0 %", "50 %", "100 %", "100 %"],
+	GraphicsQuality.GLOBAL_ILLUMINATION: ["GRAPHICS_GLOBAL_ILLUMINATION", "off, screen, scene", "3", "forward_plus",
+			"off", "off", "screen", "scene"],
+	GraphicsQuality.REFLECTIONS: ["GRAPHICS_REFLECTIONS", "off, probes, screen", "2", "all", "off", "probes", "probes",
+			"screen"],
+	GraphicsQuality.GLOW: ["GRAPHICS_GLOW", "off, on", "1", "all", "off", "on", "on", "on"],
+	GraphicsQuality.VOLUMETRIC_FOG: ["GRAPHICS_VOLUMETRIC_FOG", "off, on", "3", "forward_plus", "off", "off", "off",
+			"on"],
 }
 ## BUILT_IN's cells, by column.
 const CELL_LABEL := 0
@@ -63,6 +70,7 @@ const BUILT_IN_ONLY: Array[Array] = [
 	["upscaler", "fsr2", "forward_plus"],
 	["edge_smoothing", "fxaa", "forward_plus, mobile"],
 	["edge_smoothing", "smaa", "forward_plus, mobile"],
+	["reflections", "screen", "forward_plus"],
 ]
 
 

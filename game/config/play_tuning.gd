@@ -29,6 +29,8 @@ const DEFAULT_PATH := "res://game/config/play_tuning.tres"
 @export var figures: FigureConfig = FigureConfig.new()
 ## How a map naming a site dress is drawn (DD1: Depot's temporary dress).
 @export var site_look: SiteLook = SiteLook.new()
+## The game's look on every map: the shared light, the picture's grade and the graphics effects (docs/ART.md).
+@export var look: LookConfig = LookConfig.new()
 ## Seconds the match's summary stays up before the next match starts (a click starts it sooner); the wait starts once
 ## the last round's table makes way.
 @export var rematch_delay: float = 15.0

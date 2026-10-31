@@ -315,7 +315,9 @@ func _build_level() -> void:
 	# The bake is of the day's sun as this map sets it (an indoor field's overhead lamps, DR1), whichever preset plays.
 	var baked_sun := LightingConfig.for_map(_play.lighting, null, _map, LightingConfig.DAY)
 	_level.build(_map, _play.map_style, _tuning.body, _play.baked_light, baked_sun, _light.night, _play.site_look)
-	_lighting = FieldLighting.build(_light)
+	_play.look.push_globals()
+	_lighting = FieldLighting.build(_light, _play.look)
+	_lighting.add_probes(_map)
 	add_child(_lighting)
 	_site = SiteDress.build(_map, _play.site_look, _level.site_material())
 	if _site != null:
