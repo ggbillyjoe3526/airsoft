@@ -1,5 +1,5 @@
 extends GutTest
-## The crouched body (CR1): crouched past the threshold a character's collision body is BodyConfig.crouch_height tall,
+## The crouched body (CT1): crouched past the threshold a character's collision body is BodyConfig.crouch_height tall,
 ## it goes under anything that high and stays crouched there whatever is held; the nav grid walks a crouched body under
 ## such a roof and marks those floors low, and bots and walk-offs crouch through them.
 
@@ -152,3 +152,69 @@ func test_a_walk_off_crouches_into_a_tunnel_and_not_in_the_open() -> void:
 	c.position = Vector3(0.0, 0.0, 3.0)
 	cmd = Elimination.fill_eliminated_command(c, tuning, PlayerCommand.new(), g)
 	assert_false(cmd.crouch, "in the open")
+
+
+## A 30 m field split by a wall along x = 0 whose one gap (z in [-1, 1]) is a tunnel 4 m long, its roof `clear` over the
+## floor: [MapData, BoxWorld].
+func _tunnel_field(clear: float) -> Array:
+	var map := MapData.new()
+	map.id = "tunnel split"
+	var w := BoxWorld.new(body)
+	for b: MapData.Block in [_block(&"floor", Vector3(0.0, -0.25, 0.0), Vector3(30.0, 0.5, 30.0)),
+			_block(&"plywood", Vector3(0.0, 1.3, -8.0), Vector3(0.3, 2.6, 14.0)),
+			_block(&"plywood", Vector3(0.0, 1.3, 8.0), Vector3(0.3, 2.6, 14.0)),
+			_block(&"plywood", Vector3(0.0, clear + 0.25, 0.0), Vector3(4.0, 0.5, 2.0))]:
+		map.blocks.append(b)
+		w.add_box(b.center, b.size, RayHit.Surface.WOOD)
+	for e in 2:
+		var end := MapEnd.new()
+		end.spawns.append(SpawnPoint.new(Vector3(-12.0 if e == 0 else 12.0, 0.0, 12.0), 0.0))
+		end.dead_zone.append(SpawnPoint.new(Vector3(-14.0 if e == 0 else 14.0, 0.0, 14.0), 0.0))
+		map.ends.append(end)
+	return [map, w]
+
+
+## The roof's footprint grown by about a body's reach (m): a bot this close to the roof's edge is at the tunnel.
+const TUNNEL_NEAR := 0.6
+## The longest a bot may stand there not yet crouched (s): it crouches before the mouth, never stopped at it.
+const CROUCH_BY := 0.4
+
+
+func test_a_bot_crouches_into_the_tunnel_its_route_goes_through_without_stopping() -> void:
+	var field: Array = _tunnel_field(1.4)
+	var map: MapData = field[0]
+	var w: BoxWorld = field[1]
+	var nav := NavGrid.build(map, tuning.nav, body)
+	var sim := Simulation.new(tuning, w, w.mover(), map.ends, -10.0)
+	sim.nav = nav
+	var state := GameState.new(5, tuning)
+	var commands: Array[PlayerCommand] = []
+	var loadout: Array[ReplicaConfig] = []
+	for i in 2:
+		state.characters.append(Character.new(i, i, Vector3.ZERO, 0.0, loadout))
+		commands.append(PlayerCommand.new())
+	var levels: Dictionary[int, StringName] = {0: &"normal", 1: &"normal"}
+	var bots := BotController.new(state, -1, map, nav, w, tuning, BotConfig.load_default(), levels)
+	sim.start_match(state)
+	bots.observe(state)
+	var near_since: Array[float] = [-1.0, -1.0]
+	var longest := 0.0
+	var under := false
+	for t in roundi(60.0 / DT):
+		bots.think(state, commands, DT)
+		sim.step(state, commands, DT)
+		bots.observe(state)
+		for c in state.characters:
+			var p := c.position
+			var near := absf(p.x) < 2.0 + TUNNEL_NEAR and absf(p.z) < 1.0 + TUNNEL_NEAR
+			if not near or c.low:
+				near_since[c.id] = -1.0
+			elif near_since[c.id] < 0.0:
+				near_since[c.id] = t * DT
+			else:
+				longest = maxf(longest, t * DT - near_since[c.id])
+			under = under or (absf(p.x) < 1.5 and absf(p.z) < 0.5)
+		if under:
+			break
+	assert_true(under, "a bot hunting the other went under the roof within a minute")
+	assert_lt(longest, CROUCH_BY, "it was down before the roof, never stood at it (%.2f s)" % longest)

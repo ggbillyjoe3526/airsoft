@@ -89,7 +89,7 @@ static func _cells_under(g: NavGrid, b: MapData.Block, grow: float) -> Vector4i:
 
 
 ## Every cell's floors: each surface over its centre (the terrain's ground first, with nothing under it) with headroom
-## above it (no other surface's solid within a crouched body's height over it, CR1), lowest first; of two floors closer
+## above it (no other surface's solid within a crouched body's height over it, CT1), lowest first; of two floors closer
 ## than a crouched body's height, the higher.
 static func _floors(g: NavGrid, map: MapData, body: BodyConfig) -> void:
 	var n := g.cols * g.rows
@@ -226,7 +226,7 @@ static func _stamp_blocks(g: NavGrid, map: MapData, r: float, body: BodyConfig) 
 
 
 ## Marks low every node something passes over lower than a standing body but not a crouched one (a block or a floor
-## over it, CR1), grown by the clearance `r`: only a crouched body walks there.
+## over it, CT1), grown by the clearance `r`: only a crouched body walks there.
 static func _stamp_low(g: NavGrid, map: MapData, r: float, body: BodyConfig) -> void:
 	for b in map.blocks:
 		var bottom := b.center.y - b.size.y * 0.5

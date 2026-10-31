@@ -298,7 +298,7 @@ func _fastest(e: int, goal: Vector3) -> float:
 	return best
 
 
-## The three crouch tunnels (CR1): each one's ends (x, z) in the order a test walks it, north to south, and the stretch
+## The three crouch tunnels (CT1): each one's ends (x, z) in the order a test walks it, north to south, and the stretch
 ## under its roof (z): the Crawl box's plywood, the Badger run's logs, the road deck over the Culvert's bed.
 const TUNNELS: Array[Array] = [
 	["Crawl box", Vector2(-14.0, -20.5), Vector2(-14.0, -9.5), Vector2(-18.0, -12.0)],

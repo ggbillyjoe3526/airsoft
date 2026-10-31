@@ -29,7 +29,7 @@ static func link(g: NavGrid, query: WorldQuery, vault: VaultConfig, body: BodyCo
 	var weight := 0.0
 	for k in nodes:
 		start[k] = to.size()
-		# A vault starts and lands standing: never from or onto a floor only a crouched body fits over (CR1).
+		# A vault starts and lands standing: never from or onto a floor only a crouched body fits over (CT1).
 		if g.walkable[k] == 0 or g.low[k] != 0:
 			continue
 		if weight == 0.0:

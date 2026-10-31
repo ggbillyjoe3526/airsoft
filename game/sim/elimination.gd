@@ -72,7 +72,7 @@ static func walk_off_due(c: Character, nav: NavGrid) -> bool:
 ## while calling, walk the route to the dead zone, then stand there. Never fires, aims, reloads or switches, whatever a
 ## reused command held before (browser audit SIM-11). The walk is `forward` = HitConfig.walk_off_speed with no walk
 ## or sprint held, so movement drives it at that share of MovementConfig.run_speed, as in the browser game; crouched
-## where a tunnel lies within HitConfig.walk_off_crouch_ahead on `nav` (NavGrid.low, CR1).
+## where a tunnel lies within HitConfig.walk_off_crouch_ahead on `nav` (NavGrid.low, CT1).
 static func fill_eliminated_command(c: Character, tuning: SimTuning, out: PlayerCommand,
 		nav: NavGrid = null) -> PlayerCommand:
 	out.reset(c.yaw, 0.0)

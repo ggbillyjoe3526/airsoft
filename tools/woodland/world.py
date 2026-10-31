@@ -59,7 +59,7 @@ OVER_NAME = np.full((NX, NZ), "", dtype=object)
 CROUCH0 = np.zeros((NX, NZ), bool)       # layer-0 cells you can only cross crouched (under a deck)
 CUT_RUN_OUT = 1.5  # a tunnel's cutting starts this far (m) past its end, at the ground
 CUT_LEVEL = 1.0  # and is at its floor this far (m) short of the roof: a crouched body under it on the level
-H0 = h.copy()  # the ground before the cuttings: a covered middle is cut from it, never twice (build_map, CR1)
+H0 = h.copy()  # the ground before the cuttings: a covered middle is cut from it, never twice (build_map, CT1)
 for t in L.TUNNELS:
     (ax, az), (bx, bz) = t["a"], t["b"]
     Lt = math.hypot(bx - ax, bz - az)
@@ -76,7 +76,7 @@ for t in L.TUNNELS:
     along = (tt >= -CUT_RUN_OUT) & (tt <= Lt + CUT_RUN_OUT)
     mid = np.abs(tt - Lt / 2) <= cover / 2
     # the cutting ramps down from the ground CUT_RUN_OUT past each end to the floor CUT_LEVEL short of the covered
-    # middle (CR1: cut to the floor all the way, its ends were walls 1.3 m high and the tunnel a pit)
+    # middle (CT1: cut to the floor all the way, its ends were walls 1.3 m high and the tunnel a pit)
     run = (Lt - cover) / 2 + CUT_RUN_OUT - CUT_LEVEL
     ramp = np.clip((np.minimum(tt, Lt - tt) + CUT_RUN_OUT) / run, 0, 1)
     floor = np.where(mid, floor, h - mound * ramp)

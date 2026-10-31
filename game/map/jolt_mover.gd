@@ -2,7 +2,7 @@ class_name JoltMover
 extends CharacterMover
 ## The simulation's CharacterMover on a map's Jolt colliders (docs/ARCHITECTURE.md › Contracts 4), moving the same body
 ## BoxWorld does: a vertical cylinder of BodyConfig radius and height whose bottom is the feet, crouch_height tall while
-## the character is low (CR1). Each move sweeps it with
+## the character is low (CT1). Each move sweeps it with
 ## PhysicsServer3D.body_test_motion (its parameters and result reused, so nothing is allocated a call): vertically first,
 ## then level, sliding along what it meets, then a step up onto anything no taller than max_step. The ground probe sweeps
 ## a thin disc of the body's radius down from max_step above the feet. Both bodies belong to the MapLevel.

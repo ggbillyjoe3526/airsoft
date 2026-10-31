@@ -55,7 +55,7 @@ var _query: JoltQuery = null
 ## The movers' kinematic bodies and shapes, made on the physics server and freed with the level.
 var _rids: Array[RID] = []
 var _mover_body: RID
-## The mover's crouched body (BodyConfig.crouch_height tall, CR1).
+## The mover's crouched body (BodyConfig.crouch_height tall, CT1).
 var _low_mover_body: RID
 var _probe_body: RID
 

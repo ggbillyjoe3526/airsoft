@@ -35,7 +35,7 @@ static func step(c: Character, cmd: PlayerCommand, cfg: MovementConfig, accuracy
 	c.yaw = cmd.yaw
 	c.pitch = clampf(cmd.pitch, -cfg.max_pitch, cfg.max_pitch)
 
-	# Crouched under something lower than a standing body (a tunnel's roof, CR1), it stays down whatever is held.
+	# Crouched under something lower than a standing body (a tunnel's roof, CT1), it stays down whatever is held.
 	var kept_down := c.low and not mover.room_to_stand(c)
 	c.crouch_amount = approach(c.crouch_amount, 1.0 if cmd.crouch or kept_down else 0.0, dt / cfg.crouch_transition_time)
 	var crouched := c.crouch_amount >= cfg.crouched_threshold

@@ -98,7 +98,7 @@ static func think(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> void:
 			cmd.door_to_use = Doors.shut_ahead(w.query, w.tuning.doors, w.doors, me.position,
 					Vector2(b.move_dir.x, b.move_dir.z))
 			cmd.use_door = cmd.door_to_use >= 0
-		# A tunnel on its way (a floor only a crouched body fits over, CR1): it crouches through, as the player would.
+		# A tunnel on its way (a floor only a crouched body fits over, CT1): it crouches through, as the player would.
 		if w.nav != null and w.nav.low_ahead(me.position, b.move_dir, cfg.low_crouch_ahead):
 			cmd.crouch = true
 	# A personality that aims from cover raises its sight standing still to fight, to look over its cover or to hold;

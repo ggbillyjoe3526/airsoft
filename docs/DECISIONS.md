@@ -597,7 +597,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   The layout lives in `tools/woodland/layout.py` and `world.py`, and `build_map.py` writes `data/maps/woodland.json`:
   change the scripts, never the JSON. The game's blocks are axis-aligned, so pieces are squared and the stream runs
   straight north to south under both crossings. The old wood is a test fixture (`tests/support/maps/old_woodland.json`).
-- **A crouched body is 1.25 m tall (owner's approval of Woodland concept 3, 2026-10-31, CR1).** Crouched past the
+- **A crouched body is 1.25 m tall (owner's approval of Woodland concept 3, 2026-10-31, CT1).** Crouched past the
   threshold (MovementConfig.crouched_threshold) a character's collision body is `BodyConfig.crouch_height` tall, so it
   goes through Woodland's 1.4 m tunnels; under anything lower than a standing body it stays crouched whatever is held,
   until it is out. The nav grid walks a crouched body under such a roof and marks those floors low (`NavGrid.low`);

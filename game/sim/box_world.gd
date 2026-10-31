@@ -237,7 +237,7 @@ class BoxMover:
 	func room_to_stand(c: Character) -> bool:
 		var b := world.body
 		var up := b.height - b.crouch_height
-		return world.sweep(c.position, Vector3(0.0, up, 0.0), b.crouch_height).y >= c.position.y + up - 1e-4
+		return world.sweep(c.position, Vector3(0.0, up, 0.0), b.crouch_height).y >= c.position.y + up - SKIN
 
 	func probe_ground(c: Character, max_drop: float) -> float:
 		return world.probe(c.position, max_drop)

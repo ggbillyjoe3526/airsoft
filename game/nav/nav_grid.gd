@@ -38,7 +38,7 @@ var node_cell: PackedInt32Array = PackedInt32Array()
 var walkable: PackedByteArray = PackedByteArray()
 var floor_y: PackedFloat32Array = PackedFloat32Array()
 ## Per node: 1 where only a crouched body fits (something over the floor lower than a standing body, within the
-## clearance: a tunnel, CR1), else 0.
+## clearance: a tunnel, CT1), else 0.
 var low: PackedByteArray = PackedByteArray()
 ## Per walkable node and step d (NavGridBuilder.DI, DJ): the node of that neighbouring cell it steps onto (walkable or
 ## not), or -1; and a bit per step (1 << d) that lands on a walkable node (ALL_STEPS: no leg probe round it can fail).
