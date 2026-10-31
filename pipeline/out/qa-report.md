@@ -1,26 +1,28 @@
-Task: CR1 · QA commit none (no tests added; review only, nothing committed) · Verdict: Pass
-
-Reviewed: origin/main..cr1-work (e9cd944). The worktree also holds the worker's uncommitted edits in flight (CR1 to CT1 rename in comments, a SKIN constant in BoxMover.room_to_stand, a new bot-through-tunnel test); test_crouch_body.gd in that state: 9 tests, 48 asserts, all pass.
+Task: WR2 · QA commit 847b86d (my test file was swept into the worker's commit; head moved from ae6c160 through d646e35 to 847b86d, I tested that tree) · Verdict: Pass
 
 Blocking: none.
 
-Advisory:
-1. Woodland has a fourth low area the record and wiki don't mention: under the North bridge (about x 0, z -42) the dry stream bed is now 168 walkable low nodes (crouch-walkable; it was blocked under a 1.8 m body). Bots will route through it and so can players, which changes lane flow and sightlines on the stream. Confirm it is wanted (then name it in the wiki and record) or block it. Nodes counted by a scratch probe of NavGrid.low, clustered by 6 m cell: bridge, Crawl box, Badger run and Culvert only.
-2. PracticeSpot.restore (game/play/practice_spot.gd:48) sets crouch_amount = 1 but not Character.low, so for one tick a restored crouched body is the tall one. Self-heals in the next Movement.step; no roof exists at a spot (practice_spots.gd skips low nodes). Harmless.
-3. Perf (for the performance agent): Movement.step now makes one extra Jolt body_test_motion per tick for every low character (movement.gd:39, jolt_mover.gd:59). Bots hold crouch cover often, so a 6v6 match adds several sweeps a tick.
-4. Toggled crouch: pressing Sprint or Jump under a roof clears the toggle (player_input.gd:208-217) while the body stays down (kept_down); after the exit the player stands without pressing again. Matches the record; noting as UX.
+Advisory (nothing to fix before merge):
+1. tests/support/match_runner.gd:231 · sized_for(map, base) ignores a `base` whose round_time the caller set: on Woodland it is replaced by 180. No Woodland caller sets one today (MatchGuard.overtime_flag, match_guard.gd:131, runs on Depot only), but an overtime guard added for Woodland would silently play 3:00 rounds, not its short ones.
+2. game/map/map_catalog.gd:145 · a Round cell of 20 digits passes is_valid_int, and to_int() then logs an engine ERROR (overflow) before the warning; it still falls back and lists the map. _read_sizes (line 118) has the same, older, pattern. Trigger: put 99999999999999999999 in the Round column.
+3. UX note, as the record intends: on Woodland, Skirmish shows 3:00 and switching to Custom shows 2:30 (its own default switch).
+4. The A/D guard (16 seeds, Normal, night) passed: 125 rounds, 108 flag raises, 0 run out the clock, no bot held up past the limit. Raises in 86% of rounds is a balance figure, reported not asserted.
 
-Bugs hunted, none found (probes in scratchpad, run on the real Jolt level, Woodland):
-- Stuck or standing into a roof: from the middle of Crawl, Badger and Culvert with crouch released and sprint+jump held for 120 ticks the body stays low and crouched, rises under 4 cm (slope settle). Walking out with the same keys held ends outside, standing, never standing on a low node.
-- Walking in crouched then releasing at the mouth, and bot-style walking (nav route, sprint held, crouch = low_ahead 1 m): all three tunnels crossed both ways in 300-390 ticks, no stall at either mouth, no tick standing on a low node.
-- room_to_stand false "no room" in the open: 0 of about 69,000 sampled walkable non-low nodes on Depot (16,665), Range (5,250) and Woodland (47,165). On 88 sampled low nodes 4 report room (the grid's low mark is grown by the clearance, so it is conservative at mouths).
-- Depot and Range: 0 low nodes on both; the headroom and merge rule changes leave their grids unchanged.
-- Respawn and round reset: Character.respawn clears low (character.gd:165) with crouch_amount; Round.reset goes through it. Vault: refused while crouched, never starts or lands on low floors (NavVaults), vault ticks keep the tall body and Movement recomputes low after.
-- Woodland terrain: build_map.py rerun from the committed sources reproduces the committed data/maps/woodland.json byte for byte.
-- Mover bodies: the new low kinematic body is on CHARACTER_LAYER with the world mask, freed with the level (map_level.gd:262-267); no collision with the other mover bodies.
+Checked and clean: all 8 leaves stand on their ground (leaf corners within 3 cm; outside the wall the ground falls away at most 0.9 m, no overlap); every leaf hangs on its hut's outer face; a rebuild of build_map.py is byte-identical to woodland.json and check.py gives TOTAL 0; both poles stand on the terrain with no block over them and clear of the Box and Shed roofs; Depot, the Range, practice and no map keep the tuning's time, Custom plays its own; the HUD clock, round clock and Match card chips read 3:00 on a Woodland Skirmish and 2:30 on Depot. The round cell accepts 90 to 300 in 30 s steps and refuses 89, 301, 0, -180, 100, 185, 180.5, 3:00, 1e2, 180s and nan; a missing Round column and a short row still list the map.
 
-Tests: tests/unit/test_crouch_body.gd (8 committed, 9 with the in-flight bot test) and tests/unit/test_woodland_layout.gd:324,354 (low floor all along each roof; crouched Jolt body passes each tunnel, a standing one stops at the mouth). Each names behaviour that does not compile or run without Character.low, crouch_height and NavGrid.low, so they fail without the feature; I did not stub each out.
+Shared physics space: I checked every file that builds a Woodland MapLevel and also plays a match or session (test_bushes, test_baked_light, test_dd1_qa, test_wl9_qa, test_ki1_qa, test_night_light_qa, test_practice_spots). Each frees its level before the match or uses a session without its own level, so none is exposed, and all pass. test_woodland_layout is the only one at risk; it opens its doors during its match and restores them. The worker added this to KNOWN_ISSUES.
 
-Counts: only test_crouch_body.gd run by me (9/9, 48 asserts). Full suite and tools/check.sh are run elsewhere; test_woodland_layout.gd (includes the bot match) not run by me.
+Tests added (tests/unit/test_wr2_qa.gd, 10 tests, 2003 asserts, 43 s, all pass):
+- :71 a bot walks in and out of every hut doorway and opens each shut leaf · without the doors the shut-leaf opened assert fails; the walk only passes because the doorways are open.
+- :89 a body in the doorway stops the door shutting; once clear it shuts · fails if the leaf sat in the gap or `blocked` ignored the body.
+- :110 each door starts as the map says · fails on a wrong shut flag.
+- :117 poles on the ground, in no block · fails on a floating or buried pole.
+- :129 round time on a Woodland Skirmish only; Depot, Range, no map and Custom keep theirs; the chips show 3:00 · fails without the Round column.
+- :148 practice keeps the tuning's time.
+- :158, :170 Round cell edges; no column and short row.
+- :191 PlaySession clock and score bar: 3:00 Woodland, 2:30 Depot, Custom's 2:00 on Woodland · fails if the round time isn't played.
+- :206 a Woodland Attack / Defend session has two flags and runs 180 frames clean.
 
-Could not test: how the 1.25 m body, the lowered eye and the tunnel mouths feel to play, and the figure's look in the tunnels (needs a display); owner to try each tunnel crouched, releasing crouch inside, and the stream under the North bridge.
+Other runs (all pass): woodland_layout 17 (87 s), do1_qa, doors, two_flags 18, team_sizes 17, match_page 28, wl2_qa, cr2_qa, flag, bushes, baked_light, dd1_qa, wl9_qa, ki1_qa, night_light_qa, practice_spots, dp2/3/4_qa, bb_walls, terrain, bot_vaults, sf2_qa, wl1_qa, props, mm3_qa, night_sight(_qa), site_dress, fg2b_qa, fm1_field_map, woods_view(_qa), hud_minimap, plus the Woodland A/D guard (1207 s). Raw output: pipeline/out/qa/.
+
+Not run: tools/check.sh, the full suite and the smoke test (told not to); Woodland's Elimination guard and the Easy and Hard A/D guards; how the doors look, sound and swing in play, which needs a display and ears.

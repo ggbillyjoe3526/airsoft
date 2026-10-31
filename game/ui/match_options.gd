@@ -99,19 +99,29 @@ static func team_size(map: MapCatalog.Entry, custom: CustomRules) -> int:
 	return check_size(map, map.team_size_for(picked))
 
 
-## The round tuning a match on `map` plays: `base` with the Custom switches in force (`custom`, null under Skirmish) and
-## the team size the map gives (team_size). A copy wherever it differs from `base`, which is never written (the loaded
-## tuning is shared).
+## The round tuning a match on `map` plays: `base` with the Custom switches in force (`custom`, null under Skirmish), the
+## team size the map gives (team_size) and, under Skirmish, the map's round length (data/maps.md Round, WR2). A copy
+## wherever it differs from `base`, which is never written (the loaded tuning is shared).
 static func match_tuning(base: SimTuning, map: MapCatalog.Entry, custom: CustomRules) -> SimTuning:
 	var t := base if custom == null else custom.applied_to(base)
 	var size := team_size(map, custom)
-	if t.rounds.team_size == size:
+	var length := round_time(map, custom, t.rounds.round_time)
+	if t.rounds.team_size == size and t.rounds.round_time == length:
 		return t
 	if t == base:
 		t = base.duplicate() as SimTuning
 		t.rounds = base.rounds.duplicate() as RoundConfig
 	t.rounds.team_size = size
+	t.rounds.round_time = length
 	return t
+
+
+## The round's length (s) on `map`: Custom's own switch (`custom`; `played` is it once applied), else the map's
+## (data/maps.md Round), else `played`, the round tuning's.
+static func round_time(map: MapCatalog.Entry, custom: CustomRules, played: float) -> float:
+	if custom != null or map == null or map.round_time <= 0.0:
+		return played
+	return map.round_time
 
 
 ## `map_id` loaded as the Match page lists it: its problems (empty when it can be played) and whether it has a pole.

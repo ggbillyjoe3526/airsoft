@@ -81,7 +81,7 @@ func test_the_file_s_flags_are_read_in_order_and_a_bad_one_left_out() -> void:
 	m = MapData.parse(_json({"flags": {"x": 1, "z": 1}}), style, 6)
 	assert_false(m.has_pole, "flags must be a list")
 	m = MapData.parse(_json({"flag": {"x": 5, "z": 6}}), style, 6)
-	assert_eq(m.poles, PackedVector3Array([Vector3(5, 0, 6)]), "one `flag` is still one pole (Woodland's)")
+	assert_eq(m.poles, PackedVector3Array([Vector3(5, 0, 6)]), "one `flag` is still one pole")
 
 
 func test_each_round_starts_a_flag_at_the_foot_of_each_pole() -> void:

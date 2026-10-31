@@ -363,14 +363,24 @@ def team_sizes(m: dict) -> str:
     return f"{lo}v{lo} to {hi}v{hi} (usual {std}v{std})"
 
 
+def round_of(m: dict) -> str:
+    """A field's Skirmish round (its Round cell, else the round tuning's); none on the range."""
+    if m["Kind"] == "range":
+        return "–"
+    own = m.get("Round", "").strip()
+    if own:
+        return mins(num(own))
+    return mins(float(gd_defaults(ROOT / "game/config/round_config.gd")["round_time"]))
+
+
 def gen_maps(_arg: str) -> str:
     rows = []
     for m in maps():
         if m["Tag"] != "public":
             continue
         kind = {"field": "Field", "range": "Practice range"}.get(m["Kind"], m["Kind"])
-        rows.append([f"**[{m['Name']}](Maps#{slug(m['Name'])})**", kind, team_sizes(m), m["Blurb"]])
-    return table(["Map", "Kind", "Team sizes", "About"], rows)
+        rows.append([f"**[{m['Name']}](Maps#{slug(m['Name'])})**", kind, team_sizes(m), round_of(m), m["Blurb"]])
+    return table(["Map", "Kind", "Team sizes", "Round", "About"], rows)
 
 
 def public_map(map_id: str) -> dict:
@@ -511,7 +521,7 @@ def gen_rules(_arg: str) -> str:
             ["Team size", "the map's usual size", "the sizes the map offers ([Maps](Maps))"],
             ["Rounds to win", f"first to {rounds['wins_needed']}",
              "first to " + ", ".join(w.strip() for w in wins.split(",")[:-1]) + " or " + wins.split(",")[-1].strip()],
-            ["Round time", mins(float(rounds["round_time"])),
+            ["Round time", mins(float(rounds["round_time"])) + ", or the map's own ([Maps](Maps))",
              f"{mins(lo)} to {mins(hi)}, in {fmt(step)} s steps"],
             ["Friendly fire", on[hits["friendly_fire"]], "On or Off"],
             ["Ricochets knock you out", on[hits["ricochets_count"]], "On or Off"],

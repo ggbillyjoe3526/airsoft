@@ -109,11 +109,11 @@ func test_a_map_without_doors_takes_a_press_quietly() -> void:
 	assert_eq(state.events.count_of(GameEvent.Kind.DOOR), 0)
 
 
-func test_woodland_and_the_range_have_no_doors_and_no_door_view() -> void:
-	for id: String in ["woodland", "range"]:
-		var m := MapData.load_map(id, style, 5)
-		assert_eq(m.doors.size(), 0, id)
-		assert_null(DoorView.build(m, style, tuning.doors.swing_time), id)
+func test_the_range_has_no_doors_and_no_door_view() -> void:
+	# Woodland's huts have doors since WR2 (test_woodland_layout).
+	var m := MapData.load_map("range", style, 5)
+	assert_eq(m.doors.size(), 0)
+	assert_null(DoorView.build(m, style, tuning.doors.swing_time))
 
 
 func test_someone_out_of_play_cannot_press_use() -> void:

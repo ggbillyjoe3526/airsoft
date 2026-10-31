@@ -1,23 +1,20 @@
-Task: CT1 · A crouched body short enough for Woodland's tunnels (no TASKS.md block; judged against the brief and docs/records/CT1.md)
+Task: WR2 · Woodland's doors, two flags and 3:00 rounds (no TASKS.md block; judged against the brief and docs/records/WR2.md)
 Attempt: 2 of 4
-Head: 78c352c (= git rev-parse HEAD and PR #157's head; test_crouch_body 9/9 re-run here at the head; CI on 78c352c still in progress: this Accept holds only once it finishes green)
+Head: 847b86d (= git rev-parse HEAD; QA Pass on 847b86d, performance Pass on d646e35: the delta's only code is MapCatalog._read_round, parse-time once per catalog load, no hot path)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
 Score: 8/8 → Accept
-Evidence:
-1. body_config.gd:11 (1.25 m); movement.gd:39 kept_down; jolt_mover.gd + map_level.gd low body; bot_brain.gd:102-103; elimination.gd (walk-off crouch); world.py:79-82 + build_map.py:133 (cut once from H0, ramped); woodland.json terrain only (attempt 1 compared).
-2. CharacterMover only gains room_to_stand; Jolt stays in game/map.
-3. movement.gd:39 now skips the room_to_stand sweep while crouch is held (result identical: the target is 1 either way); practice_spot.gd:50 sets a bool. low_ahead and the walk-off crouch allocate nothing.
-4. test_crouch_body.gd:184-220: without bot_brain.gd:102-103 a standing 1.8 m bot cannot enter the 1.4 m roof, so `under` stays false and `longest` grows past CROUCH_BY (the brief's 2.15 s run agrees).
-8. git diff origin/main -- docs/records/CR1.md is empty; record, DECISIONS:600, ROADMAP:18, code comments all CT1; the only CR1 left in game/tools/tests are the Custom rules task's own. KNOWN_ISSUES row gone; wiki Maps.md:81-82 names the North bridge bed, Movement.md:13-14.
-QA and performance: both Pass, but on e9cd944 and headed "CR1". The three later commits are comment renames, a test, BoxWorld.SKIN, and the two advisories their own reports asked for (movement.gd:39 = performance's fix 1; practice_spot.gd:50 = QA's advisory 2). Neither changes a hot path's allocations or a node's lifetime, so their verdicts still hold; no re-run needed.
-Failed checks: none.
-Should fix (non-blocking, not scored):
-- docs/wiki/Maps.md:81 (133 chars) and docs/records/CT1.md:40 (165 chars) run past the 120-column house wrap; CT1.md "Defaults taken" has a stray blank line after its first bullet.
-- The changelog note (step 6) and the record's Review: and Checks lines are still pending.
+Attempt 1's must-fix and notes, verified in d646e35..847b86d:
+8. Fixed. tools/wiki.py +366-375 round_of() and +382-383 add a generated Round column to the maps table (Depot 2:30, Woodland 3:00, Range –, read from maps.md and round_config.gd); gen_rules +524 reads "2:30, or the map's own ([Maps](Maps))". Typed "3:00 / half a minute" gone (Maps.md, Modes.md +51). `tools/wiki.py check` OK, 25 pages.
+- 30 s step: map_catalog.gd +144-146 rejects off-step cells (fposmod against ROUND_TIME_STEP); maps.md +18-20 says so. test_woodland_layout +431/+437 and test_wr2_qa.gd:158-168 ("185", "100" warn once, map still listed) fail without the step check.
+- KNOWN_ISSUES.md:14 records the shared physics space of a test's own level and its match's (document).
+- Record: WR2.md attempt 1 row filled, attempt 2 row and section added.
+- Door wording: Maps.md +84 "the other team's end ... your own end".
+Notes (no fail):
+- docs/wiki/Maps.md:85 rewrapped to 124 columns (PROCESS.md:278 wraps at 120); fix when the changelog note goes in.
+- changelog.d note for WR2 still to come (due after review, pipeline/README.md).
 Owner should test in the game:
-1. Crouch-run into each tunnel mouth: no camera clipping the roof (mid-crouch eyes 1.34 m under a 1.4 m roof).
-2. Let go of crouch inside a tunnel: you stay down with no stutter and stand on your own once out; with crouch toggle on, press sprint or jump inside.
-3. Bots on the Badger run, the Crawl box and the Culvert: they crouch before the mouth, even at a sprint, and never stall there.
-4. Get eliminated on the far side of a tunnel: the walk-off crouches through it.
-5. Crawl the stream bed under the North bridge: is it a route you want (bots use it)?
-6. Walk both ends of the Badger run's cutting: ramps, no pit, no wall.
+- Woodland Skirmish: Match card chips and HUD clock show 3:00; Depot still 2:30; Custom on Woodland plays its own saved time.
+- Each hut's enemy-facing door is shut at round start, its own-side door open; opening one is heard but not too far.
+- Shut doors sit flush on the sloped Box and Cabin; open leaves fold flat and do not snag.
+- Attack / Defend: A at the Fort and B at the Sawmill both read on the HUD; attackers can reach B in a 3:00 round.
+- Bots open and pass the Hut row and Box doors without bunching in the doorway.
