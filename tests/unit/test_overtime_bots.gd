@@ -104,13 +104,13 @@ func test_each_bot_goes_once_its_reaction_is_over_never_before_it_is_up_or_once_
 		assert_false(BotFlag.wants_flag(b, w), "not before its reaction is over")
 		w.time = b.overtime_at
 		assert_true(BotFlag.wants_flag(b, w))
-	assert_eq(BotFlag.spot(w), spot, "flag mode heads for the overtime flag")
+	assert_eq(BotFlag.spot(list[0], w), spot, "flag mode heads for the overtime flag")
 	w.live = false
 	assert_false(BotFlag.wants_flag(list[0], w), "not once the round is decided")
 	w.live = true
 	state.round_state.overtime_flag.up = false
 	assert_false(BotFlag.wants_flag(list[0], w), "not with the flag down")
-	assert_eq(BotFlag.spot(w), w.flag.position, "the pole again")
+	assert_eq(BotFlag.spot(list[0], w), w.flag.position, "the pole again")
 
 
 func test_each_level_has_its_reaction_slowest_on_easy_and_quickest_on_hard() -> void:

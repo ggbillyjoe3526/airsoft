@@ -1,10 +1,10 @@
 class_name HudFlagMarker
 extends Control
-## Attack / Defend's marker over the pole (the approved concept): the flag sign, "FLAG" and the distance ("· 24 m") on a
-## dark plate with a yellow top rule, and a tail pointing down at the pole. Seen through cover; kept inside the screen's
-## edges; hidden within HudConfig.flag_marker_hide_within. With the pole off the screen's side or behind you it is
-## pinned to that side instead (concept `minimap-attack.png`): a chevron pointing there, "FLAG · 7 M", on the left under
-## the minimap and its caption so it never sits behind them.
+## Attack / Defend's marker over the pole (the approved concept): the flag sign, "FLAG" ("FLAG A" or "FLAG B" on a map
+## with two poles, AB1) and the distance ("· 24 m") on a dark plate with a yellow top rule, and a tail pointing down at
+## the pole. Seen through cover; kept inside the screen's edges; hidden within HudConfig.flag_marker_hide_within. With
+## the pole off the screen's side or behind you it is pinned to that side instead (concept `minimap-attack.png`): a
+## chevron pointing there, "FLAG · 7 M", on the left under the minimap and its caption so it never sits behind them.
 
 const GAP := 8
 const TAIL := Vector2(18.0, 11.0)
@@ -33,6 +33,10 @@ var _edge_chevron: Chevron = null
 var _edge_distance: Label = null
 var _pinned: bool = false
 var _side: int = 0 # where a pinned plate sits: -1 left, 1 right (0 while it is over the pole or hidden)
+## Both plates' titles ("FLAG", or "FLAG A" on a map with two poles), and the letter they carry.
+var _title: Label = null
+var _edge_title: Label = null
+var _letter: String = ""
 
 
 ## The chevron on a pinned plate: a yellow triangle pointing left or right.
@@ -80,9 +84,9 @@ func setup(cfg: HudConfig) -> void:
 	_glyph = HudFlagGlyph.new(HudStyle.MARKER_SIZE, GameTheme.YELLOW)
 	_glyph.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(_glyph)
-	var title := HudStyle.label(row, HudStyle.MARKER_SIZE, 800, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_LEFT,
+	_title = HudStyle.label(row, HudStyle.MARKER_SIZE, 800, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_LEFT,
 			HudStyle.SPACING_AIM)
-	title.text = HudStyle.caps("HUD_FLAG")
+	_title.text = HudStyle.caps("HUD_FLAG")
 	_distance = HudStyle.label(row, HudStyle.MARKER_SIZE, 700, GameTheme.MUTED, HORIZONTAL_ALIGNMENT_LEFT,
 			HudStyle.SPACING_AIM)
 	_plate.resized.connect(_fit)
@@ -140,6 +144,16 @@ func place(camera: Camera3D, pole: Vector3, show: bool, area: Vector2, pin: Vect
 	position = Vector2(at.x - half, at.y - size.y)
 
 
+## Names the pole `letter` on both plates ("FLAG A", AB1), or with "" just "FLAG"; the text changes only when the
+## letter does.
+func set_letter(letter: String) -> void:
+	if letter == _letter:
+		return
+	_letter = letter
+	_title.text = HudStyle.caps("HUD_FLAG") if letter.is_empty() else (tr("HUD_FLAG_NAMED") % letter).to_upper()
+	_edge_title.text = _title.text
+
+
 ## Where a plate pinned to a side sits: -1 on the left, 1 on the right, 0 when it is not pinned (or hidden).
 func pinned_side() -> int:
 	return _side
@@ -156,7 +170,7 @@ func occupied() -> Rect2:
 func text() -> String:
 	if not visible:
 		return ""
-	return "%s %s" % [HudStyle.caps("HUD_FLAG"), _distance.text]
+	return "%s %s" % [_title.text, _distance.text]
 
 
 ## The pinned plate: a chevron, "FLAG" and the distance, on a navy strip with a yellow rule on top.
@@ -177,9 +191,9 @@ func _build_edge() -> void:
 	_edge.add_child(row)
 	_edge_chevron = Chevron.new()
 	row.add_child(_edge_chevron)
-	var title := HudStyle.label(row, EDGE_SIZE, 800, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_LEFT,
+	_edge_title = HudStyle.label(row, EDGE_SIZE, 800, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_LEFT,
 			HudStyle.SPACING_AIM)
-	title.text = HudStyle.caps("HUD_FLAG")
+	_edge_title.text = HudStyle.caps("HUD_FLAG")
 	_edge_distance = HudStyle.label(row, EDGE_SIZE, 700, GameTheme.MUTED, HORIZONTAL_ALIGNMENT_LEFT,
 			HudStyle.SPACING_AIM)
 

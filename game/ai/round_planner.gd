@@ -13,6 +13,9 @@ var plans: Array[Plan] = [Plan.SPLIT, Plan.SPLIT]
 var spawn_centre: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO]
 var enemy_yaw: PackedFloat64Array = PackedFloat64Array([0.0, 0.0])
 var attack_dir: Array[Vector2] = [Vector2.RIGHT, Vector2.LEFT]
+## Attack / Defend on a map with two poles (AB1): the one the attacking bots go for this round once their lanes are
+## swept (BotFlag.in_play), drawn each round; 0 with one pole.
+var attack_flag: int = 0
 ## The field's walkable extent (x, z) and the height over every floor, for drawing hunt spots.
 var bounds_lo: Vector2 = Vector2.ZERO
 var bounds_hi: Vector2 = Vector2.ZERO
@@ -30,12 +33,14 @@ func _init(match_seed: int) -> void:
 
 
 ## A fresh round for every bot: per team a plan, the lanes dealt in a random order, bots sharing a lane setting off
-## lane_follow_delay apart. Call after the round's respawn (spawns and ends are this round's).
+## lane_follow_delay apart; on a map with two poles, the one the attackers go for. Call after the round's respawn
+## (spawns and ends are this round's).
 func plan(w: BotWorld) -> void:
 	_measure_ends(w.characters)
 	var cfg := w.cfg
 	var lane_count := w.lanes.size()
 	var flag := w.mode == RoundState.Mode.ATTACK_DEFEND and w.attackers >= 0
+	attack_flag = _rng.randi_range(0, w.flags.size() - 1) if flag and w.flags.size() > 1 else 0
 	for team in 2:
 		_members.clear()
 		for b in w.bots:

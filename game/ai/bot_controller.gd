@@ -101,9 +101,7 @@ func think(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		DevCheats.run_low(state, _player_id)
 	BotMagShare.update(w, sharing)
 	if w.mode == RoundState.Mode.ATTACK_DEFEND:
-		# Retakers matter only once the flag is off the bottom (BotFlag.wants_flag).
-		if w.flag.progress > 0.0:
-			BotFlag.pick_retakers(w)
+		BotFlag.pick_retakers(w)
 		BotFlag.pick_raiser(w)
 	var hold_fire := state.cheats.bots_hold_fire
 	# Who the weapon torches light, for this interval's looks (a night field only, WL7).
@@ -268,13 +266,15 @@ func _new_round(state: GameState) -> void:
 	world.planner.plan(world)
 
 
-## The round's mode, attacking team, flag and overtime flag, from the sim's round state (the round state's own, read
-## only).
+## The round's mode, attacking team, flags (and the one in play, BotFlag.in_play) and overtime flag, from the sim's
+## round state (the round state's own, read only).
 func _sync_round(state: GameState) -> void:
 	var rs := state.round_state
 	world.mode = rs.mode
 	world.attackers = rs.attackers
-	world.flag = rs.flag
+	world.flags = rs.flags
+	world.flag_index = BotFlag.in_play(world)
+	world.flag = rs.flags[world.flag_index]
 	world.overtime_flag = rs.overtime_flag
 
 

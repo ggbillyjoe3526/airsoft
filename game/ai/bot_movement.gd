@@ -39,7 +39,8 @@ static func move(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float, target: Cha
 			return BotMagShare.move(b, w, cmd, dt)
 		Bot.Mode.FIGHT:
 			# Fighting from cover, or at the pole raising the flag: it stays put.
-			if b.from_cover or (b.raiser and Flag.at_pole(b.character, w.flag, w.tuning.flag)):
+			var rope := w.flags[BotFlag.pole_of(b, w)]
+			if b.from_cover or (b.raiser and Flag.at_pole(b.character, rope, w.tuning.flag)):
 				return false
 			_strafe(b, w, cmd, dt, target)
 	return false
@@ -66,7 +67,8 @@ static func _guards_flag(b: Bot, w: BotWorld) -> bool:
 ## roll came up, and one watching the flag first guards it as an attacker guards the pole.
 static func _pick_flag_spot(b: Bot, w: BotWorld) -> void:
 	var cfg := w.cfg
-	var pole := BotFlag.spot(w)
+	b.flag_pole = BotFlag.pole_of(b, w)
+	var pole := BotFlag.spot(b, w)
 	b.flag_guard = _guards_flag(b, w)
 	b.team_wait = 0.0
 	b.flanking = false
@@ -133,8 +135,9 @@ static func _overtime_flank_point(b: Bot, w: BotWorld, flag: Vector3) -> void:
 ## In overtime, round the side first when flanking (_overtime_flank_point).
 static func _flag(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> bool:
 	var cfg := w.cfg
-	# The raiser changed (hit, or the player took the rope), or an overtime watch is over: raise, or guard, instead.
-	if b.flag_guard != _guards_flag(b, w):
+	# The raiser changed (hit, or the player took the rope), or an overtime watch is over: raise, or guard, instead. The
+	# pole it makes for changed (a flag went up at the other while it isn't on a worked rope, AB1): to that one.
+	if b.flag_guard != _guards_flag(b, w) or b.flag_pole != BotFlag.pole_of(b, w):
 		_pick_flag_spot(b, w)
 	if b.flanking:
 		BotRoutes.want(b, b.flank_goal, cfg)
@@ -155,7 +158,7 @@ static func _flag(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> bool:
 		else:
 			cmd.crouch = true
 		return false
-	var pole := BotFlag.spot(w)
+	var pole := BotFlag.spot(b, w)
 	if b.route_state == Bot.RouteState.FAILED:
 		if not b.flag_guard and (b.flag_goal.x != pole.x or b.flag_goal.z != pole.z):
 			# No way to that spot: try the foot of the pole itself.

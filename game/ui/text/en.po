@@ -135,6 +135,14 @@ msgstr "· %d m"
 msgid "HUD_FLAG_GOING_UP"
 msgstr "Their flag is going up!"
 
+# On a map with two poles (AB1): which one, its letter.
+msgid "HUD_FLAG_GOING_UP_AT"
+msgstr "Their flag is going up at %s!"
+
+# The flag marker on a map with two poles: "Flag A".
+msgid "HUD_FLAG_NAMED"
+msgstr "Flag %s"
+
 msgid "HUD_OVERTIME"
 msgstr "Overtime"
 

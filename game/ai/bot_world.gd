@@ -20,11 +20,13 @@ var time: float = 0.0
 var live: bool = true
 ## Seconds left in the live round (team play's late push).
 var round_clock: float = INF
-## The match's mode, and in Attack / Defend the team attacking this round (-1 in Elimination) and the pole (RoundState's,
-## read each tick).
+## The match's mode, and in Attack / Defend the team attacking this round (-1 in Elimination), every pole's flag
+## (RoundState's, read each tick) and the one in play (BotFlag.in_play: the one going for, or to pull down).
 var mode: RoundState.Mode = RoundState.Mode.ELIMINATION
 var attackers: int = -1
-var flag: FlagState = FlagState.new()
+var flags: Array[FlagState] = [FlagState.new()]
+var flag: FlagState = flags[0]
+var flag_index: int = 0
 ## Elimination's overtime flag (OV2; RoundState's, read each tick): up, its foot and the time it has left.
 var overtime_flag: OvertimeFlag = OvertimeFlag.new()
 ## The dark on a field played at night (WL6): light pools, canopy and roofs, built once as the match loads (null by

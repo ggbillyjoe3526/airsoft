@@ -65,18 +65,17 @@ static func step(rs: RoundState, characters: Array[Character], ends: Array[MapEn
 		_step_elimination_clock(rs, characters, tuning, events, dt)
 
 
-## Attack / Defend once nobody is wiped out: the flag raised wins it for the attackers; at the buzzer the defenders win,
-## unless the attackers are working the rope (raising it, or contesting it at the pole): then it plays on until they
-## stop or max_overtime has run.
+## Attack / Defend once nobody is wiped out: a flag raised (either, on a map with two) wins it for the attackers; at the
+## buzzer the defenders win, unless the attackers are working a rope (raising it, or contesting it at the pole): then it
+## plays on until they stop or max_overtime has run.
 static func _step_flag_clock(rs: RoundState, characters: Array[Character], tuning: SimTuning, events: SimEvents,
 		dt: float) -> void:
-	if Flag.step(rs.flag, characters, rs.attackers, tuning.flag, events, dt):
+	if Flag.step_all(rs.flags, characters, rs.attackers, tuning.flag, events, dt):
 		_end_round(rs, rs.attackers, GameEvent.RoundEnd.CAPTURED, tuning.rounds, events)
 		return
 	if rs.clock > 0.0:
 		return
-	var rope_worked := rs.flag.status == FlagState.Status.RAISING or rs.flag.status == FlagState.Status.CONTESTED
-	if rope_worked and rs.overtime < tuning.flag.max_overtime:
+	if Flag.rope_worked(rs.flags) and rs.overtime < tuning.flag.max_overtime:
 		rs.overtime += dt
 	else:
 		_end_round(rs, 1 - rs.attackers, GameEvent.RoundEnd.TIME, tuning.rounds, events)
@@ -216,7 +215,7 @@ static func _start_round(rs: RoundState, characters: Array[Character], ends: Arr
 	rs.overtime = 0.0
 	rs.attackers = attackers_in_round(number, tuning.rounds, rs.first_attackers) \
 			if rs.mode == RoundState.Mode.ATTACK_DEFEND else -1
-	rs.flag.reset(rs.pole)
+	rs.reset_flags()
 	rs.overtime_flag.reset(tuning.overtime)
 	place_teams(rs, characters, ends, tuning)
 	for c in characters:

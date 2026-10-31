@@ -257,6 +257,7 @@ func test_map_data_without_a_flag_has_no_pole() -> void:
 	var text := FileAccess.get_file_as_string(MapData.DIR + "depot.json")
 	var d: Dictionary = JSON.parse_string(text)
 	d.erase("flag")
+	d.erase("flags")
 	var m := MapData.parse(JSON.stringify(d), MapStyle.new(), rules.team_size)
 	assert_true(m.ok(), "a map without a flag still loads")
 	assert_false(m.has_pole)

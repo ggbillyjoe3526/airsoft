@@ -83,7 +83,9 @@ var foliage: Foliage = Foliage.new()
 ## The map's two ends (spawns and dead zones), end 0 first.
 var ends: Array[MapEnd] = []
 var kill_y: float = -10.0
-## Attack / Defend's flagpole, by end 1 (`flag` in the file); has_pole false on a map without one.
+## Attack / Defend's flagpoles by end 1, flag A first (`flags` in the file, a list of spots, AB1; or one `flag`); the
+## attackers win a round by raising either. `pole` is flag A's; has_pole false on a map without one.
+var poles: PackedVector3Array = PackedVector3Array()
 var pole: Vector3 = Vector3.ZERO
 var has_pole: bool = false
 ## Elimination's overtime flag, its foot near the middle (`overtimeFlag` in the file, OT1); has_overtime_flag false on a
@@ -211,8 +213,7 @@ static func parse(text: String, style: MapStyle, team_size: int) -> MapData:
 	m._read_kicked_dust(d.get("dressing"))
 	m.site = SiteDressing.read(d.get("dressing"), m.warnings)
 	m._read_woods(d.get("dressing"), style)
-	m.has_pole = _spot(d.get("flag"), "flag", m.warnings)
-	m.pole = _vec(d.get("flag")) if m.has_pole else Vector3.ZERO
+	m._read_poles(d.get("flags"), d.get("flag"))
 	m.has_overtime_flag = _spot(d.get("overtimeFlag"), "overtimeFlag", m.warnings)
 	m.overtime_flag = _vec(d.get("overtimeFlag")) if m.has_overtime_flag else Vector3.ZERO
 	for w in m.warnings:
@@ -727,6 +728,26 @@ static func _spots(list: Variant) -> Array[SpawnPoint]:
 		if raw is Dictionary:
 			out.append(SpawnPoint.new(_vec((raw as Dictionary).get("position")), float((raw as Dictionary).get("yaw", 0.0))))
 	return out
+
+
+## The flagpoles: each spot of `list` (the file's `flags`), up to Flag.MOST; without a list, the one `single` (`flag`).
+## A bad spot is left out with a warning (_spot).
+func _read_poles(list: Variant, single: Variant) -> void:
+	poles.clear()
+	if list == null:
+		if _spot(single, "flag", warnings):
+			poles.append(_vec(single))
+	elif not list is Array or (list as Array).is_empty():
+		warnings.append("flags %s is not a list of spots: none read" % JSON.stringify(list))
+	else:
+		for raw: Variant in list:
+			if poles.size() >= Flag.MOST:
+				warnings.append("flags: more than %d, the rest left out" % Flag.MOST)
+				break
+			if _spot(raw, "flags", warnings):
+				poles.append(_vec(raw))
+	has_pole = not poles.is_empty()
+	pole = poles[0] if has_pole else Vector3.ZERO
 
 
 static func _vec(raw: Variant) -> Vector3:

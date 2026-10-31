@@ -212,8 +212,8 @@ var _refresh_hz: float = 0.0
 var _warm: bool = false
 var _pretend_slow: bool = false
 var _stats: MatchStats = MatchStats.new()
-## Attack / Defend's pole; null in Elimination.
-var _flag: FlagView = null
+## Attack / Defend's poles as drawn, one a pole (AB1), flag A's first; empty in Elimination.
+var _flags: Array[FlagView] = []
 ## Elimination's overtime flag, built once a match on a map with a spot for it and hidden until it goes up; null
 ## otherwise (Attack / Defend, practice, a map without a spot).
 var _overtime_flag: OvertimeFlagView = null
@@ -475,7 +475,7 @@ func _start_simulation(map: MapData) -> void:
 	# Attack / Defend on a map with a pole, your team attacking first; on a map without one, Elimination.
 	if mode == MatchOptions.MODE_ATTACK_DEFEND and map.has_pole:
 		state.round_state.mode = RoundState.Mode.ATTACK_DEFEND
-		state.round_state.pole = map.pole
+		state.round_state.poles = map.poles
 		state.round_state.first_attackers = player_team
 	else:
 		mode = MatchOptions.MODE_ELIMINATION
@@ -688,10 +688,15 @@ func _build_views(ui: CanvasLayer) -> void:
 	if _mag_tosses != null:
 		first_use.append_array(_mag_tosses.materials())
 	if state.round_state.mode == RoundState.Mode.ATTACK_DEFEND:
-		_flag = FlagView.new()
-		_flag.setup(_play.flag, _colours.figures, state.round_state.pole, _tuning.flag.radius)
-		add_child(_flag)
-		first_use.append_array(_flag.materials())
+		# One view a pole; with two, each carries its letter (AB1).
+		var poles := state.round_state.poles
+		for i in poles.size():
+			var view := FlagView.new()
+			view.setup(_play.flag, _colours.figures, poles[i], _tuning.flag.radius,
+					Flag.LETTERS[i] if poles.size() > 1 else "")
+			add_child(view)
+			_flags.append(view)
+			first_use.append_array(view.materials())
 	elif state.round_state.has_overtime_spot and not practice:
 		_overtime_flag = OvertimeFlagView.new()
 		_overtime_flag.setup(_play.flag, _colours.figures, state.round_state.overtime_spot, _tuning.overtime.reach)
@@ -868,8 +873,14 @@ func hud() -> Hud:
 	return _hud
 
 
+## Flag A's pole as drawn (null outside Attack / Defend).
 func flag_view() -> FlagView:
-	return _flag
+	return _flags[0] if not _flags.is_empty() else null
+
+
+## Every pole as drawn, flag A's first (AB1).
+func flag_views() -> Array[FlagView]:
+	return _flags
 
 
 ## Elimination's overtime flag (null in Attack / Defend, practice or on a map without a spot): for tests.
@@ -1088,10 +1099,13 @@ func _process(delta: float) -> void:
 	_hud.place_sound_cues(watched, yaw, fraction)
 	if _doors != null:
 		_doors.refresh(state.doors)
-	if _flag != null:
+	if not _flags.is_empty():
 		var rs := state.round_state
-		_flag.refresh(rs.flag, rs.attackers)
-		_hud.place_flag_marker(_eyes.camera, rs.pole, rs.attackers >= 0 and rs.is_live())
+		for i in mini(_flags.size(), rs.flags.size()):
+			_flags[i].refresh(rs.flags[i], rs.attackers)
+		var shown := mini(_hud.shown_pole(), rs.flags.size() - 1)
+		_hud.place_flag_marker(_eyes.camera, rs.flags[shown].position, rs.attackers >= 0 and rs.is_live(),
+				Flag.LETTERS[shown] if rs.flags.size() > 1 else "")
 	elif _overtime_flag != null:
 		var rs := state.round_state
 		var ot := rs.overtime_flag

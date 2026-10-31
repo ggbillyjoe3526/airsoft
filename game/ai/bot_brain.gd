@@ -149,7 +149,7 @@ static func _choose_mode(b: Bot, w: BotWorld, target: Character, dt: float) -> v
 	var fresh := b.threat_in_mind(w.time, cfg)
 	var defending := BotFlag.role(b, w) == BotFlag.Role.DEFEND
 	var holds_post := defending or BotPersonality.anchor_holding(b, w)
-	var post := w.flag.position if defending else b.lane_goal
+	var post := BotFlag.post_of(b, w) if defending else b.lane_goal
 	var leash := cfg.defend_search_radius if defending else cfg.anchor_search_radius
 	var watch_from_post := fresh and holds_post and (_flat(b.last_known, post) > leash \
 			or absf(b.last_known.y - post.y) > cfg.anchor_search_rise)

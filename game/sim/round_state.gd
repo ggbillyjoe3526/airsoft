@@ -9,10 +9,16 @@ enum Phase { LIVE, OVER, MATCH_OVER }
 ## pole, and the time-out goes to the defenders.
 enum Mode { ELIMINATION, ATTACK_DEFEND }
 
-## The match's mode and, for Attack / Defend, the foot of its pole (map data) and the team attacking in the first half
-## (it follows your team pick). Set before Round.start_match.
+## The match's mode and, for Attack / Defend, the feet of its poles (map data: flag A's first, AB1) and the team
+## attacking in the first half (it follows your team pick). Set before Round.start_match. `pole` is flag A's; setting it
+## makes the match's one pole.
 var mode: Mode = Mode.ELIMINATION
-var pole: Vector3 = Vector3.ZERO
+var poles: PackedVector3Array = PackedVector3Array([Vector3.ZERO])
+var pole: Vector3:
+	get:
+		return poles[0] if not poles.is_empty() else Vector3.ZERO
+	set(at):
+		poles = PackedVector3Array([at])
 var first_attackers: int = 0
 ## Practice (the range, M21): no rounds, so no clock and no wipe-out; the round stays live from start_match on, the
 ## targets are stepped and spare magazines stay full (Simulation.step). Off in every match.
@@ -34,10 +40,14 @@ var reason: GameEvent.RoundEnd = GameEvent.RoundEnd.ELIMINATED
 var score: PackedInt32Array = PackedInt32Array([0, 0])
 ## The team that won the match, or -1.
 var match_winner: int = -1
-## Attack / Defend: the team attacking this round (-1 in Elimination), the pole, and the overtime played so far (s; time
-## ran out while the attackers worked the rope).
+## Attack / Defend: the team attacking this round (-1 in Elimination), a flag for each pole (one at least; sized to
+## `poles` each round, the same array kept), and the overtime played so far (s; time ran out while the attackers worked
+## a rope). `flag` is flag A's.
 var attackers: int = -1
-var flag: FlagState = FlagState.new()
+var flags: Array[FlagState] = [FlagState.new()]
+var flag: FlagState:
+	get:
+		return flags[0]
 var overtime: float = 0.0
 ## Elimination: the foot of the map's overtime flag (map data; set before Round.start_match on a map with a spot), and
 ## the flag itself (up, foot, time left, contested), down with all its time at each round's start. Without a spot, a
@@ -45,6 +55,16 @@ var overtime: float = 0.0
 var has_overtime_spot: bool = false
 var overtime_spot: Vector3 = Vector3.ZERO
 var overtime_flag: OvertimeFlag = OvertimeFlag.new()
+
+
+## Every flag at the bottom of its pole for a new round, one for each pole (one at least).
+func reset_flags() -> void:
+	var n := maxi(1, poles.size())
+	while flags.size() < n:
+		flags.append(FlagState.new())
+	flags.resize(n)
+	for i in n:
+		flags[i].reset(poles[i] if i < poles.size() else Vector3.ZERO)
 
 
 func is_live() -> bool:

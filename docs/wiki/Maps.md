@@ -32,7 +32,8 @@ the west in Elimination, and the teams swap ends at half time.
 - **Noisy props:** running into a container, a steel drum, a plastic barrel, a rack or a crate stack makes a noise
   bots hear, and a BB rings off the steel ([Movement](Movement#paces)).
 - **Doors:** some of the plywood rooms and huts have green [doors](#doors), some starting open and some shut.
-- **Attack / Defend** puts a flagpole on A site, at the defenders' end ([Modes](Modes#attack--defend)).
+- **Attack / Defend** puts two flagpoles at the defenders' end, **A** on A site and **B** on B site; the attackers
+  raise either ([Modes](Modes#attack--defend)).
 - Fields are greybox for now: plain blocks in the site's colours, with props and the final models coming later.
 
 ![A dark tunnel between two lanes](images/depot-tunnel.jpg)

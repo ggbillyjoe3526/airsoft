@@ -296,7 +296,7 @@ func play(seed_value: int, max_seconds: float) -> MatchTally:
 	t.farthest.resize(state.characters.size())
 	if mode == RoundState.Mode.ATTACK_DEFEND:
 		state.round_state.mode = mode
-		state.round_state.pole = map.pole
+		state.round_state.poles = map.poles
 		state.round_state.first_attackers = 0
 	else:
 		state.round_state.has_overtime_spot = map.has_overtime_flag and overtime_flag

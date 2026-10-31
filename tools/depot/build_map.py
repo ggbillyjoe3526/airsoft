@@ -175,7 +175,7 @@ def build() -> dict:
                    [spot(x, z, EYE_FACING_WEST) for x, z in L.SPAWNS_E]],
         "deadZones": [dead_zone(*L.DEAD_W, EYE_FACING_EAST), dead_zone(*L.DEAD_E, EYE_FACING_WEST)],
         "lanes": [[{"x": x, "y": 0, "z": z} for x, z in L.LANES[k]] for k in ("n", "m", "s")],
-        "flag": {"x": L.FLAG_A[0], "y": 0, "z": L.FLAG_A[1]},
+        "flags": [{"x": x, "y": 0, "z": z} for x, z in L.FLAGS],
         "overtimeFlag": {"x": L.OT_FLAG[0], "y": 0, "z": L.OT_FLAG[1]},
         "botSight": 55,
         "roof": roof(),

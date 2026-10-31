@@ -195,7 +195,8 @@ func fill(view: View, state: GameState, watched: Character, fraction: float, sto
 			view.add_patch(Vector2(p.centre.x, p.centre.z), p.radius, p.sound == MinimapHearing.Sound.SHOT,
 					_heard.shade(p))
 	if rs.mode == RoundState.Mode.ATTACK_DEFEND and rs.attackers >= 0 and rs.is_live():
-		view.set_pole(Vector2(rs.pole.x, rs.pole.z))
+		for p in rs.poles:
+			view.set_pole(Vector2(p.x, p.z))
 	elif rs.overtime_flag.up and rs.is_live():
 		view.set_pole(Vector2(rs.overtime_flag.foot.x, rs.overtime_flag.foot.z), true)
 	if holding:
@@ -315,8 +316,9 @@ class View:
 	var _patch_alphas := PackedFloat32Array()
 	var _patch_shots := PackedByteArray()
 	var _patch_count: int = 0
-	var _pole_on: bool = false
-	var _pole: Vector2 = Vector2.ZERO
+	## The poles shown this frame (Flag.MOST at most: AB1), their slots made once (_init).
+	var _poles := PackedVector2Array()
+	var _pole_count: int = 0
 	var _chequered: bool = false
 	var _dark_checks: Array[Rect2] = []
 	var _hold_on: bool = false
@@ -331,6 +333,9 @@ class View:
 	var _you_on: bool = true
 	## Where the white arrow is (the world's x, z): the middle on the minimap, wherever you are on the whole field.
 	var _you_at: Vector2 = Vector2.ZERO
+
+	func _init() -> void:
+		_poles.resize(Flag.MOST)
 
 	## `textures` are the layers (one per storey) of a drawing at `field_scale` px/m whose top left is the world's
 	## `field_origin` (x, z); up to `capacity` dots and patches.
@@ -432,7 +437,7 @@ class View:
 		_half = size.x * 0.5
 		_dot_count = 0
 		_patch_count = 0
-		_pole_on = false
+		_pole_count = 0
 		_hold_on = false
 		_ping_count = 0
 
@@ -455,11 +460,21 @@ class View:
 		_patch_shots[_patch_count] = 1 if shot else 0
 		_patch_count += 1
 
-	## Attack / Defend's pole at the world's `at`, or with `chequered` Elimination's overtime flag.
+	## One of Attack / Defend's poles at the world's `at` (each call adds one, up to two), or with `chequered`
+	## Elimination's overtime flag.
 	func set_pole(at: Vector2, chequered: bool = false) -> void:
-		_pole_on = true
-		_pole = at
+		if _pole_count >= _poles.size():
+			return
+		_poles[_pole_count] = at
+		_pole_count += 1
 		_chequered = chequered
+
+	## How many poles show this frame, and pole `i`'s spot (x, z): for tests.
+	func pole_count() -> int:
+		return _pole_count
+
+	func pole_at(i: int) -> Vector2:
+		return _poles[i]
 
 	func set_hold(at: Vector2) -> void:
 		_hold_on = true
@@ -507,8 +522,8 @@ class View:
 			_draw_hold(mid + _pin(_to_panel(_hold), _cfg.mark_pad))
 		for i in _ping_count:
 			_draw_ping(mid + _pin(_to_panel(_pings[i]), _cfg.mark_pad), _ping_contacts[i] == 1, _ping_alphas[i])
-		if _pole_on:
-			_draw_pole(mid + _pin(_to_panel(_pole), _cfg.mark_pad))
+		for i in _pole_count:
+			_draw_pole(mid + _pin(_to_panel(_poles[i]), _cfg.mark_pad))
 		for i in _dot_count:
 			_draw_dot(mid + _pin(_to_panel(_dots[i]), _cfg.dot_pad), _dot_colours[i], _dot_arrows[i])
 		if _you_on:

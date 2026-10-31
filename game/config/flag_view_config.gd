@@ -42,6 +42,12 @@ extends Resource
 @export var ring_contested: Color = Color("ffe14d")
 @export var ring_edge: Color = Color("0c1424", 0.55)
 @export var ring_edge_width: float = 0.04
+## On a map with two poles (AB1), each pole's letter, turned to face you, this far over its top (m), this tall a glyph
+## (font px at letter_pixel m a px), off-white on a dark outline, so A and B read from across a room.
+@export var letter_rise: float = 0.5
+@export var letter_size: int = 96
+@export var letter_pixel: float = 0.006
+@export var letter_outline: int = 18
 
 ## Elimination's overtime flag as drawn (OvertimeFlagView; concept `/mnt/project-files/concepts/step27/overtime-flag.png`,
 ## the browser game's FLAG_VISUALS overtime lines): a short pole on a weighted base, its cloth chequered off-white and

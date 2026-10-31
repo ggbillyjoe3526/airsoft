@@ -11,7 +11,6 @@ Every open bug, limit and known gap in the game, so nobody re-reports or re-meas
 
 | Area | Issue | Class | Found |
 |---|---|---|---|
-| Play | Attack / Defend on Depot has one flag, on A site, and defenders hold their first lane points about 37 m from it; two flags (A and B) are AB1, next (DR1) | fix now | 2026-10-31 |
 | Audio | Depot still plays the yard's ambience under its roof (birds, a crow, a dog): an indoor hall sound waits for a later pass (DR1) | can wait | 2026-10-31 |
 | Art | Depot's Lounge is lit like the rest of the hall though the concept had it dim; the roof lamps over it are only spaced wider (DR1) | can wait | 2026-10-31 |
 | Wiki | Some numbers and keys in the wiki's prose are typed, not generated, and the check can't see them drift: squad order keys, the minimap's 22 m / 60 m hearing, the Hard team's 30 s push, three restore points, the 38 m / 26 m flat ranges (WK1). Patch Notes also lists features added and later replaced, as the changelog notes do | document | 2026-10-25 |

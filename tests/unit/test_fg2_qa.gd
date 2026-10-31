@@ -99,6 +99,7 @@ func test_a_retaker_walks_back_to_its_post_once_the_flag_is_down_and_never_hunts
 	b.lane_index = last
 	b.character.position = map.pole + Vector3(0.5, 0.0, 0.0)
 	b.retake = true
+	b.retake_pole = 0
 	state.round_state.flag.progress = 0.2
 	BotBrain._choose_mode(b, w, null, DT)
 	assert_eq(b.mode, Bot.Mode.FLAG)

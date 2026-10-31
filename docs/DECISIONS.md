@@ -583,6 +583,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **Depot keeps its 65 m line across the Chrono hall (owner, 2026-10-31, DR1).** Asked whether to keep the open middle
   or break it up to about 48 m, he kept it open: the field standard's 34 m gives way to a 66 m exception for Depot
   (`FieldStandard.EXCEPTIONS`). Every spawn room opens through crate chicanes, so no spawn is seen from outside it.
+- **Attack / Defend on Depot has two flags, A and B; the attackers raise either (owner, 2026-10-31, AB1).** A map lists
+  its poles as `flags` (flag A first, two at most, `Flag.MOST`; one `flag` is still one pole). Each pole is worked on
+  its own, either raised wins, and the clock's overtime runs on either rope. The pole in play (`Flag.next_in_play`: the
+  one in play kept while it is worked and no flag going up stands higher, else the highest going up, else the highest)
+  is the one attacking bots go to and the HUD's marker and gauge follow; defenders are sent per pole.
 
 ## Replicas, Loadout and levels
 

@@ -433,8 +433,8 @@ static func _fallen(map: MapData, cfg: WoodsConfig, standing: Array[MapData.Bloc
 	for e in map.ends:
 		for s: SpawnPoint in e.spawns + e.dead_zone:
 			spots.append(Vector2(s.position.x, s.position.z))
-	if map.has_pole:
-		spots.append(Vector2(map.pole.x, map.pole.z))
+	for p in map.poles:
+		spots.append(Vector2(p.x, p.z))
 	for b in standing:
 		if b.size.y < cfg.fallen_min_height:
 			continue

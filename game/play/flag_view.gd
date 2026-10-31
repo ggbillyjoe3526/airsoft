@@ -26,14 +26,18 @@ var _ring_mat: StandardMaterial3D = null
 var _height: float = -1.0
 var _attackers: int = -1
 var _status: int = -1
+var _letter: Label3D = null
 
 
-## Builds the pole at `foot` with the rope's reach `reach` (m), the team colours from `teams`.
-func setup(cfg: FlagViewConfig, teams: TeamConfig, foot: Vector3, reach: float) -> void:
+## Builds the pole at `foot` with the rope's reach `reach` (m), the team colours from `teams`; with a `letter` (a map
+## with two poles, AB1) that letter stands over its top.
+func setup(cfg: FlagViewConfig, teams: TeamConfig, foot: Vector3, reach: float, letter: String = "") -> void:
 	_cfg = cfg
 	_teams = teams
-	name = "Flagpole"
+	name = "Flagpole" + letter
 	position = foot
+	if not letter.is_empty():
+		_add_letter(letter)
 	var alu := StandardMaterial3D.new()
 	alu.albedo_color = cfg.pole_colour
 	alu.metallic = cfg.pole_metallic
@@ -110,6 +114,11 @@ func refresh(flag: FlagState, attackers: int) -> void:
 ## The materials drawn first in a match (ShaderPrewarm), so the flag's first sight never hitches.
 func materials() -> Array[Material]:
 	return [_cloth_mat, _ring_mat]
+
+
+## The letter over the pole (AB1), "" without one: for tests.
+func letter() -> String:
+	return _letter.text if _letter != null else ""
 
 
 ## The cloth's height over the foot of the pole (m), for tests.
@@ -197,3 +206,19 @@ static func cloth_mesh(size: Vector2, droop: float) -> ArrayMesh:
 				st.set_uv(Vector2(u, 1.0 - v))
 				st.add_vertex(Vector3(u * size.x, v * size.y - droop * u * u, 0.0))
 	return st.commit()
+
+
+func _add_letter(letter: String) -> void:
+	_letter = Label3D.new()
+	_letter.name = "Letter"
+	_letter.text = letter
+	_letter.font_size = _cfg.letter_size
+	_letter.pixel_size = _cfg.letter_pixel
+	_letter.outline_size = _cfg.letter_outline
+	_letter.modulate = _cfg.cloth_pale
+	_letter.outline_modulate = _cfg.fittings_colour
+	# Billboarded as the "HIT!" sign is (FigureView.make_sign), so it shares the shader the prewarm compiles with it.
+	_letter.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_letter.position.y = _cfg.pole_height + _cfg.letter_rise
+	_letter.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_letter)

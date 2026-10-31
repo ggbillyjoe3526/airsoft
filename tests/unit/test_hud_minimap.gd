@@ -215,16 +215,16 @@ func test_the_pole_shows_while_the_round_is_live_in_attack_defend_only() -> void
 	var rs := state.round_state
 	rs.pole = Vector3(11.5, 0.0, 1.0)
 	_follow()
-	assert_false(mm.view()._pole_on, "not in Elimination")
+	assert_eq(mm.view().pole_count(), 0, "not in Elimination")
 	rs.mode = RoundState.Mode.ATTACK_DEFEND
 	rs.attackers = 0
 	rs.phase = RoundState.Phase.LIVE
 	_follow()
-	assert_true(mm.view()._pole_on, "live")
-	assert_eq(mm.view()._pole, Vector2(11.5, 1.0))
+	assert_eq(mm.view().pole_count(), 1, "live")
+	assert_eq(mm.view().pole_at(0), Vector2(11.5, 1.0))
 	rs.phase = RoundState.Phase.OVER
 	_follow()
-	assert_false(mm.view()._pole_on, "not once the round is over")
+	assert_eq(mm.view().pole_count(), 0, "not once the round is over")
 
 
 func test_your_hold_is_a_diamond_while_it_is_in_force() -> void:

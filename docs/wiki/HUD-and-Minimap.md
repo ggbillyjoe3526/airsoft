@@ -94,7 +94,8 @@ Top left, the minimap shows the field from above:
 - The other team shows only where your side **heard** them: a dashed ring for footsteps, a disc for a shot, fading
   after a few seconds. Steps carry about 22 m and shots about 60 m.
 - The area you stand in is named at the top, with the map and round under it.
-- In Attack / Defend the pole shows while the round is live, and your Hold Here spot shows as a diamond.
+- In Attack / Defend the pole (both on Depot) shows while the round is live, and your Hold Here spot shows as a
+  diamond.
 - Your team's pings show as the same ring or diamond, on the minimap's edge when they are off it, and the overtime
   flag as a chequered flag at its spot.
 - **Rotating** (the default) turns the field so the way you look is up; **Fixed** keeps north up. Pick it in

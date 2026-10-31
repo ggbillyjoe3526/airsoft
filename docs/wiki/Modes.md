@@ -23,7 +23,8 @@ touched, its cloth and ring take that team's colour and the banner says **FLAG T
 ## Attack / Defend
 
 One team attacks, the other defends a flagpole at the defenders' end. The team you pick attacks first, and the sides
-swap at half time; the Match card says who attacks first.
+swap at half time; the Match card says who attacks first. Depot has two poles, **A** and **B**, one on each site: the
+attackers win by raising their flag on either, and each pole's flag goes up and down on its own.
 
 - **Attackers** win the round by raising their flag: stand at the pole, on the rope, for **<!-- wiki:config flag_config.raise_time --> seconds**.
 - **Defenders** win by holding out until the clock runs out, or by taking out every attacker. Defenders at the pole
@@ -35,7 +36,11 @@ swap at half time; the Match card says who attacks first.
 On the field a ring round the pole shows its reach: white with nobody on the rope, the attackers' colour as they
 raise, the defenders' as they pull down, and yellow with both there. The flag climbs in the attackers' colour and the
 rope ratchets as it moves. The HUD shows **ATK** and **DEF** tags over the scores, a **FLAG** gauge with 12 notches,
-a "FLAG · 24 m" marker over the pole, and "Their flag is going up!" when you defend away from the rope.
+a "FLAG · 24 m" marker over the pole, and "Their flag is going up!" when you defend away from the rope. With two
+poles a big **A** or **B** stands over each, the minimap shows both, and the marker and the gauge follow the pole in
+play: the one being fought over, until a flag going up at the other stands higher or the fight ends; else the flag
+going up; else the nearer pole. The marker reads "FLAG B · 24 m", and the warning names the flag going up ("Their flag
+is going up at B!").
 
 A map needs a flagpole for Attack / Defend; the Match screen says when one hasn't got it.
 

@@ -212,11 +212,11 @@ func test_the_marker_and_the_minimap_show_the_flag_while_it_stands() -> void:
 	var watched := session.player
 	hud.update_minimap(session.state, watched, 0.0, 1.0, false, Vector3.ZERO)
 	var view := hud.minimap().view()
-	assert_true(view._pole_on and view._chequered, "the chequered glyph on the minimap")
-	assert_eq(view._pole, Vector2(rs.overtime_spot.x, rs.overtime_spot.z))
+	assert_true(view.pole_count() == 1 and view._chequered, "the chequered glyph on the minimap")
+	assert_eq(view.pole_at(0), Vector2(rs.overtime_spot.x, rs.overtime_spot.z))
 	rs.phase = RoundState.Phase.OVER
 	hud.update_minimap(session.state, watched, 0.0, 1.0, false, Vector3.ZERO)
-	assert_false(view._pole_on, "not once the round is over")
+	assert_eq(view.pole_count(), 0, "not once the round is over")
 
 
 func test_a_round_won_at_the_flag_says_flag_touched_and_counts_its_overtime() -> void:
