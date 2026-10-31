@@ -1,6 +1,6 @@
 # AD1 · The art direction on every map, Depot first
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass (attempt 3, 073eea7)
 
 ## Attempts
 
@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | 2026-10-31 | 1 | thread | CI all green on 48e46aa (full suite, match and night guards) | Retry 6/8 (near miss, judgment) | 7: the palette shared in name only; 8: the wiki's Depot page stale |
 | 2026-10-31 | 2 | thread | CI all green on 69865ee; 82 targeted tests | Retry 7/8 (near miss, judgment) | 7: four colours (stencil light, pallet, barrel lids, sofa feet) still outside the palette; QA and performance to run on the head |
-| 2026-10-31 | 3 | thread | look, props, site dress, DD1, colour vision, DR2, WR3, saved configs (89); CI on the head | – | – |
+| 2026-10-31 | 3 | thread | CI all green on 073eea7; 89 targeted tests; QA and performance re-run Pass | Accept 8/8 | – |
 
 ## Goal
 
