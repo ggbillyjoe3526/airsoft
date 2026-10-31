@@ -1,4 +1,4 @@
-Task: WR3 · QA commit ea73d99 (the worker's commit swept up tests/unit/test_wr3_qa.gd; QA did not commit) · Verdict: Fail (one blocking process gap)
+Task: WR3 · QA commit ea73d99 (the worker's commit swept up tests/unit/test_wr3_qa.gd; QA did not commit) · Verdict: Pass (after 3348179: its one blocking item, the changelog note, is written; first verdict Fail)
 Note: reviewed 10095c1, re-ran my tests and test_props/test_dr2_qa on HEAD 7195fa9 (ea73d99 reworked the cores into MapLevel.core_box: max 20% of width, touching thickets run flush, TILE blocks keep their box). All pass there.
 
 Blocking
@@ -31,3 +31,5 @@ Tests added (tests/unit/test_wr3_qa.gd, 7 tests, 238 asserts, all pass in 12.5 s
 Suite: tools/check.sh run: gdlint pass, changelog notes pass, wiki pass; the full unit run (check.sh, 4 parts) had not finished part 1 after about 20 minutes and ran across the worker's two new commits, so it is not a verdict: the CI run is the full suite. Raw output in pipeline/out/qa/.
 
 Could not test (owner's list): how the props look and read (trunk/spruce scale, tyre and crate stacks, the truck, thicket core between spruces), frame time with 2609 pines, any window/focus behaviour; none changed by WR3.
+
+Re-check on dae2833: changelog.d/woodland-cc0-props.md present, the ramp advisory fixed (dresses() false on a rise), the warning quotes its path; test_props 17/17, test_wr3_qa 7/7, 209 targeted tests pass after the rebase onto WR2. Verdict: Pass.
