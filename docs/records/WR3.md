@@ -63,3 +63,9 @@ models in Beta (2026-10-31).
   wrapped.
 - Performance (Pass) advised the 2,609 spruces' shadows and up to 154 prop draws per pass; Low draws no sun shadows,
   so the owner's F3 check on Low across the thickets is in the playtest list.
+- QA (on 10095c1 and 7195fa9): no code bug; `tests/unit/test_wr3_qa.gd` (7 tests: the dress key, an unknown dress,
+  GRID inside its box either way round, a seeded layout, a narrow thicket's core, a Woodland session's props freed with
+  it, none on the Range). Its one blocking item was the changelog note, written after the critic. Its advisories
+  fixed: a ramp that names a prop keeps its box (`PropDressConfig.dresses`), and the missing-model warning quotes its
+  path. Left as they are: a future bake of Woodland would need its shadow caster and baked mesh to know the props
+  (Woodland has no bake), and an unknown dress name warns at load rather than as a map problem.
