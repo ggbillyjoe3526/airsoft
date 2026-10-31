@@ -34,7 +34,10 @@ the west in Elimination, and the teams swap ends at half time.
 - **Doors:** some of the plywood rooms and huts have green [doors](#doors), some starting open and some shut.
 - **Attack / Defend** puts two flagpoles at the defenders' end, **A** on A site and **B** on B site; the attackers
   raise either ([Modes](Modes#attack--defend)).
-- Fields are greybox for now: plain blocks in the site's colours, with props and the final models coming later.
+- **Props:** the drums, barrels, the Lounge's sofa and the racking are free CC0 models: teal drums four to a pallet,
+  raspberry steel barrels in pairs, and shelving stocked with cartons on every rack. Each fills the space its block
+  did, so what you see is what stops a BB. The walls, crates and containers are still plain blocks in the site's
+  colours until the final models.
 
 ![A dark tunnel between two lanes](images/depot-tunnel.jpg)
 

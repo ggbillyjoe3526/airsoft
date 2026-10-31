@@ -4,7 +4,8 @@ extends Node3D
 ## the blocks MapLevel draws in the site's material (a container's corner posts, rails and lock bars, a crate's
 ## battens, a plywood sheet's timber cap, the perimeter wall's coping, the skip's rim), the watch tower's camouflage net
 ## and flag, the map's shade sails (SiteDressing), all as one mesh in the same material; sandbags laid bag by bag in
-## each stack round its own box, drawn smaller under them (SiteSurface.core_of; one MultiMesh); and each zone's name stencilled on its wall.
+## each stack round its own box, drawn smaller under them (SiteSurface.core_of; one MultiMesh); the CC0 props in place
+## of some kinds' boxes (PropDress, DR2); and each zone's name stencilled on its wall.
 ## Scenery only: no collider, no nav cell; every detail stays within `proud` (a bag `bag_bulge`) of its block's box.
 ## `dress_sky` gives the day its cumulus and haze.
 
@@ -21,6 +22,7 @@ const BAG_SHADE := 0.08
 
 var _details: MeshInstance3D = null
 var _bags: MultiMeshInstance3D = null
+var _props: PropDress = null
 var _stencils: Array[Label3D] = []
 
 
@@ -73,11 +75,18 @@ func stencils() -> Array[Label3D]:
 	return _stencils
 
 
+## The CC0 props (DR2), or null on a map with none.
+func props() -> PropDress:
+	return _props
+
+
 ## The materials the dress draws in, for the shader prewarm (the bags' come into view only near).
 func materials() -> Array[Material]:
 	var out: Array[Material] = [_details.material_override]
 	if _bags != null:
 		out.append(_bags.material_override)
+	if _props != null:
+		out.append_array(_props.materials())
 	return out
 
 
@@ -108,6 +117,9 @@ func _build(map: MapData, look: SiteLook, material: ShaderMaterial) -> void:
 	_details.material_override = material
 	add_child(_details)
 	_lay_bags(map, look)
+	_props = PropDress.build(map, look.props)
+	if _props != null:
+		add_child(_props)
 	var font := GameTheme.font(STENCIL_WEIGHT)
 	for s in map.site.stencils:
 		_stencil(look, s, font, stencil_paint(map, look, s))

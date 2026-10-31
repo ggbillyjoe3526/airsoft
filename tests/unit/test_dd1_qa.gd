@@ -198,6 +198,10 @@ func test_the_baked_site_mesh_keeps_the_tiles_and_draws_sandbags_inside_their_ba
 			stacks.append(AABB(m.blocks[i].center - m.blocks[i].size * 0.5, m.blocks[i].size).grow(1e-4))
 			stack_ids.append(i)
 	assert_eq(stacks.size(), 2)
+	for i in m.blocks.size():
+		if SiteSurface.as_props(look, m.blocks[i]): # DR2: a box drawn as props folds away or backs them, inside itself
+			stacks.append(AABB(m.blocks[i].center - m.blocks[i].size * 0.5, m.blocks[i].size).grow(1e-4))
+			stack_ids.append(i)
 	var moved := 0
 	var outside := 0
 	for v in tiles.positions.size():
@@ -208,9 +212,9 @@ func test_the_baked_site_mesh_keeps_the_tiles_and_draws_sandbags_inside_their_ba
 		if k < 0 or not (stacks[k].has_point(pos[v]) and stacks[k].has_point(tiles.positions[v])):
 			outside += 1
 	assert_gt(moved, 0, "the sandbag tiles are drawn smaller")
-	assert_eq(outside, 0, "only a stack's own tiles move, and inside their block")
+	assert_eq(outside, 0, "only a stack's (or a propped block's) own tiles move, and inside their block")
 	# a tile on the stack's top comes down to bag_core under it, its sides in by bag_core
-	for i in stack_ids:
+	for i in stack_ids.slice(0, 2):
 		var b := m.blocks[i]
 		var top := b.center.y + b.size.y * 0.5
 		var lowest_top := INF
