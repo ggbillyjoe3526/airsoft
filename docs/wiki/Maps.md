@@ -60,24 +60,29 @@ it; a line under the crosshair tells you which.
 
 ## Woodland
 
-**A wide, rolling wood, played at night**, in 5v5 or 6v6. Its ground slopes up to the Knoll and its log fort, with a
-rise to the west and a dry ravine along the creek, and three lanes: through the pines, across the meadow and down the
-creek past the cabin. Every slope walks; none needs a jump.
+**A big open wood, 176 by 120 m, by day or by night**, in 5v5 or 6v6. A dry stream runs down the middle, and three
+lanes cross it: the **north** over the Ridge, the North bridge and the Tower to the Fort; the **middle** past the Cabin
+and the Woodpile to the Clearing, over the Ford to Hut row; the **south** along the gravel road, round the Truck bend,
+over the Culvert to the Log stacks and the Sawmill. Attackers start in the west camp and defenders in the east camp.
 
-- **Night:** a low moon, stars and haze, with fires and lanterns lighting pools of ground round them. Fires flicker,
-  and fireflies hang by the logs and the water. Fit a [weapon torch](Parts-and-Power#lights) to see further, and load
-  [glowing BBs](Loadout#customise) to follow your shots.
-- **Seeing in the dark:** bots see you from about 40 m in the light of a fire, a lantern or a torch beam, 25 m in the
-  open under the moon, 15 m indoors and only 10 m under the trees ([Bots](Bots#at-night)).
-- **Bushes** hide you and stop BBs. You walk straight through them, but nobody sees you through more than about half
-  a metre of leaves; a BB that pushes 0.6 m into a bush stops there, and one that clips an edge flies on, slower and
-  thrown off its line. A BB in the leaves rustles and throws a green puff. The minimap marks every bush.
-- **The pines** each have a crown over your head, for looks only: you see and shoot under it. A forest and treelines
-  stand beyond the fence. From Medium detail there is grass in the meadow, wet puddles and mud, leaves, fallen
-  branches and moss.
-- Footsteps sound like grass or leaf litter, and a BB that hits the ground puffs like earth and never bounces. Owls
-  and creaking branches call from the wood.
-- **Attack / Defend** puts a flagpole at the defenders' flag spot ([Modes](Modes#attack--defend)).
+- **The stream:** its bed is 1.7 m under its banks, which are too steep to climb. Cross on the North bridge or the road,
+  or walk in and out at the Ford and the gentle slides. Down in the bed you're out of sight of the wood above.
+- **Long views, few walls:** the Ridge looks 86 m down onto the Fort; elsewhere a lane's longest line is under 80 m.
+  Cover is logs, log stacks, tyres, crates and the trunks of the trees themselves. The thickets of spruce at the edges
+  and between the lanes can't be entered.
+- **Ferns** grow knee to hip high in eight beds where you'd want to hide, and **bushes** stand taller. Nobody sees you
+  through more than about half a metre of leaves, so crouch in a fern bed to vanish; you walk straight through ferns
+  and bushes, and a BB that pushes 0.6 m into leaves stops there. The minimap marks them. Grass never hides you.
+- **The huts:** the Cabin, the two huts of Hut row and the Box on A site have windows and doorways; the Tower is a
+  platform 3.4 m up a stair, the Sawmill an open shed.
+- **Night** is the Time of day setting's (day by default): a low moon, stars and haze, with fires and lanterns at the
+  camps, the huts, the Clearing, the Fort, the Sawmill, the Truck bend and the North bridge. Bots see you from about
+  40 m in their light, 25 m under the moon and 10 m under the trees ([Bots](Bots#at-night)); by day they see 60 m.
+  At night, fit a [weapon torch](Parts-and-Power#lights) and load [glowing BBs](Loadout#customise).
+- Footsteps sound like grass, leaf litter, gravel or boards, and a BB that hits the ground puffs like earth. Owls and
+  creaking branches call from the wood.
+- **Attack / Defend** puts a flagpole in the Fort ([Modes](Modes#attack--defend)); in Elimination's overtime the flag
+  stands in the Clearing.
 
 ### Areas
 

@@ -322,7 +322,7 @@ func test_woodland_s_ground_is_tiles_that_cull_drawing_the_very_squares_of_the_w
 	var m := MapData.load_map("woodland", style, 1)
 	var level := _level(m)
 	var tiles := level.ground_tiles()
-	assert_eq(tiles.size(), 12, "120 x 80 m in tiles of 32 m: 4 x 3")
+	assert_eq(tiles.size(), 24, "176 x 120 m in tiles of 32 m: 6 x 4")
 	# the whole ground as one mesh, as it was drawn before WL4
 	var whole := []
 	whole.resize(Mesh.ARRAY_MAX)
@@ -453,7 +453,7 @@ static func _yaw_to(d: Vector3) -> float:
 
 
 func test_a_body_walks_up_down_and_across_the_knoll_s_steepest_face_and_stands_still_on_it() -> void:
-	var m := MapData.load_map("woodland", style, 1)
+	var m := OldWoodland.load_map(style, 1) # the first Woodland's Knoll
 	var face := _knoll_face(m)
 	m.blocks.clear()
 	var level := _level(m)
@@ -658,3 +658,23 @@ func test_no_ground_colour_reads_as_a_team() -> void:
 	var teams := AccessibilityTable.read_file().colours
 	for s: int in style.terrain_colours:
 		assert_false(FieldChecks.reads_as_team(style.terrain_colour(s), teams), str(RayHit.Surface.find_key(s)))
+
+
+func test_a_diagonal_line_up_smooth_ground_steeper_than_0_53_walks_but_one_across_a_kerb_s_corner_is_a_drop() -> void:
+	# Ground rising 0.4 a metre along both x and z: a straight step climbs 0.08 m a 0.2 m cell and a diagonal one 0.16,
+	# over max_step (0.15) but a straight step at a time (WR1: a Woodland bot stalled on such a bank, its line judged a
+	# drop).
+	var t := TerrainGrid.create(-10.0, -10.0, 1.0, 20, 20, func(x: float, z: float) -> float: return 0.4 * (x + z))
+	var nav := NavGrid.build(_terrain_map(t), tuning.nav, tuning.body)
+	var from := Vector3(-3.0, t.height_at(-3.0, -3.0), -3.0)
+	var to := Vector3(3.0, t.height_at(3.0, 3.0), 3.0)
+	assert_false(nav.drop_on_line(from, to), "no drop up the slope's fall line")
+	assert_true(nav.clear_line(from, to), "a clear line")
+	var route := PackedVector3Array()
+	assert_true(nav.find_route(from, to, route))
+	assert_eq(route.size(), 1, "one straight leg: %s" % route)
+	# A 0.2 m kerb (a floor block) on flat ground: crossing its corner diagonally is as much a step up as crossing its side.
+	var flat := TerrainGrid.create(-10.0, -10.0, 1.0, 20, 20, func(_x: float, _z: float) -> float: return 0.0)
+	var kerb: Array[MapData.Block] = [_block(&"floor", Vector3(3.0, 0.1, 3.0), Vector3(6.0, 0.2, 6.0))]
+	var kerbed := NavGrid.build(_terrain_map(flat, kerb), tuning.nav, tuning.body)
+	assert_true(kerbed.drop_on_line(Vector3(-2.0, 0.0, -2.0), Vector3(2.0, 0.2, 2.0)), "over a kerb's corner")

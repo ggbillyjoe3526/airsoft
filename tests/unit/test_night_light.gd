@@ -71,7 +71,7 @@ func test_the_night_preset_is_the_browsers_first_guesses() -> void:
 	assert_eq(n.sky_contribution, 0.0, "the fill is its own colour alone (the swatch model's)")
 
 
-func test_woodland_takes_its_overrides_and_turns_the_moon_toward_the_knoll() -> void:
+func test_woodland_takes_its_overrides_and_turns_the_moon_toward_its_moon_spot() -> void:
 	var n := play.night_lighting
 	var w := LightingConfig.for_map(play.lighting, n, woodland, LightingConfig.NIGHT)
 	assert_ne(w, n, "a copy")
@@ -81,8 +81,8 @@ func test_woodland_takes_its_overrides_and_turns_the_moon_toward_the_knoll() -> 
 	assert_eq(n.sun_energy, PlayTuning.load_default().night_lighting.sun_energy, "the preset itself unchanged")
 	var travel := Basis.from_euler(Vector3(deg_to_rad(-w.sun_elevation), deg_to_rad(w.sun_heading), 0.0)) * Vector3.FORWARD
 	var toward_moon := Vector2(-travel.x, -travel.z).normalized()
-	var knoll := (woodland.moon_over - woodland.middle()).normalized()
-	assert_almost_eq(toward_moon.dot(knoll), 1.0, 1e-4, "the moon hangs over the Knoll, seen from the middle")
+	var spot := (woodland.moon_over - woodland.middle()).normalized()
+	assert_almost_eq(toward_moon.dot(spot), 1.0, 1e-4, "the moon hangs over its spot, seen from the middle")
 	assert_eq(LightingConfig.for_map(play.lighting, n, depot, LightingConfig.NIGHT), n, "Depot: the preset as it is")
 	var day := LightingConfig.for_map(play.lighting, n, woodland, LightingConfig.DAY)
 	assert_eq(day, play.lighting, "by day Woodland's sun keeps its heading: only the moon turns")
@@ -112,17 +112,19 @@ func test_every_quality_preset_draws_the_stars_moon_and_haze() -> void:
 # --- MapData and the preset played ---
 
 func test_mapdata_reads_night_lighting_and_lights() -> void:
-	assert_eq([woodland.night, woodland.lighting_presets], [true, [LightingConfig.NIGHT] as Array[StringName]])
+	var both: Array[StringName] = [LightingConfig.DAY, LightingConfig.NIGHT]
+	assert_eq([woodland.night, woodland.lighting_presets], [false, both], "Woodland: day first, then night (WR1)")
 	assert_true(woodland.has_moon_over)
-	assert_eq(woodland.lights.size(), 7)
+	assert_eq(woodland.lights.size(), 11)
 	var kinds: Array[StringName] = []
 	for l in woodland.lights:
 		kinds.append(l.kind)
-	assert_eq(kinds.count(&"fire"), 2, "the camps' fires")
-	assert_eq(kinds.count(&"lantern"), 5, "the fort's and the cabin's lanterns")
+	assert_eq(kinds.count(&"fire"), 3, "the camps' fires and the Truck bend's drum")
+	assert_eq(kinds.count(&"lantern"), 8, "the huts', the Clearing's, the Fort's, the Sawmill's and the bridge's")
 	assert_eq(tower.lighting_presets, [LightingConfig.NIGHT, LightingConfig.DAY] as Array[StringName])
 	assert_true(tower.offers_choice())
-	assert_false(woodland.offers_choice() or depot.offers_choice(), "no shipped map offers both")
+	assert_true(woodland.offers_choice(), "Woodland offers both")
+	assert_false(depot.offers_choice(), "Depot by day alone")
 	var day_only: Array[StringName] = [LightingConfig.DAY]
 	assert_eq([depot.night, depot.lighting_presets, depot.lights.size()], [false, day_only, 0])
 	assert_eq(MapData.presets_in("woodland"), woodland.lighting_presets, "read without building the map")
@@ -136,9 +138,9 @@ func test_mapdata_reads_night_lighting_and_lights() -> void:
 
 
 func test_the_preset_played_is_the_maps_the_picks_or_devs() -> void:
-	assert_eq(woodland.preset_played(&""), LightingConfig.NIGHT, "Woodland: night alone")
-	assert_eq(woodland.preset_played(LightingConfig.DAY), LightingConfig.NIGHT, "a pick it doesn't offer: its own")
-	assert_eq(woodland.preset_played(&"", LightingConfig.DAY), LightingConfig.DAY, "Dev › Time of day: any preset")
+	assert_eq(woodland.preset_played(&""), LightingConfig.DAY, "Woodland: its first, day")
+	assert_eq(woodland.preset_played(LightingConfig.NIGHT), LightingConfig.NIGHT, "or the Match page's Night")
+	assert_eq(woodland.preset_played(LightingConfig.NIGHT, LightingConfig.DAY), LightingConfig.DAY, "Dev wins")
 	assert_eq(depot.preset_played(&""), LightingConfig.DAY)
 	assert_eq(depot.preset_played(LightingConfig.NIGHT), LightingConfig.DAY, "Depot by night is Dev only")
 	assert_eq(depot.preset_played(&"", LightingConfig.NIGHT), LightingConfig.NIGHT)
@@ -149,7 +151,7 @@ func test_the_preset_played_is_the_maps_the_picks_or_devs() -> void:
 
 func test_one_night_flag_drives_every_night_system() -> void:
 	var teams := play.teams
-	for c: Array in [[woodland, &"", &""], [woodland, &"", LightingConfig.DAY], [depot, &"", &""],
+	for c: Array in [[woodland, LightingConfig.NIGHT, &""], [woodland, &"", &""], [depot, &"", &""],
 			[depot, &"", LightingConfig.NIGHT], [tower, LightingConfig.DAY, &""], [tower, &"", &""]]:
 		var m: MapData = c[0]
 		var light := PlaySession.lighting_for(m, play, c[1], c[2])
@@ -223,7 +225,8 @@ func test_the_real_lights_are_the_presets_count_on_the_nearest_pools() -> void:
 	for preset: StringName in [&"low", &"medium", &"high", &"ultra"]:
 		counts.append(night.real_lights_for(GraphicsTable.shared().preset(preset).mesh_detail))
 	assert_eq(counts, [0, 2, 4, 4] as Array[int], "Low 0, Medium 2, High 4")
-	var pools := LightPools.build(woodland, night)
+	var old := OldWoodland.load_map(play.map_style, 5) # the first wood: the west camp's fire by this eye
+	var pools := LightPools.build(old, night)
 	add_child_autofree(pools)
 	var nodes := Performance.get_monitor(Performance.OBJECT_NODE_COUNT)
 	pools.set_real_count(2)
@@ -231,7 +234,7 @@ func test_the_real_lights_are_the_presets_count_on_the_nearest_pools() -> void:
 	for i in 30:
 		pools.update(eye, 0.05)
 	var served := pools.served()
-	var fire := _nearest(woodland, eye)
+	var fire := _nearest(old, eye)
 	assert_true(served.has(fire), "the west camp's fire has a real light")
 	assert_eq(pools.drawn_share(fire), 0.0, "its drawn disc faded out under it")
 	assert_eq(pools.real_lights()[served.find(fire)].light_color, night.fire_colour)
@@ -245,7 +248,7 @@ func test_the_real_lights_are_the_presets_count_on_the_nearest_pools() -> void:
 	pools.set_real_count(2)
 	await get_tree().process_frame
 	assert_eq(Performance.get_monitor(Performance.OBJECT_NODE_COUNT), nodes + 2, "two lights, none left over")
-	for k in woodland.lights.size():
+	for k in old.lights.size():
 		if not pools.served().has(k):
 			assert_eq(pools.drawn_share(k), 1.0, "pool %d drawn" % k)
 
@@ -361,11 +364,13 @@ func test_the_match_page_offers_day_or_night_only_where_a_map_offers_both() -> v
 	var picks := MatchPicks.new()
 	var box := MatchRulesBox.new(picks, Settings.new(), SimTuning.load_default())
 	add_child_autofree(box)
-	for id: String in ["depot", "woodland"]:
-		picks.map_id = id
-		box.show_tuning(SimTuning.load_default())
-		assert_false(box.time_of_day_visible(), "%s offers no choice" % id)
-	# No shipped map offers both since Neon Heights went: the test field's presets, as the box would read them.
+	picks.map_id = "depot"
+	box.show_tuning(SimTuning.load_default())
+	assert_false(box.time_of_day_visible(), "Depot offers no choice")
+	picks.map_id = "woodland"
+	box.show_tuning(SimTuning.load_default())
+	assert_true(box.time_of_day_visible(), "Woodland offers Day or Night (WR1)")
+	# The test field's presets, as the box would read them.
 	box._presets["tower"] = tower.lighting_presets
 	picks.map_id = "tower"
 	box.show_tuning(SimTuning.load_default())

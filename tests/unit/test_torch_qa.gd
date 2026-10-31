@@ -38,6 +38,8 @@ func _settings(dev: bool) -> Settings:
 func _session(map_id: String, s: Settings, kit: Kit = null) -> PlaySession:
 	var session := PlaySession.new()
 	session.map_id = map_id
+	# Woodland by night (its second preset since WR1); a map with one preset plays that.
+	session.lighting_pick = LightingConfig.NIGHT
 	session.settings = s
 	session.kit = kit
 	session.bots_active = false

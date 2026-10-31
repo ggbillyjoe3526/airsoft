@@ -80,10 +80,10 @@ const EXCEPTIONS: Dictionary[String, Dictionary] = {
 				+ "kept the hall's open middle and this line over breaking it up (2026-10-31, DR1); bots there see 55 m",
 	},
 	"woodland": {
-		"sightline": 141.0,
-		"sightline_reason": "corner to corner across the meadow and the Knoll, 140 m: played at night, where the dark, "
-				+ "not the ground, decides what anyone sees, and a BB does not carry that far (owner decision 11, "
-				+ "2026-10-05)",
+		"sightline": 170.0,
+		"sightline_reason": "pinholes between trunks across the wood, up to about 160 m: each lane's own lines stay "
+				+ "under 78 m and the Ridge overlook 86 m (the owner's concept 3, 2026-10-31); leaves and ferns hide "
+				+ "them, a BB does not carry that far and bots see 60 m (WR1)",
 	},
 }
 

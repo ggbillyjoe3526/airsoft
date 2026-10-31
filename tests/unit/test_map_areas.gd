@@ -71,7 +71,7 @@ func test_is_empty_outside_every_area_and_with_none() -> void:
 
 
 func test_the_fields_load_their_areas_each_named_shortly_and_the_range_none() -> void:
-	var counts: Dictionary[String, int] = {"depot": 37, "woodland": 14, "range": 0}
+	var counts: Dictionary[String, int] = {"depot": 37, "woodland": 244, "range": 0}
 	for id: String in counts:
 		var m := maps[id]
 		assert_true(m.ok(), "%s: %s" % [id, m.problems])

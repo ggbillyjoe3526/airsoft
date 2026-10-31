@@ -36,9 +36,15 @@ class Case:
 
 func before_all() -> void:
 	# The yard too (the old Depot, DR1): its end-1 spawns are in reach of the target cap, the hall's lanes fill it first.
-	for id: String in MAPS + ["yard"]:
+	# And the old wood (OldWoodland, WR1), whose lane points stand behind low cover.
+	for id: String in MAPS + ["yard", "old_woodland"]:
 		var c := Case.new()
-		c.map = YardMap.load_map(MapStyle.new(), 1) if id == "yard" else MapData.load_map(id, MapStyle.new(), 1)
+		if id == "yard":
+			c.map = YardMap.load_map(MapStyle.new(), 1)
+		elif id == "old_woodland":
+			c.map = OldWoodland.load_map(MapStyle.new(), 1)
+		else:
+			c.map = MapData.load_map(id, MapStyle.new(), 1)
 		var level := MapLevel.new()
 		add_child(level)
 		level.build(c.map, MapStyle.new(), tuning.body)
@@ -186,7 +192,7 @@ func test_crouched_figures_movers_and_swingers_stand_where_they_fit() -> void:
 	var crouched := 0
 	var movers := 0
 	var swingers := 0
-	for id in MAPS:
+	for id in cases:
 		for s in cases[id].specs:
 			crouched += 1 if s.crouched else 0
 			movers += 1 if s.motion == RangeTarget.Motion.MOVER else 0
@@ -412,25 +418,28 @@ func test_practice_on_depot_has_no_bots_no_score_and_starts_you_at_end_0s_first_
 	assert_eq(session.player.yaw, _start_yaw(session.state.targets), "facing the START plate")
 
 
-func test_practice_on_woodland_plays_at_night_with_your_torch_fitted() -> void:
+func test_practice_on_woodland_plays_by_day_and_by_night_with_your_torch_fitted() -> void:
 	var settings := Settings.new()
 	var rules := LoadoutRules.standard()
 	var l := rules.default_loadout("Night")
 	rules.set_part(l, AEG, &"light", TORCH)
-	var session := PlaySession.new()
-	session.practice = true
-	session.map_id = "woodland"
-	session.settings = settings
-	session.kit = rules.carried(l)
-	add_child_autofree(session)
-	assert_true(session.lighting().night, "Woodland plays at night")
-	assert_eq(session.state.characters.size(), 1, "no bots")
-	var fitted := false
-	for light in session.player.armament.lights:
-		fitted = fitted or light != null
-	assert_true(fitted, "your torch fitted")
-	assert_gt(session.state.targets.size(), 10)
-	assert_false(session.state.dev_content, "the torch and the map are public")
+	for pick: StringName in [&"", LightingConfig.NIGHT]:
+		var session := PlaySession.new()
+		session.practice = true
+		session.map_id = "woodland"
+		session.lighting_pick = pick
+		session.settings = settings
+		session.kit = rules.carried(l)
+		add_child_autofree(session)
+		var night := pick == LightingConfig.NIGHT
+		assert_eq(session.lighting().night, night, "Woodland by day first, by night when picked (WR1)")
+		assert_eq(session.state.characters.size(), 1, "no bots")
+		var fitted := false
+		for light in session.player.armament.lights:
+			fitted = fitted or light != null
+		assert_eq(fitted, night, "your torch fitted at night only")
+		assert_gt(session.state.targets.size(), 10)
+		assert_false(session.state.dev_content, "the torch and the map are public")
 
 
 func _start_yaw(targets: Array[RangeTarget]) -> float:

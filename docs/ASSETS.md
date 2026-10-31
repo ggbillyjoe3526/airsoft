@@ -54,8 +54,9 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
 - **Art references:** the owner's six reference pictures of the target look and his arm and hand study
   (owner-supplied, 2026-10-18), in `docs/art/references/` (`docs/ART.md` › The target). Not game assets: Godot
   ignores the folder and no export ships it.
-- **Map layouts:** Depot, Woodland and the range, exported as data from the browser game's map code to
-  `data/maps/*.json`. Same licence as the code.
+- **Map layouts:** the range, exported as data from the browser game's map code to `data/maps/*.json`; Depot and
+  Woodland, the owner's concepts written to that folder by `tools/depot/` and `tools/woodland/` (DR1, WR1). Same
+  licence as the code.
 
 ## Libraries and add-ons
 

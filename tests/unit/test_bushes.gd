@@ -2,7 +2,8 @@ extends GutTest
 ## Bushes hide you and stop BBs (WL5; the browser game's map/foliage.test.ts, sim/leaves.test.ts, ai/bushSight.test.ts,
 ## ai/botLeavesFire.test.ts and ai/woodlandBushMatch.test.ts): the leaves a line crosses (Foliage), a BB pushing
 ## through them (Leaves, BBStep), what bots see and shoot through (BotSenses, BotCombat), the map's bushes (MapData,
-## MapLevel) and how they are drawn, heard and marked (BushView, PuffView, SimAudio, Hud, MinimapField).
+## MapLevel) and how they are drawn, heard and marked (BushView, PuffView, SimAudio, Hud, MinimapField). Written against
+## the first Woodland's 70 bushes, kept as OldWoodland since WR1.
 
 const DT := 1.0 / 60.0
 const KILL_Y := -10.0
@@ -415,7 +416,7 @@ func test_a_body_walks_through_a_bush_as_through_open_ground() -> void:
 
 func test_woodland_reads_its_bushes_and_hands_them_to_the_simulation() -> void:
 	var t := SimTuning.load_default()
-	var map := MapData.load_map("woodland", MapStyle.new(), t.rounds.team_size)
+	var map := OldWoodland.load_map(MapStyle.new(), t.rounds.team_size)
 	assert_true(map.ok(), "; ".join(map.problems))
 	assert_eq(map.foliage.size(), 70, "the browser's 70 bushes")
 	for i in map.foliage.size():
@@ -440,8 +441,8 @@ func test_a_malformed_bush_is_left_out_with_a_warning() -> void:
 func test_woodland_s_grid_and_level_rays_are_the_same_with_and_without_its_bushes() -> void:
 	var t := SimTuning.load_default()
 	var style := MapStyle.new()
-	var with := MapData.load_map("woodland", style, t.rounds.team_size)
-	var without := MapData.load_map("woodland", style, t.rounds.team_size)
+	var with := OldWoodland.load_map(style, t.rounds.team_size)
+	var without := OldWoodland.load_map(style, t.rounds.team_size)
 	without.foliage = Foliage.new()
 	var a := NavGrid.build(with, t.nav, t.body)
 	var b := NavGrid.build(without, t.nav, t.body)
@@ -551,7 +552,7 @@ func test_a_5v5_woodland_match_never_sees_through_more_than_0_6_m_of_leaves_and_
 	t.rounds.team_size = 5
 	t.rounds.wins_needed = 2
 	t.rounds.half_time_after = 1
-	var runner := MatchRunner.new(self, "woodland", t)
+	var runner := MatchRunner.new(self, "woodland", t, null, OldWoodland.load_map(MapStyle.new(), t.rounds.team_size))
 	assert_eq(runner.level.query().foliage.size(), 70, "its bushes in the bots' world")
 	var watch := {"sampled": 0, "worst": 0.0, "leafy": 0}
 	runner.each_tick = func(state: GameState, bots: BotController) -> void:
@@ -590,9 +591,9 @@ func test_a_5v5_woodland_match_never_sees_through_more_than_0_6_m_of_leaves_and_
 
 # --- how bushes are drawn, heard and marked ---
 
-## Woodland as the game reads it.
+## The old Woodland and its 70 bushes (OldWoodland), as the game reads a map.
 static func _woodland() -> MapData:
-	return MapData.load_map("woodland", PlayTuning.load_default().map_style, SimTuning.load_default().rounds.team_size)
+	return OldWoodland.load_map(PlayTuning.load_default().map_style, SimTuning.load_default().rounds.team_size)
 
 
 func test_woodland_s_bushes_are_one_draw_of_placeholder_ellipsoids_standing_on_their_feet() -> void:
