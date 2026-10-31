@@ -1,6 +1,7 @@
 # WR1 · Woodland rebuilt as the open wood of concept 3
 
-**Review:** critic Accept 8/8 (attempt 2) · qa Pass · performance Pass
+**Review:** critic Accept 8/8 (attempt 2; attempt 3, the four-part unit tests, Accept 7/8 with its wording fixed) · qa
+Pass · performance Pass
 
 ## Attempts
 
@@ -8,6 +9,7 @@
 |---|---|---|---|---|---|
 | 2026-10-31 | 1 | thread | targeted tests pass | Retry 6/8 | `settle()` swapped its loop variables; stale docs |
 | 2026-10-31 | 2 | thread | see Checks | Accept 8/8 | – |
+| 2026-10-31 | 3 | thread | part 4 1042 / 1042 | Accept 7/8 | CI's part 2 timed out: four parts |
 
 ## Goal
 

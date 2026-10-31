@@ -3,7 +3,7 @@
 # WL9, WR1): part 1 the files before test_df (test_a* to test_dev*, test_bots.gd's whole bot matches among them), part 2
 # from test_df to before test_g, part 3 from test_g to before test_rg (test_night*, test_play* and test_range* among
 # them), part 4 the rest.
-# Each part is a Godot run of its own with its own limit; CI runs them as three jobs side by side. Settings live in
+# Each part is a Godot run of its own with its own limit; CI runs them as four jobs side by side. Settings live in
 # .gutconfig.json. Prints each failure as "FAIL: <file> <test>: <message>" and the totals, the whole output in
 # unit-<part>.log; fails if any test fails or any script error is printed.
 # Usage: tools/unit_tests.sh [1|2|3|4]  (all four parts in turn without one; GODOT=/path/to/godot to override)
@@ -43,8 +43,8 @@ list="$(IFS=,; echo "${files[*]}")"
 # Always import first, so a new class_name or asset is known to the tests whatever ran before.
 "$GODOT" --headless --path . --import > import.log 2>&1
 
-# A part takes about six minutes on a cloud session (CI1, WL9); the limit only catches a hang, inside the CI job's 20
-# minutes.
+# A part takes about 11 to 13 minutes on a cloud session and on CI (WR1); the limit catches a hang or a part grown too
+# big to split again, inside the CI job's 20 minutes.
 timeout 1080 "$GODOT" --headless --path . -s res://addons/gut/gut_cmdln.gd -gdir= -gtest="$list" > "$LOG" 2>&1
 status=$?
 

@@ -25,3 +25,14 @@ Owner should test in the game (at most 6, one line each):
 - The Ridge overlook onto the Fort (86 m): too strong for defenders or attackers?
 - Load time into Woodland (about 6 s nav build plus a ~2.5 s views freeze measured headless) on your PC.
 - Frame time at 6v6 by night on High, and a cross-map route's cost on a low-end PC (5.5 ms mean headless).
+
+## Attempt 3
+Head: 7adc90c ("Unit tests in four parts"; only CI/tooling/docs since attempt 2, no GDScript)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
+Score: 7/8 → Accept (one non-blocking check, judgment)
+- Split verified: the awk in tools/unit_tests.sh:36 partitions all 324 tests/unit files once each (77 / 57 / 110 / 80,
+  none empty); unit-4 mirrors unit-2/3 (20 min, setup-godot, part 4, unit-4-logs); check.sh gates part 4 and sums
+  unit-1..4.log; PROCESS and the WR1 record say four parts. Halves (~670/750 s) sit well inside the 1080 s limit.
+8. [judgment] tools/unit_tests.sh:6 still says "CI runs them as three jobs side by side"; :46 still says a part takes
+   "about six minutes" (parts now ~11-12 min locally). docs/PROCESS.md's reflowed line is 145 chars (house wrap 120).
+Must-fix (one-line edits, no re-review needed): "four jobs" at unit_tests.sh:6, refresh the :46 timing, rewrap PROCESS.
