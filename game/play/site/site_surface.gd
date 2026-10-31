@@ -109,14 +109,37 @@ static func ground_customs(look: SiteLook, top: float) -> Array[Color]:
 	return customs(look, Vector3(0.0, top - 50.0, 0.0), Vector3(1e4, 50.0, 1e4), &"ground", FLAG_NO_BEVEL)
 
 
+## Whether block `b` is drawn as CC0 props (PropDress, DR2) instead of its faces.
+static func as_props(look: SiteLook, b: MapData.Block) -> bool:
+	return b.rise == MapData.Rise.NONE and look.props != null and look.props.dresses(b)
+
+
 ## Where block `b`'s faces are drawn: where they are, but for a sandbag stack, whose own box is drawn `bag_core` m
-## inside its sides and top, under its bags (SiteDress), which fill the block.
+## inside its sides and top, under its bags (SiteDress), which fill the block; for a kind drawn as props
+## (PropDressConfig.dresses, DR2), which fill it instead, nowhere (folded to its middle), or for tiled props their
+## backing, half a row inside each lined face (PropDressConfig.tile_depths).
 static func core_of(look: SiteLook, b: MapData.Block) -> Transform3D:
+	if as_props(look, b):
+		if look.props.backs(b):
+			var rows := look.props.tile_depths(b)
+			return _inset(b, Vector2(rows.y * 0.5, rows.x * 0.5), look.props.backing_top)
+		return Transform3D(Basis.from_scale(Vector3.ZERO), b.center)
 	if look.finish_of(b) != &"sandbags" or b.rise != MapData.Rise.NONE:
 		return Transform3D.IDENTITY
+	return _inset(b, Vector2(look.bag_core, look.bag_core), look.bag_core)
+
+
+## Whether block `b`'s faces are not drawn at all: a kind drawn as props with no backing (DR2).
+static func hidden(look: SiteLook, b: MapData.Block) -> bool:
+	return as_props(look, b) and not look.props.backs(b)
+
+
+## Block `b`'s box drawn `side.x` m inside its sides across x, `side.y` inside those across z and `top` m under its
+## top, its foot where it is.
+static func _inset(b: MapData.Block, side: Vector2, top: float) -> Transform3D:
 	var h := b.size * 0.5
-	var k := look.bag_core
-	var scale := Vector3(maxf(h.x - k, 0.0) / h.x, maxf(b.size.y - k, 0.0) / b.size.y, maxf(h.z - k, 0.0) / h.z)
+	var scale := Vector3(maxf(h.x - side.x, 0.0) / h.x, maxf(b.size.y - top, 0.0) / b.size.y,
+			maxf(h.z - side.y, 0.0) / h.z)
 	var basis := Basis.from_scale(scale)
 	var foot := b.center - Vector3(0.0, h.y, 0.0)
 	return Transform3D(basis, foot - basis * foot)
