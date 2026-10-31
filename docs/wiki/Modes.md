@@ -48,8 +48,8 @@ A map needs a flagpole for Attack / Defend; the Match screen says when one hasn'
 
 Under the modes, the **Rules** section picks the rules:
 
-- **Skirmish** is the standard match, shown as chips on the Match card. Woodland's rounds run 3:00 instead, as
-  its chips show; a Custom match plays its own round time on any map.
+- **Skirmish** is the standard match, shown as chips on the Match card. A map may run longer rounds (the Round
+  column on [Maps](Maps)); a Custom match plays its own round time on any map.
 - **Custom** lets you set every switch yourself. Your Custom setup is saved for next time.
 
 <!-- wiki:rules -->

@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-10-31 | 1 | thread | see Checks | pending | – |
+| 2026-10-31 | 1 | thread | see Checks | Retry 7/8 (held for QA, performance) | round lengths off the 30 s steps were taken; wiki round cell typed |
+| 2026-10-31 | 2 | thread | see Checks | pending | – |
 
 ## Goal
 
@@ -48,3 +49,11 @@ and 2:30 (KNOWN_ISSUES).
 - The bot match first counted bots held up in the Hut row's west doorway: the test's own level, built for the file's
   other tests in the same physics space, kept its doors shut under the match's level. Its doors now stand open while
   the match plays (test only; a match has one level).
+
+## Attempt 2
+
+- The critic's fixes: the Round cell must be a whole number on the 30 s steps (90 to 300), so the Match card's
+  chips always show it; a 185 now warns. The wiki's Maps table generates each map's round (`tools/wiki.py`
+  `round_of`) and the Rules page points at it, in place of a typed "3:00" bullet. KNOWN_ISSUES records the shared
+  physics space of a test's own level and its match's (document).
+- `test_woodland_layout` 17/17 again (the match: 9 rounds in 541 s, held up 0).

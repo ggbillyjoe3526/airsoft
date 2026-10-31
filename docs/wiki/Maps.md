@@ -81,8 +81,8 @@ over the Culvert to the Log stacks and the Sawmill. Attackers start in the west 
   stream bed under the road. Crouch to go through; inside you stay down until you're out, and bots crouch through
   too. The stream bed under the North bridge is crouch height as well, a fourth low way along the bed.
 - **The huts:** the Cabin, the two huts of Hut row and the Box on A site have windows and two green [doors](#doors)
-  each. The door facing the far end starts each round shut and the one facing the near end open, so a hut is walked
-  into from its own side and opened, loudly, from the other. The Tower is a platform 3.4 m up a stair, the Sawmill
+  each. The door facing the other team's end starts each round shut and the one facing your own end open, so a hut
+  is walked into from its own side and opened, loudly, from the other. The Tower is a platform 3.4 m up a stair, the Sawmill
   an open shed.
 - **Night** is the Time of day setting's (day by default): a low moon, stars and haze, with fires and lanterns at the
   camps, the huts, the Clearing, the Fort, the Sawmill, the Truck bend and the North bridge. Bots see you from about
@@ -92,7 +92,6 @@ over the Culvert to the Log stacks and the Sawmill. Attackers start in the west 
   creaking branches call from the wood.
 - **Attack / Defend** puts flag **A** in the Fort and flag **B** at the Sawmill ([Modes](Modes#attack--defend)); in
   Elimination's overtime the flag stands in the Clearing.
-- **Rounds run 3:00** in a Skirmish here, half a minute longer than Depot's, for the longer walks.
 
 ### Areas
 

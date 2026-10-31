@@ -427,10 +427,12 @@ func test_a_round_length_that_isnt_one_keeps_the_tuning_s() -> void:
 	var cat := MapCatalog.parse("# Maps\n\n## Maps\n\n| Id | Name | Kind | Tag | Min | Standard | Max | Round | Blurb |\n"
 			+ "|---|---|---|---|---|---|---|---|---|\n"
 			+ "| a | A | field | public | 1 | 3 | 3 | 30 | x |\n| b | B | field | public | 1 | 3 | 3 | soon | x |\n"
-			+ "| c | C | field | public | 1 | 3 | 3 | 240 | x |\n| d | D | field | public | 1 | 3 | 3 |  | x |\n")
-	assert_eq(cat.entries.size(), 4, "every row listed")
+			+ "| c | C | field | public | 1 | 3 | 3 | 240 | x |\n| d | D | field | public | 1 | 3 | 3 |  | x |\n"
+			+ "| e | E | field | public | 1 | 3 | 3 | 185 | x |\n")
+	assert_eq(cat.entries.size(), 5, "every row listed")
 	assert_eq(cat.find("a").round_time, 0.0, "under 90 s")
 	assert_eq(cat.find("b").round_time, 0.0, "not a number")
 	assert_eq(cat.find("c").round_time, 240.0)
 	assert_eq(cat.find("d").round_time, 0.0, "blank: the tuning's")
-	assert_eq(cat.problems.size(), 2, "%s" % [cat.problems])
+	assert_eq(cat.find("e").round_time, 0.0, "off the switch's 30 s steps")
+	assert_eq(cat.problems.size(), 3, "%s" % [cat.problems])

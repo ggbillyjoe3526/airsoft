@@ -129,8 +129,9 @@ static func _read_sizes(e: Entry, row: DataTable.Row, at: String, problems: Arra
 	e.team_max = sizes[2]
 
 
-## `e`'s round length from `row`'s Round cell: blank keeps the round tuning's; anything but a whole number of seconds in
-## the Match screen's range (CustomRules.ROUND_TIME_RANGE) keeps it too, with a problem.
+## `e`'s round length from `row`'s Round cell: blank keeps the round tuning's; anything but a whole number of seconds the
+## Match screen's Round time switch could pick (CustomRules.ROUND_TIME_RANGE, in ROUND_TIME_STEP steps) keeps it too,
+## with a problem.
 static func _read_round(e: MapCatalog.Entry, row: DataTable.Row, at: String, problems: Array[String],
 		table: DataTable) -> void:
 	if not table.has_column(ROUND_COLUMN):
@@ -140,9 +141,10 @@ static func _read_round(e: MapCatalog.Entry, row: DataTable.Row, at: String, pro
 		return
 	var lo := CustomRules.ROUND_TIME_RANGE.x
 	var hi := CustomRules.ROUND_TIME_RANGE.y
-	if not raw.is_valid_int() or raw.to_int() < lo or raw.to_int() > hi:
-		problems.append("%s: Round \"%s\" is not a whole number of seconds from %d to %d: %s plays the round tuning's"
-				% [at, raw, lo, hi, e.id])
+	var step := CustomRules.ROUND_TIME_STEP
+	if not raw.is_valid_int() or raw.to_int() < lo or raw.to_int() > hi or fposmod(raw.to_int() - lo, step) != 0.0:
+		problems.append("%s: Round \"%s\" is not %d to %d s in %d s steps: %s plays the round tuning's"
+				% [at, raw, lo, hi, step, e.id])
 		return
 	e.round_time = float(raw.to_int())
 
