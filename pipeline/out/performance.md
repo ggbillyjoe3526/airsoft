@@ -1,10 +1,24 @@
-Task: DR1 · head b1d7177 · Verdict: Pass (re-check of 46230ea; earlier Pass stands)
-Run: diff review of 46230ea..b1d7177 -- game/ (2 files; the rest is tests, tools/depot/layout.py and map data) plus test_noisy_props.gd (19 pass, 121 asserts) and test_overtime_bots.gd (12 pass, 78 asserts). No smoke/--perf run: no new nodes, no per-tick code. Budget: no baseline yet, judged against targets and the 46230ea review.
-nearest_walkable in _overtime_flank_point (bot_movement.gd:117-127), judgment from reading the call chain: it is not per tick. The only caller is _pick_flag_spot (:76-78), run on entering flag mode (:51) or when the raiser/guard role flips (:138; it then sets flag_guard to the new answer, so it settles). It runs only if b.overtime_flank, which is drawn once per overtime start (bot_controller.gd:250) and cleared before the call (:77), so at most one pick per bot per overtime. The loop makes at most 2 side attempts; each side calls nearest_walkable at most once, and only when the side point is not already walkable on the flag's floor.
-Cost of one call (nav_grid.gd:170, :423): a ring scan within snap 2.0 m on 0.2 m cells, so at most 10 rings (about 441 pick_node probes), twice when the snap_drop pass finds nothing; it exits early once a ring cannot beat the best. Worst case about 1.8k probes per attempt, 2 attempts, once per bot: negligible next to the route search the pick starts anyway.
-Allocations (measured by reading): none new. The scan uses ints and floats only; goal is a Vector3 value as before; no Array, Dictionary, String or Callable. The new path also drops a floor_at call per side. The flank point lands in the existing b.flank_goal field.
-Noisy kinds (noise_config.gd:45-46, 56-57): &"drum" CLANK and &"barrel" PLASTIC are two dictionary entries, read once in PropNoise._init (prop_noise.gd:24-41) at level build. The depot has 9 drums and 13 barrels, so PropNoise holds 22 more entries and prop_quiet grows by 22 floats, once per state (prepare). Per tick: knock() returns before its loop unless the move was blocked at knock_speed or more, then does cheap AABB rejects over about 22 more entries; the work only happens on a real run into a wall or prop, not every tick. ring() scans only the ringing list: drums (CLANK, ring_reach 10 m) add 9 entries, barrels ring 0 so are not listed; checked only per hard BB impact on the level and it breaks on first hit. No allocation in either; events come from the pooled GameEvent buffer. Not a per-tick cost change.
-Regressions (> 10 % worse): none.
+Task: FM1 · head 5166090 · Verdict: Pass
+Run: no new run. The bot match has no `--perf` flag in this repo, and `git worktree add` would change the repo. I judged by reading `git diff b9538b4 5166090` plus the existing allocation tests (tools/check.sh passed 3987/3987 and the smoke test). Budget: no baseline yet (pipeline/perf-budget.json does not exist), judged against the targets and against main's code paths.
+Metrics: none measured. Everything below is judgment from reading. Frame times are not reportable in the cloud container (no GPU).
+Regressions (> 10 % worse): none (judgment). With no Go there order in force, the bot tick adds only the `_given.size()` early-continue loop.
+
 Blocking findings: none.
-Advisory: none new. Still for the owner on hardware (F3): ceiling draw calls and fill rate on Low, and the 6v6 case.
-Unexplained: none.
+
+Checked and clean (judgment):
+- Per-frame path while M is held: `hud_field_map.gd` update() to `HudMinimap.fill`/`add_pings` to `View.begin_whole`/`_clear` to `Overlay.place`. It only reuses pooled arrays and Vector2/PackedVector2Array values. The text work (`tr()`, `%`) in update() runs only when the round number changes (hud_field_map.gd:~110). `MapPointer.frame/move/world` allocate nothing.
+- Per-frame path while M is not held: update() returns right after the `visible` check (hud_field_map.gd:~97), so the closed map costs a few property reads. `_process` is off unless it is visible, and `_draw` of the backdrop runs only on resize via `_lay_out`.
+- Per bot-think tick: `SquadOrderBook.move_arrivals` (squad_order_book.gd:~237) loops over characters (~10) and skips non-MOVE givers at once. A MOVE giver costs one pass over the bots. `SquadOrders.move` for MOVE adds a few compares and one `_arrived_for` call per bot per tick, the same order of cost as HOLD. `give_move` reuses `_order_team` and the insertion sort, and runs once per click.
+- Ping path: `nearest_walkable` runs once per click, not per tick. The new PlayerCommand fields are plain values and are copied/reset consistently.
+- Freed nodes and resources: HudFieldMap is a child of the HUD, created once in `setup_minimap` (called once, play_session.gd:382), so it is freed with the HUD. `resized.connect(_lay_out)` is a self-signal connected once. `Overlay` and `View` are children. `GameTheme.spaced_font` is cached. The textures are shared with the minimap (`textures()`), not rebuilt.
+- Presets: nothing new bypasses the quality presets. There are no new shaders, materials, particles, shadows or post effects, so no prewarm entry is needed.
+- Signal connections: none new beyond the one self-connect above.
+- Allocation tests: `test_fm1_field_map.gd:317` asserts OBJECT_COUNT is unchanged over 100 open-map frames, and `test_fm1_go_there.gd` covers ticks walking to a Go there. These catch Object allocations only, not Array/String churn, so I also read the code for those. None found.
+
+Advisory (judgment):
+1. hud_field_map.gd Overlay._draw (~line 205): while M is held it calls `draw_string_outline` + `draw_string` for each area word on the storey every frame, and `queue_redraw()` every frame in `place`. That is at most 16 words on Depot (14 on Woodland), so up to ~32 text draw calls per frame, only while the map is held. The words only move when the pointer or you move. If it shows on the owner's low preset, cache the shaped text with `TextLine` (or skip the redraw while nothing moved). Check on hardware.
+2. hud_minimap.gd View.setup (~line 360): the second View builds its own `GradientTexture2D` disc (64x64) plus capacity-sized arrays, once per match. This is trivial. The disc could be shared, but it is not worth a change.
+3. hud_field_map.gd View on a large square: the whole-field texture is drawn with `TEXTURE_FILTER_LINEAR_WITH_MIPMAPS` at up to screen size, only while held. At 4K that is a full-screen-class quad with a 0.8 alpha backdrop, so a small fill cost. It needs a rendered check on the owner's hardware (the cloud container has no GPU).
+
+Fixes: none required.
+Unexplained: none. No measured metrics exist for this head. If the owner wants numbers, play with M held on Depot at 4K on the Low preset and read F3.

@@ -793,6 +793,8 @@ func _physics_process(_delta: float) -> void:
 				_commands[c.id].reset(c.yaw, c.pitch)
 		# On the range nobody is there to order; out, the wheel closes (the keys still ask, and wait for the next round).
 		_input.allow_orders(not practice, Elimination.is_in_play(player))
+		# Shut under the scoreboard and the match's summary, so a hidden pointer never takes the mouse.
+		_input.allow_map(_hud.field_map() != null and not _input.scoreboard_held() and not _hud.summary_up())
 		if _pilot != null:
 			_pilot.fill(_commands[PLAYER_ID], player, state.targets, _tuning.body)
 		elif _spectate_any and not autopilot:
@@ -1080,6 +1082,9 @@ func _process(delta: float) -> void:
 	var yaw := _view_yaw(watched, fraction)
 	_hud.update_minimap(state, watched, yaw, fraction, _bots.hold_spot(PLAYER_ID), _bots.orders.held_middle,
 			_bots.pings)
+	# The full-screen map (FM1) while its key is held; you ping on it while you can give orders.
+	_hud.update_field_map(state, watched, yaw, fraction, _bots.hold_spot(PLAYER_ID), _bots.orders.held_middle,
+			_bots.pings, _input.field_map(), watched == player and _input.orders_allowed())
 	_hud.place_sound_cues(watched, yaw, fraction)
 	if _doors != null:
 		_doors.refresh(state.doors)
@@ -1099,7 +1104,7 @@ func _process(delta: float) -> void:
 	_hud.set_watching(_bots.name_of(watched.id) if watched != player else "")
 	_show_orders(watched, delta)
 	# After the flag's and Hold here's markers, so pinned pings stack under them; through your own eyes only.
-	_hud.place_pings(_eyes.camera, _bots.pings, state.time, watched == player)
+	_hud.place_pings(_eyes.camera, _bots.pings, state.time, watched == player and not _input.field_map().open)
 	if _intents != null:
 		_intents.update(state, fraction)
 	if _first_frame_due:
@@ -1115,11 +1120,12 @@ func _on_shaders_warmed() -> void:
 
 
 ## Squad orders on screen (SO4): the order wheel while its key is held, and Hold here's marker over the spots your
-## teammates hold, through your own eyes only.
+## teammates hold (or go to: Go there's), through your own eyes only and not under the full-screen map.
 func _show_orders(watched: Character, delta: float) -> void:
 	_hud.update_orders(_input.wheel(), _bots.order_of(PLAYER_ID), _bots.order_outcome, delta)
-	var held := watched == player and _bots.hold_spot(PLAYER_ID)
-	_hud.place_hold_marker(_eyes.camera, _bots.held_middle, held)
+	# Not under the full-screen map (FM1): the map shows the spot, and the marker's floor ring draws over everything.
+	var held := watched == player and _bots.hold_spot(PLAYER_ID) and not _input.field_map().open
+	_hud.place_hold_marker(_eyes.camera, _bots.held_middle, held, _bots.order_of(PLAYER_ID) == SquadOrder.Kind.MOVE)
 
 
 ## Where `watched` looks as the view shows it: your own mouse-look while you are in play, else their yaw `fraction` of

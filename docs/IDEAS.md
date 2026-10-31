@@ -19,6 +19,10 @@ Work the owner wants one day but hasn't placed in a version.
   step 19 sound pass (plan §5.6).
 - **A Performance update (owner, 2026-10-16).** An update that focuses on making the game run better. Timing not
   decided; nothing is built for it until he places it.
+- **Vehicles on a big outdoor map (owner, 2026-10-31).** A future massive outdoor field (perhaps the redesigned
+  Woodland) with vehicles to drive round it. A driving player can't shoot but can still ping and give orders; a bot
+  can drive but gives no orders (it follows the player's); players and bots in passenger seats can fight. Nothing is
+  built until he places it.
 - ~~**Doors (owner, 2026-10-17, for Neon Heights; NH2).**~~ Built for Depot's hall (DO1, 2026-10-31).
 
 ## Maybe

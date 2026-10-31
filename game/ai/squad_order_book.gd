@@ -69,16 +69,62 @@ func order_of(giver_id: int) -> SquadOrder.Kind:
 	return _given[giver_id] as SquadOrder.Kind
 
 
-## While the bot teammates of `giver_id` hold a spot it looked at: true, with the middle of the held spots in
+## While the bot teammates of `giver_id` hold a spot it looked at, or go to one it pinged (Go there): true, with the middle of the held spots in
 ## held_middle. False for a hold where each stood (they may be far apart: no one spot to mark), and with no hold.
 func hold_spot(giver_id: int) -> bool:
-	if order_of(giver_id) != SquadOrder.Kind.HOLD or _own_spot[giver_id] == 1:
+	var kind := order_of(giver_id)
+	if (kind != SquadOrder.Kind.HOLD and kind != SquadOrder.Kind.MOVE) or _own_spot[giver_id] == 1:
 		return false
 	var giver := _character(giver_id)
 	if giver == null:
 		return false
 	held_middle = SquadOrders.held_centre(_world.bots, giver)
 	return SquadOrders.is_spot(held_middle)
+
+
+## Go there (FM1) from `giver` to `spot` (a pinged floor spot; NO_SPOT for a ping at nothing) for its bot teammates in
+## play, written into order_outcome: each its own spot side by side across the way from the giver to it, all looking on
+## that way once there; once all are there it is a Hold here (move_arrivals). Given again within hold_move of the spot
+## in force (Go there's or a looked-at Hold here's) it stays: a ping never cancels. Returns the order in force
+## afterwards.
+func give_move(giver: Character, spot: Vector3) -> SquadOrder.Kind:
+	if giver == null or giver.id < 0 or giver.id >= _given.size():
+		return SquadOrder.Kind.NONE
+	if not Elimination.is_in_play(giver):
+		_drop_order(giver)
+		order_outcome.record(giver.id, SquadOrder.Kind.NONE, SquadOrders.Notice.NOT_NOW)
+		return SquadOrder.Kind.NONE
+	var before := order_of(giver.id)
+	if not SquadOrders.is_spot(spot):
+		order_outcome.record(giver.id, before, SquadOrders.Notice.NOWHERE)
+		return before
+	var w := _world
+	var team := _order_team
+	team.clear()
+	for b in w.bots:
+		if b.character != giver and b.character.team == giver.team and Elimination.is_in_play(b.character):
+			team.append(b)
+	if team.is_empty():
+		_drop_order(giver)
+		order_outcome.record(giver.id, SquadOrder.Kind.NONE,
+				SquadOrders.Notice.CANCELLED if before != SquadOrder.Kind.NONE else SquadOrders.Notice.NOBODY)
+		return SquadOrder.Kind.NONE
+	if hold_spot(giver.id) and Vector2(spot.x - held_middle.x, spot.z - held_middle.z).length() < w.cfg.squad.hold_move:
+		order_outcome.record(giver.id, before, SquadOrders.Notice.NONE)
+		return before
+	var yaw := SquadOrders.yaw_towards(giver.position, spot, giver.yaw)
+	_sort_across(team, yaw)
+	for b in w.bots:
+		if b.order_giver == giver and not team.has(b):
+			SquadOrders.end(b, w)
+	for slot in team.size():
+		SquadOrders.start(team[slot], giver, SquadOrder.Kind.MOVE, slot)
+		team[slot].order_yaw = yaw
+	SquadOrders.place_across(team, yaw, spot, w)
+	_given[giver.id] = SquadOrder.Kind.MOVE
+	_own_spot[giver.id] = 0
+	order_outcome.record(giver.id, SquadOrder.Kind.MOVE, SquadOrders.Notice.NONE)
+	return SquadOrder.Kind.MOVE
 
 
 ## Hands `kind` out to `giver`'s bot teammates in play; `toggle`: the order in force given again cancels it (see
@@ -110,7 +156,7 @@ func _hand_out(giver: Character, kind: SquadOrder.Kind, toggle: bool) -> SquadOr
 			_drop_order(giver)
 			return SquadOrder.Kind.NONE
 	if kind == SquadOrder.Kind.HOLD:
-		_sort_across_view(team, giver)
+		_sort_across(team, giver.yaw)
 	for b in w.bots:
 		if b.order_giver == giver and not team.has(b):
 			SquadOrders.end(b, w)
@@ -123,10 +169,10 @@ func _hand_out(giver: Character, kind: SquadOrder.Kind, toggle: bool) -> SquadOr
 	return kind
 
 
-## Left to right across `giver`'s view, so nobody crosses another's path to their spot (an insertion sort: a squad is a
-## handful, and it allocates nothing).
-static func _sort_across_view(team: Array[Bot], giver: Character) -> void:
-	var right := Vector2(cos(giver.yaw), -sin(giver.yaw))
+## Left to right across a view along `yaw`, so nobody crosses another's path to their spot (an insertion sort: a squad
+## is a handful, and it allocates nothing).
+static func _sort_across(team: Array[Bot], yaw: float) -> void:
+	var right := Vector2(cos(yaw), -sin(yaw))
 	for i in range(1, team.size()):
 		var b := team[i]
 		var key := Vector2(b.character.position.x, b.character.position.z).dot(right)
@@ -185,6 +231,26 @@ func regroup_arrivals() -> void:
 				regrouping = true
 		if not regrouping:
 			_given[id] = SquadOrder.Kind.FOLLOW
+
+
+## Before the bots think, after regroup_arrivals: a Go there whose teammates all stand at their spots turns to Hold
+## here (FM1), from the same spots, looking the same way.
+func move_arrivals() -> void:
+	for id in _given.size():
+		if _given[id] != SquadOrder.Kind.MOVE:
+			continue
+		var moving := false
+		for b in _world.bots:
+			if b.order == SquadOrder.Kind.MOVE and b.order_giver != null and b.order_giver.id == id \
+					and not SquadOrders.moved_in(b):
+				moving = true
+				break
+		if moving:
+			continue
+		for b in _world.bots:
+			if b.order == SquadOrder.Kind.MOVE and b.order_giver != null and b.order_giver.id == id:
+				b.order = SquadOrder.Kind.HOLD
+		_given[id] = SquadOrder.Kind.HOLD
 
 
 ## The character `id` of the field (a giver of orders), or null.

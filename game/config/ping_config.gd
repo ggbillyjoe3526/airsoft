@@ -15,6 +15,14 @@ extends Resource
 @export var spot_snap: float = 3.0
 ## Off a wall or a crate, the spot is looked for this far back towards you (m), in front of it rather than inside.
 @export var back_off: float = 0.4
+## A ping with your view marks only floor it can see (owner, 2026-10-31): the spot must be in a clear line from where
+## the view met, judged sight_lift (m) above its floor; if a wall or a crate is between, it is looked for again further
+## back towards you, spot_snap at a time.
+@export var sight_lift: float = 1.0
+## A ping placed on the full-screen map (FM1) marks the nearest walkable floor within map_snap (m) of the point picked,
+## judged map_lift (m) above the floor of the storey the map shows.
+@export var map_snap: float = 4.0
+@export var map_lift: float = 1.0
 ## A ping is kept this long (s of match time) in the ping book, which the HUD reads.
 @export var lifetime: float = 8.0
 ## One character's pings are at least this far apart (s): a double click is one ping.

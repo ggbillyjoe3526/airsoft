@@ -32,13 +32,15 @@ enum WheelPick { HOVER, CLICK }
 ## equal slice; each order's key (an action in KeyBindings.ACTIONS; empty for none), which gives it straight away; and
 ## its name on the wheel (a translation key; a button, so in title case). Team Plan ends the order in force; Need a Mag
 ## (MH3, upper left) is the magazine hand-off's press, as its key, and reads wheel_mag_toss while a teammate asking you
-## is in reach.
+## is in reach. Go There (FM1, lower right) is a Go there ping where you looked opening the wheel, as its key.
 @export var wheel_orders: Array[SquadOrder.Kind] = [
-	SquadOrder.Kind.FOLLOW, SquadOrder.Kind.HOLD, SquadOrder.Kind.REGROUP, SquadOrder.Kind.TEAM_PLAN, SquadOrder.Kind.MAG,
+	SquadOrder.Kind.FOLLOW, SquadOrder.Kind.HOLD, SquadOrder.Kind.MOVE, SquadOrder.Kind.REGROUP,
+	SquadOrder.Kind.TEAM_PLAN, SquadOrder.Kind.MAG,
 ]
-@export var wheel_keys: Array[StringName] = [&"order_follow", &"order_hold", &"order_regroup", &"", &"mag_hand_off"]
-@export var wheel_labels: PackedStringArray = PackedStringArray(["ORDER_FOLLOW", "ORDER_HOLD", "ORDER_REGROUP",
-		"ORDER_TEAM_PLAN", "ORDER_MAG"])
+@export var wheel_keys: Array[StringName] = [&"order_follow", &"order_hold", &"ping_move", &"order_regroup", &"",
+		&"mag_hand_off"]
+@export var wheel_labels: PackedStringArray = PackedStringArray(["ORDER_FOLLOW", "ORDER_HOLD", "ORDER_MOVE",
+		"ORDER_REGROUP", "ORDER_TEAM_PLAN", "ORDER_MAG"])
 ## Need a Mag's name while a teammate asking you is in reach (a translation key).
 @export var wheel_mag_toss: String = "ORDER_MAG_TOSS"
 ## While the wheel is open the mouse moves its own pointer, not the view: this many px a mouse count, times the
@@ -47,3 +49,6 @@ enum WheelPick { HOVER, CLICK }
 @export var wheel_gain: float = 0.5
 @export var wheel_reach: float = 90.0
 @export var wheel_dead_zone: float = 24.0
+## While the full-screen map is open (FM1) the mouse moves the map's pointer: this many px a mouse count, times the
+## sensitivity.
+@export var map_gain: float = 1.0

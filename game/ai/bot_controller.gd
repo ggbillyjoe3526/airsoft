@@ -82,7 +82,7 @@ func _init(state: GameState, player_id: int, map: MapData, nav: NavGrid, query: 
 ## Writes each bot's command for this tick into `commands` (indexed by character id). With the Dev settings' Bots hold
 ## fire on (`state.cheats`), no bot pulls its trigger; with Bots run low on BBs, mag_dev_low_after into each round one
 ## bot a team in turn is put on its last magazine (DevCheats.run_low). First, a bot back from Regroup turns to Follow me,
-## and the magazine hand-off's jobs are handed out (BotMagShare.update).
+## a Go there all its teammates reached turns to Hold here, and the magazine hand-off's jobs are handed out (BotMagShare.update).
 func think(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 	var w := world
 	w.time = state.time
@@ -90,6 +90,7 @@ func think(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 	w.round_clock = state.round_state.clock
 	_sync_round(state)
 	orders.regroup_arrivals()
+	orders.move_arrivals()
 	for c in state.characters:
 		if Elimination.is_in_play(c):
 			w.mark_visited(c.team, c.position)
@@ -177,7 +178,7 @@ func observe(state: GameState) -> void:
 		elif e.kind == GameEvent.Kind.OVERTIME:
 			_overtime(state.time)
 		elif e.kind == GameEvent.Kind.PING:
-			_ping(e, state.time)
+			_ping(e, state)
 		elif e.kind == GameEvent.Kind.MATCH_OVER:
 			# No round follows to end the orders, so Hold here's marker would stay over the results.
 			orders.clear()
@@ -232,10 +233,15 @@ func _record_hit(state: GameState, shooter_id: int, bounced: bool) -> void:
 	last_hit.record(state.time, victim, shooter, bounced, known, held, seen_for, world.cfg.hit_moving_speed)
 
 
-## A PING event `e` at `time` (PN1): the pinger's ping in the book (Pings.place) and, if it marks anything, taken by
-## each of their bot teammates (Pings.take: a bot fighting, in cover or with a target in view doesn't).
-func _ping(e: GameEvent, time: float) -> void:
-	var p := pings.place(e, time, world)
+## A PING event `e` in `state`'s tick (PN1): the pinger's ping in the book (Pings.place) and, if it marks anything, taken by
+## each of their bot teammates (Pings.take: a bot fighting, in cover or with a target in view doesn't). A Go there ping
+## (FM1) is an order instead: its floor spot (Pings.move_spot) goes to SquadOrderBook.give_move, and its marker is
+## Hold here's.
+func _ping(e: GameEvent, state: GameState) -> void:
+	if e.value2 == 1:
+		orders.give_move(state.character(e.actor), pings.move_spot(e, world))
+		return
+	var p := pings.place(e, state.time, world)
 	if p == null:
 		return
 	for b in world.bots:

@@ -223,6 +223,8 @@ static func notice_key(notice: SquadOrders.Notice) -> String:
 			return "HUD_ORDER_NOBODY"
 		SquadOrders.Notice.NOT_NOW:
 			return "HUD_ORDER_NOT_NOW"
+		SquadOrders.Notice.NOWHERE:
+			return "HUD_ORDER_NOWHERE"
 	return ""
 
 

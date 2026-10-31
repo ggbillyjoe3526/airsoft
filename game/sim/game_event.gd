@@ -33,7 +33,7 @@ enum Kind {
 	BB_LEAVES, ## actor's BB came out of a bush's edge at position, flying along direction (before the leaves turned it), and flies on.
 	TORCH, ## actor switched the weapon torch on the replica in slot on (value 1) or off (value 0); off too as the replica goes away.
 	OVERTIME, ## Elimination's clock ran out with both teams in play: the overtime flag is up at position (its foot).
-	PING, ## actor (in play, the round live) pinged along direction (unit) from its eyes at position: value 1 where its view met the field reach m off (within PingConfig.reach), value 0 for nothing there (the sky).
+	PING, ## actor (in play, the round live) pinged along direction (unit) from its eyes at position: value 1 where its view met the field reach m off (within PingConfig.reach), value 0 for nothing there (the sky); value 2 (FM1) placed on the full-screen map at position; value2 1 for a Go there.
 	MAG_ASK, ## actor (low on BBs for the replica in slot) asked teammate target for a magazine, standing at position (MagShare).
 	MAG_TOSS, ## actor tossed target a magazine of value BBs from its slot value2, for target's slot, from its hand at position, reach m to target's chest.
 	MAG_CATCH, ## target caught actor's magazine at position (its chest): value BBs went into its spares of slot; value2 the thrower's slot.
@@ -53,6 +53,8 @@ enum Footstep { RUN, SPRINT, LAND, RATTLE }
 ## CAPTURED: Attack / Defend's flag raised (the attackers win). OVERTIME_FLAG: Elimination's overtime flag touched
 ## (the toucher's team wins).
 enum RoundEnd { ELIMINATED, TIME, CAPTURED, OVERTIME_FLAG }
+## A PING's value for one placed on the full-screen map (FM1).
+const PING_ON_MAP := 2
 
 var kind: Kind = Kind.SHOT
 ## Who did it: the shooter, the BB's owner, the stepper. -1 for none (round events).

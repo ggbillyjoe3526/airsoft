@@ -723,7 +723,7 @@ same and throw them (SF2).
   off; a diamond marker shows the distance. X at the sky: each holds where it stands.
 - [ ] **Regroup (V).** They sprint back to you, then follow. Get hit: the order ends and order keys say "Orders wait
   for the next round".
-- [ ] **The order wheel (hold Z).** Five items round the crosshair (Need a Mag upper left), each with its key. The
+- [ ] **The order wheel (hold Z).** Six items round the crosshair (Need a Mag upper left, Go There lower right), each with its key. The
   view stays still while a pointer lights the order it's on; let go on one to give it, or without moving to give none.
   Walking continues; firing needs a new pull after. Orders > Click points and clicks instead. A middle click while the
   wheel is open pings nothing (KI1).
@@ -757,6 +757,16 @@ same and throw them (SF2).
   not on the line. The line hides while the wheel is open. Dead on the range and while you are out; between rounds
   "Mags wait for the next round". Settings › HUD › Mag hand-off Off: no line and no magazines by the chevrons, but H
   still works. With Screen reader messages on, the line's notices are read.
+- [ ] **The full-screen map (hold M, FM1).** Depot and Woodland each fit whole, north up, over a dimmed screen, with
+  the map and round over it and the area names written in. You, your teammates, the pole, your Hold or Go there spot
+  and pings show; an enemy only where your side heard them. The mouse moves a pointer instead of the view and you can
+  still walk. Let go of M: the view turns again and the trigger needs a fresh pull. Out: the map shows but has no
+  pointer. Is it big and clear enough? Is the pointer's speed right?
+- [ ] **Go there (click on the map, Mouse 4, or the wheel's Go There).** Click a far corner of the map: a radio
+  click, both teammates set off side by side, the marker reads "GO · 40 M", then "HOLD · 40 M" once they're there,
+  facing on the way they went. Mouse 4 at a spot you look at does the same; at the sky the wheel says "Nowhere there
+  to go". The same spot again keeps it; X then holds where you look. Middle click on the map pings that spot. Does
+  six items make the wheel harder to aim?
 - [ ] **The minimap.** Top left, the way you look always up, you the white arrow; teammates are team-coloured dots
   (pinned to the edge when off it), grey once hit; an opponent you hear shows as a patch roughly where (dashed for
   steps, a dot for a shot) for a few seconds. Gameplay › HUD › Minimap Fixed keeps north up (M83).

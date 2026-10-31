@@ -10,7 +10,8 @@ extends Control
 ## the patches where your side last heard them (MinimapHearing). Rotating turns the field so the way you look is up;
 ## Fixed keeps north (the map's -z) up and turns the arrow. The field is drawn once a match (MinimapField, one picture per
 ## storey) and the panel only places it, so a frame allocates nothing. `View` draws everything over the picture; the
-## settings' thumbnails use it too.
+## settings' thumbnails use it too, and so does the full-screen map (HudFieldMap, FM1), whole and north up, through
+## `fill` and `add_pings` with its own View.
 
 ## The panel's and the caption's navy, before the panels' opacity.
 const BACKING := 1.0
@@ -28,6 +29,7 @@ var _cfg: MinimapConfig = null
 var _teams: TeamConfig = null
 var _map: MapData = null
 var _field: MinimapField = null
+var _textures: Array[Texture2D] = []
 var _heard: MinimapHearing = null
 var _view: View = null
 var _area: Label = null
@@ -58,12 +60,12 @@ func setup(cfg: MinimapConfig, teams: TeamConfig, map: MapData, heard: MinimapHe
 	offset_right = corner.x + cfg.size
 	offset_bottom = corner.y + cfg.size + cfg.caption_room
 	_field = MinimapField.build(map, cfg)
-	var textures := textures_of(_field)
+	_textures = textures_of(_field)
 	_view = View.new()
 	var inner := cfg.size - cfg.ring * 2.0
 	_view.position = Vector2(cfg.ring, cfg.ring)
 	_view.size = Vector2(inner, inner)
-	_view.setup(cfg, textures, _field.scale, _field.origin, capacity)
+	_view.setup(cfg, _textures, _field.scale, _field.origin, capacity)
 	add_child(_view)
 	_area = HudStyle.label(self, AREA_SIZE, 800, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_LEFT, AREA_SPACING)
 	_area.uppercase = true
@@ -87,9 +89,19 @@ static func textures_of(field: MinimapField) -> Array[Texture2D]:
 	return textures
 
 
-## The picture of the field (for tests).
+## The picture of the field (for tests, and the full-screen map's storeys).
 func field() -> MinimapField:
 	return _field
+
+
+## The teams' colours it draws in.
+func teams() -> TeamConfig:
+	return _teams
+
+
+## The field's layers as textures, one per storey (the full-screen map draws the same ones).
+func textures() -> Array[Texture2D]:
+	return _textures
 
 
 func view() -> View:
@@ -158,6 +170,16 @@ func follow(state: GameState, watched: Character, yaw: float, fraction: float, t
 		_round = rs.number
 		# Practice on a field has no rounds: its caption says Practice.
 		_round_label.text = tr("MODE_PRACTICE") if rs.practice else tr("HUD_ROUND") % _round
+	fill(_view, state, watched, fraction, storey, holding, hold)
+
+
+## Puts on `view` (begun for this frame) what the minimap shows over the field for `watched`, on `storey`, `fraction` of
+## the way through the tick: the teammates, the patches your side heard, the pole or the overtime flag while the round
+## is live, and Hold here's spot `hold` when `holding`. Never the other team itself. Allocates nothing.
+func fill(view: View, state: GameState, watched: Character, fraction: float, storey: int, holding: bool,
+		hold: Vector3) -> void:
+	var rs := state.round_state
+	var team := _teams.colours[watched.team]
 	for c in state.characters:
 		if c.team != watched.team or c == watched:
 			continue
@@ -167,27 +189,29 @@ func follow(state: GameState, watched: Character, yaw: float, fraction: float, t
 		var level := _field.storey_of(at.y)
 		if level != storey:
 			arrow = 1 if level > storey else -1
-		_view.add_dot(Vector2(at.x, at.z), _cfg.out_colour if out else team, arrow)
+		view.add_dot(Vector2(at.x, at.z), _cfg.out_colour if out else team, arrow)
 	for p in _heard.patches:
 		if p.live and _field.storey_of(p.centre.y) == storey:
-			_view.add_patch(Vector2(p.centre.x, p.centre.z), p.radius, p.sound == MinimapHearing.Sound.SHOT,
+			view.add_patch(Vector2(p.centre.x, p.centre.z), p.radius, p.sound == MinimapHearing.Sound.SHOT,
 					_heard.shade(p))
 	if rs.mode == RoundState.Mode.ATTACK_DEFEND and rs.attackers >= 0 and rs.is_live():
-		_view.set_pole(Vector2(rs.pole.x, rs.pole.z))
+		view.set_pole(Vector2(rs.pole.x, rs.pole.z))
 	elif rs.overtime_flag.up and rs.is_live():
-		_view.set_pole(Vector2(rs.overtime_flag.foot.x, rs.overtime_flag.foot.z), true)
+		view.set_pole(Vector2(rs.overtime_flag.foot.x, rs.overtime_flag.foot.z), true)
 	if holding:
-		_view.set_hold(Vector2(hold.x, hold.z))
-	_view.queue_redraw()
+		view.set_hold(Vector2(hold.x, hold.z))
+	view.queue_redraw()
 
 
-## Adds the pings of `team` up in `book` at `now` (s of match time) to this frame's panel (after follow): each fading
-## over the last `fade` s of its `life`, as its marker on the field does. Allocates nothing.
-func add_pings(book: Pings, team: int, now: float, life: float, fade: float) -> void:
+## Adds the pings of `team` up in `book` at `now` (s of match time) to this frame's panel (after follow), or to `to`
+## (the full-screen map's view, after its fill): each fading over the last `fade` s of its `life`, as its marker on the
+## field does. Allocates nothing.
+func add_pings(book: Pings, team: int, now: float, life: float, fade: float, to: View = null) -> void:
+	var view := to if to != null else _view
 	for i in book.size():
 		var p := book.of(i)
 		if p.team == team and book.is_up(p, now):
-			_view.add_ping(Vector2(p.spot.x, p.spot.z), p.kind == Pings.Kind.CONTACT,
+			view.add_ping(Vector2(p.spot.x, p.spot.z), p.kind == Pings.Kind.CONTACT,
 					HudPingMarker.shade(now - p.at, life, fade))
 
 
@@ -305,6 +329,8 @@ class View:
 	var _ping_ring: HudPingMarker.Mark = null
 	var _ping_diamond: HudPingMarker.Mark = null
 	var _you_on: bool = true
+	## Where the white arrow is (the world's x, z): the middle on the minimap, wherever you are on the whole field.
+	var _you_at: Vector2 = Vector2.ZERO
 
 	## `textures` are the layers (one per storey) of a drawing at `field_scale` px/m whose top left is the world's
 	## `field_origin` (x, z); up to `capacity` dots and patches.
@@ -363,6 +389,46 @@ class View:
 		_team = team
 		_enemy = enemy
 		_ppm = size.x / (2.0 * _cfg.view_radius)
+		_you_at = centre
+		_clear()
+
+	## Starts a frame of the whole field (the full-screen map, FM1): the field's drawing fitted in the square, `fill`
+	## of its side, north up, the white arrow at the world's `you` turned by `yaw`; otherwise as begin.
+	func begin_whole(you: Vector2, layer: int, yaw: float, team: Color, enemy: Color, fit: float) -> void:
+		_layer = layer
+		_rot = 0.0
+		_arrow_rot = -yaw
+		_team = team
+		_enemy = enemy
+		fit_whole(fit)
+		_you_at = you
+		_clear()
+
+	## The whole field's frame without drawing (the full-screen map frames its pointer from it while shut): the field
+	## centred, `fit` of the square's side.
+	func fit_whole(fit: float) -> void:
+		var world := field_size()
+		_centre = _origin + world * 0.5
+		_ppm = size.x * fit / maxf(maxf(world.x, world.y), 1.0)
+
+	## The field's drawing's size (m; zero with no drawing).
+	func field_size() -> Vector2:
+		if _textures.is_empty() or _scale <= 0.0:
+			return Vector2.ZERO
+		return _textures[0].get_size() / _scale
+
+	## The world (x, z) at the square's middle and its px per metre, as this frame's begin left them.
+	func centre() -> Vector2:
+		return _centre
+
+	func px_per_m() -> float:
+		return _ppm
+
+	## The square's point (px from its middle) for the world's `at` (x, z).
+	func panel_of(at: Vector2) -> Vector2:
+		return _to_panel(at)
+
+	func _clear() -> void:
 		_half = size.x * 0.5
 		_dot_count = 0
 		_patch_count = 0
@@ -446,7 +512,7 @@ class View:
 		for i in _dot_count:
 			_draw_dot(mid + _pin(_to_panel(_dots[i]), _cfg.dot_pad), _dot_colours[i], _dot_arrows[i])
 		if _you_on:
-			draw_set_transform(mid, _arrow_rot, Vector2.ONE)
+			draw_set_transform(mid + _pin(_to_panel(_you_at), _cfg.dot_pad), _arrow_rot, Vector2.ONE)
 			draw_colored_polygon(_you_shape, YOU_COLOUR)
 			draw_polyline(_you_shape, _cfg.ink, OUTLINE, true)
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

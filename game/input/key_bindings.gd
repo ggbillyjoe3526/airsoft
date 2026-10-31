@@ -16,8 +16,9 @@ const NONE := 0
 const ACTIONS: Array[StringName] = [
 	&"move_forward", &"move_back", &"move_left", &"move_right", &"walk", &"sprint", &"crouch", &"jump",
 	&"lean_left", &"lean_right", &"fire", &"aim", &"reload", &"fire_mode", &"slot_1", &"slot_2", &"holster",
-	&"torch", &"slot_next", &"slot_previous", &"hop_up_less", &"hop_up_more", &"scoreboard", &"order_follow", &"order_hold",
-	&"order_regroup", &"order_wheel", &"ping", &"mag_hand_off", &"throw_smoke", &"throw_flash", &"use_door",
+	&"torch", &"slot_next", &"slot_previous", &"hop_up_less", &"hop_up_more", &"scoreboard", &"field_map", &"order_follow",
+	&"order_hold", &"order_regroup", &"order_wheel", &"ping", &"ping_move", &"mag_hand_off", &"throw_smoke", &"throw_flash",
+	&"use_door",
 	&"loadout",
 ]
 ## Actions that can never be left keyless (owner rule, DECISIONS › Menus, HUD, settings and accessibility).
@@ -47,11 +48,13 @@ const DEFAULTS: Dictionary = {
 	&"hop_up_less": [KEY_4, KEY_PAGEDOWN],
 	&"hop_up_more": [KEY_5, KEY_PAGEUP],
 	&"scoreboard": [KEY_TAB],
+	&"field_map": [KEY_M],
 	&"order_wheel": [KEY_Z],
 	&"order_follow": [KEY_F],
 	&"order_hold": [KEY_X],
 	&"order_regroup": [KEY_V],
 	&"ping": [-MOUSE_BUTTON_MIDDLE],
+	&"ping_move": [-MOUSE_BUTTON_XBUTTON1],
 	&"mag_hand_off": [KEY_H],
 	&"throw_smoke": [KEY_G],
 	&"throw_flash": [KEY_Y],

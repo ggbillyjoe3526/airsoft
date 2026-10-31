@@ -108,6 +108,8 @@ var _order_wheel: HudOrderWheel = null
 var _hold_marker: HudHoldMarker = null
 var _hold_slots := HudHoldMarker.Slots.new()
 var _minimap: HudMinimap = null
+## The full-screen map (FM1) over the minimap's drawing, with it.
+var _field_map: HudFieldMap = null
 ## Your team's ping markers (PN2), and where the ones pinned at a side go.
 var _pings: HudPingMarkers = null
 var _ping_stack := HudPingMarkers.Stack.new()
@@ -401,6 +403,10 @@ func setup_minimap(map: MapData, cfg: MinimapConfig, heard: MinimapHearing, map_
 	move_child(_pings, _minimap.get_index())
 	_minimap.setup(cfg, _teams, map, heard, map_name, characters, _cfg.minimap_margin)
 	HudStyle.restyle(_minimap, _opacity)
+	# Over the rest of the HUD while its key is held (the order wheel never opens with it).
+	_field_map = HudFieldMap.new()
+	add_child(_field_map)
+	_field_map.setup(cfg, _minimap, map, map_name, characters, _sim.pings.lifetime, _cfg.ping_fade)
 
 
 ## Follows the character `watched` (whose eyes the view is through) on the minimap, looking `yaw`, `fraction` of the way
@@ -417,6 +423,22 @@ func update_minimap(state: GameState, watched: Character, yaw: float, fraction: 
 
 func minimap() -> HudMinimap:
 	return _minimap
+
+
+## The full-screen map (FM1) while `pointer` is open, as update_minimap's arguments say, with its pointer drawn while
+## `pointing` (you can ping); never over the scoreboard or the match's summary. Frames `pointer` on it. Allocates
+## nothing.
+func update_field_map(state: GameState, watched: Character, yaw: float, fraction: float, holding: bool,
+		hold: Vector3, book: Pings, pointer: MapPointer, pointing: bool) -> void:
+	if _field_map == null:
+		return
+	var pings := book if _prefs.ping_markers else null
+	_field_map.update(state, watched, yaw, fraction, holding, hold, pings, pointer, pointing,
+			_board_wanted or _summary.visible)
+
+
+func field_map() -> HudFieldMap:
+	return _field_map
 
 
 ## The sound cue ring (HudSoundCues) for `cues`, on the ring `cfg` sets, over the teammate markers and under the rest;
@@ -1039,8 +1061,9 @@ func update_orders(wheel: OrderWheelPointer, in_force: SquadOrder.Kind, outcome:
 
 
 ## Places Hold here's marker over `spot` (the middle of the spots held) as seen by `camera`, hidden when `show` is false;
-## held at the edge clear of the flag marker.
-func place_hold_marker(camera: Camera3D, spot: Vector3, show: bool) -> void:
+## held at the edge clear of the flag marker. `going`: Go there's (FM1), your teammates still on their way.
+func place_hold_marker(camera: Camera3D, spot: Vector3, show: bool, going: bool = false) -> void:
+	_hold_marker.set_going(going)
 	var slots := _hold_slots
 	slots.left = pin_point()
 	slots.right_top = pin_right_top()

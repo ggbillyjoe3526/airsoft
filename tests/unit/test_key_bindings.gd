@@ -101,11 +101,11 @@ func test_keys_that_cannot_be_bound_are_refused() -> void:
 
 
 func test_mouse_buttons_bind_like_keys() -> void:
-	assert_eq(b.rebind(&"reload", -MOUSE_BUTTON_XBUTTON1), KeyBindings.Result.BOUND)
-	assert_eq(_codes(&"reload"), [-MOUSE_BUTTON_XBUTTON1])
-	var e := KeyBindings.event_of(-MOUSE_BUTTON_XBUTTON1) as InputEventMouseButton
-	assert_eq(e.button_index, MOUSE_BUTTON_XBUTTON1)
-	assert_eq(KeyBindings.code_of_event(e), -MOUSE_BUTTON_XBUTTON1)
+	assert_eq(b.rebind(&"reload", -MOUSE_BUTTON_XBUTTON2), KeyBindings.Result.BOUND)
+	assert_eq(_codes(&"reload"), [-MOUSE_BUTTON_XBUTTON2])
+	var e := KeyBindings.event_of(-MOUSE_BUTTON_XBUTTON2) as InputEventMouseButton
+	assert_eq(e.button_index, MOUSE_BUTTON_XBUTTON2)
+	assert_eq(KeyBindings.code_of_event(e), -MOUSE_BUTTON_XBUTTON2)
 
 
 func test_saved_bindings_round_trip() -> void:

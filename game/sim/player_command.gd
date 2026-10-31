@@ -45,6 +45,12 @@ var toggle_torch: bool = false
 ## Ping where the view looks, for this character's bot teammates (one-shot; PN1): the simulation turns it into a PING
 ## event and the bots' controller into a ping (Pings).
 var ping: bool = false
+## The ping is a Go there (FM1): the bot teammates go to its spot and hold it (SquadOrder.Kind.MOVE).
+var ping_move: bool = false
+## The ping was placed on the full-screen map (FM1) at ping_target (world x and z, the y the floor of the storey shown)
+## rather than along the view.
+var ping_on_map: bool = false
+var ping_target: Vector3 = Vector3.ZERO
 ## The magazine hand-off (one-shot; MH1): toss a magazine to the nearest teammate asking you who is in reach, else ask
 ## for one if you are low, else nothing but a refusal (MagShare.press).
 var mag_hand_off: bool = false
@@ -79,6 +85,9 @@ func reset(view_yaw: float = 0.0, view_pitch: float = 0.0) -> void:
 	order_from_wheel = false
 	toggle_torch = false
 	ping = false
+	ping_move = false
+	ping_on_map = false
+	ping_target = Vector3.ZERO
 	mag_hand_off = false
 	throw_grenade = Grenade.Kind.NONE
 	use_door = false
@@ -107,6 +116,9 @@ func copy_from(other: PlayerCommand) -> void:
 	order_from_wheel = other.order_from_wheel
 	toggle_torch = other.toggle_torch
 	ping = other.ping
+	ping_move = other.ping_move
+	ping_on_map = other.ping_on_map
+	ping_target = other.ping_target
 	mag_hand_off = other.mag_hand_off
 	throw_grenade = other.throw_grenade
 	use_door = other.use_door

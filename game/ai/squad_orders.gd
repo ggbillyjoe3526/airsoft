@@ -3,12 +3,14 @@ class_name SquadOrders
 ## out (start, end); each tick BotBrain puts an ordered bot in ORDER mode between fights and `move` walks it there.
 ## Follow me: a spot behind the giver's heading, kept at the giver's pace, covering their back. Hold here: the spot the
 ## giver looks at, the teammates side by side across their view, all looking their way. Regroup: sprint back to the
-## giver, then follow (`regrouped`). Tuning is BotConfig.squad (SquadConfig). Allocates nothing.
+## giver, then follow (`regrouped`). Go there (FM1): a pinged spot, the teammates side by side across the way there,
+## looking on that way; once all are there it is a Hold here (SquadOrderBook.move_arrivals). Tuning is BotConfig.squad
+## (SquadConfig). Allocates nothing.
 
 ## What came of the last order given, for the presentation: CANCELLED, back to the team plan (the order given again, Team
 ## plan, or no teammate left to take it); ON_PLAN, Team plan with no order in force; NOBODY, no teammate in play to
-## take it; NOT_NOW, given while out or between rounds.
-enum Notice { NONE, CANCELLED, ON_PLAN, NOBODY, NOT_NOW }
+## take it; NOT_NOW, given while out or between rounds; NOWHERE, Go there pinged at nothing (the sky, too far).
+enum Notice { NONE, CANCELLED, ON_PLAN, NOBODY, NOT_NOW, NOWHERE }
 
 ## No spot: hold_point looking at nothing, held_centre with nobody holding.
 const NO_SPOT := Vector3(NAN, NAN, NAN)
@@ -105,7 +107,12 @@ static func hold_point(giver: Character, w: BotWorld) -> Vector3:
 ## line of sight from `point`, hold_spacing apart (the point itself where that isn't walkable or isn't in a straight
 ## walkable line from it), or with no point (NO_SPOT), the spot it stands on.
 static func place_hold(bots: Array[Bot], giver: Character, point: Vector3, w: BotWorld) -> void:
-	var right := Vector3(cos(giver.yaw), 0.0, -sin(giver.yaw))
+	place_across(bots, giver.yaw, point, w)
+
+
+## Go there's and Hold here's spots for `bots` (left to right across `yaw`): as place_hold, across the line along `yaw`.
+static func place_across(bots: Array[Bot], yaw: float, point: Vector3, w: BotWorld) -> void:
+	var right := Vector3(cos(yaw), 0.0, -sin(yaw))
 	var n := bots.size()
 	for k in n:
 		var b := bots[k]
@@ -122,12 +129,12 @@ static func place_hold(bots: Array[Bot], giver: Character, point: Vector3, w: Bo
 			b.order_goal = point
 
 
-## The middle of the spots held for `giver` among `bots`, or NO_SPOT if nobody holds one for them.
+## The middle of the spots held (or gone to: Go there) for `giver` among `bots`, or NO_SPOT if nobody holds one for them.
 static func held_centre(bots: Array[Bot], giver: Character) -> Vector3:
 	var sum := Vector3.ZERO
 	var n := 0
 	for b in bots:
-		if b.order == SquadOrder.Kind.HOLD and b.order_giver == giver:
+		if (b.order == SquadOrder.Kind.HOLD or b.order == SquadOrder.Kind.MOVE) and b.order_giver == giver:
 			sum += b.order_goal
 			n += 1
 	return sum / n if n > 0 else NO_SPOT
@@ -143,6 +150,18 @@ static func regrouped(b: Bot, w: BotWorld) -> bool:
 	b.order = SquadOrder.Kind.FOLLOW
 	b.order_heading = giver.yaw
 	return true
+
+
+## Go there: true once `b` stands at its spot (or got as near as a route goes), when it holds it (order_settled).
+static func moved_in(b: Bot) -> bool:
+	return b.order == SquadOrder.Kind.MOVE and b.order_settled
+
+
+## The yaw (the game's: 0 looks down -z, positive turns left) looking from `from` towards `to` along the ground; `fallback`
+## when they stand on the same spot.
+static func yaw_towards(from: Vector3, to: Vector3, fallback: float) -> float:
+	var d := Vector2(to.x - from.x, to.z - from.z)
+	return atan2(-d.x, -d.y) if d.length() > 1e-3 else fallback
 
 
 ## Follow me: the spot behind `giver`'s `heading` for follower `slot`: followers pair up either side of straight behind,
@@ -202,12 +221,16 @@ static func move(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> bool:
 	if giver == null:
 		return false
 	match b.order:
-		SquadOrder.Kind.HOLD:
+		SquadOrder.Kind.HOLD, SquadOrder.Kind.MOVE:
 			# No way there: it holds where it got to.
 			if b.route_state == Bot.RouteState.FAILED:
 				b.order_goal = b.character.position
 				b.route_state = Bot.RouteState.NONE
-			return _walk_to(b, w, b.order_goal, cfg.hold_arrive, dt)
+			var walking := _walk_to(b, w, b.order_goal, cfg.hold_arrive, dt)
+			# There (not merely waiting for a route): Go there turns to Hold here once all are.
+			b.order_settled = not walking and (_flat(b.order_goal, b.character.position) <= cfg.hold_arrive
+					or _arrived_for(b, b.order_goal, w))
+			return walking
 		SquadOrder.Kind.REGROUP:
 			# Sprint back; once close the controller turns it into Follow me.
 			b.order_rush = _flat(giver.position, b.character.position) > cfg.regroup_arrive

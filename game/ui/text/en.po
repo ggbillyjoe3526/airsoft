@@ -147,6 +147,10 @@ msgstr "Flag touched"
 msgid "HUD_HOLD_MARKER"
 msgstr "Hold · %d m"
 
+# Go there's marker (FM1) while your teammates are on their way to the spot pinged.
+msgid "HUD_GO_MARKER"
+msgstr "Go · %d m"
+
 # A ping's marker (PN2): your spot, or an enemy seen there, and how far it is.
 msgid "HUD_PING_MARKER"
 msgstr "Ping · %d m"
@@ -168,6 +172,10 @@ msgstr "No teammates\nin play\nto order"
 
 msgid "HUD_ORDER_NOT_NOW"
 msgstr "Orders wait for\nthe next round"
+
+# Go there (FM1) pinged at the sky, or out of reach.
+msgid "HUD_ORDER_NOWHERE"
+msgstr "Nowhere\nthere to go"
 
 msgid "HUD_CHIP_SEMI"
 msgstr "S"
@@ -1935,6 +1943,14 @@ msgstr "SQUAD: REGROUP"
 msgid "ACT_PING"
 msgstr "SQUAD: PING A SPOT"
 
+# FM1: a ping that sends your bot teammates to the spot.
+msgid "ACT_PING_MOVE"
+msgstr "SQUAD: GO THERE"
+
+# FM1: the full-screen map, while its key is held.
+msgid "ACT_FIELD_MAP"
+msgstr "MAP (HOLD)"
+
 msgid "ACT_MAG_HAND_OFF"
 msgstr "SQUAD: NEED A MAG"
 
@@ -1955,6 +1971,10 @@ msgstr "Follow Me"
 
 msgid "ORDER_HOLD"
 msgstr "Hold Here"
+
+# The order wheel's Go There (FM1): a ping where you look that sends your teammates there.
+msgid "ORDER_MOVE"
+msgstr "Go There"
 
 msgid "ORDER_REGROUP"
 msgstr "Regroup"

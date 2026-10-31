@@ -101,6 +101,18 @@ Top left, the minimap shows the field from above:
   Settings › HUD › Minimap.
 - Once you are out, the minimap follows the teammate you watch.
 
+## The full-screen map
+
+Hold **M** (Map in Settings › Controls) to see the whole field, north up, over a dimmed screen, with the map and round
+over it and the named areas written in. It shows exactly what the minimap shows and nothing more: you, your teammates,
+the pole or the overtime flag, your Hold Here or Go There spot, your team's pings, and the other team only where your
+side heard them. It shows the storey you stand on.
+
+While it is open the mouse moves a pointer on the map instead of turning your view, and your feet still move. **Click**
+to send your teammates there ([Go There](Squad-Orders#go-there)), or press the ping's key (the middle mouse button) to
+ping that spot for them. Let go of M and you look around again; the trigger needs a fresh pull. Once you are out you
+can still look at the map, but not ping on it. There is no map on the [Practice Range](Practice-Range).
+
 ## Sounds that carry information
 
 Everything you hear is positioned where it happened. Sounds from behind a wall are duller and quieter; round a corner

@@ -28,7 +28,7 @@
 
 [sub_resource type="Resource" id="Resource_01h5l"]
 script = ExtResource("1_ermsw")
-wheel_labels = PackedStringArray("ORDER_FOLLOW", "ORDER_HOLD", "ORDER_REGROUP", "ORDER_TEAM_PLAN", "ORDER_MAG")
+wheel_labels = PackedStringArray("ORDER_FOLLOW", "ORDER_HOLD", "ORDER_MOVE", "ORDER_REGROUP", "ORDER_TEAM_PLAN", "ORDER_MAG")
 
 [sub_resource type="Resource" id="Resource_2hh1h"]
 script = ExtResource("2_yrloc")

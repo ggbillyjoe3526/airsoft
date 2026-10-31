@@ -11,9 +11,11 @@ in `docs/PROCESS.md`.
   code is in `legacy/browser/`.
 - **Last tag:** `0.1-dev.1`, [0.1 Dev 1](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.1)
   (2026-10-30). The owner creates tags.
-- **Building 0.1 Dev 2** (owner, 2026-10-30): basic smoke and flash bombs, thrown by bots too (done: SF1, SF2), then
-  Depot and Woodland redesigned larger and dressed (step 28). Depot is the owner's concept 3, an indoor hall (2026-10-31):
-  the map (done: DR1), doors (done: DO1), then two flags in Attack / Defend (AB1) and its CC0 dress (DR2). The rest of 0.1 ([What 0.1 is](#what-01-is)) follows in later Dev builds.
+- **Building 0.1 Dev 2** (owner, 2026-10-30): basic smoke and flash bombs, thrown by bots too (done: SF1, SF2), a
+  full-screen map and a Go there ping (owner, 2026-10-31; done: FM1), then Depot and Woodland redesigned larger and
+  dressed (step 28). Depot is the owner's concept 3, an indoor hall (2026-10-31): the map (done: DR1), doors (done:
+  DO1), then two flags in Attack / Defend (AB1) and its CC0 dress (DR2). The rest of 0.1 ([What 0.1 is](#what-01-is))
+  follows in later Dev builds.
 - **The release path** (owner, 2026-10-12): 0.1 Dev builds, 0.1 Beta, then 0.1 (tagged `0.1.0`) opens Early
   Access to the public.
   Themed updates follow (Replica, Modes, Maps, Progression and any more), up to 1.0, the full launch. See

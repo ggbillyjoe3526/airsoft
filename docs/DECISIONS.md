@@ -710,6 +710,14 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **No map is loaded until Play (owner, 2026-10-03).** A match is a session built on Play and disposed on leaving.
 - **The minimap shows teammates, and the other team only as patches where they were last heard (owner, 2026-10-04).** A
   hit call removes that player's patch. It names the area you stand in, with the names the bots call (CL1).
+- **The full-screen map is the minimap whole, and Go there sends your squad (owner, 2026-10-31; FM1, Claude's
+  defaults).** Held M shows the field north up over a dimmed screen with the named areas, and only what the minimap
+  shows: no enemy but where your side heard them. Its pointer takes the mouse; a click there is a Go there, the ping's
+  key a ping there. Go there (mouse button 4, the order wheel's Go There, lower right) is an order sent as a ping: the
+  squad goes side by side to the spot, however far, and it turns to Hold here once all are there; at the same spot it
+  stays, never cancels. Held rather than toggled, as the scoreboard; Mouse 4 because every key near WASD is taken.
+  A ping with your view stops at the first thing it meets (a wall: its foot on your side); a click on the map goes
+  anywhere on the field, seen or not (owner, 2026-10-31).
 - **Ping is the middle mouse button, and Settings › HUD › Ping markers is On by default (2026-10-15, PG1).** One ping
   each, 8 s on screen with its distance, on the minimap too. Off hides the markers only.
 - **Asking for a magazine is H and the order wheel's fifth item, Need a Mag (2026-10-15, MG1).** One press does what
