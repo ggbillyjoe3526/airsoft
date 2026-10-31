@@ -128,7 +128,9 @@ def cut_tunnels() -> list[dict]:
         mid = (az + bz) / 2
         z0, z1 = mid - t["cover"] / 2, mid + t["cover"] / 2
         cut = (np.abs(L.GX - ax) <= TUNNEL_WALL[1]) & (L.GZ >= z0 - 0.25) & (L.GZ <= z1 + 0.25)
-        h[cut] = (h - mound)[cut]
+        # Down to the floor from the ground before the cuttings: the cells either end already in the cutting stay
+        # where they are (cut twice, they were 1.5 m pits either side of the Badger run's floor, CR1).
+        h[cut] = np.minimum(h, Wd.H0 - mound)[cut]
         kind = "plywood" if t["material"] == "wood" else "log"
         z = z0
         while z < z1 - 1e-6:
