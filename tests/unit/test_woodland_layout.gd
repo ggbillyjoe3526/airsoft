@@ -250,9 +250,16 @@ func test_a_body_walks_every_lane_end_to_end_on_the_bots_routes() -> void:
 
 
 func test_bots_play_a_whole_match_at_today_s_team_size() -> void:
+	# The match builds its own level in the same physics space as this file's: this one's doors stand open meanwhile,
+	# or a door the match opens would still be shut here, in the way of its movers (WR2).
+	var q := level.query()
+	for i in q.door_count():
+		q.set_door_shut(i, false)
 	var runner := MatchRunner.new(self, "woodland")
 	var t := runner.play(7, MATCH_SECONDS)
 	runner.free_level()
+	for i in q.door_count():
+		q.set_door_shut(i, q.door_starts_shut[i] != 0)
 	gut.p("%d rounds in %.0f s of play, %d hits, held up %d, stayed home %d" % [t.rounds.size(), t.ticks * DT, t.hits,
 			t.held_up, t.stayed_home])
 	assert_true(t.finished, "the match is won")
@@ -362,3 +369,68 @@ func test_a_crouched_body_walks_through_each_tunnel_and_a_standing_one_can_t() -
 		var roof: Vector2 = t[3]
 		var s := _walk_through(a, b, false)
 		assert_lt(s.position.z, roof.x + ROOF_INSET, "%s: standing, stopped at the mouth (at %s)" % [t[0], s.position])
+
+
+# WR2: the huts' doors, the two flags and the 3:00 round (concept 3: doors on the Cabin, the Hut row and the Box, the
+# door facing the enemy shut; A at the Fort, B at the Sawmill).
+const FLAG_A := Vector2(55.0, -38.5)
+const FLAG_B := Vector2(49.0, 38.5)
+const HUT_DOORS := 8
+const SHUT_DOORS := 4
+## How far (m) a leaf's foot may sit off the ground under it.
+const DOOR_FOOT := 0.1
+const ROUND_SECONDS := 180.0
+
+
+func test_the_huts_hang_eight_doors_half_shut_each_standing_on_its_doorway() -> void:
+	assert_eq(map.doors.size(), HUT_DOORS, "two a hut: the Cabin, the Hut row's two and the Box")
+	var shut := 0
+	for d in map.doors:
+		shut += 1 if d.shut else 0
+		var foot := d.center.y - d.size.y * 0.5
+		var floor_y := nav.floor_at(Vector3(d.center.x, foot + 1.0, d.center.z))
+		assert_almost_eq(foot, floor_y, DOOR_FOOT, "the door at %s stands on its doorway" % d.center)
+		var thin := minf(d.size.x, d.size.z)
+		assert_almost_eq(thin, 0.08, 0.001, "a leaf is 8 cm thick, as Depot's")
+	assert_eq(shut, SHUT_DOORS, "each hut's door facing the enemy starts shut")
+
+
+func test_attack_defend_has_flag_a_at_the_fort_and_b_at_the_sawmill() -> void:
+	assert_eq(map.poles.size(), 2, "two flags")
+	if map.poles.size() < 2:
+		return
+	assert_almost_eq(Vector2(map.poles[0].x, map.poles[0].z), FLAG_A, Vector2(0.01, 0.01), "A at the Fort")
+	assert_almost_eq(Vector2(map.poles[1].x, map.poles[1].z), FLAG_B, Vector2(0.01, 0.01), "B at the Sawmill")
+	var run := tuning.movement.run_speed
+	var attack := _fastest(0, map.poles[1]) / run
+	var defend := _fastest(1, map.poles[1]) / run
+	gut.p("B flag: attackers %.1f s, defenders %.1f s" % [attack, defend])
+	assert_between(attack, 30.0, 45.0, "attackers take a while to reach B")
+	assert_lt(defend, 15.0, "defenders are home at B first")
+
+
+func test_a_skirmish_round_here_is_three_minutes_and_custom_keeps_its_own() -> void:
+	var entry := MapCatalog.shared().find("woodland")
+	var base := SimTuning.load_default()
+	var played := MatchOptions.match_tuning(base, entry, null)
+	assert_eq(played.rounds.round_time, ROUND_SECONDS, "3:00 (concept 3)")
+	assert_ne(base.rounds.round_time, ROUND_SECONDS, "the loaded tuning is never written")
+	var custom := CustomRules.new()
+	custom.round_time = 120.0
+	assert_eq(MatchOptions.match_tuning(base, entry, custom).rounds.round_time, 120.0, "Custom plays its own")
+	var depot := MatchOptions.match_tuning(base, MapCatalog.shared().find("depot"), null)
+	assert_eq(depot.rounds.round_time, base.rounds.round_time, "Depot keeps 2:30")
+	assert_eq(MatchRunner.sized_for("woodland").rounds.round_time, ROUND_SECONDS, "the guards play it too")
+
+
+func test_a_round_length_that_isnt_one_keeps_the_tuning_s() -> void:
+	var cat := MapCatalog.parse("# Maps\n\n## Maps\n\n| Id | Name | Kind | Tag | Min | Standard | Max | Round | Blurb |\n"
+			+ "|---|---|---|---|---|---|---|---|---|\n"
+			+ "| a | A | field | public | 1 | 3 | 3 | 30 | x |\n| b | B | field | public | 1 | 3 | 3 | soon | x |\n"
+			+ "| c | C | field | public | 1 | 3 | 3 | 240 | x |\n| d | D | field | public | 1 | 3 | 3 |  | x |\n")
+	assert_eq(cat.entries.size(), 4, "every row listed")
+	assert_eq(cat.find("a").round_time, 0.0, "under 90 s")
+	assert_eq(cat.find("b").round_time, 0.0, "not a number")
+	assert_eq(cat.find("c").round_time, 240.0)
+	assert_eq(cat.find("d").round_time, 0.0, "blank: the tuning's")
+	assert_eq(cat.problems.size(), 2, "%s" % [cat.problems])

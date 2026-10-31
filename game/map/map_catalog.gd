@@ -1,10 +1,10 @@
 class_name MapCatalog
 extends RefCounted
 ## Which maps there are and which are listed (data/maps.md, the browser game's map/maps.ts MAPS): each map's name,
-## kind (a match field or the practice range), tag and team sizes. A map tagged dev is listed only while the Dev
+## kind (a match field or the practice range), tag, team sizes and round length. A map tagged dev is listed only while the Dev
 ## settings' Dev content switch is on, and a match on one stays out of the records (docs/DECISIONS.md › Content tags and
 ## dev content). An unreadable row is left out with a warning; an unreadable team size keeps its built-in value with a
-## warning; with no file at all, Depot alone is listed.
+## warning, as does an unreadable round length; with no file at all, Depot alone is listed.
 
 const PATH := "res://data/maps.md"
 const FILE_NAME := "maps.md"
@@ -13,6 +13,8 @@ const KINDS: Array[StringName] = [&"field", &"range"]
 const TAGS: Array[StringName] = [&"public", &"dev"]
 ## The team size columns, smallest, standard and largest (the browser game's teamSize min, standard and max).
 const SIZE_COLUMNS: PackedStringArray = ["Min", "Standard", "Max"]
+## The round length column (s), optional: a map without one plays the round tuning's (RoundConfig.round_time).
+const ROUND_COLUMN := "Round"
 
 
 class Entry:
@@ -27,6 +29,9 @@ class Entry:
 	var team_min: int = 1
 	var team_standard: int = 3
 	var team_max: int = 3
+	## The round's length (s) a Skirmish here plays (WR2: Woodland 3:00), 0 for the round tuning's own. Custom plays
+	## its own switch (CustomRules.round_time) wherever it is.
+	var round_time: float = 0.0
 
 	## Whether a match of `team_size` a side can be played here.
 	func allows(team_size: int) -> bool:
@@ -92,6 +97,7 @@ static func parse(text: String) -> MapCatalog:
 			m.problems.append("%s: %s is listed twice" % [at, e.id])
 		else:
 			_read_sizes(e, row, at, m.problems, table)
+			_read_round(e, row, at, m.problems, table)
 			m.entries.append(e)
 	for column in SIZE_COLUMNS:
 		if not table.has_column(column):
@@ -121,6 +127,24 @@ static func _read_sizes(e: Entry, row: DataTable.Row, at: String, problems: Arra
 	e.team_min = sizes[0]
 	e.team_standard = sizes[1]
 	e.team_max = sizes[2]
+
+
+## `e`'s round length from `row`'s Round cell: blank keeps the round tuning's; anything but a whole number of seconds in
+## the Match screen's range (CustomRules.ROUND_TIME_RANGE) keeps it too, with a problem.
+static func _read_round(e: MapCatalog.Entry, row: DataTable.Row, at: String, problems: Array[String],
+		table: DataTable) -> void:
+	if not table.has_column(ROUND_COLUMN):
+		return
+	var raw := row.cell(ROUND_COLUMN)
+	if raw.is_empty():
+		return
+	var lo := CustomRules.ROUND_TIME_RANGE.x
+	var hi := CustomRules.ROUND_TIME_RANGE.y
+	if not raw.is_valid_int() or raw.to_int() < lo or raw.to_int() > hi:
+		problems.append("%s: Round \"%s\" is not a whole number of seconds from %d to %d: %s plays the round tuning's"
+				% [at, raw, lo, hi, e.id])
+		return
+	e.round_time = float(raw.to_int())
 
 
 ## The entry for `map_id`, or null.

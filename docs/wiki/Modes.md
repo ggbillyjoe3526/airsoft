@@ -23,8 +23,8 @@ touched, its cloth and ring take that team's colour and the banner says **FLAG T
 ## Attack / Defend
 
 One team attacks, the other defends a flagpole at the defenders' end. The team you pick attacks first, and the sides
-swap at half time; the Match card says who attacks first. Depot has two poles, **A** and **B**, one on each site: the
-attackers win by raising their flag on either, and each pole's flag goes up and down on its own.
+swap at half time; the Match card says who attacks first. Depot and Woodland have two poles, **A** and **B**, one on
+each site: the attackers win by raising their flag on either, and each pole's flag goes up and down on its own.
 
 - **Attackers** win the round by raising their flag: stand at the pole, on the rope, for **<!-- wiki:config flag_config.raise_time --> seconds**.
 - **Defenders** win by holding out until the clock runs out, or by taking out every attacker. Defenders at the pole
@@ -48,7 +48,8 @@ A map needs a flagpole for Attack / Defend; the Match screen says when one hasn'
 
 Under the modes, the **Rules** section picks the rules:
 
-- **Skirmish** is the standard match, shown as chips on the Match card.
+- **Skirmish** is the standard match, shown as chips on the Match card. Woodland's rounds run 3:00 instead, as
+  its chips show; a Custom match plays its own round time on any map.
 - **Custom** lets you set every switch yourself. Your Custom setup is saved for next time.
 
 <!-- wiki:rules -->

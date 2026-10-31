@@ -50,7 +50,7 @@ The minimap names the area you stand in. Depot's areas:
 
 ### Doors
 
-Depot has 15 hinged doors, painted green so they stand out from the plywood. Every round starts with the same doors
+Depot has 15 hinged doors and Woodland's huts 8, painted green so they stand out from the plywood. Every round starts with the same doors
 open and the same ones shut. Press **Open / shut door** (U, [Controls](Controls)) within reach of one to open or shut
 it; a line under the crosshair tells you which.
 
@@ -80,16 +80,19 @@ over the Culvert to the Log stacks and the Sawmill. Attackers start in the west 
   Clearing; the Badger run, a log-lined run through the Knoll between the middle and the south; and the Culvert, the
   stream bed under the road. Crouch to go through; inside you stay down until you're out, and bots crouch through
   too. The stream bed under the North bridge is crouch height as well, a fourth low way along the bed.
-- **The huts:** the Cabin, the two huts of Hut row and the Box on A site have windows and doorways; the Tower is a
-  platform 3.4 m up a stair, the Sawmill an open shed.
+- **The huts:** the Cabin, the two huts of Hut row and the Box on A site have windows and two green [doors](#doors)
+  each. The door facing the far end starts each round shut and the one facing the near end open, so a hut is walked
+  into from its own side and opened, loudly, from the other. The Tower is a platform 3.4 m up a stair, the Sawmill
+  an open shed.
 - **Night** is the Time of day setting's (day by default): a low moon, stars and haze, with fires and lanterns at the
   camps, the huts, the Clearing, the Fort, the Sawmill, the Truck bend and the North bridge. Bots see you from about
   40 m in their light, 25 m under the moon and 10 m under the trees ([Bots](Bots#at-night)); by day they see 60 m.
   At night, fit a [weapon torch](Parts-and-Power#lights) and load [glowing BBs](Loadout#customise).
 - Footsteps sound like grass, leaf litter, gravel or boards, and a BB that hits the ground puffs like earth. Owls and
   creaking branches call from the wood.
-- **Attack / Defend** puts a flagpole in the Fort ([Modes](Modes#attack--defend)); in Elimination's overtime the flag
-  stands in the Clearing.
+- **Attack / Defend** puts flag **A** in the Fort and flag **B** at the Sawmill ([Modes](Modes#attack--defend)); in
+  Elimination's overtime the flag stands in the Clearing.
+- **Rounds run 3:00** in a Skirmish here, half a minute longer than Depot's, for the longer walks.
 
 ### Areas
 

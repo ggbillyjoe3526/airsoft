@@ -220,16 +220,21 @@ func _init(parent: Node, map_id: String, sim_tuning: SimTuning = null, bot_confi
 
 
 ## The round tuning a match on `map_id` plays in the guards and the balance report: `base` (the loaded tuning by
-## default) where the map offers its team size, else a copy at the map's standard size (data/maps.md, as
-## MapCatalog.Entry.team_size_for picks for the game): Depot at 3, Woodland at 5.
+## default) where the map offers its team size and has no round length of its own, else a copy at the map's standard
+## size (data/maps.md, as MapCatalog.Entry.team_size_for picks for the game) and its round length, as a Skirmish there
+## plays (MatchOptions.match_tuning): Woodland at 5 a side and 3:00.
 static func sized_for(map_id: String, base: SimTuning = null) -> SimTuning:
 	var t := base if base != null else SimTuning.load_default()
 	var entry := MapCatalog.shared().find(map_id)
-	if entry == null or entry.allows(t.rounds.team_size):
+	if entry == null:
+		return t
+	var length := MatchOptions.round_time(entry, null, t.rounds.round_time)
+	if entry.allows(t.rounds.team_size) and t.rounds.round_time == length:
 		return t
 	var sized := t.duplicate() as SimTuning
 	sized.rounds = t.rounds.duplicate() as RoundConfig
 	sized.rounds.team_size = entry.team_size_for(t.rounds.team_size)
+	sized.rounds.round_time = length
 	return sized
 
 

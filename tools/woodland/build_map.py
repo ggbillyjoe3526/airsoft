@@ -194,6 +194,30 @@ def roof_blocks() -> list[dict]:
     return out
 
 
+DOOR_T = 0.08  # a leaf's thickness, as Depot's (DO1)
+
+
+def doors() -> list[dict]:
+    """The huts' hinged doors (DO1's format), in the layout's order: each its shut leaves' box, as tall as the hut's
+    wall and standing on the doorway's ground, hung on the wall's outer face (the side it swings out to, as check.py
+    clears it) and whether it starts the round shut (layout.DOOR_SHUT)."""
+    out = []
+    off = L.WALL_T / 2 + DOOR_T / 2
+    h = L.HEIGHTS["hutwall"]
+    for d in Wd.DOORS:
+        along_x = abs(math.cos(math.radians(d["rot"]))) > 0.5
+        side = 1 if d["side"] in ("east", "south") else -1
+        cx, cz = d["x"], d["z"]
+        if along_x:
+            sx, sz, cz = d["w"], DOOR_T, cz + side * off
+        else:
+            sx, sz, cx = DOOR_T, d["w"], cx + side * off
+        g = ground(d["x"], d["z"])
+        out.append({"center": {"x": r(cx), "y": r(g + h / 2), "z": r(cz)},
+                    "size": {"x": r(sx), "y": r(h), "z": r(sz)}, "side": side, "shut": d["shut"]})
+    return out
+
+
 # ------------------------------------------------------------------ decks: the North bridge, the culvert, the tower
 def deck_blocks() -> list[dict]:
     out = []
@@ -523,7 +547,7 @@ def main() -> None:
         "spawns": spawns(),
         "deadZones": dead_zones(),
         "lanes": lanes(),
-        "flag": spot(*L.FLAG_A),
+        "flags": [spot(x, z) for x, z in L.FLAGS],
         "overtimeFlag": spot(*L.OT_FLAG),
         "botSight": BOT_SIGHT,
         "night": False,  # day by default (the first preset); night is the Time of day setting's
@@ -537,6 +561,7 @@ def main() -> None:
         "ambience": "woods",
         "dressing": dressing(),
         "areas": areas(),
+        "doors": doors(),
     }
     with open(OUT, "w") as f:
         json.dump(data, f, separators=(",", ":"))
@@ -545,7 +570,7 @@ def main() -> None:
     for b in blocks:
         kinds[b["kind"]] = kinds.get(b["kind"], 0) + 1
     print(f"woodland.json: {len(blocks)} blocks {kinds}, {len(trees)} trees ({dropped} left out by a block), "
-          f"{len(data['foliage'])} foliage, {len(data['areas'])} area boxes, {os.path.getsize(OUT) // 1024} KB")
+          f"{len(data['foliage'])} foliage, {len(data['areas'])} area boxes, {len(data['doors'])} doors, {os.path.getsize(OUT) // 1024} KB")
 
 
 if __name__ == "__main__":
