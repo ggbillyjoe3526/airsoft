@@ -157,18 +157,20 @@ func test_puddles_lie_just_over_the_ground_and_draw_before_every_other_see_throu
 	var worst := 0.0
 	for s in mesh.get_surface_count():
 		names.append(mesh.surface_get_name(s))
-		var mat := mesh.surface_get_material(s) as StandardMaterial3D
+		var mat := mesh.surface_get_material(s) as ShaderMaterial
 		assert_eq(mat.render_priority, Material.RENDER_PRIORITY_MIN, "drawn first of the see-through")
-		assert_eq(mat.transparency, BaseMaterial3D.TRANSPARENCY_ALPHA, "seen through")
-		assert_ne(mat.depth_draw_mode, BaseMaterial3D.DEPTH_DRAW_ALWAYS, "never hiding what is drawn after it")
+		assert_eq(mat.shader, LookMaterials.CLEAR_SHADER, "seen through, in the shared light")
+		assert_true(mat.shader.code.contains("ALPHA = COLOR.a"), "its colour's alpha its opacity")
+		assert_false(mat.shader.code.contains("depth_draw_always"), "never hiding what is drawn after it")
 		for v: Vector3 in mesh.surface_get_arrays(s)[Mesh.ARRAY_VERTEX]:
 			worst = maxf(worst, absf(v.y - woodland.terrain.height_at(v.x, v.z) - play.woods.puddle_lift))
 	assert_eq(names, [WoodsShapes.WATER, WoodsShapes.MUD], "water and mud, each its own draw")
 	var mats := view.materials()
 	assert_lt(worst, 0.001, "every puddle lies on the slope, just over it")
-	var water := mesh.surface_get_material(0) as StandardMaterial3D
-	var mud := mesh.surface_get_material(1) as StandardMaterial3D
-	assert_lt(water.roughness, mud.roughness, "the water glossier than the mud")
+	var water := mesh.surface_get_material(0) as ShaderMaterial
+	var mud := mesh.surface_get_material(1) as ShaderMaterial
+	assert_lt(water.get_shader_parameter(&"roughness") as float, mud.get_shader_parameter(&"roughness") as float,
+			"the water glossier than the mud")
 	assert_true(mats.has(water) and mats.has(mud), "both prewarmed")
 
 

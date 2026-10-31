@@ -315,7 +315,8 @@ func test_woodland_stays_greybox_in_a_match() -> void:
 		assert_null(session._site, "%s: no site dress" % id)
 		assert_null(session._level.site_material(), "%s: no site material" % id)
 		assert_eq(_drawn(session._level).name, &"Greybox", "%s: the greybox mesh" % id)
-		assert_true(_drawn(session._level).material_override is StandardMaterial3D)
+		var greybox := _drawn(session._level).material_override as ShaderMaterial
+		assert_eq(greybox.shader, LookMaterials.VERTEX_SHADER, "%s: the greybox in the shared light (WA1)" % id)
 		assert_eq(session.find_children("*", "SiteDress", true, false).size(), 0)
 		session._apply_graphics(GraphicsTable.shared().preset(&"low")) # nothing to set, nothing breaks
 		var sky := session._lighting.environment.sky.sky_material

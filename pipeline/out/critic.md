@@ -1,20 +1,24 @@
-Task: WR3 · Woodland's CC0 dress (no TASKS.md block; judged against the brief, the owner's ask and docs/records/WR3.md)
+Task: WA1 · Woodland in the art direction (no TASKS.md block; judged against the brief, the owner's 2026-10-31 ruling, docs/ART.md › A map in the look and docs/records/WA1.md)
 Attempt: 2 of 4
-Head: 29f8d52 (= git rev-parse HEAD; diff 10095c1..29f8d52; test_props 17/17, test_wr3_qa 7/7, test_map_level 15/15 re-run here)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept (QA's one blocking item, the changelog note, is in changelog.d/woodland-cc0-props.md; performance Pass on 10095c1, the later diff is build-time only)
-Evidence for the first pass's fixes:
-- Cores: map_level.gd:365-377 core_box runs a side flush when _touched (:381-390, a 5 cm slab against the other cored boxes) finds a thicket, else insets min(0.7 m, 20 % of the width); cored list built once (:340-344). test_props.gd:327-348 walks every touching pine pair and asserts no gap; the old inset_of insets every side, so it would fail.
-- Lined (TILE) blocks keep their box: map_level.gd:349; the old b.dress guard is gone, so a site-less map's kind-dressed blocks are now hidden too (the latent issue closed).
-- A ramp keeps its box: prop_dress_config.gd:92-93; test_props.gd:394-405.
-- Changelog note: player-facing, four lines, no dev content. Record attempt 2: WR3.md:57-71, with QA's and performance's findings.
-- Check 3: core_box/_touched are greybox build-time (O(n²) over 197 thickets, once); nothing new per frame or tick.
-Failed checks: none.
-Should fix before merge (non-blocking, not scored):
-- prop_dress_config.gd:5 is still 198 columns: the wrap moved the overflow instead of breaking it (the record's "two lines wrapped" is half true). tests/unit/test_wr3_qa.gd:44 is 130.
-Owner should test in the game:
-1. Woodland's staircase thicket clumps (x -68..-40): any glimpse of a bot through a seam you can't shoot through?
-2. Thickets read as uncrossable hedges; 1.6-1.8 m trunks as trees, not posts.
-3. Shoot round a trunk's edge: is the square hit box "a little wide" or unfair?
-4. The violet truck and teal crates: readable as cover, never a team colour?
-5. F3 frame rate on High by day and on Low, looking across the woods.
+Head: c499c80 (= git rev-parse HEAD; targeted GUT incl. test_night_light, test_look, test_terrain, test_colour_vision, test_baked_light, test_props pass; full suite to CI)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
+Score: 7/8 → Accept (one non-blocking fail; QA Pass, performance Pass, both for WA1)
+Evidence for the passes (attempt 1's stand; attempt 2 changes only the litter colour and docs):
+1. As attempt 1. Litter darkened in both homes: look_config.gd:117 and map_style.gd:98 (#7c7a58), so the palette and LEAVES ground agree; ART.md:115 matches.
+2. No contract touched.
+3. No new code; the colour is config data read at build.
+4. test_wa1_qa.gd:27 fails on main (StandardMaterial3D), :48 fails with stale bakes; test_look.gd:92-138 as before.
+5. Colours stay config data; no logic change.
+6. #7c7a58 is a khaki leaf brown, greyer than 0.3 (off both team hues), and gives wood ΔE 7.8 at night over the floor of 5 (record:61-62).
+7. Notes, not fails: the sRGB helper copied in look_vertex/look_clear and per-fragment cost stand as attempt 1 and performance said.
+Attempt 1's five doc fixes, all done: ART.md:62-64 (four greens), :81-82 (test_look and test_woods_view), :112-117 (all 15 entries, hexes match look_config.gd:114-118; olive moss = woodland.json 0x8c9a48), :210 (recipes line), game/map/README.md:15 (no grid).
+Failed checks, with evidence:
+8. [judgment] c499c80 commits 32 run logs, pipeline/out/qa/*.log (about 2,500 lines), force-added past .gitignore:10-11 (`*.log`, `pipeline/out/`); pipeline/README.md:20-21: "pipeline/out/ holds a run's reports and logs and is never committed". (The three tracked report files predate WA1; editing them follows main.) QA's test_wa1_qa.gd also rides in the thread's commit without the `Agent: qa` trailer (pipeline/README.md:14).
+Must-fix before the push (no new attempt needed): `git rm -r --cached pipeline/out/qa/*.log` and amend; optionally move test_wa1_qa.gd into its own commit with `Agent: qa`.
+Owner should test in the game (at most 6, one line each):
+- Woodland by day on Low and on Ultra: do the crowns, bushes and meadow read bright and clean, with no white glow or flat patches?
+- Woodland's darker leaf litter by day: still reads as leaves, not as mud or bare earth next to the earth paths?
+- Woodland at night: logs, fences and boards stand clear of the litter; greybox, woods and bushes readable under the moon.
+- The crimson and yellow leaf drifts: autumn leaves, not markers or team paint?
+- F3 on High and Ultra at Hut row and the Sawmill against main: frame time with the shared light over greybox and woods.
+- The Range without its metre grid: is distance still easy to judge? Depot after the rebake: bounce light unchanged?

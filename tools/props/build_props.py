@@ -52,26 +52,27 @@ RECIPES = {
     # Woodland (WR3). A tree's trunk: a log stood upright, grey-brown bark (dull, so off the orange team's hue) and pale
     # cut ends (hidden in the ground and the crown).
     "trunk": {"source": "nature/log.glb", "parts": "materials", "turn": "z_up",
-              "colours": {"woodBark": (0.52, 0.47, 0.43), "woodInner": (0.78, 0.73, 0.64)}},
+              "colours": {"woodBark": (0.482, 0.435, 0.384), "woodInner": (0.894, 0.863, 0.804)}},
     # A fallen log, and the wind-thrown trunks: the same bark lying down.
     "log": {"source": "nature/log.glb", "parts": "materials",
-            "colours": {"woodBark": (0.52, 0.47, 0.43), "woodInner": (0.78, 0.73, 0.64)}},
+            "colours": {"woodBark": (0.482, 0.435, 0.384), "woodInner": (0.894, 0.863, 0.804)}},
     # Cordwood: stacked logs, their cut ends out (the log piles, log stacks and the Woodpile).
     "logstack": {"source": "nature/log_stackLarge.glb", "parts": "materials",
-                 "colours": {"woodBark": (0.52, 0.47, 0.43), "woodInner": (0.78, 0.73, 0.64),
-                             "woodDark": (0.38, 0.35, 0.32)}},
+                 "colours": {"woodBark": (0.482, 0.435, 0.384), "woodInner": (0.894, 0.863, 0.804),
+                             "woodDark": (0.38, 0.349, 0.31)}},
     # A spruce of the thickets: dark green needles on a dark trunk.
     "pine": {"source": "nature/tree_pineTallA.glb", "parts": "materials",
-             "colours": {"woodBarkDark": (0.42, 0.38, 0.35), "leafsDark": (0.27, 0.54, 0.33)}},
-    # A tyre lying flat (the tyre walls and stacks), near black.
-    "tyre": {"source": "car/debris-tire.glb", "parts": "texture", "turn": "x_up", "colours": {"all": (0.2, 0.2, 0.21)}},
+             "colours": {"woodBarkDark": (0.38, 0.349, 0.31), "leafsDark": (0.239, 0.478, 0.29)}},
+    # A tyre lying flat (the tyre walls and stacks), in rubber.
+    "tyre": {"source": "car/debris-tire.glb", "parts": "texture", "turn": "x_up",
+             "colours": {"all": (0.239, 0.231, 0.271)}},
     # A painted crate, teal.
-    "crate": {"source": "survival/box-large.glb", "parts": "texture", "colours": {"all": (0.22, 0.5, 0.46)}},
+    "crate": {"source": "survival/box-large.glb", "parts": "texture", "colours": {"all": (0.165, 0.612, 0.565)}},
     # The Truck bend's truck: a violet cab and bed on dark wheels.
     "truck": {"source": "car/truck.glb", "parts": "nodes",
-              "colours": {"body": (0.46, 0.33, 0.6), "wheel-front-right": (0.2, 0.2, 0.21),
-                          "wheel-front-left": (0.2, 0.2, 0.21), "wheel-back-right": (0.2, 0.2, 0.21),
-                          "wheel-back-left": (0.2, 0.2, 0.21)}},
+              "colours": {"body": (0.463, 0.345, 0.667), "wheel-front-right": (0.239, 0.231, 0.271),
+                          "wheel-front-left": (0.239, 0.231, 0.271), "wheel-back-right": (0.239, 0.231, 0.271),
+                          "wheel-back-left": (0.239, 0.231, 0.271)}},
 }
 
 # A recipe's "turn" stands the model another way up before it is written: "z_up" turns its z axis up (a log on end),

@@ -59,8 +59,9 @@ drawn in the look (Surfaces, Colour).
 
 Woodland's look in placeholders (WL4, `WoodsView` from `WoodsConfig`), until the owner's models (step 32):
 
-- **Crowns.** Every tree a dark-green cone, from about 0.38 of its trunk (never under 2.6 m, over every head) to
-  1.4 m over the trunk's top, on every preset. No collider: sight, BBs and the nav grid see trunks only.
+- **Crowns.** Every tree a cone in one of the palette's four bright greens (canopy, green, pine, fern), from about
+  0.38 of its trunk (never under 2.6 m, over every head) to 1.4 m over the trunk's top, on every preset. No collider:
+  sight, BBs and the nav grid see trunks only.
 - **Beyond the fence.** The skyline's treelines (cones along their points in bands, faded to the horizon) and hills,
   and a forest of 2,000 cones in the 12 to 118 m ring round the field, standing on the hills, a share of it from
   Medium, all on Ultra.
@@ -74,8 +75,14 @@ Woodland's look in placeholders (WL4, `WoodsView` from `WoodsConfig`), until the
   as a muted green disc.
 - **The night air.** Fireflies by the logs and water, and pale motes round the eye, self-lit, the Wind dust row's
   share; still and steady under Reduced motion.
-- **Colours** are greens, browns and greys, every one more than 20 degrees from a team's hue or greyer than 0.3
-  (tested by day and night); the leaf plum #7d3b52 sits 22 degrees from HC Beta.
+- **Colours** are the look's palette's (WA1): the crowns canopy, green, pine and fern; the far forest forest, spruce
+  and pine; the bushes fern, green, olive and canopy; bark, timber and umber wood with heartwood ends; the meadow,
+  litter, earth and pebble underfoot; pond water and mud; leaf drifts in yellow, olive, umber, sand, crimson, moss and
+  timber. Every one is more than 20 degrees from a team's hue or greyer than 0.3: the palette in
+  `tests/unit/test_look.gd`, the woods' own colours in `test_woods_view.gd`.
+- **In the shared light** (WA1): the greybox and the ground (clean, no metre grid), the crowns, the forest, the floor
+  pieces, the bushes and the CC0 props on `look_vertex.gdshader`, the puddles on `look_clear.gdshader`. The grass
+  tufts keep their own light (two-sided blades would take the rim on every back face), and the skyline is unshaded.
 
 ## Colour
 
@@ -102,6 +109,12 @@ The look's palette is `LookConfig.palette` (`game/config/look_config.gd`, in `pl
 | grey | `#8c8a96` | ramps, pallets, IBC frames, the barrels' lids |
 | ceiling | `#524a72` | a roof's underside |
 | umber, moss | `#61594f`, `#b3b891` | the gaps between slats, the sofa's feet; grass on open ground |
+| bark, heartwood | `#7b6f62`, `#e4dccd` | Woodland's trunks and their cut ends (WA1) |
+| canopy, fern, olive | `#5c9a50`, `#79a650`, `#8c9a48` | Woodland's crowns and bushes; olive the logs' moss |
+| pine, spruce, forest | `#3d7a4a`, `#2f6e55`, `#2b5c48` | spruces, thicket cores and the far forest |
+| meadow, litter, earth | `#8aa860`, `#7c7a58`, `#8a8070` | Woodland's grass, leaf litter and bare earth |
+| rubber | `#3d3b45` | tyres and wheels |
+| pond, mud, mud_wet | `#4a6f6c`, `#554e44`, `#403b34` | puddles and mud (wet mud also the wet skin) |
 
 - **Spread the six evenly.** No site colour covers much more of a map than another; big repeated props (racking,
   walls) take a neutral (steel, plywood, cream) so they never make one colour dominate.
@@ -187,15 +200,14 @@ every quality level, and a night or golden-hour sky changes everything at once.
 
 ## A map in the look
 
-Woodland and every new map take the look this way (Depot did, AD1):
+Every map takes the look this way (Depot did, AD1; Woodland, WA1):
 
 1. **Draw every surface in the shared light.** A shader includes `look_light.gdshaderinc`; a vertex-coloured model
    uses `LookMaterials.vertex_colour`. A `StandardMaterial3D` doesn't get the look's shade or rim.
 2. **Paint from the palette.** Every colour a map paints is a palette entry: a new colour goes into the palette
    first, then into the map's paint. Spread the six site colours evenly and put big repeated props on a neutral. CC0
    models are recoloured into it (`tools/props/build_props.py` writes vertex colours). `tests/unit/test_look.gd` holds
-   Depot's paint, stencils, roof and props to the palette; a new map adds its own to that test (Woodland's CC0
-   recipes join when it moves onto the look).
+   Depot's and Woodland's paint and props to the palette; a new map adds its own to that test.
 3. **Keep surfaces clean.** No noise, stains or photo grain; the gradient and lit edges carry the shape.
 4. **Light it with a preset.** The map's `lighting` overrides tune the sun, fill and exposure; a roofed map's sun hangs
    nearly overhead (Depot). Check it on Low and on Ultra: Low must read as well, Ultra only adds light.

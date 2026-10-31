@@ -1,7 +1,7 @@
 class_name MapLevel
 extends Node3D
 ## A map in the world (the browser game's render/field/mapMeshes.ts and physics/physicsWorld.ts, greybox for now): the
-## blocks and the ground beyond the walls drawn as one vertex-coloured mesh under a floor grid, any sloping ground in
+## blocks and the ground beyond the walls drawn as one vertex-coloured mesh in the shared light, any sloping ground in
 ## tiles of about TERRAIN_TILE m a side in the same material (each culled on its own, in the view and in every shadow
 ## cascade; WL4), and the blocks and the sloping ground's very triangles (a trimesh) as Jolt static colliders, one body
 ## per surface so a ray knows what it met. It hands the simulation its two views of the level:
@@ -22,9 +22,6 @@ const WORLD_LAYER := 1
 const CHARACTER_LAYER := 2
 ## The ground probe's disc (JoltMover): this thick (m).
 const PROBE_THICKNESS := 0.02
-## The floor grid texture's size (px) and line width (px).
-const GRID_PIXELS := 128
-const GRID_LINE := 2
 ## What a warning about a bake tells you to do.
 const REBAKE := "rebake with tools/bake_light.gd"
 ## Sloping ground is drawn in tiles of whole ground squares at most this many metres a side (WL4).
@@ -42,7 +39,7 @@ var _style: MapStyle = null
 var _light: BakeConfig = null
 var _lighting: LightingConfig = null
 var _night: bool = false
-var _material: StandardMaterial3D = null
+var _material: ShaderMaterial = null
 var _mesh: MeshInstance3D = null
 ## The site dress's look and its material (DD1); null for a greybox map.
 var _site: SiteLook = null
@@ -329,7 +326,7 @@ func _bake_or_null() -> BakedLight:
 
 
 ## Every block and the ground beyond the walls as one mesh in one material: vertex colours carry each block's colour,
-## a world-space grid texture the metre lines, so the blocks are a single draw call (sloping ground is its tiles').
+## so the blocks are a single draw call (sloping ground is its tiles').
 ## With `site`, as the baked site's shadow caster: a block drawn as props alone (DR2) is left out, its props cast its
 ## shadow. With `props`, a block drawn as props (WR3) is left out, or drawn as its core behind its props (core_box: a
 ## thicket's), its props casting their own shadows; a lined (TILE) block keeps its box.
@@ -494,25 +491,10 @@ func _site_customs(blocks: PackedInt32Array, n: int, arrays: Array) -> void:
 	arrays[Mesh.ARRAY_CUSTOM1] = c1
 
 
-func _greybox_material(style: MapStyle) -> StandardMaterial3D:
-	var img := Image.create(GRID_PIXELS, GRID_PIXELS, true, Image.FORMAT_RGB8)
-	img.fill(Color.WHITE)
-	var line := Color(style.grid_shade, style.grid_shade, style.grid_shade)
-	for i in GRID_PIXELS:
-		for w in GRID_LINE:
-			img.set_pixel(i, w, line)
-			img.set_pixel(w, i, line)
-	img.generate_mipmaps()
-	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
-	mat.vertex_color_is_srgb = true
-	mat.albedo_texture = ImageTexture.create_from_image(img)
-	mat.uv1_triplanar = true
-	mat.uv1_world_triplanar = true
-	mat.uv1_scale = Vector3.ONE / style.grid_size
-	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
-	mat.roughness = style.roughness
-	return mat
+## The greybox's one material: its vertex colours (sRGB) in the shared light (docs/ART.md › A map in the look), clean,
+## with no grid or texture.
+static func _greybox_material(style: MapStyle) -> ShaderMaterial:
+	return LookMaterials.vertex_colour(style.roughness, 0.0, Color.WHITE, true)
 
 
 ## A convex face given anticlockwise as seen from outside, its normal worked out from its winding.

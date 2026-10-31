@@ -452,7 +452,7 @@ def dressing() -> dict:
     return {
         "seed": 3107,
         "woods": {"leaves": 0.22, "fallen": 0.15},
-        "moss": {"colour": 0x4E6B3A, "share": 0.4},
+        "moss": {"colour": 0x8C9A48, "share": 0.4},
         "puddles": [{"x": 8.0, "z": 30.0, "width": 2.4, "depth": 1.6, "mud": True},
                     {"x": -4.5, "z": -25.0, "width": 2.2, "depth": 1.5, "mud": True},
                     {"x": -52.0, "z": 30.5, "width": 3.0, "depth": 1.8},
