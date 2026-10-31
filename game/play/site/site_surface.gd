@@ -114,19 +114,23 @@ static func as_props(look: SiteLook, b: MapData.Block) -> bool:
 	return b.rise == MapData.Rise.NONE and look.props != null and look.props.dresses(b)
 
 
-## Where block `b`'s faces are drawn: where they are, but for a sandbag stack, whose own box is drawn `bag_core` m
-## inside its sides and top, under its bags (SiteDress), which fill the block; for a kind drawn as props
+## Where block `b` (of `map`) has its faces drawn: where they are, but for a sandbag stack, whose own box is drawn
+## `bag_core` m inside its sides and top, under its bags (SiteDress), which fill the block; for a kind drawn as props
 ## (PropDressConfig.dresses, DR2), which fill it instead, nowhere (folded to its middle), or for tiled props their
-## backing, half a row inside each lined face (PropDressConfig.tile_depths).
-static func core_of(look: SiteLook, b: MapData.Block) -> Transform3D:
+## backing: half a row inside each lined face, flush with each face that has no row (PropLayout.lining), `backing_top`
+## under its top.
+static func core_of(look: SiteLook, b: MapData.Block, map: MapData) -> Transform3D:
+	var lo := b.center - b.size * 0.5
+	var hi := b.center + b.size * 0.5
 	if as_props(look, b):
 		if look.props.backs(b):
-			var rows := look.props.tile_depths(b)
-			return _inset(b, Vector2(rows.y * 0.5, rows.x * 0.5), look.props.backing_top)
+			var line := PropLayout.lining(map, look.props, b)
+			return _box_to(b, lo + line.low * 0.5, hi - line.high * 0.5 - Vector3(0.0, look.props.backing_top, 0.0))
 		return Transform3D(Basis.from_scale(Vector3.ZERO), b.center)
 	if look.finish_of(b) != &"sandbags" or b.rise != MapData.Rise.NONE:
 		return Transform3D.IDENTITY
-	return _inset(b, Vector2(look.bag_core, look.bag_core), look.bag_core)
+	var bag := look.bag_core
+	return _box_to(b, lo + Vector3(bag, 0.0, bag), hi - Vector3(bag, bag, bag))
 
 
 ## Whether block `b`'s faces are not drawn at all: a kind drawn as props with no backing (DR2).
@@ -134,15 +138,10 @@ static func hidden(look: SiteLook, b: MapData.Block) -> bool:
 	return as_props(look, b) and not look.props.backs(b)
 
 
-## Block `b`'s box drawn `side.x` m inside its sides across x, `side.y` inside those across z and `top` m under its
-## top, its foot where it is.
-static func _inset(b: MapData.Block, side: Vector2, top: float) -> Transform3D:
-	var h := b.size * 0.5
-	var scale := Vector3(maxf(h.x - side.x, 0.0) / h.x, maxf(b.size.y - top, 0.0) / b.size.y,
-			maxf(h.z - side.y, 0.0) / h.z)
-	var basis := Basis.from_scale(scale)
-	var foot := b.center - Vector3(0.0, h.y, 0.0)
-	return Transform3D(basis, foot - basis * foot)
+## The transform that draws block `b`'s box from `lo` to `hi` (its corners; an inverted span folds flat).
+static func _box_to(b: MapData.Block, lo: Vector3, hi: Vector3) -> Transform3D:
+	var basis := Basis.from_scale((hi - lo).max(Vector3.ZERO) / b.size)
+	return Transform3D(basis, lo - basis * (b.center - b.size * 0.5))
 
 
 ## The flags block `b` is drawn with: a container's chevron, paint by unit and piece; the dock's and a hoarding's

@@ -340,7 +340,7 @@ static func _site_mesh(m: MapData, style: MapStyle, site: SiteLook) -> ArrayMesh
 		var c := SiteSurface.block_customs(site, b)
 		st.set_custom(0, c[0])
 		st.set_custom(1, c[1])
-		var core := SiteSurface.core_of(site, b)
+		var core := SiteSurface.core_of(site, b, m)
 		for f in GreyboxFaces.faces_of(b):
 			_add_face(st, core * f)
 	var top := GreyboxFaces.ground_top(m)
@@ -399,7 +399,7 @@ func _baked_mesh() -> ArrayMesh:
 ## The baked tiles where SiteSurface.core_of draws them (a sandbag stack's own box inside its bags).
 func _site_cores(t: GreyboxFaces.Tiles) -> void:
 	for i in map.blocks.size():
-		var core := SiteSurface.core_of(_site, map.blocks[i])
+		var core := SiteSurface.core_of(_site, map.blocks[i], map)
 		if core == Transform3D.IDENTITY:
 			continue
 		for v in t.blocks.size():

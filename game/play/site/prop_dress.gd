@@ -1,13 +1,15 @@
 class_name PropDress
 extends Node3D
 ## A site-dressed map's CC0 props (DR2): the drums, barrels, pallets and sofa that stand in the blocks of the kinds
-## PropDressConfig dresses, where PropLayout lays them, one MultiMesh a model in one vertex-coloured material. A
+## PropDressConfig dresses, where PropLayout lays them, one MultiMesh a model (the shelving one a chunk,
+## PropDressConfig.chunk, so it culls and takes its level of detail by area) in one vertex-coloured material. A
 ## drum, barrel or sofa casts its own shadow (its box draws nothing, SiteSurface.core_of, and leaves MapLevel's shadow
 ## caster); shelving casts none, its rack's backing box still does. Scenery only: no collider, no nav cell; the blocks'
 ## boxes are still what BBs and bodies meet.
 
 var _material: StandardMaterial3D = null
-var _views: Dictionary[StringName, MultiMeshInstance3D] = {}
+var _views: Dictionary[StringName, Array] = {} # each model's MultiMeshInstance3Ds, a chunk each
+var _meshes: Dictionary[StringName, Mesh] = {}
 var _placed: Dictionary[StringName, PropLayout.Placed] = {}
 
 
@@ -19,10 +21,8 @@ static func build(map: MapData, cfg: PropDressConfig) -> PropDress:
 	var meshes: Dictionary[StringName, Mesh] = {}
 	var boxes: Dictionary[StringName, AABB] = {}
 	for model: StringName in _models_used(map, cfg):
-		var mesh := load_mesh(cfg.models.get(model, ""))
+		var mesh := cfg.mesh_of(model) # warns once when it won't load
 		if mesh == null:
-			push_warning("PropDress: %s's model %s won't load; its blocks stay boxes" % [model,
-					cfg.models.get(model, "(none)")])
 			continue
 		meshes[model] = mesh
 		boxes[model] = mesh.get_aabb()
@@ -36,28 +36,39 @@ static func build(map: MapData, cfg: PropDressConfig) -> PropDress:
 	dress._material.roughness = cfg.roughness
 	dress._material.metallic = cfg.metallic
 	dress._placed = placed
+	dress._meshes = meshes
 	for model: StringName in placed:
-		dress._add(model, meshes[model], placed[model], not _tiled(cfg, model))
+		var tiled := _tiled(cfg, model)
+		dress._add(model, meshes[model], placed[model], not tiled, cfg.chunk if tiled else INF)
 	return dress
 
 
-## The first mesh of the model at `path` (a .glb scene), or null.
-static func load_mesh(path: String) -> Mesh:
-	if path.is_empty() or not ResourceLoader.exists(path):
-		return null
-	var scene := load(path) as PackedScene
-	if scene == null:
-		return null
-	var root := scene.instantiate()
-	var found := root.find_children("*", "MeshInstance3D", true, false)
-	var mesh: Mesh = (found[0] as MeshInstance3D).mesh if not found.is_empty() else null
-	root.free()
-	return mesh
+## Model `model`'s views, a chunk each (none when the model isn't drawn).
+func views_of(model: StringName) -> Array[MultiMeshInstance3D]:
+	var out: Array[MultiMeshInstance3D] = []
+	out.assign(_views.get(model, []))
+	return out
 
 
-## Each model's view, by model name.
-func views() -> Dictionary[StringName, MultiMeshInstance3D]:
-	return _views
+## Every view.
+func all_views() -> Array[MultiMeshInstance3D]:
+	var out: Array[MultiMeshInstance3D] = []
+	for model: StringName in _views:
+		out.append_array(views_of(model))
+	return out
+
+
+## How many of `model` are drawn.
+func count(model: StringName) -> int:
+	var n := 0
+	for view in views_of(model):
+		n += view.multimesh.instance_count
+	return n
+
+
+## Model `model`'s mesh, or null when it isn't drawn.
+func mesh_of(model: StringName) -> Mesh:
+	return _meshes.get(model, null)
 
 
 ## Each model's instances as laid (PropLayout), by model name: what the views draw.
@@ -93,20 +104,32 @@ static func _tiled(cfg: PropDressConfig, model: StringName) -> bool:
 	return false
 
 
-func _add(model: StringName, mesh: Mesh, p: PropLayout.Placed, shadow: bool) -> void:
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_colors = true
-	mm.mesh = mesh
-	mm.instance_count = p.transforms.size()
+func _add(model: StringName, mesh: Mesh, p: PropLayout.Placed, shadow: bool, chunk: float) -> void:
+	var cells: Dictionary[Vector2i, PackedInt32Array] = {}
 	for i in p.transforms.size():
-		mm.set_instance_transform(i, p.transforms[i])
-		mm.set_instance_color(i, Color(p.shades[i], p.shades[i], p.shades[i]))
-	var view := MultiMeshInstance3D.new()
-	view.name = String(model).capitalize()
-	view.multimesh = mm
-	view.material_override = _material
-	if not shadow:
-		view.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(view)
-	_views[model] = view
+		var at := p.transforms[i].origin
+		var cell := Vector2i(floori(at.x / chunk), floori(at.z / chunk)) if is_finite(chunk) else Vector2i.ZERO
+		if not cells.has(cell):
+			cells[cell] = PackedInt32Array()
+		cells[cell].append(i)
+	var views: Array[MultiMeshInstance3D] = []
+	for cell: Vector2i in cells:
+		var picks := cells[cell]
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.use_colors = true
+		mm.mesh = mesh
+		mm.instance_count = picks.size()
+		for k in picks.size():
+			var shade := p.shades[picks[k]]
+			mm.set_instance_transform(k, p.transforms[picks[k]])
+			mm.set_instance_color(k, Color(shade, shade, shade))
+		var view := MultiMeshInstance3D.new()
+		view.name = "%s_%d_%d" % [String(model).capitalize(), cell.x, cell.y]
+		view.multimesh = mm
+		view.material_override = _material
+		if not shadow:
+			view.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(view)
+		views.append(view)
+	_views[model] = views

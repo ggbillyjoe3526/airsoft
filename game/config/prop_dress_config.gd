@@ -44,17 +44,50 @@ enum Lay { ROW, CLUSTER, FIT, TILE }
 ## A round prop's turn about its axis is a random quarter (seeded by the map's dressing seed), and its shade varies
 ## this much either way, so a row never reads as one model repeated.
 @export var shade_jitter: float = 0.06
+## Tiled props (the shelving, most of the props' triangles) are drawn in square chunks this many m across, one
+## MultiMesh a chunk, so the camera culls the chunks off screen and each takes its own mesh level of detail (the Mesh
+## detail step's mesh_lod_threshold, GraphicsApply; the simpler meshes are generated on import). The other models are
+## one MultiMesh each, few draw calls for few triangles.
+@export var chunk: float = 20.0
 ## The props' material: roughness, and metalness.
 @export var roughness: float = 0.7
 @export var metallic: float = 0.0
 
+## Each model path's mesh as loaded (null when it won't load), so a kind is dressed only by a model that loads.
+var _meshes: Dictionary[String, Mesh] = {}
 
-## Whether block `b` is drawn as props: its kind has a prop whose model is there and it is tall enough (else it keeps
+
+## Whether block `b` is drawn as props: its kind has a prop whose model loads and it is tall enough (else it keeps
 ## its box).
 func dresses(b: MapData.Block) -> bool:
 	var model: StringName = kind_props.get(b.kind, &"")
-	return model != &"" and b.size.y >= kind_min_height.get(b.kind, 0.0) \
-			and ResourceLoader.exists(models.get(model, ""))
+	return model != &"" and b.size.y >= kind_min_height.get(b.kind, 0.0) and mesh_of(model) != null
+
+
+## Prop `model`'s mesh, or null when its model is missing or holds none (loaded once a path).
+func mesh_of(model: StringName) -> Mesh:
+	var path: String = models.get(model, "")
+	if not _meshes.has(path):
+		_meshes[path] = load_mesh(path)
+		if _meshes[path] == null:
+			push_warning("PropDressConfig: %s's model %s won't load; its blocks stay boxes" % [model, path])
+	return _meshes[path]
+
+
+## The first mesh of the model at `path` (a .glb scene), or null.
+static func load_mesh(path: String) -> Mesh:
+	if path.is_empty() or not ResourceLoader.exists(path):
+		return null
+	var scene := load(path) as PackedScene
+	if scene == null:
+		return null
+	var root := scene.instantiate()
+	if root == null:
+		return null
+	var found := root.find_children("*", "MeshInstance3D", true, false)
+	var mesh: Mesh = (found[0] as MeshInstance3D).mesh if not found.is_empty() else null
+	root.free()
+	return mesh
 
 
 ## Whether block `b` is drawn as props laid by TILE, with its backing behind them.

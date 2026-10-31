@@ -58,7 +58,7 @@ func test_every_prop_stands_inside_a_block_it_dresses() -> void:
 	var outside: Array[String] = []
 	var placed := dress.placed()
 	for model: StringName in placed:
-		var mesh := dress.views()[model].multimesh.mesh
+		var mesh := dress.mesh_of(model)
 		var verts: PackedVector3Array = mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 		var middle := mesh.get_aabb().get_center()
 		for i in placed[model].transforms.size():
@@ -77,12 +77,12 @@ func test_every_prop_stands_inside_a_block_it_dresses() -> void:
 
 func test_drums_stand_four_on_a_pallet_barrels_two_a_block_one_sofa_and_shelving_on_tall_racks() -> void:
 	var m := _map("depot")
-	var views := _dress(m).views()
-	assert_eq(views[&"drum"].multimesh.instance_count, 4 * _count(m, &"drum"), "four drums a cluster")
-	assert_eq(views[&"pallet"].multimesh.instance_count, _count(m, &"drum"), "a pallet under each cluster")
-	assert_eq(views[&"barrel"].multimesh.instance_count, 2 * _count(m, &"barrel"), "two barrels a block")
-	assert_eq(views[&"sofa"].multimesh.instance_count, 1)
-	assert_gt(views[&"shelf"].multimesh.instance_count, _count(m, &"rack", 2.0), "racking lined with shelving")
+	var dress := _dress(m)
+	assert_eq(dress.count(&"drum"), 4 * _count(m, &"drum"), "four drums a cluster")
+	assert_eq(dress.count(&"pallet"), _count(m, &"drum"), "a pallet under each cluster")
+	assert_eq(dress.count(&"barrel"), 2 * _count(m, &"barrel"), "two barrels a block")
+	assert_eq(dress.count(&"sofa"), 1)
+	assert_gt(dress.count(&"shelf"), _count(m, &"rack", 2.0), "racking lined with shelving")
 	for b in m.blocks:
 		if b.kind == &"rack" and b.size.y < 2.0:
 			assert_false(look.props.dresses(b), "a rack's shelf board stays a board")
@@ -110,7 +110,7 @@ func test_a_propped_box_draws_no_faces_and_leaves_the_baked_shadow_caster() -> v
 	for b in m.blocks:
 		if SiteSurface.hidden(look, b):
 			hidden += 1
-			var core := SiteSurface.core_of(look, b)
+			var core := SiteSurface.core_of(look, b, m)
 			assert_eq(core * (b.center + b.size * 0.5), b.center, "a drum's or barrel's box folds to its middle")
 		drawn += GreyboxFaces.faces_of(b).size() if not SiteSurface.hidden(look, b) else 0
 	assert_eq(hidden, _count(m, &"drum") + _count(m, &"barrel") + _count(m, &"sofa"))
@@ -121,23 +121,70 @@ func test_a_propped_box_draws_no_faces_and_leaves_the_baked_shadow_caster() -> v
 	assert_true(level.baked_light_drawn(), "the bake still fits: the tiles are all there, folded")
 
 
-func test_tall_racks_draw_a_backing_half_a_row_inside_each_lined_face() -> void:
+func test_tall_racks_draw_a_backing_half_a_row_inside_each_lined_face_and_flush_with_the_rest() -> void:
 	var m := _map("depot")
 	var checked := 0
+	var flush := 0
 	for b in m.blocks:
 		if not look.props.backs(b):
 			continue
 		assert_eq(look.finish_of(b), &"backing")
-		var rows := look.props.tile_depths(b)
-		var core := SiteSurface.core_of(look, b)
+		var line := PropLayout.lining(m, look.props, b)
+		var core := SiteSurface.core_of(look, b, m)
 		var lo := core * (b.center - b.size * 0.5)
 		var hi := core * (b.center + b.size * 0.5)
-		assert_almost_eq(hi.z - lo.z, b.size.z - rows.x, 1e-4, "in by half a row on the faces across z")
-		assert_almost_eq(hi.x - lo.x, b.size.x - rows.y, 1e-4, "in by half a row on the faces across x")
-		assert_almost_eq(lo.y, b.center.y - b.size.y * 0.5, 1e-4, "on the floor")
-		assert_gt(rows.x + rows.y, 0.0, "some face is lined")
+		var box_lo := b.center - b.size * 0.5
+		var box_hi := b.center + b.size * 0.5
+		for axis: int in [0, 2]:
+			assert_almost_eq(lo[axis], box_lo[axis] + line.low[axis] * 0.5, 1e-4, "half a row in, or flush")
+			assert_almost_eq(hi[axis], box_hi[axis] - line.high[axis] * 0.5, 1e-4, "half a row in, or flush")
+			flush += int(line.low[axis] == 0.0) + int(line.high[axis] == 0.0)
+		assert_almost_eq(lo.y, box_lo.y, 1e-4, "on the floor")
+		assert_gt(line.low.length() + line.high.length(), 0.0, "some face is lined")
 		checked += 1
 	assert_eq(checked, _count(m, &"rack", 2.0))
+	assert_gt(flush, 0, "some face is against a wall or another rack")
+
+
+## Seen from outside, every point of a tall rack's sides is props or backing: no slot along an unlined face, no open
+## corner where a row stops (the critic's check, DR2 attempt 1).
+func test_every_point_just_inside_a_rack_s_sides_is_shelving_or_backing() -> void:
+	var m := _map("depot")
+	var dress := _dress(m)
+	var cell := dress.mesh_of(&"shelf").get_aabb()
+	var shelves: Array[AABB] = []
+	for t in dress.placed()[&"shelf"].transforms:
+		shelves.append((t * cell).grow(1e-3))
+	var gaps: Array[String] = []
+	for b in m.blocks:
+		if not look.props.backs(b):
+			continue
+		var core := SiteSurface.core_of(look, b, m)
+		var lo := core * (b.center - b.size * 0.5)
+		var backing := AABB(lo, core * (b.center + b.size * 0.5) - lo).grow(1e-3)
+		var box_lo := b.center - b.size * 0.5
+		for edge: Vector3 in [Vector3(0.0, 0.0, 0.0), Vector3(1.0, 0.0, 0.0), Vector3(0.0, 0.0, 1.0),
+				Vector3(1.0, 0.0, 1.0)]:
+			for along: int in [0, 2]:
+				var steps := maxi(2, ceili(b.size[along] / 0.2))
+				for i in steps + 1:
+					var at := box_lo + b.size * edge
+					at[along] = box_lo[along] + b.size[along] * i / steps
+					var across := 2 - along
+					at[across] += 0.01 if edge[across] == 0.0 else -0.01
+					at[along] = clampf(at[along], box_lo[along] + 0.01, box_lo[along] + b.size[along] - 0.01)
+					at.y = box_lo.y + b.size.y * 0.5
+					if backing.has_point(at):
+						continue
+					var hit := false
+					for s in shelves:
+						if s.has_point(at):
+							hit = true
+							break
+					if not hit:
+						gaps.append("rack at %s: %s" % [b.center, at])
+						break
+	assert_eq(gaps, [] as Array[String], "a rack's footprint is all shelving or backing")
 
 
 func test_no_prop_colour_reads_as_a_team() -> void:
@@ -145,7 +192,7 @@ func test_no_prop_colour_reads_as_a_team() -> void:
 	teams.append_array(play.teams.colours)
 	var near: Array[String] = []
 	for model: StringName in look.props.models:
-		var mesh := PropDress.load_mesh(look.props.models[model])
+		var mesh := PropDressConfig.load_mesh(look.props.models[model])
 		assert_not_null(mesh, "%s loads" % model)
 		var seen: Dictionary[Color, bool] = {}
 		for linear in mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR] as PackedColorArray:
@@ -163,7 +210,7 @@ func test_the_layout_is_seeded() -> void:
 	var m := _map("depot")
 	var boxes: Dictionary[StringName, AABB] = {}
 	for model: StringName in look.props.models:
-		boxes[model] = PropDress.load_mesh(look.props.models[model]).get_aabb()
+		boxes[model] = PropDressConfig.load_mesh(look.props.models[model]).get_aabb()
 	var a := PropLayout.layout(m, look.props, boxes)
 	var b := PropLayout.layout(m, look.props, boxes)
 	for model: StringName in a:
@@ -183,11 +230,11 @@ func test_a_missing_model_leaves_its_kind_a_box() -> void:
 	var other := SiteLook.new()
 	other.props = cfg
 	assert_false(SiteSurface.as_props(other, drum))
-	assert_eq(SiteSurface.core_of(other, drum), Transform3D.IDENTITY, "its box is drawn")
+	assert_eq(SiteSurface.core_of(other, drum, m), Transform3D.IDENTITY, "its box is drawn")
 	var dress := PropDress.build(m, cfg)
 	add_child_autofree(dress)
-	assert_false(dress.views().has(&"drum"), "and no drums")
-	assert_true(dress.views().has(&"barrel"), "the rest as before")
+	assert_eq(dress.count(&"drum"), 0, "and no drums")
+	assert_gt(dress.count(&"barrel"), 0, "the rest as before")
 
 
 func test_the_props_are_in_the_site_dress_and_its_prewarm() -> void:
@@ -198,7 +245,7 @@ func test_the_props_are_in_the_site_dress_and_its_prewarm() -> void:
 	assert_not_null(site.props())
 	for mat in site.props().materials():
 		assert_true(site.materials().has(mat), "warmed before play")
-	for view: MultiMeshInstance3D in site.props().views().values():
+	for view in site.props().all_views():
 		assert_eq(view.material_override, site.props().materials()[0], "one material for every prop")
 
 
@@ -208,10 +255,34 @@ func test_woodland_has_no_props() -> void:
 
 
 func test_drums_barrels_and_the_sofa_cast_shadows_and_shelving_leaves_it_to_its_rack() -> void:
-	var views := _dress(_map("depot")).views()
+	var dress := _dress(_map("depot"))
 	for model: StringName in [&"drum", &"barrel", &"pallet", &"sofa"]:
-		assert_ne(views[model].cast_shadow, GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, "%s casts" % model)
-	assert_eq(views[&"shelf"].cast_shadow, GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, "the rack's box casts it")
+		for view in dress.views_of(model):
+			assert_ne(view.cast_shadow, GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, "%s casts" % model)
+	for view in dress.views_of(&"shelf"):
+		assert_eq(view.cast_shadow, GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, "the rack's box casts it")
+
+
+## The shelving is drawn in chunks no wider than PropDressConfig.chunk, so the camera culls what it can't see and far
+## chunks take the simpler mesh the import generated (the Mesh detail step's threshold); the rest one view a model;
+## every prop is drawn once.
+func test_shelving_is_drawn_in_chunks_that_cull_and_take_a_simpler_mesh_far_off() -> void:
+	var m := _map("depot")
+	var dress := _dress(m)
+	var placed := dress.placed()
+	for model: StringName in placed:
+		var views := dress.views_of(model)
+		assert_eq(dress.count(model), placed[model].transforms.size(), "%s: each drawn once" % model)
+		if model != &"shelf":
+			assert_eq(views.size(), 1, "%s: one view" % model)
+			continue
+		var cells: Dictionary[Vector2i, bool] = {}
+		for t in placed[model].transforms:
+			cells[Vector2i(floori(t.origin.x / look.props.chunk), floori(t.origin.z / look.props.chunk))] = true
+		assert_eq(views.size(), cells.size(), "shelving: a view a chunk")
+	assert_gt(dress.views_of(&"shelf").size(), 10, "the shelving is many chunks, not one hall-wide draw")
+	var lods: Array = RenderingServer.mesh_get_surface(dress.mesh_of(&"shelf").get_rid(), 0).get("lods", [])
+	assert_gt(lods.size(), 0, "the shelf has a simpler mesh for far chunks")
 
 
 func test_shelving_lines_only_faces_nobody_is_against() -> void:

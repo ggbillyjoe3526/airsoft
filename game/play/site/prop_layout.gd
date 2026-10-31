@@ -126,21 +126,47 @@ static func _fit_facing(model: AABB, b: MapData.Block, foot: Vector3, middle: Ve
 	return fit(model, foot, size, yaw)
 
 
-## The box's faces lined with rows of the model as tall as the box (PropDressConfig.tile_depths), each row facing out
-## and filled with as many models as fit at their own width (each stretched a little to fill the row).
-static func _tile(p: Placed, model: AABB, b: MapData.Block, foot: Vector3, cfg: PropDressConfig, map: MapData) -> void:
+## Block `b`'s TILE rows: each face's row depth (m, PropDressConfig.tile_depths), 0 on a face with none, too short
+## or wholly against another block (face_hidden). `low` holds the faces towards -x and -z, `high` those towards +x and
+## +z (y unused). The rows along x run the whole face; those along z run between them, to the corner where a row along
+## x is missing; SiteSurface draws the backing half a row inside each lined face and flush with the rest, so the box's
+## footprint is all props or backing.
+class Lining:
+	var low: Vector3 = Vector3.ZERO
+	var high: Vector3 = Vector3.ZERO
+
+
+static func lining(map: MapData, cfg: PropDressConfig, b: MapData.Block) -> Lining:
 	var rows := cfg.tile_depths(b)
+	var line := Lining.new()
+	for side: float in [-1.0, 1.0]:
+		var d := Vector3(rows.y if rows.y > 0.0 and not face_hidden(map, b, Vector3(side, 0.0, 0.0)) else 0.0, 0.0,
+				rows.x if rows.x > 0.0 and not face_hidden(map, b, Vector3(0.0, 0.0, side)) else 0.0)
+		if side < 0.0:
+			line.low = d
+		else:
+			line.high = d
+	return line
+
+
+## The box's lined faces (`lining`) filled with rows of the model as tall as the box, each row facing out and holding
+## as many models as fit at their own width (each stretched a little to fill the row).
+static func _tile(p: Placed, model: AABB, b: MapData.Block, foot: Vector3, cfg: PropDressConfig, map: MapData) -> void:
+	var line := lining(map, cfg, b)
 	var k := b.size.y / maxf(model.size.y, 1e-6)
 	var wide := maxf(model.size.x, model.size.z) * k
 	var model_long_x := model.size.x >= model.size.z
 	var h := b.size * 0.5
+	var z_mid := (line.low.z - line.high.z) * 0.5
+	var z_length := b.size.z - line.low.z - line.high.z
 	for side: float in [-1.0, 1.0]:
-		if rows.x > 0.0 and not face_hidden(map, b, Vector3(0.0, 0.0, side)):
-			_tile_row(p, model, foot + Vector3(0.0, 0.0, side * (h.z - rows.x * 0.5)), b.size.x, rows.x, b.size.y,
+		var d := line.low if side < 0.0 else line.high
+		if d.z > 0.0:
+			_tile_row(p, model, foot + Vector3(0.0, 0.0, side * (h.z - d.z * 0.5)), b.size.x, d.z, b.size.y,
 					true, side, wide, model_long_x)
-		if rows.y > 0.0 and not face_hidden(map, b, Vector3(side, 0.0, 0.0)):
-			_tile_row(p, model, foot + Vector3(side * (h.x - rows.y * 0.5), 0.0, 0.0), b.size.z - 2.0 * rows.x,
-					rows.y, b.size.y, false, side, wide, model_long_x)
+		if d.x > 0.0:
+			_tile_row(p, model, foot + Vector3(side * (h.x - d.x * 0.5), 0.0, z_mid), z_length, d.x, b.size.y,
+					false, side, wide, model_long_x)
 
 
 ## Whether block `b`'s face towards `out` (a unit axis) is wholly against another block: a thin slab just outside
