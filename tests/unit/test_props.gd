@@ -5,7 +5,8 @@ extends GutTest
 ## of its own faces (or only its backing) and leaves the baked shadow caster; no prop colour reads as a team; the
 ## layout is seeded; a missing model leaves its kind a box; the props are in the prewarm. WR3: Woodland's blocks
 ## name their props (trees, spruces, logs, cordwood, crates, tyres, a truck) with no site dress, each inside its
-## block; a grid lays a cell's prop a cell; a dressed block draws no box, a thicket only its dark core.
+## block; a grid lays a cell's prop a cell; a dressed block draws no box, a thicket only its dark core; a ramp keeps
+## its box.
 
 var play: PlayTuning = PlayTuning.load_default()
 var tuning: SimTuning = SimTuning.new()
@@ -388,3 +389,17 @@ func test_shelving_lines_only_faces_nobody_is_against() -> void:
 			assert_false(PropLayout.face_hidden(m, b, Vector3(0.0, 0.0, -1.0)), "its front faces the hall")
 			hidden += 1
 	assert_eq(hidden, 1)
+
+
+func test_a_ramp_that_names_a_prop_keeps_its_box() -> void:
+	var m := _map("woodland")
+	var b: MapData.Block = null
+	for o in m.blocks:
+		if o.dress == &"crate":
+			b = o
+			break
+	assert_true(look.props.dresses(b), "a crate block is drawn as crates")
+	b.rise = MapData.Rise.POS_X
+	assert_false(look.props.dresses(b), "but not as a ramp: it keeps its box")
+	assert_eq(look.props.core_of(b), Vector2.ZERO)
+	b.rise = MapData.Rise.NONE

@@ -85,9 +85,11 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID }
 var _meshes: Dictionary[String, Mesh] = {}
 
 
-## Whether block `b` is drawn as props: its kind has a prop whose model loads and it is tall enough (else it keeps
-## its box).
+## Whether block `b` is drawn as props: the prop it names, or else its kind's, has a model that loads, the kind's is
+## tall enough, and the block is no ramp (else it keeps its box).
 func dresses(b: MapData.Block) -> bool:
+	if b.rise != MapData.Rise.NONE:
+		return false
 	if b.dress != &"":
 		return mesh_of(b.dress) != null
 	var model: StringName = kind_props.get(b.kind, &"")
@@ -118,7 +120,7 @@ func mesh_of(model: StringName) -> Mesh:
 	if not _meshes.has(path):
 		_meshes[path] = load_mesh(path)
 		if _meshes[path] == null:
-			push_warning("PropDressConfig: %s's model %s won't load; its blocks stay boxes" % [model, path])
+			push_warning("PropDressConfig: %s's model \"%s\" won't load; its blocks stay boxes" % [model, path])
 	return _meshes[path]
 
 
