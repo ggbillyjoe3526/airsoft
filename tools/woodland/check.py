@@ -1,4 +1,4 @@
-"""Build checks: is every piece where it should be? Prints problems; writes check.json with the counts."""
+"""Build checks: is every piece where it should be? Prints the problems and their total."""
 from __future__ import annotations
 
 import json

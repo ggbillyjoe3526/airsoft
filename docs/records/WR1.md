@@ -1,12 +1,13 @@
 # WR1 · Woodland rebuilt as the open wood of concept 3
 
-**Review:** pending
+**Review:** critic Accept 8/8 (attempt 2) · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-10-31 | 1 | thread | pending | pending | – |
+| 2026-10-31 | 1 | thread | targeted tests pass | Retry 6/8 | `settle()` swapped its loop variables; stale docs |
+| 2026-10-31 | 2 | thread | see Checks | Accept 8/8 | – |
 
 ## Goal
 
@@ -32,7 +33,7 @@ cover, enterable huts, ferns and bushes that hide players, day by default and ni
   (440 trees stand), otherwise the thinner overlap gives way, never a deck or the stair.
 - 947 blocks (thicket 197, tree 440, fence 110, plywood 90, log 72, crate 17, tyre 12, wall 4, floor 3, ramp 1, truck
   1), 99 foliage (fern beds as 1 m bushes 1.2 m high, which hide a crouched body; bushes 1.7 m, which hide a standing
-  one), 11 night lights (two camp fires, nine lanterns), 244 area boxes (each concept area rasterised on 2 m, and dead
+  one), 11 night lights (three fires, eight lanterns), 244 area boxes (each concept area rasterised on 2 m, and dead
   space named after the nearest area so every walkable spot is in one), three lanes, six spawns and dead-zone spots an
   end. `night` is false: day first, night second.
 - `MapStyle`: tyre (wood's sound), truck (metal) and thicket (leaves) kinds, coloured off both team hues. The forest
@@ -48,6 +49,8 @@ cover, enterable huts, ferns and bushes that hide players, day by default and ni
 - A bot pushed off its leg asks for a fresh route for a drop on the way on once each time it has moved
   `off_leg_replan_moved` (0.5 m): on a Woodland bank the fresh route was the same one, asked again every tick, and
   the bot stood still (a livelock the match test found). It walks that route; `stuck_time` still catches a real block.
+  (The critic's alternative, judging a fresh route's first leg from where the bot stands, is the deeper fix; the
+  guard is the smaller change and keeps the off-leg check as it was everywhere else.)
 - The match guards' held-up measure (`MatchRunner.errand_of`): a hunting bot's errand is its mode and the spot it
   hunts, so a hunter turning for another spot the way it came (a teammate checked its spot first) is a change of
   errand, as a search given up for the lane already was, not a loop. Bots still go out and back on such hunts on the
@@ -74,6 +77,8 @@ cover, enterable huts, ferns and bushes that hide players, day by default and ni
 - The tunnels are 1.4 m clear, under today's 1.8 m body: nobody goes through them until CR1 (KNOWN_ISSUES).
 - Doors stand as open doorways and Attack / Defend keeps one flag, at the Fort (A), until WR2 (KNOWN_ISSUES).
 - The greybox look (no CC0 models yet) until WR3; its card is a top view of the greybox.
+- Woodland's match guards play it by night (`night = true`), as they did before WR1; by day it plays one whole match in
+  test_woodland_layout (seed 7, 5v5). Day guard jobs would add about an hour of CI per pull request.
 
 ## Checks
 

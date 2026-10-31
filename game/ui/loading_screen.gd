@@ -3,7 +3,7 @@ extends CanvasLayer
 ## The loading screen (concept `loading.png`): from PLAY until the match draws its first frame. The map's picture
 ## fills the screen under a shade that deepens toward the foot; over it the kicker ("ELIMINATION · 3 V 3 · YOU'RE
 ## ALPHA"), the map's name and line, a yellow bar and the step under way with the share done; the step's own stretch of
-## the bar pulses while it runs (Woodland's nav grid takes about 2 s on a worker thread). It sits on a canvas layer
+## the bar pulses while it runs (Woodland's nav grid takes about 6 s on a worker thread). It sits on a canvas layer
 ## above the match's own interface, takes every click, and is freed by whoever made it once the match runs.
 
 ## Above the match's interface layer (PlaySession's).

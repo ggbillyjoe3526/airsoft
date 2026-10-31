@@ -1,4 +1,4 @@
-"""Run times (fastest player from a team's spawn), sight lines, openness and spawn safety. Writes analysis.json."""
+"""Run times (fastest player from a team's spawn), sight lines, openness and spawn safety, printed."""
 from __future__ import annotations
 
 import heapq
@@ -177,7 +177,4 @@ if __name__ == "__main__":
         "Hut row to B flag (Badger run)": round(at(dijkstra((31.0, 8.0)), *L.FLAG_B), 1),
     }
     print(json.dumps(rep, indent=1))
-    np.save("west.npy", west)
-    np.save("east.npy", east)
     print("dijkstra done", round(time.time() - T0, 1))
-    json.dump(rep, open("analysis_times.json", "w"), indent=1)

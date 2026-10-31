@@ -171,7 +171,7 @@ var each_tick: Callable = Callable()
 ## only the bots' own reload loads their replicas. Off by default (the bots' commands as they fill them).
 var manual_reload: bool = false
 ## Played at night (WL6): the bots see by the map's NightField, built once each match. On by default for a map that
-## offers no day (Woodland); on a map that offers both a test sets it for the night.
+## offers no day; on a map that offers both (Woodland since WR1) a test sets it for the night.
 var night: bool = false
 ## Who carries a weapon torch (WL7): by rule every bot at night and none by day (BY_RULE, the game's), nobody, or every
 ## bot even by day (ALWAYS: a day match with torches fitted must play exactly as one without).

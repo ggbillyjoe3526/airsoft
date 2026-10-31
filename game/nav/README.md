@@ -12,7 +12,9 @@ docs/ARCHITECTURE.md › Contracts 1).
 
 - **Sloping ground** (WL1, the browser's M33c). A cell's ground is `TerrainGrid.height_at` its centre, with nothing
   under it; the grid's bounds take in the terrain's. A 1:2 slope rises 0.14 m over a diagonal step of a 0.2 m cell,
-  under `max_step`'s 0.15 m, so every slope a ramp may have is walked; a steeper one is a drop.
+  under `max_step`'s 0.15 m, so every slope a ramp may have is walked. Steeper ground (WR1) links diagonally when both
+  straight steps round the corner do and the diagonal climbs at most `max_step` x sqrt 2 (`_sloped_diagonal`), so a
+  smooth bank up to 0.75 is walked on any heading; steeper, or a kerb's corner, is a drop.
 - **Layers.** A floor over a floor is a second node of the same cells; every query takes a height and answers for the
   floor at it. Neighbouring nodes connect when their floors are at most `BodyConfig.max_step` apart, with no
   squeezing diagonally past a blocked node; drops keep the clearance on both sides, as walls do.
@@ -52,5 +54,5 @@ and dead zones), `tests/unit/test_nav_walk_off.gd` (a walk-off round a wall thro
 `tests/unit/test_terrain.gd` (the browser's sloping-ground grid tests: floors from the ground, blocks on a slope, a
 floor over the ground, routes up a 1:2 slope, none up a cliff, a platform out of reach its own region),
 `tests/unit/test_bot_vaults.gd` (a wall across the field: two regions on foot, one by vault),
-`tests/unit/test_woodland_layout.gd` (Woodland's fort routes, a body walking every lane on the bots' routes, hunt spots
-over the whole field and never on a roof).
+`tests/unit/test_woodland_layout.gd` (Woodland's camp-to-flag walks, a body walking every lane on the bots' routes,
+hunt spots over the whole field and never on a roof).

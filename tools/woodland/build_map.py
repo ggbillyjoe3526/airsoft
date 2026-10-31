@@ -474,9 +474,6 @@ def settle(blocks: list[dict]) -> list[dict]:
                 if min(grip) <= SEAM:
                     continue
                 kinds = {out[i]["kind"], out[j]["kind"]}
-                if kinds == {"tree", "thicket"}:
-                    drop.add(i if out[i]["kind"] == "tree" else j)
-                    continue
                 if "tree" in kinds:
                     drop.add(i if out[i]["kind"] == "tree" else j)
                     continue
@@ -490,16 +487,16 @@ def settle(blocks: list[dict]) -> list[dict]:
                     hi[1] = boxes[upper][0][1]
                     set_box(out[lower], lo, hi)
                 else:
-                    if out[j]["kind"] in ("floor", "ramp"):  # a walking surface never gives way
-                        i, j = j, i
-                    (alo, ahi), (blo, bhi) = boxes[i], boxes[j]
-                    if (blo[axis] + bhi[axis]) / 2 < (alo[axis] + ahi[axis]) / 2:
-                        bhi[axis] = alo[axis]
+                    # j gives way, unless it is a walking surface: that never does.
+                    keep, give = (j, i) if out[j]["kind"] in ("floor", "ramp") else (i, j)
+                    (klo, khi), (glo, ghi) = boxes[keep], boxes[give]
+                    if (glo[axis] + ghi[axis]) / 2 < (klo[axis] + khi[axis]) / 2:
+                        ghi[axis] = klo[axis]
                     else:
-                        blo[axis] = ahi[axis]
-                    set_box(out[j], blo, bhi)
-                    if bhi[axis] - blo[axis] < 0.05:
-                        drop.add(j)
+                        glo[axis] = khi[axis]
+                    set_box(out[give], glo, ghi)
+                    if ghi[axis] - glo[axis] < 0.05:
+                        drop.add(give)
                 changed = True
                 boxes = [box(b) for b in out]
         out = [b for k, b in enumerate(out) if k not in drop]
