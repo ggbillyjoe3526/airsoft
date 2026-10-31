@@ -13,6 +13,7 @@
 [ext_resource type="Script" path="res://game/config/skyline_config.gd" id="14_sk3ln"]
 [ext_resource type="Script" path="res://game/config/woods_config.gd" id="16_wd4cf"]
 [ext_resource type="Script" path="res://game/config/site_look.gd" id="17_st5lk"]
+[ext_resource type="Script" uid="uid://cvb8w0oxso48k" path="res://game/config/prop_dress_config.gd" id="29_pdc01"]
 [ext_resource type="Script" path="res://game/config/roof_config.gd" id="18_rf6cf"]
 [ext_resource type="Script" path="res://game/config/play_tuning.gd" id="6_q2qxh"]
 [ext_resource type="Script" path="res://game/config/sound_config.gd" id="7_2hh1h"]
@@ -193,8 +194,12 @@ script = ExtResource("14_sk3ln")
 [sub_resource type="Resource" id="Resource_wd4cf"]
 script = ExtResource("16_wd4cf")
 
+[sub_resource type="Resource" id="Resource_pdc01"]
+script = ExtResource("29_pdc01")
+
 [sub_resource type="Resource" id="Resource_st5lk"]
 script = ExtResource("17_st5lk")
+props = SubResource("Resource_pdc01")
 
 [sub_resource type="Resource" id="Resource_rf6cf"]
 script = ExtResource("18_rf6cf")

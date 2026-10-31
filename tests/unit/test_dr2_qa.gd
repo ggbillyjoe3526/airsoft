@@ -70,3 +70,55 @@ func test_building_and_freeing_props_leaves_no_orphans() -> void:
 		var dress := PropDress.build(m, play.site_look.props)
 		dress.free()
 	assert_eq(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT), before)
+
+
+func test_every_prop_is_in_exactly_one_chunk_for_any_chunk_size() -> void:
+	var m := _map("depot")
+	for size: float in [20.0, 0.5, 7.3, 1.0e9, 0.0, -5.0]:
+		var cfg := PropDressConfig.new()
+		cfg.chunk = size
+		var dress := PropDress.build(m, cfg)
+		add_child_autofree(dress)
+		for model: StringName in dress.placed():
+			var want := dress.placed()[model].transforms.size()
+			assert_eq(dress.count(model), want, "%s at chunk %s: each prop drawn once" % [model, size])
+
+
+func test_a_racks_props_and_backing_cover_its_whole_footprint() -> void:
+	for id: String in ["depot", "range"]:
+		var m := _map(id)
+		var look := play.site_look
+		var gaps: Array[String] = []
+		for b in m.blocks:
+			if not look.props.backs(b):
+				continue
+			var line := PropLayout.lining(m, look.props, b)
+			var lo := b.center - b.size * 0.5
+			var hi := b.center + b.size * 0.5
+			var rects: Array[Rect2] = []
+			rects.append(Rect2(lo.x + line.low.x * 0.5, lo.z + line.low.z * 0.5,
+					b.size.x - (line.low.x + line.high.x) * 0.5, b.size.z - (line.low.z + line.high.z) * 0.5))
+			if line.low.z > 0.0:
+				rects.append(Rect2(lo.x, lo.z, b.size.x, line.low.z))
+			if line.high.z > 0.0:
+				rects.append(Rect2(lo.x, hi.z - line.high.z, b.size.x, line.high.z))
+			var zl := b.size.z - line.low.z - line.high.z
+			if line.low.x > 0.0:
+				rects.append(Rect2(lo.x, lo.z + line.low.z, line.low.x, zl))
+			if line.high.x > 0.0:
+				rects.append(Rect2(hi.x - line.high.x, lo.z + line.low.z, line.high.x, zl))
+			var x := lo.x + 0.05
+			while x < hi.x:
+				var z := lo.z + 0.05
+				while z < hi.z:
+					var covered := false
+					for r in rects:
+						covered = covered or r.grow(1e-4).has_point(Vector2(x, z))
+					if not covered:
+						gaps.append("%s rack at %s: %s,%s" % [id, b.center, x, z])
+						break
+					z += 0.25
+				if not gaps.is_empty() and gaps[-1].begins_with("%s rack at %s" % [id, b.center]):
+					break
+				x += 0.25
+		assert_eq(gaps.slice(0, 3), [] as Array[String], "%s: no gap in a rack's footprint" % id)

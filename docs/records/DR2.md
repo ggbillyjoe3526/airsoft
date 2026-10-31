@@ -1,13 +1,13 @@
 # DR2 · Depot's CC0 dress
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-10-31 | 1 | thread | prop (12), site dress, DD1, map, bake, budget and session tests pass; full suite on CI | Retry 7/8 | a slot behind racks against a wall or rack (seen through, stops BBs); QA: a model there but unloadable folded its boxes; performance: the shelving was one hall-wide draw |
-| 2026-10-31 | 2 | thread | prop (14), DR2 QA (3), site dress, DD1, map, bake, budget, hall, noisy prop and session tests pass | – | – |
+| 2026-10-31 | 2 | thread | prop (14), DR2 QA (5), saved configs, site dress, DD1, map, bake, budget, hall, noisy prop and session tests pass | Accept 8/8 | – |
 
 ## Goal
 
