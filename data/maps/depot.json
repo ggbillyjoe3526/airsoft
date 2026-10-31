@@ -3976,7 +3976,8 @@
     },
     "hemi": {
      "intensity": 0.55
-    }
+    },
+    "exposureScale": 0.85
    }
   }
  },

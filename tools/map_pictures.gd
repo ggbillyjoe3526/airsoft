@@ -42,6 +42,7 @@ func _run() -> void:
 	var only := args[1] if args.size() > 1 else ""
 	DirAccess.make_dir_recursive_absolute(dir)
 	var play := PlayTuning.load_default()
+	play.look.push_globals()
 	var tuning := SimTuning.load_default()
 	var failed := 0
 	for entry in MapCatalog.shared().listed(true):
@@ -80,7 +81,7 @@ func _render(map: MapData, play: PlayTuning) -> Image:
 	port.add_child(level)
 	var body := SimTuning.load_default().body
 	level.build(map, play.map_style, body, null, null, false, play.site_look)
-	var lighting := FieldLighting.build(play.lighting)
+	var lighting := FieldLighting.build(play.lighting, play.look)
 	port.add_child(lighting)
 	_add_site(port, map, play, level, lighting)
 	_add_skyline(port, map, play, body)
@@ -107,7 +108,7 @@ func _render_range(map: MapData, play: PlayTuning, tuning: SimTuning) -> Image:
 	var level := MapLevel.new()
 	port.add_child(level)
 	level.build(map, play.map_style, tuning.body, null, null, false, play.site_look)
-	var lighting := FieldLighting.build(play.lighting)
+	var lighting := FieldLighting.build(play.lighting, play.look)
 	port.add_child(lighting)
 	_add_site(port, map, play, level, lighting)
 	_add_skyline(port, map, play, tuning.body)

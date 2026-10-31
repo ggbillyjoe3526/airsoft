@@ -16,6 +16,10 @@ enum AmbientOcclusion { OFF, HALF, FULL }
 enum TextureFiltering { OFF, X2, X4, X8, X16 }
 ## Mesh level of detail (GR2 maps each to a mesh_lod_threshold).
 enum MeshDetail { LOW, MEDIUM, HIGH, ULTRA }
+## Light bounced off the field: none, screen-space (SSIL), or the whole scene's (SDFGI with SSIL).
+enum GlobalIllumination { OFF, SCREEN, SCENE }
+## Reflections: the sky's alone, the map's reflection probes, or the probes with screen-space reflections.
+enum Reflections { OFF, PROBES, SCREEN }
 
 ## The choice that is a preset with your own rows over it.
 const CUSTOM := &"custom"
@@ -33,10 +37,14 @@ const BAKED_LIGHT := &"baked_light"
 const TEXTURE_FILTERING := &"texture_filtering"
 const MESH_DETAIL := &"mesh_detail"
 const WIND_DUST := &"wind_dust"
+const GLOBAL_ILLUMINATION := &"global_illumination"
+const REFLECTIONS := &"reflections"
+const GLOW := &"glow"
+const VOLUMETRIC_FOG := &"volumetric_fog"
 ## Every row, in the Graphics tab's order (data/graphics.md's).
 const ROWS: Array[StringName] = [RENDER_SCALE, UPSCALER, EDGE_SMOOTHING, TEMPORAL_SMOOTHING, SUN_SHADOWS,
 		SHADOW_DETAIL, SHADOW_SOFTNESS, SHADOW_RANGE, AMBIENT_OCCLUSION, BAKED_LIGHT, TEXTURE_FILTERING, MESH_DETAIL,
-		WIND_DUST]
+		WIND_DUST, GLOBAL_ILLUMINATION, REFLECTIONS, GLOW, VOLUMETRIC_FOG]
 ## Every choice the game knows for each choice row, by level. The file offers these, or some of them. (Values are Arrays:
 ## Godot 4.7 keeps a const typed dictionary's array values as Arrays, so a PackedStringArray value type misreads them.)
 const CHOICES: Dictionary[StringName, Array] = {
@@ -50,6 +58,10 @@ const CHOICES: Dictionary[StringName, Array] = {
 	BAKED_LIGHT: ["off", "on"],
 	TEXTURE_FILTERING: ["off", "2x", "4x", "8x", "16x"],
 	MESH_DETAIL: ["low", "medium", "high", "ultra"],
+	GLOBAL_ILLUMINATION: ["off", "screen", "scene"],
+	REFLECTIONS: ["off", "probes", "screen"],
+	GLOW: ["off", "on"],
+	VOLUMETRIC_FOG: ["off", "on"],
 }
 ## The widest range the file may give a range row (a typo guard): the render scale within what the viewport takes, in
 ## percent; the shadow range in metres; the dust as a share of EffectsConfig.dust_count, in percent.
@@ -77,6 +89,12 @@ var texture_filtering: TextureFiltering = TextureFiltering.OFF
 var mesh_detail: MeshDetail = MeshDetail.LOW
 ## The wind dust's specks, in percent of EffectsConfig.dust_count.
 var wind_dust: int = 0
+var global_illumination: GlobalIllumination = GlobalIllumination.OFF
+var reflections: Reflections = Reflections.OFF
+## Bright lamps and sky bloom softly.
+var glow: bool = false
+## A faint haze the light shines through (shafts and depth).
+var volumetric_fog: bool = false
 
 
 ## True for a row that is a range of numbers, false for one with named choices.
@@ -153,6 +171,14 @@ func level(row: StringName) -> int:
 			return mesh_detail
 		WIND_DUST:
 			return wind_dust
+		GLOBAL_ILLUMINATION:
+			return global_illumination
+		REFLECTIONS:
+			return reflections
+		GLOW:
+			return int(glow)
+		VOLUMETRIC_FOG:
+			return int(volumetric_fog)
 	return GraphicsTable.NO_LEVEL
 
 
@@ -186,6 +212,14 @@ func set_level(row: StringName, value: int) -> void:
 			mesh_detail = value as MeshDetail
 		WIND_DUST:
 			wind_dust = value
+		GLOBAL_ILLUMINATION:
+			global_illumination = value as GlobalIllumination
+		REFLECTIONS:
+			reflections = value as Reflections
+		GLOW:
+			glow = value != 0
+		VOLUMETRIC_FOG:
+			volumetric_fog = value != 0
 
 
 func equals(other: GraphicsQuality) -> bool:

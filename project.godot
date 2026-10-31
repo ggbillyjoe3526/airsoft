@@ -251,3 +251,34 @@ common/physics_interpolation=true
 [rendering]
 
 rendering_device/fallback_to_opengl3=true
+
+[shader_globals]
+
+look_shade={
+"type": "color",
+"value": Color(0.3372549, 0.2901961, 0.5019608, 1)
+}
+look_band={
+"type": "float",
+"value": 0.1
+}
+look_band_soft={
+"type": "float",
+"value": 0.08
+}
+look_mid_band={
+"type": "float",
+"value": 0.14
+}
+look_rim={
+"type": "color",
+"value": Color(1, 0.953, 0.831, 0.22)
+}
+look_rim_power={
+"type": "float",
+"value": 3.2
+}
+look_spec={
+"type": "float",
+"value": 0.35
+}

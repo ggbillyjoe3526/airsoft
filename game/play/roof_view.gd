@@ -20,9 +20,9 @@ static func build(map: MapData, cfg: RoofConfig) -> RoofView:
 	var y := map.roof_height
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	st.set_color(cfg.ceiling_colour)
+	st.set_color(cfg.ceiling_colour.srgb_to_linear())
 	_box(st, Vector3(area.position.x, y, area.position.y), Vector3(area.end.x, y + 0.2, area.end.y))
-	st.set_color(cfg.truss_colour)
+	st.set_color(cfg.truss_colour.srgb_to_linear())
 	var x := ceilf(area.position.x / cfg.truss_step) * cfg.truss_step
 	while x <= area.end.x:
 		_box(st, Vector3(x - cfg.truss_width * 0.5, y - cfg.truss_depth, area.position.y),
@@ -32,12 +32,10 @@ static func build(map: MapData, cfg: RoofConfig) -> RoofView:
 	view._mesh.name = "Ceiling"
 	view._mesh.mesh = st.commit()
 	view._mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	# Unshaded: the roof's underside is only ever in its own shade, and flat colour reads the same from every side.
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.vertex_color_use_as_albedo = true
-	mat.vertex_color_is_srgb = true
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	# Out of the bounce light too, so the sky's light still reaches the hall as the roof lamps' would.
+	view._mesh.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	# In the shared light (docs/ART.md › Light): its underside takes the look's shade and the bounce off the floor.
+	var mat := LookMaterials.vertex_colour(cfg.roughness, 0.0)
 	view._mesh.material_override = mat
 	view._materials.append(mat)
 	view.add_child(view._mesh)
@@ -73,6 +71,7 @@ static func _lamp_panels(map: MapData, cfg: RoofConfig) -> MultiMeshInstance3D:
 	inst.name = "Lamps"
 	inst.multimesh = mm
 	inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	inst.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 	var glow := StandardMaterial3D.new()
 	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	glow.albedo_color = cfg.lamp_colour * cfg.lamp_energy
@@ -80,7 +79,7 @@ static func _lamp_panels(map: MapData, cfg: RoofConfig) -> MultiMeshInstance3D:
 	return inst
 
 
-## A box from `lo` to `hi`, each face with its outward normal (the material draws both sides).
+## A box from `lo` to `hi`, each face with its outward normal, wound to face out (Godot's front faces are clockwise).
 static func _box(st: SurfaceTool, lo: Vector3, hi: Vector3) -> void:
 	var c := [Vector3(lo.x, lo.y, lo.z), Vector3(hi.x, lo.y, lo.z), Vector3(hi.x, lo.y, hi.z), Vector3(lo.x, lo.y, hi.z),
 			Vector3(lo.x, hi.y, lo.z), Vector3(hi.x, hi.y, lo.z), Vector3(hi.x, hi.y, hi.z), Vector3(lo.x, hi.y, hi.z)]
@@ -90,8 +89,8 @@ static func _box(st: SurfaceTool, lo: Vector3, hi: Vector3) -> void:
 		var f: Array = faces[i]
 		st.set_normal(normals[i])
 		st.add_vertex(c[f[0]])
+		st.add_vertex(c[f[2]])
 		st.add_vertex(c[f[1]])
-		st.add_vertex(c[f[2]])
 		st.add_vertex(c[f[0]])
-		st.add_vertex(c[f[2]])
 		st.add_vertex(c[f[3]])
+		st.add_vertex(c[f[2]])

@@ -71,10 +71,15 @@ static func material(look: SiteLook, map: MapData) -> ShaderMaterial:
 	m.set_shader_parameter(&"joint", look.joint)
 	m.set_shader_parameter(&"edge_width", look.edge_width)
 	m.set_shader_parameter(&"edge_light", look.edge_light)
-	_photo(m, look.slab_colour, look.slab_normal, &"slab_col", &"slab_nrm", &"slab_set",
-			Vector4(look.slab_scale, look.slab_mix, look.slab_depth, look.slab_luma))
-	_photo(m, look.ply_colour, look.ply_normal, &"ply_col", &"ply_nrm", &"ply_set",
-			Vector4(look.ply_scale, look.ply_mix, look.ply_depth, look.ply_luma))
+	m.set_shader_parameter(&"grit", look.grit)
+	m.set_shader_parameter(&"gradient", look.gradient)
+	m.set_shader_parameter(&"gradient_height", look.gradient_height)
+	# clean surfaces draw no photo grain, so the photos aren't loaded at all
+	if look.grit > 0.0:
+		_photo(m, look.slab_colour, look.slab_normal, &"slab_col", &"slab_nrm", &"slab_set",
+				Vector4(look.slab_scale, look.slab_mix, look.slab_depth, look.slab_luma))
+		_photo(m, look.ply_colour, look.ply_normal, &"ply_col", &"ply_nrm", &"ply_set",
+				Vector4(look.ply_scale, look.ply_mix, look.ply_depth, look.ply_luma))
 	_wet(m, look, map)
 	_lines(m, look, map)
 	return m

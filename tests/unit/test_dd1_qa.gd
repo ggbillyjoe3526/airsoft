@@ -344,6 +344,9 @@ func test_every_parameter_the_site_shaders_read_is_set_by_the_game() -> void:
 		var unread: Array[StringName] = [&"low"]
 		if m.puddles.is_empty():
 			unread.append_array([&"wet_tex", &"wet_rect"])
+		# clean surfaces (AD1: grit 0) weigh the photos at nothing, so they are never loaded or set
+		if look.grit <= 0.0:
+			unread.append_array([&"slab_col", &"slab_nrm", &"ply_col", &"ply_nrm", &"slab_set", &"ply_set"])
 		var unset: Array[String] = []
 		for u: Dictionary in mat.shader.get_shader_uniform_list():
 			if not unread.has(StringName(u["name"])) and mat.get_shader_parameter(u["name"]) == null:

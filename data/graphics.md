@@ -1,9 +1,10 @@
 # Graphics: the quality presets
 
 Settings › Graphics offers four presets, Low, Medium, High and Ultra, and Custom, which is a preset with some of its
-rows changed. This file is every row and each preset's value for it. High keeps the look from before the presets
-(shadows, ambient occlusion, mesh detail) and adds 16× texture filtering, which costs more on the GPU. Edge smoothing
-is Off on every preset (owner, 2026-10-29); a player who wants it turns it on, which makes the preset Custom.
+rows changed. This file is every row and each preset's value for it. The presets scale a long way (owner,
+2026-10-31): Low holds 60 FPS on a reasonably modern low-powered gaming PC and draws none of the dearer effects; Ultra
+is as close to ray-traced light as Godot's Forward+ renderer gets, for a card like an RTX 5090. Edge smoothing is Off
+on every preset (owner, 2026-10-29); a player who wants it turns it on, which makes the preset Custom.
 
 **The game reads this file.** It is bundled into the build and read when the game starts
 (`game/config/graphics_table.gd`), like [levels.md](levels.md). After editing, run `tools/unit_tests.sh`:
@@ -28,8 +29,9 @@ never stops the game from starting.
 - **The choices the game knows:** upscaler `bilinear, fsr1, fsr2`; edge smoothing `off, fxaa, smaa, msaa_2x, msaa_4x`;
   temporal smoothing, sun shadows and baked light `off, on`; shadow detail `1024, 2048, 4096, 8192` (the sun's shadow map, in
   pixels); shadow softness `hard, soft, softer, softest`; ambient occlusion `off, half, full`; texture filtering
-  `off, 2x, 4x, 8x, 16x`; mesh detail `low, medium, high, ultra`. Render scale is 10–200 % at most, shadow range 10–500
-  m and wind dust 0–100 %.
+  `off, 2x, 4x, 8x, 16x`; mesh detail `low, medium, high, ultra`; global illumination `off, screen, scene`;
+  reflections `off, probes, screen`; glow and volumetric fog `off, on`. Render scale is 10–200 % at most, shadow range
+  10–500 m and wind dust 0–100 %.
 
 ## Rows
 
@@ -48,14 +50,30 @@ never stops the game from starting.
 | texture_filtering | GRAPHICS_TEXTURE_FILTERING | off, 2x, 4x, 8x, 16x | 1 | all | 2x | 4x | 16x | 16x |
 | mesh_detail | GRAPHICS_MESH_DETAIL | low, medium, high, ultra | 1 | all | low | medium | high | ultra |
 | wind_dust | GRAPHICS_WIND_DUST | 0–100 % | 0 | all | 0 % | 50 % | 100 % | 100 % |
+| global_illumination | GRAPHICS_GLOBAL_ILLUMINATION | off, screen, scene | 3 | forward_plus | off | off | screen | scene |
+| reflections | GRAPHICS_REFLECTIONS | off, probes, screen | 2 | all | off | probes | probes | screen |
+| glow | GRAPHICS_GLOW | off, on | 1 | all | off | on | on | on |
+| volumetric_fog | GRAPHICS_VOLUMETRIC_FOG | off, on | 3 | forward_plus | off | off | off | on |
 
-- **Low** holds 60 FPS on modern low-powered hardware: no sun shadows, ambient occlusion, baked light or dust, and an
-  80 % render scale sharpened back up by FSR 1.
+- **Low** holds 60 FPS on a reasonably modern low-powered gaming PC: no sun shadows, ambient occlusion, baked light,
+  dust, bounce light, probes, glow or haze, and an 80 % render scale sharpened back up by FSR 1. The look's shared
+  light, palette and grade are the same on every preset, so Low keeps the art direction.
 - **Baked light** is the map's sky shade in corners and under roofs and the sun's warm bounce off the ground and walls,
   worked out ahead by `tools/bake_light.gd` and drawn on the map's mesh cut into half-metre tiles (more triangles, no
   other cost). A map with no bake draws the same either way.
-- **Ultra** is High with the sharpest, softest and farthest shadows, full ambient occlusion and the finest mesh
-  detail. It adds no new effect.
+- **Ultra** is the top end: the whole scene's bounce light (SDFGI with screen-space bounce at full size and its
+  finest probes), screen-space reflections over the probes, volumetric fog the sun and the bounce light up, the
+  sharpest and farthest shadows with contact hardening (Softest: the sun given a size, so a shadow is sharp at its
+  foot and soft away from it), full ambient occlusion and the finest mesh detail.
+- **Global illumination** is light bounced off the field. Screen (High) bounces what is on screen (SSIL), cheaply;
+  Scene (Ultra) adds SDFGI, the whole field's bounce and sky light, with occlusion, so a coloured wall tints the floor
+  by it and a corner or a room under a roof fills with soft light. Settings and strengths: `LookConfig`'s Global
+  illumination group.
+- **Reflections**: Probes are the map's reflection probes, one over the field and one in each large named area,
+  captured once at the start (`AreaProbes`), so a smooth floor or paint reflects the hall it is in, not the sky.
+  Screen (Ultra) adds screen-space reflections over them.
+- **Glow** blooms only what is brighter than white (lamp panels, a lit sky), softly. **Volumetric fog** is a faint
+  haze lit by the sun and the bounce light (LookConfig's Volumetric fog group).
 - **Temporal smoothing** is off on every preset: it smears the thin, fast BB streaks. It and FSR 2 are there for
   players who want them.
 - **Wind dust** is a share of the specks `game/config/effects_config.gd` sets (`dust_count`), lit by the sun so they
@@ -82,3 +100,4 @@ warning and draws no ambient occlusion; MSAA and texture filtering it draws.
 | upscaler | fsr2 | forward_plus |
 | edge_smoothing | fxaa | forward_plus, mobile |
 | edge_smoothing | smaa | forward_plus, mobile |
+| reflections | screen | forward_plus |

@@ -3,8 +3,10 @@ extends Node3D
 ## The field's light and sky from a LightingConfig (docs/ART.md › Light): a WorldEnvironment with its sky (which also
 ## gives polymer and steel their sheen) and one DirectionalLight3D, the sun or the moon, with soft, short shadows. By
 ## day the sky is Godot's procedural one; a night preset draws its own (NIGHT_SKY: the sky's gradient, stars and the
-## moon's disc with its halo where the moon is, on every quality preset) and adds its haze. The graphics settings then
-## switch the sun's shadows, their range and ambient occlusion in place (GraphicsApply.apply_field).
+## moon's disc with its halo where the moon is, on every quality preset) and adds its haze. The game's look (LookConfig,
+## docs/ART.md) grades the picture on every preset and sets the dearer effects, which start off: the graphics settings
+## then switch the sun's shadows, their range, ambient occlusion, global illumination (SSIL, SDFGI), reflections (the
+## area probes, SSR), glow and volumetric fog in place (GraphicsApply.apply_field, `set_effects`).
 
 ## The night sky. Stars sit on a grid of directions (`star_grid` cells round), one in `star_share` of the cells lit,
 ## each a soft dot up to `star_size` radians across; the moon is LIGHT0's direction. The radiance pass (the fill and
@@ -60,13 +62,17 @@ const STAR_GRID := 160.0
 var sun: DirectionalLight3D = null
 var environment: Environment = null
 var _ssao: bool = false
+var _look: LookConfig = null
+## The map's reflection probes (`add_probes`), shown while Reflections draw them.
+var _probes: Node3D = null
 
 
-## A node holding the environment and the sun.
-static func build(cfg: LightingConfig) -> FieldLighting:
+## A node holding the environment and the sun, graded and its effects set up by `look` (the built-in look when null).
+static func build(cfg: LightingConfig, look: LookConfig = null) -> FieldLighting:
 	var root := FieldLighting.new()
 	root.name = "Lighting"
 	root._ssao = cfg.ssao
+	root._look = look if look != null else LookConfig.new()
 	var sky := Sky.new()
 	sky.sky_material = night_sky_material(cfg) if cfg.night_sky() else day_sky_material(cfg)
 	var env := Environment.new()
@@ -90,6 +96,7 @@ static func build(cfg: LightingConfig) -> FieldLighting:
 		env.fog_depth_begin = cfg.fog_from
 		env.fog_depth_end = cfg.fog_to
 		env.fog_sky_affect = cfg.fog_sky
+	_grade(env, root._look)
 	root.environment = env
 	var world := WorldEnvironment.new()
 	world.name = "Environment"
@@ -140,3 +147,85 @@ static func night_sky_material(cfg: LightingConfig) -> ShaderMaterial:
 ## True if the config draws ambient occlusion at all; the graphics settings turn it off, never on against it.
 func ssao_allowed() -> bool:
 	return _ssao
+
+
+## The look this field is drawn in.
+func look() -> LookConfig:
+	return _look
+
+
+## The map's reflection probes (AreaProbes), shown while Reflections draw them; none on a map with no named areas.
+func add_probes(map: MapData) -> void:
+	_probes = AreaProbes.build(map, _look)
+	if _probes != null:
+		add_child(_probes)
+
+
+## How many reflection probes it holds (for tests).
+func probe_count() -> int:
+	return _probes.get_child_count() if _probes != null else 0
+
+
+## Switches the dearer effects (GraphicsQuality's rows): global illumination (screen: SSIL; scene: SSIL and SDFGI),
+## reflections (probes: the area probes; screen: and SSR), glow, volumetric fog, and the sun's contact-hardening soft
+## shadows (`soft_sun`). Only properties that change are set, so a repeat is free; never per frame.
+func set_effects(gi: GraphicsQuality.GlobalIllumination, reflections: GraphicsQuality.Reflections, glow: bool,
+		fog: bool, soft_sun: bool) -> void:
+	var env := environment
+	var ssil := gi != GraphicsQuality.GlobalIllumination.OFF
+	if env.ssil_enabled != ssil:
+		env.ssil_enabled = ssil
+	var sdfgi := gi == GraphicsQuality.GlobalIllumination.SCENE
+	if env.sdfgi_enabled != sdfgi:
+		env.sdfgi_enabled = sdfgi
+	var ssr := reflections == GraphicsQuality.Reflections.SCREEN
+	if env.ssr_enabled != ssr:
+		env.ssr_enabled = ssr
+	if _probes != null:
+		var probes := reflections != GraphicsQuality.Reflections.OFF
+		if _probes.visible != probes:
+			_probes.visible = probes
+	if env.glow_enabled != glow:
+		env.glow_enabled = glow
+	if env.volumetric_fog_enabled != fog:
+		env.volumetric_fog_enabled = fog
+	var size := _look.sun_size if soft_sun else 0.0
+	if not is_equal_approx(sun.light_angular_distance, size):
+		sun.light_angular_distance = size
+
+
+## The look's grade and its effects' settings on `env`, every effect left off for `set_effects`.
+static func _grade(env: Environment, look: LookConfig) -> void:
+	env.tonemap_agx_contrast = look.agx_contrast
+	env.adjustment_enabled = true
+	env.adjustment_saturation = look.saturation
+	env.adjustment_contrast = look.contrast
+	env.adjustment_brightness = look.brightness
+	env.glow_intensity = look.glow_intensity
+	env.glow_strength = look.glow_strength
+	env.glow_bloom = look.glow_bloom
+	env.glow_hdr_threshold = look.glow_threshold
+	env.ssil_radius = look.ssil_radius
+	env.ssil_intensity = look.ssil_intensity
+	env.ssil_sharpness = look.ssil_sharpness
+	env.sdfgi_use_occlusion = true
+	env.sdfgi_read_sky_light = true
+	env.sdfgi_cascades = look.sdfgi_cascades
+	env.sdfgi_min_cell_size = look.sdfgi_min_cell
+	env.sdfgi_energy = look.sdfgi_energy
+	env.sdfgi_bounce_feedback = look.sdfgi_bounce
+	env.ssr_max_steps = look.ssr_steps
+	env.ssr_fade_in = look.ssr_fade_in
+	env.ssr_fade_out = look.ssr_fade_out
+	env.ssr_depth_tolerance = look.ssr_depth_tolerance
+	env.volumetric_fog_density = look.fog_density
+	env.volumetric_fog_albedo = look.fog_albedo
+	env.volumetric_fog_anisotropy = look.fog_anisotropy
+	env.volumetric_fog_length = look.fog_length
+	env.volumetric_fog_gi_inject = look.fog_gi_inject
+	env.volumetric_fog_sky_affect = 0.0
+	env.glow_enabled = false
+	env.ssil_enabled = false
+	env.sdfgi_enabled = false
+	env.ssr_enabled = false
+	env.volumetric_fog_enabled = false
