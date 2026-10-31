@@ -1,13 +1,13 @@
 # WA1 · Woodland in the art direction
 
-**Review:** pending
+**Review:** critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-10-31 | 1 | thread | see Checks | Retry 7/8 (held for QA, performance) | docs behind the change |
-| 2026-10-31 | 2 | thread | see Checks | pending | – |
+| 2026-10-31 | 2 | thread | see Checks | Accept 7/8 | – |
 
 ## Goal
 
@@ -62,3 +62,6 @@ moved Depot onto it; this moves Woodland onto it by docs/ART.md › A map in the
   floor is 5, never lowered). Litter is darker, `#7c7a58` (ΔE 7.8), in the palette and Woodland's LEAVES ground.
 - Performance Pass: no blocking finding; the shared `light()` over the greybox and woods is for the owner's F3 check
   on High and Ultra at Hut row and the Sawmill, against main.
+- QA Pass: `tests/unit/test_wa1_qa.gd` (6 tests: the srgb flag, the clear material, no grid settings, every Woodland
+  mesh in the shared light, every bake fresh against its map, a build-and-free leak guard).
+- Critic Accept 7/8 on c499c80: its one note, QA's run logs committed past `.gitignore`, taken out.
