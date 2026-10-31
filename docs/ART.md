@@ -74,8 +74,13 @@ Woodland's look in placeholders (WL4, `WoodsView` from `WoodsConfig`), until the
   as a muted green disc.
 - **The night air.** Fireflies by the logs and water, and pale motes round the eye, self-lit, the Wind dust row's
   share; still and steady under Reduced motion.
-- **Colours** are greens, browns and greys, every one more than 20 degrees from a team's hue or greyer than 0.3
-  (tested by day and night); the leaf plum #7d3b52 sits 22 degrees from HC Beta.
+- **Colours** are the look's palette's (WA1): the crowns canopy, green, pine and fern; the far forest forest, spruce
+  and pine; the bushes fern, green, olive and canopy; bark, timber and umber wood with heartwood ends; the meadow,
+  litter, earth and pebble underfoot; pond water and mud; leaf drifts in yellow, olive, umber, sand, crimson, moss and
+  timber. Every one is more than 20 degrees from a team's hue or greyer than 0.3 (tests/unit/test_look.gd).
+- **In the shared light** (WA1): the greybox and the ground (clean, no metre grid), the crowns, the forest, the floor
+  pieces, the bushes and the CC0 props on `look_vertex.gdshader`, the puddles on `look_clear.gdshader`. The grass
+  tufts keep their own light (two-sided blades would take the rim on every back face), and the skyline is unshaded.
 
 ## Colour
 
@@ -187,7 +192,7 @@ every quality level, and a night or golden-hour sky changes everything at once.
 
 ## A map in the look
 
-Woodland and every new map take the look this way (Depot did, AD1):
+Every map takes the look this way (Depot did, AD1; Woodland, WA1):
 
 1. **Draw every surface in the shared light.** A shader includes `look_light.gdshaderinc`; a vertex-coloured model
    uses `LookMaterials.vertex_colour`. A `StandardMaterial3D` doesn't get the look's shade or rim.

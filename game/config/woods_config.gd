@@ -4,7 +4,8 @@ extends Resource
 ## config/gpuDressing.ts GPU_GRASS and GPU_FOREST): the trees' crowns, the wood beyond the fence, grass tufts, puddles
 ## and mud, leaf drifts, fallen branches and moss, and fireflies and motes at night, as WoodsShapes places them and
 ## WoodsView draws them. Look only: nothing here collides, hides anyone from the simulation or is read by play. Sizes in
-## metres; colours sRGB, none within 20 degrees of a team's hue (docs/ART.md › Colour and readability). A list indexed
+## metres; colours sRGB, each the look's palette's (LookConfig.palette, WA1) and none within 20 degrees of a team's hue
+## unless dull (docs/ART.md › Colour). A list indexed
 ## by step has one value for each Mesh detail step, Low to Ultra (GraphicsQuality.MeshDetail).
 
 @export_group("Crowns")
@@ -12,7 +13,7 @@ extends Resource
 ## over its foot (never under `crown_clear` m, so it stays over everyone's head) to `crown_over` m over its top,
 ## `crown_width` of its own height wide (radius), in one of `crown_colours`, each up to `crown_jitter` lighter or darker.
 @export var crown_colours: PackedColorArray = PackedColorArray([
-	Color("3a5a36"), Color("2f4a2c"), Color("365233"), Color("2b4430"),
+	Color("5c9a50"), Color("58904e"), Color("3d7a4a"), Color("79a650"),
 ])
 @export var crown_from: float = 0.38
 @export var crown_clear: float = 2.6
@@ -39,7 +40,7 @@ extends Resource
 @export var forest_sink: float = 0.4
 @export var forest_tries: int = 30
 @export var forest_colours: PackedColorArray = PackedColorArray([
-	Color("2b4430"), Color("2f4a2c"), Color("27402a"), Color("33502f"),
+	Color("2b5c48"), Color("2f6e55"), Color("3d7a4a"), Color("2b5c48"),
 ])
 @export var forest_fade: float = 0.2
 
@@ -82,13 +83,13 @@ extends Resource
 @export var puddle_lift: float = 0.012
 @export var puddle_roughness: float = 0.08
 @export var mud_roughness: float = 0.5
-@export var water: Color = Color("3c4642")
+@export var water: Color = Color("4a6f6c")
 @export var water_alpha: float = 0.88
-@export var wet: Color = Color("3b3a33")
+@export var wet: Color = Color("403b34")
 @export var wet_alpha: float = 0.45
-@export var mud: Color = Color("39362b")
+@export var mud: Color = Color("554e44")
 @export var mud_alpha: float = 0.85
-@export var mud_wet: Color = Color("2f2d26")
+@export var mud_wet: Color = Color("403b34")
 @export var mud_wet_alpha: float = 0.5
 
 @export_group("Leaf drifts")
@@ -105,8 +106,8 @@ extends Resource
 ## A drift's middle stands this share of `leaf_radius` out from its foot.
 @export var leaf_out: float = 0.6
 @export var leaf_colours: PackedColorArray = PackedColorArray([
-	Color("b5a03c"), Color("8a8a3e"), Color("6a5f4a"), Color("8f8a72"), Color("7d3b52"), Color("a59a5a"),
-	Color("6b5f3f"),
+	Color("e4ca46"), Color("8c9a48"), Color("61594f"), Color("b9ae98"), Color("c23874"), Color("b3b891"),
+	Color("a0947c"),
 ])
 
 @export_group("Fallen wood")
@@ -134,9 +135,9 @@ extends Resource
 @export var twig_turn: float = 0.6
 @export var twig_least: float = 0.6
 @export var bark: PackedColorArray = PackedColorArray([
-	Color("5a5140"), Color("6a5f4a"), Color("6e6248"), Color("7a6a4a"),
+	Color("7b6f62"), Color("61594f"), Color("a0947c"), Color("8c8478"),
 ])
-@export var grain: Color = Color("a99a80")
+@export var grain: Color = Color("e4dccd")
 
 @export_group("Moss")
 ## Moss on the logs (MapData.moss and moss_share; Medium and up): on the chosen logs, a lid over the top and a band
@@ -178,7 +179,7 @@ extends Resource
 ## each up to `bush_jitter` lighter or darker, as rough as `bush_roughness`; marked on the minimap in
 ## MinimapConfig.bush_colour. The art pass gives them leaves (step 32).
 @export var bush_colours: PackedColorArray = PackedColorArray([
-	Color("4a6b3a"), Color("3f5f34"), Color("56763f"), Color("44663c"),
+	Color("79a650"), Color("58904e"), Color("8c9a48"), Color("5c9a50"),
 ])
 @export var bush_jitter: float = 0.1
 @export var bush_sides: int = 12

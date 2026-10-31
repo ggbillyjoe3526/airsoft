@@ -30,11 +30,7 @@ static func build(map: MapData, cfg: WoodsConfig) -> BushView:
 		mm.set_instance_transform(i, placed(f, i))
 		mm.set_instance_color(i, colours[i])
 	view.multimesh = mm
-	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
-	mat.vertex_color_is_srgb = true
-	mat.roughness = cfg.bush_roughness
-	view.material_override = mat
+	view.material_override = LookMaterials.vertex_colour(cfg.bush_roughness, 0.0, Color.WHITE, true)
 	return view
 
 

@@ -52,12 +52,22 @@ func test_the_lights_values_are_the_projects_global_uniforms() -> void:
 ## SiteLook colours that aren't paint: a container's base (each unit takes container_paint), a frame's white tint, and
 ## the marks drawn only with grit (none on a clean surface).
 const NOT_PAINT: Array[StringName] = [&"container", &"frame", &"tuft", &"chip", &"rust_foot", &"dirt_foot"]
-## Depot's props' recipe parts (tools/props/build_props.py), every part of each, by palette name. Woodland's recipes
-## (trunk, log, logstack, pine, tyre, crate, truck) join when Woodland moves onto the look.
+## Depot's and Woodland's props' recipe parts (tools/props/build_props.py), every part of each, by palette name.
 const PROP_PARTS := {
 	"barrel": {"warm": &"crimson", "cool": &"grey"}, "drum": {"warm": &"teal", "cool": &"ink"},
 	"pallet": {"all": &"grey"}, "sofa": {"carpet": &"violet", "wood": &"umber"},
 	"shelf": {"shelf-boxes": &"steel", "carton": &"crate", "box": &"cream"},
+	"trunk": {"woodBark": &"bark", "woodInner": &"heartwood"}, "log": {"woodBark": &"bark", "woodInner": &"heartwood"},
+	"logstack": {"woodBark": &"bark", "woodInner": &"heartwood", "woodDark": &"umber"},
+	"pine": {"woodBarkDark": &"umber", "leafsDark": &"pine"}, "tyre": {"all": &"rubber"}, "crate": {"all": &"teal"},
+	"truck": {"body": &"violet", "wheel-front-right": &"rubber", "wheel-front-left": &"rubber",
+			"wheel-back-right": &"rubber", "wheel-back-left": &"rubber"},
+}
+## The greybox kinds and ground surfaces Woodland is drawn in (MapStyle), each by its palette name.
+const WOODLAND_KINDS := {
+	&"tree": &"bark", &"log": &"timber", &"fence": &"timber", &"plywood": &"plywood", &"wall": &"concrete",
+	&"floor": &"floor", &"ramp": &"floor", &"crate": &"crate", &"tyre": &"rubber", &"truck": &"violet",
+	&"thicket": &"pine",
 }
 
 
@@ -77,6 +87,54 @@ func test_depots_paint_is_the_palettes() -> void:
 	_in_palette("stencil paint", Color(site.stencil_paint, 1.0), off)
 	_in_palette("stencil light", Color(site.stencil_light, 1.0), off)
 	assert_eq(off, [] as Array[String], "every colour Depot paints is a palette colour")
+
+
+func test_woodlands_paint_is_the_palettes() -> void:
+	var play := PlayTuning.load_default()
+	var style := play.map_style
+	var woods := play.woods
+	var off: Array[String] = []
+	var m := MapData.load_map("woodland", style, 5)
+	for b in m.blocks:
+		if not WOODLAND_KINDS.has(b.kind):
+			off.append("kind %s has no palette name here" % b.kind)
+	for kind: StringName in WOODLAND_KINDS:
+		var want := look.colour(WOODLAND_KINDS[kind] as StringName)
+		if not style.colours[kind].is_equal_approx(want):
+			off.append("%s is not %s" % [kind, WOODLAND_KINDS[kind]])
+	for s: int in style.terrain_colours:
+		_in_palette("terrain %d" % s, style.terrain_colours[s], off)
+	_in_palette("ground", style.ground_colour, off)
+	for group: String in ["crown_colours", "forest_colours", "leaf_colours", "bark", "bush_colours"]:
+		var colours := woods.get(group) as PackedColorArray
+		for i in colours.size():
+			_in_palette("%s %d" % [group, i], colours[i], off)
+	for n: String in ["water", "wet", "mud", "mud_wet", "grain"]:
+		_in_palette(n, woods.get(n) as Color, off)
+	_in_palette("moss", m.moss, off)
+	_in_palette("minimap bush", Color(play.minimap.bush_colour, 1.0), off)
+	assert_eq(off, [] as Array[String], "every colour Woodland paints is a palette colour")
+
+
+func test_woodland_is_drawn_in_the_shared_light() -> void:
+	var play := PlayTuning.load_default()
+	var m := MapData.load_map("woodland", play.map_style, 5)
+	var greybox := MapLevel._greybox_material(play.map_style)
+	assert_eq(greybox.shader, LookMaterials.VERTEX_SHADER, "the greybox and the ground")
+	assert_true(greybox.get_shader_parameter(&"srgb_colours") as bool, "its colours sRGB")
+	var woods := WoodsView.build(m, play.woods, play.skyline, play.lighting, play.map_style)
+	add_child_autofree(woods)
+	for mat in woods.materials():
+		var shader := (mat as ShaderMaterial).shader if mat is ShaderMaterial else null
+		assert_not_null(shader, "%s is a shader material" % mat)
+		# the fireflies are self-lit, and the grass tufts keep their own light (two-sided blades; ART.md › The wood)
+		if shader != null and not shader.code.contains("unshaded") and shader.code != WoodsView.TUFT_SHADER:
+			assert_true(shader.code.contains("look_light.gdshaderinc") or shader == LookMaterials.VERTEX_SHADER
+					or shader == LookMaterials.CLEAR_SHADER, "every lit woods material in the shared light")
+	var bushes := BushView.build(m, play.woods)
+	if bushes != null:
+		add_child_autofree(bushes)
+		assert_eq((bushes.material_override as ShaderMaterial).shader, LookMaterials.VERTEX_SHADER, "the bushes")
 
 
 func test_the_props_recipes_are_the_palettes() -> void:

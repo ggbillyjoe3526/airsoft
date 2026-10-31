@@ -247,13 +247,8 @@ func _make_puddles(mesh: ArrayMesh) -> void:
 	if mesh == null:
 		return
 	for i in mesh.get_surface_count():
-		var mat := StandardMaterial3D.new()
-		mat.vertex_color_use_as_albedo = true
-		mat.vertex_color_is_srgb = true
-		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		mat.roughness = _cfg.mud_roughness if mesh.surface_get_name(i) == WoodsShapes.MUD else _cfg.puddle_roughness
-		mat.render_priority = Material.RENDER_PRIORITY_MIN
-		mesh.surface_set_material(i, mat)
+		var rough := _cfg.mud_roughness if mesh.surface_get_name(i) == WoodsShapes.MUD else _cfg.puddle_roughness
+		mesh.surface_set_material(i, LookMaterials.clear_colour(rough))
 	_puddles = MeshInstance3D.new()
 	_puddles.name = "Puddles"
 	_puddles.mesh = mesh
@@ -303,12 +298,9 @@ func _instanced(id: String, mm: MultiMesh, look: Material) -> MultiMeshInstance3
 	return mi
 
 
-func _flat_material(rough: float) -> StandardMaterial3D:
-	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
-	mat.vertex_color_is_srgb = true
-	mat.roughness = rough
-	return mat
+## A vertex-coloured (sRGB) material in the shared light (docs/ART.md › A map in the look).
+func _flat_material(rough: float) -> ShaderMaterial:
+	return LookMaterials.vertex_colour(rough, 0.0, Color.WHITE, true)
 
 
 ## Draws `share` of `mi`'s instances (a seeded order's first ones), hiding it at none.

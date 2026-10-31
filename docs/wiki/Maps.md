@@ -72,6 +72,8 @@ over the Culvert to the Log stacks and the Sawmill. Attackers start in the west 
 
 - **The stream:** its bed is 1.7 m under its banks, which are too steep to climb. Cross on the North bridge or the road,
   or walk in and out at the Ford and the gentle slides. Down in the bed you're out of sight of the wood above.
+- **The look:** the game's soft, stylised light over a bright green wood: lime-lit crowns, pine-green spruces, a
+  meadow floor, and the violet truck and teal crates carrying the colour, with nothing near a team's blue or orange.
 - **Long views, few walls:** the Ridge looks 86 m down onto the Fort; elsewhere a lane's longest line is under 80 m.
   Cover is logs, log stacks, tyres, crates, the violet truck and the trunks of the trees themselves, all free CC0
   models; each stops a BB at its block, a little wide of a round trunk. The thickets of spruce at the edges and between

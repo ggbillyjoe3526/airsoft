@@ -11,6 +11,7 @@ Every open bug, limit and known gap in the game, so nobody re-reports or re-meas
 
 | Area | Issue | Class | Found |
 |---|---|---|---|
+| Art | Woodland's doors, flag poles and skyline aren't in the shared light yet: the doors and poles (Depot's too) are still StandardMaterial3D, and the skyline's far treelines are unshaded; the grass tufts keep their own light, as two-sided blades would take the rim on every back face (WA1) | can wait | 2026-10-31 |
 | Tests | A test file that builds its own map level and also plays a `MatchRunner` match has both levels in one physics space, so the file level's shut doors stand in the match's way; `test_woodland_layout` opens them while its match plays (WR2) | document | 2026-10-31 |
 | Audio | Depot still plays the yard's ambience under its roof (birds, a crow, a dog): an indoor hall sound waits for a later pass (DR1) | can wait | 2026-10-31 |
 | Art | Depot's Lounge is lit like the rest of the hall though the concept had it dim; the roof lamps over it are only spaced wider (DR1) | can wait | 2026-10-31 |
