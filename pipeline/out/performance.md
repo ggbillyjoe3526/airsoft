@@ -1,16 +1,23 @@
-Task: CR1 · head e9cd944 · Verdict: Pass
-Run: smoke match (Depot, fixed seed, `--smoke --perf`), headless, both heads; plus a scratch bench (Woodland, 947 blocks) on both · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and origin/main (8badf9e)
-Metrics: nodes_max 1206 / 1206 (ok), orphans_max 792 / 792 (ok, same on main), steady nodes 978 / 978 (ok), draw calls 0 (headless, not measurable), smoke wall 89 s / 86 s (reported only; frames 2177 vs 1954 differ because headless frame count tracks speed, not ticks; shots/impacts/rounds identical)
-Regressions (> 10 % worse): none. NavGrid.build Woodland, 5 runs each: main 5.2-6.3 s (median 5.7), cr1 5.2-6.3 s (median 6.2); ranges overlap, machine noise; nodes 528400 -> 529096
+Task: WR2 · head d646e35 (brief said ae6c160; wr2-work is d646e35) · Verdict: Pass
+Run: Woodland, Attack/Defend 6v6 (custom, 180 s) and Elimination 5v5, seed 5, 1200 ticks x 3 runs per head, headless (no GPU), on a shared 4-core host (load 4-6) · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and cr1-work (the stack base, standing in for origin/main)
+Metrics (wr2 / cr1-work, ok = within 10 %):
+- OBJECT_NODE_COUNT AD 6v6 1851 / 1818 (+33, +1.8 %, ok); EL 5v5 1761 / 1742 (+19, +1.1 %, ok). measured
+- Orphan nodes 0 / 0 (ok); after queue_free the tree is back to 1 node on both heads, 4 build/free cycles in one process: nodes, objects and static memory flat after the first two cycles, same pattern as cr1-work. measured
+- Census (AD): MeshInstance3D +12, Label3D +2 (both poles now carry a letter), MultiMeshInstance3D +1 (Doors, 16 leaves), StaticBody3D +8 and CollisionShape3D +8 (the doors' colliders). Candidate draws in the main pass about +15 (about 390 before); the huts and pole B sit far apart so most are culled. Draw calls are not measured (no GPU). judgment
+- MEMORY_STATIC built, AD 497.5 / 489.2 MB (+8.3, +1.7 %); EL 488.1 / 488.0. Doors cost about 0.1 MB; the +8 MB is the two Label3D letters (the same +8.7 MB shows on Depot's AD vs EL on cr1-work), a one-time font cache, not growth. measured
+- Per-tick script time (sim step plus session _process), mean over 3 runs: AD 6.8 / 7.1 ms, EL 6.6 / 6.7 ms; medians 9.9 / 10.1 ms. Noise (host load) is larger than any difference, so no regression shows. reported only
+- Doors.shut_ahead on Woodland's 8 doors: 8.5 us/call measured under load, so 12 bots cost at most about 0.1 ms per tick (about 0.6 % of a 16.7 ms frame). measured
+Regressions (> 10 % worse): none
 Blocking findings: none
- - Freed RIDs/bodies (judgment + measured): game/map/map_level.gd:262-267 appends the low body and its shape to _rids, bodies before shapes, freed in PREDELETE (map_level.gd:174-178). Bench: Object count 4962 -> 2990 after level.free(), identical on main and cr1.
- - Per-tick allocations (judgment): none new. JoltMover._use (jolt_mover.gd:107) swaps an RID and a float; room_to_stand, low_ahead, BoxWorld.sweep(height) and Elimination's crouch line use only Vector3 values; NavGrid.low is one PackedByteArray built at load; the params/result objects are still reused.
- - Build cost (measured): NavGridBuilder._stamp_low alone 100-175 ms of a ~6 s Woodland build (about 2-3 %), once at load behind the loading screen. 1659 low nodes of 529096.
- - Per-tick cost (measured, scratch bench, Woodland, GDScript timing): move+probe 174 us tall / 197 us low (main 193 us, noise); room_to_stand 41 us per low character per tick; low_ahead 5.4 us per bot per tick (node_at 0.7 us). Twelve crouched characters cost about 0.5 ms of the 16.7 ms tick worst case; typical is a few.
+ - game/play/door_view.gd:60-67 refresh: 8 doors a frame, scalar compares, writes the MultiMesh only when a swing changes; no allocation (judgment, read).
+ - game/sim/doors.gd:108-123 shut_ahead: early-outs on pack and axis distance, Vector2 values only, no heap allocation (judgment, read).
+ - game/map/map_catalog.gd:98-148 _read_round runs once at catalog parse; match_options.gd:105-123 match_tuning runs once per match start (play_session.gd:293) and on Match page redraws, never per tick; its duplicate was already needed for Woodland's 5 a side (judgment, read).
+ - Nothing new needs a prewarm: DoorView.materials() and FlagView.materials() already feed first_use (play_session.gd:693-712); the door and pole letter materials are the existing Depot ones. judgment
 Advisory:
- - game/sim/movement.gd:39: `c.low and not mover.room_to_stand(c)` sweeps every tick while crouched, even when crouch is held and the answer is unused. `not cmd.crouch and c.low and ...` skips the 41 us sweep for the held-crouch case (player crouching, bots in cover) and keeps the result identical. Not blocking.
- - game/nav/nav_grid_builder.gd:231: _stamp_low walks every block's cells, unlike _stamp_blocks which skips non-surface blocks first; a cheap bottom-height pre-check would shave the ~150 ms. Load-time only.
- - game/ai/bot_brain.gd:101: low_ahead runs for every moving bot every think; fine at 12 bots, would be worth caching per node if bot counts grow.
-Fixes, ranked: none required. (1) skip room_to_stand while crouch is held; (2) pre-filter blocks in _stamp_low.
-Unexplained: the headless smoke frame count (2177 vs 1954) is not attributable to the diff (node, shot and impact counts are identical); likely run-speed noise in headless mode.
-Not measured: rendered frame times and draw calls (no GPU in this container); owner's hardware.
+ - game/play/flag_view.gd:41-81 every pole builds its own 6 materials and about 7 meshes, so pole B doubles them; sharing them across poles (static cache) would save a few allocations and 8 draw-state changes. Trivial at 2 poles (AB1 design, not WR2's).
+ - game/play/door_view.gd: doors cast shadows (one more shadow-pass draw per frame); follows the quality presets' shadow setting, no bypass.
+ - The +8 MB static for the pole letters is on Woodland AD only; worth a look at Low preset if memory is tight (Label3D font cache).
+ - Frame times and draw calls: confirm on the owner's hardware with F3 (Woodland Attack/Defend, standing at the Fort looking toward the Hut row).
+Fixes: none required.
+Unexplained: none (the +8.3 MB is attributed to the Label3D letters by the Depot comparison, not by an isolated test).
+Scratch bench, census and cycle scripts live outside the repo in the session scratchpad; no game files were edited.

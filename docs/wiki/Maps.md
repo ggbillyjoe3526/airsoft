@@ -82,8 +82,8 @@ over the Culvert to the Log stacks and the Sawmill. Attackers start in the west 
   too. The stream bed under the North bridge is crouch height as well, a fourth low way along the bed.
 - **The huts:** the Cabin, the two huts of Hut row and the Box on A site have windows and two green [doors](#doors)
   each. The door facing the other team's end starts each round shut and the one facing your own end open, so a hut
-  is walked into from its own side and opened, loudly, from the other. The Tower is a platform 3.4 m up a stair, the Sawmill
-  an open shed.
+  is walked into from its own side and opened, loudly, from the other. The Tower is a platform 3.4 m up a stair, the
+  Sawmill an open shed.
 - **Night** is the Time of day setting's (day by default): a low moon, stars and haze, with fires and lanterns at the
   camps, the huts, the Clearing, the Fort, the Sawmill, the Truck bend and the North bridge. Bots see you from about
   40 m in their light, 25 m under the moon and 10 m under the trees ([Bots](Bots#at-night)); by day they see 60 m.

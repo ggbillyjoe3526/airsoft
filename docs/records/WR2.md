@@ -1,13 +1,13 @@
 # WR2 · Woodland's doors, two flags and 3:00 rounds
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-10-31 | 1 | thread | see Checks | Retry 7/8 (held for QA, performance) | round lengths off the 30 s steps were taken; wiki round cell typed |
-| 2026-10-31 | 2 | thread | see Checks | pending | – |
+| 2026-10-31 | 2 | thread | see Checks | Accept 8/8 | – |
 
 ## Goal
 
@@ -57,3 +57,7 @@ and 2:30 (KNOWN_ISSUES).
   `round_of`) and the Rules page points at it, in place of a typed "3:00" bullet. KNOWN_ISSUES records the shared
   physics space of a test's own level and its match's (document).
 - `test_woodland_layout` 17/17 again (the match: 9 rounds in 541 s, held up 0).
+- QA Pass on 847b86d (`tests/unit/test_wr2_qa.gd`, 10 tests: doorways walked both ways, nobody trapped, poles on the
+  ground, round time per map and mode, the Round cell's edges, a Woodland Attack / Defend session; the Woodland A/D
+  guard, 16 seeds: 125 rounds, 108 flag raises). Performance Pass (nodes +1.8 %, no orphans, doors 8.5 µs a call).
+  Critic Accept 8/8.
