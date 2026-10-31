@@ -44,8 +44,8 @@ class _Search:
 static var _s: _Search = _Search.new()
 
 
-## The map's blocks standing on the floor (bottom within low_cover_floor_gap of the floor under them) whose top is
-## between `min_top` and `max_top` above it.
+## The map's blocks standing on the floor (bottom within low_cover_floor_gap over the floor under them, or sunk at most
+## low_cover_floor_sink into it) whose top is between `min_top` and `max_top` above it.
 static func floor_blocks(map: MapData, nav: NavGrid, cfg: BotConfig, cell: float, min_top: float,
 		max_top: float) -> Array[Block]:
 	var out: Array[Block] = []
@@ -54,7 +54,7 @@ static func floor_blocks(map: MapData, nav: NavGrid, cfg: BotConfig, cell: float
 			continue
 		var bottom := b.center.y - b.size.y * 0.5
 		var floor_y := _floor_under(nav, b, cell)
-		if is_nan(floor_y) or absf(bottom - floor_y) > cfg.low_cover_floor_gap:
+		if is_nan(floor_y) or bottom > floor_y + cfg.low_cover_floor_gap or bottom < floor_y - cfg.low_cover_floor_sink:
 			continue
 		var top := b.center.y + b.size.y * 0.5 - floor_y
 		if top <= min_top or top >= max_top:

@@ -232,7 +232,9 @@ func test_woodlands_fence_is_its_only_noisy_prop_and_the_ranges_five_are_listed(
 	var counts: Dictionary[String, int] = {}
 	for id: String in ["woodland", "range"]:
 		var style := MapStyle.new()
-		var map := MapData.load_map(id, style, tuning.rounds.team_size)
+		# The old wood's fence (OldWoodland): the count this test was written against.
+		var map := OldWoodland.load_map(style, tuning.rounds.team_size) if id == "woodland" \
+				else MapData.load_map(id, style, tuning.rounds.team_size)
 		var level := MapLevel.new()
 		add_child_autofree(level)
 		level.build(map, style, tuning.body)

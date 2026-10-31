@@ -51,12 +51,13 @@ func test_the_preset_played_decides_the_night() -> void:
 	var woodland := MapData.load_map("woodland", play.map_style, 3)
 	var tower := TowerBlock.load_map(play.map_style, 3)
 	var depot := MapData.load_map("depot", play.map_style, 3)
-	assert_true(PlaySession.lighting_for(woodland, play, &"", &"").night, "Woodland")
+	assert_false(PlaySession.lighting_for(woodland, play, &"", &"").night, "Woodland: day first (WR1)")
+	assert_true(PlaySession.lighting_for(woodland, play, LightingConfig.NIGHT, &"").night, "and picked for night")
 	assert_true(PlaySession.lighting_for(tower, play, &"", &"").night, "a map offering both: night by default")
 	assert_false(PlaySession.lighting_for(tower, play, LightingConfig.DAY, &"").night, "and picked for day")
 	assert_false(PlaySession.lighting_for(depot, play, &"", &"").night, "Depot")
 	assert_true(PlaySession.lighting_for(depot, play, &"", LightingConfig.NIGHT).night, "Depot, Dev: Time of day Night")
-	assert_false(PlaySession.lighting_for(woodland, play, &"", LightingConfig.DAY).night,
+	assert_false(PlaySession.lighting_for(woodland, play, LightingConfig.NIGHT, LightingConfig.DAY).night,
 			"Woodland, Dev: Time of day Day (a forced preset wins over the map's own)")
 
 

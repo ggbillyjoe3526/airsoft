@@ -167,6 +167,9 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var vault_retry_delay: float = 6.0
 ## A bot this far off the leg it walks (m) checks the way on for a drop before walking it.
 @export var route_off_leg: float = 0.2
+## It asks again for a drop off its leg only once it has moved this far (m) from where it last asked: a fresh route
+## from the same spot is the same route, and it walks that one (stuck_time still catches a real hold-up).
+@export var off_leg_replan_moved: float = 0.5
 ## Steps off a route (sidesteps, the last bit onto a lean spot) look this far ahead for a drop or a wall (m).
 @export var edge_lookahead: float = 0.6
 ## Keeping apart (bodies pass through each other in the physics): a bot steers off anyone in play closer than this (m).
@@ -188,8 +191,10 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## Behind a low block: this far past its far side (m), or the second try further back.
 @export var low_cover_gap: float = 0.45
 @export var low_cover_gap_far: float = 0.8
-## A block stands on the floor if its bottom is within this of the floor under it (m).
+## A block stands on the floor if its bottom is within this of the floor under it (m), or sunk into it by no more than
+## low_cover_floor_sink: a piece on sloping ground (Woodland's) is sunk so no gap shows under its low side.
 @export var low_cover_floor_gap: float = 0.05
+@export var low_cover_floor_sink: float = 0.4
 ## Lean spots at tall blocks' corners: this far into the corner's shadow (m), stepped back along the sight line in steps
 ## of this (m) until clear of the block. Further in than the body's radius, less than a full lean moves the eyes.
 @export var lean_spot_inset: float = 0.27

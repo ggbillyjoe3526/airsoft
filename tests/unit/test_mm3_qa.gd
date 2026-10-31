@@ -18,7 +18,7 @@ func after_each() -> void:
 
 
 func test_a_map_with_only_ramps_draws_nothing_and_one_on_terrain_its_ground() -> void:
-	var woodland := MapData.load_map("woodland", MapStyle.new(), 1)
+	var woodland := OldWoodland.load_map(MapStyle.new(), 1)
 	assert_true(MinimapField.drawn(woodland), "its terrain is its ground")
 	var drawn := MinimapField.build(woodland, cfg)
 	assert_eq(drawn.layers.size(), 1)

@@ -15,6 +15,7 @@ const SIDE_B: Array[int] = [0, 1, 2, 3, 2, 3, 2, 3]
 ## The steps whose links the build makes (the other four are their ways back).
 const FORWARD: Array[int] = [0, 2, 4, 6]
 const DIRECTIONS := 8
+const SQRT_2 := 1.4142135623730951
 ## The furthest open distance a cell records (cells; NavGrid.open is bytes).
 const OPEN_MAX := 255
 
@@ -329,7 +330,7 @@ static func _link(g: NavGrid, weight: float) -> void:
 			# One floor (most cells): no search.
 			if cell_start[nc + 1] - n != 1:
 				n = g.nearest_node(nc, f)
-			if n >= 0 and absf(floor_y[n] - f) <= max_step:
+			if n >= 0 and (absf(floor_y[n] - f) <= max_step or d >= 4 and _sloped_diagonal(g, c, d, f, floor_y[n])):
 				steps[k * DIRECTIONS + d] = n
 				if walkable[n] == 1:
 					mask |= 1 << d
@@ -418,3 +419,19 @@ static func _open(g: NavGrid) -> void:
 					d = mini(d, dist[c + cols - 1])
 			dist[c] = mini(dist[c], d + 1)
 	g.open = dist
+
+
+## Whether diagonal step `d` from cell `c` at floor `f` onto floor `to` climbs or descends a smooth slope (WR1): further
+## than max_step, as a diagonal on ground steeper than 0.53 is, but no further than max_step * sqrt(2), and each straight
+## step it passes is within max_step of both ends. A kerb or a box's edge fails a straight step, so it stays a drop.
+static func _sloped_diagonal(g: NavGrid, c: int, d: int, f: float, to: float) -> bool:
+	var max_step := g.max_step
+	if absf(to - f) > max_step * SQRT_2:
+		return false
+	return _between(g, c + DI[d], f, to, max_step) and _between(g, c + DJ[d] * g.cols, f, to, max_step)
+
+
+## Whether cell `side` has a floor within `max_step` of both `f` (its floor nearest `f`) and `to`.
+static func _between(g: NavGrid, side: int, f: float, to: float, max_step: float) -> bool:
+	var m := g.nearest_node(side, f)
+	return m >= 0 and absf(g.floor_y[m] - f) <= max_step and absf(to - g.floor_y[m]) <= max_step

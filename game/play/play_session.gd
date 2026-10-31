@@ -21,7 +21,7 @@ extends Node3D
 ## mid-round) and the HUD says so. Once a match; not in practice or the smoke test.
 ## The build is four steps (the map, the level, the teams, the views). Staged, one runs each rendered frame and
 ## `progressed` reports each, for the loading screen; `started` follows the frame the match is first drawn. Staged, the
-## nav grid (about 2 s on Woodland) is built on a worker thread, so the loading screen keeps drawing, and the teams step
+## nav grid (about 6 s on Woodland) is built on a worker thread, so the loading screen keeps drawing, and the teams step
 ## ends once it is in. Not staged, all four run in `_ready` (tests and tools).
 
 signal left

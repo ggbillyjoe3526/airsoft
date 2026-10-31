@@ -29,6 +29,9 @@ const MIN_SATURATION := 0.3
 ## A colour written as #rrggbb matches one within half a step of 8 bits each way.
 const HEX_SLACK := 1.0 / 255.0 + 1e-6
 const MAPS_DIR := "res://data/maps"
+## The old Woodland kept for tests (OldWoodland): its painted pieces keep the reader checked while no shipped map
+## paints.
+const FIXTURE_DIR := "res://tests/support/maps"
 
 var table: AccessibilityTable
 
@@ -112,22 +115,25 @@ func _style_colours() -> Dictionary[String, Color]:
 	return out
 
 
-## Every paint in data/maps: blocks', look-only blocks' and painted markings' (glowing signs and windows are light, not
-## paint, and may be any colour), each as "file: what #rrggbb".
+## Every paint in data/maps and the test fixtures: blocks', look-only blocks' and painted markings' (glowing signs and
+## windows are light, not paint, and may be any colour), each as "file: what #rrggbb".
 func _map_paints() -> Dictionary[String, Color]:
 	var out: Dictionary[String, Color] = {}
-	for file in DirAccess.get_files_at(MAPS_DIR):
-		if not file.ends_with(".json"):
-			continue
-		var map: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MAPS_DIR.path_join(file)))
-		for list: String in ["blocks", "decor"]:
-			for block: Dictionary in map.get(list, []):
-				if block.has("paint"):
-					_add_paint(out, file, "%s %s" % [list, block.get("kind", "")], block["paint"])
-		for sign: Dictionary in map.get("signs", []):
-			if sign.get("kind", "") == "paint":
-				_add_paint(out, file, "marking", sign["colour"])
+	for dir: String in [MAPS_DIR, FIXTURE_DIR]:
+		for file in DirAccess.get_files_at(dir):
+			if file.ends_with(".json"):
+				_add_map_paints(out, file, JSON.parse_string(FileAccess.get_file_as_string(dir.path_join(file))))
 	return out
+
+
+static func _add_map_paints(out: Dictionary[String, Color], file: String, map: Dictionary) -> void:
+	for list: String in ["blocks", "decor"]:
+		for block: Dictionary in map.get(list, []):
+			if block.has("paint"):
+				_add_paint(out, file, "%s %s" % [list, block.get("kind", "")], block["paint"])
+	for sign: Dictionary in map.get("signs", []):
+		if sign.get("kind", "") == "paint":
+			_add_paint(out, file, "marking", sign["colour"])
 
 
 static func _add_paint(out: Dictionary[String, Color], file: String, what: String, paint: Variant) -> void:

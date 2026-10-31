@@ -23,8 +23,8 @@ Tuning: `MapStyle` (`game/config/map_style.gd`: each kind's surface and colour, 
 and the canopy rule). Tests: `tests/unit/test_map_level.gd`
 (Depot read, rays and surfaces, standing, walls, the ramp, falling, BB impacts on metal, refusals, the mesh's faces),
 `tests/unit/test_ambience_config.gd` (each map's ambience), `tests/unit/test_terrain.gd` (the browser's terrain tests,
-ground surfaces, rays and feet on each, 1,000 rays down Woodland within a centimetre, a body on the Knoll's steepest
-face), `tests/unit/test_woodland_layout.gd` (the browser's Woodland layout tests on Jolt),
+ground surfaces, rays and feet on each, 1,000 rays down Woodland within a centimetre, a body on the old wood's Knoll's
+steepest face, OldWoodland), `tests/unit/test_woodland_layout.gd` (the browser's Woodland layout tests on Jolt),
 `tests/unit/test_baked_light.gd` (each bake matches its map, two bakes the same bytes, sky and bounce on a small yard,
 Depot drawn baked and switched, a map with no bake as before), `tests/unit/test_map_areas.gd` (area_at's rules, each field's areas and storeys, malformed ones left out, every walkable
 cell of Depot in an area).

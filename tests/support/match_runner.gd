@@ -9,10 +9,10 @@ const DT := 1.0 / 60.0
 const TICKS_PER_SECOND := 60
 ## Held up: a bot that has been walking its lane, hunting or making for the pole (Bot.Mode ADVANCE, SEARCH or FLAG) at
 ## every sample of the last HELD_UP_SECONDS (once a second) and is back within HELD_UP_DISTANCE (m) of where it was
-## then, counts one episode until it moves on, if either it kept one errand (mode) throughout (going round in a loop)
-## or every sample stayed within HELD_UP_REACH of that place (frozen, jittering or pacing in a doorway, whatever its
-## mode flips between). A fight or a hold on purpose in between is not held up, nor a change of errand on a long walk
-## (a search given up for its lane, walking back the way it came).
+## then, counts one episode until it moves on, if either it kept one errand (errand_of) throughout (going round in a
+## loop) or every sample stayed within HELD_UP_REACH of that place (frozen, jittering or pacing in a doorway, whatever
+## its mode flips between). A fight or a hold on purpose in between is not held up, nor a change of errand on a long
+## walk (a search given up for its lane, a hunt for another spot, walking back the way it came).
 const HELD_UP_SECONDS := 10
 const HELD_UP_DISTANCE := 0.5
 ## How far (m) from where it was HELD_UP_SECONDS ago a bot that changed errand may stray at any sample and still be held
@@ -171,7 +171,7 @@ var each_tick: Callable = Callable()
 ## only the bots' own reload loads their replicas. Off by default (the bots' commands as they fill them).
 var manual_reload: bool = false
 ## Played at night (WL6): the bots see by the map's NightField, built once each match. On by default for a map that
-## offers no day (Woodland); on a map that offers both a test sets it for the night.
+## offers no day; on a map that offers both (Woodland since WR1) a test sets it for the night.
 var night: bool = false
 ## Who carries a weapon torch (WL7): by rule every bot at night and none by day (BY_RULE, the game's), nobody, or every
 ## bot even by day (ALWAYS: a day match with torches fitted must play exactly as one without).
@@ -457,10 +457,18 @@ func _watch_held_up(state: GameState, bots: BotController, t: MatchTally, trail:
 		var walking := (bot_mode == Bot.Mode.ADVANCE or bot_mode == Bot.Mode.SEARCH or bot_mode == Bot.Mode.FLAG) \
 				and not (b != null and holding_on_purpose(b, bots.world.time))
 		var on_way := Elimination.is_in_play(c) and state.round_state.is_live() and walking
-		var now := 1 if held_up_sample(trail[c.id], errands[c.id], slot, c.position, bot_mode, on_way) else 0
+		var now := 1 if held_up_sample(trail[c.id], errands[c.id], slot, c.position, errand_of(b, bot_mode), on_way) else 0
 		if now == 1 and held[c.id] == 0:
 			t.held_up += 1
 		held[c.id] = now
+
+
+## A bot's errand for held_up_sample: its mode, and while it hunts, the spot it hunts (WR1: a Woodland hunter whose spot a
+## teammate checked first turned for one the way it came, out and back 57 m, and was judged going round in a loop).
+static func errand_of(b: Bot, bot_mode: int) -> int:
+	if b == null or not b.hunting:
+		return bot_mode
+	return bot_mode + Bot.Mode.size() * (hash(b.hunt_goal) & 0xFFFFFF)
 
 
 ## Records this second's sample in `ring` (one a second for HELD_UP_SECONDS; INF for a second it wasn't on its way) and

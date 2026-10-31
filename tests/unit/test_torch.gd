@@ -399,6 +399,7 @@ func test_a_5v5_night_match_on_woodland_works_the_torches_without_strobing() -> 
 	t.rounds.wins_needed = 2
 	t.rounds.half_time_after = 1
 	var woodland := MatchRunner.new(self, "woodland", t)
+	woodland.night = true # Woodland by night (its second preset since WR1)
 	var watch := {"on": 0, "off": 0, "fast": 0, "lit_at_start": 0, "sampled": 0, "beyond": 0, "by_torch": 0,
 			"most_lit": 0}
 	var last_switch: Dictionary[int, float] = {}
@@ -508,6 +509,7 @@ func test_the_pools_give_your_torch_a_real_light_only_when_you_carry_one_and_for
 	settings.dev.dev_content = true
 	var bare := PlaySession.new()
 	bare.map_id = "woodland"
+	bare.lighting_pick = LightingConfig.NIGHT
 	bare.settings = settings
 	bare.bots_active = false
 	add_child_autofree(bare)
@@ -519,6 +521,7 @@ func test_the_pools_give_your_torch_a_real_light_only_when_you_carry_one_and_for
 	rules.set_part(l, AEG, &"light", TORCH)
 	var fitted := PlaySession.new()
 	fitted.map_id = "woodland"
+	fitted.lighting_pick = LightingConfig.NIGHT
 	fitted.settings = settings
 	fitted.kit = rules.carried(l)
 	fitted.bots_active = false
