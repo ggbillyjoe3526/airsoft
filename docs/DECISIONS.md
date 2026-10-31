@@ -525,10 +525,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **Team sizes are each map's row in `data/maps.md` (owner, 2026-10-24: the recommended defaults; WL2).** Depot 1 to
   3, Woodland 5 or 6 with 5 standard; picking a map sets its standard size.
 - **Day / Night is the presets a map offers, never a map name (owner, 2026-10-24: the recommended defaults; WL3).**
-  Woodland offers Night alone, Depot Day (Neon Heights offered both); the Match screen shows the row only where there is
-  a choice, and Dev › Time of day plays any map by either. Depot's public night waits for 0.4's Day and Night on every
-  map. The Match screen's pick lasts the session (MatchPicks), never saved; Dev › Time of day is saved with the Dev
-  settings and, off the map's own, keeps a match out of the records, as the browser's did (WL3).
+  Woodland offered Night alone (Day and Night since WR1), Depot Day (Neon Heights offered both); the Match screen shows
+  the row only where there is a choice, and Dev › Time of day plays any map by either. Depot's public night waits for
+  0.4's Day and Night on every map. The Match screen's pick lasts the session (MatchPicks), never saved; Dev › Time of
+  day is saved with the Dev settings and, off the map's own, keeps a match out of the records, as the browser's did
+  (WL3).
 - **The practice range and the tutorial are set in Depot (owner, 2026-10-24; the tutorial dropped, owner
   2026-10-25).** Their design and layout stay as they are, but they are dressed as part of the Depot site with
   Depot's props, materials, light and skyline, so their assets are modelled with Depot's (the range in WL9, step 26;
@@ -588,6 +589,17 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   its own, either raised wins, and the clock's overtime runs on either rope. The pole in play (`Flag.next_in_play`: the
   one in play kept while it is worked and no flag going up stands higher, else the highest going up, else the highest)
   is the one attacking bots go to and the HUD's marker and gauge follow; defenders are sent per pole.
+- **Woodland is an open wood, built from concept 3 (owner, 2026-10-31, WR1; it replaces the browser's layout and
+  his 2026-10-04 and 2026-10-17 Woodland rulings).** 176 x 120 m of gently sloping ground with a dry stream down the
+  middle, three lanes (Ridge to the Fort, the Clearing, the road to the Sawmill), sparse cover, enterable huts, three
+  crouch tunnels, ferns that hide a crouched player and bushes a standing one, grass allowed. Day by default and night
+  by the Time of day row; bots see 60 m; 5v5 or 6v6; rounds 3:00 (WR2); no vehicles; the Range stays its own map.
+  The layout lives in `tools/woodland/layout.py` and `world.py`, and `build_map.py` writes `data/maps/woodland.json`:
+  change the scripts, never the JSON. The game's blocks are axis-aligned, so pieces are squared and the stream runs
+  straight north to south under both crossings. The old wood is a test fixture (`tests/support/maps/old_woodland.json`).
+- **Woodland keeps its rare long gaps between trunks (owner, 2026-10-31, WR1 decision card).** Pinholes between trees
+  run 100 to 160 m across the whole wood; each lane's own lines stay under 78 m and the Ridge overlook 86 m. Asked to
+  keep them or thicken the wood, he kept them: Woodland's sightline exception is 170 m (`FieldStandard.EXCEPTIONS`).
 
 ## Replicas, Loadout and levels
 

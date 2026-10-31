@@ -1,25 +1,29 @@
 extends GutTest
-## Woodland's layout (WL1; the browser game's map/woodland.test.ts, M33d, M88, WL2 and WL3), measured on its MapLevel's
-## Jolt colliders and its nav grid: the ground (no slope steeper than a ramp, the camps' heights, West Hill, the swell
-## and the ravine), the kinds (trees, logs and a fence, no boulder, no floor), six spawns and dead-zone spots an end,
-## the hidden starts, the fort's ways in, the cover up each lane and the hut's roof; a body walking every lane end to
-## end; and a whole bot match at today's team size. Its night, its team sizes and its extraction cases are later steps'
-## (WL2, WL3, the Modes Update).
+## Woodland as the owner's concept 3 (WR1, 2026-10-31, built by tools/woodland/build_map.py): a 176 x 120 m wood on
+## sloping ground with a dry stream down the middle, three lanes, the Ridge, the Clearing and the road. The file reads
+## clean with six a side, by day or by night; its ground, crossings and pieces stand where the concept put them; no
+## spawn is seen from outside its camp; both ends reach the overtime flag together and their own site first; a body
+## walks every lane end to end; bots take cover at its pieces; and bots play a whole match on it.
 
 const DT := 1.0 / 60.0
-## The field's half sizes (m) and the plan's corner: plan metres run x east and z north from the south-west corner.
-const HALF_X := 60.0
-const HALF_Z := 40.0
-## The Knoll's middle, under the flag (world x, z).
-const KNOLL := Vector2(41.0, -7.0)
-## The West Rise's crest, its middle (plan x, z).
-const RISE_CREST := Vector2(22.0, 44.0)
-## The fort: its inside between the walls (world x0, x1, z0, z1) and a point just outside each of its four gaps (west,
-## north, south, east; plan x, z).
-const FORT_INSIDE := Rect2(35.0, -13.5, 12.5, 13.0)
-const FORT_WAYS_IN: Array[Vector2] = [Vector2(93.0, 47.0), Vector2(101.0, 55.5), Vector2(101.0, 38.5), Vector2(109.5, 47.0)]
-## Anywhere within this of a spawn (m), about two seconds at a run: the start (M88, playtest note 13).
-const START := 8.0
+const SIDE := 6
+## The field's half sizes (m).
+const HALF_X := 88.0
+const HALF_Z := 60.0
+## The camps' plan boxes (x0, z0, size): spawns inside, seen from nowhere outside.
+const CAMPS: Array[Rect2] = [Rect2(-88.0, -14.0, 16.0, 34.0), Rect2(72.0, -16.0, 16.0, 30.0)]
+## The crossings of the dry stream (world x, z): the North bridge's deck, the road over the culvert, the Ford.
+const NORTH_BRIDGE := Vector2(-1.0, -41.5)
+const CULVERT_ROAD := Vector2(8.0, 48.3)
+const FORD := Vector2(9.5, 0.5)
+## Where the stream is measured across (world x the search starts at, z): between the Ford and the culvert, off the
+## slides, and the least its banks stand over its bed there (m).
+const BED_SPAN := Vector2(0.0, 30.0)
+const STREAM_DEPTH := 1.5
+## Walkable ground cut off from both camps, this many nav nodes or more (1 m²), is a pit nobody walks out of; the
+## Crawl box's mound top (its plan box) is out of everyone's reach instead, its sides too steep to climb.
+const PIT_NODES := 25
+const MOUND_TOP := Rect2(-26.0, -19.0, 10.0, 6.0)
 ## The most a lane's walk may take, as a share of a run along its route, before the body counts as stuck.
 const WALK_SLACK := 1.6
 ## A route's waypoint counts as reached within this (m).
@@ -30,15 +34,13 @@ const MATCH_SECONDS := 1800.0
 var tuning: SimTuning = SimTuning.load_default()
 var style: MapStyle = PlayTuning.load_default().map_style
 var map: MapData = null
-var terrain: TerrainGrid = null
 var nav: NavGrid = null
 var level: MapLevel = null
 var hit: RayHit = RayHit.new()
 
 
 func before_all() -> void:
-	map = MapData.load_map("woodland", style, 1)
-	terrain = map.terrain
+	map = MapData.load_map("woodland", style, SIDE)
 	level = MapLevel.new()
 	add_child(level)
 	level.build(map, style, tuning.body)
@@ -51,279 +53,156 @@ func after_all() -> void:
 	nav = null
 
 
-func test_woodland_loads_on_its_terrain() -> void:
-	assert_true(map.ok(), str(map.problems))
-	assert_not_null(terrain)
-
-
-# --- the ground ---
-
-func test_no_slope_is_steeper_than_a_ramp_and_the_knoll_is_a_real_slope() -> void:
-	var steepest := terrain.steepest_slope()
-	gut.p("steepest slope %.3f" % steepest)
-	assert_lte(steepest, FieldStandard.MAX_RAMP_SLOPE)
-	assert_gt(steepest, 0.3)
-
-
-func test_is_120_by_80_m_low_at_end_0_rising_to_the_knoll_with_the_flag_on_top() -> void:
-	assert_eq(terrain.max_x() - terrain.min_x, 2.0 * HALF_X)
-	assert_eq(terrain.max_z() - terrain.min_z, 2.0 * HALF_Z)
-	assert_almost_eq(terrain.height_at(-HALF_X + 6.5, 0.0), 1.0, 0.05)
-	assert_true(map.has_pole)
-	assert_between(map.pole.y, 6.2, 6.8)
-	assert_almost_eq(Vector2(map.pole.x, map.pole.z), KNOLL, Vector2(1e-5, 1e-5))
-	for s in map.ends[1].spawns:
-		assert_lt(s.position.y, map.pole.y - 3.0, "end 1's camp lies below the Knoll's top")
-
-
-func test_end_1_s_camp_is_at_most_2_m_over_end_0_s() -> void:
-	var gap := _mean_height(map.ends[1]) - _mean_height(map.ends[0])
-	gut.p("east camp %.2f m over the west" % gap)
-	assert_gt(gap, 0.5, "still the uphill end")
-	assert_lte(gap, 2.0)
-	for a in map.ends[1].spawns:
-		for b in map.ends[0].spawns:
-			assert_lte(a.position.y - b.position.y, 2.0)
-
-
-static func _mean_height(end: MapEnd) -> float:
-	var total := 0.0
-	for s in end.spawns:
-		total += s.position.y
-	return total / end.spawns.size()
-
-
-## The ground's height at plan (x, z).
-func _plan(x: float, z: float) -> float:
-	return terrain.height_at(x - HALF_X, HALF_Z - z)
-
-
-## The height at plan (x, z) over the mean of the ground `d` m either side along x.
-func _over(x: float, z: float, d: float) -> float:
-	return _plan(x, z) - (_plan(x - d, z) + _plan(x + d, z)) * 0.5
-
-
-func test_west_hill_is_about_3_4_m_at_its_middle_and_2_2_m_at_its_ends() -> void:
-	assert_between(_over(22.0, 44.0, 14.0), 3.1, 3.7)
-	for z: float in [28.0, 60.0]:
-		assert_between(_over(22.0, z, 14.0), 1.9, 2.5, "z %s" % z)
-
-
-func test_has_a_0_6_m_swell_on_the_meadow() -> void:
-	var ring := (_plan(37.0, 53.0) + _plan(55.0, 53.0) + _plan(46.0, 44.0) + _plan(46.0, 62.0)) * 0.25
-	assert_between(_plan(46.0, 53.0) - ring, 0.45, 0.75)
-
-
-func test_digs_the_creek_into_a_dry_ravine_past_the_meadow_and_1_m_by_the_hill() -> void:
-	for x: float in [50.0, 60.0, 70.0]:
-		var bed := 12.0 + 3.0 * sin(x / 14.0)
-		var depth := (_plan(x, bed + 9.0) + _plan(x, bed - 9.0)) * 0.5 - _plan(x, bed)
-		assert_between(depth, 2.0, 2.4, "x %s" % x)
-		assert_lt(absf(_plan(x, bed + 1.5) - _plan(x, bed)), 0.1, "its bed is flat at x %s" % x)
-	var west_bed := 12.0 + 3.0 * sin(12.0 / 14.0)
-	assert_lt((_plan(12.0, west_bed + 9.0) + _plan(12.0, west_bed - 9.0)) * 0.5 - _plan(12.0, west_bed), 1.2)
-
-
-# --- the kinds ---
-
-func test_trees_logs_and_a_fence_round_the_edge_and_no_boulder_or_floor() -> void:
-	var kinds: Dictionary[StringName, int] = {}
-	for b in map.blocks:
-		kinds[b.kind] = kinds.get(b.kind, 0) + 1
-	for k: StringName in [&"tree", &"log", &"fence"]:
-		assert_true(kinds.has(k), k)
-	assert_false(kinds.has(&"boulder"), "no boulders (owner: \"I hate them\")")
-	assert_false(kinds.has(&"floor"), "the ground is the terrain")
-	var sides := PackedStringArray()
-	for b in map.blocks:
-		if b.kind != &"fence":
-			continue
-		assert_true(absf(b.center.x) >= HALF_X or absf(b.center.z) >= HALF_Z, "fence at %s stands outside" % b.center)
-		assert_gte(b.size.y, 2.4, "too tall to see over standing")
-		for side: String in ["W" if b.center.x < -HALF_X else "", "E" if b.center.x > HALF_X else "",
-				"N" if b.center.z < -HALF_Z else "", "S" if b.center.z > HALF_Z else ""]:
-			if not side.is_empty() and not sides.has(side):
-				sides.append(side)
-	sides.sort()
-	assert_eq(sides, PackedStringArray(["E", "N", "S", "W"]), "a fence on all four sides")
-
-
-func test_has_no_tree_with_a_bare_12_m_trunk_and_a_hut_3_m_tall_under_a_two_ramp_tin_roof() -> void:
-	var hut: MapData.Block = null
-	for b in map.blocks:
-		if b.kind == &"tree":
-			assert_false(b.size.y >= 12.0 and is_equal_approx(b.size.x, 1.2), "a lone bare trunk at %s" % b.center)
-		if b.kind == &"log" and absf(b.size.x - 3.0) < 1e-6 and absf(b.size.z - 4.0) < 1e-6 and b.size.y >= 2.9:
-			hut = b
-	assert_not_null(hut, "the fort's hut")
-	if hut == null:
-		return
-	var top := hut.center.y + hut.size.y * 0.5
-	var roofs := 0
-	for r in map.blocks:
-		if r.kind == &"ramp" and r.surface == RayHit.Surface.METAL and absf(r.center.x - hut.center.x) < 0.01 \
-				and absf(r.center.z - hut.center.z) < 3.0:
-			roofs += 1
-			assert_almost_eq(r.center.y - r.size.y * 0.5, top, 0.05, "sits on the hut")
-			assert_gt(r.size.x, hut.size.x, "overhangs it")
-	assert_eq(roofs, 2)
-
-
-# --- the ends ---
-
-func test_six_spawns_and_dead_zone_spots_an_end_each_camp_at_its_own_end() -> void:
+func test_it_reads_clean_with_six_a_side_by_day_or_night() -> void:
+	assert_true(map.ok(), "Woodland loads: %s" % [map.problems])
+	assert_eq(map.warnings, [] as Array[String], "nothing in the file is left out")
+	assert_eq(map.display_name, "Woodland")
 	for e in 2:
-		assert_eq(map.ends[e].spawns.size(), 6)
-		assert_eq(map.ends[e].dead_zone.size(), 6)
-	for s in map.ends[0].spawns:
-		assert_lt(s.position.x, -HALF_X * 0.5)
-	for s in map.ends[1].spawns:
-		assert_gt(s.position.x, HALF_X * 0.5)
+		assert_eq(map.ends[e].spawns.size(), SIDE, "end %d spawns six" % e)
+		assert_eq(map.ends[e].dead_zone.size(), SIDE, "end %d walks six off" % e)
+	var entry := MapCatalog.shared().find("woodland")
+	assert_not_null(entry)
+	if entry != null:
+		assert_eq([entry.team_min, entry.team_standard, entry.team_max], [5, 5, 6], "5 v 5 or 6 v 6")
+	assert_eq(map.lanes.size(), 3, "three lanes")
+	assert_true(map.has_pole and map.has_overtime_flag)
+	assert_eq(map.lighting_presets, [LightingConfig.DAY, LightingConfig.NIGHT] as Array[StringName],
+			"day by default, night by the Time of day setting")
+	assert_false(map.night, "day first")
+	assert_eq(map.lights.size(), 11, "the concept's eleven lights for the night")
+	assert_eq(map.bot_sight, 60.0, "bots see 60 m (owner, 2026-10-31)")
 
 
-## Walkable ground within START of end `end`'s spawns, every `step` m, on the ground.
-func _start_zone(end: int, step: float) -> PackedVector3Array:
-	var spawns := map.ends[end].spawns
-	var lo := Vector2(INF, INF)
-	var hi := Vector2(-INF, -INF)
-	for s in spawns:
-		lo = lo.min(Vector2(s.position.x, s.position.z))
-		hi = hi.max(Vector2(s.position.x, s.position.z))
-	var out := PackedVector3Array()
-	var x := lo.x - START
-	while x <= hi.x + START:
-		var z := lo.y - START
-		while z <= hi.y + START:
-			var near := false
-			for s in spawns:
-				near = near or Vector2(s.position.x - x, s.position.z - z).length() <= START
-			var y := terrain.height_at(x, z)
-			if near and not is_nan(y) and nav.is_walkable_at(Vector3(x, y, z)):
-				out.append(Vector3(x, y, z))
-			z += step
-		x += step
-	return out
+func test_it_is_176_by_120_m_of_half_metre_ground_with_the_stream_cut_down_the_middle() -> void:
+	var t := map.terrain
+	assert_not_null(t)
+	assert_eq([t.min_x, t.min_z, t.max_x(), t.max_z(), t.cell], [-HALF_X, -HALF_Z, HALF_X, HALF_Z, 0.5])
+	# Across the stream between the Ford and the culvert, away from its slides: the bed's lowest point, and either
+	# bank 6 m off it standing well over it.
+	var bed := INF
+	var bed_x := 0.0
+	for i in 33:
+		var x := BED_SPAN.x + i * 0.5
+		if t.height_at(x, BED_SPAN.y) < bed:
+			bed = t.height_at(x, BED_SPAN.y)
+			bed_x = x
+	for side: float in [-1.0, 1.0]:
+		var bank := t.height_at(bed_x + side * 6.0, BED_SPAN.y)
+		assert_gt(bank - bed, STREAM_DEPTH, "the %s bank stands %.2f m over the bed" % [
+				"east" if side > 0.0 else "west", bank - bed])
 
 
-## Whether a standing eye over `a` has a clear line to a body over `b`, `at` m over its feet.
-func _sees_body(a: Vector3, b: Vector3, at: float) -> bool:
-	return not level.query().ray(a + Vector3(0.0, tuning.body.stand_eye_height, 0.0), b + Vector3(0.0, at, 0.0), hit)
-
-
-func test_nobody_standing_near_a_spawn_sees_the_head_or_chest_of_anyone_near_the_other_end_s() -> void:
-	var parts: Array[float] = [tuning.body.stand_eye_height, tuning.body.height * 0.5]
-	for end in 2:
-		var from := _start_zone(end, 1.0)
-		var to := _start_zone(1 - end, 1.5)
-		assert_gt(from.size(), 200, "end %d's start" % end)
-		assert_gt(to.size(), 80, "end %d's start" % (1 - end))
-		var seen := 0
-		var first := ""
-		for a in from:
-			for b in to:
-				for at in parts:
-					if _sees_body(a, b, at):
-						seen += 1
-						if first.is_empty():
-							first = "end %d start %s sees %s at %s m" % [end, a, b, at]
-		gut.p("end %d: %d spots against %d, %d lines seen" % [end, from.size(), to.size(), seen])
-		assert_eq(seen, 0, first)
-
-
-func test_the_west_rise_hides_the_starts_its_crest_sees_the_fort_and_the_camp_s_view_stops_on_it() -> void:
-	var crest := Vector3(RISE_CREST.x - HALF_X, _plan(RISE_CREST.x, RISE_CREST.y), HALF_Z - RISE_CREST.y)
-	assert_gt(crest.y - map.ends[0].spawns[0].position.y, 2.0, "the crest stands over the west camp")
-	var way_in := FORT_WAYS_IN[0]
-	assert_true(_sees_body(crest, Vector3(way_in.x - HALF_X, _plan(way_in.x, way_in.y), HALF_Z - way_in.y),
-			tuning.body.stand_eye_height), "from the crest you see the fort's west way in")
-	var shoulder := Vector3(0.0, -INF, 0.0)
-	for p in _start_zone(1, 1.5):
-		if p.y > shoulder.y:
-			shoulder = p
-	var eye := Vector3(0.0, tuning.body.stand_eye_height, 0.0)
-	for s in map.ends[0].spawns:
-		var from := s.position + eye
-		assert_true(level.query().ray(from, shoulder + eye, hit), "end 0's spawn at %s doesn't see the shoulder" % s.position)
-		assert_lt(hit.position.x, crest.x + 1.0, "the line ends in the rise, before its crest")
-
-
-# --- the fort ---
-
-## The fort's ways in, on the ground (world).
-func _ways_in() -> PackedVector3Array:
-	var out := PackedVector3Array()
-	for p in FORT_WAYS_IN:
-		out.append(Vector3(p.x - HALF_X, _plan(p.x, p.y), HALF_Z - p.y))
-	return out
-
-
-func test_the_fort_has_three_or_more_ways_in_each_a_route_to_the_flag() -> void:
-	var ways := _ways_in()
-	assert_gte(ways.size(), 3)
-	var route := PackedVector3Array()
-	for e in ways:
-		assert_true(nav.is_walkable_at(e), "%s is walkable" % e)
-		assert_true(nav.find_route(e, map.pole, route), "a route from %s to the flag" % e)
-
-
-func test_no_spot_inside_the_fort_sees_more_than_two_ways_in() -> void:
-	var ways := _ways_in()
-	var spots := 0
-	var worst := 0
-	var x := FORT_INSIDE.position.x + 0.25
-	while x < FORT_INSIDE.end.x:
-		var z := FORT_INSIDE.position.y + 0.25
-		while z < FORT_INSIDE.end.y:
-			var ground := terrain.height_at(x, z)
-			if nav.is_walkable_at(Vector3(x, ground, z)):
-				spots += 1
-				var eye := Vector3(x, ground + tuning.body.stand_eye_height, z)
-				var seen := 0
-				for e in ways:
-					if not level.query().ray(eye, e + Vector3(0.0, 1.2, 0.0), hit):
-						seen += 1
-				worst = maxi(worst, seen)
-				assert_lte(seen, 2, "from %s, %s" % [x, z])
-			z += 0.5
-		x += 0.5
-	gut.p("%d spots inside the fort, at most %d ways in seen" % [spots, worst])
-	assert_gt(spots, 200)
-
-
-func test_every_lane_has_cover_within_2_5_m_every_2_m_of_its_last_20_m_to_the_fort() -> void:
-	var cover: Array[MapData.Block] = []
-	for b in map.blocks:
-		if b.kind != &"fence" and minf(b.size.x, b.size.z) >= 0.8 and maxf(b.size.x, b.size.z) >= 1.4:
-			cover.append(b)
-	var fort := FORT_INSIDE.grow(1.0)
-	for l in map.lanes.size():
-		var lane := map.lanes[l]
-		var samples := PackedVector2Array()
-		for k in range(1, lane.size()):
-			var a := Vector2(lane[k - 1].x, lane[k - 1].z)
-			var b := Vector2(lane[k].x, lane[k].z)
-			var length := a.distance_to(b)
-			var s := 0.0
-			while s < length:
-				samples.append(a.lerp(b, s / length))
-				s += 0.5
-		var reach := -1
-		for k in samples.size():
-			if fort.has_point(samples[k]):
-				reach = k
-				break
-		assert_gt(reach, 40, "lane %d reaches the fort" % (l + 1))
-		if reach <= 40:
+func test_both_stream_crossings_are_level_with_the_ground_at_their_ends() -> void:
+	for at: Vector2 in [NORTH_BRIDGE, CULVERT_ROAD]:
+		var deck := _deck_at(at)
+		assert_not_null(deck, "a deck at %s" % at)
+		if deck == null:
 			continue
-		for k in range(reach, reach - 41, -4):
-			var nearest := INF
-			for b in cover:
-				nearest = minf(nearest, Vector2(maxf(0.0, absf(samples[k].x - b.center.x) - b.size.x * 0.5),
-						maxf(0.0, absf(samples[k].y - b.center.z) - b.size.z * 0.5)).length())
-			assert_lte(nearest, 2.5, "lane %d, %s m out" % [l + 1, (reach - k) * 0.5])
+		var top := deck.center.y + deck.size.y * 0.5
+		for side: float in [-1.0, 1.0]:
+			var end := Vector2(deck.center.x + side * (deck.size.x * 0.5 + 0.4), at.y)
+			var ground := map.terrain.height_at(end.x, end.y)
+			assert_almost_eq(ground, top, 0.15, "the ground off the %s end of the deck at %s" % [
+					"east" if side > 0.0 else "west", at])
 
 
-# --- the lanes, walked ---
+func test_every_piece_stands_on_the_ground_and_none_is_on_the_road() -> void:
+	var floating := PackedStringArray()
+	for b in map.blocks:
+		if b.kind == &"floor" or b.kind == &"ramp" or b.kind == &"plywood" and b.size.y < 0.5:
+			continue # decks, the stair, roofs and lintels stand on posts and walls
+		var bottom := b.center.y - b.size.y * 0.5
+		var lowest := INF
+		for corner: Vector2 in [Vector2(-0.5, -0.5), Vector2(0.5, -0.5), Vector2(-0.5, 0.5), Vector2(0.5, 0.5)]:
+			var x := b.center.x + corner.x * b.size.x
+			var z := b.center.z + corner.y * b.size.z
+			lowest = minf(lowest, map.terrain.height_at(clampf(x, -HALF_X, HALF_X), clampf(z, -HALF_Z, HALF_Z)))
+		if bottom > lowest + 0.05 and b.kind != &"log" and b.kind != &"plywood" and not _on_a_deck(b):
+			floating.append("%s at %s" % [b.kind, b.center])
+	assert_eq(floating.size(), 0, "blocks over the ground: %s" % [floating.slice(0, 5)])
+
+
+func test_bots_take_cover_at_its_pieces_sunk_into_the_slope() -> void:
+	var cfg := BotConfig.load_default()
+	var low := BotCover.low_blocks(map, nav, cfg, tuning)
+	var tall := BotCover.tall_blocks(map, nav, cfg, tuning)
+	gut.p("cover: %d low, %d tall" % [low.size(), tall.size()])
+	assert_gt(low.size(), 40, "logs, stacks and crates hide a crouched bot")
+	assert_gt(tall.size(), 400, "trunks, huts and thickets hide a standing one")
+	# On a flat floor: a crate on it and one sunk 0.3 m count; one sunk 0.5 m or floating 0.1 m over it does not.
+	var crates := [_box("floor", Vector3(0.0, -0.5, 0.0), Vector3(30.0, 1.0, 12.0))]
+	for c: Vector3 in [Vector3(-10.0, 0.0, 1.3), Vector3(-4.0, -0.3, 1.6), Vector3(2.0, -0.5, 1.8),
+			Vector3(8.0, 0.1, 1.2)]:
+		crates.append(_box("crate", Vector3(c.x, c.y + c.z * 0.5, 0.0), Vector3(1.2, c.z, 1.2)))
+	var field := MapData.parse(JSON.stringify({"blocks": crates}), style, 1)
+	var found := BotCover.low_blocks(field, NavGrid.build(field, tuning.nav, tuning.body), cfg, tuning)
+	var xs: Array[float] = []
+	for k in found:
+		xs.append(k.center.x)
+	assert_eq(xs, [-10.0, -4.0] as Array[float], "the crates standing on or sunk into the floor")
+
+
+func test_no_walkable_ground_is_a_pit_cut_off_from_the_camps() -> void:
+	var home := nav.node_at(map.ends[0].spawns[0].position)
+	assert_true(nav.linked(home, nav.node_at(map.ends[1].spawns[0].position)), "the camps join")
+	var cut_off: Dictionary[int, Vector3] = {}
+	var counts: Dictionary[int, int] = {}
+	for k in nav.floor_y.size():
+		if nav.walkable[k] != 1 or nav.linked(home, k):
+			continue
+		var r: int = nav.region[k]
+		counts[r] = counts.get(r, 0) + 1
+		cut_off[r] = nav.node_position(k)
+	var pits := PackedStringArray()
+	for r in counts:
+		var at := cut_off[r]
+		if counts[r] >= PIT_NODES and not MOUND_TOP.has_point(Vector2(at.x, at.z)):
+			pits.append("%d nodes at %s" % [counts[r], at])
+	assert_eq(pits.size(), 0, "ground nobody walks out of: %s" % [pits])
+
+
+func test_no_spawn_is_seen_from_outside_its_camp() -> void:
+	var q := level.query()
+	var eye := tuning.body.stand_eye_height
+	var seen := PackedStringArray()
+	for e in 2:
+		for s in map.ends[e].spawns:
+			var from := s.position + Vector3.UP * eye
+			for i in range(-87, 88, 2):
+				for j in range(-59, 60, 2):
+					var p := Vector3(i + 0.5, 0.0, j + 0.5)
+					if CAMPS[0].has_point(Vector2(p.x, p.z)) or CAMPS[1].has_point(Vector2(p.x, p.z)):
+						continue
+					if not nav.is_walkable_at(Vector3(p.x, 50.0, p.z)):
+						continue
+					p.y = nav.floor_at(Vector3(p.x, 50.0, p.z))
+					if not q.ray(from, p + Vector3.UP * eye, hit):
+						seen.append("%s from %s" % [s.position, p])
+	assert_eq(seen.size(), 0, "spawns seen: %s" % [seen.slice(0, 5)])
+
+
+func test_both_ends_reach_the_overtime_flag_together_and_their_own_site_first() -> void:
+	var run := tuning.movement.run_speed
+	var west := _fastest(0, map.overtime_flag) / run
+	var east := _fastest(1, map.overtime_flag) / run
+	gut.p("overtime flag: west %.1f s, east %.1f s" % [west, east])
+	assert_lt(absf(west - east), 2.0, "the Clearing is even (%.1f and %.1f s)" % [west, east])
+	var attack := _fastest(0, map.pole) / run
+	var defend := _fastest(1, map.pole) / run
+	gut.p("A flag: attackers %.1f s, defenders %.1f s" % [attack, defend])
+	assert_between(attack, 30.0, 45.0, "attackers take a while to reach A")
+	assert_lt(defend, 15.0, "defenders are home at A first")
+
+
+func test_every_crossing_is_reached_from_both_ends() -> void:
+	var run := tuning.movement.run_speed
+	for at: Vector2 in [NORTH_BRIDGE, CULVERT_ROAD, FORD]:
+		var goal := Vector3(at.x, nav.floor_at(Vector3(at.x, 50.0, at.y)), at.y)
+		var west := _fastest(0, goal) / run
+		var east := _fastest(1, goal) / run
+		gut.p("%s: west %.1f s, east %.1f s" % [at, west, east])
+		assert_lt(maxf(west, east), 32.0, "%s is near both ends" % at)
+
 
 func test_a_body_walks_every_lane_end_to_end_on_the_bots_routes() -> void:
 	var mover := level.mover(tuning.body)
@@ -381,42 +260,39 @@ func test_bots_play_a_whole_match_at_today_s_team_size() -> void:
 	assert_eq(t.held_up, 0, "no bot held up")
 
 
-func test_bots_hunt_over_the_whole_field_and_never_draw_a_spot_no_route_reaches() -> void:
-	var tuning := SimTuning.load_default()
-	var play_style: MapStyle = PlayTuning.load_default().map_style
-	var map := MapData.load_map("woodland", play_style, tuning.rounds.team_size)
-	var level := MapLevel.new()
-	add_child_autofree(level)
-	level.build(map, play_style, tuning.body)
-	var nav := NavGrid.build(map, tuning.nav, tuning.body)
-	var state := GameState.new(3, tuning)
-	var size := tuning.rounds.team_size
-	for i in size * 2:
-		var at := map.ends[0 if i < size else 1].spawns[i % size].position
-		state.characters.append(Character.new(i, 0 if i < size else 1, at, 0.0, ReplicaStats.default_loadout()))
-	var bots := BotController.new(state, -1, map, nav, level.query(), tuning, BotConfig.load_default(), {}, {})
-	var w := bots.world
-	var b := w.bots[0]
-	var home := nav.nearest_walkable(b.character.position, nav.snap)
-	var roof := nav.node_at(Vector3(5.0, 10.0, 15.5))
-	assert_false(nav.linked(home, roof, true), "the hut's roof is out of reach")
-	var west := 0
-	var east := 0
-	for i in 40:
-		if not w.planner.hunt_point(b, w):
+## A block's entry in a map file.
+static func _box(kind: String, center: Vector3, size: Vector3) -> Dictionary:
+	return {"kind": kind, "center": {"x": center.x, "y": center.y, "z": center.z},
+			"size": {"x": size.x, "y": size.y, "z": size.z}}
+
+
+## Whether `b` stands on a deck (the culvert's kerbs on the road over it).
+func _on_a_deck(b: MapData.Block) -> bool:
+	var deck := _deck_at(Vector2(b.center.x, b.center.z))
+	return deck != null and absf(deck.center.y + deck.size.y * 0.5 - (b.center.y - b.size.y * 0.5)) < 0.05
+
+
+## The deck (a floor block) over (x, z), or null.
+func _deck_at(at: Vector2) -> MapData.Block:
+	for b in map.blocks:
+		if b.kind == &"floor" and absf(at.x - b.center.x) < b.size.x * 0.5 and absf(at.y - b.center.z) < b.size.z * 0.5:
+			return b
+	return null
+
+
+## The shortest walk (m) from any of end `e`'s spawns to `goal`.
+func _fastest(e: int, goal: Vector3) -> float:
+	var best := INF
+	var route := PackedVector3Array()
+	for s in map.ends[e].spawns:
+		route.clear()
+		if not nav.find_route(s.position, goal, route):
 			continue
-		assert_true(nav.linked(home, nav.node_at(b.hunt_goal + Vector3(0.0, 0.1, 0.0)), true), "%s" % b.hunt_goal)
-		west += int(b.hunt_goal.x < -20.0)
-		east += int(b.hunt_goal.x > 20.0)
-	assert_gt(west, 0, "spots on the west side")
-	assert_gt(east, 0, "and on the east")
-	# Spots drawn over the hut are on its floor, under the roof no route reaches (KI1).
-	var hut_floor := nav.node_at(Vector3(5.0, 0.5, 15.5))
-	assert_true(hut_floor >= 0 and nav.walkable[hut_floor] == 1 and nav.linked(home, hut_floor, true), "the hut's floor")
-	w.planner.bounds_lo = Vector2(4.5, 15.0)
-	w.planner.bounds_hi = Vector2(5.5, 16.0)
-	var inside := 0
-	for i in 10:
-		if w.planner.hunt_point(b, w):
-			inside += int(b.hunt_goal.y < nav.floor_y[roof] - 1.0)
-	assert_eq(inside, 10, "every spot over the hut is inside it")
+		var length := 0.0
+		var at := s.position
+		for p in route:
+			length += Vector2(p.x - at.x, p.z - at.z).length()
+			at = p
+		best = minf(best, length)
+	assert_true(is_finite(best), "end %d reaches %s" % [e, goal])
+	return best

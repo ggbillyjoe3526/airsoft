@@ -96,6 +96,29 @@ func test_a_search_given_up_for_the_lane_walking_back_does_not_count() -> void:
 			func(_s: int) -> int: return Bot.Mode.ADVANCE), "a whole window on its lane on the spot")
 
 
+## A hunter whose spot a teammate checked first, turning for another spot the way it came (WR1, Woodland seed 7): out
+## and back on two hunts in one mode. Not held up; one hunt throughout, or on the spot, still is.
+func test_a_hunt_for_another_spot_walking_back_does_not_count() -> void:
+	var b := _bot()
+	b.hunting = true
+	b.hunt_goal = Vector3(-12.0, 0.0, -30.0)
+	var first := MatchRunner.errand_of(b, Bot.Mode.ADVANCE)
+	b.hunt_goal = Vector3(23.0, 0.0, -13.0)
+	var second := MatchRunner.errand_of(b, Bot.Mode.ADVANCE)
+	assert_ne(first, second, "two spots, two errands")
+	b.hunting = false
+	assert_eq(MatchRunner.errand_of(b, Bot.Mode.ADVANCE), int(Bot.Mode.ADVANCE), "its lane: the mode")
+	var ring := _ring()
+	var places: Array[Vector3] = []
+	for s in SECONDS:
+		places.append(Vector3(28.0 * sin(PI * s / SECONDS), 0.0, 0.0))
+	var two_hunts := func(s: int) -> int: return first if s < SECONDS + SECONDS / 2 else second
+	assert_false(_feed(ring, places, SECONDS * 2 + 1, func(_s: int) -> bool: return true, two_hunts),
+			"back where it was, but hunting another spot since")
+	assert_true(_feed(ring, places, SECONDS * 2 + 1, func(_s: int) -> bool: return true,
+			func(_s: int) -> int: return second), "round in a loop on one hunt")
+
+
 func test_a_bot_that_gets_somewhere_does_not_count() -> void:
 	var ring := _ring()
 	var places: Array[Vector3] = []

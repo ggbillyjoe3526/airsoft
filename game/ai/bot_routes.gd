@@ -97,10 +97,11 @@ static func point_ahead(b: Bot, distance: float) -> Vector3:
 
 ## Follows the route: writes the way to walk into b.move_dir and returns true, or false with nothing to walk (no route,
 ## or arrived). `while_planning`: keep walking the old route while a new one is wanted. A bot pushed off its leg (by a
-## teammate, a fight) that would take a drop walking straight on asks for a fresh route; one walking slower than
-## stuck_speed for stuck_time does too. A leg over a low obstacle (a vault link, NavVaults) sets b.vault_leg while the
-## obstacle is still ahead: it is walked straight, its end counts as reached once past it wherever the vault set the
-## body down, and held up on it the bot's routes go round for vault_retry_delay.
+## teammate, a fight) that would take a drop walking straight on asks for a fresh route, once each time it has moved
+## off_leg_replan_moved; one walking slower than stuck_speed for stuck_time does too. A leg over a low obstacle (a vault
+## link, NavVaults) sets b.vault_leg while the obstacle is still ahead: it is walked straight, its end counts as reached
+## once past it wherever the vault set the body down, and held up on it the bot's routes go round for
+## vault_retry_delay.
 static func follow(b: Bot, w: BotWorld, dt: float, while_planning: bool = false) -> bool:
 	var cfg := w.cfg
 	var planning := while_planning and b.route_state == Bot.RouteState.WANTED
@@ -123,7 +124,10 @@ static func follow(b: Bot, w: BotWorld, dt: float, while_planning: bool = false)
 	var wp := b.route[b.route_leg]
 	var vault := w.nav.is_vault_leg(b.route_from, wp)
 	b.vault_leg = vault and _leg_share(b.route_from, wp, p, 0.0) < 0.5
-	if not planning and not vault and _off_leg(b.route_from, wp, p) > cfg.route_off_leg and w.nav.drop_on_line(p, wp):
+	if not planning and not vault and _off_leg(b.route_from, wp, p) > cfg.route_off_leg \
+			and Vector2(p.x - b.off_leg_at.x, p.z - b.off_leg_at.z).length() > cfg.off_leg_replan_moved \
+			and w.nav.drop_on_line(p, wp):
+		b.off_leg_at = p
 		b.route_state = Bot.RouteState.WANTED
 		b.stuck_for = 0.0
 		return false

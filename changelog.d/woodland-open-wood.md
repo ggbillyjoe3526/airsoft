@@ -1,0 +1,11 @@
+### Woodland rebuilt as an open wood
+- Woodland is rebuilt as a much bigger wood, 176 by 120 metres, with gentle slopes. You play it 5v5 or 6v6.
+- A dry stream runs down the middle, with a bridge in the north and a road over a culvert in the south to cross it.
+- Three lanes run end to end: the Ridge in the north, the Clearing in the middle and the road in the south.
+- Cover is sparse. You can walk into the huts.
+- Fern beds hide a crouched player and bushes hide a standing one.
+- Day is the default. Set Time of day to night for camp fires and lanterns.
+- Bots on Woodland see 60 metres.
+- Bots take cover behind pieces on sloping ground and walk diagonally up smooth banks.
+- The crawl tunnels are too low to get through until the next update.
+- Doors and a second flag come next. The wood is still greybox until it gets its real models.

@@ -35,6 +35,10 @@ extends Resource
 	&"pillar": RayHit.Surface.METAL,
 	&"net": RayHit.Surface.WOOD,
 	&"sofa": RayHit.Surface.WOOD,
+	# Woodland's concept 3 (WR1): rubber tyres soak BBs up like wood, the pickup rings, a spruce thicket is leaves.
+	&"tyre": RayHit.Surface.WOOD,
+	&"truck": RayHit.Surface.METAL,
+	&"thicket": RayHit.Surface.LEAVES,
 }
 ## Each kind's greybox colour (sRGB). Kinds not listed take `default_colour`.
 @export var colours: Dictionary[StringName, Color] = {
@@ -66,6 +70,10 @@ extends Resource
 	&"sofa": Color(0.42, 0.31, 0.48),
 	# Its hinged doors (DO1): bottle-green painted leaves, so a door reads apart from the plywood round it.
 	&"door": Color(0.22, 0.40, 0.27),
+	# Woodland's concept 3 (WR1), off both team hues: charcoal tyres, a sage-teal pickup, dark spruce thickets.
+	&"tyre": Color(0.24, 0.24, 0.25),
+	&"truck": Color(0.36, 0.47, 0.45),
+	&"thicket": Color(0.20, 0.30, 0.22),
 }
 ## Surfaces drawn in their own colour whatever their block's kind (RayHit.Surface to sRGB): a gravel bed on the slab.
 @export var surface_colours: Dictionary[int, Color] = {

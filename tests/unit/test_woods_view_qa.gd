@@ -200,13 +200,14 @@ func test_a_woodland_match_wires_the_wood_to_the_presets_and_frees_it_with_the_s
 	for round_no in 2:
 		var session := PlaySession.new()
 		session.map_id = "woodland"
+		session.lighting_pick = LightingConfig.NIGHT # its second preset since WR1: fireflies fly by night
 		session.autopilot = true
 		add_child(session)
 		await wait_physics_frames(2)
 		var woods: WoodsView = session._woods
 		assert_not_null(woods, "the session builds the wood")
 		assert_eq(session.get_children().filter(func(c: Node) -> bool: return c is WoodsView).size(), 1, "once")
-		assert_not_null(woods.air(), "Woodland is played at night: fireflies")
+		assert_not_null(woods.air(), "Woodland by night: fireflies")
 		var shape_bodies := _bodies_in(woods)
 		assert_eq(shape_bodies, 0, "no body under the wood")
 		for preset: StringName in [&"low", &"medium", &"high", &"ultra", &"low"]:

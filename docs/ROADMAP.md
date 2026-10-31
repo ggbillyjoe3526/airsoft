@@ -14,8 +14,9 @@ in `docs/PROCESS.md`.
 - **Building 0.1 Dev 2** (owner, 2026-10-30): basic smoke and flash bombs, thrown by bots too (done: SF1, SF2), a
   full-screen map and a Go there ping (owner, 2026-10-31; done: FM1), then Depot and Woodland redesigned larger and
   dressed (step 28). Depot is the owner's concept 3, an indoor hall (2026-10-31): the map (done: DR1), doors (done:
-  DO1), two flags in Attack / Defend (done: AB1) and its CC0 dress (done: DR2). The rest of 0.1 ([What 0.1 is](#what-01-is))
-  follows in later Dev builds.
+  DO1), two flags in Attack / Defend (done: AB1) and its CC0 dress (done: DR2). Woodland is the owner's concept 3, an
+  open wood (2026-10-31): the map (done: WR1), a crouched body for its tunnels (CR1), doors, two flags and 3:00 rounds
+  (WR2), and its CC0 dress (WR3). The rest of 0.1 ([What 0.1 is](#what-01-is)) follows in later Dev builds.
 - **The release path** (owner, 2026-10-12): 0.1 Dev builds, 0.1 Beta, then 0.1 (tagged `0.1.0`) opens Early
   Access to the public.
   Themed updates follow (Replica, Modes, Maps, Progression and any more), up to 1.0, the full launch. See

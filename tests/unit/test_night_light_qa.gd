@@ -80,7 +80,7 @@ func test_a_stale_bake_still_warns_at_night() -> void:
 
 func test_changing_the_graphics_mid_match_changes_the_real_lights_and_frees_them() -> void:
 	var s := Settings.new()
-	var session := _session("woodland", s)
+	var session := _session("woodland", s, LightingConfig.NIGHT)
 	var pools := session.light_pools()
 	assert_not_null(pools, "Woodland at night has its pools")
 	for preset: StringName in [&"low", &"medium", &"high", &"ultra", &"low", &"high"]:
@@ -101,7 +101,7 @@ func test_changing_the_graphics_mid_match_changes_the_real_lights_and_frees_them
 func test_leaving_a_night_match_frees_its_pools_and_the_next_match_is_lit_by_its_own_map() -> void:
 	var before := Performance.get_monitor(Performance.OBJECT_NODE_COUNT)
 	var s := Settings.new()
-	var night := _session("woodland", s)
+	var night := _session("woodland", s, LightingConfig.NIGHT)
 	night._apply_graphics(GraphicsTable.shared().preset(&"high"))
 	assert_gt(_lights_in(night), 0)
 	night.free()
@@ -149,8 +149,11 @@ func test_a_map_offering_one_preset_ignores_the_match_pick() -> void:
 	var s := Settings.new()
 	var day := _session("depot", s, LightingConfig.NIGHT)
 	assert_false(day.lighting().night, "Depot offers day alone")
-	var wood := _session("woodland", s, LightingConfig.DAY)
-	assert_true(wood.lighting().night, "Woodland offers night alone")
+	var wood := TowerBlock.load_map(play.map_style, 4)
+	wood.lighting_presets = [LightingConfig.NIGHT] as Array[StringName]
+	assert_eq(wood.preset_played(LightingConfig.DAY), LightingConfig.NIGHT, "a field offering night alone")
+	var both := _session("woodland", s, LightingConfig.NIGHT)
+	assert_true(both.lighting().night, "Woodland offers both: the Match page's Night (WR1)")
 
 
 func test_dev_time_of_day_row_picks_saves_and_shows_the_saved_choice() -> void:

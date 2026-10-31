@@ -46,6 +46,7 @@ func test_a_woodland_night_match_counts_on_the_record() -> void:
 	var session := PlaySession.new()
 	session.settings = s
 	session.map_id = "woodland"
+	session.lighting_pick = LightingConfig.NIGHT # its second time of day since WR1
 	session.autopilot = true
 	add_child_autofree(session)
 	await wait_physics_frames(3)

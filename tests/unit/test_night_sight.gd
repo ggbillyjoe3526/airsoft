@@ -23,7 +23,8 @@ func before_all() -> void:
 	t.rounds.team_size = 5
 	t.rounds.wins_needed = 2
 	t.rounds.half_time_after = 1
-	woodland = MatchRunner.new(self, "woodland", t)
+	# The first wood (OldWoodland), night alone: these spots, pools and huts are its.
+	woodland = MatchRunner.new(self, "woodland", t, null, OldWoodland.load_map(MapStyle.new(), t.rounds.team_size))
 
 
 func after_all() -> void:

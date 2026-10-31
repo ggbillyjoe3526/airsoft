@@ -47,7 +47,7 @@ func after_each() -> void:
 
 func test_woodland_reads_its_dressing_with_no_warning() -> void:
 	assert_eq(woodland.warnings, [] as Array[String])
-	assert_eq([woodland.forest_trees, woodland.fireflies, woodland.grass_height], [2000, 150, 0.34])
+	assert_eq([woodland.forest_trees, woodland.fireflies, woodland.grass_height], [1800, 220, 0.34])
 	assert_gt(woodland.puddles.size(), 3, "puddles")
 	assert_true(woodland.puddles.any(func(p: MapData.Puddle) -> bool: return p.mud), "mud among them")
 	assert_true(woodland.has_motes and woodland.moss_share > 0.0 and woodland.leaf_drifts > 0.0

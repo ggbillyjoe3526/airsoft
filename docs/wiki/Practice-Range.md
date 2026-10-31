@@ -44,7 +44,7 @@ no score, and you start at one end of the field.
   you can see it, and it stays lit longer the further it is from you.
 - **The readout** says how far from you each BB landed, and a BB is only lost when it falls off the map.
 - **The minimap** shows, captioned Practice.
-- **Woodland's practice is at night**, with your weapon torch fitted if your replica carries one.
+- **Woodland's practice is by day**, its first time of day.
 - Practice stays picked when you pick another field. After the range, the next field gives you back the mode you had
   before.
 

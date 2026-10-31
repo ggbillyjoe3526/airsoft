@@ -183,7 +183,7 @@ func clear_line(a: Vector3, b: Vector3, probe: float = 0.0) -> bool:
 ## True if walking the straight line from `a` to (b.x, b.z) would step off a floor: some cell under it has no floor
 ## within max_step of the one before (a platform's edge, a ramp's side; past the grid's edge counts). Walls don't count.
 ## A cell whose every floor is more than `wall_above` over the one before is a wall the body is stopped by, not a
-## ledge: the line goes on past it on its own floor (G11).
+## ledge: the line goes on past it on its own floor (G11). A diagonal on a slope is the steps table's (WR1).
 func drop_on_line(a: Vector3, b: Vector3, wall_above: float = INF) -> bool:
 	var dx := b.x - a.x
 	var dz := b.z - a.z
@@ -199,6 +199,12 @@ func drop_on_line(a: Vector3, b: Vector3, wall_above: float = INF) -> bool:
 			continue
 		# Starting off any floor, the first floor met is where the line is.
 		var next := step_node(node, c) if node >= 0 else pick_node(c, a.y)
+		if next < 0 and node >= 0:
+			# A diagonal up or down a smooth slope a straight step at a time (NavGridBuilder._sloped_diagonal).
+			var di := c % cols - at % cols
+			var dj := c / cols - at / cols
+			if absi(di) == 1 and absi(dj) == 1:
+				next = steps[node * NavGridBuilder.DIRECTIONS + STEP_OF[(di + 1) * 3 + dj + 1]]
 		if next < 0 and node >= 0 and floor_y[cell_start[c]] > floor_y[node] + wall_above:
 			continue
 		if next < 0:

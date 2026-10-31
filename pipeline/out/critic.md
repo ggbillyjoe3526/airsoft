@@ -1,8 +1,38 @@
-Task: DR2 · Depot's CC0 dress (PR #155)
+Task: WR1 · Woodland rebuilt as the open wood of concept 3
 Attempt: 2 of 4
-Head: 23c670c (the follow-up commit adds only play_tuning.tres writing SiteLook's props out, for test_saved_configs, and QA's tests)
+Head: c7e8c44 + uncommitted docs, comment and tools/woodland fixes (tools/check.sh still running: gdlint, notes, wiki passed; unit tests pending). Verdict holds only if it finishes green on this tree.
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept (attempt 1: 7/8 Retry, the see-through slot behind racks against a wall or another rack)
-Resolved: PropLayout.lining gives each face its own row depth (0 on a hidden or short face); core_of draws the backing half a row in on lined faces and flush on the rest; z rows run to the corner where an x row is missing; test_every_point_just_inside_a_rack_s_sides_is_shelving_or_backing fails under the old symmetric backing. QA's load fix (mesh_of) and performance's chunking checked.
-Advisory: the mesh cache lives in a shared config resource (fine on the main thread); models come from the shorepine/kenney CC0 mirror (recorded in ASSETS.md).
-Owner should test: gaps along racks; LOD pop on far shelving; drums and barrels read as cover; colours; square baked shadow under round drums; frame rate on Low.
+Score: 8/8 → Accept (QA Pass, performance Pass, both WR1 at c7e8c44; attempt 2 adds no GDScript beyond comments)
+Failed checks, with evidence: none.
+Attempt-1 must-fix, verified:
+7. build_map.py:490-499 settle() uses keep/give locals; the loop variables are untouched; the tree/thicket branch is merged into
+   :477. Rebuilt in scratch: data/maps/woodland.json byte-identical (947 blocks, 99 foliage, 244 areas), check.py TOTAL 0.
+   check.py:1 docstring says it prints; analyze.py writes no files now (.npy and analysis_times.json gone, :177-180).
+8. tests/README.md:10 names OldWoodland and the runner's `night`; game/nav/README.md:15-17 describes _sloped_diagonal
+   (max_step x sqrt 2, a kerb's corner still a drop); docs/records/WR1.md:35 three fires, eight lanterns. QA's stale
+   comments fixed (match_guard:30, match_runner:174, nav_config:31, play_session:24 and loading_screen:6 now 6 s,
+   game/ai and game/map READMEs, KNOWN_ISSUES WL3/WL10 rows marked the old wood); record :79-80 says the guards play
+   Woodland by night (test_woodland_guards.gd passes true) and why.
+Passed, notes: 1-6 unchanged from attempt 1 (no gameplay code in this attempt's diff); the off-leg guard and the
+   critic's alternative are both in the record (:51-52).
+Advisory (not scored): settle() still keeps comparing block i after it is dropped (no `break` once i in drop): harmless
+   for today's output, but a block given way below 0.05 m can still trim a later one. The changelog note is owed
+   (written after this verdict) and the record's Review line reads pending.
+Owner should test in the game (at most 6, one line each):
+- Walk each lane at 5v5 by day and by night: does the wood read, and do the 100-160 m pinholes feel rare, not a sniper lane?
+- Crouch in a fern bed and a bush near a bot path: are you hidden as the wiki says?
+- Watch bots climb the stream banks and slides: no freezing on slopes, no walking off the North bridge's deck.
+- The Ridge overlook onto the Fort (86 m): too strong for defenders or attackers?
+- Load time into Woodland (about 6 s nav build plus a ~2.5 s views freeze measured headless) on your PC.
+- Frame time at 6v6 by night on High, and a cross-map route's cost on a low-end PC (5.5 ms mean headless).
+
+## Attempt 3
+Head: 7adc90c ("Unit tests in four parts"; only CI/tooling/docs since attempt 2, no GDScript)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
+Score: 7/8 → Accept (one non-blocking check, judgment)
+- Split verified: the awk in tools/unit_tests.sh:36 partitions all 324 tests/unit files once each (77 / 57 / 110 / 80,
+  none empty); unit-4 mirrors unit-2/3 (20 min, setup-godot, part 4, unit-4-logs); check.sh gates part 4 and sums
+  unit-1..4.log; PROCESS and the WR1 record say four parts. Halves (~670/750 s) sit well inside the 1080 s limit.
+8. [judgment] tools/unit_tests.sh:6 still says "CI runs them as three jobs side by side"; :46 still says a part takes
+   "about six minutes" (parts now ~11-12 min locally). docs/PROCESS.md's reflowed line is 145 chars (house wrap 120).
+Must-fix (one-line edits, no re-review needed): "four jobs" at unit_tests.sh:6, refresh the :46 timing, rewrap PROCESS.

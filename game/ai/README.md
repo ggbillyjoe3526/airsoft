@@ -95,7 +95,8 @@ at its level, never how well (`BotPersonality`).
 
 Nothing allocates per tick once warm. Route searches (`NavGrid.find_route`) are queued round-robin and kept to
 `NavConfig.search_budget` a tick (one, the browser's NAV.searchBudget counted in searches: AStar3D can't pause one), a
-walk-off due taking the tick's first (`BotRoutes.plan`, WL2). At 6v6 on Woodland a bot waits at most 0.08 s for its route.
+walk-off due taking the tick's first (`BotRoutes.plan`, WL2). At 6v6 on the old wood a bot waited at most 0.08 s for
+its route (WL2; Woodland's routes since WR1: KNOWN_ISSUES).
 
 ## Callouts
 
