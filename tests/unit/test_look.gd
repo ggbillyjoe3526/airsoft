@@ -52,9 +52,11 @@ func test_the_lights_values_are_the_projects_global_uniforms() -> void:
 ## SiteLook colours that aren't paint: a container's base (each unit takes container_paint), a frame's white tint, and
 ## the marks drawn only with grit (none on a clean surface).
 const NOT_PAINT: Array[StringName] = [&"container", &"frame", &"tuft", &"chip", &"rust_foot", &"dirt_foot"]
-## The props' recipe parts recoloured into the look (tools/props/build_props.py), by palette name.
+## Depot's props' recipe parts (tools/props/build_props.py), every part of each, by palette name. Woodland's recipes
+## (trunk, log, logstack, pine, tyre, crate, truck) join when Woodland moves onto the look.
 const PROP_PARTS := {
-	"barrel": {"warm": &"crimson"}, "drum": {"warm": &"teal", "cool": &"ink"}, "sofa": {"carpet": &"violet"},
+	"barrel": {"warm": &"crimson", "cool": &"grey"}, "drum": {"warm": &"teal", "cool": &"ink"},
+	"pallet": {"all": &"grey"}, "sofa": {"carpet": &"violet", "wood": &"umber"},
 	"shelf": {"shelf-boxes": &"steel", "carton": &"crate", "box": &"cream"},
 }
 
@@ -72,6 +74,8 @@ func test_depots_paint_is_the_palettes() -> void:
 		_in_palette("container paint %d" % i, site.container_paint[i], off)
 	_in_palette("roof ceiling", play.roof.ceiling_colour, off)
 	_in_palette("roof trusses", play.roof.truss_colour, off)
+	_in_palette("stencil paint", Color(site.stencil_paint, 1.0), off)
+	_in_palette("stencil light", Color(site.stencil_light, 1.0), off)
 	assert_eq(off, [] as Array[String], "every colour Depot paints is a palette colour")
 
 

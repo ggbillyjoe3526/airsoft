@@ -7,7 +7,8 @@
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-10-31 | 1 | thread | CI all green on 48e46aa (full suite, match and night guards) | Retry 6/8 (near miss, judgment) | 7: the palette shared in name only; 8: the wiki's Depot page stale |
-| 2026-10-31 | 2 | thread | look, site dress, DD1, props, colour vision, DR2, saved configs (82); CI on the head | – | – |
+| 2026-10-31 | 2 | thread | CI all green on 69865ee; 82 targeted tests | Retry 7/8 (near miss, judgment) | 7: four colours (stencil light, pallet, barrel lids, sofa feet) still outside the palette; QA and performance to run on the head |
+| 2026-10-31 | 3 | thread | look, props, site dress, DD1, colour vision, DR2, WR3, saved configs (89); CI on the head | – | – |
 
 ## Goal
 
@@ -57,6 +58,8 @@ path-traced light as Godot gets, for his RTX 5090.
   fetches skip at grit 0 (QA's and performance's advisory).
 - Attempt 2 (the critic's 8): the wiki's Depot (Maps, Home) re-rendered on High and its roof and props lines rewritten;
   the changelog says Woodland's ground and trees move onto the look next (the Woodland thread's follow-up).
+- Attempt 3: the stencils (ink, cream), the pallet and the barrels' lids (grey) and the sofa's feet (umber) are palette
+  colours too, and in the test; Woodland's CC0 recipes join it when Woodland moves onto the look.
 
 ## Checks
 

@@ -35,15 +35,15 @@ RECIPES = {
     # Steel drums in the look's crimson with steel hoops (the hall's barrel blocks: two upright a block). The colours
     # are docs/ART.md's palette (LookConfig.palette).
     "barrel": {"source": "survival/barrel.glb", "parts": "palette",
-               "colours": {"warm": (0.761, 0.22, 0.455), "cool": (0.46, 0.48, 0.5)}},
+               "colours": {"warm": (0.761, 0.22, 0.455), "cool": (0.549, 0.541, 0.588)}},
     # Fibre drums in the look's teal with ink hoops (the hall's drum blocks: four on a pallet).
     "drum": {"source": "survival/barrel.glb", "parts": "palette",
              "colours": {"warm": (0.165, 0.612, 0.565), "cool": (0.227, 0.184, 0.353)}},
-    # A timber pallet, bleached timber (dull, so off the orange team's hue).
-    "pallet": {"source": "retro-urban/pallet.glb", "parts": "texture", "colours": {"all": (0.58, 0.55, 0.5)}},
-    # The lounge's sofa: the look's violet cushions on dark timber feet.
+    # A pallet in the look's grey (SiteLook's pallet mark too).
+    "pallet": {"source": "retro-urban/pallet.glb", "parts": "texture", "colours": {"all": (0.549, 0.541, 0.588)}},
+    # The lounge's sofa: the look's violet cushions on umber feet.
     "sofa": {"source": "furniture/loungeSofa.glb", "parts": "materials",
-             "colours": {"carpet": (0.463, 0.345, 0.667), "wood": (0.28, 0.25, 0.22)}},
+             "colours": {"carpet": (0.463, 0.345, 0.667), "wood": (0.38, 0.349, 0.31)}},
     # Racking full of stock (the hall's tall rack blocks): the look's steel frames (a neutral, so the hall's many racks
     # never make one colour dominate), tan cartons below and cream boxes above.
     "shelf": {"source": "mini-market/shelf-boxes.glb", "parts": "nodes",

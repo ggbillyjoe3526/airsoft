@@ -186,8 +186,8 @@ enum Canvas {
 @export var flag_pole: float = 2.4
 ## Stencils: their paint (sRGB, with alpha), the light paint on a wall darker than `stencil_light_below` (its paint's
 ## luminance), and how far (m) they stand off the wall.
-@export var stencil_paint: Color = Color(0.227, 0.184, 0.353, 0.92)
-@export var stencil_light: Color = Color(0.96, 0.93, 0.85, 0.92)
+@export var stencil_paint: Color = Color(Color8(0x3a, 0x2f, 0x5a), 0.92)
+@export var stencil_light: Color = Color(Color8(0xf4, 0xec, 0xda), 0.92)
 @export var stencil_light_below: float = 0.45
 @export var stencil_off: float = 0.006
 
