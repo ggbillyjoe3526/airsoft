@@ -1,7 +1,7 @@
 name: Checks
 
 # Every pull request and every push to main: lint the scripts, check the changelog notes and the wiki, run the GUT unit
-# tests (in three parts side by side, CI1), import the project and run the headless smoke test, check the licence
+# tests (in four parts side by side, CI1), import the project and run the headless smoke test, check the licence
 # notices are current, and play the match guards (whole bot matches over 16 seeds, Elimination and Attack / Defend each a
 # job of their own, the night guards six of their own, WL10, the callouts' guards one, CO1; pipeline/README.md › The
 # checks). Fails on any script error or failed test. The Review line is checked by review.yml.
@@ -76,7 +76,7 @@ jobs:
           version: ${{ env.GODOT_VERSION }}
           status: ${{ env.GODOT_STATUS }}
 
-      - name: Unit tests, part 2 (tests/unit/test_df* to test_re*)
+      - name: Unit tests, part 2 (tests/unit/test_df* to test_fr*)
         run: tools/unit_tests.sh 2
 
       - name: Keep the logs
@@ -102,7 +102,7 @@ jobs:
           version: ${{ env.GODOT_VERSION }}
           status: ${{ env.GODOT_STATUS }}
 
-      - name: Unit tests, part 3 (tests/unit/test_rg* to test_z*)
+      - name: Unit tests, part 3 (tests/unit/test_g* to test_re*)
         run: tools/unit_tests.sh 3
 
       - name: Keep the logs
@@ -113,6 +113,32 @@ jobs:
           path: |
             import.log
             unit-3.log
+          if-no-files-found: ignore
+          retention-days: 14
+
+  unit-4:
+    name: Unit tests part 4
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/setup-godot
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          status: ${{ env.GODOT_STATUS }}
+
+      - name: Unit tests, part 4 (tests/unit/test_rg* to test_z*)
+        run: tools/unit_tests.sh 4
+
+      - name: Keep the logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: unit-4-logs
+          path: |
+            import.log
+            unit-4.log
           if-no-files-found: ignore
           retention-days: 14
 

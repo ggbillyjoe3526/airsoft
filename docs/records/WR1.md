@@ -88,4 +88,7 @@ cover, enterable huts, ferns and bushes that hide players, day by default and ni
   rest of part 2, test_mm1_qa to test_re, ran on its own: 611 / 611 pass. CI runs part 2 whole and the match guards.
 - Targeted: test_terrain, test_nav_grid, test_woodland_layout, test_bots, test_practice_spots, test_held_up_measure,
   test_fm1_field_map pass; the seed-7 Woodland match plays 9 rounds with no bot held up.
+- CI's unit tests part 2 ran out of its 18 minutes on the first push (no test failed: the bigger wood's tests load
+  slower). The unit tests are now four parts (`tools/unit_tests.sh`, ci.yml, check.sh, PROCESS): part 2 split at
+  `test_g`, measured locally at about 670 s and 750 s for its two halves, where it was about 1,420 s whole.
 - `tools/woodland/check.py` TOTAL 0; `build_map.py` rebuilds `data/maps/woodland.json` byte for byte.
