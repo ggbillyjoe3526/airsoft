@@ -23,13 +23,22 @@ focus loss (`release`), once you are out, and on the range (`allow_orders`). The
 
 Ping (PN1, the middle mouse button, "Squad: ping a spot"): a press fills the next tick's `PlayerCommand.ping` once,
 dead on the range as the order keys are (`allow_orders`); the simulation drops one while you are out or between rounds.
+Go there (FM1, mouse button 4, "Squad: go there", and the order wheel's Go There) is a ping with `ping_move` set.
+
+The full-screen map (FM1, M held, "Map (hold)"): like the wheel, the mouse moves its own pointer (`MapPointer`,
+`ControlsConfig.map_gain` times the sensitivity, kept on the map's square, which the HUD frames each frame) instead of
+the view, feet still move, the mouse wheel switches nothing and fire and aim need a fresh press after. A click (fire)
+there is a Go there to that point of the field, the ping's press a ping there (`ping_on_map`, `ping_target`), while
+orders can be given; the map and the wheel never open together, and there is no map where `allow_map` is off (the
+range).
 
 | File | What it holds |
 |---|---|
 | `player_input.gd` | `PlayerInput`, above |
 | `key_bindings.gd` | `KeyBindings`: two keys per action by physical key or mouse button; a key belongs to one action, a taken key swaps, Fire and the moves are never stranded, Esc, PrintScreen, Pause, F11 and the debug keys F3, F4 and F5 can't be bound (the browser game's keyBindings.ts); writes the InputMap |
+| `map_pointer.gd` | `MapPointer`: the full-screen map's pointer, kept on its square, and the point of the field under it |
 | `order_wheel_pointer.gd` | `OrderWheelPointer`: the order wheel's pointer, within reach of the middle, and which slice it is on (the browser game's orderWheel.ts) |
 | `key_names.gd` | `KeyNames`: a binding's name in the player's keyboard layout, mouse buttons named too |
 | `sensitivity.gd` | `Sensitivity`: cm/360 at a DPI and back (the browser game's sensitivity.ts) |
 
-Tests: `tests/unit/test_player_input.gd`, `test_order_wheel_input.gd`, `test_key_bindings.gd`, `test_sensitivity.gd`.
+Tests: `tests/unit/test_player_input.gd`, `test_order_wheel_input.gd`, `test_fm1_field_map.gd`, `test_key_bindings.gd`, `test_sensitivity.gd`.

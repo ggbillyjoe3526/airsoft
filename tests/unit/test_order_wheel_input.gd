@@ -120,7 +120,7 @@ func test_the_keys_and_the_wheel_do_nothing_with_nobody_to_order() -> void:
 
 func test_held_the_wheel_takes_the_mouse_and_letting_go_gives_the_order_pointed_at() -> void:
 	Input.action_press(&"move_forward")
-	_point(200.0, 0.0)
+	_point(173.0, -100.0)
 	assert_true(input.wheel().open)
 	assert_almost_eq(input.view_yaw, 0.0, 1e-6, "the view stays put")
 	assert_almost_eq(input.view_pitch, 0.0, 1e-6)
@@ -130,7 +130,7 @@ func test_held_the_wheel_takes_the_mouse_and_letting_go_gives_the_order_pointed_
 	_event(&"order_wheel", false)
 	assert_false(input.wheel().open)
 	input.fill(cmd)
-	assert_eq(cmd.squad_order, SquadOrder.Kind.HOLD, "the right slice: Hold Here")
+	assert_eq(cmd.squad_order, SquadOrder.Kind.HOLD, "the upper right slice: Hold Here")
 	assert_true(cmd.order_from_wheel)
 	_move(10.0, 0.0)
 	assert_lt(input.view_yaw, 0.0, "closed, the mouse turns the view again")

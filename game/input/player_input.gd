@@ -15,6 +15,11 @@ extends Node
 ## whether the last one sent was picked on the wheel, for where its refusal shows. Throw smoke and Throw flash (SF1)
 ## fill the next tick's throw_grenade once (the last pressed, if both). Open / shut door (DO1) fills the next tick's
 ## use_door once.
+## Go there (FM1: its key, the wheel's Go There) is a ping along the view that sends your bot teammates there
+## (PlayerCommand.ping_move). Held, the full-screen map's key opens the map (`allow_map`): as with the wheel the mouse
+## moves the map's own pointer (MapPointer) instead of the view, feet still move, the mouse wheel switches nothing, and
+## fire and aim need a fresh press once it closes; a click (fire) there is a Go there to that point of the field and a
+## ping's press a ping there (ping_on_map), while orders can be given. The map and the wheel never open together.
 
 ## The actions in project.godot's input map.
 const FORWARD := &"move_forward"
@@ -43,6 +48,10 @@ const SCOREBOARD := &"scoreboard"
 const ORDER_WHEEL := &"order_wheel"
 ## Ping where you look, for your bot teammates (PN1).
 const PING := &"ping"
+## Held, the full-screen map is open (FM1).
+const FIELD_MAP := &"field_map"
+## Go there (FM1): its key; the order wheel's Go There and a click on the map too.
+const PING_MOVE := &"ping_move"
 ## The magazine hand-off (MH3): toss one to a teammate asking you in reach, else ask for one (MagShare).
 const MAG := &"mag_hand_off"
 ## Throw a smoke bomb or a flash bomb (SF1).
@@ -81,8 +90,11 @@ var _aim_held_back: bool = false
 ## The squad order keyed or picked on the wheel since the last tick, and whether it came from the wheel.
 var _order_latch: SquadOrder.Kind = SquadOrder.Kind.NONE
 var _order_from_wheel: bool = false
-## Ping pressed since the last tick.
+## Ping pressed since the last tick, whether a Go there (FM1), and whether on the map at _ping_target.
 var _ping_latch: bool = false
+var _ping_move_latch: bool = false
+var _ping_on_map: bool = false
+var _ping_target: Vector3 = Vector3.ZERO
 ## Need a Mag pressed (or picked on the wheel) since the last tick, and whether picked on the wheel.
 var _mag_latch: bool = false
 var _mag_latch_wheel: bool = false
@@ -94,6 +106,9 @@ var mag_sent: bool = false
 var _orders_allowed: bool = true
 var _wheel_allowed: bool = true
 var _wheel: OrderWheelPointer = OrderWheelPointer.new()
+## The full-screen map's pointer, and whether there is a map to open (allow_map).
+var _map: MapPointer = MapPointer.new()
+var _map_allowed: bool = false
 
 
 func setup(controls: ControlsConfig, max_pitch: float) -> void:
@@ -107,6 +122,18 @@ func wheel() -> OrderWheelPointer:
 	return _wheel
 
 
+## The full-screen map's pointer (the HUD frames it each frame and draws it): open, and where.
+func field_map() -> MapPointer:
+	return _map
+
+
+## Whether the full-screen map can open (`on`: a match on a field, not the range): it closes once it can't.
+func allow_map(on: bool) -> void:
+	_map_allowed = on
+	if not on and _map.open:
+		_close_map()
+
+
 ## Whether orders can be given: `keys` (false on the range: no teammates to order) lets the order keys and the wheel
 ## work, `wheel` (you are in play) the wheel too. The wheel closes giving nothing once it can't stay open.
 func allow_orders(keys: bool, wheel_ok: bool) -> void:
@@ -114,11 +141,16 @@ func allow_orders(keys: bool, wheel_ok: bool) -> void:
 	_wheel_allowed = keys and wheel_ok
 	if not keys:
 		_order_latch = SquadOrder.Kind.NONE
-		_ping_latch = false
+		_clear_ping()
 	if not _wheel_allowed:
 		_mag_latch = false
 	if not _wheel_allowed and _wheel.open:
 		_close_wheel()
+
+
+## Whether a ping on the full-screen map would be taken now: orders can be given and you are in play (as the wheel).
+func orders_allowed() -> bool:
+	return _wheel_allowed
 
 
 ## Looks along (yaw, pitch), standing, as at a spawn.
@@ -145,6 +177,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if _wheel.open and _wheel_input(event):
 		return
+	if _map.open and _map_input(event):
+		return
 	var motion := event as InputEventMouseMotion
 	if motion != null:
 		var turn := _controls.radians_per_count * _controls.sensitivity
@@ -161,8 +195,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _orders_allowed and _order_key(event):
 		return
 	if event.is_action(ORDER_WHEEL):
-		if not _wheel.open: # a second key bound to the wheel doesn't recentre it
+		if not _wheel.open and not _map.open: # a second key bound to the wheel doesn't recentre it
 			_open_wheel()
+	elif event.is_action(FIELD_MAP):
+		if not _map.open and not _wheel.open:
+			_open_map()
 	elif event.is_action(FIRE):
 		_fire_latch = true
 	elif event.is_action(AIM) and _controls.aim_toggle:
@@ -198,7 +235,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_hop_steps += 1
 	elif event.is_action(PING):
 		# Not while the wheel is open: it holds the view still, so a ping would land where the view was left.
-		_ping_latch = _ping_latch or (_orders_allowed and not _wheel.open)
+		if _orders_allowed and not _wheel.open:
+			_latch_ping(false)
 	elif event.is_action(NEXT_SLOT):
 		_slot_steps += 1
 		_slot_latch = -1
@@ -248,8 +286,78 @@ func _latch_order(kind: SquadOrder.Kind, from_wheel: bool) -> void:
 			# H with the wheel held open answers in the wheel's middle too: the line under it is hidden.
 			_mag_latch_wheel = from_wheel or _wheel.open
 		return
+	if kind == SquadOrder.Kind.MOVE:
+		# Go there is a ping along the view (held still while the wheel is open: where you looked opening it).
+		if _orders_allowed:
+			_latch_ping(true)
+		return
 	_order_latch = kind
 	_order_from_wheel = from_wheel
+
+
+## A ping along the view latched for the next tick (`move`: a Go there).
+func _latch_ping(move: bool) -> void:
+	_ping_latch = true
+	_ping_move_latch = move
+	_ping_on_map = false
+
+
+## A ping on the map at the pointer's point of the field latched for the next tick (`move`: a Go there); only while
+## orders can be given and you are in play, as the wheel.
+func _latch_map_ping(move: bool) -> void:
+	if not _wheel_allowed or not _map.framed():
+		return
+	_ping_latch = true
+	_ping_move_latch = move
+	_ping_on_map = true
+	_ping_target = _map.world()
+
+
+func _clear_ping() -> void:
+	_ping_latch = false
+	_ping_move_latch = false
+	_ping_on_map = false
+
+
+## Opens the full-screen map, if there is one: the trigger is the map's until it closes and is let go.
+func _open_map() -> void:
+	if not _map_allowed:
+		return
+	_map.start()
+	hold_fire()
+
+
+## Closes the map; fire stays held back until it is let go (a click that pinged is not a shot).
+func _close_map() -> void:
+	_map.close()
+	hold_fire()
+
+
+## An event while the map is open: true if the map took it. The mouse moves its pointer; a click or Go there's key is a
+## Go there there, the ping's press a ping there; letting go of the key closes it; aim waits for a fresh press; the mouse wheel and the
+## order wheel's key do nothing. Everything else (the keys that move you, the order keys) goes on as usual.
+func _map_input(event: InputEvent) -> bool:
+	var motion := event as InputEventMouseMotion
+	if motion != null:
+		_map.move(motion.screen_relative * _controls.map_gain * _controls.sensitivity)
+		return true
+	if event.is_echo():
+		return false
+	if event.is_action_released(FIELD_MAP):
+		_close_map()
+		return true
+	if not event.is_pressed():
+		return false
+	if event.is_action(FIRE) or event.is_action(PING_MOVE):
+		_latch_map_ping(true)
+		return true
+	if event.is_action(PING):
+		_latch_map_ping(false)
+		return true
+	if event.is_action(AIM):
+		_aim_held_back = true
+		return true
+	return event.is_action(NEXT_SLOT) or event.is_action(PREVIOUS_SLOT) or event.is_action(ORDER_WHEEL)
 
 
 ## Opens the wheel, if orders can be given: the trigger is the wheel's until it closes and is let go.
@@ -314,12 +422,15 @@ func fill(cmd: PlayerCommand, held_slot: int = 0) -> void:
 	cmd.aim = _aiming()
 	# Lean is held, whatever crouch and aim do (owner, 2026-10-03).
 	cmd.lean = Input.get_action_strength(LEAN_RIGHT) - Input.get_action_strength(LEAN_LEFT)
-	if not _wheel.open:
+	if _map.open and not Input.is_action_pressed(FIELD_MAP):
+		# its key let go unseen: closed
+		_close_map()
+	if not _wheel.open and not _map.open:
 		if _fire_held_back and not Input.is_action_pressed(FIRE):
 			_fire_held_back = false
 		if _aim_held_back and not Input.is_action_pressed(AIM):
 			_aim_held_back = false
-	elif not Input.is_action_pressed(ORDER_WHEEL):
+	elif _wheel.open and not Input.is_action_pressed(ORDER_WHEEL):
 		# its key let go unseen (a rebind, the window losing it): closed, giving nothing
 		_close_wheel()
 	cmd.fire = not _fire_held_back and (Input.is_action_pressed(FIRE) or _fire_latch)
@@ -346,6 +457,9 @@ func fill_order(cmd: PlayerCommand) -> void:
 	cmd.squad_order = _order_latch
 	cmd.order_from_wheel = _order_from_wheel
 	cmd.ping = _ping_latch
+	cmd.ping_move = _ping_latch and _ping_move_latch
+	cmd.ping_on_map = _ping_latch and _ping_on_map
+	cmd.ping_target = _ping_target
 	# A bot playing you (the smoke test) may press it too: a press of yours adds to it, never takes it away.
 	mag_sent = _mag_latch
 	if _mag_latch:
@@ -353,7 +467,7 @@ func fill_order(cmd: PlayerCommand) -> void:
 		mag_from_wheel = _mag_latch_wheel
 	_order_latch = SquadOrder.Kind.NONE
 	_order_from_wheel = false
-	_ping_latch = false
+	_clear_ping()
 	_mag_latch = false
 	_mag_latch_wheel = false
 
@@ -370,6 +484,8 @@ func release() -> void:
 	_clear_latches()
 	if _wheel.open:
 		_close_wheel()
+	if _map.open:
+		_close_map()
 
 
 func _clear_latches() -> void:
@@ -386,6 +502,6 @@ func _clear_latches() -> void:
 	_hop_steps = 0
 	_order_latch = SquadOrder.Kind.NONE
 	_order_from_wheel = false
-	_ping_latch = false
+	_clear_ping()
 	_mag_latch = false
 	_mag_latch_wheel = false

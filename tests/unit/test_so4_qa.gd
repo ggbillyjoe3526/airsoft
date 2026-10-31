@@ -67,7 +67,7 @@ func test_a_notice_shows_for_a_key_pressed_with_the_wheel_open_and_for_an_order_
 	assert_false(w.visible)
 	# The same, picked on the wheel: point at Hold Here and let go (Hover).
 	_event(session, &"order_wheel", true)
-	_move(session, 100.0, 0.0)
+	_move(session, 87.0, -50.0)
 	await wait_process_frames(2)
 	assert_eq(w.lit_slice(), 1, "pointed at Hold Here")
 	var before := session._bots.order_outcome.serial

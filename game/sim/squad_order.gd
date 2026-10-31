@@ -5,5 +5,8 @@ class_name SquadOrder
 ## or the round ends; Team plan ends it at once.
 
 ## NONE: no order this tick. TEAM_PLAN: back to the team plan (the order wheel's Team Plan). MAG: the order wheel's Need
-## a Mag (MH3), never given as an order: PlayerInput turns it into the command's mag_hand_off (MagShare).
-enum Kind { NONE, FOLLOW, HOLD, REGROUP, TEAM_PLAN, MAG }
+## a Mag (MH3), never given as an order: PlayerInput turns it into the command's mag_hand_off (MagShare). MOVE: Go
+## there (FM1), never given as an order either: the order wheel's Go There, its key and a click on the full-screen map
+## are a ping (PlayerCommand.ping_move) that the bots' controller hands out as this order, to a spot, which reads Hold
+## here once they are all there.
+enum Kind { NONE, FOLLOW, HOLD, REGROUP, TEAM_PLAN, MAG, MOVE }

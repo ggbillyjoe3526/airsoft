@@ -59,12 +59,13 @@ func test_it_draws_the_wheels_items_each_with_its_key() -> void:
 	assert_true(w.visible)
 	assert_eq(w.slice_name(0), "FOLLOW ME")
 	assert_eq(w.slice_name(1), "HOLD HERE")
-	assert_eq(w.slice_name(2), "REGROUP")
-	assert_eq(w.slice_name(3), "TEAM PLAN")
-	assert_eq(w.slice_name(4), "NEED A MAG", "the fifth, upper left (MH3)")
-	assert_eq([w.slice_key(0), w.slice_key(1), w.slice_key(2), w.slice_key(3), w.slice_key(4)],
-			["F", "X", "V", "", "H"], "Team Plan has no key")
-	assert_eq(w.slice_name(5), "", "only the wheel's own items")
+	assert_eq(w.slice_name(2), "GO THERE", "the third, lower right (FM1)")
+	assert_eq(w.slice_name(3), "REGROUP")
+	assert_eq(w.slice_name(4), "TEAM PLAN")
+	assert_eq(w.slice_name(5), "NEED A MAG", "the last, upper left (MH3)")
+	assert_eq([w.slice_key(0), w.slice_key(1), w.slice_key(2), w.slice_key(3), w.slice_key(4), w.slice_key(5)],
+			["F", "X", "Mouse 4", "V", "", "H"], "Team Plan has no key")
+	assert_eq(w.slice_name(6), "", "only the wheel's own items")
 
 
 func test_a_different_wheel_is_drawn_from_its_data() -> void:
@@ -122,7 +123,7 @@ func test_the_pointer_is_drawn_in_step_with_the_mouses() -> void:
 
 func test_a_notice_shows_in_the_middle_while_the_wheel_is_open_and_times_out() -> void:
 	var w := hud.order_wheel()
-	_open(Vector2(60.0, 0.0))
+	_open(Vector2(52.0, -30.0))
 	assert_eq(w.notice_text(), "")
 	outcome.record(you.id, SquadOrder.Kind.NONE, SquadOrders.Notice.NOBODY)
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, 0.016)

@@ -13,7 +13,7 @@ const NAMES := ["", "Rook", "Brick", "Fox"]
 const YOU := 0
 const ROOK := 1
 const BRICK := 2
-## The order wheel's pointer on its fifth item, upper left (288 degrees clockwise from the top).
+## The order wheel's pointer on its last item, Need a Mag, upper left (288 degrees clockwise from the top).
 const UPPER_LEFT := Vector2(-80.0, -26.0)
 
 var tuning := SimTuning.new()
@@ -182,10 +182,10 @@ func test_h_is_dead_on_the_range_and_while_you_are_out() -> void:
 
 
 func test_the_wheels_fifth_item_upper_left_does_what_h_does() -> void:
-	assert_eq(controls.wheel_orders.size(), 5)
-	assert_eq(controls.wheel_orders[4], SquadOrder.Kind.MAG)
-	assert_eq(controls.wheel_keys[4], &"mag_hand_off")
-	assert_eq(OrderWheelPointer.slice(UPPER_LEFT, 5, controls.wheel_dead_zone), 4, "upper left")
+	assert_eq(controls.wheel_orders.size(), 6, "Go There (FM1) made it six")
+	assert_eq(controls.wheel_orders[5], SquadOrder.Kind.MAG)
+	assert_eq(controls.wheel_keys[5], &"mag_hand_off")
+	assert_eq(OrderWheelPointer.slice(UPPER_LEFT, 6, controls.wheel_dead_zone), 5, "upper left")
 	for pick: ControlsConfig.WheelPick in [ControlsConfig.WheelPick.HOVER, ControlsConfig.WheelPick.CLICK]:
 		controls.wheel_pick = pick
 		_make_input()
@@ -233,17 +233,17 @@ func test_the_wheel_draws_need_a_mag_upper_left_with_h_and_toss_a_mag_in_reach()
 	wheel.at = UPPER_LEFT
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, DT)
 	var w := hud.order_wheel()
-	assert_eq(w.slice_name(4), "NEED A MAG")
-	assert_eq(w.slice_key(4), "H")
-	assert_eq(w.lit_slice(), 4)
-	assert_true(w._label_at[4].x < 0.0 and w._label_at[4].y < 0.0, "upper left")
+	assert_eq(w.slice_name(5), "NEED A MAG")
+	assert_eq(w.slice_key(5), "H")
+	assert_eq(w.lit_slice(), 5)
+	assert_true(w._label_at[5].x < 0.0 and w._label_at[5].y < 0.0, "upper left")
 	_last_mag(state.characters[ROOK])
 	_tick([ROOK])
 	assert_true(_line().toss_ready(), "Rook asked you and is 4 m off")
-	assert_eq(w.slice_name(4), "TOSS A MAG")
+	assert_eq(w.slice_name(5), "TOSS A MAG")
 	state.characters[ROOK].position.x = 12.0
 	_tick()
-	assert_eq(w.slice_name(4), "NEED A MAG", "out of reach: asking again")
+	assert_eq(w.slice_name(5), "NEED A MAG", "out of reach: asking again")
 
 
 # --- criterion 2: a refusal, and the radio click ---

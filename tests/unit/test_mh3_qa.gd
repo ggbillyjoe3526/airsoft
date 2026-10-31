@@ -128,7 +128,7 @@ func test_the_wheel_reads_toss_a_mag_when_a_farther_asker_is_in_reach_and_the_ne
 	assert_true(sim.mag_share.can_toss_to(you, state.characters[BRICK], pick), "Brick is in reach")
 	var w := _open_wheel()
 	assert_true(_line().toss_ready(), "a press would toss to Brick")
-	assert_eq(w.slice_name(4), "TOSS A MAG", "so the wheel's item reads Toss a Mag")
+	assert_eq(w.slice_name(5), "TOSS A MAG", "so the wheel's item reads Toss a Mag")
 	wheel.close()
 	_tick([YOU])
 	var toss := state.events.first(GameEvent.Kind.MAG_TOSS)
@@ -172,11 +172,11 @@ func test_the_wheel_item_reads_need_a_mag_again_once_the_toss_is_in_the_air() ->
 	_last_mag(state.characters[ROOK])
 	_tick([ROOK])
 	var w := _open_wheel()
-	assert_eq(w.slice_name(4), "TOSS A MAG")
+	assert_eq(w.slice_name(5), "TOSS A MAG")
 	_tick([YOU])
 	assert_not_null(state.events.first(GameEvent.Kind.MAG_TOSS))
 	hud.update_orders(wheel, SquadOrder.Kind.NONE, outcome, DT)
-	assert_eq(w.slice_name(4), "NEED A MAG", "nothing left to toss to: the magazine is in the air")
+	assert_eq(w.slice_name(5), "NEED A MAG", "nothing left to toss to: the magazine is in the air")
 	assert_false(_line().toss_ready())
 
 

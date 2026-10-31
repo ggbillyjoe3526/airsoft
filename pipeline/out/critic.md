@@ -1,28 +1,21 @@
-Task: DR1 · Depot rebuilt as the indoor hall of concept 3
-Attempt: 4 of 4
-Head: b0641b5 (CI per the brief; QA Pass on 2f44878; performance Pass on b1d7177; 2f44878..b0641b5 changes map data, tests and docs only, no game/ code)
+Task: FM1 · The full-screen map and Go there
+Attempt: 1 of 4
+Head: 1ab2484 (re-checked from a8f19da: pings.gd _floor_spot line check and step-back, the stack test, KNOWN_ISSUES, PLAYTEST, changelog, FEATURES, performance report; test_fm1_go_there and test_fm1_qa 32/32 and gdlint clean on 1ab2484; full check.sh still running there)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept
-Failed checks, with evidence (file:line, one or two lines each, each marked measured or judgment):
-None.
-Check 1, resolved: layout.py:152, :154 end both west outer screens at x -45.0; depot.json's north screen is now
-  (-50..-45, -13.5..-12.5) and the dead rack (-45..-40, -22..-13) meets it face to face. My 0.25 m scan of depot.json
-  (cells in no area and no block 2 m or taller) finds 0; the 1 x 0.5 m notch left at (-45..-44, -13..-12.5) is Staging
-  floor, open only to the corridor. The 65 m Chrono line is the owner's ruling: DECISIONS.md:583 (Maps and modes),
-  field_standard.gd:80, DR1.md:69-71.
-Check 4, resolved: test_depot_hall.gd:101 (every 0.5 m cell outside the areas is inside a block 2 m or taller); run on
-  2f44878's depot.json it finds 9 open cells, from (-44.25, -13.25) east, so it fails there and passes here.
-Advisories from attempt 3, done: the gap widths are stated as built (layout.py:148 for Staging; DR1.md:43-45: corridor
-  3 m, west outer 2 m, 2.6 to 3.5 m elsewhere); test_depot_hall_qa.gd:150-153 test the widened gap and corridor middles;
-  `char` is `body` (:184); the attempts table has rows 1 to 4; the bake hash is updated (test_dp2_qa.gd:13).
-Must-fix for the next attempt: none.
+Score: 8/8 → Accept, conditional only on tools/check.sh (or CI) green on 1ab2484. FM1's performance report is now in pipeline/out/performance.md (Pass, by reading).
+Evidence:
+1. Held M opens, release closes: player_input.gd:197-199, 343-345; hearing only: hud_minimap.gd fill (teammates, heard patches, pole, hold; never the other team), hud_field_map.gd:115-117, test_it_shows_what_the_minimap_shows_and_never_the_other_team; any layout: fit_whole from the drawing's size (hud_minimap.gd +410), areas_of from map.areas, Depot and Woodland tested; bots obey: bot_controller.gd:239-241 → squad_order_book.gd give_move/move_arrivals; view ping stops at a wall: pings.gd move_spot → _floor_spot back_off, test_go_there_at_a_wall...; map click anywhere: pings.gd map_spot, never a contact.
+2. PING event gains value 2 and value2 (game_event.gd:36), PlayerCommand gains fields; no contract changed. Sim stays node-free.
+3. Per-frame paths read: hud_field_map.update (title string only on a new round), Overlay.place (redraw only when the pointer moves), MapPointer (values), move_arrivals (no alloc), give_move reuses _order_team. Allocation tests exist for the open map and walking ticks.
+4. test_go_there_on_the_map_sends_the_squad_side_by_side_and_turns_to_hold_once_there fails without give_move/move_arrivals (MOVE never given, never turns to HOLD).
 Advisory (not blocking):
-- test_depot_hall_qa.gd:188, :232: `no_wall` is only printed with gut.p, never asserted; assert it or drop it later.
-- qa-report.md still quotes "gaps and corridors 2.5 to 3 m" (its 2f44878 text); the record is the current statement.
-Owner should test in the game (at most 6, one line each):
-- Walk out of both spawns through each chicane: tight or fine? Do bots queue in them at round start?
-- Attack / Defend on Depot: do the defenders hold A stairs and B ramp, and can you take A?
-- Stand anywhere outside a spawn room: can you see a spawn? (the test says no)
-- Across the Chrono hall, Lower mid to Upper mid (65 m, kept open): does it dominate rounds?
-- Overtime on Depot: do flanking bots come round the Chrono hall's hut at the flag?
-- Bump a drum and a barrel: do the clank and the plastic thud read as toys?
+- pings.gd:190-200 the step-back loop ends only because spot_snap > 0 (back never reaches hit at 0); a maxf floor on the step would make a bad tuning value unable to hang the tick. judgment
+- The far-side case of the old nearest-walkable has no failing test of its own (no field found that shows it); the line check guards it and every ping test runs through it.
+Must-fix before merge: check.sh green on 1ab2484.
+Owner should test in the game:
+- Hold M on Depot and Woodland: is it big and readable, are the area words placed right, is the pointer speed right?
+- Click a far corner: radio click, both teammates set off side by side, "GO · N M" turns to "HOLD · N M" on arrival.
+- Mouse 4 at a wall with a crate or ledge in front of it: the squad stops on your side.
+- Click inside a building's walls or off the field: "Nowhere there to go" shows, and isn't hidden under the dimmed map.
+- Release M mid-fight: the view turns again at once and the first click after is not lost or doubled.
+- Six items on the wheel: still easy to hit the one you want?

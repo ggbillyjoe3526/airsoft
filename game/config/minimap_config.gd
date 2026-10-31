@@ -106,3 +106,20 @@ extends Resource
 ## The area label's backing, as a share of the HUD's navy (the panel and caption are solid); all follow the panels'
 ## opacity.
 @export var label_backing: float = 0.82
+
+@export_group("Full-screen map")
+## The full-screen map (FM1, the map's key held): the minimap's field whole, north up, in a square as big as the screen
+## allows, map_margin (px) inside its edges; the field fills map_fit of the square's side, and "DEPOT · ROUND 2" sits in
+## the square's top map_title_room (px), clear of the field; the screen behind it dimmed to map_backdrop.
+@export var map_margin: float = 40.0
+@export var map_title_room: float = 50.0
+@export var map_fit: float = 0.88
+@export var map_backdrop: Color = Color(Color("080d18"), 0.8)
+@export var map_title_size: int = 24
+## The named areas' words on it (type size, px) and their dark edge (px).
+@export var map_area_size: int = 13
+@export var map_area_outline: int = 5
+## Its pointer while you can ping there (px): a ring this big round a dot, in your team's colour.
+@export var map_pointer_radius: float = 10.0
+@export var map_pointer_width: float = 2.4
+@export var map_pointer_dot: float = 2.6
