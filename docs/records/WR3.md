@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-10-31 | 1 | thread | see Checks | pending | – |
+| 2026-10-31 | 1 | thread | see Checks | Retry 8/8 (held for QA, performance) | thickets' cores left gaps between touching thickets |
+| 2026-10-31 | 2 | thread | see Checks | pending | – |
 
 ## Goal
 
@@ -29,8 +30,9 @@ models in Beta (2026-10-31).
   `grid_cells` cell, each stretched to its cell and turned a random half (a square model a random quarter), so a
   stack's ends and faces vary. A model laid 64 times or more is chunked (`chunk_from`), as DR2's shelving.
 - **Without a site.** Woodland has no site dress, so `PlaySession` builds a `PropDress` on its own and warms its
-  material; `MapLevel`'s greybox leaves a dressed block out, or draws a thicket's dark core inset 0.7 m and cut to 60 %
-  of its height between its spruces (`model_cores`), so nobody sees through a thicket that stops sight below its tops.
+  material; `MapLevel`'s greybox leaves a dressed block out, or draws a thicket's dark core cut to 60 % of its height
+  between its spruces (`model_cores`, `MapLevel.core_box`), inset 0.7 m (at most a fifth of its width) only on a side
+  no other thicket touches, so nobody sees through a thicket, or between two, that stops sight below its tops.
 - `tools/eye_pictures.gd` and `tools/map_pictures.gd` draw the props, the woods and the bushes on a map without a site.
 - Wiki: Maps (the CC0 props, the boxes they stand in). KNOWN_ISSUES: the greybox row becomes the props' square
   boxes (document). ROADMAP: WR3 done.
@@ -51,3 +53,13 @@ models in Beta (2026-10-31).
   team. The full suite runs on CI.
 - Eye-level pictures of the camp, Hut row, the Sawmill and the Truck bend checked by eye (trunks, spruces, log stacks,
   crates, tyres and the truck in place, no greybox boxes showing through).
+
+## Attempt 2
+
+- The critic found the cores inset on every side left a 1.4 m gap between touching thickets (about 5 % of sight lines
+  across a clump clear, some for 26 m) and a 1 m strip's core a card. `MapLevel.core_box` now runs a core to any side
+  another thicket touches and insets the rest at most a fifth of the box's width; `test_props` checks no touching
+  pair leaves a gap. A lined (TILE) block keeps its box on a map without a site, and two lines over 120 columns are
+  wrapped.
+- Performance (Pass) advised the 2,609 spruces' shadows and up to 154 prop draws per pass; Low draws no sun shadows,
+  so the owner's F3 check on Low across the thickets is in the playtest list.

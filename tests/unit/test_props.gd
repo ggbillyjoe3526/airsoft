@@ -310,12 +310,41 @@ func test_a_dressed_block_draws_no_box_and_a_thicket_only_its_core() -> void:
 			as PackedVector3Array).size()
 	assert_lt(verts.call(dressed), verts.call(plain), "the dressed blocks' boxes are left out")
 	assert_eq(look.props.core_of(thicket), look.props.model_cores[&"pine"])
-	var core := MapLevel.inset_of(thicket, look.props.core_of(thicket))
+	var inset: Vector2 = look.props.model_cores[&"pine"]
+	var cored: Array[MapData.Block] = []
+	for b in m.blocks:
+		if b.dress == &"pine":
+			cored.append(b)
+	var lone := MapLevel.core_box(thicket, inset, [] as Array[MapData.Block])
 	var lo := thicket.center - thicket.size * 0.5
 	var hi := thicket.center + thicket.size * 0.5
-	var inset: Vector2 = look.props.model_cores[&"pine"]
-	assert_almost_eq(core * lo, lo + Vector3(inset.x, 0.0, inset.x), Vector3.ONE * 1e-4, "inset at the foot")
-	assert_almost_eq((core * hi).y, lo.y + thicket.size.y * inset.y, 1e-4, "cut down to its share")
+	var step := Vector3(minf(inset.x, thicket.size.x * MapLevel.CORE_SHARE), 0.0,
+			minf(inset.x, thicket.size.z * MapLevel.CORE_SHARE))
+	assert_almost_eq(lone * lo, lo + step, Vector3.ONE * 1e-4, "a lone thicket's core is inset at the foot")
+	assert_almost_eq((lone * hi).y, lo.y + thicket.size.y * inset.y, 1e-4, "cut down to its share")
+	# Touching thickets' cores meet: each side another thicket touches runs to the face.
+	var gaps: Array[String] = []
+	for t in cored:
+		var core := MapLevel.core_box(t, inset, cored)
+		var t_lo := t.center - t.size * 0.5
+		var t_hi := t.center + t.size * 0.5
+		var c_lo := core * t_lo
+		var c_hi := core * t_hi
+		for o in cored:
+			if o == t:
+				continue
+			var o_box := AABB(o.center - o.size * 0.5, o.size)
+			for axis: int in [0, 2]:
+				var probe_lo := t_lo
+				var probe_size := t.size
+				probe_lo[axis] = t_hi[axis]
+				probe_size[axis] = 0.01
+				if o_box.intersects(AABB(probe_lo, probe_size)) and absf(c_hi[axis] - t_hi[axis]) > 1e-3:
+					gaps.append("%s→%s" % [t.center, o.center])
+				probe_lo[axis] = t_lo[axis] - 0.01
+				if o_box.intersects(AABB(probe_lo, probe_size)) and absf(c_lo[axis] - t_lo[axis]) > 1e-3:
+					gaps.append("%s←%s" % [t.center, o.center])
+	assert_eq(gaps, [] as Array[String], "no gap between touching thickets' cores")
 	assert_gt(hidden, 0)
 
 

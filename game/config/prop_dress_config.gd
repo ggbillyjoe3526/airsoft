@@ -1,8 +1,8 @@
 class_name PropDressConfig
 extends Resource
 ## A field's CC0 props (DR2, WR3): which blocks are drawn as models instead of their box (Depot's by kind, Woodland's
-## by the prop each block names, MapData.Block.dress), and how the models are laid in the box. Each prop fills its block's box (never past it), so cover, collision and the nav grid stay the box's;
-## the box's own faces are not drawn (SiteSurface.core_of). The models are Kenney's (CC0), recoloured off the teams'
+## by the prop each block names, MapData.Block.dress), and how the models are laid in the box. Each prop fills its
+## block's box (never past it), so cover, collision and the nav grid stay the box's; the box's own faces are not drawn (SiteSurface.core_of). The models are Kenney's (CC0), recoloured off the teams'
 ## hues by tools/props/build_props.py into assets/models/props/ (docs/ASSETS.md).
 
 ## How a kind's props are laid: ROW stands round props upright side by side along the box's long side, as many as fit
@@ -46,9 +46,10 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID }
 	&"logstack": Vector3(1.6, 0.9, 1.4), &"crate": Vector3(0.9, 0.9, 1.0), &"tyre": Vector3(0.9, 0.45, 0.9),
 	&"pine": Vector3(1.5, 0.0, 1.5),
 }
-## A named prop whose box is still drawn behind it, inset (x, m) on every side and cut down to a share (y) of its
-## height, rather than not at all: a thicket's dark core between its spruces, so nothing is seen through a thicket
-## that stops BBs and sight below the tops of its trees.
+## A named prop whose box is still drawn behind it, cut down to a share (y) of its height and inset (x, m, at most a
+## fifth of the box's width) on each side with no other such box against it, rather than not at all: a thicket's dark
+## core between its spruces, unbroken across touching thickets, so nothing is seen through a thicket that stops BBs
+## and sight below the tops of its trees.
 @export var model_cores: Dictionary[StringName, Vector2] = {&"pine": Vector2(0.7, 0.6)}
 ## A dressed kind's block lower than this (m) keeps its box: a rack's shelf boards stay boards, its racking is
 ## shelving.
