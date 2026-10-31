@@ -30,11 +30,11 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 	for b in map.blocks:
 		if not cfg.dresses(b) or b.rise != MapData.Rise.NONE:
 			continue
-		var model: StringName = cfg.kind_props[b.kind]
+		var model := cfg.model_of(b)
 		if not boxes.has(model):
 			continue
 		var foot := b.center - Vector3(0.0, b.size.y * 0.5, 0.0)
-		match cfg.kind_lays.get(b.kind, PropDressConfig.Lay.FIT):
+		match cfg.lay_of(b):
 			PropDressConfig.Lay.ROW:
 				_row(_placed(out, model), boxes[model], foot, b.size, cfg, rng)
 			PropDressConfig.Lay.CLUSTER:
@@ -47,6 +47,8 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 						Vector3(b.size.x, b.size.y - lift, b.size.z), cfg, rng)
 			PropDressConfig.Lay.TILE:
 				_tile(_placed(out, model), boxes[model], b, foot, cfg, map)
+			PropDressConfig.Lay.GRID:
+				_grid(_placed(out, model), boxes[model], foot, b.size, cfg.grid_cells.get(model, b.size), cfg, rng)
 			_:
 				_placed(out, model).add(_fit_facing(boxes[model], b, foot, middle), 1.0)
 	return out
@@ -106,6 +108,37 @@ static func _cluster(p: Placed, model: AABB, foot: Vector3, size: Vector3, cfg: 
 		for j in nz:
 			var at := foot + Vector3((i + 0.5) * cx - size.x * 0.5, 0.0, (j + 0.5) * cz - size.z * 0.5)
 			p.add(fit(model, at, Vector3(d, size.y, d), _quarter_turn(rng)), _shade(cfg, rng))
+
+
+## The box filled with the model in cells about `cell` m across (x along the box's long side, y up, 0 for one layer,
+## z across), stacked from the foot, each stretched to its cell, the model's z across the box; a quarter turn either
+## way at random where that keeps it so (a round model, a square one), so a stack never reads as one model repeated.
+static func _grid(p: Placed, model: AABB, foot: Vector3, size: Vector3, cell: Vector3, cfg: PropDressConfig,
+		rng: RandomNumberGenerator) -> void:
+	var along_x := size.x >= size.z
+	var long := size.x if along_x else size.z
+	var across := size.z if along_x else size.x
+	var n := Vector3i(maxi(1, roundi(long / maxf(cell.x, 1e-6))),
+			1 if cell.y <= 0.0 else maxi(1, roundi(size.y / cell.y)), maxi(1, roundi(across / maxf(cell.z, 1e-6))))
+	var step := Vector3(long / n.x, size.y / n.y, across / n.z)
+	# The model's z across the box: unturned on a box long in x, a quarter turn (its z to world x) on one long in z.
+	var yaw := 0.0 if along_x else PI * 0.5
+	var square := absf(model.size.x - model.size.z) < 0.05 * maxf(model.size.x, model.size.z)
+	for i in n.x:
+		for k in n.z:
+			var u := (i + 0.5) * step.x - long * 0.5
+			var v := (k + 0.5) * step.z - across * 0.5
+			var at := foot + (Vector3(u, 0.0, v) if along_x else Vector3(v, 0.0, u))
+			for j in n.y:
+				var turn := yaw + (_quarter_turn(rng) if square else PI * float(rng.randi_range(0, 1)))
+				p.add(fit(model, at + Vector3(0.0, j * step.y, 0.0), _turned(step, turn - yaw), turn),
+						_shade(cfg, rng))
+
+
+## A cell's size in the model's own axes once it is turned `turn` more than its first lay: x and z swap a quarter turn
+## round.
+static func _turned(size: Vector3, turn: float) -> Vector3:
+	return Vector3(size.z, size.y, size.x) if absi(roundi(turn / (PI * 0.5))) % 2 == 1 else size
 
 
 ## One model fitted to the whole box, its long side along the box's and its front (the model's +z) facing the field's

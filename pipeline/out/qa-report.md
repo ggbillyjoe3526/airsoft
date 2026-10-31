@@ -1,28 +1,35 @@
-Task: WR2 · QA commit 847b86d (my test file was swept into the worker's commit; head moved from ae6c160 through d646e35 to 847b86d, I tested that tree) · Verdict: Pass
+Task: WR3 · QA commit ea73d99 (the worker's commit swept up tests/unit/test_wr3_qa.gd; QA did not commit) · Verdict: Pass (after 3348179: its one blocking item, the changelog note, is written; first verdict Fail)
+Note: reviewed 10095c1, re-ran my tests and test_props/test_dr2_qa on HEAD 7195fa9 (ea73d99 reworked the cores into MapLevel.core_box: max 20% of width, touching thickets run flush, TILE blocks keep their box). All pass there.
 
-Blocking: none.
+Blocking
+- changelog.d: no WR3 note in the diff (CLAUDE.md §9: every pull request adds one, written by the changelog agent). tools/check.sh's "changelog notes" gate still passes, so it is only caught by hand. Add `changelog.d/<name>.md` before ready.
 
-Advisory (nothing to fix before merge):
-1. tests/support/match_runner.gd:231 · sized_for(map, base) ignores a `base` whose round_time the caller set: on Woodland it is replaced by 180. No Woodland caller sets one today (MatchGuard.overtime_flag, match_guard.gd:131, runs on Depot only), but an overtime guard added for Woodland would silently play 3:00 rounds, not its short ones.
-2. game/map/map_catalog.gd:145 · a Round cell of 20 digits passes is_valid_int, and to_int() then logs an engine ERROR (overflow) before the warning; it still falls back and lists the map. _read_sizes (line 118) has the same, older, pattern. Trigger: put 99999999999999999999 in the Round column.
-3. UX note, as the record intends: on Woodland, Skirmish shows 3:00 and switching to Custom shows 2:30 (its own default switch).
-4. The A/D guard (16 seeds, Normal, night) passed: 125 rounds, 108 flag raises, 0 run out the clock, no bot held up past the limit. Raises in 86% of rounds is a balance figure, reported not asserted.
+Advisory (nothing in Woodland's data triggers these)
+- game/map/map_level.gd:343-349 + game/play/site/prop_layout.gd:31: a block that names `dress` and has `rise` (a ramp) vanishes: the greybox skips its box, PropLayout skips it too. Verified by a scratch run (only the ground's 6 vertices drawn, PropDress.build null). No Woodland block has both. Guard: `dresses()` false when `rise != NONE`.
+- game/map/map_level.gd:299-300: the baked branch's ShadowCaster is `_greybox_mesh(map, _style, _site)` without `_props`, and the baked tiled mesh is not told about dressed blocks, so a Woodland bake would draw and shadow the boxes under the props. Woodland has no bake today.
+- (obsolete at HEAD) `inset_of` collapsed a core on a block under 1.4 m wide; core_box caps the inset at 20% of the width.
+- game/map/map_data.gd:333: an unknown `dress` is not a map problem; it only warns once from PropDressConfig.mesh_of ("zeppelin's model  won't load", double space) and keeps the box. Typos are caught only by that warning.
+- game/config/prop_dress_config.gd:4: comment line 197 characters (house style 120; gdlint has max-line-length off). map_level.gd:332 signature 123.
+- Counts on Woodland: 2609 pines, 440 trunks, 282 log stacks, 184 tyres, 145 crates, 31 logs, 1 truck in 154 MultiMesh views, all shadow casting (perf agent's call).
 
-Checked and clean: all 8 leaves stand on their ground (leaf corners within 3 cm; outside the wall the ground falls away at most 0.9 m, no overlap); every leaf hangs on its hut's outer face; a rebuild of build_map.py is byte-identical to woodland.json and check.py gives TOTAL 0; both poles stand on the terrain with no block over them and clear of the Box and Shed roofs; Depot, the Range, practice and no map keep the tuning's time, Custom plays its own; the HUD clock, round clock and Match card chips read 3:00 on a Woodland Skirmish and 2:30 on Depot. The round cell accepts 90 to 300 in 30 s steps and refuses 89, 301, 0, -180, 100, 185, 180.5, 3:00, 1e2, 180s and nan; a missing Round column and a short row still list the map.
+Criteria checked (all hold)
+- Blocks name props (dress read, 947 blocks: 440 trunk, 197 pine, 31 log, 25 logstack, 17 crate, 12 tyre, 1 truck): test_props.gd:259, test_wr3_qa.gd.
+- GRID lay: count a cell, in-box for x-long and z-long boxes for all four grid models, same count either way round.
+- Thicket cores: dressed boxes left out, core inset; finite for slivers.
+- PlaySession builds a PropDress with no site (Woodland), none on the Range; freed with the session, no orphans.
 
-Shared physics space: I checked every file that builds a Woodland MapLevel and also plays a match or session (test_bushes, test_baked_light, test_dd1_qa, test_wl9_qa, test_ki1_qa, test_night_light_qa, test_practice_spots). Each frees its level before the match or uses a session without its own level, so none is exposed, and all pass. test_woodland_layout is the only one at risk; it opens its doors during its match and restores them. The worker added this to KNOWN_ISSUES.
+Tests added (tests/unit/test_wr3_qa.gd, 7 tests, 238 asserts, all pass in 12.5 s; test_props.gd 16/16 in 2.4 s)
+- test_a_block_s_dress_is_read_and_an_absent_one_is_empty · parse · fails on b3f0045 (Block has no `dress`: script error).
+- test_a_dress_naming_no_model_keeps_the_box_and_lays_nothing · unknown name · fails if model_of/dresses trust the name (the box would vanish).
+- test_a_grid_stays_inside_a_box_long_in_x_or_in_z_and_counts_the_same · PropLayout._grid both axes · fails on b3f0045 (no GRID / model_lays).
+- test_the_layout_is_seeded_not_random · Woodland laid twice, equal.
+- test_a_sliver_of_a_thicket_has_a_finite_core · inset_of on 1.0 / 0.2 / 1.4 m wide blocks · fails on b3f0045 (no props arg).
+- test_a_match_on_woodland_builds_the_props_without_a_site_and_frees_them · PlaySession woodland, `_props` set, no orphans · fails on b3f0045 (`_props` absent).
+- test_a_greybox_map_with_no_dress_builds_no_props · PlaySession range, `_props` null.
+(Not mutation-run against production code, which I may not edit; the "fails without" claims are from the base lacking the symbols.)
 
-Tests added (tests/unit/test_wr2_qa.gd, 10 tests, 2003 asserts, 43 s, all pass):
-- :71 a bot walks in and out of every hut doorway and opens each shut leaf · without the doors the shut-leaf opened assert fails; the walk only passes because the doorways are open.
-- :89 a body in the doorway stops the door shutting; once clear it shuts · fails if the leaf sat in the gap or `blocked` ignored the body.
-- :110 each door starts as the map says · fails on a wrong shut flag.
-- :117 poles on the ground, in no block · fails on a floating or buried pole.
-- :129 round time on a Woodland Skirmish only; Depot, Range, no map and Custom keep theirs; the chips show 3:00 · fails without the Round column.
-- :148 practice keeps the tuning's time.
-- :158, :170 Round cell edges; no column and short row.
-- :191 PlaySession clock and score bar: 3:00 Woodland, 2:30 Depot, Custom's 2:00 on Woodland · fails if the round time isn't played.
-- :206 a Woodland Attack / Defend session has two flags and runs 180 frames clean.
+Suite: tools/check.sh run: gdlint pass, changelog notes pass, wiki pass; the full unit run (check.sh, 4 parts) had not finished part 1 after about 20 minutes and ran across the worker's two new commits, so it is not a verdict: the CI run is the full suite. Raw output in pipeline/out/qa/.
 
-Other runs (all pass): woodland_layout 17 (87 s), do1_qa, doors, two_flags 18, team_sizes 17, match_page 28, wl2_qa, cr2_qa, flag, bushes, baked_light, dd1_qa, wl9_qa, ki1_qa, night_light_qa, practice_spots, dp2/3/4_qa, bb_walls, terrain, bot_vaults, sf2_qa, wl1_qa, props, mm3_qa, night_sight(_qa), site_dress, fg2b_qa, fm1_field_map, woods_view(_qa), hud_minimap, plus the Woodland A/D guard (1207 s). Raw output: pipeline/out/qa/.
+Could not test (owner's list): how the props look and read (trunk/spruce scale, tyre and crate stacks, the truck, thicket core between spruces), frame time with 2609 pines, any window/focus behaviour; none changed by WR3.
 
-Not run: tools/check.sh, the full suite and the smoke test (told not to); Woodland's Elimination guard and the Easy and Hard A/D guards; how the doors look, sound and swing in play, which needs a display and ears.
+Re-check on dae2833: changelog.d/woodland-cc0-props.md present, the ramp advisory fixed (dresses() false on a rise), the warning quotes its path; test_props 17/17, test_wr3_qa 7/7, 209 targeted tests pass after the rebase onto WR2. Verdict: Pass.

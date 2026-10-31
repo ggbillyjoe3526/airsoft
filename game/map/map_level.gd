@@ -31,6 +31,10 @@ const REBAKE := "rebake with tools/bake_light.gd"
 const TERRAIN_TILE := 32.0
 ## An indoor field's ceiling collider's thickness (m), over the roof's height (DR1).
 const CEILING_THICKNESS := 0.2
+## A dressed block's core (core_box) is inset at most this share of the box's width a side, and a side counts as
+## touched by another cored box within this many metres of it (WR3).
+const CORE_SHARE := 0.2
+const CORE_TOUCH := 0.05
 
 
 var map: MapData = null
@@ -42,6 +46,9 @@ var _material: StandardMaterial3D = null
 var _mesh: MeshInstance3D = null
 ## The site dress's look and its material (DD1); null for a greybox map.
 var _site: SiteLook = null
+## The props a block may name (MapData.Block.dress, WR3), whatever the map's site: such a block's box is drawn inset
+## behind them, or not at all.
+var _props: PropDressConfig = null
 var _site_material: ShaderMaterial = null
 ## Sloping ground's tiles, under one node; empty on a map without it.
 var _tiles: Array[MeshInstance3D] = []
@@ -74,6 +81,7 @@ func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 	_night = night
 	name = "Map_%s" % m.id
 	_material = _greybox_material(style)
+	_props = site.props if site != null else null
 	if m.site != null and site != null:
 		_site = site
 		_site_material = SiteSurface.material(site, m)
@@ -287,7 +295,7 @@ func _make_mesh() -> MeshInstance3D:
 	var baked := _baked_mesh() if _baked else null
 	if baked == null:
 		_baked = false
-		mi.mesh = _greybox_mesh(map, _style) if _site == null else _site_mesh(map, _style, _site)
+		mi.mesh = _greybox_mesh(map, _style, null, _props) if _site == null else _site_mesh(map, _style, _site)
 		return mi
 	mi.mesh = baked
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -323,19 +331,63 @@ func _bake_or_null() -> BakedLight:
 ## Every block and the ground beyond the walls as one mesh in one material: vertex colours carry each block's colour,
 ## a world-space grid texture the metre lines, so the blocks are a single draw call (sloping ground is its tiles').
 ## With `site`, as the baked site's shadow caster: a block drawn as props alone (DR2) is left out, its props cast its
-## shadow.
-static func _greybox_mesh(m: MapData, style: MapStyle, site: SiteLook = null) -> ArrayMesh:
+## shadow. With `props`, a block drawn as props (WR3) is left out, or drawn as its core behind its props (core_box: a
+## thicket's), its props casting their own shadows; a lined (TILE) block keeps its box.
+static func _greybox_mesh(m: MapData, style: MapStyle, site: SiteLook = null,
+		props: PropDressConfig = null) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var cored: Array[MapData.Block] = []
+	if props != null:
+		for b in m.blocks:
+			if props.core_of(b) != Vector2.ZERO:
+				cored.append(b)
 	for b in m.blocks:
 		if site != null and SiteSurface.hidden(site, b):
 			continue
+		var core := Transform3D.IDENTITY
+		if props != null and props.dresses(b) and props.lay_of(b) != PropDressConfig.Lay.TILE:
+			var inset := props.core_of(b)
+			if inset == Vector2.ZERO:
+				continue
+			core = core_box(b, inset, cored)
 		st.set_color(style.block_colour(b))
 		for f in GreyboxFaces.faces_of(b):
-			_add_face(st, f)
+			_add_face(st, core * f)
 	st.set_color(style.ground_colour)
 	_add_face(st, GreyboxFaces.ground_face(style, GreyboxFaces.ground_top(m)))
 	return st.commit()
+
+
+## The transform that draws block `b`'s box as its core (PropDressConfig.model_cores): its top cut down to `inset.y` of
+## its height, each side drawn `inset.x` m in (at most CORE_SHARE of the box's width) unless one of `cored` (the
+## cored blocks) touches that side, where the core runs to the face so touching thickets leave no gap between them.
+static func core_box(b: MapData.Block, inset: Vector2, cored: Array[MapData.Block]) -> Transform3D:
+	var lo := b.center - b.size * 0.5
+	var hi := b.center + b.size * 0.5
+	var to_lo := lo
+	var to_hi := Vector3(hi.x, lo.y + b.size.y * inset.y, hi.z)
+	for axis: int in [0, 2]:
+		var step := minf(inset.x, b.size[axis] * CORE_SHARE)
+		if not _touched(b, axis, -1.0, cored):
+			to_lo[axis] += step
+		if not _touched(b, axis, 1.0, cored):
+			to_hi[axis] -= step
+	var basis := Basis.from_scale((to_hi - to_lo).max(Vector3.ZERO) / b.size)
+	return Transform3D(basis, to_lo - basis * lo)
+
+
+## Whether another of `cored` meets block `b`'s side on `axis` towards `side` (+1 or -1) anywhere along it.
+static func _touched(b: MapData.Block, axis: int, side: float, cored: Array[MapData.Block]) -> bool:
+	var lo := b.center - b.size * 0.5
+	var size := b.size
+	lo[axis] += b.size[axis] if side > 0.0 else -CORE_TOUCH
+	size[axis] = CORE_TOUCH
+	var slab := AABB(lo, size)
+	for o in cored:
+		if o != b and AABB(o.center - o.size * 0.5, o.size).intersects(slab):
+			return true
+	return false
 
 
 ## The greybox's faces for the site's material: white, each vertex carrying its block's box and finish

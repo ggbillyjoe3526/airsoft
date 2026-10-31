@@ -139,6 +139,8 @@ var _woods: WoodsView = null
 var _bushes: BushView = null
 ## The site dress's details, or null on a greybox map (SiteDress, DD1).
 var _site: SiteDress = null
+## A field with no site dress drawn with CC0 props all the same (Woodland's, WR3; a site's are its SiteDress's).
+var _props: PropDress = null
 ## Scratch for the vault prompt's look ahead each tick.
 var _vault_probe: VaultState = VaultState.new()
 var _figures: Array[FigureView] = []
@@ -320,6 +322,10 @@ func _build_level() -> void:
 		add_child(_site)
 		if not _light.night:
 			SiteDress.dress_sky(_lighting, _play.site_look)
+	else:
+		_props = PropDress.build(_map, _play.site_look.props)
+		if _props != null:
+			add_child(_props)
 	_skyline = SkylineView.build(_map, _play.skyline, _light, _tuning.body.stand_eye_height)
 	if _skyline != null:
 		add_child(_skyline)
@@ -718,6 +724,8 @@ func _build_views(ui: CanvasLayer) -> void:
 		first_use.append_array(_bushes.materials())
 	if _site != null:
 		first_use.append_array(_site.materials())
+	if _props != null:
+		first_use.append_array(_props.materials())
 	if _torches != null:
 		first_use.append_array(_torches.materials())
 	# the sky (by night its own shader) is no speck: it is the background of the prewarm's frames, so it compiles there

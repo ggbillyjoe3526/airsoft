@@ -3,7 +3,10 @@ extends GutTest
 ## and a body; the drums stand four on a pallet, the barrels two a block, the sofa faces the field and the tall racks
 ## are lined with shelving over a backing while the rack's shelf boards stay boards; a box drawn as props draws none
 ## of its own faces (or only its backing) and leaves the baked shadow caster; no prop colour reads as a team; the
-## layout is seeded; a missing model leaves its kind a box; the props are in the prewarm; Woodland has none.
+## layout is seeded; a missing model leaves its kind a box; the props are in the prewarm. WR3: Woodland's blocks
+## name their props (trees, spruces, logs, cordwood, crates, tyres, a truck) with no site dress, each inside its
+## block; a grid lays a cell's prop a cell; a dressed block draws no box, a thicket only its dark core; a ramp keeps
+## its box.
 
 var play: PlayTuning = PlayTuning.load_default()
 var tuning: SimTuning = SimTuning.new()
@@ -47,10 +50,8 @@ func _count(m: MapData, kind: StringName, tall_from: float = 0.0) -> int:
 	return n
 
 
-func test_every_prop_stands_inside_a_block_it_dresses() -> void:
-	var m := _map("depot")
-	var dress := _dress(m)
-	assert_not_null(dress, "Depot is dressed with props")
+## Each prop that reaches past the box of the block it stands in, as "model index".
+func _outside(m: MapData, dress: PropDress) -> Array[String]:
 	var boxes: Array[AABB] = []
 	for b in m.blocks:
 		if look.props.dresses(b):
@@ -72,7 +73,14 @@ func test_every_prop_stands_inside_a_block_it_dresses() -> void:
 				if home < 0 or not boxes[home].has_point(t * v):
 					outside.append("%s %d" % [model, i])
 					break
-	assert_eq(outside, [] as Array[String], "no prop reaches past its block's box")
+	return outside
+
+
+func test_every_prop_stands_inside_a_block_it_dresses() -> void:
+	var m := _map("depot")
+	var dress := _dress(m)
+	assert_not_null(dress, "Depot is dressed with props")
+	assert_eq(_outside(m, dress), [] as Array[String], "no prop reaches past its block's box")
 
 
 func test_drums_stand_four_on_a_pallet_barrels_two_a_block_one_sofa_and_shelving_on_tall_racks() -> void:
@@ -249,9 +257,96 @@ func test_the_props_are_in_the_site_dress_and_its_prewarm() -> void:
 		assert_eq(view.material_override, site.props().materials()[0], "one material for every prop")
 
 
-func test_woodland_has_no_props() -> void:
+func test_woodland_is_dressed_without_a_site_each_prop_inside_the_block_that_names_it() -> void:
 	var m := _map("woodland")
-	assert_null(SiteDress.build(m, look, ShaderMaterial.new()), "no site dress, so no props")
+	assert_null(SiteDress.build(m, look, ShaderMaterial.new()), "no site dress")
+	var dress := _dress(m)
+	assert_not_null(dress, "but CC0 props all the same")
+	if dress == null:
+		return
+	var named: Dictionary[StringName, int] = {}
+	for b in m.blocks:
+		if b.dress != &"":
+			assert_true(look.props.dresses(b), "%s's %s has its model" % [b.kind, b.dress])
+			named[b.dress] = named.get(b.dress, 0) + 1
+	for model: StringName in [&"trunk", &"pine", &"log", &"logstack", &"crate", &"tyre", &"truck"]:
+		assert_gt(named.get(model, 0), 0, "a block names %s" % model)
+		assert_gt(dress.count(model), 0, "%s placed" % model)
+	assert_eq(dress.count(&"trunk"), named[&"trunk"], "one trunk a tree")
+	assert_eq(dress.count(&"truck"), 1)
+	assert_eq(_outside(m, dress), [] as Array[String], "no prop reaches past its block's box")
+
+
+func test_a_grid_lays_a_block_s_props_in_cells_and_a_round_count_a_side() -> void:
+	var m := _map("woodland")
+	var boxes: Dictionary[StringName, AABB] = {}
+	for model: StringName in look.props.models:
+		boxes[model] = PropDressConfig.load_mesh(look.props.models[model]).get_aabb()
+	var placed := PropLayout.layout(m, look.props, boxes)
+	var want := 0
+	for b in m.blocks:
+		if b.dress != &"crate":
+			continue
+		var cell: Vector3 = look.props.grid_cells[&"crate"]
+		var across := maxf(b.size.x, b.size.z)
+		var deep := minf(b.size.x, b.size.z)
+		want += maxi(1, roundi(across / cell.x)) * maxi(1, roundi(b.size.y / cell.y)) * maxi(1, roundi(deep / cell.z))
+	assert_eq(look.props.lay_of(m.blocks.filter(func(b: MapData.Block) -> bool: return b.dress == &"crate")[0]),
+			PropDressConfig.Lay.GRID)
+	assert_eq(placed[&"crate"].transforms.size(), want, "a crate a cell")
+
+
+func test_a_dressed_block_draws_no_box_and_a_thicket_only_its_core() -> void:
+	var m := _map("woodland")
+	var plain := MapLevel._greybox_mesh(m, play.map_style)
+	var dressed := MapLevel._greybox_mesh(m, play.map_style, null, look.props)
+	var thicket: MapData.Block = null
+	var hidden := 0
+	for b in m.blocks:
+		if b.dress == &"pine" and thicket == null:
+			thicket = b
+		elif b.dress != &"":
+			hidden += 1
+	var verts := func(mesh: ArrayMesh) -> int: return (mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+			as PackedVector3Array).size()
+	assert_lt(verts.call(dressed), verts.call(plain), "the dressed blocks' boxes are left out")
+	assert_eq(look.props.core_of(thicket), look.props.model_cores[&"pine"])
+	var inset: Vector2 = look.props.model_cores[&"pine"]
+	var cored: Array[MapData.Block] = []
+	for b in m.blocks:
+		if b.dress == &"pine":
+			cored.append(b)
+	var lone := MapLevel.core_box(thicket, inset, [] as Array[MapData.Block])
+	var lo := thicket.center - thicket.size * 0.5
+	var hi := thicket.center + thicket.size * 0.5
+	var step := Vector3(minf(inset.x, thicket.size.x * MapLevel.CORE_SHARE), 0.0,
+			minf(inset.x, thicket.size.z * MapLevel.CORE_SHARE))
+	assert_almost_eq(lone * lo, lo + step, Vector3.ONE * 1e-4, "a lone thicket's core is inset at the foot")
+	assert_almost_eq((lone * hi).y, lo.y + thicket.size.y * inset.y, 1e-4, "cut down to its share")
+	# Touching thickets' cores meet: each side another thicket touches runs to the face.
+	var gaps: Array[String] = []
+	for t in cored:
+		var core := MapLevel.core_box(t, inset, cored)
+		var t_lo := t.center - t.size * 0.5
+		var t_hi := t.center + t.size * 0.5
+		var c_lo := core * t_lo
+		var c_hi := core * t_hi
+		for o in cored:
+			if o == t:
+				continue
+			var o_box := AABB(o.center - o.size * 0.5, o.size)
+			for axis: int in [0, 2]:
+				var probe_lo := t_lo
+				var probe_size := t.size
+				probe_lo[axis] = t_hi[axis]
+				probe_size[axis] = 0.01
+				if o_box.intersects(AABB(probe_lo, probe_size)) and absf(c_hi[axis] - t_hi[axis]) > 1e-3:
+					gaps.append("%s→%s" % [t.center, o.center])
+				probe_lo[axis] = t_lo[axis] - 0.01
+				if o_box.intersects(AABB(probe_lo, probe_size)) and absf(c_lo[axis] - t_lo[axis]) > 1e-3:
+					gaps.append("%s←%s" % [t.center, o.center])
+	assert_eq(gaps, [] as Array[String], "no gap between touching thickets' cores")
+	assert_gt(hidden, 0)
 
 
 func test_drums_barrels_and_the_sofa_cast_shadows_and_shelving_leaves_it_to_its_rack() -> void:
@@ -294,3 +389,17 @@ func test_shelving_lines_only_faces_nobody_is_against() -> void:
 			assert_false(PropLayout.face_hidden(m, b, Vector3(0.0, 0.0, -1.0)), "its front faces the hall")
 			hidden += 1
 	assert_eq(hidden, 1)
+
+
+func test_a_ramp_that_names_a_prop_keeps_its_box() -> void:
+	var m := _map("woodland")
+	var b: MapData.Block = null
+	for o in m.blocks:
+		if o.dress == &"crate":
+			b = o
+			break
+	assert_true(look.props.dresses(b), "a crate block is drawn as crates")
+	b.rise = MapData.Rise.POS_X
+	assert_false(look.props.dresses(b), "but not as a ramp: it keeps its box")
+	assert_eq(look.props.core_of(b), Vector2.ZERO)
+	b.rise = MapData.Rise.NONE

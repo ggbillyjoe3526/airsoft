@@ -34,6 +34,10 @@ KINDS = {"palisade": "fence", "logstack": "log", "log": "log", "logpile": "log",
          "crates": "crate", "lowcrates": "crate", "tyre": "tyre", "tyrestack": "tyre", "truck": "truck",
          "fortwall": "plywood", "lowwall": "plywood", "hutwall": "plywood", "window": "plywood", "post": "log",
          "parapet": "plywood"}
+# The CC0 prop each piece's blocks are drawn as (WR3; PropDressConfig lays them in the box, which stays what BBs meet),
+# and the trees' and thickets'. The wind-thrown root plates, the posts, the walls and the palisade keep their boxes.
+DRESS = {"log": "log", "logpile": "logstack", "logstack": "logstack", "crates": "crate", "lowcrates": "crate",
+         "tyre": "tyre", "tyrestack": "tyre", "truck": "truck", "tree": "trunk", "thicket": "pine"}
 # Pieces this long or longer follow the ground in parts no longer than this (m): walls and palisades on slopes.
 FOLLOW = {"palisade", "fortwall", "hutwall", "lowwall"}
 PART = 4.0
@@ -179,7 +183,7 @@ def piece_blocks(p: dict) -> list[dict]:
             out.append(block(KINDS[kind], a1, lo, b1, a2, g + p["top"], b2))
             out.append(block(KINDS[kind], a1, g + LINTEL_FROM, b1, a2, g + wall_top, b2))
             continue
-        out.append(block(KINDS[kind], a1, bottom, b1, a2, g + p.get("bottom", 0.0) + p["top"], b2))
+        out.append(block(KINDS[kind], a1, bottom, b1, a2, g + p.get("bottom", 0.0) + p["top"], b2, piece_kind=kind))
     return out
 
 
@@ -531,6 +535,15 @@ def settle(blocks: list[dict]) -> list[dict]:
     return out
 
 
+def dressed(blocks: list[dict]) -> list[dict]:
+    """Each block of a dressed piece, tree or thicket names its prop (`dress`, DRESS)."""
+    for b in blocks:
+        if b.get("piece_kind", b["kind"]) in DRESS:
+            b["dress"] = DRESS[b.get("piece_kind", b["kind"])]
+        b.pop("piece_kind", None)
+    return blocks
+
+
 def main() -> None:
     tunnels = cut_tunnels()
     blocks = tunnels + deck_blocks() + roof_blocks()
@@ -538,7 +551,7 @@ def main() -> None:
         blocks += piece_blocks(p)
     blocks += thicket_blocks()
     trees, dropped = tree_blocks(blocks)
-    blocks = settle(blocks + fence_blocks() + trees)
+    blocks = dressed(settle(blocks + fence_blocks() + trees))
     trees = [t for t in blocks if t["kind"] == "tree"]
     data = {
         "name": "Woodland",

@@ -1,6 +1,7 @@
 extends SceneTree
 ## Renders a field at eye height from named spots, as a match draws it on High by day (its level with its bake, its
-## light as the map sets it, its site dress and its roof), to `<folder>/<name>.jpg`: pictures for the owner of a map
+## light as the map sets it, its site dress, its roof, and an outdoor field's wood, bushes and skyline; the eye stands
+## on the ground), to `<folder>/<name>.jpg`: pictures for the owner of a map
 ## that is being built (DR1). Needs a display and OpenGL, so under xvfb:
 ##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . --rendering-driver opengl3 -s res://tools/eye_pictures.gd \
 ##       -- <map id> <folder> <name>:<x>,<z>,<yaw degrees>,<pitch degrees> ...
@@ -48,9 +49,24 @@ func _run() -> void:
 		port.add_child(site)
 		level.set_detail(GraphicsQuality.MeshDetail.HIGH)
 		SiteDress.dress_sky(lighting, play.site_look)
+	if site == null:
+		var props := PropDress.build(map, play.site_look.props)
+		if props != null:
+			port.add_child(props)
 	var roof := RoofView.build(map, play.roof)
 	if roof != null:
 		port.add_child(roof)
+	# An outdoor field's wood, bushes and skyline as a match draws them on High (WR3: Woodland's pictures).
+	var woods := WoodsView.build(map, play.woods, play.skyline, play.lighting, play.map_style)
+	if woods != null:
+		port.add_child(woods)
+		woods.set_quality(GraphicsQuality.MeshDetail.HIGH, 0.0)
+	var bushes := BushView.build(map, play.woods)
+	if bushes != null:
+		port.add_child(bushes)
+	var skyline := SkylineView.build(map, play.skyline, play.lighting, tuning.body.stand_eye_height)
+	if skyline != null:
+		port.add_child(skyline)
 	var camera := Camera3D.new()
 	camera.fov = FOV
 	port.add_child(camera)
@@ -62,7 +78,8 @@ func _run() -> void:
 			push_error("eye_pictures: %s is not name:x,z,yaw,pitch" % spec)
 			failed += 1
 			continue
-		camera.global_position = Vector3(at[0], tuning.body.stand_eye_height, at[1])
+		var ground := map.terrain.height_at(at[0], at[1]) if map.terrain != null else 0.0
+		camera.global_position = Vector3(at[0], ground + tuning.body.stand_eye_height, at[1])
 		camera.global_rotation = Vector3(deg_to_rad(at[3]), deg_to_rad(at[2]), 0.0)
 		for i in SETTLE_FRAMES:
 			await RenderingServer.frame_post_draw
