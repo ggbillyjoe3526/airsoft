@@ -8,4 +8,3 @@
 - Each spawn room opens through two crate chicanes, so nobody can see into a spawn from outside it.
 - Steel drums and plastic barrels are noisy: bump into one and bots hear it.
 - In overtime, bots that flank the flag now find a way round the huts and pillars instead of walking straight in.
-- Props are coming next.

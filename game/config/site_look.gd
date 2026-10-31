@@ -25,7 +25,7 @@ enum Canvas {
 	&"frame": Canvas.PAINT, &"steel": Canvas.PAINT, &"hazard": Canvas.PAINT, &"net": Canvas.FABRIC,
 	&"flag": Canvas.FABRIC, &"coping": Canvas.PRECAST, &"sail": Canvas.FABRIC, &"default": Canvas.PAINT,
 	&"drum": Canvas.PAINT, &"barrel": Canvas.PAINT, &"pillar": Canvas.PAINT, &"netting": Canvas.FABRIC,
-	&"sofa": Canvas.FABRIC,
+	&"sofa": Canvas.FABRIC, &"backing": Canvas.PAINT,
 }
 @export var paints: Dictionary[StringName, Color] = {
 	&"slab": Color(0.56, 0.54, 0.5), &"dock": Color(0.6, 0.58, 0.54), &"gravel": Color(0.56, 0.54, 0.5),
@@ -40,8 +40,8 @@ enum Canvas {
 	&"coping": Color(0.7, 0.68, 0.64), &"sail": Color(0.9, 0.86, 0.76), &"default": Color(0.6, 0.6, 0.6),
 	# Depot's hall (DR1), MapStyle's colours: tan fibre drums, olive-grey barrels, raspberry pillars, teal netting, a
 	# plum sofa, each off both team hues.
-	&"drum": Color(0.72, 0.64, 0.36), &"barrel": Color(0.3, 0.33, 0.28), &"pillar": Color(0.62, 0.16, 0.4),
-	&"netting": Color(0.2, 0.55, 0.53), &"sofa": Color(0.42, 0.31, 0.48),
+	&"drum": Color(0.16, 0.5, 0.48), &"barrel": Color(0.6, 0.14, 0.38), &"pillar": Color(0.62, 0.16, 0.4),
+	&"netting": Color(0.2, 0.55, 0.53), &"sofa": Color(0.42, 0.31, 0.48), &"backing": Color(0.16, 0.17, 0.18),
 }
 @export var accents: Dictionary[StringName, Color] = {
 	&"dock": Color(0.86, 0.72, 0.12), &"gravel": Color(0.42, 0.39, 0.35), &"wall_outer": Color(0.55, 0.56, 0.52),
@@ -160,6 +160,8 @@ enum Canvas {
 @export var bag_bulge: float = 0.03
 @export var bag_core: float = 0.08
 @export var bags_until: float = 60.0
+## The CC0 props drawn in place of some kinds' boxes (DR2).
+@export var props: PropDressConfig = PropDressConfig.new()
 ## How far (m) the details (frames, battens, caps) stand proud of their box, and their sizes: a container's corner
 ## posts, rails and door lock bars, a crate's battens, a plywood sheet's cap and the perimeter wall's coping.
 @export var proud: float = 0.015
@@ -192,8 +194,10 @@ func finish_names() -> Array[StringName]:
 	return out
 
 
-## The finish block `b` is drawn in.
+## The finish block `b` is drawn in: a box filled by tiled props shows only its dark backing behind them (DR2).
 func finish_of(b: MapData.Block) -> StringName:
+	if props != null and props.backs(b):
+		return &"backing"
 	match b.kind:
 		&"floor":
 			if b.size.y <= gravel_to:

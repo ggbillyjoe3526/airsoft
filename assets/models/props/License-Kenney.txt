@@ -1,0 +1,33 @@
+Depot's props (assets/models/props/*.glb) are Kenney's models from the Survival Kit, Furniture Kit,
+Retro Urban Kit and Mini Market, recoloured for the game. Every Kenney kit ships the same CC0 licence; this copy is
+the one in the library mirror the models came from (github.com/shorepine/kenney at 3694c68), as written for its
+Castle Kit.
+
+	
+
+	Castle Kit (2.0)
+
+	Created/distributed by Kenney (www.kenney.nl)
+	Creation date: 27-03-2024 13:37
+	
+			------------------------------
+
+	License: (Creative Commons Zero, CC0)
+	http://creativecommons.org/publicdomain/zero/1.0/
+
+	You can use this content for personal, educational, and commercial purposes.
+
+	Support by crediting 'Kenney' or 'www.kenney.nl' (this is not a requirement)
+
+			------------------------------
+
+	• Website : www.kenney.nl
+	• Donate  : www.kenney.nl/donate
+
+	• Patreon : patreon.com/kenney
+	
+	Follow on social media for updates:
+
+	• Twitter:   twitter.com/KenneyNL
+	• Instagram: instagram.com/kenney_nl
+	• Mastodon:  mastodon.gamedev.place/@kenney

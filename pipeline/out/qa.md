@@ -1,12 +1,7 @@
-Task: AB1 · QA re-check at fb65b9c (diff 395a152..fb65b9c) · QA tests committed in fb65b9c · Verdict: Pass
+Task: DR2 · QA re-check at 23c670c · QA tests in tests/unit/test_dr2_qa.gd (5) · Verdict: Pass
 
-Blocking: none. The earlier blocker is fixed: tests/unit/test_overtime_bots.gd calls BotFlag.spot(list[0], w) in both places and parses (12 pass).
-The wants_flag advisory is fixed: game/ai/bot_flag.gd now guards b.retake_pole >= 0 before indexing the flags.
+Blocking: none. The attempt 1 blocker is fixed: PropDressConfig.dresses needs mesh_of(model) != null (loaded once a path, warns once), so a model that is there but won't load leaves its blocks as boxes.
 
-Re-run on fb65b9c: test_overtime_bots 12, test_fg2_qa 6, test_ab1_qa 13, test_two_flags 18, test_bot_flag 14, test_squad_orders 14 (all pass). Earlier on 46493f3: test_so1_qa 22, test_flag_play 14, test_fg1_qa 13, test_hud_minimap 17, test_overtime_flag 19.
-
-Verified: one-pole maps and Elimination unchanged (no retakers picked, pole 0, overtime foot used); retake_pole and flag_pole always in range; a defender is let go once its flag is on the bottom; squad-ordered bots are never sent; no pole flipping in a 100 s Depot bot match, both flags used.
-
-Advisory (non-blocking): HUD _flag_eye is zero until the first place_flag_marker, so the first frame's "nearest pole" is measured from the origin (cosmetic). Gauge shows the pole in play, not always the one being worked.
-
-Not run: whole suite, tools/check.sh, smoke test (CI). Owner to play: A and B read from across the hall, marker switching, warning naming the pole.
+Verified: every core_of caller passes the map; sandbag stacks keep the same transform through _box_to; each prop lands in exactly one chunk (totals match at chunk 20, 0.5, 7.3, 1e9, 0, -5); every rack's footprint is rows or backing on Depot and the Range; building and freeing PropDress three times leaves no orphans; shelving casts no shadow.
+Passing: test_props 14, test_dr2_qa 5, test_site_dress 14, test_dd1_qa 23, test_map_level 15, test_baked_light 12, test_saved_configs 1.
+Advisory: a failed model is cached as null for the config's life; chunk <= 0 isn't validated (one odd cell, no loss).

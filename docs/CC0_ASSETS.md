@@ -52,7 +52,7 @@ assets/models/characters/             human.glb and robot.glb, the rigged figure
 assets/models/replicas/<id>.glb       a replica's model, by replica id: aeg, pistol and cyber
 assets/models/replicaParts/<id>.glb   that replica's fittable parts, by replica id: aeg, pistol and cyber
 assets/models/powerSources/<file>.glb the menus' battery, LiPo and gas bottle pictures
-assets/models/props/                  props (planned: not created yet)
+assets/models/props/                  the site's CC0 props (DR2), made by tools/props/build_props.py
 assets/textures/                      loose surface textures (planned: not created yet)
 assets/fonts/                         Inter and its OFL.txt
 assets/audio/                         the sounds
