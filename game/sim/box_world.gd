@@ -156,11 +156,13 @@ func _circle_overlaps(x: float, z: float, radius: float, b: int) -> bool:
 	return dx * dx + dz * dz < radius * radius
 
 
-## Moves a cylinder with its feet at `feet` by `desired`, stopping at boxes: vertically first, then level with a slide
-## along walls and a step up onto anything no taller than max_step. Returns where the feet end up.
-func sweep(feet: Vector3, desired: Vector3) -> Vector3:
+## Moves a cylinder `height` tall (the body's standing height without one) with its feet at `feet` by `desired`,
+## stopping at boxes: vertically first, then level with a slide along walls and a step up onto anything no taller than
+## max_step. Returns where the feet end up.
+func sweep(feet: Vector3, desired: Vector3, height: float = NAN) -> Vector3:
 	var p := feet
 	var r := body.radius
+	var tall := body.height if is_nan(height) else height
 	# Vertical: land on a top crossed going down; stop under a bottom crossed going up.
 	var y_to := p.y + desired.y
 	if desired.y < 0.0:
@@ -172,8 +174,8 @@ func sweep(feet: Vector3, desired: Vector3) -> Vector3:
 			if box_off[b] != 0:
 				continue
 			var bottom := box_min[b].y
-			if bottom >= p.y + body.height - SKIN and bottom < y_to + body.height and _circle_overlaps(p.x, p.z, r, b):
-				y_to = minf(y_to, bottom - body.height)
+			if bottom >= p.y + tall - SKIN and bottom < y_to + tall and _circle_overlaps(p.x, p.z, r, b):
+				y_to = minf(y_to, bottom - tall)
 	p.y = y_to
 	# Level: move, then push out of every box the body overlaps above step height.
 	p.x += desired.x
@@ -181,7 +183,7 @@ func sweep(feet: Vector3, desired: Vector3) -> Vector3:
 	for _pass in PUSH_PASSES:
 		var pushed := false
 		for b in box_min.size():
-			if box_off[b] != 0 or box_max[b].y <= p.y + body.max_step or box_min[b].y >= p.y + body.height - SKIN:
+			if box_off[b] != 0 or box_max[b].y <= p.y + body.max_step or box_min[b].y >= p.y + tall - SKIN:
 				continue
 			var cx := clampf(p.x, box_min[b].x, box_max[b].x)
 			var cz := clampf(p.z, box_min[b].z, box_max[b].z)
@@ -230,7 +232,12 @@ class BoxMover:
 		world = box_world
 
 	func move(c: Character, desired: Vector3) -> Vector3:
-		return world.sweep(c.position, desired) - c.position
+		return world.sweep(c.position, desired, c.body_height(world.body)) - c.position
+
+	func room_to_stand(c: Character) -> bool:
+		var b := world.body
+		var up := b.height - b.crouch_height
+		return world.sweep(c.position, Vector3(0.0, up, 0.0), b.crouch_height).y >= c.position.y + up - 1e-4
 
 	func probe_ground(c: Character, max_drop: float) -> float:
 		return world.probe(c.position, max_drop)

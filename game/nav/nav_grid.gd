@@ -37,6 +37,9 @@ var cell_start: PackedInt32Array = PackedInt32Array([0])
 var node_cell: PackedInt32Array = PackedInt32Array()
 var walkable: PackedByteArray = PackedByteArray()
 var floor_y: PackedFloat32Array = PackedFloat32Array()
+## Per node: 1 where only a crouched body fits (something over the floor lower than a standing body, within the
+## clearance: a tunnel, CR1), else 0.
+var low: PackedByteArray = PackedByteArray()
 ## Per walkable node and step d (NavGridBuilder.DI, DJ): the node of that neighbouring cell it steps onto (walkable or
 ## not), or -1; and a bit per step (1 << d) that lands on a walkable node (ALL_STEPS: no leg probe round it can fail).
 var steps: PackedInt32Array = PackedInt32Array()
@@ -118,6 +121,17 @@ func cell_index(x: float, z: float) -> int:
 	if i < 0 or j < 0 or i >= cols or j >= rows:
 		return -1
 	return j * cols + i
+
+
+## Whether a body at `p` walking `ahead` (m, along the level unit vector `dir`) meets a floor only a crouched body fits
+## under (low): at the point, half way or at the end, each on the floor at its height.
+func low_ahead(p: Vector3, dir: Vector3, ahead: float) -> bool:
+	for s in 3:
+		var at := p + dir * (ahead * s * 0.5)
+		var k := node_at(at)
+		if k >= 0 and low[k] != 0:
+			return true
+	return false
 
 
 ## The node under the point: its cell's floor under that height, or -1 off the grid or where there is none.

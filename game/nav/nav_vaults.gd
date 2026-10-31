@@ -29,7 +29,8 @@ static func link(g: NavGrid, query: WorldQuery, vault: VaultConfig, body: BodyCo
 	var weight := 0.0
 	for k in nodes:
 		start[k] = to.size()
-		if g.walkable[k] == 0:
+		# A vault starts and lands standing: never from or onto a floor only a crouched body fits over (CR1).
+		if g.walkable[k] == 0 or g.low[k] != 0:
 			continue
 		if weight == 0.0:
 			weight = g.astar.get_point_weight_scale(k)
@@ -51,7 +52,7 @@ static func link(g: NavGrid, query: WorldQuery, vault: VaultConfig, body: BodyCo
 			for cells: int in LAND_CELLS:
 				var s := plan.far + cells * g.cell
 				var m := g.node_at(Vector3(feet.x + way.x * s, plan.top_y, feet.z + way.y * s))
-				if m < 0 or g.walkable[m] == 0:
+				if m < 0 or g.walkable[m] == 0 or g.low[m] != 0:
 					continue
 				to.append(m)
 				break

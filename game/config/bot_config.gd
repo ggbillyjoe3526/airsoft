@@ -170,6 +170,9 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## It asks again for a drop off its leg only once it has moved this far (m) from where it last asked: a fresh route
 ## from the same spot is the same route, and it walks that one (stuck_time still catches a real hold-up).
 @export var off_leg_replan_moved: float = 0.5
+## A bot crouches when a floor only a crouched body fits over (a tunnel, NavGrid.low) lies within this far ahead (m):
+## down before its head would meet the roof at a run.
+@export var low_crouch_ahead: float = 1.0
 ## Steps off a route (sidesteps, the last bit onto a lean spot) look this far ahead for a drop or a wall (m).
 @export var edge_lookahead: float = 0.6
 ## Keeping apart (bodies pass through each other in the physics): a bot steers off anyone in play closer than this (m).

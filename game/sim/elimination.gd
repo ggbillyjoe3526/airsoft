@@ -71,8 +71,10 @@ static func walk_off_due(c: Character, nav: NavGrid) -> bool:
 ## Fills `out` with what an eliminated character does instead of its controller's command: stand still with the hand up
 ## while calling, walk the route to the dead zone, then stand there. Never fires, aims, reloads or switches, whatever a
 ## reused command held before (browser audit SIM-11). The walk is `forward` = HitConfig.walk_off_speed with no walk
-## or sprint held, so movement drives it at that share of MovementConfig.run_speed, as in the browser game.
-static func fill_eliminated_command(c: Character, tuning: SimTuning, out: PlayerCommand) -> PlayerCommand:
+## or sprint held, so movement drives it at that share of MovementConfig.run_speed, as in the browser game; crouched
+## where a tunnel lies within HitConfig.walk_off_crouch_ahead on `nav` (NavGrid.low, CR1).
+static func fill_eliminated_command(c: Character, tuning: SimTuning, out: PlayerCommand,
+		nav: NavGrid = null) -> PlayerCommand:
 	out.reset(c.yaw, 0.0)
 	if c.status != Character.Status.WALKING_OFF:
 		return out
@@ -89,6 +91,9 @@ static func fill_eliminated_command(c: Character, tuning: SimTuning, out: Player
 		# Yaw 0 faces -Z and positive yaw turns left.
 		out.yaw = atan2(-dx, -dz)
 		out.forward = clampf(hits.walk_off_speed, 0.0, 1.0)
+		if nav != null:
+			out.crouch = nav.low_ahead(c.position, Vector3(-sin(out.yaw), 0.0, -cos(out.yaw)),
+					hits.walk_off_crouch_ahead)
 	return out
 
 

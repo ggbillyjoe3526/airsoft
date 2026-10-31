@@ -6,6 +6,9 @@ extends Resource
 ## Capsule radius and height (m).
 @export var radius: float = 0.32
 @export var height: float = 1.8
+## The body's height crouched (m): it stays crouched under anything lower than `height` over its feet, and goes through
+## anything at least this high (CR1: Woodland's 1.4 m tunnels; the crouched figure's head tops out at 1.13 m).
+@export var crouch_height: float = 1.25
 ## Eye height standing and fully crouched (m).
 @export var stand_eye_height: float = 1.62
 @export var crouch_eye_height: float = 1.05
