@@ -1,13 +1,13 @@
 # CT1 · A crouched body short enough for Woodland's tunnels
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-10-31 | 1 | thread | crouch and Woodland tests pass, 187 targeted | Retry 7/8 | the id CR1 was taken (Custom match rules): renamed CT1, that record restored; QA and performance hadn't reported |
-| 2026-10-31 | 2 | thread | see Checks | pending | – |
+| 2026-10-31 | 2 | thread | crouch (9), movement and practice spot tests pass; full suite on CI | Accept 8/8 | – |
 
 ## Goal
 
@@ -37,8 +37,8 @@ The concept's build note asked for a crouched body of about 1.25 m (the crouched
   cutting is now cut once from the uncut ground (`H0`) and ramps down over `CUT_RUN_OUT` (1.5 m) to its floor
   `CUT_LEVEL` (1 m) short of the roof; the rebuilt `woodland.json` changes terrain only, `check.py` TOTAL 0.
 - Tests: `test_crouch_body.gd` (9: tunnels in BoxWorld, kept down, too-low roofs, nav low floors, routes,
-  `low_ahead`, walk-off crouch, a bot crouched before the roof, never stopped at it) and `test_woodland_layout.gd` (each tunnel low on the grid; a crouched Jolt body
-  walks through each, a standing one stops at the roof).
+  `low_ahead`, walk-off crouch, a bot crouched before the roof, never stopped at it) and `test_woodland_layout.gd`
+  (each tunnel low on the grid; a crouched Jolt body walks through each, a standing one stops at the roof).
 - Wiki: Movement (crouch fits tunnels and keeps you down) and Maps (Woodland's three tunnels). DECISIONS: the crouched
   body. KNOWN_ISSUES: the tunnels row is gone.
 
@@ -46,7 +46,6 @@ The concept's build note asked for a crouched body of about 1.25 m (the crouched
 
 - The stream bed under the North bridge (the concept's "crouch under it") is low floor too, so bots crouch along
   it as a fourth low way; the wiki names it with the three tunnels.
-
 - 1.25 m, the concept's build note: 0.12 m over the crouched head, 0.15 m under the tunnels' roofs.
 - Kept down under a roof rather than refusing the stand-up key with a sound or a prompt: the simplest thing that
   never traps a body in a roof.
@@ -54,4 +53,9 @@ The concept's build note asked for a crouched body of about 1.25 m (the crouched
 
 ## Checks
 
-- pending
+- gdlint clean. 187 targeted tests pass (crouch body, Woodland layout with its bot match, nav grid, terrain, movement,
+  box world, map level, elimination, bot vaults, practice spots, bots, map areas); after the fixes, the crouch body
+  (9), movement and practice spot tests pass. The full suite runs on CI.
+- `check.py` TOTAL 0; `build_map.py` rebuilds `woodland.json` byte for byte (QA).
+- Performance: no new per-tick allocations; the low mover body freed with the level; `_stamp_low` about 150 ms of a
+  6 s Woodland nav build; `room_to_stand` 41 us a crouched character a tick, now only while crouch is let go.

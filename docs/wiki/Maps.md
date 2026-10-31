@@ -78,8 +78,8 @@ over the Culvert to the Log stacks and the Sawmill. Attackers start in the west 
   and bushes, and a BB that pushes 0.6 m into leaves stops there. The minimap marks them. Grass never hides you.
 - **Three crouch tunnels,** 1.4 m high: the Crawl box, a plywood crawl through the Berm between the Ridge and the
   Clearing; the Badger run, a log-lined run through the Knoll between the middle and the south; and the Culvert, the
-  stream bed under the road. Crouch to go through; inside you stay down until you're out, and bots crouch through too. The stream bed
-  under the North bridge is crouch height as well, a fourth low way along the bed.
+  stream bed under the road. Crouch to go through; inside you stay down until you're out, and bots crouch through
+  too. The stream bed under the North bridge is crouch height as well, a fourth low way along the bed.
 - **The huts:** the Cabin, the two huts of Hut row and the Box on A site have windows and doorways; the Tower is a
   platform 3.4 m up a stair, the Sawmill an open shed.
 - **Night** is the Time of day setting's (day by default): a low moon, stars and haze, with fires and lanterns at the
