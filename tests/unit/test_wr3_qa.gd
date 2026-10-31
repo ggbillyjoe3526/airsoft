@@ -41,7 +41,8 @@ func test_a_dress_naming_no_model_keeps_the_box_and_lays_nothing() -> void:
 	assert_true(PropLayout.layout(m, cfg, _boxes()).is_empty(), "nothing laid")
 	var plain := MapLevel._greybox_mesh(m, play.map_style)
 	var dressed := MapLevel._greybox_mesh(m, play.map_style, null, cfg)
-	var count := func(mesh: ArrayMesh) -> int: return (mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+	var count := func(mesh: ArrayMesh) -> int: return (mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+			as PackedVector3Array).size()
 	assert_eq(count.call(dressed), count.call(plain), "its box is still drawn")
 	assert_null(PropDress.build(m, cfg), "no dress, no node")
 

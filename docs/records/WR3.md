@@ -1,13 +1,13 @@
 # WR3 · Woodland's CC0 dress
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-10-31 | 1 | thread | see Checks | Retry 8/8 (held for QA, performance) | thickets' cores left gaps between touching thickets |
-| 2026-10-31 | 2 | thread | see Checks | pending | – |
+| 2026-10-31 | 2 | thread | see Checks | Accept 8/8 | – |
 
 ## Goal
 
@@ -69,3 +69,5 @@ models in Beta (2026-10-31).
   fixed: a ramp that names a prop keeps its box (`PropDressConfig.dresses`), and the missing-model warning quotes its
   path. Left as they are: a future bake of Woodland would need its shadow caster and baked mesh to know the props
   (Woodland has no bake), and an unknown dress name warns at load rather than as a map problem.
+- Critic Accept 8/8 on 29f8d52; its last note (two comment lines still over 120 columns) wrapped. QA Pass once the
+  changelog note was in; performance Pass.

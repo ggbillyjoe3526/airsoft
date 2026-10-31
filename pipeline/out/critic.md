@@ -1,20 +1,20 @@
-Task: WR2 · Woodland's doors, two flags and 3:00 rounds (no TASKS.md block; judged against the brief and docs/records/WR2.md)
+Task: WR3 · Woodland's CC0 dress (no TASKS.md block; judged against the brief, the owner's ask and docs/records/WR3.md)
 Attempt: 2 of 4
-Head: 847b86d (= git rev-parse HEAD; QA Pass on 847b86d, performance Pass on d646e35: the delta's only code is MapCatalog._read_round, parse-time once per catalog load, no hot path)
+Head: 29f8d52 (= git rev-parse HEAD; diff 10095c1..29f8d52; test_props 17/17, test_wr3_qa 7/7, test_map_level 15/15 re-run here)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept
-Attempt 1's must-fix and notes, verified in d646e35..847b86d:
-8. Fixed. tools/wiki.py +366-375 round_of() and +382-383 add a generated Round column to the maps table (Depot 2:30, Woodland 3:00, Range –, read from maps.md and round_config.gd); gen_rules +524 reads "2:30, or the map's own ([Maps](Maps))". Typed "3:00 / half a minute" gone (Maps.md, Modes.md +51). `tools/wiki.py check` OK, 25 pages.
-- 30 s step: map_catalog.gd +144-146 rejects off-step cells (fposmod against ROUND_TIME_STEP); maps.md +18-20 says so. test_woodland_layout +431/+437 and test_wr2_qa.gd:158-168 ("185", "100" warn once, map still listed) fail without the step check.
-- KNOWN_ISSUES.md:14 records the shared physics space of a test's own level and its match's (document).
-- Record: WR2.md attempt 1 row filled, attempt 2 row and section added.
-- Door wording: Maps.md +84 "the other team's end ... your own end".
-Notes (no fail):
-- docs/wiki/Maps.md:85 rewrapped to 124 columns (PROCESS.md:278 wraps at 120); fix when the changelog note goes in.
-- changelog.d note for WR2 still to come (due after review, pipeline/README.md).
+Score: 8/8 → Accept (QA's one blocking item, the changelog note, is in changelog.d/woodland-cc0-props.md; performance Pass on 10095c1, the later diff is build-time only)
+Evidence for the first pass's fixes:
+- Cores: map_level.gd:365-377 core_box runs a side flush when _touched (:381-390, a 5 cm slab against the other cored boxes) finds a thicket, else insets min(0.7 m, 20 % of the width); cored list built once (:340-344). test_props.gd:327-348 walks every touching pine pair and asserts no gap; the old inset_of insets every side, so it would fail.
+- Lined (TILE) blocks keep their box: map_level.gd:349; the old b.dress guard is gone, so a site-less map's kind-dressed blocks are now hidden too (the latent issue closed).
+- A ramp keeps its box: prop_dress_config.gd:92-93; test_props.gd:394-405.
+- Changelog note: player-facing, four lines, no dev content. Record attempt 2: WR3.md:57-71, with QA's and performance's findings.
+- Check 3: core_box/_touched are greybox build-time (O(n²) over 197 thickets, once); nothing new per frame or tick.
+Failed checks: none.
+Should fix before merge (non-blocking, not scored):
+- prop_dress_config.gd:5 is still 198 columns: the wrap moved the overflow instead of breaking it (the record's "two lines wrapped" is half true). tests/unit/test_wr3_qa.gd:44 is 130.
 Owner should test in the game:
-- Woodland Skirmish: Match card chips and HUD clock show 3:00; Depot still 2:30; Custom on Woodland plays its own saved time.
-- Each hut's enemy-facing door is shut at round start, its own-side door open; opening one is heard but not too far.
-- Shut doors sit flush on the sloped Box and Cabin; open leaves fold flat and do not snag.
-- Attack / Defend: A at the Fort and B at the Sawmill both read on the HUD; attackers can reach B in a 3:00 round.
-- Bots open and pass the Hut row and Box doors without bunching in the doorway.
+1. Woodland's staircase thicket clumps (x -68..-40): any glimpse of a bot through a seam you can't shoot through?
+2. Thickets read as uncrossable hedges; 1.6-1.8 m trunks as trees, not posts.
+3. Shoot round a trunk's edge: is the square hit box "a little wide" or unfair?
+4. The violet truck and teal crates: readable as cover, never a team colour?
+5. F3 frame rate on High by day and on Low, looking across the woods.
