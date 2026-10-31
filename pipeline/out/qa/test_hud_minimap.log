@@ -1,0 +1,47 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_hud_minimap.gd
+* test_the_panel_names_the_map_and_round_and_where_the_character_stands
+* test_the_area_label_is_rebuilt_only_when_the_area_changes
+* test_it_follows_the_one_the_view_is_through_and_their_team
+* test_rotating_turns_the_field_and_fixed_turns_the_arrow
+* test_the_panel_scale_is_the_view_radius_across_the_square
+* test_teammates_are_dots_grey_once_hit_and_enemies_are_never_dots
+* test_a_teammate_on_another_storey_is_an_arrow_up_or_down
+* test_patches_are_anonymous_and_only_those_on_your_storey_and_live
+* test_a_patch_is_whole_on_the_panel_or_a_mark_on_the_rim_never_both
+* test_the_pole_shows_while_the_round_is_live_in_attack_defend_only
+* test_your_hold_is_a_diamond_while_it_is_in_force
+* test_a_field_with_no_layers_still_gets_a_panel
+* test_a_frame_allocates_nothing
+* test_the_pictures_go_with_the_panel
+* test_the_hud_has_no_panel_on_the_range
+* test_practice_on_a_field_has_its_panel_captioned_practice
+* test_what_got_you_and_the_pinned_flag_marker_sit_under_the_panel_and_the_summary_hides_it
+17/17 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                17
+Passing Tests        17
+Asserts             120
+Time              8.148s
+
+
+Ran Scripts matching "test_hud_minimap"
+---- All tests passed! ----
+

@@ -1,0 +1,47 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_dust_effects.gd
+* test_only_a_gas_replica_breathes
+* test_a_shot_puffs_at_the_muzzle_forward_and_at_the_port_to_the_right
+* test_the_pool_is_fixed_and_the_oldest_puff_is_reused
+* test_a_far_puff_keeps_its_least_size_on_screen
+* test_only_a_sprint_or_a_landing_in_range_kicks_dust_and_a_landing_more
+* test_its_top_stays_under_the_cap_all_its_life_so_it_never_hides_anyone
+* test_it_takes_the_maps_tint_and_switches_off_with_the_wind_dust
+* test_the_specks_are_lit_by_the_light_and_fade_near_the_eye
+* test_contact_shadows_only_where_the_sun_casts_none
+* test_the_contact_shadow_lies_under_the_feet_and_stays_on_the_floor_off_it
+* test_the_figures_muzzle_is_read_from_the_model
+* test_no_effect_colour_reads_as_a_team
+* test_a_match_draws_them_from_its_events_and_its_graphics
+    3 Orphans
+        * [Site:<MeshInstance3D#457497907174>] + 1
+        * [Site:<MeshInstance3D#467094475839>]
+3 orphans
+13/13 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                13
+Passing Tests        13
+Asserts              72
+Time              5.092s
+
+
+Ran Scripts matching "test_dust_effects"
+---- All tests passed! ----
+

@@ -1,0 +1,38 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_colour_vision.gd
+* test_the_simulation_reproduces_standards_published_numbers
+* test_every_set_keeps_its_teams_far_apart_for_every_vision
+* test_high_contrast_is_apart_in_lightness_for_every_vision
+* test_high_contrasts_least_lightness_gap_is_over_three_times_standards
+* test_the_rule_catches_near_team_colours_and_passes_greys_and_far_hues
+* test_no_prop_reads_as_a_team_but_the_listed_exceptions
+* test_every_exception_is_a_prop_with_that_colour_that_still_needs_it
+* test_no_map_paint_reads_as_a_team
+8/8 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                 8
+Passing Tests         8
+Asserts              76
+Time              0.373s
+
+
+Ran Scripts matching "test_colour_vision"
+---- All tests passed! ----
+

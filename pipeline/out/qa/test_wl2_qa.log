@@ -1,0 +1,71 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_wl2_qa.gd
+* test_a_6v6_board_lists_twelve_rows_that_fit_the_screen
+* test_a_6v6_minimap_has_room_for_every_other_player
+* test_a_second_staged_match_started_at_once_after_the_first_leaves_nothing_behind
+* test_odd_saved_team_sizes_fall_back_and_the_map_plays_its_standard
+* test_a_stale_dev_map_pick_without_dev_content_offers_and_plays_depot_s_sizes
+* test_the_saved_size_survives_depot_woodland_depot
+    136 Orphans
+        * [@PanelContainer@4978:<PanelContainer#1032486651557>] + 3
+        * [@PanelContainer@4823:<PanelContainer#959992302243>] + 2
+        * [@PanelContainer@4958:<PanelContainer#1031765232293>] + 2
+        * [@PanelContainer@4917:<PanelContainer#999250987687>] + 2
+        * [@PanelContainer@4981:<PanelContainer#1034667690770>] + 2
+        * [@PanelContainer@4831:<PanelContainer#960260737826>] + 3
+        * [@PanelContainer@4827:<PanelContainer#960109742887>] + 3
+        * [@PanelContainer@4835:<PanelContainer#960411732781>] + 3
+        * [@PanelContainer@4839:<PanelContainer#960562727733>] + 3
+        * [@PanelContainer@4843:<PanelContainer#960713722710>] + 3
+        * [Map_depot:<Button#991516691464>(menu_card.gd)] + 6
+        * [@PanelContainer@4906:<PanelContainer#996516301914>] + 3
+        * [@PanelContainer@4914:<PanelContainer#996818291807>] + 3
+        * [@PanelContainer@4910:<PanelContainer#996667296868>] + 3
+        * [@PanelContainer@4898:<PanelContainer#996214312050>] + 3
+        * [Map_range:<Button#992657542289>(menu_card.gd)] + 6
+        * [Map_woodland:<Button#992087116964>(menu_card.gd)] + 6
+        * [@PanelContainer@4902:<PanelContainer#996365307220>] + 3
+        * [@PanelContainer@4970:<PanelContainer#1032184664827>] + 3
+        * [@PanelContainer@4989:<PanelContainer#1034936128562>] + 3
+        * [@PanelContainer@4993:<PanelContainer#1035087123509>] + 3
+        * [@PanelContainer@5001:<PanelContainer#1035389113399>] + 3
+        * [@PanelContainer@4997:<PanelContainer#1035238118469>] + 3
+        * [@PanelContainer@4921:<PanelContainer#999368431385>] + 3
+        * [@PanelContainer@4925:<PanelContainer#999519426334>] + 3
+        * [@PanelContainer@4974:<PanelContainer#1032335660838>] + 3
+        * [@PanelContainer@4966:<PanelContainer#1032033672518>] + 3
+        * [@PanelContainer@4962:<PanelContainer#1031882677578>] + 3
+        * [@PanelContainer@4929:<PanelContainer#999670422950>] + 3
+        * [@PanelContainer@4937:<PanelContainer#999972412844>] + 3
+        * [@PanelContainer@4933:<PanelContainer#999821417906>] + 3
+        * [@PanelContainer@4985:<PanelContainer#1034785136586>] + 3
+        * [@PanelContainer@4894:<PanelContainer#996096879483>] + 2
+136 orphans
+6/6 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                 6
+Passing Tests         6
+Asserts              62
+Time              33.45s
+
+
+Ran Scripts matching "test_wl2_qa"
+---- All tests passed! ----
+

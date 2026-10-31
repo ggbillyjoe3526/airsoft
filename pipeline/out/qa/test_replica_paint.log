@@ -1,0 +1,43 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_replica_paint.gd
+* test_a_replica_in_hand_wears_its_paints_five_colours
+* test_a_slot_without_a_paint_wears_its_classes_default
+* test_realistic_colours_show_the_plain_family
+* test_a_plain_colour_is_the_same_realistic_or_not
+* test_the_cyber_pistol_keeps_its_own_colours
+* test_a_cyber_pistol_picture_repainted_from_realistic_gets_its_glow_back
+* test_parts_the_scheme_does_not_name_keep_their_own
+* test_bots_wear_their_teams_paints
+* test_bots_show_the_plain_colour_under_realistic
+* test_a_figure_shows_the_replica_it_has_out
+* test_replicas_in_one_paint_share_their_materials
+* test_the_cache_is_bounded
+* test_nothing_is_left_after_free
+13/13 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                13
+Passing Tests        13
+Asserts              74
+Time              0.557s
+
+
+Ran Scripts matching "test_replica_paint"
+---- All tests passed! ----
+

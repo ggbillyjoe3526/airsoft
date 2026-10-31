@@ -95,7 +95,7 @@ extends Resource
 ## `ground_colour`.
 @export var terrain_colours: Dictionary[int, Color] = {
 	RayHit.Surface.GRASS: Color8(0x8a, 0xa8, 0x60),
-	RayHit.Surface.LEAVES: Color8(0x8a, 0x8a, 0x6a),
+	RayHit.Surface.LEAVES: Color8(0x7c, 0x7a, 0x58),
 	RayHit.Surface.EARTH: Color8(0x8a, 0x80, 0x70),
 	RayHit.Surface.GRAVEL: Color8(0xa0, 0x9a, 0x92),
 	RayHit.Surface.WOOD: Color8(0xa0, 0x94, 0x7c),

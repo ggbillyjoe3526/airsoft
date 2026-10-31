@@ -1,0 +1,47 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_site_dress.gd
+* test_every_block_of_depot_and_the_range_has_a_finish_of_its_own
+* test_the_gravel_beds_dock_and_slab_are_told_apart
+* test_no_site_paint_reads_as_a_team
+* test_a_site_dressing_is_read_and_a_bad_entry_left_out
+* test_a_map_paints_no_more_bay_lines_than_the_shader_draws
+* test_the_yard_paints_bay_lines_on_open_slab_and_a_hazard_lip_on_its_dock
+* test_the_yard_s_stencils_name_its_areas_on_a_wall_and_read_against_it
+* test_the_site_mesh_is_the_greybox_s_faces_with_sandbags_drawn_inside_their_bags
+* test_the_bake_fits_the_site_mesh_and_lights_it
+    3 Orphans
+        * [Site:<MeshInstance3D#156497873129>]
+        * [Site:<MeshInstance3D#166698421210>] + 1
+* test_low_draws_the_site_without_its_fine_relief
+* test_details_stay_within_their_blocks_or_out_of_reach
+* test_sandbags_fill_their_stacks
+* test_the_day_gets_clouds_and_haze
+* test_woodland_stays_greybox
+14/14 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                14
+Passing Tests        14
+Asserts             152
+Time              2.96s
+
+
+Ran Scripts matching "test_site_dress"
+---- All tests passed! ----
+

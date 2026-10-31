@@ -1,0 +1,45 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_assets.gd
+* test_every_model_loads
+* test_figures_have_their_clips_and_sidecars
+* test_every_sound_loads_and_loops_loop
+* test_fonts_load
+* test_map_layouts_parse
+5/5 passed.
+
+
+res://tests/unit/test_assets_fidelity.gd
+* test_ambience_loops_are_not_clipped
+* test_map_layouts_hold_no_lost_values
+* test_woodland_terrain_heights_are_a_list_of_every_vertex
+* test_figures_keep_their_skeleton_and_grip_bones
+* test_marks_faces_carry_the_arrows_and_tick_and_main_faces_the_up_down_arrows
+* test_every_export_preset_ships_the_figure_sidecars
+6/6 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               2
+Tests                11
+Passing Tests        11
+Asserts             508
+Time              0.743s
+
+
+Ran Scripts matching "test_assets"
+---- All tests passed! ----
+

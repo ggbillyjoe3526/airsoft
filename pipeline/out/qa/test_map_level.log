@@ -1,0 +1,45 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_map_level.gd
+* test_depot_reads_its_blocks_ends_and_kill_height
+* test_a_ray_meets_a_wall_with_its_surface_and_normal
+* test_a_ray_meets_a_container_as_metal_and_a_crate_as_wood
+* test_a_port_wall_is_plywood_and_a_gravel_bed_is_gravel_underfoot
+* test_a_block_reads_gravel_and_the_box_is_one_container_in_one_colour
+* test_a_ray_through_open_air_meets_nothing
+* test_underfoot_is_the_floor_and_the_ramp_metal
+* test_a_character_settles_on_the_floor_at_rest_height
+* test_a_wall_stops_a_character_a_radius_short
+* test_a_character_walks_up_a_ramp_onto_the_dock
+* test_a_character_falls_off_the_dock_and_lands
+* test_a_bb_landing_on_a_container_reports_metal
+* test_a_map_missing_its_floor_or_spawns_is_refused
+* test_a_ramp_is_its_kind_s_surface_unless_it_says_otherwise
+* test_the_greybox_is_one_draw_with_every_face_facing_out
+15/15 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                15
+Passing Tests        15
+Asserts              72
+Time              0.617s
+
+
+Ran Scripts matching "test_map_level"
+---- All tests passed! ----
+

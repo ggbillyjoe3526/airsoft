@@ -1,0 +1,254 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_wl1_qa.gd
+* test_height_at_a_non_square_terrain_reads_every_corner_and_edge_and_nan_just_outside
+* test_hostile_ground_data_never_errors_and_leaves_the_map_playable
+WARNING: MapData: ground's base <null> is not one of ["concrete", "metal", "wood", "earth", "gravel", "grass", "leaves"]; left out
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: a ground patch's box is not four numbers
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: ground's base <null> is not one of ["concrete", "metal", "wood", "earth", "gravel", "grass", "leaves"]; left out
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: a ground patch's width is not a number
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: ground's base <null> is not one of ["concrete", "metal", "wood", "earth", "gravel", "grass", "leaves"]; left out
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: a ground patch's width is not a number
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: ground's base <null> is not one of ["concrete", "metal", "wood", "earth", "gravel", "grass", "leaves"]; left out
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: ground's base <null> is not one of ["concrete", "metal", "wood", "earth", "gravel", "grass", "leaves"]; left out
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: ground's base <null> is not one of ["concrete", "metal", "wood", "earth", "gravel", "grass", "leaves"]; left out
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: a ground patch is not an object
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: a ground patch is not an object
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: a ground patch is not an object
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: a ground patch is not an object
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: ground's base <null> is not one of ["concrete", "metal", "wood", "earth", "gravel", "grass", "leaves"]; left out
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: ground's underTrees 5.0 is not one of ["concrete", "metal", "wood", "earth", "gravel", "grass", "leaves"]; left out
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: ground's patches are not a list
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: ground is not an object; the terrain is earth
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: ground is not an object; the terrain is earth
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_hostile_ground_data_never_errors_and_leaves_the_map_playable (res://tests/unit/test_wl1_qa.gd:50)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+* test_hostile_terrain_data_is_refused_with_a_reason_not_an_error
+* test_a_cell_that_does_not_divide_into_ground_squares_keeps_one_square_a_cell
+* test_surface_at_a_square_edge_takes_the_square_it_starts_and_every_square_has_a_surface
+* test_the_tables_that_index_by_surface_cover_grass_and_leaves_and_keep_the_old_values
+* test_the_bots_hunting_field_on_woodland_takes_in_both_camps_not_just_its_roofs
+* test_no_pair_the_search_can_join_is_refused_by_regions_on_depot_or_woodland
+8/8 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                 8
+Passing Tests         8
+Asserts             400
+Time              18.203s
+
+
+Ran Scripts matching "test_wl1_qa"
+---- All tests passed! ----
+

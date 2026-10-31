@@ -1,0 +1,71 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_terrain.gd
+* test_reads_each_vertex_height_back_and_builds_heights_row_by_row
+* test_interpolates_the_two_triangles_split_along_the_x0_z0_to_x1_z1_diagonal
+* test_is_continuous_across_cell_borders
+* test_counts_the_outer_edges_as_inside_and_is_nan_beyond_them
+* test_the_mesh_has_two_triangles_a_cell_all_facing_up
+* test_a_point_on_the_ground_is_on_the_mesh
+* test_the_ground_squares_are_the_mesh_s_triangles_cut_smaller
+* test_reads_the_slope_of_a_plane_whichever_way_it_tilts
+* test_finds_the_steepest_triangle_not_the_average
+* test_gives_the_lowest_and_highest_vertex_heights
+* test_a_map_whose_ground_is_terrain_alone_loads_and_one_with_neither_is_refused
+* test_malformed_terrain_is_refused_with_its_reason
+* test_the_ground_is_its_base_then_leaves_under_the_trees_then_each_patch
+* test_an_unknown_ground_surface_is_left_out_with_a_warning
+WARNING: MapData: ground's base lava is not one of ["concrete", "metal", "wood", "earth", "gravel", "grass", "leaves"]; left out
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_an_unknown_ground_surface_is_left_out_with_a_warning (res://tests/unit/test_terrain.gd:282)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+* test_the_level_draws_the_ground_squares_in_their_surfaces_colours_in_its_tiles
+* test_woodland_s_ground_is_tiles_that_cull_drawing_the_very_squares_of_the_whole
+* test_rays_and_feet_meet_each_ground_surface
+* test_a_ray_straight_down_meets_woodland_s_ground_within_a_centimetre_at_1000_points
+    worst of 1000 rays down: 0.00005 m
+* test_a_body_walks_up_down_and_across_the_knoll_s_steepest_face_and_stands_still_on_it
+    Knoll's steepest face: slope 0.473 at (32.5, 3.801369, 4.5), down (-0.631584, 0.0, 0.775307)
+    across the face: 4.038 m, 0.0000 m down it
+* test_the_nav_grid_takes_its_bounds_and_floors_from_the_terrain
+* test_blocks_stand_in_the_way_on_the_slope_and_beyond_the_terrain_is_nowhere
+* test_a_floor_block_over_the_ground_is_a_floor_and_one_sunk_under_it_is_not
+* test_routes_run_up_and_down_a_slope_as_steep_as_a_ramp_on_the_ground
+* test_no_route_climbs_a_cliff_but_each_side_stays_connected
+* test_a_platform_no_step_reaches_is_its_own_region_and_a_route_to_it_is_refused_at_once
+    refused in 38 us
+* test_a_terrain_whose_cols_or_rows_are_not_whole_is_refused
+* test_grass_and_leaves_are_appended_and_sound_puff_and_stop_bbs_as_earth
+* test_trees_logs_and_fences_are_dull_wood
+* test_no_ground_colour_reads_as_a_team
+* test_a_diagonal_line_up_smooth_ground_steeper_than_0_53_walks_but_one_across_a_kerb_s_corner_is_a_drop
+30/30 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                30
+Passing Tests        30
+Asserts           26547
+Time              4.899s
+
+
+Ran Scripts matching "test_terrain"
+---- All tests passed! ----
+

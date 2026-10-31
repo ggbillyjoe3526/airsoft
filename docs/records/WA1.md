@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-10-31 | 1 | thread | see Checks | pending | – |
+| 2026-10-31 | 1 | thread | see Checks | Retry 7/8 (held for QA, performance) | docs behind the change |
+| 2026-10-31 | 2 | thread | see Checks | pending | – |
 
 ## Goal
 
@@ -51,3 +52,13 @@ moved Depot onto it; this moves Woodland onto it by docs/ART.md › A map in the
 - Targeted GUT: test_look, test_woods_view, test_woods_view_qa, test_bushes, test_props, test_baked_light,
   test_dd1_qa, test_dp2_qa and the tests reading the changed colours or the minimap all pass. The full suite runs on CI.
 - Before and after pictures at eye height on High (Vulkan, lavapipe): Hut row, the Truck bend, the Sawmill.
+
+## Attempt 2
+
+- The critic (Retry 7/8, held for QA and performance) found five docs behind the change: ART.md's palette table
+  (the fifteen Woodland colours added), its crowns ("dark-green cone"), the test that holds the wood's colours, the
+  Woodland recipes still "to join" the palette test, and `game/map/README.md`'s metre grid. All five fixed.
+- `test_night_light`: timber logs, fences and boards stood ΔE 4.6 off the new leaf litter in the night fill alone (the
+  floor is 5, never lowered). Litter is darker, `#7c7a58` (ΔE 7.8), in the palette and Woodland's LEAVES ground.
+- Performance Pass: no blocking finding; the shared `light()` over the greybox and woods is for the owner's F3 check
+  on High and Ultra at Hut row and the Sawmill, against main.

@@ -1,0 +1,55 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_skyline.gd
+* test_depot_lists_its_landmarks_beyond_the_walls
+* test_every_landmark_is_seen_and_built
+* test_a_piece_no_one_sees_over_the_walls_is_left_out
+WARNING: MapData: skyline entry 3 (shed) needs x, z, width, depth and height; left out
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] _yard (res://tests/unit/test_skyline.gd:42)
+         [2] test_a_piece_no_one_sees_over_the_walls_is_left_out (res://tests/unit/test_skyline.gd:76)
+         [3] _run_test (res://addons/gut/gut.gd:622)
+         [4] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [5] test_scripts (res://addons/gut/gut.gd:1045)
+         [6] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [7] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [8] main (res://addons/gut/cli/gut_cli.gd:297)
+         [9] _init (res://addons/gut/gut_cmdln.gd:39)
+* test_one_mesh_no_collider_and_the_layout_unchanged
+* test_a_far_piece_fades_toward_the_horizon
+* test_no_skyline_colour_reads_as_a_team
+* test_it_fades_to_the_playing_horizon_and_no_fade_step_reads_as_a_team_by_day_or_night
+* test_a_treeline_is_cones_along_its_points_across_its_depth
+* test_woodland_s_treelines_and_hills_are_built_and_read_as_no_team_by_day_or_night
+* test_the_masts_lamps_glow_at_night_with_no_real_light
+* test_smoke_from_medium_and_frozen_under_reduced_motion
+* test_a_map_with_no_skyline_draws_as_before
+12/12 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                12
+Passing Tests        12
+Asserts              73
+Time              1.988s
+
+
+Ran Scripts matching "test_skyline"
+---- All tests passed! ----
+

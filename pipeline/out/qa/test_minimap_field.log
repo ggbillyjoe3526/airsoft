@@ -1,0 +1,44 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_minimap_field.gd
+* before_all
+    depot: 1 layer(s) of (1080, 720) px at 10.00 px/m, 31.9 ms, 3037 KB
+    range: 0 layer(s) of (0, 0) px at 0.00 px/m, 0.0 ms, 0 KB
+* test_the_yard_is_one_layer_at_the_layer_scale
+* test_the_yards_walls_cover_floors_and_ramps
+* test_the_dock_has_a_rim_where_it_drops
+* test_a_field_in_storeys_has_a_layer_per_storey
+* test_a_storey_leaves_out_the_floors_over_it
+* test_an_upper_storey_washes_the_street_darker
+* test_a_storeys_own_cover_shows
+* test_no_side_passes_the_cap
+* test_nothing_is_built_on_the_range
+* test_the_images_go_with_the_field
+* test_the_config_is_left_alone
+11/11 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                11
+Passing Tests        11
+Asserts              56
+Time              0.442s
+
+
+Ran Scripts matching "test_minimap_field"
+---- All tests passed! ----
+

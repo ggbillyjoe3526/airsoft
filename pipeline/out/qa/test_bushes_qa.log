@@ -1,0 +1,74 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_bushes_qa.gd
+* test_a_bb_stopped_in_leaves_hits_no_one_standing_behind_its_stop_in_the_same_tick
+* test_someone_standing_in_a_bush_is_hit_by_a_bb_that_reaches_them_within_the_leaves
+* test_a_bb_fired_from_inside_a_bush_stops_0_6_m_from_where_it_started
+* test_a_pool_bb_that_is_reused_starts_with_no_leaves_crossed
+* test_a_bb_thrown_off_its_line_by_an_edge_draws_its_turn_from_the_match_stream
+* test_a_bush_free_world_leaves_the_stream_alone
+* test_the_leaves_event_is_appended_after_every_older_kind
+* test_a_foliage_entry_that_is_not_a_list_is_ignored_with_a_warning
+WARNING: MapData: foliage is not a list of bushes; none
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_a_foliage_entry_that_is_not_a_list_is_ignored_with_a_warning (res://tests/unit/test_bushes_qa.gd:116)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: foliage is not a list of bushes; none
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_a_foliage_entry_that_is_not_a_list_is_ignored_with_a_warning (res://tests/unit/test_bushes_qa.gd:116)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+WARNING: MapData: foliage is not a list of bushes; none
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:223)
+         [1] test_a_foliage_entry_that_is_not_a_list_is_ignored_with_a_warning (res://tests/unit/test_bushes_qa.gd:116)
+         [2] _run_test (res://addons/gut/gut.gd:622)
+         [3] _test_the_scripts (res://addons/gut/gut.gd:835)
+         [4] test_scripts (res://addons/gut/gut.gd:1045)
+         [5] run_tests (res://addons/gut/gui/GutRunner.gd:198)
+         [6] _run_tests (res://addons/gut/cli/gut_cli.gd:239)
+         [7] main (res://addons/gut/cli/gut_cli.gd:297)
+         [8] _init (res://addons/gut/gut_cmdln.gd:39)
+8/8 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                 8
+Passing Tests         8
+Asserts              41
+Time              0.352s
+
+
+Ran Scripts matching "test_bushes_qa"
+---- All tests passed! ----
+
