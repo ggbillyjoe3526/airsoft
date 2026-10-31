@@ -150,9 +150,12 @@ func _add_skyline(port: SubViewport, map: MapData, play: PlayTuning, body: BodyC
 		skyline.set_smoke(true)
 
 
-## The map's wood as a match draws it on High by day (WoodsView: crowns, the forest, tufts, puddles and the floor) and
-## its bushes (BushView), each if it has them.
+## The map's wood as a match draws it on High by day (WoodsView: crowns, the forest, tufts, puddles and the floor), its
+## bushes (BushView) and, with no site dress, its CC0 props (PropDress, WR3), each if it has them.
 static func add_woods(port: Node, map: MapData, play: PlayTuning) -> void:
+	var props := PropDress.build(map, play.site_look.props) if map.site == null else null
+	if props != null:
+		port.add_child(props)
 	var woods := WoodsView.build(map, play.woods, play.skyline, play.lighting, play.map_style)
 	if woods != null:
 		port.add_child(woods)

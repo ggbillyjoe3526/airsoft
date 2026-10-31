@@ -7,8 +7,8 @@ card.
 <!-- wiki:maps -->
 
 **Team sizes** are the players a side the map offers. [Skirmish](Modes#skirmish-and-custom) plays the usual size;
-under Custom rules you pick any size the map offers. Fields are greybox for now: plain blocks and colours, with the
-finished models coming later ([Roadmap](Roadmap)).
+under Custom rules you pick any size the map offers. Fields are dressed with free CC0 props over plain blocks and
+colours, with the finished models coming later ([Roadmap](Roadmap)).
 
 ## Depot
 
@@ -71,8 +71,9 @@ over the Culvert to the Log stacks and the Sawmill. Attackers start in the west 
 - **The stream:** its bed is 1.7 m under its banks, which are too steep to climb. Cross on the North bridge or the road,
   or walk in and out at the Ford and the gentle slides. Down in the bed you're out of sight of the wood above.
 - **Long views, few walls:** the Ridge looks 86 m down onto the Fort; elsewhere a lane's longest line is under 80 m.
-  Cover is logs, log stacks, tyres, crates and the trunks of the trees themselves. The thickets of spruce at the edges
-  and between the lanes can't be entered.
+  Cover is logs, log stacks, tyres, crates, the violet truck and the trunks of the trees themselves, all free CC0
+  models; each stops a BB at its block, a little wide of a round trunk. The thickets of spruce at the edges and between
+  the lanes can't be entered or seen through.
 - **Ferns** grow knee to hip high in eight beds where you'd want to hide, and **bushes** stand taller. Nobody sees you
   through more than about half a metre of leaves, so crouch in a fern bed to vanish; you walk straight through ferns
   and bushes, and a BB that pushes 0.6 m into leaves stops there. The minimap marks them. Grass never hides you.

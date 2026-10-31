@@ -1,7 +1,8 @@
 class_name PropDress
 extends Node3D
-## A site-dressed map's CC0 props (DR2): the drums, barrels, pallets and sofa that stand in the blocks of the kinds
-## PropDressConfig dresses, where PropLayout lays them, one MultiMesh a model (the shelving one a chunk,
+## A map's CC0 props (DR2, WR3): the drums, barrels, pallets and sofa that stand in the blocks of the kinds
+## PropDressConfig dresses, and Woodland's trunks, logs, cordwood, spruces, tyres, crates and truck in the blocks that
+## name them, where PropLayout lays them, one MultiMesh a model (a model laid often, or tiled, one a chunk,
 ## PropDressConfig.chunk, so it culls and takes its level of detail by area) in one vertex-coloured material. A
 ## drum, barrel or sofa casts its own shadow (its box draws nothing, SiteSurface.core_of, and leaves MapLevel's shadow
 ## caster); shelving casts none, its rack's backing box still does. Scenery only: no collider, no nav cell; the blocks'
@@ -39,7 +40,8 @@ static func build(map: MapData, cfg: PropDressConfig) -> PropDress:
 	dress._meshes = meshes
 	for model: StringName in placed:
 		var tiled := _tiled(cfg, model)
-		dress._add(model, meshes[model], placed[model], not tiled, cfg.chunk if tiled else INF)
+		var many := placed[model].transforms.size() >= cfg.chunk_from
+		dress._add(model, meshes[model], placed[model], not tiled, cfg.chunk if tiled or many else INF)
 	return dress
 
 
@@ -87,10 +89,10 @@ static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName
 	for b in map.blocks:
 		if not cfg.dresses(b):
 			continue
-		var model: StringName = cfg.kind_props[b.kind]
+		var model := cfg.model_of(b)
 		if not used.has(model):
 			used.append(model)
-		if cfg.kind_lays.get(b.kind, PropDressConfig.Lay.FIT) == PropDressConfig.Lay.CLUSTER \
+		if cfg.lay_of(b) == PropDressConfig.Lay.CLUSTER \
 				and not used.has(cfg.pallet):
 			used.append(cfg.pallet)
 	return used
@@ -98,6 +100,8 @@ static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName
 
 ## Whether `model` lines boxes (TILE): their backing is still in the shadow caster, so the model casts none.
 static func _tiled(cfg: PropDressConfig, model: StringName) -> bool:
+	if cfg.model_lays.get(model, PropDressConfig.Lay.FIT) == PropDressConfig.Lay.TILE:
+		return true
 	for kind: StringName in cfg.kind_props:
 		if cfg.kind_props[kind] == model and cfg.kind_lays.get(kind, PropDressConfig.Lay.FIT) == PropDressConfig.Lay.TILE:
 			return true

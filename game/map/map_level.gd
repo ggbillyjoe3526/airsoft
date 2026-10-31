@@ -42,6 +42,9 @@ var _material: StandardMaterial3D = null
 var _mesh: MeshInstance3D = null
 ## The site dress's look and its material (DD1); null for a greybox map.
 var _site: SiteLook = null
+## The props a block may name (MapData.Block.dress, WR3), whatever the map's site: such a block's box is drawn inset
+## behind them, or not at all.
+var _props: PropDressConfig = null
 var _site_material: ShaderMaterial = null
 ## Sloping ground's tiles, under one node; empty on a map without it.
 var _tiles: Array[MeshInstance3D] = []
@@ -74,6 +77,7 @@ func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 	_night = night
 	name = "Map_%s" % m.id
 	_material = _greybox_material(style)
+	_props = site.props if site != null else null
 	if m.site != null and site != null:
 		_site = site
 		_site_material = SiteSurface.material(site, m)
@@ -287,7 +291,7 @@ func _make_mesh() -> MeshInstance3D:
 	var baked := _baked_mesh() if _baked else null
 	if baked == null:
 		_baked = false
-		mi.mesh = _greybox_mesh(map, _style) if _site == null else _site_mesh(map, _style, _site)
+		mi.mesh = _greybox_mesh(map, _style, null, _props) if _site == null else _site_mesh(map, _style, _site)
 		return mi
 	mi.mesh = baked
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -323,19 +327,37 @@ func _bake_or_null() -> BakedLight:
 ## Every block and the ground beyond the walls as one mesh in one material: vertex colours carry each block's colour,
 ## a world-space grid texture the metre lines, so the blocks are a single draw call (sloping ground is its tiles').
 ## With `site`, as the baked site's shadow caster: a block drawn as props alone (DR2) is left out, its props cast its
-## shadow.
-static func _greybox_mesh(m: MapData, style: MapStyle, site: SiteLook = null) -> ArrayMesh:
+## shadow. With `props`, a block drawn as the prop it names (WR3) is left out, or drawn inset behind its props as
+## PropDressConfig.core_of says (a thicket's core), its props casting their own shadows.
+static func _greybox_mesh(m: MapData, style: MapStyle, site: SiteLook = null, props: PropDressConfig = null) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for b in m.blocks:
 		if site != null and SiteSurface.hidden(site, b):
 			continue
+		var core := Transform3D.IDENTITY
+		if props != null and b.dress != &"" and props.dresses(b):
+			var inset := props.core_of(b)
+			if inset == Vector2.ZERO:
+				continue
+			core = inset_of(b, inset)
 		st.set_color(style.block_colour(b))
 		for f in GreyboxFaces.faces_of(b):
-			_add_face(st, f)
+			_add_face(st, core * f)
 	st.set_color(style.ground_colour)
 	_add_face(st, GreyboxFaces.ground_face(style, GreyboxFaces.ground_top(m)))
 	return st.commit()
+
+
+## The transform that draws block `b`'s box `inset.x` m inside each side, its top cut down to `inset.y` of its height
+## (a dressed block's core, PropDressConfig.core_of).
+static func inset_of(b: MapData.Block, inset: Vector2) -> Transform3D:
+	var lo := b.center - b.size * 0.5
+	var hi := b.center + b.size * 0.5
+	var to_lo := lo + Vector3(inset.x, 0.0, inset.x)
+	var to_hi := Vector3(hi.x - inset.x, lo.y + b.size.y * inset.y, hi.z - inset.x)
+	var basis := Basis.from_scale((to_hi - to_lo).max(Vector3.ZERO) / b.size)
+	return Transform3D(basis, to_lo - basis * lo)
 
 
 ## The greybox's faces for the site's material: white, each vertex carrying its block's box and finish

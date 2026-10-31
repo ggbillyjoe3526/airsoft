@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Depot's CC0 props (DR2): Kenney models recoloured off the team hues into assets/models/props/.
+"""The fields' CC0 props (Depot's, DR2; Woodland's, WR3): Kenney models recoloured off the team hues into
+assets/models/props/.
 
 Reads each recipe's source model from a checkout of the Kenney library's GitHub mirror (CC0,
 github.com/shorepine/kenney at SOURCE_COMMIT; kenney.nl itself is blocked in the cloud) and writes one .glb a prop:
@@ -46,7 +47,34 @@ RECIPES = {
     # boxes above.
     "shelf": {"source": "mini-market/shelf-boxes.glb", "parts": "nodes",
               "colours": {"shelf-boxes": (0.22, 0.46, 0.33), "carton": (0.6, 0.56, 0.5), "box": (0.85, 0.82, 0.72)}},
+    # Woodland (WR3). A tree's trunk: a log stood upright, grey-brown bark (dull, so off the orange team's hue) and pale
+    # cut ends (hidden in the ground and the crown).
+    "trunk": {"source": "nature/log.glb", "parts": "materials", "turn": "z_up",
+              "colours": {"woodBark": (0.52, 0.47, 0.43), "woodInner": (0.78, 0.73, 0.64)}},
+    # A fallen log, and the wind-thrown trunks: the same bark lying down.
+    "log": {"source": "nature/log.glb", "parts": "materials",
+            "colours": {"woodBark": (0.52, 0.47, 0.43), "woodInner": (0.78, 0.73, 0.64)}},
+    # Cordwood: stacked logs, their cut ends out (the log piles, log stacks and the Woodpile).
+    "logstack": {"source": "nature/log_stackLarge.glb", "parts": "materials",
+                 "colours": {"woodBark": (0.52, 0.47, 0.43), "woodInner": (0.78, 0.73, 0.64),
+                             "woodDark": (0.38, 0.35, 0.32)}},
+    # A spruce of the thickets: dark green needles on a dark trunk.
+    "pine": {"source": "nature/tree_pineTallA.glb", "parts": "materials",
+             "colours": {"woodBarkDark": (0.42, 0.38, 0.35), "leafsDark": (0.27, 0.54, 0.33)}},
+    # A tyre lying flat (the tyre walls and stacks), near black.
+    "tyre": {"source": "car/debris-tire.glb", "parts": "texture", "turn": "x_up", "colours": {"all": (0.2, 0.2, 0.21)}},
+    # A painted crate, teal.
+    "crate": {"source": "survival/box-large.glb", "parts": "texture", "colours": {"all": (0.22, 0.5, 0.46)}},
+    # The Truck bend's truck: a violet cab and bed on dark wheels.
+    "truck": {"source": "car/truck.glb", "parts": "nodes",
+              "colours": {"body": (0.46, 0.33, 0.6), "wheel-front-right": (0.2, 0.2, 0.21),
+                          "wheel-front-left": (0.2, 0.2, 0.21), "wheel-back-right": (0.2, 0.2, 0.21),
+                          "wheel-back-left": (0.2, 0.2, 0.21)}},
 }
+
+# A recipe's "turn" stands the model another way up before it is written: "z_up" turns its z axis up (a log on end),
+# "x_up" its x axis (a wheel lying flat).
+TURNS = {"z_up": lambda v: (v[0], v[2], -v[1]), "x_up": lambda v: (-v[1], v[0], v[2])}
 
 
 def read_glb(path):
@@ -137,11 +165,12 @@ def build(kenney, name, recipe):
             nor = accessor(gltf, binary, prim["attributes"]["NORMAL"])
             uv = accessor(gltf, binary, prim["attributes"]["TEXCOORD_0"]) if "TEXCOORD_0" in prim["attributes"] else None
             material = gltf["materials"][prim["material"]]["name"] if "material" in prim else "all"
+            turn = TURNS.get(recipe.get("turn", ""), lambda v: v)
             for k, p in enumerate(pos):
-                positions.append(apply(m, p, 1.0))
+                positions.append(turn(apply(m, p, 1.0)))
                 n = apply(m, nor[k], 0.0)
                 length = max(sum(c * c for c in n) ** 0.5, 1e-9)
-                normals.append(tuple(c / length for c in n))
+                normals.append(turn(tuple(c / length for c in n)))
                 if recipe["parts"] == "materials":
                     parts.append(material)
                     shades.append(1.0)

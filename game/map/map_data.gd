@@ -36,6 +36,9 @@ class Block:
 	## Which piece of its kind it is (0 first, in file order): blocks that build one thing, such as a container's walls
 	## under its roof, share their piece (MapStyle draws a piece in one colour).
 	var piece: int = 0
+	## The CC0 prop it is drawn as (`dress` in the file, WR3: a tree's trunk, a log, cordwood, crates, tyres, the truck,
+	## a thicket's spruce; PropDressConfig.model_lays), empty for its box. Look only: the box is still what BBs meet.
+	var dress: StringName = &""
 
 
 ## One pool of light on a night field (`lights` in the file; the browser's MapLight): a camp fire, a lantern, or a lamp
@@ -327,6 +330,7 @@ func _read_blocks(list: Variant, style: MapStyle) -> void:
 				problems.append("block %d's rise %s is not +x, -x, +z or -z" % [i, bd["rise"]])
 		b.surface = SURFACES.get(str(bd["surface"]), style.surface_of(b.kind)) if bd.has("surface") \
 				else style.surface_of(b.kind)
+		b.dress = StringName(str(bd.get("dress", "")))
 		if b.kind == &"floor":
 			floors += 1
 		blocks.append(b)
