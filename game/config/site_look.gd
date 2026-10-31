@@ -59,10 +59,10 @@ enum Canvas {
 ## lines. SiteSurface.MARKS gives the shader's order.
 @export var marks: Dictionary[StringName, Color] = {
 	&"tuft": Color(0.63, 0.68, 0.48), &"chip": Color(0.77, 0.75, 0.74), &"rust_foot": Color(0.7, 0.67, 0.61),
-	&"chevron": Color8(0xf6, 0xf2, 0xea), &"stripe": Color8(0x3a, 0x2f, 0x5a), &"wire": Color(0.81, 0.82, 0.81),
-	&"carton": Color8(0xc2, 0xb6, 0x98), &"slat_gap": Color(0.38, 0.35, 0.31), &"slat": Color8(0xdc, 0xca, 0xa8),
+	&"chevron": Color8(0xf4, 0xec, 0xda), &"stripe": Color8(0x3a, 0x2f, 0x5a), &"wire": Color8(0xd2, 0xce, 0xc8),
+	&"carton": Color8(0xc2, 0xb6, 0x98), &"slat_gap": Color8(0x61, 0x59, 0x4f), &"slat": Color8(0xdc, 0xca, 0xa8),
 	&"goods_olive": Color8(0x58, 0x90, 0x4e), &"goods_tan": Color8(0xdc, 0xca, 0xa8), &"pallet": Color8(0x8c, 0x8a, 0x96),
-	&"grass": Color(0.7, 0.72, 0.57), &"dirt_foot": Color(0.68, 0.65, 0.6),
+	&"grass": Color8(0xb3, 0xb8, 0x91), &"dirt_foot": Color(0.68, 0.65, 0.6),
 	&"bay_line": Color8(0xe4, 0xca, 0x46),
 }
 ## Roughness and metalness; a finish not listed is 0.8 and 0.
@@ -103,7 +103,7 @@ enum Canvas {
 ## a unit into tiers `container_tier` tall.
 @export var container_paint: Array[Color] = [
 	Color8(0xc2, 0x38, 0x74), Color8(0x76, 0x58, 0xaa), Color8(0xe4, 0xca, 0x46), Color8(0x2a, 0x9c, 0x90),
-	Color8(0x58, 0x90, 0x4e), Color8(0xec, 0xe4, 0xd4),
+	Color8(0x58, 0x90, 0x4e), Color8(0xf4, 0xec, 0xda),
 ]
 @export var container_unit: float = 6.1
 @export var container_split: float = 7.0

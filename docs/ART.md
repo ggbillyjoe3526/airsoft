@@ -90,12 +90,18 @@ The look's palette is `LookConfig.palette` (`game/config/look_config.gd`, in `pl
 | green | `#58904e` | site colour: containers, netting, cases |
 | cream | `#f4ecda` | site colour: containers, walls, sails, film |
 | concrete | `#d2cec8` | precast, docks, light concrete |
-| floor | `#b9b4ae` | an outdoor slab (Depot's hall floor is darker, `#7c7670`, so the cover stands off it) |
+| floor | `#b9b4ae` | an outdoor slab |
 | plywood | `#dccaa8` | plywood barricades |
 | timber | `#a0947c` | timber, sandbags |
 | crate | `#c2b698` | crates, cartons |
 | steel | `#6c6a7a` | steel, racking, ramps |
 | ink | `#3a2f5a` | stencils, hazard stripes' dark, a shelf's backing |
+| slab | `#7c7670` | Depot's hall floor, darker than `floor` so the cover stands off it |
+| sand, pebble, stone | `#b9ae98`, `#a09a92`, `#8c8478` | open ground, gravel, gabion stone |
+| plaster | `#ece2cf` | outer walls |
+| grey | `#8c8a96` | ramps, pallets, IBC frames |
+| ceiling | `#524a72` | a roof's underside |
+| umber, moss | `#61594f`, `#b3b891` | the gaps between slats, grass on open ground |
 
 - **Spread the six evenly.** No site colour covers much more of a map than another; big repeated props (racking,
   walls) take a neutral (steel, plywood, cream) so they never make one colour dominate.
@@ -185,9 +191,10 @@ Woodland and every new map take the look this way (Depot did, AD1):
 
 1. **Draw every surface in the shared light.** A shader includes `look_light.gdshaderinc`; a vertex-coloured model
    uses `LookMaterials.vertex_colour`. A `StandardMaterial3D` doesn't get the look's shade or rim.
-2. **Paint from the palette.** Pick each surface's colour from `LookConfig.palette`; spread the six site colours
-   evenly and put big repeated props on a neutral. CC0 models are recoloured into it (`tools/props/build_props.py`
-   writes vertex colours).
+2. **Paint from the palette.** Every colour a map paints is a palette entry: a new colour goes into the palette
+   first, then into the map's paint. Spread the six site colours evenly and put big repeated props on a neutral. CC0
+   models are recoloured into it (`tools/props/build_props.py` writes vertex colours). `tests/unit/test_look.gd` holds
+   Depot's paint, roof and props to the palette; a new map adds its own to that test.
 3. **Keep surfaces clean.** No noise, stains or photo grain; the gradient and lit edges carry the shape.
 4. **Light it with a preset.** The map's `lighting` overrides tune the sun, fill and exposure; a roofed map's sun hangs
    nearly overhead (Depot). Check it on Low and on Ultra: Low must read as well, Ultra only adds light.

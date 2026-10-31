@@ -182,10 +182,12 @@ void fragment() {
 		r -= 0.08 * stain;
 		if (mode == CONCRETE) {
 			vec2 uv = c / slab_set.x;
-			float t = dot(texture(slab_col, uv).rgb, vec3(0.299, 0.587, 0.114));
-			col *= mix(1.0, t / slab_set.w, slab_set.y * grit);
-			if (!low && grit > 0.0) {
-				n = photo_relief(slab_nrm, uv, n, along, top, slab_set.z);
+			if (grit > 0.0) {
+				float t = dot(texture(slab_col, uv).rgb, vec3(0.299, 0.587, 0.114));
+				col *= mix(1.0, t / slab_set.w, slab_set.y * grit);
+				if (!low) {
+					n = photo_relief(slab_nrm, uv, n, along, top, slab_set.z);
+				}
 			}
 			if (top && joint > 0.0 && (flags & FLAG_HAZARD) == 0) {
 				vec2 g = abs(fract(c / joint + 0.5) - 0.5) * joint;
@@ -283,10 +285,13 @@ void fragment() {
 		}
 	} else if (mode == PLYWOOD) {
 		vec2 uv = c / ply_set.x;
-		float t = dot(texture(ply_col, uv).rgb, vec3(0.299, 0.587, 0.114));
-		col = paint * mix(1.0, t / ply_set.w, ply_set.y * grit) * gr(0.9 + 0.14 * low_f);
-		if (!low && grit > 0.0) {
-			n = photo_relief(ply_nrm, uv, n, along, top, ply_set.z);
+		col = paint * gr(0.9 + 0.14 * low_f);
+		if (grit > 0.0) {
+			float t = dot(texture(ply_col, uv).rgb, vec3(0.299, 0.587, 0.114));
+			col *= mix(1.0, t / ply_set.w, ply_set.y * grit);
+			if (!low) {
+				n = photo_relief(ply_nrm, uv, n, along, top, ply_set.z);
+			}
 		}
 		if (!top) {
 			vec2 sheet = vec2(1.22, 2.44);

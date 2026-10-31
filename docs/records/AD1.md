@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-10-31 | 1 | thread | look (14), graphics, settings, site dress, props, DD1, DR2, hall, night tests; full suite on CI | – | – |
+| 2026-10-31 | 1 | thread | CI all green on 48e46aa (full suite, match and night guards) | Retry 6/8 (near miss, judgment) | 7: the palette shared in name only; 8: the wiki's Depot page stale |
+| 2026-10-31 | 2 | thread | look, site dress, DD1, props, colour vision, DR2, saved configs (82); CI on the head | – | – |
 
 ## Goal
 
@@ -49,6 +50,13 @@ path-traced light as Godot gets, for his RTX 5090.
   overhead-sun fiction, DR1); SDFGI adds colour bleed and occlusion, not a darker hall.
 - Temporal smoothing stays off on every preset (it smears BB streaks; owner's earlier ruling).
 - Figures and replicas keep their materials until the owner's Blender models; they move onto the shared light then.
+- Attempt 2 (the critic's 7): every colour Depot paints (SiteLook's paints, accents and clean marks, the container
+  paint, the roof) and the props' recipe colours are palette entries, held by `test_look.gd`; the palette gains the
+  hall's neutrals (slab, sand, plaster, grey, pebble, stone, ceiling, umber, moss) and three colours moved onto existing
+  entries (the containers' cream, the chevron, wire), none visible at play distance. The slab and plywood photo
+  fetches skip at grit 0 (QA's and performance's advisory).
+- Attempt 2 (the critic's 8): the wiki's Depot (Maps, Home) re-rendered on High and its roof and props lines rewritten;
+  the changelog says Woodland's ground and trees move onto the look next (the Woodland thread's follow-up).
 
 ## Checks
 

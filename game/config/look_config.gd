@@ -98,13 +98,17 @@ const GLOBAL_SPEC := &"look_spec"
 @export var sun_size: float = 0.6
 
 @export_group("Palette")
-## The look's colours by name (sRGB), for every map's dress.
+## The look's colours by name (sRGB), for every map's dress: a map's paint (SiteLook, RoofConfig, the props' recipes)
+## takes each colour from here, and tests/unit/test_look.gd holds Depot's to it.
 @export var palette: Dictionary[StringName, Color] = {
 	&"crimson": Color8(0xc2, 0x38, 0x74), &"violet": Color8(0x76, 0x58, 0xaa), &"yellow": Color8(0xe4, 0xca, 0x46),
 	&"teal": Color8(0x2a, 0x9c, 0x90), &"green": Color8(0x58, 0x90, 0x4e), &"cream": Color8(0xf4, 0xec, 0xda),
 	&"concrete": Color8(0xd2, 0xce, 0xc8), &"floor": Color8(0xb9, 0xb4, 0xae), &"plywood": Color8(0xdc, 0xca, 0xa8),
 	&"timber": Color8(0xa0, 0x94, 0x7c), &"crate": Color8(0xc2, 0xb6, 0x98), &"steel": Color8(0x6c, 0x6a, 0x7a),
-	&"ink": Color8(0x3a, 0x2f, 0x5a),
+	&"ink": Color8(0x3a, 0x2f, 0x5a), &"slab": Color8(0x7c, 0x76, 0x70), &"sand": Color8(0xb9, 0xae, 0x98),
+	&"plaster": Color8(0xec, 0xe2, 0xcf), &"grey": Color8(0x8c, 0x8a, 0x96), &"pebble": Color8(0xa0, 0x9a, 0x92),
+	&"stone": Color8(0x8c, 0x84, 0x78), &"ceiling": Color8(0x52, 0x4a, 0x72), &"umber": Color8(0x61, 0x59, 0x4f),
+	&"moss": Color8(0xb3, 0xb8, 0x91),
 }
 ## The six site colours, spread evenly over a map's paint so no one colour dominates.
 @export var site_colours: Array[StringName] = [&"crimson", &"violet", &"yellow", &"teal", &"green", &"cream"]
