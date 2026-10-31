@@ -47,6 +47,7 @@ func restore(c: Character) -> void:
 	c.prev_pitch = pitch
 	c.crouch_amount = 1.0 if crouched else 0.0
 	c.prev_crouch_amount = c.crouch_amount
+	c.low = crouched  # the crouched body from the first tick (CT1)
 	var a := c.armament
 	a.active = slot if slot >= 0 and slot < a.replicas.size() else 0
 	a.holstered = holstered
