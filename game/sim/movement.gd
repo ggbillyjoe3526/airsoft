@@ -35,8 +35,11 @@ static func step(c: Character, cmd: PlayerCommand, cfg: MovementConfig, accuracy
 	c.yaw = cmd.yaw
 	c.pitch = clampf(cmd.pitch, -cfg.max_pitch, cfg.max_pitch)
 
-	c.crouch_amount = approach(c.crouch_amount, 1.0 if cmd.crouch else 0.0, dt / cfg.crouch_transition_time)
+	# Crouched under something lower than a standing body (a tunnel's roof, CT1), it stays down whatever is held.
+	var kept_down := not cmd.crouch and c.low and not mover.room_to_stand(c)
+	c.crouch_amount = approach(c.crouch_amount, 1.0 if cmd.crouch or kept_down else 0.0, dt / cfg.crouch_transition_time)
 	var crouched := c.crouch_amount >= cfg.crouched_threshold
+	c.low = crouched
 	# Walking (slow, quiet) wins over sprinting, and so do aiming down sights and leaning from lean_quiet_from. Sprint:
 	# forward only, never crouched, never with the lean key held (no running out of a peek); once it is let go, sprint
 	# picks up as the lean eases back under lean_quiet_from.

@@ -16,6 +16,8 @@ extends Resource
 ## Close enough to the dead-zone spot to stop (m), and to count a route waypoint reached.
 @export var dead_zone_arrive: float = 0.15
 @export var waypoint_reach: float = 0.4
+## A walk-off crouches where a tunnel (NavGrid.low) lies within this far ahead (m, CT1).
+@export var walk_off_crouch_ahead: float = 1.0
 ## Walking off slower than stuck_speed (m/s) for stuck_time (s) counts as blocked: the character leaves the field.
 @export var stuck_speed: float = 0.5
 @export var stuck_time: float = 0.5

@@ -122,7 +122,7 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		if in_play:
 			cmd = commands[c.id] if c.id >= 0 and c.id < commands.size() else null
 		else:
-			cmd = Elimination.fill_eliminated_command(c, tuning, _eliminated)
+			cmd = Elimination.fill_eliminated_command(c, tuning, _eliminated, nav)
 		if cmd == null:
 			cmd = _idle
 			cmd.reset(c.yaw, c.pitch)

@@ -296,3 +296,69 @@ func _fastest(e: int, goal: Vector3) -> float:
 		best = minf(best, length)
 	assert_true(is_finite(best), "end %d reaches %s" % [e, goal])
 	return best
+
+
+## The three crouch tunnels (CT1): each one's ends (x, z) in the order a test walks it, north to south, and the stretch
+## under its roof (z): the Crawl box's plywood, the Badger run's logs, the road deck over the Culvert's bed.
+const TUNNELS: Array[Array] = [
+	["Crawl box", Vector2(-14.0, -20.5), Vector2(-14.0, -9.5), Vector2(-18.0, -12.0)],
+	["Badger run", Vector2(31.0, 13.0), Vector2(31.0, 25.0), Vector2(15.5, 22.5)],
+	["Culvert", Vector2(8.0, 45.3), Vector2(8.0, 51.3), Vector2(45.3, 51.3)],
+]
+## How far (m) past each end a walk through starts and finishes.
+const TUNNEL_APPROACH := 1.5
+## How far (m) inside each end of its roof a tunnel's floor must be low: its first metre runs up the slope to the
+## mouth, roofed higher.
+const ROOF_INSET := 1.0
+
+
+## Whether cell (x, z) has a walkable floor only a crouched body fits over.
+func _low_floor_at(x: float, z: float) -> bool:
+	var c := nav.cell_index(x, z)
+	for k in range(nav.cell_start[c], nav.cell_start[c + 1]):
+		if nav.walkable[k] == 1 and nav.low[k] == 1:
+			return true
+	return false
+
+
+func test_each_tunnel_is_low_floor_under_its_roof_on_the_grid() -> void:
+	for t: Array in TUNNELS:
+		var a: Vector2 = t[1]
+		var roof: Vector2 = t[3]
+		var gaps := 0
+		var z := roof.x + ROOF_INSET
+		while z <= roof.y - ROOF_INSET:
+			if not _low_floor_at(a.x, z):
+				gaps += 1
+			z += tuning.nav.cell
+		assert_eq(gaps, 0, "%s: a crouched body's floor all along under its roof" % t[0])
+
+
+## Walks a body from TUNNEL_APPROACH before end a to as far past end b, crouched or standing; where it ends.
+func _walk_through(a: Vector2, b: Vector2, crouched: bool) -> Character:
+	var way := (b - a).normalized()
+	var start := a - way * TUNNEL_APPROACH
+	var c := Character.new(0, 0, Vector3(start.x, map.terrain.height_at(start.x, start.y) + 0.3, start.y), 0.0,
+			ReplicaStats.default_loadout())
+	var cmd := PlayerCommand.new()
+	cmd.yaw = atan2(-way.x, -way.y)
+	cmd.forward = 1.0
+	cmd.crouch = crouched
+	var mover := level.mover(tuning.body)
+	var ticks := ceili((a.distance_to(b) + 2.0 * TUNNEL_APPROACH) / tuning.movement.crouch_speed / DT * 1.5)
+	for i in ticks:
+		Movement.step(c, cmd, tuning.movement, tuning.accuracy, DT, mover)
+	return c
+
+
+func test_a_crouched_body_walks_through_each_tunnel_and_a_standing_one_can_t() -> void:
+	for t: Array in TUNNELS:
+		var a: Vector2 = t[1]
+		var b: Vector2 = t[2]
+		var way := (b - a).normalized()
+		var c := _walk_through(a, b, true)
+		var past := Vector2(c.position.x - b.x, c.position.z - b.y).dot(way)
+		assert_gt(past, 0.5, "%s: crouched, out past the far end (at %s)" % [t[0], c.position])
+		var roof: Vector2 = t[3]
+		var s := _walk_through(a, b, false)
+		assert_lt(s.position.z, roof.x + ROOF_INSET, "%s: standing, stopped at the mouth (at %s)" % [t[0], s.position])

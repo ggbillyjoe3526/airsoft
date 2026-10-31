@@ -220,6 +220,9 @@ static func _placed(c: Candidate, map: MapData, nav: NavGrid, query: WorldQuery,
 		var cell := nav.node_cell[k]
 		x = nav.cell_x(cell % nav.cols)
 		z = nav.cell_z(cell / nav.cols)
+	# Not under a tunnel's roof: a spot is stood on (CT1).
+	if nav.low[k] != 0:
+		return null
 	# Not at your start: every spawn of your end keeps its clearing (the spawn yard).
 	for s in map.ends[0].spawns:
 		if Vector2(s.position.x - x, s.position.z - z).length() < cfg.field_clear_of_start:

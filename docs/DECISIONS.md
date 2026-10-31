@@ -597,6 +597,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   The layout lives in `tools/woodland/layout.py` and `world.py`, and `build_map.py` writes `data/maps/woodland.json`:
   change the scripts, never the JSON. The game's blocks are axis-aligned, so pieces are squared and the stream runs
   straight north to south under both crossings. The old wood is a test fixture (`tests/support/maps/old_woodland.json`).
+- **A crouched body is 1.25 m tall (owner's approval of Woodland concept 3, 2026-10-31, CT1).** Crouched past the
+  threshold (MovementConfig.crouched_threshold) a character's collision body is `BodyConfig.crouch_height` tall, so it
+  goes through Woodland's 1.4 m tunnels; under anything lower than a standing body it stays crouched whatever is held,
+  until it is out. The nav grid walks a crouched body under such a roof and marks those floors low (`NavGrid.low`);
+  bots (`BotConfig.low_crouch_ahead`) and walk-offs (`HitConfig.walk_off_crouch_ahead`) crouch a metre before one, and
+  no vault or practice spot starts on one.
 - **Woodland keeps its rare long gaps between trunks (owner, 2026-10-31, WR1 decision card).** Pinholes between trees
   run 100 to 160 m across the whole wood; each lane's own lines stay under 78 m and the Ridge overlook 86 m. Asked to
   keep them or thicken the wood, he kept them: Woodland's sightline exception is 170 m (`FieldStandard.EXCEPTIONS`).

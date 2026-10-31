@@ -28,6 +28,7 @@ static func fill(g: NavGrid, map: MapData, cfg: NavConfig, body: BodyConfig) -> 
 	_floors(g, map, body)
 	var r := cfg.clearance(body)
 	_stamp_blocks(g, map, r, body)
+	_stamp_low(g, map, r, body)
 	_stamp_drops(g, r, body.height * 0.5)
 	_stamp_outer_edge(g, r)
 	_link(g, 1.0 / maxf(cfg.search_greed, 1.0))
@@ -88,8 +89,8 @@ static func _cells_under(g: NavGrid, b: MapData.Block, grow: float) -> Vector4i:
 
 
 ## Every cell's floors: each surface over its centre (the terrain's ground first, with nothing under it) with headroom
-## above it (no other surface's solid within a body's height over it), lowest first; of two floors closer than a body's
-## height, the higher.
+## above it (no other surface's solid within a crouched body's height over it, CT1), lowest first; of two floors closer
+## than a crouched body's height, the higher.
 static func _floors(g: NavGrid, map: MapData, body: BodyConfig) -> void:
 	var n := g.cols * g.rows
 	# The surfaces over each cell's centre as (height there, the bottom of the solid under it), packed per cell.
@@ -165,7 +166,7 @@ static func _floors(g: NavGrid, map: MapData, body: BodyConfig) -> void:
 			var f := surf_y[k]
 			var free := true
 			for o in range(s0, s1):
-				if o != k and surf_bottom[o] < f + body.height and surf_y[o] > f + body.max_step:
+				if o != k and surf_bottom[o] < f + body.crouch_height and surf_y[o] > f + body.max_step:
 					free = false
 					break
 			if free:
@@ -173,7 +174,7 @@ static func _floors(g: NavGrid, map: MapData, body: BodyConfig) -> void:
 		kept.sort()
 		var first := count
 		for k in kept.size():
-			if k + 1 < kept.size() and kept[k + 1] - kept[k] < body.height:
+			if k + 1 < kept.size() and kept[k + 1] - kept[k] < body.crouch_height:
 				continue
 			floor_y[count] = kept[k]
 			node_cell[count] = c
@@ -189,6 +190,8 @@ static func _floors(g: NavGrid, map: MapData, body: BodyConfig) -> void:
 	g.walkable = PackedByteArray()
 	g.walkable.resize(count)
 	g.walkable.fill(1)
+	g.low = PackedByteArray()
+	g.low.resize(count)
 
 
 ## The terrain's height at each cell's centre (NAN off it), row by row; empty without terrain.
@@ -205,7 +208,7 @@ static func _ground(g: NavGrid, t: TerrainGrid) -> PackedFloat64Array:
 
 
 ## Blocks every node a block stands in the way on, grown by the clearance `r`: one whose floor it stands on or above
-## (higher than a step) without passing overhead.
+## (higher than a step) without passing over a crouched body's head.
 static func _stamp_blocks(g: NavGrid, map: MapData, r: float, body: BodyConfig) -> void:
 	for b in map.blocks:
 		if is_surface(b):
@@ -218,8 +221,23 @@ static func _stamp_blocks(g: NavGrid, map: MapData, r: float, body: BodyConfig) 
 				var c := j * g.cols + i
 				for k in range(g.cell_start[c], g.cell_start[c + 1]):
 					var f := g.floor_y[k]
-					if bottom < f + body.height and top > f + body.max_step:
+					if bottom < f + body.crouch_height and top > f + body.max_step:
 						g.walkable[k] = 0
+
+
+## Marks low every node something passes over lower than a standing body but not a crouched one (a block or a floor
+## over it, CT1), grown by the clearance `r`: only a crouched body walks there.
+static func _stamp_low(g: NavGrid, map: MapData, r: float, body: BodyConfig) -> void:
+	for b in map.blocks:
+		var bottom := b.center.y - b.size.y * 0.5
+		var box := _cells_under(g, b, r)
+		for j in range(box.y, box.w + 1):
+			for i in range(box.x, box.z + 1):
+				var c := j * g.cols + i
+				for k in range(g.cell_start[c], g.cell_start[c + 1]):
+					var f := g.floor_y[k]
+					if bottom >= f + body.crouch_height and bottom < f + body.height:
+						g.low[k] = 1
 
 
 ## Drops inside the level (a platform's edge, a gap between floors) keep the clearance on both sides, as walls do.

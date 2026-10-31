@@ -42,6 +42,9 @@ var prev_pitch: float = 0.0
 ## 0 standing, 1 fully crouched; last tick's for drawing the eye height between ticks.
 var crouch_amount: float = 0.0
 var prev_crouch_amount: float = 0.0
+## Its collision body is crouched (BodyConfig.crouch_height tall, Movement.step): crouched past the threshold, and kept
+## crouched while there is no room to stand.
+var low: bool = false
 ## The walk cycle's phase (rad): grows with the ground covered, so the legs' hit volumes and the drawn legs swing
 ## together (Hitbox). Last tick's for drawing.
 var walk_cycle: float = 0.0
@@ -113,6 +116,11 @@ static func eye_height(crouch: float, body: BodyConfig) -> float:
 	return body.stand_eye_height + (body.crouch_eye_height - body.stand_eye_height) * crouch
 
 
+## Its collision body's height now (m): BodyConfig.crouch_height while low, else height.
+func body_height(body: BodyConfig) -> float:
+	return body.crouch_height if low else body.height
+
+
 ## The eyes standing upright (no lean); BBs leave from Lean.eye.
 func eye(body: BodyConfig) -> Vector3:
 	return position + Vector3(0.0, eye_height(crouch_amount, body), 0.0)
@@ -154,6 +162,7 @@ func respawn() -> void:
 	prev_pitch = 0.0
 	crouch_amount = 0.0
 	prev_crouch_amount = 0.0
+	low = false
 	walk_cycle = 0.0
 	prev_walk_cycle = 0.0
 	grounded = false

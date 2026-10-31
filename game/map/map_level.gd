@@ -55,6 +55,8 @@ var _query: JoltQuery = null
 ## The movers' kinematic bodies and shapes, made on the physics server and freed with the level.
 var _rids: Array[RID] = []
 var _mover_body: RID
+## The mover's crouched body (BodyConfig.crouch_height tall, CT1).
+var _low_mover_body: RID
 var _probe_body: RID
 
 
@@ -166,7 +168,7 @@ func query() -> JoltQuery:
 
 ## The level as the simulation's CharacterMover (a new one each call, sharing the level's bodies).
 func mover(body: BodyConfig) -> JoltMover:
-	return JoltMover.new(_mover_body, _probe_body, body)
+	return JoltMover.new(_mover_body, _low_mover_body, _probe_body, body)
 
 
 func _notification(what: int) -> void:
@@ -249,14 +251,19 @@ func _make_mover_bodies(body: BodyConfig) -> void:
 	var space := get_world_3d().space
 	var cylinder := PhysicsServer3D.cylinder_shape_create()
 	PhysicsServer3D.shape_set_data(cylinder, {"radius": body.radius, "height": body.height})
+	var low := PhysicsServer3D.cylinder_shape_create()
+	PhysicsServer3D.shape_set_data(low, {"radius": body.radius, "height": body.crouch_height})
 	var disc := PhysicsServer3D.cylinder_shape_create()
 	PhysicsServer3D.shape_set_data(disc, {"radius": body.radius, "height": PROBE_THICKNESS})
 	_mover_body = _kinematic(space, cylinder)
+	_low_mover_body = _kinematic(space, low)
 	_probe_body = _kinematic(space, disc)
 	# Bodies first: a shape is freed after the bodies holding it.
 	_rids.append(_mover_body)
+	_rids.append(_low_mover_body)
 	_rids.append(_probe_body)
 	_rids.append(cylinder)
+	_rids.append(low)
 	_rids.append(disc)
 
 

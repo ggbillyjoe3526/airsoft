@@ -11,7 +11,6 @@ Every open bug, limit and known gap in the game, so nobody re-reports or re-meas
 
 | Area | Issue | Class | Found |
 |---|---|---|---|
-| Play | Woodland's three crouch tunnels (Crawl box, Badger run, culvert) are 1.4 m clear, under the 1.8 m body, so nobody goes through them yet; a crouched body of about 1.25 m is CR1, next (WR1) | fix now | 2026-10-31 |
 | Play | Woodland's huts stand open (no doors) and Attack / Defend there has one flag, at the Fort (A); doors, the Sawmill's flag (B) and 3:00 rounds are WR2 (WR1) | fix now | 2026-10-31 |
 | Audio | Depot still plays the yard's ambience under its roof (birds, a crow, a dog): an indoor hall sound waits for a later pass (DR1) | can wait | 2026-10-31 |
 | Art | Depot's Lounge is lit like the rest of the hall though the concept had it dim; the roof lamps over it are only spaced wider (DR1) | can wait | 2026-10-31 |
