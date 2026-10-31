@@ -82,4 +82,10 @@ cover, enterable huts, ferns and bushes that hide players, day by default and ni
 
 ## Checks
 
-- pending
+- `tools/check.sh` on c7e8c44 (attempt 2 changes only comments, docs and the generator, whose output is
+  byte-identical): gdlint, changelog notes, wiki, unit tests parts 1 and 3, smoke test and licence notices pass (1941
+  tests). Part 2 hit its local 1080 s limit in test_mm1_qa with no failure before it (the known local timeout); the
+  rest of part 2, test_mm1_qa to test_re, ran on its own: 611 / 611 pass. CI runs part 2 whole and the match guards.
+- Targeted: test_terrain, test_nav_grid, test_woodland_layout, test_bots, test_practice_spots, test_held_up_measure,
+  test_fm1_field_map pass; the seed-7 Woodland match plays 9 rounds with no bot held up.
+- `tools/woodland/check.py` TOTAL 0; `build_map.py` rebuilds `data/maps/woodland.json` byte for byte.
