@@ -116,10 +116,20 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  # The Elimination guards, tests/guards/test_match_guards.gd in four jobs (a test name's part picks each): the whole
+  # file outgrew one job's 30 minutes once Depot became the indoor hall with doors (DR1, DO1).
   guards:
-    name: Match guards (16 seeds a field)
+    name: Match guards (16 seeds a field), ${{ matrix.part.name }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        part:
+          - { name: "Depot at Normal", test: on_every_seed, log: guards-1 }
+          - { name: "Depot at Easy and Hard", test: at_easy_and_hard, log: guards-2 }
+          - { name: "Follow me", test: follow_a_leader, log: guards-3 }
+          - { name: "Bots run low on BBs", test: put_low_gets_a_magazine, log: guards-4 }
     steps:
       - uses: actions/checkout@v6
 
@@ -128,15 +138,17 @@ jobs:
           version: ${{ env.GODOT_VERSION }}
           status: ${{ env.GODOT_STATUS }}
 
-      - name: Match guards (tests/guards, Elimination)
-        run: tools/match_guards.sh test_match_guards
+      - name: Match guards (tests/guards/test_match_guards.gd, ${{ matrix.part.name }})
+        run: tools/match_guards.sh test_match_guards ${{ matrix.part.test }}
+        env:
+          GUARDS_LOG: ${{ matrix.part.log }}.log
 
       - name: Keep the log
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: guards-log
-          path: guards.log
+          name: ${{ matrix.part.log }}-log
+          path: ${{ matrix.part.log }}.log
           if-no-files-found: ignore
           retention-days: 14
 

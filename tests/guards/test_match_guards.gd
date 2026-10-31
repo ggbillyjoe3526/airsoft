@@ -5,8 +5,8 @@ extends GutTest
 ## its spawn each round and isn't held up on its way, nobody falls through the floor, flies or leaves the level, and no
 ## bot knocks out a teammate; on Depot, bot teammates told to follow a leader keep up with it (Follow me). Who wins is
 ## the balance report's (BR1), never asserted here. Thresholds are the browser's, re-measured over these seeds
-## (docs/records/MG1.md); re-measure over all 16 before changing one. Run by tools/match_guards.sh, a CI job of its own
-## (about ten minutes).
+## (docs/records/MG1.md); re-measure over all 16 before changing one. Run by tools/match_guards.sh, in four CI jobs (one
+## a test).
 
 ## Follow me on Depot (the browser's depotMatch.test.ts, M22): seeds 1 to FOLLOW_SEEDS of FOLLOW_SECONDS each, a leader
 ## bot giving it at each round start. Each seed judges more than FOLLOW_TICKS ticks, with more than FOLLOW_NEAR of them

@@ -63,6 +63,10 @@ CC0 dress.
 - Locally: `tests/unit/test_two_flags.gd` (18), QA's `tests/unit/test_ab1_qa.gd` (13) and the flag, bot flag,
   minimap, map and Depot tests pass; gdlint, the wiki check and the changelog check pass. CI runs the full suite and
   the match guards (now with both of Depot's poles) on the merge head.
+- CI: the Elimination match guards job timed out at 28 minutes on this head twice (once re-run), with the same
+  rounds as DO1's passing run; `main` failed the same way since DO1 merged (run 41207911844). The file outgrew one
+  job once Depot became the indoor hall with doors, so `ci.yml` splits it into four jobs, one a test (locally Depot at
+  Normal alone ran about 20 minutes, Bots run low 6, Follow me 1).
 - Reviews: critic Retry 6/8, 7/8, 7/8, then Accept 8/8; QA passed attempt 1, failed a re-check (a test still calling
   the old `spot`), then passed; performance failed attempt 1 (the letter's prewarm), then passed.
 - For the owner to play: whether A and B read from across the hall and the spawn chicanes; raising B while your bots
