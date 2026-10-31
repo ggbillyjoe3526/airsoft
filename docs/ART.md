@@ -204,6 +204,13 @@ Depot's temporary site dress (DD1, until the owner's models; Depot and the range
   skip's rim, the watch tower's net and flag, the sails, as one mesh in the same material; the sandbags as one
   MultiMesh within 60 m; the stencils as Label3D, charcoal, or light on a dark wall. `dress_sky` gives the day its
   cumulus and haze. Re-render the map cards with `tools/map_pictures.gd`.
+- **CC0 props** (DR2). `PropDress` (`game/play/site/prop_dress.gd`, built by SiteDress) draws the kinds
+  `PropDressConfig` (`game/config/prop_dress_config.gd`, SiteLook's `props`) dresses: drums four to a pallet, barrels
+  two a block, the sofa, and the tall racks lined with shelving, where `PropLayout` (`prop_layout.gd`, pure, seeded)
+  lays them, one MultiMesh a model in one vertex-coloured material. Every prop stays inside its block's box; the box
+  draws nothing (or, behind shelving, a dark backing half a row in: `SiteSurface.core_of`) and leaves the baked
+  shadow caster. The models are Kenney's, recoloured off the teams' hues into `assets/models/props/` by
+  `tools/props/build_props.py` (vertex colours, no textures).
 
 The figures (step 23, FI1-FI7; every bot on every preset, DECISIONS BD1):
 

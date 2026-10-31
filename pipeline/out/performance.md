@@ -1,29 +1,16 @@
-Task: AB1 · head 04f599e · Verdict: Pass (attempt 3)
-Run: no headless --perf match run (read review; test_two_flags.gd 14/14 pass) · budget: no baseline yet (perf-budget.json absent), judged against targets
-Metrics: not measured; draw calls estimated (judgment) +~11/frame on Depot (second pole: 9 MeshInstance3D + Label3D outline+fill), ~+4 shadow casters per cascade
+Task: DR2 · head 23c670c (attempt 2) · Verdict: Pass (one advisory the owner must check on Low)
+Run: headless census + code read, no GPU · budget: no baseline yet (perf-budget.json absent); judged against DECISIONS targets. test_props 14/14 pass; test_dr2_qa 5/5 on the working tree's version.
 
-Blocking
-- game/play/flag_view.gd:220-222 (judgment): the letter Label3D uses BILLBOARD_FIXED_Y and no `font`; the only Label3D in ShaderPrewarm is FigureView.make_sign (BILLBOARD_ENABLED, sign_font, game/play/figure_view.gd:272, play_session.gd:726). Label3D picks its shader by billboard mode, so the letter's variant is a missing prewarm: first sight of A/B on Depot compiles a shader mid-play. FlagView.materials() (flag_view.gd:116) returns only the cloth/ring materials.
+Attempt 1 blocker (props ignore the Mesh detail preset): answered, with a limit.
+- prop_dress.gd:107-135, prop_dress_config.gd:52: the shelving (156k of 182.5k tris) is now 24 chunk MultiMeshes of 20 m, each frustum-culled on its own and each taking its own mesh LOD; shelf.glb.import generate_lods=true and the test asserts the surface has LODs (test_dr2_qa/test_props). GraphicsApply.MESH_LOD maps the Mesh detail step to the viewport threshold (4 / 2 / 1 / 0.5 px, Low to Ultra), so the props now follow the preset like the project's other meshes. Draw calls: 24 shelf + 4 other models = 28 at most (High ceiling 150; base not measured).
+- Limit (judgment, engine formula from memory, not measured): the shelf's simpler mesh (44 tris) has edge error 0.69 m. At Low's 4 px that switches in roughly beyond 100 to 150 m at 1080p, farther at 4K, and Depot's floor is 108 x 72 m, so on Low the LOD will rarely or never engage. The real Low saving is the chunk culling (only chunks in view are drawn; a view down the hall still shows most of both long racks, maybe 80k tris). 156k shelf tris once in view is low for a GPU, so I don't call this blocking, and hiding the shelving on Low would expose the inset backing, as the coordinator says.
+
+Clean (measured/read)
+- Nothing per frame or per tick: PropDress/PropLayout run at build only; the new `_add` bucketing (Dictionary[Vector2i, PackedInt32Array]) and views_of/all_views/count (they allocate Arrays) are build/test-only, no caller under game/ outside prop_dress.gd.
+- PropDressConfig._meshes caches each model once a config; load_mesh frees the instantiated root (prop_dress_config.gd, `root.free()`); the mesh is held by the PackedScene cache and the MultiMeshes. One shared material; chunk views are children of PropDress. No orphans expected (unmeasured).
+- 358 shelves in 24 chunks: about 15 instances a draw, small per draw call; shelf shadows stay OFF; drums/barrels/pallet/sofa still cast (about 26k tris a sun cascade).
 
 Advisory
-- game/play/flag_view.gd:38-47: each FlagView builds its own alu/dark/rope StandardMaterial3D + flat edge material; two poles = duplicates, not shared (judgment). Freed with the view (no leak).
-- game/play/flag_view.gd:60-93: ~9 MeshInstance3D a pole (pre-existing pattern); second pole doubles it.
-- game/sim/flag.gd:15-22,95: step_all runs at_pole (length() sqrt) per character per pole per tick; 2x of an already-cheap loop, no allocation. length_squared would drop the sqrt (judgment, minor).
-
-Checked, clean (no per-tick/frame allocation)
-- sim: Flag.step_all/rope_worked/highest/going_up/nearest (flag.gd:9-56) iterate typed arrays, only Vector2/float locals; RoundState.reset_flags (round_state.gd:61) only per round, keeps the array.
-- bots: BotFlag.in_play once per tick (bot_controller.gd:272); post_of per defender think (bot_brain.gd:152, ternary is lazy so attackers skip it); no heap allocs. flag_pole re-pick (bot_movement.gd:139) fires on a pole change only; flag progress is monotone per pole and does not decay when idle, so no A/B flip-flop thrash.
-- HUD: Hud.flag_shown/update (hud.gd:935,967) and play_session.gd:1098-1106 loops allocate nothing; HudFlagMarker.set_letter (hud_flag_marker.gd:147) early-outs on same letter (string compare only); warning text built only when the pole changes (hud.gd:1155) - `_warning_pole` is never reset, so it stays correct. `Flag.LETTERS[..]` is a const lookup.
-- minimap: set_pole fills 2 preallocated slots (hud_minimap.gd:394), draw loops over _pole_count; no allocation.
-- teardown: FlagView Label3D is a child of its pole, freed with it; views are children of the session, built once (play_session.gd:354, 692-700); no timers, tweens, or connections added. No orphans expected.
-- Planner draws attack_flag once per round (round_planner.gd:42).
-
-Fixes, ranked
-1. Add the letter Label3D to the prewarm (FlagView exposes it, passed alongside the sign, or ShaderPrewarm gets a second sign), or set the letter to BILLBOARD_ENABLED to share the sign's variant.
-2. Share the three pole materials across FlagViews (static or passed in).
-
-Attempt 3 (395a152..04f599e): Pass. test_two_flags 17, test_bot_flag 14, test_flag_play 14 pass.
-- bot_flag.gd pick_retakers/_pick_for: now runs every A/D tick (was only with the flag off the bottom), but costs O(retakers(2) x bots) a pole instead of the old O(defenders x bots) closer count, so a net cut when the flag is up and about 2 x bots x (role + is_in_play) extra at the bottom (judgment, ~tens of iterations/tick). Typed locals, `near: Bot` ref, no containers.
-- pole_of/on_worked_rope (bot_flag.gd, bot_movement.gd FIGHT + _flag): per bot per tick, an index, a status check and one at_pole sqrt; no allocation.
-- Flag.next_in_play (flag.gd:52) once a tick (bots) and once a frame (HUD _next_shown): one 2-flag loop, no allocation. Hud.shown_pole caches it; the Nearest fallback runs only with every flag at the bottom.
-- Advisory unchanged: per-view pole materials, ~+11 draw calls on Depot.
+- Owner check on Low (laptop): FPS looking down Depot's long axis, with F3 showing draw calls and tris. If tight, cheapest fix is `visibility_range_end` on shelf chunks, or a coarser LOD (a lower-poly shelf model for the TILE kind) so LOD engages inside 100 m.
+- The MultiMesh chunk shader is still warmed through a MeshInstance3D speck (as the bags); a first-sight hitch is possible (judgment).
+- tests/unit/test_dr2_qa.gd is modified and uncommitted in the working tree (not by me); one run of it failed mid-edit, the next passed 5/5.

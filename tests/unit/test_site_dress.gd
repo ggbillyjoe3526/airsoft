@@ -214,7 +214,7 @@ func test_the_site_mesh_is_the_greybox_s_faces_with_sandbags_drawn_inside_their_
 	assert_ne(site.mesh.surface_get_format(0) & Mesh.ARRAY_FORMAT_CUSTOM0, 0, "each vertex carries its box")
 	var stacks: Array[AABB] = []
 	for blk in m.blocks:
-		if look.finish_of(blk) == &"sandbags":
+		if look.finish_of(blk) == &"sandbags" or SiteSurface.as_props(look, blk): # DR2: a propped box folds or backs
 			stacks.append(_box(blk, 1e-4))
 	var moved: Array[int] = []
 	for i in a.size():
@@ -225,7 +225,7 @@ func test_the_site_mesh_is_the_greybox_s_faces_with_sandbags_drawn_inside_their_
 			inside = inside or (s.has_point(a[i]) and s.has_point(b[i]))
 		if not inside:
 			moved.append(i)
-	assert_eq(moved, [] as Array[int], "only a sandbag stack's own box is drawn elsewhere, inside its block")
+	assert_eq(moved, [] as Array[int], "only a sandbag stack's or a propped block's own box is drawn elsewhere, inside it")
 
 
 func test_the_bake_fits_the_site_mesh_and_lights_it() -> void:

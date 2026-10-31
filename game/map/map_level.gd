@@ -286,7 +286,7 @@ func _make_mesh() -> MeshInstance3D:
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var caster := MeshInstance3D.new()
 	caster.name = "ShadowCaster"
-	caster.mesh = _greybox_mesh(map, _style)
+	caster.mesh = _greybox_mesh(map, _style, _site)
 	caster.material_override = _material
 	caster.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 	mi.add_child(caster)
@@ -315,10 +315,14 @@ func _bake_or_null() -> BakedLight:
 
 ## Every block and the ground beyond the walls as one mesh in one material: vertex colours carry each block's colour,
 ## a world-space grid texture the metre lines, so the blocks are a single draw call (sloping ground is its tiles').
-static func _greybox_mesh(m: MapData, style: MapStyle) -> ArrayMesh:
+## With `site`, as the baked site's shadow caster: a block drawn as props alone (DR2) is left out, its props cast its
+## shadow.
+static func _greybox_mesh(m: MapData, style: MapStyle, site: SiteLook = null) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for b in m.blocks:
+		if site != null and SiteSurface.hidden(site, b):
+			continue
 		st.set_color(style.block_colour(b))
 		for f in GreyboxFaces.faces_of(b):
 			_add_face(st, f)
@@ -336,7 +340,7 @@ static func _site_mesh(m: MapData, style: MapStyle, site: SiteLook) -> ArrayMesh
 		var c := SiteSurface.block_customs(site, b)
 		st.set_custom(0, c[0])
 		st.set_custom(1, c[1])
-		var core := SiteSurface.core_of(site, b)
+		var core := SiteSurface.core_of(site, b, m)
 		for f in GreyboxFaces.faces_of(b):
 			_add_face(st, core * f)
 	var top := GreyboxFaces.ground_top(m)
@@ -395,7 +399,7 @@ func _baked_mesh() -> ArrayMesh:
 ## The baked tiles where SiteSurface.core_of draws them (a sandbag stack's own box inside its bags).
 func _site_cores(t: GreyboxFaces.Tiles) -> void:
 	for i in map.blocks.size():
-		var core := SiteSurface.core_of(_site, map.blocks[i])
+		var core := SiteSurface.core_of(_site, map.blocks[i], map)
 		if core == Transform3D.IDENTITY:
 			continue
 		for v in t.blocks.size():
