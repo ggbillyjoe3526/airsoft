@@ -28,6 +28,7 @@ and 2:30 (KNOWN_ISSUES).
   `_read_round` (blank: the tuning's; anything but a whole number from 90 to 300 keeps it, with a warning). A Skirmish
   plays it (`MatchOptions.match_tuning`, `round_time`), so the Match card's chips and the clock show 3:00; Custom plays
   its own Round time switch on any map. The guards and the balance report play it too (`MatchRunner.sized_for`).
+- `test_do1_qa`'s "Woodland has no doors" is now the Range's alone.
 - Wiki: Maps (the huts' doors, A and B, 3:00) and Modes (two poles on both fields, Woodland's round). KNOWN_ISSUES: the
   doors, flags and rounds row is gone. ROADMAP: WR2 done.
 
@@ -40,4 +41,10 @@ and 2:30 (KNOWN_ISSUES).
 
 ## Checks
 
-- pending
+- gdlint clean; `check.py` TOTAL 0; `build_map.py` rebuilds `woodland.json`.
+- 320 targeted tests pass (the crouch, nav, movement and bot tests, `test_woodland_layout` with the doors, both flags,
+  the 3:00 round and its bot match: 9 rounds in 541 s, held up 0; team sizes, doors, two flags, AB1 and DO1 QA, the
+  Match page). The full suite runs on CI.
+- The bot match first counted bots held up in the Hut row's west doorway: the test's own level, built for the file's
+  other tests in the same physics space, kept its doors shut under the match's level. Its doors now stand open while
+  the match plays (test only; a match has one level).
