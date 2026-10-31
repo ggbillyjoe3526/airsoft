@@ -41,7 +41,10 @@ func test_the_lights_values_are_the_projects_global_uniforms() -> void:
 		assert_true(ProjectSettings.has_setting(setting), "project.godot declares %s" % k)
 		var declared: Variant = (ProjectSettings.get_setting(setting) as Dictionary).get("value")
 		if values[k] is Color:
-			assert_true((declared as Color).is_equal_approx(values[k] as Color), "%s: %s" % [k, declared])
+			var want := values[k] as Color
+			var got := declared as Color
+			for c in 4:
+				assert_almost_eq(got[c], want[c], 0.00001, "%s channel %d" % [k, c])
 		else:
 			assert_almost_eq(declared as float, values[k] as float, 0.0001, String(k))
 

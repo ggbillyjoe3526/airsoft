@@ -40,7 +40,10 @@ path-traced light as Godot gets, for his RTX 5090.
 ## Defaults taken
 
 - The concept's crimson (#c4405f), timber and crate sit within 20° of High contrast Beta's hue, so the palette takes
-  #c23874, #a0947c and #c2b698; the shade #564a80 and the rim #fff3d4 for the same reason toward Alpha and Beta.
+  #c23874, #a0947c and #c2b698; the shade and the rim kept off Alpha and Beta for the same reason.
+- A colour global shader uniform reaches the shader unconverted on 4.7.2, `source_color` or not (a test render on the
+  Vulkan renderer read #9d93bc back for a raw #564a80). The pictures had drawn it so, so the shade is named for what
+  they show, #9d93bc (rim #fff9eb), and `LookConfig.globals` sends both linear.
 - Racking is steel grey, not a site colour: there are dozens of racks, and any one colour on them dominates.
 - The roof stays out of the bounce light, so the sky still lights the hall as its lamps would (the established
   overhead-sun fiction, DR1); SDFGI adds colour bleed and occlusion, not a darker hall.

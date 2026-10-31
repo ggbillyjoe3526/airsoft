@@ -127,10 +127,10 @@ metalness; the light does the rest.
 
 **The shared light** (`game/play/look/look_light.gdshaderinc`, values in `LookConfig`'s Light group) is one `light()`
 for every material in the look: soft cel bands (the lit band from a 0.1 cosine, 0.08 soft, with a gentle 14 % step
-half way up), the sun's far side lit in the look's violet `#564a80` instead of falling to black, a warm rim
-(`#fff3d4`, 22 %) on an edge seen against the light, and a small soft highlight on smooth paint. Its values are global
+half way up), the sun's far side lit in the look's violet `#9d93bc` instead of falling to black, a warm rim
+(`#fff9eb`, 22 %) on an edge seen against the light, and a small soft highlight on smooth paint. Its values are global
 shader uniforms (`project.godot` [shader_globals], pushed by `LookConfig.push_globals` at the start of a match), so
-tuning it once changes every map. Ambient light, bounce light and reflections are the engine's and come on top.
+tuning it once changes every map; the colours are sent linear, since a colour global reaches the shader unconverted. Ambient light, bounce light and reflections are the engine's and come on top.
 
 **The grade** (LookConfig's Picture group) is on every preset: AgX with its contrast at 1.35, then 1.14 saturation and
 1.03 contrast, so the palette stays vibrant without pushing the team colours off.

@@ -21,8 +21,8 @@ const GLOBAL_RIM_POWER := &"look_rim_power"
 const GLOBAL_SPEC := &"look_spec"
 
 @export_group("Light")
-## What the sun adds where it doesn't reach (the far side of a band): a cool violet, never black or grey.
-@export var shade: Color = Color8(0x56, 0x4a, 0x80)
+## What the sun adds where it doesn't reach (the far side of a band): a soft cool violet, never black or grey.
+@export var shade: Color = Color8(0x9d, 0x93, 0xbc)
 ## Where the lit band starts (the light's angle as a cosine) and how soft its edge is.
 @export var band: float = 0.1
 @export var band_soft: float = 0.08
@@ -30,7 +30,7 @@ const GLOBAL_SPEC := &"look_spec"
 @export var mid_band: float = 0.14
 ## The rim: warm light on an edge seen against the sun, `rim_power` the falloff from the edge (higher is thinner), its
 ## colour's alpha its strength.
-@export var rim: Color = Color(1.0, 0.953, 0.831, 0.22)
+@export var rim: Color = Color(Color8(0xff, 0xf9, 0xeb), 0.22)
 @export var rim_power: float = 3.2
 ## A soft highlight's strength on a smooth surface (none on a rough one).
 @export var spec: float = 0.35
@@ -54,7 +54,7 @@ const GLOBAL_SPEC := &"look_spec"
 @export var ssil_sharpness: float = 0.98
 ## SDFGI (Scene): the whole field's bounce and sky light, occlusion on. Cascades, the smallest cell (m), its strength,
 ## how much of a bounce feeds the next, and its probes' rays and frames to settle.
-@export var sdfgi_cascades: int = 6
+@export var sdfgi_cascades: int = 5
 @export var sdfgi_min_cell: float = 0.2
 @export var sdfgi_energy: float = 1.0
 @export var sdfgi_bounce: float = 0.5
@@ -118,11 +118,13 @@ func colour(name: StringName) -> Color:
 	return Color.MAGENTA
 
 
-## The shared light's values, as the global shader uniforms (name to value).
+## The shared light's values, as the global shader uniforms (name to value). The colours go linear: a colour global
+## reaches a shader as it is set, with no sRGB conversion even with `source_color` (checked on 4.7.2), so project.godot
+## holds the same linear values.
 func globals() -> Dictionary[StringName, Variant]:
 	return {
-		GLOBAL_SHADE: shade, GLOBAL_BAND: band, GLOBAL_BAND_SOFT: band_soft, GLOBAL_MID_BAND: mid_band,
-		GLOBAL_RIM: rim, GLOBAL_RIM_POWER: rim_power, GLOBAL_SPEC: spec,
+		GLOBAL_SHADE: shade.srgb_to_linear(), GLOBAL_BAND: band, GLOBAL_BAND_SOFT: band_soft, GLOBAL_MID_BAND: mid_band,
+		GLOBAL_RIM: rim.srgb_to_linear(), GLOBAL_RIM_POWER: rim_power, GLOBAL_SPEC: spec,
 	}
 
 

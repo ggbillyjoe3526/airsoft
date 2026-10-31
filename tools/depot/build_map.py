@@ -181,7 +181,9 @@ def build() -> dict:
         "roof": roof(),
         "doors": doors(),
         "lighting": {"presets": ["day"], "overrides": {"day": {
-            "key": {"elevation": 76, "heading": 25, "intensity": 1.1}, "hemi": {"intensity": 0.55}}}},
+            "key": {"elevation": 76, "heading": 25, "intensity": 1.1}, "hemi": {"intensity": 0.55},
+            # the art direction's darker hall floor (AD1) takes a little less exposure
+            "exposureScale": 0.85}}},
         "bakedLight": {"file": "depot"},
         # The yard's dust: motes in the lamps' light and the grey puff feet kick up off the slab.
         "dressing": {"seed": 4127, "motes": {"tint": 14210767}, "kickedDust": {"tint": 12171184, "scale": 1},

@@ -26,6 +26,7 @@
 [ext_resource type="Script" path="res://game/config/ambience_call.gd" id="3_lbigc"]
 [ext_resource type="Script" path="res://game/config/ambience_config.gd" id="4_q5v06"]
 [ext_resource type="Resource" path="res://game/config/night_lighting.tres" id="15_nl3wl"]
+[ext_resource type="Script" uid="uid://i671gjdone00" path="res://game/config/look_config.gd" id="19_lk7ad"]
 
 [sub_resource type="Resource" id="Resource_01h5l"]
 script = ExtResource("1_ermsw")
@@ -204,6 +205,9 @@ props = SubResource("Resource_pdc01")
 [sub_resource type="Resource" id="Resource_rf6cf"]
 script = ExtResource("18_rf6cf")
 
+[sub_resource type="Resource" id="Resource_lk7ad"]
+script = ExtResource("19_lk7ad")
+
 [resource]
 script = ExtResource("6_q2qxh")
 controls = SubResource("Resource_01h5l")
@@ -226,3 +230,4 @@ minimap = SubResource("Resource_mm1cf")
 figures = SubResource("Resource_fi1fc")
 site_look = SubResource("Resource_st5lk")
 roof = SubResource("Resource_rf6cf")
+look = SubResource("Resource_lk7ad")

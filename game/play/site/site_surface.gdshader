@@ -175,9 +175,9 @@ void fragment() {
 	bool in_band = !top && h > band.x && h < band.y;
 
 	if (mode == CONCRETE || mode == PRECAST) {
-		float mid = fbm(c * 1.4);
+		float mid = grit > 0.0 ? fbm(c * 1.4) : 0.5;
 		col = paint * gr((0.84 + 0.24 * low_f) * (0.94 + 0.1 * mid));
-		float stain = smoothstep(0.58, 0.78, fbm(c * 0.35 + 7.0)) * grit;
+		float stain = grit > 0.0 ? smoothstep(0.58, 0.78, fbm(c * 0.35 + 7.0)) * grit : 0.0;
 		col *= 1.0 - 0.16 * stain;
 		r -= 0.08 * stain;
 		if (mode == CONCRETE) {
@@ -191,7 +191,7 @@ void fragment() {
 				vec2 g = abs(fract(c / joint + 0.5) - 0.5) * joint;
 				float j = min(g.x, g.y);
 				col *= mix(mix(0.82, 0.55, grit), 1.0, smoothstep(0.006, 0.018, j));
-				float tuft = step(0.8, fbm(c * 3.1 + 4.0)) * (1.0 - smoothstep(0.0, 0.05, j)) * grit;
+				float tuft = grit > 0.0 ? step(0.8, fbm(c * 3.1 + 4.0)) * (1.0 - smoothstep(0.0, 0.05, j)) * grit : 0.0;
 				col = mix(col, marks[MARK_TUFT], tuft * 0.8);
 			}
 			if (top && line_count > 0 && (flags & FLAG_HAZARD) == 0) {
@@ -202,7 +202,7 @@ void fragment() {
 					on = max(on, 1.0 - smoothstep(-fwidth(e), fwidth(e), e));
 				}
 				if (on > 0.0) {
-					float worn = smoothstep(0.55, 0.8, fbm(c * 2.3 + 11.0)) * grit;
+					float worn = grit > 0.0 ? smoothstep(0.55, 0.8, fbm(c * 2.3 + 11.0)) * grit : 0.0;
 					col = mix(col, marks[MARK_BAY_LINE] * gr(0.88 + 0.16 * low_f), on * 0.92 * (1.0 - 0.4 * worn));
 					r = mix(r, 0.6, on);
 				}
@@ -229,7 +229,9 @@ void fragment() {
 		float blk = fbm(floor(b) * 0.731);
 		col = paint * gr((0.93 + 0.1 * blk) * (0.88 + 0.18 * low_f));
 		col *= mix(mix(0.9, 0.8, grit), 1.0, smoothstep(0.003, 0.01, mm));
-		col *= 1.0 - 0.08 * grit * smoothstep(0.62, 0.9, fbm(vec2(c.x * 5.0, c.y * 0.25)));
+		if (grit > 0.0) {
+			col *= 1.0 - 0.08 * grit * smoothstep(0.62, 0.9, fbm(vec2(c.x * 5.0, c.y * 0.25)));
+		}
 		if (top) {
 			col = paint * 0.82 * gr(0.9 + 0.15 * fbm(c * 9.0));
 		} else if (in_band) {
@@ -246,9 +248,11 @@ void fragment() {
 			col *= 1.0 - 0.06 * slope * slope;
 		}
 		col *= gr(0.9 + 0.14 * low_f);
-		float chip = smoothstep(0.86, 0.9, fbm(c * 6.0 + 3.0)) * grit;
-		col = mix(col, marks[MARK_CHIP], chip * 0.4);
-		col *= 1.0 - 0.12 * grit * smoothstep(0.6, 0.85, fbm(vec2(c.x * 2.2, c.y * 0.2)));
+		if (grit > 0.0) {
+			float chip = smoothstep(0.86, 0.9, fbm(c * 6.0 + 3.0)) * grit;
+			col = mix(col, marks[MARK_CHIP], chip * 0.4);
+			col *= 1.0 - 0.12 * grit * smoothstep(0.6, 0.85, fbm(vec2(c.x * 2.2, c.y * 0.2)));
+		}
 		col = mix(col, marks[MARK_RUST_FOOT], (1.0 - smoothstep(0.0, 0.7, wpos.y)) * 0.35 * grit);
 		if ((flags & FLAG_CHEVRON) != 0 && !top) {
 			// the site's white chevron, centred on each unit's side
@@ -265,7 +269,9 @@ void fragment() {
 				q.y += 0.06;
 				float s = abs(q.y + 1.15 * abs(q.x) - 0.35);
 				float mark = (1.0 - smoothstep(0.13, 0.15, s)) * (1.0 - smoothstep(0.62, 0.64, abs(q.x)));
-				mark *= gr(0.75 + 0.25 * step(0.35, fbm(q * 14.0)));
+				if (grit > 0.0) {
+					mark *= gr(0.75 + 0.25 * step(0.35, fbm(q * 14.0)));
+				}
 				col = mix(col, marks[MARK_CHEVRON], mark);
 			}
 		}
@@ -385,7 +391,7 @@ void fragment() {
 			col = paint * gr((0.86 + 0.14 * fbm(c * 90.0)) * (0.88 + 0.2 * low_f));
 		} else {
 			col = paint * gr(0.9 + 0.14 * low_f);
-			float chip = smoothstep(0.86, 0.9, fbm(c * 7.0 + 5.0)) * grit;
+			float chip = grit > 0.0 ? smoothstep(0.86, 0.9, fbm(c * 7.0 + 5.0)) * grit : 0.0;
 			col = mix(col, paint * 0.6 + vec3(0.18), chip * 0.5);
 			col = mix(col, marks[MARK_DIRT_FOOT], (1.0 - smoothstep(0.0, 0.45, h)) * 0.3 * grit);
 			if (in_band) {

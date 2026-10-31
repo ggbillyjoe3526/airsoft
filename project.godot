@@ -256,7 +256,7 @@ rendering_device/fallback_to_opengl3=true
 
 look_shade={
 "type": "color",
-"value": Color(0.3372549, 0.2901961, 0.5019608, 1)
+"value": Color(0.3371637, 0.2917706, 0.5028865, 1)
 }
 look_band={
 "type": "float",
@@ -272,7 +272,7 @@ look_mid_band={
 }
 look_rim={
 "type": "color",
-"value": Color(1, 0.953, 0.831, 0.22)
+"value": Color(1, 0.9473066, 0.8307698, 0.22)
 }
 look_rim_power={
 "type": "float",
