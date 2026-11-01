@@ -1,33 +1,35 @@
-Task: ST2 · The Street's CC0 dress (no task block; judged against the brief and docs/records/ST2.md)
-Attempt: 2 of 4
-Head: 37731e1 (= HEAD; QA Pass at 37731e1; performance Pass at 4718e15, still valid because 4718e15..37731e1 changes only changelog.d, FEATURES and a test file)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept
-Failed checks, with evidence: none. Attempt 1's check 8 is fixed:
-- changelog.d/the-street.md:12, which said cars were still blocks, is gone.
-- changelog.d/the-street-dressed.md:1-6 says what is modelled and what stays a block (railings, fences, hedges, kiosks,
-  the bus shelter, the roadworks).
-- docs/FEATURES.md:36 credits ST2.
-The rest stands from attempt 1:
-1. build_map.py +56-59, +209-214 and prop_dress_config.gd +31-54 dress 79 blocks with 23 models. Each block keeps its
-   box: QA measured the props filling 95% of the footprint and 97% of the height (test_st2_qa.gd:50).
-2. No contract changed.
-3. Load-time build only. Performance: 113 instances in 24 MultiMeshes, 107k triangles, a 26 ms build, draw calls +5.4%,
-   no orphans. The Street is the lightest dressed map.
-4. test_props.gd +281 fails without the dress names. test_st2_qa.gd :24, :50 and :92 pin each mesh, the fill and the
-   grids.
-5. Typed config data. Colours live in the build tool's recipes.
-6. CC0 Kenney models, recoloured from the look's palette, all passing the team-hue rule (test_props.gd:199). The
-   colour reads below go to the owner rather than into changes.
-7. Advisory only: 14 GLBs repeat the same geometry with only the colour changed (about 2.2 MB), the existing recolour
-   pipeline's cost.
-8. Dev scope. KNOWN_ISSUES, the Maps wiki page, ASSETS, ROADMAP, FEATURES, the changelog note and the record are all
-   updated.
-Must-fix for the next attempt: none. Advisory: the lorries' windscreens are painted plaster, so no glass reads.
-Owner should test in the game:
-- The yellow cars in shade: car-park-b.jpg renders one at #dfad34, 14° from Beta's orange.
-- The far crimson lorry renders saturated red (#d51135) at both road ends.
-- Steel bins and lamp posts read near-black navy outdoors.
-- The skip (a 6x by 4x stretch) and the long 3.2 m settee: do they look right?
-- Vehicles as cover: does what you see match where a BB stops, including under the bodies and past the roof lines?
-- Settees and cars under the night lamps: does any read as a team colour?
+Task: BQ2 · Bot teammates ask for you with a ping
+Attempt: 1 of 4
+Head: 066256b6195d77239721997f30c1b68a8ef1337f (checks passed on it so far; the match guards were still running per the brief)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✗ | 6 ✓ | 7 ✓ | 8 ✗
+Score: 6/8 → Retry (near miss, judgment: fixing check 5 alone gives Accept 7/8)
+Failed checks, with evidence (file:line, one or two lines each, each marked measured or judgment):
+5. [judgment] game/ai/callouts.gd:381,383 `nearest_walkable(enemy ± side + Vector3.UP, _cfg.ask_snap)`: a bare 1 m
+   lift in gameplay code (contract 6). The same lift is data elsewhere (PingConfig.map_lift, pings.gd:137), and the
+   snap radius beside it already went to CalloutConfig.ask_snap.
+8. [judgment] docs/records/BQ2.md:52-55 leaves a known issue (Go round's spot may be unreachable: other storey, far
+   side of a wall) but docs/KNOWN_ISSUES.md has no row (docs/records/README.md:16 requires both). Also BQ2.md:3 already
+   reads "critic Accept 8/8" before any critic verdict.
+Passed, evidence:
+1. Point 9 (asking part; "smart and tactical" is BQ3 per ROADMAP.md:21): Need help callouts.gd:351-353 (two or more seen
+   within 4 s) and :226-228 (your pole being raised); Go round :355-367 (8 s continuous sight, first_seen_at resets
+   after contact_grace, bot_senses.gd:135-140); Cover me :227; the ping pings.gd:156, HUD hud_ping_marker.gd:40/:622.
+   "Not too often": the team gap and round cap at :341 and :529, counted at :573-578, proven by test_bq2_asks.gd:175.
+2. No contract touched: the asks only write the ping book and the log; no command, no play change (Callout guards green).
+3. _watch_asks loops characters with no allocation and exits on mode/cap/gap/pace first; strings only at _flush;
+   Go round's nav search is gated by _allowed (:362). Leftover: a NO_SPOT stand-off repeats two nav scans per tick (CPU,
+   not allocation; bounded); remembering the miss is optional.
+4. test_bq2_asks would fail with the feature removed (no Event.NEED_HELP; the per_round test counts exactly 3 in 120 s).
+6. Words plus a ping, playful lines, no new sound or asset, bots never act on an ask: pillars and tone kept.
+7. Small, readable additions; no nodes or connections. Nit: callouts_file.gd:296 tells whole numbers apart by the
+   hint's prose (`begins_with("a whole")`) and :293 picks the article by heading; a flag column would hold up better.
+Must-fix for the next attempt: name the 1 m lift (e.g. CalloutConfig.ask_lift, as PingConfig.map_lift) and use it at
+callouts.gd:381,383; add the Go round reachability row to docs/KNOWN_ISSUES.md (Bots, can wait, 2026-11-01); write the
+record's Review line from the real verdict.
+Owner should test in the game (at most 6, one line each):
+- Hang back over 15 m while a teammate fights two: do you hear "Need help" and see a HELP ring on it, and is going worth it?
+- Let a teammate trade shots with one enemy for 8 s or more: is the GO ring a flank you can actually walk to, on your side?
+- Attack / Defend: "Cover me" on the pole as your team raises it; "Need help" there as the enemy raises yours.
+- Over three or four rounds: asks rare enough (at most 3 a round, 30 s apart) yet do they ever show up at all?
+- HELP / GO / COVER read clearly against your own PING and a CONTACT diamond, near and pinned to the screen edge.
+- An ask replaces that bot's still-up Contact mark: does a vanishing CONTACT diamond confuse you?
