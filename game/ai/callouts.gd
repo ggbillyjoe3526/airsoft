@@ -378,9 +378,10 @@ func _round_spot(from: Vector3, enemy: Vector3, w: BotWorld) -> Vector3:
 	var across := Vector2(-line.y, line.x).normalized()
 	var mine := 1.0 if across.dot(Vector2(you.position.x - enemy.x, you.position.z - enemy.z)) >= 0.0 else -1.0
 	var side := Vector3(across.x, 0.0, across.y) * _file.asks.round_offset * mine
-	var k := w.nav.nearest_walkable(enemy + side + Vector3.UP, _cfg.ask_snap)
+	var lift := Vector3(0.0, _cfg.ask_lift, 0.0)
+	var k := w.nav.nearest_walkable(enemy + side + lift, _cfg.ask_snap)
 	if k < 0:
-		k = w.nav.nearest_walkable(enemy - side + Vector3.UP, _cfg.ask_snap)
+		k = w.nav.nearest_walkable(enemy - side + lift, _cfg.ask_snap)
 	return w.nav.node_position(k) if k >= 0 else SquadOrders.NO_SPOT
 
 
