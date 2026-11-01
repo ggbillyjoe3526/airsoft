@@ -1,3 +1,18 @@
+Task: BQ3 · QA commit (attempt 2, see git log, Agent: qa) · Verdict: Pass
+
+Attempt 2 (fix 218a2aa: Bot.bursting, set by BotCombat.shoot only on a tick it presses on with a burst, cleared at the top
+of shoot and in Bot.reset; the kneel needs `bursting and target_visible`)
+- Blocking 1 (unparsable test_bq3_team_play) stays fixed: 8/8 run and pass.
+- Blocking 2 (kneeling on a stale burst) is fixed: the same Normal Depot match that showed 354 of 3041 FIGHT ticks kneeling
+  without firing (211 blind, longest 211 ticks) now shows 15 of 2802, none blind, longest streak 1 tick (the knee comes the
+  tick after the burst starts and ends the tick after it does). The two pins in test_bq3_qa.gd now pass (7/7, 33 s).
+- Re-run: test_bq3_team_play 8/8, test_bot_angles 14/14, test_tl1_qa 7/7. test_bots, test_bot_bombs, test_bot_difficulty
+  and the smoke test were not re-run by me (a sweep is running in this tree); the fix touches only bot_combat.gd (two
+  lines), bot.gd and bot_movement.gd's kneel gate.
+- Advisories left as they were: pressing is sticky by design; the careful last bot's lane walk awaits the A/B re-measure.
+  The A/B for the knee (57 % Normal) should be re-measured on the fixed code if the Checks table is to stay true.
+
+--- Attempt 1 report (Fail), kept for the record ---
 Task: BQ3 · QA commit 865e729 · Verdict: Fail
 
 Blocking

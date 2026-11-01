@@ -1,0 +1,52 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_pings.gd
+* test_a_press_marks_the_floor_where_you_look_and_both_teammates_take_it
+* test_the_sky_or_past_the_reach_pings_nothing_and_the_bots_keep_what_they_had
+* test_off_a_wall_the_spot_is_on_your_side_of_it
+* test_an_enemy_you_see_under_the_view_is_a_contact_at_their_feet
+* test_an_enemy_seen_further_than_the_bots_see_is_still_a_contact_within_the_reach
+* test_no_contact_behind_a_wall_in_a_bush_or_behind_a_body
+* test_it_is_your_teams_and_nothing_while_you_are_out_between_rounds_or_on_the_range
+* test_the_ping_looks_along_the_view_with_the_recoil
+* test_a_second_press_inside_the_gap_is_one_ping_and_a_miss_starts_no_gap
+* test_one_ping_each_kept_for_its_lifetime_and_cleared_each_round
+* test_a_teammate_sets_off_for_the_spot_and_gets_nearer
+* test_under_your_order_they_keep_the_order_and_only_watch
+* test_take_is_ignored_in_a_fight_in_cover_with_a_target_in_view_or_out_of_play
+* test_a_spot_is_somewhere_to_look_a_contact_a_threat_too
+* test_a_ping_stays_in_mind_for_ping_memory_until_real_news
+* test_a_rusher_runs_to_a_ping_and_a_careful_bot_does_not
+* test_the_same_seed_and_ping_repeat_the_bots_commands
+* test_one_teammate_answers_going_to_your_ping_and_no_checking_as_well
+* test_under_your_order_the_nearest_that_took_it_says_it_watches
+* test_a_contact_call_marks_its_enemy_by_the_chance_and_the_teams_gap
+* test_marks_change_neither_the_lines_nor_play
+* test_a_press_fills_the_next_ticks_ping_once_and_none_on_the_range
+* test_ticks_with_pings_allocate_nothing
+23/23 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                23
+Passing Tests        23
+Asserts             141
+Time              17.517s
+
+
+---- All tests passed! ----
+

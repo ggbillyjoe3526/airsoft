@@ -1,0 +1,71 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_ping_markers.gd
+* test_a_spot_is_a_ring_in_your_colour_over_the_floor_with_its_distance
+* test_a_contact_is_a_diamond_in_their_colour_over_the_head_and_never_follows
+* test_it_pops_in_stays_whole_seven_seconds_and_fades_over_the_last
+* test_reduced_motion_shows_it_whole_at_once
+* test_off_screen_it_is_pinned_inside_the_edge_under_what_is_there
+* test_pinned_on_the_left_it_sits_under_a_flag_pinned_there
+* test_hidden_while_you_spectate_with_the_board_up_paused_or_switched_off
+* test_only_your_teams_pings_show
+* test_hud_size_and_opacity_apply
+* test_the_minimap_shows_the_ring_and_diamond_and_off_hides_them
+* test_a_ping_off_the_panel_is_drawn_on_its_rim
+* test_your_ping_plays_one_soft_pip_in_your_ear
+WARNING: AmbienceConfig: no day set for yard or yard
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] set_for (res://game/config/ambience_config.gd:31)
+         [1] _start_ambience (res://game/play/sim_audio.gd:642)
+         [2] setup (res://game/play/sim_audio.gd:180)
+         [3] _audio (res://tests/unit/test_ping_markers.gd:257)
+         [4] test_your_ping_plays_one_soft_pip_in_your_ear (res://tests/unit/test_ping_markers.gd:271)
+         [5] _run_test (res://addons/gut/gut.gd:622)
+         [6] _test_the_scripts (res://addons/gut/gut.gd:835)
+* test_a_teammates_mark_or_ping_plays_no_pip
+WARNING: AmbienceConfig: no day set for yard or yard
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] set_for (res://game/config/ambience_config.gd:31)
+         [1] _start_ambience (res://game/play/sim_audio.gd:642)
+         [2] setup (res://game/play/sim_audio.gd:180)
+         [3] _audio (res://tests/unit/test_ping_markers.gd:257)
+         [4] test_a_teammates_mark_or_ping_plays_no_pip (res://tests/unit/test_ping_markers.gd:287)
+         [5] _run_test (res://addons/gut/gut.gd:622)
+         [6] _test_the_scripts (res://addons/gut/gut.gd:835)
+* test_the_pip_is_the_browsers_recipe
+* test_ping_markers_are_on_by_default_saved_and_an_old_file_loads_on
+* test_the_tab_has_ping_markers_on_and_saves_a_change
+* test_markers_are_made_once_one_per_teammate
+* test_a_frame_with_none_allocates_nothing
+* test_a_frame_with_a_ping_up_allocates_no_object
+* test_the_markers_go_with_the_hud
+* test_a_ping_in_a_match_shows_on_screen_and_the_minimap_and_pips
+* test_over_the_field_it_is_one_drawn_item_and_the_plate_is_filled_only_when_pinned
+22/22 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                22
+Passing Tests        22
+Asserts              84
+Time              3.974s
+
+
+---- All tests passed! ----
+

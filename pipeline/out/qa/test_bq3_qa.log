@@ -1,0 +1,38 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_bq3_qa.gd
+* test_a_kneeling_bot_is_never_crouched_and_still_for_long_without_firing
+    { "offcone": 6, "blocked": 9 }
+    fight ticks 2802, kneeling-without-firing ticks 15 (blind 0), longest streak 1 ticks
+* test_a_new_round_clears_a_pending_call
+* test_radio_news_older_than_own_fresher_news_is_not_taken
+* test_radio_ignores_an_out_teammate_and_does_not_tell_the_other_team
+* test_radio_is_dropped_when_the_round_is_not_live
+* test_pressing_and_careful_last_wait_for_a_live_round
+* test_a_burst_it_can_not_fire_leaves_the_bot_sidestepping_not_kneeling
+7/7 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                 7
+Passing Tests         7
+Asserts              23
+Time              32.562s
+
+
+---- All tests passed! ----
+
