@@ -329,7 +329,7 @@ func test_lay_out_never_overlaps_or_leaves_the_bounds_for_random_words() -> void
 		for i in rng.randi_range(0, 6):
 			blocked.append(Rect2(bounds.position + Vector2(rng.randf() * bounds.size.x, rng.randf() * bounds.size.y),
 					Vector2(rng.randf_range(5.0, 90.0), rng.randf_range(5.0, 90.0))))
-		var got := FieldMapMarks.lay_out(wants, blocked, bounds, 3.0)
+		var got := FieldMapMarks.lay_out(wants, blocked, bounds, Vector2(3.0, 3.0))
 		assert_eq(got.size(), wants.size())
 		var placed: Array[Rect2] = []
 		for i in got.size():
@@ -347,7 +347,8 @@ func test_lay_out_never_overlaps_or_leaves_the_bounds_for_random_words() -> void
 
 func test_lay_out_with_a_word_wider_than_the_bounds_does_not_crash_or_hang() -> void:
 	var wants: Array[Rect2] = [Rect2(Vector2(5.0, 5.0), Vector2(500.0, 20.0)), Rect2(Vector2(5.0, 5.0), Vector2(500.0, 20.0))]
-	var got := FieldMapMarks.lay_out(wants, [] as Array[Rect2], Rect2(Vector2.ZERO, Vector2(50.0, 50.0)), 3.0)
+	var got := FieldMapMarks.lay_out(wants, [] as Array[Rect2], Rect2(Vector2.ZERO, Vector2(50.0, 50.0)),
+			Vector2(3.0, 3.0))
 	assert_eq(got.size(), 2)
 	assert_false(got[0].has_area() and got[1].has_area() and got[0].intersects(got[1]))
 

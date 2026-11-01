@@ -42,6 +42,11 @@ make it more detailed", for Depot, Woodland and The Street. The minimap stays he
   the poles.
 - **A word that finds no room is left out** rather than shrunk: small type over a busy map read worse than one name
   fewer.
+- **Woodland's field drawing takes about 55 ms longer to build (+17 %), once a match behind the loading screen**
+  (performance, 2026-11-01: 373-392 ms against main's 318-338 ms; The Street and Depot unchanged). The first build was
+  +130 %: the relief now reads the terrain's own vertices once a match, a sample a metre. What remains is mostly
+  `Image.resize` smoothing the ground up to the layer (about 44 ms). Accepted as the cost of the new ground: a frame
+  costs nothing more, and moving the smoothing to the GPU would mean a second texture in every minimap panel.
 - **The ground detail is in the shared drawing**, so the minimap reads the same ground; tints are a quarter share so
   cover and walls still stand out.
 

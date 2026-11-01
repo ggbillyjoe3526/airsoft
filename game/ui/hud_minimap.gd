@@ -30,6 +30,7 @@ var _teams: TeamConfig = null
 var _map: MapData = null
 var _field: MinimapField = null
 var _textures: Array[Texture2D] = []
+var _ground: Texture2D = null
 var _heard: MinimapHearing = null
 var _view: View = null
 var _area: Label = null
@@ -61,11 +62,12 @@ func setup(cfg: MinimapConfig, teams: TeamConfig, map: MapData, heard: MinimapHe
 	offset_bottom = corner.y + cfg.size + cfg.caption_room
 	_field = MinimapField.build(map, cfg)
 	_textures = textures_of(_field)
+	_ground = ground_of(_field)
 	_view = View.new()
 	var inner := cfg.size - cfg.ring * 2.0
 	_view.position = Vector2(cfg.ring, cfg.ring)
 	_view.size = Vector2(inner, inner)
-	_view.setup(cfg, _textures, _field.scale, _field.origin, capacity)
+	_view.setup(cfg, _textures, _field.scale, _field.origin, capacity, _ground, _field.ground_rect)
 	add_child(_view)
 	_area = HudStyle.label(self, AREA_SIZE, 800, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_LEFT, AREA_SPACING)
 	_area.uppercase = true
@@ -89,6 +91,14 @@ static func textures_of(field: MinimapField) -> Array[Texture2D]:
 	return textures
 
 
+## Sloping ground's picture as a texture, with mipmaps (MinimapField.ground, FM2), or null for a field without.
+static func ground_of(field: MinimapField) -> Texture2D:
+	if field.ground == null:
+		return null
+	field.ground.generate_mipmaps()
+	return ImageTexture.create_from_image(field.ground)
+
+
 ## The picture of the field (for tests, and the full-screen map's storeys).
 func field() -> MinimapField:
 	return _field
@@ -99,9 +109,13 @@ func teams() -> TeamConfig:
 	return _teams
 
 
-## The field's layers as textures, one per storey (the full-screen map draws the same ones).
+## The field's layers as textures, one per storey, and its sloping ground's (the full-screen map draws the same ones).
 func textures() -> Array[Texture2D]:
 	return _textures
+
+
+func ground() -> Texture2D:
+	return _ground
 
 
 func view() -> View:
@@ -296,6 +310,8 @@ class View:
 
 	var _cfg: MinimapConfig = null
 	var _textures: Array[Texture2D] = []
+	var _ground: Texture2D = null
+	var _ground_rect := Rect2()
 	var _disc: GradientTexture2D = null
 	var _scale: float = 10.0
 	var _origin: Vector2 = Vector2.ZERO
@@ -339,11 +355,14 @@ class View:
 		_poles.resize(Flag.MOST)
 
 	## `textures` are the layers (one per storey) of a drawing at `field_scale` px/m whose top left is the world's
-	## `field_origin` (x, z); up to `capacity` dots and patches.
+	## `field_origin` (x, z); up to `capacity` dots and patches. `ground` (null for none) is sloping ground's picture,
+	## drawn under every layer over `ground_rect` (layer px, MinimapField.ground_rect).
 	func setup(cfg: MinimapConfig, textures: Array[Texture2D], field_scale: float, field_origin: Vector2,
-			capacity: int) -> void:
+			capacity: int, ground: Texture2D = null, ground_rect: Rect2 = Rect2()) -> void:
 		_cfg = cfg
 		_textures = textures
+		_ground = ground
+		_ground_rect = ground_rect
 		_scale = field_scale
 		_origin = field_origin
 		name = "View"
@@ -507,6 +526,8 @@ class View:
 		if _layer >= 0 and _layer < _textures.size():
 			var at := mid + ((_origin - _centre) * _ppm).rotated(_rot)
 			draw_set_transform(at, _rot, Vector2.ONE * (_ppm / _scale))
+			if _ground != null:
+				draw_texture_rect(_ground, _ground_rect, false)
 			draw_texture(_textures[_layer], Vector2.ZERO)
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		for i in _patch_count:

@@ -78,26 +78,34 @@ static func areas_of(areas: Array[MapAreas.Area]) -> Array[AreaWords]:
 
 ## Lays out words: each of `wants` (a word's box on the screen where it would sit, in the order that wins room) goes
 ## there, or just above or below it, or half its width to either side, or twice as far above or below, wherever it
-## keeps `room` px clear of every word placed before it and of `blocked`, slid inside `bounds`; with no such place it is
-## left out (a zero box). Returns where each went.
-static func lay_out(wants: Array[Rect2], blocked: Array[Rect2], bounds: Rect2, room: float) -> Array[Rect2]:
+## keeps `gap` px (across, down) clear of every word placed before it and of `blocked`, slid inside `bounds`; with no
+## such place it is left out (a zero box). Returns where each went.
+static func lay_out(wants: Array[Rect2], blocked: Array[Rect2], bounds: Rect2, gap: Vector2) -> Array[Rect2]:
 	var placed: Array[Rect2] = []
 	var out: Array[Rect2] = []
 	for want in wants:
-		var step_y := want.size.y + room
-		var step_x := want.size.x * 0.5 + room
-		var tries: Array[Vector2] = [Vector2.ZERO, Vector2(0.0, -step_y), Vector2(0.0, step_y), Vector2(-step_x, 0.0),
-				Vector2(step_x, 0.0), Vector2(0.0, -step_y * 2.0), Vector2(0.0, step_y * 2.0)]
-		var got := Rect2()
-		for t in tries:
-			var r := _inside(Rect2(want.position + t, want.size), bounds)
-			if _clear(r.grow(room), placed) and _clear(r.grow(room), blocked):
-				got = r
-				break
+		var step_y := want.size.y + gap.y
+		var step_x := want.size.x * 0.5 + gap.x
+		var at := want.position
+		var tries: Array[Rect2] = []
+		for t: Vector2 in [Vector2.ZERO, Vector2(0.0, -step_y), Vector2(0.0, step_y), Vector2(-step_x, 0.0),
+				Vector2(step_x, 0.0), Vector2(0.0, -step_y * 2.0), Vector2(0.0, step_y * 2.0)]:
+			tries.append(Rect2(at + t, want.size))
+		var got := first_clear(tries, placed + blocked, bounds, gap) if want.has_area() else Rect2()
 		if got.has_area():
 			placed.append(got)
 		out.append(got)
 	return out
+
+
+## The first of `tries`, each slid inside `bounds`, that keeps `gap` px (across, down) clear of every one of `others`;
+## a zero box when none does.
+static func first_clear(tries: Array[Rect2], others: Array[Rect2], bounds: Rect2, gap: Vector2) -> Rect2:
+	for t in tries:
+		var r := _inside(t, bounds)
+		if _clear(r.grow_individual(gap.x, gap.y, gap.x, gap.y), others):
+			return r
+	return Rect2()
 
 
 ## `r` slid inside `bounds` (as far as it fits).

@@ -22,7 +22,10 @@ func test_a_map_with_only_ramps_draws_nothing_and_one_on_terrain_its_ground() ->
 	assert_true(MinimapField.drawn(woodland), "its terrain is its ground")
 	var drawn := MinimapField.build(woodland, cfg)
 	assert_eq(drawn.layers.size(), 1)
-	var meadow := drawn.layers[0].get_pixelv(Vector2i(drawn.pixel_of(-20.0, 5.0)))
+	# Sloping ground is its own picture under the layer (FM2), the layer clear over it.
+	assert_eq(drawn.layers[0].get_pixelv(Vector2i(drawn.pixel_of(-20.0, 5.0))).a, 0.0)
+	var share := (drawn.pixel_of(-20.0, 5.0) - drawn.ground_rect.position) / drawn.ground_rect.size
+	var meadow := drawn.ground.get_pixelv(Vector2i(share * Vector2(drawn.ground.get_size())))
 	var want := cfg.ground_colour
 	# The ground is tinted by its surface and shaded by its slope and height (FM2), so near the plain ground, its alpha
 	# kept (an image keeps a colour in bytes), and nothing like a wall's.

@@ -55,7 +55,7 @@ func setup(cfg: MinimapConfig, minimap: HudMinimap, map: MapData, map_name: Stri
 	set_process(false)
 	var field := minimap.field()
 	_view = HudMinimap.View.new()
-	_view.setup(cfg, minimap.textures(), field.scale, field.origin, capacity)
+	_view.setup(cfg, minimap.textures(), field.scale, field.origin, capacity, minimap.ground(), field.ground_rect)
 	add_child(_view)
 	_overlay = FieldMapOverlay.new()
 	_overlay.setup(cfg, FieldMapMarks.of(map, cfg.map_start_pad))
@@ -70,7 +70,7 @@ func setup(cfg: MinimapConfig, minimap: HudMinimap, map: MapData, map_name: Stri
 	_sub = HudStyle.label(self, cfg.map_subtitle_size, 700, GameTheme.MUTED, HORIZONTAL_ALIGNMENT_LEFT,
 			HudStyle.SPACING_SUB)
 	_sub.uppercase = true
-	_goal = HudStyle.label(self, cfg.map_subtitle_size + 2, 700, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_RIGHT,
+	_goal = HudStyle.label(self, cfg.map_goal_size, 700, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_RIGHT,
 			HudStyle.SPACING_SUB)
 	resized.connect(_lay_out)
 	_lay_out()
@@ -169,7 +169,7 @@ func _lay_out() -> void:
 	var m := _cfg.map_margin
 	var content := Rect2(Vector2(m, m), (size - Vector2(m, m) * 2.0).max(Vector2.ZERO))
 	var header := _cfg.map_header
-	var key_w := minf(_cfg.map_key_width, content.size.x * 0.3)
+	var key_w := minf(_cfg.map_key_width, content.size.x * _cfg.map_key_share)
 	var room := Rect2(content.position + Vector2(0.0, header), (content.size - Vector2(key_w + _cfg.map_key_gap,
 			header)).max(Vector2.ZERO))
 	_view.position = room.position
@@ -182,7 +182,7 @@ func _lay_out() -> void:
 	_overlay.laid_out = false
 	_key.size = Vector2(key_w, minf(_key.needed_height(), room.size.y))
 	_key.position = Vector2(content.end.x - key_w, room.position.y)
-	var title_h := _cfg.map_title_size * 1.3
+	var title_h := _cfg.map_title_size * _cfg.map_title_line
 	_title.position = content.position
 	_title.size = Vector2(content.size.x * 0.5, title_h)
 	_sub.position = content.position + Vector2(0.0, title_h)

@@ -181,15 +181,15 @@ func test_lay_out_moves_a_word_off_another_and_leaves_out_one_with_no_room() -> 
 	var bounds := Rect2(0.0, 0.0, 400.0, 400.0)
 	var wants: Array[Rect2] = [Rect2(100.0, 100.0, 80.0, 14.0), Rect2(110.0, 104.0, 60.0, 14.0)]
 	var none: Array[Rect2] = []
-	var got := FieldMapMarks.lay_out(wants, none, bounds, 2.0)
+	var got := FieldMapMarks.lay_out(wants, none, bounds, Vector2(2.0, 2.0))
 	assert_eq(got[0], wants[0], "the first keeps its place")
 	assert_true(got[1].has_area())
-	assert_false(got[1].grow(2.0).intersects(got[0]), "the second moved off it")
+	assert_false(got[1].grow(2.0).intersects(got[0]), "the second moved off it, a gap between")
 	var walled: Array[Rect2] = [Rect2(0.0, 0.0, 400.0, 400.0)]
-	got = FieldMapMarks.lay_out(wants, walled, bounds, 2.0)
+	got = FieldMapMarks.lay_out(wants, walled, bounds, Vector2(2.0, 2.0))
 	assert_false(got[0].has_area(), "no room anywhere: left out")
 	var edge: Array[Rect2] = [Rect2(380.0, 390.0, 60.0, 14.0)]
-	got = FieldMapMarks.lay_out(edge, none, bounds, 2.0)
+	got = FieldMapMarks.lay_out(edge, none, bounds, Vector2(2.0, 2.0))
 	assert_true(bounds.encloses(got[0]), "slid inside")
 
 
@@ -214,6 +214,13 @@ func _floor(surface: RayHit.Surface, x: float, colour: Color = Color(0, 0, 0, 0)
 func _pixel(f: MinimapField, x: float, z: float) -> Color:
 	var p := f.pixel_of(x, z)
 	return f.layers[0].get_pixel(int(p.x), int(p.y))
+
+
+## Sloping ground's picture at the world's (x, z) (FM2: drawn under the layers, which leave it clear).
+func _ground(f: MinimapField, x: float, z: float) -> Color:
+	var share := (f.pixel_of(x, z) - f.ground_rect.position) / f.ground_rect.size
+	var p := Vector2i(share * Vector2(f.ground.get_size()))
+	return f.ground.get_pixelv(p)
 
 
 func _near(a: Color, b: Color) -> bool:
@@ -243,10 +250,12 @@ func test_sloping_ground_facing_the_north_west_light_is_lighter() -> void:
 	lit.terrain = TerrainGrid.create(-10.0, -10.0, 1.0, 20, 20, func(x: float, _z: float) -> float: return x * 0.3)
 	var shade := MapData.new()
 	shade.terrain = TerrainGrid.create(-10.0, -10.0, 1.0, 20, 20, func(x: float, _z: float) -> float: return -x * 0.3)
-	var a := _pixel(MinimapField.build(lit, cfg), 0.0, 0.0)
-	var b := _pixel(MinimapField.build(shade, cfg), 0.0, 0.0)
+	var lit_field := MinimapField.build(lit, cfg)
+	assert_eq(_pixel(lit_field, 0.0, 0.0).a, 0.0, "the layer leaves sloping ground clear for its picture")
+	var a := _ground(lit_field, 0.0, 0.0)
+	var b := _ground(MinimapField.build(shade, cfg), 0.0, 0.0)
 	assert_gt(a.get_luminance(), b.get_luminance(), "facing the light, at the same share of the height")
-	var high := _pixel(MinimapField.build(lit, cfg), 8.0, 0.0)
+	var high := _ground(lit_field, 8.0, 0.0)
 	assert_gt(high.get_luminance(), a.get_luminance(), "higher ground lighter")
 
 

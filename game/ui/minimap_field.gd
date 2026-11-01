@@ -2,10 +2,10 @@ class_name MinimapField
 extends RefCounted
 ## The minimap's field drawing (the browser game's minimap layers, M23 and M34c): made once per match from MapData, one
 ## Image per storey (one on a map without storeys) at MinimapConfig.layer_scale px/m over the map's floors and sloping
-## ground, north (-z) up: ground (sloping ground all of it, shaded by its slope and height), raised floors (with a dark
-## rim where they drop), ramps, low cover and tall walls; ground tinted by what it is and greenery green (FM2). A
-## storey's image leaves out the blocks starting more than storey_cut above its floor and washes everything below its
-## floor darker. Built on the CPU (no renderer needed); nothing on the range. The images go with this object: drop it
+## ground, north (-z) up: ground (sloping ground all of it, as its own small picture under the layers: `ground`),
+## raised floors (with a dark rim where they drop), ramps, low cover and tall walls; ground tinted by what it is and
+## greenery green (FM2). A storey's image leaves out the blocks starting more than storey_cut above its floor and washes
+## everything below its floor darker. Built on the CPU (no renderer needed); nothing on the range. The images go with this object: drop it
 ## with the session.
 
 ## A pixel's middle, from its corner.
@@ -26,6 +26,11 @@ var floors: PackedFloat64Array = PackedFloat64Array()
 ## too big for max_layer_side).
 var origin: Vector2 = Vector2.ZERO
 var scale: float = 0.0
+## Sloping ground's own picture (FM2), one pixel about every relief_cell m, tinted and shaded, and where it lies on
+## every layer (layer px): a layer leaves it clear (washed on a storey over it), and the panel draws it under the layer,
+## smoothed by the GPU. Null without terrain.
+var ground: Image = null
+var ground_rect: Rect2 = Rect2()
 
 var _pick: float = 0.0
 
@@ -54,12 +59,14 @@ static func build(map: MapData, cfg: MinimapConfig) -> MinimapField:
 			clampi(ceili(bounds.size.y * f.scale), 1, cfg.max_layer_side))
 	f.floors = map.storeys.duplicate() if not map.storeys.is_empty() else PackedFloat64Array([0.0])
 	var bases := _bases(map, cfg)
-	var ground: Image = null
-	if map.terrain != null:
-		var t := map.terrain
-		ground = _terrain_image(t, f._rect(t.min_x, t.min_z, t.max_x(), t.max_z()), cfg)
+	var t := map.terrain
+	if t != null:
+		var step := _relief_step(t, cfg)
+		f.ground = _terrain_image(t, step, cfg)
+		var metres := Vector2(f.ground.get_size()) * t.ground_cell * step
+		f.ground_rect = Rect2(f.pixel_of(t.min_x, t.min_z), metres * f.scale)
 	for i in f.floors.size():
-		f.layers.append(f._draw(map, cfg, i, bases, side, ground))
+		f.layers.append(f._draw(map, cfg, i, bases, side))
 	return f
 
 
@@ -100,8 +107,7 @@ func byte_size() -> int:
 	return total
 
 
-func _draw(map: MapData, cfg: MinimapConfig, index: int, bases: PackedFloat64Array, side: Vector2i,
-		ground: Image) -> Image:
+func _draw(map: MapData, cfg: MinimapConfig, index: int, bases: PackedFloat64Array, side: Vector2i) -> Image:
 	var h := floors[index]
 	var has_below := index > 0
 	var pieces: Array[Piece] = []
@@ -125,9 +131,9 @@ func _draw(map: MapData, cfg: MinimapConfig, index: int, bases: PackedFloat64Arr
 	var colours := _palette(cfg)
 	var img := Image.create_empty(side.x, side.y, false, Image.FORMAT_RGBA8)
 	var t := map.terrain
-	if t != null:
-		# Sloping ground is all ground: walkable everywhere, under whatever stands on it.
-		_draw_terrain(img, ground, _rect(t.min_x, t.min_z, t.max_x(), t.max_z()), cfg, has_below)
+	if t != null and has_below:
+		# Sloping ground is all ground, drawn under the layer (`ground`); a storey over it washes it darker.
+		_fill(img, _rect(t.min_x, t.min_z, t.max_x(), t.max_z()), cfg.below_storey_colour)
 	var edge := maxi(roundi(cfg.drop_edge * scale), 1)
 	for p in pieces:
 		var c := _colour_of(p.block, p.look, colours, cfg)
@@ -138,20 +144,21 @@ func _draw(map: MapData, cfg: MinimapConfig, index: int, bases: PackedFloat64Arr
 	return img
 
 
-## Sloping ground `t` (FM2) as the layers' ground: each ground square in its surface's tint (ground_tint_share of it),
-## lighter where it faces the north-west light and where it stands high, darker where it faces away; worked out on the
-## squares' corners, a sample about every relief_cell m, then smoothed up to `r`'s size. Made once a match, for every
-## layer.
-static func _terrain_image(t: TerrainGrid, r: Rect2i, cfg: MinimapConfig) -> Image:
-	# Every `step` ground squares one sample, about relief_cell m: the smoothing up hides the difference.
-	var step := maxi(roundi(cfg.relief_cell / maxf(t.ground_cell, RELIEF_FLAT)), 1)
-	var cols := t.ground_cols / step
-	var rows := t.ground_rows / step
-	if cols <= 0 or rows <= 0:
-		var plain := Image.create_empty(maxi(r.size.x, 1), maxi(r.size.y, 1), false, Image.FORMAT_RGBA8)
-		plain.fill(cfg.ground_colour)
-		return plain
+## How many ground squares of `t` one sample of its picture takes (about relief_cell m).
+static func _relief_step(t: TerrainGrid, cfg: MinimapConfig) -> int:
+	return maxi(roundi(cfg.relief_cell / maxf(t.ground_cell, RELIEF_FLAT)), 1)
+
+
+## Sloping ground `t`'s picture (FM2): one pixel every `step` ground squares, in its surface's tint (ground_tint_share
+## of it), lighter where it faces the north-west light and where it stands high, darker where it faces away, worked out
+## on the squares' corners. Small: the panels smooth it up as they draw it.
+static func _terrain_image(t: TerrainGrid, step: int, cfg: MinimapConfig) -> Image:
+	var cols := maxi(t.ground_cols / step, 1)
+	var rows := maxi(t.ground_rows / step, 1)
 	var small := Image.create_empty(cols, rows, false, Image.FORMAT_RGBA8)
+	if t.ground_cols < step or t.ground_rows < step:
+		small.fill(cfg.ground_colour)
+		return small
 	# The squares' corners: the terrain's own vertices where a square is a cell.
 	var same := t.ground_cols == t.cols and t.ground_rows == t.rows
 	var corners := t.heights if same else t.ground_lattice()
@@ -179,21 +186,7 @@ static func _terrain_image(t: TerrainGrid, r: Rect2i, cfg: MinimapConfig) -> Ima
 			c = c.lightened(cfg.relief_shade * lit) if lit > 0.0 else c.darkened(-cfg.relief_shade * lit)
 			c = c.lightened(cfg.relief_height * ((h00 + h10 + h01 + h11) * 0.25 - lo) / span)
 			small.set_pixel(i, j, c)
-	small.resize(maxi(r.size.x, 1), maxi(r.size.y, 1), Image.INTERPOLATE_BILINEAR)
 	return small
-
-
-## The terrain's ground `ground` laid on `img` over `r`, washed darker on a storey over it (`washed`).
-static func _draw_terrain(img: Image, ground: Image, r: Rect2i, cfg: MinimapConfig, washed: bool) -> void:
-	var clipped := r.intersection(Rect2i(Vector2i.ZERO, img.get_size()))
-	if not clipped.has_area():
-		return
-	var src := Rect2i(clipped.position - r.position, clipped.size)
-	img.blit_rect(ground, src, clipped.position)
-	if washed:
-		var wash := Image.create_empty(clipped.size.x, clipped.size.y, false, Image.FORMAT_RGBA8)
-		wash.fill(cfg.below_storey_colour)
-		img.blend_rect(wash, Rect2i(Vector2i.ZERO, clipped.size), clipped.position)
 
 
 ## Block `b`'s colour as `look` (from `colours`, the looks' palette): ground and raised floors take their tint

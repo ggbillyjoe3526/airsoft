@@ -19,11 +19,13 @@ const BADGE_AT := Vector2(-1.5, -1.9)
 ## The compass: its arrow's length and half width (px), and the scale bar's tick height (px) and ink (px).
 const COMPASS_LENGTH := 22.0
 const COMPASS_HALF := 7.0
+## The gap (px) between the compass or the bar and its word.
+const COMPASS_GAP := 4.0
 const TICK := 6.0
 const BAR_WIDTH := 2.0
 const BAR_INK := 4.0
-## The gap (px) between a zone's word and its box's top edge, the word sitting just above the box.
-const ZONE_WORD_GAP := 4.0
+## The gap (px) between a zone's word and its box's edge, past the words' own gap (the word sits outside the box).
+const ZONE_WORD_GAP := 1.0
 ## A dead zone's hatch: its lines' width (px).
 const HATCH_WIDTH := 1.4
 ## Most lines a dead zone's hatch may take (each end).
@@ -152,15 +154,18 @@ func _lay_out(view: HudMinimap.View, mid: Vector2) -> void:
 	if _overtime_on and _marks.has_overtime:
 		blocked.append(_ring_box(_overtime_px))
 	for i in _marks.starts.size():
-		_starts_px[i] = _box_px(view, mid, _marks.starts[i])
-		_dead_px[i] = _box_px(view, mid, _marks.dead_zones[i])
-		_start_words[i] = _zone_word_box(_starts_px[i], _end_words[i] if i < _end_words.size() else "")
-		_dead_words[i] = _zone_word_box(_dead_px[i], _dead_word)
-		if _starts_px[i].has_area():
-			blocked.append(_start_words[i])
-			blocked.append(_starts_px[i])
-		if _dead_px[i].has_area():
-			blocked.append(_dead_words[i])
+		_starts_px[i] = _box_px(view, mid, _marks.starts[i]).intersection(_field_px)
+		_dead_px[i] = _box_px(view, mid, _marks.dead_zones[i]).intersection(_field_px)
+		for r: Rect2 in [_starts_px[i], _dead_px[i]]:
+			if r.has_area():
+				blocked.append(r)
+	# The zones' words: starts first, each just above its box, else below, else beside it, clear of every zone, flag
+	# and word placed before it; a word with no room is left out.
+	var gap := _cfg.map_area_gap
+	for i in _marks.starts.size():
+		_start_words[i] = _zone_word(_starts_px[i], _end_words[i] if i < _end_words.size() else "", blocked, gap)
+	for i in _marks.dead_zones.size():
+		_dead_words[i] = _zone_word(_dead_px[i], _dead_word, blocked, gap)
 	_hatch.clear()
 	for r in _dead_px:
 		_hatch_box(r)
@@ -185,7 +190,7 @@ func _lay_out(view: HudMinimap.View, mid: Vector2) -> void:
 			continue
 		var p := mid + view.panel_of(_marks.words[i].at)
 		wants.append(Rect2(p - _word_sizes[i] * 0.5, _word_sizes[i]))
-	var placed := FieldMapMarks.lay_out(wants, blocked, _field_px, _cfg.map_area_room)
+	var placed := FieldMapMarks.lay_out(wants, blocked, _field_px, gap)
 	for i in placed.size():
 		_word_boxes[i] = placed[i] if wants[i].has_area() else Rect2()
 
@@ -197,10 +202,21 @@ func _box_px(view: HudMinimap.View, mid: Vector2, r: Rect2) -> Rect2:
 	return Rect2(a, r.size * view.px_per_m())
 
 
-## A zone's word's box: centred just above its box.
-func _zone_word_box(r: Rect2, word: String) -> Rect2:
+## Where zone `r`'s word goes (a zero box for none), added to `blocked` once placed.
+func _zone_word(r: Rect2, word: String, blocked: Array[Rect2], gap: Vector2) -> Rect2:
+	if not r.has_area() or word.is_empty():
+		return Rect2()
 	var s := _zone_font.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, _cfg.map_zone_size)
-	return Rect2(Vector2(r.get_center().x - s.x * 0.5, r.position.y - s.y - ZONE_WORD_GAP), s)
+	var x := r.get_center().x - s.x * 0.5
+	var y := r.get_center().y - s.y * 0.5
+	# Just outside the gap kept round it, so its own box never counts against it.
+	var off := gap + Vector2.ONE * ZONE_WORD_GAP
+	var tries: Array[Rect2] = [Rect2(Vector2(x, r.position.y - s.y - off.y), s), Rect2(Vector2(x, r.end.y + off.y), s),
+			Rect2(Vector2(r.end.x + off.x, y), s), Rect2(Vector2(r.position.x - s.x - off.x, y), s)]
+	var got := FieldMapMarks.first_clear(tries, blocked, _field_px, gap)
+	if got.has_area():
+		blocked.append(got)
+	return got
 
 
 func _badge_box(pole: Vector2) -> Rect2:
@@ -282,13 +298,15 @@ func _draw_zones() -> void:
 		var c := _end_colours[i] if i < _end_colours.size() else Color.WHITE
 		draw_rect(r, Color(c, _cfg.map_start_fill))
 		draw_rect(r, c, false, _cfg.map_zone_ring)
-		_draw_zone_word(_start_words[i], _end_words[i] if i < _end_words.size() else "", c, s)
+		if _start_words[i].has_area():
+			_draw_zone_word(_start_words[i], _end_words[i], c, s)
 	if not _hatch.is_empty():
 		draw_multiline(_hatch, _cfg.map_dead_colour, HATCH_WIDTH)
 	for i in _dead_px.size():
 		if _dead_px[i].has_area():
 			draw_rect(_dead_px[i], _cfg.map_dead_colour, false, _cfg.map_zone_ring)
-			_draw_zone_word(_dead_words[i], _dead_word, _cfg.map_dead_colour, s)
+			if _dead_words[i].has_area():
+				_draw_zone_word(_dead_words[i], _dead_word, _cfg.map_dead_colour, s)
 
 
 func _draw_zone_word(box: Rect2, word: String, colour: Color, s: int) -> void:
@@ -305,7 +323,7 @@ func _draw_flag(at: Vector2, letter: String) -> void:
 	var c := at + BADGE_AT * r
 	draw_circle(c, r + BADGE_INK, _cfg.ink)
 	draw_circle(c, r, GameTheme.YELLOW)
-	var fs := roundi(r * 1.3)
+	var fs := roundi(r * _cfg.map_badge_type)
 	var s := _badge_font.get_string_size(letter, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
 	var base := Vector2(c.x - s.x * 0.5, c.y - s.y * 0.5 + _badge_font.get_ascent(fs))
 	draw_string(_badge_font, base, letter, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, GameTheme.YELLOW_INK)
@@ -330,13 +348,13 @@ func _draw_compass() -> void:
 	var s := _cfg.map_zone_size
 	draw_colored_polygon(_arrow, GameTheme.TEXT)
 	draw_polyline(_arrow_line, _cfg.ink, BADGE_INK * 0.5, true)
-	var n := Vector2(_compass.x + COMPASS_HALF + ZONE_WORD_GAP, _compass.y - COMPASS_LENGTH + _zone_font.get_ascent(s))
+	var n := Vector2(_compass.x + COMPASS_HALF + COMPASS_GAP, _compass.y - COMPASS_LENGTH + _zone_font.get_ascent(s))
 	draw_string_outline(_zone_font, n, _north_word, HORIZONTAL_ALIGNMENT_LEFT, -1, s, _cfg.map_area_outline, _cfg.ink)
 	draw_string(_zone_font, n, _north_word, HORIZONTAL_ALIGNMENT_LEFT, -1, s, GameTheme.TEXT)
 	var end := _bar + Vector2(_bar_px, 0.0)
 	_draw_bar(end, _cfg.ink, BAR_INK + BAR_WIDTH)
 	_draw_bar(end, GameTheme.TEXT, BAR_WIDTH)
-	var at := end + Vector2(ZONE_WORD_GAP * 2.0, _zone_font.get_ascent(s) * 0.5 - TICK * 0.5)
+	var at := end + Vector2(COMPASS_GAP * 2.0, _zone_font.get_ascent(s) * 0.5 - TICK * 0.5)
 	draw_string_outline(_zone_font, at, _scale_word, HORIZONTAL_ALIGNMENT_LEFT, -1, s, _cfg.map_area_outline, _cfg.ink)
 	draw_string(_zone_font, at, _scale_word, HORIZONTAL_ALIGNMENT_LEFT, -1, s, GameTheme.TEXT)
 

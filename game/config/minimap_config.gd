@@ -143,19 +143,26 @@ extends Resource
 @export var map_backdrop: Color = Color(Color("080d18"), 0.94)
 @export var map_title_size: int = 30
 @export var map_subtitle_size: int = 15
+## The goal line's type (px), the title's line as a share of its type size, and the most of the screen's width the key
+## may take.
+@export var map_goal_size: int = 17
+@export var map_title_line: float = 1.3
+@export var map_key_share: float = 0.3
 ## The named areas' words on it (type size, px: an area of at least map_area_big m² in all its boxes in the larger),
-## their dark edge (px), and the room (px) kept clear round each; a name with no room left is left out, smaller areas
-## first.
+## their dark edge (px), and the room (px, across and down) kept clear round each, a space's width across so two names
+## on a line never read as one; a name with no room left is left out, smaller areas first.
 @export var map_area_size: int = 12
 @export var map_area_big_size: int = 15
 @export var map_area_big: float = 300.0
 @export var map_area_outline: int = 5
-@export var map_area_room: float = 3.0
+@export var map_area_gap: Vector2 = Vector2(20.0, 8.0)
 ## The flags (FM2): a badge with the flag's letter this big (px, radius) beside each pole, a ring this big (px) round
 ## the pole; Elimination's overtime flag's spot shows as a faint ring until it is up.
 @export var map_flag_badge: float = 13.0
 @export var map_flag_ring: float = 22.0
 @export var map_flag_ring_width: float = 2.0
+## The badge's letter's type size, as a share of its radius.
+@export var map_badge_type: float = 1.3
 @export var map_overtime_alpha: float = 0.45
 ## Each end's start (FM2): a box round its spawns map_start_pad (m) out, its ring and fill in the colour of the team
 ## starting there (fill at map_start_fill); the dead zones a box round their spots, hatched grey. Their words are

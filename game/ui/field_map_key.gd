@@ -27,6 +27,10 @@ const ARC_POINTS := 24
 const SHOT_FILL := 0.75
 const START_FILL := 0.25
 const DASHES := 6
+## The flag's badge: its radius (px), where it sits from the ring's middle (px) and its letter.
+const FLAG_BADGE := 7.0
+const FLAG_BADGE_AT := Vector2(-6.0, -6.0)
+const FLAG_LETTER := "A"
 ## The arrow (you), the diamond (an order), as the map's own.
 const YOU_SHAPE: Array[Vector2] = [Vector2(0.0, -9.5), Vector2(7.0, 7.5), Vector2(0.0, 3.6), Vector2(-7.0, 7.5)]
 const DIAMOND_SHAPE: Array[Vector2] = [Vector2(0.0, -8.0), Vector2(8.0, 0.0), Vector2(0.0, 8.0), Vector2(-8.0, 0.0)]
@@ -36,6 +40,7 @@ var _team := Color.WHITE
 var _enemy := Color.WHITE
 var _font: Font = null
 var _heading_font: Font = null
+var _badge_font: Font = null
 var _heading: String = ""
 var _words := PackedStringArray()
 var _you := PackedVector2Array()
@@ -48,6 +53,7 @@ func setup(cfg: MinimapConfig) -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_font = GameTheme.font(600)
 	_heading_font = GameTheme.spaced_font(800, HudStyle.SPACING_SUB, HEADING_SIZE)
+	_badge_font = GameTheme.font(800)
 	_heading = HudStyle.caps("MAP_KEY")
 	for w in WORDS:
 		_words.append(tr(w))
@@ -111,8 +117,16 @@ func _draw_glyph(g: Glyph, at: Vector2) -> void:
 			draw_line(_diamond[_diamond.size() - 1], _diamond[0], _team, RING, true)
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		Glyph.FLAG:
-			draw_circle(at, GLYPH + INK, _cfg.ink)
-			draw_circle(at, GLYPH, GameTheme.YELLOW)
+			# The map's ring round the pole, its lettered badge over the ring's top left.
+			draw_arc(at, GLYPH, 0.0, TAU, ARC_POINTS, _cfg.ink, _cfg.map_flag_ring_width + INK, true)
+			draw_arc(at, GLYPH, 0.0, TAU, ARC_POINTS, GameTheme.YELLOW, _cfg.map_flag_ring_width, true)
+			var badge := at + FLAG_BADGE_AT
+			draw_circle(badge, FLAG_BADGE + INK, _cfg.ink)
+			draw_circle(badge, FLAG_BADGE, GameTheme.YELLOW)
+			var fs := roundi(FLAG_BADGE * _cfg.map_badge_type)
+			var s := _badge_font.get_string_size(FLAG_LETTER, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
+			draw_string(_badge_font, Vector2(badge.x - s.x * 0.5, badge.y - s.y * 0.5 + _badge_font.get_ascent(fs)),
+					FLAG_LETTER, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, GameTheme.YELLOW_INK)
 		Glyph.START:
 			draw_rect(box, Color(_team, START_FILL))
 			draw_rect(box, _team, false, _cfg.map_zone_ring)
