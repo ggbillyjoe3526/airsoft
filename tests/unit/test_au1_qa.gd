@@ -327,3 +327,135 @@ func test_your_own_shot_plays_on_the_plain_voices_not_the_positional_ones() -> v
 		heard += int(v.playing)
 	assert_gt(heard, 0, "your shot plays")
 	assert_eq(_voices("shot_").size(), 0, "never on the positional ones")
+
+
+# --- the field voices' cap (max_db) ---
+
+func _flash_event(at: Vector3) -> void:
+	var bang := state.events.add(GameEvent.Kind.FLASH_BANG)
+	bang.position = at
+
+
+## Every playing field voice's cap against its cue: a shot, its power part and the bang at their own level, the rest at
+## the field's.
+func _check_caps(label: String) -> int:
+	var checked := 0
+	for v in audio._field:
+		if not v.playing:
+			continue
+		checked += 1
+		var own_level := false
+		for cue: StringName in audio._streams:
+			var name := String(cue)
+			if (name.begins_with("shot_") or name.begins_with("power_") or name == "flash_bang") \
+					and (audio._streams[cue] as Array).has(v.stream):
+				own_level = true
+		if own_level:
+			assert_eq(v.max_db, v.volume_db, "%s: a shot-kind voice at its own level" % label)
+		else:
+			assert_eq(v.max_db, cfg.field_max_db, "%s: any other at the field's cap" % label)
+	return checked
+
+
+func test_voices_swapped_between_shots_the_bang_and_steps_always_take_the_cap_of_what_they_play() -> void:
+	_enemy_at(6.0)
+	_setup_audio()
+	var checked := 0
+	for round in 24:
+		state.events.clear()
+		match round % 3:
+			0:
+				_shot_event(enemy.id, enemy.eye(body))
+			1:
+				_step_event(enemy.position)
+			2:
+				_flash_event(Vector3(0.0, 1.0, 6.0))
+		audio.on_tick(state, you.id, you)
+		checked += _check_caps("round %d" % round)
+		if round % 2 == 0: # some rounds the voices finish, some the next sound lands on a busy pool
+			for v in audio._field:
+				v.stop()
+	assert_gt(checked, 0)
+
+
+func test_an_occluded_shot_is_capped_at_its_occluded_level_not_the_open_one() -> void:
+	_enemy_at(10.0)
+	var world := BoxWorld.new(body)
+	world.add_box(Vector3(0.0, 1.5, 5.0), Vector3(6.0, 3.0, 0.4))
+	audio = SimAudio.new()
+	add_child_autofree(audio)
+	audio.setup(cfg, [&"electric"] as Array[StringName], body, world, null)
+	_shot_event(enemy.id, enemy.eye(body))
+	audio.on_tick(state, you.id, you)
+	var heard := _voices("shot_") + _voices("power_")
+	assert_eq(heard.size(), 2, "shot and power part behind the wall")
+	for v in heard:
+		assert_almost_eq(v.max_db, v.volume_db, 1e-4, "capped where it was set, wall included")
+	assert_eq(StringName(_voices("shot_")[0].bus), SoundMix.BUS_EFFECTS_FULL, "and the wall's bus took its share")
+
+
+func test_a_silenced_shot_up_close_is_capped_at_its_own_muffled_level() -> void:
+	_enemy_at(2.0)
+	enemy.armament.replicas[0].muffled = true
+	_setup_audio()
+	_shot_event(enemy.id, enemy.eye(body))
+	audio.on_tick(state, you.id, you)
+	var shot := _voices("shot_")
+	assert_eq(shot.size(), 1)
+	assert_almost_eq(shot[0].volume_db, linear_to_db(cfg.shot_gain * cfg.muffled_gain), 1e-3)
+	assert_almost_eq(shot[0].max_db, shot[0].volume_db, 1e-4, "no louder than your own silenced replica")
+
+
+func test_the_flash_bang_is_capped_at_its_own_level_and_its_voice_is_the_shots_kind() -> void:
+	_enemy_at(30.0)
+	_setup_audio()
+	_flash_event(Vector3(0.0, 1.0, 4.0))
+	audio.on_tick(state, you.id, you)
+	var bang := _voices("flash_bang")
+	assert_eq(bang.size(), 1, "heard")
+	assert_eq(bang[0].max_db, bang[0].volume_db)
+	assert_eq(bang[0].unit_size, cfg.shot_unit_size)
+	assert_eq(bang[0].max_distance, cfg.bang_reach)
+
+
+func test_the_ranges_steel_ring_keeps_the_field_cap_after_a_shot_on_its_voice() -> void:
+	_enemy_at(10.0)
+	_setup_audio()
+	_shot_event(enemy.id, enemy.eye(body))
+	audio.on_tick(state, you.id, you)
+	for v in audio._field:
+		v.stop()
+	state.events.clear()
+	var hit := state.events.add(GameEvent.Kind.TARGET_HIT)
+	hit.actor = you.id
+	hit.value = RangeTarget.Kind.STEEL
+	hit.position = Vector3(0.0, 1.0, 20.0)
+	audio.on_tick(state, you.id, you)
+	var ring := _voices("steelRing")
+	assert_gt(ring.size(), 0)
+	for v in ring:
+		assert_eq(v.max_db, cfg.field_max_db)
+
+
+func test_a_zero_gain_shot_and_part_leave_no_nan_cap() -> void:
+	cfg.shot_gain = 0.0
+	cfg.power_gains = {}
+	cfg.power_gain = 0.0
+	_enemy_at(3.0)
+	_setup_audio()
+	_shot_event(enemy.id, enemy.eye(body))
+	audio.on_tick(state, you.id, you)
+	var heard := _voices("shot_") + _voices("power_")
+	assert_gt(heard.size(), 0)
+	for v in heard:
+		assert_false(is_nan(v.max_db), "-inf is allowed, NaN is not")
+		assert_true(v.max_db < -60.0 or is_inf(v.max_db), "silent")
+
+
+func test_your_own_shot_and_bang_leave_the_positional_voices_alone() -> void:
+	_setup_audio()
+	_shot_event(you.id, you.eye(body))
+	audio.on_tick(state, you.id, you)
+	for v in audio._field:
+		assert_false(v.playing)
+		assert_eq(v.max_db, 3.0, "untouched default")
