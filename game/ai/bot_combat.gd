@@ -144,7 +144,7 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 	b.bursting = false
 	if target == null or not b.target_visible:
 		b.no_shot_for = 0.0
-	elif b.no_shot_for > 0.0 and BotSenses.line_clear(w.query, eye, _aim_point) \
+	elif b.no_shot_for > 0.0 and BotSenses.shot_clear(w.query, eye, _aim_point) \
 			and not leaves_in_line(w, eye, _aim_point):
 		# The way clear again (it went round, or the glass is behind it): a shot, whether or not it can take it this tick.
 		b.no_shot_for = 0.0
@@ -182,7 +182,7 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 static func _knee_has_shot(b: Bot, w: BotWorld) -> bool:
 	var c := b.character
 	var knee := c.position + Vector3(0.0, Character.eye_height(1.0, w.tuning.body), 0.0)
-	return BotSenses.line_clear(w.query, knee, _aim_point) and not leaves_in_line(w, knee, _aim_point)
+	return BotSenses.shot_clear(w.query, knee, _aim_point) and not leaves_in_line(w, knee, _aim_point)
 
 
 ## Reloads when empty, or swaps a low magazine for a fuller spare when nobody is in sight.
@@ -232,12 +232,12 @@ static func flight_time(b: Bot, w: BotWorld, dist: float) -> float:
 ## of fire (_body_in_line) up to where a miss would stop.
 static func _line_of_fire_blocked(b: Bot, w: BotWorld, eye: Vector3, dir: Vector3, dist: float) -> bool:
 	var cfg := w.cfg
-	_level_in_line = not BotSenses.line_clear(w.query, eye, _aim_point) or leaves_in_line(w, eye, _aim_point)
+	_level_in_line = not BotSenses.shot_clear(w.query, eye, _aim_point) or leaves_in_line(w, eye, _aim_point)
 	if _level_in_line:
 		return true
 	var reach := miss_reach(cfg, dist)
 	var wall := -1.0
-	if w.query.ray(eye, eye + dir * reach, _hit):
+	if w.query.ray_past_railings(eye, eye + dir * reach, _hit):
 		wall = _hit.fraction * reach
 	# The BB flies along the aim, not the line to the target: no shooting the wall beside you.
 	if wall >= 0.0 and wall < dist * cfg.aim_wall_fraction:
@@ -283,14 +283,14 @@ static func _friendly_reach(w: BotWorld, eye: Vector3, dir: Vector3, dist: float
 	var back := minf(wall, cfg.friendly_wall_probe)
 	var raised := eye + dir * (wall - back) + Vector3(0.0, cfg.friendly_wall_clearance, 0.0)
 	var probe := back + cfg.friendly_wall_probe
-	if not w.query.ray(raised, raised + dir * probe, _hit):
+	if not w.query.ray_past_railings(raised, raised + dir * probe, _hit):
 		return reach
 	var flat := Vector2(dir.x, dir.z).length()
 	var off := stray * wall / flat if flat > 0.0 else 0.0
 	for i in 2:
 		var side := 1.0 - 2.0 * i
 		var p := raised + Vector3(dir.z * off * side, -cfg.friendly_wall_clearance, -dir.x * off * side)
-		if not w.query.ray(p, p + dir * probe, _hit):
+		if not w.query.ray_past_railings(p, p + dir * probe, _hit):
 			return reach
 	return minf(reach, wall + cfg.friendly_past_wall)
 

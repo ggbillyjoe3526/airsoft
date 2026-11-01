@@ -45,6 +45,8 @@ var _material: ShaderMaterial = null
 var _mesh: MeshInstance3D = null
 ## The see-through blocks' mesh (_glass_mesh), or null on a map with none.
 var _glass: MeshInstance3D = null
+## The railings' bars and rails (SR1), drawn in the greybox's material; null on a map with none.
+var _railings: MeshInstance3D = null
 ## The site dress's look and its material (DD1); null for a greybox map.
 var _site: SiteLook = null
 ## The props a block may name (MapData.Block.dress, WR3), whatever the map's site: such a block's box is drawn inset
@@ -105,8 +107,10 @@ func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 		sb.collision_mask = 0
 		add_child(sb)
 		_bodies.append(sb)
-	# The clear blocks (glass, BQ1) go on bodies of their own, one a surface they use, which the sight ray is blind to.
+	# The clear blocks (glass, BQ1) and the railings (SR1) go on bodies of their own, one a surface they use, which
+	# the sight ray is blind to (and the ray past the railings to the railings').
 	var clear_bodies: Dictionary[int, StaticBody3D] = {}
+	var railing_bodies: Dictionary[int, StaticBody3D] = {}
 	for b in m.blocks:
 		var shape := CollisionShape3D.new()
 		shape.position = b.center
@@ -119,43 +123,40 @@ func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 			wedge.points = GreyboxFaces.wedge_points(b, Vector3.ZERO)
 			shape.shape = wedge
 		if style.is_clear(b.kind):
-			if not clear_bodies.has(b.surface):
-				var cb := StaticBody3D.new()
-				cb.name = "Colliders_Clear_%s" % RayHit.Surface.keys()[b.surface]
-				cb.collision_layer = WORLD_LAYER
-				cb.collision_mask = 0
-				add_child(cb)
-				clear_bodies[b.surface] = cb
-			clear_bodies[b.surface].add_child(shape)
+			_own_body(clear_bodies, b.surface, "Colliders_Clear_%s").add_child(shape)
+		elif style.is_railing(b.kind) and b.rise == MapData.Rise.NONE:
+			_own_body(railing_bodies, b.surface, "Colliders_Railing_%s").add_child(shape)
 		else:
 			_bodies[b.surface].add_child(shape)
 	if m.terrain != null:
 		_add_terrain_shapes(m.terrain)
 	if m.roof_height > 0.0:
 		_add_ceiling(m)
-	_cast = RayCast3D.new()
-	_cast.name = "LevelRay"
-	_cast.top_level = true
-	_cast.enabled = false
-	_cast.collision_mask = WORLD_LAYER
-	add_child(_cast)
+	_cast = _level_ray("LevelRay")
 	var surface_rids: Array[RID] = []
 	for sb in _bodies:
 		surface_rids.append(sb.get_rid())
 	_query = JoltQuery.new(_cast, surface_rids, body)
-	if not clear_bodies.is_empty():
-		var sight := RayCast3D.new()
-		sight.name = "SightRay"
-		sight.top_level = true
-		sight.enabled = false
-		sight.collision_mask = WORLD_LAYER
-		add_child(sight)
+	_query.railings = Railings.new(style.railing)
+	for b in m.blocks:
+		if style.is_railing(b.kind) and b.rise == MapData.Rise.NONE:
+			_query.railings.add(b.center, b.size, b.surface)
+	if not clear_bodies.is_empty() or not railing_bodies.is_empty():
+		var sight := _level_ray("SightRay")
 		var rids: Array[RID] = []
 		var surfaces := PackedInt32Array()
-		for surface: int in clear_bodies:
-			rids.append(clear_bodies[surface].get_rid())
-			surfaces.append(surface)
+		_body_rids(clear_bodies, rids, surfaces)
 		_query.set_clear_bodies(rids, surfaces, sight)
+		if not railing_bodies.is_empty():
+			var bar_rids: Array[RID] = []
+			var bar_surfaces := PackedInt32Array()
+			_body_rids(railing_bodies, bar_rids, bar_surfaces)
+			_query.set_railing_bodies(bar_rids, bar_surfaces, sight, _level_ray("PastRailingsRay"))
+			_railings = MeshInstance3D.new()
+			_railings.name = "Railings"
+			_railings.mesh = _railing_mesh(m, style, _query.railings)
+			_railings.material_override = _material
+			add_child(_railings)
 	# Bushes are no collider: only leaves the simulation counts along a line (WL5).
 	_query.foliage = m.foliage
 	# What each box is, for the rules that ask (the noisy props, NP1); a ramp's wedge never makes a noise.
@@ -387,7 +388,7 @@ static func _greybox_mesh(m: MapData, style: MapStyle, site: SiteLook = null,
 	for b in m.blocks:
 		if site != null and SiteSurface.hidden(site, b):
 			continue
-		if style.is_clear(b.kind):
+		if style.is_clear(b.kind) or (style.is_railing(b.kind) and b.rise == MapData.Rise.NONE):
 			continue
 		var core := Transform3D.IDENTITY
 		if props != null and props.dresses(b) and props.lay_of(b) != PropDressConfig.Lay.TILE:
@@ -401,6 +402,55 @@ static func _greybox_mesh(m: MapData, style: MapStyle, site: SiteLook = null,
 	st.set_color(style.ground_colour)
 	_add_face(st, GreyboxFaces.ground_face(style, GreyboxFaces.ground_top(m)))
 	return st.commit()
+
+
+## The railings' bars and rails (SR1: Railings.parts, the boxes a BB meets) as one mesh in their blocks' colours.
+static func _railing_mesh(m: MapData, style: MapStyle, railings: Railings) -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var boxes: Array[AABB] = []
+	var run := 0
+	for b in m.blocks:
+		if not style.is_railing(b.kind) or b.rise != MapData.Rise.NONE:
+			continue
+		boxes.clear()
+		railings.parts(run, boxes)
+		run += 1
+		st.set_color(style.block_colour(b))
+		for box in boxes:
+			for f in GreyboxFaces.box_faces(box.position, box.end):
+				_add_face(st, f)
+	return st.commit()
+
+
+## The body of `bodies` for `surface`, made (named `name` with the surface) and added the first time it is asked for.
+func _own_body(bodies: Dictionary[int, StaticBody3D], surface: int, name_format: String) -> StaticBody3D:
+	if not bodies.has(surface):
+		var sb := StaticBody3D.new()
+		sb.name = name_format % RayHit.Surface.keys()[surface]
+		sb.collision_layer = WORLD_LAYER
+		sb.collision_mask = 0
+		add_child(sb)
+		bodies[surface] = sb
+	return bodies[surface]
+
+
+## Each of `bodies`' RIDs into `rids`, with its surface into `surfaces`.
+static func _body_rids(bodies: Dictionary[int, StaticBody3D], rids: Array[RID], surfaces: PackedInt32Array) -> void:
+	for surface: int in bodies:
+		rids.append(bodies[surface].get_rid())
+		surfaces.append(surface)
+
+
+## A ray named `ray_name` on the level's colliders, cast on demand, as a child.
+func _level_ray(ray_name: String) -> RayCast3D:
+	var ray := RayCast3D.new()
+	ray.name = ray_name
+	ray.top_level = true
+	ray.enabled = false
+	ray.collision_mask = WORLD_LAYER
+	add_child(ray)
+	return ray
 
 
 ## The see-through blocks (MapStyle.clear_kinds: The Street's glass, ST1) as one mesh, each in its colour at its kind's

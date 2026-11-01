@@ -108,6 +108,12 @@ extends Resource
 ## Kinds drawn see-through (MapLevel's Glass mesh, in the shared light), each at this opacity (0..1): The Street's
 ## window glass and bus shelter (ST1). Still solid to BBs, sight and movement: only drawn clear.
 @export var clear_kinds: Dictionary[StringName, float] = {&"glass": 0.35}
+## Kinds built as bar railings (SR1: The Street's waist-high metal railings): drawn as bars and rails, solid to movers
+## and thrown bombs, see-through to sight, and a BB meets only the bars and rails its path crosses (Railings). A ramp
+## of one of these kinds is an ordinary block.
+@export var railing_kinds: Array[StringName] = [&"railing"]
+## The railings' bars and rails.
+@export var railing: RailingConfig = RailingConfig.new()
 ## The ground beyond the field's walls, out to `ground_extent` metres each way from the middle, just below the floor.
 @export var ground_colour: Color = Color8(0x8a, 0xa8, 0x60)
 @export var ground_extent: float = 120.0
@@ -165,3 +171,8 @@ func block_colour(b: MapData.Block) -> Color:
 ## Whether blocks of `kind` are drawn see-through (clear_kinds).
 func is_clear(kind: StringName) -> bool:
 	return clear_kinds.has(kind)
+
+
+## Whether blocks of `kind` are bar railings (railing_kinds).
+func is_railing(kind: StringName) -> bool:
+	return railing_kinds.has(kind)

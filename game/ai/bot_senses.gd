@@ -33,6 +33,14 @@ static func line_clear(query: WorldQuery, a: Vector3, b: Vector3) -> bool:
 	return not query.ray(a, b, _hit)
 
 
+## True if no level surface but a railing (SR1) blocks the straight line from `a` to `b`: the line a bot checks for a
+## shot. A railing is no cover, so a bot fires through its gaps (its BBs meet the bars they meet).
+static func shot_clear(query: WorldQuery, a: Vector3, b: Vector3) -> bool:
+	if a.distance_squared_to(b) < EPSILON * EPSILON:
+		return true
+	return not query.ray_past_railings(a, b, _hit)
+
+
 ## True if nothing that hides what is behind it lies on the straight line from `a` to `b`: as line_clear, but through
 ## clear glass (WorldQuery.sight_ray, BQ1). What a bot sees, not what its BBs reach.
 static func sight_clear(query: WorldQuery, a: Vector3, b: Vector3) -> bool:
