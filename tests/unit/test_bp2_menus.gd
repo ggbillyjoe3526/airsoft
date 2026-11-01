@@ -163,6 +163,9 @@ func test_a_newer_settings_file_is_never_written_over() -> void:
 	assert_eq(int(r.version), Settings.VERSION + 1)
 	assert_eq(float((r.data as Dictionary)["fov"]), 80.0)
 	assert_ne(s.load_message, "", "still said: the changes don't save")
+	assert_true(s.from_newer_build())
+	assert_false(GraphicsStartUp.first_start_due(s, false),
+			"no first-start notice at every launch for a file that can't be marked seen")
 
 
 func test_settings_keep_keys_they_do_not_know_and_drop_the_retired_ones() -> void:

@@ -475,3 +475,8 @@ func _accessibility_from(data: Dictionary) -> void:
 static func _flag(data: Dictionary, key: String, fallback: bool) -> bool:
 	var v: Variant = data.get(key)
 	return v if v is bool else fallback
+
+
+## Whether the file on disk is a newer build's, kept as it is (no save writes over it this session).
+func from_newer_build() -> bool:
+	return _newer_on_disk
