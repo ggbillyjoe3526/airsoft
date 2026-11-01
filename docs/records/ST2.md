@@ -1,12 +1,13 @@
 # ST2 · The Street's CC0 dress
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-01 | 1 | thread | see Checks | – | – |
+| 2026-11-01 | 1 | thread | see Checks | Retry 7/8 | ST1's changelog note still called the props blocks; no ST2 note |
+| 2026-11-01 | 2 | thread | see Checks | Accept 8/8 | – |
 
 ## Goal
 
@@ -42,7 +43,11 @@ the look's palette, in the boxes ST1 gave them, so cover and collision are uncha
 ## Checks
 
 - `test_props` (a new Street test: every named prop loads, sits inside its block, one car a car block, two bins a bin
-  block), `test_street`, `test_st1_qa`.
+  block), `test_st2_qa` (QA: one mesh and surface a model, a fitted prop fills its box's footprint and height),
+  `test_street`, `test_st1_qa`, `test_look`.
+- Performance (smoke match on The Street, patched): +25 nodes, +5.4 % draws, no orphans; the dress is 107k triangles
+  in 24 MultiMeshes, the lightest dressed map (Depot 183k, Woodland 458k). If Low runs short, chunk the vehicles so
+  they cull first.
 
 ## Known issues left
 
@@ -51,4 +56,6 @@ the look's palette, in the boxes ST1 gave them, so cover and collision are uncha
 ## Owner should test
 
 - The parked cars, vans and lorries as cover: what you see should be what stops a BB.
-- No vehicle or settee reads as a team's colour by day or under the lamps at night.
+- No vehicle or settee reads as a team's colour by day or under the lamps at night: the yellow cars in shade, the
+  crimson lorry far off, steel bins and lamp posts (navy-looking outdoors).
+- The skip and the 3.2 m settee, stretched to their boxes: do they look right?
