@@ -1,4 +1,4 @@
-Task: BQ1 · QA commit (see git log, Agent: qa) · Verdict: Fail
+Task: BQ1 · QA commit (see git log, Agent: qa) · Verdict: Pass (re-run after b489081)
 
 Blocking
 1. game/ai/bot_combat.gd:143-150 (Bot.no_shot_for) · no_shot_for is cleared only where shoot() gets past the `ready` / fire-cone early return. A bot that pushes in (BotPersonality.pushes_in: SEARCH sprints, brain line 77/84) and went round after 1.5 s of glass keeps `no_shot_for` >= no_shot_move_after for as long as it sprints: cmd.sprint makes `ready` false, so the `b.no_shot_for = 0.0` after the line-of-fire check is never reached. `seeing` in bot_brain.gd:122 stays false, so with the glass gone and a clear shot at 6 m the pusher keeps sprinting at the spot and never goes to FIGHT (and never fires) until it runs into the target. Non-pusher bots (walk in SEARCH) recover at once. Fix: reset the counter when the line is open independent of `ready` (check the level in the line before the ready/cone early return), or clear it when the mode is SEARCH and the line is clear.
@@ -14,3 +14,6 @@ Tests added
 Also checked, no bug (throwaway test, not committed): Go there lapse, then Go there again elsewhere, holds the full 30 s from the new arrival and lapses again; Team plan after a Go there hold gives no QUIET; Hold here pressed over a Go there hold never lapses.
 
 Runs (13 files: fm1_go_there, bq1_glass_sight, bq1_qa, squad_orders, st1_qa, street, pings, night_sight, night_light, bot_personality, bots_hunt, bot_team_play, bot_crossfire): 130 tests, 128 pass, 2 fail (blocking 1, advisory pings count), 123 s. Did not run tools/check.sh (running in the main session). Not tested: Jolt sight ray in a real window with The Street (needs a display; owner: look through the House windows and shelter in play, bots should shoot only where the pane ends).
+
+
+Re-run after b489081: test_bq1_qa, test_pings, test_grenades, test_bot_bombs: 67 tests, 67 pass, 107 s. The pusher bug (blocking 1) is fixed and its test passes; the pings count failure was this test mutating the shared BotsFile.neutral() style, fixed in the test. The flash-through-glass advisory is fixed. tools/check.sh not run (main session).
