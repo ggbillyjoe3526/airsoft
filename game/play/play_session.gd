@@ -867,7 +867,7 @@ func _tick() -> void:
 	elif _spectate_any and not autopilot:
 		_follow_next_on_pull()
 	elif not autopilot:
-		_input.fill(_commands[PLAYER_ID], player.armament.active, player.grenades)
+		_input.fill(_commands[PLAYER_ID], player.armament.active, player.grenades, player.armament.holstered)
 	else:
 		# a bot plays you (the smoke test): your squad order keys still reach your teammates
 		_input.fill_order(_commands[PLAYER_ID])

@@ -16,7 +16,8 @@ extends Node
 ## fill the next tick's throw_grenade once (the last pressed, if both). Open / shut door (DO1) fills the next tick's
 ## use_door once. The mouse wheel (MC1, owner 2026-11-01) steps through the replicas and then the bombs left, smoke then
 ## flash, round again, never onto the holster: a step onto a bomb takes it in hand (PlayerCommand.ready_grenade), a step
-## onto a replica draws it (`wheel_item`).
+## onto a replica draws it (`wheel_item`). With the replica holstered a notch steps past the bombs and draws the other
+## replica (BP2), as the holster is nothing in hand.
 ## Go there (FM1: its key, the wheel's Go There) is a ping along the view that sends your bot teammates there
 ## (PlayerCommand.ping_move). Held, the full-screen map's key opens the map (`allow_map`): as with the wheel the mouse
 ## moves the map's own pointer (MapPointer) instead of the view, feet still move, the mouse wheel switches nothing, and
@@ -426,8 +427,9 @@ static func wheel_item(current: int, steps: int, smoke: bool, flash: bool) -> in
 
 
 ## This tick's command: held keys as they are now, presses since the last tick, the view as the mouse left it.
-## `held_slot` is the replica in hand and `hand` the bombs (null: none), which the mouse wheel steps from.
-func fill(cmd: PlayerCommand, held_slot: int = 0, hand: Grenades.Hand = null) -> void:
+## `held_slot` is the replica in hand and `hand` the bombs (null: none), which the mouse wheel steps from; `holstered`
+## says the replica is put away, so the wheel draws a replica rather than taking a bomb.
+func fill(cmd: PlayerCommand, held_slot: int = 0, hand: Grenades.Hand = null, holstered: bool = false) -> void:
 	if not active:
 		cmd.reset(view_yaw, view_pitch)
 		cmd.manual_reload = not _controls.auto_reload
@@ -467,18 +469,19 @@ func fill(cmd: PlayerCommand, held_slot: int = 0, hand: Grenades.Hand = null) ->
 	cmd.ready_grenade = Grenade.Kind.NONE
 	cmd.use_door = _door_latch
 	if _slot_steps != 0:
-		_wheel_to(cmd, held_slot, hand)
+		_wheel_to(cmd, held_slot, hand, holstered)
 	cmd.mag_hand_off = false
 	fill_order(cmd)
 	_clear_latches()
 
 
-## The mouse wheel's steps since the last tick into `cmd`: the replica to draw, or the bomb to take in hand.
-func _wheel_to(cmd: PlayerCommand, held_slot: int, hand: Grenades.Hand) -> void:
+## The mouse wheel's steps since the last tick into `cmd`: the replica to draw, or the bomb to take in hand. Holstered
+## with no bomb in hand (a bomb in hand puts the replica down too), the bombs are stepped past.
+func _wheel_to(cmd: PlayerCommand, held_slot: int, hand: Grenades.Hand, holstered: bool) -> void:
 	var current := held_slot
 	var smoke := false
 	var flash := false
-	if hand != null:
+	if hand != null and (not holstered or hand.readied != Grenade.Kind.NONE):
 		smoke = hand.smoke > 0
 		flash = hand.flash > 0
 		if hand.readied == Grenade.Kind.SMOKE:
