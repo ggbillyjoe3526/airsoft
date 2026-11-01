@@ -286,7 +286,7 @@ func test_an_old_file_without_the_graphics_fields_loads_and_keeps_its_values() -
 	assert_eq(got.renderer, Settings.Renderer.AUTO)
 	assert_false(got.first_start_seen)
 	assert_eq(got.load_message, "", "no complaint")
-	assert_eq(Settings.VERSION, 2, "2 since FB2 moved the defaults")
+	assert_eq(Settings.VERSION, 3, "3 since AU1 moved the ambience's default")
 	var raw := SaveFile.read(path, Settings.KIND)
 	assert_eq(int(raw.version), Settings.VERSION)
 
