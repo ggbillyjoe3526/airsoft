@@ -101,6 +101,30 @@ func test_a_bomb_in_hand_stays_in_hand_through_a_vault_and_no_pull_over_it_throw
 	cmds[0].forward = 0.0
 
 
+func test_a_wheel_notch_onto_a_bomb_during_a_vault_takes_it_in_hand_after_the_vault() -> void:
+	var m := _match(true)
+	var sim: Simulation = m[0]
+	var s: GameState = m[1]
+	var you := s.characters[0]
+	var cmds := _commands(s)
+	_run(sim, s, cmds, 30)
+	cmds[0].jump = true
+	cmds[0].forward = 1.0
+	_run(sim, s, cmds, 1)
+	cmds[0].jump = false
+	assert_true(you.vault.active, "vaulting")
+	cmds[0].ready_grenade = Grenade.Kind.FLASH # the wheel, mid-vault (BP2: was lost)
+	_run(sim, s, cmds, 1)
+	assert_eq(you.grenades.readied, Grenade.Kind.NONE, "nothing taken mid-vault")
+	var ticks := 0
+	while you.vault.active and ticks < 240:
+		_run(sim, s, cmds, 1)
+		ticks += 1
+	_run(sim, s, cmds, 1)
+	assert_eq(you.grenades.readied, Grenade.Kind.FLASH, "in hand once over the wall")
+	cmds[0].forward = 0.0
+
+
 func test_a_bomb_and_a_throw_key_in_one_tick_throw_the_key_and_the_replica_comes_back() -> void:
 	var m := _match()
 	var sim: Simulation = m[0]

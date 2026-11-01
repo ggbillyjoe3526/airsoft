@@ -87,7 +87,7 @@ var _middle: VBoxContainer = null
 var _hit_hold: Control = null
 var _hit_held: bool = false
 var _vault_prompt: Label = null
-## "U to open the door" or "to shut", while a door is in your reach (DO1).
+## "G to open the door" or "to shut", while a door is in your reach (DO1).
 var _door_prompt: Label = null
 var _vault_left: float = 0.0
 var _door_want: DoorPrompt = DoorPrompt.NONE
@@ -716,6 +716,14 @@ func set_door_prompt(what: DoorPrompt) -> void:
 	if what != DoorPrompt.NONE:
 		var key := KeyNames.of_action(&"use_door")
 		_door_prompt.text = tr("HUD_DOOR_OPEN" if what == DoorPrompt.OPEN else "HUD_DOOR_SHUT") % key
+
+
+## The door prompt built again with Use's key as it is bound now: after the pause menu's settings may have rebound
+## it, while you still stand at the door (BP2).
+func refresh_door_prompt() -> void:
+	var what := _door_want
+	_door_want = DoorPrompt.NONE
+	set_door_prompt(what)
 
 
 ## Whether the door prompt shows.

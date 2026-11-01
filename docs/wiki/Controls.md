@@ -23,7 +23,8 @@ so W A S D stays W A S D on any keyboard layout.
 - **Throw smoke** (4) and **Throw flash** (5) throw a smoke bomb or a flash bomb where you look at once
   ([Grenades](Grenades)).
 - **Next / previous replica** (the mouse wheel) steps through your two replicas and then your bombs left, smoke then
-  flash, and round again. It never stops on the holster. With a bomb in hand, a trigger pull throws it.
+  flash, and round again. It never stops on the holster: with your replica holstered, a notch draws a replica. With a
+  bomb in hand, a trigger pull throws it.
 - **Open / shut door** (G) opens or shuts the door within reach, the one nearest where you look. A line under the
   crosshair says which while you stand by one ([Maps](Maps#doors)).
 - **Fire** also skips the rest of a round once you are out ([How to Play](How-to-Play#skipping-the-rest-of-the-round)).

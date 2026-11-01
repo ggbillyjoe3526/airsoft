@@ -144,8 +144,9 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 	b.bursting = false
 	if target == null or not b.target_visible:
 		b.no_shot_for = 0.0
-	elif b.no_shot_for > 0.0 and BotSenses.shot_clear(w.query, eye, _aim_point) \
+	elif b.no_shot_for > 0.0 and off_aim < PI and BotSenses.shot_clear(w.query, eye, _aim_point) \
 			and not leaves_in_line(w, eye, _aim_point):
+		# (off_aim PI: aim didn't run this tick, busy with a bomb, so _aim_point is another bot's: BP2)
 		# The way clear again (it went round, or the glass is behind it): a shot, whether or not it can take it this tick.
 		b.no_shot_for = 0.0
 	var ready := w.live and BotSenses.has_reacted(b, w) and not cmd.sprint and b.mode != Bot.Mode.COVER
