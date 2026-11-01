@@ -1,27 +1,32 @@
-Task: FM2 · A more detailed full-screen map (owner's playtest 2026-11-01, point 6; no task block, judged against the brief)
-Attempt: 2 of 4
-Head: f79f0a9. The checks are NOT yet green on it: they ran on 0dc04a8, and parts 2-4, smoke and licences are still running. This verdict stands only once tools/check.sh passes on f79f0a9. Critic re-ran on f79f0a9: test_fm2_qa 35/35, test_fm2_field_map 12/12, test_minimap_field 11/11, test_fm1_field_map 15/15, test_mm3_qa 14/14; gdlint clean.
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
-Score: 7/8 → Accept (QA Pass d694977; performance Pass on 0dc04a8, +4 % Woodland build)
+Task: BQ3 · Bots play as a team and fight smarter (no task block; judged against the brief and PR #169)
+Attempt: 3 of 4
+Head: 77da242 (checks passed on it: record attempt 3, CI)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✗ | 8 ✓
+Score: 7/8 → Accept
 Evidence for the passes:
-1. Objectives: hud_field_map.gd:+125-150 (_goal_of, _show_round: the goal line in your team's colour), field_map_overlay.gd:+274-280 (A/B badges, overtime ring). Place names: field_map_marks.gd:+83 lay_out with gap (20, 8) and zone words via first_clear (overlay :+206). Detail: starts, dead zones, doors, compass, scale and key (overlay :+292-365, field_map_key.gd). Hearing only: test_fm2_qa :429. Screenshots of all three maps: no overlaps, and Depot's dead-zone words are left out by the rule.
-2. Presentation only reads state (c.end, round_state); nothing written. No contract touched.
-3. update(): _goal_of, set_round (packed compares, no copy), set_teams and place allocate nothing; View._draw adds one draw_texture_rect. Layout and the ground image run on change or once a match. Pinned by the allocation tests (test_fm2_field_map :273, test_fm2_qa :412).
-4. test_ground_is_tinted… (:230) fails without _colour_of; QA stubbed the zone clearing, ground_of and the wash, and the tests failed.
-5. Every tint, size, gap and alpha is in MinimapConfig; the overlay's constants are named presentation geometry; static types throughout; no globals.
-6. Airsoft-native marks (dead zones, starts, the hearing-only rule kept). Plain, readable words. No grimdark tone.
+1. Brief ("smarter, tactical, aim to win", friends and enemies): radio bot_radio.gd:10-47 hooked at bot_senses.gd:143
+   and bot_controller.gd:107; pressing bot_world.gd:102; careful last bot_world.gd:109 + bot_brain.gd:49; knee
+   bot_movement.gd:611; Follow me squad_orders.gd:163 + bot_brain.gd:241. Measured win share on shipped code 58 % / 55 %
+   (Normal, Depot / Street); Hard only 51-52 % and was not re-measured after QA's kneel fix.
+2. Commands only (cmd.crouch), seeded draws via b.pick, physics via sight_clear on WorldQuery; no contract touched.
+3. Read the hot paths: radio, pressing, careful_last, giver_leaving loop or compare values (Vector2 is a value), no
+   Array/Dictionary/lambda/new(); test_bots warm-tick change accounts only for SimEvents' documented pool growth.
+4. test_bq3_team_play.gd:193 fails without follow_on (bot_brain.gd:241); :152-153 fail without the knee branch.
+5. All values in BotSkill/BotConfig (.tres); static types throughout; logic in plain classes.
+6. Taking a knee, team calls and hunting a lead are recognisable airsoft play; Easy left as the learning level.
+8. changelog.d note, wiki Bots and Squad-Orders, FEATURES, PLAYTEST, ROADMAP, game/ai/README row for bot_radio.gd.
 Failed checks, with evidence:
-8. [judgment] docs/records/FM2.md › Decisions still says "Woodland … +17 % … moving the smoothing to the GPU would mean a second texture in every minimap panel". That is false at HEAD: the ground is now a GPU texture and the build is about +4 %. The branch's pipeline/out/performance.md is also still the old Fail report (head 3929b2c). The Pass report exists only in the main checkout.
-Must-fix before merge (no retry needed):
-- Commit the Pass performance.md to the branch. Rewrite the record's perf bullet (+4 %, ground is a separate small mipmapped texture under each layer). Fill in Attempts, Review and Verified once the checks are green on f79f0a9.
-Advisory (check 7, not failing):
-- MapPointer.frame (map_pointer.gd:+24) is now called only by test_fm1_qa. The flag badge is drawn twice: overlay :+319 and key :+119.
-- Comment lines over 120 characters: minimap_field.gd:8, map_pointer.gd:6.
-- settings_hud_page.gd:403 builds a View without the ground. Fine for Depot, but a terrain thumb map would show holes.
+7. [judgment] f815d87 moved pressing to counting eliminations, but its descriptions still state the old rule:
+   bot_config.gd:289 "this many more of its team in play than of the other", bot_skill.gd:71 "at least press_margin up
+   in play", game/ai/README.md:33 and docs/wiki/Bots.md:56 "players ahead" (the changelog says "eliminations ahead").
+   With uneven sides these differ, so the docs mislead the next tuner.
+Must-fix (non-blocking, fold into the merge commit): reword those four lines to "eliminations ahead". Set the record's
+Review line to this verdict (it already claims "critic Accept 8/8"). Note: QA (b8b7ee2) and performance (pre-rebase
+3597106) predate 77da242's Follow me fix; I read it (one compare and a length per bot in cover, no allocation).
 Owner should test in the game:
-- Hold M on Woodland at 1920x1080 and 1280x720. Does the ground read (hills, river, tracks), and is it too grey or too busy?
-- The Street: are the stacked names (East / Back Gardens, Bottom Street by the dead zone) easy to read?
-- Depot: the starts' words replace "Staging" and "Loading bay". Is that fine?
-- Round 1, then after half time: does the header switch attack and defend, and do the start boxes swap colour?
-- Elimination: is the faint overtime ring clear, and does it turn solid once the flag rises?
-- The minimap now shows the new ground and green hedges. Does it still read at a glance mid-fight?
+- Normal bots in the open: does the knee per burst (0.15 s down, 0.25-0.55 s bursts) read as a knee, or as crouch bobbing that makes heads hard to read?
+- Spotted by one bot: do others arrive about 1-1.6 s later in a way that reads as a call, not as wallhacks?
+- Two eliminations up, a team hunts for the rest of the round: aggressive and fun, or reckless?
+- 1v1 endings: does the careful last bot walk the lane so slowly that rounds time out?
+- Follow Me under fire from someone it can't see: does a follower leave cover and walk into the BBs?
+- Hard: does it feel any smarter? It measured about even against the old Hard.
