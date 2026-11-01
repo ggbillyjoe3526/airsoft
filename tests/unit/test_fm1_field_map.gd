@@ -207,34 +207,38 @@ func test_the_keys_have_defaults_in_the_settings_list_and_the_input_map() -> voi
 
 # --- the map on screen ---
 
-func test_any_map_fits_whole_in_the_square_north_up() -> void:
+func test_any_map_fits_whole_in_the_room_left_north_up() -> void:
 	for map: MapData in [depot, woodland]:
 		var fm := _field_map(map)
 		input.field_map().start()
 		_show(fm)
 		var v := fm.view()
 		assert_true(fm.visible)
-		assert_eq(v.size.x, v.size.y, "a square")
-		assert_almost_eq(v.size.y, 1080.0 - cfg.map_margin * 2.0, 0.5, "as big as the screen allows")
+		var room := Vector2(1920.0, 1080.0) - Vector2.ONE * cfg.map_margin * 2.0 \
+				- Vector2(cfg.map_key_width + cfg.map_key_gap, cfg.map_header)
+		assert_almost_eq(v.size.x, room.x, 0.5, "the screen less the key")
+		assert_almost_eq(v.size.y, room.y, 0.5, "the screen less the header")
 		var world := v.field_size()
 		assert_gt(world.x, 0.0)
 		var span := world * v.px_per_m()
-		assert_almost_eq(maxf(span.x, span.y), v.size.x * cfg.map_fit, 0.5, "the field fills map_fit of it")
-		# The field's corners are on the square.
+		assert_almost_eq(minf(v.size.x / span.x, v.size.y / span.y), 1.0 / cfg.map_fit, 1e-3,
+				"as big as the room allows, map_fit of it")
+		# The field's corners are inside the room.
 		var origin := v.centre() - world * 0.5
 		for corner: Vector2 in [origin, origin + world]:
 			var p := v.panel_of(corner)
-			assert_lt(maxf(absf(p.x), absf(p.y)), v.size.x * 0.5 + 0.5)
+			assert_lt(absf(p.x), v.size.x * 0.5 + 0.5)
+			assert_lt(absf(p.y), v.size.y * 0.5 + 0.5)
 		input.field_map().close()
 
 
-func test_it_frames_the_pointer_on_the_square_and_on_you() -> void:
+func test_it_frames_the_pointer_on_the_panel_and_on_you() -> void:
 	var fm := _field_map(depot)
 	input.field_map().start()
 	_show(fm)
 	var p := input.field_map()
 	var v := fm.view()
-	assert_eq(p.half, v.size.x * 0.5)
+	assert_eq(p.half, v.size * 0.5)
 	assert_almost_eq(p.ppm, v.px_per_m(), 1e-5)
 	assert_eq(p.you, v.panel_of(Vector2(you.position.x, you.position.z)))
 	p.at = p.you
@@ -260,7 +264,7 @@ func test_it_shows_what_the_minimap_shows_and_never_the_other_team() -> void:
 	assert_eq(v._dot_count, 1)
 
 
-func test_it_names_the_areas_and_hides_while_shut_or_under_the_scoreboard() -> void:
+func test_it_names_the_areas_none_over_another_and_hides_while_shut_or_under_the_scoreboard() -> void:
 	var fm := _field_map(depot)
 	_show(fm)
 	assert_false(fm.visible, "shut")
@@ -268,10 +272,17 @@ func test_it_names_the_areas_and_hides_while_shut_or_under_the_scoreboard() -> v
 	_show(fm)
 	assert_true(fm.visible)
 	var names := fm.area_words()
-	assert_gt(names.size(), 0)
-	for a in depot.areas:
-		if a.floor_from <= 0.0:
-			assert_true(names.has(a.name.to_upper()), a.name)
+	var marks := FieldMapMarks.areas_of(depot.areas)
+	assert_gt(names.size(), marks.size() * 0.75, "most names find room")
+	assert_true(names.has(marks[0].name), "the biggest area always does")
+	var ov := fm.overlay()
+	var boxes: Array[Rect2] = []
+	for i in marks.size():
+		if ov.word_box(i).has_area():
+			boxes.append(ov.word_box(i))
+	for i in boxes.size():
+		for j in range(i + 1, boxes.size()):
+			assert_false(boxes[i].intersects(boxes[j]), "no word covers another")
 	_show(fm, true, true)
 	assert_false(fm.visible, "never over the scoreboard or the summary")
 
@@ -294,10 +305,11 @@ func test_the_areas_words_are_one_a_name_over_its_biggest_box() -> void:
 	other.x1 = 1.0
 	other.z1 = 1.0
 	var list: Array[MapAreas.Area] = [small, big, other]
-	var words := HudFieldMap.areas_of(list)
+	var words := FieldMapMarks.areas_of(list)
 	assert_eq(words.size(), 2)
-	assert_eq(words[0].name, "YARD")
+	assert_eq(words[0].name, "YARD", "the biggest first")
 	assert_eq(words[0].at, Vector2(15.0, 20.0))
+	assert_eq(words[0].total, 204.0, "all its boxes")
 
 
 func test_go_theres_marker_reads_go_until_they_are_there() -> void:

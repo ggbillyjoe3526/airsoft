@@ -1,14 +1,13 @@
-Task: AU1 · head c521599 · Verdict: Pass
-Run: no match run (audio-only diff, worker's tools/check.sh in flight); targeted GUT: test_sound_occlusion, test_au1_loudness, test_voice_pool, 35/35 pass, 507 asserts · budget: no baseline yet, judged against targets and the diff
-Metrics: not measured (no per-frame code path changed beyond the SHOT event handler)
-Regressions: none measured
-Blocking: none
+Task: FM2 (a more detailed full-screen map) · head 0dc04a8 · Verdict: Pass
+Run: headless microbenchmarks of MinimapField.build and FieldMapMarks.lay_out on scratch `git archive` copies of 0dc04a8 and 7ed6d93, 7 alternating rounds of best-of-3 builds; 4-core container shared with a running check, so single runs swing +-15 % (main's own Woodland ranged 263-355 ms); no bot match (HUD-only change) · budget: no baseline yet (pipeline/perf-budget.json absent), judged against the DECISIONS targets and 7ed6d93
+Metrics (head / main, median of 7): Woodland build ~347 / ~335 ms (about +4 %, under the 10 % line; head 338-382, main 263-355) · Street ~113 / ~114 ms (same) · Depot ~21 / ~21 ms (same) · layer bytes identical to before the change on Woodland and Street, so the terrain no longer adds a full-size resize or blit (earlier heads: +130 %, then +17 %) · lay_out of all words 0.11 ms Woodland (21 words), 0.42 Street (37), 0.36 Depot (31), layout-time only (the new `placed + blocked` copy per word is the extra) · script errors 0
+Regressions (> 10 % worse): none (measured).
+Blocking findings: none.
 Advisory:
-- game/play/sim_audio.gd:206 (judgment) heard_scale per SHOT is two array reads and a float, no allocation; the shooter null check is cheap. Own shots compute it too, unused beyond the reach test; negligible.
-- game/play/sim_audio.gd:209 (judgment) _power_gain.get on a typed Dictionary[StringName, float] with a StringName key: no allocation, one hash per shot.
-- game/play/sim_audio.gd:571 (judgment) v.unit_size set per field play: one property write per voice start, bounded by the 24-voice pool.
-- Occlusion (measured by test, judgment for reach): rays are still gated by occlusion_reach 60 m and the 24-ray budget; _play checks _in_reach before share_of, and share_of casts nothing beyond 60 m (closed_far ramps the last share 60-120 m). The longer shot reach adds no rays; shots 60-120 m away reuse the cached share.
-- default_bus_layout.tres (judgment) one HardLimiter on Master: a per-block peak detector on the mix thread, no per-frame GDScript cost.
-- More shots now reach the 24-voice field pool on big maps; growth stays bounded by shot_cue_voices 6 per cue and pool priority (SHOT over FIELD), so voices never exceed 24. Presentation-only; judgment.
-Fixes: none needed
-Unexplained: none
+- game/ui/hud_minimap.gd View._draw (judgment): the ground texture is one more draw_texture_rect, in a different texture from the layer, so about one more draw call per panel frame (the minimap, plus the full map while M is held); no allocation, a GPU fill of the layer's rect with a 176 x 120 mipmapped texture. Negligible. Only maps with terrain (Woodland) pay it. Draw calls cannot be counted here (no GPU).
+- hud_minimap.gd ground_of (judgment): generate_mipmaps and ImageTexture are made once per match; the Image (about 85 KB plus mips) and the texture live as long as the minimap and are freed with it. The default 2D texture filter must be linear-with-mipmaps for the mips to count; without it the draw is plain linear, still fine.
+- field_map_overlay.gd (judgment, unchanged): every pointer move re-records all words; likely under 1 ms. A static child Control would avoid it. Optional.
+- First M press rasterises outline glyphs for three fonts (judgment, optional prewarm).
+Checked and fine: the per-frame paths (View._draw, update, place, set_round, set_teams) allocate nothing new; zone words, first_clear and the Vector2 gap run at layout time only; the settings page's thumbnail View.setup keeps its default null ground; no leaked nodes, resources or double connections; no new material or particle (no prewarm entry).
+Fixes: none required.
+Unexplained: none. Frame times and draw calls not measurable here (no GPU).

@@ -1,24 +1,34 @@
-Task: AU1 · QA commit 6f2bac6 · Verdict: Pass
+Task: FM2 (none; owner playtest 2026-11-01) · QA commit see git log (on top of 0dc04a8) · Verdict: Pass
 
-Attempt 2, head b1c3a50 (per-play AudioStreamPlayer3D.max_db: a Kind.SHOT play capped at its own volume_db, every other kind at field_max_db 3.0).
+Blocking: none. The first run's stale test (test_mm3_qa) is fixed and passes.
 
-Blocking findings: none. The attempt-1 failure (stale settings version in test_save_bundle.gd) is fixed in 795acc7 and the file passes.
+Advisory (none blocks)
+- game/ui/minimap_field.gd (build, ground_rect): the picture is cols/step samples, so a terrain whose columns do not
+  divide by the sample step stops up to one sample (relief_cell, 1 m) short of the terrain's far edge, and a terrain
+  smaller than one sample (1x1 image) overshoots it by up to step-1 squares. Woodland divides evenly (352x240, step 2) and
+  no real map is tiny, so nothing shows today; test_the_ground_picture_covers_the_terrain_to_within_one_sample pins the
+  one-sample bound.
 
-Advisory findings (for KNOWN_ISSUES or a tuning pass; by design of the cap, not bugs):
-- game/play/sim_audio.gd:573 · the flash bang is Kind.SHOT with bang_gain 1.0 (0 dB), so within 10 m it is now capped at 0 dB where it was 3 dB (about 3 dB quieter up close, same far off). Nothing in the notes asked for that; raise bang_gain to 1.4 if the bang should keep its old peak.
-- same line · a silenced bot's shot within 10 m is capped at its own muffled level (about -4 dB) where it was up to +3 dB before; deliberate ("no louder than yours"), but a silenced bot beside you is about 6 dB quieter than before this change. Owner's play-test should confirm.
-- same line · volume_db includes the per-play random spread, so the cap moves with it (a few tenths of a dB, by design). Occlusion lowers the bus, not volume_db, for the effects and power buses, so the cap is the open level and the bus does the muffling (correct).
-- Checked and fine: voice reuse in both directions (shot, bang, step, steel ring: every play resets max_db), your own sounds (plain AudioStreamPlayer, no max_db, positional voices untouched), the range's steel ring and wood target (field cap), zero gain (-inf, not NaN), a shot whose shooter is gone.
+Re-run on 0dc04a8 (single files, raw output in pipeline/out/qa/): test_fm2_qa 35/35, test_fm2_field_map 12, test_fm1_field_map 15,
+test_fm1_qa 21, test_mm3_qa 14, test_minimap_field 11, test_hud_minimap 17, test_bushes 38, test_two_flags 18,
+test_ping_markers 22, test_pn2_qa 8, test_hud_size 12, test_dp4_qa 7, test_minimap_hearing 11, test_mm2_qa 9,
+test_mm4_qa 16: all pass. gdlint on test_fm2_qa.gd clean. tools/check.sh and the full suite not run (run elsewhere).
 
-Tests added (tests/unit/test_au1_qa.gd, 7 new; each fails with the max_db line removed in a scratch copy, checked: voice-cap tests fail on the 3.0 left in place):
-- test_au1_qa.gd:360 · 24 rounds of shot, step and bang on one pool, with and without voices finishing, each playing voice's cap matches its cue · fails without the line (3.0 vs the shot's level)
-- :381 · a shot behind a wall: capped at its own level on the full-muffle bus
-- :397 · a silenced shot at 2 m capped at its muffled level
-- :409 · the flash bang capped at its own level, shot_unit_size and bang_reach kept
-- :421 · a steel ring after a shot on its voice keeps field_max_db
-- :440 · zero shot and power gain: cap is -inf or very low, never NaN
-- :455 · your own shot leaves every positional voice silent and at the default cap
+Tests added (tests/unit/test_fm2_qa.gd, 10 new, 35 total, 13467 asserts, 12 s). Checked by temporarily stubbing the
+feature in game/ (reverted, nothing under game/ committed): zone word taken as the first try with no clearing, the
+storey wash removed, ground_of returning null.
+- :486 zone words stay on the field and clear of every zone box, flag, compass, name and each other on 3 maps x 3 screen
+  sizes · fails with the clearing stubbed (words over zone boxes, off the field)
+- :520 zone boxes clipped to the field; a zone with no box has no word
+- :532 first_clear: first clear try, slid inside the bounds, gap across vs down, none when boxed in or no tries
+- :548 lay_out: zero-size want left out, Vector2 gap kept across and down
+- :572 Woodland: ground picture inside the layer, layer clear over most of it, full map and minimap Views hold the texture
+  · fails with ground_of stubbed to null
+- :598 Depot and The Street (no terrain) and an empty map: no ground image, rect or texture, Views draw none
+- :611 Tower Block with terrain: street storey clear, storeys above washed with below_storey_colour · fails with the wash removed
+- :625 tiny terrains (1x1 cell, 3x2, odd 21x19): picture non-empty and drawn, a View built on it draws · fails with ground_of null
+- :650 ground picture within one sample of the terrain's far edges (odd column count)
+- :664 repeated build/ground_of leaves no growth and the image stays readable after mipmaps
 
-Run (targeted, 26 files incl. test_save_bundle, au1_qa, au1_loudness, sound_occlusion, voice_pool, sp1_qa, parts_in_play, bot_bombs, sound_mix, ambient_calls, range_play, footsteps, settings and the other SimAudio users): 407 tests, 407 passing, 0 failing, 182.6 s, no SCRIPT ERROR. gdlint on test_au1_qa.gd clean. Raw log: pipeline/out/qa/qa-attempt2.log. Full tools/check.sh not run by me (the worker's is running).
-
-Not testable here: how the lifted bot shots sound and whether the cap choice (own level) suits the mix; needs ears on a display machine (owner's list: bot gunfire up close and at 30 m, a silenced bot beside you, a flash bang indoors).
+Not testable headless: how the GPU-smoothed ground looks, whether names and zone words read well on a real window
+(owner's list: open M on Woodland at 1920x1080 and 1280x720 and look at the ground blend, words and the key's flag glyph).

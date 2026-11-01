@@ -2,13 +2,18 @@ class_name MinimapField
 extends RefCounted
 ## The minimap's field drawing (the browser game's minimap layers, M23 and M34c): made once per match from MapData, one
 ## Image per storey (one on a map without storeys) at MinimapConfig.layer_scale px/m over the map's floors and sloping
-## ground, north (-z) up: ground (sloping ground all of it), raised floors (with a dark rim where they drop), ramps,
-## low cover and tall walls. A storey's image leaves out the blocks starting more than storey_cut above its floor and
-## washes everything below its floor darker. Built on the CPU (no renderer needed); nothing on the range. The images go
-## with this object: drop it with the session.
+## ground, north (-z) up: ground (sloping ground all of it, as its own small picture under the layers: `ground`), raised
+## floors (with a dark rim where they drop), ramps, low cover and tall walls; ground tinted by what it is and greenery
+## green (FM2). A storey's image leaves out the blocks starting more than storey_cut above its floor and washes
+## everything below its floor darker. Built on the CPU (no renderer needed); nothing on the range. The images go with
+## this object: drop it with the session.
 
 ## A pixel's middle, from its corner.
 const HALF := 0.5
+## Half of the square root of two (a unit step towards the north-west on both axes), and the least height span (m) the
+## relief divides by.
+const SQRT_HALF := 0.70710678
+const RELIEF_FLAT := 0.001
 
 ## What a block draws as.
 enum Look { GROUND, RAISED, RAMP, LOW, TALL }
@@ -21,6 +26,11 @@ var floors: PackedFloat64Array = PackedFloat64Array()
 ## too big for max_layer_side).
 var origin: Vector2 = Vector2.ZERO
 var scale: float = 0.0
+## Sloping ground's own picture (FM2), one pixel about every relief_cell m, tinted and shaded, and where it lies on
+## every layer (layer px): a layer leaves it clear (washed on a storey over it), and the panel draws it under the layer,
+## smoothed by the GPU. Null without terrain.
+var ground: Image = null
+var ground_rect: Rect2 = Rect2()
 
 var _pick: float = 0.0
 
@@ -49,6 +59,12 @@ static func build(map: MapData, cfg: MinimapConfig) -> MinimapField:
 			clampi(ceili(bounds.size.y * f.scale), 1, cfg.max_layer_side))
 	f.floors = map.storeys.duplicate() if not map.storeys.is_empty() else PackedFloat64Array([0.0])
 	var bases := _bases(map, cfg)
+	var t := map.terrain
+	if t != null:
+		var step := _relief_step(t, cfg)
+		f.ground = _terrain_image(t, step, cfg)
+		var metres := Vector2(t.ground_cols, t.ground_rows) * t.ground_cell
+		f.ground_rect = Rect2(f.pixel_of(t.min_x, t.min_z), metres * f.scale)
 	for i in f.floors.size():
 		f.layers.append(f._draw(map, cfg, i, bases, side))
 	return f
@@ -112,21 +128,105 @@ func _draw(map: MapData, cfg: MinimapConfig, index: int, bases: PackedFloat64Arr
 			level_floors.append(b)
 		pieces.append(p)
 	pieces.sort_custom(_drawn_before)
-	var colours := _palette(cfg, false)
-	var washed := _palette(cfg, true)
+	var colours := _palette(cfg)
 	var img := Image.create_empty(side.x, side.y, false, Image.FORMAT_RGBA8)
 	var t := map.terrain
-	if t != null:
-		# Sloping ground is all ground: walkable everywhere, under whatever stands on it.
-		_fill(img, _rect(t.min_x, t.min_z, t.max_x(), t.max_z()), washed[Look.GROUND] if has_below
-				else colours[Look.GROUND])
+	if t != null and has_below:
+		# Sloping ground is all ground, drawn under the layer (`ground`); a storey over it washes it darker.
+		_fill(img, _rect(t.min_x, t.min_z, t.max_x(), t.max_z()), cfg.below_storey_colour)
 	var edge := maxi(roundi(cfg.drop_edge * scale), 1)
 	for p in pieces:
-		_fill(img, _block_rect(p.block), washed[p.look] if p.below else colours[p.look])
+		var c := _colour_of(p.block, p.look, colours, cfg)
+		_fill(img, _block_rect(p.block), c.blend(cfg.below_storey_colour) if p.below else c)
 		if p.look == Look.RAISED and not p.below:
 			_draw_rim(img, p, level_floors, edge, cfg)
 	_draw_bushes(img, map.foliage, cfg.bush_colour)
 	return img
+
+
+## How many ground squares of `t` one sample of its picture takes (about relief_cell m).
+static func _relief_step(t: TerrainGrid, cfg: MinimapConfig) -> int:
+	return maxi(roundi(cfg.relief_cell / maxf(t.ground_cell, RELIEF_FLAT)), 1)
+
+
+## Sloping ground `t`'s picture (FM2): one pixel every `step` ground squares, in its surface's tint (ground_tint_share
+## of it), lighter where it faces the north-west light and where it stands high, darker where it faces away, worked out
+## on the squares' corners. Small: the panels smooth it up as they draw it.
+static func _terrain_image(t: TerrainGrid, step: int, cfg: MinimapConfig) -> Image:
+	# The last column and row take what is left when the squares don't divide by `step`, so the picture covers it all.
+	var cols := maxi(ceili(float(t.ground_cols) / step), 1)
+	var rows := maxi(ceili(float(t.ground_rows) / step), 1)
+	var small := Image.create_empty(cols, rows, false, Image.FORMAT_RGBA8)
+	if t.ground_cols < 1 or t.ground_rows < 1:
+		small.fill(cfg.ground_colour)
+		return small
+	# The squares' corners: the terrain's own vertices where a square is a cell.
+	var same := t.ground_cols == t.cols and t.ground_rows == t.rows
+	var corners := t.heights if same else t.ground_lattice()
+	var lo := INF
+	var hi := -INF
+	for h in corners:
+		lo = minf(lo, h)
+		hi = maxf(hi, h)
+	var span := maxf(hi - lo, RELIEF_FLAT)
+	var w := t.ground_cols + 1
+	for j in rows:
+		var z0 := j * step
+		var z1 := mini(z0 + step, t.ground_rows)
+		for i in cols:
+			var x0 := i * step
+			var x1 := mini(x0 + step, t.ground_cols)
+			var h00 := corners[z0 * w + x0]
+			var h10 := corners[z0 * w + x1]
+			var h01 := corners[z1 * w + x0]
+			var h11 := corners[z1 * w + x1]
+			var dx := (h10 + h11 - h00 - h01) * 0.5 / ((x1 - x0) * t.ground_cell)
+			var dz := (h01 + h11 - h00 - h10) * 0.5 / ((z1 - z0) * t.ground_cell)
+			# Rising towards the south-east faces the north-west light.
+			var lit := clampf((dx + dz) * SQRT_HALF / cfg.relief_full, -1.0, 1.0)
+			var middle := ((z0 + z1) / 2) * t.ground_cols + (x0 + x1) / 2
+			var c := _tinted(cfg.ground_colour, _surface_tint(t.surfaces[middle], cfg), cfg)
+			c = c.lightened(cfg.relief_shade * lit) if lit > 0.0 else c.darkened(-cfg.relief_shade * lit)
+			c = c.lightened(cfg.relief_height * ((h00 + h10 + h01 + h11) * 0.25 - lo) / span)
+			small.set_pixel(i, j, c)
+	return small
+
+
+## Block `b`'s colour as `look` (from `colours`, the looks' palette): ground and raised floors take their tint
+## (ground_tint_share of the floor's own colour, else of its surface's), and greenery its greens (FM2).
+static func _colour_of(b: MapData.Block, look: Look, colours: PackedColorArray, cfg: MinimapConfig) -> Color:
+	var c := colours[look]
+	if look == Look.GROUND or look == Look.RAISED:
+		return _tinted(c, Color(b.colour, 1.0) if b.colour.a > 0.0 else _surface_tint(b.surface, cfg), cfg)
+	if cfg.green_kinds.has(b.kind):
+		if look == Look.LOW:
+			return cfg.green_low_colour
+		if look == Look.TALL:
+			return cfg.green_tall_colour
+	return c
+
+
+## `c` with ground_tint_share of `tint` (none for a clear tint), keeping its alpha.
+static func _tinted(c: Color, tint: Color, cfg: MinimapConfig) -> Color:
+	if tint.a <= 0.0:
+		return c
+	return Color(c.lerp(tint, cfg.ground_tint_share), c.a)
+
+
+## A RayHit.Surface's tint, clear for concrete, metal and none (the plain ground).
+static func _surface_tint(surface: int, cfg: MinimapConfig) -> Color:
+	match surface:
+		RayHit.Surface.GRASS:
+			return cfg.grass_tint
+		RayHit.Surface.LEAVES:
+			return cfg.leaves_tint
+		RayHit.Surface.EARTH:
+			return cfg.earth_tint
+		RayHit.Surface.GRAVEL:
+			return cfg.gravel_tint
+		RayHit.Surface.WOOD:
+			return cfg.wood_tint
+	return Color(0.0, 0.0, 0.0, 0.0)
 
 
 ## Each of `bushes` as a disc of its radius in `colour`: every pixel whose middle is inside it, at least the pixel under
@@ -271,11 +371,6 @@ static func _drawn_before(a: Piece, b: Piece) -> bool:
 	return a.order < b.order
 
 
-## Each look's colour, washed with below_storey_colour when `washed`.
-static func _palette(cfg: MinimapConfig, washed: bool) -> PackedColorArray:
-	var out := PackedColorArray([cfg.ground_colour, cfg.raised_colour, cfg.ramp_colour, cfg.low_colour,
-			cfg.tall_colour])
-	if washed:
-		for i in out.size():
-			out[i] = out[i].blend(cfg.below_storey_colour)
-	return out
+## Each look's colour.
+static func _palette(cfg: MinimapConfig) -> PackedColorArray:
+	return PackedColorArray([cfg.ground_colour, cfg.raised_colour, cfg.ramp_colour, cfg.low_colour, cfg.tall_colour])
