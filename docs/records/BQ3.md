@@ -25,8 +25,9 @@ change stays only if bots with it win more rounds against bots without it.
 - **Team radio** (`BotRadio`): a bot that sees an enemy afresh tells its teammates within `share_radius` (35 m Normal,
   45 m Hard) after `share_delay` (1-1.6 s Normal, 0.5-0.9 s Hard), each taking it as a teammate's call heard there,
   unless it is fighting, sees someone, or has fresher news.
-- **Pressing a lead** (`BotWorld.pressing`): a team `BotConfig.press_margin` (2) or more players ahead in an
-  Elimination round stops holding its lane and hunts.
+- **Pressing a lead** (`BotWorld.pressing`): a team that has put `BotConfig.press_margin` (2) or more of the other
+  team out than it has lost, in an Elimination round, stops holding its lane and hunts (counted on eliminations, so
+  uneven sides alone never press; with even sides, as in the A/B, the same as counting heads).
 - **The careful last bot** (`BotWorld.careful_last`): the last of a team walks and clears corners as near the enemy.
 - All on Normal and Hard; Easy stays the fair fight to learn on. Normal keeps the levels' identity (TL1): it does not
   get Hard's held angles, corner slicing or pairs.
@@ -64,6 +65,9 @@ change stays only if bots with it win more rounds against bots without it.
 - `test_bq3_team_play` (the radio told near and late, not to the far, the fighting, the enemy or the caller; a caller
   out says nothing; Easy has none; pressing and the careful last bot in Elimination only; a knee for each burst and up
   between; Easy keeps sidestepping), `test_tl1_qa` and `test_bot_difficulty` unchanged in what they pin.
+- Older tests it touched: `test_bot_angles` (the watcher there is the last of its team, so a careful last bot looks at
+  corners too), `test_bots`' warm-tick check (now counts the event pool's documented growth to a new busiest tick,
+  which the new play reached inside the measured window; nothing else allocates).
 
 ## Known issues left
 
