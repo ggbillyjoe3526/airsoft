@@ -134,10 +134,12 @@ still blocked a few bot checks. Each now passes the railings' boxes as sight, co
 
 Tests: `tests/unit/test_bp2_railings.gd` (4) and QA's `test_bp2_railings_qa.gd` (4), each with a railing case and a
 wall case; every switch but cover's and the flash's fails a test when reverted (QA's mutation check). QA: Pass
-(advisory: bombs and their arcs still meet a railing's box, as the wiki says). Performance: Pass (each change casts the
-other ray at the same call site; no allocation; maps without railings take the plain cast). Critic: Accept 8/8 once
-these were in. 378 bot, sound, ping, railings and BP2 tests passed before the critic's three. Default taken: glass still muffles, still stops a held angle and a crossfire shot (it stops BBs), and
-still stops a ping's view (KNOWN_ISSUES, can wait).
+(advisory: bombs and their arcs still meet a railing's box, as the wiki says). Performance: Pass (each change casts
+the other ray at the same call site; no allocation; maps without railings take the plain cast). Critic: Accept 8/8
+once these were in. 378 bot, sound, ping, railings and BP2 tests passed before the critic's three.
+
+Default taken: glass still muffles, still stops a held angle and a crossfire shot (it stops BBs), and still stops a
+ping's view (KNOWN_ISSUES, can wait).
 
 ## Known issues left
 
