@@ -1,6 +1,8 @@
 extends GutTest
 ## BP2 (the 0.1 Dev 2 bug pass): one test or more for each bug it fixed.
 
+const DT := 1.0 / 60.0
+
 
 func _wheel_input() -> PlayerInput:
 	var input := PlayerInput.new()
@@ -90,3 +92,44 @@ func test_every_maps_open_doors_fold_back_in_sight_not_inside_a_wall() -> void:
 				var inside := AABB(b.center - b.size * 0.5 + Vector3.ONE * 0.01, b.size - Vector3.ONE * 0.02)
 				assert_false(inside.has_point(leaf.origin),
 						"%s door %d's open leaf %d is inside a %s block" % [id, j / 2, j % 2, b.kind])
+
+
+func test_on_the_range_a_bomb_taken_in_hand_stays_there_and_a_pull_throws_it() -> void:
+	var tuning := SimTuning.new()
+	var w := BoxWorld.new(tuning.body)
+	w.add_floor(60.0, 30.0)
+	var ends: Array[MapEnd] = []
+	for e in 2:
+		var end := MapEnd.new()
+		end.spawns.append(SpawnPoint.new(Vector3(-10.0 if e == 0 else 10.0, 0.0, 0.0), 0.0))
+		end.dead_zone.append(SpawnPoint.new(Vector3(-25.0 if e == 0 else 25.0, 0.0, 10.0), 0.0))
+		ends.append(end)
+	var sim := Simulation.new(tuning, w, w.mover(), ends, -10.0)
+	var s := GameState.new(5, tuning)
+	s.round_state.practice = true
+	s.characters.append(Character.new(0, 0, Vector3.ZERO, 0.0, ReplicaStats.default_loadout()))
+	sim.start_match(s)
+	var you := s.characters[0]
+	var cmd := PlayerCommand.new()
+	cmd.reset(you.yaw, you.pitch)
+	var cmds: Array[PlayerCommand] = [cmd]
+	for t in 30:
+		sim.step(s, cmds, DT)
+	var smokes := you.grenades.smoke
+	cmd.ready_grenade = Grenade.Kind.SMOKE
+	sim.step(s, cmds, DT)
+	cmd.ready_grenade = Grenade.Kind.NONE
+	sim.step(s, cmds, DT)
+	assert_eq(you.grenades.readied, Grenade.Kind.SMOKE, "the range's restock leaves the bomb in hand")
+	cmd.fire = true
+	sim.step(s, cmds, DT)
+	cmd.fire = false
+	assert_true(Grenades.throwing(you), "the pull throws it")
+	for t in roundi((tuning.grenades.windup + tuning.grenades.recover) / DT) + 2:
+		sim.step(s, cmds, DT)
+	assert_eq(you.grenades.smoke, smokes, "and the range gives it back")
+	var thrown := 0
+	for g in s.grenades:
+		if g.active:
+			thrown += 1
+	assert_eq(thrown, 1, "the smoke is out")
