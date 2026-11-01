@@ -306,6 +306,13 @@ func commit() -> void:
 		_rename(_edit.text)
 
 
+## Keeps the name typed in an open rename without drawing anything again: for the page being freed, where `commit` may
+## do nothing (out of the tree).
+func keep_typed() -> void:
+	if mode == Mode.RENAMING and is_instance_valid(_edit):
+		saved.rename(saved.current, _edit.text)
+
+
 func _remove_carried() -> void:
 	saved.remove(saved.current)
 	_set_mode(Mode.NORMAL)

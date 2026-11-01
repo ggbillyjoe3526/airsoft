@@ -98,10 +98,20 @@ func _exit_tree() -> void:
 		saved.changed.disconnect(_on_changed)
 
 
+## Quitting or freed with a rename open keeps the name typed, then saves: the window's close while in the tree (as
+## `close`), the page's freeing without redrawing it (none of it is drawn again).
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_PREDELETE:
-		if saved != null:
-			saved.save_if_dirty(save_path)
+		if saved == null:
+			return
+		if _strip != null:
+			if what == NOTIFICATION_WM_CLOSE_REQUEST:
+				_strip.commit()
+			else:
+				if saved.changed.is_connected(_on_changed):
+					saved.changed.disconnect(_on_changed)
+				_strip.keep_typed()
+		saved.save_if_dirty(save_path)
 
 
 func strip() -> LoadoutStrip:
