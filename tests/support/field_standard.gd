@@ -83,7 +83,7 @@ const EXCEPTIONS: Dictionary[String, Dictionary] = {
 	"street": {
 		"sightline": 82.0,
 		"sightline_reason": "diagonals across the lanes over the front gardens' railings, the low walls and parked cars, "
-				+ "up to about 80 m (car park B to the Corner green): each lane's own lines are those of the owner's "
+				+ "up to about 80 m (car park B to the Lower green): each lane's own lines are those of the owner's "
 				+ "concept 3 (2026-11-01, left 58 m, Path 54 m, right 60 m); a BB does not carry that far and bots see "
 				+ "55 m (ST1)",
 		"flag_head_start": 1.3,

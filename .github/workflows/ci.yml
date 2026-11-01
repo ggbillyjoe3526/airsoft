@@ -231,9 +231,8 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-  # The outdoor fields' guards: Woodland at 5v5 by night, 50 to 70 s a match headless, tests/guards/
-  # test_woodland_guards.gd in five jobs of 8 or 16 matches (a test name's part picks them), and The Street's (ST1),
-  # tests/guards/test_street_guards.gd, in three.
+  # The night guards: Woodland at 5v5, 50 to 70 s a match headless, tests/guards/test_woodland_guards.gd in five jobs
+  # of 8 or 16 matches (a test name's part picks them).
   night-guards:
     name: Night match guards, ${{ matrix.part.name }}
     runs-on: ubuntu-latest
@@ -247,9 +246,6 @@ jobs:
           - { name: "Woodland, Attack / Defend at Normal", file: test_woodland_guards, test: attack_defend_at_normal, log: night-guards-3 }
           - { name: "Woodland, Attack / Defend at Easy", file: test_woodland_guards, test: attack_defend_at_easy, log: night-guards-4 }
           - { name: "Woodland, both modes at Hard", file: test_woodland_guards, test: at_hard, log: night-guards-5 }
-          - { name: "The Street, Elimination at Normal", file: test_street_guards, test: elimination_at_normal, log: street-guards-1 }
-          - { name: "The Street, Attack / Defend at Normal", file: test_street_guards, test: attack_defend_at_normal, log: street-guards-2 }
-          - { name: "The Street, at night at Easy and Hard", file: test_street_guards, test: at_night, log: street-guards-3 }
     steps:
       - uses: actions/checkout@v6
 
@@ -260,6 +256,41 @@ jobs:
 
       - name: Night match guards (tests/guards/${{ matrix.part.file }}.gd, ${{ matrix.part.name }})
         run: tools/match_guards.sh ${{ matrix.part.file }} ${{ matrix.part.test }}
+        env:
+          GUARDS_LOG: ${{ matrix.part.log }}.log
+
+      - name: Keep the log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.part.log }}-log
+          path: ${{ matrix.part.log }}.log
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # The Street's guards (ST1): 5v5 by day at Normal and by night at Easy and Hard, tests/guards/test_street_guards.gd
+  # in three jobs of 8 or 16 matches (a test name's part picks them).
+  street-guards:
+    name: Street match guards, ${{ matrix.part.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        part:
+          - { name: "Elimination by day at Normal", test: elimination_at_normal, log: street-guards-1 }
+          - { name: "Attack / Defend by day at Normal", test: attack_defend_at_normal, log: street-guards-2 }
+          - { name: "both modes at night at Easy and Hard", test: at_night, log: street-guards-3 }
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/setup-godot
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          status: ${{ env.GODOT_STATUS }}
+
+      - name: Street match guards (tests/guards/test_street_guards.gd, ${{ matrix.part.name }})
+        run: tools/match_guards.sh test_street_guards ${{ matrix.part.test }}
         env:
           GUARDS_LOG: ${{ matrix.part.log }}.log
 

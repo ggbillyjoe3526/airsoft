@@ -111,7 +111,7 @@ the north end and attackers on the Bottom street at the south. Three lanes run b
 
 - **The left road** behind the west terrace's back gardens: parking bays, a van, roadworks and a removal lorry break
   up its long view.
-- **The Path** down the middle, between the fronts of the two terraces and their railed front gardens. Most front
+- **The Path** down the middle, between the fronts of the two terraces and their railed front gardens (the West and East gardens). Most front
   gates are shut; three are open, each a pocket to hold. It steps sideways at the Green corner and the Path kink.
 - **The back lane** behind the east terrace, with an electricity kiosk, a van, a bin store, bins and a skip, and **the
   right road** beyond the old works, with a delivery jam halfway down.
@@ -128,7 +128,8 @@ terrace), **the arch** under the arch building, and the open **Field** by the de
 - **Night** is the Time of day setting's (day by default): every street lamp lights a pool of the road under it.
 - **Attack / Defend** puts flag **A** in the House and flag **B** in the car park ([Modes](Modes#attack--defend)); in
   Elimination's overtime the flag stands on the Path by the Green corner. Rounds last 3 minutes.
-- **For now** its cars, bins, trees, railings and lamps are plain coloured blocks; free CC0 models replace them next.
+- **Plain blocks for now:** its cars, bins, trees, railings and lamps are coloured blocks of the size they stop a BB
+  at ([Roadmap](Roadmap)).
 
 ### Areas
 
