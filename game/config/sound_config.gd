@@ -126,10 +126,12 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 @export var max_distance: float = 60.0
 ## Others' shots and their power parts carry further (owner, 2026-11-01: bots' gunfire was lost; AU1): full level within
 ## shot_unit_size (m), falling away out to shot_reach (m), a silenced replica's reach scaled as the minimap hears it
-## (MinimapHearing.heard_scale). The voices' own cap (AudioStreamPlayer3D.max_db) keeps a shot next to you no louder
-## than your own.
+## (MinimapHearing.heard_scale). Up close a shot and its power part are capped at their own level
+## (AudioStreamPlayer3D.max_db), so a bot's replica beside you sounds as loud as yours, never louder; every other
+## sound of another's is capped at field_max_db (Godot's default).
 @export var shot_unit_size: float = 10.0
 @export var shot_reach: float = 120.0
+@export var field_max_db: float = 3.0
 ## Others' footsteps (and magazine rattle) only within step_reach (m) of your ears, about as far as bots hear a sprint,
 ## and at most step_limit of them start within step_window (s): six sprinters stay readable (AUDIO.footsteps).
 @export var step_reach: float = 22.0

@@ -79,6 +79,9 @@ func test_a_shot_and_its_power_part_carry_further_than_a_step() -> void:
 		assert_eq(v.max_distance, cfg.shot_reach, "heard out to shot_reach")
 	assert_eq(step.unit_size, cfg.unit_size, "a step keeps the field's distance")
 	assert_eq(step.max_distance, cfg.step_reach)
+	assert_almost_eq(shot.max_db, shot.volume_db, 1e-3, "a shot is capped at its own level")
+	assert_almost_eq(power.max_db, power.volume_db, 1e-3, "so is its power part")
+	assert_eq(step.max_db, cfg.field_max_db, "a step keeps the field's cap")
 	assert_almost_eq(power.volume_db, linear_to_db(cfg.power_gains[&"electric"]), 1e-3, "the motor at its own level")
 	assert_almost_eq(shot.volume_db, linear_to_db(cfg.shot_gain), 1e-3, "the shot's level is unchanged")
 
@@ -128,6 +131,32 @@ func test_a_bot_shot_at_30_m_is_far_louder_than_before() -> void:
 	assert_gt(linear_to_db(now) - linear_to_db(before), 10.0, "over 10 dB louder at 30 m")
 	var near := _heard(linear_to_db(cfg.shot_gain), cfg.shot_unit_size, cfg.shot_reach, max_db, 1.0)
 	assert_lte(linear_to_db(near), max_db, "a shot next to you no louder than the voices' cap")
+
+
+func test_a_bot_s_motor_is_heard_louder_near_and_mid_range_and_never_louder_than_yours() -> void:
+	var own_db := linear_to_db(cfg.power_gains[&"electric"])
+	var old_db := linear_to_db(cfg.shot_gain)
+	for d: float in [5.0, 20.0]:
+		var now := _heard(own_db, cfg.shot_unit_size, cfg.shot_reach, own_db, d)
+		var before := _heard(old_db, cfg.unit_size, cfg.max_distance, cfg.field_max_db, d)
+		assert_gt(linear_to_db(now) - linear_to_db(before), own_db - old_db - 0.5, "at %.0f m: the whole lift" % d)
+		assert_lte(linear_to_db(now), own_db + 1e-3, "at %.0f m: no louder than your own" % d)
+
+
+func test_a_voice_reused_from_a_shot_for_a_step_takes_the_field_s_cap() -> void:
+	_enemy_at(5.0)
+	_shot_and_step()
+	for v in audio._field:
+		v.stop()
+	state.events.clear()
+	var step := state.events.add(GameEvent.Kind.FOOTSTEP)
+	step.actor = enemy.id
+	step.value = GameEvent.Footstep.RUN
+	step.position = enemy.position
+	audio.on_tick(state, you.id, you)
+	for v in audio._field:
+		if v.playing:
+			assert_eq(v.max_db, cfg.field_max_db, "no shot's cap left on the voice")
 
 
 func test_every_power_source_is_louder_than_before() -> void:

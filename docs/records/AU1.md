@@ -1,12 +1,13 @@
 # AU1 · Bots' gunfire heard, ambience quieter
 
-**Review:** 1 attempt · critic pending · qa pending · performance pending
+**Review:** 2 attempts · critic pending · qa pending · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-01 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-01 | 1 | Opus 5.5 (build thread) | ✓ (targeted) | 7/8 Retry | AC2: a bot's lifted motor held at the old level up close by the 3 dB voice cap |
+| 2026-11-01 | 2 | Opus 5.5 (build thread) | pending | pending | – |
 
 ## Decisions
 
@@ -15,8 +16,10 @@
   60 m put a shot 30 m away about 23 dB under your own, and cut it entirely past 60 m (most of Woodland and The
   Street). The rendered motor sits about 11 dB under its shot, the gas 4 dB and the spring 7 dB.
 - **Shots get their own distance: full level within 10 m, heard to 120 m.** At 30 m that is about 11 dB louder than
-  before; the voices' 3 dB cap (AudioStreamPlayer3D.max_db, left at Godot's default) keeps a bot beside you no louder
-  than your own shot. Other sounds keep 4 m and 60 m, so footsteps and impacts still read as near.
+  before. Up close each shot and power part is capped at its own level (AudioStreamPlayer3D.max_db set per play), so a
+  bot's replica beside you sounds exactly as loud as yours, never louder; the critic's attempt 1 found the old fixed
+  3 dB cap held a bot's lifted motor at its old level out to about 35 m. Every other sound keeps the 3 dB cap
+  (field_max_db), 4 m and 60 m, so footsteps and impacts still read as near.
 - **A silenced shot carries its replica's heard_scale of 120 m** (half), as the minimap hears it.
 - **Power parts by source: motor 4.0, gas 2.2, spring 2.5** (all 1.4 before): each lifted 4 to 9 dB, the quiet motor
   most, so it sits a few dB under its shot.

@@ -569,6 +569,8 @@ func _play(cue: StringName, at: Vector3, own: bool, gain: float, kind: Kind, bus
 		v.volume_db = db if open else db + linear_to_db(SoundOcclusion.level_for(bus, share, _cfg))
 		v.pitch_scale = scale
 		v.unit_size = _unit_size[kind]
+		# A shot's cap is its own level, so a bot's shot beside you is as loud as yours; the rest keep the field's.
+		v.max_db = v.volume_db if kind == Kind.SHOT else _cfg.field_max_db
 		v.max_distance = far
 		v.bus = bus if open else SoundOcclusion.bus_for(bus, share, _cfg)
 		v.global_position = at
