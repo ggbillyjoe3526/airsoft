@@ -8,6 +8,10 @@ extends RefCounted
 ## replica is drawn again (a holstered one stays away; a torch that was on comes back on). Meanwhile the command's
 ## trigger, sights, reload, switch, selector and dial are let go (`throwing_command`). A hit drops the throw: the bomb
 ## is kept.
+## A bomb can also be taken in hand first (MC1: the mouse wheel steps from the replicas onto the bombs left): the
+## command's `ready_grenade` puts the replica down as a throw does and holds the bomb (Hand.readied) until a trigger pull
+## throws it (`ready_command`), after which the replica comes back up as after any throw. A slot, the holster or a
+## reload puts the bomb back and the armament does as asked.
 ## In the air a bomb falls and bounces off the level (GRENADE_BOUNCE), slides and rolls, and settles. A flash goes bang
 ## at its fuse (FLASH_BANG) and dazzles everyone in play with a clear line from the eyes to it, by distance and by how
 ## directly they look (DAZZLED; Character.dazzle_left), the thrower and its team too. A smoke pops at its fuse
@@ -41,6 +45,13 @@ class Hand:
 	## The replica was holstered, and its torch on, when the throw began: put back as they were after it.
 	var was_holstered: bool = false
 	var torch_was_on: bool = false
+	## The bomb in hand waiting for a trigger pull (MC1; NONE: none), and the replica's holster and torch as they were
+	## when it was taken (the throw puts them back so).
+	var readied: Grenade.Kind = Grenade.Kind.NONE
+	var ready_was_holstered: bool = false
+	var ready_torch_was_on: bool = false
+	## The trigger last tick while a bomb is in hand: a pull, not a held trigger, throws it.
+	var trigger_was_down: bool = false
 
 	## Left of `bomb` now.
 	func left(bomb: Grenade.Kind) -> int:
@@ -63,8 +74,9 @@ class Hand:
 		flash = carried_flash
 		stop()
 
-	## No throw under way (a hit, a respawn).
+	## No throw under way and no bomb in hand (a hit, a respawn).
 	func stop() -> void:
+		readied = Grenade.Kind.NONE
 		throwing = Grenade.Kind.NONE
 		windup_left = 0.0
 		recover_left = 0.0
@@ -112,6 +124,43 @@ static func throwing_command(cmd: PlayerCommand, out: PlayerCommand) -> PlayerCo
 	return out
 
 
+## The command `c` (in play) follows for a bomb in hand this tick, before `press` (MC1). `cmd.ready_grenade` takes one
+## of that kind in hand when `c` has one left and isn't throwing or vaulting: the replica goes down as for a throw
+## (Armament.put_down). With one in hand, a slot, the holster or a reload (or none of that kind left) puts it back and
+## `cmd` goes on as it came, for the armament to draw or holster; else a trigger pull throws it (throw_grenade, unless
+## the command already throws one) and the trigger and sights are let go, written into `out`.
+static func ready_command(c: Character, cmd: PlayerCommand, out: PlayerCommand) -> PlayerCommand:
+	var hand := c.grenades
+	var want := cmd.ready_grenade
+	if want != Grenade.Kind.NONE and want != hand.readied and hand.throwing == Grenade.Kind.NONE \
+			and not c.vault.active and hand.left(want) > 0:
+		if hand.readied == Grenade.Kind.NONE:
+			hand.ready_was_holstered = c.armament.holstered
+			hand.ready_torch_was_on = c.torch_on
+			c.armament.put_down()
+		hand.readied = want
+		# a trigger held as the bomb comes into hand doesn't throw it
+		hand.trigger_was_down = cmd.fire
+	if hand.readied == Grenade.Kind.NONE:
+		return cmd
+	if cmd.switch_to >= 0 or cmd.holster or cmd.reload or hand.left(hand.readied) <= 0:
+		hand.readied = Grenade.Kind.NONE
+		return cmd
+	out.copy_from(cmd)
+	var pull := cmd.fire and not hand.trigger_was_down
+	hand.trigger_was_down = cmd.fire
+	if pull and out.throw_grenade == Grenade.Kind.NONE:
+		out.throw_grenade = hand.readied
+	out.fire = false
+	out.aim = false
+	return out
+
+
+## The bomb `c` holds in hand waiting for a trigger pull (MC1; NONE: none).
+static func in_hand(c: Character) -> Grenade.Kind:
+	return c.grenades.readied
+
+
 ## Whether `c` is throwing a bomb (from the pin to the redraw).
 static func throwing(c: Character) -> bool:
 	return c.grenades.throwing != Grenade.Kind.NONE
@@ -129,8 +178,11 @@ func press(c: Character, cmd: PlayerCommand, allowed: bool, pool: Array[Grenade]
 	hand.windup_left = cfg.windup
 	hand.recover_left = cfg.recover
 	hand.released = false
-	hand.was_holstered = c.armament.holstered
-	hand.torch_was_on = c.torch_on
+	# A bomb taken in hand first: the replica was put down then, and comes back as it was then.
+	var from_hand := hand.readied != Grenade.Kind.NONE
+	hand.was_holstered = hand.ready_was_holstered if from_hand else c.armament.holstered
+	hand.torch_was_on = hand.ready_torch_was_on if from_hand else c.torch_on
+	hand.readied = Grenade.Kind.NONE
 	c.armament.put_down()
 	var e := events.add(GameEvent.Kind.GRENADE_PIN)
 	e.actor = c.id
@@ -167,7 +219,8 @@ func step(state: GameState, dt: float, kill_y: float) -> void:
 	for c in state.characters:
 		if c.dazzle_left > 0.0:
 			c.dazzle_left = maxf(0.0, c.dazzle_left - dt)
-		if c.grenades.throwing != Grenade.Kind.NONE and not Elimination.is_in_play(c):
+		var busy := c.grenades.throwing != Grenade.Kind.NONE or c.grenades.readied != Grenade.Kind.NONE
+		if busy and not Elimination.is_in_play(c):
 			c.grenades.stop()
 	for i in state.grenades.size():
 		var g := state.grenades[i]
@@ -392,7 +445,8 @@ func _bang(g: Grenade, state: GameState) -> void:
 		if not Elimination.is_in_play(c):
 			continue
 		var eye := Lean.eye(c, _tuning.body, _tuning.hits)
-		if eye.distance_to(at) > cfg.flash_reach or _query.ray(eye, at, _hit):
+		# A flash dazzles through glass as light goes through it (BQ1).
+		if eye.distance_to(at) > cfg.flash_reach or _query.sight_ray(eye, at, _hit):
 			continue
 		var flat := cos(c.pitch)
 		var look := Vector3(-sin(c.yaw) * flat, sin(c.pitch), -cos(c.yaw) * flat)

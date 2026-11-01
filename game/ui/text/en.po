@@ -72,6 +72,12 @@ msgstr "Holstered"
 msgid "HUD_SMOKE"
 msgstr "Smoke %d"
 
+msgid "HUD_SMOKE_IN_HAND"
+msgstr "Smoke in hand"
+
+msgid "HUD_FLASH_IN_HAND"
+msgstr "Flash in hand"
+
 msgid "HUD_FLASH"
 msgstr "Flash %d"
 
@@ -184,6 +190,10 @@ msgstr "Orders wait for\nthe next round"
 # Go there (FM1) pinged at the sky, or out of reach.
 msgid "HUD_ORDER_NOWHERE"
 msgstr "Nowhere\nthere to go"
+
+# A Go there held with nothing happening for a while (BQ1): the squad goes back to the plan.
+msgid "HUD_ORDER_QUIET"
+msgstr "All quiet:\nback to the\nteam plan"
 
 msgid "HUD_CHIP_SEMI"
 msgstr "S"
@@ -994,6 +1004,12 @@ msgstr "Building the views"
 
 msgid "LOAD_START"
 msgstr "Starting the match"
+
+msgid "LOAD_READY"
+msgstr "Ready"
+
+msgid "LOAD_CONTINUE"
+msgstr "Continue"
 
 msgid "LOAD_PERCENT"
 msgstr "%d %%"
@@ -2096,8 +2112,8 @@ msgstr "Yes"
 msgid "WGY_NO"
 msgstr "No"
 
-msgid "HUD_SKIP_HOLD"
-msgstr "Hold to skip the round"
+msgid "HUD_SKIP_PRESS"
+msgstr "Press to skip the round"
 
 msgid "HUD_GRAPHICS_KICKER"
 msgstr "Graphics"
@@ -2647,6 +2663,12 @@ msgstr "Minimap"
 
 msgid "SETTINGS_MINIMAP_TURN"
 msgstr "Turn"
+
+msgid "SETTINGS_MINIMAP_ZOOM"
+msgstr "Zoom"
+
+msgid "SETTINGS_MINIMAP_ZOOM_NOTE"
+msgstr "How close the minimap shows the field: higher shows less of it, bigger."
 
 msgid "SETTINGS_MINIMAP_ROTATING"
 msgstr "Rotating"

@@ -6,7 +6,10 @@ right shows how many you have left.
 
 ## Throwing
 
-Press **Throw smoke** (G) or **Throw flash** (Y) ([Controls](Controls)). Your replica goes down while you pull the pin,
+Press **Throw smoke** (4) or **Throw flash** (5) ([Controls](Controls)) to throw at once. Or roll the mouse wheel past
+your replicas to take a bomb in hand: your replica goes down, the bomb shows in your hand, the panel says **SMOKE IN
+HAND** or **FLASH IN HAND** and the crosshair stays to throw by; a trigger pull throws it. Rolling on, or a replica key,
+reload or the holster, puts it back. Your replica goes down while you pull the pin,
 the bomb leaves your hand along your view, lofted a little, and your replica comes back up: under a second in all. You
 can't fire or aim while you throw, and a reload under way stops. Throwing on the run adds some of your own speed.
 

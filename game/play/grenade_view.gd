@@ -293,18 +293,25 @@ func _draw_wash(state: GameState, eyes: Character, eye: Vector3) -> void:
 	_wash.visible = true
 
 
-## The bomb in `eyes`' hand while its pin comes out, before their eyes at `eye`.
+## The bomb in `eyes`' hand while its pin comes out, or while it waits in hand for a trigger pull (MC1), before their
+## eyes at `eye`.
 func _draw_held(eyes: Character, eye: Vector3) -> void:
 	var hand := eyes.grenades if eyes != null else null
-	if hand == null or hand.throwing == Grenade.Kind.NONE or hand.released:
+	var kind := Grenade.Kind.NONE
+	var ready := 0.0
+	if hand != null and hand.throwing != Grenade.Kind.NONE and not hand.released:
+		kind = hand.throwing
+		ready = 1.0 - clampf(hand.windup_left / maxf(_cfg.windup, 0.001), 0.0, 1.0)
+	elif hand != null and hand.readied != Grenade.Kind.NONE and Elimination.is_in_play(eyes):
+		kind = hand.readied
+	if kind == Grenade.Kind.NONE:
 		if _held.visible:
 			_held.visible = false
 		return
 	var view := Basis.from_euler(Vector3(eyes.pitch, eyes.yaw, 0.0))
-	var ready := 1.0 - clampf(hand.windup_left / maxf(_cfg.windup, 0.001), 0.0, 1.0)
 	var tip := view * Basis(Vector3.FORWARD, HELD_TIP.x) * Basis(Vector3.RIGHT, HELD_TIP.y)
 	_held.transform = Transform3D(tip, eye + view * (HELD_AT + Vector3(0.0, HELD_LIFT * ready, 0.0)))
-	var paint := _bodies[clampi(hand.throwing, 0, _bodies.size() - 1)]
+	var paint := _bodies[clampi(kind, 0, _bodies.size() - 1)]
 	if _held.material_override != paint:
 		_held.material_override = paint
 	_held.visible = true

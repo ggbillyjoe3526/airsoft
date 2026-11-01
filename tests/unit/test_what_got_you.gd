@@ -10,8 +10,16 @@ var session: PlaySession = null
 
 
 func after_each() -> void:
-	Input.action_release(&"jump")
+	Input.action_release(&"fire")
 	get_tree().paused = false
+
+
+## A press of the left mouse button (Fire's default).
+static func _click() -> InputEventMouseButton:
+	var e := InputEventMouseButton.new()
+	e.button_index = MOUSE_BUTTON_LEFT
+	e.pressed = true
+	return e
 
 
 func _facts(shooter_at: Vector3, yaw: float) -> HitFacts:
@@ -139,19 +147,17 @@ func test_auto_shows_the_card_against_pro_bots_and_off_never() -> void:
 	assert_null(session.hud().what_got_you())
 
 
-func test_out_hold_jump_to_skip_the_round_at_speed_with_the_hud_hidden() -> void:
+func test_out_a_click_skips_the_round_with_the_hud_hidden() -> void:
 	session = _session(Settings.WhatGotYou.OFF)
 	await wait_physics_frames(2)
 	assert_false(session.can_skip(), "not while you are in play")
 	session.player.status = Character.Status.OUT
 	assert_true(session.can_skip())
-	session._follow_skip(0.0)
+	session._follow_skip()
 	assert_true(session.hud().skip_hint_shown())
 	session._input.active = true
-	Input.action_press(&"jump")
-	session._follow_skip(0.3)
-	assert_false(session.skipping(), "held, but not long enough yet")
-	session._follow_skip(PlayTuning.new().skip_hold)
+	session._follow_skip()
+	session._unhandled_input(_click())
 	assert_true(session.skipping())
 	assert_false(session.hud().visible, "the HUD hides")
 	assert_false(session.hud().skip_hint_shown())
@@ -166,20 +172,18 @@ func test_out_hold_jump_to_skip_the_round_at_speed_with_the_hud_hidden() -> void
 	session.player.status = Character.Status.ALIVE
 
 
-func test_jump_held_through_the_hit_does_not_skip_until_pressed_again() -> void:
+func test_the_trigger_held_through_the_hit_does_not_skip_until_pressed_again() -> void:
 	session = _session(Settings.WhatGotYou.OFF)
 	await wait_physics_frames(2)
 	session._input.active = true
-	Input.action_press(&"jump")
+	Input.action_press(&"fire")
 	session.player.status = Character.Status.OUT
-	session._follow_skip(PlayTuning.new().skip_hold * 2.0)
-	session._follow_skip(PlayTuning.new().skip_hold * 2.0)
+	session._follow_skip()
+	session._unhandled_input(_click())
 	assert_false(session.skipping(), "held from before you were out")
-	Input.action_release(&"jump")
-	session._follow_skip(0.0)
-	Input.action_press(&"jump")
-	session._follow_skip(0.0)
-	session._follow_skip(PlayTuning.new().skip_hold)
+	Input.action_release(&"fire")
+	session._follow_skip()
+	session._unhandled_input(_click())
 	assert_true(session.skipping(), "a fresh press skips")
 	session._stop_skip()
 	session._input.active = false

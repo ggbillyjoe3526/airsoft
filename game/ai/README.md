@@ -7,7 +7,8 @@ and its `BotSkill` (`game/config/bot_tuning.tres`).
 
 ## What a bot knows
 
-Only what it could: who it sees (a 120° view, 40 m, through no wall, BB or body of someone already out; at night no
+Only what it could: who it sees (a 120° view, 40 m, through no wall, BB or body of someone already out, but through
+glass, which stops its BBs, BQ1; at night no
 further than the light round them lets them be made out: 40 m lit, 25 m in the open, 10 m under the trees, 15 m
 indoors, `NightField`; inside a lit torch's beam within its reach, 40 m, and anyone whose lit torch points within 60°
 of it from as far), anyone within 2.5 m, and what it hears (gunfire, running and sprinting feet, landings, vaults,
@@ -22,8 +23,9 @@ Each round the `RoundPlanner` gives each team a plan (split over the map's lanes
 each bot a lane to walk from its end, holding at its points and keeping with its team; past the lane it hunts the
 sectors its team checked longest ago. In sight of an enemy it fights (strafing), or first gets behind close crouch
 cover and peeks over it, or round a tall corner by leaning; it never fires with a teammate in the line, or anywhere a
-teammate could run to before the BBs pass (a sprinting bot also round its route's corners). Shot at, reloading or
-empty, it takes cover. With the enemy gone it searches where it was last seen or heard, sometimes flanking. At night
+teammate could run to before the BBs pass (a sprinting bot also round its route's corners). Seeing someone with no
+shot at them (through glass or leaves) for `no_shot_move_after`, it goes round to them as to someone out of sight
+(BQ1). Shot at, reloading or empty, it takes cover. With the enemy gone it searches where it was last seen or heard, sometimes flanking. At night
 it holds its lane points, hunts and takes hold cover out of the light pools.
 
 In Attack / Defend (`BotFlag`) the attackers walk their lanes just past the middle, then make for the pole: the nearest
@@ -51,7 +53,8 @@ whoever it sees; the order replaces only where it goes between fights (before th
 never picked for the pole, nobody waits for it and its personality stands aside. Follow me keeps each a spot behind the
 giver's heading (pairs either side, rows back, on the giver's side of walls and level), at the giver's pace, a pace
 faster or slower to close on it and sprinting when far behind, covering the giver's back once there. Hold here sends
-them to the spot the giver looks at, side by side across their view, looking their way. Regroup sprints them back, each
+them to the spot the giver looks at, side by side across their view, looking their way. Go there held once all are
+there lapses after `SquadConfig.go_there_quiet` with nothing happening round them, back to the plan (BQ1). Regroup sprints them back, each
 turning to Follow me once close. The order in force given again cancels it (from the order wheel it stays), Team plan
 ends it, and it ends when its giver is out and at each round start. Back on the plan, in Elimination the bot hunts from
 where it stands; in Attack / Defend it takes up its post.

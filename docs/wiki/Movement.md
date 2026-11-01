@@ -44,5 +44,6 @@ their own half, and draw as soon as there's a threat.
 
 ## Switching replicas
 
-You carry two replicas, set in your [Loadout](Loadout). Press **1** or **2**, or roll the mouse wheel, to switch.
+You carry two replicas, set in your [Loadout](Loadout). Press **1** or **2**, or roll the mouse wheel, to switch. The
+wheel carries on past them onto your bombs ([Grenades](Grenades#throwing)), never onto the holster.
 Each replica has its own draw time ([Replicas](Replicas)).

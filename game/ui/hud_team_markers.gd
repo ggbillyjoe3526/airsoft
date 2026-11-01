@@ -62,8 +62,8 @@ func place(camera: Camera3D, characters: Array[Character], watched: Character, c
 		if not shown:
 			continue
 		if (_frame + i) % maxi(1, _cfg.team_marker_check) == 0:
-			m.hollow = _query.ray(eye, at + Vector3.UP * head, _hit) \
-					and _query.ray(eye, at + Vector3.UP * (head * CHEST_SHARE), _hit)
+			m.hollow = _query.sight_ray(eye, at + Vector3.UP * head, _hit) \
+					and _query.sight_ray(eye, at + Vector3.UP * (head * CHEST_SHARE), _hit)
 		var out := not Elimination.is_in_play(c)
 		m.set_look(OUT_GREY if out else colour, out)
 		m.mag = not out and c.id < mags.size() and mags[c.id] == 1

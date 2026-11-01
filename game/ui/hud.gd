@@ -423,7 +423,7 @@ func update_minimap(state: GameState, watched: Character, yaw: float, fraction: 
 		hold: Vector3, book: Pings = null) -> void:
 	if _minimap == null:
 		return
-	_minimap.follow(state, watched, yaw, fraction, _prefs.minimap_turn, holding, hold)
+	_minimap.follow(state, watched, yaw, fraction, _prefs.minimap_turn, holding, hold, _prefs.minimap_zoom)
 	if book != null and _prefs.ping_markers:
 		_minimap.add_pings(book, watched.team, state.time, _sim.pings.lifetime, _cfg.ping_fade)
 
@@ -751,7 +751,7 @@ func set_skip_hint(show: bool) -> void:
 		return
 	_skip_hint.visible = show
 	if show:
-		_skip_key.text = KeyNames.of_action(&"jump").to_upper()
+		_skip_key.text = KeyNames.of_action(&"fire").to_upper()
 
 
 func skip_hint_shown() -> bool:
@@ -938,9 +938,11 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 		_hit_held = false
 	_hit_hold.visible = _hit_held and not hit_call
 	# The crosshair's gap is the spread a shot really has now (two standard deviations), on this screen at this zoom.
-	_show_cross = in_play and c.aim_raise < 0.5 and not a.replicas.is_empty() and not a.holstered
+	# A bomb in hand (MC1) keeps the crosshair, at no spread, to throw by.
+	var bomb_in_hand := c.grenades.readied != Grenade.Kind.NONE
+	_show_cross = in_play and c.aim_raise < 0.5 and not a.replicas.is_empty() and (not a.holstered or bomb_in_hand)
 	if _show_cross:
-		var spread := deg_to_rad(a.replica().spread_deg * c.spread_scale) * 2.0
+		var spread := 0.0 if bomb_in_hand else deg_to_rad(a.replica().spread_deg * c.spread_scale) * 2.0
 		var half_fov := deg_to_rad(_view.vertical_fov(zoom)) * 0.5
 		# On the screen, not the HUD's scaled root: the crosshair keeps its own size.
 		_gap = CrosshairDraw.gap(_prefs, tan(spread) / tan(half_fov) * size.y * _hud_size * 0.5)
@@ -1297,7 +1299,7 @@ func _build_step_line(parent: Control) -> void:
 	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 
 
-## "SPACE Hold to skip the round" under the watching line: the key in a chip, the words beside it, a yellow edge.
+## "LEFT MOUSE Press to skip the round" under the watching line (the trigger's key, MC1): the key in a chip, the words beside it, a yellow edge.
 func _build_skip_hint(parent: Control) -> void:
 	_skip_hint = PanelContainer.new()
 	_skip_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -1316,7 +1318,7 @@ func _build_skip_hint(parent: Control) -> void:
 	var chip := GameTheme.box(GameTheme.CARD_HI, GameTheme.LINE, SKIP_KEY_PAD.x, SKIP_KEY_PAD.y)
 	_skip_key.add_theme_stylebox_override("normal", chip)
 	var words := HudStyle.label(row, SKIP_SIZE, 700, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_LEFT)
-	words.text = tr("HUD_SKIP_HOLD")
+	words.text = tr("HUD_SKIP_PRESS")
 	words.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 
 

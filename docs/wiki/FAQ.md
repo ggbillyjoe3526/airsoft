@@ -22,7 +22,7 @@ ricochets count ([Modes](Modes#skirmish-and-custom)).
 
 ### Why do my shots drop at long range?
 
-BBs are real projectiles: they slow, fall and drift with the wind. Turn the hop-up dial (4 and 5) to keep them flat
+BBs are real projectiles: they slow, fall and drift with the wind. Turn the hop-up dial (Page Down and Page Up) to keep them flat
 for longer, aim a little high past each replica's flat range, and try the [Practice Range](Practice-Range) readout.
 
 ### Is there blood?
