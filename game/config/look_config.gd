@@ -99,7 +99,7 @@ const GLOBAL_SPEC := &"look_spec"
 
 @export_group("Palette")
 ## The look's colours by name (sRGB), for every map's dress: a map's paint (SiteLook, RoofConfig, the props' recipes)
-## takes each colour from here, and tests/unit/test_look.gd holds Depot's and Woodland's to it.
+## takes each colour from here, and tests/unit/test_look.gd holds Depot's, Woodland's and The Street's to it.
 @export var palette: Dictionary[StringName, Color] = {
 	&"crimson": Color8(0xc2, 0x38, 0x74), &"violet": Color8(0x76, 0x58, 0xaa), &"yellow": Color8(0xe4, 0xca, 0x46),
 	&"teal": Color8(0x2a, 0x9c, 0x90), &"green": Color8(0x58, 0x90, 0x4e), &"cream": Color8(0xf4, 0xec, 0xda),
@@ -116,6 +116,9 @@ const GLOBAL_SPEC := &"look_spec"
 	&"spruce": Color8(0x2f, 0x6e, 0x55), &"forest": Color8(0x2b, 0x5c, 0x48), &"meadow": Color8(0x8a, 0xa8, 0x60),
 	&"litter": Color8(0x7c, 0x7a, 0x58), &"earth": Color8(0x8a, 0x80, 0x70), &"rubber": Color8(0x3d, 0x3b, 0x45),
 	&"pond": Color8(0x4a, 0x6f, 0x6c), &"mud": Color8(0x55, 0x4e, 0x44), &"mud_wet": Color8(0x40, 0x3b, 0x34),
+	# The Street's (ST1): raspberry brick (off Beta's high-contrast orange's hue), and the terraces' pastel renders (seafoam, lilac, butter, sage).
+	&"brick": Color8(0xa3, 0x4a, 0x6a), &"seafoam": Color8(0x7f, 0xb8, 0xad), &"lilac": Color8(0xb9, 0xa8, 0xd6),
+	&"butter": Color8(0xe6, 0xd4, 0x78), &"sage": Color8(0xa9, 0xc4, 0x8e),
 }
 ## The six site colours, spread evenly over a map's paint so no one colour dominates.
 @export var site_colours: Array[StringName] = [&"crimson", &"violet", &"yellow", &"teal", &"green", &"cream"]

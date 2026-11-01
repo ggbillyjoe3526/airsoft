@@ -52,7 +52,7 @@ The minimap names the area you stand in. Depot's areas:
 
 ### Doors
 
-Depot has 15 hinged doors and Woodland's huts 8, painted green so they stand out from the plywood. Every round starts with the same doors
+Depot has 15 hinged doors, Woodland's huts 8 and The Street's House 3, painted green so they stand out from the plywood. Every round starts with the same doors
 open and the same ones shut. Press **Open / shut door** (U, [Controls](Controls)) within reach of one to open or shut
 it; a line under the crosshair tells you which.
 
@@ -103,6 +103,38 @@ over the Culvert to the Log stacks and the Sawmill. Attackers start in the west 
 Woodland's areas:
 
 <!-- wiki:areas woodland -->
+
+## The Street
+
+**A terraced street, 104 by 162 m, by day or by night**, in 5v5 or 6v6. Defenders start on the railway embankment at
+the north end and attackers on the Bottom street at the south. Three lanes run between them:
+
+- **The left road** behind the west terrace's back gardens: parking bays, a van, roadworks and a removal lorry break
+  up its long view.
+- **The Path** down the middle, between the fronts of the two terraces and their railed front gardens. Most front
+  gates are shut; three are open, each a pocket to hold. It steps sideways at the Green corner and the Path kink.
+- **The back lane** behind the east terrace, with an electricity kiosk, a van, a bin store, bins and a skip, and **the
+  right road** beyond the old works, with a delivery jam halfway down.
+
+The lanes are joined by **the Lane** past the horizontal houses, **the Pend** (a covered passage under the west
+terrace), **the arch** under the arch building, and the open **Field** by the defenders' end.
+
+- **The House:** flag A stands in its living room. Come in by the back door from the back garden, or by the front door
+  off the front garden; the hall door faces the back door, and the kitchen opens off the hall with no door. You can see
+  through every window, but only the open half of the front window lets a BB through: the glass stops it.
+- **Car park B:** flag B stands on its paved island, ringed by parked cars, a van and a bin store; the arch leads from
+  it to the right road.
+- **Railings and sills** are 1 m high: too high to vault or jump, low enough to see and shoot over.
+- **Night** is the Time of day setting's (day by default): every street lamp lights a pool of the road under it.
+- **Attack / Defend** puts flag **A** in the House and flag **B** in the car park ([Modes](Modes#attack--defend)); in
+  Elimination's overtime the flag stands on the Path by the Green corner. Rounds last 3 minutes.
+- **For now** its cars, bins, trees, railings and lamps are plain coloured blocks; free CC0 models replace them next.
+
+### Areas
+
+The Street's areas:
+
+<!-- wiki:areas street -->
 
 ## Range
 

@@ -39,6 +39,23 @@ extends Resource
 	&"tyre": RayHit.Surface.WOOD,
 	&"truck": RayHit.Surface.METAL,
 	&"thicket": RayHit.Surface.LEAVES,
+	# The Street (ST1): hedges and the scrub are leaves; railings, vehicles, lamps, bollards, cabinets, the fridge
+	# and the bus shelter ring; plastic bins, the roadworks' boards, the shed and the furniture tick like wood.
+	&"hedge": RayHit.Surface.LEAVES,
+	&"scrub": RayHit.Surface.LEAVES,
+	&"railing": RayHit.Surface.METAL,
+	&"car": RayHit.Surface.METAL,
+	&"van": RayHit.Surface.METAL,
+	&"lorry": RayHit.Surface.METAL,
+	&"lamp": RayHit.Surface.METAL,
+	&"bollard": RayHit.Surface.METAL,
+	&"cabinet": RayHit.Surface.METAL,
+	&"fridge": RayHit.Surface.METAL,
+	&"shelter": RayHit.Surface.METAL,
+	&"bins": RayHit.Surface.WOOD,
+	&"hoarding": RayHit.Surface.WOOD,
+	&"shed": RayHit.Surface.WOOD,
+	&"furniture": RayHit.Surface.WOOD,
 }
 ## Each kind's greybox colour (sRGB). Kinds not listed take `default_colour`.
 @export var colours: Dictionary[StringName, Color] = {
@@ -86,6 +103,9 @@ extends Resource
 	Color(0.22, 0.40, 0.29), Color(0.79, 0.68, 0.19), Color(0.37, 0.43, 0.49), Color(0.18, 0.48, 0.48),
 ]
 @export var default_colour: Color = Color(0.7, 0.7, 0.7)
+## Kinds drawn see-through (MapLevel's Glass mesh, in the shared light), each at this opacity (0..1): The Street's
+## window glass and bus shelter (ST1). Still solid to BBs, sight and movement: only drawn clear.
+@export var clear_kinds: Dictionary[StringName, float] = {&"glass": 0.35}
 ## The ground beyond the field's walls, out to `ground_extent` metres each way from the middle, just below the floor.
 @export var ground_colour: Color = Color8(0x8a, 0xa8, 0x60)
 @export var ground_extent: float = 120.0
@@ -133,6 +153,13 @@ func terrain_colour(surface: int) -> Color:
 	return terrain_colours.get(surface, ground_colour)
 
 
-## The colour block `b` is drawn in: its surface's own, else its piece's of its kind.
+## The colour block `b` is drawn in: its own (MapData.Block.colour), else its surface's, else its piece's of its kind.
 func block_colour(b: MapData.Block) -> Color:
+	if b.colour.a > 0.0:
+		return b.colour
 	return surface_colours.get(b.surface, colour_of(b.kind, b.piece))
+
+
+## Whether blocks of `kind` are drawn see-through (clear_kinds).
+func is_clear(kind: StringName) -> bool:
+	return clear_kinds.has(kind)

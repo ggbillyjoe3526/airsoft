@@ -231,8 +231,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-  # The night guards: Woodland at 5v5, 50 to 70 s a match headless, tests/guards/test_woodland_guards.gd in five jobs
-  # of 8 or 16 matches (a test name's part picks them).
+  # The outdoor fields' guards: Woodland at 5v5 by night, 50 to 70 s a match headless, tests/guards/
+  # test_woodland_guards.gd in five jobs of 8 or 16 matches (a test name's part picks them), and The Street's (ST1),
+  # tests/guards/test_street_guards.gd, in three.
   night-guards:
     name: Night match guards, ${{ matrix.part.name }}
     runs-on: ubuntu-latest
@@ -246,6 +247,9 @@ jobs:
           - { name: "Woodland, Attack / Defend at Normal", file: test_woodland_guards, test: attack_defend_at_normal, log: night-guards-3 }
           - { name: "Woodland, Attack / Defend at Easy", file: test_woodland_guards, test: attack_defend_at_easy, log: night-guards-4 }
           - { name: "Woodland, both modes at Hard", file: test_woodland_guards, test: at_hard, log: night-guards-5 }
+          - { name: "The Street, Elimination at Normal", file: test_street_guards, test: elimination_at_normal, log: street-guards-1 }
+          - { name: "The Street, Attack / Defend at Normal", file: test_street_guards, test: attack_defend_at_normal, log: street-guards-2 }
+          - { name: "The Street, at night at Easy and Hard", file: test_street_guards, test: at_night, log: street-guards-3 }
     steps:
       - uses: actions/checkout@v6
 

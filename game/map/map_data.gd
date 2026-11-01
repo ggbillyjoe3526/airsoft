@@ -39,6 +39,9 @@ class Block:
 	## The CC0 prop it is drawn as (`dress` in the file, WR3: a tree's trunk, a log, cordwood, crates, tyres, the truck,
 	## a thicket's spruce; PropDressConfig.model_lays), empty for its box. Look only: the box is still what BBs meet.
 	var dress: StringName = &""
+	## Its own colour (sRGB; `colour` in the file, 0xRRGGBB, ST1: The Street's palette paint, each house its own), or
+	## clear (alpha 0) to take its kind's (MapStyle.block_colour).
+	var colour: Color = Color(0, 0, 0, 0)
 
 
 ## One pool of light on a night field (`lights` in the file; the browser's MapLight): a camp fire, a lantern, or a lamp
@@ -331,6 +334,12 @@ func _read_blocks(list: Variant, style: MapStyle) -> void:
 		b.surface = SURFACES.get(str(bd["surface"]), style.surface_of(b.kind)) if bd.has("surface") \
 				else style.surface_of(b.kind)
 		b.dress = StringName(str(bd.get("dress", "")))
+		if bd.has("colour"):
+			var paint: Variant = bd["colour"]
+			if (paint is float or paint is int) and float(paint) >= 0.0 and float(paint) <= 0xffffff:
+				b.colour = Color.hex((int(paint) << 8) | 0xff)
+			else:
+				problems.append("block %d's colour %s is not 0xRRGGBB" % [i, paint])
 		if b.kind == &"floor":
 			floors += 1
 		blocks.append(b)

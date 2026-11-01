@@ -604,6 +604,22 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   The layout lives in `tools/woodland/layout.py` and `world.py`, and `build_map.py` writes `data/maps/woodland.json`:
   change the scripts, never the JSON. The game's blocks are axis-aligned, so pieces are squared and the stream runs
   straight north to south under both crossings. The old wood is a test fixture (`tests/support/maps/old_woodland.json`).
+- **The Street is a third field, built from concept 3 (owner, 2026-11-01, ST1).** A terraced street 104 x 162 m from
+  the owner's own plan (never named or pictured in the repository): the left road behind the west terrace, the Path
+  between the terraces' fronts and the back lane with the right road, linked by the Lane, the Pend (under the west
+  terrace) and the arch (under the arch building). Alpha defends from the railway embankment (north, end 1), Beta
+  attacks from the Bottom street (end 0). Flag A in the House's living room (back door, hall door opposite it, kitchen
+  opening, front door onto a railed front garden; only the open half of the front window can be shot through), flag
+  B on car park B's island, the overtime flag on the Path by the Green corner. Front gates shut but for three pockets,
+  back gardens closed, 1 m railings and window sills too high to vault, every prop placed for a reason, no sheds in
+  the back lane. Day by default and night by the Time of day row (a pool of light under every street lamp); bots see
+  55 m; 5v5 or 6v6; rounds 3:00; no upstairs. The layout lives in `tools/street/layout.py` and `build_map.py` writes
+  `data/maps/street.json`: change the scripts, never the JSON. Every block carries its own palette colour
+  (`MapData.Block.colour`); glass is solid to BBs, bodies and bots' sight, and drawn see-through (`MapStyle.clear_kinds`).
+- **The Street keeps concept 3's lines and A's head start (ST1).** Diagonals across the lanes over railings, low walls
+  and cars run to about 80 m (each lane's own lines are the concept's, at most 60 m), and the defenders reach flag A
+  1.3 times as fast as the attackers (B 1.8 times) against the standard 1.6: both written down as The Street's
+  exceptions (`FieldStandard.EXCEPTIONS`), pending the owner's word on the decision card of 2026-11-01.
 - **A crouched body is 1.25 m tall (owner's approval of Woodland concept 3, 2026-10-31, CT1).** Crouched past the
   threshold (MovementConfig.crouched_threshold) a character's collision body is `BodyConfig.crouch_height` tall, so it
   goes through Woodland's 1.4 m tunnels; under anything lower than a standing body it stays crouched whatever is held,

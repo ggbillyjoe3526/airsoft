@@ -32,6 +32,8 @@ const CEILING_THICKNESS := 0.2
 ## touched by another cored box within this many metres of it (WR3).
 const CORE_SHARE := 0.2
 const CORE_TOUCH := 0.05
+## The see-through blocks' roughness (_glass_mesh): glass, near mirror-smooth.
+const GLASS_ROUGHNESS := 0.1
 
 
 var map: MapData = null
@@ -84,6 +86,14 @@ func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 		_site_material = SiteSurface.material(site, m)
 	_mesh = _make_mesh()
 	add_child(_mesh)
+	var glass := _glass_mesh(m, style)
+	if glass != null:
+		var gi := MeshInstance3D.new()
+		gi.name = "Glass"
+		gi.mesh = glass
+		gi.material_override = LookMaterials.clear_colour(GLASS_ROUGHNESS)
+		gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(gi)
 	if m.terrain != null:
 		_add_ground_tiles(m.terrain)
 	for s in RayHit.Surface.size():
@@ -342,6 +352,8 @@ static func _greybox_mesh(m: MapData, style: MapStyle, site: SiteLook = null,
 	for b in m.blocks:
 		if site != null and SiteSurface.hidden(site, b):
 			continue
+		if style.is_clear(b.kind):
+			continue
 		var core := Transform3D.IDENTITY
 		if props != null and props.dresses(b) and props.lay_of(b) != PropDressConfig.Lay.TILE:
 			var inset := props.core_of(b)
@@ -354,6 +366,25 @@ static func _greybox_mesh(m: MapData, style: MapStyle, site: SiteLook = null,
 	st.set_color(style.ground_colour)
 	_add_face(st, GreyboxFaces.ground_face(style, GreyboxFaces.ground_top(m)))
 	return st.commit()
+
+
+## The see-through blocks (MapStyle.clear_kinds: The Street's glass, ST1) as one mesh, each in its colour at its kind's
+## opacity; null on a map with none. They stay out of the greybox (a bake still draws them solid: no baked map has
+## glass).
+static func _glass_mesh(m: MapData, style: MapStyle) -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var any := false
+	for b in m.blocks:
+		if not style.is_clear(b.kind):
+			continue
+		any = true
+		var c := style.block_colour(b)
+		c.a = style.clear_kinds[b.kind]
+		st.set_color(c)
+		for f in GreyboxFaces.faces_of(b):
+			_add_face(st, f)
+	return st.commit() if any else null
 
 
 ## The transform that draws block `b`'s box as its core (PropDressConfig.model_cores): its top cut down to `inset.y` of
