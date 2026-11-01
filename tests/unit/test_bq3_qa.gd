@@ -255,3 +255,49 @@ func test_a_follower_peeking_with_nobody_in_sight_still_comes_out_after_its_give
 	b.peek_left = 5.0
 	assert_false(BotBrain._stay_in_cover(b, follow_world, true, false, true, false, DT), "an enemy in sight: fights")
 	assert_eq(b.mode, Bot.Mode.FIGHT)
+
+
+## A burst left hanging by a tick it could not fire in is picked up again from somewhere else: the knee is checked anew.
+func test_a_burst_picked_up_again_behind_low_cover_does_not_kneel() -> void:
+	var w := BotWorld.new()
+	w.cfg = config
+	w.tuning = tuning
+	var box := BoxWorld.new(tuning.body)
+	box.add_floor(80.0, 80.0)
+	w.query = box
+	# Its nav grid, for the sidestep it takes instead of the knee.
+	var m := MapData.new()
+	var floor_block := MapData.Block.new()
+	floor_block.kind = &"floor"
+	floor_block.center = Vector3(0.0, -0.25, 0.0)
+	floor_block.size = Vector3(80.0, 0.5, 80.0)
+	m.blocks.append(floor_block)
+	w.nav = NavGrid.build(m, tuning.nav, tuning.body)
+	var spots: Array[Vector3] = [Vector3.ZERO, Vector3(0.0, 0.0, 20.0)]
+	for id in 2:
+		var c := Character.new(id, id, spots[id], 0.0, ReplicaStats.default_loadout())
+		c.position = spots[id]
+		w.characters.append(c)
+		w.bots.append(Bot.new(c, id + 1, config.skill_for(&"normal"), 2))
+	var b := w.bots[0]
+	var foe := w.characters[1]
+	b.mode = Bot.Mode.FIGHT
+	b.target_id = 1
+	b.target_visible = true
+	b.target_part = 0.6
+	b.contact = Bot.Contact.new()
+	b.aim_yaw = PI
+	b.aim_pitch = 0.0
+	# The burst began in the open, where the knee had the shot, then was left hanging.
+	b.burst_left = 0.3
+	b.knee_clear = true
+	var eye_knee := Character.eye_height(1.0, tuning.body)
+	box.add_box(Vector3(0.0, eye_knee * 0.5 + 0.1, 3.0), Vector3(4.0, eye_knee + 0.2, 0.3))
+	BotCombat._aim_point = BotSenses.body_point(foe, tuning.hits, 0.6)
+	var cmd := PlayerCommand.new()
+	var eye := BotSenses.eye_of(b.character, tuning)
+	BotCombat.shoot(b, w, foe, eye, 0.0, cmd, DT)
+	assert_true(b.bursting, "the burst goes on (standing, it sees over the wall)")
+	var knee := PlayerCommand.new()
+	BotMovement._strafe(b, w, knee, DT, foe)
+	assert_false(knee.crouch, "but kneeling would put the wall in the way: no knee")

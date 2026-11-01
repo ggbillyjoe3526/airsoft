@@ -8,7 +8,8 @@
 |---|---|---|---|---|---|
 | 2026-11-01 | 1 | Opus 5.5 (build thread) | – | – | QA Fail: the test file didn't parse (an untyped loop); a knee held on a burst not being fired |
 | 2026-11-01 | 2 | Opus 5.5 (build thread) | ✗ | – | CI's Follow me guard: Depot seed 2, a follower 12.5 m behind (catch_up 8 m) |
-| 2026-11-01 | 3 | Opus 5.5 (build thread) | ✓ | see the Review line | – |
+| 2026-11-01 | 3 | Opus 5.5 (build thread) | ✗ | Accept 7/8 | CI: `test_hit_facts` (a bot knelt behind low cover and lost its target), `test_df2_qa` (the radio's draw moved a bot onto a flank search with no nav grid) |
+| 2026-11-01 | 4 | Opus 5.5 (build thread) | ✓ | see the Review line | – |
 
 ## Goal
 
@@ -43,7 +44,9 @@ change stays only if bots with it win more rounds against bots without it.
 ## Defaults taken
 
 - Kneel per burst, not for the whole fight: kneeling still is steadiest, and the sidestep between bursts keeps it a
-  moving target. Standing still for each burst without the knee was tried and won nothing (49 %).
+  moving target. Standing still for each burst without the knee was tried and won nothing (49 %). It kneels only where
+  its kneeling eye has the shot, checked with one ray as each burst begins or picks up again (`Bot.knee_clear`), so it
+  never ducks behind low cover out of the fight.
 - Normal does not get Hard's tactics: an A/B of Normal with them against Normal without won 49 % on Depot.
 - Radio reach 35 m and 45 m, and its delay, roughly a shout across a lane and a beat to say it.
 - Under Follow me, a follower down in cover with nobody in sight, BBs in its magazine and not reloading comes out once
@@ -92,6 +95,9 @@ change stays only if bots with it win more rounds against bots without it.
   changed) and QA rechecked it alone: Pass, with two tests added to `test_bq3_qa` (a giver out of play or gone keeps
   it in cover; a peek with nobody in sight ends after the giver). From its advisories, a follower with an empty magazine
   now stays to reload first; a giver moving off any way counts (direction doesn't matter far off).
+- QA on the knee check (attempt 4): Fail then Pass. A burst left hanging and picked up again kept its old answer; it
+  is now checked again on resuming (`test_bq3_qa`: a burst picked up again behind low cover doesn't kneel).
+  `test_bq3_team_play` adds no knee where low cover would hide the target.
 
 ## Known issues left
 
