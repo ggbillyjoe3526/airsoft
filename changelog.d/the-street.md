@@ -1,0 +1,12 @@
+### The Street
+- A third map, The Street: a terraced street, 104 by 162 m, by day or night, 5v5 or 6v6, with 3-minute rounds.
+- Defenders start on the railway embankment to the north, attackers on the Bottom street to the south.
+- Three lanes: the left road behind the west terrace's back gardens, the Path between railed front gardens, and the back lane with the right road.
+- Most front gates on the Path are shut; three open pockets let you through.
+- The lanes link through the Lane, the Pend (a covered passage under a terrace), the arch and the open Field.
+- Flag A is in the House's living room, reached by its back door, front door, a hall and a kitchen.
+- You can see through every window of the House, but only the open half of the front window lets a BB through.
+- Flag B sits on car park B's island.
+- Railings and window sills are 1 m high, too high to vault.
+- Every street lamp lights a pool of light at night.
+- For now, cars, bins, trees, railings and lamps are plain coloured blocks.

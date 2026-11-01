@@ -1,32 +1,28 @@
 Task: ST1 · The Street (concept 3 as plain blocks in palette colours; no task block, judged against the brief)
-Attempt: 1 of 4
-Head: 915afe2 (= HEAD; QA Pass, performance Pass on it; tools/check.sh and the Street guards still running: verdict holds only if they go green)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✗ | 8 ✗
-Score: 6/8 → Retry (near miss, judgment)
-Evidence for passes, in brief: 1 data/maps.md:28 lists street public 5/5/6 at 180 s; test_street.gd:41 every block a palette
-colour, :58 glass stops BBs and the open half doesn't, :80 railings/sills over vault and jump; guards wired at ci.yml:250-252.
-2 no contract touched (layout values stay in data/maps/street.json and MapStyle). 3 no per-frame code; glass_materials()
-(map_level.gd:165) runs once in _build_views. 4 test_street.gd:58 fails without the Glass mesh and :97 without Block.colour.
-5 clear_kinds is MapStyle data, colour parse refuses non-integers (map_data.gd:337), static types throughout.
-6 pastel palette, BB puffs not touched, glass solid to BBs, owner rulings for 82 m and 1.3 recorded (DECISIONS, FieldStandard).
-Failed checks, with evidence:
-7. [judgment] Two areas with swapped names: "Corner green" (tools/street/layout.py:162, left lane, z 40-48) and
-   "Green corner" (layout.py:182, middle, z -6..2), ~45 m apart; the minimap names the area you stand in, so callouts
-   collide (concept 3's notes only name "Green corner"); field_standard.gd:86 cites the other one. Also ci.yml:238 runs
-   The Street's day matches under the job name "Night match guards".
-8. [judgment] Docs the change affects not updated: docs/ASSETS.md:38 (map cards row) lacks assets/maps/street.jpg and
-   :67-68 (map layouts) lacks tools/street/ (ST1); game/map/README.md:15 still says MapLevel draws every block as one mesh,
-   one draw call (now a Glass mesh too) and its MapData/MapStyle rows omit Block.colour and clear_kinds. docs/wiki/Maps.md:131
-   promises "free CC0 models replace them next", against docs/wiki/README.md:47 (describe what is in the game today).
-   tests/unit/test_wa1_qa.gd.uid rides along from another task (harmless, out of scope).
-Must-fix for the next attempt: rename "Corner green" to a distinct name (layout.py, rebuild street.json, fix
-field_standard.gd:86); rename the CI job to cover day and night; add street.jpg and tools/street/ to ASSETS.md; update
-game/map/README.md's map_data, map_level and MapStyle rows; reword Maps.md:131 to today's state ("plain coloured blocks")
-or point at the Roadmap as line 10-11 does. Commit the Pass performance report (it is only staged; HEAD still holds the Fail).
+Attempt: 2 of 4
+Head: 91825e4 (= HEAD; QA Pass, performance Pass on 915afe2, still valid: 915afe2..91825e4 changes only CI, docs, a test
+reason string and street.json's areas list, which holds names only; tools/check.sh and the A/D guard still running, so the verdict holds only if they go green)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
+Score: 8/8 → Accept
+Evidence:
+1. data/maps.md:28 lists street as public 5/5/6 at 180 s. test_street.gd:41 checks every block is a palette colour, :58 that the
+   glass stops BBs and the open half doesn't, :80 that railings and sills clear vault and jump height. The guards run as their
+   own CI job (ci.yml:273-283), and Elimination at Normal passed locally (117 rounds, 16 seeds, 0 on time).
+2. No contract touched: layout values stay in data/maps/street.json and MapStyle.
+3. No per-frame code. glass_materials() (map_level.gd:165) runs once in _build_views.
+4. test_street.gd:58 fails without the Glass mesh, and :97 fails without Block.colour.
+5. clear_kinds is MapStyle data. The colour parse refuses non-integers (map_data.gd:337). Static types throughout.
+6. Pastel palette, no gore, glass solid to BBs. The owner's 82 m and 1.3 rulings are recorded (DECISIONS, field_standard.gd:83-92).
+7. Area names now distinct (layout.py:157-182: Lower green, The lawn, West/East gardens, Left/Right bays; the Cul-de-sac's
+   two boxes adjoin). The Street's guards have their own "Street match guards" job; Woodland's night job is as it was.
+8. ASSETS.md:38 and :67-69 list street.jpg and tools/street/. game/map/README.md covers Block.colour, the Glass mesh and
+   clear_kinds. Maps.md:131 states today's state with a Roadmap link.
+Notes (not failures): "Back garden" (the House's) beside "Back gardens" is close but names distinct places. The
+test_wa1_qa.gd.uid file from another task rides along and is harmless.
 Owner should test in the game:
-- Shoot at a bot you can see through the House's glass: does the BB stopping on the pane feel fair, and do bots not seeing you through it matter?
+- Shoot at a bot you can see through the House's glass: does the BB stopping on the pane feel fair, and does it matter that bots don't see you through it?
 - Waist-high 1 m railings can't be vaulted while 0.9 m low walls can: does that read, or feel like an invisible wall?
 - Attack / Defend: can Alpha reach flag A (the House) in time with only a 1.3 head start?
 - The ~80 m cross-lane diagonals over railings and cars: do they dominate rounds?
 - The pastel terraces and cars against the team colours, by day and under the lamp pools at night.
-- Glass at 0.35 opacity, day and night, from both sides; the Glass mesh against the sky.
+- Glass at 0.35 opacity, day and night, from both sides; the minimap's area names as you cross the Street.
