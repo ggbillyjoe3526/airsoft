@@ -6,7 +6,8 @@ extends GutTest
 ## layout is seeded; a missing model leaves its kind a box; the props are in the prewarm. WR3: Woodland's blocks
 ## name their props (trees, spruces, logs, cordwood, crates, tyres, a truck) with no site dress, each inside its
 ## block; a grid lays a cell's prop a cell; a dressed block draws no box, a thicket only its dark core; a ramp keeps
-## its box.
+## its box. ST2: The Street's blocks name theirs (cars, vans, lorries, bins, a skip, lamps, trunks, the House's
+## settees, tables, units and fridge), each inside its block, bins two a block.
 
 var play: PlayTuning = PlayTuning.load_default()
 var tuning: SimTuning = SimTuning.new()
@@ -274,6 +275,27 @@ func test_woodland_is_dressed_without_a_site_each_prop_inside_the_block_that_nam
 		assert_gt(dress.count(model), 0, "%s placed" % model)
 	assert_eq(dress.count(&"trunk"), named[&"trunk"], "one trunk a tree")
 	assert_eq(dress.count(&"truck"), 1)
+	assert_eq(_outside(m, dress), [] as Array[String], "no prop reaches past its block's box")
+
+
+func test_the_street_is_dressed_each_prop_inside_the_block_that_names_it() -> void:
+	var m := _map("street")
+	var dress := _dress(m)
+	assert_not_null(dress, "The Street has CC0 props")
+	if dress == null:
+		return
+	var named: Dictionary[StringName, int] = {}
+	for b in m.blocks:
+		if b.dress != &"":
+			assert_true(look.props.dresses(b), "%s's %s has its model" % [b.kind, b.dress])
+			named[b.dress] = named.get(b.dress, 0) + 1
+	for model: StringName in [&"car_crimson", &"car_lilac", &"van_cream", &"lorry_teal", &"bin_green", &"skip", &"lamp",
+			&"trunk", &"settee", &"table", &"units", &"fridge"]:
+		assert_gt(named.get(model, 0), 0, "a block names %s" % model)
+		assert_gt(dress.count(model), 0, "%s placed" % model)
+	assert_eq(dress.count(&"car_crimson"), named[&"car_crimson"], "one car a car's block")
+	assert_eq(dress.count(&"lamp"), named[&"lamp"], "one lamp a lamp post")
+	assert_eq(dress.count(&"bin_green"), 2 * named[&"bin_green"], "two bins a bin block")
 	assert_eq(_outside(m, dress), [] as Array[String], "no prop reaches past its block's box")
 
 
