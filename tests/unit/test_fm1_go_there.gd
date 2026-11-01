@@ -304,3 +304,75 @@ func test_a_ping_at_a_wall_over_a_stack_finds_the_floor_on_your_side() -> void:
 	var dir := Vector3(0.0, 0.1, -1.0).normalized()
 	var spot: Vector3 = bots.pings._floor_spot(Vector3(10.0, 2.8, 19.0), dir, 12.0, bots.world)
 	assert_gt(spot.z, 19.0, "on your side of the wall: %s" % spot)
+
+
+## Pings a Go there on the map at `spot` and walks the squad there, until it reads Hold here.
+func _held_there(spot: Vector3) -> void:
+	_ping(true, true, spot)
+	for t in roundi(15.0 / DT):
+		if bots.order_of(YOU) == SquadOrder.Kind.HOLD:
+			return
+		_tick()
+
+
+func test_a_go_there_held_with_nothing_happening_lapses_back_to_the_team_plan() -> void:
+	_squad()
+	_held_there(Vector3(10.0, 0.0, -10.0))
+	assert_eq(bots.order_of(YOU), SquadOrder.Kind.HOLD)
+	_run(squad.go_there_quiet - 1.0)
+	assert_eq(bots.order_of(YOU), SquadOrder.Kind.HOLD, "not yet")
+	_run(1.5)
+	assert_eq(bots.order_of(YOU), SquadOrder.Kind.NONE, "all quiet: back to the plan")
+	assert_eq(bots.order_outcome.notice, SquadOrders.Notice.QUIET)
+	assert_eq(HudOrderWheel.notice_key(SquadOrders.Notice.QUIET), "HUD_ORDER_QUIET")
+	assert_ne(tr("HUD_ORDER_QUIET"), "HUD_ORDER_QUIET", "its words are in the text")
+	for b in mates:
+		assert_eq(b.order, SquadOrder.Kind.NONE)
+		assert_null(b.order_giver)
+	assert_false(bots.hold_spot(YOU))
+
+
+func test_an_enemy_heard_near_a_holder_keeps_the_go_there() -> void:
+	_squad()
+	_held_there(Vector3(10.0, 0.0, -10.0))
+	var b := mates[0]
+	for t in roundi((squad.go_there_quiet + 5.0) / DT):
+		# A noise a few metres off, heard again and again.
+		b.last_known = b.character.position + Vector3(8.0, 0.0, 0.0)
+		b.has_last_known = true
+		b.heard_at = state.time
+		_tick()
+	assert_eq(bots.order_of(YOU), SquadOrder.Kind.HOLD, "something is happening there: they stay")
+
+
+func test_an_enemy_heard_far_off_does_not_keep_it() -> void:
+	_squad()
+	_held_there(Vector3(10.0, 0.0, -10.0))
+	var b := mates[0]
+	for t in roundi((squad.go_there_quiet + 1.0) / DT):
+		b.last_known = b.character.position + Vector3(squad.go_there_contact_radius + 10.0, 0.0, 0.0)
+		b.has_last_known = true
+		b.heard_at = state.time
+		_tick()
+	assert_eq(bots.order_of(YOU), SquadOrder.Kind.NONE, "gunfire across the field is not contact there")
+
+
+func test_the_same_spot_pinged_again_counts_the_quiet_afresh() -> void:
+	_squad()
+	var spot := Vector3(10.0, 0.0, -10.0)
+	_held_there(spot)
+	_run(squad.go_there_quiet - 2.0)
+	_ping(true, true, spot + Vector3(0.5, 0.0, 0.0))
+	_run(4.0)
+	assert_eq(bots.order_of(YOU), SquadOrder.Kind.HOLD, "told again to stay")
+	_run(squad.go_there_quiet)
+	assert_eq(bots.order_of(YOU), SquadOrder.Kind.NONE)
+
+
+func test_a_hold_here_given_as_one_never_lapses() -> void:
+	_squad()
+	cmd.pitch = -0.2
+	_run(0.3)
+	assert_eq(_order(SquadOrder.Kind.HOLD), SquadOrder.Kind.HOLD)
+	_run(squad.go_there_quiet + 5.0)
+	assert_eq(bots.order_of(YOU), SquadOrder.Kind.HOLD)

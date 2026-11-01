@@ -8,7 +8,8 @@ and call their hits honestly, by the same rules as you.
 
 Bots know only what they see and hear:
 
-- They see in a **120° view** in front of them, never through walls.
+- They see in a **120° view** in front of them, never through walls, but through glass as you do (The Street's
+  windows and bus shelter). Glass still stops BBs, so a bot that sees you through it with no shot goes round to you.
 - They hear running, sprinting, vaults, landings, knocked props, shots, and a [flash's bang or a smoke's
   pop](Grenades). Walls muffle what they hear. **Walking and
   moving crouched are silent**, so you can sneak up on a bot that hasn't seen you.
