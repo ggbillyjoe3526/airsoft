@@ -272,16 +272,18 @@ func test_every_shipped_field_is_listed_without_dev_content_and_a_dev_one_only_w
 		for e in list:
 			out.append(e.id)
 		return out
-	assert_eq(ids.call(cat.fields(false)), PackedStringArray(["depot", "woodland"]), "every map is public (2026-10-29)")
-	assert_eq(ids.call(cat.fields(true)), PackedStringArray(["depot", "woodland"]))
+	assert_eq(ids.call(cat.fields(false)), PackedStringArray(["depot", "woodland", "street"]),
+			"every map is public (2026-10-29), The Street too (ST1)")
+	assert_eq(ids.call(cat.fields(true)), PackedStringArray(["depot", "woodland", "street"]))
 	assert_false(cat.is_dev("depot"))
 	assert_false(cat.is_dev("woodland"))
+	assert_false(cat.is_dev("street"))
 	assert_null(cat.find("neonHeights"), "Neon Heights is out of the game")
 	assert_true(cat.is_dev("neonHeights"), "so, with no row, it counts as dev")
 	assert_true(cat.is_dev("nowhere"), "a map with no row counts as dev")
 	cat.find("woodland").tag = &"dev"
-	assert_eq(ids.call(cat.fields(false)), PackedStringArray(["depot"]), "a dev map only with Dev content")
-	assert_eq(ids.call(cat.fields(true)), PackedStringArray(["depot", "woodland"]))
+	assert_eq(ids.call(cat.fields(false)), PackedStringArray(["depot", "street"]), "a dev map only with Dev content")
+	assert_eq(ids.call(cat.fields(true)), PackedStringArray(["depot", "woodland", "street"]))
 
 
 func test_a_bad_catalogue_row_is_left_out_and_reported() -> void:

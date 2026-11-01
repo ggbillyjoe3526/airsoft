@@ -720,6 +720,7 @@ func _build_views(ui: CanvasLayer) -> void:
 		first_use.append_array(_doors.materials())
 	if _pools != null:
 		first_use.append_array(_pools.materials())
+	first_use.append_array(_level.glass_materials())
 	if _woods != null:
 		first_use.append_array(_woods.materials())
 	if _bushes != null:

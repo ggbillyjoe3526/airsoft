@@ -25,4 +25,5 @@ warning; a map with no row is not listed.
 |---|---|---|---|---|---|---|---|---|
 | depot | Depot | field | public | 5 | 5 | 6 |  | An indoor airsoft hall: three lanes, two dark tunnels. |
 | woodland | Woodland | field | public | 5 | 5 | 6 | 180 | A big open wood over a dry stream, by day or night. |
+| street | The Street | field | public | 5 | 5 | 6 | 180 | A terraced street: front gardens, a back lane, a house to take. |
 | range | Range | range | public | 1 | 1 | 1 |  | Targets 10 to 60 m. No bots, no score. |

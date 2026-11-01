@@ -32,6 +32,8 @@ const CEILING_THICKNESS := 0.2
 ## touched by another cored box within this many metres of it (WR3).
 const CORE_SHARE := 0.2
 const CORE_TOUCH := 0.05
+## The see-through blocks' roughness (_glass_mesh): glass, near mirror-smooth.
+const GLASS_ROUGHNESS := 0.1
 
 
 var map: MapData = null
@@ -41,6 +43,8 @@ var _lighting: LightingConfig = null
 var _night: bool = false
 var _material: ShaderMaterial = null
 var _mesh: MeshInstance3D = null
+## The see-through blocks' mesh (_glass_mesh), or null on a map with none.
+var _glass: MeshInstance3D = null
 ## The site dress's look and its material (DD1); null for a greybox map.
 var _site: SiteLook = null
 ## The props a block may name (MapData.Block.dress, WR3), whatever the map's site: such a block's box is drawn inset
@@ -84,6 +88,14 @@ func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 		_site_material = SiteSurface.material(site, m)
 	_mesh = _make_mesh()
 	add_child(_mesh)
+	var glass := _glass_mesh(m, style)
+	if glass != null:
+		_glass = MeshInstance3D.new()
+		_glass.name = "Glass"
+		_glass.mesh = glass
+		_glass.material_override = LookMaterials.clear_colour(GLASS_ROUGHNESS)
+		_glass.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(_glass)
 	if m.terrain != null:
 		_add_ground_tiles(m.terrain)
 	for s in RayHit.Surface.size():
@@ -147,6 +159,14 @@ func set_baked_light(on: bool) -> void:
 ## Whether the baked light is drawn.
 func baked_light_drawn() -> bool:
 	return _baked
+
+
+## The see-through blocks' material, for the shader prewarm (empty on a map with no glass).
+func glass_materials() -> Array[Material]:
+	var out: Array[Material] = []
+	if _glass != null:
+		out.append(_glass.material_override)
+	return out
 
 
 ## The site dress's material, which SiteDress draws its details in too; null for a greybox map.
@@ -342,6 +362,8 @@ static func _greybox_mesh(m: MapData, style: MapStyle, site: SiteLook = null,
 	for b in m.blocks:
 		if site != null and SiteSurface.hidden(site, b):
 			continue
+		if style.is_clear(b.kind):
+			continue
 		var core := Transform3D.IDENTITY
 		if props != null and props.dresses(b) and props.lay_of(b) != PropDressConfig.Lay.TILE:
 			var inset := props.core_of(b)
@@ -354,6 +376,25 @@ static func _greybox_mesh(m: MapData, style: MapStyle, site: SiteLook = null,
 	st.set_color(style.ground_colour)
 	_add_face(st, GreyboxFaces.ground_face(style, GreyboxFaces.ground_top(m)))
 	return st.commit()
+
+
+## The see-through blocks (MapStyle.clear_kinds: The Street's glass, ST1) as one mesh, each in its colour at its kind's
+## opacity; null on a map with none. They stay out of the greybox (a bake still draws them solid: no baked map has
+## glass).
+static func _glass_mesh(m: MapData, style: MapStyle) -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var any := false
+	for b in m.blocks:
+		if not style.is_clear(b.kind):
+			continue
+		any = true
+		var c := style.block_colour(b)
+		c.a = style.clear_kinds[b.kind]
+		st.set_color(c)
+		for f in GreyboxFaces.faces_of(b):
+			_add_face(st, f)
+	return st.commit() if any else null
 
 
 ## The transform that draws block `b`'s box as its core (PropDressConfig.model_cores): its top cut down to `inset.y` of

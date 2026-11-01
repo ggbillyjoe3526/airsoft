@@ -258,13 +258,15 @@ static func reads_as_team(c: Color, teams: Array[Color]) -> bool:
 	return hue_saturation(c).y >= FieldStandard.MIN_SATURATION and hue_gap(c, teams) <= FieldStandard.HUE_MARGIN_DEG
 
 
-## The colours the field is drawn in, by name: MapStyle.colour_of for each kind on it, every container colour, and each
-## surface drawn in its own colour (gravel).
+## The colours the field is drawn in, by name: each block's own colour (ST1), MapStyle.colour_of for each other kind
+## on it, every container colour, and each surface drawn in its own colour (gravel).
 static func drawn_colours(map: MapData, style: MapStyle) -> Dictionary[String, Color]:
 	var out: Dictionary[String, Color] = {}
 	for b in map.blocks:
 		var kind := String(b.kind)
-		if style.surface_colours.has(b.surface):
+		if b.colour.a > 0.0:
+			out["%s #%s" % [kind, b.colour.to_html(false)]] = b.colour
+		elif style.surface_colours.has(b.surface):
 			out[str(RayHit.Surface.find_key(b.surface)).to_lower()] = style.block_colour(b)
 		elif b.kind == &"container":
 			for i in style.container_colours.size():
@@ -467,8 +469,9 @@ static func middle(m: FieldMeasure) -> Result:
 			num(FieldStandard.WALK_SPREAD * 100.0, 0)])
 
 
-## Attack / Defend: the attackers' (end 0) mean walk to the flag at least FieldStandard.FLAG_HEAD_START times the
-## defenders', and the flag out of sight of the attackers' spawn yard.
+## Attack / Defend: the attackers' (end 0) mean walk to the flag at least FieldStandard.flag_head_start times the
+## defenders' (FLAG_HEAD_START but where the owner wrote down less), and the flag out of sight of the attackers' spawn
+## yard.
 static func flag(m: FieldMeasure) -> Result:
 	var fw := m.flag_walks()
 	var attack := FieldMeasure.mean(fw[0])
@@ -478,14 +481,16 @@ static func flag(m: FieldMeasure) -> Result:
 	var ratio := attack / defend
 	var says := "The attackers (end 0) walk %s m to the flag, the defenders %s m: %s times as far" % [num(attack, 1),
 			num(defend, 1), num(ratio)]
-	if ratio < FieldStandard.FLAG_HEAD_START:
-		return Result.new(FieldStandard.FLAG, Status.FAIL, "%s. The defenders need a head start: at least %s times." % [
-				says, num(FieldStandard.FLAG_HEAD_START)])
+	var need := FieldStandard.flag_head_start(m.map.id)
+	var why := FieldStandard.flag_head_start_reason(m.map.id)
+	if ratio < need:
+		return Result.new(FieldStandard.FLAG, Status.FAIL, "%s. The defenders need a head start: at least %s times%s." % [
+				says, num(need), " (%s)" % why if not why.is_empty() else ""])
 	if m.flag_seen():
 		return Result.new(FieldStandard.FLAG, Status.FAIL, "%s, but the flag at %s can be seen from the attackers' spawn."
 				% [says, at(m.map.pole)])
-	return Result.new(FieldStandard.FLAG, Status.PASS, "%s (at least %s), and it is out of sight of the attackers' spawn."
-			% [says, num(FieldStandard.FLAG_HEAD_START)])
+	return Result.new(FieldStandard.FLAG, Status.PASS, "%s (at least %s%s), and it is out of sight of the attackers' spawn."
+			% [says, num(need), ": %s" % why if not why.is_empty() else ""])
 
 
 ## Elimination's overtime flag (the browser's overtimeFlagCheck; OV1): on walkable floor, out of the bushes (no leaves

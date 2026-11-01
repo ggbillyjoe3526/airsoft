@@ -72,12 +72,23 @@ const MIN_SATURATION := 0.3
 const MAX_RAMP_SLOPE := 0.5
 
 ## The owner's written-down differences, by field id (the browser's MAP_EXCEPTIONS): "clashes" (block pairs as
-## FieldChecks words them) with "clash_reason", "sightline" (m, FC2) with "sightline_reason".
+## FieldChecks words them) with "clash_reason", "sightline" (m, FC2) with "sightline_reason", "flag_head_start" (times,
+## ST1) with "flag_head_start_reason".
 const EXCEPTIONS: Dictionary[String, Dictionary] = {
 	"depot": {
 		"sightline": 66.0,
 		"sightline_reason": "across the open Chrono hall on the middle lane, Lower mid to Upper mid, 65 m: the owner "
 				+ "kept the hall's open middle and this line over breaking it up (2026-10-31, DR1); bots there see 55 m",
+	},
+	"street": {
+		"sightline": 82.0,
+		"sightline_reason": "diagonals across the lanes over the front gardens' railings, the low walls and parked cars, "
+				+ "up to about 80 m (car park B to the Lower green): each lane's own lines are those of the owner's "
+				+ "concept 3 (2026-11-01, left 58 m, Path 54 m, right 60 m); a BB does not carry that far and bots see "
+				+ "55 m (ST1)",
+		"flag_head_start": 1.3,
+		"flag_head_start_reason": "two flags: the defenders reach flag A (the House) 1.3 times as fast as the "
+				+ "attackers and flag B (the car park) 1.8 times, the owner's concept 3 as approved (ST1)",
 	},
 	"woodland": {
 		"sightline": 170.0,
@@ -123,3 +134,16 @@ static func sightline_limit(field_id: String) -> float:
 static func sightline_reason(field_id: String) -> String:
 	var e: Dictionary = EXCEPTIONS.get(field_id, {})
 	return str(e.get("sightline_reason", ""))
+
+
+## The head start `field_id`'s defenders need to flag A (times the attackers' walk): its exception's, or
+## FLAG_HEAD_START.
+static func flag_head_start(field_id: String) -> float:
+	var e: Dictionary = EXCEPTIONS.get(field_id, {})
+	return float(e.get("flag_head_start", FLAG_HEAD_START))
+
+
+## The owner's reason for `field_id`'s smaller head start, or "" where it keeps the standard.
+static func flag_head_start_reason(field_id: String) -> String:
+	var e: Dictionary = EXCEPTIONS.get(field_id, {})
+	return str(e.get("flag_head_start_reason", ""))

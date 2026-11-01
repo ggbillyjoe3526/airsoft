@@ -1,24 +1,28 @@
-Task: WA1 · Woodland in the art direction (no TASKS.md block; judged against the brief, the owner's 2026-10-31 ruling, docs/ART.md › A map in the look and docs/records/WA1.md)
+Task: ST1 · The Street (concept 3 as plain blocks in palette colours; no task block, judged against the brief)
 Attempt: 2 of 4
-Head: c499c80 (= git rev-parse HEAD; targeted GUT incl. test_night_light, test_look, test_terrain, test_colour_vision, test_baked_light, test_props pass; full suite to CI)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
-Score: 7/8 → Accept (one non-blocking fail; QA Pass, performance Pass, both for WA1)
-Evidence for the passes (attempt 1's stand; attempt 2 changes only the litter colour and docs):
-1. As attempt 1. Litter darkened in both homes: look_config.gd:117 and map_style.gd:98 (#7c7a58), so the palette and LEAVES ground agree; ART.md:115 matches.
-2. No contract touched.
-3. No new code; the colour is config data read at build.
-4. test_wa1_qa.gd:27 fails on main (StandardMaterial3D), :48 fails with stale bakes; test_look.gd:92-138 as before.
-5. Colours stay config data; no logic change.
-6. #7c7a58 is a khaki leaf brown, greyer than 0.3 (off both team hues), and gives wood ΔE 7.8 at night over the floor of 5 (record:61-62).
-7. Notes, not fails: the sRGB helper copied in look_vertex/look_clear and per-fragment cost stand as attempt 1 and performance said.
-Attempt 1's five doc fixes, all done: ART.md:62-64 (four greens), :81-82 (test_look and test_woods_view), :112-117 (all 15 entries, hexes match look_config.gd:114-118; olive moss = woodland.json 0x8c9a48), :210 (recipes line), game/map/README.md:15 (no grid).
-Failed checks, with evidence:
-8. [judgment] c499c80 commits 32 run logs, pipeline/out/qa/*.log (about 2,500 lines), force-added past .gitignore:10-11 (`*.log`, `pipeline/out/`); pipeline/README.md:20-21: "pipeline/out/ holds a run's reports and logs and is never committed". (The three tracked report files predate WA1; editing them follows main.) QA's test_wa1_qa.gd also rides in the thread's commit without the `Agent: qa` trailer (pipeline/README.md:14).
-Must-fix before the push (no new attempt needed): `git rm -r --cached pipeline/out/qa/*.log` and amend; optionally move test_wa1_qa.gd into its own commit with `Agent: qa`.
-Owner should test in the game (at most 6, one line each):
-- Woodland by day on Low and on Ultra: do the crowns, bushes and meadow read bright and clean, with no white glow or flat patches?
-- Woodland's darker leaf litter by day: still reads as leaves, not as mud or bare earth next to the earth paths?
-- Woodland at night: logs, fences and boards stand clear of the litter; greybox, woods and bushes readable under the moon.
-- The crimson and yellow leaf drifts: autumn leaves, not markers or team paint?
-- F3 on High and Ultra at Hut row and the Sawmill against main: frame time with the shared light over greybox and woods.
-- The Range without its metre grid: is distance still easy to judge? Depot after the rebake: bounce light unchanged?
+Head: 91825e4 (= HEAD; QA Pass, performance Pass on 915afe2, still valid: 915afe2..91825e4 changes only CI, docs, a test
+reason string and street.json's areas list, which holds names only; tools/check.sh and the A/D guard still running, so the verdict holds only if they go green)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
+Score: 8/8 → Accept
+Evidence:
+1. data/maps.md:28 lists street as public 5/5/6 at 180 s. test_street.gd:41 checks every block is a palette colour, :58 that the
+   glass stops BBs and the open half doesn't, :80 that railings and sills clear vault and jump height. The guards run as their
+   own CI job (ci.yml:273-283), and Elimination at Normal passed locally (117 rounds, 16 seeds, 0 on time).
+2. No contract touched: layout values stay in data/maps/street.json and MapStyle.
+3. No per-frame code. glass_materials() (map_level.gd:165) runs once in _build_views.
+4. test_street.gd:58 fails without the Glass mesh, and :97 fails without Block.colour.
+5. clear_kinds is MapStyle data. The colour parse refuses non-integers (map_data.gd:337). Static types throughout.
+6. Pastel palette, no gore, glass solid to BBs. The owner's 82 m and 1.3 rulings are recorded (DECISIONS, field_standard.gd:83-92).
+7. Area names now distinct (layout.py:157-182: Lower green, The lawn, West/East gardens, Left/Right bays; the Cul-de-sac's
+   two boxes adjoin). The Street's guards have their own "Street match guards" job; Woodland's night job is as it was.
+8. ASSETS.md:38 and :67-69 list street.jpg and tools/street/. game/map/README.md covers Block.colour, the Glass mesh and
+   clear_kinds. Maps.md:131 states today's state with a Roadmap link.
+Notes (not failures): "Back garden" (the House's) beside "Back gardens" is close but names distinct places. The
+test_wa1_qa.gd.uid file from another task rides along and is harmless.
+Owner should test in the game:
+- Shoot at a bot you can see through the House's glass: does the BB stopping on the pane feel fair, and does it matter that bots don't see you through it?
+- Waist-high 1 m railings can't be vaulted while 0.9 m low walls can: does that read, or feel like an invisible wall?
+- Attack / Defend: can Alpha reach flag A (the House) in time with only a 1.3 head start?
+- The ~80 m cross-lane diagonals over railings and cars: do they dominate rounds?
+- The pastel terraces and cars against the team colours, by day and under the lamp pools at night.
+- Glass at 0.35 opacity, day and night, from both sides; the minimap's area names as you cross the Street.

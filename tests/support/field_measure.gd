@@ -261,7 +261,8 @@ func walk(a: Vector3, b: Vector3) -> float:
 
 
 ## The centre of the walkable ground's bounds, on the lowest floor there (the street, not a balcony over it), or the
-## nearest walkable ground to it.
+## nearest walkable ground to it; where that is ground nobody reaches on foot (a garden behind a shut gate, ST1), the
+## nearest ground the first spawn of end 0 reaches.
 func middle() -> Vector3:
 	if not _measured.has("middle"):
 		var cx := (_x0 + _x1) * 0.5
@@ -271,8 +272,35 @@ func middle() -> Vector3:
 		if lowest < 0 or nav.walkable[lowest] != 1:
 			var y := nav.floor_y[lowest] if lowest >= 0 else 0.0
 			ground = nav.nearest_walkable(Vector3(cx, y, cz), MIDDLE_REACH)
+		var from := _spawn_node()
+		if ground >= 0 and from >= 0 and not nav.linked(from, ground):
+			ground = _nearest_linked(from, Vector3(cx, nav.floor_y[ground], cz))
 		_measured["middle"] = nav.node_position(ground) if ground >= 0 else Vector3(cx, 0.0, cz)
 	return _measured["middle"]
+
+
+## The nav node under end 0's first spawn, or -1.
+func _spawn_node() -> int:
+	if map.ends.is_empty() or map.ends[0].spawns.is_empty():
+		return -1
+	var p := map.ends[0].spawns[0].position
+	var k := nav.node_at(p)
+	return k if k >= 0 and nav.walkable[k] == 1 else nav.nearest_walkable(p, MIDDLE_REACH)
+
+
+## The walkable node nearest `p` on the plan that node `from` reaches on foot, or -1.
+func _nearest_linked(from: int, p: Vector3) -> int:
+	var best := -1
+	var best_d := INF
+	for k in nav.node_count():
+		if nav.walkable[k] != 1 or not nav.linked(from, k):
+			continue
+		var q := nav.node_position(k)
+		var d := Vector2(q.x - p.x, q.z - p.z).length_squared() + absf(q.y - p.y)
+		if d < best_d:
+			best_d = d
+			best = k
+	return best
 
 
 ## Each end's walks from its spawns to `p`, spawn by spawn (m, INF where there is no way).
