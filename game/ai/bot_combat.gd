@@ -94,7 +94,7 @@ static func _slice(b: Bot, w: BotWorld, a: BotAngles.HeldAngle, cmd: PlayerComma
 ## slices the corner nearest its bearing. False once the spot is in plain view (then it watches the spot itself).
 static func _slice_towards_last_known(b: Bot, w: BotWorld, eye: Vector3, cmd: PlayerCommand) -> bool:
 	var head := b.last_known + Vector3(0.0, w.tuning.body.stand_eye_height, 0.0)
-	if BotSenses.line_clear(w.query, eye, head):
+	if BotSenses.sight_clear(w.query, eye, head):
 		return false
 	# Only a corner short of the spot can be the one it is behind (not the far end of a long wall).
 	var to_spot := Vector2(head.x - eye.x, head.z - eye.z).length()

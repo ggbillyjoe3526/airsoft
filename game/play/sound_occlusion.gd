@@ -95,7 +95,7 @@ func impact_share(at: Vector3, came: Vector3 = Vector3.ZERO) -> float:
 	var start := Time.get_ticks_usec()
 	var blocked := false
 	if came.length_squared() > 0.0:
-		blocked = _query.ray(_ear, at - came.normalized() * _cfg.occlusion_impact_back, _hit)
+		blocked = _query.ray_past_railings(_ear, at - came.normalized() * _cfg.occlusion_impact_back, _hit)
 	else:
 		blocked = SoundPath.line_blocked(_query, _ear, at, _cfg.occlusion_surface_gap, _hit)
 	ray_usec += Time.get_ticks_usec() - start
