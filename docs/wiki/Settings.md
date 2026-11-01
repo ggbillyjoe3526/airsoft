@@ -70,7 +70,7 @@ If the game stutters, lower the preset or the render scale first.
 - **HUD opacity** sets how solid the panels are; text stays solid.
 - **HUD size** from 80 % to 150 %. The crosshair and hit marker keep their size.
 - **What got you:** Auto, On or Off ([HUD and Minimap](HUD-and-Minimap#what-got-you)).
-- **Minimap:** Rotating or Fixed.
+- **Minimap:** Rotating or Fixed, and its **Zoom**, 50 % to 200 % (how close it shows the field).
 - **Callouts:** On (the default) shows your teammates' calls in the hit feed with a radio click, and lets you hear
   enemies close by keying their radios. Off hides the calls and stops every call's click at once; a squad order a
   teammate takes still clicks.

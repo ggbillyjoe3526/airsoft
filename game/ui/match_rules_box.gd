@@ -23,6 +23,9 @@ const CHIP_SIZE := 14
 const CHIP_PAD := Vector2(12.0, 6.0)
 const CHIP_WORD_GAP := 5
 const ROW_GAP := 8
+## The room over the Day / Night row, past ROW_GAP, so it sits clear of the rows above (MC1, owner 2026-11-01: it sat
+## too close under Ricochets and Friendly fire).
+const TIME_TOP_GAP := 18
 const ROW_LABEL_WIDTH := 170.0
 const ROW_LABEL_SIZE := 15
 const ROW_LABEL_TOP := 7
@@ -91,6 +94,11 @@ func _init(picked: MatchPicks, settings: Settings, tuning: SimTuning) -> void:
 	_time_rows = VBoxContainer.new()
 	_time_rows.add_theme_constant_override("separation", ROW_GAP)
 	add_child(_time_rows)
+	var room := Control.new()
+	room.name = "TimeOfDayRoom"
+	room.custom_minimum_size = Vector2(0.0, TIME_TOP_GAP)
+	room.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_time_rows.add_child(room)
 	_build_time_of_day()
 	show_tuning(tuning)
 

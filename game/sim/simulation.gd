@@ -50,6 +50,8 @@ var _vaulting: PlayerCommand = PlayerCommand.new()
 var _after_vault: PlayerCommand = PlayerCommand.new()
 ## Followed while throwing a bomb: the command with its trigger and sights let go (Grenades.throwing_command).
 var _throwing: PlayerCommand = PlayerCommand.new()
+## Followed with a bomb in hand: a trigger pull its throw, the trigger and sights let go (Grenades.ready_command).
+var _readied: PlayerCommand = PlayerCommand.new()
 ## Where a ping's view met the field (one at a time).
 var _ping_hit: RayHit = RayHit.new()
 
@@ -137,8 +139,10 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 				Vault.try_start(c, cmd, tuning, query, state.events)
 		if in_play and c.vault.active:
 			cmd = Vault.vaulting_command(c, cmd, _vaulting)
-		# A bomb's press puts the replica down; while throwing, the trigger and sights are let go.
+		# A bomb's press puts the replica down; while throwing, the trigger and sights are let go. A bomb in hand (MC1)
+		# turns a trigger pull into its throw.
 		if in_play:
+			cmd = Grenades.ready_command(c, cmd, _readied)
 			grenades.press(c, cmd, live, state.grenades, state.events)
 			if Grenades.throwing(c):
 				cmd = Grenades.throwing_command(cmd, _throwing)

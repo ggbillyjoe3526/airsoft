@@ -14,7 +14,9 @@ extends Node
 ## tick's mag_hand_off once, dead on the range and while you are out (where the wheel is); `mag_from_wheel` says
 ## whether the last one sent was picked on the wheel, for where its refusal shows. Throw smoke and Throw flash (SF1)
 ## fill the next tick's throw_grenade once (the last pressed, if both). Open / shut door (DO1) fills the next tick's
-## use_door once.
+## use_door once. The mouse wheel (MC1, owner 2026-11-01) steps through the replicas and then the bombs left, smoke then
+## flash, round again, never onto the holster: a step onto a bomb takes it in hand (PlayerCommand.ready_grenade), a step
+## onto a replica draws it (`wheel_item`).
 ## Go there (FM1: its key, the wheel's Go There) is a ping along the view that sends your bot teammates there
 ## (PlayerCommand.ping_move). Held, the full-screen map's key opens the map (`allow_map`): as with the wheel the mouse
 ## moves the map's own pointer (MapPointer) instead of the view, feet still move, the mouse wheel switches nothing, and
@@ -253,9 +255,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				_holster_latch = false
 
 
-## Whether Jump (Space) is held, which skips the round while you are out (only while the mouse is captured).
+## Whether the trigger (fire) is held: out of a round, a fresh press skips it (MC1; only while the mouse is captured).
 func skip_held() -> bool:
-	return active and Input.is_action_pressed(JUMP)
+	return active and Input.is_action_pressed(FIRE)
 
 
 ## Whether the scoreboard's key is held (only while the mouse is captured, so a menu's Tab never shows it).
@@ -404,9 +406,28 @@ func _close_wheel() -> void:
 	hold_fire()
 
 
+## The mouse wheel's items: the replicas' two slots (SLOTS), then a smoke and a flash bomb.
+const WHEEL_SMOKE := 2
+const WHEEL_FLASH := 3
+const WHEEL_ITEMS := 4
+
+
+## The wheel's item `steps` on from `current` (WHEEL_* or a slot), round and round, past a bomb with none left
+## (`smoke`, `flash`: one left). The replicas' slots always count.
+static func wheel_item(current: int, steps: int, smoke: bool, flash: bool) -> int:
+	var at := clampi(current, 0, WHEEL_ITEMS - 1)
+	var dir := signi(steps)
+	for i in absi(steps):
+		for tries in WHEEL_ITEMS:
+			at = posmod(at + dir, WHEEL_ITEMS)
+			if (at != WHEEL_SMOKE or smoke) and (at != WHEEL_FLASH or flash):
+				break
+	return at
+
+
 ## This tick's command: held keys as they are now, presses since the last tick, the view as the mouse left it.
-## `held_slot` is the replica in hand, which the mouse wheel steps from.
-func fill(cmd: PlayerCommand, held_slot: int = 0) -> void:
+## `held_slot` is the replica in hand and `hand` the bombs (null: none), which the mouse wheel steps from.
+func fill(cmd: PlayerCommand, held_slot: int = 0, hand: Grenades.Hand = null) -> void:
 	if not active:
 		cmd.reset(view_yaw, view_pitch)
 		cmd.manual_reload = not _controls.auto_reload
@@ -443,12 +464,34 @@ func fill(cmd: PlayerCommand, held_slot: int = 0) -> void:
 	cmd.holster = _holster_latch
 	cmd.toggle_torch = _torch_latch
 	cmd.throw_grenade = _throw_latch
+	cmd.ready_grenade = Grenade.Kind.NONE
 	cmd.use_door = _door_latch
 	if _slot_steps != 0:
-		cmd.switch_to = posmod(held_slot + _slot_steps, SLOTS.size())
+		_wheel_to(cmd, held_slot, hand)
 	cmd.mag_hand_off = false
 	fill_order(cmd)
 	_clear_latches()
+
+
+## The mouse wheel's steps since the last tick into `cmd`: the replica to draw, or the bomb to take in hand.
+func _wheel_to(cmd: PlayerCommand, held_slot: int, hand: Grenades.Hand) -> void:
+	var current := held_slot
+	var smoke := false
+	var flash := false
+	if hand != null:
+		smoke = hand.smoke > 0
+		flash = hand.flash > 0
+		if hand.readied == Grenade.Kind.SMOKE:
+			current = WHEEL_SMOKE
+		elif hand.readied == Grenade.Kind.FLASH:
+			current = WHEEL_FLASH
+	var item := wheel_item(current, _slot_steps, smoke, flash)
+	if item == WHEEL_SMOKE:
+		cmd.ready_grenade = Grenade.Kind.SMOKE
+	elif item == WHEEL_FLASH:
+		cmd.ready_grenade = Grenade.Kind.FLASH
+	else:
+		cmd.switch_to = item
 
 
 ## Writes the squad order keyed or picked since the last tick, and a ping pressed since, into `cmd`, once. `fill`

@@ -19,7 +19,7 @@ lands. The **START** plate starts the timed challenge.
 ## The readout
 
 After each shot a readout names your last BB's target and distance, where it landed, or that it flew out, with a tip
-such as "Aim lower, or turn the hop-up down". Use it with the hop-up dial (4 and 5) to learn how far each replica stays
+such as "Aim lower, or turn the hop-up down". Use it with the hop-up dial (Page Down and Page Up) to learn how far each replica stays
 flat ([How to Play](How-to-Play#hop-up)).
 
 ## Timed challenge

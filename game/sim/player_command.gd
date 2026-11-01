@@ -56,6 +56,9 @@ var ping_target: Vector3 = Vector3.ZERO
 var mag_hand_off: bool = false
 ## Throw a bomb of this kind (one-shot; Grenades, SF1): NONE throws nothing.
 var throw_grenade: Grenade.Kind = Grenade.Kind.NONE
+## Take a bomb of this kind in hand (one-shot; MC1, the mouse wheel's step past the replicas): the replica goes down and
+## the next trigger pull throws it (Grenades.ready_command). NONE takes none.
+var ready_grenade: Grenade.Kind = Grenade.Kind.NONE
 ## Open or shut a door (one-shot; Doors, DO1): the one in reach nearest the view's line, or `door_to_use` when the
 ## controller picked one (a bot, the door its walk goes into; -1: none picked).
 var use_door: bool = false
@@ -90,6 +93,7 @@ func reset(view_yaw: float = 0.0, view_pitch: float = 0.0) -> void:
 	ping_target = Vector3.ZERO
 	mag_hand_off = false
 	throw_grenade = Grenade.Kind.NONE
+	ready_grenade = Grenade.Kind.NONE
 	use_door = false
 	door_to_use = -1
 
@@ -121,5 +125,6 @@ func copy_from(other: PlayerCommand) -> void:
 	ping_target = other.ping_target
 	mag_hand_off = other.mag_hand_off
 	throw_grenade = other.throw_grenade
+	ready_grenade = other.ready_grenade
 	use_door = other.use_door
 	door_to_use = other.door_to_use
