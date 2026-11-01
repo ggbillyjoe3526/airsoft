@@ -47,7 +47,8 @@ leaves out ships as null and the exported game crashes. `tests/unit/test_saved_c
 | `debug_view_config.gd` | The F4/F5 debug draw: a BB trail's length and colours, the hit volumes' colours and roundness |
 | `report_config.gd`, `report_config.tres` | The bug report (`game/report/`): the issue address and its 8,000-character limit, the cut steps, the note and title lengths, the lists' lengths, the burst ticks, the frame window and hitch threshold, the log lines, the shortest name taken out, the teams' names (loaded on its own, `ReportConfig.load_default()`) |
 | `hud_config.gd` | the low-magazine share, the magazine boxes' sizes, the crosshair, the hit marker, banner times, the hop-up readout, the vault prompt, the flag marker and warning |
-| `map_style.gd` | A map's greybox: colours and surface by block kind, the ground, the world grid |
+| `map_style.gd` | A map's greybox: colours and surface by block kind, the ground, the world grid; the see-through kinds (glass) and the bar railings' kinds |
+| `railing_config.gd` | A bar railing's bars and rails (SR1): bar spacing and width, rail height, the bottom rail's gap; read by Railings and drawn by MapLevel |
 | `graphics_table.gd`, `graphics_quality.gd` | Read `data/graphics.md`: the graphics presets (Low to Ultra), each row's label, choices or range, cost and the renderers that draw it; one set of values a field per row, a preset's or Custom's (a preset with your own rows over it) |
 | `graphics_pick.gd` | The first start's preset from the graphics card and the renderer (never Ultra), and the `--graphics=` launch option |
 | `display_config.gd` | The window: the frames a second drawn in the background (30), and the keys that switch between a window and fullscreen (F11, Alt+Enter); the automatic graphics step-down's numbers (FrameWatch: 2 s windows, 20 ms or 1.25 frames of the limit, a 5 % slow share, 2 windows, the HUD line's 5 s) |

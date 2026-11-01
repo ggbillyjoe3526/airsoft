@@ -1,12 +1,12 @@
 # SR1 · See-through railings on The Street
 
-**Review:** 1 attempt · critic pending · qa pending · performance pending
+**Review:** 1 attempt · critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-01 | 1 | Opus 5.5 (build thread) | ✓ | pending | – |
+| 2026-11-01 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Accept | – (check 8: game/config/README row, added) |
 
 ## What changed
 
@@ -46,3 +46,7 @@
 ## Known issues left
 
 - A baked map would draw its railings as solid blocks (no baked map has any; KNOWN_ISSUES).
+- A railing still muffles sound behind it, and a few bot checks (corner slicing, crossfire lane, held angles, pings)
+  still treat its box as blocking the eye (KNOWN_ISSUES).
+- The Railings mesh (19k triangles) casts sun shadows and spans the map, so it never culls; Low draws no sun shadows.
+  Check its cost on High and Ultra.
