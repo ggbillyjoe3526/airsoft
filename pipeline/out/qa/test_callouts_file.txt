@@ -1,0 +1,43 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_callouts_file.gd
+* test_the_shipped_file_reads_clean_against_bots_md_and_is_the_file_the_game_loads
+* test_the_shipped_file_rules_every_event_with_an_any_line_and_talks_for_every_personality
+* test_the_shipped_file_keeps_the_urgent_calls_first
+* test_the_shipped_file_has_a_line_without_an_area_for_events_that_can_come_without_one
+* test_the_shipped_file_marks_some_sightings_and_never_every_one
+* test_the_shipped_file_has_magazine_lines_for_every_voice_and_asks_always
+* test_reads_chances_gaps_pace_talks_and_lines_the_row_order_the_priority
+* test_never_throws_and_reports_each_bad_row_with_its_line
+* test_leaves_out_a_line_with_a_wrong_fill_a_stray_brace_one_too_long_or_an_unknown_voice
+* test_reads_the_marks_and_reports_a_bad_unknown_doubled_or_missing_rule_keeping_its_fallback
+* test_reports_a_personality_the_file_leaves_out_and_one_bots_md_lacks
+* test_a_missing_file_says_so_and_calls_nothing
+* test_fills_the_area_in_and_numbers_as_words_a_capital_only_where_a_sentence_starts
+* test_says_numbers_to_twelve_in_words_and_digits_past_it
+14/14 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                14
+Passing Tests        14
+Asserts             252
+Time              0.377s
+
+
+---- All tests passed! ----
+

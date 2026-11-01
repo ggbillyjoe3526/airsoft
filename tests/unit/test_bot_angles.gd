@@ -344,8 +344,10 @@ func test_plays_the_same_tick_for_tick_wherever_a_hidden_silent_enemy_stands_at_
 			var east := _hidden_run(map, level, nav, lv, seed_value, 1)
 			assert_gt(_distinct(west), 20, "%s, seed %d: it moves and looks about" % [lv, seed_value])
 			assert_eq(east, west, "%s, seed %d" % [lv, seed_value])
-		assert_eq(_angled, config.skill_for(lv).holds_angles or config.skill_for(lv).slices_corners,
-				"%s: Hard's runs aim at corners, the others' never look for them" % lv)
+		# The watcher is the last of its team in play, so a level that plays the last bot carefully (BQ3) looks too.
+		var s := config.skill_for(lv)
+		assert_eq(_angled, s.holds_angles or s.slices_corners or s.careful_when_last,
+				"%s: Hard's runs and a careful last bot's aim at corners, Easy's never look for them" % lv)
 	level.free()
 
 

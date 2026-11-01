@@ -128,6 +128,14 @@ func test_the_watch_is_not_started_without_a_contact_or_below_pro() -> void:
 
 func test_a_watch_ends_when_the_enemy_is_seen_again_and_it_fights() -> void:
 	var b := _bot(&"hard", WorldQuery.new())
+	# A floor under both, for a search that goes round by a flank (the bot's draws decide whether it does).
+	var m := MapData.new()
+	var floor_block := MapData.Block.new()
+	floor_block.kind = &"floor"
+	floor_block.center = Vector3(0.0, -0.25, -20.0)
+	floor_block.size = Vector3(100.0, 0.5, 100.0)
+	m.blocks.append(floor_block)
+	_w.nav = NavGrid.build(m, tuning.nav, tuning.body)
 	var foe := _w.characters[1]
 	BotSenses.perceive(b, _w)
 	b.mode = Bot.Mode.FIGHT

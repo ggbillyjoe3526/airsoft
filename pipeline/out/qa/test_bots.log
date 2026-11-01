@@ -1,0 +1,47 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_bots.gd
+* test_whole_bot_matches_play_out_fairly_over_seeds
+    bot matches: 26 rounds, 0 by the clock, 0 friendly hits, 77 holsters
+* test_bot_matches_with_ricochets_counting_stay_playable
+    ricochets counting: 247 hits, 41 off a bounce, 2 on a teammate, 3 on the shooter
+* test_a_bot_does_not_see_an_enemy_behind_a_wall
+* test_a_bot_holds_fire_with_a_teammate_in_the_line
+* test_a_bot_holds_fire_while_a_teammate_could_run_into_the_line
+* test_a_bot_holds_fire_while_a_sprinting_teammate_s_route_turns_it_across_the_line
+* test_a_bot_keeps_firing_with_a_teammate_nowhere_near_the_line
+* test_a_teammate_who_is_out_stops_only_the_bbs_before_the_target
+* test_a_miss_flies_on_past_a_near_target_as_far_as_a_bb_carries
+* test_a_bot_s_point_ahead_follows_its_route_round_corners
+* test_gunfire_is_heard_and_walls_muffle_it
+* test_a_silenced_shot_and_a_rattling_magazine_carry_less_far
+* test_cover_found_hides_from_the_threat
+* test_aim_error_settles_with_time_on_target
+* test_bot_ticks_allocate_no_objects_once_warm
+* test_pro_bot_ticks_allocate_no_objects_once_warm
+16/16 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                16
+Passing Tests        16
+Asserts              77
+Time              176.686s
+
+
+---- All tests passed! ----
+

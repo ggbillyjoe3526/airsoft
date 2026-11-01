@@ -103,6 +103,8 @@ func think(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		_ran_low = true
 		DevCheats.run_low(state, _player_id)
 	BotMagShare.update(w, sharing)
+	# What the bots saw a moment ago, told to their teammates (BQ3).
+	BotRadio.step(w)
 	if w.mode == RoundState.Mode.ATTACK_DEFEND:
 		BotFlag.pick_retakers(w)
 		BotFlag.pick_raiser(w)

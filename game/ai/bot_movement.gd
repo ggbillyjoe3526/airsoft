@@ -605,9 +605,14 @@ static func _forget_search(b: Bot, w: BotWorld) -> void:
 
 
 ## Sidestepping while shooting: never off a floor, into a wall or out of sight of the target; the other way, or
-## forward or back if both sides are blocked, or it stands.
+## forward or back if both sides are blocked, or it stands. Kneeling to fire (BQ3), it sidesteps only between bursts.
 static func _strafe(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float, target: Character) -> void:
 	var cfg := w.cfg
+	if b.skill.kneels_to_fire and b.bursting and b.knee_clear and b.target_visible:
+		# A knee for the burst it is firing (BQ3): still and low while its BBs go; never for a burst left hanging, nor
+		# where kneeling would put low cover between it and the target.
+		cmd.crouch = true
+		return
 	b.strafe_left -= dt
 	var new_step := b.strafe_left <= 0.0
 	if new_step:
@@ -642,7 +647,7 @@ static func _step_blocked(b: Bot, w: BotWorld, right: float, forward: float, tar
 	if target == null or not b.target_visible:
 		return false
 	var eye := BotSenses.eye_of(b.character, w.tuning) + _step_dir(b, right, forward) * w.cfg.strafe_sight_offset
-	return not BotSenses.line_clear(w.query, eye, BotSenses.body_point(target, w.tuning.hits, b.target_part))
+	return not BotSenses.sight_clear(w.query, eye, BotSenses.body_point(target, w.tuning.hits, b.target_part))
 
 
 ## The view's right on the ground is (cos yaw, 0, -sin yaw), its forward (-sin yaw, 0, -cos yaw).

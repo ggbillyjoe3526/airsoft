@@ -1,34 +1,56 @@
-Task: FM2 (none; owner playtest 2026-11-01) · QA commit see git log (on top of 0dc04a8) · Verdict: Pass
+Task: BQ3 · QA commit (attempt 2, see git log, Agent: qa) · Verdict: Pass
 
-Blocking: none. The first run's stale test (test_mm3_qa) is fixed and passes.
+Attempt 2 (fix 218a2aa: Bot.bursting, set by BotCombat.shoot only on a tick it presses on with a burst, cleared at the top
+of shoot and in Bot.reset; the kneel needs `bursting and target_visible`)
+- Blocking 1 (unparsable test_bq3_team_play) stays fixed: 8/8 run and pass.
+- Blocking 2 (kneeling on a stale burst) is fixed: the same Normal Depot match that showed 354 of 3041 FIGHT ticks kneeling
+  without firing (211 blind, longest 211 ticks) now shows 15 of 2802, none blind, longest streak 1 tick (the knee comes the
+  tick after the burst starts and ends the tick after it does). The two pins in test_bq3_qa.gd now pass (7/7, 33 s).
+- Re-run: test_bq3_team_play 8/8, test_bot_angles 14/14, test_tl1_qa 7/7. test_bots, test_bot_bombs, test_bot_difficulty
+  and the smoke test were not re-run by me (a sweep is running in this tree); the fix touches only bot_combat.gd (two
+  lines), bot.gd and bot_movement.gd's kneel gate.
+- Advisories left as they were: pressing is sticky by design; the careful last bot's lane walk awaits the A/B re-measure.
+  The A/B for the knee (57 % Normal) should be re-measured on the fixed code if the Checks table is to stay true.
 
-Advisory (none blocks)
-- game/ui/minimap_field.gd (build, ground_rect): the picture is cols/step samples, so a terrain whose columns do not
-  divide by the sample step stops up to one sample (relief_cell, 1 m) short of the terrain's far edge, and a terrain
-  smaller than one sample (1x1 image) overshoots it by up to step-1 squares. Woodland divides evenly (352x240, step 2) and
-  no real map is tiny, so nothing shows today; test_the_ground_picture_covers_the_terrain_to_within_one_sample pins the
-  one-sample bound.
+--- Attempt 1 report (Fail), kept for the record ---
+Task: BQ3 · QA commit 865e729 · Verdict: Fail
 
-Re-run on 0dc04a8 (single files, raw output in pipeline/out/qa/): test_fm2_qa 35/35, test_fm2_field_map 12, test_fm1_field_map 15,
-test_fm1_qa 21, test_mm3_qa 14, test_minimap_field 11, test_hud_minimap 17, test_bushes 38, test_two_flags 18,
-test_ping_markers 22, test_pn2_qa 8, test_hud_size 12, test_dp4_qa 7, test_minimap_hearing 11, test_mm2_qa 9,
-test_mm4_qa 16: all pass. gdlint on test_fm2_qa.gd clean. tools/check.sh and the full suite not run (run elsewhere).
+Blocking
+1. tests/unit/test_bq3_team_play.gd:87 did not parse (`for id in [5, 6]`, untyped iterator, warning treated as error): GUT
+   ignores the whole file, so none of BQ3's 8 tests ran. I typed it (`for id: int in`) in my commit; with that all 8 pass.
+   The record's "qa Pass" line (docs/records/BQ3.md) was therefore never true; it needs updating.
+2. A bot stays crouched and still on a stale burst. game/ai/bot_movement.gd:611 kneels on `b.burst_left > 0.0`, but
+   BotCombat.shoot (bot_combat.gd:~148-166) returns early without touching burst_left when the target is gone, not yet
+   in the fire cone, or the line is blocked by glass or leaves; burst_left also survives into the next fight (reset only on
+   a new contact, bot_senses.gd:147). In 3 seeded Depot matches (Normal, 3 round lengths x6): 354 of 3041 FIGHT ticks
+   (11 %) were kneeling without firing, 211 of them with the target not visible (FIGHT lingers), the longest streak 211
+   ticks (3.5 s) crouched, still and not shooting. A bot out of the fight's rhythm is the easiest target. Fix (worker):
+   gate the kneel on `b.target_visible and b.no_shot_for == 0.0` (and ideally zero burst_left on shoot()'s early returns).
+   Note it also fires its first BB of each burst standing (the knee is applied the tick after burst_left is set).
+   The owner's A/B (57 % Normal) was measured with this behaviour; re-measure after the fix.
 
-Tests added (tests/unit/test_fm2_qa.gd, 10 new, 35 total, 13467 asserts, 12 s). Checked by temporarily stubbing the
-feature in game/ (reverted, nothing under game/ committed): zone word taken as the first try with no clearing, the
-storey wash removed, ground_of returning null.
-- :486 zone words stay on the field and clear of every zone box, flag, compass, name and each other on 3 maps x 3 screen
-  sizes · fails with the clearing stubbed (words over zone boxes, off the field)
-- :520 zone boxes clipped to the field; a zone with no box has no word
-- :532 first_clear: first clear try, slid inside the bounds, gap across vs down, none when boxed in or no tries
-- :548 lay_out: zero-size want left out, Vector2 gap kept across and down
-- :572 Woodland: ground picture inside the layer, layer clear over most of it, full map and minimap Views hold the texture
-  · fails with ground_of stubbed to null
-- :598 Depot and The Street (no terrain) and an empty map: no ground image, rect or texture, Views draw none
-- :611 Tower Block with terrain: street storey clear, storeys above washed with below_storey_colour · fails with the wash removed
-- :625 tiny terrains (1x1 cell, 3x2, odd 21x19): picture non-empty and drawn, a View built on it draws · fails with ground_of null
-- :650 ground picture within one sample of the terrain's far edges (odd column count)
-- :664 repeated build/ground_of leaves no growth and the image stays readable after mipmaps
+Advisory
+- Pressing is sticky: `hunting` is set once (bot_brain.gd:217) and not cleared when the lead is lost, as for pushing_late.
+- Careful last bot walks the whole lane from the round start (slow); it could add round timeouts in 1v1s. Not measured.
+- test_bots warm-tick check now allows object growth equal to the event pool's growth (SimEvents.items); any one-off beyond
+  that still fails, so it still catches per-tick allocation. BotRadio/pressing/careful_last allocate nothing (read).
 
-Not testable headless: how the GPU-smoothed ground looks, whether names and zone words read well on a real window
-(owner's list: open M on Woodland at 1920x1080 and 1280x720 and look at the ground blend, words and the key's flag glyph).
+Checked, no bug: radio skips dead/out/other-team/fighting/seeing/fresher-news bots and the caller; a call due while not live
+or with the caller out is dropped; Bot.reset clears share_id/share_at; Easy never draws RNG for it; pressing and careful_last
+are Elimination and live only (not Attack/Defend; overtime bots are in FLAG mode); kneel is skipped for the raiser at the
+pole and fighting from cover; ORDER bots take radio news as a heard noise (same path as BotHearing).
+
+Tests added (tests/unit/test_bq3_qa.gd, 7 tests, 5 pass, 2 fail by design on blocking item 2)
+- :43 · a kneeling bot is never crouched and still >= 1 s on a burst it is not firing (whole Normal match) · FAILS (211 ticks)
+- :93 · Bot.reset clears a pending call · fails if the two reset lines in bot.gd are removed
+- :105 · radio does not overwrite half-second-old own news · fails if the freshness guard in bot_radio.gd:41 is removed
+- :130 · radio skips an OUT teammate and the other team · fails without the in_play/team filters
+- :155 · a call is dropped when the round is not live · fails without the `w.live` test
+- :168 · pressing and careful_last wait for a live round · fails without `live`
+- :195 · a leftover burst with the target out of sight does not kneel (unit pin, fast) · FAILS
+I checked the "fails without" claims by reading the guarded lines, not by stubbing them out.
+
+Counts: test_bq3_team_play 8/8 (after the typing fix), test_tl1_qa 7/7, test_bot_angles 14/14, test_bots 16/16 (177 s),
+test_bot_bombs 14/14, test_bot_difficulty 10/10, smoke test PASS. Full suite and tools/check.sh not run (about 40 min).
+Logs: pipeline/out/qa/. Not testable headless: how the knee feels (owner: watch a duel on Depot; bots should stand and
+sidestep between bursts, never stay low and idle).

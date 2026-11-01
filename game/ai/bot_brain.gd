@@ -46,8 +46,8 @@ static func think(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> void:
 	_choose_mode(b, w, target, dt)
 	# With a threat in mind, or walking its lane in the enemy's half (skill.slices_corners): walk and slice each corner
 	# ahead. Hunting with nothing heard, it hurries.
-	var near := b.skill.slices_corners and (b.threat_in_mind(w.time, cfg)
-			or (not b.hunting and w.planner.in_enemy_half(b)))
+	var near := (b.skill.slices_corners and (b.threat_in_mind(w.time, cfg)
+			or (not b.hunting and w.planner.in_enemy_half(b)))) or w.careful_last(b)
 	var trading := w.trading(b)
 	var pusher := BotPersonality.pushes_in(b)
 	b.careful = near and not trading and not pusher and (b.mode == Bot.Mode.ADVANCE or b.mode == Bot.Mode.SEARCH) \
@@ -214,8 +214,9 @@ static func _choose_mode(b: Bot, w: BotWorld, target: Character, dt: float) -> v
 	elif holds_post and not fresh:
 		# Holding its post: stop watching where a noise was once it is old news.
 		b.has_last_known = false
-	if b.mode == Bot.Mode.ADVANCE and not b.hunting and w.pushing_late(b):
-		# Behind on players late in the round (team play): stop holding the lane and go looking for them.
+	if b.mode == Bot.Mode.ADVANCE and not b.hunting and (w.pushing_late(b) or w.pressing(b)):
+		# Behind on players late in the round (team play), or well ahead on them (BQ3): stop holding the lane and go
+		# looking for them.
 		b.hunting = true
 		BotRoutes.drop(b)
 		b.hold_left = 0.0
@@ -236,7 +237,10 @@ static func _stay_in_cover(b: Bot, w: BotWorld, seeing: bool, reloading: bool, a
 		b.cover_left -= dt
 	# Settled in cover but still in sight of an enemy (flanked, or the spot doesn't hide it): fight back.
 	var exposed := b.cover_phase == Bot.CoverPhase.DOWN and b.cover_held >= cfg.cover_settle and seeing and not reloading
-	var done := exposed or cover_over or b.cover_give_up <= 0.0 or b.route_state == Bot.RouteState.FAILED
+	# Under Follow me with nobody in sight and BBs in its magazine, it keeps up with a giver moving off (BQ3).
+	var follow_on := not seeing and not reloading and b.character.armament.mag() > 0 \
+			and SquadOrders.giver_leaving(b, w)
+	var done := exposed or cover_over or follow_on or b.cover_give_up <= 0.0 or b.route_state == Bot.RouteState.FAILED
 	if not done and at_cover and b.cover_phase == Bot.CoverPhase.DOWN and b.cover_left <= 0.0 and not reloading:
 		# Time to look again: over crouch cover by standing, round a corner by leaning out, else by moving on.
 		if (b.cover.crouch_only or _leans_out_here(b, w)) and b.peeks_left > 0:

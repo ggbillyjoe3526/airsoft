@@ -31,6 +31,11 @@ pre_aim_reaction_time = Vector2(0.25, 0.45)
 overtime_reaction = Vector2(0.3, 0.7)
 smoke_chance = 0.5
 flash_chance = 0.5
+share_radius = 35.0
+share_delay = Vector2(1, 1.6)
+presses_advantage = true
+careful_when_last = true
+kneels_to_fire = true
 
 [sub_resource type="Resource" id="Resource_pro01"]
 script = ExtResource("2_bskl1")
@@ -60,6 +65,11 @@ team_play = true
 overtime_reaction = Vector2(0.2, 0.5)
 smoke_chance = 0.7
 flash_chance = 0.7
+share_radius = 45.0
+share_delay = Vector2(0.5, 0.9)
+presses_advantage = true
+careful_when_last = true
+kneels_to_fire = true
 
 [sub_resource type="Resource" id="Resource_sqd01"]
 script = ExtResource("3_sqcf1")

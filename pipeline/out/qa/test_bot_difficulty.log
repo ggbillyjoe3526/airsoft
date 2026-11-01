@@ -1,0 +1,39 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_bot_difficulty.gd
+* test_each_level_has_the_browser_games_numbers
+* test_only_hard_has_the_tactics
+* test_each_level_up_reacts_sooner_turns_faster_and_aims_better
+* test_teammates_follow_the_other_team_at_every_level
+* test_each_team_plays_its_own_level
+* test_a_session_gives_your_teammates_their_level_and_records_only_the_standard_pair
+* test_a_match_off_the_standard_pair_gives_xp_but_no_record
+* test_a_session_starts_each_team_at_its_level
+* test_the_balance_report_judges_each_level_by_its_band
+* test_the_runner_plays_each_team_at_its_level
+10/10 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                10
+Passing Tests        10
+Asserts              97
+Time              9.829s
+
+
+---- All tests passed! ----
+

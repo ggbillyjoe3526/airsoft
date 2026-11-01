@@ -67,6 +67,11 @@ var heard_other: Vector3 = Vector3.ZERO
 var heard_other_at: float = -INF
 ## Last near miss from an enemy BB.
 var suppressed_at: float = -INF
+## Team radio (BQ3, BotRadio): when it tells its teammates of the enemy it saw afresh (INF: nobody to tell), who (a
+## character id, -1 none) and where it saw them.
+var share_at: float = INF
+var share_id: int = -1
+var share_spot: Vector3 = Vector3.ZERO
 ## Seconds it has been aimed at its target in sight with the level in the way of its BBs (glass or leaves, BQ1):
 ## BotConfig.no_shot_move_after of it and it goes round (BotBrain).
 var no_shot_for: float = 0.0
@@ -136,6 +141,11 @@ var cover_cooldown: float = 0.0
 ## The trigger: seconds left in the burst, and in the pause after it; sidestepping, and which way.
 var burst_left: float = 0.0
 var pause_left: float = 0.0
+## Whether its last shoot() pressed on with a burst (BQ3: a bot that kneels to fire kneels only then).
+var bursting: bool = false
+## Whether its kneeling eye had the shot when this burst began (BQ3): it kneels only then, never down out of the fight
+## behind low cover.
+var knee_clear: bool = false
 var strafe_left: float = 0.0
 var strafe_dir: int = 1
 
@@ -259,6 +269,8 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	sprint_gap = 0.0
 	suppressed_at = -INF
 	no_shot_for = 0.0
+	share_at = INF
+	share_id = -1
 	ping_at = -INF
 	bomb_kind = Grenade.Kind.NONE
 	bomb_aim_until = -INF
@@ -294,6 +306,8 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	cover_cooldown = 0.0
 	burst_left = 0.0
 	pause_left = 0.0
+	bursting = false
+	knee_clear = false
 	strafe_left = 0.0
 	search_look_left = 0.0
 	flanking = false

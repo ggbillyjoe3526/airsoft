@@ -1,0 +1,40 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_bq2_asks.gd
+* test_the_shipped_file_reads_its_asks_and_has_lines_for_each
+* test_a_teammate_fighting_two_asks_you_over_and_pings_where_it_is
+* test_one_enemy_is_no_reason_to_ask_for_help
+* test_nobody_asks_you_over_when_you_are_close
+* test_nobody_asks_once_you_are_out
+* test_the_other_teams_bots_never_ask
+* test_the_team_asks_at_most_once_in_its_gap_and_a_few_times_a_round
+* test_a_stand_off_asks_you_to_go_round_to_a_spot_beside_the_enemy
+* test_raising_the_flag_asks_you_to_cover_the_pole_and_defending_it_to_help
+* test_a_press_or_a_mark_is_no_ask_and_a_new_round_clears_one
+* test_an_asks_marker_says_what_it_asks
+11/11 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                11
+Passing Tests        11
+Asserts              58
+Time              0.909s
+
+
+---- All tests passed! ----
+

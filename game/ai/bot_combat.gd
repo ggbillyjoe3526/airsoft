@@ -140,6 +140,8 @@ static func _held_angle_look(b: Bot, w: BotWorld, eye: Vector3, facing_yaw: floa
 static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim: float, cmd: PlayerCommand,
 		dt: float) -> void:
 	var cfg := w.cfg
+	var was_bursting := b.bursting
+	b.bursting = false
 	if target == null or not b.target_visible:
 		b.no_shot_for = 0.0
 	elif b.no_shot_for > 0.0 and BotSenses.line_clear(w.query, eye, _aim_point) \
@@ -157,9 +159,15 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 		b.no_shot_for = b.no_shot_for + dt if _level_in_line else 0.0
 		return
 	b.no_shot_for = 0.0
-	if b.burst_left <= 0.0 and b.pause_left <= 0.0:
+	var begun := b.burst_left <= 0.0 and b.pause_left <= 0.0
+	if begun:
 		b.burst_left = b.pick(b.skill.burst)
 	if b.burst_left > 0.0:
+		if begun or not was_bursting:
+			# A burst begun (on whoever it now aims at), or picked up again after a tick it couldn't fire in: is the
+			# knee's shot clear?
+			b.knee_clear = b.skill.kneels_to_fire and _knee_has_shot(b, w)
+		b.bursting = true
 		var a := b.character.armament
 		cmd.fire = a.fire_mode() != ReplicaConfig.FireMode.SEMI or not a.trigger_was_down
 		b.burst_left -= dt
@@ -167,6 +175,14 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 			b.pause_left = b.pick(b.skill.burst_pause)
 	else:
 		b.pause_left -= dt
+
+
+## Whether `b`'s eye, kneeling where it stands and upright, would have the shot at _aim_point (BQ3: one ray as a burst
+## begins or resumes).
+static func _knee_has_shot(b: Bot, w: BotWorld) -> bool:
+	var c := b.character
+	var knee := c.position + Vector3(0.0, Character.eye_height(1.0, w.tuning.body), 0.0)
+	return BotSenses.line_clear(w.query, knee, _aim_point) and not leaves_in_line(w, knee, _aim_point)
 
 
 ## Reloads when empty, or swaps a low magazine for a fuller spare when nobody is in sight.

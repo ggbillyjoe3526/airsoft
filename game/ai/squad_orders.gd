@@ -158,6 +158,17 @@ static func moved_in(b: Bot) -> bool:
 	return b.order == SquadOrder.Kind.MOVE and b.order_settled
 
 
+## Follow me: whether `b`'s giver, in play, is moving off from it, further than a follower's spot and its catch-up gap
+## (BQ3): a follower ducked into cover then comes out to keep up rather than be left behind.
+static func giver_leaving(b: Bot, w: BotWorld) -> bool:
+	var giver := b.order_giver
+	if b.order != SquadOrder.Kind.FOLLOW or giver == null or not Elimination.is_in_play(giver):
+		return false
+	var cfg := w.cfg.squad
+	return Vector2(giver.velocity.x, giver.velocity.z).length() >= cfg.heading_speed \
+			and _flat(giver.position, b.character.position) > cfg.follow_distance + cfg.catch_up_gap
+
+
 ## The yaw (the game's: 0 looks down -z, positive turns left) looking from `from` towards `to` along the ground; `fallback`
 ## when they stand on the same spot.
 static func yaw_towards(from: Vector3, to: Vector3, fallback: float) -> float:
