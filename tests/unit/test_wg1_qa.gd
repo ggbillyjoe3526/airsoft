@@ -125,7 +125,9 @@ func test_skipping_plays_the_round_out_at_once_then_holds_the_next_for_a_click()
 	var frames := 0
 	var ticks := session.ticks()
 	while session.skipping() and frames < 600:
+		# the skip's budget is a rendered frame's: one frame drawn between each
 		session._physics_process(0.0)
+		await wait_process_frames(1)
 		frames += 1
 	assert_false(session.skipping(), "played out")
 	assert_gt(session.ticks() - ticks, frames * 2, "many ticks a frame, not real time nor the Dev game speed")

@@ -236,7 +236,9 @@ func test_a_skip_to_the_end_of_the_match_shows_the_results_and_the_rematch_start
 	session.start_skip()
 	var frames := 0
 	while session.skipping() and frames < 600:
+		# the skip's budget is a rendered frame's: one frame drawn between each
 		session._physics_process(0.0)
+		await wait_process_frames(1)
 		frames += 1
 	assert_false(session.skipping(), "played out")
 	assert_eq(rs.phase, RoundState.Phase.MATCH_OVER, "the last round decided the match")
@@ -261,7 +263,9 @@ func test_a_click_on_the_table_after_a_skip_starts_the_next_round() -> void:
 	session.start_skip()
 	var frames := 0
 	while session.skipping() and frames < 600:
+		# the skip's budget is a rendered frame's: one frame drawn between each
 		session._physics_process(0.0)
+		await wait_process_frames(1)
 		frames += 1
 	assert_eq(rs.phase, RoundState.Phase.OVER)
 	assert_true(rs.hold_next)

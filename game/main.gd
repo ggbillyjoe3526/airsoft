@@ -398,19 +398,22 @@ func _team_size() -> int:
 	return MatchOptions.team_size(MapCatalog.shared().find(_play.map_id), _play.custom_rules)
 
 
-## The match has drawn: the loading screen goes (unless it waits for Continue) and the frame rate is the player's limit
-## (no menu cap).
+## The match has drawn: the loading screen goes and the frame rate is the player's limit (no menu cap), unless it waits
+## for Continue.
 func _on_play_started() -> void:
-	if _play == null or not _play.holding():
-		_free_loading()
+	# Held for Continue, the loading screen is still a menu: its frame cap stays until the press.
+	if _play != null and _play.holding():
+		return
+	_free_loading()
 	SettingsApply.set_menus(Settings.shared(), false)
 
 
-## Continue on the loading screen: the match starts and the screen goes.
+## Continue on the loading screen: the match starts, the screen goes and the frame rate is the player's limit.
 func _on_continue() -> void:
 	if _play != null:
 		_play.go()
 	_free_loading()
+	SettingsApply.set_menus(Settings.shared(), false)
 
 
 func _free_loading() -> void:
