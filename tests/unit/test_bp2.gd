@@ -67,3 +67,26 @@ func test_woodlands_reflection_probes_capture_over_the_ground_not_inside_a_hill(
 		assert_true(eye.y > bottom and eye.y < top, "the capture point inside its box: %s" % p.name)
 		assert_lte(bottom, ground + 0.001, "the box reaches down to the ground: %s" % p.name)
 	assert_gt(raised, 0, "some probes stand on raised ground")
+
+
+func test_every_maps_open_doors_fold_back_in_sight_not_inside_a_wall() -> void:
+	var play := PlayTuning.load_default()
+	var swing := SimTuning.load_default().doors.swing_time
+	for id: String in ["depot", "woodland", "street"]:
+		var map := MapData.load_map(id, play.map_style, SimTuning.load_default().rounds.team_size)
+		var view := DoorView.build(map, play.map_style, swing)
+		if view == null:
+			continue
+		add_child_autofree(view)
+		var doors := DoorState.new()
+		doors.shut.resize(map.doors.size())
+		doors.swing_left.resize(map.doors.size())
+		view.refresh(doors) # every door open, no swing left
+		for j in map.doors.size() * 2:
+			var leaf := view.leaf_at(j)
+			for b in map.blocks:
+				if b.kind == &"floor" or b.kind == &"ramp":
+					continue
+				var inside := AABB(b.center - b.size * 0.5 + Vector3.ONE * 0.01, b.size - Vector3.ONE * 0.02)
+				assert_false(inside.has_point(leaf.origin),
+						"%s door %d's open leaf %d is inside a %s block" % [id, j / 2, j % 2, b.kind])

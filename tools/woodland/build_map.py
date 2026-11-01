@@ -199,12 +199,37 @@ def roof_blocks() -> list[dict]:
 
 
 DOOR_T = 0.08  # a leaf's thickness, as Depot's (DO1)
+DOOR_GAP = 0.005  # the gap between a door and the face it hangs on (m)
 
 
-def doors() -> list[dict]:
+def jamb_face(blocks: list[dict], d: dict, along_x: bool, side: int, floor: float) -> float | None:
+    """The outermost face, on the door's `side`, of the walls the doorway `d` stands in: the blocks within the
+    doorway's reach along the wall and across it, standing on the doorway's `floor` (not the roof over it). Some huts' jambs are thicker than their walls (0.5 m posts round a
+    0.125 m wall), so a door hung on the wall's face had its open leaf fold back inside a post, out of sight (BP2)."""
+    reach = d["w"] / 2 + 0.3
+    best = None
+    for b in blocks:
+        if b["kind"] not in ("plywood", "wall", "log"):
+            continue
+        c, z = b["center"], b["size"]
+        if c["y"] - z["y"] / 2 > floor + 1.0:
+            continue
+        if along_x:
+            near = abs(c["x"] - d["x"]) - z["x"] / 2 < reach and abs(c["z"] - d["z"]) - z["z"] / 2 < 0.3
+            face = c["z"] + side * z["z"] / 2
+        else:
+            near = abs(c["z"] - d["z"]) - z["z"] / 2 < reach and abs(c["x"] - d["x"]) - z["x"] / 2 < 0.3
+            face = c["x"] + side * z["x"] / 2
+        if near and (best is None or side * face > side * best):
+            best = face
+    return best
+
+
+def doors(blocks: list[dict]) -> list[dict]:
     """The huts' hinged doors (DO1's format), in the layout's order: each its shut leaves' box, as tall as the hut's
-    wall and standing on the doorway's ground, hung on the wall's outer face (the side it swings out to, as check.py
-    clears it) and whether it starts the round shut (layout.DOOR_SHUT)."""
+    wall and standing on the doorway's ground, hung just outside the outermost face of its wall and jambs (the side it
+    swings out to, as check.py clears it), so it folds back flat against them, and whether it starts the round shut
+    (layout.DOOR_SHUT)."""
     out = []
     off = L.WALL_T / 2 + DOOR_T / 2
     h = L.HEIGHTS["hutwall"]
@@ -212,11 +237,14 @@ def doors() -> list[dict]:
         along_x = abs(math.cos(math.radians(d["rot"]))) > 0.5
         side = 1 if d["side"] in ("east", "south") else -1
         cx, cz = d["x"], d["z"]
-        if along_x:
-            sx, sz, cz = d["w"], DOOR_T, cz + side * off
-        else:
-            sx, sz, cx = DOOR_T, d["w"], cx + side * off
         g = ground(d["x"], d["z"])
+        face = jamb_face(blocks, d, along_x, side, g)
+        if along_x:
+            sx, sz = d["w"], DOOR_T
+            cz = face + side * (DOOR_T / 2 + DOOR_GAP) if face is not None else cz + side * off
+        else:
+            sx, sz = DOOR_T, d["w"]
+            cx = face + side * (DOOR_T / 2 + DOOR_GAP) if face is not None else cx + side * off
         out.append({"center": {"x": r(cx), "y": r(g + h / 2), "z": r(cz)},
                     "size": {"x": r(sx), "y": r(h), "z": r(sz)}, "side": side, "shut": d["shut"]})
     return out
@@ -574,7 +602,7 @@ def main() -> None:
         "ambience": "woods",
         "dressing": dressing(),
         "areas": areas(),
-        "doors": doors(),
+        "doors": doors(blocks),
     }
     with open(OUT, "w") as f:
         json.dump(data, f, separators=(",", ":"))

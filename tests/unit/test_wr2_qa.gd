@@ -74,7 +74,9 @@ func test_a_bot_walks_in_and_out_of_each_hut_doorway_opening_the_shut_leaf() -> 
 		var d := map.doors[i]
 		var out := _outward(i)
 		var mid := Vector2(d.center.x, d.center.z)
-		var outside := mid + out * 1.8
+		# Hut row's east door (door 0) opens onto a wall 1.4 m beyond its leaf (BP2 hung the doors on their jambs' outer
+		# face): start clear of it, and count a walk out as out once it is a body's width past the leaf.
+		var outside := mid + out * 1.1
 		var inside := mid - out * 2.5
 		var r := _walk(i, outside, inside)
 		var got := Vector2((r[0] as Vector3).x, (r[0] as Vector3).z)
@@ -83,7 +85,7 @@ func test_a_bot_walks_in_and_out_of_each_hut_doorway_opening_the_shut_leaf() -> 
 			assert_false((r[2] as GameState).doors.is_shut(i), "door %d: the walker opened it" % i)
 		r = _walk(i, inside, outside)
 		got = Vector2((r[0] as Vector3).x, (r[0] as Vector3).z)
-		assert_gt((got - mid).dot(out), 1.2, "door %d at %s: out from inside (ended %s)" % [i, d.center, got])
+		assert_gt((got - mid).dot(out), 1.0, "door %d at %s: out from inside (ended %s)" % [i, d.center, got])
 
 
 func test_a_body_in_the_doorway_keeps_the_door_from_shutting_on_it() -> void:
