@@ -33,6 +33,9 @@ var draws: int = 0
 var clock: float = 0.0
 ## Seconds left before the next round starts, while OVER.
 var timer: float = 0.0
+## The next round waits past `timer` for Round.end_wait (a click on the round's table): set while a skipped round is
+## played out (MC1), cleared as each round starts.
+var hold_next: bool = false
 ## The last finished round's winning team, or -1 for a draw or none yet; and why it ended (GameEvent.RoundEnd).
 var winner: int = -1
 var reason: GameEvent.RoundEnd = GameEvent.RoundEnd.ELIMINATED

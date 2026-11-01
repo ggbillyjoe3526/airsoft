@@ -5,7 +5,7 @@ extends RefCounted
 ## marker (on or off, colour, size), the ammo counter, where the hit feed sits and whether its lines fade or stay, your
 ## team's callouts in it (on or off; a file from before them loads on), the ping markers (on or off, PN2; a file from
 ## before them loads on), the magazine hand-off's line and glyphs (on or off, MH3; a file from before them loads on), the
-## navy panels' opacity, how the minimap turns
+## navy panels' opacity, how the minimap turns and how close it shows the field (MC1; a file from before it loads 100 %),
 ## and the HUD's size. The crosshair's colours leave out blue and orange,
 ## the teams'. Each value saved is checked on its own and falls back to its default.
 
@@ -27,6 +27,10 @@ const GAP_RANGE := Vector2(0.0, 12.0)
 const OPACITY_RANGE := Vector2(0.2, 1.0)
 const MARKER_SIZE_RANGE := Vector2(0.5, 2.5)
 const PANEL_OPACITY_RANGE := Vector2(0.5, 1.0)
+## The minimap's zoom (MC1, owner 2026-11-01): 1 shows MinimapConfig.view_radius from its middle to its edge, 2 half
+## that (closer), 0.5 twice it; in steps of MINIMAP_ZOOM_STEP.
+const MINIMAP_ZOOM_RANGE := Vector2(0.5, 2.0)
+const MINIMAP_ZOOM_STEP := 0.1
 ## How far past a range's single-precision end a saved number may sit and still count (_number).
 const RANGE_SLACK := 1e-6
 ## Lines the hit feed keeps for the whole match when its lines stay (the browser game's HIT_FEED.keptLines).
@@ -55,6 +59,7 @@ var ping_markers: bool = true
 var mag_hand_off: bool = true
 var panel_opacity: float = 1.0
 var minimap_turn: MinimapTurn = MinimapTurn.ROTATING
+var minimap_zoom: float = 1.0
 ## The whole HUD's scale but the crosshair's (AccessibilityConfig.HUD_SIZE_RANGE, 1 = as drawn), on top of the window's
 ## own growth.
 var hud_size: float = AccessibilityConfig.HUD_SIZE_DEFAULT
@@ -74,7 +79,8 @@ func to_dict() -> Dictionary:
 		"dynamic": dynamic, "outline": outline, "marker": marker, "marker_colour": marker_colour,
 		"marker_size": marker_size, "ammo_counter": ammo_counter, "feed_corner": int(feed_corner),
 		"feed_lines": int(feed_lines), "callouts": callouts, "ping_markers": ping_markers,
-		"mag_hand_off": mag_hand_off, "panel_opacity": panel_opacity, "minimap_turn": int(minimap_turn), "hud_size": hud_size,
+		"mag_hand_off": mag_hand_off, "panel_opacity": panel_opacity, "minimap_turn": int(minimap_turn),
+		"minimap_zoom": minimap_zoom, "hud_size": hud_size,
 	}
 
 
@@ -100,6 +106,7 @@ func from_dict(data: Dictionary) -> void:
 	mag_hand_off = _flag(data, "mag_hand_off", d.mag_hand_off)
 	panel_opacity = _number(data, "panel_opacity", d.panel_opacity, PANEL_OPACITY_RANGE)
 	minimap_turn = _pick(data, "minimap_turn", d.minimap_turn, MinimapTurn.size()) as MinimapTurn
+	minimap_zoom = snappedf(_number(data, "minimap_zoom", d.minimap_zoom, MINIMAP_ZOOM_RANGE), MINIMAP_ZOOM_STEP)
 	# Between the slider's steps reads as the nearest step.
 	hud_size = snappedf(_number(data, "hud_size", d.hud_size, AccessibilityConfig.HUD_SIZE_RANGE),
 			AccessibilityConfig.HUD_SIZE_STEP)

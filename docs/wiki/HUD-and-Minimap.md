@@ -16,7 +16,7 @@ slanted banners call the round start, half time with the ends swapped, and who t
 Bottom right: your BB count, the fire-mode chips (**S**, **B**, **A**: single, burst, auto) with the current one lit,
 and a gauge for every magazine you carry, the loaded one first, then your spares, fullest first. An empty magazine
 shows dark, so you can read them without colour. A low magazine turns yellow, and **HOLSTERED**, **RELOADING**,
-**LAST MAG** or **OUT OF BBS** show when they apply. Turning the hop-up dial shows its setting here for a moment.
+**LAST MAG**, **OUT OF BBS** or a bomb **IN HAND** show when they apply. Turning the hop-up dial shows its setting here for a moment.
 
 The crosshair opens with your spread, so it tells you how steady you are. Under it, a **RELOAD** prompt with your
 Reload key shows while your magazine is empty and you have one to load, unless reloads are Automatic in Settings; it
@@ -102,6 +102,8 @@ Top left, the minimap shows the field from above:
   flag as a chequered flag at its spot.
 - **Rotating** (the default) turns the field so the way you look is up; **Fixed** keeps north up. Pick it in
   Settings › HUD › Minimap.
+- **Zoom** (Settings › HUD › Minimap, 50 % to 200 %, 100 % by default) sets how close it shows the field: at 100 % it
+  shows <!-- wiki:config minimap_config.view_radius --> metres from your arrow to its edge, at 200 % half that, bigger.
 - Once you are out, the minimap follows the teammate you watch.
 
 ## The full-screen map

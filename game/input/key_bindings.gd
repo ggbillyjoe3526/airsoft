@@ -45,8 +45,8 @@ const DEFAULTS: Dictionary = {
 	&"torch": [KEY_T],
 	&"slot_next": [-MOUSE_BUTTON_WHEEL_DOWN],
 	&"slot_previous": [-MOUSE_BUTTON_WHEEL_UP],
-	&"hop_up_less": [KEY_4, KEY_PAGEDOWN],
-	&"hop_up_more": [KEY_5, KEY_PAGEUP],
+	&"hop_up_less": [KEY_PAGEDOWN],
+	&"hop_up_more": [KEY_PAGEUP],
 	&"scoreboard": [KEY_TAB],
 	&"field_map": [KEY_M],
 	&"order_wheel": [KEY_Z],
@@ -56,10 +56,24 @@ const DEFAULTS: Dictionary = {
 	&"ping": [-MOUSE_BUTTON_MIDDLE],
 	&"ping_move": [-MOUSE_BUTTON_XBUTTON1],
 	&"mag_hand_off": [KEY_H],
+	&"throw_smoke": [KEY_4],
+	&"throw_flash": [KEY_5],
+	&"use_door": [KEY_G],
+	&"loadout": [KEY_L],
+}
+## The layout of the defaults a save was made under, saved beside the keys ("layout"). Layout 2 (MC1, owner 2026-11-01)
+## moved the bombs to 4 and 5 (off G and Y), Open / shut door to G (off U) and left the hop-up dial on Page Down and
+## Page Up only: an action a layout-1 save holds on its old default takes the new one instead, as an action added by a
+## later build does.
+const LAYOUT := 2
+const LAYOUT_KEY := "layout"
+## Layout 1's defaults for the actions layout 2 moved.
+const LAYOUT_1_MOVED: Dictionary = {
+	&"hop_up_less": [KEY_4, KEY_PAGEDOWN],
+	&"hop_up_more": [KEY_5, KEY_PAGEUP],
 	&"throw_smoke": [KEY_G],
 	&"throw_flash": [KEY_Y],
 	&"use_door": [KEY_U],
-	&"loadout": [KEY_L],
 }
 ## Keys that can't be bound: Esc (menus), PrintScreen, Pause, F11 (fullscreen), the debug keys (F3 the overlay, F4 BB
 ## paths, F5 hit areas; they stay reserved) and the OS keys. A test checks every `debug_*` action's key is here.
@@ -202,7 +216,7 @@ func unbind(action: StringName, slot: int = 0) -> bool:
 
 ## The bindings as a saveable dictionary: action name to a list of ints.
 func to_dict() -> Dictionary:
-	var out := {}
+	var out := {LAYOUT_KEY: LAYOUT}
 	for action: StringName in ACTIONS:
 		out[String(action)] = Array(_map[action])
 	return out
@@ -211,12 +225,15 @@ func to_dict() -> Dictionary:
 ## Takes saved bindings over the defaults, ignoring what is malformed or unknown: an action whose saved list is bad
 ## keeps its default. An action the save lacks (added by a later build) takes its default unless another action holds
 ## the key. A key on two actions, or an essential action left keyless, makes the whole set unusable and the defaults
-## stand. Returns whether the saved set was used as it came.
+## stand. A save from before LAYOUT holding a moved action on its old default gives it the new one. Returns whether the
+## saved set was used as it came.
 func load_dict(data: Variant) -> bool:
 	reset()
 	if not data is Dictionary:
 		return false
 	var saved: Dictionary = data
+	var layout: Variant = saved.get(LAYOUT_KEY, 1)
+	var old_layout := not (layout is int or layout is float) or int(layout) < LAYOUT
 	var ok := true
 	var loaded: Dictionary[StringName, PackedInt32Array] = {}
 	var taken: Dictionary[int, bool] = {}
@@ -225,6 +242,9 @@ func load_dict(data: Variant) -> bool:
 		if not saved.has(name):
 			continue
 		var list: Variant = _saved_list(saved[name])
+		if old_layout and list != null and LAYOUT_1_MOVED.has(action) \
+				and list == PackedInt32Array(LAYOUT_1_MOVED[action]):
+			continue
 		if list == null or (list as PackedInt32Array).is_empty() and ESSENTIAL.has(action):
 			ok = false
 			continue

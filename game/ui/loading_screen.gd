@@ -4,7 +4,12 @@ extends CanvasLayer
 ## fills the screen under a shade that deepens toward the foot; over it the kicker ("ELIMINATION · 3 V 3 · YOU'RE
 ## ALPHA"), the map's name and line, a yellow bar and the step under way with the share done; the step's own stretch of
 ## the bar pulses while it runs (Woodland's nav grid takes about 6 s on a worker thread). It sits on a canvas layer
-## above the match's own interface, takes every click, and is freed by whoever made it once the match runs.
+## above the match's own interface, takes every click, and is freed by whoever made it once the match runs. With
+## `show_continue` (MC1, owner 2026-11-01: once the match is fully loaded) a CONTINUE button comes up bottom right,
+## focused, and the step says Ready; its press (a click, Enter or Space) says `continued`.
+
+## CONTINUE was pressed: the match can start.
+signal continued
 
 ## Above the match's interface layer (PlaySession's).
 const LAYER := 100
@@ -27,6 +32,10 @@ const PULSE_HIGH := 0.55
 const PULSE_PERIOD := 1.2
 const STEP_SIZE := 18
 const STEP_TOP_GAP := 14
+## CONTINUE's offsets from the window's right and bottom edges (px at 1080p): under the block, its right edge on the
+## block's.
+const CONTINUE_RIGHT := BLOCK_SIDE
+const CONTINUE_BOTTOM := 48.0
 ## The shade's opacity of the page colour, foot to top: (position from the foot, opacity).
 const SHADE_STOPS: Array[Vector2] = [Vector2(0.0, 0.97), Vector2(0.18, 0.97), Vector2(0.60, 0.55), Vector2(1.0, 0.35)]
 ## A Latin line is taller than its capitals; the title's box is cut to its size so the gaps read as the concept's.
@@ -41,6 +50,7 @@ var _pulse: float = 0.0
 var _step: Label = null
 var _percent: Label = null
 var _picture: TextureRect = null
+var _continue: Button = null
 
 
 func _init() -> void:
@@ -66,6 +76,18 @@ func _init() -> void:
 	root.add_child(_picture)
 	root.add_child(_shade())
 	root.add_child(_block())
+	_continue = Button.new()
+	_continue.name = "Continue"
+	_continue.theme_type_variation = GameTheme.MAIN_BUTTON
+	_continue.text = tr("LOAD_CONTINUE").to_upper()
+	_continue.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	_continue.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_continue.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_continue.offset_right = -CONTINUE_RIGHT
+	_continue.offset_bottom = -CONTINUE_BOTTOM
+	_continue.visible = false
+	_continue.pressed.connect(func() -> void: continued.emit())
+	root.add_child(_continue)
 
 
 ## Shows `map_name`, its `blurb` and the kicker, with the picture of `map_id` behind (a plain page when it has none).
@@ -92,6 +114,17 @@ func set_progress(done: int, total: int, step_text: String) -> void:
 ## PlaySession's `progressed`: `step_key` is the translation key of the step under way ("" once all are built).
 func set_progress_step(done: int, total: int, step_key: String) -> void:
 	set_progress(done, total, tr(step_key if not step_key.is_empty() else "LOAD_START"))
+
+
+## The match is fully loaded: the bar full, "Ready", and CONTINUE up and focused.
+func show_continue() -> void:
+	set_progress(1, 1, tr("LOAD_READY"))
+	_continue.visible = true
+	_continue.grab_focus()
+
+
+func continue_button() -> Button:
+	return _continue
 
 
 func kicker_text() -> String:

@@ -78,6 +78,9 @@ var _loading: LoadingScreen
 var _spot: PracticeSpot = null
 ## What the Match page has picked, kept while the menus are freed for a match.
 var _picks := MatchPicks.new()
+## Loading into a match or the range waits for the loading screen's Continue once fully loaded (MC1). Off in a headless
+## run (the tests and tools: nobody there to press it); a test turns it on to check it.
+var continue_after_loading: bool = DisplayServer.get_name() != "headless"
 var _perf: DebugPerf
 var _smoke := false
 ## The `--seed` launch option, or LaunchSeed.NONE.
@@ -360,9 +363,14 @@ func _start_play(smoke_practice: bool = false) -> void:
 	if _smoke:
 		_play.speed = SMOKE_SPEED
 	_play.staged = true
+	# Loading into a match or the range waits for Continue once fully loaded (MC1); the smoke test and the way back
+	# from practice's Loadout don't.
+	_play.wait_for_go = continue_after_loading and not _smoke and _spot == null
 	_show_loading(map_id, team)
 	_play.progressed.connect(_loading.set_progress_step)
 	_play.started.connect(_on_play_started)
+	_play.ready_to_go.connect(_loading.show_continue)
+	_loading.continued.connect(_on_continue)
 	_play.left.connect(_end_play)
 	_play.shaders_warmed.connect(graphics.settle)
 	_play.loadout_requested.connect(_open_practice_loadout)
@@ -390,8 +398,20 @@ func _team_size() -> int:
 	return MatchOptions.team_size(MapCatalog.shared().find(_play.map_id), _play.custom_rules)
 
 
-## The match has drawn: the loading screen goes and the frame rate is the player's limit (no menu cap).
+## The match has drawn: the loading screen goes and the frame rate is the player's limit (no menu cap), unless it waits
+## for Continue.
 func _on_play_started() -> void:
+	# Held for Continue, the loading screen is still a menu: its frame cap stays until the press.
+	if _play != null and _play.holding():
+		return
+	_free_loading()
+	SettingsApply.set_menus(Settings.shared(), false)
+
+
+## Continue on the loading screen: the match starts, the screen goes and the frame rate is the player's limit.
+func _on_continue() -> void:
+	if _play != null:
+		_play.go()
 	_free_loading()
 	SettingsApply.set_menus(Settings.shared(), false)
 

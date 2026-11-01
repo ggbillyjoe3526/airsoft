@@ -150,15 +150,16 @@ func pin(card_bottom: float) -> Vector2:
 
 ## Places the panel on the character `watched` (the view is through them), looking `yaw`, as they stand `fraction` of
 ## the way from their last tick to this one: the field, the area they stand in, the round, the teammates, the patches
-## and the markers. `hold` is where your Hold here stands when `holding`. Allocates nothing.
+## and the markers. `hold` is where your Hold here stands when `holding`; `zoom` is how close (HudPrefs.minimap_zoom).
+## Allocates nothing.
 func follow(state: GameState, watched: Character, yaw: float, fraction: float, turn: HudPrefs.MinimapTurn,
-		holding: bool, hold: Vector3) -> void:
+		holding: bool, hold: Vector3, zoom: float = 1.0) -> void:
 	var feet := watched.prev_position.lerp(watched.position, fraction)
 	var storey := _field.storey_of(feet.y)
 	var rotating := turn == HudPrefs.MinimapTurn.ROTATING
 	var team := _teams.colours[watched.team]
 	_view.begin(Vector2(feet.x, feet.z), storey if storey < _view.layers() else -1, yaw, rotating, team,
-			_teams.colours[1 - watched.team])
+			_teams.colours[1 - watched.team], zoom)
 	var area := MapAreas.area_at(_map.areas, feet)
 	if area != _area_name:
 		_area_name = area
@@ -385,15 +386,16 @@ class View:
 
 	## Starts a frame: the world point at the middle (x, z), the layer shown (-1 for none), the way the character looks
 	## `yaw` (the game's: positive turns left), whether the field turns with it, and the colours of their team and of
-	## the other.
-	func begin(centre: Vector2, layer: int, yaw: float, rotating: bool, team: Color, enemy: Color) -> void:
+	## the other; `zoom` (HudPrefs.minimap_zoom) times as close as MinimapConfig.view_radius shows it.
+	func begin(centre: Vector2, layer: int, yaw: float, rotating: bool, team: Color, enemy: Color,
+			zoom: float = 1.0) -> void:
 		_centre = centre
 		_layer = layer
 		_rot = yaw if rotating else 0.0
 		_arrow_rot = 0.0 if rotating else -yaw
 		_team = team
 		_enemy = enemy
-		_ppm = size.x / (2.0 * _cfg.view_radius)
+		_ppm = size.x * maxf(zoom, HudPrefs.MINIMAP_ZOOM_RANGE.x) / (2.0 * _cfg.view_radius)
 		_you_at = centre
 		_clear()
 
