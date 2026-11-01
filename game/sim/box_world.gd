@@ -19,6 +19,8 @@ var box_max: PackedVector3Array = PackedVector3Array()
 var box_surface: PackedInt32Array = PackedInt32Array()
 ## 1 for a box that is no box now: an open door's leaf (DO1).
 var box_off: PackedByteArray = PackedByteArray()
+## 1 for a clear box (glass, BQ1): solid to `ray` and movers, nothing to `sight_ray`.
+var box_clear: PackedByteArray = PackedByteArray()
 ## Each door's box (WorldQuery.add_door), by door.
 var _door_box: PackedInt32Array = PackedInt32Array()
 var body: BodyConfig = null
@@ -34,6 +36,14 @@ func add_box(center: Vector3, size: Vector3, surface: RayHit.Surface = RayHit.Su
 	box_max.append(center + size * 0.5)
 	box_surface.append(surface)
 	box_off.append(0)
+	box_clear.append(0)
+
+
+## Adds a clear box (a pane of glass, BQ1) centred at `center` measuring `size`, made of `surface`: solid to BBs and
+## movers, see-through to sight (sight_ray).
+func add_clear_box(center: Vector3, size: Vector3, surface: RayHit.Surface = RayHit.Surface.METAL) -> void:
+	add_box(center, size, surface)
+	box_clear[box_clear.size() - 1] = 1
 
 
 ## Adds a solid box of `kind` (a skip, a crate) centred at `center` measuring `size`, made of `surface`, and lists it as
@@ -72,12 +82,21 @@ func mover() -> CharacterMover:
 
 
 func ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
+	return _cast(from, to, hit, false)
+
+
+func sight_ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
+	return _cast(from, to, hit, true)
+
+
+## The nearest box on the segment (a slab test), skipping the clear ones for `sight`.
+func _cast(from: Vector3, to: Vector3, hit: RayHit, sight: bool) -> bool:
 	var dir := to - from
 	var best := INF
 	var best_box := -1
 	var best_axis := 0
 	for b in box_min.size():
-		if box_off[b] != 0:
+		if box_off[b] != 0 or (sight and box_clear[b] != 0):
 			continue
 		var t_enter := -INF
 		var t_exit := INF

@@ -13,6 +13,10 @@ var _world: BotWorld = null
 ## whether a Hold here in force was given looking at nothing, so each holds where it stood.
 var _given: PackedInt32Array = PackedInt32Array()
 var _own_spot: PackedByteArray = PackedByteArray()
+## Per giver, whether the Hold here in force came of a Go there (1: it lapses when quiet, BQ1), and since when (s of match
+## time) nothing has happened round its holders.
+var _from_move: PackedByteArray = PackedByteArray()
+var _quiet_since: PackedFloat64Array = PackedFloat64Array()
 ## The teammates an order goes to, gathered afresh for each order given.
 var _order_team: Array[Bot] = []
 
@@ -22,12 +26,15 @@ func _init(world: BotWorld) -> void:
 	_world = world
 	_given.resize(world.characters.size())
 	_own_spot.resize(world.characters.size())
+	_from_move.resize(world.characters.size())
+	_quiet_since.resize(world.characters.size())
 
 
 ## A new round: no order outlasts one (each bot's reset forgets its own).
 func clear() -> void:
 	_given.fill(SquadOrder.Kind.NONE)
 	_own_spot.fill(0)
+	_from_move.fill(0)
 
 
 ## An order from `giver_id` the simulation refused (out, or between rounds): the order in force stays, with NOT_NOW.
@@ -110,6 +117,8 @@ func give_move(giver: Character, spot: Vector3) -> SquadOrder.Kind:
 				SquadOrders.Notice.CANCELLED if before != SquadOrder.Kind.NONE else SquadOrders.Notice.NOBODY)
 		return SquadOrder.Kind.NONE
 	if hold_spot(giver.id) and Vector2(spot.x - held_middle.x, spot.z - held_middle.z).length() < w.cfg.squad.hold_move:
+		# The same spot pinged again: stay there, the quiet counted afresh.
+		_quiet_since[giver.id] = w.time
 		order_outcome.record(giver.id, before, SquadOrders.Notice.NONE)
 		return before
 	var yaw := SquadOrders.yaw_towards(giver.position, spot, giver.yaw)
@@ -123,6 +132,7 @@ func give_move(giver: Character, spot: Vector3) -> SquadOrder.Kind:
 	SquadOrders.place_across(team, yaw, spot, w)
 	_given[giver.id] = SquadOrder.Kind.MOVE
 	_own_spot[giver.id] = 0
+	_from_move[giver.id] = 0
 	order_outcome.record(giver.id, SquadOrder.Kind.MOVE, SquadOrders.Notice.NONE)
 	return SquadOrder.Kind.MOVE
 
@@ -166,6 +176,7 @@ func _hand_out(giver: Character, kind: SquadOrder.Kind, toggle: bool) -> SquadOr
 		SquadOrders.place_hold(team, giver, point, w)
 	_given[giver.id] = kind
 	_own_spot[giver.id] = 1 if kind == SquadOrder.Kind.HOLD and not looked else 0
+	_from_move[giver.id] = 0
 	return kind
 
 
@@ -190,6 +201,7 @@ func _drop_order(giver: Character) -> void:
 			SquadOrders.end(b, _world)
 	_given[giver.id] = SquadOrder.Kind.NONE
 	_own_spot[giver.id] = 0
+	_from_move[giver.id] = 0
 
 
 ## After each step: an order ends for a bot that is out, and for everyone given it once its giver is out (hit, or the
@@ -207,6 +219,7 @@ func update() -> void:
 				_drop_order(giver)
 			_given[id] = SquadOrder.Kind.NONE
 			_own_spot[id] = 0
+			_from_move[id] = 0
 			continue
 		var carried := false
 		for b in _world.bots:
@@ -216,6 +229,7 @@ func update() -> void:
 		if not carried:
 			_given[id] = SquadOrder.Kind.NONE
 			_own_spot[id] = 0
+			_from_move[id] = 0
 
 
 ## Before the bots think (as the browser game's updateOrders): each bot back within regroup_arrive of whoever gave it
@@ -251,6 +265,37 @@ func move_arrivals() -> void:
 			if b.order == SquadOrder.Kind.MOVE and b.order_giver != null and b.order_giver.id == id:
 				b.order = SquadOrder.Kind.HOLD
 		_given[id] = SquadOrder.Kind.HOLD
+		_from_move[id] = 1
+		_quiet_since[id] = _world.time
+
+
+## Before the bots think, after move_arrivals (BQ1): a Go there held with nothing happening round its holders for
+## SquadConfig.go_there_quiet ends, its bots back on the team plan, with the QUIET notice for its giver. Something
+## happening is a holder seeing an enemy, fighting, in cover, or with an enemy seen or heard (or pinged) in mind within
+## go_there_contact_radius of where it stands.
+func quiet_holds() -> void:
+	var w := _world
+	var squad := w.cfg.squad
+	var near_sq := squad.go_there_contact_radius * squad.go_there_contact_radius
+	for id in _given.size():
+		if _given[id] != SquadOrder.Kind.HOLD or _from_move[id] == 0:
+			continue
+		for b in w.bots:
+			if b.order_giver == null or b.order_giver.id != id or b.order != SquadOrder.Kind.HOLD:
+				continue
+			var p := b.character.position
+			if b.target_visible or b.mode == Bot.Mode.FIGHT or b.mode == Bot.Mode.COVER \
+					or (b.threat_in_mind(w.time, w.cfg)
+					and Vector2(b.last_known.x - p.x, b.last_known.z - p.z).length_squared() <= near_sq):
+				_quiet_since[id] = w.time
+				break
+		if w.time - _quiet_since[id] < squad.go_there_quiet:
+			continue
+		var giver := _character(id)
+		if giver == null:
+			continue
+		_drop_order(giver)
+		order_outcome.record(id, SquadOrder.Kind.NONE, SquadOrders.Notice.QUIET)
 
 
 ## The character `id` of the field (a giver of orders), or null.

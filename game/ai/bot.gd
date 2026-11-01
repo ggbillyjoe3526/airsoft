@@ -67,6 +67,9 @@ var heard_other: Vector3 = Vector3.ZERO
 var heard_other_at: float = -INF
 ## Last near miss from an enemy BB.
 var suppressed_at: float = -INF
+## Seconds it has been aimed at its target in sight with the level in the way of its BBs (glass or leaves, BQ1):
+## BotConfig.no_shot_move_after of it and it goes round (BotBrain).
+var no_shot_for: float = 0.0
 ## A teammate's ping it took (PN1, Pings.take): when (-INF: none this round) and its floor spot. It is the bot's
 ## last-known spot until real news writes another, kept in mind BotConfig.ping_memory (ping_in_mind).
 var ping_at: float = -INF
@@ -255,6 +258,7 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	sprint_run = 0.0
 	sprint_gap = 0.0
 	suppressed_at = -INF
+	no_shot_for = 0.0
 	ping_at = -INF
 	bomb_kind = Grenade.Kind.NONE
 	bomb_aim_until = -INF

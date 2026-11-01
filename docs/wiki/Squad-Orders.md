@@ -50,6 +50,12 @@ marker over the spot reads "GO · 30 M", then "HOLD · 30 M"; the minimap shows 
 the same spot again keeps it (it never cancels); somewhere else moves it. Aimed at the sky, it goes nowhere and the
 wheel's middle says so. A teammate fighting on the way fights first, as with every order.
 
+A Go There spot isn't held for ever: once they are all there, if nothing happens near them for about the
+next <!-- wiki:config squad_config.go_there_quiet --> s (no enemy seen, no fight, nothing heard within about
+the <!-- wiki:config squad_config.go_there_contact_radius --> m round them), they read "All quiet" and go back to the
+team plan. Any contact starts the wait again, and so does Go There at the same spot. A Hold Here you give yourself is
+held until you end it.
+
 ## Need a Mag
 
 Press **H** (Squad: need a mag in Settings › Controls), or pick **Need a Mag**, the order wheel's last

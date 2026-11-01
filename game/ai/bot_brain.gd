@@ -117,7 +117,9 @@ static func think(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> void:
 static func _choose_mode(b: Bot, w: BotWorld, target: Character, dt: float) -> void:
 	var me := b.character
 	var cfg := w.cfg
-	var seeing := b.target_visible and target != null
+	# In sight with no shot at them for a while (through glass, BQ1, or leaves): it goes round to them as to someone out
+	# of sight, until a shot opens.
+	var seeing := b.target_visible and target != null and b.no_shot_for < cfg.no_shot_move_after
 	var a := me.armament
 	var reloading := a.reloading()
 	var spare := not a.replicas.is_empty() and a.ammo[a.active].next_spare() >= 0

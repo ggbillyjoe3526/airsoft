@@ -185,6 +185,10 @@ msgstr "Orders wait for\nthe next round"
 msgid "HUD_ORDER_NOWHERE"
 msgstr "Nowhere\nthere to go"
 
+# A Go there held with nothing happening for a while (BQ1): the squad goes back to the plan.
+msgid "HUD_ORDER_QUIET"
+msgstr "All quiet:\nback to the\nteam plan"
+
 msgid "HUD_CHIP_SEMI"
 msgstr "S"
 

@@ -105,6 +105,8 @@ func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 		sb.collision_mask = 0
 		add_child(sb)
 		_bodies.append(sb)
+	# The clear blocks (glass, BQ1) go on bodies of their own, one a surface they use, which the sight ray is blind to.
+	var clear_bodies: Dictionary[int, StaticBody3D] = {}
 	for b in m.blocks:
 		var shape := CollisionShape3D.new()
 		shape.position = b.center
@@ -116,7 +118,17 @@ func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 			var wedge := ConvexPolygonShape3D.new()
 			wedge.points = GreyboxFaces.wedge_points(b, Vector3.ZERO)
 			shape.shape = wedge
-		_bodies[b.surface].add_child(shape)
+		if style.is_clear(b.kind):
+			if not clear_bodies.has(b.surface):
+				var cb := StaticBody3D.new()
+				cb.name = "Colliders_Clear_%s" % RayHit.Surface.keys()[b.surface]
+				cb.collision_layer = WORLD_LAYER
+				cb.collision_mask = 0
+				add_child(cb)
+				clear_bodies[b.surface] = cb
+			clear_bodies[b.surface].add_child(shape)
+		else:
+			_bodies[b.surface].add_child(shape)
 	if m.terrain != null:
 		_add_terrain_shapes(m.terrain)
 	if m.roof_height > 0.0:
@@ -131,6 +143,19 @@ func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 	for sb in _bodies:
 		surface_rids.append(sb.get_rid())
 	_query = JoltQuery.new(_cast, surface_rids, body)
+	if not clear_bodies.is_empty():
+		var sight := RayCast3D.new()
+		sight.name = "SightRay"
+		sight.top_level = true
+		sight.enabled = false
+		sight.collision_mask = WORLD_LAYER
+		add_child(sight)
+		var rids: Array[RID] = []
+		var surfaces := PackedInt32Array()
+		for surface: int in clear_bodies:
+			rids.append(clear_bodies[surface].get_rid())
+			surfaces.append(surface)
+		_query.set_clear_bodies(rids, surfaces, sight)
 	# Bushes are no collider: only leaves the simulation counts along a line (WL5).
 	_query.foliage = m.foliage
 	# What each box is, for the rules that ask (the noisy props, NP1); a ramp's wedge never makes a noise.
