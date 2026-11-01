@@ -80,9 +80,11 @@ func share_of(c: Character) -> float:
 	return closed_far(_cfg, _ray_share[id], beyond)
 
 
-## The blocked share (0 or 1) of a BB impact at `at` on a surface: one ray from the listener's eyes stopping
-## occlusion_surface_gap short of it. Over the tick's budget it plays open; beyond reach it closes from open.
-func impact_share(at: Vector3) -> float:
+## The blocked share (0 or 1) of a BB impact at `at` on a surface, the BB arriving along `came` (its velocity; zero:
+## not known): one ray from the listener's eyes to occlusion_impact_back back along `came`, on the BB's side of the
+## surface, so a wall thinner than the old gap still blocks it (BP2), or with no `came` stopping occlusion_surface_gap
+## short of `at`. Over the tick's budget it plays open; beyond reach it closes from open.
+func impact_share(at: Vector3, came: Vector3 = Vector3.ZERO) -> float:
 	if _query == null or _listener_id < 0:
 		return 0.0
 	var beyond := _ear.distance_to(at) - _cfg.occlusion_reach
@@ -91,7 +93,11 @@ func impact_share(at: Vector3) -> float:
 	if not _take(1):
 		return 0.0
 	var start := Time.get_ticks_usec()
-	var blocked := SoundPath.line_blocked(_query, _ear, at, _cfg.occlusion_surface_gap, _hit)
+	var blocked := false
+	if came.length_squared() > 0.0:
+		blocked = _query.ray(_ear, at - came.normalized() * _cfg.occlusion_impact_back, _hit)
+	else:
+		blocked = SoundPath.line_blocked(_query, _ear, at, _cfg.occlusion_surface_gap, _hit)
 	ray_usec += Time.get_ticks_usec() - start
 	return 1.0 if blocked else 0.0
 
