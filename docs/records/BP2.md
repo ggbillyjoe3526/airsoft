@@ -1,12 +1,12 @@
 # BP2 · Fixes from the 0.1 Dev 2 bug pass
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-01 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-01 | 1 | Opus 5.5 (build thread) | see Verified; QA Pass, performance Pass | Accept 8/8 | – |
 
 ## The bug pass
 
@@ -47,6 +47,15 @@ merging alongside, is read once it lands.
 8. **A wheel notch onto a bomb during a vault** is kept for its end, as a replica's is (KNOWN_ISSUES, MC1 QA).
 9. **The full-screen map** held through the scoreboard or the match summary opens again once it is gone
    (KNOWN_ISSUES, FM1).
+
+## Verified
+
+- The readers' findings were each checked by reading before fixing; each fix has a test that fails without it (QA
+  showed this for its two: the bomb-busy no-shot check and the dazzled bot's burst).
+- QA (Sonnet): Pass, no blocking findings; added `tests/unit/test_bp2_qa.gd`. Performance (Sonnet): Pass, smoke
+  `--perf` on head and base both peak at 1242 nodes and 792 orphans (the orphans are main's). Critic (Opus): Accept
+  8/8; its nits: `jamb_face`'s 0.3 m and 1.0 m are unnamed (a tool script), `off_aim < PI` reads a sentinel, and
+  `test_wr2_qa`'s walk is a little looser for Hut row's east door.
 
 ## Decisions
 

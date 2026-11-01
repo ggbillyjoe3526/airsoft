@@ -1031,6 +1031,7 @@ The 0.1 Dev 2 bug pass's fixes that need eyes on a real display or hands on the 
 - [ ] **Stand at a shut door, pause, rebind Open / shut door in Settings, resume:** the prompt names the new key.
 - [ ] **Hold M, press Tab and let it go with M still held:** the map comes back.
 - [ ] **Settings › Controls, Aim on Toggle:** aim, switch Aim to Hold and back mid-match: the sight is down.
+- [ ] **Alt-tab out of a match and click back in,** holding the trigger on full auto: the click fires nothing.
 
 ## Reporting what you find
 
