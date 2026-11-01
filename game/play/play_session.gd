@@ -213,6 +213,9 @@ var _skip_armed: bool = false
 var _skip_cover: ColorRect = null
 var _skip_note: Label = null
 var _skip_clock_shown: int = -1
+## The rendered frame the skip last ticked in, and the microseconds of ticks spent in it (`_play_out`).
+var _skip_frame: int = -1
+var _skip_spent_usec: int = 0
 var _tally: PlayerTally = PlayerTally.new(PLAYER_ID)
 ## The automatic step-down's watch, whether the window has the focus and whether the shaders are warm (the warm-up's
 ## frames say nothing about the graphics); the Dev settings' Pretend slow frames.
@@ -822,12 +825,19 @@ func _physics_process(_delta: float) -> void:
 		_tick()
 
 
-## Skipping: ticks as fast as PlayTuning.skip_budget_ms of this physics frame allows, until the round is over.
+## Skipping: ticks as fast as PlayTuning.skip_budget_ms of each rendered frame allows, until the round is over. The
+## budget is the rendered frame's, not each physics step's: the engine's catch-up steps after a long frame share it, so
+## the cover keeps drawing (and Esc answers) about budget-often.
 func _play_out() -> void:
-	var start := Time.get_ticks_usec()
+	var frame := Engine.get_process_frames()
+	if frame != _skip_frame:
+		_skip_frame = frame
+		_skip_spent_usec = 0
 	var budget := roundi(_play.skip_budget_ms * 1000.0)
-	while _skipping and Time.get_ticks_usec() - start < budget:
+	while _skipping and _skip_spent_usec < budget:
+		var start := Time.get_ticks_usec()
 		_tick()
+		_skip_spent_usec += Time.get_ticks_usec() - start
 
 
 ## One simulation tick: the bots think, your keys are read, the simulation steps and everything follows it.
@@ -1102,8 +1112,9 @@ func _process(delta: float) -> void:
 		_show_skip_clock()
 	_follow_skip()
 	_watch_frame(delta)
-	# Once the field's shaders are warm and the match runs: the warm-up's slow frames are no player's.
-	if _warm and not _holding:
+	# Once the field's shaders are warm and the match runs: the warm-up's slow frames are no player's, nor a skip's long
+	# frames under its cover.
+	if _warm and not _holding and not _skipping:
 		_frames.add(delta)
 	# The next match waits while the last round's table holds the results back.
 	if _rematch_left > 0.0 and not _hud.holds_results():
@@ -1285,7 +1296,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_move_on()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(&"fire") and not event.is_echo() and _input.active and _skip_armed and can_skip() \
-			and not _skipping:
+			and not _skipping and not _input.field_map().open:
 		# Out, a fresh press of the trigger skips the round (MC1); it is no shot.
 		start_skip()
 		_input.hold_fire()
