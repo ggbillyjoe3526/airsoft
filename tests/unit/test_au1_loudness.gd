@@ -108,10 +108,10 @@ func test_a_silenced_shot_carries_its_heard_scale_of_the_reach() -> void:
 	assert_not_null(shot)
 	if shot != null:
 		assert_almost_eq(shot.max_distance, cfg.shot_reach * 0.5, 1e-3)
-	_enemy_far_silenced(silenced)
+	_enemy_far_silenced()
 
 
-func _enemy_far_silenced(silenced: ReplicaConfig) -> void:
+func _enemy_far_silenced() -> void:
 	for v in audio._field:
 		v.stop()
 	enemy.position = Vector3(0.0, 0.0, cfg.shot_reach * 0.5 + 5.0)

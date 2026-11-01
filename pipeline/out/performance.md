@@ -1,16 +1,14 @@
-Task: ST2 · head 4718e15 · Verdict: Pass
-Run: seed 1 (smoke match), full smoke length, SMOKE_MAP patched depot→street in scratch worktrees of 4718e15 and b55e109; headless x2 and rendered once (opengl3/llvmpipe, Compatibility) · budget: no baseline yet (pipeline/perf-budget.json absent), judged against the DECISIONS targets and b55e109 (the parent; origin/main lacks ST1)
-Metrics (new / parent): nodes_max 1510 / 1485 (+25, +1.7 %, the 24 MultiMeshInstance3Ds + "Props") · orphans_max 792 / 792 (same; ends at 0) · draw_max (rendered) 372 / 353 (+5.4 %, ok) · script errors 0 / 0 · smoke ok both. Prims and frame times: llvmpipe/sampling noise (frame counts differ 1764/2006/1893 run to run), reported only; not comparable.
-Static scan of The Street's dress (measured, scratch script PropDress.build): 24 models, 113 instances, 24 MultiMeshes, 107,414 triangles, build 26 ms. Same method: Depot 182,516 tris (28 views), Woodland 458,176 (154 views). The Street is the lightest dressed map.
-Regressions (> 10 % worse): none
-Blocking findings: none
- - No per-frame or per-tick allocation: the diff is config entries, data, tests and Python tools; the one new function path is PropDress.build at map load.
- - No new material: all 24 models draw through the existing shared vertex-colour ShaderMaterial (prop_dress.gd:35), already returned by materials() for the prewarm. No preset bypass.
- - Teardown: views are children of PropDress, freed with the level (orphans back to 0 after the match, measured).
- - Size: 23 .glb about 2.5 MB source (assets/models/props 3.1 MB with imports), far under the 500 MB budget; generate_lods and create_shadow_meshes are on in the .import files.
-Advisory
- - game/play/site/prop_dress.gd:98-100 (judgment): each vehicle model has 1 to 4 instances, under chunk_from (64), so each is one MultiMesh with a map-wide AABB: ~107k triangles of vehicles are submitted every frame, never frustum-culled, and again per shadow cascade; the mesh LOD is also picked for the whole set, not per car. Fine for the Low target at this count (Depot ships 183k), but it is the first thing to look at if the owner's Low run is short.
- - game/config/prop_dress_config.gd:31-52 (judgment): 7 car, 4 van and 3 lorry colourways are separate meshes with identical geometry, so 24 draw calls (plus shadow passes) where 6 would do if the paint came from instance colours; caps tris-per-call batching, not a blocker.
- - Cars are 2,000 to 2,500 triangles (36x the 68-triangle bins); if more vehicles are added, give them a simpler import LOD or chunk them.
-Fixes, ranked by impact (only if the owner's Low run is short): 1 chunk the vehicle views by area (lower chunk_from for these models) so they cull and LOD; 2 share one mesh per vehicle type with instance-colour paint; 3 decimate cars toward about 1,000 triangles in tools/props/build_props.py.
-Unexplained: none. Not measured: GPU frame time and rendered draw calls on a real renderer (this container has no GPU; the owner measures on his PC). Note: tools/smoke_test.sh plays Depot only, so Street's dress is not in CI's smoke run; the numbers above come from a patched scratch copy. Scratch files remain under .scratch/ (worktrees removed).
+Task: AU1 · head c521599 · Verdict: Pass
+Run: no match run (audio-only diff, worker's tools/check.sh in flight); targeted GUT: test_sound_occlusion, test_au1_loudness, test_voice_pool, 35/35 pass, 507 asserts · budget: no baseline yet, judged against targets and the diff
+Metrics: not measured (no per-frame code path changed beyond the SHOT event handler)
+Regressions: none measured
+Blocking: none
+Advisory:
+- game/play/sim_audio.gd:206 (judgment) heard_scale per SHOT is two array reads and a float, no allocation; the shooter null check is cheap. Own shots compute it too, unused beyond the reach test; negligible.
+- game/play/sim_audio.gd:209 (judgment) _power_gain.get on a typed Dictionary[StringName, float] with a StringName key: no allocation, one hash per shot.
+- game/play/sim_audio.gd:571 (judgment) v.unit_size set per field play: one property write per voice start, bounded by the 24-voice pool.
+- Occlusion (measured by test, judgment for reach): rays are still gated by occlusion_reach 60 m and the 24-ray budget; _play checks _in_reach before share_of, and share_of casts nothing beyond 60 m (closed_far ramps the last share 60-120 m). The longer shot reach adds no rays; shots 60-120 m away reuse the cached share.
+- default_bus_layout.tres (judgment) one HardLimiter on Master: a per-block peak detector on the mix thread, no per-frame GDScript cost.
+- More shots now reach the 24-voice field pool on big maps; growth stays bounded by shot_cue_voices 6 per cue and pool priority (SHOT over FIELD), so voices never exceed 24. Presentation-only; judgment.
+Fixes: none needed
+Unexplained: none

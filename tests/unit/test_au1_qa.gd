@@ -4,6 +4,7 @@ extends GutTest
 ## range's targets and the ambience calls keeping theirs, and the extremes of the new levels.
 
 const ROOT := "user://test-au1-qa"
+const TUNING := "res://game/config/play_tuning.tres"
 
 var dir := ""
 var path := ""
@@ -244,7 +245,7 @@ func test_a_voice_that_played_a_shot_then_a_range_target_has_the_targets_distanc
 
 
 func test_the_ambience_calls_keep_the_fields_distance_and_play_at_the_scaled_level() -> void:
-	cfg = (load("res://game/config/play_tuning.tres") as PlayTuning).sound
+	cfg = (load(TUNING) as PlayTuning).sound
 	_setup_audio()
 	audio.on_tick(state, you.id, you)
 	state.time = audio._calls.next_at(0)
@@ -263,22 +264,22 @@ func test_the_ambience_calls_keep_the_fields_distance_and_play_at_the_scaled_lev
 
 
 func test_every_field_by_day_and_night_plays_its_beds_at_the_scaled_level() -> void:
-	cfg = (load("res://game/config/play_tuning.tres") as PlayTuning).sound
+	cfg = (load(TUNING) as PlayTuning).sound
 	var peaks: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(SoundConfig.PEAKS_PATH))
 	for id: StringName in AmbienceConfig.IDS:
 		for night: bool in [false, true]:
 			_setup_audio(night, id)
-			var set := cfg.ambiences.set_for(id, night)
-			assert_eq(audio._beds.size(), set.beds.size(), "%s night=%s" % [id, night])
+			var amb_set := cfg.ambiences.set_for(id, night)
+			assert_eq(audio._beds.size(), amb_set.beds.size(), "%s night=%s" % [id, night])
 			for i in audio._beds.size():
-				var old_db := linear_to_db(set.beds[i].gain * float(peaks[String(set.beds[i].loop)]))
+				var old_db := linear_to_db(amb_set.beds[i].gain * float(peaks[String(amb_set.beds[i].loop)]))
 				assert_almost_eq(audio._beds[i].volume_db, old_db + linear_to_db(cfg.ambience_gain), 1e-3)
 			audio.free()
 			audio = null
 
 
 func test_an_ambience_gain_of_zero_is_silent_and_raises_no_error() -> void:
-	cfg = (load("res://game/config/play_tuning.tres") as PlayTuning).sound
+	cfg = (load(TUNING) as PlayTuning).sound
 	cfg.ambience_gain = 0.0
 	_setup_audio()
 	assert_gt(audio._beds.size(), 0)

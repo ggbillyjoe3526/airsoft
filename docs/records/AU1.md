@@ -25,6 +25,15 @@
 - **Ambience: default 20 % and every bed and call at half its level (ambience_gain 0.5).** At the default that is
   about 9.5 dB quieter than before. The settings file goes to version 3, and a version 2 file still on the old 30 %
   moves to 20 %; a value the player set is kept.
+- **A flash's bang is a shot-kind play, so it too is at full level within 10 m** (it carries its own bang_reach): a
+  bang is at least as loud as a shot. Left as it is.
+- **A silenced replica's power part is not quietened** (the 2026-10-13 ruling: it sounds as it is), so a silenced
+  rifle is now mostly its motor, about 16 dB over its dulled shot, as a silenced AEG is at a real field; its reach
+  is still halved.
+- **The minimap and the bots still hear shots within 60 m** (SoundCues, max_distance × heard_scale): hearing further
+  with your ears doesn't change what bots or the minimap know, so the balance stays as tuned.
+- **A version 2 file on exactly 30 % moves to 20 %** even if the player picked 30 % on purpose: it can't be told apart
+  from the old default (as FB2's move did).
 - **Voices left at 24.** Shots already cap at 6 a cue, so the longer reach doesn't starve footsteps.
 
 ## Known issues left
