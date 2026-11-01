@@ -67,8 +67,7 @@ static func build(map: MapData, cfg: LightingConfig) -> LightPools:
 	pools._ground.mesh = ground_mesh(map, pools._lights, pools._colours, cfg)
 	pools._ground.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	pools._pool_material = ShaderMaterial.new()
-	pools._pool_material.shader = Shader.new()
-	pools._pool_material.shader.code = POOL_SHADER
+	pools._pool_material.shader = CodeShaders.of(POOL_SHADER)
 	pools._pool_material.set_shader_parameter(&"drawn", pools._drawn)
 	pools._pool_material.set_shader_parameter(&"rate", cfg.flicker_rate)
 	pools._pool_material.set_shader_parameter(&"flicker", cfg.flicker)

@@ -300,8 +300,8 @@ func _settled(xp_before: int, won: bool = true, rounds: int = 5, hits: int = 4, 
 	return s
 
 
-func _card(s: PlayerTally.Settled, p: Progress, difficulty: StringName = &"normal") -> XpCard:
-	var card := XpCard.new(s, difficulty, p, pool)
+func _card(s: PlayerTally.Settled, p: Progress) -> XpCard:
+	var card := XpCard.new(s, p, pool)
 	add_child_autofree(card)
 	return card
 
@@ -338,7 +338,7 @@ func test_no_level_up_card_without_a_new_level() -> void:
 
 func test_the_difficulty_multiplier_is_a_line() -> void:
 	var p := _progress(0)
-	var card := _card(_settled(0, true, 5, 4, &"hard", p), p, &"hard")
+	var card := _card(_settled(0, true, 5, 4, &"hard", p), p)
 	var words := _words(card)
 	assert_true(words.has("Hard bots"))
 	assert_true(words.has("× 1.5"))
@@ -398,7 +398,7 @@ func test_the_hud_shows_the_card_under_the_banner_until_the_next_match() -> void
 	var hud := session._hud
 	var p := _progress(1000)
 	var s := _settled(0, true, 5, 4, &"normal", p)
-	hud.show_xp(s, &"normal", p)
+	hud.show_xp(s, p)
 	var card := hud.xp_card()
 	assert_not_null(card)
 	assert_eq(card.get_parent(), hud)
@@ -407,7 +407,7 @@ func test_the_hud_shows_the_card_under_the_banner_until_the_next_match() -> void
 		hud.update(session.state, 1.0, 10.0)
 	assert_true(hud._banner.visible, "the win banner stays up as long as the card")
 	# a second show frees the first
-	hud.show_xp(s, &"normal", p)
+	hud.show_xp(s, p)
 	await wait_process_frames(2)
 	assert_false(is_instance_valid(card))
 	var st := session.state

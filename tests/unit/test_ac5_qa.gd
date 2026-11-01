@@ -62,7 +62,7 @@ func test_the_summary_and_the_xp_card_stay_on_screen_from_80_to_150_percent() ->
 			var settled := PlayerTally.Settled.new()
 			settled.earned = MatchXp.earned(levels, outcome)
 			settled.level_up = progress.add_xp(settled.earned.total)
-			hud.show_xp(settled, &"normal", progress)
+			hud.show_xp(settled, progress)
 			hud.open_summary(state, true, "Hold the angle")
 			hud.update(state, 1.0, 0.0)
 			await wait_process_frames(2)

@@ -1608,7 +1608,7 @@ func _settle() -> void:
 	progress.save_if_dirty()
 	kept.save_if_dirty()
 	settled = s
-	_hud.show_xp(s, difficulty, progress)
+	_hud.show_xp(s, progress)
 	_hud.summary().set_records(kept, kept.win_loss(difficulty, mode), s.news,
 			tr("SUM_RECORDS") % [tr("BOT_" + String(difficulty).to_upper()), tr(MatchOptions.MODE_NAME[mode])])
 	match_settled.emit()

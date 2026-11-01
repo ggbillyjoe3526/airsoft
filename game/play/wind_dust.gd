@@ -70,8 +70,7 @@ func setup(cfg: EffectsConfig) -> void:
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE * cfg.dust_size
 	var look := ShaderMaterial.new()
-	look.shader = Shader.new()
-	look.shader.code = SHADER
+	look.shader = CodeShaders.of(SHADER)
 	look.set_shader_parameter(&"colour", cfg.dust_colour)
 	look.set_shader_parameter(&"glint", cfg.dust_glint)
 	look.set_shader_parameter(&"fade_near", cfg.dust_fade_near)

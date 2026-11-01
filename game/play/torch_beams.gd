@@ -207,8 +207,7 @@ static func cone_mesh(segments: int) -> ArrayMesh:
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	var look := ShaderMaterial.new()
-	look.shader = Shader.new()
-	look.shader.code = CONE_SHADER
+	look.shader = CodeShaders.of(CONE_SHADER)
 	look.set_shader_parameter(&"near_fade", CONE_NEAR)
 	look.set_shader_parameter(&"fade_power", CONE_FADE)
 	mesh.surface_set_material(0, look)

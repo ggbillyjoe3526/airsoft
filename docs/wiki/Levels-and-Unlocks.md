@@ -19,6 +19,7 @@ A finished match pays:
 
 - **The bots' level multiplies the total:** the lower of your opponents' and your teammates' levels (the opponents'
   alone when you have no teammates). A [Custom](Modes#skirmish-and-custom) match pays at most the Custom multiplier.
+  The card after the match names the one that counted: "Hard bots", "Easy teammates" or "Custom rules".
 - **A round won counts only if you took part in it:** you hit an opponent in it, or were still in when it ended.
 - **A shorter Custom match pays less:** Match played, Match won and each Round won are scaled by its rounds to win
   divided by 5 (never more than in full).

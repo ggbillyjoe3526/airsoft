@@ -27,8 +27,8 @@ var _pool: Pool = null
 var _pictures: ReplicaPictures = null
 
 
-## The card for `settled` (what PlayerTally.settle returned) at the bots' `difficulty`, with `progress` as it stands now.
-func _init(settled: PlayerTally.Settled, difficulty: StringName, progress: Progress, pool: Pool) -> void:
+## The card for `settled` (what PlayerTally.settle returned), with `progress` as it stands now.
+func _init(settled: PlayerTally.Settled, progress: Progress, pool: Pool) -> void:
 	name = "XpCard"
 	_progress = progress
 	_pool = pool
@@ -47,7 +47,7 @@ func _init(settled: PlayerTally.Settled, difficulty: StringName, progress: Progr
 		return
 	for l in settled.earned.lines:
 		column.add_child(_line(_line_words(l), str(l.xp)))
-	column.add_child(_line(tr("XP_LINE_DIFFICULTY") % tr("BOT_" + String(difficulty).to_upper()),
+	column.add_child(_line(_multiplier_words(settled.earned),
 			tr("XP_MULTIPLIER") % ArmoryFacts.multiplier_text(settled.earned.multiplier)))
 	column.add_child(_total(settled.earned.total))
 	var up := settled.level_up
@@ -58,6 +58,16 @@ func _init(settled: PlayerTally.Settled, difficulty: StringName, progress: Progr
 
 func pictures() -> ReplicaPictures:
 	return _pictures
+
+
+## The multiplier's line names the row it came from: "Hard bots", "Easy teammates" or "Custom rules".
+func _multiplier_words(e: MatchXp.Earned) -> String:
+	if e.multiplier_from == MatchXp.FROM_CUSTOM:
+		return tr("XP_LINE_CUSTOM")
+	var level := tr("BOT_" + String(e.multiplier_level).to_upper())
+	if e.multiplier_from == MatchXp.FROM_TEAMMATES:
+		return tr("XP_LINE_DIFFICULTY_MATES") % level
+	return tr("XP_LINE_DIFFICULTY") % level
 
 
 ## "Match played", "Rounds won · 5 × 20" (an uneven share says just the count).

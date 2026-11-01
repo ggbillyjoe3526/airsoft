@@ -6,10 +6,10 @@ that unlocks each; this file says how each of those things shoots and handles. T
 says is what everyone who has it gets.
 
 **The game reads this file**, the same way it reads pool.md: it is bundled into the build and parsed when the game
-starts (`src/config/statsFile.ts`, `src/config/gameStats.ts`). Change a number, run the game, and it changes, for bots
-too. After editing, run `npm run test`: `src/config/stats.test.ts`
-reads this file and fails with the line number of anything it can't understand. A cell the game can't read keeps its
-built-in number, with a warning in the browser console, so a typo never stops the game from starting.
+starts (`game/config/replica_stats.gd`). Change a number, run the game, and it changes, for bots too. After editing,
+run `tools/unit_tests.sh`: `tests/unit/test_replica_stats.gd` reads this file and fails with the line number of anything
+it can't understand. A cell the game can't read keeps its built-in number, with a warning in the game's log (Godot's
+output), so a typo never stops the game from starting.
 
 One hit is still one hit. Nothing here is "damage": energy changes how fast and how far a BB flies, the rest how a
 replica handles.
@@ -31,7 +31,7 @@ replica handles.
 **Energy (J)** is the muzzle energy with the replica's factory BB weight (**BB (g)**), the way a site's chrono rates
 it. With the BB weight it sets the speed the BB leaves the barrel at (E = ½·m·v²). Other BB weights shift the energy a
 little (a heavier BB takes more of the push); every BB weight is free and picked on the Loadout's slider. What happens
-to the BB after it leaves the barrel (drag, hop-up lift, spin) is in `src/config/ballistics.ts`.
+to the BB after it leaves the barrel (drag, hop-up lift, spin) is in `game/config/ballistics_config.gd`.
 
 ### Power sources
 

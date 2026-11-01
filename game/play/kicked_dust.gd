@@ -39,8 +39,7 @@ func setup(cfg: EffectsConfig, tint: Color = Color.WHITE, size: float = 1.0) -> 
 	_colour_of_map = Color(tint, cfg.kick_opacity)
 	_scale_of_map = size
 	var look := ShaderMaterial.new()
-	look.shader = Shader.new()
-	look.shader.code = SHADER
+	look.shader = CodeShaders.of(SHADER)
 	look.set_shader_parameter(&"disc", PuffView.disc())
 	look.set_shader_parameter(&"lit", cfg.kick_lit)
 	build(cfg.kick_pool, cfg.kick_life, cfg.kick_grow_time, cfg.kick_start_scale, cfg.kick_drift, 0.0, look)

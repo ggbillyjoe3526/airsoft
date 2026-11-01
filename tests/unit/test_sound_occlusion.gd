@@ -304,3 +304,21 @@ func test_a_tick_allocates_nothing() -> void:
 		occ.impact_share(Vector3(0.0, 1.0, float(i % 9)))
 	assert_eq(Performance.get_monitor(Performance.OBJECT_COUNT), before)
 	assert_gt(occ.rays_total, 300)
+
+
+## BP2 (KNOWN_ISSUES, SP2): a BB striking the far side of a wall thinner than the old 0.2 m gap is heard through it,
+## and one on the near side open; the ray ends just back along the BB's way in.
+func test_an_impact_on_the_far_side_of_a_thin_wall_is_muffled_and_the_near_side_open() -> void:
+	world.add_box(Vector3(0.0, 1.5, 10.0), Vector3(6.0, 3.0, 0.1))
+	_sound()
+	for near: bool in [true, false]:
+		for v in audio._field:
+			v.stop()
+		state.events.clear()
+		var e := state.events.add(GameEvent.Kind.BB_IMPACT)
+		e.target = -1
+		e.position = Vector3(0.0, 1.0, 9.95 if near else 10.05)
+		e.direction = Vector3(0.0, 0.0, 60.0 if near else -60.0)
+		audio.on_tick(state, you.id, you)
+		assert_eq(_buses()["impact_concrete"], SimAudio.BUS_EFFECTS if near else SoundMix.BUS_EFFECTS_FULL,
+				"near side open, far side through the wall" if near else "far side through a 0.1 m wall")

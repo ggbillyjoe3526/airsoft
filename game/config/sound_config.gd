@@ -171,14 +171,17 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 ## Muffling through walls (SP2; the browser game's AUDIO.occlusion): rays from your ears to a character's feet raised by
 ## each of the ray heights (m: knees and head); the blocked share glides a low-pass from occlusion_open_hz to
 ## occlusion_muffled_hz on a log scale and the level from 1 to occlusion_muffled_gain. The half and full buses sit at
-## shares 0.5 and 1. A BB impact casts one ray stopping occlusion_surface_gap (m) short of its surface. No ray beyond
-## occlusion_reach (m): the last share closes to full over occlusion_far_ramp (m) more, in occlusion_far_step (m)
-## steps. A character's share is reused for occlusion_refresh_ticks; a tick casts at most occlusion_ray_budget rays.
+## shares 0.5 and 1. A BB impact casts one ray to occlusion_impact_back (m) back along the BB's way in from where it
+## struck, on its own side of the surface however thin the wall (BP2), or, with no way in known, stopping
+## occlusion_surface_gap (m) short of it. No ray beyond occlusion_reach (m): the last share closes to full over
+## occlusion_far_ramp (m) more, in occlusion_far_step (m) steps. A character's share is reused for
+## occlusion_refresh_ticks; a tick casts at most occlusion_ray_budget rays.
 @export var occlusion_ray_heights: PackedFloat32Array = PackedFloat32Array([0.45, 1.5])
 @export var occlusion_open_hz: float = 18000.0
 @export var occlusion_muffled_hz: float = 700.0
 @export var occlusion_muffled_gain: float = 0.55
 @export var occlusion_surface_gap: float = 0.2
+@export var occlusion_impact_back: float = 0.05
 @export var occlusion_reach: float = 60.0
 @export var occlusion_far_ramp: float = 60.0
 @export var occlusion_far_step: float = 5.0

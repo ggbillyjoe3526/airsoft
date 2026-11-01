@@ -74,6 +74,9 @@ var _listener: Character = null
 var _ear: Vector3 = Vector3.ZERO
 ## Muffling through walls from the listener's eyes, through the level's WorldQuery.
 var _occlusion: SoundOcclusion = null
+## The travel of the BB whose impact is being played (set round that one `_play`; zero, not known, otherwise), so a
+## strike on a wall's far face is muffled from the near side (SoundOcclusion.impact_share).
+var _struck_along: Vector3 = Vector3.ZERO
 ## Cue names worked out once: by power source, by surface, by surface and pace.
 var _shot: Dictionary[StringName, StringName] = {}
 var _power: Dictionary[StringName, StringName] = {}
@@ -253,7 +256,9 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 					if _in_reach(e.position, _cfg.max_distance) and _impacts.take(now):
 						var s := clampi(e.value2, 0, _impact.size() - 1)
 						var cue := _leaves if e.value == BBStep.IN_LEAVES else _impact[s]
+						_struck_along = e.direction
 						_play(cue, e.position, false, _cfg.impact_gain, Kind.IMPACT, BUS_EFFECTS, 1.0, 0.0, null, true)
+						_struck_along = Vector3.ZERO
 				else:
 					_play(&"bodyHit", e.position, e.target == player_id, _cfg.body_hit_gain, Kind.HIT, BUS_EFFECTS, 1.0,
 							0.0, state.character(e.target))
@@ -535,7 +540,8 @@ static func _set_muffle(cutoff_hz: float) -> void:
 
 ## Plays a variant of `cue` at `pitch`, spread by its `kind`: plain if `own`, else from `at`, heard as far as `reach`
 ## (m; SoundConfig.max_distance when not positive) and not played beyond it, muffled by the walls between the listener
-## and `source` (the character making it), or the surface `at` when `impact`. A full pool drops it.
+## and `source` (the character making it), or the surface `at` when `impact`, struck along `_struck_along`. A full
+## pool drops it.
 func _play(cue: StringName, at: Vector3, own: bool, gain: float, kind: Kind, bus: StringName, pitch: float = 1.0,
 		reach: float = 0.0, source: Character = null, impact: bool = false) -> void:
 	if not _streams.has(cue):
@@ -562,7 +568,7 @@ func _play(cue: StringName, at: Vector3, own: bool, gain: float, kind: Kind, bus
 		v.play()
 	else:
 		# Rays only for a sound that has its voice.
-		var share := _occlusion.impact_share(at) if impact else _occlusion.share_of(source)
+		var share := _occlusion.impact_share(at, _struck_along) if impact else _occlusion.share_of(source)
 		var v := _field[i]
 		v.stream = stream
 		var open := share <= 0.0 # the common case: nothing in the way, so no bus or level to work out
