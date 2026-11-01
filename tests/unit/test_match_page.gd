@@ -145,7 +145,7 @@ func test_there_are_three_levels_and_a_new_player_starts_on_normal() -> void:
 
 func test_every_shipped_map_is_public_and_a_dev_one_is_tagged() -> void:
 	var page := _page(false)
-	assert_eq(page.map_ids(), PackedStringArray(["depot", "woodland", "range"]), "listed with Dev content off")
+	assert_eq(page.map_ids(), PackedStringArray(["depot", "woodland", "street", "range"]), "listed with Dev content off")
 	for id: String in page.map_ids():
 		assert_false(_labels(page.map_card(id)).has("DEV"), id)
 		assert_false(page.is_unloadable(id), id)
@@ -171,7 +171,7 @@ func test_a_map_that_cant_load_is_greyed_with_later_and_listed_last() -> void:
 	page.picks.map_id = "ghost"
 	page._offered = PackedStringArray()
 	page._list_maps()
-	assert_eq(page.map_ids(), PackedStringArray(["depot", "woodland", "range", "ghost"]))
+	assert_eq(page.map_ids(), PackedStringArray(["depot", "woodland", "street", "range", "ghost"]))
 	var ghost := page.map_card("ghost")
 	assert_true(page.is_unloadable("ghost"))
 	assert_true(ghost.disabled)
@@ -185,7 +185,7 @@ func test_no_dev_maps_listed_with_dev_content_off() -> void:
 	var was := DevContent.use_map()
 	var page := _page(false)
 	DevContent.restore_map(was)
-	assert_eq(page.map_ids(), PackedStringArray(["depot", "range"]))
+	assert_eq(page.map_ids(), PackedStringArray(["depot", "street", "range"]))
 	assert_true(page.map_card("depot").is_picked())
 
 

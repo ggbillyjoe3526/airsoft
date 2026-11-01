@@ -21,7 +21,7 @@ func test_no_shipped_map_or_item_is_dev_and_the_range_is_listed() -> void:
 	var ids := PackedStringArray()
 	for e in cat.listed(false):
 		ids.append(e.id)
-	assert_eq(ids, PackedStringArray(["depot", "woodland", "range"]))
+	assert_eq(ids, PackedStringArray(["depot", "woodland", "street", "range"]))
 	assert_eq(cat.listed(true).size(), cat.listed(false).size(), "Dev content hides nothing now")
 	var pool := Pool.read_file()
 	var every: Array[Pool.Item] = []
