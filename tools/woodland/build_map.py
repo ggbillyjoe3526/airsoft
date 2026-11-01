@@ -431,7 +431,7 @@ def spawns() -> list[list[dict]]:
 def dead_zones() -> list[list[dict]]:
     out = []
     for (cx, cz), yaw in ((L.DEAD_W, EYE_FACING_EAST), (L.DEAD_E, EYE_FACING_WEST)):
-        out.append([{"position": spot(cx + dx, cz + dz), "yaw": yaw} for dz in (-1.0, 0.0, 1.0) for dx in (-0.5, 0.5)])
+        out.append([{"position": spot(cx + dx, cz + dz), "yaw": yaw} for dz in (-1.5, -0.5, 0.5, 1.5) for dx in (-0.5, 0.5)])
     return out
 
 

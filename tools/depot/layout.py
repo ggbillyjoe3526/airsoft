@@ -153,7 +153,8 @@ add("crates", -50.0, -13.5, -45.0, -12.5)             # north stairs screen, gap
 add("crates", -54.0, -9.5, -49.0, -8.5)               # inner screen, gap east
 add("crates", -50.0, 4.5, -45.0, 5.5)                 # south stairs screen, gap west
 add("crates", -54.0, 0.5, -49.0, 1.5)                 # inner screen, gap east
-SPAWNS_W = [(-50.0, z) for z in (-7.5, -6.3, -5.1, -3.9, -2.7, -1.5)]
+# Eight a side (8v8, TS1), 1 m apart between the inner screens: 0.75 m clear of the north one, 1.25 m of the south.
+SPAWNS_W = [(-50.0, -7.75 + i) for i in range(8)]
 DEAD_W = (-52.8, -4.5)                                # the dead zone, behind the spawn line
 
 # --- Yard (18 x 13): the west end room
@@ -259,7 +260,7 @@ add("crates", 45.5, -5.0, 50.0, -4.0)                 # stairs screen, gap east
 add("crates", 49.0, -1.0, 54.0, 0.0)                  # inner screen, gap west
 add("crates", 45.5, 13.0, 50.0, 14.0)                 # ramp screen, gap east
 add("crates", 49.0, 9.0, 54.0, 10.0)                  # inner screen, gap west
-SPAWNS_E = [(50.0, z) for z in (1.5, 2.7, 3.9, 5.1, 6.3, 7.5)]
+SPAWNS_E = [(50.0, 0.75 + i) for i in range(8)]   # the west line mirrored
 DEAD_E = (52.8, 4.5)
 
 # --- Containers (20 x 19): stacked containers make three corridors

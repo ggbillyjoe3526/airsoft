@@ -105,10 +105,10 @@ func test_a_session_plays_a_custom_copy_and_the_skirmish_one_after_it() -> void:
 	session.map_id = "depot"
 	session.match_seed = 3
 	session.autopilot = true
-	session.custom_rules = _rules(6, 7)
+	session.custom_rules = _rules(8, 7)
 	add_child_autofree(session)
 	await wait_physics_frames(2)
-	assert_eq(session.state.characters.size(), 12, "6v6: twelve characters")
+	assert_eq(session.state.characters.size(), 16, "8v8: sixteen characters")
 	assert_eq(session._tuning.rounds.wins_needed, 7)
 	assert_false(session._tuning.hits.friendly_fire)
 	assert_false(session.counts_for_records())
@@ -120,7 +120,7 @@ func test_a_session_plays_a_custom_copy_and_the_skirmish_one_after_it() -> void:
 	again.autopilot = true
 	add_child_autofree(again)
 	await wait_physics_frames(2)
-	assert_eq(again.state.characters.size(), 10, "the next Skirmish is 5v5 again")
+	assert_eq(again.state.characters.size(), 12, "the next Skirmish is 6v6 again")
 	assert_eq(again._tuning.rounds.wins_needed, 5)
 	assert_true(again._tuning.hits.friendly_fire)
 

@@ -433,8 +433,8 @@ with glowing BBs, since WL9 with practice; since WL10 the match guards and the b
   every slope walks, none needs a jump.
 - [ ] **Bots on the slopes (WL1).** Bots walk all three lanes up to the fort and fight on the hill; none gets stuck on
   a slope or a log. The minimap draws the whole field as ground with the trees, logs and fence on it.
-- [ ] **5v5 and 6v6 (WL2).** Pick Woodland: Skirmish says 5v5 and plays it; under Custom the Team size row offers 5v5
-  and 6v6 only. Play a 6v6: twelve players, each starting on a spot of their own; everyone hit walks to a spot of
+- [ ] **5v5 and 6v6 (WL2).** Pick Woodland: Skirmish says 6v6 and plays it (TS1); under Custom the Team size row
+  offers 5v5 to 8v8. Play a 6v6: twelve players, each starting on a spot of their own; everyone hit walks to a spot of
   their own in the dead zone; every bot has a name on the scoreboard. Does the field feel busy enough at 5v5, too
   crowded at 6v6? Do bots ever stand waiting before they move off (they should set off at once)?
 - [ ] **Loading Woodland (WL2).** The loading bar's current stretch pulses while "Placing the teams" shows (the nav
@@ -553,12 +553,11 @@ You're on Alpha (blue) with two bot teammates against three Beta (orange) bots b
 Play › Match. The Rules row comes first: Skirmish (the standard match) or Custom, which
 opens every row (the Modes Update adds the other rule sets).
 
-- [ ] **The rows.** Rounds to win (3 to 10), Round time (1:30 to 5:00), Team size (the picked map's own: Depot 1v1
-  to 3v3, Woodland 5v5 or 6v6), Opponents, Teammates, Friendly fire and
+- [ ] **The rows.** Rounds to win (3 to 10), Round time (1:30 to 5:00), Team size (the picked map's own: 5v5 to
+  8v8 on every field, TS1), Opponents, Teammates, Friendly fire and
   Ricochets count.
-- [ ] **Team size follows the map (WL2).** Custom 3v3 on Depot, pick Woodland: it shows 5v5; back to Depot: 3v3
-  again, and after a restart still 3v3. Skirmish plays each map's standard: Depot 3v3, Woodland
-  5v5.
+- [ ] **Team size follows the map (WL2, TS1).** Custom 8v8 on Depot, pick Woodland and The Street: each shows 8v8,
+  and after a restart still 8v8. Skirmish plays each map's standard: 6v6 on all three.
 - [ ] **A 1v1, a 2v2, first to 3.** The scoreboard and pips match the sizes; first to 3 swaps ends after round 2 and
   ends at 3. Do rounds feel too long or quick at that size?
 - [ ] **Opponents Easy, Teammates Hard.** Your teammates win clearly more often. The rules text says this match won't

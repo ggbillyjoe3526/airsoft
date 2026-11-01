@@ -105,8 +105,8 @@ def spot(x: float, z: float, yaw: float) -> dict:
 
 
 def dead_zone(cx: float, cz: float, yaw: float) -> list[dict]:
-    """Six walk-off spots: two columns of three, 0.8 m apart, round (cx, cz)."""
-    return [spot(cx + dx, cz + dz, yaw) for dz in (-0.8, 0.0, 0.8) for dx in (-0.4, 0.4)]
+    """Eight walk-off spots (8v8, TS1): two columns of four, 0.8 m apart, round (cx, cz)."""
+    return [spot(cx + dx, cz + dz, yaw) for dz in (-1.2, -0.4, 0.4, 1.2) for dx in (-0.4, 0.4)]
 
 
 def areas() -> list[dict]:

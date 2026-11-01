@@ -1,9 +1,9 @@
 extends GutTest
 ## Depot as the indoor hall (DR1, the owner's concept 3 of 2026-10-31, built by tools/depot/build_map.py): the file
-## reads clean, six a side at each end, the roof (its lamps drawn, its ceiling stopping a BB), the bots' longer sight,
-## the overhead sun, no spawn seen from the floor, and the run times the concept was balanced on.
+## reads clean, eight a side at each end (TS1), the roof (its lamps drawn, its ceiling stopping a BB), the bots' longer
+## sight, the overhead sun, no spawn seen from the floor, and the run times the concept was balanced on.
 
-const SIDE := 6
+const SIDE := 8
 
 var tuning: SimTuning = SimTuning.new()
 var style: MapStyle = MapStyle.new()
@@ -15,17 +15,17 @@ func before_all() -> void:
 	map = MapData.load_map("depot", style, SIDE)
 
 
-func test_it_reads_clean_with_six_a_side() -> void:
+func test_it_reads_clean_with_eight_a_side() -> void:
 	assert_true(map.ok(), "Depot loads: %s" % [map.problems])
 	assert_eq(map.warnings, [] as Array[String], "nothing in the file is left out")
 	assert_eq(map.display_name, "Depot")
 	for e in 2:
-		assert_eq(map.ends[e].spawns.size(), SIDE, "end %d spawns six" % e)
-		assert_eq(map.ends[e].dead_zone.size(), SIDE, "end %d walks six off" % e)
+		assert_eq(map.ends[e].spawns.size(), SIDE, "end %d spawns eight" % e)
+		assert_eq(map.ends[e].dead_zone.size(), SIDE, "end %d walks eight off" % e)
 	var entry := MapCatalog.shared().find("depot")
 	assert_not_null(entry)
 	if entry != null:
-		assert_eq([entry.team_min, entry.team_standard, entry.team_max], [5, 5, 6], "5 v 5 or 6 v 6 only")
+		assert_eq([entry.team_min, entry.team_standard, entry.team_max], [5, 6, 8], "5 v 5 to 8 v 8, 6 v 6 its standard (TS1)")
 	assert_eq(map.lanes.size(), 3, "three lanes")
 	assert_true(map.has_pole and map.has_overtime_flag)
 

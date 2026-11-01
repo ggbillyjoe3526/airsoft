@@ -246,8 +246,9 @@ def hut(cx, cz, sx, sz, rot, openings, tag, roof_h=2.5):
 
 
 # ------------------------------------------------------------------ ends
-SPAWNS_W = [(-83.0, z) for z in (-3.0, -0.5, 2.0, 4.5, 7.0, 9.5)]   # Beta / attackers
-SPAWNS_E = [(79.5, z) for z in (-8.5, -6.0, -3.5, -1.0, 1.5, 4.0)]  # Alpha / defenders
+# Eight a side (8v8, TS1), 2 m apart on the old lines' middles.
+SPAWNS_W = [(-83.0, -3.75 + 2.0 * i) for i in range(8)]   # Beta / attackers
+SPAWNS_E = [(79.5, -9.25 + 2.0 * i) for i in range(8)]    # Alpha / defenders
 DEAD_W = (-85.0, 26.0)
 DEAD_E = (84.5, -24.0)
 FLAG_A = (55.0, -38.5)

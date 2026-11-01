@@ -458,7 +458,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   from cover can't gain on a leader sprinting at its own top speed, and bots never outrun the player's sprint. Stuck,
   standing, lost or slower followers still fail it (`MatchRunner.chasing`).
 - **The match guards play each field at the team size and time of day it is played (2026-10-25, WL10; Claude's
-  defaults).** Woodland at 5v5 (its standard, from `data/maps.md` through `MatchRunner.sized_for`) at night, in
+  defaults).** Woodland at its standard size (6v6 since TS1, from `data/maps.md` through `MatchRunner.sized_for`) at night, in
   Elimination and Attack / Defend, 16 seeds at Normal and 8 at Easy, Hard and Pro each, as five CI jobs of 16 matches;
   Depot by day (Neon Heights' guards left with it, 2026-10-29). The height guards take a terrain's
   lowest point. The balance report plays Woodland the same way.
@@ -532,8 +532,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   grid use (HeightMapShape3D splits cells its own way), one body per ground surface: grass, leaves, earth, gravel,
   wood. Its timber stays dull (saturation under 0.3). It has no baked light: under the trees, night sight's canopy
   does that work. Its placeholders (crowns, bushes, logs, the cabin and fort) wait for the owner's models (step 28).
-- **Team sizes are each map's row in `data/maps.md` (owner, 2026-10-24: the recommended defaults; WL2).** Depot 1 to
-  3, Woodland 5 or 6 with 5 standard; picking a map sets its standard size.
+- **Team sizes are each map's row in `data/maps.md` (owner, 2026-10-24: the recommended defaults; WL2).** Picking a
+  map sets its standard size. **6v6 is every field's standard, with 5v5, 7v7 and 8v8 under Custom (owner, 2026-11-01,
+  TS1).** Every size should be fair and fun; the size mostly sets the pace, 5v5 the slowest and 8v8 the fastest. A
+  size is dropped on a map only with the owner, given the reason. Each field's ends hold eight spawns and eight
+  dead-zone spots; the match guards and the balance report play the standard size (`tools/balance.sh` with `SIZE=n`
+  plays another).
 - **Day / Night is the presets a map offers, never a map name (owner, 2026-10-24: the recommended defaults; WL3).**
   Woodland offered Night alone (Day and Night since WR1), Depot Day (Neon Heights offered both); the Match screen shows
   the row only where there is a choice, and Dev › Time of day plays any map by either. Depot's public night waits for

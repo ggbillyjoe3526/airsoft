@@ -125,7 +125,8 @@ static func end_names(map: MapData) -> Array[String]:
 
 
 ## A map's figures over its matches at `level` (both teams): each team's and each end's share of the decided rounds
-## (the level's band), rounds on time, and the median time and range of each round's first hit.
+## (the level's band), rounds on time, the median time and range of each round's first hit and the median round
+## length (the pace, TS1).
 static func figures(map_name: String, ends: Array[String], matches: Array[MatchRunner.MatchTally],
 		level: StringName = &"normal") -> Array[Figure]:
 	var rounds := 0
@@ -134,9 +135,11 @@ static func figures(map_name: String, ends: Array[String], matches: Array[MatchR
 	var end_wins := PackedInt32Array([0, 0])
 	var hit_times := PackedFloat32Array()
 	var hit_ranges := PackedFloat32Array()
+	var lengths := PackedFloat32Array()
 	for m in matches:
 		for r in m.rounds:
 			rounds += 1
+			lengths.append(r.seconds)
 			if r.reason == GameEvent.RoundEnd.TIME:
 				on_time += 1
 			if r.winner == 0 or r.winner == 1:
@@ -162,6 +165,7 @@ static func figures(map_name: String, ends: Array[String], matches: Array[MatchR
 			"%d rounds with a hit" % hit_times.size()))
 	out.append(number("%s: median range of a round's first hit" % at, median(hit_ranges), "m",
 			"%d rounds with a hit" % hit_ranges.size()))
+	out.append(number("%s: median round length" % at, median(lengths), "s", "%d rounds" % lengths.size()))
 	return out
 
 
@@ -173,9 +177,11 @@ static func flag_figures(map_id: String, map_name: String, matches: Array[MatchR
 	var attack_wins := 0
 	var on_time := 0
 	var captures := 0
+	var lengths := PackedFloat32Array()
 	for m in matches:
 		for r in m.rounds:
 			rounds += 1
+			lengths.append(r.seconds)
 			if r.winner >= 0 and r.winner == r.attackers:
 				attack_wins += 1
 			if r.reason == GameEvent.RoundEnd.TIME:
@@ -192,6 +198,7 @@ static func flag_figures(map_id: String, map_name: String, matches: Array[MatchR
 			"%d of %d rounds" % [on_time, rounds]))
 	out.append(share("%s: rounds won by raising the flag" % at, captures, rounds, -INF, INF,
 			"%d of %d rounds" % [captures, rounds]))
+	out.append(number("%s: median round length" % at, median(lengths), "s", "%d rounds" % lengths.size()))
 	return out
 
 

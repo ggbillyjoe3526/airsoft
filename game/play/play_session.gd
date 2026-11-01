@@ -3,7 +3,7 @@ extends Node3D
 ## A match on a map, played: the level built from its data, the simulation stepped once a physics tick with the
 ## player's command and the bots' (BotController), and everything else drawn from its state and events every rendered
 ## frame (the camera, the replica in hand, BBs, puffs, the other players, sound and the HUD). You play Alpha with bot
-## teammates against bots on Beta, as many a side as the map plays (data/maps.md: Depot three, Woodland five or six),
+## teammates against bots on Beta, as many a side as the map plays (data/maps.md: 6v6 on every field, 5v5 to 8v8 in Custom),
 ## Elimination rounds to five wins. Esc pauses; losing focus pauses too. Emits
 ## `left` when the player leaves (to the menus' Match page). The Dev settings apply here and follow every change
 ## (game speed, bottomless magazines, ghost, bots hold fire, spectate any bot, bot intentions, Retro pixels, End the

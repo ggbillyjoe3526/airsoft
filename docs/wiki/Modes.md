@@ -56,7 +56,7 @@ Under the modes, the **Rules** section picks the rules:
 
 Custom matches never go into your records, and they pay XP at no more than the Custom multiplier
 ([Levels and Unlocks](Levels-and-Unlocks#earning-xp)). The team size offers only the sizes the picked map plays:
-5v5 or 6v6 on both fields.
+5v5 to 8v8 on every field (6v6 is Skirmish's).
 
 ## Practice
 

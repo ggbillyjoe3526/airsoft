@@ -1,6 +1,7 @@
 extends GutTest
 ## WL2: team sizes per map (data/maps.md's Min, Standard and Max, the browser game's maps.ts teamSize), the Match page's
-## Team size row offering only the picked map's, a 6v6 on Woodland, the route searches' budget a tick
+## Team size row offering only the picked map's (TS1: every field 5v5 to 8v8, 6v6 its standard), a 6v6 and an 8v8 on
+## Woodland, the route searches' budget a tick
 ## (NavConfig.search_budget) and Woodland's nav grid built on a worker thread behind the loading screen.
 
 const SAVE := "user://test_team_sizes_settings.save"
@@ -28,7 +29,7 @@ func test_the_shipped_maps_offer_the_owner_s_sizes() -> void:
 	var cat := MapCatalog.read_file()
 	assert_eq(cat.problems, [] as Array[String])
 	var want: Dictionary[String, Array] = {
-		"depot": [5, 5, 6], "woodland": [5, 5, 6], "range": [1, 1, 1],
+		"depot": [5, 6, 8], "woodland": [5, 6, 8], "street": [5, 6, 8], "range": [1, 1, 1],
 	}
 	for id: String in want:
 		var e := cat.find(id)
@@ -40,13 +41,13 @@ func test_the_shipped_maps_offer_the_owner_s_sizes() -> void:
 func test_an_unreadable_size_keeps_its_built_in_value_and_warns() -> void:
 	var cat := MapCatalog.parse(HEAD
 			+ "| a | A | field | public | x | 2 | 2 | . |\n"
-			+ "| b | B | field | public | 1 | 7 | 7 | . |\n"
+			+ "| b | B | field | public | 1 | 9 | 9 | . |\n"
 			+ "| c | C | field | public | 2.5 | 4 | 0 | . |\n"
 			+ "| d | D | field | public | 4 | 5 | 6 | . |\n"
 			+ "| e | E | field | public | 6 | 5 | 6 | . |\n")
 	assert_eq(cat.entries.size(), 5, "a team size never drops a map")
 	assert_eq(_sizes(cat.find("a")), [1, 2, 2] as Array[int], "Min x keeps 1")
-	assert_eq(_sizes(cat.find("b")), [1, 3, 3] as Array[int], "7 a side keeps 3: nothing offers 7v7")
+	assert_eq(_sizes(cat.find("b")), [1, 3, 3] as Array[int], "9 a side keeps 3: nothing offers 9v9")
 	assert_eq(_sizes(cat.find("c")), [1, 3, 3] as Array[int], "2.5 and 0 kept theirs, then 1, 4, 3 is out of order")
 	assert_eq(_sizes(cat.find("d")), [4, 5, 6] as Array[int])
 	assert_eq(_sizes(cat.find("e")), [1, 3, 3] as Array[int], "a smallest over the standard: all three built in")
@@ -63,12 +64,12 @@ func test_a_missing_size_column_is_reported_once() -> void:
 	assert_eq(_sizes(cat.find("a")), [1, 2, 3] as Array[int])
 
 
-func test_nothing_offers_seven_a_side() -> void:
-	assert_eq(CustomRules.TEAM_SIZES.max(), 6)
+func test_nothing_offers_nine_a_side() -> void:
+	assert_eq(CustomRules.TEAM_SIZES.max(), 8)
 	for e in MapCatalog.shared().entries:
-		assert_lte(e.team_max, 6, e.id)
+		assert_lte(e.team_max, 8, e.id)
 	var c := CustomRules.new()
-	c.from_dict({"team_size": 7})
+	c.from_dict({"team_size": 9})
 	assert_eq(c.team_size, CustomRules.new().team_size)
 
 
@@ -78,22 +79,23 @@ func test_a_map_plays_a_picked_size_it_offers_else_its_standard() -> void:
 			"| small | Small | field | public | 1 | 3 | 3 | A small field. |\n| range | Range |"))
 	var woodland := cat.find("woodland")
 	var depot := cat.find("small")
-	assert_eq(woodland.team_size_for(3), 5)
-	assert_eq(woodland.team_size_for(6), 6)
+	assert_eq(woodland.team_size_for(3), 6)
+	assert_eq(woodland.team_size_for(5), 5)
+	assert_eq(woodland.team_size_for(8), 8)
 	assert_eq(depot.team_size_for(6), 3)
 	assert_eq(depot.team_size_for(2), 2)
-	assert_eq(MatchOptions.team_size(woodland, null), 5, "Skirmish plays the standard")
+	assert_eq(MatchOptions.team_size(woodland, null), 6, "Skirmish plays the standard")
 	assert_eq(MatchOptions.team_size(depot, null), 3)
 	assert_eq(MatchOptions.team_size(cat.find("range"), null), 1)
 	var custom := CustomRules.new()
-	custom.team_size = 6
-	assert_eq(MatchOptions.team_size(woodland, custom), 6)
+	custom.team_size = 8
+	assert_eq(MatchOptions.team_size(woodland, custom), 8)
 	custom.team_size = 2
-	assert_eq(MatchOptions.team_size(woodland, custom), 5, "2 is not one of Woodland's: its standard")
+	assert_eq(MatchOptions.team_size(woodland, custom), 6, "2 is not one of Woodland's: its standard")
 	assert_eq(MatchOptions.team_size(depot, custom), 2)
 	var base := SimTuning.load_default()
 	var played := MatchOptions.match_tuning(base, woodland, null)
-	assert_eq(played.rounds.team_size, 5)
+	assert_eq(played.rounds.team_size, 6)
 	assert_eq(base.rounds.team_size, 3, "the loaded tuning is never written")
 	assert_same(MatchOptions.match_tuning(base, depot, null), base, "a 3v3 field plays the loaded tuning as it is")
 
@@ -132,31 +134,31 @@ func _pick_size(page: MatchPage, n: int) -> void:
 func test_the_team_size_row_offers_only_the_picked_map_s_sizes() -> void:
 	var page := _page(MatchOptions.RULES_CUSTOM)
 	var box := page.rules_box()
-	assert_eq(box.offered_sizes(), [5, 6] as Array[int], "Depot")
+	assert_eq(box.offered_sizes(), [5, 6, 7, 8] as Array[int], "Depot")
 	page.map_card("woodland").pressed.emit()
-	assert_eq(box.offered_sizes(), [5, 6] as Array[int], "Woodland")
+	assert_eq(box.offered_sizes(), [5, 6, 7, 8] as Array[int], "Woodland")
 	for id in page.map_ids():
 		page.map_card(id).pressed.emit()
-		assert_false(box.offered_sizes().has(7), id)
+		assert_false(box.offered_sizes().has(4), id)
 		assert_true(box.offered_sizes().has(page.map_check_size()), "%s lights a size it offers" % id)
 
 
 func test_picking_a_map_sets_its_standard_size() -> void:
 	var page := _page(MatchOptions.RULES_SKIRMISH)
-	assert_eq(page.chip_texts()[0], "5 v 5")
+	assert_eq(page.chip_texts()[0], "6 v 6")
 	page.map_card("woodland").pressed.emit()
-	assert_eq(page.chip_texts()[0], "5 v 5")
-	assert_eq(page.map_check_size(), 5)
-	assert_string_contains(page.rules_box().blurb_text(), "5v5")
+	assert_eq(page.chip_texts()[0], "6 v 6")
+	assert_eq(page.map_check_size(), 6)
+	assert_string_contains(page.rules_box().blurb_text(), "6v6")
 	page.map_card("depot").pressed.emit()
-	assert_eq(page.chip_texts()[0], "5 v 5")
+	assert_eq(page.chip_texts()[0], "6 v 6")
 
 
 func test_a_saved_custom_size_is_kept_where_the_map_allows_it() -> void:
 	var settings := Settings.new()
 	var page := _page(MatchOptions.RULES_CUSTOM, settings)
 	var box := page.rules_box()
-	assert_eq(page.map_check_size(), 5, "the default 3 is not Depot's: its standard")
+	assert_eq(page.map_check_size(), 6, "the default 3 is not Depot's: its standard")
 	assert_eq(settings.custom_rules.team_size, 3, "the saved size is kept")
 	_pick_size(page, 5)
 	assert_eq(_saved_size(), 5)
@@ -166,14 +168,16 @@ func test_a_saved_custom_size_is_kept_where_the_map_allows_it() -> void:
 	assert_true(page.summary_text().ends_with("Custom 5v5"), page.summary_text())
 	assert_eq(_saved_size(), 5)
 	page.map_card("woodland").pressed.emit()
-	_pick_size(page, 6)
-	assert_eq(_saved_size(), 6, "6v6 picked on Woodland is saved")
+	_pick_size(page, 8)
+	assert_eq(_saved_size(), 8, "8v8 picked on Woodland is saved")
 	page.map_card("depot").pressed.emit()
-	assert_eq(page.map_check_size(), 6, "Depot plays the saved 6v6 too")
-	assert_eq(box.team_size_choice().selected(), CustomRules.TEAM_SIZES.find(6))
+	assert_eq(page.map_check_size(), 8, "Depot plays the saved 8v8 too")
+	assert_eq(box.team_size_choice().selected(), CustomRules.TEAM_SIZES.find(8))
+	page.map_card("street").pressed.emit()
+	assert_eq(page.map_check_size(), 8, "The Street plays the saved 8v8 too")
 	page.map_card("woodland").pressed.emit()
-	assert_eq(page.map_check_size(), 6, "Woodland plays the saved 6v6 again")
-	assert_eq(box.row_blurbs()[0], "You and five bot teammates against six bots.")
+	assert_eq(page.map_check_size(), 8, "Woodland plays the saved 8v8 again")
+	assert_eq(box.row_blurbs()[0], "You and seven bot teammates against eight bots.")
 
 
 func test_an_old_save_loads_unchanged() -> void:
@@ -183,27 +187,27 @@ func test_an_old_save_loads_unchanged() -> void:
 	settings.load_file(SAVE)
 	assert_eq(settings.custom_rules.to_dict(), old)
 	var page := _page(MatchOptions.RULES_CUSTOM, settings)
-	assert_eq(page.map_check_size(), 5, "2 is not Depot's: its standard")
+	assert_eq(page.map_check_size(), 6, "2 is not Depot's: its standard")
 	assert_eq(settings.custom_rules.to_dict(), old, "opening the page writes nothing over it")
 
 
-# --- 6v6 on Woodland ---
+# --- 8v8 on Woodland (the largest, TS1) ---
 
-func test_a_6v6_on_woodland_gives_everyone_a_spawn_and_a_dead_zone_spot_of_their_own() -> void:
+func test_an_8v8_on_woodland_gives_everyone_a_spawn_and_a_dead_zone_spot_of_their_own() -> void:
 	var settings := Settings.new(PlayTuning.new())
 	settings.dev.bots_hold_fire = true
 	var custom := CustomRules.new()
-	custom.team_size = 6
+	custom.team_size = 8
 	var session := PlaySession.new()
 	session.settings = settings
 	session.map_id = "woodland"
 	session.custom_rules = custom
 	add_child_autofree(session)
 	var state := session.state
-	assert_not_null(state, "Woodland 6v6 builds")
+	assert_not_null(state, "Woodland 8v8 builds")
 	if state == null:
 		return
-	assert_eq(state.characters.size(), 12, "twelve players")
+	assert_eq(state.characters.size(), 16, "sixteen players")
 	var map := session._map
 	var spawns := PackedVector3Array()
 	for c in state.characters:
@@ -216,13 +220,13 @@ func test_a_6v6_on_woodland_gives_everyone_a_spawn_and_a_dead_zone_spot_of_their
 		assert_false(c.armament.replicas.is_empty(), "%d carries a kit" % c.id)
 	for b in session._bots.world.bots:
 		assert_ne(b.bot_name, "", "bot %d has a name" % b.character.id)
-	assert_eq(session._bots.world.bots.size(), 11)
-	# Five of each team hit at once (the sixth keeps the round live), each walks off to a spot of its own.
+	assert_eq(session._bots.world.bots.size(), 15)
+	# Seven of each team hit at once (the eighth keeps the round live), each walks off to a spot of its own.
 	var out: Array[Character] = []
 	for team in 2:
 		var hit := 0
 		for c in state.characters:
-			if c.team == team and hit < 5:
+			if c.team == team and hit < 7:
 				Elimination.eliminate(c, -1, state.characters, map.ends)
 				out.append(c)
 				hit += 1
@@ -242,9 +246,9 @@ func test_a_6v6_on_woodland_gives_everyone_a_spawn_and_a_dead_zone_spot_of_their
 	for c in state.characters:
 		if Elimination.is_in_play(c):
 			Elimination.eliminate(c, -1, state.characters, map.ends)
-			assert_false(spots.has(c.dead_zone_target), "the sixth's spot (%d) is its own too" % c.id)
+			assert_false(spots.has(c.dead_zone_target), "the eighth's spot (%d) is its own too" % c.id)
 			spots.append(c.dead_zone_target)
-	assert_eq(spots.size(), 12)
+	assert_eq(spots.size(), 16)
 
 
 # --- the route search budget ---
@@ -314,10 +318,10 @@ func test_a_victim_still_vaulting_leaves_the_bots_their_search() -> void:
 	assert_false(Elimination.walk_off_due(victim, null), "no grid, no search to leave it")
 
 
-func test_at_6v6_on_woodland_no_bot_waits_a_second_for_a_route() -> void:
+func test_at_8v8_on_woodland_no_bot_waits_a_second_for_a_route() -> void:
 	var tuning := SimTuning.load_default().duplicate() as SimTuning
 	tuning.rounds = tuning.rounds.duplicate() as RoundConfig
-	tuning.rounds.team_size = 6
+	tuning.rounds.team_size = 8
 	var runner := MatchRunner.new(self, "woodland", tuning)
 	var t := runner.play(7, 60.0)
 	runner.free_level()
@@ -325,7 +329,7 @@ func test_at_6v6_on_woodland_no_bot_waits_a_second_for_a_route() -> void:
 	assert_lte(t.most_searches_a_tick, tuning.nav.search_budget, "never over the budget in a tick")
 	assert_lt(t.longest_route_wait, 1.0, "no bot waits 1 s for its route")
 	assert_lt(t.longest_walk_off_wait, tuning.hits.call_time, "a walk-off's route is in before the hit is called")
-	gut.p("Woodland 6v6, 60 s: %d searches, at most %d a tick; longest wait %.3f s, walk-off %.3f s" % [t.searches,
+	gut.p("Woodland 8v8, 60 s: %d searches, at most %d a tick; longest wait %.3f s, walk-off %.3f s" % [t.searches,
 			t.most_searches_a_tick, t.longest_route_wait, t.longest_walk_off_wait])
 
 
@@ -348,7 +352,7 @@ func test_woodland_s_nav_grid_builds_on_a_worker_thread_while_the_loading_screen
 	assert_gt(frames[3] - building_from, 2, "frames go on being drawn while the grid builds")
 	assert_eq(session._nav_task, -1)
 	assert_gt(session._sim.nav.node_count(), 200000, "Woodland's whole grid")
-	assert_eq(session.state.characters.size(), 10, "5v5")
+	assert_eq(session.state.characters.size(), 12, "6v6")
 
 
 func test_a_session_freed_while_its_grid_builds_waits_for_the_task() -> void:

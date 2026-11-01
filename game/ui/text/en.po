@@ -959,6 +959,12 @@ msgstr "You and four bot teammates against five bots."
 msgid "RULE_TEAM_BLURB_6"
 msgstr "You and five bot teammates against six bots."
 
+msgid "RULE_TEAM_BLURB_7"
+msgstr "You and six bot teammates against seven bots."
+
+msgid "RULE_TEAM_BLURB_8"
+msgstr "You and seven bot teammates against eight bots."
+
 msgid "RULE_WINS_BLURB_3"
 msgstr "A quick match: first to %d round wins."
 

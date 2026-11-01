@@ -4,12 +4,12 @@ extends SceneTree
 ## the seed count, the others on 1 to their own count, in Elimination and, on a map with a pole, Attack / Defend; the
 ## figures and verdicts are BalanceReport's. Arguments after `--`: the report's path, the commit, the seed count, then
 ## optionally a filter, the levels (comma-separated, Normal's by default), the other levels' seed count (Normal's by
-## default) and the modes ("elimination", "flag" or both comma-separated, both by default).
+## default), the modes ("elimination", "flag" or both comma-separated, both by default) and the team size (each map's
+## standard by default; one a map doesn't offer plays its standard there, TS1).
 
-## Depot and Woodland (the range is not a match map). Each plays at the team size the game gives it
-## (MatchRunner.sized_for: Woodland 5v5) and at the time of day the runner gives it (Woodland at night, its only preset;
-## Depot by day).
-const MAPS: Array[String] = ["depot", "woodland"]
+## Every field (the range is not a match map). Each plays at the team size the game gives it (MatchRunner.sized_for:
+## its standard, 6v6) or the one asked for, and at the time of day the runner gives it (by day on all three).
+const MAPS: Array[String] = ["depot", "woodland", "street"]
 ## Match time a match may take (s), as the guards allow.
 const MAX_MATCH_SECONDS := 30.0 * 60.0
 
@@ -45,11 +45,12 @@ func _run() -> void:
 	var modes := PackedStringArray(["elimination", "flag"])
 	if args.size() > 6 and args[6] != "":
 		modes = args[6].split(",", false)
+	var size := args[7].to_int() if args.size() > 7 and args[7].is_valid_int() else 0
 	var rows: Array[BalanceReport.Figure] = []
 	for map_id in MAPS:
 		if filter != "" and not map_id.containsn(filter):
 			continue
-		var runner := MatchRunner.new(root, map_id, MatchRunner.sized_for(map_id))
+		var runner := MatchRunner.new(root, map_id, MatchRunner.sized_for(map_id, null, size))
 		await physics_frame
 		await physics_frame
 		if not runner.map.problems.is_empty():
@@ -57,6 +58,8 @@ func _run() -> void:
 			runner.free_level()
 			continue
 		var name := runner.map.display_name if runner.map.display_name != "" else map_id
+		if size > 0:
+			name += " " + MatchOptions.size_short(runner.tuning.rounds.team_size)
 		var by_level: Dictionary[StringName, Array] = {}
 		for level in levels:
 			runner.difficulty = StringName(level)

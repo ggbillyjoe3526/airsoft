@@ -61,7 +61,7 @@ func test_a_second_staged_match_started_at_once_after_the_first_leaves_nothing_b
 
 
 func test_odd_saved_team_sizes_fall_back_and_the_map_plays_its_standard() -> void:
-	for odd: Variant in [7, 0, -1, 3.5, "5", null, [], 12]:
+	for odd: Variant in [9, 0, -1, 3.5, "5", null, [], 12]:
 		var c := CustomRules.new()
 		c.from_dict({"team_size": odd})
 		assert_true(CustomRules.TEAM_SIZES.has(c.team_size), "%s -> %d" % [str(odd), c.team_size])
@@ -97,8 +97,8 @@ func test_a_stale_dev_map_pick_without_dev_content_offers_and_plays_depot_s_size
 	DevContent.restore_map(catalog)
 	await wait_process_frames(1)
 	assert_eq(picks.map_id, "depot", "a dev Woodland is not listed without Dev content")
-	assert_eq(page.rules_box().offered_sizes(), [5, 6] as Array[int])
-	assert_eq(page.map_check_size(), 5, "Depot plays its standard where 2 is not offered")
+	assert_eq(page.rules_box().offered_sizes(), [5, 6, 7, 8] as Array[int])
+	assert_eq(page.map_check_size(), 6, "Depot plays its standard where 2 is not offered")
 	assert_eq(settings.custom_rules.team_size, 2, "the saved size is untouched")
 
 
@@ -109,10 +109,10 @@ func test_the_saved_size_survives_depot_woodland_depot() -> void:
 	settings.custom_rules.team_size = 2
 	var page := _page(picks, settings)
 	await wait_process_frames(1)
-	assert_eq(page.map_check_size(), 5, "2 is not Depot's: its standard")
+	assert_eq(page.map_check_size(), 6, "2 is not Depot's: its standard")
 	page._pick_map("woodland")
-	assert_eq(page.map_check_size(), 5, "Woodland offers 5 or 6: its standard")
-	assert_eq(page.rules_box().offered_sizes(), [5, 6] as Array[int])
+	assert_eq(page.map_check_size(), 6, "Woodland offers 5 to 8: its standard")
+	assert_eq(page.rules_box().offered_sizes(), [5, 6, 7, 8] as Array[int])
 	assert_eq(settings.custom_rules.team_size, 2, "the saved size is kept")
 	page.rules_box().team_size_choice().button(CustomRules.TEAM_SIZES.find(6)).pressed.emit()
 	page._pick_map("depot")

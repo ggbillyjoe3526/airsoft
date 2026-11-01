@@ -51,7 +51,7 @@ func test_the_chips_follow_a_changed_tuning() -> void:
 
 func test_the_page_shows_the_chips_the_summary_and_play() -> void:
 	var page := _page(false)
-	assert_eq(page.chip_texts(), PackedStringArray(["5 v 5", "First to 5", "Rounds 2:30", "Ends swap after 4",
+	assert_eq(page.chip_texts(), PackedStringArray(["6 v 6", "First to 5", "Rounds 2:30", "Ends swap after 4",
 			"Ricochets Don't count", "Friendly fire On"]))
 	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Normal bots")
 	assert_eq(page.play_button().text, "PLAY")
@@ -377,7 +377,7 @@ func test_woodland_builds_staged_at_its_standard_size_and_runs() -> void:
 	assert_not_null(session.state, "Woodland loads and builds")
 	if session.state == null:
 		return
-	assert_eq(session.state.characters.size(), MapCatalog.shared().find("woodland").team_standard * 2, "5v5")
+	assert_eq(session.state.characters.size(), MapCatalog.shared().find("woodland").team_standard * 2, "6v6")
 	await wait_physics_frames(30)
 	assert_gt(session.ticks(), 0, "the match runs")
 	for c in session.state.characters:
@@ -407,7 +407,7 @@ func test_play_frees_the_menus_shows_loading_and_frees_it_once_the_match_runs() 
 	main._picks.team = PlaySession.TEAM_BETA
 	main._start_play()
 	assert_not_null(main._loading)
-	assert_eq(main._loading.kicker_text(), "ELIMINATION · 5 V 5 · YOU'RE BETA")
+	assert_eq(main._loading.kicker_text(), "ELIMINATION · 6 V 6 · YOU'RE BETA")
 	assert_eq(main._loading.title_text(), "DEPOT")
 	assert_null(main._title, "no title node lives during a match")
 	assert_null(main._menus, "no menu nodes live during a match")

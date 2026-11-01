@@ -98,7 +98,7 @@ func test_a_corrupt_settings_file_opens_the_custom_page() -> void:
 	var picks := MatchPicks.new()
 	picks.rules = CUSTOM
 	var page := _page(picks, settings)
-	assert_eq(page.rules_box().team_size_choice().selected(), CustomRules.TEAM_SIZES.find(5), "the default 3, as Depot plays it")
+	assert_eq(page.rules_box().team_size_choice().selected(), CustomRules.TEAM_SIZES.find(6), "the default 3: Depot plays its standard 6v6")
 
 
 func test_every_custom_team_size_leaves_the_depot_playable() -> void:
@@ -106,7 +106,7 @@ func test_every_custom_team_size_leaves_the_depot_playable() -> void:
 	picks.rules = CUSTOM
 	var settings := Settings.new()
 	var page := _page(picks, settings)
-	assert_eq(page.rules_box().offered_sizes(), [5, 6] as Array[int], "Depot's sizes")
+	assert_eq(page.rules_box().offered_sizes(), [5, 6, 7, 8] as Array[int], "Depot's sizes")
 	for n in page.rules_box().offered_sizes():
 		page.rules_box().team_size_choice().button(CustomRules.TEAM_SIZES.find(n)).pressed.emit()
 		assert_false(page.play_button().disabled)
@@ -164,7 +164,7 @@ func test_resetting_the_save_while_the_page_lives_does_not_leave_stale_rows() ->
 	await wait_process_frames(2)
 	var shown := page.rules_box().team_size_choice().selected()
 	var depot := MapCatalog.shared().find("depot")
-	var played := CustomRules.TEAM_SIZES.find(clampi(settings.custom_rules.team_size, depot.team_min, depot.team_max))
+	var played := CustomRules.TEAM_SIZES.find(depot.team_size_for(settings.custom_rules.team_size))
 	assert_eq(shown, played, "the rows show what a match would play")
 
 

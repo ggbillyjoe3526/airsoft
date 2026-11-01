@@ -44,8 +44,8 @@ func test_skirmish_shows_the_chips_and_its_blurb_and_no_rows() -> void:
 	assert_false(box.rules_button(CUSTOM).is_picked())
 	assert_true(box.chips_visible())
 	assert_false(box.rows_visible())
-	assert_eq(box.blurb_text(), "The match as you know it: 5v5, first to 5, 2:30 rounds, friendly fire on.")
-	assert_eq(page.chip_texts(), PackedStringArray(["5 v 5", "First to 5", "Rounds 2:30", "Ends swap after 4",
+	assert_eq(box.blurb_text(), "The match as you know it: 6v6, first to 5, 2:30 rounds, friendly fire on.")
+	assert_eq(page.chip_texts(), PackedStringArray(["6 v 6", "First to 5", "Rounds 2:30", "Ends swap after 4",
 			"Ricochets Don't count", "Friendly fire On"]))
 	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Normal bots")
 
@@ -95,7 +95,7 @@ func test_the_rows_start_on_the_settings_and_carry_their_blurbs() -> void:
 	for b in box.team_size_choice().find_children("*", "Button", true, false):
 		if (b as Button).visible:
 			words.append((b as Button).text)
-	assert_eq(words, PackedStringArray(["5v5", "6v6"]), "Depot's sizes")
+	assert_eq(words, PackedStringArray(["5v5", "6v6", "7v7", "8v8"]), "Depot's sizes")
 
 
 func test_the_rows_offer_the_browser_games_choices() -> void:
@@ -183,11 +183,11 @@ func test_the_summary_line_adds_custom_and_its_team_size() -> void:
 	var page := _page()
 	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Normal bots")
 	_custom(page)
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Normal bots · Custom 5v5")
-	page.rules_box().team_size_choice().button(5).pressed.emit()
 	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Normal bots · Custom 6v6")
+	page.rules_box().team_size_choice().button(7).pressed.emit()
+	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Normal bots · Custom 8v8")
 	page.bot_button("hard").pressed.emit()
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Hard bots · Custom 6v6")
+	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Hard bots · Custom 8v8")
 	page.rules_box().rules_button(SKIRMISH).pressed.emit()
 	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Hard bots")
 
@@ -213,22 +213,22 @@ func test_the_elimination_card_and_the_chips_follow_the_custom_switches() -> voi
 			"Ricochets Count", "Friendly fire Off"]))
 	page.rules_box().rules_button(SKIRMISH).pressed.emit()
 	assert_eq(page.mode_blurb(MatchOptions.MODE_ELIMINATION), "Knock out the other team. First to 5 rounds.")
-	assert_eq(page.chip_texts()[0], "5 v 5", "back on Skirmish the page plays the loaded tuning")
+	assert_eq(page.chip_texts()[0], "6 v 6", "back on Skirmish the page plays Depot's standard")
 	assert_eq(SimTuning.load_default().rounds.wins_needed, 5, "and the loaded tuning was never written into")
 
 
 func test_the_map_check_reads_the_custom_team_size() -> void:
 	var page := _page()
-	assert_eq(page.map_check_size(), 5)
-	_custom(page)
-	page.rules_box().team_size_choice().button(5).pressed.emit()
 	assert_eq(page.map_check_size(), 6)
-	assert_true(page.map_ids().has("depot"), "Depot holds a 6v6")
+	_custom(page)
+	page.rules_box().team_size_choice().button(7).pressed.emit()
+	assert_eq(page.map_check_size(), 8)
+	assert_true(page.map_ids().has("depot"), "Depot holds an 8v8")
 	assert_false(page.is_unloadable("depot"))
 	page.rules_box().team_size_choice().button(4).pressed.emit()
 	assert_eq(page.map_check_size(), 5)
 	page.rules_box().rules_button(SKIRMISH).pressed.emit()
-	assert_eq(page.map_check_size(), 5, "Skirmish checks for its own team size again")
+	assert_eq(page.map_check_size(), 6, "Skirmish checks for its own team size again")
 	assert_eq(_picks.map_id, "depot")
 	assert_false(page.play_button().disabled)
 

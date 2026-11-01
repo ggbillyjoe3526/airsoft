@@ -1,12 +1,12 @@
 extends GutTest
 ## Woodland as the owner's concept 3 (WR1, 2026-10-31, built by tools/woodland/build_map.py): a 176 x 120 m wood on
 ## sloping ground with a dry stream down the middle, three lanes, the Ridge, the Clearing and the road. The file reads
-## clean with six a side, by day or by night; its ground, crossings and pieces stand where the concept put them; no
-## spawn is seen from outside its camp; both ends reach the overtime flag together and their own site first; a body
+## clean with eight a side (TS1), by day or by night; its ground, crossings and pieces stand where the concept put them;
+## no spawn is seen from outside its camp; both ends reach the overtime flag together and their own site first; a body
 ## walks every lane end to end; bots take cover at its pieces; and bots play a whole match on it.
 
 const DT := 1.0 / 60.0
-const SIDE := 6
+const SIDE := 8
 ## The field's half sizes (m).
 const HALF_X := 88.0
 const HALF_Z := 60.0
@@ -53,17 +53,17 @@ func after_all() -> void:
 	nav = null
 
 
-func test_it_reads_clean_with_six_a_side_by_day_or_night() -> void:
+func test_it_reads_clean_with_eight_a_side_by_day_or_night() -> void:
 	assert_true(map.ok(), "Woodland loads: %s" % [map.problems])
 	assert_eq(map.warnings, [] as Array[String], "nothing in the file is left out")
 	assert_eq(map.display_name, "Woodland")
 	for e in 2:
-		assert_eq(map.ends[e].spawns.size(), SIDE, "end %d spawns six" % e)
-		assert_eq(map.ends[e].dead_zone.size(), SIDE, "end %d walks six off" % e)
+		assert_eq(map.ends[e].spawns.size(), SIDE, "end %d spawns eight" % e)
+		assert_eq(map.ends[e].dead_zone.size(), SIDE, "end %d walks eight off" % e)
 	var entry := MapCatalog.shared().find("woodland")
 	assert_not_null(entry)
 	if entry != null:
-		assert_eq([entry.team_min, entry.team_standard, entry.team_max], [5, 5, 6], "5 v 5 or 6 v 6")
+		assert_eq([entry.team_min, entry.team_standard, entry.team_max], [5, 6, 8], "5 v 5 to 8 v 8, 6 v 6 its standard (TS1)")
 	assert_eq(map.lanes.size(), 3, "three lanes")
 	assert_true(map.has_pole and map.has_overtime_flag)
 	assert_eq(map.lighting_presets, [LightingConfig.DAY, LightingConfig.NIGHT] as Array[StringName],

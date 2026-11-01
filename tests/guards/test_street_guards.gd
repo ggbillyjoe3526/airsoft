@@ -1,5 +1,5 @@
 extends GutTest
-## The Street's match guards (ST1): whole bot-against-bot matches at 5v5, the size it plays, by day in Elimination
+## The Street's match guards (ST1): whole bot-against-bot matches at 6v6, the size it plays (TS1), by day in Elimination
 ## and Attack / Defend over 16 seeds at Normal, and by night at Easy and Hard over 8, checking what must never happen
 ## on any seed (MatchGuard, as for Depot and Woodland): rounds settle, nobody is stuck or held up, falls through the
 ## ground, flies or leaves the level, and no bot knocks out a teammate. Who wins is the balance report's (BR1). They run
