@@ -227,8 +227,7 @@ func _make_tufts(tiles: Array[WoodsShapes.Placed]) -> void:
 			holder.name = "Tufts"
 			add_child(holder)
 			_tuft_look = ShaderMaterial.new()
-			_tuft_look.shader = Shader.new()
-			_tuft_look.shader.code = TUFT_SHADER
+			_tuft_look.shader = CodeShaders.of(TUFT_SHADER)
 			_tuft_look.set_shader_parameter(&"fade", _cfg.tuft_fade)
 			_tuft_look.set_shader_parameter(&"root", _cfg.tuft_root)
 			_tuft_look.set_shader_parameter(&"tip", _cfg.tuft_tip)
@@ -271,8 +270,7 @@ func _make_air(placed: WoodsShapes.Placed, map: MapData) -> void:
 	if placed == null:
 		return
 	_air_look = ShaderMaterial.new()
-	_air_look.shader = Shader.new()
-	_air_look.shader.code = AIR_SHADER
+	_air_look.shader = CodeShaders.of(AIR_SHADER)
 	_air_look.set_shader_parameter(&"box", _cfg.mote_box)
 	_air_look.set_shader_parameter(&"edge", _cfg.mote_edge)
 	_air_look.set_shader_parameter(&"firefly", _cfg.firefly_colour * _cfg.firefly_glow)

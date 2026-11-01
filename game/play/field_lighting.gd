@@ -128,8 +128,7 @@ static func day_sky_material(cfg: LightingConfig) -> ProceduralSkyMaterial:
 ## The night sky (NIGHT_SKY) in `cfg`'s colours, its stars spread over the upper sky's cells (about 2π grid² of them).
 static func night_sky_material(cfg: LightingConfig) -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
-	mat.shader = Shader.new()
-	mat.shader.code = NIGHT_SKY
+	mat.shader = CodeShaders.of(NIGHT_SKY)
 	mat.set_shader_parameter(&"top", cfg.sky_top)
 	mat.set_shader_parameter(&"horizon", cfg.sky_horizon)
 	mat.set_shader_parameter(&"below", cfg.ground_bottom)
