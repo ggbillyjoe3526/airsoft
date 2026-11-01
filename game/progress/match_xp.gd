@@ -7,6 +7,11 @@ extends RefCounted
 
 ## The standard match's rounds to win: Match played, Match won and Round won are given in full from here on.
 const FULL_MATCH_WINS := 5
+## Where a match's multiplier came from (Earned.multiplier_from): the opponents' level, the teammates' (lower) or the
+## Custom rule set's cap (lower still).
+const FROM_OPPONENTS := &"opponents"
+const FROM_TEAMMATES := &"teammates"
+const FROM_CUSTOM := &"custom"
 
 
 ## What a finished match was, for its XP.
@@ -35,11 +40,14 @@ class Line:
 	var xp: int = 0
 
 
-## A match's XP, line by line, the multiplier and the total after it.
+## A match's XP, line by line, the multiplier (and the row it came from) and the total after it.
 class Earned:
 	extends RefCounted
 	var lines: Array[Line] = []
 	var multiplier: float = 1.0
+	## FROM_OPPONENTS, FROM_TEAMMATES or FROM_CUSTOM, and that row's level (LevelTable.CUSTOM for the cap).
+	var multiplier_from: StringName = FROM_OPPONENTS
+	var multiplier_level: StringName = &"normal"
 	var total: int = 0
 
 
@@ -55,6 +63,12 @@ static func earned(table: LevelTable, o: Outcome) -> Earned:
 	if o.hits > 0:
 		e.lines.append(_line(&"hit", o.hits, table.earn[&"hit"] * o.hits))
 	e.multiplier = multiplier(table, o.difficulty, o.teammate_difficulty, o.custom)
+	e.multiplier_from = multiplier_from(table, o.difficulty, o.teammate_difficulty, o.custom)
+	e.multiplier_level = o.difficulty
+	if e.multiplier_from == FROM_TEAMMATES:
+		e.multiplier_level = o.teammate_difficulty
+	elif e.multiplier_from == FROM_CUSTOM:
+		e.multiplier_level = LevelTable.CUSTOM
 	var sum := 0
 	for l in e.lines:
 		sum += l.xp
@@ -80,3 +94,16 @@ static func multiplier(table: LevelTable, opponents: StringName, mates: StringNa
 	if custom:
 		m = minf(m, table.multiplier(LevelTable.CUSTOM))
 	return m
+
+
+## Which row multiplier() took: the opponents' unless the teammates' is lower, the Custom cap when lower still (a tie
+## names the earlier, so Hard against Hard says the opponents).
+static func multiplier_from(table: LevelTable, opponents: StringName, mates: StringName, custom: bool) -> StringName:
+	var from := FROM_OPPONENTS
+	var m := table.multiplier(opponents)
+	if mates != &"" and table.multiplier(mates) < m:
+		from = FROM_TEAMMATES
+		m = table.multiplier(mates)
+	if custom and table.multiplier(LevelTable.CUSTOM) < m:
+		from = FROM_CUSTOM
+	return from

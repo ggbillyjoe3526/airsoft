@@ -5,10 +5,10 @@ and (later) grenade the player can unlock. It also holds Extraction's cases. Rea
 asset.
 
 **The game reads this file.** It is bundled into the build and its tables are parsed when the game starts
-(`src/pool/poolFile.ts`, `src/pool/pool.ts`). Change a number or a row, run the game, and it changes: the Loadout
-screen and the Armory use the assets. After editing, run `npm run test`: `src/pool/pool.test.ts` reads this file and
-fails with the line number of anything it can't understand (a typo in a tag, a duplicate ID, a missing column). A row
-the game can't read is skipped with a warning in the browser console, so a typo never stops the game from starting.
+(`game/pool/pool.gd`). Change a number or a row, run the game, and it changes: the Loadout screen and the Armory use
+the assets. After editing, run `tools/unit_tests.sh`: `tests/unit/test_loadout.gd` reads this file and fails with the
+line number of anything it can't understand (a typo in a tag, a duplicate ID, a missing column). A row the game can't
+read is skipped with a warning in the game's log (Godot's output), so a typo never stops the game from starting.
 
 BBs are not pooled assets: every BB weight is free and unlimited, picked on the Loadout's slider.
 
@@ -47,9 +47,9 @@ Green Gas. To let the AEG Rifle take the Red Laser, either add `under-rail` to t
 ### The Key column
 
 Every asset except a power source has a **Key**: the name of the code that says how it behaves. Its numbers (a
-replica's fire rate, an optic's zoom, a grip's handling) are in stats.md, by the same Key. The keys are listed in
-`src/pool/pool.ts` (`REPLICA_KEYS` and its neighbours). A new row can reuse an existing key: for example a second red
-dot with the same behaviour but its own name and ID. A brand new behaviour needs code first.
+replica's fire rate, an optic's zoom, a grip's handling) are in stats.md, by the same Key, read by
+`game/config/replica_stats.gd` and `game/config/part_stats.gd`. A new row can reuse an existing key: for example a
+second red dot with the same behaviour but its own name and ID. A brand new behaviour needs code first.
 
 Power sources need no key: their **Type** says what drives them, and stats.md's Power sources table (by ID) says what
 they do.

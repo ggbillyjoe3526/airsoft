@@ -111,8 +111,9 @@ func show_boot_notices(title: TitleScreen) -> void:
 ## Whether the first start's notice is due for `s`: never seen, the graphics the automatic pick (nothing chosen, no
 ## `--graphics=` preset), and a player at the screen (not the smoke run, nor a headless one).
 static func first_start_due(s: Settings, unattended: bool) -> bool:
+	# A newer build's file is kept as it is and can't be marked seen, so its first start was that build's (BP2).
 	return not unattended and not s.first_start_seen and s.graphics_choice == Settings.GRAPHICS_AUTOMATIC \
-			and s.graphics_forced == &""
+			and s.graphics_forced == &"" and not s.from_newer_build()
 
 
 ## Keep safe graphics (0), or Try my settings again (1): the player's graphics back, and a restart.

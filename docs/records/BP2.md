@@ -64,6 +64,33 @@ merging alongside, is read once it lands.
 - **Doors hang outside the outermost face.** A door may now stand up to 0.13 m clear of a thin wall where its jambs
   are posts; the gap is behind the leaf, which still overlaps both jambs.
 
+## Menus and saves (the second pull request)
+
+Reader D's findings, each checked by reading first, with tests in `tests/unit/test_bp2_menus.gd`.
+
+1. **The crash screen's note** took Tab as a tab character, so the keyboard could not leave it; Tab and Shift+Tab now
+   go round the note, the buttons, the report and Copy, and the report panel shows the focus ring.
+2. **The XP card's difficulty line** named the opponents' level whatever set the multiplier. `MatchXp.multiplier_from`
+   says which side did: the bots, easier teammates ("Easy teammates × …") or Custom rules.
+3. **A settings or loadouts file from a newer build** was written over by the older build's save. Each store now keeps
+   such a file as it is (`_newer_on_disk`); changes last until the game closes, and the message says so. The first-start
+   notice no longer comes back at every launch for such a file (`Settings.from_newer_build`).
+4. **Unknown settings keys** (a newer build's) are kept and written back (`Settings._extra`), as every other store does.
+5. **The level-0 fallback** with Disable levelling (`LevelTable.everything_unlocked`) unlocks everything for the
+   session and saves nothing.
+6. **A "damaged" warning** for settings, progress or records clears once that file saves again.
+7. **A loadout name being typed** when the game closes is kept.
+8. **Five unused text keys** are gone; the data tables' guide text points at files that exist.
+
+QA: Pass (advisories: `reset_save` keeps `_newer_on_disk`, used only by tests; a refused save stays dirty and retries
+quietly). Performance: Pass, nothing per frame. Critic: Accept 8/8; can wait: `Settings.KNOWN_KEYS` is a hand-kept
+list (a test reading every key `from_dict` reads would guard it) and `multiplier_from` repeats `multiplier()`'s min.
+
+Defaults taken: a tie in difficulty names the opponents; a newer file is never written to and nothing is set aside;
+the level-0 fallback unlocks everything for the session and saves nothing.
+
 ## Known issues left
 
-- None new. Rows changed: the MC1 controls row keeps only the old-save part; the FM1 map row keeps only the order keys.
+- None new. Rows deleted: a newer build's loadouts file written over (D); the 4K menu scale in play, stale since UI1 set
+  MAX_SCALE to 2.0 so menus and play both draw at 2x (D). Rows changed: the MC1 controls row keeps only the old-save
+  part; the FM1 map row keeps only the order keys.

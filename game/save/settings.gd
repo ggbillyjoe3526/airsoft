@@ -3,7 +3,9 @@ extends RefCounted
 ## The player's settings: plain typed state, saved through SaveFile at user://settings.save (kind "settings", version
 ## 3). Nothing here touches the engine; SettingsApply writes the values into the game, and SettingsScreen edits them.
 ## A missing file is silent defaults. A file that is damaged, unreadable or of a version this build doesn't know falls
-## back to the defaults with `load_message`; a value that is the wrong type or out of range keeps its default alone.
+## back to the defaults with `load_message` (one from a newer build is never written over: the defaults last for the
+## session); a value that is the wrong type or out of range keeps its default alone. Keys this build doesn't know are
+## kept.
 
 ## Sent when a value changed (after SettingsApply has applied it), so a readout can follow.
 signal changed
@@ -13,6 +15,16 @@ const KIND := "settings"
 ## 2 moved the first-start defaults (FB2), 3 the ambience's (AU1); an older file is brought over once by
 ## `migrate_defaults`.
 const VERSION := 3
+## The keys this build reads (with two it reads once and no longer writes: "dev_enabled", FB3, and "robots", FI6); any
+## other key in the file is kept as it was.
+const KNOWN_KEYS: Array[String] = [
+	"sensitivity", "aim_sensitivity", "invert_y", "crouch_toggle", "aim_toggle", "auto_reload", "wheel_pick",
+	"mouse_dpi", "bindings", "volumes", "window_mode", "vsync", "fov", "show_fps", "realistic_colours",
+	"what_got_you", "hud", "custom_rules", "practice_challenge", "dev", "dev_enabled", "graphics_base",
+	"graphics_choice", "graphics_custom", "frame_limit", "monitor", "last_fullscreen", "renderer", "first_start_seen",
+	"team_colours", "gauge_patterns", "sound_cues", "sound_cue_size", "sound_cue_colour", "read_out", "reduced_motion",
+	"robots",
+]
 ## Windowed leaves the window as it is (the project starts maximised); the other two are the DisplayServer's
 ## borderless and exclusive fullscreen. The first start is Exclusive (WINDOW_MODE_DEFAULT).
 enum WindowMode { WINDOWED, BORDERLESS, EXCLUSIVE }
@@ -134,10 +146,14 @@ var practice_challenge: bool = false
 var dev: DevSettings = DevSettings.new()
 ## What the settings write into: the camera and the mouse (the same resource PlaySession loads).
 var tuning: PlayTuning = null
-## Why the saved settings weren't used, or empty.
+## Why the saved settings weren't used, or empty (and empty again once a save has written a good file).
 var load_message: String = ""
 ## Changed since the last save.
 var dirty: bool = false
+## The file is from a newer build: it is never written over.
+var _newer_on_disk: bool = false
+## Keys in the file this build doesn't know, written back as they were.
+var _extra: Dictionary = {}
 
 static var _shared: Settings = null
 
@@ -161,6 +177,7 @@ static func shared() -> Settings:
 ## Reads `path`. Silent when there is no file; otherwise a message if it can't be used.
 func load_file(path: String = PATH) -> void:
 	load_message = ""
+	_newer_on_disk = false
 	var r := SaveFile.read(path, KIND)
 	if not r.ok:
 		if r.found:
@@ -171,6 +188,7 @@ func load_file(path: String = PATH) -> void:
 	if int(r.version) < 1 or int(r.version) > VERSION:
 		load_message = TranslationServer.translate("SETTINGS_NEWER")
 		push_warning("settings: %s is version %d; using the defaults" % [path, int(r.version)])
+		_newer_on_disk = int(r.version) > VERSION
 		return
 	from_dict(migrate_defaults(r.data, int(r.version)))
 
@@ -206,10 +224,15 @@ static func migrate_defaults(data: Dictionary, version: int) -> Dictionary:
 	return moved
 
 
-## Writes `path`; false if it could not be written.
+## Writes `path`; false if it could not be written (or holds a newer build's settings).
 func save(path: String = PATH) -> bool:
+	if _newer_on_disk:
+		return false
 	var ok := SaveFile.write(path, KIND, VERSION, to_dict())
 	dirty = not ok
+	if ok:
+		# the file is good again: what was wrong with the last one is said no more
+		load_message = ""
 	return ok
 
 
@@ -229,7 +252,8 @@ func to_dict() -> Dictionary:
 	var vol := {}
 	for bus: StringName in VOLUME_BUSES:
 		vol[String(bus)] = volumes[bus]
-	var out := {
+	var out := _extra.duplicate(true)
+	out.merge({
 		"sensitivity": sensitivity, "aim_sensitivity": aim_sensitivity, "invert_y": invert_y,
 		"crouch_toggle": crouch_toggle, "aim_toggle": aim_toggle, "auto_reload": auto_reload,
 		"wheel_pick": int(wheel_pick), "mouse_dpi": mouse_dpi,
@@ -241,7 +265,7 @@ func to_dict() -> Dictionary:
 		"last_fullscreen": int(last_fullscreen), "renderer": int(renderer), "first_start_seen": first_start_seen,
 		"team_colours": int(team_colours), "gauge_patterns": gauge_patterns, "sound_cues": sound_cues,
 		"sound_cue_size": sound_cue_size, "sound_cue_colour": sound_cue_colour, "read_out": read_out,
-	}
+	}, true)
 	# Following the system is never written, so the file holds only the player's own pick.
 	if reduced_motion != ReducedMotion.SYSTEM:
 		out["reduced_motion"] = reduced_motion == ReducedMotion.ON
@@ -251,8 +275,12 @@ func to_dict() -> Dictionary:
 	return out
 
 
-## Takes saved values over the defaults, each checked on its own.
+## Takes saved values over the defaults, each checked on its own; keys this build doesn't know are kept for to_dict.
 func from_dict(data: Dictionary) -> void:
+	_extra = {}
+	for k: Variant in data:
+		if not KNOWN_KEYS.has(str(k)):
+			_extra[k] = data[k]
 	sensitivity = _number(data, "sensitivity", 1.0, Sensitivity.MIN, Sensitivity.MAX)
 	aim_sensitivity = _number(data, "aim_sensitivity", 1.0, Sensitivity.AIM_MIN, Sensitivity.AIM_MAX)
 	invert_y = _flag(data, "invert_y", false)
@@ -447,3 +475,8 @@ func _accessibility_from(data: Dictionary) -> void:
 static func _flag(data: Dictionary, key: String, fallback: bool) -> bool:
 	var v: Variant = data.get(key)
 	return v if v is bool else fallback
+
+
+## Whether the file on disk is a newer build's, kept as it is (no save writes over it this session).
+func from_newer_build() -> bool:
+	return _newer_on_disk

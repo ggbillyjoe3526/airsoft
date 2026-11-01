@@ -34,7 +34,7 @@ var unlocked: PackedStringArray = PackedStringArray()
 var last_map: String = ""
 var last_team: int = -1
 var dirty: bool = false
-## Why the file couldn't be used, for the menus to show; "" when it was fine or missing.
+## Why the file couldn't be used, for the menus to show; "" when it was fine or missing, or once a save wrote a good one.
 var load_message: String = ""
 ## The file is from a newer build: it is never written over.
 var _newer_on_disk: bool = false
@@ -64,14 +64,19 @@ func standing() -> LevelTable.Standing:
 	return table.standing(xp)
 
 
+## Whether `id` is the player's: unlocked, or everything while levels.md has no readable level 0
+## (LevelTable.everything_unlocked).
 func has(id: String) -> bool:
-	return unlocked.has(id)
+	return table.everything_unlocked or unlocked.has(id)
 
 
 ## Adds what every level up to the player's own unlocks and they lack (a new player's kit, an item levels.md added to a
-## level they are past, or one it moved down); returns what was added, lowest level first.
+## level they are past, or one it moved down); returns what was added, lowest level first. Nothing while levels.md has
+## no readable level 0: its stand-in unlocks everything for the session (`has`), never into the save.
 func grant_reached() -> PackedStringArray:
 	var added := PackedStringArray()
+	if table.everything_unlocked:
+		return added
 	for id in table.unlocks_up_to(level()):
 		if not unlocked.has(id):
 			unlocked.append(id)
@@ -95,6 +100,11 @@ func add_xp(amount: int) -> LevelUp:
 	return up
 
 
+## Level 0's kit; none from a levels.md with no readable level 0 (its stand-in's everything never reaches the save).
+func _starting_kit() -> PackedStringArray:
+	return PackedStringArray() if table.everything_unlocked else table.unlocks_up_to(0)
+
+
 ## Keeps `map_id` and `team` as the last match's picks (marked to save if they changed).
 func remember_picks(map_id: String, team: int) -> void:
 	if map_id != last_map or team != last_team:
@@ -106,7 +116,7 @@ func remember_picks(map_id: String, team: int) -> void:
 ## Back to level 0 (Settings › Dev › Reset level): no XP, and the starting kit alone.
 func reset() -> void:
 	xp = 0
-	unlocked = table.unlocks_up_to(0)
+	unlocked = _starting_kit()
 	dirty = true
 
 
@@ -140,6 +150,9 @@ func save(path: String = PATH) -> bool:
 		return false
 	var ok := SaveFile.write(path, KIND, VERSION, to_dict())
 	dirty = not ok
+	if ok:
+		# the file is good again: what was wrong with the last one is said no more
+		load_message = ""
 	return ok
 
 
@@ -176,7 +189,7 @@ func from_dict(data: Dictionary) -> Array[String]:
 			problems.append("xp %s isn't a whole number from 0 to %d: starting from 0" % [str(saved_xp), MAX_XP])
 	elif saved_xp != null:
 		problems.append("xp isn't a number: starting from 0")
-	unlocked = table.unlocks_up_to(0)
+	unlocked = _starting_kit()
 	var saved: Variant = data.get("unlocked")
 	if saved is Array:
 		for id: Variant in saved:

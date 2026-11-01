@@ -125,6 +125,7 @@ func _init(previous: Dictionary, tail: LogTail, settings: Settings, config: Repo
 	add_child(columns)
 	_build_left(columns)
 	_build_right(columns)
+	_ring_focus()
 	_rewrite()
 
 
@@ -345,6 +346,8 @@ func _build_note(parent: Control) -> void:
 	_note = TextEdit.new()
 	_note.name = "Note"
 	_note.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
+	# Tab moves round the screen; a note has no use for a tab character
+	_note.tab_input_mode = false
 	_note.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_note.add_theme_font_override("font", GameTheme.font(600))
 	_note.add_theme_font_size_override("font_size", NOTE_SIZE)
@@ -400,7 +403,22 @@ func _build_right(parent: Control) -> void:
 	var plate := GameTheme.box(REPORT_FILL, GameTheme.LINE, REPORT_PAD.x, REPORT_PAD.y)
 	_report.add_theme_stylebox_override("read_only", plate)
 	_report.add_theme_stylebox_override("normal", plate)
+	var lit := GameTheme.box(REPORT_FILL, GameTheme.YELLOW, REPORT_PAD.x, REPORT_PAD.y)
+	lit.draw_center = false
+	_report.add_theme_stylebox_override("focus", lit)
 	right.add_child(_report)
+
+
+## Tab and Shift+Tab go round the screen's parts as the report panel's do: the note, the four buttons, the report,
+## then Copy beside the seed when there is one.
+func _ring_focus() -> void:
+	var ring: Array[Control] = [_note, _report_button, _copy_button, _logs_button, _continue_button, _report]
+	if _seed_button != null:
+		ring.append(_seed_button)
+	for i in ring.size():
+		var c := ring[i]
+		c.focus_next = c.get_path_to(ring[(i + 1) % ring.size()])
+		c.focus_previous = c.get_path_to(ring[(i - 1 + ring.size()) % ring.size()])
 
 
 ## A small capitals label, with its quiet note at the right.

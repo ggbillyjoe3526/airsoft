@@ -1032,6 +1032,11 @@ The 0.1 Dev 2 bug pass's fixes that need eyes on a real display or hands on the 
 - [ ] **Hold M, press Tab and let it go with M still held:** the map comes back.
 - [ ] **Settings › Controls, Aim on Toggle:** aim, switch Aim to Hold and back mid-match: the sight is down.
 - [ ] **Alt-tab out of a match and click back in,** holding the trigger on full auto: the click fires nothing.
+- [ ] **Crash screen (Dev › Crash, then start again):** type in the note, then Tab and Shift+Tab go round every part,
+  and the report panel shows a yellow ring when it has focus.
+- [ ] **Finish a match with Hard bots against Easy teammates:** the XP card says "Easy teammates × …". A Custom match
+  below the cap says "Custom rules".
+- [ ] **Rename a loadout and close the window while typing:** the name is there on the next start.
 
 ## Reporting what you find
 

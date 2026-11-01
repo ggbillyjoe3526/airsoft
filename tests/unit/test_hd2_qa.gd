@@ -46,7 +46,7 @@ func _xp(hud: Hud, bonus: int = 0) -> void:
 	var settled := PlayerTally.Settled.new()
 	settled.earned = MatchXp.earned(levels, outcome)
 	settled.level_up = progress.add_xp(settled.earned.total + bonus)
-	hud.show_xp(settled, &"normal", progress)
+	hud.show_xp(settled, progress)
 
 
 func _inside(c: Control, canvas: Vector2, what: String) -> void:
