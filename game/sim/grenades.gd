@@ -445,7 +445,8 @@ func _bang(g: Grenade, state: GameState) -> void:
 		if not Elimination.is_in_play(c):
 			continue
 		var eye := Lean.eye(c, _tuning.body, _tuning.hits)
-		if eye.distance_to(at) > cfg.flash_reach or _query.ray(eye, at, _hit):
+		# A flash dazzles through glass as light goes through it (BQ1).
+		if eye.distance_to(at) > cfg.flash_reach or _query.sight_ray(eye, at, _hit):
 			continue
 		var flat := cos(c.pitch)
 		var look := Vector3(-sin(c.yaw) * flat, sin(c.pitch), -cos(c.yaw) * flat)

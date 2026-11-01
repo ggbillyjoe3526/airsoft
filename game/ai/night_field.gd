@@ -188,7 +188,8 @@ func update_torches(characters: Array[Character], query: WorldQuery, tuning: Sim
 			var d := ray.length()
 			if d < 1e-6 or ray.dot(aim) < cos_half * d:
 				continue
-			if not query.ray(eye, point, _torch_hit):
+			# A beam lights through glass (BQ1).
+			if not query.sight_ray(eye, point, _torch_hit):
 				torch_lit[t.id] = 1
 
 

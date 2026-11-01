@@ -9,8 +9,9 @@ class_name SquadOrders
 
 ## What came of the last order given, for the presentation: CANCELLED, back to the team plan (the order given again, Team
 ## plan, or no teammate left to take it); ON_PLAN, Team plan with no order in force; NOBODY, no teammate in play to
-## take it; NOT_NOW, given while out or between rounds; NOWHERE, Go there pinged at nothing (the sky, too far).
-enum Notice { NONE, CANCELLED, ON_PLAN, NOBODY, NOT_NOW, NOWHERE }
+## take it; NOT_NOW, given while out or between rounds; NOWHERE, Go there pinged at nothing (the sky, too far); QUIET, a
+## Go there held with nothing happening for SquadConfig.go_there_quiet, so back to the team plan (BQ1).
+enum Notice { NONE, CANCELLED, ON_PLAN, NOBODY, NOT_NOW, NOWHERE, QUIET }
 
 ## No spot: hold_point looking at nothing, held_centre with nobody holding.
 const NO_SPOT := Vector3(NAN, NAN, NAN)

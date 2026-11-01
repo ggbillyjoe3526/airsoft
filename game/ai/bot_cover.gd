@@ -97,7 +97,7 @@ static func lean_side_to_see(spot: Vector3, threat_eye: Vector3, w: BotWorld) ->
 
 ## True if someone crouched at `spot` (on its floor) is hidden from `threat_eye`.
 static func hides_from(spot: Vector3, threat_eye: Vector3, w: BotWorld) -> bool:
-	return not BotSenses.line_clear(w.query, threat_eye, spot + Vector3(0.0, w.tuning.body.crouch_eye_height, 0.0))
+	return not BotSenses.sight_clear(w.query, threat_eye, spot + Vector3(0.0, w.tuning.body.crouch_eye_height, 0.0))
 
 
 ## Looks for a spot within `radius` of `from` hidden from `threat_eye` (see the class comment), trying `candidates`
@@ -176,7 +176,8 @@ static func _consider(w: BotWorld, out: Spot, x: float, z: float) -> void:
 		return
 	var spot := Vector3(x, floor_y + s.above_floor, z)
 	var body := w.tuning.body
-	if BotSenses.line_clear(w.query, s.threat_eye, spot + Vector3(0.0, body.crouch_eye_height, 0.0)):
+	# Hidden, not merely out of the BBs' way: glass (BQ1) is no cover.
+	if BotSenses.sight_clear(w.query, s.threat_eye, spot + Vector3(0.0, body.crouch_eye_height, 0.0)):
 		return # not cover at all
 	var crouch_only := BotSenses.line_clear(w.query, s.threat_eye, spot + Vector3(0.0, body.stand_eye_height, 0.0))
 	var lean := 0 if crouch_only else lean_side_to_see(spot, s.threat_eye, w)
