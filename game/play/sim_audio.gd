@@ -23,7 +23,8 @@ extends Node
 ## the listener (AmbientCalls), positional, at the pool's lowest priority. Your own sounds play plain; everyone else's
 ## from where they happen, and only within reach of the ears the view is through (the listener): others' steps
 ## step_reach and at most step_limit per step_window, their rustle foley_reach and at most foley_limit per foley_window,
-## BB impacts at most impact_limit per impact_window, the range's targets target_reach, the rest max_distance. Every
+## BB impacts at most impact_limit per impact_window, the range's targets target_reach, shots and their power parts
+## shot_reach (full level within shot_unit_size), the rest max_distance. Every
 ## variant is loaded up front, so the first shot never hitches. The voices are made once and shared through two
 ## VoicePools (yours plain, the field's positional) by priority. A cue never plays the same variant twice running; pitch
 ## and level are spread by kind (none on interface cues). Variant, pitch and level are presentation only, on SimAudio's
@@ -63,6 +64,8 @@ var _pitch_spread: PackedFloat32Array = PackedFloat32Array()
 var _level_spread: PackedFloat32Array = PackedFloat32Array()
 var _priority: PackedInt32Array = PackedInt32Array()
 var _cue_voices: PackedInt32Array = PackedInt32Array()
+## By Kind: the distance (m) within which another's sound plays at full level.
+var _unit_size: PackedFloat32Array = PackedFloat32Array()
 var _steps: VoicePool.StartLimit = null
 var _impacts: VoicePool.StartLimit = null
 var _foleys: VoicePool.StartLimit = null
@@ -74,6 +77,8 @@ var _occlusion: SoundOcclusion = null
 ## Cue names worked out once: by power source, by surface, by surface and pace.
 var _shot: Dictionary[StringName, StringName] = {}
 var _power: Dictionary[StringName, StringName] = {}
+## By power source: its power part's level (SoundConfig.power_gains).
+var _power_gain: Dictionary[StringName, float] = {}
 var _dry: Dictionary[StringName, StringName] = {}
 var _mag_out: Dictionary[StringName, StringName] = {}
 var _mag_in: Dictionary[StringName, StringName] = {}
@@ -133,6 +138,7 @@ func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, quer
 		var power_part := "power_%s" % p
 		var has_part := ResourceLoader.exists("%s%s_1.wav" % [SoundConfig.CUE_DIR, power_part])
 		_power[p] = _load(power_part) if has_part else &""
+		_power_gain[p] = cfg.power_gains.get(p, cfg.power_gain)
 		_dry[p] = _load("dryFire_%s" % p)
 		_mag_out[p] = _load("magOut_%s" % p)
 		_mag_in[p] = _load("magIn_%s" % p)
@@ -197,9 +203,11 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				var p := _power_of(state, e.actor, e.slot)
 				var muffled := _muffled(state, e.actor, e.slot)
 				var shooter := state.character(e.actor)
+				var reach := _cfg.shot_reach * (MinimapHearing.heard_scale(shooter, e.slot) if shooter != null else 1.0)
 				_play(_shot.get(p, &""), e.position, own, _cfg.shot_gain * (_cfg.muffled_gain if muffled else 1.0),
-						Kind.SHOT, BUS_MUFFLED if muffled else BUS_EFFECTS, 1.0, 0.0, shooter)
-				_play(_power.get(p, &""), e.position, own, _cfg.shot_gain, Kind.SHOT, BUS_POWER, 1.0, 0.0, shooter)
+						Kind.SHOT, BUS_MUFFLED if muffled else BUS_EFFECTS, 1.0, reach, shooter)
+				_play(_power.get(p, &""), e.position, own, _power_gain.get(p, _cfg.power_gain), Kind.SHOT, BUS_POWER, 1.0,
+						reach, shooter)
 			GameEvent.Kind.DRY_FIRE:
 				_mechanism(_dry.get(_power_of(state, e.actor, e.slot), &""), state, e, own)
 			GameEvent.Kind.RELOAD_START:
@@ -491,7 +499,7 @@ func _call(state: GameState, now: float) -> void:
 		var at := _calls.at
 		var pitch := 1.0 + _rng.randf_range(-kind.pitch, kind.pitch)
 		var far := maxf(_cfg.max_distance, _ear.distance_to(at) + CALL_SLACK)
-		_play(kind.cue, at, false, kind.level, Kind.CALL, BUS_AMBIENCE, pitch, far)
+		_play(kind.cue, at, false, kind.level * _cfg.ambience_gain, Kind.CALL, BUS_AMBIENCE, pitch, far)
 
 
 func _mechanism(cue: StringName, state: GameState, e: GameEvent, own: bool) -> void:
@@ -560,6 +568,7 @@ func _play(cue: StringName, at: Vector3, own: bool, gain: float, kind: Kind, bus
 		var open := share <= 0.0 # the common case: nothing in the way, so no bus or level to work out
 		v.volume_db = db if open else db + linear_to_db(SoundOcclusion.level_for(bus, share, _cfg))
 		v.pitch_scale = scale
+		v.unit_size = _unit_size[kind]
 		v.max_distance = far
 		v.bus = bus if open else SoundOcclusion.bus_for(bus, share, _cfg)
 		v.global_position = at
@@ -592,6 +601,7 @@ func _kinds(cfg: SoundConfig) -> void:
 	_level_spread.resize(n)
 	_priority.resize(n)
 	_cue_voices.resize(n)
+	_unit_size.resize(n)
 	var pitch: Dictionary[Kind, float] = {
 		Kind.SHOT: cfg.shot_pitch, Kind.MECHANISM: cfg.mechanism_pitch, Kind.STEP: cfg.step_pitch,
 		Kind.VAULT: cfg.vault_pitch, Kind.ROPE: cfg.rope_pitch, Kind.IMPACT: cfg.impact_pitch, Kind.HIT: 0.0,
@@ -610,12 +620,14 @@ func _kinds(cfg: SoundConfig) -> void:
 		_level_spread[k] = level[k]
 		_priority[k] = VoicePool.Priority.FIELD
 		_cue_voices[k] = cfg.cue_voices
+		_unit_size[k] = cfg.unit_size
 	_priority[Kind.SHOT] = VoicePool.Priority.SHOT
 	_priority[Kind.HIT] = VoicePool.Priority.SHOT
 	_priority[Kind.INTERFACE] = VoicePool.Priority.OWN
 	_priority[Kind.RADIO] = VoicePool.Priority.OWN
 	_priority[Kind.CALL] = VoicePool.Priority.CALL
 	_cue_voices[Kind.SHOT] = cfg.shot_cue_voices
+	_unit_size[Kind.SHOT] = cfg.shot_unit_size
 
 
 ## Loads `<cue>_1.wav` .. `_<variants>.wav` (those that exist) under the cue's name, which it returns.
@@ -652,7 +664,7 @@ func _start_ambience(id: StringName) -> void:
 		var v := AudioStreamPlayer.new()
 		v.stream = load(path)
 		v.bus = BUS_AMBIENCE
-		v.volume_db = linear_to_db(bed.gain * peak)
+		v.volume_db = linear_to_db(bed.gain * peak * _cfg.ambience_gain)
 		add_child(v)
 		v.play()
 		_beds.append(v)

@@ -1,7 +1,7 @@
 class_name Settings
 extends RefCounted
 ## The player's settings: plain typed state, saved through SaveFile at user://settings.save (kind "settings", version
-## 2). Nothing here touches the engine; SettingsApply writes the values into the game, and SettingsScreen edits them.
+## 3). Nothing here touches the engine; SettingsApply writes the values into the game, and SettingsScreen edits them.
 ## A missing file is silent defaults. A file that is damaged, unreadable or of a version this build doesn't know falls
 ## back to the defaults with `load_message`; a value that is the wrong type or out of range keeps its default alone.
 
@@ -10,8 +10,9 @@ signal changed
 
 const PATH := "user://settings.save"
 const KIND := "settings"
-## 2 moved the first-start defaults (FB2); a version 1 file is brought over once by `migrate_defaults`.
-const VERSION := 2
+## 2 moved the first-start defaults (FB2), 3 the ambience's (AU1); an older file is brought over once by
+## `migrate_defaults`.
+const VERSION := 3
 ## Windowed leaves the window as it is (the project starts maximised); the other two are the DisplayServer's
 ## borderless and exclusive fullscreen. The first start is Exclusive (WINDOW_MODE_DEFAULT).
 enum WindowMode { WINDOWED, BORDERLESS, EXCLUSIVE }
@@ -28,7 +29,7 @@ const VOLUME_DEFAULTS: Dictionary[StringName, float] = {
 	&"Master": 1.0,
 	&"Effects": 0.7,
 	&"Power": 1.0,
-	&"Ambience": 0.3,
+	&"Ambience": 0.2,
 	&"Interface": 0.4,
 }
 ## The volumes a version 1 file started with: one still equal to its old default was never touched.
@@ -38,6 +39,14 @@ const VOLUME_DEFAULTS_V1: Dictionary[StringName, float] = {
 	&"Power": 1.0,
 	&"Ambience": 0.6,
 	&"Interface": 0.5,
+}
+## The volumes a version 2 file started with (FB2): only the ambience has moved since (AU1).
+const VOLUME_DEFAULTS_V2: Dictionary[StringName, float] = {
+	&"Master": 1.0,
+	&"Effects": 0.7,
+	&"Power": 1.0,
+	&"Ambience": 0.3,
+	&"Interface": 0.4,
 }
 ## Exclusive fullscreen on the display the game opens on, and V-Sync off, from the first start (owner, 2026-10-29).
 const WINDOW_MODE_DEFAULT := WindowMode.EXCLUSIVE
@@ -167,20 +176,23 @@ func load_file(path: String = PATH) -> void:
 
 
 ## `data` as a version `version` file's, with every value still at the old default moved to the new one (a value the
-## player changed is kept): the volumes, Windowed and V-Sync. Version 2 or later is returned as it is. A new
-## dictionary; `data` is not changed.
+## player changed is kept): the volumes (from version 1 or 2), Windowed and V-Sync (from version 1). The current
+## version or later is returned as it is. A new dictionary; `data` is not changed.
 static func migrate_defaults(data: Dictionary, version: int) -> Dictionary:
-	if version >= 2:
+	if version >= VERSION:
 		return data
 	var moved := data.duplicate(true)
+	var old_volumes := VOLUME_DEFAULTS_V1 if version < 2 else VOLUME_DEFAULTS_V2
 	var saved_vol: Variant = moved.get("volumes")
 	if saved_vol is Dictionary:
 		var vol: Dictionary = saved_vol
 		for bus: StringName in VOLUME_BUSES:
 			var key := String(bus)
 			var v: Variant = vol.get(key)
-			if (v is float or v is int) and is_equal_approx(float(v), VOLUME_DEFAULTS_V1[bus]):
+			if (v is float or v is int) and is_equal_approx(float(v), old_volumes[bus]):
 				vol[key] = VOLUME_DEFAULTS[bus]
+	if version >= 2:
+		return moved
 	var mode: Variant = moved.get("window_mode")
 	if (mode is float or mode is int) and roundi(float(mode)) == WINDOW_MODE_DEFAULT_V1:
 		moved["window_mode"] = int(WINDOW_MODE_DEFAULT)

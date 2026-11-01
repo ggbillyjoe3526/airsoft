@@ -16,6 +16,11 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 ## Levels and pitch spreads (± share) by kind. A shot plays with its power part (motor whir, gas pop) on top.
 @export var shot_gain: float = 1.4
 @export var shot_pitch: float = 0.03
+## A shot's power part (the motor's whir, the gas's pop and hiss, the spring's twang) plays at its power source's gain
+## in power_gains, or power_gain for one not listed. The rendered motor sits about 11 dB under its shot, the gas's 4 dB
+## and the spring's 7 dB, so each is lifted to be heard over a firefight at full Power volume (owner, 2026-11-01: AU1).
+@export var power_gain: float = 2.5
+@export var power_gains: Dictionary[StringName, float] = {&"electric": 4.0, &"gas": 2.2, &"spring": 2.5}
 @export var mechanism_gain: float = 0.8
 @export var mechanism_pitch: float = 0.04
 @export var step_gain: float = 0.54
@@ -119,6 +124,12 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 ## not played at all (the browser game's AUDIO.spatial.maxDistance); the range's targets carry target_reach.
 @export var unit_size: float = 4.0
 @export var max_distance: float = 60.0
+## Others' shots and their power parts carry further (owner, 2026-11-01: bots' gunfire was lost; AU1): full level within
+## shot_unit_size (m), falling away out to shot_reach (m), a silenced replica's reach scaled as the minimap hears it
+## (MinimapHearing.heard_scale). The voices' own cap (AudioStreamPlayer3D.max_db) keeps a shot next to you no louder
+## than your own.
+@export var shot_unit_size: float = 10.0
+@export var shot_reach: float = 120.0
 ## Others' footsteps (and magazine rattle) only within step_reach (m) of your ears, about as far as bots hear a sprint,
 ## and at most step_limit of them start within step_window (s): six sprinters stay readable (AUDIO.footsteps).
 @export var step_reach: float = 22.0
@@ -172,8 +183,10 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 @export var occlusion_ray_budget: int = 24
 ## Every field's beds and calls by day and by night (the browser game's AMBIENCES), picked by the map's `ambience`: the
 ## beds on the Ambience bus at their gain times the loop's stored peak (assets/audio/README.md), the calls round the
-## listener on the Ambience bus at the field pool's lowest priority.
+## listener on the Ambience bus at the field pool's lowest priority. Every bed and call plays at ambience_gain times its
+## own level, under the Ambience volume (owner, 2026-11-01: too loud and distracting; AU1).
 @export var ambiences: AmbienceConfig = AmbienceConfig.new()
+@export var ambience_gain: float = 0.5
 ## The referee's pea whistle (the browser game's whistle.ts), rendered by tools/render_whistle.gd as whistle_short and
 ## whistle_long, whistle_variants of each with the warble's phase moved round its cycle, and played at whistle_gain on
 ## the Interface bus. A sine at whistle_hz whose pitch warbles at whistle_warble_hz by whistle_warble_depth (a share of

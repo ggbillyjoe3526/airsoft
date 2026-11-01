@@ -16,8 +16,9 @@ The default keys are on [Controls](Controls).
 ## Audio
 
 Volumes for **Master**, **Effects**, **Power source** (the motor or gas part of a shot), **Ambience** and
-**Interface**. A new game starts with Master at 100 %, Effects 70 %, Power source 100 %, Ambience 30 % and Interface
-40 %. If you delete your save, they come back.
+**Interface**. A new game starts with Master at 100 %, Effects 70 %, Power source 100 %, Ambience 20 % and Interface
+40 %. If you delete your save, they come back. Gunfire carries across the whole field, so you can hear where a fight
+is from a long way off; a silenced replica carries half as far.
 
 ## Display
 
