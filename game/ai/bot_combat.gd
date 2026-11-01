@@ -9,6 +9,8 @@ static var _hit: RayHit = RayHit.new()
 static var _volume: Hitbox.Volume = Hitbox.Volume.new()
 ## The point aim() last aimed at (with lead): shoot() reads it the same tick.
 static var _aim_point: Vector3 = Vector3.ZERO
+## Whether the last line-of-fire check found the level itself (a wall, glass, leaves) on the line to the aim point.
+static var _level_in_line: bool = false
 ## Where aim() looks with nobody in sight, set by the branch that decides it (and by _held_angle_look).
 static var _look_yaw: float = 0.0
 static var _look_pitch: float = 0.0
@@ -138,6 +140,12 @@ static func _held_angle_look(b: Bot, w: BotWorld, eye: Vector3, facing_yaw: floa
 static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim: float, cmd: PlayerCommand,
 		dt: float) -> void:
 	var cfg := w.cfg
+	if target == null or not b.target_visible:
+		b.no_shot_for = 0.0
+	elif b.no_shot_for > 0.0 and BotSenses.line_clear(w.query, eye, _aim_point) \
+			and not leaves_in_line(w, eye, _aim_point):
+		# The way clear again (it went round, or the glass is behind it): a shot, whether or not it can take it this tick.
+		b.no_shot_for = 0.0
 	var ready := w.live and BotSenses.has_reacted(b, w) and not cmd.sprint and b.mode != Bot.Mode.COVER
 	if not ready or target == null or off_aim >= deg_to_rad(cfg.fire_cone_deg):
 		b.pause_left = maxf(0.0, b.pause_left - dt)
@@ -145,7 +153,10 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 	var dir := Vector3(-sin(b.aim_yaw) * cos(b.aim_pitch), sin(b.aim_pitch), -cos(b.aim_yaw) * cos(b.aim_pitch))
 	var dist := eye.distance_to(_aim_point)
 	if _line_of_fire_blocked(b, w, eye, dir, dist):
+		# Seen through glass or leaves it can't shoot through (BQ1): counted, so it goes round in time.
+		b.no_shot_for = b.no_shot_for + dt if _level_in_line else 0.0
 		return
+	b.no_shot_for = 0.0
 	if b.burst_left <= 0.0 and b.pause_left <= 0.0:
 		b.burst_left = b.pick(b.skill.burst)
 	if b.burst_left > 0.0:
@@ -199,12 +210,14 @@ static func flight_time(b: Bot, w: BotWorld, dist: float) -> float:
 	return t if t < INF else 0.0
 
 
-## True if `b` must hold fire along `dir` from `eye` at a target `dist` m away: cover on the line to the aim point, more
+## True if `b` must hold fire along `dir` from `eye` at a target `dist` m away (_level_in_line says whether the level
+## itself, glass or leaves, stood on the line to the aim point): cover on the line to the aim point, more
 ## leaves in the way than it shoots through (leaves_in_line), a wall close in front along the aim, or a body in the line
 ## of fire (_body_in_line) up to where a miss would stop.
 static func _line_of_fire_blocked(b: Bot, w: BotWorld, eye: Vector3, dir: Vector3, dist: float) -> bool:
 	var cfg := w.cfg
-	if not BotSenses.line_clear(w.query, eye, _aim_point) or leaves_in_line(w, eye, _aim_point):
+	_level_in_line = not BotSenses.line_clear(w.query, eye, _aim_point) or leaves_in_line(w, eye, _aim_point)
+	if _level_in_line:
 		return true
 	var reach := miss_reach(cfg, dist)
 	var wall := -1.0

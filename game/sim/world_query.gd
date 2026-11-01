@@ -31,6 +31,13 @@ func ray(_from: Vector3, _to: Vector3, _hit: RayHit) -> bool:
 	return false
 
 
+## As `ray`, for sight (BQ1): the nearest surface that hides what is behind it, passing through the clear ones (The
+## Street's glass, MapStyle.clear_kinds), which stop BBs, bodies and bombs but not the eye. A level with no clear
+## surface answers as `ray`.
+func sight_ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
+	return ray(from, to, hit)
+
+
 ## What the ground under `feet` is made of (RayHit.Surface.NONE when it can't tell).
 func surface_under(_feet: Vector3) -> RayHit.Surface:
 	return RayHit.Surface.NONE

@@ -82,7 +82,7 @@ func _init(state: GameState, player_id: int, map: MapData, nav: NavGrid, query: 
 ## Writes each bot's command for this tick into `commands` (indexed by character id). With the Dev settings' Bots hold
 ## fire on (`state.cheats`), no bot pulls its trigger; with Bots run low on BBs, mag_dev_low_after into each round one
 ## bot a team in turn is put on its last magazine (DevCheats.run_low). First, a bot back from Regroup turns to Follow me,
-## a Go there all its teammates reached turns to Hold here, and the magazine hand-off's jobs are handed out (BotMagShare.update).
+## a Go there all its teammates reached turns to Hold here (one held quiet too long ends, BQ1), and the magazine hand-off's jobs are handed out (BotMagShare.update).
 func think(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 	var w := world
 	w.time = state.time
@@ -91,6 +91,7 @@ func think(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 	_sync_round(state)
 	orders.regroup_arrivals()
 	orders.move_arrivals()
+	orders.quiet_holds()
 	for c in state.characters:
 		if Elimination.is_in_play(c):
 			w.mark_visited(c.team, c.position)

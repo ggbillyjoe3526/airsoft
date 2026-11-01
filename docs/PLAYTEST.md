@@ -516,6 +516,11 @@ You're on Alpha (blue) with two bot teammates against three Beta (orange) bots b
   first through the gap, an **Anchor** holds one spot aiming over cover, a **Flanker** takes a lane of its own, a
   **Careful** bot clears each corner. Can you tell them apart?
 - [ ] **At night** (Woodland): bots on every level hold posts out of lantern light.
+- [ ] **Go There goes quiet (BQ1).** Send your squad somewhere nobody is (Mouse 4): once there they hold it, and
+  after about 30 s with nothing seen or heard near them they read "All quiet" and go back to the plan. A shot or a
+  sighting near them keeps them there. Is 30 s right?
+- [ ] **Glass on The Street (BQ1).** Stand behind the House's window and let a bot outside see you: it squares up but
+  doesn't shoot the glass, then comes round by a door. Glass is no cover from its eyes.
 - [ ] **Anchors (BP5).** In Elimination with over a minute left, give an anchor teammate Follow me (F), then end it
   with F again: it goes hunting.
 

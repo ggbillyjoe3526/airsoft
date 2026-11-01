@@ -52,5 +52,10 @@ extends Resource
 @export var hold_arrive: float = 0.7
 ## Hold here again, looking at least this far from the held spot (m), moves it; nearer cancels the order.
 @export var hold_move: float = 3.0
+## Go there (FM1) once all are there holds as a Hold here, but only while something happens (BQ1): this long (s) with
+## no holder seeing an enemy, fighting, in cover or with one seen or heard within go_there_contact_radius (m) of
+## where it stands, and they go back to the team plan. A Hold here given as one never lapses.
+@export var go_there_quiet: float = 30.0
+@export var go_there_contact_radius: float = 30.0
 ## Regroup: teammates sprint back to the giver and follow once this close (m).
 @export var regroup_arrive: float = 4.0

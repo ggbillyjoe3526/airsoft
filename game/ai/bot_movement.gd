@@ -528,7 +528,7 @@ static func _crouched_view_clear(b: Bot, w: BotWorld, at: Vector3) -> bool:
 	var floor_y := w.nav.floor_at(at)
 	var eye := Vector3(at.x, (at.y if is_nan(floor_y) else floor_y) + w.tuning.body.crouch_eye_height, at.z)
 	var look := eye + Vector3(-sin(yaw), 0.0, -cos(yaw)) * w.cfg.hold_look_distance
-	return BotSenses.line_clear(w.query, eye, look)
+	return BotSenses.sight_clear(w.query, eye, look)
 
 
 ## At a lane point, maybe (the skill's hold_cover_chance) crouch cover close by to hold from: hidden from a point

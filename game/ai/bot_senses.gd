@@ -33,6 +33,14 @@ static func line_clear(query: WorldQuery, a: Vector3, b: Vector3) -> bool:
 	return not query.ray(a, b, _hit)
 
 
+## True if nothing that hides what is behind it lies on the straight line from `a` to `b`: as line_clear, but through
+## clear glass (WorldQuery.sight_ray, BQ1). What a bot sees, not what its BBs reach.
+static func sight_clear(query: WorldQuery, a: Vector3, b: Vector3) -> bool:
+	if a.distance_squared_to(b) < EPSILON * EPSILON:
+		return true
+	return not query.sight_ray(a, b, _hit)
+
+
 ## Within `viewer`'s field of view, or close enough to notice anyway.
 static func in_view(viewer: Character, at: Vector3, cfg: BotConfig) -> bool:
 	var dx := at.x - viewer.position.x
@@ -89,7 +97,7 @@ static func sees_spot(viewer: Character, spot: Vector3, range_m: float, w: BotWo
 		return false
 	var chest := spot + Vector3(0.0, Hitbox.hit_top(0.0, w.tuning.hits) * w.cfg.aim_height_fraction, 0.0)
 	var eye := eye_of(viewer, w.tuning)
-	return line_clear(w.query, eye, chest) and (flat <= w.cfg.close_awareness or leaves_clear(w, eye, chest)) \
+	return sight_clear(w.query, eye, chest) and (flat <= w.cfg.close_awareness or leaves_clear(w, eye, chest)) \
 			and smoke_clear(w, eye, chest)
 
 
@@ -197,7 +205,7 @@ static func smoke_clear(w: BotWorld, a: Vector3, b: Vector3) -> bool:
 ## and with `leafy` (farther than close_awareness) no more bush than foliage_see_through.
 static func _sight_clear(eye: Vector3, point: Vector3, viewer: Character, target: Character, w: BotWorld,
 		leafy: bool) -> bool:
-	return line_clear(w.query, eye, point) and (not leafy or leaves_clear(w, eye, point)) \
+	return sight_clear(w.query, eye, point) and (not leafy or leaves_clear(w, eye, point)) \
 			and smoke_clear(w, eye, point) and not _body_in_sight(eye, point, viewer, target, w)
 
 
