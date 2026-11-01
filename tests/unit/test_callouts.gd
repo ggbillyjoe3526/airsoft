@@ -10,10 +10,12 @@ const LINES: PackedStringArray = [
 	"Contact, {area}!", "{count}, {area}!", "Movement, {area}.", "{left} left!", "Last one!", "Tagged!", "Reloading!",
 	"Pushing {area}!", "Flanking {area}.", "Checking {area}.", "Holding {area}.", "Raising!", "Flag!",
 	"Overtime, {area}!", "Going to {area}.", "Watching {area}.", "Need a mag!", "Mag coming!", "Thanks for the mag!",
+	"Need help!", "Go round!", "Cover me!",
 ]
 ## The shipped order of urgency.
 const ORDER: Array[int] = [
-	E.LAST_ONE, E.DOWN, E.TAGGED, E.PING_GOING, E.PING_WATCHING, E.NEED_MAG, E.MAG_COMING, E.OVERTIME, E.FLAG,
+	E.LAST_ONE, E.DOWN, E.TAGGED, E.PING_GOING, E.PING_WATCHING, E.NEED_MAG, E.MAG_COMING, E.NEED_HELP, E.COVER_ME,
+	E.GO_ROUND, E.OVERTIME, E.FLAG,
 	E.RAISING, E.CONTACTS, E.CONTACT, E.RELOADING, E.MAG_THANKS, E.HEARD, E.PUSHING, E.FLANKING, E.CHECKING,
 	E.HOLDING,
 ]

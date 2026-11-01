@@ -29,6 +29,8 @@ plays: the calls are what it already does, put into words.
 - **Marks.** A teammate calling Contact or Contacts that still sees the enemy may also mark them for you, a ping over
   where they are: the chance is how likely, and the team marks at most once in its seconds. Marks only show; they
   never change how anyone plays.
+- **Asks.** When a teammate asks for you (Need help, Go round, Cover me) and pings the spot: how often the team may
+  ask, how many times a round, how far you must be for it to bother, and what counts as needing help or a stand-off.
 - **Lines** are what a bot says: one picked at random from the event's rows for its personality and the rows for
   Any. Words in braces are filled in: `{area}` is the named area ("Dock"), `{count}` how many ("Two") and `{left}` how
   many of the other team are left. A line with `{area}` is skipped when there is no area to name. Keep lines short (48
@@ -63,6 +65,14 @@ plays: the calls are what it already does, put into words.
 - **Mag coming.** It sets off to bring a teammate a magazine: one who asked it, or you, when you asked (the Mag key or
   the order wheel's Need a Mag). Said as soon as its own gap lets it, while it still brings it. Fills nothing.
 - **Thanks for the mag.** It catches a magazine a teammate tossed it. Fills nothing.
+- **Need help.** A bot on your team asks you over, and pings where it is for you: it is fighting two or more enemies
+  at once (Asks), or it defends the pole the other team starts raising the flag on. Fills `{area}` (where it is).
+- **Go round.** A bot on your team has traded looks with one enemy for a while (a stand-off, Asks): it pings a spot to
+  their side for you to go round to. Fills `{area}` (the spot's).
+- **Cover me.** Attack / Defend: a bot on your team starts raising the flag and pings the pole for you. Fills nothing.
+
+Only bots on your team ask, only while you are in play and far from them (Asks), and never more often than Asks
+allows. Their pings show as yours do, marked Help, Go or Cover; nobody else changes what they do for one.
 
 Hit players never talk: they raise a hand, call their hit and walk off, as on a real field ("dead men don't talk").
 
@@ -77,6 +87,9 @@ Hit players never talk: they raise a hand, call their hit and walk off, as on a 
 | Watching your ping | 1 | 0 |
 | Need a mag | 1 | 3 |
 | Mag coming | 1 | 0 |
+| Need help | 1 | 0 |
+| Cover me | 1 | 0 |
+| Go round | 1 | 0 |
 | Overtime | 1 | 0 |
 | Flag | 1 | 10 |
 | Raising | 1 | 10 |
@@ -105,6 +118,18 @@ Hit players never talk: they raise a hand, call their hit and walk off, as on a 
 |---|---|
 | A sighting is marked (chance) | 0.35 |
 | The team's marks apart (s) | 12 |
+
+## Asks
+
+| Rule | Value |
+|---|---|
+| The team's asks apart (s) | 30 |
+| Asks a round, at most | 3 |
+| You are further than (m) | 15 |
+| Seen at once to need help | 2 |
+| Seen within (s) | 4 |
+| A stand-off after (s) | 8 |
+| Go round beside them (m) | 12 |
 
 ## Personalities
 
@@ -157,6 +182,21 @@ Hit players never talk: they raise a hand, call their hit and walk off, as on a 
 | Watching your ping | Any | Watching {area}. |
 | Watching your ping | Any | Copy, watching it. |
 | Watching your ping | Anchor | Got {area} covered. |
+| Need help | Any | Need a hand, {area}! |
+| Need help | Any | Need help, {area}! |
+| Need help | Any | They're all over me, {area}! |
+| Need help | Any | Need a hand over here! |
+| Need help | Any | Could use some help! |
+| Need help | Rusher | Get over here, {area}! |
+| Need help | Careful | Pinned, {area}. Need you. |
+| Go round | Any | Go round, {area}! I'll hold them. |
+| Go round | Any | Swing round {area}, I've got them busy. |
+| Go round | Any | Go round them, I'll hold them here! |
+| Go round | Flanker | Take {area}, catch them side on. |
+| Go round | Anchor | I'll keep them here. Go round {area}. |
+| Cover me | Any | On the flag, cover me! |
+| Cover me | Any | Raising it, watch my back! |
+| Cover me | Careful | Raising. Cover me, please. |
 | Reloading | Any | Reloading! |
 | Reloading | Any | Changing mags! |
 | Reloading | Any | Mag change, cover me! |

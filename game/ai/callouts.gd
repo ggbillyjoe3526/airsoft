@@ -15,7 +15,9 @@ extends RefCounted
 ## a stream of its own, so marks never change the lines. The magazine hand-off (MH2, BotMagShare): a bot's ask (Need a
 ## mag) and its setting off to bring one (Mag coming) are said once each, as soon as the pace lets the bot speak while it
 ## still asks or brings it; a catch with BBs in it, Thanks for the mag. Tagged (Extraction) is read from the file but not
-## raised yet: its system raises it.
+## raised yet: its system raises it. Asks (BQ2, callouts.md › Asks): a bot on your team in a fight with more than it can
+## take on, in a stand-off, defending the pole the flag goes up on, or raising the flag, calls Need help, Go round or
+## Cover me and pings the spot for you (Pings.ask); only while you are in play and far off, as often as Asks allows.
 
 const TEAMS := 2
 ## The events any teammate may say (the one nearest to where it happened), not only the bot it happened to: its own
@@ -23,14 +25,20 @@ const TEAMS := 2
 const TEAM_EVENTS: Array[int] = [
 	CalloutsFile.Event.DOWN, CalloutsFile.Event.LAST_ONE, CalloutsFile.Event.TAGGED, CalloutsFile.Event.RAISING,
 	CalloutsFile.Event.FLAG, CalloutsFile.Event.OVERTIME, CalloutsFile.Event.PING_GOING,
-	CalloutsFile.Event.PING_WATCHING,
+	CalloutsFile.Event.PING_WATCHING, CalloutsFile.Event.COVER_ME,
 ]
 ## The answers to a player's ping and the asks and answers for a magazine: a personality's Talks (×) never makes them
 ## less likely.
 const ANSWERS: Array[int] = [
 	CalloutsFile.Event.PING_GOING, CalloutsFile.Event.PING_WATCHING, CalloutsFile.Event.NEED_MAG,
-	CalloutsFile.Event.MAG_COMING,
+	CalloutsFile.Event.MAG_COMING, CalloutsFile.Event.NEED_HELP, CalloutsFile.Event.GO_ROUND,
+	CalloutsFile.Event.COVER_ME,
 ]
+## The asks (BQ2), and what each one's ping asks (Pings.Ask), in the same order.
+const ASK_EVENTS: Array[int] = [
+	CalloutsFile.Event.NEED_HELP, CalloutsFile.Event.GO_ROUND, CalloutsFile.Event.COVER_ME,
+]
+const ASK_KINDS: Array[int] = [Pings.Ask.HELP, Pings.Ask.GO, Pings.Ask.COVER]
 ## The events that say how many are left: a newer hit makes any still waiting out of date.
 const COUNTS: Array[int] = [CalloutsFile.Event.DOWN, CalloutsFile.Event.LAST_ONE, CalloutsFile.Event.TAGGED]
 ## The marks' stream is the callouts' seed with these bits flipped too (the browser game's MARK_SALT), so marking a
@@ -50,6 +58,8 @@ class Pending:
 	var left: int = 0
 	var enemy: int = -1
 	var until: float = -INF
+	## An ask's spot (the floor it pings, BQ2).
+	var spot: Vector3 = Vector3.ZERO
 
 
 ## Per team: when it last said anything and each event, when it last called each enemy (by character index), the last
@@ -65,12 +75,17 @@ class TeamTalk:
 	var queue: Array[Pending] = []
 	var ping_answered: float = -INF
 	var marked_at: float = -INF
+	## Asks (BQ2): how many this round, and when the last.
+	var asks: int = 0
+	var asked_at: float = -INF
 
 
 ## The calls said, for the presentation.
 var said: CalloutLog = null
 ## The ping book a Contact call marks its enemy in (BotController's; null marks nothing).
 var pings: Pings = null
+## You (the player's character): the bots on your team ask for you (BQ2). Null: nobody asks.
+var you: Character = null
 var _file: CalloutsFile = null
 var _cfg: CalloutConfig = null
 var _areas: Array[MapAreas.Area] = []
@@ -177,6 +192,8 @@ func _reset() -> void:
 			p.until = -INF
 		talk.ping_answered = -INF
 		talk.marked_at = -INF
+		talk.asks = 0
+		talk.asked_at = -INF
 	_said_at.fill(-INF)
 	_held_called.fill(0)
 
@@ -205,6 +222,10 @@ func _on_event(e: GameEvent, state: GameState, bots: Array[Bot]) -> void:
 				return
 			_offer_from_team(attackers, CalloutsFile.Event.RAISING, -1, e.position, bots, "", 0, 0)
 			_offer_from_team(1 - attackers, CalloutsFile.Event.FLAG, -1, e.position, bots, "", 0, 0)
+			# Asks (BQ2): your team raising it asks you to cover the pole; your team defending it, to come and help.
+			if _far_from_you(e.position):
+				var ask := CalloutsFile.Event.COVER_ME if you.team == attackers else CalloutsFile.Event.NEED_HELP
+				_offer_from_team(you.team, ask, -1, e.position, bots, area_of(e.position), 0, 0, e.position)
 		GameEvent.Kind.OVERTIME:
 			# Elimination's overtime flag went up (OV2): on each team, the bot nearest it says so, naming its area.
 			var area := area_of(e.position)
@@ -274,6 +295,8 @@ func _watch(i: int, state: GameState, w: BotWorld) -> void:
 	if fresh >= 0:
 		var event := CalloutsFile.Event.CONTACTS if seen >= 2 else CalloutsFile.Event.CONTACT
 		_offer(t, event, i, bots, area_of(chars[fresh].position), seen, 0, fresh)
+	if you != null and t == you.team and _far_from_you(me.position):
+		_watch_asks(i, state, w)
 	# A noise heard in this tick's hearing (stamped with the bots' time), while nobody on the team has anyone in sight; a
 	# ping isn't one.
 	if b.heard_at == w.time and b.has_last_known and seen == 0 and not b.on_ping_spot() and not _team_sees(t, bots):
@@ -302,6 +325,67 @@ func _watch(i: int, state: GameState, w: BotWorld) -> void:
 	if b.at_post and _was_at_post[i] == 0 and _held_called[i] == 0:
 		_held_called[i] = 1
 		_offer(t, CalloutsFile.Event.HOLDING, i, bots, area_of(me.position), 0, 0, -1)
+
+
+## Bot `i` on your team, far from you, may ask for you (BQ2, callouts.md › Asks): Need help, fighting (or in cover
+## from) at least Asks' outnumbered enemies seen within its seen_within, at where it stands; Go round, fighting one it has
+## had in sight since a stand-off ago, at a spot round_offset to their side (yours, if a walkable floor is there).
+func _watch_asks(i: int, state: GameState, w: BotWorld) -> void:
+	var b := w.bots[i]
+	if b.mode != Bot.Mode.FIGHT and b.mode != Bot.Mode.COVER:
+		return
+	var asks := _file.asks
+	var t := b.character.team
+	var talk := _teams[t]
+	# Said as soon as the pace lets the bot speak, as a magazine ask is, so it never waits in the queue to be dropped.
+	if talk.asks >= int(asks.per_round) or _now - talk.asked_at < asks.gap or not _pace_allows(i, w.bots):
+		return
+	var chars := state.characters
+	var seen := 0
+	for c in chars:
+		if c.team == t or not Elimination.is_in_play(c) or c.id < 0 or c.id >= b.contacts.size():
+			continue
+		var contact := b.contacts[c.id]
+		if contact != null and _now - contact.seen_at <= asks.seen_within:
+			seen += 1
+	if seen >= asks.outnumbered:
+		_offer(t, CalloutsFile.Event.NEED_HELP, i, w.bots, area_of(b.character.position), seen, 0, -1,
+				b.character.position)
+		return
+	if b.mode != Bot.Mode.FIGHT or not b.target_visible or b.contact == null \
+			or _now - b.contact.first_seen_at < asks.stand_off:
+		return
+	var target := state.character(b.target_id)
+	if target == null or not Elimination.is_in_play(target):
+		return
+	var spot := _round_spot(b.character.position, target.position, w)
+	if SquadOrders.is_spot(spot):
+		_offer(t, CalloutsFile.Event.GO_ROUND, i, w.bots, area_of(spot), 0, 0, -1, spot)
+
+
+## A walkable floor spot Asks' round_offset to the side of an enemy at `enemy` that a bot at `from` holds (across the
+## line between them), on your side first, then the other; NO_SPOT when neither has one near (SquadOrders).
+func _round_spot(from: Vector3, enemy: Vector3, w: BotWorld) -> Vector3:
+	if w.nav == null:
+		return SquadOrders.NO_SPOT
+	var line := Vector2(enemy.x - from.x, enemy.z - from.z)
+	if line.length() < 0.001:
+		return SquadOrders.NO_SPOT
+	var across := Vector2(-line.y, line.x).normalized()
+	var mine := 1.0 if across.dot(Vector2(you.position.x - enemy.x, you.position.z - enemy.z)) >= 0.0 else -1.0
+	var offset := _file.asks.round_offset
+	for side: float in [mine, -mine]:
+		var at := enemy + Vector3(across.x, 0.0, across.y) * offset * side + Vector3.UP
+		var k := w.nav.nearest_walkable(at, _cfg.ask_snap)
+		if k >= 0:
+			return w.nav.node_position(k)
+	return SquadOrders.NO_SPOT
+
+
+## Whether you are in play and further than Asks' you_further from `at` (on the ground): worth asking for you.
+func _far_from_you(at: Vector3) -> bool:
+	return you != null and Elimination.is_in_play(you) \
+			and Vector2(you.position.x - at.x, you.position.z - at.z).length() > _file.asks.you_further
 
 
 ## A player's ping that team `t`'s bots took (Pings.take) and have thought on since (taken before this tick's think):
@@ -359,7 +443,7 @@ func _team_saw(team: int, enemy: Character, bots: Array[Bot]) -> bool:
 ## A team event (a hit, the flag): said by bot `own` if it may speak, else by the team's bot nearest `at` that may (in
 ## play and outside its own gap).
 func _offer_from_team(team: int, event: int, own: int, at: Vector3, bots: Array[Bot], area: String, count: int,
-		left: int) -> void:
+		left: int, spot: Vector3 = Vector3.ZERO) -> void:
 	var speaker := own if own >= 0 and _may_speak(own, bots) else -1
 	if speaker < 0:
 		var best := INF
@@ -372,7 +456,7 @@ func _offer_from_team(team: int, event: int, own: int, at: Vector3, bots: Array[
 				best = d
 				speaker = i
 	if speaker >= 0:
-		_offer(team, event, speaker, bots, area, count, left, -1)
+		_offer(team, event, speaker, bots, area, count, left, -1, spot)
 
 
 ## Whether bot `i` may speak now with nothing in its way: in play and outside its own gap, its team's gap passed and
@@ -393,8 +477,9 @@ func _may_speak(i: int, bots: Array[Bot]) -> bool:
 
 
 ## Offers bot `i`'s call of `event` to its team: kept if no gap stops it and its chance comes up, in a free place in
-## the queue or in place of a less urgent call.
-func _offer(team: int, event: int, i: int, bots: Array[Bot], area: String, count: int, left: int, enemy: int) -> void:
+## the queue or in place of a less urgent call. An ask (BQ2) pings `spot` when said.
+func _offer(team: int, event: int, i: int, bots: Array[Bot], area: String, count: int, left: int, enemy: int,
+		spot: Vector3 = Vector3.ZERO) -> void:
 	var rule := _file.rules[event]
 	var b := bots[i]
 	var talk := _teams[team]
@@ -422,6 +507,7 @@ func _offer(team: int, event: int, i: int, bots: Array[Bot], area: String, count
 	slot.count = count
 	slot.left = left
 	slot.enemy = enemy
+	slot.spot = spot
 	slot.until = _now + _file.pace.max_wait
 
 
@@ -437,6 +523,8 @@ func _allowed(talk: TeamTalk, event: int, i: int, bots: Array[Bot], area: String
 	elif not _may_speak(i, bots):
 		return false
 	if enemy >= 0 and _now - talk.enemy_at[enemy] < pace.same_enemy_gap:
+		return false
+	if ASK_EVENTS.has(event) and (talk.asks >= int(_file.asks.per_round) or _now - talk.asked_at < _file.asks.gap):
 		return false
 	return event != CalloutsFile.Event.HEARD or area != talk.heard_area or _now - talk.heard_at >= pace.same_enemy_gap
 
@@ -480,6 +568,12 @@ func _flush(t: int, state: GameState, w: BotWorld, live: bool) -> void:
 				talk.enemy_at[k] = _now
 	said.add(b.character.id, t, next.event as CalloutsFile.Event, text, _now)
 	_mark(talk, next, b, state, w)
+	var ask := ASK_EVENTS.find(next.event)
+	if ask >= 0:
+		talk.asks += 1
+		talk.asked_at = _now
+		if pings != null:
+			pings.ask(b.character, next.spot, ASK_KINDS[ask] as Pings.Ask, _now)
 
 
 ## Whether a sighting just said marks the enemy it calls for the team (callouts.md › Marks): the speaker still sees them,
@@ -489,6 +583,9 @@ func _mark(talk: TeamTalk, said_call: Pending, b: Bot, state: GameState, w: BotW
 	var marks := _file.marks
 	if pings == null or said_call.enemy < 0 or marks.chance <= 0.0 or _now - talk.marked_at < marks.gap \
 			or (said_call.event != CalloutsFile.Event.CONTACT and said_call.event != CalloutsFile.Event.CONTACTS):
+		return
+	# A mark never covers the speaker's ask still up (BQ2).
+	if pings.asking(b.character.id, _now):
 		return
 	var chars := state.characters
 	if said_call.enemy >= chars.size():

@@ -9,12 +9,13 @@ const PATH := "res://data/callouts.md"
 const FILE_NAME := "callouts.md"
 ## Longest a line may be once filled in (with the longest area name and number word in): one line of the feed.
 const LINE_MAX := 48
-## Longest gap any Pace, Marks or Team gap cell may give (s), and the most a personality's Talks (×) may be.
+## Longest gap any Pace, Marks, Asks or Team gap cell may give (s), and the most a personality's Talks (×) may be.
 const GAP_MAX := 120.0
 const TALKS_MAX := 5.0
 const WHEN := "When they call"
 const PACE := "Pace"
 const MARKS := "Marks"
+const ASKS := "Asks"
 const PERSONALITIES := "Personalities"
 const LINES := "Lines"
 const ANY := "any"
@@ -22,7 +23,7 @@ const ANY := "any"
 ## The events a bot calls (callouts.md › The events), in the browser's order.
 enum Event {
 	CONTACT, CONTACTS, HEARD, DOWN, LAST_ONE, TAGGED, RELOADING, PUSHING, FLANKING, CHECKING, HOLDING, RAISING, FLAG,
-	OVERTIME, PING_GOING, PING_WATCHING, NEED_MAG, MAG_COMING, MAG_THANKS,
+	OVERTIME, PING_GOING, PING_WATCHING, NEED_MAG, MAG_COMING, MAG_THANKS, NEED_HELP, GO_ROUND, COVER_ME,
 }
 ## What a line may fill in: the named area, how many were seen, how many are left.
 enum Fill { AREA, COUNT, LEFT }
@@ -30,11 +31,11 @@ enum Fill { AREA, COUNT, LEFT }
 const EVENT_NAMES: PackedStringArray = [
 	"Contact", "Contacts", "Heard", "Down", "Last one", "Tagged", "Reloading", "Pushing", "Flanking", "Checking",
 	"Holding", "Raising", "Flag", "Overtime", "Going to your ping", "Watching your ping", "Need a mag", "Mag coming",
-	"Thanks for the mag",
+	"Thanks for the mag", "Need help", "Go round", "Cover me",
 ]
 const EVENT_FILLS: Array[PackedInt32Array] = [
 	[Fill.AREA], [Fill.COUNT, Fill.AREA], [Fill.AREA], [Fill.LEFT], [Fill.AREA], [], [], [Fill.AREA], [Fill.AREA],
-	[Fill.AREA], [Fill.AREA], [], [], [Fill.AREA], [Fill.AREA], [Fill.AREA], [], [], [],
+	[Fill.AREA], [Fill.AREA], [], [], [Fill.AREA], [Fill.AREA], [Fill.AREA], [], [], [], [Fill.AREA], [Fill.AREA], [],
 ]
 const FILL_NAMES: PackedStringArray = ["area", "count", "left"]
 ## Numbers to twelve in words, as a sentence starts and inside one; past twelve, the digits.
@@ -55,6 +56,16 @@ const PACE_ROWS: Array[Array] = [
 const MARK_ROWS: Array[Array] = [
 	["A sighting is marked (chance)", &"chance", 1.0, "a number from 0 to 1"],
 	["The team's marks apart (s)", &"gap", GAP_MAX, "seconds from 0 to 120"],
+]
+## The Asks rows (BQ2), as MARK_ROWS.
+const ASK_ROWS: Array[Array] = [
+	["The team's asks apart (s)", &"gap", GAP_MAX, "seconds from 0 to 120"],
+	["Asks a round, at most", &"per_round", 10.0, "a whole number from 0 to 10"],
+	["You are further than (m)", &"you_further", 100.0, "metres from 0 to 100"],
+	["Seen at once to need help", &"outnumbered", 10.0, "a whole number from 0 to 10"],
+	["Seen within (s)", &"seen_within", 30.0, "seconds from 0 to 30"],
+	["A stand-off after (s)", &"stand_off", GAP_MAX, "seconds from 0 to 120"],
+	["Go round beside them (m)", &"round_offset", 40.0, "metres from 0 to 40"],
 ]
 
 
@@ -84,6 +95,21 @@ class Marks:
 	extends RefCounted
 	var chance: float = 0.35
 	var gap: float = 12.0
+
+
+## callouts.md › Asks (BQ2): when a bot on your team pings a spot for you as it calls Need help, Go round or Cover me.
+## The team asks at most once in `gap` and `per_round` times a round, only while you are further than `you_further` m
+## from it (or from the pole); Need help when it fights `outnumbered` enemies or more seen within `seen_within` s, Go
+## round when it has traded looks with one for `stand_off` s, pinging a spot `round_offset` m to the side of them.
+class Asks:
+	extends RefCounted
+	var gap: float = 30.0
+	var per_round: float = 3.0
+	var you_further: float = 15.0
+	var outnumbered: float = 2.0
+	var seen_within: float = 4.0
+	var stand_off: float = 8.0
+	var round_offset: float = 12.0
 
 
 ## One line: `who` a personality's key (&"rusher") or &"" for Any, the text as written, and the text cut into its
@@ -118,6 +144,7 @@ class Line:
 var rules: Array[Rule] = []
 var pace: Pace = Pace.new()
 var marks: Marks = Marks.new()
+var asks: Asks = Asks.new()
 ## Talks (×) per personality key; a bot without a personality, or one the table lacks, talks × 1.
 var talks: Dictionary[StringName, float] = {}
 ## Each event's lines (by Event).
@@ -160,7 +187,11 @@ static func parse(text: String, personalities: Array[StringName]) -> CalloutsFil
 		f.problems.append_array(t.problems)
 	f._read_rules(f._required(tables, WHEN, ["Event", "Chance", "Team gap (s)"]))
 	f._read_pace(f._required(tables, PACE, ["Rule", "Seconds"]))
-	f._read_marks(f._required(tables, MARKS, ["Rule", "Value"]))
+	f._read_values(f._required(tables, MARKS, ["Rule", "Value"]), MARK_ROWS, f.marks, MARKS)
+	# Asks (BQ2) are optional: a file without the table asks with Asks' defaults, and only for events it has rows for.
+	var asks := DataTable.find(tables, ASKS)
+	if asks != null:
+		f._read_values(f._required(tables, ASKS, ["Rule", "Value"]), ASK_ROWS, f.asks, ASKS)
 	f._read_talks(f._required(tables, PERSONALITIES, ["Personality", "Talks (×)"]), personalities)
 	f._read_lines(f._required(tables, LINES, ["Event", "Who", "Line"]), personalities)
 	return f
@@ -249,27 +280,28 @@ func _read_pace(t: DataTable) -> void:
 					_num_text(float(pace.get(p[1])))])
 
 
-func _read_marks(t: DataTable) -> void:
+## A Rule / Value table (Marks, Asks) of `rows` into `into`'s fields; `heading` names it in a problem.
+func _read_values(t: DataTable, rows: Array[Array], into: Object, heading: String) -> void:
 	if t == null:
 		return
 	var done: Array[StringName] = []
 	for row in t.rows:
-		var m := _row_named(MARK_ROWS, row.cell("Rule"))
+		var m := _row_named(rows, row.cell("Rule"))
 		var v := _number(row.cell("Value"))
 		if m.is_empty():
-			problems.append("%s: \"%s\" is not a marks rule (%s)" % [t.where(row.line), row.cell("Rule"),
-					_names(MARK_ROWS)])
+			problems.append("%s: \"%s\" is not %s rule (%s)" % [t.where(row.line), row.cell("Rule"),
+					"a marks" if heading == MARKS else "an asks", _names(rows)])
 		elif done.has(m[1]):
 			problems.append("%s: %s is listed twice" % [t.where(row.line), m[0]])
-		elif not (v >= 0.0 and v <= m[2]):
+		elif not (v >= 0.0 and v <= m[2]) or ((m[3] as String).begins_with("a whole") and v != floorf(v)):
 			problems.append("%s: %s: \"%s\" is not %s" % [t.where(row.line), m[0], row.cell("Value"), m[3]])
 		else:
 			done.append(m[1])
-			marks.set(m[1], v)
-	for m in MARK_ROWS:
+			into.set(m[1], v)
+	for m in rows:
 		if not done.has(m[1]):
-			problems.append("%s: Marks: no row for %s, so it is %s" % [t.where(t.line), m[0],
-					_num_text(float(marks.get(m[1])))])
+			problems.append("%s: %s: no row for %s, so it is %s" % [t.where(t.line), heading, m[0],
+					_num_text(float(into.get(m[1])))])
 
 
 func _read_talks(t: DataTable, personalities: Array[StringName]) -> void:
@@ -413,7 +445,7 @@ func _required(tables: Array[DataTable], heading_text: String, wanted: PackedStr
 	return t
 
 
-## The row of `table` (PACE_ROWS, MARK_ROWS) whose first column is `cell`, or [].
+## The row of `table` (PACE_ROWS, MARK_ROWS, ASK_ROWS) whose first column is `cell`, or [].
 static func _row_named(table: Array[Array], cell: String) -> Array:
 	var key := _key_of(cell)
 	for r in table:
