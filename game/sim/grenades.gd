@@ -68,11 +68,16 @@ class Hand:
 		carried_flash = maxi(0, flashes)
 		refill()
 
-	## Every carried bomb back, and no throw under way (a respawn; the range after a throw).
+	## Every carried bomb back, and no throw under way (a respawn).
 	func refill() -> void:
+		restock()
+		stop()
+
+	## Every carried bomb back, leaving a bomb in hand where it is (the range, every tick there's no throw under way:
+	## refill's stop dropped a bomb taken in hand on the tick it was taken, BP2).
+	func restock() -> void:
 		smoke = carried_smoke
 		flash = carried_flash
-		stop()
 
 	## No throw under way and no bomb in hand (a hit, a respawn).
 	func stop() -> void:

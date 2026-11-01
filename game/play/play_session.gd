@@ -867,7 +867,7 @@ func _tick() -> void:
 	elif _spectate_any and not autopilot:
 		_follow_next_on_pull()
 	elif not autopilot:
-		_input.fill(_commands[PLAYER_ID], player.armament.active, player.grenades)
+		_input.fill(_commands[PLAYER_ID], player.armament.active, player.grenades, player.armament.holstered)
 	else:
 		# a bot plays you (the smoke test): your squad order keys still reach your teammates
 		_input.fill_order(_commands[PLAYER_ID])
@@ -1291,6 +1291,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and event.is_pressed() and not _input.active and not get_tree().paused:
 		_capture()
+		# the click that took the mouse back is not a shot (BP2)
+		_input.hold_fire()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(&"fire") and not event.is_echo() and _input.active and _hud.round_result().is_up():
 		_move_on()
@@ -1497,8 +1499,10 @@ func _resume() -> void:
 	_pause.close()
 	get_tree().paused = false
 	_capture()
-	# the settings, opened from the pause menu, may have rebound the Reload key (and in practice the Loadout's)
+	# the settings, opened from the pause menu, may have rebound the Reload key, the door's (and in practice the
+	# Loadout's)
 	_hud.reload_prompt().refresh_key()
+	_hud.refresh_door_prompt()
 	if practice:
 		_hud.range_readout().refresh_key()
 

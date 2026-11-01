@@ -174,6 +174,11 @@ static func vaulting_command(c: Character, cmd: PlayerCommand, out: PlayerComman
 		v.held_any = true
 	if cmd.switch_to >= 0:
 		v.held_switch_to = cmd.switch_to
+		v.held_ready_grenade = Grenade.Kind.NONE
+		v.held_any = true
+	if cmd.ready_grenade != Grenade.Kind.NONE:
+		v.held_ready_grenade = cmd.ready_grenade
+		v.held_switch_to = -1
 		v.held_any = true
 	if cmd.cycle_fire_mode:
 		v.held_fire_modes += 1
@@ -200,6 +205,8 @@ static func with_held_presses(v: VaultState, cmd: PlayerCommand, out: PlayerComm
 	out.reload = out.reload or v.held_reload
 	if v.held_switch_to >= 0 and out.switch_to < 0:
 		out.switch_to = v.held_switch_to
+	if v.held_ready_grenade != Grenade.Kind.NONE and out.ready_grenade == Grenade.Kind.NONE and out.switch_to < 0:
+		out.ready_grenade = v.held_ready_grenade
 	if v.held_fire_modes > 0 and not out.cycle_fire_mode:
 		out.cycle_fire_mode = true
 		v.held_fire_modes -= 1
@@ -209,6 +216,7 @@ static func with_held_presses(v: VaultState, cmd: PlayerCommand, out: PlayerComm
 	v.held_holster = false
 	v.held_hop_up_steps = 0
 	v.held_switch_to = -1
+	v.held_ready_grenade = Grenade.Kind.NONE
 	v.held_any = v.held_fire_modes > 0
 	return out
 

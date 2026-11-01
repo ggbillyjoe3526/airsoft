@@ -41,9 +41,10 @@ static func observe(state: GameState, w: BotWorld) -> void:
 				if knocker != null and Elimination.is_in_play(knocker):
 					_hear(w, knocker, e.position, knocker.position, e.reach, null)
 			GameEvent.Kind.FLASH_BANG, GameEvent.Kind.SMOKE_POP:
-				# An enemy's bomb going off (SF2): news of someone where it went off, a flash's from further.
+				# An enemy's bomb going off (SF2): news of someone where it went off, a flash's from further; none of a
+				# thrower already out (BP2: one hit before the pop sent bots searching for nobody, as a door's never does).
 				var thrower := _character(w, e.actor)
-				if thrower != null:
+				if thrower != null and Elimination.is_in_play(thrower):
 					var reach := w.cfg.bang_hearing if e.kind == GameEvent.Kind.FLASH_BANG else w.cfg.pop_hearing
 					_hear(w, thrower, e.position, e.position, reach, null, e.position)
 			GameEvent.Kind.DOOR:

@@ -200,7 +200,7 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 			RangeTargets.refill_spares(c.armament)
 			# Bombs too: practise as many throws as you like.
 			if not Grenades.throwing(c):
-				c.grenades.refill()
+				c.grenades.restock()
 	else:
 		Round.step(state.round_state, state.characters, ends, state.bbs, tuning, state.events, dt)
 		# A new round: the last round's bombs and smoke are gone.

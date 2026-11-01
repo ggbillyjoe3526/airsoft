@@ -27,6 +27,8 @@ static func think(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> void:
 	# Dazzled by a flash (SF1): it sees nothing (BotSenses), so it ducks where it stands until it can see again.
 	if me.dazzle_left > 0.0:
 		b.target_visible = false
+		# a burst it was firing is over: once it sees again, a new one checks its knee's shot afresh (BP2)
+		b.bursting = false
 		b.aim_yaw = me.yaw
 		b.aim_pitch = me.pitch
 		cmd.crouch = true

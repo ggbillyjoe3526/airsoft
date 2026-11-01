@@ -319,6 +319,25 @@ func test_an_enemy_bang_or_pop_is_heard_and_a_teammate_s_is_not() -> void:
 	assert_false(b.has_last_known, "a pop past its reach")
 
 
+func test_a_bang_or_pop_of_a_thrower_already_out_is_no_news() -> void:
+	var m := _match(_world(), Vector3(0.0, 0.0, -30.0))
+	var s: GameState = m[1]
+	var b: Bot = m[2]
+	var w: BotWorld = m[3]
+	w.bots = [b]
+	var depot := MapData.load_map("depot", MapStyle.new(), tuning.rounds.team_size)
+	w.nav = NavGrid.build(depot, tuning.nav, tuning.body)
+	s.characters[2].status = Character.Status.WALKING_OFF
+	for kind: int in [GameEvent.Kind.FLASH_BANG, GameEvent.Kind.SMOKE_POP]:
+		b.has_last_known = false
+		s.events.clear()
+		var e := s.events.add(kind)
+		e.actor = 2
+		e.position = Vector3(3.0, 0.1, -15.0)
+		BotHearing.observe(s, w)
+		assert_false(b.has_last_known, "kind %d: its thrower is out (BP2)" % kind)
+
+
 # --- Levels and seeds ---
 
 

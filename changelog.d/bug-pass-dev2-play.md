@@ -1,0 +1,11 @@
+### Fixes
+- The mouse wheel from a holstered replica now draws a replica, not a bomb.
+- On the Range, a bomb taken with the mouse wheel stays in your hand and can be thrown.
+- Woodland's hut doors fold back against the posts when open, so they are no longer hidden inside them.
+- On Medium detail and up, Woodland's reflections no longer show the inside of the hill.
+- The door prompt shows the key you rebound in the pause menu.
+- Switching Aim or Crouch from Toggle to Hold and back no longer turns the toggle back on by itself.
+- The click that takes the mouse back into the game no longer fires a shot.
+- Bots no longer go looking for a bomb thrower who is already out.
+- A mouse wheel step onto a bomb during a vault is kept and taken in hand when the vault ends.
+- The full-screen map comes back if you are still holding M after the scoreboard closes.

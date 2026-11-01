@@ -53,7 +53,7 @@ The minimap names the area you stand in. Depot's areas:
 ### Doors
 
 Depot has 15 hinged doors, Woodland's huts 8 and The Street's House 3, painted green so they stand out from the plywood. Every round starts with the same doors
-open and the same ones shut. Press **Open / shut door** (U, [Controls](Controls)) within reach of one to open or shut
+open and the same ones shut. Press **Open / shut door** (G, [Controls](Controls)) within reach of one to open or shut
 it; a line under the crosshair tells you which.
 
 - **A shut door is solid.** It stops BBs, bombs, sight and bodies, so it hides who is behind it.
