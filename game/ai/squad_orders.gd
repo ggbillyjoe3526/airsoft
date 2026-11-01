@@ -81,7 +81,7 @@ static func hold_point(giver: Character, w: BotWorld) -> Vector3:
 	var cfg := w.cfg.squad
 	var eye := BotSenses.eye_of(giver, w.tuning)
 	var view := giver.view_direction()
-	if not w.query.ray(eye, eye + view * cfg.hold_range, _hit):
+	if not w.query.ray_past_railings(eye, eye + view * cfg.hold_range, _hit):
 		return NO_SPOT
 	var flat := Vector2(view.x, view.z).length()
 	if flat < 1e-3:

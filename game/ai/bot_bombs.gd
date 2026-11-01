@@ -87,7 +87,7 @@ static func _try_flash(b: Bot, w: BotWorld) -> bool:
 		return false
 	var eye := BotSenses.eye_of(me, w.tuning)
 	var spot := b.last_known + Vector3(0.0, cfg.flash_spot_height, 0.0)
-	if BotSenses.line_clear(w.query, eye, spot):
+	if BotSenses.sight_clear(w.query, eye, spot):
 		return false
 	b.bomb_roll_at = w.time + cfg.bomb_roll_gap
 	if b.bomb_rng.randf() >= b.skill.flash_chance:

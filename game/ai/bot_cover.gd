@@ -77,7 +77,8 @@ static func tall_blocks(map: MapData, nav: NavGrid, cfg: BotConfig, tuning: SimT
 
 
 ## Which way (1 right, -1 left, 0 neither) someone standing at `spot` and facing `threat_eye` can lean to see it: the
-## leaned eye has a clear line to the threat and room to lean (no wall within lean_room_margin past it).
+## leaned eye sees the threat (through glass or a bar railing) and has room to lean (no wall within lean_room_margin
+## past it).
 static func lean_side_to_see(spot: Vector3, threat_eye: Vector3, w: BotWorld) -> int:
 	var body := w.tuning.body
 	var yaw := BotAim.look_yaw(spot, threat_eye)
@@ -90,7 +91,7 @@ static func lean_side_to_see(spot: Vector3, threat_eye: Vector3, w: BotWorld) ->
 			return 0
 		var k := 1.0 + w.cfg.lean_room_margin / sideways
 		var reach := upright + Vector3(offset.x * k, offset.y, offset.z * k)
-		if BotSenses.line_clear(w.query, upright, reach) and BotSenses.line_clear(w.query, threat_eye, upright + offset):
+		if BotSenses.line_clear(w.query, upright, reach) and BotSenses.sight_clear(w.query, threat_eye, upright + offset):
 			return side
 	return 0
 
@@ -179,7 +180,7 @@ static func _consider(w: BotWorld, out: Spot, x: float, z: float) -> void:
 	# Hidden, not merely out of the BBs' way: glass (BQ1) is no cover.
 	if BotSenses.sight_clear(w.query, s.threat_eye, spot + Vector3(0.0, body.crouch_eye_height, 0.0)):
 		return # not cover at all
-	var crouch_only := BotSenses.line_clear(w.query, s.threat_eye, spot + Vector3(0.0, body.stand_eye_height, 0.0))
+	var crouch_only := BotSenses.sight_clear(w.query, s.threat_eye, spot + Vector3(0.0, body.stand_eye_height, 0.0))
 	var lean := 0 if crouch_only else lean_side_to_see(spot, s.threat_eye, w)
 	if s.peekable and not crouch_only and lean == 0:
 		return
