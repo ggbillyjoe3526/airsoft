@@ -1,6 +1,6 @@
 # BQ3 · Bots play as a team and fight smarter
 
-**Review:** critic Accept 8/8 · qa Pass · performance Pass
+**Review:** critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -46,11 +46,11 @@ change stays only if bots with it win more rounds against bots without it.
   moving target. Standing still for each burst without the knee was tried and won nothing (49 %).
 - Normal does not get Hard's tactics: an A/B of Normal with them against Normal without won 49 % on Depot.
 - Radio reach 35 m and 45 m, and its delay, roughly a shout across a lane and a beat to say it.
-- Under Follow me, a follower down in cover with nobody in sight and not reloading comes out once its giver moves off
-  further than its spot and catch-up gap (`SquadOrders.giver_leaving`, every level). CI's Follow me guard caught a
-  follower that took cover on a contact, then sat out its duck and a peek while the leader sprinted on; at the same
-  sprint it never closed the gap. Turning the knee off also passed, but only by moving that seed's fights; the cause
-  was the cover. It reuses follow_distance and catch_up_gap, no new tuning.
+- Under Follow me, a follower down in cover with nobody in sight, BBs in its magazine and not reloading comes out once
+  its giver moves off further than its spot and catch-up gap (`SquadOrders.giver_leaving`, every level). CI's Follow
+  me guard caught a follower that took cover on a contact, then sat out its duck and a peek while the leader sprinted
+  on; at the same sprint it never closed the gap. Turning the knee off also passed, but only by moving that seed's
+  fights; the cause was the cover. It reuses follow_distance and catch_up_gap, no new tuning.
 
 ## Checks
 
@@ -87,6 +87,11 @@ change stays only if bots with it win more rounds against bots without it.
   ticks a tick either side of a burst, longest 1 tick, against 354 and 211 before the fix).
 - Performance: Pass (smoke match level with BQ2's head on nodes and orphans; the radio and the two checks loop the
   bots and characters without allocating; the warm-tick reading is fair, the event pool being one object a slot).
+- Critic: Accept 7/8 (check 7: four descriptions still said pressing counts players in play, not eliminations; reworded
+  after the verdict). QA and performance ran before the Follow me fix; the critic read it (no allocation, no contract
+  changed) and QA rechecked it alone: Pass, with two tests added to `test_bq3_qa` (a giver out of play or gone keeps
+  it in cover; a peek with nobody in sight ends after the giver). From its advisories, a follower with an empty magazine
+  now stays to reload first; a giver moving off any way counts (direction doesn't matter far off).
 
 ## Known issues left
 

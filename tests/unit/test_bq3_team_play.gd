@@ -195,6 +195,10 @@ func test_a_follower_in_cover_comes_out_to_keep_up_with_its_giver_moving_off() -
 	assert_false(BotBrain._stay_in_cover(b, world, true, false, true, false, 1.0 / 60.0), "not with an enemy in sight")
 	b = _following_in_cover(far, squad.heading_speed * 2.0)
 	assert_false(BotBrain._stay_in_cover(b, world, false, true, true, false, 1.0 / 60.0), "nor reloading")
+	b = _following_in_cover(far, squad.heading_speed * 2.0)
+	var arm := b.character.armament
+	arm.ammo[arm.active].mag = 0
+	assert_false(BotBrain._stay_in_cover(b, world, false, false, true, false, 1.0 / 60.0), "nor empty, to reload first")
 	b = _following_in_cover(far, 0.0)
 	assert_false(BotBrain._stay_in_cover(b, world, false, false, true, false, 1.0 / 60.0), "a giver standing waits")
 	b = _following_in_cover(squad.follow_distance, squad.heading_speed * 2.0)

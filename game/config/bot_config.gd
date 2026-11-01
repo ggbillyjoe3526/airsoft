@@ -286,7 +286,8 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## With this many seconds left or fewer and fewer of its team in play than of the other, it stops holding its lane and
 ## goes looking for them.
 @export var late_push_time: float = 30.0
-## Pressing the advantage (BotSkill.presses_advantage, BQ3): this many more of its team in play than of the other.
+## Pressing the advantage (BotSkill.presses_advantage, BQ3): this many more eliminations ahead: the other team's
+## players out less its own.
 @export var press_margin: int = 2
 
 @export_group("Personalities")

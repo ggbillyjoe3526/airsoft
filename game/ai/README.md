@@ -30,7 +30,7 @@ it holds its lane points, hunts and takes hold cover out of the light pools.
 
 On Normal and Hard the team keeps a radio (BQ3, `BotRadio`): a bot that sees someone afresh tells its teammates within
 `BotSkill.share_radius` of them after `share_delay`, each taking it as a teammate's call heard there (not one fighting or
-with fresher news). A team `BotConfig.press_margin` or more players ahead in Elimination hunts (`BotWorld.pressing`), and
+with fresher news). A team `BotConfig.press_margin` or more eliminations ahead in Elimination hunts (`BotWorld.pressing`), and
 the last of a team plays carefully, walking and clearing corners as near the enemy (`BotWorld.careful_last`). Fighting
 in the open, a bot with `BotSkill.kneels_to_fire` takes a knee for each burst and sidesteps only between bursts.
 

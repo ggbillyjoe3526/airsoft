@@ -68,8 +68,8 @@ extends Resource
 ## share_radius tells nobody.
 @export var share_radius: float = 0.0
 @export var share_delay: Vector2 = Vector2(1.0, 1.6)
-## Pressing the advantage (BQ3, Elimination): with its team at least BotConfig.press_margin up in play, it stops holding
-## its lane and hunts.
+## Pressing the advantage (BQ3, Elimination): with its team at least BotConfig.press_margin eliminations ahead, it
+## stops holding its lane and hunts.
 @export var presses_advantage: bool = false
 ## The last of its team in play (BQ3, Elimination), it walks and clears corners as near the enemy, unless pushing late.
 @export var careful_when_last: bool = false

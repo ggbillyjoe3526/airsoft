@@ -237,8 +237,9 @@ static func _stay_in_cover(b: Bot, w: BotWorld, seeing: bool, reloading: bool, a
 		b.cover_left -= dt
 	# Settled in cover but still in sight of an enemy (flanked, or the spot doesn't hide it): fight back.
 	var exposed := b.cover_phase == Bot.CoverPhase.DOWN and b.cover_held >= cfg.cover_settle and seeing and not reloading
-	# Under Follow me with nobody in sight, it keeps up with a giver moving off (BQ3).
-	var follow_on := not seeing and not reloading and SquadOrders.giver_leaving(b, w)
+	# Under Follow me with nobody in sight and BBs in its magazine, it keeps up with a giver moving off (BQ3).
+	var follow_on := not seeing and not reloading and b.character.armament.mag() > 0 \
+			and SquadOrders.giver_leaving(b, w)
 	var done := exposed or cover_over or follow_on or b.cover_give_up <= 0.0 or b.route_state == Bot.RouteState.FAILED
 	if not done and at_cover and b.cover_phase == Bot.CoverPhase.DOWN and b.cover_left <= 0.0 and not reloading:
 		# Time to look again: over crouch cover by standing, round a corner by leaning out, else by moving on.

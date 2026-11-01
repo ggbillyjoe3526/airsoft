@@ -53,7 +53,7 @@ one; "Follow opponents" puts them back.
 
 - A bot that spots you tells the teammates near that spot where you are, a moment later (sooner and further on Hard),
   and they come ready for you there.
-- A team two or more players ahead in Elimination stops holding and goes looking for the rest.
+- A team two or more eliminations ahead in Elimination stops holding and goes looking for the rest.
 - The last bot of a team still in plays it carefully: it walks, checks each corner ahead and leans out past it.
 - In a fight in the open they take a knee for each burst, then sidestep between bursts: steadier BBs, and less of
   them to hit.

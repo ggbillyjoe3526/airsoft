@@ -205,3 +205,53 @@ func _stale_burst(visible: bool) -> PlayerCommand:
 func test_a_burst_it_can_not_fire_leaves_the_bot_sidestepping_not_kneeling() -> void:
 	var cmd := _stale_burst(false)
 	assert_false(cmd.crouch, "target out of sight: nothing to kneel for (the burst_left is a leftover)")
+
+
+var follow_world: BotWorld = null
+
+
+## Bot 1 of a two-bot world down in cover under Follow me from bot 0, who sprints off `gap` m away.
+func _follower_in_cover(gap: float) -> Bot:
+	var w := BotWorld.new()
+	follow_world = w
+	w.cfg = config
+	w.tuning = tuning
+	w.time = 10.0
+	for id in 2:
+		var c := Character.new(id, 0, Vector3(gap * (1 - id), 0.0, 0.0), 0.0, ReplicaStats.default_loadout())
+		c.position = Vector3(gap * (1 - id), 0.0, 0.0)
+		w.characters.append(c)
+		w.bots.append(Bot.new(c, id + 1, config.skill_for(&"normal"), 2))
+	var b := w.bots[1]
+	b.order = SquadOrder.Kind.FOLLOW
+	b.order_giver = w.characters[0]
+	b.mode = Bot.Mode.COVER
+	b.cover_phase = Bot.CoverPhase.DOWN
+	b.cover_left = 5.0
+	b.cover_give_up = config.cover_max_time
+	w.characters[0].velocity = Vector3(config.squad.heading_speed * 3.0, 0.0, 0.0)
+	return b
+
+
+func test_a_follower_stays_in_cover_when_its_giver_is_out_of_play_or_gone() -> void:
+	var far := config.squad.follow_distance + config.squad.catch_up_gap + 5.0
+	var b := _follower_in_cover(far)
+	assert_true(SquadOrders.giver_leaving(b, follow_world), "alive giver sprinting off: leaving")
+	b.order_giver.status = Character.Status.OUT
+	assert_false(SquadOrders.giver_leaving(b, follow_world), "an eliminated giver is not followed out of cover")
+	b.order_giver = null
+	assert_false(SquadOrders.giver_leaving(b, follow_world), "no giver: nothing to follow")
+
+
+func test_a_follower_peeking_with_nobody_in_sight_still_comes_out_after_its_giver() -> void:
+	var far := config.squad.follow_distance + config.squad.catch_up_gap + 5.0
+	var b := _follower_in_cover(far)
+	b.cover_phase = Bot.CoverPhase.PEEK
+	b.peek_left = 5.0
+	b.peeks_left = 2
+	assert_true(BotBrain._stay_in_cover(b, follow_world, false, false, true, false, DT), "leaves mid-peek")
+	b = _follower_in_cover(far)
+	b.cover_phase = Bot.CoverPhase.PEEK
+	b.peek_left = 5.0
+	assert_false(BotBrain._stay_in_cover(b, follow_world, true, false, true, false, DT), "an enemy in sight: fights")
+	assert_eq(b.mode, Bot.Mode.FIGHT)
