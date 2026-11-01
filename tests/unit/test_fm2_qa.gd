@@ -479,3 +479,194 @@ func test_ultra_wide_and_tall_windows_keep_the_field_the_pointer_and_the_words_i
 		assert_almost_eq(pointer.world().x, v.centre().x, 0.05)
 		assert_almost_eq(pointer.world().z, v.centre().y, 0.05)
 		pointer.close()
+
+
+# --- the zone words, laid out clear of everything (0dc04a8) ---
+
+func test_zone_words_stay_on_the_field_and_never_overlap_a_zone_a_flag_the_compass_or_each_other() -> void:
+	for id: String in ["depot", "woodland", "street"]:
+		for screen: Vector2 in [Vector2(1920.0, 1080.0), Vector2(1280.0, 720.0), Vector2(1024.0, 600.0)]:
+			var fm := _field_map(_load(id), screen)
+			_attack_defend(0)
+			_show(fm)
+			var ov := fm.overlay()
+			var what := "%s at %s" % [id, screen]
+			var compass := Rect2(ov._bar - Vector2(0.0, FieldMapOverlay.COMPASS_LENGTH + FieldMapOverlay.TICK),
+					Vector2(maxf(ov._bar_px, 14.0), FieldMapOverlay.COMPASS_LENGTH + FieldMapOverlay.TICK))
+			var words: Array[Rect2] = []
+			words.append_array(ov._start_words)
+			words.append_array(ov._dead_words)
+			var zones: Array[Rect2] = []
+			zones.append_array(ov._starts_px)
+			zones.append_array(ov._dead_px)
+			for i in words.size():
+				var w := words[i]
+				if not w.has_area():
+					continue
+				assert_true(ov._field_px.grow(0.5).encloses(w), "%s: zone word %d off the field %s" % [what, i, w])
+				for r: Rect2 in zones:
+					assert_false(r.has_area() and r.intersects(w), "%s: zone word %d over a zone box" % [what, i])
+				for p in ov._flags_px:
+					assert_false(ov._badge_box(p).intersects(w) or ov._ring_box(p).intersects(w),
+							"%s: zone word %d over a flag" % [what, i])
+				assert_false(compass.intersects(w), "%s: zone word %d over the compass" % [what, i])
+				for j in ov._word_boxes.size():
+					assert_false(ov.word_box(j).has_area() and ov.word_box(j).intersects(w),
+							"%s: zone word %d over the name %s" % [what, i, ov._marks.words[j].name])
+				for j in range(i + 1, words.size()):
+					assert_false(words[j].has_area() and words[j].intersects(w), "%s: zone words %d, %d" % [what, i, j])
+
+
+func test_a_zone_box_never_leaves_the_field_and_a_zone_without_a_box_has_no_word() -> void:
+	for id: String in ["depot", "woodland", "street"]:
+		var fm := _field_map(_load(id), Vector2(1280.0, 720.0))
+		_show(fm)
+		var ov := fm.overlay()
+		for i in ov._starts_px.size():
+			for r: Rect2 in [ov._starts_px[i], ov._dead_px[i]]:
+				assert_true(not r.has_area() or ov._field_px.grow(0.5).encloses(r), "%s: a zone box off the field" % id)
+			assert_false(not ov._starts_px[i].has_area() and ov._start_words[i].has_area(), "%s: start %d" % [id, i])
+			assert_false(not ov._dead_px[i].has_area() and ov._dead_words[i].has_area(), "%s: dead %d" % [id, i])
+
+
+func test_first_clear_picks_the_first_clear_try_slid_inside_the_bounds_and_gives_none_when_boxed_in() -> void:
+	var bounds := Rect2(0.0, 0.0, 100.0, 100.0)
+	var gap := Vector2(10.0, 4.0)
+	var others: Array[Rect2] = [Rect2(40.0, 40.0, 20.0, 20.0)]
+	var tries: Array[Rect2] = [Rect2(45.0, 35.0, 10.0, 10.0), Rect2(45.0, 5.0, 10.0, 10.0)]
+	assert_eq(FieldMapMarks.first_clear(tries, others, bounds, gap), Rect2(45.0, 5.0, 10.0, 10.0), "second try is clear")
+	var edge: Array[Rect2] = [Rect2(-30.0, 80.0, 10.0, 10.0)]
+	assert_eq(FieldMapMarks.first_clear(edge, [] as Array[Rect2], bounds, gap), Rect2(0.0, 80.0, 10.0, 10.0), "slid in")
+	# The gap is across (x) and down (y): 9 px off sideways is too close (gap 10), 9 px off vertically is clear (gap 4).
+	var side: Array[Rect2] = [Rect2(69.0, 40.0, 10.0, 10.0)]
+	assert_false(FieldMapMarks.first_clear(side, others, bounds, gap).has_area(), "9 px across is within the gap")
+	var down: Array[Rect2] = [Rect2(40.0, 69.0, 10.0, 10.0)]
+	assert_true(FieldMapMarks.first_clear(down, others, bounds, gap).has_area(), "9 px down is clear of a 4 px gap")
+	assert_false(FieldMapMarks.first_clear([] as Array[Rect2], others, bounds, gap).has_area(), "no tries")
+
+
+func test_lay_out_leaves_out_a_zero_sized_want_and_keeps_the_gap_across_and_down() -> void:
+	var bounds := Rect2(0.0, 0.0, 300.0, 200.0)
+	var gap := Vector2(20.0, 8.0)
+	var wants: Array[Rect2] = [Rect2(100.0, 100.0, 60.0, 14.0), Rect2(Vector2(10.0, 10.0), Vector2.ZERO),
+			Rect2(100.0, 100.0, 60.0, 14.0), Rect2(104.0, 104.0, 60.0, 14.0)]
+	var got := FieldMapMarks.lay_out(wants, [] as Array[Rect2], bounds, gap)
+	assert_false(got[1].has_area(), "a want with no area is left out")
+	for i in got.size():
+		if not got[i].has_area():
+			continue
+		assert_true(bounds.encloses(got[i]), "word %d inside" % i)
+		for j in range(i + 1, got.size()):
+			if got[j].has_area():
+				assert_false(got[i].grow_individual(gap.x, gap.y, gap.x, gap.y).intersects(got[j]), "%d, %d" % [i, j])
+
+
+# --- sloping ground's own picture (0dc04a8) ---
+
+func _terrain_map(x0: float, z0: float, cell: float, nx: int, nz: int) -> MapData:
+	var m := MapData.new()
+	m.terrain = TerrainGrid.create(x0, z0, cell, nx, nz, func(x: float, z: float) -> float: return 0.1 * (x + z))
+	return m
+
+
+func test_on_woodland_the_layer_is_clear_where_the_ground_picture_lies_and_the_view_holds_the_texture() -> void:
+	var map := _load("woodland")
+	var f := MinimapField.build(map, cfg)
+	assert_not_null(f.ground, "woodland has a ground picture")
+	assert_true(f.ground_rect.has_area())
+	var side := Vector2(f.layers[0].get_size())
+	assert_true(Rect2(Vector2.ZERO, side).grow(1.0).encloses(f.ground_rect), "the picture lies within the layer")
+	# The layer leaves the ground clear (sample a grid across it): only cover and walls are drawn on it.
+	var clear := 0
+	var total := 0
+	for gx in 8:
+		for gz in 8:
+			var p := f.ground_rect.position + f.ground_rect.size * Vector2((gx + 0.5) / 8.0, (gz + 0.5) / 8.0)
+			total += 1
+			if f.layers[0].get_pixelv(Vector2i(p)).a == 0.0:
+				clear += 1
+	assert_gt(clear, total / 2, "most of the open ground is clear on the layer (%d of %d)" % [clear, total])
+	var fm := _field_map(map)
+	assert_not_null(fm.view()._ground, "the full map's View holds a ground texture")
+	assert_eq(fm.view()._ground_rect, f.ground_rect)
+	var mm: HudMinimap = root.get_child(0)
+	assert_not_null(mm.ground(), "the minimap holds the ground texture")
+	assert_not_null(mm.view()._ground, "and its View draws it")
+	assert_eq(mm.view()._ground_rect, mm.field().ground_rect)
+
+
+func test_a_map_without_terrain_has_no_ground_picture_and_the_views_draw_none() -> void:
+	for id: String in ["depot", "street"]:
+		var map := _load(id)
+		var f := MinimapField.build(map, cfg)
+		assert_null(f.ground, "%s: no ground image" % id)
+		assert_false(f.ground_rect.has_area(), "%s: no ground rect" % id)
+		assert_null(HudMinimap.ground_of(f), "%s: no ground texture" % id)
+		var fm := _field_map(map)
+		assert_null(fm.view()._ground, "%s: the full map draws no ground" % id)
+		assert_null((root.get_child(0) as HudMinimap).ground(), "%s: nor the minimap" % id)
+	assert_null(HudMinimap.ground_of(MinimapField.build(MapData.new(), cfg)), "an empty map")
+
+
+func test_a_storey_over_terrain_washes_it_and_the_street_storey_leaves_it_clear() -> void:
+	var map := TowerBlock.load_map(MapStyle.new(), 2)
+	map.terrain = TerrainGrid.create(-60.0, -60.0, 1.0, 120, 120, func(_x: float, _z: float) -> float: return 0.0)
+	var f := MinimapField.build(map, cfg)
+	assert_gt(f.layers.size(), 1, "the tower has storeys")
+	assert_not_null(f.ground)
+	var p := Vector2i(f.pixel_of(-59.0, -59.0))
+	assert_eq(f.layers[0].get_pixelv(p).a, 0.0, "the ground floor leaves the terrain clear")
+	for i in range(1, f.layers.size()):
+		var c := f.layers[i].get_pixelv(p)
+		assert_almost_eq(c.a, cfg.below_storey_colour.a, 0.01, "storey %d washes the terrain" % i)
+		assert_almost_eq(c.r, cfg.below_storey_colour.r, 0.01, "storey %d wash colour" % i)
+
+
+func test_a_tiny_terrain_still_has_a_ground_picture_the_views_and_gpu_can_use() -> void:
+	# One 0.25 m cell with relief_cell 1 m (a sample every 4 squares), then 3 x 2 cells, then a 21 x 19 odd one.
+	var cases: Array[MapData] = [_terrain_map(0.0, 0.0, 0.25, 1, 1), _terrain_map(-1.0, -1.0, 0.25, 3, 2),
+			_terrain_map(-10.0, -10.0, 1.0, 21, 19)]
+	for m in cases:
+		var f := MinimapField.build(m, cfg)
+		assert_not_null(f.ground, "a ground picture for %d x %d cells" % [m.terrain.cols, m.terrain.rows])
+		assert_gt(f.ground.get_width(), 0)
+		assert_gt(f.ground.get_height(), 0)
+		assert_true(f.ground_rect.has_area())
+		assert_eq(f.layers.size(), 1)
+		var tex := HudMinimap.ground_of(f)
+		assert_not_null(tex, "a texture")
+		assert_gt(tex.get_width(), 0)
+		for y in f.ground.get_height():
+			for x in f.ground.get_width():
+				assert_gt(f.ground.get_pixel(x, y).a, 0.0, "every sample is a drawn colour")
+		var v := HudMinimap.View.new()
+		v.setup(cfg, HudMinimap.textures_of(f), f.scale, f.origin, 4, tex, f.ground_rect)
+		v.size = Vector2(200.0, 200.0)
+		add_child_autofree(v)
+		await wait_physics_frames(2)
+		assert_not_null(v._ground)
+
+
+func test_the_ground_picture_covers_the_terrain_to_within_one_sample() -> void:
+	# A terrain whose columns do not divide into samples (21 columns, a sample every 2) must not leave a wide bare
+	# strip under the layer: at most one sample (relief_cell m) short of the terrain's far edge.
+	cfg.relief_cell = 2.0
+	var m := _terrain_map(-10.0, -10.0, 1.0, 21, 19)
+	var f := MinimapField.build(m, cfg)
+	var want := Rect2(f.pixel_of(m.terrain.min_x, m.terrain.min_z),
+			Vector2(m.terrain.cols, m.terrain.rows) * m.terrain.cell * f.scale)
+	assert_lte(f.ground_rect.position.distance_to(want.position), 0.5, "starts at the terrain's corner")
+	var slack := cfg.relief_cell * f.scale + 0.5
+	assert_lte(absf(f.ground_rect.end.x - want.end.x), slack, "east edge within one sample")
+	assert_lte(absf(f.ground_rect.end.y - want.end.y), slack, "south edge within one sample")
+
+
+func test_building_the_ground_picture_leaks_nothing_and_ground_of_keeps_the_image_readable() -> void:
+	var map := _load("woodland")
+	var before := Performance.get_monitor(Performance.OBJECT_COUNT)
+	for i in 3:
+		var f := MinimapField.build(map, cfg)
+		var tex := HudMinimap.ground_of(f)
+		assert_eq(Vector2i(tex.get_width(), tex.get_height()), f.ground.get_size())
+		assert_gt(f.ground.get_pixelv(Vector2i(2, 2)).a, 0.0, "still readable after the mipmaps")
+	assert_lte(Performance.get_monitor(Performance.OBJECT_COUNT), before + 8.0, "pictures freed with their fields")
