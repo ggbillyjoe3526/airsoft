@@ -1,56 +1,23 @@
-Task: BQ3 · QA commit (attempt 2, see git log, Agent: qa) · Verdict: Pass
+Task: SR1 · QA commit c8c6e59 · Verdict: Pass
 
-Attempt 2 (fix 218a2aa: Bot.bursting, set by BotCombat.shoot only on a tick it presses on with a burst, cleared at the top
-of shoot and in Bot.reset; the kneel needs `bursting and target_visible`)
-- Blocking 1 (unparsable test_bq3_team_play) stays fixed: 8/8 run and pass.
-- Blocking 2 (kneeling on a stale burst) is fixed: the same Normal Depot match that showed 354 of 3041 FIGHT ticks kneeling
-  without firing (211 blind, longest 211 ticks) now shows 15 of 2802, none blind, longest streak 1 tick (the knee comes the
-  tick after the burst starts and ends the tick after it does). The two pins in test_bq3_qa.gd now pass (7/7, 33 s).
-- Re-run: test_bq3_team_play 8/8, test_bot_angles 14/14, test_tl1_qa 7/7. test_bots, test_bot_bombs, test_bot_difficulty
-  and the smoke test were not re-run by me (a sweep is running in this tree); the fix touches only bot_combat.gd (two
-  lines), bot.gd and bot_movement.gd's kneel gate.
-- Advisories left as they were: pressing is sticky by design; the careful last bot's lane walk awaits the A/B re-measure.
-  The A/B for the knee (57 % Normal) should be re-measured on the fixed code if the Checks table is to stay true.
+Blocking findings: none.
+Advisory findings:
+- game/sim/railings.gd:_run_hit treats a path that starts exactly on a bar's face and heads away as a hit at t 0 (boundary inclusive). Not reachable today: Ricochet lifts a bounced BB 2 mm off (ricochet_config.gd lift_off) and 300 random BB shots at a bar all came to rest (no repeated landing). If lift_off is ever set to 0 a BB would re-land on the bar it left.
+- game/map/map_level.gd build: a block whose kind is in both clear_kinds and railing_kinds gets a glass body but is still added to `railings` (and the Railings mesh run counter then drifts from the colliders). No such kind exists; only a config mistake would trigger it.
+- A baked map would draw railings as solid blocks (author already lists this in KNOWN_ISSUES).
 
---- Attempt 1 report (Fail), kept for the record ---
-Task: BQ3 · QA commit 865e729 · Verdict: Fail
+Tests added (tests/unit/test_sr1_railings_qa.gd, 10 tests, 40 asserts); all fail without the feature (the classes do not exist), and the key ones were mutation-checked:
+- :44 bars agree with drawn boxes · 8,000 rays over 6 run shapes (along x/z, deep, too low for a foot rail, shorter than two bars, square), axis-aligned, vertical, grazing, a tick's length and up to 3 m · changing the bar search `ceili` to `floori` in railings.gd fails it (3 tests fail).
+- :84 hit point and normal sit on the crossed face, facing the shooter · same mutation.
+- :99 BB meets the nearer of a bar and the level (wall in front, wall behind, fraction of the whole segment) · BoxWorld.
+- :118 zero, tiny, negative, NaN lengths, empty set, far outside the index do not fault.
+- :140 a path starting inside a run's box exits a gap and stops in a bar.
+- :152 300 random BBs fired through BBStep at a bar run all come to rest, none lands 8+ times.
+- :183 glass beside a railing on a built Jolt level: sight passes both, ray_past_railings and bb_ray stop on the glass, ray stops on the box · removing the `past_railings` skip in BoxWorld also fails the earlier tests.
+- :202 a ramp of the railing kind is an ordinary solid wedge (no bars, no Railings mesh, hides what is behind it).
+- :214 the Jolt mover cannot walk through a railing · passes through when the railing is left out (checked).
+- :232 5,000 bb_ray calls leave OBJECT_COUNT unchanged; building and freeing a railing level 3 times leaves no orphan nodes and no extra nodes.
 
-Blocking
-1. tests/unit/test_bq3_team_play.gd:87 did not parse (`for id in [5, 6]`, untyped iterator, warning treated as error): GUT
-   ignores the whole file, so none of BQ3's 8 tests ran. I typed it (`for id: int in`) in my commit; with that all 8 pass.
-   The record's "qa Pass" line (docs/records/BQ3.md) was therefore never true; it needs updating.
-2. A bot stays crouched and still on a stale burst. game/ai/bot_movement.gd:611 kneels on `b.burst_left > 0.0`, but
-   BotCombat.shoot (bot_combat.gd:~148-166) returns early without touching burst_left when the target is gone, not yet
-   in the fire cone, or the line is blocked by glass or leaves; burst_left also survives into the next fight (reset only on
-   a new contact, bot_senses.gd:147). In 3 seeded Depot matches (Normal, 3 round lengths x6): 354 of 3041 FIGHT ticks
-   (11 %) were kneeling without firing, 211 of them with the target not visible (FIGHT lingers), the longest streak 211
-   ticks (3.5 s) crouched, still and not shooting. A bot out of the fight's rhythm is the easiest target. Fix (worker):
-   gate the kneel on `b.target_visible and b.no_shot_for == 0.0` (and ideally zero burst_left on shoot()'s early returns).
-   Note it also fires its first BB of each burst standing (the knee is applied the tick after burst_left is set).
-   The owner's A/B (57 % Normal) was measured with this behaviour; re-measure after the fix.
+Counts: test_sr1_railings.gd 12/12 (66 asserts); test_sr1_railings_qa.gd 10/10 (40 asserts, 1 s). Related files all pass: bb_step 18, box_world 11, bq1_glass_sight 6, bq1_qa 2, map_level 15, ricochet 9, st1_qa 9, st2_qa 3, street 5 (pipeline/out/qa/sr1_related.txt). Smoke test passes (zero script errors, 484 shots, 7 rounds; pipeline/out/qa/smoke.log). tools/check.sh not run (the worker runs it).
 
-Advisory
-- Pressing is sticky: `hunting` is set once (bot_brain.gd:217) and not cleared when the lead is lost, as for pushing_late.
-- Careful last bot walks the whole lane from the round start (slow); it could add round timeouts in 1v1s. Not measured.
-- test_bots warm-tick check now allows object growth equal to the event pool's growth (SimEvents.items); any one-off beyond
-  that still fails, so it still catches per-tick allocation. BotRadio/pressing/careful_last allocate nothing (read).
-
-Checked, no bug: radio skips dead/out/other-team/fighting/seeing/fresher-news bots and the caller; a call due while not live
-or with the caller out is dropped; Bot.reset clears share_id/share_at; Easy never draws RNG for it; pressing and careful_last
-are Elimination and live only (not Attack/Defend; overtime bots are in FLAG mode); kneel is skipped for the raiser at the
-pole and fighting from cover; ORDER bots take radio news as a heard noise (same path as BotHearing).
-
-Tests added (tests/unit/test_bq3_qa.gd, 7 tests, 5 pass, 2 fail by design on blocking item 2)
-- :43 · a kneeling bot is never crouched and still >= 1 s on a burst it is not firing (whole Normal match) · FAILS (211 ticks)
-- :93 · Bot.reset clears a pending call · fails if the two reset lines in bot.gd are removed
-- :105 · radio does not overwrite half-second-old own news · fails if the freshness guard in bot_radio.gd:41 is removed
-- :130 · radio skips an OUT teammate and the other team · fails without the in_play/team filters
-- :155 · a call is dropped when the round is not live · fails without the `w.live` test
-- :168 · pressing and careful_last wait for a live round · fails without `live`
-- :195 · a leftover burst with the target out of sight does not kneel (unit pin, fast) · FAILS
-I checked the "fails without" claims by reading the guarded lines, not by stubbing them out.
-
-Counts: test_bq3_team_play 8/8 (after the typing fix), test_tl1_qa 7/7, test_bot_angles 14/14, test_bots 16/16 (177 s),
-test_bot_bombs 14/14, test_bot_difficulty 10/10, smoke test PASS. Full suite and tools/check.sh not run (about 40 min).
-Logs: pipeline/out/qa/. Not testable headless: how the knee feels (owner: watch a duel on Depot; bots should stand and
-sidestep between bursts, never stay low and idle).
+Not tested (needs a display or play): how the bars read at range and shimmer on a real window; the feel of shooting through a railing; mover feel against the box in a gap (the headless mover test only shows it is blocked).
