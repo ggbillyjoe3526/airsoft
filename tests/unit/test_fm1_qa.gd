@@ -420,11 +420,12 @@ func test_the_area_words_are_laid_out_again_when_the_screen_resizes() -> void:
 	var root := fm.get_parent() as Control
 	_event(&"field_map", true)
 	_frame(fm, st, me)
-	var before: Vector2 = fm._overlay._at[0]
+	var before: Rect2 = fm.overlay().word_box(0)
 	root.size = Vector2(1000.0, 700.0)
 	_frame(fm, st, me)
-	var ov: Control = fm._overlay
-	var words := HudFieldMap.areas_of(MapData.load_map("depot", MapStyle.new(), 1).areas)
+	var ov := fm.overlay()
+	var words := FieldMapMarks.areas_of(MapData.load_map("depot", MapStyle.new(), 1).areas)
 	var want: Vector2 = ov.size * 0.5 + fm.view().panel_of(words[0].at)
-	assert_ne(fm._overlay._at[0], before, "moved with the square")
-	assert_almost_eq(fm._overlay._at[0].x + fm._overlay._sizes[0].x * 0.5, want.x, 0.01)
+	var now := ov.word_box(0)
+	assert_ne(now, before, "moved with the field")
+	assert_true(now.grow(now.size.x).has_point(want), "still over its area")

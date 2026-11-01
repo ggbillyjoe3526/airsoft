@@ -1,29 +1,27 @@
-Task: BQ2 · Bot teammates ask for you with a ping
+Task: FM2 · A more detailed full-screen map (owner's playtest 2026-11-01, point 6; no task block, judged against the brief)
 Attempt: 2 of 4
-Head: 9c782a11044d7ca32e012f98d4b92791cffe37df (local: gdlint on the changed scripts, wiki, changelog, 4 GUT files
-60/60; CI's full suite passed on 066256b; the only code change since is the lift. Merge only once CI passes on this head)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept
-Failed checks, with evidence: none.
-Attempt 1's failures, now passing:
-5. callouts.gd:381-383 use `Vector3(0.0, _cfg.ask_lift, 0.0)`, and callout_config.gd names `ask_lift = 1.0` as
-   PingConfig.map_lift does. The lift is a Vector3 value with no heap allocation.
-8. docs/KNOWN_ISSUES.md:29 has a Bots row for the Go round reach (can wait, 2026-11-01), placed with the can-wait rows.
-   The record names it, and its attempts table has the Retry row.
-Passed, evidence (unchanged from attempt 1):
-1. Point 9, the asking part ("smart and tactical" is BQ3, ROADMAP.md:21): Need help at callouts.gd:351-353 and :226-228;
-   Go round at :355-368; Cover me at :227; the ping at pings.gd:156; the HUD at hud_ping_marker.gd:40. "Not too often":
-   the gap and the round cap at :341 and :529, counted at the flush, proven by test_bq2_asks.gd:175.
-2. No contract touched: the asks only write the ping book and the log, and no bot acts on them (Callout guards green).
-3. No allocation on the tick path. Gates come before the loop and before the nav search; strings are built only when said.
-4. test_bq2_asks fails with the feature removed (the per_round test counts exactly 3 asks in 120 s).
-6. Words plus a ping, playful lines, no new asset or sound: pillars and tone kept.
-7. Small additions and no nodes. Nit left: callouts_file.gd:296 spots whole-number rows by the hint's wording.
-Must-fix: none. The record's Review line should read "critic Accept 8/8 · qa Pass · performance Pass" (7/8 is wrong).
-Owner should test in the game (at most 6, one line each):
-- Hang back over 15 m while a teammate fights two: do you hear "Need help" and see a HELP ring on it, and is going worth it?
-- Let a teammate trade shots with one enemy for 8 s or more: is the GO ring a flank on your side that you can actually walk to?
-- Attack / Defend: "Cover me" on the pole as your team raises it, and "Need help" there as the enemy raises yours.
-- Over three or four rounds: are asks rare enough (at most 3 a round, 30 s apart), and do they show up at all?
-- Do HELP / GO / COVER read clearly against your own PING and a CONTACT diamond, both near and pinned to the screen edge?
-- An ask replaces that bot's still-up Contact mark: does the CONTACT diamond vanishing confuse you?
+Head: f79f0a9. The checks are NOT yet green on it: they ran on 0dc04a8, and parts 2-4, smoke and licences are still running. This verdict stands only once tools/check.sh passes on f79f0a9. Critic re-ran on f79f0a9: test_fm2_qa 35/35, test_fm2_field_map 12/12, test_minimap_field 11/11, test_fm1_field_map 15/15, test_mm3_qa 14/14; gdlint clean.
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
+Score: 7/8 → Accept (QA Pass d694977; performance Pass on 0dc04a8, +4 % Woodland build)
+Evidence for the passes:
+1. Objectives: hud_field_map.gd:+125-150 (_goal_of, _show_round: the goal line in your team's colour), field_map_overlay.gd:+274-280 (A/B badges, overtime ring). Place names: field_map_marks.gd:+83 lay_out with gap (20, 8) and zone words via first_clear (overlay :+206). Detail: starts, dead zones, doors, compass, scale and key (overlay :+292-365, field_map_key.gd). Hearing only: test_fm2_qa :429. Screenshots of all three maps: no overlaps, and Depot's dead-zone words are left out by the rule.
+2. Presentation only reads state (c.end, round_state); nothing written. No contract touched.
+3. update(): _goal_of, set_round (packed compares, no copy), set_teams and place allocate nothing; View._draw adds one draw_texture_rect. Layout and the ground image run on change or once a match. Pinned by the allocation tests (test_fm2_field_map :273, test_fm2_qa :412).
+4. test_ground_is_tinted… (:230) fails without _colour_of; QA stubbed the zone clearing, ground_of and the wash, and the tests failed.
+5. Every tint, size, gap and alpha is in MinimapConfig; the overlay's constants are named presentation geometry; static types throughout; no globals.
+6. Airsoft-native marks (dead zones, starts, the hearing-only rule kept). Plain, readable words. No grimdark tone.
+Failed checks, with evidence:
+8. [judgment] docs/records/FM2.md › Decisions still says "Woodland … +17 % … moving the smoothing to the GPU would mean a second texture in every minimap panel". That is false at HEAD: the ground is now a GPU texture and the build is about +4 %. The branch's pipeline/out/performance.md is also still the old Fail report (head 3929b2c). The Pass report exists only in the main checkout.
+Must-fix before merge (no retry needed):
+- Commit the Pass performance.md to the branch. Rewrite the record's perf bullet (+4 %, ground is a separate small mipmapped texture under each layer). Fill in Attempts, Review and Verified once the checks are green on f79f0a9.
+Advisory (check 7, not failing):
+- MapPointer.frame (map_pointer.gd:+24) is now called only by test_fm1_qa. The flag badge is drawn twice: overlay :+319 and key :+119.
+- Comment lines over 120 characters: minimap_field.gd:8, map_pointer.gd:6.
+- settings_hud_page.gd:403 builds a View without the ground. Fine for Depot, but a terrain thumb map would show holes.
+Owner should test in the game:
+- Hold M on Woodland at 1920x1080 and 1280x720. Does the ground read (hills, river, tracks), and is it too grey or too busy?
+- The Street: are the stacked names (East / Back Gardens, Bottom Street by the dead zone) easy to read?
+- Depot: the starts' words replace "Staging" and "Loading bay". Is that fine?
+- Round 1, then after half time: does the header switch attack and defend, and do the start boxes swap colour?
+- Elimination: is the faint overtime ring clear, and does it turn solid once the flag rises?
+- The minimap now shows the new ground and green hedges. Does it still read at a glance mid-fight?

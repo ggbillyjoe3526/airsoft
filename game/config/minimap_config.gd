@@ -78,6 +78,29 @@ extends Resource
 ## (its KNOWN_ISSUES); the dark rim keeps the dock's outline plain through a patch.
 @export var drop_colour: Color = Color(Color("16191e"), 0.95)
 @export var drop_edge: float = 0.3
+## What the ground is (FM2): a floor or a square of sloping ground takes this share of its surface's tint (a floor with
+## its own colour, The Street's, takes that colour instead), so grass, tracks, decks and roads read apart; concrete and
+## metal keep the plain ground.
+@export var ground_tint_share: float = 0.26
+@export var grass_tint: Color = Color("7a9866")
+@export var leaves_tint: Color = Color("6c8a5c")
+@export var earth_tint: Color = Color("9a7650")
+@export var gravel_tint: Color = Color("a8a496")
+@export var wood_tint: Color = Color("a07a52")
+## Sloping ground's relief (FM2): lit from the north-west, a slope facing the light relief_shade lighter and one facing
+## away as much darker once it climbs relief_full (rise over run), less on a gentler one; and the highest ground
+## relief_height lighter than the lowest.
+@export var relief_full: float = 0.35
+## The ground's tint and relief are worked out about every relief_cell m (FM2: Woodland's 0.5 m squares four to a
+## sample, so the match's loading screen waits no longer), then smoothed.
+@export var relief_cell: float = 1.0
+@export var relief_shade: float = 0.22
+@export var relief_height: float = 0.16
+## Greenery that blocks (FM2: Woodland's thickets, The Street's hedges and scrub): drawn in these darker greens, low and
+## tall, instead of the grey of cover and the white of walls, so a wall of leaves reads apart from a wall.
+@export var green_kinds: Array[StringName] = [&"thicket", &"hedge", &"scrub"]
+@export var green_low_colour: Color = Color(Color("4d7a45"), 0.95)
+@export var green_tall_colour: Color = Color(Color("3e6a3a"), 0.98)
 
 @export_group("Markers")
 ## What the panel draws over the field, in px at 1080p. The outline (ink) under a marker keeps it plain on any ground.
@@ -108,17 +131,54 @@ extends Resource
 @export var label_backing: float = 0.82
 
 @export_group("Full-screen map")
-## The full-screen map (FM1, the map's key held): the minimap's field whole, north up, in a square as big as the screen
-## allows, map_margin (px) inside its edges; the field fills map_fit of the square's side, and "DEPOT · ROUND 2" sits in
-## the square's top map_title_room (px), clear of the field; the screen behind it dimmed to map_backdrop.
+## The full-screen map (FM1, FM2; the map's key held): over the screen dimmed to map_backdrop, map_margin (px) inside
+## its edges, a header map_header (px) tall ("DEPOT", the round, and what your side must do), the key down the right
+## map_key_width (px) wide after map_key_gap, and the field whole, north up, as big as the room left allows (map_fit of
+## it, so the edges keep a little air).
 @export var map_margin: float = 40.0
-@export var map_title_room: float = 50.0
-@export var map_fit: float = 0.88
-@export var map_backdrop: Color = Color(Color("080d18"), 0.8)
-@export var map_title_size: int = 24
-## The named areas' words on it (type size, px) and their dark edge (px).
-@export var map_area_size: int = 13
+@export var map_header: float = 64.0
+@export var map_key_width: float = 210.0
+@export var map_key_gap: float = 24.0
+@export var map_fit: float = 0.96
+@export var map_backdrop: Color = Color(Color("080d18"), 0.94)
+@export var map_title_size: int = 30
+@export var map_subtitle_size: int = 15
+## The goal line's type (px), the title's line as a share of its type size, and the most of the screen's width the key
+## may take.
+@export var map_goal_size: int = 17
+@export var map_title_line: float = 1.3
+@export var map_key_share: float = 0.3
+## The named areas' words on it (type size, px: an area of at least map_area_big m² in all its boxes in the larger),
+## their dark edge (px), and the room (px, across and down) kept clear round each, a space's width across so two names
+## on a line never read as one; a name with no room left is left out, smaller areas first.
+@export var map_area_size: int = 12
+@export var map_area_big_size: int = 15
+@export var map_area_big: float = 300.0
 @export var map_area_outline: int = 5
+@export var map_area_gap: Vector2 = Vector2(20.0, 8.0)
+## The flags (FM2): a badge with the flag's letter this big (px, radius) beside each pole, a ring this big (px) round
+## the pole; Elimination's overtime flag's spot shows as a faint ring until it is up.
+@export var map_flag_badge: float = 13.0
+@export var map_flag_ring: float = 22.0
+@export var map_flag_ring_width: float = 2.0
+## The badge's letter's type size, as a share of its radius.
+@export var map_badge_type: float = 1.3
+@export var map_overtime_alpha: float = 0.45
+## Each end's start (FM2): a box round its spawns map_start_pad (m) out, its ring and fill in the colour of the team
+## starting there (fill at map_start_fill); the dead zones a box round their spots, hatched grey. Their words are
+## map_zone_size px.
+@export var map_start_pad: float = 2.0
+@export var map_start_fill: float = 0.14
+@export var map_zone_ring: float = 2.0
+@export var map_dead_colour: Color = Color(Color("aab2bc"), 0.7)
+@export var map_dead_hatch: float = 9.0
+@export var map_zone_size: int = 11
+## Doors (FM2): a bar this wide (px) across each doorway, in this wood colour, on a dark edge.
+@export var map_door_colour: Color = Color("e0a05a")
+@export var map_door_width: float = 3.0
+## The compass and scale bar in the field's bottom left (px): the bar shows map_scale_metres (m).
+@export var map_scale_metres: float = 10.0
+@export var map_scale_pad: float = 14.0
 ## Its pointer while you can ping there (px): a ring this big round a dot, in your team's colour.
 @export var map_pointer_radius: float = 10.0
 @export var map_pointer_width: float = 2.4

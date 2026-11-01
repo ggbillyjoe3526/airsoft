@@ -195,7 +195,7 @@ func test_a_patch_is_whole_on_the_panel_or_a_mark_on_the_rim_never_both() -> voi
 	_panel()
 	var view := mm.view()
 	_follow()
-	var reach := view._half
+	var reach := view._half.x
 	for metres: float in [2.0, 12.0, 19.5, 20.5, 30.0]:
 		for turn: float in [0.0, 1.0, 2.5, -2.0]:
 			_follow(you, turn)
