@@ -143,6 +143,9 @@ var burst_left: float = 0.0
 var pause_left: float = 0.0
 ## Whether its last shoot() pressed on with a burst (BQ3: a bot that kneels to fire kneels only then).
 var bursting: bool = false
+## Whether its kneeling eye had the shot when this burst began (BQ3): it kneels only then, never down out of the fight
+## behind low cover.
+var knee_clear: bool = false
 var strafe_left: float = 0.0
 var strafe_dir: int = 1
 
@@ -304,6 +307,7 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	burst_left = 0.0
 	pause_left = 0.0
 	bursting = false
+	knee_clear = false
 	strafe_left = 0.0
 	search_look_left = 0.0
 	flanking = false

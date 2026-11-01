@@ -148,6 +148,7 @@ func test_normal_takes_a_knee_for_each_burst_and_sidesteps_between() -> void:
 	var b := world.bots[0]
 	b.burst_left = 0.3
 	b.bursting = true
+	b.knee_clear = true
 	BotMovement._strafe(b, world, cmd, 1.0 / 60.0, world.characters[3])
 	assert_true(cmd.crouch, "a knee while the BBs go")
 	assert_eq(cmd.right, 0.0, "and still")
@@ -158,6 +159,24 @@ func test_normal_takes_a_knee_for_each_burst_and_sidesteps_between() -> void:
 	BotMovement._strafe(b, world, cmd, 1.0 / 60.0, world.characters[3])
 	assert_false(cmd.crouch, "up again in the pause")
 	assert_ne(cmd.right, 0.0, "sidestepping")
+
+
+func test_no_knee_where_low_cover_would_hide_the_target() -> void:
+	_fighting(&"normal")
+	var b := world.bots[0]
+	var foe := world.characters[3]
+	BotCombat._aim_point = BotSenses.body_point(foe, world.tuning.hits, 0.6)
+	assert_true(BotCombat._knee_has_shot(b, world), "in the open the knee has the shot")
+	# A waist-high wall a few metres out: standing it sees over, kneeling it would not.
+	var eye_knee := Character.eye_height(1.0, world.tuning.body)
+	(world.query as BoxWorld).add_box(Vector3(0.0, eye_knee * 0.5 + 0.1, 3.0), Vector3(4.0, eye_knee + 0.2, 0.3))
+	assert_false(BotCombat._knee_has_shot(b, world), "behind low cover it stays up")
+	var cmd := PlayerCommand.new()
+	b.burst_left = 0.3
+	b.bursting = true
+	b.knee_clear = false
+	BotMovement._strafe(b, world, cmd, 1.0 / 60.0, foe)
+	assert_false(cmd.crouch, "so no knee for this burst")
 
 
 func test_easy_keeps_sidestepping_as_it_shoots() -> void:

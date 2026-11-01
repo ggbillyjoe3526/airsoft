@@ -160,6 +160,7 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 	b.no_shot_for = 0.0
 	if b.burst_left <= 0.0 and b.pause_left <= 0.0:
 		b.burst_left = b.pick(b.skill.burst)
+		b.knee_clear = b.skill.kneels_to_fire and _knee_has_shot(b, w)
 	if b.burst_left > 0.0:
 		b.bursting = true
 		var a := b.character.armament
@@ -169,6 +170,13 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 			b.pause_left = b.pick(b.skill.burst_pause)
 	else:
 		b.pause_left -= dt
+
+
+## Whether `b`'s eye, kneeling where it stands and upright, would have the shot at _aim_point (BQ3: one ray a burst).
+static func _knee_has_shot(b: Bot, w: BotWorld) -> bool:
+	var c := b.character
+	var knee := c.position + Vector3(0.0, Character.eye_height(1.0, w.tuning.body), 0.0)
+	return BotSenses.line_clear(w.query, knee, _aim_point) and not leaves_in_line(w, knee, _aim_point)
 
 
 ## Reloads when empty, or swaps a low magazine for a fuller spare when nobody is in sight.
