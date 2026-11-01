@@ -358,6 +358,10 @@ func _watch_asks(i: int, state: GameState, w: BotWorld) -> void:
 	var target := state.character(b.target_id)
 	if target == null or not Elimination.is_in_play(target):
 		return
+	# Checked before the spot is looked for, so a stand-off the gaps keep quiet costs no nav search each tick.
+	if _file.rules[CalloutsFile.Event.GO_ROUND].chance <= 0.0 \
+			or not _allowed(talk, CalloutsFile.Event.GO_ROUND, i, w.bots, "", -1):
+		return
 	var spot := _round_spot(b.character.position, target.position, w)
 	if SquadOrders.is_spot(spot):
 		_offer(t, CalloutsFile.Event.GO_ROUND, i, w.bots, area_of(spot), 0, 0, -1, spot)
@@ -373,13 +377,11 @@ func _round_spot(from: Vector3, enemy: Vector3, w: BotWorld) -> Vector3:
 		return SquadOrders.NO_SPOT
 	var across := Vector2(-line.y, line.x).normalized()
 	var mine := 1.0 if across.dot(Vector2(you.position.x - enemy.x, you.position.z - enemy.z)) >= 0.0 else -1.0
-	var offset := _file.asks.round_offset
-	for side: float in [mine, -mine]:
-		var at := enemy + Vector3(across.x, 0.0, across.y) * offset * side + Vector3.UP
-		var k := w.nav.nearest_walkable(at, _cfg.ask_snap)
-		if k >= 0:
-			return w.nav.node_position(k)
-	return SquadOrders.NO_SPOT
+	var side := Vector3(across.x, 0.0, across.y) * _file.asks.round_offset * mine
+	var k := w.nav.nearest_walkable(enemy + side + Vector3.UP, _cfg.ask_snap)
+	if k < 0:
+		k = w.nav.nearest_walkable(enemy - side + Vector3.UP, _cfg.ask_snap)
+	return w.nav.node_position(k) if k >= 0 else SquadOrders.NO_SPOT
 
 
 ## Whether you are in play and further than Asks' you_further from `at` (on the ground): worth asking for you.
