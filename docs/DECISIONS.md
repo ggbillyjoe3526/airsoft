@@ -765,6 +765,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   stays, never cancels. Held rather than toggled, as the scoreboard; Mouse 4 because every key near WASD is taken.
   A ping with your view stops at the first thing it meets (a wall: its foot on your side); a click on the map goes
   anywhere on the field, seen or not (owner, 2026-10-31).
+- **The full-screen map marks what never moves, and still no enemy (owner's playtest, 2026-11-01: "show objectives,
+  location names, etc. make it more detailed"; FM2, Claude's defaults).** Over the minimap's view it adds the flags'
+  letters (or Elimination's overtime spot), each end's start in the colour of the team starting there, the dead zones,
+  the doors, place names sized by area with none over another (a smaller one moves aside or is left out), a compass
+  and a scale bar; a header says what your side must do and a key explains the marks. Doors show where they are, never
+  whether they are open. The field drawing it shares with the minimap tints the ground by what it is and shades
+  slopes, so the minimap gets the same ground.
 - **Ping is the middle mouse button, and Settings › HUD › Ping markers is On by default (2026-10-15, PG1).** One ping
   each, 8 s on screen with its distance, on the minimap too. Off hides the markers only.
 - **Asking for a magazine is H and the order wheel's fifth item, Need a Mag (2026-10-15, MG1).** One press does what

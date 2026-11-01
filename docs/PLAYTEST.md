@@ -762,6 +762,12 @@ same and throw them (SF2).
   and pings show; an enemy only where your side heard them. The mouse moves a pointer instead of the view and you can
   still walk. Let go of M: the view turns again and the trigger needs a fresh pull. Out: the map shows but has no
   pointer. Is it big and clear enough? Is the pointer's speed right?
+- [ ] **The full-screen map's detail (FM2).** Hold M on Depot, Woodland and The Street: the field fills the screen
+  beside the key. The header names the round and says what your side must do (attack, then defend after half time;
+  "Knock out the other team" in Elimination). A and B badges sit by the flags; both starts are boxed in their team's
+  colour (swapped after half time) with the dead zones hatched; doors show as wood-coloured bars. No place names
+  overlap. Woodland's hills, tracks and dry river and The Street's gardens and roads read apart, on the minimap too.
+  Is anything missing you'd look for? Is the ground too busy?
 - [ ] **Go there (click on the map, Mouse 4, or the wheel's Go There).** Click a far corner of the map: a radio
   click, both teammates set off side by side, the marker reads "GO · 40 M", then "HOLD · 40 M" once they're there,
   facing on the way they went. Mouse 4 at a spot you look at does the same; at the sky the wheel says "Nowhere there

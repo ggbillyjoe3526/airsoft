@@ -22,7 +22,7 @@ const COMPASS_HALF := 7.0
 const TICK := 6.0
 const BAR_WIDTH := 2.0
 const BAR_INK := 4.0
-## The gap (px) between a zone's word and its box's top edge, inside it.
+## The gap (px) between a zone's word and its box's top edge, the word sitting just above the box.
 const ZONE_WORD_GAP := 4.0
 ## A dead zone's hatch: its lines' width (px).
 const HATCH_WIDTH := 1.4
@@ -197,7 +197,7 @@ func _box_px(view: HudMinimap.View, mid: Vector2, r: Rect2) -> Rect2:
 	return Rect2(a, r.size * view.px_per_m())
 
 
-## A zone's word's box: along the top of its box, inside it.
+## A zone's word's box: centred just above its box.
 func _zone_word_box(r: Rect2, word: String) -> Rect2:
 	var s := _zone_font.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, _cfg.map_zone_size)
 	return Rect2(Vector2(r.get_center().x - s.x * 0.5, r.position.y - s.y - ZONE_WORD_GAP), s)

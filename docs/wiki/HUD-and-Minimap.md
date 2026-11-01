@@ -101,13 +101,29 @@ Top left, the minimap shows the field from above:
 - **Rotating** (the default) turns the field so the way you look is up; **Fixed** keeps north up. Pick it in
   Settings › HUD › Minimap.
 - Once you are out, the minimap follows the teammate you watch.
+- The ground is shaded by what it is: grass, tracks and roads apart, hills shaded by their slope, hedges and thickets
+  in green.
 
 ## The full-screen map
 
-Hold **M** (Map in Settings › Controls) to see the whole field, north up, over a dimmed screen, with the map and round
-over it and the named areas written in. It shows exactly what the minimap shows and nothing more: you, your teammates,
-the pole or the overtime flag, your Hold Here or Go There spot, your team's pings, and the other team only where your
-side heard them. It shows the storey you stand on.
+Hold **M** (Map in Settings › Controls) to see the whole field, north up, as big as the screen allows over a dimmed
+screen. The header names the map, the round and the mode, and says what your side must do this round ("You attack:
+raise the flag at A / B", "You defend", "Knock out the other team"). A key down the right explains every mark.
+
+On top of what the minimap shows (you, your teammates, your Hold Here or Go There spot, your team's pings, and the
+other team only where your side heard them) the map marks what never moves:
+
+- **The flags:** in Attack / Defend each flag has a yellow ring and its letter, **A** or **B**. In Elimination a faint
+  ring marks where the overtime flag will rise, solid once it is up.
+- **Each team's start**, boxed in the colour of the team starting there (they swap at half time), and the **dead
+  zones**, hatched grey.
+- **Doors**, as short wood-coloured bars across their doorways.
+- **Place names**, bigger for the big areas; where two would overlap the smaller one moves aside or is left out.
+- **The ground:** grass, tracks, decks and roads in their own shades, hills shaded by their slope, hedges and thickets
+  in green. The minimap shows the same ground.
+- A **compass** and a 10 m **scale bar** in the corner.
+
+It shows the storey you stand on.
 
 While it is open the mouse moves a pointer on the map instead of turning your view, and your feet still move. **Click**
 to send your teammates there ([Go There](Squad-Orders#go-there)), or press the ping's key (the middle mouse button) to
