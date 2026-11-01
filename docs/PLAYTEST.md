@@ -93,6 +93,14 @@ The rifle holds 60 BBs and the pistol 18, each with 4 magazines a round. Nothing
   first, spares fullest first, an empty one dark.
 - [ ] **Empty the GBB Pistol and press R the instant the last BB goes.** The slide still snaps back and stays back
   through the reload, closing near the end as above.
+- [ ] **Hear the bots fight (AU1).** With the volumes at their defaults, play Woodland or The Street and hang back
+  while the bots engage. Their gunfire is clear from across the field: a rifle's motor whir and shots, a pistol's
+  gas pop, a spring's twang, loud up close and duller and quieter the further off (and through walls). A bot right by
+  you is no louder than your own replica. A silenced bot carries about half as far. Does a full-auto burst ever crackle
+  or distort?
+- [ ] **Quieter ambience (AU1).** Settings › Audio › Ambience starts at 20 % on a new save (or a save you never changed
+  it on). Birds, insects and the yard's hum sit well under the footsteps and gunfire; does it still give the field
+  life without distracting?
 
 ## Aiming and optics
 
