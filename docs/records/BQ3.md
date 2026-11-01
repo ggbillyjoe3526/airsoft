@@ -72,9 +72,12 @@ change stays only if bots with it win more rounds against bots without it.
   | All of BQ3 | Depot, Hard | 60 / 57 | 51 % |
   | All of BQ3, after QA's kneel fix | Depot, Normal | 71 / 51 | 58 % |
   | All of BQ3, after QA's kneel fix | The Street, Normal | 67 / 54 | 55 % |
+  | All of BQ3, the knee only with the shot | Depot, Normal | 75 / 45 | 62 % |
+  | All of BQ3, the knee only with the shot | The Street, Normal | 62 / 57 | 52 % |
 
-  The rows above the last two were run before QA's fix (a knee was sometimes held on a burst not being fired); the
-  last two are the shipped code. Normal wins clearly more; Hard about evens (it already held angles and traded), so its edge is small.
+  The rows above the last four were run before QA's fix (a knee was sometimes held on a burst not being fired); the
+  last two are the shipped code but for the recheck when a burst picks up again. Normal wins clearly more on Depot and
+  a little more on The Street; Hard about evens (it already held angles and traded), so its edge is small.
 - `test_bq3_team_play` (the radio told near and late, not to the far, the fighting, the enemy or the caller; a caller
   out says nothing; Easy has none; pressing and the careful last bot in Elimination only; a knee for each burst and up
   between; Easy keeps sidestepping; a follower in cover comes out after a giver moving off, not with an enemy in sight,
