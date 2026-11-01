@@ -1,39 +1,24 @@
-Task: MC1 · QA commit 5aadfbf · Verdict: Pass
+Task: AU1 · QA commit 6f2bac6 · Verdict: Pass
 
-Blocking: none.
-Advisory (for KNOWN_ISSUES):
-1. Skip frame cadence: game/play/play_session.gd _play_out spends skip_budget_ms in every physics step, and the engine
-   runs up to max_physics_steps_per_frame=10 catch-up steps a rendered frame, so a skip renders about one frame per
-   0.47 s (probe: 16 frames for a 100 s round, 7.5 s, with check.sh running alongside). Esc, Leave and the clock text
-   answer within about half a second. Share one budget per rendered frame (spend it in _process) or cap catch-up.
-2. play_session.gd:1107 `_frames.add(delta)` is not gated on _skipping, so a skip's 50 to 470 ms frames land in the bug
-   report's frame line (FrameWindow, ReportFacts).
-3. PlayerInput._wheel_to starts from the active slot even when holstered: the first notch from a holstered replica
-   takes a bomb in hand instead of drawing the other replica (it drew it before MC1).
-4. A wheel notch onto a bomb during a vault is lost (Vault.vaulting_command resets ready_grenade); a notch onto a replica
-   is kept (held_switch_to). Inconsistent, harmless.
-5. KeyBindings.load_dict: a moved default whose new key the player's own key holds is dropped without a hint, and the
-   next save fixes the empty list. A layout-1 save with smoke/flash swapped (Y, G) loses the door key; one with the dial
-   reordered (PgDn, 4) loses the smoke key. Documented in MC1.md; no UI says it. Never a shared key (tested).
-Tests added, tests/unit/test_mc1_qa.gd (15 tests, 313 asserts; each checked in a scratch copy with the line mutated):
-- :77 bomb stays in hand through a vault, no pull throws · vault drop of readied in ready_command fails it
-- :104 ready_grenade + throw key in one tick · new keys/API absent at the base commit
-- :125 bomb ends with the round, pull between rounds throws nothing, next round clean · same
-- :148 holstered replica stays holstered after the throw · from_hand restore mutated: fails
-- :169 reload puts the bomb back and draws the replica · new API absent at the base
-- :186 wheel_item never lands on a bomb with none left · new API absent at the base
-- :207 leaving the match mid-skip restores disable_3d · exit-tree restore removed: fails
-- :220 skip to the match's end shows results, rematch starts unheld · hold_next reset removed: fails
-- :254 click on the table after a skip moves on only after waiting past the delays · hold_next/end_wait absent at base
-- :288,:309 Continue after go_fallback when shaders never warm; clock not started before first frame · fallback removed: fails
-- :323 go() idempotent and harmless when not holding · new API absent at the base
-- :360,:391,:400 old saves: five partly changed saves never share a key, keep essentials and re-save identically;
-  partial save takes new defaults; any layout marker shape loads · LAYOUT_KEY absent at the base
-Ran: test_mc1_qa 15/15; targeted (mc1, wg1_qa, what_got_you, sf1_qa, doors, grenades, hud_minimap, hud_prefs,
-key_bindings, minimap_hearing, player_input, round, round_result, order_wheel_input) 243/243, 2030 asserts, 120 s;
-second batch (callouts_feed, fb1_qa, ho1_qa, hud_hunt, hud_size, mag_hand_off_hud, match_page, mn2_qa, ping_markers,
-team_sizes) 189/189, 353 s. tools/check.sh not run (running in the background from this tree). Raw output in
-pipeline/out/qa/.
-Could not test (owner's list, needs a display): the Continue button's look, focus and Enter/Space; mouse capture after
-Continue; the skip cover and clock on a real window; wheel and bomb-in-hand feel; the Day / Night spacing; the zoom slider
-and sample maps drawn; Esc latency during a skip; a click with the map (M) open while out (not probed).
+Attempt 2, head b1c3a50 (per-play AudioStreamPlayer3D.max_db: a Kind.SHOT play capped at its own volume_db, every other kind at field_max_db 3.0).
+
+Blocking findings: none. The attempt-1 failure (stale settings version in test_save_bundle.gd) is fixed in 795acc7 and the file passes.
+
+Advisory findings (for KNOWN_ISSUES or a tuning pass; by design of the cap, not bugs):
+- game/play/sim_audio.gd:573 · the flash bang is Kind.SHOT with bang_gain 1.0 (0 dB), so within 10 m it is now capped at 0 dB where it was 3 dB (about 3 dB quieter up close, same far off). Nothing in the notes asked for that; raise bang_gain to 1.4 if the bang should keep its old peak.
+- same line · a silenced bot's shot within 10 m is capped at its own muffled level (about -4 dB) where it was up to +3 dB before; deliberate ("no louder than yours"), but a silenced bot beside you is about 6 dB quieter than before this change. Owner's play-test should confirm.
+- same line · volume_db includes the per-play random spread, so the cap moves with it (a few tenths of a dB, by design). Occlusion lowers the bus, not volume_db, for the effects and power buses, so the cap is the open level and the bus does the muffling (correct).
+- Checked and fine: voice reuse in both directions (shot, bang, step, steel ring: every play resets max_db), your own sounds (plain AudioStreamPlayer, no max_db, positional voices untouched), the range's steel ring and wood target (field cap), zero gain (-inf, not NaN), a shot whose shooter is gone.
+
+Tests added (tests/unit/test_au1_qa.gd, 7 new; each fails with the max_db line removed in a scratch copy, checked: voice-cap tests fail on the 3.0 left in place):
+- test_au1_qa.gd:360 · 24 rounds of shot, step and bang on one pool, with and without voices finishing, each playing voice's cap matches its cue · fails without the line (3.0 vs the shot's level)
+- :381 · a shot behind a wall: capped at its own level on the full-muffle bus
+- :397 · a silenced shot at 2 m capped at its muffled level
+- :409 · the flash bang capped at its own level, shot_unit_size and bang_reach kept
+- :421 · a steel ring after a shot on its voice keeps field_max_db
+- :440 · zero shot and power gain: cap is -inf or very low, never NaN
+- :455 · your own shot leaves every positional voice silent and at the default cap
+
+Run (targeted, 26 files incl. test_save_bundle, au1_qa, au1_loudness, sound_occlusion, voice_pool, sp1_qa, parts_in_play, bot_bombs, sound_mix, ambient_calls, range_play, footsteps, settings and the other SimAudio users): 407 tests, 407 passing, 0 failing, 182.6 s, no SCRIPT ERROR. gdlint on test_au1_qa.gd clean. Raw log: pipeline/out/qa/qa-attempt2.log. Full tools/check.sh not run by me (the worker's is running).
+
+Not testable here: how the lifted bot shots sound and whether the cap choice (own level) suits the mix; needs ears on a display machine (owner's list: bot gunfire up close and at 30 m, a silenced bot beside you, a flash bang indoors).

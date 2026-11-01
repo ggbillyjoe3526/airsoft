@@ -1,16 +1,14 @@
-Task: MC1 · head 4960a08 · Verdict: Pass
-Run: no new match run (a full --perf match would only compete with tools/check.sh, still running on this tree); measured instead: tests/unit/test_mc1.gd + test_mc1_qa.gd headless (34 tests, 42.6 s, load alongside), diff read against 7ed6d93 (= origin/main's MC1 base) · budget: no baseline yet (pipeline/perf-budget.json absent), judged against the targets and the brief's own numbers
-Metrics (brief's cloud numbers, noisy, not re-measured): Woodland tick ~2.1 ms bots + ~2.6 ms sim + ~0.36 ms presentation (live play is unchanged by the diff, so no "main" delta to compare); skip 101 s of round in ~16 s, Depot 26 s in ~6 s. Frame times: reported only, no GPU here.
-Regressions (> 10 % worse): none found. The per-tick additions are one early-returning call and an int compare, far under 1 % of a tick (judgment).
-Blocking findings: none.
-  - Hot path is allocation-free (judgment, read): Grenades.ready_command (grenades.gd:132) returns `cmd` untouched unless a bomb is in hand, else copies into the preallocated Simulation._readied (simulation.gd:53); PlayerInput.wheel_item is a static int loop; _wheel_to runs only on a wheel step; PlayerCommand gains one enum, copied by value.
-  - Skip cadence OK (judgment, read): _play_out (play_session.gd:831) shares 50 ms per rendered frame via Engine.get_process_frames, so catch-up physics steps cannot multiply it; overshoot is at most one tick, so the cover redraws and Esc answers about every 55 ms. Pacer is not consulted while skipping or holding, so no tick backlog builds up.
-  - disable_3d is restored on every exit (judgment, read + test): _stop_skip (called from the tick that ends the round, ROUND_OVER, and the match end) and _exit_tree (leave mid-skip); covered by test_leaving_the_match_mid_skip_draws_the_window_again and the skip-to-match-end test, both passing. No other path clears `_skipping`.
-  - Teardown clean (judgment): _skip_cover and the note are children of the existing ui layer and go with it; the Continue button is freed with its loading screen, its lambda captures only that node; ready_to_go/continued are connected once per _start_play to fresh nodes, no duplicate connections.
-  - Skip clock label: rewritten once per second (play_session.gd:1436), no per-frame string work. Replica panel bomb row rebuilt only on a count/in-hand change; minimap zoom is one multiply in View.begin (the field is a single scaled texture), no allocation.
+Task: AU1 · head c521599 · Verdict: Pass
+Run: no match run (audio-only diff, worker's tools/check.sh in flight); targeted GUT: test_sound_occlusion, test_au1_loudness, test_voice_pool, 35/35 pass, 507 asserts · budget: no baseline yet, judged against targets and the diff
+Metrics: not measured (no per-frame code path changed beyond the SHOT event handler)
+Regressions: none measured
+Blocking: none
 Advisory:
-  - play_session.gd:1001-1002 and :984-999: while skipping, _hud.on_calls (feed lines, screen-reader text), _puffs/_kicked/_figure on_shot/_breathe still run per tick for a hidden, undrawn field. Pooled, so bounded, roughly the 0.36 ms of presentation (<8 % of a tick); skipping them under `_skipping` would shave a little more off every skip. judgment
-  - main.gd:406: _on_play_started drops the menu frame cap while the match is held for Continue, so the 3D scene renders uncapped behind the loading screen until pressed (extra GPU/heat on a waiting player, bounded by their frame limit). Keep the menu cap while play.holding(). judgment
-  - A full 3:00 Woodland round skips in roughly 30 s on this cloud CPU; on low-powered hardware (budget target: Low preset on weak PCs) it could run to a minute under the still cover. Only Esc then Leave stops it. Acceptable; owner call whether the cover needs a progress bar or a cancel. judgment
-Fixes: none required. Optional, ranked: (1) skip view-only event handlers under _skipping; (2) keep the menu frame cap while holding.
-Unexplained: none for performance. Not perf, for QA/the caller: tests/unit/test_mc1_qa.gd:266/273/274 (test_a_click_on_the_table_after_a_skip_starts_the_next_round) FAILS on this head (measured, 1 of 34). Cause by reading: the test loops session._physics_process(0.0) with no frame between, and 4960a08's budget is per rendered frame (Engine.get_process_frames), so only ~50 ms of ticks run, the round never reaches OVER. The code is right (the same property keeps catch-up steps from doubling the budget); the test needs `await wait_process_frames(1)` inside the loop, as the skip-to-match-end test does.
+- game/play/sim_audio.gd:206 (judgment) heard_scale per SHOT is two array reads and a float, no allocation; the shooter null check is cheap. Own shots compute it too, unused beyond the reach test; negligible.
+- game/play/sim_audio.gd:209 (judgment) _power_gain.get on a typed Dictionary[StringName, float] with a StringName key: no allocation, one hash per shot.
+- game/play/sim_audio.gd:571 (judgment) v.unit_size set per field play: one property write per voice start, bounded by the 24-voice pool.
+- Occlusion (measured by test, judgment for reach): rays are still gated by occlusion_reach 60 m and the 24-ray budget; _play checks _in_reach before share_of, and share_of casts nothing beyond 60 m (closed_far ramps the last share 60-120 m). The longer shot reach adds no rays; shots 60-120 m away reuse the cached share.
+- default_bus_layout.tres (judgment) one HardLimiter on Master: a per-block peak detector on the mix thread, no per-frame GDScript cost.
+- More shots now reach the 24-voice field pool on big maps; growth stays bounded by shot_cue_voices 6 per cue and pool priority (SHOT over FIELD), so voices never exceed 24. Presentation-only; judgment.
+Fixes: none needed
+Unexplained: none

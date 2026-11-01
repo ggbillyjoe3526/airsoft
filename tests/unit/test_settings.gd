@@ -53,7 +53,7 @@ func test_the_defaults_are_the_owners() -> void:
 	assert_eq(s.volumes[&"Master"], 1.0)
 	assert_eq(s.volumes[&"Effects"], 0.7)
 	assert_eq(s.volumes[&"Power"], 1.0)
-	assert_eq(s.volumes[&"Ambience"], 0.3)
+	assert_eq(s.volumes[&"Ambience"], 0.2, "ambience 20 % (owner, 2026-11-01; AU1)")
 	assert_eq(s.volumes[&"Interface"], 0.4)
 	assert_eq(s.fov, tuning.view.horizontal_fov_16x9, "the field of view starts where the camera config does")
 	assert_eq(s.sensitivity, tuning.controls.sensitivity)
@@ -119,7 +119,7 @@ func test_a_version_1_file_still_at_the_old_defaults_moves_to_the_new_ones() -> 
 	assert_eq(t.window_mode, Settings.WindowMode.EXCLUSIVE)
 	assert_false(t.vsync)
 	assert_eq(t.volumes[&"Effects"], 0.7)
-	assert_eq(t.volumes[&"Ambience"], 0.3)
+	assert_eq(t.volumes[&"Ambience"], 0.2)
 	assert_eq(t.volumes[&"Interface"], 0.4)
 	assert_eq(t.volumes[&"Master"], 1.0)
 	assert_eq(t.volumes[&"Power"], 1.0)
@@ -186,7 +186,7 @@ func test_reset_gives_the_new_defaults() -> void:
 	assert_false(s.vsync)
 	assert_eq(s.volumes[&"Effects"], 0.7)
 	assert_eq(s.volumes[&"Power"], 1.0)
-	assert_eq(s.volumes[&"Ambience"], 0.3)
+	assert_eq(s.volumes[&"Ambience"], 0.2)
 	assert_eq(s.volumes[&"Interface"], 0.4)
 
 
@@ -249,7 +249,7 @@ func test_each_bad_value_keeps_its_own_default() -> void:
 	assert_eq(t.volumes[&"Master"], 0.5)
 	assert_eq(t.volumes[&"Effects"], 0.7)
 	assert_eq(t.volumes[&"Power"], 1.0)
-	assert_eq(t.volumes[&"Ambience"], 0.3)
+	assert_eq(t.volumes[&"Ambience"], 0.2)
 	assert_eq(t.volumes[&"Interface"], 0.0)
 	assert_eq(Array(t.bindings.codes(&"reload")), [KEY_R])
 
@@ -380,7 +380,7 @@ func test_a_file_from_before_the_graphics_fields_loads_unchanged() -> void:
 		"show_fps": true, "volumes": {"Master": 0.7},
 	})
 	var t := _again()
-	assert_eq(Settings.VERSION, 2, "2 since FB2 moved the defaults; adding fields does not bump it")
+	assert_eq(Settings.VERSION, 3, "3 since AU1 moved the ambience's default; adding fields does not bump it")
 	assert_eq(t.load_message, "", "an older file is not a damaged one")
 	assert_almost_eq(t.sensitivity, 1.5, 1e-6)
 	assert_eq(t.window_mode, Settings.WindowMode.BORDERLESS)
@@ -552,7 +552,7 @@ func test_a_file_from_before_the_accessibility_fields_loads_unchanged() -> void:
 		"sensitivity": 1.5, "fov": 95.0, "realistic_colours": true, "hud": {"colour": 2},
 	})
 	var t := _again()
-	assert_eq(Settings.VERSION, 2, "2 since FB2 moved the defaults; adding fields does not bump it")
+	assert_eq(Settings.VERSION, 3, "3 since AU1 moved the ambience's default; adding fields does not bump it")
 	assert_eq(t.load_message, "")
 	assert_almost_eq(t.sensitivity, 1.5, 1e-6)
 	assert_almost_eq(t.fov, 95.0, 1e-6)

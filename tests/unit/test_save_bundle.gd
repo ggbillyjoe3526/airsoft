@@ -59,9 +59,10 @@ func test_reads_the_four_stores_as_one() -> void:
 	var b := SaveBundle.read(_paths())
 	assert_eq(b.stores.keys(), ["settings", "loadouts", "progress", "records"])
 	for kind: String in SaveBundle.KINDS:
-		# Records are at version 2 since the bots' levels moved up a name (TL1), settings since the first-start defaults
-		# moved (FB2); the rest at 1.
-		assert_eq(b.stores[kind]["version"], 2 if kind == "records" or kind == "settings" else 1, kind)
+		# Records are at version 2 since the bots' levels moved up a name (TL1), settings at 3 since the ambience's
+		# default moved (AU1); the rest at 1.
+		var want := 2 if kind == "records" else (3 if kind == "settings" else 1)
+		assert_eq(b.stores[kind]["version"], want, kind)
 		assert_true(b.stores[kind]["data"] is Dictionary, kind)
 	assert_eq(b.version, Version.current())
 	assert_gt(b.saved_at, 0)

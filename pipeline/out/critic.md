@@ -1,26 +1,31 @@
-Task: MC1 · Match controls and menu fixes (no task block; judged against the brief's points 1, 5, 7, 10, 11)
-Attempt: 1 of 4
-Head: 3076d2e (= git rev-parse HEAD; lint, notes, wiki and targeted GUT passed on it; full unit suite and CI still running, so this verdict holds only once CI is green on 3076d2e)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
-Score: 7/8 → Accept (one non-blocking check failed; QA Pass, performance Pass)
-Evidence for the passes, in short:
-1. Pt 1: play_session.gd:1207 _follow_hold, then ready_to_go → loading_screen.show_continue; the clock is held (_physics_process returns while _holding). Pt 5: settings_hud_page.gd:253 slider, 50 to 200 %, hud_minimap.gd:398. Pt 7: the fire press at play_session.gd:1298, _play_out :831, hold_next :1413 / round.gd:40, the match's end in test_mc1_qa:220. Pt 10: key_bindings.gd:59-62 (4, 5, G), player_input.gd:417 wheel_item never stops on the holster. Pt 11: match_rules_box.gd:28,99.
-2. ready_grenade goes through PlayerCommand; Grenades.ready_command (grenades.gd:132) is a plain sim class. hold_next is written by the session the same way end_wait already was.
-3. ready_command copies into the preallocated _readied; _play_out and wheel_item don't allocate; the skip clock's string is rebuilt only when its second changes.
-4. test_mc1.gd:328 (a held round) can't parse or pass without hold_next; QA mutation-checked its 15 tests.
-Failed checks, with evidence:
-8. [judgment] The player-facing text says the skip is quick, but the brief's own measurements say otherwise. changelog.d/match-controls-and-menus.md:7 and docs/wiki/How-to-Play.md:41 both say the "Skipping the round" screen shows "for a moment". The record measured 101 s of Woodland in 16 s, and performance estimates about 30 s for a full round and up to a minute on weak PCs.
-   Also, MC1.md:36 says "Known issues left: None", but QA filed advisories 3 to 5 "for KNOWN_ISSUES" and they were left unfixed: the wheel from a holstered slot 1 goes to smoke, a vault drops a wheel notch onto a bomb, and a key-migration edge can leave an action keyless. The weak-PC skip time isn't recorded either. None of these has a KNOWN_ISSUES row.
-   Two comments are stale since 4960a08: play_session.gd:30 and play_tuning.gd still say the budget is "a physics frame"; it is per rendered frame now (:828).
-Must-fix (none needed for Accept; do them in this PR):
-- Reword "for a moment" in the changelog note and the wiki: the round plays out unseen, with its clock counting down.
-- Add KNOWN_ISSUES rows for QA advisories 3 to 5 and for the skip time on weak PCs, and update MC1.md › Known issues left.
-- Fix the two stale "physics frame" comments.
-Not failed, but the owner's to rule: a skip takes about as long as the old 6x fast-forward did (101 s in 16 s ≈ 6.3x), only unseen. Simulating the rest honestly can't go much faster; the sim and the bots take about 4.7 ms a tick. An instant skip means approximating the rest of the round (fewer bot thinks, or a scored result), which is his call.
+Task: AU1 · Bots' gunfire heard, ambience quieter
+Attempt: 2 of 4
+Head: 6d8bc5e (= git rev-parse HEAD; per the brief, tools/check.sh: gdlint, changelog, wiki ✓, unit parts still running)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
+Score: 8/8 → Accept (if check.sh finishes green on 6d8bc5e; a red check reopens this)
+Failed checks, with evidence: none.
+1. AC2 now holds up close: game/play/sim_audio.gd:574 sets max_db = maxf(volume_db, field_max_db) for Kind.SHOT,
+   so a bot's motor (+12 dB), gas (+6.8) and spring (+8) reach their own level beside you instead of the old 3 dB.
+   The cap is never under 3 dB, so nothing shot-kind (silenced shot, bang) is quieter than at base; a bot's shot is
+   never more than 0.1 dB over your own (2.9 vs 3 dB, as at base). Other kinds reset to field_max_db, so a reused
+   voice carries no shot's cap. AC1, AC3, AC4 as judged in attempt 1.
+3. One maxf and one property write per voice start, inside the bounded 24-voice pool; no allocation.
+4. test_au1_loudness.gd:82-84 asserts the live voice's max_db (fails with the line removed: 3.0 vs 12);
+   :136 models Godot's capped formula at 5 and 20 m (whole lift, never over your own);
+   :146 and test_au1_qa.gd:360 cover voice reuse.
+5. field_max_db is a SoundConfig export (sound_config.gd:135), not a literal; typed throughout.
+Notes (non-blocking):
+- QA's Pass is on b1c3a50; 6d8bc5e changed the cap to maxf and the worker edited five of QA's assertions to match.
+  I read them: each now checks the new rule and the silenced-shot and bang tests check the "no quieter" claim, so the
+  Pass stands for the head, but the record should say QA's tests were updated by the worker.
+- docs/DECISIONS.md: the edited ambience line runs past the 120-column house wrap.
+- Record's Review line still reads "critic pending · qa pending"; fill in at the records commit.
+- Attempt-1 advisories stand for the owner: the Master limiter may pump under your own full-auto; bots and the
+  minimap still hear to 60 m while you hear 120 m.
 Owner should test in the game (at most 6, one line each):
-- Skip from early in a Woodland round: is the wait under the still cover acceptable on your PC, or should it be faster and less faithful?
-- Load a match: does CONTINUE appear only once the match is fully loaded, do Enter, Space and a click all start it, and is no shot fired?
-- Mouse wheel: replica → smoke → flash → replica, starting from a drawn and from a holstered replica; then throw the bomb in hand with a click.
-- Hop-up dial now only on Page Down / Page Up: is it reachable mid-fight, or does it need a closer default key?
-- Minimap zoom at 50 % and 200 %: the samples, the field and the heard-patch rims follow the slider.
-- Match page: is the Day / Night row's spacing under Ricochets and Friendly fire right?
+- A bot firing 2 to 20 m away at default volumes: motor whir, gas pop and spring twang clearly heard?
+- A firefight 40 to 100 m off on Woodland: audible, and can you tell its direction?
+- Your own full-auto burst: does the rest of the field duck or "pump" while you fire?
+- A silenced bot beside you: mostly motor, and still right?
+- Ambience at the new 20 % default: alive but not distracting?
+- A flashbang within 10 m: loud but not painful?

@@ -698,10 +698,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   look is a Dev setting again, Realistic colours moved to the Loadout's Colour tab (MR1), and the Voices placeholder is
   gone. The top bar's level reads "LVL 3".
 - **First-start defaults after the 0.1 Dev 1 playtest (owner, 2026-10-29; FB2).** Volumes: master 100 %, effects 70 %,
-  power source 100 %, ambience 30 %, interface 40 %. The game launches in exclusive fullscreen (on the display it
-  opens on). V-Sync is off. Edge smoothing is Off, on every graphics preset (a player who turns it on keeps it, as
-  Custom). A save from before (settings version 1) moves a value still equal to the old default to the new one, once;
-  a value the player changed is kept. Reset to defaults gives the new values.
+  power source 100 %, ambience 30 % (20 % since 2026-11-01: Audio), interface 40 %. The game launches in exclusive
+  fullscreen (on the display it opens on). V-Sync is off. Edge smoothing is Off, on every graphics preset (a player who
+  turns it on keeps it, as Custom). A save from before (settings version 1) moves a value still equal to the old default
+  to the new one, once; a value the player changed is kept. Reset to defaults gives the new values.
 - **Reloads are manual by default (owner, 2026-10-29; RL2).** "Weapons currently automatically reload. This shouldn't
   happen. By default a prompt should come up for the player to press the R button. In the settings there can be a
   setting to toggle between manual and automatic reloads." Settings › Controls › Reload: Manual (the default; an empty
@@ -813,6 +813,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **Shots are louder and a replica's power source has its own slider (owner, 2026-10-13, Dev 5 playtest note 2).**
   Settings › Audio › Power source volume covers the motor, the gas pop and hiss, the spring's twang. Shots 1.4 (+2.9
   dB), the power part 1.4, the motor 1.1, footsteps 0.54 so a bot's sprint is still heard against your own shot.
+- **Bots' gunfire is heard across the field and the ambience is quiet (owner, 2026-11-01 playtest: "I can't seem to
+  hear bots firing their weapons. Make power sources much louder even at 100% volume"; "Ambience volume is too high.
+  20% should be default but you could make it generally much quieter. It's too distracting"; AU1).** Others' shots and
+  their power parts are at full level within 10 m and carry 120 m (other sounds keep 4 m and 60 m); the power parts
+  are lifted: the motor 4.0, gas 2.2, spring 2.5 (were 1.4). Ambience starts at 20 % and every bed and call plays at
+  half its old level; a save still on the old 30 % moves to 20 %. Master has a limiter, so the louder mix never clips.
 
 ## Save and settings storage
 

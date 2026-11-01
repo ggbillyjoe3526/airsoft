@@ -117,10 +117,23 @@ func test_migrating_does_not_change_the_dictionary_it_was_given() -> void:
 	assert_eq((moved["volumes"] as Dictionary)["Effects"], 0.7)
 
 
-func test_version_2_and_later_pass_through_unchanged() -> void:
-	var data := {"vsync": true, "window_mode": 0, "volumes": {"Effects": 0.8}}
-	assert_eq(Settings.migrate_defaults(data, 2), data)
-	assert_eq(Settings.migrate_defaults(data, 3), data)
+func test_the_current_version_and_later_pass_through_unchanged() -> void:
+	var data := {"vsync": true, "window_mode": 0, "volumes": {"Effects": 0.8, "Ambience": 0.3}}
+	assert_eq(Settings.migrate_defaults(data, Settings.VERSION), data)
+	assert_eq(Settings.migrate_defaults(data, Settings.VERSION + 1), data)
+
+
+func test_a_version_2_file_moves_only_an_untouched_ambience() -> void:
+	var data := {"vsync": true, "window_mode": 0, "volumes": {"Effects": 0.8, "Ambience": 0.3, "Interface": 0.4}}
+	var moved := Settings.migrate_defaults(data, 2)
+	var vol: Dictionary = moved["volumes"]
+	assert_eq(vol["Ambience"], Settings.VOLUME_DEFAULTS[&"Ambience"], "the old 30 % default moves to 20 %")
+	assert_eq(vol["Effects"], 0.8, "a volume the player changed is kept")
+	assert_eq(vol["Interface"], 0.4, "a default that did not move stays")
+	assert_eq(moved["vsync"], true, "version 2's window and V-Sync are not version 1's: left alone")
+	assert_eq(moved["window_mode"], 0)
+	var kept := Settings.migrate_defaults({"volumes": {"Ambience": 0.5}}, 2)
+	assert_eq((kept["volumes"] as Dictionary)["Ambience"], 0.5, "an ambience the player set is kept")
 
 
 # --- the version a file holds ---
@@ -186,7 +199,7 @@ func test_a_bundle_holding_version_1_settings_is_restorable_and_migrates_on_load
 	t.load_file(paths[SaveBundle.KINDS.find(Settings.KIND)])
 	assert_eq(t.window_mode, Settings.WindowMode.EXCLUSIVE)
 	assert_false(t.vsync)
-	assert_eq(t.volumes[&"Ambience"], 0.3)
+	assert_eq(t.volumes[&"Ambience"], Settings.VOLUME_DEFAULTS[&"Ambience"])
 
 
 func test_a_bundle_with_newer_settings_is_refused() -> void:
