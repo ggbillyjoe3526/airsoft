@@ -133,3 +133,25 @@ func test_on_the_range_a_bomb_taken_in_hand_stays_there_and_a_pull_throws_it() -
 		if g.active:
 			thrown += 1
 	assert_eq(thrown, 1, "the smoke is out")
+
+
+func test_the_door_prompt_names_uses_key_as_rebound_while_you_stand_at_the_door() -> void:
+	var frame := Control.new()
+	frame.size = Vector2(1920.0, 1080.0)
+	add_child_autofree(frame)
+	var hud := Hud.new()
+	frame.add_child(hud)
+	var you := Character.new(0, 0, Vector3.ZERO, 0.0, ReplicaStats.default_loadout())
+	hud.setup(HudConfig.new(), TeamConfig.new(), ViewConfig.new(), SimTuning.new(), you)
+	hud.set_door_prompt(Hud.DoorPrompt.OPEN)
+	var before := hud._door_prompt.text
+	var key := InputEventKey.new()
+	key.physical_keycode = KEY_K
+	InputMap.action_erase_events(&"use_door")
+	InputMap.action_add_event(&"use_door", key)
+	hud.set_door_prompt(Hud.DoorPrompt.OPEN)
+	assert_eq(hud._door_prompt.text, before, "unchanged while the prompt is")
+	hud.refresh_door_prompt()
+	assert_ne(hud._door_prompt.text, before, "built again with the new key")
+	assert_string_contains(hud._door_prompt.text, KeyNames.of_action(&"use_door"))
+	InputMap.load_from_project_settings()

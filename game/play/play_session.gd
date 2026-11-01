@@ -1497,8 +1497,10 @@ func _resume() -> void:
 	_pause.close()
 	get_tree().paused = false
 	_capture()
-	# the settings, opened from the pause menu, may have rebound the Reload key (and in practice the Loadout's)
+	# the settings, opened from the pause menu, may have rebound the Reload key, the door's (and in practice the
+	# Loadout's)
 	_hud.reload_prompt().refresh_key()
+	_hud.refresh_door_prompt()
 	if practice:
 		_hud.range_readout().refresh_key()
 
