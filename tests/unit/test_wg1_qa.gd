@@ -1,7 +1,8 @@
 extends GutTest
 ## QA for WG1 (What got you and skipping the round): the edges of the skip (the round or match ending while skipping,
-## the pause menu, autopilot, the Dev game speed, a rebound Jump), the card for a teammate's, a bounced or your own BB
-## and its freeing on a new match, the kept feed line under a busy feed, and the setting's save, load and screen.
+## the pause menu, autopilot, a rebound Fire; since MC1 played out at once on a fresh press), the card for a
+## teammate's, a bounced or your own BB and its freeing on a new match, the kept feed line under a busy feed, and the
+## setting's save, load and screen.
 
 const K := GameEvent.Kind
 
@@ -9,7 +10,7 @@ var session: PlaySession = null
 
 
 func after_each() -> void:
-	Input.action_release(&"jump")
+	Input.action_release(&"fire")
 	InputMap.load_from_project_settings()
 	get_tree().paused = false
 
@@ -65,24 +66,24 @@ func test_the_skipping_note_never_draws_over_the_pause_menu() -> void:
 	session.player.status = Character.Status.ALIVE
 
 
-func test_the_hint_names_jump_as_bound_after_a_rebind_from_the_pause_menu() -> void:
+func test_the_hint_names_fire_as_bound_after_a_rebind_from_the_pause_menu() -> void:
 	session = _session()
 	await wait_physics_frames(2)
 	session.player.status = Character.Status.OUT
-	session._follow_skip(0.0)
+	session._follow_skip()
 	var hud := session.hud()
 	assert_true(hud.skip_hint_shown())
 	var key: Label = hud._skip_key
-	assert_eq(key.text, KeyNames.of_action(&"jump").to_upper())
+	assert_eq(key.text, KeyNames.of_action(&"fire").to_upper())
 	var before := key.text
-	# Paused, Settings > Controls rebinds Jump (KeyBindingList applies it to the InputMap at once), then Resume.
+	# Paused, Settings > Controls rebinds Fire (KeyBindingList applies it to the InputMap at once), then Resume.
 	session._open_pause()
-	InputMap.action_erase_events(&"jump")
-	InputMap.action_add_event(&"jump", KeyBindings.event_of(KEY_J))
+	InputMap.action_erase_events(&"fire")
+	InputMap.action_add_event(&"fire", KeyBindings.event_of(KEY_J))
 	session._resume()
-	session._follow_skip(0.0)
-	assert_ne(KeyNames.of_action(&"jump").to_upper(), before)
-	assert_eq(key.text, KeyNames.of_action(&"jump").to_upper(), "the hint still names the old key")
+	session._follow_skip()
+	assert_ne(KeyNames.of_action(&"fire").to_upper(), before)
+	assert_eq(key.text, KeyNames.of_action(&"fire").to_upper(), "the hint still names the old key")
 	session.player.status = Character.Status.ALIVE
 
 
@@ -101,29 +102,38 @@ func test_the_last_player_out_ending_the_match_stops_the_skip_and_brings_the_hud
 	assert_true(session.hud().holds_results(), "the round's table is due as usual")
 	assert_eq(session._rematch_left, session._play.rematch_delay, "the rematch is due as usual")
 	session._input.active = true
-	Input.action_press(&"jump")
-	session._follow_skip(10.0)
+	session._follow_skip()
+	session._unhandled_input(_click())
 	assert_false(session.skipping(), "no skip once the round is over")
 	assert_false(session.hud().skip_hint_shown())
 	session._input.active = false
 	session.player.status = Character.Status.ALIVE
 
 
-func test_skipping_runs_skip_speed_times_the_dev_game_speed_and_only_while_skipping() -> void:
+func test_skipping_plays_the_round_out_at_once_then_holds_the_next_for_a_click() -> void:
 	session = _session()
 	await wait_physics_frames(2)
-	session.state.cheats.game_speed = 2.0
-	session._physics_process(0.0)
-	assert_almost_eq(session._pacer.rate, 2.0, 1e-6)
 	session.player.status = Character.Status.OUT
+	# Two seconds left: a skip plays them out within a few frames, whatever the Dev game speed.
+	session.state.cheats.game_speed = 0.5
+	session.state.round_state.clock = 2.0
 	session.start_skip()
-	var before := session.ticks()
-	session._physics_process(0.0)
-	assert_almost_eq(session._pacer.rate, 2.0 * session._play.skip_speed, 1e-6)
-	assert_gt(session.ticks() - before, 2, "more ticks a frame while skipping")
-	session._stop_skip()
-	session._physics_process(0.0)
-	assert_almost_eq(session._pacer.rate, 2.0, 1e-6, "back to the game speed")
+	assert_true(session._skip_cover.visible, "a plain cover: none of it is shown")
+	assert_true(session.get_viewport().disable_3d, "nor drawn")
+	assert_string_contains(session._skip_note.text, "0:02", "the clock it plays down")
+	assert_false(session.hud().visible)
+	var frames := 0
+	var ticks := session.ticks()
+	while session.skipping() and frames < 600:
+		session._physics_process(0.0)
+		frames += 1
+	assert_false(session.skipping(), "played out")
+	assert_gt(session.ticks() - ticks, frames * 2, "many ticks a frame, not real time nor the Dev game speed")
+	assert_false(session.state.round_state.is_live())
+	assert_true(session.state.round_state.hold_next, "the next round waits")
+	assert_false(session._skip_cover.visible)
+	assert_false(session.get_viewport().disable_3d, "the field drawn again")
+	assert_true(session.hud().visible, "the HUD is back for the round's table")
 	session.state.cheats.game_speed = 1.0
 	session.player.status = Character.Status.ALIVE
 
@@ -134,7 +144,7 @@ func test_autopilot_never_offers_the_skip() -> void:
 	session.autopilot = true
 	session.player.status = Character.Status.OUT
 	assert_false(session.can_skip())
-	session._follow_skip(0.0)
+	session._follow_skip()
 	assert_false(session.hud().skip_hint_shown())
 	session.start_skip()
 	assert_false(session.skipping())
@@ -142,24 +152,30 @@ func test_autopilot_never_offers_the_skip() -> void:
 	session.player.status = Character.Status.ALIVE
 
 
-func test_letting_go_of_jump_restarts_the_hold() -> void:
+func test_a_trigger_held_through_the_hit_does_not_skip_and_a_fresh_press_does() -> void:
 	session = _session()
 	await wait_physics_frames(2)
-	session.player.status = Character.Status.OUT
 	session._input.active = true
-	var hold := session._play.skip_hold
-	Input.action_press(&"jump")
-	session._follow_skip(hold * 0.6)
-	Input.action_release(&"jump")
-	session._follow_skip(0.016)
-	Input.action_press(&"jump")
-	session._follow_skip(hold * 0.6)
-	assert_false(session.skipping(), "two short holds are not one long one")
-	session._follow_skip(hold * 0.6)
-	assert_true(session.skipping())
+	Input.action_press(&"fire")
+	session.player.status = Character.Status.OUT
+	session._follow_skip()
+	session._unhandled_input(_click())
+	assert_false(session.skipping(), "held since before you could skip: not armed")
+	Input.action_release(&"fire")
+	session._follow_skip()
+	session._unhandled_input(_click())
+	assert_true(session.skipping(), "a fresh press skips")
 	session._stop_skip()
 	session._input.active = false
 	session.player.status = Character.Status.ALIVE
+
+
+## A press of the left mouse button (Fire's default).
+static func _click() -> InputEventMouseButton:
+	var e := InputEventMouseButton.new()
+	e.button_index = MOUSE_BUTTON_LEFT
+	e.pressed = true
+	return e
 
 
 # --- the card ---

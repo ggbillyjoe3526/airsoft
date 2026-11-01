@@ -3,8 +3,8 @@ extends VBoxContainer
 ## The replica panel, bottom right (the concept's `.rep`): a framed dark panel with a yellow rule on its left holding the
 ## loaded count and the spare BBs, the fire modes the replica offers as S / B / A chips with the one in use lit, and a
 ## box per magazine (MagGauges). Above it two small notes: the hop-up readout while you turn the dial, and the status
-## (reloading, out of BBs, last magazine, holstered; nothing while a bomb is thrown). Under the boxes, the smoke and
-## flash bombs left (SF1), dimmed at none. With the HUD tab's ammo counter off there are no counts and each box shows
+## (reloading, out of BBs, last magazine, holstered, a bomb in hand; nothing while a bomb is thrown). Under the boxes,
+## the smoke and flash bombs left (SF1), dimmed at none, the one in hand (MC1) yellow. With the HUD tab's ammo counter off there are no counts and each box shows
 ## only whether its magazine holds BBs. Text is rebuilt only when what it shows changes.
 
 ## The framed panel's width (px at 1080p, the browser's UI2 compact panel), its yellow rule, its padding (left, top,
@@ -19,9 +19,12 @@ const NOTE_PAD := Vector2i(10, 4)
 const NOTE_GAP := 6
 const HOP_SIZE := 17
 ## The fire modes' chip letters (ReplicaConfig.FireMode order) and the status lines' keys (none, reloading, out of BBs,
-## last magazine, holstered).
+## last magazine, holstered, then a smoke and a flash bomb in hand: STATUS_IN_HAND plus its Grenade.Kind).
 const CHIP_KEYS: Array[String] = ["HUD_CHIP_SEMI", "HUD_CHIP_BURST", "HUD_CHIP_AUTO"]
-const STATUS_KEYS: Array[String] = ["", "HUD_RELOADING", "HUD_OUT_OF_BBS", "HUD_LAST_MAG", "HUD_HOLSTERED"]
+const STATUS_KEYS: Array[String] = ["", "HUD_RELOADING", "HUD_OUT_OF_BBS", "HUD_LAST_MAG", "HUD_HOLSTERED",
+		"HUD_SMOKE_IN_HAND", "HUD_FLASH_IN_HAND"]
+const STATUS_HOLSTERED := 4
+const STATUS_IN_HAND := 4
 ## The bombs' row: each kind's words (Grenade.Kind order, NONE unused).
 const BOMB_KEYS: Array[String] = ["", "HUD_SMOKE", "HUD_FLASH"]
 
@@ -42,9 +45,10 @@ var _shown_holstered: bool = false
 var _shown_mag: int = -1
 var _shown_spare: int = -1
 var _shown_status: int = -1
-## The bombs' labels (Grenade.Kind order, NONE null) and the counts they show (-1: not yet).
+## The bombs' labels (Grenade.Kind order, NONE null), the counts they show (-1: not yet) and the bomb shown in hand.
 var _bombs: Array[Label] = []
 var _shown_bombs: PackedInt32Array = PackedInt32Array([-1, -1, -1])
+var _shown_in_hand: Grenade.Kind = Grenade.Kind.NONE
 
 
 func setup(cfg: HudConfig) -> void:
@@ -148,7 +152,8 @@ func refresh(a: Armament, hand: Grenades.Hand = null) -> void:
 	var spare := a.spare_bbs()
 	var mode := a.fire_mode() as int
 	var throwing := hand != null and hand.throwing != Grenade.Kind.NONE
-	var away := a.holstered and not throwing
+	var in_hand := hand.readied if hand != null else Grenade.Kind.NONE
+	var away := a.holstered and not throwing and in_hand == Grenade.Kind.NONE
 	if hand != null:
 		_refresh_bombs(hand)
 	if a.active != _shown_slot or mode != _shown_mode or away != _shown_holstered:
@@ -174,8 +179,10 @@ func refresh(a: Armament, hand: Grenades.Hand = null) -> void:
 	var status := 0
 	if throwing:
 		status = 0
+	elif in_hand != Grenade.Kind.NONE:
+		status = STATUS_IN_HAND + in_hand
 	elif a.holstered:
-		status = 4
+		status = STATUS_HOLSTERED
 	elif a.reloading():
 		status = 1
 	elif mag == 0 and spare == 0:
@@ -188,18 +195,24 @@ func refresh(a: Armament, hand: Grenades.Hand = null) -> void:
 		_status.visible = status > 0
 
 
-## The bombs left in `hand`, each label rebuilt only when its count changes: dimmed at none.
+## The bombs left in `hand`, each label rebuilt only when its count or the bomb in hand changes: dimmed at none, yellow
+## in hand.
 func _refresh_bombs(hand: Grenades.Hand) -> void:
+	var held_changed := hand.readied != _shown_in_hand
+	_shown_in_hand = hand.readied
 	for kind in _bombs.size():
 		var label := _bombs[kind]
 		if label == null:
 			continue
 		var left := hand.left(kind as Grenade.Kind)
-		if left == _shown_bombs[kind]:
+		if left == _shown_bombs[kind] and not held_changed:
 			continue
 		_shown_bombs[kind] = left
 		label.text = (tr(BOMB_KEYS[kind]) % left).to_upper()
-		label.add_theme_color_override("font_color", GameTheme.TEXT if left > 0 else GameTheme.DIM)
+		var colour := GameTheme.TEXT if left > 0 else GameTheme.DIM
+		if kind == hand.readied:
+			colour = GameTheme.YELLOW
+		label.add_theme_color_override("font_color", colour)
 
 
 ## The bombs' labels' text now (Grenade.Kind order, NONE empty), for tests.

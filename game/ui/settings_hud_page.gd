@@ -49,6 +49,7 @@ var _panels: HSlider = null
 var _hud_size: HSlider = null
 var _what_got_you: MenuChoice = null
 var _turn: MenuChoice = null
+var _zoom: HSlider = null
 var _thumbs: Array[Thumb] = []
 var _thumbs_row: HBoxContainer = null
 var _preview: HudPreview = null
@@ -194,6 +195,8 @@ func refresh() -> void:
 	_what_got_you.put(_screen.settings.what_got_you)
 	_turn.put(p.minimap_turn)
 	_show_turn(p.minimap_turn)
+	_screen.set_slider(_zoom, p.minimap_zoom * 100.0)
+	_zoom_thumbs(p.minimap_zoom)
 	_preview.show_prefs(p)
 	_follow_teams()
 
@@ -245,6 +248,16 @@ func _build_minimap(right: VBoxContainer) -> void:
 		changed.emit(true))
 	_screen.explain(_turn.get_parent() as Control, "%s %s %s %s" % [tr("SETTINGS_MINIMAP_ROTATING_LEAD"),
 			tr("SETTINGS_MINIMAP_ROTATING_NOTE"), tr("SETTINGS_MINIMAP_FIXED_LEAD"), tr("SETTINGS_MINIMAP_FIXED_NOTE")])
+	# Zoom (MC1): in percent, marked at 100 % under the slider; the samples follow it.
+	var zoom_step := roundf(HudPrefs.MINIMAP_ZOOM_STEP * 100.0)
+	_zoom = _narrow(_screen.add_slider_row(rows, "SETTINGS_MINIMAP_ZOOM", HudPrefs.MINIMAP_ZOOM_RANGE.x * 100.0,
+			HudPrefs.MINIMAP_ZOOM_RANGE.y * 100.0, zoom_step, PERCENT, RIGHT_LABEL))
+	_zoom.add_child(Mark.new(100.0, PERCENT))
+	_note(_zoom.get_parent() as Control, "SETTINGS_MINIMAP_ZOOM_NOTE")
+	_zoom.value_changed.connect(func(v: float) -> void:
+		_prefs().minimap_zoom = v / 100.0
+		_zoom_thumbs(_prefs().minimap_zoom)
+		_after(false))
 	_thumbs_row = HBoxContainer.new()
 	_thumbs_row.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	_thumbs_row.add_theme_constant_override("separation", THUMB_GAP)
@@ -256,6 +269,16 @@ func _build_minimap(right: VBoxContainer) -> void:
 	# The samples draw Depot's field, built once the first time the tab is seen; the team colours follow a set picked
 	# on the Accessibility tab when this one shows again.
 	_thumbs_row.visibility_changed.connect(_on_shown)
+
+
+func minimap_zoom() -> HSlider:
+	return _zoom
+
+
+## The samples drawn at the minimap's zoom `zoom`.
+func _zoom_thumbs(zoom: float) -> void:
+	for thumb in _thumbs:
+		thumb.set_zoom(zoom)
 
 
 ## Marks the sample of the turn chosen.
@@ -294,6 +317,7 @@ func _build_thumbs() -> void:
 	var textures := HudMinimap.textures_of(field)
 	for i in _thumbs.size():
 		_thumbs[i].build(cfg, textures, field, _teams.colours[0], _teams.colours[1], i == 0)
+	_zoom_thumbs(_prefs().minimap_zoom)
 
 
 ## A choice landed: the preview follows and the screen saves it.
@@ -374,6 +398,9 @@ class Thumb:
 	var _view: HudMinimap.View = null
 	var _cfg: MinimapConfig = null
 	var _rotating: bool = false
+	var _zoom: float = 1.0
+	var _team: Color = Color.WHITE
+	var _enemy: Color = Color.WHITE
 	var _tag: Label = null
 	var _built: bool = false
 
@@ -411,9 +438,19 @@ class Thumb:
 		_frame.move_child(_view, 0)
 		paint(team, enemy)
 
+	## Draws the sample at the minimap's zoom `zoom` (HudPrefs.minimap_zoom), once built.
+	func set_zoom(zoom: float) -> void:
+		if is_equal_approx(zoom, _zoom):
+			return
+		_zoom = zoom
+		if _built:
+			paint(_team, _enemy)
+
 	## Draws the sample's scene with you and your teammates in `team`'s colour, `enemy` the other team's.
 	func paint(team: Color, enemy: Color) -> void:
-		_view.begin(THUMB_AT, 0, -deg_to_rad(THUMB_HEADING), _rotating, team, enemy)
+		_team = team
+		_enemy = enemy
+		_view.begin(THUMB_AT, 0, -deg_to_rad(THUMB_HEADING), _rotating, team, enemy, _zoom)
 		for i in THUMB_TEAM.size():
 			_view.add_dot(THUMB_TEAM[i], _cfg.out_colour if i == 1 else team, 0)
 		_view.queue_redraw()

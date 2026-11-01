@@ -277,9 +277,14 @@ One BB hit puts anyone out. A round lasts up to 2:30 and the first team to 5 rou
 
 - [ ] **Get hit.** A sharp tick, a sign of where it came from, and your view walks off. Then you watch a teammate; a
   click moves to the next one.
-- [ ] **Skip to next round** (M83). Out and spectating, Esc skips at once with no pause menu, then "Click to play · Esc
-  for the menu" holds the next round; the pause menu's **Skip to next round** still works. On match point it reads
-  **Skip to the result**. Not offered in play, between rounds, in Extraction or on the range.
+- [ ] **Skip to next round** (MC1). Out and watching, "LEFT MOUSE Press to skip the round" shows at the bottom. Click:
+  a plain screen says **Skipping the round** for a moment (no fast-forward, no sound), then the round's result shows
+  and stays until you click it for the next round. On the last round the match's results follow. Hit while holding
+  the trigger: letting go and clicking again skips, the held trigger doesn't. The pause menu's **Skip to next round**
+  does the same. Does the wait feel short enough on a full Woodland round?
+- [ ] **Continue after loading** (MC1). Press PLAY: the loading screen fills its bar, says **Ready** and only then
+  shows **CONTINUE** bottom right. Click it (or press Enter or Space): the match starts, the round clock running from
+  then, not before. Coming back to the range from its Loadout goes straight in.
 - [ ] **Shoot a teammate (carefully).** Friendly fire counts, so they go out too.
 - [ ] **Walk-offs.** Hit players walk all the way to their dead zone by a sensible route, promptly, on every map; they
   stand on separate spots.
@@ -605,10 +610,14 @@ pays XP ×1.5.
 
 ## Smoke and flash bombs (SF1)
 
-Every round you carry one smoke bomb (G) and one flash bomb (Y); the replica panel shows what's left. Bots carry the
+Every round you carry one smoke bomb (4) and one flash bomb (5); the replica panel shows what's left. Bots carry the
 same and throw them (SF2).
 
-- [ ] **The throw.** Press G: the pin clicks, your replica drops for about half a second, the canister goes where you
+- [ ] **The mouse wheel (MC1).** Roll it: rifle, pistol, smoke, flash, rifle again, never the holster; a bomb you have
+  none of is passed. On a bomb the replica goes down, the bomb shows in your hand, the panel says **SMOKE IN HAND** (its
+  count yellow) and the crosshair stays. A click throws it and the replica comes back; rolling on, 1, 2, R or 3 puts it
+  back. Is it quick enough to use in a fight?
+- [ ] **The throw.** Press 4: the pin clicks, your replica drops for about half a second, the canister goes where you
   look (a little above it) and the replica comes back up. Does it feel quick enough mid-fight, or too slow to be worth
   it? Can you lob one over a container, and does a sprinting throw carry further?
 - [ ] **The smoke.** About 1 s after it lands, a pop and a hiss, and a pale cloud about 8 m wide grows over 2.5 s,
@@ -770,6 +779,9 @@ same and throw them (SF2).
 - [ ] **The minimap.** Top left, the way you look always up, you the white arrow; teammates are team-coloured dots
   (pinned to the edge when off it), grey once hit; an opponent you hear shows as a patch roughly where (dashed for
   steps, a dot for a shot) for a few seconds. Gameplay › HUD › Minimap Fixed keeps north up (M83).
+- [ ] **Minimap zoom (MC1).** Settings › HUD › Minimap › Zoom, 50 % to 200 %: the two samples beside it follow. In a
+  match at 200 % the field shows twice as big round you (half as far), at 50 % twice as far. A heard enemy past the
+  edge rides the rim at any zoom. Which zoom do you settle on?
 - [ ] **Markers off the minimap (BP5).** A ping, the overtime flag, an Extraction exit or a hold marker off to your
   left sits under the minimap, never behind it.
 

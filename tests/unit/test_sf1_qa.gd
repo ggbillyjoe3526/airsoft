@@ -299,12 +299,13 @@ func test_a_refresh_with_no_hand_leaves_the_bomb_row_alone() -> void:
 # --- Key bindings and input ---
 
 
-func test_the_throw_keys_default_to_g_and_y_and_are_in_project_godot() -> void:
+func test_the_throw_keys_default_to_4_and_5_and_are_in_project_godot() -> void:
 	var b := KeyBindings.new()
 	assert_true(KeyBindings.ACTIONS.has(&"throw_smoke"))
 	assert_true(KeyBindings.ACTIONS.has(&"throw_flash"))
-	assert_eq(Array(b.codes(&"throw_smoke")), [KEY_G])
-	assert_eq(Array(b.codes(&"throw_flash")), [KEY_Y])
+	# On 4 and 5 since MC1 (owner, 2026-11-01; were G and Y).
+	assert_eq(Array(b.codes(&"throw_smoke")), [KEY_4])
+	assert_eq(Array(b.codes(&"throw_flash")), [KEY_5])
 	assert_true(InputMap.has_action(&"throw_smoke"))
 	assert_true(InputMap.has_action(&"throw_flash"))
 
@@ -320,11 +321,11 @@ func test_no_default_key_is_bound_to_two_actions() -> void:
 
 func test_taking_the_flash_key_for_smoke_swaps_the_two() -> void:
 	var b := KeyBindings.new()
-	assert_eq(b.rebind(&"throw_smoke", KEY_Y), KeyBindings.Result.SWAPPED)
+	assert_eq(b.rebind(&"throw_smoke", KEY_5), KeyBindings.Result.SWAPPED)
 	assert_eq(b.last_other, &"throw_flash")
-	assert_eq(Array(b.codes(&"throw_smoke")), [KEY_Y])
-	assert_eq(Array(b.codes(&"throw_flash")), [KEY_G])
-	assert_eq(b.action_of(KEY_G), &"throw_flash")
+	assert_eq(Array(b.codes(&"throw_smoke")), [KEY_5])
+	assert_eq(Array(b.codes(&"throw_flash")), [KEY_4])
+	assert_eq(b.action_of(KEY_4), &"throw_flash")
 
 
 func test_every_action_has_a_label_for_the_controls_page() -> void:

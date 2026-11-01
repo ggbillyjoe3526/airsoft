@@ -37,6 +37,9 @@ var listener_id: int = -1
 var side: int = -1
 ## The simulated time (s) of the last tick heard.
 var time: float = 0.0
+## How close the minimap shows the field (HudPrefs.minimap_zoom): the view radius `beyond_view` is measured on is
+## MinimapConfig.view_radius over it.
+var zoom: float = 1.0
 
 var _cfg: MinimapConfig = null
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -161,7 +164,8 @@ func _age(listener: Character) -> void:
 			_drop(p)
 		elif listener != null:
 			var d := Vector2(p.centre.x - listener.position.x, p.centre.z - listener.position.z)
-			p.beyond_view = d.length_squared() > _cfg.view_radius * _cfg.view_radius
+			var reach := _cfg.view_radius / maxf(zoom, HudPrefs.MINIMAP_ZOOM_RANGE.x)
+			p.beyond_view = d.length_squared() > reach * reach
 
 
 static func _drop(p: Patch) -> void:

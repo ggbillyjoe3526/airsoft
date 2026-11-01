@@ -5,10 +5,10 @@ class_name Round
 ## map's spot (OvertimeFlag), and the first team to touch it wins; untouched for OvertimeConfig.time, or on a map with no
 ## spot, it is a draw too. Attack / Defend (RoundState.mode): the attackers also win by raising their flag on the pole
 ## (Flag), and the time-out goes to the defenders, after up to FlagConfig.max_overtime while the attackers still work
-## the rope. After RoundConfig.reset_delay everyone respawns for the next round, until a team has wins_needed wins and
-## a lead of win_by: the match is over until start_match. Ends swap after half_time_after decided rounds, so an uneven
-## map is fair over a match. start_match sets a match up before the first tick; step runs once a tick and allocates
-## nothing.
+## the rope. After RoundConfig.reset_delay (or, with RoundState.hold_next, at end_wait) everyone respawns for the next
+## round, until a team has wins_needed wins and a lead of win_by: the match is over until start_match. Ends swap after
+## half_time_after decided rounds, so an uneven map is fair over a match. start_match sets a match up before the first
+## tick; step runs once a tick and allocates nothing.
 
 
 ## A new match from round 1: scores cleared, fire selectors back to their defaults, every character placed at its team's end and respawned, no BBs in flight,
@@ -37,7 +37,9 @@ static func step(rs: RoundState, characters: Array[Character], ends: Array[MapEn
 		rs.timer -= dt
 		# A drawn round is played again (owner, browser audit SIM-19): same number, same ends, so draws never use up the
 		# match's rounds or move half time.
-		if rs.timer <= 0.0:
+		if rs.timer <= 0.0 and rs.hold_next:
+			rs.timer = 0.0
+		elif rs.timer <= 0.0:
 			_start_round(rs, characters, ends, pool, tuning, events, rs.number if rs.drawn() else rs.number + 1)
 		return
 	# Live. A team with members but nobody left in play is wiped out (an empty team never is).
@@ -121,12 +123,13 @@ static func longest_overtime(tuning: SimTuning, mode: RoundState.Mode) -> float:
 	return tuning.flag.max_overtime if mode == RoundState.Mode.ATTACK_DEFEND else tuning.overtime.time
 
 
-## Ends the wait between rounds now, so the next tick starts the next round (a click on the round's table). False when
-## no round is over and waiting.
+## Ends the wait between rounds now, so the next tick starts the next round (a click on the round's table), held or not.
+## False when no round is over and waiting.
 static func end_wait(rs: RoundState) -> bool:
 	if rs.phase != RoundState.Phase.OVER:
 		return false
 	rs.timer = 0.0
+	rs.hold_next = false
 	return true
 
 
@@ -212,6 +215,7 @@ static func _start_round(rs: RoundState, characters: Array[Character], ends: Arr
 	rs.phase = RoundState.Phase.LIVE
 	rs.clock = tuning.rounds.round_time
 	rs.timer = 0.0
+	rs.hold_next = false
 	rs.overtime = 0.0
 	rs.attackers = attackers_in_round(number, tuning.rounds, rs.first_attackers) \
 			if rs.mode == RoundState.Mode.ATTACK_DEFEND else -1

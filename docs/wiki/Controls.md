@@ -20,10 +20,15 @@ so W A S D stays W A S D on any keyboard layout.
   ([Squad Orders](Squad-Orders#pings)).
 - **Squad: need a mag** (H) tosses a magazine to a teammate who asked you, or asks for one when you are low
   ([Squad Orders](Squad-Orders#need-a-mag)); it is also the order wheel's fifth item.
-- **Throw smoke** (G) and **Throw flash** (Y) throw a smoke bomb or a flash bomb where you look
+- **Throw smoke** (4) and **Throw flash** (5) throw a smoke bomb or a flash bomb where you look at once
   ([Grenades](Grenades)).
-- **Open / shut door** (U) opens or shuts the door within reach, the one nearest where you look. A line under the
+- **Next / previous replica** (the mouse wheel) steps through your two replicas and then your bombs left, smoke then
+  flash, and round again. It never stops on the holster. With a bomb in hand, a trigger pull throws it.
+- **Open / shut door** (G) opens or shuts the door within reach, the one nearest where you look. A line under the
   crosshair says which while you stand by one ([Maps](Maps#doors)).
+- **Fire** also skips the rest of a round once you are out ([How to Play](How-to-Play#skipping-the-rest-of-the-round)).
+- A save from before these keys moved keeps your own changes: an action still on its old default key (smoke on G, flash
+  on Y, doors on U, the hop-up dial on 4 and 5 as well as Page Down and Page Up) takes its new one.
 
 ## Keys you can't change
 

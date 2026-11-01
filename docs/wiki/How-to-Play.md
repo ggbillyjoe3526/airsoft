@@ -37,9 +37,11 @@ is played again under the same number.
 
 ### Skipping the rest of the round
 
-Once you're out, hold **Jump** for half a second and the rest of the round plays at <!-- wiki:config play_tuning.skip_speed --> times speed with the HUD
-hidden. A hint at the bottom of the screen reminds you, using your own Jump key, and the pause menu has **Skip to next
-round** while you can skip.
+Once you're out, click (**Fire**) and the rest of the round is played out at once, unseen: a plain screen says
+**Skipping the round** for a moment, then the round's result shows. Click it for the next round, which waits for you;
+after the match's last round the results follow. A hint at the bottom of the screen reminds you, using your own Fire
+key, and the pause menu has **Skip to next round** while you can skip. The trigger held as you were hit doesn't skip:
+let go and click again.
 
 ## BBs are real projectiles
 
@@ -61,7 +63,7 @@ and longer shots drift further downwind. Specks of dust drift with it, so you ca
 
 ### Hop-up
 
-Each replica has a hop-up dial. Press **4** (less) or **5** (more), or Page Down and Page Up, to turn it during a
+Each replica has a hop-up dial. Press **Page Down** (less) or **Page Up** (more) to turn it during a
 match. The replica panel shows the setting for a moment, with how far a level shot stays flat, or where an
 over-hopped BB starts to climb. Each replica keeps its own setting until the match ends; set its starting value in the
 [Loadout](Loadout). Bots keep their replicas' factory setting.

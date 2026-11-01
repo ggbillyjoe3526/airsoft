@@ -361,10 +361,11 @@ func test_the_view_folds_open_leaves_flat_against_the_wall() -> void:
 	assert_null(DoorView.build(YardMap.load_map(style, 3), style, cfg.swing_time), "no doors, no view")
 
 
-func test_use_is_on_u_and_named_on_the_controls() -> void:
+func test_use_is_on_g_and_named_on_the_controls() -> void:
 	assert_true(InputMap.has_action(&"use_door"))
 	assert_true(KeyBindings.ACTIONS.has(&"use_door"))
-	assert_eq(Array(KeyBindings.DEFAULTS[&"use_door"]), [KEY_U])
+	# On G since MC1 (owner, 2026-11-01: U was awkward).
+	assert_eq(Array(KeyBindings.DEFAULTS[&"use_door"]), [KEY_G])
 	assert_ne(tr("ACT_USE_DOOR"), "ACT_USE_DOOR", "a name on the controls list")
 	assert_ne(tr("HUD_DOOR_OPEN"), "HUD_DOOR_OPEN")
 	assert_ne(tr("HUD_DOOR_SHUT"), "HUD_DOOR_SHUT")

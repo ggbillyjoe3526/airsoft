@@ -351,8 +351,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **Steps on gravel and steel plate carry 1.35 times as far (2026-10-15, NP1; DP4).** The simulation names the ground
   under a character (`WorldQuery.surface_under`) and puts the carry on the step, so bots, the audio, the sound cues and
   the minimap read one answer. Walking stays silent on every ground.
-- **Smoke and flash bombs: one of each a round, thrown with G and Y (2026-10-30, SF1; Claude's defaults, the owner
-  asked for basic ones in 0.1 Dev 2).** Every player and bot carries one smoke and one flash, refilled each round and
+- **Smoke and flash bombs: one of each a round, thrown with 4 and 5 (2026-10-30, SF1; Claude's defaults, the owner
+  asked for basic ones in 0.1 Dev 2; on 4 and 5 since MC1, owner 2026-11-01, was G and Y).** The mouse wheel steps
+  through the two replicas and then the bombs left, never onto the holster; a bomb taken in hand that way waits for a
+  trigger pull (owner, 2026-11-01). Doors open and shut on G (was U, which he found awkward); the hop-up dial keeps
+  Page Down and Page Up. Every player and bot carries one smoke and one flash, refilled each round and
   on the range after each throw; nothing is chosen in the Loadout yet. A throw is a quick 0.3 s windup (the replica
   lowered), the canister thrown where you look a little lofted, then the replica back up. Bombs bounce and roll; they
   never hit or eliminate anyone. Numbers are in `game/config/grenade_config.gd`.
@@ -738,9 +741,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **A menu page is pinned to the window; only its long part scrolls (UX1, 2026-10-17).** The top bar, the heading and the
   main button always show; long lists scroll inside, fading at the foot while more lies below.
 - **The order wheel is on Z (owner, 2026-10-04); Hold here X, Regroup V, Follow me F.** Orders end when their giver is
-  hit and at each round start. A window that loses focus pauses the match. Out, you skip the rest of the round by
-  holding Space (Jump) or from the pause menu's Skip to next round (the approved step 14 concept, owner 2026-10-22;
-  it replaces "Esc while you are out skips the round at once", 2026-10-13, as Esc opens the pause menu here).
+  hit and at each round start. A window that loses focus pauses the match. Out, a click (Fire) skips the rest of the
+  round, or the pause menu's Skip to next round (owner, 2026-11-01, MC1; replaces holding Space, 2026-10-22, which
+  replaced Esc, 2026-10-13): the rest is simulated at once and never shown fast-forwarded, then the round's result
+  shows and the next round waits for a click on it (or the match's results follow).
+- **A match waits for Continue once fully loaded (owner, 2026-11-01, MC1).** The loading screen's CONTINUE comes up
+  only once the match is built, drawn and its shaders warm; the round clock starts on the press.
 - **The menu and UI redesign is approved (owner, 2026-10-05); the HUD is restyled in place, with the same positions.**
 - **The menus use Inter (owner, 2026-10-07).** He finds Barlow hard to read, numbers above all.
 - **The teams are Alpha (blue) and Beta (orange), although Beta is also the name of the Beta builds (owner,
