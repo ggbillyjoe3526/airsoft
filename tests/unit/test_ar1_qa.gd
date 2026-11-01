@@ -60,7 +60,7 @@ func test_a_card_freed_leaves_no_nodes_behind() -> void:
 		var s := PlayerTally.Settled.new()
 		s.earned = MatchXp.earned(table, o)
 		s.level_up = p.add_xp(s.earned.total)
-		var card := XpCard.new(s, &"normal", p, pool)
+		var card := XpCard.new(s, p, pool)
 		add_child(card)
 		await wait_process_frames(2)
 		card.queue_free()
@@ -71,7 +71,7 @@ func test_a_card_freed_leaves_no_nodes_behind() -> void:
 func test_a_card_with_levelling_off_and_no_earned_does_not_crash() -> void:
 	var s := PlayerTally.Settled.new()
 	s.why_none = "XP_NONE_DEV"
-	var card := XpCard.new(s, &"hard", _progress(0), pool)
+	var card := XpCard.new(s, _progress(0), pool)
 	add_child_autofree(card)
 	assert_gt(card.find_children("*", "Label", true, false).size(), 0)
 

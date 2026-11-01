@@ -221,9 +221,6 @@ msgstr "Resume"
 msgid "PAUSE_TITLE_SCREEN"
 msgstr "Back to the menus"
 
-msgid "PLAY_CLICK"
-msgstr "Click to play"
-
 msgid "BOOT_TITLE"
 msgstr "AIRSOFT"
 
@@ -354,7 +351,7 @@ msgid "SETTINGS_DAMAGED"
 msgstr "Your saved settings could not be read, so the defaults are in use."
 
 msgid "SETTINGS_NEWER"
-msgstr "Your saved settings are from a different version of the game, so the defaults are in use."
+msgstr "Your saved settings are from a different version of the game, so the defaults are in use. The file is kept as it is: changes made here last until you quit."
 
 msgid "LOADOUT_NAME"
 msgstr "Loadout %d"
@@ -363,7 +360,7 @@ msgid "LOADOUTS_DAMAGED"
 msgstr "Your saved loadouts could not be read, so the default loadout is in use."
 
 msgid "LOADOUTS_NEWER"
-msgstr "Your saved loadouts are from a different version of the game, so the default loadout is in use."
+msgstr "Your saved loadouts are from a different version of the game, so the default loadout is in use. The file is kept as it is: changes made here last until you quit."
 
 msgid "SETTINGS_CONTROLS"
 msgstr "CONTROLS"
@@ -1850,6 +1847,12 @@ msgstr "Hits · %d"
 msgid "XP_LINE_DIFFICULTY"
 msgstr "%s bots"
 
+msgid "XP_LINE_DIFFICULTY_MATES"
+msgstr "%s teammates"
+
+msgid "XP_LINE_CUSTOM"
+msgstr "Custom rules"
+
 msgid "XP_MULTIPLIER"
 msgstr "× %s"
 
@@ -2284,15 +2287,6 @@ msgstr "Automatic, %s:"
 
 msgid "GRAPHICS_AUTOMATIC_NOTE"
 msgstr "Picked for your graphics card at each start, until you choose a preset or change a row."
-
-msgid "GRAPHICS_CUSTOM_NONE"
-msgstr "%s with no changes yet. Picking a preset sets every row below again."
-
-msgid "GRAPHICS_CUSTOM_ONE"
-msgstr "%s with 1 change (marked). Picking a preset sets every row below again."
-
-msgid "GRAPHICS_CUSTOM_MANY"
-msgstr "%s with %d changes (marked). Picking a preset sets every row below again."
 
 msgid "GRAPHICS_CUSTOM_NONE_SHORT"
 msgstr "%s with no changes yet."
@@ -2881,9 +2875,6 @@ msgstr "No tearing, at most the screen’s rate. Off: a little less input delay.
 
 msgid "SETTINGS_FRAME_LIMIT"
 msgstr "FRAME-RATE LIMIT"
-
-msgid "SETTINGS_UNLIMITED"
-msgstr "Unlimited"
 
 msgid "SETTINGS_NO_LIMIT"
 msgstr "Off"
