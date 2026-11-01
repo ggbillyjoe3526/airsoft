@@ -207,8 +207,8 @@ func _placed(p: Ping, owner: Character, now: float, marked: bool) -> void:
 ## The floor spot for a ping whose view (along `dir`) met the field at `point`, `hit` m from the eyes: the nearest
 ## walkable floor within PingConfig.spot_snap of a point back_off (at most `hit`) back towards the pinger, so in front
 ## of a wall or a crate's side, on the level the view reached. It must be in sight of that point (sight_lift over its
-## floor): a floor beyond a thin wall is never the spot; then it is looked for again spot_snap further back, as far as
-## the eyes. The point itself if no floor is near.
+## floor; through glass or a bar railing): a floor beyond a thin wall is never the spot; then it is looked for again
+## spot_snap further back, as far as the eyes. The point itself if no floor is near.
 func _floor_spot(point: Vector3, dir: Vector3, hit: float, w: BotWorld) -> Vector3:
 	if w.nav == null:
 		return point
@@ -220,7 +220,7 @@ func _floor_spot(point: Vector3, dir: Vector3, hit: float, w: BotWorld) -> Vecto
 		var k := w.nav.nearest_walkable(from, step)
 		if k >= 0:
 			var spot := w.nav.node_position(k)
-			if w.query == null or BotSenses.line_clear(w.query, from, spot + Vector3.UP * _cfg.sight_lift):
+			if w.query == null or BotSenses.sight_clear(w.query, from, spot + Vector3.UP * _cfg.sight_lift):
 				return spot
 	return point
 

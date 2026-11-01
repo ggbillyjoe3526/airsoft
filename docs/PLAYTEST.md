@@ -1047,6 +1047,8 @@ The 0.1 Dev 2 bug pass's fixes that need eyes on a real display or hands on the 
   changed from the pause menu and a window resize, and the hit marker fades out fully.
 - [ ] **Behind a thin wall or a shut Depot door while a bot hits its far side:** the smack is muffled; a hit on your
   side, or a BB grazing the floor in front of you, sounds open.
+- [ ] **The Street, a bot behind a metal railing:** its steps and shots sound open, not muffled, and a BB ringing off
+  a bar does too. Ping the road beyond a railing, and give a Hold order across one: both land on the road.
 
 ## Reporting what you find
 

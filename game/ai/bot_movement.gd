@@ -396,8 +396,9 @@ static func _stagger_hold(b: Bot, w: BotWorld) -> void:
 
 
 ## Crossfire: moves b.lane_goal round the lane's next point (the choke towards the attackers) by crossfire_turn_deg, at
-## the same distance from it, to the first spot on its floor that sees the choke at head height from an angle at least
-## crossfire_min_deg away from `mate`'s. False (goal unchanged) if the lane has no next point or no spot will do.
+## the same distance from it, to the first spot on its floor with a shot at the choke at head height (through a bar
+## railing, SR1) from an angle at least crossfire_min_deg away from `mate`'s. False (goal unchanged) if the lane has no
+## next point or no spot will do.
 static func _crossfire_spot(b: Bot, w: BotWorld, mate: Vector3) -> bool:
 	var cfg := w.cfg
 	if b.lane < 0 or b.lane >= w.lanes.size():
@@ -430,7 +431,7 @@ static func _crossfire_spot(b: Bot, w: BotWorld, mate: Vector3) -> bool:
 			if absf(angle_difference(mate_yaw, atan2(x - choke.x, z - choke.z))) < deg_to_rad(cfg.crossfire_min_deg):
 				continue
 			var floor_y := w.nav.floor_at(Vector3(x, g.y, z))
-			if not BotSenses.line_clear(w.query, Vector3(x, floor_y + eye_up, z), choke_eye):
+			if not BotSenses.shot_clear(w.query, Vector3(x, floor_y + eye_up, z), choke_eye):
 				continue
 			b.lane_goal = Vector3(x, floor_y, z)
 			return true

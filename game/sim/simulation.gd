@@ -250,7 +250,7 @@ func _ping(c: Character, commands: Array[PlayerCommand], live: bool, events: Sim
 	e.value2 = 1 if cmd.ping_move else 0
 	e.position = eye
 	e.direction = dir
-	if reach > 0.0 and query.ray(eye, eye + dir * reach, _ping_hit):
+	if reach > 0.0 and query.ray_past_railings(eye, eye + dir * reach, _ping_hit):
 		e.value = 1
 		e.reach = _ping_hit.fraction * reach
 

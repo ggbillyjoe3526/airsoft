@@ -35,7 +35,8 @@ static var _candidate: HeldAngle = HeldAngle.new()
 
 
 ## Fills `out` (best first) with up to out.size() angles held from `eye`, facing about `facing_yaw` (the enemy side),
-## someone's head at `head_y`. Two picks are at least angle_separation_deg apart. Returns how many were found.
+## someone's head at `head_y`. Two picks are at least angle_separation_deg apart. Returns how many were found. Its
+## rays pass a bar railing (SR1): someone can shoot through one, so the angle runs on past it.
 static func find(query: WorldQuery, eye: Vector3, head_y: float, facing_yaw: float, cfg: BotConfig,
 		out: Array[HeldAngle]) -> int:
 	var n := mini(cfg.angle_rays, MAX_RAYS)
@@ -45,7 +46,7 @@ static func find(query: WorldQuery, eye: Vector3, head_y: float, facing_yaw: flo
 	var reach := cfg.angle_max_distance
 	for i in n:
 		var to := eye + _dir(first + i * step) * reach
-		_dists[i] = _hit.fraction * reach if query.ray(eye, to, _hit) else reach
+		_dists[i] = _hit.fraction * reach if query.ray_past_railings(eye, to, _hit) else reach
 	for a in out:
 		a.score = -INF
 	var found := 0

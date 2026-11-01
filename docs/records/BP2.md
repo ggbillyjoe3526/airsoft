@@ -115,9 +115,36 @@ none; a BB that bounces and strikes again within 5 cm (a tight inside corner) ca
 Left from the readers, not fixed here: Depot's doors 5 and 8 fold with their leaf tips about 5 cm into the wall
 (KNOWN_ISSUES); the reflection probe count on the open maps is unmeasured (needs a GPU).
 
+## After the railings (the fourth pull request)
+
+SR1 (#173) made The Street's metal railings bars and left one row: a railing's box still muffled sound behind it and
+still blocked a few bot checks. Each now passes the railings' boxes as sight, cover and shots already did:
+
+1. **Sound** (`SoundPath`, both the player's muffling and the bots' hearing, and `SoundOcclusion.impact_share`): a
+   railing muffles nothing, so someone behind one, a BB ringing off a bar and one landing beyond it play open.
+2. **Held angles** (`BotAngles.find`): the rays run on past a railing to the corner beyond it (someone can shoot
+   through it). Slicing towards a last-known spot uses them, and stops once the spot is in plain view (`sight_clear`,
+   through glass too).
+3. **The crossfire spot** needs a shot at the choke (`shot_clear`), so a railing between is no reason to move on.
+4. **Pings:** the view passes a railing and lands on the ground beyond; the ping's floor spot is checked by sight.
+5. **The Hold order** looks past a railing (`SquadOrders.hold_point`); **cover** judges a lean or a standing head seen
+   through bars or glass as seen (`BotCover`, so `crouch_only` now counts glass as no cover, as the hide check already
+   did); a bot **flashes** a last-known spot only when it can't see it, bars or glass between (`BotBombs`). The
+   critic found these three.
+
+Tests: `tests/unit/test_bp2_railings.gd` (4) and QA's `test_bp2_railings_qa.gd` (4), each with a railing case and a
+wall case; every switch but cover's and the flash's fails a test when reverted (QA's mutation check). QA: Pass
+(advisory: bombs and their arcs still meet a railing's box, as the wiki says). Performance: Pass (each change casts
+the other ray at the same call site; no allocation; maps without railings take the plain cast). Critic: Accept 8/8
+once these were in. 378 bot, sound, ping, railings and BP2 tests passed before the critic's three.
+
+Default taken: glass still muffles, still stops a held angle and a crossfire shot (it stops BBs), and still stops a
+ping's view (KNOWN_ISSUES, can wait).
+
 ## Known issues left
 
-- New: an impact in a tight inside corner; Depot doors 5 and 8 (third pull request). Rows deleted: the BB impact on a
-  wall's far face (SP2); a newer build's loadouts file written over (D); the 4K menu scale in play, stale since UI1 set
+- New: a ping's view stops on glass (fourth pull request); an impact in a tight inside corner; Depot doors 5 and 8
+  (third pull request). Rows deleted: the BB impact on a wall's far face (SP2); SR1's railings muffling sound and
+  blocking bot checks; a newer build's loadouts file written over (D); the 4K menu scale in play, stale since UI1 set
   MAX_SCALE to 2.0 so menus and play both draw at 2x (D). Rows changed: the MC1 controls row keeps only the old-save
   part; the FM1 map row keeps only the order keys.
