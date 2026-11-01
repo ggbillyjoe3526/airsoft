@@ -91,6 +91,9 @@ extends Resource
 ## away as much darker once it climbs relief_full (rise over run), less on a gentler one; and the highest ground
 ## relief_height lighter than the lowest.
 @export var relief_full: float = 0.35
+## The ground's tint and relief are worked out about every relief_cell m (FM2: Woodland's 0.5 m squares four to a
+## sample, so the match's loading screen waits no longer), then smoothed.
+@export var relief_cell: float = 1.0
 @export var relief_shade: float = 0.22
 @export var relief_height: float = 0.16
 ## Greenery that blocks (FM2: Woodland's thickets, The Street's hedges and scrub): drawn in these darker greens, low and

@@ -54,8 +54,12 @@ static func build(map: MapData, cfg: MinimapConfig) -> MinimapField:
 			clampi(ceili(bounds.size.y * f.scale), 1, cfg.max_layer_side))
 	f.floors = map.storeys.duplicate() if not map.storeys.is_empty() else PackedFloat64Array([0.0])
 	var bases := _bases(map, cfg)
+	var ground: Image = null
+	if map.terrain != null:
+		var t := map.terrain
+		ground = _terrain_image(t, f._rect(t.min_x, t.min_z, t.max_x(), t.max_z()), cfg)
 	for i in f.floors.size():
-		f.layers.append(f._draw(map, cfg, i, bases, side))
+		f.layers.append(f._draw(map, cfg, i, bases, side, ground))
 	return f
 
 
@@ -96,7 +100,8 @@ func byte_size() -> int:
 	return total
 
 
-func _draw(map: MapData, cfg: MinimapConfig, index: int, bases: PackedFloat64Array, side: Vector2i) -> Image:
+func _draw(map: MapData, cfg: MinimapConfig, index: int, bases: PackedFloat64Array, side: Vector2i,
+		ground: Image) -> Image:
 	var h := floors[index]
 	var has_below := index > 0
 	var pieces: Array[Piece] = []
@@ -122,7 +127,7 @@ func _draw(map: MapData, cfg: MinimapConfig, index: int, bases: PackedFloat64Arr
 	var t := map.terrain
 	if t != null:
 		# Sloping ground is all ground: walkable everywhere, under whatever stands on it.
-		_draw_terrain(img, t, cfg, has_below)
+		_draw_terrain(img, ground, _rect(t.min_x, t.min_z, t.max_x(), t.max_z()), cfg, has_below)
 	var edge := maxi(roundi(cfg.drop_edge * scale), 1)
 	for p in pieces:
 		var c := _colour_of(p.block, p.look, colours, cfg)
@@ -133,36 +138,62 @@ func _draw(map: MapData, cfg: MinimapConfig, index: int, bases: PackedFloat64Arr
 	return img
 
 
-## Sloping ground `t` (FM2): each ground square in its surface's tint (ground_tint_share of it), lighter where it faces
-## the north-west light and where it stands high, darker where it faces away; drawn small, then smoothed up to the
-## layer's scale. Washed darker on a storey over it (`washed`).
-func _draw_terrain(img: Image, t: TerrainGrid, cfg: MinimapConfig, washed: bool) -> void:
-	var cols := t.ground_cols
-	var rows := t.ground_rows
+## Sloping ground `t` (FM2) as the layers' ground: each ground square in its surface's tint (ground_tint_share of it),
+## lighter where it faces the north-west light and where it stands high, darker where it faces away; worked out on the
+## squares' corners, a sample about every relief_cell m, then smoothed up to `r`'s size. Made once a match, for every
+## layer.
+static func _terrain_image(t: TerrainGrid, r: Rect2i, cfg: MinimapConfig) -> Image:
+	# Every `step` ground squares one sample, about relief_cell m: the smoothing up hides the difference.
+	var step := maxi(roundi(cfg.relief_cell / maxf(t.ground_cell, RELIEF_FLAT)), 1)
+	var cols := t.ground_cols / step
+	var rows := t.ground_rows / step
 	if cols <= 0 or rows <= 0:
-		_fill(img, _rect(t.min_x, t.min_z, t.max_x(), t.max_z()), cfg.ground_colour)
-		return
+		var plain := Image.create_empty(maxi(r.size.x, 1), maxi(r.size.y, 1), false, Image.FORMAT_RGBA8)
+		plain.fill(cfg.ground_colour)
+		return plain
 	var small := Image.create_empty(cols, rows, false, Image.FORMAT_RGBA8)
-	var heights := t.height_range()
-	var span := maxf(heights.y - heights.x, RELIEF_FLAT)
-	var g := t.ground_cell
+	# The squares' corners: the terrain's own vertices where a square is a cell.
+	var same := t.ground_cols == t.cols and t.ground_rows == t.rows
+	var corners := t.heights if same else t.ground_lattice()
+	var lo := INF
+	var hi := -INF
+	for h in corners:
+		lo = minf(lo, h)
+		hi = maxf(hi, h)
+	var span := maxf(hi - lo, RELIEF_FLAT)
+	var w := t.ground_cols + 1
+	var run := t.ground_cell * step
 	for j in rows:
-		var z := t.min_z + (j + HALF) * g
 		for i in cols:
-			var x := t.min_x + (i + HALF) * g
-			var c := _tinted(cfg.ground_colour, _surface_tint(t.surfaces[j * cols + i], cfg), cfg)
-			var dx := (t.height_clamped(x + g, z) - t.height_clamped(x - g, z)) / (2.0 * g)
-			var dz := (t.height_clamped(x, z + g) - t.height_clamped(x, z - g)) / (2.0 * g)
+			var k := j * step * w + i * step
+			var h00 := corners[k]
+			var h10 := corners[k + step]
+			var h01 := corners[k + step * w]
+			var h11 := corners[k + step * w + step]
+			var dx := (h10 + h11 - h00 - h01) * 0.5 / run
+			var dz := (h01 + h11 - h00 - h10) * 0.5 / run
 			# Rising towards the south-east faces the north-west light.
 			var lit := clampf((dx + dz) * SQRT_HALF / cfg.relief_full, -1.0, 1.0)
+			var middle := (j * step + step / 2) * t.ground_cols + i * step + step / 2
+			var c := _tinted(cfg.ground_colour, _surface_tint(t.surfaces[middle], cfg), cfg)
 			c = c.lightened(cfg.relief_shade * lit) if lit > 0.0 else c.darkened(-cfg.relief_shade * lit)
-			c = c.lightened(cfg.relief_height * (t.height_clamped(x, z) - heights.x) / span)
-			small.set_pixel(i, j, c.blend(cfg.below_storey_colour) if washed else c)
-	var r := _rect(t.min_x, t.min_z, t.max_x(), t.max_z())
-	small.resize(r.size.x, r.size.y, Image.INTERPOLATE_BILINEAR)
+			c = c.lightened(cfg.relief_height * ((h00 + h10 + h01 + h11) * 0.25 - lo) / span)
+			small.set_pixel(i, j, c)
+	small.resize(maxi(r.size.x, 1), maxi(r.size.y, 1), Image.INTERPOLATE_BILINEAR)
+	return small
+
+
+## The terrain's ground `ground` laid on `img` over `r`, washed darker on a storey over it (`washed`).
+static func _draw_terrain(img: Image, ground: Image, r: Rect2i, cfg: MinimapConfig, washed: bool) -> void:
 	var clipped := r.intersection(Rect2i(Vector2i.ZERO, img.get_size()))
-	if clipped.has_area():
-		img.blit_rect(small, Rect2i(clipped.position - r.position, clipped.size), clipped.position)
+	if not clipped.has_area():
+		return
+	var src := Rect2i(clipped.position - r.position, clipped.size)
+	img.blit_rect(ground, src, clipped.position)
+	if washed:
+		var wash := Image.create_empty(clipped.size.x, clipped.size.y, false, Image.FORMAT_RGBA8)
+		wash.fill(cfg.below_storey_colour)
+		img.blend_rect(wash, Rect2i(Vector2i.ZERO, clipped.size), clipped.position)
 
 
 ## Block `b`'s colour as `look` (from `colours`, the looks' palette): ground and raised floors take their tint
