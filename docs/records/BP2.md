@@ -127,9 +127,16 @@ still blocked a few bot checks. Each now passes the railings' boxes as sight, co
    through glass too).
 3. **The crossfire spot** needs a shot at the choke (`shot_clear`), so a railing between is no reason to move on.
 4. **Pings:** the view passes a railing and lands on the ground beyond; the ping's floor spot is checked by sight.
+5. **The Hold order** looks past a railing (`SquadOrders.hold_point`); **cover** judges a lean or a standing head seen
+   through bars or glass as seen (`BotCover`, so `crouch_only` now counts glass as no cover, as the hide check already
+   did); a bot **flashes** a last-known spot only when it can't see it, bars or glass between (`BotBombs`). The
+   critic found these three.
 
-Tests: `tests/unit/test_bp2_railings.gd` (5 tests; four fail without the change); 378 bot, sound, ping, railings and
-BP2 tests pass. Default taken: glass still muffles, still stops a held angle and a crossfire shot (it stops BBs), and
+Tests: `tests/unit/test_bp2_railings.gd` (4) and QA's `test_bp2_railings_qa.gd` (4), each with a railing case and a
+wall case; every switch but cover's and the flash's fails a test when reverted (QA's mutation check). QA: Pass
+(advisory: bombs and their arcs still meet a railing's box, as the wiki says). Performance: Pass (each change casts the
+other ray at the same call site; no allocation; maps without railings take the plain cast). Critic: Accept 8/8 once
+these were in. 378 bot, sound, ping, railings and BP2 tests passed before the critic's three. Default taken: glass still muffles, still stops a held angle and a crossfire shot (it stops BBs), and
 still stops a ping's view (KNOWN_ISSUES, can wait).
 
 ## Known issues left

@@ -127,8 +127,8 @@ terrace), **the arch** under the arch building, and the open **Field** by the de
 - **Railings and sills** are 1 m high: too high to vault or jump, low enough to see and shoot over.
 - **The metal railings are bars.** You see through them, and so do the bots. A BB flies on through the gaps and stops
   only on a bar or a rail, so about three shots in four go through: a railing is no cover, and nobody hides behind
-  one. Sound carries through it as through open air, and a ping lands on the ground beyond it. You still can't walk or
-  throw a bomb through it. The tall wooden garden fences stay solid.
+  one. Sound carries through it as through open air, and a ping or a Hold order lands on the ground beyond it. You
+  still can't walk or throw a bomb through it. The tall wooden garden fences stay solid.
 - **Night** is the Time of day setting's (day by default): every street lamp lights a pool of the road under it.
 - **Attack / Defend** puts flag **A** in the House and flag **B** in the car park ([Modes](Modes#attack--defend)); in
   Elimination's overtime the flag stands on the Path by the Green corner. Rounds last 3 minutes.

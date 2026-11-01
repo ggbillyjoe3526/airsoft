@@ -109,3 +109,22 @@ func test_a_ping_floor_spot_behind_a_railing_is_in_sight_and_behind_a_wall_is_no
 			assert_eq(spot, nav.spot, "seen through the bars, the floor beyond is the spot")
 		else:
 			assert_eq(spot, point, "behind a wall it is never the spot")
+
+
+func test_a_hold_order_across_a_railing_holds_beyond_it_and_one_at_a_wall_short_of_it() -> void:
+	# The giver at the origin looks level east: a line across x = 4 (bars or a wall), and a wall at x = 15 beyond.
+	for railing: bool in [true, false]:
+		var q := _world(railing, Vector3(4.0, 1.0, 0.0), Vector3(0.08, 2.0, 60.0))
+		q.add_box(Vector3(15.0, 1.5, 0.0), Vector3(0.3, 3.0, 60.0))
+		var me := Character.new(0, 0, Vector3.ZERO, EAST, ReplicaStats.default_loadout())
+		me.pitch = 0.0
+		var w := _bot_world(q, me)
+		var nav := FlatNav.new()
+		nav.cell = 0.5
+		w.nav = nav
+		var at := SquadOrders.hold_point(me, w)
+		assert_ne(at, SquadOrders.NO_SPOT, "a spot to hold")
+		if railing:
+			assert_gt(at.x, 10.0, "on the road beyond the bars, short of the far wall")
+		else:
+			assert_lt(at.x, 4.0, "short of the wall")

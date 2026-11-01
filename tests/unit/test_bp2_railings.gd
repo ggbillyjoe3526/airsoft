@@ -1,7 +1,7 @@
 extends GutTest
 ## BP2 after SR1 (KNOWN_ISSUES, SR1's AI row): a bar railing muffles no sound, and the bot checks that read a railing's
-## box as solid (held angles, slicing towards a last-known spot, the crossfire spot, the ping's floor spot) see or
-## shoot through it, as sight, cover and shots already did. Glass still muffles and still stops a held angle.
+## box as solid see or shoot through it (held angles and the ping's view here; slicing, the crossfire spot, the ping's
+## floor spot and the Hold order in test_bp2_railings_qa.gd). Glass still muffles and still stops a held angle.
 
 const EAST := -PI * 0.5
 
@@ -40,7 +40,7 @@ func test_a_bb_striking_beyond_a_railing_or_on_its_bar_is_heard_open() -> void:
 		var you := Character.new(0, 0, Vector3.ZERO, EAST)
 		var mine: Array[Character] = [you]
 		occ.begin_tick(mine, you, you.eye(tuning.body))
-		# A strike on the railing's far bar face, and one on the ground beyond it, both flying east.
+		# A strike on a bar from beyond (flying west), and one on the ground beyond it (flying east).
 		var on_bar := occ.impact_share(Vector3(4.04, 1.0, 0.0), Vector3(-60.0, 0.0, 0.0))
 		var beyond := occ.impact_share(Vector3(9.0, 0.0, 0.0), Vector3(60.0, -5.0, 0.0))
 		if railing:
@@ -66,13 +66,6 @@ func test_a_held_angle_runs_on_past_a_railing_to_the_corner_beyond_it() -> void:
 			assert_gt(far, 0, "the corner beyond the bars is an angle to hold")
 		else:
 			assert_eq(far, 0, "behind a wall it is out of sight")
-
-
-func test_a_bot_closing_on_a_spot_seen_through_a_railing_watches_it_rather_than_slicing() -> void:
-	var eye := Vector3(0.0, tuning.body.stand_eye_height, 0.0)
-	var head := Vector3(8.0, tuning.body.stand_eye_height, 0.0)
-	assert_true(BotSenses.sight_clear(_world(true), eye, head), "the spot is in plain view through the bars")
-	assert_false(BotSenses.sight_clear(_world(false), eye, head), "behind a wall it is round a corner")
 
 
 func test_a_ping_through_a_railing_lands_on_the_ground_beyond_it() -> void:
