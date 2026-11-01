@@ -430,14 +430,15 @@ def lanes() -> list[list[dict]]:
     return [[spot(x, z) for (x, z) in LANES[k]] for k in ("l", "m", "r")]
 
 
-# From the attackers' end (the Bottom street, end 0) to the defenders' (the embankment, end 1).
+# From the attackers' end (the Bottom street, end 0) towards the defenders' (the embankment, end 1). Each lane stops at
+# the defenders' posts by the flags, not at their spawn: in Attack / Defend a defender holds the first point (or two)
+# of its lane from its own end (RoundPlanner), so the last point is a lane's post and the one before its forward post.
+# Left: the Pend's mouth over the back garden, then the left road. Middle: the path beside the House's front garden
+# over the car park, then the path jog. Right: the Arch over the island and the yard, then the yard.
 LANES = {
-    "l": [(-20.0, 77.0), (-45.5, 60.0), (-45.5, 25.5), (-39.5, 12.0), (-44.0, -10.0), (-44.0, -40.0), (-15.0, -44.0),
-          (0.0, -55.0), (4.0, -62.0)],
-    "m": [(-3.0, 77.0), (-14.0, 70.0), (-10.0, 30.0), (-10.0, 5.0), (-15.0, -10.0), (-15.0, -40.0), (0.0, -55.0),
-          (4.0, -62.0)],
-    "r": [(14.0, 77.0), (13.2, 60.0), (11.5, 20.0), (20.0, 0.0), (30.0, -20.0), (30.0, -45.0), (26.6, -50.0),
-          (20.0, -58.0), (12.0, -62.0)],
+    "l": [(-20.0, 77.0), (-45.5, 60.0), (-45.5, 25.5), (-39.5, 12.0), (-44.0, -10.0), (-34.5, -15.5)],
+    "m": [(-3.0, 77.0), (-14.0, 70.0), (-10.0, 30.0), (-10.0, 5.0), (-15.0, -10.0)],
+    "r": [(14.0, 77.0), (13.2, 60.0), (11.5, 20.0), (20.0, 0.0), (15.0, -10.5)],
 }
 DEAD_S = (-14.0, 77.5)  # the attackers' walk-off, west of the Bottom street's spawn hedge
 DEAD_N = (-14.5, -63.5)  # the defenders', west of the embankment's

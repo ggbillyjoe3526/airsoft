@@ -47,6 +47,9 @@ models. The real street the plan came from is never named or pictured in the rep
 - Day by default, night by the Time of day row; 17 street lamps each light a lantern pool (radius 8 m).
 - Doors are 0.9 m so each leaf folds flat against wall clear of the corners: the back door opens into the living room,
   the hall door back into it, the front door out over the front garden.
+- The bots' lanes stop at the defenders' posts by the flags (the Pend's mouth, the path by the House, the Arch),
+  not at their spawn: holding the first points from their own end, defenders had stood 50 m behind the flags and
+  lost every Attack / Defend round to a capture (144 of 144); now about half (64 of 126 over 16 seeds).
 - Bots see 55 m, as on Depot. The Bottom street has two vans on its north kerb so no line runs its 94 m length.
 - Pastel renders for the terraces, slate (the palette's ceiling) for every roof, raspberry brick (off the high
   contrast orange's hue) for bin stores and a terrace colour.
@@ -57,7 +60,9 @@ models. The real street the plan came from is never named or pictured in the rep
 - Field rules: every rule passes but the middle, which warns (attackers walk 101.5 m to it, defenders 81.3 m).
 - `test_street` (5), `test_st1_qa` (9), `test_field_layout`, `test_field_rules`, `test_map_areas`, `test_look`,
   `test_baked_light` and the rest QA listed pass; `test_dev_settings` updated for the third public field.
-- Street guard, Elimination at Normal: 117 rounds over 16 seeds, none on time, no failures.
+- Street guards: Elimination at Normal 118 rounds over 16 seeds, none on time; Attack / Defend at Normal 126 rounds,
+  64 captures (51 %), none on time; at night, Elimination at Easy 64 rounds and Attack / Defend at Hard 61 rounds
+  (32 captures). No failures.
 
 ## Known issues left
 
