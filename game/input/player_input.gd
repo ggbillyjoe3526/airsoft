@@ -441,6 +441,12 @@ func fill(cmd: PlayerCommand, held_slot: int = 0, hand: Grenades.Hand = null, ho
 	cmd.pitch = view_pitch
 	cmd.walk = Input.is_action_pressed(WALK)
 	cmd.sprint = Input.is_action_pressed(SPRINT)
+	# Toggle switched to Hold in the settings forgets the toggled state, so switching back starts standing and the
+	# sight down (BP2).
+	if not _controls.crouch_toggle:
+		_crouched = false
+	if not _controls.aim_toggle:
+		_aimed = false
 	cmd.crouch = crouch_chosen()
 	cmd.aim = _aiming()
 	# Lean is held, whatever crouch and aim do (owner, 2026-10-03).

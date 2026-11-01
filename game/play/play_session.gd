@@ -1291,6 +1291,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and event.is_pressed() and not _input.active and not get_tree().paused:
 		_capture()
+		# the click that took the mouse back is not a shot (BP2)
+		_input.hold_fire()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(&"fire") and not event.is_echo() and _input.active and _hud.round_result().is_up():
 		_move_on()

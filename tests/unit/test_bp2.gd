@@ -155,3 +155,23 @@ func test_the_door_prompt_names_uses_key_as_rebound_while_you_stand_at_the_door(
 	assert_ne(hud._door_prompt.text, before, "built again with the new key")
 	assert_string_contains(hud._door_prompt.text, KeyNames.of_action(&"use_door"))
 	InputMap.load_from_project_settings()
+
+
+func test_aim_and_crouch_toggled_on_then_switched_to_hold_and_back_start_off() -> void:
+	var input := _wheel_input()
+	var controls := ControlsConfig.new()
+	controls.aim_toggle = true
+	controls.crouch_toggle = true
+	input.setup(controls, 1.5)
+	input._aimed = true
+	input._crouched = true
+	var cmd := PlayerCommand.new()
+	controls.aim_toggle = false
+	controls.crouch_toggle = false
+	input.fill(cmd)
+	controls.aim_toggle = true
+	controls.crouch_toggle = true
+	input.fill(cmd)
+	assert_false(cmd.aim, "the sight isn't up again by itself")
+	assert_false(cmd.crouch, "nor the crouch")
+	input.active = false
