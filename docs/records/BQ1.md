@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-01 | 1 | Opus 5.5 (build thread) | ✓ | pending | – |
+| 2026-11-01 | 1 | Opus 5.5 (build thread) | – | – | QA Fail: a sprinting bot kept its no-shot count with the line clear |
+| 2026-11-01 | 2 | Opus 5.5 (build thread) | ✓ | pending | – |
 
 ## Goal
 
@@ -26,11 +27,12 @@ glass as solid for sight.
 - **Glass.** `WorldQuery.sight_ray` passes clear blocks (`MapStyle.clear_kinds`) that `ray` meets. `MapLevel` puts
   them on bodies of their own and gives `JoltQuery` a second `RayCast3D` blind to them; `BoxWorld.add_clear_box` is
   the headless twin. Bot sight (`BotSenses.sight_clear`: seeing someone, a spot seen empty), a hold's view, cover
-  (glass hides nobody), torch beams and the HUD's team markers read it; BBs, lean room, held angles, bombs and line of
-  fire still use `ray`.
+  (glass hides nobody), torch beams, a flash bomb's dazzle and the HUD's team markers read it; BBs, sound, lean room,
+  held angles, a bomb's flight and line of fire still use `ray` (glass muffles sound as a wall does).
 - **No shot, go round.** A bot aimed at someone it sees with the level in the way of its BBs (glass, or more leaves
   than it shoots through) counts `Bot.no_shot_for`; after `BotConfig.no_shot_move_after` (1.5 s) it treats them as out
-  of sight and goes after them (a search), until a shot opens.
+  of sight and goes after them (a search), until a shot opens; the count clears as soon as the line is clear again,
+  whether or not it can fire that tick (QA: a pusher sprinting round never squared up again).
 
 ## Decisions
 

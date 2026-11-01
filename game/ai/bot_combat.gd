@@ -142,6 +142,10 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 	var cfg := w.cfg
 	if target == null or not b.target_visible:
 		b.no_shot_for = 0.0
+	elif b.no_shot_for > 0.0 and BotSenses.line_clear(w.query, eye, _aim_point) \
+			and not leaves_in_line(w, eye, _aim_point):
+		# The way clear again (it went round, or the glass is behind it): a shot, whether or not it can take it this tick.
+		b.no_shot_for = 0.0
 	var ready := w.live and BotSenses.has_reacted(b, w) and not cmd.sprint and b.mode != Bot.Mode.COVER
 	if not ready or target == null or off_aim >= deg_to_rad(cfg.fire_cone_deg):
 		b.pause_left = maxf(0.0, b.pause_left - dt)

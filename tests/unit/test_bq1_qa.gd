@@ -56,7 +56,8 @@ func _seconds_to_fight_again(pushes_in: bool, delay: float, limit: float) -> flo
 	var commands: Array[PlayerCommand] = [PlayerCommand.new(), PlayerCommand.new()]
 	var b := bots.world.bots[0]
 	if pushes_in:
-		b.style = BotsFile.neutral()
+		# A style of its own: the neutral one is shared by every bot without a personality.
+		b.style = BotsFile.Style.new()
 		b.style.pushes_in = true
 	var went := false
 	for t in roundi(8.0 / DT):
