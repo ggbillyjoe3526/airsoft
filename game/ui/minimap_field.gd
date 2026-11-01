@@ -63,7 +63,7 @@ static func build(map: MapData, cfg: MinimapConfig) -> MinimapField:
 	if t != null:
 		var step := _relief_step(t, cfg)
 		f.ground = _terrain_image(t, step, cfg)
-		var metres := Vector2(f.ground.get_size()) * t.ground_cell * step
+		var metres := Vector2(t.ground_cols, t.ground_rows) * t.ground_cell
 		f.ground_rect = Rect2(f.pixel_of(t.min_x, t.min_z), metres * f.scale)
 	for i in f.floors.size():
 		f.layers.append(f._draw(map, cfg, i, bases, side))
@@ -153,10 +153,11 @@ static func _relief_step(t: TerrainGrid, cfg: MinimapConfig) -> int:
 ## of it), lighter where it faces the north-west light and where it stands high, darker where it faces away, worked out
 ## on the squares' corners. Small: the panels smooth it up as they draw it.
 static func _terrain_image(t: TerrainGrid, step: int, cfg: MinimapConfig) -> Image:
-	var cols := maxi(t.ground_cols / step, 1)
-	var rows := maxi(t.ground_rows / step, 1)
+	# The last column and row take what is left when the squares don't divide by `step`, so the picture covers it all.
+	var cols := maxi(ceili(float(t.ground_cols) / step), 1)
+	var rows := maxi(ceili(float(t.ground_rows) / step), 1)
 	var small := Image.create_empty(cols, rows, false, Image.FORMAT_RGBA8)
-	if t.ground_cols < step or t.ground_rows < step:
+	if t.ground_cols < 1 or t.ground_rows < 1:
 		small.fill(cfg.ground_colour)
 		return small
 	# The squares' corners: the terrain's own vertices where a square is a cell.
@@ -169,19 +170,21 @@ static func _terrain_image(t: TerrainGrid, step: int, cfg: MinimapConfig) -> Ima
 		hi = maxf(hi, h)
 	var span := maxf(hi - lo, RELIEF_FLAT)
 	var w := t.ground_cols + 1
-	var run := t.ground_cell * step
 	for j in rows:
+		var z0 := j * step
+		var z1 := mini(z0 + step, t.ground_rows)
 		for i in cols:
-			var k := j * step * w + i * step
-			var h00 := corners[k]
-			var h10 := corners[k + step]
-			var h01 := corners[k + step * w]
-			var h11 := corners[k + step * w + step]
-			var dx := (h10 + h11 - h00 - h01) * 0.5 / run
-			var dz := (h01 + h11 - h00 - h10) * 0.5 / run
+			var x0 := i * step
+			var x1 := mini(x0 + step, t.ground_cols)
+			var h00 := corners[z0 * w + x0]
+			var h10 := corners[z0 * w + x1]
+			var h01 := corners[z1 * w + x0]
+			var h11 := corners[z1 * w + x1]
+			var dx := (h10 + h11 - h00 - h01) * 0.5 / ((x1 - x0) * t.ground_cell)
+			var dz := (h01 + h11 - h00 - h10) * 0.5 / ((z1 - z0) * t.ground_cell)
 			# Rising towards the south-east faces the north-west light.
 			var lit := clampf((dx + dz) * SQRT_HALF / cfg.relief_full, -1.0, 1.0)
-			var middle := (j * step + step / 2) * t.ground_cols + i * step + step / 2
+			var middle := ((z0 + z1) / 2) * t.ground_cols + (x0 + x1) / 2
 			var c := _tinted(cfg.ground_colour, _surface_tint(t.surfaces[middle], cfg), cfg)
 			c = c.lightened(cfg.relief_shade * lit) if lit > 0.0 else c.darkened(-cfg.relief_shade * lit)
 			c = c.lightened(cfg.relief_height * ((h00 + h10 + h01 + h11) * 0.25 - lo) / span)

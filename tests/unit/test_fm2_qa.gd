@@ -647,18 +647,17 @@ func test_a_tiny_terrain_still_has_a_ground_picture_the_views_and_gpu_can_use() 
 		assert_not_null(v._ground)
 
 
-func test_the_ground_picture_covers_the_terrain_to_within_one_sample() -> void:
-	# A terrain whose columns do not divide into samples (21 columns, a sample every 2) must not leave a wide bare
-	# strip under the layer: at most one sample (relief_cell m) short of the terrain's far edge.
+func test_the_ground_picture_covers_the_whole_terrain() -> void:
+	# A terrain whose columns do not divide into samples (21 columns, a sample every 2) leaves no bare strip: the last
+	# column and row of samples take what is left, so the picture reaches the terrain's far edges.
 	cfg.relief_cell = 2.0
 	var m := _terrain_map(-10.0, -10.0, 1.0, 21, 19)
 	var f := MinimapField.build(m, cfg)
 	var want := Rect2(f.pixel_of(m.terrain.min_x, m.terrain.min_z),
 			Vector2(m.terrain.cols, m.terrain.rows) * m.terrain.cell * f.scale)
-	assert_lte(f.ground_rect.position.distance_to(want.position), 0.5, "starts at the terrain's corner")
-	var slack := cfg.relief_cell * f.scale + 0.5
-	assert_lte(absf(f.ground_rect.end.x - want.end.x), slack, "east edge within one sample")
-	assert_lte(absf(f.ground_rect.end.y - want.end.y), slack, "south edge within one sample")
+	assert_eq(f.ground.get_size(), Vector2i(11, 10), "a part sample at each far edge")
+	assert_lte(f.ground_rect.position.distance_to(want.position), 0.01, "starts at the terrain's corner")
+	assert_lte(f.ground_rect.end.distance_to(want.end), 0.01, "ends at the terrain's far corner")
 
 
 func test_building_the_ground_picture_leaks_nothing_and_ground_of_keeps_the_image_readable() -> void:
