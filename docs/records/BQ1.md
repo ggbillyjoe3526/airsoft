@@ -1,13 +1,13 @@
 # BQ1 · Go there goes quiet, and bots see through glass
 
-**Review:** critic Accept 8/8 · qa Pass · performance Pass
+**Review:** critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-01 | 1 | Opus 5.5 (build thread) | – | – | QA Fail: a sprinting bot kept its no-shot count with the line clear |
-| 2026-11-01 | 2 | Opus 5.5 (build thread) | ✓ | pending | – |
+| 2026-11-01 | 2 | Opus 5.5 (build thread) | ✓ | Accept 7/8 (check 7: three bot checks still used the BB ray; fixed in BQ3) | – |
 
 ## Goal
 
