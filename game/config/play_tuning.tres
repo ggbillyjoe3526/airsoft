@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://game/config/flag_view_config.gd" id="4_b3fuu"]
 [ext_resource type="Script" path="res://game/config/lighting_config.gd" id="4_yrloc"]
 [ext_resource type="Script" path="res://game/config/map_style.gd" id="5_b3fuu"]
+[ext_resource type="Script" uid="uid://dvfsxqss4c2vt" path="res://game/config/railing_config.gd" id="30_rl1sr"]
 [ext_resource type="Script" path="res://game/config/minimap_config.gd" id="11_mm1cf"]
 [ext_resource type="Script" path="res://game/config/figure_config.gd" id="12_fi1fc"]
 [ext_resource type="Script" path="res://game/config/bake_config.gd" id="13_bk2lt"]
@@ -49,8 +50,12 @@ script = ExtResource("3_264px")
 [sub_resource type="Resource" id="Resource_ynup1"]
 script = ExtResource("4_yrloc")
 
+[sub_resource type="Resource" id="Resource_rl1sr"]
+script = ExtResource("30_rl1sr")
+
 [sub_resource type="Resource" id="Resource_ca7sx"]
 script = ExtResource("5_b3fuu")
+railing = SubResource("Resource_rl1sr")
 
 [sub_resource type="Resource" id="Resource_3isbp"]
 script = ExtResource("8_q2qxh")

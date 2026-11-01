@@ -624,6 +624,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   1.3 times as fast as the attackers (B 1.8 times) against the standard 1.6: both written down as The Street's
   exceptions (`FieldStandard.EXCEPTIONS`). Asked to keep the approved layout or move the defenders' spawn and add
   cover, the owner kept it (decision card, 2026-11-01).
+- **The Street's metal railings are see-through bars; its wooden fences stay solid (owner, 2026-11-01, SR1).** Every
+  railing block (`MapStyle.railing_kinds`) is drawn as bars and rails (`RailingConfig`); sight, bots' cover checks
+  and their shot checks pass its box, and a BB meets only the bars and rails its path crosses (`Railings`,
+  `WorldQuery.bb_ray`). Movers and thrown bombs still meet the box. Asked whether the 6 ft wooden garden fences
+  should become see-through too, the owner kept them solid (decision card, 2026-11-01).
 - **A crouched body is 1.25 m tall (owner's approval of Woodland concept 3, 2026-10-31, CT1).** Crouched past the
   threshold (MovementConfig.crouched_threshold) a character's collision body is `BodyConfig.crouch_height` tall, so it
   goes through Woodland's 1.4 m tunnels; under anything lower than a standing body it stays crouched whatever is held,

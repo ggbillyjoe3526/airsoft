@@ -1,13 +1,18 @@
-Task: BQ3 · head 3597106 · Verdict: Pass
-Run: smoke match (--smoke --perf, fixed smoke seed), headless, vs worktree of ef8659c · budget: no baseline yet, judged against targets and ef8659c
-Metrics: nodes_max 1238 / 1238 (ok) · orphans_max 792 / 792 (ok, same) · draw_max 0 / 0 (headless) · frames 1641 / 3087 (the match ends sooner: bots press and kneel, different play; not a cost). Script time per tick not logged by --smoke: judged from the code.
-Regressions (> 10 % worse): none
-Blocking findings: none
+Task: SR1 · head 865d388 · Verdict: Pass
+Run: no match run (the smoke/`--perf` match is Depot, which has no railings; its only new work is the `railings.is_empty()` early-out in bb_ray). Headless micro-benchmarks on The Street instead (525 blocks, 42 railing runs, fixed RNG seeds), once on this machine; budget: no baseline yet (pipeline/perf-budget.json absent), judged against the targets and a main-like build (railing_kinds = [], i.e. railings as plain boxes).
+Metrics (measured, script time only, this machine):
+- Railings.first_bar: 1.1 us/call at 0.5 to 2 m segments (a BB's per-tick travel), 2.5 us at 8 m, 6.2 us at 40 m. Index = 4 m grid; 0 Objects allocated over 50k calls.
+- bb_ray (Jolt + first_bar) 4.6 us vs plain Jolt ray 2.5 us: about +2.2 us per BB per tick. 60 BBs in flight = 0.13 ms/tick; the full 256-BB pool (max_bbs) = 0.56 ms/tick (3 % of 16.7 ms), unreachable in practice.
+- Bot shot checks: same count of Jolt rays as before (ray -> ray_past_railings, one-for-one), no first_bar call. No added cost.
+- MapLevel.build on The Street: 61 to 66 ms vs 51 ms without railings (+10 to 15 ms once, behind the loading screen). Nodes +3 (Railings mesh, PastRailingsRay, railing collider body); all freed with the level: node delta +0 and 0 orphans after queue_free, twice in a row (build, free, build, free).
+- Railings mesh: 1 surface, 1,592 boxes, 19,104 tris, 1 draw call (+ shadow passes). AABB 17 x 1 x 112 m.
+Regressions (> 10 % worse): none measurable on the headless metrics (node count, orphans, per-tick script time on Depot unchanged by construction). Draw calls and frame times need a rendered run on the owner's hardware.
+Blocking findings: none.
 Advisory:
-- tests/unit/test_bots.gd:430-435 (measured): the adjusted warm-tick test is a fair reading of SimEvents (game/sim/sim_events.gd:3 documents a pool that grows to the busiest tick seen). GameEvent is one RefCounted with no sub-objects, so each pooled event is exactly one object and `before + grown` is exact accounting, not a loophole. Probe: Normal pool 4, grown 0; Hard 2 -> 4 in the measured window (ef8659c: Hard 3 stable, no growth). The new high is a different RNG stream and play, not a leak. Weakness: a late new high still lands in the measured window. Could warm longer or assert `grown` is small; non-blocking, the pool is bounded by the busiest tick.
-- game/ai/bot_world.gd:100-125 (judgment): pressing/careful_last are gated by mode, skill flag and live before any loop, so Easy pays nothing. pressing loops all characters (_out_lead, full pass) once per bot per tick only in ADVANCE, not hunting, Elimination, Normal/Hard; careful_last exits at the first teammate in play, and bot_brain.gd:50 short-circuits it. Worst case about 2 x bots x characters (~200 iterations at 5v5) per tick, no allocation. Could cache _out_lead per tick in BotController if 10v10 or more ever matters; can wait.
-- game/ai/bot_radio.gd:20-45 (judgment): step() is one pass over bots per sim tick with two cheap compares; tell() runs only when a call is due (once per fresh sighting, bots x 1 pass). Vector2(...) is a value, no heap. Allocates nothing as documented.
-- bot_movement.gd:646, bot_bombs.gd:110,168 (judgment): line_clear -> sight_clear is the same single ray on the sight cast (JoltQuery reuses its one RayCast3D, BoxWorld the same slab loop). No added ray count; the kneel early return in _strafe is cheaper than before.
-- No nodes, resources, signal connections or timers added. New Bot fields (share_at/share_id/share_spot) are reset in Bot.reset; nothing unbounded.
+- game/map/map_level.gd:155-159 (judgment): Railings casts shadows (default) and is one mesh spanning most of the map, so it is never frustum-culled; its 19k tris are about 3x the rest of the greybox (525 boxes, roughly 6k tris) and are re-drawn in every sun-shadow cascade, and they sit outside the "bake draws no more shadow tris" arrangement (map_level.gd:334-350). About 25k tris is trivial for a Low-preset GPU, but check Low on the owner's PC; if it matters, add SHADOW_CASTING_SETTING_OFF on thin bars, a visibility range, or split by area.
+- game/map/map_level.gd:408-423 (judgment): each bar is a full 6-face box (bottoms and tops included; end bars and rails overlap). Dropping hidden faces would save about 15 to 20 % of the tris; low value.
+- game/map/map_level.gd:154 (judgment): the Railings mesh uses the shared greybox ShaderMaterial (no new shader), so no prewarm entry is missing on The Street (it has no site dress). If a site-dressed map ever lists railing_kinds, this material would differ from that map's main one and need a prewarm entry.
+- game/sim/railings.gd:13 INDEX_CELL = 4.0 is a magic number but a named const; fine.
+- Nothing allocates in first_bar, bb_ray or ray_past_railings (reused _bar_hit, static scratch vars); _index() allocates once after the last add (level build), not per tick.
 Fixes: none required.
-Unexplained: none. GUT: test_bots.gd 16/16 pass on this head.
+Unexplained: none. Not measured: draw calls, GPU frame time, and the Low-preset 60 fps target (no GPU in the container); a Street match with --perf on the owner's PC would confirm.

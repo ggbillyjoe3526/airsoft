@@ -21,6 +21,9 @@ var box_surface: PackedInt32Array = PackedInt32Array()
 var box_off: PackedByteArray = PackedByteArray()
 ## 1 for a clear box (glass, BQ1): solid to `ray` and movers, nothing to `sight_ray`.
 var box_clear: PackedByteArray = PackedByteArray()
+## 1 for a railing's box (SR1): solid to `ray` and movers, nothing to `sight_ray` and `ray_past_railings` (a BB meets
+## its bars through `railings`).
+var box_railing: PackedByteArray = PackedByteArray()
 ## Each door's box (WorldQuery.add_door), by door.
 var _door_box: PackedInt32Array = PackedInt32Array()
 var body: BodyConfig = null
@@ -37,6 +40,7 @@ func add_box(center: Vector3, size: Vector3, surface: RayHit.Surface = RayHit.Su
 	box_surface.append(surface)
 	box_off.append(0)
 	box_clear.append(0)
+	box_railing.append(0)
 
 
 ## Adds a clear box (a pane of glass, BQ1) centred at `center` measuring `size`, made of `surface`: solid to BBs and
@@ -44,6 +48,14 @@ func add_box(center: Vector3, size: Vector3, surface: RayHit.Surface = RayHit.Su
 func add_clear_box(center: Vector3, size: Vector3, surface: RayHit.Surface = RayHit.Surface.METAL) -> void:
 	add_box(center, size, surface)
 	box_clear[box_clear.size() - 1] = 1
+
+
+## Adds a bar railing (SR1) filling the box centred at `center` measuring `size`, made of `surface`: a solid box to
+## movers and `ray`, its bars and rails to BBs (WorldQuery.railings), see-through to sight.
+func add_railing(center: Vector3, size: Vector3, surface: RayHit.Surface = RayHit.Surface.METAL) -> void:
+	add_box(center, size, surface)
+	box_railing[box_railing.size() - 1] = 1
+	railings.add(center, size, surface)
 
 
 ## Adds a solid box of `kind` (a skip, a crate) centred at `center` measuring `size`, made of `surface`, and lists it as
@@ -82,21 +94,26 @@ func mover() -> CharacterMover:
 
 
 func ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
-	return _cast(from, to, hit, false)
+	return _cast(from, to, hit, false, false)
 
 
 func sight_ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
-	return _cast(from, to, hit, true)
+	return _cast(from, to, hit, true, true)
 
 
-## The nearest box on the segment (a slab test), skipping the clear ones for `sight`.
-func _cast(from: Vector3, to: Vector3, hit: RayHit, sight: bool) -> bool:
+func ray_past_railings(from: Vector3, to: Vector3, hit: RayHit) -> bool:
+	return _cast(from, to, hit, false, true)
+
+
+## The nearest box on the segment (a slab test), skipping the clear ones for `sight` and the railings' for
+## `past_railings`.
+func _cast(from: Vector3, to: Vector3, hit: RayHit, sight: bool, past_railings: bool) -> bool:
 	var dir := to - from
 	var best := INF
 	var best_box := -1
 	var best_axis := 0
 	for b in box_min.size():
-		if box_off[b] != 0 or (sight and box_clear[b] != 0):
+		if box_off[b] != 0 or (sight and box_clear[b] != 0) or (past_railings and box_railing[b] != 0):
 			continue
 		var t_enter := -INF
 		var t_exit := INF

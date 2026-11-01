@@ -19,6 +19,12 @@ var _surface_bodies: Array[RID] = []
 ## movers, not to sight.
 var _clear_bodies: Array[RID] = []
 var _clear_surfaces: PackedInt32Array = PackedInt32Array()
+## The railings' bodies (SR1, MapStyle.railing_kinds) and each one's RayHit.Surface: solid to movers and the level ray,
+## not to sight nor `_past_cast`, the level ray's twin a BB's path and a bot's shot check cast (null on a level with
+## no railings: they cast `_cast`); a BB meets the railings' bars through WorldQuery.railings.
+var _railing_bodies: Array[RID] = []
+var _railing_surfaces: PackedInt32Array = PackedInt32Array()
+var _past_cast: RayCast3D = null
 var _body: BodyConfig = null
 var _under: RayHit = RayHit.new()
 ## Each door's leaf (DO1), by door: the one shape of a wooden static body of its own, disabled while the door is open.
@@ -38,6 +44,23 @@ func ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
 
 func sight_ray(from: Vector3, to: Vector3, hit: RayHit) -> bool:
 	return _cast_on(_sight_cast if _sight_cast != null else _cast, from, to, hit)
+
+
+func ray_past_railings(from: Vector3, to: Vector3, hit: RayHit) -> bool:
+	return _cast_on(_past_cast if _past_cast != null else _cast, from, to, hit)
+
+
+## The railings' bodies as the level built them (MapLevel), each made of `surfaces`' RayHit.Surface; `sight` (the ray
+## sight casts, as set_clear_bodies) and `past` (the ray past the railings, in the level's tree with the level ray's
+## mask) are made blind to them here.
+func set_railing_bodies(bodies: Array[RID], surfaces: PackedInt32Array, sight: RayCast3D, past: RayCast3D) -> void:
+	_railing_bodies = bodies
+	_railing_surfaces = surfaces
+	_sight_cast = sight
+	_past_cast = past
+	for rid in bodies:
+		sight.add_exception_rid(rid)
+		past.add_exception_rid(rid)
 
 
 ## The clear bodies as the level built them (MapLevel), each made of `surfaces`' RayHit.Surface, and `sight`: a ray in
@@ -95,6 +118,9 @@ func _surface_of(rid: RID) -> RayHit.Surface:
 	for c in _clear_bodies.size():
 		if _clear_bodies[c] == rid:
 			return _clear_surfaces[c] as RayHit.Surface
+	for r in _railing_bodies.size():
+		if _railing_bodies[r] == rid:
+			return _railing_surfaces[r] as RayHit.Surface
 	# A door's leaf is plywood.
 	for b in _door_bodies:
 		if b == rid:

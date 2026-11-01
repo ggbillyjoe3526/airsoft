@@ -1,7 +1,8 @@
 class_name BBStep
 ## Moves every BB in flight one tick, drifting in the wind, and stops it at whatever its path crosses first (the browser
 ## game's sim/bbs.ts stepBBs, without prop noise, which comes with its task): a body, a practice range target, a bush's
-## leaves once it has pushed through leaf_stop_depth of them over its flight (FO1), or the level, where a hard surface
+## leaves once it has pushed through leaf_stop_depth of them over its flight (FO1), or the level (WorldQuery.bb_ray: a
+## railing's bars and rails, not the gaps between them, SR1), where a hard surface
 ## bounces it off instead (a ricochet, M20). A BB that comes out of a bush having crossed less flies on from where it
 ## came out, slowed and thrown off its line (Leaves), and the rest of that tick's travel is dropped, as with a bounce.
 ## Every body on the field stops a BB (M85: it never goes on through someone to whoever is behind); only a body in play
@@ -56,7 +57,7 @@ static func step(pool: BBPool, characters: Array[Character], query: WorldQuery, 
 		if length > MIN_SEGMENT:
 			var dir := segment / length
 			var wall := INF
-			if query.ray(bb.prev_position, bb.position, _ray_hit):
+			if query.bb_ray(bb.prev_position, bb.position, _ray_hit):
 				wall = _ray_hit.fraction * length
 			var reach := minf(wall, length)
 			# Leaves before the surface: where the BB stops in them, or comes out of them, ends its path here; a path

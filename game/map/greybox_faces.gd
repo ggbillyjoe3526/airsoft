@@ -26,8 +26,11 @@ class Tiles:
 static func faces_of(b: MapData.Block) -> Array[PackedVector3Array]:
 	if b.rise != MapData.Rise.NONE:
 		return _wedge_faces(b)
-	var lo := b.center - b.size * 0.5
-	var hi := b.center + b.size * 0.5
+	return box_faces(b.center - b.size * 0.5, b.center + b.size * 0.5)
+
+
+## The faces of the box from corner `lo` to `hi`, in faces_of's order (a railing's bars and rails, SR1, too).
+static func box_faces(lo: Vector3, hi: Vector3) -> Array[PackedVector3Array]:
 	var c := PackedVector3Array([
 		Vector3(lo.x, lo.y, lo.z), Vector3(hi.x, lo.y, lo.z), Vector3(hi.x, lo.y, hi.z), Vector3(lo.x, lo.y, hi.z),
 		Vector3(lo.x, hi.y, lo.z), Vector3(hi.x, hi.y, lo.z), Vector3(hi.x, hi.y, hi.z), Vector3(lo.x, hi.y, hi.z),

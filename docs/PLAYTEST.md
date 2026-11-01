@@ -526,6 +526,10 @@ You're on Alpha (blue) with two bot teammates against three Beta (orange) bots b
   sighting near them keeps them there. Is 30 s right?
 - [ ] **Glass on The Street (BQ1).** Stand behind the House's window and let a bot outside see you: it squares up but
   doesn't shoot the glass, then comes round by a door. Glass is no cover from its eyes.
+- [ ] **See-through railings on The Street (SR1).** Look through the front gardens' metal railings: you see the
+  gardens beyond. Shoot at someone behind one: most BBs go through, now and then one pings off a bar or rail. Crouch
+  behind a railing while a bot looks your way: it sees you and shoots through it. You can't walk or throw a bomb
+  through. Do the bars read clearly at range by day and night, without shimmering?
 - [ ] **Teammates ask for you (BQ2).** Stay back while your bots fight: one fighting two at once calls "Need help"
   with a HELP ping where it is; one stuck trading shots with a single enemy for a while calls "Go round" with a GO ping
   beside the enemy; in Attack / Defend the raiser calls "Cover me" with a COVER ping on the pole. At most one ask every
