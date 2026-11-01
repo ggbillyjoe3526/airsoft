@@ -695,10 +695,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   look is a Dev setting again, Realistic colours moved to the Loadout's Colour tab (MR1), and the Voices placeholder is
   gone. The top bar's level reads "LVL 3".
 - **First-start defaults after the 0.1 Dev 1 playtest (owner, 2026-10-29; FB2).** Volumes: master 100 %, effects 70 %,
-  power source 100 %, ambience 30 % (20 % since 2026-11-01: Audio), interface 40 %. The game launches in exclusive fullscreen (on the display it
-  opens on). V-Sync is off. Edge smoothing is Off, on every graphics preset (a player who turns it on keeps it, as
-  Custom). A save from before (settings version 1) moves a value still equal to the old default to the new one, once;
-  a value the player changed is kept. Reset to defaults gives the new values.
+  power source 100 %, ambience 30 % (20 % since 2026-11-01: Audio), interface 40 %. The game launches in exclusive
+  fullscreen (on the display it opens on). V-Sync is off. Edge smoothing is Off, on every graphics preset (a player who
+  turns it on keeps it, as Custom). A save from before (settings version 1) moves a value still equal to the old default
+  to the new one, once; a value the player changed is kept. Reset to defaults gives the new values.
 - **Reloads are manual by default (owner, 2026-10-29; RL2).** "Weapons currently automatically reload. This shouldn't
   happen. By default a prompt should come up for the player to press the R button. In the settings there can be a
   setting to toggle between manual and automatic reloads." Settings › Controls › Reload: Manual (the default; an empty

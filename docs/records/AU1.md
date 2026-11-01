@@ -1,13 +1,13 @@
 # AU1 · Bots' gunfire heard, ambience quieter
 
-**Review:** 2 attempts · critic pending · qa pending · performance Pass
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-01 | 1 | Opus 5.5 (build thread) | ✓ (targeted) | 7/8 Retry | AC2: a bot's lifted motor held at the old level up close by the 3 dB voice cap |
-| 2026-11-01 | 2 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-01 | 2 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 ## Decisions
 
@@ -39,6 +39,8 @@
   with your ears doesn't change what bots or the minimap know, so the balance stays as tuned.
 - **A version 2 file on exactly 30 % moves to 20 %** even if the player picked 30 % on purpose: it can't be told apart
   from the old default (as FB2's move did).
+- **QA's attempt-2 Pass was on b1c3a50;** the worker's 6d8bc5e then moved the shot cap to the louder of its own level
+  and 3 dB and updated five of QA's assertions in test_au1_qa.gd to match (the critic read them and accepted).
 - **Voices left at 24.** Shots already cap at 6 a cue, so the longer reach doesn't starve footsteps.
 
 ## Known issues left
