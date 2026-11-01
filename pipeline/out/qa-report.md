@@ -1,4 +1,4 @@
-Task: AU1 · QA commit PENDING · Verdict: Pass
+Task: AU1 · QA commit 6f2bac6 · Verdict: Pass
 
 Attempt 2, head b1c3a50 (per-play AudioStreamPlayer3D.max_db: a Kind.SHOT play capped at its own volume_db, every other kind at field_max_db 3.0).
 
@@ -11,13 +11,13 @@ Advisory findings (for KNOWN_ISSUES or a tuning pass; by design of the cap, not 
 - Checked and fine: voice reuse in both directions (shot, bang, step, steel ring: every play resets max_db), your own sounds (plain AudioStreamPlayer, no max_db, positional voices untouched), the range's steel ring and wood target (field cap), zero gain (-inf, not NaN), a shot whose shooter is gone.
 
 Tests added (tests/unit/test_au1_qa.gd, 7 new; each fails with the max_db line removed in a scratch copy, checked: voice-cap tests fail on the 3.0 left in place):
-- test_au1_qa.gd:342 · 24 rounds of shot, step and bang on one pool, with and without voices finishing, each playing voice's cap matches its cue · fails without the line (3.0 vs the shot's level)
-- :369 · a shot behind a wall: capped at its own level on the full-muffle bus
-- :384 · a silenced shot at 2 m capped at its muffled level
-- :395 · the flash bang capped at its own level, shot_unit_size and bang_reach kept
-- :408 · a steel ring after a shot on its voice keeps field_max_db
-- :424 · zero shot and power gain: cap is -inf or very low, never NaN
-- :440 · your own shot leaves every positional voice silent and at the default cap
+- test_au1_qa.gd:360 · 24 rounds of shot, step and bang on one pool, with and without voices finishing, each playing voice's cap matches its cue · fails without the line (3.0 vs the shot's level)
+- :381 · a shot behind a wall: capped at its own level on the full-muffle bus
+- :397 · a silenced shot at 2 m capped at its muffled level
+- :409 · the flash bang capped at its own level, shot_unit_size and bang_reach kept
+- :421 · a steel ring after a shot on its voice keeps field_max_db
+- :440 · zero shot and power gain: cap is -inf or very low, never NaN
+- :455 · your own shot leaves every positional voice silent and at the default cap
 
 Run (targeted, 26 files incl. test_save_bundle, au1_qa, au1_loudness, sound_occlusion, voice_pool, sp1_qa, parts_in_play, bot_bombs, sound_mix, ambient_calls, range_play, footsteps, settings and the other SimAudio users): 407 tests, 407 passing, 0 failing, 182.6 s, no SCRIPT ERROR. gdlint on test_au1_qa.gd clean. Raw log: pipeline/out/qa/qa-attempt2.log. Full tools/check.sh not run by me (the worker's is running).
 
