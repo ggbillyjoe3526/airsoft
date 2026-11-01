@@ -39,8 +39,9 @@ extends Resource
 	&"tyre": RayHit.Surface.WOOD,
 	&"truck": RayHit.Surface.METAL,
 	&"thicket": RayHit.Surface.LEAVES,
-	# The Street (ST1): hedges and the scrub are leaves; railings, vehicles, lamps, bollards, cabinets, the fridge
-	# and the bus shelter ring; plastic bins, the roadworks' boards, the shed and the furniture tick like wood.
+	# The Street (ST1): hedges and the scrub are leaves; railings, vehicles, lamps, bollards, cabinets, the fridge,
+	# the bus shelter and window glass ring (glass has no sound of its own yet); plastic bins, the roadworks' boards,
+	# the shed and the furniture tick like wood.
 	&"hedge": RayHit.Surface.LEAVES,
 	&"scrub": RayHit.Surface.LEAVES,
 	&"railing": RayHit.Surface.METAL,
@@ -52,6 +53,7 @@ extends Resource
 	&"cabinet": RayHit.Surface.METAL,
 	&"fridge": RayHit.Surface.METAL,
 	&"shelter": RayHit.Surface.METAL,
+	&"glass": RayHit.Surface.METAL,
 	&"bins": RayHit.Surface.WOOD,
 	&"hoarding": RayHit.Surface.WOOD,
 	&"shed": RayHit.Surface.WOOD,

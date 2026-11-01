@@ -336,7 +336,8 @@ func _read_blocks(list: Variant, style: MapStyle) -> void:
 		b.dress = StringName(str(bd.get("dress", "")))
 		if bd.has("colour"):
 			var paint: Variant = bd["colour"]
-			if (paint is float or paint is int) and float(paint) >= 0.0 and float(paint) <= 0xffffff:
+			if (paint is float or paint is int) and float(paint) >= 0.0 and float(paint) <= 0xffffff \
+					and float(paint) == floorf(float(paint)):
 				b.colour = Color.hex((int(paint) << 8) | 0xff)
 			else:
 				problems.append("block %d's colour %s is not 0xRRGGBB" % [i, paint])

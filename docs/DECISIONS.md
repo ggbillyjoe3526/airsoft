@@ -616,10 +616,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   55 m; 5v5 or 6v6; rounds 3:00; no upstairs. The layout lives in `tools/street/layout.py` and `build_map.py` writes
   `data/maps/street.json`: change the scripts, never the JSON. Every block carries its own palette colour
   (`MapData.Block.colour`); glass is solid to BBs, bodies and bots' sight, and drawn see-through (`MapStyle.clear_kinds`).
-- **The Street keeps concept 3's lines and A's head start (ST1).** Diagonals across the lanes over railings, low walls
+- **The Street keeps concept 3's lines and A's head start (owner, 2026-11-01, ST1).** Diagonals across the lanes over railings, low walls
   and cars run to about 80 m (each lane's own lines are the concept's, at most 60 m), and the defenders reach flag A
   1.3 times as fast as the attackers (B 1.8 times) against the standard 1.6: both written down as The Street's
-  exceptions (`FieldStandard.EXCEPTIONS`), pending the owner's word on the decision card of 2026-11-01.
+  exceptions (`FieldStandard.EXCEPTIONS`). Asked to keep the approved layout or move the defenders' spawn and add
+  cover, the owner kept it (decision card, 2026-11-01).
 - **A crouched body is 1.25 m tall (owner's approval of Woodland concept 3, 2026-10-31, CT1).** Crouched past the
   threshold (MovementConfig.crouched_threshold) a character's collision body is `BodyConfig.crouch_height` tall, so it
   goes through Woodland's 1.4 m tunnels; under anything lower than a standing body it stays crouched whatever is held,
