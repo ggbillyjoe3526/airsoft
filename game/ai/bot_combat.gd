@@ -159,11 +159,13 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 		b.no_shot_for = b.no_shot_for + dt if _level_in_line else 0.0
 		return
 	b.no_shot_for = 0.0
-	if b.burst_left <= 0.0 and b.pause_left <= 0.0:
+	var begun := b.burst_left <= 0.0 and b.pause_left <= 0.0
+	if begun:
 		b.burst_left = b.pick(b.skill.burst)
 	if b.burst_left > 0.0:
-		if not was_bursting:
-			# A burst begun, or picked up again after a tick it couldn't fire in: is the knee's shot still clear?
+		if begun or not was_bursting:
+			# A burst begun (on whoever it now aims at), or picked up again after a tick it couldn't fire in: is the
+			# knee's shot clear?
 			b.knee_clear = b.skill.kneels_to_fire and _knee_has_shot(b, w)
 		b.bursting = true
 		var a := b.character.armament

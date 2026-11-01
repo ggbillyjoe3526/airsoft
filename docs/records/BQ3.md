@@ -1,6 +1,6 @@
 # BQ3 · Bots play as a team and fight smarter
 
-**Review:** critic Accept 7/8 · qa Pass · performance Pass
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -98,6 +98,8 @@ change stays only if bots with it win more rounds against bots without it.
   changed) and QA rechecked it alone: Pass, with two tests added to `test_bq3_qa` (a giver out of play or gone keeps
   it in cover; a peek with nobody in sight ends after the giver). From its advisories, a follower with an empty magazine
   now stays to reload first; a giver moving off any way counts (direction doesn't matter far off).
+- Critic, second pass (attempt 4): Accept 8/8. From its advisory, a new burst is checked too (a target switched
+  mid-burst zeroes the burst while the bot still counts as firing).
 - QA on the knee check (attempt 4): Fail then Pass. A burst left hanging and picked up again kept its old answer; it
   is now checked again on resuming (`test_bq3_qa`: a burst picked up again behind low cover doesn't kneel).
   `test_bq3_team_play` adds no knee where low cover would hide the target.
