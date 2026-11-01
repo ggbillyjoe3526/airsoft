@@ -5,7 +5,7 @@ teammate still in play.
 
 | Order | Key | What your teammates do |
 | --- | --- | --- |
-| **Follow Me** | F | Stay with you and keep up as you move. |
+| **Follow Me** | F | Stay with you and keep up as you move. One that ducked into cover comes out to keep up once nobody is in sight. |
 | **Hold Here** | X | Spread out across the spot you are looking at and hold it (where they stand, if you look at nothing in reach). |
 | **Go There** | Mouse 4 | Go to the spot you are looking at, however far, and hold it once they are all there ([below](#go-there)). |
 | **Regroup** | V | Come back to you. |

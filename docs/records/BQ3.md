@@ -7,7 +7,8 @@
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-01 | 1 | Opus 5.5 (build thread) | – | – | QA Fail: the test file didn't parse (an untyped loop); a knee held on a burst not being fired |
-| 2026-11-01 | 2 | Opus 5.5 (build thread) | ✓ | see the Review line | – |
+| 2026-11-01 | 2 | Opus 5.5 (build thread) | ✗ | – | CI's Follow me guard: Depot seed 2, a follower 12.5 m behind (catch_up 8 m) |
+| 2026-11-01 | 3 | Opus 5.5 (build thread) | ✓ | see the Review line | – |
 
 ## Goal
 
@@ -45,6 +46,11 @@ change stays only if bots with it win more rounds against bots without it.
   moving target. Standing still for each burst without the knee was tried and won nothing (49 %).
 - Normal does not get Hard's tactics: an A/B of Normal with them against Normal without won 49 % on Depot.
 - Radio reach 35 m and 45 m, and its delay, roughly a shout across a lane and a beat to say it.
+- Under Follow me, a follower down in cover with nobody in sight and not reloading comes out once its giver moves off
+  further than its spot and catch-up gap (`SquadOrders.giver_leaving`, every level). CI's Follow me guard caught a
+  follower that took cover on a contact, then sat out its duck and a peek while the leader sprinted on; at the same
+  sprint it never closed the gap. Turning the knee off also passed, but only by moving that seed's fights; the cause
+  was the cover. It reuses follow_distance and catch_up_gap, no new tuning.
 
 ## Checks
 
@@ -68,11 +74,14 @@ change stays only if bots with it win more rounds against bots without it.
   last two are the shipped code. Normal wins clearly more; Hard about evens (it already held angles and traded), so its edge is small.
 - `test_bq3_team_play` (the radio told near and late, not to the far, the fighting, the enemy or the caller; a caller
   out says nothing; Easy has none; pressing and the careful last bot in Elimination only; a knee for each burst and up
-  between; Easy keeps sidestepping), `test_tl1_qa` and `test_bot_difficulty` unchanged in what they pin.
+  between; Easy keeps sidestepping; a follower in cover comes out after a giver moving off, not with an enemy in sight,
+  reloading, a giver standing or close, or another order), `test_tl1_qa` and `test_bot_difficulty` unchanged in what they pin.
 - Older tests it touched: `test_bot_angles` (the watcher there is the last of its team, so a careful last bot looks at
   corners too), `test_bots`' warm-tick check (now counts the event pool's documented growth to a new busiest tick,
   which the new play reached inside the measured window; nothing else allocates).
 
+- Follow me guard (Depot, 4 seeds): before the cover fix seed 2's worst was 12.52 m; after it 4.92 m, the others
+  unchanged (4.88, 5.55, 7.47 m), all 100 % or 97 % near.
 - QA: Fail then Pass (`test_bq3_qa`: a pending call cleared by a round reset, fresher news kept, nobody out or on the
   other team told, nothing before the round is live, no knee held without firing over a whole match: 15 of 2802 fight
   ticks a tick either side of a burst, longest 1 tick, against 354 and 211 before the fix).

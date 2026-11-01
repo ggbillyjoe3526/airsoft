@@ -2,6 +2,7 @@ extends GutTest
 ## BQ3 · The bots play more as a team: a team radio (BotRadio: a fresh sighting told to teammates near it after a
 ## moment), pressing the advantage when well ahead in Elimination and the last of a team playing carefully, on Normal
 ## and Hard (Hard tells its team sooner and further), and taking a knee for each burst in the open; Easy has none.
+## Under Follow me, a follower in cover comes out to keep up with its giver moving off (every level).
 
 const YARD := Vector3(0.0, 0.0, 0.0)
 
@@ -167,3 +168,37 @@ func test_easy_keeps_sidestepping_as_it_shoots() -> void:
 	BotMovement._strafe(b, world, cmd, 1.0 / 60.0, world.characters[3])
 	assert_false(cmd.crouch)
 	assert_ne(cmd.right, 0.0)
+
+
+## Bot 1 down in cover under Follow me from character 0; its giver at `gap` m moving at `speed` m/s.
+func _following_in_cover(gap: float, speed: float) -> Bot:
+	_world()
+	var b := world.bots[1]
+	var giver := world.characters[0]
+	b.order = SquadOrder.Kind.FOLLOW
+	b.order_giver = giver
+	b.mode = Bot.Mode.COVER
+	b.cover_phase = Bot.CoverPhase.DOWN
+	b.cover_left = 1.0
+	b.cover_give_up = config.cover_max_time
+	giver.position = b.character.position + Vector3(gap, 0.0, 0.0)
+	giver.velocity = Vector3(speed, 0.0, 0.0)
+	return b
+
+
+func test_a_follower_in_cover_comes_out_to_keep_up_with_its_giver_moving_off() -> void:
+	var squad := config.squad
+	var far := squad.follow_distance + squad.catch_up_gap + 1.0
+	var b := _following_in_cover(far, squad.heading_speed * 2.0)
+	assert_true(BotBrain._stay_in_cover(b, world, false, false, true, false, 1.0 / 60.0), "out, after its giver")
+	b = _following_in_cover(far, squad.heading_speed * 2.0)
+	assert_false(BotBrain._stay_in_cover(b, world, true, false, true, false, 1.0 / 60.0), "not with an enemy in sight")
+	b = _following_in_cover(far, squad.heading_speed * 2.0)
+	assert_false(BotBrain._stay_in_cover(b, world, false, true, true, false, 1.0 / 60.0), "nor reloading")
+	b = _following_in_cover(far, 0.0)
+	assert_false(BotBrain._stay_in_cover(b, world, false, false, true, false, 1.0 / 60.0), "a giver standing waits")
+	b = _following_in_cover(squad.follow_distance, squad.heading_speed * 2.0)
+	assert_false(BotBrain._stay_in_cover(b, world, false, false, true, false, 1.0 / 60.0), "nor one still close")
+	b = _following_in_cover(far, squad.heading_speed * 2.0)
+	b.order = SquadOrder.Kind.HOLD
+	assert_false(BotBrain._stay_in_cover(b, world, false, false, true, false, 1.0 / 60.0), "Follow me only")
