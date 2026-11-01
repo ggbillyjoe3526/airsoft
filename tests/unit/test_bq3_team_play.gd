@@ -82,18 +82,27 @@ func test_easy_bots_have_no_radio() -> void:
 
 func test_a_team_well_ahead_presses_and_the_last_one_plays_carefully() -> void:
 	_world()
-	assert_false(world.pressing(world.bots[0]), "three against two is not enough")
+	assert_false(world.pressing(world.bots[0]), "uneven sides alone are no lead")
+	# Two more on team 1 (nobody's bots): three against four.
+	for id in [5, 6]:
+		world.characters.append(Character.new(id, 1, Vector3(0.0, 0.0, 30.0), 0.0, ReplicaStats.default_loadout()))
 	world.characters[4].status = Character.Status.OUT
-	assert_true(world.pressing(world.bots[0]), "three against one presses")
+	assert_false(world.pressing(world.bots[0]), "one up is not enough")
+	world.characters[5].status = Character.Status.OUT
+	assert_true(world.pressing(world.bots[0]), "two up presses")
 	assert_false(world.pressing(world.bots[3]))
+	assert_false(world.careful_last(world.bots[3]), "one teammate still in")
+	world.characters[6].status = Character.Status.OUT
 	assert_true(world.careful_last(world.bots[3]), "the last of its team")
 	assert_false(world.careful_last(world.bots[0]))
 	world.mode = RoundState.Mode.ATTACK_DEFEND
 	assert_false(world.pressing(world.bots[0]), "Elimination only: Attack / Defend has its pole")
 	assert_false(world.careful_last(world.bots[3]))
 	_world(&"easy")
+	world.characters[1].status = Character.Status.OUT
+	world.characters[2].status = Character.Status.CALLING
+	assert_false(world.pressing(world.bots[3]), "Easy doesn't")
 	world.characters[4].status = Character.Status.OUT
-	assert_false(world.pressing(world.bots[0]), "Easy doesn't")
 	assert_false(world.careful_last(world.bots[3]), "Easy doesn't")
 
 

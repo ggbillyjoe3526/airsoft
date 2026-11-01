@@ -427,6 +427,9 @@ func _assert_warm_ticks_allocate_nothing() -> void:
 	for t in 600:
 		_tick()
 	var before := Performance.get_monitor(Performance.OBJECT_COUNT)
+	var events_before := state.events.items.size()
 	for t in 600:
 		_tick()
-	assert_eq(Performance.get_monitor(Performance.OBJECT_COUNT), before)
+	# The tick's event pool grows to the busiest tick yet (SimEvents), a one-off a new high costs; nothing else may.
+	var grown := state.events.items.size() - events_before
+	assert_eq(Performance.get_monitor(Performance.OBJECT_COUNT), before + grown)
