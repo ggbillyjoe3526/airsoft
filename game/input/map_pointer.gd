@@ -3,8 +3,8 @@ extends RefCounted
 ## The full-screen map's own pointer (FM1): while the map's key is held the mouse moves this instead of the view, kept
 ## on the map's panel. The HUD hands PlayerInput the panel each frame (`frame`, or `frame_rect` for one that isn't
 ## square, FM2): where its middle is in the world, its pixels per metre, its half size and the floor of the storey it
-## shows; a click there is a ping on that point of the field (`world`). Positions are px from the panel's middle, x right (the world's +x), y down (the world's +z: the map
-## keeps north up). Plain state and math. Allocates nothing.
+## shows; a click there is a ping on that point of the field (`world`). Positions are px from the panel's middle, x
+## right (the world's +x), y down (the world's +z: the map keeps north up). Plain state and math. Allocates nothing.
 
 var open: bool = false
 var at: Vector2 = Vector2.ZERO

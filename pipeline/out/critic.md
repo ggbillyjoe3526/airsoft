@@ -1,26 +1,27 @@
-Task: MC1 · Match controls and menu fixes (no task block; judged against the brief's points 1, 5, 7, 10, 11)
-Attempt: 1 of 4
-Head: 3076d2e (= git rev-parse HEAD; lint, notes, wiki and targeted GUT passed on it; full unit suite and CI still running, so this verdict holds only once CI is green on 3076d2e)
+Task: FM2 · A more detailed full-screen map (owner's playtest 2026-11-01, point 6; no task block, judged against the brief)
+Attempt: 2 of 4
+Head: f79f0a9. The checks are NOT yet green on it: they ran on 0dc04a8, and parts 2-4, smoke and licences are still running. This verdict stands only once tools/check.sh passes on f79f0a9. Critic re-ran on f79f0a9: test_fm2_qa 35/35, test_fm2_field_map 12/12, test_minimap_field 11/11, test_fm1_field_map 15/15, test_mm3_qa 14/14; gdlint clean.
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
-Score: 7/8 → Accept (one non-blocking check failed; QA Pass, performance Pass)
-Evidence for the passes, in short:
-1. Pt 1: play_session.gd:1207 _follow_hold, then ready_to_go → loading_screen.show_continue; the clock is held (_physics_process returns while _holding). Pt 5: settings_hud_page.gd:253 slider, 50 to 200 %, hud_minimap.gd:398. Pt 7: the fire press at play_session.gd:1298, _play_out :831, hold_next :1413 / round.gd:40, the match's end in test_mc1_qa:220. Pt 10: key_bindings.gd:59-62 (4, 5, G), player_input.gd:417 wheel_item never stops on the holster. Pt 11: match_rules_box.gd:28,99.
-2. ready_grenade goes through PlayerCommand; Grenades.ready_command (grenades.gd:132) is a plain sim class. hold_next is written by the session the same way end_wait already was.
-3. ready_command copies into the preallocated _readied; _play_out and wheel_item don't allocate; the skip clock's string is rebuilt only when its second changes.
-4. test_mc1.gd:328 (a held round) can't parse or pass without hold_next; QA mutation-checked its 15 tests.
+Score: 7/8 → Accept (QA Pass d694977; performance Pass on 0dc04a8, +4 % Woodland build)
+Evidence for the passes:
+1. Objectives: hud_field_map.gd:+125-150 (_goal_of, _show_round: the goal line in your team's colour), field_map_overlay.gd:+274-280 (A/B badges, overtime ring). Place names: field_map_marks.gd:+83 lay_out with gap (20, 8) and zone words via first_clear (overlay :+206). Detail: starts, dead zones, doors, compass, scale and key (overlay :+292-365, field_map_key.gd). Hearing only: test_fm2_qa :429. Screenshots of all three maps: no overlaps, and Depot's dead-zone words are left out by the rule.
+2. Presentation only reads state (c.end, round_state); nothing written. No contract touched.
+3. update(): _goal_of, set_round (packed compares, no copy), set_teams and place allocate nothing; View._draw adds one draw_texture_rect. Layout and the ground image run on change or once a match. Pinned by the allocation tests (test_fm2_field_map :273, test_fm2_qa :412).
+4. test_ground_is_tinted… (:230) fails without _colour_of; QA stubbed the zone clearing, ground_of and the wash, and the tests failed.
+5. Every tint, size, gap and alpha is in MinimapConfig; the overlay's constants are named presentation geometry; static types throughout; no globals.
+6. Airsoft-native marks (dead zones, starts, the hearing-only rule kept). Plain, readable words. No grimdark tone.
 Failed checks, with evidence:
-8. [judgment] The player-facing text says the skip is quick, but the brief's own measurements say otherwise. changelog.d/match-controls-and-menus.md:7 and docs/wiki/How-to-Play.md:41 both say the "Skipping the round" screen shows "for a moment". The record measured 101 s of Woodland in 16 s, and performance estimates about 30 s for a full round and up to a minute on weak PCs.
-   Also, MC1.md:36 says "Known issues left: None", but QA filed advisories 3 to 5 "for KNOWN_ISSUES" and they were left unfixed: the wheel from a holstered slot 1 goes to smoke, a vault drops a wheel notch onto a bomb, and a key-migration edge can leave an action keyless. The weak-PC skip time isn't recorded either. None of these has a KNOWN_ISSUES row.
-   Two comments are stale since 4960a08: play_session.gd:30 and play_tuning.gd still say the budget is "a physics frame"; it is per rendered frame now (:828).
-Must-fix (none needed for Accept; do them in this PR):
-- Reword "for a moment" in the changelog note and the wiki: the round plays out unseen, with its clock counting down.
-- Add KNOWN_ISSUES rows for QA advisories 3 to 5 and for the skip time on weak PCs, and update MC1.md › Known issues left.
-- Fix the two stale "physics frame" comments.
-Not failed, but the owner's to rule: a skip takes about as long as the old 6x fast-forward did (101 s in 16 s ≈ 6.3x), only unseen. Simulating the rest honestly can't go much faster; the sim and the bots take about 4.7 ms a tick. An instant skip means approximating the rest of the round (fewer bot thinks, or a scored result), which is his call.
-Owner should test in the game (at most 6, one line each):
-- Skip from early in a Woodland round: is the wait under the still cover acceptable on your PC, or should it be faster and less faithful?
-- Load a match: does CONTINUE appear only once the match is fully loaded, do Enter, Space and a click all start it, and is no shot fired?
-- Mouse wheel: replica → smoke → flash → replica, starting from a drawn and from a holstered replica; then throw the bomb in hand with a click.
-- Hop-up dial now only on Page Down / Page Up: is it reachable mid-fight, or does it need a closer default key?
-- Minimap zoom at 50 % and 200 %: the samples, the field and the heard-patch rims follow the slider.
-- Match page: is the Day / Night row's spacing under Ricochets and Friendly fire right?
+8. [judgment] docs/records/FM2.md › Decisions still says "Woodland … +17 % … moving the smoothing to the GPU would mean a second texture in every minimap panel". That is false at HEAD: the ground is now a GPU texture and the build is about +4 %. The branch's pipeline/out/performance.md is also still the old Fail report (head 3929b2c). The Pass report exists only in the main checkout.
+Must-fix before merge (no retry needed):
+- Commit the Pass performance.md to the branch. Rewrite the record's perf bullet (+4 %, ground is a separate small mipmapped texture under each layer). Fill in Attempts, Review and Verified once the checks are green on f79f0a9.
+Advisory (check 7, not failing):
+- MapPointer.frame (map_pointer.gd:+24) is now called only by test_fm1_qa. The flag badge is drawn twice: overlay :+319 and key :+119.
+- Comment lines over 120 characters: minimap_field.gd:8, map_pointer.gd:6.
+- settings_hud_page.gd:403 builds a View without the ground. Fine for Depot, but a terrain thumb map would show holes.
+Owner should test in the game:
+- Hold M on Woodland at 1920x1080 and 1280x720. Does the ground read (hills, river, tracks), and is it too grey or too busy?
+- The Street: are the stacked names (East / Back Gardens, Bottom Street by the dead zone) easy to read?
+- Depot: the starts' words replace "Staging" and "Loading bay". Is that fine?
+- Round 1, then after half time: does the header switch attack and defend, and do the start boxes swap colour?
+- Elimination: is the faint overtime ring clear, and does it turn solid once the flag rises?
+- The minimap now shows the new ground and green hedges. Does it still read at a glance mid-fight?

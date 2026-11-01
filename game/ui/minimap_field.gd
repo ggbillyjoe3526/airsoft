@@ -2,11 +2,11 @@ class_name MinimapField
 extends RefCounted
 ## The minimap's field drawing (the browser game's minimap layers, M23 and M34c): made once per match from MapData, one
 ## Image per storey (one on a map without storeys) at MinimapConfig.layer_scale px/m over the map's floors and sloping
-## ground, north (-z) up: ground (sloping ground all of it, as its own small picture under the layers: `ground`),
-## raised floors (with a dark rim where they drop), ramps, low cover and tall walls; ground tinted by what it is and
-## greenery green (FM2). A storey's image leaves out the blocks starting more than storey_cut above its floor and washes
-## everything below its floor darker. Built on the CPU (no renderer needed); nothing on the range. The images go with this object: drop it
-## with the session.
+## ground, north (-z) up: ground (sloping ground all of it, as its own small picture under the layers: `ground`), raised
+## floors (with a dark rim where they drop), ramps, low cover and tall walls; ground tinted by what it is and greenery
+## green (FM2). A storey's image leaves out the blocks starting more than storey_cut above its floor and washes
+## everything below its floor darker. Built on the CPU (no renderer needed); nothing on the range. The images go with
+## this object: drop it with the session.
 
 ## A pixel's middle, from its corner.
 const HALF := 0.5
