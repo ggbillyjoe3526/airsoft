@@ -251,6 +251,35 @@ func test_an_8v8_on_woodland_gives_everyone_a_spawn_and_a_dead_zone_spot_of_thei
 	assert_eq(spots.size(), 16)
 
 
+func test_an_8v8_tab_board_fits_the_screen_at_the_largest_hud_size() -> void:
+	var custom := CustomRules.new()
+	custom.team_size = 8
+	var session := PlaySession.new()
+	session.settings = Settings.new(PlayTuning.new())
+	session.settings.dev.bots_hold_fire = true
+	session.map_id = "depot"
+	session.custom_rules = custom
+	add_child_autofree(session)
+	assert_not_null(session.state, "Depot 8v8 builds")
+	if session.state == null:
+		return
+	var window := get_tree().root
+	var was := window.size
+	window.size = Vector2i(1920, 1080) # a 1080p screen (headless starts square)
+	var hud := session._hud
+	hud.set_hud_size(AccessibilityConfig.HUD_SIZE_RANGE.y)
+	session.set_physics_process(false)
+	session.set_process(false)
+	hud.show_board(true)
+	hud.update(session.state, 1.0, PlaySession.TICK)
+	var board := hud.board()
+	assert_true(board.visible, "Tab shows the board")
+	assert_eq(board.table().lines().size(), 16, "sixteen rows")
+	var foot := Hud.BOARD_TOP + board.get_combined_minimum_size().y * board.scale.y
+	assert_lte(foot, hud.size.y - Hud.SUMMARY_EDGE + 0.5, "the board ends on the screen (scale %.2f)" % board.scale.y)
+	window.size = was
+
+
 # --- the route search budget ---
 
 ## A world of `count` bots on the old yard (YardMap), each wanting a route across it.

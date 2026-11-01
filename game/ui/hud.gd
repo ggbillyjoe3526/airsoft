@@ -306,6 +306,7 @@ func setup(cfg: HudConfig, teams: TeamConfig, view: ViewConfig, sim: SimTuning, 
 	_board = HudScoreboard.new()
 	_place(_board, Vector4(0.5, 0.0, 0.5, 0.0), Rect2(0.0, BOARD_TOP, 0.0, 0.0))
 	_board.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_board.pivot_offset_ratio = Vector2(0.5, 0.0) # held smaller about its top middle (_fit_board)
 	add_child(_board)
 	_board.setup(cfg, teams, teams.colours[player.team], sim.flag.max_overtime)
 	# Whose eyes you watch through, bottom centre.
@@ -613,6 +614,15 @@ func _fit_round_result() -> void:
 		_round_result.scale = Vector2.ONE * fit
 
 
+## Holds the Tab scoreboard at the share of its size that fits between BOARD_TOP and the screen's bottom edge less
+## SUMMARY_EDGE (TS1: an 8v8's sixteen rows under a large HUD size would run off the screen).
+func _fit_board() -> void:
+	var room := size.y - SUMMARY_EDGE - BOARD_TOP
+	var fit := clampf(room / maxf(_board.get_combined_minimum_size().y, 1.0), CARDS_FIT_FLOOR, 1.0)
+	if not is_equal_approx(_board.scale.x, fit):
+		_board.scale = Vector2.ONE * fit
+
+
 ## The share (CARDS_FIT_FLOOR..1) of `height` (px) that fits between the cards' top, XP_GAP under the stack's foot, and
 ## the screen's bottom edge less SUMMARY_EDGE.
 func _height_fit(height: float) -> float:
@@ -912,6 +922,8 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 	if _stats != null:
 		_round_result.update(state, _stats, _player)
 		_board.update(state, _stats, _player, _board_wanted)
+		if _board.visible:
+			_fit_board()
 	if _xp != null:
 		_xp.visible = not _round_result.holds_results()
 	var summary_was_up := _summary.visible

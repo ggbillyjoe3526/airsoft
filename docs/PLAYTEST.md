@@ -662,6 +662,21 @@ same and throw them (SF2).
 - [ ] **Reduced motion** (Settings › Accessibility): your own flash is a softer wash, not full white.
 - [ ] **Practice range.** Throw both: they come back once the throw ends, so you can keep throwing.
 
+## Team sizes (TS1)
+
+Every field plays 6v6 by default; Custom offers 5v5, 6v6, 7v7 and 8v8 on each (owner, 2026-11-01).
+
+- [ ] **The default.** Skirmish on Depot, Woodland and The Street: the chips say 6 v 6 and twelve play.
+- [ ] **Every size, every map.** A Custom match at 5v5 and at 8v8 on each field. Every player starts on a spot of
+  their own; everyone hit walks to a spot of their own in the dead zone. Is each size fair and fun? 5v5 should feel
+  slower and more careful, 8v8 faster and busier, with rounds about as long.
+- [ ] **Depot at 8v8.** Do the squads leave the staging chicanes without queuing, and do the tunnels and doors jam?
+- [ ] **The Tab board at 8v8.** Sixteen rows, all on screen, also at Settings › HUD size 150 % (it shrinks to fit).
+- [ ] **Frame time at 8v8.** With `--perf`, an 8v8 on Woodland on Low in a busy fight: the overlay's frame time
+  and its max, and the `[perf-summary]` line at exit; the same on Depot and The Street. The cloud measured the CPU
+  only (`tools/team_bench.gd`, `docs/records/TS1.md`): about 6 ms a frame on average on Woodland, 14 ms at its
+  slowest 1 %. Note any hitch, and whether BBs ever vanish mid-flight in a big fight.
+
 ## Menus
 
 - [ ] **The title screen.** Only "AIRSOFT", the tagline "Call your hit. Go again." and **START**. The build sits small at the bottom right with **Licences** over it, a
