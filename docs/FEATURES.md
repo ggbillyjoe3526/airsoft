@@ -54,7 +54,7 @@ or drop (`docs/ROADMAP.md` › What 0.1 is).
 
 ## Menus and settings
 
-- Settings: a screen from the title screen and the pause menu for controls, audio, display and the FPS counter; every change applies and saves at once (SE1)
+- Settings: a screen from the title screen and the pause menu for controls, audio (Ambience starts at 20 %), display and the FPS counter; every change applies and saves at once (SE1)
 - HUD tab in Settings, after Display: crosshair shape, colour, size, thickness, gap, opacity, spread and outline with a live preview; hit marker; ammo counter; hit feed corner and fade; HUD panel opacity; What got you; Callouts (HO1, CO2)
 - Dev tab: cheats and tools, always there with every switch off until it is turned on: game speed, ghost, bottomless magazines, spectate bots, retro pixels, reset save (DV2), disable levelling and reset level (LV1, FB3)
 - Match screen: pick a map from picture cards (Depot or Woodland; Woodland is an open wood of 176 x 120 m on gentle slopes, a dry stream down the middle, three lanes, huts you walk into, fern beds that hide a crouched player and bushes a standing one, WR1), the mode (Elimination), your team (ALPHA or BETA) and a Bots section with two rows, Opponents and Teammates, each Easy, Normal or Hard (Teammates follow the opponents until picked), with a Rules section under the modes: Skirmish (rules as chips) or Custom (five switches: team size, from the picked map's own sizes: Depot and Woodland 5v5 or 6v6, rounds to win, round time, friendly fire, ricochets, each saved as you change it), and a Day / Night row for a map that offers both (Woodland, day first, WR1; Depot plays by day; Settings › Dev › Time of day forces either); picks stay while the game is open (MN2, MN3, WL3, WL4, WL5)
