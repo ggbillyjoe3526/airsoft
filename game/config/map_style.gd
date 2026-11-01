@@ -173,6 +173,6 @@ func is_clear(kind: StringName) -> bool:
 	return clear_kinds.has(kind)
 
 
-## Whether blocks of `kind` are bar railings (railing_kinds).
+## Whether blocks of `kind` are bar railings (railing_kinds; a kind also listed as clear is glass).
 func is_railing(kind: StringName) -> bool:
-	return railing_kinds.has(kind)
+	return railing_kinds.has(kind) and not clear_kinds.has(kind)
