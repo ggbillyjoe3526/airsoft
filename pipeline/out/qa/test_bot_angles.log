@@ -1,0 +1,43 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_bot_angles.gd
+* test_aims_just_past_a_corner_at_head_height_where_someone_would_step_out
+* test_holds_both_sides_of_a_doorway_and_nothing_in_the_open
+* test_keeps_the_better_of_two_close_picks
+* test_hard_turns_to_the_corner_instead_of_sweeping_and_looks_for_corners_only_now_and_then
+* test_finds_the_same_corners_wherever_the_enemies_are
+* test_answers_sooner_and_steadier_when_someone_steps_out_where_a_hard_bot_already_aims
+* test_changes_nothing_below_hard
+* test_hard_alone_holds_angles_and_is_no_quicker_than_normal_when_surprised
+* test_slicing_aims_at_the_corner_ahead_and_leans_out_once_close
+* test_slicing_towards_someone_heard_round_a_corner_aims_at_that_corner
+* test_hard_watches_where_someone_ducked_out_before_going_after_them_and_normal_goes_at_once
+* test_a_corner_slicer_tops_up_only_from_cover_with_a_threat_in_mind
+* test_a_hard_match_counts_for_the_records
+* test_plays_the_same_tick_for_tick_wherever_a_hidden_silent_enemy_stands_at_every_level
+14/14 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                14
+Passing Tests        14
+Asserts             255
+Time              13.152s
+
+
+---- All tests passed! ----
+

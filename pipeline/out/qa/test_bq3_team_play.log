@@ -1,0 +1,37 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_bq3_team_play.gd
+* test_a_fresh_sighting_is_told_to_teammates_near_it_after_a_moment
+* test_a_teammate_fighting_or_in_sight_of_someone_keeps_its_own
+* test_a_caller_out_before_its_call_says_nothing
+* test_easy_bots_have_no_radio
+* test_a_team_well_ahead_presses_and_the_last_one_plays_carefully
+* test_normal_and_hard_have_the_radio_and_easy_none
+* test_normal_takes_a_knee_for_each_burst_and_sidesteps_between
+* test_easy_keeps_sidestepping_as_it_shoots
+8/8 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                 8
+Passing Tests         8
+Asserts              39
+Time              3.231s
+
+
+---- All tests passed! ----
+

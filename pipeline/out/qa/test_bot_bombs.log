@@ -1,0 +1,44 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_bot_bombs.gd
+* test_the_throw_pitch_comes_down_where_it_was_aimed_and_the_high_arc_rises_higher
+* test_a_bot_s_smoke_settles_near_where_it_meant_it_to
+* test_a_pinned_bot_turns_to_its_smoke_then_throws_it_along_the_line_to_the_threat
+* test_a_pinned_bot_that_lost_sight_smokes_toward_where_it_knows_the_threat_to_be
+* test_no_smoke_out_of_cover_unpinned_too_close_or_far_or_with_a_cloud_already_there
+* test_a_searching_bot_flashes_round_the_corner_looks_away_and_the_enemy_is_dazzled_the_most
+* test_no_flash_that_would_go_off_in_the_air_over_a_wall
+* test_no_flash_at_a_spot_in_sight_too_near_or_far_by_a_teammate_or_with_none_left
+* test_a_failed_roll_waits_its_gap_before_the_next
+* test_a_throw_it_cannot_turn_to_in_time_is_given_up
+* test_an_enemy_bang_or_pop_is_heard_and_a_teammate_s_is_not
+* test_each_level_up_throws_more_often
+* test_the_bombs_rolls_are_their_own_stream
+* test_bots_throw_both_bombs_in_whole_matches_on_depot
+    bombs on Depot: 16 rounds, 8 smokes, 19 flashes, dazzled: 7 enemies, 3 teammates, 0 throwers
+14/14 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                14
+Passing Tests        14
+Asserts              67
+Time              71.788s
+
+
+---- All tests passed! ----
+

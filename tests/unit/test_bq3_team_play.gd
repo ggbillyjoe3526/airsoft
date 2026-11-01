@@ -84,7 +84,7 @@ func test_a_team_well_ahead_presses_and_the_last_one_plays_carefully() -> void:
 	_world()
 	assert_false(world.pressing(world.bots[0]), "uneven sides alone are no lead")
 	# Two more on team 1 (nobody's bots): three against four.
-	for id in [5, 6]:
+	for id: int in [5, 6]:
 		world.characters.append(Character.new(id, 1, Vector3(0.0, 0.0, 30.0), 0.0, ReplicaStats.default_loadout()))
 	world.characters[4].status = Character.Status.OUT
 	assert_false(world.pressing(world.bots[0]), "one up is not enough")
