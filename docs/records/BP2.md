@@ -89,8 +89,35 @@ list (a test reading every key `from_dict` reads would guard it) and `multiplier
 Defaults taken: a tie in difficulty names the opponents; a newer file is never written to and nothing is set aside;
 the level-0 fallback unlocks everything for the session and saves nothing.
 
+## Performance and sound (the third pull request)
+
+1. **Shaders written as code** (C): the night sky, kicked and wind dust, light pools, torch beams and Woodland's tufts
+   and air built a new `Shader` each match, so each compiled again. `CodeShaders.of` keeps one per source for the run;
+   each match still makes and frees its own materials, so no setting carries from one match to the next.
+2. **The HUD's crosshair** (C) was queued for a redraw every frame. It redraws only when what it draws changes (spread,
+   crosshair shown, the hit marker's fade, prefs, HUD size, window size).
+3. **A BB striking the far side of a thin wall** (B) played open: the ray stopped 0.2 m short of the impact, on the
+   listener's side of a 0.15 m wall. It now stops `occlusion_impact_back` (0.05 m) back along the BB's own way in,
+   always on the BB's side (KNOWN_ISSUES SP2 row). With no way in known (a bounce, a pop), the old gap stands.
+
+Verified: 97 sound and performance tests at 75af03d; QA's `tests/unit/test_bp2_perf_qa.gd` (19 tests, mutation-checked
+against the old HUD, a dropped `_gap` and a dropped prefs reset). Performance: Pass, smoke `--perf` nodes and orphans
+identical to base, no new exit warnings. QA's one catch, `_play` at eleven arguments (gdlint's limit is ten), is fixed
+by setting `_struck_along` round the impact's one `_play`. Critic: Accept 8/8.
+
+Decisions: 0.05 m lies inside the path the BB just flew, so on its own side of any wall; the impact's direction rides in
+a member (`_struck_along`) because gdlint caps a function at ten arguments.
+
+Can wait (critic and performance advisories): within 0.2 m of the ears an impact now costs one ray where it cost
+none; a BB that bounces and strikes again within 5 cm (a tight inside corner) can play its second impact muffled
+(KNOWN_ISSUES); `_struck_along` is a side channel safe while `_play` plays one sound.
+
+Left from the readers, not fixed here: Depot's doors 5 and 8 fold with their leaf tips about 5 cm into the wall
+(KNOWN_ISSUES); the reflection probe count on the open maps is unmeasured (needs a GPU).
+
 ## Known issues left
 
-- None new. Rows deleted: a newer build's loadouts file written over (D); the 4K menu scale in play, stale since UI1 set
+- New: an impact in a tight inside corner; Depot doors 5 and 8 (third pull request). Rows deleted: the BB impact on a
+  wall's far face (SP2); a newer build's loadouts file written over (D); the 4K menu scale in play, stale since UI1 set
   MAX_SCALE to 2.0 so menus and play both draw at 2x (D). Rows changed: the MC1 controls row keeps only the old-save
   part; the FM1 map row keeps only the order keys.

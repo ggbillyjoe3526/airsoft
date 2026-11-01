@@ -1037,6 +1037,12 @@ The 0.1 Dev 2 bug pass's fixes that need eyes on a real display or hands on the 
 - [ ] **Finish a match with Hard bots against Easy teammates:** the XP card says "Easy teammates × …". A Custom match
   below the cap says "Custom rules".
 - [ ] **Rename a loadout and close the window while typing:** the name is there on the next start.
+- [ ] **Two night matches in a row on Woodland:** the second loads and plays its first seconds without a hitch, and a
+  Depot night then a Woodland night keep each map's own sky, dust, light pools and torch beams.
+- [ ] **The crosshair:** it widens when you sprint or fire and narrows after, follows a zoom, a crosshair setting
+  changed from the pause menu and a window resize, and the hit marker fades out fully.
+- [ ] **Behind a thin wall or a shut Depot door while a bot hits its far side:** the smack is muffled; a hit on your
+  side, or a BB grazing the floor in front of you, sounds open.
 
 ## Reporting what you find
 

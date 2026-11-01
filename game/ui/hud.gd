@@ -162,6 +162,10 @@ var _banner_left: float = 0.0
 var _hop_left: float = 0.0
 var _gap: float = 0.0
 var _show_cross: bool = true
+## What the crosshair and the hit marker were last drawn with (gap, marker left, crosshair shown, HUD size) and the
+## size drawn at: drawn again only when one changes (BP2), never every frame for nothing. NAN: draw on the next frame.
+var _drawn_with: Vector4 = Vector4(NAN, NAN, NAN, NAN)
+var _drawn_at: Vector2 = Vector2.ZERO
 ## The slot the hop-up readout is about.
 var _hop_slot: int = -1
 ## The HUD tab's choices (apply_prefs).
@@ -528,6 +532,8 @@ func board() -> HudScoreboard:
 ## opacity. Callouts switched off take their lines out of the feed at once.
 func apply_prefs(prefs: HudPrefs) -> void:
 	_prefs = prefs
+	# the crosshair's own look (colour, shape) may have changed: draw it again
+	_drawn_with = Vector4(NAN, NAN, NAN, NAN)
 	var right := prefs.feed_corner == HudPrefs.FeedCorner.TOP_RIGHT
 	var where := HudFeed.Place.TOP_RIGHT if right else HudFeed.Place.BOTTOM_LEFT
 	if where != _feed.corner:
@@ -982,6 +988,17 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 	_hits.prune(state.time)
 	_feed.fit(_feed_room())
 	_feed.refresh(_hits, state.time, state.characters, _player)
+	_redraw_if_changed()
+
+
+## Draws the crosshair and the hit marker again if what they show changed since they were last drawn.
+func _redraw_if_changed() -> void:
+	var marker := _marker_left if _prefs.marker else 0.0
+	var now := Vector4(_gap, marker, 1.0 if _show_cross else 0.0, _hud_size)
+	if now == _drawn_with and size == _drawn_at:
+		return
+	_drawn_with = now
+	_drawn_at = size
 	queue_redraw()
 
 
