@@ -2,13 +2,13 @@
 
 From the owner's playtest of 2026-11-01 (points 1, 5, 7, 10 and 11).
 
-**Review:** pending
+**Review:** critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-01 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-01 | 1 | thread | CI | Accept 7/8 | – (check 8: "for a moment" wording, KNOWN_ISSUES rows, two stale comments; fixed in this PR) |
 
 ## Decisions
 
@@ -33,4 +33,4 @@ From the owner's playtest of 2026-11-01 (points 1, 5, 7, 10 and 11).
 
 ## Known issues left
 
-- None.
+- The skip's length on a weak PC, and QA's three wheel and key-migration edges (KNOWN_ISSUES, Play and Controls).

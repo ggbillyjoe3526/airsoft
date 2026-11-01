@@ -37,11 +37,11 @@ is played again under the same number.
 
 ### Skipping the rest of the round
 
-Once you're out, click (**Fire**) and the rest of the round is played out at once, unseen: a plain screen says
-**Skipping the round** for a moment, then the round's result shows. Click it for the next round, which waits for you;
-after the match's last round the results follow. A hint at the bottom of the screen reminds you, using your own Fire
-key, and the pause menu has **Skip to next round** while you can skip. The trigger held as you were hit doesn't skip:
-let go and click again.
+Once you're out, click (**Fire**) and the rest of the round is played out unseen, as fast as your computer allows: a
+plain screen says **Skipping the round** with the round's clock counting down, then the round's result shows. Click it
+for the next round, which waits for you; after the match's last round the results follow. A hint at the bottom of the
+screen reminds you, using your own Fire key, and the pause menu has **Skip to next round** while you can skip. The
+trigger held as you were hit doesn't skip: let go and click again.
 
 ## BBs are real projectiles
 

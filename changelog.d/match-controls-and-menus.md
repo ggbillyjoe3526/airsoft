@@ -4,7 +4,7 @@
 
 ### Click to skip a round
 - Out of a round, click (Fire) to skip it instead of holding Space.
-- The rest of the round is played out at once, unseen: a "Skipping the round" screen shows for a moment, with no fast-forward and no sound.
+- The rest of the round is played out unseen, as fast as your computer allows: a "Skipping the round" screen shows the round's clock counting down, with no fast-forward and no sound.
 - The round's result shows, and the next round waits for your click. After the last round, the match's results follow.
 - The pause menu's Skip to next round does the same.
 

@@ -35,7 +35,7 @@ const DEFAULT_PATH := "res://game/config/play_tuning.tres"
 ## the last round's table makes way.
 @export var rematch_delay: float = 15.0
 ## Out, a press of the trigger skips the round (MC1): the rest is played out as fast as the computer allows, this many
-## milliseconds of ticks each physics frame until it ends. The cover is still, so a long frame costs nothing seen: most
+## milliseconds of ticks each rendered frame until it ends. The cover is still, so a long frame costs nothing seen: most
 ## of the time goes to ticks (a Woodland tick of ten bots is a few ms).
 @export var skip_budget_ms: float = 50.0
 ## With the loading screen's Continue (MC1): the longest (s) the shaders' warm-up may keep it hidden after the match is

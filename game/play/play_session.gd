@@ -27,7 +27,7 @@ extends Node3D
 ## fully loaded (drawn once and its shaders warm, or PlayTuning.go_fallback after the first frame at the latest), for
 ## the loading screen's Continue.
 ## Out of a live round, a fresh press of the trigger (or the pause menu's Skip to next round) skips the rest of it (MC1,
-## owner 2026-11-01): it is played out at once, as fast as the frame allows (PlayTuning.skip_budget_ms a physics frame),
+## owner 2026-11-01): it is played out at once, as fast as the frame allows (PlayTuning.skip_budget_ms a rendered frame),
 ## silently and under a plain cover, never shown fast-forwarded; then the round's table shows and the next round waits
 ## for a click on it (RoundState.hold_next), or the match's summary follows the last round's.
 

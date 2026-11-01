@@ -11,6 +11,8 @@ Every open bug, limit and known gap in the game, so nobody re-reports or re-meas
 
 | Area | Issue | Class | Found |
 |---|---|---|---|
+| Play | Skipping a round plays its rest out honestly, as fast as the computer allows (MC1): headless in the cloud 101 s of Woodland took about 16 s and 26 s of Depot about 6 s, so a whole round may take about 30 s, longer on a weak PC. Faster means approximating the rest (fewer bot thinks or a scored result), the owner's call | playtest | 2026-11-01 |
+| Controls | The mouse wheel from a holstered replica takes the smoke in hand instead of drawing the other replica; a wheel notch onto a bomb during a vault is lost (one onto a replica is kept). An old save holding a moved default (4, 5, G) on another action of the player's leaves the moved action keyless, with no hint, until set in Settings › Controls (MC1 QA) | can wait | 2026-11-01 |
 | Bots | The Street's glass (the House's windows, the bus shelter) is solid to the one ray BBs and sight share, so bots don't see through it as players do; a ray that sees through glass but stops BBs waits for a follow-up (ST1) | can wait | 2026-11-01 |
 | Art | The Street's railings, fences, hedges, kiosks, the bus shelter and the roadworks are still plain blocks in palette colours; its cars, vans, lorries, bins, skips, lamps, trees and the House's furniture are CC0 models (ST2). A bake would draw its glass solid (it has none) (ST1) | document | 2026-11-01 |
 | Art | Woodland's doors, flag poles and skyline aren't in the shared light yet: the doors and poles (Depot's too) are still StandardMaterial3D, and the skyline's far treelines are unshaded; the grass tufts keep their own light, as two-sided blades would take the rim on every back face (WA1) | can wait | 2026-10-31 |
