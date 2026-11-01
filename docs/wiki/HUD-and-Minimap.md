@@ -52,7 +52,9 @@ the minimap when it is off screen, and the minimap shows the chequered flag at i
 
 Your [ping](Squad-Orders#pings) is a ring in your team's colour just over the floor with **PING** and its distance
 under it ("PING · 9 M"), and a soft pip in your ear. A teammate's Contact mark is a diamond in the other team's colour
-over the enemy's head where they were seen ("CONTACT · 13 M"); it stays there and never follows them. Markers are seen
+over the enemy's head where they were seen ("CONTACT · 13 M"); it stays there and never follows them. A teammate
+[asking for you](Bots#your-teammates-ask-for-you) pings a ring marked with what it wants: "HELP · 40 M", "GO · 25 M"
+or "COVER · 30 M". Markers are seen
 through cover, pop in, stay 7 seconds and fade over the last one. Off screen they are pinned inside the edge under the
 minimap with an arrow the way they are. They hide while you watch a teammate, with the scoreboard up and in the pause
 menu. Settings › HUD › Ping markers turns them off.

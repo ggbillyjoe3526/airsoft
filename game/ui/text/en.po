@@ -172,6 +172,14 @@ msgstr "Ping · %d m"
 msgid "HUD_CONTACT_MARKER"
 msgstr "Contact · %d m"
 
+# A bot teammate's ask (BQ2): come and help it, cover it on the flag; and how far it is. Go round reads
+# HUD_GO_MARKER, as Go there does.
+msgid "HUD_HELP_MARKER"
+msgstr "Help · %d m"
+
+msgid "HUD_COVER_MARKER"
+msgstr "Cover · %d m"
+
 msgid "HUD_ORDER_ACTIVE"
 msgstr "Active"
 

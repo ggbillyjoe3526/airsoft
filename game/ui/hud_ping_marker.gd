@@ -36,6 +36,9 @@ const FEATHER := 1.0
 ## The pop's easing: out, so it pops up and settles (the overtime flag's rise).
 const POP_EASE := 0.4
 
+## A spot's words by what it asks (Pings.Ask): a plain ping's, Help, Go, Cover (BQ2).
+const ASK_KEYS: PackedStringArray = ["HUD_PING_MARKER", "HUD_HELP_MARKER", "HUD_GO_MARKER", "HUD_COVER_MARKER"]
+
 var _cfg: HudConfig = null
 ## The field look's glyphs, its words' font, the words and where they start (drawn in _draw).
 var _ring: Mark = null
@@ -50,6 +53,7 @@ var _chevron: Glyph = null
 var _edge_icon: Glyph = null
 var _edge_words: Label = null
 var _kind: Pings.Kind = Pings.Kind.SPOT
+var _ask: Pings.Ask = Pings.Ask.NONE
 var _colour := Color.TRANSPARENT
 var _metres: int = -1
 var _pinned: bool = false
@@ -85,15 +89,17 @@ func setup(cfg: HudConfig) -> void:
 			HudStyle.SPACING_AIM)
 
 
-## Shows a ping of `kind` in `colour`, `metres` away: the glyph and the words change only when these do.
-func set_ping(kind: Pings.Kind, colour: Color, metres: int) -> void:
-	if kind == _kind and colour == _colour and metres == _metres:
+## Shows a ping of `kind` in `colour`, `metres` away, asking `ask` of you (a bot teammate's, BQ2: its words say what):
+## the glyph and the words change only when these do.
+func set_ping(kind: Pings.Kind, colour: Color, metres: int, ask: Pings.Ask = Pings.Ask.NONE) -> void:
+	if kind == _kind and colour == _colour and metres == _metres and ask == _ask:
 		return
 	_kind = kind
 	_colour = colour
 	_metres = metres
+	_ask = ask
 	_shape = Shape.DIAMOND if kind == Pings.Kind.CONTACT else Shape.RING
-	var key := "HUD_CONTACT_MARKER" if kind == Pings.Kind.CONTACT else "HUD_PING_MARKER"
+	var key := "HUD_CONTACT_MARKER" if kind == Pings.Kind.CONTACT else ASK_KEYS[ask]
 	_text = (tr(key) % metres).to_upper()
 	if _pinned:
 		_fill_edge()

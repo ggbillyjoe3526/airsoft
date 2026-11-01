@@ -14,3 +14,7 @@ extends Resource
 @export var queue: int = 3
 ## Said calls kept for the presentation to read (CalloutLog), the oldest overwritten: at most two a tick are said.
 @export var log_size: int = 16
+## A Go round ask's spot (BQ2) is the nearest walkable floor within this (m) of the point to the enemy's side.
+@export var ask_snap: float = 4.0
+## The point beside the enemy is lifted this (m) above its feet before snapping, so it finds the floor it stands on.
+@export var ask_lift: float = 1.0

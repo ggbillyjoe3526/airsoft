@@ -77,6 +77,8 @@ func _init(state: GameState, player_id: int, map: MapData, nav: NavGrid, query: 
 	if talk:
 		callouts = Callouts.new(CalloutsFile.shared(), config.callouts, map.areas, state.match_seed)
 		callouts.pings = pings
+		# The bots on your team ask for you (BQ2); with no player (the autopilot), nobody asks.
+		callouts.you = state.character(player_id) if player_id >= 0 else null
 
 
 ## Writes each bot's command for this tick into `commands` (indexed by character id). With the Dev settings' Bots hold

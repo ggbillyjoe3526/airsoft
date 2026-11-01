@@ -10,6 +10,9 @@ extends RefCounted
 
 ## What a ping marks: a spot on the field, or an enemy seen there.
 enum Kind { SPOT, CONTACT }
+## What a bot teammate's spot ping asks of you (BQ2, Callouts' asks): nothing (a press, a mark), to come and help it, to
+## go round to the spot, to cover it on the flag.
+enum Ask { NONE, HELP, GO, COVER }
 
 ## A PING event's value for a ping placed on the full-screen map at its position (FM1); 1 is one along the view that met
 ## the field, 0 one at nothing.
@@ -19,7 +22,7 @@ const ON_MAP := GameEvent.PING_ON_MAP
 ## One character's ping: who placed it and their team, what it marks, where the marker goes (the point the view met, or
 ## the enemy's chest), the floor spot the bots go to or watch (the nearest walkable one to the point, or the enemy's
 ## feet), the enemy marked (character id, -1 for a spot), when (s of match time; -INF: none) and whether it is a
-## teammate's mark from a call rather than a press.
+## teammate's mark (or ask, BQ2) from a call rather than a press, and what it asks.
 class Ping:
 	extends RefCounted
 	var owner: int = -1
@@ -30,6 +33,7 @@ class Ping:
 	var enemy_id: int = -1
 	var at: float = -INF
 	var marked: bool = false
+	var ask: Ask = Ask.NONE
 
 
 ## Pings placed this match, marks included (the serial the next one gets): the HUD hears a new one by it.
@@ -69,6 +73,7 @@ func clear() -> void:
 	for p in _book:
 		p.at = -INF
 		p.marked = false
+		p.ask = Ask.NONE
 
 
 ## A PING event `e` (Simulation): where its pinger's view points becomes their ping, at `now` (s of match time), and
@@ -146,6 +151,26 @@ func mark(caller: Character, enemy: Character, now: float, w: BotWorld) -> void:
 	_placed(p, caller, now, true)
 
 
+## A bot teammate's ask (BQ2: Callouts, data/callouts.md › Asks): `caller`'s ping, a spot at `spot` (a floor point)
+## asking `what` of its team's players now (`now`, s of match time), in the book only: no bot takes it.
+func ask(caller: Character, spot: Vector3, what: Ask, now: float) -> void:
+	var p := of(caller.id)
+	if p == null:
+		return
+	p.kind = Kind.SPOT
+	p.enemy_id = -1
+	p.point = spot
+	p.spot = spot
+	_placed(p, caller, now, true)
+	p.ask = what
+
+
+## Whether character `id`'s ping is an ask still up at `now` (a mark doesn't overwrite one).
+func asking(id: int, now: float) -> bool:
+	var p := of(id)
+	return is_up(p, now) and p.ask != Ask.NONE
+
+
 ## Bot `b` hears a teammate's ping (the browser game's takePing): its spot becomes the bot's last-known one, as a noise
 ## heard there exactly and kept in mind BotConfig.ping_memory (Bot.ping_in_mind), and the bot's own play decides what it
 ## does (BotBrain): a search the way its personality searches; a defender or an anchor holding watches it from its post
@@ -175,6 +200,7 @@ func _placed(p: Ping, owner: Character, now: float, marked: bool) -> void:
 	p.team = owner.team
 	p.at = now
 	p.marked = marked
+	p.ask = Ask.NONE
 	placed += 1
 
 

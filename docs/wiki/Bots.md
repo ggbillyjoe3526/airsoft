@@ -93,6 +93,15 @@ flag going up. A team speaks one call at a time, a moment apart, the most urgent
 lines and talks more or less. Hit players never talk, and what a bot says never changes how anyone plays. You see
 only your own team's words; an enemy close by is heard keying their radio.
 
+### Your teammates ask for you
+
+A bot on your team can ask you over with a ping as well as words, when you are far from it: **Need help** when it is
+fighting two or more at once, or defends the pole the other team starts raising the flag on; **Go round** when it has
+traded looks with one enemy for a while, pinging a spot to their side for you to flank from; **Cover me** when it
+starts raising the flag. The team asks at most once every 30 s and three times a round, so an ask always means
+something. The ping shows like yours, marked HELP, GO or COVER with its distance; nobody else changes what they do for
+it, so it's your call whether to go.
+
 ## The overtime flag
 
 When Elimination's [overtime flag](Modes#the-overtime-flag) goes up, every bot sets off to touch

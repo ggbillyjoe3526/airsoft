@@ -526,6 +526,10 @@ You're on Alpha (blue) with two bot teammates against three Beta (orange) bots b
   sighting near them keeps them there. Is 30 s right?
 - [ ] **Glass on The Street (BQ1).** Stand behind the House's window and let a bot outside see you: it squares up but
   doesn't shoot the glass, then comes round by a door. Glass is no cover from its eyes.
+- [ ] **Teammates ask for you (BQ2).** Stay back while your bots fight: one fighting two at once calls "Need help"
+  with a HELP ping where it is; one stuck trading shots with a single enemy for a while calls "Go round" with a GO ping
+  beside the enemy; in Attack / Defend the raiser calls "Cover me" with a COVER ping on the pole. At most one ask every
+  30 s, three a round. Are they useful, and not too often?
 - [ ] **Anchors (BP5).** In Elimination with over a minute left, give an anchor teammate Follow me (F), then end it
   with F again: it goes hunting.
 

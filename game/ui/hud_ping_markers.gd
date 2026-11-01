@@ -75,7 +75,8 @@ func place(camera: Camera3D, book: Pings, now: float, show: bool, area: Vector2,
 		var contact := p.kind == Pings.Kind.CONTACT
 		var anchor := p.point + Vector3.UP * _cfg.ping_contact_lift if contact \
 				else p.spot + Vector3.UP * _cfg.ping_spot_height
-		m.set_ping(p.kind, _other if contact else _own, roundi(Vector2(anchor.x - eye.x, anchor.z - eye.z).length()))
+		m.set_ping(p.kind, _other if contact else _own, roundi(Vector2(anchor.x - eye.x, anchor.z - eye.z).length()),
+				p.ask)
 		m.set_age(now - p.at, _life, pops)
 		var behind := camera.is_position_behind(anchor)
 		var at := Vector2.ZERO if behind else camera.unproject_position(anchor) / hud_size

@@ -107,7 +107,10 @@ After each step (`BotController.observe`) the bots put what they just did into w
 `data/callouts.md` says: a fresh sighting (Contact, Contacts), a noise while nobody on the team sees anyone (Heard), the
 team's hits (Down, Last one), a reload under threat, setting off after someone (Pushing, Flanking, Checking), settling
 at a hold, and the flag going up (Raising, Flag). One call a team at a time, at the file's pace; hit players never talk.
-The calls go into `CalloutLog` and nothing reads them yet (CO2 shows them). The director draws on its own stream, so a
+The calls go into `CalloutLog` and nothing reads them yet (CO2 shows them). The bots on your team also ask for you
+(BQ2, callouts.md › Asks): Need help (fighting two or more, or defending the pole being raised), Go round (a stand-off:
+a spot to the enemy's side) and Cover me (raising the flag), each pinging its spot in the ping book (`Pings.ask`) while
+you are in play and far off, at most once in the Asks gap and a few times a round; no bot takes an ask. The director draws on its own stream, so a
 match plays the same with the callouts or without (`tests/guards/test_callout_guards.gd`).
 
 ## Not yet
