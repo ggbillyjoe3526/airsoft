@@ -304,7 +304,8 @@ class View:
 	var _rot: float = 0.0
 	var _arrow_rot: float = 0.0
 	var _ppm: float = 1.0
-	var _half: float = 0.0
+	## Half the panel's width and height (px): a square on the minimap, the room left on the full-screen map.
+	var _half: Vector2 = Vector2.ZERO
 	var _team: Color = Color.WHITE
 	var _enemy: Color = Color.WHITE
 	var _dots := PackedVector2Array()
@@ -397,8 +398,8 @@ class View:
 		_you_at = centre
 		_clear()
 
-	## Starts a frame of the whole field (the full-screen map, FM1): the field's drawing fitted in the square, `fill`
-	## of its side, north up, the white arrow at the world's `you` turned by `yaw`; otherwise as begin.
+	## Starts a frame of the whole field (the full-screen map, FM1): the field's drawing fitted in the panel, `fit` of
+	## the room it allows, north up, the white arrow at the world's `you` turned by `yaw`; otherwise as begin.
 	func begin_whole(you: Vector2, layer: int, yaw: float, team: Color, enemy: Color, fit: float) -> void:
 		_layer = layer
 		_rot = 0.0
@@ -410,11 +411,11 @@ class View:
 		_clear()
 
 	## The whole field's frame without drawing (the full-screen map frames its pointer from it while shut): the field
-	## centred, `fit` of the square's side.
+	## centred, as big as the panel allows times `fit`, its shape kept.
 	func fit_whole(fit: float) -> void:
-		var world := field_size()
-		_centre = _origin + world * 0.5
-		_ppm = size.x * fit / maxf(maxf(world.x, world.y), 1.0)
+		var world := field_size().max(Vector2.ONE)
+		_centre = _origin + field_size() * 0.5
+		_ppm = minf(size.x / world.x, size.y / world.y) * fit
 
 	## The field's drawing's size (m; zero with no drawing).
 	func field_size() -> Vector2:
@@ -434,7 +435,7 @@ class View:
 		return _to_panel(at)
 
 	func _clear() -> void:
-		_half = size.x * 0.5
+		_half = size * 0.5
 		_dot_count = 0
 		_patch_count = 0
 		_pole_count = 0
@@ -538,13 +539,13 @@ class View:
 
 	## `p` held inside the panel `pad` px from its edge, towards where it is.
 	func _pin(p: Vector2, pad: float) -> Vector2:
-		var limit := _half - pad
-		var m := maxf(absf(p.x), absf(p.y))
-		return p if m <= limit else p * (limit / m)
+		var limit := (_half - Vector2(pad, pad)).max(Vector2.ONE)
+		var m := maxf(absf(p.x) / limit.x, absf(p.y) / limit.y)
+		return p if m <= 1.0 else p / m
 
 	## Whether the panel's point `p` lies off the panel: a patch there is only a mark on the rim, one on it is drawn whole.
 	func _off(p: Vector2) -> bool:
-		return absf(p.x) > _half or absf(p.y) > _half
+		return absf(p.x) > _half.x or absf(p.y) > _half.y
 
 	## Footsteps: a faint disc inside a dashed ring on a dark outline.
 	func _draw_step(i: int, mid: Vector2) -> void:

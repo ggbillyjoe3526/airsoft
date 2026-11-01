@@ -3468,3 +3468,82 @@ msgstr "Quit"
 
 msgid "QUIT_CANCEL"
 msgstr "Cancel"
+
+# The full-screen map's header (FM2): what your side must do this round (%s: the flags' letters, "A / B").
+msgid "MAP_GOAL_ATTACK"
+msgstr "You attack: raise the flag at %s"
+
+msgid "MAP_GOAL_ATTACK_ONE"
+msgstr "You attack: raise the flag"
+
+msgid "MAP_GOAL_DEFEND"
+msgstr "You defend: hold %s until time runs out"
+
+msgid "MAP_GOAL_DEFEND_ONE"
+msgstr "You defend: hold the flag until time runs out"
+
+msgid "MAP_GOAL_ELIMINATION"
+msgstr "Knock out the other team"
+
+msgid "MAP_GOAL_OVERTIME"
+msgstr "Overtime: raise the flag or knock them out"
+
+# The full-screen map's marks (FM2): an end's start (%s: the team's name), the dead zone, north, the scale bar
+# (%d: metres).
+msgid "MAP_START"
+msgstr "%s start"
+
+msgid "MAP_DEAD_ZONE"
+msgstr "Dead zone"
+
+msgid "MAP_NORTH"
+msgstr "N"
+
+msgid "MAP_SCALE"
+msgstr "%d m"
+
+# The full-screen map's key (FM2).
+msgid "MAP_KEY"
+msgstr "Key"
+
+msgid "MAP_KEY_YOU"
+msgstr "You"
+
+msgid "MAP_KEY_MATE"
+msgstr "Teammate"
+
+msgid "MAP_KEY_OUT"
+msgstr "Teammate out"
+
+msgid "MAP_KEY_STEPS"
+msgstr "Heard moving"
+
+msgid "MAP_KEY_SHOT"
+msgstr "Heard shooting"
+
+msgid "MAP_KEY_PING"
+msgstr "Ping"
+
+msgid "MAP_KEY_ORDER"
+msgstr "Go there / Hold"
+
+msgid "MAP_KEY_FLAG"
+msgstr "Flag"
+
+msgid "MAP_KEY_START"
+msgstr "Start"
+
+msgid "MAP_KEY_DEAD"
+msgstr "Dead zone"
+
+msgid "MAP_KEY_DOOR"
+msgstr "Door"
+
+msgid "MAP_KEY_LOW"
+msgstr "Low cover"
+
+msgid "MAP_KEY_WALL"
+msgstr "Wall"
+
+msgid "MAP_KEY_GREEN"
+msgstr "Hedge, thicket"
