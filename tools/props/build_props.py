@@ -30,7 +30,14 @@ SHADE_KEEP = 0.6
 # written linear as glTF keeps vertex colours). Every colour stays off the teams' hues (tests/unit/test_props.gd).
 # A "palette" model's parts are its texture's colour families: "warm" is a pixel whose hue is red to yellow and
 # saturated, "cool" any other; a "nodes" model's parts are its nodes' names and a "materials" model's its materials'
-# names; a "texture" model is one part. A textured model keeps its texture's light and shade within each part.
+# names; a "texture" model is one part. A "paint" model's parts are its texture's paintwork ("paint": any saturated
+# pixel, a vehicle's body colour and its lamps), its pale glass and chrome ("light"), its tyres and underside ("dark")
+# and the rest ("trim": bumpers and sills). A textured model keeps its texture's light and shade within each part.
+# The Street's vehicles' glass, trim and tyres (ST2): pale sea-green glass (a blue one reads as Alpha's at its
+# lightest), the look's grey and rubber.
+GLASS = (0.8, 0.85, 0.84)
+TRIM = (0.549, 0.541, 0.588)
+TYRE = (0.239, 0.231, 0.271)
 RECIPES = {
     # Steel drums in the look's crimson with steel hoops (the hall's barrel blocks: two upright a block). The colours
     # are docs/ART.md's palette (LookConfig.palette).
@@ -73,6 +80,62 @@ RECIPES = {
               "colours": {"body": (0.463, 0.345, 0.667), "wheel-front-right": (0.239, 0.231, 0.271),
                           "wheel-front-left": (0.239, 0.231, 0.271), "wheel-back-right": (0.239, 0.231, 0.271),
                           "wheel-back-left": (0.239, 0.231, 0.271)}},
+    # The Street (ST2), every colour the look's palette's (LookConfig.palette) and the colour its block is drawn in
+    # without its prop (tools/street/build_map.py). Vehicles: the body painted over the source's orange, blue or
+    # green, pale glass (a box lorry's cab cream), grey bumpers and sills, dark tyres. Parked cars come in three
+    # bodies in turn.
+    "car_crimson": {"source": "car/sedan.glb", "parts": "paint",
+        "colours": {"paint": (0.761, 0.22, 0.455), "light": GLASS, "trim": TRIM, "dark": TYRE}},
+    "car_teal": {"source": "car/hatchback-sports.glb", "parts": "paint",
+        "colours": {"paint": (0.165, 0.612, 0.565), "light": GLASS, "trim": TRIM, "dark": TYRE}},
+    "car_cream": {"source": "car/suv.glb", "parts": "paint",
+        "colours": {"paint": (0.957, 0.925, 0.855), "light": GLASS, "trim": TRIM, "dark": TYRE}},
+    "car_lilac": {"source": "car/sedan.glb", "parts": "paint",
+        "colours": {"paint": (0.725, 0.659, 0.839), "light": GLASS, "trim": TRIM, "dark": TYRE}},
+    "car_yellow": {"source": "car/hatchback-sports.glb", "parts": "paint",
+        "colours": {"paint": (0.894, 0.792, 0.275), "light": GLASS, "trim": TRIM, "dark": TYRE}},
+    "car_green": {"source": "car/suv.glb", "parts": "paint",
+        "colours": {"paint": (0.345, 0.565, 0.306), "light": GLASS, "trim": TRIM, "dark": TYRE}},
+    "car_grey": {"source": "car/sedan.glb", "parts": "paint",
+        "colours": {"paint": (0.549, 0.541, 0.588), "light": GLASS, "trim": TRIM, "dark": TYRE}},
+    "van_cream": {"source": "car/van.glb", "parts": "paint",
+        "colours": {"paint": (0.957, 0.925, 0.855), "light": GLASS, "trim": TRIM, "dark": TYRE}},
+    "van_plaster": {"source": "car/van.glb", "parts": "paint",
+        "colours": {"paint": (0.925, 0.886, 0.812), "light": GLASS, "trim": TRIM, "dark": TYRE}},
+    "van_teal": {"source": "car/van.glb", "parts": "paint",
+        "colours": {"paint": (0.165, 0.612, 0.565), "light": GLASS, "trim": TRIM, "dark": TYRE}},
+    "van_grey": {"source": "car/van.glb", "parts": "paint",
+        "colours": {"paint": (0.549, 0.541, 0.588), "light": GLASS, "trim": TRIM, "dark": TYRE}},
+    "lorry_crimson": {"source": "car/delivery.glb", "parts": "paint",
+        "colours": {"paint": (0.761, 0.22, 0.455), "light": (0.925, 0.886, 0.812), "trim": TRIM, "dark": TYRE}},
+    "lorry_teal": {"source": "car/delivery.glb", "parts": "paint",
+        "colours": {"paint": (0.165, 0.612, 0.565), "light": (0.925, 0.886, 0.812), "trim": TRIM, "dark": TYRE}},
+    "lorry_cream": {"source": "car/delivery.glb", "parts": "paint",
+        "colours": {"paint": (0.957, 0.925, 0.855), "light": (0.925, 0.886, 0.812), "trim": TRIM, "dark": TYRE}},
+    # Bins: two a bin block, each body in its block's colour with a dark lid.
+    "bin_green": {"source": "furniture/trashcan.glb", "parts": "materials",
+        "colours": {"metal": (0.345, 0.565, 0.306), "metalDark": TYRE}},
+    "bin_steel": {"source": "furniture/trashcan.glb", "parts": "materials",
+        "colours": {"metal": (0.424, 0.416, 0.478), "metalDark": TYRE}},
+    "bin_teal": {"source": "furniture/trashcan.glb", "parts": "materials",
+        "colours": {"metal": (0.165, 0.612, 0.565), "metalDark": TYRE}},
+    # A skip, yellow with a dark lid.
+    "skip": {"source": "retro-urban/detail-dumpster-closed.glb", "parts": "materials",
+             "colours": {"wall_metal": (0.894, 0.792, 0.275), "wall": (0.894, 0.792, 0.275), "roof": TYRE}},
+    # A street lamp in steel.
+    "lamp": {"source": "city-roads/light-square.glb", "parts": "texture", "colours": {"all": (0.424, 0.416, 0.478)}},
+    # The House's settees, teal cushions on timber feet (the sofa's violet reads as Alpha's blue indoors, crimson as
+    # Beta's red); its dining table in timber; its kitchen units cream under a timber top (steel reads navy indoors); its
+    # fridge.
+    "settee": {"source": "furniture/loungeSofa.glb", "parts": "materials",
+               "colours": {"carpet": (0.165, 0.612, 0.565), "wood": (0.627, 0.580, 0.486)}},
+    "table": {"source": "furniture/table.glb", "parts": "materials", "colours": {"wood": (0.627, 0.58, 0.486)}},
+    "units": {"source": "furniture/kitchenCabinet.glb", "parts": "materials",
+              "colours": {"metal": (0.627, 0.580, 0.486), "wood": (0.957, 0.925, 0.855),
+                          "woodDark": (0.627, 0.580, 0.486)}},
+    "fridge": {"source": "furniture/kitchenFridge.glb", "parts": "materials",
+               "colours": {"metalLight": (0.957, 0.925, 0.855), "metal": (0.957, 0.925, 0.855),
+                           "metalDark": (0.424, 0.416, 0.478), "glass": GLASS}},
 }
 
 # A recipe's "turn" stands the model another way up before it is written: "z_up" turns its z axis up (a log on end),
@@ -137,6 +200,11 @@ def apply(m, v, w):
     return tuple(m[i][0] * v[0] + m[i][1] * v[1] + m[i][2] * v[2] + m[i][3] * w for i in range(3))
 
 
+def paint_of_pixel(rgb):
+    _, s, v = colorsys.rgb_to_hsv(*[c / 255.0 for c in rgb])
+    return "paint" if s > 0.35 else ("light" if v > 0.75 else ("dark" if v < 0.3 else "trim"))
+
+
 def part_of_pixel(rgb):
     h, s, _ = colorsys.rgb_to_hsv(*[c / 255.0 for c in rgb])
     return "warm" if s > 0.35 and (h < 1.0 / 6.0 or h > 11.0 / 12.0) else "cool"
@@ -180,7 +248,8 @@ def build(kenney, name, recipe):
                 else:
                     w, h = image.size
                     rgb = image.getpixel((min(w - 1, int(uv[k][0] * w)), min(h - 1, int(uv[k][1] * h))))
-                    part = {"palette": part_of_pixel(rgb), "nodes": node.get("name", "")}.get(recipe["parts"], "all")
+                    part = {"palette": part_of_pixel(rgb), "paint": paint_of_pixel(rgb),
+                            "nodes": node.get("name", "")}.get(recipe["parts"], "all")
                     parts.append(part)
                     shades.append(luminance(rgb))
             idx = accessor(gltf, binary, prim["indices"]) if "indices" in prim else [(i,) for i in range(len(pos))]

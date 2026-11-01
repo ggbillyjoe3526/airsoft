@@ -46,13 +46,17 @@ KINDS = {
     "hwall": ("wall", "plaster"), "fence": ("fence", "timber"), "gateleaf": ("fence", "timber"),
     "hedge": ("hedge", "canopy"), "lowhedge": ("hedge", "canopy"), "dead": ("scrub", "forest"),
     "railing": ("railing", "steel"), "lowwall": ("lowwall", "stone"), "kerbwall": ("lowwall", "stone"),
-    "car": ("car", ["crimson", "teal", "cream", "violet", "yellow", "green", "grey"]),
-    "van": ("van", ["cream", "plaster", "teal", "grey"]), "lorry": ("lorry", ["violet", "teal", "cream"]),
+    "car": ("car", ["crimson", "teal", "cream", "lilac", "yellow", "green", "grey"]),
+    "van": ("van", ["cream", "plaster", "teal", "grey"]), "lorry": ("lorry", ["crimson", "teal", "cream"]),
     "bins": ("bins", ["green", "steel", "teal"]), "skip": ("skip", "yellow"), "binstore": ("brick", "brick"),
     "phone": ("brick", "brick"), "kiosk": ("cabinet", "green"), "cabinet": ("cabinet", "green"),
     "lamp": ("lamp", "steel"), "tree": ("tree", "bark"), "shed": ("shed", "umber"), "sofa": ("furniture", "violet"),
     "table": ("furniture", "timber"), "units": ("furniture", "cream"), "fridge": ("fridge", "cream"),
 }
+# The CC0 prop (PropDressConfig.models, tools/props/build_props.py) each piece kind is drawn as, in its block's box
+# (ST2); "{}" takes the piece's paint, as the props come in the colours the blocks are painted.
+DRESS = {"car": "car_{}", "van": "van_{}", "lorry": "lorry_{}", "bins": "bin_{}", "skip": "skip", "lamp": "lamp",
+         "tree": "trunk", "sofa": "settee", "table": "table", "units": "units", "fridge": "fridge"}
 GLASS_PAINT = "pond"
 ROOF_PAINT = "ceiling"
 WORKS_PAINT = "grey"
@@ -202,10 +206,12 @@ def piece_blocks() -> list[dict]:
         elif k == "tree":
             cx, cz = (x1 + x2) / 2, (z1 + z2) / 2
             s = TREE_SIDE / 2
-            out.append(block("tree", cx - s, 0.0, cz - s, cx + s, h, cz + s, "bark"))
+            out.append(block("tree", cx - s, 0.0, cz - s, cx + s, h, cz + s, "bark", dress=DRESS["tree"]))
         else:
             kind, _ = KINDS[k]
-            out.append(block(kind, x1, 0.0, z1, x2, h, z2, paint_of(k, n)))
+            paint = paint_of(k, n)
+            extra = {"dress": DRESS[k].format(paint)} if k in DRESS else {}
+            out.append(block(kind, x1, 0.0, z1, x2, h, z2, paint, **extra))
     return out
 
 

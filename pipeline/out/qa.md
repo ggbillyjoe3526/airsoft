@@ -1,7 +1,10 @@
-Task: DR2 · QA re-check at 23c670c · QA tests in tests/unit/test_dr2_qa.gd (5) · Verdict: Pass
+Task: ST2 · QA commit 37731e1 (tests in head) · Verdict: Pass
 
-Blocking: none. The attempt 1 blocker is fixed: PropDressConfig.dresses needs mesh_of(model) != null (loaded once a path, warns once), so a model that is there but won't load leaves its blocks as boxes.
-
-Verified: every core_of caller passes the map; sandbag stacks keep the same transform through _box_to; each prop lands in exactly one chunk (totals match at chunk 20, 0.5, 7.3, 1e9, 0, -5); every rack's footprint is rows or backing on Depot and the Range; building and freeing PropDress three times leaves no orphans; shelving casts no shadow.
-Passing: test_props 14, test_dr2_qa 5, test_site_dress 14, test_dd1_qa 23, test_map_level 15, test_baked_light 12, test_saved_configs 1.
-Advisory: a failed model is cached as null for the config's life; chunk <= 0 isn't validated (one odd cell, no loss).
+Re-check at head 37731e1 (no code changed since 4718e15).
+- The earlier blocker is fixed: changelog.d/the-street.md drops the stale blocks line, and changelog.d/the-street-dressed.md
+  (plus a FEATURES line) says the railings, fences, hedges, kiosks, bus shelter and roadworks are still blocks.
+- tools/changelog.sh check passes; tools/wiki.py check passes (25 pages).
+- test_st2_qa 3/3, 261 asserts, 0.5 s. Earlier at 4718e15: test_props 18/18, test_street 5/5, test_st1_qa 9/9, test_look 16/16.
+- Advisory unchanged: FIT stretches models non-uniformly (skip 2.3x, settee 2.1x, lamps and trunks thin posts); look needs a display.
+- Not run: full suite, tools/check.sh, match guards, smoke test. Needs a display: how the stretched props look, team-colour reads
+  by day and night, vehicle draw cost with shadows (performance agent).

@@ -128,8 +128,9 @@ terrace), **the arch** under the arch building, and the open **Field** by the de
 - **Night** is the Time of day setting's (day by default): every street lamp lights a pool of the road under it.
 - **Attack / Defend** puts flag **A** in the House and flag **B** in the car park ([Modes](Modes#attack--defend)); in
   Elimination's overtime the flag stands on the Path by the Green corner. Rounds last 3 minutes.
-- **Plain blocks for now:** its cars, bins, trees, railings and lamps are coloured blocks of the size they stop a BB
-  at ([Roadmap](Roadmap)).
+- **Cars, vans and lorries** are parked in the street's colours, never a team's, alongside bins, skips, lamp posts
+  and the House's settees, table and kitchen. Each fills the space it stops a BB in, so what you see is your cover.
+  The railings, fences, hedges and kiosks are still plain coloured blocks ([Roadmap](Roadmap)).
 
 ### Areas
 

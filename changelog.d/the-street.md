@@ -9,4 +9,3 @@
 - Flag B sits on car park B's island.
 - Railings and window sills are 1 m high, too high to vault.
 - Every street lamp lights a pool of light at night.
-- For now, cars, bins, trees, railings and lamps are plain coloured blocks.

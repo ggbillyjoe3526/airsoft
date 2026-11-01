@@ -12,7 +12,7 @@ Every open bug, limit and known gap in the game, so nobody re-reports or re-meas
 | Area | Issue | Class | Found |
 |---|---|---|---|
 | Bots | The Street's glass (the House's windows, the bus shelter) is solid to the one ray BBs and sight share, so bots don't see through it as players do; a ray that sees through glass but stops BBs waits for a follow-up (ST1) | can wait | 2026-11-01 |
-| Art | The Street's cars, vans, bins, trees, railings, lamps and furniture are plain blocks in palette colours until its CC0 dress (ST2); a bake would draw its glass solid (it has none) (ST1) | document | 2026-11-01 |
+| Art | The Street's railings, fences, hedges, kiosks, the bus shelter and the roadworks are still plain blocks in palette colours; its cars, vans, lorries, bins, skips, lamps, trees and the House's furniture are CC0 models (ST2). A bake would draw its glass solid (it has none) (ST1) | document | 2026-11-01 |
 | Art | Woodland's doors, flag poles and skyline aren't in the shared light yet: the doors and poles (Depot's too) are still StandardMaterial3D, and the skyline's far treelines are unshaded; the grass tufts keep their own light, as two-sided blades would take the rim on every back face (WA1) | can wait | 2026-10-31 |
 | Tests | A test file that builds its own map level and also plays a `MatchRunner` match has both levels in one physics space, so the file level's shut doors stand in the match's way; `test_woodland_layout` opens them while its match plays (WR2) | document | 2026-10-31 |
 | Audio | Depot still plays the yard's ambience under its roof (birds, a crow, a dog): an indoor hall sound waits for a later pass (DR1) | can wait | 2026-10-31 |
