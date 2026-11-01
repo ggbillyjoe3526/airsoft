@@ -608,8 +608,8 @@ static func _forget_search(b: Bot, w: BotWorld) -> void:
 ## forward or back if both sides are blocked, or it stands. Kneeling to fire (BQ3), it sidesteps only between bursts.
 static func _strafe(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float, target: Character) -> void:
 	var cfg := w.cfg
-	if b.skill.kneels_to_fire and b.burst_left > 0.0:
-		# A knee for the burst (BQ3): still and low while its BBs go.
+	if b.skill.kneels_to_fire and b.bursting and b.target_visible:
+		# A knee for the burst it is firing (BQ3): still and low while its BBs go; never for a burst left hanging.
 		cmd.crouch = true
 		return
 	b.strafe_left -= dt

@@ -141,6 +141,8 @@ var cover_cooldown: float = 0.0
 ## The trigger: seconds left in the burst, and in the pause after it; sidestepping, and which way.
 var burst_left: float = 0.0
 var pause_left: float = 0.0
+## Whether its last shoot() pressed on with a burst (BQ3: a bot that kneels to fire kneels only then).
+var bursting: bool = false
 var strafe_left: float = 0.0
 var strafe_dir: int = 1
 
@@ -301,6 +303,7 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	cover_cooldown = 0.0
 	burst_left = 0.0
 	pause_left = 0.0
+	bursting = false
 	strafe_left = 0.0
 	search_look_left = 0.0
 	flanking = false

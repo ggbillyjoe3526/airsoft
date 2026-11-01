@@ -140,6 +140,7 @@ static func _held_angle_look(b: Bot, w: BotWorld, eye: Vector3, facing_yaw: floa
 static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim: float, cmd: PlayerCommand,
 		dt: float) -> void:
 	var cfg := w.cfg
+	b.bursting = false
 	if target == null or not b.target_visible:
 		b.no_shot_for = 0.0
 	elif b.no_shot_for > 0.0 and BotSenses.line_clear(w.query, eye, _aim_point) \
@@ -160,6 +161,7 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 	if b.burst_left <= 0.0 and b.pause_left <= 0.0:
 		b.burst_left = b.pick(b.skill.burst)
 	if b.burst_left > 0.0:
+		b.bursting = true
 		var a := b.character.armament
 		cmd.fire = a.fire_mode() != ReplicaConfig.FireMode.SEMI or not a.trigger_was_down
 		b.burst_left -= dt

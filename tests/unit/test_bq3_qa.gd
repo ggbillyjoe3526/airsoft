@@ -178,6 +178,13 @@ func _stale_burst(visible: bool) -> PlayerCommand:
 	var box := BoxWorld.new(tuning.body)
 	box.add_floor(80.0, 80.0)
 	w.query = box
+	var m := MapData.new()
+	var block := MapData.Block.new()
+	block.kind = &"floor"
+	block.center = Vector3(0.0, -0.25, 0.0)
+	block.size = Vector3(80.0, 0.5, 80.0)
+	m.blocks.append(block)
+	w.nav = NavGrid.build(m, tuning.nav, tuning.body)
 	var spots: Array[Vector3] = [Vector3.ZERO, Vector3(0.0, 0.0, 20.0)]
 	for id in 2:
 		var c := Character.new(id, id, spots[id], 0.0, ReplicaStats.default_loadout())

@@ -146,11 +146,13 @@ func test_normal_takes_a_knee_for_each_burst_and_sidesteps_between() -> void:
 	var cmd := _fighting(&"normal")
 	var b := world.bots[0]
 	b.burst_left = 0.3
+	b.bursting = true
 	BotMovement._strafe(b, world, cmd, 1.0 / 60.0, world.characters[3])
 	assert_true(cmd.crouch, "a knee while the BBs go")
 	assert_eq(cmd.right, 0.0, "and still")
 	cmd = PlayerCommand.new()
 	b.burst_left = 0.0
+	b.bursting = false
 	b.pause_left = 0.4
 	BotMovement._strafe(b, world, cmd, 1.0 / 60.0, world.characters[3])
 	assert_false(cmd.crouch, "up again in the pause")
@@ -161,6 +163,7 @@ func test_easy_keeps_sidestepping_as_it_shoots() -> void:
 	var cmd := _fighting(&"easy")
 	var b := world.bots[0]
 	b.burst_left = 0.3
+	b.bursting = true
 	BotMovement._strafe(b, world, cmd, 1.0 / 60.0, world.characters[3])
 	assert_false(cmd.crouch)
 	assert_ne(cmd.right, 0.0)
