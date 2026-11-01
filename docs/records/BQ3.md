@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-01 | 1 | Opus 5.5 (build thread) | ✓ | see the Review line | – |
+| 2026-11-01 | 1 | Opus 5.5 (build thread) | – | – | QA Fail: the test file didn't parse (an untyped loop); a knee held on a burst not being fired |
+| 2026-11-01 | 2 | Opus 5.5 (build thread) | ✓ | see the Review line | – |
 
 ## Goal
 
@@ -19,8 +20,8 @@ change stays only if bots with it win more rounds against bots without it.
 - **How bots got hit** (a scratch count over 4 Normal matches each on Depot and The Street, about 240 hits a map):
   about two in three hits landed on a bot in a fight that had seen its shooter, mostly while it sidestepped standing
   up (crouched in under 5 %); most were alone. So the open fight and the team's news were the places to work.
-- **A knee to fire** (`BotSkill.kneels_to_fire`, `BotMovement._strafe`): fighting in the open, a bot takes a knee
-  for each burst and sidesteps only between bursts, so its BBs leave from a still, crouched stance (Accuracy) and less
+- **A knee to fire** (`BotSkill.kneels_to_fire`, `BotMovement._strafe`, `Bot.bursting`): fighting in the open, a bot
+  takes a knee for each burst it is firing and sidesteps only between bursts, so its BBs leave from a still, crouched stance (Accuracy) and less
   of it shows while it shoots. Fighting from cover is unchanged.
 - **Team radio** (`BotRadio`): a bot that sees an enemy afresh tells its teammates within `share_radius` (35 m Normal,
   45 m Hard) after `share_delay` (1-1.6 s Normal, 0.5-0.9 s Hard), each taking it as a teammate's call heard there,
@@ -60,14 +61,23 @@ change stays only if bots with it win more rounds against bots without it.
   | A knee to fire, on top | Woodland, Normal | 61 / 54 | 53 % |
   | All of BQ3 | The Street, Normal | 66 / 49 | 57 % |
   | All of BQ3 | Depot, Hard | 60 / 57 | 51 % |
+  | All of BQ3, after QA's kneel fix | Depot, Normal | 71 / 51 | 58 % |
+  | All of BQ3, after QA's kneel fix | The Street, Normal | 67 / 54 | 55 % |
 
-  Normal wins clearly more; Hard about evens (it already held angles and traded), so its edge is small.
+  The rows above the last two were run before QA's fix (a knee was sometimes held on a burst not being fired); the
+  last two are the shipped code. Normal wins clearly more; Hard about evens (it already held angles and traded), so its edge is small.
 - `test_bq3_team_play` (the radio told near and late, not to the far, the fighting, the enemy or the caller; a caller
   out says nothing; Easy has none; pressing and the careful last bot in Elimination only; a knee for each burst and up
   between; Easy keeps sidestepping), `test_tl1_qa` and `test_bot_difficulty` unchanged in what they pin.
 - Older tests it touched: `test_bot_angles` (the watcher there is the last of its team, so a careful last bot looks at
   corners too), `test_bots`' warm-tick check (now counts the event pool's documented growth to a new busiest tick,
   which the new play reached inside the measured window; nothing else allocates).
+
+- QA: Fail then Pass (`test_bq3_qa`: a pending call cleared by a round reset, fresher news kept, nobody out or on the
+  other team told, nothing before the round is live, no knee held without firing over a whole match: 15 of 2802 fight
+  ticks a tick either side of a burst, longest 1 tick, against 354 and 211 before the fix).
+- Performance: Pass (smoke match level with BQ2's head on nodes and orphans; the radio and the two checks loop the
+  bots and characters without allocating; the warm-tick reading is fair, the event pool being one object a slot).
 
 ## Known issues left
 
