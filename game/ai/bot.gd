@@ -67,6 +67,11 @@ var heard_other: Vector3 = Vector3.ZERO
 var heard_other_at: float = -INF
 ## Last near miss from an enemy BB.
 var suppressed_at: float = -INF
+## Team radio (BQ3, BotRadio): when it tells its teammates of the enemy it saw afresh (INF: nobody to tell), who (a
+## character id, -1 none) and where it saw them.
+var share_at: float = INF
+var share_id: int = -1
+var share_spot: Vector3 = Vector3.ZERO
 ## Seconds it has been aimed at its target in sight with the level in the way of its BBs (glass or leaves, BQ1):
 ## BotConfig.no_shot_move_after of it and it goes round (BotBrain).
 var no_shot_for: float = 0.0
@@ -259,6 +264,8 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	sprint_gap = 0.0
 	suppressed_at = -INF
 	no_shot_for = 0.0
+	share_at = INF
+	share_id = -1
 	ping_at = -INF
 	bomb_kind = Grenade.Kind.NONE
 	bomb_aim_until = -INF

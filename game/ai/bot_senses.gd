@@ -140,6 +140,7 @@ static func perceive(b: Bot, w: BotWorld) -> void:
 		c.first_seen_at = w.time
 		c.held = b.skill.holds_angles and b.holding and pre_aimed
 		BotAim.fresh_error(b, cfg, true)
+		BotRadio.saw(b, w, best)
 	elif c != b.contact:
 		# Back on someone seen moments ago: no new reaction, but this target's aim error, not the last one's.
 		BotAim.fresh_error(b, cfg, false)

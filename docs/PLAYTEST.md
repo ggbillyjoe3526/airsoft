@@ -530,6 +530,10 @@ You're on Alpha (blue) with two bot teammates against three Beta (orange) bots b
   with a HELP ping where it is; one stuck trading shots with a single enemy for a while calls "Go round" with a GO ping
   beside the enemy; in Attack / Defend the raiser calls "Cover me" with a COVER ping on the pole. At most one ask every
   30 s, three a round. Are they useful, and not too often?
+- [ ] **Bots play as a team (BQ3).** On Normal, let one enemy bot see you, then move off: its teammates near that spot
+  arrive ready for you there a moment later. Get two or more ahead in Elimination: your bots stop holding and go hunting.
+  The last bot of a team walks and checks corners. In an open fight they take a knee for each burst. Do they feel
+  smarter, and still beatable on Normal?
 - [ ] **Anchors (BP5).** In Elimination with over a minute left, give an anchor teammate Follow me (F), then end it
   with F again: it goes hunting.
 

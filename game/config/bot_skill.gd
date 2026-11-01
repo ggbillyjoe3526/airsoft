@@ -63,3 +63,16 @@ extends Resource
 ## it may (BotConfig.bomb_roll_gap; SF2).
 @export var smoke_chance: float = 0.3
 @export var flash_chance: float = 0.3
+## Team radio (BQ3): seeing someone afresh, it tells its teammates within share_radius (m) of them where they are after
+## share_delay (s), as a teammate's call: each goes after it or watches it as its own play takes a noise there. Zero
+## share_radius tells nobody.
+@export var share_radius: float = 0.0
+@export var share_delay: Vector2 = Vector2(1.0, 1.6)
+## Pressing the advantage (BQ3, Elimination): with its team at least BotConfig.press_margin up in play, it stops holding
+## its lane and hunts.
+@export var presses_advantage: bool = false
+## The last of its team in play (BQ3, Elimination), it walks and clears corners as near the enemy, unless pushing late.
+@export var careful_when_last: bool = false
+## Fighting in the open (BQ3), it takes a knee for each burst and sidesteps in the pauses between them: its BBs leave
+## from a still, crouched stance (Accuracy) and it shows less of itself while it shoots.
+@export var kneels_to_fire: bool = false

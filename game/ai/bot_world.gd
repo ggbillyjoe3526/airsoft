@@ -97,6 +97,33 @@ func pushing_late(b: Bot) -> bool:
 	return balance < 0
 
 
+## Pressing the advantage (BotSkill.presses_advantage, BQ3): true in a live Elimination round while `b`'s team has
+## at least BotConfig.press_margin more in play than the other.
+func pressing(b: Bot) -> bool:
+	if mode != RoundState.Mode.ELIMINATION or not b.skill.presses_advantage or not live:
+		return false
+	return _in_play_lead(b.character.team) >= cfg.press_margin
+
+
+## The last of its team in play in a live Elimination round, with BotSkill.careful_when_last (BQ3).
+func careful_last(b: Bot) -> bool:
+	if mode != RoundState.Mode.ELIMINATION or not b.skill.careful_when_last or not live:
+		return false
+	for c in characters:
+		if c != b.character and c.team == b.character.team and Elimination.is_in_play(c):
+			return false
+	return true
+
+
+## How many more of `team` are in play than of the other (negative when fewer).
+func _in_play_lead(team: int) -> int:
+	var lead := 0
+	for c in characters:
+		if Elimination.is_in_play(c):
+			lead += 1 if c.team == team else -1
+	return lead
+
+
 ## Team play: true while `b` goes to trade a teammate's hit call it heard.
 func trading(b: Bot) -> bool:
 	return time - b.trade_at < cfg.trade_time
