@@ -4,7 +4,8 @@ extends RefCounted
 ## current one is the loadout carried and every edit goes to it, so there is no Save button (docs/DECISIONS.md ›
 ## Loadout). Saved through SaveFile at user://loadouts.save (kind "loadouts", version 1), apart from the settings.
 ## A missing file is one default loadout. A damaged file, or one of a newer version, falls back to that with
-## `load_message`; a saved value that won't do keeps its default and warns. Fields this build doesn't know are kept. A
+## `load_message` (a newer one is never written over: the default lasts for the session); a saved value that won't do
+## keeps its default and warns. Fields this build doesn't know are kept. A
 ## loadout saved before Glowing BBs (WL8) loads them At Night on every replica.
 
 ## Sent after any change to the loadouts or which one is current.
@@ -26,6 +27,8 @@ var current: int = 0
 var dirty: bool = false
 ## Why the file couldn't be used, for the menus to show; "" when it was fine or missing.
 var load_message: String = ""
+## The file is from a newer build: it is never written over.
+var _newer_on_disk: bool = false
 var _extra: Dictionary = {}
 
 static var _shared: SavedLoadouts = null
@@ -142,6 +145,7 @@ static func clean_name(text: String) -> String:
 ## Reads `path`. Silent when there is no file; otherwise a message if it can't be used.
 func load_file(path: String = PATH) -> void:
 	load_message = ""
+	_newer_on_disk = false
 	var r := SaveFile.read(path, KIND)
 	if not r.ok:
 		if r.found:
@@ -152,13 +156,16 @@ func load_file(path: String = PATH) -> void:
 	if int(r.version) < 1 or int(r.version) > VERSION:
 		load_message = TranslationServer.translate("LOADOUTS_NEWER")
 		push_warning("loadouts: %s is version %d; using the default loadout" % [path, int(r.version)])
+		_newer_on_disk = int(r.version) > VERSION
 		return
 	for p in from_dict(r.data):
 		push_warning("loadouts: " + p)
 
 
-## Writes `path`; false if it could not be written.
+## Writes `path`; false if it could not be written (or holds a newer build's loadouts).
 func save(path: String = PATH) -> bool:
+	if _newer_on_disk:
+		return false
 	var ok := SaveFile.write(path, KIND, VERSION, to_dict())
 	dirty = not ok
 	return ok

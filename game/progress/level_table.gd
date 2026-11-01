@@ -59,6 +59,9 @@ var levels: Array[Level] = []
 var earn: Dictionary[StringName, int] = DEFAULT_EARN.duplicate()
 var multipliers: Dictionary[StringName, float] = DEFAULT_MULTIPLIERS.duplicate()
 var problems: Array[String] = []
+## No readable level 0: level 0 stands in with every item, for this session alone (Progress neither grants nor saves
+## those unlocks, so a fixed levels.md finds the player's own list as it was).
+var everything_unlocked: bool = false
 ## The level each item unlocks at, by pool ID. An item no row names is absent: no level unlocks it.
 var _unlock_level: Dictionary[String, int] = {}
 
@@ -97,6 +100,7 @@ static func parse(text: String, pool: Pool) -> LevelTable:
 		for it in _items(pool):
 			all.unlocks.append(it.id)
 		t.levels.append(all)
+		t.everything_unlocked = true
 	for l in t.levels:
 		for id in l.unlocks:
 			t._unlock_level[id] = l.number

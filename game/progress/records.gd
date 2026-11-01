@@ -155,6 +155,9 @@ func save(path: String = PATH) -> bool:
 		return false
 	var ok := SaveFile.write(path, KIND, VERSION, to_dict())
 	dirty = not ok
+	if ok:
+		# the file is good again: what was wrong with the last one is said no more
+		load_message = ""
 	return ok
 
 
