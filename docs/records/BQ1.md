@@ -49,7 +49,10 @@ glass as solid for sight.
 
 - `test_fm1_go_there` (five new tests: the lapse and its notice, a noise near keeps it, a noise far off doesn't, the
   same spot again restarts it, Hold here never lapses), `test_bq1_glass_sight` (ray and sight on a BoxWorld and a
-  built level, sight and cover through glass, a bot that sees through glass goes round and lands nothing).
+  built level, sight and cover through glass, a bot that sees through glass goes round and lands nothing), `test_bq1_qa`
+  (QA's: a pusher squares up again once the glass is gone).
+- Performance: Pass, smoke match on Depot level with origin/main (nodes, orphans, shots the same); `sight_ray` is one
+  cast as `ray` was. Advisory kept: a bot counting a no-shot casts its line twice a tick for at most 1.5 s.
 
 ## Known issues left
 
