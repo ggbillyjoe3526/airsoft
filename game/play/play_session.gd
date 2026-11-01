@@ -22,7 +22,14 @@ extends Node3D
 ## The build is four steps (the map, the level, the teams, the views). Staged, one runs each rendered frame and
 ## `progressed` reports each, for the loading screen; `started` follows the frame the match is first drawn. Staged, the
 ## nav grid (about 6 s on Woodland) is built on a worker thread, so the loading screen keeps drawing, and the teams step
-## ends once it is in. Not staged, all four run in `_ready` (tests and tools).
+## ends once it is in. Not staged, all four run in `_ready` (tests and tools). With `wait_for_go` (MC1, owner
+## 2026-11-01) the match is drawn but holds still once built, the mouse free, until `go`: `ready_to_go` says when it is
+## fully loaded (drawn once and its shaders warm, or PlayTuning.go_fallback after the first frame at the latest), for
+## the loading screen's Continue.
+## Out of a live round, a fresh press of the trigger (or the pause menu's Skip to next round) skips the rest of it (MC1,
+## owner 2026-11-01): it is played out at once, as fast as the frame allows (PlayTuning.skip_budget_ms a rendered frame),
+## silently and under a plain cover, never shown fast-forwarded; then the round's table shows and the next round waits
+## for a click on it (RoundState.hold_next), or the match's summary follows the last round's.
 
 signal left
 ## Practice: the Loadout was asked for (its key, or the pause menu's row); the entry screen takes `practice_spot`, frees
@@ -30,8 +37,10 @@ signal left
 signal loadout_requested
 ## `done` of `total` build steps are finished; `step_key` is the translation key of the one running next ("" at the end).
 signal progressed(done: int, total: int, step_key: String)
-## The match has been drawn once (or the map was refused): the loading screen can go.
+## The match has been drawn once (or the map was refused): the loading screen can go, unless it waits for `go`.
 signal started
+## With `wait_for_go`: the match is fully loaded and holds still for `go` (the loading screen's Continue).
+signal ready_to_go
 ## A finished match counted: its XP, levels reached and records (`settled`).
 signal match_settled
 ## The field's shaders are warm (ShaderPrewarm done): the graphics started (GraphicsGuard settles on it).
@@ -61,6 +70,8 @@ var lighting_pick: StringName = &""
 @export var player_team: int = TEAM_ALPHA
 ## True: build a step a frame (the loading screen follows it); false: all at once in `_ready`.
 var staged: bool = false
+## Staged: once built, hold still (drawn, the mouse free, no ticks) until `go`, saying `ready_to_go` once fully loaded.
+var wait_for_go: bool = false
 ## The smoke test's pilot: a bot plays your character, with no mouse or keys.
 var autopilot: bool = false
 ## Simulation ticks per physics tick: the smoke test plays a whole match faster than real time.
@@ -180,6 +191,10 @@ var _running: bool = false
 var _nav_task: int = -1
 var _nav_out: Array[NavGrid] = []
 var _first_frame_due: bool = false
+## Waiting for `go` (wait_for_go), whether `ready_to_go` was said, and seconds since the first frame was drawn.
+var _holding: bool = false
+var _go_said: bool = false
+var _held_for: float = -1.0
 var _pacer: TickPacer = TickPacer.new()
 ## The sight's raise as drawn for whoever the view is through (FB6: even at any game speed).
 var _aim := AimFollow.new()
@@ -191,13 +206,16 @@ var _watch_input: PlayerCommand = PlayerCommand.new()
 var _intents: BotIntentView = null
 var _retro: RetroPixels = null
 var _rematch_left: float = -1.0
-## Skipping the round you are out of: the rest plays at PlayTuning.skip_speed with the HUD hidden; how long Jump has
-## been held towards it, and whether it was up once you could skip (a press made before does not count); the line that
-## says so.
+## Skipping the round you are out of: the rest is played out at once under the cover with the HUD hidden and no sound;
+## whether the trigger was up once you could skip (a press made before does not count); the cover and its line.
 var _skipping: bool = false
-var _skip_held_for: float = 0.0
 var _skip_armed: bool = false
+var _skip_cover: ColorRect = null
 var _skip_note: Label = null
+var _skip_clock_shown: int = -1
+## The rendered frame the skip last ticked in, and the microseconds of ticks spent in it (`_play_out`).
+var _skip_frame: int = -1
+var _skip_spent_usec: int = 0
 var _tally: PlayerTally = PlayerTally.new(PLAYER_ID)
 ## The automatic step-down's watch, whether the window has the focus and whether the shaders are warm (the warm-up's
 ## frames say nothing about the graphics); the Dev settings' Pretend slow frames.
@@ -400,7 +418,8 @@ func _build_views_and_start() -> void:
 	# A field's minimap in practice too (nobody to hear); the range is a corridor you see whole.
 	if not _on_range:
 		_hud.setup_minimap(_map, _play.minimap, _heard, map_name, state.characters.size())
-	_capture()
+	if not (staged and wait_for_go):
+		_capture()
 
 
 ## The team the bots play against you.
@@ -432,6 +451,7 @@ func _advance_build() -> void:
 		if _map.ok():
 			_running = true
 			_first_frame_due = true
+			_holding = wait_for_go
 		else:
 			started.emit()
 
@@ -766,6 +786,14 @@ func _build_views(ui: CanvasLayer) -> void:
 	skip_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	skip_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(skip_layer)
+	# Playing the rest out shows none of it: a plain cover over the field, the line on it.
+	_skip_cover = ColorRect.new()
+	_skip_cover.name = "SkipCover"
+	_skip_cover.color = GameTheme.BG
+	_skip_cover.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_skip_cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_skip_cover.visible = false
+	skip_layer.add_child(_skip_cover)
 	_skip_note = HudStyle.label(skip_layer, SKIP_NOTE_SIZE, 800, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_CENTER,
 			HudStyle.SPACING_AIM)
 	_skip_note.text = HudStyle.caps("HUD_SKIPPING")
@@ -787,42 +815,68 @@ func _build_views(ui: CanvasLayer) -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if not _running:
+	if not _running or _holding:
 		return
-	_pacer.rate = speed * state.cheats.game_speed * (_play.skip_speed if _skipping else 1.0)
+	if _skipping:
+		_play_out()
+		return
+	_pacer.rate = speed * state.cheats.game_speed
 	for i in _pacer.ticks():
-		if _rematch_left == 0.0:
-			_rematch_left = -1.0
-			_watch.new_match()
-			# A rematch's report tells this match only.
-			_recent.clear()
-			_frames.clear()
-			_pause.errors = error_log
-			_sim.start_match(state)
-			_refresh_kinds()
-			_reset_flinches()
-			_after_tick()
-		if bots_active:
-			_bots.think(state, _commands, TICK)
-		else:
-			for c in state.characters:
-				_commands[c.id].reset(c.yaw, c.pitch)
-		# On the range nobody is there to order; out, the wheel closes (the keys still ask, and wait for the next round).
-		_input.allow_orders(not practice, Elimination.is_in_play(player))
-		# Shut under the scoreboard and the match's summary, so a hidden pointer never takes the mouse.
-		_input.allow_map(_hud.field_map() != null and not _input.scoreboard_held() and not _hud.summary_up())
-		if _pilot != null:
-			_pilot.fill(_commands[PLAYER_ID], player, state.targets, _tuning.body)
-		elif _spectate_any and not autopilot:
-			_follow_next_on_pull()
-		elif not autopilot:
-			_input.fill(_commands[PLAYER_ID], player.armament.active)
-		else:
-			# a bot plays you (the smoke test): your squad order keys still reach your teammates
-			_input.fill_order(_commands[PLAYER_ID])
-		_sim.step(state, _commands, TICK)
-		_ticks += 1
+		_tick()
+
+
+## Skipping: ticks as fast as PlayTuning.skip_budget_ms of each rendered frame allows, until the round is over. The
+## budget is the rendered frame's, not each physics step's: the engine's catch-up steps after a long frame share it, so
+## the cover keeps drawing (and Esc answers) about budget-often.
+func _play_out() -> void:
+	var frame := Engine.get_process_frames()
+	if frame != _skip_frame:
+		_skip_frame = frame
+		_skip_spent_usec = 0
+	var budget := roundi(_play.skip_budget_ms * 1000.0)
+	while _skipping and _skip_spent_usec < budget:
+		var start := Time.get_ticks_usec()
+		_tick()
+		_skip_spent_usec += Time.get_ticks_usec() - start
+
+
+## One simulation tick: the bots think, your keys are read, the simulation steps and everything follows it.
+func _tick() -> void:
+	if _rematch_left == 0.0:
+		_rematch_left = -1.0
+		_watch.new_match()
+		# A rematch's report tells this match only.
+		_recent.clear()
+		_frames.clear()
+		_pause.errors = error_log
+		_sim.start_match(state)
+		_refresh_kinds()
+		_reset_flinches()
 		_after_tick()
+	if bots_active:
+		_bots.think(state, _commands, TICK)
+	else:
+		for c in state.characters:
+			_commands[c.id].reset(c.yaw, c.pitch)
+	# On the range nobody is there to order; out, the wheel closes (the keys still ask, and wait for the next round).
+	_input.allow_orders(not practice, Elimination.is_in_play(player))
+	# Shut under the scoreboard and the match's summary, so a hidden pointer never takes the mouse.
+	_input.allow_map(_hud.field_map() != null and not _input.scoreboard_held() and not _hud.summary_up())
+	if _pilot != null:
+		_pilot.fill(_commands[PLAYER_ID], player, state.targets, _tuning.body)
+	elif _spectate_any and not autopilot:
+		_follow_next_on_pull()
+	elif not autopilot:
+		_input.fill(_commands[PLAYER_ID], player.armament.active, player.grenades)
+	else:
+		# a bot plays you (the smoke test): your squad order keys still reach your teammates
+		_input.fill_order(_commands[PLAYER_ID])
+	_sim.step(state, _commands, TICK)
+	_ticks += 1
+	# Played out: the tick the round ends in is heard and shown as usual (its whistle, the last hit's call).
+	if _skipping and not state.round_state.is_live():
+		_stop_skip()
+	_after_tick()
 
 
 ## Ticks the simulation has run.
@@ -930,16 +984,21 @@ func _after_tick() -> void:
 	_bots.observe(state)
 	var ears := spectated()
 	_heard.on_tick(state, ears)
-	if settings.sound_cues:
+	# Played out under the cover (a skip): nothing of it is heard, nor its sound cues shown.
+	var heard := not _skipping
+	if settings.sound_cues and heard:
 		_cues.on_tick(state, ears)
 	_debug.on_tick()
-	_audio.on_tick(state, PLAYER_ID, ears)
+	if heard:
+		_audio.on_tick(state, PLAYER_ID, ears)
 	_mix.on_tick(state, PLAYER_ID)
-	_audio.on_order(_bots.order_outcome, PLAYER_ID)
-	_audio.on_ping(_bots.pings, PLAYER_ID)
+	if heard:
+		_audio.on_order(_bots.order_outcome, PLAYER_ID)
+		_audio.on_ping(_bots.pings, PLAYER_ID)
 	_hud.on_tick(state, _input.mag_from_wheel)
 	if _bots.callouts != null:
-		_audio.on_calls(_bots.callouts.said, state, player.team, settings.hud.callouts)
+		if heard:
+			_audio.on_calls(_bots.callouts.said, state, player.team, settings.hud.callouts)
 		_hud.on_calls(_bots.callouts.said, state)
 	_hud.set_vault_ready(_vault_ready())
 	_hud.set_door_prompt(_door_prompt())
@@ -1047,10 +1106,15 @@ func _process(delta: float) -> void:
 		if staged:
 			_advance_build()
 		return
-	_follow_skip(delta)
+	if _holding:
+		_follow_hold(delta)
+	if _skipping:
+		_show_skip_clock()
+	_follow_skip()
 	_watch_frame(delta)
-	# Once the field's shaders are warm: the warm-up's slow frames are no player's.
-	if _warm:
+	# Once the field's shaders are warm and the match runs: the warm-up's slow frames are no player's, nor a skip's long
+	# frames under its cover.
+	if _warm and not _holding and not _skipping:
 		_frames.add(delta)
 	# The next match waits while the last round's table holds the results back.
 	if _rematch_left > 0.0 and not _hud.holds_results():
@@ -1134,7 +1198,37 @@ func _process(delta: float) -> void:
 		_intents.update(state, fraction)
 	if _first_frame_due:
 		_first_frame_due = false
+		_held_for = 0.0
 		started.emit()
+
+
+## Holding for `go`: `ready_to_go` once the match has been drawn and its shaders are warm, or go_fallback after the first
+## frame at the latest (a prewarm that never ends never keeps you from the match).
+func _follow_hold(delta: float) -> void:
+	if _go_said or _held_for < 0.0:
+		return
+	_held_for += delta
+	if _warm or _held_for >= _play.go_fallback:
+		_go_said = true
+		ready_to_go.emit()
+
+
+## Whether the match is built and holding still for `go`.
+func holding() -> bool:
+	return _holding
+
+
+## Whether `ready_to_go` was said: the match is fully loaded.
+func ready_for_go() -> bool:
+	return _go_said
+
+
+## The match starts (the loading screen's Continue): it ticks from now on and takes the mouse.
+func go() -> void:
+	if not _holding:
+		return
+	_holding = false
+	_capture()
 
 
 ## The prewarm left the tree: done, unless the match itself is leaving.
@@ -1185,7 +1279,7 @@ func spectated() -> Character:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not _running:
+	if not _running or _holding:
 		return
 	# Esc while paused reaches the menu instead: this node is paused with the tree.
 	if event.is_action_pressed(&"pause") and not event.is_echo():
@@ -1200,6 +1294,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(&"fire") and not event.is_echo() and _input.active and _hud.round_result().is_up():
 		_move_on()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(&"fire") and not event.is_echo() and _input.active and _skip_armed and can_skip() \
+			and not _skipping and not _input.field_map().open:
+		# Out, a fresh press of the trigger skips the round (MC1); it is no shot.
+		start_skip()
+		_input.hold_fire()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(&"fire") and not event.is_echo() and _input.active and _hud.summary_up():
 		_start_now()
@@ -1233,6 +1333,9 @@ func _notification(what: int) -> void:
 
 
 func _exit_tree() -> void:
+	# Left mid-skip (the pause menu's Leave): the window draws the field again.
+	if _skipping:
+		get_viewport().disable_3d = false
 	# Freed while the nav grid builds (the window closed on the loading screen): the task is waited for, never left.
 	if _nav_task >= 0:
 		WorkerThreadPool.wait_for_task_completion(_nav_task)
@@ -1265,7 +1368,8 @@ func _open_pause() -> void:
 	_hud.show_board(false)
 	_hud.close_order_wheel()
 	_hud.hide_pings()
-	# The hint comes back on resume naming Jump's key as bound then (Settings can rebind it); a hold starts over.
+	# The hint comes back on resume naming the trigger's key as bound then (Settings can rebind it); a trigger held
+	# through the pause doesn't skip.
 	_hud.set_skip_hint(false)
 	_skip_armed = false
 	_pause.set_can_skip(can_skip() and not _skipping)
@@ -1290,39 +1394,51 @@ func skipping() -> bool:
 	return _skipping
 
 
-## The hint while you can skip, and Jump held skip_hold starts skipping.
-func _follow_skip(delta: float) -> void:
+## The hint while you can skip; the trigger let go once you can arms it, so a fresh press skips (`_unhandled_input`).
+func _follow_skip() -> void:
 	var can := can_skip() and not _skipping
 	_hud.set_skip_hint(can)
-	var held := _input.skip_held()
-	if can and held and _skip_armed:
-		_skip_held_for += delta
-		if _skip_held_for >= _play.skip_hold:
-			start_skip()
-	else:
-		_skip_held_for = 0.0
-		# Only a press made once you can skip counts: Jump held through the hit, or through a pause, does not.
-		_skip_armed = can and not held
+	# Only a press made once you can skip counts: the trigger held through the hit, or through a pause, does not.
+	_skip_armed = can and (_skip_armed or not _input.skip_held())
 
 
-## Skips the rest of the round: it plays at skip_speed with the HUD hidden and "Skipping the round" showing, until it
-## ends (the round's table shows as usual).
+## Skips the rest of the round: it is played out at once (`_play_out`) under the cover with "Skipping the round" on
+## it, the HUD hidden and nothing heard; then the round's table shows as usual and the next round waits for a click on
+## it (RoundState.hold_next).
 func start_skip() -> void:
 	if _skipping or not can_skip():
 		return
 	_skipping = true
-	_skip_held_for = 0.0
+	_skip_armed = false
+	state.round_state.hold_next = true
 	_hud.set_skip_hint(false)
 	_hud.visible = false
+	_skip_cover.visible = true
 	_skip_note.visible = true
+	# Under the cover nothing of the field needs drawing: the frame's time goes to the ticks.
+	get_viewport().disable_3d = true
+	_skip_clock_shown = -1
+	_show_skip_clock()
 
 
 func _stop_skip() -> void:
 	if not _skipping:
 		return
 	_skipping = false
+	get_viewport().disable_3d = false
 	_hud.visible = true
+	_skip_cover.visible = false
 	_skip_note.visible = false
+
+
+## "Skipping the round · 1:12": the round's clock as the skip plays it down, so a long one is seen to move; written
+## only when its second changes.
+func _show_skip_clock() -> void:
+	var left := ceili(state.round_state.clock)
+	if left == _skip_clock_shown and _skip_note.text != "":
+		return
+	_skip_clock_shown = left
+	_skip_note.text = "%s · %s" % [HudStyle.caps("HUD_SKIPPING"), HudStyle.clock_text(left)]
 
 
 func _skip_from_pause() -> void:
@@ -1498,6 +1614,8 @@ func _settle() -> void:
 ## the start and on every change (the settings can open from the pause menu).
 func _apply_hud() -> void:
 	_hud.apply_prefs(settings.hud)
+	if _heard != null:
+		_heard.zoom = settings.hud.minimap_zoom
 	if not settings.hud.callouts:
 		_audio.stop_calls()
 	_hud.set_patterns(settings.gauge_patterns)
@@ -1585,7 +1703,8 @@ func graphics_automatic() -> bool:
 ## test's pilot or a round being skipped), and only while FrameWatch.counts.
 func _watch_frame(delta: float) -> void:
 	var machine := GraphicsApply.machine()
-	var in_play := _warm and not practice and not autopilot and not _skipping and state.round_state.is_live()
+	var in_play := _warm and not practice and not autopilot and not _skipping and not _holding \
+			and state.round_state.is_live()
 	var counting := FrameWatch.counts(graphics_automatic(), machine.preset, _focused, get_tree().paused, in_play,
 			machine.rendering_method)
 	_watch.feed(delta, settings.frame_limit, counting, _pretend_slow, _refresh_hz if settings.vsync else 0.0)
