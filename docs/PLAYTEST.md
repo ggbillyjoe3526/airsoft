@@ -1016,6 +1016,22 @@ Bugs the browser game had and fixed; a bug pass checks the rebuild doesn't bring
   (22 m without a silencer)."
 - [ ] **New game at 1920×1080 and 2560×1440:** "Elimination" stays inside its card.
 
+## Bug pass fixes (BP2)
+
+The 0.1 Dev 2 bug pass's fixes that need eyes on a real display or hands on the keys.
+
+- [ ] **Holster (3), then roll the mouse wheel one notch either way:** a replica comes up, never a smoke or a flash.
+  With a bomb in hand the wheel still steps to the other bomb.
+- [ ] **On the Range, roll the wheel to the smoke and pull the trigger:** the smoke is in hand and thrown; another is
+  there at once.
+- [ ] **Vault a low wall and roll the wheel onto a bomb mid-vault:** it is in hand once you are over.
+- [ ] **Woodland, Medium or higher:** Hut row, East camp, North bridge and A site reflect their own surroundings, not a
+  dark smear (their probes used to sit inside the hill).
+- [ ] **Woodland's huts:** an open door's two leaves fold flat against the hut's posts and are easy to see.
+- [ ] **Stand at a shut door, pause, rebind Open / shut door in Settings, resume:** the prompt names the new key.
+- [ ] **Hold M, press Tab and let it go with M still held:** the map comes back.
+- [ ] **Settings › Controls, Aim on Toggle:** aim, switch Aim to Hold and back mid-match: the sight is down.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
