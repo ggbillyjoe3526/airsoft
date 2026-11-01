@@ -1,13 +1,13 @@
 # BQ2 · Bot teammates ask for you with a ping
 
-**Review:** critic Accept 7/8 · qa Pass · performance Pass
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-01 | 1 | Opus 5.5 (build thread) | ✓ | Retry 6/8 | a bare 1 m lift in the Go round search; the known issue not in KNOWN_ISSUES |
-| 2026-11-01 | 2 | Opus 5.5 (build thread) | ✓ | see the Review line | – |
+| 2026-11-01 | 2 | Opus 5.5 (build thread) | ✓ | Accept 8/8 | – |
 
 ## Goal
 
