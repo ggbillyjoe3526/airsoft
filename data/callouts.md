@@ -30,7 +30,8 @@ plays: the calls are what it already does, put into words.
   where they are: the chance is how likely, and the team marks at most once in its seconds. Marks only show; they
   never change how anyone plays.
 - **Asks.** When a teammate asks for you (Need help, Go round, Cover me) and pings the spot: how often the team may
-  ask, how many times a round, how far you must be for it to bother, and what counts as needing help or a stand-off.
+  ask, how many times a round, how far you must be for it to bother, and what counts as needing help or a stand-off
+  (0 seen at once turns Need help off in a fight).
 - **Lines** are what a bot says: one picked at random from the event's rows for its personality and the rows for
   Any. Words in braces are filled in: `{area}` is the named area ("Dock"), `{count}` how many ("Two") and `{left}` how
   many of the other team are left. A line with `{area}` is skipped when there is no area to name. Keep lines short (48

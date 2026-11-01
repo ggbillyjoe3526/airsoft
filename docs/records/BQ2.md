@@ -6,7 +6,7 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-01 | 1 | Opus 5.5 (build thread) | ✓ | pending | – |
+| 2026-11-01 | 1 | Opus 5.5 (build thread) | ✓ | see the Review line | – |
 
 ## Goal
 
@@ -43,7 +43,13 @@ round/match."
   or on the other team; the gap and the round's cap; Go round's spot beside the enemy on your side; Cover me and Need
   help on the flag; a mark is no ask; the markers' words), `test_callouts`, `test_callouts_file`, `test_pings`,
   `test_ping_markers`.
+- QA: Pass (`test_bq2_qa`: no player, you on team 1, two bots in one fight ask once, stand-off guards, Go round's spot on
+  the nav grid, a mark never covers an ask, a round start drops a queued ask). Advisory taken: 0 seen at once turns
+  Need help off (0 used to ask about nobody).
+- Performance: Pass (smoke match level with main: nodes, orphans, shots). Advisory taken: Go round's spot is looked
+  for only once the ask may be said, with no array per call.
 
 ## Known issues left
 
-- None.
+- Go round's spot is walkable floor beside the enemy, but nothing checks you can reach it from where you are
+  (another storey, the far side of a wall). Can wait: the owner's playtest says whether it matters.

@@ -348,7 +348,7 @@ func _watch_asks(i: int, state: GameState, w: BotWorld) -> void:
 		var contact := b.contacts[c.id]
 		if contact != null and _now - contact.seen_at <= asks.seen_within:
 			seen += 1
-	if seen >= asks.outnumbered:
+	if asks.outnumbered > 0 and seen >= asks.outnumbered:
 		_offer(t, CalloutsFile.Event.NEED_HELP, i, w.bots, area_of(b.character.position), seen, 0, -1,
 				b.character.position)
 		return
