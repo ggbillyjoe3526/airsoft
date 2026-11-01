@@ -16,8 +16,10 @@
   60 m put a shot 30 m away about 23 dB under your own, and cut it entirely past 60 m (most of Woodland and The
   Street). The rendered motor sits about 11 dB under its shot, the gas 4 dB and the spring 7 dB.
 - **Shots get their own distance: full level within 10 m, heard to 120 m.** At 30 m that is about 11 dB louder than
-  before. Up close each shot and power part is capped at its own level (AudioStreamPlayer3D.max_db set per play), so a
-  bot's replica beside you sounds exactly as loud as yours, never louder; the critic's attempt 1 found the old fixed
+  before. Up close each shot and power part is capped at its own level or the field's 3 dB, the louder
+  (AudioStreamPlayer3D.max_db set per play), so a bot's lifted motor beside you sounds as loud as yours, and a quieter
+  shot-kind play (a silenced shot, the flash's bang) is as loud up close as before (QA attempt 2 found a pure own-level
+  cap made those 3 to 6 dB quieter); the critic's attempt 1 found the old fixed
   3 dB cap held a bot's lifted motor at its old level out to about 35 m. Every other sound keeps the 3 dB cap
   (field_max_db), 4 m and 60 m, so footsteps and impacts still read as near.
 - **A silenced shot carries its replica's heard_scale of 120 m** (half), as the minimap hears it.

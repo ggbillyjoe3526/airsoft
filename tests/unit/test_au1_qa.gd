@@ -351,7 +351,7 @@ func _check_caps(label: String) -> int:
 					and (audio._streams[cue] as Array).has(v.stream):
 				own_level = true
 		if own_level:
-			assert_eq(v.max_db, v.volume_db, "%s: a shot-kind voice at its own level" % label)
+			assert_eq(v.max_db, maxf(v.volume_db, cfg.field_max_db), "%s: a shot-kind voice at its own level or the field's" % label)
 		else:
 			assert_eq(v.max_db, cfg.field_max_db, "%s: any other at the field's cap" % label)
 	return checked
@@ -390,11 +390,11 @@ func test_an_occluded_shot_is_capped_at_its_occluded_level_not_the_open_one() ->
 	var heard := _voices("shot_") + _voices("power_")
 	assert_eq(heard.size(), 2, "shot and power part behind the wall")
 	for v in heard:
-		assert_almost_eq(v.max_db, v.volume_db, 1e-4, "capped where it was set, wall included")
+		assert_almost_eq(v.max_db, maxf(v.volume_db, cfg.field_max_db), 1e-4, "capped where it was set, wall included")
 	assert_eq(StringName(_voices("shot_")[0].bus), SoundMix.BUS_EFFECTS_FULL, "and the wall's bus took its share")
 
 
-func test_a_silenced_shot_up_close_is_capped_at_its_own_muffled_level() -> void:
+func test_a_silenced_shot_up_close_is_no_quieter_than_before() -> void:
 	_enemy_at(2.0)
 	enemy.armament.replicas[0].muffled = true
 	_setup_audio()
@@ -403,17 +403,17 @@ func test_a_silenced_shot_up_close_is_capped_at_its_own_muffled_level() -> void:
 	var shot := _voices("shot_")
 	assert_eq(shot.size(), 1)
 	assert_almost_eq(shot[0].volume_db, linear_to_db(cfg.shot_gain * cfg.muffled_gain), 1e-3)
-	assert_almost_eq(shot[0].max_db, shot[0].volume_db, 1e-4, "no louder than your own silenced replica")
+	assert_almost_eq(shot[0].max_db, cfg.field_max_db, 1e-4, "its muffled level is under the field's cap: the field's")
 
 
-func test_the_flash_bang_is_capped_at_its_own_level_and_its_voice_is_the_shots_kind() -> void:
+func test_the_flash_bang_up_close_is_as_loud_as_before_and_its_voice_is_the_shots_kind() -> void:
 	_enemy_at(30.0)
 	_setup_audio()
 	_flash_event(Vector3(0.0, 1.0, 4.0))
 	audio.on_tick(state, you.id, you)
 	var bang := _voices("flash_bang")
 	assert_eq(bang.size(), 1, "heard")
-	assert_eq(bang[0].max_db, bang[0].volume_db)
+	assert_eq(bang[0].max_db, maxf(bang[0].volume_db, cfg.field_max_db))
 	assert_eq(bang[0].unit_size, cfg.shot_unit_size)
 	assert_eq(bang[0].max_distance, cfg.bang_reach)
 
@@ -448,8 +448,8 @@ func test_a_zero_gain_shot_and_part_leave_no_nan_cap() -> void:
 	var heard := _voices("shot_") + _voices("power_")
 	assert_gt(heard.size(), 0)
 	for v in heard:
-		assert_false(is_nan(v.max_db), "-inf is allowed, NaN is not")
-		assert_true(v.max_db < -60.0 or is_inf(v.max_db), "silent")
+		assert_false(is_nan(v.max_db), "no NaN cap")
+		assert_true(v.volume_db < -60.0 or is_inf(v.volume_db), "silent: the level, whatever the cap")
 
 
 func test_your_own_shot_and_bang_leave_the_positional_voices_alone() -> void:
