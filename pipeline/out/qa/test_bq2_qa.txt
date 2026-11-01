@@ -1,0 +1,39 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_bq2_qa.gd
+* test_with_no_player_nobody_asks_and_nothing_breaks
+* test_when_you_are_on_the_second_team_its_bots_ask_and_the_first_team_never_does
+* test_two_bots_in_the_same_fight_make_one_ask_in_the_gap
+* test_a_stand_off_against_an_enemy_who_went_down_does_not_ask
+* test_a_stand_off_with_no_nav_asks_nothing
+* test_a_stand_off_with_the_enemy_on_top_of_the_bot_asks_nothing_and_does_not_throw
+* test_a_go_round_spot_is_on_the_nav_grid
+* test_a_contact_call_while_the_ask_is_up_does_not_mark_over_it
+* test_an_ask_waiting_when_the_round_restarts_is_never_said
+* test_you_going_out_after_an_ask_is_offered_but_before_it_is_said_cancels_it
+10/10 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                10
+Passing Tests        10
+Asserts              19
+Time              1.525s
+
+
+---- All tests passed! ----
+
