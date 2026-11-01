@@ -346,3 +346,19 @@ func test_go_theres_key_on_the_open_map_sends_them_to_the_pointer_not_the_hidden
 	input.fill(cmd)
 	assert_true(cmd.ping and cmd.ping_move and cmd.ping_on_map)
 	assert_eq(cmd.ping_target, Vector3(20.0, 0.0, 0.0))
+
+
+func test_the_map_held_through_the_scoreboard_opens_again_once_it_is_gone() -> void:
+	_event(&"field_map", true)
+	assert_true(input.field_map().open)
+	input.allow_map(false) # the scoreboard shuts it, M still held
+	assert_false(input.field_map().open)
+	var cmd := PlayerCommand.new()
+	input.fill(cmd)
+	assert_false(input.field_map().open, "not while the scoreboard is up")
+	input.allow_map(true)
+	input.fill(cmd)
+	assert_true(input.field_map().open, "open again, M never let go (BP2)")
+	_event(&"field_map", false)
+	input.fill(cmd)
+	assert_false(input.field_map().open)

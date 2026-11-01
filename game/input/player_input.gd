@@ -454,6 +454,9 @@ func fill(cmd: PlayerCommand, held_slot: int = 0, hand: Grenades.Hand = null, ho
 	if _map.open and not Input.is_action_pressed(FIELD_MAP):
 		# its key let go unseen: closed
 		_close_map()
+	elif not _map.open and _map_allowed and not _wheel.open and Input.is_action_pressed(FIELD_MAP):
+		# its key still held once the scoreboard or the match summary that shut it is gone: open again (BP2)
+		_open_map()
 	if not _wheel.open and not _map.open:
 		if _fire_held_back and not Input.is_action_pressed(FIRE):
 			_fire_held_back = false
