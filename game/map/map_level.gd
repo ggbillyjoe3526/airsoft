@@ -43,6 +43,8 @@ var _lighting: LightingConfig = null
 var _night: bool = false
 var _material: ShaderMaterial = null
 var _mesh: MeshInstance3D = null
+## The see-through blocks' mesh (_glass_mesh), or null on a map with none.
+var _glass: MeshInstance3D = null
 ## The site dress's look and its material (DD1); null for a greybox map.
 var _site: SiteLook = null
 ## The props a block may name (MapData.Block.dress, WR3), whatever the map's site: such a block's box is drawn inset
@@ -88,12 +90,12 @@ func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 	add_child(_mesh)
 	var glass := _glass_mesh(m, style)
 	if glass != null:
-		var gi := MeshInstance3D.new()
-		gi.name = "Glass"
-		gi.mesh = glass
-		gi.material_override = LookMaterials.clear_colour(GLASS_ROUGHNESS)
-		gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		add_child(gi)
+		_glass = MeshInstance3D.new()
+		_glass.name = "Glass"
+		_glass.mesh = glass
+		_glass.material_override = LookMaterials.clear_colour(GLASS_ROUGHNESS)
+		_glass.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(_glass)
 	if m.terrain != null:
 		_add_ground_tiles(m.terrain)
 	for s in RayHit.Surface.size():
@@ -157,6 +159,14 @@ func set_baked_light(on: bool) -> void:
 ## Whether the baked light is drawn.
 func baked_light_drawn() -> bool:
 	return _baked
+
+
+## The see-through blocks' material, for the shader prewarm (empty on a map with no glass).
+func glass_materials() -> Array[Material]:
+	var out: Array[Material] = []
+	if _glass != null:
+		out.append(_glass.material_override)
+	return out
 
 
 ## The site dress's material, which SiteDress draws its details in too; null for a greybox map.

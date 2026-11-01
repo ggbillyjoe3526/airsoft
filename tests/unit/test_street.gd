@@ -73,6 +73,7 @@ func test_the_glass_stops_a_bb_and_the_open_half_of_the_front_window_does_not() 
 		var mat := glass.material_override as ShaderMaterial
 		assert_eq(mat.shader, LookMaterials.CLEAR_SHADER, "see-through, in the shared light")
 		assert_eq(glass.cast_shadow, GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, "casting no shadow")
+		assert_eq(level.glass_materials(), [mat] as Array[Material], "its material warmed with the others")
 
 
 func test_railings_and_window_sills_are_too_high_to_vault_or_jump() -> void:

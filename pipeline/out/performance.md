@@ -1,18 +1,14 @@
-Task: WA1 · head 7310ead · Verdict: Pass
-Run: none (judgment review). The smoke match is headless and plays Depot, so it cannot show shader or draw cost; the diff adds no nodes, no tick code and no per-frame code · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and the diff
-Metrics: not measured (no GPU in the container; node count, orphans and static memory unchanged by construction: only material types change)
-Regressions (> 10 % worse): none measured
-Blocking findings: none
-Advisory:
-- game/play/look/look_vertex.gdshader:15 and look_clear.gdshader:12 (judgment): the sRGB-to-linear branch runs per fragment, and mix() evaluates both the pow and the linear arm, so a pow(vec3) per pixel on the greybox, 6000-instance forest and crowns. Small next to look_light's per-light smoothsteps and pow. Doing it in vertex() (COLOR is writable) would make it per vertex; costs interpolation in linear space, so only if frame time shows it.
-- game/play/look/look_light.gdshaderinc:15 (judgment): the custom light() now covers the whole greybox mesh and the crowns/forest, replacing the built-in lighting (per light: 3 smoothsteps, 1-2 pow, a normalize). Pixel cost goes up on the biggest-overdraw surface wherever a map has many lights. Offset by dropping the triplanar grid (3 mipmapped anisotropic samples per pixel, map_level.gd old :495-509). Check on High/Ultra on the owner's hardware.
-- game/play/woods_view.gd:210,216 (judgment): crowns and forest each get their own ShaderMaterial with the same roughness (crown_roughness), same as before; one shared material would do.
-- game/play/look/look_materials.gd:28 (judgment): clear_colour keeps RENDER_PRIORITY_MIN and cast_shadow stays OFF (woods_view.gd:255), so puddle sorting and shadows are as before: two surfaces sorted by distance within one priority, ALPHA written so a depth-writing blend pass is not used for shadows. No change.
-Positives (judgment):
-- Shaders: 3 StandardMaterial3D permutations (triplanar-textured opaque, flat opaque, alpha) become look_vertex (already compiled for the CC0 props and Depot; srgb_colours is a uniform, so no new pipeline variant) plus one new look_clear. Net compiles about the same or fewer.
-- Prewarm: look_clear's materials are returned by WoodsView.materials() (woods_view.gd:163-173) and BushView.materials(), which play_session.gd:733 feeds to ShaderPrewarm; the greybox is on screen from the first frame. No missing entry.
-- Allocations: every new call (vertex_colour, clear_colour, _greybox_material) is build-time; none in _process, the tick, per-shot or per-hit code. LookMaterials loads each shader once (preload).
-- Resources: the 128 px grid Image and ImageTexture (with mipmaps) per map load are gone; ShaderMaterials are refcounted and held by their MeshInstance/MultiMesh, freed with the node; no new signals, timers or tweens. Bush and woods stay MultiMesh. Bakes grow depot.res +6 KB, range.res +0.2 KB.
-- Presets: no shadow, resolution or draw-distance setting changed; forest, floor and puddle shadows stay off.
-Fixes: none required.
-Unexplained: none. Not verified: the real GPU cost of custom light() on the greybox; test on Windows at High and Ultra with the F3 overlay, compared with main, in Woodland's Hut row and Sawmill.
+Task: ST1 · The Street · head edc0197 · Verdict: Fail
+Run: no seed or frames (no bot match; the owner has the match guards running separately); headless build probe of street, depot and woodland (MapLevel + WoodsView, built then freed) · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and the other maps built the same way on this machine
+Metrics (street / depot / woodland): level build 51 / 107 / 761 ms (ok); level nodes 543 / 262 / 1004 (ok); level mesh vertices 17.4k / 7.9k / 15.2k (ok); woods nodes 3 / 0 / 30 (900 trees are one MultiMesh, ok); nodes after free 1 on all three; orphans 0 (ok); static memory 80.3 / 79.7 / 85.1 MB (ok); draw calls and frame times not measured (no GPU)
+Regressions (> 10 % worse): none (no per-frame or per-tick code changed; origin/main has no Street to compare)
+Blocking findings
+- game/map/map_level.gd:94 + game/play/play_session.gd:~713-735 (judgment, confirmed by reading): the new "Glass" mesh uses LookMaterials.clear_colour, whose shader (look_clear.gdshader) is drawn today only by Woodland's puddles (woods_view.gd:251, listed through WoodsView.materials()). On the Street, WoodsView has no puddles (2 materials), and nothing else puts the Glass material or the look_clear shader into PlaySession's first_use list for ShaderPrewarm. The shader is therefore compiled the first time a window comes into view: a first-use hitch, which this review rules treat as blocking (a new material without a prewarm entry).
+Advisory
+- game/map/map_level.gd:85-97 (measured): the glass is 3 blocks of 525, one surface, no shadows; cost is negligible. One transparent pass over a night/day field is fine; no preset bypass found.
+- data/maps/street.json (measured): 17 light pools, under LightPools.MAX_POOLS 32; real lights are capped per preset and cast no shadow (light_pools.gd:7, 190). 900 forest trees are one MultiMesh scaled by WoodsConfig.forest_share per preset (Low none); under most_forest_trees 6000.
+- 509 area boxes and 525 blocks: build cost 51 ms, one-off. tests/support/field_measure.gd:_nearest_linked scans all nav nodes once (cached) and only in tests; not a runtime cost.
+- game/map/map_data.gd:337: colour parse is load-time only; no allocation concern.
+Fixes, ranked by impact
+1. Give MapLevel a getter for the Glass material (null on maps without glass) and append it to first_use in PlaySession next to _woods.materials() (the same way _roof, _doors and _pools do), so ShaderPrewarm draws a speck with it. Add a test that the Street's list includes it.
+Unexplained: none. Not measured: draw calls, frame times on Low/Ultra and the first-sight hitch itself (needs a rendered run on the owner's PC); a match-level --perf run and a main comparison were skipped because the match guards are using the machine and the change has no per-frame code.
