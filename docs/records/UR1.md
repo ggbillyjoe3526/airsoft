@@ -1,13 +1,13 @@
 # UR1 · Concept B look, side rail and no title screen
 
-**Review:** pending
+**Review:** 2 attempts · critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-02 | 1 | Opus 5.5 (build thread) | stopped for the fixes | Retry 5/8 | notice over PLAY; About inline; map flags teal; ARCHITECTURE |
-| 2026-11-02 | 2 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-02 | 2 | Opus 5.5 (build thread) | ✓ | Accept 7/8 | – |
 
 ## Goal
 

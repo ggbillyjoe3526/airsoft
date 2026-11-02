@@ -6,7 +6,7 @@ extends Control
 ## saving, when the Match tab comes back) or the Armory (ArmoryPage, built and freed the same way). A tab press goes to
 ## the entry screen, which opens the settings beside the rail and asks for the page. Esc backs out of what the page has
 ## open (the Loadout's rename, replace and Customise); with nothing open it reaches Main, which asks QUIT GAME? (FB1),
-## as the rail's QUIT does. A notice (GraphicsNotice) shows bottom right over the page (`show_notice`).
+## as the rail's QUIT does. A notice (GraphicsNotice) shows at the page's bottom left over it (`show_notice`).
 ## From practice (`open_practice_loadout`, concept `loadout-practice.png`) the menus are only the Loadout page beside
 ## the rail's LOADOUT tab and BACK TO PRACTICE: that button, the Loadout's key and Esc (after what the page has open)
 ## send `practice_requested`.
@@ -18,7 +18,6 @@ signal quit_requested
 ## From practice: back to the range was asked for (the button, the Loadout's key or Esc).
 signal practice_requested
 
-## A notice's corner: from the right edge and from the bottom (px at 1080p).
 ## A graphics notice sits at the page's bottom left, beside the rail, clear of PLAY at the bottom right (px).
 const NOTICE_LEFT := 52.0
 const NOTICE_BOTTOM := 44.0
@@ -129,7 +128,8 @@ func notice() -> GraphicsNotice:
 func close_notice() -> void:
 	if _notice == null:
 		return
-	var had_keys := _notice.get_viewport() != null and _notice.is_ancestor_of(_notice.get_viewport().gui_get_focus_owner())
+	var focused: Control = _notice.get_viewport().gui_get_focus_owner() if _notice.get_viewport() != null else null
+	var had_keys := focused != null and _notice.is_ancestor_of(focused)
 	_notice.queue_free()
 	_notice = null
 	if had_keys and visible:

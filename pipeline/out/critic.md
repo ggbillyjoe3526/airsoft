@@ -12,3 +12,11 @@ Fixed in attempt 2: the notice sits bottom left beside the rail, takes the keybo
 (test_title_and_menus); About is SettingsAboutPage with SettingsGraphicsPage.renderer_words; the field map and its
 key draw flags in WARN / WARN_INK; BACK TO PRACTICE takes its height from its content; ARCHITECTURE updated; QA
 re-check and UR1's performance report written.
+
+Attempt: 2 of 4
+Head: 41aca87 (conditional on tools/check.sh passing on it)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✗ | 8 ✓
+Score: 7/8 → Accept
+7. close_notice read the focus owner without a null check (the Loadout from practice closes the notice before it
+   takes the keyboard), and two comments in menu_screen.gd still said the notice sits bottom right. Fixed in the
+   same push.
