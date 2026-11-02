@@ -11,6 +11,10 @@ Every open bug, limit and known gap in the game, so nobody re-reports or re-meas
 
 | Area | Issue | Class | Found |
 |---|---|---|---|
+| Menus | The Loadout's replica row rounds the Sniper Rifle's 0.8 shots a second to "1 BBs/s" (SN1); the Loadout is being rebuilt (UR1) | can wait | 2026-11-02 |
+| Play | Your bot teammates still carry the factory AEG, never the Sniper Rifle, and the rifle's magazines aren't shared with the AEG's (its own class, SN1) | can wait | 2026-11-02 |
+| Menus | With Dev content off, level 7 holds nothing to show (only the dev M140 Spring, SN1): its Armory row and level-up card are bare until the Sniper Rifle goes public | can wait | 2026-11-02 |
+| Art | The Sniper Rifle's model is the AEG's with a longer barrel, a placeholder until the owner's own model from his reference photos (SN1) | document | 2026-11-02 |
 | Play | Skipping a round plays its rest out honestly, as fast as the computer allows (MC1): headless in the cloud 101 s of Woodland took about 16 s and 26 s of Depot about 6 s, so a whole round may take about 30 s, longer on a weak PC. Faster means approximating the rest (fewer bot thinks or a scored result), the owner's call | playtest | 2026-11-01 |
 | Controls | An old save holding a moved default (4, 5, G) on another action of the player's leaves the moved action keyless, with no hint, until set in Settings › Controls (MC1 QA) | can wait | 2026-11-01 |
 | Art | The Street's fences, hedges, kiosks, the bus shelter and the roadworks are still plain blocks in palette colours; its railings are drawn bars (SR1); its cars, vans, lorries, bins, skips, lamps, trees and the House's furniture are CC0 models (ST2). A bake would draw its glass and railings as solid blocks (it has none) (ST1, SR1) | document | 2026-11-01 |

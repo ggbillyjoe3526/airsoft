@@ -1,11 +1,16 @@
 class_name PowerModels
 ## Which model draws each power source in the menus (the browser game's config/assets.ts `POWER_SOURCE_FILE`): the file in
-## assets/models/powerSources/ and, for the gas bottle (one model, three gases), the colour its `Label` takes. By pool.md
-## ID; a power source with no entry has no picture (tests/unit/test_armory.gd fails when one is added without).
+## assets/models/powerSources/ and, for the gas bottle (one model, three gases) and the spring (three springs), the colour
+## its `Label` takes. By pool.md ID; a power source with no entry has no picture (tests/unit/test_armory.gd fails when
+## one is added without).
 
 const BATTERY_FILE := &"standardBattery"
 const LIPO_FILE := &"lipoBattery"
 const BOTTLE_FILE := &"gasBottle"
+## The springs' one coil (SN1), its paper band in each spring's colour.
+const SPRING_FILE := &"spring"
+## How far (rad, about X) a spring is tipped: like a battery, it lies along the picture, thin.
+const SPRING_TIP := 0.6
 ## The label colour a file with no `Label` is asked for.
 const NO_LABEL := Color.WHITE
 ## How far (rad, about X) a battery is tipped up its lead end: it lies along the picture, thin; tipped it fills it. The
@@ -18,6 +23,9 @@ const PICTURES: Dictionary[String, Dictionary] = {
 	"000004": {"file": BOTTLE_FILE, "label": Color("6bc47c")},
 	"000008": {"file": BOTTLE_FILE, "label": Color("c8382c")},
 	"000009": {"file": BOTTLE_FILE, "label": Color("2a2b30")},
+	"000022": {"file": SPRING_FILE, "tip": SPRING_TIP, "label": Color("8a5cc7")},
+	"000023": {"file": SPRING_FILE, "tip": SPRING_TIP, "label": Color("c8382c")},
+	"000024": {"file": SPRING_FILE, "tip": SPRING_TIP, "label": Color("2a2b30")},
 }
 
 

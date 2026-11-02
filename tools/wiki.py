@@ -322,9 +322,12 @@ def gen_parts(which: str) -> str:
 def gen_site_limits(_arg: str) -> str:
     path = DATA / "stats.md"
     rows = []
+    classes = {cell(r, "Key", path): r["Class"] for r in md_table(path, "## Replicas")}
     for r in md_table(path, "## Site limits"):
-        names = [i["Name"] for i in replica_items() if r["Class"] in {t.strip() for t in i["Tags"].split(",")}]
-        rows.append([r["Class"].capitalize(), f"{cell(r, 'Limit (J)', path)} J", ", ".join(names) or "–"])
+        names = [i["Name"] for i in replica_items() if classes.get(i["Key"]) == r["Class"]]
+        if not names:
+            continue  # a class only dev replicas use (the sniper's, SN1) waits for them to go public
+        rows.append([r["Class"].capitalize(), f"{cell(r, 'Limit (J)', path)} J", ", ".join(names)])
     return table(["Class", "Most energy allowed", "Replicas"], rows)
 
 

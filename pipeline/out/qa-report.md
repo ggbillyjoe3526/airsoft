@@ -1,55 +1,30 @@
-Task: none (UR1 part 1) · QA commit 6b5eda8 · Verdict: Fail
+Task: SN1 · QA commit 692c4d0 · Verdict: Pass (after f489857; first run Fail)
 
-Blocking (1)
-1. game/ui/settings_screen.gd (in_menus, offset_left = NavRail.WIDTH via MenuScreen.add_over_page, menu_screen.gd:~95) with
-   game/ui/settings_hud_page.gd, settings_access_page.gd, settings_graphics_page.gd: the settings tab pages are built
-   for 1920 px, and the rail now takes 136 of them. Their minimum widths (HUD 1800, Accessibility 1749, Graphics 1673)
-   exceed the 1664 px left, so the tab container grows past the right edge: at 1080p (and, scaled, at 1280x720) the HUD
-   tab ends at x=1992 and Accessibility at 1941 of 1920, cutting off the right-hand column; Graphics overruns its margin
-   by 1 px. Repro: open Settings, press the HUD tab. Fix: narrow those pages' fixed columns as loadout_gear was.
+Blocking
+1. Missing translation: game/ui/armory_facts.gd:92 builds "ARMORY_BLURB_REPLICA_" + key; game/ui/text/en.po has PISTOL, AEG and CYBER only, no ARMORY_BLURB_REPLICA_SNIPER (en.po ~1832). With Dev content on and the Sniper Rifle the next unlock, the Armory's next-unlock card shows the raw key. test_armory.gd's blurb check only runs with Dev off, so it missed it. Pinned by test_the_armory_has_a_blurb_for_the_sniper_rifle_not_its_translation_key.
 
-Advisory (not blocking)
-- game/ui/settings_screen.gd:147 and game/ui/loadout_page.gd:76: the "could not read your settings/loadouts" load
-  messages are now teal ACCENT, but they are warnings; the brief keeps WARN yellow for warnings.
-- game/main.gd:_build_menus -> graphics.show_safe_notice(_menus) runs on every menus build, so while the safe-start
-  question is unanswered it also shows over the practice Loadout (_open_practice_loadout); before, it sat on the
-  hidden title. Repro: leave the safe-start notice unanswered, play, open practice, press the Loadout key.
-- game/ui/menu_screen.gd:~48 / match_page.gd:_list_maps: the backdrop follows map_picked only; if the catalogue
-  or Custom team size makes the picked map unloadable at run time, _keep_a_playable_map moves picks.map_id without
-  the signal and the backdrop keeps the old field until the next pick. Unreachable today (every map is public).
-- A graphics notice (bottom right) is Tab-reachable from the open settings (it is above them); harmless.
+Advisory
+- game/ui/armory_track.gd:76 / armory_facts.gd:43-48: level 7 now holds only the dev M140, so a Dev-off player sees "LEVEL 7 ... NEXT" with an empty row at level 6, while the summary's next unlock (next_row) says level 8. Cosmetic.
+- game/ui/xp_card.gd:127-160: a Dev-off level-up to 7 shows a "LEVEL 7!" panel with no "Unlocked" line and no picture (pinned: nothing named leaks).
+- game/ui/settings_save_page.gd:642 shows the unlocked count, which includes dev items: a number, never a name.
+- The Loadout still rounds 0.8 BBs/s to "1" (already in SN1.md known issues).
 
-Checked, no bug found: boot focus on PLAY; focus after a match, after Credits and Report close (back on their About
-buttons), after the crash screen's Continue; Esc with About, Credits or Report open (only the top layer closes, then
-QUIT GAME? and focus returns into the settings); notice above settings, settings under the rail (also for a notice
-shown after); repeated settings/About/credits/report cycles leave the node count and orphans unchanged; settings
-opened from the Loadout and Armory tabs restore the right page and focus; a second SETTINGS press does not stack
-screens; practice rail (only LOADOUT + BACK TO PRACTICE, no SETTINGS/QUIT, Esc and the button send practice_requested);
-backdrop with a missing file, a non-texture and a field with no picture, and with the real pictures headless (about
-13 ms each); every new translation key exists; rail words fit the 136 px rail; Match, Loadout and Armory minimum
-widths fit the 1784 px beside the rail; pause-menu settings still plate, About without the menu buttons.
+Checked and fine
+- Dev gating: Armory rows and counts, level-up card, saved loadout with the rifle (plays as default, not a dev match), bot kits (300 seeds x 3 difficulties x 3 personalities, no Sniper kit without Dev), wiki (tools/wiki.py check: OK, 25 pages).
+- Owner's levels (5/5/5, Red Gas 6, M140 7, M150 9, cap 10), springs unlock one by one, old saves get the new level-5 gear and keep Red Gas, scope off stays off through a save (worker test).
+- Single shot: 600 ticks of a held trigger = 1 shot; one fire mode. Every spring x every muzzle part stays <= 2.3 J.
+- Hip spread: x6 sight down, x3.5 half raised, equal to the AEG sight up.
+- Bot match (Yard, all 10 bots Sniper kit, seed 21): 157 shots (15 with the sight down), 39 hits, match finished.
 
-Tests added (tests/unit/test_ur1_qa.gd, 24 tests, 125 asserts; 23 pass, 1 fails on purpose)
-- :every_settings_tab_fits_beside_the_rail_at_1080p · pins blocking bug 1 · fails now; passes on the old layout (the
-  tabs fitted 1920 minus 112 px of margin) and will pass once the three pages are narrowed.
-- :the_backdrop_copes_with_a_missing_or_wrong_kind_of_picture, :blurs_every_listed_fields_picture · stub blurred() to
-  return a texture for any path (missing file) and the first fails; return null and the second fails.
-- :the_settings_open_over_the_page_under_the_rail_and_a_notice, :opening_and_closing_the_settings_about_credits_and_report_leaves_nothing_behind,
-  :credits_and_report_close_back_to_their_about_buttons, :esc_* (3), :settings_tab_pressed_twice..., :closing_the_settings_from_the_loadout/armory_tab...,
-  :a_tab_pressed_with_the_settings_open..., :the_practice_rail_*, :the_rail_*, :the_pages_beside_the_rail_fit...,
-  :after_the_crash_screen_continue... · regression pins; each fails if the matching line in main.gd/menu_screen.gd
-  (add_over_page's move_child, _credits_closed/_report_closed focus, set_page_hidden, set_practice) is removed.
-  I did not run the removals for every one; the ordering and focus ones I reasoned from the code.
+Tests added (tests/unit/test_sn1_qa.gd, 16 tests, 15 pass, 1 fails on the bug above)
+- :34 levels_as_owner_set_them_and_cap_10, :44 springs_unlock_one_by_one, :60 old save gets level-5 gear, :74 old level-5 player keeps Red Gas: with the shipped data swapped for origin/main's levels.md these fail (checked).
+- :84 armory names no sniper gear, :104 next unlock skips level 7, :115 dev-only level-up names none, :138 saved loadout falls back, :149 no bot kit without Dev, :164 Hard bots carry it with Dev: fail on main (no such items; the card/hud filter changed signature, so main does not run them).
+- :174 held trigger = 1 shot, :190 springs x muzzles under limit, :207 hip spread vs AEG, :232 blurb (fails, bug), :237 class name, :242 bot match.
 
-Suite: only this file was run (tools/check.sh runs elsewhere): 23/24, 14.8 s; log in pipeline/out/qa/ur1-qa.log.
-Not testable headless: how the glass panels and the blurred picture look, text cut by the real renderer at 1280x720
-(the layout figures above are the 1920x1080 design space the stretch scales), window-mode changes. Owner: open each
-Settings tab at 1280x720 and 1920x1080, and look at the HUD and Accessibility tabs' right edge.
+Counts: sniper_rifle 11/11 pass (114 asserts); sn1_qa 15/16 pass, 22 s. Raw output in pipeline/out/qa/. tools/check.sh and the full suite not run, as instructed.
 
-Re-check (attempt 2, by the lead; QA's own test as the evidence): Pass.
-- Blocking 1 fixed in 89d8286: the HUD and Accessibility labels, the HUD's sliders and the column gaps are narrower;
-  `test_ur1_qa.gd` › test_every_settings_tab_fits_beside_the_rail_at_1080p passes, with test_ui1_menus' no-cut-words
-  and no-overlap tests on every tab.
-- Advisories taken: the load warnings are WARN; the safe-start notice closes for the Loadout from practice; the
-  backdrop follows a field that stands in (map_picked from _keep_a_playable_map). The notice tabbable over Settings
-  stays (harmless), and now takes the keyboard when it shows (critic, attempt 1).
+Not testable here: how the model, scope view, cocking clip and sound look and feel (needs a display), hop-up flight at 48 m, bot behaviour feel with the sight-up wait. Owner should playtest those.
+
+## Re-run after the fix (f489857)
+
+ARMORY_BLURB_REPLICA_SNIPER added to en.po. test_sn1_qa.gd + test_armory.gd: 39/39 pass. Verdict: **Pass**.

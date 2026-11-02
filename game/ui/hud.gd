@@ -877,10 +877,11 @@ func on_calls(said: CalloutLog, state: GameState) -> void:
 			_announce.announcer().add_call(speakers[call.speaker_id], call.line)
 
 
-## The finished match's XP under the banner (`settled`, `progress` as it stands now), until the next match starts.
-func show_xp(settled: PlayerTally.Settled, progress: Progress) -> void:
+## The finished match's XP under the banner (`settled`, `progress` as it stands now), until the next match starts; dev
+## items it unlocked are named only with `dev_content`.
+func show_xp(settled: PlayerTally.Settled, progress: Progress, dev_content: bool = false) -> void:
 	hide_xp()
-	_xp = XpCard.new(settled, progress, Pool.shared())
+	_xp = XpCard.new(settled, progress, Pool.shared(), dev_content)
 	_place(_xp, Vector4(0.5, 0.5, 0.5, 0.5), Rect2(-XpCard.WIDTH * 0.5, 0.0, XpCard.WIDTH, 0.0))
 	_xp.pivot_offset_ratio = Vector2(0.5, 0.0) # held smaller about its top middle with the summary (_fit_summary)
 	add_child(_xp)

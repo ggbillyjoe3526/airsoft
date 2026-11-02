@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="ReplicaConfig" format=3]
+
+[ext_resource type="Script" path="res://game/config/replica_config.gd" id="1_sn1rf"]
+
+[resource]
+script = ExtResource("1_sn1rf")
+id = &"sniper"
+display_name = "Sniper Rifle"
+power = &"spring"
+fire_modes = Array[int]([0])
+fire_rate = 0.8
+mag_size = 25
+mags = 4
+reload_time = 2.2
+draw_time = 0.65
+muzzle_energy = 1.9
+site_class = &"sniper"
+bb_weight = 0.3
+hop_up_max = 0.3
+hop_up_dial = 0.6
+spread_deg = 0.1
+recoil_deg = 0.4
+hip_spread = 6.0
+bolt_action = true

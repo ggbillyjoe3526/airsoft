@@ -48,7 +48,8 @@ func test_the_shipped_levels_read_clean_and_unlock_every_item_once() -> void:
 	assert_eq(table.levels[10].total, 6500)
 	assert_eq(table.unlock_level(AEG), 0)
 	assert_eq(table.unlock_level(RED_DOT), 1)
-	assert_eq(table.unlock_level(SCOPE), 7)
+	assert_eq(table.unlock_level(SCOPE), 5, "with the Sniper Rifle it comes on (SN1)")
+	assert_eq(table.unlock_level("000021"), 5)
 	assert_eq(table.unlock_level(CYBER), 10)
 	var count := 0
 	for l in table.levels:
@@ -273,7 +274,7 @@ func test_locked_items_are_listed_but_cannot_be_picked_and_play_as_they_come() -
 	var p := Progress.new(table)
 	rules.follow_progress(p, false)
 	assert_true(rules.is_locked(SCOPE))
-	assert_eq(rules.unlock_level(SCOPE), 7)
+	assert_eq(rules.unlock_level(SCOPE), 5)
 	assert_false(rules.set_part(l, AEG, &"optic", RED_DOT))
 	assert_false(rules.set_power(l, AEG, STANDARD) and rules.set_power(l, AEG, LIPO))
 	var kit := rules.carried(l)

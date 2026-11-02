@@ -95,7 +95,8 @@ func default_loadout(loadout_name: String) -> Loadout:
 	return l
 
 
-## `item` as it comes: its factory BB weight and dial, its class's colour and the first power source that fits.
+## `item` as it comes: its factory BB weight and dial, its class's colour, the first power source that fits and the
+## parts it comes with (pool.md › Comes with; one still locked stays off until it is unlocked, as any part).
 func default_tune(item: Pool.Item) -> ReplicaTune:
 	var t := ReplicaTune.new()
 	var r := config(item)
@@ -105,8 +106,11 @@ func default_tune(item: Pool.Item) -> ReplicaTune:
 	t.hop_up = clampf(r.hop_up_dial, rules.hop_up_min_dial, rules.hop_up_max_dial)
 	t.paint = ReplicaSchemes.OWN if ReplicaSchemes.OWN_COLOURS.has(item.key) \
 			else ReplicaSchemes.default_paint(r.site_class)
-	var powers := pool.powers_for(item, false)
+	# A public replica comes with a public power source; a dev one may come with a dev one (the Sniper Rifle's springs).
+	var powers := pool.powers_for(item, item.is_dev())
 	t.power_id = powers[0].id if not powers.is_empty() else ""
+	for pt in pool.comes_with(item):
+		t.parts[pt.slot] = pt.id
 	return t
 
 

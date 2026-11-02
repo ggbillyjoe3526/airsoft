@@ -54,6 +54,16 @@ second red dot with the same behaviour but its own name and ID. A brand new beha
 Power sources need no key: their **Type** says what drives them, and stats.md's Power sources table (by ID) says what
 they do.
 
+### Comes with
+
+A replica's **Comes with** lists the parts fitted to it as it comes, by their Name, separated by commas: the Sniper
+Rifle comes with the 2x Scope (owner, 2026-11-02). A new player's setup starts with them on, they can be taken off or
+swapped on its Customise screen like any part, and a bot kit with no parts for it carries them too. Each must fit the
+replica, one per slot, and should unlock at the replica's level or before it (levels.md: the 2x Scope unlocks with the
+Sniper Rifle at level 5): a part still locked stays off until it is unlocked. Empty: nothing fitted (its
+standard magazine and barrel, iron sights). A power source isn't listed here: a replica comes with the first in the
+Power sources table that fits it.
+
 ### Power sources
 
 Every replica needs one, picked on its Customise screen from the ones you have unlocked that fit it.
@@ -64,7 +74,8 @@ Every replica needs one, picked on its Customise screen from the ones you have u
   where the spring inside sets the energy); a gas or a spring sets the energy. A new power source needs a row there
   too.
 - **Springs.** Each spring is its own asset (an M100 spring, an M110 spring …), not a slider on one spring: swapping
-  springs is how a spring replica is tuned. There are no spring replicas yet, so the Springs table below is empty.
+  springs is how a spring replica is tuned. The first in the table that fits is the one a replica comes with (the M130
+  Spring on the Sniper Rifle).
 
 ### Levels
 
@@ -90,10 +101,10 @@ config; owner, 2026-10-04).
 To add a higher spec battery for every electric replica, take the next free ID and add a row to Power sources:
 
 ```
-| 000021 | High Output Battery | battery | electric | dev |
+| 000025 | High Output Battery | battery | electric | dev |
 ```
 
-Then add a row to stats.md's Power sources table saying what it does (`| 000021 | High Output Battery | 0 | 25 | 0 |`
+Then add a row to stats.md's Power sources table saying what it does (`| 000025 | High Output Battery | 0 | 25 | 0 |`
 gives 25 % more rate of fire), and its Name to a level's Unlocks in levels.md (say level 11, raising the cap). Its
 Access says `dev`, so it shows only with Dev content on while you try it out. Change it to `public` and it is
 everyone's at its level; once unlocked it shows in the Power row of every replica tagged `electric`.
@@ -132,11 +143,12 @@ The cases an Extraction run places (M44, dev content for now). Each run's seed p
 
 ### Replicas
 
-| ID | Name | Key | Tags | Access |
-|---|---|---|---|---|
-| 000001 | GBB Pistol | pistol | pistol, gas, pistol-mag, pistol-rail, muzzle-thread | public |
-| 000002 | AEG Rifle | aeg | rifle, electric, aeg-mag, top-rail, under-rail, barrel-mount, muzzle-thread | public |
-| 000019 | Cyber Pistol | cyber | pistol, built-in-power | public |
+| ID | Name | Key | Tags | Comes with | Access |
+|---|---|---|---|---|---|
+| 000001 | GBB Pistol | pistol | pistol, gas, pistol-mag, pistol-rail, muzzle-thread | | public |
+| 000002 | AEG Rifle | aeg | rifle, electric, aeg-mag, top-rail, under-rail, barrel-mount, muzzle-thread | | public |
+| 000019 | Cyber Pistol | cyber | pistol, built-in-power | | public |
+| 000021 | Sniper Rifle | sniper | rifle, spring, top-rail, under-rail, muzzle-thread | 2x Scope | dev |
 
 ### Power sources
 
@@ -147,10 +159,15 @@ The cases an Extraction run places (M44, dev content for now). Each run's seed p
 | 000004 | Green Gas | gas | gas | public |
 | 000008 | Red Gas | gas | gas | public |
 | 000009 | Black Gas | gas | gas | public |
+| 000022 | M130 Spring | spring | spring | dev |
+| 000023 | M140 Spring | spring | spring | dev |
+| 000024 | M150 Spring | spring | spring | dev |
 
 ### Springs
 
-Spring replicas aren't in the game yet. Springs go in Power sources above, with Type `spring` and Fits `spring`.
+The springs are in Power sources above, with Type `spring` and Fits `spring`, set out as the gases are (owner,
+2026-11-02): the M130 the Sniper Rifle comes with, the medium M140 and the high-performance M150 (more energy and kick,
+and a little slower to cock).
 
 ### Optics
 

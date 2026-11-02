@@ -352,8 +352,15 @@ func test_a_level_up_over_two_levels_names_everything_it_unlocked() -> void:
 	await wait_process_frames(2)
 	var words := _words(card)
 	assert_true(words.has("LEVEL 5!"))
-	assert_true(words.has("Unlocked: Silencer, Red Gas, Tight-Bore Barrel"))
-	assert_eq(card.find_child("LevelUp", true, false).find_children("*", "TextureRect", true, false).size(), 3)
+	assert_true(words.has("Unlocked: Silencer, Tight-Bore Barrel, 2x Scope"),
+			"the dev Sniper Rifle and its spring (SN1) are left out without Dev content")
+	assert_eq(card.find_child("LevelUp", true, false).find_children("*", "TextureRect", true, false).size(), 3,
+			"at most UP_PICTURES_MAX pictures")
+	var dev_card := XpCard.new(s, p, pool, true)
+	add_child_autofree(dev_card)
+	await wait_process_frames(2)
+	assert_true(_words(dev_card).has("Unlocked: Silencer, Tight-Bore Barrel, Sniper Rifle, M130 Spring, 2x Scope"),
+			"with Dev content on they are named")
 
 
 func test_a_match_that_gave_none_says_why() -> void:

@@ -24,14 +24,18 @@ const BACKING := 0.9
 
 var _progress: Progress = null
 var _pool: Pool = null
+## Dev items unlocked are named (Dev content on); without it they stay hidden, as everywhere else (SN1).
+var _dev_content: bool = false
 var _pictures: ReplicaPictures = null
 
 
-## The card for `settled` (what PlayerTally.settle returned), with `progress` as it stands now.
-func _init(settled: PlayerTally.Settled, progress: Progress, pool: Pool) -> void:
+## The card for `settled` (what PlayerTally.settle returned), with `progress` as it stands now; dev items it unlocked are
+## named only with `dev_content`.
+func _init(settled: PlayerTally.Settled, progress: Progress, pool: Pool, dev_content: bool = false) -> void:
 	name = "XpCard"
 	_progress = progress
 	_pool = pool
+	_dev_content = dev_content
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	custom_minimum_size = Vector2(WIDTH, 0.0)
 	add_theme_stylebox_override("panel", HudStyle.navy_box(BACKING, GameTheme.LINE, PAD.x, PAD.y))
@@ -123,7 +127,7 @@ func _level_up(up: Progress.LevelUp) -> Control:
 	var items: Array[Pool.Item] = []
 	for id in up.unlocked:
 		var it := _pool.item(id)
-		if it != null:
+		if it != null and (_dev_content or not it.is_dev()):
 			items.append(it)
 	var panel := PanelContainer.new()
 	panel.name = "LevelUp"

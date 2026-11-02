@@ -9,7 +9,7 @@ enum FireMode { SEMI, BURST, AUTO }
 ## stats.md's Key, and the generic, non-brand name the HUD shows.
 @export var id: StringName = &""
 @export var display_name: String = ""
-## What drives it: "electric" (a battery and motor, an AEG) or "gas".
+## What drives it: "electric" (a battery and motor, an AEG), "gas" or "spring" (a bolt-action rifle).
 @export var power: StringName = &"electric"
 ## The sounds it makes (assets/audio/cues/shot_<sound>_*.wav and the rest), when they aren't its power's own (the Cyber
 ## Pistol's, which has no power part apart); "" for its power's.
@@ -36,6 +36,12 @@ enum FireMode { SEMI, BURST, AUTO }
 ## Random spread, the standard deviation of the shot direction (degrees), and the upward view kick per shot (degrees).
 @export var spread_deg: float = 0.5
 @export var recoil_deg: float = 0.2
+## How much wider the spread is with the sight down than raised (Accuracy; 1: as wide as stance and movement make it).
+## A long rifle pointed from the hip goes nowhere near where a raised sight would put it (the Sniper Rifle, SN1).
+@export var hip_spread: float = 1.0
+## Each shot is followed by a bolt worked by hand (the Sniper Rifle): its cycle is heard and drawn after every shot, and
+## its fire rate is how fast the bolt is worked.
+@export var bolt_action: bool = false
 
 ## What its parts make of it, as carried (LoadoutRules.carried; as it comes, these change nothing). The view's zoom when
 ## aimed (0: the iron sights', ViewConfig.aim_zoom), and the share of the usual time to raise the sight.

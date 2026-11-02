@@ -31,6 +31,10 @@ seeds the browser game used, so they sound as they did.
   `tools/render_doors.gd` renders them from its own constants and seeds (a latch's click and a hinge's creak; a shorter
   creak, a plywood leaf's slam and the latch), each scaled to a 0.9 peak; their level is SoundConfig's `door_gain`. To
   re-render: `godot --headless --path . -s res://tools/render_doors.gd`, then `godot --headless --path . --import`.
+- `cues/boltCycle_<n>.wav` (1 to 3): the Sniper Rifle's cocking after every shot (SN1), made for this game.
+  `tools/render_bolt.gd` renders it from its own constants and seeds (the charging handle's plastic scrape over the
+  spring's rising zing, the sear's click, the snap home), timed to the model's Fire clip and scaled to a 0.9 peak. To
+  re-render: `godot --headless --path . -s res://tools/render_bolt.gd`, then `godot --headless --path . --import`.
 - Not baked in: the room reverb and distance muffling, which were applied live; in Godot they belong to the audio buses
   and `AudioStreamPlayer3D`.
 

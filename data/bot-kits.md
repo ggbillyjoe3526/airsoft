@@ -23,7 +23,8 @@ The kits are the bots' own: what you have unlocked never changes them.
   their sidearm yet (docs/KNOWN_ISSUES.md), so for now the secondary and its parts are carried, not used.
 - **Primary parts** and **Secondary parts** list what is fitted to each, by Name (or ID) in pool.md, separated by
   commas: optics, grips, lasers, barrels, muzzle parts, magazines and power sources. Each must fit its replica (pool.md's
-  Fits), one per slot. Empty: the replica as it comes (its standard magazine, battery or gas, iron sights).
+  Fits), one per slot. Empty: the replica as it comes (its standard magazine, battery, gas or spring, and the parts
+  pool.md says it comes with, else iron sights: the Sniper Rifle comes with its 2x Scope).
 - **Suits** lists the bot personalities that lean towards the kit (rusher, anchor, flanker, careful: the
   Personalities table in bots.md), separated by commas, or nothing. A bot whose personality is listed picks the kit 3
   times as often as the other kits with Suits (the browser game's lean; bots have no personalities in this game yet, so
@@ -39,10 +40,11 @@ The kits are the bots' own: what you have unlocked never changes them.
 - **Not here.** Weapon torches: on a night field every bot carries one by rule (pool.md › Lights). BB weight and the
   hop-up stay as each replica comes. Every bot carries one smoke and one flash bomb a round, as you do (SF1), and throws them (SF2).
 
-The kits are first guesses for the owner's playtest. Easy carries the most factory replicas; each level up carries
-more and better matched gear; Hard never factory. The Cyber Pistol turns up now and then from Normal up. Rushers lean
-to Support, Pointman and the Cyber Pistol, anchors to Marksman and Support, flankers to Stealth and Pointman, careful
-bots to Rifleman and Marksman.
+The kits are first guesses for the owner's playtest. Easy carries the most factory replicas; each level up carries more
+and better matched gear; Hard never factory. The Cyber Pistol turns up now and then from Normal up, and the Sniper Rifle
+(a dev item for now, so only with Dev content on) at every level, more often on Hard. Rushers lean to Support, Pointman
+and the Cyber Pistol, anchors to Marksman, Support and Sniper, flankers to Stealth and Pointman, careful bots to
+Rifleman, Marksman and Sniper.
 
 ## Kits
 
@@ -55,3 +57,4 @@ bots to Rifleman and Marksman.
 | Stealth | AEG Rifle | Red Dot, Silencer, Low-Cap Magazine | GBB Pistol | Silencer | flanker | 10 | 15 | 20 |
 | Pointman | AEG Rifle | Red Dot, Angled Grip | GBB Pistol | Red Laser, Extended Magazine, Red Gas | rusher, flanker | 15 | 18 | 23 |
 | Cyber | Cyber Pistol | | GBB Pistol | Red Laser | rusher | 0 | 2 | 2 |
+| Sniper | Sniper Rifle | | GBB Pistol | | anchor, careful | 3 | 6 | 8 |

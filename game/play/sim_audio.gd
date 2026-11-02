@@ -40,6 +40,8 @@ const BUS_INTERFACE := &"Interface"
 const BUS_POWER := &"Power"
 ## A silenced shot plays through this bus's low-pass filter (its first effect), under Effects.
 const BUS_MUFFLED := &"Muffled"
+## The charging handle drawn back and let go after each shot of a spring rifle (assets/audio/cues/boltCycle_*.wav, SN1).
+const BOLT_CUE := &"boltCycle"
 ## Cue names by RayHit.Surface (none sounds as concrete; a BB on gravel, grass or leaves as earth, a step on each as
 ## its own) and by GameEvent.Footstep.
 const SURFACE_NAMES: PackedStringArray = ["concrete", "concrete", "metal", "wood", "earth", "gravel", "grass", "leaves"]
@@ -156,7 +158,7 @@ func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, quer
 	for cue: String in ["selector", "draw", "reloadRefused", "bodyHit", "hitTick", "hitMarker", "count_beep", "vault",
 			"foley_holster", "magRattle", "rope_up", "rope_down", "steelRing", "radio_ack", "foley_crouch", "foley_stand",
 			"foley_lean", "whistle_short", "whistle_long", "torchClick", "ping_pip", "magToss", "magCatch", "grenade_pin",
-			"grenade_bounce", "smoke_pop", "flash_bang", "door_open", "door_shut"]:
+			"grenade_bounce", "smoke_pop", "flash_bang", "door_open", "door_shut", BOLT_CUE]:
 		_load(cue)
 	_set_muffle(cfg.muffled_cutoff_hz)
 	for i in cfg.field_voices:
@@ -211,6 +213,9 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 						Kind.SHOT, BUS_MUFFLED if muffled else BUS_EFFECTS, 1.0, reach, shooter)
 				_play(_power.get(p, &""), e.position, own, _power_gain.get(p, _cfg.power_gain), Kind.SHOT, BUS_POWER, 1.0,
 						reach, shooter)
+				# A spring rifle is cocked by hand after every shot: the charging handle back and home (SN1).
+				if _bolt_action(state, e.actor, e.slot):
+					_mechanism(BOLT_CUE, state, e, own)
 			GameEvent.Kind.DRY_FIRE:
 				_mechanism(_dry.get(_power_of(state, e.actor, e.slot), &""), state, e, own)
 			GameEvent.Kind.RELOAD_START:
@@ -519,6 +524,12 @@ func _power_of(state: GameState, actor: int, slot: int) -> StringName:
 	if c == null or slot < 0 or slot >= c.armament.replicas.size():
 		return &""
 	return c.armament.replicas[slot].sound_profile()
+
+
+## Whether `actor`'s replica in `slot` is cocked by hand after each shot (ReplicaConfig.bolt_action).
+func _bolt_action(state: GameState, actor: int, slot: int) -> bool:
+	var c := state.character(actor)
+	return c != null and slot >= 0 and slot < c.armament.replicas.size() and c.armament.replicas[slot].bolt_action
 
 
 ## Whether `actor`'s replica in `slot` is silenced.

@@ -705,6 +705,18 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **Parts on figures wait for the art pass (owner, 2026-10-19).** A figure's replica is one cut-down mesh, so a part's
   figure copy sits over its standard magazine or flash hider; the figure models get those split out in the art pass.
   Nothing shows it until then (bots carry no parts).
+- **The Sniper Rifle (owner, 2026-11-02, SN1).** Pulled into 0.1 from the Replica Update: like the AEG with a longer
+  barrel, spring driven, **single shot** only, and it **comes with the 2x Scope fitted**, which can be taken off or
+  swapped. It unlocks at **level 5** with the 2x Scope (moved from level 7 so it comes with the rifle) and the M130
+  Spring; Red Gas moved from 5 to 6 to spread level 5 out; the cap stays 10. Springs are set out as the gases are: the
+  M130 as it comes, the M140 (level 7) and M150 (level 9) adding 10 % and 20 % energy and kick.
+- **Defaults taken for the Sniper Rifle (SN1, the owner may change any).** A **sniper site class with a 2.3 J limit**,
+  as UK sites allow bolt-actions; 1.9 J with 0.30 g BBs (the heaviest the Loadout loads, so the BB range stays 0.20 to
+  0.30 g for everyone); 0.8 shots a second (the charging handle cocked after each); 25 BBs × 4; a **hip spread** of 6
+  (a new stats.md column: wider with the sight down, as it comes up the same as everything); the AEG's grips fit, no
+  barrels or AEG magazines; stronger springs cock 5 % and 10 % slower. A **Comes with** column in pool.md fits parts as
+  a replica comes. Bots with it raise the sight to fight and take a shot from the hip only inside 8 m; a Sniper kit
+  carries it (Dev content only while it is dev).
 
 ## Menus, HUD, settings and accessibility
 

@@ -8,10 +8,12 @@ extends Resource
 	&"aeg": Vector3(0.12, -0.19, -0.26),
 	&"pistol": Vector3(0.12, -0.15, -0.34),
 	&"cyber": Vector3(0.12, -0.15, -0.34),
+	&"sniper": Vector3(0.12, -0.19, -0.26),
 }
 @export var hip_default: Vector3 = Vector3(0.13, -0.16, -0.32)
 ## Aimed, the sight line (rear to front sight) runs through the eye; the replica sits this far forward of it.
-@export var aim_forward: Dictionary[StringName, float] = {&"aeg": -0.2, &"pistol": -0.36, &"cyber": -0.36}
+@export var aim_forward: Dictionary[StringName, float] = {&"aeg": -0.2, &"pistol": -0.36, &"cyber": -0.36,
+		&"sniper": -0.2}
 @export var aim_forward_default: float = -0.25
 ## Looking through an optic, by its part Key (ReplicaView, OpticGlass): its glass's centre (z in the part's own space,
 ## -z forward, on the sight line) and radius (m), measured from the part models; how far behind the glass the eye sits

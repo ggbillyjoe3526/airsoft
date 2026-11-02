@@ -14,7 +14,7 @@ func test_a_gone_maps_presets_read_day_alone_and_load_refuses_it_cleanly() -> vo
 	assert_false(m.problems.is_empty(), "a refused map says why")
 
 
-func test_no_shipped_map_or_item_is_dev_and_the_range_is_listed() -> void:
+func test_no_shipped_map_or_item_is_dev_but_the_sniper_and_the_range_is_listed() -> void:
 	var cat := MapCatalog.read_file()
 	for e in cat.listed(false):
 		assert_false(cat.is_dev(e.id), e.id)
@@ -28,8 +28,10 @@ func test_no_shipped_map_or_item_is_dev_and_the_range_is_listed() -> void:
 	every.append_array(pool.replicas)
 	every.append_array(pool.powers)
 	every.append_array(pool.parts)
+	# The only dev items are the ones in development on purpose: SN1's Sniper Rifle and its springs.
+	var in_development := PackedStringArray(["000021", "000022", "000023", "000024"])
 	for it in every:
-		assert_false(it.is_dev(), it.display_name)
+		assert_eq(it.is_dev(), in_development.has(it.id), it.display_name)
 
 
 func test_the_torch_is_a_night_light_for_bots_without_dev_content() -> void:
