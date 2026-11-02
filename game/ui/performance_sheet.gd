@@ -22,6 +22,8 @@ const BAR_HEIGHT := 8.0
 const BAR_BACK := Color(1.0, 1.0, 1.0, 0.08)
 
 var _rows: Array[Dictionary] = []
+## The heading's " · AEG RIFLE" ("" until a page names the replica).
+var _replica: Label = null
 ## What the sheet compares, and the lines in words of what got better, worse and capped ("" for none).
 var _sub: String = ""
 var _better: String = ""
@@ -32,15 +34,25 @@ var _capped: String = ""
 func _init() -> void:
 	name = "PerformanceSheet"
 	custom_minimum_size = Vector2(WIDTH, 0.0)
-	add_theme_stylebox_override("panel", GameTheme.box(GameTheme.PANEL, GameTheme.LINE, PAD.x, PAD.y))
+	add_theme_stylebox_override("panel", GameTheme.panel_box(PAD.x, PAD.y))
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 0)
 	add_child(column)
-	column.add_child(MenuParts.spaced(TranslationServer.translate("PERF_TITLE"), 22, 800, GameTheme.MUTED,
-			GameTheme.SPACING_HEADING))
+	# a section heading like the pages' others (UR3): PERFORMANCE · and the replica it shows
+	var title := HBoxContainer.new()
+	title.add_theme_constant_override("separation", 0)
+	title.add_child(MenuParts.heading(TranslationServer.translate("PERF_TITLE")))
+	_replica = MenuParts.heading("")
+	title.add_child(_replica)
+	column.add_child(title)
 	column.add_child(_gap(SUB_GAP))
 	for spec in LoadoutPerformance.SPECS:
 		_rows.append(_build_row(column, spec))
+
+
+## Names the replica the sheet shows, after PERFORMANCE.
+func set_replica(display_name: String) -> void:
+	_replica.text = (" · " + display_name).to_upper() if display_name != "" else ""
 
 
 ## The row for `field`'s value label, for the tests and the screenshots.

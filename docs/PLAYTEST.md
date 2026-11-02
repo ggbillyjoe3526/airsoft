@@ -720,6 +720,11 @@ Every field plays 6v6 by default; Custom offers 5v5, 6v6, 7v7 and 8v8 on each (o
   inside its row, its name and a line; the modes under them with their lines; the rules in the middle; your team and
   the bots at the right, and a card at the foot with the field's picture, its name, the rest of the match and PLAY.
   Pick each field and mode: the card and the backdrop follow. Check at 1920×1080 and 1280×720 that nothing is cut off.
+- [ ] **The Loadout page (UR3).** LOADOUT with the loadout's name and replicas beside it, the saved loadouts under it,
+  then the PRIMARY card with its replica large and CUSTOMISE, the SECONDARY card beside the GRENADES (smoke and flash
+  with their keys), the SWAP row, and Performance at the right. A rifle and a pistol are drawn true to size against each
+  other; swap the rifle into the secondary slot: it is just as large there. Pick each card: CUSTOMISE moves with the
+  ring and the Swap row says which slot it fills.
 - [ ] **Esc (FB1).** Esc on any menu page and in Settings asks **QUIT GAME?** with the focus on CANCEL; Esc again or
   CANCEL closes it and QUIT leaves. A dialog's, a key rebind's and the Loadout's rename Esc still come first (the
   credits close, a key waiting stops waiting); in a match Esc is still the pause menu, and its Settings close on Esc.

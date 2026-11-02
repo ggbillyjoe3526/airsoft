@@ -12,9 +12,12 @@ extends Control
 ## Sent when Customise opens or closes.
 signal customising_changed
 
-const MARGIN_X := 56
-const STRIP_TOP := 28
-const NOTICE_TOP := 88
+## The strip's row under the gear page's title (LoadoutGear: MARGIN and TOP), and the load notice at the title row's right.
+const MARGIN_X := MenuParts.PAGE_MARGIN.x
+const STRIP_TOP := 112.0
+const NOTICE_TOP := 34.0
+## The load notice wraps in this width, clear of the title's line.
+const NOTICE_WIDTH := 560.0
 const NOTICE_SIZE := 15
 const KEYS: Array[Key] = [KEY_1, KEY_2, KEY_3, KEY_4, KEY_5]
 
@@ -70,13 +73,16 @@ func _init(saved_in: SavedLoadouts = null, settings_in: Settings = null) -> void
 	_strip = LoadoutStrip.new(saved)
 	_strip.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	_strip.offset_left = MARGIN_X
-	_strip.offset_right = -MARGIN_X
+	_strip.offset_right = -MenuParts.PAGE_MARGIN.z
 	_strip.offset_top = STRIP_TOP
 	add_child(_strip)
 	_notice = MenuParts.text("", NOTICE_SIZE, 700, GameTheme.WARN)
-	_notice.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	_notice.offset_left = MARGIN_X
-	_notice.offset_right = -MARGIN_X
+	_notice.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_notice.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_notice.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_notice.custom_minimum_size = Vector2(NOTICE_WIDTH, 0.0)
+	_notice.offset_right = -MenuParts.PAGE_MARGIN.z
 	_notice.offset_top = NOTICE_TOP
 	_notice.visible = false
 	add_child(_notice)
@@ -85,6 +91,8 @@ func _init(saved_in: SavedLoadouts = null, settings_in: Settings = null) -> void
 		_notice.text = saved.load_message
 		_notice.visible = true
 		saved.load_message = ""
+	# shown again (back from Settings): a rebind or a setting changed there shows at once
+	visibility_changed.connect(_on_visibility_changed)
 	_refresh()
 
 
@@ -243,6 +251,11 @@ func _on_changed() -> void:
 
 func _refresh_after_tab(_tab: CustomiseView.Tab) -> void:
 	if is_node_ready():
+		_refresh()
+
+
+func _on_visibility_changed() -> void:
+	if visible and is_inside_tree():
 		_refresh()
 
 

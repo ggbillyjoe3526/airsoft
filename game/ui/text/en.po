@@ -1037,17 +1037,14 @@ msgstr "Something went wrong in this match (1 error). The game carried on; Repor
 msgid "PAUSE_ERRORS"
 msgstr "Something went wrong in this match (%d errors). The game carried on; Report a Bug sends what happened."
 
-msgid "LOADOUT_CARRIED"
-msgstr "CARRIED"
-
-msgid "LOADOUT_REPLICAS"
-msgstr "YOUR REPLICAS"
-
 msgid "LOADOUT_PRIMARY"
 msgstr "PRIMARY"
 
 msgid "LOADOUT_SECONDARY"
 msgstr "SECONDARY"
+
+msgid "LOADOUT_SWAP"
+msgstr "SWAP %s"
 
 msgid "LOADOUT_GRENADES"
 msgstr "GRENADES"

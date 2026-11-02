@@ -77,7 +77,7 @@ func test_the_loadout_tab_is_on_and_opens_the_gear_page() -> void:
 	assert_true(page.gear().visible)
 	assert_false(page.customising())
 	var words := _words(page)
-	for expected: String in ["CARRIED", "YOUR REPLICAS", "PERFORMANCE", "PRIMARY", "SECONDARY", "GRENADES"]:
+	for expected: String in ["LOADOUT", "SWAP PRIMARY", "PERFORMANCE", "PRIMARY", "SECONDARY", "GRENADES"]:
 		assert_true(words.has(expected), expected)
 	assert_eq(page.gear().customise_button().text, "CUSTOMISE")
 
@@ -459,3 +459,57 @@ func test_freeing_the_page_leaves_no_orphan_nodes_and_no_connections() -> void:
 	assert_eq(saved.changed.get_connections().size(), 0, "the page let go of the store")
 	await wait_process_frames(2)
 	assert_eq(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT), before, "no orphan nodes")
+
+
+# --- UR3: concept B v2's Loadout ---
+
+func test_customise_sits_on_the_picked_card_and_the_swap_row_names_its_slot() -> void:
+	var page := _page()
+	var gear := page.gear()
+	var words := _words(page)
+	assert_true(words.has("SWAP PRIMARY"))
+	assert_true(gear.carried_card(Loadout.Slot.PRIMARY).is_ancestor_of(gear.customise_button()))
+	assert_true(gear.customise_button().visible)
+	gear.carried_card(Loadout.Slot.SECONDARY).pressed.emit()
+	assert_true(gear.carried_card(Loadout.Slot.SECONDARY).is_ancestor_of(gear.customise_button()),
+			"CUSTOMISE moves with the ring")
+	assert_true(gear.customise_button().visible)
+	assert_true(_words(page).has("SWAP SECONDARY"))
+	var shown := 0
+	for b: Node in gear.find_children("Customise", "Button", true, false):
+		shown += 1 if (b as Button).visible else 0
+	assert_eq(shown, 1, "one CUSTOMISE on the page")
+
+
+func test_the_title_line_names_the_loadout_and_what_it_carries() -> void:
+	var page := _page()
+	var title := page.gear().find_child("TitleRow", true, false) as Control
+	assert_not_null(title)
+	assert_string_contains(page.gear().foot_text(), "AEG Rifle and GBB Pistol")
+	assert_lt(title.get_global_rect().end.y, page.strip().get_global_rect().position.y + 1.0, "the strip under it")
+
+
+func test_the_carried_cards_draw_a_pistol_true_to_size_against_a_rifle() -> void:
+	var page := _page()
+	var gear := page.gear()
+	var rifle := gear.carried_picture(Loadout.Slot.PRIMARY).custom_minimum_size
+	var pistol := gear.carried_picture(Loadout.Slot.SECONDARY).custom_minimum_size
+	var pictures := page.pictures()
+	assert_almost_eq(rifle.x / pistol.x, pictures.extent(&"aeg").x / pictures.extent(&"pistol").x, 0.02)
+	assert_lte(rifle.x, LoadoutGear.CARRIED_BOX.x + 0.5)
+	assert_lte(rifle.y, LoadoutGear.CARRIED_BOX.y + 0.5)
+
+
+func test_a_rebound_throw_key_shows_on_the_grenades_when_the_page_is_shown_again() -> void:
+	var page := _page()
+	var grenades := page.gear().find_child("Grenades", true, false) as Control
+	assert_true(_words(grenades).has(KeyNames.of_action(&"throw_smoke")))
+	var nine := InputEventKey.new()
+	nine.physical_keycode = KEY_9
+	InputMap.action_erase_events(&"throw_smoke")
+	InputMap.action_add_event(&"throw_smoke", nine)
+	var shown := KeyNames.of_action(&"throw_smoke")
+	page.visible = false
+	page.visible = true
+	assert_true(_words(grenades).has(shown), "the new key, as on the way back from Settings")
+	InputMap.load_from_project_settings()

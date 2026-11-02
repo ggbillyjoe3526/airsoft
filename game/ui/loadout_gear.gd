@@ -1,80 +1,82 @@
 class_name LoadoutGear
 extends Control
-## The Loadout tab's gear page body (concept `gear.png`): CARRIED (the primary and the secondary, the picked slot ringed in
-## yellow, and the grenades carried every round: a smoke and a flash, SF1), YOUR REPLICAS (each replica to carry, the
-## cards of those carried tagged with their slot, the ones the game can't play yet greyed LATER and the ones not
-## unlocked yet greyed with their level), the hint, the Performance sheet and the slanted CUSTOMISE.
-## A replica's picture sits inside its card with room round it, kept in shape, so it can't touch the card's lines at any
-## window size. The page owner reads `slot_picked`, `replica_picked` and `customise_requested` and calls `refresh`.
+## The Loadout tab's gear page body (UI concept B v2, `loadout.png`, owner 2026-11-02): LOADOUT and its line (the loadout
+## carried and what is in it), then the glass panels: the PRIMARY card (its replica large, its name and what it carries,
+## CUSTOMISE on the picked card), the SECONDARY card beside the GRENADES carried every round (SF1), the SWAP row (every
+## replica to carry in the picked slot: the ones carried tagged with their slot, the ones the game can't play yet greyed
+## LATER, the ones not unlocked yet greyed with their level) and the Performance sheet at the right.
+## Every replica on the page is drawn at one scale (owner, 2026-10-19 and 2026-11-02: replicas to scale), the cards'
+## sized so the longest fits a card's picture box and the swap row's so it fits a row's: a rifle in either slot is the
+## same size, a pistol beside it true to size. The page owner reads `slot_picked`, `replica_picked` and
+## `customise_requested` and calls `refresh`. LoadoutPage puts the saved loadouts' strip in the row under the title.
 
 signal slot_picked(slot: Loadout.Slot)
 signal replica_picked(id: String)
 signal customise_requested
 
-# beside the side rail (UR1): 48 + 700 + 32 + 424 + 32 + 500 + 48 fills the 1784 px the rail leaves of 1920
-const MARGIN_X := 48
-const TOP := 116
-const BOTTOM := 120
-const COLUMN_GAP := 32
-const CARRIED_WIDTH := 700.0
+## Where the panels start (the page's margins, title and panels are MenuParts'): under the title row and LoadoutPage's
+## strip (its STRIP_TOP plus the strip's height and a gap). The Performance column's width.
+const TOP := 186.0
 const SIDE_WIDTH := 500.0
-const CARD_GAP := 18
-## A carried card's picture area is as tall in both slots, so a rifle fits either.
-const IMAGE_HEIGHT := 230.0
-## Room round a carried picture: below the slot's name and key (the label ends about 30 px down) and at the sides and foot.
-const PICTURE_TOP := 46.0
-const PICTURE_SIDE := 16.0
-const PICTURE_BOTTOM := 16.0
-## The room the longest replica's picture takes in a carried card and in the list. Every replica in the cards is drawn at
-## the scale that fills the first, and every one in the list at the list's, so replicas read true to size against each
-## other (owner, 2026-10-19).
-const CARRIED_BOX := Vector2(CARRIED_WIDTH - 2.0 * GameTheme.BORDER - 2.0 * PICTURE_SIDE,
-		IMAGE_HEIGHT - PICTURE_TOP - PICTURE_BOTTOM)
-const LIST_BOX := Vector2(168.0, 72.0)
-const TITLE_PAD := Vector4(18.0, 12.0, 18.0, 16.0)
-const TITLE_HEIGHT := 62.0
-const LABEL_SIZE := 15
-const LABEL_SPACING := 0.1
-const LABEL_POS := Vector2(18.0, 14.0)
-const NAME_SIZE := 24
-const SUB_SIZE := 16
+## A carried card: its padding, the room for its slot's label row above the picture and its name block below.
+const CARD_PAD := Vector2(24.0, 18.0)
+const CARD_HEAD := 40.0
+const CARD_FOOT := 64.0
+## The picture box both carried cards hold: the longest replica fits it, in either slot (a rifle carried as the secondary
+## is as large as one carried as the primary), and every carried replica is drawn at that scale.
+const CARRIED_BOX := Vector2(640.0, 170.0)
+## The secondary card is as wide as the box needs; the grenades panel takes the rest of the row.
+const SECONDARY_WIDTH := CARRIED_BOX.x + 2.0 * CARD_PAD.x
+const SLOT_SIZE := 15
+const SLOT_SPACING := 0.1
 const KEY_SIZE := 13
-const OFF_HEIGHT := 48.0
-## The grenades row: each bomb's words (Grenade.Kind order, NONE unused) and its colour dot's size (px).
+const KEY_PAD := Vector2i(7, 1)
+const SLOT_KEY_GAP := 12
+const NAME_SIZE := 34
+const NAME_SPACING := 0.02
+const SUB_SIZE := 16
+## CUSTOMISE's words: smaller than PLAY's, a button on a card.
+const CUSTOMISE_SIZE := 20
+const NAME_SUB_GAP := 2
+## The grenades panel: a tile a bomb (its height and padding), its icon, the count and name, and its throw key.
 const GRENADE_KEYS: Array[String] = ["", "LOADOUT_SMOKE", "LOADOUT_FLASH"]
-const GRENADE_DOT := 10.0
-const REPLICA_GAP := 12
-const REPLICA_HEIGHT := 92.0
-const REPLICA_PICTURE := Vector2(188.0, 0.0)
-const REPLICA_PICTURE_PAD := Vector2(10.0, 8.0)
-const REPLICA_NAME_SIZE := 20
-const REPLICA_SUB_SIZE := 15
-const REPLICA_TEXT_GAP := 4
-## The list is never narrower than a picture and a name, in a window too small for the page (its old, larger heading
-## used to hold it this wide).
-const REPLICAS_MIN_WIDTH := 320.0
-## The range's note under the list (concept `loadout-practice.png`): the gap above, the padding (left past the rule, top,
-## right, bottom; the left is past the rule), the rule's width, the kicker's and the words' sizes and the words' extra line spacing (px at 1080p).
-const NOTE_GAP := 28
+const GRENADE_ACTIONS: Array[StringName] = [&"", &"throw_smoke", &"throw_flash"]
+const GRENADE_ICON := 44.0
+const GRENADE_GAP := 10
+const GRENADE_TILE_GAP := 12
+const GRENADE_TILE_HEIGHT := 160.0
+const GRENADE_TILE_PAD := Vector2i(16, 14)
+const GRENADE_SIZE := 17
+const HEADING_GAP := 14
+## The swap row: its label's width, the gap between its cards, a card's height and padding, and the picture box the
+## longest replica fits there.
+const SWAP_LABEL_WIDTH := 170.0
+const SWAP_GAP := 12
+const REPLICA_HEIGHT := 72.0
+const REPLICA_PAD := Vector2(12.0, 8.0)
+const LIST_BOX := Vector2(120.0, 52.0)
+const REPLICA_NAME_SIZE := 17
+const REPLICA_SUB_SIZE := 13
+## What a swap card says under its name: the slot it is carried in, or nothing (the rest is its tooltip).
+const REPLICA_TEXT_GAP := 2
+const REPLICA_TAG_GAP := 6
+const REPLICA_PIC_GAP := 12
+## The range's note under the Performance sheet (concept `loadout-practice.png`): the gap above, the padding (left past
+## the rule, top, right, bottom), the rule's width, the kicker's and the words' sizes and the words' extra line spacing.
+const NOTE_GAP := 18
 const NOTE_PAD := Vector4(18.0, 14.0, 18.0, 16.0)
 const NOTE_RULE := 4
 const NOTE_KICKER_SIZE := 13
 const NOTE_SIZE := 17
 const NOTE_LINE := 3
-const FOOT_LEFT := 56.0
-const FOOT_BOTTOM := 58.0
-const FOOT_SIZE := 18
-const CUSTOMISE_RIGHT := 56.0
-const CUSTOMISE_BOTTOM := 44.0
-## The range note: the gap between its kicker and its words, and the kicker's letter spacing (share of its size).
 const NOTE_WORDS_GAP := 6
 const NOTE_KICKER_SPACING := 0.1
 
 var _pictures: ReplicaPictures = null
-var _glow: GradientTexture2D = null
 var _carried: Array[MenuCard] = []
 var _carried_pic: Array[TextureRect] = []
-## Pixels per metre of replica in the carried cards and in the list.
+var _carried_customise: Array[Button] = []
+## Pixels per metre of replica in the carried cards and in the swap row.
 var _carried_scale: float = 1.0
 var _list_scale: float = 1.0
 var _carried_name: Array[Label] = []
@@ -83,10 +85,18 @@ var _rows: Dictionary[String, MenuCard] = {}
 var _row_pic: Dictionary[String, TextureRect] = {}
 var _row_slot: Dictionary[String, Label] = {}
 var _row_rest: Dictionary[String, Label] = {}
+## The swap cards that can be carried now: their tooltip adds how to pick, swap and customise.
+var _row_hint: Dictionary[String, bool] = {}
+## A swap card's line under its name, and whether it has tags: the line hides when it has neither tags nor a slot, so
+## the name sits in the middle.
+var _row_sub: Dictionary[String, HBoxContainer] = {}
+var _row_tagged: Dictionary[String, bool] = {}
 var _sheet: PerformanceSheet = null
-var _foot_name: Label = null
-var _foot_rest: Label = null
-var _customise: Button = null
+var _line_name: Label = null
+var _line_rest: Label = null
+var _swap_label: Label = null
+var _grenade_keys: Array[Label] = []
+var _picked: Loadout.Slot = Loadout.Slot.PRIMARY
 var _facts: LoadoutFacts = null
 var _note: Control = null
 
@@ -95,27 +105,44 @@ func _init(pictures: ReplicaPictures, facts: LoadoutFacts) -> void:
 	name = "LoadoutGear"
 	_pictures = pictures
 	_facts = facts
-	_glow = MenuParts.glow(GameTheme.CARD)
 	_set_scales()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var margin := MarginContainer.new()
+	var m := MenuParts.PAGE_MARGIN
+	var title := _build_title()
+	title.position = Vector2(m.x, m.y)
+	add_child(title)
+	var margin := MenuParts.padded(m.x, TOP, m.z, m.w)
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", MARGIN_X)
-	margin.add_theme_constant_override("margin_right", MARGIN_X)
-	margin.add_theme_constant_override("margin_top", TOP)
-	margin.add_theme_constant_override("margin_bottom", BOTTOM)
+	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(margin)
 	var columns := HBoxContainer.new()
-	columns.add_theme_constant_override("separation", COLUMN_GAP)
+	columns.add_theme_constant_override("separation", MenuParts.PANEL_GAP)
 	margin.add_child(columns)
-	columns.add_child(_build_carried())
-	columns.add_child(_build_replicas())
+	var left := VBoxContainer.new()
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.add_theme_constant_override("separation", MenuParts.PANEL_GAP)
+	columns.add_child(left)
+	_build_carried()
+	_carried[Loadout.Slot.PRIMARY].size_flags_vertical = Control.SIZE_EXPAND_FILL
+	left.add_child(_carried[Loadout.Slot.PRIMARY])
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", MenuParts.PANEL_GAP)
+	var secondary := _carried[Loadout.Slot.SECONDARY]
+	secondary.custom_minimum_size.x = SECONDARY_WIDTH
+	row.add_child(secondary)
+	row.add_child(_build_grenades())
+	left.add_child(row)
+	left.add_child(_build_swap())
+	var side := VBoxContainer.new()
+	side.add_theme_constant_override("separation", 0)
+	side.custom_minimum_size = Vector2(SIDE_WIDTH, 0.0)
 	_sheet = PerformanceSheet.new()
-	_sheet.custom_minimum_size = Vector2(SIDE_WIDTH, 0.0)
-	# as tall as its rows: filling the column took it down onto CUSTOMISE (UI1)
-	_sheet.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	columns.add_child(_sheet)
-	_build_foot()
+	# as tall as the column, as the panels beside it; the range's note under it when it shows
+	_sheet.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	side.add_child(_sheet)
+	_note = _build_range_note()
+	side.add_child(_note)
+	columns.add_child(side)
 
 
 func carried_card(slot: Loadout.Slot) -> MenuCard:
@@ -130,13 +157,14 @@ func sheet() -> PerformanceSheet:
 	return _sheet
 
 
+## CUSTOMISE: on the picked carried card.
 func customise_button() -> Button:
-	return _customise
+	return _carried_customise[_picked]
 
 
-## The line under the cards ("CQB Rush · AEG Rifle and GBB Pistol · carried into every match").
+## The title's line ("CQB Rush · AEG Rifle and GBB Pistol · carried into every match").
 func foot_text() -> String:
-	return _foot_name.text + _foot_rest.text
+	return _line_name.text + _line_rest.text
 
 
 func replica_ids() -> PackedStringArray:
@@ -146,16 +174,22 @@ func replica_ids() -> PackedStringArray:
 ## Shows the carried loadout, with `slot` picked and the paint names as the Realistic colours switch says.
 func refresh(slot: Loadout.Slot, realistic: bool) -> void:
 	var f := _facts
+	_picked = slot
+	_swap_label.text = tr("LOADOUT_SWAP") % tr(LoadoutFacts.SLOT_KEYS[slot]).to_upper()
+	# a rebind in Settings › Controls shows when the page is shown again (LoadoutPage refreshes then)
+	for kind: int in [Grenade.Kind.SMOKE, Grenade.Kind.FLASH]:
+		_grenade_keys[kind].text = KeyNames.of_action(GRENADE_ACTIONS[kind])
 	var names := PackedStringArray()
 	for s in LoadoutFacts.SLOTS:
 		var card := _carried[s]
 		card.set_picked(s == slot)
+		_carried_customise[s].visible = s == slot
 		if not f.has(s):
 			continue
 		var item := f.item(s)
 		var t := f.tune(s)
 		names.append(item.display_name)
-		_carried_name[s].text = item.display_name
+		_carried_name[s].text = item.display_name.to_upper()
 		var bits := PackedStringArray([f.paint_name(s, realistic), tr("LOADOUT_GRAMS") % t.bb_weight])
 		var power := f.power_name(s)
 		if power != "":
@@ -168,6 +202,7 @@ func refresh(slot: Loadout.Slot, realistic: bool) -> void:
 		_row_pic[id].texture = _pictures.texture(item.key, t.paint, realistic, f.fitted_keys(item))
 		var carried_in := f.slot_of(id)
 		_row_slot[id].visible = carried_in >= 0
+		_row_sub[id].visible = carried_in >= 0 or _row_tagged[id]
 		if carried_in >= 0:
 			_row_slot[id].text = tr(LoadoutFacts.SLOT_KEYS[carried_in])
 		var config := f.rules().config(item)
@@ -176,28 +211,43 @@ func refresh(slot: Loadout.Slot, realistic: bool) -> void:
 			_row_rest[id].text = (" · " + rest) if carried_in >= 0 else rest
 		elif carried_in < 0:
 			_row_rest[id].text = tr("LOADOUT_COMES_WITH_LEVELS") % _class_word(_site_class(item))
-	_foot_name.text = f.saved.carried().name
-	_foot_rest.text = " · " + tr("LOADOUT_FOOT") % " and ".join(names) if not names.is_empty() else ""
+		var about := _row_rest[id].text.trim_prefix(" · ")
+		_rows[id].tooltip_text = about + ("\n" + tr("LOADOUT_HINT") if _row_hint.has(id) else "")
+	_line_name.text = f.saved.carried().name
+	_line_rest.text = " · " + tr("LOADOUT_FOOT") % " and ".join(names) if not names.is_empty() else ""
 	_sheet.show_sheet(f.sheet(slot), tr("LOADOUT_SHEET_SUB") % f.item(slot).display_name)
+	_sheet.set_replica(f.item(slot).display_name)
 	# the pictures now hold the parts fitted: one scale again for every replica, sized to the longest
 	_set_scales()
 	for s in LoadoutFacts.SLOTS:
 		if f.has(s):
 			_carried_pic[s].custom_minimum_size = _pictures.extent(f.item(s).key) * _carried_scale
 	for id: String in _rows:
-		_row_pic[id].custom_minimum_size = _pictures.extent(f.pool().item(id).key) * _list_scale
+		_row_pic[id].custom_minimum_size = _list_size(f.pool().item(id))
 
 
 ## The two scales: each lets the longest replica listed fill its box (and no replica be taller than the box).
 func _set_scales() -> void:
 	var longest := Vector2.ZERO
+	var rules := _facts.rules()
 	for item in _listed():
+		# a replica the game can't play yet has no model to measure (its extent is a stand-in), so it sets no scale
+		if rules.config(item) == null:
+			continue
 		var e := _pictures.extent(item.key)
 		longest = Vector2(maxf(longest.x, e.x), maxf(longest.y, e.y))
 	if longest == Vector2.ZERO:
 		return
 	_carried_scale = minf(CARRIED_BOX.x / longest.x, CARRIED_BOX.y / longest.y)
 	_list_scale = minf(LIST_BOX.x / longest.x, LIST_BOX.y / longest.y)
+
+
+## A replica's picture size in the swap row: at the row's scale, and never past its box (a replica the game can't play
+## yet has only a stand-in extent, so it is fitted to the box instead).
+func _list_size(item: Pool.Item) -> Vector2:
+	var want := _pictures.extent(item.key) * _list_scale
+	var fit := minf(1.0, minf(LIST_BOX.x / want.x, LIST_BOX.y / want.y)) if want.x > 0.0 and want.y > 0.0 else 1.0
+	return want * fit
 
 
 ## The picture in a carried card, and in a list row (for the tests).
@@ -209,125 +259,141 @@ func list_picture(id: String) -> TextureRect:
 	return _row_pic[id]
 
 
-func _build_carried() -> Control:
-	var column := MenuParts.section(MenuParts.heading(tr("LOADOUT_CARRIED")))
-	column.custom_minimum_size = Vector2(CARRIED_WIDTH, 0.0)
-	var cards := VBoxContainer.new()
-	cards.add_theme_constant_override("separation", CARD_GAP)
-	column.add_child(cards)
+## The two carried cards (not yet placed): the slot's label and key at the top left, the replica in the middle in a
+## box CARRIED_BOX holds, its name and what it carries at the foot, CUSTOMISE at the bottom right while it is picked.
+func _build_carried() -> void:
 	for s in LoadoutFacts.SLOTS:
 		var card := MenuCard.new()
 		card.name = "Carried_%d" % (s + 1)
 		card.ring = true
-		var image := IMAGE_HEIGHT
-		card.custom_minimum_size = Vector2(0.0, image + TITLE_HEIGHT + GameTheme.BORDER)
-		var box := VBoxContainer.new()
-		box.add_theme_constant_override("separation", 0)
-		var stage := Control.new()
-		stage.custom_minimum_size = Vector2(0.0, image)
+		# glass like the panels beside them: the ring says which is picked
+		card.fill = GameTheme.PANEL
+		card.picked_fill = GameTheme.PANEL
+		card.custom_minimum_size = Vector2(0.0, CARD_HEAD + CARRIED_BOX.y + CARD_FOOT + 2.0 * CARD_PAD.y)
+		var pad := MenuParts.padded(CARD_PAD.x, CARD_PAD.y, CARD_PAD.x, CARD_PAD.y)
+		pad.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var stack := VBoxContainer.new()
+		stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		stack.add_theme_constant_override("separation", 0)
+		var head := HBoxContainer.new()
+		head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		head.custom_minimum_size = Vector2(0.0, CARD_HEAD)
+		head.alignment = BoxContainer.ALIGNMENT_BEGIN
+		head.add_theme_constant_override("separation", SLOT_KEY_GAP)
+		var label := MenuParts.head_text(tr(LoadoutFacts.SLOT_KEYS[s]), SLOT_SIZE, 600, GameTheme.MUTED, SLOT_SPACING)
+		label.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		head.add_child(label)
+		var key := MenuParts.key_chip(str(s + 1), KEY_SIZE, GameTheme.DIM, KEY_PAD)
+		key.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		head.add_child(key)
+		stack.add_child(head)
+		# the picture's room grows with the card (the primary fills the column), the picture stays at the one scale
+		var stage := CenterContainer.new()
 		stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var glow := TextureRect.new()
-		glow.texture = _glow
-		glow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		glow.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		stage.add_child(glow)
-		var pad := MenuParts.padded(PICTURE_SIDE, PICTURE_TOP, PICTURE_SIDE, PICTURE_BOTTOM)
-		pad.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		stage.custom_minimum_size = Vector2(0.0, CARRIED_BOX.y)
 		var pic := MenuParts.picture(CARRIED_BOX)
-		pad.add_child(pic)
-		stage.add_child(pad)
-		var label := MenuParts.spaced(tr(LoadoutFacts.SLOT_KEYS[s]), LABEL_SIZE, 800, GameTheme.MUTED, LABEL_SPACING)
-		label.position = LABEL_POS
-		stage.add_child(label)
-		stage.add_child(_key_chip(s + 1))
-		box.add_child(stage)
-		var title := PanelContainer.new()
-		title.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var rule := GameTheme.box(Color(0.0, 0.0, 0.0, 0.0), Color(0.0, 0.0, 0.0, 0.0), int(TITLE_PAD.x),
-				int(TITLE_PAD.y))
-		rule.border_width_top = GameTheme.BORDER
-		rule.border_color = GameTheme.LINE
-		rule.content_margin_bottom = TITLE_PAD.w
-		title.add_theme_stylebox_override("panel", rule)
-		var row := HBoxContainer.new()
-		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var item_name := MenuParts.text("", NAME_SIZE, 800, GameTheme.TEXT)
-		item_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(item_name)
-		var sub := MenuParts.text("", SUB_SIZE, 600, GameTheme.MUTED)
-		sub.size_flags_vertical = Control.SIZE_SHRINK_END
-		row.add_child(sub)
-		title.add_child(row)
-		box.add_child(title)
-		card.add_content(box)
+		stage.add_child(pic)
+		stack.add_child(stage)
+		var foot := HBoxContainer.new()
+		foot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		foot.custom_minimum_size = Vector2(0.0, CARD_FOOT)
+		var words := VBoxContainer.new()
+		words.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		words.alignment = BoxContainer.ALIGNMENT_END
+		words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		words.add_theme_constant_override("separation", NAME_SUB_GAP)
+		var item_name := MenuParts.head_text("", NAME_SIZE, 700, GameTheme.TEXT, NAME_SPACING)
+		item_name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		words.add_child(item_name)
+		var sub := MenuParts.text("", SUB_SIZE, 500, GameTheme.MUTED)
+		sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		words.add_child(sub)
+		foot.add_child(words)
+		var customise := Button.new()
+		customise.name = "Customise"
+		customise.theme_type_variation = GameTheme.MAIN_BUTTON
+		customise.text = tr("LOADOUT_CUSTOMISE")
+		customise.add_theme_font_size_override("font_size", CUSTOMISE_SIZE)
+		customise.size_flags_vertical = Control.SIZE_SHRINK_END
+		customise.visible = false
+		customise.pressed.connect(func() -> void: customise_requested.emit())
+		foot.add_child(customise)
+		stack.add_child(foot)
+		pad.add_child(stack)
+		card.add_content(pad)
+		# the card lets the mouse through its insides; CUSTOMISE takes its own clicks
+		customise.mouse_filter = Control.MOUSE_FILTER_STOP
 		card.pressed.connect(func() -> void: slot_picked.emit(s))
 		card.gui_input.connect(_double_click.bind(s))
-		cards.add_child(card)
 		_carried.append(card)
 		_carried_pic.append(pic)
 		_carried_name.append(item_name)
 		_carried_sub.append(sub)
-	cards.add_child(_build_grenades())
-	return column
+		_carried_customise.append(customise)
 
 
-## The key chip at a card's top right (the concept's `.key`).
-func _key_chip(number: int) -> Control:
-	var chip := PanelContainer.new()
-	chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	chip.add_theme_stylebox_override("panel", GameTheme.box(Color(0.0, 0.0, 0.0, 0.0), GameTheme.LINE, 7, 1))
-	chip.add_child(MenuParts.text(str(number), KEY_SIZE, 800, GameTheme.DIM))
-	chip.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	chip.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	chip.offset_right = -LABEL_POS.x
-	chip.offset_top = LABEL_POS.y
-	return chip
-
-
-## The grenades every loadout carries each round (SF1): the label, then each bomb's count and name in its canister's
-## colour (GrenadeView). Nothing to pick yet: chest rigs and pouches decide what you carry in a later version.
+## The grenades every loadout carries each round (SF1), on a glass panel: a tile a bomb, its canister (GrenadeGlyph),
+## its count and name, and the key that throws it. Nothing to pick yet: chest rigs and pouches decide what you carry in a
+## later version.
 func _build_grenades() -> Control:
-	var box := PanelContainer.new()
-	box.name = "Grenades"
-	box.custom_minimum_size = Vector2(0.0, OFF_HEIGHT)
-	box.add_theme_stylebox_override("panel", GameTheme.box(GameTheme.CARD, GameTheme.LINE, int(LABEL_POS.x), 10))
-	var row := HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_BEGIN
-	row.add_theme_constant_override("separation", CARD_GAP)
-	row.add_child(MenuParts.spaced(tr("LOADOUT_GRENADES"), LABEL_SIZE, 800, GameTheme.MUTED, LABEL_SPACING))
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", HEADING_GAP)
+	box.add_child(MenuParts.heading(tr("LOADOUT_GRENADES")))
+	var tiles := HBoxContainer.new()
+	tiles.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	tiles.add_theme_constant_override("separation", GRENADE_TILE_GAP)
 	var bombs := SimTuning.load_default().grenades
 	var carried: Array[int] = [0, bombs.smoke_carried, bombs.flash_carried]
+	_grenade_keys.resize(GRENADE_KEYS.size())
 	for kind: int in [Grenade.Kind.SMOKE, Grenade.Kind.FLASH]:
-		var item := MenuParts.text(tr(GRENADE_KEYS[kind]) % carried[kind], LABEL_SIZE, 700, GameTheme.TEXT)
+		var tile := PanelContainer.new()
+		tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tile.custom_minimum_size = Vector2(0.0, GRENADE_TILE_HEIGHT)
+		tile.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		tile.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tile.add_theme_stylebox_override("panel", GameTheme.box(GameTheme.CARD, GameTheme.LINE, GRENADE_TILE_PAD.x,
+				GRENADE_TILE_PAD.y))
+		var column := VBoxContainer.new()
+		column.alignment = BoxContainer.ALIGNMENT_CENTER
+		column.add_theme_constant_override("separation", GRENADE_GAP)
+		var icon := GrenadeGlyph.new(kind, GRENADE_ICON)
+		icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		column.add_child(icon)
+		var item := MenuParts.text(tr(GRENADE_KEYS[kind]) % carried[kind], GRENADE_SIZE, 700, GameTheme.TEXT)
 		item.name = GRENADE_KEYS[kind]
-		var dot := ColorRect.new()
-		dot.color = GrenadeView.BODY_COLOURS[kind]
-		dot.custom_minimum_size = Vector2(GRENADE_DOT, GRENADE_DOT)
-		dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		row.add_child(dot)
-		row.add_child(item)
-	box.tooltip_text = tr("LOADOUT_GRENADES_TIP")
-	box.add_child(row)
-	return box
+		item.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		column.add_child(item)
+		var key := MenuParts.key_chip("", KEY_SIZE, GameTheme.DIM, KEY_PAD)
+		key.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		_grenade_keys[kind] = key.get_child(0) as Label
+		column.add_child(key)
+		tile.add_child(column)
+		tiles.add_child(tile)
+	box.add_child(tiles)
+	var panel := MenuParts.glass(box)
+	panel.name = "Grenades"
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel.tooltip_text = tr("LOADOUT_GRENADES_TIP")
+	return panel
 
 
-func _build_replicas() -> Control:
-	var column := MenuParts.section(MenuParts.heading(tr("LOADOUT_REPLICAS")))
-	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	column.custom_minimum_size.x = REPLICAS_MIN_WIDTH
-	var list := VBoxContainer.new()
-	list.add_theme_constant_override("separation", REPLICA_GAP)
-	column.add_child(list)
+## SWAP PRIMARY (or SECONDARY): every replica to carry in the picked slot, in a row, at the row's one scale.
+func _build_swap() -> Control:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", SWAP_GAP)
+	_swap_label = MenuParts.heading("")
+	_swap_label.custom_minimum_size = Vector2(SWAP_LABEL_WIDTH, 0.0)
+	_swap_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(_swap_label)
 	var rules := _facts.rules()
 	for item in _listed():
 		var later := rules.config(item) == null
 		var lock := rules.unlock_level(item.id) if not later and rules.is_locked(item.id) else -1
-		list.add_child(_replica_row(item, later, lock))
-	_note = _build_range_note()
-	column.add_child(_note)
-	return column
+		row.add_child(_replica_row(item, later, lock))
+	var panel := MenuParts.glass(row)
+	panel.name = "Swap"
+	return panel
 
 
 ## Shows or hides the note from the range (Loadout opened from practice): what is carried here is the match loadout too.
@@ -346,7 +412,7 @@ func _build_range_note() -> Control:
 	holder.name = "RangeNote"
 	holder.add_theme_constant_override("separation", 0)
 	var gap := Control.new()
-	gap.custom_minimum_size = Vector2(0.0, NOTE_GAP - MenuParts.HEADING_GAP)
+	gap.custom_minimum_size = Vector2(0.0, NOTE_GAP)
 	holder.add_child(gap)
 	var plate := HBoxContainer.new()
 	plate.add_theme_constant_override("separation", 0)
@@ -397,40 +463,52 @@ func _replica_row(item: Pool.Item, later: bool, lock_level: int) -> MenuCard:
 	var card := MenuCard.new()
 	card.name = "Replica_%s" % item.id
 	card.custom_minimum_size = Vector2(0.0, REPLICA_HEIGHT)
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	# how to pick, swap and customise: the card's tooltip (UI1: it was a paragraph under the list)
 	if not later and lock_level < 0:
-		card.tooltip_text = tr("LOADOUT_HINT")
+		_row_hint[item.id] = true
+	var pad := MenuParts.padded(REPLICA_PAD.x, REPLICA_PAD.y, REPLICA_PAD.x, REPLICA_PAD.y)
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 0)
-	var pad := MenuParts.padded(REPLICA_PICTURE_PAD.x, REPLICA_PICTURE_PAD.y, REPLICA_PICTURE_PAD.x,
-			REPLICA_PICTURE_PAD.y)
-	pad.custom_minimum_size = Vector2(REPLICA_PICTURE.x, 0.0)
-	var pic := MenuParts.picture(_pictures.extent(item.key) * _list_scale)
-	pad.add_child(pic)
-	row.add_child(pad)
+	row.add_theme_constant_override("separation", REPLICA_PIC_GAP)
+	var stage := CenterContainer.new()
+	stage.custom_minimum_size = Vector2(LIST_BOX.x, 0.0)
+	stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var pic := MenuParts.picture(_list_size(item))
+	stage.add_child(pic)
+	row.add_child(stage)
 	var text := VBoxContainer.new()
 	text.add_theme_constant_override("separation", REPLICA_TEXT_GAP)
 	text.alignment = BoxContainer.ALIGNMENT_CENTER
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var title := HBoxContainer.new()
 	title.add_theme_constant_override("separation", 10)
-	title.add_child(MenuParts.text(item.display_name, REPLICA_NAME_SIZE, 800, GameTheme.TEXT))
-	if later:
-		title.add_child(MenuTag.later())
-	if lock_level >= 0:
-		title.add_child(MenuTag.level(lock_level))
-	if item.is_dev():
-		title.add_child(MenuTag.dev())
+	var item_name := MenuParts.text(item.display_name, REPLICA_NAME_SIZE, 700, GameTheme.TEXT)
+	item_name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	item_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.add_child(item_name)
 	text.add_child(title)
+	# under the name: the slot it is carried in, or its tags (LATER, the level that unlocks it, DEV), so the name keeps
+	# the card's width
 	var sub := HBoxContainer.new()
-	sub.add_theme_constant_override("separation", 0)
-	var slot_label := MenuParts.text("", REPLICA_SUB_SIZE, 800, GameTheme.ACCENT)
-	var rest := MenuParts.text("", REPLICA_SUB_SIZE, 600, GameTheme.MUTED)
+	sub.add_theme_constant_override("separation", REPLICA_TAG_GAP)
+	if later:
+		sub.add_child(MenuTag.later())
+	if lock_level >= 0:
+		sub.add_child(MenuTag.level(lock_level))
+	if item.is_dev():
+		sub.add_child(MenuTag.dev())
+	_row_sub[item.id] = sub
+	_row_tagged[item.id] = sub.get_child_count() > 0
+	var slot_label := MenuParts.text("", REPLICA_SUB_SIZE, 700, GameTheme.ACCENT)
+	# the class and fire rate: the card's tooltip, not a line cut short (the concept's cards show the name only)
+	var rest := MenuParts.text("", REPLICA_SUB_SIZE, 500, GameTheme.MUTED)
+	rest.visible = false
 	sub.add_child(slot_label)
 	sub.add_child(rest)
 	text.add_child(sub)
 	row.add_child(text)
-	card.add_content(row)
+	pad.add_child(row)
+	card.add_content(pad)
 	card.set_greyed(later or lock_level >= 0)
 	card.pressed.connect(func() -> void: replica_picked.emit(item.id))
 	card.gui_input.connect(_double_click_replica.bind(item.id))
@@ -441,30 +519,15 @@ func _replica_row(item: Pool.Item, later: bool, lock_level: int) -> MenuCard:
 	return card
 
 
-func _build_foot() -> void:
-	var foot := HBoxContainer.new()
-	foot.name = "Foot"
-	foot.add_theme_constant_override("separation", 0)
-	foot.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	foot.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	foot.offset_left = FOOT_LEFT
-	foot.offset_bottom = -FOOT_BOTTOM
-	_foot_name = MenuParts.text("", FOOT_SIZE, 800, GameTheme.TEXT)
-	_foot_rest = MenuParts.text("", FOOT_SIZE, 600, GameTheme.MUTED)
-	foot.add_child(_foot_name)
-	foot.add_child(_foot_rest)
-	add_child(foot)
-	_customise = Button.new()
-	_customise.name = "Customise"
-	_customise.theme_type_variation = GameTheme.MAIN_BUTTON
-	_customise.text = tr("LOADOUT_CUSTOMISE")
-	_customise.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	_customise.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	_customise.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	_customise.offset_right = -CUSTOMISE_RIGHT
-	_customise.offset_bottom = -CUSTOMISE_BOTTOM
-	_customise.pressed.connect(func() -> void: customise_requested.emit())
-	add_child(_customise)
+## LOADOUT in condensed capitals and its line beside it: the loadout carried and what is in it.
+func _build_title() -> Control:
+	var line := HBoxContainer.new()
+	line.add_theme_constant_override("separation", 0)
+	_line_name = MenuParts.text("", MenuParts.PAGE_LINE_SIZE, 700, GameTheme.TEXT)
+	_line_rest = MenuParts.page_line("")
+	line.add_child(_line_name)
+	line.add_child(_line_rest)
+	return MenuParts.page_title(tr("MENU_TAB_LOADOUT"), line)
 
 
 ## A double click on a carried card opens Customise for it.

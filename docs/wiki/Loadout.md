@@ -8,9 +8,11 @@ power, BB weight, hop-up and colours. Every edit applies at once; there is no Sa
 The **LOADOUT** tab keeps up to **five** named loadouts. Press **1** to **5** to pick one, and make a new one, rename,
 duplicate, replace or remove it. The one picked is carried into the next match.
 
-Each loadout has a **primary** and a **secondary** replica. The tab shows the two you carry and every replica you can
-carry; replicas you haven't unlocked yet show greyed out with their level. A new player starts with the AEG Rifle and
-the GBB Pistol. Every loadout carries the same **grenades** each round: one smoke bomb and one flash bomb
+Each loadout has a **primary** and a **secondary** replica. The primary's card is the big one at the top, the
+secondary's sits under it beside your grenades, and every replica shows at its true size against the others. Click a
+card to pick that slot (or press its key), then pick a replica in the **Swap** row under them to carry it there;
+replicas you haven't unlocked yet show greyed out with their level. A new player starts with the AEG Rifle and the GBB
+Pistol. Every loadout carries the same **grenades** each round: one smoke bomb and one flash bomb
 ([Grenades](Grenades)). Picking what you carry comes with chest rigs and pouches in a later update
 ([Roadmap](Roadmap)).
 
@@ -23,7 +25,7 @@ the energy. Point at the panel to read what got better and worse in words.
 
 ## Customise
 
-**CUSTOMISE** tunes one replica at a time:
+**CUSTOMISE**, on the picked replica's card, tunes one replica at a time:
 
 - **Colour:** eight bold schemes, four plain ones, and a **Realistic colours everywhere** switch that shows every bold
   scheme as its plain colour, yours and the bots'.
