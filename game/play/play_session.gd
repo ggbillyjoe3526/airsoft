@@ -483,6 +483,10 @@ func _start_simulation(map: MapData) -> void:
 	_heard = MinimapHearing.new(_play.minimap)
 	_cues = SoundCues.new(_access, _play.sound)
 	state.dev_content = MapCatalog.shared().is_dev(map_id)
+	var listed := MapCatalog.shared().find(map_id)
+	# "No full auto indoors" (data/maps.md Start mode): every round's selectors start held to it, bots' too.
+	if listed != null:
+		state.round_state.start_mode = listed.start_mode
 	var loadout := ReplicaStats.default_loadout()
 	if kit == null:
 		var s := settings if settings != null else Settings.shared()

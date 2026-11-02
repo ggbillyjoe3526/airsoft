@@ -18,12 +18,17 @@ warning; a map with no row is not listed.
 - **Round** is the round's length in seconds a Skirmish there plays (Custom plays its own Round time switch): 90 to
   300 in 30 s steps, as that switch offers, or blank for the game's 150 (2:30). One that isn't keeps 2:30 with a
   warning.
+- **Start mode** is the most a fire selector starts each round on there: `semi` or `burst` holds every replica that
+  comes on full auto to its highest mode no higher (SEMI, then BURST, then AUTO), any replica now or added later, the
+  bots' too; you can still switch to auto in the round. Blank or `auto` starts every replica as it comes, and a
+  selector stays as set for the match. Anything else starts them as they come, with a warning. "No full auto indoors"
+  (owner, 2026-11-02): Depot, the one fully indoor field, starts on `semi`.
 
 ## Maps
 
-| Id | Name | Kind | Tag | Min | Standard | Max | Round | Blurb |
-|---|---|---|---|---|---|---|---|---|
-| depot | Depot | field | public | 5 | 6 | 8 |  | An indoor airsoft hall: three lanes, two dark tunnels. |
-| woodland | Woodland | field | public | 5 | 6 | 8 | 180 | A big open wood over a dry stream, by day or night. |
-| street | The Street | field | public | 5 | 6 | 8 | 180 | A terraced street: front gardens, a back lane, a house to take. |
-| range | Range | range | public | 1 | 1 | 1 |  | Targets 10 to 60 m. No bots, no score. |
+| Id | Name | Kind | Tag | Min | Standard | Max | Round | Start mode | Blurb |
+|---|---|---|---|---|---|---|---|---|---|
+| depot | Depot | field | public | 5 | 6 | 8 |  | semi | An indoor airsoft hall: three lanes, two dark tunnels. |
+| woodland | Woodland | field | public | 5 | 6 | 8 | 180 |  | A big open wood over a dry stream, by day or night. |
+| street | The Street | field | public | 5 | 6 | 8 | 180 |  | A terraced street: front gardens, a back lane, a house to take. |
+| range | Range | range | public | 1 | 1 | 1 |  |  | Targets 10 to 60 m. No bots, no score. |

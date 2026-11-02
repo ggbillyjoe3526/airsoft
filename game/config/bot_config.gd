@@ -85,6 +85,15 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var aim_wander_settle: float = 3.0
 ## Fires only with its view within this of its (erroneous) aim point (degrees).
 @export var fire_cone_deg: float = 3.0
+## On a field with a start mode ("no full auto indoors", NA1, BotFireMode): a bot may go to full auto only down a sight
+## line with nothing of the level this far along its aim (m) at someone with this much open floor round them (m, the
+## nav grid's open field), and does for a target with this chance, decided once per target.
+@export var auto_line_min: float = 35.0
+@export var auto_open_min: float = 2.0
+@export var auto_chance: float = 0.5
+## There, the least time between a bot's pulls on semi (s): a quick player's tapping, five a second, against the AEG's
+## 13 BBs a second on full auto. Elsewhere a bot on semi pulls as fast as the replica cycles, as it always has.
+@export var semi_tap_gap: float = 0.2
 ## Aims at this share of the target's hit-volume height (the chest), or its head when only that shows.
 @export var aim_height_fraction: float = 0.7
 @export var head_height_fraction: float = 0.93

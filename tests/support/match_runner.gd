@@ -302,6 +302,10 @@ func play(seed_value: int, max_seconds: float) -> MatchTally:
 	t.map_id = map.id
 	t.seed_value = seed_value
 	t.farthest.resize(state.characters.size())
+	# The field's start mode, as a match there plays it (data/maps.md, PlaySession).
+	var listed := MapCatalog.shared().find(map.id)
+	if listed != null:
+		state.round_state.start_mode = listed.start_mode
 	if mode == RoundState.Mode.ATTACK_DEFEND:
 		state.round_state.mode = mode
 		state.round_state.poles = map.poles

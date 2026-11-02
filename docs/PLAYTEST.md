@@ -335,6 +335,11 @@ An asymmetric warehouse yard. Attackers start in the west yard, defenders in the
 flagpole stands in the walled loading bay. Three lanes lead there: **Dock Road** (north, along a raised loading dock),
 **Container Alley** (the middle, through the Main Gate) and the **Office** (south, close quarters).
 
+- [ ] **No full auto indoors** (NA1). Start a Depot match with the AEG: the selector (the replica and the HUD chip)
+  shows single shots. Press **B** twice: auto, and it fires full auto. Next round it is back on single shots. Bots on
+  Depot fire single shots (a quick tap-tap); only now and then, at you out in the open down a long line (the Chrono
+  hall), does one switch to a full-auto buzz, never at you in a cramped room or round a short corner. On Woodland or
+  The Street the AEG starts on auto and keeps the mode you pick from round to round.
 - [ ] **Walk all three lanes from the west yard to the pole.** None has a dead end and you can tell which you're in.
 - [ ] **The dock.** Its ramps have no bumps; you can step off its open edge (a 1.2 m drop) but walking up to it
   doesn't push you off.
