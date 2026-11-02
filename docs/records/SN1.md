@@ -1,12 +1,12 @@
 # SN1 · The Sniper Rifle
 
-**Review:** 1 attempt · critic pending · qa pending · performance pending
+**Review:** 1 attempt · critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-02 | 1 | Opus 5.5 (build thread) | ✓ | pending | – |
+| 2026-11-02 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Accept | – (check 8: KNOWN_ISSUES rows and the audio README, added) |
 
 ## What changed
 

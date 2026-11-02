@@ -1,31 +1,34 @@
-Task: TS1 · 6v6 on every field, 5v5 to 8v8 under Custom
+Task: SN1 · The Sniper Rifle
 Attempt: 1 of 4
-Head: b7c2eb6 (checks passed on it locally; CI's last red guard fixed in this commit)
+Head: 7c5cca4 (checks passed on it)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
 Score: 7/8 → Accept
 Evidence for the passes (short):
-1. data/maps.md +26-28 (5/6/8 on all three, the row offers Min to Max so 7v7 too); custom_rules.gd +13 TEAM_SIZES to 8;
-   8 spawns and 8 dead-zone spots from tools/*/layout.py and build_map.py, only `spawns`/`deadZones` changed in the
-   JSON (checked); round.gd place_teams centres a 6 on slots 1-6; guards at 8v8 and frame/balance runs in the record.
-2. No contract touched. 3. hud.gd +619 _fit_board: Vector2 and float only, scale written only on change.
-4. test_team_sizes.gd +254 (board fits 8v8 at HUD 150 %) fails without _fit_board (QA measured 1083 of 1080 px).
-5/6. Rules untouched in nodes; no props added (the van was tried and dropped); Chrono hall and the house untouched.
+1. Spring primary, AEG with a 0.20 m longer barrel (tools/blender/replicas/sniper.py, sniper.tres:9 power spring); single
+   shot (sniper.tres:10 fire_modes [SEMI], 0.8/s, Fire clip + boltCycle after each shot sim_audio.gd:+216); 2x Scope
+   fitted, removable and swappable (pool.md:+150 Comes with, loadout_rules.gd:+113, test_sniper_rifle.gd:78);
+   M130/M140/M150 as the gases (stats.md:+85..87, pool.md:+162..164); levels 5/6/7/9, cap 10 (levels.md:+38..44);
+   Sniper bot kit (bot-kits.md:+60); dev gating: pool Access dev, level-up card xp_card.gd:+130, wiki.py:+329, Roadmap
+   "In development" only; Armory checked by QA (test_sn1_qa.gd:102,120).
+2. No contract touched: game/ai and game/sim gain no Node, audio or input; new tuning is BotConfig/ReplicaConfig exports.
+3. Hot paths read: accuracy.gd:+31 (one index and arithmetic), bot_combat.gd:+158/+185, sim_audio.gd:+216/+530 per
+   SHOT event: no allocation. comes_with/_names allocate only at table read and loadout build.
+4. test_sniper_rifle.gd:156 fails without Accuracy's hip term; :78 fails without Pool.comes_with/default_tune.
 Failed checks, with evidence:
-8. [judgment] Docs not fully current or in house style:
-   - tests/README.md:8 still says the guards play "Woodland at 5v5 at night" (now 6v6).
-   - Added prose over the 120-column wrap (PROCESS › Writing docs): docs/DECISIONS.md:461, tools/balance.sh:3 (152),
-     game/play/play_session.gd:6, tests/guards/test_woodland_guards.gd:4, tests/support/match_guard.gd:29.
-   - The Follow me guard's dazzle exemption (match_runner.gd +541) binds every later guard run like DP4's ruling
-     beside it in DECISIONS (~line 455) but is recorded only in docs/records/TS1.md.
-Advisory (non-blocking): hud.gd +621 floors the board with CARDS_FIT_FLOOR, a name for the cards (a BOARD_FIT_FLOOR or a
-note reads better); test_team_sizes.gd +263 leaves the window at 1920x1080 if the build fails early; no test asserts
-The Street's ends hold eight (Depot and Woodland do; QA checked by hand). QA and performance reviewed the pre-rebase
-head 4240208: _fit_board and the guard change came after, read here and fine.
-Must-fix for the next attempt: none (Accept); fold the check 8 items into this PR's last push if cheap.
+8. [judgment] The record's four "Known issues left" (docs/records/SN1.md:53-59: Loadout rounds 0.8 to "1 BBs/s",
+   teammates carry the factory AEG, Dev-off level 7 bare in the Armory and on the level-up card, placeholder model)
+   are not rows in docs/KNOWN_ISSUES.md, which docs/PROCESS.md:189 requires. And assets/audio/README.md, which lists
+   every cue this game renders itself and its tool (whistle, ping, grenades, doors :14-33), has no boltCycle_1..3 /
+   tools/render_bolt.gd entry (docs/ASSETS.md:+74 has it).
+Must-fix (non-blocking, fold into this pull request before merge): add the four rows to docs/KNOWN_ISSUES.md (Class:
+   can wait / document, Found 2026-11-02); add a boltCycle bullet to assets/audio/README.md with its re-render command.
+Advisory (no check failed):
+- game/ai/bot_brain.gd:114-115 repeats the mode test of :109-111; one shared `in_fight` bool would keep them in step.
+- game/ui/settings_save_page.gd:642 counts dev items in "unlocked" with Dev content off (a number, never a name).
 Owner should test in the game:
-- Woodland 8v8 on Low with --perf in a busy fight: frame time and hitches (CPU p99 14 ms headless).
-- Tab at 8v8 with HUD size 150 %: all sixteen rows on screen and still readable when shrunk.
-- 5v5 vs 8v8 on each field: 5v5 slower and careful, 8v8 busier, rounds about as long; does any size feel unfair?
-- The Street Elimination from each end: does the north (embankment) end feel stronger (bots 55-64 %)?
-- Depot 8v8: squads leave the staging chicanes and tunnels without queuing.
-- 8v8 full-auto fights: do BBs ever vanish mid-flight (pool of 256)?
+- Hold the trigger: one shot, and the cocking clip and sound line up with the 1.25 s before the next.
+- Hip versus through the 2x Scope: does the 6x hip spread feel fair; is the flat reach to about 48 m right.
+- Take the scope off, then fit a Red Dot; both survive a restart.
+- Dev content off: Armory, Loadout, level-up at 5 and 7 show no sniper gear (level 7 is bare, known).
+- Hard bots with the Sniper kit: do they wait too long for the sight, and are hip shots inside 8 m sensible.
+- M140 and M150: the extra kick and slower cocking feel worth the energy.
