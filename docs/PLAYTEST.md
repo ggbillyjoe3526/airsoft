@@ -691,6 +691,10 @@ Every field plays 6v6 by default; Custom offers 5v5, 6v6, 7v7 and 8v8 on each (o
   From practice only LOADOUT and BACK TO PRACTICE show.
 - [ ] **Settings › About (UR1).** Version and renderer, then Report a Bug, Licences and Quit to desktop; no title box.
   Licences shows Godot's licence, every add-on's and Barlow Condensed's.
+- [ ] **The Match page (UR2).** Fields down the left, each with a small picture taken at eye height (none from above)
+  inside its row, its name and a line; the modes under them with their lines; the rules in the middle; your team and
+  the bots at the right, and a card at the foot with the field's picture, its name, the rest of the match and PLAY.
+  Pick each field and mode: the card and the backdrop follow. Check at 1920×1080 and 1280×720 that nothing is cut off.
 - [ ] **Esc (FB1).** Esc on any menu page and in Settings asks **QUIT GAME?** with the focus on CANCEL; Esc again or
   CANCEL closes it and QUIT leaves. A dialog's, a key rebind's and the Loadout's rename Esc still come first (the
   credits close, a key waiting stops waiting); in a match Esc is still the pause menu, and its Settings close on Esc.

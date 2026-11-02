@@ -2,8 +2,8 @@
 
     python3 tools/depot/build_map.py
 
-Then rebake its light (`godot --headless --path . -s res://tools/bake_light.gd -- depot`) and re-render its card
-(`tools/map_pictures.gd`, docs/ASSETS.md). The JSON is the map file the game reads (game/map/map_data.gd).
+Then rebake its light (`godot --headless --path . -s res://tools/bake_light.gd -- depot`) and re-render its picture
+at eye height (`tools/eye_pictures.gd`, docs/ASSETS.md). The JSON is the map file the game reads (game/map/map_data.gd).
 """
 from __future__ import annotations
 
