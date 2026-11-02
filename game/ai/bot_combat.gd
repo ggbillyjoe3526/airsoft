@@ -163,6 +163,8 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 	var begun := b.burst_left <= 0.0 and b.pause_left <= 0.0
 	if begun:
 		b.burst_left = b.pick(b.skill.burst)
+		# Indoors, full auto only down a long sight line at someone in the open, and only now and then (NA1).
+		BotFireMode.on_burst(b, w, target, eye, dir)
 	if b.burst_left > 0.0:
 		if begun or not was_bursting:
 			# A burst begun (on whoever it now aims at), or picked up again after a tick it couldn't fire in: is the

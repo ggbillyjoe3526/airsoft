@@ -24,13 +24,22 @@ too, not only the AEG.
   lowest), so it works for any replica by its `fire_modes`, never by name. `Round.start_match` and, on a field with a
   rule, every `_start_round` reset the selectors through it.
 - **Bots.** Bot kits put full-auto replicas on auto (`BotKits.kit_of`); the round reset holds them to semi like the
-  player's. Bots never press the selector, so they stay on semi all round.
+  player's. The owner then asked (19:48) that bots may go full auto, rarely and only when it is needed: down a long
+  sight line at a target in open space, as an option. `BotFireMode`: as a burst begins, the shot is open when the
+  level's geometry leaves `BotConfig.auto_line_min` (35 m) clear along the aim and the target's nav cell has
+  `auto_open_min` (2 m) of open floor round it (`NavGrid.open`, built from the map's blocks). Then, once per target,
+  `auto_chance` (0.5) decides; the bot presses the selector a step a tick to auto, and back to the start mode once the
+  shot isn't open or the target is gone. On fields without a start mode bots never touch the selector.
 
 ## Decisions
 
 - **Semi, not burst.** The owner allowed either; single shots is the stricter, more site-like reading.
-- **Bots follow the rule and never switch to auto.** Fair: the rule binds both teams; the player alone may choose
-  auto.
+- **Open floor is 2 m clear all round** (`auto_open_min`): on Depot that is about 14 % of the walkable floor (the
+  Chrono hall's middle and the yards), at 3 m only 2 %, at 4 m almost none. A test keeps it between 5 and 25 %.
+- **A long line is 35 m** (`auto_line_min`): Depot's lanes bend round dead space, so only the Chrono hall (65 m) and
+  the yards run that far.
+- **Half the open shots, decided once per target** (`auto_chance`): "it's an option"; deciding per burst would make
+  nearly every long fight full auto.
 - **Back to the start mode every round** on a field with a rule (the field's chrono check before each game); fields
   without one keep a selector as set for the match, as before.
 
@@ -38,7 +47,10 @@ too, not only the AEG.
 
 - `tests/unit/test_start_mode.gd`: catalogue reads, the hold for any replica (AEG, a semi/auto pistol, burst/auto,
   auto only), every shipped full-auto replica held on Depot, every round reset and B reaching auto, other fields
-  unchanged, no bot code presses the selector.
+  unchanged.
+- `tests/unit/test_start_mode_bots.gd`: an open shot needs both the long line and the open floor; some bots take it and
+  some don't; the switch to auto and back when the target goes; a closed shot drops auto and isn't decided again; no
+  auto on cramped floor, without a start mode, or on a replica without auto; Depot's open floor share.
 
 ## Known issues left
 

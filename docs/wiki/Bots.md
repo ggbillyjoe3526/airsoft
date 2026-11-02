@@ -81,7 +81,7 @@ kits that suit it.
 
 <!-- wiki:bot-kits -->
 
-Your teammates carry the AEG Rifle and the GBB Pistol as they come. Bots fire full auto wherever their replica has it.
+Your teammates carry the AEG Rifle and the GBB Pistol as they come. Bots fire full auto wherever their replica has it, except on an indoor field (Depot, [no full auto indoors](Maps#depot)): there they fire single shots and only now and then switch to full auto, at someone out in the open down a long sight line.
 
 ## Bots in Attack / Defend
 

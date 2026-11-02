@@ -127,7 +127,10 @@ func test_every_shipped_replica_with_full_auto_starts_below_it_on_depot() -> voi
 
 func test_on_a_no_auto_field_every_round_starts_on_semi_and_b_still_reaches_auto() -> void:
 	rs.start_mode = SEMI
-	cs[2].armament.modes[0] = AUTO # a bot's kit puts its AEG on full auto
+	# A bot's kit puts a replica with full auto on it (BotKits.kit_of).
+	var bot_aeg := cs[2].armament.replicas[0].duplicate() as ReplicaConfig
+	bot_aeg.default_fire_mode = AUTO
+	cs[2].armament.replicas[0] = bot_aeg
 	Round.start_match(rs, cs, ends, pool, tuning, events)
 	for c in cs:
 		assert_eq(c.armament.modes[0], SEMI, "character %d starts on semi" % c.id)
@@ -145,11 +148,3 @@ func test_elsewhere_selectors_start_as_they_come_and_stay_as_set() -> void:
 	var picked := cs[0].armament.fire_mode()
 	_next_round()
 	assert_eq(cs[0].armament.fire_mode(), picked, "kept for the match")
-
-
-func test_bots_never_touch_the_selector() -> void:
-	const AI := "res://game/ai/"
-	for file in DirAccess.get_files_at(AI):
-		if file.ends_with(".gd"):
-			assert_false(FileAccess.get_file_as_string(AI + file).contains("cycle_fire_mode"),
-					"%s keeps the field's start mode" % file)

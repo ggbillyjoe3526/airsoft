@@ -90,6 +90,7 @@ at its level, never how well (`BotPersonality`).
 | `bot_bombs.gd` | `BotBombs` (SF2): a smoke when pinned in cover by someone at range, a flash round a corner before a push (where it lands before the bang and no teammate near would see it), then a look away until the bang; the skill's chance from the bot's own bomb stream, along an arc clear of the level |
 | `bot_senses.gd`, `bot_hearing.gd` | Sight (view cone, walls, bodies, no more than 0.6 m of bush beyond close awareness, no more than 0.8 m of a smoke bomb's cloud at any distance, nothing while dazzled, SF1, the night's range, which part shows) and hearing (gunfire, feet and further on loud ground, hit calls, near misses, a knock on a noisy prop as a step, a ring off steel faintly, an enemy's flash bang or smoke pop (SF2); walls judged by `SoundPath`) |
 | `bot_aim.gd`, `bot_combat.gd` | Turning, aim error that settles, lead; bursts, line-of-fire checks (no fire through more than 0.25 m of bush), reloads |
+| `bot_fire_mode.gd` | `BotFireMode`: the selector on a field with a start mode (NA1, no full auto indoors): kept on it, full auto only now and then down a long sight line at someone on open floor (`NavGrid.open`) |
 | `bot_radio.gd` | `BotRadio` (BQ3): a fresh sighting told to teammates near it after the skill's delay |
 | `bot_holster.gd` | Holstering on a long, calm sprint through its own half, drawing again on a threat |
 | `bot_angles.gd` | Held angles: the corners and doorways in view where someone would step out, from the level's walls alone |
