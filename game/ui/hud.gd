@@ -26,8 +26,9 @@ extends Control
 ## under the crosshair while reloads are manual (HudReloadPrompt; owner, 2026-10-29).
 
 const MARGIN := 32.0
-## The replica panel's lane, bottom right: as wide as its hop-up note, as tall as its notes and panel.
-const PANEL_LANE := Vector2(340.0, 230.0)
+## The replica panel's lane, bottom right: as wide as its hop-up note, as tall as its notes and panel (both notes and the
+## bomb row: 255 px, BP3).
+const PANEL_LANE := Vector2(340.0, 260.0)
 const TOP_WIDTH := 800.0
 ## The hit call's and banners' stack: this wide, centred, hanging this far under the score bar's column (so the step-down
 ## line, the flag gauge or a large HUD size push it down and it never covers the score bar), the HIT! call and its walk-off
@@ -200,6 +201,8 @@ func setup(cfg: HudConfig, teams: TeamConfig, view: ViewConfig, sim: SimTuning, 
 	_replica = ReplicaPanel.new()
 	_place(_replica, Vector4(1.0, 1.0, 1.0, 1.0), Rect2(-MARGIN - PANEL_LANE.x, -MARGIN - PANEL_LANE.y, PANEL_LANE.x,
 			PANEL_LANE.y))
+	# Anything taller than the lane grows up the screen, never off its bottom edge.
+	_replica.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_replica.setup(cfg)
 	add_child(_replica)
 	# The score bar and "First to N", top centre.

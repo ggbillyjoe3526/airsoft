@@ -207,7 +207,8 @@ func refresh(slot: Loadout.Slot, realistic: bool) -> void:
 			_row_slot[id].text = tr(LoadoutFacts.SLOT_KEYS[carried_in])
 		var config := f.rules().config(item)
 		if config != null:
-			var rest := tr("LOADOUT_REPLICA_SUB") % [_class_word(config.site_class), roundi(config.fire_rate)]
+			var rest := tr("LOADOUT_REPLICA_SUB") % [_class_word(config.site_class),
+					LoadoutPerformance.rate_text(config.fire_rate)]
 			_row_rest[id].text = (" · " + rest) if carried_in >= 0 else rest
 		elif carried_in < 0:
 			_row_rest[id].text = tr("LOADOUT_COMES_WITH_LEVELS") % _class_word(_site_class(item))

@@ -20,8 +20,20 @@ static func step(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> void:
 	# it away while the giver does: its sprint breaks as it eases back into place never add up to holster_after (and
 	# drawing at each one would flap), and with its replica up it can't keep pace with the holster's faster sprint
 	# (MovementConfig.holster_sprint_scale; NA1's Follow me guard).
-	var with_giver := b.order == SquadOrder.Kind.FOLLOW and b.order_giver != null and b.order_giver.armament.holstered
+	var with_giver := b.order == SquadOrder.Kind.FOLLOW and b.order_giver != null and put_away(b.order_giver)
 	var away := safe and (b.sprint_gap < cfg.holster_draw_after or with_giver if a.holstered
 			else b.sprint_run >= cfg.holster_after or (with_giver and cmd.sprint))
 	cmd.holster = away and not a.holstered
 	cmd.switch_to = -1 if away else 0
+
+
+## Whether `c` has put its replica away in the holster: a bomb in hand or being thrown puts it down for the throw, and
+## counts as away only if it was holstered before (BP3: followers holstered as the giver readied a flash, then drew
+## slowly at the first threat).
+static func put_away(c: Character) -> bool:
+	var hand := c.grenades
+	if hand.readied != Grenade.Kind.NONE:
+		return hand.ready_was_holstered
+	if hand.throwing != Grenade.Kind.NONE:
+		return hand.was_holstered
+	return c.armament.holstered

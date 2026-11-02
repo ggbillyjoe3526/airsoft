@@ -93,7 +93,11 @@ func test_full_auto_once_taken_is_switched_to_and_dropped_when_the_target_goes()
 	assert_eq(_select(foe), AUTO, "semi to burst to auto, a press a tick")
 	b.target_visible = false
 	assert_eq(_select(foe), SEMI, "target gone: back on the start mode")
-	assert_eq(b.auto_for, -1)
+	# Kept for that target (BP3): seen again in the open, it goes back to full auto without a new roll.
+	assert_eq(b.auto_for, foe.id)
+	b.target_visible = true
+	BotFireMode.on_burst(b, w, foe, EYE, AIM)
+	assert_eq(_select(foe, 4), AUTO, "seen again in the open: full auto again")
 
 
 func test_a_shot_no_longer_open_goes_back_to_the_start_mode_and_isn_t_rolled_again() -> void:

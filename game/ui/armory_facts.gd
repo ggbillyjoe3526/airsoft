@@ -38,14 +38,16 @@ func _init(table_in: LevelTable, pool_in: Pool, xp_in: int, off: bool, dev_conte
 		var row := Row.new()
 		row.number = l.number
 		row.total = l.total
-		if off or l.number <= level:
-			row.state = State.UNLOCKED
-		elif l.number == level + 1:
-			row.state = State.NEXT
 		for id in l.unlocks:
 			var it := pool.item(id)
 			if it != null and (dev_content or not it.is_dev()):
 				row.items.append(it)
+		if off or l.number <= level:
+			row.state = State.UNLOCKED
+		elif not row.items.is_empty() and next_row() == null:
+			# The next level with something to show (BP3: level 7 holds only a dev spring, so with Dev content off
+			# its empty card was marked next while the header named level 8).
+			row.state = State.NEXT
 		item_count += row.items.size()
 		if row.state == State.UNLOCKED:
 			unlocked_count += row.items.size()
@@ -59,7 +61,7 @@ func standing() -> LevelTable.Standing:
 ## The first level not unlocked that has something to show, or null at the cap and with levelling off.
 func next_row() -> Row:
 	for row in rows:
-		if row.state != State.UNLOCKED and not row.items.is_empty():
+		if row.state == State.NEXT:
 			return row
 	return null
 

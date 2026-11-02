@@ -1089,7 +1089,7 @@ msgid "LOADOUT_CLASS_PISTOL"
 msgstr "pistol"
 
 msgid "LOADOUT_REPLICA_SUB"
-msgstr "%s · %d BBs/s"
+msgstr "%s · %s BBs/s"
 
 msgid "LOADOUT_COMES_WITH_LEVELS"
 msgstr "%s · comes with levels"

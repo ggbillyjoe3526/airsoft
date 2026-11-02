@@ -35,14 +35,15 @@ static func pull(b: Bot, w: BotWorld, wants: bool) -> bool:
 static func select(b: Bot, w: BotWorld, target: Character, cmd: PlayerCommand) -> void:
 	if w.start_mode == ReplicaConfig.FireMode.AUTO:
 		return
-	if target == null or not b.target_visible:
-		b.auto_for = -1
 	var a := b.character.armament
 	var v := b.character.vault
 	if a.replicas.is_empty() or v.active or v.held_fire_modes > 0:
 		return
 	var replica := a.replicas[a.active]
-	var wanted := ReplicaConfig.FireMode.AUTO if b.auto_for >= 0 and target != null and b.auto_for == target.id \
+	# Out of sight it goes back to the start mode, but keeps the target's full auto for when it shows again in the
+	# open (BP3: losing sight for a tick behind cover took it for good, the roll being once per target).
+	var shown := target != null and b.target_visible
+	var wanted := ReplicaConfig.FireMode.AUTO if shown and b.auto_for == target.id \
 			else Armament.start_mode(replica, w.start_mode)
 	if a.fire_mode() != wanted and replica.fire_modes.has(wanted):
 		cmd.cycle_fire_mode = true

@@ -18,16 +18,18 @@ const RATTLES_BAR := 0.3
 ## Rows that show only on the Customise tabs they belong to (the sheet's `extra`), and the one only a rattling magazine adds.
 const TAB_ROWS: Array[StringName] = [&"zoom", &"aim"]
 const MOVING_ROW := &"moving"
+## The step a fire rate is shown to (rate_text).
+const RATE_STEP := 0.01
 ## The rows, top to bottom: the Figures field, the translation keys of its name and unit, the decimals shown, the value
 ## the bar is full at, whether a short bar is the good one, and which way counts as better.
 const SPECS: Array[Dictionary] = [
-	{"field": &"energy", "name": "PERF_ENERGY", "unit": "PERF_UNIT_J", "decimals": 2, "full": 1.6, "invert": false,
+	{"field": &"energy", "name": "PERF_ENERGY", "unit": "PERF_UNIT_J", "decimals": 2, "full": 2.3, "invert": false,
 			"better": Better.HIGHER},
 	{"field": &"speed", "name": "PERF_SPEED", "unit": "PERF_UNIT_FPS", "decimals": 0, "full": 460.0, "invert": false,
 			"better": Better.HIGHER},
 	{"field": &"bb_weight", "name": "PERF_BB_WEIGHT", "unit": "PERF_UNIT_G", "decimals": 2, "full": 0.5,
 			"invert": false, "better": Better.NONE},
-	{"field": &"rate", "name": "PERF_RATE", "unit": "PERF_UNIT_BBS", "decimals": 0, "full": 20.0, "invert": false,
+	{"field": &"rate", "name": "PERF_RATE", "unit": "PERF_UNIT_BBS", "decimals": 2, "full": 20.0, "invert": false,
 			"better": Better.HIGHER},
 	{"field": &"on_target", "name": "PERF_ON_TARGET", "unit": "PERF_UNIT_M", "decimals": 0, "full": 60.0,
 			"invert": false, "better": Better.HIGHER},
@@ -35,7 +37,7 @@ const SPECS: Array[Dictionary] = [
 			"better": Better.LOWER},
 	{"field": &"spread", "name": "PERF_SPREAD", "unit": "PERF_UNIT_DEG", "decimals": 2, "full": 1.2, "invert": true,
 			"better": Better.LOWER},
-	{"field": &"zoom", "name": "PERF_ZOOM", "unit": "PERF_UNIT_X", "decimals": 2, "full": 3.5, "invert": false,
+	{"field": &"zoom", "name": "PERF_ZOOM", "unit": "PERF_UNIT_X", "decimals": 2, "full": 6.0, "invert": false,
 			"better": Better.HIGHER},
 	{"field": &"aim", "name": "PERF_AIM", "unit": "PERF_UNIT_S", "decimals": 2, "full": 0.4, "invert": true,
 			"better": Better.LOWER},
@@ -200,4 +202,13 @@ static func _shown(field: StringName, f: Figures, value: float, decimals: int) -
 		return TranslationServer.translate("PERF_MAGAZINES_FORMAT") % [f.mag_size, f.mags]
 	if field == &"on_target" and f.on_target_full:
 		return TranslationServer.translate("PERF_FULL_RANGE") % roundi(value)
+	if field == &"rate":
+		return rate_text(value)
 	return ("%." + str(decimals) + "f") % value
+
+
+## A fire rate (BBs/s) as the Loadout shows it: whole rates as they are (13), a spring rifle's to two places without
+## trailing zeros (0.8, 0.76), so a spring's slower cycling shows (BP3: 0.8 read "1").
+static func rate_text(rate: float) -> String:
+	var shown := snappedf(rate, RATE_STEP)
+	return str(roundi(shown)) if is_equal_approx(shown, roundf(shown)) else String.num(shown)

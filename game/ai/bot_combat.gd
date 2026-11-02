@@ -175,7 +175,9 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 			b.knee_clear = b.skill.kneels_to_fire and _knee_has_shot(b, w)
 		b.bursting = true
 		var a := b.character.armament
-		cmd.fire = BotFireMode.pull(b, w, a.fire_mode() != ReplicaConfig.FireMode.SEMI or not a.trigger_was_down)
+		# Never on a tick the selector moves: on the way back from burst to semi it passes full auto (BP3).
+		cmd.fire = not cmd.cycle_fire_mode and BotFireMode.pull(b, w,
+				a.fire_mode() != ReplicaConfig.FireMode.SEMI or not a.trigger_was_down)
 		b.burst_left -= dt
 		if b.burst_left <= 0.0:
 			b.pause_left = b.pick(b.skill.burst_pause)

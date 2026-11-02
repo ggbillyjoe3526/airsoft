@@ -118,6 +118,9 @@ func set_page_hidden(hidden: bool) -> void:
 		_loadout.visible = not hidden
 	if _armory != null:
 		_armory.visible = not hidden
+	# A waiting notice steps aside under Settings, whose BACK sits in the same corner (BP3), and comes back after it.
+	if _notice != null:
+		_notice.visible = not hidden
 
 
 ## The notice showing, or null.
@@ -158,12 +161,19 @@ func page_tab() -> NavRail.Tab:
 
 
 func focus_play() -> void:
+	if _notice != null:
+		# A notice waiting for an answer keeps the keyboard, so Enter never starts a match past it (BP3: after the crash
+		# screen, or back from Settings, PLAY took it).
+		_focus_notice()
+		return
 	_match.focus_play()
 
 
-## Puts the keyboard on the page's main control.
+## Puts the keyboard on the page's main control, or on a notice waiting for an answer.
 func focus_page() -> void:
-	if _loadout != null:
+	if _notice != null:
+		_focus_notice()
+	elif _loadout != null:
 		_loadout.focus_default()
 	elif _armory != null:
 		_rail.tab_button(NavRail.Tab.ARMORY).grab_focus()

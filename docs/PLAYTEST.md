@@ -1138,6 +1138,21 @@ The 0.1 Dev 2 bug pass's fixes that need eyes on a real display or hands on the 
 - [ ] **The Street, a bot behind a metal railing:** its steps and shots sound open, not muffled, and a BB ringing off
   a bar does too. Ping the road beyond a railing, and give a Hold order across one: both land on the road.
 
+## Bug pass fixes (BP3)
+
+The fixes from the bug pass after the Sniper Rifle that need hands on the keys. Dev content on for the rifle and scope.
+
+- [ ] **Sniper Rifle, then switch to the pistol at once and fire:** the pistol fires as soon as it is up.
+- [ ] **Sniper Rifle, click again as the handle snaps home:** the next shot goes as the rifle is ready, not lost.
+  A quick double click after a shot fires once.
+- [ ] **Variable Scope at 6×, then 2×:** the view turns slower the more it zooms; the 2x Scope too. Say if it is too
+  slow or too quick.
+- [ ] **Loadout and Customise, Sniper Rifle:** its rate reads 0.8 BBs/s, 0.76 with the M140 and 0.73 with the M150.
+- [ ] **In a match, on your last magazine, turn the hop-up dial:** the replica panel stays put, no jump.
+- [ ] **Settings › HUD at 150 %:** the preview's panel shows whole, bombs counted.
+- [ ] **Match › Custom rules:** each choice's dark track stops at its last button.
+- [ ] **Depot, follow a teammate bot (Follow me) and take a flash in hand:** it keeps its replica up.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
