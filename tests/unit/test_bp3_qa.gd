@@ -67,3 +67,23 @@ func test_control_with_the_window_off_the_pistol_stays_quiet() -> void:
 			if events.items[k].kind == GameEvent.Kind.SHOT and c.armament.active == 1:
 				pistol_shots += 1
 	assert_eq(pistol_shots, 0)
+
+
+func test_rate_text_edges_around_the_whole_rate_cut() -> void:
+	assert_eq(LoadoutPerformance.rate_text(1.99), "1.99")
+	assert_eq(LoadoutPerformance.rate_text(1.999), "2", "snaps to 2.00, shown whole")
+	assert_eq(LoadoutPerformance.rate_text(2.0), "2")
+	assert_eq(LoadoutPerformance.rate_text(8.05), "8", "a LiPo pistol at 7 BBs/s + 15 % reads whole")
+	assert_eq(LoadoutPerformance.rate_text(0.0), "0")
+	assert_eq(LoadoutPerformance.rate_text(0.8 * 1.15), "0.92")
+
+
+func test_a_new_round_clears_the_open_burst_flag() -> void:
+	var cfg := BotConfig.load_default()
+	var me := Character.new(0, 0, Vector3.ZERO, 0.0, ReplicaStats.default_loadout())
+	var b := Bot.new(me, 1, cfg.skill_for(&"normal"), 2)
+	b.auto_open = true
+	b.auto_for = 5
+	b.reset(0, 0, 0.0, cfg)
+	assert_false(b.auto_open)
+	assert_eq(b.auto_for, -1)
