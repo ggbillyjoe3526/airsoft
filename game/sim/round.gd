@@ -11,7 +11,7 @@ class_name Round
 ## tick; step runs once a tick and allocates nothing.
 
 
-## A new match from round 1: scores cleared, fire selectors back to their defaults, every character placed at its team's end and respawned, no BBs in flight,
+## A new match from round 1: scores cleared, fire selectors back to their defaults (held to the field's start mode), every character placed at its team's end and respawned, no BBs in flight,
 ## and ROUND_START for round 1.
 static func start_match(rs: RoundState, characters: Array[Character], ends: Array[MapEnd], pool: BBPool,
 		tuning: SimTuning, events: SimEvents) -> void:
@@ -22,7 +22,7 @@ static func start_match(rs: RoundState, characters: Array[Character], ends: Arra
 	rs.winner = -1
 	rs.reason = GameEvent.RoundEnd.ELIMINATED
 	for c in characters:
-		c.armament.reset_fire_modes()
+		c.armament.reset_fire_modes(rs.start_mode)
 		c.armament.reset_hop_ups()
 	_start_round(rs, characters, ends, pool, tuning, events, 1)
 
@@ -224,6 +224,9 @@ static func _start_round(rs: RoundState, characters: Array[Character], ends: Arr
 	place_teams(rs, characters, ends, tuning)
 	for c in characters:
 		c.respawn()
+		# A field with a start mode starts every round on it, whatever was picked in the last (data/maps.md).
+		if rs.start_mode != ReplicaConfig.FireMode.AUTO:
+			c.armament.reset_fire_modes(rs.start_mode)
 	if pool != null:
 		for bb in pool.bbs:
 			bb.active = false

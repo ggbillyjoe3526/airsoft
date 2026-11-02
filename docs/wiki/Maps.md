@@ -24,6 +24,8 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
 - **Links** join the lanes: open cuts and galleries, two tight alleys, and two **tunnels**, one in each half. The
   tunnels are unlit and bend twice: dark, but never pitch black.
 - **The roof:** a violet ceiling on crimson trusses, with rows of glowing lamps. A BB fired up stops at the ceiling.
+- **No full auto indoors:** as at a real indoor site, every replica that can fire full auto starts each round on
+  single shots here, bots' too. Press **B** to switch to auto during the round if you want it.
 - **Long sight lines** down the Chrono hall and the yards: bots on Depot see 55 metres, further than on other fields.
 - **The Box** sits in the Box yard: a roofed container you can fight inside, and container rows with ports guard
   B site.

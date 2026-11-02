@@ -58,6 +58,10 @@ var overtime: float = 0.0
 var has_overtime_spot: bool = false
 var overtime_spot: Vector3 = Vector3.ZERO
 var overtime_flag: OvertimeFlag = OvertimeFlag.new()
+## The field's start mode (data/maps.md Start mode; set before Round.start_match): below AUTO, every round starts each
+## selector on it at most (Armament.start_mode), "no full auto indoors"; AUTO, selectors start the match as they come
+## and stay as set until it ends.
+var start_mode: ReplicaConfig.FireMode = ReplicaConfig.FireMode.AUTO
 
 
 ## Every flag at the bottom of its pole for a new round, one for each pole (one at least).
