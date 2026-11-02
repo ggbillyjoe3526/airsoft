@@ -44,6 +44,12 @@ too, not only the AEG.
 - **Bots tap semi at a player's pace there: 5 a second** (`semi_tap_gap` 0.2 s). QA found a bot on semi pulled every
   other tick, so the press buffer fired at the replica's full rate (the AEG's 13 a second) and semi indoors was full
   auto in all but name. Only on a field with a start mode, so bots' pistols elsewhere are as before.
+- **A follower holsters with its leader** (`BotHolster`, all fields). CI's Follow me guard on Depot failed seed 3
+  (worst 8.63 m, over catch_up 8 m): the leader sprinted with its replica away (6.93 m/s) while a follower, its sprint
+  breaking every half second as it eased back into place, never sprinted holster_after (1.5 s) in one go, so it kept
+  its replica up at 6.3 m/s and fell behind. Main's seed 3 never met that; the new semi fights moved the leader onto a
+  long calm sprint. Now a follower sprinting after a holstered giver puts its own away once safe; seed 3 passes
+  (worst 6.71 m) with seeds 1, 2 and 4 unchanged or close.
 - **No selector presses through a vault** (or while presses kept through one still play): they would be kept and
   spin the selector past the mode wanted.
 - **Half the open shots, decided once per target** (`auto_chance`): "it's an option"; deciding per burst would make
@@ -57,7 +63,7 @@ too, not only the AEG.
   auto only), every shipped full-auto replica held on Depot, every round reset and B reaching auto, other fields
   unchanged.
 - `tests/unit/test_start_mode_bots.gd`: an open shot needs both the long line and the open floor; some bots take it and
-  some don't; the switch to auto and back when the target goes; no presses through a vault; a level line; semi taps at 5 a second indoors only; a closed shot drops auto and isn't decided again; no
+  some don't; the switch to auto and back when the target goes; no presses through a vault; a level line; semi taps at 5 a second indoors only; a follower holsters with a holstered leader; a closed shot drops auto and isn't decided again; no
   auto on cramped floor, without a start mode, or on a replica without auto; Depot's open floor share.
 
 ## Known issues left

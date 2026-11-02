@@ -2,7 +2,8 @@ class_name BotHolster
 ## Bots and the holster (the browser game's ai/botHolster.ts): the same command and rules as the player's. A bot puts its
 ## primary away on a long, calm sprint through its own half, and draws it again, the slower draw, as soon as that stops
 ## being safe: someone seen or heard, the enemy's half, a reload to make, or the sprint over for a moment
-## (BotConfig.holster_*). Allocates nothing.
+## (BotConfig.holster_*). A follower sprinting after a giver whose replica is away puts its own away at once (Follow me).
+## Allocates nothing.
 
 
 ## Writes `cmd.holster` and `cmd.switch_to` for `b` (the primary, which also draws it when holstered; -1 while it keeps
@@ -15,6 +16,12 @@ static func step(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> void:
 	var busy := cmd.fire or cmd.reload or a.reloading() or a.reload_queued
 	var safe := w.live and not busy and not b.target_visible and w.time - b.last_threat_at > cfg.holster_calm_for \
 			and not w.planner.in_enemy_half(b)
-	var away := safe and (b.sprint_gap < cfg.holster_draw_after if a.holstered else b.sprint_run >= cfg.holster_after)
+	# Following a giver who sprints with the replica away (Follow me), it puts its own away too once safe: its sprint
+	# breaks as it eases back into place never add up to holster_after, and with its replica up it can't keep pace with
+	# the holster's faster sprint (MovementConfig.holster_sprint_scale; NA1's Follow me guard).
+	var with_giver := cmd.sprint and b.order == SquadOrder.Kind.FOLLOW and b.order_giver != null \
+			and b.order_giver.armament.holstered
+	var away := safe and (b.sprint_gap < cfg.holster_draw_after if a.holstered
+			else b.sprint_run >= cfg.holster_after or with_giver)
 	cmd.holster = away and not a.holstered
 	cmd.switch_to = -1 if away else 0
