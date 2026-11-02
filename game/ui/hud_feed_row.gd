@@ -1,10 +1,10 @@
 class_name HudFeedRow
 extends Control
-## One hit-feed line (concept `hud-feed.png`): who fired, the BB's trail, who was hit, and their HIT call, on a navy
-## plate with the shooter's team bar on the left. Names in their team's colour, "You" in white; a teammate's name
-## carries the teammate chevron; your own lines are framed in yellow. A teammate's callout (CO2, concept
-## `step27/callouts.png`) is a row of its own kind: the team bar, the speaker's chevron and name, a radio glyph and the
-## words. One node: everything is drawn, laid out once each time the line changes.
+## One hit-feed line (concept `hud-feed.png`, rounded as UI concept B v2 `hud.png`): who fired, the BB's trail, who was
+## hit, and their HIT call, on a rounded navy pill with the shooter's team bar inside its left end. Names in their
+## team's colour, "You" in white; a teammate's name carries the teammate chevron; your own lines are framed in teal. A
+## teammate's callout (CO2, concept `step27/callouts.png`) is a row of its own kind: the team bar, the speaker's chevron
+## and name, a radio glyph and the words. One node: everything is drawn, laid out once each time the line changes.
 
 const HEIGHT := 38.0
 const PAD_LEFT := 12.0
@@ -19,6 +19,10 @@ const TAG_GLYPH := 15.0
 const TAG_PAD := Vector2(6.0, 3.0)
 const TAG_GAP := 4.0
 const HIT_RED := Color("e23b3b")
+## The pill's corners, the team bar's inset from its top and bottom, and the HIT tag's corners.
+const RADIUS := 10
+const BAR_INSET := 9.0
+const TAG_RADIUS := 4
 const FRAME_ALPHA := 0.85
 const FRAME_WIDTH := 2.0
 ## Trail dots: three small ones fading in, then the BB with a faint ring.
@@ -58,6 +62,11 @@ class Who:
 
 var _name_font: Font = null
 var _you_font: Font = null
+## The pill, your lines' frame and the HIT tag, made once a row (the pill's colour set at each draw from the panels'
+## opacity).
+var _plate: StyleBoxFlat = null
+var _frame: StyleBoxFlat = null
+var _tag_box: StyleBoxFlat = null
 var _tag_font: Font = null
 var _words_font: Font = null
 ## A callout row: its words, and where they and the radio glyph sit.
@@ -98,6 +107,18 @@ func _init() -> void:
 	_tag_font = GameTheme.spaced_font(800, HudStyle.SPACING_AIM, TAG_SIZE)
 	_words_font = GameTheme.font(WORDS_WEIGHT)
 	_tag_word = HudStyle.caps("HUD_HIT_TAG")
+	_plate = StyleBoxFlat.new()
+	_plate.set_corner_radius_all(RADIUS)
+	_plate.anti_aliasing = true
+	_frame = StyleBoxFlat.new()
+	_frame.draw_center = false
+	_frame.set_corner_radius_all(RADIUS)
+	_frame.set_border_width_all(roundi(FRAME_WIDTH))
+	_frame.border_color = Color(GameTheme.ACCENT, FRAME_ALPHA)
+	_frame.anti_aliasing = true
+	_tag_box = StyleBoxFlat.new()
+	_tag_box.bg_color = HIT_RED
+	_tag_box.set_corner_radius_all(TAG_RADIUS)
 
 
 ## Fills the line from `shooter` and `victim` (read now, not kept), the shooter's team colour for the bar, your
@@ -210,8 +231,9 @@ static func _centred_baseline(f: Font, font_size: int) -> float:
 
 func _draw() -> void:
 	var w := size.x
-	draw_rect(Rect2(0.0, 0.0, w, HEIGHT), HudStyle.backing_on(self, HudStyle.BACKING_CLOCK))
-	draw_rect(Rect2(0.0, 0.0, BAR, HEIGHT), _bar)
+	_plate.bg_color = HudStyle.backing_on(self, HudStyle.BACKING_CLOCK)
+	draw_style_box(_plate, Rect2(0.0, 0.0, w, HEIGHT))
+	draw_rect(Rect2(BAR, BAR_INSET, BAR, HEIGHT - BAR_INSET * 2.0), _bar)
 	if _shooter_mate:
 		_shooter_chevron.paint(self, _mate_colour, false)
 	draw_string(_you_font if _shooter_you else _name_font, Vector2(_shooter_x, _baseline), _shooter,
@@ -233,15 +255,12 @@ func _draw() -> void:
 		_victim_chevron.paint(self, _mate_colour, false)
 	draw_string(_you_font if _victim_you else _name_font, Vector2(_victim_x, _baseline), _victim,
 			HORIZONTAL_ALIGNMENT_LEFT, -1, NAME_SIZE, _victim_colour)
-	draw_rect(_tag, HIT_RED)
+	draw_style_box(_tag_box, _tag)
 	_hand.paint(self, Color.WHITE)
 	draw_string(_tag_font, Vector2(_word_x, _tag_baseline), _tag_word, HORIZONTAL_ALIGNMENT_LEFT, -1, TAG_SIZE,
 			Color.WHITE)
 	if _framed:
-		var inset := FRAME_WIDTH * 0.5
-		# Inside the team bar, which stays showing.
-		draw_rect(Rect2(BAR + inset, inset, w - BAR - FRAME_WIDTH, HEIGHT - FRAME_WIDTH),
-				Color(GameTheme.ACCENT, FRAME_ALPHA), false, FRAME_WIDTH)
+		draw_style_box(_frame, Rect2(0.0, 0.0, w, HEIGHT))
 
 
 ## The radio glyph: a handset's body under its antenna, the speaker grille cut across it.

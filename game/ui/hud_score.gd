@@ -1,12 +1,13 @@
 class_name HudScore
 extends Control
-## The score bar at the top (the concept's `.score`): each team's pip block (one slanted pip per win needed, filled up
-## to its wins), the team's colour block with its score, and the clock panel with the round under it. In Attack / Defend
-## an ATK tag (yellow) and a DEF tag (dark) sit on the two blocks, and the clock reads "OT" and the overtime left once
-## time has run out while the attackers work the rope. With gauge patterns on (set_patterned), Beta's filled pips and
-## score block are striped (HudStyle.STRIPED_TEAM; GaugePattern, built once at setup) and the block's number gets a dark
-## edge. Your team sits on the left (setup's `first`), the other on the right, each in its own colour, through half time
-## too (owner, 2026-10-30). Everything redraws or retypes only when a value changes; nothing is allocated per frame.
+## The score bar at the top (UI concept B v2 `hud.png`): one rounded glass plate holding each team's pips (one slanted
+## pip per win needed, filled up to its wins), the team's rounded colour block with its score, and the clock with the
+## round under it. In Attack / Defend an ATK tag (teal) and a DEF tag (dark), rounded, sit on the two blocks, and the
+## clock reads "OT" and the overtime left once time has run out while the attackers work the rope. With gauge patterns
+## on (set_patterned), Beta's filled pips and score block are striped (HudStyle.STRIPED_TEAM; GaugePattern, built once
+## at setup) and the block's number gets a dark edge. Your team sits on the left (setup's `first`), the other on the
+## right, each in its own colour, through half time too (owner, 2026-10-30). Everything redraws or retypes only when a
+## value changes; nothing is allocated per frame.
 
 var _teams: TeamConfig = null
 var _count: int = 0
@@ -34,6 +35,11 @@ var _patterned: bool = false
 ## The striped team's block and pips (one per pip, in order), built once at setup.
 var _block_stripes := GaugePattern.new()
 var _pip_stripes: Array[GaugePattern] = []
+## The plate behind the bar (its colour set at each draw from the panels' opacity) and each team's block's outline.
+var _plate := StyleBoxFlat.new()
+var _blocks: Array[PackedVector2Array] = []
+## The ATK / DEF tags' box (its colour set at each draw).
+var _tag_box := StyleBoxFlat.new()
 
 
 ## `first` is the team drawn on the left (yours); every other call here still names teams, never ends.
@@ -62,12 +68,19 @@ func setup(teams: TeamConfig, wins_needed: int, first: int = 0) -> void:
 		l.size = Vector2(block, height)
 		l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		_score_labels.append(l)
+		var inset := HudStyle.BLOCK_INSET
+		_blocks.append(HudStyle.rounded_rect(Rect2(_block_x[side], inset, block, height - inset * 2.0),
+				HudStyle.BLOCK_RADIUS))
 		if side == HudStyle.STRIPED_TEAM:
-			_block_stripes.set_rect(Rect2(_block_x[side], 0.0, block, height))
+			_block_stripes.set_shape(_blocks[side])
 			for i in _count:
 				var stripes := GaugePattern.new()
 				stripes.set_shape(_shapes[side * _count + i])
 				_pip_stripes.append(stripes)
+	_plate.set_corner_radius_all(roundi(HudStyle.SCORE_RADIUS))
+	_plate.anti_aliasing = true
+	_tag_box.set_corner_radius_all(roundi(HudStyle.TAG_RADIUS))
+	_tag_box.anti_aliasing = true
 	var clock_row := HBoxContainer.new()
 	clock_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	clock_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -86,7 +99,8 @@ func setup(teams: TeamConfig, wins_needed: int, first: int = 0) -> void:
 	for side in 2:
 		var tag := HudStyle.label(self, HudStyle.TAG_SIZE, 800, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_CENTER,
 				HudStyle.SPACING_ROUND)
-		tag.position = Vector2(_block_x[side], -HudStyle.TAG_HEIGHT)
+		# resting on the block's top edge, which is inset into the plate
+		tag.position = Vector2(_block_x[side], HudStyle.BLOCK_INSET - HudStyle.TAG_HEIGHT)
 		tag.size = Vector2(block, HudStyle.TAG_HEIGHT)
 		tag.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		tag.visible = false
@@ -195,21 +209,18 @@ func set_round(number: int) -> void:
 
 func _draw() -> void:
 	var h := HudStyle.SCORE_HEIGHT
-	var block := HudStyle.BLOCK_WIDTH
-	var side_back := HudStyle.backing_on(self, HudStyle.BACKING_SIDE)
-	var right := _clock_x + HudStyle.CLOCK_WIDTH
-	draw_rect(Rect2(0.0, 0.0, _side_width, h), side_back)
-	draw_rect(Rect2(_clock_x, 0.0, HudStyle.CLOCK_WIDTH, h), HudStyle.backing_on(self, HudStyle.BACKING_CLOCK))
+	_plate.bg_color = HudStyle.backing_on(self, HudStyle.BACKING_SIDE)
+	draw_style_box(_plate, Rect2(0.0, 0.0, custom_minimum_size.x, h))
 	for side in 2:
-		draw_rect(Rect2(_block_x[side], 0.0, block, h), _teams.colours[side])
+		draw_colored_polygon(_blocks[side], _teams.colours[side])
 	if _patterned:
 		_block_stripes.draw(self)
-	draw_rect(Rect2(right + block, 0.0, _side_width, h), side_back)
 	if _attackers >= 0:
 		for side in 2:
 			var tag := _tags[side]
 			var fill := GameTheme.ACCENT if side == _attackers else HudStyle.backing_on(self, HudStyle.BACKING_CLOCK)
-			draw_rect(Rect2(tag.position, tag.size), fill)
+			_tag_box.bg_color = fill
+			draw_style_box(_tag_box, Rect2(tag.position, tag.size))
 	var empty := Color(GameTheme.TEXT, HudStyle.PIP_EMPTY_ALPHA)
 	for side in 2:
 		var filled := pips_filled(side)

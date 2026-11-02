@@ -1709,9 +1709,6 @@ msgstr "No XP: Dev settings or dev content were used in this match."
 msgid "ARMORY_LEVEL"
 msgstr "LEVEL"
 
-msgid "ARMORY_OF"
-msgstr "of %d"
-
 msgid "ARMORY_XP_INTO"
 msgstr "%s / %s XP"
 
@@ -1736,59 +1733,35 @@ msgstr "ALL UNLOCKED"
 msgid "ARMORY_OFF_NOTE"
 msgstr "Levelling is off (Settings › Dev › Disable levelling), so every replica and part is yours to carry. Your own level, %d, comes back when you turn it on."
 
-msgid "ARMORY_NEXT"
-msgstr "NEXT UNLOCK"
-
-msgid "ARMORY_NEXT_LEVEL"
-msgstr "NEXT UNLOCK · LEVEL %d"
-
-msgid "ARMORY_NEXT_NONE"
-msgstr "Nothing left"
-
-msgid "ARMORY_NEXT_NONE_NOTE"
-msgstr "You have every item. More come when the level cap goes up."
-
-msgid "ARMORY_NEXT_OFF"
-msgstr "Levelling is off, so every item is unlocked."
-
-msgid "ARMORY_NEXT_ALSO"
-msgstr "Also at this level: %s."
-
-msgid "ARMORY_EARN_HEAD"
-msgstr "HOW XP IS EARNED"
-
-msgid "ARMORY_EARN_MATCH"
-msgstr "Every match"
-
-msgid "ARMORY_EARN_WIN"
-msgstr "A win"
-
-msgid "ARMORY_EARN_ROUND"
-msgstr "Each round won"
-
-msgid "ARMORY_EARN_HIT"
-msgstr "Each hit on an opponent"
-
-msgid "ARMORY_EARN_XP"
-msgstr "%d XP"
-
-msgid "ARMORY_EARN_MORE"
-msgstr "%d more"
-
 msgid "ARMORY_MULTIPLIER"
 msgstr "%s ×%s"
-
-msgid "ARMORY_EARN_DIFFICULTY"
-msgstr "Difficulty"
 
 msgid "ARMORY_EARN_NOTE"
 msgstr "Then times the difficulty: %s. A first-to-5 win on Normal gives about %d XP. Practice, and matches with Dev settings, give none."
 
-msgid "ARMORY_LEVELS_HEAD"
-msgstr "LEVELS"
-
 msgid "ARMORY_LEVELS_NOTE"
 msgstr "Everything unlocked stays yours. Settings › Dev › Disable levelling unlocks it all."
+
+msgid "ARMORY_LINE"
+msgstr "Level up by playing; every level unlocks kit"
+
+msgid "ARMORY_DOT_KIT"
+msgstr "KIT"
+
+msgid "ARMORY_EARN_LINE"
+msgstr "Every match %d XP · a win +%d · round won %d · hit %d"
+
+msgid "ARMORY_ROW_NEXT"
+msgstr "NEXT · %s XP"
+
+msgid "ARMORY_ROW_XP"
+msgstr "%s XP"
+
+msgid "ARMORY_BROWSE_BACK"
+msgstr "Back a level"
+
+msgid "ARMORY_BROWSE_ON"
+msgstr "On a level"
 
 msgid "ARMORY_START"
 msgstr "STARTING KIT"
@@ -1796,17 +1769,8 @@ msgstr "STARTING KIT"
 msgid "ARMORY_ROW_LEVEL"
 msgstr "LEVEL %d"
 
-msgid "ARMORY_ROW_STATE"
-msgstr "%s XP · %s"
-
 msgid "ARMORY_STATE_UNLOCKED"
 msgstr "UNLOCKED"
-
-msgid "ARMORY_STATE_NEXT"
-msgstr "NEXT"
-
-msgid "ARMORY_STATE_LOCKED"
-msgstr "LOCKED"
 
 msgid "ARMORY_KIND_REPLICA"
 msgstr "REPLICA"

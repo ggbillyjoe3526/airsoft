@@ -218,8 +218,6 @@ func _open_settings() -> void:
 		_settings_screen = SettingsScreen.new()
 		_settings_screen.settings = Settings.shared()
 		_settings_screen.restart = _restart
-		# beside the rail, whose lit SETTINGS tab names the screen
-		_settings_screen.show_heading = false
 		_settings_screen.in_menus = true
 		_settings_screen.closed.connect(_settings_closed)
 		_settings_screen.credits_requested.connect(_show_credits)

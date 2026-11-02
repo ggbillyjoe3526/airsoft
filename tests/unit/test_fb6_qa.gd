@@ -206,8 +206,11 @@ func test_the_stripes_follow_betas_block_to_the_left() -> void:
 	bar.set_patterned(true)
 	assert_true(bar.striped(1))
 	assert_false(bar.striped(0))
-	var stripe_rect: Rect2 = bar._block_stripes._rect
-	assert_eq(stripe_rect.position.x, bar.block_x(HudStyle.STRIPED_TEAM), "the striped block is Beta's wherever it sits")
+	# the stripes follow the block's rounded outline (UR7)
+	var left := INF
+	for p: Vector2 in bar._block_stripes._shape:
+		left = minf(left, p.x)
+	assert_almost_eq(left, bar.block_x(HudStyle.STRIPED_TEAM), 0.01, "the striped block is Beta's wherever it sits")
 
 
 func test_a_real_attack_defend_session_as_beta_puts_atk_over_the_left_block_when_beta_attacks() -> void:

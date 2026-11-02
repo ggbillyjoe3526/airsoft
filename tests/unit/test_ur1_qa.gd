@@ -412,5 +412,5 @@ func test_every_settings_tab_fits_beside_the_rail_at_1080p() -> void:
 		s._tabs.current_tab = i
 		await wait_process_frames(2)
 		assert_lte(s.get_global_rect().end.x, 1920.5, "tab %s: the screen ends inside the window" % s._tabs.get_tab_title(i))
-		assert_lte(s._tabs.get_global_rect().end.x, 1920.0 - SettingsScreen.MARGIN_X + 0.5,
+		assert_lte(s._tabs.get_global_rect().end.x, 1920.0 - MenuParts.PAGE_MARGIN.z + 0.5,
 				"tab %s: its content ends inside the margin" % s._tabs.get_tab_title(i))

@@ -6,17 +6,20 @@ where your team is. It always reflects the real state of the match. Much of it c
 
 ## The top bar
 
-Each team's score as pips filling toward the win, the round clock, the round number and the target ("FIRST TO 5").
+One rounded bar: each team's score in its colour with pips filling toward the win, the round clock, the round number
+and the target ("FIRST TO 5").
 Your team is always on the left in its own colour (Alpha blue, Beta orange), even after the ends swap at half time.
 In Attack / Defend it adds **ATK** and **DEF** tags and the **FLAG** gauge, and "OT" on the clock in overtime. Big
 slanted banners call the round start, half time with the ends swapped, and who took the round or the match.
 
 ## The replica panel
 
-Bottom right: your BB count, the fire-mode chips (**S**, **B**, **A**: single, burst, auto) with the current one lit,
-and a gauge for every magazine you carry, the loaded one first, then your spares, fullest first. An empty magazine
-shows dark, so you can read them without colour. A low magazine turns yellow, and **HOLSTERED**, **RELOADING**,
-**LAST MAG**, **OUT OF BBS** or a bomb **IN HAND** show when they apply. Turning the hop-up dial shows its setting here for a moment.
+Bottom right, on a rounded panel: your smoke and flash bombs as icons with how many are left (dimmed at none, and the
+one in your hand larger on a light chip), your BB count, a gauge for every magazine you carry, the loaded one first,
+then your spares, fullest first, and the replica's name with its fire-mode chips (**S**, **B**, **A**: single, burst,
+auto), the current one lit. An empty magazine shows dark, so you can read them without colour. A low magazine turns
+yellow, and **HOLSTERED**, **RELOADING**, **LAST MAG**, **OUT OF BBS** or a bomb **IN HAND** show when they apply.
+Turning the hop-up dial shows its setting here for a moment.
 
 The crosshair opens with your spread, so it tells you how steady you are. Under it, a **RELOAD** prompt with your
 Reload key shows while your magazine is empty and you have one to load, unless reloads are Automatic in Settings; it
@@ -24,9 +27,9 @@ goes as the reload starts.
 
 ## Hit feed and teammate markers
 
-The hit feed (top right, or bottom left if you like) shows each hit: who fired, the BB trail, who was hit and their
-red **HIT** call with a raised hand, in team colours. Your own lines say "You" and are framed in teal, and your own
-hit stays framed until the next round.
+The hit feed (top right, or bottom left if you like) shows each hit: who fired, the BB trail, who was hit and their red
+**HIT** call with a raised hand, in team colours, each on a rounded pill. Your own lines say "You" and are framed in
+teal, and your own hit stays framed until the next round.
 
 Teammates wear a chevron in your team's colour over their heads, seen through walls: solid when you can see them,
 hollow when cover hides them, grey with a raised hand once they're hit. Markers never show over enemies and never

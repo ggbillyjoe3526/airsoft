@@ -57,6 +57,7 @@ func refresh(a: Armament) -> void:
 		if _count != 0:
 			_count = 0
 			_shown_slot = -1
+			custom_minimum_size.x = 0.0
 			queue_redraw()
 		return
 	var ammo := a.ammo[a.active]
@@ -68,7 +69,17 @@ func refresh(a: Armament) -> void:
 	for i in ammo.pouch.size():
 		_shown_pouch[i] = ammo.pouch[i]
 	_count = fill_shares(a, _shares)
+	# as wide as its boxes, so a parent can set it to the right (UR7)
+	custom_minimum_size.x = row_width(_count)
 	queue_redraw()
+
+
+## The width `count` boxes take, the loaded one's wider gap after it.
+func row_width(count: int) -> float:
+	if count <= 0:
+		return 0.0
+	return count * _cfg.gauge_width + (_cfg.gauge_loaded_gap if count > 1 else 0.0) \
+			+ maxi(0, count - 2) * _cfg.gauge_gap
 
 
 ## Writes each magazine's share of a full one into `out` (resized to fit), the loaded magazine first and then the

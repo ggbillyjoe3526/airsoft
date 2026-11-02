@@ -18,8 +18,6 @@ signal credits_requested
 signal report_requested
 signal quit_requested
 
-const MARGIN_X := 56.0
-const MARGIN_Y := 28.0
 const SAVE_DELAY := 0.5
 ## The rows' one design (UI1): a name LABEL_WIDTH wide, ROW_SEPARATION, then the control, every row at least
 ## GameTheme.CONTROL_HEIGHT tall and ROW_GAP apart; a section's heading SECTION_GAP under the row before it.
@@ -33,8 +31,6 @@ const SECTION_GAP := 18
 ## The Controls tab's two columns: the left's width and the gap (px).
 const CONTROLS_LEFT := 760.0
 const COLUMN_GAP := 48
-## The page heading's size (px at 1080p).
-const HEADING_SIZE := 34
 ## cm/360 boxes: the widest range a typed figure may be in before it is held to the sensitivity's range.
 const CM_MIN := 0.1
 const CM_MAX := 1000.0
@@ -55,8 +51,6 @@ var settings: Settings = null
 var save_path: String = Settings.PATH
 ## Whether Esc closes the screen (the pause menu's settings); off in the menus, where Esc asks QUIT GAME? instead.
 var esc_closes: bool = false
-## Whether the SETTINGS heading shows: not beside the menus' rail, whose lit SETTINGS tab already says it.
-var show_heading: bool = true
 ## Opened from the menus (beside the rail, over the field's picture): no plate of its own, and About has Report a Bug,
 ## Licences and Quit; off from the pause menu, which has its own.
 var in_menus: bool = false
@@ -76,7 +70,6 @@ var crash_now: Callable = Callable()
 var log_test_error: Callable = Callable()
 
 var _back: Button = null
-var _heading: Label = null
 var _tabs: TabContainer = null
 var _load_message: Label = null
 var _note: Label = null
@@ -127,24 +120,27 @@ func _ready() -> void:
 	add_child(plate)
 	var box := VBoxContainer.new()
 	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	box.offset_left = MARGIN_X
-	box.offset_right = -MARGIN_X
-	box.offset_top = MARGIN_Y
-	box.offset_bottom = -MARGIN_Y
+	box.offset_left = MenuParts.PAGE_MARGIN.x
+	box.offset_right = -MenuParts.PAGE_MARGIN.z
+	box.offset_top = MenuParts.PAGE_MARGIN.y
+	box.offset_bottom = -MenuParts.PAGE_MARGIN.w
 	box.add_theme_constant_override("separation", ROW_GAP)
 	add_child(box)
-	_heading = Label.new()
-	_heading.text = tr("SETTINGS_TITLE").to_upper()
-	_heading.add_theme_font_override("font", GameTheme.heading_font(700, GameTheme.SPACING_TAB, HEADING_SIZE))
-	_heading.add_theme_font_size_override("font_size", HEADING_SIZE)
-	_heading.visible = show_heading
-	box.add_child(_heading)
+	# SETTINGS as every page's title (UI concept B v2), then the tabs a gap under it
+	var title := MenuParts.page_title(tr("SETTINGS_TITLE"))
+	box.add_child(title)
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(0.0, MenuParts.PAGE_TITLE_AFTER - ROW_GAP)
+	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(gap)
 	_load_message = Label.new()
 	_load_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_load_message.add_theme_color_override("font_color", GameTheme.WARN)
 	box.add_child(_load_message)
 	_tabs = TabContainer.new()
 	_tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	# the first pill flush under the title's first letter
+	_tabs.add_theme_constant_override("side_margin", 0)
 	box.add_child(_tabs)
 	_build_controls()
 	_build_audio()

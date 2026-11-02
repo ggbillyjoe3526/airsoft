@@ -745,6 +745,19 @@ Every field plays 6v6 by default; Custom offers 5v5, 6v6, 7v7 and 8v8 on each (o
   the replica never moves or grows. Switch between the tabs: the panel stays the same size. Drag with either mouse
   button to turn and tilt it, scroll to zoom, pick 3/4, Left, Right and Top, and press R: back to 3/4. Check a pistol
   too. Does turning it feel smooth, and is the 3/4 view a good start?
+- [ ] **The Armory (UR5).** ARMORY with its line and two arrows at the top right; a panel with LEVEL n large, your
+  XP, how XP is earned at the right, and a track of dots from KIT to the top level, filled to yours. Under it four
+  level cards from your level, the next edged in teal, locked ones dimmed. The arrows and a click on a dot browse the
+  cards. Hover an item: what it does. Check at 1920×1080 and 1280×720.
+- [ ] **Settings (UR6).** SETTINGS as the page's title, the tabs a row of rounded buttons with the open one white,
+  and the panel a gap under them. Every row of choices is one dark bar with the picked choice a white pill (also on
+  Match's Custom rules, Customise's views and Glowing BBs). Look through every tab, and the pause menu's Settings in a
+  match, at 1920×1080 and 1280×720.
+- [ ] **The HUD (UR7).** In a match: the score is one rounded bar with your team on the left; the hit feed's lines
+  are rounded pills; bottom right, the smoke and flash show as icons with their counts above your BB count, and the
+  replica's name sits by the S / B / A chips. Press 4: the smoke grows on a light chip; throw it: its count drops and
+  the icon dims at none. With gauge patterns on (Accessibility), Beta's block is still striped. Are the icons big
+  enough to read at a glance?
 - [ ] **Esc (FB1).** Esc on any menu page and in Settings asks **QUIT GAME?** with the focus on CANCEL; Esc again or
   CANCEL closes it and QUIT leaves. A dialog's, a key rebind's and the Loadout's rename Esc still come first (the
   credits close, a key waiting stops waiting); in a match Esc is still the pause menu, and its Settings close on Esc.
