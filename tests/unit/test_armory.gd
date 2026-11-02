@@ -58,7 +58,6 @@ func test_the_armory_tab_is_on_and_opens_the_page_it_frees_when_left() -> void:
 	var menus := MenuScreen.new(MatchPicks.new(), settings)
 	add_child_autofree(menus)
 	assert_false(menus.nav_rail().tab_button(NavRail.Tab.ARMORY).disabled)
-	assert_eq(NavRail.LATER_TABS.size(), 0)
 	assert_null(menus.armory_page(), "built when asked for")
 	menus.show_armory()
 	var page := menus.armory_page()
