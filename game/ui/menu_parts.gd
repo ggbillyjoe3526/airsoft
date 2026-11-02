@@ -12,6 +12,17 @@ const GLOW := Color("27406b")
 const GLOW_CENTRE := Vector2(0.5, 0.6)
 const GLOW_REACH := 0.7
 const GLOW_SIZE := 64
+## A menu page (UI concept B): its room inside the space right of the side rail (left, top, right, bottom), its title's
+## size and letter spacing, the gap to the line beside it and that line's size, the gap under the title row, and its
+## glass panels' gap and padding. Every page draws these through page_title and glass, so they line up page to page.
+const PAGE_MARGIN := Vector4(52.0, 34.0, 48.0, 44.0)
+const PAGE_TITLE_SIZE := 54
+const PAGE_TITLE_SPACING := 0.02
+const PAGE_TITLE_GAP := 22
+const PAGE_LINE_SIZE := 18
+const PAGE_TITLE_AFTER := 20
+const PANEL_GAP := 26
+const PANEL_PAD := Vector2i(22, 22)
 ## A key cap's corner radius and least width (px).
 const KEY_CORNER := 4
 const KEY_MIN_WIDTH := 26.0
@@ -142,3 +153,35 @@ static func picture(box: Vector2 = Vector2.ZERO) -> TextureRect:
 		r.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		r.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	return r
+
+
+## A page's title row: `title` in condensed capitals and `line` beside it, sitting on the title's baseline.
+static func page_title(title: String, line: Control) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.name = "TitleRow"
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", PAGE_TITLE_GAP)
+	var words := head_text(title, PAGE_TITLE_SIZE, 700, GameTheme.TEXT, PAGE_TITLE_SPACING)
+	words.name = "Title"
+	row.add_child(words)
+	var drop := padded(0.0, 0.0, 0.0, roundf(PAGE_TITLE_SIZE * 0.16))
+	drop.size_flags_vertical = Control.SIZE_SHRINK_END
+	line.size_flags_vertical = Control.SIZE_SHRINK_END
+	drop.add_child(line)
+	row.add_child(drop)
+	return row
+
+
+## A page title's muted line.
+static func page_line(words: String) -> Label:
+	var line := text(words, PAGE_LINE_SIZE, 500, GameTheme.MUTED)
+	line.add_theme_constant_override("line_spacing", 0)
+	return line
+
+
+## `content` on a glass panel, padded.
+static func glass(content: Control, pad: Vector2i = PANEL_PAD) -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", GameTheme.panel_box(pad.x, pad.y))
+	panel.add_child(content)
+	return panel

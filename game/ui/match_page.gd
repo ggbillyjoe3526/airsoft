@@ -15,17 +15,7 @@ signal play_pressed
 ## A field was picked (the menus' backdrop follows it).
 signal map_picked(map_id: String)
 
-## The page's margins inside the room right of the rail (px).
-const MARGIN := Vector4(52.0, 34.0, 48.0, 44.0)
-## MATCH and its line.
-const TITLE_SIZE := 54
-const TITLE_SPACING := 0.02
-const LINE_SIZE := 18
-const TITLE_GAP := 22
-const TITLE_AFTER := 20
-## The three panels: the gap between them, their padding, the fields' and the team's column widths.
-const PANEL_GAP := 26
-const PANEL_PAD := Vector2(22.0, 22.0)
+## The three panels' columns (the page's margins, title and panels are MenuParts'): the fields' and the team's widths.
 const FIELDS_WIDTH := 520.0
 const SIDE_WIDTH := 500.0
 const SECTION_GAP := 26
@@ -235,63 +225,39 @@ func attack_line() -> String:
 
 
 func _build() -> void:
-	var margin := MenuParts.padded(MARGIN.x, MARGIN.y, MARGIN.z, MARGIN.w)
+	var m := MenuParts.PAGE_MARGIN
+	var margin := MenuParts.padded(m.x, m.y, m.z, m.w)
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(margin)
 	var page := VBoxContainer.new()
-	page.add_theme_constant_override("separation", TITLE_AFTER)
+	page.add_theme_constant_override("separation", MenuParts.PAGE_TITLE_AFTER)
 	margin.add_child(page)
-	page.add_child(_build_title())
+	page.add_child(MenuParts.page_title(tr("MENU_TAB_MATCH"), MenuParts.page_line(tr("MENU_MATCH_LINE"))))
 	var panels := HBoxContainer.new()
 	panels.name = "Panels"
 	panels.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	panels.add_theme_constant_override("separation", PANEL_GAP)
+	panels.add_theme_constant_override("separation", MenuParts.PANEL_GAP)
 	page.add_child(panels)
-	var fields := _panel(_build_fields())
+	var fields := MenuParts.glass(_build_fields())
 	fields.custom_minimum_size.x = FIELDS_WIDTH
 	panels.add_child(fields)
 	_rules = MatchRulesBox.new(picks, _settings, _tuning)
 	_rules.changed.connect(_on_rules_changed)
-	var rules := _panel(_rules)
+	var rules := MenuParts.glass(_rules)
 	rules.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panels.add_child(rules)
 	var side := VBoxContainer.new()
 	side.custom_minimum_size.x = SIDE_WIDTH
-	side.add_theme_constant_override("separation", PANEL_GAP)
-	side.add_child(_panel(_build_side()))
+	side.add_theme_constant_override("separation", MenuParts.PANEL_GAP)
+	side.add_child(MenuParts.glass(_build_side()))
 	var room := Control.new()
 	room.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	room.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	side.add_child(room)
-	var play := _panel(_build_play())
+	var play := MenuParts.glass(_build_play())
 	play.name = "PlayCard"
 	side.add_child(play)
 	panels.add_child(side)
-
-
-## MATCH in condensed capitals and its line beside it.
-func _build_title() -> Control:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", TITLE_GAP)
-	var title := MenuParts.head_text(tr("MENU_TAB_MATCH"), TITLE_SIZE, 700, GameTheme.TEXT, TITLE_SPACING)
-	title.name = "Title"
-	row.add_child(title)
-	var line := MenuParts.text(tr("MENU_MATCH_LINE"), LINE_SIZE, 500, GameTheme.MUTED)
-	line.size_flags_vertical = Control.SIZE_SHRINK_END
-	line.add_theme_constant_override("line_spacing", 0)
-	var drop := MenuParts.padded(0.0, 0.0, 0.0, roundf(TITLE_SIZE * 0.16))
-	drop.size_flags_vertical = Control.SIZE_SHRINK_END
-	drop.add_child(line)
-	row.add_child(drop)
-	return row
-
-
-## `content` on a glass panel, padded.
-func _panel(content: Control) -> PanelContainer:
-	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", GameTheme.panel_box(int(PANEL_PAD.x), int(PANEL_PAD.y)))
-	panel.add_child(content)
-	return panel
 
 
 func _section(heading: Control) -> VBoxContainer:
