@@ -114,10 +114,28 @@ func refill() -> void:
 	burst_shots_left = 0
 
 
-## Every selector back to its replica's default, for a new match (the browser game's restartMatch).
-func reset_fire_modes() -> void:
+## Every selector back to its replica's default, for a new match (the browser game's restartMatch), held to
+## `most` (the field's start mode, RoundState.start_mode; AUTO: no rule) as start_mode holds it.
+func reset_fire_modes(most: ReplicaConfig.FireMode = ReplicaConfig.FireMode.AUTO) -> void:
 	for i in replicas.size():
-		modes[i] = replicas[i].default_fire_mode
+		modes[i] = start_mode(replicas[i], most)
+
+
+## The mode `r` starts on under a field's start mode `most` ("no full auto indoors", owner 2026-11-02): its default
+## where that is no higher (SEMI < BURST < AUTO), else the highest mode it offers that is, else its lowest. Any replica
+## whose default is full auto is held, whatever it is.
+static func start_mode(r: ReplicaConfig, most: ReplicaConfig.FireMode) -> ReplicaConfig.FireMode:
+	if r.default_fire_mode <= most or r.fire_modes.is_empty():
+		return r.default_fire_mode
+	var lowest := r.fire_modes[0]
+	var held := false
+	var highest_held := lowest
+	for m in r.fire_modes:
+		lowest = mini(lowest, m) as ReplicaConfig.FireMode
+		if m <= most and (not held or m > highest_held):
+			highest_held = m
+			held = true
+	return highest_held if held else lowest
 
 
 ## Every hop-up dial back to its replica's setting, for a new match: a turn in play lasts the match.

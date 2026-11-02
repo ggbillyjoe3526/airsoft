@@ -114,6 +114,7 @@ static func think(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> void:
 	if BotCombat.fights_aimed(me) and not me.armament.holstered and (b.mode == Bot.Mode.FIGHT or b.holding
 			or (b.mode == Bot.Mode.COVER and b.cover_phase == Bot.CoverPhase.PEEK)):
 		cmd.aim = true
+	BotFireMode.select(b, w, target, cmd)
 	BotCombat.shoot(b, w, target, eye, off_aim, cmd, dt)
 	BotCombat.reload_when_due(b, w, cmd)
 	BotHolster.step(b, w, cmd, dt)

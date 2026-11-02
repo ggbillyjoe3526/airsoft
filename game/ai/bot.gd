@@ -146,6 +146,12 @@ var bursting: bool = false
 ## Whether its kneeling eye had the shot when this burst began (BQ3): it kneels only then, never down out of the fight
 ## behind low cover.
 var knee_clear: bool = false
+## On a field with a start mode (NA1, BotFireMode): the id of the target it went to full auto for (-1: none), and of
+## the last target it decided for (once per target).
+var auto_for: int = -1
+var auto_rolled_for: int = -1
+## There, on semi: the world time it may next pull (BotFireMode.pull, BotConfig.semi_tap_gap).
+var next_tap: float = -INF
 var strafe_left: float = 0.0
 var strafe_dir: int = 1
 
@@ -308,6 +314,9 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	pause_left = 0.0
 	bursting = false
 	knee_clear = false
+	auto_for = -1
+	auto_rolled_for = -1
+	next_tap = -INF
 	strafe_left = 0.0
 	search_look_left = 0.0
 	flanking = false

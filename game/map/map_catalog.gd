@@ -1,7 +1,7 @@
 class_name MapCatalog
 extends RefCounted
 ## Which maps there are and which are listed (data/maps.md, the browser game's map/maps.ts MAPS): each map's name,
-## kind (a match field or the practice range), tag, team sizes and round length. A map tagged dev is listed only while the Dev
+## kind (a match field or the practice range), tag, team sizes, round length and start mode. A map tagged dev is listed only while the Dev
 ## settings' Dev content switch is on, and a match on one stays out of the records (docs/DECISIONS.md › Content tags and
 ## dev content). An unreadable row is left out with a warning; an unreadable team size keeps its built-in value with a
 ## warning, as does an unreadable round length; with no file at all, Depot alone is listed.
@@ -15,6 +15,15 @@ const TAGS: Array[StringName] = [&"public", &"dev"]
 const SIZE_COLUMNS: PackedStringArray = ["Min", "Standard", "Max"]
 ## The round length column (s), optional: a map without one plays the round tuning's (RoundConfig.round_time).
 const ROUND_COLUMN := "Round"
+## The start mode column, optional: the selector setting a replica that comes on full auto starts every round on there
+## ("no full auto indoors", owner 2026-11-02). Blank or `auto` for none.
+const START_COLUMN := "Start mode"
+const START_MODES: Dictionary[String, ReplicaConfig.FireMode] = {
+	"": ReplicaConfig.FireMode.AUTO,
+	"auto": ReplicaConfig.FireMode.AUTO,
+	"burst": ReplicaConfig.FireMode.BURST,
+	"semi": ReplicaConfig.FireMode.SEMI,
+}
 
 
 class Entry:
@@ -32,6 +41,9 @@ class Entry:
 	## The round's length (s) a Skirmish here plays (WR2: Woodland 3:00), 0 for the round tuning's own. Custom plays
 	## its own switch (CustomRules.round_time) wherever it is.
 	var round_time: float = 0.0
+	## The most a selector starts each round on here (RoundState.start_mode, Armament.start_mode): SEMI or BURST and a
+	## replica that comes on full auto starts below it; AUTO (no rule) and every replica starts as it comes.
+	var start_mode: ReplicaConfig.FireMode = ReplicaConfig.FireMode.AUTO
 
 	## Whether a match of `team_size` a side can be played here.
 	func allows(team_size: int) -> bool:
@@ -98,6 +110,7 @@ static func parse(text: String) -> MapCatalog:
 		else:
 			_read_sizes(e, row, at, m.problems, table)
 			_read_round(e, row, at, m.problems, table)
+			_read_start_mode(e, row, at, m.problems, table)
 			m.entries.append(e)
 	for column in SIZE_COLUMNS:
 		if not table.has_column(column):
@@ -147,6 +160,19 @@ static func _read_round(e: MapCatalog.Entry, row: DataTable.Row, at: String, pro
 				% [at, raw, lo, hi, step, e.id])
 		return
 	e.round_time = float(raw.to_int())
+
+
+## `e`'s start mode from `row`'s Start mode cell (START_MODES); anything else keeps no rule, with a problem.
+static func _read_start_mode(e: MapCatalog.Entry, row: DataTable.Row, at: String, problems: Array[String],
+		table: DataTable) -> void:
+	if not table.has_column(START_COLUMN):
+		return
+	var raw := row.cell(START_COLUMN).to_lower()
+	if not START_MODES.has(raw):
+		problems.append("%s: Start mode \"%s\" is not semi, burst or auto: %s starts replicas as they come"
+				% [at, raw, e.id])
+		return
+	e.start_mode = START_MODES[raw]
 
 
 ## The entry for `map_id`, or null.

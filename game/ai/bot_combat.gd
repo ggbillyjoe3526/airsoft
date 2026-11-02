@@ -166,6 +166,8 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 	var begun := b.burst_left <= 0.0 and b.pause_left <= 0.0
 	if begun:
 		b.burst_left = b.pick(b.skill.burst)
+		# Indoors, full auto only down a long sight line at someone in the open, and only now and then (NA1).
+		BotFireMode.on_burst(b, w, target, eye, dir)
 	if b.burst_left > 0.0:
 		if begun or not was_bursting:
 			# A burst begun (on whoever it now aims at), or picked up again after a tick it couldn't fire in: is the
@@ -173,7 +175,7 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 			b.knee_clear = b.skill.kneels_to_fire and _knee_has_shot(b, w)
 		b.bursting = true
 		var a := b.character.armament
-		cmd.fire = a.fire_mode() != ReplicaConfig.FireMode.SEMI or not a.trigger_was_down
+		cmd.fire = BotFireMode.pull(b, w, a.fire_mode() != ReplicaConfig.FireMode.SEMI or not a.trigger_was_down)
 		b.burst_left -= dt
 		if b.burst_left <= 0.0:
 			b.pause_left = b.pick(b.skill.burst_pause)
