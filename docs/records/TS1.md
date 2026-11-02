@@ -67,6 +67,9 @@ Elimination); what grows is the action: hits a minute rise about 65 % from 5v5 t
   corner sooner), so it goes to KNOWN_ISSUES for a Street rebalance rather than dropping 8v8 there.
 - Spawn spacing and dead-zone layout: Claude's defaults (above), each 6v6 still standing on the middle six.
 - The guards and the balance report play the standard 6v6; `SIZE=n` plays another.
+- Follow me's guard no longer judges a follower while a flash dazzles it (it ducks blind where it stands, as SF1 has
+  it) and gives it the usual rejoin time after: with the new spawn lines Depot's seed 3 put the leader's follower in a
+  flash for 1.4 s and the leader 10 m on. Not a following fault, so the guard, not the bots, changed.
 
 ## Verified
 
