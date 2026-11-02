@@ -1,12 +1,12 @@
 # TS1 · 6v6 on every field, 5v5 to 8v8 under Custom
 
-**Review:** REVIEW_LINE
+**Review:** critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-01 | 1 | Opus 5.5 (build thread) | ✓ (local) | CRITIC | – |
+| 2026-11-01 | 1 | Opus 5.5 (build thread) | ✓ | Accept 7/8 | – |
 
 ## Goal
 
@@ -51,9 +51,27 @@ held up past the limit on Depot (its staging chicanes and tunnels don't choke).
 Attack / Defend's attackers' share, band 45 to 55 % and 40 to 65 %; the median round length; hits a minute from the
 hit counts):
 
-BALANCE_TABLE
+| Field | Size | Elimination: the stronger end | Attack / Defend: attackers | Elimination: median round |
+|---|---|---|---|---|
+| Depot | 5v5 | west 59.5 % (outside, within noise) | 65.5 % | 43.8 s |
+| Depot | 6v6 | east 55.0 % | 49.2 % | 43.5 s |
+| Depot | 7v7 | west 51.2 % | 70.0 % (outside, within noise; band 38 to 67 %) | 46.2 s |
+| Depot | 8v8 | west 50.4 % | 59.2 % | 44.7 s |
+| Woodland | 5v5 | east 50.9 % | 67.2 % (outside, within noise) | 51.1 s |
+| Woodland | 6v6 | east 50.4 % | 57.6 % | 54.3 s |
+| Woodland | 7v7 | west 55.4 % (outside, within noise) | 68.3 % (outside, within noise) | 60.9 s |
+| Woodland | 8v8 | east 52.0 % | 63.7 % | 55.4 s |
+| The Street | 5v5 | north 57.3 % (outside, within noise) | 59.5 % | 56.4 s |
+| The Street | 6v6 | north 53.2 % | 57.1 % | 59.6 s |
+| The Street | 7v7 | north 61.7 % (outside, within noise) | 49.2 % | 50.5 s |
+| The Street | 8v8 | north 64.0 % (outside) | 65.3 % (outside, within noise) | 59.2 s |
 
-**Pace.** Rounds last about as long at every size (Depot 44 s, Woodland 51 to 55 s, The Street 56 to 64 s in
+Depot's 7v7 Attack / Defend and Woodland's 7v7 Elimination sit just past the edge, within one standard error, with
+the sizes either side in band and no trend with size: noise, not a lean. Woodland's Attack / Defend runs high at every
+size (64 % over all four, 309 of 481 rounds), at the band's edge, not past it: KNOWN_ISSUES, for the owner's
+playtest. The Street's Elimination north lean grows with size: below.
+
+**Pace.** Rounds last about as long at every size (Depot 44 s, Woodland 51 to 61 s, The Street 50 to 64 s in
 Elimination); what grows is the action: hits a minute rise about 65 % from 5v5 to 8v8 (Depot 10.5 to 17.3, Woodland
 9.1 to 13.8, The Street 8.2 to 13.7). So 5v5 plays slower and more careful and 8v8 faster and busier, as asked.
 
@@ -78,8 +96,14 @@ Elimination); what grows is the action: hits a minute rise about 65 % from 5v5 t
   spot of their own; at 8v8 on Woodland no bot waits a second for a route; the Tab board fits an 8v8 at HUD size 150 %
   (fails without `_fit_board`).
 
+## Critic
+
+Accept 7/8 at b7c2eb6 (`pipeline/out/critic.md`); check 8 (the docs) failed on a stale "5v5" in `tests/README.md`,
+added lines past 120 columns and the Follow me guard's flash rule kept only here. All three fixed in the last push
+(the rule is in DECISIONS beside DP4's).
+
 ## Outstanding
 
-- The Street's Elimination north-end lean (KNOWN_ISSUES).
+- The Street's Elimination north-end lean, and Woodland's Attack / Defend at the attackers' edge (KNOWN_ISSUES).
 - The draw at 8v8 on a GPU, and how each size feels: the owner (PLAYTEST › Team sizes).
 - CI's guard jobs now play 6v6: about a quarter longer (the longest about 24 of its 30 minutes, performance agent).

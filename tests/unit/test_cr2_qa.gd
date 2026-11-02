@@ -98,7 +98,8 @@ func test_a_corrupt_settings_file_opens_the_custom_page() -> void:
 	var picks := MatchPicks.new()
 	picks.rules = CUSTOM
 	var page := _page(picks, settings)
-	assert_eq(page.rules_box().team_size_choice().selected(), CustomRules.TEAM_SIZES.find(6), "the default 3: Depot plays its standard 6v6")
+	assert_eq(page.rules_box().team_size_choice().selected(), CustomRules.TEAM_SIZES.find(6),
+			"the default 3: Depot plays its standard 6v6")
 
 
 func test_every_custom_team_size_leaves_the_depot_playable() -> void:

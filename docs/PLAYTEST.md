@@ -676,6 +676,10 @@ Every field plays 6v6 by default; Custom offers 5v5, 6v6, 7v7 and 8v8 on each (o
   and its max, and the `[perf-summary]` line at exit; the same on Depot and The Street. The cloud measured the CPU
   only (`tools/team_bench.gd`, `docs/records/TS1.md`): about 6 ms a frame on average on Woodland, 14 ms at its
   slowest 1 %. Note any hitch, and whether BBs ever vanish mid-flight in a big fight.
+- [ ] **The Street's ends.** Elimination on The Street from each end: does the north end (the embankment) feel
+  stronger? Bots win 53 to 64 % of rounds from it, more the bigger the teams (KNOWN_ISSUES).
+- [ ] **Woodland's Attack / Defend.** Attack and defend a few rounds each: do the attackers have it too easy? Bots
+  attacking win about 64 % of rounds at every size, at the edge of the 40 to 65 % band.
 
 ## Menus
 

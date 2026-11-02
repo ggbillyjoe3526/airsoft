@@ -26,8 +26,8 @@ const LONGEST_AIR := 1.0
 const ROUND_SLACK := 0.1
 
 
-## A runner on `map_id` at the team size the game plays there (MatchRunner.sized_for: 6v6 on every field), at `level`, at
-## night when `night` is set or the map offers no day, else by day; with `base`'s tuning when given.
+## A runner on `map_id` at the team size the game plays there (MatchRunner.sized_for: 6v6 on every field), at `level`,
+## at night when `night` is set or the map offers no day, else by day; with `base`'s tuning when given.
 static func runner(test: GutTest, map_id: String, level: StringName, night: bool,
 		mode: RoundState.Mode = RoundState.Mode.ELIMINATION, base: SimTuning = null) -> MatchRunner:
 	var r := MatchRunner.new(test, map_id, MatchRunner.sized_for(map_id, base))

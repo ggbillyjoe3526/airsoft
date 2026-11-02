@@ -63,7 +63,8 @@ func test_it_reads_clean_with_eight_a_side_by_day_or_night() -> void:
 	var entry := MapCatalog.shared().find("woodland")
 	assert_not_null(entry)
 	if entry != null:
-		assert_eq([entry.team_min, entry.team_standard, entry.team_max], [5, 6, 8], "5 v 5 to 8 v 8, 6 v 6 its standard (TS1)")
+		assert_eq([entry.team_min, entry.team_standard, entry.team_max], [5, 6, 8],
+				"5 v 5 to 8 v 8, 6 v 6 its standard (TS1)")
 	assert_eq(map.lanes.size(), 3, "three lanes")
 	assert_true(map.has_pole and map.has_overtime_flag)
 	assert_eq(map.lighting_presets, [LightingConfig.DAY, LightingConfig.NIGHT] as Array[StringName],

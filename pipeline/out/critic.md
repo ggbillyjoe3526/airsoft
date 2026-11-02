@@ -1,20 +1,31 @@
-Task: SR1 · See-through railings on The Street
+Task: TS1 · 6v6 on every field, 5v5 to 8v8 under Custom
 Attempt: 1 of 4
-Head: a5ac2c4 (checks passed on it)
+Head: b7c2eb6 (checks passed on it locally; CI's last red guard fixed in this commit)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
-Score: 7/8 → Accept (QA Pass, performance Pass)
-Evidence for the passes (brief, no task block): bars drawn from the same boxes a BB meets (railings.gd:115 parts, map_level.gd:+408 _railing_mesh); BBs use bb_ray in BBStep (bb_step.gd:+60) with exact bar/rail slab tests (railings.gd:140); sight passes (jolt_query.gd:+53 set_railing_bodies), cover uses sight_clear so a railing is never cover (bot_cover.gd:100,180), shot checks pass (bot_senses.gd:+38 shot_clear, bot_combat.gd:+147,+186,+236,+287); garden fences solid (test_sr1_railings.gd:281). Contracts 1 and 4 kept: Railings is RefCounted in game/sim, reached only through WorldQuery; BoxWorld and JoltQuery both answer. No per-tick allocation: first_bar/bb_ray use packed arrays, reused _bar_hit and static scratch; _index() allocates once, on the first query.
+Score: 7/8 → Accept
+Evidence for the passes (short):
+1. data/maps.md +26-28 (5/6/8 on all three, the row offers Min to Max so 7v7 too); custom_rules.gd +13 TEAM_SIZES to 8;
+   8 spawns and 8 dead-zone spots from tools/*/layout.py and build_map.py, only `spawns`/`deadZones` changed in the
+   JSON (checked); round.gd place_teams centres a 6 on slots 1-6; guards at 8v8 and frame/balance runs in the record.
+2. No contract touched. 3. hud.gd +619 _fit_board: Vector2 and float only, scale written only on change.
+4. test_team_sizes.gd +254 (board fits 8v8 at HUD 150 %) fails without _fit_board (QA measured 1083 of 1080 px).
+5/6. Rules untouched in nodes; no props added (the van was tried and dropped); Chrono hall and the house untouched.
 Failed checks, with evidence:
-8. [judgment] game/config/railing_config.gd added but game/config/README.md has no row for it (the folder README rule for a file added).
-Must-fix for the next attempt: none blocking. Before merge, add the railing_config.gd row to game/config/README.md (docs-only, same PR).
-Advisory (not blocking):
-- SoundPath (sound_path.gd:11,16,28) still casts `ray`, so a railing muffles footsteps and shots behind it like low cover (0.5 share) for bots' hearing and the player's occlusion; open bars shouldn't. Worth a follow-up row or ray_past_railings there.
-- A few bot checks still treat the box as solid sight: _slice_towards_last_known (bot_combat.gd:97), the crossfire lane pick (bot_movement.gd:433), held angles (bot_angles.gd:48), pings.gd:223. Bots may "slice" toward a spot they can already see through a railing; the same precedent BQ1 left for glass.
-- Performance's advisory stands: the Railings mesh casts shadows and spans the map (map_level.gd:+155), never frustum-culled; check Low.
+8. [judgment] Docs not fully current or in house style:
+   - tests/README.md:8 still says the guards play "Woodland at 5v5 at night" (now 6v6).
+   - Added prose over the 120-column wrap (PROCESS › Writing docs): docs/DECISIONS.md:461, tools/balance.sh:3 (152),
+     game/play/play_session.gd:6, tests/guards/test_woodland_guards.gd:4, tests/support/match_guard.gd:29.
+   - The Follow me guard's dazzle exemption (match_runner.gd +541) binds every later guard run like DP4's ruling
+     beside it in DECISIONS (~line 455) but is recorded only in docs/records/TS1.md.
+Advisory (non-blocking): hud.gd +621 floors the board with CARDS_FIT_FLOOR, a name for the cards (a BOARD_FIT_FLOOR or a
+note reads better); test_team_sizes.gd +263 leaves the window at 1920x1080 if the build fails early; no test asserts
+The Street's ends hold eight (Depot and Woodland do; QA checked by hand). QA and performance reviewed the pre-rebase
+head 4240208: _fit_board and the guard change came after, read here and fine.
+Must-fix for the next attempt: none (Accept); fold the check 8 items into this PR's last push if cheap.
 Owner should test in the game:
-- Look through the front-garden railings by day and night: bars read cleanly at range, no shimmer.
-- Shoot at a bot behind a railing: most BBs get through, some ping off a bar or rail.
-- Crouch behind a railing with a bot facing you: it sees you and shoots; it never hides behind one.
-- Try to walk or throw a bomb through: both stopped.
-- A Street match on Low: frame time with the railings in view (shadows on).
-- Footsteps of a bot just behind a railing: do they sound muffled?
+- Woodland 8v8 on Low with --perf in a busy fight: frame time and hitches (CPU p99 14 ms headless).
+- Tab at 8v8 with HUD size 150 %: all sixteen rows on screen and still readable when shrunk.
+- 5v5 vs 8v8 on each field: 5v5 slower and careful, 8v8 busier, rounds about as long; does any size feel unfair?
+- The Street Elimination from each end: does the north (embankment) end feel stronger (bots 55-64 %)?
+- Depot 8v8: squads leave the staging chicanes and tunnels without queuing.
+- 8v8 full-auto fights: do BBs ever vanish mid-flight (pool of 256)?
