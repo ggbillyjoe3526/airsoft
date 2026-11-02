@@ -18,8 +18,9 @@ const RATTLES_BAR := 0.3
 ## Rows that show only on the Customise tabs they belong to (the sheet's `extra`), and the one only a rattling magazine adds.
 const TAB_ROWS: Array[StringName] = [&"zoom", &"aim"]
 const MOVING_ROW := &"moving"
-## The step a fire rate is shown to (rate_text).
+## The step a fire rate under WHOLE_RATE (BBs/s) is shown to, and the rate from which it shows whole (rate_text).
 const RATE_STEP := 0.01
+const WHOLE_RATE := 2.0
 ## The rows, top to bottom: the Figures field, the translation keys of its name and unit, the decimals shown, the value
 ## the bar is full at, whether a short bar is the good one, and which way counts as better.
 const SPECS: Array[Dictionary] = [
@@ -207,8 +208,10 @@ static func _shown(field: StringName, f: Figures, value: float, decimals: int) -
 	return ("%." + str(decimals) + "f") % value
 
 
-## A fire rate (BBs/s) as the Loadout shows it: whole rates as they are (13), a spring rifle's to two places without
-## trailing zeros (0.8, 0.76), so a spring's slower cycling shows (BP3: 0.8 read "1").
+## A fire rate (BBs/s) as the Loadout shows it: from WHOLE_RATE up to the nearest whole (13, 15 with a LiPo), below it
+## to two places without trailing zeros (0.8, 0.76), so a spring's slower cycling shows (BP3: 0.8 read "1").
 static func rate_text(rate: float) -> String:
+	if rate >= WHOLE_RATE:
+		return str(roundi(rate))
 	var shown := snappedf(rate, RATE_STEP)
 	return str(roundi(shown)) if is_equal_approx(shown, roundf(shown)) else String.num(shown)

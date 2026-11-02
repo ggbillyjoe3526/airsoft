@@ -122,3 +122,24 @@ func test_a_spring_rifle_s_rate_reads_as_it_is() -> void:
 	assert_eq(LoadoutPerformance.rate_text(0.8), "0.8")
 	assert_eq(LoadoutPerformance.rate_text(0.8 / 1.05), "0.76", "the M140's slower cycling shows")
 	assert_eq(LoadoutPerformance.rate_text(13.0), "13")
+	assert_eq(LoadoutPerformance.rate_text(14.95), "15", "a LiPo AEG reads whole")
+
+
+func test_a_click_kept_for_the_rifle_never_fires_the_pistol_switched_to() -> void:
+	var c := _sniper_and_pistol()
+	var tuning := SimTuning.new()
+	_shots(c, 2, -1, tuning)
+	# A click 0.6 s into the cycle (inside the bolt's window), then straight to the pistol: no shot without a new click.
+	var cmd := PlayerCommand.new()
+	var pool := BBPool.new(8)
+	var events := SimEvents.new()
+	var fired := 0
+	for tick in 90:
+		cmd.fire = tick == 36
+		cmd.switch_to = 1 if tick == 37 else -1
+		events.clear()
+		Armament.step(c, cmd, EYE, 1.0, true, pool, Seeds.stream(3), events, tuning, DT)
+		for k in events.count:
+			if events.items[k].kind == GameEvent.Kind.SHOT:
+				fired += 1
+	assert_eq(fired, 0)

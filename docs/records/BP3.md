@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-03 | 1 | Opus 5.5 (bug pass thread) | see Checks | – | – |
+| 2026-11-03 | 1 | Opus 5.5 (bug pass thread) | ✓ | Retry 6/8 | a switch fired a kept bolt press; full auto came back for a target re-seen out of the open |
+| 2026-11-03 | 2 | Opus 5.5 (bug pass thread) | see Checks | – | – |
 
 ## The bug pass
 
@@ -23,7 +24,8 @@ pull request fixes what they found that a player meets; the balance work follows
    stowed bolt keeps cycling and switching back never skips it.
 2. **A click once the handle looked home was lost**: the Fire clip and cocking sound end 0.71 s after a shot, the cycle
    1.25 to 1.39 s. A bolt-action press within `ReplicaRulesConfig.bolt_press_window` (0.7 s) of the cycle's end is
-   kept until it ends; an earlier one lapses as before, so a double click never fires twice.
+   kept until it ends; an earlier one lapses as before, so a double click never fires twice. A switch drops a kept press
+   (critic: it fired the pistol as it came up).
 3. **The mouse turned as fast through 6× as at the hip**: through a scope's glass the turn now scales with the glass's
    zoom (`FirstPersonView`), not the iron sights' 1.2 round it; the 2x Scope too.
 4. **The rifle read "1 BBs/s"** on the Loadout card and the performance sheet: rates now show to two places without
@@ -38,8 +40,9 @@ pull request fixes what they found that a player meets; the balance work follows
    graphics question waited, so Enter started a match past it. The notice keeps it. Under Settings the notice steps
    aside (it covered BACK) and comes back after.
 9. **Dev content switched in Settings** left the Loadout page's list stale; it is built again, as the Armory is.
-10. **Bots indoors** (NA1): losing sight for a tick took a target's full auto for good (the roll is once per target), so
-    it is now kept for when the target shows in the open again; a bot never fires on a tick its selector moves (the way
+10. **Bots indoors** (NA1): losing sight for a tick took a target's full auto for good (the roll is once per target).
+    Now losing sight ends the burst and drops to the start mode, keeping the roll, and the next burst that finds the
+    target in the open again goes back to full auto (`Bot.auto_open`), never one that finds it in a doorway; a bot never fires on a tick its selector moves (the way
     from burst back to semi passes full auto); and followers no longer holster when the giver takes a bomb in hand
     (`BotHolster.put_away`).
 

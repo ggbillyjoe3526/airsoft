@@ -1,26 +1,30 @@
-Task: SN2 · The Variable Scope
-Attempt: 2 of 4
-Head: 300895a (full checks passed on 9472793; after e3ff224 and the clean SN1/origin-main merges only the overlapping tests re-ran, all pass; CI must confirm on this head)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept
-Failed checks, with evidence: none.
-Attempt-1 findings, now fixed:
-1. Wheel zooms only with the sight up: play_session.gd:875 passes `player.aiming and player.armament.zoom_turns()`,
-   player_input.gd:483 still needs cmd.aim too, armament.gd:311 requires `c.aiming` (Aiming.step runs before
-   Armament.step, simulation.gd:154/177, so it is this tick's sight). test_variable_scope.gd:110 fails without the
-   armament.gd:311 gate (aimed=false turn) and checks the wheel gives switch_to 1, zoom_steps 0 mid-reload.
-8. KNOWN_ISSUES.md:14 (6× mouse speed, playtest) and :15 (placeholder model, document) added; vault_state.gd:26-27 wrapped.
-Advisory (not failing):
-- Mid-vault the sight is down (Aiming excludes c.vault.active), so the player's wheel now switches there and
-  Vault's held_zoom_steps (vault.gd:192, :218) is never filled from input; records/SN2.md "Held through a vault"
-  overstates it. Harmless sim-level symmetry; reword the record line or drop the plumbing later.
-- test_variable_scope.gd:129 recomputes the play_session gate itself, so play_session.gd:875 has no direct test.
-- Armament.zoom_now() (armament.gd:156) is still used only by tests.
-Must-fix for the next attempt: none.
-Owner should test in the game (at most 6, one line each):
-- Aim the Variable Scope on the AEG Rifle and the Sniper Rifle; wheel 2× to 6× and back: the glass changes, the click and readout show.
-- Is 6× useful at range on Woodland and The Street, and is the mouse too fast at 6×?
-- From the hip, and aimed through the Red Dot or 2x Scope, the wheel still switches replicas and bombs.
-- Aim held (and with toggle aim), reload, wheel to the pistol: it switches, no zoom click.
-- The zoom holds through lowering, switching away and back and a new round; a new match starts it at 2×.
-- It raises noticeably slower than the 2x Scope (1.9 against 1.6): too slow? The longer model looks right?
+Task: BP3 · Fixes from the bug pass after the Sniper Rifle
+Attempt: 1 of 4
+Head: 9f2a2a2 (brief names no check head; docs/records/BP3.md says tools/check.sh passed; not re-run)
+Checks: 1 ✗ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✗ | 7 ✓ | 8 ✓
+Score: 6/8 → Retry (also: pipeline/out/qa-report.md and performance.md are SN2's; no BP3 QA or performance report)
+Failed checks, with evidence (file:line, one or two lines each, each marked measured or judgment):
+1. [judgment, confirmed by a scratch run] game/sim/armament.gd:345 adds the bolt's remaining cooldown (up to 0.7 s) to
+   pending_press, but _draw (armament.gd:445) never clears pending_press (holster at :290 and put_down at :432 do).
+   Click on the rifle 0.6 s into its cycle, switch to the pistol next tick: the pistol fires on its own at tick 56,
+   as its 0.3 s draw ends, with no click. Before BP3 the 0.15 s buffer lapsed inside the draw. A phantom shot.
+6. [judgment] game/ai/bot_fire_mode.gd:45-46 restores AUTO for any re-sighted auto_for target, open or not. The open
+   check runs only at a burst's start (bot_combat.gd:166-169), and burst_left is not spent while the target is
+   hidden or blocked (bot_combat.gd:153-163 return first), so a target that reappears mid-burst in a doorway or room
+   gets the rest of the burst on full auto indoors. That breaks NA1's owner rule (full auto only at a target in the
+   open down a long line) and the record's own claim, item 10: "kept for when the target shows in the open again".
+Must-fix for the next attempt:
+- Clear (or drop the bolt extension of) pending_press on a switch in Armament._draw; add a GUT test: click inside
+  bolt_press_window, switch to the pistol, expect no SHOT without a new click.
+- Restore a kept full auto only after the open check passes again: re-run open_shot when sight returns, or end the
+  burst when sight is lost. Add a test with a target re-seen out of the open, mid-burst.
+- Re-run QA and performance on this head, writing their reports to pipeline/out/.
+Notes (not failing): changelog.d/bug-pass-sniper.md exists but is untracked, so it is not in HEAD; commit it in the
+same push. Untested here: the bot's no-fire-on-selector-tick, the notice focus and menu_choice's track (UI).
+Owner should test in the game:
+- Sniper Rifle: shoot, click again once the handle looks home: one shot at the cycle's end; a fast double click: one.
+- Shoot the rifle, switch to the pistol at once: it fires as soon as it's up; switch back: the bolt isn't skipped.
+- Aimed through the Variable Scope at 2x and 6x, and through the 2x Scope: does the turn speed feel right?
+- Crash the game or pick Safe graphics: does Enter on the notice answer it, not start a match? Is BACK reachable under Settings?
+- Settings › HUD at 150 %: the whole panel with its bomb row shows; in a match the panel doesn't jump.
+- Indoors vs bots: they stay on semi unless you're in the open down a long line, after ducking behind cover too.

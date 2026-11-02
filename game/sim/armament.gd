@@ -449,6 +449,8 @@ func _draw(slot: int, actor: int, events: SimEvents, scale: float = 1.0) -> void
 		stowed_cooldowns[slot] = 0.0
 	active = slot
 	holstered = false
+	# A press kept for the replica put away never fires the one drawn (BP3: a bolt-window click fired the pistol).
+	pending_press = 0.0
 	reload_left = 0.0
 	draw_left = replicas[slot].draw_time * scale
 	draw_total = draw_left
