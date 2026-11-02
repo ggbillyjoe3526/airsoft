@@ -70,11 +70,12 @@ var bottomless: bool = false
 var recoil: float = 0.0
 ## BBs still to come in the burst under way (0: none).
 var burst_shots_left: int = 0
-## Each slot's selector setting (one of its fire_modes), hop-up dial (0..1 of hop_up_max) and BB weight (g). Factory
-## values to start; kept through a refill.
+## Each slot's selector setting (one of its fire_modes), hop-up dial (0..1 of hop_up_max), BB weight (g) and optic zoom
+## (×: aim_zoom, turned up to aim_zoom_to on a variable optic, SN2). Factory values to start; kept through a refill.
 var modes: Array[ReplicaConfig.FireMode] = []
 var hop_ups: PackedFloat64Array = PackedFloat64Array()
 var bb_weights: PackedFloat64Array = PackedFloat64Array()
+var zooms: PackedFloat64Array = PackedFloat64Array()
 ## Each slot's weapon light (Torch.Light; null: none). Set as the match is built, only on a field played at night
 ## (Kit.lights_for); empty or short: no light on the slots past its end.
 var lights: Array[Torch.Light] = []
@@ -92,6 +93,7 @@ static func create(loadout: Array[ReplicaConfig], weights: PackedFloat64Array = 
 		a.ammo.append(m)
 		a.modes.append(r.default_fire_mode)
 		a.hop_ups.append(r.hop_up_dial)
+		a.zooms.append(r.aim_zoom)
 		a.bb_weights.append(weights[i] if i < weights.size() else r.bb_weight)
 	return a
 
@@ -142,6 +144,24 @@ static func start_mode(r: ReplicaConfig, most: ReplicaConfig.FireMode) -> Replic
 func reset_hop_ups() -> void:
 	for i in replicas.size():
 		hop_ups[i] = replicas[i].hop_up_dial
+
+
+## Every variable optic back to its lowest zoom, for a new match: a turn in play lasts the match (SN2).
+func reset_zooms() -> void:
+	for i in replicas.size():
+		zooms[i] = replicas[i].aim_zoom
+
+
+## The zoom aimed through the optic on the replica in hand (×; 0: none of its own, the iron sights').
+func zoom_now() -> float:
+	if replicas.is_empty():
+		return 0.0
+	return zooms[active]
+
+
+## The replica in hand has a variable optic (SN2): aimed, the mouse wheel turns its zoom.
+func zoom_turns() -> bool:
+	return not replicas.is_empty() and not holstered and replicas[active].aim_zoom_to > replicas[active].aim_zoom
 
 
 ## The light on the replica in hand, or null: none fitted, or the replica is holstered (the torch goes out, M92).
@@ -287,6 +307,9 @@ static func step(c: Character, cmd: PlayerCommand, eye: Vector3, kick_scale: flo
 	var mode := a.modes[a.active]
 	if cmd.hop_up_steps != 0:
 		a._turn_hop_up(c.id, cmd.hop_up_steps, rules, events)
+	# Only with the sight up (Aiming: not mid-reload or draw): a turn you can't see is no turn.
+	if cmd.zoom_steps != 0 and c.aiming and a.zoom_turns():
+		a._turn_zoom(c.id, cmd.zoom_steps, rules, events)
 
 	var ready := a.draw_left <= 0.0 and a.reload_left <= 0.0
 	if cmd.reload and a.draw_left > 0.0 and a.reload_left <= 0.0:
@@ -373,6 +396,19 @@ func _turn_hop_up(actor: int, steps: int, rules: ReplicaRulesConfig, events: Sim
 	var e := _event(events, GameEvent.Kind.HOP_UP, actor)
 	e.value = roundi(dial * 100.0)
 	e.value2 = 1 if not is_equal_approx(dial, before) else 0
+
+
+## Turns the variable optic on the replica in hand `steps` notches of `rules.zoom_step` (positive: in), between its
+## aim_zoom and aim_zoom_to, with its ZOOM event.
+func _turn_zoom(actor: int, steps: int, rules: ReplicaRulesConfig, events: SimEvents) -> void:
+	var r := replicas[active]
+	var before := zooms[active]
+	var notch := roundi((before - r.aim_zoom) / rules.zoom_step) + steps
+	var zoom := clampf(r.aim_zoom + notch * rules.zoom_step, r.aim_zoom, r.aim_zoom_to)
+	zooms[active] = zoom
+	var e := _event(events, GameEvent.Kind.ZOOM, actor)
+	e.value = roundi(zoom * 100.0)
+	e.value2 = 1 if not is_equal_approx(zoom, before) else 0
 
 
 ## The replica goes down for a throw (Grenades): away as holstered, silently, a reload, a draw and a burst stopped as a

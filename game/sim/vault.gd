@@ -189,6 +189,9 @@ static func vaulting_command(c: Character, cmd: PlayerCommand, out: PlayerComman
 	if cmd.hop_up_steps != 0:
 		v.held_hop_up_steps += cmd.hop_up_steps
 		v.held_any = true
+	if cmd.zoom_steps != 0:
+		v.held_zoom_steps += cmd.zoom_steps
+		v.held_any = true
 	out.reset(cmd.yaw, cmd.pitch)
 	out.fire = c.armament.trigger_was_down
 	out.aim = c.armament.aim_was_down
@@ -212,9 +215,11 @@ static func with_held_presses(v: VaultState, cmd: PlayerCommand, out: PlayerComm
 		v.held_fire_modes -= 1
 	out.holster = out.holster or v.held_holster
 	out.hop_up_steps += v.held_hop_up_steps
+	out.zoom_steps += v.held_zoom_steps
 	v.held_reload = false
 	v.held_holster = false
 	v.held_hop_up_steps = 0
+	v.held_zoom_steps = 0
 	v.held_switch_to = -1
 	v.held_ready_grenade = Grenade.Kind.NONE
 	v.held_any = v.held_fire_modes > 0

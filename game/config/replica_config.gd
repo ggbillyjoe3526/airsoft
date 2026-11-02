@@ -49,6 +49,9 @@ enum FireMode { SEMI, BURST, AUTO }
 @export var raise_scale: float = 1.0
 ## The aim_zoom is only inside the optic's glass (a scope): the view round it zooms as the iron sights'.
 @export var zoom_in_glass: bool = false
+## A variable optic's top zoom (SN2): aimed, the mouse wheel turns the zoom from aim_zoom up to this in
+## ReplicaRulesConfig.zoom_step steps (Armament.zooms). At or below aim_zoom: a fixed zoom.
+@export var aim_zoom_to: float = 0.0
 ## How long a sprint's or landing's shake stays in the aim, as a share.
 @export var shake_scale: float = 1.0
 ## Its magazines rattle as you move: bots close by hear you even walking.

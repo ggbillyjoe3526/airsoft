@@ -1,34 +1,26 @@
-Task: SN1 · The Sniper Rifle
-Attempt: 1 of 4
-Head: 7c5cca4 (checks passed on it)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
-Score: 7/8 → Accept
-Evidence for the passes (short):
-1. Spring primary, AEG with a 0.20 m longer barrel (tools/blender/replicas/sniper.py, sniper.tres:9 power spring); single
-   shot (sniper.tres:10 fire_modes [SEMI], 0.8/s, Fire clip + boltCycle after each shot sim_audio.gd:+216); 2x Scope
-   fitted, removable and swappable (pool.md:+150 Comes with, loadout_rules.gd:+113, test_sniper_rifle.gd:78);
-   M130/M140/M150 as the gases (stats.md:+85..87, pool.md:+162..164); levels 5/6/7/9, cap 10 (levels.md:+38..44);
-   Sniper bot kit (bot-kits.md:+60); dev gating: pool Access dev, level-up card xp_card.gd:+130, wiki.py:+329, Roadmap
-   "In development" only; Armory checked by QA (test_sn1_qa.gd:102,120).
-2. No contract touched: game/ai and game/sim gain no Node, audio or input; new tuning is BotConfig/ReplicaConfig exports.
-3. Hot paths read: accuracy.gd:+31 (one index and arithmetic), bot_combat.gd:+158/+185, sim_audio.gd:+216/+530 per
-   SHOT event: no allocation. comes_with/_names allocate only at table read and loadout build.
-4. test_sniper_rifle.gd:156 fails without Accuracy's hip term; :78 fails without Pool.comes_with/default_tune.
-Failed checks, with evidence:
-8. [judgment] The record's four "Known issues left" (docs/records/SN1.md:53-59: Loadout rounds 0.8 to "1 BBs/s",
-   teammates carry the factory AEG, Dev-off level 7 bare in the Armory and on the level-up card, placeholder model)
-   are not rows in docs/KNOWN_ISSUES.md, which docs/PROCESS.md:189 requires. And assets/audio/README.md, which lists
-   every cue this game renders itself and its tool (whistle, ping, grenades, doors :14-33), has no boltCycle_1..3 /
-   tools/render_bolt.gd entry (docs/ASSETS.md:+74 has it).
-Must-fix (non-blocking, fold into this pull request before merge): add the four rows to docs/KNOWN_ISSUES.md (Class:
-   can wait / document, Found 2026-11-02); add a boltCycle bullet to assets/audio/README.md with its re-render command.
-Advisory (no check failed):
-- game/ai/bot_brain.gd:114-115 repeats the mode test of :109-111; one shared `in_fight` bool would keep them in step.
-- game/ui/settings_save_page.gd:642 counts dev items in "unlocked" with Dev content off (a number, never a name).
-Owner should test in the game:
-- Hold the trigger: one shot, and the cocking clip and sound line up with the 1.25 s before the next.
-- Hip versus through the 2x Scope: does the 6x hip spread feel fair; is the flat reach to about 48 m right.
-- Take the scope off, then fit a Red Dot; both survive a restart.
-- Dev content off: Armory, Loadout, level-up at 5 and 7 show no sniper gear (level 7 is bare, known).
-- Hard bots with the Sniper kit: do they wait too long for the sight, and are hip shots inside 8 m sensible.
-- M140 and M150: the extra kick and slower cocking feel worth the energy.
+Task: SN2 · The Variable Scope
+Attempt: 2 of 4
+Head: 300895a (full checks passed on 9472793; after e3ff224 and the clean SN1/origin-main merges only the overlapping tests re-ran, all pass; CI must confirm on this head)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
+Score: 8/8 → Accept
+Failed checks, with evidence: none.
+Attempt-1 findings, now fixed:
+1. Wheel zooms only with the sight up: play_session.gd:875 passes `player.aiming and player.armament.zoom_turns()`,
+   player_input.gd:483 still needs cmd.aim too, armament.gd:311 requires `c.aiming` (Aiming.step runs before
+   Armament.step, simulation.gd:154/177, so it is this tick's sight). test_variable_scope.gd:110 fails without the
+   armament.gd:311 gate (aimed=false turn) and checks the wheel gives switch_to 1, zoom_steps 0 mid-reload.
+8. KNOWN_ISSUES.md:14 (6× mouse speed, playtest) and :15 (placeholder model, document) added; vault_state.gd:26-27 wrapped.
+Advisory (not failing):
+- Mid-vault the sight is down (Aiming excludes c.vault.active), so the player's wheel now switches there and
+  Vault's held_zoom_steps (vault.gd:192, :218) is never filled from input; records/SN2.md "Held through a vault"
+  overstates it. Harmless sim-level symmetry; reword the record line or drop the plumbing later.
+- test_variable_scope.gd:129 recomputes the play_session gate itself, so play_session.gd:875 has no direct test.
+- Armament.zoom_now() (armament.gd:156) is still used only by tests.
+Must-fix for the next attempt: none.
+Owner should test in the game (at most 6, one line each):
+- Aim the Variable Scope on the AEG Rifle and the Sniper Rifle; wheel 2× to 6× and back: the glass changes, the click and readout show.
+- Is 6× useful at range on Woodland and The Street, and is the mouse too fast at 6×?
+- From the hip, and aimed through the Red Dot or 2x Scope, the wheel still switches replicas and bombs.
+- Aim held (and with toggle aim), reload, wheel to the pistol: it switches, no zoom click.
+- The zoom holds through lowering, switching away and back and a new round; a new match starts it at 2×.
+- It raises noticeably slower than the 2x Scope (1.9 against 1.6): too slow? The longer model looks right?

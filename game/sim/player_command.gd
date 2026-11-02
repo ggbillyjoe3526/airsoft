@@ -33,6 +33,9 @@ var cycle_fire_mode: bool = false
 var lean: float = 0.0
 ## Notches to turn the hop-up dial of the replica in hand this tick (one-shot): positive for more lift. Bots leave it 0.
 var hop_up_steps: int = 0
+## Notches to turn a variable optic's zoom on the replica in hand this tick (one-shot, SN2): positive zooms in. Bots
+## leave it 0.
+var zoom_steps: int = 0
 ## Put the replica in hand away (one-shot; the holster): nothing to fire or aim, a faster run that never passes the
 ## sprint. A slot, a fresh trigger pull, an aim press or a reload draws it again, slower than a switch.
 var holster: bool = false
@@ -83,6 +86,7 @@ func reset(view_yaw: float = 0.0, view_pitch: float = 0.0) -> void:
 	cycle_fire_mode = false
 	lean = 0.0
 	hop_up_steps = 0
+	zoom_steps = 0
 	holster = false
 	squad_order = SquadOrder.Kind.NONE
 	order_from_wheel = false
@@ -115,6 +119,7 @@ func copy_from(other: PlayerCommand) -> void:
 	cycle_fire_mode = other.cycle_fire_mode
 	lean = other.lean
 	hop_up_steps = other.hop_up_steps
+	zoom_steps = other.zoom_steps
 	holster = other.holster
 	squad_order = other.squad_order
 	order_from_wheel = other.order_from_wheel

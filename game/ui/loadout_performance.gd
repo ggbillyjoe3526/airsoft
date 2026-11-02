@@ -144,7 +144,7 @@ static func measure(replica: ReplicaConfig, grams: float, dial: float, tuning: S
 	f.mags = replica.mags
 	f.reload = replica.reload_time
 	f.draw = replica.draw_time
-	f.zoom = replica.aim_zoom if replica.aim_zoom > 0.0 else iron_zoom
+	f.zoom = maxf(replica.aim_zoom, replica.aim_zoom_to) if replica.aim_zoom > 0.0 else iron_zoom
 	f.aim = tuning.movement.aim_raise_time * replica.raise_scale
 	f.rattles = replica.rattles
 	return f

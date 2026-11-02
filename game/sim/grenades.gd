@@ -126,6 +126,7 @@ static func throwing_command(cmd: PlayerCommand, out: PlayerCommand) -> PlayerCo
 	out.holster = false
 	out.cycle_fire_mode = false
 	out.hop_up_steps = 0
+	out.zoom_steps = 0
 	return out
 
 

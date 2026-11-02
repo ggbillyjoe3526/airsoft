@@ -173,7 +173,8 @@ func _measure(slot: Loadout.Slot, item: Pool.Item, part_slot: StringName, part: 
 	var r := kit.replicas[slot]
 	var tuning := _facts.tuning
 	var values: Dictionary = {}
-	values[&"zoom"] = r.aim_zoom if r.aim_zoom > 0.0 else _facts.iron_zoom
+	# A variable optic (SN2) shows the most it zooms.
+	values[&"zoom"] = maxf(r.aim_zoom, r.aim_zoom_to) if r.aim_zoom > 0.0 else _facts.iron_zoom
 	values[&"aim"] = tuning.movement.aim_raise_time * r.raise_scale
 	values[&"shake"] = r.shake_scale * 100.0
 	values[&"spread"] = r.spread_deg

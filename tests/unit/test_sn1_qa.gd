@@ -113,7 +113,7 @@ func test_the_armory_names_no_sniper_gear_without_dev_content_and_with_it_names_
 	for id in DEV_IDS:
 		assert_false(plain_ids.has(id), "%s hidden" % id)
 		assert_true(dev_ids.has(id), "%s shown with Dev content" % id)
-	assert_eq(dev.item_count - plain.item_count, 4, "the rifle and three springs")
+	assert_eq(dev.item_count - plain.item_count, 5, "the rifle, three springs and the Variable Scope (SN2)")
 	assert_true(plain_ids.has(SCOPE), "the public 2x Scope is still listed")
 
 

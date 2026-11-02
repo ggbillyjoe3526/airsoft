@@ -272,6 +272,21 @@ A dev item (SN1): turn on Settings › Dev settings › Dev content, and Disable
   fight and hold their fire from the hip unless you are within 8 m. Do they feel dangerous at range and beatable up
   close? Is it fair on Depot, Woodland and The Street, at 5v5 and 8v8?
 
+## Variable Scope
+
+A dev item (SN2): turn on Dev content, and Disable levelling (or Level up to 8).
+
+- [ ] **Fit it.** Customise › Optic lists the Variable Scope for the AEG Rifle and the Sniper Rifle. Its look: the 2x
+  Scope a little longer, with a ridged zoom ring and a white mark (a placeholder until your own model).
+- [ ] **Zoom.** Aim through it: it starts at 2×. Wheel up zooms in a step at a time to 6×, wheel down back to 2×, with a
+  click and "Zoom 4×" where the hop-up shows. Only the glass zooms; the view round it stays. Does 6× feel useful at
+  long range on Woodland and The Street?
+- [ ] **The wheel from the hip.** Not aimed, the wheel still switches replicas and bombs. Aimed through any other
+  sight, it switches too.
+- [ ] **Kept.** The zoom stays where you left it when you lower and raise it, switch away and back, and into the next
+  round; a new match starts it at 2×.
+- [ ] **Raise.** It comes up a little slower than the 2x Scope. Too slow?
+
 ## Levels and the Armory
 
 Finished matches give XP, each level up to 10 unlocks parts for good, and nothing is ever sold. What each level

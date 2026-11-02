@@ -88,15 +88,22 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
 
 ## Optics
 
-| Key | Name | Zoom (×) | Raise time (×) | In the glass |
-|---|---|---|---|---|
-| redDot | Red Dot | 1.25 | 1 | no |
-| scope2x | 2x Scope | 2 | 1.6 | yes |
+| Key | Name | Zoom (×) | Raise time (×) | In the glass | Zoom to (×) |
+|---|---|---|---|---|---|
+| redDot | Red Dot | 1.25 | 1 | no | 1.25 |
+| scope2x | 2x Scope | 2 | 1.6 | yes | 2 |
+| scopeVar | Variable Scope | 2 | 1.9 | yes | 6 |
 
 - **Zoom.** How much aiming through it narrows the view (1 is none).
 - **Raise time.** The time to bring it to your eye.
 - **In the glass.** yes: only the view inside its glass is zoomed (a scope); the view round it stays as the iron sights'
   (owner, 2026-10-19: no dark surround). no: the whole view zooms.
+- **Zoom to.** A variable optic's top zoom (SN2): aimed through it, the mouse wheel turns it from its Zoom up to this
+  (up zooms in, down out, 1× a notch: `zoom_step` in `game/config/replica_rules_config.gd`), and the zoom stays where
+  you left it for the rest of the match. The same as Zoom: a fixed optic. Only an optic zoomed in the glass turns; on
+  one that zooms the whole view (In the glass: no) it is ignored.
+- **Variable Scope** (SN2, owner 2026-11-02: the 2x Scope, variable, a little longer): 2× to 6×, only in its glass as
+  the 2x Scope; a longer, heavier scope, so slower to raise (1.9 against 1.6).
 
 ## Grips
 

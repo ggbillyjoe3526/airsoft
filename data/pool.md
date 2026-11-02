@@ -101,10 +101,10 @@ config; owner, 2026-10-04).
 To add a higher spec battery for every electric replica, take the next free ID and add a row to Power sources:
 
 ```
-| 000025 | High Output Battery | battery | electric | dev |
+| 000026 | High Output Battery | battery | electric | dev |
 ```
 
-Then add a row to stats.md's Power sources table saying what it does (`| 000025 | High Output Battery | 0 | 25 | 0 |`
+Then add a row to stats.md's Power sources table saying what it does (`| 000026 | High Output Battery | 0 | 25 | 0 |`
 gives 25 % more rate of fire), and its Name to a level's Unlocks in levels.md (say level 11, raising the cap). Its
 Access says `dev`, so it shows only with Dev content on while you try it out. Change it to `public` and it is
 everyone's at its level; once unlocked it shows in the Power row of every replica tagged `electric`.
@@ -175,6 +175,7 @@ and a little slower to cock).
 |---|---|---|---|---|
 | 000007 | Red Dot | redDot | top-rail | public |
 | 000010 | 2x Scope | scope2x | top-rail | public |
+| 000025 | Variable Scope | scopeVar | top-rail | dev |
 
 ### Grips
 

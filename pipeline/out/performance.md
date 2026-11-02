@@ -1,18 +1,18 @@
-Task: SN1 · head cf67ad7 · Verdict: Pass
-Run: no --perf match run (tools/check.sh and the unit tests were running in the background, so a timing run would be skewed); read-only review of `git diff origin/main...HEAD` · budget: no baseline yet (pipeline/perf-budget.json does not exist), judged against targets and the diff
-Metrics: not measured. Script cost is by reading, all judgment: nothing in the diff adds a node, a signal connection, a timer, a tween or a material to the running game.
-Regressions (> 10 % worse): none measured; none expected (no runtime path got a loop, a node or a growing structure).
-Blocking findings: none.
-Advisory (all judgment):
-- game/sim/accuracy.gd:31 target_spread_scale: per tick per character, one `armament.replica()` call (array index), a float multiply and a Resource field read. No allocation. Cost: well under 1 us per character per tick.
-- game/ai/bot_brain.gd:114 and game/ai/bot_combat.gd:158: `fights_aimed()` runs twice per bot per think (and once in shoot only past the target gate). Two array reads and a compare each, no allocation. Cost: negligible. If it ever shows in a profile, cache the result on the bot at weapon swap.
-- game/play/sim_audio.gd:217 and :529: per SHOT event only (not per tick); `_bolt_action` is an index and a bool read, `_mechanism` is the same path as the other mechanism cues (pooled players via `_play`). Boltcycle plays at 0.8 shots/s per sniper at most, so no voice growth beyond the existing voice cap. No allocation added.
-- game/play/sim_audio.gd:158: boltCycle joins the `_load` list, so the 3 wavs (75 KB each, 225 KB on disk, imported as compressed `compress/mode=2`) are loaded at setup, not on first shot: no first-use hitch. Memory: about 225 KB.
-- game/loadout/loadout_rules.gd:109 `pool.comes_with()`: builds two small arrays and runs `named()` per Comes-with name, but only in default_tune (menu and loadout building, not per frame or per tick).
-- game/pool/pool.gd:194,214,230: `_names` / `comes_with` allocate PackedStringArray / Array; table read at start and loadout build only.
-- game/ui/xp_card.gd:130 and hud.gd:880: one extra bool in the end-of-match card; the card is built once per settle and freed by `hide_xp`. No change in node lifetime.
-- game/config/replica_stats.gd:168: `col.get("optional", false)` once per column at table read. Negligible.
-Assets (judgment): replicas/sniper.glb 397 KB (about 5.8k tris body, in line with the AEG), replicaParts/sniper.glb 203 KB, powerSources/spring.glb 52 KB (shared by the 3 springs through PowerModels, tinted by Label, so one mesh, not three). Loaded on demand like the other replica models. About 0.9 MB of new install size in total. The sniper replica is held in hand by one viewmodel at a time and by bot figures through the existing shared-model path; no new per-instance material or mesh code in the diff.
-Shaders and presets: no new shader, particle, shadow or post effect, so no prewarm entry is needed and no quality-preset bypass.
-Fixes: none required.
-Unexplained: none. Not checked: draw calls and frame time (no GPU here), and the sniper's view-model draw cost in a rendered run; the owner's hardware should confirm F3 draw calls with the sniper in hand equal the AEG's, within noise.
+Task: SN2 · head bdcf468 · Verdict: Pass
+Run: none (brief: no unit/check runs, no targeted run needed; bots never set zoom_steps, so a bot match exercises none of the new paths) · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and the diff
+Metrics: not measured. Node count, orphans, draw calls and static memory cannot change: no node, timer, tween, material, shader or connection is added at runtime (judgment)
+Regressions (> 10 % worse): none measured; none expected
+
+Blocking findings: none
+
+Advisory (all judgment)
+- game/play/replica_view.gd:236-238: one float write per rendered frame, only for a glass with magnify > 0 (a PackedFloat64Array read, no allocation). OpticGlass.update already ran every frame, so no new work. A narrower glass FOV at 6x renders no more than at 2x.
+- game/ui/hud.gd:1269-1273: _show_zoom does tr() % String.num().trim_suffix() on a ZOOM event (one string, a few allocations, per wheel notch). Event-rate, not per-frame, and far cheaper than _show_hop_up's BB flight at hud.gd:1257; fine.
+- game/sim/armament.gd:143-146: zoom_turns() runs once per player tick from play_session.gd:870 (two array reads, two compares). Negligible. _turn_zoom (armament.gd:384-392) allocates nothing: the ZOOM event comes from the existing pool (_event).
+- game/input/player_input.gd:432-486: fill() gains a bool param and one int write; no allocation.
+- assets/models/replicaParts/aeg.glb, sniper.glb: +60.2 KB and +61.5 KB (+20 % and +30 % per file, +122 KB install), 2,140 tris per copy plus its figure version. Reuses the 2x Scope's materials (no new material or shader, so no prewarm entry is needed; the glass shader is the existing one). Only the fitted optic is shown, so the triangle cost is paid only when it is fitted. Within lean-asset policy; the owner sets the install budget.
+- game/sim/{armament,vault,vault_state,grenades,player_command,round}.gd: zooms is a PackedFloat64Array sized per loadout in create(); reset on match start (round.gd:27), no per-round or per-frame allocation. vault held_zoom_steps is a plain int.
+- game/config/*: new fields are plain exports (aim_zoom_to, zoom_step, zoom_to) and dictionary entries for scopeVar; the glass's picture size and its quality-preset sizing (_fit_side) are untouched, so no preset bypass.
+
+Fixes, ranked: none needed
+Unexplained: none

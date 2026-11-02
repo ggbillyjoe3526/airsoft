@@ -42,6 +42,9 @@ msgstr "Hop-up %d%%  ·  flat to %s"
 msgid "HUD_HOP_UP_HIGH"
 msgstr "Hop-up %d%%  ·  climbs from %s"
 
+msgid "HUD_ZOOM"
+msgstr "Zoom %s×"
+
 msgid "HUD_METRES"
 msgstr "%d m"
 

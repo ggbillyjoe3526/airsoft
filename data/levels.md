@@ -38,7 +38,7 @@ typo never stops the game from starting.
 | 5 | 600 | Tight-Bore Barrel, Sniper Rifle, M130 Spring, 2x Scope |
 | 6 | 700 | Angled Grip, Low-Cap Magazine, Red Gas |
 | 7 | 800 | M140 Spring |
-| 8 | 900 | 11.1 V LiPo Battery |
+| 8 | 900 | 11.1 V LiPo Battery, Variable Scope |
 | 9 | 1000 | Long Barrel, Black Gas, M150 Spring |
 | 10 | 1200 | Cyber Pistol |
 

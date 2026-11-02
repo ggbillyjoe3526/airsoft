@@ -717,6 +717,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   barrels or AEG magazines; stronger springs cock 5 % and 10 % slower. A **Comes with** column in pool.md fits parts as
   a replica comes. Bots with it raise the sight to fight and take a shot from the hip only inside 8 m; a Sniper kit
   carries it (Dev content only while it is dev).
+- **The Variable Scope (owner, 2026-11-02, SN2).** The 2x Scope, but variable zoom and a little longer. Defaults taken
+  (the owner may change any): **2× to 6×** in 1× steps, only in its glass as the 2x Scope; aimed through it the **mouse
+  wheel** turns the zoom (up in, down out) instead of switching, and the zoom stays where it is left for the match;
+  slower to raise than the 2x Scope (1.9 against 1.6); fits any top rail (the AEG Rifle and the Sniper Rifle); unlocks
+  at **level 8**. The rifle still comes with the 2x Scope.
 
 ## Menus, HUD, settings and accessibility
 
