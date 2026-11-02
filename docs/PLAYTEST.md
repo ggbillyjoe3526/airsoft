@@ -749,6 +749,10 @@ Every field plays 6v6 by default; Custom offers 5v5, 6v6, 7v7 and 8v8 on each (o
   XP, how XP is earned at the right, and a track of dots from KIT to the top level, filled to yours. Under it four
   level cards from your level, the next edged in teal, locked ones dimmed. The arrows and a click on a dot browse the
   cards. Hover an item: what it does. Check at 1920×1080 and 1280×720.
+- [ ] **Settings (UR6).** SETTINGS as the page's title, the tabs a row of rounded buttons with the open one white,
+  and the panel a gap under them. Every row of choices is one dark bar with the picked choice a white pill (also on
+  Match's Custom rules, Customise's views and Glowing BBs). Look through every tab, and the pause menu's Settings in a
+  match, at 1920×1080 and 1280×720.
 - [ ] **Esc (FB1).** Esc on any menu page and in Settings asks **QUIT GAME?** with the focus on CANCEL; Esc again or
   CANCEL closes it and QUIT leaves. A dialog's, a key rebind's and the Loadout's rename Esc still come first (the
   credits close, a key waiting stops waiting); in a match Esc is still the pause menu, and its Settings close on Esc.

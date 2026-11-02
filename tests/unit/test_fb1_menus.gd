@@ -272,7 +272,7 @@ func test_settings_back_is_a_small_button_at_the_bottom_left() -> void:
 	var back := screen.find_child("Back", true, false) as Button
 	assert_not_null(back)
 	assert_lt(back.size.x, 220.0, "as wide as its word, not the screen")
-	assert_almost_eq(back.get_global_rect().position.x, SettingsScreen.MARGIN_X, 1.0, "at the left margin")
+	assert_almost_eq(back.get_global_rect().position.x, MenuParts.PAGE_MARGIN.x, 1.0, "at the left margin")
 	var screen_rect := screen.get_global_rect()
 	assert_gt(back.get_global_rect().position.y, screen_rect.position.y + screen_rect.size.y * 0.8, "at the bottom")
 

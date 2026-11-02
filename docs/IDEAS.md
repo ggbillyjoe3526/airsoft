@@ -48,6 +48,9 @@ New ideas the owner wants to think about (owner, 2026-10-06). Roadmap items he m
   for now).
 - **A Dev aid: skip to the last round.** The owner's suggestion, a Dev setting that jumps a match to its last round
   to test the match's end (moved from `docs/KNOWN_ISSUES.md`, KI1).
+- **A preview of the graphics preset (UR6, 2026-11-02).** The UI concept's Settings shows a picture at the right of
+  the Graphics tab of what the picked quality preset looks like. Settings has no such picture yet; the GPU cost marks
+  and the help say what each choice costs.
 
 ## No for now
 

@@ -49,6 +49,10 @@ const BORDER := 2
 const FOCUS_BORDER := 2
 ## Every box's corner radius, and a panel's (px at 1080p).
 const RADIUS := 8
+## Settings' tab pills: their padding, the gap between them and the gap under them over the panel.
+const TAB_PAD := Vector2i(18, 8)
+const TAB_SEPARATION := 8
+const TAB_GAP := 14
 const PANEL_RADIUS := 14
 const BUTTON_MARGIN_X := 18
 const BUTTON_MARGIN_Y := 8
@@ -64,10 +68,9 @@ const LINK_BUTTON := &"QuietLink"
 ## The same with a rule under it (Licences).
 const LINK_UNDERLINED := &"QuietLinkRuled"
 const UNDERLINE_GAP := 4
-## The main button's corners and how much lighter it is under the pointer; the selected tab's rule (px).
+## The main button's corners and how much lighter it is under the pointer.
 const MAIN_RADIUS := 12
 const MAIN_HOVER_LIGHTEN := 0.15
-const TAB_RULE := 3
 ## Barlow Condensed's weights in the game.
 const HEAD_WEIGHT_MIN := 500
 const HEAD_WEIGHT_MAX := 700
@@ -220,12 +223,9 @@ static func knob() -> Texture2D:
 	return _knob
 
 
-## A box with a rule of `rule` under it (the selected tab).
-static func tab_box(fill: Color, rule: Color, margin_x: int, margin_y: int) -> StyleBoxFlat:
-	var s := box(fill, Color(0.0, 0.0, 0.0, 0.0), margin_x, margin_y)
-	s.border_width_bottom = TAB_RULE
-	s.border_color = rule
-	return s
+## A tab's pill: `fill`, rounded, its words padded (TAB_PAD).
+static func pill_box(fill: Color) -> StyleBoxFlat:
+	return box(fill, Color(0.0, 0.0, 0.0, 0.0), TAB_PAD.x, TAB_PAD.y)
 
 
 ## The shared Theme.
@@ -334,6 +334,15 @@ static func focus_box() -> StyleBoxFlat:
 	return s
 
 
+## The focus outline drawn just outside a control (a white pill's tab or choice), so it lies on the dark round it and
+## not on the white, where teal would hardly show.
+static func focus_ring_out() -> StyleBoxFlat:
+	var s := focus_box()
+	s.set_expand_margin_all(FOCUS_BORDER + 1)
+	s.set_corner_radius_all(RADIUS + FOCUS_BORDER + 1)
+	return s
+
+
 static func _add_panels(t: Theme) -> void:
 	t.set_stylebox("panel", "PanelContainer", panel_box(0, 0))
 	t.set_stylebox("panel", "Panel", panel_box(0, 0))
@@ -341,14 +350,20 @@ static func _add_panels(t: Theme) -> void:
 	t.set_stylebox("hover", "PopupMenu", box(CARD_HI, Color(0.0, 0.0, 0.0, 0.0), 0, 2))
 	t.set_color("font_color", "PopupMenu", TEXT)
 	t.set_color("font_hover_color", "PopupMenu", TEXT)
-	# Tabs: the selected one is lit with the yellow rule, as the top bar's.
-	t.set_stylebox("panel", "TabContainer", panel_box(20, 12))
-	t.set_stylebox("tab_selected", "TabContainer", tab_box(CARD_HI, ACCENT, 24, 10))
-	t.set_stylebox("tab_unselected", "TabContainer", tab_box(PANEL, PANEL, 24, 10))
-	t.set_stylebox("tab_hovered", "TabContainer", tab_box(CARD, CARD, 24, 10))
-	t.set_stylebox("tab_disabled", "TabContainer", tab_box(PANEL, PANEL, 24, 10))
-	t.set_stylebox("tab_focus", "TabContainer", focus_box())
-	t.set_color("font_selected_color", "TabContainer", TEXT)
+	# Tabs: a row of pills over the panel, a gap between them (UI concept B v2 `settings.png`); the selected one white
+	# with dark words.
+	var tab_panel := panel_box(20, 12)
+	tab_panel.expand_margin_top = -TAB_GAP
+	tab_panel.content_margin_top += TAB_GAP
+	t.set_stylebox("panel", "TabContainer", tab_panel)
+	t.set_stylebox("tab_selected", "TabContainer", pill_box(TEXT))
+	t.set_stylebox("tab_unselected", "TabContainer", pill_box(CARD))
+	t.set_stylebox("tab_hovered", "TabContainer", pill_box(CARD_HI))
+	t.set_stylebox("tab_disabled", "TabContainer", pill_box(CARD))
+	t.set_stylebox("tab_focus", "TabContainer", focus_ring_out())
+	t.set_stylebox("tabbar_background", "TabContainer", StyleBoxEmpty.new())
+	t.set_constant("tab_separation", "TabContainer", TAB_SEPARATION)
+	t.set_color("font_selected_color", "TabContainer", BG)
 	t.set_color("font_unselected_color", "TabContainer", MUTED)
 	t.set_color("font_hovered_color", "TabContainer", TEXT)
 	t.set_color("font_disabled_color", "TabContainer", DIM)

@@ -155,8 +155,8 @@ static func picture(box: Vector2 = Vector2.ZERO) -> TextureRect:
 	return r
 
 
-## A page's title row: `title` in condensed capitals and `line` beside it, sitting on the title's baseline.
-static func page_title(title: String, line: Control) -> HBoxContainer:
+## A page's title row: `title` in condensed capitals and `line` (if any) beside it, sitting on the title's baseline.
+static func page_title(title: String, line: Control = null) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.name = "TitleRow"
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -164,6 +164,8 @@ static func page_title(title: String, line: Control) -> HBoxContainer:
 	var words := head_text(title, PAGE_TITLE_SIZE, 700, GameTheme.TEXT, PAGE_TITLE_SPACING)
 	words.name = "Title"
 	row.add_child(words)
+	if line == null:
+		return row
 	var drop := padded(0.0, 0.0, 0.0, roundf(PAGE_TITLE_SIZE * 0.16))
 	drop.size_flags_vertical = Control.SIZE_SHRINK_END
 	line.size_flags_vertical = Control.SIZE_SHRINK_END
