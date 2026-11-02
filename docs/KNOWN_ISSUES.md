@@ -11,6 +11,8 @@ Every open bug, limit and known gap in the game, so nobody re-reports or re-meas
 
 | Area | Issue | Class | Found |
 |---|---|---|---|
+| Play | Aimed at 6× through the Variable Scope, the mouse turns the view as fast as at 2× (no scope slows it, the 2x Scope's glass included); it may feel quick (SN2) | playtest | 2026-11-02 |
+| Art | The Variable Scope's model is the 2x Scope's run on longer with a zoom ring, a placeholder until the owner's own model (SN2) | document | 2026-11-02 |
 | Menus | The Loadout's replica row rounds the Sniper Rifle's 0.8 shots a second to "1 BBs/s" (SN1); the Loadout is being rebuilt (UR1) | can wait | 2026-11-02 |
 | Play | Your bot teammates still carry the factory AEG, never the Sniper Rifle, and the rifle's magazines aren't shared with the AEG's (its own class, SN1) | can wait | 2026-11-02 |
 | Menus | With Dev content off, level 7 holds nothing to show (only the dev M140 Spring, SN1): its Armory row and level-up card are bare until the Sniper Rifle goes public | can wait | 2026-11-02 |

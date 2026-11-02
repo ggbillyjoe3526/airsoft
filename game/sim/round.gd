@@ -24,6 +24,7 @@ static func start_match(rs: RoundState, characters: Array[Character], ends: Arra
 	for c in characters:
 		c.armament.reset_fire_modes(rs.start_mode)
 		c.armament.reset_hop_ups()
+		c.armament.reset_zooms()
 	_start_round(rs, characters, ends, pool, tuning, events, 1)
 
 

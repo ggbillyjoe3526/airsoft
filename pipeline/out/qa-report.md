@@ -1,30 +1,37 @@
-Task: SN1 · QA commit 692c4d0 · Verdict: Pass (after f489857; first run Fail)
+Task: SN2 · QA commit ac04a2d · Verdict: Pass (after the fix; first run Fail)
 
 Blocking
-1. Missing translation: game/ui/armory_facts.gd:92 builds "ARMORY_BLURB_REPLICA_" + key; game/ui/text/en.po has PISTOL, AEG and CYBER only, no ARMORY_BLURB_REPLICA_SNIPER (en.po ~1832). With Dev content on and the Sniper Rifle the next unlock, the Armory's next-unlock card shows the raw key. test_armory.gd's blurb check only runs with Dev off, so it missed it. Pinned by test_the_armory_has_a_blurb_for_the_sniper_rifle_not_its_translation_key.
+1. game/sim/armament.gd:146 (zoom_turns) with game/play/first_person_view.gd:118 and game/loadout/loadout_rules.gd:334:
+   a variable optic whose stats.md row says "In the glass: no" and "Zoom to" above "Zoom" (data-legal, e.g. Red Dot with
+   Zoom to 3) gets aim_zoom_to set and zoom_turns() true, so the wheel is taken, the click and "Zoom 3x" readout show,
+   but the view stays at aim_zoom (aimed_zoom reads aim_zoom, never Armament.zooms; only ReplicaView's glass reads
+   zooms). Scenario: edit the Red Dot row, aim, scroll: no switching, no visible zoom. Fix: aim_zoom_to only when
+   zoom_in_glass (loadout_rules.gd:334), or make zoom_turns() require it; or document the column as glass-only.
+   Pinned by test_the_wheel_only_turns_a_zoom_you_can_see.
 
 Advisory
-- game/ui/armory_track.gd:76 / armory_facts.gd:43-48: level 7 now holds only the dev M140, so a Dev-off player sees "LEVEL 7 ... NEXT" with an empty row at level 6, while the summary's next unlock (next_row) says level 8. Cosmetic.
-- game/ui/xp_card.gd:127-160: a Dev-off level-up to 7 shows a "LEVEL 7!" panel with no "Unlocked" line and no picture (pinned: nothing named leaks).
-- game/ui/settings_save_page.gd:642 shows the unlocked count, which includes dev items: a number, never a name.
-- The Loadout still rounds 0.8 BBs/s to "1" (already in SN1.md known issues).
+- game/input/player_input.gd:483: the wheel zooms whenever cmd.aim (the button) is held, not when aimed through it
+  (Aiming sets c.aiming false while reloading, drawing, holstered, vaulting). Holding aim through a reload and scrolling
+  zooms the lowered scope instead of switching replica; ignores sprint too. Owner may prefer this; check on play.
+- game/ui/loadout_performance.gd:147: the Customise performance sheet's Zoom figure still reads aim_zoom (2x) for the
+  Variable Scope, while part_options.gd:177 shows 6x; the two disagree and the sheet compare never credits the range.
+- Window scale_with_zoom sensitivity is not scaled by the glass zoom (as the 2x Scope); at 6x aim turns feel fast.
+- pipeline/out/performance.md is modified in the worktree by another agent; not part of my commit.
 
-Checked and fine
-- Dev gating: Armory rows and counts, level-up card, saved loadout with the rifle (plays as default, not a dev match), bot kits (300 seeds x 3 difficulties x 3 personalities, no Sniper kit without Dev), wiki (tools/wiki.py check: OK, 25 pages).
-- Owner's levels (5/5/5, Red Gas 6, M140 7, M150 9, cap 10), springs unlock one by one, old saves get the new level-5 gear and keep Red Gas, scope off stays off through a save (worker test).
-- Single shot: 600 ticks of a held trigger = 1 shot; one fire mode. Every spring x every muzzle part stays <= 2.3 J.
-- Hip spread: x6 sight down, x3.5 half raised, equal to the AEG sight up.
-- Bot match (Yard, all 10 bots Sniper kit, seed 21): 157 shots (15 with the sight down), 39 hits, match finished.
+Tests added (tests/unit/test_sn2_qa.gd, 7 tests)
+- :27 each slot keeps its own zoom (two variable rifles, active 1): checked by assertion on slot 0 staying 2x.
+- :36 a new match resets zoom through Round.start_match: with reset_zooms commented out in round.gd it fails (5 vs 2).
+- :53 top zoom 5.5 turns back down and bottoms at 2x (passes; guards the roundi notch maths).
+- :64 zoom_step 0.5 gives 2.5x and event value 250 (passes).
+- :73 a bot's 0 steps change nothing (passes).
+- :80 wheel only turns a visible zoom: FAILS today (bug 1).
+- :92 Customise top zoom 6x / fixed optic carries none (passes).
 
-Tests added (tests/unit/test_sn1_qa.gd, 16 tests, 15 pass, 1 fails on the bug above)
-- :34 levels_as_owner_set_them_and_cap_10, :44 springs_unlock_one_by_one, :60 old save gets level-5 gear, :74 old level-5 player keeps Red Gas: with the shipped data swapped for origin/main's levels.md these fail (checked).
-- :84 armory names no sniper gear, :104 next unlock skips level 7, :115 dev-only level-up names none, :138 saved loadout falls back, :149 no bot kit without Dev, :164 Hard bots carry it with Dev: fail on main (no such items; the card/hud filter changed signature, so main does not run them).
-- :174 held trigger = 1 shot, :190 springs x muzzles under limit, :207 hip spread vs AEG, :232 blurb (fails, bug), :237 class name, :242 bot match.
+Run: test_sn2_qa + test_variable_scope: 16 tests, 15 passing, 1 failing (bug 1), 100/101 asserts.
+Not run (told not to): tools/check.sh, unit_tests.sh, smoke test. Not testable headless: the glass drawing the live zoom
+(ReplicaView.update), the HUD readout, the click sound, the wheel through a real window; owner should play: aim the
+Variable Scope on AEG and Sniper, scroll 2x-6x, check the glass changes and the readout, hip-scroll still switches.
 
-Counts: sniper_rifle 11/11 pass (114 asserts); sn1_qa 15/16 pass, 22 s. Raw output in pipeline/out/qa/. tools/check.sh and the full suite not run, as instructed.
+## Re-run after the fix
 
-Not testable here: how the model, scope view, cocking clip and sound look and feel (needs a display), hop-up flight at 48 m, bot behaviour feel with the sight-up wait. Owner should playtest those.
-
-## Re-run after the fix (f489857)
-
-ARMORY_BLURB_REPLICA_SNIPER added to en.po. test_sn1_qa.gd + test_armory.gd: 39/39 pass. Verdict: **Pass**.
+`aim_zoom_to` is set only for an optic zoomed in its glass (loadout_rules.gd); test_sn2_qa.gd + test_variable_scope.gd + test_customise_parts.gd: 40/40 pass. Verdict: **Pass**.

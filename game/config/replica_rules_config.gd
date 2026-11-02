@@ -22,6 +22,8 @@ extends Resource
 @export var holster_draw_scale: float = 1.8
 ## One notch of the dial turned in play (share of hop_up_max); never zero, the dial snaps to it.
 @export_range(0.01, 0.5, 0.01) var hop_up_dial_step: float = 0.05
+## A variable optic's zoom step (×) per notch of the mouse wheel while aimed through it (SN2, owner default: 1×).
+@export_range(0.25, 2.0, 0.25) var zoom_step: float = 1.0
 ## The BB weights a player can load (g) and the Loadout's step (the browser game's BB_WEIGHT): 0.20 to 0.30 g.
 @export var bb_weight_min: float = 0.2
 @export var bb_weight_max: float = 0.3

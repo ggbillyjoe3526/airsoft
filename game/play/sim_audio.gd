@@ -228,7 +228,7 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				_mechanism(&"draw", state, e, own)
 			GameEvent.Kind.HOLSTER:
 				_mechanism(&"foley_holster", state, e, own)
-			GameEvent.Kind.FIRE_MODE, GameEvent.Kind.HOP_UP:
+			GameEvent.Kind.FIRE_MODE, GameEvent.Kind.HOP_UP, GameEvent.Kind.ZOOM:
 				_mechanism(&"selector", state, e, own)
 			GameEvent.Kind.TORCH:
 				_mechanism(&"torchClick", state, e, own)

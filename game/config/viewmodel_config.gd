@@ -19,10 +19,10 @@ extends Resource
 ## -z forward, on the sight line) and radius (m), measured from the part models; how far behind the glass the eye sits
 ## aimed (m, so the glass shows as the approved sight concepts do); and the mark on the glass (dot: a lit red dot;
 ## cross: a scope's reticle). An optic not listed is aimed along its sight line with no glass drawn.
-@export var optic_glass_z: Dictionary[StringName, float] = {&"redDot": 0.027, &"scope2x": 0.0522}
-@export var optic_glass_radius: Dictionary[StringName, float] = {&"redDot": 0.0118, &"scope2x": 0.0132}
-@export var optic_eye_back: Dictionary[StringName, float] = {&"redDot": 0.136, &"scope2x": 0.1728}
-@export var optic_mark: Dictionary[StringName, StringName] = {&"redDot": &"dot", &"scope2x": &"cross"}
+@export var optic_glass_z: Dictionary[StringName, float] = {&"redDot": 0.027, &"scope2x": 0.0522, &"scopeVar": 0.0522}
+@export var optic_glass_radius: Dictionary[StringName, float] = {&"redDot": 0.0118, &"scope2x": 0.0132, &"scopeVar": 0.0132}
+@export var optic_eye_back: Dictionary[StringName, float] = {&"redDot": 0.136, &"scope2x": 0.1728, &"scopeVar": 0.1728}
+@export var optic_mark: Dictionary[StringName, StringName] = {&"redDot": &"dot", &"scope2x": &"cross", &"scopeVar": &"cross"}
 ## The view through the glass is drawn this much wider than the glass shows on screen (room for sway), into a square
 ## picture this share of the screen's height on a side.
 @export var glass_margin: float = 1.15

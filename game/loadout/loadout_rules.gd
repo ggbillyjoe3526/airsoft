@@ -331,6 +331,8 @@ func _apply_parts(r: ReplicaConfig, fitted: Dictionary[StringName, Pool.Item]) -
 	# An optic with no stats.md row has no zoom of its own: the iron sights' stays.
 	r.aim_zoom = optic.zoom if fitted.has(&"optic") and stats.parts.has(&"optic", fitted[&"optic"].key) else 0.0
 	r.zoom_in_glass = optic.in_glass and r.aim_zoom > 0.0
+	# Only a scope's glass shows a turned zoom (ReplicaView): a whole-view optic stays fixed.
+	r.aim_zoom_to = optic.zoom_to if r.zoom_in_glass and optic.zoom_to > r.aim_zoom else 0.0
 	r.shake_scale = grip.shake
 	r.spread_deg *= laser.spread * barrel.spread
 	r.rattles = mag.rattles

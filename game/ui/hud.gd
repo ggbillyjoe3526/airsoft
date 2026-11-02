@@ -818,6 +818,9 @@ func on_tick(state: GameState, mag_from_wheel: bool = false) -> void:
 			GameEvent.Kind.HOP_UP:
 				if e.actor == _player.id:
 					_show_hop_up(e.value / 100.0)
+			GameEvent.Kind.ZOOM:
+				if e.actor == _player.id:
+					_show_zoom(e.value / 100.0)
 			GameEvent.Kind.BB_IMPACT:
 				if e.actor == _player.id and e.target < 0 and e.value == BBStep.IN_LEAVES \
 						and e.position.distance_to(Lean.eye(_player, _sim.body, _sim.hits)) <= _cfg.leaves_notice_near:
@@ -1261,6 +1264,13 @@ func _show_hop_up(dial: float) -> void:
 	_replica.show_hop(tr(key) % [roundi(dial * 100.0), flat])
 	_hop_left = _cfg.hop_show_time
 	_hop_slot = a.active
+
+
+## A variable optic's readout (SN2), in the hop-up's place: the zoom it is turned to.
+func _show_zoom(zoom: float) -> void:
+	_replica.show_hop(tr("HUD_ZOOM") % String.num(zoom, 1).trim_suffix(".0"))
+	_hop_left = _cfg.hop_show_time
+	_hop_slot = _player.armament.active
 
 
 ## A round ended (`e`, ROUND_OVER): the stamp from your side (WON, LOST or DRAW, in the winners' colour) over the round

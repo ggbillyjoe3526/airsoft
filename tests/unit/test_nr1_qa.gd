@@ -28,8 +28,8 @@ func test_no_shipped_map_or_item_is_dev_but_the_sniper_and_the_range_is_listed()
 	every.append_array(pool.replicas)
 	every.append_array(pool.powers)
 	every.append_array(pool.parts)
-	# The only dev items are the ones in development on purpose: SN1's Sniper Rifle and its springs.
-	var in_development := PackedStringArray(["000021", "000022", "000023", "000024"])
+	# The only dev items are the ones in development on purpose: SN1's Sniper Rifle and its springs, SN2's Variable Scope.
+	var in_development := PackedStringArray(["000021", "000022", "000023", "000024", "000025"])
 	for it in every:
 		assert_eq(it.is_dev(), in_development.has(it.id), it.display_name)
 

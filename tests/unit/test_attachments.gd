@@ -49,7 +49,7 @@ func _base(id: String) -> ReplicaConfig:
 func test_the_shipped_pool_lists_the_parts_by_slot() -> void:
 	var pool := rules.pool
 	assert_eq(pool.problems, [] as Array[String])
-	assert_eq(pool.parts.size(), 12, "the weapon torch a part since WL7")
+	assert_eq(pool.parts.size(), 13, "the weapon torch a part since WL7, the Variable Scope since SN2")
 	assert_eq(pool.item(SCOPE).slot, &"optic")
 	assert_eq(pool.item(SCOPE).key, &"scope2x")
 	assert_eq(pool.item(SILENCER).slot, &"muzzle")

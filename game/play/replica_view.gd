@@ -233,6 +233,9 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 	held.root.position = pos
 	held.root.rotation = rot
 	if _glass != null:
+		# A variable optic's glass shows the zoom it is turned to (SN2); a fixed scope's never changes.
+		if held.window != null and held.window.magnify > 0.0:
+			held.window.magnify = a.zooms[_active]
 		_glass.update(held.window, aim)
 
 
