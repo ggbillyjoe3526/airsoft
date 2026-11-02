@@ -1208,6 +1208,27 @@ msgstr "CAPPED"
 msgid "CUSTOMISE_BACK"
 msgstr "‹ LOADOUT"
 
+msgid "CUSTOMISE_VIEW_3_4"
+msgstr "3/4"
+
+msgid "CUSTOMISE_VIEW_LEFT"
+msgstr "Left"
+
+msgid "CUSTOMISE_VIEW_RIGHT"
+msgstr "Right"
+
+msgid "CUSTOMISE_VIEW_TOP"
+msgstr "Top"
+
+msgid "CUSTOMISE_HINT_DRAG"
+msgstr "Drag to rotate"
+
+msgid "CUSTOMISE_HINT_ZOOM"
+msgstr "Scroll to zoom"
+
+msgid "CUSTOMISE_HINT_RESET"
+msgstr "Reset view"
+
 msgid "CUSTOMISE_COLOUR"
 msgstr "COLOUR"
 

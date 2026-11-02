@@ -209,6 +209,7 @@ func show_gear() -> void:
 		return
 	_customising = false
 	_pictures.let_go_parts()
+	_customise.let_go()
 	_customise.visible = false
 	_gear.visible = true
 	_strip.visible = true

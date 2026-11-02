@@ -218,7 +218,7 @@ func test_an_edit_goes_straight_to_the_loadout_carried_and_is_saved_on_leaving()
 	assert_almost_eq(saved.carried().tunes[AEG].bb_weight, 0.28, 1e-6)
 	assert_almost_eq(saved.carried().tunes[AEG].hop_up, 0.8, 1e-6)
 	assert_true(view.part_card(CustomiseView.Tab.BBS).is_picked())
-	assert_eq(view.crumb_text(), "AEG Rifle PRIMARY · LOADOUT 1")
+	assert_eq(view.crumb_text(), "AEG RIFLE PRIMARY · LOADOUT 1", "the name is the page's title")
 	view.show_tab(CustomiseView.Tab.POWER)
 	assert_eq(view.power_ids(), PackedStringArray([saved.rules.pool.powers_for(saved.rules.pool.item(AEG), false)[0].id,
 			LIPO]))

@@ -340,6 +340,7 @@ func test_the_sheets_line_names_the_parts_carried() -> void:
 
 # --- the pictures ---
 
+## The gear page's picture (Customise shows the turntable).
 func test_the_replica_picture_shows_the_parts_and_returns_when_they_come_off() -> void:
 	var page := _page(0)
 	var pictures := page.pictures()
@@ -350,6 +351,7 @@ func test_the_replica_picture_shows_the_parts_and_returns_when_they_come_off() -
 	var plain := model.get_child_count()
 	_pick(page, MUZZLE, 1)
 	_pick(page, MAGAZINE, 1)
+	page.show_gear()
 	assert_gt(pictures.extent(&"aeg").x, bare.x, "the silencer is longer than the flash hider")
 	assert_eq(model.get_child_count(), plain + 1, "the silencer on the model")
 	assert_not_null(model.find_child("magazine", true, false).get_node_or_null("magazine_hiCap"),
@@ -359,8 +361,10 @@ func test_the_replica_picture_shows_the_parts_and_returns_when_they_come_off() -
 	assert_false((model.find_child("FlashHider", true, false) as Node3D).visible)
 	for mag in model.find_children("Magazine", "Node3D", true, false):
 		assert_false((mag as Node3D).visible, "the standard magazine is hidden for the Hi-Cap")
+	page.show_customise(0)
 	_pick(page, MUZZLE, 0)
 	_pick(page, MAGAZINE, 0)
+	page.show_gear()
 	assert_eq(model.get_child_count(), plain, "the parts that were replaced are freed")
 	assert_true((model.find_child("FlashHider", true, false) as Node3D).visible)
 	assert_eq(pictures.extent(&"aeg"), bare)
@@ -404,21 +408,27 @@ func test_the_cards_on_the_gear_page_show_the_parts_at_one_shared_scale() -> voi
 			longer.x / same_pistol.x, 0.05, "the list thumbnails keep the same relation")
 
 
-func test_the_customise_picture_keeps_the_rifles_scale_when_parts_are_fitted() -> void:
+func test_the_turntable_keeps_the_rifles_frame_when_parts_are_fitted() -> void:
 	var page := _page(0)
-	var view := page.customise()
-	var bare := view.find_children("*", "TextureRect", true, false)
-	var shot := bare[0] as TextureRect
-	for r in bare:
-		if (r as TextureRect).texture is ViewportTexture and (r as TextureRect).custom_minimum_size.x > 300.0:
-			shot = r
-			break
-	var before := shot.custom_minimum_size
+	var table := page.customise().turntable()
+	var model := table.model()
+	var holder := model.get_parent() as Node3D
+	var distance := table.camera_distance()
+	var centre := holder.position
+	var plain := model.get_child_count()
 	_pick(page, MUZZLE, 1)
-	assert_gt(shot.custom_minimum_size.x, before.x, "longer with the silencer on")
-	assert_lte(shot.custom_minimum_size.x, CustomiseView.SHOT_ROOM.x + 0.5)
-	assert_lte(shot.custom_minimum_size.y, CustomiseView.SHOT_ROOM.y + 0.5)
-	assert_almost_eq(shot.custom_minimum_size.y, before.y, 0.5, "same scale: the same height")
+	_pick(page, BARREL, 2)
+	_pick(page, OPTIC, 1)
+	assert_same(table.model(), model, "the same model, refitted")
+	assert_not_null(model.get_node_or_null("muzzle_silencer"), "the silencer on the turntable's rifle")
+	assert_eq(model.get_child_count(), plain + 3)
+	assert_eq(table.camera_distance(), distance, "the camera never moves for a part")
+	assert_eq(holder.position, centre, "nor does the rifle")
+	_pick(page, MUZZLE, 0)
+	_pick(page, BARREL, 0)
+	_pick(page, OPTIC, 0)
+	assert_eq(model.get_child_count(), plain, "the parts come off again")
+	assert_true((model.find_child("FlashHider", true, false) as Node3D).visible)
 
 
 # --- freeing ---
