@@ -269,9 +269,6 @@ msgstr "Needs a map with a flagpole"
 msgid "MENU_LEVEL"
 msgstr "LVL"
 
-msgid "MENU_MAP"
-msgstr "MAP"
-
 msgid "MENU_PLAY"
 msgstr "PLAY"
 
@@ -3589,3 +3586,9 @@ msgstr "Renderer"
 
 msgid "SETTINGS_ABOUT_QUIT"
 msgstr "Quit to desktop"
+
+msgid "MENU_FIELD"
+msgstr "Field"
+
+msgid "MENU_MATCH_LINE"
+msgstr "Pick a field, a mode and who you play with"

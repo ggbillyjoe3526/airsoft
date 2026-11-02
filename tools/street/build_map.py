@@ -3,7 +3,7 @@ anywhere:
 
     python3 tools/street/build_map.py
 
-Then re-render its card (`tools/map_pictures.gd`, docs/ASSETS.md). The JSON is the map file the game reads
+Then re-render its picture at eye height (`tools/eye_pictures.gd`, docs/ASSETS.md). The JSON is the map file the game reads
 (game/map/map_data.gd). Every colour is a palette colour of the shared look (LookConfig, by name in PAINT), written
 on its block (`colour`, MapData.Block.colour); tests/unit/test_street.gd holds the map to them.
 """

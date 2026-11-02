@@ -275,7 +275,7 @@ Depot's temporary site dress (DD1, until the owner's models; Depot and the range
 - **Details.** `SiteDress` (`game/play/site/site_dress.gd`): container frames, crate battens, caps and coping, the
   skip's rim, the watch tower's net and flag, the sails, as one mesh in the same material; the sandbags as one
   MultiMesh within 60 m; the stencils as Label3D, charcoal, or light on a dark wall. `dress_sky` gives the day its
-  cumulus and haze. Re-render the map cards with `tools/map_pictures.gd`.
+  cumulus and haze. Re-render the field pictures at eye height with `tools/eye_pictures.gd` (spots in `docs/records/UR2.md`).
 - **CC0 props** (DR2). `PropDress` (`game/play/site/prop_dress.gd`, built by SiteDress) draws the kinds
   `PropDressConfig` (`game/config/prop_dress_config.gd`, SiteLook's `props`) dresses: drums four to a pallet, barrels
   two a block, the sofa, and the tall racks lined with shelving, where `PropLayout` (`prop_layout.gd`, pure, seeded)
@@ -309,6 +309,6 @@ The figures (step 23, FI1-FI7; every bot on every preset, DECISIONS BD1):
 The wood (WL4): `WoodsShapes` (`game/play/woods_shapes.gd`) places every part from `MapData`'s `dressing` with
 seeded order and colours, as plain data; `WoodsView` draws it (instanced cones, tuft tiles, one puddle mesh of two
 surfaces, one floor mesh, one night-air draw) and follows the Mesh detail and Wind dust rows; `SkylineShapes` builds
-the treelines; `BushView` (`game/play/bush_view.gd`) draws the bushes the simulation reads (`MapData.foliage`). Pictures: `tools/map_pictures.gd` renders `assets/maps/woodland.jpg` with it on High.
+the treelines; `BushView` (`game/play/bush_view.gd`) draws the bushes the simulation reads (`MapData.foliage`). Pictures: `tools/eye_pictures.gd` renders Woodland's at eye height with it on High (UR2).
 
 The browser game's version is in `legacy/browser/docs/ART.md`.

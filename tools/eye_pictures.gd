@@ -6,13 +6,18 @@ extends SceneTree
 ##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . --rendering-driver opengl3 -s res://tools/eye_pictures.gd \
 ##       -- <map id> <folder> <name>:<x>,<z>,<yaw degrees>,<pitch degrees> ...
 ## Yaw 0 looks along -z (north), 90 along -x (west); pitch is up from level. An argument `preset=<low|medium|high|ultra>`
-## draws that Graphics preset's values (GraphicsApply) instead of High. Dev only: tools/ never ships.
+## draws that Graphics preset's values (GraphicsApply) instead of High. An argument `card` writes a field's Match
+## picture instead: cut from the centre to 7:4, scaled to 700 x 400 at the map cards' quality (UR2; the spots are in
+## docs/ASSETS.md). Dev only: tools/ never ships.
 
 const SIZE := Vector2i(1600, 900)
 const QUALITY := 0.9
 const FOV := 75.0
 const MSAA := Viewport.MSAA_4X
 const SETTLE_FRAMES := 6
+## `card`: a field's Match picture, its size (px) and JPEG quality, as tools/map_pictures.gd writes the range's.
+const CARD_SIZE := Vector2i(700, 400)
+const CARD_QUALITY := 0.85
 ## Frames to settle under the whole scene's bounce light (SDFGI converges over about 30) and before the first picture
 ## (the reflection probes capture once, a face a frame).
 const GI_SETTLE_FRAMES := 40
@@ -26,9 +31,13 @@ func _initialize() -> void:
 func _run() -> void:
 	var args := OS.get_cmdline_user_args()
 	var preset := &"high"
-	for a in args.duplicate():
+	var card := false
+	for a: String in args.duplicate():
 		if a.begins_with("preset="):
 			preset = StringName(a.trim_prefix("preset="))
+			args.erase(a)
+		elif a == "card":
+			card = true
 			args.erase(a)
 	if args.size() < 3:
 		push_error("eye_pictures: give a map id, a folder and at least one name:x,z,yaw,pitch")
@@ -61,21 +70,11 @@ func _run() -> void:
 		port.add_child(site)
 		level.set_detail(GraphicsQuality.MeshDetail.HIGH)
 		SiteDress.dress_sky(lighting, play.site_look)
-	if site == null:
-		var props := PropDress.build(map, play.site_look.props)
-		if props != null:
-			port.add_child(props)
 	var roof := RoofView.build(map, play.roof)
 	if roof != null:
 		port.add_child(roof)
-	# An outdoor field's wood, bushes and skyline as a match draws them on High (WR3: Woodland's pictures).
-	var woods := WoodsView.build(map, play.woods, play.skyline, play.lighting, play.map_style)
-	if woods != null:
-		port.add_child(woods)
-		woods.set_quality(GraphicsQuality.MeshDetail.HIGH, 0.0)
-	var bushes := BushView.build(map, play.woods)
-	if bushes != null:
-		port.add_child(bushes)
+	# An outdoor field's props, wood and bushes as a match draws them on High (WR3: Woodland's pictures).
+	add_woods(port, map, play)
 	var skyline := SkylineView.build(map, play.skyline, play.lighting, tuning.body.stand_eye_height)
 	if skyline != null:
 		port.add_child(skyline)
@@ -106,9 +105,37 @@ func _run() -> void:
 		for i in settle:
 			await RenderingServer.frame_post_draw
 		var path := "%s/%s.jpg" % [args[1].trim_suffix("/"), parts[0]]
-		if port.get_texture().get_image().save_jpg(path, QUALITY) != OK:
+		var image := port.get_texture().get_image()
+		if card:
+			image = card_cut(image)
+		if image.save_jpg(path, CARD_QUALITY if card else QUALITY) != OK:
 			push_error("eye_pictures: %s could not be written" % path)
 			failed += 1
 			continue
 		print("[eye_pictures] %s" % path)
 	quit(1 if failed > 0 else 0)
+
+
+## The map's wood as a match draws it on High by day (WoodsView: crowns, the forest, tufts, puddles and the floor), its
+## bushes (BushView) and, with no site dress, its CC0 props (PropDress, WR3), each if it has them.
+static func add_woods(port: Node, map: MapData, play: PlayTuning) -> void:
+	var props := PropDress.build(map, play.site_look.props) if map.site == null else null
+	if props != null:
+		port.add_child(props)
+	var woods := WoodsView.build(map, play.woods, play.skyline, play.lighting, play.map_style)
+	if woods != null:
+		port.add_child(woods)
+		woods.set_quality(GraphicsQuality.MeshDetail.HIGH, 0.0)
+	var bushes := BushView.build(map, play.woods)
+	if bushes != null:
+		port.add_child(bushes)
+
+
+## A render cut from its centre to CARD_SIZE's shape and scaled to it: a field's Match picture.
+static func card_cut(image: Image) -> Image:
+	var aspect := float(CARD_SIZE.x) / CARD_SIZE.y
+	var w := mini(image.get_width(), roundi(image.get_height() * aspect))
+	var h := mini(image.get_height(), roundi(w / aspect))
+	var cut := image.get_region(Rect2i((image.get_width() - w) / 2, (image.get_height() - h) / 2, w, h))
+	cut.resize(CARD_SIZE.x, CARD_SIZE.y, Image.INTERPOLATE_LANCZOS)
+	return cut

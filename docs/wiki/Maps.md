@@ -1,8 +1,8 @@
 # Maps
 
 Every field in Airsoft is built like a real airsoft site: cover to move between, choke points, flanking routes, long
-and short sightlines, and a spawn and a dead zone at each end. Pick a map on the **Match** screen from its picture
-card.
+and short sightlines, and a spawn and a dead zone at each end. Pick a map on the **Match** page from the
+Fields list: each one shows a small picture taken at a player's eye height and a line about it.
 
 <!-- wiki:maps -->
 

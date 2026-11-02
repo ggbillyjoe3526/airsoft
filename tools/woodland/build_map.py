@@ -5,7 +5,7 @@ layout as data). Needs Python 3.10+ and numpy. Run from anywhere:
 
 `python3 tools/woodland/check.py` first: the build checker (foliage, pieces, slopes, decks, banks, reachability) must
 print TOTAL 0. The JSON is the map file the game reads (game/map/map_data.gd); never edit it by hand. Re-render the
-map's card afterwards (`tools/map_pictures.gd`, docs/ASSETS.md).
+map's picture at eye height afterwards (`tools/eye_pictures.gd … card`, docs/ASSETS.md).
 
 The concept is a height field on a 0.5 m grid and pieces on it. The game's blocks are axis-aligned boxes, so the
 layout squares every piece to the nearest quarter turn, and the stream runs north-south under both crossings. Here the

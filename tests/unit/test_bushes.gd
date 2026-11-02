@@ -612,13 +612,13 @@ func test_woodland_s_bushes_are_one_draw_of_placeholder_ellipsoids_standing_on_t
 			"nothing on a map without bushes")
 
 
-func test_the_map_cards_picture_draws_woodlands_bushes() -> void:
-	var pictures: GDScript = load("res://tools/map_pictures.gd")
+func test_the_field_picture_draws_woodlands_bushes() -> void:
+	var pictures: GDScript = load("res://tools/eye_pictures.gd")
 	var port := Node3D.new()
 	add_child_autofree(port)
 	pictures.add_woods(port, _woodland(), PlayTuning.load_default())
 	var bushes := port.find_children("*", "BushView", false, false)
-	assert_eq(bushes.size(), 1, "the card's render dresses Woodland as a match does, bushes and all")
+	assert_eq(bushes.size(), 1, "the eye-height render dresses Woodland as a match does, bushes and all")
 	if not bushes.is_empty():
 		assert_eq((bushes[0] as BushView).multimesh.instance_count, _woodland().foliage.size())
 

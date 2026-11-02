@@ -56,7 +56,7 @@ func test_the_page_shows_the_chips_the_summary_and_play() -> void:
 	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Normal bots")
 	assert_eq(page.play_button().text, "PLAY")
 	var words := _labels(page)
-	for expected: String in ["MAP", "MODE", "YOUR TEAM", "BOTS", "RULES", "DEPOT"]:
+	for expected: String in ["FIELD", "MODE", "YOUR TEAM", "BOTS", "RULES", "DEPOT"]:
 		assert_true(words.has(expected), expected)
 	# the map's line is its card's tooltip (UI1)
 	assert_eq(page.map_card("depot").tooltip_text, "An indoor airsoft hall: three lanes, two dark tunnels.")
@@ -420,3 +420,49 @@ func test_play_frees_the_menus_shows_loading_and_frees_it_once_the_match_runs() 
 	await wait_process_frames(2)
 	assert_not_null(main._menus)
 	assert_true(main._menus.match_page().team_card(1).is_picked(), "the pick is still there")
+
+
+# --- UR2: concept B v2's Match page ---
+
+func test_the_fields_are_a_list_of_eye_height_pictures_with_their_blurbs() -> void:
+	var page := _page(false)
+	await wait_process_frames(2)
+	for id: String in page.map_ids():
+		var card := page.map_card(id)
+		var picture := card.find_children("*", "TextureRect", true, false)[0] as TextureRect
+		assert_eq(picture.custom_minimum_size, MatchPage.FIELD_PICTURE, "%s: one picture size" % id)
+		assert_true(card.get_global_rect().encloses(picture.get_global_rect()), "%s: the picture stays in its card" % id)
+		assert_eq((card.find_child("Blurb", true, false) as Label).text, MapCatalog.shared().find(id).blurb)
+	var cards := page.map_ids()
+	assert_lt(page.map_card(cards[0]).get_global_rect().position.y, page.map_card(cards[1]).get_global_rect().position.y,
+			"one under another")
+
+
+func test_the_play_card_names_the_field_and_the_rest_of_the_match() -> void:
+	var page := _page(false)
+	page.map_card("woodland").pressed.emit()
+	var card := page.find_child("PlayCard", true, false) as Control
+	assert_not_null(card)
+	var words := PackedStringArray()
+	for l: Node in card.find_children("*", "Label", true, false):
+		words.append((l as Label).text)
+	assert_true(words.has("WOODLAND"), "the field's name")
+	assert_true(words.has(page.summary_text().trim_prefix("Woodland · ")), "the rest of the summary under it")
+	assert_true(card.is_ancestor_of(page.play_button()), "PLAY across the card")
+
+
+func test_a_mode_shows_its_blurb_on_the_card() -> void:
+	var page := _page(false)
+	var blurb := page.mode_card("elimination").find_child("Blurb", true, false) as Label
+	assert_eq(blurb.text, page.mode_blurb("elimination"))
+	assert_string_contains(blurb.text, "First to 5")
+
+
+func test_a_field_picture_is_cut_from_the_render_centre_to_the_cards_size() -> void:
+	var pictures: GDScript = load("res://tools/eye_pictures.gd")
+	var render := Image.create(1600, 900, false, Image.FORMAT_RGB8)
+	render.fill(Color.BLACK)
+	render.fill_rect(Rect2i(780, 430, 40, 40), Color.WHITE)
+	var cut: Image = pictures.card_cut(render)
+	assert_eq(cut.get_size(), Vector2i(700, 400))
+	assert_gt(cut.get_pixel(350, 200).r, 0.9, "the render's middle stays in the middle")
