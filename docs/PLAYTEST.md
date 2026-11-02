@@ -197,7 +197,7 @@ never players.
 
 ## Loadout and Customise
 
-Loadout (the title screen or the top bar). The slots are Primary, Secondary and Grenades (greyed: none yet); a replica
+Loadout (the side rail). The slots are Primary, Secondary and Grenades (greyed: none yet); a replica
 still to unlock is greyed with a lock and its level. Right-click an equipped replica, or use Customise, to change its
 parts. To try every part before you have levelled, turn on Settings › Dev › Disable levelling.
 
@@ -277,10 +277,9 @@ A dev item (SN1): turn on Settings › Dev settings › Dev content, and Disable
 Finished matches give XP, each level up to 10 unlocks parts for good, and nothing is ever sold. What each level
 unlocks is in `data/levels.md`; the Armory shows it in the game.
 
-- [ ] **Level 0 to start.** On a fresh save (Settings › Save file › Delete) the top bar reads "LVL 0"
+- [ ] **Level 0 to start.** On a fresh save (Settings › Save file › Delete) the side rail reads "LV 0"
   with an empty bar.
-- [ ] **The level badge.** "LVL N" with a thin XP bar at the far right of the top bar on every screen after the title;
-  point at it for "X XP to level N+1", click it to open the Armory (from the pause menu it does nothing).
+- [ ] **The level badge.** "LV N" with a thin XP bar near the foot of the side rail on every menu page (UR1).
 - [ ] **The Armory.** Your level "of 10", the XP bar and how XP is earned (a match 100, a win 100 more, each round won
   20, each hit 10, times the difficulty), what the next level unlocks, and every level with its items (reached ones
   Unlocked, the next Next). Easy to read?
@@ -703,31 +702,35 @@ Every field plays 6v6 by default; Custom offers 5v5, 6v6, 7v7 and 8v8 on each (o
 
 ## Menus
 
-- [ ] **The title screen.** Only "AIRSOFT", the tagline "Call your hit. Go again." and **START**. The build sits small at the bottom right with **Licences** over it, a
-  **Fullscreen** button at the bottom left. Licences shows Godot's licence and every add-on's.
-- [ ] **The wordmark and Esc (FB1).** Click **AIRSOFT** at the top left of Match, Loadout, Armory or Settings: the title
-  screen. Esc on the title, on any menu page and in Settings asks **QUIT GAME?** with the focus on CANCEL; Esc again or
+- [ ] **No title screen; concept B (UR1).** The game opens straight on Match with PLAY focused, over a blurred view of
+  the field you picked (pick another field: the backdrop changes). Frosted panels, one teal accent, no blue and yellow
+  outside the team colours and the warnings (a low magazine, THEIR FLAG IS GOING UP!, the flags). Headings are in the
+  condensed face; every number is still in the plain face: tell me if any heading is hard to read.
+- [ ] **The side rail (UR1).** Text only, words centred: AIRSOFT, MATCH, LOADOUT, ARMORY, SETTINGS, then LV and its XP
+  bar and QUIT at the foot. The current tab sits on a lighter card with a teal rule at its left. QUIT asks QUIT GAME?.
+  From practice only LOADOUT and BACK TO PRACTICE show.
+- [ ] **Settings › About (UR1).** Version and renderer, then Report a Bug, Licences and Quit to desktop; no title box.
+  Licences shows Godot's licence, every add-on's and Barlow Condensed's.
+- [ ] **Esc (FB1).** Esc on any menu page and in Settings asks **QUIT GAME?** with the focus on CANCEL; Esc again or
   CANCEL closes it and QUIT leaves. A dialog's, a key rebind's and the Loadout's rename Esc still come first (the
   credits close, a key waiting stops waiting); in a match Esc is still the pause menu, and its Settings close on Esc.
 - [ ] **Leaving lands on Match (FB6).** Quit a match from the pause menu, and leave practice: both open the Match page
-  with PLAY focused (Enter starts again) and your picks kept, never the title; AIRSOFT still opens the title.
-- [ ] **Buttons are as wide as their words (FB1).** Look through the title's notice, Match, Loadout, Settings (every
+  with PLAY focused (Enter starts again) and your picks kept.
+- [ ] **Buttons are as wide as their words (FB1).** Look through the first start's notice, Match, Loadout, Settings (every
   tab), the pause menu and the quit question at 1920×1080 and 1280×720: no button has a field of empty space in it, and
-  the buttons of a group (the bar's tabs, a Settings row's choices, QUIT and CANCEL) are one width. Settings' **BACK**
+  the buttons of a group (the rail's tabs, a Settings row's choices, QUIT and CANCEL) are one width. Settings' **BACK**
   is a small button at the bottom left.
 - [ ] **Switches stay put (FB1).** Press each On / Off (and Hold / Toggle) switch on every Settings tab: nothing beside
   it moves, resizes or vanishes. On Graphics the "FOR YOUR CARD" tag is whole, and pressing a switch (the preset
   becomes Custom) doesn't shift the rows under the preset line.
-- [ ] **Compact and steady menus (UI1).** At 1920×1080, 1280×720 and your 4K screen go through the title, Match,
+- [ ] **Compact and steady menus (UI1).** At 1920×1080, 1280×720 and your 4K screen go through Match,
   Loadout, Customise (every part), Armory, every Settings tab, the pause menu, QUIT GAME?, Report a Bug and the
   credits. Buttons and switches are one height and one type size; no word is cut, nothing lies over anything else and
   nothing runs off the window (the Armory's starting kit wraps to a second line). Click every switch and choice, hover,
   hold the mouse down and let go: nothing else on the screen moves or changes size. In Customise press and hold
   **‹ LOADOUT**: it still reads LOADOUT. On Graphics **FOR YOUR CARD** sits above its preset. Rest the pointer on a row,
   a bot level, a mode or a map card: its old line of help is the tooltip. Tell me any help you now miss.
-- [ ] **The top bar** on every screen after the title: MATCH, LOADOUT, ARMORY, SETTINGS, your level and XP bar on the
-  right, the current place marked.
-- [ ] **The Match screen** (START). 01 Map as picture cards (a Day | Night switch where a map has both), 02 Mode as
+- [ ] **The Match screen**. 01 Map as picture cards (a Day | Night switch where a map has both), 02 Mode as
   cards with **Practice last**, 03 Match rules; on the right Your match with the Loadout's Change and **Start match**
   (**Start practice** for the range).
 - [ ] **Your team** (M98). Alpha or Beta, each with its colour dot, kept after you leave; Extraction hides the row. On
@@ -934,7 +937,7 @@ Settings › Graphics › Quality: Low, Medium, High, Ultra or Custom.
   thin bright lines at 20 to 30 m on a high-DPI laptop and a monitor.
 - [ ] **Debug panel (F3).** "frame ms (sim / draw / GPU)", the antialias line, draw calls.
   Note the frame rate and draw calls on each preset in the open yard and in the office.
-- [ ] **Load time.** Play from the title after a moment: no long hitch; on the laptop Medium starts within about half
+- [ ] **Load time.** Play from the Match page after a moment: no long hitch; on the laptop Medium starts within about half
   a second of Low.
 - [ ] **No shader hitches (PF1).** Start the game with `--perf` on Medium, High and Ultra in turn, the first time
   after installing. The first picture of the field holds a moment before round 1 while shaders build: note how long.
@@ -965,7 +968,7 @@ save, the restore points and the logs (Windows: `%APPDATA%\Airsoft`).
 - [ ] **Saved automatically.** Change the field of view, then open Save file: "Last saved just now", and the tiles show
   your level, XP, items unlocked, matches, saved loadouts and the version. Quit, start again: your settings, loadouts,
   level and records are as you left them. Closing the window mid-match loses nothing saved before it.
-- [ ] **Open folder** opens the save folder in Explorer (Windows) or your file manager (Linux), from the title's
+- [ ] **Open folder** opens the save folder in Explorer (Windows) or your file manager (Linux), from the menus'
   settings and from the pause menu. Copy the folder, delete the save, put the copy back with the game closed: your save
   is back.
 - [ ] **Restore points.** The first start of each day keeps the save as it was (none for a new player, none when nothing
@@ -987,14 +990,14 @@ Play a release build (installer or zip) for these; running from the Godot editor
 
 - [ ] **Install and uninstall (Windows).** The installer adds a Start menu entry and runs the game; uninstalling
   removes it and keeps your save. Installing a newer build over it keeps your save and settings.
-- [ ] **The zip and the Linux build** run from their folder and boot to the title with no error.
+- [ ] **The zip and the Linux build** run from their folder and boot to the Match page with no error.
 - [ ] **Window modes.** Settings › Display: Windowed, Borderless fullscreen and Fullscreen each apply at once and are
   kept after a restart; F10 goes fullscreen and back with play carrying on. A window can be resized and moved, and
   the picture and HUD follow.
 - [ ] **First-start display (FB2).** A new save opens in exclusive fullscreen on the screen the game starts on, with
   V-Sync off and edge smoothing Off on Low, Medium, High and Ultra. An old save you never changed moves to these
   once; Windowed, V-Sync or smoothing you chose yourself stays. Pick Windowed, then F11: back to exclusive fullscreen.
-  On the title and menus F3 reads no more than your screen's refresh rate; in a match it follows your Frame rate limit.
+  In the menus F3 reads no more than your screen's refresh rate; in a match it follows your Frame rate limit.
 - [ ] **Mouse capture.** Play captures the mouse; Esc pauses and frees it; Resume captures it again with no jump on
   the first move. The pointer never leaves the window while captured; the back and forward side buttons do nothing
   unless bound.
@@ -1013,10 +1016,10 @@ Play a release build (installer or zip) for these; running from the Godot editor
 
 ## Bug reports
 
-Report a Bug is on the title's foot, before Licences, and at the pause menu's foot beside the seed. Play a release
+Report a Bug is in Settings › About, before Licences, and at the pause menu's foot beside the seed. Play a release
 build for these.
 
-- [ ] **The issue opens filled in.** From the title and from a paused match, type a note and press Report on GitHub:
+- [ ] **The issue opens filled in.** From Settings › About and from a paused match, type a note and press Report on GitHub:
   your browser opens a new issue on the game's GitHub titled "Bug: " and your note's first line, the note and the
   whole report below it, and the panel says "Opened GitHub in your browser. The whole report is copied too." Nothing
   is posted until you press Submit there. The match stays paused behind the panel; Back and Esc close only the panel.

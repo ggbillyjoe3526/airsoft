@@ -104,7 +104,7 @@ func _draw() -> void:
 		var share := _shares[i] if _counted or _shares[i] <= 0.0 else 1.0
 		var colour := Color(GameTheme.TEXT, HudStyle.MAG_SPARE_ALPHA)
 		if i == 0:
-			colour = GameTheme.YELLOW if is_low(share, _counted, _cfg.low_mag_share) else GameTheme.TEXT
+			colour = GameTheme.WARN if is_low(share, _counted, _cfg.low_mag_share) else GameTheme.TEXT
 		var box := Rect2(x, 0.0, w, h)
 		draw_rect(box.grow(-line * 0.5), colour, false, line)
 		if share > 0.0:

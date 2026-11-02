@@ -1,6 +1,6 @@
 # Loadout
 
-Open **Loadout** from the top bar. What you set here is what you carry into every match: your replicas, their parts,
+Open **Loadout** from the side rail. What you set here is what you carry into every match: your replicas, their parts,
 power, BB weight, hop-up and colours. Every edit applies at once; there is no Save button.
 
 ## Saved loadouts

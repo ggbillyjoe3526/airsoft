@@ -66,4 +66,4 @@ func _draw() -> void:
 	var lean := SlantStyle.SKEW
 	var r := HudStyle.BANNER_RULE
 	var rule := PackedVector2Array([face[0], face[1], Vector2(face[1].x - r * lean, r), Vector2(face[0].x - r * lean, r)])
-	draw_colored_polygon(rule, GameTheme.YELLOW)
+	draw_colored_polygon(rule, GameTheme.ACCENT)

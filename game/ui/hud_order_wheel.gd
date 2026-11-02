@@ -276,7 +276,7 @@ func _draw() -> void:
 	var back := HudStyle.backing_on(self, SLICE_ALPHA)
 	for i in _slices.size():
 		var lit := i == _lit
-		draw_colored_polygon(_slices[i], GameTheme.YELLOW if lit else back)
+		draw_colored_polygon(_slices[i], GameTheme.ACCENT if lit else back)
 		draw_polyline(_outlines[i], LIT_EDGE if lit else GameTheme.LINE, LIT_STROKE if lit else STROKE, true)
 	if _force >= 0:
 		draw_colored_polygon(_bands[_force], _colour)
@@ -291,15 +291,15 @@ func _draw_hub() -> void:
 	draw_circle(Vector2.ZERO, _hub, HudStyle.backing_on(self, alpha))
 	draw_arc(Vector2.ZERO, _hub, 0.0, TAU, 64, GameTheme.LINE, STROKE, true)
 	if _showing_notice:
-		draw_arc(Vector2.ZERO, _hub - NOTICE_RULE * 0.5, 0.0, TAU, 64, GameTheme.YELLOW, NOTICE_RULE, true)
+		draw_arc(Vector2.ZERO, _hub - NOTICE_RULE * 0.5, 0.0, TAU, 64, GameTheme.ACCENT, NOTICE_RULE, true)
 
 
 ## Slice `i`'s name and key, and the ACTIVE tag when it is the order in force.
 func _draw_words(i: int) -> void:
 	var lit := i == _lit
 	var fade := DIM if _showing_notice else 1.0
-	var ink := Color(GameTheme.YELLOW_INK if lit else GameTheme.TEXT, fade)
-	var key_ink := Color(GameTheme.YELLOW_INK if lit else GameTheme.MUTED, fade)
+	var ink := Color(GameTheme.ACCENT_INK if lit else GameTheme.TEXT, fade)
+	var key_ink := Color(GameTheme.ACCENT_INK if lit else GameTheme.MUTED, fade)
 	var has_key := not _keys[i].is_empty()
 	var key_h := _key_font.get_height(KEY_SIZE) + KEY_PAD.y * 2.0 + KEY_EDGE
 	var column := float(NAME_SIZE) + WORDS_GAP + (key_h if has_key else NO_KEY_HEIGHT)
@@ -312,7 +312,7 @@ func _draw_words(i: int) -> void:
 		var text_w := _key_font.get_string_size(_keys[i], HORIZONTAL_ALIGNMENT_LEFT, -1, KEY_SIZE).x
 		var w := maxf(KEY_MIN, text_w + KEY_PAD.x * 2.0 + KEY_EDGE)
 		var chip := Rect2(mid - w * 0.5, top + NAME_SIZE + WORDS_GAP, w, key_h)
-		_chip.bg_color = Color(GameTheme.YELLOW_INK, 0.1 * fade) if lit else Color(0.0, 0.0, 0.0, 0.0)
+		_chip.bg_color = Color(GameTheme.ACCENT_INK, 0.1 * fade) if lit else Color(0.0, 0.0, 0.0, 0.0)
 		_chip.border_color = key_ink
 		draw_style_box(_chip, chip)
 		var key_base := chip.position.y + (key_h - _key_font.get_height(KEY_SIZE)) * 0.5 + _key_font.get_ascent(KEY_SIZE)

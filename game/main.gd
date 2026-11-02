@@ -1,11 +1,12 @@
 extends Node
-## The entry scene: the title (TitleScreen: START, Licences, Quit), the menus (MenuScreen: the top bar over the Match page
-## with its map, mode, team, bots and rules, the Loadout page, which the LOADOUT tab builds and leaving it saves and
-## frees, or the Armory, built and freed the same way), the settings under the top bar, the credits, the F3 performance overlay, the Show FPS readout and the window's keys and focus (WindowWatch). The Match page
+## The entry scene: the menus, the first screen (no title screen: owner, 2026-11-02; MenuScreen: the rail beside the
+## Match page with its map, mode, team, bots and rules, the Loadout page, which the LOADOUT tab builds and leaving it
+## saves and frees, or the Armory, built and freed the same way), the settings beside the rail (their About tab has the
+## version, Report a Bug, Licences and Quit), the credits, the F3 performance overlay, the Show FPS readout and the window's keys and focus (WindowWatch). The Match page
 ## lists the public maps, and the dev ones too while the Dev settings' Dev content switch is on (MapCatalog). PLAY saves the
-## loadouts, frees the title and the menus (no menu nodes live during a match) and opens a match (PlaySession) on the picked
+## loadouts, frees the menus (no menu nodes live during a match) and opens a match (PlaySession) on the picked
 ## map and team, on the `--seed` launch option's seed if given, else a fresh one, behind the loading screen until it has
-## drawn its first frame; leaving it builds them again and comes back to the title. The picks live in a MatchPicks kept
+## drawn its first frame; leaving it builds them again. The picks live in a MatchPicks kept
 ## here. The menus grow with a tall window (MenuScale).
 ## `--smoke` (tools/smoke_test.sh) opens and closes the settings, the credits, the Loadout page (with Customise) and the Armory,
 ## plays a whole match on Depot with a bot in your place (faster than real time), giving squad orders once the first
@@ -15,17 +16,17 @@ extends Node
 ## the range and opens the menus as the Loadout alone (MenuScreen.open_practice_loadout); BACK TO PRACTICE, the key or Esc
 ## saves it and builds the range again on that spot.
 ## The graphics at start-up (GraphicsStartUp): boot logs the renderer in force; a start that never drew its first match
-## restarts once on safe graphics and the title asks; the title says once why the game is on the simpler renderer, and
+## restarts once on safe graphics and the menus ask; the menus say once why the game is on the simpler renderer, and
 ## on the first start which preset the card picked (its Graphics settings opens Settings › Graphics). Then today's
 ## restore point (SaveKeeper.keep_today), not in the smoke run, a headless one or one the editor started.
 ## The run record and the error log (SV3): the ErrorLog keeps this run's last errors from boot to exit; after the safe
 ## start, a RunRecord notes the run (a crashed one kept as `previous`), each match or practice, round start and return
 ## to the menus, and the clean quit. Neither prints.
-## Report a Bug (SV5): the title's link opens the ReportPanel on this run's facts (built when asked for, freed once
-## closed); a match hands the ErrorLog to its pause menu, which has its own. The smoke test opens and closes it from the
-## title, never pressing Report.
+## Report a Bug (SV5): Settings › About's button opens the ReportPanel on this run's facts (built when asked for, freed once
+## closed); a match hands the ErrorLog to its pause menu, which has its own. The smoke test opens and closes it from
+## About, never pressing Report.
 ## The crash screen (SV6, CrashScreen): a start whose record kept a `previous` (the last run closed unexpectedly) shows it
-## before the title and its notices; Continue, Report a Bug or quitting from it clears `previous`, so it shows once.
+## before the menus and their notices; Continue, Report a Bug or quitting from it clears `previous`, so it shows once.
 
 const SMOKE_SETTINGS_OPEN := 10
 const SMOKE_SETTINGS_CLOSE := 20
@@ -38,7 +39,7 @@ const SMOKE_ARMORY_OPEN := 83
 const SMOKE_ARMORY_CLOSE := 87
 const SMOKE_PLAY := 90
 ## Simulation ticks per physics tick in the smoke match; the most ticks it may take (a match that runs longer fails:
-## 30 min of match time); and frames it waits after leaving, as a player back on the title screen would, so the audio
+## 30 min of match time); and frames it waits after leaving, as a player back on the menus would, so the audio
 ## server lets go of the match's last sounds before the exit check.
 const SMOKE_SPEED := 8
 const SMOKE_MAX_TICKS := 108000
@@ -58,19 +59,18 @@ const SMOKE_ORDER_STEPS: PackedStringArray = ["+order_follow", "-order_follow", 
 		"+order_wheel", "", "-order_wheel", "+mag_hand_off", "-mag_hand_off", "+order_wheel", "<", "-order_wheel"]
 const SMOKE_WHEEL_FLICK := Vector2(0.0, -400.0)
 const SMOKE_MAG_FLICK := Vector2(-380.0, -124.0)
-## The smoke test's Report a Bug, from the title before the menus open: the frames it opens and closes on.
+## The smoke test's Report a Bug, from Settings › About: the frames it opens and closes on.
 const SMOKE_REPORT_OPEN := 3
 const SMOKE_REPORT_CLOSE := 6
-## Where a report from the title says the player was (English: reports are read by the developer).
-const REPORT_SCREEN_TITLE := "title"
+## Where a report from the menus says the player was (English: reports are read by the developer).
+const REPORT_SCREEN_MENUS := "menus"
 
 var _credits: Credits
-## Report a Bug over the title, while it is open.
+## Report a Bug over the menus, while it is open.
 var _report_panel: ReportPanel = null
 var _settings_screen: SettingsScreen
 ## QUIT GAME? while it is asked (Esc in the menus), else null.
 var _quit_prompt: QuitPrompt = null
-var _title: TitleScreen
 var _menus: MenuScreen
 var _play: PlaySession
 var _loading: LoadingScreen
@@ -96,7 +96,7 @@ var _smoke_range_left_at := -1
 var _smoke_order_step := 0
 var _smoke_orders := -1
 var _smoke_mags := -1
-## The graphics at start-up: the safe start's record and the title's notices (tests set its paths and hooks first).
+## The graphics at start-up: the safe start's record and the menus' notices (tests set its paths and hooks first).
 var graphics: GraphicsStartUp = GraphicsStartUp.new()
 ## This run's last errors and warnings, added as a Logger at boot and removed at exit.
 var error_log: ErrorLog = ErrorLog.new()
@@ -137,7 +137,7 @@ func _ready() -> void:
 	# before the settings screens and the match, so a key list waiting for a key has F11 first
 	add_child(WindowWatch.new())
 	_build_screens()
-	_title.focus_start()
+	_menus.focus_play()
 	SettingsApply.set_menus(Settings.shared(), true)
 	_credits = Credits.new()
 	_credits.visible = false
@@ -150,7 +150,7 @@ func _ready() -> void:
 	get_window().size_changed.connect(_scale_menus)
 	set_process(_smoke)
 	if not _show_crash_screen():
-		graphics.show_boot_notices(_title)
+		graphics.show_boot_notices(_menus)
 
 
 func _exit_tree() -> void:
@@ -168,19 +168,15 @@ func _exit_tree() -> void:
 	MenuScale.apply(window, false)
 
 
-## The title and the menus page, built at boot and after each match; a match frees them (a hidden menu would keep
-## its nodes for the whole match).
+## The menus, built at boot and after each match; a match frees them (a hidden menu would keep its nodes for the
+## whole match).
 func _build_screens() -> void:
 	_build_menus()
-	_build_title()
 	# first in the tree, under the credits, the readouts and any match
 	move_child(_menus, 0)
-	move_child(_title, 1)
 
 
 func _free_screens() -> void:
-	_title.queue_free()
-	_title = null
 	_menus.queue_free()
 	_menus = null
 
@@ -190,59 +186,28 @@ func _scale_menus() -> void:
 	MenuScale.apply(get_window(), _play == null)
 
 
-func _build_title() -> void:
-	_title = TitleScreen.new()
-	_title.start_pressed.connect(_show_menus)
-	_title.credits_pressed.connect(_show_credits)
-	_title.report_pressed.connect(_show_report)
-	_title.quit_pressed.connect(get_tree().quit)
-	add_child(_title)
-	graphics.show_safe_notice(_title)
-
-
 func _build_menus() -> void:
 	_menus = MenuScreen.new(_picks, Settings.shared())
-	_menus.visible = false
-	_menus.title_requested.connect(_on_title_requested)
 	_menus.tab_requested.connect(_on_tab)
+	_menus.quit_requested.connect(ask_quit)
 	_menus.match_page().play_pressed.connect(_start_play)
 	_menus.practice_requested.connect(_back_to_practice)
 	add_child(_menus)
+	graphics.show_safe_notice(_menus)
 
 
-func _show_menus() -> void:
-	_title.visible = false
-	_menus.visible = true
-	_menus.focus_play()
-
-
-## The AIRSOFT wordmark: the settings, if open, close (saving), then the title shows.
-func _on_title_requested() -> void:
-	if _settings_screen != null:
-		_settings_screen.close()
-	_show_title()
-
-
-func _show_title() -> void:
-	# the Loadout page is saved and freed; the menus open on the Match page again
-	_menus.show_match()
-	_menus.visible = false
-	_title.visible = true
-	_title.focus_start()
-
-
-## A top bar tab: Settings opens the settings under the bar; Match, Loadout and Armory close them and show their page.
-func _on_tab(tab: TopBar.Tab) -> void:
-	if tab == TopBar.Tab.SETTINGS:
+## A rail tab: Settings opens the settings beside the rail; Match, Loadout and Armory close them and show their page.
+func _on_tab(tab: NavRail.Tab) -> void:
+	if tab == NavRail.Tab.SETTINGS:
 		_open_settings()
 		return
 	if _settings_screen != null:
 		_settings_screen.close()
-	if tab == TopBar.Tab.LOADOUT:
+	if tab == NavRail.Tab.LOADOUT:
 		_menus.show_loadout()
-	elif tab == TopBar.Tab.ARMORY:
+	elif tab == NavRail.Tab.ARMORY:
 		_menus.show_armory()
-	elif tab == TopBar.Tab.MATCH:
+	elif tab == NavRail.Tab.MATCH:
 		_menus.show_match()
 
 
@@ -253,13 +218,18 @@ func _open_settings() -> void:
 		_settings_screen = SettingsScreen.new()
 		_settings_screen.settings = Settings.shared()
 		_settings_screen.restart = _restart
-		# under the top bar, whose lit SETTINGS tab names the screen
+		# beside the rail, whose lit SETTINGS tab names the screen
 		_settings_screen.show_heading = false
+		_settings_screen.in_menus = true
 		_settings_screen.closed.connect(_settings_closed)
-		add_child(_settings_screen)
-		# under the top bar, which stays on show
-		_settings_screen.offset_top = TopBar.HEIGHT
-	_menus.top_bar().set_current(TopBar.Tab.SETTINGS)
+		_settings_screen.credits_requested.connect(_show_credits)
+		_settings_screen.report_requested.connect(_show_report)
+		_settings_screen.quit_requested.connect(ask_quit)
+		# beside the rail, which stays on show, and under a graphics notice, the credits and the prompts
+		_menus.add_over_page(_settings_screen)
+	_menus.nav_rail().set_current(NavRail.Tab.SETTINGS)
+	# the settings show over the field's picture, so the page under them steps aside
+	_menus.set_page_hidden(true)
 	_settings_screen.open()
 
 
@@ -267,9 +237,10 @@ func _settings_closed() -> void:
 	_settings_screen.queue_free()
 	_settings_screen = null
 	if _menus != null:
+		_menus.set_page_hidden(false)
 		# Disable levelling or Reset level may have changed it.
 		_menus.show_level()
-		_menus.top_bar().set_current(_menus.page_tab())
+		_menus.nav_rail().set_current(_menus.page_tab())
 		if _menus.visible:
 			_menus.focus_page()
 
@@ -278,36 +249,38 @@ func _show_credits() -> void:
 	_credits.open()
 
 
-## The credits only open from the title: Enter starts again once they close.
+## The credits open from Settings › About: Licences takes the keyboard back once they close.
 func _credits_closed() -> void:
-	if _title != null and _title.visible:
-		_title.focus_start()
+	if _settings_screen != null:
+		_settings_screen.about_credits_button().grab_focus()
 
 
-## Report a Bug from the title: the panel over it on this run's facts as they stand now.
+## Report a Bug from Settings › About: the panel over the menus on this run's facts as they stand now.
 func _show_report() -> void:
 	if _report_panel == null:
 		_report_panel = ReportPanel.new()
 		_report_panel.closed.connect(_report_closed)
 		add_child(_report_panel)
 	var config := _report_panel.config
-	_report_panel.open(ReportFacts.live(null, Settings.shared(), error_log, REPORT_SCREEN_TITLE, "", config,
+	_report_panel.open(ReportFacts.live(null, Settings.shared(), error_log, REPORT_SCREEN_MENUS, "", config,
 			ReportScrub.for_this_machine(config)))
 
 
 func _report_closed() -> void:
 	_report_panel.queue_free()
 	_report_panel = null
-	if _title != null and _title.visible:
-		_title.report_button().grab_focus()
+	if _settings_screen != null:
+		_settings_screen.about_report_button().grab_focus()
 
 
-## The smoke test's Report a Bug: opened from the title's link and closed with Back; Report is never pressed.
+## The smoke test's Report a Bug: opened from Settings › About's button and closed with Back; Report is never pressed.
 func _smoke_bug_report() -> void:
 	if _frame == SMOKE_REPORT_OPEN:
-		_title.report_button().pressed.emit()
+		_open_settings()
+		_settings_screen.show_about()
+		_settings_screen.about_report_button().pressed.emit()
 		if _report_panel == null or not _report_panel.report_text().begins_with(BugReport.TITLE):
-			push_error("smoke: Report a Bug showed no report from the title")
+			push_error("smoke: Report a Bug showed no report from Settings › About")
 			set_process(false)
 			get_tree().quit(1)
 	elif _frame == SMOKE_REPORT_CLOSE and _report_panel != null:
@@ -324,7 +297,7 @@ func _keeps_picks() -> bool:
 func _start_play(smoke_practice: bool = false) -> void:
 	if _play != null:
 		return
-	# No menu nodes live during a match: the title and the menus are freed now and built again when it ends. The loadouts
+	# No menu nodes live during a match: the menus are freed now and built again when it ends. The loadouts
 	# are saved first (the Loadout page, if open, is part of what is freed).
 	if _settings_screen != null:
 		_settings_screen.close()
@@ -435,9 +408,10 @@ func _open_practice_loadout() -> void:
 	_play = null
 	_build_screens()
 	SettingsApply.set_menus(Settings.shared(), true)
-	_title.visible = false
-	_menus.visible = true
 	_menus.open_practice_loadout(_spot.slot as Loadout.Slot)
+	# the Loadout from practice is a quick stop: the safe-start question waits for the menus proper, as it did on the
+	# title before UR1
+	_menus.close_notice()
 	_scale_menus()
 
 
@@ -468,9 +442,8 @@ func _end_play() -> void:
 	_play = null
 	_build_screens()
 	SettingsApply.set_menus(Settings.shared(), true)
-	# Leaving a match or the range lands on the Match page with Play focused, the picks kept (owner, 2026-10-30); the
-	# title is the AIRSOFT wordmark away.
-	_show_menus()
+	# Leaving a match or the range lands on the Match page with Play focused, the picks kept (owner, 2026-10-30).
+	_menus.focus_play()
 	_scale_menus()
 
 
@@ -522,7 +495,7 @@ func _record_menus() -> void:
 
 # --- The crash screen ---
 
-## The crash screen over the hidden title when the last run closed unexpectedly: true if it shows.
+## The crash screen over the hidden menus when the last run closed unexpectedly: true if it shows.
 func _show_crash_screen() -> bool:
 	if run == null or not run.crashed_before():
 		return false
@@ -537,9 +510,9 @@ func _show_crash_screen() -> bool:
 	crash_screen.log_dir = crash_log_dir
 	crash_screen.reported.connect(_crash_shown)
 	crash_screen.continued.connect(_crash_continued)
-	_title.visible = false
+	_menus.visible = false
 	add_child(crash_screen)
-	move_child(crash_screen, _title.get_index() + 1)
+	move_child(crash_screen, _menus.get_index() + 1)
 	return true
 
 
@@ -549,7 +522,7 @@ func _crash_shown() -> void:
 	run.save(run_path)
 
 
-## Continue: the title, and its notices as on any start.
+## Continue: the menus, and their notices as on any start.
 func _crash_continued() -> void:
 	# a second Continue in the same frame finds the screen gone
 	if crash_screen == null:
@@ -557,9 +530,9 @@ func _crash_continued() -> void:
 	_crash_shown()
 	crash_screen.queue_free()
 	crash_screen = null
-	_title.visible = true
-	_title.focus_start()
-	graphics.show_boot_notices(_title)
+	_menus.visible = true
+	_menus.focus_play()
+	graphics.show_boot_notices(_menus)
 
 
 # --- Graphics at start-up ---
@@ -573,14 +546,13 @@ func _restart() -> void:
 
 ## The first start's Graphics settings: the menus, and the settings on their Graphics tab.
 func _open_graphics_settings() -> void:
-	if _title == null or _menus == null:
+	if _menus == null:
 		return
-	_show_menus()
 	_open_settings()
 	_settings_screen.show_graphics()
 
 
-## Esc in the menus, the title included, asks QUIT GAME? (owner, 2026-10-29). Whatever has Esc of its own took it first
+## Esc in the menus asks QUIT GAME? (owner, 2026-10-29). Whatever has Esc of its own took it first
 ## (a dialog or popup, a key being rebound, the Loadout's rename and Customise, the credits): this only sees what is left.
 ## In a match Esc is the pause menu's.
 func _unhandled_input(event: InputEvent) -> void:
@@ -607,9 +579,7 @@ func _quit_closed() -> void:
 	# the prompt gave the keyboard back to what had it; if that is gone, the screen's own default button takes it
 	if get_viewport().gui_get_focus_owner() != null:
 		return
-	if _title != null and _title.visible:
-		_title.focus_start()
-	elif _menus != null and _menus.visible:
+	if _menus != null and _menus.visible:
 		_menus.focus_page()
 
 
@@ -619,7 +589,6 @@ func _process(_delta: float) -> void:
 	_frame += 1
 	_smoke_bug_report()
 	if _frame == SMOKE_SETTINGS_OPEN:
-		_show_menus()
 		_open_settings()
 	elif _frame == SMOKE_SETTINGS_CLOSE:
 		if _settings_screen != null:
@@ -629,16 +598,16 @@ func _process(_delta: float) -> void:
 	elif _frame == SMOKE_CREDITS_CLOSE:
 		_credits.close()
 	elif _frame == SMOKE_LOADOUT_OPEN:
-		_on_tab(TopBar.Tab.LOADOUT)
+		_on_tab(NavRail.Tab.LOADOUT)
 	elif _frame == SMOKE_CUSTOMISE_OPEN:
 		if _menus.loadout_page() != null:
 			_menus.loadout_page().show_customise()
 	elif _frame == SMOKE_LOADOUT_CLOSE:
-		_on_tab(TopBar.Tab.MATCH)
+		_on_tab(NavRail.Tab.MATCH)
 	elif _frame == SMOKE_ARMORY_OPEN:
-		_on_tab(TopBar.Tab.ARMORY)
+		_on_tab(NavRail.Tab.ARMORY)
 	elif _frame == SMOKE_ARMORY_CLOSE:
-		_on_tab(TopBar.Tab.MATCH)
+		_on_tab(NavRail.Tab.MATCH)
 	elif _frame == SMOKE_PLAY:
 		_start_play()
 	elif _smoke_ordering():

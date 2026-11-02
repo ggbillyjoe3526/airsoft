@@ -12,6 +12,8 @@ extends Control
 ## Everything is drawn for 1920x1080 and the window's stretch scales it.
 
 signal play_pressed
+## A field was picked (the menus' backdrop follows it).
+signal map_picked(map_id: String)
 
 const MARGIN_X := 56
 const TOP := 40
@@ -316,7 +318,7 @@ func _build_modes() -> Control:
 		row.add_child(_centred(only))
 		_only_tags[mode] = only
 		if MatchOptions.POLE_MODES.has(mode):
-			var needs := _text(tr("MENU_NEEDS_POLE"), NEEDS_SIZE, 700, GameTheme.YELLOW.darkened(NEEDS_DARKEN))
+			var needs := _text(tr("MENU_NEEDS_POLE"), NEEDS_SIZE, 700, GameTheme.ACCENT.darkened(NEEDS_DARKEN))
 			needs.name = "NeedsPole"
 			needs.visible = false
 			needs.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -497,6 +499,8 @@ func _keep_a_playable_map() -> void:
 		if not _unloadable[id]:
 			picks.map_id = id
 			_play.disabled = false
+			# the backdrop follows the field that stands in
+			map_picked.emit(id)
 			return
 	_play.disabled = true
 
@@ -595,6 +599,7 @@ func _retune() -> void:
 func _pick_map(map_id: String) -> void:
 	picks.map_id = map_id
 	_refresh()
+	map_picked.emit(map_id)
 
 
 func _pick_mode(mode: String) -> void:

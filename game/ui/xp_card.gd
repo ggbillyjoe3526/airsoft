@@ -115,7 +115,7 @@ func _total(total: int) -> Control:
 	var a := MenuParts.text(tr("XP_EARNED"), TOTAL_SIZE, 800, GameTheme.TEXT)
 	a.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(a)
-	row.add_child(MenuParts.text(tr("XP_TOTAL") % total, TOTAL_SIZE, 800, GameTheme.YELLOW))
+	row.add_child(MenuParts.text(tr("XP_TOTAL") % total, TOTAL_SIZE, 800, GameTheme.ACCENT))
 	var below := MenuParts.padded(0.0, TOTAL_GAP.y, 0.0, 0.0)
 	below.add_child(row)
 	box.add_child(below)
@@ -132,7 +132,7 @@ func _level_up(up: Progress.LevelUp) -> Control:
 	var panel := PanelContainer.new()
 	panel.name = "LevelUp"
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.add_theme_stylebox_override("panel", GameTheme.box(GameTheme.CARD_HI, GameTheme.YELLOW, UP_PAD.x, UP_PAD.y))
+	panel.add_theme_stylebox_override("panel", GameTheme.box(GameTheme.CARD_HI, GameTheme.ACCENT, UP_PAD.x, UP_PAD.y))
 	var row := HBoxContainer.new()
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.add_child(row)
@@ -141,7 +141,7 @@ func _level_up(up: Progress.LevelUp) -> Control:
 	text.add_theme_constant_override("separation", 3)
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	text.add_child(MenuParts.text(tr("XP_LEVEL_UP") % up.to, UP_NAME_SIZE, 800, GameTheme.YELLOW))
+	text.add_child(MenuParts.text(tr("XP_LEVEL_UP") % up.to, UP_NAME_SIZE, 800, GameTheme.ACCENT))
 	if not items.is_empty():
 		var names := PackedStringArray()
 		for it in items:

@@ -15,7 +15,7 @@ signal continued
 ## Report a Bug opened the issue.
 signal reported
 
-const BACKDROP := TitleScreen.BACKDROP
+const BACKDROP := "res://assets/ui/title-backdrop.jpg"
 ## The page colour over the picture.
 const SHADE := 0.93
 ## The two columns (px): the left one's edge, the top, their widths and the gap between.
@@ -293,7 +293,7 @@ func _build_left(parent: Control) -> void:
 	_space(left, NOTE_GAP)
 	_build_buttons(left)
 	_space(left, BUTTONS_GAP)
-	_status = HudStyle.label(left, FINE_SIZE, 700, GameTheme.YELLOW, HORIZONTAL_ALIGNMENT_LEFT)
+	_status = HudStyle.label(left, FINE_SIZE, 700, GameTheme.ACCENT, HORIZONTAL_ALIGNMENT_LEFT)
 	_status.name = "Status"
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status.visible = false
@@ -352,7 +352,7 @@ func _build_note(parent: Control) -> void:
 	_note.add_theme_font_override("font", GameTheme.font(600))
 	_note.add_theme_font_size_override("font_size", NOTE_SIZE)
 	_note.add_theme_stylebox_override("normal", GameTheme.box(GameTheme.BG, GameTheme.LINE, NOTE_PAD.x, NOTE_PAD.y))
-	_note.add_theme_stylebox_override("focus", GameTheme.box(GameTheme.BG, GameTheme.YELLOW, NOTE_PAD.x, NOTE_PAD.y))
+	_note.add_theme_stylebox_override("focus", GameTheme.box(GameTheme.BG, GameTheme.ACCENT, NOTE_PAD.x, NOTE_PAD.y))
 	_note.text_changed.connect(_on_note_changed)
 	holder.add_child(_note)
 	_count = HudStyle.label(holder, COUNT_SIZE, 700, GameTheme.DIM, HORIZONTAL_ALIGNMENT_RIGHT)
@@ -371,9 +371,9 @@ func _build_buttons(parent: Control) -> void:
 	row.name = "Buttons"
 	row.add_theme_constant_override("separation", BUTTON_GAP)
 	parent.add_child(row)
-	_report_button = _button(row, "CRASH_REPORT_BUG", GameTheme.YELLOW, GameTheme.YELLOW, GameTheme.YELLOW_INK)
+	_report_button = _button(row, "CRASH_REPORT_BUG", GameTheme.ACCENT, GameTheme.ACCENT, GameTheme.ACCENT_INK)
 	_report_button.pressed.connect(_on_report)
-	_copy_button = _button(row, "CRASH_COPY_REPORT", GameTheme.CARD, GameTheme.YELLOW, GameTheme.TEXT)
+	_copy_button = _button(row, "CRASH_COPY_REPORT", GameTheme.CARD, GameTheme.ACCENT, GameTheme.TEXT)
 	_copy_button.pressed.connect(_on_copy_report)
 	_logs_button = _button(row, "CRASH_OPEN_LOGS", GameTheme.CARD, GameTheme.LINE, GameTheme.TEXT)
 	_logs_button.pressed.connect(_on_open_logs)
@@ -403,7 +403,7 @@ func _build_right(parent: Control) -> void:
 	var plate := GameTheme.box(REPORT_FILL, GameTheme.LINE, REPORT_PAD.x, REPORT_PAD.y)
 	_report.add_theme_stylebox_override("read_only", plate)
 	_report.add_theme_stylebox_override("normal", plate)
-	var lit := GameTheme.box(REPORT_FILL, GameTheme.YELLOW, REPORT_PAD.x, REPORT_PAD.y)
+	var lit := GameTheme.box(REPORT_FILL, GameTheme.ACCENT, REPORT_PAD.x, REPORT_PAD.y)
 	lit.draw_center = false
 	_report.add_theme_stylebox_override("focus", lit)
 	right.add_child(_report)
@@ -438,7 +438,7 @@ func _button(parent: Control, key: String, fill: Color, edge: Color, ink: Color)
 	b.add_theme_font_override("font", GameTheme.spaced_font(800, BUTTON_SPACING, BUTTON_SIZE))
 	b.add_theme_font_size_override("font_size", BUTTON_SIZE)
 	GameTheme.dress(b, GameTheme.box(fill, edge, BUTTON_PAD, 0), GameTheme.box(fill.lightened(0.1), edge, BUTTON_PAD, 0),
-			GameTheme.box(fill.lightened(0.1), GameTheme.YELLOW, BUTTON_PAD, 0))
+			GameTheme.box(fill.lightened(0.1), GameTheme.ACCENT, BUTTON_PAD, 0))
 	for colour: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
 		b.add_theme_color_override(colour, ink)
 	parent.add_child(b)

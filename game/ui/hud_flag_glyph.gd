@@ -25,7 +25,7 @@ const CHECK_EDGE := 1.0
 const CHECK_PALE := Color8(238, 234, 224)
 const CHECK_DARK := Color8(38, 40, 44)
 
-var colour: Color = GameTheme.YELLOW:
+var colour: Color = GameTheme.WARN:
 	set(value):
 		if value != colour:
 			colour = value

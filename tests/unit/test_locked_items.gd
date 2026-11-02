@@ -112,6 +112,6 @@ func test_an_open_loadout_page_is_built_again_when_levelling_changes_under_the_s
 	settings.dev.disable_levelling = true
 	menus.show_level()
 	assert_ne(menus.loadout_page(), page, "built again with everything unlocked")
-	assert_eq(menus.top_bar().level_text(), "", "no level chip while levelling is off")
+	assert_eq(menus.nav_rail().level_text(), "", "no level chip while levelling is off")
 	assert_false(menus.loadout_page().gear().replica_ids().is_empty())
 	menus.leave_loadout()

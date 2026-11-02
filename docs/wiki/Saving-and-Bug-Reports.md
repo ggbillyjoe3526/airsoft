@@ -23,7 +23,7 @@ pause menu: leave the match to use them.
 
 ## Report a bug
 
-**Report a Bug** on the title screen and in the pause menu opens a panel with a box for a note of up to 500
+**Report a Bug** in **Settings › About** and in the pause menu opens a panel with a box for a note of up to 500
 characters.
 
 - **Report on GitHub** copies the whole report and opens a new public GitHub issue with it filled in, in your
@@ -37,7 +37,7 @@ happened in the match.
 
 ## If the game crashes
 
-The next start shows a crash screen once, before the title: "Sorry about that. Your save is fine." It says what you
+The next start shows a crash screen once, before the menus: "Sorry about that. Your save is fine." It says what you
 were doing (the match, the round and the seed), shows the report with a box for a note, and has **Report a Bug**,
 **Open log folder** and **Continue**.
 

@@ -67,10 +67,11 @@ func test_every_sound_loads_and_loops_loop() -> void:
 
 func test_fonts_load() -> void:
 	var fonts := _files("res://assets/fonts", "woff2")
-	assert_eq(fonts.size(), 8)
+	assert_eq(fonts.size(), 11, "Inter's eight and Barlow Condensed's three (UR1, headings)")
 	for path: String in fonts:
 		var f := load(path) as FontFile
-		assert_true(f != null and f.get_font_name().begins_with("Inter"), path)
+		var family := "Barlow" if path.get_file().begins_with("BarlowCondensed") else "Inter"
+		assert_true(f != null and f.get_font_name().begins_with(family), path)
 		if f:
 			# the main faces carry the latin letters; the "marks" faces only the arrows and the tick
 			var main := not path.get_file().begins_with("Inter-marks")

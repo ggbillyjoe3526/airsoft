@@ -87,7 +87,7 @@ func test_quitting_with_the_question_open_asks_again_and_never_restarts() -> voi
 	add_child(next)
 	await wait_process_frames(1)
 	assert_false(next.has_meta(&"restarted"), "asking, never restarting")
-	assert_not_null((next.get("_title") as TitleScreen).notice())
+	assert_not_null((next.get("_menus") as MenuScreen).notice())
 	next.free()
 
 
@@ -144,14 +144,14 @@ func test_a_crash_on_the_restarted_start_asks_and_never_restarts_again() -> void
 		add_child(again)
 		await wait_process_frames(1)
 		assert_false(again.has_meta(&"restarted"), "start %d" % i)
-		assert_not_null((again.get("_title") as TitleScreen).notice(), "asks on start %d" % i)
+		assert_not_null((again.get("_menus") as MenuScreen).notice(), "asks on start %d" % i)
 		again.free()
 	second.free()
 
 
 # --- The notices come at the right time ---
 
-func test_the_question_comes_back_on_the_title_after_a_match() -> void:
+func test_the_question_comes_back_on_the_menus_after_a_match() -> void:
 	var s := Settings.shared()
 	var g := GraphicsGuard.new()
 	g.state = GraphicsGuard.State.RESTARTING
@@ -159,11 +159,11 @@ func test_the_question_comes_back_on_the_title_after_a_match() -> void:
 	var main := _main_with(g)
 	add_child_autofree(main)
 	await wait_process_frames(1)
-	assert_not_null((main.get("_title") as TitleScreen).notice())
+	assert_not_null((main.get("_menus") as MenuScreen).notice())
 	main.call("_free_screens")
 	main.call("_build_screens")
 	await wait_process_frames(2)
-	assert_not_null((main.get("_title") as TitleScreen).notice(), "still unanswered after a match")
+	assert_not_null((main.get("_menus") as MenuScreen).notice(), "still unanswered after a match")
 
 
 func test_the_simpler_renderer_notice_shows_once_and_not_after_a_match() -> void:
@@ -171,18 +171,18 @@ func test_the_simpler_renderer_notice_shows_once_and_not_after_a_match() -> void
 	var main := _main_with(GraphicsGuard.new())
 	add_child(main)
 	await wait_process_frames(1)
-	var title := main.get("_title") as TitleScreen
+	var title := main.get("_menus") as MenuScreen
 	assert_not_null(title.notice(), "the first start says why")
 	assert_ne(GraphicsGuard.load_file(_guard_path).renderer_notice, "", "remembered")
 	main.call("_free_screens")
 	main.call("_build_screens")
 	await wait_process_frames(2)
-	assert_null((main.get("_title") as TitleScreen).notice(), "not again after a match")
+	assert_null((main.get("_menus") as MenuScreen).notice(), "not again after a match")
 	main.free()
 	var next := _main_with(GraphicsGuard.load_file(_guard_path))
 	add_child(next)
 	await wait_process_frames(1)
-	assert_null((next.get("_title") as TitleScreen).notice(), "nor on the next start")
+	assert_null((next.get("_menus") as MenuScreen).notice(), "nor on the next start")
 	next.free()
 
 
@@ -194,7 +194,7 @@ func test_no_notice_on_forward_plus() -> void:
 	var main := _main_with(GraphicsGuard.new())
 	add_child(main)
 	await wait_process_frames(1)
-	assert_null((main.get("_title") as TitleScreen).notice())
+	assert_null((main.get("_menus") as MenuScreen).notice())
 	main.free()
 
 

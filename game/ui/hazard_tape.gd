@@ -9,7 +9,7 @@ const DARK := Color("1a1a1a")
 const STRIPE := 14.0
 
 ## The stripes' colour: safety yellow, or the crash screen's warning orange.
-var stripe_colour: Color = GameTheme.YELLOW
+var stripe_colour: Color = GameTheme.ACCENT
 
 
 func _init() -> void:

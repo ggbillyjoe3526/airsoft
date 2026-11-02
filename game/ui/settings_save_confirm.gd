@@ -112,7 +112,7 @@ func _init() -> void:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", GAP)
 	panel.add_child(col)
-	_kicker = MenuParts.spaced("", KICKER_SIZE, 800, GameTheme.YELLOW, GameTheme.SPACING_HEADING)
+	_kicker = MenuParts.spaced("", KICKER_SIZE, 800, GameTheme.ACCENT, GameTheme.SPACING_HEADING)
 	col.add_child(_kicker)
 	_title = MenuParts.spaced("", TITLE_SIZE, 800, GameTheme.TEXT, GameTheme.SPACING_TAB)
 	col.add_child(_title)
@@ -140,7 +140,7 @@ func _init() -> void:
 	_cancel.name = "Cancel"
 	_cancel.text = tr("SAVE_CANCEL").to_upper()
 	_cancel.pressed.connect(close)
-	SettingsSavePage.paint(_cancel, Color(0.0, 0.0, 0.0, 0.0), GameTheme.YELLOW, GameTheme.TEXT, BUTTON_SIZE, BUTTON_PAD)
+	SettingsSavePage.paint(_cancel, Color(0.0, 0.0, 0.0, 0.0), GameTheme.ACCENT, GameTheme.TEXT, BUTTON_SIZE, BUTTON_PAD)
 	acts.add_child(_cancel)
 	# the two are one width, so the long yes words don't leave CANCEL a small box beside a big one (FB1)
 	ButtonWidth.group([_yes, _cancel])
@@ -160,7 +160,7 @@ func _ready() -> void:
 
 ## Fills the question from `a` and shows it, the focus on CANCEL.
 func ask(a: Ask) -> void:
-	var edge := GameTheme.BAD if a.tone == Tone.DANGER else GameTheme.YELLOW
+	var edge := GameTheme.BAD if a.tone == Tone.DANGER else GameTheme.ACCENT
 	_rule.color = edge
 	_kicker.text = a.kicker.to_upper()
 	_kicker.add_theme_color_override("font_color", edge)
@@ -177,7 +177,7 @@ func ask(a: Ask) -> void:
 	_keeps.text = a.keeps
 	_keeps.visible = a.keeps != ""
 	_yes.text = a.yes.to_upper()
-	SettingsSavePage.paint(_yes, edge, edge, GameTheme.YELLOW_INK, BUTTON_SIZE, BUTTON_PAD)
+	SettingsSavePage.paint(_yes, edge, edge, GameTheme.ACCENT_INK, BUTTON_SIZE, BUTTON_PAD)
 	visible = true
 	set_process_input(true)
 	_cancel.grab_focus()
@@ -269,7 +269,7 @@ func _head_row() -> Control:
 	row.add_child(_cell("", LABEL_WIDTH, HEAD_SIZE, GameTheme.MUTED, true))
 	_now_head = _cell(tr("SAVE_NOW").to_upper(), NOW_WIDTH, HEAD_SIZE, GameTheme.MUTED, true)
 	row.add_child(_now_head)
-	_then_head = _cell("", 0.0, HEAD_SIZE, GameTheme.YELLOW, true)
+	_then_head = _cell("", 0.0, HEAD_SIZE, GameTheme.ACCENT, true)
 	row.add_child(_then_head)
 	return line
 

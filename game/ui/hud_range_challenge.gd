@@ -235,7 +235,7 @@ func _show_hint(best: int) -> void:
 	var line := tr("CHALLENGE_READY")
 	if best > 0:
 		line += " [color=#%s]·[/color] %s [color=#%s][b]%d[/b][/color]" % [muted, tr("CHALLENGE_BEST_LINE"),
-				GameTheme.YELLOW.to_html(false), best]
+				GameTheme.ACCENT.to_html(false), best]
 	_hint_line.text = line
 
 
@@ -256,7 +256,7 @@ func _build_bar() -> void:
 	_bar.add_theme_constant_override("separation", 0)
 	_bar.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_lane(BAR_TOP).add_child(_bar)
-	_hits = _block(tr("CHALLENGE_HITS"), GameTheme.YELLOW, GameTheme.YELLOW_INK, GameTheme.YELLOW_INK, 1.0)
+	_hits = _block(tr("CHALLENGE_HITS"), GameTheme.ACCENT, GameTheme.ACCENT_INK, GameTheme.ACCENT_INK, 1.0)
 	_build_clock()
 	_best = _block(tr("CHALLENGE_BEST"), Color(0.0, 0.0, 0.0, 0.0), GameTheme.TEXT, GameTheme.MUTED,
 			HudStyle.BACKING_CLOCK)
@@ -365,8 +365,8 @@ func _build_banner() -> void:
 	_result_hits = _cell(cells, tr("CHALLENGE_HITS"), false)
 	_result_shots = _cell(cells, tr("CHALLENGE_SHOTS"), true)
 	_result_missed = _cell(cells, tr("CHALLENGE_MISSED"), true)
-	_tag_new = _tag(NEW_BEST_SIZE, NEW_BEST_PAD, tr("CHALLENGE_NEW_BEST"), GameTheme.YELLOW_INK,
-			GameTheme.YELLOW, GameTheme.YELLOW)
+	_tag_new = _tag(NEW_BEST_SIZE, NEW_BEST_PAD, tr("CHALLENGE_NEW_BEST"), GameTheme.ACCENT_INK,
+			GameTheme.ACCENT, GameTheme.ACCENT)
 	_tag_kept = _tag(NOT_KEPT_SIZE, NOT_KEPT_PAD, tr("CHALLENGE_NOT_KEPT"), MenuTag.DEV_TEXT,
 			Color(0.0, 0.0, 0.0, 0.0), MenuTag.DEV_EDGE)
 	var tags := HBoxContainer.new()

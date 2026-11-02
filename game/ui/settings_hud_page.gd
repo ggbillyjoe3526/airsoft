@@ -11,11 +11,11 @@ extends HBoxContainer
 signal changed(immediate: bool)
 
 ## The columns' widths (the right one takes the rest), the labels' widths and the sliders' (px).
-const LEFT_WIDTH := 780.0
-const COLUMN_GAP := 48
-const LEFT_LABEL := 200.0
-const RIGHT_LABEL := 230.0
-const SLIDER_WIDTH := SettingsScreen.SLIDER_WIDTH
+const LEFT_WIDTH := 650.0
+const COLUMN_GAP := 24
+const LEFT_LABEL := 170.0
+const RIGHT_LABEL := 200.0
+const SLIDER_WIDTH := 220.0
 ## The space before a row's note (px).
 const PX := "%d px"
 const PERCENT := "%d%%"
@@ -467,10 +467,10 @@ class Thumb:
 			return
 		var side := custom_minimum_size.x
 		var inner := side - OUTLINE * 2.0
-		draw_rect(Rect2(0.0, 0.0, side, OUTLINE), GameTheme.YELLOW)
-		draw_rect(Rect2(0.0, side - OUTLINE, side, OUTLINE), GameTheme.YELLOW)
-		draw_rect(Rect2(0.0, OUTLINE, OUTLINE, inner), GameTheme.YELLOW)
-		draw_rect(Rect2(side - OUTLINE, OUTLINE, OUTLINE, inner), GameTheme.YELLOW)
+		draw_rect(Rect2(0.0, 0.0, side, OUTLINE), GameTheme.ACCENT)
+		draw_rect(Rect2(0.0, side - OUTLINE, side, OUTLINE), GameTheme.ACCENT)
+		draw_rect(Rect2(0.0, OUTLINE, OUTLINE, inner), GameTheme.ACCENT)
+		draw_rect(Rect2(side - OUTLINE, OUTLINE, OUTLINE, inner), GameTheme.ACCENT)
 
 
 ## A mark on a slider's track at one value, its figure under it (the concept's 100 % tick under HUD size).

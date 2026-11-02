@@ -426,13 +426,12 @@ func test_the_menu_pages_have_no_cut_words_and_no_overlaps() -> void:
 	await _steady(menus, "Armory")
 
 
-func test_the_title_its_notice_the_quit_prompt_and_the_credits_have_no_cut_words_and_no_overlaps() -> void:
-	var title := TitleScreen.new()
-	add_child_autofree(title)
-	await _steady(title, "Title")
-	title.show_notice(GraphicsNotice.first_start(&"low", "Radeon RX 6600 · Discrete", "1920 × 1080 · 60 Hz"))
-	await _steady(title, "First start notice")
-	title.close_notice()
+func test_the_menus_notice_the_quit_prompt_and_the_credits_have_no_cut_words_and_no_overlaps() -> void:
+	var menus := MenuScreen.new()
+	add_child_autofree(menus)
+	menus.show_notice(GraphicsNotice.first_start(&"low", "Radeon RX 6600 · Discrete", "1920 × 1080 · 60 Hz"))
+	await _steady(menus.notice(), "First start notice")
+	menus.close_notice()
 	var prompt := QuitPrompt.new()
 	add_child_autofree(prompt)
 	await _steady(prompt, "QUIT GAME?")

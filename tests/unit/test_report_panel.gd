@@ -1,5 +1,5 @@
 extends GutTest
-## Report a Bug's panel (SV5, game/ui/report_panel.gd; concept step22 `report-bug.png`) and the title's way in. The URL
+## Report a Bug's panel (SV5, game/ui/report_panel.gd; concept step22 `report-bug.png`) and the way in from Settings › About. The URL
 ## opener and the clipboard are always injected here: no test opens a browser or touches the real clipboard.
 
 const MAIN := preload("res://game/main.tscn")
@@ -251,48 +251,44 @@ func test_back_and_esc_close_it() -> void:
 	assert_signal_emit_count(panel, "closed", 2)
 
 
-# --- the title ---
+# --- Settings › About (UR1: the title screen is gone) ---
 
-func test_the_title_foot_has_report_a_bug_before_licences() -> void:
-	var title := TitleScreen.new()
-	add_child_autofree(title)
-	var foot: Node = title.find_child("Foot", true, false)
-	assert_eq(foot.get_child(1), title.report_button(), "the version, then Report a Bug, then Licences")
-	assert_eq(foot.get_child(2), title.credits_button())
-	assert_eq(title.report_button().text, "Report a Bug")
-	watch_signals(title)
-	title.report_button().pressed.emit()
-	assert_signal_emitted(title, "report_pressed")
+func _about(main: Node) -> Button:
+	main._menus.nav_rail().tab_button(NavRail.Tab.SETTINGS).pressed.emit()
+	await wait_process_frames(1)
+	main._settings_screen.show_about()
+	return main._settings_screen.about_report_button()
 
 
-func test_report_a_bug_from_the_title_opens_the_panel_and_back_frees_it() -> void:
+func test_report_a_bug_from_about_opens_the_panel_and_back_frees_it() -> void:
 	var main: Node = add_child_autofree(MAIN.instantiate())
 	await wait_process_frames(2)
-	var title: TitleScreen = main._title
-	title.report_button().pressed.emit()
+	var report: Button = await _about(main)
+	assert_eq(report.text.to_lower(), "report a bug")
+	report.pressed.emit()
 	var opened_panel: ReportPanel = main.find_child("ReportPanel", true, false)
-	assert_not_null(opened_panel, "the panel over the title")
+	assert_not_null(opened_panel, "the panel over the menus")
 	assert_true(opened_panel.visible)
 	assert_true(opened_panel.report_text().begins_with(BugReport.TITLE))
-	assert_string_contains(opened_panel.report_text(), "Screen: title")
+	assert_string_contains(opened_panel.report_text(), "Screen: menus")
 	assert_string_contains(opened_panel.report_text(), "Version: " + Version.current())
 	opened_panel.back_button().pressed.emit()
 	await wait_process_frames(2)
 	assert_null(main.find_child("ReportPanel", true, false), "freed once closed")
-	assert_true(title.report_button().has_focus(), "the focus back on the link")
+	assert_true(report.has_focus(), "the focus back on the button")
 
 
-func test_opening_and_closing_it_from_the_title_leaves_no_nodes() -> void:
+func test_opening_and_closing_it_from_about_leaves_no_nodes() -> void:
 	var main: Node = add_child_autofree(MAIN.instantiate())
 	await wait_process_frames(2)
-	var title: TitleScreen = main._title
-	title.report_button().pressed.emit()
+	var report: Button = await _about(main)
+	report.pressed.emit()
 	(main.find_child("ReportPanel", true, false) as ReportPanel).close()
 	await wait_process_frames(2)
 	var nodes := Performance.get_monitor(Performance.OBJECT_NODE_COUNT)
 	var orphans := Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)
 	for i in 5:
-		title.report_button().pressed.emit()
+		report.pressed.emit()
 		(main.find_child("ReportPanel", true, false) as ReportPanel).close()
 		await wait_process_frames(2)
 	assert_lte(Performance.get_monitor(Performance.OBJECT_NODE_COUNT), nodes)

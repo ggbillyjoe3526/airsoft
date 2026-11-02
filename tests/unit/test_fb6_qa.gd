@@ -37,8 +37,7 @@ func _leave_by_pause(main: Node) -> void:
 func _assert_match_page(main: Node, why: String) -> void:
 	assert_null(main._play, why)
 	assert_true(main._menus.visible, "%s: menus show" % why)
-	assert_false(main._title.visible, "%s: not the title" % why)
-	assert_eq(main._menus.page_tab(), TopBar.Tab.MATCH, "%s: Match page" % why)
+	assert_eq(main._menus.page_tab(), NavRail.Tab.MATCH, "%s: Match page" % why)
 	assert_eq(get_viewport().gui_get_focus_owner(), main._menus.match_page().play_button(), "%s: Play focused" % why)
 	assert_false(get_tree().paused, "%s: tree not left paused" % why)
 	assert_eq(Input.mouse_mode, Input.MOUSE_MODE_VISIBLE, "%s: mouse released" % why)
@@ -73,18 +72,17 @@ func test_two_matches_left_in_a_row_leave_no_extra_nodes() -> void:
 
 func test_settings_opened_on_the_match_page_then_a_match_then_leave_opens_settings_again() -> void:
 	var main := await _boot()
-	main._show_menus()
-	main._menus.top_bar().tab_button(TopBar.Tab.SETTINGS).pressed.emit()
+	main._menus.nav_rail().tab_button(NavRail.Tab.SETTINGS).pressed.emit()
 	await wait_process_frames(2)
 	assert_not_null(main._settings_screen)
 	await _play(main)
 	assert_null(main._settings_screen, "the match closed the settings")
 	await _leave_by_pause(main)
 	_assert_match_page(main, "left after settings")
-	main._menus.top_bar().tab_button(TopBar.Tab.SETTINGS).pressed.emit()
+	main._menus.nav_rail().tab_button(NavRail.Tab.SETTINGS).pressed.emit()
 	await wait_process_frames(2)
 	assert_not_null(main._settings_screen, "Settings opens again")
-	main._menus.top_bar().tab_button(TopBar.Tab.MATCH).pressed.emit()
+	main._menus.nav_rail().tab_button(NavRail.Tab.MATCH).pressed.emit()
 	await wait_process_frames(2)
 	assert_null(main._settings_screen, "and closes to the Match page")
 

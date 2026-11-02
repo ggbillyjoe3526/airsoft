@@ -524,9 +524,9 @@ func _button(parent: Control, text: String, main: bool) -> Button:
 	b.add_theme_font_override("font", GameTheme.spaced_font(800, GameTheme.SPACING_MAIN, BUTTON_SIZE))
 	b.add_theme_font_size_override("font_size", BUTTON_SIZE)
 	if main:
-		var ink := GameTheme.YELLOW_INK
-		var solid := GameTheme.box(GameTheme.YELLOW, GameTheme.YELLOW, BUTTON_PAD_X, BUTTON_PAD_Y)
-		GameTheme.dress(b, solid, GameTheme.box(GameTheme.YELLOW.lightened(0.15), GameTheme.YELLOW, BUTTON_PAD_X,
+		var ink := GameTheme.ACCENT_INK
+		var solid := GameTheme.box(GameTheme.ACCENT, GameTheme.ACCENT, BUTTON_PAD_X, BUTTON_PAD_Y)
+		GameTheme.dress(b, solid, GameTheme.box(GameTheme.ACCENT.lightened(0.15), GameTheme.ACCENT, BUTTON_PAD_X,
 				BUTTON_PAD_Y), solid)
 		for colour: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
 			b.add_theme_color_override(colour, ink)

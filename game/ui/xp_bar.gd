@@ -30,4 +30,4 @@ func _draw() -> void:
 		return
 	draw_colored_polygon(SlantStyle.corners(Rect2(Vector2.ZERO, size)), TRACK)
 	if _fraction > 0.0:
-		draw_colored_polygon(SlantStyle.corners(Rect2(Vector2.ZERO, Vector2(size.x * _fraction, size.y))), GameTheme.YELLOW)
+		draw_colored_polygon(SlantStyle.corners(Rect2(Vector2.ZERO, Vector2(size.x * _fraction, size.y))), GameTheme.ACCENT)

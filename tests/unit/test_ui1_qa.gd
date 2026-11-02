@@ -407,23 +407,23 @@ func test_pressing_a_key_binding_waits_for_a_key_and_moves_nothing_then_cancels_
 
 # --- The other screens -----------------------------------------------------------------------------------------------
 
-func test_no_button_on_the_title_its_notices_the_quit_prompt_the_credits_or_the_report_moves_anything() -> void:
+func test_no_button_on_the_rail_the_notices_the_quit_prompt_the_credits_or_the_report_moves_anything() -> void:
 	var holder := Control.new()
 	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	holder.theme = GameTheme.get_theme()
 	add_child_autofree(holder)
-	var title := TitleScreen.new()
-	holder.add_child(title)
+	var menus := MenuScreen.new()
+	holder.add_child(menus)
 	await wait_process_frames(3)
-	var touched := await _hammer(title, "Title")
+	var touched := await _hammer(menus.nav_rail(), "Rail")
 	for notice: GraphicsNotice in [
 			GraphicsNotice.first_start(&"low", "Radeon RX 6600 · Discrete", "1920 × 1080 · 60 Hz"),
 			GraphicsNotice.safe_start("Forward+", "Compatibility"),
 			GraphicsNotice.simpler_renderer("it crashed while starting", "Radeon RX 6600 · Discrete", "Compatibility")]:
-		title.show_notice(notice)
+		menus.show_notice(notice)
 		await wait_process_frames(3)
 		touched += await _hammer(notice, "Notice")
-		title.close_notice()
+		menus.close_notice()
 	var prompt := QuitPrompt.new()
 	holder.add_child(prompt)
 	await wait_process_frames(3)
@@ -435,7 +435,7 @@ func test_no_button_on_the_title_its_notices_the_quit_prompt_the_credits_or_the_
 	await wait_process_frames(3)
 	touched += await _hammer(credits, "Credits")
 	credits.close()
-	assert_gt(touched, 8, "the buttons of the title and its overlays were touched")
+	assert_gt(touched, 8, "the buttons of the rail and the overlays were touched")
 
 
 func test_no_pause_menu_button_moves_anything_when_held_dragged_off_or_let_go_elsewhere() -> void:
@@ -720,7 +720,7 @@ func test_turning_on_show_fps_does_not_cover_the_level_chip_or_any_other_menu_co
 	s.show_fps = false
 	s.changed.emit()
 	await wait_process_frames(3)
-	var chip := menus.find_child("LevelChip", true, false) as Control
+	var chip := menus.find_child("Level", true, false) as Control
 	assert_not_null(chip)
 	assert_true(chip.is_visible_in_tree(), "the level chip shows")
 	var label := readout.find_children("*", "Label", true, false)[0] as Label
@@ -736,7 +736,7 @@ func test_turning_on_show_fps_does_not_cover_the_level_chip_or_any_other_menu_co
 	var covered := PackedStringArray()
 	for c: Control in menus.find_children("*", "Control", true, false):
 		if c.is_visible_in_tree() and c.get_global_rect().size.x > 0.0 and c.get_global_rect().intersects(label.get_global_rect()):
-			if c is Button or c is Label or c.name == "LevelChip":
+			if c is Button or c is Label or c.name == "Level":
 				covered.append("%s %s" % [c.name, c.get_global_rect()])
 	assert_eq(covered, PackedStringArray(), "the figure %s lies over nothing the menu shows" % label.get_global_rect())
 

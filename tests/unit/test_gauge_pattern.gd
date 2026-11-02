@@ -221,7 +221,7 @@ func test_the_patterns_row_is_live_and_its_sample_follows_the_switch_and_the_set
 	for p in parts:
 		striped.append(p.striped)
 	assert_eq(striped, [false, false, true, true, true] as Array[bool], "Beta's and the low magazine striped")
-	assert_eq(parts[4].colour, GameTheme.YELLOW)
+	assert_eq(parts[4].colour, GameTheme.WARN)
 	page.patterns().toggled.emit(false)
 	for p in parts:
 		assert_false(p.striped, "off: solid")

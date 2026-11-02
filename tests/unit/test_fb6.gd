@@ -1,6 +1,5 @@
 extends GutTest
-## FB6 (the owner's 0.1 Dev 1 feedback): leaving a match or the range lands on the menus' Match page with Play focused,
-## never the title; on Beta your team is on the left of the score bar and first on every table; and the sight comes up
+## FB6 (the owner's 0.1 Dev 1 feedback): leaving a match or the range lands on the menus' Match page with Play focused; on Beta your team is on the left of the score bar and first on every table; and the sight comes up
 ## evenly every drawn frame at any game speed (the Dev settings' pacer).
 
 const MAIN := preload("res://game/main.tscn")
@@ -20,12 +19,11 @@ func after_each() -> void:
 func _assert_on_the_match_page(main: Node, why: String) -> void:
 	assert_null(main._play, why)
 	assert_true(main._menus.visible, "%s: the menus show" % why)
-	assert_false(main._title.visible, "%s: not the title" % why)
-	assert_eq(main._menus.page_tab(), TopBar.Tab.MATCH, "%s: on the Match page" % why)
+	assert_eq(main._menus.page_tab(), NavRail.Tab.MATCH, "%s: on the Match page" % why)
 	assert_eq(get_viewport().gui_get_focus_owner(), main._menus.match_page().play_button(), "%s: Play focused" % why)
 
 
-func test_leave_in_the_pause_menu_lands_on_the_match_page_and_the_wordmark_still_opens_the_title() -> void:
+func test_leave_in_the_pause_menu_lands_on_the_match_page() -> void:
 	var main: Node = add_child_autofree(MAIN.instantiate())
 	await wait_process_frames(2)
 	main._start_play()
@@ -35,9 +33,6 @@ func test_leave_in_the_pause_menu_lands_on_the_match_page_and_the_wordmark_still
 	play._pause.leave_button().pressed.emit()
 	await wait_process_frames(2)
 	_assert_on_the_match_page(main, "left a match")
-	main._menus.title_requested.emit()
-	assert_true(main._title.visible, "the AIRSOFT wordmark opens the title as before")
-	assert_false(main._menus.visible)
 
 
 func test_leaving_practice_lands_on_the_match_page_too() -> void:

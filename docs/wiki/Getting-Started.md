@@ -15,7 +15,7 @@ Each release has three downloads, named after the version (here `0.1-dev.1`):
 | `Airsoft-0.1-dev.1-Linux.zip` | Linux: unzip, then run `Airsoft.x86_64` (mark it executable first if your file manager asks). |
 
 Every download carries `THIRD_PARTY_NOTICES.txt`, the licences of everything the game ships; the game shows the same
-text under **Licences** on the title screen.
+text under **Settings › About › Licences**.
 
 ## Installing on Windows
 
@@ -35,15 +35,15 @@ delete it ([Saving and Bug Reports](Saving-and-Bug-Reports)).
 
 The game is built to run smoothly on modest PCs: the Low graphics preset aims at 60 frames a second on a low-spec
 laptop. It draws with Vulkan or Direct3D 12; a graphics card or driver without them is switched to a simpler renderer
-on its own, and the title screen says so once. Mouse and keyboard; there is no controller support yet.
+on its own, and the menus say so once. Mouse and keyboard; there is no controller support yet.
 
 ## Your first start
 
 1. The first start shows your graphics card, your screen and the graphics preset picked for them (Medium for built-in
    graphics, High for a separate card). Press **OK**, or **Graphics settings** to change it.
-2. The title screen says "Call your hit. Go again." Press **START** (or Enter).
-3. The top bar holds **Match**, **Loadout**, **Armory**, **Settings** and your level. Click **AIRSOFT** at its left to go
-   back to the title screen. **Esc** in the menus asks **Quit game?**: **Quit** leaves, **Cancel** (or Esc again) stays.
+2. The game opens straight on **Match**, over a blurred view of the field you picked. There is no title screen.
+3. The rail down the left holds **Match**, **Loadout**, **Armory** and **Settings**, with your level and **Quit** at its
+   foot. **Esc** in the menus asks **Quit game?**: **Quit** leaves, **Cancel** (or Esc again) stays.
 
 ## Your first match
 

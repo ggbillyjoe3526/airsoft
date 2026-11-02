@@ -30,7 +30,7 @@ func _init(words: PackedStringArray, compact: bool = false) -> void:
 	var font := GameTheme.font(700) if compact else GameTheme.spaced_font(800, GameTheme.SPACING_TAB, text_size)
 	var plain := GameTheme.box(GameTheme.CARD, GameTheme.LINE, pad, 0)
 	var hover := GameTheme.box(GameTheme.CARD_HI, GameTheme.LINE, pad, 0)
-	var lit := GameTheme.box(GameTheme.CARD_HI, GameTheme.YELLOW, pad, 0)
+	var lit := GameTheme.box(GameTheme.CARD_HI, GameTheme.ACCENT, pad, 0)
 	for i in words.size():
 		var b := Button.new()
 		b.text = words[i] if compact else words[i].to_upper()

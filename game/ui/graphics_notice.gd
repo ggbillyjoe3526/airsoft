@@ -45,14 +45,14 @@ const REASON_KEYS: Dictionary[String, String] = {
 
 var _box: VBoxContainer = null
 var _buttons: Array[Button] = []
-var _edge_colour: Color = GameTheme.YELLOW
+var _edge_colour: Color = GameTheme.ACCENT
 
 
 func _init(warn: bool = false) -> void:
 	name = "GraphicsNotice"
 	theme = GameTheme.get_theme()
 	custom_minimum_size.x = WARN_WIDTH if warn else WIDTH
-	_edge_colour = WARN if warn else GameTheme.YELLOW
+	_edge_colour = WARN if warn else GameTheme.ACCENT
 	var panel := GameTheme.box(FILL, GameTheme.LINE, PAD.x, PAD.y)
 	panel.border_width_left = LEFT_EDGE
 	add_theme_stylebox_override("panel", panel)
@@ -88,7 +88,7 @@ static func safe_start(was: String, now: String) -> GraphicsNotice:
 ## (`card`, its name and type) and the renderer (`renderer`, its name and driver).
 static func simpler_renderer(reason: String, card: String, renderer: String) -> GraphicsNotice:
 	var n := GraphicsNotice.new()
-	n.kicker(tr_static("NOTICE_SIMPLER_KICKER"), GameTheme.YELLOW)
+	n.kicker(tr_static("NOTICE_SIMPLER_KICKER"), GameTheme.ACCENT)
 	n.heading(tr_static("NOTICE_SIMPLER_TITLE"))
 	n.line(tr_static(REASON_KEYS.get(reason, "NOTICE_SIMPLER_FALLBACK")))
 	n.facts(PackedStringArray([tr_static("GRAPHICS_CARD"), card, tr_static("GRAPHICS_RENDERER"), renderer]))
@@ -100,7 +100,7 @@ static func simpler_renderer(reason: String, card: String, renderer: String) -> 
 ## type) and the screen (`screen`, screen_words). OK (0) or Graphics settings (1).
 static func first_start(preset: StringName, card: String, screen: String) -> GraphicsNotice:
 	var n := GraphicsNotice.new()
-	n.kicker(tr_static("NOTICE_FIRST_KICKER"), GameTheme.YELLOW)
+	n.kicker(tr_static("NOTICE_FIRST_KICKER"), GameTheme.ACCENT)
 	n.heading(tr_static("NOTICE_FIRST_TITLE") % tr_static(PRESET_KEY % String(preset).to_upper()))
 	n.line(tr_static("NOTICE_FIRST_BODY"))
 	n.facts(PackedStringArray([tr_static("GRAPHICS_CARD"), card, tr_static("GRAPHICS_SCREEN"), screen]))
@@ -204,12 +204,12 @@ func actions(words_in_order: PackedStringArray) -> void:
 		var b := Button.new()
 		b.text = words_in_order[i].to_upper()
 		var solid := i == 0
-		var normal := GameTheme.box(GameTheme.YELLOW if solid else Color(0.0, 0.0, 0.0, 0.0), GameTheme.YELLOW)
-		var lit := GameTheme.box(GameTheme.YELLOW.lightened(0.15) if solid else GameTheme.CARD_HI, GameTheme.YELLOW)
+		var normal := GameTheme.box(GameTheme.ACCENT if solid else Color(0.0, 0.0, 0.0, 0.0), GameTheme.ACCENT)
+		var lit := GameTheme.box(GameTheme.ACCENT.lightened(0.15) if solid else GameTheme.CARD_HI, GameTheme.ACCENT)
 		GameTheme.dress(b, normal, lit, lit)
 		b.add_theme_font_override("font", GameTheme.spaced_font(800, GameTheme.SPACING_TAB, BUTTON_SIZE))
 		b.add_theme_font_size_override("font_size", BUTTON_SIZE)
-		var ink := GameTheme.YELLOW_INK if solid else GameTheme.TEXT
+		var ink := GameTheme.ACCENT_INK if solid else GameTheme.TEXT
 		for colour: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
 			b.add_theme_color_override(colour, ink)
 		b.pressed.connect(chosen.emit.bind(i))

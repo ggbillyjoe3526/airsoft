@@ -1,7 +1,7 @@
 extends GutTest
 ## FB1, the menus after William's 0.1 Dev 1 playtest: a Settings switch keeps its size and nothing moves when it is
 ## pressed, the For your card tag isn't under its neighbours, Customise's LOADOUT button works, buttons are as wide as
-## their words and one width in a group, the AIRSOFT wordmark goes to the title, Esc asks QUIT GAME?, and Settings' BACK is
+## their words and one width in a group, the rail's QUIT asks QUIT GAME? (UR1: the wordmark's title is gone), Esc asks QUIT GAME?, and Settings' BACK is
 ## small and at the bottom left.
 
 const MAIN := preload("res://game/main.tscn")
@@ -182,12 +182,11 @@ func test_a_click_on_the_loadout_button_in_customise_goes_back_to_the_loadout() 
 
 func test_the_loadout_tab_in_the_bar_also_leaves_customise() -> void:
 	var main: Node = await _boot()
-	main._show_menus()
-	main._menus.top_bar().tab_button(TopBar.Tab.LOADOUT).pressed.emit()
+	main._menus.nav_rail().tab_button(NavRail.Tab.LOADOUT).pressed.emit()
 	var page: LoadoutPage = main._menus.loadout_page()
 	page.show_customise()
 	assert_true(page.customising())
-	main._menus.top_bar().tab_button(TopBar.Tab.LOADOUT).pressed.emit()
+	main._menus.nav_rail().tab_button(NavRail.Tab.LOADOUT).pressed.emit()
 	assert_false(page.customising(), "the tab for the page you are on goes back to its first screen")
 	main._menus.leave_loadout()
 
@@ -243,11 +242,11 @@ func test_swatches_keep_their_squares() -> void:
 
 
 func test_the_bar_tabs_are_one_width() -> void:
-	var bar := TopBar.new()
+	var bar := NavRail.new()
 	add_child_autofree(bar)
 	await wait_process_frames(3)
-	var w := bar.tab_button(TopBar.Tab.MATCH).size.x
-	for tab: TopBar.Tab in TopBar.TAB_KEYS:
+	var w := bar.tab_button(NavRail.Tab.MATCH).size.x
+	for tab: NavRail.Tab in NavRail.TAB_KEYS:
 		assert_almost_eq(bar.tab_button(tab).size.x, w, 0.5)
 
 
@@ -278,62 +277,42 @@ func test_settings_back_is_a_small_button_at_the_bottom_left() -> void:
 	assert_gt(back.get_global_rect().position.y, screen_rect.position.y + screen_rect.size.y * 0.8, "at the bottom")
 
 
-# --- 19: the wordmark and Esc ------------------------------------------------------------------------------------------
+# --- 19: QUIT and Esc -------------------------------------------------------------------------------------------------
 
-func test_the_wordmark_is_a_button_that_goes_to_the_title_and_is_off_in_practice() -> void:
-	var bar := TopBar.new()
+func test_quit_in_the_rail_is_hidden_in_practice() -> void:
+	var bar := NavRail.new()
 	add_child_autofree(bar)
 	watch_signals(bar)
-	assert_eq(bar.wordmark().text, "AIRSOFT")
-	bar.wordmark().pressed.emit()
-	assert_signal_emit_count(bar, "wordmark_pressed", 1)
+	bar.quit_button().pressed.emit()
+	assert_signal_emit_count(bar, "quit_pressed", 1)
 	bar.set_practice(true)
-	assert_true(bar.wordmark().disabled, "from practice there is no title to go to")
+	assert_false(bar.quit_button().visible, "from practice the way out is BACK TO PRACTICE")
 	bar.set_practice(false)
-	assert_false(bar.wordmark().disabled)
+	assert_true(bar.quit_button().visible)
 
 
-func test_clicking_the_wordmark_from_the_menus_or_the_settings_shows_the_title() -> void:
+func test_quit_in_the_rail_asks_quit_game_with_the_focus_on_cancel_and_escape_closes_it() -> void:
 	var main: Node = await _boot()
-	main._show_menus()
-	assert_false(main._title.visible)
-	main._menus.top_bar().wordmark().pressed.emit()
-	assert_true(main._title.visible)
-	assert_false(main._menus.visible)
-	main._show_menus()
-	main._menus.top_bar().tab_button(TopBar.Tab.SETTINGS).pressed.emit()
+	main._menus.nav_rail().quit_button().pressed.emit()
 	await wait_process_frames(2)
-	assert_not_null(main._settings_screen)
-	main._menus.top_bar().wordmark().pressed.emit()
-	await wait_process_frames(2)
-	assert_null(main._settings_screen, "the settings closed on the way")
-	assert_true(main._title.visible)
-
-
-func test_escape_on_the_title_asks_quit_game_with_the_focus_on_cancel_and_escape_again_closes_it() -> void:
-	var main: Node = await _boot()
-	assert_true(main._title.visible)
-	await _esc()
 	var prompt: QuitPrompt = main._quit_prompt
-	assert_not_null(prompt, "Esc on the title asks")
-	assert_true(main._title.visible, "and stays on the title")
+	assert_not_null(prompt, "QUIT asks")
+	assert_true(main._menus.visible, "and stays on the menus")
 	assert_eq(prompt.get_viewport().gui_get_focus_owner(), prompt.cancel_button(), "CANCEL has the focus")
 	assert_eq(prompt.quit_button().size.x, prompt.cancel_button().size.x, "QUIT and CANCEL are one width")
 	await _esc()
-	assert_null(main._quit_prompt, "Esc again closes it")
-	assert_true(main._title.visible)
+	assert_null(main._quit_prompt, "Esc closes it")
 
 
 func test_escape_in_the_menus_and_in_the_settings_asks_quit_game_and_changes_nothing_else() -> void:
 	var main: Node = await _boot()
-	main._show_menus()
 	await _esc()
 	assert_not_null(main._quit_prompt)
 	assert_true(main._menus.visible, "the menus stay")
 	main._quit_prompt.cancel_button().pressed.emit()
 	await wait_process_frames(2)
 	assert_null(main._quit_prompt, "CANCEL closes it")
-	main._menus.top_bar().tab_button(TopBar.Tab.SETTINGS).pressed.emit()
+	main._menus.nav_rail().tab_button(NavRail.Tab.SETTINGS).pressed.emit()
 	await wait_process_frames(2)
 	await _esc()
 	assert_not_null(main._quit_prompt, "Esc in the settings asks too")
@@ -363,8 +342,7 @@ func test_a_dialog_or_the_credits_take_escape_before_the_quit_prompt() -> void:
 
 func test_escape_while_a_key_waits_to_be_rebound_cancels_it_and_asks_nothing() -> void:
 	var main: Node = await _boot()
-	main._show_menus()
-	main._menus.top_bar().tab_button(TopBar.Tab.SETTINGS).pressed.emit()
+	main._menus.nav_rail().tab_button(NavRail.Tab.SETTINGS).pressed.emit()
 	await wait_process_frames(2)
 	var keys: KeyBindingList = main._settings_screen._keys
 	keys.begin(&"move_forward", 0)

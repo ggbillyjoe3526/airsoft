@@ -97,7 +97,7 @@ func _init() -> void:
 	whole.add_theme_constant_override("separation", 0)
 	panel.add_child(whole)
 	var rule := ColorRect.new()
-	rule.color = GameTheme.YELLOW
+	rule.color = GameTheme.ACCENT
 	rule.custom_minimum_size = Vector2(0.0, TOP_RULE)
 	whole.add_child(rule)
 	var pad := MenuParts.padded(PAD_X, PAD_TOP - TOP_RULE, PAD_X, PAD_BOTTOM)
@@ -292,7 +292,7 @@ func _left_column() -> VBoxContainer:
 	var box := VBoxContainer.new()
 	box.custom_minimum_size = Vector2(LEFT_WIDTH, 0.0)
 	box.add_theme_constant_override("separation", 0)
-	box.add_child(MenuParts.spaced(tr("REPORT_BUG").to_upper(), KICK_SIZE, 800, GameTheme.YELLOW, KICK_SPACING))
+	box.add_child(MenuParts.spaced(tr("REPORT_BUG").to_upper(), KICK_SIZE, 800, GameTheme.ACCENT, KICK_SPACING))
 	box.add_child(_gap(TITLE_TOP))
 	box.add_child(MenuParts.spaced(tr("REPORT_TITLE").to_upper(), TITLE_SIZE, 800, GameTheme.TEXT, TITLE_SPACING))
 	box.add_child(_gap(TITLE_BOTTOM))
@@ -311,7 +311,7 @@ func _left_column() -> VBoxContainer:
 	_note.add_theme_font_override("font", GameTheme.font(600))
 	_note.add_theme_font_size_override("font_size", NOTE_SIZE)
 	_note.add_theme_stylebox_override("normal", GameTheme.box(GameTheme.BG, GameTheme.LINE, NOTE_PAD.x, NOTE_PAD.y))
-	var lit := GameTheme.box(GameTheme.BG, GameTheme.YELLOW, NOTE_PAD.x, NOTE_PAD.y)
+	var lit := GameTheme.box(GameTheme.BG, GameTheme.ACCENT, NOTE_PAD.x, NOTE_PAD.y)
 	lit.draw_center = false
 	_note.add_theme_stylebox_override("focus", lit)
 	_note.text_changed.connect(_note_changed)
@@ -327,9 +327,9 @@ func _left_column() -> VBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", BUTTON_GAP)
 	box.add_child(row)
-	_report = _button(row, tr("REPORT_ON_GITHUB"), GameTheme.YELLOW, true)
+	_report = _button(row, tr("REPORT_ON_GITHUB"), GameTheme.ACCENT, true)
 	_report.pressed.connect(report)
-	_copy = _button(row, tr("REPORT_COPY"), GameTheme.YELLOW, false)
+	_copy = _button(row, tr("REPORT_COPY"), GameTheme.ACCENT, false)
 	_copy.pressed.connect(copy)
 	_back = _button(row, tr("REPORT_BACK"), GameTheme.LINE, false)
 	_back.pressed.connect(close)
@@ -363,7 +363,7 @@ func _right_column() -> VBoxContainer:
 	_report_view.add_theme_color_override("font_readonly_color", REPORT_INK)
 	_report_view.add_theme_stylebox_override("read_only",
 			GameTheme.box(REPORT_FILL, GameTheme.LINE, REPORT_PAD.x, REPORT_PAD.y))
-	var lit := GameTheme.box(REPORT_FILL, GameTheme.YELLOW, REPORT_PAD.x, REPORT_PAD.y)
+	var lit := GameTheme.box(REPORT_FILL, GameTheme.ACCENT, REPORT_PAD.x, REPORT_PAD.y)
 	lit.draw_center = false
 	_report_view.add_theme_stylebox_override("focus", lit)
 	box.add_child(_report_view)
@@ -411,7 +411,7 @@ func _button(parent: Control, words: String, edge: Color, solid: bool) -> Button
 			BUTTON_PAD_X, 0), plain)
 	if solid:
 		for colour: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
-			b.add_theme_color_override(colour, GameTheme.YELLOW_INK)
+			b.add_theme_color_override(colour, GameTheme.ACCENT_INK)
 	parent.add_child(b)
 	return b
 

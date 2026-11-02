@@ -255,7 +255,7 @@ func _edit_input(event: InputEvent) -> void:
 
 
 func _say(key: String, arg: String) -> void:
-	_prompt = MenuParts.text(tr(key) % arg if arg != "" else tr(key), NAME_SIZE - 2, 700, GameTheme.YELLOW)
+	_prompt = MenuParts.text(tr(key) % arg if arg != "" else tr(key), NAME_SIZE - 2, 700, GameTheme.ACCENT)
 	_prompt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	add_child(_prompt)
 

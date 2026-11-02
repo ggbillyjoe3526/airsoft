@@ -276,7 +276,7 @@ func _draw() -> void:
 			_draw_flag(_flags_px[i], Flag.LETTERS[i] if i < Flag.LETTERS.size() else "")
 	if _overtime_on and _marks.has_overtime:
 		var a := 1.0 if _overtime_up else _cfg.map_overtime_alpha
-		draw_arc(_overtime_px, _cfg.map_flag_ring, 0.0, TAU, RING_POINTS, Color(GameTheme.YELLOW, a),
+		draw_arc(_overtime_px, _cfg.map_flag_ring, 0.0, TAU, RING_POINTS, Color(GameTheme.WARN, a),
 				_cfg.map_flag_ring_width, true)
 	_draw_words()
 	_draw_compass()
@@ -318,15 +318,15 @@ func _draw_zone_word(box: Rect2, word: String, colour: Color, s: int) -> void:
 ## A flag's ring round its pole, and its letter on a yellow badge up and left of it.
 func _draw_flag(at: Vector2, letter: String) -> void:
 	draw_arc(at, _cfg.map_flag_ring, 0.0, TAU, RING_POINTS, _cfg.ink, _cfg.map_flag_ring_width + BADGE_INK, true)
-	draw_arc(at, _cfg.map_flag_ring, 0.0, TAU, RING_POINTS, GameTheme.YELLOW, _cfg.map_flag_ring_width, true)
+	draw_arc(at, _cfg.map_flag_ring, 0.0, TAU, RING_POINTS, GameTheme.WARN, _cfg.map_flag_ring_width, true)
 	var r := _cfg.map_flag_badge
 	var c := at + BADGE_AT * r
 	draw_circle(c, r + BADGE_INK, _cfg.ink)
-	draw_circle(c, r, GameTheme.YELLOW)
+	draw_circle(c, r, GameTheme.WARN)
 	var fs := roundi(r * _cfg.map_badge_type)
 	var s := _badge_font.get_string_size(letter, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
 	var base := Vector2(c.x - s.x * 0.5, c.y - s.y * 0.5 + _badge_font.get_ascent(fs))
-	draw_string(_badge_font, base, letter, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, GameTheme.YELLOW_INK)
+	draw_string(_badge_font, base, letter, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, GameTheme.WARN_INK)
 
 
 func _draw_words() -> void:
