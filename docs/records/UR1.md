@@ -11,7 +11,7 @@
 
 ## Goal
 
-The first of five pull requests for the owner's UI redesign. He asked for a new UI with no blue and yellow theme
+The first of six pull requests for the owner's UI redesign. He asked for a new UI with no blue and yellow theme
 ("simple, minimalistic and compact … consistent, professional, and AAA quality … intuitive"), picked concept B (Side
 rail) on 2026-11-02 with changes (v2: a text-only rail with centred words, no title box on About, pictures that fit
 their boxes, eye-height field pictures, a square minimap, larger grenade icons), asked for no title screen ("the game
@@ -56,7 +56,6 @@ Next: Match and Loadout (eye-height field pictures, replicas to one scale inside
   minimap's flag, the M map's flags and its key, the settings' and loadouts' load warnings.
 - **The rail is 136 px.** Wide enough for SETTINGS in condensed capitals with room each side, and narrow enough that
   the pages lose only 7 % of a 1080p width.
-
 - **About has no Save file row.** The concept's About repeated the save folder; Settings › Save file already has it
   with Open folder, so About keeps to the version, the renderer and the three buttons.
 
