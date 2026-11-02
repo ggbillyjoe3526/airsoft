@@ -1,37 +1,30 @@
-Task: TS1 · QA commit none (no tests added; this pass was read-only apart from this report) · Verdict: Pass
+Task: SN1 · QA commit 692c4d0 · Verdict: Pass (after f489857; first run Fail)
 
-Reviewed 4240208 (origin/main..HEAD, 42 files). Blocking findings: none.
+Blocking
+1. Missing translation: game/ui/armory_facts.gd:92 builds "ARMORY_BLURB_REPLICA_" + key; game/ui/text/en.po has PISTOL, AEG and CYBER only, no ARMORY_BLURB_REPLICA_SNIPER (en.po ~1832). With Dev content on and the Sniper Rifle the next unlock, the Armory's next-unlock card shows the raw key. test_armory.gd's blurb check only runs with Dev off, so it missed it. Pinned by test_the_armory_has_a_blurb_for_the_sniper_rifle_not_its_translation_key.
 
-Checked, all fine
-- Acceptance 1 and 2: data/maps.md gives 5/6/8 on all three fields. TEAM_SIZES is 1 to 8, and the loader accepts 7 and 8.
-  Each map JSON changed only its spawns and deadZones; geometry is untouched. Loaded at 8 a side, all three read clean with
-  no problems or warnings, 8 spawns and 8 dead-zone spots an end, every spot walkable on the nav grid. A ray scan of
-  every spawn to the field's walkable cells (2 m grid, outside 16 m of its own end) saw none, as before. Dead-zone
-  sight is the same as before (worst spot 164 vs 158 cells Woodland W, 41 vs 32 Woodland E, 67 vs 67 and 74 vs 73 Street).
-- Place_teams: the middle six of eight (slots 1 to 6) at 6v6. 5v5 takes slots 1 to 5 and 7v7 slots 0 to 6, half a metre
-  off centre, harmless.
-- Acceptance 3: PlaySession builds Street 8v8 and 7v7 and 5v5, Depot 7v7 and Woodland 7v7 with unique spawns, every bot
-  named and unique, and 600 ticks run with no script errors. Street 8v8 had no test; I ran it by hand. The en.po blurbs 7 and 8
-  exist, and the key is RULE_%s_BLURB_%d.
-- Acceptance 4: the balance_run argument index (8th) matches balance.sh. sized_for(picked) falls back to the standard
-  for sizes a map doesn't offer. The median round length is added to both report modes. team_bench is excluded from
-  exports (tools/*) and gdlint is clean on every changed .gd file.
-- Nothing else assumes 6 a side: HUD pips follow wins needed, not team size. Minimap and mag-line capacity, the torch
-  beams and figure_of follow characters.size(). The BB pool (256) peaked at 12 in an 8v8 autopilot match. The
-  bot roster has 32 names for 15 bots, and the thrown-magazine pool recycles the oldest. Saves load through _choice, so an
-  old 3 or 6 stays valid. report_facts counts team sizes from the characters.
+Advisory
+- game/ui/armory_track.gd:76 / armory_facts.gd:43-48: level 7 now holds only the dev M140, so a Dev-off player sees "LEVEL 7 ... NEXT" with an empty row at level 6, while the summary's next unlock (next_row) says level 8. Cosmetic.
+- game/ui/xp_card.gd:127-160: a Dev-off level-up to 7 shows a "LEVEL 7!" panel with no "Unlocked" line and no picture (pinned: nothing named leaks).
+- game/ui/settings_save_page.gd:642 shows the unlocked count, which includes dev items: a number, never a name.
+- The Loadout still rounds 0.8 BBs/s to "1" (already in SN1.md known issues).
 
-Advisory (not blocking; for KNOWN_ISSUES or a later pass)
-1. game/ui/hud.gd:53 and hud_scoreboard.gd (Tab board): measured 923 px tall at 8v8 with the Hard Pro tip (763 at 6v6),
-   at top 160, so it ends at 1083 of 1080: the tip box's last 3 px clip. The match summary and round result have a height
-   fit (_height_fit); the Tab board has none, so any HUD size above 1.0 pushes the 8v8 board off screen (6v6 does at
-   1.16 and up). Fix: scale the board with _height_fit as the summary does, or trim ROW_HEIGHT or BOARD_TOP.
-2. docs/FEATURES.md:33 (Depot "5v5 or 6v6") and :36 (The Street "5v5 or 6v6") are stale; only line 65 was updated.
-3. Coverage gap: no test builds The Street at 8v8 or checks its spawns and dead zone unseen (test_street.gd loads it at
-   5). Suggest a test_team_sizes case across all three maps (Woodland's exists) plus an unseen-spawn test for Street.
-4. KNOWN_ISSUES records the headless frame cost; Woodland 8v8 p99 is 14.1 ms CPU, so it may drop frames on Low.
-   That needs a GPU playtest (owner's list).
+Checked and fine
+- Dev gating: Armory rows and counts, level-up card, saved loadout with the rifle (plays as default, not a dev match), bot kits (300 seeds x 3 difficulties x 3 personalities, no Sniper kit without Dev), wiki (tools/wiki.py check: OK, 25 pages).
+- Owner's levels (5/5/5, Red Gas 6, M140 7, M150 9, cap 10), springs unlock one by one, old saves get the new level-5 gear and keep Red Gas, scope off stays off through a save (worker test).
+- Single shot: 600 ticks of a held trigger = 1 shot; one fire mode. Every spring x every muzzle part stays <= 2.3 J.
+- Hip spread: x6 sight down, x3.5 half raised, equal to the AEG sight up.
+- Bot match (Yard, all 10 bots Sniper kit, seed 21): 157 shots (15 with the sight down), 39 hits, match finished.
 
-Tests added or changed: none. Targeted runs: not needed, the suite passed on this head; I used scratch scripts outside
-the repo (measure, spots, build, bbs) and left no repo files changed.
-Could not test: how 5v5 to 8v8 feels (pace and fairness) and GPU frame time; both go to the owner's playtest list.
+Tests added (tests/unit/test_sn1_qa.gd, 16 tests, 15 pass, 1 fails on the bug above)
+- :34 levels_as_owner_set_them_and_cap_10, :44 springs_unlock_one_by_one, :60 old save gets level-5 gear, :74 old level-5 player keeps Red Gas: with the shipped data swapped for origin/main's levels.md these fail (checked).
+- :84 armory names no sniper gear, :104 next unlock skips level 7, :115 dev-only level-up names none, :138 saved loadout falls back, :149 no bot kit without Dev, :164 Hard bots carry it with Dev: fail on main (no such items; the card/hud filter changed signature, so main does not run them).
+- :174 held trigger = 1 shot, :190 springs x muzzles under limit, :207 hip spread vs AEG, :232 blurb (fails, bug), :237 class name, :242 bot match.
+
+Counts: sniper_rifle 11/11 pass (114 asserts); sn1_qa 15/16 pass, 22 s. Raw output in pipeline/out/qa/. tools/check.sh and the full suite not run, as instructed.
+
+Not testable here: how the model, scope view, cocking clip and sound look and feel (needs a display), hop-up flight at 48 m, bot behaviour feel with the sight-up wait. Owner should playtest those.
+
+## Re-run after the fix (f489857)
+
+ARMORY_BLURB_REPLICA_SNIPER added to en.po. test_sn1_qa.gd + test_armory.gd: 39/39 pass. Verdict: **Pass**.

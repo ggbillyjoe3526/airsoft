@@ -118,12 +118,20 @@ func test_the_same_kit_twice_gives_equal_numbers() -> void:
 
 func test_every_shipped_kit_builds_on_standard_rules_with_parts_matching() -> void:
 	var std := LoadoutRules.standard()
+	var with_dev := LoadoutRules.standard()
+	with_dev.dev_content = true
 	for p in BotKits.shared().kits:
-		assert_true(BotKits.offers(std, p), p.kit_name)
-		var kit := BotKits.kit_of(p, std)
+		# A kit carrying dev gear (SN1's Sniper) is offered only with Dev content on, and makes a dev match.
+		var dev_kit := false
+		for id in p.items():
+			dev_kit = dev_kit or pool.item(id).is_dev()
+		var rules_for := with_dev if dev_kit else std
+		assert_eq(BotKits.offers(std, p), not dev_kit, p.kit_name)
+		assert_true(BotKits.offers(rules_for, p), p.kit_name)
+		var kit := BotKits.kit_of(p, rules_for)
 		assert_eq(kit.size(), p.slots.size(), p.kit_name)
 		assert_eq(kit.parts.size(), kit.size())
-		assert_false(kit.dev, p.kit_name)
+		assert_eq(kit.dev, dev_kit, p.kit_name)
 		for i in kit.size():
 			for id in p.slots[i].parts:
 				var it := pool.item(id)
