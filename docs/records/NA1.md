@@ -1,6 +1,6 @@
 # NA1 · No full auto indoors
 
-**Review:** pending
+**Review:** 4 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -8,7 +8,8 @@
 |---|---|---|---|---|---|
 | 2026-11-02 | 1 | Opus 5.5 (build thread) | see Checks | 8/8 (held for QA, performance) | owner added bots' auto (19:48) |
 | 2026-11-02 | 2 | Opus 5.5 (build thread) | see Checks | 7/8 Retry | a bot's selector presses were kept through a vault and spun it after |
-| 2026-11-02 | 3 | Opus 5.5 (build thread) | see Checks | pending | – |
+| 2026-11-02 | 3 | Opus 5.5 (build thread) | see Checks | 8/8 Accept (QA then found bots on semi fired at full rate) | semi tap pace; CI Follow me guard (holster fix) |
+| 2026-11-02 | 4 | Opus 5.5 (build thread) | see Checks | 8/8 Accept | – |
 
 ## Goal
 
