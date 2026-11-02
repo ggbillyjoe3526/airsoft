@@ -1,23 +1,37 @@
-Task: SR1 · QA commit c8c6e59 · Verdict: Pass
+Task: TS1 · QA commit none (no tests added; this pass was read-only apart from this report) · Verdict: Pass
 
-Blocking findings: none.
-Advisory findings:
-- game/sim/railings.gd:_run_hit treats a path that starts exactly on a bar's face and heads away as a hit at t 0 (boundary inclusive). Not reachable today: Ricochet lifts a bounced BB 2 mm off (ricochet_config.gd lift_off) and 300 random BB shots at a bar all came to rest (no repeated landing). If lift_off is ever set to 0 a BB would re-land on the bar it left.
-- game/map/map_level.gd build: a block whose kind is in both clear_kinds and railing_kinds gets a glass body but is still added to `railings` (and the Railings mesh run counter then drifts from the colliders). No such kind exists; only a config mistake would trigger it.
-- A baked map would draw railings as solid blocks (author already lists this in KNOWN_ISSUES).
+Reviewed 4240208 (origin/main..HEAD, 42 files). Blocking findings: none.
 
-Tests added (tests/unit/test_sr1_railings_qa.gd, 10 tests, 40 asserts); all fail without the feature (the classes do not exist), and the key ones were mutation-checked:
-- :44 bars agree with drawn boxes · 8,000 rays over 6 run shapes (along x/z, deep, too low for a foot rail, shorter than two bars, square), axis-aligned, vertical, grazing, a tick's length and up to 3 m · changing the bar search `ceili` to `floori` in railings.gd fails it (3 tests fail).
-- :84 hit point and normal sit on the crossed face, facing the shooter · same mutation.
-- :99 BB meets the nearer of a bar and the level (wall in front, wall behind, fraction of the whole segment) · BoxWorld.
-- :118 zero, tiny, negative, NaN lengths, empty set, far outside the index do not fault.
-- :140 a path starting inside a run's box exits a gap and stops in a bar.
-- :152 300 random BBs fired through BBStep at a bar run all come to rest, none lands 8+ times.
-- :183 glass beside a railing on a built Jolt level: sight passes both, ray_past_railings and bb_ray stop on the glass, ray stops on the box · removing the `past_railings` skip in BoxWorld also fails the earlier tests.
-- :202 a ramp of the railing kind is an ordinary solid wedge (no bars, no Railings mesh, hides what is behind it).
-- :214 the Jolt mover cannot walk through a railing · passes through when the railing is left out (checked).
-- :232 5,000 bb_ray calls leave OBJECT_COUNT unchanged; building and freeing a railing level 3 times leaves no orphan nodes and no extra nodes.
+Checked, all fine
+- Acceptance 1 and 2: data/maps.md gives 5/6/8 on all three fields. TEAM_SIZES is 1 to 8, and the loader accepts 7 and 8.
+  Each map JSON changed only its spawns and deadZones; geometry is untouched. Loaded at 8 a side, all three read clean with
+  no problems or warnings, 8 spawns and 8 dead-zone spots an end, every spot walkable on the nav grid. A ray scan of
+  every spawn to the field's walkable cells (2 m grid, outside 16 m of its own end) saw none, as before. Dead-zone
+  sight is the same as before (worst spot 164 vs 158 cells Woodland W, 41 vs 32 Woodland E, 67 vs 67 and 74 vs 73 Street).
+- Place_teams: the middle six of eight (slots 1 to 6) at 6v6. 5v5 takes slots 1 to 5 and 7v7 slots 0 to 6, half a metre
+  off centre, harmless.
+- Acceptance 3: PlaySession builds Street 8v8 and 7v7 and 5v5, Depot 7v7 and Woodland 7v7 with unique spawns, every bot
+  named and unique, and 600 ticks run with no script errors. Street 8v8 had no test; I ran it by hand. The en.po blurbs 7 and 8
+  exist, and the key is RULE_%s_BLURB_%d.
+- Acceptance 4: the balance_run argument index (8th) matches balance.sh. sized_for(picked) falls back to the standard
+  for sizes a map doesn't offer. The median round length is added to both report modes. team_bench is excluded from
+  exports (tools/*) and gdlint is clean on every changed .gd file.
+- Nothing else assumes 6 a side: HUD pips follow wins needed, not team size. Minimap and mag-line capacity, the torch
+  beams and figure_of follow characters.size(). The BB pool (256) peaked at 12 in an 8v8 autopilot match. The
+  bot roster has 32 names for 15 bots, and the thrown-magazine pool recycles the oldest. Saves load through _choice, so an
+  old 3 or 6 stays valid. report_facts counts team sizes from the characters.
 
-Counts: test_sr1_railings.gd 12/12 (66 asserts); test_sr1_railings_qa.gd 10/10 (40 asserts, 1 s). Related files all pass: bb_step 18, box_world 11, bq1_glass_sight 6, bq1_qa 2, map_level 15, ricochet 9, st1_qa 9, st2_qa 3, street 5 (pipeline/out/qa/sr1_related.txt). Smoke test passes (zero script errors, 484 shots, 7 rounds; pipeline/out/qa/smoke.log). tools/check.sh not run (the worker runs it).
+Advisory (not blocking; for KNOWN_ISSUES or a later pass)
+1. game/ui/hud.gd:53 and hud_scoreboard.gd (Tab board): measured 923 px tall at 8v8 with the Hard Pro tip (763 at 6v6),
+   at top 160, so it ends at 1083 of 1080: the tip box's last 3 px clip. The match summary and round result have a height
+   fit (_height_fit); the Tab board has none, so any HUD size above 1.0 pushes the 8v8 board off screen (6v6 does at
+   1.16 and up). Fix: scale the board with _height_fit as the summary does, or trim ROW_HEIGHT or BOARD_TOP.
+2. docs/FEATURES.md:33 (Depot "5v5 or 6v6") and :36 (The Street "5v5 or 6v6") are stale; only line 65 was updated.
+3. Coverage gap: no test builds The Street at 8v8 or checks its spawns and dead zone unseen (test_street.gd loads it at
+   5). Suggest a test_team_sizes case across all three maps (Woodland's exists) plus an unseen-spawn test for Street.
+4. KNOWN_ISSUES records the headless frame cost; Woodland 8v8 p99 is 14.1 ms CPU, so it may drop frames on Low.
+   That needs a GPU playtest (owner's list).
 
-Not tested (needs a display or play): how the bars read at range and shimmer on a real window; the feel of shooting through a railing; mover feel against the box in a gap (the headless mover test only shows it is blocked).
+Tests added or changed: none. Targeted runs: not needed, the suite passed on this head; I used scratch scripts outside
+the repo (measure, spots, build, bbs) and left no repo files changed.
+Could not test: how 5v5 to 8v8 feels (pace and fairness) and GPU frame time; both go to the owner's playtest list.
