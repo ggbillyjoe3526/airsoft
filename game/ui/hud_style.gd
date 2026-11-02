@@ -10,6 +10,15 @@ const SCORE_HEIGHT := 73.0
 const BLOCK_WIDTH := 64.0
 const CLOCK_WIDTH := 170.0
 const AIM_GAP := 9.0
+## The bar's one rounded glass plate (its corners) and each team block's inset from the plate's top and bottom and its
+## corners (UI concept B v2 `hud.png`).
+const SCORE_RADIUS := 14.0
+const BLOCK_INSET := 7.0
+const BLOCK_RADIUS := 8.0
+## The ATK / DEF tags' corners.
+const TAG_RADIUS := 4.0
+## How many points a rounded corner is drawn with.
+const CORNER_STEPS := 5
 ## The slanted pips: size, gap, border, side padding and the lean (tan 14 degrees, the concept's `skewX(-14deg)`).
 const PIP_SIZE := Vector2(16.0, 22.0)
 const PIP_GAP := 6.0
@@ -140,6 +149,23 @@ static func pip_shape(at: Vector2) -> PackedVector2Array:
 		Vector2(at.x + s, at.y), Vector2(at.x + PIP_SIZE.x + s, at.y),
 		Vector2(at.x + PIP_SIZE.x - s, at.y + PIP_SIZE.y), Vector2(at.x - s, at.y + PIP_SIZE.y),
 	])
+
+
+## `rect` with corners rounded to `radius`, as a convex outline (clockwise from the top left's end), for a filled shape
+## or GaugePattern.set_shape. Built once, never per frame.
+static func rounded_rect(rect: Rect2, radius: float) -> PackedVector2Array:
+	var r := minf(radius, minf(rect.size.x, rect.size.y) * 0.5)
+	var out := PackedVector2Array()
+	var centres: Array[Vector2] = [
+		Vector2(rect.end.x - r, rect.position.y + r), Vector2(rect.end.x - r, rect.end.y - r),
+		Vector2(rect.position.x + r, rect.end.y - r), Vector2(rect.position.x + r, rect.position.y + r),
+	]
+	for corner in 4:
+		var start := -PI * 0.5 + corner * PI * 0.5
+		for i in CORNER_STEPS + 1:
+			var a := start + PI * 0.5 * float(i) / float(CORNER_STEPS)
+			out.append(centres[corner] + Vector2(cos(a), sin(a)) * r)
+	return out
 
 
 ## The width of one team's pip block for `count` pips.
