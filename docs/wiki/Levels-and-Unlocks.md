@@ -9,7 +9,7 @@ there are no microtransactions, loot boxes or paid advantages.
 <!-- wiki:unlocks -->
 
 Locked items stay listed in the [Loadout](Loadout), greyed out with **LEVEL n**, so you can see what's coming. The
-top bar shows your level. At the top level, XP stops counting until more levels come in a later update.
+side rail shows your level. At the top level, XP stops counting until more levels come in a later update.
 
 ## Earning XP
 
@@ -41,7 +41,7 @@ default. Custom matches never count, and the summary says "Not counted this matc
 
 ## The Armory
 
-The **ARMORY** tab on the top bar shows your level, the XP bar and what the next level takes, the XP you have earned
+The **ARMORY** tab on the side rail shows your level, the XP bar and what the next level takes, the XP you have earned
 in all, how many items are unlocked, the next unlock with its picture, and every level's items marked unlocked, next
 or locked. It also shows how XP is earned and the bot level multipliers.
 

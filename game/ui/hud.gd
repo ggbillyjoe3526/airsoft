@@ -229,7 +229,7 @@ func setup(cfg: HudConfig, teams: TeamConfig, view: ViewConfig, sim: SimTuning, 
 	_warning.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_warning.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	var warn_box := HudStyle.panel_box(HudStyle.BACKING_BANNER, WARNING_PAD.x, WARNING_PAD.y)
-	warn_box.border_color = GameTheme.YELLOW
+	warn_box.border_color = GameTheme.WARN
 	warn_box.border_width_top = roundi(HudStyle.BANNER_RULE)
 	_warning.add_theme_stylebox_override("panel", warn_box)
 	_warning.visible = false
@@ -238,7 +238,7 @@ func setup(cfg: HudConfig, teams: TeamConfig, view: ViewConfig, sim: SimTuning, 
 	warn_row.add_theme_constant_override("separation", WARNING_GAP)
 	warn_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_warning.add_child(warn_row)
-	_warning_flag = HudFlagGlyph.new(HudStyle.WARNING_GLYPH, GameTheme.YELLOW)
+	_warning_flag = HudFlagGlyph.new(HudStyle.WARNING_GLYPH, GameTheme.WARN)
 	_warning_flag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	warn_row.add_child(_warning_flag)
 	_warning_text = HudStyle.label(warn_row, HudStyle.WARNING_SIZE, 800, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_CENTER,
@@ -1315,7 +1315,7 @@ func _build_step_line(parent: Control) -> void:
 	var box := HudStyle.panel_box(STEP_BACKING, STEP_PAD.z, STEP_PAD.y)
 	box.content_margin_left = STEP_PAD.x
 	box.content_margin_bottom = STEP_PAD.w
-	box.border_color = GameTheme.YELLOW
+	box.border_color = GameTheme.ACCENT
 	box.border_width_left = roundi(HudStyle.BANNER_RULE)
 	_step_line.add_theme_stylebox_override("panel", box)
 	_step_line.visible = false
@@ -1324,7 +1324,7 @@ func _build_step_line(parent: Control) -> void:
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_theme_constant_override("separation", STEP_GAP)
 	_step_line.add_child(row)
-	var kicker := HudStyle.label(row, STEP_KICKER_SIZE, 800, GameTheme.YELLOW, HORIZONTAL_ALIGNMENT_LEFT,
+	var kicker := HudStyle.label(row, STEP_KICKER_SIZE, 800, GameTheme.ACCENT, HORIZONTAL_ALIGNMENT_LEFT,
 			STEP_KICKER_SPACING)
 	kicker.text = tr("HUD_GRAPHICS_KICKER").to_upper()
 	kicker.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -1341,7 +1341,7 @@ func _build_skip_hint(parent: Control) -> void:
 	_skip_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_skip_hint.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	var box := HudStyle.panel_box(HudStyle.BACKING_CLOCK, 12, 8)
-	box.border_color = GameTheme.YELLOW
+	box.border_color = GameTheme.ACCENT
 	box.border_width_left = roundi(HudStyle.BANNER_RULE)
 	_skip_hint.add_theme_stylebox_override("panel", box)
 	_skip_hint.visible = false

@@ -239,7 +239,7 @@ func _lay_row(row: Row, y: float) -> void:
 
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), HudStyle.backing_on(self, HudStyle.BACKING_CLOCK))
-	draw_rect(Rect2(0.0, 0.0, size.x, HudStyle.BANNER_RULE), GameTheme.YELLOW)
+	draw_rect(Rect2(0.0, 0.0, size.x, HudStyle.BANNER_RULE), GameTheme.ACCENT)
 	if _heading != "":
 		_draw_heading()
 	elif _title != "":
@@ -296,8 +296,8 @@ func _draw_row(row: Row) -> void:
 	var line := Rect2(PAD.x, row.y, size.x - PAD.x * 2.0, ROW_HEIGHT)
 	draw_rect(Rect2(line.position, Vector2(line.size.x, 1.0)), Color(GameTheme.LINE, RULE_ALPHA))
 	if row.you:
-		draw_rect(line, Color(GameTheme.YELLOW, YOU_TINT))
-		draw_rect(Rect2(line.position, Vector2(YOU_BAR, ROW_HEIGHT)), GameTheme.YELLOW)
+		draw_rect(line, Color(GameTheme.ACCENT, YOU_TINT))
+		draw_rect(Rect2(line.position, Vector2(YOU_BAR, ROW_HEIGHT)), GameTheme.ACCENT)
 	var own := GameTheme.DIM if row.out else GameTheme.TEXT
 	var font := _you_font if row.you else _row_font
 	var base := row.y + (ROW_HEIGHT + font.get_ascent(ROW_SIZE) - font.get_descent(ROW_SIZE)) * 0.5

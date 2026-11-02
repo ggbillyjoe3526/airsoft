@@ -75,7 +75,7 @@ func setup(teams: TeamConfig, wins_needed: int, first: int = 0) -> void:
 	clock_row.position = Vector2(_clock_x, 4.0)
 	clock_row.size = Vector2(HudStyle.CLOCK_WIDTH, 46.0)
 	add_child(clock_row)
-	_ot_label = HudStyle.label(clock_row, HudStyle.OT_SIZE, 800, GameTheme.YELLOW, HORIZONTAL_ALIGNMENT_CENTER)
+	_ot_label = HudStyle.label(clock_row, HudStyle.OT_SIZE, 800, GameTheme.ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
 	_ot_label.text = HudStyle.caps("HUD_OT")
 	_ot_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_ot_label.size_flags_vertical = Control.SIZE_FILL
@@ -173,7 +173,7 @@ func set_sides(attackers: int) -> void:
 		tag.visible = attackers >= 0
 		var attacking := side == attackers
 		tag.text = HudStyle.caps("HUD_ATK" if attacking else "HUD_DEF")
-		tag.add_theme_color_override("font_color", GameTheme.YELLOW_INK if attacking else GameTheme.TEXT)
+		tag.add_theme_color_override("font_color", GameTheme.ACCENT_INK if attacking else GameTheme.TEXT)
 	queue_redraw()
 
 
@@ -208,7 +208,7 @@ func _draw() -> void:
 	if _attackers >= 0:
 		for side in 2:
 			var tag := _tags[side]
-			var fill := GameTheme.YELLOW if side == _attackers else HudStyle.backing_on(self, HudStyle.BACKING_CLOCK)
+			var fill := GameTheme.ACCENT if side == _attackers else HudStyle.backing_on(self, HudStyle.BACKING_CLOCK)
 			draw_rect(Rect2(tag.position, tag.size), fill)
 	var empty := Color(GameTheme.TEXT, HudStyle.PIP_EMPTY_ALPHA)
 	for side in 2:

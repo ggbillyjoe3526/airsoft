@@ -197,7 +197,7 @@ func _block() -> Control:
 	block.offset_right = -BLOCK_SIDE
 	block.offset_bottom = -BLOCK_BOTTOM
 	block.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_kicker = _label(KICKER_SIZE, 800, GameTheme.YELLOW)
+	_kicker = _label(KICKER_SIZE, 800, GameTheme.ACCENT)
 	_kicker.add_theme_font_override("font", GameTheme.spaced_font(800, KICKER_SPACING, KICKER_SIZE))
 	block.add_child(_kicker)
 	block.add_child(_space(TITLE_TOP_GAP))
@@ -219,13 +219,13 @@ func _block() -> Control:
 	track.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_fill = ColorRect.new()
 	_fill.name = "Fill"
-	_fill.color = GameTheme.YELLOW
+	_fill.color = GameTheme.ACCENT
 	_fill.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	track.add_child(_fill)
 	_pending = ColorRect.new()
 	_pending.name = "Pending"
-	_pending.color = GameTheme.YELLOW
+	_pending.color = GameTheme.ACCENT
 	_pending.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_pending.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_pending.modulate.a = PULSE_LOW

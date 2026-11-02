@@ -53,7 +53,7 @@ func _init(settings_in: Settings = null, progress_in: Progress = null, records_i
 	var page := VBoxContainer.new()
 	page.add_theme_constant_override("separation", NOTICE_GAP)
 	margin.add_child(page)
-	_notice = MenuParts.text(_load_problems(), NOTICE_SIZE, 700, GameTheme.YELLOW)
+	_notice = MenuParts.text(_load_problems(), NOTICE_SIZE, 700, GameTheme.ACCENT)
 	_notice.name = "Notice"
 	_notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_notice.visible = _notice.text != ""

@@ -707,7 +707,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   Toggle (now Hold: the 2026-10-18 ruling above), crouch Hold, volumes master 100 %, effects 80 %, power source 100 %, ambience 60 %, interface 50 % (volumes changed
   2026-10-29: the next ruling). The Retro
   look is a Dev setting again, Realistic colours moved to the Loadout's Colour tab (MR1), and the Voices placeholder is
-  gone. The top bar's level reads "LVL 3".
+  gone. The side rail's level reads "LV 3" (UR1).
 - **First-start defaults after the 0.1 Dev 1 playtest (owner, 2026-10-29; FB2).** Volumes: master 100 %, effects 70 %,
   power source 100 %, ambience 30 % (20 % since 2026-11-01: Audio), interface 40 %. The game launches in exclusive
   fullscreen (on the display it opens on). V-Sync is off. Edge smoothing is Off, on every graphics preset (a player who
@@ -722,7 +722,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **A button is as wide as its words, and a group is one width (owner, 2026-10-29; FB1).** "Buttons should not be wider
   than the text in them, however keep the width consistent." Each button is its words plus the theme's padding; the
   buttons of one group (a row, a column or a bar on one screen) all take the widest one's width, set by one helper
-  (`ButtonWidth`), never per screen. It covers the top bar's tabs, the Match page's choices and level buttons, every
+  (`ButtonWidth`), never per screen. It covers the side rail's tabs, the Match page's choices and level buttons, every
   Settings choice row, the pause menu, the dialogs and the notices. Settings' BACK is a small button at the bottom left.
   Cards with a picture or a paragraph (maps, modes, replicas, parts) are panels, not buttons, and still fill their
   column; quiet text links (Report a Bug, Licences, Rename) are words, not boxes; a key's box in the Controls list is a
@@ -735,21 +735,19 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   box (`GameTheme.dress`), so no state cuts its words. A line of help stays on screen only where a player would be stuck
   or surprised (the key-binding hint, the order wheel's Hover and Click, "From the next start.", what Custom rules
   cost); the rest is the row's tooltip.
-- **The wordmark goes home, and Esc anywhere in the menus asks to quit (owner, 2026-10-29; FB1).** A click on AIRSOFT in
-  the top bar goes to the title screen (not from the Loadout in practice, which has no title). Esc in the menus, the
-  title and Settings included, opens QUIT GAME? with QUIT and CANCEL, the focus on CANCEL; Esc again or CANCEL closes it.
-  Anything with an Esc of its own takes it first (a dialog or popup, a key being rebound, the Loadout's rename or
-  Customise, the credits and the report); in a match Esc stays the pause menu, and its Settings close on Esc.
+- **Esc anywhere in the menus asks to quit (owner, 2026-10-29; FB1).** Esc in the menus, Settings included, opens
+  QUIT GAME? with QUIT and CANCEL, the focus on CANCEL; Esc again or CANCEL closes it. Anything with an Esc of its own
+  takes it first (a dialog or popup, a key being rebound, the Loadout's rename or Customise, the credits and the
+  report); in a match Esc stays the pause menu, and its Settings close on Esc. The wordmark is words now (UR1).
 - **Leaving a match lands on the Match page, and your team is always on the left (owner, 2026-10-30; FB6).** Every
-  way out of a match or the range goes back to the menus' Match page with Play focused and the picks kept; only the
-  AIRSOFT wordmark opens the title. The score bar, the Tab scoreboard, the round table and the match summary put your
+  way out of a match or the range goes back to the menus' Match page with Play focused and the picks kept. The score bar, the Tab scoreboard, the round table and the match summary put your
   team first, on the left, in its own colour, half time included.
 - **Small menu rulings (owner, 2026-10-03 to 2026-10-07).** The tagline is "Call your hit. Go again." Menu headings and
   labels are in capitals, descriptions as written. Unbuilt items are listed greyed out with a LATER tag.
 - **The menus grow with a tall window as the HUD does (UX1, 2026-10-17).** They scale by the window height over 1080,
   up to 2× at 4K, so 4K draws exactly as 1080 does (UI1, 2026-10-30; was 1.5×, the browser game's, which left most of a
   4K screen empty); 1080p and smaller draw as before.
-- **A menu page is pinned to the window; only its long part scrolls (UX1, 2026-10-17).** The top bar, the heading and the
+- **A menu page is pinned to the window; only its long part scrolls (UX1, 2026-10-17).** The side rail, the heading and the
   main button always show; long lists scroll inside, fading at the foot while more lies below.
 - **The order wheel is on Z (owner, 2026-10-04); Hold here X, Regroup V, Follow me F.** Orders end when their giver is
   hit and at each round start. A window that loses focus pauses the match. Out, a click (Fire) skips the rest of the
@@ -758,8 +756,18 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   shows and the next round waits for a click on it (or the match's results follow).
 - **A match waits for Continue once fully loaded (owner, 2026-11-01, MC1).** The loading screen's CONTINUE comes up
   only once the match is built, drawn and its shaders warm; the round clock starts on the press.
-- **The menu and UI redesign is approved (owner, 2026-10-05); the HUD is restyled in place, with the same positions.**
-- **The menus use Inter (owner, 2026-10-07).** He finds Barlow hard to read, numbers above all.
+- **The UI redesign is concept B, Side rail (owner, 2026-11-02; UR1, replaces the blue and yellow look of 2026-10-05).**
+  Frosted-glass panels over the field you picked, blurred; one teal accent (`GameTheme.ACCENT`); no blue and yellow
+  outside the team colours. A text-only rail on the left, words centred, holds the AIRSOFT wordmark, MATCH, LOADOUT,
+  ARMORY, SETTINGS, the level and QUIT. Field pictures are photo-mode views from eye height, never overhead; replica
+  pictures share one scale and fit inside their boxes; Customise keeps the replica fixed and can turn it in 3D; the HUD
+  minimap is square and the equipped grenade's icon is the bigger one. Concepts: `/mnt/project-files/concepts/ui-redesign/`.
+- **There is no title screen (owner, 2026-11-02; UR1).** The game opens on the Match page. The version, the renderer,
+  Report a Bug, Licences and Quit to desktop are in Settings › About (no title box there); QUIT is also at the rail's
+  foot.
+- **Headings use Barlow Condensed; words only, numbers stay Inter (UR1, 2026-11-02).** The owner picked concept B with
+  its condensed headings. His 2026-10-07 ruling ("He finds Barlow hard to read, numbers above all") still holds for
+  numbers and body text: scores, levels in figures, stats and every paragraph stay Inter.
 - **The teams are Alpha (blue) and Beta (orange), although Beta is also the name of the Beta builds (owner,
   2026-10-07).** The hit feed reads "Beta 2 called HIT · Alpha 3": who called the hit, then whose BB it was; the player
   is "You".

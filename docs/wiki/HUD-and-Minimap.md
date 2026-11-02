@@ -25,7 +25,7 @@ goes as the reload starts.
 ## Hit feed and teammate markers
 
 The hit feed (top right, or bottom left if you like) shows each hit: who fired, the BB trail, who was hit and their
-red **HIT** call with a raised hand, in team colours. Your own lines say "You" and are framed in yellow, and your own
+red **HIT** call with a raised hand, in team colours. Your own lines say "You" and are framed in teal, and your own
 hit stays framed until the next round.
 
 Teammates wear a chevron in your team's colour over their heads, seen through walls: solid when you can see them,

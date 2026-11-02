@@ -13,6 +13,10 @@ extends Control
 
 ## The screen closed.
 signal closed
+## About's Licences, Report a Bug and Quit were pressed (the menus' settings only: `in_menus`).
+signal credits_requested
+signal report_requested
+signal quit_requested
 
 const MARGIN_X := 56.0
 const MARGIN_Y := 28.0
@@ -51,8 +55,11 @@ var settings: Settings = null
 var save_path: String = Settings.PATH
 ## Whether Esc closes the screen (the pause menu's settings); off in the menus, where Esc asks QUIT GAME? instead.
 var esc_closes: bool = false
-## Whether the SETTINGS heading shows: not under the menus' top bar, whose lit SETTINGS tab already says it.
+## Whether the SETTINGS heading shows: not beside the menus' rail, whose lit SETTINGS tab already says it.
 var show_heading: bool = true
+## Opened from the menus (beside the rail, over the field's picture): no plate of its own, and About has Report a Bug,
+## Licences and Quit; off from the pause menu, which has its own.
+var in_menus: bool = false
 ## The match's End the round now, set when opened from the pause menu (returns false when no round is live); empty
 ## from the title screen.
 var end_round: Callable = Callable()
@@ -102,6 +109,7 @@ var _speed: HSlider = null
 var _end_round: Button = null
 var _confirm_level: ConfirmationDialog = null
 var _confirm_crash: ConfirmationDialog = null
+var _about_page: SettingsAboutPage = null
 
 
 func _ready() -> void:
@@ -114,6 +122,8 @@ func _ready() -> void:
 	var plate := ColorRect.new()
 	plate.color = GameTheme.BG
 	plate.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# in the menus the field's blurred picture shows through
+	plate.visible = not in_menus
 	add_child(plate)
 	var box := VBoxContainer.new()
 	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -125,13 +135,13 @@ func _ready() -> void:
 	add_child(box)
 	_heading = Label.new()
 	_heading.text = tr("SETTINGS_TITLE").to_upper()
-	_heading.add_theme_font_override("font", GameTheme.spaced_font(800, GameTheme.SPACING_TAB, HEADING_SIZE))
+	_heading.add_theme_font_override("font", GameTheme.heading_font(700, GameTheme.SPACING_TAB, HEADING_SIZE))
 	_heading.add_theme_font_size_override("font_size", HEADING_SIZE)
 	_heading.visible = show_heading
 	box.add_child(_heading)
 	_load_message = Label.new()
 	_load_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_load_message.add_theme_color_override("font_color", GameTheme.YELLOW)
+	_load_message.add_theme_color_override("font_color", GameTheme.WARN)
 	box.add_child(_load_message)
 	_tabs = TabContainer.new()
 	_tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -143,6 +153,7 @@ func _ready() -> void:
 	_build_hud()
 	_build_access()
 	_build_save()
+	_build_about()
 	_build_dev()
 	# the foot: BACK, a small button at the bottom left as wide as its words (owner, 2026-10-29), and the note of the last
 	# action beside it in a line of its own width, so a note never moves the tabs
@@ -152,7 +163,7 @@ func _ready() -> void:
 	_back = Button.new()
 	_back.name = "Back"
 	_back.text = tr("SETTINGS_BACK").to_upper()
-	GameTheme.small_button(_back, GameTheme.YELLOW)
+	GameTheme.small_button(_back, GameTheme.ACCENT)
 	_back.pressed.connect(close)
 	ButtonWidth.group([_back])
 	foot.add_child(_back)
@@ -190,6 +201,24 @@ func open() -> void:
 func show_graphics() -> void:
 	# the page sits in its tab's scroll box
 	_tabs.current_tab = _graphics_page.get_parent().get_parent().get_index()
+
+
+## Shows the About tab.
+func show_about() -> void:
+	_tabs.current_tab = _about_page.get_parent().get_parent().get_index()
+
+
+## About's Report a Bug, Licences and Quit buttons (null from the pause menu).
+func about_report_button() -> Button:
+	return _about_page.report_button()
+
+
+func about_credits_button() -> Button:
+	return _about_page.credits_button()
+
+
+func about_quit_button() -> Button:
+	return _about_page.quit_button()
 
 
 ## The tab showing (tests).
@@ -597,6 +626,19 @@ func _refresh() -> void:
 	_end_round.disabled = not end_round.is_valid()
 
 
+# --- About ---
+
+## About (no title screen: owner, 2026-11-02): SettingsAboutPage on its tab.
+func _build_about() -> void:
+	var tab := _page(tr("SETTINGS_ABOUT"))
+	_about_page = SettingsAboutPage.new()
+	tab.add_child(_about_page)
+	_about_page.build(self, in_menus)
+	_about_page.report_pressed.connect(func() -> void: report_requested.emit())
+	_about_page.credits_pressed.connect(func() -> void: credits_requested.emit())
+	_about_page.quit_pressed.connect(func() -> void: quit_requested.emit())
+
+
 # --- Building blocks ---
 
 ## A scrolling tab page titled `title` (a tab takes its page's name), returned as the column to fill. It scrolls to the
@@ -626,7 +668,7 @@ func add_section(page: Control, text: String) -> void:
 static func section_label(text: String) -> Label:
 	var label := Label.new()
 	label.text = text.to_upper()
-	label.add_theme_font_override("font", GameTheme.spaced_font(800, GameTheme.SPACING_SECTION,
+	label.add_theme_font_override("font", GameTheme.heading_font(600, GameTheme.SPACING_HEADING_CAPS,
 			GameTheme.SECTION_SIZE))
 	label.add_theme_font_size_override("font_size", GameTheme.SECTION_SIZE)
 	label.add_theme_color_override("font_color", GameTheme.MUTED)
@@ -706,7 +748,7 @@ func _spin_row(page: Control, label_key: String, lo: float, hi: float, step: flo
 	spin.get_line_edit().add_theme_font_size_override("font_size", GameTheme.LABEL_SIZE)
 	spin.get_line_edit().add_theme_stylebox_override("normal", GameTheme.box(GameTheme.CARD, GameTheme.LINE,
 			GameTheme.CONTROL_PAD_X, 0))
-	spin.get_line_edit().add_theme_stylebox_override("focus", GameTheme.box(GameTheme.CARD, GameTheme.YELLOW,
+	spin.get_line_edit().add_theme_stylebox_override("focus", GameTheme.box(GameTheme.CARD, GameTheme.ACCENT,
 			GameTheme.CONTROL_PAD_X, 0))
 	row.add_child(spin)
 	return spin

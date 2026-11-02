@@ -1,37 +1,55 @@
-Task: TS1 · QA commit none (no tests added; this pass was read-only apart from this report) · Verdict: Pass
+Task: none (UR1 part 1) · QA commit 6b5eda8 · Verdict: Fail
 
-Reviewed 4240208 (origin/main..HEAD, 42 files). Blocking findings: none.
+Blocking (1)
+1. game/ui/settings_screen.gd (in_menus, offset_left = NavRail.WIDTH via MenuScreen.add_over_page, menu_screen.gd:~95) with
+   game/ui/settings_hud_page.gd, settings_access_page.gd, settings_graphics_page.gd: the settings tab pages are built
+   for 1920 px, and the rail now takes 136 of them. Their minimum widths (HUD 1800, Accessibility 1749, Graphics 1673)
+   exceed the 1664 px left, so the tab container grows past the right edge: at 1080p (and, scaled, at 1280x720) the HUD
+   tab ends at x=1992 and Accessibility at 1941 of 1920, cutting off the right-hand column; Graphics overruns its margin
+   by 1 px. Repro: open Settings, press the HUD tab. Fix: narrow those pages' fixed columns as loadout_gear was.
 
-Checked, all fine
-- Acceptance 1 and 2: data/maps.md gives 5/6/8 on all three fields. TEAM_SIZES is 1 to 8, and the loader accepts 7 and 8.
-  Each map JSON changed only its spawns and deadZones; geometry is untouched. Loaded at 8 a side, all three read clean with
-  no problems or warnings, 8 spawns and 8 dead-zone spots an end, every spot walkable on the nav grid. A ray scan of
-  every spawn to the field's walkable cells (2 m grid, outside 16 m of its own end) saw none, as before. Dead-zone
-  sight is the same as before (worst spot 164 vs 158 cells Woodland W, 41 vs 32 Woodland E, 67 vs 67 and 74 vs 73 Street).
-- Place_teams: the middle six of eight (slots 1 to 6) at 6v6. 5v5 takes slots 1 to 5 and 7v7 slots 0 to 6, half a metre
-  off centre, harmless.
-- Acceptance 3: PlaySession builds Street 8v8 and 7v7 and 5v5, Depot 7v7 and Woodland 7v7 with unique spawns, every bot
-  named and unique, and 600 ticks run with no script errors. Street 8v8 had no test; I ran it by hand. The en.po blurbs 7 and 8
-  exist, and the key is RULE_%s_BLURB_%d.
-- Acceptance 4: the balance_run argument index (8th) matches balance.sh. sized_for(picked) falls back to the standard
-  for sizes a map doesn't offer. The median round length is added to both report modes. team_bench is excluded from
-  exports (tools/*) and gdlint is clean on every changed .gd file.
-- Nothing else assumes 6 a side: HUD pips follow wins needed, not team size. Minimap and mag-line capacity, the torch
-  beams and figure_of follow characters.size(). The BB pool (256) peaked at 12 in an 8v8 autopilot match. The
-  bot roster has 32 names for 15 bots, and the thrown-magazine pool recycles the oldest. Saves load through _choice, so an
-  old 3 or 6 stays valid. report_facts counts team sizes from the characters.
+Advisory (not blocking)
+- game/ui/settings_screen.gd:147 and game/ui/loadout_page.gd:76: the "could not read your settings/loadouts" load
+  messages are now teal ACCENT, but they are warnings; the brief keeps WARN yellow for warnings.
+- game/main.gd:_build_menus -> graphics.show_safe_notice(_menus) runs on every menus build, so while the safe-start
+  question is unanswered it also shows over the practice Loadout (_open_practice_loadout); before, it sat on the
+  hidden title. Repro: leave the safe-start notice unanswered, play, open practice, press the Loadout key.
+- game/ui/menu_screen.gd:~48 / match_page.gd:_list_maps: the backdrop follows map_picked only; if the catalogue
+  or Custom team size makes the picked map unloadable at run time, _keep_a_playable_map moves picks.map_id without
+  the signal and the backdrop keeps the old field until the next pick. Unreachable today (every map is public).
+- A graphics notice (bottom right) is Tab-reachable from the open settings (it is above them); harmless.
 
-Advisory (not blocking; for KNOWN_ISSUES or a later pass)
-1. game/ui/hud.gd:53 and hud_scoreboard.gd (Tab board): measured 923 px tall at 8v8 with the Hard Pro tip (763 at 6v6),
-   at top 160, so it ends at 1083 of 1080: the tip box's last 3 px clip. The match summary and round result have a height
-   fit (_height_fit); the Tab board has none, so any HUD size above 1.0 pushes the 8v8 board off screen (6v6 does at
-   1.16 and up). Fix: scale the board with _height_fit as the summary does, or trim ROW_HEIGHT or BOARD_TOP.
-2. docs/FEATURES.md:33 (Depot "5v5 or 6v6") and :36 (The Street "5v5 or 6v6") are stale; only line 65 was updated.
-3. Coverage gap: no test builds The Street at 8v8 or checks its spawns and dead zone unseen (test_street.gd loads it at
-   5). Suggest a test_team_sizes case across all three maps (Woodland's exists) plus an unseen-spawn test for Street.
-4. KNOWN_ISSUES records the headless frame cost; Woodland 8v8 p99 is 14.1 ms CPU, so it may drop frames on Low.
-   That needs a GPU playtest (owner's list).
+Checked, no bug found: boot focus on PLAY; focus after a match, after Credits and Report close (back on their About
+buttons), after the crash screen's Continue; Esc with About, Credits or Report open (only the top layer closes, then
+QUIT GAME? and focus returns into the settings); notice above settings, settings under the rail (also for a notice
+shown after); repeated settings/About/credits/report cycles leave the node count and orphans unchanged; settings
+opened from the Loadout and Armory tabs restore the right page and focus; a second SETTINGS press does not stack
+screens; practice rail (only LOADOUT + BACK TO PRACTICE, no SETTINGS/QUIT, Esc and the button send practice_requested);
+backdrop with a missing file, a non-texture and a field with no picture, and with the real pictures headless (about
+13 ms each); every new translation key exists; rail words fit the 136 px rail; Match, Loadout and Armory minimum
+widths fit the 1784 px beside the rail; pause-menu settings still plate, About without the menu buttons.
 
-Tests added or changed: none. Targeted runs: not needed, the suite passed on this head; I used scratch scripts outside
-the repo (measure, spots, build, bbs) and left no repo files changed.
-Could not test: how 5v5 to 8v8 feels (pace and fairness) and GPU frame time; both go to the owner's playtest list.
+Tests added (tests/unit/test_ur1_qa.gd, 24 tests, 125 asserts; 23 pass, 1 fails on purpose)
+- :every_settings_tab_fits_beside_the_rail_at_1080p · pins blocking bug 1 · fails now; passes on the old layout (the
+  tabs fitted 1920 minus 112 px of margin) and will pass once the three pages are narrowed.
+- :the_backdrop_copes_with_a_missing_or_wrong_kind_of_picture, :blurs_every_listed_fields_picture · stub blurred() to
+  return a texture for any path (missing file) and the first fails; return null and the second fails.
+- :the_settings_open_over_the_page_under_the_rail_and_a_notice, :opening_and_closing_the_settings_about_credits_and_report_leaves_nothing_behind,
+  :credits_and_report_close_back_to_their_about_buttons, :esc_* (3), :settings_tab_pressed_twice..., :closing_the_settings_from_the_loadout/armory_tab...,
+  :a_tab_pressed_with_the_settings_open..., :the_practice_rail_*, :the_rail_*, :the_pages_beside_the_rail_fit...,
+  :after_the_crash_screen_continue... · regression pins; each fails if the matching line in main.gd/menu_screen.gd
+  (add_over_page's move_child, _credits_closed/_report_closed focus, set_page_hidden, set_practice) is removed.
+  I did not run the removals for every one; the ordering and focus ones I reasoned from the code.
+
+Suite: only this file was run (tools/check.sh runs elsewhere): 23/24, 14.8 s; log in pipeline/out/qa/ur1-qa.log.
+Not testable headless: how the glass panels and the blurred picture look, text cut by the real renderer at 1280x720
+(the layout figures above are the 1920x1080 design space the stretch scales), window-mode changes. Owner: open each
+Settings tab at 1280x720 and 1920x1080, and look at the HUD and Accessibility tabs' right edge.
+
+Re-check (attempt 2, by the lead; QA's own test as the evidence): Pass.
+- Blocking 1 fixed in 89d8286: the HUD and Accessibility labels, the HUD's sliders and the column gaps are narrower;
+  `test_ur1_qa.gd` › test_every_settings_tab_fits_beside_the_rail_at_1080p passes, with test_ui1_menus' no-cut-words
+  and no-overlap tests on every tab.
+- Advisories taken: the load warnings are WARN; the safe-start notice closes for the Loadout from practice; the
+  backdrop follows a field that stands in (map_picked from _keep_a_playable_map). The notice tabbable over Settings
+  stays (harmless), and now takes the keyboard when it shows (critic, attempt 1).

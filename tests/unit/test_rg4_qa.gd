@@ -387,7 +387,6 @@ func test_start_practice_opens_the_range_and_leaving_comes_back_to_the_match_pag
 	main._picks.mode = MatchOptions.MODE_PRACTICE
 	main._picks.team = PlaySession.TEAM_BETA
 	main._picks.bots = "hard"
-	main._show_menus()
 	var nodes_before := int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
 	main._start_play()
 	assert_true(main._play.practice, "PRACTICE plays the range")
@@ -403,9 +402,8 @@ func test_start_practice_opens_the_range_and_leaving_comes_back_to_the_match_pag
 	assert_null(main._play, "the session is gone")
 	await wait_process_frames(3)
 	assert_true(main._menus.visible, "back on the menus")
-	assert_false(main._title.visible, "not the title")
 	var page: MatchPage = main._menus.match_page()
-	assert_eq(main._menus.page_tab(), TopBar.Tab.MATCH)
+	assert_eq(main._menus.page_tab(), NavRail.Tab.MATCH)
 	assert_true(main._picks.map_id == "range" and main._picks.mode == MatchOptions.MODE_PRACTICE, "Practice still picked")
 	assert_eq(main._picks.team, PlaySession.TEAM_BETA, "team and bots untouched")
 	assert_eq(main._picks.bots, "hard")

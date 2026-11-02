@@ -3574,3 +3574,18 @@ msgstr "Wall"
 
 msgid "MAP_KEY_GREEN"
 msgstr "Hedge, thicket"
+
+msgid "MENU_LEVEL_SHORT"
+msgstr "LV %d"
+
+msgid "SETTINGS_ABOUT"
+msgstr "About"
+
+msgid "SETTINGS_ABOUT_VERSION"
+msgstr "Version"
+
+msgid "SETTINGS_ABOUT_RENDERER"
+msgstr "Renderer"
+
+msgid "SETTINGS_ABOUT_QUIT"
+msgstr "Quit to desktop"

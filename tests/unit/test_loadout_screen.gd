@@ -65,15 +65,15 @@ func _words(root: Node) -> PackedStringArray:
 func test_the_loadout_tab_is_on_and_opens_the_gear_page() -> void:
 	var menus := MenuScreen.new(MatchPicks.new(), settings)
 	add_child_autofree(menus)
-	assert_false(menus.top_bar().tab_button(TopBar.Tab.LOADOUT).disabled)
-	assert_false(menus.top_bar().tab_button(TopBar.Tab.ARMORY).disabled, "the Armory is built (AR1)")
+	assert_false(menus.nav_rail().tab_button(NavRail.Tab.LOADOUT).disabled)
+	assert_false(menus.nav_rail().tab_button(NavRail.Tab.ARMORY).disabled, "the Armory is built (AR1)")
 	assert_null(menus.loadout_page(), "built when asked for")
 	menus.show_loadout()
 	var page := menus.loadout_page()
 	assert_not_null(page)
 	assert_false(menus.match_page().visible)
-	assert_eq(menus.top_bar().current(), TopBar.Tab.LOADOUT)
-	assert_eq(menus.page_tab(), TopBar.Tab.LOADOUT)
+	assert_eq(menus.nav_rail().current(), NavRail.Tab.LOADOUT)
+	assert_eq(menus.page_tab(), NavRail.Tab.LOADOUT)
 	assert_true(page.gear().visible)
 	assert_false(page.customising())
 	var words := _words(page)
@@ -91,26 +91,24 @@ func test_the_match_tab_brings_the_match_page_back_and_frees_the_loadout_page() 
 	assert_null(menus.loadout_page())
 	assert_true(page.is_queued_for_deletion())
 	assert_true(menus.match_page().visible)
-	assert_eq(menus.top_bar().current(), TopBar.Tab.MATCH)
+	assert_eq(menus.nav_rail().current(), NavRail.Tab.MATCH)
 
 
-func test_the_entry_scene_shows_the_page_for_the_tab_and_goes_back_to_match_on_escape_to_the_title() -> void:
+func test_the_entry_scene_shows_the_page_for_the_tab_and_the_match_tab_goes_back() -> void:
 	var main: Node = add_child_autofree(MAIN.instantiate())
 	await wait_process_frames(2)
-	main._show_menus()
-	main._on_tab(TopBar.Tab.LOADOUT)
+	main._on_tab(NavRail.Tab.LOADOUT)
 	var menus: MenuScreen = main._menus
 	assert_not_null(menus.loadout_page())
-	main._show_title()
-	assert_null(menus.loadout_page(), "the title takes the menus back to Match")
-	assert_eq(menus.top_bar().current(), TopBar.Tab.MATCH)
+	main._on_tab(NavRail.Tab.MATCH)
+	assert_null(menus.loadout_page(), "the Match tab frees the Loadout")
+	assert_eq(menus.nav_rail().current(), NavRail.Tab.MATCH)
 
 
 func test_escape_in_customise_goes_back_to_the_gear_page_not_to_the_quit_question() -> void:
 	var main: Node = add_child_autofree(MAIN.instantiate())
 	await wait_process_frames(2)
-	main._show_menus()
-	main._on_tab(TopBar.Tab.LOADOUT)
+	main._on_tab(NavRail.Tab.LOADOUT)
 	var menus: MenuScreen = main._menus
 	var page := menus.loadout_page()
 	page.show_customise(0)
@@ -121,14 +119,12 @@ func test_escape_in_customise_goes_back_to_the_gear_page_not_to_the_quit_questio
 	await wait_process_frames(2)
 	assert_false(page.customising(), "the first Esc leaves Customise")
 	assert_true(menus.visible, "and stays in the menus")
-	assert_true(main._title.visible == false)
 	cancel = InputEventAction.new()
 	cancel.action = &"ui_cancel"
 	cancel.pressed = true
 	Input.parse_input_event(cancel)
 	await wait_process_frames(2)
 	assert_not_null(main._quit_prompt, "the next one asks QUIT GAME? (owner, 2026-10-29)")
-	assert_false(main._title.visible)
 
 
 # --- keys 1 to 5 and the strip ---
@@ -179,7 +175,7 @@ func test_the_strip_creates_renames_duplicates_replaces_and_removes() -> void:
 	assert_eq(saved.slots.size(), 2)
 
 
-func test_escape_leaves_replace_then_customise_and_the_menus_keep_theirs_for_the_title() -> void:
+func test_escape_leaves_replace_then_customise_and_the_menus_keep_theirs_for_the_quit_question() -> void:
 	saved.create()
 	var page := _page()
 	page.strip().start_replace()

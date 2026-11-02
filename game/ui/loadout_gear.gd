@@ -11,11 +11,12 @@ signal slot_picked(slot: Loadout.Slot)
 signal replica_picked(id: String)
 signal customise_requested
 
-const MARGIN_X := 56
+# beside the side rail (UR1): 48 + 700 + 32 + 424 + 32 + 500 + 48 fills the 1784 px the rail leaves of 1920
+const MARGIN_X := 48
 const TOP := 116
 const BOTTOM := 120
 const COLUMN_GAP := 32
-const CARRIED_WIDTH := 820.0
+const CARRIED_WIDTH := 700.0
 const SIDE_WIDTH := 500.0
 const CARD_GAP := 18
 ## A carried card's picture area is as tall in both slots, so a rifle fits either.
@@ -350,7 +351,7 @@ func _build_range_note() -> Control:
 	var plate := HBoxContainer.new()
 	plate.add_theme_constant_override("separation", 0)
 	var rule := ColorRect.new()
-	rule.color = GameTheme.YELLOW
+	rule.color = GameTheme.ACCENT
 	rule.custom_minimum_size = Vector2(NOTE_RULE, 0.0)
 	plate.add_child(rule)
 	var panel := PanelContainer.new()
@@ -363,7 +364,7 @@ func _build_range_note() -> Control:
 	panel.add_theme_stylebox_override("panel", face)
 	var words := VBoxContainer.new()
 	words.add_theme_constant_override("separation", NOTE_WORDS_GAP)
-	words.add_child(MenuParts.spaced(tr("LOADOUT_RANGE_KICKER").to_upper(), NOTE_KICKER_SIZE, 800, GameTheme.YELLOW,
+	words.add_child(MenuParts.spaced(tr("LOADOUT_RANGE_KICKER").to_upper(), NOTE_KICKER_SIZE, 800, GameTheme.ACCENT,
 			NOTE_KICKER_SPACING))
 	var text := MenuParts.text(tr("LOADOUT_RANGE_NOTE"), NOTE_SIZE, 600, GameTheme.TEXT)
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -423,7 +424,7 @@ func _replica_row(item: Pool.Item, later: bool, lock_level: int) -> MenuCard:
 	text.add_child(title)
 	var sub := HBoxContainer.new()
 	sub.add_theme_constant_override("separation", 0)
-	var slot_label := MenuParts.text("", REPLICA_SUB_SIZE, 800, GameTheme.YELLOW)
+	var slot_label := MenuParts.text("", REPLICA_SUB_SIZE, 800, GameTheme.ACCENT)
 	var rest := MenuParts.text("", REPLICA_SUB_SIZE, 600, GameTheme.MUTED)
 	sub.add_child(slot_label)
 	sub.add_child(rest)

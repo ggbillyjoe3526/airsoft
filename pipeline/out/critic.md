@@ -1,31 +1,22 @@
-Task: TS1 · 6v6 on every field, 5v5 to 8v8 under Custom
+Task: none (UR1 part 1) · Concept B look, side rail, blurred field, no title screen, Settings › About
 Attempt: 1 of 4
-Head: b7c2eb6 (checks passed on it locally; CI's last red guard fixed in this commit)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
+Head: 89d8286
+Checks: 1 ✗ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✗ | 8 ✗
+Score: 5/8 → Retry
+1. A graphics notice sat bottom right over PLAY with the focus left on PLAY (Enter started a match unseen); About's
+   renderer read engine ids; the M map's flags were teal while the HUD's were yellow.
+7. About was built inline in an 851-line SettingsScreen; BACK TO PRACTICE's height was a font-size formula.
+8. ARCHITECTURE's game/ui row still described the title screen, the top bar and the navy and yellow look.
+Reports: QA's Fail had no re-check line; performance.md was TS1's.
+Fixed in attempt 2: the notice sits bottom left beside the rail, takes the keyboard and gives it back to the page
+(test_title_and_menus); About is SettingsAboutPage with SettingsGraphicsPage.renderer_words; the field map and its
+key draw flags in WARN / WARN_INK; BACK TO PRACTICE takes its height from its content; ARCHITECTURE updated; QA
+re-check and UR1's performance report written.
+
+Attempt: 2 of 4
+Head: 41aca87 (conditional on tools/check.sh passing on it)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✗ | 8 ✓
 Score: 7/8 → Accept
-Evidence for the passes (short):
-1. data/maps.md +26-28 (5/6/8 on all three, the row offers Min to Max so 7v7 too); custom_rules.gd +13 TEAM_SIZES to 8;
-   8 spawns and 8 dead-zone spots from tools/*/layout.py and build_map.py, only `spawns`/`deadZones` changed in the
-   JSON (checked); round.gd place_teams centres a 6 on slots 1-6; guards at 8v8 and frame/balance runs in the record.
-2. No contract touched. 3. hud.gd +619 _fit_board: Vector2 and float only, scale written only on change.
-4. test_team_sizes.gd +254 (board fits 8v8 at HUD 150 %) fails without _fit_board (QA measured 1083 of 1080 px).
-5/6. Rules untouched in nodes; no props added (the van was tried and dropped); Chrono hall and the house untouched.
-Failed checks, with evidence:
-8. [judgment] Docs not fully current or in house style:
-   - tests/README.md:8 still says the guards play "Woodland at 5v5 at night" (now 6v6).
-   - Added prose over the 120-column wrap (PROCESS › Writing docs): docs/DECISIONS.md:461, tools/balance.sh:3 (152),
-     game/play/play_session.gd:6, tests/guards/test_woodland_guards.gd:4, tests/support/match_guard.gd:29.
-   - The Follow me guard's dazzle exemption (match_runner.gd +541) binds every later guard run like DP4's ruling
-     beside it in DECISIONS (~line 455) but is recorded only in docs/records/TS1.md.
-Advisory (non-blocking): hud.gd +621 floors the board with CARDS_FIT_FLOOR, a name for the cards (a BOARD_FIT_FLOOR or a
-note reads better); test_team_sizes.gd +263 leaves the window at 1920x1080 if the build fails early; no test asserts
-The Street's ends hold eight (Depot and Woodland do; QA checked by hand). QA and performance reviewed the pre-rebase
-head 4240208: _fit_board and the guard change came after, read here and fine.
-Must-fix for the next attempt: none (Accept); fold the check 8 items into this PR's last push if cheap.
-Owner should test in the game:
-- Woodland 8v8 on Low with --perf in a busy fight: frame time and hitches (CPU p99 14 ms headless).
-- Tab at 8v8 with HUD size 150 %: all sixteen rows on screen and still readable when shrunk.
-- 5v5 vs 8v8 on each field: 5v5 slower and careful, 8v8 busier, rounds about as long; does any size feel unfair?
-- The Street Elimination from each end: does the north (embankment) end feel stronger (bots 55-64 %)?
-- Depot 8v8: squads leave the staging chicanes and tunnels without queuing.
-- 8v8 full-auto fights: do BBs ever vanish mid-flight (pool of 256)?
+7. close_notice read the focus owner without a null check (the Loadout from practice closes the notice before it
+   takes the keyboard), and two comments in menu_screen.gd still said the notice sits bottom right. Fixed in the
+   same push.

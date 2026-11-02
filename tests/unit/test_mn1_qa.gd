@@ -20,41 +20,47 @@ func _boot() -> Node:
 
 func test_escape_in_settings_asks_to_quit_and_leaves_the_settings_and_menus_as_they_are() -> void:
 	var main: Node = await _boot()
-	main._show_menus()
-	main._menus.top_bar().tab_button(TopBar.Tab.SETTINGS).pressed.emit()
+	main._menus.nav_rail().tab_button(NavRail.Tab.SETTINGS).pressed.emit()
 	await wait_process_frames(1)
 	await _esc()
 	assert_not_null(main._quit_prompt, "Esc in the menus' settings asks QUIT GAME? (owner, 2026-10-29)")
 	assert_not_null(main._settings_screen, "the settings stay open under it")
 	assert_true(main._menus.visible)
-	assert_false(main._title.visible)
 	await _esc()
 	assert_true(main._quit_prompt == null or main._quit_prompt.is_queued_for_deletion(), "Esc again closes it")
 	assert_not_null(main._settings_screen)
 
 
-func test_credits_open_from_title_and_escape_closes_them_without_leaving_the_title() -> void:
+func _open_about(main: Node) -> SettingsScreen:
+	main._menus.nav_rail().tab_button(NavRail.Tab.SETTINGS).pressed.emit()
+	await wait_process_frames(1)
+	main._settings_screen.show_about()
+	return main._settings_screen
+
+
+func test_credits_open_from_about_and_escape_closes_them_back_to_about() -> void:
 	var main: Node = await _boot()
-	main._title.credits_button().pressed.emit()
+	var screen: SettingsScreen = await _open_about(main)
+	screen.about_credits_button().pressed.emit()
 	assert_true(main._credits.visible)
 	await _esc()
 	assert_false(main._credits.visible)
-	assert_true(main._title.visible)
+	assert_not_null(main._settings_screen, "back on Settings › About")
+	assert_true(main._menus.visible)
 
 
-func test_after_the_credits_close_enter_still_reaches_start() -> void:
+func test_after_the_credits_close_the_focus_is_back_on_licences() -> void:
 	var main: Node = await _boot()
-	main._title.credits_button().pressed.emit()
+	var screen: SettingsScreen = await _open_about(main)
+	screen.about_credits_button().pressed.emit()
 	main._credits.close()
 	await wait_process_frames(2)
-	var owner_ctl := get_viewport().gui_get_focus_owner()
-	assert_eq(owner_ctl, main._title.start_button(), "focus returns to START (Enter must start)")
+	assert_eq(get_viewport().gui_get_focus_owner(), screen.about_credits_button(), "focus returns to Licences")
 
 
 func test_after_settings_close_enter_still_reaches_play() -> void:
 	var main: Node = await _boot()
-	main._show_menus()
-	main._menus.top_bar().tab_button(TopBar.Tab.SETTINGS).pressed.emit()
+	main._menus.nav_rail().tab_button(NavRail.Tab.SETTINGS).pressed.emit()
 	await wait_process_frames(1)
 	main._settings_screen._back.pressed.emit() # Esc now asks QUIT GAME? in the menus; Back closes the settings
 	await wait_process_frames(2)
@@ -62,25 +68,22 @@ func test_after_settings_close_enter_still_reaches_play() -> void:
 	assert_eq(get_viewport().gui_get_focus_owner(), main._menus.match_page().play_button())
 
 
-func test_start_then_enter_press_starts_menus_and_play_has_focus() -> void:
+func test_the_game_opens_with_play_focused() -> void:
 	var main: Node = await _boot()
-	assert_eq(get_viewport().gui_get_focus_owner(), main._title.start_button())
-	main._title.start_button().pressed.emit()
 	assert_eq(get_viewport().gui_get_focus_owner(), main._menus.match_page().play_button())
 
 
 func test_opening_and_closing_settings_and_credits_repeatedly_leaks_no_nodes() -> void:
 	var main: Node = await _boot()
-	main._show_menus()
-	var bar: TopBar = main._menus.top_bar()
-	bar.tab_button(TopBar.Tab.SETTINGS).pressed.emit()
+	var bar: NavRail = main._menus.nav_rail()
+	bar.tab_button(NavRail.Tab.SETTINGS).pressed.emit()
 	await wait_process_frames(2)
 	main._settings_screen.close()
 	await wait_process_frames(2)
 	var before := int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
 	var conns := bar.tab_pressed.get_connections().size()
 	for i in 5:
-		bar.tab_button(TopBar.Tab.SETTINGS).pressed.emit()
+		bar.tab_button(NavRail.Tab.SETTINGS).pressed.emit()
 		await wait_process_frames(2)
 		main._settings_screen.close()
 		await wait_process_frames(2)
@@ -88,18 +91,18 @@ func test_opening_and_closing_settings_and_credits_repeatedly_leaks_no_nodes() -
 		main._credits.close()
 	assert_eq(int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)), before, "no nodes left behind")
 	assert_eq(bar.tab_pressed.get_connections().size(), conns)
-	assert_eq(main._menus.top_bar().current(), TopBar.Tab.MATCH)
+	assert_eq(main._menus.nav_rail().current(), NavRail.Tab.MATCH)
 
 
-func test_title_menus_title_round_trips_keep_one_connection_per_signal() -> void:
+func test_settings_round_trips_keep_one_connection_per_signal() -> void:
 	var main: Node = await _boot()
-	var n_start: int = main._title.start_pressed.get_connections().size()
-	var n_back: int = main._menus.title_requested.get_connections().size()
+	var n_quit: int = main._menus.quit_requested.get_connections().size()
 	for i in 4:
-		main._show_menus()
-		main._show_title()
-	assert_eq(main._title.start_pressed.get_connections().size(), n_start)
-	assert_eq(main._menus.title_requested.get_connections().size(), n_back)
+		main._menus.nav_rail().tab_button(NavRail.Tab.SETTINGS).pressed.emit()
+		await wait_process_frames(1)
+		main._settings_screen.close()
+		await wait_process_frames(1)
+	assert_eq(main._menus.quit_requested.get_connections().size(), n_quit)
 
 
 func test_dev_content_toggle_adds_and_removes_the_dev_map_choice() -> void:
@@ -154,15 +157,14 @@ func test_content_scale_is_one_in_play_and_restored_on_return() -> void:
 func _count_menus(main: Node) -> int:
 	var n := 0
 	for c in main.get_children():
-		if c is TitleScreen or c is MenuScreen:
+		if c is MenuScreen:
 			n += 1
 	return n
 
 
-func test_a_match_frees_the_title_and_menus_and_leaving_rebuilds_them() -> void:
+func test_a_match_frees_the_menus_and_leaving_rebuilds_them() -> void:
 	var main: Node = await _boot()
-	main._show_menus()
-	main._menus.top_bar().tab_button(TopBar.Tab.SETTINGS).pressed.emit()
+	main._menus.nav_rail().tab_button(NavRail.Tab.SETTINGS).pressed.emit()
 	await wait_process_frames(2)
 	main._start_play()
 	await wait_process_frames(3)
@@ -170,10 +172,9 @@ func test_a_match_frees_the_title_and_menus_and_leaving_rebuilds_them() -> void:
 	assert_null(main._settings_screen, "the settings closed with the menus")
 	main._end_play()
 	await wait_process_frames(2)
-	assert_eq(_count_menus(main), 2, "title and menus back")
-	# FB6 (owner, 2026-10-30): back on the Match page with Play focused, not the title
+	assert_eq(_count_menus(main), 1, "the menus back")
+	# FB6 (owner, 2026-10-30): back on the Match page with Play focused
 	assert_true(main._menus.visible)
-	assert_false(main._title.visible)
 	assert_eq(get_viewport().gui_get_focus_owner(), main._menus.match_page().play_button())
 	assert_gt(main._menus.match_page().map_ids().size(), 0, "the Match page lists the maps again")
 
@@ -183,7 +184,7 @@ func test_every_translation_key_used_in_the_new_ui_exists_in_en_po() -> void:
 	var re := RegEx.new()
 	re.compile("tr\\(\"([A-Z0-9_]+)\"\\)")
 	var missing := PackedStringArray()
-	for f: String in ["title_screen", "top_bar", "menu_screen", "match_page", "credits", "settings_screen", "hazard_tape"]:
+	for f: String in ["nav_rail", "menu_backdrop", "menu_screen", "match_page", "credits", "settings_screen", "hazard_tape"]:
 		var src := FileAccess.get_file_as_string("res://game/ui/%s.gd" % f)
 		for m in re.search_all(src):
 			if not po.contains("msgid \"%s\"" % m.get_string(1)):

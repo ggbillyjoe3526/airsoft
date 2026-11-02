@@ -224,7 +224,7 @@ func _away(p: Vector3) -> float:
 func _draw_last() -> void:
 	_shown.copy_from(_last)
 	var small := "[font_size=%d][color=#%s][b]%s[/b][/color][/font_size]" % [SMALL_SIZE, GameTheme.MUTED.to_html(false), "%s"]
-	var rule := GameTheme.YELLOW
+	var rule := GameTheme.ACCENT
 	var big_colour := GameTheme.TEXT
 	var big_size := NAME_SIZE
 	var sub := ""

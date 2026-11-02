@@ -52,7 +52,7 @@ static func dev() -> MenuTag:
 
 ## "ATK": the side attacking first in Attack / Defend, dark on yellow.
 static func attack() -> MenuTag:
-	return make(TranslationServer.translate("MENU_ATK"), GameTheme.YELLOW_INK, GameTheme.YELLOW, GameTheme.YELLOW)
+	return make(TranslationServer.translate("MENU_ATK"), GameTheme.ACCENT_INK, GameTheme.ACCENT, GameTheme.ACCENT)
 
 
 ## "LEVEL 7": the level that unlocks a locked item.

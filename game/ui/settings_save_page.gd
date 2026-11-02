@@ -323,7 +323,7 @@ func _build_folder(col: VBoxContainer) -> void:
 	_path.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_path.add_theme_stylebox_override("normal", GameTheme.box(GameTheme.BG, GameTheme.LINE, PATH_PAD.x, PATH_PAD.y))
 	row.add_child(_path)
-	_open = _button("SAVE_OPEN_FOLDER", Color(0.0, 0.0, 0.0, 0.0), GameTheme.YELLOW, GameTheme.TEXT)
+	_open = _button("SAVE_OPEN_FOLDER", Color(0.0, 0.0, 0.0, 0.0), GameTheme.ACCENT, GameTheme.TEXT)
 	_open.pressed.connect(_open_folder)
 	row.add_child(_open)
 	_path.tooltip_text = tr("SAVE_FOLDER_HELP")
@@ -343,7 +343,7 @@ func _open_folder() -> void:
 func _build_points(col: VBoxContainer) -> void:
 	col.add_child(MenuParts.heading(tr("SAVE_RESTORE_POINTS").to_upper()))
 	col.add_child(_note_label(tr("SAVE_RESTORE_HELP") % SaveKeeper.RESTORE_POINTS, GameTheme.MUTED))
-	_lock_note = _note_label(tr("SAVE_IN_MATCH"), GameTheme.YELLOW)
+	_lock_note = _note_label(tr("SAVE_IN_MATCH"), GameTheme.ACCENT)
 	_lock_note.visible = false
 	col.add_child(_lock_note)
 	_message = _note_label(tr("SAVE_NOT_WRITTEN"), GameTheme.BAD)
@@ -371,7 +371,7 @@ func _point_row(i: int) -> PanelContainer:
 	day_col.add_child(day_row)
 	var day := MenuParts.text("", DAY_SIZE, 800, GameTheme.TEXT)
 	day_row.add_child(day)
-	var tag := MenuTag.make(tr("SAVE_TODAY").to_upper(), GameTheme.YELLOW_INK, GameTheme.YELLOW, GameTheme.YELLOW)
+	var tag := MenuTag.make(tr("SAVE_TODAY").to_upper(), GameTheme.ACCENT_INK, GameTheme.ACCENT, GameTheme.ACCENT)
 	tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	day_row.add_child(tag)
 	var opened := MenuParts.text("", OPENED_SIZE, 600, GameTheme.MUTED)
@@ -425,7 +425,7 @@ func _build_undo(col: VBoxContainer) -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", ROW_GAP)
 	col.add_child(row)
-	_undo = _button("SAVE_UNDO", Color(0.0, 0.0, 0.0, 0.0), GameTheme.YELLOW, GameTheme.TEXT)
+	_undo = _button("SAVE_UNDO", Color(0.0, 0.0, 0.0, 0.0), GameTheme.ACCENT, GameTheme.TEXT)
 	_undo.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_undo.pressed.connect(_ask_undo)
 	row.add_child(_undo)

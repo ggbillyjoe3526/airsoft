@@ -73,7 +73,7 @@ func _init(saved_in: SavedLoadouts = null, settings_in: Settings = null) -> void
 	_strip.offset_right = -MARGIN_X
 	_strip.offset_top = STRIP_TOP
 	add_child(_strip)
-	_notice = MenuParts.text("", NOTICE_SIZE, 700, GameTheme.YELLOW)
+	_notice = MenuParts.text("", NOTICE_SIZE, 700, GameTheme.WARN)
 	_notice.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	_notice.offset_left = MARGIN_X
 	_notice.offset_right = -MARGIN_X

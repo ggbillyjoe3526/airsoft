@@ -71,7 +71,7 @@ func _row(r: ArmoryFacts.Row) -> Control:
 	panel.name = "Level%d" % r.number
 	panel.custom_minimum_size = Vector2(0.0, ROW_HEIGHT)
 	var face := GameTheme.box(GameTheme.CARD_HI if next else GameTheme.CARD,
-			GameTheme.YELLOW if next else GameTheme.LINE, 0, 0)
+			GameTheme.ACCENT if next else GameTheme.LINE, 0, 0)
 	if next:
 		face.border_width_left = NEXT_EDGE
 	panel.add_theme_stylebox_override("panel", face)
@@ -113,7 +113,7 @@ func _head(r: ArmoryFacts.Row) -> Control:
 	if r.state == ArmoryFacts.State.UNLOCKED:
 		colour = GameTheme.GOOD
 	elif r.state == ArmoryFacts.State.NEXT:
-		colour = GameTheme.YELLOW
+		colour = GameTheme.ACCENT
 	var words := tr(state_key) if r.number == 0 else tr("ARMORY_ROW_STATE") % [ArmoryFacts.grouped(r.total), tr(state_key)]
 	column.add_child(MenuParts.spaced(words, STATE_SIZE, 700, colour, 0.02))
 	return pad

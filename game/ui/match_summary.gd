@@ -76,7 +76,7 @@ func setup(teams: TeamConfig, mate_colour: Color, top: float) -> void:
 	_tip_box = PanelContainer.new()
 	_tip_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var box := panel_box()
-	box.border_color = GameTheme.YELLOW
+	box.border_color = GameTheme.ACCENT
 	box.border_width_top = 0
 	box.border_width_right = 0
 	box.border_width_bottom = 0
@@ -211,7 +211,7 @@ static func column(parent: Control, gap: int = 10) -> VBoxContainer:
 
 ## A panel's yellow title in capitals (`key` translated, or `text` when given).
 static func title(parent: Control, key: String, text: String = "") -> Label:
-	var l := HudStyle.label(parent, TITLE_SIZE, 800, GameTheme.YELLOW, HORIZONTAL_ALIGNMENT_LEFT, HudStyle.SPACING_ROUND)
+	var l := HudStyle.label(parent, TITLE_SIZE, 800, GameTheme.ACCENT, HORIZONTAL_ALIGNMENT_LEFT, HudStyle.SPACING_ROUND)
 	l.text = text.to_upper() if text != "" else HudStyle.caps(key)
 	return l
 

@@ -644,7 +644,7 @@ class View:
 			draw_colored_polygon(_flag, _cfg.ink)
 			draw_polyline(_flag_line, _cfg.ink, FLAG_INK, true)
 		draw_line(Vector2.ZERO, POLE_TOP, POLE_COLOUR, POLE_WIDTH, true)
-		var foot := GameTheme.YELLOW
+		var foot := GameTheme.WARN
 		if _chequered:
 			foot = HudFlagGlyph.CHECK_PALE
 			draw_rect(CHEQUER, foot)

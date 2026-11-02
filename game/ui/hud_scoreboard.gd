@@ -71,7 +71,7 @@ func setup(cfg: HudConfig, teams: TeamConfig, mate_colour: Color, max_overtime: 
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_theme_constant_override("separation", TIP_GAP)
 	_tip_box.add_child(row)
-	var label := HudStyle.label(row, TIP_LABEL_SIZE, 800, GameTheme.YELLOW, HORIZONTAL_ALIGNMENT_LEFT,
+	var label := HudStyle.label(row, TIP_LABEL_SIZE, 800, GameTheme.ACCENT, HORIZONTAL_ALIGNMENT_LEFT,
 			HudStyle.SPACING_ROUND)
 	label.text = HudStyle.caps("HUD_PRO_TIP")
 	label.size_flags_vertical = Control.SIZE_SHRINK_BEGIN

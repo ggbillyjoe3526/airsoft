@@ -1,6 +1,6 @@
 extends GutTest
-## The title and the menus' top bar (game/ui/title_screen.gd, top_bar.gd, menu_screen.gd), and the entry scene's way
-## from one to the other.
+## The menus' side rail and backdrop (game/ui/nav_rail.gd, menu_backdrop.gd, menu_screen.gd), and the entry scene
+## opening on them (UR1: no title screen).
 
 const MAIN := preload("res://game/main.tscn")
 
@@ -12,65 +12,53 @@ func _texts(root: Node) -> PackedStringArray:
 	return out
 
 
-func test_the_title_has_start_report_licences_quit_and_no_fullscreen_button() -> void:
-	var title := TitleScreen.new()
-	add_child_autofree(title)
-	assert_eq(title.start_button().text, "START")
-	assert_eq(title.report_button().text, "Report a Bug")
-	assert_eq(title.credits_button().text, "Licences")
-	assert_eq(title.quit_button().text, "QUIT")
-	assert_eq(_texts(title).size(), 4, "START, Report a Bug, Licences and QUIT only")
+func test_the_game_opens_on_the_match_page_with_no_title_screen() -> void:
+	var main: Node = add_child_autofree(MAIN.instantiate())
+	await wait_process_frames(2)
+	var menus: MenuScreen = main._menus
+	assert_true(menus.visible, "the game opens on the menus (UR1: no title screen)")
+	assert_eq(menus.nav_rail().current(), NavRail.Tab.MATCH)
+	assert_true(menus.match_page().visible)
+	assert_eq(get_viewport().gui_get_focus_owner(), menus.match_page().play_button(), "Enter plays")
+	assert_null(main.get("_title"), "no title node at all")
 
 
-func test_the_title_shows_the_tagline_and_the_version_in_the_foot_beside_licences() -> void:
-	var title := TitleScreen.new()
-	add_child_autofree(title)
-	var labels := PackedStringArray()
-	for l in title.find_children("*", "Label", true, false):
-		labels.append((l as Label).text)
-	assert_true(labels.has("Call your hit. Go again."))
-	assert_true(labels.has("AIRSOFT"))
-	var foot: Node = title.find_child("Foot", true, false)
-	assert_not_null(foot)
-	assert_eq(foot.get_child(0).name, "Version", "the version, then Report a Bug (SV5), Licences and Quit")
-	assert_eq((foot.get_child(0) as Label).text, Version.current())
-	assert_eq(foot.get_child(1), title.report_button())
-	assert_eq(foot.get_child(2), title.credits_button())
-	assert_eq(foot.get_child(3), title.quit_button())
-	assert_eq(foot.get_child_count(), 4, "nothing else in the foot")
+func test_the_rail_has_the_wordmark_and_quit_and_quit_asks() -> void:
+	var main: Node = add_child_autofree(MAIN.instantiate())
+	await wait_process_frames(2)
+	var bar: NavRail = main._menus.nav_rail()
+	var mark := bar.find_child("Wordmark", true, false) as Label
+	assert_not_null(mark, "the wordmark is words, not a button")
+	assert_eq(mark.text, "AIRSOFT")
+	assert_eq(bar.quit_button().text, "QUIT")
+	bar.quit_button().pressed.emit()
+	await wait_process_frames(1)
+	assert_not_null(main._quit_prompt, "QUIT asks QUIT GAME?")
+	main._quit_prompt.close()
 
 
-func test_the_title_backdrop_is_the_shipped_picture() -> void:
-	var title := TitleScreen.new()
-	add_child_autofree(title)
-	var picture: TextureRect = title.find_child("Backdrop", true, false)
-	assert_not_null(picture.texture, "assets/ui/title-backdrop.jpg loads")
-	assert_eq(picture.texture.get_size(), Vector2(1920.0, 1080.0))
+func test_the_backdrop_shows_the_picked_field_blurred() -> void:
+	var menus := MenuScreen.new()
+	add_child_autofree(menus)
+	var back := menus.backdrop()
+	assert_eq(back.map_id(), menus.match_page().picks.map_id, "the field you picked")
+	menus.match_page().map_picked.emit("woodland")
+	assert_eq(back.map_id(), "woodland")
+	if DisplayServer.get_name() != "headless":
+		assert_not_null(back.picture().texture)
 
 
-func test_the_title_buttons_send_their_signals() -> void:
-	var title := TitleScreen.new()
-	add_child_autofree(title)
-	watch_signals(title)
-	title.start_button().pressed.emit()
-	title.credits_button().pressed.emit()
-	title.quit_button().pressed.emit()
-	assert_signal_emitted(title, "start_pressed")
-	assert_signal_emitted(title, "credits_pressed")
-	assert_signal_emitted(title, "quit_pressed")
-
-
-func test_the_top_bar_has_the_four_tabs_all_built() -> void:
-	var bar := TopBar.new()
+func test_the_rail_has_the_four_tabs_all_built() -> void:
+	var bar := NavRail.new()
 	add_child_autofree(bar)
-	assert_eq(bar.tab_button(TopBar.Tab.MATCH).text, "MATCH")
-	assert_eq(bar.tab_button(TopBar.Tab.LOADOUT).text, "LOADOUT")
-	assert_eq(bar.tab_button(TopBar.Tab.ARMORY).text, "ARMORY")
-	assert_eq(bar.tab_button(TopBar.Tab.SETTINGS).text, "SETTINGS")
-	assert_false(bar.tab_button(TopBar.Tab.MATCH).disabled)
-	assert_false(bar.tab_button(TopBar.Tab.SETTINGS).disabled)
-	assert_false(bar.tab_button(TopBar.Tab.LOADOUT).disabled, "the Loadout tab is built (LO2)")
-	assert_false(bar.tab_button(TopBar.Tab.ARMORY).disabled, "the Armory tab is built (AR1)")
+	assert_eq(bar.tab_button(NavRail.Tab.MATCH).text, "MATCH")
+	assert_eq(bar.tab_button(NavRail.Tab.LOADOUT).text, "LOADOUT")
+	assert_eq(bar.tab_button(NavRail.Tab.ARMORY).text, "ARMORY")
+	assert_eq(bar.tab_button(NavRail.Tab.SETTINGS).text, "SETTINGS")
+	assert_false(bar.tab_button(NavRail.Tab.MATCH).disabled)
+	assert_false(bar.tab_button(NavRail.Tab.SETTINGS).disabled)
+	assert_false(bar.tab_button(NavRail.Tab.LOADOUT).disabled, "the Loadout tab is built (LO2)")
+	assert_false(bar.tab_button(NavRail.Tab.ARMORY).disabled, "the Armory tab is built (AR1)")
 	var later := 0
 	for l in bar.find_children("*", "Label", true, false):
 		if (l as Label).text == "LATER":
@@ -79,45 +67,46 @@ func test_the_top_bar_has_the_four_tabs_all_built() -> void:
 
 
 func test_the_level_chip_reads_the_level_and_hides_with_levelling_off() -> void:
-	var bar := TopBar.new()
+	var bar := NavRail.new()
 	add_child_autofree(bar)
 	bar.set_level(3)
-	var chip := bar.find_child("LevelChip", true, false) as Control
-	var words := PackedStringArray()
-	for l in chip.find_children("*", "Label", true, false):
-		words.append((l as Label).text)
-	assert_eq(" ".join(words), "LVL 3")
+	var chip := bar.find_child("Level", true, false) as Control
+	assert_eq(bar.level_text(), "LV 3")
 	bar.set_level(-1)
 	assert_false(chip.visible, "no chip while levelling is off")
 	assert_eq(bar.level_text(), "")
 
 
 func test_the_current_tab_is_lit() -> void:
-	var bar := TopBar.new()
+	var bar := NavRail.new()
 	add_child_autofree(bar)
-	assert_eq(bar.current(), TopBar.Tab.MATCH)
-	bar.set_current(TopBar.Tab.SETTINGS)
-	assert_eq(bar.current(), TopBar.Tab.SETTINGS)
-	bar.set_current(TopBar.Tab.ARMORY)
-	assert_eq(bar.current(), TopBar.Tab.ARMORY)
-	var lit := bar.tab_button(TopBar.Tab.ARMORY).get_theme_stylebox("normal") as StyleBoxFlat
-	assert_eq(lit.border_color, GameTheme.YELLOW)
-	var dark := bar.tab_button(TopBar.Tab.MATCH).get_theme_stylebox("normal") as StyleBoxFlat
-	assert_ne(dark.border_color, GameTheme.YELLOW)
+	assert_eq(bar.current(), NavRail.Tab.MATCH)
+	bar.set_current(NavRail.Tab.SETTINGS)
+	assert_eq(bar.current(), NavRail.Tab.SETTINGS)
+	bar.set_current(NavRail.Tab.ARMORY)
+	assert_eq(bar.current(), NavRail.Tab.ARMORY)
+	var lit := bar.tab_button(NavRail.Tab.ARMORY).get_theme_stylebox("normal") as StyleBoxFlat
+	assert_eq(lit.bg_color, GameTheme.CARD_HI, "the lit tab sits on a card")
+	var dark := bar.tab_button(NavRail.Tab.MATCH).get_theme_stylebox("normal") as StyleBoxFlat
+	assert_eq(dark.bg_color.a, 0.0, "the others are bare words")
+	var rule := bar.tab_button(NavRail.Tab.ARMORY).get_child(0) as ColorRect
+	assert_eq(rule.color, GameTheme.ACCENT)
+	assert_true(rule.visible, "with the teal rule")
+	assert_false((bar.tab_button(NavRail.Tab.MATCH).get_child(0) as ColorRect).visible)
 
 
 func test_pressing_a_tab_sends_it() -> void:
-	var bar := TopBar.new()
+	var bar := NavRail.new()
 	add_child_autofree(bar)
 	watch_signals(bar)
-	bar.tab_button(TopBar.Tab.SETTINGS).pressed.emit()
-	assert_signal_emitted_with_parameters(bar, "tab_pressed", [TopBar.Tab.SETTINGS])
+	bar.tab_button(NavRail.Tab.SETTINGS).pressed.emit()
+	assert_signal_emitted_with_parameters(bar, "tab_pressed", [NavRail.Tab.SETTINGS])
 
 
 func test_the_menu_page_has_the_bar_and_a_play_button() -> void:
 	var menus := MenuScreen.new()
 	add_child_autofree(menus)
-	assert_not_null(menus.top_bar())
+	assert_not_null(menus.nav_rail())
 	assert_eq(menus.match_page().play_button().text, "PLAY")
 	assert_eq(menus.match_page().play_button().theme_type_variation, GameTheme.MAIN_BUTTON)
 	watch_signals(menus.match_page())
@@ -134,16 +123,10 @@ func test_the_slanted_button_leans_right_inside_its_box() -> void:
 	assert_eq(p[3].x, 10.0, "the bottom left corner is the box's")
 
 
-func test_start_opens_the_menus_and_escape_asks_to_quit_while_the_wordmark_goes_back_to_the_title() -> void:
+func test_escape_on_the_menus_asks_to_quit() -> void:
 	var main: Node = add_child_autofree(MAIN.instantiate())
 	await wait_process_frames(2)
-	var title: TitleScreen = main._title
 	var menus: MenuScreen = main._menus
-	assert_true(title.visible)
-	assert_false(menus.visible)
-	title.start_button().pressed.emit()
-	assert_false(title.visible)
-	assert_true(menus.visible)
 	var e := InputEventAction.new()
 	e.action = "ui_cancel"
 	e.pressed = true
@@ -152,24 +135,19 @@ func test_start_opens_the_menus_and_escape_asks_to_quit_while_the_wordmark_goes_
 	assert_not_null(main._quit_prompt, "Esc on the menus asks QUIT GAME? (owner, 2026-10-29)")
 	assert_true(menus.visible)
 	main._quit_prompt.close()
-	menus.top_bar().wordmark().pressed.emit()
-	await wait_process_frames(2)
-	assert_true(title.visible, "the AIRSOFT wordmark goes back to the title")
-	assert_false(menus.visible)
 
 
 func test_the_settings_tab_lights_while_the_settings_are_open() -> void:
 	var main: Node = add_child_autofree(MAIN.instantiate())
 	await wait_process_frames(2)
-	main._show_menus()
-	var bar: TopBar = main._menus.top_bar()
-	bar.tab_button(TopBar.Tab.SETTINGS).pressed.emit()
-	assert_eq(bar.current(), TopBar.Tab.SETTINGS)
-	assert_eq(main._settings_screen.offset_top, float(TopBar.HEIGHT), "under the bar")
-	bar.tab_button(TopBar.Tab.MATCH).pressed.emit()
+	var bar: NavRail = main._menus.nav_rail()
+	bar.tab_button(NavRail.Tab.SETTINGS).pressed.emit()
+	assert_eq(bar.current(), NavRail.Tab.SETTINGS)
+	assert_eq(main._settings_screen.offset_left, float(NavRail.WIDTH), "beside the rail")
+	bar.tab_button(NavRail.Tab.MATCH).pressed.emit()
 	await wait_process_frames(2)
 	assert_null(main._settings_screen, "the Match tab closes the settings")
-	assert_eq(bar.current(), TopBar.Tab.MATCH)
+	assert_eq(bar.current(), NavRail.Tab.MATCH)
 
 
 func test_the_main_scene_resets_the_window_scale_when_freed() -> void:
@@ -183,3 +161,34 @@ func test_the_main_scene_resets_the_window_scale_when_freed() -> void:
 	await wait_process_frames(2)
 	assert_false(window.size_changed.is_connected(cb))
 	assert_almost_eq(window.content_scale_factor, 1.0, 1e-5)
+
+
+func test_a_notice_sits_clear_of_play_and_takes_the_keyboard_then_gives_it_back() -> void:
+	var host := Control.new()
+	host.size = Vector2(1920.0, 1080.0)
+	add_child_autofree(host)
+	var menus := MenuScreen.new()
+	host.add_child(menus)
+	await wait_process_frames(2)
+	menus.focus_play()
+	var notice := GraphicsNotice.first_start(&"low", "Radeon RX 6600 · Discrete", "1920 × 1080 · 60 Hz")
+	menus.show_notice(notice)
+	await wait_process_frames(3)
+	var play := menus.match_page().play_button()
+	assert_false(notice.get_global_rect().intersects(play.get_global_rect()), "PLAY shows beside the notice")
+	assert_gte(notice.get_global_rect().position.x, float(NavRail.WIDTH), "right of the rail")
+	assert_true(notice.is_ancestor_of(get_viewport().gui_get_focus_owner()), "Enter answers the notice")
+	menus.close_notice()
+	await wait_process_frames(1)
+	assert_eq(get_viewport().gui_get_focus_owner(), play, "and the keyboard is back on PLAY")
+
+
+func test_about_names_the_renderer_in_words() -> void:
+	var screen := SettingsScreen.new()
+	screen.settings = Settings.new()
+	screen.save_path = "user://test-title-and-menus-about.json"
+	add_child_autofree(screen)
+	screen.open()
+	var renderer := screen.find_child("Renderer", true, false) as Label
+	assert_eq(renderer.text, SettingsGraphicsPage.renderer_words(GraphicsApply.machine()))
+	assert_true(renderer.text.contains(" · "))

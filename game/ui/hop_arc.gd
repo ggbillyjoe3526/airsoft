@@ -78,7 +78,7 @@ func _draw() -> void:
 		for i in _heights.size():
 			var h := clampf(_heights[i], -FALL, RISE)
 			points.append(Vector2(left + width * float(i) * STEP / _range, aim_y - h * scale_y))
-		draw_polyline(points, GameTheme.YELLOW, PATH_WIDTH, true)
+		draw_polyline(points, GameTheme.ACCENT, PATH_WIDTH, true)
 	var mark_x := left + width * clampf(_on_target / _range, 0.0, 1.0)
 	draw_line(Vector2(mark_x, top), Vector2(mark_x, size.y - PAD.y), GameTheme.MUTED, MARK_WIDTH)
 	var font := GameTheme.font(800)

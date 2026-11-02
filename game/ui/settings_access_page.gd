@@ -16,10 +16,10 @@ enum Section { TEAM_COLOURS, GAUGE_PATTERNS, SCREEN_READER, SOUND_CUES, REDUCED_
 ## The sections still to build, greyed with LATER and not clickable: none now.
 const LATER: Array[Section] = []
 ## The columns' widths (the right one takes the rest), the labels' widths and the slider's (px).
-const LEFT_WIDTH := 860.0
-const COLUMN_GAP := 48
-const LEFT_LABEL := 230.0
-const RIGHT_LABEL := 230.0
+const LEFT_WIDTH := 770.0
+const COLUMN_GAP := 32
+const LEFT_LABEL := 190.0
+const RIGHT_LABEL := 190.0
 const SLIDER_WIDTH := 300.0
 ## A note beside a row or under a section: its size and the space before it (px); the room between a heading and its
 ## LATER tag.
@@ -181,7 +181,7 @@ func _set_card(colour_set: TeamColours.Set, teams: TeamConfig) -> MenuCard:
 			GameTheme.SPACING_TAB)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(title)
-	var tag := MenuTag.make(tr("SETTINGS_IN_USE"), GameTheme.YELLOW_INK, GameTheme.YELLOW, GameTheme.YELLOW)
+	var tag := MenuTag.make(tr("SETTINGS_IN_USE"), GameTheme.ACCENT_INK, GameTheme.ACCENT, GameTheme.ACCENT)
 	head.add_child(tag)
 	rows.add_child(head)
 	var swatches := HBoxContainer.new()
@@ -280,7 +280,7 @@ func _show_sample() -> void:
 	var s := _screen.settings
 	var teams := _hud_sets[clampi(s.team_colours, 0, _hud_sets.size() - 1)]
 	for part in _samples:
-		var colour := GameTheme.YELLOW if part.side < 0 else teams.colours[part.side]
+		var colour := GameTheme.WARN if part.side < 0 else teams.colours[part.side]
 		part.show_as(colour, s.gauge_patterns and (part.side < 0 or part.side == HudStyle.STRIPED_TEAM))
 
 

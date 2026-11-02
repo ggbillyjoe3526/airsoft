@@ -23,7 +23,7 @@ func _init() -> void:
 	add_theme_stylebox_override("panel", MatchSummary.panel_box())
 	_column = MatchSummary.column(self, 0)
 	_rule = MatchSummary.row_rule()
-	_chip = GameTheme.box(GameTheme.YELLOW, Color(0.0, 0.0, 0.0, 0.0), CHIP_PAD.x, CHIP_PAD.y)
+	_chip = GameTheme.box(GameTheme.ACCENT, Color(0.0, 0.0, 0.0, 0.0), CHIP_PAD.x, CHIP_PAD.y)
 
 
 ## Fills it from `records` under `heading`, with `win_loss` at this difficulty and mode and what this match changed
@@ -68,7 +68,7 @@ func _value(line: HBoxContainer, value: String, new_record: bool, note: String) 
 	v.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var shown := value
 	if new_record:
-		var chip := HudStyle.label(line, CHIP_SIZE, 800, GameTheme.YELLOW_INK, HORIZONTAL_ALIGNMENT_CENTER,
+		var chip := HudStyle.label(line, CHIP_SIZE, 800, GameTheme.ACCENT_INK, HORIZONTAL_ALIGNMENT_CENTER,
 				HudStyle.SPACING_ROUND)
 		chip.text = HudStyle.caps("SUM_NEW_RECORD")
 		chip.add_theme_stylebox_override("normal", _chip)

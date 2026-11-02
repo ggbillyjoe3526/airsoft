@@ -50,9 +50,16 @@ static func key_chip(words: String, size: int, colour: Color, pad: Vector2i) -> 
 	return chip
 
 
-## The section heading (22 px, muted, spaced).
+## The section heading: muted Barlow Condensed capitals, spaced (concept B's `.cap`).
 static func heading(words: String) -> Label:
-	return spaced(words, GameTheme.HEADING_SIZE, 800, GameTheme.MUTED, GameTheme.SPACING_HEADING)
+	return head_text(words, GameTheme.HEADING_SIZE, 600, GameTheme.MUTED, GameTheme.SPACING_HEADING_CAPS)
+
+
+## A label in Barlow Condensed capitals spaced `em`: a page title, a card's name (words only, never a number).
+static func head_text(words: String, size: int, weight: int, colour: Color, em: float) -> Label:
+	var label := text(words.to_upper(), size, weight, colour)
+	label.add_theme_font_override("font", GameTheme.heading_font(weight, em, size))
+	return label
 
 
 ## A section heading with its NOT USED tag after it (child 1, hidden until `set_unused`): the concept's `h2 .later`.
