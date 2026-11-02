@@ -47,8 +47,8 @@ right (hover for the details). Under them a track has a dot for the starting kit
 level and on into the next by the XP you have earned.
 
 Below the track are four level cards, starting at your level. Each card shows its items with their pictures (hover an
-item to see what it does), marked **UNLOCKED**, **NEXT** (edged in teal: the next level with something new) or with the XP that reaches it. Browse the
-levels with the arrows at the top right, or click a dot on the track.
+item to see what it does), marked **UNLOCKED**, **NEXT** (edged in teal: the next level with something new) or with
+the XP that reaches it. Browse the levels with the arrows at the top right, or click a dot on the track.
 
 Your level, unlocks and records are saved in their own file, apart from your settings, so a crash never loses them
 ([Saving and Bug Reports](Saving-and-Bug-Reports)).

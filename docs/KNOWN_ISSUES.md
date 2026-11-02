@@ -15,6 +15,7 @@ Every open bug, limit and known gap in the game, so nobody re-reports or re-meas
 | Play | The bolt's cocking sound plays to its end after a switch to the pistol or a hit mid-cycle (BP3) | can wait | 2026-11-03 |
 | Play | A mouse wheel notch on the tick a reload or a slot key's draw starts, aimed through the Variable Scope, neither zooms nor switches (BP3) | can wait | 2026-11-03 |
 | Play | Indoors, a bot that fights two targets in turn rolls for full auto again on each return to one, so its chance at that one compounds (NA1, BP3) | can wait | 2026-11-03 |
+| Play | Indoors, a bot's burst held up with its target still in sight (glass or leaves in the line, or not ready) keeps its full auto, and finishes on it wherever the target then stands (NA1, BP3 critic) | can wait | 2026-11-03 |
 | Menus | The Loadout's carried cards show the slot keys as 1 and 2 even when slot_1 and slot_2 are rebound (BP3) | can wait | 2026-11-03 |
 | Menus | Customise's 3D replica keeps the resolution it was built at when the window moves to a screen of another size at the same aspect ratio, until Customise is reopened (BP3) | can wait | 2026-11-03 |
 | Art | The Variable Scope's model is the 2x Scope's run on longer with a zoom ring, a placeholder until the owner's own model (SN2) | document | 2026-11-02 |

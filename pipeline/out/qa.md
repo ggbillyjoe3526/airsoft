@@ -1,4 +1,4 @@
-Task: BP3 (attempt 2) · QA commit pending · Verdict: Pass
+Task: BP3 (attempt 2) · QA commit 5f293f5 · Verdict: Pass
 
 Attempt-1 findings, both fixed:
 - Bolt press firing the pistol after a switch: Armament._draw now clears pending_press (game/sim/armament.gd:453). test_bp3 (click kept for the rifle, 0 shots) and test_bp3_qa (click at 0.8 s, switch a tick later; control with the window off) pass. A press made on the switch tick itself still fires after the draw (the clear runs before the fire section), as intended. Not checked by stubbing the fix out (QA may not edit game/).

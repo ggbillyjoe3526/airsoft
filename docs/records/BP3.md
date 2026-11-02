@@ -1,13 +1,13 @@
 # BP3 · Fixes from the bug pass after the Sniper Rifle
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-03 | 1 | Opus 5.5 (bug pass thread) | ✓ | Retry 6/8 | a switch fired a kept bolt press; full auto came back for a target re-seen out of the open |
-| 2026-11-03 | 2 | Opus 5.5 (bug pass thread) | see Checks | – | – |
+| 2026-11-03 | 2 | Opus 5.5 (bug pass thread) | ✓ | Accept 8/8 | – |
 
 ## The bug pass
 
@@ -42,9 +42,9 @@ pull request fixes what they found that a player meets; the balance work follows
 9. **Dev content switched in Settings** left the Loadout page's list stale; it is built again, as the Armory is.
 10. **Bots indoors** (NA1): losing sight for a tick took a target's full auto for good (the roll is once per target).
     Now losing sight ends the burst and drops to the start mode, keeping the roll, and the next burst that finds the
-    target in the open again goes back to full auto (`Bot.auto_open`), never one that finds it in a doorway; a bot never fires on a tick its selector moves (the way
-    from burst back to semi passes full auto); and followers no longer holster when the giver takes a bomb in hand
-    (`BotHolster.put_away`).
+    target in the open again goes back to full auto (`Bot.auto_open`), never one that finds it in a doorway; a bot
+    never fires on a tick its selector moves (the way from burst back to semi passes full auto); and followers no
+    longer holster when the giver takes a bomb in hand (`BotHolster.put_away`).
 
 Known issues: two rows fixed (the 6× mouse speed, "1 BBs/s"); six can-wait or playtest rows added from the readers.
 
