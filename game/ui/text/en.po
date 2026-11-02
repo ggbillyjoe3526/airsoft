@@ -1835,6 +1835,9 @@ msgstr "An electric rifle with a rail for every part."
 msgid "ARMORY_BLURB_REPLICA_CYBER"
 msgstr "A pistol with its battery built in: nothing to pick for power."
 
+msgid "ARMORY_BLURB_REPLICA_SNIPER"
+msgstr "A spring rifle, cocked after every shot: long and flat, wild from the hip."
+
 msgid "XP_LINE_MATCH_PLAYED"
 msgstr "Match played"
 

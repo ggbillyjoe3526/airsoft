@@ -54,4 +54,6 @@
 
 - The Loadout's replica row rounds 0.8 shots a second to "1 BBs/s" (the Loadout is being rebuilt by UR1).
 - Teammates still carry the factory AEG; the rifle's magazines aren't shared with the AEG's (class `sniper`).
+- With Dev content off, level 7 holds nothing to show (only the dev M140 Spring) until the rifle goes public: its
+  Armory row and level-up card are bare.
 - The model is a placeholder: reshaped when the owner's reference photos arrive.
