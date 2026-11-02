@@ -102,7 +102,8 @@ func test_each_hit_reads_its_side_distance_and_held_angle_or_time_in_view() -> v
 	var f := HitFacts.new()
 	var victim := Character.new(0, 0)
 	f.record(1.0, victim, Character.new(3, 1, Vector3(-18.0, 0.0, 0.0)), false, true, true, 0.4, 1.0)
-	assert_eq(SummaryHits.hit_bbcode(f), "From your left, 18 m · [color=#f2c230]holding the angle[/color]")
+	assert_eq(SummaryHits.hit_bbcode(f),
+			"From your left, 18 m · [color=#%s]holding the angle[/color]" % GameTheme.ACCENT.to_html(false))
 	f.record(1.0, victim, Character.new(3, 1, Vector3(0.0, 0.0, 9.0)), true, false, false, 1.6, 1.0)
 	assert_eq(SummaryHits.hit_bbcode(f), "From behind, 9 m · seen for 1.6 s · off a bounce")
 
