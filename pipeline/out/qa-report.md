@@ -1,4 +1,4 @@
-Task: none (UR1 part 1) · QA commit (this commit) · Verdict: Fail
+Task: none (UR1 part 1) · QA commit 6b5eda8 · Verdict: Fail
 
 Blocking (1)
 1. game/ui/settings_screen.gd (in_menus, offset_left = NavRail.WIDTH via MenuScreen.add_over_page, menu_screen.gd:~95) with
