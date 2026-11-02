@@ -60,14 +60,14 @@ func setup(cfg: HudConfig) -> void:
 	_hop = _note(GameTheme.TEXT)
 	_hop.add_theme_font_override("font", GameTheme.font(600))
 	_hop.add_theme_font_size_override("font_size", HOP_SIZE)
-	_status = _note(GameTheme.YELLOW)
+	_status = _note(GameTheme.WARN)
 	var panel := PanelContainer.new()
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.size_flags_horizontal = Control.SIZE_SHRINK_END
 	panel.custom_minimum_size = Vector2(WIDTH, 0.0)
 	var frame := HudStyle.panel_box(HudStyle.BACKING_PANEL, 0, 0)
 	frame.border_width_left = RULE
-	frame.border_color = GameTheme.YELLOW
+	frame.border_color = GameTheme.ACCENT
 	frame.content_margin_left = PAD.x
 	frame.content_margin_top = PAD.y
 	frame.content_margin_right = PAD.z
@@ -170,7 +170,7 @@ func refresh(a: Armament, hand: Grenades.Hand = null) -> void:
 		_shown_mag = mag
 		_mag.text = str(mag)
 		var low := mag <= floori(r.mag_size * _cfg.low_mag_share)
-		_mag.add_theme_color_override("font_color", GameTheme.YELLOW if low else GameTheme.TEXT)
+		_mag.add_theme_color_override("font_color", GameTheme.WARN if low else GameTheme.TEXT)
 	if spare != _shown_spare:
 		_shown_spare = spare
 		_spare.text = tr("HUD_SPARE") % spare
@@ -211,7 +211,7 @@ func _refresh_bombs(hand: Grenades.Hand) -> void:
 		label.text = (tr(BOMB_KEYS[kind]) % left).to_upper()
 		var colour := GameTheme.TEXT if left > 0 else GameTheme.DIM
 		if kind == hand.readied:
-			colour = GameTheme.YELLOW
+			colour = GameTheme.ACCENT
 		label.add_theme_color_override("font_color", colour)
 
 

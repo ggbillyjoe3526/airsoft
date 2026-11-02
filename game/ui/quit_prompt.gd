@@ -50,7 +50,7 @@ func _init() -> void:
 	frame.add_theme_constant_override("separation", 0)
 	centre.add_child(frame)
 	var rule := ColorRect.new()
-	rule.color = GameTheme.YELLOW
+	rule.color = GameTheme.ACCENT
 	rule.custom_minimum_size.y = RULE
 	frame.add_child(rule)
 	var panel := PanelContainer.new()
@@ -71,13 +71,13 @@ func _init() -> void:
 	_quit = Button.new()
 	_quit.name = "Quit"
 	_quit.text = tr("QUIT_YES").to_upper()
-	SettingsSavePage.paint(_quit, GameTheme.YELLOW, GameTheme.YELLOW, GameTheme.YELLOW_INK, BUTTON_SIZE, BUTTON_PAD)
+	SettingsSavePage.paint(_quit, GameTheme.ACCENT, GameTheme.ACCENT, GameTheme.ACCENT_INK, BUTTON_SIZE, BUTTON_PAD)
 	_quit.pressed.connect(func() -> void: confirmed.emit())
 	actions.add_child(_quit)
 	_cancel = Button.new()
 	_cancel.name = "Cancel"
 	_cancel.text = tr("QUIT_CANCEL").to_upper()
-	SettingsSavePage.paint(_cancel, Color(0.0, 0.0, 0.0, 0.0), GameTheme.YELLOW, GameTheme.TEXT, BUTTON_SIZE, BUTTON_PAD)
+	SettingsSavePage.paint(_cancel, Color(0.0, 0.0, 0.0, 0.0), GameTheme.ACCENT, GameTheme.TEXT, BUTTON_SIZE, BUTTON_PAD)
 	_cancel.pressed.connect(close)
 	actions.add_child(_cancel)
 	ButtonWidth.group([_quit, _cancel])

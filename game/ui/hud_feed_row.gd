@@ -241,7 +241,7 @@ func _draw() -> void:
 		var inset := FRAME_WIDTH * 0.5
 		# Inside the team bar, which stays showing.
 		draw_rect(Rect2(BAR + inset, inset, w - BAR - FRAME_WIDTH, HEIGHT - FRAME_WIDTH),
-				Color(GameTheme.YELLOW, FRAME_ALPHA), false, FRAME_WIDTH)
+				Color(GameTheme.ACCENT, FRAME_ALPHA), false, FRAME_WIDTH)
 
 
 ## The radio glyph: a handset's body under its antenna, the speaker grille cut across it.

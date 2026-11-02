@@ -62,7 +62,7 @@ Depot and Woodland are the fields for now. New fields are on the [Roadmap](Roadm
 
 ### How do I report a bug?
 
-**Report a Bug** on the title screen or in the pause menu fills in a GitHub issue for you; nothing is sent until you
+**Report a Bug** in **Settings › About** or in the pause menu fills in a GitHub issue for you; nothing is sent until you
 press Submit ([Saving and Bug Reports](Saving-and-Bug-Reports#report-a-bug)).
 
 ### Is this wiki up to date?

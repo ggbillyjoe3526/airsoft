@@ -198,7 +198,7 @@ func test_the_count_turns_yellow_at_a_low_magazine_and_back_on_a_swap() -> void:
 	assert_eq(p._mag.get_theme_color("font_color"), GameTheme.TEXT)
 	a.ammo[a.active].mag = 1
 	p.refresh(a)
-	assert_eq(p._mag.get_theme_color("font_color"), GameTheme.YELLOW)
+	assert_eq(p._mag.get_theme_color("font_color"), GameTheme.WARN)
 	a.ammo[a.active].mag = a.replica().mag_size
 	p.refresh(a)
 	assert_eq(p._mag.get_theme_color("font_color"), GameTheme.TEXT)

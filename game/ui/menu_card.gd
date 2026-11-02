@@ -12,7 +12,7 @@ const HOVER_LIGHTEN := 0.06
 
 var fill: Color = GameTheme.CARD
 var picked_fill: Color = GameTheme.CARD_HI
-var accent: Color = GameTheme.YELLOW
+var accent: Color = GameTheme.ACCENT
 var ring: bool = false
 ## The left bar's colour (transparent: none), and how much of it shows while the card isn't picked.
 var bar: Color = Color(0.0, 0.0, 0.0, 0.0)

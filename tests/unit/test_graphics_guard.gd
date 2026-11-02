@@ -327,14 +327,14 @@ func test_the_smoke_run_and_headless_runs_guard_nothing() -> void:
 	add_child_autofree(main)
 	await wait_process_frames(1)
 	assert_null((main.graphics as GraphicsStartUp).guard)
-	assert_null((main.get("_title") as TitleScreen).notice())
+	assert_null((main.get("_menus") as MenuScreen).notice())
 
 
 func test_a_start_after_a_crash_writes_safe_graphics_and_restarts() -> void:
 	var main := _main_with(_guard(GraphicsGuard.State.STARTING))
 	add_child(main)
 	assert_true(main.has_meta(&"restarted"))
-	assert_null(main.get("_title"), "nothing built")
+	assert_null(main.get("_menus"), "nothing built")
 	assert_true(RendererOverride.asks_compatibility(_renderer_path))
 	var saved := Settings.new(PlayTuning.new())
 	saved.load_file(_settings_path)
@@ -358,7 +358,7 @@ func test_the_restarted_start_asks_and_try_again_restores_and_restarts() -> void
 	var main := _main_with(g)
 	add_child_autofree(main)
 	await wait_process_frames(1)
-	var notice := (main.get("_title") as TitleScreen).notice()
+	var notice := (main.get("_menus") as MenuScreen).notice()
 	assert_not_null(notice, "the safe start's question")
 	var words := notice.words()
 	assert_true(words.has("High · Forward+ (kept, not in use)"), "your settings")
@@ -371,7 +371,7 @@ func test_the_restarted_start_asks_and_try_again_restores_and_restarts() -> void
 	var read := GraphicsGuard.load_file(_guard_path)
 	assert_false(read.asking())
 	assert_eq(read.state, GraphicsGuard.State.SETTLED)
-	assert_null((main.get("_title") as TitleScreen).notice())
+	assert_null((main.get("_menus") as MenuScreen).notice())
 
 
 func test_keep_safe_graphics_closes_the_question_for_good() -> void:
@@ -381,7 +381,7 @@ func test_keep_safe_graphics_closes_the_question_for_good() -> void:
 	var main := _main_with(g)
 	add_child_autofree(main)
 	await wait_process_frames(1)
-	var notice := (main.get("_title") as TitleScreen).notice()
+	var notice := (main.get("_menus") as MenuScreen).notice()
 	notice.button(0).pressed.emit()
 	assert_false(main.has_meta(&"restarted"))
 	assert_eq(s.renderer, Settings.Renderer.COMPATIBILITY, "kept")

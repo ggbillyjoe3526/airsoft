@@ -346,14 +346,14 @@ func test_the_menus_have_a_settings_tab_that_opens_the_screen() -> void:
 		if (b as Button).text == tr("MENU_TAB_SETTINGS"):
 			button = b
 	assert_not_null(button, "a Settings button")
-	assert_null(_settings_child(main), "not built until asked for")
+	assert_null(_settings_child(main._menus), "not built until asked for")
 	button.pressed.emit()
-	var opened := _settings_child(main)
+	var opened := _settings_child(main._menus)
 	assert_not_null(opened)
 	assert_true(opened.visible)
 	opened.close()
 	await wait_process_frames(1)
-	assert_null(_settings_child(main), "freed once closed")
+	assert_null(_settings_child(main._menus), "freed once closed")
 
 
 func _settings_child(parent: Node) -> SettingsScreen:
@@ -660,14 +660,13 @@ func test_the_display_tab_leaves_no_connection_behind() -> void:
 	assert_eq(s.changed.get_connections().size(), before, "back: once again")
 
 
-func test_the_title_screen_has_no_fullscreen_button() -> void:
-	var title := TitleScreen.new()
-	add_child_autofree(title)
-	var words := " ".join(_labels(title, PackedStringArray())).to_lower()
-	for b: Node in title.find_children("*", "Button", true, false):
+func test_the_menus_have_no_fullscreen_button() -> void:
+	var menus := MenuScreen.new(MatchPicks.new(), s)
+	add_child_autofree(menus)
+	var words := " ".join(_labels(menus, PackedStringArray())).to_lower()
+	for b: Node in menus.find_children("*", "Button", true, false):
 		words += " " + (b as Button).text.to_lower()
 	assert_false(words.contains("fullscreen"), words)
-
 
 
 # --- Accessibility (AC2) ---
@@ -699,19 +698,40 @@ func test_the_accessibility_tab_comes_after_hud() -> void:
 	assert_eq(names[at - 1], tr("SETTINGS_HUD").to_upper())
 
 
-func test_the_save_file_tab_comes_after_accessibility_and_before_dev() -> void:
+func test_the_save_file_tab_comes_after_accessibility_then_about_then_dev() -> void:
 	var names := PackedStringArray()
 	for i in screen._tabs.get_tab_count():
 		names.append(screen._tabs.get_tab_title(i))
 	var at := names.find(tr("SETTINGS_SAVE_FILE").to_upper())
 	assert_gt(at, 0)
 	assert_eq(names[at - 1], tr("SETTINGS_ACCESSIBILITY").to_upper())
-	assert_eq(names[at + 1], tr("SETTINGS_DEV").to_upper())
+	assert_eq(names[at + 1], tr("SETTINGS_ABOUT").to_upper())
+	assert_eq(names[at + 2], tr("SETTINGS_DEV").to_upper())
 
 
-## From the title (main gives the restart) the save may be replaced; from a match (End the round) or with no restart,
+func test_about_shows_the_version_and_in_the_menus_the_title_screen_s_buttons() -> void:
+	screen.show_about()
+	assert_eq(screen._tabs.get_tab_title(screen.current_tab()), tr("SETTINGS_ABOUT").to_upper())
+	var version := screen._about_page.find_child("Version", true, false) as Label
+	assert_eq(version.text, Version.current())
+	assert_null(screen.about_report_button(), "from the pause menu: no Report, Licences or Quit of About's own")
+	var menus := SettingsScreen.new()
+	menus.settings = s
+	menus.save_path = screen.save_path
+	menus.in_menus = true
+	add_child_autofree(menus)
+	watch_signals(menus)
+	menus.about_report_button().pressed.emit()
+	menus.about_credits_button().pressed.emit()
+	menus.about_quit_button().pressed.emit()
+	assert_signal_emit_count(menus, "report_requested", 1)
+	assert_signal_emit_count(menus, "credits_requested", 1)
+	assert_signal_emit_count(menus, "quit_requested", 1)
+
+
+## From the menus (main gives the restart) the save may be replaced; from a match (End the round) or with no restart,
 ## not.
-func test_the_save_may_be_replaced_only_from_the_title() -> void:
+func test_the_save_may_be_replaced_only_from_the_menus() -> void:
 	assert_false(screen.can_replace(), "no restart given")
 	screen.restart = func() -> void: pass
 	assert_true(screen.can_replace())

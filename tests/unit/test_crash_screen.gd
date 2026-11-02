@@ -347,7 +347,7 @@ func _left_crashed() -> void:
 	assert_true(r.save(_run_path))
 
 
-func test_a_start_after_a_crash_shows_the_screen_before_the_title() -> void:
+func test_a_start_after_a_crash_shows_the_screen_before_the_menus() -> void:
 	_left_crashed()
 	_write_log()
 	var main: Node = _main()
@@ -356,14 +356,14 @@ func test_a_start_after_a_crash_shows_the_screen_before_the_title() -> void:
 	var screen: CrashScreen = main.crash_screen
 	assert_not_null(screen)
 	assert_true(screen.is_visible_in_tree())
-	assert_false(main._title.visible, "the title waits")
-	assert_null(main._title.notice(), "the graphics notices wait too")
+	assert_false(main._menus.visible, "the menus wait")
+	assert_null(main._menus.notice(), "the graphics notices wait too")
 	assert_eq(screen.facts()[2], "Depot · Elimination · round 4, 2–1")
 	assert_eq(screen.facts()[3], "48213")
 	assert_true(RunRecord.load_file(_run_path).crashed_before(), "kept until it is seen")
 
 
-func test_a_start_after_a_clean_quit_shows_the_title_at_once() -> void:
+func test_a_start_after_a_clean_quit_shows_the_menus_at_once() -> void:
 	var r := RunRecord.new()
 	r.start("0.1 Dev 3", STARTED, GONE)
 	r.close()
@@ -372,11 +372,11 @@ func test_a_start_after_a_clean_quit_shows_the_title_at_once() -> void:
 	add_child_autofree(main)
 	await wait_process_frames(1)
 	assert_null(main.crash_screen)
-	assert_true(main._title.visible)
+	assert_true(main._menus.visible)
 	assert_null(main.find_child("CrashScreen", true, false))
 
 
-func test_continue_clears_the_crash_and_opens_the_title_with_its_notices() -> void:
+func test_continue_clears_the_crash_and_opens_the_menus_with_their_notices() -> void:
 	_left_crashed()
 	var s := Settings.shared()
 	s.first_start_seen = false
@@ -388,13 +388,13 @@ func test_continue_clears_the_crash_and_opens_the_title_with_its_notices() -> vo
 	add_child_autofree(main)
 	await wait_process_frames(1)
 	var screen: CrashScreen = main.crash_screen
-	assert_null(main._title.notice())
+	assert_null(main._menus.notice())
 	screen.continue_button().pressed.emit()
 	await wait_process_frames(1)
 	assert_null(main.crash_screen)
 	assert_false(is_instance_valid(screen), "freed")
-	assert_true(main._title.visible)
-	assert_not_null(main._title.notice(), "the first start's notice, as on any start")
+	assert_true(main._menus.visible)
+	assert_not_null(main._menus.notice(), "the first start's notice, as on any start")
 	assert_false(RunRecord.load_file(_run_path).crashed_before(), "shown once")
 	assert_eq(RunRecord.load_file(_run_path).state, RunRecord.State.RUNNING, "the run goes on")
 
@@ -420,7 +420,7 @@ func test_two_continues_in_one_frame_do_nothing_twice() -> void:
 	screen.continue_button().pressed.emit()
 	await wait_process_frames(1)
 	assert_null(main.crash_screen)
-	assert_true(main._title.visible)
+	assert_true(main._menus.visible)
 
 
 func test_a_failed_report_keeps_the_crash_for_the_next_start() -> void:

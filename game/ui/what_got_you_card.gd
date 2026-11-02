@@ -78,7 +78,7 @@ func _init(facts: HitFacts, shooter_name: String, colour: Color, note: String) -
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_theme_constant_override("separation", SECTION_GAP)
 	add_child(column)
-	var title := HudStyle.label(column, TITLE_SIZE, 800, GameTheme.YELLOW, HORIZONTAL_ALIGNMENT_LEFT,
+	var title := HudStyle.label(column, TITLE_SIZE, 800, GameTheme.ACCENT, HORIZONTAL_ALIGNMENT_LEFT,
 			HudStyle.SPACING_ROUND)
 	title.text = HudStyle.caps("WGY_TITLE")
 	var head := HBoxContainer.new()
@@ -104,10 +104,10 @@ func _init(facts: HitFacts, shooter_name: String, colour: Color, note: String) -
 	rows.add_theme_constant_override("separation", 0)
 	column.add_child(rows)
 	if facts.ricochet:
-		_row(rows, rule, tr("WGY_BOUNCED"), tr("WGY_YES"), GameTheme.YELLOW)
+		_row(rows, rule, tr("WGY_BOUNCED"), tr("WGY_YES"), GameTheme.ACCENT)
 	if facts.held_known:
 		_row(rows, rule, tr("WGY_HELD") % shooter_name, tr("WGY_YES" if facts.held else "WGY_NO"),
-				GameTheme.YELLOW if facts.held else GameTheme.TEXT)
+				GameTheme.ACCENT if facts.held else GameTheme.TEXT)
 	if facts.in_view >= 0.0:
 		_row(rows, rule, tr("WGY_IN_VIEW") % shooter_name, tr("WGY_SECONDS") % facts.in_view, GameTheme.TEXT)
 	_row(rows, rule, tr("WGY_YOU_WERE"), tr("WGY_MOVING" if facts.moving else "WGY_STILL"), GameTheme.TEXT)

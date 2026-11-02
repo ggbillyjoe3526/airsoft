@@ -244,10 +244,10 @@ func _build_preset(column: VBoxContainer) -> void:
 	_preset = MenuChoice.new(words)
 	stack.add_child(_preset)
 	_preset.picked.connect(_on_preset)
-	_tag = HudStyle.label(_tag_room, Line.TAG_SIZE, 800, GameTheme.YELLOW_INK, HORIZONTAL_ALIGNMENT_CENTER,
+	_tag = HudStyle.label(_tag_room, Line.TAG_SIZE, 800, GameTheme.ACCENT_INK, HORIZONTAL_ALIGNMENT_CENTER,
 			Line.TAG_SPACING)
 	_tag.text = tr("GRAPHICS_FOR_YOUR_CARD").to_upper()
-	_tag.add_theme_stylebox_override("normal", GameTheme.box(GameTheme.YELLOW, Color(0.0, 0.0, 0.0, 0.0), Line.TAG_PAD.x,
+	_tag.add_theme_stylebox_override("normal", GameTheme.box(GameTheme.ACCENT, Color(0.0, 0.0, 0.0, 0.0), Line.TAG_PAD.x,
 			Line.TAG_PAD.y))
 	_tag_room.custom_minimum_size.y = _tag.get_combined_minimum_size().y + TAG_GAP
 	# the tag follows its button wherever the row lays it out
@@ -390,7 +390,7 @@ func _build_reset(column: VBoxContainer) -> void:
 	column.add_child(row)
 	row.add_theme_constant_override("separation", SettingsScreen.ROW_SEPARATION)
 	_reset = Button.new()
-	GameTheme.small_button(_reset, GameTheme.YELLOW)
+	GameTheme.small_button(_reset, GameTheme.ACCENT)
 	_reset.pressed.connect(_on_reset)
 	row.add_child(_reset)
 
@@ -635,7 +635,7 @@ class Mark:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	func _draw() -> void:
-		draw_circle(Vector2(-Line.MARK_LEFT, size.y * 0.5), Line.MARK_RADIUS, GameTheme.YELLOW)
+		draw_circle(Vector2(-Line.MARK_LEFT, size.y * 0.5), Line.MARK_RADIUS, GameTheme.ACCENT)
 
 
 ## What a row takes from the graphics card: three squares, as many filled as its cost, under the column's GPU COST.

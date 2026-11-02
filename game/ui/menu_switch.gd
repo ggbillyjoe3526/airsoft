@@ -39,7 +39,7 @@ func _init(on_words: String = "", off_words: String = "") -> void:
 		_ring = StyleBoxFlat.new()
 		_ring.draw_center = false
 		_ring.set_border_width_all(GameTheme.FOCUS_BORDER)
-		_ring.border_color = GameTheme.YELLOW
+		_ring.border_color = GameTheme.ACCENT
 		_ring.set_corner_radius_all(int((PILL.y + RING_GAP * 2.0) * 0.5))
 	for icon: String in ["checked", "unchecked", "checked_disabled", "unchecked_disabled", "checked_mirrored",
 			"unchecked_mirrored", "checked_disabled_mirrored", "unchecked_disabled_mirrored"]:
@@ -67,10 +67,10 @@ func _draw() -> void:
 	var on := button_pressed
 	var pill := Rect2((size - PILL) * 0.5, PILL)
 	var radius := PILL.y * 0.5
-	var fill := GameTheme.YELLOW if on else GameTheme.LINE
+	var fill := GameTheme.ACCENT if on else GameTheme.LINE
 	if is_hovered() and not disabled:
 		fill = fill.lightened(HOVER_LIGHTEN)
-	var knob := GameTheme.YELLOW_INK if on else GameTheme.TEXT
+	var knob := GameTheme.ACCENT_INK if on else GameTheme.TEXT
 	if disabled:
 		fill.a = DIM_ALPHA
 		knob.a = DIM_ALPHA

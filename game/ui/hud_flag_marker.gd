@@ -62,7 +62,7 @@ class Chevron:
 		_shape[0] = Vector2(0.0 if left else w, h * 0.5)
 		_shape[1] = Vector2(w if left else 0.0, 0.0)
 		_shape[2] = Vector2(w if left else 0.0, h)
-		draw_colored_polygon(_shape, GameTheme.YELLOW)
+		draw_colored_polygon(_shape, GameTheme.WARN)
 
 
 func setup(cfg: HudConfig) -> void:
@@ -73,7 +73,7 @@ func setup(cfg: HudConfig) -> void:
 	_plate = PanelContainer.new()
 	_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var box := HudStyle.panel_box(HudStyle.BACKING_CLOCK, PAD.x, PAD.y)
-	box.border_color = GameTheme.YELLOW
+	box.border_color = GameTheme.WARN
 	box.border_width_top = RULE
 	_plate.add_theme_stylebox_override("panel", box)
 	add_child(_plate)
@@ -81,7 +81,7 @@ func setup(cfg: HudConfig) -> void:
 	row.add_theme_constant_override("separation", GAP)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_plate.add_child(row)
-	_glyph = HudFlagGlyph.new(HudStyle.MARKER_SIZE, GameTheme.YELLOW)
+	_glyph = HudFlagGlyph.new(HudStyle.MARKER_SIZE, GameTheme.WARN)
 	_glyph.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(_glyph)
 	_title = HudStyle.label(row, HudStyle.MARKER_SIZE, 800, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_LEFT,
@@ -180,7 +180,7 @@ func _build_edge() -> void:
 	var box := HudStyle.panel_box(HudStyle.BACKING_CLOCK, EDGE_PAD.x, EDGE_PAD.y)
 	box.content_margin_right = EDGE_PAD.z
 	box.content_margin_bottom = EDGE_PAD.w
-	box.border_color = GameTheme.YELLOW
+	box.border_color = GameTheme.WARN
 	box.border_width_top = EDGE_RULE
 	_edge.add_theme_stylebox_override("panel", box)
 	_edge.visible = false

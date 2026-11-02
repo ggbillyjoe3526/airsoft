@@ -93,7 +93,7 @@ func closing_text() -> String:
 static func hit_bbcode(facts: HitFacts) -> String:
 	var t := TranslationServer.translate(SHORT_KEYS[WhatGotYouCard.from_of(facts)]) % roundi(facts.distance)
 	if facts.held:
-		t += " · [color=#%s]%s[/color]" % [GameTheme.YELLOW.to_html(false),
+		t += " · [color=#%s]%s[/color]" % [GameTheme.ACCENT.to_html(false),
 				TranslationServer.translate(&"WGY_SHORT_HELD")]
 	elif facts.in_view >= 0.0:
 		t += " · " + TranslationServer.translate(&"WGY_SHORT_SEEN") % facts.in_view

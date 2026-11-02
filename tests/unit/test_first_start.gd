@@ -1,5 +1,5 @@
 extends GutTest
-## GR5's first start (concept `first-run.png`): on the first title with the automatic pick, a notice names the preset
+## GR5's first start (concept `first-run.png`): on the first menus with the automatic pick, a notice names the preset
 ## the card picked (Medium on integrated graphics, High on a dedicated card, never Ultra), the card and the screen, with
 ## OK or Graphics settings (Settings › Graphics); START works under it; it shows once (first_start_seen, saved) and
 ## never in the smoke run or a headless one. Headless; every file lives under user://test-first-start.
@@ -71,7 +71,7 @@ func test_the_notice_names_the_pick_the_card_and_the_screen() -> void:
 			"Picked for your graphics card. If the game stutters in a match it steps down a preset between rounds by"
 			+ " itself, until you pick one.", "Graphics card", "Test Card 3000 · dedicated", "Screen",
 			"2560 × 1440 · 144 Hz · borderless fullscreen", "OK", "GRAPHICS SETTINGS"]))
-	assert_eq(n.edge_colour(), GameTheme.YELLOW)
+	assert_eq(n.edge_colour(), GameTheme.ACCENT)
 
 
 func test_the_screen_in_words() -> void:
@@ -95,15 +95,15 @@ func test_when_it_is_due() -> void:
 	assert_false(GraphicsStartUp.first_start_due(s, false), "a --graphics= preset")
 
 
-# --- On the title ---
+# --- On the menus ---
 
 func test_the_first_title_shows_it_once_and_saves_it_seen() -> void:
 	var main := _main()
 	add_child(main)
 	await wait_process_frames(1)
-	var title := main.get("_title") as TitleScreen
-	assert_not_null(title.notice())
-	var words := _words(title.notice())
+	var menus := main.get("_menus") as MenuScreen
+	assert_not_null(menus.notice())
+	var words := _words(menus.notice())
 	assert_eq(words[1], "GRAPHICS SET TO HIGH", "a dedicated card: High")
 	assert_eq(words[4], "Test Card 3000 · dedicated")
 	assert_true(Settings.shared().first_start_seen)
@@ -111,18 +111,18 @@ func test_the_first_title_shows_it_once_and_saves_it_seen() -> void:
 	saved.load_file(_settings_path)
 	assert_true(saved.first_start_seen, "saved as it shows")
 	assert_eq(saved.graphics_choice, Settings.GRAPHICS_AUTOMATIC, "the pick isn't saved")
-	title.notice().button(0).pressed.emit()
+	menus.notice().button(0).pressed.emit()
 	await wait_process_frames(1)
-	assert_null(title.notice(), "OK closes it")
+	assert_null(menus.notice(), "OK closes it")
 	main.call("_free_screens")
 	main.call("_build_screens")
 	await wait_process_frames(1)
-	assert_null((main.get("_title") as TitleScreen).notice(), "not again after a match")
+	assert_null((main.get("_menus") as MenuScreen).notice(), "not again after a match")
 	main.free()
 	var next := _main()
 	add_child(next)
 	await wait_process_frames(1)
-	assert_null((next.get("_title") as TitleScreen).notice(), "nor on the next start")
+	assert_null((next.get("_menus") as MenuScreen).notice(), "nor on the next start")
 	next.free()
 
 
@@ -131,21 +131,21 @@ func test_integrated_graphics_start_on_medium() -> void:
 	var main := _main()
 	add_child(main)
 	await wait_process_frames(1)
-	var title := main.get("_title") as TitleScreen
-	assert_eq(_words(title.notice())[1], "GRAPHICS SET TO MEDIUM")
-	assert_eq(_words(title.notice())[4], "Test Card 3000 · integrated")
+	var menus := main.get("_menus") as MenuScreen
+	assert_eq(_words(menus.notice())[1], "GRAPHICS SET TO MEDIUM")
+	assert_eq(_words(menus.notice())[4], "Test Card 3000 · integrated")
 	main.free()
 
 
-func test_start_works_under_it() -> void:
+func test_the_menus_work_under_it() -> void:
 	var main := _main()
 	add_child(main)
 	await wait_process_frames(1)
-	var title := main.get("_title") as TitleScreen
-	assert_not_null(title.notice())
-	title.start_button().pressed.emit()
-	assert_false(title.visible)
-	assert_true((main.get("_menus") as Control).visible, "the menus")
+	var menus := main.get("_menus") as MenuScreen
+	assert_not_null(menus.notice())
+	assert_true(menus.visible, "the menus show under the notice")
+	menus.nav_rail().tab_button(NavRail.Tab.LOADOUT).pressed.emit()
+	assert_eq(menus.page_tab(), NavRail.Tab.LOADOUT, "and their tabs work")
 	main.free()
 
 
@@ -153,10 +153,10 @@ func test_graphics_settings_opens_the_graphics_tab() -> void:
 	var main := _main()
 	add_child(main)
 	await wait_process_frames(1)
-	var title := main.get("_title") as TitleScreen
-	title.notice().button(1).pressed.emit()
+	var menus := main.get("_menus") as MenuScreen
+	menus.notice().button(1).pressed.emit()
 	await wait_process_frames(1)
-	assert_null(title.notice())
+	assert_null(menus.notice())
 	var screen := main.get("_settings_screen") as SettingsScreen
 	assert_not_null(screen, "the settings open")
 	assert_true(screen.visible)
@@ -172,7 +172,7 @@ func test_a_players_own_preset_or_a_headless_run_shows_nothing() -> void:
 	var main := _main()
 	add_child(main)
 	await wait_process_frames(1)
-	assert_null((main.get("_title") as TitleScreen).notice(), "a preset of the player's own")
+	assert_null((main.get("_menus") as MenuScreen).notice(), "a preset of the player's own")
 	assert_false(Settings.shared().first_start_seen)
 	main.free()
 	Settings.shared().choose_graphics(Settings.GRAPHICS_AUTOMATIC, &"high")
@@ -180,7 +180,7 @@ func test_a_players_own_preset_or_a_headless_run_shows_nothing() -> void:
 	(headless.graphics as GraphicsStartUp).settings_path = _settings_path
 	add_child(headless)
 	await wait_process_frames(1)
-	assert_null((headless.get("_title") as TitleScreen).notice(), "a headless run (the smoke run is one)")
+	assert_null((headless.get("_menus") as MenuScreen).notice(), "a headless run (the smoke run is one)")
 	assert_false(Settings.shared().first_start_seen)
 	assert_false(FileAccess.file_exists(_settings_path), "nothing saved")
 	headless.free()
@@ -191,8 +191,8 @@ func test_the_smoke_run_never_shows_it() -> void:
 	g.headless_notices = true
 	g.settings_path = _settings_path
 	g.start(true)
-	var title := TitleScreen.new()
-	add_child_autofree(title)
-	g.show_boot_notices(title)
-	assert_null(title.notice())
+	var menus := MenuScreen.new()
+	add_child_autofree(menus)
+	g.show_boot_notices(menus)
+	assert_null(menus.notice())
 	assert_false(Settings.shared().first_start_seen)

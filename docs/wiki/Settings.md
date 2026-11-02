@@ -1,8 +1,8 @@
 # Settings
 
-Open **Settings** from the title screen's top bar or the pause menu. Every change applies at once, even in the middle
+Open **Settings** from the rail on the left of the menus or from the pause menu. Every change applies at once, even in the middle
 of a match, and is saved straight away. If the settings file is ever damaged, the game starts on the defaults and
-says so. **Back**, a small button at the bottom left, closes Settings. An On/Off setting is a switch: yellow with the
+says so. **Back**, a small button at the bottom left, closes Settings. An On/Off setting is a switch: teal with the
 knob at the right when on. Nothing on the screen moves or changes size when you press a switch or pick a choice. Rest
 the pointer on a row to see what it does: the help wraps onto more lines and always stays on screen.
 
@@ -27,7 +27,7 @@ is from a long way off; a silenced replica carries half as far.
   **F11** or **Alt+Enter** switches between windowed and your last fullscreen mode.
 - **Monitor:** with two screens or more, the screen the window opens on.
 - **V-Sync** (off by default) and a **Frame-rate limit**: 30 to 360 frames a second, or Off for no limit. In the background
-  the game drops to 30 frames a second. The title and menus never draw more frames than your screen shows, whatever
+  the game drops to 30 frames a second. The menus never draw more frames than your screen shows, whatever
   the limit.
 - **Field of view** and **Show FPS** (the figure sits in the bottom-right corner).
 
@@ -88,6 +88,11 @@ Team colours, gauge patterns, sound cues, reduced motion and screen reader messa
 ## Save file
 
 Your save, its folder and its restore points: see [Saving and Bug Reports](Saving-and-Bug-Reports).
+
+## About
+
+**About** shows the game's version and the renderer it draws with, and has **Report a Bug**, **Licences** (everything
+the game ships and their licences) and **Quit to desktop**. In a match, the pause menu has its own Report a Bug.
 
 ## Dev settings
 

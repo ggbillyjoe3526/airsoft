@@ -1,7 +1,7 @@
 extends GutTest
 ## FB1 QA: what the menu fixes must keep true under a keyboard and a pointer, beyond test_fb1_menus.gd: the focus comes
 ## back where it was when QUIT GAME? closes, a button that is not showing sets no group's width, Esc has its owner in
-## each menu state, and the prompt, the screens and the wordmark leave nothing behind when they open and close again.
+## each menu state, and the prompt, the screens and the tabs leave nothing behind when they open and close again.
 
 const MAIN := preload("res://game/main.tscn")
 
@@ -62,8 +62,7 @@ func _hit(node: Node, at: Vector2) -> Control:
 
 ## The Settings screen of `main` on its last-but-one tab (Save file), with the screen's tab box.
 func _settings_on_save_tab(main: Node) -> SettingsScreen:
-	main._show_menus()
-	main._menus.top_bar().tab_button(TopBar.Tab.SETTINGS).pressed.emit()
+	main._menus.nav_rail().tab_button(NavRail.Tab.SETTINGS).pressed.emit()
 	await wait_process_frames(3)
 	var screen: SettingsScreen = main._settings_screen
 	var tabs: TabContainer = screen.find_children("*", "TabContainer", true, false)[0]
@@ -76,21 +75,8 @@ func _settings_on_save_tab(main: Node) -> SettingsScreen:
 
 # --- The focus comes back --------------------------------------------------------------------------------------------
 
-func test_the_focus_is_back_on_start_when_quit_game_closes_on_the_title() -> void:
-	var main: Node = await _boot()
-	main._title.focus_start()
-	var before := _focus()
-	assert_not_null(before, "START has the keyboard on the title")
-	await _esc()
-	assert_not_null(main._quit_prompt)
-	await _esc()
-	assert_null(main._quit_prompt)
-	assert_eq(_focus(), before, "a keyboard player is not left with nothing focused after CANCEL or Esc")
-
-
 func test_the_focus_is_back_where_it_was_when_cancel_closes_the_prompt_in_the_menus_and_the_settings() -> void:
 	var main: Node = await _boot()
-	main._show_menus()
 	await wait_process_frames(2)
 	var before := _focus()
 	assert_not_null(before, "the Match page has the keyboard on PLAY")
@@ -99,7 +85,7 @@ func test_the_focus_is_back_where_it_was_when_cancel_closes_the_prompt_in_the_me
 	main._quit_prompt.cancel_button().pressed.emit()
 	await wait_process_frames(2)
 	assert_eq(_focus(), before, "CANCEL gives the keyboard back to PLAY")
-	main._menus.top_bar().tab_button(TopBar.Tab.SETTINGS).pressed.emit()
+	main._menus.nav_rail().tab_button(NavRail.Tab.SETTINGS).pressed.emit()
 	await wait_process_frames(3)
 	var in_settings := _focus()
 	assert_not_null(in_settings)
@@ -166,15 +152,13 @@ func test_the_pause_menu_in_a_match_is_as_wide_as_its_widest_showing_button() ->
 
 func test_escape_in_the_practice_loadout_goes_back_to_the_range_and_asks_nothing() -> void:
 	var main: Node = await _boot()
-	main._title.visible = false
-	main._menus.visible = true
 	main._menus.open_practice_loadout(Loadout.Slot.PRIMARY)
 	await wait_process_frames(3)
 	watch_signals(main._menus)
 	await _esc()
 	assert_signal_emit_count(main._menus, "practice_requested", 1)
 	assert_null(main._quit_prompt, "practice has its own way back")
-	assert_true(main._menus.top_bar().wordmark().disabled, "and no title to go to")
+	assert_false(main._menus.nav_rail().quit_button().visible, "and no QUIT in practice")
 	main._menus.leave_loadout()
 	await wait_process_frames(2)
 
@@ -192,21 +176,20 @@ func test_escape_with_a_settings_question_open_closes_only_the_question() -> voi
 	assert_not_null(main._settings_screen, "the settings stay")
 
 
-func test_the_wordmark_with_a_settings_question_open_frees_the_settings_and_shows_the_title() -> void:
+func test_the_match_tab_with_a_settings_question_open_frees_the_settings_and_shows_the_match_page() -> void:
 	var main: Node = await _boot()
 	var screen := await _settings_on_save_tab(main)
 	screen.save_page().confirm().ask(SettingsSaveConfirm.Ask.new())
 	await wait_process_frames(2)
-	main._menus.top_bar().wordmark().pressed.emit()
+	main._menus.nav_rail().tab_button(NavRail.Tab.MATCH).pressed.emit()
 	await wait_process_frames(3)
 	assert_null(main._settings_screen, "the settings were freed")
-	assert_true(main._title.visible)
+	assert_true(main._menus.match_page().visible)
 
 
 func test_escape_ends_a_rebind_then_the_next_asks_quit_game() -> void:
 	var main: Node = await _boot()
-	main._show_menus()
-	main._menus.top_bar().tab_button(TopBar.Tab.SETTINGS).pressed.emit()
+	main._menus.nav_rail().tab_button(NavRail.Tab.SETTINGS).pressed.emit()
 	await wait_process_frames(3)
 	var keys: KeyBindingList = main._settings_screen._keys
 	keys.begin(&"move_forward", 0)
@@ -244,7 +227,6 @@ func test_enter_on_cancel_closes_the_prompt_and_on_quit_sends_confirmed() -> voi
 
 func test_tab_and_the_arrows_stay_in_the_prompt_and_never_reach_the_menu_under_it() -> void:
 	var main: Node = await _boot()
-	main._show_menus()
 	await wait_process_frames(3)
 	main.ask_quit()
 	await wait_process_frames(2)
@@ -261,14 +243,13 @@ func test_tab_and_the_arrows_stay_in_the_prompt_and_never_reach_the_menu_under_i
 
 func test_the_prompt_covers_the_menus_so_a_click_never_reaches_them() -> void:
 	var main: Node = await _boot()
-	main._show_menus()
 	await wait_process_frames(3)
-	var mark: Button = main._menus.top_bar().wordmark()
+	var mark: Button = main._menus.nav_rail().quit_button()
 	main.ask_quit()
 	await wait_process_frames(2)
 	var hit := _hit(main, mark.get_global_rect().get_center())
 	assert_not_null(hit)
-	assert_true(main._quit_prompt.is_ancestor_of(hit), "the click lands on the prompt's shade, not the wordmark")
+	assert_true(main._quit_prompt.is_ancestor_of(hit), "the click lands on the prompt's shade, not QUIT")
 	main._quit_prompt.close()
 
 
@@ -286,11 +267,10 @@ func test_two_escapes_in_one_frame_leave_no_prompt_and_asking_again_works() -> v
 	await _esc()
 
 
-func test_opening_and_closing_quit_game_the_settings_and_the_title_again_leaves_no_nodes() -> void:
+func test_opening_and_closing_quit_game_the_settings_and_the_tabs_again_leaves_no_nodes() -> void:
 	var main: Node = await _boot()
-	main._show_menus()
-	var bar: TopBar = main._menus.top_bar()
-	bar.tab_button(TopBar.Tab.SETTINGS).pressed.emit()
+	var bar: NavRail = main._menus.nav_rail()
+	bar.tab_button(NavRail.Tab.SETTINGS).pressed.emit()
 	await wait_process_frames(3)
 	main._settings_screen.close()
 	await wait_process_frames(3)
@@ -301,25 +281,24 @@ func test_opening_and_closing_quit_game_the_settings_and_the_title_again_leaves_
 		await wait_process_frames(2)
 		main._quit_prompt.cancel_button().pressed.emit()
 		await wait_process_frames(2)
-		bar.tab_button(TopBar.Tab.SETTINGS).pressed.emit()
+		bar.tab_button(NavRail.Tab.SETTINGS).pressed.emit()
 		await wait_process_frames(2)
 		main._settings_screen.close()
 		await wait_process_frames(2)
-		bar.wordmark().pressed.emit()
+		bar.tab_button(NavRail.Tab.ARMORY).pressed.emit()
 		await wait_process_frames(2)
-		main._show_menus()
+		bar.tab_button(NavRail.Tab.MATCH).pressed.emit()
 		await wait_process_frames(2)
 	assert_eq(Performance.get_monitor(Performance.OBJECT_NODE_COUNT), nodes, "no node left over")
 	assert_eq(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT), orphans)
-	assert_eq(bar.wordmark().pressed.get_connections().size(), 1, "one listener on the wordmark")
-	assert_eq(main._menus.title_requested.get_connections().size(), 1)
+	assert_eq(bar.quit_button().pressed.get_connections().size(), 1, "one listener on QUIT")
+	assert_eq(main._menus.quit_requested.get_connections().size(), 1)
 
 
 # --- Fix round 1: what the fixes must not break ----------------------------------------------------------------------
 
 func test_the_focus_falls_back_to_the_screens_own_control_when_the_remembered_one_is_gone() -> void:
 	var main: Node = await _boot()
-	main._show_menus()
 	await wait_process_frames(2)
 	main.ask_quit()
 	await wait_process_frames(2)
@@ -327,14 +306,6 @@ func test_the_focus_falls_back_to_the_screens_own_control_when_the_remembered_on
 	main._quit_prompt.close()
 	await wait_process_frames(2)
 	assert_not_null(_focus(), "the Match page gives the keyboard to a control of its own (no script error)")
-	main._show_title()
-	await wait_process_frames(2)
-	main.ask_quit()
-	await wait_process_frames(2)
-	main._quit_prompt._before = null
-	main._quit_prompt.close()
-	await wait_process_frames(2)
-	assert_eq(_focus(), main._title.start_button(), "the title gives it to START")
 
 
 func test_a_group_whose_members_are_all_hidden_or_toggle_every_frame_stays_sane() -> void:
@@ -366,8 +337,7 @@ func test_a_group_whose_members_are_all_hidden_or_toggle_every_frame_stays_sane(
 
 func test_escape_in_the_name_field_cancels_the_rename_and_the_next_escape_asks_quit_game() -> void:
 	var main: Node = await _boot()
-	main._show_menus()
-	main._menus.top_bar().tab_button(TopBar.Tab.LOADOUT).pressed.emit()
+	main._menus.nav_rail().tab_button(NavRail.Tab.LOADOUT).pressed.emit()
 	await wait_process_frames(3)
 	var page: LoadoutPage = main._menus.loadout_page()
 	page.strip().start_rename()

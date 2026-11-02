@@ -1,7 +1,7 @@
 class_name GraphicsStartUp
 extends RefCounted
 ## The graphics at start-up, for the entry scene (game/main.gd): the safe start's check before anything is built
-## (GraphicsGuard, RendererOverride) and its question on the title; once per change of reason, why the game is on the
+## (GraphicsGuard, RendererOverride) and its question on the menus; once per change of reason, why the game is on the
 ## simpler renderer; and once ever, the first start's notice (concept `first-run.png`: the automatic pick, the card and
 ## the screen; OK or Graphics settings; Settings.first_start_seen). Nothing is guarded in the smoke run, a headless one
 ## or one the editor started (its Stop button ends a run as a crash would), unless a test gives `guard_path`; the
@@ -80,8 +80,8 @@ func settle() -> void:
 		guard.save(guard_path)
 
 
-## The safe start's question on `title`, while it waits for an answer (each title built).
-func show_safe_notice(title: TitleScreen) -> void:
+## The safe start's question on `menus`, while it waits for an answer (each time they are built).
+func show_safe_notice(menus: MenuScreen) -> void:
 	if guard == null or not guard.asking():
 		return
 	var machine := GraphicsApply.machine()
@@ -92,20 +92,20 @@ func show_safe_notice(title: TitleScreen) -> void:
 	var s := Settings.shared()
 	var now := GraphicsNotice.graphics_words(s.graphics_choice, machine.preset, s.renderer)
 	var notice := GraphicsNotice.safe_start(words, now)
-	notice.chosen.connect(_on_safe_answer.bind(title))
-	title.show_notice(notice)
+	notice.chosen.connect(_on_safe_answer.bind(menus))
+	menus.show_notice(notice)
 	# the safe notice says why the game is on the simpler renderer
 	guard.notice_due(RendererOverride.REASON_SETTINGS)
 	guard.save(guard_path)
 
 
-## The notices of a start, on its first title: why the game is on the simpler renderer (once per change of reason),
+## The notices of a start, on its first menus: why the game is on the simpler renderer (once per change of reason),
 ## else the first start's (once ever). Neither while the safe start asks.
-func show_boot_notices(title: TitleScreen) -> void:
-	if title.notice() != null:
+func show_boot_notices(menus: MenuScreen) -> void:
+	if menus.notice() != null:
 		return
-	if not _show_renderer_notice(title):
-		_show_first_start(title)
+	if not _show_renderer_notice(menus):
+		_show_first_start(menus)
 
 
 ## Whether the first start's notice is due for `s`: never seen, the graphics the automatic pick (nothing chosen, no
@@ -117,8 +117,8 @@ static func first_start_due(s: Settings, unattended: bool) -> bool:
 
 
 ## Keep safe graphics (0), or Try my settings again (1): the player's graphics back, and a restart.
-func _on_safe_answer(index: int, title: TitleScreen) -> void:
-	title.close_notice()
+func _on_safe_answer(index: int, menus: MenuScreen) -> void:
+	menus.close_notice()
 	if index == 0:
 		guard.keep()
 		guard.save(guard_path)
@@ -133,7 +133,7 @@ func _on_safe_answer(index: int, title: TitleScreen) -> void:
 
 
 ## Once per change of reason, why the game is on the simpler renderer: true if it showed.
-func _show_renderer_notice(title: TitleScreen) -> bool:
+func _show_renderer_notice(menus: MenuScreen) -> bool:
 	if guard == null or guard.asking():
 		return false
 	var machine := GraphicsApply.machine()
@@ -146,13 +146,13 @@ func _show_renderer_notice(title: TitleScreen) -> bool:
 	var card := SettingsGraphicsPage.card_words(machine)
 	var renderer := SettingsGraphicsPage.renderer_words(machine)
 	var notice := GraphicsNotice.simpler_renderer(guard.renderer_notice, card, renderer)
-	notice.chosen.connect(func(_i: int) -> void: title.close_notice())
-	title.show_notice(notice)
+	notice.chosen.connect(func(_i: int) -> void: menus.close_notice())
+	menus.show_notice(notice)
 	return true
 
 
 ## The first start's notice, once: marked seen and saved as it shows, so it never comes back.
-func _show_first_start(title: TitleScreen) -> void:
+func _show_first_start(menus: MenuScreen) -> void:
 	var s := Settings.shared()
 	if not first_start_due(s, _smoke or (_headless() and not headless_notices)):
 		return
@@ -161,15 +161,15 @@ func _show_first_start(title: TitleScreen) -> void:
 	var screen := GraphicsNotice.screen_words(DisplayServer.screen_get_size(at),
 			DisplayServer.screen_get_refresh_rate(at), s.window_mode)
 	var notice := GraphicsNotice.first_start(machine.preset, SettingsGraphicsPage.card_words(machine), screen)
-	notice.chosen.connect(_on_first_start_answer.bind(title))
-	title.show_notice(notice)
+	notice.chosen.connect(_on_first_start_answer.bind(menus))
+	menus.show_notice(notice)
 	s.first_start_seen = true
 	s.save(settings_path)
 
 
 ## OK (0), or Graphics settings (1), which opens Settings › Graphics.
-func _on_first_start_answer(index: int, title: TitleScreen) -> void:
-	title.close_notice()
+func _on_first_start_answer(index: int, menus: MenuScreen) -> void:
+	menus.close_notice()
 	if index == 1:
 		graphics_settings_requested.emit()
 

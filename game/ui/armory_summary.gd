@@ -80,7 +80,7 @@ func _level_line(s: LevelTable.Standing) -> Control:
 	var big := HBoxContainer.new()
 	big.add_theme_constant_override("separation", 0)
 	big.add_child(MenuParts.spaced(tr("ARMORY_LEVEL") + " ", BIG_SIZE, 800, GameTheme.TEXT, 0.02))
-	big.add_child(MenuParts.spaced(str(s.level), BIG_SIZE, 800, GameTheme.YELLOW, 0.02))
+	big.add_child(MenuParts.spaced(str(s.level), BIG_SIZE, 800, GameTheme.ACCENT, 0.02))
 	row.add_child(big)
 	var of := MenuParts.text(tr("ARMORY_OF") % _facts.table.cap(), OF_SIZE, 700, GameTheme.MUTED)
 	of.size_flags_vertical = Control.SIZE_SHRINK_END
