@@ -7,11 +7,25 @@ extends RefCounted
 ## line is the level's own geometry along the aim (a ray, BotConfig.auto_line_min long), the open ground the nav grid's
 ## open field (NavGrid.open, the clear space round the target's cell, BotConfig.auto_open_min). As a burst begins with
 ## both true it decides once per target (BotConfig.auto_chance); it goes back to the start mode once the shot isn't
-## open any more or the target is gone. On a field without a start mode it never touches the selector (bot kits come
-## on full auto there, BotKits.kit_of). Allocation-free.
+## open any more or the target is gone. On semi it taps at a player's pace (pull). On a field without a start mode it
+## never touches the selector and pulls as it always has (bot kits come on full auto there, BotKits.kit_of).
+## Allocation-free.
 
 ## The sight line's check (one at a time: the bots think in turn).
 static var _hit: RayHit = RayHit.new()
+
+
+## The trigger this tick, given whether the bot `wants` it down (on semi, a fresh pull). On a field with a start mode a
+## bot on semi pulls no faster than a player taps (BotConfig.semi_tap_gap), so semi indoors is slower than full auto
+## (a replica cycles a pull as fast as its full-auto rate, fire_rate); elsewhere, and in burst or auto, as wanted.
+static func pull(b: Bot, w: BotWorld, wants: bool) -> bool:
+	var a := b.character.armament
+	if w.start_mode == ReplicaConfig.FireMode.AUTO or a.fire_mode() != ReplicaConfig.FireMode.SEMI:
+		return wants
+	if not wants or w.time < b.next_tap:
+		return false
+	b.next_tap = w.time + w.cfg.semi_tap_gap
+	return true
 
 
 ## The selector this tick, called before the trigger: a press of the selector key while the replica in hand isn't on

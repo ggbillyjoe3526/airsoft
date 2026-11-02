@@ -41,6 +41,9 @@ too, not only the AEG.
 - **A long line is 35 m** (`auto_line_min`), level at eye height along the aim's heading (so the floor short of a
   crouched target never ends it): Depot's lanes bend round dead space, so only the Chrono hall and the yards run that
   far (the critic measured the longest clear line at 58 m, and 35 m or more through about 73 % of the open floor).
+- **Bots tap semi at a player's pace there: 5 a second** (`semi_tap_gap` 0.2 s). QA found a bot on semi pulled every
+  other tick, so the press buffer fired at the replica's full rate (the AEG's 13 a second) and semi indoors was full
+  auto in all but name. Only on a field with a start mode, so bots' pistols elsewhere are as before.
 - **No selector presses through a vault** (or while presses kept through one still play): they would be kept and
   spin the selector past the mode wanted.
 - **Half the open shots, decided once per target** (`auto_chance`): "it's an option"; deciding per burst would make
@@ -54,7 +57,7 @@ too, not only the AEG.
   auto only), every shipped full-auto replica held on Depot, every round reset and B reaching auto, other fields
   unchanged.
 - `tests/unit/test_start_mode_bots.gd`: an open shot needs both the long line and the open floor; some bots take it and
-  some don't; the switch to auto and back when the target goes; no presses through a vault; a level line; a closed shot drops auto and isn't decided again; no
+  some don't; the switch to auto and back when the target goes; no presses through a vault; a level line; semi taps at 5 a second indoors only; a closed shot drops auto and isn't decided again; no
   auto on cramped floor, without a start mode, or on a replica without auto; Depot's open floor share.
 
 ## Known issues left

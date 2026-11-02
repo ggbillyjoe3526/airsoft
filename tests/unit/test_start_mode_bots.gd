@@ -133,6 +133,24 @@ func test_a_long_line_is_level_whatever_the_aim_s_pitch() -> void:
 	assert_false(BotFireMode.long_line(w, EYE, Vector3.DOWN), "straight down has no heading")
 
 
+## Pulls over a second of a bot on semi pulling whenever it may (`wants` every other tick, as BotCombat taps).
+func _pulls_in_a_second() -> int:
+	var pulls := 0
+	for i in 60:
+		w.time = i / 60.0
+		pulls += 1 if BotFireMode.pull(b, w, i % 2 == 0) else 0
+	return pulls
+
+
+func test_on_semi_indoors_a_bot_taps_at_a_player_s_pace_not_the_replica_s_full_rate() -> void:
+	var taps := _pulls_in_a_second()
+	assert_eq(taps, ceili(1.0 / config.semi_tap_gap), "%d pulls a second" % taps)
+	assert_lt(taps, roundi(b.character.armament.replicas[0].fire_rate), "slower than its full auto")
+	w.start_mode = AUTO
+	b.next_tap = -INF
+	assert_eq(_pulls_in_a_second(), 30, "elsewhere every fresh pull, as before")
+
+
 func test_a_cramped_shot_never_goes_auto() -> void:
 	for s in 40:
 		b = Bot.new(b.character, s + 1, config.skill_for(&"normal"), 2)
