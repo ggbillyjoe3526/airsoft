@@ -740,6 +740,11 @@ Every field plays 6v6 by default; Custom offers 5v5, 6v6, 7v7 and 8v8 on each (o
   with their keys), the SWAP row, and Performance at the right. A rifle and a pistol are drawn true to size against each
   other; swap the rifle into the secondary slot: it is just as large there. Pick each card: CUSTOMISE moves with the
   ring and the Swap row says which slot it fills.
+- [ ] **Customise's turntable (UR4).** Open CUSTOMISE: the replica's name is the title with LOADOUT before it, and
+  the replica stands on a turntable in a glass panel. Fit a silencer, a long barrel and a scope, then take them off:
+  the replica never moves or grows. Switch between the tabs: the panel stays the same size. Drag with either mouse
+  button to turn and tilt it, scroll to zoom, pick 3/4, Left, Right and Top, and press R: back to 3/4. Check a pistol
+  too. Does turning it feel smooth, and is the 3/4 view a good start?
 - [ ] **Esc (FB1).** Esc on any menu page and in Settings asks **QUIT GAME?** with the focus on CANCEL; Esc again or
   CANCEL closes it and QUIT leaves. A dialog's, a key rebind's and the Loadout's rename Esc still come first (the
   credits close, a key waiting stops waiting); in a match Esc is still the pause menu, and its Settings close on Esc.

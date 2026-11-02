@@ -42,12 +42,12 @@ func _page(size: Vector2i = ROOM, with: SavedLoadouts = null) -> LoadoutPage:
 ## A pool with `extra` more replica rows after the shipped ones (each "id|name|key|tags|access").
 func _grown_saved(extra: PackedStringArray) -> SavedLoadouts:
 	var text := FileAccess.get_file_as_string(Pool.PATH)
-	var anchor := "| 000019 | Cyber Pistol | cyber | pistol, built-in-power | public |\n"
+	var anchor := "| 000019 | Cyber Pistol | cyber | pistol, built-in-power | | public |\n"
 	assert_true(text.contains(anchor), "pool.md anchor")
 	var rows := ""
 	for e: String in extra:
 		var p := e.split("|")
-		rows += "| %s | %s | %s | %s | %s |\n" % [p[0], p[1], p[2], p[3], p[4]]
+		rows += "| %s | %s | %s | %s | | %s |\n" % [p[0], p[1], p[2], p[3], p[4]]
 	var pool := Pool.parse(text.replace(anchor, anchor + rows))
 	var stats := ReplicaStats.read_file()
 	return SavedLoadouts.new(LoadoutRules.new(pool, stats, SimTuning.load_default().replica_rules))
@@ -204,7 +204,8 @@ func test_dev_replicas_listed_with_dev_content_still_fit_the_page() -> void:
 	settings.dev.dev_content = true
 	var page := _page(ROOM, grown)
 	await wait_process_frames(3)
-	assert_eq(page.gear().replica_ids().size(), 4)
+	# the three public replicas, the Sniper Rifle (dev for now) and the added one
+	assert_eq(page.gear().replica_ids().size(), 5)
 	_assert_room(page, "dev replica")
 
 

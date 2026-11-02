@@ -1,10 +1,11 @@
 class_name CustomiseView
 extends Control
-## The Customise page body (concepts `colour.png`, `bbs.png`, `optic.png` and `magazine.png`): the way back, the replica's
-## name and slot, the parts down the left (COLOUR, BBs, POWER, then OPTIC, GRIP, BARREL, MUZZLE, MAGAZINE, LASER and LIGHT,
+## The Customise page body (concepts `colour.png`, `bbs.png`, `optic.png` and `magazine.png`; UI concept B v2
+## `customise.png`): the way back and the replica's name as the page's title with its slot beside it, the parts down the
+## left (COLOUR, BBs, POWER, then OPTIC, GRIP, BARREL, MUZZLE, MAGAZINE, LASER and LIGHT,
 ## each greyed with the mount it needs on a replica that can't take one; LIGHT greyed LATER while no light is on offer,
-## WL7), the replica's picture with the
-## tab's controls under it and the Performance sheet on the right. COLOUR: the eight bold schemes, the four plain colours and
+## WL7), the replica on its turntable (ReplicaTurntable: one fixed frame whatever is fitted, turned by drag or a view
+## button) with the tab's controls under it and the Performance sheet on the right. COLOUR: the eight bold schemes, the four plain colours and
 ## the Realistic colours switch. BBs: the weight slider with Glowing BBs under it (At Night, Always, Off: WL8), and the
 ## hop-up's slider with its flight. POWER: the power sources that
 ## fit. A part tab (PartPage): the slot as it comes and each part that fits, with its figures. The picture shows the parts
@@ -58,10 +59,6 @@ const TAB_SHEET_ROWS: Dictionary[Tab, Array] = {
 ## The part tabs shown greyed LATER in the concept's place while no part of their slot is on offer (PartOptions.offered),
 ## by their name's key.
 const LATER_TABS: Dictionary[String, Tab] = {"PART_LIGHT": Tab.LIGHT}
-const MARGIN_X := 56
-const CRUMB_TOP := 28
-const BODY_TOP := 96
-const BODY_BOTTOM := 40
 const COLUMN_GAP := 32
 const PARTS_WIDTH := 300.0
 const SIDE_WIDTH := 500.0
@@ -79,18 +76,16 @@ const MOUNT_JOIN := " / "
 const SHEET_LIST_PARTS := 2
 const BACK_SIZE := 16
 const BACK_PAD := Vector2i(16, 8)
-const CRUMB_GAP := 14
-const CRUMB_NAME_SIZE := 30
-const CRUMB_SUB_SIZE := 18
-const SHOT_HEIGHT := 360.0
-const SHOT_HEIGHT_BBS := 300.0
-const SHOT_PAD := Vector2(24.0, 18.0)
-## The most the replica's picture takes (the concepts': a rifle about 690 px wide, 565 on the BBs tab).
-const SHOT_BOX := Vector2(730.0, 270.0)
-const SHOT_BOX_BBS := Vector2(600.0, 210.0)
-## The most a picture with parts fitted takes: the rifle keeps the scale it has bare (the parts add to it) up to this.
-const SHOT_ROOM := Vector2(880.0, 322.0)
-const SHOT_ROOM_BBS := Vector2(700.0, 264.0)
+const CRUMB_GAP := 20
+## The turntable's panel: one height on every tab (the frame never moves), its padding, the views row's gap and the
+## hints' size.
+const STAGE_HEIGHT := 400.0
+const STAGE_PAD := Vector2i(16, 14)
+const STAGE_ROW_GAP := 10
+const HINT_SIZE := 14
+const HINT_GAP := 18
+const HINT_KEY_GAP := 6
+const HINT_KEY_PAD := Vector2i(6, 1)
 const OPTS_TOP := 18
 const SUB_HEAD_SIZE := 16
 const SUB_HEAD_SPACING := 0.1
@@ -130,7 +125,6 @@ var tab: Tab = Tab.COLOUR
 
 var _pictures: ReplicaPictures = null
 var _facts: LoadoutFacts = null
-var _glow: GradientTexture2D = null
 var _back: Button = null
 var _crumb_name: Label = null
 var _crumb_sub: Label = null
@@ -143,8 +137,8 @@ var _part_mount: Dictionary[Tab, Label] = {}
 var _part_pad: Dictionary[Tab, MarginContainer] = {}
 var _part_pages: Dictionary[Tab, PartPage] = {}
 var _options: PartOptions = null
-var _shot_stage: Control = null
-var _shot: TextureRect = null
+var _turntable: ReplicaTurntable = null
+var _views: MenuChoice = null
 var _pages: Dictionary[Tab, Control] = {}
 var _tiles: Dictionary[StringName, MenuCard] = {}
 var _own_note: Label = null
@@ -172,17 +166,15 @@ func _init(pictures: ReplicaPictures, facts: LoadoutFacts) -> void:
 	_pictures = pictures
 	_facts = facts
 	_options = PartOptions.new(facts)
-	_glow = MenuParts.glow(GameTheme.BG)
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	# the body's box fills the whole view, the crumb's corner included: it must not catch the clicks meant for the
 	# LOADOUT button under it (FB1: the button did nothing)
 	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin.add_theme_constant_override("margin_left", MARGIN_X)
-	margin.add_theme_constant_override("margin_right", MARGIN_X)
-	margin.add_theme_constant_override("margin_top", BODY_TOP)
-	margin.add_theme_constant_override("margin_bottom", BODY_BOTTOM)
+	margin.add_theme_constant_override("margin_left", int(MenuParts.PAGE_MARGIN.x))
+	margin.add_theme_constant_override("margin_right", int(MenuParts.PAGE_MARGIN.z))
+	margin.add_theme_constant_override("margin_bottom", int(MenuParts.PAGE_MARGIN.w))
 	add_child(margin)
 	var columns := HBoxContainer.new()
 	columns.add_theme_constant_override("separation", COLUMN_GAP)
@@ -193,8 +185,13 @@ func _init(pictures: ReplicaPictures, facts: LoadoutFacts) -> void:
 	_sheet.custom_minimum_size = Vector2(SIDE_WIDTH, 0.0)
 	_sheet.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	columns.add_child(_sheet)
-	# the crumb last, so it is drawn and hit above the body
-	_build_crumb()
+	# the crumb last, so it is drawn and hit above the body; the body starts under it
+	var crumb := _build_crumb()
+	var place_body := func() -> void:
+		margin.add_theme_constant_override("margin_top", roundi(MenuParts.PAGE_MARGIN.y
+				+ crumb.get_combined_minimum_size().y + MenuParts.PAGE_TITLE_AFTER))
+	crumb.minimum_size_changed.connect(place_body)
+	place_body.call()
 	show_tab(Tab.COLOUR)
 
 
@@ -266,7 +263,21 @@ func sheet() -> PerformanceSheet:
 	return _sheet
 
 
-## The crumb's replica name and its "PRIMARY · CQB RUSH".
+## The replica on its turntable, and the row of views over it.
+func turntable() -> ReplicaTurntable:
+	return _turntable
+
+
+func view_choice() -> MenuChoice:
+	return _views
+
+
+## Lets go of the turntable's model (the page is closed).
+func let_go() -> void:
+	_turntable.let_go()
+
+
+## The title's replica name and its "PRIMARY · CQB RUSH".
 func crumb_text() -> String:
 	return _crumb_name.text + " " + _crumb_sub.text
 
@@ -291,7 +302,6 @@ func show_tab(t: Tab) -> void:
 	for id: Tab in _pages:
 		_pages[id].visible = id == t
 		_parts[id].set_picked(id == t)
-	_shot_stage.custom_minimum_size.y = SHOT_HEIGHT_BBS if t == Tab.BBS else SHOT_HEIGHT
 	# A part picture's viewport is held only while its tab is on.
 	if not PART_SLOTS.has(t) and _pictures != null:
 		_pictures.let_go_parts()
@@ -308,13 +318,13 @@ func refresh(slot: Loadout.Slot, realistic: bool) -> void:
 	var t := f.tune(slot)
 	var r := f.replica(slot)
 	var base := f.as_it_comes(slot)
-	_crumb_name.text = item.display_name
+	_crumb_name.text = item.display_name.to_upper()
 	_crumb_sub.text = "%s · %s" % [tr(LoadoutFacts.SLOT_KEYS[slot]), f.saved.carried().name.to_upper()]
 	_part_sub[Tab.COLOUR].text = f.paint_name(slot, realistic)
 	_part_sub[Tab.BBS].text = f.bbs_line(slot)
 	var power := f.power_name(slot)
 	_part_sub[Tab.POWER].text = power if power != "" else tr("CUSTOMISE_POWER_BUILT_IN")
-	_show_picture(item, t, realistic)
+	_turntable.show_replica(item.key, t.paint, realistic, _facts.fitted_keys(item))
 	# colour
 	var own := t.paint == ReplicaSchemes.OWN
 	for box in _tile_boxes:
@@ -373,17 +383,6 @@ func _join_words(names: PackedStringArray) -> String:
 	return "%s %s %s" % [", ".join(names.slice(0, names.size() - 1)), tr("PART_AND"), names[names.size() - 1]]
 
 
-## The picture of the replica with its parts: at the scale the bare replica fills its box at, as far as the room allows.
-func _show_picture(item: Pool.Item, t: ReplicaTune, realistic: bool) -> void:
-	_shot.texture = _pictures.texture(item.key, t.paint, realistic, _facts.fitted_keys(item))
-	var bare := _pictures.bare_extent(item.key)
-	var now := _pictures.extent(item.key)
-	var box := SHOT_BOX_BBS if tab == Tab.BBS else SHOT_BOX
-	var room := SHOT_ROOM_BBS if tab == Tab.BBS else SHOT_ROOM
-	var scale := minf(minf(box.x / bare.x, box.y / bare.y), minf(room.x / now.x, room.y / now.y))
-	_shot.custom_minimum_size = now * scale
-
-
 ## Part tab `t`: on with what is fitted under its name, or greyed with the mount its parts need.
 func _refresh_part_tab(t: Tab, slot: Loadout.Slot) -> void:
 	var part_slot := PART_SLOTS[t]
@@ -430,14 +429,17 @@ func _on_target_metres(r: ReplicaConfig, t: ReplicaTune) -> float:
 
 
 
-func _build_crumb() -> void:
+## The title row: the way back, then the replica's name as the page's title with its slot beside it.
+func _build_crumb() -> Control:
 	var row := HBoxContainer.new()
 	row.name = "Crumb"
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_theme_constant_override("separation", CRUMB_GAP)
-	row.position = Vector2(MARGIN_X, CRUMB_TOP)
+	row.position = Vector2(MenuParts.PAGE_MARGIN.x, MenuParts.PAGE_MARGIN.y)
 	_back = Button.new()
 	_back.name = "Back"
 	_back.text = tr("CUSTOMISE_BACK")
+	_back.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_back.add_theme_font_override("font", GameTheme.spaced_font(700, GameTheme.SPACING_TAB, BACK_SIZE))
 	_back.add_theme_font_size_override("font_size", BACK_SIZE)
 	# every state its own box with the same margins: the pressed box was the theme's, 2 px wider each side, and a press
@@ -447,12 +449,12 @@ func _build_crumb() -> void:
 			GameTheme.box(GameTheme.CARD_HI, GameTheme.ACCENT, BACK_PAD.x, BACK_PAD.y))
 	_back.pressed.connect(func() -> void: back_requested.emit())
 	row.add_child(_back)
-	_crumb_name = MenuParts.spaced("", CRUMB_NAME_SIZE, 800, GameTheme.TEXT, 0.02)
-	row.add_child(_crumb_name)
-	_crumb_sub = MenuParts.spaced("", CRUMB_SUB_SIZE, 700, GameTheme.MUTED, GameTheme.SPACING_TAB)
-	_crumb_sub.size_flags_vertical = Control.SIZE_SHRINK_END
-	row.add_child(_crumb_sub)
+	_crumb_sub = MenuParts.page_line("")
+	var title := MenuParts.page_title("", _crumb_sub)
+	_crumb_name = title.get_node("Title") as Label
+	row.add_child(title)
 	add_child(row)
+	return row
 
 
 func _build_parts() -> Control:
@@ -517,21 +519,7 @@ func _build_stage() -> Control:
 	stage.name = "Stage"
 	stage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	stage.add_theme_constant_override("separation", 0)
-	_shot_stage = Control.new()
-	_shot_stage.custom_minimum_size = Vector2(0.0, SHOT_HEIGHT)
-	_shot_stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var glow := TextureRect.new()
-	glow.texture = _glow
-	glow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	glow.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_shot_stage.add_child(glow)
-	var pad := MenuParts.padded(SHOT_PAD.x, SHOT_PAD.y, SHOT_PAD.x, SHOT_PAD.y)
-	pad.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_shot = MenuParts.picture(SHOT_BOX)
-	pad.add_child(_shot)
-	_shot_stage.add_child(pad)
-	stage.add_child(_shot_stage)
+	stage.add_child(_build_turntable())
 	var opts := MarginContainer.new()
 	opts.add_theme_constant_override("margin_top", OPTS_TOP)
 	opts.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -552,6 +540,58 @@ func _build_stage() -> Control:
 		_pages[t].set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		holder.add_child(_pages[t])
 	return stage
+
+
+## The turntable on its glass panel, one height on every tab: the views over it on the left, the hints on the right.
+func _build_turntable() -> Control:
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", STAGE_ROW_GAP)
+	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var words := PackedStringArray()
+	for key: String in ReplicaTurntable.VIEW_KEYS:
+		words.append(tr(key))
+	_views = MenuChoice.new(words, true)
+	_views.name = "Views"
+	row.add_child(_views)
+	var gap := Control.new()
+	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(gap)
+	row.add_child(_hints())
+	column.add_child(row)
+	_turntable = ReplicaTurntable.new()
+	column.add_child(_turntable)
+	_views.picked.connect(_turntable.set_view)
+	_turntable.view_changed.connect(_views.put)
+	_views.put(_turntable.view())
+	var panel := MenuParts.glass(column, STAGE_PAD)
+	panel.name = "Stage"
+	panel.custom_minimum_size = Vector2(0.0, STAGE_HEIGHT)
+	return panel
+
+
+## "Drag to rotate · Scroll to zoom  [R] Reset view".
+func _hints() -> Control:
+	var row := HBoxContainer.new()
+	row.name = "Hints"
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", HINT_GAP)
+	for key: String in ["CUSTOMISE_HINT_DRAG", "CUSTOMISE_HINT_ZOOM"]:
+		var hint := MenuParts.text(tr(key), HINT_SIZE, 500, GameTheme.MUTED)
+		hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(hint)
+	var reset := HBoxContainer.new()
+	reset.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	reset.add_theme_constant_override("separation", HINT_KEY_GAP)
+	var chip := MenuParts.key_chip("R", HINT_SIZE - 2, GameTheme.MUTED, HINT_KEY_PAD)
+	chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	reset.add_child(chip)
+	var words := MenuParts.text(tr("CUSTOMISE_HINT_RESET"), HINT_SIZE, 500, GameTheme.MUTED)
+	words.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	reset.add_child(words)
+	row.add_child(reset)
+	return row
 
 
 func _sub_head(words: String, note: String) -> Control:

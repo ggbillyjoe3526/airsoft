@@ -65,7 +65,7 @@ func texture(key: StringName, paint: StringName, realistic: bool, parts: Diction
 	var shot := _shot_of(key)
 	if shot == null:
 		return null
-	var sig := _signature(parts)
+	var sig := signature(parts)
 	var refit := sig != shot.parts_sig
 	if refit:
 		_fit(shot, key, parts)
@@ -279,7 +279,7 @@ func _rig(model: Node3D, long_side: int, port_name: String) -> Shot:
 
 ## Fits the viewport and the camera to what the model shows now.
 func _frame(shot: Shot) -> void:
-	var box := _bounds(shot.model)
+	var box := bounds(shot.model)
 	var wide := maxf(box.size.z * MARGIN, MIN_EXTENT)
 	var high := maxf(box.size.y * MARGIN, MIN_EXTENT)
 	shot.extent = Vector2(wide, high)
@@ -297,8 +297,8 @@ func _fit(shot: Shot, key: StringName, parts: Dictionary) -> void:
 	_frame(shot)
 
 
-## "slot=key" for each part, in slot order: what two calls must differ by to need a new picture.
-func _signature(parts: Dictionary) -> String:
+## "slot=key" for each part, in slot order: what two calls must differ by to need a new picture (or a refit).
+static func signature(parts: Dictionary) -> String:
 	var words := PackedStringArray()
 	for slot: StringName in parts:
 		words.append("%s=%s" % [slot, parts[slot]])
@@ -307,8 +307,8 @@ func _signature(parts: Dictionary) -> String:
 
 
 ## The model's box (its own space) from its visible meshes, found without needing the tree: each mesh's box moved by the
-## transforms between it and the model.
-func _bounds(model: Node3D) -> AABB:
+## transforms between it and the model. ReplicaTurntable frames on it too.
+static func bounds(model: Node3D) -> AABB:
 	var box := AABB()
 	var first := true
 	for node in model.find_children("*", "MeshInstance3D", true, false):
@@ -326,7 +326,7 @@ func _bounds(model: Node3D) -> AABB:
 	return box
 
 
-func _hidden(node: Node3D, model: Node3D) -> bool:
+static func _hidden(node: Node3D, model: Node3D) -> bool:
 	var n: Node = node
 	while n != model and n is Node3D:
 		if not (n as Node3D).visible:

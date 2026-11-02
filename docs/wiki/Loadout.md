@@ -36,8 +36,12 @@ the energy. Point at the panel to read what got better and worse in words.
 - **Part tabs:** optic, grip, laser, barrel, muzzle part, magazine and light ([weapon torch](Parts-and-Power#lights)). A tab the replica can't take shows greyed out,
   with the mount it needs. Each part's card shows its picture and what it changes, better in green and worse in red.
 
-The replica's picture shows the parts fitted, in your colours, drawn to the same scale as the others so a pistol looks
-small beside a rifle.
+The replica stands on a turntable at the top, with the parts fitted and in your colours. It stays the same size and in
+the same place whatever you fit, so you can see a part change it. Drag it (either mouse button) to turn it, scroll to
+zoom, or pick a view: **3/4**, **Left**, **Right** or **Top**. **R** puts it back to 3/4.
+
+On the Loadout page itself every replica is drawn to the same scale as the others, so a pistol looks small beside a
+rifle.
 
 ## From the practice range
 
