@@ -41,9 +41,14 @@ default. Custom matches never count, and the summary says "Not counted this matc
 
 ## The Armory
 
-The **ARMORY** tab on the side rail shows your level, the XP bar and what the next level takes, the XP you have earned
-in all, how many items are unlocked, the next unlock with its picture, and every level's items marked unlocked, next
-or locked. It also shows how XP is earned and the bot level multipliers.
+The **ARMORY** tab on the side rail shows your level in large type, with the XP you have towards the next level, the
+XP you have earned in all and how many items are unlocked. How XP is earned and the bot level multipliers sit at the
+right (hover for the details). Under them a track has a dot for the starting kit and each level, filled up to your
+level and on into the next by the XP you have earned.
+
+Below the track are four level cards, starting at your level. Each card shows its items with their pictures (hover an
+item to see what it does), marked **UNLOCKED**, **NEXT** (edged in teal) or with the XP that reaches it. Browse the
+levels with the arrows at the top right, or click a dot on the track.
 
 Your level, unlocks and records are saved in their own file, apart from your settings, so a crash never loses them
 ([Saving and Bug Reports](Saving-and-Bug-Reports)).

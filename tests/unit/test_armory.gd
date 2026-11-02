@@ -89,18 +89,20 @@ func test_level_3_lists_ten_of_twenty_with_the_silencer_next() -> void:
 	assert_eq(states[5], ArmoryFacts.State.LOCKED)
 	assert_eq(states.size(), 11)
 	var words := _words(page.summary())
-	for w: String in ["LEVEL ", "3", "of 10", "120 / 500 XP", "380 XP to level 4", "920", "10 / 20", "NEXT UNLOCK · LEVEL 4",
-			"Silencer", "HOW XP IS EARNED", "100 XP", "100 more", "20", "10"]:
+	for w: String in ["LEVEL 3", "120 / 500 XP · 380 XP to level 4", "920 XP earned in all · 10 / 20 unlocked",
+			"Every match 100 XP · a win +100 · round won 20 · hit 10 · Easy ×0.5 · Normal ×1 · Hard ×1.5"]:
 		assert_true(words.has(w), w)
-	# the multipliers in one row, the rest its tooltip (UI1)
-	assert_true(words.has("Difficulty"))
-	assert_true(words.has("Easy ×0.5 · Normal ×1 · Hard ×1.5"))
-	var difficulty := page.summary().find_child("Difficulty", true, false) as Control
-	assert_eq(difficulty.tooltip_text, "Then times the difficulty: Easy ×0.5 · Normal ×1 · Hard ×1.5. A first-to-5 win on Normal gives about 250 XP. Practice, and matches with Dev settings, give none.")
+	# the multipliers and the rest of what XP means: the earn line's tooltip (UI1)
+	assert_eq(page.summary().earn_line().tooltip_text, "Then times the difficulty: Easy ×0.5 · Normal ×1 · Hard ×1.5. A first-to-5 win on Normal gives about 250 XP. Practice, and matches with Dev settings, give none.")
 	var track := _words(page.track())
-	for w: String in ["LEVELS", "STARTING KIT", "LEVEL 1", "100 XP · UNLOCKED", "1,300 XP · NEXT", "1,900 XP · LOCKED",
-			"6,500 XP · LOCKED", "Red Dot", "Cyber Pistol", "REPLICA", "POWER", "MUZZLE"]:
+	for w: String in ["STARTING KIT", "LEVEL 1", "UNLOCKED", "NEXT · 1,300 XP", "1,900 XP", "6,500 XP", "Red Dot",
+			"Cyber Pistol", "Replica", "Power", "Muzzle"]:
 		assert_true(track.has(w), w)
+	assert_eq(page.track().first(), 3, "the cards open on your level")
+	assert_true(page.track().row(4).visible, "the next level beside it")
+	assert_false(page.track().row(2).visible)
+	assert_eq((page.track().row(4).find_child("Item_" + SILENCER, true, false) as Control).tooltip_text,
+			ArmoryFacts.blurb(_item(SILENCER)), "an item's words are its tooltip")
 	assert_almost_eq(page.summary().bar().fraction(), 120.0 / 500.0, 0.001)
 
 
@@ -108,12 +110,12 @@ func test_level_1_and_a_new_player_list_the_start_and_the_first_unlock() -> void
 	var page := _page(100)
 	assert_eq(page.facts().level, 1)
 	assert_eq(page.facts().next_row().number, 2)
-	assert_true(_words(page.summary()).has("NEXT UNLOCK · LEVEL 2"))
 	assert_eq(page.track().row(0).find_children("Item_*", "PanelContainer", true, false).size(), 5,
 			"the starting kit: two replicas, two power sources and the Weapon Torch")
 	var fresh := _page(0)
 	assert_eq(fresh.facts().next_row().number, 1)
-	assert_true(_words(fresh.summary()).has("0 / 100 XP"))
+	assert_true(_words(fresh.summary()).has("0 / 100 XP · 100 XP to level 1"))
+	assert_eq(fresh.track().first(), 0, "a new player sees the kit first")
 
 
 func test_at_the_cap_it_says_xp_stops_counting_and_nothing_is_next() -> void:
@@ -123,10 +125,9 @@ func test_at_the_cap_it_says_xp_stops_counting_and_nothing_is_next() -> void:
 	assert_null(facts.next_row())
 	assert_eq(facts.unlocked_count, 20)
 	var words := _words(page.summary())
-	assert_true(words.has("Top level reached"))
-	assert_true(words.has("XP counts again when the level cap goes up."))
-	assert_true(words.has("Nothing left"))
-	assert_eq(page.summary().bar().fraction(), 1.0)
+	assert_true(words.has("Top level reached · XP counts again when the level cap goes up."))
+	assert_eq(page.summary().bar().fraction(), 0.0, "nothing past the cap to fill")
+	assert_eq(page.track().first(), page.track().last_first(), "the last levels show")
 	assert_eq(page.track().row(10).find_children("Item_*", "PanelContainer", true, false).size(), 1)
 
 
@@ -140,9 +141,8 @@ func test_with_levelling_off_everything_is_unlocked() -> void:
 		assert_eq(r.state, ArmoryFacts.State.UNLOCKED)
 	var words := _words(page.summary())
 	assert_true(words.has("ALL UNLOCKED"))
-	assert_null(page.summary().bar(), "no level bar while levelling is off")
-	assert_false(_words(page.track()).has("1,900 XP · LOCKED"))
-	assert_true(_words(page.track()).has("1,900 XP · UNLOCKED"))
+	assert_false(_words(page.track()).has("1,900 XP"), "no level waits on XP")
+	assert_false(_words(page.track()).has("NEXT · 1,300 XP"))
 
 
 func test_dev_items_are_listed_only_with_dev_content_and_waiting_ones_never() -> void:
@@ -213,11 +213,11 @@ func test_a_power_picture_leaves_the_files_shared_label_material_alone() -> void
 	assert_true(untouched, "each picture paints its own copy")
 
 
-func test_the_next_unlock_has_its_picture() -> void:
+func test_the_next_levels_items_have_their_pictures() -> void:
 	var page := _page(920)
 	await wait_process_frames(2)
-	var pic := page.summary().find_child("NextPicture", true, false) as TextureRect
-	assert_not_null(pic.texture)
+	var tile := page.track().row(4).find_child("Item_" + SILENCER, true, false)
+	assert_not_null((tile.find_child("Picture", true, false) as TextureRect).texture)
 
 
 # --- load messages and staleness ---
