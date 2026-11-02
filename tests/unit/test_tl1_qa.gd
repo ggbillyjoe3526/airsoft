@@ -46,6 +46,8 @@ func test_every_kit_weight_is_the_old_column_one_name_up() -> void:
 	}
 	var seen := 0
 	for p in k.kits:
+		if not old.has(p.kit_name):
+			continue  # A kit added since (SN1's Sniper) has no old column.
 		var w: Array = old[p.kit_name]
 		for i in 3:
 			assert_eq(p.weights.get(MatchOptions.BOT_LEVELS[i], -1.0), float(w[i]), "%s at %s" % [p.kit_name, MatchOptions.BOT_LEVELS[i]])
