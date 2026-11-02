@@ -6,11 +6,11 @@ extends RefCounted
 ## had. A Custom match plays them (applied_to), stays out of the records and gives XP at no more than the Custom
 ## multiplier (data/levels.md).
 
-## The Match screen's choices: players per team (each map offers its own run of them, data/maps.md: Depot 1 to 3,
-## Woodland 5 or 6; nothing offers 7v7), rounds to win, and the round time's range and step (s; the browser game's
+## The Match screen's choices: players per team (each map offers its own run of them, data/maps.md: every field 5v5 to
+## 8v8, 6v6 its standard; nothing offers 9v9), rounds to win, and the round time's range and step (s; the browser game's
 ## TEAM_SIZE_CHOICES, WINS_NEEDED_CHOICES and ROUND_TIME_SETTING). A saved team size is kept whatever map is picked:
 ## a map that doesn't offer it plays its standard size (MatchOptions.team_size).
-const TEAM_SIZES: Array[int] = [1, 2, 3, 4, 5, 6]
+const TEAM_SIZES: Array[int] = [1, 2, 3, 4, 5, 6, 7, 8]
 const WINS_NEEDED: Array[int] = [3, 5, 7, 10]
 const ROUND_TIME_RANGE := Vector2(90.0, 300.0)
 const ROUND_TIME_STEP := 30.0

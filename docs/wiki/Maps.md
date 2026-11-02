@@ -6,14 +6,15 @@ card.
 
 <!-- wiki:maps -->
 
-**Team sizes** are the players a side the map offers. [Skirmish](Modes#skirmish-and-custom) plays the usual size;
-under Custom rules you pick any size the map offers. Fields are dressed with free CC0 props over plain blocks and
+**Team sizes** are the players a side the map offers. [Skirmish](Modes#skirmish-and-custom) plays the usual size,
+6v6 on every field; under Custom rules you pick any size the map offers, 5v5 to 8v8. Fewer players make a slower,
+more careful match, more make a faster, busier one. Fields are dressed with free CC0 props over plain blocks and
 colours, with the finished models coming later ([Roadmap](Roadmap)).
 
 ## Depot
 
-**An indoor airsoft hall**, 108 by 72 metres under one roof, in 5v5 or 6v6. Alpha starts at the east end and Beta in
-the west in Elimination, and the teams swap ends at half time.
+**An indoor airsoft hall**, 108 by 72 metres under one roof, in 6v6 (5v5 to 8v8 under Custom). Alpha starts at the east
+end and Beta in the west in Elimination, and the teams swap ends at half time.
 
 ![Depot's Chrono hall under the violet ceiling and its lamps](images/depot-chrono-hall.jpg)
 
@@ -65,10 +66,11 @@ it; a line under the crosshair tells you which.
 
 ## Woodland
 
-**A big open wood, 176 by 120 m, by day or by night**, in 5v5 or 6v6. A dry stream runs down the middle, and three
-lanes cross it: the **north** over the Ridge, the North bridge and the Tower to the Fort; the **middle** past the Cabin
-and the Woodpile to the Clearing, over the Ford to Hut row; the **south** along the gravel road, round the Truck bend,
-over the Culvert to the Log stacks and the Sawmill. Attackers start in the west camp and defenders in the east camp.
+**A big open wood, 176 by 120 m, by day or by night**, in 6v6 (5v5 to 8v8 under Custom). A dry stream runs down the
+middle, and three lanes cross it: the **north** over the Ridge, the North bridge and the Tower to the Fort; the
+**middle** past the Cabin and the Woodpile to the Clearing, over the Ford to Hut row; the **south** along the gravel
+road, round the Truck bend, over the Culvert to the Log stacks and the Sawmill. Attackers start in the west camp and
+defenders in the east camp.
 
 - **The stream:** its bed is 1.7 m under its banks, which are too steep to climb. Cross on the North bridge or the road,
   or walk in and out at the Ford and the gentle slides. Down in the bed you're out of sight of the wood above.
@@ -106,8 +108,8 @@ Woodland's areas:
 
 ## The Street
 
-**A terraced street, 104 by 162 m, by day or by night**, in 5v5 or 6v6. Defenders start on the railway embankment at
-the north end and attackers on the Bottom street at the south. Three lanes run between them:
+**A terraced street, 104 by 162 m, by day or by night**, in 6v6 (5v5 to 8v8 under Custom). Defenders start on the
+railway embankment at the north end and attackers on the Bottom street at the south. Three lanes run between them:
 
 - **The left road** behind the west terrace's back gardens: parking bays, a van, roadworks and a removal lorry break
   up its long view.

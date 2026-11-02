@@ -22,8 +22,9 @@ const HELD_UP_REACH := 2.0
 ## A character that ends a round in play without ever getting this far from its spawn (m) stayed home that round.
 const LEAVES_SPAWN := 8.0
 ## Follow me (follow_leader): a follower is judged once it has carried out the order FOLLOW_REJOIN seconds in a row
-## (back from a fight or cover, it gets that long to rejoin); near within the follow distance, catch_up_gap and
-## FOLLOW_NEAR_SLACK (m) of the leader; standing still slower than STILL_SPEED (m/s) while the leader moves.
+## (back from a fight, cover or a flash's dazzle, when it ducks blind where it stands, it gets that long to rejoin);
+## near within the follow distance, catch_up_gap and FOLLOW_NEAR_SLACK (m) of the leader; standing still slower than
+## STILL_SPEED (m/s) while the leader moves.
 const FOLLOW_REJOIN := 3.0
 const FOLLOW_NEAR_SLACK := 2.0
 const STILL_SPEED := 0.5
@@ -222,18 +223,20 @@ func _init(parent: Node, map_id: String, sim_tuning: SimTuning = null, bot_confi
 ## The round tuning a match on `map_id` plays in the guards and the balance report: `base` (the loaded tuning by
 ## default) where the map offers its team size and has no round length of its own, else a copy at the map's standard
 ## size (data/maps.md, as MapCatalog.Entry.team_size_for picks for the game) and its round length, as a Skirmish there
-## plays (MatchOptions.match_tuning): Woodland at 5 a side and 3:00.
-static func sized_for(map_id: String, base: SimTuning = null) -> SimTuning:
+## plays (MatchOptions.match_tuning): Woodland at 6 a side and 3:00. With `picked` (a Custom size, TS1), that size
+## where the map offers it, else its standard.
+static func sized_for(map_id: String, base: SimTuning = null, picked: int = 0) -> SimTuning:
 	var t := base if base != null else SimTuning.load_default()
 	var entry := MapCatalog.shared().find(map_id)
 	if entry == null:
 		return t
 	var length := MatchOptions.round_time(entry, null, t.rounds.round_time)
-	if entry.allows(t.rounds.team_size) and t.rounds.round_time == length:
+	var size := entry.team_size_for(picked if picked > 0 else t.rounds.team_size)
+	if size == t.rounds.team_size and t.rounds.round_time == length:
 		return t
 	var sized := t.duplicate() as SimTuning
 	sized.rounds = t.rounds.duplicate() as RoundConfig
-	sized.rounds.team_size = entry.team_size_for(t.rounds.team_size)
+	sized.rounds.team_size = size
 	sized.rounds.round_time = length
 	return sized
 
@@ -535,7 +538,7 @@ func _watch_follow(state: GameState, bots: BotController, t: MatchTally, followi
 		var c := b.character
 		if c.team != leader.team or c == leader:
 			continue
-		var carried := b.order == SquadOrder.Kind.FOLLOW and b.mode == Bot.Mode.ORDER
+		var carried := b.order == SquadOrder.Kind.FOLLOW and b.mode == Bot.Mode.ORDER and c.dazzle_left <= 0.0
 		following[c.id] = following[c.id] + DT if carried else 0.0
 		# The ring's oldest entry, CHASE_TICKS ago, is the one this tick overwrites.
 		var slot := t.ticks % CHASE_TICKS

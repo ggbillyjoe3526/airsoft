@@ -38,8 +38,8 @@ func test_the_switches_survive_a_save_and_a_load() -> void:
 func test_a_bad_value_falls_back_on_its_own() -> void:
 	var c := CustomRules.new()
 	var d := CustomRules.new()
-	c.from_dict({"team_size": 7, "wins_needed": 10.0, "round_time": 100, "friendly_fire": "no", "ricochets_count": true})
-	assert_eq(c.team_size, d.team_size, "7v7 isn't offered")
+	c.from_dict({"team_size": 9, "wins_needed": 10.0, "round_time": 100, "friendly_fire": "no", "ricochets_count": true})
+	assert_eq(c.team_size, d.team_size, "9v9 isn't offered")
 	assert_eq(c.wins_needed, 10, "a whole number read back as a float")
 	assert_eq(c.round_time, d.round_time, "off the half-minute steps")
 	assert_eq(c.friendly_fire, d.friendly_fire, "not a bool")

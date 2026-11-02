@@ -15,7 +15,7 @@ var _shipped: MapCatalog = null
 func before_all() -> void:
 	_shipped = MapCatalog.shared()
 	MapCatalog._shared = MapCatalog.parse(FileAccess.get_file_as_string(MapCatalog.PATH).replace(
-			"| depot | Depot | field | public | 5 | 5 | 6 |", "| depot | Depot | field | public | 1 | 3 | 3 |"))
+			"| depot | Depot | field | public | 5 | 6 | 8 |", "| depot | Depot | field | public | 1 | 3 | 3 |"))
 	assert_eq(MapCatalog._shared.find("depot").team_min, 1)
 
 

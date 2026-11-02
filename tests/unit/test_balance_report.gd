@@ -52,7 +52,7 @@ func test_figures_split_teams_from_ends_and_count_the_clock() -> void:
 	m.rounds.append(_round(-1, 0, GameEvent.RoundEnd.TIME, -1.0, -1.0))
 	var ends: Array[String] = ["the west end", "the east end"]
 	var rows := BalanceReport.figures("Depot", ends, [m] as Array[MatchRunner.MatchTally])
-	assert_eq(rows.size(), 7)
+	assert_eq(rows.size(), 8)
 	assert_almost_eq(rows[0].value, 0.75, 1e-6, "Alpha 3 of 4 decided")
 	assert_almost_eq(rows[1].value, 0.25, 1e-6, "Beta 1 of 4")
 	assert_almost_eq(rows[2].value, 0.5, 1e-6, "the west end: Alpha once from it, Beta once from it")
@@ -129,7 +129,7 @@ func test_flag_figures_count_the_attackers_rounds_the_clock_and_captures_with_ea
 		m.rounds.append(r)
 	var matches: Array[MatchRunner.MatchTally] = [m]
 	var f := BalanceReport.flag_figures("depot", "Depot", matches)
-	assert_eq(f.size(), 3)
+	assert_eq(f.size(), 4)
 	assert_almost_eq(f[0].value, 2.0 / 5.0, 1e-6, "the attackers won two of five (a draw is nobody's)")
 	assert_eq(Vector2(f[0].band_min, f[0].band_max), BalanceReport.ATTACK_NORMAL_BANDS["depot"])
 	assert_almost_eq(f[1].value, 1.0 / 5.0, 1e-6, "one ran out the clock")

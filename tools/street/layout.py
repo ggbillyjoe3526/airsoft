@@ -232,8 +232,9 @@ HOUSE = {"x1": -31, "z1": -8, "x2": -22, "z2": 0, "ext": None}
 ARCHES = [(10, -12, 20, -9, 5.4)]
 
 # ================================================================ PIECES
-SPAWNS_N = [(x, -64.0) for x in (-2.0, 1.0, 4.0, 7.0, 10.0, 13.0)]
-SPAWNS_S = [(x, 78.0) for x in (-1.0, 2.0, 5.0, 8.0, 11.0, 14.0)]
+# Eight a side (8v8, TS1), 2 m apart on the old lines' middles, inside the screening hedges.
+SPAWNS_N = [(-1.5 + 2.0 * i, -64.0) for i in range(8)]
+SPAWNS_S = [(-0.5 + 2.0 * i, 78.0) for i in range(8)]
 
 # --- Embankment: scrub along the railway screens the spawn; gaps at the ends
 line("hedge", -4, -60.5, 19, -60.5)
