@@ -482,7 +482,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   comes on full auto, any replica now or later and the bots' too, to semi (or burst) at the start of every round
   there; the player can still switch to auto in the round. Bots may too, but only for a target in open space down a
   long sight line, and not every time (owner, 2026-11-02: "It's an option; it doesn't mean they have to";
-  `BotFireMode`). Depot, the one fully indoor field, starts on semi; the other fields start replicas as they come and
+  `BotFireMode`). Both hold on every map later given a Start mode (owner, 2026-11-02). Depot, the one fully indoor
+  field, starts on semi; the other fields start replicas as they come and
   keep a selector as set for the match.
 - **A match is first to 5 round wins by default, with 2:30 rounds (2026-09-30).** A drawn round is replayed in both
   modes (2026-10-04). Half-time comes after `winsNeeded - 1` rounds, so the decider is always in the second half.

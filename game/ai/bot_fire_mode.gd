@@ -15,14 +15,17 @@ static var _hit: RayHit = RayHit.new()
 
 
 ## The selector this tick, called before the trigger: a press of the selector key while the replica in hand isn't on
-## the mode wanted (one step a tick: semi to auto takes two).
+## the mode wanted (one step a tick: semi to auto takes two). Never through a vault, or while presses kept through
+## one are still played (Vault.with_held_presses): a press then would be kept too, and the selector would run past
+## the mode wanted.
 static func select(b: Bot, w: BotWorld, target: Character, cmd: PlayerCommand) -> void:
 	if w.start_mode == ReplicaConfig.FireMode.AUTO:
 		return
 	if target == null or not b.target_visible:
 		b.auto_for = -1
 	var a := b.character.armament
-	if a.replicas.is_empty():
+	var v := b.character.vault
+	if a.replicas.is_empty() or v.active or v.held_fire_modes > 0:
 		return
 	var replica := a.replicas[a.active]
 	var wanted := ReplicaConfig.FireMode.AUTO if b.auto_for >= 0 and target != null and b.auto_for == target.id \
@@ -40,25 +43,32 @@ static func on_burst(b: Bot, w: BotWorld, target: Character, eye: Vector3, dir: 
 	if a.replicas.is_empty() or not a.replicas[a.active].fire_modes.has(ReplicaConfig.FireMode.AUTO):
 		b.auto_for = -1
 		return
+	# Decided against for this target: nothing to check again.
+	if b.auto_rolled_for == target.id and b.auto_for != target.id:
+		return
 	if not open_shot(w, eye, dir, target.position):
 		b.auto_for = -1
 		return
-	if b.auto_for == target.id or b.auto_rolled_for == target.id:
+	if b.auto_for == target.id:
 		return
 	b.auto_rolled_for = target.id
 	if b.rng.randf() < w.cfg.auto_chance:
 		b.auto_for = target.id
 
 
-## Whether a shot from `eye` along `dir` at someone standing at `feet` is the open one full auto is for: nothing of
-## the level within auto_line_min along the aim (a long sight line), and `feet` on open ground (the nav grid's open
-## field at least auto_open_min round it).
+## Whether a shot from `eye` along `dir` at someone standing at `feet` is the open one full auto is for: `feet` on open
+## ground (the nav grid's open field at least auto_open_min round it), and nothing of the level within auto_line_min
+## along the aim's heading (a long sight line).
 static func open_shot(w: BotWorld, eye: Vector3, dir: Vector3, feet: Vector3) -> bool:
-	return long_line(w, eye, dir) and open_at(w, feet)
+	return open_at(w, feet) and long_line(w, eye, dir)
 
 
+## Level at eye height along the aim's heading (a line down the hall, not into the floor short of it).
 static func long_line(w: BotWorld, eye: Vector3, dir: Vector3) -> bool:
-	return not w.query.ray_past_railings(eye, eye + dir * w.cfg.auto_line_min, _hit)
+	var level := Vector3(dir.x, 0.0, dir.z)
+	if level.is_zero_approx():
+		return false
+	return not w.query.ray_past_railings(eye, eye + level.normalized() * w.cfg.auto_line_min, _hit)
 
 
 static func open_at(w: BotWorld, feet: Vector3) -> bool:

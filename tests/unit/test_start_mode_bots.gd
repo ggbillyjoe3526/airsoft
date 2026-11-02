@@ -109,6 +109,30 @@ func test_a_shot_no_longer_open_goes_back_to_the_start_mode_and_isn_t_rolled_aga
 	assert_eq(b.auto_for, -1, "decided once per target")
 
 
+func test_no_press_through_a_vault_so_the_selector_settles_after_it() -> void:
+	_open_ground()
+	b.auto_for = foe.id
+	b.auto_rolled_for = foe.id
+	var cmd := PlayerCommand.new()
+	b.character.vault.active = true
+	BotFireMode.select(b, w, foe, cmd)
+	assert_false(cmd.cycle_fire_mode, "vaulting: a press would only be kept")
+	b.character.vault.active = false
+	b.character.vault.held_fire_modes = 1
+	BotFireMode.select(b, w, foe, cmd)
+	assert_false(cmd.cycle_fire_mode, "a kept press still to play")
+	b.character.vault.held_fire_modes = 0
+	assert_eq(_select(foe), AUTO, "then it presses its way to auto")
+
+
+func test_a_long_line_is_level_whatever_the_aim_s_pitch() -> void:
+	var q := w.query as BoxWorld
+	q.add_box(Vector3(0.0, -0.5, 0.0), Vector3(SIZE, 1.0, SIZE)) # a floor
+	var down := Vector3(0.0, -0.15, -1.0).normalized() # at someone crouched 10 m off
+	assert_true(BotFireMode.long_line(w, EYE, down), "the floor ahead doesn't end the line")
+	assert_false(BotFireMode.long_line(w, EYE, Vector3.DOWN), "straight down has no heading")
+
+
 func test_a_cramped_shot_never_goes_auto() -> void:
 	for s in 40:
 		b = Bot.new(b.character, s + 1, config.skill_for(&"normal"), 2)

@@ -6,7 +6,9 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-02 | 1 | Opus 5.5 (build thread) | see Checks | pending | – |
+| 2026-11-02 | 1 | Opus 5.5 (build thread) | see Checks | 8/8 (held for QA, performance) | owner added bots' auto (19:48) |
+| 2026-11-02 | 2 | Opus 5.5 (build thread) | see Checks | 7/8 Retry | a bot's selector presses were kept through a vault and spun it after |
+| 2026-11-02 | 3 | Opus 5.5 (build thread) | see Checks | pending | – |
 
 ## Goal
 
@@ -36,8 +38,11 @@ too, not only the AEG.
 - **Semi, not burst.** The owner allowed either; single shots is the stricter, more site-like reading.
 - **Open floor is 2 m clear all round** (`auto_open_min`): on Depot that is about 14 % of the walkable floor (the
   Chrono hall's middle and the yards), at 3 m only 2 %, at 4 m almost none. A test keeps it between 5 and 25 %.
-- **A long line is 35 m** (`auto_line_min`): Depot's lanes bend round dead space, so only the Chrono hall (65 m) and
-  the yards run that far.
+- **A long line is 35 m** (`auto_line_min`), level at eye height along the aim's heading (so the floor short of a
+  crouched target never ends it): Depot's lanes bend round dead space, so only the Chrono hall and the yards run that
+  far (the critic measured the longest clear line at 58 m, and 35 m or more through about 73 % of the open floor).
+- **No selector presses through a vault** (or while presses kept through one still play): they would be kept and
+  spin the selector past the mode wanted.
 - **Half the open shots, decided once per target** (`auto_chance`): "it's an option"; deciding per burst would make
   nearly every long fight full auto.
 - **Back to the start mode every round** on a field with a rule (the field's chrono check before each game); fields
@@ -49,7 +54,7 @@ too, not only the AEG.
   auto only), every shipped full-auto replica held on Depot, every round reset and B reaching auto, other fields
   unchanged.
 - `tests/unit/test_start_mode_bots.gd`: an open shot needs both the long line and the open floor; some bots take it and
-  some don't; the switch to auto and back when the target goes; a closed shot drops auto and isn't decided again; no
+  some don't; the switch to auto and back when the target goes; no presses through a vault; a level line; a closed shot drops auto and isn't decided again; no
   auto on cramped floor, without a start mode, or on a replica without auto; Depot's open floor share.
 
 ## Known issues left
