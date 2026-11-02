@@ -48,8 +48,9 @@ too, not only the AEG.
   (worst 8.63 m, over catch_up 8 m): the leader sprinted with its replica away (6.93 m/s) while a follower, its sprint
   breaking every half second as it eased back into place, never sprinted holster_after (1.5 s) in one go, so it kept
   its replica up at 6.3 m/s and fell behind. Main's seed 3 never met that; the new semi fights moved the leader onto a
-  long calm sprint. Now a follower sprinting after a holstered giver puts its own away once safe; seed 3 passes
-  (worst 6.71 m) with seeds 1, 2 and 4 unchanged or close.
+  long calm sprint. Now a follower sprinting after a holstered giver puts its own away once safe, and keeps it away
+  through its sprint breaks while the giver does (drawing at each break would flap, the critic's advisory); all four
+  seeds pass (worst 4.92, 6.24, 5.49, 7.31 m). Tests in `tests/unit/test_holster_follow.gd`.
 - **No selector presses through a vault** (or while presses kept through one still play): they would be kept and
   spin the selector past the mode wanted.
 - **Half the open shots, decided once per target** (`auto_chance`): "it's an option"; deciding per burst would make

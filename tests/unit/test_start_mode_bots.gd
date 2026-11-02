@@ -192,25 +192,3 @@ func test_depot_s_open_field_is_its_most_open_floor_not_all_of_it() -> void:
 	var share := float(open) / walkable
 	assert_between(share, 0.05, 0.25, "%.0f %% of Depot's floor counts as open" % (share * 100.0))
 
-
-## Follow me with the leader's replica away: a follower sprinting after it puts its own away at once, so it keeps pace
-## with the holster's faster sprint (the Follow me guard on Depot found a follower's sprint breaks, easing into place,
-## never let it holster).
-func test_a_follower_sprinting_after_a_holstered_leader_holsters_too() -> void:
-	w.planner = RoundPlanner.new(1)
-	w.planner.spawn_centre = [Vector3.ZERO, Vector3(0.0, 0.0, -100.0)]
-	w.live = true
-	b.target_visible = false
-	var leader := Character.new(2, 0, Vector3(0.0, 0.0, -3.0), 0.0, ReplicaStats.default_loadout())
-	leader.armament.holstered = true
-	b.order = SquadOrder.Kind.FOLLOW
-	b.order_giver = leader
-	var cmd := PlayerCommand.new()
-	cmd.sprint = true
-	BotHolster.step(b, w, cmd, 1.0 / 60.0)
-	assert_true(cmd.holster, "away with the leader's")
-	leader.armament.holstered = false
-	cmd = PlayerCommand.new()
-	cmd.sprint = true
-	BotHolster.step(b, w, cmd, 1.0 / 60.0)
-	assert_false(cmd.holster, "a leader with the replica up: the usual sprint first")

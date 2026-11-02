@@ -16,12 +16,12 @@ static func step(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> void:
 	var busy := cmd.fire or cmd.reload or a.reloading() or a.reload_queued
 	var safe := w.live and not busy and not b.target_visible and w.time - b.last_threat_at > cfg.holster_calm_for \
 			and not w.planner.in_enemy_half(b)
-	# Following a giver who sprints with the replica away (Follow me), it puts its own away too once safe: its sprint
-	# breaks as it eases back into place never add up to holster_after, and with its replica up it can't keep pace with
-	# the holster's faster sprint (MovementConfig.holster_sprint_scale; NA1's Follow me guard).
-	var with_giver := cmd.sprint and b.order == SquadOrder.Kind.FOLLOW and b.order_giver != null \
-			and b.order_giver.armament.holstered
-	var away := safe and (b.sprint_gap < cfg.holster_draw_after if a.holstered
-			else b.sprint_run >= cfg.holster_after or with_giver)
+	# Following a giver with the replica away (Follow me), it puts its own away too as it sprints, once safe, and keeps
+	# it away while the giver does: its sprint breaks as it eases back into place never add up to holster_after (and
+	# drawing at each one would flap), and with its replica up it can't keep pace with the holster's faster sprint
+	# (MovementConfig.holster_sprint_scale; NA1's Follow me guard).
+	var with_giver := b.order == SquadOrder.Kind.FOLLOW and b.order_giver != null and b.order_giver.armament.holstered
+	var away := safe and (b.sprint_gap < cfg.holster_draw_after or with_giver if a.holstered
+			else b.sprint_run >= cfg.holster_after or (with_giver and cmd.sprint))
 	cmd.holster = away and not a.holstered
 	cmd.switch_to = -1 if away else 0
