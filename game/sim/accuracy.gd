@@ -1,7 +1,8 @@
 class_name Accuracy
 ## Accuracy by stance and movement (the browser game's sim/accuracy.ts): how much a character's state scales its
 ## replica's spread. Holding still, crouching above all, is steady, and steadier the longer you hold; moving, jumping,
-## firing on the run in a sprint and the moments after one are not; the sight raised to the eye tightens it (M84).
+## firing on the run in a sprint and the moments after one are not; the sight raised to the eye tightens it (M84), and
+## the more for a replica with a hip spread (ReplicaConfig.hip_spread, SN1).
 ## Bots and the player follow the same rule.
 
 ## Summed tick lengths drift below round numbers (9 × 1/60 < 0.15): keeps the delay a whole number of ticks.
@@ -26,7 +27,10 @@ static func target_spread_scale(c: Character, cfg: MovementConfig, a: AccuracyCo
 	var moving := clampf((speed - a.still_below) / (cfg.crouch_speed - a.still_below), 0.0, 1.0)
 	var crouched := a.crouched + (a.crouched_moving - a.crouched) * moving
 	var aimed := 1.0 + (a.aimed - 1.0) * c.aim_raise
-	return move * (1.0 + (crouched - 1.0) * c.crouch_amount) * aimed
+	# A replica with a hip spread (the Sniper Rifle) is that much wider with the sight down, less as it comes up.
+	var r := c.armament.replica() if c.armament != null else null
+	var hip := 1.0 + ((r.hip_spread if r != null else 1.0) - 1.0) * (1.0 - c.aim_raise)
+	return move * (1.0 + (crouched - 1.0) * c.crouch_amount) * aimed * hip
 
 
 ## One tick: the multiplier jumps up to the target at once and comes back down once the shake stops, within a few ticks

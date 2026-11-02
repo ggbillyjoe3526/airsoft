@@ -19,7 +19,9 @@ in `docs/PROCESS.md`.
   (done: WR2), and its CC0 dress (done: WR3). The Street joins them as a third field, the owner's concept 3 of a terraced street
   (2026-11-01): the map (done: ST1), then its CC0 dress (done: ST2). From the owner's playtest (2026-11-01), smarter
   bots: Go there lapsing when quiet and bots seeing through glass (done: BQ1), bot teammates asking you over with a
-  ping (done: BQ2) and a pass over the bots' play (done: BQ3), and a more detailed full-screen map (done: FM2). The rest of 0.1
+  ping (done: BQ2) and a pass over the bots' play (done: BQ3), and a more detailed full-screen map (done: FM2). The owner pulled the spring sniper rifle into 0.1 (2026-11-02): like the
+  AEG with a longer barrel, single shot, its 2x Scope fitted, three springs, unlocked at level 5 (SN1, dev until he
+  plays it), then a variable scope (SN2). The rest of 0.1
   ([What 0.1 is](#what-01-is)) follows in later Dev builds.
 - **The release path** (owner, 2026-10-12): 0.1 Dev builds, 0.1 Beta, then 0.1 (tagged `0.1.0`) opens Early
   Access to the public.
@@ -252,10 +254,8 @@ After 0.1 the game grows through themed updates, each a mini expansion (owner, 2
 
 ### 0.2 · Replica Update: replicas, attachments and items
 
-- **The spring sniper rifle, the next replica** (from 0.1 Dev 6). One shot per bolt cycle, high velocity, long reach
-  and a loud crack. Before building it, ask the owner how he wants it built and its specs (owner, 2026-10-06).
-- **A 2–4x variable scope and a holographic sight** (from 0.1 Dev 6; Dev 4 note 5). The mouse wheel zooms while
-  aiming.
+- **The spring sniper rifle** moved into 0.1 Dev 2 (owner, 2026-11-02: SN1), and the **variable scope** with it (SN2).
+- **A holographic sight** (from 0.1 Dev 6; Dev 4 note 5).
 - **Grenades, smoke and flash** (from 0.1 Dev 6). Airsoft-style throwables for the Loadout's Grenades slot: a CO2
   sound grenade (a bang, no shrapnel), and more from the basic smoke and flash bombs that 0.1 Dev 2 brings, thrown by
   bots too (owner, 2026-10-29). How each one knocks players
@@ -283,7 +283,7 @@ After 0.1 the game grows through themed updates, each a mini expansion (owner, 2
 |---|---|---|
 | AEGs | Electric full-auto with a motor whirr; mid- or hi-cap mags | In the game |
 | GBB pistols | Blowback slide; the slide locks back on empty; gas mags (the gas pistol became the GBB Pistol, RM7) | In the game |
-| Spring sniper rifles | One shot per bolt cycle; high velocity and long reach; a loud crack | Replica Update, next |
+| Spring sniper rifles | One shot per cocking; high velocity and long reach (the Sniper Rifle, SN1) | 0.1 Dev 2, dev |
 | DMRs | Semi-auto only; high velocity; a minimum engagement distance, as at real sites | Maybe |
 | SMGs | Compact and quick to handle; high rate; short range | Maybe, after the sniper |
 | Shotguns | Several BBs per shell; pump every shot; shells loaded one by one | Maybe, after the sniper |

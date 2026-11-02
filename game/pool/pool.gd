@@ -9,6 +9,8 @@ const PATH := "res://data/pool.md"
 const FILE_NAME := "pool.md"
 const REPLICAS_TABLE := "Replicas"
 const POWER_TABLE := "Power sources"
+## The Replicas table's optional column of parts fitted as it comes.
+const COMES_WITH := "Comes with"
 const ACCESS: Array[StringName] = [&"public", &"dev"]
 const POWER_TYPES: Array[StringName] = [&"battery", &"gas", &"spring"]
 ## The part tables and the loadout slot each fills (a replica's standard magazine, barrel and iron sights are built in;
@@ -43,6 +45,8 @@ class Item:
 	var type: StringName = &""
 	var fits: PackedStringArray = PackedStringArray()
 	var access: StringName = &"public"
+	## A replica's parts as it comes (pool.md › Comes with): their Names as written, fitted by LoadoutRules.default_tune.
+	var comes_with: PackedStringArray = PackedStringArray()
 
 	func is_dev() -> bool:
 		return access == &"dev"
@@ -187,6 +191,7 @@ func _read(t: DataTable, kind: Kind, into: Array[Item], slot: StringName = &"") 
 		if kind == Kind.REPLICA:
 			it.key = StringName(row.cell("Key"))
 			it.tags = _words(row.cell("Tags"))
+			it.comes_with = _names(row.cell(COMES_WITH))
 			if it.key == &"":
 				problems.append("%s: %s has no Key" % [where, it.id])
 				continue
@@ -204,6 +209,29 @@ func _read(t: DataTable, kind: Kind, into: Array[Item], slot: StringName = &"") 
 				problems.append("%s: Type must be battery, gas or spring, not \"%s\"" % [where, it.type])
 				continue
 		into.append(it)
+
+
+## The parts `replica` comes with (its Comes with, by Name or ID): each that is a part fitting it, the first for each
+## slot; a name that isn't one is left out (tests/unit/test_loadout.gd names it).
+func comes_with(replica: Item) -> Array[Item]:
+	var out: Array[Item] = []
+	var slots: Array[StringName] = []
+	for n in replica.comes_with:
+		var pt := named(n)
+		if pt != null and pt.kind == Kind.PART and not slots.has(pt.slot) and fits(pt, replica):
+			out.append(pt)
+			slots.append(pt.slot)
+	return out
+
+
+## "2x Scope, Vertical Grip" as its names, as written.
+static func _names(cell: String) -> PackedStringArray:
+	var out := PackedStringArray()
+	for w in cell.split(","):
+		var t := w.strip_edges()
+		if t != "":
+			out.append(t)
+	return out
 
 
 ## "pistol, gas, pistol-mag" as its words.

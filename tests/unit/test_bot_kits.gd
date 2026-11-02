@@ -38,7 +38,7 @@ func test_the_shipped_file_reads_clean() -> void:
 	var k := BotKits.read_file(pool)
 	assert_eq(k.problems, [] as Array[String])
 	assert_eq(k.kits.map(func(p: BotKits.Plan) -> String: return p.kit_name),
-			["Factory", "Rifleman", "Marksman", "Support", "Stealth", "Pointman", "Cyber"])
+			["Factory", "Rifleman", "Marksman", "Support", "Stealth", "Pointman", "Cyber", "Sniper"])
 	var cyber := _kit(k, "Cyber")
 	assert_eq(cyber.slots[0].replica, CYBER)
 	assert_eq(cyber.weights[&"easy"], 0.0, "never at Easy")
@@ -163,7 +163,7 @@ func test_what_you_have_unlocked_never_changes_a_bots_kit() -> void:
 	s.free()
 	assert_null(bot_rules.progress, "the bots' rules follow no progress")
 	var k := BotKits.read_file(pool)
-	assert_eq(BotKits.kit_of(_kit(k, "Marksman"), bot_rules).parts[0][&"optic"], &"scope2x", "the 2x Scope (level 7) fitted")
+	assert_eq(BotKits.kit_of(_kit(k, "Marksman"), bot_rules).parts[0][&"optic"], &"scope2x", "the 2x Scope (level 5) fitted")
 
 
 func test_in_a_session_the_opponents_carry_their_kits_and_your_teammates_theirs_as_they_come() -> void:

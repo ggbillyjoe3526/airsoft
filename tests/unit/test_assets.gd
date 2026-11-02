@@ -31,7 +31,7 @@ func test_every_model_loads() -> void:
 				assert_not_null(node, path)
 				node.free()
 			count += 1
-	assert_eq(count, 11, "two figures, three replicas, three part sets, three power sources")
+	assert_eq(count, 14, "two figures, four replicas, four part sets, four power sources (the Sniper Rifle's and the spring, SN1)")
 
 
 func test_figures_have_their_clips_and_sidecars() -> void:
@@ -53,8 +53,8 @@ func test_figures_have_their_clips_and_sidecars() -> void:
 
 func test_every_sound_loads_and_loops_loop() -> void:
 	var cues := _files("res://assets/audio/cues", "wav")
-	assert_eq(cues.size(), 397,
-			"the salvage's 372 (the city's calls went with Neon Heights), the whistle's 6, the pip, the bombs' 12 (SF1), the doors' 6 (DO1)")
+	assert_eq(cues.size(), 400,
+			"the salvage's 372 (the city's calls went with Neon Heights), the whistle's 6, the pip, the bombs' 12 (SF1), the doors' 6 (DO1), the spring rifle's cocking 3 (SN1)")
 	for path: String in cues:
 		var s := load(path) as AudioStreamWAV
 		assert_true(s != null and s.get_length() > 0.0, path)

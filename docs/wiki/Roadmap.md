@@ -25,6 +25,11 @@ The rest of this wiki describes all of it.
 
 - **0.1 Dev 2:** Depot and Woodland redesigned and dressed with free models and textures.
 
+### In development
+
+- A **spring sniper rifle**, cocked after every shot, with the 2x Scope fitted, long reach and three springs to unlock,
+  and a **variable scope** to go with it.
+
 ### Then: the art pass
 
 The greybox goes. Finished models for Depot and everything in it (the range too), human figures
@@ -38,13 +43,12 @@ order is still open: whichever comes first takes the next number.
 
 ### Replica Update
 
-- A **spring sniper rifle**: one shot per bolt cycle, long reach and a loud crack.
-- A **variable scope** and a **holographic sight**.
+- A **holographic sight**.
 - **More grenades** for the Loadout's Grenades slot, airsoft style: a CO2 sound grenade, and more from the smoke and
   flash bombs.
 - **Chest rigs, belts and pouches** that decide what you carry, and an inventory.
 - **Gas cooling:** rapid fire cools a gas replica's magazine and weakens its shots for a while.
-- A chrono check before each match, more parts, and more replica types after the sniper (maybe DMRs, SMGs and
+- A chrono check before each match, more parts, and more replica types (maybe DMRs, SMGs and
   shotguns; later gas blowback rifles and LMGs).
 
 ### Modes Update

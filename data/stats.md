@@ -39,30 +39,39 @@ What drives the replica, by type (pool.md's power source Type):
 
 - **Battery.** Sets the rate of fire, as in a real AEG (the spring inside the replica sets its energy).
 - **Gas.** Sets the energy: a stronger gas pushes harder, and kicks harder too.
-- **Spring** (no spring replicas yet). Sets the energy.
+- **Spring.** Sets the energy, as a gas does, and how hard the rifle is to cock: the medium and high-performance springs
+  shoot harder and kick harder, like Red and Black Gas, and cycle a little slower (the M150 takes the rifle to 2.28 J,
+  under the sniper limit).
 
 ### Site limits
 
-Like a real site's chrono, the energy a replica may leave the barrel with is capped by its **Class** (rifle or pistol).
+Like a real site's chrono, the energy a replica may leave the barrel with is capped by its **Class** (rifle, pistol, or
+sniper for a single-shot spring rifle, which sites let shoot harder, as UK sites do for bolt-actions).
 Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the Loadout says so.
 
 ---
 
 ## Replicas
 
-| Key | Name | Class | Energy (J) | BB (g) | Fire rate (BBs/s) | Magazine (BBs) | Magazines | Reload (s) | Draw (s) | Spread (°) | Recoil (°) |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| aeg | AEG Rifle | rifle | 0.97 | 0.25 | 13 | 60 | 4 | 1.8 | 0.45 | 0.45 | 0.18 |
-| pistol | GBB Pistol | pistol | 0.52 | 0.2 | 7 | 18 | 4 | 1.2 | 0.3 | 0.8 | 0.5 |
-| cyber | Cyber Pistol | pistol | 1.0 | 0.25 | 14 | 50 | 3 | 1.1 | 0.28 | 0.3 | 0.06 |
+| Key | Name | Class | Energy (J) | BB (g) | Fire rate (BBs/s) | Magazine (BBs) | Magazines | Reload (s) | Draw (s) | Spread (°) | Recoil (°) | Hip spread (×) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| aeg | AEG Rifle | rifle | 0.97 | 0.25 | 13 | 60 | 4 | 1.8 | 0.45 | 0.45 | 0.18 | 1 |
+| pistol | GBB Pistol | pistol | 0.52 | 0.2 | 7 | 18 | 4 | 1.2 | 0.3 | 0.8 | 0.5 | 1 |
+| cyber | Cyber Pistol | pistol | 1.0 | 0.25 | 14 | 50 | 3 | 1.1 | 0.28 | 0.3 | 0.06 | 1 |
+| sniper | Sniper Rifle | sniper | 1.9 | 0.3 | 0.8 | 25 | 4 | 2.2 | 0.65 | 0.1 | 0.4 | 6 |
 
 - **Fire rate.** BBs a second with the trigger held (auto, and within a burst), or the fastest you can click (semi).
 - **Magazines.** Carried per round, the loaded one included.
-- **Spread.** The random scatter of the shots from the hip (degrees), before stance and movement.
+- **Spread.** The random scatter of the shots from the hip (degrees), before stance, movement and the hip spread.
 - **Recoil.** The upward kick of each shot (degrees). Light: these are toys, not firearms.
-- **Cyber Pistol** (M32). The level cap's reward (levels.md): 1.00 J (the pistol limit), 14 BBs/s, 0.30° spread,
-  50 BBs × 3, 1.1 s reload, 0.28 s draw, 0.06° kick. Its battery is built in (no power source fits it), and nothing
-  else fits it either.
+- **Hip spread.** How many times wider the spread is with the sight down than with it raised (1: no difference beyond
+  the usual, Accuracy's). A long rifle pointed from the hip is a guess.
+- **Sniper Rifle** (SN1, owner 2026-11-02: like the AEG with a longer barrel, spring driven, single shot, the 2x Scope
+  fitted as it comes). The long-range pick: 1.90 J with 0.30 g BBs (the heaviest the Loadout loads; 440 fps on a
+  0.20 g chrono) stays within 15 cm of the aim line to about 48 m (the AEG 39 m) and gets to 50 m in 0.81 s (the AEG
+  1.18 s), and its 0.10° of spread is the tightest there is. Against that, one shot every 1.25 s (the
+  spring cocked by the charging handle after each one), 25 BBs a magazine, a slow reload and draw, and from the hip six
+  times the spread. Its class's site limit is the bolt-action one (below).
 
 ## Power sources
 
@@ -73,6 +82,9 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
 | 000004 | Green Gas | 0 | 0 | 0 |
 | 000008 | Red Gas | 10 | 0 | 10 |
 | 000009 | Black Gas | 20 | 0 | 20 |
+| 000022 | M130 Spring | 0 | 0 | 0 |
+| 000023 | M140 Spring | 10 | -5 | 10 |
+| 000024 | M150 Spring | 20 | -10 | 20 |
 
 ## Optics
 
@@ -135,7 +147,7 @@ barrel.
 
 ## Muzzle parts
 
-Screwed onto a replica tagged `muzzle-thread` in pool.md (the GBB Pistol and the AEG Rifle).
+Screwed onto a replica tagged `muzzle-thread` in pool.md (the GBB Pistol, the AEG Rifle and the Sniper Rifle).
 
 | Key | Name | Energy % | Handling (×) | Heard from (×) |
 |---|---|---|---|---|
@@ -164,3 +176,4 @@ torch is a new row.
 |---|---|
 | rifle | 1.2 |
 | pistol | 1.0 |
+| sniper | 2.3 |

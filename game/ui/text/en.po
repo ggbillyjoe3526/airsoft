@@ -1085,6 +1085,9 @@ msgstr "Own colours"
 msgid "LOADOUT_CLASS_RIFLE"
 msgstr "rifle"
 
+msgid "LOADOUT_CLASS_SNIPER"
+msgstr "sniper rifle"
+
 msgid "LOADOUT_CLASS_PISTOL"
 msgstr "pistol"
 

@@ -22,12 +22,13 @@ const LIMIT_HEADER := "Limit (J)"
 ## The Limit (J) column's range, and the limits as shipped (J) when the table can't be read.
 const LIMIT_MIN := 0.1
 const LIMIT_MAX := 10.0
-const DEFAULT_SITE_LIMITS: Dictionary[StringName, float] = {&"rifle": 1.2, &"pistol": 1.0}
+const DEFAULT_SITE_LIMITS: Dictionary[StringName, float] = {&"rifle": 1.2, &"pistol": 1.0, &"sniper": 2.3}
 
 enum Kind { NUMBER, WHOLE, WORD }
 
 ## The Replicas table's columns (statsFile.ts REPLICA_COLUMNS): the ReplicaConfig property each sets, how it is read and
-## the range a number must fall in.
+## the range a number must fall in. An optional column (added after the browser game's) may be left out quietly: every
+## replica then keeps its built-in number.
 const COLUMNS: Array[Dictionary] = [
 	{"header": "Class", "field": &"site_class", "kind": Kind.WORD},
 	{"header": "Energy (J)", "field": &"muzzle_energy", "kind": Kind.NUMBER, "min": 0.05, "max": 5.0},
@@ -39,6 +40,7 @@ const COLUMNS: Array[Dictionary] = [
 	{"header": "Draw (s)", "field": &"draw_time", "kind": Kind.NUMBER, "min": 0.05, "max": 5.0},
 	{"header": "Spread (°)", "field": &"spread_deg", "kind": Kind.NUMBER, "min": 0.0, "max": 10.0},
 	{"header": "Recoil (°)", "field": &"recoil_deg", "kind": Kind.NUMBER, "min": 0.0, "max": 5.0},
+	{"header": "Hip spread (×)", "field": &"hip_spread", "kind": Kind.NUMBER, "min": 1.0, "max": 20.0, "optional": true},
 ]
 
 ## What a power source changes, as shares (0.15 is +15 %): energy (gas, spring), rate of fire (battery) and kick.
@@ -163,7 +165,7 @@ func _read_replicas(t: DataTable) -> void:
 		problems.append("%s: no \"%s\" table: using the built-in numbers" % [FILE_NAME, REPLICAS_TABLE])
 		return
 	for col in COLUMNS:
-		if not t.has_column(col["header"]):
+		if not t.has_column(col["header"]) and not col.get("optional", false):
 			problems.append("%s: the %s table has no \"%s\" column: using the built-in numbers" % [t.where(t.line),
 					REPLICAS_TABLE, col["header"]])
 	for row in t.rows:

@@ -35,16 +35,19 @@ typo never stops the game from starting.
 | 2 | 300 | Vertical Grip, Red Laser |
 | 3 | 400 | Hi-Cap Magazine, Extended Magazine |
 | 4 | 500 | Silencer |
-| 5 | 600 | Red Gas, Tight-Bore Barrel |
-| 6 | 700 | Angled Grip, Low-Cap Magazine |
-| 7 | 800 | 2x Scope |
+| 5 | 600 | Tight-Bore Barrel, Sniper Rifle, M130 Spring, 2x Scope |
+| 6 | 700 | Angled Grip, Low-Cap Magazine, Red Gas |
+| 7 | 800 | M140 Spring |
 | 8 | 900 | 11.1 V LiPo Battery |
-| 9 | 1000 | Long Barrel, Black Gas |
+| 9 | 1000 | Long Barrel, Black Gas, M150 Spring |
 | 10 | 1200 | Cyber Pistol |
 
 - **The order.** The first levels give the parts that help straight away (a clear sight, a steadier aim, more BBs),
   the middle ones the trade-offs (a quiet muzzle, quick handling or a tighter barrel), and the last ones the strongest
-  power (the LiPo battery, Black Gas) and the Cyber Pistol.
+  power (the LiPo battery, Black Gas) and the Cyber Pistol. The Sniper Rifle is the first new replica (level 5, with
+  the M130 Spring it comes with, owner 2026-11-02), its stronger springs follow as the stronger gases do (M140 at 7, M150
+  at 9 with Black Gas), and the 2x Scope it comes with moved from level 7 to 5 to unlock with it, Red Gas from 5 to 6 to spread level 5 out
+  (owner, 2026-11-02).
 - **The pace** (2026-10-13). A first-to-5 match on Normal gives about 250 XP, so level 1 comes after the first match
   and level 10 after about 25 matches on Normal (about 17 on Hard).
 - **At the cap,** XP stops counting until the cap goes up: the Armory and the match summary say so.

@@ -90,6 +90,10 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var head_height_fraction: float = 0.93
 
 @export_group("Firing")
+## A replica with a hip spread (the Sniper Rifle, SN1) fires only once its sight is up this far (Character.aim_raise),
+## unless its target is within hip_fire_range (m), where a shot from the hip is worth taking.
+@export var aimed_fire_raise: float = 0.9
+@export var hip_fire_range: float = 8.0
 ## Swaps a magazine below this share of a full one when nobody is in sight.
 @export var tactical_reload_fraction: float = 0.35
 ## Never fires with a teammate this close to the line of fire (m, beyond their hit volume), widened by this many of the

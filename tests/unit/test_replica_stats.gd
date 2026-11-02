@@ -65,7 +65,8 @@ func test_lays_a_file_over_the_built_in_numbers() -> void:
 	assert_eq(s.problems, [] as Array[String])
 	assert_eq(s.energy_limit(&"rifle"), 1.5)
 	assert_eq(s.energy_limit(&"pistol"), 1.0, "a class the file leaves out keeps the built-in limit")
-	assert_eq(s.energy_limit(&"sniper"), INF)
+	assert_eq(s.energy_limit(&"sniper"), 2.3, "the bolt-action class keeps its built-in limit too")
+	assert_eq(s.energy_limit(&"dmr"), INF, "a class with no limit anywhere has none")
 
 
 func test_a_cell_it_cannot_read_keeps_the_built_in_number_and_is_reported_with_its_line() -> void:

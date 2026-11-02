@@ -252,6 +252,26 @@ until 10.
 - [ ] **Bots with it.** With it unlocked (or Disable levelling on), about 1 Hard match in 20 has an opponent with it.
   Never on Easy or Normal, never a teammate.
 
+## Sniper Rifle
+
+A dev item (SN1): turn on Settings › Dev settings › Dev content, and Disable levelling (or Level up to 5).
+
+- [ ] **Equip it.** It is in the primary list as Sniper Rifle; it comes with the 2x Scope fitted and the M130 Spring.
+- [ ] **Its look.** The AEG with a 20 cm longer barrel (a placeholder until your own model). Is it clearly longer?
+- [ ] **Single shot.** One click, one BB; clicking faster does nothing until the charging handle has gone back and home
+  (about 1.25 s). The fire mode key does nothing. Does the cocking look and sound right?
+- [ ] **From the hip and raised.** From the hip the BBs scatter wide; with the scope up they go where the reticle is.
+  Shooting at 40 to 50 m on the range, does it feel like the long-range pick without being a laser beam?
+- [ ] **Customise.** The optic row has the 2x Scope on; take it off (iron sights) and put it back; the Red Dot, the
+  AEG's grips, the Silencer and the torch fit; no barrels, no AEG magazines. Power lists the M130, M140 and M150
+  Springs (pictures: a coil with a violet, crimson or black band).
+- [ ] **Springs.** The M140 and M150 shoot harder (Energy up 10 % and 20 %) and cock a little slower. Can you feel it?
+- [ ] **Levels.** In the Armory level 5 holds the Sniper Rifle, the M130 Spring, the 2x Scope and the Tight-Bore Barrel;
+  level 6 has Red Gas; the M140 is at 7 and the M150 at 9. With Dev content off none of the rifle's items show.
+- [ ] **Bots with it.** About 1 opponent in 12 on Hard (fewer on Normal and Easy) carries it: they raise the scope to
+  fight and hold their fire from the hip unless you are within 8 m. Do they feel dangerous at range and beatable up
+  close? Is it fair on Depot, Woodland and The Street, at 5v5 and 8v8?
+
 ## Levels and the Armory
 
 Finished matches give XP, each level up to 10 unlocks parts for good, and nothing is ever sold. What each level

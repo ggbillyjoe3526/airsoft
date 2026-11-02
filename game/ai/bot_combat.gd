@@ -155,6 +155,9 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 		return
 	var dir := Vector3(-sin(b.aim_yaw) * cos(b.aim_pitch), sin(b.aim_pitch), -cos(b.aim_yaw) * cos(b.aim_pitch))
 	var dist := eye.distance_to(_aim_point)
+	if fights_aimed(b.character) and b.character.aim_raise < cfg.aimed_fire_raise and dist > cfg.hip_fire_range:
+		# Its sight still coming up, and the target too far for a shot from the hip: wait for the sight.
+		return
 	if _line_of_fire_blocked(b, w, eye, dir, dist):
 		# Seen through glass or leaves it can't shoot through (BQ1): counted, so it goes round in time.
 		b.no_shot_for = b.no_shot_for + dt if _level_in_line else 0.0
@@ -176,6 +179,12 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 			b.pause_left = b.pick(b.skill.burst_pause)
 	else:
 		b.pause_left -= dt
+
+
+## Whether `c`'s replica in hand is fought with its sight up (a hip spread: the Sniper Rifle, SN1).
+static func fights_aimed(c: Character) -> bool:
+	var r := c.armament.replica() if c.armament != null else null
+	return r != null and r.hip_spread > 1.0
 
 
 ## Whether `b`'s eye, kneeling where it stands and upright, would have the shot at _aim_point (BQ3: one ray as a burst
