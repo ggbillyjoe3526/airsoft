@@ -144,7 +144,7 @@ func _ready() -> void:
 	box.add_child(_heading)
 	_load_message = Label.new()
 	_load_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_load_message.add_theme_color_override("font_color", GameTheme.ACCENT)
+	_load_message.add_theme_color_override("font_color", GameTheme.WARN)
 	box.add_child(_load_message)
 	_tabs = TabContainer.new()
 	_tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL

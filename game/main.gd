@@ -409,6 +409,9 @@ func _open_practice_loadout() -> void:
 	_build_screens()
 	SettingsApply.set_menus(Settings.shared(), true)
 	_menus.open_practice_loadout(_spot.slot as Loadout.Slot)
+	# the Loadout from practice is a quick stop: the safe-start question waits for the menus proper, as it did on the
+	# title before UR1
+	_menus.close_notice()
 	_scale_menus()
 
 

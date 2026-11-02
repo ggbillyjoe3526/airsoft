@@ -16,10 +16,10 @@ enum Section { TEAM_COLOURS, GAUGE_PATTERNS, SCREEN_READER, SOUND_CUES, REDUCED_
 ## The sections still to build, greyed with LATER and not clickable: none now.
 const LATER: Array[Section] = []
 ## The columns' widths (the right one takes the rest), the labels' widths and the slider's (px).
-const LEFT_WIDTH := 860.0
-const COLUMN_GAP := 48
-const LEFT_LABEL := 230.0
-const RIGHT_LABEL := 230.0
+const LEFT_WIDTH := 770.0
+const COLUMN_GAP := 32
+const LEFT_LABEL := 190.0
+const RIGHT_LABEL := 190.0
 const SLIDER_WIDTH := 300.0
 ## A note beside a row or under a section: its size and the space before it (px); the room between a heading and its
 ## LATER tag.

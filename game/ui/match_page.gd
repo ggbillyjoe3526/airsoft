@@ -499,6 +499,8 @@ func _keep_a_playable_map() -> void:
 		if not _unloadable[id]:
 			picks.map_id = id
 			_play.disabled = false
+			# the backdrop follows the field that stands in
+			map_picked.emit(id)
 			return
 	_play.disabled = true
 

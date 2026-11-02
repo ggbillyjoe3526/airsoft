@@ -11,11 +11,11 @@ extends HBoxContainer
 signal changed(immediate: bool)
 
 ## The columns' widths (the right one takes the rest), the labels' widths and the sliders' (px).
-const LEFT_WIDTH := 780.0
-const COLUMN_GAP := 48
-const LEFT_LABEL := 200.0
-const RIGHT_LABEL := 230.0
-const SLIDER_WIDTH := SettingsScreen.SLIDER_WIDTH
+const LEFT_WIDTH := 650.0
+const COLUMN_GAP := 24
+const LEFT_LABEL := 170.0
+const RIGHT_LABEL := 200.0
+const SLIDER_WIDTH := 220.0
 ## The space before a row's note (px).
 const PX := "%d px"
 const PERCENT := "%d%%"

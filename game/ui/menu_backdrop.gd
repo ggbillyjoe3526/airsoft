@@ -12,6 +12,9 @@ const SOFT := Vector2i(384, 216)
 ## The shade: the night colour at these opacities, left to right (positions are shares of the width).
 const SHADE_STOPS: Array[Vector2] = [Vector2(0.0, 0.84), Vector2(0.45, 0.58), Vector2(1.0, 0.64)]
 
+## The blurred pictures by path, kept for the run.
+static var _blurred: Dictionary[String, Texture2D] = {}
+
 var _picture: TextureRect = null
 var _map_id: String = ""
 
@@ -53,8 +56,18 @@ func picture() -> TextureRect:
 	return _picture
 
 
-## The picture at `path`, blurred; null when there is none.
+## The picture at `path`, blurred; null when there is none. Blurred once a run (about 1 MB for the four fields), so a
+## pick or the menus' rebuild after a match costs no frame.
 static func blurred(path: String) -> Texture2D:
+	if _blurred.has(path):
+		return _blurred[path]
+	var soft := _blur(path)
+	if soft != null:
+		_blurred[path] = soft
+	return soft
+
+
+static func _blur(path: String) -> Texture2D:
 	if not ResourceLoader.exists(path):
 		return null
 	var source := load(path) as Texture2D
@@ -67,7 +80,8 @@ static func blurred(path: String) -> Texture2D:
 	if image.is_compressed():
 		image.decompress()
 	image.resize(SMALL.x, SMALL.y, Image.INTERPOLATE_BILINEAR)
-	image.resize(SOFT.x, SOFT.y, Image.INTERPOLATE_CUBIC)
+	# bilinear: the window's filter smooths it further, and cubic cost a frame (UR1 performance review)
+	image.resize(SOFT.x, SOFT.y, Image.INTERPOLATE_BILINEAR)
 	return ImageTexture.create_from_image(image)
 
 

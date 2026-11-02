@@ -15,8 +15,8 @@ extends HBoxContainer
 signal changed(immediate: bool)
 
 ## The columns' widths (the right one takes the rest), the labels' widths and the sliders' (px).
-const LEFT_WIDTH := 860.0
-const COLUMN_GAP := 48
+const LEFT_WIDTH := 830.0
+const COLUMN_GAP := 32
 const LEFT_LABEL := 230.0
 const RIGHT_LABEL := 230.0
 const SLIDER_WIDTH := 260.0
