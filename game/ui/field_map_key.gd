@@ -119,14 +119,14 @@ func _draw_glyph(g: Glyph, at: Vector2) -> void:
 		Glyph.FLAG:
 			# The map's ring round the pole, its lettered badge over the ring's top left.
 			draw_arc(at, GLYPH, 0.0, TAU, ARC_POINTS, _cfg.ink, _cfg.map_flag_ring_width + INK, true)
-			draw_arc(at, GLYPH, 0.0, TAU, ARC_POINTS, GameTheme.ACCENT, _cfg.map_flag_ring_width, true)
+			draw_arc(at, GLYPH, 0.0, TAU, ARC_POINTS, GameTheme.WARN, _cfg.map_flag_ring_width, true)
 			var badge := at + FLAG_BADGE_AT
 			draw_circle(badge, FLAG_BADGE + INK, _cfg.ink)
-			draw_circle(badge, FLAG_BADGE, GameTheme.ACCENT)
+			draw_circle(badge, FLAG_BADGE, GameTheme.WARN)
 			var fs := roundi(FLAG_BADGE * _cfg.map_badge_type)
 			var s := _badge_font.get_string_size(FLAG_LETTER, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
 			draw_string(_badge_font, Vector2(badge.x - s.x * 0.5, badge.y - s.y * 0.5 + _badge_font.get_ascent(fs)),
-					FLAG_LETTER, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, GameTheme.ACCENT_INK)
+					FLAG_LETTER, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, GameTheme.WARN_INK)
 		Glyph.START:
 			draw_rect(box, Color(_team, START_FILL))
 			draw_rect(box, _team, false, _cfg.map_zone_ring)

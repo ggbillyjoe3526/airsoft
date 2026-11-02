@@ -33,6 +33,8 @@ const ACCENT_INK := Color("05201c")
 ## Signal yellow, for warnings and the flags only (a low magazine, THEIR FLAG IS GOING UP!, a flag's marker), never as a
 ## theme colour (UR1).
 const WARN := Color("ffd23f")
+## Words on WARN (a flag's letter).
+const WARN_INK := Color("1a1608")
 ## Better and worse (the Loadout's Performance sheet).
 const GOOD := Color("5fd08a")
 const BAD := Color("ff7a6b")

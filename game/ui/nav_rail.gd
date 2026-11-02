@@ -238,11 +238,17 @@ func _build_back() -> Button:
 	column.add_child(cap)
 	pad.add_child(column)
 	b.add_child(pad)
-	# the button is as tall as its words and key
-	b.custom_minimum_size.y = BACK_PAD.y * 2 + BACK_GAP + BACK_SIZE * 2 + BACK_KEY_SIZE * 2
+	# the button is as tall as its words (wrapped as they are laid out) and key: a Button doesn't size to its children
+	pad.minimum_size_changed.connect(_fit_back.bind(b, pad))
+	_fit_back.call_deferred(b, pad)
 	b.pressed.connect(func() -> void: practice_pressed.emit())
 	b.visible = false
 	return b
+
+
+func _fit_back(b: Button, pad: Control) -> void:
+	if is_instance_valid(b) and is_instance_valid(pad):
+		b.custom_minimum_size.y = pad.get_combined_minimum_size().y
 
 
 ## The level: "LV 3" over a thin bar of the XP into it.

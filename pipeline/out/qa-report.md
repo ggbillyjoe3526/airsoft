@@ -45,3 +45,11 @@ Suite: only this file was run (tools/check.sh runs elsewhere): 23/24, 14.8 s; lo
 Not testable headless: how the glass panels and the blurred picture look, text cut by the real renderer at 1280x720
 (the layout figures above are the 1920x1080 design space the stretch scales), window-mode changes. Owner: open each
 Settings tab at 1280x720 and 1920x1080, and look at the HUD and Accessibility tabs' right edge.
+
+Re-check (attempt 2, by the lead; QA's own test as the evidence): Pass.
+- Blocking 1 fixed in 89d8286: the HUD and Accessibility labels, the HUD's sliders and the column gaps are narrower;
+  `test_ur1_qa.gd` › test_every_settings_tab_fits_beside_the_rail_at_1080p passes, with test_ui1_menus' no-cut-words
+  and no-overlap tests on every tab.
+- Advisories taken: the load warnings are WARN; the safe-start notice closes for the Loadout from practice; the
+  backdrop follows a field that stands in (map_picked from _keep_a_playable_map). The notice tabbable over Settings
+  stays (harmless), and now takes the keyboard when it shows (critic, attempt 1).

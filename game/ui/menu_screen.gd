@@ -19,8 +19,9 @@ signal quit_requested
 signal practice_requested
 
 ## A notice's corner: from the right edge and from the bottom (px at 1080p).
-const NOTICE_RIGHT := 48.0
-const NOTICE_BOTTOM := 48.0
+## A graphics notice sits at the page's bottom left, beside the rail, clear of PLAY at the bottom right (px).
+const NOTICE_LEFT := 52.0
+const NOTICE_BOTTOM := 44.0
 
 var _rail: NavRail = null
 var _backdrop: MenuBackdrop = null
@@ -81,18 +82,27 @@ func backdrop() -> MenuBackdrop:
 	return _backdrop
 
 
-## Shows `notice` bottom right over the page, in place of any other; the page works under it.
+## Shows `notice` at the page's bottom left over the page, in place of any other, with the keyboard on its first
+## button so Enter answers it rather than starting a match unseen; the page works under it.
 func show_notice(notice: GraphicsNotice) -> void:
 	close_notice()
 	_notice = notice
 	add_child(notice)
-	notice.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	notice.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	notice.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	notice.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	notice.offset_right = -NOTICE_RIGHT
+	notice.offset_left = NavRail.WIDTH + NOTICE_LEFT
 	notice.offset_bottom = -NOTICE_BOTTOM
-	notice.offset_left = notice.offset_right
+	notice.offset_right = notice.offset_left
 	notice.offset_top = notice.offset_bottom
+	_focus_notice.call_deferred()
+
+
+func _focus_notice() -> void:
+	if _notice == null or not _notice.is_visible_in_tree():
+		return
+	var buttons := _notice.find_children("*", "Button", true, false)
+	if not buttons.is_empty():
+		(buttons[0] as Button).grab_focus()
 
 
 ## Puts `screen` (the settings) over the page, under the rail and any notice, beside the rail.
@@ -117,9 +127,13 @@ func notice() -> GraphicsNotice:
 
 
 func close_notice() -> void:
-	if _notice != null:
-		_notice.queue_free()
-		_notice = null
+	if _notice == null:
+		return
+	var had_keys := _notice.get_viewport() != null and _notice.is_ancestor_of(_notice.get_viewport().gui_get_focus_owner())
+	_notice.queue_free()
+	_notice = null
+	if had_keys and visible:
+		focus_page()
 
 
 func match_page() -> MatchPage:

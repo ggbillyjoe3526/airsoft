@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-02 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-02 | 1 | Opus 5.5 (build thread) | stopped for the fixes | Retry 5/8 | notice over PLAY; About inline; map flags teal; ARCHITECTURE |
+| 2026-11-02 | 2 | Opus 5.5 (build thread) | pending | pending | – |
 
 ## Goal
 
@@ -40,17 +41,24 @@ Next: Match and Loadout (eye-height field pictures, replicas to one scale inside
 - **No title screen.** `Main` builds only the menus and opens on Match with PLAY focused; every way back (a match, the
   range, the crash screen's Continue) lands there. The graphics notices show on the menus (`MenuScreen.show_notice`).
   `TitleScreen` is gone; the crash screen keeps its own backdrop picture.
-- **Settings › About.** A tab between Save file and Dev: Version, Renderer, and from the menus Report a Bug, Licences
-  and Quit to desktop. The settings now live inside the menus (`MenuScreen.add_over_page`), under the rail, a
-  notice, the credits and the prompts.
+- **Settings › About.** `SettingsAboutPage`, a tab between Save file and Dev: Version, Renderer (in words, as
+  Graphics names it), and from the menus Report a Bug, Licences and Quit to desktop. The settings now live inside the
+  menus (`MenuScreen.add_over_page`), under the rail, a notice, the credits and the prompts. The HUD and
+  Accessibility tabs' labels, the HUD's sliders and the column gaps are narrower, so every tab fits beside the rail.
+- **Notices.** A graphics notice sits at the page's bottom left beside the rail, clear of PLAY, takes the keyboard
+  (Enter answers it) and gives it back to the page when it closes. The Loadout from practice shows none.
 
 ## Decisions
 
 - Concept B, no title screen, Barlow for words only: `docs/DECISIONS.md` › Menus, HUD, settings and accessibility.
 - **Signal yellow stays for warnings and flags.** Teal is the theme; a low magazine or a flag going up in teal would
-  read as decoration, not a warning. The world's contested flag ring is yellow too.
+  read as decoration, not a warning. The world's contested flag ring is yellow too, and so are the HUD marker, the
+  minimap's flag, the M map's flags and its key, the settings' and loadouts' load warnings.
 - **The rail is 136 px.** Wide enough for SETTINGS in condensed capitals with room each side, and narrow enough that
   the pages lose only 7 % of a 1080p width.
+
+- **About has no Save file row.** The concept's About repeated the save folder; Settings › Save file already has it
+  with Open folder, so About keeps to the version, the renderer and the three buttons.
 
 ## Known issues left
 

@@ -712,7 +712,7 @@ func test_the_save_file_tab_comes_after_accessibility_then_about_then_dev() -> v
 func test_about_shows_the_version_and_in_the_menus_the_title_screen_s_buttons() -> void:
 	screen.show_about()
 	assert_eq(screen._tabs.get_tab_title(screen.current_tab()), tr("SETTINGS_ABOUT").to_upper())
-	var version := screen._about_page.find_child("Version", true, false) as Label
+	var version := screen.find_child("Version", true, false) as Label
 	assert_eq(version.text, Version.current())
 	assert_null(screen.about_report_button(), "from the pause menu: no Report, Licences or Quit of About's own")
 	var menus := SettingsScreen.new()

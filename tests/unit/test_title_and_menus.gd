@@ -161,3 +161,34 @@ func test_the_main_scene_resets_the_window_scale_when_freed() -> void:
 	await wait_process_frames(2)
 	assert_false(window.size_changed.is_connected(cb))
 	assert_almost_eq(window.content_scale_factor, 1.0, 1e-5)
+
+
+func test_a_notice_sits_clear_of_play_and_takes_the_keyboard_then_gives_it_back() -> void:
+	var host := Control.new()
+	host.size = Vector2(1920.0, 1080.0)
+	add_child_autofree(host)
+	var menus := MenuScreen.new()
+	host.add_child(menus)
+	await wait_process_frames(2)
+	menus.focus_play()
+	var notice := GraphicsNotice.first_start(&"low", "Radeon RX 6600 · Discrete", "1920 × 1080 · 60 Hz")
+	menus.show_notice(notice)
+	await wait_process_frames(3)
+	var play := menus.match_page().play_button()
+	assert_false(notice.get_global_rect().intersects(play.get_global_rect()), "PLAY shows beside the notice")
+	assert_gte(notice.get_global_rect().position.x, float(NavRail.WIDTH), "right of the rail")
+	assert_true(notice.is_ancestor_of(get_viewport().gui_get_focus_owner()), "Enter answers the notice")
+	menus.close_notice()
+	await wait_process_frames(1)
+	assert_eq(get_viewport().gui_get_focus_owner(), play, "and the keyboard is back on PLAY")
+
+
+func test_about_names_the_renderer_in_words() -> void:
+	var screen := SettingsScreen.new()
+	screen.settings = Settings.new()
+	screen.save_path = "user://test-title-and-menus-about.json"
+	add_child_autofree(screen)
+	screen.open()
+	var renderer := screen.find_child("Renderer", true, false) as Label
+	assert_eq(renderer.text, SettingsGraphicsPage.renderer_words(GraphicsApply.machine()))
+	assert_true(renderer.text.contains(" · "))

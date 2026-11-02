@@ -109,10 +109,7 @@ var _speed: HSlider = null
 var _end_round: Button = null
 var _confirm_level: ConfirmationDialog = null
 var _confirm_crash: ConfirmationDialog = null
-var _about_page: VBoxContainer = null
-var _about_report: Button = null
-var _about_credits: Button = null
-var _about_quit: Button = null
+var _about_page: SettingsAboutPage = null
 
 
 func _ready() -> void:
@@ -208,20 +205,20 @@ func show_graphics() -> void:
 
 ## Shows the About tab.
 func show_about() -> void:
-	_tabs.current_tab = _about_page.get_parent().get_index()
+	_tabs.current_tab = _about_page.get_parent().get_parent().get_index()
 
 
 ## About's Report a Bug, Licences and Quit buttons (null from the pause menu).
 func about_report_button() -> Button:
-	return _about_report
+	return _about_page.report_button()
 
 
 func about_credits_button() -> Button:
-	return _about_credits
+	return _about_page.credits_button()
 
 
 func about_quit_button() -> Button:
-	return _about_quit
+	return _about_page.quit_button()
 
 
 ## The tab showing (tests).
@@ -631,53 +628,15 @@ func _refresh() -> void:
 
 # --- About ---
 
-## About (no title screen: owner, 2026-11-02): the version and the renderer; from the menus also Report a Bug,
-## Licences (the credits) and Quit, which the title screen had.
+## About (no title screen: owner, 2026-11-02): SettingsAboutPage on its tab.
 func _build_about() -> void:
-	_about_page = _page(tr("SETTINGS_ABOUT"))
-	var version := add_row(_about_page, "SETTINGS_ABOUT_VERSION")
-	version.add_child(_about_value(Version.current(), "Version"))
-	var renderer := add_row(_about_page, "SETTINGS_ABOUT_RENDERER")
-	var probe := GraphicsApply.machine()
-	renderer.add_child(_about_value("%s · %s" % [probe.rendering_method, probe.driver], "Renderer"))
-	if not in_menus:
-		return
-	var gap := Control.new()
-	gap.custom_minimum_size = Vector2(0.0, SECTION_GAP)
-	_about_page.add_child(gap)
-	var buttons := HBoxContainer.new()
-	buttons.add_theme_constant_override("separation", ROW_SEPARATION)
-	_about_page.add_child(buttons)
-	_about_report = _about_button(buttons, "REPORT_BUG", "Report")
-	_about_report.pressed.connect(func() -> void: report_requested.emit())
-	_about_credits = _about_button(buttons, "MENU_LICENCES", "Licences")
-	_about_credits.pressed.connect(func() -> void: credits_requested.emit())
-	var quit_gap := Control.new()
-	quit_gap.custom_minimum_size = Vector2(0.0, SECTION_GAP * 2)
-	_about_page.add_child(quit_gap)
-	var quit_row := HBoxContainer.new()
-	_about_page.add_child(quit_row)
-	_about_quit = _about_button(quit_row, "SETTINGS_ABOUT_QUIT", "Quit")
-	_about_quit.pressed.connect(func() -> void: quit_requested.emit())
-
-
-func _about_value(text: String, node_name: String) -> Label:
-	var l := Label.new()
-	l.name = node_name
-	l.text = text
-	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	l.add_theme_font_override("font", GameTheme.font(600))
-	l.add_theme_font_size_override("font_size", GameTheme.LABEL_SIZE)
-	return l
-
-
-func _about_button(parent: Control, key: String, node_name: String) -> Button:
-	var b := Button.new()
-	b.name = node_name
-	b.text = tr(key).to_upper()
-	GameTheme.small_button(b)
-	parent.add_child(b)
-	return b
+	var tab := _page(tr("SETTINGS_ABOUT"))
+	_about_page = SettingsAboutPage.new()
+	tab.add_child(_about_page)
+	_about_page.build(self, in_menus)
+	_about_page.report_pressed.connect(func() -> void: report_requested.emit())
+	_about_page.credits_pressed.connect(func() -> void: credits_requested.emit())
+	_about_page.quit_pressed.connect(func() -> void: quit_requested.emit())
 
 
 # --- Building blocks ---
