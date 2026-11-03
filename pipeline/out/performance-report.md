@@ -10,3 +10,15 @@ reading the diff against the targets (no baseline yet).
 - `tests/unit/test_uf2_clicks.gd` is test-only and does not ship.
 
 No blocking or advisory findings.
+
+## Part 2: skip grace (ee0eb5a)
+
+Verdict: **Pass**. No `--perf` run: the change is one float add per frame (no baseline yet; judged by reading the diff).
+
+- `game/play/play_session.gd:1418`: `_follow_skip(delta)` does a float add, a compare and two bool ops per frame; no
+  Array, String, Callable or node allocation. `_out_for` (line 216) is a plain float; nothing to free or disconnect.
+- `set_skip_hint(ready)` is called each frame as before; its cost is unchanged from Part 1's baseline behaviour.
+- `skip_grace` is a typed `@export` on `PlayTuning` read from the cached `_play`; no per-frame load.
+- The count runs in `_process`, so skip's own fast tick loop does not touch it (`can` is false while `_skipping`).
+
+No blocking or advisory findings.

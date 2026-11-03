@@ -22,3 +22,16 @@ Verdict: **Pass**
 
 ## Not verifiable here
 Real-mouse feel on a display: click SWITCH REPLICA on each carried card, double-click a card (only picks it), CUSTOMISE opens it.
+
+## Part 2: skip grace (ee0eb5a)
+Verdict: Pass. test_uf2_clicks (8), test_wg1_qa (12), test_what_got_you (9) all green.
+- _out_for resets every frame the player is in play, the round is not live, autopilot is on or a skip is running (the
+  `can` guard), so a new round, a rematch or a second knock-out starts a fresh grace.
+- Hit then round ends inside the grace: is_live false, so the counter zeroes; nothing carries to the next round.
+- Pause: _process stops with the tree, so _out_for freezes (not resets) and resumes; _skip_armed is cleared on pause and
+  re-arms only once the trigger is up. Pause menu's own Skip button is not gated by the grace (deliberate click). Fine.
+- Trigger held through the grace: _skip_armed needs the trigger up once `ready`, so a held trigger never skips; a click
+  and release inside the grace is not armed (ready false). Correct.
+- Autopilot: can_skip false, counter stays 0.
+- Minor/no action: a single long frame (hitch) adds its whole delta, so it can shorten the grace; not worth fixing.
+- Not verifiable here: how 1.5 s feels on a display.
