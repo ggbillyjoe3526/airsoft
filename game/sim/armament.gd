@@ -45,6 +45,9 @@ var ammo: Array[Ammo] = []
 var active: int = 0
 ## Seconds until the next shot may go (slightly negative keeps an auto rate exact).
 var cooldown: float = 0.0
+## Each slot's cooldown while it is put away (s, 0 for the slot in hand): a bolt still cycling keeps cycling on the
+## sling, and never holds up the replica switched to (BP3: the Sniper Rifle's 1.25 s blocked the pistol's first shot).
+var stowed_cooldowns: PackedFloat64Array = PackedFloat64Array()
 ## The replica is put away (the holster): nothing in hand fires, aims, reloads, turns its dial or switches its selector.
 var holstered: bool = false
 ## The aim button last tick: a press, not a held button, draws a holstered replica.
@@ -95,6 +98,7 @@ static func create(loadout: Array[ReplicaConfig], weights: PackedFloat64Array = 
 		a.hop_ups.append(r.hop_up_dial)
 		a.zooms.append(r.aim_zoom)
 		a.bb_weights.append(weights[i] if i < weights.size() else r.bb_weight)
+		a.stowed_cooldowns.append(0.0)
 	return a
 
 
@@ -106,6 +110,7 @@ func refill() -> void:
 	active = 0
 	holstered = false
 	cooldown = 0.0
+	stowed_cooldowns.fill(0.0)
 	reload_left = 0.0
 	draw_left = 0.0
 	draw_total = 0.0
@@ -254,6 +259,9 @@ static func step(c: Character, cmd: PlayerCommand, eye: Vector3, kick_scale: flo
 		a.cooldown = 0.0
 	else:
 		a.cooldown = maxf(-dt, a.cooldown - dt)
+	for i in a.stowed_cooldowns.size():
+		if a.stowed_cooldowns[i] > 0.0:
+			a.stowed_cooldowns[i] = maxf(0.0, a.stowed_cooldowns[i] - dt)
 	a.pending_press = maxf(0.0, a.pending_press - dt)
 	if a.draw_left > 0.0:
 		a.draw_left = maxf(0.0, a.draw_left - dt)
@@ -331,6 +339,10 @@ static func step(c: Character, cmd: PlayerCommand, eye: Vector3, kick_scale: flo
 	# Semi and burst presses are kept briefly, so a click during the cooldown still fires when ready.
 	if pressed:
 		a.pending_press = rules.press_buffer + fire_hold_off
+		if replica_now.bolt_action and a.cooldown > 0.0 and a.cooldown <= rules.bolt_press_window:
+			# A spring rifle is worked by hand: a click once the handle is home fires as the cycle ends (BP3: one
+			# after the handle looked home but before the cycle ran out was lost, with no shot and no dry click).
+			a.pending_press += a.cooldown
 	var busy := a.draw_left > 0.0 or a.reload_left > 0.0
 	if a.burst_shots_left > 0 and (not can_fire or busy):
 		a.burst_shots_left = 0
@@ -431,8 +443,14 @@ func bring_up(actor: int, events: SimEvents, scale: float) -> void:
 ## Brings the replica in `slot` up, out of the holster or in place of the one in hand: `scale` times its draw time (1
 ## for a switch). Cancels a reload, a burst and a queued reload.
 func _draw(slot: int, actor: int, events: SimEvents, scale: float = 1.0) -> void:
+	if slot != active and slot < stowed_cooldowns.size() and active < stowed_cooldowns.size():
+		stowed_cooldowns[active] = maxf(cooldown, 0.0)
+		cooldown = stowed_cooldowns[slot]
+		stowed_cooldowns[slot] = 0.0
 	active = slot
 	holstered = false
+	# A press kept for the replica put away never fires the one drawn (BP3: a bolt-window click fired the pistol).
+	pending_press = 0.0
 	reload_left = 0.0
 	draw_left = replicas[slot].draw_time * scale
 	draw_total = draw_left

@@ -89,16 +89,22 @@ func test_an_open_shot_is_an_option_some_bots_take_and_some_don_t() -> void:
 func test_full_auto_once_taken_is_switched_to_and_dropped_when_the_target_goes() -> void:
 	_open_ground()
 	b.auto_for = foe.id
+	b.auto_open = true
 	b.auto_rolled_for = foe.id
 	assert_eq(_select(foe), AUTO, "semi to burst to auto, a press a tick")
 	b.target_visible = false
 	assert_eq(_select(foe), SEMI, "target gone: back on the start mode")
-	assert_eq(b.auto_for, -1)
+	# Kept for that target (BP3): seen again in the open, it goes back to full auto without a new roll.
+	assert_eq(b.auto_for, foe.id)
+	b.target_visible = true
+	BotFireMode.on_burst(b, w, foe, EYE, AIM)
+	assert_eq(_select(foe, 4), AUTO, "seen again in the open: full auto again")
 
 
 func test_a_shot_no_longer_open_goes_back_to_the_start_mode_and_isn_t_rolled_again() -> void:
 	_open_ground()
 	b.auto_for = foe.id
+	b.auto_open = true
 	b.auto_rolled_for = foe.id
 	w.nav = _grid(0)
 	BotFireMode.on_burst(b, w, foe, EYE, AIM)
@@ -112,6 +118,7 @@ func test_a_shot_no_longer_open_goes_back_to_the_start_mode_and_isn_t_rolled_aga
 func test_no_press_through_a_vault_so_the_selector_settles_after_it() -> void:
 	_open_ground()
 	b.auto_for = foe.id
+	b.auto_open = true
 	b.auto_rolled_for = foe.id
 	var cmd := PlayerCommand.new()
 	b.character.vault.active = true
@@ -192,3 +199,19 @@ func test_depot_s_open_field_is_its_most_open_floor_not_all_of_it() -> void:
 	var share := float(open) / walkable
 	assert_between(share, 0.05, 0.25, "%.0f %% of Depot's floor counts as open" % (share * 100.0))
 
+
+
+func test_a_target_seen_again_out_of_the_open_gets_no_full_auto_mid_burst() -> void:
+	_open_ground()
+	b.auto_for = foe.id
+	b.auto_rolled_for = foe.id
+	b.auto_open = true
+	b.burst_left = 1.0
+	assert_eq(_select(foe), AUTO)
+	b.target_visible = false
+	assert_eq(_select(foe), SEMI, "out of sight: the start mode, and the burst ends")
+	assert_eq(b.burst_left, 0.0)
+	# Back in sight in a doorway (no open ground), before a new burst has judged the shot: still semi (BP3).
+	w.nav = _grid(0)
+	b.target_visible = true
+	assert_eq(_select(foe), SEMI, "full auto waits for a burst that finds the target in the open")

@@ -7,9 +7,9 @@ extends Control
 ## at any size but 100 % a tag names it and dashed outlines show the two parts at 100 % (concept
 ## `settings-hud-size.png`). show_prefs() follows a change.
 
-## Tall enough that the panel at 125 % stays clear of the feed line (the concept's `settings-hud-size.png`), short
+## Tall enough that the panel with its bomb row fits whole at 150 % (BP3; 180 cut the row from about 115 %), short
 ## enough that the tab needs no scrolling at 1080p.
-const HEIGHT := 180.0
+const HEIGHT := 236.0
 ## The feed line and the replica panel are drawn this much smaller, so they fit the shorter preview and leave the
 ## Minimap row room in the tab (concept `settings-minimap.png`).
 const PART_SCALE := 0.8
@@ -41,6 +41,8 @@ const GHOST_TAG_BACKING := 0.8
 const GHOST_TAG_PAD := Vector2i(6, 2)
 ## The sample magazine: BBs loaded, and one spare emptied so Ammo counter Off shows a hollow box.
 const LOADED := 27
+## Each bomb the preview's panel shows carried.
+const PREVIEW_BOMBS := 1
 
 var _prefs: HudPrefs = null
 var _cfg := HudConfig.new()
@@ -84,7 +86,11 @@ func _init() -> void:
 	# The feed line over the panel: at a large HUD size they meet in the short preview, and the line reads whole.
 	add_child(_feed)
 	if not _armament.replicas.is_empty():
-		_panel.refresh(_armament)
+		# One of each bomb, as a round starts: the bomb row shows its counts (BP3: blank, at full strength).
+		var hand := Grenades.Hand.new()
+		hand.smoke = PREVIEW_BOMBS
+		hand.flash = PREVIEW_BOMBS
+		_panel.refresh(_armament, hand)
 	_ghosts = Ghosts.new()
 	_ghosts.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(_ghosts)

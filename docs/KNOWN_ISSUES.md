@@ -11,9 +11,14 @@ Every open bug, limit and known gap in the game, so nobody re-reports or re-meas
 
 | Area | Issue | Class | Found |
 |---|---|---|---|
-| Play | Aimed at 6× through the Variable Scope, the mouse turns the view as fast as at 2× (no scope slows it, the 2x Scope's glass included); it may feel quick (SN2) | playtest | 2026-11-02 |
+| Play | The Sniper Rifle's Fire clip and cocking sound show the handle home 0.71 s after a shot, but the rifle is ready at 1.25 s (M130) to 1.39 s (M150); a click after the handle is home now fires as the cycle ends (BP3). Re-time with the owner's model and sounds | playtest | 2026-11-03 |
+| Play | The bolt's cocking sound plays to its end after a switch to the pistol or a hit mid-cycle (BP3) | can wait | 2026-11-03 |
+| Play | A mouse wheel notch on the tick a reload or a slot key's draw starts, aimed through the Variable Scope, neither zooms nor switches (BP3) | can wait | 2026-11-03 |
+| Play | Indoors, a bot that fights two targets in turn rolls for full auto again on each return to one, so its chance at that one compounds (NA1, BP3) | can wait | 2026-11-03 |
+| Play | Indoors, a bot's burst held up with its target still in sight (glass or leaves in the line, or not ready) keeps its full auto, and finishes on it wherever the target then stands (NA1, BP3 critic) | can wait | 2026-11-03 |
+| Menus | The Loadout's carried cards show the slot keys as 1 and 2 even when slot_1 and slot_2 are rebound (BP3) | can wait | 2026-11-03 |
+| Menus | Customise's 3D replica keeps the resolution it was built at when the window moves to a screen of another size at the same aspect ratio, until Customise is reopened (BP3) | can wait | 2026-11-03 |
 | Art | The Variable Scope's model is the 2x Scope's run on longer with a zoom ring, a placeholder until the owner's own model (SN2) | document | 2026-11-02 |
-| Menus | The Loadout's replica row rounds the Sniper Rifle's 0.8 shots a second to "1 BBs/s" (SN1); the Loadout is being rebuilt (UR1) | can wait | 2026-11-02 |
 | Play | Your bot teammates still carry the factory AEG, never the Sniper Rifle, and the rifle's magazines aren't shared with the AEG's (its own class, SN1) | can wait | 2026-11-02 |
 | Menus | With Dev content off, level 7 holds nothing to show (only the dev M140 Spring, SN1): its Armory row and level-up card are bare until the Sniper Rifle goes public | can wait | 2026-11-02 |
 | Art | The Sniper Rifle's model is the AEG's with a longer barrel, a placeholder until the owner's own model from his reference photos (SN1) | document | 2026-11-02 |

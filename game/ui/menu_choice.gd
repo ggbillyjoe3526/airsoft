@@ -102,8 +102,19 @@ func add(b: Button) -> void:
 
 
 func _draw() -> void:
-	if _track != null and not _buttons.is_empty():
-		draw_style_box(_track, Rect2(Vector2.ZERO, size).grow(TRACK_PAD))
+	if _track == null or _buttons.is_empty():
+		return
+	# Round the buttons only: a row stretched wider than them (Custom rules, BP3) keeps its track to their width.
+	var first := _buttons[0]
+	var last := _buttons[-1]
+	var left := first.position.x
+	var right := last.position.x + last.size.x
+	draw_style_box(_track, Rect2(left, 0.0, right - left, size.y).grow(TRACK_PAD))
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_SORT_CHILDREN:
+		queue_redraw()
 
 
 func _on_pressed(index: int) -> void:

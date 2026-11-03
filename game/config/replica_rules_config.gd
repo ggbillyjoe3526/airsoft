@@ -10,6 +10,10 @@ extends Resource
 @export var max_shot_pitch_deg: float = 89.9
 ## A semi trigger press while the replica isn't ready still fires if it gets ready within this (s).
 @export var press_buffer: float = 0.15
+## A bolt-action replica's press this close to the end of its cycle (s) is kept until the cycle ends (BP3): the Fire
+## clip shows the handle home 0.71 s into the cycle, and the M150's runs 1.39 s, so a click after the handle looks home
+## always fires. Earlier clicks lapse as any press does, so a double click never fires twice.
+@export var bolt_press_window: float = 0.7
 ## BBs a burst-mode pull fires, unless the magazine runs dry first.
 @export var burst_shots: int = 3
 ## Muzzle energy scales with (BB weight / factory weight) to this power (a heavier BB takes more of the push).

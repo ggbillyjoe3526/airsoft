@@ -1,26 +1,27 @@
-Task: SN2 · The Variable Scope
+Task: BP3 · Fixes from the bug pass after the Sniper Rifle
 Attempt: 2 of 4
-Head: 300895a (full checks passed on 9472793; after e3ff224 and the clean SN1/origin-main merges only the overlapping tests re-ran, all pass; CI must confirm on this head)
+Head: bcb0325 (brief names no check head; docs/records/BP3.md says tools/check.sh passed; not re-run)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept
-Failed checks, with evidence: none.
-Attempt-1 findings, now fixed:
-1. Wheel zooms only with the sight up: play_session.gd:875 passes `player.aiming and player.armament.zoom_turns()`,
-   player_input.gd:483 still needs cmd.aim too, armament.gd:311 requires `c.aiming` (Aiming.step runs before
-   Armament.step, simulation.gd:154/177, so it is this tick's sight). test_variable_scope.gd:110 fails without the
-   armament.gd:311 gate (aimed=false turn) and checks the wheel gives switch_to 1, zoom_steps 0 mid-reload.
-8. KNOWN_ISSUES.md:14 (6× mouse speed, playtest) and :15 (placeholder model, document) added; vault_state.gd:26-27 wrapped.
-Advisory (not failing):
-- Mid-vault the sight is down (Aiming excludes c.vault.active), so the player's wheel now switches there and
-  Vault's held_zoom_steps (vault.gd:192, :218) is never filled from input; records/SN2.md "Held through a vault"
-  overstates it. Harmless sim-level symmetry; reword the record line or drop the plumbing later.
-- test_variable_scope.gd:129 recomputes the play_session gate itself, so play_session.gd:875 has no direct test.
-- Armament.zoom_now() (armament.gd:156) is still used only by tests.
-Must-fix for the next attempt: none.
-Owner should test in the game (at most 6, one line each):
-- Aim the Variable Scope on the AEG Rifle and the Sniper Rifle; wheel 2× to 6× and back: the glass changes, the click and readout show.
-- Is 6× useful at range on Woodland and The Street, and is the mouse too fast at 6×?
-- From the hip, and aimed through the Red Dot or 2x Scope, the wheel still switches replicas and bombs.
-- Aim held (and with toggle aim), reload, wheel to the pistol: it switches, no zoom click.
-- The zoom holds through lowering, switching away and back and a new round; a new match starts it at 2×.
-- It raises noticeably slower than the 2x Scope (1.9 against 1.6): too slow? The longer model looks right?
+Score: 8/8 → Accept on the code, provided this head's QA and performance reports (pending) pass
+Evidence for attempt 1's two failures:
+1. Fixed. game/sim/armament.gd:453 clears pending_press in _draw, so a bolt-window press (:345) never reaches the
+   slot drawn. tests/unit/test_bp3_qa.gd:44 (click at tick 48, switch at 49) and test_bp3.gd:128 would fire the
+   pistol without :453, as attempt 1's scratch run showed.
+6. Fixed. game/ai/bot_fire_mode.gd:46-50 ends the burst and clears auto_open once sight is lost. AUTO needs auto_open
+   (:50), which only on_burst sets after open_shot passes (:70-78). test_start_mode_bots.gd:204 (re-seen in a
+   doorway, no new burst: SEMI) fails without auto_open.
+Notes (not failing):
+- Residual, also on main: a burst stalled with the target still seen (line of fire blocked by glass or leaves at
+  bot_combat.gd:162, or not ready at :151) keeps burst_left and auto_open, so when it resumes it finishes on full auto
+  wherever the target now stands. This is narrower than attempt 1's case. A KNOWN_ISSUES can-wait row would cover it.
+- A sight loss now zeroes burst_left without a pause, so a re-seen target gets a fresh burst, not the rest of one.
+- docs/wiki/Levels-and-Unlocks.md:50 and docs/records/BP3.md item 10 run past the house line width.
+- Changelog: "bots keep full auto on a target that drops out of sight" undersells the rule. They go back to full auto
+  only when a new burst finds the target in the open.
+Owner should test in the game:
+- Sniper Rifle: click again once the handle looks home: one shot at the cycle's end; a fast double click: one.
+- Shoot the rifle and switch straight to the pistol: it fires only when you click once it's up; switch back: the bolt isn't skipped.
+- Variable Scope at 2x and 6x, and the 2x Scope: does the aimed turn speed feel right?
+- After a crash or Safe graphics: Enter answers the notice, not PLAY; under Settings, BACK is reachable.
+- Settings › HUD at 150 %: the whole panel with its bomb row shows; in a match the panel doesn't jump.
+- Indoors vs bots: semi unless you're in the open down a long line, also after you duck behind cover and step out in a doorway.

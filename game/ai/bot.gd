@@ -150,6 +150,8 @@ var knee_clear: bool = false
 ## the last target it decided for (once per target).
 var auto_for: int = -1
 var auto_rolled_for: int = -1
+## The burst under way found auto_for's target in the open (BotFireMode.on_burst): full auto only then (BP3).
+var auto_open: bool = false
 ## There, on semi: the world time it may next pull (BotFireMode.pull, BotConfig.semi_tap_gap).
 var next_tap: float = -INF
 var strafe_left: float = 0.0
@@ -316,6 +318,7 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	knee_clear = false
 	auto_for = -1
 	auto_rolled_for = -1
+	auto_open = false
 	next_tap = -INF
 	strafe_left = 0.0
 	search_look_left = 0.0

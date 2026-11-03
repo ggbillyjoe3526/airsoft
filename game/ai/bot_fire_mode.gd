@@ -35,14 +35,19 @@ static func pull(b: Bot, w: BotWorld, wants: bool) -> bool:
 static func select(b: Bot, w: BotWorld, target: Character, cmd: PlayerCommand) -> void:
 	if w.start_mode == ReplicaConfig.FireMode.AUTO:
 		return
-	if target == null or not b.target_visible:
-		b.auto_for = -1
 	var a := b.character.armament
 	var v := b.character.vault
 	if a.replicas.is_empty() or v.active or v.held_fire_modes > 0:
 		return
 	var replica := a.replicas[a.active]
-	var wanted := ReplicaConfig.FireMode.AUTO if b.auto_for >= 0 and target != null and b.auto_for == target.id \
+	# Out of sight it goes back to the start mode and ends the burst, but keeps the target's full auto for when the next
+	# burst finds it in the open again (on_burst; BP3: losing sight for a tick behind cover took it for good, the roll
+	# being once per target).
+	var shown := target != null and b.target_visible
+	if not shown and b.auto_open:
+		b.auto_open = false
+		b.burst_left = 0.0
+	var wanted := ReplicaConfig.FireMode.AUTO if shown and b.auto_open and b.auto_for == target.id \
 			else Armament.start_mode(replica, w.start_mode)
 	if a.fire_mode() != wanted and replica.fire_modes.has(wanted):
 		cmd.cycle_fire_mode = true
@@ -62,12 +67,15 @@ static func on_burst(b: Bot, w: BotWorld, target: Character, eye: Vector3, dir: 
 		return
 	if not open_shot(w, eye, dir, target.position):
 		b.auto_for = -1
+		b.auto_open = false
 		return
 	if b.auto_for == target.id:
+		b.auto_open = true
 		return
 	b.auto_rolled_for = target.id
 	if b.rng.randf() < w.cfg.auto_chance:
 		b.auto_for = target.id
+		b.auto_open = true
 
 
 ## Whether a shot from `eye` along `dir` at someone standing at `feet` is the open one full auto is for: `feet` on open

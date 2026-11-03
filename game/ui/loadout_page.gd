@@ -126,13 +126,15 @@ func strip() -> LoadoutStrip:
 	return _strip
 
 
-## True if the game's levelling changed since the page was built (Disable levelling, or what is unlocked).
+## True if the game's levelling changed since the page was built (Disable levelling, Dev content, or what is unlocked).
 func locks_changed() -> bool:
 	return _lock_key != "" and _locks_now() != _lock_key
 
 
 func _locks_now() -> String:
-	return "%s:%d" % [settings.dev.disable_levelling, Progress.shared().unlocked.size()]
+	# Dev content too (BP3): switching it in Settings left the Sniper Rifle and its parts listed, or missing, until the
+	# tab was reopened.
+	return "%s:%s:%d" % [settings.dev.disable_levelling, settings.dev.dev_content, Progress.shared().unlocked.size()]
 
 
 func gear() -> LoadoutGear:

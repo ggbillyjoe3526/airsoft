@@ -108,7 +108,9 @@ func update(c: Character, input: PlayerInput, fraction: float, delta: float, aim
 		_show_torch(c)
 	var r := c.armament.replica()
 	var zoom := lerpf(1.0, aimed_zoom(r, _view), aim)
-	input.zoom = zoom
+	# The turn follows what the eye sees: through a scope's glass that is the glass's zoom (2× to 6× on the Variable
+	# Scope), not the view round it (BP3: Scale with zoom did nothing through a scope).
+	input.zoom = lerpf(1.0, maxf(c.armament.zoom_now(), 1.0), aim) if r != null and r.zoom_in_glass else zoom
 	camera.fov = _view.vertical_fov(zoom)
 
 
