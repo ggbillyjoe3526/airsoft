@@ -183,6 +183,8 @@ var talk: bool = true
 ## Elimination's overtime flag goes up on a map with a spot, as in the game (OV1); off, a clock run out level is a draw
 ## at once, as before it: a match that never reaches overtime plays the same either way.
 var overtime_flag: bool = true
+## The kit each bot of the match being played picked, by character id (MatchTally.kits), for an `each_tick` watch.
+var kits_now: PackedStringArray = PackedStringArray()
 var _kits: BotKits = null
 var _kit_rules: LoadoutRules = null
 var config: BotConfig = null
@@ -298,6 +300,7 @@ func play(seed_value: int, max_seconds: float) -> MatchTally:
 	var bots := BotController.new(state, -1, map, nav, level.query(), tuning, config, levels, identities, talk)
 	bots.world.night = NightField.build(map, config, night)
 	t.kits = kit_names
+	kits_now = kit_names
 	t.hits_by.resize(state.characters.size())
 	t.map_id = map.id
 	t.seed_value = seed_value

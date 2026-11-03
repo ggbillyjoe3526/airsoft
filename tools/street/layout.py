@@ -465,7 +465,9 @@ add("shelter", 2.0, 76.2, 9.0, 77.0)
 box("van", -30.0, 75.05, 5.6, 2.1)
 box("van", 28.0, 75.05, 5.6, 2.1)
 
-# --- The Path: lamps on the verge side (never on the path), a bin
+# --- The Path: lamps on the verge side (never on the path); wheelie bins out mid-Path, the one hop on its 47 m
+# straight from the jog to the kink (SN3: a defender at the jog shot down it at attackers with nowhere to stop)
+box("bins", -10.25, 25.0, 0.7, 1.4)
 for x, z in ((-16.9, -41), (-16.9, -23), (-12.25, 20.5), (-16.25, 58)):
     box("lamp", x, z, 0.2, 0.2)
 # ================================================================ dead space -> pieces

@@ -24,6 +24,14 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## Field of view (degrees, full angle) and how far a bot makes someone out (m).
 @export var fov_deg: float = 120.0
 @export var view_distance: float = 40.0
+## Further, the sniper's reach (SN3; a map's own bot sight, MapData.bot_sight, is 55 to 60 m): a bot fighting with a
+## sight-up replica (the Sniper Rifle) and its sight raised makes people out to at least scoped_view_distance (m; its BBs
+## stay within half a metre of the aim to about 54 to 59 m); and someone whose BB just missed it, or hit a teammate near
+## it, is made out to revealed_view_distance for revealed_for (s), past the farthest a BB reaches (the M150's about
+## 67 m), so a sniper out past its sight can be answered.
+@export var scoped_view_distance: float = 60.0
+@export var revealed_view_distance: float = 70.0
+@export var revealed_for: float = 4.0
 ## Anyone this close is noticed whichever way the bot faces (m): footsteps, breathing, kit. Bushes hide no one this
 ## close.
 @export var close_awareness: float = 2.5
@@ -103,6 +111,10 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## unless its target is within hip_fire_range (m), where a shot from the hip is worth taking.
 @export var aimed_fire_raise: float = 0.9
 @export var hip_fire_range: float = 8.0
+## A bolt-action bot fires past hip_fire_range only once this share of its skill's aim_settle_time has gone (SN3), and
+## through a sniper's raised scope its aim error is this much of the hand's (BotCombat.scoped).
+@export var bolt_settle_share: float = 1.0
+@export var scoped_error_scale: float = 0.5
 ## Swaps a magazine below this share of a full one when nobody is in sight.
 @export var tactical_reload_fraction: float = 0.35
 ## Never fires with a teammate this close to the line of fire (m, beyond their hit volume), widened by this many of the

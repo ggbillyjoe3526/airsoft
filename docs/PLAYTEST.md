@@ -1166,6 +1166,18 @@ The fixes from the second half of the bug pass that need hands on the keys.
 - [ ] **Raise and lower the 2x Scope and the Variable Scope at 6×:** the crosshair shrinks away and comes back
   without a wide flash.
 
+## Sniper balance (SN3)
+
+Dev content on for the rifle. The numbers came from bots; these need you.
+
+- [ ] **The Street, the Path:** the wheelie bins halfway down its straight. Is it a stop you would use going up it, and
+  does it look right where it stands?
+- [ ] **Sniper Rifle at 55 to 65 m, at a bot that hasn't seen you:** miss it on purpose. It turns and answers within a
+  moment, where before it never could see you. Fair, or too quick?
+- [ ] **Against sniper bots (Hard, Dev content on):** their first shot comes once their aim has settled, and through
+  the scope it lands. Dangerous at range, beatable up close?
+- [ ] **Each field at 6v6 with Dev content on:** does any end or side feel stacked once snipers are about?
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
