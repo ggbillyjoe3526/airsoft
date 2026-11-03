@@ -1,37 +1,23 @@
-Task: SN2 · QA commit ac04a2d · Verdict: Pass (after the fix; first run Fail)
+Task: none (AU2) · QA commit see branch qa-au2 head · Verdict: Pass
 
-Blocking
-1. game/sim/armament.gd:146 (zoom_turns) with game/play/first_person_view.gd:118 and game/loadout/loadout_rules.gd:334:
-   a variable optic whose stats.md row says "In the glass: no" and "Zoom to" above "Zoom" (data-legal, e.g. Red Dot with
-   Zoom to 3) gets aim_zoom_to set and zoom_turns() true, so the wheel is taken, the click and "Zoom 3x" readout show,
-   but the view stays at aim_zoom (aimed_zoom reads aim_zoom, never Armament.zooms; only ReplicaView's glass reads
-   zooms). Scenario: edit the Red Dot row, aim, scroll: no switching, no visible zoom. Fix: aim_zoom_to only when
-   zoom_in_glass (loadout_rules.gd:334), or make zoom_turns() require it; or document the column as glass-only.
-   Pinned by test_the_wheel_only_turns_a_zoom_you_can_see.
+Blocking findings: none.
 
-Advisory
-- game/input/player_input.gd:483: the wheel zooms whenever cmd.aim (the button) is held, not when aimed through it
-  (Aiming sets c.aiming false while reloading, drawing, holstered, vaulting). Holding aim through a reload and scrolling
-  zooms the lowered scope instead of switching replica; ignores sprint too. Owner may prefer this; check on play.
-- game/ui/loadout_performance.gd:147: the Customise performance sheet's Zoom figure still reads aim_zoom (2x) for the
-  Variable Scope, while part_options.gd:177 shows 6x; the two disagree and the sheet compare never credits the range.
-- Window scale_with_zoom sensitivity is not scaled by the glass zoom (as the 2x Scope); at 6x aim turns feel fast.
-- pipeline/out/performance.md is modified in the worktree by another agent; not part of my commit.
+Checked, no defect found:
+- Surface enum users: puff colours (11 entries, play_tuning.tres matches), SimAudio SURFACE_NAMES/IMPACT_NAMES (11), ricochet, minimap tint, NoiseConfig.ground (glass 1.35 as metal), MapData.SURFACES (all 10 nameable), MapLevel bodies (sized by Surface.size()), terrain surface_faces(count), JoltQuery clear/railing surfaces. Nothing overflows or falls through to a default for GLASS/PLASTIC/CARDBOARD. Bakes (depot, range) match their blocks (baked-light, depot, range tests pass).
+- Slide lock: SimAudio._emptied reads mag after the tick; one shot per replica per tick, so one lock per last BB. No lock on dry click, auto reload or magazine seat, Cyber Pistol, spring, electric (no slideLock_* file for those profiles). Bots lock too (event driven), same as bolt cycle and dry fire.
+- Whistle: only test_whistle_sound, test_sp3_qa and test_ping_markers pinned rendered bytes; all rewritten. Timing tests (overtime_flag_play, whistle_queue, rg3_qa, sp3_qa) use cfg.whistle_short, pass at 0.3 s. No test or tool calls render_whistle/doors/bolt into assets; render_grenades/others still load their WAV writer fine.
+- Every new wav has its .import file; no orphan .import files.
 
-Tests added (tests/unit/test_sn2_qa.gd, 7 tests)
-- :27 each slot keeps its own zoom (two variable rifles, active 1): checked by assertion on slot 0 staying 2x.
-- :36 a new match resets zoom through Round.start_match: with reset_zooms commented out in round.gd it fails (5 vs 2).
-- :53 top zoom 5.5 turns back down and bottoms at 2x (passes; guards the roundi notch maths).
-- :64 zoom_step 0.5 gives 2.5x and event value 250 (passes).
-- :73 a bot's 0 steps change nothing (passes).
-- :80 wheel only turns a visible zoom: FAILS today (bug 1).
-- :92 Customise top zoom 6x / fixed optic carries none (passes).
+Advisory (not blocking):
+- Bottomless dev cheat never decrements the mag, so the pistol never slide-locks under it (harmless).
+- A silenced gas pistol's slide lock plays at full mechanism gain, like its dry click and magazine sounds (not muffled).
 
-Run: test_sn2_qa + test_variable_scope: 16 tests, 15 passing, 1 failing (bug 1), 100/101 asserts.
-Not run (told not to): tools/check.sh, unit_tests.sh, smoke test. Not testable headless: the glass drawing the live zoom
-(ReplicaView.update), the HUD readout, the click sound, the wheel through a real window; owner should play: aim the
-Variable Scope on AEG and Sniper, scroll 2x-6x, check the glass changes and the readout, hip-scroll still switches.
+Tests added:
+- tests/unit/test_au2_qa.gd:44 · last BB through the real Armament locks once, later dry clicks do not · fails with the SimAudio lock branch removed (0 locks)
+- :51 · auto reload after the last shot adds no second lock
+- :56 · Cyber Pistol, spring and electric profiles never lock
+- :64 · dry click on an empty gas pistol does not lock
+- :69 · every surface MapData can name has a puff, step cue, impact cue and ricochet value
 
-## Re-run after the fix
-
-`aim_zoom_to` is set only for an optic zoomed in its glass (loadout_rules.gd); test_sn2_qa.gd + test_variable_scope.gd + test_customise_parts.gd: 40/40 pass. Verdict: **Pass**.
+Run (touched and neighbour files, 45 scripts): 159 + 96 + 80 + 5 tests, all passing; raw output pipeline/out/qa/au2.txt. Whole suite and tools/check.sh left to the main session.
+Could not test: how the recordings sound/levels (gain 0.45 whistle, 0.2 pip) in play; the owner should listen.
