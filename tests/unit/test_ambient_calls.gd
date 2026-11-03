@@ -131,6 +131,7 @@ func _audio(map: MapData) -> SimAudio:
 	var audio := SimAudio.new()
 	add_child_autofree(audio)
 	audio.setup(cfg, [] as Array[StringName], BodyConfig.new(), null, map)
+	audio.start_ambience() # the match starts it (UF1: silent under the loading screen)
 	return audio
 
 
