@@ -4,10 +4,10 @@ extends RefCounted
 ## under "hud": the crosshair (shape, colour, size, thickness, gap, opacity, dynamic or static spread, outline), the hit
 ## marker (on or off, colour, size), the ammo counter, where the hit feed sits and whether its lines fade or stay, your
 ## team's callouts in it (on or off; a file from before them loads on), the ping markers (on or off, PN2; a file from
-## before them loads on), the magazine hand-off's line and glyphs (on or off, MH3; a file from before them loads on), the
-## navy panels' opacity, how the minimap turns and how close it shows the field (MC1; a file from before it loads 100 %),
-## and the HUD's size. The crosshair's colours leave out blue and orange,
-## the teams'. Each value saved is checked on its own and falls back to its default.
+## before them loads on), the magazine hand-off's line and glyphs (on or off, MH3; a file from before them loads on),
+## the HUD opacity (the replica panel and the minimap), how the minimap turns and how close it shows the field (MC1; a
+## file from before it loads 100 %), and the HUD's size. The crosshair's colours leave out blue and orange, the teams'.
+## Each value saved is checked on its own and falls back to its default.
 
 enum Shape { CROSS, CROSS_DOT, CIRCLE, DOT }
 enum FeedCorner { TOP_RIGHT, BOTTOM_LEFT }
@@ -20,13 +20,14 @@ enum MinimapTurn { ROTATING, FIXED }
 const COLOURS: Array[Color] = [Color("f5f7fa"), Color("5cff6e"), Color("ffe94a"), Color("4af2ff"), Color("ff6ee6"),
 		Color("ff3b30")]
 ## Slider ranges: the crosshair's size, thickness and gap (px at 1080p), its opacity, the hit marker's size (1 = as
-## built) and the panels' opacity (the browser game's CROSSHAIR_RANGES, HIT_MARKER_RANGES and HUD_OPACITY).
+## built) and the HUD opacity (from the browser game's CROSSHAIR_RANGES, HIT_MARKER_RANGES and HUD_OPACITY; the HUD
+## opacity goes down to 20 %, which keeps the panel and the minimap findable).
 const SIZE_RANGE := Vector2(2.0, 16.0)
 const THICKNESS_RANGE := Vector2(1.0, 4.0)
 const GAP_RANGE := Vector2(0.0, 12.0)
 const OPACITY_RANGE := Vector2(0.2, 1.0)
 const MARKER_SIZE_RANGE := Vector2(0.5, 2.5)
-const PANEL_OPACITY_RANGE := Vector2(0.5, 1.0)
+const PANEL_OPACITY_RANGE := Vector2(0.2, 1.0)
 ## The minimap's zoom (MC1, owner 2026-11-01): 1 shows MinimapConfig.view_radius from its middle to its edge, 2 half
 ## that (closer), 0.5 twice it; in steps of MINIMAP_ZOOM_STEP.
 const MINIMAP_ZOOM_RANGE := Vector2(0.5, 2.0)
@@ -57,6 +58,8 @@ var ping_markers: bool = true
 ## The magazine hand-off's line under the crosshair and its glyphs by the chevrons (MH3); off, the hand-off goes on
 ## unshown (the screen reader still reads its notices).
 var mag_hand_off: bool = true
+## The HUD opacity: the replica panel (count, magazines, bombs) and the minimap, words and all, in a match (owner,
+## 2026-11-03).
 var panel_opacity: float = 1.0
 var minimap_turn: MinimapTurn = MinimapTurn.ROTATING
 var minimap_zoom: float = 1.0

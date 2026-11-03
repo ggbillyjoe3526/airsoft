@@ -70,7 +70,7 @@ If the game stutters, lower the preset or the render scale first.
 - **Ammo counter:** off hides every BB count, and each magazine gauge only shows whether it holds BBs.
 - **Hit feed:** top right or bottom left; lines fade after a few seconds, or on **Keep** the last 10 hits stay up all
   match.
-- **HUD opacity** sets how solid the panels are; text stays solid.
+- **HUD opacity** fades the ammo and grenade panel and the minimap in a match, from solid down to 20 %.
 - **HUD size** from 80 % to 150 %. The crosshair and hit marker keep their size.
 - **What got you:** Auto, On or Off ([HUD and Minimap](HUD-and-Minimap#what-got-you)).
 - **Minimap:** Rotating or Fixed, and its **Zoom**, 50 % to 200 % (how close it shows the field).

@@ -136,7 +136,7 @@ func show_prefs(prefs: HudPrefs) -> void:
 	_size_tag.visible = resized
 	_ghosts.visible = resized
 	_ghost_tag.visible = resized
-	HudStyle.restyle(self, prefs.panel_opacity)
+	_panel.modulate.a = prefs.panel_opacity
 	_place_chips()
 
 

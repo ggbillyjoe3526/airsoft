@@ -288,15 +288,16 @@ func test_held_at_the_edge_it_stays_clear_of_the_flag_marker() -> void:
 	assert_almost_eq(marker.position.y, spot_y, 0.5)
 
 
-func test_marker_and_wheel_take_the_panel_opacity() -> void:
+## The HUD opacity is the replica panel's and the minimap's (UR8): the wheel and the hold marker stay solid.
+func test_marker_and_wheel_stay_solid_whatever_the_hud_opacity() -> void:
 	var prefs := HudPrefs.new()
 	prefs.panel_opacity = 0.5
 	hud.apply_prefs(prefs)
-	assert_almost_eq(hud.order_wheel().get_meta(HudStyle.OPACITY) as float, 0.5, 0.001)
-	assert_almost_eq(hud.hold_marker().get_meta(HudStyle.OPACITY) as float, 0.5, 0.001)
+	assert_almost_eq(hud.order_wheel().modulate.a, 1.0, 0.001)
+	assert_almost_eq(hud.hold_marker().modulate.a, 1.0, 0.001)
 	var plate := hud.hold_marker().get_child(0) as PanelContainer
 	var box := plate.get_theme_stylebox("panel") as StyleBoxFlat
-	assert_almost_eq(box.bg_color.a, HudStyle.BACKING_CLOCK * 0.5, 0.001)
+	assert_almost_eq(box.bg_color.a, HudStyle.BACKING_CLOCK, 0.001)
 
 
 # --- no waste ---

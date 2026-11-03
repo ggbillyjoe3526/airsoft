@@ -77,12 +77,6 @@ func setup(cfg: HudConfig, share: MagShare, you: Character, characters: int, col
 	visible = false
 
 
-## The plate's backing at the panels' `opacity` (HudPrefs.panel_opacity), the underlined one's too.
-func set_opacity(opacity: float) -> void:
-	for box: StyleBoxFlat in [_plain, _ruled]:
-		box.bg_color.a = (box.get_meta(HudStyle.BOX_ALPHA) as float) * opacity
-
-
 ## The names by character id, as the feed shows them.
 func set_names(names: PackedStringArray) -> void:
 	_names = names

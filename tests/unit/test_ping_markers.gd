@@ -201,7 +201,8 @@ func test_only_your_teams_pings_show() -> void:
 	assert_true(_marker(BRICK).visible, "a teammate's mark from their call shows")
 
 
-func test_hud_size_and_opacity_apply() -> void:
+## The HUD size applies; the HUD opacity leaves the pings solid (UR8: it is the replica panel's and the minimap's).
+func test_hud_size_applies_and_the_pings_stay_solid() -> void:
 	var prefs := HudPrefs.new()
 	prefs.hud_size = 1.5
 	prefs.panel_opacity = 0.5
@@ -211,9 +212,9 @@ func test_hud_size_and_opacity_apply() -> void:
 	var m := _marker()
 	var at := _camera.unproject_position(Vector3(1.0, _cfg.ping_spot_height, -9.0)) / 1.5
 	assert_almost_eq(m.position + m.pivot_offset, at, Vector2(0.5, 0.5), "placed in the HUD's scaled px")
-	assert_almost_eq(_hud.ping_markers().get_meta(HudStyle.OPACITY) as float, 0.5, 0.001)
+	assert_almost_eq(_hud.ping_markers().modulate.a, 1.0, 0.001)
 	var box := m._edge.get_theme_stylebox("panel") as StyleBoxFlat
-	assert_almost_eq(box.bg_color.a, HudStyle.BACKING_CLOCK * 0.5, 0.001, "the pinned plate's navy")
+	assert_almost_eq(box.bg_color.a, HudStyle.BACKING_CLOCK, 0.001, "the pinned plate's navy")
 
 
 # --- the minimap ---

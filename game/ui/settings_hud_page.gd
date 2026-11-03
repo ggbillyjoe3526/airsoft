@@ -2,10 +2,11 @@ class_name SettingsHudPage
 extends HBoxContainer
 ## The settings' HUD tab (concept `hud-options.png`; the browser game's Settings › HUD and Crosshair): on the left the
 ## crosshair (shape, colour, size, thickness, gap, opacity, dynamic or static spread, outline) and the hit marker (on or
-## off, colour, size); on the right a live preview (HudPreview), the HUD size (marked at 100 %, concept
-## `settings-hud-size.png`), the ammo counter, where the hit feed sits and whether its lines fade or stay, your team's
-## callouts in it (CO2), the ping markers (PN2), the magazine hand-off's line (MH3), the navy panels' opacity and What got you, and the minimap's turn
-## (Rotating or Fixed, drawn as two small samples). Every choice lands in the settings' HudPrefs at once and `changed` asks the screen to save it.
+## off, colour, size); on the right a live preview (HudPreview), the HUD size (marked at 100 %, concept `settings-hud-
+## size.png`), the ammo counter, where the hit feed sits and whether its lines fade or stay, your team's callouts in it
+## (CO2), the ping markers (PN2), the magazine hand-off's line (MH3), the HUD opacity and What got you, and the
+## minimap's turn (Rotating or Fixed, drawn as two small samples). Every choice lands in the settings' HudPrefs at once
+## and `changed` asks the screen to save it.
 
 ## A choice changed: saved now (`immediate`, a click) or a moment after a slider stops.
 signal changed(immediate: bool)
