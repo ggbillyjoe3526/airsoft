@@ -1,12 +1,12 @@
 # UF2 · SWITCH REPLICA takes a click; no double click into Customise; a grace before the skip
 
-**Review:** pending
+**Review:** 1 attempt · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-03 | 1 | Opus 5.5 (build thread) | ✓ | pending | – |
+| 2026-11-03 | 1 | Opus 5.5 (build thread) | ✓ | Accept 8/8 | – |
 
 ## Goal
 
@@ -37,5 +37,7 @@ skipped the round at once; he asked for a 1 or 2 second delay in which a click i
 
 - gdlint clean; `test_uf2_clicks.gd` 8/8 (the four click tests 0/4 before the fix); UF1, loadout, UR3 and every skip
   suite (WG1, What got you, MC1, SM1, UI1, HUD size) pass; four older skip tests now pass the grace first.
+- QA Pass (both parts), performance Pass (both parts), critic Accept 8/8; its nits (the test-only default on
+  `_follow_skip`, the pause test checking only that the session's frames stop) can wait.
 - A real-click run at 1920 × 1080 (Xvfb): SWITCH REPLICA opens for each slot, CLOSE and a replica card take clicks, the
   other slot's replica swaps, a double click leaves Customise shut.
