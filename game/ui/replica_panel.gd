@@ -1,12 +1,13 @@
 class_name ReplicaPanel
 extends VBoxContainer
-## The replica panel, bottom right (UI concept B v2 `hud.png`): a rounded glass panel, everything set to its right
-## edge. At its top the smoke and flash bombs (SF1) as icons (GrenadeGlyph) with how many are left, dimmed at none, the
-## one in hand (MC1) larger on a light chip; then the loaded count and the spare BBs, a box per magazine (MagGauges),
-## and the replica's name with the fire modes it offers as S / B / A chips, the one in use lit. Above the panel two
-## small notes: the hop-up readout while you turn the dial, and the status (reloading, out of BBs, last magazine,
-## holstered, a bomb in hand; nothing while a bomb is thrown). With the HUD tab's ammo counter off there are no counts
-## and each box shows only whether its magazine holds BBs. Text is rebuilt only when what it shows changes.
+## The replica panel, bottom right (UI concept B v2 `hud.png`): a rounded glass panel, set to its right edge but for the
+## magazine boxes. At its top the smoke and flash bombs (SF1) as icons (GrenadeGlyph) with how many are left, dimmed at
+## none, the one in hand (MC1) larger on a light chip; then the loaded count and the spare BBs, a box per magazine
+## (MagGauges) at the panel's left edge, and the replica's name with the fire modes it offers as S / B / A chips, the
+## one in use lit. Above the panel two small notes: the hop-up readout while you turn the dial, and the status
+## (reloading, out of BBs, last magazine, holstered, a bomb in hand; nothing while a bomb is thrown). With the HUD tab's
+## ammo counter off there are no counts and each box shows only whether its magazine holds BBs. Text is rebuilt only
+## when what it shows changes.
 
 ## The panel's width (px at 1080p), its padding (left, top, right, bottom) and the space between its rows.
 const WIDTH := 196.0
@@ -104,7 +105,8 @@ func setup(cfg: HudConfig) -> void:
 	_spare.size_flags_vertical = Control.SIZE_SHRINK_END
 	_gauges = MagGauges.new()
 	_gauges.setup(cfg)
-	_gauges.size_flags_horizontal = Control.SIZE_SHRINK_END
+	# at the panel's left edge, under the name's start (owner, 2026-11-03)
+	_gauges.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	rows.add_child(_gauges)
 	var foot := HBoxContainer.new()
 	foot.mouse_filter = Control.MOUSE_FILTER_IGNORE
