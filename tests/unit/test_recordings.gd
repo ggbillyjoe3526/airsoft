@@ -1,7 +1,7 @@
 extends GutTest
-## The owner's recordings (AU2): every cue they replaced still has its variants, the three surfaces they added (glass,
-## plastic, cardboard) sound as themselves and otherwise behave as the metal and wood they were before, and a gas
-## pistol's last shot locks its slide back.
+## The owner's recordings (AU2, and the placeholders cut from them, AU3): every cue they replaced still has its
+## variants, the three surfaces they added (glass, plastic, cardboard) sound as themselves and otherwise behave as the
+## metal and wood they were before, and a gas pistol's last shot locks its slide back.
 
 const VARIANTS := 5
 ## Cues cut from the recordings with 5 variants and with 3 (tools/cut_recordings.py).
@@ -9,9 +9,10 @@ const FIVE: PackedStringArray = ["shot_gas", "power_gas", "dryFire_gas", "magOut
 		"shot_electric", "dryFire_electric", "magOut_electric", "magIn_electric", "shot_spring", "dryFire_spring",
 		"magOut_spring", "magIn_spring", "shot_cyber", "dryFire_cyber", "magOut_cyber", "magIn_cyber", "reloadRefused",
 		"magRattle", "magToss", "magCatch", "torchClick", "impact_metal", "impact_wood", "bodyHit", "impact_glass",
-		"impact_plastic", "impact_cardboard"]
+		"impact_plastic", "impact_cardboard", "power_spring", "selector", "radio_ack", "steelRing", "vault",
+		"impact_concrete", "impact_earth", "impact_leaves", "draw", "foley_holster", "rope_up", "rope_down"]
 const THREE: PackedStringArray = ["slideLock_gas", "boltCycle", "prop_clank", "prop_rattle", "prop_plastic",
-		"prop_wood", "door_open", "door_shut", "whistle_short", "whistle_long"]
+		"prop_wood", "door_open", "door_shut", "whistle_short", "whistle_long", "prop_steel", "prop_glass"]
 
 var body: BodyConfig = BodyConfig.new()
 var audio: SimAudio = null
@@ -40,6 +41,23 @@ func test_every_recorded_cue_has_its_variants_and_no_more() -> void:
 		assert_eq(_variants(cue), 3, cue)
 	for cue: String in ["count_beep", "ping_pip"]:
 		assert_eq(_variants(cue), 1, cue)
+
+
+func _length(cue: String, n: int) -> float:
+	return (load("%s%s_%d.wav" % [SoundConfig.CUE_DIR, cue, n]) as AudioStream).get_length()
+
+
+func test_the_aegs_motor_runs_longer_under_each_shot() -> void:
+	# AU3, owner: "a bit more of the electric motor whir": 0.16 s a shot (was 0.11).
+	for n in VARIANTS:
+		assert_almost_eq(_length("power_electric", n + 1), 0.16, 0.005, "power_electric_%d" % (n + 1))
+
+
+func test_the_whistles_blasts_last_as_long_as_the_blasts_are_timed() -> void:
+	var cfg := PlayTuning.load_default().sound
+	for n in cfg.whistle_variants:
+		assert_almost_eq(_length("whistle_short", n + 1), cfg.whistle_short, 0.005)
+		assert_almost_eq(_length("whistle_long", n + 1), cfg.whistle_long, 0.005)
 
 
 func test_every_surface_names_a_bbs_cue_and_a_steps_cue() -> void:

@@ -859,6 +859,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   replicas where they fit; "Magazine in/out" and "Metal slide" are the pistol's; the beep is for anything that needs a
   beep; cardboard goes wherever it fits even without a cardboard surface; the gas refill is not used; "empty lock
   back" is the slide locking back on the last shot.
+- **Until the owner records a sound, his recordings stand in for it wherever they can, edited to fit, and each is
+  labelled a placeholder with what to record (owner, 2026-11-03: "reuse any sounds where possible but label them
+  placeholder and keep track of what new sounds i need to record"; "if you need to edit a sound to fit another sound
+  that's OK"; AU3).** The list is `tools/cut_recordings.py --placeholders`. His whistle takes are set aside ("they are
+  bad, my whistle isn't great") for a synthesised pea whistle until he records a better one. The AEG has more of the
+  motor's whir ("a bit more of the electric motor whir"): 3 dB louder, 0.16 s a shot (was 0.11).
 - **A replica's shot follows its power source: electric, gas or spring (owner, 2026-10-03).** An empty AEG still cycles;
   an empty gas pistol only clicks.
 - **Footsteps are information, so gameplay audio comes first (owner, 2026-10-05).** Every ground's step stays within
