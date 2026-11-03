@@ -38,6 +38,9 @@ const DEFAULT_PATH := "res://game/config/play_tuning.tres"
 ## milliseconds of ticks each rendered frame until it ends. The cover is still, so a long frame costs nothing seen: most
 ## of the time goes to ticks (a Woodland tick of ten bots is a few ms).
 @export var skip_budget_ms: float = 50.0
+## Seconds out of the round before a press of the trigger can skip it (owner, 2026-11-03: the clicks of the fight that
+## put you out skipped the round at once). The skip hint shows once it can.
+@export var skip_grace: float = 1.5
 ## With the loading screen's Continue (MC1): the longest (s) the shaders' warm-up may keep it hidden after the match is
 ## first drawn.
 @export var go_fallback: float = 10.0

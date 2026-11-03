@@ -1,38 +1,24 @@
-# Performance report: UF1 (4b10288..f7f819a)
+# Performance report: UF2 (9965b76)
 
-Verdict: **Pass**. No baseline yet (pipeline/perf-budget.json has no lines); judged by reading the diff against the
-targets. I did not run the --perf bot match (another process is running the checks); the diff touches UI only.
+Verdict: **Pass**. No `--perf` match run: the diff touches no in-match code, only the Loadout's card build. Judged by
+reading the diff against the targets (no baseline yet).
 
-## Hot paths
-- Hud.update (hud.gd ~925-935): adds `board`, `set_covered(board)`, `_middle.visible = ...` per frame. All are bool
-  and property sets. `Control.visible` returns early when the value is unchanged, so no redraw or notification. No
-  array, string, Callable or node lookup. Pass.
-- HudRoundResult.update/set_covered: bool early-out, `visible = false` is a no-op once hidden. The table is refilled
-  once on uncover (the `not visible` branch), not per frame. Pass.
-- HudMinimap.View._draw (hud_minimap.gd ~527): `Color(1,1,1,opacity_of(self))` is a value type, one get_meta (a
-  dictionary lookup) per redraw. No heap allocation. The extra modulate arg to draw_texture_rect/draw_texture costs
-  nothing. _draw runs on queue_redraw, which is already per frame in play. Minor: the same get_meta is done in
-  backing_on just above, so two lookups per draw. Negligible.
-- HudMinimap ring _draw (hud_minimap.gd ~234): one Color and four draw_rect on redraw only. Pass.
+- `game/ui/loadout_gear.gd`: the two `mouse_filter` sets run once per card at build time, not per frame; no allocation.
+- Removing `_double_click` and its `card.gui_input` connection drops a bound Callable per card and a handler that ran
+  on every mouse event over the card. Nothing left connected or unfreed.
+- `customise_requested` is still emitted by CUSTOMISE and connected in `loadout_page.gd`.
+- `tests/unit/test_uf2_clicks.gd` is test-only and does not ship.
 
-## restyle on opacity change
-- apply_prefs calls HudStyle.restyle(_replica) and (_minimap) only inside `not is_equal_approx(...)`, so once per
-  change, not per frame. Slider drag fires it per step: it walks the subtree (get_children allocates an array per
-  node, plus queue_redraw on each) for two small subtrees. Acceptable for a settings interaction. setup_minimap calls
-  it once. Pass.
+No blocking or advisory findings.
 
-## Node and resource lifetime
-- LoadoutSwitch (loadout_switch.gd): built once in LoadoutGear (`_switch = LoadoutSwitch.new(...)`, add_child) and
-  freed with its parent. open/close only toggle `visible`, with no per-open instantiate, tween or timer. refresh()
-  runs per loadout change (not per frame) and reuses the card, picture and label nodes, with no new nodes. The
-  `.bind`/lambda connections are made once at build. No duplicate signal connections found. The old SWAP row's cards
-  moved here, so the node count is roughly unchanged. Pass.
-- ArmoryDots (armory_dots.gd): draw_arc (32 segments) and a draw_rect for the picked dot, on redraw only, with
-  queue_redraw on click. No allocation beyond draw commands. Pass.
-- SimAudio: start_ambience loops `_beds` and calls play() only if not playing (idempotent). It is called from
-  _ready, `_process` (guarded by `_first_frame_due`, once) and go(). No new players, no leak. Pass.
-- NavRail, settings page moves, HudTable size constants: layout only. Pass.
+## Part 2: skip grace (ee0eb5a)
 
-## Not measured
-Draw calls and frame times need a rendered run on the owner's hardware. Nothing in the diff adds a draw item per
-frame beyond the single ring and picked-dot marks.
+Verdict: **Pass**. No `--perf` run: the change is one float add per frame (no baseline yet; judged by reading the diff).
+
+- `game/play/play_session.gd:1418`: `_follow_skip(delta)` does a float add, a compare and two bool ops per frame; no
+  Array, String, Callable or node allocation. `_out_for` (line 216) is a plain float; nothing to free or disconnect.
+- `set_skip_hint(ready)` is called each frame as before; its cost is unchanged from Part 1's baseline behaviour.
+- `skip_grace` is a typed `@export` on `PlayTuning` read from the cached `_play`; no per-frame load.
+- The count runs in `_process`, so skip's own fast tick loop does not touch it (`can` is false while `_skipping`).
+
+No blocking or advisory findings.

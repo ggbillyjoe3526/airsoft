@@ -211,6 +211,9 @@ var _rematch_left: float = -1.0
 ## whether the trigger was up once you could skip (a press made before does not count); the cover and its line.
 var _skipping: bool = false
 var _skip_armed: bool = false
+## Seconds you have been able to skip (out, the round live), counted while the match plays: the trigger skips only
+## after PlayTuning.skip_grace (UF2).
+var _out_for: float = 0.0
 var _skip_cover: ColorRect = null
 var _skip_note: Label = null
 var _skip_clock_shown: int = -1
@@ -1118,7 +1121,7 @@ func _process(delta: float) -> void:
 		_follow_hold(delta)
 	if _skipping:
 		_show_skip_clock()
-	_follow_skip()
+	_follow_skip(delta)
 	_watch_frame(delta)
 	# Once the field's shaders are warm and the match runs: the warm-up's slow frames are no player's, nor a skip's long
 	# frames under its cover.
@@ -1408,12 +1411,16 @@ func skipping() -> bool:
 	return _skipping
 
 
-## The hint while you can skip; the trigger let go once you can arms it, so a fresh press skips (`_unhandled_input`).
-func _follow_skip() -> void:
+## The hint once you have been out `PlayTuning.skip_grace` seconds (`delta` of them pass this frame); the trigger let
+## go after that arms it, so a fresh press skips (`_unhandled_input`).
+func _follow_skip(delta: float = 0.0) -> void:
 	var can := can_skip() and not _skipping
-	_hud.set_skip_hint(can)
+	_out_for = _out_for + delta if can else 0.0
+	# the clicks of the fight that put you out don't skip the round: none counts until the grace has passed
+	var ready := can and _out_for >= _play.skip_grace
+	_hud.set_skip_hint(ready)
 	# Only a press made once you can skip counts: the trigger held through the hit, or through a pause, does not.
-	_skip_armed = can and (_skip_armed or not _input.skip_held())
+	_skip_armed = ready and (_skip_armed or not _input.skip_held())
 
 
 ## Skips the rest of the round: it is played out at once (`_play_out`) under the cover with "Skipping the round" on
