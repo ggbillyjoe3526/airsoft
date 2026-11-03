@@ -1,7 +1,7 @@
 extends SceneTree
 ## The Sniper Rifle's synthesised cocking draft (SN1), kept for reference since the game plays the owner's recordings
-## (AU2, tools/cut_recordings.py): rendered as boltCycle_<n>.wav to the folder named after `--`, each variant from its own seeded noise and a slightly moved pitch. A spring rifle is cocked by hand after
-## every shot: the charging handle drawn back over the spring (a plastic scrape, the spring's rising zing under it, the
+## (AU2, tools/cut_recordings.py): rendered as boltCycle_<n>.wav to the folder named after `--`, each variant from
+## its own seeded noise and a slightly moved pitch. A spring rifle is cocked by hand after every shot: the charging handle drawn back over the spring (a plastic scrape, the spring's rising zing under it, the
 ## sear's click as it catches), then let go to snap home (a hollow plastic clack). Timed to the model's Fire clip
 ## (tools/blender/replicas/sniper.py: back from 0.29 s to 0.50 s, home at 0.71 s). A toy's plastic, not a rifle's steel.
 ## No display needed:

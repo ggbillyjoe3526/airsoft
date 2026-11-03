@@ -61,7 +61,7 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
 
 ## Made by the project
 
-- **The owner's recordings** (AU2, 2026-11-03): 36 recordings William made himself at home (a gas pistol, a motor's
+- **The owner's recordings** (AU2, 2026-11-03): 36 recordings William made himself (a gas pistol he recorded, a motor's
   whir, BBs on metal, wood, glass, plastic, cardboard and cloth, knocks on shelves, a crate and wood, a door, a pea
   whistle, a digital thermometer's beep, a pouch, a torch, a magazine thrown and caught). The originals are in the
   shared project files (`audio/william/raw/`), not the repository; `tools/cut_recordings.py` cuts, cleans and levels

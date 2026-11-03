@@ -53,8 +53,8 @@ no power source fits it, and no part fits it either. It wears its own white, cya
 
 Every replica's shots, dry clicks and magazines are real recordings: a gas pistol, an electric motor's whirr and
 hands on magazines, recorded for the game. You can tell them apart by ear: the AEG Rifle's motor whirr, the GBB
-Pistol's gas pop and slide, and the Cyber Pistol's short buzz. BBs sound different on metal, wood, glass, plastic, cardboard and on a player, so you hear
-what a shot hit.
+Pistol's gas pop and slide, and the Cyber Pistol's short buzz. BBs sound different on metal, wood, glass, plastic,
+cardboard and on a player, so you hear what a shot hit.
 
 ## BB weight
 
