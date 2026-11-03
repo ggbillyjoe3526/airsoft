@@ -117,7 +117,8 @@ railway embankment at the north end and attackers on the Bottom street at the so
 - **The left road** behind the west terrace's back gardens: parking bays, a van, roadworks and a removal lorry break
   up its long view.
 - **The Path** down the middle, between the fronts of the two terraces and their railed front gardens (the West and East gardens). Most front
-  gates are shut; three are open, each a pocket to hold. It steps sideways at the Green corner and the Path kink.
+  gates are shut; three are open, each a pocket to hold. It steps sideways at the Green corner and the Path kink, and
+  wheelie bins put out halfway down its long straight give you somewhere to crouch.
 - **The back lane** behind the east terrace, with an electricity kiosk, a van, a bin store, bins and a skip, and **the
   right road** beyond the old works, with a delivery jam halfway down.
 

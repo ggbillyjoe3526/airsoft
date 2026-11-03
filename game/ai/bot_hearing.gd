@@ -84,6 +84,12 @@ static func _hit_call(e: GameEvent, w: BotWorld) -> void:
 	if flat.length() > 1e-6:
 		flat = flat.normalized() * back
 		guess -= Vector3(flat.x, 0.0, flat.y)
+	# Teammates within earshot of the call look for the shooter out to the sniper's reach (SN3).
+	for b in w.bots:
+		var c := b.character
+		if c.team == victim.team and c != victim and Elimination.is_in_play(c) \
+				and c.position.distance_to(victim.position) <= w.cfg.hearing_distance:
+			reveal(b, shooter, w)
 	_hear(w, shooter, victim.position, victim.position, w.cfg.hearing_distance, null, guess, true)
 
 
@@ -99,6 +105,7 @@ static func _near_miss(e: GameEvent, w: BotWorld) -> void:
 		b.suppressed_at = w.time
 		b.last_threat_at = w.time
 		if shooter != null and Elimination.is_in_play(shooter):
+			reveal(b, shooter, w)
 			_hear(w, shooter, b.character.position, shooter.position, INF, b)
 
 
@@ -184,3 +191,10 @@ static func _character(w: BotWorld, id: int) -> Character:
 		if c.id == id:
 			return c
 	return null
+
+
+## Bot `b` was shot at by `shooter` (or a teammate by it was hit): it makes the shooter out to
+## BotConfig.revealed_view_distance for revealed_for (BotSenses.sight_reach), so a sniper past its view is answered.
+static func reveal(b: Bot, shooter: Character, w: BotWorld) -> void:
+	b.revealed_id = shooter.id
+	b.revealed_until = w.time + w.cfg.revealed_for

@@ -1,20 +1,38 @@
-Task: BP3B · QA commit uncommitted (working tree on 6b24db5) · Verdict: Pass
+Task: SN3 · QA commit not committed (tests staged only, left to the caller) · Verdict: Pass
 
-Blocking: none.
+Blocking findings: none.
+Advisory findings:
+- game/ai/bot_hearing.gd (_hit_call reveal loop): teammates within hearing_distance of the victim are given the shooter
+  whatever the shooter's distance. Harmless (the reach is 70 m, and the bot must still face, see and light the target),
+  but a shooter 150 m away is still "revealed". Can wait.
+- game/ai/bot_combat.gd bolt_waits: the wait restarts whenever a contact lapses past contact_grace, so a sniper bot
+  peeking in and out never fires on a flicker. It cannot hold for good: settling grows with the clock for as long as the
+  contact lives, and with no contact there is no wait. Intended; only a feel check.
+- The Street lane 2 waypoints run straight over the new bins (x -10, z 30 to 5); nav routes round them (tested), so
+  no stuck bot, but the bins are in the line a middle-lane bot walks. Feel check only.
 
-Advisory:
-- docs/PLAYTEST.md:871 still quotes the old refusal "Nobody near has a mag to spare"; the BP3B change makes it "Nobody near has a spare mag that fits" (en.po, the wiki and test_mag_hand_off_hud.gd are updated). Docs-only fix.
-- game/ui/quit_prompt.gd:14-18: the new GROUP const was inserted between the doc comment for SHADE_ALPHA/WIDTH/PAD ("The shade over the screen ... px at 1080p") and its constants, so that comment now sits over GROUP. Cosmetic; move GROUP above it.
-- test_bp3_menus.gd:60 (crosshair) only pins that FirstPersonView.view_zoom exists and differs from input.zoom; it does not pin the PlaySession wiring (reverting game/play/play_session.gd:1171 to _input.zoom left it green). Covered by my test below.
-- test_bp3_menus.gd:46 (Settings to ARMORY) passes if anything visible has focus, a weak pin; it does fail without the main.gd change (null focus), so it stands.
-- Looked for the same "_unhandled_input runs before the prompt's _unhandled_key_input" leak elsewhere: game/ui/menu_screen.gd:263 (Loadout key while in practice) and game/main.gd:560 read keys too, but QUIT GAME? cannot open while a PlaySession exists (main.gd ask_quit guard), so it is not reachable. No other menu page reads plain keys.
+What I hunted and found sound:
+- Reveal across rounds: Bot.reset clears revealed_id/revealed_until, and RoundPlanner resets every bot each round; a new
+  match builds new bots.
+- Shooter already out: a near miss and a hit call both check Elimination.is_in_play(shooter); a dead teammate, a victim's
+  out-of-earshot teammate and a friendly hit get no reveal.
+- Night and dazzle: sight_reach only lengthens the range; visible_part still applies dazzle, made_out (night) and the
+  FOV and line checks, so a revealed sniper in the dark or a dazzled bot is still unseen.
+- Bolt wait: bounded for easy/normal/hard (fires once reacted plus aim_settle_time x bolt_settle_share); no contact, no wait.
+- Bins: solid in nav, 1.4 m clear on each side of the 3.5 m Path, routes from (-10,30) to (-10,5) avoid the footprint, and
+  every Alpha spawn reaches every Beta spawn.
 
-Checked, no bug found: pause menu close() with Settings open (closed signal restores focus modes), repeated open/close of Settings (modes restored each time, none left at FOCUS_NONE), the Loadout chip refresh, view_zoom unchanged for iron/optic sights (equals the old input.zoom outside glass scopes) and while spectating, state.dev_content set at PlaySession start for dev maps and dev kits, and the run's helped flag (never a best, same as off_record).
+Tests added, tests/unit/test_sn3_qa.gd (11 tests, 87 asserts, all pass):
+- test_a_new_round_clears_a_reveal · Bot.reset · fails with the two reset lines removed from bot.gd (checked).
+- test_a_shooter_already_out_is_not_revealed_by_a_near_miss / _by_a_hit_call · is_in_play guards · the hit-call one fails with
+  the shooter guard removed (checked); the near-miss one pins the existing guard.
+- test_a_hit_call_out_of_earshot_or_on_a_dead_teammate_reveals_nothing · fails with the teammate in-play guard removed (checked).
+- test_a_friendly_hit_reveals_nobody, test_a_reveal_does_not_see_through_a_dazzle, test_a_reveal_does_not_see_past_the_dark
+  · fail without the feature only in the sense that a reveal bypassing dazzle or night would break them (not mutated).
+- test_the_bolt_wait_always_ends, test_a_bolt_bot_with_no_contact_does_not_hold_fire · bolt_waits is finite for three skills.
+- test_the_path_bins_leave_the_path_walkable_both_sides_and_end_to_end, test_every_spawn_still_reaches_the_other_end_of_the_street
+  · nav on the regenerated street.json; fail if the bins sealed the Path or a spawn.
 
-Tests added/changed:
-- tests/unit/test_bp3b_qa.gd:30 · PlaySession with the Sniper Rifle + 2x Scope, aim_raise 0.4: the HUD's crosshair gap equals the gap for FirstPersonView.view_zoom and differs from the glass zoom (input.zoom) · fails with play_session.gd reverted to origin/main (gap 21.2 vs 16.36).
-- Reviewed worker tests, each run against a copy of the tree with game/ reverted to origin/main: test_bp3_menus pause-menu focus test fails 8 asserts (focus mode FOCUS_ALL) with pause_menu.gd reverted; Settings-to-ARMORY test fails (no focus owner) with main.gd reverted; the crosshair test errors with first_person_view.gd reverted; the GROUP test cannot compile without quit_prompt.gd (parse error); test_loadout_screen 1-5 hold fails with loadout_page.gd/quit_prompt.gd reverted; test_range_challenge dev-content-never-a-best fails with simulation.gd reverted; test_mag_hand_off_hud fails with en.po reverted. test_practice_spots (The Street) is a coverage addition, no production change.
-
-Runs (working tree): test_bp3_menus 4/4, test_loadout_screen 26/26, test_range_challenge 20/20, test_practice_spots 15/15, test_mag_hand_off_hud 24/24, test_pause_menu 16/16, test_bp3b_qa 1/1. All green. Whole suite and smoke test not run (tools/check.sh was running separately).
-
-Could not test (needs a display / hands on keys; already in the PLAYTEST BP3B list): real Tab/Enter focus walk under Settings, the real keypress ordering behind QUIT GAME?, and how the crosshair looks while raising a scope. Add: rebind the Loadout key in the pause menu's Settings and check the chip.
+Runs (single files, all green): test_sn3_qa 11/11, test_pn1_qa 4/4, test_sniper_rifle 11/11, test_night_sight 12/12 (20 s).
+Not run, as instructed: test_street, test_field_layout, test_bp3_balance, tools/check.sh, the smoke test.
+Not testable here: how the bins and the 4 s reveal feel to play, and the sniper-bench balance figures (owner's playtest list).

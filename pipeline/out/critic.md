@@ -1,26 +1,25 @@
-Task: BP3B · The full-game bug pass's fixes after the Sniper Rifle
+Task: SN3 · Balancing the Sniper Rifle, its springs and the Variable Scope
 Attempt: 2 of 4
-Head: 6b24db5 plus the uncommitted working tree (tools/check.sh still running: gdlint, changelog, wiki passed so far; not re-run here). This verdict holds only once check.sh is green on this tree.
+Head: 704372c (= origin/main) plus the staged tree; the brief gives no tools/check.sh result for it (QA ran single test files), so this Accept holds only once tools/check.sh is green on the pushed head
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
 Score: 8/8 → Accept
-QA (pipeline/out/qa.md) and performance (pipeline/out/performance.md) both say Pass for this tree, with no blocking findings.
-Evidence:
-1. All six fixes are in the diff. pause_menu.gd:376,384-394: FOCUS_NONE under Settings, restored on close, and the Loadout chip is refreshed. loadout_page.gd:242 with quit_prompt.gd:16,97. main.gd:204,213. simulation.gd:198-200 (`or state.dev_content`). first_person_view.gd:23,117 with play_session.gd:1171. en.po:2043.
-2. No contract changed. The sim reads a state flag, and the HUD reads a view float.
-3. Nothing is allocated per frame or per tick. The array literal at pause_menu.gd:392 runs only when Settings opens or closes. The group count at loadout_page.gd:242 runs once per key event and builds no array. The view_zoom store is a float.
-4. I read test_range_challenge.gd:399: without the simulation.gd change, `helped` stays false and the test fails. QA reverted game/ for each worker test and saw each one fail. test_bp3b_qa.gd:30 now pins the PlaySession wiring that test_bp3_menus.gd:60 missed.
-5. Everything is typed. There are no new gameplay literals and no new global state. The group is a const StringName on the class that joins it.
-6. The changes are fixes and one clearer refusal line. No tone or pillar issue.
-7. Attempt 1's failure is fixed. quit_prompt.gd:14-16: GROUP and its doc now sit above the shade block, and SHADE_ALPHA/WIDTH/PAD/RULE keep their own doc.
-8. The scope is Beta fixes only. KNOWN_ISSUES has two new can-wait rows and the stale ones swept. PLAYTEST:871's quote is updated and the Loadout-chip check added (PLAYTEST:1162). The wiki line and the changelog note are there. Practice-Range.md needs no change.
-Notes (not failing):
-- Two added doc lines run past the 120-column house width: PLAYTEST.md:871 and wiki/Squad-Orders.md:69. Rewrap them when convenient.
-- New code comments cite "(BP3)", not BP3B: first_person_view.gd:21, simulation.gd:198, quit_prompt.gd:14, pause_menu.gd:376. The record frames this as BP3's second half, so the comments read correctly.
-- docs/records/BP3B.md still says `**Review:** pending` and its attempts row shows "–". Fill both in the records push.
-Owner should test in the game:
-- In a match: Esc, Settings, Tab many times, then Enter. Nothing behind the settings resumes or quits.
-- On the range: Esc, Settings, rebind Loadout, BACK. The pause menu's Loadout chip shows the new key.
-- On the Loadout page: Esc for QUIT GAME?, then press 2. Nothing changes behind the prompt; after Cancel, 2 switches.
-- From Settings, go to ARMORY by the rail with the keyboard. Focus lands on something you can see, and the arrow keys move from it.
-- Raise and lower the 2x Scope and the Variable Scope at 6×. The crosshair shrinks and comes back without flaring wide.
-- Practice: a Timed run with the Sniper Rifle sets no best. A stock AEG run still keeps its best.
+Attempt 1's points, answered:
+- Fields: Attack / Defend is now measured on all three at 6v6 (docs/records/SN3.md:39-40), all in band with snipers; Depot's 67 % without them is a new KNOWN_ISSUES row. Depot's 42 and 59 are worded against the band and the ±6-point noise (:38-39). Woodland 7v7/8v8 is the known WOODLAND78 placeholder (:38), waived by the brief; fill it or note the rows as lost before the push.
+- Tags: every new line and file reads SN3 (test_sn3_balance.gd, bot_config.gd:27, bot_hearing.gd:87, layout.py:468) but one: tests/unit/test_sn3_qa.gd:2 "(SN3 / BP3)".
+- Null guard: bot_combat.gd:199 now guards armament as fights_aimed does.
+- tests/README.md:9 names sniper_bench.gd and its command line.
+- QA (pipeline/out/qa.md) and performance (pipeline/out/performance.md) both report on SN3 and Pass.
+Verified, no finding:
+- Check 4: test_a_near_miss_reveals_the_shooter_for_a_while fails without reveal (sight_reach stays view_distance, visible_part 0 at 65 m).
+- Hot paths: sight_reach, scoped, bolt_waits and the _hit_call loop are scalar work with no allocation; _hit_call returns early on a null or out shooter, so reveal never gets a null.
+- New tuning is BotConfig exports; no contract changed; the changelog's "(dev content)" heading matches sniper-rifle.md and variable-scope.md.
+Advisory (not failed):
+- After the bins, The Street with the shipped kits was re-run at 6v6 only (SN3.md:55); the KNOWN_ISSUES row still quotes TS1's pre-bins 16-seed figures for the other sizes. Worth a 16-seed run at 5v5, 7v7 and 8v8 when the guards next run.
+- Records push: fix test_sn3_qa.gd:2's tag, add attempt 2's row (attempt 1: 5/8 Retry, with its reason) and fill the Review line.
+Owner should test in the game (at most 6, one line each):
+- From 60 to 65 m with the Sniper Rifle, miss a bot on purpose: does it turn and answer fairly, not instantly?
+- After that reveal, AEG bots have no range gate and may pour BBs at you that fall short for 4 s: fun, or silly?
+- Hard sniper bots at range: the first shot comes late but lands; beatable by closing in or flanking?
+- The Street, the Path bins at mid-straight: a stop you'd use going north, and does it read as cover?
+- The Street with Dev content off: does the north end still feel stronger, or did the bins even it up?
+- Each field at 6v6 with Dev content on: any end that feels stacked?

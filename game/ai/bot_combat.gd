@@ -35,6 +35,10 @@ static func aim(b: Bot, w: BotWorld, target: Character, eye: Vector3, walking: b
 		var since := BotAim.settling(w.time, b.contact, cfg)
 		var first := BotAim.first_error_size(since, dist, b.skill)
 		var error := BotAim.error_size(since, walking or cmd.right != 0.0, dist, sideways, b.skill)
+		if scoped(b, cfg):
+			# Through a sniper's scope the hand's wander is finer (SN3): one shot a cycle has to count.
+			error *= cfg.scoped_error_scale
+			first *= cfg.scoped_error_scale
 		return BotAim.step(b, BotAim.look_yaw(eye, point), BotAim.look_pitch(eye, point), error - first, first, cfg, dt)
 	_look_yaw = b.aim_yaw
 	_look_pitch = 0.0
@@ -158,6 +162,8 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 	if fights_aimed(b.character) and b.character.aim_raise < cfg.aimed_fire_raise and dist > cfg.hip_fire_range:
 		# Its sight still coming up, and the target too far for a shot from the hip: wait for the sight.
 		return
+	if bolt_waits(b, w, dist):
+		return
 	if _line_of_fire_blocked(b, w, eye, dir, dist):
 		# Seen through glass or leaves it can't shoot through (BQ1): counted, so it goes round in time.
 		b.no_shot_for = b.no_shot_for + dt if _level_in_line else 0.0
@@ -183,6 +189,21 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 			b.pause_left = b.pick(b.skill.burst_pause)
 	else:
 		b.pause_left -= dt
+
+
+## Whether bot `b`, with a bolt-action replica in hand and its target `dist` m away past hip_fire_range, holds its shot
+## until its aim has settled (BotConfig.bolt_settle_share of its skill's aim_settle_time; SN3): one shot, then a long
+## cycle, and its first aim is off to one side on purpose so a burst walks on.
+static func bolt_waits(b: Bot, w: BotWorld, dist: float) -> bool:
+	var cfg := w.cfg
+	var in_hand := b.character.armament.replica() if b.character.armament != null else null
+	return in_hand != null and in_hand.bolt_action and dist > cfg.hip_fire_range and b.contact != null \
+			and BotAim.settling(w.time, b.contact, cfg) < b.skill.aim_settle_time * cfg.bolt_settle_share
+
+
+## Whether `b` aims through a sniper's raised scope (a sight-up replica, sight raised): BotConfig.scoped_error_scale.
+static func scoped(b: Bot, cfg: BotConfig) -> bool:
+	return fights_aimed(b.character) and b.character.aim_raise >= cfg.aimed_fire_raise
 
 
 ## Whether `c`'s replica in hand is fought with its sight up (a hip spread: the Sniper Rifle, SN1).

@@ -109,6 +109,18 @@ static func sees_spot(viewer: Character, spot: Vector3, range_m: float, w: BotWo
 			and smoke_clear(w, eye, chest)
 
 
+## How far bot `b` makes `target` out (m): view_distance, further through a raised sniper's scope, and further still for
+## someone who just shot at it or a teammate by it (BotConfig.scoped_view_distance, revealed_view_distance; SN3).
+static func sight_reach(b: Bot, target: Character, w: BotWorld) -> float:
+	var cfg := w.cfg
+	var reach := cfg.view_distance
+	if BotCombat.scoped(b, cfg):
+		reach = maxf(reach, cfg.scoped_view_distance)
+	if b.revealed_id == target.id and w.time < b.revealed_until:
+		reach = maxf(reach, cfg.revealed_view_distance)
+	return reach
+
+
 ## Updates what bot `b` sees: the nearest enemy in sight becomes its target, though it stays on the current one while
 ## that one is in sight and no other is clearly nearer. Someone not seen for contact_grace is a new contact: its reaction
 ## delay and aim settling start over. Hearing never counts as contact.
@@ -124,7 +136,7 @@ static func perceive(b: Bot, w: BotWorld) -> void:
 		var d := _flat(me.position, other.position)
 		if d >= best_d:
 			continue
-		var part := visible_part(me, other, w)
+		var part := visible_part(me, other, w, sight_reach(b, other, w))
 		if part > 0.0:
 			best = other
 			best_part = part
@@ -132,7 +144,7 @@ static func perceive(b: Bot, w: BotWorld) -> void:
 	if best != null and best.id != b.target_id and b.target_id >= 0:
 		var cur := _character(w, b.target_id)
 		if cur != null and Elimination.is_in_play(cur) and _flat(me.position, cur.position) - best_d < cfg.target_switch_margin:
-			var part := visible_part(me, cur, w)
+			var part := visible_part(me, cur, w, sight_reach(b, cur, w))
 			if part > 0.0:
 				best = cur
 				best_part = part

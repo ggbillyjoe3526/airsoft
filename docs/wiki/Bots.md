@@ -14,6 +14,9 @@ Bots know only what they see and hear:
   pop](Grenades). Walls muffle what they hear. **Walking and
   moving crouched are silent**, so you can sneak up on a bot that hasn't seen you.
 - A rattling hi-cap magazine gives you away to bots close by, and a silencer halves how far your shots carry.
+- They see about 55 to 60 m by day, depending on the field. A BB that lands by a bot, or hits its teammate close to
+  it, gives the shooter away: for a few seconds the bot makes them out to 70 m, so a long shot from out of sight is
+  answered.
 - They react after a moment, and their aim settles before it is steady. They never fire with a teammate in the way,
   or where a teammate could step into the shot before the BBs arrive.
 

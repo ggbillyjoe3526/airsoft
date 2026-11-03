@@ -154,6 +154,10 @@ var auto_rolled_for: int = -1
 var auto_open: bool = false
 ## There, on semi: the world time it may next pull (BotFireMode.pull, BotConfig.semi_tap_gap).
 var next_tap: float = -INF
+## Who last shot at it or its teammate from where it could tell (SN3: a near miss or a hit call), made out to
+## BotConfig.revealed_view_distance until the world time revealed_until (-1: nobody).
+var revealed_id: int = -1
+var revealed_until: float = -INF
 var strafe_left: float = 0.0
 var strafe_dir: int = 1
 
@@ -320,6 +324,8 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	auto_rolled_for = -1
 	auto_open = false
 	next_tap = -INF
+	revealed_id = -1
+	revealed_until = -INF
 	strafe_left = 0.0
 	search_look_left = 0.0
 	flanking = false
