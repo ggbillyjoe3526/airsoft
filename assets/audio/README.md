@@ -11,6 +11,14 @@ takes and level). Re-cut with `python3 tools/cut_recordings.py <raw folder>`, th
 A gas pistol's shot is split where its crack gives way to the slide and the gas: the crack is `shot_gas`, the rest its
 power part `power_gas`, so the two together are the recording.
 
+**Placeholders** (AU3, 2026-11-03): until the owner records them, 25 cues are his recordings reused, re-pitched,
+filtered or sliced (the Sniper Rifle's and the Cyber Pistol's sounds, the AEG's magazine, the spring's twang, the
+selector, the radio, the steel ring, the vault, the draw, the holster, the flag rope, BBs on concrete, soil and
+leaves, the steel skip and glass props), and the whistle is a synthesised pea whistle (his takes are set aside: "my
+whistle isn't great"). The script labels each one with what to record; `python3 tools/cut_recordings.py <raw folder>
+--placeholders` prints them, and those still synthesised, as tables. The owner's plain status of every sound is in the
+shared project files, `audio/sound-status.md` (keep it current with every audio change).
+
 Everything below that the recordings didn't replace is still the browser game's synthesis:
 
 Every sound the browser game synthesised, rendered once to WAV (16-bit mono, 44.1 kHz) from its recipes
@@ -24,9 +32,9 @@ seeds the browser game used, so they sound as they did.
   imported to loop. They render far above full scale (the browser played them as float through a small gain), so each
   is stored normalised to its peak, and `loops/peaks.json` records that peak: play a loop at the browser game's gain
   times its peak to hear it at the browser's level.
-- `cues/whistle_short_<n>.wav`, `whistle_long_<n>.wav` and `ping_pip_1.wav`: recorded since AU2 (above). The
-  synthesised draft (the browser game's live pea whistle and its beep) still renders with `tools/render_whistle.gd`,
-  only to a folder named after `--`.
+- `cues/whistle_short_<n>.wav`, `whistle_long_<n>.wav` and `ping_pip_1.wav`: the pip is recorded since AU2; the
+  whistle is `tools/cut_recordings.py`'s synthesised pea whistle since AU3 (above). The browser game's draft (its live
+  pea whistle and its beep) still renders with `tools/render_whistle.gd`, only to a folder named after `--`.
 - `cues/grenade_pin_<n>.wav`, `grenade_bounce_<n>.wav`, `smoke_pop_<n>.wav` and `flash_bang_<n>.wav` (1 to 3): the
   smoke and flash bombs (SF1), made for this game, so never in the browser game. `tools/render_grenades.gd` renders
   them from its own constants and seeds (the pin's metal tink and scrape, a canister's hollow knock, the smoke's pop

@@ -31,6 +31,20 @@ FADE_IN = 0.002
 # Pitch steps for repeated takes.
 PITCHES = [1.0, 0.96, 1.04, 0.93, 1.07, 0.98, 1.02]
 PEAK_CAP_DB = -1.0
+# Filled by build(): each placeholder cue and what to record for it.
+PLACEHOLDERS = {}
+# Cues still synthesised, nothing reused yet, and what to record for each.
+STILL_SYNTH = {
+    "step_<surface>_run/sprint/land": "footsteps on concrete, metal, wood, gravel, grass, earth and leaves",
+    "foley_crouch, foley_stand, foley_lean": "clothes and kit rustling as you crouch, stand and lean",
+    "hitMarker": "a short bright tap, your BB hitting someone",
+    # Kept synthesised: the BB recordings are too peaky to reach its level, and the tick of being hit must read.
+    "hitTick": "a BB hitting goggles or a helmet, close to the mic",
+    "grenade_pin, grenade_bounce, smoke_pop, flash_bang": "a pin pulled, a can knocking on the ground, a pop and "
+    "hiss, a balloon pop",
+    "ambience_* and loops/": "a big quiet indoor room, the woods by day and night, a quiet street or yard; birds, "
+    "crows, a dog, an owl, a creaking tree",
+}
 LIMIT_DB = 6.0
 
 
@@ -97,6 +111,14 @@ def biquad(a, b0, b1, b2, a1, a2):
         x2, x1, y2, y1 = x1, x, y1, v
         y[i] = v
     return y
+
+
+def low_pass(a, hz):
+    w = 2.0 * np.pi * hz / RATE
+    alpha = np.sin(w) / (2.0 * 0.7071)
+    c = np.cos(w)
+    n = 1.0 + alpha
+    return biquad(a, (1 - c) / 2 / n, (1 - c) / n, (1 - c) / 2 / n, -2 * c / n, (1 - alpha) / n)
 
 
 def high_pass(a, hz):
@@ -231,6 +253,31 @@ def mix(*parts):
     return sum(np.pad(p, (0, n - len(p))) for p in parts)
 
 
+def pea_whistle(seconds, variant):
+    """A synthesised referee's pea whistle, `seconds` long: a tone near 3.1 kHz with a little of its octave, warbled in
+    pitch and level at about 30 Hz by the pea (a slightly uneven trill, different for each `variant`), over a thin
+    breath of noise; it scoops up into pitch over its first 25 ms and dies over its last 40 ms."""
+    rng = np.random.default_rng(31 + variant)
+    n = int(round(seconds * RATE))
+    t = np.arange(n) / RATE
+    trill_hz = 29.0 + 2.5 * variant
+    wobble = np.cumsum(rng.normal(0.0, 1.0, n))
+    wobble = low_pass(wobble - np.linspace(wobble[0], wobble[-1], n), 6.0)
+    wobble /= max(np.abs(wobble).max(), 1e-9)
+    trill = np.sin(2.0 * np.pi * trill_hz * t + 0.8 * wobble + variant)
+    scoop = 1.0 - 0.06 * np.exp(-t / 0.025)
+    hz = 3100.0 * (1.0 + 0.01 * (variant - 1)) * scoop * (1.0 + 0.035 * trill)
+    phase = 2.0 * np.pi * np.cumsum(hz) / RATE
+    tone = np.sin(phase) + 0.22 * np.sin(2.0 * phase + 0.4) + 0.06 * np.sin(3.0 * phase)
+    breath = low_pass(high_pass(rng.normal(0.0, 1.0, n), 2200.0), 5200.0)
+    breath *= 0.35 / max(np.abs(breath).max(), 1e-9)
+    am = 1.0 - 0.45 * (0.5 + 0.5 * trill)
+    x = (tone + breath) * am
+    attack = np.minimum(1.0, t / 0.012)
+    release = np.clip((seconds - t) / 0.04, 0.0, 1.0) ** 2
+    return x * attack * release
+
+
 def bolt(x, length=0.85, back_at=0.50, home_at=0.71):
     """A slide's pull back and its run home, each moved so its knock lands where the Sniper Rifle's Fire clip has the
     handle reach the back and snap home (tools/render_bolt.gd's timings)."""
@@ -257,8 +304,11 @@ def build(folder):
     """Every cue: its name and its variants, before levelling, and its level (dB, loudest 50 ms)."""
     cues = {}
 
-    def put(cue, vs, target):
+    def put(cue, vs, target, stand_in=""):
+        """`stand_in`: for a placeholder (another sound reused until the owner records this one), what to record."""
         cues[cue] = (list(vs), target)
+        if stand_in:
+            PLACEHOLDERS[cue] = stand_in
 
     # Gas Blowback Pistol: each shot split where its crack gives way to the slide and the gas, the crack as the shot
     # and the rest as its power part (which plays with it on the Power volume, power_gains' gas over shot_gain louder),
@@ -288,35 +338,47 @@ def build(folder):
     put("magOut_gas", variants(mag_out, 5), -28.1)
     put("magIn_gas", variants(mag_in, 5), -25.1)
 
-    # AEG Rifle: the motor's whir from the start of each run of the motor (its spin up), a semi shot's length, under
-    # the crack of the pistol's shot, a little lower, for the piston and the BB.
+    # AEG Rifle: the motor's whir from the start of each run of the motor (its spin up), a little longer than a semi
+    # shot (so full auto's shots run into one whir) and 3 dB over the old motor (owner, 2026-11-03: "a bit more of the
+    # electric motor whir"), under the crack of the pistol's shot, a little lower, for the piston and the BB.
     motor = pick(folder, [("motor_whir2.wav", None)], 0.9, 0.05)
-    put("power_electric", [onset_slice(m, 0.11, 30) for m in variants(motor, 5)], -29.3)
+    put("power_electric", [onset_slice(m, 0.16, 40) for m in variants(motor, 5)], -26.3)
     cracks = [high_pass(onset_slice(s, 0.045, 20), 300.0) for s in shots]
     put("shot_electric", variants(cracks, 5, 0.9), -18.5)
     motor3 = pick(folder, [("motor_whir3.wav", None)], 0.9, 0.05)
     put("dryFire_electric", [onset_slice(m, 0.09, 25) for m in variants(motor3, 5)], -28.2)
     # The rifles' bigger magazines: the pistol's, lower.
-    put("magOut_electric", variants(mag_out, 5, 0.9), -30.8)
-    put("magIn_electric", variants(mag_in, 5, 0.9), -27.0)
+    put("magOut_electric", variants(mag_out, 5, 0.9), -30.8,
+        "a rifle magazine pulled out")
+    put("magIn_electric", variants(mag_in, 5, 0.9), -27.0,
+        "a rifle magazine pushed in")
 
     # Sniper Rifle (spring): the pistol's shot pitched down for the spring's heavier thump; its magazine lower; the
     # pistol's dry click lower; the pistol's slide pulled back and run home as its cocking.
-    put("shot_spring", variants(shots, 5, 0.75), -16.8)
-    put("dryFire_spring", variants(dry, 5, 0.88), -37.2)
-    put("magOut_spring", variants(mag_out, 5, 0.85), -30.6)
-    put("magIn_spring", variants(mag_in, 5, 0.85), -26.9)
+    put("shot_spring", variants(shots, 5, 0.75), -16.8,
+        "a spring sniper rifle's shot")
+    put("dryFire_spring", variants(dry, 5, 0.88), -37.2,
+        "a spring rifle's trigger, uncocked")
+    put("magOut_spring", variants(mag_out, 5, 0.85), -30.6,
+        "a sniper rifle's magazine pulled out")
+    put("magIn_spring", variants(mag_in, 5, 0.85), -26.9,
+        "a sniper rifle's magazine pushed in")
     slides = pick(folder, [("Metal slide.wav", None)], 0.75, 0.1)
-    put("boltCycle", [bolt(s) for s in slides[:3]], -14.0)
+    put("boltCycle", [bolt(s) for s in slides[:3]], -14.0,
+        "a spring rifle's bolt pulled back and pushed home")
 
     # Cyber Pistol (electric pistol): a shorter, higher whir under a small crack; the pistol's dry click and
     # magazines a little higher.
     cyber = [mix(onset_slice(resample(m, 1.2), 0.07, 20), 0.4 * resample(c, 1.15))
              for m, c in zip(variants(motor3, 5), variants(cracks, 5))]
-    put("shot_cyber", cyber, -16.9)
-    put("dryFire_cyber", variants(dry, 5, 1.1), -30.3)
-    put("magOut_cyber", variants(mag_out, 5, 1.06), -30.8)
-    put("magIn_cyber", variants(mag_in, 5, 1.06), -27.1)
+    put("shot_cyber", cyber, -16.9,
+        "an electric pistol's shot")
+    put("dryFire_cyber", variants(dry, 5, 1.1), -30.3,
+        "an electric pistol fired empty")
+    put("magOut_cyber", variants(mag_out, 5, 1.06), -30.8,
+        "an electric pistol's magazine pulled out")
+    put("magIn_cyber", variants(mag_in, 5, 1.06), -27.1,
+        "an electric pistol's magazine pushed in")
 
     # Gear and hands.
     put("reloadRefused", variants(pick(folder, [("pouch_slap.wav", None)], 0.3), 5), -32.7)
@@ -342,6 +404,48 @@ def build(folder):
     put("impact_plastic", variants(pick(folder, [("bb_plastic.wav", None)], 0.3), 5), -30.0)
     put("impact_cardboard", variants(pick(folder, [("BB_cardboard.wav", None)], 0.25, 0.4), 5), -32.0)
 
+    # Placeholders for the sounds not recorded yet (owner, 2026-11-03: "reuse any sounds where possible but label them
+    # placeholder"), each edited to fit: the spring's twang a BB's ring on metal far lower; the selector, the torch's
+    # click shorter and higher; the radio's key, the torch's clicks through a radio's narrow band; the range's steel a
+    # BB's ring on metal; a vault, hands knocked on wood; BBs on concrete, the first knock on wood higher; on earth, a
+    # BB on cloth lower; in leaves, the BBs' rattle; a steel skip run into, the stacked shelf far lower; glass bumped,
+    # the BB's clink on glass; a draw, the magazine's swish; a holster, the pouch higher; the flag rope's ratchet, the
+    # pistol's dry click higher.
+    metal = pick(folder, [("bb_metal.wav", None)], 0.6, 0.3)
+    put("power_spring", [onset_slice(resample(m, 0.45), 0.33, 80) for m in variants(metal, 5)], -19.3,
+        "a spring rifle's spring twanging as it fires")
+    clicks = pick(folder, [("torch_switch.wav", None)], 0.15)
+    put("selector", [onset_slice(resample(k, 1.15), 0.04, 15) for k in variants(clicks, 5)], -31.8,
+        "a replica's fire selector clicking")
+    radio = [low_pass(high_pass(k, 500.0), 2800.0) for k in variants(clicks, 5)]
+    put("radio_ack", [onset_slice(r, 0.16, 30) for r in radio], -33.5, "a walkie-talkie keyed on and off")
+    put("steelRing", [onset_slice(m, 0.4, 120) for m in variants(metal, 5)], -27.1, "a BB ringing a steel target")
+    knocks = pick(folder, [("Knock wooden surface.wav", None)], 0.3)
+    put("vault", [onset_slice(k, 0.15, 50) for k in variants(knocks, 5, 1.1)], -26.0,
+        "hands and kit going over a low wall")
+    put("impact_concrete", [onset_slice(w, 0.05, 20) for w in variants(wood[:5], 5, 1.25)], -32.1,
+        "a BB hitting concrete or brick")
+    cloth = pick(folder, [("BB_fabric.wav", [0, 1, 3])], 0.15, 0.4)
+    put("impact_earth", [onset_slice(w, 0.06, 25) for w in variants(cloth, 5, 0.8)], -36.8, "a BB landing in soil")
+    rattle = pick(folder, [("bb_soft_rattle.wav", [1, 3, 4, 5, 6])], 0.4)
+    put("impact_leaves", [onset_slice(r, 0.1, 40) for r in variants(rattle, 5)], -28.4,
+        "a BB going through leaves and a bush")
+    stack = pick(folder, [("Knock into stacked metal shelf.wav", None)], 0.6)
+    put("prop_steel", [onset_slice(resample(s, 0.6), 0.5, 150) for s in variants(stack, 3)], -15.6,
+        "running into a steel skip or container")
+    clinks = pick(folder, [("BB_glass.wav", [0, 1, 2]), ("bb_glass2.wav", None)], 0.2)
+    put("prop_glass", [onset_slice(g, 0.15, 50) for g in variants(clinks, 3)], -27.9,
+        "bumping glass or bottles")
+    swish = Source.get(folder, "catching_throwing_magazine.wav")
+    whoosh = cut(swish.a, 0.36, 0.8, swish.floor, 0.3)
+    put("draw", [onset_slice(w, 0.12, 40) for w in variants([whoosh], 5)], -34.4,
+        "a rifle swung up from its sling")
+    put("foley_holster", variants(pick(folder, [("pouch_slap.wav", None)], 0.2), 5, 1.2), -30.4,
+        "a pistol pushed into a holster")
+    put("rope_up", [onset_slice(d, 0.09, 25) for d in variants(dry, 5, 1.3)], -31.8, "a rope ratcheting up a pole")
+    put("rope_down", [onset_slice(d, 0.09, 25) for d in variants(dry, 5, 1.1)], -32.0,
+        "a rope ratcheting down a pole")
+
     # Props run into, and the doors.
     put("prop_clank", variants(pick(folder, [("Knock metal shelf.wav", None)], 0.6), 3), -21.7)
     put("prop_rattle", variants(pick(folder, [("Knock into stacked metal shelf.wav", None)], 0.6), 3), -29.8)
@@ -353,8 +457,10 @@ def build(folder):
     # The referee's pea whistle; a digital thermometer's beep (6.3 kHz) an octave down as the shot timer's, and lower
     # and shorter as your ping's pip (about 1.7 kHz, under the timer).
     # Each blast exactly SoundConfig's whistle_short or whistle_long, which time the blasts after it.
-    put("whistle_short", [fixed(w, 0.3) for w in pick(folder, [("short_whistle.wav", None)], 0.45, 0.25)[:3]], -4.0)
-    put("whistle_long", [fixed(w, 0.8) for w in pick(folder, [("Long whistle.wav", [1, 2, 3])], 1.2, 0.3)], -4.0)
+    # The owner's whistle takes are set aside (2026-11-03, "my whistle isn't great"): a synthesised pea whistle stands
+    # in until he records a better one, at the target his takes had (the limiter lands it 1 to 2 dB over them).
+    put("whistle_short", [pea_whistle(0.3, v) for v in range(3)], -4.0, "a referee's pea whistle, a short blast")
+    put("whistle_long", [pea_whistle(0.8, v) for v in range(3)], -4.0, "a referee's pea whistle, a long blast")
     beep = pick(folder, [("beep.wav", None)], 0.3, 0.25)[0]
     put("count_beep", [shape(resample(beep, 0.5)[:int(0.2 * RATE)], 0.3)], -28.7)
     put("ping_pip", [shape(resample(beep, 0.27)[:int(0.08 * RATE)], 0.4)], -5.0)
@@ -364,6 +470,8 @@ def build(folder):
 def aside(folder):
     """Recordings the game has no place for yet, cut and levelled the same way, kept out of the game."""
     return {
+        "whistle_short": ([fixed(w, 0.3) for w in pick(folder, [("short_whistle.wav", None)], 0.45, 0.25)[:3]], -4.0),
+        "whistle_long": ([fixed(w, 0.8) for w in pick(folder, [("Long whistle.wav", [1, 2, 3])], 1.2, 0.3)], -4.0),
         "slide_release": (pick(folder, [("Pistol slider locked back reload magazine.wav", [2])], 0.3), -26.0),
         "slide_rack": (pick(folder, [("pistol_cocking.wav", None)], 0.4), -24.0),
     }
@@ -374,8 +482,18 @@ def main():
     ap.add_argument("raw")
     ap.add_argument("--only", default="")
     ap.add_argument("--aside", default="")
+    ap.add_argument("--placeholders", action="store_true", help="print the placeholders as a Markdown table")
     args = ap.parse_args()
     only = set(filter(None, args.only.split(",")))
+    if args.placeholders:
+        build(args.raw)
+        print("| Cue | Placeholder until you record |\n|---|---|")
+        for cue, what in sorted(PLACEHOLDERS.items()):
+            print("| `%s` | %s |" % (cue, what))
+        print("\n| Still synthesised | Record |\n|---|---|")
+        for cue, what in STILL_SYNTH.items():
+            print("| `%s` | %s |" % (cue, what))
+        return
     for cue, (vs, target) in build(args.raw).items():
         if only and cue not in only:
             continue

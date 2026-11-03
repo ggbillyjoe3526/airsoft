@@ -68,12 +68,14 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
   them into the cues it lists, every replica's shots, dry clicks and magazines (the AEG from the motor and the pistol's
   crack, the Sniper Rifle and the Cyber Pistol from the pistol's), the pistol's slide locking back, BBs on metal,
   wood, glass, plastic, cardboard and players, the gear, the props, the doors, the whistle, the shot timer and the
-  ping. Owner-made for the game; same licence as the code. To re-cut: `python3 tools/cut_recordings.py <raw folder>`,
+  ping. Since AU3 they also stand in, labelled placeholders, for 25 cues until he records them (14 of them new; the
+  script's `--placeholders` lists them), and the whistle is a pea whistle the script synthesises (his takes set
+  aside).
+  Owner-made for the game; same licence as the code. To re-cut: `python3 tools/cut_recordings.py <raw folder>`,
   then `godot --headless --path . --import`.
 - **Sounds:** the rest of the 78 sounds and 4 ambience loops are still rendered from the browser game's synthesis
-  recipes, in `assets/audio/` (`assets/audio/README.md`): concrete, earth and leaf impacts, the steps, the kit
-  rustle, the selector, the draw, the radio, the hits, the vault, the steel ring, the flag rope, the noisy steel skip
-  and glass, the ambience, and the Sniper Rifle's spring twang. No outside source; same licence as the code.
+  recipes, in `assets/audio/` (`assets/audio/README.md`): the steps, the kit rustle, the hits and the ambience. No
+  outside source; same licence as the code.
 - **The smoke and flash bombs' sounds:** `assets/audio/cues/grenade_pin_1.wav` to `_3`, and the same three of
   `grenade_bounce`, `smoke_pop` and `flash_bang`, synthesised by our own `tools/render_grenades.gd` (SF1, 2026-10-30).
   No outside source; same licence as the code. To re-render: `godot --headless --path . -s

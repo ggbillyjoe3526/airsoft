@@ -1,10 +1,11 @@
 extends SceneTree
-## The synthesised draft of the referee's pea whistle and the ping's pip, kept for reference since the game plays the
-## owner's recordings (AU2, tools/cut_recordings.py), and the plain WAV writer the other renderers share. Renders the
-## whistle (the browser game's whistle.ts, which played it live) from SoundConfig's whistle numbers in
-## play_tuning.tres as whistle_short_<n>.wav and whistle_long_<n>.wav to the folder named after `--`: 16-bit mono
-## 44.1 kHz like the other cues, whistle_variants of each, the warble's phase moved round its cycle from one to the next;
-## and the ping's pip (PN2; the browser game's whistle.beep at AUDIO.pingPip, on the same output) to ping_pip_1.wav.
+## The browser game's synthesised draft of the referee's pea whistle and the ping's pip, kept for reference since the
+## game plays tools/cut_recordings.py's whistle (AU3) and the owner's recorded pip (AU2), and the plain WAV writer the
+## other renderers share. Renders the whistle (the browser game's whistle.ts, which played it live) from SoundConfig's
+## whistle numbers in play_tuning.tres as whistle_short_<n>.wav and whistle_long_<n>.wav to the folder named after `--`:
+## 16-bit mono 44.1 kHz like the other cues, whistle_variants of each, the warble's phase moved round its cycle from one
+## to the next; and the ping's pip (PN2; the browser game's whistle.beep at AUDIO.pingPip, on the same output) to
+## ping_pip_1.wav.
 ## No display needed:
 ##   godot --headless --path . -s res://tools/render_whistle.gd -- <folder>
 
@@ -22,8 +23,8 @@ func _initialize() -> void:
 func _run() -> void:
 	var args := OS.get_cmdline_user_args()
 	if args.is_empty():
-		# The game plays the owner's recordings (AU2, tools/cut_recordings.py): render this draft elsewhere.
-		push_error("render_whistle: the game plays recordings now; name an output folder after --")
+		# The game plays tools/cut_recordings.py's cues (AU2, AU3): render this draft elsewhere.
+		push_error("render_whistle: the game plays tools/cut_recordings.py's cues; name an output folder after --")
 		quit(1)
 		return
 	var out := args[0].trim_suffix("/") + "/"
