@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-03 | 1 | Opus 5.5 (hits thread) | – | – | – |
+| 2026-11-03 | 1 | Opus 5.5 (hits thread) | pass | Retry 6/8 | hitbox.gd too big (the pose moved to HitPose); folder READMEs; QA's report not written |
+| 2026-11-03 | 2 | Opus 5.5 (hits thread) | – | – | – |
 
 ## The ask
 
@@ -29,14 +30,14 @@ it counted on 19 to 37 %.
    of the walk cycle, still standing and crouched, 7 jump and 12 vault samples (the hips' place and turn and each leg
    bone's turn), and the upper body in the hips' frame for the rifle's and the pistol's aim down, level and up,
    holstered and holstered sprinting. 55 KB.
-2. **Hitbox.build_volume** blends them as the graph does: the gait space by its own triangles and barycentric weights
-   (the nearest edge outside them), the crouch space linearly, the crouch by its amount, each turn as weighted steps
-   from its rest (AnimationMixer's blend); poses the legs down from the hips; puts the upper body on them; then
-   FigureBend's crouch limit, lean and aim lean. The capsules hang on the joints: a head sphere, a torso of four
-   capsules (side by side for the width, front and back for the plate carrier's pouches and the pack), the hips, and
-   each leg's thigh, shin and boot. Their shapes are `HitConfig.fit_*`, tuned by `tools/hit_fit_tune.gd` against the
-   drawn figure. The built-in volume stays for the practice range's plywood figures (drawn from it) and when
-   `HitConfig.fit` is null.
+2. **HitPose** (`game/sim/hit_pose.gd`) blends them as the graph does: the gait space by its own triangles and
+   barycentric weights (the nearest edge outside them), the crouch space linearly, the crouch by its amount, each turn
+   as weighted steps from its rest (AnimationMixer's blend); poses the legs down from the hips; puts the upper body on
+   them; then FigureBend's crouch limit, lean and aim lean. **Hitbox.build_volume** hangs the capsules on the joints: a
+   head sphere, a torso of four capsules (side by side for the width, front and back for the plate carrier's pouches and
+   the pack), the hips, and each leg's thigh, shin and boot. Their shapes are `HitConfig.fit_*`, tuned by
+   `tools/hit_fit_tune.gd` against the drawn figure. The built-in volume stays for the practice range's plywood figures
+   (drawn from it) and when `HitConfig.fit` is null.
 3. **Cheaper where it counts:** a character's volume is built only once a BB's path comes near it
    (`Hitbox.may_touch`, `HitConfig.volume_reach` and `volume_top`), at most once a tick (BBStep), and a bot's line of
    fire check skips mates nowhere near the line.

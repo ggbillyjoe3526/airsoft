@@ -1,5 +1,5 @@
 extends GutTest
-## HV1: the fitted hit volume's joints (HitFit, Hitbox._fit_pose) are the drawn figure's. The committed bake is current
+## HV1: the fitted hit volume's joints (HitFit, HitPose.pose) are the drawn figure's. The committed bake is current
 ## (a fresh one from the figures matches it), and for characters in every kind of state the joints Hitbox poses from it
 ## (the blend spaces' blends, the legs posed from the blended turns, FigureBend's crouch limit, lean and aim lean) sit on
 ## the drawn skeleton's, bend and all.

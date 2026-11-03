@@ -1,37 +1,33 @@
-# QA report: UF2 (Loadout SWITCH REPLICA click, no double-click Customise)
+Task: HV1 · QA commit 86cba0b · Verdict: Pass
 
-Verdict: **Pass**
+Blocking: none. Advisory: none found.
 
-## Run
-- tests/unit/test_uf2_clicks.gd: 4/4 pass (15 asserts), clicks pushed through the viewport (motion, press, release).
-- Fails without the fix: with origin/main's loadout_gear.gd restored, 4/4 fail; fix restored afterwards (git diff clean of my probing).
-- No production or test edits by QA.
+Criteria:
+1. Hit in every pose: test_hit_registration.gd covers stand, crouch, crouch-walk, crouch-back, run_0, between,
+   aim_down and vault from three sides. test_hit_registration_qa.gd adds lean left and right, aim up, run 1 to 3,
+   walk 1 and crouch-half (at least 93 % struck), and a jumping figure struck at the chest.
+2. Beside the figure: at least 95 % of BBs fired just beside the body pass in the same poses; a ray 60 cm beside a
+   jumping figure passes.
+3. No tunnelling: a 400 m/s BB that starts 3 m in front and would end 3.7 m behind the target in one tick still
+   strikes it (and the 160 m/s test passes).
+4. Crouch under 1.2 m cover: test_hit_fit.gd, every pitch, still and crouch-walking.
+5. Plywood figures and `fit = null`: test_hitbox.gd (15), test_bb_step.gd (18), test_range_targets.gd pass.
+6. Volumes built only when needed: may_touch is false for a line 30 m off or a segment ending short, true through the
+   figure; over 60 seeded random states with 40 rays each it never rejects a ray the full volume strikes. Bots'
+   friendly-fire check: test_bots.gd.
 
-## Hunt
-- Same bug elsewhere: every `add_content` caller (loadout_switch, settings_access_page, part_page, customise_view x4,
-  match_page x2, loadout_strip x2) wraps display content only (labels, swatches, stat rows). The Buttons/Sliders in those
-  files (_close, _back, _play, LoadoutSlider, cue-size HSlider, _link) are added outside a card's pad. Only loadout_gear
-  had controls inside a card, and both (CUSTOMISE, SWITCH REPLICA) now get STOP after add_content.
-- `MouseFilter` STOP set before add_content anywhere in game/ui: none (the grep for MOUSE_FILTER_STOP shows only
-  shades/overlays, menu_parts._lock, turntable, armory dots).
-- Removed `_double_click`: no remaining references in game/ or tests/. `customise_requested` still wired from the CUSTOMISE button only.
-- Docs: docs/PLAYTEST.md updated (line 1198). docs/KNOWN_ISSUES.md:110 still lists "mouse double-click on a carried card"
-  as needing a real display; now stale (minor, docs only).
-- Residual: menu_parts._lock re-enables STOP on any BaseButton in a locked-then-unlocked subtree, so unlocking a card
-  containing the buttons restores STOP (fine); cards are not locked on this page.
+Tests added: tests/unit/test_hit_registration_qa.gd (5 tests, 77 asserts, all pass).
+- test_leaning_aiming_up_and_running_figures_are_struck_and_the_air_beside_them_passes
+- test_a_jumping_figure_is_struck_at_the_chest
+- test_a_bb_fast_enough_to_cross_a_body_in_a_tick_still_strikes_it
+- test_a_far_character_is_not_touched_and_a_near_one_is
+- test_a_standing_figure_under_the_volume_top_is_never_skipped_by_the_quick_test (random poses)
 
-## Not verifiable here
-Real-mouse feel on a display: click SWITCH REPLICA on each carried card, double-click a card (only picks it), CUSTOMISE opens it.
+Fails without the feature (by reading): the built-in volume missed 25 to 36 % of crouched, crouch-walking and running
+figures (FI7) and has no airborne pose, so the pose and jump tests fail on it.
 
-## Part 2: skip grace (ee0eb5a)
-Verdict: Pass. test_uf2_clicks (8), test_wg1_qa (12), test_what_got_you (9) all green.
-- _out_for resets every frame the player is in play, the round is not live, autopilot is on or a skip is running (the
-  `can` guard), so a new round, a rematch or a second knock-out starts a fresh grace.
-- Hit then round ends inside the grace: is_live false, so the counter zeroes; nothing carries to the next round.
-- Pause: _process stops with the tree, so _out_for freezes (not resets) and resumes; _skip_armed is cleared on pause and
-  re-arms only once the trigger is up. Pause menu's own Skip button is not gated by the grace (deliberate click). Fine.
-- Trigger held through the grace: _skip_armed needs the trigger up once `ready`, so a held trigger never skips; a click
-  and release inside the grace is not armed (ready false). Correct.
-- Autopilot: can_skip false, counter stays 0.
-- Minor/no action: a single long frame (hitch) adds its whole delta, so it can shorten the grace; not worth fixing.
-- Not verifiable here: how 1.5 s feels on a display.
+Runs: test_hit_registration (3), test_hit_fit (3), test_bb_step (18), test_hitbox (15), all pass. The full suite was
+run by the worker in four parts.
+
+Not testable here: how hits feel in play. The owner checks by eye that the hit tick lands on the visible body when
+crouch-walking, vaulting and leaning.

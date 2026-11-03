@@ -25,7 +25,7 @@ const LEG_BONES := 6
 const SAMPLE := LEG_TURNS + 4 * LEG_BONES
 ## `leg_offsets`: each leg's thigh on the hips, shin on the thigh, foot on the shin and toe on the foot, left then right.
 const OFFSETS := 8
-## The lower body's points as Hitbox poses them (Hitbox._low): the Hips bone's place and axes, then each leg's joints.
+## The lower body's points as Hitbox poses them (HitPose.lower): the Hips bone's place and axes, then each leg's joints.
 const HIPS := 0
 const HIPS_X := 1
 const HIPS_Y := 2
