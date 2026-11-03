@@ -12,7 +12,6 @@ const BRICK := 1
 const ROOK := 2
 const DASH := 3
 const SAVE := "user://test_ping_markers_settings.save"
-const Renderer := preload("res://tools/render_whistle.gd")
 
 var _teams := TeamConfig.new()
 var _cfg := HudConfig.new()
@@ -293,17 +292,17 @@ func test_a_teammates_mark_or_ping_plays_no_pip() -> void:
 	assert_eq(_pips(audio), 0)
 
 
-func test_the_pip_is_the_browsers_recipe() -> void:
+func test_the_pip_is_the_recorded_beep_short_and_under_the_shot_timer() -> void:
+	# The owner's recorded beep (AU2, tools/cut_recordings.py), lower and shorter than the shot timer's.
+	var pip := load("res://assets/audio/cues/ping_pip_1.wav") as AudioStreamWAV
+	var timer := load("res://assets/audio/cues/count_beep_1.wav") as AudioStreamWAV
+	assert_not_null(pip)
+	assert_not_null(timer)
+	assert_almost_eq(pip.get_length(), 0.08, 0.002)
+	assert_lt(pip.get_length(), timer.get_length(), "a mark, not a countdown")
 	var cfg := SoundConfig.new()
-	assert_eq(cfg.ping_pip_hz, 1700.0)
-	assert_eq(cfg.ping_pip_length, 0.08)
-	var pip := Renderer.pip(cfg)
-	assert_eq(pip.size(), roundi(0.08 * 44100.0))
-	assert_true(FileAccess.get_file_as_bytes("res://assets/audio/cues/ping_pip_1.wav") == Renderer.wav(pip),
-			"the cue is SoundConfig's pip (re-render it)")
-	var stream := load("res://assets/audio/cues/ping_pip_1.wav") as AudioStreamWAV
-	assert_not_null(stream)
-	assert_almost_eq(stream.get_length(), 0.08, 0.002)
+	assert_almost_eq(cfg.ping_pip_gain, 0.2, 1e-6)
+	assert_lt(cfg.ping_pip_gain, cfg.beep_gain, "quieter than the shot timer")
 
 
 # --- the setting ---

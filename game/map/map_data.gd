@@ -21,7 +21,8 @@ const RISES: Dictionary[String, Rise] = {"+x": Rise.POS_X, "-x": Rise.NEG_X, "+z
 const SURFACES: Dictionary[String, RayHit.Surface] = {
 	"concrete": RayHit.Surface.CONCRETE, "metal": RayHit.Surface.METAL, "wood": RayHit.Surface.WOOD,
 	"earth": RayHit.Surface.EARTH, "gravel": RayHit.Surface.GRAVEL, "grass": RayHit.Surface.GRASS,
-	"leaves": RayHit.Surface.LEAVES,
+	"leaves": RayHit.Surface.LEAVES, "glass": RayHit.Surface.GLASS, "plastic": RayHit.Surface.PLASTIC,
+	"cardboard": RayHit.Surface.CARDBOARD,
 }
 
 

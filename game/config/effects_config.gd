@@ -37,11 +37,13 @@ extends Resource
 @export var puff_life: float = 0.35
 @export var puff_start_size: float = 0.05
 @export var puff_end_size: float = 0.32
-## A puff's colour on each surface (RayHit.Surface order: none, concrete, metal, wood, earth, gravel, grass, leaves),
-## and on a body hit. Gravel, grass and leaves puff as earth.
+## A puff's colour on each surface (RayHit.Surface order: none, concrete, metal, wood, earth, gravel, grass, leaves,
+## glass, plastic, cardboard), and on a body hit. Gravel, grass and leaves puff as earth, glass as metal, plastic and
+## cardboard as wood.
 @export var puff_colours: PackedColorArray = PackedColorArray([
 	Color(0.8, 0.78, 0.72, 0.7), Color(0.82, 0.8, 0.75, 0.7), Color(0.78, 0.8, 0.82, 0.6), Color(0.76, 0.66, 0.5, 0.7),
 	Color(0.6, 0.52, 0.4, 0.75), Color(0.6, 0.52, 0.4, 0.75), Color(0.6, 0.52, 0.4, 0.75), Color(0.6, 0.52, 0.4, 0.75),
+	Color(0.78, 0.8, 0.82, 0.6), Color(0.76, 0.66, 0.5, 0.7), Color(0.76, 0.66, 0.5, 0.7),
 ])
 @export var hit_puff_colour: Color = Color(1.0, 1.0, 1.0, 0.9)
 @export var hit_puff_scale: float = 1.6

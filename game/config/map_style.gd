@@ -7,8 +7,9 @@ extends Resource
 ## and a surface with a colour of its own (gravel) is drawn in it. Sloping ground (TerrainGrid) is drawn in its
 ## surfaces' `terrain_colours`.
 
-## What a BB or a footstep meets on each kind (RayHit.Surface). Moulded plastic ticks hollow, nearest to wood;
-## sand-filled bags and gabions soak BBs up like wood. Kinds not listed are concrete.
+## What a BB or a footstep meets on each kind (RayHit.Surface). Moulded plastic (the toilets, the bins) and cardboard
+## (the wrapped stock, the fibre drums) tick as themselves (AU2); sand-filled bags and gabions soak BBs up like wood.
+## Kinds not listed are concrete.
 @export var surfaces: Dictionary[StringName, int] = {
 	&"floor": RayHit.Surface.CONCRETE,
 	&"ramp": RayHit.Surface.CONCRETE,
@@ -16,10 +17,10 @@ extends Resource
 	&"barrier": RayHit.Surface.CONCRETE,
 	&"crate": RayHit.Surface.WOOD,
 	&"container": RayHit.Surface.METAL,
-	&"toilet": RayHit.Surface.WOOD,
+	&"toilet": RayHit.Surface.PLASTIC,
 	&"rack": RayHit.Surface.WOOD,
 	&"gabion": RayHit.Surface.WOOD,
-	&"wrapped": RayHit.Surface.WOOD,
+	&"wrapped": RayHit.Surface.CARDBOARD,
 	&"ibc": RayHit.Surface.METAL,
 	&"sandbags": RayHit.Surface.WOOD,
 	&"generator": RayHit.Surface.METAL,
@@ -28,9 +29,9 @@ extends Resource
 	&"tree": RayHit.Surface.WOOD,
 	&"log": RayHit.Surface.WOOD,
 	&"fence": RayHit.Surface.WOOD,
-	# Depot's warehouse (DR1): fibre drums and the sofa soak BBs up like wood, steel barrels and pillars ring, and the
-	# netting's fine mesh stops a BB dead, nearest to wood.
-	&"drum": RayHit.Surface.WOOD,
+	# Depot's warehouse (DR1): fibre drums are cardboard, the sofa soaks BBs up like wood, steel barrels and pillars
+	# ring, and the netting's fine mesh stops a BB dead, nearest to wood.
+	&"drum": RayHit.Surface.CARDBOARD,
 	&"barrel": RayHit.Surface.METAL,
 	&"pillar": RayHit.Surface.METAL,
 	&"net": RayHit.Surface.WOOD,
@@ -39,9 +40,9 @@ extends Resource
 	&"tyre": RayHit.Surface.WOOD,
 	&"truck": RayHit.Surface.METAL,
 	&"thicket": RayHit.Surface.LEAVES,
-	# The Street (ST1): hedges and the scrub are leaves; railings, vehicles, lamps, bollards, cabinets, the fridge,
-	# the bus shelter and window glass ring (glass has no sound of its own yet); plastic bins, the roadworks' boards,
-	# the shed and the furniture tick like wood.
+	# The Street (ST1): hedges and the scrub are leaves; railings, vehicles, lamps, bollards, cabinets, the fridge
+	# and the bus shelter ring; window glass is glass and the bins plastic (AU2); the roadworks' boards, the shed and
+	# the furniture tick like wood.
 	&"hedge": RayHit.Surface.LEAVES,
 	&"scrub": RayHit.Surface.LEAVES,
 	&"railing": RayHit.Surface.METAL,
@@ -53,8 +54,8 @@ extends Resource
 	&"cabinet": RayHit.Surface.METAL,
 	&"fridge": RayHit.Surface.METAL,
 	&"shelter": RayHit.Surface.METAL,
-	&"glass": RayHit.Surface.METAL,
-	&"bins": RayHit.Surface.WOOD,
+	&"glass": RayHit.Surface.GLASS,
+	&"bins": RayHit.Surface.PLASTIC,
 	&"hoarding": RayHit.Surface.WOOD,
 	&"shed": RayHit.Surface.WOOD,
 	&"furniture": RayHit.Surface.WOOD,

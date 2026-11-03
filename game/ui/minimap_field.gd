@@ -224,7 +224,7 @@ static func _surface_tint(surface: int, cfg: MinimapConfig) -> Color:
 			return cfg.earth_tint
 		RayHit.Surface.GRAVEL:
 			return cfg.gravel_tint
-		RayHit.Surface.WOOD:
+		RayHit.Surface.WOOD, RayHit.Surface.PLASTIC, RayHit.Surface.CARDBOARD:
 			return cfg.wood_tint
 	return Color(0.0, 0.0, 0.0, 0.0)
 

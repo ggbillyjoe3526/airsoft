@@ -71,6 +71,7 @@ const SOUND_NAMES: PackedStringArray = ["steel", "clank", "rattle", "glass", "pl
 @export var ground: Dictionary[int, float] = {
 	RayHit.Surface.METAL: 1.35,
 	RayHit.Surface.GRAVEL: 1.35,
+	RayHit.Surface.GLASS: 1.35,
 }
 
 

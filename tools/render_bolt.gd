@@ -1,16 +1,13 @@
 extends SceneTree
-## Renders the Sniper Rifle's cocking sound (SN1) to assets/audio/cues/boltCycle_<n>.wav, 16-bit mono 44.1 kHz like the
-## other cues, each variant from its own seeded noise and a slightly moved pitch. A spring rifle is cocked by hand after
+## The Sniper Rifle's synthesised cocking draft (SN1), kept for reference since the game plays the owner's recordings
+## (AU2, tools/cut_recordings.py): rendered as boltCycle_<n>.wav to the folder named after `--`, each variant from its own seeded noise and a slightly moved pitch. A spring rifle is cocked by hand after
 ## every shot: the charging handle drawn back over the spring (a plastic scrape, the spring's rising zing under it, the
 ## sear's click as it catches), then let go to snap home (a hollow plastic clack). Timed to the model's Fire clip
 ## (tools/blender/replicas/sniper.py: back from 0.29 s to 0.50 s, home at 0.71 s). A toy's plastic, not a rifle's steel.
 ## No display needed:
-##   godot --headless --path . -s res://tools/render_bolt.gd
-## then `godot --headless --path . --import` and commit the files with their .import files. An argument after `--`
-## names another output folder.
+##   godot --headless --path . -s res://tools/render_bolt.gd -- <folder>
 
 const RATE := 44100
-const OUT_DIR := "res://assets/audio/cues/"
 const STEM := "boltCycle"
 const WHISTLE := preload("res://tools/render_whistle.gd")
 const GRENADES := preload("res://tools/render_grenades.gd")
@@ -55,7 +52,12 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var args := OS.get_cmdline_user_args()
-	var out := OUT_DIR if args.is_empty() else args[0].trim_suffix("/") + "/"
+	if args.is_empty():
+		# The game plays the owner's recordings (AU2, tools/cut_recordings.py): render this draft elsewhere.
+		push_error("render_bolt: the game plays recordings now; name an output folder after --")
+		quit(1)
+		return
+	var out := args[0].trim_suffix("/") + "/"
 	var failed := false
 	for v in VARIANTS:
 		var rng := RandomNumberGenerator.new()

@@ -1,7 +1,8 @@
 class_name SimAudio
 extends Node
 ## The match's sound, from the tick's events (docs/ARCHITECTURE.md › Contracts 3): shots with their power part (a
-## silenced one's shot duller and quieter; its power part and clicks as they are), dry clicks, magazines, the selector,
+## silenced one's shot duller and quieter; its power part and clicks as they are; a gas pistol's last shot of a
+## magazine with its slide locking back, AU2), dry clicks, magazines, the selector,
 ## the hop-up dial, the weapon torch's click (WL7) and draws, BB impacts by surface (in a bush's leaves their rustle,
 ## quieter for one brushing through an edge, WL5), footsteps by surface and pace (louder and further on loud ground, by
 ## the event's carry), vaults, a run into a noisy prop (its prop_<sound> cue; a BB's ring is its impact), the flag's
@@ -43,9 +44,11 @@ const BUS_MUFFLED := &"Muffled"
 ## The charging handle drawn back and let go after each shot of a spring rifle (assets/audio/cues/boltCycle_*.wav, SN1).
 const BOLT_CUE := &"boltCycle"
 ## Cue names by RayHit.Surface (none sounds as concrete; a BB on gravel, grass or leaves as earth, a step on each as
-## its own) and by GameEvent.Footstep.
-const SURFACE_NAMES: PackedStringArray = ["concrete", "concrete", "metal", "wood", "earth", "gravel", "grass", "leaves"]
-const IMPACT_NAMES: PackedStringArray = ["concrete", "concrete", "metal", "wood", "earth", "earth", "earth", "earth"]
+## its own; a step on glass as on metal, on plastic or cardboard as on wood) and by GameEvent.Footstep.
+const SURFACE_NAMES: PackedStringArray = ["concrete", "concrete", "metal", "wood", "earth", "gravel", "grass", "leaves",
+		"metal", "wood", "wood"]
+const IMPACT_NAMES: PackedStringArray = ["concrete", "concrete", "metal", "wood", "earth", "earth", "earth", "earth",
+		"glass", "plastic", "cardboard"]
 const STEP_NAMES: PackedStringArray = ["run", "sprint", "land"]
 ## What a play is, for its pitch and level spread, its priority in the field's pool and how many of its cue may sound.
 enum Kind { SHOT, MECHANISM, STEP, VAULT, ROPE, IMPACT, HIT, STEEL, INTERFACE, RADIO, FOLEY, CALL, PROP, RADIO_CALL }
@@ -85,6 +88,8 @@ var _power: Dictionary[StringName, StringName] = {}
 ## By power source: its power part's level (SoundConfig.power_gains).
 var _power_gain: Dictionary[StringName, float] = {}
 var _dry: Dictionary[StringName, StringName] = {}
+## Each sound profile's slide locking back on the magazine's last shot (slideLock_<profile>, AU2), or none.
+var _slide_lock: Dictionary[StringName, StringName] = {}
 var _mag_out: Dictionary[StringName, StringName] = {}
 var _mag_in: Dictionary[StringName, StringName] = {}
 var _impact: Array[StringName] = []
@@ -145,6 +150,8 @@ func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, quer
 		_power[p] = _load(power_part) if has_part else &""
 		_power_gain[p] = cfg.power_gains.get(p, cfg.power_gain)
 		_dry[p] = _load("dryFire_%s" % p)
+		var lock := "slideLock_%s" % p
+		_slide_lock[p] = _load(lock) if ResourceLoader.exists("%s%s_1.wav" % [SoundConfig.CUE_DIR, lock]) else &""
 		_mag_out[p] = _load("magOut_%s" % p)
 		_mag_in[p] = _load("magIn_%s" % p)
 	for s in IMPACT_NAMES:
@@ -216,6 +223,9 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				# A spring rifle is cocked by hand after every shot: the charging handle back and home (SN1).
 				if _bolt_action(state, e.actor, e.slot):
 					_mechanism(BOLT_CUE, state, e, own)
+				# A gas pistol's slide locks back on the magazine's last BB (AU2).
+				if _slide_lock.get(p, &"") != &"" and _emptied(state, e.actor, e.slot):
+					_mechanism(_slide_lock[p], state, e, own)
 			GameEvent.Kind.DRY_FIRE:
 				_mechanism(_dry.get(_power_of(state, e.actor, e.slot), &""), state, e, own)
 			GameEvent.Kind.RELOAD_START:
@@ -530,6 +540,12 @@ func _power_of(state: GameState, actor: int, slot: int) -> StringName:
 func _bolt_action(state: GameState, actor: int, slot: int) -> bool:
 	var c := state.character(actor)
 	return c != null and slot >= 0 and slot < c.armament.replicas.size() and c.armament.replicas[slot].bolt_action
+
+
+## Whether `actor`'s replica in `slot` has no BB left in its loaded magazine (its last shot was this tick's).
+func _emptied(state: GameState, actor: int, slot: int) -> bool:
+	var c := state.character(actor)
+	return c != null and slot >= 0 and slot < c.armament.ammo.size() and c.armament.ammo[slot].mag == 0
 
 
 ## Whether `actor`'s replica in `slot` is silenced.
