@@ -241,3 +241,107 @@ func test_the_attack_defend_tags_rest_on_their_blocks() -> void:
 		var tag: Label = bar._tags[side]
 		assert_almost_eq(tag.position.x, bar.block_x(side), 0.001)
 		assert_almost_eq(tag.position.y + tag.size.y, HudStyle.BLOCK_INSET, 0.01, "the tag rests on its block's top edge")
+
+
+## UR8 QA: the magazine boxes at the panel's left edge, at the edges.
+func _mags_character(mags: int, name_in: String = "") -> Character:
+	var replicas: Array[ReplicaConfig] = []
+	for r in loadout:
+		replicas.append(r.duplicate() as ReplicaConfig)
+	replicas[0].mags = mags
+	if name_in != "":
+		replicas[0].display_name = name_in
+	return Character.new(0, 0, Vector3.ZERO, 0.0, replicas)
+
+
+func _frame_of(p: ReplicaPanel) -> Control:
+	return p.gauges().get_parent().get_parent() as Control
+
+
+func test_ur8_the_boxes_stay_at_the_left_edge_with_the_ammo_counter_off() -> void:
+	var p := _panel(_mags_character(4))
+	p.set_counted(false)
+	await wait_process_frames(3)
+	var gauges := p.gauges()
+	var name_label := p.find_child("ReplicaName", true, false) as Control
+	assert_almost_eq(gauges.get_global_rect().position.x, name_label.get_global_rect().position.x, 1.0)
+	assert_almost_eq(gauges.size.x, gauges.row_width(4), 0.5, "the counts' row going away does not stretch the boxes")
+	assert_true(gauges.get_global_rect().position.x < _frame_of(p).get_global_rect().get_center().x)
+
+
+func test_ur8_a_replica_swap_with_another_magazine_count_resizes_the_row_from_the_left() -> void:
+	var replicas: Array[ReplicaConfig] = []
+	for r in loadout:
+		replicas.append(r.duplicate() as ReplicaConfig)
+	replicas[0].mags = 2
+	replicas[1].mags = 7
+	var c := Character.new(0, 0, Vector3.ZERO, 0.0, replicas)
+	var p := _panel(c)
+	await wait_process_frames(3)
+	var gauges := p.gauges()
+	var left := gauges.get_global_rect().position.x
+	assert_almost_eq(gauges.size.x, gauges.row_width(2), 0.5)
+	c.armament.active = 1
+	p.refresh(c.armament, c.grenades)
+	await wait_process_frames(3)
+	assert_almost_eq(gauges.size.x, gauges.row_width(7), 0.5, "wider for seven boxes")
+	assert_almost_eq(gauges.get_global_rect().position.x, left, 0.5, "the left edge does not move")
+	c.armament.active = 0
+	p.refresh(c.armament, c.grenades)
+	await wait_process_frames(3)
+	assert_almost_eq(gauges.size.x, gauges.row_width(2), 0.5, "and back, not left wide")
+	assert_almost_eq(_frame_of(p).size.x, ReplicaPanel.WIDTH, 0.5)
+
+
+func test_ur8_up_to_ten_magazines_fit_inside_the_panel() -> void:
+	for n: int in [1, 2, 3, 6, 10]:
+		var p := _panel(_mags_character(n))
+		await wait_process_frames(3)
+		var frame := _frame_of(p).get_global_rect()
+		var row := p.gauges().get_global_rect()
+		assert_gte(row.position.x, frame.position.x + ReplicaPanel.PAD.x - 0.5, "%d mags: inside the left padding" % n)
+		assert_lte(row.end.x, frame.end.x - ReplicaPanel.PAD.z + 0.5, "%d mags: inside the right padding" % n)
+		assert_almost_eq(frame.size.x, ReplicaPanel.WIDTH, 0.5, "%d mags: panel keeps its width" % n)
+
+
+func test_ur8_many_magazines_never_draw_outside_the_panel() -> void:
+	# 11 or more boxes need over 168 px: the panel widens (as before UR8) rather than draw them outside; the data caps at 6
+	var p := _panel(_mags_character(14))
+	await wait_process_frames(3)
+	var frame := _frame_of(p).get_global_rect()
+	var row := p.gauges().get_global_rect()
+	assert_lte(row.end.x, frame.end.x + 0.5, "the row ends inside the panel: %s in %s" % [row, frame])
+	assert_gte(row.position.x, frame.position.x - 0.5, "and starts inside it")
+
+
+func test_ur8_no_replicas_leaves_the_row_empty_and_at_the_left() -> void:
+	var empty: Array[ReplicaConfig] = []
+	var c := Character.new(0, 0, Vector3.ZERO, 0.0, empty)
+	var p := ReplicaPanel.new()
+	add_child_autofree(p)
+	p.setup(HudConfig.new())
+	p.gauges().refresh(c.armament)
+	await wait_process_frames(2)
+	assert_eq(p.gauges().size.x, 0.0)
+	assert_eq(p.gauges().custom_minimum_size.x, 0.0)
+	assert_false(is_nan(p.gauges().get_global_rect().position.x))
+
+
+func test_ur8_a_hud_at_150_percent_keeps_the_boxes_inside_the_scaled_panel() -> void:
+	var holder := Control.new()
+	holder.size = Vector2(1920.0, 1080.0)
+	add_child_autofree(holder)
+	Hud.scale_root(holder, 1.5)
+	var p := ReplicaPanel.new()
+	holder.add_child(p)
+	p.setup(HudConfig.new())
+	var c := _mags_character(6)
+	p.refresh(c.armament, c.grenades)
+	await wait_process_frames(3)
+	var frame := _frame_of(p).get_global_rect()
+	var row := p.gauges().get_global_rect()
+	var name_label := p.find_child("ReplicaName", true, false) as Control
+	assert_almost_eq(row.position.x, name_label.get_global_rect().position.x, 1.0)
+	assert_gte(row.position.x, frame.position.x - 0.5)
+	assert_lte(row.end.x, frame.end.x + 0.5)
+	assert_almost_eq(row.size.x, p.gauges().row_width(6) * 1.5, 1.0, "scaled with the HUD")

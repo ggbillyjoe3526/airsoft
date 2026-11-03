@@ -13,8 +13,8 @@ func after_each() -> void:
 			DirAccess.remove_absolute(path + end)
 
 
-## Pause menu › Settings › HUD opacity: the tab's preview shows it, then the save tells the HUD, which brings its own
-## boxes to the new opacity.
+## Pause menu › Settings › HUD opacity: the tab's preview shows it, then the save tells the HUD, which fades its
+## replica panel and minimap (owner, 2026-11-03).
 func test_a_panel_opacity_change_from_the_open_settings_reaches_the_hud() -> void:
 	var s := Settings.new(PlayTuning.new())
 	var hud := _hud()
@@ -25,8 +25,7 @@ func test_a_panel_opacity_change_from_the_open_settings_reaches_the_hud() -> voi
 	screen._hud_page._panels.value = 50.0
 	screen.close()
 	assert_almost_eq(s.hud.panel_opacity, 0.5, 0.001)
-	var frame := hud._replica.get_child(2).get_theme_stylebox("panel") as StyleBoxFlat
-	assert_almost_eq(frame.bg_color.a, HudStyle.BACKING_PANEL * 0.5, 0.001, "the replica panel follows the tab")
+	assert_almost_eq(hud._replica.modulate.a, 0.5, 0.001, "the replica panel follows the tab")
 
 
 ## A preview showing a choice never reaches the HUD: each holds its own opacity.
@@ -39,36 +38,38 @@ func test_the_preview_s_opacity_never_reaches_the_hud() -> void:
 	var shown := HudPrefs.new()
 	shown.panel_opacity = 0.6
 	preview.show_prefs(shown)
-	var frame := hud._replica.get_child(2).get_theme_stylebox("panel") as StyleBoxFlat
-	assert_almost_eq(frame.bg_color.a, HudStyle.BACKING_PANEL, 0.001)
+	assert_almost_eq(hud._replica.modulate.a, 1.0, 0.001)
 	assert_almost_eq(HudStyle.backing_on(hud.score(), 1.0).a, 1.0, 0.001)
 
 
-## The flag marker's plate and its tail are one shape: the tail must take the panel opacity with the plate.
-func test_the_flag_markers_tail_matches_its_plate_after_a_restyle() -> void:
+## The HUD opacity fades only the replica panel and the minimap (owner, 2026-11-03): the flag marker, plate and tail,
+## stays solid.
+func test_the_flag_marker_stays_solid_whatever_the_hud_opacity() -> void:
 	var hud := _hud()
 	var p := HudPrefs.new()
 	p.panel_opacity = 0.5
 	hud.apply_prefs(p)
 	var marker: HudFlagMarker = hud._flag_marker
 	var plate := marker._plate.get_theme_stylebox("panel") as StyleBoxFlat
-	assert_almost_eq(plate.bg_color.a, HudStyle.BACKING_CLOCK * 0.5, 0.001, "the plate follows")
+	assert_almost_eq(plate.bg_color.a, HudStyle.BACKING_CLOCK, 0.001, "the plate stays")
 	assert_almost_eq(HudStyle.backing_on(marker, HudStyle.BACKING_CLOCK).a, plate.bg_color.a, 0.001,
-			"the tail follows its plate")
+			"the tail matches its plate")
+	assert_almost_eq(marker.modulate.a, 1.0, 0.001)
 
 
-## Parts the HUD adds after a restyle (What got you, the XP card) start at the opacity, as do the summary's panels.
-func test_parts_added_after_a_restyle_take_the_opacity() -> void:
+## Parts outside the replica panel and the minimap (What got you, the summary's panels) stay solid at any HUD opacity.
+func test_other_parts_stay_solid_whatever_the_hud_opacity() -> void:
 	var hud := _hud()
 	var p := HudPrefs.new()
 	p.panel_opacity = 0.7
 	hud.apply_prefs(p)
 	var records := hud.summary().records().get_theme_stylebox("panel") as StyleBoxFlat
-	assert_almost_eq(records.bg_color.a, MatchSummary.BACKING * 0.7, 0.001, "the summary's records panel")
+	assert_almost_eq(records.bg_color.a, MatchSummary.BACKING, 0.001, "the summary's records panel")
 	hud.show_what_got_you(HitFacts.new(), "Dash", Color.ORANGE, "")
 	var card := hud.what_got_you().get_theme_stylebox("panel") as StyleBoxFlat
-	assert_almost_eq(card.bg_color.a, WhatGotYouCard.BACKING * 0.7, 0.001, "What got you, added after")
-	assert_almost_eq(HudStyle.backing_on(hud.what_got_you(), 1.0).a, 0.7, 0.001, "its drawn backing")
+	assert_almost_eq(card.bg_color.a, WhatGotYouCard.BACKING, 0.001, "What got you")
+	assert_almost_eq(hud.what_got_you().modulate.a, 1.0, 0.001)
+	assert_almost_eq(hud._replica.modulate.a, 0.7, 0.001, "the replica panel fades")
 
 
 ## The restyle leaves a box that isn't a navy one (no meta) alone.
@@ -249,20 +250,19 @@ func _screen(s: Settings) -> SettingsScreen:
 	return screen
 
 
-## The preview's own parts (its feed line's drawn backing, the replica panel's box) take the tab's opacity.
+## The preview's replica panel takes the tab's HUD opacity; its feed line stays solid.
 func test_the_preview_s_parts_take_the_tab_s_opacity() -> void:
 	var preview := HudPreview.new()
 	add_child_autofree(preview)
 	var p := HudPrefs.new()
 	p.panel_opacity = 0.6
 	preview.show_prefs(p)
-	assert_almost_eq(HudStyle.backing_on(preview.feed_row(), 1.0).a, 0.6, 0.001, "the feed line's backing")
-	var frame := preview.panel().get_child(2).get_theme_stylebox("panel") as StyleBoxFlat
-	assert_almost_eq(frame.bg_color.a, HudStyle.BACKING_PANEL * 0.6, 0.001, "the replica panel")
+	assert_almost_eq(HudStyle.backing_on(preview.feed_row(), 1.0).a, 1.0, 0.001, "the feed line's backing")
+	assert_almost_eq(preview.panel().modulate.a, 0.6, 0.001, "the replica panel")
 
 
-## The What got you card's dial (a part that draws its own backing) is restyled with the card it sits in.
-func test_the_what_got_you_dial_takes_the_opacity() -> void:
+## The What got you card's dial (a part that draws its own backing) stays solid with its card.
+func test_the_what_got_you_dial_stays_solid() -> void:
 	var hud := _hud()
 	var p := HudPrefs.new()
 	p.panel_opacity = 0.5
@@ -273,5 +273,5 @@ func test_the_what_got_you_dial_takes_the_opacity() -> void:
 		if n.get_class() == "Control" and n.get_script() != null and n.get_parent() is HBoxContainer:
 			dials.append(n)
 	for d in dials:
-		assert_almost_eq(HudStyle.backing_on(d as CanvasItem, 1.0).a, 0.5, 0.001)
+		assert_almost_eq(HudStyle.backing_on(d as CanvasItem, 1.0).a, 1.0, 0.001)
 	assert_gt(dials.size(), 0, "the dial was found")

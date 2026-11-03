@@ -101,14 +101,15 @@ func test_a_feed_row_is_a_rounded_pill() -> void:
 	assert_false(row._frame.draw_center, "your lines' frame is an outline")
 
 
-func test_the_magazine_boxes_sit_at_the_right_under_the_count() -> void:
+func test_the_magazine_boxes_sit_at_the_panel_s_left_edge() -> void:
 	var c := Character.new(0, 0, Vector3.ZERO, 0.0, loadout)
 	var p := _panel(c)
 	await wait_process_frames(2)
 	var gauges := p.gauges()
 	var row := gauges.get_global_rect()
 	assert_almost_eq(row.size.x, gauges.row_width(gauges._count), 0.5, "as wide as its boxes")
-	assert_almost_eq(row.end.x, p._spare.get_global_rect().end.x, 1.0, "right edge under the count's")
+	var name_label := p.find_child("ReplicaName", true, false) as Control
+	assert_almost_eq(row.position.x, name_label.get_global_rect().position.x, 1.0, "left edge with the name's (owner)")
 
 
 func test_readying_a_bomb_does_not_move_the_panel() -> void:

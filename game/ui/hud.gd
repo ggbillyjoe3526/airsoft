@@ -171,7 +171,8 @@ var _drawn_at: Vector2 = Vector2.ZERO
 var _hop_slot: int = -1
 ## The HUD tab's choices (apply_prefs).
 var _prefs := HudPrefs.new()
-## The panel opacity the HUD's parts show (HudStyle.restyle).
+## The HUD opacity (HudPrefs.panel_opacity): how much the replica panel and the minimap show, words and all (owner,
+## 2026-11-03: only those two, only in a match).
 var _opacity: float = 1.0
 ## The HUD's size (HudPrefs.hud_size, 1 = as drawn), and how much of the flag warning's pulse shows (Reduced motion).
 var _hud_size: float = 1.0
@@ -378,7 +379,6 @@ func setup_field(query: WorldQuery, body: BodyConfig, names: PackedStringArray, 
 	_pings.setup(_cfg, _sim.pings.lifetime, characters, _player, _teams.colours[_player.team],
 			_teams.colours[1 - _player.team])
 	_pings.hud_size = _hud_size
-	HudStyle.restyle(_pings, _opacity)
 	_feed.set_names(names)
 	_round_result.set_names(names)
 	_summary.set_names(names)
@@ -401,7 +401,6 @@ func setup_mag_line(share: MagShare, characters: int) -> void:
 	_mag_line.set_names(_names)
 	_mag_line.enabled = _prefs.mag_hand_off
 	_mag_line.counted = _prefs.ammo_counter
-	_mag_line.set_opacity(_opacity)
 
 
 func mag_line() -> HudMagLine:
@@ -417,7 +416,7 @@ func setup_minimap(map: MapData, cfg: MinimapConfig, heard: MinimapHearing, map_
 	move_child(_flag_marker, _minimap.get_index()) # the map is drawn over the marker, never the other way round
 	move_child(_pings, _minimap.get_index())
 	_minimap.setup(cfg, _teams, map, heard, map_name, characters, _cfg.minimap_margin)
-	HudStyle.restyle(_minimap, _opacity)
+	_minimap.modulate.a = _opacity
 	# Over the rest of the HUD while its key is held (the order wheel never opens with it).
 	_field_map = HudFieldMap.new()
 	add_child(_field_map)
@@ -551,11 +550,12 @@ func apply_prefs(prefs: HudPrefs) -> void:
 	_replica.set_counted(prefs.ammo_counter)
 	if not is_equal_approx(prefs.panel_opacity, _opacity):
 		_opacity = prefs.panel_opacity
-		HudStyle.restyle(self, _opacity)
+		_replica.modulate.a = _opacity
+		if _minimap != null:
+			_minimap.modulate.a = _opacity
 	if _mag_line != null:
 		_mag_line.enabled = prefs.mag_hand_off
 		_mag_line.counted = prefs.ammo_counter
-		_mag_line.set_opacity(_opacity)
 	set_hud_size(prefs.hud_size)
 
 
@@ -759,7 +759,6 @@ func show_what_got_you(facts: HitFacts, shooter_name: String, colour: Color, not
 	_place(_what_got_you, Vector4(0.0, 0.0, 0.0, 0.0), Rect2(CARD_LEFT, top, WhatGotYouCard.WIDTH, 0.0))
 	add_child(_what_got_you)
 	_what_got_you.visible = not _board.visible
-	HudStyle.restyle(_what_got_you, _opacity)
 
 
 func hide_what_got_you() -> void:
@@ -892,7 +891,6 @@ func show_xp(settled: PlayerTally.Settled, progress: Progress, dev_content: bool
 	_xp.pivot_offset_ratio = Vector2(0.5, 0.0) # held smaller about its top middle with the summary (_fit_summary)
 	add_child(_xp)
 	_hang_cards()
-	HudStyle.restyle(_xp, _opacity)
 	_xp.visible = not _round_result.holds_results()
 
 
@@ -1110,8 +1108,6 @@ func setup_orders(controls: ControlsConfig) -> void:
 	_place(_order_wheel, Vector4(0.5, 0.5, 0.5, 0.5), Rect2(0.0, 0.0, 0.0, 0.0))
 	add_child(_order_wheel)
 	_order_wheel.setup(_cfg, controls, colour)
-	HudStyle.restyle(_order_wheel, _opacity)
-	HudStyle.restyle(_hold_marker, _opacity)
 
 
 ## Shows the wheel as `wheel` (the pointer PlayerInput moves) has it, with the order `in_force` and the last order

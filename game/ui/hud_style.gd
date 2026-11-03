@@ -92,7 +92,8 @@ const NUMBER_EDGE := 5
 const NUMBER_EDGE_ALPHA := 0.9
 
 
-## The page colour at `alpha`, scaled by the HUD tab's panel `opacity` (HudPrefs.panel_opacity): every HUD backing.
+## The page colour at `alpha`, scaled by a panel `opacity` (restyle; the HUD keeps its backings at 1 since the HUD
+## opacity became the replica panel's and the minimap's, UR8).
 static func backing(alpha: float, opacity: float = 1.0) -> Color:
 	return Color(GameTheme.BG, alpha * opacity)
 

@@ -1633,8 +1633,8 @@ func _apply_hud() -> void:
 	_hud.set_sound_cues(settings.sound_cues, settings.sound_cue_size, settings.sound_cue_colour)
 	if not settings.sound_cues:
 		_cues.clear()
-	# The skipping note sits outside the HUD, over it, at the HUD's size.
-	HudStyle.restyle(_skip_note, settings.hud.panel_opacity)
+	# The skipping note sits outside the HUD, over it, at the HUD's size (solid: the HUD opacity is the replica panel's and
+	# the minimap's only, UR8).
 	Hud.scale_root(_skip_note.get_parent() as Control, _hud.hud_size())
 
 

@@ -34,7 +34,7 @@ func test_the_choices_survive_a_save_and_a_load() -> void:
 func test_a_bad_value_falls_back_on_its_own() -> void:
 	var p := HudPrefs.new()
 	p.from_dict({"shape": 9, "colour": 2, "size": 99.0, "gap": 6, "opacity": "full", "outline": 1, "marker": false,
-			"feed_corner": 1.5, "feed_lines": 1, "panel_opacity": 0.2, "minimap_turn": 2})
+			"feed_corner": 1.5, "feed_lines": 1, "panel_opacity": 0.1, "minimap_turn": 2})
 	var d := HudPrefs.new()
 	assert_eq(p.shape, d.shape, "no fifth shape")
 	assert_eq(p.colour, 2)
@@ -111,8 +111,7 @@ func test_the_hud_takes_the_choices() -> void:
 	assert_true(hud.hit_lines().stay)
 	assert_eq(hud.hit_lines().max_lines, HudPrefs.KEPT_LINES)
 	assert_false(hud._replica.counted())
-	var box := hud._replica.get_child(2).get_theme_stylebox("panel") as StyleBoxFlat
-	assert_almost_eq(box.bg_color.a, HudStyle.BACKING_PANEL * 0.5, 0.001, "the replica panel's backing")
+	assert_almost_eq(hud._replica.modulate.a, 0.5, 0.001, "the replica panel fades (UR8)")
 	p.feed_lines = HudPrefs.FeedLines.FADE
 	p.ammo_counter = true
 	p.panel_opacity = 1.0
@@ -120,7 +119,7 @@ func test_the_hud_takes_the_choices() -> void:
 	assert_false(hud.hit_lines().stay)
 	assert_eq(hud.hit_lines().max_lines, HudConfig.new().feed_lines)
 	assert_true(hud._replica.counted())
-	assert_almost_eq(box.bg_color.a, HudStyle.BACKING_PANEL, 0.001)
+	assert_almost_eq(hud._replica.modulate.a, 1.0, 0.001)
 
 
 func test_the_panel_opacity_stays_with_the_hud() -> void:
@@ -128,7 +127,8 @@ func test_the_panel_opacity_stays_with_the_hud() -> void:
 	var p := HudPrefs.new()
 	p.panel_opacity = 0.6
 	hud.apply_prefs(p)
-	assert_almost_eq(HudStyle.backing_on(hud.score(), 1.0).a, 0.6, 0.001, "a part of the HUD")
+	assert_almost_eq(hud._replica.modulate.a, 0.6, 0.001, "the replica panel")
+	assert_almost_eq(HudStyle.backing_on(hud.score(), 1.0).a, 1.0, 0.001, "the score stays solid (UR8)")
 	var row := HudFeedRow.new()
 	add_child_autofree(row)
 	assert_almost_eq(HudStyle.backing_on(row, 1.0).a, 1.0, 0.001, "a part outside it draws as built")
