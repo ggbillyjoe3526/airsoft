@@ -1,22 +1,13 @@
-Task: SN3 · head 704372c + staged diff · Verdict: Pass
-Run: tools/team_bench.gd, Street 8v8, 60 s match time, seed 1, headless (no GPU), 2 runs each on head and on origin/main (704372c, scratch worktree) · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and origin/main
-Metrics (tick mean / p95 / p99 ms, 2 runs): head 2.70, 2.68 / 5.98, 6.01 / 8.53, 7.30; main 2.93, 2.90 / 6.88, 6.79 / 8.53, 8.66. Frame (views) mean 1.0 both. Frames over 16.7 ms: head 3 and 2 of 3600, main 2 and 2. Worst-tick spikes 17 to 24 ms on both (noise on a shared 4-core box). All measured. Frame times reported only, not owner hardware.
-Regressions (> 10 % worse): none (head is not slower; the spread is run noise). Node, orphan and memory monitors not touched by the diff (no scene, node, or resource added).
-Caveat: the bench plays the shipped kits (Dev content off, no Sniper Rifle), so the scoped and revealed branches ran mostly on their early-out. Their cost is judged by reading below.
-
-Blocking findings: none.
-- game/ai/bot_senses.gd:112 sight_reach (judgment): per bot per candidate per perceive. Runs on the 0.1 s think tick (bot_brain.gd:36, think_interval 0.1), not every tick, and only after the `d >= best_d` skip, so only for enemies nearer than the best so far. Scalar math, two property reads, one id compare; no allocation. At 16 bots x <= 8 enemies x 10 Hz that is about 1300 calls/s of a few dozen ops. Negligible.
-- game/ai/bot_combat.gd:205 scoped / :210 fights_aimed (judgment): scoped also runs in aim() every tick per bot with a target (bot_combat.gd:38). Two Armament.replica() lookups (array index) plus compares. No allocation. Negligible.
-- game/ai/bot_combat.gd:194 bolt_waits (judgment): in shoot(), after the cheap aimed-raise early-out; short-circuits on in_hand.bolt_action (false for every AEG kit) before the settling() maths. No allocation.
-- game/ai/bot_hearing.gd:87 _hit_call loop over w.bots (judgment): once per CHARACTER_HIT, at most 16 iterations of is_in_play and distance_to (float, no allocation). Hits are a few per round, not per tick. The new `var c` / `for b` are plain locals. Fine. reveal() at :196 writes two fields, no allocation.
-- game/ai/bot.gd:157,327 (judgment): two scalar fields per Bot, reset in reset(); no leak, no pooling concern.
-- game/config/bot_config.gd (judgment): five new @export scalars, read from cfg (cached local in the hot paths); no per-call allocation, no preset or shader involvement.
-- data/maps/street.json / tools/street/layout.py:468 (judgment): one box ("bins") added to the Street's obstacle list. Adds one collider and one grid/nav bake cell set at load, plus one more occluder in sight rays on the Path; no new material or mesh type (reuses the box generator), so no prewarm entry is missing. Did not open the JSON.
-- tests/support/match_runner.gd:186 kits_now: test support only, never shipped; a reference to an existing array (no copy).
-- tests/balance/sniper_bench.gd: dev only, never exported; not reviewed for runtime cost.
-
-Advisory: none.
-Fixes: none needed.
-Unexplained: none. The worst-tick spikes (17 to 24 ms) appear in both head and main runs, so not attributable to the diff.
-
-Pass
+Task: none (AU2) · head 31cbb53 · Verdict: Pass
+Run: not measured (no --perf match run; the change adds no node or tick work beyond the lines below) · budget: no baseline yet (pipeline/perf-budget.json does not exist), judged against targets and the diff against 4b10288
+Metrics: install size assets/ 17 MB, assets/audio 15 MB, cues 13 MB / 500 MB budget (ok, measured); 418 cue WAVs, largest 308 KB (smoke_pop) (measured)
+Regressions (> 10 % worse): none measured; frame times not measurable here
+Blocking findings: none
+Advisory:
+- Memory (judgment): cues import as AudioStreamWAV (compress/mode=2), all cues loaded at setup; 13 MB on disk, a few MB decoded at most. Three more impact sets (glass, plastic, cardboard) load once in SimAudio.setup (sim_audio.gd:155), not per frame.
+- Voices (judgment): longer tails (impacts 0.18-0.35 s, mags 0.4 s, doors ~1 s, power_gas 0.3 s) hold voices longer, but all play is bounded: field_voices 24, own_voices 8, cue_voices 4, shot_cue_voices 6 (sound_config.gd:147-150), impact_limit 8 per impact_window via VoicePool.StartLimit (sim_audio.gd:141). A 0.35 s impact at 8 per window cannot exceed the pool; worst case is the oldest voice being reused (audible cut), not growth. Could raise cue_voices for impacts if the owner hears clipping in a heavy hose; a feel test, not a perf issue.
+- sim_audio.gd:226-227 (judgment): per SHOT, `_slide_lock.get(p, &"")` is a Dictionary lookup on StringName, no allocation; `_emptied` (sim_audio.gd:546) is only called when the profile has a slide lock (gas pistols), and does two array reads and a compare. No String formatting, Array, Callable or lambda per frame. The `"%s%s_1.wav"` format at sim_audio.gd:153 is in setup only.
+- Surface enum +3 (ray_hit.gd:9) (judgment): map_level makes one StaticBody3D per surface, so at most 3 more bodies per map, only for surfaces a map uses; negligible node count. Per-surface tables (SURFACE_NAMES, IMPACT_NAMES, puff_colours, noise ground, ricochet match) are extended in step; array lookups by enum, no new allocation. Depot and range bakes are the same size (130667 B; 6953 -> 6948 B).
+- Presets/prewarm (judgment): no new material, particle or shader; the glass/plastic/cardboard puffs reuse existing colours. No quality-preset bypass.
+- Teardown (judgment): no new nodes, timers, tweens or connections in the diff; nothing to free.
+Fixes: none required.

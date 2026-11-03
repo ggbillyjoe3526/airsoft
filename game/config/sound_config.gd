@@ -102,10 +102,11 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 @export var enemy_radio_reach: float = 15.0
 @export var radio_voices: int = 2
 ## Your ping placed (PN2; the browser game's AUDIO.pingPip, PG1): one short soft pip in your ear on the Interface bus,
-## lower and quieter than the shot timer so it reads as a mark, not a countdown. A plain sine at ping_pip_hz,
-## ping_pip_length (s) long with the whistle's attack and release, rendered by tools/render_whistle.gd as ping_pip_1 and
-## played at ping_pip_gain (the browser's volume, as whistle_gain is).
-@export var ping_pip_gain: float = 0.13
+## lower and quieter than the shot timer so it reads as a mark, not a countdown. The owner's recorded beep (AU2), lower
+## and shorter (ping_pip_1, tools/cut_recordings.py), played at ping_pip_gain: the browser's volume lifted 4 dB, as the
+## recording's loudest 50 ms sit that far under the old sine's. ping_pip_hz and ping_pip_length are the synthesised
+## draft's (tools/render_whistle.gd).
+@export var ping_pip_gain: float = 0.2
 @export var ping_pip_hz: float = 1700.0
 @export var ping_pip_length: float = 0.08
 ## The practice range (M21): steel rings, a plywood figure knocks (an impact on wood), each heard target_reach (m) away,
@@ -193,19 +194,23 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 ## own level, under the Ambience volume (owner, 2026-11-01: too loud and distracting; AU1).
 @export var ambiences: AmbienceConfig = AmbienceConfig.new()
 @export var ambience_gain: float = 0.5
-## The referee's pea whistle (the browser game's whistle.ts), rendered by tools/render_whistle.gd as whistle_short and
-## whistle_long, whistle_variants of each with the warble's phase moved round its cycle, and played at whistle_gain on
-## the Interface bus. A sine at whistle_hz whose pitch warbles at whistle_warble_hz by whistle_warble_depth (a share of
-## the pitch: the pea rattling), fading in over whistle_attack (s) and out over the last whistle_release (s).
-@export var whistle_gain: float = 0.25
+## The referee's pea whistle: the owner's recorded blasts (AU2, tools/cut_recordings.py), whistle_short and
+## whistle_long, whistle_variants of each, played at whistle_gain on the Interface bus: the browser's 0.25 lifted 5 dB,
+## as a real whistle's loudest 50 ms sit that far under the old full-scale sine's. The rest are the synthesised draft's
+## recipe (tools/render_whistle.gd, the browser game's whistle.ts): a sine at whistle_hz whose pitch warbles at
+## whistle_warble_hz by whistle_warble_depth (a share of the pitch: the pea rattling), fading in over whistle_attack (s)
+## and out over the last whistle_release (s).
+@export var whistle_gain: float = 0.45
 @export var whistle_hz: float = 2900.0
 @export var whistle_warble_hz: float = 28.0
 @export var whistle_warble_depth: float = 0.04
 @export var whistle_attack: float = 0.02
 @export var whistle_release: float = 0.05
 @export var whistle_variants: int = 3
-## A short blast (s; a round's start) and a long one (s; a round's end, the match's end, the range's Time).
-@export var whistle_short: float = 0.14
+## A short blast (s; a round's start) and a long one (s; a round's end, the match's end, the range's Time): the
+## recordings' lengths (the long one the browser's; the short one longer than its 0.14 s, as a real blast is), which
+## time the blasts that follow them.
+@export var whistle_short: float = 0.3
 @export var whistle_long: float = 0.8
 ## The blasts: a round starts on round_start_blasts short ones, each starting round_start_gap blast-lengths after the
 ## one before; a round ends on one long; the match ends on match_over_blasts more long ones after it, each

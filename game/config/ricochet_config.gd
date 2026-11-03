@@ -31,9 +31,9 @@ func restitution(surface: RayHit.Surface) -> float:
 	match surface:
 		RayHit.Surface.CONCRETE:
 			return concrete
-		RayHit.Surface.METAL:
+		RayHit.Surface.METAL, RayHit.Surface.GLASS:
 			return metal
-		RayHit.Surface.WOOD:
+		RayHit.Surface.WOOD, RayHit.Surface.PLASTIC, RayHit.Surface.CARDBOARD:
 			return wood
 		RayHit.Surface.EARTH, RayHit.Surface.GRAVEL, RayHit.Surface.GRASS, RayHit.Surface.LEAVES:
 			return earth

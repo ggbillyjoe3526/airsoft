@@ -53,8 +53,8 @@ func test_figures_have_their_clips_and_sidecars() -> void:
 
 func test_every_sound_loads_and_loops_loop() -> void:
 	var cues := _files("res://assets/audio/cues", "wav")
-	assert_eq(cues.size(), 400,
-			"the salvage's 372 (the city's calls went with Neon Heights), the whistle's 6, the pip, the bombs' 12 (SF1), the doors' 6 (DO1), the spring rifle's cocking 3 (SN1)")
+	assert_eq(cues.size(), 418,
+			"the salvage's 372 (the city's calls went with Neon Heights), the whistle's 6, the pip, the bombs' 12 (SF1), the doors' 6 (DO1), the spring rifle's cocking 3 (SN1), the BBs on glass, plastic and cardboard 15 and the slide lock 3 (AU2)")
 	for path: String in cues:
 		var s := load(path) as AudioStreamWAV
 		assert_true(s != null and s.get_length() > 0.0, path)

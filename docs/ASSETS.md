@@ -61,22 +61,26 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
 
 ## Made by the project
 
-- **Sounds:** 78 sounds (372 variants) and 4 ambience loops rendered once from the browser game's synthesis recipes, in
-  `assets/audio/` (`assets/audio/README.md`). No outside source; same licence as the code. They are replaced with CC0
-  or recorded sounds later.
-- **The referee's whistle:** `assets/audio/cues/whistle_short_1.wav` to `_3` and `whistle_long_1.wav` to `_3`, the
-  browser game's live pea whistle rendered by our own `tools/render_whistle.gd` from SoundConfig's whistle numbers
-  (SP3, 2026-10-22), and `ping_pip_1.wav`, the ping's pip from the same tool (PN2, 2026-10-26). No outside source; same licence as the code. To re-render after those numbers change:
-  `godot --headless --path . -s res://tools/render_whistle.gd`, then `godot --headless --path . --import`, and commit
-  the files with their `.import` files.
+- **The owner's recordings** (AU2, 2026-11-03): 36 recordings William made himself (a gas pistol he recorded, a motor's
+  whir, BBs on metal, wood, glass, plastic, cardboard and cloth, knocks on shelves, a crate and wood, a door, a pea
+  whistle, a digital thermometer's beep, a pouch, a torch, a magazine thrown and caught). The originals are in the
+  shared project files (`audio/william/raw/`), not the repository; `tools/cut_recordings.py` cuts, cleans and levels
+  them into the cues it lists, every replica's shots, dry clicks and magazines (the AEG from the motor and the pistol's
+  crack, the Sniper Rifle and the Cyber Pistol from the pistol's), the pistol's slide locking back, BBs on metal,
+  wood, glass, plastic, cardboard and players, the gear, the props, the doors, the whistle, the shot timer and the
+  ping. Owner-made for the game; same licence as the code. To re-cut: `python3 tools/cut_recordings.py <raw folder>`,
+  then `godot --headless --path . --import`.
+- **Sounds:** the rest of the 78 sounds and 4 ambience loops are still rendered from the browser game's synthesis
+  recipes, in `assets/audio/` (`assets/audio/README.md`): concrete, earth and leaf impacts, the steps, the kit
+  rustle, the selector, the draw, the radio, the hits, the vault, the steel ring, the flag rope, the noisy steel skip
+  and glass, the ambience, and the Sniper Rifle's spring twang. No outside source; same licence as the code.
 - **The smoke and flash bombs' sounds:** `assets/audio/cues/grenade_pin_1.wav` to `_3`, and the same three of
   `grenade_bounce`, `smoke_pop` and `flash_bang`, synthesised by our own `tools/render_grenades.gd` (SF1, 2026-10-30).
-- **The doors' sounds:** `assets/audio/cues/door_open_1.wav` to `_3` and `door_shut_1.wav` to `_3`, synthesised by our
-  own `tools/render_doors.gd` (DO1, 2026-10-31).
-- **The spring rifle's cocking:** `assets/audio/cues/boltCycle_1.wav` to `_3`, synthesised by our own
-  `tools/render_bolt.gd` (SN1, 2026-11-02): the charging handle drawn back over the spring and let go. A placeholder
-  until the owner's own sounds arrive.
-  No outside source; same licence as the code. Re-render them the same way as the whistle, with that tool.
+  No outside source; same licence as the code. To re-render: `godot --headless --path . -s
+  res://tools/render_grenades.gd`, then `godot --headless --path . --import`.
+- **Synthesised drafts kept for reference:** `tools/render_whistle.gd` (the whistle and the ping's pip, SP3, PN2),
+  `tools/render_doors.gd` (DO1) and `tools/render_bolt.gd` (SN1) render the drafts the recordings replaced, only to a
+  folder named after `--`.
 - **Art references:** the owner's six reference pictures of the target look and his arm and hand study
   (owner-supplied, 2026-10-18), in `docs/art/references/` (`docs/ART.md` › The target). Not game assets: Godot
   ignores the folder and no export ships it.

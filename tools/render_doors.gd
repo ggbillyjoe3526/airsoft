@@ -1,16 +1,14 @@
 extends SceneTree
-## Renders the hinged doors' sounds (DO1) to assets/audio/cues/, 16-bit mono 44.1 kHz like the other cues, each variant
+## The hinged doors' synthesised draft (DO1), kept for reference since the game plays the owner's recordings (AU2,
+## tools/cut_recordings.py): rendered to the folder named after `--`, 16-bit mono 44.1 kHz like the cues, each variant
 ## from its own seeded noise and a slightly moved pitch:
 ## - door_open_<n>: the latch's click, then the hinge's creak as the plywood leaf swings away;
 ## - door_shut_<n>: a shorter creak, then the leaf's hollow wooden slam and the latch clicking home.
 ## A plywood door in a hall, not a vault's: light and a little rattly, loud enough that the other team hears it.
 ## No display needed:
-##   godot --headless --path . -s res://tools/render_doors.gd
-## then `godot --headless --path . --import` and commit the files with their .import files. An argument after `--`
-## names another output folder.
+##   godot --headless --path . -s res://tools/render_doors.gd -- <folder>
 
 const RATE := 44100
-const OUT_DIR := "res://assets/audio/cues/"
 const WHISTLE := preload("res://tools/render_whistle.gd")
 const GRENADES := preload("res://tools/render_grenades.gd")
 ## Variants of each cue, and the seed each cue's noise starts from (variant n adds n).
@@ -56,7 +54,12 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var args := OS.get_cmdline_user_args()
-	var out := OUT_DIR if args.is_empty() else args[0].trim_suffix("/") + "/"
+	if args.is_empty():
+		# The game plays the owner's recordings (AU2, tools/cut_recordings.py): render this draft elsewhere.
+		push_error("render_doors: the game plays recordings now; name an output folder after --")
+		quit(1)
+		return
+	var out := args[0].trim_suffix("/") + "/"
 	var failed := false
 	for v in VARIANTS:
 		var pitch := 1.0 + PITCH_STEP * v

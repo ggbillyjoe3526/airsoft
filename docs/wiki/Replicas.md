@@ -36,7 +36,7 @@ magazine. It is in your kit from the start.
 
 A gas blowback pistol: every shot cycles the slide with a puff of gas from the muzzle and the ejection port. It fires
 **single shots** only. Its slide locks back when you fire the last BB and closes as the new magazine seats near the
-end of the reload, so you always know when it is empty.
+end of the reload, so you always know when it is empty: you hear it lock back on that last shot.
 
 Gas drives it, so the gas you load sets its energy: stronger gas pushes harder and kicks harder. It takes a laser, a
 silencer and an extended magazine. It is in your kit from the start.
@@ -48,6 +48,13 @@ shots, bursts or full auto**, faster than the rifle from big magazines, with alm
 its numbers). Its battery is built in, so
 no power source fits it, and no part fits it either. It wears its own white, cyan and magenta colours; with
 **Realistic colours** on it turns plain grey with no glow. It has its own shot, dry-click and magazine sounds.
+
+## How they sound
+
+Every replica's shots, dry clicks and magazines are real recordings: a gas pistol, an electric motor's whirr and
+hands on magazines, recorded for the game. You can tell them apart by ear: the AEG Rifle's motor whirr, the GBB
+Pistol's gas pop and slide, and the Cyber Pistol's short buzz. BBs sound different on metal, wood, glass, plastic,
+cardboard and on a player, so you hear what a shot hit.
 
 ## BB weight
 

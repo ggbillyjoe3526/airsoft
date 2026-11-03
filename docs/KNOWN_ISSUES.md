@@ -12,7 +12,7 @@ Every open bug, limit and known gap in the game, so nobody re-reports or re-meas
 | Area | Issue | Class | Found |
 |---|---|---|---|
 | Code | `HudStyle.restyle`, its box metas and `backing()`'s opacity have no game caller since the HUD opacity became the replica panel's and the minimap's fade (UR8); only tests use them. Remove with their tests | can wait | 2026-11-03 |
-| Play | The Sniper Rifle's Fire clip and cocking sound show the handle home 0.71 s after a shot, but the rifle is ready at 1.25 s (M130) to 1.39 s (M150); a click after the handle is home now fires as the cycle ends (BP3). Re-time with the owner's model and sounds | playtest | 2026-11-03 |
+| Play | The Sniper Rifle's Fire clip and cocking sound show the handle home 0.71 s after a shot, but the rifle is ready at 1.25 s (M130) to 1.39 s (M150); a click after the handle is home now fires as the cycle ends (BP3). The cocking is the owner's recorded pistol slide since AU2, timed to the clip; re-time with the owner's model | playtest | 2026-11-03 |
 | Play | The bolt's cocking sound plays to its end after a switch to the pistol or a hit mid-cycle (BP3) | can wait | 2026-11-03 |
 | Play | A mouse wheel notch on the tick a reload or a slot key's draw starts, aimed through the Variable Scope, neither zooms nor switches (BP3) | can wait | 2026-11-03 |
 | Play | Indoors, a bot that fights two targets in turn rolls for full auto again on each return to one, so its chance at that one compounds (NA1, BP3) | can wait | 2026-11-03 |

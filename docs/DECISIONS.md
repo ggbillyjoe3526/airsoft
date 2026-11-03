@@ -852,8 +852,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Audio
 
-- **Every sound starts as a recipe synthesised in code (2026-10-03).** Replicas sound like toys: mechanical and
-  plasticky. CC0 samples may be added where synthesis falls short, each recorded in `docs/ASSETS.md`.
+- **Every sound started as a recipe synthesised in code (2026-10-03); the owner's own recordings replace them as he
+  makes them (owner, 2026-11-02 and 2026-11-03, AU2).** Replicas sound like toys: mechanical and plasticky. He rejected
+  the synthesised and CC0 drafts and records his own (`docs/ASSETS.md` › Made by the project); `tools/cut_recordings.py`
+  cuts them in at the old sounds' levels. His rulings on the first batch: reuse his pistol sounds for the other
+  replicas where they fit; "Magazine in/out" and "Metal slide" are the pistol's; the beep is for anything that needs a
+  beep; cardboard goes wherever it fits even without a cardboard surface; the gas refill is not used; "empty lock
+  back" is the slide locking back on the last shot.
 - **A replica's shot follows its power source: electric, gas or spring (owner, 2026-10-03).** An empty AEG still cycles;
   an empty gas pistol only clicks.
 - **Footsteps are information, so gameplay audio comes first (owner, 2026-10-05).** Every ground's step stays within

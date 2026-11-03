@@ -1,10 +1,16 @@
 extends GutTest
-## The referee's whistle (SP3): the rendered blasts on disk (length, peak, pitch, made from SoundConfig's numbers by
-## tools/render_whistle.gd) and SoundConfig's level and blast pattern (the browser game's whistle.ts and AUDIO).
+## The referee's whistle (SP3, recorded in AU2): the owner's recorded blasts on disk (format, length, peak, a pea
+## whistle's pitch, cut by tools/cut_recordings.py) and SoundConfig's level and blast pattern (the browser game's
+## whistle.ts and AUDIO).
 
-const Renderer := preload("res://tools/render_whistle.gd")
+const SHORT := "whistle_short"
+const LONG := "whistle_long"
 const RATE := 44100
 const HEADER := 44
+## Where a pea whistle sounds (Hz, its zero crossings' rate): the recording's is about 2.2 to 3.1 kHz.
+const PITCH := Vector2(1500.0, 4000.0)
+## The recordings' peaks sit at tools/cut_recordings.py's cap (-1 dB) or a little under.
+const PEAK := Vector2(0.8, 0.9)
 
 var cfg: SoundConfig
 
@@ -13,11 +19,10 @@ func before_all() -> void:
 	cfg = PlayTuning.load_default().sound
 
 
-func test_each_blast_is_a_16_bit_mono_wav_of_its_length_at_full_scale_and_2900_hz() -> void:
-	for stem: String in [Renderer.SHORT, Renderer.LONG]:
-		var seconds := Renderer.length_of(cfg, stem)
-		assert_almost_eq(seconds, 0.14 if stem == Renderer.SHORT else 0.8, 1e-6, stem)
-		for v in 3:
+func test_each_blast_is_a_16_bit_mono_wav_of_its_length_peaking_near_full_scale_at_a_whistles_pitch() -> void:
+	for stem: String in [SHORT, LONG]:
+		var seconds := cfg.whistle_short if stem == SHORT else cfg.whistle_long
+		for v in cfg.whistle_variants:
 			var path := "%s%s_%d.wav" % [SoundConfig.CUE_DIR, stem, v + 1]
 			var bytes := FileAccess.get_file_as_bytes(path)
 			assert_gt(bytes.size(), HEADER, path)
@@ -31,52 +36,42 @@ func test_each_blast_is_a_16_bit_mono_wav_of_its_length_at_full_scale_and_2900_h
 			var frames := bytes.decode_u32(40) >> 1
 			assert_almost_eq(float(frames) / RATE, seconds, 1.0 / RATE, "%s lasts its blast" % path)
 			var peak := 0
-			var first := -1.0
-			var last := -1.0
 			var rises := 0
 			var before := bytes.decode_s16(HEADER)
 			for i in range(1, frames):
 				var s := bytes.decode_s16(HEADER + i * 2)
 				peak = maxi(peak, absi(s))
 				if before <= 0 and s > 0:
-					var at := i - 1 + float(-before) / float(s - before)
-					if first < 0.0:
-						first = at
-					last = at
 					rises += 1
 				before = s
-			assert_between(peak / 32767.0, 0.98, 1.0, "%s peaks at full scale" % path)
-			var hz := (rises - 1) / ((last - first) / RATE)
-			assert_almost_eq(hz / 2900.0, 1.0, 0.02, "%s sounds at %.1f Hz" % [path, hz])
+			assert_between(peak / 32767.0, PEAK.x, PEAK.y, "%s peaks near full scale" % path)
+			var hz := rises / seconds
+			assert_between(hz, PITCH.x, PITCH.y, "%s sounds as a pea whistle (%.0f Hz)" % [path, hz])
 
 
-func test_the_files_are_rendered_from_sound_configs_numbers_each_variant_its_own() -> void:
-	var renders: Array[PackedByteArray] = []
-	for stem: String in [Renderer.SHORT, Renderer.LONG]:
+func test_the_blasts_are_each_their_own_take() -> void:
+	var seen: Array[PackedByteArray] = []
+	for stem: String in [SHORT, LONG]:
 		for v in cfg.whistle_variants:
 			var path := "%s%s_%d.wav" % [SoundConfig.CUE_DIR, stem, v + 1]
-			var made := Renderer.wav(Renderer.samples(cfg, Renderer.length_of(cfg, stem), v))
-			assert_true(FileAccess.get_file_as_bytes(path) == made, "%s is SoundConfig's whistle (re-render it)" % path)
-			for other in renders:
-				assert_false(other == made, "%s differs from the other variants" % path)
-			renders.append(made)
-	assert_false(ResourceLoader.exists("%swhistle_short_%d.wav" % [SoundConfig.CUE_DIR, cfg.whistle_variants + 1]))
+			var bytes := FileAccess.get_file_as_bytes(path)
+			assert_false(seen.has(bytes), "%s differs from the other variants" % path)
+			seen.append(bytes)
+	assert_false(ResourceLoader.exists("%s%s_%d.wav" % [SoundConfig.CUE_DIR, SHORT, cfg.whistle_variants + 1]))
 
 
-func test_the_whistle_numbers_are_the_browsers() -> void:
-	assert_almost_eq(cfg.whistle_gain, 0.25, 1e-6, "level")
-	assert_almost_eq(cfg.whistle_hz, 2900.0, 1e-6)
-	assert_almost_eq(cfg.whistle_warble_hz, 28.0, 1e-6)
-	assert_almost_eq(cfg.whistle_warble_depth, 0.04, 1e-6)
-	assert_almost_eq(cfg.whistle_attack, 0.02, 1e-6)
-	assert_almost_eq(cfg.whistle_release, 0.05, 1e-6)
+func test_the_whistle_numbers() -> void:
+	# The browser's 0.25 lifted 5 dB: a real whistle's loudest 50 ms sit that far under the old full-scale sine's.
+	assert_almost_eq(cfg.whistle_gain, 0.45, 1e-6, "level")
+	assert_almost_eq(cfg.whistle_short, 0.3, 1e-6)
+	assert_almost_eq(cfg.whistle_long, 0.8, 1e-6, "the browser's long blast")
 	assert_eq(cfg.whistle_variants, 3)
 
 
 func test_a_round_starts_on_two_short_blasts_the_second_1_6_lengths_on() -> void:
 	assert_eq(cfg.round_start_blasts, 2)
 	assert_almost_eq(cfg.round_start_blast(0), 0.0, 1e-6)
-	assert_almost_eq(cfg.round_start_blast(1), 0.14 * 1.6, 1e-6)
+	assert_almost_eq(cfg.round_start_blast(1), 0.3 * 1.6, 1e-6)
 
 
 func test_the_match_ends_on_three_more_long_blasts_after_the_rounds_each_1_3_lengths_on() -> void:
