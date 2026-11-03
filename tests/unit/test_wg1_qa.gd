@@ -70,7 +70,7 @@ func test_the_hint_names_fire_as_bound_after_a_rebind_from_the_pause_menu() -> v
 	session = _session()
 	await wait_physics_frames(2)
 	session.player.status = Character.Status.OUT
-	session._follow_skip()
+	session._follow_skip(session._play.skip_grace)  # out the grace (UF2)
 	var hud := session.hud()
 	assert_true(hud.skip_hint_shown())
 	var key: Label = hud._skip_key
@@ -160,7 +160,7 @@ func test_a_trigger_held_through_the_hit_does_not_skip_and_a_fresh_press_does() 
 	session._input.active = true
 	Input.action_press(&"fire")
 	session.player.status = Character.Status.OUT
-	session._follow_skip()
+	session._follow_skip(session._play.skip_grace)  # out the grace (UF2)
 	session._unhandled_input(_click())
 	assert_false(session.skipping(), "held since before you could skip: not armed")
 	Input.action_release(&"fire")

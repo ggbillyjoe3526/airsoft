@@ -153,7 +153,7 @@ func test_out_a_click_skips_the_round_with_the_hud_hidden() -> void:
 	assert_false(session.can_skip(), "not while you are in play")
 	session.player.status = Character.Status.OUT
 	assert_true(session.can_skip())
-	session._follow_skip()
+	session._follow_skip(session._play.skip_grace)  # out the grace (UF2)
 	assert_true(session.hud().skip_hint_shown())
 	session._input.active = true
 	session._follow_skip()
@@ -178,7 +178,7 @@ func test_the_trigger_held_through_the_hit_does_not_skip_until_pressed_again() -
 	session._input.active = true
 	Input.action_press(&"fire")
 	session.player.status = Character.Status.OUT
-	session._follow_skip()
+	session._follow_skip(session._play.skip_grace)  # out the grace (UF2)
 	session._unhandled_input(_click())
 	assert_false(session.skipping(), "held from before you were out")
 	Input.action_release(&"fire")
