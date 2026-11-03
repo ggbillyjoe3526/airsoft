@@ -929,8 +929,10 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 		# the match's summary (which holds the match's results) the board stays down (owner, 2026-11-03: they drew over
 		# each other).
 		var board := _board_wanted and not (_summary.is_open() and not _round_result.holds_results())
-		_round_result.set_covered(board)
-		_middle.visible = not board
+		var over_table := board and _round_result.is_open()
+		_round_result.set_covered(over_table)
+		# only the round's stamp goes with its table: in a live round the hit call and banners stay as they were
+		_middle.visible = not over_table
 		_round_result.update(state, _stats, _player)
 		_board.update(state, _stats, _player, board)
 		if _board.visible:

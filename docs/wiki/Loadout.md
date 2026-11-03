@@ -12,9 +12,9 @@ Each loadout has a **primary** and a **secondary** replica. The primary's card i
 secondary's sits under it beside your grenades, and every replica shows at its true size against the others. Click a
 card to pick that slot (or press its key). To change the replica in a slot, press **SWITCH REPLICA** on its card and
 pick one from the list that pops up; picking the one in your other slot swaps the two. Esc, CLOSE or a click outside
-the list leaves it as it was. Replicas you haven't unlocked yet show greyed out with their level. A new player starts with the AEG Rifle and the GBB
-Pistol. Every loadout carries the same **grenades** each round: one smoke bomb and one flash bomb
-([Grenades](Grenades)). Picking what you carry comes with chest rigs and pouches in a later update
+the list leaves it as it was. Replicas you haven't unlocked yet show greyed out with their level. A new player
+starts with the AEG Rifle and the GBB Pistol. Every loadout carries the same **grenades** each round: one smoke bomb
+and one flash bomb ([Grenades](Grenades)). Picking what you carry comes with chest rigs and pouches in a later update
 ([Roadmap](Roadmap)).
 
 ## The Performance sheet

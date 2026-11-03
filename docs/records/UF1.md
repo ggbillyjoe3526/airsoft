@@ -1,12 +1,12 @@
 # UF1 · UI fixes from the owner's playtest
 
-**Review:** pending
+**Review:** 1 attempt · critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-03 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-03 | 1 | Opus 5.5 (build thread) | ✓ | Accept 7/8 | – (check 8 fixed after: Tab hid the live round's hit call) |
 
 ## Goal
 
@@ -41,10 +41,21 @@ or the match.
 
 - **The minimap's field picture counts as background** and fades; its dots, pings, flag and your arrow stay solid.
 - **The pop-up closes on a pick.** One click to switch, as the old row was.
-- **Tab over the round's table: the board wins;** over the match's summary the board stays down (the summary already
-  shows the match's numbers, and the board drew over it).
+- **Tab over the round's table: the board wins** (the table and its stamp hide until Tab is let go); over the match's
+  summary the board stays down (the summary already shows the match's numbers, and the board drew over it). In a live
+  round nothing else changes: the hit call and banners stay as before (critic, attempt 1).
 - **The picked level is marked only after a click,** not on opening the page (the NEXT card keeps its teal edge).
 
 ## Checks
 
-Pending.
+- gdlint clean; `test_uf1_ui_fixes.gd` 20/20 and QA's `test_uf1_qa.gd` 8/8; the HUD, loadout, settings, armory and
+  audio neighbour suites pass. Full `tools/check.sh` locally, then CI.
+- Engine renders at 1920 × 1080 (Compatibility, Xvfb) of every fix: `/mnt/project-files/playtest/uf1/`.
+- QA: Pass; its two advisories (the pop-up left open behind Customise or a hidden page) fixed with a test.
+- Performance: Pass (bool and visibility sets per frame, a value Color in the minimap's draw, restyle only on a change).
+- Critic: Accept 7/8; check 8 (Tab hid the hit call and banners in a live round too) fixed: only the round's stamp hides
+  with its table.
+
+## Known issues
+
+- The pop-up doesn't trap keyboard focus: Tab can reach the rail behind its shade (critic nit; can wait).

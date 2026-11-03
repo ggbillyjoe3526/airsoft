@@ -1,4 +1,4 @@
-Task: UF1 · QA commit (see git log, "Agent: qa") · Verdict: Pass
+Task: UF1 · QA commit de42876 · Verdict: Pass
 
 Scope: seven playtest fixes in f7f819a over 4b10288. The thread's 19 tests pass; I added 8 probes (all pass).
 
