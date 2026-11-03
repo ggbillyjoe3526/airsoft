@@ -276,7 +276,4 @@ static func settle_share(delta: float, settle: float) -> float:
 ## Where in the Vault clip (0..1) vault `v` is: its first `top` over the rise onto the top, the rest across it to the
 ## hand-over to the fall, so the hop keeps to the body's path whatever the obstacle (the browser's vaultClipShare).
 static func vault_progress(v: VaultState, top: float) -> float:
-	if v.time < v.rise_end:
-		return clampf(top * v.time / v.rise_end, 0.0, 1.0) if v.rise_end > 0.0 else top
-	var span := v.end - v.rise_end
-	return clampf(top + (1.0 - top) * (v.time - v.rise_end) / span, 0.0, 1.0) if span > 0.0 else 1.0
+	return v.clip_share(top)

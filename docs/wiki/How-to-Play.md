@@ -16,6 +16,11 @@ The first team to <!-- wiki:config round_config.wins_needed --> round wins takes
 There are no health bars. **Any BB that hits you takes you out**, wherever it lands, and the same goes for everyone
 else.
 
+A BB counts where it meets the figure you see, in every pose: head and headgear, the plate carrier and pack, hips, legs
+and boots, whether they're standing, crouched, running, leaning or vaulting. Arms and replicas don't count, so a BB
+that only clips an elbow or a muzzle flies on. F5 shows everyone's hit areas if you want to check
+([Controls](Controls#keys-you-cant-change)).
+
 When a BB hits you:
 
 1. You hear a sharp tick, your replica jolts and drops out of view, and the field's sound dips.

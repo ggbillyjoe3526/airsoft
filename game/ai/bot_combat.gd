@@ -346,7 +346,7 @@ static func _body_in_line(b: Bot, w: BotWorld, from: Vector3, dir: Vector3, dist
 			continue
 		if mate.team != me.team:
 			# An opponent already out, between you and the target, would take the BBs.
-			if Elimination.is_in_play(mate):
+			if Elimination.is_in_play(mate) or not Hitbox.may_touch(mate, from, dir, to_target, hits):
 				continue
 			Hitbox.build_volume(mate, hits, _volume)
 			if Hitbox.ray_character(from, dir, to_target, _volume) < INF:
@@ -359,11 +359,15 @@ static func _body_in_line(b: Bot, w: BotWorld, from: Vector3, dir: Vector3, dist
 		# Past the target only a teammate a BB could knock out matters; before it every body stops the BBs.
 		var harmed := dist if in_play and hits.friendly_fire else to_target
 		var margin := cfg.friendly_margin + reach * stray
+		var speed := Vector2(mate.velocity.x, mate.velocity.z).length()
+		# Nowhere near the line, even widened and walked on (below, and along its route as far): nothing to build.
+		var room := margin + cfg.friendly_mate_speed * flight + speed * flight
+		if not Hitbox.may_touch(mate, from, dir, harmed, hits, room):
+			continue
 		Hitbox.build_volume(mate, hits, _volume)
 		_inflate(_volume, margin + (cfg.friendly_mate_speed * flight if in_play else 0.0))
 		if Hitbox.ray_character(from, dir, harmed, _volume) < INF:
 			return true
-		var speed := Vector2(mate.velocity.x, mate.velocity.z).length()
 		if speed <= 0.0 or (in_play and speed <= cfg.friendly_mate_speed):
 			continue
 		_shift(_volume, mate.velocity.x * flight, mate.velocity.z * flight)

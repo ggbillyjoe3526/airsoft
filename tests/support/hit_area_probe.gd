@@ -26,7 +26,11 @@ const ARM_BONES: PackedStringArray = ["UpperArm", "ElbowHelper", "Forearm", "Han
 		"Pinky", "Thumb"]
 ## The poses measured, each a Character's state (`character`).
 const POSES: Array[StringName] = [&"stand", &"crouch", &"lean_left", &"lean_right", &"walk_0", &"walk_1", &"walk_2",
-		&"walk_3", &"run_0", &"run_1", &"run_2", &"run_3", &"crouch_walk", &"vault", &"aim_up", &"aim_down"]
+		&"walk_3", &"run_0", &"run_1", &"run_2", &"run_3", &"crouch_walk", &"vault", &"aim_up", &"aim_down",
+		&"between", &"crouch_half", &"crouch_back"]
+## Between the fitted volume's samples (HV1): a way, a speed and a walk-cycle phase none of HitFit's samples sits on.
+const BETWEEN_WAY := PI / 8.0
+const BETWEEN_PHASE := PI / 8.0
 
 
 ## A level 0 surface as skinning reads it (`_parts`).
@@ -128,6 +132,17 @@ func character(pose_name: StringName) -> Character:
 			c.pitch = _models.config.aim_pitch
 		&"aim_down":
 			c.pitch = -_models.config.aim_pitch
+		&"between":
+			var speed := (_moves.walk_speed + _moves.run_speed) * 0.5
+			c.velocity = Vector3(sin(BETWEEN_WAY), 0.0, -cos(BETWEEN_WAY)) * speed
+			c.walk_cycle = BETWEEN_PHASE
+			c.pitch = _models.config.aim_pitch * 0.3
+		&"crouch_half":
+			c.crouch_amount = 0.5
+		&"crouch_back":
+			c.crouch_amount = 1.0
+			c.velocity = Vector3(0.0, 0.0, _moves.crouch_speed)
+			c.walk_cycle = PI * 0.5 + BETWEEN_PHASE
 	if name.begins_with("walk_"):
 		c.velocity = Vector3(0.0, 0.0, -_moves.walk_speed)
 		c.walk_cycle = phase
@@ -174,6 +189,58 @@ func measure(kind: int, head: StringName, pose_name: StringName) -> Result:
 	r.missed = 100.0 * missed / maxf(r.drawn_rays, 1.0)
 	r.thin_air = 100.0 * thin / maxf(r.volume_rays, 1.0)
 	return r
+
+
+## Level rays at kind `kind` wearing `head` in pose `pose_name` from side `angle` (round +Y from +Z), every `stride`th
+## cell across and up: each ray's start `back` m out on the near side and its unit way, in pairs (start, way). `inside`:
+## the drawn body's cells whose rim is all drawn body too (a BB there strikes the figure you see); else the cells whose
+## rim is all clear of it but within `reach` m of it across the grid (a BB there passes beside it).
+func drawn_rays(kind: int, head: StringName, pose_name: StringName, angle: float, stride: int, back: float,
+		inside: bool, reach: float = 0.1) -> PackedVector3Array:
+	var c := character(pose_name)
+	_bake(_body(kind, head), c)
+	var drawn := PackedByteArray()
+	drawn.resize(_cols * _rows)
+	_draw_mesh(drawn, angle)
+	var near := int(round(reach / CELL))
+	var across := Vector3(cos(angle), 0.0, -sin(angle))
+	var way := Vector3(sin(angle), 0.0, cos(angle))
+	var out := PackedVector3Array()
+	for y in range(0, _rows, stride):
+		for x in range(0, _cols, stride):
+			var i := y * _cols + x
+			var hit := drawn[i] != 0
+			if inside != hit or _near_clear(drawn, i, hit):
+				continue
+			if not inside and not _within(drawn, x, y, near):
+				continue
+			var at := across * ((x + 0.5) * CELL - ACROSS) + Vector3(0.0, (y + 0.5) * CELL + BELOW, 0.0)
+			out.append(at - way * back)
+			out.append(way)
+	return out
+
+
+## Whether any cell within the rim of cell `i` differs from `hit` (drawn or not).
+func _near_clear(cells: PackedByteArray, i: int, hit: bool) -> bool:
+	var x := i % _cols
+	var y := i / _cols
+	for o in _rim:
+		var nx := x + o.x
+		var ny := y + o.y
+		if nx >= 0 and ny >= 0 and nx < _cols and ny < _rows and (cells[ny * _cols + nx] != 0) != hit:
+			return true
+	return false
+
+
+## Whether a drawn cell lies within `reach` cells of (`x`, `y`), across or up.
+func _within(cells: PackedByteArray, x: int, y: int, reach: int) -> bool:
+	for dy in range(-reach, reach + 1):
+		for dx in range(-reach, reach + 1):
+			var nx := x + dx
+			var ny := y + dy
+			if nx >= 0 and ny >= 0 and nx < _cols and ny < _rows and cells[ny * _cols + nx] != 0:
+				return true
+	return false
 
 
 func _body(kind: int, head: StringName) -> FigureBody:

@@ -282,10 +282,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **The hit area is fitted to each rigged figure (owner, 2026-10-16, Dev 6 playtest; HV1, IM8).** Head, chest,
   shoulders, hips and legs sit on each figure's own bones, read from the clips as the figures load; a test holds every
   pose of both figures to M85's bar (4 % missed, 3 % thin air). A new figure must pass it.
-- **Until step 28 the hit area stays Hitbox's built-in volume, one for both kinds, measured, not fitted (step 23 plan,
-  default 2; FI7).** `test_figure_hit_area.gd` measures it against the drawn placeholder figures on every kind, head and
-  pose and fails if a share rises 0.5 points over FI7's numbers (`docs/records/FI7.md`); step 28 fits it once to the
-  final figures, to M85's bar (HV1).
+- **The fit is baked, not read at load (HV1, 2026-11-03, default; the owner's "hits not registering").** The human's
+  own animation graph is sampled by `tools/hit_fit_bake.gd` into `game/config/hit_fit.tres`, which the simulation
+  blends as the graph blends its clips (no scene in the simulation, the same result on every machine);
+  `test_hit_fit.gd` fails while the file is stale, so a new figure or clip is re-baked in its own pull request. Robots
+  (a Dev easter egg) use the human's fit; the plywood range figures keep the built-in volume they are drawn from.
 - **Hit calling stays a raised hand and a sign, with no dead rag, night light or shouted "HIT!" for now (owner,
   2026-10-06).**
 - **A hit player calls HIT for 1.4 s, then walks to their team's dead zone along nav routes (2026-09-30).** Once a round

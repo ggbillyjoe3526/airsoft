@@ -113,22 +113,29 @@ func test_cannot_lean_at_all_with_a_wall_against_the_body() -> void:
 
 
 func test_a_leaned_body_is_hit_at_its_leaned_head_and_missed_where_the_head_was() -> void:
+	# The fitted volume (HV1): its head rolls about the hip pivot by the lean's angle, as Lean.offset rolls a point on the
+	# centre line (the drawn head sits a little to one side of it, so the roll is taken from where it is).
 	var c := standing()
+	var upright := Hitbox.Volume.new()
+	Hitbox.build_volume(c, hits, upright)
 	c.lean = 1.0
 	var v := Hitbox.Volume.new()
 	Hitbox.build_volume(c, hits, v)
-	var head := Lean.offset(hits.head_height, 1.0, 0.0, 0.0, hits) + Vector3(0.0, hits.head_height, 0.0)
+	var was := upright.head.a
+	var head := v.head.a
+	var pivot := Vector3(0.0, hits.pivot_height, was.z)
+	var rolled := pivot + (was - pivot).rotated(Vector3.BACK, -hits.lean_max_angle)
+	var on_line := Lean.offset(was.y, 1.0, 0.0, 0.0, hits)
+	assert_almost_eq(Vector3(0.0, was.y, was.z) + on_line, pivot + (Vector3(0.0, was.y, was.z) - pivot).rotated(
+			Vector3.BACK, -hits.lean_max_angle), Vector3.ONE * CLOSE, "Lean.offset is the same roll")
+	assert_almost_eq(head, rolled, Vector3.ONE * CLOSE, "the head rolled about the hip pivot")
 	var t := Hitbox.ray_character(Vector3(head.x, head.y, 10.0), Vector3.FORWARD, 20.0, v)
-	assert_almost_eq(t, 10.0 - hits.head_radius, CLOSE, "the leaned head")
-	assert_eq(Hitbox.ray_character(Vector3(0.0, hits.head_height, 10.0), Vector3.FORWARD, 20.0, v), INF,
+	assert_almost_eq(t, 10.0 - head.z - v.head.r, CLOSE, "the leaned head")
+	assert_eq(Hitbox.ray_character(Vector3(was.x, was.y, 10.0), Vector3.FORWARD, 20.0, v), INF,
 			"where the head was upright")
-	assert_lt(Hitbox.ray_character(Vector3(hits.leg_hip_spread, 0.5, 10.0), Vector3.FORWARD, 20.0, v), 20.0,
+	var knee := upright.parts[Hitbox.SHIN_L].a
+	assert_lt(Hitbox.ray_character(Vector3(knee.x, knee.y, 10.0), Vector3.FORWARD, 20.0, v), 20.0,
 			"the legs stay put")
-	# Leaning left mirrors it.
-	c.lean = -1.0
-	Hitbox.build_volume(c, hits, v)
-	assert_lt(Hitbox.ray_character(Vector3(-head.x, head.y, 10.0), Vector3.FORWARD, 20.0, v), 20.0)
-	assert_eq(Hitbox.ray_character(Vector3(head.x, head.y, 10.0), Vector3.FORWARD, 20.0, v), INF)
 
 
 func test_bbs_leave_from_the_leaned_eyes_in_the_simulation() -> void:

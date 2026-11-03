@@ -16,9 +16,11 @@ const IN_LEAVES := 1
 ## A tick's path shorter than this (m) is no path: nothing to test.
 const MIN_SEGMENT := 1e-9
 
-## This tick's hit volume of each character, by index in the roster: characters don't move while BBs fly, so they're
-## built once a tick, not once a BB. Grown to the roster's size once, then reused.
+## This tick's hit volume of each character, by index in the roster: characters don't move while BBs fly, so each is
+## built at most once a tick, and only once a BB's path comes near it (Hitbox.may_touch; _built: 1 once built this
+## tick). Grown to the roster's size once, then reused.
 static var _volumes: Array[Hitbox.Volume] = []
+static var _built: PackedByteArray = PackedByteArray()
 static var _ray_hit: RayHit = RayHit.new()
 ## The body a BB reached this tick (_first_body): its index in the roster (-1: none), and how far along the segment.
 static var _reached: int = -1
@@ -75,9 +77,9 @@ static func step(pool: BBPool, characters: Array[Character], query: WorldQuery, 
 				else:
 					in_leaves = _crossing.exit - _crossing.enter
 			if not prepared:
-				_prepare(characters, tuning.hits)
+				_prepare(characters)
 				prepared = true
-			_first_body(bb, dir, leaf_end if leaf_end >= 0.0 else reach, characters)
+			_first_body(bb, dir, leaf_end if leaf_end >= 0.0 else reach, characters, tuning.hits)
 			if not targets.is_empty() and not cease_fire and _stop_on_target(bb, dir, targets, tuning, events, rng):
 				continue
 			if _reached >= 0:
@@ -191,23 +193,30 @@ static func _stop_on_target(bb: BB, dir: Vector3, targets: Array[RangeTarget], t
 	return true
 
 
-## Builds this tick's hit volume of every character (see _volumes).
-static func _prepare(characters: Array[Character], hits: HitConfig) -> void:
+## Readies this tick's hit volumes (see _volumes): none built yet.
+static func _prepare(characters: Array[Character]) -> void:
 	while _volumes.size() < characters.size():
 		_volumes.append(Hitbox.Volume.new())
-	for i in characters.size():
-		Hitbox.build_volume(characters[i], hits, _volumes[i])
+	if _built.size() < characters.size():
+		_built.resize(characters.size())
+	_built.fill(0)
 
 
 ## The first body along the BB's segment this tick (from prev_position along `dir`, before `max_t`) into _reached and
-## _reached_at. Every body counts, whatever its status; only the shooter is skipped, until the BB has bounced, and a
+## _reached_at, by `hits`' volumes. Every body counts, whatever its status; only the shooter is skipped, until the BB has bounced, and a
 ## ghost (DevCheats).
-static func _first_body(bb: BB, dir: Vector3, max_t: float, characters: Array[Character]) -> void:
+static func _first_body(bb: BB, dir: Vector3, max_t: float, characters: Array[Character], hits: HitConfig) -> void:
 	_reached = -1
 	var best := max_t
 	for i in characters.size():
-		if (characters[i].id == bb.owner_id and bb.bounces == 0) or characters[i].ghost:
+		var c := characters[i]
+		if (c.id == bb.owner_id and bb.bounces == 0) or c.ghost:
 			continue
+		if not Hitbox.may_touch(c, bb.prev_position, dir, best, hits):
+			continue
+		if _built[i] == 0:
+			Hitbox.build_volume(c, hits, _volumes[i])
+			_built[i] = 1
 		var d := Hitbox.ray_character(bb.prev_position, dir, best, _volumes[i])
 		if d <= best:
 			best = d

@@ -382,7 +382,7 @@ func test_bots_throw_both_bombs_in_whole_matches_on_depot() -> void:
 	var self_dazzled := 0
 	var rounds := 0
 	var limit := roundi(t.rounds.round_time / DT) * 14
-	for seed_value: int in [1, 2]:
+	for seed_value: int in [1, 2, 3]:
 		var sim := Simulation.new(t, level.query(), level.mover(t.body), map.ends, map.kill_y)
 		sim.nav = nav
 		var state := GameState.new(seed_value, t)

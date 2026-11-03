@@ -397,10 +397,17 @@ func test_bbs_fly_through_smoke() -> void:
 	_place(shooter, Vector3(-8.0, 0.0, 0.0), -PI * 0.5)
 	_place(target, Vector3(8.0, 0.0, 0.0), PI * 0.5)
 	_smoke_at(s, Vector3(0.0, 0.04, 0.0), cfg.smoke_grow + 1.0)
+	# No spread, and the shooter settled into its stance a tick first, so the aim is the BB's line (HV1: the hit area is
+	# the drawn figure's, so a lucky spread over the chest no longer grazes a head that isn't there).
+	var arms := shooter.armament
+	var steady := arms.replicas[arms.active].duplicate() as ReplicaConfig
+	steady.spread_deg = 0.0
+	arms.replicas[arms.active] = steady
+	cmds[0].yaw = -PI * 0.5
+	sim.step(s, cmds, DT)
 	var eye := Lean.eye(shooter, tuning.body, tuning.hits)
 	var chest := BotSenses.body_point(target, tuning.hits, 0.7)
 	assert_gt(Grenades.smoke_depth(s.grenades, cfg, eye, chest), 5.0, "the line runs through the cloud")
-	cmds[0].yaw = -PI * 0.5
 	cmds[0].pitch = atan2(chest.y - eye.y, chest.x - eye.x) + 0.004
 	cmds[0].fire = true
 	var hits := 0
