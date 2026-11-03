@@ -1,13 +1,13 @@
 # HV1 · The hit area fitted to the drawn figure
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-03 | 1 | Opus 5.5 (hits thread) | pass | Retry 6/8 | hitbox.gd too big (the pose moved to HitPose); folder READMEs; QA's report not written |
-| 2026-11-03 | 2 | Opus 5.5 (hits thread) | – | – | – |
+| 2026-11-03 | 2 | Opus 5.5 (hits thread) | pass | Accept 8/8 | – |
 
 ## The ask
 
