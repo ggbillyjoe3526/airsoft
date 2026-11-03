@@ -2040,7 +2040,7 @@ msgid "HUD_MAG_LOST"
 msgstr "The mag was lost"
 
 msgid "HUD_MAG_NOBODY"
-msgstr "Nobody near has a mag to spare"
+msgstr "Nobody near has a spare mag that fits"
 
 msgid "HUD_MAG_NOT_LOW"
 msgstr "You still have a full spare mag"

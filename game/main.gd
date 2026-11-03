@@ -201,7 +201,8 @@ func _on_tab(tab: NavRail.Tab) -> void:
 	if tab == NavRail.Tab.SETTINGS:
 		_open_settings()
 		return
-	if _settings_screen != null:
+	var from_settings := _settings_screen != null
+	if from_settings:
 		_settings_screen.close()
 	if tab == NavRail.Tab.LOADOUT:
 		_menus.show_loadout()
@@ -209,6 +210,9 @@ func _on_tab(tab: NavRail.Tab) -> void:
 		_menus.show_armory()
 	elif tab == NavRail.Tab.MATCH:
 		_menus.show_match()
+	if from_settings and _menus.visible:
+		# Closing the settings focused the page they covered, which the new page may just have hidden (BP3).
+		_menus.focus_page()
 
 
 ## The settings over the menus, built when asked for and freed once closed (a hidden screen would keep its

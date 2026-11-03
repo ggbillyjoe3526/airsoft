@@ -365,7 +365,7 @@ func test_a_notice_shows_2_5_s() -> void:
 
 func test_each_refusal_has_its_words() -> void:
 	var words := {
-		MagShare.Refusal.NOBODY: "Nobody near has a mag to spare",
+		MagShare.Refusal.NOBODY: "Nobody near has a spare mag that fits",
 		MagShare.Refusal.NOT_LOW: "You still have a full spare mag",
 		MagShare.Refusal.NO_SPARE: "No mag of yours fits Rook's replica",
 		MagShare.Refusal.WAIT: "Ask again in a moment",

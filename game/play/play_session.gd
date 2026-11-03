@@ -1168,7 +1168,7 @@ func _process(delta: float) -> void:
 		_torches.update(state.characters, watched, fraction, _figure_of, _eyes.camera)
 	_hud.show_board(_input.scoreboard_held())
 	_hud.manual_reload = _commands[PLAYER_ID].manual_reload # the prompt follows the rule the sim used (RL2)
-	_hud.update(state, _input.zoom, delta)
+	_hud.update(state, _eyes.view_zoom, delta)
 	_hud.place_team_markers(_eyes.camera, state.characters, watched, fraction)
 	var yaw := _view_yaw(watched, fraction)
 	_hud.update_minimap(state, watched, yaw, fraction, _bots.hold_spot(PLAYER_ID), _bots.orders.held_middle,

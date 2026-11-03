@@ -396,6 +396,18 @@ func test_a_dev_cheat_applied_in_a_run_keeps_it_from_the_best_and_a_match_never_
 	assert_eq(in_match.challenge.phase, RangeChallenge.Phase.READY)
 
 
+func test_a_run_with_dev_content_in_hand_is_never_a_best() -> void:
+	# BP3: the Sniper Rifle or the Variable Scope in practice made a best, though dev content stays off the records.
+	var m := _practice()
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	state.dev_content = true
+	_shoot(sim, state, roundi((3.0 + cfg.challenge_countdown + cfg.challenge_run_time) / DT))
+	assert_not_null(state.challenge.last)
+	assert_true(state.challenge.last.helped)
+	assert_false(state.challenge.last.best)
+
+
 func test_a_running_practice_tick_allocates_no_objects_once_warm() -> void:
 	var m := _practice()
 	var sim: Simulation = m[0]
