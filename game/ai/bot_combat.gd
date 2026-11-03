@@ -374,22 +374,15 @@ static func _body_in_line(b: Bot, w: BotWorld, from: Vector3, dir: Vector3, dist
 		if Hitbox.ray_character(from, dir, harmed, _volume) < INF:
 			return true
 		var walker := w.bot_of(mate) if in_play else null
-		if walker != null and walker.route_state == Bot.RouteState.OK \
-				and _ahead_in_line(walker, hits, from, dir, harmed, margin, speed * flight):
-			return true
+		if walker != null and walker.route_state == Bot.RouteState.OK:
+			# The same volume (no second build), back to `margin` wider and moved to where its route takes it.
+			_inflate(_volume, -cfg.friendly_mate_speed * flight)
+			var ahead := BotRoutes.point_ahead(walker, speed * flight)
+			_shift(_volume, ahead.x - mate.position.x - mate.velocity.x * flight,
+					ahead.z - mate.position.z - mate.velocity.z * flight)
+			if Hitbox.ray_character(from, dir, harmed, _volume) < INF:
+				return true
 	return false
-
-
-## True if bot `walker`'s hit volume, `margin` m wider, stands in the line of fire (`harmed` m along `dir` from `from`)
-## once it has walked `distance` m more along its route.
-static func _ahead_in_line(walker: Bot, hits: HitConfig, from: Vector3, dir: Vector3, harmed: float, margin: float,
-		distance: float) -> bool:
-	var mate := walker.character
-	var ahead := BotRoutes.point_ahead(walker, distance)
-	Hitbox.build_volume(mate, hits, _volume)
-	_inflate(_volume, margin)
-	_shift(_volume, ahead.x - mate.position.x, ahead.z - mate.position.z)
-	return Hitbox.ray_character(from, dir, harmed, _volume) < INF
 
 
 static func _inflate(v: Hitbox.Volume, margin: float) -> void:

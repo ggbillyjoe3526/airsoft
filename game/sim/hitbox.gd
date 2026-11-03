@@ -221,7 +221,8 @@ static func _build(feet: Vector3, yaw: float, crouch: float, lean: float, swing:
 	_fill(v.head, head_at, head_at, hits.head_radius)
 	_fill(v.parts[CHEST_L], _upper(feet, cos_yaw, sin_yaw, 0.0, hits.torso_bottom - drop, cr, sr, hip_y),
 			_upper(feet, cos_yaw, sin_yaw, 0.0, hits.torso_top - drop, cr, sr, hip_y), hits.body_radius)
-	for k: int in [CHEST_R, CHEST_FRONT, CHEST_BACK]:
+	# One chest: the fitted volume's other torso capsules sit on it (CHEST_R to CHEST_BACK, in order).
+	for k: int in range(CHEST_R, CHEST_BACK + 1):
 		_fill(v.parts[k], v.parts[CHEST_L].a, v.parts[CHEST_L].b, hits.body_radius)
 	for i in 2:
 		var side := 2 * i - 1
