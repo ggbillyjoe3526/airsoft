@@ -92,8 +92,8 @@ const NUMBER_EDGE := 5
 const NUMBER_EDGE_ALPHA := 0.9
 
 
-## The page colour at `alpha`, scaled by a panel `opacity` (restyle; the HUD keeps its backings at 1 since the HUD
-## opacity became the replica panel's and the minimap's, UR8).
+## The page colour at `alpha`, scaled by a panel `opacity` (restyle: the HUD opacity fades only the replica panel's and
+## the minimap's backgrounds, UR8 and UF1; the rest of the HUD keeps its backings at 1).
 static func backing(alpha: float, opacity: float = 1.0) -> Color:
 	return Color(GameTheme.BG, alpha * opacity)
 
@@ -112,7 +112,12 @@ static func edge_number(l: Label, striped: bool) -> void:
 
 ## The backing a HUD `part` draws itself at `alpha`: at the panel opacity restyle() gave it (100% until then).
 static func backing_on(part: CanvasItem, alpha: float) -> Color:
-	return backing(alpha, part.get_meta(OPACITY, 1.0) as float)
+	return backing(alpha, opacity_of(part))
+
+
+## The panel opacity restyle() gave `part` (1 until then), for a background it draws other than a backing.
+static func opacity_of(part: CanvasItem) -> float:
+	return part.get_meta(OPACITY, 1.0) as float
 
 
 ## A navy panel at `alpha` with an `edge` and the given margins, at 100% until restyle() brings it to a panel opacity.
@@ -123,7 +128,8 @@ static func navy_box(alpha: float, edge: Color, margin_x: int, margin_y: int) ->
 
 
 ## Brings `root` and every part under it to the panel `opacity`: each navy_box, and each part that draws its own
-## backing (backing_on). Whoever owns the parts calls it again for parts added later.
+## backing (backing_on, opacity_of). Only backgrounds fade; icons, numbers and words keep their own alpha. Whoever owns
+## the parts calls it again for parts added later.
 static func restyle(root: Control, opacity: float) -> void:
 	for slot: StringName in BOX_SLOTS:
 		var box := root.get_theme_stylebox(slot) as StyleBoxFlat if root.has_theme_stylebox_override(slot) else null

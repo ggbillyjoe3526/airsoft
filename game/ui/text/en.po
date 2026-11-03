@@ -1046,8 +1046,17 @@ msgstr "PRIMARY"
 msgid "LOADOUT_SECONDARY"
 msgstr "SECONDARY"
 
-msgid "LOADOUT_SWAP"
-msgstr "SWAP %s"
+msgid "LOADOUT_SWITCH_REPLICA"
+msgstr "Switch Replica"
+
+msgid "LOADOUT_SWITCH_TITLE"
+msgstr "Switch %s replica"
+
+msgid "LOADOUT_SWITCH_NOTE"
+msgstr "Pick a replica to carry in this slot. Picking the one in your other slot swaps the two."
+
+msgid "LOADOUT_SWITCH_CLOSE"
+msgstr "Close"
 
 msgid "LOADOUT_GRENADES"
 msgstr "GRENADES"
@@ -1060,9 +1069,6 @@ msgstr "%d × SMOKE"
 
 msgid "LOADOUT_FLASH"
 msgstr "%d × FLASH"
-
-msgid "LOADOUT_HINT"
-msgstr "Pick a slot, then a replica to carry in it. Picking one already carried swaps the two.\nDouble-click a carried replica, or CUSTOMISE, to change its colour, BBs, hop-up and power."
 
 msgid "LOADOUT_CUSTOMISE"
 msgstr "CUSTOMISE"
@@ -2643,7 +2649,7 @@ msgid "SETTINGS_HUD_OPACITY"
 msgstr "HUD opacity"
 
 msgid "SETTINGS_HUD_OPACITY_NOTE"
-msgstr "Fades the ammo and bomb panel and the minimap in a match."
+msgstr "Fades the backgrounds of the ammo and bomb panel and the minimap in a match. Icons, numbers and words stay solid."
 
 msgid "SETTINGS_HUD_SIZE"
 msgstr "HUD size"

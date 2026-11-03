@@ -231,14 +231,15 @@ func add_pings(book: Pings, team: int, now: float, life: float, fade: float, to:
 					HudPingMarker.shade(now - p.at, life, fade))
 
 
-## The panel's ring.
+## The panel's ring: part of its background, so at the HUD opacity (HudStyle.restyle).
 func _draw() -> void:
 	var s := _cfg.size
 	var r := _cfg.ring
-	draw_rect(Rect2(0.0, 0.0, s, r), GameTheme.LINE)
-	draw_rect(Rect2(0.0, s - r, s, r), GameTheme.LINE)
-	draw_rect(Rect2(0.0, r, r, s - r * 2.0), GameTheme.LINE)
-	draw_rect(Rect2(s - r, r, r, s - r * 2.0), GameTheme.LINE)
+	var line := Color(GameTheme.LINE, GameTheme.LINE.a * HudStyle.opacity_of(self))
+	draw_rect(Rect2(0.0, 0.0, s, r), line)
+	draw_rect(Rect2(0.0, s - r, s, r), line)
+	draw_rect(Rect2(0.0, r, r, s - r * 2.0), line)
+	draw_rect(Rect2(s - r, r, r, s - r * 2.0), line)
 
 
 ## The caption under the panel: the map, a muted dot and the round, on a navy strip.
@@ -526,11 +527,13 @@ class View:
 		draw_rect(Rect2(Vector2.ZERO, size), HudStyle.backing_on(self, BACKING))
 		var mid := size * 0.5
 		if _layer >= 0 and _layer < _textures.size():
+			# the field's picture is the panel's background: at the HUD opacity; the marks over it stay solid
+			var fade := Color(1.0, 1.0, 1.0, HudStyle.opacity_of(self))
 			var at := mid + ((_origin - _centre) * _ppm).rotated(_rot)
 			draw_set_transform(at, _rot, Vector2.ONE * (_ppm / _scale))
 			if _ground != null:
-				draw_texture_rect(_ground, _ground_rect, false)
-			draw_texture(_textures[_layer], Vector2.ZERO)
+				draw_texture_rect(_ground, _ground_rect, false, fade)
+			draw_texture(_textures[_layer], Vector2.ZERO, fade)
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		for i in _patch_count:
 			if _patch_shots[i] == 0:

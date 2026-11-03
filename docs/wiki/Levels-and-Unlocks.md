@@ -48,7 +48,8 @@ level and on into the next by the XP you have earned.
 
 Below the track are four level cards, starting at your level. Each card shows its items with their pictures (hover an
 item to see what it does), marked **UNLOCKED**, **NEXT** (edged in teal: the next level with something new) or with
-the XP that reaches it. Browse the levels with the arrows at the top right, or click a dot on the track.
+the XP that reaches it. Browse the levels with the arrows at the top right, or click a dot on the track: the dot you
+clicked is ringed and its level's card is edged in white.
 
 Your level, unlocks and records are saved in their own file, apart from your settings, so a crash never loses them
 ([Saving and Bug Reports](Saving-and-Bug-Reports)).

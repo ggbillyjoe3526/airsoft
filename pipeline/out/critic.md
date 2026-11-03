@@ -1,25 +1,32 @@
-Task: SN3 · Balancing the Sniper Rifle, its springs and the Variable Scope
-Attempt: 2 of 4
-Head: 704372c (= origin/main) plus the staged tree; the brief gives no tools/check.sh result for it (QA ran single test files), so this Accept holds only once tools/check.sh is green on the pushed head
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept
-Attempt 1's points, answered:
-- Fields: Attack / Defend is now measured on all three at 6v6 (docs/records/SN3.md:39-40), all in band with snipers; Depot's 67 % without them is a new KNOWN_ISSUES row. Depot's 42 and 59 are worded against the band and the ±6-point noise (:38-39). Woodland 7v7/8v8 is the known WOODLAND78 placeholder (:38), waived by the brief; fill it or note the rows as lost before the push.
-- Tags: every new line and file reads SN3 (test_sn3_balance.gd, bot_config.gd:27, bot_hearing.gd:87, layout.py:468) but one: tests/unit/test_sn3_qa.gd:2 "(SN3 / BP3)".
-- Null guard: bot_combat.gd:199 now guards armament as fights_aimed does.
-- tests/README.md:9 names sniper_bench.gd and its command line.
-- QA (pipeline/out/qa.md) and performance (pipeline/out/performance.md) both report on SN3 and Pass.
-Verified, no finding:
-- Check 4: test_a_near_miss_reveals_the_shooter_for_a_while fails without reveal (sight_reach stays view_distance, visible_part 0 at 65 m).
-- Hot paths: sight_reach, scoped, bolt_waits and the _hit_call loop are scalar work with no allocation; _hit_call returns early on a null or out shooter, so reveal never gets a null.
-- New tuning is BotConfig exports; no contract changed; the changelog's "(dev content)" heading matches sniper-rifle.md and variable-scope.md.
-Advisory (not failed):
-- After the bins, The Street with the shipped kits was re-run at 6v6 only (SN3.md:55); the KNOWN_ISSUES row still quotes TS1's pre-bins 16-seed figures for the other sizes. Worth a 16-seed run at 5v5, 7v7 and 8v8 when the guards next run.
-- Records push: fix test_sn3_qa.gd:2's tag, add attempt 2's row (attempt 1: 5/8 Retry, with its reason) and fill the Review line.
-Owner should test in the game (at most 6, one line each):
-- From 60 to 65 m with the Sniper Rifle, miss a bot on purpose: does it turn and answer fairly, not instantly?
-- After that reveal, AEG bots have no range gate and may pour BBs at you that fall short for 4 s: fun, or silly?
-- Hard sniper bots at range: the first shot comes late but lands; beatable by closing in or flanking?
-- The Street, the Path bins at mid-straight: a stop you'd use going north, and does it read as cover?
-- The Street with Dev content off: does the north end still feel stronger, or did the bins even it up?
-- Each field at 6v6 with Dev content on: any end that feels stacked?
+Task: UF1 · UI fixes from the owner's playtest (no TASKS block; judged against the record and the seven asks)
+Attempt: 1 of 4
+Head: 417833f (gdlint, UF1 and neighbour suites green; full tools/check.sh still running, verdict holds only if it passes)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
+Score: 7/8 → Accept
+Evidence for the passes:
+1. Opacity: hud.gd +553/+419 HudStyle.restyle instead of modulate.a, hud_minimap.gd +238/+531 ring and field picture
+   at opacity_of; HUD tab: settings_hud_page.gd +121 Panels moved left (screenshot: Minimap fits, no bar); Armory:
+   armory_dots.gd +95/+118, armory_track.gd +83, armory_page.gd +65; Rail: nav_rail.gd +170-178 offsets only, no
+   position.x; Loadout: loadout_switch.gd (new), loadout_gear.gd +263 SWITCH REPLICA, swap via LoadoutRules.equip;
+   Loading: sim_audio.gd +672 start_ambience, beds no longer play() at layout (-702), play_session.gd +1212/+1242;
+   Scoreboard: hud_table.gd rows 40→30, hud.gd +931-935 set_covered and board held down over the summary.
+2. No ARCHITECTURE contract touched (UI and SimAudio presentation only).
+3. Hud.update adds bool and visible sets only; View._draw builds a value Color; restyle runs on a pref change only.
+4. test_nothing_sounds_behind_the_loading_screen_until_continue fails on base (beds played at _start_ambience);
+   test_the_lit_tab_s_rule_sits_on_its_card fails with the old position.x = -RULE_WIDTH * 2.
+5-7. Typed, constants named, no globals; pop-up built once, shown by visible; helpers moved, not copied.
+Failed checks, with evidence:
+8. [judgment] hud.gd:933 `_middle.visible = not board` hides the hit call ("HIT!") and every banner whenever Tab is
+   held, in a live round too, not only over the round's table. The owner asked about after a round or match; the
+   record's Decisions (docs/records/UF1.md) and the wiki say nothing about the live-round case (QA advisory 3).
+Must-fix before merge (non-blocking): add a Decisions line to docs/records/UF1.md saying Tab hides the hit call and
+banners while held in a live round (or limit the hide to when the round's table is up), and ask the owner.
+Nits: docs/wiki/Loadout.md one line runs past 120 columns; LoadoutSwitch is not focus-trapped (Tab can still reach
+the rail behind the shade).
+Owner should test in the game:
+- HUD opacity 20 %: panel and minimap backgrounds fade, counts, icons, mag boxes, dots stay solid over bright walls.
+- Settings › HUD at your resolution: Minimap zoom and samples visible with no scroll bar.
+- Armory: click several dots, including off-screen levels; ring, teal number and white card edge follow.
+- Loadout: SWITCH REPLICA on each slot, pick the other slot's replica (swap), Esc, CLOSE, click outside.
+- Load a match: total silence until Continue; then ambience. Also Loadout → back to match (no Continue).
+- Hold Tab mid-round when hit: is losing the "HIT!" call under the board OK? After a round, 8v8, HUD size 150 %.

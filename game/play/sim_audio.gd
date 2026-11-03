@@ -683,8 +683,21 @@ func _load(cue: String) -> StringName:
 	return key
 
 
-## Starts ambience `id`'s beds by day or by `night`, each looping on the Ambience bus at its gain times its loop's
-## stored peak, and makes its calls (timed in play). One copy of each bed, unpanned:
+## The ambience's beds start: none plays until this is called, so the loading screen is silent (owner, 2026-11-03: the
+## ambience starts when the match does, on Continue). Calling it again does nothing.
+func start_ambience() -> void:
+	for v in _beds:
+		if not v.playing:
+			v.play()
+
+
+## Whether the beds have started (start_ambience).
+func ambience_started() -> bool:
+	return not _beds.is_empty() and _beds[0].playing
+
+
+## Lays out ambience `id`'s beds by day or by `night`, each to loop on the Ambience bus at its gain times its loop's
+## stored peak (start_ambience plays them), and makes its calls (timed in play). One copy of each bed, unpanned:
 ## a plain voice has no pan for the browser's two copies spread `width` apart.
 func _start_ambience(id: StringName) -> void:
 	var ambience := _cfg.ambiences.set_for(id, night)
@@ -702,7 +715,6 @@ func _start_ambience(id: StringName) -> void:
 		v.bus = BUS_AMBIENCE
 		v.volume_db = linear_to_db(bed.gain * peak * _cfg.ambience_gain)
 		add_child(v)
-		v.play()
 		_beds.append(v)
 	_calls = AmbientCalls.new(ambience.calls)
 	for call in ambience.calls:

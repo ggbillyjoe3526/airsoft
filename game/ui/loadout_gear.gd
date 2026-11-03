@@ -2,13 +2,14 @@ class_name LoadoutGear
 extends Control
 ## The Loadout tab's gear page body (UI concept B v2, `loadout.png`, owner 2026-11-02): LOADOUT and its line (the loadout
 ## carried and what is in it), then the glass panels: the PRIMARY card (its replica large, its name and what it carries,
-## CUSTOMISE on the picked card), the SECONDARY card beside the GRENADES carried every round (SF1), the SWAP row (every
-## replica to carry in the picked slot: the ones carried tagged with their slot, the ones the game can't play yet greyed
-## LATER, the ones not unlocked yet greyed with their level) and the Performance sheet at the right.
+## SWITCH REPLICA at its top right, CUSTOMISE on the picked card), the SECONDARY card the same beside the GRENADES carried
+## every round (SF1), and the Performance sheet at the right. SWITCH REPLICA picks that card's slot and opens the
+## pop-up of every replica to carry in it (LoadoutSwitch; owner, 2026-11-03: it replaced the SWAP row); the one carried
+## in the other slot swaps the two.
 ## Every replica on the page is drawn at one scale (owner, 2026-10-19 and 2026-11-02: replicas to scale), the cards'
-## sized so the longest fits a card's picture box and the swap row's so it fits a row's: a rifle in either slot is the
-## same size, a pistol beside it true to size. The page owner reads `slot_picked`, `replica_picked` and
-## `customise_requested` and calls `refresh`. LoadoutPage puts the saved loadouts' strip in the row under the title.
+## sized so the longest fits a card's picture box: a rifle in either slot is the same size, a pistol beside it true to
+## size. The page owner reads `slot_picked`, `replica_picked` and `customise_requested` and calls `refresh`.
+## LoadoutPage puts the saved loadouts' strip in the row under the title.
 
 signal slot_picked(slot: Loadout.Slot)
 signal replica_picked(id: String)
@@ -48,19 +49,9 @@ const GRENADE_TILE_HEIGHT := 160.0
 const GRENADE_TILE_PAD := Vector2i(16, 14)
 const GRENADE_SIZE := 17
 const HEADING_GAP := 14
-## The swap row: its label's width, the gap between its cards, a card's height and padding, and the picture box the
-## longest replica fits there.
-const SWAP_LABEL_WIDTH := 170.0
-const SWAP_GAP := 12
-const REPLICA_HEIGHT := 72.0
-const REPLICA_PAD := Vector2(12.0, 8.0)
-const LIST_BOX := Vector2(120.0, 52.0)
-const REPLICA_NAME_SIZE := 17
-const REPLICA_SUB_SIZE := 13
-## What a swap card says under its name: the slot it is carried in, or nothing (the rest is its tooltip).
-const REPLICA_TEXT_GAP := 2
-const REPLICA_TAG_GAP := 6
-const REPLICA_PIC_GAP := 12
+## SWITCH REPLICA on a carried card: its words' size and padding.
+const SWITCH_SIZE := 14
+const SWITCH_PAD := Vector2i(12, 5)
 ## The range's note under the Performance sheet (concept `loadout-practice.png`): the gap above, the padding (left past
 ## the rule, top, right, bottom), the rule's width, the kicker's and the words' sizes and the words' extra line spacing.
 const NOTE_GAP := 18
@@ -76,25 +67,15 @@ var _pictures: ReplicaPictures = null
 var _carried: Array[MenuCard] = []
 var _carried_pic: Array[TextureRect] = []
 var _carried_customise: Array[Button] = []
-## Pixels per metre of replica in the carried cards and in the swap row.
+var _carried_switch: Array[Button] = []
+## Pixels per metre of replica in the carried cards.
 var _carried_scale: float = 1.0
-var _list_scale: float = 1.0
 var _carried_name: Array[Label] = []
 var _carried_sub: Array[Label] = []
-var _rows: Dictionary[String, MenuCard] = {}
-var _row_pic: Dictionary[String, TextureRect] = {}
-var _row_slot: Dictionary[String, Label] = {}
-var _row_rest: Dictionary[String, Label] = {}
-## The swap cards that can be carried now: their tooltip adds how to pick, swap and customise.
-var _row_hint: Dictionary[String, bool] = {}
-## A swap card's line under its name, and whether it has tags: the line hides when it has neither tags nor a slot, so
-## the name sits in the middle.
-var _row_sub: Dictionary[String, HBoxContainer] = {}
-var _row_tagged: Dictionary[String, bool] = {}
+var _switch: LoadoutSwitch = null
 var _sheet: PerformanceSheet = null
 var _line_name: Label = null
 var _line_rest: Label = null
-var _swap_label: Label = null
 var _grenade_keys: Array[Label] = []
 var _picked: Loadout.Slot = Loadout.Slot.PRIMARY
 var _facts: LoadoutFacts = null
@@ -132,7 +113,6 @@ func _init(pictures: ReplicaPictures, facts: LoadoutFacts) -> void:
 	row.add_child(secondary)
 	row.add_child(_build_grenades())
 	left.add_child(row)
-	left.add_child(_build_swap())
 	var side := VBoxContainer.new()
 	side.add_theme_constant_override("separation", 0)
 	side.custom_minimum_size = Vector2(SIDE_WIDTH, 0.0)
@@ -143,14 +123,44 @@ func _init(pictures: ReplicaPictures, facts: LoadoutFacts) -> void:
 	_note = _build_range_note()
 	side.add_child(_note)
 	columns.add_child(side)
+	# over the whole page while it is open
+	_switch = LoadoutSwitch.new(pictures, facts)
+	_switch.picked.connect(func(id: String) -> void: replica_picked.emit(id))
+	add_child(_switch)
 
 
 func carried_card(slot: Loadout.Slot) -> MenuCard:
 	return _carried[slot]
 
 
+## A replica's card in the SWITCH REPLICA pop-up.
 func replica_card(id: String) -> MenuCard:
-	return _rows.get(id)
+	return _switch.card(id)
+
+
+## SWITCH REPLICA on the carried card of `slot`.
+func switch_button(slot: Loadout.Slot) -> Button:
+	return _carried_switch[slot]
+
+
+## The SWITCH REPLICA pop-up, and whether it is open.
+func switcher() -> LoadoutSwitch:
+	return _switch
+
+
+func switching() -> bool:
+	return _switch.visible
+
+
+## Picks `slot` and opens the pop-up of replicas to carry in it.
+func open_switch(slot: Loadout.Slot) -> void:
+	slot_picked.emit(slot)
+	_switch.open(slot)
+
+
+## Closes the pop-up with nothing changed.
+func close_switch() -> void:
+	_switch.close()
 
 
 func sheet() -> PerformanceSheet:
@@ -168,14 +178,13 @@ func foot_text() -> String:
 
 
 func replica_ids() -> PackedStringArray:
-	return PackedStringArray(_rows.keys())
+	return _switch.ids()
 
 
 ## Shows the carried loadout, with `slot` picked and the paint names as the Realistic colours switch says.
 func refresh(slot: Loadout.Slot, realistic: bool) -> void:
 	var f := _facts
 	_picked = slot
-	_swap_label.text = tr("LOADOUT_SWAP") % tr(LoadoutFacts.SLOT_KEYS[slot]).to_upper()
 	# a rebind in Settings › Controls shows when the page is shown again (LoadoutPage refreshes then)
 	for kind: int in [Grenade.Kind.SMOKE, Grenade.Kind.FLASH]:
 		_grenade_keys[kind].text = KeyNames.of_action(GRENADE_ACTIONS[kind])
@@ -196,24 +205,6 @@ func refresh(slot: Loadout.Slot, realistic: bool) -> void:
 			bits.append(power)
 		_carried_sub[s].text = " · ".join(bits)
 		_carried_pic[s].texture = _pictures.texture(item.key, t.paint, realistic, f.fitted_keys(item))
-	for id: String in _rows:
-		var item := f.pool().item(id)
-		var t := f.rules().tune_of(f.saved.carried(), id)
-		_row_pic[id].texture = _pictures.texture(item.key, t.paint, realistic, f.fitted_keys(item))
-		var carried_in := f.slot_of(id)
-		_row_slot[id].visible = carried_in >= 0
-		_row_sub[id].visible = carried_in >= 0 or _row_tagged[id]
-		if carried_in >= 0:
-			_row_slot[id].text = tr(LoadoutFacts.SLOT_KEYS[carried_in])
-		var config := f.rules().config(item)
-		if config != null:
-			var rest := tr("LOADOUT_REPLICA_SUB") % [_class_word(config.site_class),
-					LoadoutPerformance.rate_text(config.fire_rate)]
-			_row_rest[id].text = (" · " + rest) if carried_in >= 0 else rest
-		elif carried_in < 0:
-			_row_rest[id].text = tr("LOADOUT_COMES_WITH_LEVELS") % _class_word(_site_class(item))
-		var about := _row_rest[id].text.trim_prefix(" · ")
-		_rows[id].tooltip_text = about + ("\n" + tr("LOADOUT_HINT") if _row_hint.has(id) else "")
 	_line_name.text = f.saved.carried().name
 	_line_rest.text = " · " + tr("LOADOUT_FOOT") % " and ".join(names) if not names.is_empty() else ""
 	_sheet.show_sheet(f.sheet(slot), tr("LOADOUT_SHEET_SUB") % f.item(slot).display_name)
@@ -223,41 +214,23 @@ func refresh(slot: Loadout.Slot, realistic: bool) -> void:
 	for s in LoadoutFacts.SLOTS:
 		if f.has(s):
 			_carried_pic[s].custom_minimum_size = _pictures.extent(f.item(s).key) * _carried_scale
-	for id: String in _rows:
-		_row_pic[id].custom_minimum_size = _list_size(f.pool().item(id))
+	_switch.refresh(realistic)
 
 
-## The two scales: each lets the longest replica listed fill its box (and no replica be taller than the box).
+## The carried cards' scale: the longest replica listed fills the box (and no replica is taller than it).
 func _set_scales() -> void:
-	var longest := Vector2.ZERO
-	var rules := _facts.rules()
-	for item in _listed():
-		# a replica the game can't play yet has no model to measure (its extent is a stand-in), so it sets no scale
-		if rules.config(item) == null:
-			continue
-		var e := _pictures.extent(item.key)
-		longest = Vector2(maxf(longest.x, e.x), maxf(longest.y, e.y))
-	if longest == Vector2.ZERO:
-		return
-	_carried_scale = minf(CARRIED_BOX.x / longest.x, CARRIED_BOX.y / longest.y)
-	_list_scale = minf(LIST_BOX.x / longest.x, LIST_BOX.y / longest.y)
+	var longest := LoadoutSwitch.longest(_pictures, _facts.rules())
+	if longest != Vector2.ZERO:
+		_carried_scale = minf(CARRIED_BOX.x / longest.x, CARRIED_BOX.y / longest.y)
 
 
-## A replica's picture size in the swap row: at the row's scale, and never past its box (a replica the game can't play
-## yet has only a stand-in extent, so it is fitted to the box instead).
-func _list_size(item: Pool.Item) -> Vector2:
-	var want := _pictures.extent(item.key) * _list_scale
-	var fit := minf(1.0, minf(LIST_BOX.x / want.x, LIST_BOX.y / want.y)) if want.x > 0.0 and want.y > 0.0 else 1.0
-	return want * fit
-
-
-## The picture in a carried card, and in a list row (for the tests).
+## The picture in a carried card, and on a replica's card in the pop-up (for the tests).
 func carried_picture(slot: Loadout.Slot) -> TextureRect:
 	return _carried_pic[slot]
 
 
 func list_picture(id: String) -> TextureRect:
-	return _row_pic[id]
+	return _switch.picture(id)
 
 
 ## The two carried cards (not yet placed): the slot's label and key at the top left, the replica in the middle in a
@@ -287,6 +260,18 @@ func _build_carried() -> void:
 		var key := MenuParts.key_chip(str(s + 1), KEY_SIZE, GameTheme.DIM, KEY_PAD)
 		key.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		head.add_child(key)
+		var room := Control.new()
+		room.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		room.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		head.add_child(room)
+		var switch := Button.new()
+		switch.name = "SwitchReplica"
+		switch.text = tr("LOADOUT_SWITCH_REPLICA").to_upper()
+		SettingsSavePage.paint(switch, GameTheme.CARD_HI, GameTheme.LINE, GameTheme.TEXT, SWITCH_SIZE, SWITCH_PAD)
+		switch.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		switch.mouse_filter = Control.MOUSE_FILTER_STOP
+		switch.pressed.connect(open_switch.bind(s))
+		head.add_child(switch)
 		stack.add_child(head)
 		# the picture's room grows with the card (the primary fills the column), the picture stays at the one scale
 		var stage := CenterContainer.new()
@@ -332,6 +317,7 @@ func _build_carried() -> void:
 		_carried_name.append(item_name)
 		_carried_sub.append(sub)
 		_carried_customise.append(customise)
+		_carried_switch.append(switch)
 
 
 ## The grenades every loadout carries each round (SF1), on a glass panel: a tile a bomb, its canister (GrenadeGlyph),
@@ -376,24 +362,6 @@ func _build_grenades() -> Control:
 	panel.name = "Grenades"
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel.tooltip_text = tr("LOADOUT_GRENADES_TIP")
-	return panel
-
-
-## SWAP PRIMARY (or SECONDARY): every replica to carry in the picked slot, in a row, at the row's one scale.
-func _build_swap() -> Control:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", SWAP_GAP)
-	_swap_label = MenuParts.heading("")
-	_swap_label.custom_minimum_size = Vector2(SWAP_LABEL_WIDTH, 0.0)
-	_swap_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(_swap_label)
-	var rules := _facts.rules()
-	for item in _listed():
-		var later := rules.config(item) == null
-		var lock := rules.unlock_level(item.id) if not later and rules.is_locked(item.id) else -1
-		row.add_child(_replica_row(item, later, lock))
-	var panel := MenuParts.glass(row)
-	panel.name = "Swap"
 	return panel
 
 
@@ -444,82 +412,6 @@ func _build_range_note() -> Control:
 	return holder
 
 
-## The replicas to list: the ones a new player carries first (ReplicaStats.DEFAULT_LOADOUT), then the rest in the pool's
-## order; dev replicas only with Dev content on. The order stays put as replicas are swapped.
-func _listed() -> Array[Pool.Item]:
-	var rules := _facts.rules()
-	var out: Array[Pool.Item] = []
-	for key in ReplicaStats.DEFAULT_LOADOUT:
-		var it := rules.pool.replica_by_key(key)
-		if it != null and not (it.is_dev() and not rules.dev_content):
-			out.append(it)
-	for it in rules.pool.replicas:
-		if not out.has(it) and not (it.is_dev() and not rules.dev_content):
-			out.append(it)
-	return out
-
-
-## A replica's row; `lock_level` >= 0: not unlocked yet, greyed with the level that unlocks it.
-func _replica_row(item: Pool.Item, later: bool, lock_level: int) -> MenuCard:
-	var card := MenuCard.new()
-	card.name = "Replica_%s" % item.id
-	card.custom_minimum_size = Vector2(0.0, REPLICA_HEIGHT)
-	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	# how to pick, swap and customise: the card's tooltip (UI1: it was a paragraph under the list)
-	if not later and lock_level < 0:
-		_row_hint[item.id] = true
-	var pad := MenuParts.padded(REPLICA_PAD.x, REPLICA_PAD.y, REPLICA_PAD.x, REPLICA_PAD.y)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", REPLICA_PIC_GAP)
-	var stage := CenterContainer.new()
-	stage.custom_minimum_size = Vector2(LIST_BOX.x, 0.0)
-	stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var pic := MenuParts.picture(_list_size(item))
-	stage.add_child(pic)
-	row.add_child(stage)
-	var text := VBoxContainer.new()
-	text.add_theme_constant_override("separation", REPLICA_TEXT_GAP)
-	text.alignment = BoxContainer.ALIGNMENT_CENTER
-	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var title := HBoxContainer.new()
-	title.add_theme_constant_override("separation", 10)
-	var item_name := MenuParts.text(item.display_name, REPLICA_NAME_SIZE, 700, GameTheme.TEXT)
-	item_name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	item_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title.add_child(item_name)
-	text.add_child(title)
-	# under the name: the slot it is carried in, or its tags (LATER, the level that unlocks it, DEV), so the name keeps
-	# the card's width
-	var sub := HBoxContainer.new()
-	sub.add_theme_constant_override("separation", REPLICA_TAG_GAP)
-	if later:
-		sub.add_child(MenuTag.later())
-	if lock_level >= 0:
-		sub.add_child(MenuTag.level(lock_level))
-	if item.is_dev():
-		sub.add_child(MenuTag.dev())
-	_row_sub[item.id] = sub
-	_row_tagged[item.id] = sub.get_child_count() > 0
-	var slot_label := MenuParts.text("", REPLICA_SUB_SIZE, 700, GameTheme.ACCENT)
-	# the class and fire rate: the card's tooltip, not a line cut short (the concept's cards show the name only)
-	var rest := MenuParts.text("", REPLICA_SUB_SIZE, 500, GameTheme.MUTED)
-	rest.visible = false
-	sub.add_child(slot_label)
-	sub.add_child(rest)
-	text.add_child(sub)
-	row.add_child(text)
-	pad.add_child(row)
-	card.add_content(pad)
-	card.set_greyed(later or lock_level >= 0)
-	card.pressed.connect(func() -> void: replica_picked.emit(item.id))
-	card.gui_input.connect(_double_click_replica.bind(item.id))
-	_rows[item.id] = card
-	_row_pic[item.id] = pic
-	_row_slot[item.id] = slot_label
-	_row_rest[item.id] = rest
-	return card
-
-
 ## LOADOUT in condensed capitals and its line beside it: the loadout carried and what is in it.
 func _build_title() -> Control:
 	var line := HBoxContainer.new()
@@ -537,22 +429,3 @@ func _double_click(event: InputEvent, slot: Loadout.Slot) -> void:
 	if click != null and click.double_click and click.button_index == MOUSE_BUTTON_LEFT and click.pressed:
 		slot_picked.emit(slot)
 		customise_requested.emit()
-
-
-## A double click on a replica card that is carried does the same for its slot.
-func _double_click_replica(event: InputEvent, id: String) -> void:
-	var click := event as InputEventMouseButton
-	if click != null and click.double_click and click.button_index == MOUSE_BUTTON_LEFT and click.pressed:
-		var slot := _facts.slot_of(id)
-		if slot >= 0:
-			slot_picked.emit(slot as Loadout.Slot)
-			customise_requested.emit()
-
-
-func _class_word(site_class: StringName) -> String:
-	return tr("LOADOUT_CLASS_" + String(site_class).to_upper())
-
-
-## The class a replica the game can't play yet belongs to: from its pool tags.
-func _site_class(item: Pool.Item) -> StringName:
-	return &"pistol" if item.tags.has("pistol") else &"rifle"

@@ -3,7 +3,7 @@ extends PanelContainer
 ## The rail down the left of every menu page (UI concept B, owner 2026-11-02; docs/records/UR1.md): words only, each
 ## centred: the AIRSOFT wordmark, the tabs MATCH, LOADOUT, ARMORY and SETTINGS, then at the foot the player's level with
 ## a thin bar of the XP into it (`set_level`; hidden while levelling is off) and QUIT. The current tab is lit with a
-## card and a teal rule at its left. A tab press is sent as `tab_pressed`; the page decides what to show and calls
+## card and a teal rule on its left edge. A tab press is sent as `tab_pressed`; the page decides what to show and calls
 ## `set_current`. QUIT is sent as `quit_pressed` (the game asks QUIT GAME?). From practice (`set_practice`) the rail
 ## shows only the LOADOUT tab and, under the wordmark, the teal BACK TO PRACTICE button with the Loadout's key; it is
 ## sent as `practice_pressed`, and QUIT is hidden (the range has its own way out). The four tabs are one width.
@@ -164,15 +164,18 @@ func _build_tab(tab: Tab) -> Control:
 	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	button.pressed.connect(func() -> void: tab_pressed.emit(tab))
 	_tabs[tab] = button
-	# the lit tab's rule, at the button's left
+	# the lit tab's rule, on the lit card's left edge and centred on its height (offsets only: setting `position` on a
+	# rule anchored top to bottom before the button had a size pushed it RULE_INSET past the card's foot)
 	var rule := ColorRect.new()
+	rule.name = "Rule"
 	rule.color = GameTheme.ACCENT
 	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	rule.anchor_top = 0.0
 	rule.anchor_bottom = 1.0
+	rule.offset_left = 0.0
+	rule.offset_right = RULE_WIDTH
 	rule.offset_top = RULE_INSET
 	rule.offset_bottom = -RULE_INSET
-	rule.offset_right = RULE_WIDTH
-	rule.position.x = -RULE_WIDTH * 2
 	button.add_child(rule)
 	_rules[tab] = rule
 	return button

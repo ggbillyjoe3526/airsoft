@@ -77,6 +77,8 @@ notices.
 Hold **Tab** for the scoreboard over the field while the match keeps playing: the map, mode, bots' level and team
 size, the round and its time, each team's score and players still in (your team first), and every player's hits this
 round, hits, times hit, BBs fired, accuracy and time in play. Players out this round are greyed with an **OUT** tag.
+Held while a round's results are up, it takes their place until you let go; the match's results already show
+everything, so it stays down over them.
 
 ## What got you
 
