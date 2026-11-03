@@ -1,4 +1,4 @@
-Task: none (AU2) · QA commit see branch qa-au2 head · Verdict: Pass
+Task: none (AU2) · QA commit (branch qa-au2) · Verdict: Pass
 
 Blocking findings: none.
 
