@@ -373,13 +373,25 @@ func open_settings() -> void:
 		_screen.end_round = end_round
 		_screen.closed.connect(_settings_closed)
 		add_child(_screen)
+	# The menu's buttons sit under the settings: out of the focus ring, so Tab can't reach Resume or Quit unseen (BP3).
+	_buttons_focusable(false)
 	_screen.open()
 
 
 func _settings_closed() -> void:
 	_screen.queue_free()
 	_screen = null
+	_buttons_focusable(true)
+	# the settings may have rebound it
+	_loadout_key.text = KeyNames.of_action(&"loadout")
 	_settings_button.grab_focus()
+
+
+## Whether the menu's own buttons take the keyboard focus (off while the settings show over them).
+func _buttons_focusable(on: bool) -> void:
+	for b: Button in [_resume, _challenge, _loadout, _skip, _settings_button, _leave, _report_button]:
+		if b != null:
+			b.focus_mode = Control.FOCUS_ALL if on else Control.FOCUS_NONE
 
 
 ## Whether the settings are showing.

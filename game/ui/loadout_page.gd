@@ -239,6 +239,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		return
 	var key := event as InputEventKey
+	if key != null and get_tree().get_node_count_in_group(QuitPrompt.GROUP) > 0:
+		return
 	var plain := key != null and not (key.ctrl_pressed or key.alt_pressed or key.shift_pressed or key.meta_pressed)
 	if plain and key.pressed and not key.echo and not _customising and _strip.mode == LoadoutStrip.Mode.NORMAL:
 		var place := KEYS.find(key.keycode)

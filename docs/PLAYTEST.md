@@ -868,8 +868,8 @@ Every field plays 6v6 by default; Custom offers 5v5, 6v6, 7v7 and 8v8 on each (o
   double-click, the nearest teammate says "Mag coming!", the line under the crosshair says "Dash is bringing you a
   mag" and a small magazine sits by their chevron; they come and toss one you see arc and spin into your hands
   ("+1 mag from Dash · 60 BBs", and a catch sound). H again at once: "Dash is already bringing you one". With a full
-  spare: "You still have a full spare mag"; with nobody near: "Nobody near has a mag to spare". The line never names
-  a key. Is the arc readable, the catch satisfying, the line easy to read over a bright wall?
+  spare: "You still have a full spare mag"; with nobody near: "Nobody near has a spare mag that fits". The line never
+  names a key. Is the arc readable, the catch satisfying, the line easy to read over a bright wall?
 - [ ] **A teammate asks you.** Settings › Dev › Bots run low on BBs: 8 s into each round a bot of each team is on its
   last magazine and calls "Need a mag!". When that is you, the line says "Dash needs a mag · 12 m" (a magazine by
   their chevron), underlined in your team's colour once they are within a toss; H tosses it ("Mag to Dash") and they
@@ -1152,6 +1152,19 @@ The fixes from the bug pass after the Sniper Rifle that need hands on the keys. 
 - [ ] **Settings › HUD at 150 %:** the preview's panel shows whole, bombs counted.
 - [ ] **Match › Custom rules:** each choice's dark track stops at its last button.
 - [ ] **Depot, follow a teammate bot (Follow me) and take a flash in hand:** it keeps its replica up.
+
+## Full-game bug pass fixes (BP3B)
+
+The fixes from the second half of the bug pass that need hands on the keys.
+
+- [ ] **In a match, Esc, Settings, then press Tab a few times:** the focus stays in Settings; Enter never resumes or
+  quits the match behind them.
+- [ ] **On the range, Esc, Settings, rebind Loadout, BACK:** the pause menu's Loadout row shows the new key.
+- [ ] **On the Loadout page, Esc for QUIT GAME?, then press 2:** nothing changes behind the prompt; Cancel, and 2
+  switches as before.
+- [ ] **In Settings, Shift+Tab to ARMORY and press Enter:** the arrow keys move round the Armory.
+- [ ] **Raise and lower the 2x Scope and the Variable Scope at 6×:** the crosshair shrinks away and comes back
+  without a wide flash.
 
 ## Reporting what you find
 

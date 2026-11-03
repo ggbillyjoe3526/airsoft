@@ -66,6 +66,6 @@ and a radio click says they heard. Your magazine flies in a short arc into their
 is made, the BBs come out of the thrower's pouch. A toss reaches <!-- wiki:config mag_share_config.toss_range --> m.
 After an ask ends you can ask again <!-- wiki:config mag_share_config.player_ask_gap --> seconds later. A press that
 can't do anything says why: on the line under the crosshair, or in the wheel's middle when you picked it there
-("Nobody near has a mag to spare", "You still have a full spare mag", "Get closer to Rook to toss a mag"). It does
-nothing while you are out or on the [Practice Range](Practice-Range); between rounds magazines wait for the next round.
+("Nobody near has a spare mag that fits", "You still have a full spare mag", "Get closer to Rook to toss a mag"). It
+does nothing while you are out or on the [Practice Range](Practice-Range); between rounds magazines wait for the next round.
 What the [HUD](HUD-and-Minimap#the-magazine-hand-off) shows, and how [bots](Bots#magazines) ask and bring one.

@@ -11,6 +11,9 @@ signal confirmed
 ## It closed (CANCEL or Esc; not QUIT).
 signal closed
 
+## Every prompt up is in this group: a page's own keys (the Loadout page's 1 to 5) wait while one is (BP3; Godot hands
+## every _unhandled_input its key before any _unhandled_key_input, where this prompt stops keys).
+const GROUP := &"quit_prompt"
 ## The shade over the screen (the page colour, this opaque), the panel's width, its inner margins and the yellow rule on
 ## top (px at 1080p).
 const SHADE_ALPHA := 0.72
@@ -91,6 +94,7 @@ func _init() -> void:
 
 
 func _ready() -> void:
+	add_to_group(GROUP)
 	_before = get_viewport().gui_get_focus_owner()
 	_cancel.grab_focus()
 

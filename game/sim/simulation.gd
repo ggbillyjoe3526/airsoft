@@ -195,7 +195,9 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 	if state.round_state.practice:
 		# Practice has no rounds: it's always live, with no clock.
 		RangeTargets.step(state.targets, tuning, dt, state.rng)
-		state.challenge.step(state.targets, state.events, tuning.targets, dt, state.rng, state.cheats.any())
+		# Dev content (the Sniper Rifle, a dev field) keeps a run off the bests as a Dev setting does (BP3).
+		state.challenge.step(state.targets, state.events, tuning.targets, dt, state.rng,
+				state.cheats.any() or state.dev_content)
 		for c in state.characters:
 			RangeTargets.refill_spares(c.armament)
 			# Bombs too: practise as many throws as you like.

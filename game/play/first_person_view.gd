@@ -18,6 +18,9 @@ const RECOIL_FOLLOW := 40.0
 const LEAN_PACE_STEP := 0.01
 
 var camera: Camera3D = null
+## The view's own zoom right now (1: none), as the camera draws it: the HUD's crosshair is sized on it, not on the
+## turn's zoom, which through a scope's glass is the glass's (BP3).
+var view_zoom: float = 1.0
 ## Seconds of simulation time per real second (the pacer's rate: the Dev settings' game speed); the recoil follows over
 ## the simulation's time, so slowed it eases between the ticks instead of stepping with them.
 var sim_rate: float = 1.0
@@ -111,6 +114,7 @@ func update(c: Character, input: PlayerInput, fraction: float, delta: float, aim
 	# The turn follows what the eye sees: through a scope's glass that is the glass's zoom (2× to 6× on the Variable
 	# Scope), not the view round it (BP3: Scale with zoom did nothing through a scope).
 	input.zoom = lerpf(1.0, maxf(c.armament.zoom_now(), 1.0), aim) if r != null and r.zoom_in_glass else zoom
+	view_zoom = zoom
 	camera.fov = _view.vertical_fov(zoom)
 
 
