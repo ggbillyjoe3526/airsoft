@@ -269,7 +269,6 @@ func _build_carried() -> void:
 		switch.text = tr("LOADOUT_SWITCH_REPLICA").to_upper()
 		SettingsSavePage.paint(switch, GameTheme.CARD_HI, GameTheme.LINE, GameTheme.TEXT, SWITCH_SIZE, SWITCH_PAD)
 		switch.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-		switch.mouse_filter = Control.MOUSE_FILTER_STOP
 		switch.pressed.connect(open_switch.bind(s))
 		head.add_child(switch)
 		stack.add_child(head)
@@ -308,10 +307,11 @@ func _build_carried() -> void:
 		stack.add_child(foot)
 		pad.add_child(stack)
 		card.add_content(pad)
-		# the card lets the mouse through its insides; CUSTOMISE takes its own clicks
+		# add_content lets the mouse through the card's insides to the card, so the two buttons in it take their own
+		# clicks again after it (set before, SWITCH REPLICA was turned off and its clicks picked the card: UF2)
 		customise.mouse_filter = Control.MOUSE_FILTER_STOP
+		switch.mouse_filter = Control.MOUSE_FILTER_STOP
 		card.pressed.connect(func() -> void: slot_picked.emit(s))
-		card.gui_input.connect(_double_click.bind(s))
 		_carried.append(card)
 		_carried_pic.append(pic)
 		_carried_name.append(item_name)
@@ -421,11 +421,3 @@ func _build_title() -> Control:
 	line.add_child(_line_name)
 	line.add_child(_line_rest)
 	return MenuParts.page_title(tr("MENU_TAB_LOADOUT"), line)
-
-
-## A double click on a carried card opens Customise for it.
-func _double_click(event: InputEvent, slot: Loadout.Slot) -> void:
-	var click := event as InputEventMouseButton
-	if click != null and click.double_click and click.button_index == MOUSE_BUTTON_LEFT and click.pressed:
-		slot_picked.emit(slot)
-		customise_requested.emit()

@@ -1194,6 +1194,8 @@ Dev content on for the rifle. The numbers came from bots; these need you.
 - [ ] **After a round:** the round's table is smaller. Hold Tab: the scoreboard replaces the table and the WON/LOST
   stamp instead of drawing over them; let go and they come back. At the match's end Tab does nothing over the results.
   Try 8v8 and HUD size 150 % too.
+- [ ] **Loadout, with the mouse (UF2):** click SWITCH REPLICA on each card: the list opens. Pick a replica: it's
+  carried. Double-click a card: it's only picked; Customise opens from CUSTOMISE alone.
 
 ## Reporting what you find
 
