@@ -348,3 +348,17 @@ func test_a_6v6_board_ends_above_the_replica_panel_at_1080p() -> void:
 	var board := Hud.BOARD_TOP + HudTable.PAD.y * 2.0 + HudTable.HEADING_SIZE + HudTable.HEADING_BELOW + rows
 	assert_lt(board, 1080.0 - 220.0, "the board's foot (%d px) clears the replica panel's top" % roundi(board))
 	assert_eq(HudTable.ROW_HEIGHT, 30.0, "compact rows")
+
+
+## QA (attempt 1, advisory): the pop-up never stays open behind Customise or across a hidden page.
+func test_customise_and_hiding_the_page_close_the_pop_up() -> void:
+	var page := _page()
+	await wait_process_frames(2)
+	var gear := page.gear()
+	gear.open_switch(Loadout.Slot.PRIMARY)
+	page.show_customise()
+	assert_false(gear.switching(), "Customise closes it")
+	page.show_gear()
+	gear.open_switch(Loadout.Slot.SECONDARY)
+	page.visible = false
+	assert_false(gear.switching(), "another tab closes it")

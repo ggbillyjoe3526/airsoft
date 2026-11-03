@@ -196,6 +196,7 @@ func show_customise(which: int = -1) -> void:
 	if _customising or not _facts.has(_slot):
 		return
 	_customising = true
+	_gear.close_switch() # never left open behind Customise, where its keys would still reach it
 	_gear.visible = false
 	_strip.visible = false
 	_notice.visible = false
@@ -265,7 +266,9 @@ func _refresh_after_tab(_tab: CustomiseView.Tab) -> void:
 
 
 func _on_visibility_changed() -> void:
-	if visible and is_inside_tree():
+	if not visible:
+		_gear.close_switch() # another tab or back to practice: the pop-up is not waiting on the way back
+	elif is_inside_tree():
 		_refresh()
 
 

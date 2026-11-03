@@ -928,7 +928,7 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 		# Tab over the round's table: the board shows and the table and its stamp hide under it until Tab is let go; over
 		# the match's summary (which holds the match's results) the board stays down (owner, 2026-11-03: they drew over
 		# each other).
-		var board := _board_wanted and not _summary.visible
+		var board := _board_wanted and not (_summary.is_open() and not _round_result.holds_results())
 		_round_result.set_covered(board)
 		_middle.visible = not board
 		_round_result.update(state, _stats, _player)
