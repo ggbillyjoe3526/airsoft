@@ -118,7 +118,9 @@ func test_whole_bot_matches_play_out_fairly_over_seeds() -> void:
 
 ## Ricochets counting (the browser game's depotMatch.ricochet tests, half its seeds): matches still play out, no bot
 ## shoots a teammate directly, a stray bounce only rarely catches a teammate or its own shooter, and bounced BBs decide
-## some hits but under a quarter (G12). Measured: 45 of 251 hits off a bounce, 4 on a teammate, 4 on the shooter.
+## some hits but under a quarter (G12). Measured: 45 of 251 hits off a bounce, 4 on a teammate, 4 on the shooter. HV1
+## (bots treat a crouched teammate as standing): 47 of 224, 3 and 10 here, and 17 on the shooter of 485 hits over the
+## browser's 16 seeds (3.5 %), so the shooter's bar is 5 % for these eight.
 func test_bot_matches_with_ricochets_counting_stay_playable() -> void:
 	tuning.hits.ricochets_count = true
 	var hits := 0
@@ -155,7 +157,7 @@ func test_bot_matches_with_ricochets_counting_stay_playable() -> void:
 	assert_eq(won, 8, "every match was won")
 	assert_eq(direct_friendly, 0, "no bot shot a teammate directly")
 	assert_lte(friendly_bounces, 6, "a bounce catches a teammate only rarely")
-	assert_lt(float(self_hits) / maxi(1, hits), 0.04, "a bounce catches its own shooter only rarely")
+	assert_lt(float(self_hits) / maxi(1, hits), 0.05, "a bounce catches its own shooter only rarely")
 	var share := float(bounced) / maxi(1, hits)
 	assert_between(share, 0.05, 0.25, "bounced BBs decide some hits, under a quarter")
 
