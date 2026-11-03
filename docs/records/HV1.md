@@ -72,7 +72,7 @@ once a tick at most.
 - **Arms and replicas still don't count** (owner, 2026-10-01). A BB clipping only an elbow sticking out flies on.
 - **Robots** (Dev) use the human's fit: KNOWN_ISSUES.
 - **Bots treat a crouched teammate as standing** in their line-of-fire check (CI's Attack / Defend guard, seed 9: a
-  shot pressed over a crouched teammate's head fired as he stood up). With it the 8-seed ricochet test's own-shooter
+  shot pressed over a crouched teammate's head fired as it stood up). With it the 8-seed ricochet test's own-shooter
   share is 4.5 % (10 of 224), over its 4 % bar; over the browser's 16 seeds it is 3.5 %, so that bar is now 5 %.
 - **Headgear:** one head sphere for the four heads (the tuner measured the HighCut; the others are within the bar).
 

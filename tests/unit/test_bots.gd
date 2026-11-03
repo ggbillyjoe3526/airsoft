@@ -218,6 +218,44 @@ func test_a_bot_holds_fire_with_a_teammate_in_the_line() -> void:
 	assert_gt(shots, 0, "with the line clear it fires")
 
 
+func test_a_bot_holds_fire_over_a_crouched_teammate_who_could_stand_into_the_line() -> void:
+	# HV1 (CI's Attack / Defend guard, Depot seed 9): a shot pressed over a crouched teammate's head fired as it stood
+	# up. Up East yard at an enemy raised 1.4 m, the line runs over the teammate's crouched head but through where its
+	# head is standing: the bot holds fire.
+	_start(6)
+	var shooter := _bot(0)
+	var mate := state.characters[1]
+	var enemy := state.characters[3]
+	shooter.character.position = Vector3(20.0, 0.0, 0.0)
+	enemy.position = Vector3(20.0, 1.4, -12.0)
+	shooter.character.yaw = 0.0
+	shooter.aim_yaw = 0.0
+	for c in state.characters:
+		c.prev_position = c.position
+		if c != shooter.character and c != mate and c != enemy:
+			c.status = Character.Status.OUT
+	shooter.skill = config.skill.duplicate() as BotSkill
+	shooter.skill.contact_cover_min_distance = INF
+	mate.crouch_amount = 1.0
+	mate.prev_crouch_amount = 1.0
+	var shots := 0
+	for t in 180:
+		mate.position = Vector3(20.0, 0.0, -9.0)
+		bots.think(state, commands, DT)
+		if commands[0].fire:
+			shots += 1
+		state.time += DT
+	assert_eq(shooter.target_id, enemy.id, "it sees the enemy past its crouched teammate")
+	assert_eq(shots, 0, "never fires over a crouched teammate's head")
+	for t in 180:
+		mate.position = Vector3(24.0, 0.0, -9.0)
+		bots.think(state, commands, DT)
+		if commands[0].fire:
+			shots += 1
+		state.time += DT
+	assert_gt(shots, 0, "with the line clear it fires")
+
+
 ## Shots bot 0 fires in 3 s at an enemy 12 m up East yard while bot teammate 1 stands at `mate_at` in `mode`, moving at
 ## `velocity` on `route` (none: no route), held there each tick.
 func _shots_past_a_walker(mate_at: Vector3, route: PackedVector3Array, mode: Bot.Mode = Bot.Mode.ADVANCE,
