@@ -2643,7 +2643,7 @@ msgid "SETTINGS_HUD_OPACITY"
 msgstr "HUD opacity"
 
 msgid "SETTINGS_HUD_OPACITY_NOTE"
-msgstr "Fades the ammo and grenade panel and the minimap in a match."
+msgstr "Fades the ammo and bomb panel and the minimap in a match."
 
 msgid "SETTINGS_HUD_SIZE"
 msgstr "HUD size"

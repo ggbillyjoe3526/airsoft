@@ -1,12 +1,13 @@
 # UR8 · Magazine boxes at the HUD panel's left; HUD opacity for the panel and the minimap
 
-**Review:** pending
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-03 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-03 | 1 | Opus 5.5 (build thread) | ✓ | Accept 8/8 | – (the owner then widened the task to the opacity) |
+| 2026-11-03 | 2 | Opus 5.5 (build thread) | ✓ | Accept 8/8 | – |
 
 ## Goal
 
@@ -37,4 +38,11 @@ affects the HUD during a match. The magazine/bomb counter and the minimap".
 
 ## Checks
 
-- pending
+- gdlint clean on game and tests; HUD, settings and opacity suites 345/345, then QA's 8/8 (`test_ur8_opacity.gd`) and
+  97/97 neighbours. The full suite runs in CI.
+- QA: Pass twice. The magazine-box probes (counter off, a swap, 1 to 10 boxes, 150 %) are in `test_ur7_qa.gd`; the
+  opacity probes (an old 50 % save, spectating and the M map stay solid, hide and show, the status notes fade with
+  the panel) in `test_ur8_opacity.gd`.
+- Performance: Pass (`modulate` is a colour multiplier, no extra pass; the restyle walks are gone).
+- Status notes (RELOADING, LAST MAG) fade with the panel, as asked ("words and all"); at 20 % they are faint, left
+  for the owner's playtest.
