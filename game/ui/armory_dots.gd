@@ -3,7 +3,8 @@ extends Control
 ## The Armory's level track (UI concept B v2 `armory.png`): a dot for the starting kit and each level along one line, the
 ## line teal up to the player's level and on into the next by the share of its XP earned; the reached dots filled teal,
 ## the next one large and white, the rest rings. KIT and the level numbers sit under them. A click on a dot sends
-## `level_picked`, so the cards under it can show that level.
+## `level_picked`, so the cards under it can show that level, and marks that dot picked: a white ring round it and its
+## label in teal under a teal bar (owner, 2026-11-03), until another dot is clicked.
 
 ## A dot was clicked: its level (0 for the starting kit).
 signal level_picked(number: int)
@@ -19,12 +20,20 @@ const LABEL_GAP := 10.0
 const END_ROOM := 16.0
 const RING_COLOUR := Color(1.0, 1.0, 1.0, 0.35)
 const FACE := Color(0.06, 0.07, 0.1, 1.0)
+## The picked dot: the ring round it (its gap outside the dot and its width), and the bar under its label (width, height,
+## gap under the label).
+const PICKED_GAP := 4.0
+const PICKED_RING := 2.0
+const PICKED_BAR := Vector2(22.0, 3.0)
+const PICKED_BAR_GAP := 5.0
 
 var _count: int = 1
 var _level: int = 0
 var _fraction: float = 0.0
 var _font: Font = null
 var _words: PackedStringArray = []
+## The dot clicked last (-1: none yet).
+var _picked: int = -1
 
 
 ## `count` dots (the starting kit and each level), the player at `level`, `fraction` of the way to the next.
@@ -60,6 +69,17 @@ func dot_position(i: int) -> Vector2:
 	return Vector2(END_ROOM + step * i, y)
 
 
+## The dot clicked last (-1: none yet).
+func picked() -> int:
+	return _picked
+
+
+## Marks dot `i` picked (-1: none).
+func set_picked(i: int) -> void:
+	_picked = clampi(i, -1, _count - 1)
+	queue_redraw()
+
+
 ## The dot nearest `x`.
 func dot_at(x: float) -> int:
 	var best := 0
@@ -72,7 +92,9 @@ func dot_at(x: float) -> int:
 func _gui_input(event: InputEvent) -> void:
 	var click := event as InputEventMouseButton
 	if click != null and click.pressed and click.button_index == MOUSE_BUTTON_LEFT:
-		level_picked.emit(dot_at(click.position.x))
+		var i := dot_at(click.position.x)
+		set_picked(i)
+		level_picked.emit(i)
 		accept_event()
 
 
@@ -93,7 +115,14 @@ func _draw() -> void:
 		else:
 			draw_circle(c, DOT, FACE)
 			draw_arc(c, DOT, 0.0, TAU, 24, RING_COLOUR, RING, true)
-		var colour := GameTheme.TEXT if i <= _level + 1 else GameTheme.DIM
+		var picked := i == _picked
+		if picked:
+			var r := (NEXT_DOT if i == _level + 1 else DOT) + PICKED_GAP
+			draw_arc(c, r, 0.0, TAU, 32, GameTheme.TEXT, PICKED_RING, true)
+		var colour := GameTheme.ACCENT if picked else GameTheme.TEXT if i <= _level + 1 else GameTheme.DIM
 		var width := _font.get_string_size(_words[i], HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE).x
-		draw_string(_font, Vector2(c.x - width * 0.5, c.y + NEXT_DOT + LABEL_GAP + LABEL_SIZE), _words[i],
-				HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE, colour)
+		var base := c.y + NEXT_DOT + LABEL_GAP + LABEL_SIZE
+		draw_string(_font, Vector2(c.x - width * 0.5, base), _words[i], HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE,
+				colour)
+		if picked:
+			draw_rect(Rect2(c.x - PICKED_BAR.x * 0.5, base + PICKED_BAR_GAP, PICKED_BAR.x, PICKED_BAR.y), GameTheme.ACCENT)

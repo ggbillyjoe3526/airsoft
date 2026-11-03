@@ -81,6 +81,7 @@ func setup(cfg: HudConfig) -> void:
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.size_flags_horizontal = Control.SIZE_SHRINK_END
 	panel.custom_minimum_size = Vector2(WIDTH, 0.0)
+	panel.name = "Frame"
 	var frame := HudStyle.panel_box(HudStyle.BACKING_PANEL, 0, 0)
 	frame.set_corner_radius_all(GameTheme.PANEL_RADIUS)
 	frame.content_margin_left = PAD.x

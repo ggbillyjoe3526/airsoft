@@ -77,8 +77,9 @@ func test_the_loadout_tab_is_on_and_opens_the_gear_page() -> void:
 	assert_true(page.gear().visible)
 	assert_false(page.customising())
 	var words := _words(page)
-	for expected: String in ["LOADOUT", "SWAP PRIMARY", "PERFORMANCE", "PRIMARY", "SECONDARY", "GRENADES"]:
+	for expected: String in ["LOADOUT", "PERFORMANCE", "PRIMARY", "SECONDARY", "GRENADES"]:
 		assert_true(words.has(expected), expected)
+	assert_eq(page.gear().switch_button(Loadout.Slot.PRIMARY).text, "SWITCH REPLICA", "UF1: no SWAP row")
 	assert_eq(page.gear().customise_button().text, "CUSTOMISE")
 
 
@@ -408,6 +409,7 @@ func test_every_replica_picture_sits_inside_its_card_clear_of_its_lines_at_any_s
 		var page := LoadoutPage.new(saved, settings)
 		page.save_path = LOADOUTS
 		holder.add_child(page)
+		page.gear().open_switch(Loadout.Slot.PRIMARY) # the replicas' cards are in its pop-up (UF1)
 		await wait_process_frames(3)
 		var cards: Array[MenuCard] = [page.gear().carried_card(Loadout.Slot.PRIMARY),
 				page.gear().carried_card(Loadout.Slot.SECONDARY)]
@@ -473,18 +475,18 @@ func test_freeing_the_page_leaves_no_orphan_nodes_and_no_connections() -> void:
 
 # --- UR3: concept B v2's Loadout ---
 
-func test_customise_sits_on_the_picked_card_and_the_swap_row_names_its_slot() -> void:
+func test_customise_sits_on_the_picked_card_and_switch_replica_on_both() -> void:
 	var page := _page()
 	var gear := page.gear()
-	var words := _words(page)
-	assert_true(words.has("SWAP PRIMARY"))
+	for slot: Loadout.Slot in LoadoutFacts.SLOTS:
+		assert_true(gear.carried_card(slot).is_ancestor_of(gear.switch_button(slot)), "SWITCH REPLICA on each card (UF1)")
 	assert_true(gear.carried_card(Loadout.Slot.PRIMARY).is_ancestor_of(gear.customise_button()))
 	assert_true(gear.customise_button().visible)
 	gear.carried_card(Loadout.Slot.SECONDARY).pressed.emit()
 	assert_true(gear.carried_card(Loadout.Slot.SECONDARY).is_ancestor_of(gear.customise_button()),
 			"CUSTOMISE moves with the ring")
 	assert_true(gear.customise_button().visible)
-	assert_true(_words(page).has("SWAP SECONDARY"))
+	assert_true(gear.switch_button(Loadout.Slot.PRIMARY).visible, "SWITCH REPLICA stays on the card not picked")
 	var shown := 0
 	for b: Node in gear.find_children("Customise", "Button", true, false):
 		shown += 1 if (b as Button).visible else 0

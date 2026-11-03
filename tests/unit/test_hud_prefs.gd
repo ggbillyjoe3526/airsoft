@@ -111,7 +111,7 @@ func test_the_hud_takes_the_choices() -> void:
 	assert_true(hud.hit_lines().stay)
 	assert_eq(hud.hit_lines().max_lines, HudPrefs.KEPT_LINES)
 	assert_false(hud._replica.counted())
-	assert_almost_eq(hud._replica.modulate.a, 0.5, 0.001, "the replica panel fades (UR8)")
+	assert_almost_eq(HudStyle.opacity_of(hud._replica), 0.5, 0.001, "the replica panel fades (UR8)")
 	p.feed_lines = HudPrefs.FeedLines.FADE
 	p.ammo_counter = true
 	p.panel_opacity = 1.0
@@ -119,7 +119,7 @@ func test_the_hud_takes_the_choices() -> void:
 	assert_false(hud.hit_lines().stay)
 	assert_eq(hud.hit_lines().max_lines, HudConfig.new().feed_lines)
 	assert_true(hud._replica.counted())
-	assert_almost_eq(hud._replica.modulate.a, 1.0, 0.001)
+	assert_almost_eq(HudStyle.opacity_of(hud._replica), 1.0, 0.001)
 
 
 func test_the_panel_opacity_stays_with_the_hud() -> void:
@@ -127,7 +127,7 @@ func test_the_panel_opacity_stays_with_the_hud() -> void:
 	var p := HudPrefs.new()
 	p.panel_opacity = 0.6
 	hud.apply_prefs(p)
-	assert_almost_eq(hud._replica.modulate.a, 0.6, 0.001, "the replica panel")
+	assert_almost_eq(HudStyle.opacity_of(hud._replica), 0.6, 0.001, "the replica panel")
 	assert_almost_eq(HudStyle.backing_on(hud.score(), 1.0).a, 1.0, 0.001, "the score stays solid (UR8)")
 	var row := HudFeedRow.new()
 	add_child_autofree(row)

@@ -3,7 +3,8 @@ extends HBoxContainer
 ## The Armory's level cards (UI concept B v2 `armory.png`): CARDS levels side by side from the one `first()` names, each
 ## a glass card with LEVEL n (or KIT) and its state (UNLOCKED in teal; NEXT, edged in teal; else the XP that reaches it),
 ## then a tile an item: its picture, name and kind, its words in the tooltip; a locked level's tiles dimmed. Every card
-## is built; `browse` and `show_from` choose which show. It opens on the player's level.
+## is built; `browse` and `show_from` choose which show. It opens on the player's level. The level picked on the track
+## (`set_picked`) has its card edged in white (owner, 2026-11-03), wherever the arrows move the cards.
 
 ## The level shown first changed (the page's arrows follow).
 signal moved
@@ -26,10 +27,17 @@ const TILE_LINE_GAP := 2
 const ONE_COLUMN_MAX := 3
 const LOCKED_ALPHA := 0.45
 const NEXT_EDGE := 2
+## The picked level's card: its edge (white, px) and fill.
+const PICKED_EDGE := 2
+const PICKED_FILL := Color(0.11, 0.125, 0.17, 0.86)
 
 var _facts: ArmoryFacts = null
 var _pictures: ItemPictures = null
 var _rows: Dictionary[int, Control] = {}
+## Each card's own face, and the one face the picked card wears (-1: none picked).
+var _faces: Dictionary[int, StyleBoxFlat] = {}
+var _picked_face: StyleBoxFlat = null
+var _picked: int = -1
 var _first: int = 0
 
 
@@ -71,6 +79,19 @@ func show_from(number: int) -> void:
 	moved.emit()
 
 
+## Edges level `number`'s card as the one picked (-1: none); the card picked before goes back to its own face.
+func set_picked(number: int) -> void:
+	if _rows.has(_picked):
+		(_rows[_picked] as PanelContainer).add_theme_stylebox_override("panel", _faces[_picked])
+	_picked = number if _rows.has(number) else -1
+	if _picked >= 0:
+		(_rows[_picked] as PanelContainer).add_theme_stylebox_override("panel", _picked_face)
+
+
+func picked() -> int:
+	return _picked
+
+
 ## One level along (`step` -1 or 1).
 func browse(step: int) -> void:
 	show_from(_first + step)
@@ -88,6 +109,12 @@ func _card(r: ArmoryFacts.Row) -> Control:
 		face.border_color = GameTheme.ACCENT
 		face.set_border_width_all(NEXT_EDGE)
 	panel.add_theme_stylebox_override("panel", face)
+	_faces[r.number] = face
+	if _picked_face == null:
+		_picked_face = GameTheme.panel_box(CARD_PAD.x, CARD_PAD.y)
+		_picked_face.bg_color = PICKED_FILL
+		_picked_face.border_color = GameTheme.TEXT
+		_picked_face.set_border_width_all(PICKED_EDGE)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", HEAD_GAP)
 	panel.add_child(column)

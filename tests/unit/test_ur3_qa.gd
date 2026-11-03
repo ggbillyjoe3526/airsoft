@@ -178,24 +178,24 @@ func test_swapping_the_rifle_to_the_secondary_swaps_the_two_slots_and_their_pict
 func test_the_swap_row_fits_the_page_with_the_shipped_replicas() -> void:
 	var page := _page()
 	await wait_process_frames(3)
-	_assert_room(page, "shipped")
+	await _assert_room(page, "shipped")
 
 
-func test_the_swap_row_fits_with_five_replicas_and_the_sheet_stays_on_screen() -> void:
+func test_the_switch_pop_up_fits_with_five_replicas_and_the_sheet_stays_on_screen() -> void:
 	var grown := _grown_saved(PackedStringArray(["000101|Alpha Pistol|pistol|pistol, gas|public",
 			"000102|Beta Rifle|aeg|rifle, electric, aeg-mag|public"]))
 	var page := _page(ROOM, grown)
 	await wait_process_frames(3)
 	assert_eq(page.gear().replica_ids().size(), 5)
-	_assert_room(page, "five replicas")
+	await _assert_room(page, "five replicas")
 
 
-func test_the_swap_row_fits_with_four_replicas() -> void:
+func test_the_switch_pop_up_fits_with_four_replicas() -> void:
 	var grown := _grown_saved(PackedStringArray(["000101|Alpha Pistol|pistol|pistol, gas|public"]))
 	var page := _page(ROOM, grown)
 	await wait_process_frames(3)
 	assert_eq(page.gear().replica_ids().size(), 4)
-	_assert_room(page, "four replicas")
+	await _assert_room(page, "four replicas")
 
 
 func test_dev_replicas_listed_with_dev_content_still_fit_the_page() -> void:
@@ -206,7 +206,7 @@ func test_dev_replicas_listed_with_dev_content_still_fit_the_page() -> void:
 	await wait_process_frames(3)
 	# the three public replicas, the Sniper Rifle (dev for now) and the added one
 	assert_eq(page.gear().replica_ids().size(), 5)
-	_assert_room(page, "dev replica")
+	await _assert_room(page, "dev replica")
 
 
 func test_a_dev_replica_is_hidden_with_dev_content_off() -> void:
@@ -219,6 +219,9 @@ func test_a_dev_replica_is_hidden_with_dev_content_off() -> void:
 func _assert_room(page: LoadoutPage, what: String) -> void:
 	var room := Rect2(Vector2(NavRail.WIDTH, 0.0), Vector2(ROOM))
 	var gear := page.gear()
+	# the replicas' cards are in SWITCH REPLICA's pop-up (UF1): open, they all fit the screen
+	gear.open_switch(Loadout.Slot.PRIMARY)
+	await wait_process_frames(2)
 	var min_size := gear.get_combined_minimum_size()
 	assert_lte(min_size.x, float(ROOM.x - NavRail.WIDTH), "%s: min width %s" % [what, min_size])
 	assert_lte(min_size.y, float(ROOM.y), "%s: min height %s" % [what, min_size])
@@ -275,8 +278,10 @@ func test_the_page_fits_a_four_by_three_window() -> void:
 		assert_true(room.encloses(c), "card %s" % c)
 		assert_true(c.encloses(gear.carried_picture(slot).get_global_rect()), "picture inside card %d" % slot)
 	assert_true(room.encloses(gear.sheet().get_global_rect()))
-	var swap := gear.find_child("Swap", true, false) as Control
-	assert_true(room.encloses(swap.get_global_rect()), "swap row %s" % swap.get_global_rect())
+	assert_null(gear.find_child("Swap", true, false), "no SWAP row (UF1: SWITCH REPLICA's pop-up instead)")
+	for slot: Loadout.Slot in LoadoutFacts.SLOTS:
+		var b := gear.switch_button(slot).get_global_rect()
+		assert_true(gear.carried_card(slot).get_global_rect().encloses(b), "SWITCH REPLICA %s inside its card" % b)
 
 
 # --- what the page leaves behind ---

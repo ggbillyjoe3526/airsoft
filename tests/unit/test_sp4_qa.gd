@@ -125,6 +125,7 @@ func test_every_shipped_maps_ambience_loads_and_its_calls_sound() -> void:
 		_sound(map)
 		var amb := cfg.ambiences.set_for(map.ambience, false)
 		assert_eq(audio._beds.size(), amb.beds.size(), "%s: every bed found" % id)
+		audio.start_ambience() # the match starts it (UF1: silent under the loading screen)
 		for bed in audio._beds:
 			assert_true(bed.playing, id)
 			assert_eq(bed.bus, SimAudio.BUS_AMBIENCE, id)

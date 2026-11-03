@@ -6,9 +6,9 @@ extends VBoxContainer
 ## round" says (the match's last round: "Click for the results", held until that click or table_hold).
 
 ## The player's column width (px), then the columns after it: header keys and widths (px).
-const PLAYER_WIDTH := 240.0
+const PLAYER_WIDTH := 200.0
 const COLUMNS: Array[StringName] = [&"HUD_COL_HITS", &"HUD_COL_BBS", &"HUD_COL_TIME", &"HUD_COL_HIT_BY"]
-const WIDTHS: Array[float] = [70.0, 110.0, 130.0, 120.0]
+const WIDTHS: Array[float] = [60.0, 100.0, 110.0, 120.0]
 const HINT_GAP := 10
 const HINT_SIZE := 13
 const NAME_LIGHTEN := 0.3
@@ -28,6 +28,8 @@ var _slid: bool = false
 var _final: bool = false
 var _number: int = 0
 var _played: int = 0
+## Hidden under the Tab scoreboard (set_covered).
+var _covered: bool = false
 
 
 func setup(cfg: HudConfig, teams: TeamConfig, rounds: RoundConfig, mate_colour: Color) -> void:
@@ -101,6 +103,8 @@ func update(state: GameState, stats: MatchStats, you: Character) -> void:
 		return
 	if _since < _cfg.table_delay:
 		return
+	if _covered:
+		return
 	if not visible:
 		_fill(state, stats, you)
 		visible = true
@@ -115,6 +119,18 @@ func update(state: GameState, stats: MatchStats, you: Character) -> void:
 
 func table() -> HudTable:
 	return _table
+
+
+## While `on` the table hides under the Tab scoreboard (owner, 2026-11-03: the two drew over each other); let go, it
+## shows again as it was, filled afresh. Its timing (the next round, the results' hold) runs on underneath.
+func set_covered(on: bool) -> void:
+	_covered = on
+	if on:
+		visible = false
+
+
+func covered() -> bool:
+	return _covered
 
 
 func hint_text() -> String:

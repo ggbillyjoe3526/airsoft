@@ -25,7 +25,7 @@ func test_a_panel_opacity_change_from_the_open_settings_reaches_the_hud() -> voi
 	screen._hud_page._panels.value = 50.0
 	screen.close()
 	assert_almost_eq(s.hud.panel_opacity, 0.5, 0.001)
-	assert_almost_eq(hud._replica.modulate.a, 0.5, 0.001, "the replica panel follows the tab")
+	assert_almost_eq(HudStyle.opacity_of(hud._replica), 0.5, 0.001, "the replica panel follows the tab")
 
 
 ## A preview showing a choice never reaches the HUD: each holds its own opacity.
@@ -38,7 +38,7 @@ func test_the_preview_s_opacity_never_reaches_the_hud() -> void:
 	var shown := HudPrefs.new()
 	shown.panel_opacity = 0.6
 	preview.show_prefs(shown)
-	assert_almost_eq(hud._replica.modulate.a, 1.0, 0.001)
+	assert_almost_eq(HudStyle.opacity_of(hud._replica), 1.0, 0.001)
 	assert_almost_eq(HudStyle.backing_on(hud.score(), 1.0).a, 1.0, 0.001)
 
 
@@ -69,7 +69,7 @@ func test_other_parts_stay_solid_whatever_the_hud_opacity() -> void:
 	var card := hud.what_got_you().get_theme_stylebox("panel") as StyleBoxFlat
 	assert_almost_eq(card.bg_color.a, WhatGotYouCard.BACKING, 0.001, "What got you")
 	assert_almost_eq(hud.what_got_you().modulate.a, 1.0, 0.001)
-	assert_almost_eq(hud._replica.modulate.a, 0.7, 0.001, "the replica panel fades")
+	assert_almost_eq(HudStyle.opacity_of(hud._replica), 0.7, 0.001, "the replica panel fades")
 
 
 ## The restyle leaves a box that isn't a navy one (no meta) alone.
@@ -258,7 +258,8 @@ func test_the_preview_s_parts_take_the_tab_s_opacity() -> void:
 	p.panel_opacity = 0.6
 	preview.show_prefs(p)
 	assert_almost_eq(HudStyle.backing_on(preview.feed_row(), 1.0).a, 1.0, 0.001, "the feed line's backing")
-	assert_almost_eq(preview.panel().modulate.a, 0.6, 0.001, "the replica panel")
+	assert_almost_eq(HudStyle.opacity_of(preview.panel()), 0.6, 0.001, "the replica panel's background (UF1)")
+	assert_almost_eq(preview.panel().modulate.a, 1.0, 0.001, "its words stay solid")
 
 
 ## The What got you card's dial (a part that draws its own backing) stays solid with its card.

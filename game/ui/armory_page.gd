@@ -62,6 +62,7 @@ func _init(settings_in: Settings = null, progress_in: Progress = null, records_i
 	_track.moved.connect(_refresh_arrows)
 	page.add_child(_track)
 	_summary.bar().level_picked.connect(_track.show_from)
+	_summary.bar().level_picked.connect(_track.set_picked)
 	_refresh_arrows()
 
 

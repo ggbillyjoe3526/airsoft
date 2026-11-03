@@ -171,8 +171,8 @@ var _drawn_at: Vector2 = Vector2.ZERO
 var _hop_slot: int = -1
 ## The HUD tab's choices (apply_prefs).
 var _prefs := HudPrefs.new()
-## The HUD opacity (HudPrefs.panel_opacity): how much the replica panel and the minimap show, words and all (owner,
-## 2026-11-03: only those two, only in a match).
+## The HUD opacity (HudPrefs.panel_opacity): how much of the replica panel's and the minimap's backgrounds show; their
+## icons, numbers and words stay solid (owner, 2026-11-03: only those two, only in a match, only the backgrounds).
 var _opacity: float = 1.0
 ## The HUD's size (HudPrefs.hud_size, 1 = as drawn), and how much of the flag warning's pulse shows (Reduced motion).
 var _hud_size: float = 1.0
@@ -416,7 +416,7 @@ func setup_minimap(map: MapData, cfg: MinimapConfig, heard: MinimapHearing, map_
 	move_child(_flag_marker, _minimap.get_index()) # the map is drawn over the marker, never the other way round
 	move_child(_pings, _minimap.get_index())
 	_minimap.setup(cfg, _teams, map, heard, map_name, characters, _cfg.minimap_margin)
-	_minimap.modulate.a = _opacity
+	HudStyle.restyle(_minimap, _opacity)
 	# Over the rest of the HUD while its key is held (the order wheel never opens with it).
 	_field_map = HudFieldMap.new()
 	add_child(_field_map)
@@ -550,9 +550,9 @@ func apply_prefs(prefs: HudPrefs) -> void:
 	_replica.set_counted(prefs.ammo_counter)
 	if not is_equal_approx(prefs.panel_opacity, _opacity):
 		_opacity = prefs.panel_opacity
-		_replica.modulate.a = _opacity
+		HudStyle.restyle(_replica, _opacity)
 		if _minimap != null:
-			_minimap.modulate.a = _opacity
+			HudStyle.restyle(_minimap, _opacity)
 	if _mag_line != null:
 		_mag_line.enabled = prefs.mag_hand_off
 		_mag_line.counted = prefs.ammo_counter
@@ -925,8 +925,14 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 	_reload_prompt.show_when(manual_reload and in_play and state.round_state.is_live() and a.reload_due())
 	# The round's stamp stays up as long as the table under it, the match's banner as long as the XP.
 	if _stats != null:
+		# Tab over the round's table: the board shows and the table and its stamp hide under it until Tab is let go; over
+		# the match's summary (which holds the match's results) the board stays down (owner, 2026-11-03: they drew over
+		# each other).
+		var board := _board_wanted and not _summary.visible
+		_round_result.set_covered(board)
+		_middle.visible = not board
 		_round_result.update(state, _stats, _player)
-		_board.update(state, _stats, _player, _board_wanted)
+		_board.update(state, _stats, _player, board)
 		if _board.visible:
 			_fit_board()
 	if _xp != null:

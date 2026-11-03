@@ -8,10 +8,11 @@ extends VBoxContainer
 ## play changes, and when only the numbers moved (each BB fired moves them) at most every HudConfig.board_refill_gap.
 
 ## The player's column width (px), then the columns after it: header keys and widths (px). "This round" is shaded.
-const PLAYER_WIDTH := 220.0
+## Compact (owner, 2026-11-03: the board was too big): 30 px rows, so a 6v6 board ends well above the replica panel.
+const PLAYER_WIDTH := 200.0
 const COLUMNS: Array[StringName] = [&"HUD_COL_THIS_ROUND", &"HUD_COL_HITS", &"HUD_COL_TIMES_HIT", &"HUD_COL_BBS",
 		&"HUD_COL_ACCURACY", &"HUD_COL_TIME"]
-const WIDTHS: Array[float] = [150.0, 70.0, 130.0, 130.0, 140.0, 160.0]
+const WIDTHS: Array[float] = [120.0, 60.0, 110.0, 110.0, 110.0, 130.0]
 const THIS_ROUND := 0
 ## The Pro tips (the browser game's PRO_TIPS), one per round, round 1 first, then round again.
 const PRO_TIPS: Array[StringName] = [&"PRO_TIP_1", &"PRO_TIP_2", &"PRO_TIP_3", &"PRO_TIP_4"]

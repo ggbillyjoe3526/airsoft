@@ -1178,6 +1178,23 @@ Dev content on for the rifle. The numbers came from bots; these need you.
   the scope it lands. Dangerous at range, beatable up close?
 - [ ] **Each field at 6v6 with Dev content on:** does any end or side feel stacked once snipers are about?
 
+## UI fixes from your playtest (UF1)
+
+- [ ] **HUD opacity at 20 %** (Settings › HUD): in a match, the ammo panel's and the minimap's backgrounds (and the
+  minimap's picture of the field) fade, while the counts, bomb icons, magazine boxes, chips, minimap dots and the map
+  name stay solid. Readable over a bright wall and a dark one?
+- [ ] **Settings › HUD at 1080p:** everything, Minimap included, shows without scrolling. HUD opacity and What got you
+  moved to the left column under Hit marker.
+- [ ] **Armory:** click a dot on the level track. The dot gets a white ring and its number turns teal, and that level's
+  card is edged in white (even when it isn't the first card shown). Click another: the mark moves.
+- [ ] **Side rail:** the teal bar sits on the lit tab's card, centred on it, for every tab.
+- [ ] **Loadout:** no Swap row. SWITCH REPLICA on each card opens the list; picking the one in your other slot swaps
+  them; Esc, CLOSE or a click outside closes it with nothing changed. Number keys don't change loadout while it's open.
+- [ ] **Loading a match:** silence until you press Continue, then the ambience starts.
+- [ ] **After a round:** the round's table is smaller. Hold Tab: the scoreboard replaces the table and the WON/LOST
+  stamp instead of drawing over them; let go and they come back. At the match's end Tab does nothing over the results.
+  Try 8v8 and HUD size 150 % too.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

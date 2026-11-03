@@ -87,6 +87,7 @@ func test_a_locked_replica_is_greyed_with_its_level_in_the_list() -> void:
 	page.save_path = LOADOUTS
 	page.settings_path = SETTINGS
 	add_child_autofree(page)
+	page.gear().open_switch(Loadout.Slot.PRIMARY) # the list is SWITCH REPLICA's pop-up (UF1)
 	var card := page.gear().replica_card(PISTOL)
 	assert_true(card.disabled)
 	assert_eq(_tags(card), PackedStringArray(["LEVEL 1"]))

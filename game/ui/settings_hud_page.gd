@@ -2,11 +2,11 @@ class_name SettingsHudPage
 extends HBoxContainer
 ## The settings' HUD tab (concept `hud-options.png`; the browser game's Settings › HUD and Crosshair): on the left the
 ## crosshair (shape, colour, size, thickness, gap, opacity, dynamic or static spread, outline) and the hit marker (on or
-## off, colour, size); on the right a live preview (HudPreview), the HUD size (marked at 100 %, concept `settings-hud-
-## size.png`), the ammo counter, where the hit feed sits and whether its lines fade or stay, your team's callouts in it
-## (CO2), the ping markers (PN2), the magazine hand-off's line (MH3), the HUD opacity and What got you, and the
-## minimap's turn (Rotating or Fixed, drawn as two small samples). Every choice lands in the settings' HudPrefs at once
-## and `changed` asks the screen to save it.
+## off, colour, size), then the HUD opacity and What got you; on the right a live preview (HudPreview), the HUD size
+## (marked at 100 %, concept `settings-hud-size.png`), the ammo counter, where the hit feed sits and whether its lines
+## fade or stay, your team's callouts in it (CO2), the ping markers (PN2), the magazine hand-off's line (MH3), and the
+## minimap's turn (Rotating or Fixed, drawn as two small samples) and zoom. All of it shows at 1080p without scrolling.
+## Every choice lands in the settings' HudPrefs at once and `changed` asks the screen to save it.
 
 ## A choice changed: saved now (`immediate`, a click) or a moment after a slider stops.
 signal changed(immediate: bool)
@@ -118,6 +118,20 @@ func build(screen: SettingsScreen) -> void:
 	_marker_size.value_changed.connect(func(v: float) -> void:
 		_prefs().marker_size = v / 100.0
 		_after(false))
+	# Panels under the hit marker, so the right column's Minimap fits without scrolling at 1080p (owner, 2026-11-03)
+	screen.add_section(left, tr("SETTINGS_PANELS"))
+	_panels = _percent_slider(left, "SETTINGS_HUD_OPACITY", HudPrefs.PANEL_OPACITY_RANGE, LEFT_LABEL)
+	_note(_panels.get_parent() as Control, "SETTINGS_HUD_OPACITY_NOTE")
+	_panels.value_changed.connect(func(v: float) -> void:
+		_prefs().panel_opacity = v / 100.0
+		_after(false))
+	_what_got_you = _choice(left, "SETTINGS_WHAT_GOT_YOU", ["SETTINGS_AUTO", "SETTINGS_ON", "SETTINGS_OFF"],
+			LEFT_LABEL, "")
+	# what Auto means would surprise: said beside it
+	_screen.add_note(_what_got_you.get_parent() as Control, tr("SETTINGS_WHAT_GOT_YOU_NOTE"))
+	_what_got_you.picked.connect(func(i: int) -> void:
+		_screen.settings.what_got_you = i as Settings.WhatGotYou
+		changed.emit(true))
 	var right := _column(0.0)
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_preview = HudPreview.new()
@@ -155,19 +169,6 @@ func build(screen: SettingsScreen) -> void:
 	_mag.toggled.connect(func(on: bool) -> void:
 		_prefs().mag_hand_off = on
 		_after(true))
-	screen.add_section(right, tr("SETTINGS_PANELS"))
-	_panels = _percent_slider(right, "SETTINGS_HUD_OPACITY", HudPrefs.PANEL_OPACITY_RANGE, RIGHT_LABEL)
-	_note(_panels.get_parent() as Control, "SETTINGS_HUD_OPACITY_NOTE")
-	_panels.value_changed.connect(func(v: float) -> void:
-		_prefs().panel_opacity = v / 100.0
-		_after(false))
-	_what_got_you = _choice(right, "SETTINGS_WHAT_GOT_YOU", ["SETTINGS_AUTO", "SETTINGS_ON", "SETTINGS_OFF"],
-			RIGHT_LABEL, "")
-	# what Auto means would surprise: said beside it
-	_screen.add_note(_what_got_you.get_parent() as Control, tr("SETTINGS_WHAT_GOT_YOU_NOTE"))
-	_what_got_you.picked.connect(func(i: int) -> void:
-		_screen.settings.what_got_you = i as Settings.WhatGotYou
-		changed.emit(true))
 	_build_minimap(right)
 
 

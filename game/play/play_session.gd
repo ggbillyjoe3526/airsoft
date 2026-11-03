@@ -25,7 +25,8 @@ extends Node3D
 ## ends once it is in. Not staged, all four run in `_ready` (tests and tools). With `wait_for_go` (MC1, owner
 ## 2026-11-01) the match is drawn but holds still once built, the mouse free, until `go`: `ready_to_go` says when it is
 ## fully loaded (drawn once and its shaders warm, or PlayTuning.go_fallback after the first frame at the latest), for
-## the loading screen's Continue.
+## the loading screen's Continue. Nothing sounds under the loading screen: the ambience starts with the match, at
+## Continue or, without it, as the screen goes (owner, 2026-11-03).
 ## Out of a live round, a fresh press of the trigger (or the pause menu's Skip to next round) skips the rest of it (MC1,
 ## owner 2026-11-01): it is played out at once, as fast as the frame allows (PlayTuning.skip_budget_ms a rendered frame),
 ## silently and under a plain cover, never shown fast-forwarded; then the round's table shows and the next round waits
@@ -280,6 +281,8 @@ func _ready() -> void:
 	while _step < STEP_KEYS.size():
 		_build_step()
 	_running = _map.ok()
+	if _running:
+		_audio.start_ambience()
 
 
 ## Runs the next build step and reports it.
@@ -1204,6 +1207,9 @@ func _process(delta: float) -> void:
 	if _first_frame_due:
 		_first_frame_due = false
 		_held_for = 0.0
+		# the loading screen goes now unless it waits for Continue: the ambience starts with the match, never under it
+		if not _holding:
+			_audio.start_ambience()
 		started.emit()
 
 
@@ -1233,6 +1239,7 @@ func go() -> void:
 	if not _holding:
 		return
 	_holding = false
+	_audio.start_ambience()
 	_capture()
 
 

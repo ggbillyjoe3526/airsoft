@@ -221,9 +221,13 @@ func show_gear() -> void:
 	customising_changed.emit()
 
 
-## Esc: leaves rename, replace or remove, else Customise; false when there was nothing to leave (the menus go back).
+## Esc: leaves rename, replace or remove, else the SWITCH REPLICA pop-up, else Customise; false when there was nothing
+## to leave (the menus go back).
 func back_out() -> bool:
 	if _strip.cancel():
+		return true
+	if _gear.switching():
+		_gear.close_switch()
 		return true
 	if _customising:
 		show_gear()
@@ -242,7 +246,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if key != null and get_tree().get_node_count_in_group(QuitPrompt.GROUP) > 0:
 		return
 	var plain := key != null and not (key.ctrl_pressed or key.alt_pressed or key.shift_pressed or key.meta_pressed)
-	if plain and key.pressed and not key.echo and not _customising and _strip.mode == LoadoutStrip.Mode.NORMAL:
+	if plain and key.pressed and not key.echo and not _customising and not _gear.switching() \
+			and _strip.mode == LoadoutStrip.Mode.NORMAL:
 		var place := KEYS.find(key.keycode)
 		if place >= 0 and place < saved.slots.size():
 			saved.use(place)
