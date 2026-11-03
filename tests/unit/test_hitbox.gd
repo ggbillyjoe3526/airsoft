@@ -5,7 +5,9 @@ extends GutTest
 
 const CLOSE := 1e-5
 
-var hits: HitConfig = HitConfig.new()
+## The built-in volume (HitConfig.fit null): the practice range's plywood figures, and a character's when there is no
+## fit. test_hit_fit, test_hit_registration and test_figure_hit_area hold the fitted one (HV1).
+var hits: HitConfig = _built_in()
 var volume: Hitbox.Volume = Hitbox.Volume.new()
 
 
@@ -196,3 +198,9 @@ func test_the_bound_holds_every_part() -> void:
 			assert_lte(Vector2(end.x - b.a.x, end.z - b.a.z).length() + p.r, b.r + CLOSE, "part %d" % k)
 			assert_gte(end.y - p.r, b.a.y - CLOSE, "part %d" % k)
 			assert_lte(end.y + p.r, b.b.y + CLOSE, "part %d" % k)
+
+
+static func _built_in() -> HitConfig:
+	var h := HitConfig.new()
+	h.fit = null
+	return h

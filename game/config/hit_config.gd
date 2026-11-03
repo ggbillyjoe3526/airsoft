@@ -64,3 +64,36 @@ extends Resource
 @export var strides_per_metre: float = 0.75
 @export var walking_speed: float = 0.2
 @export var max_stride: float = 1.0
+## The hit area fitted to the drawn figure (HV1): its joints, baked from the figure's own clips (HitFit,
+## tools/hit_fit_bake.gd). A character's volume hangs on them (Hitbox.build_volume); the numbers above shape only the
+## practice range's plywood figures, and the volume when no fit is given (null).
+@export var fit: HitFit = preload("res://game/config/hit_fit.tres")
+## Nothing of a character's hit volume reaches further than volume_reach (m) across from its feet, nor below them or
+## higher than volume_top over them by more than that: Hitbox.may_touch's quick test before a volume is built.
+@export var volume_reach: float = 1.2
+@export var volume_top: float = 2.0
+## The fitted volume's shapes on the joints (m; tools/hit_fit_tune.gd measures them against the drawn figure): the head
+## sphere fit_head_centre of the way from the Head joint to the drawn head's top; the torso two capsules side by side,
+## fit_chest_half_width either side and fit_chest_ahead in front of the spine's line, from fit_chest_low of the way from
+## the Hips joint to Spine1 up to fit_chest_high of the way from Chest to Neck; each hip a capsule from the thigh's joint
+## fit_pelvis_up along the hips; each leg's thigh and shin between its joints, and the boot from fit_boot_heel of the
+## foot's length behind the ankle to the toe, fit_boot_drop under them.
+@export var fit_head_centre: float = 0.3625
+@export var fit_head_radius: float = 0.1275
+@export var fit_chest_low: float = 0.3
+@export var fit_chest_high: float = 0.16
+@export var fit_chest_half_width: float = 0.057
+@export var fit_chest_ahead: float = -0.022
+@export var fit_chest_radius: float = 0.15
+## And two more on the spine's line for its depth (the plate carrier's pouches, the pack): fit_chest_front ahead of it
+## and fit_chest_back behind, of fit_chest_depth_radius.
+@export var fit_chest_front: float = 0.072
+@export var fit_chest_back: float = 0.0895
+@export var fit_chest_depth_radius: float = 0.13
+@export var fit_pelvis_up: float = 0.045
+@export var fit_hips_radius: float = 0.12
+@export var fit_thigh_radius: float = 0.085
+@export var fit_shin_radius: float = 0.071
+@export var fit_boot_heel: float = 0.16
+@export var fit_boot_drop: float = 0.0
+@export var fit_boot_radius: float = 0.052

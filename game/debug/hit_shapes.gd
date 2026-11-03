@@ -1,6 +1,6 @@
 class_name HitShapes
 extends RefCounted
-## Wireframes of a character's hit volume (Hitbox.build_volume) for the debug draw: the head sphere and the nine
+## Wireframes of a character's hit volume (Hitbox.build_volume) for the debug draw: the head sphere and the twelve
 ## capsules, each as a ring at both ends, four lines along its side and a half circle round each end in two planes. The
 ## volume's bounding capsule is not drawn (it is a shortcut for the ray tests, not a hit area). Allocates nothing.
 

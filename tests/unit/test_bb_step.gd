@@ -55,6 +55,9 @@ var nobody: Array[Character] = []
 
 func before_each() -> void:
 	tuning = SimTuning.new()
+	# BBStep's rules on the built-in volume's known shape (a chest 0.2 m round); test_hit_registration holds BBStep to
+	# the fitted volume (HV1).
+	tuning.hits.fit = null
 	events = SimEvents.new()
 
 

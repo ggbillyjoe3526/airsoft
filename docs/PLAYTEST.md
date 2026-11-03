@@ -1199,6 +1199,20 @@ Dev content on for the rifle. The numbers came from bots; these need you.
 - [ ] **Knocked out while firing (UF2):** keep clicking as you're hit. The round isn't skipped; the skip hint shows
   about 1.5 s later and a click then skips. Does 1.5 s feel right (it's `skip_grace` in play tuning)?
 
+## Hits that register (HV1)
+
+- [ ] **Crouched bots behind low cover:** shoot the head and shoulders that show over a crate or wall. Every BB you see
+  strike them counts.
+- [ ] **Moving bots:** shoot bots running, crouch-walking, strafing and vaulting across you, at the legs and the body.
+  A BB you see land on them counts; one you see pass just beside them doesn't.
+- [ ] **Leaning:** a bot leaning out from a corner is hit where its head and shoulders show, not where they'd be
+  upright.
+- [ ] **F5 (hit areas):** the wireframes sit on the figures in every pose, crouched and running too, instead of
+  floating upright beside a kneeling figure.
+- [ ] **Arms:** a BB that clips only an elbow or a hand sticking out past the body still flies on (arms don't count,
+  your ruling from October). Say if you want arms to count.
+- [ ] **Frame rate in a big firefight** (8v8, Ultra and Low): no new hitches when lots of BBs are flying.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

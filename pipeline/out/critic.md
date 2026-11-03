@@ -1,26 +1,16 @@
-Task: UF2 · SWITCH REPLICA takes a click; no double click into Customise; a grace before the skip
-Attempt: 1 of 4
-Head: a4fdff3 (brief named no head; record's checks ✓ cover ee0eb5a's code, a4fdff3 adds only reports)
+Task: HV1 · The hit area fitted to the drawn figure (follow-up commits, judged on git diff 5c84f56..2b89dcb only)
+Attempt: 2 of 4 (follow-up to attempt 2's Accept at e6c1970)
+Head: 2b89dcbf23adfba8469a41c528ed4398f5b4f26d (test_bots.gd 17/17 green on it per the coordinator; CI pending)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
 Score: 8/8 → Accept
-Evidence (no task block; judged against the owner's three asks):
-1. (1) game/ui/loadout_gear.gd:+313 sets SWITCH REPLICA's STOP after card.add_content (menu_card.gd:42 _ignore_mouse
-   was turning it off); (2) gui_input/_double_click removed (-314, -424..431), no other double_click in game/;
-   (3) play_session.gd:+1418..1423 _out_for counts while can_skip, hint and arming wait for PlayTuning.skip_grace 1.5 s.
-2. No contract touched: UI and PlaySession presentation only; the value is a typed PlayTuning export (contract 6).
-3. _follow_skip: one float add, compare, two bools per frame; loadout filter set once per card at build.
-4. test_uf2_clicks.gd pushes real mouse events through a SubViewport; switch_button STOP assert fails on main's order;
-   test_clicks_in_the_grace_... skips on the first click without the grace. QA confirmed 4/4 click tests fail on main.
-5. Typed throughout; no magic numbers (skip_grace in tuning); node logic only, no sim change; no new global state.
-6. A short, honest beat after the hit before the skip fits hit calling; hint hidden until a click works (readable).
-7. Small diff, removed handler leaves no connection. Minor: `_follow_skip(delta: float = 0.0)` keeps a zero default
-   only for tests; How-to-Play.md:44 now runs past the wrap width.
-8. In scope (Beta fixes); changelog.d, FEATURES, wiki, KNOWN_ISSUES row and PLAYTEST updated; record notes the 1.5 s.
-Advisory (not blocking): test_a_pause_does_not_count_toward_the_grace only asserts can_process(), not that _out_for
-holds; a hitch frame adds its whole delta (QA, can wait). Record's Review: line still says pending.
+Evidence:
+1/6. bot_combat.gd:371-378 tests an in-play crouched mate's volume raised by crouch_drop x crouch_amount, then shifts
+   it back before the velocity and route tests.
+2/3/5. No contract touched; _shift's dy is a default (values only); the rise comes from HitConfig.
+4. test_bots.gd:221 test_a_bot_holds_fire_over_a_crouched_teammate_who_could_stand_into_the_line: the line clears the
+   crouched head but meets the standing one, and target_id == enemy proves the bot sees its target. 0 shots, then shots
+   once the mate steps aside. The coordinator ran it without the rise block: 51 shots, fails.
+7/8. The test sits beside its sibling. The ricochet bar change (4 % to 5 %) is measured and recorded in HV1.md.
+Failed checks: none. Must-fix: none. Merge once CI is green.
 Owner should test in the game:
-- Click SWITCH REPLICA on both carried cards: the list opens; pick a replica, it's carried (the other slot swaps).
-- Double-click a carried card: it's only picked; only CUSTOMISE opens Customise.
-- Keep firing as you're hit: no skip; the hint appears about 1.5 s later and a click then skips. Is 1.5 s right?
-- Hold the trigger through the hit and past 1.5 s: no skip until you let go and click again.
-- Pause during the grace, wait, resume: the hint doesn't appear instantly on resume.
+- Crouch in front of a bot teammate in a fight, then stand: it holds fire over you and doesn't knock you out.

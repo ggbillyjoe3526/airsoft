@@ -1,28 +1,35 @@
 class_name Hitbox
-## What a BB can hit on a character, and ray tests against it (the browser game's sim/hitbox.ts, the built-in figure's
-## volume, M85): a head sphere, a chest capsule, two hip capsules side by side, and each leg's thigh, shin and boot,
-## swinging about the hip on the walk cycle and squashed towards it when crouching. The head, chest and hips tilt with a
-## lean about the hip pivot (Lean), as the drawn upper body does, so only what pokes out past cover can be hit; the legs
-## stay put. Arms and replicas aren't part of it (owner, DECISIONS 2026-10-01). One volume for both kinds of figure:
-## the drawn figure is measured against it (FI7, tests/support/hit_area_probe.gd, docs/records/FI7.md) and fitting it
-## to the figures' joints waits for step 32 (HV1). A practice range figure is the same volume, upright and still
-## (build_figure). Every ray test returns the distance along
-## a unit ray to where it first touches, or INF for a miss; a ray that starts inside touches at 0.
+## What a BB can hit on a character, and ray tests against it (the browser game's sim/hitbox.ts, M85; HV1): a head
+## sphere, the torso's four capsules, two hip capsules side by side, and each leg's thigh, shin and boot. A character's
+## volume hangs on its drawn figure's own joints (HitConfig.fit, HitFit: baked from the figure's clips for its gait,
+## crouch, walk cycle, aim, hold, jump and vault), then crouch-limited, leaned and aim-leaned as FigureBend draws it, so
+## a BB is a hit where it meets the figure you see. Arms and replicas aren't part of it (owner, DECISIONS 2026-10-01).
+## test_figure_hit_area.gd measures it against the drawn figure in every pose. A practice range plywood figure keeps the
+## built-in volume it is drawn from (build_figure), as does a character when HitConfig.fit is null. Every ray test
+## returns the distance along a unit ray to where it first touches, or INF for a miss; a ray that starts inside touches
+## at 0.
 
-## Where each part sits in Volume.parts.
-const CHEST := 0
-const HIP_L := 1
-const HIP_R := 2
-const THIGH_L := 3
-const SHIN_L := 4
-const BOOT_L := 5
-const THIGH_R := 6
-const SHIN_R := 7
-const BOOT_R := 8
-const PART_COUNT := 9
+## Where each part sits in Volume.parts: the torso's four capsules, side by side and front and back (one chest capsule
+## four times in the built-in volume), the hips, then each leg's thigh, shin and boot.
+const CHEST_L := 0
+const CHEST_R := 1
+const CHEST_FRONT := 2
+const CHEST_BACK := 3
+const HIP_L := 4
+const HIP_R := 5
+const THIGH_L := 6
+const SHIN_L := 7
+const BOOT_L := 8
+const THIGH_R := 9
+const SHIN_R := 10
+const BOOT_R := 11
+const PART_COUNT := 12
 ## Below this, a squared length or a ray's squared reach across an axis counts as none (a point capsule, a ray along
 ## the axis).
 const EPSILON := 1e-12
+
+## may_touch's capsule (used only within one call).
+static var _coarse: Capsule = Capsule.new()
 
 
 ## A capsule: the sphere centres a and b and the radius. A sphere has a == b; a vertical capsule (the head, the bound)
@@ -137,6 +144,16 @@ static func ray_character(o: Vector3, d: Vector3, max_t: float, v: Volume) -> fl
 	return nearest
 
 
+## Whether the unit ray `o + t·d` (0 ≤ t ≤ max_t) passes within `margin` m of the room `c`'s hit volume could take
+## (HitConfig.volume_reach and volume_top round its feet): false means it misses the volume, so there is no need to
+## build it. Allocates nothing.
+static func may_touch(c: Character, o: Vector3, d: Vector3, max_t: float, hits: HitConfig, margin: float = 0.0) -> bool:
+	_coarse.a = c.position
+	_coarse.b = c.position + Vector3(0.0, hits.volume_top, 0.0)
+	_coarse.r = hits.volume_reach + margin
+	return not is_inf(ray_vertical_capsule(o, d, max_t, _coarse))
+
+
 ## Top of the hit volume (the top of the head) above the feet for a crouch of `crouch` (0..1).
 static func hit_top(crouch: float, hits: HitConfig) -> float:
 	return hits.head_height + hits.head_radius - hits.crouch_drop * crouch
@@ -160,9 +177,12 @@ static func step_walk_cycle(c: Character, hits: HitConfig) -> void:
 	c.walk_cycle += moved * hits.strides_per_metre * TAU
 
 
-## Writes the character's hit volume now into `v`: standing on its feet, turned by its yaw, crouched, the upper body
-## leaned, legs on the walk cycle.
+## Writes the character's hit volume now into `v`: standing on its feet, turned by its yaw, posed as its figure is
+## drawn (HitConfig.fit), or the built-in volume crouched, leaned and on the walk cycle when there is no fit.
 static func build_volume(c: Character, hits: HitConfig, v: Volume) -> void:
+	if hits.fit != null:
+		_build_fitted(c, hits, hits.fit, v)
+		return
 	_build(c.position, c.yaw, c.crouch_amount, c.lean, leg_swing(c.walk_cycle, c, hits), hits, v)
 
 
@@ -187,8 +207,11 @@ static func _build(feet: Vector3, yaw: float, crouch: float, lean: float, swing:
 	var sr := sin(roll)
 	var head_at := _upper(feet, cos_yaw, sin_yaw, 0.0, hits.head_height - drop, cr, sr, hip_y)
 	_fill(v.head, head_at, head_at, hits.head_radius)
-	_fill(v.parts[CHEST], _upper(feet, cos_yaw, sin_yaw, 0.0, hits.torso_bottom - drop, cr, sr, hip_y),
+	_fill(v.parts[CHEST_L], _upper(feet, cos_yaw, sin_yaw, 0.0, hits.torso_bottom - drop, cr, sr, hip_y),
 			_upper(feet, cos_yaw, sin_yaw, 0.0, hits.torso_top - drop, cr, sr, hip_y), hits.body_radius)
+	# One chest: the fitted volume's other torso capsules sit on it (CHEST_R to CHEST_BACK, in order).
+	for k: int in range(CHEST_R, CHEST_BACK + 1):
+		_fill(v.parts[k], v.parts[CHEST_L].a, v.parts[CHEST_L].b, hits.body_radius)
 	for i in 2:
 		var side := 2 * i - 1
 		var hx := side * hits.hips_half_width
@@ -249,13 +272,82 @@ static func _bound(v: Volume, feet: Vector3) -> void:
 	var reach := 0.0
 	var lo := INF
 	var hi := -INF
-	# Both ends of the head, then of each part (no array of points: building the bound allocates nothing).
-	for k in (PART_COUNT + 1) * 2:
-		var cap: Capsule = v.head if k < 2 else v.parts[(k - 2) >> 1]
-		var p := cap.a if k % 2 == 0 else cap.b
-		reach = maxf(reach, Vector2(p.x - feet.x, p.z - feet.z).length() + cap.r)
-		lo = minf(lo, p.y - cap.r)
-		hi = maxf(hi, p.y + cap.r)
+	# The head, then each part, both ends (no array of points: building the bound allocates nothing).
+	for k in PART_COUNT + 1:
+		var cap: Capsule = v.head if k == 0 else v.parts[k - 1]
+		var a := cap.a
+		var b := cap.b
+		var r := cap.r
+		var ax := a.x - feet.x
+		var az := a.z - feet.z
+		var bx := b.x - feet.x
+		var bz := b.z - feet.z
+		reach = maxf(reach, sqrt(maxf(ax * ax + az * az, bx * bx + bz * bz)) + r)
+		lo = minf(lo, minf(a.y, b.y) - r)
+		hi = maxf(hi, maxf(a.y, b.y) + r)
 	v.bound.a = Vector3(feet.x, lo, feet.z)
 	v.bound.b = Vector3(feet.x, hi, feet.z)
 	v.bound.r = reach
+
+
+## The fitted volume of `c` (HV1) from `fit`'s joints: the lower body for its gait, crouch and walk cycle (in the air
+## the Jump clip's, vaulting the Vault clip's), the upper body on the hips for its aim and hold, then FigureBend's crouch
+## limit, lean and aim lean, and the capsules on the joints, turned by its yaw onto its feet.
+static func _build_fitted(c: Character, hits: HitConfig, fit: HitFit, v: Volume) -> void:
+	HitPose.pose(c, hits, fit)
+	var cos_yaw := cos(c.yaw)
+	var sin_yaw := sin(c.yaw)
+	var feet := c.position
+	var hips := HitPose.lower[HitFit.HIPS]
+	var up := HitPose.lower[HitFit.HIPS_Y]
+	var head := HitPose.upper[HitFit.HEAD].lerp(HitPose.upper[HitFit.HEAD_TOP], hits.fit_head_centre)
+	_fit_fill(v.head, feet, cos_yaw, sin_yaw, head, head, hits.fit_head_radius)
+	# The torso: the spine's line, with the hips' forward square to it and the side square to both.
+	var low := hips.lerp(HitPose.upper[HitFit.SPINE1], hits.fit_chest_low)
+	var high := HitPose.upper[HitFit.CHEST].lerp(HitPose.upper[HitFit.NECK], hits.fit_chest_high)
+	var axis := (high - low).normalized()
+	var ahead := HitPose.lower[HitFit.HIPS_Z] - axis * HitPose.lower[HitFit.HIPS_Z].dot(axis)
+	ahead = ahead.normalized() if ahead.length_squared() > EPSILON else Vector3.FORWARD
+	var side := axis.cross(ahead) * hits.fit_chest_half_width
+	var front := ahead * hits.fit_chest_front
+	var back := ahead * -hits.fit_chest_back
+	ahead *= hits.fit_chest_ahead
+	_fit_fill(v.parts[CHEST_L], feet, cos_yaw, sin_yaw, low - side + ahead, high - side + ahead, hits.fit_chest_radius)
+	_fit_fill(v.parts[CHEST_R], feet, cos_yaw, sin_yaw, low + side + ahead, high + side + ahead, hits.fit_chest_radius)
+	_fit_fill(v.parts[CHEST_FRONT], feet, cos_yaw, sin_yaw, low + front, high + front, hits.fit_chest_depth_radius)
+	_fit_fill(v.parts[CHEST_BACK], feet, cos_yaw, sin_yaw, low + back, high + back, hits.fit_chest_depth_radius)
+	var lift := up.normalized() * hits.fit_pelvis_up
+	var drop := Vector3(0.0, -hits.fit_boot_drop, 0.0)
+	for i in 2:
+		var first := HitFit.THIGH_L if i == 0 else HitFit.THIGH_R
+		var part := THIGH_L if i == 0 else THIGH_R
+		var thigh := HitPose.lower[first]
+		var knee := HitPose.lower[first + 1]
+		var ankle := HitPose.lower[first + 2]
+		var toe := HitPose.lower[first + 3]
+		_fit_fill(v.parts[HIP_L + i], feet, cos_yaw, sin_yaw, thigh, thigh + lift, hits.fit_hips_radius)
+		_fit_fill(v.parts[part], feet, cos_yaw, sin_yaw, thigh, knee, hits.fit_thigh_radius)
+		_fit_fill(v.parts[part + 1], feet, cos_yaw, sin_yaw, knee, ankle, hits.fit_shin_radius)
+		_fit_fill(v.parts[part + 2], feet, cos_yaw, sin_yaw, ankle + (ankle - toe) * hits.fit_boot_heel + drop,
+				toe + drop, hits.fit_boot_radius)
+	_bound(v, feet)
+
+
+## The fitted joints of `c` in its figure's frame (HitFit's lower and upper points, as FigureBend leaves them) copied
+## into `lower` and `upper` (resized to HitFit.LOWER and UPPER): for tests and tools.
+static func fitted_joints(c: Character, hits: HitConfig, lower: PackedVector3Array, upper: PackedVector3Array) -> void:
+	HitPose.pose(c, hits, hits.fit)
+	lower.resize(HitFit.LOWER)
+	upper.resize(HitFit.UPPER)
+	for k in HitFit.LOWER:
+		lower[k] = HitPose.lower[k]
+	for k in HitFit.UPPER:
+		upper[k] = HitPose.upper[k]
+
+
+## A capsule from the figure-frame points `a` to `b` of radius `r`, turned by the yaw onto `feet`.
+static func _fit_fill(cap: Capsule, feet: Vector3, cos_yaw: float, sin_yaw: float, a: Vector3, b: Vector3,
+		r: float) -> void:
+	cap.a = feet + Vector3(a.x * cos_yaw + a.z * sin_yaw, a.y, a.z * cos_yaw - a.x * sin_yaw)
+	cap.b = feet + Vector3(b.x * cos_yaw + b.z * sin_yaw, b.y, b.z * cos_yaw - b.x * sin_yaw)
+	cap.r = r

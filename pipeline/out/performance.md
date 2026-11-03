@@ -1,13 +1,13 @@
-Task: none (AU2) · head 31cbb53 · Verdict: Pass
-Run: not measured (no --perf match run; the change adds no node or tick work beyond the lines below) · budget: no baseline yet (pipeline/perf-budget.json does not exist), judged against targets and the diff against 4b10288
-Metrics: install size assets/ 17 MB, assets/audio 15 MB, cues 13 MB / 500 MB budget (ok, measured); 418 cue WAVs, largest 308 KB (smoke_pop) (measured)
-Regressions (> 10 % worse): none measured; frame times not measurable here
-Blocking findings: none
+Task: HV1 · head e3f2984 · Verdict: Pass
+Run: micro-benchmark only (16 characters moving, headless, 2000-20000 iterations); no --perf match run · budget: no baseline yet, judged against targets and origin/main's built-in path
+Metrics: build_volume fitted 51 us vs built-in 35 us (measured); may_touch 3.1 us/call incl. loop (measured); OBJECT_COUNT delta over 5000 builds 0 / 0 (no leaks, measured)
+Regressions (>10 %): fitted build +45 % per build, by design; offset by lazy build (see advisory)
+Blocking: none
+ - Per-tick allocation: none found in _build_fitted, _fit_pose, _add_*, _legs, may_touch (statics reused; Vector3/Quaternion/Transform3D are values; HitFit.table()/rest() cache once, held by the resource).
 Advisory:
-- Memory (judgment): cues import as AudioStreamWAV (compress/mode=2), all cues loaded at setup; 13 MB on disk, a few MB decoded at most. Three more impact sets (glass, plastic, cardboard) load once in SimAudio.setup (sim_audio.gd:155), not per frame.
-- Voices (judgment): longer tails (impacts 0.18-0.35 s, mags 0.4 s, doors ~1 s, power_gas 0.3 s) hold voices longer, but all play is bounded: field_voices 24, own_voices 8, cue_voices 4, shot_cue_voices 6 (sound_config.gd:147-150), impact_limit 8 per impact_window via VoicePool.StartLimit (sim_audio.gd:141). A 0.35 s impact at 8 per window cannot exceed the pool; worst case is the oldest voice being reused (audible cut), not growth. Could raise cue_voices for impacts if the owner hears clipping in a heavy hose; a feel test, not a perf issue.
-- sim_audio.gd:226-227 (judgment): per SHOT, `_slide_lock.get(p, &"")` is a Dictionary lookup on StringName, no allocation; `_emptied` (sim_audio.gd:546) is only called when the profile has a slide lock (gas pistols), and does two array reads and a compare. No String formatting, Array, Callable or lambda per frame. The `"%s%s_1.wav"` format at sim_audio.gd:153 is in setup only.
-- Surface enum +3 (ray_hit.gd:9) (judgment): map_level makes one StaticBody3D per surface, so at most 3 more bodies per map, only for surfaces a map uses; negligible node count. Per-surface tables (SURFACE_NAMES, IMPACT_NAMES, puff_colours, noise ground, ricochet match) are extended in step; array lookups by enum, no new allocation. Depot and range bakes are the same size (130667 B; 6953 -> 6948 B).
-- Presets/prewarm (judgment): no new material, particle or shader; the glass/plastic/cardboard puffs reuse existing colours. No quality-preset bypass.
-- Teardown (judgment): no new nodes, timers, tweens or connections in the diff; nothing to free.
-Fixes: none required.
+ - game/sim/hitbox.gd _build (built-in path): `for k: int in [CHEST_R, CHEST_FRONT, CHEST_BACK]` allocates an Array per build (judgment); only fit==null and tests, not shipped path. Unroll or const PackedInt32Array.
+ - game/ai/bot_combat.gd:389 _ahead_in_line rebuilds the mate's volume (up to 3 builds per mate per check: 351/367/389, ~50 us each) (judgment). Worst case 16 chars x 3 = ~2.4 ms per check, but only for walking in-play mates the line already passed may_touch for; consider reusing the unshifted build.
+ - game/sim/bb_step.gd:215 may_touch runs per BB per character (3 us each): 30 BBs x 16 = ~1.4 ms/tick worst case if all pass the loop (judgment); a bound check ray_character does anyway, so a fused early-out would save it. Builds stay capped at 16/tick (0.8 ms).
+ - game/sim/hit_fit.gd table(): first-use build per field at first fitted build (one-time hitch in a match, small); consider warming at start (judgment).
+ - game/sim/hitbox.gd _add_gait: Geometry2D calls and nested loops on gait fallback path only; fine.
+Fixes ranked: 1) reuse build in _ahead_in_line; 2) const array in _build; 3) warm HitFit tables at load.

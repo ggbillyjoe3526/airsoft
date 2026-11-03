@@ -35,6 +35,16 @@ var held_zoom_steps: int = 0
 var held_ready_grenade: Grenade.Kind = Grenade.Kind.NONE
 
 
+## Where in the Vault clip (0..1) this vault is: its first `top` over the rise onto the top, the rest across it to the
+## hand-over to the fall, so the hop keeps to the body's path whatever the obstacle (the browser's vaultClipShare). The
+## drawn figure (FigurePose) and the hit volume (Hitbox) both read it.
+func clip_share(top: float) -> float:
+	if time < rise_end:
+		return clampf(top * time / rise_end, 0.0, 1.0) if rise_end > 0.0 else top
+	var span := end - rise_end
+	return clampf(top + (1.0 - top) * (time - rise_end) / span, 0.0, 1.0) if span > 0.0 else 1.0
+
+
 ## Ends a vault at once and drops what was kept through it (a respawn, a rescue back into the level).
 func cancel() -> void:
 	active = false

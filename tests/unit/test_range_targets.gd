@@ -206,15 +206,17 @@ func test_down_and_hidden_targets_and_a_cease_fire_let_bbs_through() -> void:
 
 
 func test_stands_its_figures_exactly_as_tall_as_a_character_on_the_same_floor() -> void:
-	# A hit on the range is a hit in a match to the centimetre (audit SIM-12): level rays from in front, from the floor
-	# to over the head, agree at every height.
+	# A plywood figure is Hitbox's built-in volume to the centimetre (audit SIM-12): level rays from in front, from the
+	# floor to over the head, agree at every height. A match's characters wear the fit to the drawn figure instead (HV1).
+	var plywood := tuning.hits.duplicate() as HitConfig
+	plywood.fit = null
 	for crouched: bool in [false, true]:
 		var figure := _first(_targets(), RangeTarget.Kind.FIGURE, crouched)
 		var p := figure.position
 		var c := Character.new(0, 0, p + Vector3(0.0, tuning.body.rest_gap, 0.0), PI) # facing the firing line
 		c.crouch_amount = 1.0 if crouched else 0.0
 		var v := Hitbox.Volume.new()
-		Hitbox.build_volume(c, tuning.hits, v)
+		Hitbox.build_volume(c, plywood, v)
 		var differ: Array[float] = []
 		var y := p.y
 		while y <= 1.9:

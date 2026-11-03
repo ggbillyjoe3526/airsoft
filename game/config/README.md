@@ -16,7 +16,8 @@ leaves out ships as null and the exported game crashes. `tests/unit/test_saved_c
 | `ballistics_config.gd` | BB flight: air, BB size, hop-up spin, lift, spin decay, lifetime, pool size; leaves (the depth that stops a BB, the speed kept and the scatter a metre) |
 | `movement_config.gd`, `accuracy_config.gd`, `body_config.gd` | Paces (the holstered run too), jump, crouch, aiming pace, lean speed and wall clearance; spread by stance and motion; the body's size |
 | `vault_config.gd` | Vaulting: the heights and depth vaulted, reach, the path's speed and tuck, the fire lockout after |
-| `hit_config.gd` | Hit calling, friendly fire and whether ricochets count, the walk-off, the hit volume (head, chest, hips, legs) and the lean's pivot and tilt |
+| `hit_config.gd` | Hit calling, friendly fire and whether ricochets count, the walk-off, the built-in hit volume (head, chest, hips, legs), the lean's pivot and tilt, and the fitted volume: its `fit`, the quick test's `volume_reach` and `volume_top`, and the capsules' `fit_*` shapes |
+| `hit_fit.tres` | The human figure's baked joints (HitFit, HV1), written by `tools/hit_fit_bake.gd`; re-bake after changing the figure's rig or clips (`test_hit_fit.gd` fails while it is stale) |
 | `wind_config.gd` | The match's breeze: its speed range, gusts and veer |
 | `ricochet_config.gd` | BBs bouncing off hard surfaces: restitution by material, slide, scatter, the most bounces |
 | `round_config.gd` | Rounds: clock, score, half time, reset |

@@ -118,7 +118,9 @@ func test_whole_bot_matches_play_out_fairly_over_seeds() -> void:
 
 ## Ricochets counting (the browser game's depotMatch.ricochet tests, half its seeds): matches still play out, no bot
 ## shoots a teammate directly, a stray bounce only rarely catches a teammate or its own shooter, and bounced BBs decide
-## some hits but under a quarter (G12). Measured: 45 of 251 hits off a bounce, 4 on a teammate, 4 on the shooter.
+## some hits but under a quarter (G12). Measured: 45 of 251 hits off a bounce, 4 on a teammate, 4 on the shooter. HV1
+## (bots treat a crouched teammate as standing): 47 of 224, 3 and 10 here, and 17 on the shooter of 485 hits over the
+## browser's 16 seeds (3.5 %), so the shooter's bar is 5 % for these eight.
 func test_bot_matches_with_ricochets_counting_stay_playable() -> void:
 	tuning.hits.ricochets_count = true
 	var hits := 0
@@ -155,7 +157,7 @@ func test_bot_matches_with_ricochets_counting_stay_playable() -> void:
 	assert_eq(won, 8, "every match was won")
 	assert_eq(direct_friendly, 0, "no bot shot a teammate directly")
 	assert_lte(friendly_bounces, 6, "a bounce catches a teammate only rarely")
-	assert_lt(float(self_hits) / maxi(1, hits), 0.04, "a bounce catches its own shooter only rarely")
+	assert_lt(float(self_hits) / maxi(1, hits), 0.05, "a bounce catches its own shooter only rarely")
 	var share := float(bounced) / maxi(1, hits)
 	assert_between(share, 0.05, 0.25, "bounced BBs decide some hits, under a quarter")
 
@@ -209,6 +211,44 @@ func test_a_bot_holds_fire_with_a_teammate_in_the_line() -> void:
 	# The same duel with the teammate stepped aside: it does fire.
 	for t in 180:
 		mate.position = Vector3(24.0, 0.0, -6.0)
+		bots.think(state, commands, DT)
+		if commands[0].fire:
+			shots += 1
+		state.time += DT
+	assert_gt(shots, 0, "with the line clear it fires")
+
+
+func test_a_bot_holds_fire_over_a_crouched_teammate_who_could_stand_into_the_line() -> void:
+	# HV1 (CI's Attack / Defend guard, Depot seed 9): a shot pressed over a crouched teammate's head fired as it stood
+	# up. Up East yard at an enemy raised 1.4 m, the line runs over the teammate's crouched head but through where its
+	# head is standing: the bot holds fire.
+	_start(6)
+	var shooter := _bot(0)
+	var mate := state.characters[1]
+	var enemy := state.characters[3]
+	shooter.character.position = Vector3(20.0, 0.0, 0.0)
+	enemy.position = Vector3(20.0, 1.4, -12.0)
+	shooter.character.yaw = 0.0
+	shooter.aim_yaw = 0.0
+	for c in state.characters:
+		c.prev_position = c.position
+		if c != shooter.character and c != mate and c != enemy:
+			c.status = Character.Status.OUT
+	shooter.skill = config.skill.duplicate() as BotSkill
+	shooter.skill.contact_cover_min_distance = INF
+	mate.crouch_amount = 1.0
+	mate.prev_crouch_amount = 1.0
+	var shots := 0
+	for t in 180:
+		mate.position = Vector3(20.0, 0.0, -9.0)
+		bots.think(state, commands, DT)
+		if commands[0].fire:
+			shots += 1
+		state.time += DT
+	assert_eq(shooter.target_id, enemy.id, "it sees the enemy past its crouched teammate")
+	assert_eq(shots, 0, "never fires over a crouched teammate's head")
+	for t in 180:
+		mate.position = Vector3(24.0, 0.0, -9.0)
 		bots.think(state, commands, DT)
 		if commands[0].fire:
 			shots += 1
