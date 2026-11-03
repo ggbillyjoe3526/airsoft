@@ -1,4 +1,4 @@
-# UF2 · SWITCH REPLICA takes a click; no double click into Customise
+# UF2 · SWITCH REPLICA takes a click; no double click into Customise; a grace before the skip
 
 **Review:** pending
 
@@ -11,7 +11,8 @@
 ## Goal
 
 The owner's playtest of UF1 (2026-11-03): SWITCH REPLICA on the Loadout's carried cards did nothing, and a double click
-on a carried card opened Customise, which he doesn't want.
+on a carried card opened Customise, which he doesn't want. Then (15:39): knocked out while clicking, the next click
+skipped the round at once; he asked for a 1 or 2 second delay in which a click isn't registered.
 
 ## Approach
 
@@ -22,12 +23,19 @@ on a carried card opened Customise, which he doesn't want.
 3. UF1's tests pressed the buttons by emitting `pressed`, which skips the mouse. `test_uf2_clicks.gd` clicks through the
    viewport as the mouse does (all four tests fail without the fix).
 
+4. **Skip grace:** `PlayTuning.skip_grace` (1.5 s). `PlaySession._follow_skip(delta)` counts `_out_for` while you can
+   skip (reset when you can't); the hint shows and the trigger arms only once it passes. The count runs in `_process`,
+   so a pause doesn't use it up. The pause menu's Skip to next round is a deliberate choice and stays at once.
+
 ## Decisions
 
 - **A double click now just picks the card** (two clicks), as on the Match page's cards.
+- **The grace is 1.5 s** (between the owner's 1 and 2), and **the skip hint waits for it**, so the hint never offers a
+  click that does nothing. The pause menu's skip doesn't wait.
 
 ## Checks
 
-- gdlint clean; `test_uf2_clicks.gd` 4/4 (0/4 before the fix); UF1, loadout and UR3 suites pass.
+- gdlint clean; `test_uf2_clicks.gd` 8/8 (the four click tests 0/4 before the fix); UF1, loadout, UR3 and every skip
+  suite (WG1, What got you, MC1, SM1, UI1, HUD size) pass; four older skip tests now pass the grace first.
 - A real-click run at 1920 × 1080 (Xvfb): SWITCH REPLICA opens for each slot, CLOSE and a replica card take clicks, the
   other slot's replica swaps, a double click leaves Customise shut.

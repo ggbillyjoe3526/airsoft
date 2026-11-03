@@ -1,13 +1,21 @@
 extends GutTest
 ## UF2: the Loadout's buttons answer a real mouse click (the owner's playtest, 2026-11-03: SWITCH REPLICA did nothing,
 ## its clicks picked the card), and a double click on a carried card no longer opens Customise. The clicks go through
-## the viewport as the mouse's would, not as an emitted `pressed`.
+## the viewport as the mouse's would, not as an emitted `pressed`. Out of a round, the trigger skips it only after
+## PlayTuning.skip_grace (the fight's own clicks skipped it at once).
 
 const LOADOUTS := "user://test_uf2_loadouts.save"
 const SETTINGS := "user://test_uf2_settings.save"
 const AEG := "000002"
 const PISTOL := "000001"
 const CYBER := "000019"
+
+var session: PlaySession = null
+
+
+func after_each() -> void:
+	Input.action_release(&"fire")
+	get_tree().paused = false
 
 
 func after_all() -> void:
@@ -96,3 +104,79 @@ func test_a_double_click_on_a_carried_card_does_not_open_customise() -> void:
 	assert_eq(page.slot(), Loadout.Slot.SECONDARY, "the clicks still pick the card")
 	await _click(page.gear().customise_button())
 	assert_true(page.customising(), "CUSTOMISE takes a click")
+
+
+# --- the skip's grace ---
+
+
+func _session() -> PlaySession:
+	var s := PlaySession.new()
+	s.bots_active = false
+	s.settings = Settings.new()
+	add_child_autofree(s)
+	return s
+
+
+static func _fire() -> InputEventMouseButton:
+	var e := InputEventMouseButton.new()
+	e.button_index = MOUSE_BUTTON_LEFT
+	e.pressed = true
+	return e
+
+
+func test_the_grace_is_between_one_and_two_seconds() -> void:
+	var grace := PlayTuning.new().skip_grace
+	assert_between(grace, 1.0, 2.0, "the owner's 1 or 2 seconds")
+	var shipped := load("res://game/config/play_tuning.tres") as PlayTuning
+	assert_eq(shipped.skip_grace, grace, "the shipped tuning keeps it")
+
+
+func test_clicks_in_the_grace_do_not_skip_and_one_after_it_does() -> void:
+	session = _session()
+	await wait_physics_frames(2)
+	session._input.active = true
+	session.player.status = Character.Status.OUT
+	var grace := session._play.skip_grace
+	session._follow_skip(0.0)
+	session._unhandled_input(_fire())
+	assert_false(session.skipping(), "the click of the fight that put you out")
+	assert_false(session.hud().skip_hint_shown(), "no hint while a click can't skip")
+	session._follow_skip(grace * 0.9)
+	session._unhandled_input(_fire())
+	assert_false(session.skipping(), "still in the grace")
+	session._follow_skip(grace * 0.2)
+	assert_true(session.hud().skip_hint_shown(), "the hint once a click can skip")
+	session._unhandled_input(_fire())
+	assert_true(session.skipping(), "a click after the grace skips")
+	session._stop_skip()
+	session._input.active = false
+	session.player.status = Character.Status.ALIVE
+
+
+func test_the_grace_starts_again_each_time_you_are_out() -> void:
+	session = _session()
+	await wait_physics_frames(2)
+	session._input.active = true
+	session.player.status = Character.Status.OUT
+	session._follow_skip(session._play.skip_grace)
+	assert_true(session.hud().skip_hint_shown())
+	session.player.status = Character.Status.ALIVE
+	session._follow_skip(0.1)
+	session.player.status = Character.Status.OUT
+	session._follow_skip(0.1)
+	session._unhandled_input(_fire())
+	assert_false(session.skipping(), "out again: a new grace")
+	session._input.active = false
+	session.player.status = Character.Status.ALIVE
+
+
+func test_a_pause_does_not_count_toward_the_grace() -> void:
+	session = _session()
+	await wait_physics_frames(2)
+	session.player.status = Character.Status.OUT
+	session._follow_skip(0.0)
+	session._open_pause()
+	assert_false(session.can_process(), "the session's frames, which count the grace, stop with the tree")
+	session._resume()
+	assert_true(session.can_process())
+	session.player.status = Character.Status.ALIVE

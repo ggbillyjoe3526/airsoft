@@ -1196,6 +1196,8 @@ Dev content on for the rifle. The numbers came from bots; these need you.
   Try 8v8 and HUD size 150 % too.
 - [ ] **Loadout, with the mouse (UF2):** click SWITCH REPLICA on each card: the list opens. Pick a replica: it's
   carried. Double-click a card: it's only picked; Customise opens from CUSTOMISE alone.
+- [ ] **Knocked out while firing (UF2):** keep clicking as you're hit. The round isn't skipped; the skip hint shows
+  about 1.5 s later and a click then skips. Does 1.5 s feel right (it's `skip_grace` in play tuning)?
 
 ## Reporting what you find
 

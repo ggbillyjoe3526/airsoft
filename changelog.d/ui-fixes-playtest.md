@@ -11,3 +11,4 @@
 - Over the match's final results, Tab does nothing, as they already show the match.
 - SWITCH REPLICA now works with the mouse; before, clicking it did nothing.
 - A double click on a replica card on the Loadout no longer opens Customise; only the CUSTOMISE button does.
+- Once you're out, clicks are ignored for 1.5 seconds before one can skip the round, so the shots you fired as you were hit no longer skip it.
