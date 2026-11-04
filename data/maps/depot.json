@@ -3422,6 +3422,7 @@
   "z": -3.0
  },
  "botSight": 55,
+ "ambience": "indoor",
  "roof": {
   "height": 8.0,
   "lamps": [

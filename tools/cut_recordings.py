@@ -12,6 +12,7 @@ the floor, faded in over 2 ms and out over the last part, and written 16-bit mon
 """
 
 import argparse
+import json
 import os
 import struct
 import sys
@@ -20,6 +21,7 @@ import numpy as np
 
 RATE = 44100
 CUES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "audio", "cues")
+LOOPS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "audio", "loops")
 # The recorder's start-up click lasts the first few hundredths of every file.
 SKIP = 0.08
 # A take: the level 12 dB over the room's floor (its quietest tenth), and within SPREAD dB of the file's loudest.
@@ -35,15 +37,9 @@ PEAK_CAP_DB = -1.0
 PLACEHOLDERS = {}
 # Cues still synthesised, nothing reused yet, and what to record for each.
 STILL_SYNTH = {
-    "step_<surface>_run/sprint/land": "footsteps on concrete, metal, wood, gravel, grass, earth and leaves",
-    "foley_crouch, foley_stand, foley_lean": "clothes and kit rustling as you crouch, stand and lean",
-    "hitMarker": "a short bright tap, your BB hitting someone",
-    # Kept synthesised: the BB recordings are too peaky to reach its level, and the tick of being hit must read.
-    "hitTick": "a BB hitting goggles or a helmet, close to the mic",
-    "grenade_pin, grenade_bounce, smoke_pop, flash_bang": "a pin pulled, a can knocking on the ground, a pop and "
-    "hiss, a balloon pop",
-    "ambience_* and loops/": "a big quiet indoor room, the woods by day and night, a quiet street or yard; birds, "
-    "crows, a dog, an owl, a creaking tree",
+    "step_metal_run/sprint/land": "footsteps on metal: a grate or a metal stair",
+    "flash_bang": "a balloon popping",
+    "ambience_* and loops/": "the woods by day and night; birds, crows, a dog, an owl, a creaking tree",
 }
 LIMIT_DB = 6.0
 
@@ -248,6 +244,32 @@ def fixed(x, seconds, fade=0.08):
     return y
 
 
+def steady(takes_, n, skip=0):
+    """`n` of the takes, after the first `skip` of them in loudness order, whose loudest 50 ms sit closest to their
+    median: a walk's even steps, leaving out the odd scuff and stamp."""
+    if not takes_:
+        return []
+    mid = np.median([loud50(t) for t in takes_])
+    ranked = sorted(takes_, key=lambda t: abs(loud50(t) - mid))
+    return ranked[skip:skip + n] if len(ranked) >= skip + n else ranked[:n]
+
+
+def loudest_windows(a, n, seconds, fade=0.3):
+    """The `n` loudest stretches of `a`, `seconds` long and apart from each other: a rustle that never falls silent
+    enough between moves to count as takes."""
+    w = int(seconds * RATE)
+    e = np.convolve(a ** 2, np.ones(w) / w, mode="valid")
+    out, taken = [], np.zeros(len(e), dtype=bool)
+    for i in np.argsort(e)[::-1]:
+        if len(out) == n:
+            break
+        if taken[max(0, i - w):i + w].any():
+            continue
+        taken[i] = True
+        out.append(shape(a[i:i + w].copy(), fade))
+    return out
+
+
 def mix(*parts):
     n = max(len(p) for p in parts)
     return sum(np.pad(p, (0, n - len(p))) for p in parts)
@@ -336,6 +358,8 @@ def build(folder):
         cues[cue] = (list(vs), target)
         if stand_in:
             PLACEHOLDERS[cue] = stand_in
+        else:
+            PLACEHOLDERS.pop(cue, None)
 
     # Gas Blowback Pistol: each shot split where its crack gives way to the slide and the gas, the crack as the shot
     # and the rest as its power part (which plays with it on the Power volume, power_gains' gas over shot_gain louder),
@@ -374,11 +398,12 @@ def build(folder):
     put("shot_electric", variants(cracks, 5, 0.9), -18.5)
     motor3 = pick(folder, [("motor_whir3.wav", None)], 0.9, 0.05)
     put("dryFire_electric", [onset_slice(m, 0.09, 25) for m in variants(motor3, 5)], -28.2)
-    # The rifles' bigger magazines: the pistol's, lower.
-    put("magOut_electric", variants(mag_out, 5, 0.9), -30.8,
-        "a rifle magazine pulled out")
-    put("magIn_electric", variants(mag_in, 5, 0.9), -27.0,
-        "a rifle magazine pushed in")
+    # The electric and spring replicas' plastic magazines: a TV remote's battery cover clicked off (the quieter takes)
+    # and on (owner's foley, 2026-11-04), lower for the rifles' bigger magazines.
+    cover_off = pick(folder, [("remote_cover_clipping.wav", [0, 2, 4, 6])], 0.25, 0.3)
+    cover_on = pick(folder, [("remote_cover_clipping.wav", [1, 3, 5, 7])], 0.25, 0.3)
+    put("magOut_electric", variants(cover_off, 5, 0.85), -30.8)
+    put("magIn_electric", variants(cover_on, 5, 0.85), -27.0)
 
     # Sniper Rifle (spring): the pistol's shot pitched down for the spring's heavier thump, softened, with a knock on
     # wood far lower and a low thud under it (owner, 2026-11-04: "a bit more of a thud", "more 'full' like a wooden
@@ -392,10 +417,8 @@ def build(folder):
         "a spring sniper rifle's shot")
     put("dryFire_spring", variants(dry, 5, 0.88), -37.2,
         "a spring rifle's trigger, uncocked")
-    put("magOut_spring", variants(mag_out, 5, 0.85), -30.6,
-        "a sniper rifle's magazine pulled out")
-    put("magIn_spring", variants(mag_in, 5, 0.85), -26.9,
-        "a sniper rifle's magazine pushed in")
+    put("magOut_spring", variants(cover_off, 5, 0.8), -30.6)
+    put("magIn_spring", variants(cover_on, 5, 0.8), -26.9)
     slides = pick(folder, [("Metal slide.wav", None)], 0.75, 0.1)
     put("boltCycle", [bolt(s) for s in slides[:3]], -14.0,
         "a spring rifle's bolt pulled back and pushed home")
@@ -409,10 +432,8 @@ def build(folder):
         "an electric pistol's shot")
     put("dryFire_cyber", variants(dry, 5, 1.1), -30.3,
         "an electric pistol fired empty")
-    put("magOut_cyber", variants(mag_out, 5, 1.06), -30.8,
-        "an electric pistol's magazine pulled out")
-    put("magIn_cyber", variants(mag_in, 5, 1.06), -27.1,
-        "an electric pistol's magazine pushed in")
+    put("magOut_cyber", variants(cover_off, 5, 1.0), -30.8)
+    put("magIn_cyber", variants(cover_on, 5, 1.0), -27.1)
 
     # Gear and hands.
     put("reloadRefused", variants(pick(folder, [("pouch_slap.wav", None)], 0.3), 5), -32.7)
@@ -439,26 +460,14 @@ def build(folder):
     put("impact_cardboard", variants(pick(folder, [("BB_cardboard.wav", None)], 0.25, 0.4), 5), -32.0)
 
     # Placeholders for the sounds not recorded yet (owner, 2026-11-03: "reuse any sounds where possible but label them
-    # placeholder"), each edited to fit: the spring's twang a BB's ring on metal far lower; the selector, the torch's
-    # click shorter and higher; the radio's key, the torch's clicks through a radio's narrow band; the range's steel a
-    # BB's ring on metal; a vault, hands knocked on wood; BBs on concrete, the first knock on wood higher; on earth, a
-    # BB on cloth lower; in leaves, the BBs' rattle; a steel skip run into, the stacked shelf far lower; glass bumped,
-    # the BB's clink on glass; a draw, the magazine's swish; a holster, the pouch higher; the flag rope's ratchet, the
-    # pistol's dry click higher.
+    # placeholder"), each edited to fit: BBs on concrete, the first knock on wood higher; on earth, a BB on cloth
+    # lower; in leaves, the BBs' rattle; a steel skip run into, the stacked shelf far lower; the flag rope's ratchet,
+    # the pistol's dry click higher.
     metal = pick(folder, [("bb_metal.wav", None)], 0.6, 0.3)
     # The spring's ring lower, darker and short, 8 dB under its first level (owner, 2026-11-04: "a tiny bit more subtle
     # and slightly more bass", then "a little quieter and less echo").
     put("power_spring", [onset_slice(low_pass(resample(m, 0.38), 1800.0), 0.16, 70) for m in variants(metal, 5)], -27.3,
         "a spring rifle's spring twanging as it fires")
-    clicks = pick(folder, [("torch_switch.wav", None)], 0.15)
-    put("selector", [onset_slice(resample(k, 1.15), 0.04, 15) for k in variants(clicks, 5)], -31.8,
-        "a replica's fire selector clicking")
-    radio = [low_pass(high_pass(k, 500.0), 2800.0) for k in variants(clicks, 5)]
-    put("radio_ack", [onset_slice(r, 0.16, 30) for r in radio], -33.5, "a walkie-talkie keyed on and off")
-    put("steelRing", [onset_slice(m, 0.4, 120) for m in variants(metal, 5)], -27.1, "a BB ringing a steel target")
-    knocks = pick(folder, [("Knock wooden surface.wav", None)], 0.3)
-    put("vault", [onset_slice(k, 0.15, 50) for k in variants(knocks, 5, 1.1)], -26.0,
-        "hands and kit going over a low wall")
     put("impact_concrete", [onset_slice(w, 0.05, 20) for w in variants(wood[:5], 5, 1.25)], -32.1,
         "a BB hitting concrete or brick")
     cloth = pick(folder, [("BB_fabric.wav", [0, 1, 3])], 0.15, 0.4)
@@ -469,26 +478,88 @@ def build(folder):
     stack = pick(folder, [("Knock into stacked metal shelf.wav", None)], 0.6)
     put("prop_steel", [onset_slice(resample(s, 0.6), 0.5, 150) for s in variants(stack, 3)], -15.6,
         "running into a steel skip or container")
-    clinks = pick(folder, [("BB_glass.wav", [0, 1, 2]), ("bb_glass2.wav", None)], 0.2)
-    put("prop_glass", [onset_slice(g, 0.15, 50) for g in variants(clinks, 3)], -27.9,
-        "bumping glass or bottles")
-    swish = Source.get(folder, "catching_throwing_magazine.wav")
-    whoosh = cut(swish.a, 0.36, 0.8, swish.floor, 0.3)
-    put("draw", [onset_slice(w, 0.12, 40) for w in variants([whoosh], 5)], -34.4,
-        "a rifle swung up from its sling")
-    put("foley_holster", variants(pick(folder, [("pouch_slap.wav", None)], 0.2), 5, 1.2), -30.4,
-        "a pistol pushed into a holster")
     put("rope_up", [onset_slice(d, 0.09, 25) for d in variants(dry, 5, 1.3)], -31.8, "a rope ratcheting up a pole")
     put("rope_down", [onset_slice(d, 0.09, 25) for d in variants(dry, 5, 1.1)], -32.0,
         "a rope ratcheting down a pole")
+
+    # The owner's second batch (2026-11-04). His steps on a solid floor ("not concrete but close") are concrete's run,
+    # sprint and landing, and stand in for wood's a little lower; gravel and leaves walked on are their own, a
+    # little heavier as a sprint and lower as a landing; grass and earth stand in from leaves and gravel, softened.
+    # Metal's steps stay synthesised.
+    def steps(name, longest, which=None):
+        return [t for t in pick(folder, [(name, which)], longest, 0.3) if len(t) > int(0.06 * RATE)]
+
+    floor_walk = steps("walking_concrete.wav", 0.22)
+    floor_run = steps("Running.wav", 0.22)
+    jumps = steps("Jumping.wav", 0.35)
+    gravel = steps("gravel_walking.wav", 0.25)
+    leaves = steps("leaves_walking.wav", 0.25)
+    put("step_concrete_run", variants(steady(floor_walk, 5), 5), -22.4)
+    put("step_concrete_sprint", variants(steady(floor_run, 5), 5), -21.0)
+    put("step_concrete_land", variants(steady(jumps, 5), 5), -17.9)
+    put("step_wood_run", variants(steady(steps("Walking.wav", 0.22), 5), 5, 0.9), -20.2, "footsteps on a wooden floor")
+    put("step_wood_sprint", variants(steady(floor_run, 5, 5), 5, 0.9), -19.7, "running on a wooden floor")
+    put("step_wood_land", variants(steady(jumps, 5), 5, 0.88), -17.9, "landing a jump on a wooden floor")
+    put("step_gravel_run", variants(steady(gravel, 5), 5), -21.2)
+    put("step_gravel_sprint", variants(steady(gravel, 5, 5), 5), -20.3)
+    put("step_gravel_land", variants(steady(gravel, 5, 10), 5, 0.85), -17.7, "landing a jump on gravel")
+    put("step_leaves_run", variants(steady(leaves, 5), 5), -20.8)
+    put("step_leaves_sprint", variants(steady(leaves, 5, 5), 5), -19.2)
+    put("step_leaves_land", variants(steady(leaves, 5, 10), 5, 0.85), -17.0, "landing a jump on dry leaves")
+    for gait, target in (("run", -22.0), ("sprint", -20.8), ("land", -18.0)):
+        put("step_grass_%s" % gait, [low_pass(t, 3500.0) for t in variants(steady(leaves, 5, 5), 5, 0.95)], target,
+            "footsteps on grass")
+    for gait, target in (("run", -22.4), ("sprint", -20.2), ("land", -18.3)):
+        put("step_earth_%s" % gait, [low_pass(t, 2500.0) for t in variants(steady(gravel, 5, 5), 5, 0.9)], target,
+            "footsteps on soil")
+
+    # Kit: his clothes rustling, the longest stretch as a crouch, a shorter as standing and the shortest as a lean, with
+    # his keys jangling 10 dB under; the holster, the replica raised (the draw) and the vault his own.
+    rustle = high_pass(Source.get(folder, "clothes_rustle.wav").a, 150.0)
+    keys = steady(pick(folder, [("jangling_keys.wav", None)], 0.3, 0.4), 5)
+    for cue, seconds, target in (("foley_crouch", 0.25, -28.1), ("foley_stand", 0.22, -31.1), ("foley_lean", 0.16,
+                                                                                               -32.3)):
+        put(cue, [under(r, k[:len(r)], 10.0) for r, k in zip(loudest_windows(rustle, 5, seconds), keys)], target)
+    put("foley_holster", variants(pick(folder, [("holstering.wav", None)], 0.3), 5), -30.4)
+    put("draw", variants(pick(folder, [("raising_replica.wav", None)], 0.4), 5), -34.4)
+    put("vault", variants(steady(pick(folder, [("vaulting.wav", None)], 0.5), 5), 5), -26.0)
+
+    # Hits: a BB on his goggles as the tick of being hit (its handling thumps filtered out), his hit confirm, a BB on
+    # the steel target, glass bumped.
+    goggles = [high_pass(t, 800.0) for t in pick(folder, [("bb_hit_goggles.wav", None)], 0.1, 0.4)]
+    put("hitTick", variants(steady(goggles, 5), 5), -17.4)
+    put("hitMarker", variants(pick(folder, [("hit_confirm.wav", None)], 0.12, 0.4), 5), -18.2)
+    put("steelRing", variants(steady(pick(folder, [("steel_target.wav", None)], 0.4, 0.4), 5), 5), -27.1)
+    put("prop_glass", variants(pick(folder, [("bumping_glass.wav", None)], 0.4, 0.4), 3), -27.9)
+
+    # The selector his switch; the radio his crackle; the flag rope's ratchet his pen clicked (a placeholder).
+    put("selector", variants(pick(folder, [("switch.wav", None)], 0.08, 0.4), 5), -31.8)
+    put("radio_ack", variants(pick(folder, [("radio_crackle.wav", None)], 0.3, 0.4), 5), -33.5)
+    pens = pick(folder, [("pen_click.wav", None)], 0.12, 0.4)
+    put("rope_up", variants(pens, 5, 1.1), -31.8, "a rope ratcheting up a pole")
+    put("rope_down", variants(pens, 5, 0.95), -32.0, "a rope ratcheting down a pole")
+
+    # The smoke bomb: his grenade pin, a can bouncing (its first knock), and the long deodorant spray as the smoke's
+    # hiss 9 dB under a pop (the can's knock far lower), dying over its last second as the synthesised one did.
+    # (The pin's first take is too thin to reach the old pin's level under the limiter.)
+    put("grenade_pin", pick(folder, [("pin_pull_grenade.wav", [1, 3, 2])], 0.2), -10.2)
+    cans = pick(folder, [("can_bouncing.wav", None)], 0.2, 0.4)
+    put("grenade_bounce", variants(cans, 3), -14.2)
+    sprays = variants(pick(folder, [("deodorant_spray_long.wav", None)], 3.5, 0.05), 3)
+    pops = [onset_slice(resample(k, 0.6), 0.12, 40) for k in variants(cans, 3)]
+    put("smoke_pop", [fixed(under(p, x, 9.0), 3.5, 1.0) for p, x in zip(pops, sprays)], -9.9)
 
     # Props run into, and the doors.
     put("prop_clank", variants(pick(folder, [("Knock metal shelf.wav", None)], 0.6), 3), -21.7)
     put("prop_rattle", variants(pick(folder, [("Knock into stacked metal shelf.wav", None)], 0.6), 3), -29.8)
     put("prop_plastic", variants(pick(folder, [("Knock plastic crate.wav", None)], 0.5), 3), -21.2)
     put("prop_wood", variants(pick(folder, [("Knock wooden surface.wav", None)], 0.5), 3), -23.0)
-    put("door_open", variants(pick(folder, [("door_open.wav", None)], 1.2, 0.2), 3), -17.5)
-    put("door_shut", variants(pick(folder, [("door_close.wav", None)], 1.0, 0.2), 3), -11.3)
+    # The doors: his first takes and two of his second (2026-11-04, "a different sound to give doors a variety"), the
+    # second's opens the quieter, brighter takes.
+    put("door_open", variants(pick(folder, [("door_open.wav", None)], 1.2, 0.2), 3)
+        + pick(folder, [("door_open_and_close.wav", [0, 5])], 1.2, 0.2), -17.5)
+    put("door_shut", variants(pick(folder, [("door_close.wav", None)], 1.0, 0.2), 3)
+        + pick(folder, [("door_open_and_close.wav", [1, 7])], 1.0, 0.2), -11.3)
 
     # The referee's pea whistle; a digital thermometer's beep (6.3 kHz) an octave down as the shot timer's, and lower
     # and shorter as your ping's pip (about 1.7 kHz, under the timer).
@@ -503,6 +574,44 @@ def build(folder):
     return cues
 
 
+def ride(x, seconds=0.5, most=4.0):
+    """`x` with its louder moments (a door, a car) ridden down towards its median level, by at most `most` dB, so a
+    bed that repeats every minute has nothing in it that stands out."""
+    w = int(seconds * RATE)
+    e = np.sqrt(np.convolve(x ** 2, np.ones(w) / w, mode="same") + 1e-12)
+    g = np.clip(np.median(e) / e, 10 ** (-most / 20.0), 1.0)
+    return x * np.convolve(g, np.ones(w) / w, mode="same")
+
+
+def bed(parts, fade=2.0):
+    """A seamless loop from `parts` (stretches of ambience), each at their common median level, run into each other
+    and the end into the start over `fade` s (equal power)."""
+    mid = np.median([np.sqrt(np.mean(p ** 2)) for p in parts])
+    parts = [ride(p) * mid / np.sqrt(np.mean(p ** 2)) for p in parts]
+    n = int(fade * RATE)
+    up, down = np.sin(np.linspace(0.0, np.pi / 2, n)), np.cos(np.linspace(0.0, np.pi / 2, n))
+    out = parts[0]
+    for p in parts[1:]:
+        out = np.concatenate([out[:-n], out[-n:] * down + p[:n] * up, p[n:]])
+    out = np.concatenate([out[-n:] * down + out[:n] * up, out[n:-n]])
+    return out / np.abs(out).max()
+
+
+def loops(folder):
+    """The owner's ambience recordings as beds (2026-11-04), each `loops/<id>.wav` stored at its peak and with the
+    peak (in loops/peaks.json) that brings it to an RMS of 1, as the browser game's beds were: an indoor room for
+    Depot, his two outdoor recordings run together for The Street by day ("for choice/variety"), and his street at
+    night for The Street at night and, until he records a forest, Woodland."""
+    def take(name, start, seconds):
+        a = high_pass(read(os.path.join(folder, name)), 40.0)
+        return a[int(start * RATE):int((start + seconds) * RATE)]
+    return {
+        "indoor": bed([take("indoor_ambient.wav", 3.0, 52.0)]),
+        "street_day": bed([take("outdoor_ambient.wav", 3.0, 42.0), take("outdoor_ambient2.wav", 5.0, 42.0)]),
+        "street_night": bed([take("street_night.wav", 3.0, 62.0)]),
+    }
+
+
 def aside(folder):
     """Recordings the game has no place for yet, cut and levelled the same way, kept out of the game."""
     return {
@@ -513,12 +622,77 @@ def aside(folder):
     }
 
 
+# Footsteps are information (owner, 2026-10-05): every ground's step within 1.5 dB of concrete's overall and 3 dB in
+# the boot's band, measured as the browser game's test did (the first 0.1 s; the band's share of the first 4096
+# samples). The recordings differ more than that, so each ground is balanced to the recorded concrete with some room.
+STEP_BAND = (700.0, 4000.0)
+STEP_ALL_DB, STEP_BAND_DB = 1.0, 2.0
+STEP_GROUNDS = ("wood", "metal", "gravel", "grass", "leaves", "earth")
+
+
+def band_part(x):
+    """The part of `x` inside STEP_BAND (100 Hz cosine edges), by FFT."""
+    hz = np.fft.rfftfreq(len(x), 1.0 / RATE)
+    lo, hi = STEP_BAND
+    m = np.clip(np.minimum((hz - lo + 50.0) / 100.0, (hi + 50.0 - hz) / 100.0), 0.0, 1.0)
+    m = 0.5 - 0.5 * np.cos(np.pi * m)
+    return np.fft.irfft(np.fft.rfft(x) * m, len(x))
+
+
+def step_power(vs, band):
+    n = int(0.1 * RATE)
+    total = 0.0
+    for v in vs:
+        p = np.sum(v[:n] ** 2) / n
+        if band:
+            pad = np.zeros(4096)
+            pad[:min(4096, len(v))] = v[:4096]
+            spec = np.abs(np.fft.rfft(pad))[1:] ** 2
+            hz = np.fft.rfftfreq(4096, 1.0 / RATE)[1:]
+            p *= spec[(hz >= STEP_BAND[0]) & (hz <= STEP_BAND[1])].sum() / spec.sum()
+        total += p
+    return total / len(vs)
+
+
+def balance_steps(cues):
+    """Each ground's steps (`cues`, cue: levelled variants; metal's synthesised ones read from disk) turned up or down
+    in the band and out of it until they sit within STEP_ALL_DB and STEP_BAND_DB of concrete's. Returns the cues it
+    changed."""
+    out = {}
+    for pace in ("run", "sprint", "land"):
+        ref = cues["step_concrete_" + pace]
+        ref_all, ref_band = step_power(ref, False), step_power(ref, True)
+        for ground in STEP_GROUNDS:
+            cue = "step_%s_%s" % (ground, pace)
+            vs = cues.get(cue)
+            if vs is None:
+                vs = [read(os.path.join(CUES, f)) for f in sorted(os.listdir(CUES))
+                      if f.startswith(cue + "_") and f.endswith(".wav") and f[len(cue) + 1:-4].isdigit()]
+            parts = [(band_part(v), v - band_part(v)) for v in vs]
+            g_band = g_rest = 1.0
+            for _ in range(8):
+                ys = [g_band * b + g_rest * r for b, r in parts]
+                d_band = 10 * np.log10(step_power(ys, True) / ref_band)
+                d_all = 10 * np.log10(step_power(ys, False) / ref_all)
+                if abs(d_all) <= STEP_ALL_DB and abs(d_band) <= STEP_BAND_DB:
+                    break
+                g_band *= 10 ** ((np.clip(d_band, -STEP_BAND_DB, STEP_BAND_DB) - d_band) / 20.0)
+                ys = [g_band * b + g_rest * r for b, r in parts]
+                g = 10 ** (-10 * np.log10(step_power(ys, False) / ref_all) / 20.0)
+                g_band, g_rest = g_band * g, g_rest * g
+            if max(abs(np.log10(g_band)), abs(np.log10(g_rest))) > 0.0025:  # 0.05 dB
+                out[cue] = ys
+                print("balanced %-18s band %+.1f dB, rest %+.1f dB" % (cue, 20 * np.log10(g_band), 20 * np.log10(g_rest)))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("raw")
     ap.add_argument("--only", default="")
     ap.add_argument("--aside", default="")
     ap.add_argument("--placeholders", action="store_true", help="print the placeholders as a Markdown table")
+    ap.add_argument("--loops", action="store_true", help="also make the ambience beds (loops/ and peaks.json)")
     args = ap.parse_args()
     only = set(filter(None, args.only.split(",")))
     if args.placeholders:
@@ -530,16 +704,31 @@ def main():
         for cue, what in STILL_SYNTH.items():
             print("| `%s` | %s |" % (cue, what))
         return
-    for cue, (vs, target) in build(args.raw).items():
+    made = {cue: [v if target is None else level(v, target) for v in vs] for cue, (vs, target) in build(args.raw).items()}
+    made.update(balance_steps(made))
+    for cue, vs in made.items():
         if only and cue not in only:
             continue
         on_disk = len([f for f in os.listdir(CUES) if f.startswith(cue + "_") and f.endswith(".wav")
                        and f[len(cue) + 1:-4].isdigit()])
-        if on_disk and on_disk != len(vs):
+        if on_disk > len(vs):
             sys.exit("%s: %d variants made, %d on disk" % (cue, len(vs), on_disk))
         for n, v in enumerate(vs, 1):
-            write(os.path.join(CUES, "%s_%d.wav" % (cue, n)), v if target is None else level(v, target))
+            if np.abs(v).max() >= 1.0:
+                sys.exit("%s_%d clips after balancing" % (cue, n))
+            write(os.path.join(CUES, "%s_%d.wav" % (cue, n)), v)
         print("%-18s %d x %.2f s" % (cue, len(vs), np.mean([len(v) for v in vs]) / RATE))
+    if args.loops:
+        peaks_path = os.path.join(LOOPS, "peaks.json")
+        with open(peaks_path) as f:
+            peaks = json.load(f)
+        for name, a in loops(args.raw).items():
+            write(os.path.join(LOOPS, name + ".wav"), a)
+            peaks[name] = round(float(1.0 / np.sqrt(np.mean(a ** 2))), 6)
+            print("loop %-12s %.1f s, peak %.3f" % (name, len(a) / RATE, peaks[name]))
+        with open(peaks_path, "w") as f:
+            json.dump(peaks, f, indent=1)
+            f.write("\n")
     if args.aside:
         os.makedirs(args.aside, exist_ok=True)
         for cue, (vs, target) in aside(args.raw).items():

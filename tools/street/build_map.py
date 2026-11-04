@@ -463,6 +463,7 @@ def build() -> dict:
         "flags": [spot(*L.FLAG_A), spot(*L.FLAG_B)],
         "overtimeFlag": spot(*L.OT_FLAG),
         "botSight": BOT_SIGHT,
+        "ambience": "street",  # the owner's recordings of a street by day and by night (AU5)
         "night": False,  # day by default (the first preset); night is the Time of day setting's
         "lighting": {"presets": ["day", "night"], "moonOver": {"x": r(L.OT_FLAG[0]), "z": r(L.OT_FLAG[1])},
                      # pale render and paving under a clear sky take a little less exposure, as Depot's floor (AD1)

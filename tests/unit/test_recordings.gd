@@ -10,9 +10,11 @@ const FIVE: PackedStringArray = ["shot_gas", "power_gas", "dryFire_gas", "magOut
 		"magOut_spring", "magIn_spring", "shot_cyber", "dryFire_cyber", "magOut_cyber", "magIn_cyber", "reloadRefused",
 		"magRattle", "magToss", "magCatch", "torchClick", "impact_metal", "impact_wood", "bodyHit", "impact_glass",
 		"impact_plastic", "impact_cardboard", "power_spring", "selector", "radio_ack", "steelRing", "vault",
-		"impact_concrete", "impact_earth", "impact_leaves", "draw", "foley_holster", "rope_up", "rope_down"]
+		"impact_concrete", "impact_earth", "impact_leaves", "draw", "foley_holster", "rope_up", "rope_down",
+		"door_open", "door_shut", "hitTick", "hitMarker", "foley_crouch", "foley_stand", "foley_lean",
+		"step_concrete_run", "step_concrete_sprint", "step_concrete_land", "step_gravel_run", "step_leaves_run"]
 const THREE: PackedStringArray = ["slideLock_gas", "boltCycle", "prop_clank", "prop_rattle", "prop_plastic",
-		"prop_wood", "door_open", "door_shut", "whistle_short", "whistle_long", "prop_steel", "prop_glass"]
+		"prop_wood", "whistle_short", "whistle_long", "prop_steel", "prop_glass"]
 
 var body: BodyConfig = BodyConfig.new()
 var audio: SimAudio = null
@@ -160,3 +162,33 @@ func test_an_electric_replica_has_no_slide_to_lock() -> void:
 	audio.setup(SoundConfig.new(), [&"electric", &"gas"] as Array[StringName], body, BoxWorld.new(body), null)
 	assert_eq(audio._slide_lock[&"electric"], &"")
 	assert_eq(audio._slide_lock[&"gas"], &"slideLock_gas")
+
+
+## The first 0.1 s of a cue file's samples (16-bit mono PCM, as tools/cut_recordings.py writes them), read from the
+## source WAV: the imported stream is compressed.
+func _onset_power(cue: String, n: int) -> float:
+	var bytes := FileAccess.get_file_as_bytes("%s%s_%d.wav" % [SoundConfig.CUE_DIR, cue, n])
+	var at := 12
+	while at + 8 <= bytes.size() and bytes.slice(at, at + 4).get_string_from_ascii() != "data":
+		at += 8 + bytes.decode_u32(at + 4)
+	var window := int(0.1 * 44100.0)
+	var total := 0.0
+	for i in mini(window, (bytes.size() - at - 8) / 2):
+		var v := bytes.decode_s16(at + 8 + 2 * i) / 32768.0
+		total += v * v
+	return total / window
+
+
+func test_every_ground_steps_as_loud_as_concrete() -> void:
+	# Footsteps are information (owner, 2026-10-05): within 1.5 dB of concrete at every pace, so a soft ground hides
+	# nobody. AU5's recordings differ more than that; tools/cut_recordings.py balances them (and the 0.7 to 4 kHz band).
+	for pace: String in ["run", "sprint", "land"]:
+		var concrete := 0.0
+		for n in VARIANTS:
+			concrete += _onset_power("step_concrete_" + pace, n + 1)
+		for ground: String in ["wood", "metal", "gravel", "grass", "leaves", "earth"]:
+			var power := 0.0
+			for n in VARIANTS:
+				power += _onset_power("step_%s_%s" % [ground, pace], n + 1)
+			var off := 10.0 * log(power / concrete) / log(10.0)
+			assert_lt(absf(off), 1.5, "%s %s: %.2f dB" % [ground, pace, off])

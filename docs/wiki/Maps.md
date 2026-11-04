@@ -24,6 +24,7 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
 - **Links** join the lanes: open cuts and galleries, two tight alleys, and two **tunnels**, one in each half. The
   tunnels are unlit and bend twice: dark, but never pitch black.
 - **The roof:** a violet ceiling on crimson trusses, with rows of glowing lamps. A BB fired up stops at the ceiling.
+- **It sounds like a big empty hall:** a quiet hum of the building, with the odd creak from the roof.
 - **No full auto indoors:** as at a real indoor site, every replica that can fire full auto starts each round on
   single shots here, bots' too. Press **B** to switch to auto during the round if you want it. Bots switch only now
   and then, at someone out in the open down one of Depot's long sight lines.
@@ -136,6 +137,7 @@ terrace), **the arch** under the arch building, and the open **Field** by the de
   one. Sound carries through it as through open air, and a ping or a Hold order lands on the ground beyond it. You
   still can't walk or throw a bomb through it. The tall wooden garden fences stay solid.
 - **Night** is the Time of day setting's (day by default): every street lamp lights a pool of the road under it.
+- **It sounds like a real street,** by day and a quieter one at night, with a bird, a crow or a dog now and then.
 - **Attack / Defend** puts flag **A** in the House and flag **B** in the car park ([Modes](Modes#attack--defend)); in
   Elimination's overtime the flag stands on the Path by the Green corner. Rounds last 3 minutes.
 - **Cars, vans and lorries** are parked in the street's colours, never a team's, alongside bins, skips, lamp posts
