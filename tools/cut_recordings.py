@@ -254,11 +254,22 @@ def steady(takes_, n, skip=0):
     return ranked[skip:skip + n] if len(ranked) >= skip + n else ranked[:n]
 
 
+def moving_mean(a, w, mode):
+    """The mean of each `w` samples of `a`, as convolving with a box of `w` would give ("valid" or "same"), by a
+    running sum: a window of a second over a minute of audio in milliseconds, not minutes."""
+    c = np.cumsum(np.r_[np.zeros(w), a, np.zeros(w - 1)])
+    full = (c[w:] - c[:-w]) / w
+    if mode == "valid":
+        return full[w - 1:len(a)]
+    start = (w - 1) // 2
+    return full[start:start + len(a)]
+
+
 def loudest_windows(a, n, seconds, fade=0.3):
     """The `n` loudest stretches of `a`, `seconds` long and apart from each other: a rustle that never falls silent
     enough between moves to count as takes."""
     w = int(seconds * RATE)
-    e = np.convolve(a ** 2, np.ones(w) / w, mode="valid")
+    e = moving_mean(a ** 2, w, "valid")
     out, taken = [], np.zeros(len(e), dtype=bool)
     for i in np.argsort(e)[::-1]:
         if len(out) == n:
@@ -461,8 +472,8 @@ def build(folder):
 
     # Placeholders for the sounds not recorded yet (owner, 2026-11-03: "reuse any sounds where possible but label them
     # placeholder"), each edited to fit: BBs on concrete, the first knock on wood higher; on earth, a BB on cloth
-    # lower; in leaves, the BBs' rattle; a steel skip run into, the stacked shelf far lower; the flag rope's ratchet,
-    # the pistol's dry click higher.
+    # lower; in leaves, the BBs' rattle; a steel skip run into, the stacked shelf far lower. (The flag rope's is the pen
+    # click, in the second batch below.)
     metal = pick(folder, [("bb_metal.wav", None)], 0.6, 0.3)
     # The spring's ring lower, darker and short, 8 dB under its first level (owner, 2026-11-04: "a tiny bit more subtle
     # and slightly more bass", then "a little quieter and less echo").
@@ -478,9 +489,6 @@ def build(folder):
     stack = pick(folder, [("Knock into stacked metal shelf.wav", None)], 0.6)
     put("prop_steel", [onset_slice(resample(s, 0.6), 0.5, 150) for s in variants(stack, 3)], -15.6,
         "running into a steel skip or container")
-    put("rope_up", [onset_slice(d, 0.09, 25) for d in variants(dry, 5, 1.3)], -31.8, "a rope ratcheting up a pole")
-    put("rope_down", [onset_slice(d, 0.09, 25) for d in variants(dry, 5, 1.1)], -32.0,
-        "a rope ratcheting down a pole")
 
     # The owner's second batch (2026-11-04). His steps on a solid floor ("not concrete but close") are concrete's run,
     # sprint and landing, and stand in for wood's a little lower; gravel and leaves walked on are their own, a
@@ -578,9 +586,9 @@ def ride(x, seconds=0.5, most=4.0):
     """`x` with its louder moments (a door, a car) ridden down towards its median level, by at most `most` dB, so a
     bed that repeats every minute has nothing in it that stands out."""
     w = int(seconds * RATE)
-    e = np.sqrt(np.convolve(x ** 2, np.ones(w) / w, mode="same") + 1e-12)
+    e = np.sqrt(moving_mean(x ** 2, w, "same") + 1e-12)
     g = np.clip(np.median(e) / e, 10 ** (-most / 20.0), 1.0)
-    return x * np.convolve(g, np.ones(w) / w, mode="same")
+    return x * moving_mean(g, w, "same")
 
 
 def bed(parts, fade=2.0):
@@ -707,6 +715,10 @@ def main():
     made = {cue: [v if target is None else level(v, target) for v in vs] for cue, (vs, target) in build(args.raw).items()}
     made.update(balance_steps(made))
     for cue, vs in made.items():
+        for n, v in enumerate(vs, 1):
+            if np.abs(v).max() >= 1.0:
+                sys.exit("%s_%d clips after balancing; nothing written" % (cue, n))
+    for cue, vs in made.items():
         if only and cue not in only:
             continue
         on_disk = len([f for f in os.listdir(CUES) if f.startswith(cue + "_") and f.endswith(".wav")
@@ -714,8 +726,6 @@ def main():
         if on_disk > len(vs):
             sys.exit("%s: %d variants made, %d on disk" % (cue, len(vs), on_disk))
         for n, v in enumerate(vs, 1):
-            if np.abs(v).max() >= 1.0:
-                sys.exit("%s_%d clips after balancing" % (cue, n))
             write(os.path.join(CUES, "%s_%d.wav" % (cue, n)), v)
         print("%-18s %d x %.2f s" % (cue, len(vs), np.mean([len(v) for v in vs]) / RATE))
     if args.loops:
