@@ -53,6 +53,12 @@ func test_the_aegs_motor_runs_longer_under_each_shot() -> void:
 		assert_almost_eq(_length("power_electric", n + 1), 0.16, 0.005, "power_electric_%d" % (n + 1))
 
 
+func test_the_cyber_pistols_motor_runs_a_little_longer() -> void:
+	# AU4, owner: "a tiny bit more of the motor whir": each shot 0.09 s (was 0.07).
+	for n in VARIANTS:
+		assert_almost_eq(_length("shot_cyber", n + 1), 0.09, 0.005, "shot_cyber_%d" % (n + 1))
+
+
 func test_the_whistles_blasts_last_as_long_as_the_blasts_are_timed() -> void:
 	var cfg := PlayTuning.load_default().sound
 	for n in cfg.whistle_variants:
