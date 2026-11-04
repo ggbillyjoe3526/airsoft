@@ -7,7 +7,7 @@
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-04 | 1 | Claude (build thread) | 2 unit tests failed (barrel end moved) | Retry 5/8 | the right hand did not grip; docs claimed more than the build; owner's 15:10 review |
-| 2026-11-04 | 2 | Claude (build thread) | pass | Accept 8/8 (image rounds 4 to 10 against the owner's photos; all 25 ratios within 10 % at round 10) | – |
+| 2026-11-04 | 2 | Claude (build thread) | pass | Accept 7/8 (QA Pass, performance Pass; image rounds 4 to 10, all 25 ratios within 10 % at round 10) | – |
 
 ## What changed
 
@@ -45,7 +45,7 @@
 - **Shared helpers** `tools/blender/replicas/hardsurface.py`: prisms, lofts, lathes, fillets, Chaikin smoothing,
   booleans, the finish pass, bones and export, for the rest of the Blender batches.
 - **The Sniper Rifle** placeholder re-run (`sniper.py`) from the new AEG, its barrel run on 42.6 cm so it keeps its
-  length (barrel end 0.765 m as before); `sniper.py` stops if the AEG's `BarrelEnd` is not where it expects. 39,818
+  length (barrel end 0.765 m as before); `sniper.py` stops if the AEG's `BarrelEnd` is not where it expects. 39,838
   triangles in the hands.
 - **The figures' rifle seat** (`human.json`, `robot.json`, from `bot14.py`'s `RIFLE_SEAT`): the rifle moved in the
   fist so the new grip's middle sits where the old one's did, the barrel's line kept (a known issue until the figures
@@ -54,8 +54,8 @@
   were built and their hold solved with no clipping and both wrists within 30°, but in a close-up the right hand lay
   flat on the receiver's side with its little finger off the grip (the solver's fingertip check was satisfied by the
   receiver, not the grip). They are not drawn in game yet, so they move to the arms-in-game step, which solves the
-  hold for each replica and is judged in game; the work so far is kept in the project's files
-  (`art/blender/arms-wip/`).
+  hold for each replica and is judged in game; the work so far is kept outside the repository, in the
+  project's shared files (`/mnt/project-files/art/blender/arms-wip/`).
 
 ## Decisions
 

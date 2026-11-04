@@ -23,9 +23,9 @@ and a stronger gas kicks harder too. Energy still stops at the [site limit](Repl
 
 ## Optics
 
-An optic on the top rail. With one fitted the iron sights fold down (the AEG Rifle's are taken off) and aiming
-looks through it. The red dot is a lit dot on clear glass, with the view open round it. The 2x scope magnifies only
-inside its glass: the view round it stays as it is, with nothing dark round the edge.
+An optic on the top rail. With one fitted the iron sights come off and aiming looks through it. The red dot is a lit
+dot on clear glass, with the view open round it. The 2x scope magnifies only inside its glass: the view round it stays
+as it is, with nothing dark round the edge.
 
 <!-- wiki:parts optics -->
 

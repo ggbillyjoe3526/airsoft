@@ -9,8 +9,9 @@ extends SkeletonModifier3D
 const BONES: PackedStringArray = ["frontSight", "rearSight"]
 ## Folded flat along the rail, tipping forward (rad about the bone's x).
 const FOLD_ANGLE := -PI * 0.5
-## Sights that disappear as well as fold: the AEG's front sight (ears and post on an A-frame base can't fold flat) and
-## its rear leaf (folded, it would lie under an optic's mount).
+## Sights that disappear as well as fold, on every replica that has them (today the AEG Rifle's and the Sniper Rifle's
+## built from it): the front sight (ears and post on an A-frame base can't fold flat) and the rear leaf (folded, it
+## would lie under an optic's mount). A sight bone left out of this list only folds.
 const HIDDEN: PackedStringArray = ["frontSight", "rearSight"]
 ## A hidden sight's scale: too small to see, but not zero, so the bone's transform stays invertible.
 const HIDDEN_SCALE := Vector3(0.001, 0.001, 0.001)
