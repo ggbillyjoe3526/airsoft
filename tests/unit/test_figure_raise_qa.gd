@@ -206,7 +206,8 @@ func test_the_replica_is_level_within_a_quarter_second_of_the_first_shot_at_a_wa
 	var raised := _muzzle[v].y
 	var level := _view(FigureMix.HUMAN, c, null)
 	await _run(level, c, 40)
-	assert_gt(raised, _muzzle[level].y + 0.2, "raised before the shot (the muzzle well up)")
+	# The BL1 carbine (about 67 cm) clears a wall 0.5 m ahead with a smaller tilt than the old rifle did: ~0.1 m up.
+	assert_gt(raised, _muzzle[level].y + 0.07, "raised before the shot (the muzzle well up)")
 	# From the shot, 15 frames (0.25 s) later the muzzle is back at the shoulder.
 	await _run(v, c, 15, true)
 	assert_almost_eq(_muzzle[v].y, _muzzle[level].y, 0.08, "level 0.25 s into a burst")

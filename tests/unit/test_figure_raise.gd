@@ -140,7 +140,8 @@ func test_level_with_nothing_in_reach() -> void:
 	_wall(world, 2.0)
 	var v := _view(FigureMix.HUMAN, c, world)
 	await _pose(v, c)
-	assert_almost_eq(_ahead(v), 0.98, 0.03, "the rifle held out level")
+	# The BL1 rifle is the owner's ~67 cm carbine (2026-11-04 "as short as the photos"), so it reaches 0.72 m ahead.
+	assert_almost_eq(_ahead(v), 0.72, 0.03, "the rifle held out level")
 	assert_almost_eq(_muzzle[v].y, 1.52, 0.03, "at the shoulder")
 
 
@@ -150,7 +151,7 @@ func test_a_shot_holds_the_replica_level_and_it_rises_after() -> void:
 	_wall(world, 0.5)
 	var v := _view(FigureMix.HUMAN, c, world)
 	await _pose(v, c, 40, true)
-	assert_gt(_ahead(v), 0.9, "firing, level (the BB leaves where it points)")
+	assert_gt(_ahead(v), 0.65, "firing, level (the BB leaves where it points; the BL1 carbine reaches 0.72 m)")
 	await _pose(v, c, 40)
 	assert_lte(_ahead(v), 0.5 + SLACK, "raised once the shot's hold is over")
 

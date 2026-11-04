@@ -7,7 +7,8 @@
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-04 | 1 | Claude (build thread) | 2 unit tests failed (barrel end moved) | Retry 5/8 | the right hand did not grip; docs claimed more than the build; owner's 15:10 review |
-| 2026-11-04 | 2 | Claude (build thread) | pass | Accept 7/8 (QA Pass, performance Pass; image rounds 4 to 10, all 25 ratios within 10 % at round 10) | – |
+| 2026-11-04 | 2 | Claude (build thread) | CI: 5 unit tests failed (shorter rifle) | Accept 7/8 (QA Pass, performance Pass; image rounds 4 to 10, all 25 ratios within 10 % at round 10) | fit the magazines, reload hold, figure accent and raise tests to the carbine |
+| 2026-11-04 | 3 | Claude (build thread) | targeted tests pass (11 files) | Accept 7/8 (QA Pass on the fix, performance Pass) | – |
 
 ## What changed
 
@@ -22,7 +23,7 @@
   that runs down into the grip, a pistol grip raked 30° with a finger swell, a crane-style stock (battery tubes, an open toe plate with a
   slot along it, a slot down it and a pin hole, the adjustment lever, a rounded ribbed pad) on a castle nut, a curved
   magazine with five ribs a side and a square base, and a birdcage flash hider behind two bands. 39,698 triangles in the hands
-  (budget 40,000), its figure version 328, 7 materials.
+  (budget 40,000), its figure version 340, 7 materials.
 - **The owner's reviews (2026-11-04).** 14:12 and 14:13: shorter; the trigger guard "has a big gap in it"; the hands
   "are terrible". 15:10 to 15:12: "too short now", the magazine "slightly too long", the wrist "at a very strange
   angle", "pay close attention to reference images", "the critic needs to be more harsh" (so the critic's brief,
@@ -50,6 +51,12 @@
 - **The figures' rifle seat** (`human.json`, `robot.json`, from `bot14.py`'s `RIFLE_SEAT`): the rifle moved in the
   fist so the new grip's middle sits where the old one's did, the barrel's line kept (a known issue until the figures
   batch re-seats both hands).
+- **Fitted to the shorter rifle** (after CI on attempt 2): `fit_parts.py` now sizes the magazine parts to the new
+  well (the hi-cap 5 % longer than the rifle's own, the low-cap 35 % shorter), so the Customise frame holds them; the
+  figures' reload hold (`magazineInHand` in `human.json`, `robot.json`) moved so the hand's magazine sits on the
+  rifle's again (both under 0.1 mm off; `bot14.py` does not write these, so a figures rebuild must keep them); the
+  figures' rifle gained its accent slot (the front post's tip); and the raise-at-a-wall tests now expect the
+  carbine's reach (0.72 m ahead, from 0.98 m) and its smaller lift (about 0.1 m at a wall 0.5 m ahead).
 - **First-person arms: taken out of this batch.** The arms (the MakeHuman base mesh, CC0, under a glove and sleeve)
   were built and their hold solved with no clipping and both wrists within 30°, but in a close-up the right hand lay
   flat on the receiver's side with its little finger off the grip (the solver's fingertip check was satisfied by the

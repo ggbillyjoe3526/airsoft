@@ -90,7 +90,7 @@ extends Resource
 @export var pistol_aim_clips: PackedStringArray = PackedStringArray(["Pistol_AimDown", "Pistol_Aim", "Pistol_AimUp"])
 @export var aim_pitch: float = PI / 3.0
 @export var aim_reach: float = 0.55
-## Muzzle up at a wall (FB5): armed, the replica reaches about 1.0 m ahead (a pistol 0.6 m) of the 0.32 m body, so with
+## Muzzle up at a wall (FB5): armed, the rifle reaches about 0.72 m ahead (a pistol 0.6 m) of the 0.32 m body, so with
 ## level geometry within raise_reach_rifle (raise_reach_pistol) along the aim, from raise_drop below the eyes, the
 ## drawn upper body blends to a high ready by how close it is, fully raised at raise_full (m): the aim clips to level,
 ## the spine leant raise_lean (rad) back, and the replica (FigureReady) turned raise_angle (rad) muzzle up about the

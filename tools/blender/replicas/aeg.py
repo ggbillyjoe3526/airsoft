@@ -814,7 +814,7 @@ def moving_parts() -> dict:
 
 def figure() -> object:
     """The figures' cut-down copy: the silhouette in a few hundred faces."""
-    b = hs.Builder("Figure", ["Body", "Furniture", "Detail", "Metal"])
+    b = hs.Builder("Figure", ["Body", "Furniture", "Detail", "Metal", "Accent"])
     b.box((-UPPER_HW, UPPER_Y[0], SEAM), (UPPER_HW, UPPER_Y[1], RAIL_TOP - 0.004), "Body")
     b.prism([(y, lz(z)) for y, z in ((-0.096, 0.020), (-0.096, 0.004), (-0.081, -0.021), (-0.034, -0.025),
                                      (0.024, -0.025), (0.024, -0.066), (0.1005, -0.066), (0.104, -0.003),
@@ -850,6 +850,9 @@ def figure() -> object:
     b.prism([(GUARD_Y[1] + 0.006, BORE_Z), (FRONT_SIGHT_Y + 0.0065, BORE_Z), (FRONT_SIGHT_Y + 0.0065, SIGHT_Z + 0.0035),
              (FRONT_SIGHT_Y - 0.0055, SIGHT_Z + 0.0035), (GUARD_Y[1] + 0.006, BORE_Z + 0.020)], "x", -0.0085, 0.0085,
             "Detail")
+    # The front post's tip in the scheme's accent, so every paint slot is on the figures' copy too.
+    b.box((-0.0012, FRONT_SIGHT_Y - 0.0012, SIGHT_Z + 0.0035), (0.0012, FRONT_SIGHT_Y + 0.0012, SIGHT_Z + 0.0065),
+          "Accent")
     ob = b.build()
     for p in ob.data.polygons:
         p.use_smooth = False
