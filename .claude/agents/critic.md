@@ -43,6 +43,17 @@ can't settle a check.
   `passed/8`. One check short of Accept is a near miss: say so with its mark (`pipeline/README.md` › Verdict and
   attempts says what follows).
 - You can't play the game: judge feel from code evidence and list what the owner should test; his playtest wins.
+- **Models (owner, 2026-11-04: "the critic needs to be more harsh … the quality is very poor so far").** A change
+  that adds or reshapes a model (`.glb`) fails check 1 unless all of these hold, and you judge them from images: open
+  the owner's reference photos the record names and the review renders in your brief (with Read), never the code
+  alone. (a) **Proportions:** measure at least five ratios on a reference photo and on a render from the same angle
+  (overall length, the main sections' lengths, the magazine or grip below the body, heights; for hands, finger and
+  palm lengths and the wrist line) and list them; any more than 10 % off fails. (b) **Construction:** every part is
+  joined where the real one is; no gap, floating or sunk part, clipping, visible faceting on a curve, stretched skin or
+  broken silhouette in any close-up. (c) **Poses:** a held pose is one a person can hold comfortably; a wrist bent
+  more than about 30° off the forearm's line, or an elbow, finger or thumb at an angle a hand can't make, fails.
+  (d) **Bar:** it would pass as finished work from a AAA studio next to the reference. When in doubt, fail it, and
+  say exactly what to change.
 
 ## Output (exactly this, at most 30 lines plus the owner's list; the same text to `pipeline/out/critic.md`)
 

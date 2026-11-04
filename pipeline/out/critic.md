@@ -1,16 +1,15 @@
-Task: HV1 · The hit area fitted to the drawn figure (follow-up commits, judged on git diff 5c84f56..2b89dcb only)
-Attempt: 2 of 4 (follow-up to attempt 2's Accept at e6c1970)
-Head: 2b89dcbf23adfba8469a41c528ed4398f5b4f26d (test_bots.gd 17/17 green on it per the coordinator; CI pending)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept
-Evidence:
-1/6. bot_combat.gd:371-378 tests an in-play crouched mate's volume raised by crouch_drop x crouch_amount, then shifts
-   it back before the velocity and route tests.
-2/3/5. No contract touched; _shift's dy is a default (values only); the rise comes from HitConfig.
-4. test_bots.gd:221 test_a_bot_holds_fire_over_a_crouched_teammate_who_could_stand_into_the_line: the line clears the
-   crouched head but meets the standing one, and target_id == enemy proves the bot sees its target. 0 shots, then shots
-   once the mate steps aside. The coordinator ran it without the rise block: 51 shots, fails.
-7/8. The test sits beside its sibling. The ricochet bar change (4 % to 5 %) is measured and recorded in HV1.md.
-Failed checks: none. Must-fix: none. Merge once CI is green.
-Owner should test in the game:
-- Crouch in front of a bot teammate in a fight, then stand: it holds fire over you and doesn't knock you out.
+Task: BL1 · Blender batch 1: the AEG Rifle · attempt 2 · head fa46a29
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗ → 7/8, Accept once QA and performance passed (both Pass)
+1. Models: the image critic's rounds 4 to 10 against the owner's main photo; round 10 Accept, all 25 ratios within
+   10 % (0.92 to 1.07); no gap, floating part, clipping or faceting in the close-ups; the arms are out of the diff.
+2. The replica contract (empties, bones, five clips) kept; parts refitted by fit_parts.py.
+3. sight_fold.gd's per-frame path sets cached rotations and scales; nothing allocated per frame.
+4. test_parts_in_play.gd asserts both sights hidden under an optic and back without one.
+6. No logos; a generic carbine; plain colours.
+8. Docs said more than the build (fixed after this review): the wiki's "fold down (the AEG Rifle's are taken off)" now
+   "come off"; the record's Critic cell holds this verdict; the arms' work named at its real place (project files).
+Advisory: HIDDEN equals BONES, so the fold rotation no longer shows (comment now says so); the magazine curves 1.3 cm,
+within the ratios, the owner to judge.
+Owner to test: the carbine in first person, hip and aimed (sights lined up, nothing poking into view); red dot on and
+off (both iron sights go and come back); bots' grip and support hand (known issue); every part in Customise; the
+magazine's curve; frame rate at 8v8 on Low.

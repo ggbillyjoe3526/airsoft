@@ -181,7 +181,7 @@ func test_in_hand_it_is_the_aeg_with_a_longer_barrel_and_a_cocking_fire_clip() -
 	var aeg := view._held[1]
 	assert_eq(sniper.id, &"sniper")
 	assert_not_null(sniper.muzzle)
-	assert_almost_eq(sniper.muzzle.position.z - aeg.muzzle.position.z, -0.2, 1e-3, "the barrel 20 cm longer")
+	assert_almost_eq(sniper.muzzle.position.z - aeg.muzzle.position.z, -0.426, 1e-3, "the barrel 43 cm longer than the carbine")
 	assert_almost_eq(sniper.rear_sight, aeg.rear_sight, Vector3.ONE * 1e-4, "the AEG's sights")
 	assert_not_null(sniper.anim)
 	for clip: StringName in [&"Fire", &"Reload", &"Inspect"]:

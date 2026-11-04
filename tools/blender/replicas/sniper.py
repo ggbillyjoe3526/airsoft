@@ -32,9 +32,10 @@ OUT_PARTS = os.path.join(ROOT, "assets/models/replicaParts/sniper.glb")
 
 ARMATURE_NAME = "SniperRifle"
 # How much longer the barrel is than the AEG's (m), and the AEG's barrel end and bore height (Blender space: +Y
-# forward, +Z up) that it grows from.
-EXTENSION = 0.20
-AEG_BARREL_END = Vector((0.0, 0.565, 0.034))
+# forward, +Z up) that it grows from. The AEG was cut to its photos' length in BL1 (its barrel end 0.565 -> 0.339); the
+# rifle kept its own length (barrel end 0.765), so its run grew by as much. build_model checks the AEG's BarrelEnd.
+EXTENSION = 0.426
+AEG_BARREL_END = Vector((0.0, 0.339, 0.044))
 BARREL_RADIUS = 0.0105
 BAND_RADIUS = 0.0135
 BAND_LENGTH = 0.014
@@ -158,6 +159,9 @@ def build_model() -> None:
     # The importer's bone display shape is no part of the model.
     for ob in [o for o in bpy.data.objects if o.type == "MESH" and not o.data.materials]:
         bpy.data.objects.remove(ob, do_unlink=True)
+    end = bpy.data.objects["BarrelEnd"].matrix_world.translation
+    if (end - AEG_BARREL_END).length > 0.001:
+        raise SystemExit("the AEG's BarrelEnd is at %s, not %s: update AEG_BARREL_END" % (tuple(end), tuple(AEG_BARREL_END)))
     lengthen_barrel(arm)
     new_fire_clip(arm)
     export(OUT_MODEL, True)

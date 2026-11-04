@@ -22,6 +22,7 @@ Every open bug, limit and known gap in the game, so nobody re-reports or re-meas
 | Graphics | Figures change detail by their real distance, so through the Variable Scope at 6× a figure 40 m off is drawn at its coarsest level, and a part with none (the radio) is gone (BP3) | can wait | 2026-11-03 |
 | Menus | The Loadout's carried cards show the slot keys as 1 and 2 even when slot_1 and slot_2 are rebound (BP3) | can wait | 2026-11-03 |
 | Menus | Customise's 3D replica keeps the resolution it was built at when the window moves to a screen of another size at the same aspect ratio, until Customise is reopened (BP3) | can wait | 2026-11-03 |
+| Art | The figures still hold the AEG Rifle by the old grip's place: the rifle was moved so the grip's middle stays in the fist and the barrel's line is kept, but the grip is raked 8° more than the hand and the support hand sits a little off the new handguard until the figures batch re-seats both hands (BL1) | can wait | 2026-11-04 |
 | Art | The Variable Scope's model is the 2x Scope's run on longer with a zoom ring, a placeholder until the owner's own model (SN2) | document | 2026-11-02 |
 | Play | Your bot teammates still carry the factory AEG, never the Sniper Rifle, and the rifle's magazines aren't shared with the AEG's (its own class, SN1) | can wait | 2026-11-02 |
 | Menus | With Dev content off, level 7 holds nothing to show (only the dev M140 Spring, SN1): its Armory row and level-up card are bare until the Sniper Rifle goes public | can wait | 2026-11-02 |

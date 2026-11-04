@@ -47,6 +47,11 @@ func _bone_rotation(model: Node3D, bone: String) -> Quaternion:
 	return s.get_bone_pose_rotation(s.find_bone(bone))
 
 
+func _bone_scale(model: Node3D, bone: String) -> Vector3:
+	var s := model.find_child("Skeleton3D", true, false) as Skeleton3D
+	return s.get_bone_pose_scale(s.find_bone(bone))
+
+
 func _bone_rest(model: Node3D, bone: String) -> Quaternion:
 	var s := model.find_child("Skeleton3D", true, false) as Skeleton3D
 	return s.get_bone_rest(s.find_bone(bone)).basis.get_rotation_quaternion()
@@ -70,11 +75,16 @@ func test_parts_take_the_place_of_the_standard_ones_and_come_off_again() -> void
 	assert_eq(fit.optic_key, &"redDot")
 	# The silencer sits on the long barrel's end, 0.1 m out.
 	var silencer := model.find_child("muzzle_silencer", true, false) as Node3D
-	assert_almost_eq(silencer.position.z, -0.665, EPS)
+	assert_almost_eq(silencer.position.z, -0.439, EPS)
 	assert_almost_eq(fit.sight_line, Vector3(0.0, 0.104, -0.025), Vector3.ONE * EPS)
 	assert_false(_bone_rotation(model, "frontSight").is_equal_approx(_bone_rest(model, "frontSight")),
 			"the iron sights fold under an optic")
+	assert_almost_eq(_bone_scale(model, "frontSight"), SightFold.HIDDEN_SCALE, Vector3.ONE * EPS,
+			"the A-frame front sight disappears under an optic")
+	assert_almost_eq(_bone_scale(model, "rearSight"), SightFold.HIDDEN_SCALE, Vector3.ONE * EPS,
+			"and the rear leaf with it")
 	ReplicaParts.unfit(fit)
+	assert_almost_eq(_bone_scale(model, "frontSight"), Vector3.ONE, Vector3.ONE * EPS, "and comes back without it")
 	assert_eq(model.find_children("muzzle_silencer*", "", true, false).size(), 0)
 	assert_true(mag.visible)
 	assert_true(hider.visible)
@@ -188,7 +198,7 @@ func test_without_an_optic_the_iron_sights_aim_as_before() -> void:
 	var hands := _hands(_kit(AEG, {&"grip": VERTICAL}))
 	var held: ReplicaView.Held = hands._held[0]
 	assert_null(held.window)
-	assert_almost_eq(held.rear_sight, Vector3(0.0, 0.088, 0.0693), Vector3.ONE * EPS)
+	assert_almost_eq(held.rear_sight, Vector3(0.0, 0.098, 0.0307), Vector3.ONE * EPS)
 
 
 func test_a_silenced_replica_shoots_from_the_silencer() -> void:

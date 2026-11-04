@@ -1213,6 +1213,24 @@ Dev content on for the rifle. The numbers came from bots; these need you.
   your ruling from October). Say if you want arms to count.
 - [ ] **Frame rate in a big firefight** (8v8, Ultra and Low): no new hitches when lots of BBs are flying.
 
+## The new AEG Rifle model (BL1)
+
+- [ ] **In your hands:** the AEG Rifle is the short carbine from your photo, about 67 cm (quad-rail handguard, A-frame
+  front sight, flip-up rear sight, raked grip, crane-style stock, curved magazine). Is anything poking into the view
+  while you walk, sprint, lean and aim?
+- [ ] **Iron sights:** aim with no optic. The rear aperture and front post line up on the crosshair; fit a red dot
+  and both iron sights disappear, so nothing sits in the optic's view.
+- [ ] **Moving parts:** fire (the trigger pulls), press B through the modes (the selector turns: up for single, back
+  for auto), reload (the magazine drops out and a new one goes up the well) and Inspect (the charging handle draws
+  back, the dust cover opens, the hop-up dial turns).
+- [ ] **Paints and parts:** in Customise, try each paint and every part: grips, torch, barrels, silencer and
+  magazines sit on the rifle, not floating or sunk in. The long barrel and silencer start at the new barrel's
+  end, and the torch sits on the rail beside the handguard.
+- [ ] **Menus:** the Loadout and Armory pictures show the new rifle, sharp and to scale.
+- [ ] **Sniper Rifle (Dev content on):** it is the new AEG with its long barrel for now (as long overall as before);
+  the bolt-action model is next.
+- [ ] **Frame rate:** no drop against before, at 8v8 on Ultra and Low.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

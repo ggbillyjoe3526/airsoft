@@ -411,8 +411,12 @@ def solve_fingers(rig, objs, sd, plan):
 # shooters do on an AEG. The support hand cups the handguard from below: palm under it, fingers up its right side,
 # thumb up the left. On the pistol the left hand is the right hand's grip mirrored, moved forward over the right
 # fingers and turned in, its fingers wrapping the right hand's.
-RIFLE_SEAT = Matrix([[0.805781, 0.382011, -0.452531, -0.038293], [-0.2159, 0.901037, 0.37619, 0.080339],
-                     [0.551456, -0.205425, 0.808515, 0.050959], [0.0, 0.0, 0.0, 1.0]])
+# BL1 (2026-11-04): the AEG's lower receiver and grip were raised 3.6 cm in the rifle; the rifle sits 1.2 cm lower
+# in the fist than the first seat (its grip 2.4 cm higher in the hand), so the support hand still meets the
+# handguard. Its grip then raked to 30 degrees (from 22) and moved 3.0 cm forward: the rifle moved so the grip's
+# middle stays in the fist, the barrel's line kept. The figures batch re-seats both hands.
+RIFLE_SEAT = Matrix([[0.805781, 0.382011, -0.452531, -0.040834], [-0.2159, 0.901037, 0.37619, 0.053534],
+                     [0.551456, -0.205425, 0.808515, 0.044177], [0.0, 0.0, 0.0, 1.0]])
 PISTOL_SEAT = Matrix([[0.805781, 0.450791, -0.384062, -0.019122], [-0.2159, 0.827497, 0.518301, 0.079554],
                       [0.551456, -0.334718, 0.764107, 0.026286], [0.0, 0.0, 0.0, 1.0]])
 REPLICA_ON_GRIP['rifle'] = RIFLE_SEAT
