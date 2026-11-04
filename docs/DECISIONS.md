@@ -872,6 +872,16 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   The Cyber Pistol has "a tiny bit more of the motor whir" and "a slight hum of an electric motor (think of ... an
   electric vehicle or bike's motor)", not "too high pitched": 0.09 s a shot (was 0.07), 3 dB up, at about the motor's
   own pitch, a faint whine under it.
+- **The owner's second batch (2026-11-04, AU5) goes in where it fits, and stands in where it's close.** His
+  "Walking", "Running" and "Jumping" are on a "solid floor. not concrete but close", so they are concrete's sprint and
+  landing and stand in for wood ("it can be used as a place holder where needed"). His door take is "a different sound
+  to give doors a variety of sounds": two more of each, not a replacement. Both outdoor ambiences are The Street's day
+  ("just there for choice/variety"); "street_night" is The Street's night and Woodland's bed until he records a forest.
+  The fire selector is his switch ("use switch for fire selector"); the pen click is reused as the flag rope's stand-in.
+  Defaults he took: the electric toothbrush doesn't replace the Cyber Pistol he approved (a comparison is in the shared
+  files); the keys are a quiet layer under the kit rustle; the long deodorant spray is the smoke grenade's hiss, the
+  short one held back. Every ground's steps are balanced to his concrete by `tools/cut_recordings.py`, so the
+  footsteps-are-information rule below still holds.
 - **A replica's shot follows its power source: electric, gas or spring (owner, 2026-10-03).** An empty AEG still cycles;
   an empty gas pistol only clicks.
 - **Footsteps are information, so gameplay audio comes first (owner, 2026-10-05).** Every ground's step stays within

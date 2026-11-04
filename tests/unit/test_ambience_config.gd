@@ -27,10 +27,10 @@ func _sets() -> Dictionary[String, AmbienceSet]:
 
 func test_every_ambience_has_a_day_and_a_night_set_with_beds() -> void:
 	assert_not_null(amb, "play_tuning.tres holds the ambiences")
-	assert_eq(AmbienceConfig.IDS, [&"yard", &"woods"] as Array[StringName])
+	assert_eq(AmbienceConfig.IDS, [&"yard", &"woods", &"indoor", &"street"] as Array[StringName])
 	for id in AmbienceConfig.IDS:
 		assert_true(amb.day.has(id) and amb.night.has(id), "%s by day and by night" % id)
-	assert_eq(_sets().size(), 4)
+	assert_eq(_sets().size(), 8)
 	for at: String in _sets():
 		assert_gt(_sets()[at].beds.size(), 0, "%s has a bed" % at)
 		assert_gt(_sets()[at].calls.size(), 0, "%s has a call" % at)
@@ -40,9 +40,10 @@ func test_the_sets_are_the_browsers() -> void:
 	assert_eq(_loops(amb.day[&"yard"]), ["yard"])
 	assert_eq(_cues(amb.day[&"yard"]), ["ambience_bird", "ambience_crow", "ambience_dog"])
 	assert_eq(_cues(amb.night[&"yard"]), ["ambience_dog"])
-	assert_eq(_loops(amb.day[&"woods"]), ["pines"])
+	# Woodland's beds are the owner's street at night until he records a forest (AU5); its calls are the browser's.
+	assert_eq(_loops(amb.day[&"woods"]), ["street_night"])
 	assert_eq(_cues(amb.day[&"woods"]), ["ambience_bird", "ambience_creak"])
-	assert_eq(_loops(amb.night[&"woods"]), ["pines", "insects"])
+	assert_eq(_loops(amb.night[&"woods"]), ["street_night"])
 	assert_eq(_cues(amb.night[&"woods"]), ["ambience_owl", "ambience_creak"])
 	var yard_bed := amb.day[&"yard"].beds[0]
 	assert_almost_eq(yard_bed.gain, 0.035, 1e-6, "the browser's yard bed")
@@ -94,6 +95,18 @@ func test_no_bed_and_no_set_of_beds_together_is_louder_than_the_yards() -> void:
 		assert_lte(sqrt(power), yard.gain + 1e-6, "%s's beds together no louder than the yard" % at)
 
 
+func test_the_owners_recorded_beds() -> void:
+	# AU5: Depot's big quiet room (its creaks for calls); The Street's two outdoor takes by day (the yard's calls) and
+	# the street at night (the dog).
+	assert_eq(_loops(amb.day[&"indoor"]), ["indoor"])
+	assert_eq(_loops(amb.night[&"indoor"]), ["indoor"])
+	assert_eq(_cues(amb.day[&"indoor"]), ["ambience_creak"])
+	assert_eq(_loops(amb.day[&"street"]), ["street_day"])
+	assert_eq(_cues(amb.day[&"street"]), ["ambience_bird", "ambience_crow", "ambience_dog"])
+	assert_eq(_loops(amb.night[&"street"]), ["street_night"])
+	assert_eq(_cues(amb.night[&"street"]), ["ambience_dog"])
+
+
 func test_a_set_is_picked_by_id_and_time_of_day_an_unknown_one_plays_the_yard() -> void:
 	assert_eq(amb.set_for(&"woods", false), amb.day[&"woods"])
 	assert_eq(amb.set_for(&"woods", true), amb.night[&"woods"])
@@ -105,7 +118,8 @@ func test_a_set_is_picked_by_id_and_time_of_day_an_unknown_one_plays_the_yard() 
 
 
 func test_each_map_reads_its_ambience() -> void:
-	var want: Dictionary[String, StringName] = {"depot": &"yard", "woodland": &"woods", "range": &"yard"}
+	var want: Dictionary[String, StringName] = {"depot": &"indoor", "woodland": &"woods", "range": &"yard",
+			"street": &"street"}
 	for id: String in want:
 		var map := MapData.load_map(id, MapStyle.new(), 1)
 		assert_eq(map.ambience, want[id], id)

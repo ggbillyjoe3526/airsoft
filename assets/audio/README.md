@@ -11,10 +11,20 @@ takes and level). Re-cut with `python3 tools/cut_recordings.py <raw folder>`, th
 A gas pistol's shot is split where its crack gives way to the slide and the gas: the crack is `shot_gas`, the rest its
 power part `power_gas`, so the two together are the recording.
 
-**Placeholders** (AU3, 2026-11-03): until the owner records them, 25 cues are his recordings reused, re-pitched,
-filtered or sliced (the Sniper Rifle's and the Cyber Pistol's sounds, the AEG's magazine, the spring's twang, the
-selector, the radio, the steel ring, the vault, the draw, the holster, the flag rope, BBs on concrete, soil and
-leaves, the steel skip and glass props), and the whistle is a synthesised pea whistle (his takes are set aside: "my
+**The second batch** (AU5, 2026-11-04): 30 more recordings give the steps on concrete, gravel and leaves, the kit
+rustle (`foley_*`), the holster, the draw, the vault, the hit tick and hit marker, the steel ring, the glass prop, the
+selector, the radio, the electric, spring and cyber magazines, the grenades' pin, bounce and smoke hiss, and two more
+doors each way. Every ground's steps (metal's synthesised ones too) are then balanced to the recorded concrete, within
+1 dB overall and 2 dB in the 0.7 to 4 kHz band (`balance_steps`; the rule is in `docs/DECISIONS.md` › Audio). With
+`--loops` the script also makes the beds `loops/indoor.wav` (the Depot), `street_day.wav` and `street_night.wav` (The
+Street; the night one is Woodland's too until a forest is recorded): a stretch of each recording, its spikes ridden
+down, cross-faded into a seamless loop and stored at its peak, with `peaks.json` holding the factor that brings it to
+an RMS of 1, so a bed's gain in `play_tuning.tres` is its loudness.
+
+**Placeholders** (AU3, 2026-11-03; AU5): until the owner records them, 25 cues are his recordings reused, re-pitched,
+filtered or sliced (the Sniper Rifle's and the Cyber Pistol's shots, twang, bolt and dry fire, the flag rope, BBs on
+concrete, soil and leaves, the steel skip, and the steps on wood, grass and soil and the jumps onto gravel and leaves),
+and the whistle is a synthesised pea whistle (his takes are set aside: "my
 whistle isn't great"). The script labels each one with what to record; `python3 tools/cut_recordings.py <raw folder>
 --placeholders` prints them, and those still synthesised, as tables. The owner's plain status of every sound is in the
 shared project files, `audio/sound-status.md` (keep it current with every audio change).
@@ -29,7 +39,7 @@ seeds the browser game used, so they sound as they did.
   `shot_electric_1.wav` to `_5.wav`). A shot's power part (`power_*`) plays with its shot on its own volume slider.
   78 cues, 372 files, and the whistle's 2 cues and 6 files (below).
 - `loops/<id>.wav`: the ambience beds (`yard`, `pines`, `insects`, `crackle`), seamless,
-  imported to loop. They render far above full scale (the browser played them as float through a small gain), so each
+  imported to loop. Only `yard` still plays since AU5 (the others are kept, unused). They render far above full scale (the browser played them as float through a small gain), so each
   is stored normalised to its peak, and `loops/peaks.json` records that peak: play a loop at the browser game's gain
   times its peak to hear it at the browser's level.
 - `cues/whistle_short_<n>.wav`, `whistle_long_<n>.wav` and `ping_pip_1.wav`: the pip is recorded since AU2; the
@@ -40,8 +50,9 @@ seeds the browser game used, so they sound as they did.
   them from its own constants and seeds (the pin's metal tink and scrape, a canister's hollow knock, the smoke's pop
   and fading hiss, the flash's short crack and thump), each scaled to a 0.9 peak; their levels are SoundConfig's. To
   re-render: `godot --headless --path . -s res://tools/render_grenades.gd`, then `godot --headless --path . --import`.
-  The throw itself plays `magToss`.
-- `cues/door_open_<n>.wav` and `door_shut_<n>.wav` (1 to 3): recorded since AU2; the synthesised draft (DO1)
+  The throw itself plays `magToss`. Since AU5 the pin, the bounce and the smoke's pop are the owner's recordings
+  (above); only `flash_bang` is still this renderer's.
+- `cues/door_open_<n>.wav` and `door_shut_<n>.wav` (1 to 5): recorded since AU2, 4 and 5 since AU5; the synthesised draft (DO1)
   renders with `tools/render_doors.gd` to a folder named after `--`.
 - `cues/boltCycle_<n>.wav` (1 to 3): recorded since AU2; the synthesised draft (SN1) renders with
   `tools/render_bolt.gd` to a folder named after `--`.

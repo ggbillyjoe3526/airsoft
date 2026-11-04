@@ -178,6 +178,7 @@ def build() -> dict:
         "flags": [{"x": x, "y": 0, "z": z} for x, z in L.FLAGS],
         "overtimeFlag": {"x": L.OT_FLAG[0], "y": 0, "z": L.OT_FLAG[1]},
         "botSight": 55,
+        "ambience": "indoor",  # the owner's recording of a big quiet room (AU5)
         "roof": roof(),
         "doors": doors(),
         "lighting": {"presets": ["day"], "overrides": {"day": {

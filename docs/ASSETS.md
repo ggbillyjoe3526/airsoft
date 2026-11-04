@@ -70,11 +70,16 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
   wood, glass, plastic, cardboard and players, the gear, the props, the doors, the whistle, the shot timer and the
   ping. Since AU3 they also stand in, labelled placeholders, for 25 cues until he records them (14 of them new; the
   script's `--placeholders` lists them), and the whistle is a pea whistle the script synthesises (his takes set
-  aside).
+  aside). His second batch (AU5, 2026-11-04, 30 recordings: footsteps on a solid floor, concrete, gravel and leaves,
+  clothes and keys, a holster, a strap swung up, a vault, a BB on goggles, a tap, a steel target, glass, a switch, a
+  radio, a remote's battery cover, a pen, a grenade pin, a can, deodorant, a door, a toothbrush, and a big room, a
+  street by day and at night) adds the steps, the kit rustle, the hits, the magazines, the grenades' pin, bounce and
+  hiss, two more doors each way, and the Depot's, The Street's and (for now) Woodland's ambience beds (`--loops`).
   Owner-made for the game; same licence as the code. To re-cut: `python3 tools/cut_recordings.py <raw folder>`,
   then `godot --headless --path . --import`.
-- **Sounds:** the rest of the 78 sounds and 4 ambience loops are still rendered from the browser game's synthesis
-  recipes, in `assets/audio/` (`assets/audio/README.md`): the steps, the kit rustle, the hits and the ambience. No
+- **Sounds:** the rest of the sounds and 4 ambience loops are still rendered from the browser game's synthesis
+  recipes, in `assets/audio/` (`assets/audio/README.md`): the metal steps, the flashbang, the yard bed and the
+  ambient calls. No
   outside source; same licence as the code.
 - **The smoke and flash bombs' sounds:** `assets/audio/cues/grenade_pin_1.wav` to `_3`, and the same three of
   `grenade_bounce`, `smoke_pop` and `flash_bang`, synthesised by our own `tools/render_grenades.gd` (SF1, 2026-10-30).

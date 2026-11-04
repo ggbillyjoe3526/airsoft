@@ -66,6 +66,36 @@ loop = &"yard"
 gain = 0.035
 width = 0.7
 
+[sub_resource type="Resource" id="Resource_au5in"]
+script = ExtResource("2_5olvw")
+loop = &"indoor"
+gain = 0.03
+width = 0.7
+
+[sub_resource type="Resource" id="Resource_au5sd"]
+script = ExtResource("2_5olvw")
+loop = &"street_day"
+gain = 0.03
+width = 0.7
+
+[sub_resource type="Resource" id="Resource_au5sn"]
+script = ExtResource("2_5olvw")
+loop = &"street_night"
+gain = 0.02
+width = 0.7
+
+[sub_resource type="Resource" id="Resource_au5wd"]
+script = ExtResource("2_5olvw")
+loop = &"street_night"
+gain = 0.018
+width = 0.75
+
+[sub_resource type="Resource" id="Resource_au5wn"]
+script = ExtResource("2_5olvw")
+loop = &"street_night"
+gain = 0.02
+width = 0.75
+
 [sub_resource type="Resource" id="Resource_7ki38"]
 script = ExtResource("3_lbigc")
 cue = &"ambience_bird"
@@ -107,12 +137,6 @@ script = ExtResource("1_jm3g4")
 beds = Array[ExtResource("2_5olvw")]([SubResource("Resource_kmp0v")])
 calls = Array[ExtResource("3_lbigc")]([SubResource("Resource_7ki38"), SubResource("Resource_akg4p"), SubResource("Resource_d6etx")])
 
-[sub_resource type="Resource" id="Resource_i80lf"]
-script = ExtResource("2_5olvw")
-loop = &"pines"
-gain = 0.018
-width = 0.75
-
 [sub_resource type="Resource" id="Resource_kxkck"]
 script = ExtResource("3_lbigc")
 cue = &"ambience_creak"
@@ -127,19 +151,13 @@ rng_seed = 3603
 
 [sub_resource type="Resource" id="Resource_a0he4"]
 script = ExtResource("1_jm3g4")
-beds = Array[ExtResource("2_5olvw")]([SubResource("Resource_i80lf")])
+beds = Array[ExtResource("2_5olvw")]([SubResource("Resource_au5wd")])
 calls = Array[ExtResource("3_lbigc")]([SubResource("Resource_7ki38"), SubResource("Resource_kxkck")])
 
 [sub_resource type="Resource" id="Resource_4hk2b"]
 script = ExtResource("1_jm3g4")
 beds = Array[ExtResource("2_5olvw")]([SubResource("Resource_kmp0v")])
 calls = Array[ExtResource("3_lbigc")]([SubResource("Resource_d6etx")])
-
-[sub_resource type="Resource" id="Resource_02nuc"]
-script = ExtResource("2_5olvw")
-loop = &"insects"
-gain = 0.009
-width = 0.9
 
 [sub_resource type="Resource" id="Resource_ws40d"]
 script = ExtResource("3_lbigc")
@@ -155,16 +173,35 @@ rng_seed = 3374
 
 [sub_resource type="Resource" id="Resource_gs03g"]
 script = ExtResource("1_jm3g4")
-beds = Array[ExtResource("2_5olvw")]([SubResource("Resource_i80lf"), SubResource("Resource_02nuc")])
+beds = Array[ExtResource("2_5olvw")]([SubResource("Resource_au5wn")])
 calls = Array[ExtResource("3_lbigc")]([SubResource("Resource_ws40d"), SubResource("Resource_kxkck")])
+
+[sub_resource type="Resource" id="Resource_au5ii"]
+script = ExtResource("1_jm3g4")
+beds = Array[ExtResource("2_5olvw")]([SubResource("Resource_au5in")])
+calls = Array[ExtResource("3_lbigc")]([SubResource("Resource_kxkck")])
+
+[sub_resource type="Resource" id="Resource_au5ss"]
+script = ExtResource("1_jm3g4")
+beds = Array[ExtResource("2_5olvw")]([SubResource("Resource_au5sd")])
+calls = Array[ExtResource("3_lbigc")]([SubResource("Resource_7ki38"), SubResource("Resource_akg4p"), SubResource("Resource_d6etx")])
+
+[sub_resource type="Resource" id="Resource_au5tn"]
+script = ExtResource("1_jm3g4")
+beds = Array[ExtResource("2_5olvw")]([SubResource("Resource_au5sn")])
+calls = Array[ExtResource("3_lbigc")]([SubResource("Resource_d6etx")])
 
 [sub_resource type="Resource" id="Resource_amb3c"]
 script = ExtResource("4_q5v06")
 day = Dictionary[StringName, ExtResource("1_jm3g4")]({
+&"indoor": SubResource("Resource_au5ii"),
+&"street": SubResource("Resource_au5ss"),
 &"woods": SubResource("Resource_a0he4"),
 &"yard": SubResource("Resource_yt6mn")
 })
 night = Dictionary[StringName, ExtResource("1_jm3g4")]({
+&"indoor": SubResource("Resource_au5ii"),
+&"street": SubResource("Resource_au5tn"),
 &"woods": SubResource("Resource_gs03g"),
 &"yard": SubResource("Resource_4hk2b")
 })
