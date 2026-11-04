@@ -690,7 +690,8 @@ def balance_steps(cues):
                 g_band, g_rest = g_band * g, g_rest * g
             if max(abs(np.log10(g_band)), abs(np.log10(g_rest))) > 0.0025:  # 0.05 dB
                 out[cue] = ys
-                print("balanced %-18s band %+.1f dB, rest %+.1f dB" % (cue, 20 * np.log10(g_band), 20 * np.log10(g_rest)))
+                print("balanced %-18s band %+.1f dB, rest %+.1f dB"
+                      % (cue, 20 * np.log10(g_band), 20 * np.log10(g_rest)))
     return out
 
 
@@ -712,7 +713,8 @@ def main():
         for cue, what in STILL_SYNTH.items():
             print("| `%s` | %s |" % (cue, what))
         return
-    made = {cue: [v if target is None else level(v, target) for v in vs] for cue, (vs, target) in build(args.raw).items()}
+    made = {cue: [v if target is None else level(v, target) for v in vs]
+            for cue, (vs, target) in build(args.raw).items()}
     made.update(balance_steps(made))
     for cue, vs in made.items():
         for n, v in enumerate(vs, 1):

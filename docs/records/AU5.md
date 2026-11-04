@@ -35,8 +35,8 @@
   the sniper rifle, as is for the Cyber Pistol. The gas pistol keeps its own.
 - **Grenades:** the pin (takes 2 to 4; the first is too thin; its loudest 50 ms land at -12.6 to -14 dB against
   the -10.2 target, the limiter holding its sharp peak, so about 3 dB quieter than the synthesised pin), the can for
-  the bounce (0.2 s), and the smoke's pop: the can 40 % lower under the long deodorant spray 9 dB down, 3.5 s. The flash stays synthesised (a balloon is on
-  the list).
+  the bounce (0.2 s), and the smoke's pop: the can 40 % lower under the long deodorant spray 9 dB down, 3.5 s. The
+  flash stays synthesised (a balloon is on the list).
 - **Flag rope:** the pen click 10 % higher (up) and 5 % lower (down), placeholders.
 - **Doors:** two more takes each way (5 variants, was 3), from `door_open_and_close`.
 - **Ambience beds:** `--loops` takes a stretch of each recording (indoor 3 to 55 s, the two outdoor files 3 to 45 and
