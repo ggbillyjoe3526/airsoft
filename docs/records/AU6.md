@@ -1,12 +1,13 @@
 # AU6 · The owner's third batch: whistle, metal, grass and gravel steps, rope, flashbang, spring rifle, woods; the toothbrush Cyber Pistol
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-04 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-04 | 1 | Opus 5.5 (build thread) | ✓ | 6/8 Revise | metal steps cut 70 to 135 ms before their clank; docs the critic named |
+| 2026-11-04 | 2 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 ## Decisions
 
