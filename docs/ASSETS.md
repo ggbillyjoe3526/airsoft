@@ -84,8 +84,9 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
   recipes, in `assets/audio/` (`assets/audio/README.md`): the yard bed and the ambient calls. No
   outside source; same licence as the code.
 - **The smoke and flash bombs' sounds:** `assets/audio/cues/grenade_pin_1.wav` to `_3`, and the same three of
-  `grenade_bounce`, `smoke_pop` and `flash_bang`, synthesised by our own `tools/render_grenades.gd` (SF1, 2026-10-30).
-  No outside source; same licence as the code. To re-render: `godot --headless --path . -s
+  `grenade_bounce`, `smoke_pop` and `flash_bang`, synthesised by our own `tools/render_grenades.gd` (SF1, 2026-10-30)
+  and replaced by the owner's recordings (the pin, bounce and pop in AU5, the bang in AU6); the renderer only drafts
+  now. No outside source; same licence as the code. To re-render: `godot --headless --path . -s
   res://tools/render_grenades.gd`, then `godot --headless --path . --import`.
 - **Synthesised drafts kept for reference:** `tools/render_whistle.gd` (the whistle and the ping's pip, SP3, PN2),
   `tools/render_doors.gd` (DO1) and `tools/render_bolt.gd` (SN1) render the drafts the recordings replaced, only to a

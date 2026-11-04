@@ -277,10 +277,28 @@ def onsets(a, rise, gap, look=0.08, within=30.0):
     return out
 
 
+def lead_in(x, within=10.0):
+    """How long (s) `x` takes to come within `within` dB of its loudest (2 ms steps)."""
+    e = db(env(x, 0.002))
+    return np.argmax(e >= e.max() - within) * 0.002 if len(e) else 0.0
+
+
+def tight(x, longest):
+    """`x` from just before it first comes within 10 dB of its loudest, at most `longest` s: a step whose scuff
+    leads into its hit plays the hit with the foot."""
+    s = max(0, int((lead_in(x) - PRE_ROLL) * RATE))
+    return x[s:s + int(longest * RATE)]
+
+
 def from_onsets(a, starts, seconds, fade=0.3):
-    """`seconds` of `a` from each of `starts` (s), less a 4 ms run-up, faded out."""
-    return [shape(a[max(0, int((t - PRE_ROLL) * RATE)):int((t + seconds) * RATE)].copy(), fade) for t in starts
-            if int((t + seconds) * RATE) <= len(a)]
+    """`seconds` of `a` from each of `starts` (s), each moved on to where it first comes within 10 dB of its loudest
+    (so a soft lead-in never delays the hit), less a 4 ms run-up, faded out."""
+    out = []
+    for t in starts:
+        t += lead_in(a[int(t * RATE):int((t + seconds) * RATE)])
+        if int((t + seconds) * RATE) <= len(a):
+            out.append(shape(a[max(0, int((t - PRE_ROLL) * RATE)):int((t + seconds) * RATE)].copy(), fade))
+    return out
 
 
 def saturate(x, drive):
@@ -418,6 +436,7 @@ def build(folder):
     # moved to where the Fire clip has the handle. (The AU4 mix of the pistol's shot, a knock, a thud and a crack that
     # stood in until now is in git history, 7f1586e.)
     fire = Source.get(folder, "sniper_fire.wav").a
+    # (A burst too near the file's end to cut, as the rise in its last tail is, has no run-up either.)
     bursts = [t for t in onsets(fire, 6.0, 0.5) if (t + 0.45) * RATE <= len(fire)]
     put("shot_spring", variants(from_onsets(fire, bursts, 0.45), 5), -16.8)
     run_ups = [shape(fire[int((t - 0.165) * RATE):int((t - 0.005) * RATE)].copy(), 0.2) for t in bursts]
@@ -486,10 +505,13 @@ def build(folder):
     # landings he hasn't recorded are the steps lower. Earth stands in from gravel, softened. His metal and running
     # gravel never fall quiet between steps, so they are cut where each step starts.
     def steps(name, longest, which=None):
-        return [t for t in pick(folder, [(name, which)], longest, 0.3) if len(t) > int(0.06 * RATE)]
+        cuts = pick(folder, [(name, which)], longest + 0.2, 0.3)
+        return [shape(tight(t, longest).copy(), 0.3) for t in cuts if len(t) > int(0.06 * RATE)]
 
-    def run_together(name, longest, rise, gap):
+    def run_together(name, longest, rise, gap, below=0.0):
         a = Source.get(folder, name).a
+        if below:
+            a = high_pass(high_pass(a, below), below)
         return from_onsets(a, onsets(a, rise, gap), longest)
 
     floor_walk = steps("walking_concrete.wav", 0.22)
@@ -499,8 +521,9 @@ def build(folder):
     gravel_run = run_together("running_gravel.wav", 0.25, 10.0, 0.2)
     leaves = steps("leaves_walking.wav", 0.25)
     grass = steps("walking_grass.wav", 0.25)
-    # (His metal steps ring over a steady low rumble: below 250 Hz is taken out.)
-    metal = [high_pass(high_pass(t, 250.0), 250.0) for t in run_together("walking_metal.wav", 0.25, 6.0, 0.3)]
+    # (His metal steps ring over a steady low rumble: below 250 Hz is taken out before the steps are found. They come
+    # every 0.6 s.)
+    metal = run_together("walking_metal.wav", 0.25, 6.0, 0.45, 250.0)
     put("step_concrete_run", variants(steady(floor_walk, 5), 5), -22.4)
     put("step_concrete_sprint", variants(steady(floor_run, 5), 5), -21.0)
     put("step_concrete_land", variants(steady(jumps, 5), 5), -17.9)
@@ -678,19 +701,15 @@ def step_power(vs, band):
 
 
 def balance_steps(cues):
-    """Each ground's steps (`cues`, cue: levelled variants; metal's synthesised ones read from disk) turned up or down
-    in the band and out of it until they sit within STEP_ALL_DB and STEP_BAND_DB of concrete's. Returns the cues it
-    changed."""
+    """Each ground's steps (`cues`, cue: levelled variants) turned up or down in the band and out of it until they sit
+    within STEP_ALL_DB and STEP_BAND_DB of concrete's. Returns the cues it changed."""
     out = {}
     for pace in ("run", "sprint", "land"):
         ref = cues["step_concrete_" + pace]
         ref_all, ref_band = step_power(ref, False), step_power(ref, True)
         for ground in STEP_GROUNDS:
             cue = "step_%s_%s" % (ground, pace)
-            vs = cues.get(cue)
-            if vs is None:
-                vs = [read(os.path.join(CUES, f)) for f in sorted(os.listdir(CUES))
-                      if f.startswith(cue + "_") and f.endswith(".wav") and f[len(cue) + 1:-4].isdigit()]
+            vs = cues[cue]
             parts = [(band_part(v), v - band_part(v)) for v in vs]
             g_band = g_rest = 1.0
             for _ in range(8):

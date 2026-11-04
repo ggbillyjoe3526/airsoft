@@ -14,7 +14,7 @@ power part `power_gas`, so the two together are the recording.
 **The second batch** (AU5, 2026-11-04): 30 more recordings give the steps on concrete, gravel and leaves, the kit
 rustle (`foley_*`), the holster, the draw, the vault, the hit tick and hit marker, the steel ring, the glass prop, the
 selector, the radio, the electric, spring and cyber magazines, the grenades' pin, bounce and smoke hiss, and two more
-doors each way. Every ground's steps (metal's synthesised ones too) are then balanced to the recorded concrete, within
+doors each way. Every ground's steps are then balanced to the recorded concrete, within
 1 dB overall and 2 dB in the 0.7 to 4 kHz band (`balance_steps`; the rule is in `docs/DECISIONS.md` › Audio). With
 `--loops` the script also makes the beds `loops/indoor.wav` (the Depot), `street_day.wav` and `street_night.wav` (The
 Street; the night one is Woodland's night too for now): a stretch of each recording, its spikes ridden
