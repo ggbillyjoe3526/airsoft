@@ -27,8 +27,9 @@ each replica as it comes, before [parts and power sources](Parts-and-Power).
 An electric rifle (an AEG, "automatic electric gun"), with a motor whirr on every shot. It fires **single shots,
 3-round bursts or full auto**: press **B** to change mode, and the fire selector on the replica shows the mode you
 are in. On an indoor field (Depot) it starts each round on single shots: [no full auto indoors](Maps#depot).
-A battery drives it, so the battery you fit sets its rate of fire. It is a short modern carbine: a slotted rail
-handguard, a raked grip, an adjustable stock and a curved magazine.
+A battery drives it, so the battery you fit sets its rate of fire. It is a short carbine, about 67 cm long: a
+quad-rail handguard with a ribbed cover, an A-frame front sight, a flip-up rear sight, a raked grip, an adjustable
+stock and a curved magazine.
 
 The AEG Rifle takes the most parts: an optic on its top rail, a grip under it, a barrel, a muzzle part and a different
 magazine. It is in your kit from the start.

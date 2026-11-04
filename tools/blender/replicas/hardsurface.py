@@ -68,6 +68,51 @@ def superellipse(hw: float, front: float, back: float, n: float = 3.0, count: in
     return pts
 
 
+def fillet(corners: list, seg: int = 4) -> list:
+    """A closed outline through (x, y, r) corners, each rounded by an arc of radius r (0 keeps it sharp)."""
+    pts = []
+    n = len(corners)
+    for i, (x, y, r) in enumerate(corners):
+        if r <= 0.0:
+            pts.append((x, y))
+            continue
+        p = (x, y)
+        a, b = corners[i - 1], corners[(i + 1) % n]
+        da = (a[0] - x, a[1] - y)
+        db = (b[0] - x, b[1] - y)
+        la, lb = math.hypot(*da), math.hypot(*db)
+        ua, ub = (da[0] / la, da[1] / la), (db[0] / lb, db[1] / lb)
+        half = math.acos(max(-1.0, min(1.0, ua[0] * ub[0] + ua[1] * ub[1]))) * 0.5
+        t = min(r / math.tan(half), la * 0.5, lb * 0.5)
+        r = t * math.tan(half)
+        p0 = (x + ua[0] * t, y + ua[1] * t)
+        p1 = (x + ub[0] * t, y + ub[1] * t)
+        bis = (ua[0] + ub[0], ua[1] + ub[1])
+        lbis = math.hypot(*bis)
+        d = r / math.sin(half)
+        c = (p[0] + bis[0] / lbis * d, p[1] + bis[1] / lbis * d)
+        a0 = math.atan2(p0[1] - c[1], p0[0] - c[0])
+        a1 = math.atan2(p1[1] - c[1], p1[0] - c[0])
+        sweep = (a1 - a0 + math.pi) % (2.0 * math.pi) - math.pi
+        for k in range(seg + 1):
+            ang = a0 + sweep * k / seg
+            pts.append((c[0] + r * math.cos(ang), c[1] + r * math.sin(ang)))
+    return pts
+
+
+def smooth(points: list, rounds: int = 2) -> list:
+    """An open polyline rounded by Chaikin's corner cutting, its two ends kept where they are."""
+    pts = list(points)
+    for _ in range(rounds):
+        out = [pts[0]]
+        for (ax, ay), (bx, by) in zip(pts, pts[1:]):
+            out.append((0.75 * ax + 0.25 * bx, 0.75 * ay + 0.25 * by))
+            out.append((0.25 * ax + 0.75 * bx, 0.25 * ay + 0.75 * by))
+        out.append(pts[-1])
+        pts = out
+    return pts
+
+
 def circle(r: float, count: int = 16, start: float = 0.0) -> list:
     return [(r * math.cos(start + 2 * math.pi * i / count), r * math.sin(start + 2 * math.pi * i / count))
             for i in range(count)]
