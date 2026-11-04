@@ -253,6 +253,33 @@ def mix(*parts):
     return sum(np.pad(p, (0, n - len(p))) for p in parts)
 
 
+def under(x, bed, db):
+    """`bed` scaled so its loudest 50 ms sit `db` dB under `x`'s, mixed under it."""
+    return mix(x, bed * 10 ** ((loud50(x) - db - loud50(bed)) / 20.0))
+
+
+def thud(seconds=0.12, variant=0):
+    """A low thump: a sine falling from about 130 to 55 Hz, dying away over `seconds`, the body of a spring rifle's
+    piston hitting home (owner, 2026-11-04: "a bit more of a thud")."""
+    n = int(round(seconds * RATE))
+    t = np.arange(n) / RATE
+    hz = 55.0 + 75.0 * np.exp(-t / 0.025) * (1.0 + 0.04 * (variant - 2))
+    x = np.sin(2.0 * np.pi * np.cumsum(hz) / RATE)
+    return x * np.minimum(1.0, t / 0.002) * np.exp(-t / (seconds / 4.0))
+
+
+def ev_hum(seconds, variant=0):
+    """An electric motor's whine, as an e-bike's or an electric car's: a tone rising from about 380 to 550 Hz with a
+    little of its 2nd and 3rd harmonics and a 120 Hz hum under it, swelling in and dying with the shot (owner,
+    2026-11-04, the Cyber Pistol: "a slight hum of an electric motor")."""
+    n = int(round(seconds * RATE))
+    t = np.arange(n) / RATE
+    hz = (380.0 + 170.0 * (1.0 - np.exp(-t / 0.03))) * (1.0 + 0.02 * (variant - 2))
+    ph = 2.0 * np.pi * np.cumsum(hz) / RATE
+    x = np.sin(ph) + 0.3 * np.sin(2.0 * ph) + 0.12 * np.sin(3.0 * ph) + 0.25 * np.sin(2.0 * np.pi * 120.0 * t)
+    return x * np.minimum(1.0, t / 0.008) * np.clip((seconds - t) / 0.03, 0.0, 1.0) ** 2
+
+
 def pea_whistle(seconds, variant):
     """A synthesised referee's pea whistle, `seconds` long: a tone near 3.1 kHz with a little of its octave, warbled in
     pitch and level at about 30 Hz by the pea (a slightly uneven trill, different for each `variant`), over a thin
@@ -353,9 +380,15 @@ def build(folder):
     put("magIn_electric", variants(mag_in, 5, 0.9), -27.0,
         "a rifle magazine pushed in")
 
-    # Sniper Rifle (spring): the pistol's shot pitched down for the spring's heavier thump; its magazine lower; the
-    # pistol's dry click lower; the pistol's slide pulled back and run home as its cocking.
-    put("shot_spring", variants(shots, 5, 0.75), -16.8,
+    # Sniper Rifle (spring): the pistol's shot pitched down for the spring's heavier thump, softened, with a knock on
+    # wood far lower and a low thud under it (owner, 2026-11-04: "a bit more of a thud", "more 'full' like a wooden
+    # thud noise") and the AEG's crack a little lower on top, as loud as the rest ("needs more of a 'crack'"); its
+    # magazine lower; the pistol's dry click lower; the pistol's slide pulled back and run home as its cocking.
+    wood_knocks = variants(pick(folder, [("Knock wooden surface.wav", None)], 0.3), 5, 0.6)
+    crack_tops = variants(cracks, 5, 0.85)
+    spring_shots = [under(under(under(low_pass(s, 4000.0), low_pass(k, 1500.0), 3.0), thud(0.12, v), 3.0), c, 0.0)
+                    for v, (s, k, c) in enumerate(zip(variants(shots, 5, 0.75), wood_knocks, crack_tops))]
+    put("shot_spring", spring_shots, -16.8,
         "a spring sniper rifle's shot")
     put("dryFire_spring", variants(dry, 5, 0.88), -37.2,
         "a spring rifle's trigger, uncocked")
@@ -367,10 +400,11 @@ def build(folder):
     put("boltCycle", [bolt(s) for s in slides[:3]], -14.0,
         "a spring rifle's bolt pulled back and pushed home")
 
-    # Cyber Pistol (electric pistol): a shorter, higher whir under a small crack; the pistol's dry click and
-    # magazines a little higher.
-    cyber = [mix(onset_slice(resample(m, 1.2), 0.07, 20), 0.4 * resample(c, 1.15))
-             for m, c in zip(variants(motor3, 5), variants(cracks, 5))]
+    # Cyber Pistol (electric pistol): a short whir a little under the motor's own pitch under a small crack, 3 dB up,
+    # with an electric motor's whine under it (owner, 2026-11-04: "a tiny bit more of the motor whir ... a slight hum
+    # of an electric motor", then "a little too high pitched"); the pistol's dry click and magazines a little higher.
+    cyber = [mix(under(1.4 * onset_slice(resample(m, 0.95), 0.09, 25), ev_hum(0.09, v), 9.0), 0.4 * resample(c, 1.15))
+             for v, (m, c) in enumerate(zip(variants(motor3, 5), variants(cracks, 5)))]
     put("shot_cyber", cyber, -16.9,
         "an electric pistol's shot")
     put("dryFire_cyber", variants(dry, 5, 1.1), -30.3,
@@ -412,7 +446,9 @@ def build(folder):
     # the BB's clink on glass; a draw, the magazine's swish; a holster, the pouch higher; the flag rope's ratchet, the
     # pistol's dry click higher.
     metal = pick(folder, [("bb_metal.wav", None)], 0.6, 0.3)
-    put("power_spring", [onset_slice(resample(m, 0.45), 0.33, 80) for m in variants(metal, 5)], -19.3,
+    # The spring's ring lower, darker and short, 8 dB under its first level (owner, 2026-11-04: "a tiny bit more subtle
+    # and slightly more bass", then "a little quieter and less echo").
+    put("power_spring", [onset_slice(low_pass(resample(m, 0.38), 1800.0), 0.16, 70) for m in variants(metal, 5)], -27.3,
         "a spring rifle's spring twanging as it fires")
     clicks = pick(folder, [("torch_switch.wav", None)], 0.15)
     put("selector", [onset_slice(resample(k, 1.15), 0.04, 15) for k in variants(clicks, 5)], -31.8,

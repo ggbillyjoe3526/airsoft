@@ -865,7 +865,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   placeholder and keep track of what new sounds i need to record"; "if you need to edit a sound to fit another sound
   that's OK"; AU3).** The list is `tools/cut_recordings.py --placeholders`. His whistle takes are set aside ("they are
   bad, my whistle isn't great") for a synthesised pea whistle until he records a better one. The AEG has more of the
-  motor's whir ("a bit more of the electric motor whir"): 3 dB louder, 0.16 s a shot (was 0.11).
+  motor's whir ("a bit more of the electric motor whir"): 3 dB louder, 0.16 s a shot (was 0.11). The Sniper Rifle's
+  spring is "a tiny bit more subtle and slightly more bass", then "a little quieter and less echo", and the shot has
+  "a bit more of a thud", "more 'full' like a wooden thud noise" (2026-11-04, AU4): the spring 8 dB down, lower,
+  darker and half as long; a knock on wood and a synthesised thump under each shot, and "more of a 'crack'" on top.
+  The Cyber Pistol has "a tiny bit more of the motor whir" and "a slight hum of an electric motor (think of ... an
+  electric vehicle or bike's motor)", not "too high pitched": 0.09 s a shot (was 0.07), 3 dB up, at about the motor's
+  own pitch, a faint whine under it.
 - **A replica's shot follows its power source: electric, gas or spring (owner, 2026-10-03).** An empty AEG still cycles;
   an empty gas pistol only clicks.
 - **Footsteps are information, so gameplay audio comes first (owner, 2026-10-05).** Every ground's step stays within
