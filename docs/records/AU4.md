@@ -1,16 +1,17 @@
 # AU4 · A softer, deeper spring and a thud on the Sniper Rifle, more motor on the Cyber Pistol
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-04 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-04 | 1 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – (four rounds of owner previews before review) |
 
 ## Decisions
 
-- **The owner's asks** are in `docs/DECISIONS.md` › Audio; the amounts below are defaults for "a tiny bit" and "a bit".
+- **The owner's asks** are in `docs/DECISIONS.md` › Audio; the amounts below are defaults for "a tiny bit" and "a
+  bit".
 - **Four rounds of previews** with the owner (`audio/william/preview/au4/` in the shared project files, each at one
   level with the one before). Round 2 was too metallic, echoing and thin on the rifle and too high on the pistol; round
   3 settled the pistol ("fine for now") and the rifle's body; round 4 put the crack back on the rifle, which ships.
@@ -25,8 +26,8 @@
   `ev_hum()` 9 dB under it: a tone rising from 380 to 550 Hz with its 2nd and 3rd harmonics and a 120 Hz hum, the
   whine of an e-bike's motor. The limiter holds the crack's peak, so the shot's loudest 50 ms vary by about 2 dB
   between variants.
-- **No slide sound on the Cyber Pistol:** a short slide tick, then an electric one, were tried for its small moving part;
-  the owner kept the pistol without it ("happy with the latest sounds").
+- **No slide sound on the Cyber Pistol:** a short slide tick, then an electric one, were tried for its small moving
+  part; the owner kept the pistol without it ("happy with the latest sounds").
 - Both stay labelled placeholders until the owner records a spring rifle and an electric pistol (or foley for them).
 
 ## Known issues left
