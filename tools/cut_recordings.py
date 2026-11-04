@@ -717,16 +717,16 @@ def main():
             for cue, (vs, target) in build(args.raw).items()}
     made.update(balance_steps(made))
     for cue, vs in made.items():
+        on_disk = len([f for f in os.listdir(CUES) if f.startswith(cue + "_") and f.endswith(".wav")
+                       and f[len(cue) + 1:-4].isdigit()])
+        if on_disk > len(vs):
+            sys.exit("%s: %d variants made, %d on disk; nothing written" % (cue, len(vs), on_disk))
         for n, v in enumerate(vs, 1):
             if np.abs(v).max() >= 1.0:
                 sys.exit("%s_%d clips after balancing; nothing written" % (cue, n))
     for cue, vs in made.items():
         if only and cue not in only:
             continue
-        on_disk = len([f for f in os.listdir(CUES) if f.startswith(cue + "_") and f.endswith(".wav")
-                       and f[len(cue) + 1:-4].isdigit()])
-        if on_disk > len(vs):
-            sys.exit("%s: %d variants made, %d on disk" % (cue, len(vs), on_disk))
         for n, v in enumerate(vs, 1):
             write(os.path.join(CUES, "%s_%d.wav" % (cue, n)), v)
         print("%-18s %d x %.2f s" % (cue, len(vs), np.mean([len(v) for v in vs]) / RATE))
