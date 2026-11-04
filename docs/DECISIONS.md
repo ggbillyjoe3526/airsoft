@@ -882,6 +882,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   files); the keys are a quiet layer under the kit rustle; the long deodorant spray is the smoke grenade's hiss, the
   short one held back. Every ground's steps are balanced to his concrete by `tools/cut_recordings.py`, so the
   footsteps-are-information rule below still holds.
+- **The owner's third batch (2026-11-04, AU6) replaces what it records, and the Cyber Pistol is his toothbrush.** He
+  heard both and chose: "i prefer the cyber pistol with the toothbrush". Defaults taken while he was away: his
+  recorded sniper shot and bolt replace the AU4 mix he had approved that morning (the mix is in git history if he
+  wants it back); his whistle replaces the synthesised one; his woods are Woodland's day bed, and the night keeps the
+  street-at-night stand-in, as his woods have daytime birds in them; his metal steps and woods lose the wind's rumble
+  (under 250 Hz and 150 Hz); his flashbang is saturated to come within 2 dB of the old bang's loudness.
 - **A replica's shot follows its power source: electric, gas or spring (owner, 2026-10-03).** An empty AEG still cycles;
   an empty gas pistol only clicks.
 - **Footsteps are information, so gameplay audio comes first (owner, 2026-10-05).** Every ground's step stays within

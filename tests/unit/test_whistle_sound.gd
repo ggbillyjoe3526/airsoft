@@ -7,8 +7,10 @@ const SHORT := "whistle_short"
 const LONG := "whistle_long"
 const RATE := 44100
 const HEADER := 44
-## Where a pea whistle sounds (Hz, its zero crossings' rate): the recording's is about 2.2 to 3.1 kHz.
-const PITCH := Vector2(1500.0, 4000.0)
+## Where a pea whistle sounds (Hz, its zero crossings' rate): the owner's first whistle was about 2.2 to 3.1 kHz, his
+## second (AU6) about 2.6 to 2.8 kHz, but 4.05 kHz on its two harder 1 s blasts; referees' whistles run to about
+## 4.5 kHz.
+const PITCH := Vector2(1500.0, 4500.0)
 ## The recordings' peaks sit at tools/cut_recordings.py's cap (-1 dB) or a little under.
 const PEAK := Vector2(0.8, 0.9)
 

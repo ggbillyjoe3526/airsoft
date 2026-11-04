@@ -40,8 +40,9 @@ func test_the_sets_are_the_browsers() -> void:
 	assert_eq(_loops(amb.day[&"yard"]), ["yard"])
 	assert_eq(_cues(amb.day[&"yard"]), ["ambience_bird", "ambience_crow", "ambience_dog"])
 	assert_eq(_cues(amb.night[&"yard"]), ["ambience_dog"])
-	# Woodland's beds are the owner's street at night until he records a forest (AU5); its calls are the browser's.
-	assert_eq(_loops(amb.day[&"woods"]), ["street_night"])
+	# Woodland's beds are the owner's woods by day (AU6) and his street at night until he records the woods at night
+	# (AU5); its calls are the browser's.
+	assert_eq(_loops(amb.day[&"woods"]), ["woods_day"])
 	assert_eq(_cues(amb.day[&"woods"]), ["ambience_bird", "ambience_creak"])
 	assert_eq(_loops(amb.night[&"woods"]), ["street_night"])
 	assert_eq(_cues(amb.night[&"woods"]), ["ambience_owl", "ambience_creak"])

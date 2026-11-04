@@ -1,6 +1,6 @@
 extends GutTest
-## The owner's recordings (AU2, and the placeholders cut from them, AU3): every cue they replaced still has its
-## variants, the three surfaces they added (glass, plastic, cardboard) sound as themselves and otherwise behave as the
+## The owner's recordings (AU2, AU5, AU6, and the placeholders cut from them, AU3): every cue they replaced still has
+## its variants, the three surfaces they added (glass, plastic, cardboard) sound as themselves and otherwise behave as the
 ## metal and wood they were before, and a gas pistol's last shot locks its slide back.
 
 const VARIANTS := 5
@@ -12,9 +12,11 @@ const FIVE: PackedStringArray = ["shot_gas", "power_gas", "dryFire_gas", "magOut
 		"impact_plastic", "impact_cardboard", "power_spring", "selector", "radio_ack", "steelRing", "vault",
 		"impact_concrete", "impact_earth", "impact_leaves", "draw", "foley_holster", "rope_up", "rope_down",
 		"door_open", "door_shut", "hitTick", "hitMarker", "foley_crouch", "foley_stand", "foley_lean",
-		"step_concrete_run", "step_concrete_sprint", "step_concrete_land", "step_gravel_run", "step_leaves_run"]
+		"step_concrete_run", "step_concrete_sprint", "step_concrete_land", "step_gravel_run", "step_leaves_run",
+		"step_gravel_sprint", "step_grass_run", "step_grass_sprint", "step_grass_land", "step_metal_run",
+		"step_metal_sprint"]
 const THREE: PackedStringArray = ["slideLock_gas", "boltCycle", "prop_clank", "prop_rattle", "prop_plastic",
-		"prop_wood", "whistle_short", "whistle_long", "prop_steel", "prop_glass"]
+		"prop_wood", "whistle_short", "whistle_long", "prop_steel", "prop_glass", "flash_bang"]
 
 var body: BodyConfig = BodyConfig.new()
 var audio: SimAudio = null
@@ -62,7 +64,8 @@ func test_the_cyber_pistols_motor_runs_a_little_longer() -> void:
 
 
 func test_the_spring_rings_short() -> void:
-	# AU4, owner: "a little quieter and less echo": the spring's ring 0.16 s (was 0.33).
+	# AU4, owner: "a little quieter and less echo": the spring's part 0.16 s (was 0.33), since AU6 the last of his
+	# recorded shot's run-up.
 	for n in VARIANTS:
 		assert_almost_eq(_length("power_spring", n + 1), 0.16, 0.005, "power_spring_%d" % (n + 1))
 

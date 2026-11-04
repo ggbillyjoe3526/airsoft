@@ -59,7 +59,7 @@ func test_every_sound_loads_and_loops_loop() -> void:
 		var s := load(path) as AudioStreamWAV
 		assert_true(s != null and s.get_length() > 0.0, path)
 	var loops := _files("res://assets/audio/loops", "wav")
-	assert_eq(loops.size(), 7, "the browser's 4 and the owner's indoor room and street by day and night (AU5)")
+	assert_eq(loops.size(), 8, "the browser's 4, the owner's room and street by day and night (AU5), woods (AU6)")
 	for path: String in loops:
 		var s := load(path) as AudioStreamWAV
 		assert_true(s != null and s.loop_mode == AudioStreamWAV.LOOP_FORWARD, "%s loops" % path)

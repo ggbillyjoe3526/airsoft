@@ -120,7 +120,7 @@ func test_the_maps_day_beds_loop_on_ambience_and_no_map_plays_the_yard() -> void
 	var loops: Array[String] = []
 	for v in wood._beds:
 		loops.append(v.stream.resource_path.get_file())
-	assert_eq(loops, ["street_night.wav"], "the woods by day: the owner's street at night until he records a forest (AU5)")
+	assert_eq(loops, ["woods_day.wav"], "the woods by day: the owner's woods (AU6)")
 	var calls: Array[StringName] = []
 	for kind in wood._calls.calls:
 		calls.append(kind.cue)

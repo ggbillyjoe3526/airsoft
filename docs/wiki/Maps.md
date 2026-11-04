@@ -99,8 +99,8 @@ defenders in the east camp.
   camps, the huts, the Clearing, the Fort, the Sawmill, the Truck bend and the North bridge. Bots see you from about
   40 m in their light, 25 m under the moon and 10 m under the trees ([Bots](Bots#at-night)); by day they see 60 m.
   At night, fit a [weapon torch](Parts-and-Power#lights) and load [glowing BBs](Loadout#customise).
-- Footsteps sound like grass, leaf litter, gravel or boards, and a BB that hits the ground puffs like earth. Owls and
-  creaking branches call from the wood.
+- Footsteps sound like grass, leaf litter, gravel or boards, and a BB that hits the ground puffs like earth. By day
+  the wood sounds like a real one; owls and creaking branches call from it.
 - **Attack / Defend** puts flag **A** in the Fort and flag **B** at the Sawmill ([Modes](Modes#attack--defend)); in
   Elimination's overtime the flag stands in the Clearing.
 
