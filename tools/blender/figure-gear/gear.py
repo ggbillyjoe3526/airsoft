@@ -11,7 +11,7 @@ assets/models/characters/human.glb in place of the old ones (splice.py), so the 
   fits) on the right hip, a grenade pouch on the left and a folded dump pouch at the back.
 - The pack: a ranger-green two-compartment assault pack with a grab handle, a loop panel, MOLLE rows, compression
   straps and shoulder straps over the carrier's.
-- The radio: an unbranded dual-band handheld with a display, a knob and a long antenna, in an open pouch on the
+- The radio: an unbranded dual-band handheld with a display, a knob and a 6 cm stub antenna, in an open pouch on the
   left of the cummerbund.
 
 No brand marks. Plain colours from a small swatch texture (`gear_col`, `gear_orm`, `teamgear_col`), each surface a
