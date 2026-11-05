@@ -164,6 +164,9 @@ func set_bomb_meshes(meshes: Array[Mesh]) -> void:
 		var grip := _models.grip(_kind, &"pistol")
 		_bomb_on_grip = Transform3D(grip.basis, Vector3.ZERO) \
 				* Transform3D(Basis(Vector3.UP, _config.throw_bomb_turn), _config.throw_bomb_shift)
+	# Given anew: nothing in the hand until `show_bomb` says, from the new meshes.
+	_bomb.mesh = null
+	_bomb.visible = false
 	bomb_shown = Grenade.Kind.NONE
 
 
