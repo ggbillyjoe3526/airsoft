@@ -125,10 +125,14 @@ func test_the_late_materials_are_drawn_once_at_the_start_and_then_freed() -> voi
 	var bombs := fresh._grenades.materials().size()
 	var roof := fresh._roof.materials().size() if fresh._roof != null else 0
 	var doors := fresh._doors.materials().size() if fresh._doors != null else 0
-	assert_eq(prewarm.get_child_count(), 10 + skyline + site + overtime + mags + bombs + roof + doors + 2 * figures,
+	var arms := fresh._hands.arms_materials().size()
+	assert_gt(arms, 0, "your arms (BL4)")
+	assert_eq(prewarm.get_child_count(), 10 + skyline + site + overtime + mags + bombs + roof + doors + arms
+			+ 2 * figures,
 			"a BB, its trail (FB4), a glowing BB and its streak (WL8), a puff, a gas puff, kicked dust, the contact shadow, a wind speck,"
 			+ " the sign, the skyline's, the site dress's (DD1), the overtime flag's (OV3), the tossed magazines' (MH3),"
-			+ " the bombs' (SF1), the roof's (DR1), the doors' (DO1) and each figure material solid and fading")
+			+ " the bombs' (SF1), the roof's (DR1), the doors' (DO1), your arms' (BL4) and each figure material solid and"
+			+ " fading")
 	await wait_process_frames(ShaderPrewarm.FRAMES + 1)
 	assert_false(is_instance_valid(prewarm), "gone once its frames are drawn")
 
