@@ -74,18 +74,30 @@ SERRATIONS = 11
 SERRATION_DEPTH = 0.0007
 PORT_Y = (-0.0095, 0.0225)
 PORT_DEPTH = 0.0088
+# The port's left edge (x) on the top; the barrel hood's clearance to the port's walls and its right face's inset from
+# the flank.
+PORT_X = -0.0035
+HOOD_GAP = 0.00015
+HOOD_INSET = 0.0012
 GUIDE_R = 0.0024
 GUIDE_Z = Z(104.0)
 REAR_SIGHT_HW = 0.0078
-NOTCH_HW = 0.00175
+NOTCH_HW = 0.0020
 # The bore (the photo's muzzle: py 63 to 99), the barrel's outer radius and the BB bore's, and the barrel's end, just
 # proud of the slide's face (photo: x 20).
 BORE_Z = Z(81.0)
 BARREL_R = 0.0061
 BORE_R = 0.0031
 BARREL_END = Y(20.0)
-# The sights: the rear's notch floor and the front's top on one line.
-SIGHT_Z = SLIDE_TOP + 0.0018
+# The sights. SIGHT_Z is the sight line (the front post's top, the empties' height and so the eye's when aimed:
+# ReplicaView), a hair under the rear sight's top (Z(35)) for an equal-height picture; the rear's notch floor sits
+# NOTCH_DROP under it, so aimed the whole post stands in the notch with light either side (owner 2026-11-05: the post
+# was hidden, the floor had been on the line). The post stands taller than the photo's (1.7 mm) and its dot is bigger,
+# so the sight picture reads at arm's length.
+SIGHT_Z = SLIDE_TOP + 0.0030
+NOTCH_DROP = 0.0021
+FRONT_POST_HW = 0.0016
+FRONT_DOT_R = 0.0010
 REAR_SIGHT_Y = Y(529.0)
 FRONT_SIGHT_Y = Y(49.0)
 # The frame: half widths of its upper part (walls, dust cover), the trigger guard and the grip.
@@ -211,7 +223,7 @@ def slide() -> object:
     # The ejection port: open on the top's right and down the right side to PORT_DEPTH, its front corners rounded.
     c = hs.Builder("c_port", ["Body"])
     c.prism(hs.fillet([(PORT_Y[0], top - PORT_DEPTH, 0.0), (PORT_Y[1], top - PORT_DEPTH, 0.003),
-                       (PORT_Y[1], top + 0.01, 0.0), (PORT_Y[0], top + 0.01, 0.0)], 6), "x", -0.0035, 0.02, "Body")
+                       (PORT_Y[1], top + 0.01, 0.0), (PORT_Y[0], top + 0.01, 0.0)], 6), "x", PORT_X, 0.02, "Body")
     cutters.append(c.build())
     # The extractor's slot: a recess in the right flank running back from the port.
     flank = top - foot
@@ -246,18 +258,19 @@ def slide() -> object:
     b = hs.Builder("CoverPlate", ["Body"])
     b.prism(inner, "y", y0 - 0.0002, y0 + 0.001, "Body")
     parts = [ob, hs.finish(b.build(), 0.0003, 1)]
-    # The barrel: its hood filling the port, flush with the top, a step at the chamber's back; its tube to the face.
+    # The barrel: its hood filling the port to a hairline (HOOD_GAP) front, back and on the left, flush with the top
+    # (owner 2026-11-05: no gap between slide and barrel in the port), its right face HOOD_INSET inside the flank as
+    # the photos' chamber; its tube to the face.
     b = hs.Builder("Barrel", ["Metal"])
-    hood = hs.fillet([(PORT_Y[0] + 0.0010, BORE_Z, 0.0), (PORT_Y[1] - 0.0010, BORE_Z, 0.0),
-                      (PORT_Y[1] - 0.0010, top - 0.0030, 0.0015), (PORT_Y[1] - 0.0045, top - 0.0002, 0.001),
-                      (PORT_Y[0] + 0.0040, top - 0.0002, 0.0), (PORT_Y[0] + 0.0040, top - 0.0012, 0.0),
-                      (PORT_Y[0] + 0.0010, top - 0.0012, 0.0)], 3)
-    b.prism(hood, "x", -0.0026, 0.0098, "Metal")
+    g = HOOD_GAP
+    hood = [(PORT_Y[0] + g, BORE_Z), (PORT_Y[1] - g, BORE_Z), (PORT_Y[1] - g, top - 0.0002),
+            (PORT_Y[0] + g, top - 0.0002)]
+    b.prism(hood, "x", PORT_X + g, SLIDE_HW - HOOD_INSET, "Metal")
     end = BARREL_END
     b.tube([(PORT_Y[0] + 0.002, BARREL_R), (end - 0.0004, BARREL_R), (end, BARREL_R - 0.0005)],
            [(PORT_Y[0] + 0.002, BORE_R), (end - 0.0008, BORE_R), (end, BORE_R + 0.0012)], "Metal", 28,
            centre=(0.0, 0.0, BORE_Z))
-    parts.append(hs.finish(b.build(), 0.0004, 1))
+    parts.append(hs.finish(b.build(), 0.00025, 1))
     # The spring guide's end, the extractor and the sights.
     b = hs.Builder("Bits", ["Detail", "Metal", "Accent"])
     b.lathe([(y1 - 0.004, GUIDE_R - 0.0008), (y1 - 0.0012, GUIDE_R - 0.0008), (y1 - 0.0008, GUIDE_R - 0.0014),
@@ -274,24 +287,28 @@ def slide() -> object:
             (Y(540.0), top + 0.0007)]
     b.prism(rear, "x", -REAR_SIGHT_HW, REAR_SIGHT_HW, "Detail")
     # Front sight: a post with a white dot set into its sloped back face (one piece with it, owner 2026-11-05), the
-    # dot standing 0.12 mm proud.
-    foot, dot_z = top - 0.0004, SIGHT_Z - 0.0012
+    # dot laid on the face (tilted with it), standing 0.12 mm proud, centred where the notch's light frames it.
+    foot = top - 0.0004
     b.prism(hs.fillet([(Y(53.5), foot, 0.0), (Y(44.5), foot, 0.0), (Y(46.0), SIGHT_Z, 0.0006),
-                       (Y(51.5), SIGHT_Z, 0.0006)], 3), "x", -0.0017, 0.0017, "Detail")
-    back = Y(53.5 - 2.0 * (dot_z - foot) / (SIGHT_Z - foot))
-    b.lathe([(0.0, 0.0), (0.0, 0.0005), (0.0003, 0.0005), (0.0003, 0.0)], "Accent", 12,
-            centre=(0.0, back - 0.00012, dot_z), axis="y")
+                       (Y(51.5), SIGHT_Z, 0.0006)], 3), "x", -FRONT_POST_HW, FRONT_POST_HW, "Detail")
+    dot_z = SIGHT_Z - FRONT_DOT_R - 0.0004
+    back = Y(53.5) + (Y(51.5) - Y(53.5)) * (dot_z - foot) / (SIGHT_Z - foot)
+    tilt = math.atan2(Y(51.5) - Y(53.5), SIGHT_Z - foot)
+    f = b.lathe([(0.0, 0.0), (0.0, FRONT_DOT_R), (0.0004, FRONT_DOT_R), (0.0004, 0.0)], "Accent", 16,
+                centre=(0.0, back - 0.00012, dot_z), axis="y")
+    b.transform(f, hs.rot_about("x", -tilt, (0.0, back, dot_z)))
     bits = b.build()
+    floor = SIGHT_Z - NOTCH_DROP
     c = hs.Builder("c_notch", ["Detail"])
     c.prism(hs.rounded_rect(NOTCH_HW, 0.0030, 0.0009, 3), "y", ry - 0.010, ry + 0.010, "Detail",
-            offset=(0.0, 0.0, SIGHT_Z + 0.0030))
+            offset=(0.0, 0.0, floor + 0.0030))
     hs.cut(bits, [c.build()])
     # The notch's white outline: a U on the sight's sloped back face.
     b = hs.Builder("RearDot", ["Accent"])
-    w = 0.0008
+    w = 0.0006
     zt = Z(35.0) - 0.0001
-    u = [(-NOTCH_HW - w, 0.0), (-NOTCH_HW - w, SIGHT_Z - w - zt), (NOTCH_HW + w, SIGHT_Z - w - zt),
-         (NOTCH_HW + w, 0.0), (NOTCH_HW, 0.0), (NOTCH_HW, SIGHT_Z - zt), (-NOTCH_HW, SIGHT_Z - zt), (-NOTCH_HW, 0.0)]
+    u = [(-NOTCH_HW - w, 0.0), (-NOTCH_HW - w, floor - w - zt), (NOTCH_HW + w, floor - w - zt),
+         (NOTCH_HW + w, 0.0), (NOTCH_HW, 0.0), (NOTCH_HW, floor - zt), (-NOTCH_HW, floor - zt), (-NOTCH_HW, 0.0)]
     f = b.prism(u, "y", -0.00012, 0.00012, "Accent")
     # Laid on the back face, which leans forward at its top (from x 540 at its foot to 534 at the top).
     lean = math.atan2(Y(534.0) - Y(540.0), Z(35.0) - (top + 0.0007))
@@ -852,7 +869,7 @@ def figure() -> object:
     b.prism([(y, z) for y, z, _r in pts([(462, 413), (597, 413), (597, 447), (462, 447)])], "x", -MAG_HW, MAG_HW,
             "Detail")
     b.lathe([(SLIDE_Y[1] - 0.004, BARREL_R), (SLIDE_Y[1] + 0.0004, BARREL_R)], "Metal", 8, centre=(0.0, 0.0, BORE_Z))
-    b.box((-0.004, REAR_SIGHT_Y - 0.003, SLIDE_TOP), (0.004, REAR_SIGHT_Y + 0.002, SIGHT_Z + 0.002), "Detail")
+    b.box((-0.004, REAR_SIGHT_Y - 0.003, SLIDE_TOP), (0.004, REAR_SIGHT_Y + 0.002, Z(35.0)), "Detail")
     b.box((-0.0012, FRONT_SIGHT_Y - 0.0012, SLIDE_TOP), (0.0012, FRONT_SIGHT_Y + 0.0012, SIGHT_Z), "Accent")
     # The frame's opening for the trigger finger, as a dark plate either side reads at a figure's distance.
     ob = b.build()

@@ -42,7 +42,8 @@ end of the reload, so you always know when it is empty: you hear it lock back on
 
 Gas drives it, so the gas you load sets its energy: stronger gas pushes harder and kicks harder. It is a compact
 striker pistol: a squared slide with serrations at the back, a railed dust cover, a raked grip with stippled panels
-and finger grooves, and a thumb rest. It takes a laser, a silencer and an extended magazine. It is in your kit from
+and finger grooves, and a thumb rest. Its sights are a white U at the back and a post with a white dot at the front:
+aimed, the post sits in the U. It takes a laser, a silencer and an extended magazine. It is in your kit from
 the start.
 
 ## Cyber Pistol
