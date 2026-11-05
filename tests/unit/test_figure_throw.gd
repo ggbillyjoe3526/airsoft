@@ -218,15 +218,14 @@ func test_the_hand_and_bomb_pass_beside_the_head_never_across_the_face() -> void
 		c.armament.put_down()
 		var v := _view(kind, c)
 		await _pose(v, c)
-		var share := config.throw_cock
-		while share <= 1.0:
+		for step in 9:
+			var share := lerpf(config.throw_cock, 1.0, step / 8.0)
 			_throwing(c, share)
 			await _pose(v, c, 1)
 			var middle: Vector3 = _drawn[v]["HeadMiddle"]
 			for bone: String in ["Hand_R", "Grip_R"]:
 				assert_gt((_drawn[v][bone] as Vector3).distance_to(middle), 0.15,
 						"kind %d, share %.2f: %s clear of the head" % [kind, share, bone])
-			share += 0.05
 
 
 func test_a_throw_from_a_bomb_held_in_hand_keeps_the_arm_up() -> void:

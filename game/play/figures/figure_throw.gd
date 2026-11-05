@@ -11,6 +11,8 @@ extends RefCounted
 
 ## Below this (m) a length counts as none; under this weight nothing is moved.
 const EPSILON := 0.0001
+## The right elbow's pole swings ahead over this first share of the arm coming over.
+const POLE_SWING := 0.5
 
 var _config: FigureConfig = null
 var _spine: int = -1
@@ -51,8 +53,9 @@ func pose(skeleton: Skeleton3D, share: float, held: bool, from_hand: bool = fals
 	var right := right_key(share, held, _config)
 	_reach(skeleton, 0, chest * in_skeleton(right), chest * in_skeleton(right_pole(share, held, _config)), w, chest)
 	if not held:
+		# The left arm comes in over throw_in even from a bomb held in hand (it hung while the right held the bomb).
 		_reach(skeleton, 3, chest * in_skeleton(left_key(share, _config)),
-				chest * in_skeleton(_config.throw_left_pole), w, chest)
+				chest * in_skeleton(_config.throw_left_pole), weight(share, false, _config), chest)
 
 
 ## How much of the throw's pose is drawn `share` of the way through it: in over throw_in of the windup, out over the
@@ -98,7 +101,7 @@ static func right_pole(share: float, held: bool, config: FigureConfig) -> Vector
 	if held or share <= cock:
 		return config.throw_right_pole
 	var t := clampf((share - cock) / (1.0 - cock), 0.0, 1.0)
-	return config.throw_right_pole.lerp(config.throw_over_pole, smoothstep(0.0, 1.0, minf(t * 2.0, 1.0)))
+	return config.throw_right_pole.lerp(config.throw_over_pole, smoothstep(0.0, 1.0, minf(t / POLE_SWING, 1.0)))
 
 
 ## The left wrist's key: at the right hand pulling the pin, then pointing out while the right arm cocks, tucked in as
