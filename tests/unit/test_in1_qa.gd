@@ -83,6 +83,9 @@ func test_a_reload_after_a_cut_inspect_poses_the_reload_clip_to_its_end() -> voi
 	_frame()
 	var clip := _held().anim.get_animation(ReplicaView.RELOAD_CLIP)
 	assert_almost_eq(_held().anim.current_animation_position, clip.length, 0.0001)
+	# Past the cut's ease-back, which drops a press (no snap from the turn to the first key).
+	for i in ceili(cfg.inspect_cancel_time / DT) + 1:
+		_frame()
 	view.inspect()
 	_frame()
 	assert_true(view.inspecting(), "can inspect again after")

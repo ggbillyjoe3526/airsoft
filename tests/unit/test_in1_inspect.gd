@@ -200,6 +200,17 @@ func test_a_shot_ends_it_and_the_pose_eases_back_over_the_cancel_time() -> void:
 	assert_almost_eq(view._inspect_shift, Vector3.ZERO, Vector3.ONE * EPS)
 
 
+func test_a_press_while_easing_back_from_a_shot_is_dropped_never_snapped() -> void:
+	_cut_by(view.on_shot, "a shot")
+	view.inspect()
+	_frame()
+	assert_false(view.inspecting(), "still easing back: no snap to the first key")
+	_frames(ceili(cfg.inspect_cancel_time / DT) + 1)
+	view.inspect()
+	_frame()
+	assert_true(view.inspecting(), "back at the hold: a press inspects again")
+
+
 func test_a_reload_a_sprint_or_raising_the_sight_ends_it() -> void:
 	_cut_by(func() -> void: a.reload_left = a.replica().reload_time, "a reload")
 	a.reload_left = 0.0

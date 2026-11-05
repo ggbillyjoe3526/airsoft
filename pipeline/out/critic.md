@@ -1,33 +1,35 @@
-Task: GA1 · The figures' running animations (no task block; judged against the brief and the record)
-Attempt: 3 of 4
-Head: 30fb3ba (targeted tests 38/38 per brief; full check.sh running separately. QA Pass at 30fb3ba, uncommitted
-qa-report.md; performance Pass at a1bbbc9, attempt 3 changed only clip data, the crouch cycle and the test)
+Task: IN1 · Inspect the replica in hand (no task block; judged against the brief)
+Attempt: 1 of 4
+Head: 23a0634 (brief's 9c7a0aa does not exist; coordinator corrected to 23a0634. tools/check.sh on it not yet confirmed)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept (subject to the full check.sh passing on 30fb3ba)
-Evidence (frames in scratchpad c1/, c1q/, compared with b1/, b1q/):
-1. Attempt-2 must-fixes met. Crouch walk inside the 1.15 m ruling: knees forward over the toes, no frog splay
-   (c1q/crouch_008, crouch_012); the trailing knee clear of the floor (c1/crouch_024); the swing knee stops under the
-   forearm, not in it (c1/crouch_008); short heel-up steps (gait.py:61-64, 1.05 m, 240 a minute). Back-pedal: the torso
-   now upright over the feet, no longer leaning back; the knee about over the toes (c1/back_000, back_008 against
-   b1/back_000, back_008; Run_B pitch 6, bias 0.03). Run: shoulders over the hips, flight and heel kick kept
-   (c1/run_000-015). Walk, sprint and strafes still read well (c1/walk_*, sprint_*, left_*). References named honestly
-   (GA1.md › References). Rig and meshes unchanged, so the models rule's proportion ratios don't apply to clips.
-4. test_gait_cycle.gd:+160 turns the character a quarter and steps +X (back) and -Z (aside); a sign slip in
-   step_walk_cycle reads +X as ahead and fails the 0.619 share. Locks in my attempt-2 advisory.
-8. changelog.d/figure-running.md no longer over-claims; PLAYTEST.md:72-74 asks about the right things now.
-The owner's call, not a block: the crouch walk is still a deep squat walk (hips 0.39 m, the swing thigh above level,
-c1/crouch_008, c1q/crouch_028). That is what crouch_top_max 1.15 under an aim-owned, near-upright upper body allows
-(DECISIONS:279). A taller one (hips ~0.55 m, back bent forward, the replica held level) needs either his crouch-cover
-ruling changed or a new crouched upper body over the aim, which is outside GA1's clips. The record offers it
-(GA1.md › Defaults); the thread must put it to him in its report, not leave it only in the record.
-Advisory (no fix needed now): c1q/crouch_028 the swing shin flicks out a little as it passes; the dead clip data
-splice.mjs leaves in the .glb adds about 0.4 MB a figure (performance advisory); Run_F's 8° and Sprint's 14° dip the
-replica while moving (recorded default).
-Must-fix for the next attempt: none.
+Score: 8/8 → Retry (process only: QA's report still says Fail, no IN1 performance report on disk)
+Evidence:
+1. project.godot:110 and key_bindings.gd:18,42 (Y, listed, ACT_INSPECT in en.po; old saves: test_in1_inspect.gd:59);
+   replica_view.gd:337 plays the Inspect clip under the per-replica pose (viewmodel_config.gd:87-120); ends on shot :140,
+   hit :151, hidden :190, switch :200, reload/draw/holster/sprint/aim :258; ease linear over 0.15 s :378; parts at rest
+   :351; take_inspect never reaches PlayerCommand (player_input.gd:270, play_session.gd:1142). QA's two bugs fixed:
+   player_input.gd:244 (wheel/map), replica_view.gd:324,328 (slide lock no longer seeks over Inspect).
+2. No contract touched; presentation only (ARCHITECTURE › Contracts, item 7).
+3. _pose_inspect/inspect_blocked/take_inspect: values only; PackedFloat32Array read by reference; signal connected once
+   (play_session.gd:777); pose lookup only at start.
+4. test_in1_inspect.gd:132 asserts the Inspect clip plays and rotation.y turns >0.5 rad: fails without _start_inspect.
+5. Typed throughout; pose numbers in ViewModelConfig/InspectPose resources; MIN_LENGTH named; no globals.
+6. Plastic clicks from the replica's own dry fire/mag sounds, own ear only; side-on read of parts fits pillar 1/2.
+Not blocking:
+- [judgment] replica_view.gd:258-263 with :346: Y pressed during the 0.15 s ease-back (e.g. right after a shot) restarts
+  at key 0 = zero, so the replica snaps from its part-turned pose to the hold in one frame. Ignore asks while
+  _inspect_fade > 0, or start from the current turn.
+- [judgment] replica_view.gd:190-193 and :200-203 repeat the same four resets; one _drop_inspect() helper.
+- Changelog/wiki name AEG, GBB and Cyber but not the sniper's bolt (PLAYTEST does); fine if the sniper isn't the
+  player's yet.
+- Record to write at the records step: the three defaults (Y; full turn with Reduced motion on; dry fire doesn't end it).
+Must-fix for the next attempt (no code change needed): QA re-runs on 23a0634 and rewrites pipeline/out/qa-report.md to
+Pass; the performance agent's IN1 report goes to pipeline/out/performance.md (the file now holds GA1's; BL6's is in
+performance-report.md); tools/check.sh green on 23a0634. Then this is Accept as it stands.
 Owner should test in the game:
-- Crouch-walk past a bot side on and three-quarter: is this low squat walk acceptable, or do you want the taller,
-  bent-forward crouch walk (needs crouch_top_max raised or a new crouched upper body)?
-- Back-pedal a bot (hold S): does it read as stepping back with weight forward, and do 4.6 steps a second look right?
-- Run and sprint a bot past you: does the forward lean read well, and is the replica's dip while running acceptable?
-- Strafe-duel a bot: does the 35° hip turn under a square rifle convince at range?
-- Run diagonally (W+A, S+D): do the feet slide where the clips blend?
+- Y with each replica: the whole replica in view side on, parts moving, back to the exact hold at the end.
+- Fire, aim, reload, switch, holster, sprint mid-inspect: eases back in a blink, parts home, no pop.
+- Fire then press Y at once: watch for the one-frame snap above.
+- Reduced motion on: is the full turn acceptable to you?
+- Rebind Inspect in Settings › Controls; Y with the order wheel or map open does nothing.
+- Length (3 s rifles, 2 s pistols) and loudness of the clicks.

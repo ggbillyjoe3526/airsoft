@@ -187,20 +187,14 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 		_jolt = 0.0
 		# A raise never outlives the view: shown again, it comes back as the character stands.
 		_fire_hold = 0.0
-		_cut_inspect()
-		_inspect_fade = 0.0
-		_inspect_turn = Vector3.ZERO
-		_inspect_shift = Vector3.ZERO
+		_drop_inspect()
 		_inspect_asked = false
 		if _glass != null:
 			_glass.update(null, 0.0)
 		return
 	if a.active != _active:
 		# The draw brings the next replica up from below: nothing of the last one's turn is eased onto it.
-		_cut_inspect()
-		_inspect_fade = 0.0
-		_inspect_turn = Vector3.ZERO
-		_inspect_shift = Vector3.ZERO
+		_drop_inspect()
 		_show(a.active)
 	var held := _held[_active]
 	var follow := 1.0 - exp(-_cfg.return_rate * delta)
@@ -256,7 +250,8 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 	# Turned over to look at (IN1): ended by what `inspect_blocked` names here, before a reload's clip takes the parts.
 	if inspect_blocked(c, aim):
 		_cut_inspect()
-	elif _inspect_asked and _inspect_age < 0.0:
+	elif _inspect_asked and _inspect_age < 0.0 and _inspect_fade <= 0.0:
+		# Not while easing back from one just ended: it would snap from the turn to the first key.
 		_start_inspect(held)
 	_inspect_asked = false
 	_pose_inspect(delta)
@@ -357,6 +352,14 @@ func _cut_inspect() -> void:
 	if held.anim != null and held.anim.assigned_animation == INSPECT_CLIP:
 		held.anim.pause()
 		_seek(held, INSPECT_CLIP, 0.0)
+
+
+## Ends the inspect under way, if any, with nothing left to ease back (the replica hidden, or another drawn).
+func _drop_inspect() -> void:
+	_cut_inspect()
+	_inspect_fade = 0.0
+	_inspect_turn = Vector3.ZERO
+	_inspect_shift = Vector3.ZERO
 
 
 ## Moves the inspect on `delta` seconds: the pose at its share and the sounds it has reached; once ended early, the
