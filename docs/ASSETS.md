@@ -71,8 +71,9 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
   Sniper Rifle and the Cyber Pistol from the pistol's), one dry click for every replica (the pistol's, owner
   2026-11-05), the pistol's slide locking back, BBs on metal, wood, glass, plastic, cardboard and players, the gear,
   the props, the doors, the whistle, the shot timer and the ping. Since AU3 they also stand in, labelled placeholders,
-  for cues until he records them (25 at AU3, 13 since AU8; the script's `--placeholders` lists them), and the whistle is a pea whistle the script synthesises (his takes set
-  aside). His second batch (AU5, 2026-11-04, 30 recordings: footsteps on a solid floor, concrete, gravel and leaves,
+  for cues until he records them (25 at AU3, 13 since AU8; the script's `--placeholders` lists them), and the
+  whistle is a pea whistle the script synthesises (his takes set aside).
+  His second batch (AU5, 2026-11-04, 30 recordings: footsteps on a solid floor, concrete, gravel and leaves,
   clothes and keys, a holster, a strap swung up, a vault, a BB on goggles, a tap, a steel target, glass, a switch, a
   radio, a remote's battery cover, a pen, a grenade pin, a can, deodorant, a door, a toothbrush, and a big room, a
   street by day and at night) adds the steps, the kit rustle, the hits, the magazines, the grenades' pin, bounce and
