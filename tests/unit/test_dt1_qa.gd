@@ -11,7 +11,8 @@ var tuning: SimTuning = SimTuning.new()
 var bots: BotConfig = BotConfig.load_default()
 
 
-## A bot with the Sniper Rifle in hand, reacted, aimed straight at a foe 5 m off (inside hip_fire_range) over open floor.
+## A bot with the Sniper Rifle in hand, reacted, aimed straight at a foe 5 m off (inside hip_fire_range) over open
+## floor.
 func _bot() -> Array:
 	var world := BoxWorld.new(tuning.body)
 	world.add_floor(60.0, 60.0)

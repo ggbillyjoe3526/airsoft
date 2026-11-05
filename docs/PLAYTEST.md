@@ -279,7 +279,7 @@ Public since 2026-11-05 (SN1): turn on Settings › Dev settings › Disable lev
 
 ## Variable Scope
 
-A dev item (SN2): turn on Dev content, and Disable levelling (or Level up to 8).
+Public since 2026-11-05 (SN2): turn on Settings › Dev settings › Disable levelling (or Level up to 8).
 
 - [ ] **Fit it.** Customise › Optic lists the Variable Scope for the AEG Rifle and the Sniper Rifle. Its look: the 2x
   Scope a little longer, with a ridged zoom ring and a white mark (a placeholder until your own model).
