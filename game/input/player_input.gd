@@ -240,7 +240,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action(USE_DOOR):
 		_door_latch = true
 	elif event.is_action(INSPECT):
-		_inspect_latch = true
+		# Not behind the wheel or the map: the replica would turn over unseen.
+		_inspect_latch = not _wheel.open and not _map.open
 	elif event.is_action(HOP_UP_LESS):
 		_hop_steps -= 1
 	elif event.is_action(HOP_UP_MORE):

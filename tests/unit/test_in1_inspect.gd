@@ -218,6 +218,8 @@ func test_a_switch_ends_it_and_leaves_the_old_replicas_parts_at_rest() -> void:
 	assert_eq(rifle.anim.assigned_animation, String(ReplicaView.INSPECT_CLIP))
 	assert_almost_eq(rifle.anim.current_animation_position, 0.0, EPS, "the clip back at its start: parts at rest")
 	assert_false(rifle.anim.is_playing())
+	assert_eq(view._inspect_turn, Vector3.ZERO, "the next replica comes up with none of its turn")
+	assert_eq(view._inspect_shift, Vector3.ZERO)
 
 
 func test_a_hit_ends_it_and_a_hidden_view_drops_it_whole() -> void:

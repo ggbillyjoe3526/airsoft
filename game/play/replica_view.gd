@@ -137,8 +137,8 @@ func muzzle_position() -> Vector3:
 func on_shot() -> void:
 	_kick = minf(_cfg.kick_max, _kick + 1.0)
 	_fire_hold = _cfg.sprint_fire_hold
+	_cut_inspect()
 	if _active >= 0 and _held[_active].anim != null and _held[_active].anim.has_animation(FIRE_CLIP):
-		_cut_inspect()
 		_held[_active].anim.stop()
 		_held[_active].anim.play(FIRE_CLIP)
 
@@ -196,7 +196,11 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 			_glass.update(null, 0.0)
 		return
 	if a.active != _active:
+		# The draw brings the next replica up from below: nothing of the last one's turn is eased onto it.
 		_cut_inspect()
+		_inspect_fade = 0.0
+		_inspect_turn = Vector3.ZERO
+		_inspect_shift = Vector3.ZERO
 		_show(a.active)
 	var held := _held[_active]
 	var follow := 1.0 - exp(-_cfg.return_rate * delta)
@@ -316,14 +320,16 @@ func _pose_slide(held: Held, a: Armament) -> void:
 		var cycling := anim.is_playing() and anim.current_animation == FIRE_CLIP \
 				and anim.current_animation_position < _cfg.slide_lock_after
 		if not cycling:
-			_seek(held, SLIDE_LOCK_CLIP, 1.0)
+			# Inspected, the Inspect clip keeps the parts: the hold alone keeps the slide back.
+			if not inspecting():
+				_seek(held, SLIDE_LOCK_CLIP, 1.0)
 			held.slide_locked = true
 	elif not lock and held.slide_locked:
-		_seek(held, FIRE_CLIP, 0.0)
+		if not inspecting():
+			_seek(held, FIRE_CLIP, 0.0)
 		held.slide_locked = false
 	# The bone is held over whatever clip is posed (the Reload clip keys the slide forward): SlideLockPose.
 	held.slide_hold.active = held.slide_locked
-
 
 
 ## Starts an inspect of `held`: its pose (by replica id, else the default) over its Inspect clip's length (else the
