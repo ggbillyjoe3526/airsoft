@@ -1,6 +1,6 @@
 # BL9 · The smoke and flash bombs' models
 
-**Review:** pending (critic Retry 6/8 on attempt 3; qa Pass; performance Pass)
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -9,7 +9,7 @@
 | 2026-11-05 | 1 | Claude (build thread) | model tests pass (3 files) | art Retry | the fuze body showed through the head's chamfer; the head read charcoal, not black; the lever arm thin and upright; the head's outline and the crown's notches off the photo's; the flash's ring small and edge-on, its cap pale, its ends knife-sharp |
 | 2026-11-05 | 2 | Claude (build thread) | `tools/check.sh` pass (4,748 tests) | art Accept; QA Fail | a smoke at rest lay lever down, sunk 8.4 mm into the ground |
 | 2026-11-05 | 3 | Claude (build thread) | `tools/check.sh` pass (4,757 tests) | Retry 6/8 (QA Pass, performance Pass) | an unused paints list left in GrenadeView; a stale triangle count in ASSETS; the review line written ahead of the verdict; the reports not on the reviewed head |
-| 2026-11-05 | 4 | Claude (build thread) | | | – |
+| 2026-11-05 | 4 | Claude (build thread) | `tools/check.sh` pass (4,757 tests) | Accept 8/8 (QA Pass, performance Pass) | – |
 
 ## What changed
 
@@ -24,7 +24,8 @@ The smoke and flash bombs were plain cylinders; they are now modelled from the o
   bent tail, and a dark steel ring.
 - **Flash** (`assets/models/grenades/flash.glb`, 3,460 triangles): the pull-ring tube, 40 by 130 mm, olive card with
   rolled ends, the kind's band round the top wrapping over the rim, a sealed cap with a hole in the middle sitting
-  just inside it, and a two-turn split key ring (its wire twelve-sided, so it reads round in the hand) hanging from a wire hook over the rim.
+  just inside it, and a two-turn split key ring (its wire twelve-sided, so it reads round in the hand) hanging from
+  a wire hook over the rim.
 - **In the game** (`GrenadeView`): each slot and the bomb in hand draw the kind's mesh, swapped only when the kind
   changes; the `Kind` material is painted from `BODY_COLOURS`, so the models match the HUD's bomb icons. A bomb at
   rest lies on its side, the smoke's lever up, lifted by the model's own lowest reach that way (QA found the smoke
