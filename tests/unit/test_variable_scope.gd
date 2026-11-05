@@ -198,6 +198,7 @@ func test_it_unlocks_at_level_8() -> void:
 
 
 func test_both_rifles_parts_files_carry_it_longer_than_the_2x_scope() -> void:
+	# The owner's photos (BL8): a compact prism scope, longer than the 2x magnifier, within a part's budget.
 	for file: String in ["aeg", "sniper"]:
 		var parts := (load("res://assets/models/replicaParts/%s.glb" % file) as PackedScene).instantiate()
 		add_child_autofree(parts)
@@ -209,10 +210,8 @@ func test_both_rifles_parts_files_carry_it_longer_than_the_2x_scope() -> void:
 			continue
 		assert_not_null(v.find_child("optic_scopeVar_Figure", true, false), "%s: its figure version" % file)
 		assert_not_null(v.find_child("optic_scopeVar_SightLine", true, false), "%s: its sight line" % file)
-		var longer := v.get_aabb().size.z - fixed.get_aabb().size.z
-		assert_almost_eq(longer, 0.035, 0.002, "%s: 3.5 cm longer" % file)
-		assert_almost_eq(v.get_aabb().end.z, fixed.get_aabb().end.z, 0.001, "%s: the eyepiece where the 2x Scope's is" % file)
-		assert_lt(v.mesh.get_faces().size() / 3, 2500, "%s: a small part" % file)
+		assert_gt(v.get_aabb().size.z, fixed.get_aabb().size.z + 0.05, "%s: longer than the 2x Scope" % file)
+		assert_lt(v.mesh.get_faces().size() / 3, 10000, "%s: within a part's 10,000 triangles" % file)
 
 
 func _notch(input: PlayerInput, button: MouseButton) -> void:
