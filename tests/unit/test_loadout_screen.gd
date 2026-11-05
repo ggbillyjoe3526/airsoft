@@ -375,7 +375,7 @@ func test_each_paint_is_built_once_and_a_replica_has_one_picture() -> void:
 	var first := ReplicaPaint.materials(&"cobalt", false)[0]
 	page.pictures().texture(&"aeg", &"cobalt", false)
 	assert_same(ReplicaPaint.materials(&"cobalt", false)[0], first, "the same paint asked again builds nothing")
-	assert_eq(page.pictures().count(), 3, "the rifle, the pistol and the Cyber Pistol")
+	assert_eq(page.pictures().count(), 4, "the rifle, the pistol, the Cyber Pistol and the Sniper Rifle")
 	assert_eq(ReplicaPaint.materials(&"cobalt", true)[1].albedo_color, ReplicaSchemes.colours(&"cobalt", true)[1],
 			"Realistic colours: the plain family")
 	assert_eq(ReplicaPaint.materials(ReplicaSchemes.OWN, false).size(), 0, "the Cyber Pistol keeps the model's own")

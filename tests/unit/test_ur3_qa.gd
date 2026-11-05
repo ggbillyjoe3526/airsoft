@@ -181,21 +181,21 @@ func test_the_swap_row_fits_the_page_with_the_shipped_replicas() -> void:
 	await _assert_room(page, "shipped")
 
 
-func test_the_switch_pop_up_fits_with_five_replicas_and_the_sheet_stays_on_screen() -> void:
+func test_the_switch_pop_up_fits_with_six_replicas_and_the_sheet_stays_on_screen() -> void:
 	var grown := _grown_saved(PackedStringArray(["000101|Alpha Pistol|pistol|pistol, gas|public",
 			"000102|Beta Rifle|aeg|rifle, electric, aeg-mag|public"]))
 	var page := _page(ROOM, grown)
 	await wait_process_frames(3)
-	assert_eq(page.gear().replica_ids().size(), 5)
-	await _assert_room(page, "five replicas")
+	assert_eq(page.gear().replica_ids().size(), 6, "the four public replicas (the Sniper Rifle since 2026-11-05) and two")
+	await _assert_room(page, "six replicas")
 
 
-func test_the_switch_pop_up_fits_with_four_replicas() -> void:
+func test_the_switch_pop_up_fits_with_five_replicas() -> void:
 	var grown := _grown_saved(PackedStringArray(["000101|Alpha Pistol|pistol|pistol, gas|public"]))
 	var page := _page(ROOM, grown)
 	await wait_process_frames(3)
-	assert_eq(page.gear().replica_ids().size(), 4)
-	await _assert_room(page, "four replicas")
+	assert_eq(page.gear().replica_ids().size(), 5)
+	await _assert_room(page, "five replicas")
 
 
 func test_dev_replicas_listed_with_dev_content_still_fit_the_page() -> void:
@@ -213,7 +213,7 @@ func test_a_dev_replica_is_hidden_with_dev_content_off() -> void:
 	var grown := _grown_saved(PackedStringArray(["000101|Alpha Pistol|pistol|pistol, gas|dev"]))
 	var page := _page(ROOM, grown)
 	await wait_process_frames(2)
-	assert_eq(page.gear().replica_ids().size(), 3)
+	assert_eq(page.gear().replica_ids().size(), 4, "the four public replicas, not the dev one")
 
 
 func _assert_room(page: LoadoutPage, what: String) -> void:
