@@ -8,7 +8,8 @@ extends Node3D
 ## figure versions fitted (ReplicaParts). Calling a hit, "HIT!" shows above the head; it stays up on the walk off; a
 ## figure leaving the field fades out, its replicas put away. The hit flinch (`hit`, FigureFlinch): the upper body
 ## jolts the way the BB flew, through FigureBend. In a reload (FI4) the left hand carries a copy of the replica model's
-## magazine, made here once a slot in the replica's paint, and throws the old one into `thrown`. A kind the session
+## magazine, made here once a slot in the replica's paint, and throws the old one into `thrown`. A bomb thrown (GT1,
+## `set_bombs`): its model in the right hand until it leaves, the arms throwing it. A kind the session
 ## couldn't load draws no body, only the sign (the tests catch a missing model, FigureModels warns). Where the sun casts
 ## no shadows, a soft dark disc lies on the floor under it (`set_contact_shadow`: the contact shadow, one shared mesh).
 
@@ -62,6 +63,10 @@ var _wall: RayHit = null
 var _raise_wait: int = 0
 var _raise_stride: int = 1
 var _since_shot: float = INF
+## The bombs' meshes by Grenade.Kind (GrenadeView's, shared) and their timing, for a throw in the hand (GT1; empty:
+## none drawn).
+var _bomb_meshes: Array[Mesh] = []
+var _grenade_config: GrenadeConfig = null
 
 
 ## Draws `c` in `team_colour` (the body's Team* paint, set_body, and the sign's outline), glowing with `glow` of it
@@ -114,10 +119,24 @@ func set_body(models: FigureModels, kind: int, lines: Vector2) -> void:
 			add_child(_body)
 			_body.hands.hold(_replicas, _classes, _magazines)
 			_body.hands.thrown = thrown
+			if not _bomb_meshes.is_empty():
+				_body.hands.set_bomb_meshes(_bomb_meshes)
+			_pose.grenades = _grenade_config
 			_body.set_fade(_fade)
 		else:
 			_body.free()
 			_body = null
+
+
+## Throws drawn with `meshes` (GrenadeView.meshes, by Grenade.Kind, shared) in the hand, timed by `cfg` (GT1): the
+## bomb in the right hand from the pin to the release, the arms throwing it.
+func set_bombs(meshes: Array[Mesh], cfg: GrenadeConfig) -> void:
+	_bomb_meshes = meshes
+	_grenade_config = cfg
+	if _pose != null:
+		_pose.grenades = cfg
+	if _body != null:
+		_body.hands.set_bomb_meshes(meshes)
 
 
 ## Raises the replica, muzzle up, at level geometry `query` finds within its reach along the aim (FB5), the eyes at
@@ -321,6 +340,7 @@ func animate(c: Character, fraction: float, delta: float, eye: Vector3) -> void:
 	if _fade < 1.0:
 		_body.hands.show_hands(-1, -1, false)
 		_body.hands.show_reload(-1, 0.0, true)
+		_body.hands.show_bomb(Grenade.Kind.NONE)
 
 
 ## How far (0..1) the replica is raised at the level ahead of `c`'s aim, as `_pose` read it (FB5): by how close the
@@ -384,6 +404,7 @@ func update(c: Character, fraction: float, delta: float = 0.0) -> void:
 		if fade < 1.0:
 			_body.hands.show_hands(-1, -1, false)
 			_body.hands.show_reload(-1, 0.0, true)
+			_body.hands.show_bomb(Grenade.Kind.NONE)
 
 
 ## The contact shadow under `c`'s feet at `fraction`: narrower crouched (`_place_disc`).
