@@ -8,6 +8,9 @@
   `docs/KNOWN_ISSUES.md` says what the figure code must do about those. The sidecar gives the clips' lengths and paces,
   where each replica sits on the `Grip_R` bone and where the magazines go in the reloads. How the browser game drew
   them: `legacy/browser/src/config/figureRig.ts`.
+- The human's gear (`Kit*`, `Kit_Pack*`, `Kit_Radio*`, BL12) is built by `tools/blender/figure-gear/gear.py` and spliced
+  into `human.glb` by node name (`splice.py`), leaving the body, heads and clips as they are; rerun it after any other
+  rebuild of the file.
 - Godot extracted each figure's textures beside it on import (`*_col`, `*_nrm`, `*_orm`); commit them with their
   `.import` files.
 - A CC0 figure can replace them later: node names, team colours, scale, the size budget and where to find CC0

@@ -10,9 +10,10 @@ extends SceneTree
 ## name the numbers to tune (default: all).
 const STEPS: Dictionary[String, float] = {"fit_head_centre": 0.1, "fit_head_radius": 0.01, "fit_chest_low": 0.1,
 		"fit_chest_high": 0.1, "fit_chest_half_width": 0.01, "fit_chest_ahead": 0.01, "fit_chest_radius": 0.01,
-		"fit_chest_front": 0.02, "fit_chest_back": 0.02, "fit_chest_depth_radius": 0.02, "fit_pelvis_up": 0.02,
-		"fit_hips_radius": 0.01, "fit_thigh_radius": 0.01, "fit_shin_radius": 0.01, "fit_boot_heel": 0.1,
-		"fit_boot_drop": 0.01, "fit_boot_radius": 0.01}
+		"fit_chest_front": 0.02, "fit_chest_back": 0.02, "fit_chest_depth_radius": 0.02, "fit_chest_back_radius": 0.02,
+		"fit_chest_back_low": 0.1, "fit_chest_back_high": 0.1, "fit_pelvis_up": 0.02, "fit_hips_radius": 0.01,
+		"fit_thigh_radius": 0.01, "fit_shin_radius": 0.01, "fit_boot_heel": 0.1, "fit_boot_drop": 0.01,
+		"fit_boot_radius": 0.01}
 const ROUNDS := 4
 const BAR_MISSED := 4.0
 const BAR_THIN := 3.0

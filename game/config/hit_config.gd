@@ -94,19 +94,24 @@ extends Resource
 ## fit_pelvis_up along the hips; each leg's thigh and shin between its joints, and the boot from fit_boot_heel of the
 ## foot's length behind the ankle to the toe, fit_boot_drop under them.
 @export var fit_head_centre: float = 0.3625
-@export var fit_head_radius: float = 0.1275
-@export var fit_chest_low: float = 0.3
-@export var fit_chest_high: float = 0.16
-@export var fit_chest_half_width: float = 0.057
-@export var fit_chest_ahead: float = -0.022
-@export var fit_chest_radius: float = 0.15
-## And two more on the spine's line for its depth (the plate carrier's pouches, the pack): fit_chest_front ahead of it
-## and fit_chest_back behind, of fit_chest_depth_radius.
-@export var fit_chest_front: float = 0.072
-@export var fit_chest_back: float = 0.0895
-@export var fit_chest_depth_radius: float = 0.13
-@export var fit_pelvis_up: float = 0.045
-@export var fit_hips_radius: float = 0.12
+@export var fit_head_radius: float = 0.128
+@export var fit_chest_low: float = 0.463
+@export var fit_chest_high: float = 0.147
+@export var fit_chest_half_width: float = 0.067
+@export var fit_chest_ahead: float = -0.071
+@export var fit_chest_radius: float = 0.158
+## And two more on the spine's line for its depth (the plate carrier's pouches, the pack): fit_chest_front ahead of it,
+## of fit_chest_depth_radius, and fit_chest_back behind, of fit_chest_back_radius, from fit_chest_back_low of the way up
+## the torso's line to fit_chest_back_high of the way from Chest to Neck (below Chest when negative; the pack rides on
+## the back, above the hips, and stands nearly to the shoulders).
+@export var fit_chest_front: float = 0.057
+@export var fit_chest_back: float = 0.130
+@export var fit_chest_depth_radius: float = 0.150
+@export var fit_chest_back_radius: float = 0.165
+@export var fit_chest_back_low: float = 0.250
+@export var fit_chest_back_high: float = -0.080
+@export var fit_pelvis_up: float = 0.022
+@export var fit_hips_radius: float = 0.129
 @export var fit_thigh_radius: float = 0.085
 @export var fit_shin_radius: float = 0.071
 @export var fit_boot_heel: float = 0.16

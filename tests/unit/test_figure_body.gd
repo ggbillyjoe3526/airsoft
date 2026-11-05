@@ -6,7 +6,7 @@ extends GutTest
 const BUDGET := [60000, 20000, 6000]
 const DISTANCES := [5.0, 10.0, 20.0, 40.0]
 ## The human with the largest head (HighCut, id 0) at High's lines: LOD0, LOD0, LOD1, LOD2 (step 23 plan › 2).
-const HUMAN_HIGH := [19966, 19966, 6752, 2337]
+const HUMAN_HIGH := [29130, 29130, 9526, 2995]
 const RED := Color(0.9, 0.2, 0.15)
 const BLUE := Color(0.2, 0.4, 0.95)
 
@@ -141,7 +141,7 @@ func test_the_levels_cast_no_shadow_and_one_twin_casts_it() -> void:
 		assert_eq(twins, 1)
 	var human := _body(FigureMix.HUMAN, 0)
 	# LOD2 body, HighCut, kit and pack.
-	assert_eq(_tris(human.meshes[-1].mesh), 2337)
+	assert_eq(_tris(human.meshes[-1].mesh), 2995)
 	assert_same(_body(FigureMix.HUMAN, 4).meshes[-1].mesh, human.meshes[-1].mesh, "made once a kind and head")
 
 
