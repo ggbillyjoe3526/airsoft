@@ -97,7 +97,8 @@ F_RING_AT = math.radians(-95.0)  # where round the tube the ring hangs (0 = +X, 
 F_HOOK_WIRE = 0.5
 
 SEG_BODY = 48
-SEG_FLASH = 40
+SEG_FLASH = 64
+RING_STEPS = 56  # the flash's split ring: steps a turn
 
 
 # The bombs' own colours (GrenadeView.BODY_COLOURS), which the game paints the `Kind` material in.
@@ -404,10 +405,10 @@ def build_flash() -> bpy.types.Object:
     hook_low = z0 - 1.5
     centre = out * clear + upv * (hook_low - F_RING_R)
     turns = 2
-    steps = 40 * turns
+    steps = RING_STEPS * turns
     helix = []
     for i in range(steps + 1):
-        a = math.pi * 0.5 + TAU * i / 40
+        a = math.pi * 0.5 + TAU * i / RING_STEPS
         lift = F_RING_PITCH * (i / steps - 0.5)
         p = centre + (side * math.cos(a) + upv * math.sin(a)) * F_RING_R + out * lift
         helix.append(tuple(p))
@@ -421,7 +422,7 @@ def build_flash() -> bpy.types.Object:
             tuple(out * (F_R + F_BAND[2] + 1.1) + upv * (z1 - 0.5)),
             tuple(ring_top + out * 0.1 + upv * 0.6 + side * 0.3),
             tuple(ring_top - upv * 0.6 - side * 1.0)]
-    sweep(b, hook, F_HOOK_WIRE, "Steel", sides=6)
+    sweep(b, hook, F_HOOK_WIRE, "Steel", sides=8)
     parts.append(hs.finish(b.build(), bevel=0.0))
 
     ob = hs.join("Flash", parts)

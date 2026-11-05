@@ -22,7 +22,7 @@ The smoke and flash bombs were plain cylinders; they are now modelled from the o
   channel-section lever (its top plate chamfered at both ends, its lower edge sloping), the arm down the right side to
   just past halfway, flaring 2 mm, with three notches and a slanted tip, a pivot rivet, the pull pin's leg with its
   bent tail, and a dark steel ring.
-- **Flash** (`assets/models/grenades/flash.glb`, 3,460 triangles): the pull-ring tube, 40 by 130 mm, olive card with
+- **Flash** (`assets/models/grenades/flash.glb`, 5,120 triangles): the pull-ring tube, 40 by 130 mm, olive card with
   rolled ends, the kind's band round the top wrapping over the rim, a sealed cap with a hole in the middle sitting
   just inside it, and a two-turn split key ring (its wire twelve-sided, so it reads round in the hand) hanging from
   a wire hook over the rim.
@@ -42,8 +42,9 @@ The smoke and flash bombs were plain cylinders; they are now modelled from the o
   clips, and the build fails if the ring ever enters the head.
 - The flash photos in `flash_grenade/` show a smoke tube of the same maker; the flash takes their shape, the smoke
   the canister, so the two bombs are told apart by shape as well as colour.
-- Budget: 5,500 triangles and 200 KB a grenade (`docs/CC0_ASSETS.md` › Grenade models), a prop's budget with room
-  for the hand view; at most twelve bombs fly at once.
+- Detail fills the budget (owner, 2026-11-05: aim close to it): the smoke at 96 %, the flash at 93 % (its tube and
+  rings drawn rounder, 64 sides). Budget: 5,500 triangles and 200 KB a grenade (`docs/CC0_ASSETS.md` › Grenade
+  models), a prop's budget with room for the hand view; at most twelve bombs fly at once.
 
 ## Known issues
 
