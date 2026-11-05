@@ -411,7 +411,7 @@ def build_flash() -> bpy.types.Object:
         lift = F_RING_PITCH * (i / steps - 0.5)
         p = centre + (side * math.cos(a) + upv * math.sin(a)) * F_RING_R + out * lift
         helix.append(tuple(p))
-    sweep(b, helix, F_RING_WIRE, "Steel", sides=8)
+    sweep(b, helix, F_RING_WIRE, "Steel", sides=12)  # round enough not to read as a flat band up close
     # The hook: from under the cap's edge, over the rim, down the outside to the ring's top.
     ring_top = centre + upv * F_RING_R
     hook = [tuple(out * (F_RIM_IN - 1.5) + upv * (top + 0.3)),

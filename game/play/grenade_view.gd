@@ -65,7 +65,6 @@ var soft_flash: bool = false
 
 var _cfg: GrenadeConfig = null
 var _canisters: Array[MeshInstance3D] = []
-var _bodies: Array[StandardMaterial3D] = []
 ## Each kind's mesh, its Kind material painted (BODY_COLOURS), by Grenade.Kind, and how far it reaches below its
 ## middle lying on its side (m).
 var _meshes: Array[Mesh] = []
@@ -96,7 +95,6 @@ func setup(count: int, cfg: GrenadeConfig, night: bool) -> void:
 		var paint := StandardMaterial3D.new()
 		paint.albedo_color = BODY_COLOURS[kind]
 		paint.roughness = BODY_ROUGHNESS
-		_bodies.append(paint)
 		var mesh := _kind_mesh(kind, paint)
 		_meshes.append(mesh)
 		_lie_reach.append(-(_lying() * mesh.get_aabb()).position.y)
