@@ -8,7 +8,7 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
   in Godot the eye looks along -z.
 - **Skeleton.** `Arms`: each side's `Shoulder`, `UpperArm`, `Forearm`, `Hand`, `Thumb1-3`, `Index1-3`, `Middle1-3`,
   `Ring1-3`, `Pinky1-3` and `Grip` with `_R` or `_L`, the figures' bone names.
-- **Mesh.** `Arm_R` and `Arm_L` (39,338 triangles together): the MakeHuman base mesh's arm and hand (CC0,
+- **Mesh.** `Arm_R` and `Arm_L` (39,386 triangles together): the MakeHuman base mesh's arm and hand (CC0,
   `tools/blender/arms/source/`) under a glove (skin + 1.1 mm, `glove.py`) with one moulded knuckle shell over the four
   knuckles (domed, with a padded rim), a rounded plate over each finger section and the thumb, a suede palm patch, a
   cuff and wrist strap, and a sleeve rolled over the cuff with a banded hem, ending 13 cm above the elbow (the view
@@ -28,8 +28,9 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
 - **Solving.** `pose.py` places each hand on the replica's mesh (on a grip, the thumb's root and the index and little
   finger's knuckles at marks on it, rolled to the straightest wrist; on the rifle's handguard, a search for the cupped hand whose
   fingers wrap it), curls the fingers until they touch, the index onto the trigger, and bends each elbow to keep the
-  wrist straight; a last pass on the skinned mesh opens any finger still touching and eases a pressing palm back (the
-  thumb waiting for its hand). `arms.py` stops without writing if any face of the arms passes into a replica. Re-run
+  wrist straight; last passes on the skinned mesh open any finger still touching and ease a pressing palm back (the
+  thumb waiting for its hand), then seat each holding palm and close each holding finger until its glove all but
+  touches. `arms.py` stops without writing if any face of the arms passes into a replica. Re-run
   it whenever a replica's model changes.
 - **Shading.** In game the arms are drawn with pressed depth and take no shadows (ArmsView): the sun's shadow map on
   pressed depth broke into hard patches on the sleeve.

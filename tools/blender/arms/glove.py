@@ -41,8 +41,8 @@ SLEEVE_OFF = (0.0080, 0.0105)
 SLEEVE_BAND = 0.030
 SLEEVE_HEM = 0.0022
 # The hard parts' heights over the glove (m).
-SHELL_THICK = 0.0024
-KNUCKLE_DOME = 0.0022
+SHELL_THICK = 0.0016
+KNUCKLE_DOME = 0.0042
 KNUCKLE_RIM = 0.0007
 PAD_THICK = 0.0013
 # The knuckle shell: how far it reaches beyond the outer knuckles, back from them over the hand and on over them (m).
@@ -50,7 +50,7 @@ KNUCKLE_SPAN = 0.006
 KNUCKLE_BACK = 0.024
 KNUCKLE_OVER = 0.002
 # The finger plates, as shares of each bone from its root: one on the first bone, one on the second.
-PLATES = (((0.22, 0.80),), ((0.20, 0.78),))
+PLATES = (((0.26, 0.76),), ((0.24, 0.74),))
 
 
 def load_source(shoulder: Vector) -> tuple:
@@ -291,7 +291,7 @@ class Surface:
         return hit[0], n
 
     def shell(self, origin_at, dir_at, rows: int, cols: int, thick, mat: str, closed: bool = False,
-              bone: str = None, smooth: int = 2) -> tuple:
+              bone: str = None, smooth: int = 2, lift: float = 0.0004) -> tuple:
         """A raised part over a patch of the surface: for each (u, v) in -1..1 a ray from `origin_at(u, v)` along
         `dir_at(u, v)` finds the surface; the patch is smoothed so a skin crease under it never shows through, and
         stands `thick(u, v)` (or a number) off it."""
@@ -314,7 +314,7 @@ class Surface:
             normals = [[n.normalized() for n in row] for row in _smoothed(normals, closed)]
         if callable(thick):
             thick = [[thick(u, v) for u, v in row] for row in dirs]
-        return self.solid(rings, normals, thick, mat, closed, bone)
+        return self.solid(rings, normals, thick, mat, closed, bone, lift)
 
 
 def _smoothed(grid: list, closed: bool) -> list:
@@ -373,13 +373,13 @@ def knuckle_guard(surf: Surface, fr: Frame) -> tuple:
     knuck_u = [-0.78, -0.26, 0.26, 0.78]
 
     def thick(u: float, v: float) -> float:
-        dome = sum(math.exp(-((u - ku) / 0.17) ** 2) for ku in knuck_u)
+        dome = sum(math.exp(-((u - ku) / 0.15) ** 2) for ku in knuck_u)
         rise = math.exp(-((v - 0.55) / 0.45) ** 2)
         edge = max(abs(u), abs(v))
         rim = KNUCKLE_RIM * math.exp(-((edge - 0.80) / 0.09) ** 2)
         return (SHELL_THICK + KNUCKLE_DOME * min(1.0, dome) * rise + rim) * _soft_box(u, v, 0.22) + 0.0003
 
-    return surf.shell(origin, direction, 13, 29, thick, "GloveArmour", False, "Hand", 4)
+    return surf.shell(origin, direction, 13, 29, thick, "GloveArmour", False, "Hand", 4, 0.0010)
 
 
 def finger_pads(surf: Surface, fr: Frame) -> list:
@@ -404,7 +404,7 @@ def finger_pads(surf: Surface, fr: Frame) -> list:
         def thick(u: float, v: float) -> float:
             return PAD_THICK * _soft_box(u, v, grid[2]) + 0.0003
 
-        return surf.shell(origin, direction, grid[0], 9, thick, "GloveArmour", False, bone, grid[1])
+        return surf.shell(origin, direction, grid[0], 9, thick, "GloveArmour", False, bone, grid[1], 0.0008)
 
     for f in (2, 3, 4, 5):
         name = FINGER_NAMES[f]
@@ -466,13 +466,13 @@ def build_left(shoulder: Vector) -> tuple:
         mesh.add(*part)
     # The palm's suede patch, over the heel of the hand and up to the fingers' roots.
     across = (fr.knuckles[3] - fr.knuckles[0]).normalized()
-    pc = fr.palm_centre - fr.fingers * 0.006
+    pc = fr.palm_centre + fr.fingers * 0.002
 
     def palm_origin(u: float, v: float) -> Vector:
-        return pc + across * (u * 0.026) + fr.fingers * (v * 0.030)
+        return pc + across * (u * 0.024) + fr.fingers * (v * 0.024)
 
     mesh.add(*surf.shell(palm_origin, lambda u, v: fr.palmar, 7, 11,
-                         lambda u, v: 0.0012 * _soft_box(u, v, 0.35) + 0.0009, "GloveArmour"))
+                         lambda u, v: 0.0012 * _soft_box(u, v, 0.35) + 0.0009, "GloveArmour", smooth=4, lift=0.0008))
     # The neoprene cuff, and its strap round it with a pull tab on the little finger's side.
     mesh.add(*ring(surf, fr, CUFF[:2], CUFF[2], "Glove"))
     mesh.add(*ring(surf, fr, STRAP[:2], CUFF[2] + STRAP[2], "GloveArmour"))
@@ -483,10 +483,11 @@ def build_left(shoulder: Vector) -> tuple:
         return fr.wrist + fr.fdir * (STRAP[0] + (STRAP[1] - STRAP[0]) * (0.5 + 0.42 * v))
 
     def tab_dir(u: float, v: float) -> Vector:
-        t = math.radians(28.0) * u
-        return (out * math.cos(t) + fr.dorsal * math.sin(t)) + fr.dorsal * 0.35
+        t = math.radians(40.0) * u
+        return (out * math.cos(t) + fr.dorsal * math.sin(t)) + fr.dorsal * 0.9
 
-    mesh.add(*surf.shell(tab_origin, tab_dir, 5, 7, CUFF[2] + STRAP[2] + 0.0018, "GloveArmour"))
+    mesh.add(*surf.shell(tab_origin, tab_dir, 5, 9, lambda u, v: (CUFF[2] + STRAP[2] + 0.0022) * _soft_box(u, v, 0.3),
+                         "GloveArmour", smooth=3))
 
     sleeve(mesh, verts, faces, wts, fr)
     return mesh, j, fr, pts

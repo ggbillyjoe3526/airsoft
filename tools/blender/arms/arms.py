@@ -156,9 +156,10 @@ DOWN = {"kind": "down", "at": (0.0, 0.06, -0.40),
 PISTOL_RIGHT = dict(RIGHT, web=(0.012, -0.095, -0.045), index=(0.024, -0.042, -0.040), pinky=(0.026, -0.058, -0.098),
                     thumb_at=(-0.024, -0.045, -0.012), thumb_hug=3.0, shoulder=(0.0, -0.12, 0.10), drop=0.0,
                     swing=(-15.0, -15.0, -15.0))
-# The Cyber Pistol: a deeper, wider grip, its web lower under a long tang, its trigger further forward.
-CYBER_RIGHT = dict(PISTOL_RIGHT, web=(0.012, -0.110, -0.052), index=(0.028, -0.054, -0.048),
-                   pinky=(0.028, -0.066, -0.110), thumb_at=(-0.028, -0.065, -0.032), rolls=(-180.0, 174.0))
+# The Cyber Pistol: the GBB's marks laid on its own grip (the owner: the two grips should look the same), the web a
+# little lower under its long tang; its frame by the rear block leaves the thumb room only high along it.
+CYBER_RIGHT = dict(PISTOL_RIGHT, web=(0.012, -0.110, -0.052), index=(0.025, -0.045, -0.040),
+                   pinky=(0.024, -0.055, -0.096), thumb_at=(-0.026, -0.048, -0.014))
 # The AEG Rifle's grip: the same three marks, the hand high on the short grip so the little finger closes round its
 # foot (the owner, 2026-11-05), the knuckles' line raked back with the grip; the shoulder drawn in and back a little
 # to keep the wrist straight.
@@ -490,6 +491,18 @@ def solve(rig: Rig, hands: dict, j: dict, hold: Hold, arms: list) -> tuple:
     # The trigger finger's pad rests on the trigger (`onto` keeps it there), so the check leaves the trigger out.
     frame = [o for o in solid if not o.name.startswith("Trigger")]
     hits = 0 if os.environ.get("BL_NORELAX") else pose.relax(rig, hands, arms, frame, poles)
+    if not hits and not os.environ.get("BL_NORELAX"):
+        # Then each holding palm seats on the replica and every holding finger closes until its glove all but
+        # touches it (the trigger finger stays on its mark).
+        for side in ("R", "L") if hold.left["kind"] == "guard" else ("R",):
+            print("  %s palm pressed in %.1f mm" % (side, pose.press(rig, hands, arms, frame, poles, side) * 1000))
+        fingers = [("R", n) for n in ("Middle", "Ring", "Pinky", "Thumb")]
+        if hold.left["kind"] == "guard":
+            fingers += [("L", n) for n in ("Index", "Middle", "Ring", "Pinky", "Thumb")]
+        print("  tightened", pose.tighten(rig, hands, arms, frame, fingers))
+        if os.environ.get("BL_DEBUG"):
+            for side in ("R", "L") if hold.left["kind"] == "guard" else ("R",):
+                print("   %s skin gaps (mm)" % side, pose.skin_gaps(arms, frame, side))
     return objects, solid, hits
 
 

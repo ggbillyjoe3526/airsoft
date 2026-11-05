@@ -8,7 +8,8 @@
 |---|---|---|---|---|---|
 | 2026-11-05 | 1 | Claude (build thread) | 6/8 | Retry | Hands off the owner's photos (pistol thumbs, the rifle support hand), glove construction, wrists over 30°, the ASSETS row |
 | 2026-11-05 | 2 | Claude (build thread) | 7/8 | Retry | Below the bar next to the photos: thumb heights, fingertips past the front strap, the slab knuckle shell and dice plates, a torn sleeve top; the owner's notes (16:30) |
-| 2026-11-05 | 3 | Claude (build thread) | pending | pending | – |
+| 2026-11-05 | 3 | Claude (build thread) | 7/8 | Retry | Below the stricter bar: torn web and patch edges, band-like knuckle shell, Cyber index short of the trigger, thumbs high; the owner's notes (17:54: tighter, the Cyber like the GBB) |
+| 2026-11-05 | 4 | Claude (build thread) | pending | pending | – |
 
 ## What changed
 
@@ -18,13 +19,13 @@
   materials. Each replica gets a clip `<id>_Hold` and an empty `Hold_<id>` at its origin.
 - **The holds**, solved against each replica's model (`pose.py`), none passing into it (the build refuses to write
   otherwise):
-  - AEG Rifle: right hand high on the grip, little finger round its foot, index on the trigger (0.6 mm), wrist 22°;
+  - AEG Rifle: right hand high on the grip, little finger round its foot, index on the trigger (0.4 mm), wrist 18.7°;
     left hand under the handguard's middle (y 0.19), fingers resting on its right side, thumb along its left side,
-    wrist 10.5°.
+    wrist 10.7°.
   - GBB Pistol: right hand alone, high on the back strap, fingers up under the guard, index on the trigger (0.7 mm),
     thumb along the frame, wrist 23.7°.
-  - Cyber Pistol (fitted to BL6's rebuilt model): right hand alone, index on the trigger (6.0 mm), thumb along the
-    frame, wrist 25.1°.
+  - Cyber Pistol (fitted to BL6's rebuilt model): right hand alone, the GBB's hold on its grip, index on the trigger
+    (0.2 mm), thumb high beside the rear block, wrist 15.3°.
 - **In the game** (`game/play/arms_view.gd`): ArmsView rides the replica in hand (ReplicaView's `Held.root`), its
   `Hold_<id>` on the replica's origin, posed by `<id>_Hold`; pressed depth, no shadow, out of the optic's view; the
   left arm hidden on one-handed replicas (ViewModelConfig.one_hand); a robot's colours (ViewModelConfig.robot_arms).
@@ -46,6 +47,15 @@
   - Glove: the knuckle shell over the knuckles only (24 mm deep, smoothed, padded rim); one rounded plate over each
     finger section, wrapping it; the sleeve ends 13 cm above the elbow and its cap moves with its rim (the torn top);
     39,338 triangles.
+- **Attempt 4** (the owner's notes, 17:54, and the critic's):
+  - Two last passes on the skinned mesh: each holding palm moves into the replica until its glove would first touch
+    (`pose.press`), then every holding finger closes until its glove would first touch (`pose.tighten`); the build
+    still refuses to write if anything passes into a replica. The log prints each hand's skin gaps with `BL_DEBUG`.
+  - The Cyber's marks are the GBB's laid on its own grip; index on the trigger (0.2 mm), wrist 15.3°, its finger gaps
+    like the GBB's; its thumb rides high beside the rear block (lower, the frame leaves it no room without dropping
+    the whole hand, which made the two grips look different).
+  - Glove: four taller knuckle domes on a thinner shell, lifted off the hand; the plates lifted with softer ends; the
+    palm patch off the heel; a larger velcro tab on the back of the cuff. 39,386 triangles.
 - `Hand.seat` can keep the whole hand bone clear (the left hand's knuckles and thumb heel); `Hand.thumb` lets the
   thumb's root rest on the grip and can hug its whole length to the replica.
 
