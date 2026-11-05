@@ -1260,6 +1260,20 @@ Your five fixes from the marked-up render (2026-11-05), worked from your origina
   grip in first person and on the bots.
 - [ ] **Paints:** in Customise, try each paint: the grip now takes the body's colour.
 
+## The new Cyber Pistol model (BL6)
+
+- [ ] **In your hands:** the Cyber Pistol keeps its white, cyan and pink look with far more detail (teeth along the
+  front block's foot, a finned rear cap, the pink core behind bars on the slide's sides and top, a dark fire-mode
+  panel with three lights, a ribbed cell in the grip, the old curved trigger a little longer and upright in a taller guard, close to the grip). Does
+  it still feel like the pistol you liked? Is anything
+  poking into the view while you walk, sprint, lean and aim?
+- [ ] **Iron sights:** aim. The front post and the rear notch line up on the crosshair as before.
+- [ ] **Moving parts:** fire (the slide kicks back and the trigger moves), step the fire modes (the slider moves),
+  reload (the cell drops out of the grip and a new one goes up) and Inspect.
+- [ ] **Torch and paints:** fit the Weapon Torch (under the front block, clear of the teeth); turn on Realistic colours
+  (plain grey, no glow).
+- [ ] **Menus and figures:** the Loadout and Armory pictures show the new pistol; a bot carrying it shows its outline.
+
 ## The new Sniper Rifle model (BL5)
 
 The bolt-action in the grey chassis from your first sniper photo (2026-11-05). Dev content on.
