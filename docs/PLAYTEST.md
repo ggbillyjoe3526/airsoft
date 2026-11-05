@@ -1367,6 +1367,8 @@ Every BB in flight is now a proper Blender model, round from every side instead 
   content on: The Street is back, marked DEV, and a match there gives no XP.
 - [ ] **Sniper bots.** A few Hard matches with Dev content off: now and then a bot carries the Sniper Rifle. On
   Woodland at 8v8, does one end feel stacked once snipers are about?
+- [ ] **Sniper bots never shoot a teammate.** They now wait for the bolt before each shot, so they fire a little slower;
+  do they still feel dangerous at range?
 
 ## Reporting what you find
 

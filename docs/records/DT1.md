@@ -33,6 +33,15 @@ now Dev only."
 - Critic: `changelog.d/bug-pass-full-game.md` no longer says sniper gear runs are not kept; PLAYTEST's SN1 intro drops
   Dev content.
 
+## CI's finding
+
+- The Street's night guards on Easy failed at seed 7: a Sniper-kit bot (bots carry the rifle without Dev content now)
+  knocked out a teammate 1 m away. Armament keeps a press made while a bolt-action cycles until the bolt is home
+  (bolt_press_window), up to most of a second after the bot's line-of-fire check. Bots now never press while the bolt
+  is still worked (`BotCombat._bolt_cycling`; `tests/unit/test_dt1_qa.gd`, which fails without it). Seed 7 has no
+  friendly hit and the Street night guards pass. QA and performance Pass; the shorter press_buffer keep on every
+  replica is a KNOWN_ISSUES row.
+
 ## Defaults taken
 
 - **No High Output Battery.** The only "High Output Battery" is pool.md's worked example of adding a battery, not a real

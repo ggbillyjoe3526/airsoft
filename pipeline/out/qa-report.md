@@ -51,3 +51,37 @@ Whether the rifle, the Variable Scope and sniper bots feel right on public maps;
 
 ## Re-check at 76b12ad
 Blocking item 1 fixed (test_match_page.gd expects [depot, range]). Items 2-6 fixed: test_ur2_qa runs the Street text-fit tests with Dev content on; PLAYTEST.md:275, ROADMAP row, KNOWN_ISSUES row and Practice-Range wiki corrected. Extra stale counts fixed in test_loadout, test_loadout_screen, test_locked_items, test_uf1_ui_fixes, test_ur3_qa, test_customise_parts. No new problems seen in the diff (tests and docs only).
+
+## DT1 bolt-press fix (8753bef)
+
+QA verdict: **Pass** (advisory items below, none blocking). Performance verdict: **Pass**. Read-only review; Godot was not run.
+
+Change: BotCombat.shoot sets cmd.fire only when `not _bolt_cycling(a)` (replica().bolt_action and cooldown > 0). The check
+sits before BotFireMode.pull in the `and` chain, so a held-back tick does not consume `next_tap` and the press is never
+handed to Armament.step's bolt_press_window buffer (armament.gd:341-345). Root cause matches the diff.
+
+QA
+- Correct and narrow: only bolt-actions (the Sniper Rifle) are affected; AEG, pistols and Cyber take the old path (second test).
+- `next_tap` is untouched while cycling (short-circuit); `burst_left` still ticks down, `pause_left` is set at burst end
+  as before, so burst/pause bookkeeping is unchanged. `trigger_was_down` falls to false during the cycle, so the first
+  tick with the bolt home is a fresh press (`not trigger_was_down` holds); it fires that same step (cooldown rests at 0 in semi).
+- Cadence change (SN3 advisory, unmeasured): before, a click in the last 0.7 s of the 1.25 s cycle (fire_rate 0.8) fired
+  the tick the bolt was home. Now the bot must be inside a burst window (skill.burst 0.2-0.45 s, then burst_pause
+  0.3-0.65 s, personality-scaled) when the bolt comes home, else it waits for the next window. Sniper bots will fire
+  somewhat slower than 0.8/s, by up to about one burst_pause, and Rushers (burst x1.2, pause x0.8) least. This is the
+  safer direction and the SN3 target is unlikely to be broken, but no test pins the cadence; suggest a one-off
+  shots-per-minute count for a Hard sniper bot over a fixed duel, and a PLAYTEST line.
+- Other buffered presses past the line check, pre-existing and NOT fixed: (1) semi/burst `press_buffer` 0.15 s + fire_hold_off
+  when a press lands during draw/reload busy (Sniper draw 0.65 s, reload 2.2 s) or cooldown > 0 on any semi replica
+  (cooldown under 0.15 s, e.g. pistols at 7/s); (2) the window is 9 ticks, so a teammate needs about 1 m of movement
+  in 0.15 s: very unlikely, not a measured failure. Note a bot that presses while reloading is possible only if shoot
+  runs then; I did not trace whether the bot code stops pressing in reload/draw. Low risk, can wait; list in KNOWN_ISSUES if wanted.
+- Tests: test_dt1_qa covers hold-during-cooldown and fire-when-home (stated to fail without the fix) and that an AEG is not
+  held. Gaps: no assertion that next_tap or burst_left is unchanged, no test with a start_mode field (the `pull` semi-tap path).
+- Restored stowed cooldown on weapon switch (armament.gd:448) is covered, as it sets `cooldown` too.
+
+Performance
+- Per shooting tick per bot: one `replica()` call (array index), two field reads, a compare. No allocation, no new
+  node or resource, static function, `RefCounted` typed `var r`. BotCombat.bolt_waits already does the same lookup.
+  On the held-back tick it also skips BotFireMode.pull. Net cost is below measurement; no budget affected.
+- Fewer pressed-and-buffered events on Armament for sniper bots; no effect on the 60 Hz step budget.
