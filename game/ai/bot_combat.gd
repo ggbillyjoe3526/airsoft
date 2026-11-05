@@ -181,14 +181,22 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 			b.knee_clear = b.skill.kneels_to_fire and _knee_has_shot(b, w)
 		b.bursting = true
 		var a := b.character.armament
-		# Never on a tick the selector moves: on the way back from burst to semi it passes full auto (BP3).
-		cmd.fire = not cmd.cycle_fire_mode and BotFireMode.pull(b, w,
+		# Never on a tick the selector moves: on the way back from burst to semi it passes full auto (BP3). Never while
+		# a bolt-action still cycles either: that press is kept until the bolt is home (Armament, bolt_press_window),
+		# up to most of a second after this tick's line-of-fire check, and a teammate can step in front meanwhile (DT1).
+		cmd.fire = not cmd.cycle_fire_mode and not _bolt_cycling(a) and BotFireMode.pull(b, w,
 				a.fire_mode() != ReplicaConfig.FireMode.SEMI or not a.trigger_was_down)
 		b.burst_left -= dt
 		if b.burst_left <= 0.0:
 			b.pause_left = b.pick(b.skill.burst_pause)
 	else:
 		b.pause_left -= dt
+
+
+## True while the bolt-action replica in hand is still being worked (its cycle's cooldown not run out).
+static func _bolt_cycling(a: Armament) -> bool:
+	var r := a.replica()
+	return r != null and r.bolt_action and a.cooldown > 0.0
 
 
 ## Whether bot `b`, with a bolt-action replica in hand and its target `dist` m away past hip_fire_range, holds its shot
