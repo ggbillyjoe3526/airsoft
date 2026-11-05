@@ -7,7 +7,8 @@
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-05 | 1 | Claude (build thread) | model tests pass (3 files) | art Retry | the fuze body showed through the head's chamfer; the head read charcoal, not black; the lever arm thin and upright; the head's outline and the crown's notches off the photo's; the flash's ring small and edge-on, its cap pale, its ends knife-sharp |
-| 2026-11-05 | 2 | Claude (build thread) | `tools/check.sh` | art Accept, then critic | – |
+| 2026-11-05 | 2 | Claude (build thread) | `tools/check.sh` pass (4,748 tests) | art Accept; QA Fail | a smoke at rest lay lever down, sunk 8.4 mm into the ground |
+| 2026-11-05 | 3 | Claude (build thread) | targeted tests pass (3 files) | | – |
 
 ## What changed
 
@@ -25,8 +26,9 @@ The smoke and flash bombs were plain cylinders; they are now modelled from the o
   just inside it, and a two-turn split key ring hanging from a wire hook over the rim.
 - **In the game** (`GrenadeView`): each slot and the bomb in hand draw the kind's mesh, swapped only when the kind
   changes; the `Kind` material is painted from `BODY_COLOURS`, so the models match the HUD's bomb icons. A bomb at
-  rest lies on its side lifted by its body's radius (`LIE_RADII`). A model that won't load falls back to the old
-  canister. Every material the models draw is prewarmed.
+  rest lies on its side, the smoke's lever up, lifted by the model's own lowest reach that way (QA found the smoke
+  sunk 8.4 mm with its lever down). A model that won't load falls back to the old canister. Every material the models
+  draw is prewarmed.
 
 ## Decisions
 

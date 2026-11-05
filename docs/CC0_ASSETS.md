@@ -157,7 +157,7 @@ bomb, `assets/models/grenades/<smoke|flash>.glb`, built by `tools/blender/grenad
 
 - **Space.** Metres, life size, one mesh. The long axis is up (Blender +Z, the game's +Y) through the origin, which is
   the middle of the bomb's body; the game spins it about that point in flight and lays it on its side when it rests,
-  lifted by its body's radius (`GrenadeView.LIE_RADII`).
+  its +X side up (the smoke's lever), lifted by the model's own lowest reach (`GrenadeView.LIE`).
 - **Materials.** Plain colours, drawn as the file sets them. The material named `Kind` is painted in the bomb's own
   colour (`GrenadeView.BODY_COLOURS`: green smoke, violet flash), so the model matches the HUD's bomb icons. No
   colour within 20° of a team's hue, as for every prop.

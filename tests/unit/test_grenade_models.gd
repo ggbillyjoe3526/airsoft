@@ -39,11 +39,17 @@ func test_each_model_loads_as_one_mesh() -> void:
 func test_each_model_stands_up_its_axis_through_its_middle_at_life_size() -> void:
 	for kind: int in KINDS:
 		var box := PropDressConfig.load_mesh(GrenadeView.MODELS[kind]).get_aabb()
-		var body := GrenadeView.LIE_RADII[kind]
 		assert_almost_eq(box.size.y, LENGTHS[kind], LENGTH_SLACK, "kind %d's length" % kind)
 		assert_almost_eq(box.get_center().y, 0.0, LENGTH_SLACK, "its middle on the origin")
 		assert_gt(box.size.y, box.size.x, "long axis up")
-		assert_gt(box.size.x, body * 2.0 - 0.001, "its body as wide as it lies on")
+
+
+func test_a_smoke_at_rest_lies_on_its_body_with_its_lever_up() -> void:
+	var v := _view()
+	var box := v.mesh_of(Grenade.Kind.SMOKE).get_aabb()
+	# The lever and ring stand out on the model's +X side; lying, that side is up and the body's far side is down.
+	assert_almost_eq(v.lie_reach(Grenade.Kind.SMOKE), -box.position.x, 0.0001)
+	assert_lt(v.lie_reach(Grenade.Kind.SMOKE), 0.029, "rests on the body's 27.6 mm, not the lever's 36 mm")
 
 
 func test_each_model_is_within_the_triangle_budget() -> void:

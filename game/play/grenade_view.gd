@@ -16,8 +16,9 @@ const MODELS: Array[String] = ["", "res://assets/models/grenades/smoke.glb", "re
 const KIND_MATERIAL := "Kind"
 const CANISTER_RADIUS := 0.032
 const CANISTER_HEIGHT := 0.12
-## How far each kind's body reaches from its axis (m): lying on its side it rests on that.
-const LIE_RADII: Array[float] = [CANISTER_RADIUS, 0.0275, 0.02]
+## A bomb at rest lies on its side, turned this way about the view's forward axis: the smoke's lever (the model's +X)
+## points up, so the canister rests on its body; it is lifted by the model's own lowest reach that way.
+const LIE := -PI * 0.5
 ## Each kind's colour (NONE unused); its spin while flying (turns a second).
 const BODY_COLOURS: Array[Color] = [Color("2b2d31"), Color("4f9d6a"), Color("7d5bc4")]
 const BODY_ROUGHNESS := 0.6
@@ -65,8 +66,10 @@ var soft_flash: bool = false
 var _cfg: GrenadeConfig = null
 var _canisters: Array[MeshInstance3D] = []
 var _bodies: Array[StandardMaterial3D] = []
-## Each kind's mesh, its Kind material painted (BODY_COLOURS), by Grenade.Kind.
+## Each kind's mesh, its Kind material painted (BODY_COLOURS), by Grenade.Kind, and how far it reaches below its
+## middle lying on its side (m).
 var _meshes: Array[Mesh] = []
+var _lie_reach := PackedFloat32Array()
 var _puffs: MultiMeshInstance3D = null
 ## Each puff's place in the unit ball and its size share, the same for every cloud.
 var _layout := PackedVector3Array()
@@ -94,7 +97,9 @@ func setup(count: int, cfg: GrenadeConfig, night: bool) -> void:
 		paint.albedo_color = BODY_COLOURS[kind]
 		paint.roughness = BODY_ROUGHNESS
 		_bodies.append(paint)
-		_meshes.append(_kind_mesh(kind, paint))
+		var mesh := _kind_mesh(kind, paint)
+		_meshes.append(mesh)
+		_lie_reach.append(-(_lying() * mesh.get_aabb()).position.y)
 	for i in maxi(0, count):
 		var m := MeshInstance3D.new()
 		m.visible = false
@@ -194,6 +199,16 @@ func mesh_of(kind: int) -> Mesh:
 	return _meshes[clampi(kind, 0, _meshes.size() - 1)]
 
 
+## How far kind `kind`'s model reaches below its middle lying on its side (m), for tests.
+func lie_reach(kind: int) -> float:
+	return _lie_reach[clampi(kind, 0, _lie_reach.size() - 1)]
+
+
+## A bomb lying on its side.
+static func _lying() -> Transform3D:
+	return Transform3D(Basis(Vector3.FORWARD, LIE), Vector3.ZERO)
+
+
 ## The model of `kind` (MODELS) with its Kind material swapped for `paint`, made once; a plain canister drawn in
 ## `paint` when it has none or won't load.
 static func _kind_mesh(kind: int, paint: StandardMaterial3D) -> Mesh:
@@ -269,11 +284,11 @@ func _draw_canister(m: MeshInstance3D, g: Grenade, fraction: float) -> void:
 	var at := g.prev_position.lerp(g.position, fraction)
 	var basis := Basis.IDENTITY
 	if g.resting:
-		basis = Basis(Vector3.FORWARD, PI * 0.5) # lying on its side
+		basis = _lying().basis
 	else:
 		basis = Basis(Vector3.RIGHT, SPIN * TAU * g.age)
 	var kind := clampi(g.kind, 0, _meshes.size() - 1)
-	m.transform = Transform3D(basis, at + Vector3(0.0, LIE_RADII[kind] - _cfg.radius, 0.0) if g.resting else at)
+	m.transform = Transform3D(basis, at + Vector3(0.0, _lie_reach[kind] - _cfg.radius, 0.0) if g.resting else at)
 	if m.mesh != _meshes[kind]:
 		m.mesh = _meshes[kind]
 	m.visible = true
