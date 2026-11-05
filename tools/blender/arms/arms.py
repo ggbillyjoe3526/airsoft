@@ -43,7 +43,7 @@ FPS = 60
 # Colours from the owner's coyote reference gloves (ref_images/hands/gloves) in the game's look: plain, clean, a
 # little warm.
 MATERIALS = {
-    "Glove": (0xa48a63, 0.85, 0.0), "GloveArmour": (0x5a4a37, 0.55, 0.0), "Sleeve": (0x667052, 0.92, 0.0),
+    "Glove": (0x8f7553, 0.85, 0.0), "GloveArmour": (0x4f4131, 0.55, 0.0), "Sleeve": (0x667052, 0.92, 0.0),
     "SleeveTrim": (0x515a41, 0.88, 0.0),
 }
 NAMES = list(MATERIALS)
@@ -118,8 +118,6 @@ CYBER_RIGHT = dict(PISTOL_RIGHT, d=-0.008, f=0.058, slant=15.0)
 HOLDS = {
     "aeg": Hold("aeg.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.073, -0.026), 31.0, 0.046, 0.0155),
                 RIGHT, GUARD),
-    "sniper": Hold("sniper.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.073, -0.026), 31.0, 0.046, 0.0155),
-                   RIGHT, GUARD),
     "pistol": Hold("pistol.glb", godot_to_eye(0.12, -0.15, -0.34), Grip((0.0, -0.070, -0.016), 27.0, 0.046, 0.0130),
                    PISTOL_RIGHT, DOWN),
     "cyber": Hold("cyber.glb", godot_to_eye(0.12, -0.15, -0.34), Grip((0.0, -0.0905, -0.036), 17.0, 0.060, 0.0158),
