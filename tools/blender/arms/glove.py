@@ -47,6 +47,9 @@ SHELL_THICK = 0.0016
 KNUCKLE_DOME = 0.0024
 KNUCKLE_RIM = 0.0012
 KNUCKLE_ROUND = 0.75
+KNUCKLE_LOBE = 0.004
+KNUCKLE_SEAM = 0.0008
+KNUCKLE_U = (-0.75, -0.25, 0.25, 0.75)
 PAD_THICK = 0.0018
 # The finger plates bend with the glove beneath them (rigid on one bone, the skin rose through their ends as the joints
 # beside them closed).
@@ -431,7 +434,9 @@ def knuckle_guard(surf: Surface, fr: Frame) -> tuple:
         u, v = (u * (1.0 - KNUCKLE_ROUND + KNUCKLE_ROUND * math.sqrt(1.0 - v * v * 0.5)),
                 v * (1.0 - KNUCKLE_ROUND + KNUCKLE_ROUND * math.sqrt(1.0 - u * u * 0.5)))
         back = KNUCKLE_BACK * (1.0 - v) * 0.5
-        return line(u * (1.0 - 0.30 * (1.0 - v) * 0.5)) + f * (KNUCKLE_OVER - back) - up * 0.006
+        # Its edge over the knuckles lobed, a rounded tongue reaching on over each (photo 123404).
+        lobe = KNUCKLE_LOBE * sum(math.exp(-((u - ku) / 0.2) ** 2) for ku in KNUCKLE_U) * max(0.0, v) ** 2
+        return line(u * (1.0 - 0.30 * (1.0 - v) * 0.5)) + f * (KNUCKLE_OVER - back + lobe) - up * 0.006
 
     def direction(u: float, v: float) -> Vector:
         return up + across * u * 0.25
@@ -441,7 +446,9 @@ def knuckle_guard(surf: Surface, fr: Frame) -> tuple:
         dome = max(0.0, 1.0 - (u * u * 0.8 + (v - 0.2) * (v - 0.2) * 0.5))
         edge = max(abs(u), abs(v))
         rim = KNUCKLE_RIM * math.exp(-((edge - 0.86) / 0.05) ** 2)
-        return (SHELL_THICK + KNUCKLE_DOME * dome + rim) * _soft_box(u, v, 0.14) + 0.0003
+        # A stitched seam just inside the border: a fine groove.
+        seam = KNUCKLE_SEAM * math.exp(-((edge - 0.76) / 0.025) ** 2)
+        return (SHELL_THICK + KNUCKLE_DOME * dome + rim - seam) * _soft_box(u, v, 0.14) + 0.0003
 
     return surf.shell(origin, direction, 13, 29, thick, "GloveArmour", False, "Hand", 8, 0.0010)
 
@@ -453,7 +460,7 @@ def finger_pads(surf: Surface, fr: Frame) -> list:
     j = fr.j
     out = []
 
-    def pad(a: Vector, b: Vector, up: Vector, span: tuple, wrap: float, bone: str, grid: tuple = (7, 2, 0.5)) -> tuple:
+    def pad(a: Vector, b: Vector, up: Vector, span: tuple, wrap: float, bone: str, grid: tuple = (9, 1, 0.5)) -> tuple:
         d = (b - a).normalized()
         up = (up - d * up.dot(d)).normalized()
         side = d.cross(up)
@@ -467,9 +474,12 @@ def finger_pads(surf: Surface, fr: Frame) -> list:
             return up * math.cos(t) + side * math.sin(t)
 
         def thick(u: float, v: float) -> float:
-            return PAD_THICK * max(0.0, 1.0 - u * u - v * v) ** 0.6 * _soft_box(u, v, grid[2]) + 0.0003
+            # A domed oval with a sunken hole in its middle (the photo's rubber knuckle pads).
+            r2 = u * u + v * v
+            hole = 1.0 - 0.85 * math.exp(-r2 / 0.08)
+            return PAD_THICK * max(0.0, 1.0 - r2) ** 0.6 * hole * _soft_box(u, v, grid[2]) + 0.0003
 
-        return surf.shell(origin, direction, grid[0], 9, thick, "GloveArmour", False, PAD_RIGID and bone, grid[1],
+        return surf.shell(origin, direction, grid[0], 11, thick, "GloveArmour", False, PAD_RIGID and bone, grid[1],
                           0.0008)
 
     for f in (2, 3, 4, 5):
@@ -480,7 +490,7 @@ def finger_pads(surf: Surface, fr: Frame) -> list:
     d = (b - a).normalized()
     away = a - fr.palm_centre
     away = (away - d * away.dot(d)).normalized()
-    out.append(pad(a, b, (away + fr.dorsal * 0.6), (0.30, 0.85), PAD_WRAP, "Thumb2", (5, 1, 0.4)))
+    out.append(pad(a, b, (away + fr.dorsal * 0.6), (0.30, 0.85), PAD_WRAP, "Thumb2", (9, 1, 0.5)))
     return out
 
 
@@ -503,7 +513,9 @@ def build_left(shoulder: Vector) -> tuple:
     src_v, src_f, j = load_source(shoulder)
     fr = Frame(j)
     up_dir = (j["shoulder"] - j["elbow"]).normalized()
-    cuts = [(fr.wrist + fr.fdir * t, fr.fdir) for t in (SLEEVE_END + 0.004, GLOVE_TOP)]
+    # Cut where the sleeve ends and where its band does, so both run clean round the arm (a face-by-face edge left
+    # the cuff ragged and some of its edges open, which the shoulder's cap then closed in long slivers through the arm).
+    cuts = [(fr.wrist + fr.fdir * t, fr.fdir) for t in (SLEEVE_END, SLEEVE_END - SLEEVE_BAND, GLOVE_TOP)]
     cuts.append((j["elbow"] + up_dir * UPPER_KEEP, up_dir))
     verts, faces = subdivide(src_v, src_f, cuts)
     pts = bone_points(j)
@@ -619,7 +631,7 @@ def sleeve(mesh: Mesh, verts: list, faces: list, wts: list, fr: Frame) -> None:
     for o in used:
         d = off(verts[o])
         # The banded cuff stands a little proud of the sleeve.
-        if fr.along(verts[o]) > SLEEVE_END - SLEEVE_BAND:
+        if fr.along(verts[o]) > SLEEVE_END - SLEEVE_BAND - 1e-6:
             d += 0.0012
         outer.append(verts[o] + snrm[o] * d)
     base = mesh.add(outer, [[idx[i] for i in f] for f in sleeve_f], smats, [wts[o] for o in used])

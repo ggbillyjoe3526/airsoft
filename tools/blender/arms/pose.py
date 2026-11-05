@@ -398,13 +398,17 @@ class Hand:
                            @ Matrix.Rotation(math.radians(base[2]), 3, self.axis[b1]))
         return self.settle("Thumb", (0.0, bends[0], bends[1]), col, span)
 
-    def onto(self, name: str, target: Vector, col: Collider, limits: tuple, swing: int = 20) -> list:
+    def onto(self, name: str, target: Vector, col: Collider, limits: tuple, swing: int = 20,
+             couple: float = 0.0) -> list:
         """Bends a finger so its last bone's pad comes to `target` (the trigger) without passing into the replica: a
-        search over its three bends and its base's swing sideways (up to `swing` degrees), coarse then fine."""
+        search over its three bends and its base's swing sideways (up to `swing` degrees), coarse then fine. With
+        `couple`, the last joint bends that share of the middle one, as a relaxed finger's do, and is not searched."""
         bones = ["%s%d_%s" % (name, k, self.side) for k in (1, 2, 3)]
         side_axis = self.axis[bones[0]].cross(Vector((0.0, 1.0, 0.0))).normalized()
 
         def apply(lat: float, a: tuple) -> None:
+            if couple:
+                a = (a[0], a[1], a[1] * couple)
             for k, ang in enumerate(a):
                 rot = Matrix.Rotation(math.radians(ang), 3, self.axis[bones[k]])
                 if k == 0:
@@ -421,20 +425,20 @@ class Hand:
 
         best = None
         for lat in range(-swing, swing + 1, 10):
-            for a1 in range(-10, limits[0] + 1, 10):
+            for a1 in range(0 if couple else -10, limits[0] + 1, 10):
                 for a2 in range(0, limits[1] + 1, 10):
-                    for a3 in range(0, limits[2] + 1, 10):
+                    for a3 in range(0, 1 if couple else limits[2] + 1, 10):
                         sc, clear = score(lat, (a1, a2, a3))
                         if best is None or sc < best[0]:
                             best = (sc, [lat, a1, a2, a3], clear)
         step = 4.0
         while step >= 1.0:
             moved = False
-            for k in range(4):
+            for k in range(3 if couple else 4):
                 for sgn in (-1.0, 1.0):
                     trial = list(best[1])
                     trial[k] += sgn * step
-                    if k == 0 and abs(trial[0]) > swing:
+                    if k == 0 and abs(trial[0]) > swing or couple and trial[1] < 0.0:
                         continue
                     sc, clear = score(trial[0], tuple(trial[1:]))
                     if sc < best[0]:
@@ -443,6 +447,8 @@ class Hand:
             if not moved:
                 step *= 0.5
         apply(best[1][0], tuple(best[1][1:]))
+        if couple:
+            best[1][3] = best[1][2] * couple
         if best[2] < CONTACT:
             print("  ! the %s finger passes %.1f mm into the replica reaching its mark" % (
                 name, (CONTACT - best[2]) * 1e3))
