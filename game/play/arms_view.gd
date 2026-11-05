@@ -74,6 +74,15 @@ func holding() -> StringName:
 	return _on
 
 
+## Every material the arms can wear (each kind's, depth pressed), for ShaderPrewarm: none without the model.
+func materials() -> Array[Material]:
+	var out: Array[Material] = []
+	for worn: Array in _worn.values():
+		for m: Material in worn:
+			out.append(m)
+	return out
+
+
 ## Dresses the arms as `kind` (FigureMix.HUMAN or FigureMix.ROBOT).
 func set_kind(kind: int) -> void:
 	if kind == _kind:

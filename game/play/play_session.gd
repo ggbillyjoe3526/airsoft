@@ -741,6 +741,7 @@ func _build_views(ui: CanvasLayer) -> void:
 		add_child(_overtime_flag)
 		first_use.append_array(_overtime_flag.materials())
 	first_use.append_array(_hands.prewarm_glass())
+	first_use.append_array(_hands.arms_materials())
 	first_use.append_array(range_materials)
 	if _skyline != null:
 		first_use.append_array(_skyline.materials())
