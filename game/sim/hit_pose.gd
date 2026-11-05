@@ -2,7 +2,8 @@ class_name HitPose
 ## The fitted hit volume's pose (HV1): the human figure's joints in its own frame (feet on the origin, facing -Z), posed
 ## from HitFit's samples as its animation graph blends them (the gait and crouch blend spaces, the crouch, the jump and
 ## the vault, each turn blended as AnimationMixer does, the legs posed down from the hips, the upper body for the aim
-## and hold) and then bent as FigureBend draws it. Hitbox.build_volume hangs the capsules on them. Allocates nothing.
+## and hold, turned back to standing still's heading) and then bent as FigureBend draws it. Hitbox.build_volume hangs
+## the capsules on them. Allocates nothing.
 
 ## A point this little outside a gait triangle (a share of its weights) still counts as in it: on a shared edge.
 const BARYCENTRIC_EDGE := 1e-6
@@ -88,11 +89,19 @@ static func pose(c: Character, hits: HitConfig, fit: HitFit) -> void:
 			_add_upper(aims, HitFit.UPPER * lo, 1.0 - t)
 			_add_upper(aims, HitFit.UPPER * (lo + 1), t)
 	_legs(fit)
-	# The upper body on the blended hips.
+	# The upper body on the blended hips, turned back to standing still's heading (HitConfig.upper_steady), as
+	# FigureBend draws it while the upper body's clips show (not vaulting, not out).
 	var o := lower[HitFit.HIPS]
 	var x := lower[HitFit.HIPS_X]
 	var y := lower[HitFit.HIPS_Y]
 	var z := lower[HitFit.HIPS_Z]
+	if alive and not vaulting and hits.upper_steady != 0.0:
+		var turn := HitFit.steady_turn(fit.still_heading(crouch), x) * hits.upper_steady
+		if turn != 0.0:
+			var steady := Basis(Vector3.UP, turn)
+			x = steady * x
+			y = steady * y
+			z = steady * z
 	for k in HitFit.UPPER:
 		var l := upper[k]
 		upper[k] = o + x * l.x + y * l.y + z * l.z

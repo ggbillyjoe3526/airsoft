@@ -68,6 +68,10 @@ Play › Mode Elimination on Depot, Match › Opponents Normal. Set the mouse se
 - [ ] **Watch the crosshair.** It opens when you run or jump, closes almost at once when you stop, and is tightest
   crouched and still; crouch-walking sits between standing still and walking.
 - [ ] **Sprint up and down Depot's dock ramps.** Uphill loses about a quarter of a sprint's pace (a confirmed call).
+- [ ] **Watch bots run (GA1).** On Depot, watch bots walk, run, sprint, strafe and back-pedal past you, and crouch-walk.
+  Their feet stay planted on the floor without sliding, each step rolls heel to toe, and the legs keep pace with the
+  speed. Strafing, the legs turn into the step while the rifle stays on its aim. Does any gait look wrong, especially
+  the back-pedal and strafes (quick steps, about 4 a second) and the low crouch walk (short quick steps)?
 - [ ] **Controls through a vault (BP5).** Vault a low wall (Depot's office hall has one). On Semi, hold left click
   through it: one BB, not two. Hold right click: the sight drops and comes back.
 
@@ -1334,6 +1338,13 @@ The AEG Rifle's two barrels are proper models now, built from the rifle's own ba
 - [ ] **Up close:** on each card the bucking's centre is a dark hole and the hop dial's teeth read (not blown white);
   with the long barrel fitted there's no line or flicker where the extension's flats meet its shoulder, and the brass
   crown in the flash hider looks round. The first open of the Barrel tab doesn't hitch.
+
+## GBB Pistol sights and port (GS1)
+
+- [ ] **Aim:** aim the GBB Pistol in the Range. The front post with its white dot stands in the rear sight's notch,
+  its top level with the rear sight's top, a sliver of light either side; the BBs land on the post's top.
+- [ ] **Port:** Inspect the pistol and look at the top of the slide: the barrel fills the ejection port with no dark
+  gap round it, and the slide still blows back and locks back cleanly.
 
 ## Reporting what you find
 
