@@ -1245,6 +1245,21 @@ Dev content on for the rifle. The numbers came from bots; these need you.
   cover, the silencer on the muzzle and the extended magazine in the grip with its base pad below.
 - [ ] **Menus:** the Loadout and Armory pictures show the new pistol, sharp and to scale.
 
+## The AEG Rifle's fixes (BL3)
+
+Your five fixes from the marked-up render (2026-11-05), worked from your original photo.
+
+- [ ] **Trigger:** in first person and Customise, the trigger's face curves forward and its tip curls forward.
+- [ ] **Charging handle:** Inspect the rifle: the handle behind the receiver slides 5 cm back with air under it, over
+  the stock, and home again, nothing poking through; no flicker on the receiver's back under it.
+- [ ] **Grip:** the trigger finger lands on the blade mid-guard; the grip's back flows down from the receiver with no
+  ridge or ledge.
+- [ ] **Rail:** the top rail runs level from the receiver onto the handguard; an optic still fits and hides the iron
+  sights.
+- [ ] **One body:** the receiver, magazine well and grip read as one moulded piece; the right hand still holds the
+  grip in first person and on the bots.
+- [ ] **Paints:** in Customise, try each paint: the grip now takes the body's colour.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
