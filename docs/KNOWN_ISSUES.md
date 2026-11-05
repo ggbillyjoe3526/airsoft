@@ -11,6 +11,8 @@ Every open bug, limit and known gap in the game, so nobody re-reports or re-meas
 
 | Area | Issue | Class | Found |
 |---|---|---|---|
+| Art | The figure's knee pads are still the v12 pads, cut out of the old body as `Kit_Pads` (BL10), until the pads thread's own pads replace them | fix now (BL13) | 2026-11-05 |
+| Art | The figure's sleeve edge shows a jagged line where it meets the glove's cuff, seen only close up (BL10) | can wait | 2026-11-05 |
 | Play | The Sniper Rifle's Fire clip (since BL5 the bolt drawn back at 0.48 s, home at 0.72 s and turned down at 0.88 s) and cocking sound show the rifle cocked about 0.9 s after a shot, but the rifle is ready at 1.25 s (M130) to 1.39 s (M150); a click after the handle is home now fires as the cycle ends (BP3). The cocking is the owner's recorded pistol slide since AU2, timed to the clip; re-time with the owner's model | playtest | 2026-11-03 |
 | Play | The bolt's cocking sound plays to its end after a switch to the pistol or a hit mid-cycle (BP3) | can wait | 2026-11-03 |
 | Play | A mouse wheel notch on the tick a reload or a slot key's draw starts, aimed through the Variable Scope, neither zooms nor switches (BP3) | can wait | 2026-11-03 |
@@ -73,7 +75,7 @@ Every open bug, limit and known gap in the game, so nobody re-reports or re-meas
 | Play | Settings has no Gameplay group yet (SE1). Window modes, F11 and Alt+Enter, the monitor, V-Sync, the background frame rate and key names in the player's layout are tested only against a stand-in for the display server (they need a display; the owner's checks in `docs/records/SE1.md` and `docs/records/GR3.md`) | can wait | 2026-10-18 |
 | Play | A screen reader hears only the hit feed, your hit and the rounds' turns: squad orders aren't read, and the menus' custom-drawn controls (choices, toggles, cards, sliders) have no spoken names; a Beta polish pass (plan step 21, question 8) (AC6) | can wait | 2026-10-23 |
 | Play | Above 100 % Dev game speed the pacer runs one tick on one frame and two on the next, and drawing keeps only one past tick, so positions, figures and BBs move unevenly (the sight is spread evenly since FB6); spreading the rest needs a second past tick kept | can wait | 2026-10-30 |
-| Play | A thrown bomb passes through characters (it bounces off the level only), and the figure has no throw animation: it slings its replica for the throw. The canister held in first person is a plain cylinder, no hand (SF1) | can wait | 2026-10-30 |
+| Play | A thrown bomb passes through characters (it bounces off the level only). The bomb held in first person shows no hand until the first-person arms (BL4, #204) merge; a grenade hold for them is GT1's follow-up. Figures throw it (GT1), but the bomb still leaves from the eyes, not the hand (SF1) | can wait | 2026-11-05 |
 | Play | A torch that is on goes off for a throw and comes back on after it; the flash's flare shows for 0.3 s, so a long frame hitch at the bang can skip it on screen (the wash and the sound still play) (SF1) | can wait | 2026-10-30 |
 | Play | While you skip a round the HUD is hidden, the screen reader's label with it: hit lines during the skip aren't read and the last one stays as its text until the next message; the round's end still reads (AC6) | can wait | 2026-10-23 |
 | Play | Dev settings › End the round now while Elimination's overtime flag stands puts the flag's whole 30 s on the round's table, however much of it was played (it runs the flag's time out; OV3) | can wait | 2026-10-26 |

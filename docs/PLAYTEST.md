@@ -698,6 +698,9 @@ same and throw them (SF2).
   nothing happens. Throw one at your own feet: your screen goes white and the sound dips, then fades back. Is the
   blinding fair, and is it fun rather than annoying?
 - [ ] **Turn away.** Throw a flash, then turn your back on it before the bang: nothing. Side on, a short wash.
+- [ ] **Bomb sounds (AU7).** Throw a smoke and a flash on the range, near and from 10 to 20 m away: the ring pull, then
+  your tin can clattering where it lands, starting right as it hits, and again if it bounces on, the smoke hissing as it goes
+  off with no deep pop, and the flash a clean balloon pop. Do they sound like your recordings? Is the flash loud enough?
 - [ ] **Bots' smoke (SF2).** Pin a bot in cover from 10 to 30 m with steady fire: now and then it smokes the line
   between you (more often on Hard). Does it read as a bot buying time, and is it annoying how often?
 - [ ] **Bots' flash (SF2).** Let a bot hear you round a corner, then wait: it may flash the corner, turn its back and
@@ -1331,6 +1334,17 @@ Every BB in flight is now a proper Blender model, round from every side instead 
 - [ ] **Thrown:** throw each. It tumbles in flight, bounces and comes to rest lying on its side on the ground, not
   sunk into it or floating over it.
 - [ ] **Bots' bombs:** the ones bots throw look the same, and the HUD's bomb icons match the stripe and band colours.
+
+## Bots throwing bombs (GT1)
+
+- [ ] **The wind-up:** on the Practice Range or in a match, watch a bot throw a smoke or flash from 5 to 15 m. Its
+  replica goes to its chest, the bomb shows in its right hand and the left hand meets it to pull the pin. The arm
+  swings back by its ear with the left arm pointing ahead, then comes over beside the head, elbow first, never across
+  the face, and the bomb leaves as the hand reaches out ahead at head height.
+- [ ] **After:** the arm follows through down across the body, then the replica comes back up. No bomb is left in the
+  hand after it is thrown.
+- [ ] **Shape:** nothing stretches oddly at the shoulder or armpit while the arm is up, on both the soldier and the
+  robot (Settings › Dev › Robots).
 
 ## GBB Pistol sights and port (GS1)
 
