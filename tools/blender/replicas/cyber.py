@@ -81,14 +81,14 @@ def xs(sx: int, inner: float, outer: float) -> tuple:
 # SIZE_Y; heights (z) times SIZE_Z_UP above the bore's foot (z 0) and SIZE_Z_LOW below it; widths (x) times
 # SIZE_X_UPPER over the frame (the shroud, slide, rear block and cap: 13.3 mm a side, the GBB's slide 12.75), and on the
 # frame SIZE_X_FRAME (12.4 mm, the GBB's frame) flaring to SIZE_X_GRIP (15 mm, the GBB's grip) over GRIP_FLARE.
-# 229 x 193 x 38 mm becomes 204 x 157 x 27 mm (the GBB: 204 x 140 x 31 with its wider grip). Round parts on the sides
+# 229 x 193 x 38 mm becomes 206 x 152 x 32 mm (the GBB: 204 x 140 x 31). Round parts on the sides
 # are drawn pre-squashed (`place`) so they come out round; the rail, trigger and sights keep their own widths.
 SIZE_Y = 0.89
 SIZE_Z_UP = 0.72
 SIZE_Z_LOW = 0.84
 SIZE_X_UPPER = 0.72
-SIZE_X_FRAME = 12.4 / 15.8
-SIZE_X_GRIP = 15.0 / 15.8
+GBB_FRAME_HW = 12.4
+GBB_GRIP_HW = 15.0
 GRIP_FLARE = (-20.0, -40.0)
 
 # The slide: its length (y), height (z) and half width, as the old model's; the bore's height.
@@ -99,6 +99,9 @@ BORE_Z = 15.0
 # The front shroud's and rear block's half width, the frame's, the trigger guard's and the grip's.
 SHROUD_HW = 18.5
 FRAME_HW = 15.8
+# The frame's width scales (see SIZE_Y): BL6's frame to the GBB's frame and grip.
+SIZE_X_FRAME = GBB_FRAME_HW / FRAME_HW
+SIZE_X_GRIP = GBB_GRIP_HW / FRAME_HW
 GUARD_HW = 6.5
 # The shroud: its side outline (front face at 101, top at 37, the lower edge at -21 with its three teeth' gaps).
 SHROUD = [(17.0, 37.0), (95.5, 37.0), (101.0, 31.5), (101.0, -18.0), (94.5, -26.6), (52.0, -26.6), (52.0, 0.0),
@@ -148,10 +151,12 @@ GRIP = [(-20.0, -20.0), (-24.0, -34.0), (-27.5, -36.0, 4.0), (-31.5, -60.0, 30.0
 # nearer the grip than the old model's (owner, 2026-11-05: "the player would need to stretch their finger"); the loop's
 # front slants up to the front block's foot, so no notch opens under it. CZ1 sets the trigger TRIGGER_BACK further
 # back, to the GBB's reach from the back strap (BL6's sat 19 mm further out), the opening's back wall with it, 4 mm
-# behind the blade and 4 mm ahead of the grip's front.
+# behind the blade and 4 mm ahead of the grip's front; the guard's front (the opening's front wall and the loop's lower
+# front) moves 7.5 mm back with it, so the opening stays 4.5 mm longer than BL6's behind the trigger and the Weapon
+# Torch's back end clears the loop (at the moved TorchMount it sank 2 mm into it).
 TRIGGER_BACK = 13.0
-GUARD_HOLE = [(33.7, -16.5, 1.0), (33.7, -35.5), (29.0, -40.0, 1.0), (-16.0, -40.0, 1.0), (-16.0, -16.5, 1.0)]
-GUARD_LOOP = [(52.0, -14.0), (52.0, -24.0, 1.0), (42.0, -34.0, 2.0), (42.0, -42.5), (37.5, -47.0, 1.5), (-2.0, -47.0),
+GUARD_HOLE = [(26.2, -16.5, 1.0), (26.2, -35.5), (21.5, -40.0, 1.0), (-16.0, -40.0, 1.0), (-16.0, -16.5, 1.0)]
+GUARD_LOOP = [(52.0, -14.0), (52.0, -24.0, 1.0), (34.5, -34.0, 2.0), (34.5, -42.5), (30.0, -47.0, 1.5), (-2.0, -47.0),
               (-2.0, -14.0)]
 GUARD_WEB = [(-1.0, -20.0), (-1.0, -47.0), (-20.0, -47.0, 5.0), (-27.5, -38.0), (-26.0, -20.0)]
 TRIGGER_SLOT = ((-8.0 - TRIGGER_BACK, 13.0 - TRIGGER_BACK), (-26.0, -8.0), 3.4)
@@ -171,7 +176,7 @@ RAIL_Y = (57.0, 92.0)
 RAIL_Z = (-26.6, -21.0)
 RAIL_HW = 10.0
 RAIL_SLOTS = 4
-# The sights' tops on one line: BL6's z 40 (the old marks) raised 2 mm, so the rear sight keeps 2.5 mm under its
+# The sight line (the front post's top and both empties): BL6's z 40 (the old marks) raised 2 mm, so the rear sight keeps 2.5 mm under its
 # notch's floor (with the floor at 40 - NOTCH_DROP the notch cut the sight to its foot and its back face split).
 SIGHT_Z = 42.0
 # SIGHT_Z is the sight line: the front post's top and the empties' height, so the eye's when aimed. The rear notch's
@@ -612,11 +617,11 @@ def frame() -> list:
         cut.append(side_recess("c_window", GRIP_WINDOW, sx, FRAME_HW, WINDOW_DEPTH))
         cut.append(side_recess("c_housing", HOUSING, sx, FRAME_HW, 1.6))
         # A channel along the guard's bottom bar.
-        cut.append(side_recess("c_gch", [(32.0, -44.1, 0.6), (0.0, -44.1, 0.6), (0.0, -42.9, 0.6), (32.0, -42.9, 0.6)],
+        cut.append(side_recess("c_gch", [(24.5, -44.1, 0.6), (0.0, -44.1, 0.6), (0.0, -42.9, 0.6), (24.5, -42.9, 0.6)],
                                sx, GUARD_HW, 0.6))
         # Grooves down the guard's front and the seam lines between the dust cover and the guard.
         for z in (-37.0, -41.0):
-            cut.append(side_recess("c_gg", [(43.0, z - 0.5), (37.0, z - 0.5), (37.0, z + 0.5), (43.0, z + 0.5)], sx,
+            cut.append(side_recess("c_gg", [(35.5, z - 0.5), (29.5, z - 0.5), (29.5, z + 0.5), (35.5, z + 0.5)], sx,
                                    GUARD_HW, 0.5))
     # Serrations down the front strap (the old model's teeth), through its whole width.
     for i in range(FRONT_SERRATIONS):

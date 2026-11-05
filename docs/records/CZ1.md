@@ -1,12 +1,13 @@
 # CZ1 · The Cyber Pistol at the GBB Pistol's size
 
-**Review:** 1 attempt · critic pending · qa pending · performance pending
+**Review:** 2 attempts · critic pending · qa pending · performance pending
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-05 | 1 | Claude (CZ1 thread) | pending | pending | – |
+| 2026-11-05 | 1 | Claude (CZ1 thread) | running | Retry 6/8 | the Weapon Torch's back end sank 2 mm into the guard loop (`TorchMount` moved back with the warp, the loop's front less); docs' sizes and "the GBB's reach" wrong; no QA report yet |
+| 2026-11-05 | 2 | Claude (CZ1 thread) | pending | pending | – |
 
 ## What changed
 
@@ -28,25 +29,33 @@
   0.5 mm over it, the post 3.2 mm and the notch 4 mm wide (the GBB's), so the post and its glowing dot stand in the
   notch with light either side. The sight line rose 2 mm (before the warp) so 2.5 mm of rear sight stays under the
   notch's floor: with the floor at its foot, the back face's triangles bridged the notch. `tests/unit/test_cyber_sights.gd`
-  ray-tests the sight picture as `test_pistol_sights.gd` does the GBB's. Round parts on the sides (screws,
-  the cap's and cell's glowing rings, the fire-mode lights) are drawn pre-squashed in `place`, so they come out round.
-- **Size:** 229 × 193 × 38 mm before, 204 × 152 × 31 mm now (the GBB: 204 × 140 × 31). The grip is 55 to 59 mm front to
+  ray-tests the sight picture as `test_pistol_sights.gd` does the GBB's.
+- **Round parts on the sides** (screws, the cap's and cell's glowing rings, the fire-mode lights) are drawn
+  pre-squashed in `place`, so they come out round.
+- **Size:** 229 × 193 × 38 mm before, 206 × 152 × 32 mm now (the GBB: 204 × 140 × 31). The grip is 55 to 59 mm front to
   back and 30 mm across (the GBB's 58 to 61 and 31); the top is at 26.6 mm (the GBB's 26.1), the bore at 10.8 (10.5),
   the sight line at 30.2 (25.7).
 - **Thumb room:** the rear block's skirt (below z -8 mm before the warp) is sunk 0.8 mm, from BL6's 1.2, so it sits
   0.3 mm proud of the frame, as the GBB's slide does; the band above it 0.9 mm.
-- **Budget:** 37,802 triangles in the hands (40k; the owner's ~95 % rule), spent on 4 segments per outline fillet
+- **Budget:** 37,826 triangles in the hands (40k; the owner's ~95 % rule), spent on 4 segments per outline fillet
   (BL6: 3) and a third bevel segment on the muzzle block and frame, two on the cell, three on the base pad. Figure
   version 240.
 - **The torch part** (`replicaParts/cyber.glb`) rebuilt by `tools/blender/parts/attachments.py`'s `write("cyber")` at
-  the moved `TorchMount`; the other parts files untouched.
+  the moved `TorchMount`; the other parts files untouched. `write` now stops the build when a part of a file in
+  `CLEAR_OF_BODY` touches the replica's Body (a BVH overlap of every face; the Cyber's torch: 0 pairs, 3.6 mm clear at
+  its nearest; the attempt-1 model gives 222 pairs and stops).
 
 ## Decisions
 
 - **The trigger moves 13 mm nearer the grip** (11.6 mm at the new size; bone y -7.6 mm, the GBB's -5.4), the guard
   opening's back wall 4.5 mm with it (4 mm behind the blade, 4 mm ahead of the grip's front). BL6's trigger sat 19 mm
   further from the back strap than the GBB's, and the owner's trigger ruling (2026-11-05: "the player would need to
-  stretch their finger") went the same way. Default taken, told to the owner with the pictures.
+  stretch their finger") went the same way. Default taken, told to the owner with the pictures. The reach from the back
+  strap (at z -25 mm) is 73.6 mm to the GBB's 68.3: the back strap stays where BL6 drew it, since bringing it forward
+  means moving the cell and its windows inside the grip too; the arms' hold is fitted to the grip, not to that gap.
+- **The guard's front moves 7.5 mm back** (before the warp: the opening's front wall to 26.2, the loop's lower front to
+  34.5), so the opening, which the trigger left 38 mm long ahead of it, is shorter, and the Weapon Torch's back end
+  clears the loop.
 - **A shallower base pad** (to z -144 mm before the warp, BL6's -151), so the grip ends 7 mm under the GBB's magazine,
   not 13.
 - **A warp, not a redrawn outline:** BL6's design is a few hundred hand-placed millimetre marks the owner approved; one

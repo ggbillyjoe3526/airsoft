@@ -111,8 +111,8 @@ func test_its_selector_shows_the_fire_mode_even_while_the_fire_clip_plays() -> v
 	_frame(view, c)
 	view.on_shot()
 	var auto: Transform3D = await _drawn_selector(held)
-	assert_almost_eq(semi.origin.y, 0.0163, 1e-3, "semi: half way along the clip")
-	assert_almost_eq(auto.origin.y, 0.0243, 1e-3, "auto: the clip's end, held through the Fire clip")
+	assert_almost_eq(semi.origin.y, 0.0145, 1e-3, "semi: half way along the clip (CZ1 size)")
+	assert_almost_eq(auto.origin.y, 0.0216, 1e-3, "auto: the clip's end, held through the Fire clip")
 
 
 func test_the_aegs_selector_turns_with_its_fire_mode_too() -> void:
