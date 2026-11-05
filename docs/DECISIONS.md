@@ -670,6 +670,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **The AEG Rifle and the GBB Pistol are redesigned from the owner's reference photos, with no text or logo copied
   (owner, 2026-10-12; RM6, RM7).** Small, minimal iron sights; the old length, grip, magazine, rails and mounts stay.
   The Gas Pistol became the GBB Pistol, a blowback replica with the same numbers.
+- **Your first-person arms (BL4, 2026-11-05; defaults the owner can change).** Coyote gloves and olive sleeves, built
+  from the MakeHuman CC0 arm with the figures' bone names, one hold per replica solved against its model with no face
+  passing into it (owner, 2026-11-04: no clipping, a natural wrist). Pistols are held in the right hand alone, the left
+  arm lowered out of view: two-handed pistol holds clipped or bent the wrist. A robot player's arms are graphite and
+  light grey. No arm clips for firing or reloading yet: the replica's own clips move its parts. A replica's model change
+  means re-running `tools/blender/arms/arms.py`.
 - **Glowing BBs are green and loaded At Night by default (owner, 2026-10-24; WL8).** A per-replica Customise choice
   (At Night, Always, Off), saved with the loadout; every bot loads At Night. Drawing only: a seeded match plays the same
   with every choice. Their greens stay more than 20 degrees of hue off every team's.

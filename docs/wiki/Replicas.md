@@ -4,7 +4,8 @@ Replicas are the toy guns of airsoft: plastic, light, and they fire 6 mm BBs. In
 original design, and they differ in how they load, cycle, sound and handle, **never in damage**. One hit is one hit,
 whatever it came from.
 
-You carry two at once, a primary and a sidearm, picked in your [Loadout](Loadout).
+You carry two at once, a primary and a sidearm, picked in your [Loadout](Loadout). In play you see your own arms,
+in coyote gloves and sleeves, holding the one in your hands: a rifle in both hands, a pistol in your right hand alone.
 
 ## Stats
 

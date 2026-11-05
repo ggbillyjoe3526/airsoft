@@ -43,9 +43,14 @@ class Held:
 	var selector: SelectorPose = null
 
 var _cfg: ViewModelConfig = null
-## Whose arms you would see (FigureMix.HUMAN or FigureMix.ROBOT), set by PlaySession from the match's mix. No arm is
-## drawn yet: step 32's first-person arms read it.
-var arms_kind: int = FigureMix.HUMAN
+## Whose arms you see holding the replica (FigureMix.HUMAN or FigureMix.ROBOT), set by PlaySession from the match's
+## mix: ArmsView.
+var arms_kind: int = FigureMix.HUMAN:
+	set(kind):
+		arms_kind = kind
+		if _arms != null:
+			_arms.set_kind(kind)
+var _arms: ArmsView = null
 var _held: Array[Held] = []
 var _active: int = -1
 var _kick: float = 0.0
@@ -80,6 +85,10 @@ func setup(cfg: ViewModelConfig, loadout: Array[ReplicaConfig], query: WorldQuer
 		view: ViewConfig = null, eyes: Camera3D = null) -> void:
 	_cfg = cfg
 	_query = query
+	_arms = ArmsView.new()
+	add_child(_arms)
+	_arms.setup(cfg)
+	_arms.set_kind(arms_kind)
 	if view != null and eyes != null:
 		_glass = OpticGlass.new()
 		_glass.setup(cfg, view, eyes)
@@ -279,6 +288,8 @@ func _show(slot: int) -> void:
 			_held[i].window.disc.visible = false
 	_active = slot
 	_kick = 0.0
+	if slot >= 0 and slot < _held.size():
+		_arms.hold(_held[slot].id, _held[slot].root)
 
 
 func _seek(held: Held, clip: StringName, share: float) -> void:
