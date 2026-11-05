@@ -167,6 +167,7 @@ func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = fals
 	tree.set(FigureGraph.P_WALK_OFF_PACE, pose.walk_off_speed / _walk_off_pace if _walk_off_pace > 0.0 else 1.0)
 	tree.advance(delta)
 	bend.hits = hits
+	bend.steady = pose.upper_weight()
 	bend.lean = pose.lean
 	bend.crouch = pose.crouch
 	# The spine leans what the aim clips leave of the pitch, while they show (not holstered, not calling the hit).
