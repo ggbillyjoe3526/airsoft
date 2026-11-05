@@ -1,6 +1,6 @@
 # BL4 · Your first-person arms
 
-**Review:** critic Retry 6/8 (attempt 6) · qa Pass (attempt 4) · performance Pass (attempt 4); the owner's ruling (2026-11-05
+**Review:** critic Retry 7/8 (attempt 8) · qa Pass (attempt 4) · performance Pass (attempt 4); the owner's ruling (2026-11-05
 18:37, 19:46): keep going past the four attempts, the critic extremely harsh, merged only once he approves
 
 ## Attempts
@@ -13,21 +13,30 @@
 | 2026-11-05 | 4 | Claude (build thread) | 7/8 | Retry | Last attempt, stopped for the owner: finger first sections 7 to 11 mm off the grips, the Cyber thumb high beside the rear block, the support hand over the handguard's top (forearm rise 29°), slab knuckle shell, block-like plates, torn web and back-of-hand edges at large thumb twists |
 | 2026-11-05 | 5 | Claude (build thread) | 7/8 | Retry | The owner's notes (18:37: keep going; the web's spike, the rifle thumb, the Cyber to be resized): support fingers over the rail, web and thumb gaps, the GBB middle finger under the guard, its wrap short, the knuckle shell |
 | 2026-11-05 | 6 | Claude (build thread) | 6/8 | Retry | Extremely harsh (owner, 19:46): the pistol thumb a paddle beside the slide in the aimed view, support tips over the rail, the support thumb root off, rifle ring and little finger gaps, the trigger pad 2.2 mm off, the rifle wrist 27.7°, finger plates, tip caps and palm patch unlike photo 123404, a wedge in the sleeve, a mottled shell, the record's numbers |
+| 2026-11-05 | 7 | Claude (build thread) | 6/8 | Retry | Support tips about 18 mm over the handguard's top (an overhand look from the left), the pistol thumb standing off the grip seen from behind, holes and a ragged band edge on the sleeve, first-section gaps (pistol index 9.4 and 10.7 mm), the record's numbers |
+| 2026-11-05 | 8 | Claude (build thread) | 7/8 | Retry | Sleeve fixed; the GBB thumb still long and off the panel from behind, support fingers splayed and their middle sections 10 to 13 mm off the side, first-section gaps 6 to 11 mm, the rifle web flat, glove pads oversized and no fabric detail, QA not yet on the head |
 
 ## What changed
 
 - **The model** (`assets/models/arms/arms.glb`, `tools/blender/arms/`): the MakeHuman CC0 arm (`source/`) under a
   dark olive glove (skin + 1.1 mm) with a moulded knuckle guard, finger and thumb pads, a palm patch, cuff and
-  strap, and a sleeve rolled over the cuff; mirrored for the right arm; the figures' bone names; 38,170 triangles, four plain
+  strap, and a sleeve rolled over the cuff; mirrored for the right arm; the figures' bone names; 39,364 triangles, four plain
   materials. Each replica gets a clip `<id>_Hold` and an empty `Hold_<id>` at its origin.
-- **The holds** (attempt 7), solved against each replica's model at rest (`pose.py`), none passing into it (the build
+- **The holds** (attempt 8), solved against each replica's model at rest (`pose.py`), none passing into it (the build
   refuses to write otherwise; gaps are the glove's skin to the replica, from the build log with `BL_DEBUG`):
   - AEG Rifle: right hand high on the grip, the little finger wholly on it above the foot, the thumb round the grip's
-    left side, index on the trigger, wrist 22.1°; left hand low under the handguard, its fingertips on the right side
-    (0.2 to 0.5 mm), the forearm rising 57°, wrist 0.5°.
+    left side, index on the trigger (pad 1.4 mm off), wrist 22.1°; skin gaps (mm, first / middle / last section):
+    index 6.0 / 3.7 / 2.3, middle 2.9 / 0.2 / -, ring 8.4 / 0.5 / 0.2, little 6.1 / 7.1 / 0.2, thumb 10.6 / 0.5 / 0.0.
+  - AEG support hand: under the handguard at a fixed turn (fingers yawed 80°, pitched 48°), the forearm rising 55°,
+    wrist 20.8°; each fingertip aimed at a point on the right side 5 mm ahead of its knuckle and 19.5 mm below the
+    rail's top, its last joint bending 0.7 of its middle one (pads off their points: index 2.4, middle 10.5, ring 5.9,
+    little 0.2 mm; one tip about 4 mm over the rail's top seen from the left); gaps index 6.1 / 7.8 / 0.9, middle 3.0 / 12.7 / 0.8, ring
+    4.7 / 10.3 / 0.2, little 1.3 / 1.2 / 0.1, thumb 8.5 / 0.1 / 2.1.
   - GBB Pistol: right hand alone, high on the back strap; the thumb round the back strap's corner and down the grip's
-    left side, as photo 123843; fingers closed under the guard (middle 0.0, ring 0.3, little finger 0.2 mm at their
-    middle and last sections); the trigger finger re-found after the palm seats (pad 0.8 mm off); wrist 16.8°.
+    left side, as photo 123843, its tip toward (-20, -58, -60) mm and held close (hug 6); fingers closed under the
+    guard (gaps middle 3.2 / 0.3 / 2.9, ring 6.4 / 0.3 / 0.5, little 5.9 / 2.0 / 0.2, thumb 8.0 / 0.2 / 0.2); the
+    trigger finger re-found after the palm seats (pad 0.8 mm off; index 9.4 / 10.7 / 1.5: the finger runs straight
+    along the frame to the trigger); wrist 16.8°.
   - Cyber Pistol: waits for its resize to the GBB's size (the owner, 18:37); built with `BL_FORCE` meanwhile.
 - **In the game** (`game/play/arms_view.gd`): ArmsView rides the replica in hand (ReplicaView's `Held.root`), its
   `Hold_<id>` on the replica's origin, posed by `<id>_Hold`; pressed depth, no shadow, out of the optic's view; the
@@ -70,6 +79,22 @@
     each finger's first section and the thumb's, plain fingertips, a rounded palm patch. 38,170 triangles.
   - The sleeve follows the forearm and upper arm only (it twisted with the wrist and folded into a dark wedge along
     the forearm in the pistol's aimed view); its normals smoothed.
+- **Attempt 8** (the critic's attempt 7 list):
+  - Support hand: steeper, the knuckles rose up the side and the fingers stood over the top; flatter, the wrist bent
+    past 30° (twenty placements tried). Fixed at 80° / 48°, each finger then reaches for its own point on the right
+    side (`Hand.onto` with `couple`, `TIP_COUPLE`): curled like a relaxed finger, never a claw.
+  - Sleeve: its cuff was cut 4 mm off where its faces were chosen, so some cuff edges counted as the shoulder's
+    opening and its cap closed over them with 87 long slivers through the forearm: the holes in the pistol's aimed
+    view, the ragged cuff and the void at it. The sleeve is now cut at its end and at its band's edge (a clean ring).
+  - Pistol thumb tip lower and held closer (`thumb_at`, `thumb_hug` 6).
+  - Glove: four soft lobes in the knuckle dome with seams between, a sunken centre in each finger pad.
+- **Attempt 9** (the critic's attempt 8 list):
+  - Support fingers held together (each swings at most 8° sideways reaching its point): curled side by side, the
+    tips at the rail's edge.
+  - The web between thumb and index: the glove itself bulges up to 4 mm over the muscle there (`glove.web_muscle`),
+    fullest toward the index, so it reads rounded, not as a flat sheet.
+  - The thumb's glove 1.5 mm fuller over its last two sections; the finger pads smaller (24° round the finger),
+    1.2 mm high, their hollow wider; the knuckle shell's lobes softer (2.5 mm).
 - `Hand.seat` can keep the whole hand bone clear (the left hand's knuckles and thumb heel); `Hand.thumb` lets the
   thumb's root rest on the grip and can hug its whole length to the replica.
 
@@ -83,10 +108,12 @@
 
 ## Known issues
 
-- The support fingertips still reach a few millimetres over the handguard's top seen from the left: a cupped hand's
-  fingers are longer than the 48 mm side; the build keeps them as low as they rest.
-- First finger sections stand 6 to 9 mm off the grips (rifle ring and little fingers, the pistol's ring); the rifle's
-  thumb root and the support thumb root 8 to 11 mm.
+- From the eye the support fingers show beyond the handguard's right edge (they lie on its outside); seen from the
+  left one tip rises about 4 mm over the rail's top, and the fingers splay about 0.8 finger widths at their tips.
+- The GBB thumb lies on the grip's left panel (its last sections 0.2 mm off) yet its tip stands 15 to 19 mm out from
+  the frame seen from behind, its own thickness; its visible length is 1.27 of the grip's depth (photo 123843: 1.14).
+- First finger sections stand 6 to 10 mm off the grips (rifle ring, little and index, the pistol's index and ring);
+  the thumb roots 8 to 11 mm; the support middle and ring fingers' middle sections 10 to 13 mm off the side.
 - The owner's holding photos show pistols two-handed, thumbs forward: the left hand's hold over the right is still
   to solve (first tries bent the left wrist past 80°).
 - The Sniper Rifle's new chassis grip (BL5, about 6 cm deep, its back strap raked) needs its own hold.

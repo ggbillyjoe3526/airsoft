@@ -47,10 +47,14 @@ SHELL_THICK = 0.0016
 KNUCKLE_DOME = 0.0024
 KNUCKLE_RIM = 0.0012
 KNUCKLE_ROUND = 0.75
-KNUCKLE_LOBE = 0.004
+KNUCKLE_LOBE = 0.0025
 KNUCKLE_SEAM = 0.0008
 KNUCKLE_U = (-0.75, -0.25, 0.25, 0.75)
-PAD_THICK = 0.0018
+PAD_THICK = 0.0012
+# How far the muscle between thumb and index stands out under the glove (m).
+WEB_BULGE = 0.0040
+WEB_RADIUS = 0.020
+THUMB_FULL = 0.0015
 # The finger plates bend with the glove beneath them (rigid on one bone, the skin rose through their ends as the joints
 # beside them closed).
 PAD_RIGID = False
@@ -61,7 +65,7 @@ KNUCKLE_OVER = 0.002
 # The finger pads, as shares of each finger's first bone from its root (an oval just short of the middle knuckle), and
 # how far round the finger each reaches (degrees either side of its back).
 PAD_SPAN = (0.40, 0.90)
-PAD_WRAP = 34.0
+PAD_WRAP = 24.0
 
 
 def load_source(shoulder: Vector) -> tuple:
@@ -453,6 +457,18 @@ def knuckle_guard(surf: Surface, fr: Frame) -> tuple:
     return surf.shell(origin, direction, 13, 29, thick, "GloveArmour", False, "Hand", 8, 0.0010)
 
 
+def web_muscle(p: Vector, n: Vector, fr: Frame) -> float:
+    """How far the glove stands out at `p` (normal `n`) over the muscle between the thumb's and the index finger's
+    bones (first dorsal interosseous): a soft rounded bulge on the back of the web, fullest toward the index, so the web
+    reads as a hand's and not a flat sheet (the critic). The glove's own surface, so it bends as the skin does."""
+    j = fr.j
+    centre = j["finger-1-2"].lerp(j["finger-2-1"], 0.55).lerp(fr.wrist.lerp(j["finger-2-1"], 0.6), 0.35)
+    d = p - centre
+    r = (d - fr.dorsal * d.dot(fr.dorsal)).length / WEB_RADIUS
+    facing = max(0.0, n.dot(fr.dorsal) + 0.3) / 1.3
+    return WEB_BULGE * max(0.0, 1.0 - r * r) ** 2 * facing
+
+
 def finger_pads(surf: Surface, fr: Frame) -> list:
     """The finger pads (the owner's glove photo 123404): a small domed oval on the back of each finger's first bone,
     just short of the middle knuckle, and one on the back of the thumb's; none on the palm's side, the fingertips
@@ -476,7 +492,7 @@ def finger_pads(surf: Surface, fr: Frame) -> list:
         def thick(u: float, v: float) -> float:
             # A domed oval with a sunken hole in its middle (the photo's rubber knuckle pads).
             r2 = u * u + v * v
-            hole = 1.0 - 0.85 * math.exp(-r2 / 0.08)
+            hole = 1.0 - 0.9 * math.exp(-r2 / 0.12)
             return PAD_THICK * max(0.0, 1.0 - r2) ** 0.6 * hole * _soft_box(u, v, grid[2]) + 0.0003
 
         return surf.shell(origin, direction, grid[0], 11, thick, "GloveArmour", False, PAD_RIGID and bone, grid[1],
@@ -529,7 +545,10 @@ def build_left(shoulder: Vector) -> tuple:
     hand_f = [f for f in faces if fr.along(centre(verts, f)) > GLOVE_TOP]
     used = sorted({i for f in hand_f for i in f})
     idx = {o: k for k, o in enumerate(used)}
-    gv = [verts[o] + nrm[o] * GLOVE_THICK for o in used]
+    # The thumb's glove a little fuller (the photos' gloved thumbs are about a quarter thicker than the hand's skin
+    # makes them: the critic, 123843).
+    gv = [verts[o] + nrm[o] * (GLOVE_THICK + web_muscle(verts[o], nrm[o], fr) +
+                               THUMB_FULL * (wts[o].get("Thumb2", 0.0) + wts[o].get("Thumb3", 0.0))) for o in used]
     gf = [[idx[i] for i in f] for f in hand_f]
     gw = [wts[o] for o in used]
     mesh.add(gv, gf, "Glove", gw)

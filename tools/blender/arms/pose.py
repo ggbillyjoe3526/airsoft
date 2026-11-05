@@ -399,10 +399,12 @@ class Hand:
         return self.settle("Thumb", (0.0, bends[0], bends[1]), col, span)
 
     def onto(self, name: str, target: Vector, col: Collider, limits: tuple, swing: int = 20,
-             couple: float = 0.0) -> list:
+             couple: float = 0.0, lie: float = 0.0) -> list:
         """Bends a finger so its last bone's pad comes to `target` (the trigger) without passing into the replica: a
         search over its three bends and its base's swing sideways (up to `swing` degrees), coarse then fine. With
-        `couple`, the last joint bends that share of the middle one, as a relaxed finger's do, and is not searched."""
+        `couple`, the last joint bends that share of the middle one, as a relaxed finger's do, and is not searched;
+        with `lie`, its middle section's gap to the replica costs that share as much as the pad's distance (the finger
+        lies along the surface rather than arching off it)."""
         bones = ["%s%d_%s" % (name, k, self.side) for k in (1, 2, 3)]
         side_axis = self.axis[bones[0]].cross(Vector((0.0, 1.0, 0.0))).normalized()
 
@@ -420,11 +422,14 @@ class Hand:
             clear = min(self.clearance(b, col) for b in bones)
             m = self.rig.pose[bones[2]]
             pad = min((m @ q - target).length for q in self.points[bones[2]])
-            # Clear of the replica first, then the pad nearest the target.
+            # Clear of the replica first, then the pad nearest the target (and the middle section near the surface).
+            if lie:
+                pad += lie * max(0.0, self.clearance(bones[1], col))
             return pad + (0.0 if clear >= CONTACT else 1.0 + (CONTACT - clear) * 10.0), clear
 
         best = None
-        for lat in range(-swing, swing + 1, 10):
+        swing = int(swing)
+        for lat in sorted({-swing, 0, swing} | set(range(-swing, swing + 1, 10))):
             for a1 in range(0 if couple else -10, limits[0] + 1, 10):
                 for a2 in range(0, limits[1] + 1, 10):
                     for a3 in range(0, 1 if couple else limits[2] + 1, 10):
@@ -452,7 +457,9 @@ class Hand:
         if best[2] < CONTACT:
             print("  ! the %s finger passes %.1f mm into the replica reaching its mark" % (
                 name, (CONTACT - best[2]) * 1e3))
-        print("  %s finger on its mark: pad %.1f mm off" % (name, (best[0] if best[2] >= CONTACT else -1) * 1e3))
+        m = self.rig.pose[bones[2]]
+        pad = min((m @ q - target).length for q in self.points[bones[2]])
+        print("  %s finger on its mark: pad %.1f mm off" % (name, (pad if best[2] >= CONTACT else -1) * 1e3))
         return [round(x) for x in best[1]]
 
     def close(self, name: str, col: Collider, ratio: tuple, limit: tuple, start: tuple = (0.0, 0.0, 0.0)) -> list:
