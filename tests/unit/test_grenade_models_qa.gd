@@ -37,6 +37,7 @@ func test_a_bomb_at_rest_lies_on_the_ground_with_no_part_of_its_model_below_it()
 		var low := m.transform.origin.y + _lowest(m.mesh, m.transform.basis)
 		var ground := g.position.y - cfg.radius
 		assert_gte(low, ground - SINK_SLACK, "kind %d: its lowest point %.4f m under the ground" % [kinds[i], ground - low])
+		assert_lte(low, ground + SINK_SLACK, "kind %d: not floating %.4f m above it" % [kinds[i], low - ground])
 
 
 func test_a_slot_reused_for_the_other_kind_draws_that_kinds_model() -> void:
