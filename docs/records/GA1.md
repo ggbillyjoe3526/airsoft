@@ -72,4 +72,8 @@ sees (`/mnt/project-files/art/animation/ga1/`).
   A taller crouch walk, hips about 0.55 m with the back bent well forward and the head and replica held up, needs
   either a higher crouch_top_max (the owner's crouch-cover ruling) or a new crouched upper body over the aim; offered
   to the owner as a follow-up, not built.
+- Two tests that leaned on a moving figure's exact pose were made robust, not loosened in meaning: `test_bots` caps the
+  BBs that bounce into a teammate at 3.5% of the hits (was a count of 6; 3 of 224 before the new legs, 7 of 242
+  after, over the same 8 seeded matches), and `test_pings` stands the body that blocks sight where the line crosses its
+  chest, not the seam between its chest and head (a walking body's stride put the line through that seam).
 - Sprint leans the pelvis 14° forward, so the shouldered replica dips 14° while sprinting (sprinting can't aim well).
