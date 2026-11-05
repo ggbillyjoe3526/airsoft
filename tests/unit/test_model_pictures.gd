@@ -60,6 +60,7 @@ func test_every_power_model_is_the_picture_of_a_power_source() -> void:
 
 
 func test_every_grenade_model_is_a_bomb_kind() -> void:
+	assert_eq(ReplicaPictures.GRENADE_FILES.size(), Grenade.Kind.size(), "a file name for every kind")
 	for f in _glbs("grenades"):
 		assert_has(ReplicaPictures.GRENADE_FILES, StringName(f), "grenades/%s.glb is a bomb's (GRENADE_FILES)" % f)
 
@@ -86,5 +87,4 @@ func test_a_bomb_icon_shows_its_model_when_there_is_one_and_the_flat_can_until_t
 
 func test_no_bomb_kind_has_a_model_name_for_none() -> void:
 	assert_eq(ReplicaPictures.grenade_path(Grenade.Kind.NONE), "")
-	assert_eq(ReplicaPictures.GRENADE_FILES.size(), Grenade.Kind.size())
 
