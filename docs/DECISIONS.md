@@ -35,6 +35,8 @@ binds; the rest goes in the task's record. When this file nears 50 KB, move supe
   routes, drop rules and vault links are tuned to it.
 - **The browser game's gameplay code and tests stay in `legacy/browser/` as the reference to rewrite from (owner,
   2026-10-18).** Hidden from Godot by its `.gdignore`, read only, and deleted at 0.1 (the first public release).
+  **Removed early, on 2026-11-05 (owner, before tagging 0.1 Dev 2, to keep the size down):** every path under
+  `legacy/browser/` that a doc names is read from git at the tag `0.1-dev.1`, where the folder is unchanged.
 - **Infrastructure comes from the owner's other Godot project, katanashotgun (owner, 2026-10-18).** Its session hook,
   setup-godot action, CI shape, GUT, gdlint, smoke test, release workflow and Inno Setup installer, version and
   changelog scripts, licence notices, crash-safe save files, settings, the sound cue and voice pool system, perf

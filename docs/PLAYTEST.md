@@ -5,7 +5,8 @@ plays them all. A change that alters what a section describes updates that secti
 as described; anything else is worth reporting ([Reporting what you find](#reporting-what-you-find)).
 
 Each section applies once its feature lands; `docs/FEATURES.md` lists what has. The checks are carried from the
-browser game, whose guide (with the reasons and exact figures) stays readable in `legacy/browser/docs/` until 0.1.
+browser game, whose guide (with the reasons and exact figures) stays readable in `legacy/browser/docs/` at the git tag
+`0.1-dev.1`.
 
 ## Get the game running
 
@@ -1348,6 +1349,14 @@ Every BB in flight is now a proper Blender model, round from every side instead 
   its top level with the rear sight's top, a sliver of light either side; the BBs land on the post's top.
 - [ ] **Port:** Inspect the pistol and look at the top of the slide: the barrel fills the ejection port with no dark
   gap round it, and the slide still blows back and locks back cleanly.
+
+## The full bug pass before 0.1 Dev 2 (BP4)
+
+- [ ] **Switch Replica by keyboard.** On the Loadout page, Tab to SWITCH REPLICA and press Enter. Tab and the arrows
+  stay inside the list (they never land on a button behind it). Press Esc, or Enter on a replica: the keyboard is back
+  on SWITCH REPLICA, and Enter opens the list again.
+- [ ] **Flags from a roof.** On Woodland in Attack / Defend, if you can get onto the shelter roof by flag B, standing
+  there does nothing to the flag; at the pole's foot it rises as before.
 
 ## Reporting what you find
 

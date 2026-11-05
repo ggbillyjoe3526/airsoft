@@ -1,22 +1,20 @@
 # Legacy: reference copies
 
-`browser/` is the browser game; `katanashotgun/` holds a few scripts from the owner's katanashotgun project, with its
-own `README.md`. Both are hidden from Godot by `.gdignore` and go at 0.1.
+`katanashotgun/` holds a few scripts from the owner's katanashotgun project, with its own `README.md`. It is hidden
+from Godot by `.gdignore` and goes at 0.1.
 
-## The browser game
+## The browser game (removed 2026-11-05)
 
-The browser version of this game (`ggbillyjoe3526/Airsoft`, frozen at the tag `0.1-beta.1`, commit `da04e66`),
-kept so every system can be rewritten in Godot from its tested original after the old repository leaves the project.
+`browser/` was the browser version of this game (`ggbillyjoe3526/Airsoft`, frozen at the tag `0.1-beta.1`, commit
+`da04e66`): its TypeScript gameplay code and tests, its whole `docs/` folder and its old gate scripts, kept so every
+system could be rewritten in Godot from its tested original. Nothing built, ran or shipped from it. The owner had it
+removed on 2026-11-05, before tagging 0.1 Dev 2, to keep the size down.
 
-- **Read it, never run or edit it.** It is TypeScript for Three.js and Vite; nothing here builds. `.gdignore` hides
-  the folder from Godot, and no export includes it.
-- **What is here:** `browser/src/` is the gameplay code and its tests (the simulation, bots, navigation, maps, loadout,
-  levels, saves, settings, the content checks, the sound recipes), without the renderer, the HTML menus and the
-  models. `browser/docs/` is the old repository's whole `docs/` folder plus its `CHANGELOG.md`: the archive, the task
-  records (why each value is what it is), the old known issues and the handover pack (`browser/docs/handover/`).
-  `browser/e2e/` holds the browser specs (read them for what screens do) and `browser/pipeline/` the old gate scripts,
-  the content check and the bot balance report.
-- **How to use it:** grep, then read ranges. Each `src/` folder has a `README.md` naming its files, tuning and tests.
-  `browser/docs/handover/SALVAGE.md` maps each system to its Godot home. A system's tests are rewritten as GUT tests
-  in the pull request that ports it.
-- **It goes at 0.1** (owner, 2026-10-18), once every system it holds has been ported or dropped.
+It is unchanged in git at the tag `0.1-dev.1`, so every `legacy/browser/...` path the docs name still reads:
+
+- `git show 0.1-dev.1:legacy/browser/docs/handover/SALVAGE.md` reads one file;
+- `git grep <terms> 0.1-dev.1 -- legacy/browser` searches it (grep, then read ranges; never read it whole);
+- `git ls-tree -r --name-only 0.1-dev.1 legacy/browser/src/sim` lists a folder.
+
+`browser/docs/handover/SALVAGE.md` maps each system to its Godot home, `browser/src/<folder>/README.md` names each
+folder's files, tuning and tests, and `browser/docs/records/` holds why each value is what it is.
