@@ -1264,6 +1264,20 @@ Your five fixes from the marked-up render (2026-11-05), worked from your origina
   grip in first person and on the bots.
 - [ ] **Paints:** in Customise, try each paint: the grip now takes the body's colour.
 
+## The new Cyber Pistol model (BL6)
+
+- [ ] **In your hands:** the Cyber Pistol keeps its white, cyan and pink look with far more detail (teeth along the
+  front block's foot, a finned rear cap, the pink core behind bars on the slide's sides and top, a dark fire-mode
+  panel with three lights, a ribbed cell in the grip, the old curved trigger a little longer and upright in a taller guard, close to the grip). Does
+  it still feel like the pistol you liked? Is anything
+  poking into the view while you walk, sprint, lean and aim?
+- [ ] **Iron sights:** aim. The front post and the rear notch line up on the crosshair as before.
+- [ ] **Moving parts:** fire (the slide kicks back and the trigger moves), step the fire modes (the slider moves),
+  reload (the cell drops out of the grip and a new one goes up) and Inspect.
+- [ ] **Torch and paints:** fit the Weapon Torch (under the front block, clear of the teeth); turn on Realistic colours
+  (plain grey, no glow).
+- [ ] **Menus and figures:** the Loadout and Armory pictures show the new pistol; a bot carrying it shows its outline.
+
 ## The new Sniper Rifle model (BL5)
 
 The bolt-action in the grey chassis from your first sniper photo (2026-11-05). Dev content on.
@@ -1280,6 +1294,16 @@ The bolt-action in the grey chassis from your first sniper photo (2026-11-05). D
   and line up when aimed. The grips go on the short rail under the forend, the torch on the rail on its right, the
   silencer on the barrel's end in place of the cap.
 - [ ] **Hold:** the right hand holds the grip in first person and on the bots; the rifle sits right in the hands.
+
+## The BB model (BM1)
+
+Every BB in flight is now a proper Blender model, round from every side instead of the old eight-sided ball.
+
+- [ ] **Up close:** in the Range, fire the AEG Rifle with your eye on the muzzle: each BB leaves as a round ball with
+  an even dark rim, no corners, and joins its path as before.
+- [ ] **At range:** BBs still read as small bright dots with a faint trail at 20 to 40 m, on pale walls and the sky.
+- [ ] **Glowing BBs:** on Woodland at night, glowing BBs are round green balls with their streak, as before.
+- [ ] **Frame rate:** a full-auto magazine dump on Low keeps its frame rate (F3 box).
 
 ## Reporting what you find
 

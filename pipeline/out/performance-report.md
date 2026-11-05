@@ -1,24 +1,27 @@
-# Performance report: UF2 (9965b76)
+Task: BL6 · head e7725d6 · Verdict: Pass
+Run: none (asset-only change, no GDScript; glb JSON inspected with python, no Godot run) · budget: no baseline yet, judged against the 40k-triangle replica limit and origin/main's glb
 
-Verdict: **Pass**. No `--perf` match run: the diff touches no in-match code, only the Loadout's card build. Judged by
-reading the diff against the targets (no baseline yet).
+Metrics (cyber.glb, old -> new), measured from the glb JSON:
+- Triangles in the hands (all meshes except Figure): 2,688 -> 31,594 (limit 40,000, ok, 79 %)
+- Figure (bot LOD): 148 -> 236 tris, 270 -> 426 verts (small, ok)
+- Vertices total: 5,380 -> 27,578 (Body 19,887)
+- Meshes 6 -> 6, nodes 18 -> 18, materials 5 -> 5 (shared, same set), animations 4 -> 4
+- Surfaces (primitives): 16 -> 18; hands-side draw calls ~14 -> ~14+2 (Selector 1->2, Trigger 1->2); Figure 4 prims unchanged
+- Images/textures: 0 / 0 (no textures, ok); extensions: none
+- File size: 171,708 -> 879,740 bytes (+0.7 MB, 0.17 % of the 500 MB install budget, ok)
 
-- `game/ui/loadout_gear.gd`: the two `mouse_filter` sets run once per card at build time, not per frame; no allocation.
-- Removing `_double_click` and its `card.gui_input` connection drops a bound Callable per card and a handler that ran
-  on every mouse event over the card. Nothing left connected or unfreed.
-- `customise_requested` is still emitted by CUSTOMISE and connected in `loadout_page.gd`.
-- `tests/unit/test_uf2_clicks.gd` is test-only and does not ship.
+Regressions (> 10 % worse): triangle count, vertex count and file size are up, all inside budget. Only the 2 extra surfaces touch the draw-call count (+2 per viewmodel, negligible). Judgment, not blocking.
 
-No blocking or advisory findings.
+Blocking findings: none
+ - Per-frame work: no .gd/.tscn/.tres/config changed (diff is glb, tools/blender/replicas/cyber.py, docs, changelog); nothing runs per frame or per tick (judgment, verified by diff stat).
+ - cyber.py is an offline Blender build tool under tools/, not referenced by game code or exports (judgment).
+ - Materials stay shared by name (5 per file), no per-instance materials introduced (measured).
 
-## Part 2: skip grace (ee0eb5a)
+Advisory:
+ - Body is 24,422 tris, 77 % of the hands budget; further detail on this replica or a second pistol of this weight leaves little headroom. Re-measure on the owner's hardware at the next playtest (frame time is not measurable in the cloud container).
+ - Selector and Trigger now carry 2 primitives each; if they share a material, merging them saves 2 draw calls per viewmodel (minor).
+ - The record's 31,596 differs from the measured 31,594 by 2 triangles; cosmetic.
 
-Verdict: **Pass**. No `--perf` run: the change is one float add per frame (no baseline yet; judged by reading the diff).
+Fixes: none required.
 
-- `game/play/play_session.gd:1418`: `_follow_skip(delta)` does a float add, a compare and two bool ops per frame; no
-  Array, String, Callable or node allocation. `_out_for` (line 216) is a plain float; nothing to free or disconnect.
-- `set_skip_hint(ready)` is called each frame as before; its cost is unchanged from Part 1's baseline behaviour.
-- `skip_grace` is a typed `@export` on `PlayTuning` read from the cached `_play`; no per-frame load.
-- The count runs in `_process`, so skip's own fast tick loop does not touch it (`can` is false while `_skipping`).
-
-No blocking or advisory findings.
+Verdict: Pass

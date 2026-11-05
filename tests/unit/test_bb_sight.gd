@@ -118,3 +118,23 @@ func test_the_muzzle_join_keeps_only_the_offset_across_the_flight() -> void:
 	var off := BBView.across_flight(Vector3(0.12, -0.19, -0.9), Vector3.FORWARD * SPEED)
 	assert_almost_eq(off, Vector3(0.12, -0.19, 0.0), Vector3.ONE * 1e-6)
 	assert_eq(BBView.across_flight(Vector3.ONE, Vector3.ZERO), Vector3.ONE, "no flight: all of it")
+
+
+func test_every_bb_is_the_blender_ball_in_its_own_material() -> void:
+	var view := _view(4)
+	var mesh := view.multimesh.mesh
+	assert_false(mesh is PrimitiveMesh, "BM1: the Blender BB, not a code-made ball")
+	assert_same(view.draws()[1].multimesh.mesh, mesh, "white and glowing BBs share the one mesh")
+	var tris := mesh.get_faces().size() / 3
+	assert_between(tris, 200, 400, "round up close, cheap with the whole pool in the air")
+	var box := mesh.get_aabb()
+	assert_almost_eq(box.size.x, 1.0, 0.02, "modelled 1 m across: drawn bb_size wide")
+	assert_almost_eq(box.get_center().length(), 0.0, 1e-3, "centred")
+	assert_true(view.draws()[0].material_override is ShaderMaterial, "white: rimmed")
+	assert_true(view.draws()[1].material_override is StandardMaterial3D, "glowing: lit itself")
+
+
+func test_an_unreadable_bb_model_still_draws_a_ball() -> void:
+	var mesh := BBView.bb_mesh("res://assets/models/effects/missing.glb")
+	assert_true(mesh is SphereMesh, "a code-made ball of the same size")
+	assert_almost_eq(mesh.get_aabb().get_longest_axis_size(), 1.0, 1e-3)
