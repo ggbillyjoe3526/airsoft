@@ -150,10 +150,10 @@ GRIP = [(-20.0, -20.0), (-24.0, -34.0), (-27.5, -36.0, 4.0), (-31.5, -60.0, 30.0
 # full-width web behind, the opening tall enough for the trigger and a little more. The trigger and guard sit 12 mm
 # nearer the grip than the old model's (owner, 2026-11-05: "the player would need to stretch their finger"); the loop's
 # front slants up to the front block's foot, so no notch opens under it. CZ1 sets the trigger TRIGGER_BACK further
-# back, to the GBB's reach from the back strap (BL6's sat 19 mm further out), the opening's back wall with it, 4 mm
-# behind the blade and 4 mm ahead of the grip's front; the guard's front (the opening's front wall and the loop's lower
-# front) moves 7.5 mm back with it, so the opening stays 4.5 mm longer than BL6's behind the trigger and the Weapon
-# Torch's back end clears the loop (at the moved TorchMount it sank 2 mm into it).
+# back, nearer the GBB's reach from the back strap (BL6's was 19 mm longer, CZ1's 5 mm), and the opening's back wall
+# with it, 4 mm behind the blade and 4 mm ahead of the grip's front; the guard's front (the opening's front wall and
+# the loop's lower front) moves 7.5 mm back, so the opening stays 4.5 mm longer than BL6's behind the trigger and the
+# Weapon Torch's back end clears the loop (at the moved TorchMount it sank 2 mm into it).
 TRIGGER_BACK = 13.0
 GUARD_HOLE = [(26.2, -16.5, 1.0), (26.2, -35.5), (21.5, -40.0, 1.0), (-16.0, -40.0, 1.0), (-16.0, -16.5, 1.0)]
 GUARD_LOOP = [(52.0, -14.0), (52.0, -24.0, 1.0), (34.5, -34.0, 2.0), (34.5, -42.5), (30.0, -47.0, 1.5), (-2.0, -47.0),
@@ -176,8 +176,9 @@ RAIL_Y = (57.0, 92.0)
 RAIL_Z = (-26.6, -21.0)
 RAIL_HW = 10.0
 RAIL_SLOTS = 4
-# The sight line (the front post's top and both empties): BL6's z 40 (the old marks) raised 2 mm, so the rear sight keeps 2.5 mm under its
-# notch's floor (with the floor at 40 - NOTCH_DROP the notch cut the sight to its foot and its back face split).
+# The sight line (the front post's top and both empties): BL6's z 40 (the old marks) raised 2 mm, so the rear sight
+# keeps 2.5 mm under its notch's floor (with the floor at 40 - NOTCH_DROP the notch cut the sight to its foot and its
+# back face split).
 SIGHT_Z = 42.0
 # SIGHT_Z is the sight line: the front post's top and the empties' height, so the eye's when aimed. The rear notch's
 # floor sits NOTCH_DROP under it and the rear sight's top REAR_SIGHT_RISE over it, so aimed the post stands in the

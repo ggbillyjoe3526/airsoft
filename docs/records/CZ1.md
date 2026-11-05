@@ -1,13 +1,13 @@
 # CZ1 · The Cyber Pistol at the GBB Pistol's size
 
-**Review:** 2 attempts · critic pending · qa pending · performance pending
+**Review:** 2 attempts · critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-05 | 1 | Claude (CZ1 thread) | running | Retry 6/8 | the Weapon Torch's back end sank 2 mm into the guard loop (`TorchMount` moved back with the warp, the loop's front less); docs' sizes and "the GBB's reach" wrong; no QA report yet |
-| 2026-11-05 | 2 | Claude (CZ1 thread) | pending | pending | – |
+| 2026-11-05 | 2 | Claude (CZ1 thread) | ✓ | Accept 7/8 | – (check 8: two code comments, fixed) |
 
 ## What changed
 
