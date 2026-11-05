@@ -1187,8 +1187,8 @@ def build(lod: int, tree, torso: fit.Torso, hips: fit.Torso) -> dict:
 # ------------------------------------------------------------------------------------------- skin, paint, export
 
 BUDGET = {  # triangles per piece and level (the figure's gear share: 14,000 / 4,500 / 1,500, BL10-BL12 split)
-    "Kit": (10550, 3480, 1100),
-    "Kit_Pack": (2680, 780, 400),
+    "Kit": (10480, 3480, 1100),
+    "Kit_Pack": (2750, 780, 400),
     "Kit_Radio": (770, 240),
 }
 LOD_SUFFIX = ("", "_LOD1", "_LOD2")
