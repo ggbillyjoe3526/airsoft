@@ -6,8 +6,9 @@ rulings `docs/DECISIONS.md`, how work runs `docs/PROCESS.md`.
 ## Now
 
 - **The game has moved from the browser to Godot (owner, 2026-10-18).** This repository restarts at 0.1 Dev 1. The
-  browser game (frozen at `0.1-beta.1`; its repository is no longer on GitHub) is copied into `legacy/browser/` as the
-  reference to rewrite from; its handover pack is `legacy/browser/docs/handover/`.
+  browser game (frozen at `0.1-beta.1`; its repository is no longer on GitHub) was copied into `legacy/browser/` as the
+  reference to rewrite from, and removed on 2026-11-05 (owner): read it from git at the tag `0.1-dev.1`, its handover
+  pack at `legacy/browser/docs/handover/` there.
 - **The salvage runs as three pull requests** from the "Salvage audit and roadmap" thread: the docs, the owner's data
   tables and the legacy reference (merged); the Godot bootstrap (project, boot screen, CI, tests, release, agents and
   pipeline, from the owner's katanashotgun project, whose remaining useful scripts are in `legacy/katanashotgun/`);

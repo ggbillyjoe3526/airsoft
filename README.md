@@ -4,8 +4,9 @@ An original first-person airsoft shooter for Windows and Linux, built with Godot
 matches against bots on purpose-built airsoft fields: plastic replicas, visible BBs, one hit and you're out, hand up,
 "HIT!", walk off, reset, go again. Single player against bots only.
 
-It is the same game as the browser version (frozen at `0.1-beta.1`; its code was kept in `legacy/browser/` until 2026-11-05 and is still in git at the tag `0.1-dev.1`), rebuilt as an
-installable desktop game. Versions restarted at 0.1 Dev 1.
+It is the same game as the browser version (frozen at `0.1-beta.1`; its code was kept in `legacy/browser/` until
+2026-11-05 and is still in git at the tag `0.1-dev.1`), rebuilt as an installable desktop game. Versions restarted
+at 0.1 Dev 1.
 
 The [wiki](https://github.com/ggbillyjoe3526/airsoft/wiki) explains the game for players: controls, rules, every
 replica's stats, maps, modes, bots, settings, patch notes and the roadmap. Its pages are `docs/wiki/`, published on

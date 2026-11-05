@@ -164,8 +164,8 @@ func close_switch() -> void:
 	_switch.close()
 
 
-## The pop-up closed: the keyboard goes back to the SWITCH REPLICA it was opened from (BP4: it was left on nothing), unless
-## the page itself is going away.
+## The pop-up closed: the keyboard goes back to the SWITCH REPLICA it was opened from (BP4: it was left on nothing),
+## unless the page itself is going away.
 func _on_switch_closed() -> void:
 	var back := _carried_switch[_switch.slot()] if _switch.slot() < _carried_switch.size() else null
 	if back != null and back.is_visible_in_tree():

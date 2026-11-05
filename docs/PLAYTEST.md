@@ -5,7 +5,8 @@ plays them all. A change that alters what a section describes updates that secti
 as described; anything else is worth reporting ([Reporting what you find](#reporting-what-you-find)).
 
 Each section applies once its feature lands; `docs/FEATURES.md` lists what has. The checks are carried from the
-browser game, whose guide (with the reasons and exact figures) stays readable in `legacy/browser/docs/` at the git tag `0.1-dev.1`.
+browser game, whose guide (with the reasons and exact figures) stays readable in `legacy/browser/docs/` at the git tag
+`0.1-dev.1`.
 
 ## Get the game running
 
