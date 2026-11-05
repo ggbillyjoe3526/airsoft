@@ -52,7 +52,7 @@ const UPPER := 8
 ## Aim samples a hold: down, level, up (the aim clips' blend at -1, 0, 1).
 const AIMS := 3
 
-@export var phases: int = 24
+@export var phases: int = 32
 @export var leg_offsets: PackedVector3Array = PackedVector3Array()
 ## Each turn's rest (the hips' in the figure's frame, then each leg bone's on its parent, as a sample's turns): the
 ## animation graph blends each turn as weighted steps away from its rest, as Hitbox does.
@@ -111,6 +111,31 @@ func is_complete() -> bool:
 			and holster.size() == UPPER and sprint.size() == UPPER
 
 
+## The hips' heading (rad, heading()) standing still, crouched still, and between them by `crouch` (0..1): what the
+## upper body is turned back to over a stepping clip's hips (GA1, HitConfig.upper_steady).
+func still_heading(crouch: float) -> float:
+	if is_nan(_still_headings.x):
+		_still_headings = Vector2(_sample_heading(stand_still), _sample_heading(crouch_still))
+	return lerp_angle(_still_headings.x, _still_headings.y, clampf(crouch, 0.0, 1.0))
+
+
+## How far (rad, about +Y) a bone's x axis `x_axis` is turned from +X: a hips' heading in any frame turned about +Y.
+static func heading(x_axis: Vector3) -> float:
+	return atan2(-x_axis.z, x_axis.x)
+
+
+## The turn about +Y (rad, -PI..PI) that brings hips whose x axis is `x_axis` back to heading `still`.
+static func steady_turn(still: float, x_axis: Vector3) -> float:
+	return wrapf(still - heading(x_axis), -PI, PI)
+
+
+static func _sample_heading(sample: PackedFloat32Array) -> float:
+	if sample.size() < HIPS_TURN + 4:
+		return 0.0
+	var q := Quaternion(sample[HIPS_TURN], sample[HIPS_TURN + 1], sample[HIPS_TURN + 2], sample[HIPS_TURN + 3])
+	return heading(Basis(q.normalized()).x)
+
+
 ## Blend point `point`'s sample at `phase` in `gait` or `crouch`.
 func clip_at(point: int, phase: int) -> int:
 	return point * phases + phase
@@ -127,6 +152,8 @@ class Table:
 ## The rests (HitFit.rests) as turns, and the tables ready to blend: built once, on first use.
 var _rests: Array[Quaternion] = []
 var _tables: Dictionary[StringName, Table] = {}
+## The hips' heading standing still and crouched still (still_heading), read once.
+var _still_headings: Vector2 = Vector2(NAN, NAN)
 
 
 ## Turn `j`'s rest (0: the hips', then each leg bone's).

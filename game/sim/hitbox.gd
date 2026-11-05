@@ -9,6 +9,9 @@ class_name Hitbox
 ## returns the distance along a unit ray to where it first touches, or INF for a miss; a ray that starts inside touches
 ## at 0.
 
+## The shortest walk cycle (m): a guard against a zero length in the tables.
+const MIN_CYCLE := 0.1
+
 ## Where each part sits in Volume.parts: the torso's four capsules, side by side and front and back (one chest capsule
 ## four times in the built-in volume), the hips, then each leg's thigh, shin and boot.
 const CHEST_L := 0
@@ -167,14 +170,56 @@ static func leg_swing(cycle: float, c: Character, hits: HitConfig) -> float:
 	return 0.0
 
 
-## Moves the walk cycle on by the ground covered since last tick (c.prev_position); a jump of max_stride or more (a
-## respawn, a move to the dead zone) is no step. Once a tick, after the movement step. Never wrapped, so the drawn legs
-## can interpolate from last tick's.
+## Moves the walk cycle on by the ground covered since last tick (c.prev_position), a cycle every cycle_length of it;
+## a jump of max_stride or more (a respawn, a move to the dead zone) is no step. Once a tick, after the movement step.
+## Never wrapped, so the drawn legs can interpolate from last tick's.
 static func step_walk_cycle(c: Character, hits: HitConfig) -> void:
 	var moved := Vector2(c.position.x - c.prev_position.x, c.position.z - c.prev_position.z).length()
-	if moved >= hits.max_stride:
+	if moved >= hits.max_stride or moved <= 0.0:
 		return
-	c.walk_cycle += moved * hits.strides_per_metre * TAU
+	var speed := Vector2(c.velocity.x, c.velocity.z).length()
+	# The step in the character's frame (FigurePose.read): ahead and to the right.
+	var sin_yaw := sin(c.yaw)
+	var cos_yaw := cos(c.yaw)
+	var step := Vector2(c.velocity.x * cos_yaw - c.velocity.z * sin_yaw, -c.velocity.x * sin_yaw - c.velocity.z * cos_yaw)
+	c.walk_cycle += moved / cycle_length(speed, c.crouch_amount, hits, step) * TAU
+
+
+## The ground (m) one walk cycle (two steps) covers at `speed` (m/s), crouched `crouch` (0..1), stepping `step` (the
+## character's frame: x to its right, y ahead; any length): HitConfig's standing lengths, in line between their speeds
+## and shortened stepping back or aside (back_cycle_share, side_cycle_share by the step's share each way), and its
+## crouched lengths, blended by the crouch.
+static func cycle_length(speed: float, crouch: float, hits: HitConfig, step: Vector2 = Vector2(0.0, 1.0)) -> float:
+	var standing := _by_speed(speed, hits.cycle_speeds, hits.cycle_metres) * way_share(step, hits)
+	var crouched := _by_speed(speed, hits.crouch_cycle_speeds, hits.crouch_cycle_metres)
+	return maxf(lerpf(standing, crouched, clampf(crouch, 0.0, 1.0)), MIN_CYCLE)
+
+
+## The standing cycle's share for a step `step` (x right, y ahead): 1 ahead, back_cycle_share back, side_cycle_share
+## aside, weighted by how much of the step goes each way; 1 for no step.
+static func way_share(step: Vector2, hits: HitConfig) -> float:
+	var ahead := maxf(step.y, 0.0)
+	var back := maxf(-step.y, 0.0)
+	var side := absf(step.x)
+	var total := ahead + back + side
+	if total <= 0.0:
+		return 1.0
+	return (ahead + back * hits.back_cycle_share + side * hits.side_cycle_share) / total
+
+
+## `metres` at `speed` in line between the `speeds` (ascending) either side, held past the ends.
+static func _by_speed(speed: float, speeds: PackedFloat32Array, metres: PackedFloat32Array) -> float:
+	var last := mini(speeds.size(), metres.size()) - 1
+	if last < 0:
+		return MIN_CYCLE
+	if speed <= speeds[0]:
+		return metres[0]
+	for k in last:
+		if speed <= speeds[k + 1]:
+			var span := speeds[k + 1] - speeds[k]
+			var share := (speed - speeds[k]) / span if span > 0.0 else 1.0
+			return lerpf(metres[k], metres[k + 1], share)
+	return metres[last]
 
 
 ## Writes the character's hit volume now into `v`: standing on its feet, turned by its yaw, posed as its figure is

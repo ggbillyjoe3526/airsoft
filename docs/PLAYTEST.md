@@ -68,6 +68,10 @@ Play › Mode Elimination on Depot, Match › Opponents Normal. Set the mouse se
 - [ ] **Watch the crosshair.** It opens when you run or jump, closes almost at once when you stop, and is tightest
   crouched and still; crouch-walking sits between standing still and walking.
 - [ ] **Sprint up and down Depot's dock ramps.** Uphill loses about a quarter of a sprint's pace (a confirmed call).
+- [ ] **Watch bots run (GA1).** On Depot, watch bots walk, run, sprint, strafe and back-pedal past you, and crouch-walk.
+  Their feet stay planted on the floor without sliding, each step rolls heel to toe, and the legs keep pace with the
+  speed. Strafing, the legs turn into the step while the rifle stays on its aim. Does any gait look wrong, especially
+  the back-pedal and strafes (quick steps, about 4 a second) and the low crouch walk (short quick steps)?
 - [ ] **Controls through a vault (BP5).** Vault a low wall (Depot's office hall has one). On Semi, hold left click
   through it: one BB, not two. Hold right click: the sight drops and comes back.
 
@@ -1291,6 +1295,24 @@ The bolt-action in the grey chassis from your first sniper photo (2026-11-05). D
   silencer on the barrel's end in place of the cap.
 - [ ] **Hold:** the right hand holds the grip in first person and on the bots; the rifle sits right in the hands.
 
+## The attachments from your photos (BL8)
+
+Every attachment rebuilt from your reference photos (2026-11-05). Where a folder mixed styles, the model follows the
+style most of its photos show.
+
+- [ ] **Red dot:** a closed micro red dot on a low rail riser. Aim: the dot sits mid-window and the view round the
+  small window stays open; the rifle sits a little nearer your eye than before (the window is smaller than the old
+  round one).
+- [ ] **2x scope:** the magnifier on its hinged mount. Aim: the magnified view fills the eyepiece with no dark ring
+  or frame showing through the glass.
+- [ ] **Variable scope:** the prism scope with the red fibre front sight. Aim and wheel through 2x to 6x on the AEG
+  and the sniper rifle: the view fills the eyepiece.
+- [ ] **Grips:** the short vertical grip and the swept angled grip under the AEG's handguard, nothing poking through.
+- [ ] **Silencers:** the rifle's tube on the AEG and sniper; the pistol's short, stout one on its knurled collar.
+- [ ] **Laser and torch:** under the GBB Pistol's rail, alone and together (the torch hangs under the laser); the
+  torch on the Cyber Pistol and on the AEG's right side. At night the beam leaves the torch's head.
+- [ ] **Customise and paints:** each part in each paint; the Loadout and Armory pictures show them sharp and to scale.
+
 ## The BB model (BM1)
 
 Every BB in flight is now a proper Blender model, round from every side instead of the old eight-sided ball.
@@ -1312,12 +1334,20 @@ Every BB in flight is now a proper Blender model, round from every side instead 
 ## Bots throwing bombs (GT1)
 
 - [ ] **The wind-up:** on the Practice Range or in a match, watch a bot throw a smoke or flash from 5 to 15 m. Its
-  replica goes to its chest, the bomb shows in its right hand, the arm swings back by its head with the left arm
-  pointing ahead, then comes over and the bomb leaves as the arm reaches out high ahead.
+  replica goes to its chest, the bomb shows in its right hand and the left hand meets it to pull the pin. The arm
+  swings back by its ear with the left arm pointing ahead, then comes over beside the head, elbow first, never across
+  the face, and the bomb leaves as the hand reaches out ahead at head height.
 - [ ] **After:** the arm follows through down across the body, then the replica comes back up. No bomb is left in the
   hand after it is thrown.
 - [ ] **Shape:** nothing stretches oddly at the shoulder or armpit while the arm is up, on both the soldier and the
   robot (Settings › Dev › Robots).
+
+## GBB Pistol sights and port (GS1)
+
+- [ ] **Aim:** aim the GBB Pistol in the Range. The front post with its white dot stands in the rear sight's notch,
+  its top level with the rear sight's top, a sliver of light either side; the BBs land on the post's top.
+- [ ] **Port:** Inspect the pistol and look at the top of the slide: the barrel fills the ejection port with no dark
+  gap round it, and the slide still blows back and locks back cleanly.
 
 ## Reporting what you find
 
