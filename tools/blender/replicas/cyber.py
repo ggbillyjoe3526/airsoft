@@ -171,14 +171,20 @@ RAIL_Y = (57.0, 92.0)
 RAIL_Z = (-26.6, -21.0)
 RAIL_HW = 10.0
 RAIL_SLOTS = 4
-# The sights' tops on one line (z 40, the old marks).
-SIGHT_Z = 40.0
-# The sights' widths (mm, as fitted: the warp narrows the upper parts SIZE_X_UPPER) and the rear notch's depth.
-FRONT_POST_HW = 1.7
+# The sights' tops on one line: BL6's z 40 (the old marks) raised 2 mm, so the rear sight keeps 2.5 mm under its
+# notch's floor (with the floor at 40 - NOTCH_DROP the notch cut the sight to its foot and its back face split).
+SIGHT_Z = 42.0
+# SIGHT_Z is the sight line: the front post's top and the empties' height, so the eye's when aimed. The rear notch's
+# floor sits NOTCH_DROP under it and the rear sight's top REAR_SIGHT_RISE over it, so aimed the post stands in the
+# notch with light either side (owner 2026-11-05: "you can't see the cyber pistols iron sights"; BL6's notch floor sat
+# on the sight line and hid the post, the GBB's GS1 bug). Widths and heights in mm as fitted (the warp scales the
+# upper parts SIZE_X_UPPER across and SIZE_Z_UP up): the GBB's post and notch widths.
+FRONT_POST_HW = 1.6
 FRONT_DOT_R = 0.6
 REAR_SIGHT_HW = 6.5
-NOTCH_HW = 1.6
-NOTCH_DEPTH = 2.5
+NOTCH_HW = 2.0
+NOTCH_DROP = 2.1
+REAR_SIGHT_RISE = 0.5
 FRONT_SIGHT_Y = 103.8
 REAR_SIGHT_Y = -76.8
 # The selector's track on the frame's sides and its three lights (semi, burst, auto: the slider's centre at half,
@@ -572,13 +578,14 @@ def rear_sight() -> object:
     """The rear sight: a wide block on the rear block's top, sloped front and back, a square notch and a glowing line
     under it on its back face."""
     y = REAR_SIGHT_Y
-    top = SIGHT_Z + NOTCH_DEPTH / SIZE_Z_UP
+    top = SIGHT_Z + REAR_SIGHT_RISE / SIZE_Z_UP
+    floor = SIGHT_Z - NOTCH_DROP / SIZE_Z_UP
     hw, notch_hw = REAR_SIGHT_HW / SIZE_X_UPPER, NOTCH_HW / SIZE_X_UPPER
     b = hs.Builder("RearSight", ["CyberFrame"])
     b.prism(poly([(y + 5.5, 36.6), (y - 4.0, 36.6), (y - 3.2, top, 0.4), (y + 3.2, top, 0.4)]), "x", m(-hw), m(hw),
             "CyberFrame")
     ob = b.build()
-    notch = box("c_notch", (-notch_hw, y - 8.0, SIGHT_Z), (notch_hw, y + 8.0, top + 5.0), "CyberFrame")
+    notch = box("c_notch", (-notch_hw, y - 8.0, floor), (notch_hw, y + 8.0, top + 5.0), "CyberFrame")
     hs.cut(ob, [notch])
     hs.finish(ob, m(0.3), 1)
     return ob

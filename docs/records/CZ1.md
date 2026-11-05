@@ -21,10 +21,18 @@
   normals go through the warp's Jacobian, so the shading stays as `hs.finish` made it. Bones, empties and the clips'
   keys go through `fit` (centre-line points), the slide's and selector's travel through the length scale.
 - **Kept their own widths:** the rail (20 mm, so the Weapon Torch's flush clamp still fits it), the trigger blade, and
-  the sights (post 3.4 mm, notch 3.2 mm, rear sight 13 mm wide, notch 2.5 mm deep). Round parts on the sides (screws,
+  the sights (below).
+- **The iron sights show (owner, 2026-11-05 19:12: "you can't see the cyber pistols iron sights").** Aimed, the eye
+  sits on the sight line (the `RearSight` empty's height); BL6's rear notch floor sat on that line, so the rear sight
+  hid the whole front post (the GBB's GS1 bug). Now the notch floor is 2.1 mm under the line and the rear sight's top
+  0.5 mm over it, the post 3.2 mm and the notch 4 mm wide (the GBB's), so the post and its glowing dot stand in the
+  notch with light either side. The sight line rose 2 mm (before the warp) so 2.5 mm of rear sight stays under the
+  notch's floor: with the floor at its foot, the back face's triangles bridged the notch. `tests/unit/test_cyber_sights.gd`
+  ray-tests the sight picture as `test_pistol_sights.gd` does the GBB's. Round parts on the sides (screws,
   the cap's and cell's glowing rings, the fire-mode lights) are drawn pre-squashed in `place`, so they come out round.
 - **Size:** 229 × 193 × 38 mm before, 204 × 152 × 31 mm now (the GBB: 204 × 140 × 31). The grip is 55 to 59 mm front to
-  back and 30 mm across (the GBB's 58 to 61 and 31); the top is at 26.6 mm (the GBB's 26.1), the bore at 10.8 (10.5).
+  back and 30 mm across (the GBB's 58 to 61 and 31); the top is at 26.6 mm (the GBB's 26.1), the bore at 10.8 (10.5),
+  the sight line at 30.2 (25.7).
 - **Thumb room:** the rear block's skirt (below z -8 mm before the warp) is sunk 0.8 mm, from BL6's 1.2, so it sits
   0.3 mm proud of the frame, as the GBB's slide does; the band above it 0.9 mm.
 - **Budget:** 37,802 triangles in the hands (40k; the owner's ~95 % rule), spent on 4 segments per outline fillet

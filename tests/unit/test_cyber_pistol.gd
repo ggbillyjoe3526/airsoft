@@ -75,7 +75,7 @@ func test_in_hand_it_is_drawn_from_its_model_with_its_sights_marked() -> void:
 	var held := view._held[1]
 	assert_eq(held.id, &"cyber")
 	assert_not_null(held.muzzle)
-	assert_almost_eq(held.rear_sight, Vector3(0.0, 0.0288, 0.06835), Vector3.ONE * 1e-4,
+	assert_almost_eq(held.rear_sight, Vector3(0.0, 0.03024, 0.06835), Vector3.ONE * 1e-4,
 			"the rear notch, as marked (at the GBB's size since CZ1)")
 	assert_null(held.slide, "electric: no slide lock")
 	assert_not_null(held.selector)
