@@ -1,6 +1,6 @@
 # BL7 · The power sources from the owner's photos
 
-**Review:** critic Retry 7/8 on attempt 2 (attempt 3 in review)
+**Review:** 3 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | 2026-11-05 | 1 | Claude (build thread) | touched tests pass (44); local part 1 timed out (exit 124, test_dd1_qa, not touched) | Retry 7/8 (QA Pass, performance Pass) | bottle's solid print ran to a V at half height; battery leads short and thin, stickers read as holes; LiPo balance plug small and hidden; spring coils 12-sided; black label and spring invisible |
 | 2026-11-05 | 2 | Claude (build thread) | touched tests pass (44), gdlint clean | Retry 7/8 | the spring's 14-sided coils showed corners in close-up |
-| 2026-11-05 | 3 | Claude (build thread) | touched tests pass (44), CI | (filled in below) | – |
+| 2026-11-05 | 3 | Claude (build thread) | touched tests pass (44), CI | Accept 8/8 (QA Pass, performance Pass) | – |
 
 ## What changed
 
