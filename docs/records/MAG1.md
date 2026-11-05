@@ -1,6 +1,6 @@
 # MAG1 · The alternative magazines as their own models
 
-**Review:** pending
+**Review:** 3 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | 2026-11-05 | 1 | Claude (build thread) | targeted tests pass (88 + 4) | Retry 6/8 (QA Pass, performance Pass) | extended base pad big against generic photos; streaks and slivers round the holes; catch window raised, not cut; base plates and nozzle not the standard's; budget spent on rings; two renders cropped; .uid uncommitted, unused parameter, long line |
 | 2026-11-05 | 2 | Claude (build thread) | targeted tests pass (43) | Retry 7/8 | low-cap at 84 % of its budget and the test's floor lowered to let it pass |
-| 2026-11-05 | 3 | Claude (build thread) | targeted tests pass | pending | – |
+| 2026-11-05 | 3 | Claude (build thread) | targeted tests pass (5) | Accept 8/8 (QA Pass, performance Pass) | – |
 
 ## What changed
 
