@@ -1228,7 +1228,7 @@ Dev content on for the rifle. The numbers came from bots; these need you.
   end, and the torch sits on the rail beside the handguard.
 - [ ] **Menus:** the Loadout and Armory pictures show the new rifle, sharp and to scale.
 - [ ] **Sniper Rifle (Dev content on):** it is the new AEG with its long barrel for now (as long overall as before);
-  the bolt-action model is next.
+  the bolt-action model is next (since BL5: its own model, below).
 - [ ] **Frame rate:** no drop against before, at 8v8 on Ultra and Low.
 
 ## The new GBB Pistol model (BL2)
@@ -1273,6 +1273,23 @@ Your five fixes from the marked-up render (2026-11-05), worked from your origina
 - [ ] **Torch and paints:** fit the Weapon Torch (under the front block, clear of the teeth); turn on Realistic colours
   (plain grey, no glow).
 - [ ] **Menus and figures:** the Loadout and Armory pictures show the new pistol; a bot carrying it shows its outline.
+
+## The new Sniper Rifle model (BL5)
+
+The bolt-action in the grey chassis from your first sniper photo (2026-11-05). Dev content on.
+
+- [ ] **Look:** in Customise and first person, the rifle reads as your photo: the long barrel and its cap, the M-LOK
+  forend, the black receiver and rail, the short box magazine, the trigger guard and paddle, the grip and the stock
+  with its cheek piece and screws.
+- [ ] **Shoot:** after each shot the bolt handle (on the right) lifts, the bolt slides back and home and the handle
+  turns down, within about a second; the cocking sound still lines up with it.
+- [ ] **Inspect:** the bolt lifts and draws part way back, then closes; nothing pokes through the stock or the scope.
+- [ ] **Reload:** the paddle in front of the guard tips forward and the box magazine drops out and back in.
+- [ ] **Safety:** switching to safe tips the small lever behind the bolt back.
+- [ ] **Parts:** the 2x Scope and Variable Scope sit on the rail; with no optic, flip-up sights stand on the rail's ends
+  and line up when aimed. The grips go on the short rail under the forend, the torch on the rail on its right, the
+  silencer on the barrel's end in place of the cap.
+- [ ] **Hold:** the right hand holds the grip in first person and on the bots; the rifle sits right in the hands.
 
 ## Reporting what you find
 
