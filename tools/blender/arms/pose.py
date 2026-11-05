@@ -16,6 +16,8 @@ SHOULDER = {}
 CONTACT = 0.0008
 # How far the thumb's base swings each way (deg): past this, plain linear skinning folds the glove at its web.
 THUMB_SWING = 30
+# The thumb search's finer step round its best (degrees).
+THUMB_FINE = 5
 # How much of each finger's splay from the middle finger a hold takes out.
 ADDUCT = {2: 0.9, 4: 0.9, 5: 0.95}
 
@@ -111,12 +113,18 @@ class Rig:
         self.children = {b.name: [c.name for c in b.children] for b in arm.data.bones}
         self.pose = dict(self.rest)
         self.local = {}
+        # Each bone moved this far (eye space) from where its parent puts it: a hold's own shoulder.
+        self.shift = {}
+        self.drop = {}
+        self.across = {}
 
     def fk(self, name: str, local_rot: Matrix = None) -> Matrix:
         """Poses a bone from its parent's pose, turned by `local_rot` in its own frame."""
         p = self.parent[name]
         self.local[name] = local_rot.copy() if local_rot is not None else Matrix.Identity(3)
         m = self.pose[p] @ self.rest[p].inverted() @ self.rest[name] @ self.local[name].to_4x4()
+        if name in self.shift:
+            m = Matrix.Translation(self.shift[name]) @ m
         self.pose[name] = m
         return m
 
@@ -266,46 +274,63 @@ class Hand:
     def touches(self, b: str, col: Collider) -> bool:
         return self.clearance(b, col) < CONTACT
 
-    def thumb(self, col: Collider, ratio: tuple, limit: tuple, target: Vector = None, hug: float = 0.0) -> list:
+    def thumb(self, col: Collider, ratio: tuple, limit: tuple, target: Vector = None, hug: float = 0.0,
+              swing: int = THUMB_SWING, twists: tuple = (-30, 0, 30)) -> list:
         """Swings the thumb at its base (across the palm, round its own line and in its bend) to the clear place
         nearest the rifle (and, given a `target`, with its tip nearest that; with `hug`, its whole length kept close
-        to the rifle too), then curls its tip bones onto it."""
+        to the rifle too; `swing` and `twists` bound its turns at the base, degrees), then curls its tip bones onto
+        it."""
         b1, b2, b3 = ("Thumb%d_%s" % (k, self.side) for k in (1, 2, 3))
         inv = self.rig.rest[b1].to_3x3().inverted()
         across = inv @ self.palmar
         twist = Vector((0.0, 1.0, 0.0))
+
+        def score_at(a: int, c: int, t: int) -> tuple:
+            rot = (Matrix.Rotation(math.radians(c), 3, across) @ Matrix.Rotation(math.radians(t), 3, twist)
+                   @ Matrix.Rotation(math.radians(a), 3, self.axis[b1]))
+            self.rig.fk(b1, rot)
+            self.rig.fk(b2)
+            self.rig.fk(b3)
+            gaps = [self.clearance(b, col) for b in (b1, b2, b3)]
+            # Its root may rest on the grip (the web of the hand on the back strap), never pass into it.
+            clear = min(gaps[0] + CONTACT, gaps[1], gaps[2])
+            # Clear of the rifle first; then as close to it as can be, with the least swing.
+            score = (0.0 if clear >= CONTACT else 1.0 + (CONTACT - clear)) + clear * 2.0 + \
+                0.0003 * (abs(a) + abs(c) + abs(t)) / 10.0
+            if hug:
+                score += hug * sum(max(g, 0.0) for g in gaps[1:]) / 2.0
+            if target is not None:
+                m = self.rig.pose[b3]
+                score += (m.translation + m.to_3x3().col[1] * self.rig.length[b3] - target).length * 3.0
+            return score, rot, a, c, t
+
         best = None
-        for a in range(-THUMB_SWING, THUMB_SWING + 1, 10):
+        for a in range(-swing, swing + 1, 10):
             for c in range(-80, 85, 10):
-                for t in (-30, 0, 30):
-                    rot = (Matrix.Rotation(math.radians(c), 3, across) @ Matrix.Rotation(math.radians(t), 3, twist)
-                           @ Matrix.Rotation(math.radians(a), 3, self.axis[b1]))
-                    self.rig.fk(b1, rot)
-                    self.rig.fk(b2)
-                    self.rig.fk(b3)
-                    gaps = [self.clearance(b, col) for b in (b1, b2, b3)]
-                    # Its root may rest on the grip (the web of the hand on the back strap), never pass into it.
-                    clear = min(gaps[0] + CONTACT, gaps[1], gaps[2])
-                    # Clear of the rifle first; then as close to it as can be, with the least swing.
-                    score = (0.0 if clear >= CONTACT else 1.0 + (CONTACT - clear)) + clear * 2.0 + \
-                        0.0003 * (abs(a) + abs(c) + abs(t)) / 10.0
-                    if hug:
-                        score += hug * sum(max(g, 0.0) for g in gaps[1:]) / 2.0
-                    if target is not None:
-                        m = self.rig.pose[b3]
-                        score += (m.translation + m.to_3x3().col[1] * self.rig.length[b3] - target).length * 3.0
-                    if best is None or score < best[0]:
-                        best = (score, rot, a, c, t)
+                for t in twists:
+                    found = score_at(a, c, t)
+                    if best is None or found[0] < best[0]:
+                        best = found
+        # Then finer round the best, within the same bounds.
+        a0, c0, t0 = best[2:]
+        for a in range(max(-swing, a0 - 10), min(swing, a0 + 10) + 1, THUMB_FINE):
+            for c in range(max(-80, c0 - 10), min(80, c0 + 10) + 1, THUMB_FINE):
+                for t in range(max(min(twists), t0 - 15), min(max(twists), t0 + 15) + 1, THUMB_FINE):
+                    found = score_at(a, c, t)
+                    if found[0] < best[0]:
+                        best = found
         self.adduct[b1] = best[1]
         if os.environ.get("BL_DEBUG"):
             print("   thumb search: score %.4f at %s" % (best[0], best[2:]))
         out = self.close("Thumb", col, (0.0, ratio[1], ratio[2]), (0.0, limit[1], limit[2]))
         return list(best[2:]) + out[1:]
 
-    def settle(self, name: str, start: tuple, col: Collider, span: int = 30, swing: float = 0.0) -> list:
+    def settle(self, name: str, start: tuple, col: Collider, span: int = 30, swing: float = 0.0,
+               root: bool = False) -> list:
         """Poses a finger at its authored bends `start` (degrees, base to tip; its base swung `swing` degrees
         sideways), then curls it further or opens it, its three joints together and the tip a little less, until it
-        rests on the replica: the most curl within `span` of the authored pose that stays clear of it."""
+        rests on the replica: the most curl within `span` of the authored pose that stays clear of it. With `root`,
+        its first bone may rest on the replica (a palm cupped round a handguard), never pass into it."""
         bones = ["%s%d_%s" % (name, k, self.side) for k in (1, 2, 3)]
         side_axis = self.axis[bones[0]].cross(Vector((0.0, 1.0, 0.0))).normalized()
 
@@ -320,9 +345,11 @@ class Hand:
 
         for t in range(span, -3 * span - 1, -2):
             angles = apply(t)
-            if not any(self.touches(b, col) for b in bones):
+            if not (self.clearance(bones[0], col) < (0.0 if root else CONTACT)
+                    or any(self.touches(b, col) for b in bones[1:])):
                 return [round(a) for a in angles]
-        print("  ! the %s finger can't clear the replica" % name)
+        print("  ! the %s finger can't clear the replica %s" % (name, [round(self.clearance(b, col) * 1000, 1)
+                                                                    for b in bones]))
         return [round(a) for a in angles]
 
     def thumb_at(self, base: tuple, bends: tuple, col: Collider, span: int = 20) -> list:
@@ -465,6 +492,7 @@ def place_arm(rig: Rig, side: str, hand_m: Matrix, pole: Vector, quiet: bool = F
     """Upper arm and forearm reach the wrist; the forearm turns with the hand so the wrist never twists."""
     up, fo, hn = "UpperArm_" + side, "Forearm_" + side, "Hand_" + side
     rig.fk("Shoulder_" + side)
+    rig.fk(up)
     s = rig.pose[up].translation
     a = (rig.rest[fo].translation - rig.rest[up].translation).length
     b = (rig.rest[hn].translation - rig.rest[fo].translation).length
@@ -538,8 +566,10 @@ def clipping(objects: list, solid: list) -> tuple:
 
 def relax(rig: Rig, hands: dict, objects: list, solid: list, poles: dict) -> int:
     """Settles the hold on the skinned surface itself: a finger still touching the rifle opens a little at that
-    joint, a palm still pressing in eases back; until nothing passes into the rifle."""
+    joint, a palm still pressing in eases back (its thumb waits until it has, or the thumb would swing out from the
+    grip when it is the web of the hand pressing in); until nothing passes into the rifle."""
     hits = 0
+    turned = {}
     for _ in range(60):
         rig.write()
         hits, tally = clipping(objects, solid)
@@ -557,10 +587,16 @@ def relax(rig: Rig, hands: dict, objects: list, solid: list, poles: dict) -> int
                 m = Matrix.Translation(-h.normal * 0.0004) @ rig.pose["Hand_" + side]
                 place_arm(rig, side, m, poles[side], quiet=True)
                 rig.refresh("Hand_" + side)
+            elif bone.startswith("Thumb") and any(b in tally for b in ("Hand_" + side, "Forearm_" + side)):
+                # The thumb's root is the web of the hand: let the hand ease back first.
+                continue
             elif bone in hands[side].axis:
+                turned[bone] = turned.get(bone, 0) + 1
                 turn = Matrix.Rotation(math.radians(-1.5), 3, hands[side].axis[bone])
                 rig.fk(bone, rig.local[bone] @ turn)
                 rig.refresh(bone)
+    if os.environ.get("BL_DEBUG"):
+        print("   relaxed:", turned)
     if hits:
         print("  still passing into the replica:", sorted(last.items(), key=lambda x: -x[1]))
     return hits

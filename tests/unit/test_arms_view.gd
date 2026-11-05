@@ -114,6 +114,7 @@ func test_the_arms_draw_as_the_replica_does() -> void:
 			var worn := mesh_node.get_surface_override_material(i) as BaseMaterial3D
 			assert_not_null(worn, "a copy of its own")
 			assert_true(worn.use_z_clip_scale, "depth pressed")
+			assert_true(worn.disable_receive_shadows, "no shadow falls on them (pressed depth would streak it)")
 			assert_almost_eq(worn.z_clip_scale, cfg.depth_scale, EPS)
 
 
