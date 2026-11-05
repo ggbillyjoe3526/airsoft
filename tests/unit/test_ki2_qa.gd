@@ -237,6 +237,10 @@ func test_a_realistic_colours_view_holds_the_slide_back_too() -> void:
 
 
 func test_switching_replicas_back_and_forth_adds_and_frees_nothing() -> void:
+	# Counted with the pistol in hand, as the switches end: your arms (ArmsView) ride the replica in hand.
+	a.active = 1
+	_frame()
+	await _settle()
 	var before := _pistol().root.get_child_count()
 	var nodes := Performance.get_monitor(Performance.OBJECT_NODE_COUNT)
 	for i in 6:
