@@ -29,9 +29,9 @@ outline, with detail cut into it:
 - **Both AEG parts:** the catch window cut 1.2 mm into the left side near the top, with a dark floor (the photos'
   slot), six grip grooves cut across the base plate's foot (those clear of the wheel on the hi-cap), ribs with rounded
   crowns whose ends slope down into the body, and the flare at the well's foot eased over its 4 mm.
-- **Extended:** 4 cm longer along the grip's rake (the old part 2.2), two staggered columns of witness holes bored
+- **Extended:** 3.5 cm longer along the grip's rake (the old part 2.2), two staggered columns of witness holes bored
   1.2 mm into its back (the owner's pistol magazine photos), the catch notch cut into its left side, an exhaust valve
-  and feed lips on top, its base pad in the frame's colour. 9,470 triangles.
+  and feed lips on top, its base pad in the frame's colour. 9,468 triangles.
 - Each keeps the part contract: origin on the MagWell, a `_Figure` copy (44, 44, 28 triangles), the replica's paint
   materials. Each is cleaned as exported (no zero-area triangles) and the flat faces round a cut get their own
   normals, so nothing streaks. `fit_parts.py` no longer stretches magazines; `gbb.py` no longer builds the extended.
@@ -42,8 +42,9 @@ outline, with detail cut into it:
 
 - **The Low-Cap is built too** (the owner named "hicap, extended" with "i think"): it is the third non-standard
   magazine, so it is rebuilt from the standard one the same way, shorter, as its old model was.
-- **Lengths:** hi-cap 1.32 and low-cap 0.70 of the standard below the well, the extended 4 cm longer: long enough to
-  read at a glance in first person and on the bots' replicas, short of the hands and the ground.
+- **Lengths:** hi-cap 1.32 and low-cap 0.70 of the standard below the well, the extended 3.5 cm longer: long enough
+  to read at a glance in first person and on the bots' replicas, short of the hands and the ground. The extended was
+  4 cm until CI's Customise frame test (`test_ur4_qa.gd`) found it 3 % out of the frame in the side views.
 - **The extended keeps the standard's base pad** (critic attempt 1 measured it big against generic magazine photos):
   the pad is traced from the owner's own pistol photo in BL2 and shared with the standard magazine, which he passed
   ("almost perfect"); the owner's rule is "the standard magazines … just longer", so it stays, in the frame's colour.

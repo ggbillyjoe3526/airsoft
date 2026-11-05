@@ -55,7 +55,7 @@ LOWCAP_BOTTOM = -0.1310
 # rest of each budget goes on the details below.
 HICAP_FINE = 2
 LOWCAP_FINE = 3
-EXTENDED_FINE = 8
+EXTENDED_FINE = 9
 # The AEG base plate's frame (aeg.mag_plate: its top at z 0, +y toward the muzzle): its foot, and the grip grooves cut
 # across its foot (their places along it, half width, width, depth), inside the standard plate's outline.
 PLATE_FOOT = -0.0075
@@ -82,9 +82,10 @@ COLLAR = (0.0006, 0.0018, 0.0014)
 SLIVER = 1e-10
 # Neighbouring faces this close to parallel (normals' dot) lie in one plane (within about 0.25°).
 PLANE_DOT = 0.99999
-# The pistol's extended magazine: this much longer along the rake than its standard one (4 cm: a long "+10" magazine,
-# twice the old part's 2.2 cm so it reads at a glance).
-EXTENDED = 0.040
+# The pistol's extended magazine: this much longer along the rake than its standard one (3.5 cm: a long "+10" magazine,
+# half as long again as the old part's 2.2 cm so it reads at a glance, and the most the Customise frame holds below
+# the grip in the side views: test_ur4_qa.gd).
+EXTENDED = 0.035
 # Its witness holes down its back in two staggered columns (as the owner's pistol magazine photos have): the first's
 # distance down the magazine from its top, the spacing down a column, their radius and depth, the columns' offset
 # from the middle, and the last's distance from the foot. Its catch notch cut into the left side near the top (its

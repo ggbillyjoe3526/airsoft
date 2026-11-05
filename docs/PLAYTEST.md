@@ -1327,7 +1327,7 @@ The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built 
 - [ ] **Hi-Cap (AEG Rifle):** in Customise, the magazine is about a third longer than the standard one, curving on
   down with the same ribs, with a knurled winding wheel showing under its base plate.
 - [ ] **Low-Cap (AEG Rifle):** a short magazine, about two thirds of the standard one's length below the rifle.
-- [ ] **Extended (GBB Pistol):** the magazine sticks out about 4 cm below the grip, with a row of holes down its back
+- [ ] **Extended (GBB Pistol):** the magazine sticks out about 3.5 cm below the grip, with a row of holes down its back
   and its base pad in the frame's colour.
 - [ ] **Reload:** with each fitted, the reload drops that magazine out and brings it back in; nothing pokes through
   the hands, the grip or the rifle.
