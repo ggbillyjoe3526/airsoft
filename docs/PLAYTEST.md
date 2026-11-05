@@ -1319,6 +1319,18 @@ Every BB in flight is now a proper Blender model, round from every side instead 
 - [ ] **Glowing BBs:** on Woodland at night, glowing BBs are round green balls with their streak, as before.
 - [ ] **Frame rate:** a full-auto magazine dump on Low keeps its frame rate (F3 box).
 
+## The barrel models (BA1)
+
+The AEG Rifle's two barrels are proper models now, built from the rifle's own barrel (no photos needed).
+
+- [ ] **Customise, Barrel tab:** the Tight-Bore card shows a polished steel inner barrel in its hop-up unit (red
+  bucking at the back, the toothed hop dial on the side); the Long Barrel card a brass inner barrel, longer, through
+  its barrel extension. Each card shows the whole barrel to scale, so the long one is the longer.
+- [ ] **Fitted:** with the tight bore the rifle looks as it comes, but for a polished ring inside the flash hider; with
+  the long barrel the knurled, fluted extension sits between the front sight and the flash hider, which moves out
+  10 cm. Fit a silencer on the long barrel: it starts at the extension's end. Nothing pokes through the rifle.
+- [ ] **Paints:** the extension takes each paint like the rifle's barrel; the inner barrels keep their steel and brass.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

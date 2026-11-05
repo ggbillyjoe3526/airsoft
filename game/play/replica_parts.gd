@@ -5,13 +5,15 @@ extends RefCounted
 ## top-level object per part named <slot>_<key>, placed where it sits on the replica, with its figures' cut-down copy
 ## (<slot>_<key>_Figure) beside it or under it. A magazine part takes the standard magazine's place and follows it
 ## through a reload; a muzzle part takes the flash hider's; a barrel with an end point carries the muzzle device and the
-## muzzle out to it; an optic folds the iron sights down (SightFold). `unfit` undoes it all.
+## muzzle out to it; an optic folds the iron sights down (SightFold); what a part has inside the replica (<slot>_<key>_Inside:
+## a barrel's inner barrel and hop-up unit) shows in its own picture and is left out once fitted. `unfit` undoes it all.
 
 const PART_DIR := "res://assets/models/replicaParts/"
 const FIGURE_SUFFIX := "_Figure"
 const SIGHT_LINE_SUFFIX := "_SightLine"
 const MUZZLE_SUFFIX := "_Muzzle"
 const BARREL_END_SUFFIX := "_BarrelEnd"
+const INSIDE_SUFFIX := "_Inside"
 ## The replica's own nodes the parts work with: its magazine mesh(es) and the bone attachment that carries them through
 ## the clips, its flash hider and its muzzle point.
 const MAGAZINE_NODE := "Magazine"
@@ -66,6 +68,10 @@ static func fit(model: Node3D, key: StringName, parts: Dictionary, animated: boo
 		_move(f, f.muzzle, shift)
 	for slot: StringName in taken:
 		var node := taken[slot]
+		var inside := node.get_node_or_null(NodePath(String(node.name) + INSIDE_SUFFIX))
+		if inside != null:
+			node.remove_child(inside)
+			inside.free()
 		match slot:
 			MAGAZINE_SLOT:
 				for mag in model.find_children(MAGAZINE_NODE, "Node3D", true, false):
