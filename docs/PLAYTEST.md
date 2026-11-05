@@ -1295,6 +1295,24 @@ The bolt-action in the grey chassis from your first sniper photo (2026-11-05). D
   silencer on the barrel's end in place of the cap.
 - [ ] **Hold:** the right hand holds the grip in first person and on the bots; the rifle sits right in the hands.
 
+## The attachments from your photos (BL8)
+
+Every attachment rebuilt from your reference photos (2026-11-05). Where a folder mixed styles, the model follows the
+style most of its photos show.
+
+- [ ] **Red dot:** a closed micro red dot on a low rail riser. Aim: the dot sits mid-window and the view round the
+  small window stays open; the rifle sits a little nearer your eye than before (the window is smaller than the old
+  round one).
+- [ ] **2x scope:** the magnifier on its hinged mount. Aim: the magnified view fills the eyepiece with no dark ring
+  or frame showing through the glass.
+- [ ] **Variable scope:** the prism scope with the red fibre front sight. Aim and wheel through 2x to 6x on the AEG
+  and the sniper rifle: the view fills the eyepiece.
+- [ ] **Grips:** the short vertical grip and the swept angled grip under the AEG's handguard, nothing poking through.
+- [ ] **Silencers:** the rifle's tube on the AEG and sniper; the pistol's short, stout one on its knurled collar.
+- [ ] **Laser and torch:** under the GBB Pistol's rail, alone and together (the torch hangs under the laser); the
+  torch on the Cyber Pistol and on the AEG's right side. At night the beam leaves the torch's head.
+- [ ] **Customise and paints:** each part in each paint; the Loadout and Armory pictures show them sharp and to scale.
+
 ## The BB model (BM1)
 
 Every BB in flight is now a proper Blender model, round from every side instead of the old eight-sided ball.
