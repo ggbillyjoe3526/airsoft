@@ -5,7 +5,8 @@ plays them all. A change that alters what a section describes updates that secti
 as described; anything else is worth reporting ([Reporting what you find](#reporting-what-you-find)).
 
 Each section applies once its feature lands; `docs/FEATURES.md` lists what has. The checks are carried from the
-browser game, whose guide (with the reasons and exact figures) stays readable in `legacy/browser/docs/` until 0.1.
+browser game, whose guide (with the reasons and exact figures) stays readable in `legacy/browser/docs/` at the git tag
+`0.1-dev.1`.
 
 ## Get the game running
 
@@ -68,6 +69,10 @@ Play › Mode Elimination on Depot, Match › Opponents Normal. Set the mouse se
 - [ ] **Watch the crosshair.** It opens when you run or jump, closes almost at once when you stop, and is tightest
   crouched and still; crouch-walking sits between standing still and walking.
 - [ ] **Sprint up and down Depot's dock ramps.** Uphill loses about a quarter of a sprint's pace (a confirmed call).
+- [ ] **Watch bots run (GA1).** On Depot, watch bots walk, run, sprint, strafe and back-pedal past you, and crouch-walk.
+  Their feet stay planted on the floor without sliding, each step rolls heel to toe, and the legs keep pace with the
+  speed. Strafing, the legs turn into the step while the rifle stays on its aim. Does any gait look wrong, especially
+  the back-pedal and strafes (quick steps, about 4 a second) and the low crouch walk (short quick steps)?
 - [ ] **Controls through a vault (BP5).** Vault a low wall (Depot's office hall has one). On Semi, hold left click
   through it: one BB, not two. Hold right click: the sight drops and comes back.
 
@@ -1319,12 +1324,28 @@ Every BB in flight is now a proper Blender model, round from every side instead 
 - [ ] **Glowing BBs:** on Woodland at night, glowing BBs are round green balls with their streak, as before.
 - [ ] **Frame rate:** a full-auto magazine dump on Low keeps its frame rate (F3 box).
 
+## The smoke and flash bomb models (BL9)
+
+- [ ] **In hand:** take each bomb in hand (mouse wheel). The smoke is a grey canister with a green stripe, a black
+  lever and a pull ring; the flash a slim olive tube with a violet band and a ring. Nothing pokes into the view.
+- [ ] **Thrown:** throw each. It tumbles in flight, bounces and comes to rest lying on its side on the ground, not
+  sunk into it or floating over it.
+- [ ] **Bots' bombs:** the ones bots throw look the same, and the HUD's bomb icons match the stripe and band colours.
+
 ## GBB Pistol sights and port (GS1)
 
 - [ ] **Aim:** aim the GBB Pistol in the Range. The front post with its white dot stands in the rear sight's notch,
   its top level with the rear sight's top, a sliver of light either side; the BBs land on the post's top.
 - [ ] **Port:** Inspect the pistol and look at the top of the slide: the barrel fills the ejection port with no dark
   gap round it, and the slide still blows back and locks back cleanly.
+
+## The full bug pass before 0.1 Dev 2 (BP4)
+
+- [ ] **Switch Replica by keyboard.** On the Loadout page, Tab to SWITCH REPLICA and press Enter. Tab and the arrows
+  stay inside the list (they never land on a button behind it). Press Esc, or Enter on a replica: the keyboard is back
+  on SWITCH REPLICA, and Enter opens the list again.
+- [ ] **Flags from a roof.** On Woodland in Attack / Defend, if you can get onto the shelter roof by flag B, standing
+  there does nothing to the flag; at the pole's foot it rises as before.
 
 ## Reporting what you find
 

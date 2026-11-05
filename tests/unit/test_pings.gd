@@ -242,7 +242,8 @@ func test_no_contact_behind_a_wall_in_a_bush_or_behind_a_body() -> void:
 	_squad(ENEMY_AT, [BACKSTOP])
 	var body := state.characters[1]
 	body.status = Character.Status.OUT
-	body.position = Vector3(-20.0, 0.0, 20.0)
+	# Where your look at the enemy's chest crosses the body's chest, clear of the seam between its chest and head.
+	body.position = Vector3(-15.0, 0.0, 20.0)
 	p = _ping_toward(_chest(orange))
 	assert_eq(p.enemy_id, -1, "the body of someone hit stops sight")
 
