@@ -43,6 +43,9 @@ const BUS_POWER := &"Power"
 const BUS_MUFFLED := &"Muffled"
 ## The charging handle drawn back and let go after each shot of a spring rifle (assets/audio/cues/boltCycle_*.wav, SN1).
 const BOLT_CUE := &"boltCycle"
+## Every replica's trigger pulled with nothing loaded, today's and any added later: the gas pistol's recorded dry click
+## (assets/audio/cues/dryFire_*.wav; owner, 2026-11-05, final, not a stand-in).
+const DRY_CUE := &"dryFire"
 ## Cue names by RayHit.Surface (none sounds as concrete; a BB on gravel, grass or leaves as earth, a step on each as
 ## its own; a step on glass as on metal, on plastic or cardboard as on wood) and by GameEvent.Footstep.
 const SURFACE_NAMES: PackedStringArray = ["concrete", "concrete", "metal", "wood", "earth", "gravel", "grass", "leaves",
@@ -87,7 +90,6 @@ var _shot: Dictionary[StringName, StringName] = {}
 var _power: Dictionary[StringName, StringName] = {}
 ## By power source: its power part's level (SoundConfig.power_gains).
 var _power_gain: Dictionary[StringName, float] = {}
-var _dry: Dictionary[StringName, StringName] = {}
 ## Each sound profile's slide locking back on the magazine's last shot (slideLock_<profile>, AU2), or none.
 var _slide_lock: Dictionary[StringName, StringName] = {}
 var _mag_out: Dictionary[StringName, StringName] = {}
@@ -149,7 +151,6 @@ func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, quer
 		var has_part := ResourceLoader.exists("%s%s_1.wav" % [SoundConfig.CUE_DIR, power_part])
 		_power[p] = _load(power_part) if has_part else &""
 		_power_gain[p] = cfg.power_gains.get(p, cfg.power_gain)
-		_dry[p] = _load("dryFire_%s" % p)
 		var lock := "slideLock_%s" % p
 		_slide_lock[p] = _load(lock) if ResourceLoader.exists("%s%s_1.wav" % [SoundConfig.CUE_DIR, lock]) else &""
 		_mag_out[p] = _load("magOut_%s" % p)
@@ -165,7 +166,7 @@ func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, quer
 	for cue: String in ["selector", "draw", "reloadRefused", "bodyHit", "hitTick", "hitMarker", "count_beep", "vault",
 			"foley_holster", "magRattle", "rope_up", "rope_down", "steelRing", "radio_ack", "foley_crouch", "foley_stand",
 			"foley_lean", "whistle_short", "whistle_long", "torchClick", "ping_pip", "magToss", "magCatch", "grenade_pin",
-			"grenade_bounce", "smoke_pop", "flash_bang", "door_open", "door_shut", BOLT_CUE]:
+			"grenade_bounce", "smoke_pop", "flash_bang", "door_open", "door_shut", BOLT_CUE, DRY_CUE]:
 		_load(cue)
 	_set_muffle(cfg.muffled_cutoff_hz)
 	for i in cfg.field_voices:
@@ -227,7 +228,7 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				if _slide_lock.get(p, &"") != &"" and _emptied(state, e.actor, e.slot):
 					_mechanism(_slide_lock[p], state, e, own)
 			GameEvent.Kind.DRY_FIRE:
-				_mechanism(_dry.get(_power_of(state, e.actor, e.slot), &""), state, e, own)
+				_mechanism(DRY_CUE, state, e, own)
 			GameEvent.Kind.RELOAD_START:
 				_mechanism(_mag_out.get(_power_of(state, e.actor, e.slot), &""), state, e, own)
 			GameEvent.Kind.RELOAD_END:

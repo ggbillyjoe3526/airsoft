@@ -67,8 +67,8 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
   whir, BBs on metal, wood, glass, plastic, cardboard and cloth, knocks on shelves, a crate and wood, a door, a pea
   whistle, a digital thermometer's beep, a pouch, a torch, a magazine thrown and caught). The originals are in the
   shared project files (`audio/william/raw/`), not the repository; `tools/cut_recordings.py` cuts, cleans and levels
-  them into the cues it lists, every replica's shots, dry clicks and magazines (the AEG from the motor and the pistol's
-  crack, the Sniper Rifle and the Cyber Pistol from the pistol's), the pistol's slide locking back, BBs on metal,
+  them into the cues it lists, every replica's shots and magazines (the AEG from the motor and the pistol's crack, the
+  Sniper Rifle and the Cyber Pistol from the pistol's), one dry click for every replica (the pistol's, owner 2026-11-05), the pistol's slide locking back, BBs on metal,
   wood, glass, plastic, cardboard and players, the gear, the props, the doors, the whistle, the shot timer and the
   ping. Since AU3 they also stand in, labelled placeholders, for 25 cues until he records them (14 of them new; the
   script's `--placeholders` lists them), and the whistle is a pea whistle the script synthesises (his takes set

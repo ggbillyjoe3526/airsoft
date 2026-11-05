@@ -143,7 +143,7 @@ func test_it_sounds_as_its_own_with_no_power_part() -> void:
 	audio.setup(SoundConfig.new(), [&"cyber", &"electric"] as Array[StringName], BodyConfig.new(), null, null)
 	assert_eq(audio._power[&"cyber"], &"", "no power part apart")
 	assert_ne(audio._power[&"electric"], &"")
-	for cue: StringName in [audio._shot[&"cyber"], audio._dry[&"cyber"], audio._mag_out[&"cyber"],
+	for cue: StringName in [audio._shot[&"cyber"], SimAudio.DRY_CUE, audio._mag_out[&"cyber"],
 			audio._mag_in[&"cyber"]]:
 		assert_false((audio._streams[cue] as Array).is_empty(), "%s has its sounds" % cue)
 	var state := GameState.new(1)
