@@ -1324,6 +1324,25 @@ Every BB in flight is now a proper Blender model, round from every side instead 
 - [ ] **Glowing BBs:** on Woodland at night, glowing BBs are round green balls with their streak, as before.
 - [ ] **Frame rate:** a full-auto magazine dump on Low keeps its frame rate (F3 box).
 
+## The smoke and flash bomb models (BL9)
+
+- [ ] **In hand:** take each bomb in hand (mouse wheel). The smoke is a grey canister with a green stripe, a black
+  lever and a pull ring; the flash a slim olive tube with a violet band and a ring. Nothing pokes into the view.
+- [ ] **Thrown:** throw each. It tumbles in flight, bounces and comes to rest lying on its side on the ground, not
+  sunk into it or floating over it.
+- [ ] **Bots' bombs:** the ones bots throw look the same, and the HUD's bomb icons match the stripe and band colours.
+
+## Bots throwing bombs (GT1)
+
+- [ ] **The wind-up:** on the Practice Range or in a match, watch a bot throw a smoke or flash from 5 to 15 m. Its
+  replica goes to its chest, the bomb shows in its right hand and the left hand meets it to pull the pin. The arm
+  swings back by its ear with the left arm pointing ahead, then comes over beside the head, elbow first, never across
+  the face, and the bomb leaves as the hand reaches out ahead at head height.
+- [ ] **After:** the arm follows through down across the body, then the replica comes back up. No bomb is left in the
+  hand after it is thrown.
+- [ ] **Shape:** nothing stretches oddly at the shoulder or armpit while the arm is up, on both the soldier and the
+  robot (Settings › Dev › Robots).
+
 ## GBB Pistol sights and port (GS1)
 
 - [ ] **Aim:** aim the GBB Pistol in the Range. The front post with its white dot stands in the rear sight's notch,
