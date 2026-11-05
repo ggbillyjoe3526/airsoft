@@ -1,6 +1,6 @@
 # GA1 · The figures' running animations
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | 2026-11-05 | 1 | Claude (build thread) | figure, hit and hitbox tests pass (23 files, 243 tests) | Retry 6/8 (QA Pass, performance Pass) | every gait a bent-knee crouch-run (hips 0.86 m), no flight, the swing foot dragging; back-pedal and strafes forced onto the forward run's 2.94 m cycle (1.47 m lunges); the crouch walk sitting back on its heels, feet ahead; knees crossing on the strafes |
 | 2026-11-05 | 2 | Claude (build thread) | figure, hit, hitbox and gait tests pass (24 files, 253 tests) | Retry 6/8 | run and sprint fixed; the crouch walk a full-squat duck walk, the swing knee splayed out like a frog, the thigh in the forearm; every standing gait's torso upright or back over hips pushed forward; no named references; the changelog over-claiming |
-| 2026-11-05 | 3 | Claude (build thread) | figure, hit, hitbox and gait tests pass | pending | – |
+| 2026-11-05 | 3 | Claude (build thread) | figure, hit, hitbox and gait tests pass; tools/check.sh | Accept 8/8 (QA Pass) | – |
 
 ## Why
 

@@ -1,19 +1,15 @@
-Task: GA1 · QA commit pending · Verdict: Pass
+Task: GA1 · QA commit 30fb3ba (no new commit; no tests added) · Verdict: Pass
 
-Blocking: none.
-Advisory: none found. Checked: Hitbox.step_walk_cycle takes speed from c.velocity, not the ground moved; a vault or a
-knock that moves position with zero velocity advances the cycle at the first table point (1.0 m / 0.8 m), harmless
-(no stepping clip shows then). Walk-off and bots set velocity through Movement.step, so cadence follows speed.
-Empty, zero and repeated-speed tables stay finite (MIN_CYCLE guard); steady_turn wraps across +-PI.
+Scope: git diff a1bbbc9 30fb3ba (hitbox.gd, hit_config.gd, hit_fit.tres, hit_pose.gd, gait.py, test_gait_cycle.gd).
 
-Tests added (tests/unit/test_gait_cycle.gd, 9 tests, 60 asserts, all pass):
-- test_cycle_length_is_in_line_between_speeds_and_held_past_the_ends · fails if lerp or end-hold is removed (old code had no table).
-- test_cycle_length_blends_to_the_crouched_table · fails if the crouch blend is dropped.
-- test_cycle_length_never_below_the_minimum_even_with_bad_tables · fails without the MIN_CYCLE clamp.
-- test_cycle_length_with_empty_or_repeated_tables_is_finite · fails without the empty/zero-span guards.
-- test_step_walk_cycle_advances_a_whole_cycle_over_the_cycle_length · old code used strides_per_metre (0.75/m), not the 1.763 m table.
-- test_each_gait_clip_covers_the_cycle_length_at_its_speed · human and robot sidecars, Walk_F/Run_F/Sprint/CrouchWalk, within 1% (fails if a clip or table is re-tuned alone).
-- test_steady_turn_wraps_to_the_short_way_round · fails without wrapf.
-- test_upper_steady_changes_the_upper_body_only_while_it_is_on · upper_steady 1 moves the strafe's upper joints, 0 reproduces the old pose.
-- test_a_vaulting_or_out_character_keeps_the_hips_upper_body · fails if the alive/not-vaulting guard is removed.
-Not run: tools/check.sh (main thread); in-game look of the gait needs a display (owner's list).
+Blocking: none. Advisory: none.
+
+Checks
+- Yaw/sign: step = (vx*cos - vz*sin, -vx*sin - vz*cos) matches FigurePose.read (figure_pose.gd:102-103: ahead, right) exactly; forward at yaw 0 is -Z (y=+1 for velocity -Z). Quarter-turn test (yaw PI/2 faces -X: +X is back, -Z is right) agrees by hand.
+- way_share: total==0 returns 1.0, so no divide by zero or NaN; an unnormalised step is fine (ratio). Continuous across y=0 (ahead and back both 0 weight at the seam), so no jump in cycle rate between forward and back. Diagonals weight by |components| (L1), so a 45 degree back-left is (back+side shares)/2; a design choice, tested at the ahead/side diagonal.
+- cycle_length: share applies to the standing term only; crouch lerp is clamped 0..1, partial crouch is a linear blend, MIN_CYCLE floor keeps the divisor positive even with share set to 0 or negative. Crouched length ignores the way (tested; the 1.05 crouch metres is within the table).
+- step_walk_cycle: velocity zero with moved>0 (teleport/push, below max_stride) gives step zero, share 1, finite. Uses c.yaw while FigurePose uses an interpolated yaw: negligible (sub-tick). Applied to bots too: Simulation calls it per character (simulation.gd:167), same code path.
+- Phase: only the rate changes with direction, never the phase, so no pop when switching direction.
+
+Tests: test_gait_cycle.gd (11 tests incl. back/aside/diagonal/no-step/crouch and the own-frame quarter-turn case) + test_hitbox + test_figure_animator: 36 passing, 0 failing, 880 asserts. Not run: tools/check.sh (already running), smoke test.
+Not testable here: how the shorter back/side cycles look against the Run_B/Run_L/R clips (needs a display; owner to eyeball foot sliding going backwards and strafing, and crouch-walk at 1.05 m).
