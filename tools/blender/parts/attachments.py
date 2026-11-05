@@ -35,6 +35,7 @@ Running it again rebuilds the same parts.
 
 import math
 import os
+import random
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "replicas"))
@@ -791,8 +792,10 @@ def build_grip_angled() -> bpy.types.Object:
 
 
 # The short vertical grip (vertical_grip): its clamp, then its body as rings from the top down (z mm under the rail's
-# face, the half width across, the half length fore and aft, mm): a slight waist and a flared foot.
-VG_RINGS = [(-6.0, 13.2, 16.0), (-11.0, 12.6, 15.1), (-30.0, 12.1, 14.5), (-49.0, 12.2, 14.6), (-54.0, 13.2, 15.6),
+# face, the half width across, the half length fore and aft, mm): a top flared fore and aft, a slight waist, a flared
+# foot.
+VG_RINGS = [(-6.0, 13.2, 20.2), (-9.0, 12.9, 19.4), (-12.5, 12.5, 16.6), (-16.0, 12.2, 15.0), (-30.0, 12.1, 14.5),
+            (-49.0, 12.2, 14.6), (-54.0, 13.2, 15.6),
             (-57.5, 13.4, 15.8), (-59.5, 12.6, 15.1)]
 VG_RIBS = 22
 
@@ -811,7 +814,7 @@ def vg_ring(z: float, hw: float, hl: float, n: int = 32) -> list:
     for i in range(n):
         t = math.tau * i / n
         c, s = math.cos(t), math.sin(t)
-        x = hw * math.copysign(abs(c) ** (2.0 / 3.2), c)
+        x = hw * math.copysign(abs(c) ** (2.0 / 5.0), c)
         y = hl * math.copysign(abs(s) ** (2.0 / 2.6), s)
         pts.append((x * MM, y * MM, z * MM))
     return pts
@@ -836,41 +839,44 @@ def build_grip_vertical() -> bpy.types.Object:
     gb.loft([vg_ring(z, hw, hl) for z, hw, hl in VG_RINGS], "Furniture")
     body = gb.build()
     # A textured panel let into each side.
-    cuts = [prism_cutter(hs.fillet([(-8.0, -15.0, 3.0), (8.0, -15.0, 3.0), (8.0, -48.0, 3.0), (-8.0, -48.0, 3.0)], 3),
-                         "x", s * 10.8, s * 16.0) for s in (-1.0, 1.0)]
+    cuts = [prism_cutter(hs.fillet([(-9.8, -16.0, 3.0), (9.8, -16.0, 3.0), (9.8, -48.0, 3.0), (-9.8, -48.0, 3.0)], 3),
+                         "x", s * 10.4, s * 18.0) for s in (-1.0, 1.0)]
     hs.cut(body, cuts)
     hs.finish(body, bevel=0.0008, segments=2)
     db = hs.Builder("vg_detail", ["Furniture", "Rubber", "Metal"])
     pb = hs.Builder("vg_stipple", ["Furniture"])
-    # The panels: a stippled face (a fine grid of low studs) at the pocket's floor.
+    # The panels: a stippled face at the pocket's floor, its small studs scattered (seeded, so a rebuild matches).
+    rng = random.Random(8)
     for s in (-1.0, 1.0):
-        db.prism(mmp(hs.fillet([(-7.8, -15.2, 2.8), (7.8, -15.2, 2.8), (7.8, -47.8, 2.8), (-7.8, -47.8, 2.8)], 2)),
-                 "x", s * 10.4 * MM, s * 11.25 * MM, "Furniture")
+        db.prism(mmp(hs.fillet([(-9.6, -16.2, 2.8), (9.6, -16.2, 2.8), (9.6, -47.8, 2.8), (-9.6, -47.8, 2.8)], 2)),
+                 "x", s * 10.0 * MM, s * 10.85 * MM, "Furniture")
         for row in range(23):
-            for col in range(12):
-                y = -6.6 + col * 1.2 + (0.6 if row % 2 else 0.0)
-                if y > 6.7:
+            for col in range(15):
+                y = -8.4 + col * 1.2 + (0.6 if row % 2 else 0.0) + rng.uniform(-0.4, 0.4)
+                z = -17.6 + row * -1.32 + rng.uniform(-0.4, 0.4)
+                if abs(y) > 8.6 or z < -46.8:
                     continue
-                stud(pb, s, 11.2, y, -16.8 + row * -1.35, 0.55, 0.32, "Furniture")
+                stud(pb, s, 10.8, y, z, rng.uniform(0.4, 0.65), rng.uniform(0.18, 0.38), "Furniture")
     # The fine ribs down the front and back faces, each set into the body's curve.
     for end in (-1.0, 1.0):
         for i in range(VG_RIBS):
-            z = -12.5 - i * 1.9
+            z = -16.5 - i * 1.65
             hl = vg_hl(z - 0.5)
             pb.prism(mmp([(-6.0, z), (6.0, z), (5.6, z - 0.9), (-5.6, z - 0.9)]), "y",
                      end * (hl - 0.4) * MM, end * (hl + 0.35) * MM, "Furniture")
     # The clamp, its cross bolt and nut.
-    rail_clamp_under(db, PICATINNY, -16.5, 16.5, -7.0, 2.6, "Furniture")
-    disc_x(db, 13.2, 15.0, 0.0, -2.8, 4.0, "Metal", 24, 0.6)
-    db.box(mm(15.0, -3.2, -3.25), mm(15.06, 3.2, -2.35), "Rubber")
-    hex_x(db, -13.2, -15.6, 0.0, -2.6, 3.0, "Metal")
+    # The clamp, as long as the grip's flared top; its cross screw (a big slotted head) and nut.
+    rail_clamp_under(db, PICATINNY, -20.0, 20.0, -7.0, 2.6, "Furniture")
+    disc_x(db, 13.2, 14.7, 0.0, -2.8, 4.4, "Metal", 24, 0.6)
+    db.box(mm(14.7, -3.6, -3.25), mm(14.76, 3.6, -2.35), "Rubber")
+    hex_x(db, -13.2, -15.3, 0.0, -2.6, 3.0, "Metal")
     detail = db.build()
     hs.finish(detail, bevel=0.0003, segments=1, angle=math.radians(50.0))
     stipple = pb.build()
     hs.finish(stipple, bevel=0.0)
     ob = hs.join("grip_vertical", [body, detail, stipple])
     fig = hs.Builder("grip_vertical_Figure", ["Furniture"])
-    fig.box(mm(-12.6, -16.0, -59.5), mm(12.6, 16.0, 0.0), "Furniture")
+    fig.box(mm(-13.2, -18.0, -59.5), mm(13.2, 18.0, 0.0), "Furniture")
     fig.build().parent = ob
     return ob
 
@@ -879,7 +885,7 @@ def build_grip_vertical() -> bpy.types.Object:
 
 # A plain tube with rounded ends and end-cap seams, its bore let into the front face (silencer): the rifle's and the
 # pistol's (slimmer, on a knurled thread adaptor), as (length, radius, adaptor length) in mm from the barrel's end.
-SILENCERS = {"rifle": (165.0, 14.2, 0.0), "pistol": (128.0, 9.8, 9.0)}
+SILENCERS = {"rifle": (165.0, 14.2, 0.0), "pistol": (118.0, 13.2, 6.0)}
 
 
 def build_silencer(kind: str = "rifle") -> bpy.types.Object:
@@ -895,9 +901,10 @@ def build_silencer(kind: str = "rifle") -> bpy.types.Object:
     pb = hs.Builder("sil_plain", ["Metal", "Rubber"])
     tube_y(pb, [(y1 - 3.9, 4.6), (y1 - 3.0, 4.6)], [(y1 - 3.9, 3.4), (y1 - 3.0, 3.4)], "Rubber", 20)
     if adaptor > 0.0:
-        lathe_y(b, [(-0.5, 0.0), (-0.5, 7.0), (0.0, 7.6), (1.0, 7.6)], "Metal", 32)
-        knurl(pb, 1.0, adaptor - 1.0, 7.5, 8.1, 36, 0.9, "Metal")
-        lathe_y(b, [(adaptor - 1.0, 7.6), (adaptor - 0.4, 7.6), (adaptor, 6.0)], "Metal", 32)
+        # The thread spigot (mostly in the replica's thread), a narrow step, then the full-width knurled collar.
+        lathe_y(b, [(-6.0, 0.0), (-6.0, 4.0), (-5.5, 4.6), (0.6, 4.6), (0.6, 8.6), (1.4, 8.6), (1.4, r - 0.8),
+                    (1.9, r - 0.3)], "Metal", 32)
+        knurl(pb, 1.9, adaptor, r - 0.45, r + 0.05, 64, 0.8, "Metal")
     ob = b.build()
     hs.finish(ob, bevel=0.0)
     plain = pb.build()
@@ -974,10 +981,10 @@ def build_laser(rail_name: str = "pistol") -> bpy.types.Object:
 # The compact pistol light (weapon_torch: the X300-style photos), built under a rail and turned onto the AEG's side
 # rail: its clamp, body and head (mm under the rail's face, along +Y from the clamp's middle).
 WT_CLAMP = (-12.0, 12.0)
-WT_BODY = (-32.0, 12.0)
+WT_BODY = (-32.0, -1.0)
 WT_TOP, WT_BOTTOM, WT_HALF = -5.5, -30.0, 12.4
 WT_AXIS = -17.6
-WT_HEAD = (14.0, 30.5)
+WT_HEAD = (3.5, 30.5)
 WT_HEAD_R = 11.0
 
 
@@ -987,17 +994,17 @@ def build_torch(rail_name: str = "pistol") -> bpy.types.Object:
     # The body as a prism of its section, eased into the round head by a loft.
     sec = hs.fillet([(-WT_HALF, WT_TOP, 1.5), (WT_HALF, WT_TOP, 1.5), (WT_HALF, WT_BOTTOM, 7.0),
                      (-WT_HALF, WT_BOTTOM, 7.0)], 6)
-    bb.prism(mmp(sec), "y", WT_BODY[0] * MM, (WT_BODY[1] - 6.0) * MM, "Detail")
+    bb.prism(mmp(sec), "y", WT_BODY[0] * MM, (WT_HEAD[0] - 4.5) * MM, "Detail")
     circle_ring = []
     for x, z in sec:
         a = math.atan2(z - WT_AXIS, x)
         circle_ring.append((math.cos(a) * (WT_HEAD_R - 0.4) * MM, WT_HEAD[0] * MM,
                             (WT_AXIS + math.sin(a) * (WT_HEAD_R - 0.4)) * MM))
-    bb.loft([[(x * MM, (WT_BODY[1] - 6.0) * MM, z * MM) for x, z in sec], circle_ring], "Detail", cap0=False,
+    bb.loft([[(x * MM, (WT_HEAD[0] - 4.5) * MM, z * MM) for x, z in sec], circle_ring], "Detail", cap0=False,
             cap1=True)
     body = bb.build()
     # A long flat channel down each flank, the slot under the clamp.
-    hs.cut(body, [prism_cutter(hs.fillet([(-21.0, -12.0, 1.5), (3.0, -12.0, 1.5), (3.0, -21.0, 1.5),
+    hs.cut(body, [prism_cutter(hs.fillet([(-21.0, -12.0, 1.5), (-4.0, -12.0, 1.5), (-4.0, -21.0, 1.5),
                                           (-21.0, -21.0, 1.5)], 2), "x", s * (WT_HALF - 0.7), s * (WT_HALF + 3.0))
                   for s in (-1.0, 1.0)])
     hs.finish(body, bevel=0.0005)
@@ -1009,12 +1016,20 @@ def build_torch(rail_name: str = "pistol") -> bpy.types.Object:
                  (WT_HEAD[1], WT_HEAD_R - 0.5), (WT_HEAD[1], WT_HEAD_R - 1.7), (WT_HEAD[1] - 1.0, WT_HEAD_R - 2.3)],
             "Detail", 40, z=WT_AXIS, cap=False)
     # The clamp: its housing on the body's top, the jaws round the rail, the cross latch (left) and its screw (right).
-    rail_clamp_under(hb, rail, WT_CLAMP[0], WT_CLAMP[1], WT_TOP - 0.5, 2.4, "Detail")
+    # The Cyber's rail sits flush between its shroud's flanks: there the clamp can't hook round the rail, so nothing
+    # outside the rail rises past its face (a flat top, a lower latch, no jaw screws).
+    flush = rail_name == "cyber"
+    if not flush:
+        rail_clamp_under(hb, rail, WT_CLAMP[0], WT_CLAMP[1], WT_TOP - 0.5, 2.4, "Detail")
+    top = 0.3 if flush else 1.5
     hb.prism(mmp([(WT_CLAMP[0] - 4.0, 0.0), (WT_CLAMP[1] + 3.0, 0.0), (WT_CLAMP[1] + 6.0, WT_TOP - 0.2),
                   (WT_CLAMP[0] - 7.0, WT_TOP - 0.2)]), "x", -(rail["half"] + 1.2) * MM,
              (rail["half"] + 1.2) * MM, "Detail")
+    # The housing's front rests on the head on a saddle.
+    hb.prism(mmp([(-7.0, WT_TOP + 0.2), (7.0, WT_TOP + 0.2), (5.0, WT_AXIS + WT_HEAD_R - 0.6),
+                  (-5.0, WT_AXIS + WT_HEAD_R - 0.6)]), "y", (WT_HEAD[0] - 1.0) * MM, (WT_CLAMP[1] + 4.0) * MM, "Detail")
     lx = -(rail["half"] + 2.4)
-    hb.prism(mmp(hs.fillet([(-4.0, 1.5, 1.0), (4.0, 1.5, 1.0), (5.0, -6.5, 1.5), (-5.0, -6.5, 1.5)], 2)), "x",
+    hb.prism(mmp(hs.fillet([(-4.0, top, 1.0), (4.0, top, 1.0), (5.0, -6.5, 1.5), (-5.0, -6.5, 1.5)], 2)), "x",
              lx * MM, (lx - 2.2) * MM, "Detail", offset=(0.0, -2.0 * MM, 0.0))
     disc_x(hb, -lx, -lx + 1.4, -2.0, -2.4, 2.4, "Metal", 16, 0.3)
     # The rocker paddles at the back, one each side, and the tail cap.
@@ -1035,11 +1050,11 @@ def build_torch(rail_name: str = "pistol") -> bpy.types.Object:
     lathe_y(pb, [(WT_HEAD[1] - 8.6, 2.2), (WT_HEAD[1] - 8.6, 0.0)], "Rubber", 20, z=WT_AXIS, cap=False)
     pb.box(mm(-1.1, WT_HEAD[1] - 8.6, WT_AXIS - 1.1), mm(1.1, WT_HEAD[1] - 8.0, WT_AXIS + 1.1), "Led")
     for s in (-1.0, 1.0):
-        for y in (-8.0, 0.0, 8.0):
+        for y in () if flush else (-8.0, 0.0, 8.0):
             disc_x(pb, s * (rail["half"] + 2.4), s * (rail["half"] + 2.46), y, 2.0, 0.9, "Rubber", 10)
     for i in range(5):
         y = -5.6 + i * 1.8
-        pb.box(mm(lx - 2.7, y, -5.4), mm(lx - 2.1, y + 0.7, 0.6), "Detail")
+        pb.box(mm(lx - 2.7, y, -5.4), mm(lx - 2.1, y + 0.7, min(0.6, top - 0.9)), "Detail")
     for s in (-1.0, 1.0):
         for i in range(4):
             y = -31.0 + i * 2.0
