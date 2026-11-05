@@ -1,26 +1,20 @@
-Task: BA1 attempt 2 · QA commit (see git log, "Agent: qa") · Verdict: Pass
+Task: BA1 attempt 3 · QA commit (see git log, "Agent: qa BA1 attempt 3") · Verdict: Pass
 
 Blocking: none.
-Advisory: ReplicaParts.inside and take dereference `scene.instantiate() as Node3D` unchecked; a parts file whose root is not a Node3D would crash. Not reachable with the shipped files.
+Advisory: unchanged from attempt 2 (ReplicaParts.inside and take cast `instantiate() as Node3D` unchecked; not reachable with the shipped files).
 
-Probes of the new path (all behave as intended):
-- inside(): the holder is freed on every path (node found or null); the returned node is parented to nothing, owner and its children's owner cleared. 20 calls per barrel plus an unknown part leave the node count unchanged.
-- Missing file (pistol has no inside/ file) returns null before any load; a part with no node (optic redDot, unknown barrel key) returns null; no crash.
-- Fit never loads the inside file: fitted, unfit, refit and figure copies carry no `_Inside` (also with muzzle and optic).
-- Picture cache: the id is key/slot/part, so a second ask returns the cached Shot (part_count stays 2); let_go_parts and freeing the node release the ports, node count back to the start.
-- The 60 degree turn: only the barrel slot is in PART_TURN; the optic picture and a missing part (extent 1,1, nothing cached) are unaffected. It turns the part and its inside by the same basis, so they stay aligned; extent still comes from the turned model (barrel cards read below a 9:1 ratio, test_barrel_models).
-- Paint: the inside's own materials get no override; the extension's Metal does.
-- Export: presets include everything outside the exclude list, so inside/aeg.glb ships; it has its .import.
-- aeg.glb (parts) is under the 2 MB guard.
+Regression checks at f8bea33 (diff 09ce678..f8bea33):
+- Fill light: added in _part_shot only when PART_FILL has the slot (barrel); an optic picture keeps the sun alone (1 light), a barrel picture has 2. Replica pictures go through a different path and never reach it.
+- Cached path: the fill is added before the Shot is stored in _part_shots, and a repeat ask returns the cached Shot early, so no second light (barrel stays at 2 after repeated part_texture and part_extent calls).
+- Freeing: the light is a child of the port, so let_go_parts (queue_free of the port) frees it with the viewport; zero part lights remain after two frames.
+- Barrel models: test_barrel_models still passes against the rebuilt glbs (counts 9,454 and 9,954 under the 10,000 cap, aspect, chamber material, inside split); the parts file stays under the 2 MB guard.
 
-Tests added in tests/unit/test_ba1_qa.gd (all pass; they fail if the holder free in inside() is dropped, the cache id loses the part, or the turn leaks to other slots):
-- test_repeated_inside_calls_leave_no_nodes_behind
-- test_a_barrel_picture_holds_part_and_inside_and_lets_both_go
-- test_the_turn_is_for_barrels_only_and_a_part_with_no_model_has_no_picture
-Failure modes checked by reading the code, not by stubbing it out.
+Test added:
+- tests/unit/test_ba1_qa.gd:136 · barrel picture has exactly two DirectionalLight3D, optic one, a repeated ask adds none, none left after let_go_parts · fails if PART_FILL leaks to the optic slot (2 lights), if the fill is added after the cache check (3 lights), or if the light is parented outside the port (survives let_go). Checked by reading the code, not by stubbing it out.
 
-Counts: test_ba1_qa and test_barrel_models: 16 of 16 pass. test_replica_parts.gd does not exist in the repo (the brief's path); skipped. I did not run tools/check.sh or the smoke test.
+Run: test_ba1_qa, test_barrel_models, test_customise_parts: 41 of 41 pass, 319 asserts.
+I did not run tools/check.sh (already running) or the smoke test.
 
-Not tested (needs a display): the framing of the turned barrel cards and the look of the inside beside the part.
+Not tested (needs a display): how the fill-lit barrel cards look, the shoulder where the flats meet, and the thread and O-ring detail. These go to the owner's list.
 
 Pass

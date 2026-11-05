@@ -137,3 +137,25 @@ func test_the_turn_is_for_barrels_only_and_a_part_with_no_model_has_no_picture()
 	assert_ne(red, Vector2.ONE, "the optic has its model")
 	assert_eq(pictures.part_extent(&"aeg", &"barrel", &"nonesuch"), Vector2.ONE, "no model, no picture")
 	assert_eq(pictures.part_count(), 1, "nothing is cached for a missing part")
+
+
+func _lights(pictures: Node, port_prefix: String) -> int:
+	var n := 0
+	for port: Node in pictures.get_children():
+		if str(port.name).begins_with(port_prefix):
+			n += port.find_children("*", "DirectionalLight3D", true, false).size()
+	return n
+
+
+func test_a_barrel_picture_has_a_fill_light_and_the_others_do_not_and_a_second_ask_adds_none() -> void:
+	var pictures := ReplicaPictures.new()
+	add_child_autofree(pictures)
+	pictures.part_texture(&"aeg", &"barrel", &"long", &"", false)
+	pictures.part_texture(&"aeg", &"barrel", &"long", &"", false)
+	pictures.part_extent(&"aeg", &"barrel", &"long")
+	assert_eq(_lights(pictures, "Part_aeg_barrel"), 2, "sun and fill, once")
+	pictures.part_texture(&"aeg", &"optic", &"redDot", &"", false)
+	assert_eq(_lights(pictures, "Part_aeg_optic"), 1, "an optic keeps the sun alone")
+	pictures.let_go_parts()
+	await wait_physics_frames(2)
+	assert_eq(_lights(pictures, "Part_"), 0, "the lights go with their viewports")
