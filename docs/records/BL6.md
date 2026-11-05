@@ -1,6 +1,6 @@
 # BL6 · Blender: the Cyber Pistol
 
-**Review:** pending
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -8,6 +8,7 @@
 |---|---|---|---|---|---|
 | 2026-11-05 | 1 | Claude (BL6 thread) | CI | art review: Retry (round 1, 11 fixes made), Accept (round 2, its 4 small fixes made) | – |
 | 2026-11-05 | 2 | Claude (BL6 thread) | CI | code critic: Retry 6/8 (the figures' frame outline crossed itself; record stale) | fixed |
+| 2026-11-05 | 3 | Claude (BL6 thread) | CI | code critic: Accept 8/8 | – |
 
 ## What changed
 
@@ -34,7 +35,7 @@
   materials CyberSlab, CyberFrame, CyberLine, CyberCore and CyberMetal with the old colours and glow. The old file's
   `Figure` node sat 0.3 m down (a leftover: the game resets the Figure's transform); the new one sits at the origin like
   the other replicas'.
-- **Budget:** 31,330 triangles in the hands (40k limit), 240 in the figure version; 6 meshes, 5 materials, no
+- **Budget:** 31,328 triangles in the hands (the glTF count) (40k limit), 240 in the figure version; 6 meshes, 5 materials, no
   textures. The build is deterministic (two runs give the same file).
 
 ## Defaults taken
