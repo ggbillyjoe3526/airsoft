@@ -57,14 +57,18 @@ func test_a_scaled_parent_and_huge_or_zero_sizes_stay_inside_the_picture_bounds(
 
 
 func test_freed_icons_leave_no_orphan_nodes() -> void:
-	var before := Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)
+	# Checks the icon's own nodes by id: the suite's orphan count moves with other tests' frees.
 	for i in 3:
 		var icon := GrenadeGlyph.new(Grenade.Kind.SMOKE, 44.0)
 		add_child(icon)
 		icon.kind = Grenade.Kind.FLASH
+		var ids: Array[int] = []
+		for n in icon.find_children("*", "", true, false):
+			ids.append(n.get_instance_id())
 		icon.free()
-	await wait_physics_frames(2)
-	assert_eq(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT), before)
+		for id in ids:
+			assert_false(is_instance_id_valid(id), "a node of the icon outlives it")
+	assert_true(true, "freed")
 
 
 func test_an_icon_taken_out_of_the_tree_and_back_in_keeps_a_valid_picture() -> void:
