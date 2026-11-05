@@ -1,6 +1,6 @@
 # BL4 · Your first-person arms
 
-**Review:** pending
+**Review:** critic Retry 7/8 (attempt 4, last) · qa Pass · performance Pass; stopped and kept on its branch for the owner
 
 ## Attempts
 
@@ -9,7 +9,7 @@
 | 2026-11-05 | 1 | Claude (build thread) | 6/8 | Retry | Hands off the owner's photos (pistol thumbs, the rifle support hand), glove construction, wrists over 30°, the ASSETS row |
 | 2026-11-05 | 2 | Claude (build thread) | 7/8 | Retry | Below the bar next to the photos: thumb heights, fingertips past the front strap, the slab knuckle shell and dice plates, a torn sleeve top; the owner's notes (16:30) |
 | 2026-11-05 | 3 | Claude (build thread) | 7/8 | Retry | Below the stricter bar: torn web and patch edges, band-like knuckle shell, Cyber index short of the trigger, thumbs high; the owner's notes (17:54: tighter, the Cyber like the GBB) |
-| 2026-11-05 | 4 | Claude (build thread) | pending | pending | – |
+| 2026-11-05 | 4 | Claude (build thread) | 7/8 | Retry | Last attempt, stopped for the owner: finger first sections 7 to 11 mm off the grips, the Cyber thumb high beside the rear block, the support hand over the handguard's top (forearm rise 29°), slab knuckle shell, block-like plates, torn web and back-of-hand edges at large thumb twists |
 
 ## What changed
 

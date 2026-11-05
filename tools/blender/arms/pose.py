@@ -658,9 +658,12 @@ def tighten(rig: Rig, hands: dict, objects: list, solid: list, fingers: list) ->
         hits, tally = clipping(objects, solid)
         if not hits:
             continue
+        # A clip on a bone no turned finger owns (the trigger finger, the arm) stops every finger that just turned.
+        owned = {b for b in tally if any(b.startswith(n) and b.endswith("_" + sd) for sd, n in turned)}
+        stray = bool(set(tally) - owned)
         for side, name in turned:
             mine = [b for b in tally if b.startswith(name) and b.endswith("_" + side)]
-            if mine or ("Hand_" + side in tally):
+            if mine or stray:
                 for k, share in ((3, TIGHTEN_TIP), (2, 1.0), (1, 1.0)):
                     bone = "%s%d_%s" % (name, k, side)
                     turn = Matrix.Rotation(math.radians(-TIGHTEN_STEP * share), 3, hands[side].axis[bone])

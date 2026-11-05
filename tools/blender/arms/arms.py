@@ -500,6 +500,10 @@ def solve(rig: Rig, hands: dict, j: dict, hold: Hold, arms: list) -> tuple:
         if hold.left["kind"] == "guard":
             fingers += [("L", n) for n in ("Index", "Middle", "Ring", "Pinky", "Thumb")]
         print("  tightened", pose.tighten(rig, hands, arms, frame, fingers))
+        # Whatever the last passes did, the arms are checked once more before anything is written.
+        hits, tally = pose.clipping(arms, frame)
+        if hits:
+            print("  still passing into the replica:", sorted(tally.items(), key=lambda x: -x[1]))
         if os.environ.get("BL_DEBUG"):
             for side in ("R", "L") if hold.left["kind"] == "guard" else ("R",):
                 print("   %s skin gaps (mm)" % side, pose.skin_gaps(arms, frame, side))
