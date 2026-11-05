@@ -147,6 +147,19 @@ replicas). Each power source, by its pool ID, is drawn from one file.
   Black Gas.
 - **Budget.** 60 KB a file, about 1,500 triangles. No textures.
 
+### Grenade models
+
+The smoke and flash bombs in a match (BL9): thrown, lying where they landed and in the thrower's hand. One file per
+bomb, `assets/models/grenades/<smoke|flash>.glb`, built by `tools/blender/grenades/grenades.py`.
+
+- **Space.** Metres, life size, one mesh. The long axis is up (Blender +Z, the game's +Y) through the origin, which is
+  the middle of the bomb's body; the game spins it about that point in flight and lays it on its side when it rests,
+  lifted by its body's radius (`GrenadeView.LIE_RADII`).
+- **Materials.** Plain colours, drawn as the file sets them. The material named `Kind` is painted in the bomb's own
+  colour (`GrenadeView.BODY_COLOURS`: green smoke, violet flash), so the model matches the HUD's bomb icons. No
+  colour within 20° of a team's hue, as for every prop.
+- **Budget.** 200 KB, 5,500 triangles a file. No textures.
+
 ## Blender, step by step
 
 For a Quaternius or Kenney character.
@@ -172,6 +185,7 @@ foundations).
 | First-person arms | ≤ 8 MB, ≤ 40,000 triangles, ≤ 4 materials, 2K textures |
 | A replica model | ≤ 6 MB, ≤ 40,000 triangles in the hands, ≤ 3,000 on a figure, ≤ 6 materials, 2K textures |
 | A replica's parts file | ≤ 2 MB, ≤ 10,000 triangles a part |
+| A grenade model | ≤ 200 KB, ≤ 5,500 triangles, plain colours |
 | A prop | ≤ 1 MB, ≤ 5,000 triangles (a landmark ≤ 30,000 with LODs), sharing texture sets with other props |
 | A surface texture set | ≤ 6 MB at 2K (colour, normal, ORM) |
 | Everything external | ≤ 25 MB |
