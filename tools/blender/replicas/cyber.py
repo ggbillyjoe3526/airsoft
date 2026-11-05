@@ -81,7 +81,7 @@ BORE_Z = 15.0
 # The front shroud's and rear block's half width, the frame's, the trigger guard's and the grip's.
 SHROUD_HW = 18.5
 FRAME_HW = 15.8
-GUARD_HW = 9.0
+GUARD_HW = 6.5
 # The shroud: its side outline (front face at 101, top at 37, the lower edge at -21 with its three teeth' gaps).
 SHROUD = [(17.0, 37.0), (95.5, 37.0), (101.0, 31.5), (101.0, -18.0), (94.5, -26.6), (52.0, -26.6), (52.0, 0.0),
           (36.0, 0.0), (45.0, 31.0), (12.0, 31.0)]
@@ -125,8 +125,11 @@ GRIP = [(-20.0, -20.0), (-24.0, -34.0), (-27.5, -36.0, 4.0), (-31.5, -60.0, 30.0
         (-115.0, -126.0, 1.5), (-114.0, -118.0, 4.0), (-99.0, -62.0, 30.0), (-86.0, -22.0, 4.0), (-99.0, -14.5, 2.0),
         (-104.5, -10.5, 1.5), (-103.0, -7.0), (-93.5, -7.0), (-90.0, -20.0)]
 # The trigger guard's opening and the slot the trigger hangs from.
-GUARD_HOLE = [(44.5, -25.0), (44.5, -35.5), (38.5, -41.0, 1.5), (-4.0, -41.0, 3.0), (-10.0, -35.0, 2.0),
-              (-10.0, -25.0)]
+# The old model's shape (owner, 2026-11-05: "more like the original trigger and guard"): a narrow loop in front, a
+# full-width web behind, the opening tall enough for the trigger and a little more.
+GUARD_HOLE = [(45.7, -16.5, 1.0), (45.7, -35.5), (41.0, -40.0, 1.0), (0.5, -40.0, 1.0), (0.5, -16.5, 1.0)]
+GUARD_LOOP = [(54.0, -14.0), (54.0, -42.5), (49.5, -47.0, 1.5), (10.0, -47.0), (10.0, -14.0)]
+GUARD_WEB = [(11.0, -20.0), (11.0, -47.0), (-20.0, -47.0, 5.0), (-27.5, -38.0), (-26.0, -20.0)]
 TRIGGER_SLOT = ((4.0, 25.0), (-26.0, -8.0), 3.4)
 # The grip's windows, where the power cell shows (inset in the frame's sides), and their depth.
 GRIP_WINDOW = [(-31.5, -27.0, 3.0), (-82.0, -27.0, 4.0), (-109.6, -118.0, 3.0), (-59.5, -118.0, 3.0)]
@@ -158,7 +161,7 @@ LIGHT_R = 1.3
 HOUSING = [(31.5, -14.0, 1.6), (1.0, -14.0, 1.6), (1.0, -0.8, 1.6), (31.5, -0.8, 1.6)]
 HOUSING_IN = [(31.2, -13.7), (1.3, -13.7), (1.3, -1.1), (31.2, -1.1)]
 HOUSING_FACE = FRAME_HW - 0.4
-FRONT_SERRATIONS = 8
+FRONT_SERRATIONS = 7
 
 EMPTIES = {
     "Muzzle": (0.0, m(BARREL_END), m(BORE_Z)),
@@ -550,10 +553,10 @@ def frame() -> list:
     scallops and back strap grooves; the selector's track and lights, the release button, takedown lever and pins."""
     upper = side("FrameUpper", [(52.0, 0.0), (52.0, -21.0), (-90.0, -21.0), (-93.5, -7.0), (-93.5, 0.0)],
                  FRAME_HW, "CyberSlab")
-    guard = side("Guard", [(50.5, -20.0), (50.5, -37.0), (43.0, -46.0, 2.0), (-14.0, -46.0, 4.0), (-24.0, -37.0),
-                           (-28.0, -20.0)], GUARD_HW, "CyberSlab")
+    guard = side("Guard", GUARD_LOOP, GUARD_HW, "CyberSlab")
+    web = side("Web", GUARD_WEB, FRAME_HW, "CyberSlab")
     grip = side("Grip", GRIP, FRAME_HW, "CyberSlab")
-    hs.cut(upper, [guard, grip], "UNION")
+    hs.cut(upper, [guard, web, grip], "UNION")
     ob = upper
     ob.name = "Frame"
     cut = [side("c_guard", GUARD_HOLE, 30.0, "CyberSlab")]
@@ -563,15 +566,15 @@ def frame() -> list:
         cut.append(side_recess("c_window", GRIP_WINDOW, sx, FRAME_HW, WINDOW_DEPTH))
         cut.append(side_recess("c_housing", HOUSING, sx, FRAME_HW, 1.6))
         # A channel along the guard's bottom bar.
-        cut.append(side_recess("c_gch", [(38.0, -43.6, 0.6), (-8.0, -43.6, 0.6), (-8.0, -42.4, 0.6), (38.0, -42.4, 0.6)],
+        cut.append(side_recess("c_gch", [(44.0, -44.1, 0.6), (12.0, -44.1, 0.6), (12.0, -42.9, 0.6), (44.0, -42.9, 0.6)],
                                sx, GUARD_HW, 0.6))
         # Grooves down the guard's front and the seam lines between the dust cover and the guard.
         for z in (-27.0, -31.0):
-            cut.append(side_recess("c_gg", [(51.5, z - 0.5), (47.0, z - 0.5), (47.0, z + 0.5), (51.5, z + 0.5)], sx,
+            cut.append(side_recess("c_gg", [(53.0, z - 0.5), (47.0, z - 0.5), (47.0, z + 0.5), (53.0, z + 0.5)], sx,
                                    GUARD_HW, 0.5))
     # Serrations down the front strap (the old model's teeth), through its whole width.
     for i in range(FRONT_SERRATIONS):
-        z = -46.0 - i * 9.0
+        z = -53.0 - i * 9.0
         yf = _front_y(z)
         cut.append(side("c_fs", [(yf + 4.0, z - 2.2), (yf - 2.5, z - 1.0), (yf - 2.5, z + 1.0), (yf + 4.0, z + 2.2)],
                         30.0, "CyberSlab"))
@@ -611,7 +614,6 @@ def frame() -> list:
         b.prism(poly([(45.0, -12.8, 1.0), (35.0, -14.2, 2.0), (35.0, -8.8, 2.0), (45.0, -7.8, 1.0)]), "x", m(lo),
                 m(hi), "CyberMetal")
         screw(b, sx, 37.6, -11.5, FRAME_HW + 1.3, 1.5)
-    pin(b, 30.0, -18.0, FRAME_HW, 1.5)
     pin(b, -86.0, -16.5, FRAME_HW, 1.5)
     bits = b.build()
     bits.data.polygons.foreach_set("use_smooth", [True] * len(bits.data.polygons))
@@ -653,17 +655,11 @@ def _back_y(z: float) -> float:
 # --------------------------------------------------------------------------------------------- trigger and selector
 
 def trigger() -> object:
-    """A curved, flat-faced trigger with a safety blade down its middle."""
-    blade = [(21.0, -11.0), (22.6, -16.0, 2.5), (22.0, -23.0, 4.0), (20.4, -29.5, 4.0), (21.2, -34.8, 1.5),
-             (19.6, -37.0, 1.0), (16.0, -36.4, 1.0), (15.2, -31.0, 4.0), (16.0, -24.0, 4.0), (16.4, -17.0, 2.5),
-             (15.0, -11.0)]
+    """The old model's curved blade (its outline, a little longer: its foot 3 mm above the guard's floor)."""
+    blade = [(13.9, -11.0), (20.6, -13.4, 1.0), (18.2, -19.0, 5.0), (15.7, -26.5, 8.0), (15.8, -36.0, 1.2),
+             (13.4, -37.0, 1.2), (11.0, -35.0, 1.2), (11.3, -28.0, 8.0), (12.3, -19.5, 5.0), (13.2, -11.3)]
     ob = side("Trigger", blade, 2.8, "CyberFrame")
-    hs.cut(ob, [side("c_blade", [(24.0, -31.0), (24.0, -17.0), (20.0, -17.0), (18.4, -31.0)], 0.9, "CyberFrame")])
-    hs.finish(ob, m(0.4), 2)
-    b = hs.Builder("Safety", ["CyberMetal"])
-    b.prism(poly([(22.4, -17.6, 0.8), (21.8, -24.0, 1.5), (20.6, -30.0, 0.8), (19.4, -29.6), (20.4, -17.6)]), "x",
-            m(-0.85), m(0.85), "CyberMetal")
-    return hs.join("Trigger", [ob, b.build()])
+    return hs.finish(ob, m(0.4), 2)
 
 
 def selector() -> object:
@@ -747,8 +743,8 @@ def figure() -> object:
     b.box((m(-REAR_CAP_HW), m(REAR_CAP_Y[0]), m(REAR_CAP_Z[0])), (m(REAR_CAP_HW), m(REAR_CAP_Y[1]), m(REAR_CAP_Z[1])),
           "CyberMetal")
     b.lathe([(m(CAP_Y[1]), m(BARREL_R)), (m(BARREL_END), m(BARREL_R))], "CyberMetal", 8, centre=(0.0, 0.0, m(BORE_Z)))
-    b.prism([(m(p[0]), m(p[1])) for p in [(52.0, 0.0), (52.0, -21.0), (50.5, -23.0), (50.5, -37.0), (43.0, -46.0),
-                                          (-14.0, -46.0), (-24.0, -37.0), (-54.0, -126.0), (-115.0, -126.0),
+    b.prism([(m(p[0]), m(p[1])) for p in [(52.0, 0.0), (52.0, -21.0), (50.5, -23.0), (54.0, -14.0), (54.0, -42.5),
+                                          (49.5, -47.0), (-20.0, -47.0), (-27.5, -38.0), (-54.0, -126.0), (-115.0, -126.0),
                                           (-86.0, -22.0), (-104.5, -10.5), (-93.5, 0.0)]], "x", m(-FRAME_HW),
             m(FRAME_HW), "CyberSlab")
     b.prism([(m(p[0]), m(p[1])) for p in [(-55.5, -126.0), (-116.0, -126.0), (-114.5, -150.0), (-63.0, -150.0)]],

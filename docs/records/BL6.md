@@ -6,7 +6,7 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-05 | 1 | Claude (BL6 thread) | pending | art review: Retry (round 1, 11 fixes made), Accept (round 2, its 4 small fixes made) | – |
+| 2026-11-05 | 1 | Claude (BL6 thread) | CI | art review: Retry (round 1, 11 fixes made), Accept (round 2, its 4 small fixes made) | – |
 
 ## What changed
 
@@ -29,20 +29,25 @@
   at 60 fps with the old file's keys; the empties Muzzle, FrontSight, RearSight, MagWell, SlideBack and TorchMount at
   the old points (so `replicaParts/cyber.glb`'s torch is unchanged); the meshes Body, Slide, Trigger, Selector,
   Magazine and Figure; the materials CyberSlab, CyberFrame, CyberLine, CyberCore and CyberMetal with the old colours
-  and glow.
-- **Budget:** 31,596 triangles in the hands (40k limit), 236 in the figure version; 6 meshes, 5 materials, no
+  and glow. The old file's `Figure` node sat 0.3 m down (a leftover: the game resets the Figure's transform); the new one
+  sits at the origin like the other replicas'.
+- **Budget:** 31,322 triangles in the hands (40k limit), 240 in the figure version; 6 meshes, 5 materials, no
   textures. The build is deterministic (two runs give the same file).
 
 ## Defaults taken
 
 - The rail under the front ends at y 92 mm, behind the shroud's lower front chamfer (the torch's clamp still fits).
-- The guard opening's rear wall moved forward to y -10 mm (the old model's opening ran to about -12), so the trigger
-  doesn't sit lost in a long guard.
+- **Owner's review (2026-11-05 08:55-08:56):** "I love it!", then the trigger longer and the guard taller, "more like
+  the original trigger and guard shape". So the trigger is the old model's curved blade (its outline, 2.4 mm longer:
+  z -11 to -37) and the guard the old one's: a narrow loop in front (6.5 mm either side), a full-width web behind, the
+  opening y 0.5 to 45.7 and z -16.5 to -40, 3 mm under the trigger's foot.
 
 ## Verified
 
 - The Cyber Pistol's tests (every test file that names it, plus parts in play): 317 of 317 passed on the first build.
-- `tools/check.sh`: pending.
+- `tools/check.sh` (local): gdlint not installed here (CI runs it), changelog notes and wiki pass, unit tests part 2
+  passes; parts 1 and 3 stopped at their local time limit (exit 124, a cloud session's known slowness while renders ran
+  alongside); CI runs the whole suite.
 
 ## Play this
 

@@ -1264,7 +1264,8 @@ Your five fixes from the marked-up render (2026-11-05), worked from your origina
 
 - [ ] **In your hands:** the Cyber Pistol keeps its white, cyan and pink look with far more detail (teeth along the
   front block's foot, a finned rear cap, the pink core behind bars on the slide's sides and top, a dark fire-mode
-  panel with three lights, a ribbed cell in the grip). Does it still feel like the pistol you liked? Is anything
+  panel with three lights, a ribbed cell in the grip, the old curved trigger a little longer in a taller guard). Does
+  it still feel like the pistol you liked? Is anything
   poking into the view while you walk, sprint, lean and aim?
 - [ ] **Iron sights:** aim. The front post and the rear notch line up on the crosshair as before.
 - [ ] **Moving parts:** fire (the slide kicks back and the trigger moves), step the fire modes (the slider moves),
