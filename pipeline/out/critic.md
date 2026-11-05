@@ -1,33 +1,33 @@
-Task: GA1 · The figures' running animations (no task block; judged against the brief and the record)
+Task: HS1 · Replicas worn on the figure: the pistol in the holster, the rifle on the back (no task block; judged against the owner's 16:18, 18:01 and 19:14 words)
 Attempt: 3 of 4
-Head: 30fb3ba (targeted tests 38/38 per brief; full check.sh running separately. QA Pass at 30fb3ba, uncommitted
-qa-report.md; performance Pass at a1bbbc9, attempt 3 changed only clip data, the crouch cycle and the test)
+Head: 6a13fa9. Full check.sh last ran on d0d26b5. Since then, targeted runs pass; I reran test_figure_hands myself: 24/24, 540 asserts. QA Pass, performance Pass, both run on 9252cee. This Accept holds only once tools/check.sh is green on the final head. Do not merge before that.
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept (subject to the full check.sh passing on 30fb3ba)
-Evidence (frames in scratchpad c1/, c1q/, compared with b1/, b1q/):
-1. Attempt-2 must-fixes met. Crouch walk inside the 1.15 m ruling: knees forward over the toes, no frog splay
-   (c1q/crouch_008, crouch_012); the trailing knee clear of the floor (c1/crouch_024); the swing knee stops under the
-   forearm, not in it (c1/crouch_008); short heel-up steps (gait.py:61-64, 1.05 m, 240 a minute). Back-pedal: the torso
-   now upright over the feet, no longer leaning back; the knee about over the toes (c1/back_000, back_008 against
-   b1/back_000, back_008; Run_B pitch 6, bias 0.03). Run: shoulders over the hips, flight and heel kick kept
-   (c1/run_000-015). Walk, sprint and strafes still read well (c1/walk_*, sprint_*, left_*). References named honestly
-   (GA1.md › References). Rig and meshes unchanged, so the models rule's proportion ratios don't apply to clips.
-4. test_gait_cycle.gd:+160 turns the character a quarter and steps +X (back) and -Z (aside); a sign slip in
-   step_walk_cycle reads +X as ahead and fails the 0.619 share. Locks in my attempt-2 advisory.
-8. changelog.d/figure-running.md no longer over-claims; PLAYTEST.md:72-74 asks about the right things now.
-The owner's call, not a block: the crouch walk is still a deep squat walk (hips 0.39 m, the swing thigh above level,
-c1/crouch_008, c1q/crouch_028). That is what crouch_top_max 1.15 under an aim-owned, near-upright upper body allows
-(DECISIONS:279). A taller one (hips ~0.55 m, back bent forward, the replica held level) needs either his crouch-cover
-ruling changed or a new crouched upper body over the aim, which is outside GA1's clips. The record offers it
-(GA1.md › Defaults); the thread must put it to him in its report, not leave it only in the record.
-Advisory (no fix needed now): c1q/crouch_028 the swing shin flicks out a little as it passes; the dead clip data
-splice.mjs leaves in the .glb adds about 0.4 MB a figure (performance advisory); Run_F's 8° and Sprint's 14° dip the
-replica while moving (recorded default).
+Score: 8/8 → Accept
+Failed checks, with evidence: none.
+Round-2 must-fixes:
+- Sniper past the pack: the owner ruled on it at 19:14 ("keep as is, ends stick out"). It is recorded in DECISIONS.md:177-178, KNOWN_ISSUES.md:127 and HS1.md:62. Settled.
+- Fit reads only the corners: fixed. _back_rest now rasterises every triangle whose corners are all on the chest (figure_models.gd:393-407).
+  - Measured at load: the human's kit cells went from 730 (9252cee) to 874 (head). So the vertex-only fit did leave holes.
+- Test pinning the fit: test_figure_hands.gd:240-271 poses the figure and samples the AEG's and sniper's faces against the posed pack.
+  - It asserts the nearest gap is > -4 mm and < gap + 1 cm.
+  - Without the fit, the lift is about -4 cm (QA), so the gap would be about 4.3 cm and the test would fail. A flipped sign would also fail it.
+- QA and performance reports exist and both pass. Their low findings are fixed:
+  - NaN lift: figure_models.gd:141.
+  - cell <= 0: :123 and :356.
+  - Pistol lift: figure_hands.gd:140.
+- Round-2 nits fixed: the bare 0.5 (now back_rest_share, figure_config.gd:170), "flat" in the wiki and changelog, DECISIONS wrapped at 120.
+Non-blocking (fix in the records commit):
+- performance.md is stale for the triangle fit. My measurement of load_kinds on the same machine (3 runs each):
+  - 9252cee: 67-85 ms. 6a13fa9: 103-107 ms.
+  - About +30 ms, once at start-up and never per frame. Update performance.md's 55-61 ms line.
+- HS1.md:46 still gives the round-2 numbers ("0.5 to 2.5 cm … touches it at 5 mm"). The brief's probe after the triangle fit says 0.6-3 cm, nearest 6 mm. Update them.
+- The st10 renders (18:11) predate 5b70048. Re-render the AEG side and back views on the head before the PR, so the sheet shows what ships.
+- The new test treats the whole pack as rigid on Chest (test_figure_hands.gd:264), while the fit uses only triangles rigged to the chest. It only checks standing. Crouch and run are untested.
+- QA low finding 2 is still open: steps in rest_on_back/_back_rest are uncapped for a huge or bad import. Can wait.
 Must-fix for the next attempt: none.
-Owner should test in the game:
-- Crouch-walk past a bot side on and three-quarter: is this low squat walk acceptable, or do you want the taller,
-  bent-forward crouch walk (needs crouch_top_max raised or a new crouched upper body)?
-- Back-pedal a bot (hold S): does it read as stepping back with weight forward, and do 4.6 steps a second look right?
-- Run and sprint a bot past you: does the forward lean read well, and is the replica's dip while running acceptable?
-- Strafe-duel a bot: does the 35° hip turn under a square rifle convince at range?
-- Run diagonally (W+A, S+D): do the feet slide where the clips blend?
+Owner should test in the game (at most 6, one line each):
+- A bot with the AEG on its back, from behind and the side, standing and running: does it read as resting on the pack?
+- A bot crouching or looking up: does the AEG's stock touch the helmet or sink into the pack's top?
+- A bot running: does the left arm swing through the AEG's muzzle or the sniper's barrel below the pack?
+- A bot vaulting with the pistol holstered: does the pistol stay in the holster? (There is still no Vault render.)
+- The Cyber Pistol holstered up close while crouched: is the speck at the holster's foot acceptable?

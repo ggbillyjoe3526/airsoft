@@ -4,8 +4,8 @@ extends RefCounted
 ## its last two ticks into the lower body's targets, and `settle` moves the blends towards them at the browser's settle
 ## times (an exponential step: about two thirds of the way in each settle time). The upper body (FI3) from its
 ## armament: the pitch, the rifle's or the pistol's hold, the holster and the draw out of it, a switch between replicas
-## and which replica is in the hand, slung or hanging from it, and a reload's share (FI4). Pure: no node, nothing
-## allocated per call; one per figure, reused every frame. FigureBody plays it.
+## and which replica is in the hand, on the back, in the holster or hanging from it, and a reload's share (FI4). Pure:
+## no node, nothing allocated per call; one per figure, reused every frame. FigureBody plays it.
 
 ## The step in the figure's own frame (m/s; x to its right, y ahead): zero below the walking speed (still).
 var gait: Vector2 = Vector2.ZERO
@@ -47,10 +47,12 @@ var sprint_weight: float = 0.0
 ## Muzzle up at a wall (FB5, 0..1): FigureView's target from its ray, and as eased.
 var raise_target: float = 0.0
 var raise: float = 0.0
-## The replica slots drawn: in the hand (-1 none), slung on the chest (-1 none), and whether the one in the hand hangs
-## from it (calling the hit, walking off).
+## The replica slots drawn: in the hand (-1 none), on the carrier's back (the first rifle, whenever it isn't in
+## the hand; -1 none), in the holster (the first pistol, likewise), and whether the one in the hand hangs from it
+## (calling the hit, walking off).
 var in_hand: int = -1
-var slung: int = -1
+var on_back: int = -1
+var in_holster: int = -1
 var hanging: bool = false
 ## A switch between replicas under way (the Switch clip: backwards to a rifle), whether it began since the last read
 ## (the clip is fired once), and how long the draw takes in all (s).
@@ -124,14 +126,16 @@ func read(c: Character, fraction: float, hits: HitConfig) -> void:
 	read_hands(c.armament, call > 0.0 or c.status == Character.Status.WALKING_OFF, alive)
 
 
-## The upper body's targets from armament `a`: what is in the hand, slung or put away, the draw and a switch under way;
-## `called` the hand raised (the replica in the hand hangs from the other); a reload counts only while `alive`.
+## The upper body's targets from armament `a`: what is in the hand, on the back, in the holster or put away, the draw
+## and a switch under way; `called` the hand raised (the replica in the hand hangs from the other); a reload counts only
+## while `alive`.
 func read_hands(a: Armament, called: bool, alive: bool = true) -> void:
 	switch_started = false
 	reload_started = false
 	if a == null or a.replicas.is_empty():
 		in_hand = -1
-		slung = -1
+		on_back = -1
+		in_holster = -1
 		hanging = false
 		switching = false
 		holster = 0.0
@@ -164,7 +168,10 @@ func read_hands(a: Armament, called: bool, alive: bool = true) -> void:
 	in_hand = -1 if put_away else a.active
 	if switching and share < switch_share(switch_back):
 		in_hand = _switch_from
-	slung = _first_rifle(a) if put_away else -1
+	var rifle := _first_rifle(a)
+	on_back = rifle if rifle != in_hand else -1
+	var side_arm := _first_pistol(a)
+	in_holster = side_arm if side_arm != in_hand else -1
 	hanging = called and in_hand >= 0
 
 
@@ -206,7 +213,15 @@ static func _is_pistol(a: Armament, slot: int) -> bool:
 	return slot >= 0 and slot < a.replicas.size() and a.replicas[slot].site_class == &"pistol"
 
 
-## The first slot that isn't a pistol (the rifle that rides slung), or -1.
+## The first pistol's slot (the one that sits in the holster), or -1.
+static func _first_pistol(a: Armament) -> int:
+	for i in a.replicas.size():
+		if _is_pistol(a, i):
+			return i
+	return -1
+
+
+## The first slot that isn't a pistol (the rifle that rides on the back), or -1.
 static func _first_rifle(a: Armament) -> int:
 	for i in a.replicas.size():
 		if not _is_pistol(a, i):

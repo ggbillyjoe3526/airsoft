@@ -148,17 +148,38 @@ extends Resource
 @export var pistol_reload_clip: StringName = &"Pistol_Reload"
 @export var magazine_node: String = "Magazine"
 @export var thrown_max: int = 12
-## Holstered, the rifle rides slung on the Chest bone (the browser's FIGURE_RIG.sling): its butt sling_butt.x to the
-## figure's right of the spine and sling_butt.y above the feet, sling_back_human behind the spine line (sling_back_pack
-## over a human's pack, sling_pack_part; sling_back_robot on a robot), its long axis sling_tilt (rad) from upright, the
-## muzzle down to the left and its right side facing out. Placed against the Holster clip's chest, standing.
+## Out of the hand, the rifle lies on the figure's back from the Chest bone (the browser's FIGURE_RIG.sling): its middle
+## back_middle.x to the figure's right of the spine and back_middle.y above the feet, its left side (against the kit)
+## back_depth_human behind the chest bone (back_depth_pack with a human's pack, back_pack_part; back_depth_robot on a
+## robot), its long axis back_tilt (rad) from upright with the muzzle down to the left, leaning back_lean (rad, the butt
+## toward the body, as the pack's back slopes), its right side facing out. Placed against the Holster clip's chest,
+## standing. Then each rifle is moved straight out or in until it rests back_rest_gap (m) off the kit behind it: the
+## triangles of back_rest_parts rigged at least back_rest_share to the chest bone (so they move with it), looked at in
+## squares of back_rest_cell (m) across and along it (none on a robot, which keeps its depth).
 @export var chest_bone: StringName = &"Chest"
-@export var sling_butt: Vector2 = Vector2(0.17, 1.42)
-@export var sling_tilt: float = 0.75
-@export var sling_back_human: float = 0.19
-@export var sling_back_pack: float = 0.34
-@export var sling_back_robot: float = 0.17
-@export var sling_pack_part: String = "Kit_Pack"
+@export var back_middle: Vector2 = Vector2(0.0, 1.28)
+@export var back_tilt: float = 0.3
+@export var back_lean: float = 0.3
+@export var back_depth_human: float = 0.19
+@export var back_depth_pack: float = 0.317
+@export var back_depth_robot: float = 0.17
+@export var back_pack_part: String = "Kit_Pack"
+@export var back_rest_parts: PackedStringArray = PackedStringArray(["Kit_Pack", "Kit"])
+@export var back_rest_cell: float = 0.015
+@export var back_rest_gap: float = 0.003
+@export var back_rest_share: float = 0.5
+## Out of the hand, a pistol sits in the belt holster: its frame is the kind's model's empty holster_node (the replica's
+## axes: +Z up out of the mouth toward the grip, +Y the slide's top, toward the figure's front; its origin at the mouth
+## on the slide's line), carried by holster_bone with holster_follow of holster_follow_bone's swing (the holster's own
+## skin: Hips, up to 0.35 Thigh_R at its foot; a rigid pistol can't bend with it, and a tenth kept the Cyber Pistol
+## inside it crouched); the pistol's muzzle holster_depth (m) below the mouth (both pistols' figure meshes clear the
+## pocket's walls standing from 0.10 to 0.13 m; 0.11 sits the muzzle clear of the foot's bend). A kind without the
+## empty (the robot) shows no pistol out of the hand.
+@export var holster_node: String = "PistolHolster"
+@export var holster_bone: StringName = &"Hips"
+@export var holster_follow_bone: StringName = &"Thigh_R"
+@export var holster_follow: float = 0.1
+@export var holster_depth: float = 0.11
 ## The replica in the hand sits on this bone by the sidecar's replicaOnGrip for its class (rifle, pistol).
 @export var grip_bone: StringName = &"Grip_R"
 ## Calling the hit (the left hand up), the replica hangs from the right hand's grip, its long axis this far (rad) off

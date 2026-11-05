@@ -1,13 +1,36 @@
-# QA: BL3 AEG Rifle rework, re-check of v20 (aeg.glb == scratchpad aeg2/v20.glb; sniper.glb rebuilt from it)
+# QA: HS1 (681450b..HEAD, back rest)
 
-Verdict: **Pass**
+Verdict: Pass. No test added (nothing found that a test catches and a real asset triggers).
 
-Method as before: headless bpy, animation data cleared, clip keyframes applied by hand, ray casts into Body.
-- **Trigger, Fire (17 degrees about x at bone y -0.0067):** nearest Body 1.4 mm at rest and 1.4 mm at full pull (side clearance in the slot, +-4.5 vs +-3.1).
-  Rear gap to the slot's back wall 13.0 mm at rest, 14.1 mm at full pull; front 19.3 / 18.2 mm. No guard, bar or grip contact. The v14 bottom-out (0.3 mm) is gone.
-- **Charging handle shaft past the new rail end blocks, Inspect pull 0 to 0.050:** channel walls measure x +-0.0056 at z 0.065 / 0.0665 / 0.0678 on every
-  sampled y from -0.0845 to -0.035, so the blocks leave the walls where they were. Shaft is +-0.0052 to 0.0061 at its joint (+-0.0052 along the channel), z 0.0648-0.068, y -0.085 to -0.030:
-  no Body vertex inside its swept box at 0, 0.0125, 0.025, 0.0375, 0.050. It slides free.
-- **T over the Body:** clearance 11.2 mm at pull 0, 5.6 mm at 0.0125, 5.0 mm from 0.025 to 0.050. The blocks (top z 0.0679) are under the T (bottom 0.0665 only at x beyond +-0.0106 in front of -0.085, where the T is behind them).
-- Not rechecked because unchanged: bones, empties, clips and the earlier test list (the coordinator is re-running targeted tests). I did not measure the new grip or GripPanels for interpenetration with the Trigger beyond the trigger check above, which covers every Body vertex including the joined panels.
-- Not verified: how the grip groove and panels read in play.
+Ran (targeted, headless): test_figure_hands 24/24, test_figure_hands_qa 21/21, test_figure_view 9/9,
+test_lo3_qa 7/7, test_replica_paint 13/13. Note: without `-gdir=` GUT loads the whole suite and a single file
+takes 3-4 minutes; with it each file takes seconds.
+
+Probed FigureModels.rest_on_back / _back_rest directly (scratch script, not committed):
+- null mesh, empty ArrayMesh (no faces), unknown kind, robot kind: all return 0.0; the robot's back_rest is empty
+  (no Kit_Pack part), so it keeps back_depth_robot. In hold the `if r != null` guard also covers a missing replica.
+- A mesh that misses the kit (far away): 0.0, cached.
+- The four real figure meshes (aeg, cyber, pistol, sniper): 1-6 ms each on first ask, lift about -0.040 to -0.043 m
+  (small, tested < 0.06). The cache is hit afterwards, so LOD swaps and set_body re-holds cost nothing.
+- Mesh sharing: FigureView loads the replica .glb through load(), so every figure of a replica id shares one Mesh
+  resource; the per-kind cache is keyed correctly, stays at one entry per replica id and per kind, and is freed
+  with FigureModels. `middle` comes from the same mesh's AABB, so a cached lift is never reused with another middle.
+- 874 kit cells built for the human; chest bind found by name or by bone name, so a skin with unnamed binds still
+  resolves through get_bind_bone. A skin with neither skips the part (no crash); a mesh with no skin is skipped.
+- Re-holding after set_body: release() resets on_back/in_holster, hold() recomputes from the cache; covered by the
+  existing test_lo3_qa and test_replica_paint changes, which pass.
+
+Findings (all low, none block):
+1. A corrupt mesh with a NaN vertex gives lift = NaN (probe: "nan"), which would make the replica transform NaN
+   and the rifle vanish. Real assets are fine; a `is_finite` guard on lift would close it.
+2. The sampling loop is unbounded in mesh size: a 50 m box took 26 s on first ask. Replicas are 0.2-1.1 m, so
+   no real cost; a cap on `steps` would make it safe against a bad import. Also a back_rest_cell of 0 or less
+   in a tuned config would hang (division by zero gives huge steps); config-only.
+3. hold() also computes (and caches) a lift for pistol meshes, which are never carried on the back by the
+   rule "rifles only". Harmless: about 1 ms, once. The pistol's lift is -0.040 like the rifles', so nothing visible.
+4. The view test counts worn replicas from the hands' own slots, so it would still pass if on_back and in_holster
+   both showed the same slot; test_figure_hands pins the slots separately, so this is covered.
+
+Not verified: how the rifle looks resting on the pack (clipping through the pack in the crouch or the walk-off
+pose). Owner to look at a bot standing, crouching and walking off with the rifle on the back, and at the robot,
+whose rifle should sit 0.17 m behind the chest with no pack.

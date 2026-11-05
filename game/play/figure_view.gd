@@ -3,7 +3,7 @@ extends Node3D
 ## Another player on the field, drawn as its rigged figure (FigureBody, step 23; every bot on every preset, DECISIONS
 ## BD1), placed and posed from its Character between the last two ticks: its legs by `animate` (FigurePose: moving,
 ## crouching, jumping, vaulting, the hit call, the walk-off and the lean) and its upper body (the aim, the holster, a
-## switch, a trigger press per SHOT event, `on_shot`), its replicas handed to it (FigureHands: in the hand, slung,
+## switch, a trigger press per SHOT event, `on_shot`), its replicas handed to it (FigureHands: in the hand, stowed,
 ## hanging from the hand), the models' cut-down figure versions in its team's paint (ReplicaPaint) with its parts'
 ## figure versions fitted (ReplicaParts). Calling a hit, "HIT!" shows above the head; it stays up on the walk off; a
 ## figure leaving the field fades out, its replicas put away. The hit flinch (`hit`, FigureFlinch): the upper body

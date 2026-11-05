@@ -244,13 +244,37 @@ func test_the_rifle_in_hand_and_the_pistol_held_by_its_class() -> void:
 	pose.read(c, 1.0, hits)
 	pose.snap()
 	assert_eq(pose.in_hand, 0)
-	assert_eq(pose.slung, -1)
+	assert_eq(pose.on_back, -1)
 	assert_eq(pose.pistol_weight, 0.0)
 	c.armament.active = 1
 	pose.read(c, 1.0, hits)
 	assert_eq(pose.pistol, 1.0, "the pistol's aim")
 	pose.settle(cfg.settle_hold)
 	assert_almost_eq(pose.pistol_weight, 1.0 - exp(-1.0), 1e-3, "eased at hold")
+
+
+func test_out_of_the_hand_the_rifle_rides_on_the_back_and_the_pistol_in_the_holster() -> void:
+	var c := _armed()
+	pose.read(c, 1.0, hits)
+	assert_eq(pose.in_hand, 0)
+	assert_eq(pose.on_back, -1, "the rifle in the hand isn't on the back")
+	assert_eq(pose.in_holster, 1, "the pistol in the holster")
+	c.armament.active = 1
+	pose.read(c, 1.0, hits)
+	assert_eq(pose.in_hand, 1)
+	assert_eq(pose.on_back, 0, "the rifle on the back")
+	assert_eq(pose.in_holster, -1, "the pistol in the hand")
+	c.armament.holstered = true
+	pose.read(c, 1.0, hits)
+	assert_eq(pose.in_hand, -1)
+	assert_eq(pose.on_back, 0, "holstered: both stowed")
+	assert_eq(pose.in_holster, 1)
+	var loadout: Array[ReplicaConfig] = [ReplicaStats.load_replica(&"pistol")]
+	var pistol_only := Character.new(1, 0, Vector3.ZERO, 0.0, loadout)
+	pistol_only.armament.holstered = true
+	pose.read(pistol_only, 1.0, hits)
+	assert_eq(pose.on_back, -1, "no rifle")
+	assert_eq(pose.in_holster, 0, "the only pistol, put away")
 
 
 func test_a_switch_starts_once_and_hands_over_at_its_share() -> void:
@@ -290,14 +314,14 @@ func test_a_switch_starts_once_and_hands_over_at_its_share() -> void:
 	assert_eq(pose.in_hand, 0)
 
 
-func test_holstered_the_rifle_is_slung_and_a_draw_brings_it_to_the_hand_at_half() -> void:
+func test_holstered_the_rifle_is_on_the_back_and_a_draw_brings_it_to_the_hand_at_half() -> void:
 	var c := _armed()
 	var a := c.armament
 	a.active = 1
 	a.holstered = true
 	pose.read(c, 1.0, hits)
 	assert_eq(pose.in_hand, -1, "nothing in the hand")
-	assert_eq(pose.slung, 0, "the rifle slung, even with the pistol put away")
+	assert_eq(pose.on_back, 0, "the rifle on the back, even with the pistol put away")
 	assert_eq(pose.holster, 1.0)
 	a.holstered = false
 	a.active = 0
@@ -305,12 +329,12 @@ func test_holstered_the_rifle_is_slung_and_a_draw_brings_it_to_the_hand_at_half(
 	a.draw_left = 0.8
 	pose.read(c, 1.0, hits)
 	assert_false(pose.switch_started, "out of the holster isn't a switch")
-	assert_eq(pose.slung, 0, "still slung at 0.2")
+	assert_eq(pose.on_back, 0, "still on the back at 0.2")
 	assert_eq(pose.holster, 1.0, "the arms still hang")
 	a.draw_left = 0.25
 	pose.read(c, 1.0, hits)
 	assert_eq(pose.in_hand, 0, "in the hand at 0.75")
-	assert_eq(pose.slung, -1)
+	assert_eq(pose.on_back, -1)
 	assert_almost_eq(pose.holster, 0.5, EPS, "the arms half way up to the aim")
 	a.draw_left = 0.0
 	pose.read(c, 1.0, hits)
@@ -330,8 +354,8 @@ func test_calling_the_hit_the_replica_hangs_and_the_upper_body_gives_way() -> vo
 	assert_true(pose.hanging, "still hanging on the walk off")
 	c.armament.holstered = true
 	pose.read(c, 1.0, hits)
-	assert_false(pose.hanging, "holstered: it stays slung")
-	assert_eq(pose.slung, 0)
+	assert_false(pose.hanging, "holstered: it stays on the back")
+	assert_eq(pose.on_back, 0)
 
 
 func test_reading_the_upper_body_allocates_nothing() -> void:

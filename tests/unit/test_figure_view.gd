@@ -177,8 +177,14 @@ func test_the_replica_out_shows_on_a_body() -> void:
 	c.status = Character.Status.ALIVE
 	f.update(c, 1.0)
 	f.animate(c, 1.0, 0.0, f.global_position)
+	var hands := f.body().hands
+	assert_true(hands.replica(hands.in_hand) != null and hands.replica(hands.in_hand).visible, "the replica out")
+	var worn := 0
+	for slot: int in [hands.on_back, hands.in_holster]:
+		if hands.replica(slot) != null:
+			worn += 1
 	var shown := 0
 	for r in f._replicas:
 		if r != null and r.visible:
 			shown += 1
-	assert_eq(shown, 1)
+	assert_eq(shown, 1 + worn, "the replica out and the ones worn on the body (HS1), no more")

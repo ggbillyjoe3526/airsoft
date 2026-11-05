@@ -2,13 +2,14 @@ class_name FigureHands
 extends Node3D
 ## The replicas on a rigged figure (step 23, FI3): the figure's replicas (FigureView's figure versions, painted and with
 ## their parts) placed each time the skeleton is posed, after FigureBend, so they follow the drawn bones. The one in the
-## hand sits on the grip bone by the sidecar's replicaOnGrip for its class (FigureModels.grip); holstered, the rifle
-## rides slung on the chest (FigureModels.sling, its butt there); calling the hit, the one in the hand hangs from the
-## grip, its long axis FigureConfig.hang_tilt off straight down with the muzzle forward. In a reload (FI4) a copy of the
-## replica model's magazine rides on the sidecar's bone (Hand_L): the old one pulled out from oldMagazine.from, thrown
-## at its release into ThrownMagazines, then the new one from `from` to `to`; one copy a slot, so the hand never holds
-## two. A child of the skeleton, so everything here is in the skeleton's frame (the file's, facing +Z). Presentation
-## only: FigureBody says what shows.
+## hand sits on the grip bone by the sidecar's replicaOnGrip for its class (FigureModels.grip); out of the hand, the
+## rifle rides on the carrier's back (FigureModels.on_back, its middle there) and the pistol sits in the belt holster
+## (FigureModels.holster; none on a kind without one); calling the hit, the one in the hand hangs from the grip, its
+## long axis FigureConfig.hang_tilt off straight down with the muzzle forward. In a reload (FI4) a copy of the replica
+## model's magazine rides on the sidecar's bone (Hand_L): the old one pulled out from oldMagazine.from, thrown at its
+## release into ThrownMagazines, then the new one from `from` to `to`; one copy a slot, so the hand never holds two. A
+## child of the skeleton, so everything here is in the skeleton's frame (the file's, facing +Z). Presentation only:
+## FigureBody says what shows.
 
 ## Which magazine the hand shows in a reload.
 const MAG_NONE := 0
@@ -37,17 +38,23 @@ class Reload:
 var _skeleton: Skeleton3D = null
 var _grip_bone: int = -1
 var _chest_bone: int = -1
+var _holster_bone: int = -1
+var _follow_bone: int = -1
 ## The figure's replicas by slot (null where a slot has no model), each one's place on the grip bone, the point of it
-## the grip holds (its frame), and its place on the chest bone when slung.
+## the grip holds (its frame), its place on the chest bone on the back and on the holster bones in the holster.
 var _replicas: Array[MeshInstance3D] = []
 var _on_grip: Array[Transform3D] = []
 var _grip_points: PackedVector3Array = PackedVector3Array()
 var _on_chest: Array[Transform3D] = []
+var _in_holster: Array[Transform3D] = []
+var _in_holster_follow: Array[Transform3D] = []
 ## Hanging from the hand: the replica's frame in the skeleton's (its muzzle down, tilted forward).
 var _hang: Basis = Basis.IDENTITY
-## Shown now: the slot in the hand, the slot slung, and whether the one in the hand hangs.
+## Shown now: the slot in the hand, the slot on the back, the slot in the holster, and whether the one in the hand
+## hangs.
 var in_hand: int = -1
-var slung: int = -1
+var on_back: int = -1
+var in_holster: int = -1
 var hanging: bool = false
 var _models: FigureModels = null
 var _kind: int = 0
@@ -75,6 +82,10 @@ func setup(skeleton: Skeleton3D, models: FigureModels, kind: int, config: Figure
 	_config = config
 	_grip_bone = skeleton.find_bone(config.grip_bone)
 	_chest_bone = skeleton.find_bone(config.chest_bone)
+	_holster_bone = skeleton.find_bone(config.holster_bone) if models.has_holster(kind) else -1
+	_follow_bone = skeleton.find_bone(config.holster_follow_bone) if models.has_holster(kind) else -1
+	if _follow_bone < 0:
+		_holster_bone = -1
 	# Its muzzle (-Z) down and tilted ahead (+Z in the file), its right side (+X) to the figure's right (-X).
 	var muzzle := Vector3(0.0, -cos(config.hang_tilt), sin(config.hang_tilt))
 	var right_side := Vector3(-1.0, 0.0, 0.0)
@@ -103,23 +114,38 @@ func hold(replicas: Array[MeshInstance3D], classes: Array[StringName],
 	_throw_due = false
 	_on_grip.clear()
 	_on_chest.clear()
+	_in_holster.clear()
+	_in_holster_follow.clear()
 	_grip_points.clear()
-	var sling := _models.sling(_kind)
+	var back := _models.on_back(_kind)
+	var holster := _models.holster(_kind)
+	var follow := _models.holster_follow(_kind)
 	for i in replicas.size():
 		var r := replicas[i]
 		var grip := _models.grip(_kind, classes[i] if i < classes.size() else &"rifle")
 		_on_grip.append(grip)
 		_grip_points.append(grip.affine_inverse().origin)
-		var butt := Vector3.ZERO
+		var middle := Vector3.ZERO
+		var muzzle := Vector3.ZERO
 		if r != null:
 			var box := r.get_aabb()
-			butt = Vector3(0.0, 0.0, box.end.z)
+			# Its middle along its length, on its left side (the side against the carrier or the pack).
+			middle = Vector3(box.position.x, 0.0, box.get_center().z)
+			# The slide's top over the muzzle's end, middle across.
+			muzzle = Vector3(box.get_center().x, box.end.y, box.position.z)
 			r.get_parent().remove_child(r)
 			r.visible = false
 			add_child(r)
-		_on_chest.append(sling * Transform3D(Basis.IDENTITY, -butt))
+		# Only a rifle goes on the back; a pistol's slot there is never shown.
+		var rifle := r != null and (classes[i] if i < classes.size() else &"rifle") != &"pistol"
+		var lift := _models.rest_on_back(_kind, r.mesh, middle) if rifle else 0.0
+		_on_chest.append(back * Transform3D(Basis.IDENTITY, Vector3(lift, 0.0, 0.0) - middle))
+		var seat := Transform3D(Basis.IDENTITY, Vector3(0.0, 0.0, -_config.holster_depth) - muzzle)
+		_in_holster.append(holster * seat)
+		_in_holster_follow.append(follow * seat)
 	in_hand = -1
-	slung = -1
+	on_back = -1
+	in_holster = -1
 	hanging = false
 
 
@@ -136,24 +162,31 @@ func release(to: Node3D) -> void:
 	_magazines = []
 	_reloads.clear()
 	in_hand = -1
-	slung = -1
+	on_back = -1
+	in_holster = -1
 	hanging = false
 	mag_slot = -1
 	mag_shown = MAG_NONE
 	_throw_due = false
 
 
-## Shows replica `hand` in the hand (hanging from it when `hang`) and `sling` slung on the chest (-1: none).
-func show_hands(hand: int, sling: int, hang: bool) -> void:
+## Shows replica `hand` in the hand (hanging from it when `hang`), `back` on the carrier's back and `holster`
+## in the holster (-1: none; a kind without a holster shows none there).
+func show_hands(hand: int, back: int, hang: bool, holster: int = -1) -> void:
 	hanging = hang
-	if hand == in_hand and sling == slung:
+	if _holster_bone < 0:
+		holster = -1
+	if hand == in_hand and back == on_back and holster == in_holster:
 		return
 	_set_shown(in_hand, false)
-	_set_shown(slung, false)
+	_set_shown(on_back, false)
+	_set_shown(in_holster, false)
 	in_hand = hand
-	slung = sling
+	on_back = back
+	in_holster = holster
 	_set_shown(in_hand, true)
-	_set_shown(slung, true)
+	_set_shown(on_back, true)
+	_set_shown(in_holster, true)
 
 
 ## The reload in slot `slot` at `share` of it (-1: none under way): the magazine its share shows on the hand, and its
@@ -205,9 +238,15 @@ func place(skeleton: Skeleton3D) -> void:
 			held.transform = Transform3D(_hang, grip.origin - _hang * _grip_points[in_hand])
 		else:
 			held.transform = grip * _on_grip[in_hand]
-	var carried := replica(slung)
+	var carried := replica(on_back)
 	if carried != null and _chest_bone >= 0:
-		carried.transform = skeleton.get_bone_global_pose(_chest_bone) * _on_chest[slung]
+		carried.transform = skeleton.get_bone_global_pose(_chest_bone) * _on_chest[on_back]
+	var stowed := replica(in_holster)
+	if stowed != null:
+		# Carried as the holster's skin is, mostly by the hips with a share of the thigh's swing.
+		var by_hips := skeleton.get_bone_global_pose(_holster_bone) * _in_holster[in_holster]
+		var by_thigh := skeleton.get_bone_global_pose(_follow_bone) * _in_holster_follow[in_holster]
+		stowed.transform = by_hips.interpolate_with(by_thigh, _config.holster_follow)
 	var r := _reloads[mag_slot] if mag_slot >= 0 and mag_slot < _reloads.size() else null
 	if r == null or r.bone < 0:
 		_throw_due = false
