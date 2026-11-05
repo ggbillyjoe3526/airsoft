@@ -43,6 +43,8 @@ rulings `docs/DECISIONS.md`, how work runs `docs/PROCESS.md`.
 ## Where to look
 
 - **Rulings in force:** `docs/DECISIONS.md`. **Open issues:** `docs/KNOWN_ISSUES.md`.
+- **The browser game's files** below were removed on 2026-11-05; read them from git at the tag `0.1-dev.1`
+  (`git show 0.1-dev.1:legacy/browser/<path>`, `git grep <terms> 0.1-dev.1 -- legacy/browser`).
 - **How a system worked in the browser game:** `legacy/browser/src/<folder>/README.md`, then its tests.
 - **Why a number is what it is:** `legacy/browser/docs/records/` and `legacy/browser/docs/archive/`.
 - **What to rebuild:** `legacy/browser/docs/FEATURES.md` is the parity list; `docs/FEATURES.md` fills as features land.

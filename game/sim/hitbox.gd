@@ -187,7 +187,8 @@ static func build_volume(c: Character, hits: HitConfig, v: Volume) -> void:
 
 
 ## Writes a still figure's hit volume into `v`: a character's standing on `feet`, turned by `yaw`, crouched by `crouch`
-## (0..1), upright, legs at rest (a practice range figure, RangeTargets: a hit there is a hit in a match).
+## (0..1), upright, legs at rest (a practice range figure, RangeTargets). It is the built-in plywood shape: a match's
+## characters use the volume fitted to the drawn figure since HV1 (HitFit), a little different at the head and chest.
 static func build_figure(feet: Vector3, yaw: float, crouch: float, hits: HitConfig, v: Volume) -> void:
 	_build(feet, yaw, crouch, 0.0, 0.0, hits, v)
 

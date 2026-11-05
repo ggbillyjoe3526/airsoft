@@ -4,7 +4,7 @@ An original first-person airsoft shooter for Windows and Linux, built with Godot
 matches against bots on purpose-built airsoft fields: plastic replicas, visible BBs, one hit and you're out, hand up,
 "HIT!", walk off, reset, go again. Single player against bots only.
 
-It is the same game as the browser version (frozen at `0.1-beta.1`, its code kept in `legacy/browser/`), rebuilt as an
+It is the same game as the browser version (frozen at `0.1-beta.1`; its code was kept in `legacy/browser/` until 2026-11-05 and is still in git at the tag `0.1-dev.1`), rebuilt as an
 installable desktop game. Versions restarted at 0.1 Dev 1.
 
 The [wiki](https://github.com/ggbillyjoe3526/airsoft/wiki) explains the game for players: controls, rules, every
@@ -53,7 +53,7 @@ dressed in the new art direction.
 | `tests/` | GUT unit tests, run headless |
 | `tools/` | Check, test, release and asset scripts; `tools/blender/` builds the figures |
 | `docs/` | Vision, art direction, rulings, roadmap, process, the playtest guide and the wiki's pages (`docs/wiki/`) |
-| `legacy/` | Read-only reference, removed at 0.1: the browser game's gameplay code, tests and docs, and a few katanashotgun scripts still to port |
+| `legacy/` | Read-only reference, removed at 0.1: a few katanashotgun scripts still to port (the browser game's code went on 2026-11-05; see `legacy/README.md`) |
 
 ## Checks
 

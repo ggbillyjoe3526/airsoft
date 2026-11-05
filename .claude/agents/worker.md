@@ -11,7 +11,8 @@ everywhere. `CLAUDE.md` §2, §3, §4, §5, §8 and §10 apply in full.
 
 1. Read the task block in `docs/TASKS.md`, the contracts it names (`docs/ARCHITECTURE.md` › Contracts), the folder
    `README.md` of each folder you touch, and the files you will touch: grep first, read in ranges. Where the task
-   rebuilds a browser system, its reference is under `legacy/browser/` (search it, never read it whole).
+   rebuilds a browser system, its reference is under `legacy/browser/` in git at the tag `0.1-dev.1` (`git grep <terms>
+   0.1-dev.1 -- legacy/browser`; never read it whole).
 2. Build the smallest change that meets every acceptance criterion, inside `touches` (tests, docs and the
    `changelog.d/` note are always allowed); a file outside it goes in your report, never in quietly. Rules in plain
    classes under `game/`, nodes reading state; tuning in `data/` or `game/config/`. Edit `.tscn` and `.tres` text

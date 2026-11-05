@@ -7,6 +7,9 @@ extends Resource
 ## Players in play within this distance of the pole (m, flat) work the rope: an arm's reach and a step, so a crouched
 ## player by the pole counts.
 @export var radius: float = 1.6
+## ... with their feet within this height of the pole's foot (m, BP4): a player on a roof or a floor above, inside the
+## radius flat, doesn't work the rope (OvertimeConfig.reach_height's rule).
+@export var reach_height: float = 1.0
 ## Seconds for the attackers to raise the flag from the bottom to the top: short enough to finish between two peeks
 ## (6 s made the pole rarely decide a round).
 @export var raise_time: float = 5.0
