@@ -130,13 +130,13 @@ RIGHT = {"d": 0.006, "f": 0.038, "x": 0.012, "slant": 30.0, "wrap": -30.0, "thum
 # palm centre placed with the handguard's centre line `forward` toward the fingers (far enough that the fingers rest on
 # its right side rather than reaching over its top: the owner, 2026-11-05) and `depth` out of the palm, seated
 # on it and held `standoff` off; its turn found by `cup` over `search` ((yaw), (pitch), (roll) ranges, degrees: the
-# fingers' line yawed from forward toward the right and pitched up, the palm rolled from facing up toward the left),
+# fingers' line yawed from forward toward the right and pitched up, the palm rolled either way from facing up),
 # the forearm rising toward `rise` degrees from below. The arm comes from a bladed stance: its shoulder moved
 # `shoulder` (eye space; forward and down, so the forearm rises about 46 degrees as in the photos), the elbow at least
 # `drop` below it and at most `across` in toward the body. The thumb reaches
 # along the handguard's left side for (thumb_x, y + thumb_f, thumb_z), its length kept close to it (thumb_hug).
 GUARD = {"kind": "guard", "y": 0.190, "forward": 0.030, "depth": 0.034, "standoff": 0.006,
-         "search": ((70, 100), (30, 60), (0, 30)), "rise": 50.0, "shoulder": (-0.04, 0.14, -0.14), "drop": 0.06,
+         "search": ((70, 100), (30, 70), (-30, 30)), "rise": 50.0, "shoulder": (-0.04, 0.14, -0.14), "drop": 0.06,
          "across": 0.25, "thumb_x": -0.023, "thumb_f": 0.05, "thumb_z": 0.055, "thumb_hug": 3.0,
          "fingers": {"Index": (35, 35, 20), "Middle": (40, 45, 30), "Ring": (40, 45, 30), "Pinky": (35, 40, 25)},
          "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
