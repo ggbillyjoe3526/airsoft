@@ -82,6 +82,9 @@ THUMB_WIDE = 40
 THUMB_TWISTS = tuple(range(-90, 61, 15))
 THUMB_TIP = 60
 MOVE_COST = 1000.0
+# With a mark for the little finger's knuckle: its cost per metre off that mark (against degrees of bend), unless the
+# hold gives its own (`pinky_cost`).
+PINKY_COST = 600.0
 
 
 def godot_to_eye(x: float, y: float, z: float) -> Vector:
@@ -119,17 +122,18 @@ class Hold:
 # `slant` forward from the grip's line (the grip lies across the palm on a diagonal, which keeps the wrist straight);
 # the palm facing the grip's side, turned `wrap` toward its front (negative: round its back).
 RIGHT = {"d": 0.006, "f": 0.038, "x": 0.012, "slant": 30.0, "wrap": -30.0, "thumb_d": 0.030, "thumb_f": 0.030,
-         "thumb_hug": 0.0, "thumb_aim": 1.0,
+         "thumb_hug": 0.0, "thumb_aim": 1.0, "swing": (0.0, 0.0, 0.0),
          "fingers": {"Middle": (60, 60, 45), "Ring": (60, 60, 45), "Pinky": (55, 55, 40)},
          "thumb": ((-45.0, 0.0, 30.0), (35.0, 25.0))}
 # The left hand under a rifle's handguard (the owner's photos 123627, 123646, 123656): `y` along it (rifle +Y), its
-# palm centre placed with the handguard's centre line `forward` toward the fingers and `depth` out of the palm, seated
+# palm centre placed with the handguard's centre line `forward` toward the fingers (far enough that the fingers rest on
+# its right side rather than reaching over its top: the owner, 2026-11-05) and `depth` out of the palm, seated
 # on it and held `standoff` off; its turn found by `cup` over `search` ((yaw), (pitch), (roll) ranges, degrees: the
 # fingers' line yawed from forward toward the right and pitched up, the palm rolled from facing up toward the left),
 # the forearm rising toward `rise` degrees from below. The arm comes from a bladed stance: its shoulder moved
 # `shoulder` (eye space), the elbow at least `drop` below it and at most `across` in toward the body. The thumb reaches
 # along the handguard's left side for (thumb_x, y + thumb_f, thumb_z), its length kept close to it (thumb_hug).
-GUARD = {"kind": "guard", "y": 0.190, "forward": 0.014, "depth": 0.034, "standoff": 0.006,
+GUARD = {"kind": "guard", "y": 0.190, "forward": 0.030, "depth": 0.034, "standoff": 0.006,
          "search": ((70, 100), (30, 60), (0, 30)), "rise": 50.0, "shoulder": (-0.04, 0.02, -0.08), "drop": 0.06,
          "across": 0.25, "thumb_x": -0.023, "thumb_f": 0.05, "thumb_z": 0.055, "thumb_hug": 3.0,
          "fingers": {"Index": (35, 35, 20), "Middle": (40, 45, 30), "Ring": (40, 45, 30), "Pinky": (35, 40, 25)},
@@ -141,19 +145,28 @@ DOWN = {"kind": "down", "at": (0.0, 0.06, -0.40),
         "thumb": ((0.0, 0.0, 10.0), (10.0, 10.0))}
 # The right hand high on a pistol's grip (the owner's photos, one-handed: 123843, 123830, 123816), in the replica's own
 # space (x right, y forward, z up): the thumb's root joint (deep in the heel of the thumb) behind the back strap's right
-# corner, the index finger's knuckle on the grip's right side under the trigger guard, the palm rolled about the line
-# between them to keep the wrist straightest; so the web of the hand wraps the back strap under the beavertail and the
-# thumb reaches forward along the frame's left side under the slide (its tip toward `thumb_at`). The arm reaches out
+# corner, the index finger's knuckle on the grip's right side under the trigger guard and the little finger's knuckle
+# near the front strap low down (`pinky`: the hand turned to lay all three nearest their marks, then rolled about the
+# first two to keep the wrist straightest and the little finger's knuckle near its mark); so the web of the hand wraps
+# the back strap under the beavertail, the fingers close up under the trigger guard (swung `swing` toward the index)
+# with the little finger on the grip too, and the thumb reaches forward along the frame's left side under the slide
+# (its tip toward `thumb_at`). The arm reaches out
 # to it, as a pistol is held: its shoulder raised and drawn back `shoulder` (eye space), its elbow free to come up
 # to the shoulder's height (`drop`).
-PISTOL_RIGHT = dict(RIGHT, web=(0.012, -0.095, -0.045), index=(0.024, -0.042, -0.040),
-                    thumb_at=(-0.024, -0.045, -0.012), thumb_hug=3.0, shoulder=(0.0, -0.12, 0.10), drop=0.0)
+PISTOL_RIGHT = dict(RIGHT, web=(0.012, -0.095, -0.045), index=(0.024, -0.042, -0.040), pinky=(0.026, -0.058, -0.098),
+                    thumb_at=(-0.024, -0.045, -0.012), thumb_hug=3.0, shoulder=(0.0, -0.12, 0.10), drop=0.0,
+                    swing=(-15.0, -15.0, -15.0))
 # The Cyber Pistol: a deeper, wider grip, its web lower under a long tang, its trigger further forward.
-CYBER_RIGHT = dict(PISTOL_RIGHT, web=(0.016, -0.126, -0.062), index=(0.028, -0.054, -0.048),
-                   thumb_at=(-0.028, -0.065, -0.032))
+CYBER_RIGHT = dict(PISTOL_RIGHT, web=(0.012, -0.110, -0.052), index=(0.028, -0.054, -0.048),
+                   pinky=(0.028, -0.066, -0.110), thumb_at=(-0.028, -0.065, -0.032), rolls=(-180.0, 174.0))
+# The AEG Rifle's grip: the same three marks, the hand high on the short grip so the little finger closes round its
+# foot (the owner, 2026-11-05), the knuckles' line raked back with the grip; the shoulder drawn in and back a little
+# to keep the wrist straight.
+AEG_RIGHT = dict(RIGHT, web=(0.047, -0.097, -0.054), index=(0.030, -0.031, -0.036), pinky=(0.026, -0.064, -0.092),
+                 pinky_cost=2000.0, swing=(-10.0, -10.0, -10.0), shoulder=(-0.04, -0.03, 0.0))
 HOLDS = {
     "aeg": Hold("aeg.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.073, -0.026), 31.0, 0.046, 0.0155),
-                RIGHT, GUARD),
+                AEG_RIGHT, GUARD),
     "pistol": Hold("pistol.glb", godot_to_eye(0.12, -0.15, -0.34), Grip((0.0, -0.070, -0.016), 27.0, 0.046, 0.0130),
                    PISTOL_RIGHT, DOWN),
     "cyber": Hold("cyber.glb", godot_to_eye(0.12, -0.15, -0.34), Grip((0.0, -0.0905, -0.036), 17.0, 0.060, 0.0158),
@@ -262,8 +275,9 @@ def pose_fingers(hand: pose.Hand, spec: dict, col: Collider, thumb_to: Vector = 
     """Each finger of `spec` at its authored bends, settled onto the replica, and the thumb: swung so its tip comes
     nearest `thumb_to`, or at its authored turn; their bends, for the log."""
     curls = {}
+    swing = dict(zip(("Middle", "Ring", "Pinky"), spec.get("swing", (0.0, 0.0, 0.0))))
     for name, start in spec["fingers"].items():
-        curls[name] = hand.settle(name, start, col, root=root)
+        curls[name] = hand.settle(name, start, col, swing=swing.get(name, 0.0), root=root)
     if thumb_to is not None:
         turns = (THUMB_WIDE, THUMB_TWISTS) if wide else (pose.THUMB_SWING, (-30, 0, 30))
         tip = math.radians(THUMB_TIP if wide else 45)
@@ -282,10 +296,17 @@ def web_pose(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, r: dict, col: Colli
     sx = pose.to_side("R")
     i_rest, w_rest, t_rest = sx(j["finger-2-1"]), sx(j["finger-1-1"]), sx(j["finger-1-2"])
     i_at, w_at = to_eye @ Vector(r["index"]), to_eye @ Vector(r["web"])
-    base = pose.rot_between(w_rest - i_rest, w_at - i_at)
-    axis = (w_at - i_at).normalized()
+    p_rest = sx(j["finger-5-1"])
+    p_at = to_eye @ Vector(r["pinky"]) if "pinky" in r else None
+    if p_at is None:
+        base = pose.rot_between(w_rest - i_rest, w_at - i_at)
+    else:
+        # The turn that best lays the thumb's root, the index knuckle and the little finger's knuckle on their marks.
+        base = pose.fit_turn([w_rest, i_rest, p_rest], [w_at, i_at, p_at])
+    axis = (base @ (w_rest - i_rest)).normalized()
     best = None
-    for k in range(-180, 180, ROLL_STEP):
+    lo, hi = r.get("rolls", (-180, 174))
+    for k in range(int(lo), int(hi) + 1, ROLL_STEP):
         rot = Matrix.Rotation(math.radians(k), 3, axis) @ base
         palm = rot @ hand.palmar
         if palm.x > -PALM_FACING:
@@ -295,10 +316,14 @@ def web_pose(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, r: dict, col: Colli
         moved = (m.translation - m0.translation).length
         _, bend = elbow_for(rig, "R", m, quiet=True)
         score = bend + moved * MOVE_COST
+        p5 = m @ (rig.rest["Hand_R"].inverted() @ p_rest)
+        if p_at is not None:
+            score += (p5 - p_at).length * r.get("pinky_cost", PINKY_COST)
         mcp = to_eye.inverted() @ (m @ (rig.rest["Hand_R"].inverted() @ t_rest))
         if os.environ.get("BL_DEBUG"):
-            print("    roll %4d: bend %5.1f moved %5.1f mm palm %s thumb knuckle %s" % (
-                k, bend, moved * 1000, tuple(round(c, 2) for c in palm), tuple(round(c, 3) for c in mcp)))
+            print("    roll %4d: bend %5.1f moved %5.1f mm palm %s thumb knuckle %s pinky knuckle %s" % (
+                k, bend, moved * 1000, tuple(round(c, 2) for c in palm), tuple(round(c, 3) for c in mcp),
+                tuple(round(c, 3) for c in to_eye.inverted() @ p5)))
         if best is None or score < best[0]:
             best = (score, k, m, palm)
     print("  R: web roll %d deg" % best[1])
@@ -321,7 +346,7 @@ def right_hand(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider, ob
     if os.environ.get("BL_DEBUG"):
         sx = pose.to_side("R")
         rest_inv = rig.rest["Hand_R"].inverted()
-        for name in ("hand", "finger-2-1", "finger-5-1", "finger-1-2"):
+        for name in ("hand", "finger-1-1", "finger-2-1", "finger-5-1", "finger-1-2"):
             p = to_eye.inverted() @ (hand_m @ (rest_inv @ sx(j[name])))
             print("   %s: %s" % (name, tuple(round(c, 3) for c in p)))
     pole_r, _ = elbow_for(rig, "R", hand_m)
