@@ -361,7 +361,9 @@ static func _build_fitted(c: Character, hits: HitConfig, fit: HitFit, v: Volume)
 	_fit_fill(v.parts[CHEST_L], feet, cos_yaw, sin_yaw, low - side + ahead, high - side + ahead, hits.fit_chest_radius)
 	_fit_fill(v.parts[CHEST_R], feet, cos_yaw, sin_yaw, low + side + ahead, high + side + ahead, hits.fit_chest_radius)
 	_fit_fill(v.parts[CHEST_FRONT], feet, cos_yaw, sin_yaw, low + front, high + front, hits.fit_chest_depth_radius)
-	_fit_fill(v.parts[CHEST_BACK], feet, cos_yaw, sin_yaw, low + back, high + back, hits.fit_chest_depth_radius)
+	var back_high := HitPose.upper[HitFit.CHEST].lerp(HitPose.upper[HitFit.NECK], hits.fit_chest_back_high)
+	_fit_fill(v.parts[CHEST_BACK], feet, cos_yaw, sin_yaw, low.lerp(back_high, hits.fit_chest_back_low) + back,
+			back_high + back, hits.fit_chest_back_radius)
 	var lift := up.normalized() * hits.fit_pelvis_up
 	var drop := Vector3(0.0, -hits.fit_boot_drop, 0.0)
 	for i in 2:

@@ -17,6 +17,9 @@
   replaces `Body` (and `Kit_Pads`) in `human.glb`. The build reads `human.glb` itself, so build into a copy and splice
   afterwards. The heads (`Head_*`), the carrier and gear (`Kit`, `Kit_Pack`, `Kit_Radio`) and the knee pads
   (`Kit_Pads`) are separate nodes, each owned by its own build.
+- The human's gear (`Kit*`, `Kit_Pack*`, `Kit_Radio*`, BL12) is built by `tools/blender/figure-gear/gear.py` and spliced
+  into `human.glb` by node name (`splice.py`), leaving the body, heads and clips as they are; rerun it after any other
+  rebuild of the file.
 - Godot extracted each figure's textures beside it on import (`*_col`, `*_nrm`, `*_orm`); commit them with their
   `.import` files.
 - A CC0 figure can replace them later: node names, team colours, scale, the size budget and where to find CC0

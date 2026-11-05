@@ -100,11 +100,16 @@ extends Resource
 @export var fit_chest_half_width: float = 0.056
 @export var fit_chest_ahead: float = -0.030
 @export var fit_chest_radius: float = 0.150
-## And two more on the spine's line for its depth (the plate carrier's pouches, the pack): fit_chest_front ahead of it
-## and fit_chest_back behind, of fit_chest_depth_radius.
+## And two more on the spine's line for its depth (the plate carrier's pouches, the pack): fit_chest_front ahead of it,
+## of fit_chest_depth_radius, and fit_chest_back behind, of fit_chest_back_radius, from fit_chest_back_low of the way up
+## the torso's line to fit_chest_back_high of the way from Chest to Neck (below Chest when negative; the pack rides on
+## the back, above the hips, and stands nearly to the shoulders).
 @export var fit_chest_front: float = 0.069
 @export var fit_chest_back: float = 0.078
 @export var fit_chest_depth_radius: float = 0.130
+@export var fit_chest_back_radius: float = 0.130
+@export var fit_chest_back_low: float = 0.0
+@export var fit_chest_back_high: float = 0.185
 @export var fit_pelvis_up: float = 0.067
 @export var fit_hips_radius: float = 0.089
 @export var fit_thigh_radius: float = 0.085
