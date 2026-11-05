@@ -1,10 +1,10 @@
 extends GutTest
-## The Sniper Rifle (SN1; owner, 2026-11-02; public since 2026-11-05): a replica that plays by stats.md's `sniper` row, single shot, driven by
-## the springs (the M130 as it comes, the M140 and M150 stronger, as the gases are), under the sniper class's site
-## limit, comes with the 2x Scope fitted (pool.md › Comes with), is six times as wide from the hip, unlocks at level 5
-## with the scope, is drawn from sniper.glb (BL5: a bolt-action in a grey chassis from the owner's photo, its Fire clip
-## the bolt's cycle), is heard cocking after every shot, and is carried by the Sniper bot kit, whose bots fight it with
-## the sight up.
+## The Sniper Rifle (SN1; owner, 2026-11-02; public since 2026-11-05): a replica that plays by stats.md's `sniper` row,
+## single shot, driven by the springs (the M130 as it comes, the M140 and M150 stronger, as the gases are), under the
+## sniper class's site limit, comes with the 2x Scope fitted (pool.md › Comes with), is six times as wide from the hip,
+## unlocks at level 5 with the scope, is drawn from sniper.glb (BL5: a bolt-action in a grey chassis from the owner's
+## photo, its Fire clip the bolt's cycle), is heard cocking after every shot, and is carried by the Sniper bot kit,
+## whose bots fight it with the sight up.
 
 const DT := 1.0 / 60.0
 const EYE := Vector3(0.0, 1.6, 0.0)

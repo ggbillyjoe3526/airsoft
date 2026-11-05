@@ -7,5 +7,5 @@
 - Need a Mag says "Nobody near has a spare mag that fits" when nobody can help, which is true whether teammates are out
   of spares or carry mags for another replica.
 
-### Sniper Rifle
-- A Practice challenge run with dev gear, such as the Sniper Rifle or the Variable Scope, is no longer kept as a best.
+### Practice
+- A Practice challenge run with dev gear is no longer kept as a best.

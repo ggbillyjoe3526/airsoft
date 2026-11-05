@@ -259,7 +259,7 @@ until 10.
 
 ## Sniper Rifle
 
-A dev item (SN1): turn on Settings › Dev settings › Dev content, and Disable levelling (or Level up to 5).
+Public since 2026-11-05 (SN1): turn on Settings › Dev settings › Disable levelling (or Level up to 5).
 
 - [ ] **Equip it.** It is in the primary list as Sniper Rifle; it comes with the 2x Scope fitted and the M130 Spring.
 - [ ] **Its look.** The AEG with a 20 cm longer barrel (a placeholder until your own model). Is it clearly longer?
@@ -1346,7 +1346,8 @@ Every BB in flight is now a proper Blender model, round from every side instead 
   offers each once unlocked.
 - [ ] **The Street hidden.** With Dev content off, the Match page lists Depot, Woodland and the Range only. Turn Dev
   content on: The Street is back, marked DEV, and a match there gives no XP.
-- [ ] **Sniper bots.** A few Hard matches with Dev content off: now and then a bot carries the Sniper Rifle.
+- [ ] **Sniper bots.** A few Hard matches with Dev content off: now and then a bot carries the Sniper Rifle. On
+  Woodland at 8v8, does one end feel stacked once snipers are about?
 
 ## Reporting what you find
 

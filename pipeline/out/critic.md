@@ -1,33 +1,32 @@
-Task: GA1 · The figures' running animations (no task block; judged against the brief and the record)
-Attempt: 3 of 4
-Head: 30fb3ba (targeted tests 38/38 per brief; full check.sh running separately. QA Pass at 30fb3ba, uncommitted
-qa-report.md; performance Pass at a1bbbc9, attempt 3 changed only clip data, the crouch cycle and the test)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept (subject to the full check.sh passing on 30fb3ba)
-Evidence (frames in scratchpad c1/, c1q/, compared with b1/, b1q/):
-1. Attempt-2 must-fixes met. Crouch walk inside the 1.15 m ruling: knees forward over the toes, no frog splay
-   (c1q/crouch_008, crouch_012); the trailing knee clear of the floor (c1/crouch_024); the swing knee stops under the
-   forearm, not in it (c1/crouch_008); short heel-up steps (gait.py:61-64, 1.05 m, 240 a minute). Back-pedal: the torso
-   now upright over the feet, no longer leaning back; the knee about over the toes (c1/back_000, back_008 against
-   b1/back_000, back_008; Run_B pitch 6, bias 0.03). Run: shoulders over the hips, flight and heel kick kept
-   (c1/run_000-015). Walk, sprint and strafes still read well (c1/walk_*, sprint_*, left_*). References named honestly
-   (GA1.md › References). Rig and meshes unchanged, so the models rule's proportion ratios don't apply to clips.
-4. test_gait_cycle.gd:+160 turns the character a quarter and steps +X (back) and -Z (aside); a sign slip in
-   step_walk_cycle reads +X as ahead and fails the 0.619 share. Locks in my attempt-2 advisory.
-8. changelog.d/figure-running.md no longer over-claims; PLAYTEST.md:72-74 asks about the right things now.
-The owner's call, not a block: the crouch walk is still a deep squat walk (hips 0.39 m, the swing thigh above level,
-c1/crouch_008, c1q/crouch_028). That is what crouch_top_max 1.15 under an aim-owned, near-upright upper body allows
-(DECISIONS:279). A taller one (hips ~0.55 m, back bent forward, the replica held level) needs either his crouch-cover
-ruling changed or a new crouched upper body over the aim, which is outside GA1's clips. The record offers it
-(GA1.md › Defaults); the thread must put it to him in its report, not leave it only in the record.
-Advisory (no fix needed now): c1q/crouch_028 the swing shin flicks out a little as it passes; the dead clip data
-splice.mjs leaves in the .glb adds about 0.4 MB a figure (performance advisory); Run_F's 8° and Sprint's 14° dip the
-replica while moving (recorded default).
-Must-fix for the next attempt: none.
+Task: DT1 · Sniper Rifle public, The Street dev (no task block; judged against the owner's ask and docs/records/DT1.md)
+Attempt: 1 of 4
+Head: 76b12ad (checks passed on it: gdlint, changelog, wiki check, GUT parts 1-2 and the targeted 127/127, smoke; CI queued. QA Pass, performance Pass)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
+Score: 7/8 → Accept
+Evidence for the passes:
+1. data/pool.md:151 (Sniper Rifle), :162-164 (M130/M140/M150), :178 (Variable Scope) public; data/maps.md:33 The Street dev.
+   High Output Battery: only pool.md:104's fenced worked example (no stats row, no level), so leaving it and telling the
+   owner is right; a real one would be new Dev content with balance, his call.
+2/3/5. No .gd, scene or contract touched; one en.po string (PART_BLURB_SCOPEVAR, en.po:1562). The dev flag in
+   play_session.gd:491-553 reads the tags, so the change works through data alone.
+4. test_sniper_rifle.gd:+56 is_offered with Dev content off and :+236 BotKits.offers off; test_dev_settings.gd:+275
+   cat.fields(false) == [depot, woodland]; test_sn1_qa.gd:+107 the shipped tags. Each fails on origin/main's data.
+   The dev-gating tests keep their cover by re-tagging in their own pool (test_sn1_qa before_all, test_bp3:+107).
+7. Pass; cosmetic only: test_sniper_rifle.gd:2's doc line is 142 chars where the file wraps at 120.
+Failed checks, with evidence:
+8. [judgment] changelog.d/bug-pass-full-game.md:11 still says "A Practice challenge run with dev gear, such as the
+   Sniper Rifle or the Variable Scope, is no longer kept as a best." The diff retitled its heading (:10) but left the
+   line; with both items public, their runs are now kept (play_session.gd:501-503 reads kit.dev_under), so the
+   generated Patch Notes would tell players the opposite of the game. Also docs/PLAYTEST.md:262 still opens the SN1
+   checklist with "A dev item (SN1): turn on ... Dev content", contradicting its own :275 fix.
+Fix before merge (non-blocking, one edit each): reword bug-pass-full-game.md:11 to name no sniper gear (e.g. "dev gear,
+such as a dev map or a dev part"); PLAYTEST.md:262 drop "A dev item" and the Dev content step. Optional:
+sniper-public-street-dev.md:2 "(5, 7, 9 and 8)" gives four levels for five items; say "the rifle and M130 at 5, the
+M140 at 7, the Variable Scope at 8, the M150 at 9". KNOWN_ISSUES Woodland sniper-lean row asked to be solved "before
+the rifle goes public"; its severity "can wait" may want "playtest" now players meet it (owner's call).
 Owner should test in the game:
-- Crouch-walk past a bot side on and three-quarter: is this low squat walk acceptable, or do you want the taller,
-  bent-forward crouch walk (needs crouch_top_max raised or a new crouched upper body)?
-- Back-pedal a bot (hold S): does it read as stepping back with weight forward, and do 4.6 steps a second look right?
-- Run and sprint a bot past you: does the forward lean read well, and is the replica's dip while running acceptable?
-- Strafe-duel a bot: does the 35° hip turn under a square rifle convince at range?
-- Run diagonally (W+A, S+D): do the feet slide where the clips blend?
+- Dev content off: Armory lists the Sniper Rifle and M130 at 5, M140 at 7, Variable Scope at 8, M150 at 9, no DEV tag.
+- Dev content off: Match page shows Depot, Woodland, Range; a saved pick of The Street falls back to Depot cleanly.
+- Dev content on: The Street is back, marked DEV, and a match there gives no XP.
+- Hard Woodland 8v8 with Dev content off: do sniper bots make end 0 feel lopsided (SN3 measured 60 %)?
+- First raise of the Variable Scope in an ordinary match: any hitch?
