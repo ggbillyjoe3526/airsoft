@@ -116,8 +116,8 @@ func test_a_magazine_part_follows_the_magazine_bone_through_a_reload() -> void:
 	var part := fit.nodes[0]
 	var attachment := model.find_child("magazine", true, false) as Node3D
 	assert_eq(part.get_parent(), attachment)
-	# At rest it sits where the part model places it.
-	assert_almost_eq(_in_model(part, model).origin, Vector3(0.0, -0.02, 0.067), Vector3.ONE * EPS)
+	# At rest it sits where the part model places it: the magazine well's mouth (BL2's pistol, from the photo).
+	assert_almost_eq(_in_model(part, model).origin, Vector3(0.0, -0.0203, 0.04), Vector3.ONE * EPS)
 
 
 func test_an_unknown_part_or_replica_fits_nothing() -> void:
