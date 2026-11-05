@@ -108,7 +108,7 @@ static func step(flag: FlagState, characters: Array[Character], attackers: int, 
 	return flag.progress >= 1.0
 
 
-## True if `c` is in play and close enough to the pole (flat) to work the rope.
+## True if `c` is in play, close enough to the pole (flat) to work the rope and on its floor (not on a roof above it).
 static func at_pole(c: Character, flag: FlagState, cfg: FlagConfig) -> bool:
-	return Elimination.is_in_play(c) \
+	return Elimination.is_in_play(c) and absf(c.position.y - flag.position.y) <= cfg.reach_height \
 			and Vector2(c.position.x - flag.position.x, c.position.z - flag.position.z).length() <= cfg.radius
