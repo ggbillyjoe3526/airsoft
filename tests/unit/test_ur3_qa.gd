@@ -204,7 +204,7 @@ func test_dev_replicas_listed_with_dev_content_still_fit_the_page() -> void:
 	settings.dev.dev_content = true
 	var page := _page(ROOM, grown)
 	await wait_process_frames(3)
-	# the three public replicas, the Sniper Rifle (dev for now) and the added one
+	# the four public replicas (the Sniper Rifle public since 2026-11-05) and the added one
 	assert_eq(page.gear().replica_ids().size(), 5)
 	await _assert_room(page, "dev replica")
 

@@ -1559,6 +1559,9 @@ msgstr "A red dot on clear glass, quick at any range."
 msgid "PART_BLURB_SCOPE2X"
 msgstr "Reach for long lanes, slower to raise."
 
+msgid "PART_BLURB_SCOPEVAR"
+msgstr "Turns from 2x to 6x on the mouse wheel, slowest to raise."
+
 msgid "PART_BLURB_VERTICAL"
 msgstr "Steadies the aim after a sprint, a little slower to bring up."
 

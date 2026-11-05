@@ -78,7 +78,8 @@ func test_level_3_lists_ten_of_twenty_with_the_silencer_next() -> void:
 	var page := _page(920)
 	var facts := page.facts()
 	assert_eq(facts.level, 3)
-	assert_eq([facts.unlocked_count, facts.item_count], [10, 20], "the Weapon Torch is listed: public since 2026-10-29")
+	assert_eq([facts.unlocked_count, facts.item_count], [10, 25],
+			"the Weapon Torch (2026-10-29) and the Sniper Rifle, its springs and the Variable Scope (2026-11-05) are listed")
 	assert_eq(facts.next_row().number, 4)
 	assert_eq(facts.next_row().items[0].id, SILENCER)
 	var states: Array[ArmoryFacts.State] = []
@@ -89,7 +90,7 @@ func test_level_3_lists_ten_of_twenty_with_the_silencer_next() -> void:
 	assert_eq(states[5], ArmoryFacts.State.LOCKED)
 	assert_eq(states.size(), 11)
 	var words := _words(page.summary())
-	for w: String in ["LEVEL 3", "120 / 500 XP · 380 XP to level 4", "920 XP earned in all · 10 / 20 unlocked",
+	for w: String in ["LEVEL 3", "120 / 500 XP · 380 XP to level 4", "920 XP earned in all · 10 / 25 unlocked",
 			"Every match 100 XP · a win +100 · round won 20 · hit 10 · Easy ×0.5 · Normal ×1 · Hard ×1.5"]:
 		assert_true(words.has(w), w)
 	# the multipliers and the rest of what XP means: the earn line's tooltip (UI1)
@@ -123,7 +124,7 @@ func test_at_the_cap_it_says_xp_stops_counting_and_nothing_is_next() -> void:
 	var facts := page.facts()
 	assert_eq(facts.level, 10)
 	assert_null(facts.next_row())
-	assert_eq(facts.unlocked_count, 20)
+	assert_eq(facts.unlocked_count, 25)
 	var words := _words(page.summary())
 	assert_true(words.has("Top level reached · XP counts again when the level cap goes up."))
 	assert_eq(page.summary().bar().fraction(), 0.0, "nothing past the cap to fill")
@@ -135,7 +136,7 @@ func test_with_levelling_off_everything_is_unlocked() -> void:
 	var page := _page(920, true)
 	var facts := page.facts()
 	assert_true(facts.levelling_off)
-	assert_eq([facts.unlocked_count, facts.item_count], [20, 20])
+	assert_eq([facts.unlocked_count, facts.item_count], [25, 25])
 	assert_null(facts.next_row())
 	for r in facts.rows:
 		assert_eq(r.state, ArmoryFacts.State.UNLOCKED)
@@ -177,7 +178,7 @@ func test_every_item_has_its_own_model_picture_and_a_blurb() -> void:
 			assert_ne(blurb, "", it.display_name)
 			assert_false(blurb.begins_with("PART_BLURB") or blurb.begins_with("ARMORY_BLURB"), it.display_name)
 			shown += 1
-	assert_eq(shown, 20)
+	assert_eq(shown, 25)
 
 
 func test_every_power_source_has_a_model_entry_and_a_gas_bottle_takes_its_own_label() -> void:
@@ -352,15 +353,15 @@ func test_a_level_up_over_two_levels_names_everything_it_unlocked() -> void:
 	await wait_process_frames(2)
 	var words := _words(card)
 	assert_true(words.has("LEVEL 5!"))
-	assert_true(words.has("Unlocked: Silencer, Tight-Bore Barrel, 2x Scope"),
-			"the dev Sniper Rifle and its spring (SN1) are left out without Dev content")
+	assert_true(words.has("Unlocked: Silencer, Tight-Bore Barrel, Sniper Rifle, M130 Spring, 2x Scope"),
+			"the Sniper Rifle and its spring, public since 2026-11-05, are named without Dev content")
 	assert_eq(card.find_child("LevelUp", true, false).find_children("*", "TextureRect", true, false).size(), 3,
 			"at most UP_PICTURES_MAX pictures")
 	var dev_card := XpCard.new(s, p, pool, true)
 	add_child_autofree(dev_card)
 	await wait_process_frames(2)
 	assert_true(_words(dev_card).has("Unlocked: Silencer, Tight-Bore Barrel, Sniper Rifle, M130 Spring, 2x Scope"),
-			"with Dev content on they are named")
+			"and with Dev content on")
 
 
 func test_a_match_that_gave_none_says_why() -> void:

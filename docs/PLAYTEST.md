@@ -1339,6 +1339,15 @@ Every BB in flight is now a proper Blender model, round from every side instead 
 - [ ] **Flags from a roof.** On Woodland in Attack / Defend, if you can get onto the shelter roof by flag B, standing
   there does nothing to the flag; at the pole's foot it rises as before.
 
+## Sniper Rifle public, The Street dev (DT1)
+
+- [ ] **Sniper gear without Dev content.** With Settings › Dev › Dev content off, the Armory lists the Sniper Rifle and
+  the M130 Spring at level 5, the M140 at 7, the Variable Scope at 8 and the M150 at 9, with no DEV tag; the Loadout
+  offers each once unlocked.
+- [ ] **The Street hidden.** With Dev content off, the Match page lists Depot, Woodland and the Range only. Turn Dev
+  content on: The Street is back, marked DEV, and a match there gives no XP.
+- [ ] **Sniper bots.** A few Hard matches with Dev content off: now and then a bot carries the Sniper Rifle.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

@@ -55,6 +55,19 @@ no power source fits it, and only the Weapon Torch fits it. It wears its own whi
 glowing slashes, a pink core behind bars in its slide, a finned rear cap and three fire-mode lights; with
 **Realistic colours** on it turns plain grey with no glow. It has its own shot, dry-click and magazine sounds.
 
+## Sniper Rifle
+
+A spring-powered bolt-action rifle, unlocked at level 5. It fires **single shots** only: after every shot you hear the
+bolt drawn back over the spring and snapped home before the next one is ready. It shoots harder and
+further than the AEG Rifle, from small magazines, and has its own [site limit](#site-limits).
+
+It comes with the **2x Scope** fitted; take it off or swap it for another optic in the Loadout. It is made to be aimed:
+from the hip its shots scatter widely, and the spread closes as the sight comes up. The spring you fit sets its energy
+([Parts and Power](Parts-and-Power#power-sources)). It takes the AEG Rifle's optics, grips and muzzle parts, but no
+barrels or other magazines. It is a long rifle in a grey chassis: a plain barrel with a thread cap, a slotted forend,
+a black receiver with a top rail, a short box magazine, a vertical grip and a stock with a cheek piece and a rubber
+butt pad.
+
 ## How they sound
 
 Every replica's shots, dry clicks and magazines are made from real recordings: a gas pistol, an electric motor's
