@@ -8,8 +8,8 @@ extends Node3D
 ## replica model's magazine rides on the sidecar's bone (Hand_L): the old one pulled out from oldMagazine.from, thrown
 ## at its release into ThrownMagazines, then the new one from `from` to `to`; one copy a slot, so the hand never holds
 ## two. A bomb thrown (GT1) shows in the right hand until it leaves: its model (GrenadeView's, shared) on the grip bone,
-## turned as a pistol's grip sits there (FigureConfig.throw_bomb_turn, throw_bomb_shift). A child of the skeleton, so everything here is in the skeleton's frame (the file's, facing +Z). Presentation
-## only: FigureBody says what shows.
+## turned as a pistol's grip sits there (FigureConfig.throw_bomb_turn, throw_bomb_shift). A child of the skeleton, so
+## everything here is in the skeleton's frame (the file's, facing +Z). Presentation only: FigureBody says what shows.
 
 ## Which magazine the hand shows in a reload.
 const MAG_NONE := 0

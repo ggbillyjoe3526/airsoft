@@ -67,7 +67,8 @@ static func weight(share: float, held: bool, config: FigureConfig) -> float:
 
 
 ## The right wrist's key from its shoulder (the figure's frame) `share` of the way through the throw: ready, out to the
-## lift and up to cocked by throw_cock of the windup, then accelerating over to the release, then down to the follow-through.
+## lift and up to cocked by throw_cock of the windup, then accelerating over to the release, then down to the
+## follow-through.
 static func right_key(share: float, held: bool, config: FigureConfig) -> Vector3:
 	var cock := clampf(config.throw_cock, EPSILON, 1.0 - EPSILON)
 	if held or share <= 0.0:

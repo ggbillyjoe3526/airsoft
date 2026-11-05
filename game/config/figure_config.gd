@@ -167,17 +167,17 @@ extends Resource
 @export var hang_tilt: float = 0.0
 ## A bomb thrown (SF1; GT1): the bomb's model in the right hand (on grip_bone, turned as a pistol's grip there,
 ## throw_bomb_turn (rad, about its own up) further and throw_bomb_shift (m, its frame) off the grip's point), and the
-## arms reaching for each throw_* key by two-bone IK (FigureThrow) over the holster's hanging arms. The keys are
-## each hand's wrist from its own shoulder, in the figure's frame (x right, y up, z ahead) turned with its chest: the
-## right hand from throw_ready (the bomb at the chest; a bomb held in hand, MC1, stays there) out to the side by
-## throw_lift and up and back to throw_cocked (by the ear, the elbow out under the shoulder) by throw_cock of
-## the windup (throw_lift_at of the way to it), then over and out to throw_release (high ahead) at the release, and on to
-## throw_follow (down across the body) over the recovery; the left hand points out at the target (throw_point) and
-## tucks in to the chest (throw_tuck) as the right comes over. The arms take the pose over the first throw_in of the
-## windup and give it back over the last throw_out of the recovery; the upper chain turns throw_twist (rad) away about
-## the spine as the arm cocks and as far back across as it follows through. Each elbow bends towards its pole (the
-## figure's frame): the right elbow stays low and out, as the body's skin drags at the armpit with the upper arm above
-## level. Drawn only: the bomb still leaves the eyes (Grenades).
+## arms reaching for each throw_* key by two-bone IK (FigureThrow) over the holster's hanging arms. The keys are each
+## hand's wrist from its own shoulder, in the figure's frame (x right, y up, z ahead) turned with its chest: the right
+## hand from throw_ready (the bomb at the chest; a bomb held in hand, MC1, stays there) out to the side by throw_lift
+## and up and back to throw_cocked (by the ear, the elbow out under the shoulder) by throw_cock of the windup
+## (throw_lift_at of the way to it), then over and out to throw_release (high ahead) at the release, and on to
+## throw_follow (down across the body) over the recovery; the left hand points out at the target (throw_point) and tucks
+## in to the chest (throw_tuck) as the right comes over. The arms take the pose over the first throw_in of the windup
+## and give it back over the last throw_out of the recovery; the upper chain turns throw_twist (rad) away about the
+## spine as the arm cocks and as far back across as it follows through. Each elbow bends towards its pole (the figure's
+## frame): the right elbow stays low and out, as the body's skin drags at the armpit with the upper arm above level.
+## Drawn only: the bomb still leaves the eyes (Grenades).
 @export var throw_bomb_turn: float = 0.0
 @export var throw_bomb_shift: Vector3 = Vector3.ZERO
 @export var throw_ready: Vector3 = Vector3(-0.1, -0.22, 0.3)
