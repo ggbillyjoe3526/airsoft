@@ -1,22 +1,27 @@
-Task: none (BL8) · QA commit fc0d184 · Verdict: Pass
+Task: BA1 · QA commit (see git log, "Agent: qa") · Verdict: Pass
 
 Blocking: none.
+Advisory: none found. The known test_parts_in_play silenced-shot failure did NOT reproduce here (that file passed 41/41 with this change), so it is environment-dependent, not caused by BA1.
 
-Advisory
-- optic_redDot (aeg.glb, sniper.glb): looked at along the bore, the base/rear block covers the lower half of the glass disc (rays 3.7 mm or more below the sight line hit the housing at z 0.0065 to 0.023; the disc is at z -0.0125, radius 7.5 mm). The dot at the disc centre and the upper half are clear, so aiming works, but the glass shows as a clipped half-moon in play. The owner should eyeball the aimed red dot (needs a display). The 2x and variable scopes are clear over the whole disc.
-- The 2x and variable scopes' rubber/detail eyepiece rims stand within 0.2 mm of the disc plane but not in front of it (held by the test).
+Probes (all behave as the brief says):
+- Fitted views: ReplicaParts.fit is the single path for the hands ReplicaView, Customise turntable and replica pictures; it frees `<part>_Inside` before parenting, so none shows (also with muzzle and optic fitted together).
+- unfit: node count of the rifle is back to its original after fit and unfit; a second fit and unfit gives the same result.
+- figure_meshes: Inside is a sibling of the Figure copy, so figures never carry it.
+- take(figure=false), the alone picture: Inside is present and visible; the Figure copy is stripped.
+- ReplicaPaint: Steel, Brass, Etch, Chamber, Bucking and Bore get no override; the extension's Metal does.
+- sniper.glb: no barrel nodes, no `_Inside` node.
+- aeg.glb is 1,977,576 bytes (under the 2 MB budget of 2,097,152, margin about 120 KB). It grew 606 KB, so watch it if later parts are added.
 
-Tests added: tests/unit/test_attachment_models.gd (11 tests, load the real glb files)
-- budgets: every part under 10,000 triangles, every file under 2 MB, each part has a _Figure that is smaller.
-- marker empties: optic _SightLine, muzzle _Muzzle, laser/torch _Beam, _UnderLaser on pistol/cyber torches only.
-- red dot sight line (0, 0.104, -0.025) in aeg and sniper space; every sight line on its lens centre; optics on the bore plane.
-- glass discs: rays down the bore through the window (centre and 0.9 of the radius) hit nothing in front of the disc and hit glass within 2 mm behind it; fails with the old viewmodel_config (checked: 2 of 11 fail with the base commit's config).
-- glass radius inside the lens, glass_z inside the optic, eye_back set for all three optics.
-- torch beam at its TorchLens centre and lens face on aeg, pistol, cyber, sniper; AEG/sniper torch out on the right rail pointing forward; laser beam at LaserLens.
-- sniper carries the AEG's attachment models (same triangle counts) with its silencer further out.
-- materials: named from the known set; ReplicaPaint (two schemes) leaves Lens, LensDot, Fibre, TorchLens, LaserLens and Rubber unpainted.
+Tests added
+- tests/unit/test_ba1_qa.gd:24 · aeg.glb under 2 MB · a guard, passes at the current size and would fail on a bloated re-export.
+- tests/unit/test_ba1_qa.gd:30 · fit then unfit of each barrel: no Inside, node count restored, refit works · fails if the removal block in fit is stubbed out (Inside stays in the fitted tree).
+- tests/unit/test_ba1_qa.gd:47 · long barrel with muzzle and optic: no Inside, other parts fitted · same stub check.
+- tests/unit/test_ba1_qa.gd:54 · figure_meshes carry no Inside · guard on the Figure and Inside layout.
+- tests/unit/test_ba1_qa.gd:64 · alone picture keeps a visible Inside and drops the Figure · fails if take() stripped Inside.
+- tests/unit/test_ba1_qa.gd:76 · paint leaves the six inner materials and paints Metal · fails if the inner meshes used the paintable names.
+- tests/unit/test_ba1_qa.gd:97 · sniper parts file has no barrels or Inside · guard.
+I checked the failure modes by reasoning from the code, not by stubbing the change out and re-running them.
 
-Existing part tests all pass: parts_in_play 15, customise_parts 24, variable_scope 10, sniper_rifle 11, torch 26, attachments 17, at3_qa 14, torch_qa 11 (log pipeline/out/qa/parts.log).
-Game code reading part meshes (replica_pictures bounds, replica_paint, replica_parts) needs no change; nothing in game/ reads the _Beam empties (torch_beams uses constants).
+Counts: test_ba1_qa, test_barrel_models, test_at3_qa and test_parts_in_play: 41 of 41 pass (1.5 s). Customise, ur4, figure, paint, turntable and parts tests: 253 of 253 pass, 9119 asserts (270 s). I did not run tools/check.sh (it was already running) or the smoke test.
 
-Not tested: barrels and magazines byte-identical to the base (not diffed), tools/check.sh and the smoke test (not run), how the optics, torch and laser look (needs a display).
+Not tested (owner's list, needs a display): how the Inside looks in the part's menu picture (framing, the long barrel's size next to its extension); that the barrel cards in the Customise tab look right with the larger pictures.
