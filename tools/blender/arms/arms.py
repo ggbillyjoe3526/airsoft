@@ -112,9 +112,9 @@ DOWN = {"kind": "down", "at": (0.0, 0.06, -0.40),
 # The right hand on a pistol's grip: as RIGHT, its knuckles a little higher under the trigger guard and further
 # forward, the palm turned less round the front strap (a pistol's grip is short and narrow).
 PISTOL_RIGHT = dict(RIGHT, d=0.004, f=0.044, wrap=-15.0, slant=25.0, thumb_d=0.0, thumb_f=0.035)
-# The Cyber Pistol's trigger sits 5 cm ahead of its grip and above it: the knuckles higher and further forward, the
+# The Cyber Pistol's grip is deep and its trigger about 3 cm ahead of it: the knuckles higher and further forward, the
 # knuckles' line more upright.
-CYBER_RIGHT = dict(PISTOL_RIGHT, d=-0.008, f=0.052, slant=15.0)
+CYBER_RIGHT = dict(PISTOL_RIGHT, d=-0.008, f=0.058, slant=15.0)
 HOLDS = {
     "aeg": Hold("aeg.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.073, -0.026), 31.0, 0.046, 0.0155),
                 RIGHT, GUARD),
@@ -122,7 +122,7 @@ HOLDS = {
                    RIGHT, GUARD),
     "pistol": Hold("pistol.glb", godot_to_eye(0.12, -0.15, -0.34), Grip((0.0, -0.070, -0.016), 27.0, 0.046, 0.0130),
                    PISTOL_RIGHT, DOWN),
-    "cyber": Hold("cyber.glb", godot_to_eye(0.12, -0.15, -0.34), Grip((0.0, -0.083, -0.036), 17.0, 0.046, 0.0152),
+    "cyber": Hold("cyber.glb", godot_to_eye(0.12, -0.15, -0.34), Grip((0.0, -0.0905, -0.036), 17.0, 0.060, 0.0158),
                   CYBER_RIGHT, DOWN),
 }
 

@@ -2,6 +2,7 @@
 and the contact solver that closes each finger onto a replica's surface without passing into it."""
 
 import math
+import os
 
 import bpy
 from mathutils import Matrix, Vector
@@ -283,7 +284,8 @@ class Hand:
                     self.rig.fk(b2)
                     self.rig.fk(b3)
                     gaps = [self.clearance(b, col) for b in (b1, b2, b3)]
-                    clear = min(gaps)
+                    # Its root may rest on the grip (the web of the hand on the back strap), never pass into it.
+                    clear = min(gaps[0] + CONTACT, gaps[1], gaps[2])
                     # Clear of the rifle first; then as close to it as can be, with the least swing.
                     score = (0.0 if clear >= CONTACT else 1.0 + (CONTACT - clear)) + clear * 2.0 + \
                         0.0003 * (abs(a) + abs(c) + abs(t)) / 10.0
@@ -295,6 +297,8 @@ class Hand:
                     if best is None or score < best[0]:
                         best = (score, rot, a, c, t)
         self.adduct[b1] = best[1]
+        if os.environ.get("BL_DEBUG"):
+            print("   thumb search: score %.4f at %s" % (best[0], best[2:]))
         out = self.close("Thumb", col, (0.0, ratio[1], ratio[2]), (0.0, limit[1], limit[2]))
         return list(best[2:]) + out[1:]
 
