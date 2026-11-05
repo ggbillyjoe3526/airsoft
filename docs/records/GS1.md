@@ -1,13 +1,13 @@
 # GS1 · GBB Pistol: front sight when aimed, no gap in the port
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-05 | 1 | Claude (build thread) | gdlint, changelog, wiki, smoke, notices and the new test green locally; unit parts on CI | Retry 7/8 | the notch's white U drawn too high (heights laid along a leaning face), bridging the notch over the post under the dot |
-| 2026-11-05 | 2 | Claude (build thread) | gdlint and the sights test green locally; unit parts on CI | pending | – |
+| 2026-11-05 | 2 | Claude (build thread) | gdlint and the sights test green locally; unit parts on CI | Accept 8/8 (on the owner's hood-slope fix too) | – |
 
 ## What the owner asked (2026-11-05)
 
@@ -49,6 +49,12 @@ untouched (nothing it holds moved).
   notch's floor to show, too small to read at arm's length. Readability over the photo here (pillar 4).
 - `aim_forward` (the pistol 0.36 m from the eye aimed) is unchanged: the post is about 7 px wide at 1080p, like a real
   pistol at arm's length. If it still reads too small in play, bringing the pistol closer is the next lever.
+
+## For a later pass (critic, not failing)
+
+- The notch's floor corners are rounded 0.9 mm (as on main) while the white U's inner corners are square: a 1 px dark
+  wedge in each at 1080p. ref12's notch is square.
+- The front post's top edge catches light in Cycles just above the dot; check it in the game's light.
 
 ## Verified
 
