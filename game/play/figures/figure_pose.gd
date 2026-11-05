@@ -78,6 +78,8 @@ var snapped: bool = false
 var bomb: int = Grenade.Kind.NONE
 var throw_share: float = -1.0
 var bomb_held: bool = false
+## The throw under way began from a bomb held in hand (the arm already up, so it doesn't drop first).
+var throw_from_hand: bool = false
 var grenades: GrenadeConfig = null
 ## The draw under way came out of the holster; the slot in the hand before a switch; the last read's holster and draw.
 var _from_holster: bool = false
@@ -134,11 +136,14 @@ func read(c: Character, fraction: float, hits: HitConfig) -> void:
 
 ## The bomb in the right hand from `hand` (none unless `alive`): its throw's share, or held in hand.
 func read_throw(hand: Grenades.Hand, alive: bool) -> void:
+	var was_held := bomb_held
 	bomb = Grenade.Kind.NONE
 	throw_share = -1.0
 	bomb_held = false
 	if hand == null or not alive or grenades == null:
+		throw_from_hand = false
 		return
+	throw_from_hand = hand.throwing != Grenade.Kind.NONE and (was_held or throw_from_hand)
 	if hand.throwing != Grenade.Kind.NONE:
 		if hand.released:
 			throw_share = 1.0 + clampf(1.0 - hand.recover_left / maxf(grenades.recover, 1e-6), 0.0, 1.0)

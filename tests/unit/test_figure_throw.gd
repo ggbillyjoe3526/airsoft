@@ -48,6 +48,9 @@ func _view(kind: int, c: Character) -> FigureView:
 		for bone: String in ["Hand_R", "Hand_L", "Head", "UpperArm_R", "UpperArm_L", "Grip_R"]:
 			drawn[bone] = v.global_transform.affine_inverse() \
 					* (sk.global_transform * sk.get_bone_global_pose(sk.find_bone(bone)).origin)
+		var head := sk.get_bone_global_pose(sk.find_bone("Head"))
+		drawn["HeadMiddle"] = v.global_transform.affine_inverse() \
+				* (sk.global_transform * (head * Vector3(0.0, config.head_top * 0.5, 0.0)))
 		_drawn[v] = drawn)
 	return v
 
@@ -91,7 +94,11 @@ func test_the_keys_run_ready_cocked_release_follow_through() -> void:
 	# Out to the side on the way back, never through the chest.
 	var lifted := FigureThrow.right_key(config.throw_cock * 0.5, false, config)
 	assert_gt(lifted.x, config.throw_ready.x + 0.1, "the hand swings out to the right on its way back")
-	assert_eq(FigureThrow.left_key(0.0, config), config.throw_point)
+	assert_eq(FigureThrow.left_key(0.0, config), config.throw_pin, "the left hand at the pin first")
+	assert_almost_eq(FigureThrow.left_key(config.throw_cock, config), config.throw_point, Vector3.ONE * 0.0001)
+	assert_almost_eq(FigureThrow.right_key(config.throw_cock + (1.0 - config.throw_cock) * sqrt(config.throw_over_at),
+			false, config), config.throw_over, Vector3.ONE * 0.0001, "over beside the head on the way")
+	assert_eq(FigureThrow.weight(0.0, false, config, true), 1.0, "from the hand: the arm already up")
 	assert_almost_eq(FigureThrow.left_key(1.0, config), config.throw_tuck, Vector3.ONE * 0.0001)
 	assert_lt(FigureThrow.twist(config.throw_cock, false, config), 0.0, "turned away as the arm cocks")
 	assert_almost_eq(FigureThrow.twist(1.0, false, config), 0.0, 0.0001, "square at the release")
@@ -203,3 +210,37 @@ func test_without_bombs_given_the_hand_draws_none() -> void:
 	v.set_body(models, FigureMix.HUMAN, config.lod_high)
 	await _pose(v, c)
 	assert_null(v.body().hands.bomb(), "no bomb node made")
+
+
+func test_the_hand_and_bomb_pass_beside_the_head_never_across_the_face() -> void:
+	for kind: int in [FigureMix.HUMAN, FigureMix.ROBOT]:
+		var c := _character()
+		c.armament.put_down()
+		var v := _view(kind, c)
+		await _pose(v, c)
+		var share := config.throw_cock
+		while share <= 1.0:
+			_throwing(c, share)
+			await _pose(v, c, 1)
+			var middle: Vector3 = _drawn[v]["HeadMiddle"]
+			for bone: String in ["Hand_R", "Grip_R"]:
+				assert_gt((_drawn[v][bone] as Vector3).distance_to(middle), 0.15,
+						"kind %d, share %.2f: %s clear of the head" % [kind, share, bone])
+			share += 0.05
+
+
+func test_a_throw_from_a_bomb_held_in_hand_keeps_the_arm_up() -> void:
+	var c := _character()
+	c.armament.put_down()
+	c.grenades.readied = Grenade.Kind.SMOKE
+	var v := _view(FigureMix.HUMAN, c)
+	await _pose(v, c)
+	var held: Vector3 = _drawn[v]["Hand_R"]
+	# The trigger pull: the throw begins at share 0 from the hand.
+	c.grenades.readied = Grenade.Kind.NONE
+	c.grenades.throwing = Grenade.Kind.SMOKE
+	c.grenades.windup_left = grenades.windup
+	c.grenades.recover_left = grenades.recover
+	await _pose(v, c, 1)
+	assert_lt((_drawn[v]["Hand_R"] as Vector3).distance_to(held), 0.02, "the arm doesn't drop to hanging first")
+	assert_true(v.body().hands.bomb().visible)

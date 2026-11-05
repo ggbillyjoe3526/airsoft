@@ -36,9 +36,10 @@ func _init(skeleton: Skeleton3D, config: FigureConfig) -> void:
 		_arms.clear()
 
 
-## Poses `skeleton` `share` of the way through a throw (below 0: none), or holding a bomb in hand when `held`.
-func pose(skeleton: Skeleton3D, share: float, held: bool) -> void:
-	var w := weight(share, held, _config)
+## Poses `skeleton` `share` of the way through a throw (below 0: none), or holding a bomb in hand when `held`;
+## `from_hand`: the throw began from a bomb held in hand.
+func pose(skeleton: Skeleton3D, share: float, held: bool, from_hand: bool = false) -> void:
+	var w := weight(share, held, _config, from_hand)
 	if w <= EPSILON or _arms.is_empty() or _spine < 0 or _chest < 0:
 		return
 	var turn := twist(share, held, _config) * w
@@ -48,16 +49,17 @@ func pose(skeleton: Skeleton3D, share: float, held: bool) -> void:
 	var chest := (skeleton.get_bone_global_pose(_chest).basis
 			* skeleton.get_bone_global_rest(_chest).basis.inverse()).orthonormalized()
 	var right := right_key(share, held, _config)
-	_reach(skeleton, 0, chest * in_skeleton(right), chest * in_skeleton(_config.throw_right_pole), w, chest)
+	_reach(skeleton, 0, chest * in_skeleton(right), chest * in_skeleton(right_pole(share, held, _config)), w, chest)
 	if not held:
 		_reach(skeleton, 3, chest * in_skeleton(left_key(share, _config)),
 				chest * in_skeleton(_config.throw_left_pole), w, chest)
 
 
 ## How much of the throw's pose is drawn `share` of the way through it: in over throw_in of the windup, out over the
-## last throw_out of the recovery; all of it holding a bomb in hand (`held`); none with no throw (`share` < 0).
-static func weight(share: float, held: bool, config: FigureConfig) -> float:
-	if held:
+## last throw_out of the recovery; all of it holding a bomb in hand (`held`), and through the windup of a throw from
+## the hand (`from_hand`: the arm is already up); none with no throw (`share` < 0).
+static func weight(share: float, held: bool, config: FigureConfig, from_hand: bool = false) -> float:
+	if held or (from_hand and share >= 0.0 and share <= 1.0):
 		return 1.0
 	if share < 0.0:
 		return 0.0
@@ -81,15 +83,33 @@ static func right_key(share: float, held: bool, config: FigureConfig) -> Vector3
 		return config.throw_lift.lerp(config.throw_cocked, (t - lift) / (1.0 - lift))
 	if share <= 1.0:
 		var t := (share - cock) / (1.0 - cock)
-		return config.throw_cocked.lerp(config.throw_release, t * t)
+		t *= t
+		var over := clampf(config.throw_over_at, EPSILON, 1.0 - EPSILON)
+		if t <= over:
+			return config.throw_cocked.lerp(config.throw_over, smoothstep(0.0, 1.0, t / over))
+		return config.throw_over.lerp(config.throw_release, (t - over) / (1.0 - over))
 	return config.throw_release.lerp(config.throw_follow, smoothstep(0.0, 1.0, minf(share - 1.0, 1.0)))
 
 
-## The left wrist's key: pointing out while the right arm cocks, tucked in as it comes over.
+## Where the right elbow bends towards (the figure's frame): out and down while the arm cocks, swinging to ahead and
+## down as it comes over (the elbow leads the throw, so the upper arm never stands out sideways over the shoulder).
+static func right_pole(share: float, held: bool, config: FigureConfig) -> Vector3:
+	var cock := clampf(config.throw_cock, EPSILON, 1.0 - EPSILON)
+	if held or share <= cock:
+		return config.throw_right_pole
+	var t := clampf((share - cock) / (1.0 - cock), 0.0, 1.0)
+	return config.throw_right_pole.lerp(config.throw_over_pole, smoothstep(0.0, 1.0, minf(t * 2.0, 1.0)))
+
+
+## The left wrist's key: at the right hand pulling the pin, then pointing out while the right arm cocks, tucked in as
+## it comes over.
 static func left_key(share: float, config: FigureConfig) -> Vector3:
 	var cock := clampf(config.throw_cock, EPSILON, 1.0 - EPSILON)
+	var pin := clampf(config.throw_pin_until, 0.0, cock - EPSILON)
+	if share <= pin:
+		return config.throw_pin
 	if share <= cock:
-		return config.throw_point
+		return config.throw_pin.lerp(config.throw_point, smoothstep(pin, cock, share))
 	return config.throw_point.lerp(config.throw_tuck, smoothstep(cock, 1.0, minf(share, 1.0)))
 
 

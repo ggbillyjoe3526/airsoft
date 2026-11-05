@@ -178,6 +178,7 @@ func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = fals
 	# A bomb thrown or held in hand (GT1): the arms throw it, the bomb in the right hand until it leaves.
 	bend.throw_share = pose.throw_share
 	bend.throw_held = pose.bomb_held
+	bend.throw_from_hand = pose.throw_from_hand
 	hands.show_hands(pose.in_hand, pose.slung, pose.hanging)
 	hands.show_bomb(pose.bomb)
 	hands.feet = pose.feet

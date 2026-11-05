@@ -24,9 +24,11 @@ var hits: HitConfig = null
 var aim_lean: float = 0.0
 ## How far (0..1) the arms bring the replica to the high ready at a wall.
 var high_ready: float = 0.0
-## A bomb's throw: its share (0..1 the windup, 1..2 the recovery; below 0 none), and a bomb held in hand (MC1).
+## A bomb's throw: its share (0..1 the windup, 1..2 the recovery; below 0 none), a bomb held in hand (MC1), and a
+## throw begun from one.
 var throw_share: float = -1.0
 var throw_held: bool = false
+var throw_from_hand: bool = false
 var _config: FigureConfig = null
 var _hips: int = -1
 var _spine: int = -1
@@ -54,7 +56,7 @@ func _process_modification_with_delta(_delta: float) -> void:
 		if _ready != null:
 			_ready.hold(skeleton, high_ready)
 		if _throw != null and (throw_share >= 0.0 or throw_held):
-			_throw.pose(skeleton, throw_share, throw_held)
+			_throw.pose(skeleton, throw_share, throw_held, throw_from_hand)
 
 
 ## Lowers and leans `skeleton` from the pose its clips gave it.

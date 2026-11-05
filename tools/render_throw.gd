@@ -11,13 +11,14 @@ const SIZE := Vector2i(960, 1080)
 const SETTLE_FRAMES := 30
 const TICK := 1.0 / 60.0
 ## The shares pictured (-1: the bomb held in hand, MC1).
-const SHARES: Array[float] = [-1.0, 0.15, 0.4, 0.6, 0.85, 1.0, 1.4, 1.8]
+const SHARES: Array[float] = [-1.0, 0.1, 0.4, 0.6, 0.85, 1.0, 1.4, 1.8]
 ## The views: the camera's offset from the figures' middle (m, the figures face -z) and the point it looks at.
 const VIEWS: Dictionary[String, Vector3] = {
 	"right": Vector3(3.2, 1.3, 0.0),
 	"front": Vector3(1.8, 1.4, -2.6),
 	"rear": Vector3(-1.6, 1.6, 2.6),
 	"hand": Vector3(1.5, 1.7, -1.6),
+	"face": Vector3(0.3, 1.6, -2.2),
 }
 const LOOK_AT := Vector3(0.0, 1.1, 0.0)
 const HAND_AT := Vector3(0.25, 1.45, 0.0)
@@ -90,8 +91,8 @@ func _run() -> void:
 				v.animate(c, 1.0, TICK, camera.global_position)
 				await process_frame
 			for view: String in VIEWS:
-				camera.fov = 26.0 if view == "hand" else 40.0
-				camera.look_at_from_position(VIEWS[view], HAND_AT if view == "hand" else LOOK_AT)
+				camera.fov = 26.0 if view == "hand" or view == "face" else 40.0
+				camera.look_at_from_position(VIEWS[view], HAND_AT if view == "hand" or view == "face" else LOOK_AT)
 				await process_frame
 				await process_frame
 				var image := root.get_texture().get_image()
