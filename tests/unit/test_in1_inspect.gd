@@ -115,6 +115,22 @@ func test_every_model_with_an_inspect_clip_has_its_own_pose() -> void:
 		assert_lt(p.turn_at(0.5).y, -0.5, "turned side on, the right side to the eye")
 
 
+func test_the_saved_play_tuning_holds_every_pose_as_the_script_does() -> void:
+	# An export reads the .tres, where the script's InspectPose.make defaults never run (test_saved_configs).
+	var saved := PlayTuning.load_default().viewmodel
+	assert_eq(saved.inspect_poses.keys().size(), cfg.inspect_poses.keys().size())
+	for id: StringName in cfg.inspect_poses:
+		var mine: InspectPose = cfg.inspect_poses[id]
+		var theirs: InspectPose = saved.inspect_poses.get(id)
+		assert_not_null(theirs, "%s saved" % id)
+		assert_eq(theirs.turn, mine.turn, "%s turns" % id)
+		assert_eq(theirs.shift, mine.shift, "%s shifts" % id)
+		assert_eq(theirs.sound_cue, mine.sound_cue, "%s sounds" % id)
+		assert_almost_eq(theirs.duration, mine.duration, EPS)
+	assert_not_null(saved.inspect_pose_default)
+	assert_true(saved.inspect_pose_default.valid())
+
+
 func test_a_pose_eases_between_its_keys() -> void:
 	var p := InspectPose.make(1.0, PackedFloat32Array([0.0, 0.5, 1.0]), [Vector3.ZERO, Vector3(0.0, -1.0, 0.0),
 			Vector3.ZERO], [Vector3.ZERO, Vector3(-0.2, 0.0, 0.0), Vector3.ZERO], PackedFloat32Array(), [])
