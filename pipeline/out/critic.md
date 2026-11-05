@@ -1,25 +1,39 @@
-Task: MP1 · New models in the UI's pictures
-Attempt: 1 of 4
-Head: 12fad30 (touched tests and gdlint pass on it; full tools/check.sh still running, so Accept holds only if it passes)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
-Score: 7/8 → Accept (one non-blocking check fails, judgment)
-1 ✓ Replicas, parts and power sources are already drawn live from the glbs (no user:// or baked cache in game/ui). The bombs now are too: grenade_glyph.gd:62-71, replica_pictures.gd:199-218. No UI shows figures, gear or arms (no reference to models/characters in game/ui). The guard test fails the build when a model folder isn't pictured: test_model_pictures.gd:38.
-2 ✓ No contract in ARCHITECTURE › Contracts names ReplicaPictures, GrenadeGlyph or the model folders.
-3 ✓ The picture is taken only on entering the tree or on a kind change. replica_panel.gd:265-267 sets only the size and modulate each update. _draw does no heap work.
-4 ✓ The new tests use GRENADE_FILES, grenade_path and shows_model, so they fail to parse without the change. The folder and pool guards are the feature. The model draw path runs only once BL9's glbs exist: two QA tests are pending until then, and BL9's PR will turn them on.
-5 ✓ UI only, typed, the sizes are named constants (PICTURE_SCALE/MIN/MAX), no global state.
-6 ✓ No .glb added or reshaped. The model-quality checks fall to BL9.
-7 ✓ _make_model is shared with the power sources, not copied. The glyph's ReplicaPictures is its child and is freed with it (test_freed_icons_leave_no_orphan_nodes).
-Failed checks, with evidence:
-8. [judgment] Docs and labels aren't all current:
-   (a) assets/README.md:9 still calls title-backdrop.jpg "the title's backdrop … still of Depot". It is now the crash screen's, cut from assets/maps/depot.jpg (ASSETS.md got this right).
-   (b) tests/unit/test_model_pictures.gd:10 lists "props" as match-only with "no picture to keep up". But tools/eye_pictures.gd:122 bakes PropDress props into the field pictures (menu backdrop, Match page, loading screen). A new prop model leaves those jpgs out of date. Say so in the comment, or point to the re-render step in ASSETS.md.
-   (c) pipeline/out/performance.md is still BL3's report. MP1's performance verdict is only in the brief.
-Must-fix (small, this attempt): 8a, 8b, and write MP1's performance report to pipeline/out/performance.md.
-Advisory: grenade_glyph.gd:68 takes the size from get_global_transform_with_canvas(), which leaves out the window's canvas_items stretch. At 4K (2x) the HUD's held bomb (BOMB_ICON_HELD 40 → 80 physical px) is drawn from a 64 px texture, about 1.25x upscaled and soft. Using get_screen_transform().get_scale() fixes this at no cost. Also say in assets/README.md that a new model folder must be added to test_model_pictures.gd, so the Blender threads aren't surprised by a red CI.
-Owner should test in the game (after BL9 merges):
-- Loadout › Grenades: the smoke (green) and flash (violet) tiles show the 3D bombs standing upright, centred, not cropped.
-- HUD: both bomb icons read at a glance. The held one grows and stays sharp, also at 1440p/4K if you have it.
-- HUD: a bomb with none left is visibly dimmed.
-- First match after launch: no hitch when the HUD appears (one-time shader build for the bomb pictures).
-- Customise, Armory and the level-up card show each newly merged replica, part or power model without a restart of anything else.
+Task: BL8 · Attachments modelled from the owner's photos (nine parts, unbranded)
+Attempt: 3 of 4
+Head: 319a75e. Full tools/check.sh not run on it: it last passed on f1dc779, 4,752/4,752. On 4a17278, 144/144 part
+tests pass and gdlint, the changelog and the wiki checks pass; the coordinator stopped the run. The Accept holds only
+once tools/check.sh is green on the rebased head; do not merge before. Models in 4a17278. QA Pass (03dc1ca).
+Performance Pass, re-measured on 4a17278.
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
+Score: 8/8 → Accept
+Failed checks, with evidence: none.
+Attempt-2 must-fixes, measured with pixel scans of the full-size photos against the cmp/r2 renders at the same angle:
+- Pistol silencer (attachments.py:888, :907), against wey027-02 side-on:
+  - Tube and collar L/D 4.68 → 4.43 (-5 %). Overall L/D 5.13 → 4.70 (-8 %).
+  - Collar 1.00 → 1.00 of the tube. Spigot 0.39 → 0.35 (-10 %, at the limit). Collar length 0.21 → 0.25 D (±3 px).
+  - Met. Fitted in ctx.jpg, it sits flush on the slide.
+- Torch (attachments.py:987): the head is 0.435 of the length, against 0.40 to 0.46 in the X300 photos. Met.
+  - The body lofts onto the head with no step or gap. The saddle meets the head's top line.
+  - The Cyber variant's flush clamp is a fit constraint (:1021), not a defect.
+- Vertical grip (attachments.py:797, :849), against the Double-Bell side photo:
+  - Flare to waist 1.43 → 1.35 (-6 %). Height to waist 1.90 → 2.05 (+8 %). Foot 1.01 → 1.06.
+  - Flare zone 0.30 → 0.27 of the height (-10 %). Stipple panel 0.72 → 0.65 of the face (-10 %).
+  - The studs are seeded and scattered, and no longer read as a grid. Met.
+- The other six parts are unchanged since attempt 2, where they passed. The laser's windage wheel (c_lz right side) is
+  joined and knurled.
+- Checks 2 to 5 are unchanged from attempt 2: build script and .glb only, with no game code, per-frame path or contract.
+  test_attachment_models.gd fails on the base config (QA: 2 of 11).
+Must-fix for the next attempt: none. Before the records commit (non-blocking):
+- attachments.py:867 is a stale duplicate comment line ("The clamp, its cross bolt and nut."). Delete it.
+- Polish, if BL8 is reopened:
+  - Round the vertical grip's clamp top edges, at about a 3 mm radius. In the photo, at 4 % below the top the width is
+    0.78 of the maximum; in the render it is 1.00.
+  - The pistol silencer's collar knurl is about twice the photo's pitch, and its step is a 1 mm washer where the photo
+    has a 5 mm neck.
+Owner should test in the game:
+- The pistol with the silencer and the torch at viewmodel distance: proportions against the slide.
+- ADS through the red dot: the deck sits below the window and the glass is clear (QA's half-moon advisory).
+- The vertical grip's flared top and stipple in first person: does the boxy clamp top show under the handguard?
+- The torch and laser beams leave their emitters on the pistol and the Cyber, and re-check the torch once the Cyber
+  rebuild merges.
+- The variable scope and a first slot swap on the Low preset: any hitch on first draw (performance's prewarm note).
