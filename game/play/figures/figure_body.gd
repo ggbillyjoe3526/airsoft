@@ -10,7 +10,8 @@ extends Node3D
 ## and leans it and draws the hit flinch (`set_flinch`); it fades through GeometryInstance3D.transparency, so no material
 ## is copied. Its upper body (FI3) plays over the legs in the same tree (the aim by pitch, the holster, a switch, a
 ## trigger press per shot, a reload: FI4), FigureBend leans the aim the rest of the way, and FigureHands puts the
-## replicas in the hand, on the sling or hanging from the hand, and a reload's magazines on the left hand.
+## replicas in the hand, on the sling or hanging from the hand, and a reload's magazines on the left hand. A bomb thrown
+## (GT1): FigureBend's FigureThrow swings the arms, FigureHands holds the bomb in the right hand until it leaves.
 
 ## A gate of the upper body (FigureGraph's Transitions) as last asked: not yet, shut (a stand-in plays), open.
 const GATE_UNSET := -1
@@ -174,7 +175,11 @@ func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = fals
 	bend.aim_lean = pose.aim_lean() * aiming
 	# Muzzle up at a wall (FB5), as far as the aim shows.
 	bend.high_ready = pose.raise * aiming
+	# A bomb thrown or held in hand (GT1): the arms throw it, the bomb in the right hand until it leaves.
+	bend.throw_share = pose.throw_share
+	bend.throw_held = pose.bomb_held
 	hands.show_hands(pose.in_hand, pose.slung, pose.hanging)
+	hands.show_bomb(pose.bomb)
 	hands.feet = pose.feet
 	hands.velocity = pose.velocity
 	hands.show_reload(pose.reload_slot if pose.reloading else -1, pose.reload_share, pose.snapped)

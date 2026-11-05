@@ -9,7 +9,8 @@ extends SkeletonModifier3D
 ## sets `lean`, `crouch` and `flinch`.
 ## Then (FI3, `aim`) the upper chain pitched about the spine's own joint by `aim_lean`: what the aim clips leave of the
 ## pitch (they turn the replica FigureConfig.aim_reach of it), so the replica points where the shot goes.
-## Last, at a wall (FB5, `high_ready`), the arms bring the replica to the high ready, muzzle up (FigureReady).
+## At a wall (FB5, `high_ready`), the arms bring the replica to the high ready, muzzle up (FigureReady). Last, a bomb
+## thrown or held in hand (GT1, `throw_share`, `throw_held`): the arms throw it (FigureThrow).
 
 ## Leaning (-1 left .. 1 right) and crouched (0..1), as drawn this frame.
 var lean: float = 0.0
@@ -23,11 +24,15 @@ var hits: HitConfig = null
 var aim_lean: float = 0.0
 ## How far (0..1) the arms bring the replica to the high ready at a wall.
 var high_ready: float = 0.0
+## A bomb's throw: its share (0..1 the windup, 1..2 the recovery; below 0 none), and a bomb held in hand (MC1).
+var throw_share: float = -1.0
+var throw_held: bool = false
 var _config: FigureConfig = null
 var _hips: int = -1
 var _spine: int = -1
 var _head: int = -1
 var _ready: FigureReady = null
+var _throw: FigureThrow = null
 
 
 ## Bends `skeleton`'s bones by `config`'s crouch line and the hit volume's lean geometry (`hits`).
@@ -38,6 +43,7 @@ func setup(skeleton: Skeleton3D, config: FigureConfig) -> void:
 	_spine = skeleton.find_bone(config.lean_bone)
 	_head = skeleton.find_bone(config.head_bone)
 	_ready = FigureReady.new(skeleton, config)
+	_throw = FigureThrow.new(skeleton, config)
 
 
 func _process_modification_with_delta(_delta: float) -> void:
@@ -47,6 +53,8 @@ func _process_modification_with_delta(_delta: float) -> void:
 		aim(skeleton)
 		if _ready != null:
 			_ready.hold(skeleton, high_ready)
+		if _throw != null and (throw_share >= 0.0 or throw_held):
+			_throw.pose(skeleton, throw_share, throw_held)
 
 
 ## Lowers and leans `skeleton` from the pose its clips gave it.

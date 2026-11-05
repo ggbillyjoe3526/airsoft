@@ -72,6 +72,13 @@ var reload_share: float = 0.0
 var feet: Vector3 = Vector3.ZERO
 var velocity: Vector3 = Vector3.ZERO
 var snapped: bool = false
+## A bomb (GT1, Grenade.Kind; NONE: none) in the right hand: thrown, `throw_share` of the way through its throw (0..1
+## the windup to the release, 1..2 the recovery after it; below 0 none), or held in hand waiting for a trigger pull
+## (`bomb_held`, MC1). The windup's and the recovery's lengths (s) are `grenades`' (FigureView.set_bombs).
+var bomb: int = Grenade.Kind.NONE
+var throw_share: float = -1.0
+var bomb_held: bool = false
+var grenades: GrenadeConfig = null
 ## The draw under way came out of the holster; the slot in the hand before a switch; the last read's holster and draw.
 var _from_holster: bool = false
 var _switch_from: int = -1
@@ -122,6 +129,25 @@ func read(c: Character, fraction: float, hits: HitConfig) -> void:
 	pitch = lerpf(c.prev_pitch, c.pitch, fraction)
 	sprinting = 1.0 if c.sprinting else 0.0
 	read_hands(c.armament, call > 0.0 or c.status == Character.Status.WALKING_OFF, alive)
+	read_throw(c.grenades, alive)
+
+
+## The bomb in the right hand from `hand` (none unless `alive`): its throw's share, or held in hand.
+func read_throw(hand: Grenades.Hand, alive: bool) -> void:
+	bomb = Grenade.Kind.NONE
+	throw_share = -1.0
+	bomb_held = false
+	if hand == null or not alive or grenades == null:
+		return
+	if hand.throwing != Grenade.Kind.NONE:
+		if hand.released:
+			throw_share = 1.0 + clampf(1.0 - hand.recover_left / maxf(grenades.recover, 1e-6), 0.0, 1.0)
+		else:
+			throw_share = clampf(1.0 - hand.windup_left / maxf(grenades.windup, 1e-6), 0.0, 1.0)
+			bomb = hand.throwing
+	elif hand.readied != Grenade.Kind.NONE:
+		bomb = hand.readied
+		bomb_held = true
 
 
 ## The upper body's targets from armament `a`: what is in the hand, slung or put away, the draw and a switch under way;

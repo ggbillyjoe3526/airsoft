@@ -13,6 +13,9 @@ reload or the holster, puts it back. Your replica goes down while you pull the p
 the bomb leaves your hand along your view, lofted a little, and your replica comes back up: under a second in all. You
 can't fire or aim while you throw, and a reload under way stops. Throwing on the run adds some of your own speed.
 
+Bots throw the same way: you see the bomb in a bot's hand as its arm swings back by its head, then over and out as it
+lets go.
+
 Bombs bounce off walls and the ground, then roll and settle. They don't bounce off people. If you are hit while you
 pull the pin, you keep the bomb.
 

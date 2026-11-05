@@ -165,6 +165,37 @@ extends Resource
 ## straight down with the muzzle forward. Straight down (FB5): tilted 0.25 rad, a rifle reached 0.52 m ahead, through
 ## a wall the figure stood at; hanging straight, 0.36 m, about the body's 0.32 m.
 @export var hang_tilt: float = 0.0
+## A bomb thrown (SF1; GT1): the bomb's model in the right hand (on grip_bone, turned as a pistol's grip there,
+## throw_bomb_turn (rad, about its own up) further and throw_bomb_shift (m, its frame) off the grip's point), and the
+## arms reaching for each throw_* key by two-bone IK (FigureThrow) over the holster's hanging arms. The keys are
+## each hand's wrist from its own shoulder, in the figure's frame (x right, y up, z ahead) turned with its chest: the
+## right hand from throw_ready (the bomb at the chest; a bomb held in hand, MC1, stays there) out to the side by
+## throw_lift and up and back to throw_cocked (by the ear, the elbow out under the shoulder) by throw_cock of
+## the windup (throw_lift_at of the way to it), then over and out to throw_release (high ahead) at the release, and on to
+## throw_follow (down across the body) over the recovery; the left hand points out at the target (throw_point) and
+## tucks in to the chest (throw_tuck) as the right comes over. The arms take the pose over the first throw_in of the
+## windup and give it back over the last throw_out of the recovery; the upper chain turns throw_twist (rad) away about
+## the spine as the arm cocks and as far back across as it follows through. Each elbow bends towards its pole (the
+## figure's frame): the right elbow stays low and out, as the body's skin drags at the armpit with the upper arm above
+## level. Drawn only: the bomb still leaves the eyes (Grenades).
+@export var throw_bomb_turn: float = 0.0
+@export var throw_bomb_shift: Vector3 = Vector3.ZERO
+@export var throw_ready: Vector3 = Vector3(-0.1, -0.22, 0.3)
+@export var throw_lift: Vector3 = Vector3(0.3, -0.18, 0.12)
+@export var throw_lift_at: float = 0.45
+@export var throw_cocked: Vector3 = Vector3(0.16, 0.1, -0.1)
+@export var throw_release: Vector3 = Vector3(-0.02, 0.14, 0.48)
+@export var throw_follow: Vector3 = Vector3(-0.24, -0.3, 0.36)
+@export var throw_point: Vector3 = Vector3(0.04, 0.02, 0.52)
+@export var throw_tuck: Vector3 = Vector3(0.14, -0.26, 0.2)
+@export var throw_cock: float = 0.6
+@export var throw_in: float = 0.3
+@export var throw_out: float = 0.5
+@export var throw_twist: float = 0.35
+@export var throw_right_pole: Vector3 = Vector3(0.7, -1.0, -0.2)
+@export var throw_left_pole: Vector3 = Vector3(-1.0, -0.8, 0.0)
+@export var throw_arm_bones: PackedStringArray = PackedStringArray(["UpperArm_R", "Forearm_R", "Hand_R", "UpperArm_L",
+		"Forearm_L", "Hand_L"])
 ## Robots (Settings › Dev › Robots, the Easter egg, off by default; RB1) are picked from the match seed XOR this salt so
 ## no gameplay stream moves (the browser's ROBOT_SEED_SALT).
 @export var robot_salt: int = 0x5f3759df
