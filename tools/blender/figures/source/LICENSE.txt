@@ -1,0 +1,6 @@
+makehuman_body.obj is derived from the MakeHuman 1.x base mesh (hm08, makehuman/data/3dobjs/base.obj) and MPFB2's
+macro targets (src/mpfb/data/targets/macrodetails/*.target.gz), both released by the MakeHuman Community under
+CC0 1.0 Universal (public domain dedication): https://creativecommons.org/publicdomain/zero/1.0/
+
+Sources: https://github.com/makehumancommunity/makehuman and https://github.com/makehumancommunity/mpfb2
+No credit is required; it is recorded in docs/ASSETS.md.

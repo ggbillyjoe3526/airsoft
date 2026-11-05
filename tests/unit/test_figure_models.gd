@@ -26,7 +26,7 @@ func test_both_kinds_load_with_their_sidecars() -> void:
 		assert_almost_eq(reload.to, 0.5093, 1e-6)
 		assert_not_null(reload.old, "the old magazine")
 		assert_almost_eq(reload.old.lifetime, 3.0, 1e-6)
-	assert_eq(models.sidecar(FigureMix.HUMAN).parts.size(), 23, "human: body, four heads, kit, pack, radio")
+	assert_eq(models.sidecar(FigureMix.HUMAN).parts.size(), 26, "human: body, four heads, kit, pack, radio, pads")
 	assert_eq(models.sidecar(FigureMix.ROBOT).parts.size(), 9)
 
 

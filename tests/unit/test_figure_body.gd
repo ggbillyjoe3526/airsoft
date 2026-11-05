@@ -6,7 +6,8 @@ extends GutTest
 const BUDGET := [60000, 20000, 6000]
 const DISTANCES := [5.0, 10.0, 20.0, 40.0]
 ## The human with the largest head (HighCut, id 0) at High's lines: LOD0, LOD0, LOD1, LOD2 (step 23 plan › 2).
-const HUMAN_HIGH := [25224, 25224, 8486, 2843]
+## BL10: the rebuilt body (33,458 triangles; LOD1 10,999, LOD2 3,298) and the v12 knee pads as Kit_Pads.
+const HUMAN_HIGH := [46574, 46574, 15476, 4749]
 const RED := Color(0.9, 0.2, 0.15)
 const BLUE := Color(0.2, 0.4, 0.95)
 
@@ -140,7 +141,7 @@ func test_the_levels_cast_no_shadow_and_one_twin_casts_it() -> void:
 				assert_eq(mi.cast_shadow, GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, mi.name)
 		assert_eq(twins, 1)
 	var human := _body(FigureMix.HUMAN, 0)
-	# LOD2 body, HighCut, kit and pack.
+	# LOD2 body, HighCut, kit, pack and pads.
 	assert_eq(_tris(human.meshes[-1].mesh), HUMAN_HIGH[3])
 	assert_same(_body(FigureMix.HUMAN, 4).meshes[-1].mesh, human.meshes[-1].mesh, "made once a kind and head")
 
@@ -174,7 +175,7 @@ func test_a_teams_team_surfaces_share_one_material_and_the_rest_stay_as_modelled
 	var human := _body(FigureMix.HUMAN, 0)
 	var paint := human.meshes[0].get_surface_override_material(1) as BaseMaterial3D
 	assert_eq(paint.albedo_color, RED)
-	assert_null(human.meshes[0].get_surface_override_material(0), "Outfit as modelled")
+	assert_null(human.meshes[0].get_surface_override_material(0), "Clothing as modelled")
 
 
 func test_the_high_contrast_glow_lights_the_team_paint() -> void:
