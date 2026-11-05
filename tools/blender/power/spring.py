@@ -4,7 +4,7 @@ One painted main spring, life size (a 20 cm airsoft rifle spring), from the owne
 round wire coiled with closed dead coils at both ends and a progressive section, its coils close together, at one
 end. The whole wire is the `Label` material, so the menus paint each spring in its own colour, as springs are painted
 (game/ui/power_models.gd: one model, three springs). Plain colours, no textures, within the power-source budget
-(docs/CC0_ASSETS.md › Power-source models: 4,000 triangles, 100 KB).
+(docs/CC0_ASSETS.md › Power-source models: 6,000 triangles, 120 KB).
 
 Blender axes: the spring runs along Y, its progressive end at -Y.
 
@@ -31,11 +31,11 @@ LENGTH = 200.0
 COIL_RADIUS = 8.6  # to the wire's centre: about 18.8 mm across the outside
 WIRE_RADIUS = 0.8
 WIRE_SIDES = 5
-STEPS_PER_TURN = 12
-DEAD_TURNS = 1.25  # closed coils at each end, touching
-PROGRESSIVE_TURNS = 8.0  # at the -Y end, their pitch half the main coils'
+STEPS_PER_TURN = 14
+DEAD_TURNS = 1.5  # closed coils at each end, touching
+PROGRESSIVE_TURNS = 9.0  # at the -Y end, their pitch half the main coils'
 PROGRESSIVE_PITCH = 0.5
-MAIN_TURNS = 21.5
+MAIN_TURNS = 28.0
 BLEND_TURNS = 1.0  # each change of pitch eased over this many turns
 LABEL = (1.0, 1.0, 1.0, 1.0)
 

@@ -4,7 +4,7 @@ An unbranded 9.6 V NiMH brick pack, life size, from the owner's photo of one (re
 pack): eight 2/3A cells, two rows of four, in glossy red shrink that pulls into the groove between the rows and dips
 where the cells meet, pillowed and crinkled at the ends, with two plain white stickers laid on its face. Its red and
 black leads leave one end, loop down and run back under the pack to a lime mini plug. No text, no logos, no textures
-(docs/CC0_ASSETS.md › Power-source models: 4,000 triangles, 100 KB).
+(docs/CC0_ASSETS.md › Power-source models: 6,000 triangles, 120 KB).
 
 Blender axes: the pack runs along +Y with its lead end at +Y; its two rows of cells sit one above the other (Z), so
 its wide face, with the stickers, is +X, the side the menu camera sees.
@@ -40,35 +40,40 @@ LENGTH = CELL_LENGTH * CELLS_LONG + 1.5
 GROOVE = 1.1  # how far the shrink pulls in between the two rows
 ARC_STEPS = 9
 FLANK_STEPS = 4
-JOINT_DIP = 0.25  # where two cells meet end to end
+JOINT_DIP = 0.12  # where two cells meet end to end
 JOINT_WIDTH = 4.5
 END_PILLOW = (0.0, 0.66), (0.8, 0.88), (2.2, 0.975), (4.0, 1.0)  # (mm in from the end, scale of the section)
-END_CRINKLE = 0.6
+END_CRINKLE = 0.4
 SEED = 11
 
 # The two stickers on the wide face, from the lead end (millimetres along, half height across the face).
 STICKERS = ((29.0, 63.0), (68.0, 108.0))
 STICKER_HALF = 9.0
-STICKER_LIFT = 0.12
-STICKER_CORNER = 2.0
-STICKER_ROWS = 10
+STICKER_LIFT = 0.2
+STICKER_CORNER = 3.0
+STICKER_ROWS = 18
+# The bars on each sticker: (centre across, -1 .. 1; half height, mm; start along, length along, both 0 .. 1 of the
+# sticker, from its lead-end edge).
+INK_BARS = ((0.55, 0.9, 0.12, 0.62), (0.12, 0.45, 0.12, 0.76), (-0.18, 0.45, 0.12, 0.55), (-0.48, 0.45, 0.12, 0.7))
+INK_LIFT = 0.04
 
 # The leads (millimetres, from the lead end): 16 AWG silicone, separate, converging on the plug.
-LEAD_RADIUS = 1.3
+LEAD_RADIUS = 1.5
 LEAD_SIDES = 8
-RED_PATH = ((1.6, -3.0, 6.0), (1.8, 9.0, 7.0), (2.6, 21.0, -4.0), (2.4, 16.0, -24.0), (1.4, -6.0, -28.0),
-            (1.2, -38.0, -27.0), (1.3, -60.0, -26.0))
-BLACK_PATH = ((-1.6, -3.0, 2.0), (-1.9, 6.0, 1.5), (-2.8, 13.0, -9.0), (-2.6, 8.0, -22.0), (-1.4, -10.0, -26.5),
-              (-1.2, -38.0, -27.0), (-1.3, -60.0, -26.0))
+RED_PATH = ((1.8, -3.0, 6.0), (2.0, 10.0, 7.0), (2.8, 23.0, -5.0), (2.6, 17.0, -26.0), (1.6, -8.0, -30.5),
+            (1.5, -50.0, -30.0), (1.6, -84.0, -29.5))
+BLACK_PATH = ((-1.8, -3.0, 2.0), (-2.1, 7.0, 1.5), (-3.0, 15.0, -10.0), (-2.8, 9.0, -24.0), (-1.6, -12.0, -29.5),
+              (-1.5, -50.0, -30.0), (-1.6, -84.0, -29.5))
 SPAN_STEPS = 6
 
-WRAP, STICKER = "Wrap", "Print"
+WRAP, STICKER, INK = "Wrap", "Print", "Ink"
 RED, BLACK, PLUG, SOCKET = "Lead", "LeadBlack", "Plug", "Socket"
 
 
 def materials() -> None:
     hs.material(WRAP, 0xC8161E, 0.24)
-    hs.material(STICKER, 0xEEEDE8, 0.5)
+    hs.material(STICKER, 0xE4E1D8, 0.55)
+    hs.material(INK, 0x9A9890, 0.6)
     hs.material(RED, 0xC42A28, 0.5)
     hs.material(BLACK, 0x1C1C1E, 0.5)
     hs.material(PLUG, 0xC9DD5A, 0.35)
@@ -156,6 +161,16 @@ def sticker(b: hs.Builder, y0: float, y1: float) -> None:
         f.normal_update()
         if f.normal.x < -0.5:
             f.normal_flip()
+    # Faint grey bars where its print would be, a heading and lines of small print: no letters.
+    span = y1 - y0
+    i = b.mat(INK)
+    for zc, half, start, length in INK_BARS:
+        x = (face_x(zc * STICKER_HALF) + STICKER_LIFT + INK_LIFT) * MM
+        ya = (LENGTH - y1 + span * (1.0 - start - length)) * MM
+        yb = (LENGTH - y1 + span * (1.0 - start)) * MM
+        za, zb = (zc * STICKER_HALF - half) * MM, (zc * STICKER_HALF + half) * MM
+        q = [bm.verts.new(v) for v in ((x, ya, za), (x, yb, za), (x, yb, zb), (x, ya, zb))]
+        bm.faces.new(q).material_index = i
 
 
 def lead(b: hs.Builder, points: tuple, mat: str) -> list:

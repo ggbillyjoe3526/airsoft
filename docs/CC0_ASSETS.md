@@ -145,8 +145,8 @@ replicas). Each power source, by its pool ID, is drawn from one file.
 - **Materials.** Plain colours, drawn as the file sets them but kept low in metalness (the studio has no reflections).
   A material named `Label` is painted in the power source's own `label` colour, so one gas bottle draws Green, Red and
   Black Gas.
-- **Budget.** 100 KB and 4,000 triangles a file (raised from 60 KB and 1,500 in BL7, 2026-11-05, so the models
-  follow the owner's photos: the bottle's ribbed cap, the leads' round wires). No textures.
+- **Budget.** 120 KB and 6,000 triangles a file (raised from 60 KB and 1,500 in BL7, 2026-11-05, so the models
+  follow the owner's photos: the bottle's ribbed cap, the spring's round coils, the leads' round wires). No textures.
 - **Built by** `tools/blender/power/`: `gas_bottle.py`, `lipo_battery.py`, `standard_battery.py` (wires and plugs in
   `leads.py`) and `spring.py`.
 

@@ -5,7 +5,7 @@ black shrink): a long square-ish stick with softly rounded edges, faint waists w
 shrink, pillowed and crinkled shrink at both ends, a red print band and a thin white line near the far end. From the
 lead end: the main lead (red and black, side by side) bends down and back to a tan mini plug, and the four-wire
 balance lead curls inside it to a white balance plug. No text, no logos, no textures (docs/CC0_ASSETS.md ›
-Power-source models: 4,000 triangles, 100 KB).
+Power-source models: 6,000 triangles, 120 KB).
 
 Blender axes: the stick runs along +Y with its lead end at +Y, its tall side up Z, the face the menu camera sees +X.
 
@@ -52,13 +52,14 @@ LINE_LOW = 20.5
 LINE_HIGH = 21.5
 
 # The leads (millimetres). Main: 16 AWG silicone, side by side. Balance: four thin wires, flat.
-MAIN_RADIUS = 1.35
+MAIN_RADIUS = 1.6
 MAIN_SIDES = 8
-MAIN_PATH = ((0.0, -3.0, 4.0), (0.0, 7.0, 3.6), (0.0, 15.0, -6.0), (0.0, 12.0, -24.0), (0.0, -6.0, -33.0),
-             (0.0, -26.0, -34.0), (0.0, -38.0, -34.0))
-BALANCE_RADIUS = 0.62
+MAIN_PATH = ((0.0, -3.0, 4.5), (0.0, 9.0, 3.5), (0.0, 20.0, -10.0), (0.0, 16.0, -32.0), (0.0, -4.0, -41.0),
+             (0.0, -28.0, -42.0), (0.0, -44.0, -42.0))
+BALANCE_RADIUS = 0.7
 BALANCE_SIDES = 5
-BALANCE_PATH = ((0.0, -3.0, -4.5), (0.0, 4.0, -5.5), (0.0, 7.5, -11.0), (0.0, 3.0, -17.0), (0.0, -6.0, -18.5))
+BALANCE_PATH = ((0.0, -3.0, -4.5), (0.0, 5.0, -5.5), (0.0, 10.0, -12.0), (0.0, 6.0, -20.0), (0.0, -5.0, -23.0),
+                (0.0, -18.0, -23.0))
 SPAN_STEPS = 5
 
 CASE, BAND, LINE = "Case", "Band", "Line"

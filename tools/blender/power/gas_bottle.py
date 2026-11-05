@@ -5,7 +5,7 @@ tall seamless aluminium can with a parabolic shoulder, a rolled base round a dom
 fine vertical ribs stop under a smooth top band and above a plain skirt. One model draws every gas
 (game/ui/power_models.gd): the cap and the printed shoulder, which ends in a chevron on the front, are the `Label`
 material, painted in each gas's colour; the can is satin black with a pale print band round its foot. No text, no
-logos, no textures. Within the gas bottle's budget (docs/CC0_ASSETS.md › Power-source models: 4,000 triangles, 100 KB).
+logos, no textures. Within the gas bottle's budget (docs/CC0_ASSETS.md › Power-source models: 6,000 triangles, 120 KB).
 
 The front (+X in Blender, the side the menu camera sees) carries the chevron. Blender Z up becomes glTF Y up.
 
@@ -58,16 +58,16 @@ VALLEY_DEPTH = 0.55
 RIB_TAPER = 1.2  # the ribs run out into the smooth band over this height
 TOP_BAND = 3.0
 TOP_ROUND = 2.6
-TOP_ROUND_RINGS = 2
+TOP_ROUND_RINGS = 4
 TOP_DISH = 0.4  # the top is very slightly dished, as moulded caps are
 
-# The print (millimetres up the can). The shoulder print runs down to a level edge round the back and a chevron on
-# the front whose point is CHEVRON_DROP lower, CHEVRON_HALF_WIDTH (radians) either side of +X.
+# The print (millimetres up the can). The shoulder print is solid down to a level edge 30 % of the can down from the
+# top (as the main photo's solid colour); under it two Label stripes, level round the back, dip into a chevron on the
+# front whose point is CHEVRON_DROP lower, CHEVRON_HALF_WIDTH (radians) either side of +X, the can black inside it.
 PRINT_EDGE = HEIGHT - CAP_HEIGHT - SHOULDER_HEIGHT - 20.0
-CHEVRON_DROP = 45.0
+CHEVRON_DROP = 34.0
 CHEVRON_HALF_WIDTH = math.radians(60.0)
-PINSTRIPE = 3.0  # a thin Label line following the print's edge, chevron and all
-PINSTRIPE_GAP = 6.0
+STRIPES = ((4.0, 3.5), (10.0, 1.5))  # (gap under the level edge, width) of each chevron stripe
 FOOT_PRINT_LOW = CORNER_RADIUS + 3.0
 FOOT_PRINT_HIGH = FOOT_PRINT_LOW + 15.0
 
@@ -76,7 +76,7 @@ SHARP_ANGLE = math.radians(40.0)
 CAN = (0.018, 0.019, 0.021, 1.0)
 LABEL = (1.0, 1.0, 1.0, 1.0)
 PRINT = (0.62, 0.63, 0.64, 1.0)
-MATERIALS = (("Can", CAN, 0.55, 0.32), ("Label", LABEL, 0.0, 0.38), ("Print", PRINT, 0.0, 0.45))
+MATERIALS = (("Can", CAN, 0.55, 0.2), ("Label", LABEL, 0.0, 0.26), ("Print", PRINT, 0.0, 0.35))
 CAN_MAT, LABEL_MAT, PRINT_MAT = 0, 1, 2
 
 
@@ -150,12 +150,11 @@ def can(bm: bmesh.types.BMesh) -> float:
     for z, mat in ((FOOT_PRINT_LOW, PRINT_MAT), (FOOT_PRINT_HIGH, CAN_MAT)):
         rings.append(ring(bm, RADIUS, z, n))
         mats.append(mat)
-    for drop, mat in ((PINSTRIPE_GAP + PINSTRIPE, LABEL_MAT), (PINSTRIPE_GAP, CAN_MAT)):
-        rings.append(ring(bm, RADIUS, lambda a, drop=drop: PRINT_EDGE - chevron(a) - drop, n))
-        mats.append(mat)
-    # The shoulder print's edge: level round the back, a chevron on the front.
-    rings.append(ring(bm, RADIUS, lambda a: PRINT_EDGE - chevron(a), n))
-    mats.append(LABEL_MAT)
+    # The chevron stripes, lowest first, then the solid print's level edge.
+    for gap, width in reversed(STRIPES):
+        for drop, mat in ((gap + width, LABEL_MAT), (gap, CAN_MAT)):
+            rings.append(ring(bm, RADIUS, lambda a, drop=drop: PRINT_EDGE - chevron(a) - drop, n))
+            mats.append(mat)
     rings.append(ring(bm, RADIUS, PRINT_EDGE, n))
     mats.append(LABEL_MAT)
     # The shoulder.

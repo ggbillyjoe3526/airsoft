@@ -30,9 +30,9 @@ TAMIYA_RIB_WIDTH = 0.8
 
 # The JST-XH style balance plug (4 pins) on a LiPo's balance lead, millimetres.
 XH_PITCH = 2.5
-XH_LENGTH = 7.0
+XH_LENGTH = 9.5
 XH_DEPTH = 5.8
-XH_END = 1.4  # wall past the outer pins
+XH_END = 2.45  # wall past the outer pins: 12.4 wide for four
 XH_CORNER = 0.4
 XH_SLOT = 1.5
 XH_SLOT_DEPTH = 0.06

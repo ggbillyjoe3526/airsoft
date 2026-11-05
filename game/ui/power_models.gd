@@ -22,10 +22,10 @@ const PICTURES: Dictionary[String, Dictionary] = {
 	"000015": {"file": LIPO_FILE, "tip": BATTERY_TIP},
 	"000004": {"file": BOTTLE_FILE, "label": Color("6bc47c")},
 	"000008": {"file": BOTTLE_FILE, "label": Color("c8382c")},
-	"000009": {"file": BOTTLE_FILE, "label": Color("2a2b30")},
+	"000009": {"file": BOTTLE_FILE, "label": Color("5b6069")},
 	"000022": {"file": SPRING_FILE, "tip": SPRING_TIP, "label": Color("8a5cc7")},
 	"000023": {"file": SPRING_FILE, "tip": SPRING_TIP, "label": Color("c8382c")},
-	"000024": {"file": SPRING_FILE, "tip": SPRING_TIP, "label": Color("2a2b30")},
+	"000024": {"file": SPRING_FILE, "tip": SPRING_TIP, "label": Color("5b6069")},
 }
 
 

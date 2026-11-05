@@ -3,8 +3,8 @@ extends GutTest
 ## paints it, the bottle upright and the batteries and spring lying along Z.
 
 const DIR := "res://assets/models/powerSources/"
-const MAX_TRIANGLES := 4000
-const MAX_BYTES := 100 * 1024
+const MAX_TRIANGLES := 6000
+const MAX_BYTES := 120 * 1024
 const WITH_LABEL: Array[String] = ["gasBottle", "spring"]
 const WITHOUT_LABEL: Array[String] = ["lipoBattery", "standardBattery"]
 const LYING: Array[String] = ["lipoBattery", "standardBattery", "spring"]
