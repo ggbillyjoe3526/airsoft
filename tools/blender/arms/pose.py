@@ -95,6 +95,18 @@ def rot_between(a: Vector, b: Vector) -> Matrix:
     return a.normalized().rotation_difference(b.normalized()).to_matrix()
 
 
+def fit_turn(rest: list, at: list) -> Matrix:
+    """The rotation that best turns the points `rest` onto `at` about their centres (least squares, Kabsch)."""
+    import numpy as np
+    a = np.array([tuple(p) for p in rest])
+    b = np.array([tuple(p) for p in at])
+    h = (a - a.mean(0)).T @ (b - b.mean(0))
+    u, _, vt = np.linalg.svd(h)
+    d = np.sign(np.linalg.det(vt.T @ u.T))
+    r = vt.T @ np.diag((1.0, 1.0, d)) @ u.T
+    return Matrix([tuple(row) for row in r])
+
+
 def basis(f: Vector, n: Vector) -> Matrix:
     """A rotation whose columns are the fingers' direction, the palm's normal and their cross."""
     f = f.normalized()
