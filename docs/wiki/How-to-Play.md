@@ -3,7 +3,9 @@
 ## The match
 
 Two teams of the same size, **Alpha** (blue) and **Beta** (orange), start at opposite ends of a field. You play one
-member of your team; everyone else is a [bot](Bots). A match is played in rounds against the clock:
+member of your team; everyone else is a [bot](Bots). Everyone wears the same field kit (an olive combat shirt,
+camouflage trousers, dark gloves and coyote boots), so you tell the teams apart by the team colour on the plate carrier
+and the armbands. A match is played in rounds against the clock:
 
 - **Elimination:** take out the whole other team to win the round.
 - **Attack / Defend:** the attackers raise their flag on the defenders' pole, or the defenders hold out.
