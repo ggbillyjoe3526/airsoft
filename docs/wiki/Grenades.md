@@ -18,6 +18,8 @@ pull the pin, you keep the bomb.
 
 ## Smoke bomb
 
+A grey canister with a green stripe, a black lever down its side and a pull ring on top.
+
 A smoke bomb pops <!-- wiki:config grenade_config.smoke_fuse --> seconds after it leaves your hand and smokes where it
 lies for <!-- wiki:config grenade_config.smoke_time --> seconds: a white cloud about <!-- wiki:config grenade_config.smoke_radius --> metres out from the canister each way, thinning away at the end.
 
@@ -29,6 +31,8 @@ lies for <!-- wiki:config grenade_config.smoke_time --> seconds: a white cloud a
 Use it to cross open ground, to cut off a long angle, or to cover a retreat.
 
 ## Flash bomb
+
+A slim olive tube with a violet band round its top and a pull ring hanging from the rim.
 
 A flash bomb goes off <!-- wiki:config grenade_config.flash_fuse --> seconds after it leaves your hand with a bright
 flash and a bang. Anyone with a clear line from their eyes to it is **dazzled**: your screen goes white and the sound

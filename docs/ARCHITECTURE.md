@@ -17,8 +17,9 @@ the rulings behind them are in `docs/DECISIONS.md` › Engine and stack. Each `g
   are a live region never drawn (`HudAnnounce`, fed by `Announcer`). In 4.7.2 the live modes are
   `AccessibilityServer.LIVE_*`; headless, `DisplayServer.accessibility_screen_reader_active()` answers -1 and
   `AccessibilityServer.is_supported()` false, so tests check the text and properties only.
-- **The browser game is the reference.** Each system is rewritten from `legacy/browser/src/` with its tests ported to
-  GUT in the same pull request; `legacy/browser/docs/handover/SALVAGE.md` maps each system to its folder here.
+- **The browser game is the reference.** Each system was rewritten from `legacy/browser/src/` with its tests ported to
+  GUT in the same pull request; `legacy/browser/docs/handover/SALVAGE.md` maps each system to its folder here. The
+  folder was removed on 2026-11-05 (owner); every path under it is read from git at the tag `0.1-dev.1`.
   Three.js and Godot are both right-handed, Y up, metres, -Z forward, so positions and yaw carry as they are.
 
 ## Folders

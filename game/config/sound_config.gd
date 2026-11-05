@@ -196,8 +196,8 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 @export var ambience_gain: float = 0.5
 ## The referee's pea whistle: whistle_short and whistle_long blasts, whistle_variants of each, played at whistle_gain on
 ## the Interface bus: the browser's 0.25 lifted 5 dB, as a real whistle's loudest 50 ms sit that far under the old
-## full-scale sine's. Since AU3 a stand-in pea whistle synthesised by tools/cut_recordings.py (pea_whistle) until the
-## owner records a better one; his AU2 takes are set aside. The rest are the browser game's draft's recipe
+## full-scale sine's. Since AU6 the owner's own pea whistle, cut by tools/cut_recordings.py (AU3's synthesised stand-in
+## and his AU2 takes are set aside). The rest are the browser game's draft's recipe
 ## (tools/render_whistle.gd, the browser game's whistle.ts): a sine at whistle_hz whose pitch warbles at
 ## whistle_warble_hz by whistle_warble_depth (a share of the pitch: the pea rattling), fading in over whistle_attack (s)
 ## and out over the last whistle_release (s).
