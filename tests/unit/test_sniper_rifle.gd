@@ -2,8 +2,9 @@ extends GutTest
 ## The Sniper Rifle (SN1; owner, 2026-11-02): a dev replica that plays by stats.md's `sniper` row, single shot, driven by
 ## the springs (the M130 as it comes, the M140 and M150 stronger, as the gases are), under the sniper class's site
 ## limit, comes with the 2x Scope fitted (pool.md › Comes with), is six times as wide from the hip, unlocks at level 5
-## with the scope, is drawn from sniper.glb (the AEG's model with a longer barrel and a cocking Fire clip), is heard
-## cocking after every shot, and is carried by the Sniper bot kit, whose bots fight it with the sight up.
+## with the scope, is drawn from sniper.glb (BL5: a bolt-action in a grey chassis from the owner's photo, its Fire clip
+## the bolt's cycle), is heard cocking after every shot, and is carried by the Sniper bot kit, whose bots fight it with
+## the sight up.
 
 const DT := 1.0 / 60.0
 const EYE := Vector3(0.0, 1.6, 0.0)
@@ -172,7 +173,7 @@ func test_from_the_hip_it_is_six_times_as_wide_and_raised_as_any_replica() -> vo
 			3.5, 1e-4, "half up, half way")
 
 
-func test_in_hand_it_is_the_aeg_with_a_longer_barrel_and_a_cocking_fire_clip() -> void:
+func test_in_hand_it_is_a_bolt_action_with_a_long_barrel_and_a_bolt_cycle_fire_clip() -> void:
 	var c := Character.new(1, 0, Vector3.ZERO, 0.0, [_sniper(), rules.config(rules.pool.item(AEG))] as Array[ReplicaConfig])
 	var view := ReplicaView.new()
 	add_child_autofree(view)
@@ -181,12 +182,19 @@ func test_in_hand_it_is_the_aeg_with_a_longer_barrel_and_a_cocking_fire_clip() -
 	var aeg := view._held[1]
 	assert_eq(sniper.id, &"sniper")
 	assert_not_null(sniper.muzzle)
-	assert_almost_eq(sniper.muzzle.position.z - aeg.muzzle.position.z, -0.426, 1e-3, "the barrel 43 cm longer than the carbine")
-	assert_almost_eq(sniper.rear_sight, aeg.rear_sight, Vector3.ONE * 1e-4, "the AEG's sights")
+	assert_almost_eq(sniper.muzzle.position.z - aeg.muzzle.position.z, -0.379, 2e-3,
+			"its barrel ends 38 cm further out than the carbine's (BL5, the owner's photo)")
+	assert_almost_eq(sniper.rear_sight.y, aeg.rear_sight.y, 0.005, "its flip-up sights about as high as the AEG's")
 	assert_not_null(sniper.anim)
-	for clip: StringName in [&"Fire", &"Reload", &"Inspect"]:
+	for clip: StringName in [&"Fire", &"Reload", &"Inspect", &"Selector", &"SightsFold"]:
 		assert_true(sniper.anim.has_animation(clip), clip)
-	assert_almost_eq(sniper.anim.get_animation(&"Fire").length, 1.0, 0.01, "the cocking: about a second")
+	var fire := sniper.anim.get_animation(&"Fire")
+	assert_almost_eq(fire.length, 1.0, 0.01, "the bolt's cycle: about a second")
+	var bones: Array[String] = []
+	for t in fire.get_track_count():
+		bones.append(String(fire.track_get_path(t).get_concatenated_subnames()))
+	assert_true(bones.has("bolt") and bones.has("trigger"), "the shot, then the bolt worked")
+	assert_false(bones.has("chargingHandle"), "no charging handle on a bolt-action")
 	var vm := ViewModelConfig.new()
 	assert_true(vm.hip.has(&"sniper") and vm.aim_forward.has(&"sniper"))
 
