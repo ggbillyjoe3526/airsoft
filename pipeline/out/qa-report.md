@@ -1,39 +1,37 @@
-Task: BL6 (none in TASKS.md) · QA commit none (no tests added; read-only check) · Verdict: Pass
+Task: BL6 targeted rerun · head 229bd55 (e7725d6..HEAD) · Verdict: Pass
+Method: parsed assets/models/replicas/cyber.glb with python3 -I (numpy), against e7725d6 (the last passed head) and
+origin/main (74cdd35). No Godot, no check.sh (CI runs the unit tests). No tests added; nothing under game/ touched.
 
-Checked: git diff origin/main...HEAD, old vs new cyber.glb compared by parsing the glTF JSON and binary with python
-(no Godot, no check.sh run, as instructed).
+1. Bones and clips: Pass.
+   - Against e7725d6 the only differences in the whole file are the trigger bone and its mesh node: bone translation
+     y 0.0165 -> 0.0045 (z -0.0125, x 0), the Trigger mesh node -0.0165 -> -0.0045, the trigger's inverse bind matrix
+     (origin column y -0.0165 -> -0.0045) and the trigger translation keys in Fire, Selector, Reload and Inspect
+     (every key moved by exactly -0.012 in y). All other bones, node transforms and inverse bind matrices are identical.
+   - Rotation keys of the trigger are identical to e7725d6 (Fire peak x -0.14936, w 0.98878 = -17.18 deg about X).
+     Against origin/main they differ by at most 7.5e-5 in a quaternion component (0.009 deg), which arrived with the
+     earlier BL6 rebuild, not with this change; harmless.
+2. Game and tests do not read the trigger bone: Pass. find_bone is used only for "selector" (selector_pose.gd),
+   "slide" (slide_lock_pose.gd), the sight-fold bones and figure_graph.gd's path lookup (the figure rig, not cyber).
+   No "trigger" bone name in game/ or tests/ (hits are comments and the input flag).
+3. Trigger inside the guard opening: Pass. Trigger mesh (302 vertices, mm in model space) spans y 1.2 to 8.4,
+   z -36.7 to -11.1, |x| <= 2.8. At rest and at the Fire peak (rotated -17.18 deg about the bone at y 4.5, z -12.5),
+   all 224 vertices below z -16.5 lie inside GUARD_HOLE, the nearest 1.85 mm (rest) and 1.88 mm (peak) from its edge.
+   The 78 vertices above it lie inside TRIGGER_SLOT (y -8..13, z -26..-8, half width 3.4), and |x| 2.8 < 3.4.
+   At the peak the blade reaches y -2.9, z -36.1: clear of the opening's back (-11.5) and floor (-40).
+   Body vertices in the trigger corridor (104) are all on the slot's walls (x = +-3.4); none inside the blade's path.
+4. Figure mesh: Pass. The new frame outline (13 points, GUARD_LOOP[:5] plus floor, grip and tang) has no crossing
+   edges and no vertex touching another edge: a simple polygon (clockwise, area 11468.5 mm2). In the glb, welded by
+   position the Figure is a closed manifold (144 vertices, 240 triangles, no duplicate or unpaired edges, positive
+   volume, no degenerate triangles). Each side plane (x = +-15.8) holds 11 outward triangles whose area sums to the
+   polygon's exactly (11468.5), so none overlap or are flipped; the other 2 triangles per side face inward (the
+   window prism's base), hidden.
+5. Empties, materials and clips: Pass. Against e7725d6 the empties (Muzzle, MagWell, SlideBack, TorchMount, FrontSight,
+   RearSight, the lower-case bones), material names and order, mesh primitives and clip lengths (Fire 0.1333, Selector
+   0.2, Reload 1.1, Inspect 2.0) are identical. Against origin/main the clip lengths and the five material names are
+   the same (the list order differs, and primitives index it by name-order); the empties are the same except two
+   differences that predate this rerun and passed before: the Figure node has no -0.3 y offset any more, and
+   FrontSight and RearSight are listed in a different order (same positions).
 
-Contract kept (all verified against the old file):
-- Armature CyberPistol, one skin, joints root, magazine, selector, slide, trigger: same local transforms as before.
-- Clips Fire (0.1333 s, 8 frames), Selector (0.2 s, 12), Reload (1.1 s, 66), Inspect (2.0 s, 120): same lengths, key
-  counts and sampled first/mid/last values on every channel (slide Fire 9 keys, trigger Fire rotation 9, selector 13,
-  magazine Reload 67, Inspect 121). Only node indices shifted.
-- Empties Muzzle, FrontSight, RearSight, MagWell, SlideBack, TorchMount: identical translations.
-- Meshes Body, Slide, Trigger, Selector, Magazine, Figure present; materials CyberSlab, CyberFrame, CyberLine,
-  CyberCore, CyberMetal with identical colours, metal, roughness and emissive (material order differs; lookups are by
-  name).
-- Budget: hands 31,594 triangles (<= 40,000), Figure 236 (<= 3,000), 5 materials (<= 6), no textures, 880 KB (<= 6 MB).
-  No NaN positions. Mesh extents stay inside the old envelope (Body y -0.126..0.042, z -0.114..0.115; Muzzle at the
-  front face z -0.114; sights below the body top).
-
-Blocking findings: none.
-
-Advisory:
-1. The old Figure node carried a translation of (0, -0.3, 0); the new one has none. The other replicas (aeg, pistol,
-   sniper) have none either, and the new Figure mesh sits where the old mesh did, so it is probably the old
-   file's leftover, but docs/records/BL6.md does not mention it. The owner's playtest line "a bot carrying it shows its
-   outline" covers it; worth one sentence in the record.
-2. Body is a single mesh of 24,422 triangles (4 primitives). Fine for the budget; the performance agent owns frame cost
-   in the hands view and the menu turntable.
-3. Rear block reaches 0.115 m, 25 mm past the SlideBack empty (0.09); the doc contract allows this, and a pistol's
-   figure uses the empty's depth, so the figure's grip alignment is unchanged.
-4. docs/records/BL6.md still says check.sh pending and Review pending (expected until the gates finish).
-
-Tests added or changed: none (the change is a binary asset; the existing GUT tests that load the Cyber Pistol passed
-317/317 per the caller). I did not run the suite.
-
-Could not test: how it looks and feels in hands, iron-sight alignment, torch clearance with the teeth, the slide and
-cell not clipping in motion, paint and Realistic-colour look. These are on docs/PLAYTEST.md > BL6 for the owner.
-Not run: tools/check.sh, smoke test, Blender rebuild determinism (the record claims two runs match).
-
-Verdict: Pass
+Blocking findings: none. Advisory findings: none new.
+Not testable here: how the trigger and guard look and reach in the owner's hand, and the figures' pistol in play
+(needs a display); the Godot import of the rebuilt glb and the unit tests (CI).
