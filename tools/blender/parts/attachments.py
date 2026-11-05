@@ -864,7 +864,6 @@ def build_grip_vertical() -> bpy.types.Object:
             hl = vg_hl(z - 0.5)
             pb.prism(mmp([(-6.0, z), (6.0, z), (5.6, z - 0.9), (-5.6, z - 0.9)]), "y",
                      end * (hl - 0.4) * MM, end * (hl + 0.35) * MM, "Furniture")
-    # The clamp, its cross bolt and nut.
     # The clamp, as long as the grip's flared top; its cross screw (a big slotted head) and nut.
     rail_clamp_under(db, PICATINNY, -20.0, 20.0, -7.0, 2.6, "Furniture")
     disc_x(db, 13.2, 14.7, 0.0, -2.8, 4.4, "Metal", 24, 0.6)
