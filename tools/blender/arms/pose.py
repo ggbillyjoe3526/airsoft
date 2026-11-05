@@ -576,6 +576,102 @@ def clipping(objects: list, solid: list) -> tuple:
     return len(pairs), tally
 
 
+# The last pass's steps: each finger's curl (degrees at its root; the middle joint as much, the tip TIGHTEN_TIP of it)
+# and how far it may close in all.
+TIGHTEN_STEP = 1.5
+TIGHTEN_MAX = 24.0
+TIGHTEN_TIP = 0.7
+
+
+def skin_gaps(objects: list, solid: list, side: str) -> dict:
+    """The nearest the skinned glove of each bone of `side`'s hand comes to the replica (mm), for the log."""
+    dg = bpy.context.evaluated_depsgraph_get()
+    col = Collider(solid)
+    out = {}
+    for ob in objects:
+        if not ob.name.endswith("_" + side):
+            continue
+        ev = ob.evaluated_get(dg)
+        me = ev.to_mesh()
+        names = {g.index: g.name for g in ob.vertex_groups}
+        for v, sv in zip(me.vertices, ob.data.vertices):
+            g = max(sv.groups, key=lambda x: x.weight, default=None)
+            if g is None:
+                continue
+            b = names[g.group]
+            if b.startswith(("UpperArm", "Forearm", "Shoulder")):
+                continue
+            d = col.dist(ob.matrix_world @ v.co)
+            if d < out.get(b, 9.0):
+                out[b] = d
+        ev.to_mesh_clear()
+    return {b.rsplit("_", 1)[0]: round(d * 1000, 1) for b, d in sorted(out.items())}
+
+
+PRESS_STEP = 0.0004
+PRESS_MAX = 0.008
+
+
+def press(rig: Rig, hands: dict, objects: list, solid: list, poles: dict, side: str) -> float:
+    """Moves `side`'s hand into its palm, toward the replica, a step at a time until its skin would first touch it,
+    and stops a step short: the palm seated on the grip, not standing off it. How far it moved (m)."""
+    h = hands[side]
+    moved = 0.0
+    while moved + PRESS_STEP <= PRESS_MAX:
+        before = rig.pose["Hand_" + side].copy()
+        m = Matrix.Translation(h.normal * PRESS_STEP) @ before
+        place_arm(rig, side, m, poles[side], quiet=True)
+        rig.refresh("Hand_" + side)
+        rig.write()
+        if clipping(objects, solid)[0]:
+            place_arm(rig, side, before, poles[side], quiet=True)
+            rig.refresh("Hand_" + side)
+            break
+        moved += PRESS_STEP
+    rig.write()
+    return moved
+
+
+def tighten(rig: Rig, hands: dict, objects: list, solid: list, fingers: list) -> dict:
+    """Closes each finger of `fingers` (("R", "Middle"), ...) onto the replica on the skinned surface itself: all of
+    them curl a step at a time, and each stops a step short of where its glove would first touch (the owner: gripped
+    tight, never clipping). The bone-sampled solve leaves gaps the skin doesn't need. Degrees each closed, for the
+    log."""
+    closed = {f: 0.0 for f in fingers}
+    live = set(fingers)
+    while live:
+        turned = []
+        for side, name in sorted(live):
+            if closed[(side, name)] + TIGHTEN_STEP > TIGHTEN_MAX:
+                live.discard((side, name))
+                continue
+            for k, share in ((1, 1.0), (2, 1.0), (3, TIGHTEN_TIP)):
+                bone = "%s%d_%s" % (name, k, side)
+                turn = Matrix.Rotation(math.radians(TIGHTEN_STEP * share), 3, hands[side].axis[bone])
+                rig.fk(bone, rig.local[bone] @ turn)
+                rig.refresh(bone)
+            closed[(side, name)] += TIGHTEN_STEP
+            turned.append((side, name))
+        if not turned:
+            break
+        rig.write()
+        hits, tally = clipping(objects, solid)
+        if not hits:
+            continue
+        for side, name in turned:
+            mine = [b for b in tally if b.startswith(name) and b.endswith("_" + side)]
+            if mine or ("Hand_" + side in tally):
+                for k, share in ((3, TIGHTEN_TIP), (2, 1.0), (1, 1.0)):
+                    bone = "%s%d_%s" % (name, k, side)
+                    turn = Matrix.Rotation(math.radians(-TIGHTEN_STEP * share), 3, hands[side].axis[bone])
+                    rig.fk(bone, rig.local[bone] @ turn)
+                    rig.refresh(bone)
+                closed[(side, name)] -= TIGHTEN_STEP
+                live.discard((side, name))
+    rig.write()
+    return {"%s %s" % f: round(a, 1) for f, a in closed.items()}
+
+
 def relax(rig: Rig, hands: dict, objects: list, solid: list, poles: dict) -> int:
     """Settles the hold on the skinned surface itself: a finger still touching the rifle opens a little at that
     joint, a palm still pressing in eases back (its thumb waits until it has, or the thumb would swing out from the
