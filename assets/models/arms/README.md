@@ -8,21 +8,29 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
   in Godot the eye looks along -z.
 - **Skeleton.** `Arms`: each side's `Shoulder`, `UpperArm`, `Forearm`, `Hand`, `Thumb1-3`, `Index1-3`, `Middle1-3`,
   `Ring1-3`, `Pinky1-3` and `Grip` with `_R` or `_L`, the figures' bone names.
-- **Mesh.** `Arm_R` and `Arm_L` (39,646 triangles together): the MakeHuman base mesh's arm and hand (CC0,
-  `tools/blender/arms/source/`) under a glove (skin + 1.1 mm, `glove.py`) with a moulded knuckle guard, padded
-  fingers and thumb, a suede palm patch, a cuff and wrist strap, and a sleeve rolled over the cuff with a banded hem.
+- **Mesh.** `Arm_R` and `Arm_L` (39,950 triangles together): the MakeHuman base mesh's arm and hand (CC0,
+  `tools/blender/arms/source/`) under a glove (skin + 1.1 mm, `glove.py`) with one moulded knuckle shell over the four
+  knuckles, segmented plates on the fingers and thumb, a suede palm patch, a cuff and wrist strap, and a sleeve rolled
+  over the cuff with a banded hem.
 - **Materials.** `Glove` (dark olive-brown), `GloveArmour` (guard, pads, strap, patch), `Sleeve`, `SleeveTrim`. Plain colours,
   no textures. A robot's arms are recoloured in game (ViewModelConfig.robot_arms).
 - **Holds.** One per replica: a clip `<id>_Hold` (`aeg`, `pistol`, `cyber`) posing both arms, and an empty
   `Hold_<id>` where that replica's origin sits in it (at ViewModelConfig.hip). In game the arms ride the replica's
   node with that empty on its origin, so they follow its sway, kick, cant and drop.
-  - The AEG Rifle: the right hand round the pistol grip, index on the trigger, thumb round the back; the left hand
-    wrapped round the handguard's middle, fingers up its right side, thumb along its left side.
-  - Pistols (`pistol`, `cyber`): held in the right hand alone, the left arm lowered (and hidden in game,
-    ViewModelConfig.one_hand).
-- **Solving.** `pose.py` places each hand on the replica's mesh (knuckle line, palm seated to contact, fingers curled
-  until they touch, the index onto the trigger) and bends each elbow to keep the wrist straight; `arms.py` stops
-  without writing if any face of the arms passes into a replica. Re-run it whenever a replica's model changes.
+  - The AEG Rifle: the right hand round the pistol grip, index on the trigger, thumb wrapped round the grip's left
+    side; the left hand under the handguard's middle, its forearm rising to it from below, fingers wrapped up its right
+    side, thumb along its left side.
+  - Pistols (`pistol`, `cyber`): held high in the right hand alone, the web of the hand on the back strap under the
+    beavertail, the thumb forward along the frame's left side under the slide; the left arm lowered (and hidden in
+    game, ViewModelConfig.one_hand).
+- **Solving.** `pose.py` places each hand on the replica's mesh (on a pistol, the thumb's root and the index knuckle
+  at marks on the grip, rolled to the straightest wrist; on the rifle's handguard, a search for the cupped hand whose
+  fingers wrap it), curls the fingers until they touch, the index onto the trigger, and bends each elbow to keep the
+  wrist straight; a last pass on the skinned mesh opens any finger still touching and eases a pressing palm back (the
+  thumb waiting for its hand). `arms.py` stops without writing if any face of the arms passes into a replica. Re-run
+  it whenever a replica's model changes.
+- **Shading.** In game the arms are drawn with pressed depth and take no shadows (ArmsView): the sun's shadow map on
+  pressed depth broke into hard patches on the sleeve.
 - **Not yet.** The Sniper Rifle has no hold (its new chassis grip, BL5, is still to fit), so it shows no arms. Pistols
   are one-handed until the two-handed, thumbs-forward hold of the owner's photos is solved. No arm clips for firing or
   reloading: the replica's own clips move its parts as before.

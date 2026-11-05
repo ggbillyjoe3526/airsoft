@@ -29,7 +29,7 @@ FINGER_NAMES = {1: "Thumb", 2: "Index", 3: "Middle", 4: "Ring", 5: "Pinky"}
 GLOVE_THICK = 0.0011
 GLOVE_TOP = -0.062
 # The neoprene cuff (from, to, thickness) and its strap round it (from, to, thickness) up the forearm.
-CUFF = (-0.006, -0.060, 0.0026)
+CUFF = (-0.006, -0.052, 0.0026)
 STRAP = (-0.016, -0.044, 0.0016)
 # The sleeve: where its cuff ends, how far it stands off the skin at the cuff and at the shoulder, its banded cuff's
 # width and its hem.
@@ -39,8 +39,14 @@ SLEEVE_BAND = 0.030
 SLEEVE_HEM = 0.0022
 # The hard parts' heights over the glove (m).
 SHELL_THICK = 0.0024
-KNUCKLE_DOME = 0.0020
-PAD_THICK = 0.0019
+KNUCKLE_DOME = 0.0022
+PAD_THICK = 0.0017
+# The knuckle shell: how far it reaches beyond the outer knuckles, back from them over the hand and on over them (m).
+KNUCKLE_SPAN = 0.006
+KNUCKLE_BACK = 0.040
+KNUCKLE_OVER = 0.006
+# The finger plates, as shares of each bone from its root: two on the first bone, one on the second.
+PLATES = (((0.16, 0.50), (0.56, 0.90)), ((0.14, 0.86),))
 
 
 def load_source(shoulder: Vector) -> tuple:
@@ -308,15 +314,19 @@ class Surface:
 
 
 def _smoothed(grid: list, closed: bool) -> list:
-    """One round of averaging each inner point of a grid with its four neighbours (the edges stay put)."""
+    """One round of averaging each inner point of a grid with its four neighbours; the first and last rows only
+    along themselves, so a part's edge runs clean (the corners of an open patch stay put)."""
     rows, cols = len(grid), len(grid[0])
     out = [list(row) for row in grid]
-    for r in range(1, rows - 1):
+    for r in range(rows):
         for c in range(cols):
             if not closed and c in (0, cols - 1):
                 continue
-            nb = grid[r - 1][c] + grid[r + 1][c] + grid[r][(c - 1) % cols] + grid[r][(c + 1) % cols]
-            out[r][c] = grid[r][c] * 0.5 + nb * 0.125
+            side = grid[r][(c - 1) % cols] + grid[r][(c + 1) % cols]
+            if r in (0, rows - 1):
+                out[r][c] = grid[r][c] * 0.5 + side * 0.25
+            else:
+                out[r][c] = grid[r][c] * 0.5 + (grid[r - 1][c] + grid[r + 1][c] + side) * 0.125
     return out
 
 
@@ -331,8 +341,10 @@ def _soft_box(u: float, v: float, edge: float = 0.18) -> float:
 
 
 def knuckle_guard(surf: Surface, fr: Frame) -> tuple:
-    """The moulded knuckle guard: a shell across the back of the hand over the four knuckles, a dome over each with
-    a groove between neighbours, rigid on the hand."""
+    """The moulded knuckle shell (the owner's glove photos: one hard shell, not a pad per knuckle): across the back of
+    the hand from beyond the index to beyond the little finger, from half way back to the wrist to just over the
+    knuckles, a dome over each knuckle with a shallow groove between neighbours, its edges easing down into the glove;
+    rigid on the hand."""
     j, k = fr.j, fr.knuckles
     up = fr.dorsal
     across = (k[3] - k[0]).normalized()
@@ -343,27 +355,31 @@ def knuckle_guard(surf: Surface, fr: Frame) -> tuple:
         """The knuckles' line from just beyond the index (-1) to just beyond the little finger (+1)."""
         s = (u + 1.0) * 0.5 * 3.0
         i = min(2, max(0, int(s)))
-        return k[i].lerp(k[i + 1], s - i) - across * 0.002 * (1.0 - (u + 1.0))
+        return k[i].lerp(k[i + 1], s - i) + across * KNUCKLE_SPAN * u
 
     def origin(u: float, v: float) -> Vector:
-        # From well behind the knuckles (v = -1) to just over them (v = +1).
-        return line(u) + f * (-0.020 + (v + 1.0) * 0.5 * 0.024) - up * 0.004
+        # From well back over the back of the hand (v = -1) to just over the knuckles (v = +1), narrowing a little
+        # towards the wrist.
+        back = KNUCKLE_BACK * (1.0 - v) * 0.5
+        return line(u * (1.0 - 0.18 * (1.0 - v) * 0.5)) + f * (KNUCKLE_OVER - back) - up * 0.006
 
     def direction(u: float, v: float) -> Vector:
         return up + across * u * 0.25
 
-    knuck_u = [-1.0, -1.0 / 3.0, 1.0 / 3.0, 1.0]
+    knuck_u = [-0.78, -0.26, 0.26, 0.78]
 
     def thick(u: float, v: float) -> float:
-        dome = sum(math.exp(-((u - ku) / 0.2) ** 2) for ku in knuck_u)
-        return SHELL_THICK + KNUCKLE_DOME * min(1.0, dome) * math.exp(-((v - 0.3) / 0.7) ** 2)
+        dome = sum(math.exp(-((u - ku) / 0.17) ** 2) for ku in knuck_u)
+        rise = math.exp(-((v - 0.55) / 0.45) ** 2)
+        return (SHELL_THICK + KNUCKLE_DOME * min(1.0, dome) * rise) * _soft_box(u, v, 0.22) + 0.0003
 
-    return surf.shell(origin, direction, 9, 31, thick, "GloveArmour", False, "Hand")
+    return surf.shell(origin, direction, 13, 29, thick, "GloveArmour", False, "Hand")
 
 
 def finger_pads(surf: Surface, fr: Frame) -> list:
-    """Two pads on each finger's first bone and one on its second, and one on the thumb's first bone: each wraps
-    the back of its bone and is rigid on it."""
+    """The segmented finger plates (the owner's glove photos): over the back of each finger's first bone two plates
+    end to end with a narrow gap, and one over its second; one over the thumb's; each wraps the back of its bone, eases
+    down at its edges and is rigid on it."""
     j = fr.j
     out = []
 
@@ -379,21 +395,25 @@ def finger_pads(surf: Surface, fr: Frame) -> list:
             t = math.radians(wrap) * u
             return up * math.cos(t) + side * math.sin(t)
 
-        return surf.shell(origin, direction, 5, 9, PAD_THICK, "GloveArmour", False, bone, 1)
+        def thick(u: float, v: float) -> float:
+            return PAD_THICK * _soft_box(u, v, 0.4) + 0.0003
+
+        return surf.shell(origin, direction, 5, 9, thick, "GloveArmour", False, bone, 1)
 
     for f in (2, 3, 4, 5):
         name = FINGER_NAMES[f]
-        wrap = 52.0 if f != 5 else 48.0
+        wrap = 44.0 if f != 5 else 40.0
         a, b = j["finger-%d-1" % f], j["finger-%d-2" % f]
-        out.append(pad(a, b, fr.dorsal, (0.22, 0.52), wrap, name + "1"))
-        out.append(pad(a, b, fr.dorsal, (0.58, 0.86), wrap, name + "1"))
+        for span in PLATES[0]:
+            out.append(pad(a, b, fr.dorsal, span, wrap, name + "1"))
         a, b = j["finger-%d-2" % f], j["finger-%d-3" % f]
-        out.append(pad(a, b, fr.dorsal, (0.25, 0.80), wrap, name + "2"))
+        for span in PLATES[1]:
+            out.append(pad(a, b, fr.dorsal, span, wrap, name + "2"))
     a, b = j["finger-1-2"], j["finger-1-3"]
     d = (b - a).normalized()
     away = a - fr.palm_centre
     away = (away - d * away.dot(d)).normalized()
-    out.append(pad(a, b, (away + fr.dorsal * 0.6), (0.25, 0.80), 50.0, "Thumb2"))
+    out.append(pad(a, b, (away + fr.dorsal * 0.6), (0.20, 0.82), 46.0, "Thumb2"))
     return out
 
 
@@ -442,8 +462,8 @@ def build_left(shoulder: Vector) -> tuple:
     def palm_origin(u: float, v: float) -> Vector:
         return pc + across * (u * 0.026) + fr.fingers * (v * 0.030)
 
-    mesh.add(*surf.shell(palm_origin, lambda u, v: fr.palmar, 9, 11,
-                         lambda u, v: 0.0012 * _soft_box(u, v, 0.35) + 0.0003, "GloveArmour"))
+    mesh.add(*surf.shell(palm_origin, lambda u, v: fr.palmar, 7, 11,
+                         lambda u, v: 0.0012 * _soft_box(u, v, 0.35) + 0.0009, "GloveArmour"))
     # The neoprene cuff, and its strap round it with a pull tab on the little finger's side.
     mesh.add(*ring(surf, fr, CUFF[:2], CUFF[2], "Glove"))
     mesh.add(*ring(surf, fr, STRAP[:2], CUFF[2] + STRAP[2], "GloveArmour"))

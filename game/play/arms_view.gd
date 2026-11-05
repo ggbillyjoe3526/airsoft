@@ -5,8 +5,9 @@ extends Node3D
 ## posing both arms on it and an empty `Hold_<id>` where that replica's origin sits, so the arms ride the replica's
 ## node (ReplicaView's Held.root) and follow its sway, kick, cant and drop. A replica the model has no hold for shows no
 ## arms. One-handed replicas (ViewModelConfig.one_hand) hide the left arm. A robot's arms (FigureMix.ROBOT) wear
-## ViewModelConfig.robot_arms. The materials press their depth as the replica's do, cast no shadow and stay out of an
-## optic's view. A child of ReplicaView.
+## ViewModelConfig.robot_arms. The materials press their depth as the replica's do, cast no shadow, take none (the sun's
+## shadow on pressed depth breaks into hard patches over the sleeve) and stay out of an optic's view. A child of
+## ReplicaView.
 
 const MODEL := "res://assets/models/arms/arms.glb"
 ## The model's names (tools/blender/arms/arms.py).
@@ -113,13 +114,14 @@ func _dress() -> void:
 			mesh_node.set_surface_override_material(i, _worn[own][robot])
 
 
-## A copy of `own` with its depth pressed towards the eye (ViewModelConfig.depth_scale), in the robot's colour if
-## `robot` and robot_arms names it.
+## A copy of `own` with its depth pressed towards the eye (ViewModelConfig.depth_scale) and no shadow falling on it, in
+## the robot's colour if `robot` and robot_arms names it.
 func _pressed(own: Material, robot: bool) -> Material:
 	var copy := own.duplicate() as Material
 	var base := copy as BaseMaterial3D
 	if base == null:
 		return copy
+	base.disable_receive_shadows = true
 	if _cfg.depth_scale < 1.0:
 		base.use_z_clip_scale = true
 		base.z_clip_scale = _cfg.depth_scale

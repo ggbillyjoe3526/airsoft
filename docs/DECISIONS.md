@@ -670,7 +670,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   passing into it (owner, 2026-11-04: no clipping, a natural wrist). Pistols are held in the right hand alone, the left
   arm lowered out of view, until the two-handed thumbs-forward hold of his photos (`ref_images/hands/holding_replica`)
   is solved: the first tries bent the left wrist past 80°. The Sniper Rifle shows no arms until its new chassis grip
-  (BL5) is fitted. A robot player's arms are graphite and light grey. No arm clips for firing or reloading yet: the replica's own clips move its parts. A replica's model change
+  (BL5) is fitted. A pistol sits high in the hand, the web on the back strap and the thumb forward along the frame;
+  the rifle's support hand comes up under the handguard from below. The arms take no shadows in game (pressed depth
+  broke the sun's shadow into patches). A robot player's arms are graphite and light grey. No arm clips for firing or reloading yet: the replica's own clips move its parts. A replica's model change
   means re-running `tools/blender/arms/arms.py`.
 - **Glowing BBs are green and loaded At Night by default (owner, 2026-10-24; WL8).** A per-replica Customise choice
   (At Night, Always, Off), saved with the loadout; every bot loads At Night. Drawing only: a seeded match plays the same
