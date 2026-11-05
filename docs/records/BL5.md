@@ -1,6 +1,6 @@
 # BL5 · The Sniper Rifle's model
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | 2026-11-05 | 1 | Claude (build thread) | targeted tests pass (11 files) | Retry 7/8 (QA Pass, performance Pass) | a dark slit where the receiver's flat met the chassis; the nose's sling socket lost; a dark band under the forend; a seam across the grip; facets on the comb; a cheek piece too flat; the guard's opening too square; small photo details |
 | 2026-11-05 | 2 | Claude (build thread) | targeted tests pass (3 files) | Retry 7/8 | a black patch where the guard's front post shared its opening's wall; streaks round the rear screw's pocket (a boolean in the stock's side); a hard step where the grip meets the stock |
-| 2026-11-05 | 3 | Claude (build thread) | targeted tests pass (1 file) | pending | – |
+| 2026-11-05 | 3 | Claude (build thread) | targeted tests pass (1 file) | Accept 8/8 (QA Pass, performance Pass on attempt 1; only the model changed since) | – |
 
 ## What changed
 
@@ -65,3 +65,6 @@ from the owner's pick of his sniper photos (2026-11-05: the grey chassis, `ref_i
 
 - The cocking sound was timed to the old charging handle's clip; the bolt's cycle keeps the same phases (drawn back
   about 0.5 s, home about 0.7 s), so it should still line up; check by ear.
+- The critic's polish notes, none visible at game distance: a 0.5 mm dark speck and a faint hairline where the grip
+  joins the chassis on the left; the rear stock screw is a round boss with a hex pocket where the photo has a hex
+  recess in the flat side; the nose's sling hole reads grey, not black; a faint 3 mm shading dash under the first slot.
