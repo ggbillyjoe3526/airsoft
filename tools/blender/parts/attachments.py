@@ -970,6 +970,9 @@ def build_silencer(kind: str = "rifle") -> bpy.types.Object:
         prof += [(y0 + SIL_BAND[0] - 0.2, r), (y0 + SIL_BAND[0], r - 0.4), (y0 + SIL_BAND[1], r - 0.4),
                  (y0 + SIL_BAND[1] + 0.2, r)]
         prof += [(y0 + SIL_BAND[1] + 1.2 + d, rr) for rr, d in seam]
+        # The front cap's grip grooves: two more seams ahead of the end seam.
+        prof += [(y1 - 16.5 + d, rr) for rr, d in seam]
+        prof += [(y1 - 12.0 + d, rr) for rr, d in seam]
     prof += [(y1 - 7.5 + d, rr) for rr, d in seam]
     prof += cap_arc(y1, r, e, 1.0)[1:]
     prof += [(y1, r - e - 0.6), (y1 - 0.5, r - e - 1.0), (y1 - 0.5, 7.4), (y1, 6.8), (y1, 5.6), (y1 - 1.0, 4.8)]
@@ -998,12 +1001,11 @@ def build_silencer(kind: str = "rifle") -> bpy.types.Object:
     hs.finish(plain, bevel=0.0)
     kb_ob = None
     if adaptor == 0.0:
-        # The coupling's knurl shades smooth: its points share their corners (the AEG's parts file is near its cap).
+        # The coupling's knurl: coarse, few points, hard-edged, so it reads at arm's length and stays light in the file.
         kb = hs.Builder("sil_knurl", ["Detail"])
-        knurl(kb, y0 + SIL_BAND[0], y0 + SIL_BAND[1], r - 0.4, r - 0.02, 72, 0.6, "Detail")
+        knurl(kb, y0 + SIL_BAND[0], y0 + SIL_BAND[1], r - 0.4, r + 0.1, 40, 1.0, "Detail")
         kb_ob = kb.build()
         hs.finish(kb_ob, bevel=0.0, weighted=False)
-        kb_ob.data.set_sharp_from_angle(angle=math.pi)
     ob = hs.join("muzzle_silencer", [ob, plain, kb_ob])
     fig = hs.Builder("muzzle_silencer_Figure", ["Detail"])
     fig.lathe([(y0 * MM, 0.0), (y0 * MM, r * MM), (y1 * MM, r * MM), (y1 * MM, 0.0)], "Detail", 8)
@@ -1044,8 +1046,8 @@ def build_laser(rail_name: str = "pistol") -> bpy.types.Object:
     seam = LZ_FRONT - 7.6, LZ_FRONT - 7.0
     hs.cut(block, [box_cutter((-20, seam[0], zbot + 3.0), (-12.9, seam[1], 1.0)),
                    box_cutter((12.9, seam[0], zbot + 3.0), (20, seam[1], 1.0)),
-                   prism_cutter(hs.fillet([(y1 + 2.0, -7.0, 1.5), (LZ_FRONT - 10.0, -7.0, 1.5),
-                                           (LZ_FRONT - 10.0, -18.0, 1.5), (y1 + 2.0, -18.0, 1.5)], 4), "x",
+                   prism_cutter(hs.fillet([(y1 + 0.5, -7.0, 1.5), (LZ_FRONT - 8.6, -7.0, 1.5),
+                                           (LZ_FRONT - 8.6, -19.0, 1.5), (y1 + 0.5, -19.0, 1.5)], 4), "x",
                                 12.8, 14.0),
                    port])
     hs.finish(block, bevel=0.0004, segments=4)
@@ -1057,15 +1059,15 @@ def build_laser(rail_name: str = "pistol") -> bpy.types.Object:
     face_axis(bezel, 0.0, LZ_AXIS)
     # The adjusting screws: elevation under the housing, windage a knurled wheel in its right side; the clamp's cross
     # screws on the left, its bolt on the right; the switch pad in the left panel.
-    disc_z(tb, 0.0, 2.0, zbot - 1.0, zbot + 0.2, 2.6, "Detail", 24, 0.3)
-    disc_x(tb, 13.2, 13.9, LZ_FRONT - 13.0, LZ_AXIS, 2.4, "Detail", 24, 0.3)
+    disc_z(tb, 0.0, 2.0, zbot - 0.3, zbot + 0.2, 2.6, "Detail", 24, 0.15)
+    disc_x(tb, 12.7, 13.9, LZ_FRONT - 13.0, LZ_AXIS, 2.4, "Detail", 24, 0.3)
     disc_x(tb, 13.9, 15.6, LZ_FRONT - 13.0, LZ_AXIS, 4.2, "Detail", 40, 0.4)
     for y in (-6.0, 6.0):
         disc_x(tb, -14.4, -15.4, y, -1.8, 1.6, "Metal", 20, 0.3)
         hex_x(tb, -15.4, -15.46, y, -1.8, 0.8, "Rubber")
     disc_x(tb, 14.4, 15.6, 0.0, -1.8, 2.4, "Metal", 24, 0.3)
-    tb.prism(mmp(hs.fillet([(y1 + 4.0, -9.0, 1.8), (LZ_FRONT - 12.0, -9.0, 1.8), (LZ_FRONT - 12.0, -16.0, 1.8),
-                            (y1 + 4.0, -16.0, 1.8)], 4)), "x", -13.0 * MM, -13.9 * MM, "Rubber")
+    tb.prism(mmp(hs.fillet([(y1 + 3.0, -9.0, 1.8), (LZ_FRONT - 8.4, -9.0, 1.8), (LZ_FRONT - 8.4, -16.0, 1.8),
+                            (y1 + 3.0, -16.0, 1.8)], 4)), "x", -13.0 * MM, -13.9 * MM, "Rubber")
     # Grip ribs down the front cap's flanks.
     for sx in (-1.0, 1.0):
         for i in range(7):
@@ -1077,12 +1079,12 @@ def build_laser(rail_name: str = "pistol") -> bpy.types.Object:
     pb = hs.Builder("lz_plain", ["Detail", "Rubber", "LaserLens", "Metal"])
     ridged(pb, 13.95, 15.55, 4.2, 4.5, 40, "Detail", x=LZ_FRONT - 13.0, z=LZ_AXIS, axis="x")
     lens(pb, LZ_LENS_Y, 1.95, "LaserLens", 64, z=LZ_AXIS)
-    slot_z(pb, 0.0, 2.0, zbot - 1.05, 3.2, 0.6, 0.0, "Rubber")
+    slot_z(pb, 0.0, 2.0, zbot - 0.35, 3.2, 0.6, 0.0, "Rubber")
     hex_x(pb, 15.6, 15.66, LZ_FRONT - 13.0, LZ_AXIS, 1.0, "Rubber")
     hex_x(pb, 15.6, 15.66, 0.0, -1.8, 1.1, "Rubber")
     # Fine grip lines across the switch pad.
     for i in range(7):
-        y = y1 + 5.2 + i * 0.9
+        y = y1 + 3.8 + i * 0.8
         pb.box(mm(-14.1, y, -15.2), mm(-13.85, y + 0.4, -9.8), "Rubber")
     plain = pb.build()
     hs.finish(plain, bevel=0.0)
