@@ -104,12 +104,12 @@ extends Resource
 ## of fit_chest_depth_radius, and fit_chest_back behind, of fit_chest_back_radius, from fit_chest_back_low of the way up
 ## the torso's line to fit_chest_back_high of the way from Chest to Neck (below Chest when negative; the pack rides on
 ## the back, above the hips, and stands nearly to the shoulders).
-@export var fit_chest_front: float = 0.057
+@export var fit_chest_front: float = 0.054
 @export var fit_chest_back: float = 0.130
 @export var fit_chest_depth_radius: float = 0.150
 @export var fit_chest_back_radius: float = 0.165
 @export var fit_chest_back_low: float = 0.250
-@export var fit_chest_back_high: float = -0.080
+@export var fit_chest_back_high: float = -0.120
 @export var fit_pelvis_up: float = 0.022
 @export var fit_hips_radius: float = 0.129
 @export var fit_thigh_radius: float = 0.085
