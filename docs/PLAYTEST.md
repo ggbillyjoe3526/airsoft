@@ -272,7 +272,7 @@ A dev item (SN1): turn on Settings › Dev settings › Dev content, and Disable
   Springs (pictures: a coil with a violet, crimson or black band).
 - [ ] **Springs.** The M140 and M150 shoot harder (Energy up 10 % and 20 %) and cock a little slower. Can you feel it?
 - [ ] **Levels.** In the Armory level 5 holds the Sniper Rifle, the M130 Spring, the 2x Scope and the Tight-Bore Barrel;
-  level 6 has Red Gas; the M140 is at 7 and the M150 at 9. With Dev content off none of the rifle's items show.
+  level 6 has Red Gas; the M140 is at 7 and the M150 at 9. They show with Dev content off too (public since 2026-11-05).
 - [ ] **Bots with it.** About 1 opponent in 12 on Hard (fewer on Normal and Easy) carries it: they raise the scope to
   fight and hold their fire from the hip unless you are within 8 m. Do they feel dangerous at range and beatable up
   close? Is it fair on Depot, Woodland and The Street, at 5v5 and 8v8?

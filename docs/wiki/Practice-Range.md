@@ -30,8 +30,8 @@ Press **Esc** for the range's pause menu and switch **Timed challenge** on; the 
 2. A bar shows your time and hits while you clear the targets.
 3. **TIME!** shows your hits, shots and misses, and **NEW BEST** when you beat your best time.
 
-Each map keeps its own best, so the range's and Depot's are separate. A run with a Dev setting on says **NOT KEPT**
-instead.
+Each map keeps its own best, so the range's and Depot's are separate. A run with a Dev setting on, or on a map
+still in development, says **NOT KEPT** instead.
 
 ## Practice on a field
 

@@ -187,7 +187,8 @@ func test_no_dev_maps_listed_with_dev_content_off() -> void:
 	var was := DevContent.use_map()
 	var page := _page(false)
 	DevContent.restore_map(was)
-	assert_eq(page.map_ids(), PackedStringArray(["depot", "street", "range"]))
+	assert_eq(page.map_ids(), PackedStringArray(["depot", "range"]),
+			"Woodland tagged dev here, The Street dev since 2026-11-05")
 	assert_true(page.map_card("depot").is_picked())
 
 
