@@ -144,13 +144,13 @@ func test_a_glowing_bb_is_green_with_its_streak_and_a_white_one_draws_as_before(
 	assert_eq(draws.size(), 4, "white BBs, glowing balls and streaks, and the white BBs' trails (FB4): no halo")
 	assert_eq(view.get_child_count(), 3)
 	assert_eq(draws[0].multimesh.visible_instance_count, 1, "one white BB")
-	var white := draws[0].multimesh.mesh.surface_get_material(0) as ShaderMaterial
+	var white := draws[0].material_override as ShaderMaterial
 	assert_eq(white.get_shader_parameter(&"colour"), cfg.bb_colour, "white as before, rimmed (FB4)")
 	assert_eq(draws[3].multimesh.visible_instance_count, 1, "its trail; none for the glowing ones")
 	assert_eq(draws[1].multimesh.visible_instance_count, 2, "two glowing BBs")
 	assert_eq(draws[2].multimesh.visible_instance_count, 2, "a streak each")
 	assert_true(draws[1].visible and draws[2].visible)
-	var green := draws[1].multimesh.mesh.surface_get_material(0) as StandardMaterial3D
+	var green := draws[1].material_override as StandardMaterial3D
 	assert_eq(green.albedo_color, cfg.glow_colour)
 	assert_eq(green.shading_mode, BaseMaterial3D.SHADING_MODE_UNSHADED, "lit itself")
 	var trail := draws[2].multimesh.mesh.surface_get_material(0) as StandardMaterial3D

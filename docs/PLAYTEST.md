@@ -1295,6 +1295,16 @@ style most of its photos show.
   torch on the Cyber Pistol and on the AEG's right side. At night the beam leaves the torch's head.
 - [ ] **Customise and paints:** each part in each paint; the Loadout and Armory pictures show them sharp and to scale.
 
+## The BB model (BM1)
+
+Every BB in flight is now a proper Blender model, round from every side instead of the old eight-sided ball.
+
+- [ ] **Up close:** in the Range, fire the AEG Rifle with your eye on the muzzle: each BB leaves as a round ball with
+  an even dark rim, no corners, and joins its path as before.
+- [ ] **At range:** BBs still read as small bright dots with a faint trail at 20 to 40 m, on pale walls and the sky.
+- [ ] **Glowing BBs:** on Woodland at night, glowing BBs are round green balls with their streak, as before.
+- [ ] **Frame rate:** a full-auto magazine dump on Low keeps its frame rate (F3 box).
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
