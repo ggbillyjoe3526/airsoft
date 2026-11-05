@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-05 | 1 | Claude (build thread) | figure, hit and hitbox tests pass (23 files, 243 tests) | pending | – |
+| 2026-11-05 | 1 | Claude (build thread) | figure, hit and hitbox tests pass (23 files, 243 tests) | Retry 6/8 (QA Pass, performance Pass) | every gait a bent-knee crouch-run (hips 0.86 m), no flight, the swing foot dragging; back-pedal and strafes forced onto the forward run's 2.94 m cycle (1.47 m lunges); the crouch walk sitting back on its heels, feet ahead; knees crossing on the strafes |
+| 2026-11-05 | 2 | Claude (build thread) | figure, hit, hitbox and gait tests pass (24 files, 253 tests) | pending | – |
 
 ## Why
 
@@ -29,9 +30,11 @@ figure." Filming the figure in game (`tools/gait_pictures.gd`) showed three caus
   slides at the clip's speed; the swing is a smooth arc (the heel kicked up on a run); the pelvis bobs, sways, turns
   with the swinging leg and drops on its side; the hips sink only where a foot would be out of reach; two-bone IK
   with the knee in the foot's own plane. Keys at 60 a second. The upper body keeps the old clips' (the aim covers it).
-- **Cadence by speed** (`HitConfig.cycle_speeds`/`cycle_metres`, crouched `crouch_cycle_*`; `Hitbox.cycle_length`):
-  the walk cycle moves one cycle per the clip's own speed × seconds (walk 1.76 m at 2.3 m/s, run 2.94 m at 4.2,
-  sprint 3.99 m at 6.3, crouch 1.26 m at 2.1), in line between. `strides_per_metre` is gone.
+- **Cadence by speed and way** (`HitConfig.cycle_speeds`/`cycle_metres`, crouched `crouch_cycle_*`, `back_cycle_share`,
+  `side_cycle_share`; `Hitbox.cycle_length`): the walk cycle moves one cycle per the clip's own speed × seconds (walk
+  1.76 m at 2.3 m/s, run 2.94 m at 4.2, sprint 3.99 m at 6.3, crouch 1.26 m at 2.1), in line between; stepping back
+  it is 0.619 of the run's (Run_B 1.82 m) and aside 0.667 (Run_L/R 1.96 m), blended by the step's share each way.
+  `strides_per_metre` is gone.
 - **Steady upper body** (`HitConfig.upper_steady`, `FigureBend.steady_upper`, the same turn in `HitPose`): over a
   stepping clip the upper chain is turned back about the hips to standing still's hips heading (`HitFit.still_heading`,
   crouched blended), so the pelvis may swing and turn 38° into a strafe while the replica keeps its heading. The hit
@@ -45,8 +48,12 @@ figure." Filming the figure in game (`tools/gait_pictures.gd`) showed three caus
 ## Defaults taken (owner not asked)
 
 - Game speeds unchanged (walk 2.3, run 4.2, sprint 6.3, crouch 2.1 m/s); cadence set from them: walk 156, run 171,
-  sprint 190, crouch walk 200 steps a minute.
-- Strafes turn the pelvis 38° and the feet 52° into the step; the upper body stays square to the aim.
-- The crouch walk keeps the hips 0.62 m down (the crouch line) and sits back with the feet ahead, knees up: the
-  only way the low hips leave the knees off the floor.
-- Sprint leans the pelvis 9° forward, so the shouldered replica dips 9° while sprinting.
+  sprint 190, back-pedal 277, strafe 257, crouch walk 200 steps a minute (quick short steps back and aside).
+- Run and sprint stand tall (hips 0.92 and 0.90 m at the top of the bob, ±4 to 4.5 cm with a flight phase), land the
+  foot near under the hips and kick the heel straight up after toe-off.
+- Strafes turn the pelvis 35° and the feet 25° into the step, the legs on lanes apart so the knees never cross; the
+  upper body stays square to the aim.
+- The crouch walk keeps the hips 0.62 m down (the crouch line) and walks on the balls of the feet, the feet under the
+  hips, the knees forward, up and a little out: with the aim owning the upper body, the low hips leave no other way
+  to keep the knees off the floor.
+- Sprint leans the pelvis 14° forward, so the shouldered replica dips 14° while sprinting (sprinting can't aim well).

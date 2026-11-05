@@ -22,24 +22,24 @@
   },
   {
    "name": "Run_B",
-   "seconds": 0.7,
-   "frames": 21,
+   "seconds": 0.433,
+   "frames": 13,
    "loop": true,
    "upperBodyOnly": false,
    "speed": 4.2
   },
   {
    "name": "Run_L",
-   "seconds": 0.7,
-   "frames": 21,
+   "seconds": 0.467,
+   "frames": 14,
    "loop": true,
    "upperBodyOnly": false,
    "speed": 4.2
   },
   {
    "name": "Run_R",
-   "seconds": 0.7,
-   "frames": 21,
+   "seconds": 0.467,
+   "frames": 14,
    "loop": true,
    "upperBodyOnly": false,
    "speed": 4.2

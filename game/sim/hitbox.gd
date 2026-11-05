@@ -178,15 +178,33 @@ static func step_walk_cycle(c: Character, hits: HitConfig) -> void:
 	if moved >= hits.max_stride or moved <= 0.0:
 		return
 	var speed := Vector2(c.velocity.x, c.velocity.z).length()
-	c.walk_cycle += moved / cycle_length(speed, c.crouch_amount, hits) * TAU
+	# The step in the character's frame (FigurePose.read): ahead and to the right.
+	var sin_yaw := sin(c.yaw)
+	var cos_yaw := cos(c.yaw)
+	var step := Vector2(c.velocity.x * cos_yaw - c.velocity.z * sin_yaw, -c.velocity.x * sin_yaw - c.velocity.z * cos_yaw)
+	c.walk_cycle += moved / cycle_length(speed, c.crouch_amount, hits, step) * TAU
 
 
-## The ground (m) one walk cycle (two steps) covers at `speed` (m/s), crouched `crouch` (0..1): HitConfig's standing and
-## crouched lengths, each in line between its speeds, blended by the crouch.
-static func cycle_length(speed: float, crouch: float, hits: HitConfig) -> float:
-	var standing := _by_speed(speed, hits.cycle_speeds, hits.cycle_metres)
+## The ground (m) one walk cycle (two steps) covers at `speed` (m/s), crouched `crouch` (0..1), stepping `step` (the
+## character's frame: x to its right, y ahead; any length): HitConfig's standing lengths, in line between their speeds
+## and shortened stepping back or aside (back_cycle_share, side_cycle_share by the step's share each way), and its
+## crouched lengths, blended by the crouch.
+static func cycle_length(speed: float, crouch: float, hits: HitConfig, step: Vector2 = Vector2(0.0, 1.0)) -> float:
+	var standing := _by_speed(speed, hits.cycle_speeds, hits.cycle_metres) * way_share(step, hits)
 	var crouched := _by_speed(speed, hits.crouch_cycle_speeds, hits.crouch_cycle_metres)
 	return maxf(lerpf(standing, crouched, clampf(crouch, 0.0, 1.0)), MIN_CYCLE)
+
+
+## The standing cycle's share for a step `step` (x right, y ahead): 1 ahead, back_cycle_share back, side_cycle_share
+## aside, weighted by how much of the step goes each way; 1 for no step.
+static func way_share(step: Vector2, hits: HitConfig) -> float:
+	var ahead := maxf(step.y, 0.0)
+	var back := maxf(-step.y, 0.0)
+	var side := absf(step.x)
+	var total := ahead + back + side
+	if total <= 0.0:
+		return 1.0
+	return (ahead + back * hits.back_cycle_share + side * hits.side_cycle_share) / total
 
 
 ## `metres` at `speed` in line between the `speeds` (ascending) either side, held past the ends.

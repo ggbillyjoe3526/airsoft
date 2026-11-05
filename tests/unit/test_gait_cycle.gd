@@ -4,7 +4,11 @@ extends GutTest
 
 const KINDS: Array[String] = ["human", "robot"]
 ## Sidecar clip -> crouched.
-const GAITS: Dictionary[String, bool] = {"Walk_F": false, "Run_F": false, "Sprint": false, "CrouchWalk": true}
+const GAITS: Dictionary[String, bool] = {"Walk_F": false, "Run_F": false, "Sprint": false, "CrouchWalk": true,
+		"Run_B": false, "Run_L": false, "Run_R": false}
+## The way each clip steps (x right, y ahead) where it isn't ahead.
+const WAYS: Dictionary[String, Vector2] = {"Run_B": Vector2(0.0, -1.0), "Run_L": Vector2(-1.0, 0.0),
+		"Run_R": Vector2(1.0, 0.0)}
 
 var hits: HitConfig = null
 
@@ -90,7 +94,7 @@ func test_each_gait_clip_covers_the_cycle_length_at_its_speed() -> void:
 			var speed := float(clip["speed"])
 			var metres := speed * float(clip["seconds"])
 			var crouch := 1.0 if GAITS[name] else 0.0
-			var want := Hitbox.cycle_length(speed, crouch, hits)
+			var want := Hitbox.cycle_length(speed, crouch, hits, WAYS.get(name, Vector2(0.0, 1.0)))
 			assert_almost_eq(metres, want, want * 0.01, "%s %s: speed x seconds vs the HitConfig table" % [kind, name])
 
 
@@ -140,3 +144,15 @@ func test_a_vaulting_or_out_character_keeps_the_hips_upper_body() -> void:
 	HitPose.pose(c, hits, hits.fit)
 	for k in off.size():
 		assert_almost_eq(HitPose.upper[k], off[k], Vector3.ONE * 1e-6)
+
+
+func test_stepping_back_or_aside_takes_the_shorter_cycle() -> void:
+	var ahead := Hitbox.cycle_length(4.2, 0.0, hits, Vector2(0.0, 1.0))
+	assert_almost_eq(Hitbox.cycle_length(4.2, 0.0, hits, Vector2(0.0, -4.2)), ahead * hits.back_cycle_share, 1e-5)
+	assert_almost_eq(Hitbox.cycle_length(4.2, 0.0, hits, Vector2(-3.0, 0.0)), ahead * hits.side_cycle_share, 1e-5)
+	var diagonal := Hitbox.cycle_length(4.2, 0.0, hits, Vector2(1.0, 1.0))
+	assert_almost_eq(diagonal, ahead * (1.0 + hits.side_cycle_share) * 0.5, 1e-5, "half ahead, half aside")
+	assert_almost_eq(Hitbox.cycle_length(4.2, 0.0, hits, Vector2.ZERO), ahead, 1e-5, "no step: the cycle ahead")
+	assert_almost_eq(Hitbox.cycle_length(2.1, 1.0, hits, Vector2(0.0, -2.1)), Hitbox.cycle_length(2.1, 1.0, hits),
+			1e-5, "crouched, the way doesn't change it")
+

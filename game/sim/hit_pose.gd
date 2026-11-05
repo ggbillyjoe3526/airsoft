@@ -2,7 +2,8 @@ class_name HitPose
 ## The fitted hit volume's pose (HV1): the human figure's joints in its own frame (feet on the origin, facing -Z), posed
 ## from HitFit's samples as its animation graph blends them (the gait and crouch blend spaces, the crouch, the jump and
 ## the vault, each turn blended as AnimationMixer does, the legs posed down from the hips, the upper body for the aim
-## and hold, turned back to standing still's heading) and then bent as FigureBend draws it. Hitbox.build_volume hangs the capsules on them. Allocates nothing.
+## and hold, turned back to standing still's heading) and then bent as FigureBend draws it. Hitbox.build_volume hangs
+## the capsules on them. Allocates nothing.
 
 ## A point this little outside a gait triangle (a share of its weights) still counts as in it: on a shared edge.
 const BARYCENTRIC_EDGE := 1e-6

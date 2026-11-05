@@ -70,6 +70,10 @@ extends Resource
 @export var cycle_metres: PackedFloat32Array = PackedFloat32Array([1.0, 1.763, 2.94, 3.99])
 @export var crouch_cycle_speeds: PackedFloat32Array = PackedFloat32Array([0.0, 2.1])
 @export var crouch_cycle_metres: PackedFloat32Array = PackedFloat32Array([0.8, 1.26])
+## Stepping back or aside the standing cycle is this share of the cycle ahead at the same speed (Run_B and Run_L/R take
+## shorter, quicker steps than Run_F: each clip's speed × seconds over Run_F's); between, by the step's share each way.
+@export var back_cycle_share: float = 0.6190
+@export var side_cycle_share: float = 0.6667
 ## How much of the hips' turn away from standing still's heading the upper body is turned back over a stepping clip's
 ## hips (GA1; 1: all, so the replica keeps its heading while the pelvis swings and turns into a step aside; 0: none, the
 ## upper body rides the hips). Applied alike to the hit volume (HitPose) and the drawn figure (FigureBend).
