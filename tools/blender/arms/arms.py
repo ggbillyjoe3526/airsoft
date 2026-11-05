@@ -40,10 +40,10 @@ OUT = os.environ.get("BL_OUT") or os.path.join(ROOT, "assets/models/arms/arms.gl
 REPLICAS = os.path.join(ROOT, "assets/models/replicas")
 FPS = 60
 
-# Colours from the owner's coyote reference gloves (ref_images/hands/gloves) in the game's look: plain, clean, a
-# little warm.
+# Colours from the owner's glove photos (ref_images/hands/gloves: dark olive with black moulded knuckles), the same as
+# the figures' gloves (BL10), so your arms match what other players wear.
 MATERIALS = {
-    "Glove": (0x8f7553, 0.85, 0.0), "GloveArmour": (0x4f4131, 0.55, 0.0), "Sleeve": (0x667052, 0.92, 0.0),
+    "Glove": (0x4c4638, 0.85, 0.0), "GloveArmour": (0x242422, 0.55, 0.0), "Sleeve": (0x667052, 0.92, 0.0),
     "SleeveTrim": (0x515a41, 0.88, 0.0),
 }
 NAMES = list(MATERIALS)

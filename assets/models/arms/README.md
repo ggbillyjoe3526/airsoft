@@ -1,6 +1,6 @@
 # First-person arms
 
-`arms.glb` (glTF binary): your own arms in the first-person view, in coyote gloves and sleeves, holding the replica in
+`arms.glb` (glTF binary): your own arms in the first-person view, in dark olive gloves and sleeves, holding the replica in
 hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools/blender/arms/arms.py .`, pip
 `bpy==5.2.3`); drawn by `game/play/arms_view.gd` (ArmsView, under ReplicaView).
 
@@ -11,7 +11,7 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
 - **Mesh.** `Arm_R` and `Arm_L` (39,646 triangles together): the MakeHuman base mesh's arm and hand (CC0,
   `tools/blender/arms/source/`) under a glove (skin + 1.1 mm, `glove.py`) with a moulded knuckle guard, padded
   fingers and thumb, a suede palm patch, a cuff and wrist strap, and a sleeve rolled over the cuff with a banded hem.
-- **Materials.** `Glove` (coyote), `GloveArmour` (guard, pads, strap, patch), `Sleeve`, `SleeveTrim`. Plain colours,
+- **Materials.** `Glove` (dark olive-brown), `GloveArmour` (guard, pads, strap, patch), `Sleeve`, `SleeveTrim`. Plain colours,
   no textures. A robot's arms are recoloured in game (ViewModelConfig.robot_arms).
 - **Holds.** One per replica: a clip `<id>_Hold` (`aeg`, `pistol`, `cyber`) posing both arms, and an empty
   `Hold_<id>` where that replica's origin sits in it (at ViewModelConfig.hip). In game the arms ride the replica's
