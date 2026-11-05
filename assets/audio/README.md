@@ -52,11 +52,13 @@ seeds the browser game used, so they sound as they did.
 
 - `cues/<cue>_<n>.wav`: each cue's variants (the cue's dots become underscores: `shot.electric` is
   `shot_electric_1.wav` to `_5.wav`). A shot's power part (`power_*`) plays with its shot on its own volume slider.
-  78 cues, 372 files, and the whistle's 2 cues and 6 files (below).
-- `loops/<id>.wav`: the ambience beds (`yard`, `pines`, `insects`, `crackle`), seamless, imported to loop. Only `yard`
-  still plays since AU5 (the others are kept, unused); the owner's beds are above. They render far above full scale (the
-  browser played them as float through a small gain), so each is stored normalised to its peak, and `loops/peaks.json`
-  records that peak: play a loop at the browser game's gain times its peak to hear it at the browser's level.
+  The browser game's 78 cues were rendered here, since joined by the owner's recordings (below): 88 cues and 406 files,
+  plus the whistle's 2 cues and 6 files (BP4 removed the unused motor spin-up and spin-down).
+- `loops/<id>.wav`: the browser game's ambience bed `yard`, seamless, imported to loop; it still plays on the Range
+  (its `pines`, `insects` and `crackle` went unused after AU5 and BP4 removed them). The owner's beds are above. They
+  render far above full scale (the browser played them as float through a small gain), so each is stored normalised to
+  its peak, and `loops/peaks.json` records that peak: play a loop at the browser game's gain times its peak to hear it
+  at the browser's level.
 - `cues/whistle_short_<n>.wav`, `whistle_long_<n>.wav` and `ping_pip_1.wav`: the pip is recorded since AU2; the
   whistle was `tools/cut_recordings.py`'s synthesised pea whistle from AU3 and is his own since AU6 (above). The
   browser game's draft (its live pea whistle and its beep) still renders with `tools/render_whistle.gd`, only to a

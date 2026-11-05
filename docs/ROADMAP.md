@@ -8,7 +8,7 @@ in `docs/PROCESS.md`.
 
 - **Building the game.** The game restarted on 2026-10-18 as an installable desktop game built with Godot and
   Blender. The browser game it replaces stopped at its 0.1 Beta 1; its old repository is no longer on GitHub, and its
-  code is in `legacy/browser/`.
+  code was in `legacy/browser/` until 2026-11-05 (in git at the tag `0.1-dev.1`).
 - **Last tag:** `0.1-dev.1`, [0.1 Dev 1](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.1)
   (2026-10-30). The owner creates tags.
 - **Building 0.1 Dev 2** (owner, 2026-10-30): basic smoke and flash bombs, thrown by bots too (done: SF1, SF2), a

@@ -1,17 +1,33 @@
-Task: AU7 · The smoke and flash bombs re-cut to sound like the owner's recordings
-Attempt: 2 of 4
-Head: d98953e plus the uncommitted check-7 fix in game/play/sim_audio.gd (checks: the suite was running at review time; re-run on the commit that adds this fix)
+Task: GA1 · The figures' running animations (no task block; judged against the brief and the record)
+Attempt: 3 of 4
+Head: 30fb3ba (targeted tests 38/38 per brief; full check.sh running separately. QA Pass at 30fb3ba, uncommitted
+qa-report.md; performance Pass at a1bbbc9, attempt 3 changed only clip data, the crouch cycle and the test)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept, once pipeline/out holds QA's and performance's AU7 reports for this head with Pass (Retry while either is missing or fails)
-Failed checks, with evidence: none. Measured on the cues (tools/cut_recordings.py helpers):
-- Bounce: every cue now starts on its knock (-12 to -15 dB in the first 20 ms; the 0.18 s pre-sound is gone). Cues are 0.6 s and 30 dB down by 0.34 to 0.38 s; bounce_hold 0.45 (game/config/sound_config.gd:79) sits just past that, so a bomb's next visible bounce 0.4 to 0.6 s later is heard.
-- Pin: starts on its click (-21 dB at 0 to 20 ms), clean decay to -90 dB by 0.24 s, no noise-floor tail. Crest 22 to 24 dB, as in his raw takes.
-- Flash: clean, crest 10 dB (his raw pop 11.8, the old clipped cue 4.0). bang_gain 1.4 (sound_config.gd:81) leaves the master limiter about 2 dB at close range, not the 5 dB that 2.0 gave.
-- Check 7: game/play/sim_audio.gd:258 calls `_mechanism(..., _cfg.pin_gain)` (gain defaults to -1, meaning mechanism_gain) instead of the copied body.
-- Tests: the onset test and `bounce_hold < KNOCKS_MOST` fail on attempt 1's cues; the stale-time guard is at sim_audio.gd:268-270. Record and README claims match the measurements.
-Must-fix for the next attempt: none. Commit the sim_audio.gd fix and file the QA and performance reports.
-Owner should test in the game (at most 6, one line each):
-- Throw a smoke onto open ground and lob one high: does each visible bounce clatter, on time?
-- Your own pin pull and a bot's: a clean click, other sounds steady (the click peaks about +3 dBFS into the limiter)?
-- A flash at your feet and at 15 m: a clean pop, and is 1.4 loud enough?
-- The smoke going off (the spray only): noticeable from 10 to 20 m?
+Score: 8/8 → Accept (subject to the full check.sh passing on 30fb3ba)
+Evidence (frames in scratchpad c1/, c1q/, compared with b1/, b1q/):
+1. Attempt-2 must-fixes met. Crouch walk inside the 1.15 m ruling: knees forward over the toes, no frog splay
+   (c1q/crouch_008, crouch_012); the trailing knee clear of the floor (c1/crouch_024); the swing knee stops under the
+   forearm, not in it (c1/crouch_008); short heel-up steps (gait.py:61-64, 1.05 m, 240 a minute). Back-pedal: the torso
+   now upright over the feet, no longer leaning back; the knee about over the toes (c1/back_000, back_008 against
+   b1/back_000, back_008; Run_B pitch 6, bias 0.03). Run: shoulders over the hips, flight and heel kick kept
+   (c1/run_000-015). Walk, sprint and strafes still read well (c1/walk_*, sprint_*, left_*). References named honestly
+   (GA1.md › References). Rig and meshes unchanged, so the models rule's proportion ratios don't apply to clips.
+4. test_gait_cycle.gd:+160 turns the character a quarter and steps +X (back) and -Z (aside); a sign slip in
+   step_walk_cycle reads +X as ahead and fails the 0.619 share. Locks in my attempt-2 advisory.
+8. changelog.d/figure-running.md no longer over-claims; PLAYTEST.md:72-74 asks about the right things now.
+The owner's call, not a block: the crouch walk is still a deep squat walk (hips 0.39 m, the swing thigh above level,
+c1/crouch_008, c1q/crouch_028). That is what crouch_top_max 1.15 under an aim-owned, near-upright upper body allows
+(DECISIONS:279). A taller one (hips ~0.55 m, back bent forward, the replica held level) needs either his crouch-cover
+ruling changed or a new crouched upper body over the aim, which is outside GA1's clips. The record offers it
+(GA1.md › Defaults); the thread must put it to him in its report, not leave it only in the record.
+Advisory (no fix needed now): c1q/crouch_028 the swing shin flicks out a little as it passes; the dead clip data
+splice.mjs leaves in the .glb adds about 0.4 MB a figure (performance advisory); Run_F's 8° and Sprint's 14° dip the
+replica while moving (recorded default).
+Must-fix for the next attempt: none.
+Owner should test in the game:
+- Crouch-walk past a bot side on and three-quarter: is this low squat walk acceptable, or do you want the taller,
+  bent-forward crouch walk (needs crouch_top_max raised or a new crouched upper body)?
+- Back-pedal a bot (hold S): does it read as stepping back with weight forward, and do 4.6 steps a second look right?
+- Run and sprint a bot past you: does the forward lean read well, and is the replica's dip while running acceptable?
+- Strafe-duel a bot: does the 35° hip turn under a square rifle convince at range?
+- Run diagonally (W+A, S+D): do the feet slide where the clips blend?
