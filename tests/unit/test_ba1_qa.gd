@@ -61,15 +61,20 @@ func test_figure_copies_carry_no_inside() -> void:
 			m.free()
 
 
-func test_a_barrel_taken_alone_for_its_picture_has_the_inside_visible() -> void:
+func test_a_barrels_inside_comes_from_its_own_file_and_the_part_alone_keeps_no_figure() -> void:
 	for key: StringName in BARRELS:
 		var node := ReplicaParts.take(&"aeg", {&"barrel": key}, false)[&"barrel"] as Node3D
-		var inside := node.get_node_or_null("barrel_%s_Inside" % key) as Node3D
-		assert_not_null(inside)
-		if inside != null:
-			assert_true(inside.visible)
+		assert_null(node.get_node_or_null("barrel_%s_Inside" % key), "the parts file carries no inside")
 		assert_null(node.get_node_or_null("barrel_%s_Figure" % key), "the figure copy is left out of the picture")
 		node.free()
+		var inside := ReplicaParts.inside(&"aeg", &"barrel", key)
+		assert_not_null(inside, "barrel_%s has its inside" % key)
+		if inside != null:
+			assert_true(inside.visible)
+			assert_null(inside.owner)
+			inside.free()
+	assert_null(ReplicaParts.inside(&"aeg", &"optic", &"redDot"), "a part with nothing inside has none")
+	assert_null(ReplicaParts.inside(&"pistol", &"barrel", &"long"), "a replica with no insides file has none")
 
 
 func test_paint_changes_the_extension_metal_but_not_the_inner_materials() -> void:

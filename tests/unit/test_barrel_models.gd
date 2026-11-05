@@ -1,9 +1,10 @@
 extends GutTest
 ## BA1: the AEG Rifle's barrel upgrades in assets/models/replicaParts/aeg.glb. Each is an inner barrel in its hop-up unit
-## (the long barrel with its outer extension): what sits inside the rifle is the part's _Inside child, shown in the
-## part's own picture and left out once it is fitted (ReplicaParts.fit).
+## (the long barrel with its outer extension): what sits inside the rifle is in replicaParts/inside/aeg.glb, drawn only in
+## the part's own picture (ReplicaParts.inside), never loaded by a fit.
 
 const PARTS_FILE := "res://assets/models/replicaParts/aeg.glb"
+const INSIDE_FILE := "res://assets/models/replicaParts/inside/aeg.glb"
 const RIFLE := "res://assets/models/replicas/aeg.glb"
 const BARRELS: Array[StringName] = [&"tightBore", &"long"]
 const PART_TRIS := 10000
@@ -50,13 +51,14 @@ func _box(root: Node3D) -> AABB:
 
 func test_each_barrel_has_its_figure_and_inside_and_keeps_the_whole_part_under_budget() -> void:
 	var root := _load(PARTS_FILE)
+	var insides := _load(INSIDE_FILE)
 	for key: StringName in BARRELS:
 		var n := "barrel_%s" % key
 		var part := root.get_node_or_null(n) as MeshInstance3D
 		assert_not_null(part, n)
 		if part == null:
 			continue
-		var inside := part.get_node_or_null(n + "_Inside") as MeshInstance3D
+		var inside := insides.get_node_or_null(n + "_Inside") as MeshInstance3D
 		var fig := part.get_node_or_null(n + "_Figure") as MeshInstance3D
 		assert_not_null(inside, "%s has its inner barrel and hop-up unit" % n)
 		assert_not_null(fig, "%s has its figure copy" % n)
@@ -66,15 +68,16 @@ func test_each_barrel_has_its_figure_and_inside_and_keeps_the_whole_part_under_b
 		assert_lt(_tris(fig), _tris(part), "%s figure is cut down" % n)
 		assert_almost_eq(part.position, Vector3(0.0, 0.044, -BARREL_END_Y), Vector3.ONE * 0.0001,
 				"%s sits on the rifle's barrel end" % n)
+		assert_almost_eq(inside.position, part.position, Vector3.ONE * 0.0001, "%s inside sits where it does" % n)
 
 
 func test_the_inner_barrel_reaches_back_to_the_rifles_hop_up_and_out_to_the_crown() -> void:
-	var root := _load(PARTS_FILE)
+	var root := _load(INSIDE_FILE)
 	for key: StringName in BARRELS:
-		var part := root.get_node(NodePath("barrel_%s" % key)) as Node3D
-		var box := _box(part)
-		# Godot's -Z is the bore's forward: the box's back is its largest z.
-		var back := BARREL_END_Y - (box.position.z + box.size.z)
+		var part := root.get_node(NodePath("barrel_%s_Inside" % key)) as Node3D
+		var box := part.transform * _box(part)
+		# In the rifle's space Godot's -Z is the bore's forward: the box's back is its largest z.
+		var back := -(box.position.z + box.size.z)
 		assert_lt(back, HOP_DIAL_Y - 0.02, "barrel_%s: its hop-up unit is round the rifle's dial" % key)
 		assert_gt(back, HOP_DIAL_Y - 0.04, "barrel_%s: and no further back" % key)
 
@@ -84,7 +87,6 @@ func test_a_fitted_tight_bore_leaves_only_its_crown_in_the_flash_hiders_bore() -
 	var fit := ReplicaParts.fit(model, &"aeg", {&"barrel": &"tightBore"})
 	assert_eq(fit.nodes.size(), 1)
 	var node := fit.nodes[0]
-	assert_null(node.get_node_or_null("barrel_tightBore_Inside"), "the inner barrel is left out once fitted")
 	var box := _box(node)
 	assert_lt(maxf(absf(box.position.x), absf(box.end.x)), HIDER_BORE_R, "the crown fits the hider's bore")
 	assert_lt(maxf(absf(box.position.y), absf(box.end.y)), HIDER_BORE_R)
@@ -94,11 +96,10 @@ func test_a_fitted_tight_bore_leaves_only_its_crown_in_the_flash_hiders_bore() -
 	ReplicaParts.unfit(fit)
 
 
-func test_a_fitted_long_barrel_keeps_its_extension_and_end_and_drops_its_inside() -> void:
+func test_a_fitted_long_barrel_keeps_its_extension_and_end() -> void:
 	var model := _load(RIFLE)
 	var fit := ReplicaParts.fit(model, &"aeg", {&"barrel": &"long"})
 	var node := fit.nodes[0]
-	assert_null(node.get_node_or_null("barrel_long_Inside"))
 	var end := node.get_node_or_null("barrel_long_BarrelEnd") as Node3D
 	assert_not_null(end)
 	if end != null:
@@ -109,16 +110,27 @@ func test_a_fitted_long_barrel_keeps_its_extension_and_end_and_drops_its_inside(
 	ReplicaParts.unfit(fit)
 
 
-func test_a_barrels_own_picture_part_keeps_its_inside_and_its_own_materials() -> void:
+func test_a_barrels_inside_keeps_its_own_materials_under_paint() -> void:
 	for key: StringName in BARRELS:
-		var taken := ReplicaParts.take(&"aeg", {&"barrel": key}, false)
-		var node := taken[&"barrel"]
-		var inside := node.get_node_or_null(NodePath("barrel_%s_Inside" % key)) as MeshInstance3D
-		assert_not_null(inside, "barrel_%s alone shows its inside" % key)
+		var inside := ReplicaParts.inside(&"aeg", &"barrel", key)
+		assert_not_null(inside, "barrel_%s has its inside" % key)
+		if inside == null:
+			continue
 		var holder := Node3D.new()
 		add_child_autofree(holder)
-		holder.add_child(node)
+		holder.add_child(inside)
 		ReplicaPaint.apply(holder, &"cobalt", false)
-		if inside != null:
-			for i in inside.mesh.get_surface_count():
-				assert_null(inside.get_surface_override_material(i), "barrel_%s inside surface %d keeps its own" % [key, i])
+		var m := inside as MeshInstance3D
+		for i in m.mesh.get_surface_count():
+			assert_null(m.get_surface_override_material(i), "barrel_%s inside surface %d keeps its own" % [key, i])
+
+
+func test_the_barrel_cards_are_turned_so_they_read() -> void:
+	var pictures := ReplicaPictures.new()
+	add_child_autofree(pictures)
+	for key: StringName in BARRELS:
+		var e := pictures.part_extent(&"aeg", &"barrel", key)
+		assert_lt(e.x / e.y, 9.0, "barrel_%s: its picture is not a thin line (%s)" % [key, e])
+	var tight := pictures.part_extent(&"aeg", &"barrel", &"tightBore")
+	var long := pictures.part_extent(&"aeg", &"barrel", &"long")
+	assert_gt(long.x, tight.x, "the long barrel's picture is the longer")

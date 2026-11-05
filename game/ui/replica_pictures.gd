@@ -14,6 +14,9 @@ const POWER_DIR := "res://assets/models/powerSources/"
 ## The picture's longer side (px); the other follows the replica's shape. A part's picture is smaller.
 const LONG_SIDE := 1024
 const PART_LONG_SIDE := 384
+## A part slot whose parts are long and thin is pictured turned this far (degrees) about the upright from side on, its
+## back end toward the viewer: a barrel is fifteen times as long as it is tall, so side on its card would be a thin line.
+const PART_TURN: Dictionary[StringName, float] = {&"barrel": 60.0}
 ## The room left round the replica in its picture (a share).
 const MARGIN := 1.06
 ## The least a picture measures (m), so a model with nothing to show can't divide by nothing.
@@ -236,6 +239,14 @@ func _part_shot(key: StringName, slot: StringName, part: StringName) -> Shot:
 	var model := Node3D.new()
 	model.name = "Part"
 	model.add_child(node)
+	var inside := ReplicaParts.inside(key, slot, part)
+	if inside != null:
+		model.add_child(inside)
+	var turn := deg_to_rad(float(PART_TURN.get(slot, 0.0)))
+	if turn != 0.0:
+		for n: Node in model.get_children():
+			var n3 := n as Node3D
+			n3.transform = Transform3D(Basis(Vector3.UP, turn), Vector3.ZERO) * n3.transform
 	shot = _rig(model, PART_LONG_SIDE, "Part_%s_%s_%s" % [key, slot, part])
 	shot.bare_extent = shot.extent
 	_part_shots[id] = shot

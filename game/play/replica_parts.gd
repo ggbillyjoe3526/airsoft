@@ -5,10 +5,12 @@ extends RefCounted
 ## top-level object per part named <slot>_<key>, placed where it sits on the replica, with its figures' cut-down copy
 ## (<slot>_<key>_Figure) beside it or under it. A magazine part takes the standard magazine's place and follows it
 ## through a reload; a muzzle part takes the flash hider's; a barrel with an end point carries the muzzle device and the
-## muzzle out to it; an optic folds the iron sights down (SightFold); what a part has inside the replica (<slot>_<key>_Inside:
-## a barrel's inner barrel and hop-up unit) shows in its own picture and is left out once fitted. `unfit` undoes it all.
+## muzzle out to it; an optic folds the iron sights down (SightFold). `unfit` undoes it all. What a part puts inside the
+## replica (a barrel's inner barrel and hop-up unit) is in its own file, assets/models/replicaParts/inside/<replica>.glb,
+## as <slot>_<key>_Inside: only the part's own picture draws it (`inside`), so fitting never loads it.
 
 const PART_DIR := "res://assets/models/replicaParts/"
+const INSIDE_DIR := "res://assets/models/replicaParts/inside/"
 const FIGURE_SUFFIX := "_Figure"
 const SIGHT_LINE_SUFFIX := "_SightLine"
 const MUZZLE_SUFFIX := "_Muzzle"
@@ -68,10 +70,6 @@ static func fit(model: Node3D, key: StringName, parts: Dictionary, animated: boo
 		_move(f, f.muzzle, shift)
 	for slot: StringName in taken:
 		var node := taken[slot]
-		var inside := node.get_node_or_null(NodePath(String(node.name) + INSIDE_SUFFIX))
-		if inside != null:
-			node.remove_child(inside)
-			inside.free()
 		match slot:
 			MAGAZINE_SLOT:
 				for mag in model.find_children(MAGAZINE_NODE, "Node3D", true, false):
@@ -184,6 +182,26 @@ static func take(key: StringName, parts: Dictionary, figure: bool) -> Dictionary
 		taken[StringName(slot)] = node
 	holder.free()
 	return taken
+
+
+## What part `part` for `slot` of replica `key` puts inside the replica, placed in the replica's space, owned by nothing;
+## null if it puts nothing there. The part's own picture draws it beside the part.
+static func inside(key: StringName, slot: StringName, part: StringName) -> Node3D:
+	var path := "%s%s.glb" % [INSIDE_DIR, key]
+	if not ResourceLoader.exists(path):
+		return null
+	var scene := load(path) as PackedScene
+	if scene == null:
+		return null
+	var holder := scene.instantiate() as Node3D
+	var node := holder.get_node_or_null("%s_%s%s" % [slot, part, INSIDE_SUFFIX]) as Node3D
+	if node != null:
+		holder.remove_child(node)
+		node.owner = null
+		for child in node.find_children("*", "", true, false):
+			child.owner = null
+	holder.free()
+	return node
 
 
 static func _hide(f: Fit, node: Node3D) -> void:

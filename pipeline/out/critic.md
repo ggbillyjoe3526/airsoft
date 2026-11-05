@@ -1,39 +1,49 @@
-Task: BL8 · Attachments modelled from the owner's photos (nine parts, unbranded)
-Attempt: 3 of 4
-Head: 319a75e. Full tools/check.sh not run on it: it last passed on f1dc779, 4,752/4,752. On 4a17278, 144/144 part
-tests pass and gdlint, the changelog and the wiki checks pass; the coordinator stopped the run. The Accept holds only
-once tools/check.sh is green on the rebased head; do not merge before. Models in 4a17278. QA Pass (03dc1ca).
-Performance Pass, re-measured on 4a17278.
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept
-Failed checks, with evidence: none.
-Attempt-2 must-fixes, measured with pixel scans of the full-size photos against the cmp/r2 renders at the same angle:
-- Pistol silencer (attachments.py:888, :907), against wey027-02 side-on:
-  - Tube and collar L/D 4.68 → 4.43 (-5 %). Overall L/D 5.13 → 4.70 (-8 %).
-  - Collar 1.00 → 1.00 of the tube. Spigot 0.39 → 0.35 (-10 %, at the limit). Collar length 0.21 → 0.25 D (±3 px).
-  - Met. Fitted in ctx.jpg, it sits flush on the slide.
-- Torch (attachments.py:987): the head is 0.435 of the length, against 0.40 to 0.46 in the X300 photos. Met.
-  - The body lofts onto the head with no step or gap. The saddle meets the head's top line.
-  - The Cyber variant's flush clamp is a fit constraint (:1021), not a defect.
-- Vertical grip (attachments.py:797, :849), against the Double-Bell side photo:
-  - Flare to waist 1.43 → 1.35 (-6 %). Height to waist 1.90 → 2.05 (+8 %). Foot 1.01 → 1.06.
-  - Flare zone 0.30 → 0.27 of the height (-10 %). Stipple panel 0.72 → 0.65 of the face (-10 %).
-  - The studs are seeded and scattered, and no longer read as a grid. Met.
-- The other six parts are unchanged since attempt 2, where they passed. The laser's windage wheel (c_lz right side) is
-  joined and knurled.
-- Checks 2 to 5 are unchanged from attempt 2: build script and .glb only, with no game code, per-frame path or contract.
-  test_attachment_models.gd fails on the base config (QA: 2 of 11).
-Must-fix for the next attempt: none. Before the records commit (non-blocking):
-- attachments.py:867 is a stale duplicate comment line ("The clamp, its cross bolt and nut."). Delete it.
-- Polish, if BL8 is reopened:
-  - Round the vertical grip's clamp top edges, at about a 3 mm radius. In the photo, at 4 % below the top the width is
-    0.78 of the maximum; in the render it is 1.00.
-  - The pistol silencer's collar knurl is about twice the photo's pitch, and its step is a 1 mm washer where the photo
-    has a 5 mm neck.
+Task: BA1 · The barrel models (brief, no TASKS block)
+Attempt: 1 of 4
+Head: dc67076 (brief named c5964de; dc67076 adds only changelog.d/barrel-models.md and FEATURES.md). Targeted tests
+294/294 and gdlint, changelog and wiki gates pass; full tools/check.sh still running on 7e3b7a5. QA Pass, perf Pass.
+Checks: 1 ✗ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
+Score: 6/8 → Retry (not a near miss)
+Proportions (a), side renders (3.69 and 2.92 px/mm) against real M4 AEG parts. All are within 10 %, so (a) passes:
+  barrel L/OD 39.0 vs 40.3 (-3 %) · hop length/barrel 0.141 vs ~0.143 · hop height/length 0.59 vs ~0.62 (-5 %) ·
+  bore/OD 0.68 vs 0.67 · extension tube/rifle barrel OD 17.5/17.2 mm · long/tight length 1.29 vs 1.25 (+3 %).
+Failed checks, with evidence:
+1. [measured] Criterion 6, card legibility. card_tightBore_shown.png is 170x14 px, mean RGB 20,20,22, and the
+   "polished steel" barrel draws black. Steel is metallic 1.0 and roughness 0.16 (barrels.py:58), with no reflections
+   in the picture. Brass reads dark brown (mean RGB 33,32,31). The barrel is 2-3 px thick. The dial, O-rings and
+   bucking can't be read, and the old placeholders were 24 px tall. PLAYTEST.md:1326 promises what the card can't show.
+1. [judgment] (b) Construction:
+   - crown_close.png has a dashed white crack round the barrel where the crown (-3 mm) meets the inner barrel
+     (barrels.py:136, :379; two objects with mismatched rings, 48 vs 52 segments).
+   - ext_close.png has a dark seam where the wrench flats meet the taper at y 23 (barrels.py:342 vs :346). The taper
+     lathe starts at full radius 10.45 behind 8.9 mm flats.
+   - ext_close.png has another seam at the taper and flutes join at y 28: 32 segments meet 56 (:338, :340).
+   - Visible facets on the hop unit's rear sleeve and round underside (24 segments, hop_close.png left end). Visible
+     facets on the centring spacer (36 segments, crown_close.png).
+1. [judgment] (d) Bar:
+   - HOP_BEVEL = 0.0 (barrels.py:98) leaves a moulded chamber with razor-cut edges. It reads as a flat grey extrusion,
+     not an AAA part.
+   - The hop arm sits 3.6 mm under the window's top, so the window reads empty (hop_close.png).
+   - The 14 mm thread is a plain 3 mm stub (EXT_THREAD, :79) and is bare in the alone picture.
+   - 3-fitted.jpg ships with an empty fourth panel.
+8. [measured] ASSETS.md row says 9,740 and 9,890 triangles. The glb has 9,882 (814+9,048+20) and 9,886
+   (4,898+4,968+20).
+Must-fix for the next attempt:
+1. Steel, Brass and Etch: metallic ≤ 0.75 and roughness ≥ 0.3, as the rifle's Metal (0.75/0.38). Or give the picture
+   viewport an environment. Target: steel pixels' mean luminance ≥ 120 on card_tightBore_full.png, and brass with a
+   visibly gold hue.
+2. Barrel cards ≥ 24 px tall in the Customise barrel tab. Either scale the barrel tab on the longest barrel's length
+   only with a 24 px minimum height, or frame each card on its hop-up end. Re-capture card_*_shown.png.
+3. Weld the crown into the inner barrel's mesh with the same segment count, and give the extension's lathes, flats and
+   flutes matching ring counts. Chamfer the taper's start down to the flats' 8.9 mm. Then show no seam in
+   crown_close.png or ext_close.png.
+4. Raise the hop unit to ≥ 48 segments and the spacer to ≥ 52. Set HOP_BEVEL to about 0.0004 m (0.4 mm) with 2
+   segments. Pay for it from the long barrel's hidden length (20 segments → 16 between the O-rings), staying ≤ 10,000.
+5. Raise the hop arm so its top is within 1 mm of the window's top, cut 4 to 5 thread grooves into a 10 mm, 14 mm
+   thread, fill or drop the empty panel, and correct the ASSETS counts.
 Owner should test in the game:
-- The pistol with the silencer and the torch at viewmodel distance: proportions against the slide.
-- ADS through the red dot: the deck sits below the window and the glass is clear (QA's half-moon advisory).
-- The vertical grip's flared top and stipple in first person: does the boxy clamp top show under the handguard?
-- The torch and laser beams leave their emitters on the pistol and the Cyber, and re-check the torch once the Cyber
-  rebuild merges.
-- The variable scope and a first slot swap on the Low preset: any hitch on first draw (performance's prewarm note).
+- Customise › Barrel: both cards read as steel and brass, and the long one is visibly longer.
+- Tight bore fitted: the crown ring is visible in the flash hider at viewmodel distance, with no flicker.
+- Long barrel: the extension sits flush on the barrel behind the front sight, and the silencer starts at its end.
+- Each paint on the long barrel: the extension matches the rifle's barrel.
+- First fit on the Low preset: any hitch from the new materials (performance's prewarm note).

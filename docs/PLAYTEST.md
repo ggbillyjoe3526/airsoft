@@ -1323,9 +1323,10 @@ Every BB in flight is now a proper Blender model, round from every side instead 
 
 The AEG Rifle's two barrels are proper models now, built from the rifle's own barrel (no photos needed).
 
-- [ ] **Customise, Barrel tab:** the Tight-Bore card shows a polished steel inner barrel in its hop-up unit (red
-  bucking at the back, the toothed hop dial on the side); the Long Barrel card a brass inner barrel, longer, through
-  its barrel extension. Each card shows the whole barrel to scale, so the long one is the longer.
+- [ ] **Customise, Barrel tab:** the cards show each barrel turned at an angle, the hop-up end nearest: the Tight-Bore a
+  steel inner barrel in its hop-up unit (red bucking at the back, the toothed hop dial on the side), the Long Barrel a
+  brass inner barrel, longer, through its barrel extension. Both to one scale, so the long one is the longer. The
+  Armory's barrel pictures look the same.
 - [ ] **Fitted:** with the tight bore the rifle looks as it comes, but for a polished ring inside the flash hider; with
   the long barrel the knurled, fluted extension sits between the front sight and the flash hider, which moves out
   10 cm. Fit a silencer on the long barrel: it starts at the extension's end. Nothing pokes through the rifle.
