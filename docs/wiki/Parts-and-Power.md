@@ -19,6 +19,10 @@ A replica with no parts plays exactly as it comes, and bots on the other team ca
 What drives the replica. A **battery** sets an electric replica's rate of fire; **gas** sets a gas replica's energy,
 and a stronger gas kicks harder too. Energy still stops at the [site limit](Replicas#site-limits).
 
+The menus show each one as it looks at the field: the **Standard Battery** a red NiMH brick pack, the **11.1 V LiPo**
+a black stick pack with its balance lead, the gases one 1 litre can whose cap and shoulder are the gas's colour, and
+the springs a painted rifle spring in each spring's colour.
+
 <!-- wiki:parts power -->
 
 ## Optics
