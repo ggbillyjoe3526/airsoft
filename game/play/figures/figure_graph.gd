@@ -125,7 +125,9 @@ static func build(side: FigureSidecar, library: AnimationLibrary, skeleton: Skel
 		if not library.has_animation(name) or i >= cfg.gait_ways.size():
 			push_warning("FigureGraph: no clip or way for %s" % name)
 			continue
-		gait.add_blend_point(_stepping(library, name, skeleton, prefix, cfg), cfg.gait_ways[i] * _pace(side, name), -1,
+		var way := cfg.gait_ways[i]
+		gait.add_blend_point(_stepping(library, name, skeleton, prefix, cfg, Vector3(-way.x, 0.0, way.y).normalized()),
+				way * _pace(side, name), -1,
 				name)
 	var crouch := AnimationNodeBlendSpace1D.new()
 	crouch.min_space = 0.0
@@ -313,9 +315,12 @@ static func additive(anim: Animation, skeleton: Skeleton3D, prefix: String) -> A
 	return made
 
 
-## The time (s) in `anim` where the leg from `cfg.swing_hip` to `cfg.swing_ankle` swings furthest forward, of
-## `cfg.swing_samples` points, posed from the tracks over `skeleton`'s rest.
-static func forward_time(anim: Animation, skeleton: Skeleton3D, prefix: String, cfg: FigureConfig) -> float:
+## The time (s) in `anim` where the leg from `cfg.swing_hip` to `cfg.swing_ankle` swings furthest along `way` (the
+## clip's travel in the model's frame, which faces +Z: ahead by default), of `cfg.swing_samples` points, posed from the
+## tracks over `skeleton`'s rest. Measured along the travel, every clip's leading left leg (GA1: a step back, a step
+## aside) meets FORWARD_PHASE, so neighbouring clips blend in step.
+static func forward_time(anim: Animation, skeleton: Skeleton3D, prefix: String, cfg: FigureConfig,
+		way: Vector3 = Vector3.BACK) -> float:
 	var hip := skeleton.find_bone(cfg.swing_hip)
 	var ankle := skeleton.find_bone(cfg.swing_ankle)
 	if hip < 0 or ankle < 0:
@@ -327,21 +332,23 @@ static func forward_time(anim: Animation, skeleton: Skeleton3D, prefix: String, 
 	for i in samples:
 		var t := anim.length * i / samples
 		var swing := swing_angle(bone_pose(anim, skeleton, prefix, hip, t).origin,
-				bone_pose(anim, skeleton, prefix, ankle, t).origin)
+				bone_pose(anim, skeleton, prefix, ankle, t).origin, way)
 		if swing > best:
 			best = swing
 			at = t
 	return at
 
 
-## How far forward (rad, ahead positive) the leg from `hip` to `ankle` swings, both in the model's frame (it faces +Z).
-static func swing_angle(hip: Vector3, ankle: Vector3) -> float:
-	return atan2(ankle.z - hip.z, hip.y - ankle.y)
+## How far along `way` (rad; a flat unit vector, ahead by default) the leg from `hip` to `ankle` swings, both in the
+## model's frame (it faces +Z).
+static func swing_angle(hip: Vector3, ankle: Vector3, way: Vector3 = Vector3.BACK) -> float:
+	return atan2((ankle - hip).dot(way), hip.y - ankle.y)
 
 
-## A stepping clip: its timeline stretched to one walk cycle, looping, its forward swing at FORWARD_PHASE.
+## A stepping clip: its timeline stretched to one walk cycle, looping, its swing furthest along `way` (its travel in the
+## model's frame) at FORWARD_PHASE.
 static func _stepping(library: AnimationLibrary, name: StringName, skeleton: Skeleton3D, prefix: String,
-		cfg: FigureConfig) -> AnimationNodeAnimation:
+		cfg: FigureConfig, way: Vector3 = Vector3.BACK) -> AnimationNodeAnimation:
 	var node := _clip(library, name)
 	var anim := library.get_animation(name)
 	node.use_custom_timeline = true
@@ -349,7 +356,7 @@ static func _stepping(library: AnimationLibrary, name: StringName, skeleton: Ske
 	node.stretch_time_scale = true
 	node.loop_mode = Animation.LOOP_LINEAR
 	if anim != null and anim.length > 0.0:
-		var forward := forward_time(anim, skeleton, prefix, cfg) / anim.length * TAU
+		var forward := forward_time(anim, skeleton, prefix, cfg, way) / anim.length * TAU
 		node.start_offset = fposmod(forward - FORWARD_PHASE, TAU)
 	return node
 
