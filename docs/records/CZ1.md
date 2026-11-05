@@ -37,7 +37,7 @@
   the sight line at 30.2 (25.7).
 - **Thumb room:** the rear block's skirt (below z -8 mm before the warp) is sunk 0.8 mm, from BL6's 1.2, so it sits
   0.3 mm proud of the frame, as the GBB's slide does; the band above it 0.9 mm.
-- **Budget:** 37,826 triangles in the hands (40k; the owner's ~95 % rule), spent on 4 segments per outline fillet
+- **Budget:** 37,824 triangles in the hands (the glTF count) (40k; the owner's ~95 % rule), spent on 4 segments per outline fillet
   (BL6: 3) and a third bevel segment on the muzzle block and frame, two on the cell, three on the base pad. Figure
   version 240.
 - **The torch part** (`replicaParts/cyber.glb`) rebuilt by `tools/blender/parts/attachments.py`'s `write("cyber")` at
