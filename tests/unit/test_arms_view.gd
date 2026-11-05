@@ -137,6 +137,19 @@ func test_a_robot_wears_the_robot_colours() -> void:
 		assert_eq(arm.get_surface_override_material(i), human[name], "%s back to the glove" % name)
 
 
+func test_every_arms_material_is_offered_to_the_prewarm() -> void:
+	var hands := _hands([&"aeg"])
+	var offered := hands.arms_materials()
+	assert_eq(offered.size(), 2 * cfg.robot_arms.size(), "each of the four materials, human and robot")
+	_show(hands, 0)
+	var arm := _model(hands).find_child("Arm_R", true, false) as MeshInstance3D
+	for i in arm.mesh.get_surface_count():
+		assert_has(offered, arm.get_surface_override_material(i), "the human one worn is prewarmed")
+	hands.arms_kind = FigureMix.ROBOT
+	for i in arm.mesh.get_surface_count():
+		assert_has(offered, arm.get_surface_override_material(i), "the robot one worn is prewarmed")
+
+
 func test_the_arms_are_freed_with_the_view() -> void:
 	var hands := _hands([&"aeg", &"pistol"])
 	_show(hands, 1)

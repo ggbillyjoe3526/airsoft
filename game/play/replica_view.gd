@@ -105,6 +105,11 @@ func set_motion(motion: MotionScale) -> void:
 	_motion = motion
 
 
+## Your arms' materials (ArmsView), for ShaderPrewarm, so the first replica shown or switched to doesn't hitch.
+func arms_materials() -> Array[Material]:
+	return _arms.materials() if _arms != null else [] as Array[Material]
+
+
 ## The optics' glass materials, for ShaderPrewarm, with the glass's picture readied now (none without an optic's glass).
 func prewarm_glass() -> Array[Material]:
 	var out: Array[Material] = []
