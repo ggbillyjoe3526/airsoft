@@ -1,15 +1,16 @@
-Task: BL3 · AEG Rifle rework · head working tree (uncommitted) · Verdict: Pass
-Run: no game run; model-only change (no GDScript, scenes or config), so measured by parsing the glb JSON chunks (python3 -I) · budget: no pipeline/perf-budget.json lines; judged against the contract (replicas 40,000 tris in hands, 2K textures, 7 materials) and main's glbs
-Metrics (main -> now, measured from glb accessors):
- aeg.glb    file 1,126,816 -> 1,131,788 B (+0.4 %) · meshes 12 -> 12 · primitives (draw calls) 26 -> 26 · materials 7 -> 7 (limit 7, ok) · textures/images 0 -> 0 · nodes 31 -> 31
- aeg.glb    triangles all meshes 40,038 -> 40,156 (+0.3 %); in the hands (minus Figure 340) 39,816 (limit 40,000, ok, 184 spare; matches the build log)
- sniper.glb file 1,157,204 -> 1,162,692 B (+0.5 %) · meshes 12 · primitives 26 -> 26 · materials 7 -> 7 (ok) · textures 0 · nodes 31
- sniper.glb triangles all meshes 40,178 -> 40,296 (+0.3 %); in the hands (minus Figure 360) 39,936 (limit 40,000, ok, only 64 spare)
-Regressions (> 10 % worse): none
-Blocking findings: none
+Task: GA1 · head a1bbbc9 · Verdict: Pass
+Run: figure_bench headless, 11 figures, 600 frames (10 s), eye in the middle, same machine, this head vs origin/main worktree · budget: no baseline yet (no pipeline/perf-budget.json), judged against targets and origin/main
+Metrics (measured, script time; noisy, single run each): animation per figure mean 116.0 us / 128.6 (ok), p99 308 / 387 (ok); skeleton per figure mean 24.5 us / 25.2 (ok), p99 59 / 89 (ok); both, 11 figures mean 1.545 ms / 1.692 ms (ok). Frame times on owner's hardware only; no rendered run (no GPU), so draw calls not measured.
+Regressions (> 10 % worse): none (the differences are inside run-to-run noise, in this head's favour).
+Blocking findings: none.
+ - Hitbox.step_walk_cycle/cycle_length/_by_speed (game/sim/hitbox.gd:173-205): judgment, no allocation. PackedFloat32Array reads, a loop of at most 3 steps, early return on moved <= 0 (standing still costs nothing). Two lerps per moving character per tick, negligible.
+ - HitPose.pose steady turn (game/sim/hit_pose.gd:97-104): judgment, Basis/float values only (stack), no heap; still_heading is cached.
+ - HitFit.still_heading (game/sim/hit_fit.gd:114-119): judgment, first call reads two samples and caches in _still_headings (Vector2 NaN sentinel); later calls are one lerp_angle. No per-tick allocation. Cache is per fit resource, not per character.
+ - FigureBend.steady_upper (game/play/figures/figure_bend.gd:85-96): measured, skeleton per figure +0 (24.5 vs 25.2 us). Two get_bone_global_pose and one set per figure per frame; Transform3D/Basis are values. Early-outs on steady <= 0.
 Advisory:
- - tools/blender/replicas/sniper.py (derives from aeg.py): sniper hands total is 39,936, 64 tris under the budget; any further AEG body growth will push the sniper over. Judgment, not blocking.
- - Body is 30,996 tris of the 39,816 (78 %); if later work needs room, the Body mesh is where to trim. Judgment.
- - Textures: none embedded (flat materials), so no 2K texture or VRAM cost; file size delta is mesh data only (+5 KB each). Measured.
- - No code, scene or config change: no per-frame allocations, node or resource lifetime, or prewarm impact (7 materials unchanged, so no new shader variants). Judgment.
-Fixes: not needed.
+ - game/sim/hit_pose.gd:5-6 doc line is now over the 120-column style (gdlint line length may flag it); not a perf matter.
+ - Asset size: human.glb 4.03 -> 4.48 MB (+11 %), robot.glb 3.25 -> 3.70 MB (+14 %; the brief's 3.54 is not what git shows), hit_fit.tres 56 -> 72 KB. About +0.9 MB install in total, from old clip data left unused in the binary chunk (splice.mjs). Judgment: within noise of a multi-hundred-MB install, but stripping the dead chunk would win it back; owner sets the install budget, none recorded. Load time unchanged: models 60.2 ms vs 59.4 ms, set_body 154 vs 157 ms (measured).
+ - hit_fit.tres phases 24 -> 32: HitFit tables built once on first use, so +33 % one-time memory/build for the tables only (judgment); no per-tick cost, since sampling is indexed with interpolation.
+ - tools/gait_pictures.gd and tools/blender/bot-figure/gait/* are dev-only; confirm they are excluded from export presets (judgment, not checked).
+Fixes: none required.
+Unexplained: none. The bench is scripted (no simulation), so Hitbox.step_walk_cycle and HitPose per tick are judged by reading, not by a measured match run; no --perf bot match was run.
