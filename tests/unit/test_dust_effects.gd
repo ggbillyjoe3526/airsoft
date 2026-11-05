@@ -197,7 +197,7 @@ func test_the_contact_shadow_lies_under_the_feet_and_stays_on_the_floor_off_it()
 func test_the_figures_muzzle_is_read_from_the_model() -> void:
 	var model := (load(FigureView.MODEL_DIR + "pistol.glb") as PackedScene).instantiate()
 	var at := FigureView._in_model(model.find_child(ReplicaParts.MUZZLE_NODE, true, false) as Node3D, model)
-	assert_almost_eq(at, Vector3(0.0, 0.015, -0.104), Vector3.ONE * 1e-3, "the pistol's muzzle point")
+	assert_almost_eq(at, Vector3(0.0, 0.0105, -0.0996), Vector3.ONE * 1e-3, "the pistol's muzzle point (BL2)")
 	model.free()
 
 

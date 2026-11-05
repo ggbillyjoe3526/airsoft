@@ -1231,6 +1231,20 @@ Dev content on for the rifle. The numbers came from bots; these need you.
   the bolt-action model is next.
 - [ ] **Frame rate:** no drop against before, at 8v8 on Ultra and Low.
 
+## The new GBB Pistol model (BL2)
+
+- [ ] **In your hands:** the GBB Pistol is the striker pistol from your photos (squared slide with rear serrations,
+  a flush barrel, a railed dust cover, a raked grip with stippled panels and finger grooves, a thumb rest). Is
+  anything poking into the view while you walk, sprint, lean and aim?
+- [ ] **Iron sights:** aim. The rear sight's U and the front dot line up on the crosshair.
+- [ ] **Moving parts:** fire (the slide blows back), empty it (the slide locks back), reload (the magazine release
+  presses, the magazine drops and a new one goes up the well) and Inspect (the slide draws back a little).
+- [ ] **Figures:** a bot reloading its pistol pulls the old magazine out of the grip and seats the new one, both in
+  the left hand.
+- [ ] **Paints and parts:** in Customise, try each paint and every part: the laser and torch sit under the dust
+  cover, the silencer on the muzzle and the extended magazine in the grip with its base pad below.
+- [ ] **Menus:** the Loadout and Armory pictures show the new pistol, sharp and to scale.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
