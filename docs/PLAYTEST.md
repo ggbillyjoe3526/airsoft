@@ -1294,6 +1294,24 @@ The bolt-action in the grey chassis from your first sniper photo (2026-11-05). D
   silencer on the barrel's end in place of the cap.
 - [ ] **Hold:** the right hand holds the grip in first person and on the bots; the rifle sits right in the hands.
 
+## The attachments from your photos (BL8)
+
+Every attachment rebuilt from your reference photos (2026-11-05). Where a folder mixed styles, the model follows the
+style most of its photos show.
+
+- [ ] **Red dot:** a closed micro red dot on a low rail riser. Aim: the dot sits mid-window and the view round the
+  small window stays open; the rifle sits a little nearer your eye than before (the window is smaller than the old
+  round one).
+- [ ] **2x scope:** the magnifier on its hinged mount. Aim: the magnified view fills the eyepiece with no dark ring
+  or frame showing through the glass.
+- [ ] **Variable scope:** the prism scope with the red fibre front sight. Aim and wheel through 2x to 6x on the AEG
+  and the sniper rifle: the view fills the eyepiece.
+- [ ] **Grips:** the short vertical grip and the swept angled grip under the AEG's handguard, nothing poking through.
+- [ ] **Silencers:** the rifle's tube on the AEG and sniper; the pistol's short, stout one on its knurled collar.
+- [ ] **Laser and torch:** under the GBB Pistol's rail, alone and together (the torch hangs under the laser); the
+  torch on the Cyber Pistol and on the AEG's right side. At night the beam leaves the torch's head.
+- [ ] **Customise and paints:** each part in each paint; the Loadout and Armory pictures show them sharp and to scale.
+
 ## The BB model (BM1)
 
 Every BB in flight is now a proper Blender model, round from every side instead of the old eight-sided ball.
@@ -1303,6 +1321,13 @@ Every BB in flight is now a proper Blender model, round from every side instead 
 - [ ] **At range:** BBs still read as small bright dots with a faint trail at 20 to 40 m, on pale walls and the sky.
 - [ ] **Glowing BBs:** on Woodland at night, glowing BBs are round green balls with their streak, as before.
 - [ ] **Frame rate:** a full-auto magazine dump on Low keeps its frame rate (F3 box).
+
+## GBB Pistol sights and port (GS1)
+
+- [ ] **Aim:** aim the GBB Pistol in the Range. The front post with its white dot stands in the rear sight's notch,
+  its top level with the rear sight's top, a sliver of light either side; the BBs land on the post's top.
+- [ ] **Port:** Inspect the pistol and look at the top of the slide: the barrel fills the ejection port with no dark
+  gap round it, and the slide still blows back and locks back cleanly.
 
 ## Reporting what you find
 
