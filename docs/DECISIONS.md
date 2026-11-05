@@ -991,6 +991,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   gains nothing there for four times the memory.
 - **Menus stay smooth (owner, 2026-10-12; IM1).** "The UI should always feel smooth and responsive", with a loading
   screen allowed for the tutorial, range, maps and matches.
+- **The human figure is built in parts, one owner each (BL10 to BL13, 2026-11-05; owner: "split the models up into
+  their own threads").** `Body` (clothes, gloves, boots) is BL10's, `Head_*` BL11's, `Kit`, `Kit_Pack` and `Kit_Radio`
+  BL12's, `Kit_Pads` BL13's; each is spliced into `human.glb` by node (`tools/blender/figures/splice_part.py`), leaving
+  the skeleton, the clips and the other parts alone. Triangles at LOD0/1/2 within the 60k/20k/6k figure budget: body
+  34k/11k/3.3k, heads 8k/2.6k/0.8k, gear 14k/4.5k/1.5k, pads 3k/1k/0.3k. Whoever merges second reruns their splice on
+  the merged file and updates `tests/unit/test_figure_body.gd`'s counts.
 - **The install size budget is 500 MB installed (Claude's recommendation, 2026-10-18; the owner asked for one and may
   change it).** Roughly 100 MB is Godot and today's assets (an estimate until a release build measures it); the rest
   leaves room for the owner's own models, two dressed fields with baked light, and sound. Per-asset limits stay in
