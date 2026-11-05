@@ -64,7 +64,7 @@ MATERIALS = {
     "Steel": (0xe2e5e8, 0.3, 0.4),
     "Brass": (0xe6b25a, 0.32, 0.4),
     "Etch": (0x8a8e94, 0.45, 0.4),
-    "Chamber": (0x2a2c30, 0.62, 0.0),
+    "Chamber": (0x5c6068, 0.62, 0.0),
     "Bucking": (0xa8322c, 0.78, 0.0),
     "Bore": (0x070708, 0.9, 0.0),
 }
@@ -84,7 +84,7 @@ CROWN_BACK, CROWN_FACE = -3.0, 7.0
 # (its length and the grooves cut in it), and its inner barrel's crown 4 mm past the thread.
 EXT_LEN = 100.0
 EXT_THREAD = 10.0
-THREAD_GROOVES = 3
+THREAD_GROOVES = 4
 LONG_CROWN_FACE = EXT_LEN + EXT_THREAD + 4.0
 # The rifle's barrel at its end (aeg.py: 8.6 mm radius) and the extension's coupling over its thread.
 OUTER_R = 8.6
@@ -96,7 +96,7 @@ FLUTE_R = 1.25
 FLUTE_DEPTH = 0.85
 FLUTE_Y = (31.0, 84.0)
 # O-ring spacers along each inner barrel (mm, part space) and the fluted centring spacer near the muzzle.
-O_RINGS = {"tightBore": (-205.0, -125.0, -52.0), "long": (-205.0, -110.0)}
+O_RINGS = {"tightBore": (-205.0, -125.0, -52.0), "long": (-160.0,)}
 SPACER_Y = {"tightBore": (-34.0, -18.0)}
 # The spacer's radius (mm).
 SPACER_R = 6.6
@@ -105,12 +105,12 @@ SPACER_R = 6.6
 # (mm). The extension's lathes, flats and flutes share one count round, as each crown and its inner barrel do, so no
 # seam opens where they meet.
 FLUTE_END_ROWS = 3
-FLUTE_AROUND = 72
-KNURL_AROUND = 40
-KNURL_PITCH = 1.375
+FLUTE_AROUND = 64
+KNURL_AROUND = 36
+KNURL_PITCH = 1.5
 HOP_BEVEL = 0.0
 # Points round each turned piece: each inner barrel and its crown, the hop-up unit, the extension.
-SEG = {"tightBore": 52, "long": 20, "hop": 28, "extension": 36}
+SEG = {"tightBore": 52, "behind": 36, "long": 20, "crown": 52, "hop": 28, "sleeve": 48, "extension": 32}
 HOP_CHAMFER = 0.45
 # The rotary hop-up dial: its radius and teeth (mm).
 DIAL_R = 7.6
@@ -164,9 +164,11 @@ def crown(name: str, face: float, mat: str, seg: int) -> bpy.types.Object:
     return hs.finish(b.build(), bevel=0.0)
 
 
-def inner_barrel(b: hs.Builder, kind: str, front: float, mat: str, seg: int) -> None:
+def inner_barrel(b: hs.Builder, kind: str, front: float, mat: str, seg: int, seg_back: int) -> None:
     """The inner barrel from inside the bucking to the crown's back (`front`): the C-clip's groove at the chamber's
-    nose, (tight bore) an etched band, the O-ring spacers in their grooves and the fluted centring spacer."""
+    nose, (tight bore) an etched band, the O-ring spacers in their grooves and the fluted centring spacer. Behind the
+    spacer the barrel is turned with `seg_back` points, in front of it (seen past the crown) with `seg`; the change
+    is under the spacer."""
     clip = HOP_Y + 23.0
     prof = [(BARREL_REAR, 0.0), (BARREL_REAR, BARREL_R - 0.35), (BARREL_REAR + 0.35, BARREL_R),
             (clip - 0.2, BARREL_R), (clip, BARREL_R - 0.45), (clip + 0.9, BARREL_R - 0.45), (clip + 1.1, BARREL_R)]
@@ -175,14 +177,19 @@ def inner_barrel(b: hs.Builder, kind: str, front: float, mat: str, seg: int) -> 
         # Two fine rings bound a matt etched band (the maker's marks, left plain).
         prof += [(etch[0] - 0.5, BARREL_R), (etch[0] - 0.3, BARREL_R - 0.12), (etch[0], BARREL_R - 0.12),
                  (etch[0], BARREL_R)]
-        at.lathe_y(b, prof, mat, seg)
-        at.lathe_y(b, [(etch[0], BARREL_R), (etch[1], BARREL_R)], "Etch", seg, cap=False)
+        at.lathe_y(b, prof, mat, seg_back)
+        at.lathe_y(b, [(etch[0], BARREL_R), (etch[1], BARREL_R)], "Etch", seg_back, cap=False)
         prof = [(etch[1], BARREL_R), (etch[1], BARREL_R - 0.12), (etch[1] + 0.3, BARREL_R - 0.12),
                 (etch[1] + 0.5, BARREL_R)]
     for y in O_RINGS[kind]:
         prof += [(y - 1.1, BARREL_R), (y - 0.9, BARREL_R - 0.35), (y + 0.9, BARREL_R - 0.35), (y + 1.1, BARREL_R)]
-    prof += [(front, BARREL_R), (front, 0.0)]
-    at.lathe_y(b, prof, mat, seg)
+    split = 0.5 * sum(SPACER_Y[kind]) if kind in SPACER_Y else None
+    if split is None:
+        prof += [(front, BARREL_R), (front, 0.0)]
+        at.lathe_y(b, prof, mat, seg)
+    else:
+        at.lathe_y(b, prof + [(split, BARREL_R), (split, 0.0)], mat, seg_back)
+        at.lathe_y(b, [(split, 0.0), (split, BARREL_R), (front, BARREL_R), (front, 0.0)], mat, seg)
     for y in O_RINGS[kind]:
         torus_y(b, y, BARREL_R + 0.25, 0.85, "Rubber", 28 if seg > 32 else 16, 6)
     # The centring spacer: a polymer sleeve that holds the barrel in the outer barrel's middle, its ends chamfered and a
@@ -247,9 +254,9 @@ def hop_unit(seg: int) -> list:
     b.loft([[(x * MM, y * MM, z * MM) for x, z in ring] for ring, y in
             ((inset, -20.0), (outline, -20.0 + c), (outline, 20.0 - c), (inset, 20.0))], "Chamber")
     # The rear sleeve round the nozzle's way in and the front nose with the C-clip's slot.
-    at.lathe_y(b, [(-25.0, 7.6), (-24.6, 8.8), (-20.2, 8.8), (-20.0, 8.6)], "Chamber", seg)
+    at.lathe_y(b, [(-25.0, 7.6), (-24.6, 8.8), (-20.2, 8.8), (-20.0, 8.6)], "Chamber", SEG["sleeve"])
     at.lathe_y(b, [(20.0, 8.6), (21.4, 7.2), (24.0, 7.2), (24.0, 5.4), (25.0, 5.4), (25.0, 6.4), (27.0, 6.4),
-                   (27.0, BARREL_R + 0.1)], "Chamber", seg)
+                   (27.0, BARREL_R + 0.1)], "Chamber", SEG["sleeve"])
     # The magazine's seat: a block under the front with a rounded nose and a groove for the magazine's lip.
     seat = hs.fillet([(-4.0, -6.0, 0.0), (19.0, -6.0, 0.0), (19.0, -12.0, 2.5), (14.0, -17.0, 2.0),
                       (1.0, -17.0, 1.5), (-4.0, -12.5, 1.0)], 3)
@@ -297,7 +304,7 @@ def hop_unit(seg: int) -> list:
     c = hs.Builder("hop_clip", ["Steel"])
     pts = []
     gap = math.radians(34.0)
-    n = 24
+    n = 16
     for i in range(n + 1):
         t = -math.pi / 2 + gap / 2 + (math.tau - gap) * i / n
         pts.append((math.cos(t) * 6.9, math.sin(t) * 6.9))
@@ -397,9 +404,9 @@ def extension(seg: int) -> bpy.types.Object:
     at.knurl(b, 2.0, 13.0, COUPLING_R - 0.38, COUPLING_R + 0.02, KNURL_AROUND, KNURL_PITCH, "Metal")
     at.lathe_y(b, [(13.0, COUPLING_R), (13.6, COUPLING_R - 0.5), (14.8, COUPLING_R - 0.5), (15.4, COUPLING_R)], "Metal",
                seg)
-    # The shoulder past the flats, chamfered up from the flats' faces, then the taper to the tube.
-    at.lathe_y(b, [(23.0, FLAT_HALF), (23.4, COUPLING_R - 0.15), (24.8, 9.7), (26.6, 8.9), (28.0, OUTER_R)], "Metal",
-               seg)
+    # The shoulder the flats are milled up to (its face closes the flats' ends), then the taper to the tube.
+    at.lathe_y(b, [(23.0, FLAT_HALF - 0.3), (23.0, COUPLING_R), (24.2, COUPLING_R), (25.4, 9.7), (26.6, 8.9),
+                   (28.0, OUTER_R)], "Metal", seg)
     fluted_tube(b, 28.0, 87.6, FLUTE_AROUND, "Metal", seg)
     # The thread: crests and V-shaped roots, a chamfer at its tip.
     pitch = EXT_THREAD / (THREAD_GROOVES + 0.5)
@@ -411,7 +418,8 @@ def extension(seg: int) -> bpy.types.Object:
     pieces.append(hs.finish(b.build(), bevel=0.0))
     # The wrench flats, their edges eased.
     b = hs.Builder("ext_flats", ["Metal"])
-    b.prism([(x * MM, z * MM) for x, z in flats_outline(COUPLING_R, FLAT_HALF, seg)], "y", 15.4 * MM, 23.0 * MM,
+    # Its back end runs on into the shoulder, so its eased edge there is buried and the flats meet the face cleanly.
+    b.prism([(x * MM, z * MM) for x, z in flats_outline(COUPLING_R, FLAT_HALF, seg)], "y", 15.4 * MM, 23.8 * MM,
             "Metal")
     pieces.append(hs.finish(b.build(), bevel=0.00025, segments=1))
     # The lock ring and its four spanner notches.
@@ -429,10 +437,10 @@ def extension(seg: int) -> bpy.types.Object:
 
 # ------------------------------------------------------------------------------------------------------- parts
 
-def inside(kind: str, mat: str, seg_barrel: int, seg_hop: int, front: float) -> bpy.types.Object:
+def inside(kind: str, mat: str, seg_barrel: int, seg_back: int, seg_hop: int, front: float) -> bpy.types.Object:
     """The part's `_Inside` child: its inner barrel (to the crown's back) and the hop-up unit, in part space."""
     b = hs.Builder("barrel_%s%s" % (kind, INSIDE_SUFFIX), [mat, "Etch", "Rubber", "Chamber"])
-    inner_barrel(b, kind, front, mat, seg_barrel)
+    inner_barrel(b, kind, front, mat, seg_barrel, seg_back)
     barrel = hs.finish(b.build(), bevel=0.0)
     hop = hs.join("hop", hop_unit(seg_hop))
     hop.data.transform(Matrix.Translation(Vector(mm(0.0, HOP_Y, 0.0))))
@@ -446,8 +454,8 @@ def figure(name: str, prof: list, mat: str, parent: bpy.types.Object) -> None:
 
 
 def build_tight_bore() -> bpy.types.Object:
-    ob = crown("barrel_tightBore", CROWN_FACE, "Steel", SEG["tightBore"])
-    inner = inside("tightBore", "Steel", SEG["tightBore"], SEG["hop"], CROWN_BACK)
+    ob = crown("barrel_tightBore", CROWN_FACE, "Steel", SEG["crown"])
+    inner = inside("tightBore", "Steel", SEG["tightBore"], SEG["behind"], SEG["hop"], CROWN_BACK)
     inner.parent = ob
     figure("barrel_tightBore", [(CROWN_BACK, BARREL_R), (CROWN_FACE, BARREL_R)], "Steel", ob)
     return ob
@@ -455,9 +463,9 @@ def build_tight_bore() -> bpy.types.Object:
 
 def build_long() -> bpy.types.Object:
     ext = extension(SEG["extension"])
-    tip = crown("long_crown", LONG_CROWN_FACE, "Brass", SEG["long"])
+    tip = crown("long_crown", LONG_CROWN_FACE, "Brass", SEG["crown"])
     ob = hs.join("barrel_long", [ext, tip])
-    inner = inside("long", "Brass", SEG["long"], SEG["hop"], LONG_CROWN_FACE - (CROWN_FACE - CROWN_BACK))
+    inner = inside("long", "Brass", SEG["long"], SEG["long"], SEG["hop"], LONG_CROWN_FACE - (CROWN_FACE - CROWN_BACK))
     inner.parent = ob
     figure("barrel_long", [(0.0, COUPLING_R), (EXT_LEN, OUTER_R)], "Metal", ob)
     at.child_empty("barrel_long_BarrelEnd", mm(0.0, EXT_LEN, 0.0), ob)
