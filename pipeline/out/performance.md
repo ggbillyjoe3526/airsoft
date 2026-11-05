@@ -1,17 +1,14 @@
-Task: none (BL8) · head 4a17278 · Verdict: Pass
-Run: no match run (the only code change is tools/blender/parts/attachments.py, a build script that never ships; a unit test was added; no GPU in the container) · budget: no baseline yet, judged against docs/CC0_ASSETS.md > Size limits, the targets and base 106a53f
-Metrics (measured, from the glTF JSON of each .glb; 0 images in all, so no VRAM or import cost):
-- File size: aeg 1,339 KB, sniper 1,250 KB, pistol 521 KB, cyber 93 KB / 2 MB limit (ok). Was 1,208 / 1,090 / 322 / 109 KB at 61dc3d6; total about 4.4 MB of the 500 MB install.
-- Triangles per part, max: optic_scopeVar 9,960 / 10,000 (ok, 0.4 % margin; was 9,912). scope2x 6,388, grip_vertical 5,192 (was about 3,500, stipple studs), redDot 5,510, pistol max 4,926, cyber max 3,066. No part over the cap.
-- Surfaces per part, max: 6 (scopeVar), 5 (pistol, cyber), 4 (redDot, scope2x), 3 (grip_vertical). Unchanged except the torch gaining a Led surface (the last report had 4).
-- Worst-case AEG fit (scopeVar + vertical grip + torch + hiCap mag + silencer + barrel): about 20k part triangles, 24 part surfaces (24 extra draw calls, 1 blended). It fits the 40,000 hands cap only if the body is under about 20k (judgment: body not counted).
-Regressions (> 10 % worse): none at runtime. Asset growth is by design (pistol +62 % in file size, grip about +48 % in triangles).
-Blocking findings: none.
+Task: BA1 · head 7e3b7a5 · Verdict: Pass
+Run: no match run (headless, no GPU; the code change is one fit-time free, not per frame) · budget: no perf-budget.json in tree, judged against targets, docs/CC0_ASSETS.md > Size limits and 724956a
+Metrics: aeg.glb 1,977,576 B / 2 MB parts-file limit (ok, measured; 2,000,000 B leaves 22,424 B, 1.1 %; 2 MiB leaves 119 KB) · triangles a part 9,882 and 9,886 / 10,000 (ok, measured by author, 118 and 114 left) · hand draw cost: crown 814 tris 2 surfaces, extension 4,898 tris 3 surfaces (ok, judgment) · fit free ~43 us, whole-file instantiate ~116 us after load (measured, 20 runs, headless)
+Regressions (> 10 % worse): none measured in code. File size +44 % (1.37 -> 1.98 MB), within budget; the file is only loaded on a fit, not at start.
+Blocking findings: none
+ - replica_parts.gd:71-74 remove_child + free is correct (judgment, measured 0 orphans in my probe): the _Inside child is detached then freed, its meshes are shared resources owned by the glb, so nothing leaks and the node count in hand drops. It runs once per fit (menu change, spawn), not per frame, and allocates one NodePath + String concat per slot taken. Fine.
+ - Figure path (take figure=true) uses the 20-triangle _Figure copy and never sees _Inside; unused parts are freed with holder.free(). Fine (judgment).
+ - Picture path (replica_pictures.gd:232 take, not fit) keeps _Inside on purpose; it is freed with its node when the picture is torn down (judgment).
 Advisory:
-- Prewarm (measured by reading, not drawn): play_session.gd:737 view.materials() is the FlagView's (inside the ATTACK_DEFEND branch, lines 728-737), not the replica parts. replica_view.gd:100 prewarm_glass() returns only held.window.material. shader_prewarm.gd draws only the materials it is handed as specks. So the fitted parts' own materials (metal, polymer, Lens, LensDot, Fibre, Led, reflector) are not prewarmed (judgment: whether they share an already-listed material was not checked).
-- They are still drawn before play for the replica in hand: replica_view.gd:274 shows only the active slot, and the hands are visible from the first frame (line 144), while the match holds for the prewarm (play_session.gd:1220). So the active replica's parts compile during the hold, not mid-match. A part's material first shows mid-match only on a first swap to the other slot, a first fire-mode or attachment change, or the torch Led and the blended LensDot lit for the first time (judgment, not verified, no GPU). Godot 4.x compiles pipelines asynchronously via ubershaders, which softens the hitch.
-- Because it is 4.4 MB of geometry with 24 draw calls, a rendered check on the Low preset (F3 overlay, Sniper with every part fitted) is still worth doing.
-- optic_scopeVar has 40 triangles of room: any more detail needs a trim.
-- The diff adds no per-frame or per-tick allocation, nodes, timers or connections to free (measured by reading the diff).
-Fixes: none required. Ranked if a first-swap hitch shows: (1) append each held replica's part materials (ReplicaParts.Fit) to the list in replica_view.prewarm_glass(); (2) make the inactive slot's parts drawn once during the hold.
-Unexplained: none. Frame time and draw calls need the owner's rendered run.
+ - aeg.glb headroom is thin (22 KB under 2,000,000 B; 119 KB under 2 MiB). Any later AEG part (optic, stock, more barrels) will breach the 2 MB limit; say which unit the limit uses, and plan to trim the _Inside meshes (9,048 and 4,968 tris, only seen in the menu picture) or split them into a menu-only file before the next part. Biggest lever for size and load time.
+ - Load cost: ReplicaParts.take loads the whole glb (the PackedScene is cached by ResourceLoader, so repeat fits are ~0.1 ms instantiate; the first load reads 1.98 MB and builds ~20k triangles of buffers, including the _Inside meshes that are then freed). One-off, at match start or menu open, not per frame (judgment).
+ - Six new materials (Steel, Brass, Etch, Chamber, Bucking, Bore): only Steel/Brass/Etch/Metal-style ones can appear in hand (crown); Chamber, Bucking and Bore sit on _Inside and never draw in hand. The BL8 record already notes parts' own materials are not prewarmed (docs/records, line 54), so the crown's materials can hitch on first draw; this is the same existing gap, not new. Add parts' materials to the prewarm list in BA2/Beta (judgment).
+ - Extra surfaces in hand: +2 (crown) or +3 (long barrel) draw calls per shadow-casting pass; negligible next to the 40,000-triangle replica budget (hands total stays well under; judgment).
+Fixes (none required), ranked: 1. keep headroom in aeg.glb by moving _Inside geometry to menu-only data before the next part; 2. add parts' materials to shader prewarm.
