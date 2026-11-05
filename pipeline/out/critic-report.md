@@ -1,33 +1,17 @@
-Task: BL6 · The Cyber Pistol rebuilt in Blender from code (no task block; judged against the brief)
+Task: AU7 · The smoke and flash bombs re-cut to sound like the owner's recordings
 Attempt: 2 of 4
-Head: 229bd55 (git rev-parse HEAD). CI passed on e11a317. At 229bd55, Lint, Review line, Callout guards and two match guards are green; unit tests 1-4 and 13 guard jobs are still running.
+Head: d98953e plus the uncommitted check-7 fix in game/play/sim_audio.gd (checks: the suite was running at review time; re-run on the commit that adds this fix)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept (holds only once every CI job at 229bd55 is green; any red job makes it Retry)
-Evidence:
-1. Figure fixed: tools/blender/replicas/cyber.py:750-754 builds the outline from GUARD_LOOP[:5] (cyber.py:133). (50.5,-23) is gone.
-   - No edge pair of the 13-point outline crosses. Its area is 11,468.5 mm2, and both caps in the glb have that same area.
-   - Rasterised at 0.25 mm, both caps have 0 overlapping cells (e11a317: 755 and 8,410 cells, up to 3 deep).
-   - The Figure is 240 tris, closed (360 edges each used twice) and has no degenerate faces. Its guard front stands at 52 mm, as on the hands model.
-   - Against e11a317, only the Figure mesh changed. Body, Slide, Trigger, Selector and Magazine are byte-identical, as are nodes, skins, materials, the animation data and the inverse bind matrices. So the attempt-1 ratios still hold (all within 5 %; the grip's 23 % is ruled by the owner).
-   - The renders cyber-v11-q_front and cyber-v11-q_rear at head show the moved guard joined to the front block's foot. Nothing floats, no gap opens under the loop, and the teeth sit clear in front of it.
-2. No game/ diff. The trigger bone, its inverse bind matrix and its keys moved together (QA: -0.012 in y, nothing else). No code calls find_bone on the trigger.
-3/5. No runtime code: cyber.py is an offline tool.
-4. Asset only. test_cp1_qa.gd:294-306 loads the Figure and its materials, and the material names are unchanged.
-6. Original design: no text, no logos, no brand names. Toy colours, ruled by the owner.
-7. figure() is still one short function, and the outline now comes from the shared constant instead of a second copy.
-8. docs/records/BL6.md fixes everything attempt 1 named:
-   - :17-18 records the 23 % deeper grip.
-   - The "safety blade" is gone.
-   - :30-31 records the trigger bone's move.
-   - :55 records the owner's 09:52 "Perfect".
-   - :10 adds the attempts row.
-QA (qa-report.md, 229bd55): Pass. Performance (performance-report.md, e7725d6): Pass. It still holds, because the hands' triangles are unchanged and the Figure's count stays 240.
-Nit, not failed: the record (:37) gives 31,330 triangles for the hands. The glb has 31,328 (24,480 + 3,108 + 2,760 + 544 + 436). Fix it the next time the record is touched.
-Must-fix for the next attempt: none. Merge only after every CI job at 229bd55 is green.
-Owner should test in the game:
-- Grip: it is 23 % deeper than the old one (63 vs 50.5 mm). Does it look right in your hand view?
-- Fire: the trigger swings from its top with no jump, and the slide kicks.
-- Aim: the front post and rear notch line up as before.
-- A bot carrying it, near and far: the guard front now matches your own.
-- The q_front view shows a small step at the top front corner of the guard opening. Does it read as intended up close?
-- Fit the torch: it should clear the teeth. Then switch to Realistic colours: grey, no glow.
+Score: 8/8 → Accept, once pipeline/out holds QA's and performance's AU7 reports for this head with Pass (Retry while either is missing or fails)
+Failed checks, with evidence: none. Measured on the cues (tools/cut_recordings.py helpers):
+- Bounce: every cue now starts on its knock (-12 to -15 dB in the first 20 ms; the 0.18 s pre-sound is gone). Cues are 0.6 s and 30 dB down by 0.34 to 0.38 s; bounce_hold 0.45 (game/config/sound_config.gd:79) sits just past that, so a bomb's next visible bounce 0.4 to 0.6 s later is heard.
+- Pin: starts on its click (-21 dB at 0 to 20 ms), clean decay to -90 dB by 0.24 s, no noise-floor tail. Crest 22 to 24 dB, as in his raw takes.
+- Flash: clean, crest 10 dB (his raw pop 11.8, the old clipped cue 4.0). bang_gain 1.4 (sound_config.gd:81) leaves the master limiter about 2 dB at close range, not the 5 dB that 2.0 gave.
+- Check 7: game/play/sim_audio.gd:258 calls `_mechanism(..., _cfg.pin_gain)` (gain defaults to -1, meaning mechanism_gain) instead of the copied body.
+- Tests: the onset test and `bounce_hold < KNOCKS_MOST` fail on attempt 1's cues; the stale-time guard is at sim_audio.gd:268-270. Record and README claims match the measurements.
+Must-fix for the next attempt: none. Commit the sim_audio.gd fix and file the QA and performance reports.
+Owner should test in the game (at most 6, one line each):
+- Throw a smoke onto open ground and lob one high: does each visible bounce clatter, on time?
+- Your own pin pull and a bot's: a clean click, other sounds steady (the click peaks about +3 dBFS into the limiter)?
+- A flash at your feet and at 15 m: a clean pop, and is 1.4 loud enough?
+- The smoke going off (the spray only): noticeable from 10 to 20 m?

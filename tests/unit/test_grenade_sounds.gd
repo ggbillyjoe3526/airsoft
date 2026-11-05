@@ -92,6 +92,13 @@ func test_a_new_throw_from_the_same_slot_starts_its_can_afresh() -> void:
 	assert_eq(_bounce_at(0, 2.0 + cfg.bounce_hold * 0.5), 1, "a new bomb in the slot")
 
 
+func test_a_can_started_before_the_clock_went_back_does_not_silence_a_bounce() -> void:
+	_throw(0)
+	assert_eq(_bounce_at(0, 30.0), 1)
+	# A new match's clock starts again, its throw from this slot unheard (skipped).
+	assert_eq(_bounce_at(0, 30.0 - cfg.bounce_hold * 0.5), 1, "a time from before the clock went back is stale")
+
+
 ## When (s) `x` first comes within 10 dB of its peak.
 func _onset(x: PackedFloat32Array) -> float:
 	var peak := 0.0

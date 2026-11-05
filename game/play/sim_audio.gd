@@ -255,9 +255,7 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				_play(&"magCatch", catcher.eye(_body) if catcher != null else e.position, e.target == player_id,
 						_cfg.mechanism_gain, Kind.MECHANISM, BUS_EFFECTS, 1.0, 0.0, catcher)
 			GameEvent.Kind.GRENADE_PIN:
-				var puller := state.character(e.actor)
-				_play(&"grenade_pin", puller.eye(_body) if puller != null else e.position, own, _cfg.pin_gain,
-						Kind.MECHANISM, BUS_EFFECTS, 1.0, 0.0, puller)
+				_mechanism(&"grenade_pin", state, e, own, _cfg.pin_gain)
 			GameEvent.Kind.GRENADE_THROW:
 				_mechanism(&"magToss", state, e, own)
 				if e.target >= 0:
@@ -537,10 +535,10 @@ func _call(state: GameState, now: float) -> void:
 		_play(kind.cue, at, false, kind.level * _cfg.ambience_gain, Kind.CALL, BUS_AMBIENCE, pitch, far)
 
 
-func _mechanism(cue: StringName, state: GameState, e: GameEvent, own: bool) -> void:
+func _mechanism(cue: StringName, state: GameState, e: GameEvent, own: bool, gain: float = -1.0) -> void:
 	var c := state.character(e.actor)
 	var at := c.eye(_body) if c != null else e.position
-	_play(cue, at, own, _cfg.mechanism_gain, Kind.MECHANISM, BUS_EFFECTS, 1.0, 0.0, c)
+	_play(cue, at, own, gain if gain >= 0.0 else _cfg.mechanism_gain, Kind.MECHANISM, BUS_EFFECTS, 1.0, 0.0, c)
 
 
 ## The sound profile of `actor`'s replica in `slot` (its power's, or its own).

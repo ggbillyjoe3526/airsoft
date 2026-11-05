@@ -1,6 +1,6 @@
 # AU7 · The smoke and flash bombs re-cut to sound like the owner's recordings
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 Owner, 2026-11-05: "the flash and smoke grenades don't sound like the recordings i made for them? i used a balloon pop
 sound for the flashbang and for the smoke grenade a ring pull sound and a bouncing can." Then, on the first re-cut's
@@ -11,7 +11,7 @@ preview: "grenade pin sound is muffle/static noise?"; on the second: "perfect".
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-05 | 1 | Opus 5.5 (build thread) | ✓ (bomb tests) | 5/8 Revise | bounce cut late, hold too long, ring-out claims; owner: pin hiss |
-| 2026-11-05 | 2 | Opus 5.5 (build thread) | – | – | – |
+| 2026-11-05 | 2 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 ## Cause
 

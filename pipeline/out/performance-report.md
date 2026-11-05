@@ -1,27 +1,17 @@
-Task: BL6 · head e7725d6 · Verdict: Pass
-Run: none (asset-only change, no GDScript; glb JSON inspected with python, no Godot run) · budget: no baseline yet, judged against the 40k-triangle replica limit and origin/main's glb
+Task: AU7 · head d98953e + uncommitted game/play/sim_audio.gd · Verdict: Pass
+Run: none (audio re-cut and a few lines of sim logic; no --perf match run) · budget: no baseline yet, judged against targets and by reading the diff
 
-Metrics (cyber.glb, old -> new), measured from the glb JSON:
-- Triangles in the hands (all meshes except Figure): 2,688 -> 31,594 (limit 40,000, ok, 79 %)
-- Figure (bot LOD): 148 -> 236 tris, 270 -> 426 verts (small, ok)
-- Vertices total: 5,380 -> 27,578 (Body 19,887)
-- Meshes 6 -> 6, nodes 18 -> 18, materials 5 -> 5 (shared, same set), animations 4 -> 4
-- Surfaces (primitives): 16 -> 18; hands-side draw calls ~14 -> ~14+2 (Selector 1->2, Trigger 1->2); Figure 4 prims unchanged
-- Images/textures: 0 / 0 (no textures, ok); extensions: none
-- File size: 171,708 -> 879,740 bytes (+0.7 MB, 0.17 % of the 500 MB install budget, ok)
-
-Regressions (> 10 % worse): triangle count, vertex count and file size are up, all inside budget. Only the 2 extra surfaces touch the draw-call count (+2 per viewmodel, negligible). Judgment, not blocking.
+Metrics: not measured (judgment only)
+Regressions (> 10 % worse): none measured
 
 Blocking findings: none
- - Per-frame work: no .gd/.tscn/.tres/config changed (diff is glb, tools/blender/replicas/cyber.py, docs, changelog); nothing runs per frame or per tick (judgment, verified by diff stat).
- - cyber.py is an offline Blender build tool under tools/, not referenced by game code or exports (judgment).
- - Materials stay shared by name (5 per file), no per-instance materials introduced (measured).
+
+Checked (judgment unless marked):
+- Per-tick allocations: none. sim_audio.gd:85 `_bounced_at` is one PackedFloat64Array, resized only in `_bomb_bounce_slot` (:625-632) when below the 12-slot pool, so at most once a match. The new `since` local (:268) is a float. `_mechanism` (:538) takes `gain: float = -1.0`, no Callable or Array; the pin handler passes `_cfg.pin_gain`.
+- Stale-clock guard (`since >= 0.0`, :268-269) fixes a bounce muted after a new match; no cost.
+- Voice pool: bounce/pin/flash play on cue_voices = 4 per cue within the 24 field voices (sound_config.gd:151-153). The bounce cue is now 0.6 s (was 1.1 s) and bounce_hold 0.45 s (was 1.0 s), so a bomb starts a new bounce cue every 0.45 s at most: at most ~2 voices per bomb, capped at 4 per cue (the oldest is reused). Bounded, no growth.
+- Size (measured): bounce WAVs 97064 -> 53318 B each (-131 KB across 3 vs the first AU7 cut), pins 22.4 KB each (-8 KB each vs the first cut). Net against main: bounce +36 KB each, pin +4 to +5 KB each, flash +4 to +5 KB each, about +150 KB of source WAV. The .import files are unchanged: compress/mode=2 (QOA, about 4x smaller exported), loop_mode=0. Static memory impact is well under 0.1 MB.
+- Loading: cues are loaded up front with the other variants, so no first-use hitch. No new material, particle or preset bypass.
 
 Advisory:
- - Body is 24,422 tris, 77 % of the hands budget; further detail on this replica or a second pistol of this weight leaves little headroom. Re-measure on the owner's hardware at the next playtest (frame time is not measurable in the cloud container).
- - Selector and Trigger now carry 2 primitives each; if they share a material, merging them saves 2 draw calls per viewmodel (minor).
- - The record's 31,596 differs from the measured 31,594 by 2 triangles; cosmetic.
-
-Fixes: none required.
-
-Verdict: Pass
+- sound_config.gd (pin_gain 1.6, bang_gain 1.4) are loudness tuning, not performance; a playtest item.
