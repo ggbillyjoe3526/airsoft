@@ -582,6 +582,7 @@ TIGHTEN_STEP = 1.5
 TIGHTEN_MAX = 24.0
 TIGHTEN_TIP = 0.7
 TIGHTEN_SHARES = (1.0, 1.0, TIGHTEN_TIP)
+TIGHTEN_WRAP = (0.0, 1.0, 0.8)
 
 
 def skin_gaps(objects: list, solid: list, side: str) -> dict:
@@ -624,7 +625,10 @@ def press(rig: Rig, hands: dict, objects: list, solid: list, poles: dict, side: 
         place_arm(rig, side, m, poles[side], quiet=True)
         rig.refresh("Hand_" + side)
         rig.write()
-        if clipping(objects, solid)[0]:
+        hits, tally = clipping(objects, solid)
+        if hits:
+            if os.environ.get("BL_DEBUG"):
+                print("   %s press stopped by" % side, sorted(tally.items(), key=lambda x: -x[1])[:4])
             place_arm(rig, side, before, poles[side], quiet=True)
             rig.refresh("Hand_" + side)
             break
@@ -634,46 +638,28 @@ def press(rig: Rig, hands: dict, objects: list, solid: list, poles: dict, side: 
 
 
 def tighten(rig: Rig, hands: dict, objects: list, solid: list, fingers: list) -> dict:
-    """Closes each finger of `fingers` (("R", "Middle"), ...) onto the replica on the skinned surface itself: all of
-    them curl a step at a time, and each stops a step short of where its glove would first touch (the owner: gripped
-    tight, never clipping). The bone-sampled solve leaves gaps the skin doesn't need. Degrees each closed, for the
+    """Closes each finger of `fingers` (("R", "Middle"), ...) onto the replica on the skinned surface itself, one
+    finger at a time, a step at a time, each stopping a step short of where its glove would first touch (the owner:
+    gripped tight, never clipping): first the whole finger (TIGHTEN_SHARES), then, once its root can close no further
+    (the skin of its root's crease meets the grip first), its last two joints alone, so its end wraps on round the
+    grip (TIGHTEN_WRAP). The bone-sampled solve leaves gaps the skin doesn't need. Degrees each closed, for the
     log."""
-    closed = {f: 0.0 for f in fingers}
-    live = set(fingers)
-    while live:
-        turned = []
-        for side, name in sorted(live):
-            if closed[(side, name)] + TIGHTEN_STEP > TIGHTEN_MAX:
-                live.discard((side, name))
-                continue
-            for k, share in zip((1, 2, 3), TIGHTEN_SHARES):
-                bone = "%s%d_%s" % (name, k, side)
-                turn = Matrix.Rotation(math.radians(TIGHTEN_STEP * share), 3, hands[side].axis[bone])
-                rig.fk(bone, rig.local[bone] @ turn)
-                rig.refresh(bone)
-            closed[(side, name)] += TIGHTEN_STEP
-            turned.append((side, name))
-        if not turned:
-            break
-        rig.write()
-        hits, tally = clipping(objects, solid)
-        if not hits:
-            continue
-        # A clip on a bone no turned finger owns (the trigger finger, the arm) stops every finger that just turned.
-        owned = {b for b in tally if any(b.startswith(n) and b.endswith("_" + sd) for sd, n in turned)}
-        stray = bool(set(tally) - owned)
-        for side, name in turned:
-            mine = [b for b in tally if b.startswith(name) and b.endswith("_" + side)]
-            if mine or stray:
-                for k, share in reversed(list(zip((1, 2, 3), TIGHTEN_SHARES))):
-                    bone = "%s%d_%s" % (name, k, side)
-                    turn = Matrix.Rotation(math.radians(-TIGHTEN_STEP * share), 3, hands[side].axis[bone])
-                    rig.fk(bone, rig.local[bone] @ turn)
-                    rig.refresh(bone)
-                closed[(side, name)] -= TIGHTEN_STEP
-                live.discard((side, name))
-    rig.write()
-    return {"%s %s" % f: round(a, 1) for f, a in closed.items()}
+    closed = {}
+    for side, name in fingers:
+        total = 0.0
+        for shares in (TIGHTEN_SHARES, TIGHTEN_WRAP):
+            n = 0.0
+            while n + TIGHTEN_STEP <= TIGHTEN_MAX:
+                _turn_finger(rig, hands, side, name, shares, TIGHTEN_STEP)
+                rig.write()
+                if clipping(objects, solid)[0]:
+                    _turn_finger(rig, hands, side, name, shares, -TIGHTEN_STEP)
+                    rig.write()
+                    break
+                n += TIGHTEN_STEP
+            total += n
+        closed["%s %s" % (side, name)] = total
+    return closed
 
 
 # The wrap's step: the root joint closes WRAP_STEP while the middle joint and the tip open by their share of it, so

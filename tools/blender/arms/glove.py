@@ -42,9 +42,10 @@ SLEEVE_BAND = 0.030
 SLEEVE_HEM = 0.0022
 # The hard parts' heights over the glove (m).
 SHELL_THICK = 0.0016
-KNUCKLE_DOME = 0.0055
-KNUCKLE_RIM = 0.0007
-KNUCKLE_CROWN = 0.0035
+KNUCKLE_DOME = 0.0030
+KNUCKLE_RIM = 0.0011
+KNUCKLE_CROWN = 0.0022
+KNUCKLE_RIDGE_W = 0.11
 KNUCKLE_ROUND = 0.6
 PAD_THICK = 0.0013
 # The finger plates bend with the glove beneath them (rigid on one bone, the skin rose through their ends as the joints
@@ -391,6 +392,11 @@ def _smoothed(grid: list, closed: bool) -> list:
 
 # ------------------------------------------------------------------------------------------------------ the arm
 
+def _smooth01(t: float) -> float:
+    t = min(1.0, max(0.0, t))
+    return t * t * (3.0 - 2.0 * t)
+
+
 def _soft_box(u: float, v: float, edge: float = 0.18) -> float:
     """1 inside a rounded box over u, v in -1..1, easing to 0 over `edge` at its sides and corners."""
     du = max(0.0, abs(u) - (1.0 - edge)) / edge
@@ -431,15 +437,16 @@ def knuckle_guard(surf: Surface, fr: Frame) -> tuple:
     knuck_u = [-0.78, -0.26, 0.26, 0.78]
 
     def thick(u: float, v: float) -> float:
-        dome = sum(math.exp(-((u - ku) / 0.15) ** 2) for ku in knuck_u)
-        rise = math.exp(-((v - 0.60) / 0.35) ** 2)
-        # The whole plate crowned like the photos' moulded shells, the knuckles standing proud along its front.
-        crown = KNUCKLE_CROWN * (1.0 - u * u) * (1.0 - v * v)
+        # A rigid moulded plate (the owner's glove photos): a flat crown, four even ridges running back from the
+        # knuckles, and a crisp raised rim round a rounded outline.
+        ridge = sum(math.exp(-((u - ku) / KNUCKLE_RIDGE_W) ** 2) for ku in knuck_u)
+        along = _smooth01((v + 0.35) / 0.55) * (1.0 - _smooth01((v - 0.85) / 0.15))
         edge = max(abs(u), abs(v))
-        rim = KNUCKLE_RIM * math.exp(-((edge - 0.80) / 0.09) ** 2)
-        return (SHELL_THICK + crown + KNUCKLE_DOME * min(1.0, dome) * rise + rim) * _soft_box(u, v, 0.55) + 0.0003
+        rim = KNUCKLE_RIM * math.exp(-((edge - 0.86) / 0.06) ** 2)
+        return (SHELL_THICK + KNUCKLE_CROWN + KNUCKLE_DOME * min(1.0, ridge) * along + rim) * _soft_box(u, v, 0.16) \
+            + 0.0003
 
-    return surf.shell(origin, direction, 13, 29, thick, "GloveArmour", False, "Hand", 4, 0.0010)
+    return surf.shell(origin, direction, 13, 29, thick, "GloveArmour", False, "Hand", 8, 0.0010)
 
 
 def finger_pads(surf: Surface, fr: Frame) -> list:
@@ -526,7 +533,8 @@ def build_left(shoulder: Vector) -> tuple:
     mesh.add(*knuckle_guard(surf, fr))
     for part in finger_pads(surf, fr):
         mesh.add(*part)
-    # The palm's suede patch, over the heel of the hand and up to the fingers' roots.
+    # The palm's suede patch, over the heel of the hand and up to the fingers' roots; its thickness eases out well
+    # in from its edges, so it reads as a rounded pad (moving its corners in moved the trigger finger's solve).
     across = (fr.knuckles[3] - fr.knuckles[0]).normalized()
     pc = fr.palm_centre + fr.fingers * 0.002
 
@@ -534,7 +542,7 @@ def build_left(shoulder: Vector) -> tuple:
         return pc + across * (u * 0.024) + fr.fingers * (v * 0.024)
 
     mesh.add(*surf.shell(palm_origin, lambda u, v: fr.palmar, 7, 11,
-                         lambda u, v: 0.0012 * _soft_box(u, v, 0.35) + 0.0009, "GloveArmour", smooth=4, lift=0.0008))
+                         lambda u, v: 0.0021 * _soft_box(u, v, 0.6) + 0.0001, "GloveArmour", smooth=4, lift=0.0008))
     # The neoprene cuff, and its strap round it with a pull tab on the little finger's side.
     mesh.add(*ring(surf, fr, CUFF[:2], CUFF[2], "Glove"))
     mesh.add(*ring(surf, fr, STRAP[:2], CUFF[2] + STRAP[2], "GloveArmour"))

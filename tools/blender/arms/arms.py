@@ -43,7 +43,7 @@ FPS = 60
 # Colours from the owner's glove photos (ref_images/hands/gloves: dark olive with black moulded knuckles), the same as
 # the figures' gloves (BL10), so your arms match what other players wear.
 MATERIALS = {
-    "Glove": (0x4c4638, 0.85, 0.0), "GloveArmour": (0x242422, 0.55, 0.0), "Sleeve": (0x667052, 0.92, 0.0),
+    "Glove": (0x4c4638, 0.85, 0.0), "GloveArmour": (0x242422, 0.68, 0.0), "Sleeve": (0x667052, 0.92, 0.0),
     "SleeveTrim": (0x515a41, 0.88, 0.0),
 }
 NAMES = list(MATERIALS)
@@ -128,15 +128,17 @@ RIGHT = {"d": 0.006, "f": 0.038, "x": 0.012, "slant": 30.0, "wrap": -30.0, "thum
          "thumb": ((-45.0, 0.0, 30.0), (35.0, 25.0))}
 # The left hand under a rifle's handguard (the owner's photos 123627, 123646, 123656): `y` along it (rifle +Y), its
 # palm centre placed with the handguard's centre line `forward` toward the fingers (far enough that the fingers rest on
-# its right side rather than reaching over its top: the owner, 2026-11-05) and `depth` out of the palm, seated
+# its right side rather than reaching over its top: the owner, 2026-11-05; the hand a little further right, its
+# wrist less turned in: 19:41) and `depth` out of the palm, seated
 # on it and held `standoff` off; its turn found by `cup` over `search` ((yaw), (pitch), (roll) ranges, degrees: the
 # fingers' line yawed from forward toward the right and pitched up, the palm rolled either way from facing up),
 # the forearm rising toward `rise` degrees from below. The arm comes from a bladed stance: its shoulder moved
-# `shoulder` (eye space; forward and down, so the forearm rises about 46 degrees as in the photos), the elbow at least
+# `shoulder` (eye space; forward, down and in under the rifle, so the forearm rises about 50 degrees as in the photos
+# and the wrist needs little turn), the elbow at least
 # `drop` below it and at most `across` in toward the body. The thumb reaches
 # along the handguard's left side for (thumb_x, y + thumb_f, thumb_z), its length kept close to it (thumb_hug).
-GUARD = {"kind": "guard", "y": 0.190, "forward": 0.030, "depth": 0.034, "standoff": 0.006,
-         "search": ((70, 100), (30, 70), (-30, 30)), "rise": 50.0, "shoulder": (-0.04, 0.14, -0.14), "drop": 0.06,
+GUARD = {"kind": "guard", "y": 0.190, "forward": 0.036, "depth": 0.034, "standoff": 0.006,
+         "search": ((70, 100), (30, 70), (-30, 30)), "rise": 50.0, "shoulder": (0.04, 0.12, -0.16), "drop": 0.06,
          "across": 0.25, "thumb_x": -0.023, "thumb_f": 0.05, "thumb_z": 0.055, "thumb_hug": 3.0,
          "fingers": {"Index": (35, 35, 20), "Middle": (40, 45, 30), "Ring": (40, 45, 30), "Pinky": (35, 40, 25)},
          "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
@@ -155,7 +157,7 @@ DOWN = {"kind": "down", "at": (0.0, 0.06, -0.40),
 # (its tip toward `thumb_at`). The arm reaches out
 # to it, as a pistol is held: its shoulder raised and drawn back `shoulder` (eye space), its elbow free to come up
 # to the shoulder's height (`drop`).
-PISTOL_RIGHT = dict(RIGHT, web=(0.012, -0.095, -0.045), index=(0.021, -0.042, -0.040), pinky=(0.020, -0.058, -0.098),
+PISTOL_RIGHT = dict(RIGHT, web=(0.012, -0.095, -0.045), index=(0.018, -0.042, -0.040), pinky=(0.018, -0.058, -0.098),
                     thumb_at=(-0.024, -0.045, -0.012), thumb_hug=3.0, shoulder=(0.0, -0.12, 0.10), drop=0.0,
                     swing=(-15.0, -15.0, -15.0))
 # The Cyber Pistol: the GBB's marks laid on its own grip (the owner: the two grips should look the same), the web a
@@ -164,11 +166,11 @@ CYBER_RIGHT = dict(PISTOL_RIGHT, web=(0.012, -0.110, -0.052), index=(0.025, -0.0
                    pinky=(0.024, -0.055, -0.096), thumb_at=(-0.026, -0.048, -0.014))
 # The AEG Rifle's grip: the same three marks, the hand high on the short grip so the little finger closes round its
 # foot (the owner, 2026-11-05), the knuckles' line raked back with the grip, the web closer in over the back strap so
-# the thumb reaches round onto the grip's left side (`thumb_at`, its length kept close: the owner, 18:37); the
-# shoulder drawn in and back a little to keep the wrist straight.
+# the thumb reaches round onto the grip's left side, high on it (`thumb_at`, its length kept close: the owner, 18:37,
+# 19:41); the shoulder drawn in and back a little to keep the wrist straight.
 AEG_RIGHT = dict(RIGHT, web=(0.042, -0.103, -0.056), index=(0.030, -0.031, -0.036), pinky=(0.026, -0.064, -0.092),
                  pinky_cost=2000.0, swing=(-10.0, -10.0, -10.0), shoulder=(-0.04, -0.03, 0.0),
-                 thumb_at=(-0.020, -0.060, -0.055), thumb_hug=5.0)
+                 thumb_at=(-0.020, -0.062, -0.045), thumb_hug=5.0)
 HOLDS = {
     "aeg": Hold("aeg.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.073, -0.026), 31.0, 0.046, 0.0155),
                 AEG_RIGHT, GUARD),
