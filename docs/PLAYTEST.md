@@ -1319,6 +1319,13 @@ Every BB in flight is now a proper Blender model, round from every side instead 
 - [ ] **Glowing BBs:** on Woodland at night, glowing BBs are round green balls with their streak, as before.
 - [ ] **Frame rate:** a full-auto magazine dump on Low keeps its frame rate (F3 box).
 
+## GBB Pistol sights and port (GS1)
+
+- [ ] **Aim:** aim the GBB Pistol in the Range. The front post with its white dot stands in the rear sight's notch,
+  its top level with the rear sight's top, a sliver of light either side; the BBs land on the post's top.
+- [ ] **Port:** Inspect the pistol and look at the top of the slide: the barrel fills the ejection port with no dark
+  gap round it, and the slide still blows back and locks back cleanly.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
