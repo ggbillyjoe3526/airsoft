@@ -28,6 +28,8 @@ model already carried an Inspect clip (BL1, BL2, BL5, BL6) that nothing played; 
   dropped, not snapped. Dry-firing an empty replica (no shot) doesn't end it.
 - **Reduced motion draws the full turn:** the player asked for it, and it moves the replica, not the camera.
 - **Not behind the order wheel or the map:** a press there is dropped.
+- **The poses are written into `play_tuning.tres`** as well as the script's defaults: an export reads the saved file,
+  where `InspectPose.make` never runs (`test_saved_configs`).
 
 ## Known issues left
 
