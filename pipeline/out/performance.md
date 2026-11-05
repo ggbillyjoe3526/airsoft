@@ -1,15 +1,19 @@
-Task: BL3 · AEG Rifle rework · head working tree (uncommitted) · Verdict: Pass
-Run: no game run; model-only change (no GDScript, scenes or config), so measured by parsing the glb JSON chunks (python3 -I) · budget: no pipeline/perf-budget.json lines; judged against the contract (replicas 40,000 tris in hands, 2K textures, 7 materials) and main's glbs
-Metrics (main -> now, measured from glb accessors):
- aeg.glb    file 1,126,816 -> 1,131,788 B (+0.4 %) · meshes 12 -> 12 · primitives (draw calls) 26 -> 26 · materials 7 -> 7 (limit 7, ok) · textures/images 0 -> 0 · nodes 31 -> 31
- aeg.glb    triangles all meshes 40,038 -> 40,156 (+0.3 %); in the hands (minus Figure 340) 39,816 (limit 40,000, ok, 184 spare; matches the build log)
- sniper.glb file 1,157,204 -> 1,162,692 B (+0.5 %) · meshes 12 · primitives 26 -> 26 · materials 7 -> 7 (ok) · textures 0 · nodes 31
- sniper.glb triangles all meshes 40,178 -> 40,296 (+0.3 %); in the hands (minus Figure 360) 39,936 (limit 40,000, ok, only 64 spare)
-Regressions (> 10 % worse): none
-Blocking findings: none
+Task: none (BL8) · head 61dc3d6 · Verdict: Pass
+Run: no match run (asset-only change, no gameplay code; the container has no GPU, so no draw-call or frame-time run) · budget: no baseline yet, judged against docs/CC0_ASSETS.md > Size limits, the targets and origin/main's files
+Metrics (measured, read from the glTF JSON of each .glb):
+- Parts file size: aeg 1.18 MB, sniper 1.09 MB, pistol 0.31 MB, cyber 0.11 MB / 2 MB limit (ok). Total up about 1.9 MB of a 500 MB install.
+- Triangles per part in the hands: max 9,912 (optic_scopeVar) / 10,000 (ok, 0.9 % margin); redDot 5,948, scope2x 6,228, grips 3,360-3,520, torch 3,400, silencer 1,886-2,484, aeg magazines 380-648, pistol magazine 2,020, laser 2,334.
+- Figure copies: 12-104 triangles, 1 surface each (ok; the 3,000 figure-replica cap is far off).
+- No textures (0 images), so no VRAM or import-compression cost.
+- Surfaces per part: 2-6 (scopeVar 6, magazine_hiCap 5, torch 4, optics 4). Transparent surfaces: 1 per optic (the Lens was already BLEND on main), none elsewhere. LensDot/Fibre add a surface only inside the optics.
+- Worst-case first-person fit on the AEG (scopeVar + vertical grip + torch + hiCap mag + silencer + tightBore barrel): about 19.4k part triangles, 23 part surfaces (about 23 extra draw calls, 1 blended), plus the replica body. Under the 40,000 hands-model cap only if the body is under about 20k (judgment: the body was not counted here).
+Regressions (> 10 % worse): none measurable at runtime. Asset growth is by design (aeg 355 -> 1,208 KB, pistol 123 -> 322 KB, cyber 21 -> 109 KB).
+Blocking findings: none.
 Advisory:
- - tools/blender/replicas/sniper.py (derives from aeg.py): sniper hands total is 39,936, 64 tris under the budget; any further AEG body growth will push the sniper over. Judgment, not blocking.
- - Body is 30,996 tris of the 39,816 (78 %); if later work needs room, the Body mesh is where to trim. Judgment.
- - Textures: none embedded (flat materials), so no 2K texture or VRAM cost; file size delta is mesh data only (+5 KB each). Measured.
- - No code, scene or config change: no per-frame allocations, node or resource lifetime, or prewarm impact (7 materials unchanged, so no new shader variants). Judgment.
-Fixes: not needed.
+- game/config/viewmodel_config.gd (3 optic dictionaries): constants only, read at setup; no per-frame cost (judgment).
+- assets/models/replicaParts/*.glb: each optic is now 4-6 draw calls in the hands (judgment). A hands scene carrying scope + torch + grip + mag is about 20+ calls for attachments. Cheap on Ultra, worth a rendered check on the Low preset.
+- LensDot (alpha blended) and Fibre (emissive) are new materials. replica_view.gd:100 prewarm_glass() covers only the window material; play_session.gd:737 view.materials() may or may not include the part meshes' own materials. If it does not, the first show of an optic compiles a blended pipeline mid-match (judgment; not verified, no GPU). Lens was already blended on main, so the risk is only the new LensDot/Fibre variants.
+- The optic_scopeVar part sits 88 triangles under the 10,000 cap; any further detail needs a trim.
+- Diff adds no GDScript allocation per frame or tick, no nodes, timers or connections to free (measured by reading the diff: only the three constants in viewmodel_config.gd, a unit test and Blender build scripts).
+Fixes: none required. If the Low preset shows a hitch on first optic draw, add the optic parts' materials to the prewarm list.
+Unexplained: none. Frame time and draw calls need the owner's rendered run (F3 overlay) with the Sniper scopeVar and every part fitted.
