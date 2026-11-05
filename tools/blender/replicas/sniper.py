@@ -110,7 +110,7 @@ BOTTOM = [(516, 262), (517, 266), (519, 269.5), (523, 272.5), (530, 274.5), (540
           (1340, 318), (1462, 393), (1480, 393), (1500, 395), (1540, 399), (1580, 404), (1586, 408), (1589, 414),
           (1592, 420), (1594, 426), (1597, 432), (1600, 438.5), (1650, 444), (1700, 448), (1750, 452), (1772, 454)]
 FACET = [(516, 252), (600, 254), (800, 260), (900, 265), (1000, 268), (1150, 272), (1300, 281), (1325, 284),
-         (1340, 312), (1462, 386), (1480, 377), (1530, 371), (1600, 375), (1700, 388), (1772, 395)]
+         (1340, 317), (1462, 392), (1470, 390), (1485, 378), (1530, 371), (1600, 375), (1700, 388), (1772, 395)]
 # Its half width (m) at its sides and at its bottom, and the top edge's chamfer, along it.
 HALF = [(516, 0.0240), (1240, 0.0240), (1330, 0.0180), (1345, 0.0175), (1446, 0.0175), (1462, 0.0200),
         (1772, 0.0200)]
@@ -122,7 +122,7 @@ CHAMFER = [(516, 0.0025), (1228, 0.0025), (1300, 0.0030), (1345, 0.0040), (1446,
 GRIP = [(1312, 284), (1318, 300), (1327, 312), (1335, 318), (1340, 324), (1342, 330), (1344, 342), (1346, 360), (1347, 380),
         (1348, 396), (1350, 414), (1351, 430), (1352, 441, 4), (1358, 445.5, 4), (1383, 438.5), (1413, 426.5),
         (1435, 414.5), (1452, 402.5), (1466, 391), (1474, 360), (1400, 325), (1340, 290)]
-GRIP_HW = 0.0170
+GRIP_HW = 0.0175
 
 # The forend's M-LOK slots (px centres along it, at py 232.5, 51 by 11 px) and the recessed panel round them.
 SLOTS = [573.0, 637.5, 702.5, 767.5, 832.5]
@@ -131,14 +131,18 @@ SLOT_LEN = 51.0
 SLOT_H = 11.0
 PANEL = [(523, 217, 2), (868, 217, 12), (868, 247.5, 12), (523, 247.5, 2)]
 PANEL_DEPTH = 0.0006
+UNDER_SLOTS = [575.0, 640.0]
 SLOT_DEPTH = 0.0045
 # The sling socket's boss at the forend's nose (centre px, radius px), as the photo's.
 LUG = (522.0, 251.0, 18.0)
 # The cheek piece's panel on the stock's sides (proud of them), as the photo's outline.
 CHEEK = [(1453, 262.5, 0), (1699, 262.5, 2), (1699, 291, 9), (1690, 300, 4), (1479, 299, 4)]
-CHEEK_PROUD = 0.0006
+CHEEK_PROUD = 0.0020
 # The stock's screws: (px, py, head radius px, ring radius px).
-SCREWS = [(1570.0, 325.0, 9.0, 15.5), (1708.0, 337.0, 7.0, 12.5)]
+# The first a hex head in a washer, the second a hex pocket with a round hole in its floor (head = the hex's corner
+# radius, ring = the hole's radius, px).
+SCREWS = [(1570.0, 325.0, 9.0, 15.5), (1708.0, 337.0, 9.5, 3.5)]
+POCKET_DEPTH = 0.0015
 
 # Under the chassis: the magazine, the bottom metal with the trigger guard, the release paddle, the trigger.
 MAG = [(1002, 279), (1148, 279), (1148, 331.5, 2), (1010, 323.5, 4), (1002, 318, 4)]
@@ -149,8 +153,8 @@ PLATE_HW = 0.0125
 GUARD_FRONT = [(1149, 300), (1186, 300), (1186, 352), (1178, 356.5, 2), (1164, 356, 3), (1160, 348, 3), (1154, 331)]
 GUARD = [(1176, 300), (1292, 300), (1290, 308, 3), (1284, 316, 4), (1283.5, 337, 10), (1270, 354, 10),
          (1245, 359.5, 6), (1196, 359.5, 4), (1176, 357, 3)]
-GUARD_HOLE = [(1186, 309.5, 2), (1271, 309.5, 3), (1272.5, 336, 8), (1262, 349.5, 10), (1240, 352, 6), (1206, 352, 8),
-              (1186, 342, 10)]
+GUARD_HOLE = [(1186, 309.5, 15), (1271, 309.5, 8), (1272.5, 336, 8), (1262, 349.5, 10), (1240, 352, 6), (1206, 352, 8),
+              (1186, 342, 14)]
 GUARD_HW = 0.0050
 GUARD_FRONT_HW = 0.0085
 PADDLE = [(1172, 352), (1188, 352), (1188, 386, 3), (1185, 390, 2), (1181, 389.5, 2), (1176, 365)]
@@ -190,6 +194,28 @@ REAR_SIGHT_Y = Y(RAIL_PX[1]) + 0.0090
 OPTIC_Y = 0.064
 GRIP_RAIL_PX = (690.0, 812.0)
 TORCH_RAIL_PX = (676.0, 796.0)
+
+
+def catmull_rom(table: list, x0: float, x1: float, step: float) -> list:
+    """`table`'s points from x0 to x1 resampled every `step` px along a Catmull-Rom curve through them (the rest
+    kept), so a traced curve has no kinks between its points."""
+    keep = [p for p in table if p[0] < x0 or p[0] > x1]
+    inner = [p for p in table if x0 <= p[0] <= x1]
+    ext = [table[table.index(inner[0]) - 1]] + inner + [table[table.index(inner[-1]) + 1]]
+    out = []
+    for i in range(1, len(ext) - 2):
+        p0, p1, p2, p3 = ext[i - 1], ext[i], ext[i + 1], ext[i + 2]
+        n = max(1, int((p2[0] - p1[0]) / step))
+        for k in range(n):
+            t = k / n
+            out.append(tuple(0.5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t * t
+                                    + (-a + 3 * b - 3 * c + d) * t ** 3) for a, b, c, d in zip(p0, p1, p2, p3)))
+    out.append(inner[-1])
+    return sorted(keep + out)
+
+
+# The tang, comb and wrist curve, smooth for the first-person view (critic, BL5).
+TOP = catmull_rom(TOP, 1300.0, 1446.0, 2.0)
 
 
 def chassis_top(px: float) -> float:
@@ -321,7 +347,7 @@ def chassis() -> object:
         cutters.append(c.build())
     # Two slots under the forend, ahead of the grip rail.
     c = hs.Builder("c_under", ["Detail"])
-    for cx in (575.0, 640.0):
+    for cx in UNDER_SLOTS:
         z0 = chassis_bottom(cx)
         ring = slot_outline(cx, SLOT_PY, SLOT_LEN, SLOT_H)
         # The slot's outline laid flat (across the rifle instead of up it), cut up into the forend's foot.
@@ -329,7 +355,17 @@ def chassis() -> object:
         c.prism(flat, "z", z0 - 0.01, z0 + SLOT_DEPTH, "Detail")
     cutters.append(c.build())
     # The scallop on the receiver's left (the photo's flat) runs down into the chassis's top edge.
-    cutters.append(scallop_cutter("Furniture"))
+    # The chassis's notch reaches 0.8 mm past the receiver's flat, so the flat fills it (no shared plane).
+    cutters.append(scallop_cutter("Furniture", RECEIVER_R - 0.0033))
+    # The rear screw's hex pocket either side of the stock.
+    px, py, head, _ring = SCREWS[1]
+    for sx in (1.0, -1.0):
+        c = hs.Builder("c_pocket_hex", ["Furniture"])
+        hws = at(HALF, px)
+        c.lathe([(sx * (hws - POCKET_DEPTH), 0.0), (sx * (hws - POCKET_DEPTH), head / PX_PER_M),
+                 (sx * (hws + 0.01), head / PX_PER_M), (sx * (hws + 0.01), 0.0)], "Furniture", 6,
+                centre=(0.0, Y(px), Z(py)), axis="x", start=0.0)
+        cutters.append(c.build())
     # The bolt handle's pocket on the right, and the bolt release's on the left.
     c = hs.Builder("c_pocket", ["Furniture"])
     for x0, x1 in ((0.0100, 0.0400), (-0.0400, -0.0100)):
@@ -349,23 +385,27 @@ def dark_slots(ob: object) -> None:
     inner = hw - PANEL_DEPTH - 0.0002
     r = SLOT_H / 2 / PX_PER_M + 0.0002
     hl = SLOT_LEN / 2 / PX_PER_M + 0.0002
+    floor = hw - PANEL_DEPTH - SLOT_DEPTH - 0.0002
     dark = ob.data.materials.find("Detail")
     for p in ob.data.polygons:
         c = p.center
         for cx in SLOTS:
-            if abs(c.x) < inner and abs(c.y - Y(cx)) < hl and abs(c.z - Z(SLOT_PY)) < r:
+            if floor < abs(c.x) < inner and abs(c.y - Y(cx)) < hl and abs(c.z - Z(SLOT_PY)) < r:
                 p.material_index = dark
-        for cx in (575.0, 640.0):
-            if c.z > chassis_bottom(cx) + 0.0002 and abs(c.y - Y(cx)) < hl and abs(c.x) < r:
+        # Underneath: only faces inside the cut, above the foot where the face itself is.
+        zb = chassis_bottom(ORIGIN_PX[0] - c.y * PX_PER_M)
+        for cx in UNDER_SLOTS:
+            if zb + 0.0002 < c.z < zb + SLOT_DEPTH + 0.0003 and abs(c.y - Y(cx)) < hl and abs(c.x) < r:
                 p.material_index = dark
 
 
-def scallop_cutter(mat: str) -> object:
-    """The flat on the receiver's left (the photo's dark scallop), cut in `mat`."""
+
+def scallop_cutter(mat: str, inner: float = RECEIVER_R - 0.0025) -> object:
+    """The flat on the receiver's left (the photo's dark scallop), cut in `mat` in to `inner` from the bore."""
     c = hs.Builder("c_scallop", [mat])
     poly = [(y, z) for y, z in hs.fillet(pts([(1033, 187, 14), (1230, 187, 14), (1230, 218, 14), (1033, 218, 14)]),
                                          4)]
-    c.prism(poly, "x", -0.040, -(RECEIVER_R - 0.0025), mat)
+    c.prism(poly, "x", -0.040, -inner, mat)
     return c.build()
 
 
@@ -373,22 +413,39 @@ def nose_lug() -> object:
     """The sling socket's boss across the forend's nose, a hex socket in either end."""
     b = hs.Builder("Lug", ["Furniture", "Detail"])
     cy, cz, r = Y(LUG[0]), Z(LUG[1]), LUG[2] / PX_PER_M
-    hw = at(HALF, NOSE_PX) - 0.0004
-    b.lathe([(-hw, 0.0), (-hw, r), (hw, r), (hw, 0.0)], "Furniture", 20, centre=(0.0, cy, cz), axis="x")
+    hw = at(HALF, NOSE_PX) + 0.0010
+    b.lathe([(-hw, 0.0), (-hw, r), (hw, r), (hw, 0.0)], "Furniture", 24, centre=(0.0, cy, cz), axis="x")
+    # The socket's raised hex ring either side (18 mm across its corners).
+    for sx in (1.0, -1.0):
+        b.lathe([(sx * (hw - 0.0005), 0.0), (sx * (hw - 0.0005), 0.0090), (sx * (hw + 0.0008), 0.0090),
+                 (sx * (hw + 0.0010), 0.0084), (sx * (hw + 0.0010), 0.0)], "Furniture", 6, centre=(0.0, cy, cz),
+                axis="x", start=math.pi / 6)
     ob = b.build()
     c = hs.Builder("c_socket", ["Detail"])
     for sx in (1.0, -1.0):
-        c.lathe([(sx * (hw - 0.0030), 0.0), (sx * (hw - 0.0030), 0.0062), (sx * (hw + 0.01), 0.0062),
-                 (sx * (hw + 0.01), 0.0)], "Detail", 6, centre=(0.0, cy, cz), axis="x", start=math.pi / 6)
+        c.lathe([(sx * (hw - 0.0040), 0.0), (sx * (hw - 0.0040), 0.0030), (sx * (hw + 0.01), 0.0030),
+                 (sx * (hw + 0.01), 0.0)], "Detail", 16, centre=(0.0, cy, cz), axis="x")
     hs.cut(ob, [c.build()])
-    hs.finish(ob, 0.0008, 2)
+    dark = ob.data.materials.find("Detail")
+    for p in ob.data.polygons:
+        if math.hypot(p.center.y - cy, p.center.z - cz) < 0.00305 and abs(p.center.x) < hw + 0.0009:
+            p.material_index = dark
+    hs.finish(ob, 0.0004, 2)
     return ob
 
 
 def grip() -> object:
     b = hs.Builder("Grip", ["Furniture"])
     side_prism(b, GRIP, GRIP_HW, "Furniture", 4)
-    return hs.finish(b.build(), 0.0050, 3)
+    ob = b.build()
+    # Rounded by a bevel only: no custom normals, as it is joined to the chassis by a boolean (they would carry over).
+    mod = ob.modifiers.new("bevel", "BEVEL")
+    mod.width = 0.0050
+    mod.segments = 3
+    mod.limit_method = "ANGLE"
+    mod.use_clamp_overlap = True
+    hs.apply_modifiers(ob)
+    return ob
 
 
 def cheek_panels() -> object:
@@ -397,12 +454,18 @@ def cheek_panels() -> object:
     poly = [(y, z) for y, z in hs.fillet(pts(CHEEK), 4)]
     b.prism(poly, "x", hw - 0.002, hw + CHEEK_PROUD, "Furniture")
     b.prism(poly, "x", -hw - CHEEK_PROUD, -hw + 0.002, "Furniture")
-    return hs.finish(b.build(), 0.0004, 1)
+    return hs.finish(b.build(), 0.0003, 1)
 
 
 def screws() -> object:
     b = hs.Builder("Screws", ["Metal", "Detail"])
-    for px, py, head, ring in SCREWS:
+    # The rear one's pocket (cut in the chassis) has a dark round hole in its floor.
+    px, py, _head, hole = SCREWS[1]
+    hw = at(HALF, px) - POCKET_DEPTH
+    for sx in (1.0, -1.0):
+        b.lathe([(sx * (hw - 0.0004), 0.0), (sx * (hw - 0.0004), hole / PX_PER_M), (sx * (hw + 0.0001), hole / PX_PER_M),
+                 (sx * (hw + 0.0001), 0.0)], "Detail", 14, centre=(0.0, Y(px), Z(py)), axis="x")
+    for px, py, head, ring in SCREWS[:1]:
         hw = at(HALF, px)
         for sx in (1.0, -1.0):
             centre = (0.0, Y(px), Z(py))
@@ -458,7 +521,14 @@ def flash_hider() -> object:
     """The thread cap on the barrel's end: rounded at its face, a bore through it."""
     b = hs.Builder("FlashHider", ["Body", "Detail"])
     y0, y1 = Y(BARREL_END_PX) - 0.0015, Y(MUZZLE_PX)
-    b.lathe([(y0, 0.0), (y0, CAP_R - 0.0004), (y0 + 0.0006, CAP_R), (y1 - 0.0030, CAP_R), (y1 - 0.0012, CAP_R - 0.0008),
+    # Its grip: fine grooves round it between the barrel and the rounded face.
+    grooves = []
+    y = y0 + 0.0016
+    while y + 0.0010 < y1 - 0.0034:
+        grooves += [(y, CAP_R), (y + 0.0003, CAP_R - 0.0004), (y + 0.0006, CAP_R - 0.0004), (y + 0.0009, CAP_R)]
+        y += 0.0013
+    b.lathe([(y0, 0.0), (y0, CAP_R - 0.0004), (y0 + 0.0006, CAP_R)] + grooves + [(y1 - 0.0030, CAP_R),
+             (y1 - 0.0012, CAP_R - 0.0008),
              (y1 - 0.0002, CAP_R - 0.0026), (y1, CAP_R - 0.0042), (y1, 0.0048), (y1 - 0.0006, 0.0045)], "Body", 32,
             centre=(0.0, 0.0, BORE_Z), cap=False)
     b.lathe([(y1 - 0.0006, 0.0045), (y1 - 0.0080, 0.0045), (y1 - 0.0080, 0.0)], "Detail", 32,
@@ -485,11 +555,18 @@ def bolt_release() -> object:
     b = hs.Builder("BoltRelease", ["Detail"])
     side_prism(b, [(1237, 213, 2), (1259, 213, 2), (1259, 243, 3), (1237, 243, 3)], -0.0125, "Detail", 2,
                x0=-0.0195)
+    # Its four grip ribs across its face, as the photo's.
+    for py in (219.0, 226.0, 233.0, 240.0):
+        side_prism(b, [(1239, py - 1.4, 1), (1257, py - 1.4, 1), (1257, py + 1.4, 1), (1239, py + 1.4, 1)], -0.0190,
+                   "Detail", 1, x0=-0.0203)
     return hs.finish(b.build(), 0.0006, 1)
 
 
 def body() -> object:
-    parts = [hs.finish(chassis(), 0.0012, 2), nose_lug(), grip(), cheek_panels(), screws(), rails(), receiver(),
+    # The grip is one piece with the chassis (its sides flush with the wrist's), as the photo's.
+    ch = chassis()
+    hs.cut(ch, [grip()], "UNION")
+    parts = [hs.finish(ch, 0.0012, 2), nose_lug(), cheek_panels(), screws(), rails(), receiver(),
              bottom_metal(), bolt_release()]
     for ob in parts:
         print("  part %-12s %6d" % (ob.name, hs.tris(ob)))
@@ -502,6 +579,9 @@ def bolt() -> object:
     """The bolt: its shroud, its body (inside the receiver until it is drawn), the handle's collar, stem and knob."""
     b = hs.Builder("Bolt", ["Detail", "Metal"])
     b.lathe([(Y(px), r) for px, r in SHROUD], "Detail", 32, centre=(0.0, 0.0, BORE_Z))
+    # The bright ring at the shroud's front, as the photo's.
+    b.lathe([(Y(1244.0), 0.0), (Y(1244.0), 0.0119), (Y(1240.5), 0.0119), (Y(1240.0), 0.0114), (Y(1240.0), 0.0)],
+            "Metal", 32, centre=(0.0, 0.0, BORE_Z))
     yb = Y(1240.0)
     b.lathe([(yb + 0.0005, 0.0), (yb + 0.0005, BOLT_R), (yb + BOLT_LEN, BOLT_R), (yb + BOLT_LEN, 0.0)], "Metal", 24,
             centre=(0.0, 0.0, BORE_Z))

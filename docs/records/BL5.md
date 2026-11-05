@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-05 | 1 | Claude (build thread) | targeted tests pass (11 files) | pending | – |
+| 2026-11-05 | 1 | Claude (build thread) | targeted tests pass (11 files) | Retry 7/8 (QA Pass, performance Pass) | a dark slit where the receiver's flat met the chassis; the nose's sling socket lost; a dark band under the forend; a seam across the grip; facets on the comb; a cheek piece too flat; the guard's opening too square; small photo details |
+| 2026-11-05 | 2 | Claude (build thread) | targeted tests pass (3 files) | pending | – |
 
 ## What changed
 
@@ -21,14 +22,16 @@ from the owner's pick of his sniper photos (2026-11-05: the grey chassis, `ref_i
 - **The chassis** (`Furniture`, grey in the file): one loft from the forend's nose to the butt, its sides flat, its top
   edge chamfered (wide along the stock, as the photo's), a lower facet leaning in; the barrel's channel along the
   forend's top; a recessed panel with five M-LOK slots a side (dark inside, as holes) and two underneath; the sling
-  socket's boss at the nose; the grip a rounded slab under the wrist; the cheek piece a proud panel; the stock's two
-  screws a side; a rubber butt pad on a spacer.
+  socket's boss at the nose, a raised hex ring and a hole either side; the grip a rounded slab joined to the wrist by
+  a boolean union, flush with it; the tang, comb and wrist line smoothed along a curve through the traced points; the
+  cheek piece a panel 2 mm proud; a hex screw in a washer and a hex pocket a side; a rubber butt pad on a spacer.
 - **The action** (`Body`): a round receiver with a top rail (21 teeth), the photo's flat on its left (into the
   chassis's top edge), a port on its right, the barrel's nut, a barrel tapering 28 to 24 mm to a rounded thread cap
-  (`FlashHider`, hidden by the silencer).
+  (`FlashHider`, grooved, hidden by the silencer).
 - **The bolt** (`Bolt`, bone `bolt` on the bore): its shroud behind the receiver, its body inside the receiver until
   it is drawn, and its handle on the right (the photo shows the rifle's left; a right-handed bolt suits the view),
-  resting in a pocket in the chassis; the left pocket holds the bolt release.
+  resting in a pocket in the chassis; the left pocket holds the ribbed bolt release; a bright ring on the shroud's
+  front.
 - **Underneath:** the box magazine (`Magazine`, a window either side with the follower's spine, a BB at its lips), the
   bottom metal and trigger guard as the photo's, the paddle release in front of the guard (`MagRelease`), the trigger
   (`Trigger`), the safety's small lever behind the shroud (`Selector`).
@@ -42,7 +45,7 @@ from the owner's pick of his sniper photos (2026-11-05: the grey chassis, `ref_i
   short rail under the forend, `TorchMount` on a short rail on its right, `BarrelEnd` behind the cap.
 - **The parts file** (`replicaParts/sniper.glb`): the AEG Rifle's optics, grips, torch and silencer moved from the
   AEG's mounts onto these; no barrels, no magazines.
-- 29,656 triangles in the hands (budget 40,000), the figure version 156; 7 materials.
+- 35,380 triangles in the hands (budget 40,000), the figure version 156; 7 materials.
 
 ## Decisions
 
@@ -51,8 +54,8 @@ from the owner's pick of his sniper photos (2026-11-05: the grey chassis, `ref_i
 - The photo has no iron sights; low flip-ups on the rail's ends stand in, hidden while an optic is fitted (the rifle
   comes with the 2x Scope).
 - The chassis's file colour is the photo's grey; the game paints it in its scheme's furniture colour as any replica's.
-- The grip is a separate rounded slab joined to the chassis, not a boolean union: its sides stand 0.5 mm in from the
-  wrist's, which reads as a moulded parting line.
+- The grip is rounded by a bevel alone before its union with the chassis: custom normals carried through the boolean
+  streaked the whole chassis's shading.
 
 ## Known issues
 
