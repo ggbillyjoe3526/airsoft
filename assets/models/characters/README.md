@@ -8,6 +8,9 @@
   `docs/KNOWN_ISSUES.md` says what the figure code must do about those. The sidecar gives the clips' lengths and paces,
   where each replica sits on the `Grip_R` bone and where the magazines go in the reloads. How the browser game drew
   them: `legacy/browser/src/config/figureRig.ts`.
+- The human's four heads (`Head_HighCut`, `Head_Cap`, `Head_Boonie`, `Head_FullCut` and their LODs) are rebuilt from
+  the owner's photos by `tools/blender/figures/` (BL11), which splices them into `human.glb` with their own atlas
+  (`human_headwear_*`); the rest of the figure is left alone.
 - Godot extracted each figure's textures beside it on import (`*_col`, `*_nrm`, `*_orm`); commit them with their
   `.import` files.
 - A CC0 figure can replace them later: node names, team colours, scale, the size budget and where to find CC0
