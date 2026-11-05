@@ -42,12 +42,17 @@ SLEEVE_BAND = 0.030
 SLEEVE_HEM = 0.0022
 # The hard parts' heights over the glove (m).
 SHELL_THICK = 0.0016
-KNUCKLE_DOME = 0.0042
+KNUCKLE_DOME = 0.0055
 KNUCKLE_RIM = 0.0007
+KNUCKLE_CROWN = 0.0035
+KNUCKLE_ROUND = 0.6
 PAD_THICK = 0.0013
+# The finger plates bend with the glove beneath them (rigid on one bone, the skin rose through their ends as the joints
+# beside them closed).
+PAD_RIGID = False
 # The knuckle shell: how far it reaches beyond the outer knuckles, back from them over the hand and on over them (m).
 KNUCKLE_SPAN = 0.006
-KNUCKLE_BACK = 0.024
+KNUCKLE_BACK = 0.040
 KNUCKLE_OVER = 0.002
 # The finger plates, as shares of each bone from its root: one on the first bone, one on the second.
 PLATES = (((0.26, 0.76),), ((0.24, 0.74),))
@@ -142,6 +147,51 @@ def weights(verts: list, j: dict, pts: dict) -> list:
         w = {b: x / tot for b, x in w.items() if x / tot > 0.01}
         tot = sum(w.values())
         out.append({b: x / tot for b, x in w.items()})
+    return out
+
+
+# Rounds of smoothing over the thumb's root, and how far round it (edge rings): the web between thumb and index
+# finger takes the thumb's turn gradually instead of folding to a point (the owner, 2026-11-05).
+WEB_SMOOTH = 8
+WEB_RINGS = 3
+# Rounds of the same over every finger joint's crease (the skin tore at the knuckles of a tight curl).
+JOINT_SMOOTH = 3
+
+
+def smooth_web(wts: list, faces: list) -> list:
+    """`wts` with the weights round the thumb's root (Thumb1's skin and WEB_RINGS rings past it) blended with their
+    neighbours' WEB_SMOOTH times, and every finger joint's JOINT_SMOOTH times, each vertex keeping its four
+    largest."""
+    near = [set() for _ in wts]
+    for f in faces:
+        for k, a in enumerate(f):
+            b = f[(k + 1) % len(f)]
+            near[a].add(b)
+            near[b].add(a)
+    region = {i for i, w in enumerate(wts) if "Thumb1" in w}
+    for _ in range(WEB_RINGS):
+        region |= {n for i in region for n in near[i]}
+    joints = {i for i, w in enumerate(wts) if len(w) > 1 and any(b[-1].isdigit() for b in w)}
+    out = _blend(wts, near, joints, JOINT_SMOOTH)
+    return _blend(out, near, region, WEB_SMOOTH)
+
+
+def _blend(wts: list, near: list, region: set, rounds: int) -> list:
+    out = list(wts)
+    for _ in range(rounds):
+        nxt = list(out)
+        for i in region:
+            mix = {}
+            for b, x in out[i].items():
+                mix[b] = mix.get(b, 0.0) + 0.5 * x
+            share = 0.5 / max(1, len(near[i]))
+            for n in near[i]:
+                for b, x in out[n].items():
+                    mix[b] = mix.get(b, 0.0) + share * x
+            top = sorted(mix.items(), key=lambda kv: -kv[1])[:4]
+            tot = sum(x for _, x in top)
+            nxt[i] = {b: x / tot for b, x in top if x / tot > 0.01}
+        out = nxt
     return out
 
 
@@ -309,9 +359,14 @@ class Surface:
             rings.append(row)
             normals.append(nrow)
             dirs.append(drow)
+        cast = [list(row) for row in rings]
         for _ in range(smooth):
             rings = _smoothed(rings, closed)
             normals = [[n.normalized() for n in row] for row in _smoothed(normals, closed)]
+        # Smoothing a patch over a rounded finger pulls it in under the skin, and the skin then shows through its
+        # edges in a ragged line: no point may end below where its ray met the surface.
+        rings = [[p + n * max(0.0, (q - p).dot(n)) for p, q, n in zip(row, crow, nrow)]
+                 for row, crow, nrow in zip(rings, cast, normals)]
         if callable(thick):
             thick = [[thick(u, v) for u, v in row] for row in dirs]
         return self.solid(rings, normals, thick, mat, closed, bone, lift)
@@ -363,9 +418,12 @@ def knuckle_guard(surf: Surface, fr: Frame) -> tuple:
 
     def origin(u: float, v: float) -> Vector:
         # From well back over the back of the hand (v = -1) to just over the knuckles (v = +1), narrowing a little
-        # towards the wrist.
+        # towards the wrist; its corners rounded (the square pulled part way to a disc: the photos' shells are
+        # rounded plates, never cut sheets).
+        u, v = (u * (1.0 - KNUCKLE_ROUND + KNUCKLE_ROUND * math.sqrt(1.0 - v * v * 0.5)),
+                v * (1.0 - KNUCKLE_ROUND + KNUCKLE_ROUND * math.sqrt(1.0 - u * u * 0.5)))
         back = KNUCKLE_BACK * (1.0 - v) * 0.5
-        return line(u * (1.0 - 0.18 * (1.0 - v) * 0.5)) + f * (KNUCKLE_OVER - back) - up * 0.006
+        return line(u * (1.0 - 0.30 * (1.0 - v) * 0.5)) + f * (KNUCKLE_OVER - back) - up * 0.006
 
     def direction(u: float, v: float) -> Vector:
         return up + across * u * 0.25
@@ -374,10 +432,12 @@ def knuckle_guard(surf: Surface, fr: Frame) -> tuple:
 
     def thick(u: float, v: float) -> float:
         dome = sum(math.exp(-((u - ku) / 0.15) ** 2) for ku in knuck_u)
-        rise = math.exp(-((v - 0.55) / 0.45) ** 2)
+        rise = math.exp(-((v - 0.60) / 0.35) ** 2)
+        # The whole plate crowned like the photos' moulded shells, the knuckles standing proud along its front.
+        crown = KNUCKLE_CROWN * (1.0 - u * u) * (1.0 - v * v)
         edge = max(abs(u), abs(v))
         rim = KNUCKLE_RIM * math.exp(-((edge - 0.80) / 0.09) ** 2)
-        return (SHELL_THICK + KNUCKLE_DOME * min(1.0, dome) * rise + rim) * _soft_box(u, v, 0.22) + 0.0003
+        return (SHELL_THICK + crown + KNUCKLE_DOME * min(1.0, dome) * rise + rim) * _soft_box(u, v, 0.55) + 0.0003
 
     return surf.shell(origin, direction, 13, 29, thick, "GloveArmour", False, "Hand", 4, 0.0010)
 
@@ -404,7 +464,7 @@ def finger_pads(surf: Surface, fr: Frame) -> list:
         def thick(u: float, v: float) -> float:
             return PAD_THICK * _soft_box(u, v, grid[2]) + 0.0003
 
-        return surf.shell(origin, direction, grid[0], 9, thick, "GloveArmour", False, bone, grid[1], 0.0008)
+        return surf.shell(origin, direction, grid[0], 9, thick, "GloveArmour", False, PAD_RIGID and bone, grid[1], 0.0008)
 
     for f in (2, 3, 4, 5):
         name = FINGER_NAMES[f]
@@ -448,6 +508,8 @@ def build_left(shoulder: Vector) -> tuple:
     verts, faces = subdivide(src_v, src_f, cuts)
     pts = bone_points(j)
     wts = weights(verts, j, pts)
+    if WEB_SMOOTH:
+        wts = smooth_web(wts, faces)
     nrm = vertex_normals(verts, faces)
     mesh = Mesh()
 

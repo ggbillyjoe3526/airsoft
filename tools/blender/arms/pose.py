@@ -581,6 +581,7 @@ def clipping(objects: list, solid: list) -> tuple:
 TIGHTEN_STEP = 1.5
 TIGHTEN_MAX = 24.0
 TIGHTEN_TIP = 0.7
+TIGHTEN_SHARES = (1.0, 1.0, TIGHTEN_TIP)
 
 
 def skin_gaps(objects: list, solid: list, side: str) -> dict:
@@ -645,7 +646,7 @@ def tighten(rig: Rig, hands: dict, objects: list, solid: list, fingers: list) ->
             if closed[(side, name)] + TIGHTEN_STEP > TIGHTEN_MAX:
                 live.discard((side, name))
                 continue
-            for k, share in ((1, 1.0), (2, 1.0), (3, TIGHTEN_TIP)):
+            for k, share in zip((1, 2, 3), TIGHTEN_SHARES):
                 bone = "%s%d_%s" % (name, k, side)
                 turn = Matrix.Rotation(math.radians(TIGHTEN_STEP * share), 3, hands[side].axis[bone])
                 rig.fk(bone, rig.local[bone] @ turn)
@@ -664,7 +665,7 @@ def tighten(rig: Rig, hands: dict, objects: list, solid: list, fingers: list) ->
         for side, name in turned:
             mine = [b for b in tally if b.startswith(name) and b.endswith("_" + side)]
             if mine or stray:
-                for k, share in ((3, TIGHTEN_TIP), (2, 1.0), (1, 1.0)):
+                for k, share in reversed(list(zip((1, 2, 3), TIGHTEN_SHARES))):
                     bone = "%s%d_%s" % (name, k, side)
                     turn = Matrix.Rotation(math.radians(-TIGHTEN_STEP * share), 3, hands[side].axis[bone])
                     rig.fk(bone, rig.local[bone] @ turn)
@@ -673,6 +674,42 @@ def tighten(rig: Rig, hands: dict, objects: list, solid: list, fingers: list) ->
                 live.discard((side, name))
     rig.write()
     return {"%s %s" % f: round(a, 1) for f, a in closed.items()}
+
+
+# The wrap's step: the root joint closes WRAP_STEP while the middle joint and the tip open by their share of it, so
+# the finger's first section comes down onto the grip and its end stays where it rests.
+WRAP_STEP = 1.5
+WRAP_MAX = 30.0
+WRAP_OPEN = (0.6, 0.4)
+
+
+def _turn_finger(rig: Rig, hands: dict, side: str, name: str, shares: tuple, step: float) -> None:
+    for k, share in zip((1, 2, 3), shares):
+        if share:
+            bone = "%s%d_%s" % (name, k, side)
+            rig.fk(bone, rig.local[bone] @ Matrix.Rotation(math.radians(step * share), 3, hands[side].axis[bone]))
+            rig.refresh(bone)
+
+
+def wrap(rig: Rig, hands: dict, objects: list, solid: list, fingers: list) -> dict:
+    """After `tighten`, lays each finger's first section onto the replica: its root joint closes while the joints
+    past it open (WRAP_OPEN), a step at a time, until its glove would first touch. A tightened finger touches with its
+    end; this brings its whole length down (the critic: first sections standing off the grip). Degrees each wrapped."""
+    shares = (1.0, -WRAP_OPEN[0], -WRAP_OPEN[1])
+    back = tuple(-x for x in shares)
+    done = {}
+    for side, name in fingers:
+        n = 0.0
+        while n + WRAP_STEP <= WRAP_MAX:
+            _turn_finger(rig, hands, side, name, shares, WRAP_STEP)
+            rig.write()
+            if clipping(objects, solid)[0]:
+                _turn_finger(rig, hands, side, name, back, WRAP_STEP)
+                break
+            n += WRAP_STEP
+        rig.write()
+        done["%s %s" % (side, name)] = n
+    return done
 
 
 def relax(rig: Rig, hands: dict, objects: list, solid: list, poles: dict) -> int:
