@@ -775,8 +775,8 @@ def mag_release() -> object:
 def magazine(name: str = "Magazine", extra: float = 0.0, plate_mat: str = "Detail", fine: int = 1) -> object:
     """A double-stack gas magazine raked like the grip: its body, a base plate under a flanged lip, the follower
     with the top BBs, and its gas valve under the plate. `extra` metres longer along the rake for a magazine part
-    (tools/blender/parts/magazines.py), its plate in `plate_mat`; `fine` times the rings along it, rounder corners,
-    BBs and valve and a finer bevel (the parts' own budget)."""
+    (tools/blender/parts/magazines.py), its plate in `plate_mat`; `fine` times rounder corners, BBs and valve and a
+    finer bevel (the parts' own budget)."""
     rake = math.radians(GRIP_RAKE)
     down = Vector((0.0, -math.sin(rake), -math.cos(rake)))
     top = Vector(MAG_TOP)
@@ -790,7 +790,7 @@ def magazine(name: str = "Magazine", extra: float = 0.0, plate_mat: str = "Detai
         c = top + down * (length * t)
         return [(x * s, c.y + y * s, c.z) for x, y in hs.rounded_rect(MAG_HW, MAG_HD, 0.0045, 2 * fine)]
 
-    b.loft([ring(0.0)] + [ring(k / fine * (1.0 - 0.003 / length)) for k in range(1, fine + 1)] + [ring(1.0)], "Metal")
+    b.loft([ring(0.0), ring(1.0 - 0.003 / length), ring(1.0)], "Metal")
     # The base plate (photo: x 462 to 594, py 420 to 447), in two tiers.
     plate = _base_plate(plate_mat)
     if extra > 0.0:

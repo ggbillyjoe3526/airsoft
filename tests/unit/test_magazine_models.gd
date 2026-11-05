@@ -8,8 +8,10 @@ const REPLICAS := "res://assets/models/replicas/"
 const PARTS := "res://assets/models/replicaParts/"
 ## docs/CC0_ASSETS.md › Size limits: a part's triangles.
 const PART_TRIS := 10000
-## The owner (2026-11-05): detail up to the budget, so each part uses most of it.
-const PART_TRIS_USED := 0.9
+## The owner (2026-11-05): detail up to the budget, so each part uses most of it (the short low-cap the least).
+const PART_TRIS_USED := 0.8
+## docs/CC0_ASSETS.md › Size limits: a replica's parts file.
+const PARTS_FILE_BYTES := 2 * 1024 * 1024
 ## How much further below the well each part reaches than its replica's own magazine (m, at least or at most).
 const HICAP_LONGER := 0.025
 const LOWCAP_SHORTER := 0.020
@@ -92,3 +94,9 @@ func test_each_part_uses_its_budget_has_a_cut_down_figure_and_paints_as_the_repl
 		for i in m.mesh.get_surface_count():
 			var nm := m.mesh.surface_get_material(i).resource_name
 			assert_true(nm in MATERIALS, "%s surface %d: '%s' is a replica material" % [pair[1], i, nm])
+
+
+func test_the_parts_files_stay_within_their_size() -> void:
+	for replica: String in ["aeg", "pistol"]:
+		var size := FileAccess.get_file_as_bytes(PARTS + replica + ".glb").size()
+		assert_lte(size, PARTS_FILE_BYTES, "%s.glb within a parts file's 2 MB" % replica)

@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-05 | 1 | Claude (build thread) | targeted tests | pending | – |
+| 2026-11-05 | 1 | Claude (build thread) | targeted tests pass (88 + 4) | Retry 6/8 (QA Pass, performance Pass) | extended base pad big against generic photos; streaks and slivers round the holes; catch window raised, not cut; base plates and nozzle not the standard's; budget spent on rings; two renders cropped; .uid uncommitted, unused parameter, long line |
+| 2026-11-05 | 2 | Claude (build thread) | targeted tests pass | pending | – |
 
 ## What changed
 
@@ -17,17 +18,23 @@ All three were old placeholders (the hi-cap and low-cap from the first AEG, stre
 
 One build script, `tools/blender/parts/magazines.py`, rebuilds them in `assets/models/replicaParts/aeg.glb` and
 `pistol.glb` by running each replica's own magazine function (`aeg.magazine`, `gbb.magazine`, now taking a name, a
-length and a `fine` level) at another length, so each is its replica's standard magazine, longer or shorter:
+length and a `fine` level) at another length, so each is its replica's standard magazine, longer or shorter, in its
+outline, with detail cut into it:
 
 - **Hi-Cap:** 13.0 cm below the well against the standard's 9.9 (1.32), its curve and ribs carried on down, with a
   knurled winding wheel in a collar under the base plate, a thumb bar and screw across it (the reference list's "the
-  hi-cap's wheel"). 9,760 triangles.
-- **Low-Cap:** 6.9 cm below the well (0.70). 9,836 triangles.
-- **Extended:** 4 cm longer along the grip's rake (the old part 2.2), witness holes bored down its back (the owner's
-  pistol magazine photos), an exhaust valve and feed lips on top, its base pad in the frame's colour. 9,569 triangles.
-- AEG parts also get a flared rim, pull tab and grip ridges on the base plate, the catch window and a BB feed nozzle.
+  hi-cap's wheel"). 9,700 triangles.
+- **Low-Cap:** 6.9 cm below the well (0.70). 8,410 triangles.
+- **Both AEG parts:** the catch window cut 1.2 mm into the left side near the top, with a dark floor (the photos'
+  slot), and grip grooves cut across the base plate's foot (in front of the wheel on the hi-cap).
+- **Extended:** 4 cm longer along the grip's rake (the old part 2.2), two staggered columns of witness holes bored
+  1.2 mm into its back (the owner's pistol magazine photos), the catch notch cut into its left side, an exhaust valve
+  and feed lips on top, its base pad in the frame's colour. 9,470 triangles.
 - Each keeps the part contract: origin on the MagWell, a `_Figure` copy (44, 44, 28 triangles), the replica's paint
-  materials. `fit_parts.py` no longer stretches magazines; `gbb.py` no longer builds the extended one.
+  materials. Each is cleaned as exported (no zero-area triangles) and the flat faces round a cut get their own
+  normals, so nothing streaks. `fit_parts.py` no longer stretches magazines; `gbb.py` no longer builds the extended.
+- `test_magazine_models.gd`: lengths against the standard magazines, widths, MagWell, budget, figures, materials and
+  the parts files' 2 MB.
 
 ## Decisions
 
@@ -35,13 +42,21 @@ length and a `fine` level) at another length, so each is its replica's standard 
   magazine, so it is rebuilt from the standard one the same way, shorter, as its old model was.
 - **Lengths:** hi-cap 1.32 and low-cap 0.70 of the standard below the well, the extended 4 cm longer: long enough to
   read at a glance in first person and on the bots' replicas, short of the hands and the ground.
-- **Detail to the part budget** (owner, 2026-11-05 14:13: aim close to the budget): each is 9,569 to 9,836 of a part's
-  10,000 triangles (docs/CC0_ASSETS.md › Size limits), from finer rings, corners and bevels (`fine`) and the details
-  above. The replica's own magazine is unchanged (it shares the replica's 40,000).
-- **The wheel's knurls are bevelled at 0.2 mm, one segment**, so the wheel stays about 1,500 triangles.
+- **The extended keeps the standard's base pad** (critic attempt 1 measured it big against generic magazine photos):
+  the pad is traced from the owner's own pistol photo in BL2 and shared with the standard magazine, which he passed
+  ("almost perfect"); the owner's rule is "the standard magazines … just longer", so it stays, in the frame's colour.
+- **Outlines stay the standard's** (critic attempt 1): the first attempt's flared rim, pull tab and BB nozzle went;
+  the detail is cut in, not added on.
+- **Detail to the part budget** (owner, 2026-11-05 14:13: aim close to the budget): a part has 10,000 triangles
+  (docs/CC0_ASSETS.md › Size limits), the replica's own magazine shares the rifle's 40,000. The hi-cap and extended
+  use 97 and 95 %, on the curve's rings and rounder corners where they show and on the wheel, holes and cuts. The
+  low-cap uses 84 %: it is short, and more would be rings no one sees (the critic's point in attempt 1).
+- **The hi-cap's wheel** has 20 knurls round 32 segments, bevelled 0.15 mm in two segments: about 3,900 triangles.
 - **No photos of hi-cap, low-cap or extended magazines** were in `ref_images.zip`: the shapes follow the standard
   magazines and their photos (`replicas/aeg_rifle/aeg_magazine`, `replicas/gbb_pistol/gbb_pistol_magazine`).
 
 ## Known issues left
 
-- None yet.
+- On a bot's rifle the low-cap's figure block is drawn over the replica's own figure, whose magazine is longer, so its
+  foot may show under the low-cap at a distance (as with the old part; QA).
+- After BL8 (#205) lands, aeg.glb is about 1.8 MB of its 2 MB; the new test guards it.
