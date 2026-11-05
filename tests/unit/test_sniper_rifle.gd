@@ -184,9 +184,10 @@ func test_in_hand_it_is_a_bolt_action_with_a_long_barrel_and_a_bolt_cycle_fire_c
 	assert_not_null(sniper.muzzle)
 	assert_almost_eq(sniper.muzzle.position.z - aeg.muzzle.position.z, -0.379, 2e-3,
 			"its barrel ends 38 cm further out than the carbine's (BL5, the owner's photo)")
-	assert_almost_eq(sniper.rear_sight.y, aeg.rear_sight.y, 0.005, "its flip-up sights about as high as the AEG's")
+	# The AEG's sights were lowered 7.5 mm (owner, 2026-11-05: smaller, subtler); the rifle's flip-ups kept theirs.
+	assert_almost_eq(sniper.rear_sight.y, aeg.rear_sight.y, 0.012, "its flip-up sights about as high as the AEG's")
 	assert_not_null(sniper.anim)
-	for clip: StringName in [&"Fire", &"Reload", &"Inspect", &"Selector", &"SightsFold"]:
+	for clip: StringName in [&"Fire", &"Reload", &"Inspect", &"Selector"]:
 		assert_true(sniper.anim.has_animation(clip), clip)
 	var fire := sniper.anim.get_animation(&"Fire")
 	assert_almost_eq(fire.length, 1.0, 0.01, "the bolt's cycle: about a second")

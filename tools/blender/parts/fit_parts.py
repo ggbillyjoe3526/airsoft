@@ -19,8 +19,12 @@ are built from this file).
 import os
 import sys
 
-import bpy
-from mathutils import Vector
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "replicas"))
+
+import bpy  # noqa: E402
+from mathutils import Vector  # noqa: E402
+
+import hardsurface as hs  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
 # The parts files fitted, by replica id.
@@ -53,7 +57,7 @@ def lowest(ob: bpy.types.Object) -> float:
 def mounts(replica: str) -> tuple:
     """The replica model's empties by name, in its space, and its own magazine's lowest point."""
     reset()
-    bpy.ops.import_scene.gltf(filepath=os.path.join(ROOT, "assets/models/replicas/%s.glb" % replica))
+    hs.import_glb(os.path.join(ROOT, "assets/models/replicas/%s.glb" % replica))
     mag = bpy.data.objects.get("Magazine")
     return ({o.name: o.matrix_world.translation.copy() for o in bpy.data.objects if o.type == "EMPTY"},
             lowest(mag) if mag is not None else None)

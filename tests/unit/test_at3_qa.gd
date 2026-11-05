@@ -61,21 +61,21 @@ func test_fitting_and_unfitting_repeatedly_restores_the_model_exactly() -> void:
 	var before := _snapshot(model)
 	var parts := {&"optic": &"scope2x", &"magazine": &"hiCap", &"barrel": &"long", &"muzzle": &"silencer"}
 	for i in 5:
-		var fit := ReplicaParts.fit(model, &"aeg", parts, i % 2 == 0)
+		var fit := ReplicaParts.fit(model, &"aeg", parts)
 		assert_gt(fit.nodes.size(), 0)
 		ReplicaParts.unfit(fit)
 		assert_eq(_snapshot(model), before, "round %d" % i)
 
 
-func test_pistol_with_laser_silencer_and_extended_magazine_has_no_optic_and_no_fold() -> void:
+func test_pistol_with_laser_silencer_and_extended_magazine_has_no_optic_and_hides_nothing_of_its_sights() -> void:
 	var kit := _kit(PISTOL, {&"laser": LASER, &"muzzle": SILENCER, &"magazine": EXTENDED}, 1)
 	var hands := _hands(kit)
 	var held: ReplicaView.Held = hands._held[1]
 	assert_null(held.window)
 	assert_null(held.fit.optic)
-	assert_null(held.fit.fold)
 	assert_eq(held.muzzle.name, &"muzzle_silencer_Muzzle")
-	assert_false(held.root.find_children("SightFold", "", true, false).size() > 0)
+	for sight in IronSights.of(held.root):
+		assert_true(sight.visible, "no optic, %s stays" % sight.name)
 
 
 func test_cyber_pistol_without_a_parts_model_fits_nothing_and_still_shoots() -> void:
@@ -98,7 +98,7 @@ func test_a_part_not_in_the_models_is_left_out_without_error() -> void:
 func test_a_replica_without_parts_aims_as_before_and_has_no_glass() -> void:
 	var hands := _hands(_kit(AEG, {}))
 	assert_null(hands._held[0].window)
-	assert_null(hands._held[0].fit.fold)
+	assert_true(hands._held[0].fit.hidden.is_empty(), "nothing hidden, the iron sights up")
 
 
 func test_switching_replica_while_aimed_stops_the_glass() -> void:

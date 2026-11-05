@@ -1422,7 +1422,7 @@ msgid "PART_RATTLES"
 msgstr "Rattles:"
 
 msgid "PART_NOTE_OPTIC"
-msgstr "On the top rail. Aiming looks through it; the iron sights fold down."
+msgstr "On the top rail. Aiming looks through it; the iron sights come off."
 
 msgid "PART_NOTE_GRIP"
 msgstr "Under the rail. Changes how it handles and how steady the aim stays."

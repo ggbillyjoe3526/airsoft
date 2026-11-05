@@ -11,6 +11,8 @@ Every open bug, limit and known gap in the game, so nobody re-reports or re-meas
 
 | Area | Issue | Class | Found |
 |---|---|---|---|
+| Models | The GBB Pistol's dust cover front is square-cut with box-edged channel walls; the owner's locked-back photo (83c82df7) shows a rounded nose closed up to the barrel (GS2 critic, attempt 5) | can wait | 2026-11-05 |
+| Models | The GBB Pistol's sights keep GS1's size and place (the owner's approved sight picture, #211), not his Gen5 photos': there the front sight's base is 7.5 mm long and 3.8 mm tall and the rear 4.2 mm tall, 8.8 mm from the back (GS2 critic). Change them only if he asks; their height sets the aimed eye | can wait | 2026-11-05 |
 | Play | The Sniper Rifle's Fire clip (since BL5 the bolt drawn back at 0.48 s, home at 0.72 s and turned down at 0.88 s) and cocking sound show the rifle cocked about 0.9 s after a shot, but the rifle is ready at 1.25 s (M130) to 1.39 s (M150); a click after the handle is home now fires as the cycle ends (BP3). The cocking is the owner's recorded pistol slide since AU2, timed to the clip; re-time with the owner's model | playtest | 2026-11-03 |
 | Play | The bolt's cocking sound plays to its end after a switch to the pistol or a hit mid-cycle (BP3) | can wait | 2026-11-03 |
 | Play | A mouse wheel notch on the tick a reload or a slot key's draw starts, aimed through the Variable Scope, neither zooms nor switches (BP3) | can wait | 2026-11-03 |

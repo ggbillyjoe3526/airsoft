@@ -670,6 +670,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **The AEG Rifle and the GBB Pistol are redesigned from the owner's reference photos, with no text or logo copied
   (owner, 2026-10-12; RM6, RM7).** Small, minimal iron sights; the old length, grip, magazine, rails and mounts stay.
   The Gas Pistol became the GBB Pistol, a blowback replica with the same numbers.
+- **An optic removes a replica's iron sights completely, never folds them, on every replica now and later (owner,
+  2026-11-05; GS2).** Every piece of the iron sights hangs from a bone ending in `Sight` and the game hides those
+  bones' attachments (`IronSights`); a test holds every optic-taking model to it.
+- **A gas pistol's slide is back only while firing or locked on an empty magazine, and only the slide moves: the
+  barrel stays and shows in front of it (owner, 2026-11-05; GS2).** Every model rests with its parts home.
 - **Glowing BBs are green and loaded At Night by default (owner, 2026-10-24; WL8).** A per-replica Customise choice
   (At Night, Always, Off), saved with the loadout; every bot loads At Night. Drawing only: a seeded match plays the same
   with every choice. Their greens stay more than 20 degrees of hue off every team's.

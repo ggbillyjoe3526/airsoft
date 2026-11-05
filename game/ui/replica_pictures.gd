@@ -3,7 +3,7 @@ extends Node
 ## The replicas' pictures on the menus, drawn live from their models (assets/models/replicas/<key>.glb): each replica has
 ## one small viewport that looks at it from the right, flat (no perspective), in the paint it was last asked for, and every
 ## card showing that replica shows the same texture. The parts fitted to it are put on the model as they are in play
-## (ReplicaParts: the standard magazine or flash hider they replace hidden, the iron sights folded under an optic); the
+## (ReplicaParts: the standard magazine or flash hider they replace hidden, the iron sights hidden under an optic); the
 ## picture is drawn again only when its paint or parts change, and the parts it replaces are freed. Each part also has a picture of its own, alone and in the same paint, for the Customise cards, kept
 ## only for the slot on show. A viewport draws once when the picture is made and once more for each repaint (not every
 ## frame). The paints' materials are ReplicaPaint's: built once each and shared with the match. The power sources have pictures of their own, from

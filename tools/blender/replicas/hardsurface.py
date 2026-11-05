@@ -365,6 +365,36 @@ def empty(name: str, loc: tuple, parent: bpy.types.Object = None) -> bpy.types.O
     return e
 
 
+def rest_pose(arm: bpy.types.Object) -> None:
+    """Leaves `arm` showing its rest pose wherever Blender evaluates it (a render, a figure copy baked from the evaluated
+    meshes): no active action and every NLA track muted. A clip's strip holds its last key outside its own frames, so
+    with the tracks live the last one (a pistol's SlideLock) drew the slide locked back at every frame. The exporter
+    still writes every track as its own animation (export)."""
+    ad = arm.animation_data
+    if ad is not None:
+        ad.action = None
+        for track in ad.nla_tracks:
+            track.mute = True
+    for pb in arm.pose.bones:
+        pb.rotation_quaternion = (1.0, 0.0, 0.0, 0.0)
+        pb.location = (0.0, 0.0, 0.0)
+        pb.scale = (1.0, 1.0, 1.0)
+    bpy.context.view_layer.update()
+
+
+def import_glb(path: str) -> list:
+    """Imports a glTF file and puts its armatures at rest (rest_pose): Blender's importer makes the file's first
+    animation the active action, so at the scene's frame 1 a replica showed its Fire clip's first frame (a pistol's
+    slide most of the way back, 2026-11-05). Returns the objects it brought in."""
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=path)
+    new = [ob for ob in bpy.data.objects if ob not in before]
+    for ob in new:
+        if ob.type == "ARMATURE":
+            rest_pose(ob)
+    return new
+
+
 def export(path: str, animated: bool) -> None:
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=False, export_apply=True,
                               export_animations=animated, export_animation_mode="NLA_TRACKS", export_yup=True,

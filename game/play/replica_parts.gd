@@ -5,7 +5,7 @@ extends RefCounted
 ## top-level object per part named <slot>_<key>, placed where it sits on the replica, with its figures' cut-down copy
 ## (<slot>_<key>_Figure) beside it or under it. A magazine part takes the standard magazine's place and follows it
 ## through a reload; a muzzle part takes the flash hider's; a barrel with an end point carries the muzzle device and the
-## muzzle out to it; an optic folds the iron sights down (SightFold). `unfit` undoes it all.
+## muzzle out to it; an optic hides the iron sights whole (IronSights). `unfit` undoes it all.
 
 const PART_DIR := "res://assets/models/replicaParts/"
 const FIGURE_SUFFIX := "_Figure"
@@ -33,8 +33,6 @@ class Fit:
 	var hidden: Array[Node3D] = []
 	var moved: Array[Node3D] = []
 	var moved_from: Array[Vector3] = []
-	var skeleton: Skeleton3D = null
-	var fold: SightFold = null
 	## The optic fitted (null: the iron sights), its Key, and its sight line's place in the model's space.
 	var optic: Node3D = null
 	var optic_key: StringName = &""
@@ -43,9 +41,9 @@ class Fit:
 	var muzzle: Node3D = null
 
 
-## Fits `parts` (part slot -> part Key, as Kit.parts has them) to `model`, replica `key`'s model. `animated`: its clips
-## pose it (the hands), so the iron sights are held folded every frame, not just set. A part the models lack is left out.
-static func fit(model: Node3D, key: StringName, parts: Dictionary, animated: bool = false) -> Fit:
+## Fits `parts` (part slot -> part Key, as Kit.parts has them) to `model`, replica `key`'s model. A part the models
+## lack is left out.
+static func fit(model: Node3D, key: StringName, parts: Dictionary) -> Fit:
 	var f := Fit.new()
 	f.model = model
 	f.muzzle = model.find_child(MUZZLE_NODE, true, false) as Node3D
@@ -94,17 +92,12 @@ static func fit(model: Node3D, key: StringName, parts: Dictionary, animated: boo
 				model.add_child(node)
 		f.nodes.append(node)
 	if f.optic != null:
-		f.skeleton = model.find_child("Skeleton3D", true, false) as Skeleton3D
-		if f.skeleton != null:
-			SightFold.fold(f.skeleton)
-			if animated:
-				f.fold = SightFold.new()
-				f.fold.setup(f.skeleton)
-				f.skeleton.add_child(f.fold)
+		for sight in IronSights.of(model):
+			_hide(f, sight)
 	return f
 
 
-## Takes the parts off again: frees them and puts back what they hid, moved and folded.
+## Takes the parts off again: frees them and puts back what they hid (the iron sights too) and moved.
 static func unfit(f: Fit) -> void:
 	for node in f.nodes:
 		node.get_parent().remove_child(node)
@@ -117,13 +110,6 @@ static func unfit(f: Fit) -> void:
 		f.moved[i].position = f.moved_from[i]
 	f.moved.clear()
 	f.moved_from.clear()
-	if f.fold != null:
-		f.skeleton.remove_child(f.fold)
-		f.fold.free()
-		f.fold = null
-	if f.skeleton != null:
-		SightFold.unfold(f.skeleton)
-		f.skeleton = null
 	f.optic = null
 	f.optic_key = &""
 	f.muzzle = f.model.find_child(MUZZLE_NODE, true, false) as Node3D

@@ -109,11 +109,11 @@ The rifle holds 60 BBs and the pistol 18, each with 4 magazines a round. Nothing
 
 ## Aiming and optics
 
-The rifle comes with flip-up iron sights; a red dot or a 2× scope is a part you fit in Loadout › Customise.
+The rifle comes with iron sights; a red dot or a 2× scope is a part you fit in Loadout › Customise.
 
 - [ ] **Hold right click with iron sights.** The rifle comes up to your eye, the view narrows a touch and the
   crosshair goes: the front post sits in the rear ring.
-- [ ] **Fit the red dot and aim.** It sits on the rifle with the iron sights folded under it; the crosshair gives way
+- [ ] **Fit the red dot and aim.** It sits on the rifle with the iron sights gone; the crosshair gives way
   to the dot and you move at a quiet walk (no sprint while aiming). Let go and it all goes back.
 - [ ] **Shoot while aiming.** BBs go where the dot (or post) is. Aiming halves the spread: at 25 to 35 m it should be
   clearly tighter, and the hip up close should still feel fine.
@@ -1346,6 +1346,23 @@ Every BB in flight is now a proper Blender model, round from every side instead 
   on SWITCH REPLICA, and Enter opens the list again.
 - [ ] **Flags from a roof.** On Woodland in Attack / Defend, if you can get onto the shelter roof by flag B, standing
   there does nothing to the flag; at the pole's foot it rises as before.
+
+## GBB slide, AEG sights and stock (GS2)
+
+- [ ] **GBB at rest:** look at the GBB Pistol in the Loadout, Customise, in your hand and in its holster on a bot: the
+  slide is always forward, flush with the frame's nose. Its slide has lines at the front and back, a chamfered nose
+  and rounded edges, like your photos.
+- [ ] **GBB firing:** fire it, then empty it. Only the slide runs back; the barrel stays and shows in front of it,
+  and the slide stays back until the reload seats the new magazine.
+- [ ] **GBB front:** in Inspect or on a bot, the muzzle and the spring hole under it (with the guide rod's cap) look
+  like your Gen5 photos; locked back, nothing but the barrel shows in front of the slide.
+- [ ] **AEG irons:** aim the AEG Rifle at a figure down the Range with no optic. The small ring at the back and the
+  front post line up easily and the figure shows clearly round the post.
+- [ ] **Optic:** fit the red dot, then the 2x Scope, on the AEG Rifle and on the Sniper Rifle. No part of the iron
+  sights shows at the hip, aimed or on the menu pictures; take the optic off and they come back.
+- [ ] **AEG stock:** the stock's sides are flat, the half-round tubes gone.
+- [ ] **AEG charging handle:** it sits lower, under the rail's back end, and on a reload it pulls straight back
+  without passing through anything.
 
 ## Reporting what you find
 

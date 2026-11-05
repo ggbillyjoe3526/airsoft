@@ -65,13 +65,31 @@ SLIDE_TOP = Z(45.0)
 SLIDE_SIDE_FOOT = Z(108.0)
 SLIDE_FOOT = Z(112.0)
 SLIDE_HW = 0.01275
+# How far the slide runs back firing and locked on an empty magazine (the Fire and SlideLock clips).
+SLIDE_TRAVEL = 0.026
 NOSE_HW = 0.0112
 # The top edges' bevel; the rear serrations; the ejection port (y from, to) and its depth down the right flank; the
 # spring guide's hole (radius, height); the rear sight's half width and its notch's.
+# The owner's slide photos (2026-11-05, art/references/replicas/gbb-pistol/william-2026-11-05/, measured on the side
+# view fea446d0, the slide 2,113 px for 186.5 mm: 0.088 mm a pixel): the slide's top edges rounded SLIDE_BEVEL; its
+# nose chamfered on the top and both sides, NOSE_CHAMFER in over the last NOSE_CHAMFER_LEN, curving in from the flank
+# with its facets' meeting rounded (NOSE_BLEND); its back face's edges rounded BACK_ROUND; and seven flat-bottomed
+# grooves (SERRATION_W wide, SERRATION_PITCH apart, SERRATION_DEPTH deep, their top ends rounded at the top edge) at
+# each end, the first front one FRONT_SERRATION_AT behind the face and the last rear one's back edge
+# REAR_SERRATION_AT before the back.
 SLIDE_BEVEL = 0.0022
-NOSE_CHAMFER = 0.0016
-SERRATIONS = 11
+NOSE_CHAMFER = 0.0024
+NOSE_CHAMFER_LEN = 0.0060
+BACK_ROUND = 0.0022
+NOSE_BLEND = 0.0030
+SERRATIONS = 7
+SERRATION_W = 0.0026
+SERRATION_PITCH = 0.0050
 SERRATION_DEPTH = 0.0007
+FRONT_SERRATION_AT = 0.0138
+REAR_SERRATION_AT = 0.0094
+# The fine lines across the rear cover plate's upper half.
+PLATE_LINES = 5
 PORT_Y = (-0.0095, 0.0225)
 PORT_DEPTH = 0.0088
 # The port's left edge (x) on the top; the barrel hood's clearance to the port's walls and its right face's inset from
@@ -81,16 +99,29 @@ HOOD_GAP = 0.00015
 HOOD_INSET = 0.0012
 # The hood's sloped front: it leaves the top this far behind the port's front wall and meets that wall this far down.
 HOOD_SLOPE = (0.0045, 0.0030)
-GUIDE_R = 0.0024
-GUIDE_Z = Z(104.0)
+# The slide's nose lip, as the owner's photos: under the barrel the slide's face drops LIP_FOOT, in front of the
+# frame's dust cover (whose front sits behind it), LIP_DEPTH deep and LIP_HW a side, its bottom corners rounded; it
+# runs back in a channel in the dust cover (frame_upper) as the slide cycles. Narrow enough to leave the dust cover's
+# walls beside the rail slots.
+LIP_FOOT = Z(143.0)
+LIP_DEPTH = 0.0030
+LIP_HW = 0.0070
+LIP_ROUND = 0.0030
+# The recoil spring's hole in the lip under the barrel, the guide rod's flat cap in it with its centre hole: about
+# 2.2 mm of metal under it and over it to the barrel's hole, 1.8 mm either side.
+GUIDE_R = 0.0052
+GUIDE_Z = Z(121.0)
 REAR_SIGHT_HW = 0.0078
 NOTCH_HW = 0.0020
-# The bore (the photo's muzzle: py 63 to 99), the barrel's outer radius and the BB bore's, and the barrel's end, just
-# proud of the slide's face (photo: x 20).
-BORE_Z = Z(81.0)
-BARREL_R = 0.0061
+# The bore, 48 % down the slide's face as the owner's Gen5 photos (the main photo's py 77), the barrel's outer radius
+# (14 mm across, as the photos') and the BB bore's, and the barrel's end, 1.7 mm proud of the slide's face as the photos'.
+BORE_Z = Z(77.0)
+BARREL_R = 0.0070
 BORE_R = 0.0031
-BARREL_END = Y(20.0)
+# The muzzle's opening, recessed MUZZLE_RECESS to the inner barrel's bore.
+MUZZLE_R = 0.0047
+MUZZLE_RECESS = 0.003
+BARREL_END = Y(17.0)
 # The sights. SIGHT_Z is the sight line (the front post's top, the empties' height and so the eye's when aimed:
 # ReplicaView), a hair under the rear sight's top (Z(35)) for an equal-height picture; the rear's notch floor sits
 # NOTCH_DROP under it, so aimed the whole post stands in the notch with light either side (owner 2026-11-05: the post
@@ -116,7 +147,7 @@ GRIP_CHAMFER = 0.0026
 # out of the floor.
 TAKEDOWN_RECESS = ((273.0, 130.0), (13.5, 14.5), 4.0, 0.0008, 0.33)
 TAKEDOWN_PROUD = 0.0009
-RAIL_SLOT_DEPTH = 0.0045
+RAIL_SLOT_DEPTH = 0.0039
 BACK_GROOVES, BACK_GROOVE_PY, BACK_GROOVE_PITCH = 18, (244.0, 386.0), 142.0 / 17.0
 FRONT_GROOVE_PY = tuple(c + d for c in (260.0, 310.5, 363.5) for d in (-8.25, -2.75, 2.75, 8.25))
 THUMB_CLEAR = 0.00015
@@ -183,14 +214,14 @@ def pts(trace: list) -> list:
 
 def slide() -> object:
     """The slide: a square block with bevelled top edges and the narrower nose under its front, rear serrations, the
-    ejection port with the barrel's hood filling it, the extractor, the rear cover plate, the sights, and the barrel
-    and spring guide in its face."""
+    ejection port (the barrel's hood fills it: barrel()), the extractor, the rear cover plate and the sights."""
     b = hs.Builder("Slide", ["Body", "Detail", "Metal", "Accent"])
     y0, y1 = SLIDE_Y
     top, foot = SLIDE_TOP, SLIDE_SIDE_FOOT
-    ch = SLIDE_BEVEL
-    sec = [(-NOSE_HW, SLIDE_FOOT), (NOSE_HW, SLIDE_FOOT), (NOSE_HW, foot), (SLIDE_HW, foot), (SLIDE_HW, top - ch),
-           (SLIDE_HW - ch, top), (-SLIDE_HW + ch, top), (-SLIDE_HW, top - ch), (-SLIDE_HW, foot), (-NOSE_HW, foot)]
+    # Its top edges rounded, as the photos' (owner, 2026-11-05: "slightly rounded"), not chamfered.
+    sec = hs.fillet([(-NOSE_HW, SLIDE_FOOT, 0.0), (NOSE_HW, SLIDE_FOOT, 0.0), (NOSE_HW, foot, 0.0),
+                     (SLIDE_HW, foot, 0.0), (SLIDE_HW, top, SLIDE_BEVEL), (-SLIDE_HW, top, SLIDE_BEVEL),
+                     (-SLIDE_HW, foot, 0.0), (-NOSE_HW, foot, 0.0)], 5)
     b.prism(sec, "y", y0, y1, "Body")
     ob = b.build()
     # The side's outline: the top's corners rounded front and back, as the photo's.
@@ -199,28 +230,54 @@ def slide() -> object:
     c.prism(hs.fillet([(y0, SLIDE_FOOT - 0.002, 0.0), (y1, SLIDE_FOOT - 0.002, 0.0), (y1, top, r), (y0, top, r)], 6),
             "x", -0.02, 0.02, "Body")
     hs.cut(ob, [c.build()], "INTERSECT")
-    # The face's chamfer: the top and sides run in NOSE_CHAMFER at 45 degrees round the muzzle end.
+    # The nose's chamfer: the top and sides run in NOSE_CHAMFER over the last NOSE_CHAMFER_LEN, as the photos'; and
+    # the back face's edges (top and sides) rounded BACK_ROUND in four steps.
     c = hs.Builder("c_nose", ["Body"])
     big = 0.001
-    chamfer = NOSE_CHAMFER + big
 
-    def box_ring(y: float, d: float) -> list:
+    def box_ring(y: float, d: float, corner: float = 0.0005) -> list:
+        """The cutter's section at `y`, `d` in from the slide's sides and top, its top corners rounded `corner`."""
         x, zt = SLIDE_HW + big - d, top + big - d
         zb = SLIDE_FOOT - 0.003
-        return [(-x, y, zb), (x, y, zb), (x, y, zt), (-x, y, zt)]
+        ring = [(-x, y, zb), (x, y, zb)]
+        for cx, a0 in ((x - corner, 0.0), (-x + corner, 0.5 * math.pi)):
+            for i in range(6):
+                a = a0 + 0.5 * math.pi * i / 5
+                ring.append((cx + corner * math.cos(a), y, zt - corner + corner * math.sin(a)))
+        return ring
 
-    c.loft([box_ring(y0 - 0.01, 0.0), box_ring(y1 - chamfer, 0.0), box_ring(y1 + 0.0001, chamfer + 0.0001)], "Body")
+    rings = [box_ring(y0 - 0.0001, big + BACK_ROUND)]
+    for k in range(1, 5):
+        a = 0.5 * math.pi * k / 4
+        rings.append(box_ring(y0 + BACK_ROUND * (1.0 - math.cos(a)), big + BACK_ROUND * (1.0 - math.sin(a))))
+    # The nose: from the flank (no crease where it starts) curving in to NOSE_CHAMFER at the face, its top and side
+    # facets meeting round a corner that grows from the top's own fillet (so no kink where the chamfer starts) to
+    # NOSE_BLEND at the face, as the photos' soft nose.
+    rings.append(box_ring(y1 - NOSE_CHAMFER_LEN - 0.002, 0.0, SLIDE_BEVEL + big))
+    for k in range(5):
+        u = k / 4
+        rings.append(box_ring(y1 - NOSE_CHAMFER_LEN * (1.0 - u) + (0.0001 if k == 4 else 0.0),
+                              big + NOSE_CHAMFER * u ** 1.7, SLIDE_BEVEL + (NOSE_BLEND - SLIDE_BEVEL) * u))
+    c.loft(rings, "Body")
     hs.cut(ob, [c.build()], "INTERSECT")
+    # The nose lip under the face, one piece with the slide.
+    c = hs.Builder("c_lip", ["Body"])
+    lip_hh = 0.5 * (SLIDE_FOOT + 0.001 - LIP_FOOT)
+    c.prism(hs.rounded_rect(LIP_HW, lip_hh, LIP_ROUND, 4), "y", y1 - LIP_DEPTH, y1, "Body",
+            offset=(0.0, 0.0, LIP_FOOT + lip_hh))
+    hs.cut(ob, [c.build()], "UNION")
     cutters = []
-    # Rear serrations: flat-bottomed grooves as wide as the lands between them, the flank's full height and into
-    # the bevel (photo: nine, x 440 to 532).
-    pitch = (Y(440.0) - Y(532.0)) / (SERRATIONS - 0.5)
+    # Front and rear serrations, as the owner's slide photos: SERRATIONS flat-bottomed grooves at each end, about as
+    # wide as the ridges between them, the flank's full height and square-ended up through the rounded top edge.
+    starts = [y0 + REAR_SERRATION_AT + i * SERRATION_PITCH for i in range(SERRATIONS)]
+    starts += [y1 - FRONT_SERRATION_AT - SERRATION_W - i * SERRATION_PITCH for i in range(SERRATIONS)]
+    end = top - 0.15 * SLIDE_BEVEL
     for sx in (-1, 1):
-        for i in range(SERRATIONS):
-            y0s = Y(532.0) + i * pitch
+        for y0s in starts:
             c = hs.Builder("c_ser", ["Body"])
             xa, xb = sorted((sx * (SLIDE_HW - SERRATION_DEPTH), sx * 0.02))
-            c.box((xa, y0s, foot - 0.001), (xb, y0s + pitch * 0.5, top + 0.001), "Body")
+            c.prism([(y0s, foot - 0.001), (y0s + SERRATION_W, foot - 0.001), (y0s + SERRATION_W, end),
+                     (y0s, end)], "x", xa, xb, "Body")
             cutters.append(c.build())
     # The ejection port: open on the top's right and down the right side to PORT_DEPTH, its front corners rounded.
     c = hs.Builder("c_port", ["Body"])
@@ -248,37 +305,28 @@ def slide() -> object:
     cutters.append(cut_plate)
     # The muzzle's bore through the face, and the spring guide's hole under it.
     c = hs.Builder("c_bore", ["Body"])
-    c.lathe([(y1 - 0.030, BARREL_R + 0.0004), (y1 + 0.01, BARREL_R + 0.0004)], "Body", 28,
+    c.lathe([(y1 - 0.030, BARREL_R + 0.0004), (y1 + 0.01, BARREL_R + 0.0004)], "Body", 32,
             centre=(0.0, 0.0, BORE_Z))
     cutters.append(c.build())
     c = hs.Builder("c_guide", ["Body"])
-    c.lathe([(y1 - 0.010, GUIDE_R), (y1 + 0.01, GUIDE_R)], "Body", 24, centre=(0.0, 0.0, GUIDE_Z))
+    c.lathe([(y1 - 0.010, GUIDE_R), (y1 + 0.01, GUIDE_R)], "Body", 32, centre=(0.0, 0.0, GUIDE_Z))
     cutters.append(c.build())
     hs.cut(ob, cutters)
-    hs.finish(ob, 0.0008, 2)
-    # The cover plate itself, a touch inside the face.
+    hs.finish(ob, 0.0008, 1)
+    # The cover plate itself, a touch inside the face, with fine lines across its upper half as the photos'.
     b = hs.Builder("CoverPlate", ["Body"])
     b.prism(inner, "y", y0 - 0.0002, y0 + 0.001, "Body")
-    parts = [ob, hs.finish(b.build(), 0.0003, 1)]
-    # The barrel: its hood filling the port to a hairline (HOOD_GAP) front, back and on the left, flush with the top
-    # (owner 2026-11-05: no gap between slide and barrel in the port), its front edge sloping down to the barrel as
-    # before (owner 2026-11-05: keep the slope), its right face HOOD_INSET inside the flank as the photos' chamber;
-    # its tube to the face.
-    b = hs.Builder("Barrel", ["Metal"])
-    g = HOOD_GAP
-    hood = hs.fillet([(PORT_Y[0] + g, BORE_Z, 0.0), (PORT_Y[1] - g, BORE_Z, 0.0),
-                      (PORT_Y[1] - g, top - HOOD_SLOPE[1], 0.0015), (PORT_Y[1] - HOOD_SLOPE[0], top - 0.0002, 0.001),
-                      (PORT_Y[0] + g, top - 0.0002, 0.0)], 3)
-    b.prism(hood, "x", PORT_X + g, SLIDE_HW - HOOD_INSET, "Metal")
-    end = BARREL_END
-    b.tube([(PORT_Y[0] + 0.002, BARREL_R), (end - 0.0004, BARREL_R), (end, BARREL_R - 0.0005)],
-           [(PORT_Y[0] + 0.002, BORE_R), (end - 0.0008, BORE_R), (end, BORE_R + 0.0012)], "Metal", 28,
-           centre=(0.0, 0.0, BORE_Z))
-    parts.append(hs.finish(b.build(), 0.00025, 1))
-    # The spring guide's end, the extractor and the sights.
+    plate_ob = b.build()
+    lines = []
+    for k in range(PLATE_LINES):
+        z = foot + 0.0042 + k * 0.0013
+        c = hs.Builder("c_line", ["Body"])
+        c.box((-0.0072, y0 - 0.001, z), (0.0072, y0 + 0.0001, z + 0.0005), "Body")
+        lines.append(c.build())
+    hs.cut(plate_ob, lines)
+    parts = [ob, hs.finish(plate_ob, 0.0002, 1)]
+    # The extractor and the sights.
     b = hs.Builder("Bits", ["Detail", "Metal", "Accent"])
-    b.lathe([(y1 - 0.004, GUIDE_R - 0.0008), (y1 - 0.0012, GUIDE_R - 0.0008), (y1 - 0.0008, GUIDE_R - 0.0014),
-             (y1 - 0.0008, 0.0)], "Metal", 20, centre=(0.0, 0.0, GUIDE_Z))
     # Extractor: a slim bar in its slot, a little below the flank, its rear end rounded.
     g = 0.0003
     bar = hs.fillet([(PORT_Y[0] - 0.0175 + g, ez0 + g, 0.0013), (PORT_Y[0] - 0.0006, ez0 + g, 0.0),
@@ -321,8 +369,43 @@ def slide() -> object:
     face_y = Y(534.0) - (Z(35.0) - zt) * math.tan(lean)
     b.transform(f, Matrix.Translation((0.0, face_y, zt)) @ Matrix.Rotation(-lean, 4, "X"))
     dot = b.build()
-    parts += [hs.finish(bits, 0.0003, 1), dot]
+    parts += [hs.finish(bits, 0.0003, 1), dot, guide_rod()]
     return hs.join("Slide", parts)
+
+
+def barrel() -> object:
+    """The barrel, on the frame, not the slide (owner 2026-11-05: firing, only the slide moves
+    back and the barrel shows in front of it, as his photos of a slide locked back). The hood fills the port to a
+    hairline (HOOD_GAP) front, back and on the left, flush with the top (owner 2026-11-05: no gap between slide and
+    barrel in the port), its front edge sloping down to the barrel (owner 2026-11-05: keep the slope), its right face
+    HOOD_INSET inside the flank as the photos' chamber; its tube to the face. Straight, not
+    tilted down as a real locked-back barrel is: the replica's barrel is fixed."""
+    top = SLIDE_TOP
+    b = hs.Builder("Barrel", ["Metal"])
+    g = HOOD_GAP
+    hood = hs.fillet([(PORT_Y[0] + g, BORE_Z, 0.0), (PORT_Y[1] - g, BORE_Z, 0.0),
+                      (PORT_Y[1] - g, top - HOOD_SLOPE[1], 0.0015), (PORT_Y[1] - HOOD_SLOPE[0], top - 0.0002, 0.001),
+                      (PORT_Y[0] + g, top - 0.0002, 0.0)], 3)
+    b.prism(hood, "x", PORT_X + g, SLIDE_HW - HOOD_INSET, "Metal")
+    end = BARREL_END
+    # A flat crown (its edges broken by finish(), the shading split there) round the wide opening, the inner
+    # barrel's bore recessed behind it, as the photos'.
+    b.tube([(PORT_Y[0] + 0.002, BARREL_R), (end, BARREL_R)],
+           [(PORT_Y[0] + 0.002, BORE_R), (end - MUZZLE_RECESS, BORE_R), (end - MUZZLE_RECESS, MUZZLE_R),
+            (end, MUZZLE_R)], "Metal", 32, centre=(0.0, 0.0, BORE_Z))
+    return hs.finish(b.build(), 0.0002, 1)
+
+
+def guide_rod() -> object:
+    """The recoil spring's guide rod in the lip's hole: its flat cap with a centre hole and the rod behind it inside
+    the slide. It rides with the slide, as the owner's locked-back photos: with the slide back nothing of it shows in
+    front of the slide (a real rod's spring sits squeezed behind the lip)."""
+    y1 = SLIDE_Y[1]
+    b = hs.Builder("GuideRod", ["Metal"])
+    b.lathe([(y1 - 0.012, 0.0036), (y1 - 0.0024, 0.0036), (y1 - 0.0024, GUIDE_R - 0.0004),
+             (y1 - 0.0006, GUIDE_R - 0.0004), (y1 - 0.0006, 0.0015), (y1 - 0.0016, 0.0015), (y1 - 0.0016, 0.0)],
+            "Metal", 28, centre=(0.0, 0.0, GUIDE_Z))
+    return hs.finish(b.build(), 0.0002, 1)
 
 
 # ------------------------------------------------------------------------------------------------------------ frame
@@ -395,17 +478,21 @@ def grip_ring(py: float, count: int = 40) -> list:
     return [(x * swell(py, cy + d, hw) / hw, cy + d, z) for x, d in hs.superellipse(hw, half, half, n, count)]
 
 
+# The grip loft's row spacing (photo px) down the straight run.
+GRIP_ROW = 4.0
+
+
 def grip() -> object:
     b = hs.Builder("Grip", ["Furniture"])
     pys = [101.0, 103.0, 106.0, 110.0, 115.0, 120.0, 125.0, 130.0, 135.0, 140.0]
     py = 144.0
     while py < 206.0:
         pys.append(py)
-        py += 4.0
+        py += GRIP_ROW
     py = 206.0
     while py < GRIP_FOOT - 13.0:
         pys.append(py)
-        py += 4.0
+        py += GRIP_ROW
     # Close rows at the chamfer's top so its edge stays crisp.
     pys += [GRIP_FOOT - d for d in (12.5, 12.0, 8.0, 4.0, 0.0)]
     b.loft([grip_ring(p) for p in pys], "Furniture")
@@ -515,13 +602,23 @@ def frame_upper() -> object:
     hs.cut(web, [guard_opening()])
     hs.cut(ob, [guard, web, grip()], "UNION")
     cutters = []
-    # The rail's slots under the slide's nose, a side (py 131 to 141.5, x 10 to 166, 4.5 mm deep), so the rail's
+    # The rail's slots under the slide's nose, a side (py 131 to 141.5, x 10 to 166, 3.9 mm deep: 1.2 mm of wall left
+    # beside the lip's channel), so the rail's
     # land stands out under them; and its cross slot.
     for sx in (-1, 1):
         c = hs.Builder("c_rail", ["Furniture"])
         xa, xb = sorted((sx * (FRAME_HW - RAIL_SLOT_DEPTH), sx * 0.02))
         c.box((xa, Y(166.0), Z(141.5)), (xb, Y(10.0), Z(131.0)), "Furniture")
         cutters.append(c.build())
+    # The dust cover's front behind the slide's nose lip, and the channel the lip runs back in as the slide cycles.
+    y1 = SLIDE_Y[1]
+    c = hs.Builder("c_lip_front", ["Furniture"])
+    c.box((-0.02, y1 - LIP_DEPTH - 0.0004, -0.05), (0.02, y1 + 0.01, 0.01), "Furniture")
+    cutters.append(c.build())
+    c = hs.Builder("c_lip_way", ["Furniture"])
+    c.box((-(LIP_HW + 0.0003), y1 - SLIDE_TRAVEL - LIP_DEPTH - 0.0008, LIP_FOOT - 0.0003),
+          (LIP_HW + 0.0003, y1, 0.01), "Furniture")
+    cutters.append(c.build())
     c = hs.Builder("c_slot", ["Furniture"])
     c.box((-(FRAME_HW - 0.0014), Y(92.0), Z(170.0)), (FRAME_HW - 0.0014, Y(78.0), Z(145.0)), "Furniture")
     cutters.append(c.build())
@@ -921,7 +1018,7 @@ def ease_out(t: float) -> float:
 DROP = (-0.0814, -0.2046)
 CLIPS = {
     "Fire": (7 / 60, {
-        "slide": ("ly", [(0.0, 0.0), (0.05, -0.026, "out"), (7 / 60, 0.0)]),
+        "slide": ("ly", [(0.0, 0.0), (0.05, -SLIDE_TRAVEL, "out"), (7 / 60, 0.0)]),
         "trigger": ("rx", [(0.0, 0.0), (0.0333, -16.04), (0.05, -16.04), (7 / 60, 0.0)]),
     }),
     "Reload": (1.2, {
@@ -930,11 +1027,13 @@ CLIPS = {
                             (0.6167, (DROP[0] * 0.636, DROP[1] * 0.636)), (1.0167, (0.0, 0.0), "out"),
                             (1.05, (0.00074, 0.00186)), (1.1167, (0.0, 0.0)), (1.2, (0.0, 0.0))]),
     }),
+    # The slide stays home: it is only ever back while firing or locked on an empty magazine (owner, 2026-11-05; the
+    # Inspect clip's press check, 16 mm back, is gone).
     "Inspect": (2.0, {
-        "slide": ("ly", [(0.0, 0.0), (0.283, 0.0), (0.55, -0.016), (1.333, -0.016), (1.40, 0.0), (2.0, 0.0)]),
+        "slide": ("ly", [(0.0, 0.0), (2.0, 0.0)]),
     }),
     "SlideLock": (1 / 60, {
-        "slide": ("ly", [(0.0, 0.0), (1 / 60, -0.026)]),
+        "slide": ("ly", [(0.0, 0.0), (1 / 60, -SLIDE_TRAVEL)]),
     }),
 }
 
@@ -986,9 +1085,8 @@ def clips(arm: bpy.types.Object) -> None:
         track = ad.nla_tracks.new()
         track.name = clip
         track.strips.new(clip, 0, act)
-    for pb in arm.pose.bones:
-        pb.rotation_quaternion = (1.0, 0.0, 0.0, 0.0)
-        pb.location = (0.0, 0.0, 0.0)
+    # At rest from here on (renders, the figure copy), the tracks muted; every one is still exported.
+    hs.rest_pose(arm)
 
 
 # ------------------------------------------------------------------------------------------------------------ main
@@ -1005,6 +1103,8 @@ def build() -> None:
         print("  part %-12s %6d" % (ob.name, hs.tris(ob)))
     body = hs.join("Body", parts)
     body.parent = arm
+    # The barrel stays with the frame (its own mesh: the sights' and port's tests read it with the slide).
+    barrel().parent = arm
     for ob, bone in ((slide(), "slide"), (trigger(), "trigger"), (magazine(), "magazine"),
                      (mag_release(), "magRelease")):
         hs.parent_to_bone(ob, arm, bone)

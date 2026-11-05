@@ -872,9 +872,8 @@ def clips(arm: bpy.types.Object) -> None:
         track = ad.nla_tracks.new()
         track.name = clip
         track.strips.new(clip, 0, act)
-    for pb in arm.pose.bones:
-        pb.rotation_quaternion = (1.0, 0.0, 0.0, 0.0)
-        pb.location = (0.0, 0.0, 0.0)
+    # At rest from here on (renders, the figure copy), the tracks muted; every one is still exported.
+    hs.rest_pose(arm)
 
 
 # ------------------------------------------------------------------------------------------------------------ main

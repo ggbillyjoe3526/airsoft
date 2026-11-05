@@ -119,10 +119,16 @@ A replica's file is its model in the hands, on the menus' pictures and on the fi
 - **Moving parts (RM1).** Objects the file's animations move hang from one bone (the armature's root) and are drawn in
   the body's own meshes, so they cost no draw call. The game poses them from its state, never on a clock: `Fire` (the
   trigger, and a pistol's slide kicking back and home, each shot), `Selector` (safe at 0, semi at half its length,
-  burst at three quarters, auto at the end), `SightsFold` (while an optic is fitted), `Reload` (through the reload),
+  burst at three quarters, auto at the end), `Reload` (through the reload),
   `Inspect` (on the Inspect key, RM2) and `SlideLock` (RM7: held at its end while the magazine is empty, a GBB's slide
   caught back; put it after the others, as a later animation wins a part two of them move). The magazine is never a
-  bone: the game moves it (and the hand holding it).
+  bone: the game moves it (and the hand holding it). Only the slide rides the slide bone: the barrel stays with the
+  frame, so with the slide back it shows in front of it (owner, 2026-11-05). The file opens at rest: the build leaves
+  the armature with no active action and its tracks muted (`hardsurface.rest_pose`), and scripts that read a replica
+  file import it with `hardsurface.import_glb`, as Blender's importer otherwise shows the first clip's frame 1.
+- **Iron sights (owner, 2026-11-05, every replica).** Every piece of the iron sights (base, leaf, ears, post) hangs
+  from a bone whose name ends in `Sight` (`frontSight`, `rearSight`). With any optic fitted the game hides them whole
+  (`IronSights`): never folded, so nothing stands in the optic's way.
 - **Parts.** `replicaParts/<id>.glb`: one top-level object per part named `<kind>_<id>` (`optic_redDot`,
   `magazine_hiCap`, `muzzle_silencer` …), in the replica's space where it fits; a child `<name>_Figure` is ignored. Two
   child empties are read (RM8): an optic's `<name>_SightLine` on its sight line (aimed, the replica is raised so it
