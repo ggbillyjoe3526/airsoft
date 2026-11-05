@@ -1,11 +1,16 @@
-Task: BL9 · QA commit af428b3 (tests unchanged since; checked on head bb671b4) · Verdict: Pass
+Task: AU8 · QA commit 10ca090 · Verdict: Pass
 
-Blocking: none. Advisory: none.
+Blocking: none. Advisory: the changelog note was untracked at 10ca090 (committed with the reports).
 
-Since 4de834a (flash.glb at 5,120 triangles with a rounder tube and rings, docs, two merges of origin/main with no grenade code) the grenade tests still pass:
-- test_grenade_models_qa.gd: 3 of 3 (rest lie neither below nor floating, kind change in a reused slot, held bomb mesh)
-- test_grenade_models.gd: 8 of 8 (this includes the triangle budget and the length and centre checks on the new flash)
-- test_sf1_qa.gd: 38 of 38
-
-Not run: tools/check.sh and the smoke test.
-Needs a display (owner's list): how the smoke bomb looks lying lever-up on a real floor, and the flash's rounder tube and rings up close.
+- Old cue names: none left. A grep over game, tools, tests, data, docs, .import/.tres/.tscn for `dryFire_(gas|electric|spring|cyber)` and `_dry[`
+  finds only the new test's "went" asserts and the record. `assets/audio/cues/` holds dryFire_1..5 and their imports.
+- `_dry` is gone; its other users (test_cp1_qa, test_cyber_pistol) were updated.
+- DRY_CUE is preloaded once in setup(); `_mechanism(DRY_CUE, ...)` no longer depends on the profile, so a later
+  profile still clicks (the new test's `anyLaterOne`).
+- Bots' dry fire comes from Armament for any actor, the same path, so bots click like the player.
+- Silenced replicas: the DRY_FIRE branch never read the suppressor; test_at3_qa's silenced dry fire passes.
+- Dev bottomless magazines never reach the `mag <= 0` branch that emits DRY_FIRE: unchanged.
+- Range: `street` is in AmbienceConfig.IDS; set_for picks day or night by the preset's night flag; the range gets
+  The Street's day set (and its night set under Dev › Time of day).
+- Targeted tests green: test_ambience_config 9, test_recordings 13, test_cyber_pistol 8, test_cp1_qa 16,
+  test_sniper_rifle 11, test_at3_qa 14. test_assets' 397 = 412 - 15.
