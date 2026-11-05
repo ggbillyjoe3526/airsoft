@@ -53,18 +53,23 @@ S_BANDS = [           # the sleeve's bands bottom to top: (from, to, material)
     (101.0, 109.0, "Band"),
 ]
 S_LABEL_TOP = 109.0
-S_CAP_R = 27.1
+S_CAP_R = 27.6         # a hair proud of the sleeve, as in the photo
 S_CAP_SIDE = 114.5    # the cap's straight side ends; the shoulder rounds up to the crown
 S_CROWN = (119.0, 118.3)   # the crown's segments' tops, alternating
 S_CROWN_SEGS = 12
-S_NOTCH = 2.2         # how deep each V notch between segments is
+S_NOTCH = 3.5         # how deep each V notch between segments is
+S_NOTCH_W = 0.045     # each notch's half width, as a share of a segment
 S_CROWN_IN = 23.0     # the crown's inner edge; the recessed top inside it
 S_HEAD_TOP = 140.0
-S_FLANGE_FOOT = 124.9
+S_FLANGE_FOOT = (127.5, 124.5)  # the head flanges' lower edge, sloping from the left down to the right
+S_HEAD_LEFT = -27.0    # the head's left end, flush with the sleeve
+S_TOP_END = 23.7       # where the top plate ends and its chamfer runs down to the arm
+S_CHAMFER_FOOT = 130.0
 S_CORE = (26.0, 11.4)  # the fuze body's half width (x) and half depth (y)
 S_LEVER_Y = 13.0       # the lever's flanges' outer faces
 S_SHEET = 1.6          # the lever's sheet
-S_ARM = (26.9, 31.4)   # the arm's flange from its inner edge to the outside (x)
+S_ARM = (26.9, 31.4)   # the arm's flange from its inner edge to the outside (x) where it leaves the head
+S_ARM_FLARE = 2.1      # the arm's outside edge flares out this much (mm) by its tip
 S_ARM_Y = 8.5          # the arm's flanges' outer faces: narrower than the head's, clear of the sleeve
 S_ARM_JOIN = 120.5     # where the arm meets the head's wider channel, closed by a step plate
 S_ARM_TIP = (59.7, 63.0)   # the arm's slanted tip: outer and inner heights
@@ -74,7 +79,7 @@ S_NOTCH_D = 0.8
 S_BUMP = (-13.8, 2.3, 1.2)  # the raised pad on the head's top: from x, to x, height
 S_RIVET = (-22.8, 132.1, 1.05)
 S_PIN_HOLE = (17.4, 133.2)
-S_RING = (26.0, -16.8, 137.0, 10.0, 0.85, math.radians(15.0))  # centre x y z, radius, wire, turn about z
+S_RING = (25.5, -17.3, 136.5, 10.5, 0.85, math.radians(25.0))  # centre x y z, radius, wire, turn about z
 S_WIRE = 0.75
 
 # ------------------------------------------------------------------------------------------------------------ flash
@@ -85,10 +90,10 @@ F_RIM_IN = 18.95
 F_CAP_DROP = 0.7               # the cap sits this far under the rim
 F_HOLE_R = 4.3
 F_HOLE_DEPTH = 3.2
-F_RING_R = 12.0
+F_RING_R = 13.5
 F_RING_WIRE = 0.8
 F_RING_PITCH = 1.7
-F_RING_AT = math.radians(-35.0)  # where round the tube the ring hangs (0 = +X, the photos' right side)
+F_RING_AT = math.radians(-95.0)  # where round the tube the ring hangs (0 = +X, the photos' right side)
 F_HOOK_WIRE = 0.5
 
 SEG_BODY = 48
@@ -101,14 +106,15 @@ KIND_FLASH = 0x7D5BC4
 
 
 def colours(kind: int) -> None:
-    hs.material("Shell", 0x606164, 0.7)
-    hs.material("Band", 0x8B8C8F, 0.7)
+    hs.material("Shell", 0x4E4F52, 0.7)
+    hs.material("Band", 0x76777A, 0.7)
     hs.material("Kind", kind, 0.6)
-    hs.material("Cap", 0x2B2C2F, 0.55)
-    hs.material("Lever", 0x161719, 0.5)
+    hs.material("Cap", 0x1C1D1F, 0.8)
+    hs.material("Lever", 0x0C0C0D, 0.85)
     hs.material("Steel", 0x9B9DA1, 0.35, 0.8)
-    hs.material("Olive", 0x3F4427, 0.8)
-    hs.material("Seal", 0x30263F, 0.6)
+    hs.material("Wire", 0x3C3E42, 0.4, 0.8)
+    hs.material("Olive", 0x3F3915, 0.8)
+    hs.material("Seal", 0x2E1F3C, 0.9)
     hs.material("Hole", 0x121214, 0.9)
 
 
@@ -178,7 +184,7 @@ def crown_profile(theta: float) -> list:
     k = int(theta // seg) % S_CROWN_SEGS
     u = (theta - k * seg) / seg
     top = S_CROWN[k % 2]
-    notch = 0.07
+    notch = S_NOTCH_W
     edge = min(u, 1.0 - u)
     if edge < notch:
         top -= S_NOTCH * (1.0 - edge / notch)
@@ -200,7 +206,7 @@ def crown_angles() -> list:
     seg = TAU / S_CROWN_SEGS
     out = []
     for k in range(S_CROWN_SEGS):
-        for u in (0.0, 0.07, 0.3, 0.5, 0.7, 0.93):
+        for u in (0.0, S_NOTCH_W, 0.3, 0.5, 0.7, 1.0 - S_NOTCH_W):
             out.append((k + u) * seg)
     return out
 
@@ -218,14 +224,27 @@ def smoke_cap(b: hs.Builder) -> None:
     b.loft(rings, "Cap", cap0=True, cap1=False)
 
 
-def arm_edge() -> list:
-    """The arm's outside edge (x, z) mm from its tip up to the head, its notches cut in."""
-    ox = S_ARM[1]
-    pts = [(ox, S_ARM_TIP[0])]
+def arm_x(z: float) -> float:
+    """The arm's outside edge (x mm) at height `z`: S_ARM's outside at the head, flaring S_ARM_FLARE out by the tip."""
+    share = (S_ARM_JOIN - z) / (S_ARM_JOIN - S_ARM_TIP[0])
+    return S_ARM[1] + S_ARM_FLARE * min(max(share, 0.0), 1.0)
+
+
+def arm_edge(inset: float = 0.0) -> list:
+    """The arm's outside edge (x, z) mm from its tip up to the head, its notches cut in; `inset` mm in from it."""
+    pts = [(arm_x(S_ARM_TIP[0]) - inset, S_ARM_TIP[0])]
     for c in S_NOTCHES:
         h = S_NOTCH_H * 0.5
-        pts += [(ox, c - h), (ox - S_NOTCH_D, c), (ox, c + h)]
+        pts += [(arm_x(c - h) - inset, c - h), (arm_x(c) - S_NOTCH_D - inset, c), (arm_x(c + h) - inset, c + h)]
     return pts
+
+
+def chamfer_z(x: float, inside: bool) -> float:
+    """The chamfer's outside line (or the web's inside line) at `x`."""
+    ox = S_ARM[1]
+    slope = (S_HEAD_TOP - S_CHAMFER_FOOT) / (ox - S_TOP_END)
+    z = S_HEAD_TOP - slope * (x - S_TOP_END)
+    return z - S_SHEET * math.sqrt(1.0 + slope * slope) if inside else z
 
 
 def lever_outlines() -> list:
@@ -235,13 +254,40 @@ def lever_outlines() -> list:
     ox, ix = S_ARM[1], S_ARM[0]
     t = S_SHEET
     join = S_ARM_JOIN
-    head = [(ox, join), (ox, 131.0), (20.5, S_HEAD_TOP), (-24.5, S_HEAD_TOP), (-28.2, 133.6), (-28.2, 127.3),
-            (-23.8, S_FLANGE_FOOT), (18.5, S_FLANGE_FOOT), (ix, join)]
+    left, right = S_FLANGE_FOOT
+    # Where the web's inside line under the chamfer meets the top plate's underside, and the arm's inside.
+    x_in_top = S_TOP_END + (chamfer_z(S_TOP_END, True) - (S_HEAD_TOP - t)) / ((S_HEAD_TOP - S_CHAMFER_FOOT) /
+                                                                            (ox - S_TOP_END))
+    z_in_side = chamfer_z(ox - t, True)
+    head = [(ox, join), (ox, S_CHAMFER_FOOT), (S_TOP_END, S_HEAD_TOP), (S_HEAD_LEFT + 3.0, S_HEAD_TOP),
+            (S_HEAD_LEFT, S_HEAD_TOP - 5.2), (S_HEAD_LEFT, left + 1.0), (S_HEAD_LEFT + 3.0, left),
+            (18.5, right), (ix, join)]
     arm = arm_edge() + [(ox, join), (ix, join), (ix, S_ARM_TIP[1])]
-    web_head = [(ox, join), (ox, 131.0), (20.5, S_HEAD_TOP), (-24.5, S_HEAD_TOP), (-24.5, S_HEAD_TOP - t),
-                (19.9, S_HEAD_TOP - t), (ox - t, 130.3), (ox - t, join)]
-    web_arm = arm_edge() + [(ox, join), (ox - t, join), (ox - t, S_ARM_TIP[0] + 1.0)]
+    web_head = [(ox, join), (ox, S_CHAMFER_FOOT), (S_TOP_END, S_HEAD_TOP), (S_HEAD_LEFT + 3.0, S_HEAD_TOP),
+                (S_HEAD_LEFT + 3.0, S_HEAD_TOP - t), (x_in_top, S_HEAD_TOP - t), (ox - t, z_in_side), (ox - t, join)]
+    web_arm = arm_edge() + [(ox, join), (ox - t, join)] + [(x, z) for x, z in reversed(arm_edge(t))][:-1] + \
+        [(arm_x(S_ARM_TIP[0]) - t, S_ARM_TIP[0] + 1.0)]
     return [(head, S_LEVER_Y), (arm, S_ARM_Y), (web_head, -S_LEVER_Y), (web_arm, -S_ARM_Y)]
+
+
+def core_outline() -> list:
+    """The fuze body inside the lever as seen from the front (x, z) mm: up to the top plate's underside, its right
+    corner cut under the web's inside chamfer line so it never shows through."""
+    ox = S_ARM[1]
+    slope = (S_HEAD_TOP - S_CHAMFER_FOOT) / (ox - S_TOP_END)
+    top = S_HEAD_TOP - S_SHEET
+    x_corner = S_TOP_END + (chamfer_z(S_TOP_END, True) - top) / slope - 0.3
+    x_side = S_CORE[0]
+    return [(-S_CORE[0], 117.0), (x_side, 117.0), (x_side, chamfer_z(x_side, True) - 0.3), (x_corner, top),
+            (-S_CORE[0], top)]
+
+
+def clear_of_head(ring: list, wire: float) -> None:
+    """Fails the build if a point of the pull ring's wire comes inside the head or the lever (a box round them)."""
+    for x, y, z in ring:
+        inside_head = x < S_ARM[1] + wire and abs(y) < S_LEVER_Y + wire and S_ARM_JOIN - wire < z < S_HEAD_TOP + wire
+        if inside_head:
+            raise SystemExit("the pull ring clips the head at (%.1f, %.1f, %.1f)" % (x, y, z))
 
 
 def build_smoke() -> bpy.types.Object:
@@ -260,8 +306,7 @@ def build_smoke() -> bpy.types.Object:
 
     # The fuze body inside the lever, its corners rounded.
     b = hs.Builder("SmokeHead", [])
-    core = [(x * MM, y * MM) for x, y in hs.rounded_rect(S_CORE[0], S_CORE[1], 2.0, 3)]
-    b.prism(core, "z", 117.0 * MM, (S_HEAD_TOP - S_SHEET) * MM, "Lever")
+    prism_y(b, core_outline(), -S_CORE[1], S_CORE[1], "Lever")
     # The pad on the head's top.
     bx0, bx1, bh = S_BUMP
     b.box(v(bx0, -6.0, S_HEAD_TOP - 0.2), v(bx1, 6.0, S_HEAD_TOP + bh), "Lever")
@@ -292,18 +337,19 @@ def build_smoke() -> bpy.types.Object:
     u = Vector((math.cos(turn), math.sin(turn), 0.0))
     w = Vector((0.0, 0.0, 1.0))
     centre = Vector((cx, cy, cz))
-    # The pin's eye is where the ring meets it, at the ring's upper left.
-    t_eye = math.radians(129.0)
+    # The pin's eye is where the ring meets it, at the ring's upper left; from the hole the pin's leg rises to it, its
+    # tail bent right along the flange.
+    t_eye = math.radians(140.0)
     eye = centre + (u * math.cos(t_eye) + w * math.sin(t_eye)) * rad
-    pin = [(hx, S_LEVER_Y + 0.8, hz), (hx, 0.0, hz), (hx, -S_LEVER_Y - 0.6, hz),
-           (hx + 0.2, -S_LEVER_Y - 1.4, hz + 0.6), (hx + 3.6, -S_LEVER_Y - 1.4, hz - 0.4)]
-    sweep(b, pin, S_WIRE, "Steel", sides=8)
-    stem = [(hx - 0.1, -S_LEVER_Y - 1.1, hz + 0.4), (hx - 0.4, (eye.y - S_LEVER_Y) * 0.5 - 0.6, (hz + eye.z) * 0.5),
-            (eye.x - 0.8, eye.y + 0.3, eye.z - 0.9), (eye.x, eye.y, eye.z + 0.2),
-            (eye.x + 1.2, eye.y - 0.2, eye.z - 0.6)]
-    sweep(b, stem, S_WIRE, "Steel", sides=8)
+    face = -S_LEVER_Y - 1.2
+    pin = [(hx, S_LEVER_Y + 0.8, hz), (hx, 0.0, hz), (hx, face, hz), (hx + 5.5, face + 0.1, hz - 0.5)]
+    sweep(b, pin, S_WIRE, "Wire", sides=8)
+    leg = [(hx, face, hz), (hx + 0.2, face - 0.3, hz + 5.0), (eye.x - 0.2, eye.y + 1.0, eye.z - 1.4),
+           (eye.x + 0.3, eye.y - 0.2, eye.z + 0.6), (eye.x + 1.3, eye.y - 0.6, eye.z - 0.4)]
+    sweep(b, leg, S_WIRE, "Wire", sides=8)
     ring = [tuple(centre + (u * math.cos(TAU * i / 40) + w * math.sin(TAU * i / 40)) * rad) for i in range(40)]
-    sweep(b, ring, wire, "Steel", sides=8, closed=True)
+    sweep(b, ring, wire, "Wire", sides=8, closed=True)
+    clear_of_head(ring, wire)
     parts.append(hs.finish(b.build(), bevel=0.0))
 
     ob = hs.join("Smoke", parts)
@@ -313,17 +359,36 @@ def build_smoke() -> bpy.types.Object:
 
 # ------------------------------------------------------------------------------------------------------------ flash
 
+ROLL = 0.9  # the card tube's rolled ends (mm)
+ROLL_STEPS = 4
+
+
+def rolled(z: float, r: float, roll: float, up: bool) -> list:
+    """A quarter round of `roll` mm turning the tube's flat end at height `z` into its side at radius `r`: from the
+    end face out and up the side (`up`, the bottom) or from the side up and in over the end (the top)."""
+    pts = []
+    for i in range(ROLL_STEPS + 1):
+        a = 0.5 * math.pi * i / ROLL_STEPS
+        if up:  # the end face to the side: centre (z + roll, r - roll)
+            pts.append((z + roll - roll * math.cos(a), r - roll + roll * math.sin(a)))
+        else:  # the side to the end face: centre (z - roll, r - roll)
+            pts.append((z - roll + roll * math.sin(a), r - roll + roll * math.cos(a)))
+    return pts
+
+
 def build_flash() -> bpy.types.Object:
     parts = []
     b = hs.Builder("FlashTube", [])
     z0, z1, proud = F_BAND
     # The tube from its recessed end disc, its edge rounded, up to the band.
-    lathe_mm(b, [(0.7, 0.0), (0.7, F_R - 1.1), (0.0, F_R - 0.6), (0.15, F_R - 0.15), (0.6, F_R), (z0, F_R)],
-             "Olive", SEG_FLASH, cap=False)
-    lathe_mm(b, [(z0, F_R), (z0, F_R + proud), (z1, F_R + proud), (z1, F_R)], "Kind", SEG_FLASH, cap=False)
-    # The tube's cut end above the band, dark card, rounded, then the inside wall down to the cap.
-    lathe_mm(b, [(z1, F_R), (F_LEN - 0.4, F_R), (F_LEN, F_R - 0.4), (F_LEN, F_RIM_IN + 0.3),
-                 (F_LEN - 0.3, F_RIM_IN), (F_LEN - F_CAP_DROP, F_RIM_IN)], "Cap", SEG_FLASH, cap=False)
+    lathe_mm(b, [(0.7, 0.0), (0.7, F_R - 1.3)] + rolled(0.0, F_R, ROLL, up=True) + [(z0, F_R)], "Olive", SEG_FLASH,
+             cap=False)
+    # The band wraps over the tube's rolled end onto its rim.
+    lathe_mm(b, [(z0, F_R), (z0, F_R + proud)] + rolled(F_LEN, F_R + proud, ROLL, up=False) + [(F_LEN, F_RIM_IN + 0.3)],
+             "Kind", SEG_FLASH, cap=False)
+    # The inside wall from the rim down to the cap, dark card.
+    lathe_mm(b, [(F_LEN, F_RIM_IN + 0.3), (F_LEN - 0.3, F_RIM_IN), (F_LEN - F_CAP_DROP, F_RIM_IN)], "Cap", SEG_FLASH,
+             cap=False)
     top = F_LEN - F_CAP_DROP
     lathe_mm(b, [(top, F_RIM_IN), (top, F_HOLE_R + 0.3), (top - 0.3, F_HOLE_R)], "Seal", SEG_FLASH, cap=False)
     lathe_mm(b, [(top - 0.3, F_HOLE_R), (top - F_HOLE_DEPTH, F_HOLE_R - 0.3), (top - F_HOLE_DEPTH, 0.0)], "Hole",
