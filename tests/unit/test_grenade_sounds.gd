@@ -1,10 +1,14 @@
 extends GutTest
 ## The smoke and flash bombs' sounds are the owner's recordings, cut cleanly (owner, 2026-11-05: "a balloon pop sound
-## for the flashbang and for the smoke grenade a ring pull sound and a bouncing can"): the can bouncing plays as one
-## whole take from a bomb's first bounce, the pin rings out, and the balloon pop keeps its punch and tail.
+## for the flashbang and for the smoke grenade a ring pull sound and a bouncing can"): the can's knock group plays once
+## from a bomb's bounce, the pin starts on its click, and the balloon pop keeps its punch and tail.
 
-const BOUNCE_SECONDS := 1.1
-const PIN_LEAST := 0.3
+const BOUNCE_SECONDS := 0.6
+## The can's knock group: within 30 dB of its peak this long (s), about what bounce_hold leaves silent.
+const KNOCKS_MOST := 0.5
+## A cut that starts on its sound reaches its peak within this long (s): the pin's click and the can's first knock.
+const ONSET_MOST := 0.02
+const ONSET_SHARE := 0.316
 ## A clipped burst's loudest 50 ms sit within about 4 dB of its peak; a clean pop's well under it.
 const POP_CREST_LEAST_DB := 7.0
 
@@ -88,11 +92,23 @@ func test_a_new_throw_from_the_same_slot_starts_its_can_afresh() -> void:
 	assert_eq(_bounce_at(0, 2.0 + cfg.bounce_hold * 0.5), 1, "a new bomb in the slot")
 
 
-func test_the_can_bounces_on_and_the_pin_rings_out() -> void:
+## When (s) `x` first comes within 10 dB of its peak.
+func _onset(x: PackedFloat32Array) -> float:
+	var peak := 0.0
+	for v in x:
+		peak = maxf(peak, absf(v))
+	for i in x.size():
+		if absf(x[i]) >= peak * ONSET_SHARE:
+			return i / 44100.0
+	return 0.0
+
+
+func test_the_pin_and_the_can_start_on_their_sound_and_the_hold_is_the_knocks() -> void:
 	for n in 3:
 		assert_almost_eq(_length("grenade_bounce", n + 1), BOUNCE_SECONDS, 0.01, "grenade_bounce_%d" % (n + 1))
-		assert_gt(_length("grenade_pin", n + 1), PIN_LEAST, "grenade_pin_%d" % (n + 1))
-	assert_almost_eq(cfg.bounce_hold, BOUNCE_SECONDS, 0.15, "the hold is about the can's length")
+		assert_lt(_onset(_samples("grenade_pin", n + 1)), ONSET_MOST, "grenade_pin_%d starts on its click" % (n + 1))
+		assert_lt(_onset(_samples("grenade_bounce", n + 1)), ONSET_MOST, "grenade_bounce_%d on its knock" % (n + 1))
+	assert_lt(cfg.bounce_hold, KNOCKS_MOST, "a bomb's next visible bounce is heard")
 
 
 func test_the_balloon_pop_is_not_clipped_into_a_flat_burst() -> void:

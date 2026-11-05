@@ -29,11 +29,13 @@ gravel, the flag rope (`rope_up`, `rope_down`: 0.25 s of his first pull and his 
 electric toothbrush (his pick). His steps that never fall quiet between them (metal, running on gravel) are cut where
 each starts (`onsets`).
 
-**The bombs re-cut** (AU7, 2026-11-05; owner: they "don't sound like the recordings"): `grenade_pin` keeps his
-ring's ring-out (0.4 s, was 0.2), `grenade_bounce` is a whole take of his can bouncing (1.1 s: the knock, the rattle
-and the little bounces, played once a bomb from its first bounce, SoundConfig.bounce_hold), `smoke_pop` is his long
-spray alone from its burst (the can pitched down as a pop is gone), and `flash_bang` his balloon pop clean, with
-SoundConfig.bang_gain making up the 6 dB the soft clip gave.
+**The bombs re-cut** (AU7, 2026-11-05; owner: they "don't sound like the recordings"): each cut starts on its sound
+(`from_onsets`; the pin's takes were found 3 to 15 ms after its click, the can's first 0.18 s before its knock).
+`grenade_pin` is his click high-passed at 300 Hz and left at its peak (matched to the old pin's loudness it took
+17 dB and the limiter, and hissed), lifted by SoundConfig.pin_gain; `grenade_bounce` is his can's knock group
+(0.6 s: the knock and its rattle, 30 dB down by 0.3 to 0.4 s), played once from a bomb's bounce
+(SoundConfig.bounce_hold); `smoke_pop` is his long spray alone from its burst (the can pitched down as a pop is gone);
+`flash_bang` his balloon pop clean, SoundConfig.bang_gain making up most of the level the soft clip gave.
 
 **Placeholders** (AU3, 2026-11-03; AU5; AU6): until the owner records them, 15 cues are his recordings reused,
 re-pitched, filtered or sliced (the Sniper Rifle's and the Cyber Pistol's dry fire, BBs on concrete, soil and leaves,

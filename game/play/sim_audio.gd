@@ -255,7 +255,9 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				_play(&"magCatch", catcher.eye(_body) if catcher != null else e.position, e.target == player_id,
 						_cfg.mechanism_gain, Kind.MECHANISM, BUS_EFFECTS, 1.0, 0.0, catcher)
 			GameEvent.Kind.GRENADE_PIN:
-				_mechanism(&"grenade_pin", state, e, own)
+				var puller := state.character(e.actor)
+				_play(&"grenade_pin", puller.eye(_body) if puller != null else e.position, own, _cfg.pin_gain,
+						Kind.MECHANISM, BUS_EFFECTS, 1.0, 0.0, puller)
 			GameEvent.Kind.GRENADE_THROW:
 				_mechanism(&"magToss", state, e, own)
 				if e.target >= 0:
@@ -265,7 +267,9 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				# The owner's can bouncing, as a whole take: its later knocks are the bomb's next bounces.
 				if e.target >= 0:
 					_bomb_bounce_slot(e.target, state)
-					if now - _bounced_at[e.target] < _cfg.bounce_hold:
+					# A time from before `now`'s clock went back (a new match, its throw skipped unheard) is stale.
+					var since := now - _bounced_at[e.target]
+					if since >= 0.0 and since < _cfg.bounce_hold:
 						continue
 					_bounced_at[e.target] = now
 				var hard := minf(1.0, e.reach / maxf(_cfg.bounce_full_speed, 0.001))

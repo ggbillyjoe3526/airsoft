@@ -567,13 +567,20 @@ def build(folder):
     put("rope_up", loudest_windows(pulls[0], 5, 0.25), -31.8)
     put("rope_down", loudest_windows(pulls[1], 5, 0.25), -32.0)
 
-    # The smoke bomb: his grenade pin with its ring's ring-out, his can bouncing as a whole take (the first knock,
-    # the rattle and the little bounces after it: SimAudio plays it once a bomb, from its first bounce), and his long
-    # deodorant spray as the smoke going off, from its own burst (owner, 2026-11-05: "a ring pull sound and a bouncing
-    # can"; the can pitched down as a pop, and its first 0.2 s alone as each bounce, didn't sound like his).
-    # (The pin's first take is too thin to reach the old pin's level under the limiter.)
-    put("grenade_pin", pick(folder, [("pin_pull_grenade.wav", [1, 3, 2])], 0.4, 0.3), -10.2)
-    put("grenade_bounce", variants(pick(folder, [("can_bouncing.wav", None)], 1.1, 0.3), 3), -14.2)
+    # The smoke bomb: his grenade pin, his can bouncing as a whole knock group (the first knock and the rattle after it,
+    # 0.6 s: SimAudio plays it once from a bomb's bounce, SoundConfig.bounce_hold), and his long deodorant spray as the
+    # smoke going off, from its own burst (owner, 2026-11-05: "a ring pull sound and a bouncing can"; the can pitched
+    # down as a pop, and its first 0.2 s alone as each bounce, didn't sound like his).
+    # Each cut starts at its sound (`from_onsets`), a little before where the takes are found: the pin's click peaks
+    # 3 to 15 ms before them (cut from the take, its click was lost), the can's first take has 0.18 s of soft
+    # pre-sound before its knock. The pin is high-passed at 300 Hz (its room rumble; the click is mostly 6 to 12 kHz)
+    # and left at its peak, a click 22 to 24 dB over its loudest 50 ms: matched to the old pin's loudness it took
+    # 17 dB of gain and the limiter, and hissed (owner: "muffle/static noise"); SoundConfig.pin_gain lifts it instead.
+    pin_src = Source.get(folder, "pin_pull_grenade.wav")
+    pin = high_pass(pin_src.a, 300.0)
+    put("grenade_pin", [from_onsets(pin, [pin_src.takes[i][0] - 0.05], 0.25, 0.5)[0] for i in [1, 3, 2]], -24.0)
+    can = Source.get(folder, "can_bouncing.wav")
+    put("grenade_bounce", variants([from_onsets(can.a, [t[0] - 0.02], 0.6, 0.4)[0] for t in can.takes], 3), -14.2)
     sprays = variants(pick(folder, [("deodorant_spray_long.wav", None)], 3.5, 0.05), 3)
     put("smoke_pop", [fixed(x, 3.5, 1.0) for x in sprays], -14.0)
     # The flash bomb: his balloon pop from its bang, a little higher and lower for the other two (third batch), clean:
