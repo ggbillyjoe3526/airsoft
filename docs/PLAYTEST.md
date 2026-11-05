@@ -1331,6 +1331,9 @@ The AEG Rifle's two barrels are proper models now, built from the rifle's own ba
   the long barrel the knurled, fluted extension sits between the front sight and the flash hider, which moves out
   10 cm. Fit a silencer on the long barrel: it starts at the extension's end. Nothing pokes through the rifle.
 - [ ] **Paints:** the extension takes each paint like the rifle's barrel; the inner barrels keep their steel and brass.
+- [ ] **Up close:** on each card the bucking's centre is a dark hole and the hop dial's teeth read (not blown white);
+  with the long barrel fitted there's no line or flicker where the extension's flats meet its shoulder, and the brass
+  crown in the flash hider looks round. The first open of the Barrel tab doesn't hitch.
 
 ## Reporting what you find
 

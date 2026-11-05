@@ -1,6 +1,6 @@
 # BA1 · The barrel models
 
-**Review:** 4 attempts · critic PENDING · qa Pass · performance Pass
+**Review:** 4 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -9,7 +9,7 @@
 | 2026-11-05 | 1 | Claude (build thread) | targeted tests pass (294) | Retry 6/8 (QA Pass, performance Pass) | steel and brass drew black on the cards; cards 14 px tall; seams at the crown, flats and flutes; razor-edged chamber; hop arm low in its window; bare thread stub; ASSETS counts stale |
 | 2026-11-05 | 2 | Claude (build thread) | tools/check.sh: gdlint, changelog, wiki green; targeted tests pass (68) | Retry 7/8 (QA Pass) | the long barrel's extension and the dark chamber drew as silhouettes on the card; a crack where the flats meet the shoulder; the hop sleeve faceted; the long crown 20 points; a 3-groove thread |
 | 2026-11-05 | 3 | Claude (build thread) | targeted tests pass (143, QA's 41) | Retry 7/8 (QA Pass, performance Pass) | the barrel's solid rear end showed white or gold through the bucking's lip, the most prominent detail on the turned cards |
-| 2026-11-05 | 4 | Claude (build thread) | PENDING | PENDING | – |
+| 2026-11-05 | 4 | Claude (build thread) | targeted tests pass (41); full check on this head and CI | Accept 8/8 (QA Pass, performance Pass) | – |
 
 ## What changed
 
@@ -50,6 +50,8 @@ The AEG Rifle's two barrel upgrades, Tight-Bore and Long Barrel, were text only.
 ## Known issues left
 
 - The long barrel sits 46 triangles under its cap: any detail added must come out elsewhere.
+- The long barrel's coupling is open at its back (an inner wall would cost 64 triangles), so its own card shows a
+  little of the extension's grey inside past the hop-up end (critic, advisory). Fitted, the rifle's barrel fills it.
 - The insides' materials are not in the shader prewarm. They draw only in the Customise picture, so a first open of
   the barrel tab might hitch once (performance, advisory).
 - Whichever of this task and the magazines task merges second reruns the other's script over the shared aeg.glb.
