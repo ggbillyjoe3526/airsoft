@@ -64,8 +64,9 @@ Do **not** build networking code, servers, or matchmaking.
 
 ## 5. Core Mechanics
 
-The browser game's tuned rules are the starting point: `legacy/browser/` holds its gameplay code and tests, and
-`legacy/browser/docs/handover/SALVAGE.md` maps each system to its Godot home. Tune them through play.
+The browser game's tuned rules are the starting point. Its code, tests and docs (`legacy/browser/`, removed
+2026-11-05 at the owner's word) are read from git at the tag `0.1-dev.1` (`legacy/README.md`), and
+`legacy/browser/docs/handover/SALVAGE.md` there maps each system to its Godot home. Tune them through play.
 
 - **BBs** are real projectiles, not hitscan: visible travel, gravity, hop-up lift that flattens the arc over mid-range,
   then drops off; slight spread per replica. Ballistics logic is pure and unit-tested.
@@ -98,8 +99,8 @@ pass: `docs/PROCESS.md` (grep the heading you need). The rules every session kee
 - **Placing work:** new systems, modes and content are Dev; fixing, balance, performance, stability, UX/QoL, polish are
   Beta. Don't build later-version features unless the owner pulled them into 0.1.
 - **The old browser repository** (once `ggbillyjoe3526/Airsoft`, frozen at `0.1-beta.1`) is no longer on GitHub; that
-  name now opens this repository (renamed from Airsoft-Next to `airsoft`). Its code is the read-only reference in
-  `legacy/browser/` (deleted at 0.1).
+  name now opens this repository (renamed from Airsoft-Next to `airsoft`). Its code, once copied to `legacy/browser/`,
+  was removed on 2026-11-05 (owner) and is read from git at the tag `0.1-dev.1`.
 - Future ideas go in `docs/IDEAS.md`; don't implement them unless asked.
 
 ## 7. How to Work
@@ -114,7 +115,8 @@ can't verify (how it feels to play), tell the owner exactly what to test.
 
 **Token and context hygiene** (owner, 2026-10-02 and 2026-10-06; usage runs out fast):
 - **One task per thread.**
-- **Grep first, then read ranges.** Big docs are read by heading, never whole; `legacy/` is searched, never read whole.
+- **Grep first, then read ranges.** Big docs are read by heading, never whole; the old browser game is grepped in git
+  at the tag `0.1-dev.1`.
 - **Quiet output:** filter every command's output to failures and totals.
 - **One push when the gates are green:** records in the same push, no separate status pushes, no pull request title
   edits.

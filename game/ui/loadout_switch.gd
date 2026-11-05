@@ -5,10 +5,13 @@ extends Control
 ## card for every replica to carry (the ones carried tagged with their slot, the one in this slot ringed, the ones the
 ## game can't play yet greyed LATER, the ones not unlocked yet greyed with their level), each drawn at the cards' one
 ## scale (owner, 2026-10-19: replicas to scale). A card sends `picked` and the pop-up closes; CLOSE, Esc (the page's
-## back_out) or a click on the shade closes it with nothing changed. Built once with the page, shown by `open`.
+## back_out) or a click on the shade closes it with nothing changed. Built once with the page, shown by `open`. While
+## it is open the keyboard stays inside it (BP4): Tab or an arrow that would leave it lands back on the card it left.
 
 ## A replica card was pressed: its id (the page equips it in the slot being switched).
 signal picked(id: String)
+## It closed, by a pick or with nothing changed (the page puts the keyboard back on SWITCH REPLICA).
+signal closed
 
 ## The shade (the page colour, this opaque), the panel's width, its padding and the teal rule on top (px at 1080p).
 const SHADE_ALPHA := 0.72
@@ -47,6 +50,8 @@ var _rests: Dictionary[String, Label] = {}
 ## A card's line under its name, and whether it has tags: the line hides when it has neither tags nor a slot, so the name
 ## sits in the middle.
 var _subs: Dictionary[String, HBoxContainer] = {}
+## The control inside the pop-up that last had the keyboard, where focus that strays outside comes back to.
+var _inside: Control = null
 var _tagged: Dictionary[String, bool] = {}
 
 
@@ -150,15 +155,41 @@ func open(slot: Loadout.Slot) -> void:
 	for id: String in _cards:
 		_cards[id].set_picked(_facts.slot_of(id) == int(slot))
 	var here := _cards.get(_facts.item(slot).id if _facts.has(slot) else "") as MenuCard
-	if here != null and is_inside_tree():
-		here.grab_focus()
-	elif is_inside_tree():
-		_close.grab_focus()
+	if not is_inside_tree():
+		return
+	_inside = here if here != null else _close
+	_inside.grab_focus()
+	var focus := get_viewport().gui_focus_changed
+	if not focus.is_connected(_on_focus_changed):
+		focus.connect(_on_focus_changed)
 
 
 ## Hides it with nothing changed.
 func close() -> void:
+	var was_open := visible
 	visible = false
+	_inside = null
+	if is_inside_tree() and get_viewport().gui_focus_changed.is_connected(_on_focus_changed):
+		get_viewport().gui_focus_changed.disconnect(_on_focus_changed)
+	if was_open:
+		closed.emit()
+
+
+func _exit_tree() -> void:
+	if get_viewport().gui_focus_changed.is_connected(_on_focus_changed):
+		get_viewport().gui_focus_changed.disconnect(_on_focus_changed)
+
+
+## The keyboard moved: inside the pop-up it is remembered; anywhere else (a control hidden behind the shade) it is
+## sent back, so Enter never acts on something unseen.
+func _on_focus_changed(to: Control) -> void:
+	if not visible:
+		return
+	if is_ancestor_of(to):
+		_inside = to
+		return
+	var back := _inside if is_instance_valid(_inside) and _inside.is_visible_in_tree() else _close
+	back.grab_focus.call_deferred()
 
 
 func slot() -> Loadout.Slot:
