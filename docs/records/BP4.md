@@ -1,11 +1,13 @@
 # BP4 · The full bug pass before 0.1 Dev 2
 
-**Review:** pending
+**Review:** part 1 (#213): critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
+| 2026-11-05 | 1 | Opus 5.5 (bug pass thread) | ✓ (targeted) | Retry 7/8 | QA report missing from the brief; HANDOFF tense, long lines, audio count wording |
+| 2026-11-05 | 2 | Opus 5.5 (bug pass thread) | ✓ (targeted) | Accept 8/8 | – |
 
 ## The bug pass
 
