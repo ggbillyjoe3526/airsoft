@@ -201,8 +201,8 @@ func test_the_sniper_carries_the_aegs_attachments_and_a_muzzle_at_its_own_barrel
 
 
 func test_materials_are_named_and_replica_paint_leaves_the_glass_and_fibre_alone() -> void:
-	var known: Array[String] = ["Detail", "Metal", "Rubber", "Accent", "Body", "Furniture", "Lens", "LensDot", "Fibre", "TorchLens", "LaserLens"]
-	var untouched: Array[String] = ["Lens", "LensDot", "Fibre", "TorchLens", "LaserLens", "Rubber"]
+	var known: Array[String] = ["Detail", "Metal", "Rubber", "Accent", "Body", "Furniture", "Lens", "LensDot", "Fibre", "TorchLens", "Led", "LaserLens"]
+	var untouched: Array[String] = ["Lens", "LensDot", "Fibre", "TorchLens", "Led", "LaserLens", "Rubber"]
 	for file: String in FILES:
 		var root := _load(file)
 		for m: MeshInstance3D in _parts(root):
