@@ -214,21 +214,25 @@ func test_the_laser_sits_flush_in_its_housing_with_nothing_standing_out_in_front
 
 
 func test_the_2x_scope_stands_low() -> void:
-	# The owner (2026-11-05): less tall; his pick, the axis 36 mm over the rail (the first build's was 46). The rifles'
-	# iron sights fold away and hide under any optic (SightFold), so nothing meets the lowered belly.
+	# The owner (2026-11-05): less tall, then "as much as possible": the axis 26 mm over the rail (the first build's was
+	# 46), as low as the AEG's receiver leaves the glass in clear view. The rifles' iron sights fold away and hide
+	# under any optic (SightFold), so nothing meets the lowered belly.
 	var m := _part(_load("aeg"), "optic_scope2x")
 	var top := -INF
 	for v in _verts(m):
 		top = maxf(top, v.y)
-	assert_lt(top, 0.066, "at least 9 mm lower than the first build")
+	assert_lt(top, 0.056, "at least 19 mm lower than the first build")
 	var line := m.get_node("optic_scope2x_SightLine") as Node3D
-	assert_almost_eq(line.position.y, 0.036, 0.0005, "its sight line on the lowered axis")
+	assert_almost_eq(line.position.y, 0.026, 0.0005, "its sight line on the lowered axis")
 
 
 func test_the_variable_scope_is_a_little_smaller() -> void:
 	# The owner (2026-11-05): "a little smaller" than the first build's 146 mm.
 	var m := _part(_load("aeg"), "optic_scopeVar")
 	assert_between(m.get_aabb().size.z, 0.12, 0.135)
+	# Shrunk towards the rail's face, so it sits as low on its neck as on the photo.
+	var line := m.get_node("optic_scopeVar_SightLine") as Node3D
+	assert_lt(line.position.y, 0.0300, "its sight line low over the clamp")
 
 
 func test_the_sniper_carries_the_aegs_attachments_and_a_muzzle_at_its_own_barrel() -> void:

@@ -439,10 +439,12 @@ def build_red_dot() -> bpy.types.Object:
 
 # The magnifier: its axis over the rail, its body (front and back of the flat-topped section, the round nose and the
 # eyepiece), the hinged mount under it (mm).
-# The axis stands 10 mm lower than the first build's (the owner, 2026-11-05: "less tall", then his pick of 36 mm): the
-# belly 15.6 mm over the rail. Both rifles' iron sights fold away and hide under any optic (SightFold), so the
-# Sniper Rifle's rear leaf (19 mm standing, under the eyepiece) never meets it.
-S2_AXIS = 36.0
+# The axis stands 20 mm lower than the first build's (the owner, 2026-11-05: "less tall", then "as much as possible"
+# with nothing in the way of the glass): the belly 5.6 mm over the rail on a low saddle. Both rifles' iron sights fold
+# away and hide under any optic (SightFold), so only the replica's own body could come between the eye and the glass:
+# on the AEG its receiver's back (15 mm over the rail, 95 mm behind the mount) starts to cut the glass's lower edge
+# below a 26 mm axis; the Sniper Rifle has nothing there.
+S2_AXIS = 26.0
 S2_R = 20.4
 S2_BACK, S2_BODY_FRONT, S2_FRONT = -30.0, 17.0, 26.0
 S2_EYE_GLASS = -28.6
@@ -522,23 +524,21 @@ def build_scope_2x() -> bpy.types.Object:
     plain = pb.build()
     hs.finish(plain, bevel=0.0)
 
-    # The hinged mount: a rail clamp, the lower block, the hinge knuckle along the bore (left), the upper block and
-    # the saddle the body sits in.
+    # The hinged mount, as low as it goes: a rail clamp, a thin base plate, the hinge knuckle along the bore (left,
+    # tucked under the body's flank) and the saddle the body sits in.
     mb = hs.Builder("s2_mount", ["Detail", "Metal", "Rubber"])
     rail_clamp(mb, PICATINNY, -13.0, 17.0, 5.0, 3.2, "Detail")
-    mb.prism(mmp(hs.fillet([(-12.6, 4.5, 0.0), (12.6, 4.5, 0.0), (12.6, 10.0, 1.5), (-12.6, 10.0, 1.5)], 2)), "y",
+    mb.prism(mmp(hs.fillet([(-12.6, 4.5, 0.0), (12.6, 4.5, 0.0), (12.6, 6.6, 0.8), (-12.6, 6.6, 0.8)], 2)), "y",
              -12.0 * MM, 16.0 * MM, "Detail")
-    mb.prism(mmp(hs.fillet([(-12.6, 10.0, 1.0), (12.6, 10.0, 1.0), (12.6, 14.4, 1.0), (-12.6, 14.4, 1.0)], 2)), "y",
-             -11.0 * MM, 15.0 * MM, "Detail")
-    saddle = [(-13.0, 14.0), (13.0, 14.0), (13.0, h - 14.0)] + \
+    saddle = [(-13.0, 4.5), (13.0, 4.5), (13.0, h - 14.0)] + \
              [(math.cos(math.radians(-38.0 - 104.0 * i / 8)) * (S2_R + 0.2),
                h + math.sin(math.radians(-38.0 - 104.0 * i / 8)) * (S2_R + 0.2)) for i in range(9)] + \
              [(-13.0, h - 14.0)]
     mb.prism(mmp(saddle), "y", -11.0 * MM, 15.0 * MM, "Detail")
-    cyl(mb, -11.0, 15.0, 3.4, "Detail", 24, x=-12.8, z=12.2, chamfer=0.6)
-    cyl(mb, -11.6, -11.0, 1.7, "Metal", 16, x=-12.8, z=12.2)
-    cyl(mb, 15.0, 15.6, 1.7, "Metal", 16, x=-12.8, z=12.2)
-    disc_x(mb, 12.4, 13.4, 2.0, 7.4, 1.6, "Metal", 16, 0.3)
+    cyl(mb, -11.0, 15.0, 3.0, "Detail", 24, x=-14.0, z=7.6, chamfer=0.5)
+    cyl(mb, -11.6, -11.0, 1.5, "Metal", 16, x=-14.0, z=7.6)
+    cyl(mb, 15.0, 15.6, 1.5, "Metal", 16, x=-14.0, z=7.6)
+    disc_x(mb, 12.4, 13.4, 2.0, 8.6, 1.4, "Metal", 16, 0.3)
     hex_x(mb, -15.8, -13.4, 2.0, -1.8, 3.2, "Metal")
     disc_x(mb, 15.6, 13.6, 2.0, -1.8, 3.4, "Metal", 18, 0.4)
     mount = mb.build()
@@ -569,13 +569,13 @@ SV_GLASS_R = 12.0
 # so neither the bore nor the glass's ring breaks through underneath.
 SV_BORE_R = 14.6
 # The scope is built at the photo's size, then shrunk by SV_SCALE (the owner, 2026-11-05: "a little smaller") towards
-# the top of its neck (SV_SCALE_Z, mm up); the clamp and neck are built apart, only shortened by it, so they keep the
-# rail's section and the photo's clamp-to-scope length.
-SV_SCALE, SV_SCALE_Z = 0.9, 15.0
+# the rail's face (SV_SCALE_Z, mm up), so it sits lower on its neck as on the photo; the clamp and neck are built apart,
+# only shortened by it, so they keep the rail's section and the photo's clamp-to-scope length.
+SV_SCALE, SV_SCALE_Z = 0.9, 0.0
 
 
 def sv_shrink(ob: bpy.types.Object) -> None:
-    """Shrinks a mesh by SV_SCALE towards the mount's middle at SV_SCALE_Z."""
+    """Shrinks a mesh by SV_SCALE towards the rail's face at SV_SCALE_Z."""
     z0 = SV_SCALE_Z * MM
     for v in ob.data.vertices:
         v.co = Vector((v.co.x * SV_SCALE, v.co.y * SV_SCALE, z0 + (v.co.z - z0) * SV_SCALE))
@@ -1182,6 +1182,18 @@ def build_torch(rail_name: str = "pistol") -> bpy.types.Object:
             pb.box(mm(min(s * (WT_HALF + 1.6), s * (WT_HALF + 2.0)), y, -19.5),
                    mm(max(s * (WT_HALF + 1.6), s * (WT_HALF + 2.0)), y + 0.55, -10.5), "Detail")
     hex_x(pb, -lx + 1.4, -lx + 1.46, -2.0, -2.4, 1.0, "Rubber")
+    if flush:
+        # The Cyber's flush clamp has no jaws: its triangles go to a ridged grip on the bezel instead.
+        def bezel_ring(y: float, ridges: bool) -> list:
+            ring = []
+            for i in range(120):
+                t = math.tau * (i + 0.5 * (i % 2)) / 120
+                r = WT_HEAD_R + (0.75 if ridges and i % 2 == 0 else 0.2)
+                ring.append((math.cos(t) * r * MM, y * MM, (WT_AXIS + math.sin(t) * r) * MM))
+            return ring
+        by0, by1 = WT_HEAD[1] - 3.9, WT_HEAD[1] - 1.0
+        pb.loft([bezel_ring(by0, False), bezel_ring(by0, True), bezel_ring(by1, True), bezel_ring(by1, False)],
+                "Detail", cap0=False, cap1=False)
     plain = pb.build()
     hs.finish(plain, bevel=0.0)
     ob = hs.join("light_weaponTorch", [body, head, plain])
