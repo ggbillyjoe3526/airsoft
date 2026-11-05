@@ -1326,6 +1326,14 @@ Every BB in flight is now a proper Blender model, round from every side instead 
 - [ ] **Glowing BBs:** on Woodland at night, glowing BBs are round green balls with their streak, as before.
 - [ ] **Frame rate:** a full-auto magazine dump on Low keeps its frame rate (F3 box).
 
+## The smoke and flash bomb models (BL9)
+
+- [ ] **In hand:** take each bomb in hand (mouse wheel). The smoke is a grey canister with a green stripe, a black
+  lever and a pull ring; the flash a slim olive tube with a violet band and a ring. Nothing pokes into the view.
+- [ ] **Thrown:** throw each. It tumbles in flight, bounces and comes to rest lying on its side on the ground, not
+  sunk into it or floating over it.
+- [ ] **Bots' bombs:** the ones bots throw look the same, and the HUD's bomb icons match the stripe and band colours.
+
 ## GBB Pistol sights and port (GS1)
 
 - [ ] **Aim:** aim the GBB Pistol in the Range. The front post with its white dot stands in the rear sight's notch,
