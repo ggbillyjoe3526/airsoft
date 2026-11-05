@@ -1,7 +1,8 @@
 class_name BBView
 extends MultiMeshInstance3D
 ## Every BB in the air, drawn between the last two ticks as one MultiMesh (one draw call, nothing allocated a frame):
-## small bright spheres with a darker rim (bb_ball.gdshader), a little larger than life and never under
+## the Blender BB (EffectsConfig.bb_model, BM1), small bright balls with a darker rim (bb_ball.gdshader), a little
+## larger than life and never under
 ## EffectsConfig.bb_min_angle on screen, each with a faint
 ## short trail fading back along its flight (one more instanced draw), so they read at range. Your own BBs leave from
 ## the muzzle's side of the view and join their true path from the eye over EffectsConfig.muzzle_join_time, so a shot
@@ -11,7 +12,7 @@ extends MultiMeshInstance3D
 ## and a green streak back along its flight, two more instanced draws, hidden while none flies. Which BBs glow is set
 ## once a match (`set_glowing`): presentation only, as the BBs fly the same.
 
-## A sphere this coarse is round at a BB's size on screen.
+## The stand-in ball's coarseness, drawn only when EffectsConfig.bb_model can't be read.
 const RADIAL_SEGMENTS := 8
 const RINGS := 4
 ## A streak seen this nearly end-on (the sine of its angle off the line of sight) is not drawn: it would be a dot.
@@ -42,8 +43,11 @@ func setup(cfg: EffectsConfig, pool_size: int) -> void:
 	white.set_shader_parameter(&"colour", cfg.bb_colour)
 	white.set_shader_parameter(&"rim", cfg.bb_rim_colour)
 	white.set_shader_parameter(&"rim_from", cfg.bb_rim_from)
-	multimesh = _instances(_sphere(white), pool_size)
-	_glow_balls = _child("GlowBBs", _sphere(_unshaded(cfg.glow_colour)), pool_size)
+	var ball_mesh := bb_mesh(cfg.bb_model)
+	multimesh = _instances(ball_mesh, pool_size)
+	material_override = white
+	_glow_balls = _child("GlowBBs", ball_mesh, pool_size)
+	_glow_balls.material_override = _unshaded(cfg.glow_colour)
 	var streak := _unshaded(Color(cfg.glow_streak_colour, cfg.glow_streak_opacity))
 	streak.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	streak.cull_mode = BaseMaterial3D.CULL_DISABLED
@@ -81,12 +85,28 @@ static func glow_bits(choices: Array[Loadout.Glow], night: bool) -> int:
 
 ## The material the field draws with (ShaderPrewarm draws it before the first one).
 func drawn_material() -> Material:
-	return (multimesh.mesh as PrimitiveMesh).material
+	return material_override
 
 
 ## The glowing BBs' materials, for ShaderPrewarm too: the first one fired mustn't stall a frame.
 func glow_materials() -> Array[Material]:
-	return [(_glow_balls.multimesh.mesh as PrimitiveMesh).material, (_streaks.multimesh.mesh as PrimitiveMesh).material]
+	return [_glow_balls.material_override, (_streaks.multimesh.mesh as PrimitiveMesh).material]
+
+
+## The ball every BB is drawn as: the first mesh of the model at `path` (1 m across, centred), shared by the white and
+## the glowing BBs, each drawing it in its own material. A model that can't be read warns and leaves a code-made ball
+## of the same size, so BBs still show.
+static func bb_mesh(path: String) -> Mesh:
+	var scene := load(path) as PackedScene if ResourceLoader.exists(path) else null
+	if scene != null:
+		var root := scene.instantiate()
+		var found := root.find_children("*", "MeshInstance3D", true, false)
+		var mesh: Mesh = (found[0] as MeshInstance3D).mesh if not found.is_empty() else null
+		root.free()
+		if mesh != null:
+			return mesh
+	push_warning("BBView: no BB model at %s; drawing a code-made ball" % path)
+	return _sphere()
 
 
 ## The white BBs' trail material, for ShaderPrewarm (null: no trails drawn).
@@ -214,13 +234,12 @@ static func _unshaded(colour: Color) -> StandardMaterial3D:
 	return mat
 
 
-static func _sphere(mat: Material) -> SphereMesh:
+static func _sphere() -> SphereMesh:
 	var sphere := SphereMesh.new()
 	sphere.radius = 0.5
 	sphere.height = 1.0
 	sphere.radial_segments = RADIAL_SEGMENTS
 	sphere.rings = RINGS
-	sphere.material = mat
 	return sphere
 
 

@@ -6,6 +6,8 @@ extends Resource
 
 ## A BB drawn this wide (m): larger than a real 6 mm BB so it reads at range.
 @export var bb_size: float = 0.012
+## The ball every BB in flight is drawn as (BM1, tools/blender/effects/bb.py): modelled 1 m across, drawn bb_size wide.
+@export_file("*.glb") var bb_model: String = "res://assets/models/effects/bb.glb"
 @export var bb_colour: Color = Color(1.0, 0.98, 0.92)
 ## A white BB is drawn `bb_colour` where it faces you and `bb_rim_colour` round its edge (from where it faces you less
 ## than `bb_rim_from`, the cosine), so it reads on pale walls and sky as well as dark ones. It is never narrower on
