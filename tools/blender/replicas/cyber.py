@@ -126,11 +126,14 @@ GRIP = [(-20.0, -20.0), (-24.0, -34.0), (-27.5, -36.0, 4.0), (-31.5, -60.0, 30.0
         (-104.5, -10.5, 1.5), (-103.0, -7.0), (-93.5, -7.0), (-90.0, -20.0)]
 # The trigger guard's opening and the slot the trigger hangs from.
 # The old model's shape (owner, 2026-11-05: "more like the original trigger and guard"): a narrow loop in front, a
-# full-width web behind, the opening tall enough for the trigger and a little more.
-GUARD_HOLE = [(45.7, -16.5, 1.0), (45.7, -35.5), (41.0, -40.0, 1.0), (0.5, -40.0, 1.0), (0.5, -16.5, 1.0)]
-GUARD_LOOP = [(54.0, -14.0), (54.0, -42.5), (49.5, -47.0, 1.5), (10.0, -47.0), (10.0, -14.0)]
-GUARD_WEB = [(11.0, -20.0), (11.0, -47.0), (-20.0, -47.0, 5.0), (-27.5, -38.0), (-26.0, -20.0)]
-TRIGGER_SLOT = ((4.0, 25.0), (-26.0, -8.0), 3.4)
+# full-width web behind, the opening tall enough for the trigger and a little more. The trigger and guard sit 12 mm
+# nearer the grip than the old model's (owner, 2026-11-05: "the player would need to stretch their finger"); the loop's
+# front slants up to the front block's foot, so no notch opens under it.
+GUARD_HOLE = [(33.7, -16.5, 1.0), (33.7, -35.5), (29.0, -40.0, 1.0), (-11.5, -40.0, 1.0), (-11.5, -16.5, 1.0)]
+GUARD_LOOP = [(52.0, -14.0), (52.0, -24.0, 1.0), (42.0, -34.0, 2.0), (42.0, -42.5), (37.5, -47.0, 1.5), (-2.0, -47.0),
+              (-2.0, -14.0)]
+GUARD_WEB = [(-1.0, -20.0), (-1.0, -47.0), (-20.0, -47.0, 5.0), (-27.5, -38.0), (-26.0, -20.0)]
+TRIGGER_SLOT = ((-8.0, 13.0), (-26.0, -8.0), 3.4)
 # The grip's windows, where the power cell shows (inset in the frame's sides), and their depth.
 GRIP_WINDOW = [(-31.5, -27.0, 3.0), (-82.0, -27.0, 4.0), (-109.6, -118.0, 3.0), (-59.5, -118.0, 3.0)]
 WINDOW_DEPTH = 3.5
@@ -177,7 +180,7 @@ BONES = {
     "magazine": (0.0, -0.0819, -0.1209),
     "selector": (0.0, 0.0083, -0.0055),
     "slide": (0.0, 0.0, 0.015),
-    "trigger": (0.0, 0.0165, -0.0125),
+    "trigger": (0.0, 0.0045, -0.0125),
 }
 BONE_LENGTH = 0.01
 
@@ -566,11 +569,11 @@ def frame() -> list:
         cut.append(side_recess("c_window", GRIP_WINDOW, sx, FRAME_HW, WINDOW_DEPTH))
         cut.append(side_recess("c_housing", HOUSING, sx, FRAME_HW, 1.6))
         # A channel along the guard's bottom bar.
-        cut.append(side_recess("c_gch", [(44.0, -44.1, 0.6), (12.0, -44.1, 0.6), (12.0, -42.9, 0.6), (44.0, -42.9, 0.6)],
+        cut.append(side_recess("c_gch", [(32.0, -44.1, 0.6), (0.0, -44.1, 0.6), (0.0, -42.9, 0.6), (32.0, -42.9, 0.6)],
                                sx, GUARD_HW, 0.6))
         # Grooves down the guard's front and the seam lines between the dust cover and the guard.
-        for z in (-27.0, -31.0):
-            cut.append(side_recess("c_gg", [(53.0, z - 0.5), (47.0, z - 0.5), (47.0, z + 0.5), (53.0, z + 0.5)], sx,
+        for z in (-37.0, -41.0):
+            cut.append(side_recess("c_gg", [(43.0, z - 0.5), (37.0, z - 0.5), (37.0, z + 0.5), (43.0, z + 0.5)], sx,
                                    GUARD_HW, 0.5))
     # Serrations down the front strap (the old model's teeth), through its whole width.
     for i in range(FRONT_SERRATIONS):
@@ -657,8 +660,8 @@ def _back_y(z: float) -> float:
 def trigger() -> object:
     """The old model's curved blade, a little longer (its foot 3 mm above the guard's floor) and stood upright:
     the finger face hollow, the foot curling slightly forward of the root (owner, 2026-11-05)."""
-    blade = [(13.9, -11.0), (20.6, -13.4, 1.0), (19.0, -19.0, 5.0), (18.6, -27.0, 8.0), (20.2, -35.5, 1.2),
-             (18.0, -37.0, 1.2), (15.6, -35.0, 1.2), (14.6, -28.0, 8.0), (14.0, -19.5, 5.0), (13.2, -11.3)]
+    blade = [(1.9, -11.0), (8.6, -13.4, 1.0), (7.0, -19.0, 5.0), (6.6, -27.0, 8.0), (8.2, -35.5, 1.2),
+             (6.0, -37.0, 1.2), (3.6, -35.0, 1.2), (2.6, -28.0, 8.0), (2.0, -19.5, 5.0), (1.2, -11.3)]
     ob = side("Trigger", blade, 2.8, "CyberFrame")
     return hs.finish(ob, m(0.4), 2)
 
