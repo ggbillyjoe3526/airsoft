@@ -670,7 +670,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **The AEG Rifle and the GBB Pistol are redesigned from the owner's reference photos, with no text or logo copied
   (owner, 2026-10-12; RM6, RM7).** Small, minimal iron sights; the old length, grip, magazine, rails and mounts stay.
   The Gas Pistol became the GBB Pistol, a blowback replica with the same numbers.
-- **Your first-person arms (BL4, 2026-11-05; defaults the owner can change).** Coyote gloves and olive sleeves, built
+- **Your first-person arms (BL4, 2026-11-05; defaults the owner can change).** Dark olive gloves (as the figures wear, BL10) and olive sleeves, built
   from the MakeHuman CC0 arm with the figures' bone names, one hold per replica solved against its model with no face
   passing into it (owner, 2026-11-04: no clipping, a natural wrist). Pistols are held in the right hand alone, the left
   arm lowered out of view, until the two-handed thumbs-forward hold of his photos (`ref_images/hands/holding_replica`)
