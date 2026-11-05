@@ -7,7 +7,7 @@ class_name PowerModels
 const BATTERY_FILE := &"standardBattery"
 const LIPO_FILE := &"lipoBattery"
 const BOTTLE_FILE := &"gasBottle"
-## The springs' one coil (SN1), its paper band in each spring's colour.
+## The springs' one coil (SN1, rebuilt BL7), its whole wire painted in each spring's colour.
 const SPRING_FILE := &"spring"
 ## How far (rad, about X) a spring is tipped: like a battery, it lies along the picture, thin.
 const SPRING_TIP := 0.6
