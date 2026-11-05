@@ -7,8 +7,8 @@ extends Node3D
 ## grip, its long axis FigureConfig.hang_tilt off straight down with the muzzle forward. In a reload (FI4) a copy of the
 ## replica model's magazine rides on the sidecar's bone (Hand_L): the old one pulled out from oldMagazine.from, thrown
 ## at its release into ThrownMagazines, then the new one from `from` to `to`; one copy a slot, so the hand never holds
-## two. A child of the skeleton, so everything here is in the skeleton's frame (the file's, facing +Z). Presentation
-## only: FigureBody says what shows.
+## two, and the magazine in the replica's well hidden while the well is empty. A child of the skeleton, so everything
+## here is in the skeleton's frame (the file's, facing +Z). Presentation only: FigureBody says what shows.
 
 ## Which magazine the hand shows in a reload.
 const MAG_NONE := 0
@@ -55,6 +55,10 @@ var _config: FigureConfig = null
 ## The magazines' copies by slot (null where a replica has none) and each slot's reload (null without one); the slot
 ## whose copy shows, which magazine it shows, the reload's last share seen, a throw due at the next placing.
 var _magazines: Array[MeshInstance3D] = []
+## The magazine in each slot's well (the replica's piece the hand's copy is made from, null for none), and the slot
+## whose well is empty now (-1: none).
+var _wells: Array[MeshInstance3D] = []
+var _empty_well: int = -1
 var _reloads: Array[Reload] = []
 var mag_slot: int = -1
 var mag_shown: int = MAG_NONE
@@ -90,10 +94,13 @@ func hold(replicas: Array[MeshInstance3D], classes: Array[StringName],
 	_replicas = replicas
 	_magazines = magazines
 	_reloads.clear()
+	_wells.clear()
+	_empty_well = -1
 	for i in replicas.size():
 		var site_class := classes[i] if i < classes.size() else &"rifle"
 		_reloads.append(_reload(site_class))
 		var m := magazine(i)
+		_wells.append(_well(replicas[i], m))
 		if m != null:
 			m.get_parent().remove_child(m)
 			m.visible = false
@@ -124,8 +131,10 @@ func hold(replicas: Array[MeshInstance3D], classes: Array[StringName],
 
 
 ## Gives the replicas and the magazines' copies back to `to` (hidden; the caller places them), so they outlive this
-## figure.
+## figure; a well emptied by a reload under way shows its magazine again.
 func release(to: Node3D) -> void:
+	_set_empty_well(-1)
+	_wells.clear()
 	for list: Array[MeshInstance3D] in [_replicas, _magazines]:
 		for r in list:
 			if r != null and r.get_parent() == self:
@@ -163,6 +172,7 @@ func show_reload(slot: int, share: float, fresh: bool) -> void:
 	var r := _reloads[slot] if slot >= 0 and slot < _reloads.size() else null
 	if r == null or magazine(slot) == null:
 		_set_magazine(-1, MAG_NONE)
+		_set_empty_well(-1)
 		_last_share = 0.0
 		_throw_due = false
 		return
@@ -179,6 +189,9 @@ func show_reload(slot: int, share: float, fresh: bool) -> void:
 	elif r.throws and share >= r.old_from and share < r.release:
 		shown = MAG_OLD
 	_set_magazine(slot, shown)
+	# The well is empty from the old one's pull (the new one's, with nothing to pull) until the new one is home.
+	var out := r.old_from if r.throws else r.new_from
+	_set_empty_well(slot if share >= out and share < r.new_to else -1)
 
 
 ## The copy of slot `slot`'s magazine, or null.
@@ -237,6 +250,29 @@ func _set_magazine(slot: int, shown: int) -> void:
 	var now := magazine(slot)
 	if now != null:
 		now.visible = shown != MAG_NONE
+
+
+func _set_empty_well(slot: int) -> void:
+	if slot == _empty_well:
+		return
+	var was := _wells[_empty_well] if _empty_well >= 0 and _empty_well < _wells.size() else null
+	if was != null:
+		was.visible = true
+	_empty_well = slot
+	var now := _wells[slot] if slot >= 0 and slot < _wells.size() else null
+	if now != null:
+		now.visible = false
+
+
+## The piece of `replica` that `copy` (the hand's magazine) is made from: the magazine in its well, or null.
+static func _well(replica: MeshInstance3D, copy: MeshInstance3D) -> MeshInstance3D:
+	if replica == null or copy == null:
+		return null
+	for c: Node in replica.get_children():
+		var m := c as MeshInstance3D
+		if m != null and m.mesh == copy.mesh:
+			return m
+	return null
 
 
 ## Class `site_class`'s reload from the sidecar (its class's clip), or null when the sidecar has none.

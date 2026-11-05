@@ -147,12 +147,14 @@ func test_held_in_play_the_sights_stay_folded_over_the_clips() -> void:
 
 
 func test_the_figures_get_the_parts_cut_down_copies_in_place() -> void:
-	var meshes := ReplicaParts.figure_meshes(&"aeg", {&"optic": &"redDot", &"magazine": &"hiCap", &"grip": &"angled"})
+	var parts := {&"optic": &"redDot", &"magazine": &"hiCap", &"grip": &"angled"}
+	var meshes: Array[Node3D] = ReplicaParts.take(&"aeg", parts, true).values()
 	assert_eq(meshes.size(), 3)
-	var names: Array = meshes.map(func(m: MeshInstance3D) -> String: return m.name)
+	var names: Array = meshes.map(func(m: Node3D) -> String: return m.name)
 	assert_has(names, "optic_redDot_Figure")
 	assert_has(names, "magazine_hiCap_Figure")
-	for m in meshes:
+	for m: Node3D in meshes:
+		assert_true(m is MeshInstance3D, "%s is a mesh" % m.name)
 		if m.name == "optic_redDot_Figure":
 			assert_almost_eq(m.position, Vector3(0.0, 0.0735, -0.025), Vector3.ONE * EPS, "the optic's copy where it sits")
 		assert_null(m.get_parent())

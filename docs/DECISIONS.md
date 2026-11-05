@@ -705,7 +705,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   hand, on figures and in menus, from the same model.
 - **Parts on figures wait for the art pass (owner, 2026-10-19).** A figure's replica is one cut-down mesh, so a part's
   figure copy sits over its standard magazine or flash hider; the figure models get those split out in the art pass.
-  Nothing shows it until then (bots carry no parts).
+  Nothing shows it until then (bots carry no parts). *Done in TP1 (2026-11-05): the figure copies are cut down from the
+  hands' models with the magazine, flash hider and iron sights apart, and `ReplicaParts.fit_figure` fits the parts.*
 - **The Sniper Rifle (owner, 2026-11-02, SN1).** Pulled into 0.1 from the Replica Update: like the AEG with a longer
   barrel, spring driven, **single shot** only, and it **comes with the 2x Scope fitted**, which can be taken off or
   swapped. It unlocks at **level 5** with the 2x Scope (moved from level 7 so it comes with the rifle) and the M130

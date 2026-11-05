@@ -26,12 +26,16 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bpy  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
+import figure_copy  # noqa: E402
 import hardsurface as hs  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
 OUT = os.environ.get("BL_OUT") or os.path.join(ROOT, "assets/models/replicas/aeg.glb")
 ARMATURE = "AEGRifle"
 FPS = 60
+# The figures' copy (figure_copy.py): triangles per piece, 3,000 in all, the replica budget on a figure
+# (docs/CC0_ASSETS.md › Size limits), used in full (TP1, 2026-11-05).
+FIGURE_TRIS = {"Figure": 2400, "Magazine": 260, "FlashHider": 120, "Sights": 220}
 
 # The owner's rulings (2026-11-04): shorter than the first pass (14:12), "too short now" at CQB length (15:10), then
 # "match the reference images as close as possible" (16:49): the length of his main photo's carbine, about 67 cm with
@@ -927,55 +931,6 @@ def moving_parts() -> dict:
     return parts
 
 
-def figure() -> object:
-    """The figures' cut-down copy: the silhouette in a few hundred faces."""
-    b = hs.Builder("Figure", ["Body", "Furniture", "Detail", "Metal", "Accent"])
-    b.box((-UPPER_HW, UPPER_Y[0], SEAM), (UPPER_HW, UPPER_Y[1], RAIL_TOP - 0.004), "Body")
-    b.prism([(y, lz(z)) for y, z in ((-0.096, 0.020), (-0.096, 0.004), (-0.081, -0.021), (-0.034, -0.025),
-                                     (0.024, -0.025), (0.024, -0.066), (0.1005, -0.066), (0.104, -0.003),
-                                     (-0.085, 0.0), (-0.085, 0.020))], "x", -LOWER_HW, LOWER_HW, "Body")
-    b.prism([(y, lz(z)) for y, z in ((0.024, -0.062), (0.016, -0.068), (-0.024, -0.068), (-0.040, -0.040),
-                                     (-0.030, -0.040), (-0.022, -0.0635), (0.024, -0.0635))], "x", -0.004, 0.004,
-            "Body")
-    gw = GUARD_HW + 0.0094
-    sec = [(-gw + 0.004, GUARD_Z[0] - 0.009), (gw - 0.004, GUARD_Z[0] - 0.009), (gw, GUARD_Z[0]), (gw, RAIL_BASE),
-           (gw - 0.004, RAIL_TOP - 0.003), (-gw + 0.004, RAIL_TOP - 0.003), (-gw, RAIL_BASE), (-gw, GUARD_Z[0])]
-    b.prism(sec, "y", GUARD_Y[0], GUARD_Y[1], "Furniture")
-    b.lathe([(GUARD_Y[1] - 0.01, 0.0092), (MUZZLE[1], 0.0092)], "Metal", 8, centre=(0.0, 0.0, BORE_Z))
-    b.lathe([(BARREL_END[1], 0.0115), (MUZZLE[1], 0.0112)], "Metal", 8, centre=(0.0, 0.0, BORE_Z))
-    b.lathe([(-0.1010, 0.0176), (-0.090, 0.0176)], "Detail", 8, centre=(0.0, 0.0, TUBE_Z))
-    b.prism([(y + STOCK_IN, z) for y, z in ((-0.188, 0.033), (-0.1805, 0.0570), (-0.1845, STOCK_TOP), (-0.3515, STOCK_TOP),
-             (-0.3515, -0.0505), (-0.3343, -0.0505), (-0.2576, 0.0042), (-0.197, 0.0148))], "x", -0.0185, 0.0185,
-            "Furniture")
-    rake = math.radians(GRIP_RAKE)
-    down = Vector((0.0, -math.sin(rake), -math.cos(rake)))
-    fwd = Vector((0.0, math.cos(rake), -math.sin(rake)))
-    top = Vector((0.0, GRIP_TOP_Y, lz(GRIP_TOP_Z)))
-    rings = []
-    for t, hw, fr, bk in ((0.0, 0.0128, 0.0165, 0.0215), (0.38, 0.0144, 0.0232, 0.023), (1.0, 0.0158, 0.0228, 0.0254)):
-        c = top + down * (GRIP_LENGTH * t)
-        rings.append([c + Vector((x, 0.0, 0.0)) + fwd * f for x, f in hs.superellipse(hw, fr, bk, 2.6, 8)])
-    b.loft(rings, "Detail")
-    rings = []
-    for z in (-0.020, -0.075, MAG_BOTTOM):
-        cy = mag_spine(z)[0]
-        rings.append([(x, cy + y, mz(z)) for x, y in hs.rounded_rect(MAG_HW, MAG_HD, 0.006, 1)])
-    b.loft(rings, "Detail")
-    b.box((-0.008, -0.0721, RAIL_TOP), (0.008, -0.0691, SIGHT_Z + 0.004), "Detail")
-    b.prism([(GUARD_Y[1] + 0.006, BORE_Z), (FRONT_SIGHT_Y + 0.0065, BORE_Z), (FRONT_SIGHT_Y + 0.0065, SIGHT_Z + 0.0035),
-             (FRONT_SIGHT_Y - 0.0055, SIGHT_Z + 0.0035), (GUARD_Y[1] + 0.006, BORE_Z + 0.020)], "x", -0.0085, 0.0085,
-            "Detail")
-    # The front post's tip in the scheme's accent, so every paint slot is on the figures' copy too.
-    b.box((-0.0012, FRONT_SIGHT_Y - 0.0012, SIGHT_Z + 0.0035), (0.0012, FRONT_SIGHT_Y + 0.0012, SIGHT_Z + 0.0065),
-          "Accent")
-    ob = b.build()
-    for p in ob.data.polygons:
-        p.use_smooth = False
-    return ob
-
-
-# --------------------------------------------------------------------------------------------------------- rig
-
 def armature() -> bpy.types.Object:
     data = bpy.data.armatures.new(ARMATURE)
     arm = bpy.data.objects.new(ARMATURE, data)
@@ -1096,7 +1051,6 @@ def build() -> None:
     fh.location = (0.0, 0.0, 0.0)
     for bone, ob in moving_parts().items():
         hs.parent_to_bone(ob, arm, bone)
-    fig = figure()
     for name, loc in EMPTIES.items():
         hs.empty(name, loc, arm)
     # The flash hider's origin at the barrel's end, like the old file's (a muzzle part replaces it there).
@@ -1104,14 +1058,15 @@ def build() -> None:
     me.transform(Matrix.Translation(-Vector(BARREL_END)))
     fh.location = BARREL_END
     clips(arm)
+    fig = figure_copy.make(FIGURE_TRIS)
     total = 0
     for ob in bpy.data.objects:
         if ob.type == "MESH":
             n = hs.tris(ob)
-            if ob.name != "Figure":
+            if not ob.name.startswith("Figure"):
                 total += n
             print("  %-16s %6d triangles" % (ob.name, n))
-    print("  in the hands: %d triangles; figure: %d" % (total, hs.tris(fig)))
+    print("  in the hands: %d triangles; figure: %d" % (total, sum(hs.tris(o) for o in [fig] + list(fig.children))))
     hs.export(OUT, True)
     print("wrote", OUT)
 

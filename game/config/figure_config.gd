@@ -142,11 +142,13 @@ extends Resource
 @export var gate_clip: StringName = &"Holster"
 ## The reloads (FI4): Rifle_Reload or Pistol_Reload by the replica's class, played over the holster and under the
 ## switch, placed by the reload's share of the replica's reload time (the sidecar's fitTo). The magazine in the hand and
-## the old one thrown are copies of the replica model's magazine_node mesh, placed by the sidecar's magazineInHand; at
-## most thrown_max lie on the field (the oldest goes first), from one shared pool of that many.
+## the old one thrown are copies of the magazine in the figure version's well (ReplicaParts.fit_figure: its own, or a
+## magazine part's figure copy when one is fitted), placed by the sidecar's magazineInHand; at most thrown_max lie on
+## the field (the oldest goes first), from one shared pool of that many. magazine_node names the figure version's own
+## magazine for the hand-off's toss (FigureModels.magazine_mesh, MagTossView).
 @export var rifle_reload_clip: StringName = &"Rifle_Reload"
 @export var pistol_reload_clip: StringName = &"Pistol_Reload"
-@export var magazine_node: String = "Magazine"
+@export var magazine_node: String = "Figure_Magazine"
 @export var thrown_max: int = 12
 ## Holstered, the rifle rides slung on the Chest bone (the browser's FIGURE_RIG.sling): its butt sling_butt.x to the
 ## figure's right of the spine and sling_butt.y above the feet, sling_back_human behind the spine line (sling_back_pack

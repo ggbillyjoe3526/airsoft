@@ -322,7 +322,7 @@ func _load(r: ReplicaConfig, paint: StringName, realistic: bool, parts: Dictiona
 		_aim_through(held, r)
 	# The figures' cut-down copy never shows in the hands, and the hands' replica casts no shadow on the field and
 	# stays out of the glass's view.
-	var figure := model.find_child("Figure", true, false) as Node3D
+	var figure := model.find_child(ReplicaParts.FIGURE_NODE, true, false) as Node3D
 	if figure != null:
 		figure.visible = false
 	for mesh: Node in model.find_children("*", "GeometryInstance3D", true, false):

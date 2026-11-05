@@ -28,6 +28,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bpy  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
+import figure_copy  # noqa: E402
 import hardsurface as hs  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
@@ -36,6 +37,9 @@ PARTS = os.path.join(ROOT, "assets/models/replicaParts/pistol.glb")
 PARTS_OUT = os.environ.get("BL_PARTS_OUT") or PARTS
 ARMATURE = "GBBPistol"
 FPS = 60
+# The figures' copy (figure_copy.py): triangles per piece, 3,000 in all, the replica budget on a figure
+# (docs/CC0_ASSETS.md › Size limits), used in full (TP1, 2026-11-05).
+FIGURE_TRIS = {"Figure": 2760, "Magazine": 240}
 
 # The owner's main photo (a side view, muzzle left) to model space: PX_PER_M pixels a metre, the photo's (ORIGIN_PX)
 # pixel at the model's origin (the old model's grip on the photo's, best overlap).
@@ -867,24 +871,6 @@ def _base_plate(mat: str) -> object:
     return hs.join("Plate", parts)
 
 
-def figure() -> object:
-    """The figures' cut-down copy: the silhouette in a couple of hundred faces."""
-    b = hs.Builder("Figure", ["Body", "Furniture", "Detail", "Metal", "Accent"])
-    b.box((-SLIDE_HW, SLIDE_Y[0], SLIDE_SIDE_FOOT), (SLIDE_HW, SLIDE_Y[1], SLIDE_TOP), "Body")
-    b.prism([P(22, 99)[:2], P(22, 154), P(205, 157), P(218, 160), P(218, 246), P(386, 242), P(447, 410),
-             P(612, 410), P(545, 236), P(522, 180), P(578, 122), P(560, 99)], "x", -FRAME_HW, FRAME_HW, "Furniture")
-    b.prism([(y, z) for y, z, _r in pts([(462, 413), (597, 413), (597, 447), (462, 447)])], "x", -MAG_HW, MAG_HW,
-            "Detail")
-    b.lathe([(SLIDE_Y[1] - 0.004, BARREL_R), (SLIDE_Y[1] + 0.0004, BARREL_R)], "Metal", 8, centre=(0.0, 0.0, BORE_Z))
-    b.box((-0.004, REAR_SIGHT_Y - 0.003, SLIDE_TOP), (0.004, REAR_SIGHT_Y + 0.002, Z(35.0)), "Detail")
-    b.box((-0.0012, FRONT_SIGHT_Y - 0.0012, SLIDE_TOP), (0.0012, FRONT_SIGHT_Y + 0.0012, SIGHT_Z), "Accent")
-    # The frame's opening for the trigger finger, as a dark plate either side reads at a figure's distance.
-    ob = b.build()
-    for p in ob.data.polygons:
-        p.use_smooth = False
-    return ob
-
-
 # ------------------------------------------------------------------------------------------------------------- rig
 
 def armature() -> bpy.types.Object:
@@ -1008,19 +994,18 @@ def build() -> None:
     for ob, bone in ((slide(), "slide"), (trigger(), "trigger"), (magazine(), "magazine"),
                      (mag_release(), "magRelease")):
         hs.parent_to_bone(ob, arm, bone)
-    fig = figure()
-    fig.parent = arm
     for name, loc in EMPTIES.items():
         hs.empty(name, loc, arm)
     clips(arm)
+    fig = figure_copy.make(FIGURE_TRIS)
     total = 0
     for ob in bpy.data.objects:
         if ob.type == "MESH":
             n = hs.tris(ob)
-            if ob.name != "Figure":
+            if not ob.name.startswith("Figure"):
                 total += n
             print("  %-16s %6d triangles" % (ob.name, n))
-    print("  in the hands: %d triangles; figure: %d" % (total, hs.tris(fig)))
+    print("  in the hands: %d triangles; figure: %d" % (total, sum(hs.tris(o) for o in [fig] + list(fig.children))))
     hs.export(OUT, True)
     print("wrote", OUT)
     build_parts()
