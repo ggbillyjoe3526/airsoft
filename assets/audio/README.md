@@ -24,10 +24,16 @@ an RMS of 1, so a bed's gain in `play_tuning.tres` is its loudness.
 **The third batch** (AU6, 2026-11-04): 11 more give the whistle (`whistle_short`, `whistle_long`: his blasts under
 0.9 s and over, each cut to SoundConfig's length), the steps on metal (its rumble under 250 Hz taken out), grass and
 gravel, the flag rope (`rope_up`, `rope_down`: 0.25 s of his first pull and his second), the flash bomb
-(`flash_bang`, saturated), the Sniper Rifle's shot (`shot_spring`, from each burst; its run-up before the burst is
+(`flash_bang`; clean since AU7), the Sniper Rifle's shot (`shot_spring`, from each burst; its run-up before the burst is
 `power_spring`) and bolt (`boltCycle`), and `loops/woods_day.wav`, Woodland's day bed. The Cyber Pistol's whir is his
 electric toothbrush (his pick). His steps that never fall quiet between them (metal, running on gravel) are cut where
 each starts (`onsets`).
+
+**The bombs re-cut** (AU7, 2026-11-05; owner: they "don't sound like the recordings"): `grenade_pin` keeps his
+ring's ring-out (0.4 s, was 0.2), `grenade_bounce` is a whole take of his can bouncing (1.1 s: the knock, the rattle
+and the little bounces, played once a bomb from its first bounce, SoundConfig.bounce_hold), `smoke_pop` is his long
+spray alone from its burst (the can pitched down as a pop is gone), and `flash_bang` his balloon pop clean, with
+SoundConfig.bang_gain making up the 6 dB the soft clip gave.
 
 **Placeholders** (AU3, 2026-11-03; AU5; AU6): until the owner records them, 15 cues are his recordings reused,
 re-pitched, filtered or sliced (the Sniper Rifle's and the Cyber Pistol's dry fire, BBs on concrete, soil and leaves,
@@ -59,7 +65,7 @@ seeds the browser game used, so they sound as they did.
   and fading hiss, the flash's short crack and thump), each scaled to a 0.9 peak; their levels are SoundConfig's. To
   re-render: `godot --headless --path . -s res://tools/render_grenades.gd`, then `godot --headless --path . --import`.
   The throw itself plays `magToss`. Since AU5 the pin, the bounce and the smoke's pop are the owner's recordings
-  (above), and the flash's bang too since AU6, so this renderer only drafts.
+  (above), and the flash's bang too since AU6 (all re-cut in AU7), so this renderer only drafts.
 - `cues/door_open_<n>.wav` and `door_shut_<n>.wav` (1 to 5): recorded since AU2, 4 and 5 since AU5; the synthesised draft (DO1)
   renders with `tools/render_doors.gd` to a folder named after `--`.
 - `cues/boltCycle_<n>.wav` (1 to 3): recorded since AU2 (the pistol's slide), his rifle bolt since AU6; the

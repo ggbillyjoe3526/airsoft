@@ -16,6 +16,9 @@ can't fire or aim while you throw, and a reload under way stops. Throwing on the
 Bombs bounce off walls and the ground, then roll and settle. They don't bounce off people. If you are hit while you
 pull the pin, you keep the bomb.
 
+You can hear a bomb coming: the ring pull as the pin comes out, then a tin can clattering where it lands. A smoke bomb
+hisses as it goes off; a flash bomb goes off with a sharp pop.
+
 ## Smoke bomb
 
 A smoke bomb pops <!-- wiki:config grenade_config.smoke_fuse --> seconds after it leaves your hand and smokes where it

@@ -301,12 +301,6 @@ def from_onsets(a, starts, seconds, fade=0.3):
     return out
 
 
-def saturate(x, drive):
-    """`x` driven into a soft clip (tanh) `drive` times over its peak: louder for the same peak, a little rougher."""
-    x = x / max(np.abs(x).max(), 1e-9)
-    return np.tanh(drive * x) / np.tanh(drive)
-
-
 def blast_length(a, start):
     """How long a sound starting at `start` (s) holds: until its level falls 15 dB under its first 0.1 s."""
     e = db(env(a[int(start * RATE):]))
@@ -573,20 +567,20 @@ def build(folder):
     put("rope_up", loudest_windows(pulls[0], 5, 0.25), -31.8)
     put("rope_down", loudest_windows(pulls[1], 5, 0.25), -32.0)
 
-    # The smoke bomb: his grenade pin, a can bouncing (its first knock), and the long deodorant spray as the smoke's
-    # hiss 9 dB under a pop (the can's knock far lower), dying over its last second as the synthesised one did.
+    # The smoke bomb: his grenade pin with its ring's ring-out, his can bouncing as a whole take (the first knock,
+    # the rattle and the little bounces after it: SimAudio plays it once a bomb, from its first bounce), and his long
+    # deodorant spray as the smoke going off, from its own burst (owner, 2026-11-05: "a ring pull sound and a bouncing
+    # can"; the can pitched down as a pop, and its first 0.2 s alone as each bounce, didn't sound like his).
     # (The pin's first take is too thin to reach the old pin's level under the limiter.)
-    put("grenade_pin", pick(folder, [("pin_pull_grenade.wav", [1, 3, 2])], 0.2), -10.2)
-    cans = pick(folder, [("can_bouncing.wav", None)], 0.2, 0.4)
-    put("grenade_bounce", variants(cans, 3), -14.2)
+    put("grenade_pin", pick(folder, [("pin_pull_grenade.wav", [1, 3, 2])], 0.4, 0.3), -10.2)
+    put("grenade_bounce", variants(pick(folder, [("can_bouncing.wav", None)], 1.1, 0.3), 3), -14.2)
     sprays = variants(pick(folder, [("deodorant_spray_long.wav", None)], 3.5, 0.05), 3)
-    pops = [onset_slice(resample(k, 0.6), 0.12, 40) for k in variants(cans, 3)]
-    put("smoke_pop", [fixed(under(p, x, 9.0), 3.5, 1.0) for p, x in zip(pops, sprays)], -9.9)
-    # The flash bomb: his recording from its bang, a little higher and lower for the other two (third batch),
-    # saturated so it comes within 2 dB of the synthesised bang's loudness (its peaks would hold it 7 dB under).
+    put("smoke_pop", [fixed(x, 3.5, 1.0) for x in sprays], -14.0)
+    # The flash bomb: his balloon pop from its bang, a little higher and lower for the other two (third batch), clean:
+    # driving it into a soft clip to match the synthesised bang's loudness squashed the pop into a flat burst (owner,
+    # 2026-11-05); SoundConfig.bang_gain makes the level up instead, under the master bus's limiter.
     flash = Source.get(folder, "flash_grenade.wav").a
-    put("flash_bang", [saturate(b, 4.0) for b in variants(from_onsets(flash, onsets(flash, 6.0, 0.5)[:1], 0.45), 3)],
-        -3.4)
+    put("flash_bang", variants(from_onsets(flash, onsets(flash, 6.0, 0.5)[:1], 0.5), 3), -3.4)
 
     # Props run into, and the doors.
     put("prop_clank", variants(pick(folder, [("Knock metal shelf.wav", None)], 0.6), 3), -21.7)

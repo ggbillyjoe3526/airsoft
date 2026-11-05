@@ -68,13 +68,17 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 ## (m), a little past the furthest a bot hears one (DoorConfig.heard, 20 m).
 @export var door_gain: float = 0.8
 @export var door_reach: float = 26.0
-## Smoke and flash bombs (SF1): a bomb's knock where it bounces (at the gain times its speed into the surface over
-## bounce_full_speed, at most the gain) and a smoke's pop and hiss, both heard out to prop_reach; a flash's bang, heard
-## out to bang_reach (m). The pin and the throw are mechanisms (mechanism_gain).
+## Smoke and flash bombs (SF1): a bomb's bouncing can where it bounces (at the gain times its speed into the surface
+## over bounce_full_speed, at most the gain), a bounce within bounce_hold (s) of the one that started it left silent,
+## as the can's own knocks and rattle play on; a smoke going off (its spray), both heard out to prop_reach; a flash's
+## bang, heard out to bang_reach (m), at bang_gain (the owner's balloon pop is left clean, so 6 dB quieter in its file
+## than the clipped one was; the master bus's limiter holds the peaks). The pin and the throw are mechanisms
+## (mechanism_gain).
 @export var bounce_gain: float = 0.7
 @export var bounce_full_speed: float = 6.0
+@export var bounce_hold: float = 1.0
 @export var smoke_pop_gain: float = 0.8
-@export var bang_gain: float = 1.0
+@export var bang_gain: float = 2.0
 @export var bang_reach: float = 60.0
 ## Attack / Defend's flag rope ratcheting a notch at the pole (FLAG_ROPE), heard from the pole.
 @export var rope_gain: float = 0.8
