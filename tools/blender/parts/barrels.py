@@ -327,7 +327,8 @@ def hop_unit(seg: int) -> list:
     k = hs.Builder("hop_bucking", ["Bucking", "Bore"])
     at.tube_y(k, [(-27.2, 5.0), (-27.0, 5.9), (-26.4, 6.2), (-25.3, 6.2), (-25.0, 5.6), (12.0, 5.6),
                   (12.0, BARREL_R)], [(-27.2, 3.2), (-25.4, 3.0), (12.0, BARREL_R - 0.01)], "Bucking", 24)
-    at.lens(k, -24.0, 3.05, "Bore", seg // 2, facing=-1.0)
+    # The way in dark, set inside the lip behind the barrel's rear end, so the end is never seen through it.
+    at.lens(k, -25.2, 3.02, "Bore", seg // 2, facing=-1.0)
     out.append(hs.finish(k.build(), bevel=0.0))
     return out
 

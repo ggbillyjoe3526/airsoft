@@ -20,6 +20,8 @@ const PART_TURN: Dictionary[StringName, float] = {&"barrel": 60.0}
 ## A part slot whose parts are mostly the replica's dark metal is pictured with a fill light from the viewer's side
 ## too (its energy), so a barrel extension's knurl and flutes catch a highlight instead of drawing as a silhouette.
 const PART_FILL: Dictionary[StringName, float] = {&"barrel": 1.8}
+## How far the fill light looks down past the camera's line (degrees).
+const FILL_PITCH := -20.0
 ## The room left round the replica in its picture (a share).
 const MARGIN := 1.06
 ## The least a picture measures (m), so a model with nothing to show can't divide by nothing.
@@ -253,9 +255,9 @@ func _part_shot(key: StringName, slot: StringName, part: StringName) -> Shot:
 	shot = _rig(model, PART_LONG_SIDE, "Part_%s_%s_%s" % [key, slot, part])
 	var fill_energy := float(PART_FILL.get(slot, 0.0))
 	if fill_energy > 0.0:
-		# From over the camera's shoulder, looking back along it at the part.
+		# From over the camera's shoulder, looking the way it looks at the part.
 		var fill := DirectionalLight3D.new()
-		fill.rotation_degrees = Vector3(-20.0, 90.0, 0.0)
+		fill.rotation_degrees = shot.camera.rotation_degrees + Vector3(FILL_PITCH, 0.0, 0.0)
 		fill.light_energy = fill_energy
 		shot.port.add_child(fill)
 	shot.bare_extent = shot.extent

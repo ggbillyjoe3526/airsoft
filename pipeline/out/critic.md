@@ -1,38 +1,36 @@
 Task: BA1 · The barrel models (brief, no TASKS block)
-Attempt: 2 of 4
-Head: 2ec0305 (= HEAD; targeted tests pass, full tools/check.sh still running). QA (c5964de) and performance (7e3b7a5)
-reports predate this head's insides file and ReplicaParts.inside(); they describe a fit-time free that no longer exists.
+Attempt: 3 of 4
+Head: 50710d0 (= HEAD; targeted tests pass, 143 + QA's 41; full tools/check.sh still running on f8bea33). QA (50710d0)
+and performance (c173a5b) both Pass on this code.
 Checks: 1 ✗ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 7/8 → Retry (near miss, measured and judgment; also Retry until QA and performance re-run on this head)
-Fixed since attempt 1: steel reads 126,135,150 and brass gold on the card; crown seam gone (crown_close.png); arm in the
-window; ASSETS counts match the glbs (882+8,948+20 = 9,850; 4,830+4,980+20 = 9,830); proportions (a) unchanged, pass.
+Score: 7/8 → Retry (near miss, judgment)
+Fixed since attempt 2, checked on the images: the extension reads on the card (card_long_full.png x 284-368 averages
+54-66,60-72,70-82 on bg ~32: about +30); chamber 0x5c6068; no crack at the flats' end (ext_close x≈300, fit_long_close
+x≈520: a clean milled step); hop sleeve and nose round (hop_close left end); long crown 52; thread 4 grooves (accepted:
+inside the 4 to 5 first asked, the cap allows no 5th). Fill light test (test_ba1_qa.gd:150) fails without PART_FILL.
+(a) Proportions, unchanged, pass: inner barrel 345 mm vs a real M4 363 (-5 %); long/tight 452/345 = 1.31 vs 1.25 (+5 %);
+hop unit/barrel 52/345 = 0.151 vs 0.152; bore/OD 6.03/8.9 vs 6.03/9 (+1 %); extension OD = rifle barrel OD (17.2).
 Failed checks, with evidence:
-1. [measured] Card legibility (cards_shown.png, card bg 30,32,36). The long barrel's extension, its one visible
-   difference, draws 32-37,37-42,46-51: a silhouette, no knurl or flutes. The hop body is about 35,37,44. Only the
-   bucking, dial and inner barrel read. Chamber is 0x2a2c30 (barrels.py:67), the card's own colour.
-1. [judgment] (b) Construction:
-   - Dark crack round the extension at the flats' end, in ext_close.png x≈300 and in hand in fit_long_close.png
-     x≈520. barrels.py:401 starts the shoulder at r 8.9 at y 23, but the flats prism's round arcs end at r 10.45, so a
-     0.4 mm-wide, 1.5 mm-deep slot runs round them.
-   - The hop unit's rear sleeve is visibly faceted (28 points, barrels.py:250; hop_close.png left end, x 315-380).
-1. [judgment] (d) Bar:
-   - The budget reason for 28 points doesn't hold. The tight-bore inside spends about 5,500 of its 8,948 triangles on a
-     9 mm tube at 52 points that is hidden when fitted and 3 px tall on the card. The sleeve and nose lathes cost
-     about 8 triangles per point each.
-   - The long crown is 20 points (SEG["long"], :113) and shows in hand inside the hider. It is in aeg.glb, apart from
-     its inside, so the weld no longer ties its count.
-   - The thread has 3 grooves (:87); 4 to 5 were asked for.
+1. [judgment] (b) Construction, the inner barrel has no bore at its back. barrels.py:172 starts the barrel's profile
+   at (BARREL_REAR, 0.0), a solid cap at hop -25 mm; the bucking's dark bore disc is at -24.0 (:329), in front of
+   that cap, so it is never seen. Through the bucking's lip the eye meets a flat lit face: white in the tight bore
+   (tight_alone.png at 260,560; v3_cards_full.png at 80,110: a white dot in the red ring) and pale gold in the long
+   (long_alone.png at 215,575). The card turns the hop-up end toward the viewer, so this is the most prominent detail
+   on both barrel cards: it reads as a red-and-white cap, not the nozzle's way in.
 Must-fix for the next attempt:
-1. Chamber to a mid grey (about 0x5c6068). Make the extension read on the card: luminance ≥ 25 above the card's, via a
-   fill or rim light on the barrel slot's picture (as PART_TURN is per slot). Re-capture cards_shown.png.
-2. Start the shoulder at (23.0, COUPLING_R) and chamfer the flats prism's own end instead. Show no line at y 23 in
-   ext_close.png and fit_long_close.png.
-3. Hop sleeve and nose lathes ≥ 48 points (body keeps 28 if needed). Long crown 52 points. Pay for it by taking the
-   tight-bore inner barrel to about 32 points behind the spacer (change the count under it). Stay ≤ 10,000.
-4. Thread: 5 grooves. Then QA and performance re-run on the new head.
+1. Make the bore dark from the bucking's lip. Either move the Bore lens behind the barrel's rear (y about -25.2,
+   r 3.0, inside the lip) or start the barrel's rear profile at (BARREL_REAR, BORE_R) and put the Bore disc 1 to 2 mm
+   down it. Costs 0 to 36 triangles; the long barrel has 46 left (it is 20 points there). Re-capture tight_alone,
+   long_alone and the cards at 3x: the bucking's centre is near-black on both.
+Advisory (not blocking):
+- The coupling's back is open (lathe from r 8.4, :402) and the material is double-sided, so the card shows the
+  extension's inside through it as grey (v3_cards_full.png x≈800-840); an inner wall at r 8.4 for a few mm would close
+  it if triangles allow.
+- The fill light's angle (replica_pictures.gd:258, -20, 90) repeats the camera's yaw (:282) by hand; tie it to the camera.
 Owner should test in the game:
-- Customise › Barrel: hop unit and the long barrel's extension read against the dark card, not only the red bucking.
-- Long barrel fitted, aimed: no dark ring between the knurled coupling's flats and the fluted tube.
-- Long barrel fitted: the brass crown in the flash hider is round, not polygonal.
-- Each paint on the long barrel: the extension matches the rifle's barrel.
+- Customise › Barrel: the bucking's centre is dark on both cards, not white or gold.
+- Customise › Barrel: the hop dial's teeth still read under the fill light (not blown out white).
+- Long barrel fitted, aimed: no line or flicker where the flats meet the round shoulder.
+- Long barrel fitted: the extension takes each paint like the rifle's barrel.
+- Tight bore fitted: the crown sits centred in the flash hider; the hider's own facets are the rifle's, not this task's.
 - First open of the Barrel tab: no hitch from loading inside/aeg.glb.

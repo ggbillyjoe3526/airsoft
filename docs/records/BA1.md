@@ -1,6 +1,6 @@
 # BA1 · The barrel models
 
-**Review:** 3 attempts · critic PENDING · qa PENDING · performance PENDING
+**Review:** 4 attempts · critic PENDING · qa Pass · performance Pass
 
 ## Attempts
 
@@ -8,7 +8,8 @@
 |---|---|---|---|---|---|
 | 2026-11-05 | 1 | Claude (build thread) | targeted tests pass (294) | Retry 6/8 (QA Pass, performance Pass) | steel and brass drew black on the cards; cards 14 px tall; seams at the crown, flats and flutes; razor-edged chamber; hop arm low in its window; bare thread stub; ASSETS counts stale |
 | 2026-11-05 | 2 | Claude (build thread) | tools/check.sh: gdlint, changelog, wiki green; targeted tests pass (68) | Retry 7/8 (QA Pass) | the long barrel's extension and the dark chamber drew as silhouettes on the card; a crack where the flats meet the shoulder; the hop sleeve faceted; the long crown 20 points; a 3-groove thread |
-| 2026-11-05 | 3 | Claude (build thread) | PENDING | PENDING | – |
+| 2026-11-05 | 3 | Claude (build thread) | targeted tests pass (143, QA's 41) | Retry 7/8 (QA Pass, performance Pass) | the barrel's solid rear end showed white or gold through the bucking's lip, the most prominent detail on the turned cards |
+| 2026-11-05 | 4 | Claude (build thread) | PENDING | PENDING | – |
 
 ## What changed
 
