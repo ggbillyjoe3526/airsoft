@@ -43,6 +43,10 @@ const BUS_POWER := &"Power"
 const BUS_MUFFLED := &"Muffled"
 ## The charging handle drawn back and let go after each shot of a spring rifle (assets/audio/cues/boltCycle_*.wav, SN1).
 const BOLT_CUE := &"boltCycle"
+## The inspect's cues (InspectPose.sound_cue) that name the replica's own sound, not a shared one.
+const INSPECT_DRY := &"dryFire"
+const INSPECT_MAG_IN := &"magIn"
+const INSPECT_MAG_OUT := &"magOut"
 ## Cue names by RayHit.Surface (none sounds as concrete; a BB on gravel, grass or leaves as earth, a step on each as
 ## its own; a step on glass as on metal, on plastic or cardboard as on wood) and by GameEvent.Footstep.
 const SURFACE_NAMES: PackedStringArray = ["concrete", "concrete", "metal", "wood", "earth", "gravel", "grass", "leaves",
@@ -377,6 +381,20 @@ func on_ping(book: Pings, player_id: int) -> void:
 		return
 	_ping_at = p.at
 	_play(&"ping_pip", Vector3.ZERO, true, _cfg.ping_pip_gain, Kind.INTERFACE, BUS_INTERFACE)
+
+
+## A part's sound as you inspect the replica in hand (IN1, ReplicaView.inspect_sound), in your ear as your own
+## mechanism's: `cue` is the replica's own dry fire, magazine in or magazine out by its sound `profile`
+## (ReplicaConfig.sound_profile) for dryFire, magIn and magOut, else that shared cue (selector, torchClick, ...).
+func inspect_sound(cue: StringName, profile: StringName) -> void:
+	var stream := cue
+	if cue == INSPECT_DRY:
+		stream = _dry.get(profile, &"")
+	elif cue == INSPECT_MAG_IN:
+		stream = _mag_in.get(profile, &"")
+	elif cue == INSPECT_MAG_OUT:
+		stream = _mag_out.get(profile, &"")
+	_play(stream, Vector3.ZERO, true, _cfg.mechanism_gain, Kind.MECHANISM, BUS_EFFECTS)
 
 
 ## The calls said in `said` (CalloutLog) since the last look, each as its radio click (the browser game's radioCall): a

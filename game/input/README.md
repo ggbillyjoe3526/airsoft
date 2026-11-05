@@ -6,8 +6,9 @@ lost. It reads nothing while the mouse is free, so a menu click never fires. Def
 map, by physical key (WASD on any layout): move WASD or arrows, walk Shift, sprint Alt, crouch C or Ctrl, jump Space
 (at a low obstacle it vaults), lean Q and E, fire and aim the mouse buttons, reload R, fire mode B, replicas 1, 2 and the
 mouse wheel, scoreboard Tab, squad orders Follow me F, Hold here X, Regroup V and the order wheel Z (held), Need a
-Mag H, ping the middle mouse button, throw a smoke bomb G and a flash bomb Y (SF1: each press fills the next tick's
-`throw_grenade` once), pause Esc,
+Mag H, ping the middle mouse button, throw a smoke bomb 4 and a flash bomb 5 (SF1: each press fills the next tick's
+`throw_grenade` once), inspect the replica in hand Y (IN1: the view's alone, never in a command; `take_inspect` hands
+the press to the play scene's next frame), pause Esc,
 the reserved debug keys F3 (overlay), F4 (BB paths) and F5 (hit areas). Rebinding is in Settings (below). Crouch is held (`ControlsConfig.crouch_toggle` on makes it a toggle, which a sprint or jump
 press stands up from); aim is held (`ControlsConfig.aim_toggle` on makes it a toggle); lean is always held. Tuning: `ControlsConfig`
 (`aim_sensitivity` multiplies the turn while the sight is up). The settings screen writes its values into it, and

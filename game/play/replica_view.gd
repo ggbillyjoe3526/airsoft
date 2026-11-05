@@ -10,13 +10,22 @@ extends Node3D
 ## the reload; the fire selector shows the mode it is set to (SelectorPose). Its parts are fitted from their models
 ## (ReplicaParts), as the menus show them; aimed with an optic, the eye looks along the optic's sight line through its
 ## glass (OpticGlass). Reduced motion (set_motion) draws less of the sway, the kick and the reload's cant. Hit
-## (`on_hit`), it jolts and drops out of view before it hides, the same with motion reduced. A child of the camera.
+## (`on_hit`), it jolts and drops out of view before it hides, the same with motion reduced. Inspected (IN1, `inspect`),
+## it is turned over in the hands by its InspectPose while its model's Inspect clip works its parts, the parts' sounds
+## going out as `inspect_sound`; a shot, a hit, a reload, a draw, a switch, the holster, a sprint or raising the sight
+## ends it (the pose eases back, the parts rest at once). A child of the camera.
+
+## A part of the replica in hand made a sound while it is inspected: an InspectPose cue (SimAudio.inspect_sound).
+signal inspect_sound(cue: StringName)
 
 const MODEL_DIR := "res://assets/models/replicas/"
 ## The models' animation clips (docs/CC0_ASSETS.md › Replica models).
 const FIRE_CLIP := &"Fire"
 const RELOAD_CLIP := &"Reload"
 const SLIDE_LOCK_CLIP := &"SlideLock"
+const INSPECT_CLIP := &"Inspect"
+## The shortest length (s) a share of an inspect is taken over (no division by a zero-length clip).
+const MIN_LENGTH := 0.001
 ## The power source whose replicas lock their slide back on empty (gas blowback).
 const SLIDE_LOCK_POWER := &"gas"
 
@@ -70,6 +79,16 @@ var _motion: MotionScale = MotionScale.new()
 ## (shared paints are pressed once), and each copy's own.
 var _pressed: Dictionary[Material, Material] = {}
 var _pressed_from: Dictionary[Material, Material] = {}
+## The inspect (IN1): asked for since the last frame; seconds into the one under way (-1: none), its length and pose,
+## and its next sound; and, once it ends early, the seconds left easing back from the turn and shift it was at.
+var _inspect_asked: bool = false
+var _inspect_age: float = -1.0
+var _inspect_length: float = 0.0
+var _inspect_pose: InspectPose = null
+var _inspect_sound: int = 0
+var _inspect_fade: float = 0.0
+var _inspect_turn: Vector3 = Vector3.ZERO
+var _inspect_shift: Vector3 = Vector3.ZERO
 
 
 ## Draws `loadout` from its models, slot `i` in `paints[i]` (the replica's default where the kit names none; see
@@ -119,6 +138,7 @@ func on_shot() -> void:
 	_kick = minf(_cfg.kick_max, _kick + 1.0)
 	_fire_hold = _cfg.sprint_fire_hold
 	if _active >= 0 and _held[_active].anim != null and _held[_active].anim.has_animation(FIRE_CLIP):
+		_cut_inspect()
 		_held[_active].anim.stop()
 		_held[_active].anim.play(FIRE_CLIP)
 
@@ -128,6 +148,26 @@ func on_shot() -> void:
 func on_hit() -> void:
 	_jolt = _cfg.hit_jolt
 	_hit_age = 0.0
+	_cut_inspect()
+
+
+## Inspect the replica in hand (IN1): from the next frame it is turned over to look at, unless it can't be now (see
+## `inspect_blocked`); asked again while one is under way, nothing changes.
+func inspect() -> void:
+	_inspect_asked = true
+
+
+## True while nothing can be inspected for `c`, its sight raised `aim` (as drawn): sprinting, holstered (a bomb in hand
+## too), reloading, drawing or the sight coming up.
+func inspect_blocked(c: Character, aim: float) -> bool:
+	var a := c.armament
+	return a.replicas.is_empty() or c.sprinting or a.holstered or a.reload_left > 0.0 or a.draw_left > 0.0 \
+			or aim > _cfg.inspect_aim_cancel
+
+
+## Whether an inspect is under way.
+func inspecting() -> bool:
+	return _inspect_age >= 0.0
 
 
 ## Poses the replica in hand for `c`, `delta` seconds since the last frame, its sight raised `aim` (as drawn:
@@ -147,10 +187,16 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 		_jolt = 0.0
 		# A raise never outlives the view: shown again, it comes back as the character stands.
 		_fire_hold = 0.0
+		_cut_inspect()
+		_inspect_fade = 0.0
+		_inspect_turn = Vector3.ZERO
+		_inspect_shift = Vector3.ZERO
+		_inspect_asked = false
 		if _glass != null:
 			_glass.update(null, 0.0)
 		return
 	if a.active != _active:
+		_cut_inspect()
 		_show(a.active)
 	var held := _held[_active]
 	var follow := 1.0 - exp(-_cfg.return_rate * delta)
@@ -202,6 +248,16 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 		rot.x -= _cfg.holster_tilt * _away * left * left
 	else:
 		_away = 0.0
+
+	# Turned over to look at (IN1): ended by what `inspect_blocked` names here, before a reload's clip takes the parts.
+	if inspect_blocked(c, aim):
+		_cut_inspect()
+	elif _inspect_asked and _inspect_age < 0.0:
+		_start_inspect(held)
+	_inspect_asked = false
+	_pose_inspect(delta)
+	rot += _inspect_turn
+	pos += _inspect_shift
 
 	# Canted through a reload, its clip following the reload's progress.
 	if a.reload_left > 0.0:
@@ -267,6 +323,59 @@ func _pose_slide(held: Held, a: Armament) -> void:
 		held.slide_locked = false
 	# The bone is held over whatever clip is posed (the Reload clip keys the slide forward): SlideLockPose.
 	held.slide_hold.active = held.slide_locked
+
+
+
+## Starts an inspect of `held`: its pose (by replica id, else the default) over its Inspect clip's length (else the
+## pose's), the clip played from its start.
+func _start_inspect(held: Held) -> void:
+	_inspect_pose = _cfg.inspect_poses.get(held.id, _cfg.inspect_pose_default) as InspectPose
+	_inspect_length = _inspect_pose.duration
+	if held.anim != null and held.anim.has_animation(INSPECT_CLIP):
+		_inspect_length = held.anim.get_animation(INSPECT_CLIP).length
+		held.anim.stop()
+		held.anim.play(INSPECT_CLIP)
+	_inspect_age = 0.0
+	_inspect_sound = 0
+	_inspect_fade = 0.0
+
+
+## Ends the inspect under way early: the pose eases back from where it is over inspect_cancel_time, and the parts of
+## the replica in hand go back to rest at once (the clip's start).
+func _cut_inspect() -> void:
+	if _inspect_age < 0.0:
+		return
+	_inspect_age = -1.0
+	_inspect_fade = _cfg.inspect_cancel_time
+	var held := _held[_active]
+	if held.anim != null and held.anim.assigned_animation == INSPECT_CLIP:
+		held.anim.pause()
+		_seek(held, INSPECT_CLIP, 0.0)
+
+
+## Moves the inspect on `delta` seconds: the pose at its share and the sounds it has reached; once ended early, the
+## pose eased back towards the hold.
+func _pose_inspect(delta: float) -> void:
+	var step := maxf(delta, 0.0)
+	if _inspect_age >= 0.0:
+		_inspect_age += step
+		var share := minf(_inspect_age / maxf(_inspect_length, MIN_LENGTH), 1.0)
+		_inspect_turn = _inspect_pose.turn_at(share)
+		_inspect_shift = _inspect_pose.shift_at(share)
+		var cues := _inspect_pose.sound_at
+		while _inspect_sound < cues.size() and share >= cues[_inspect_sound]:
+			inspect_sound.emit(_inspect_pose.sound_cue[_inspect_sound])
+			_inspect_sound += 1
+		if share >= 1.0:
+			_inspect_age = -1.0
+	elif _inspect_fade > 0.0:
+		var keep := maxf(_inspect_fade - step, 0.0) / _inspect_fade
+		_inspect_turn *= keep
+		_inspect_shift *= keep
+		_inspect_fade = maxf(_inspect_fade - step, 0.0)
+	else:
+		_inspect_turn = Vector3.ZERO
+		_inspect_shift = Vector3.ZERO
 
 
 func _show(slot: int) -> void:

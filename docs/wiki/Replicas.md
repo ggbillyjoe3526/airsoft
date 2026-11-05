@@ -29,7 +29,8 @@ An electric rifle (an AEG, "automatic electric gun"), with a motor whirr on ever
 are in. On an indoor field (Depot) it starts each round on single shots: [no full auto indoors](Maps#depot).
 A battery drives it, so the battery you fit sets its rate of fire. It is a short carbine, about 67 cm long: a
 quad-rail handguard with a ribbed cover, an A-frame front sight, a flip-up rear sight, a raked grip moulded in one
-piece with the receiver, an adjustable stock and a curved magazine. Inspect it to see the charging handle pulled back.
+piece with the receiver, an adjustable stock and a curved magazine. [Inspect](Controls) it (**Y**) to see the charging
+handle pulled back, the dust cover open and the hop-up dial turn.
 
 The AEG Rifle takes the most parts: an optic on its top rail, a grip under it, a barrel, a muzzle part and a different
 magazine. It is in your kit from the start.
