@@ -1,13 +1,13 @@
 # GT1 · Bots show the bomb in hand and throw it
 
-**Review:** pending
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-05 | 1 | Opus 5.5 (build thread) | ✓ (part 4 local time limit) | 6/8 Retry (QA Pass, performance Pass) | the hand and bomb passed across the face coming over; the armpit swelled past the vest under the raised arm; KNOWN_ISSUES still said figures had no throw |
-| 2026-11-05 | 2 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-05 | 2 | Opus 5.5 (build thread) | ✓ (4,782 tests) | 8/8 Accept (QA Pass, performance Pass) | – |
 
 ## What changed
 
