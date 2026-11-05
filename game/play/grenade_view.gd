@@ -192,6 +192,12 @@ func materials() -> Array[Material]:
 	return out
 
 
+## Every kind's mesh by Grenade.Kind (NONE's unused), each made once and shared: the figures hold them in the hand
+## while they throw (FigureView.set_bombs; never changed there).
+func meshes() -> Array[Mesh]:
+	return _meshes
+
+
 ## Kind `kind`'s mesh, for tests.
 func mesh_of(kind: int) -> Mesh:
 	return _meshes[clampi(kind, 0, _meshes.size() - 1)]

@@ -7,8 +7,10 @@ extends Node3D
 ## grip, its long axis FigureConfig.hang_tilt off straight down with the muzzle forward. In a reload (FI4) a copy of the
 ## replica model's magazine rides on the sidecar's bone (Hand_L): the old one pulled out from oldMagazine.from, thrown
 ## at its release into ThrownMagazines, then the new one from `from` to `to`; one copy a slot, so the hand never holds
-## two, and the magazine in the replica's well hidden while the well is empty. A child of the skeleton, so everything
-## here is in the skeleton's frame (the file's, facing +Z). Presentation only: FigureBody says what shows.
+## two, and the magazine in the replica's well hidden while the well is empty. A bomb thrown (GT1) shows in the right
+## hand until it leaves: its model (GrenadeView's, shared) on the grip bone, turned as a pistol's grip sits there
+## (FigureConfig.throw_bomb_turn, throw_bomb_shift). A child of the skeleton, so everything here is in the skeleton's
+## frame (the file's, facing +Z). Presentation only: FigureBody says what shows.
 
 ## Which magazine the hand shows in a reload.
 const MAG_NONE := 0
@@ -68,6 +70,12 @@ var _throw_due: bool = false
 var thrown: ThrownMagazines = null
 var feet: Vector3 = Vector3.ZERO
 var velocity: Vector3 = Vector3.ZERO
+## The bomb in the hand (made by `set_bomb_meshes`; null: none drawn), each kind's mesh by Grenade.Kind, its place on
+## the grip bone, and the kind shown (NONE: hidden).
+var _bomb: MeshInstance3D = null
+var _bomb_meshes: Array[Mesh] = []
+var _bomb_on_grip: Transform3D = Transform3D.IDENTITY
+var bomb_shown: int = Grenade.Kind.NONE
 
 
 ## Places replicas on `skeleton`'s bones as kind `kind` of `models` says, by `config`.
@@ -152,6 +160,41 @@ func release(to: Node3D) -> void:
 	_throw_due = false
 
 
+## The bombs' meshes by Grenade.Kind (GrenadeView.meshes, shared, never changed here); the hand holds one when
+## `show_bomb` says. Made once a figure.
+func set_bomb_meshes(meshes: Array[Mesh]) -> void:
+	_bomb_meshes = meshes
+	if _bomb == null:
+		_bomb = MeshInstance3D.new()
+		_bomb.name = "Bomb"
+		_bomb.visible = false
+		_bomb.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(_bomb)
+		# Centred on the grip bone, turned as a pistol's grip is held there.
+		var grip := _models.grip(_kind, &"pistol")
+		_bomb_on_grip = Transform3D(grip.basis, Vector3.ZERO) \
+				* Transform3D(Basis(Vector3.UP, _config.throw_bomb_turn), _config.throw_bomb_shift)
+	# Given anew: nothing in the hand until `show_bomb` says, from the new meshes.
+	_bomb.mesh = null
+	_bomb.visible = false
+	bomb_shown = Grenade.Kind.NONE
+
+
+## Shows bomb `kind` in the right hand (Grenade.Kind; NONE hides it).
+func show_bomb(kind: int) -> void:
+	if _bomb == null or kind == bomb_shown:
+		return
+	bomb_shown = kind
+	var mesh: Mesh = _bomb_meshes[kind] if kind > Grenade.Kind.NONE and kind < _bomb_meshes.size() else null
+	_bomb.mesh = mesh
+	_bomb.visible = mesh != null
+
+
+## The bomb in the hand as drawn, or null (for tests).
+func bomb() -> MeshInstance3D:
+	return _bomb
+
+
 ## Shows replica `hand` in the hand (hanging from it when `hang`) and `sling` slung on the chest (-1: none).
 func show_hands(hand: int, sling: int, hang: bool) -> void:
 	hanging = hang
@@ -218,6 +261,8 @@ func place(skeleton: Skeleton3D) -> void:
 			held.transform = Transform3D(_hang, grip.origin - _hang * _grip_points[in_hand])
 		else:
 			held.transform = grip * _on_grip[in_hand]
+	if _bomb != null and _bomb.visible and _grip_bone >= 0:
+		_bomb.transform = skeleton.get_bone_global_pose(_grip_bone) * _bomb_on_grip
 	var carried := replica(slung)
 	if carried != null and _chest_bone >= 0:
 		carried.transform = skeleton.get_bone_global_pose(_chest_bone) * _on_chest[slung]
