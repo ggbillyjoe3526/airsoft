@@ -13,15 +13,17 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
   fingers and thumb, a suede palm patch, a cuff and wrist strap, and a sleeve rolled over the cuff with a banded hem.
 - **Materials.** `Glove` (coyote), `GloveArmour` (guard, pads, strap, patch), `Sleeve`, `SleeveTrim`. Plain colours,
   no textures. A robot's arms are recoloured in game (ViewModelConfig.robot_arms).
-- **Holds.** One per replica: a clip `<id>_Hold` (`aeg`, `pistol`, `cyber`, `sniper`) posing both arms, and an empty
+- **Holds.** One per replica: a clip `<id>_Hold` (`aeg`, `pistol`, `cyber`) posing both arms, and an empty
   `Hold_<id>` where that replica's origin sits in it (at ViewModelConfig.hip). In game the arms ride the replica's
   node with that empty on its origin, so they follow its sway, kick, cant and drop.
-  - Rifles (`aeg`, `sniper`): the right hand round the pistol grip, index on the trigger, thumb round the back; the
-    left palm under the handguard, fingers up its right side.
+  - The AEG Rifle: the right hand round the pistol grip, index on the trigger, thumb round the back; the left hand
+    wrapped round the handguard's middle, fingers up its right side, thumb along its left side.
   - Pistols (`pistol`, `cyber`): held in the right hand alone, the left arm lowered (and hidden in game,
     ViewModelConfig.one_hand).
 - **Solving.** `pose.py` places each hand on the replica's mesh (knuckle line, palm seated to contact, fingers curled
   until they touch, the index onto the trigger) and bends each elbow to keep the wrist straight; `arms.py` stops
   without writing if any face of the arms passes into a replica. Re-run it whenever a replica's model changes.
-- **Not yet.** No arm clips for firing or reloading: the replica's own clips move its parts as before.
+- **Not yet.** The Sniper Rifle has no hold (its new chassis grip, BL5, is still to fit), so it shows no arms. Pistols
+  are one-handed until the two-handed, thumbs-forward hold of the owner's photos is solved. No arm clips for firing or
+  reloading: the replica's own clips move its parts as before.
 - **Budget.** `docs/CC0_ASSETS.md` › Size limits: first-person arms ≤ 40,000 triangles, ≤ 4 materials.

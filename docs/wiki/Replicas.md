@@ -5,7 +5,7 @@ original design, and they differ in how they load, cycle, sound and handle, **ne
 whatever it came from.
 
 You carry two at once, a primary and a sidearm, picked in your [Loadout](Loadout). In play you see your own arms,
-in coyote gloves and sleeves, holding the one in your hands: a rifle in both hands, a pistol in your right hand alone.
+in coyote gloves and sleeves, holding the one in your hands: the AEG Rifle in both hands, a pistol in your right hand.
 
 ## Stats
 
