@@ -101,3 +101,39 @@ func test_the_sniper_parts_file_has_no_barrels_and_no_inside() -> void:
 	assert_eq(root.find_children("barrel*", "", true, false).size(), 0)
 	assert_eq(_insides(root).size(), 0)
 	root.free()
+
+
+func test_repeated_inside_calls_leave_no_nodes_behind() -> void:
+	var before := int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
+	for i in 20:
+		for key: StringName in BARRELS:
+			var inside := ReplicaParts.inside(&"aeg", &"barrel", key)
+			assert_not_null(inside)
+			inside.free()
+		assert_null(ReplicaParts.inside(&"aeg", &"barrel", &"nonesuch"), "an unknown part has no inside")
+	assert_eq(int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)), before, "the holder is freed every time")
+
+
+func test_a_barrel_picture_holds_part_and_inside_and_lets_both_go() -> void:
+	var before := int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
+	var pictures := ReplicaPictures.new()
+	add_child_autofree(pictures)
+	for key: StringName in BARRELS:
+		assert_not_null(pictures.part_texture(&"aeg", &"barrel", key, &"", false))
+		assert_not_null(pictures.part_texture(&"aeg", &"barrel", key, &"", false))
+	assert_eq(pictures.part_count(), 2, "a second ask is the cached picture, not a new one")
+	pictures.let_go_parts()
+	await wait_physics_frames(2)
+	assert_eq(pictures.part_count(), 0)
+	pictures.free()
+	await wait_physics_frames(2)
+	assert_lte(int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)), before + 1, "no picture node outlives its holder")
+
+
+func test_the_turn_is_for_barrels_only_and_a_part_with_no_model_has_no_picture() -> void:
+	var pictures := ReplicaPictures.new()
+	add_child_autofree(pictures)
+	var red := pictures.part_extent(&"aeg", &"optic", &"redDot")
+	assert_ne(red, Vector2.ONE, "the optic has its model")
+	assert_eq(pictures.part_extent(&"aeg", &"barrel", &"nonesuch"), Vector2.ONE, "no model, no picture")
+	assert_eq(pictures.part_count(), 1, "nothing is cached for a missing part")

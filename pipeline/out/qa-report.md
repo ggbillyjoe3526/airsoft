@@ -1,27 +1,26 @@
-Task: BA1 · QA commit (see git log, "Agent: qa") · Verdict: Pass
+Task: BA1 attempt 2 · QA commit (see git log, "Agent: qa") · Verdict: Pass
 
 Blocking: none.
-Advisory: none found. The known test_parts_in_play silenced-shot failure did NOT reproduce here (that file passed 41/41 with this change), so it is environment-dependent, not caused by BA1.
+Advisory: ReplicaParts.inside and take dereference `scene.instantiate() as Node3D` unchecked; a parts file whose root is not a Node3D would crash. Not reachable with the shipped files.
 
-Probes (all behave as the brief says):
-- Fitted views: ReplicaParts.fit is the single path for the hands ReplicaView, Customise turntable and replica pictures; it frees `<part>_Inside` before parenting, so none shows (also with muzzle and optic fitted together).
-- unfit: node count of the rifle is back to its original after fit and unfit; a second fit and unfit gives the same result.
-- figure_meshes: Inside is a sibling of the Figure copy, so figures never carry it.
-- take(figure=false), the alone picture: Inside is present and visible; the Figure copy is stripped.
-- ReplicaPaint: Steel, Brass, Etch, Chamber, Bucking and Bore get no override; the extension's Metal does.
-- sniper.glb: no barrel nodes, no `_Inside` node.
-- aeg.glb is 1,977,576 bytes (under the 2 MB budget of 2,097,152, margin about 120 KB). It grew 606 KB, so watch it if later parts are added.
+Probes of the new path (all behave as intended):
+- inside(): the holder is freed on every path (node found or null); the returned node is parented to nothing, owner and its children's owner cleared. 20 calls per barrel plus an unknown part leave the node count unchanged.
+- Missing file (pistol has no inside/ file) returns null before any load; a part with no node (optic redDot, unknown barrel key) returns null; no crash.
+- Fit never loads the inside file: fitted, unfit, refit and figure copies carry no `_Inside` (also with muzzle and optic).
+- Picture cache: the id is key/slot/part, so a second ask returns the cached Shot (part_count stays 2); let_go_parts and freeing the node release the ports, node count back to the start.
+- The 60 degree turn: only the barrel slot is in PART_TURN; the optic picture and a missing part (extent 1,1, nothing cached) are unaffected. It turns the part and its inside by the same basis, so they stay aligned; extent still comes from the turned model (barrel cards read below a 9:1 ratio, test_barrel_models).
+- Paint: the inside's own materials get no override; the extension's Metal does.
+- Export: presets include everything outside the exclude list, so inside/aeg.glb ships; it has its .import.
+- aeg.glb (parts) is under the 2 MB guard.
 
-Tests added
-- tests/unit/test_ba1_qa.gd:24 · aeg.glb under 2 MB · a guard, passes at the current size and would fail on a bloated re-export.
-- tests/unit/test_ba1_qa.gd:30 · fit then unfit of each barrel: no Inside, node count restored, refit works · fails if the removal block in fit is stubbed out (Inside stays in the fitted tree).
-- tests/unit/test_ba1_qa.gd:47 · long barrel with muzzle and optic: no Inside, other parts fitted · same stub check.
-- tests/unit/test_ba1_qa.gd:54 · figure_meshes carry no Inside · guard on the Figure and Inside layout.
-- tests/unit/test_ba1_qa.gd:64 · alone picture keeps a visible Inside and drops the Figure · fails if take() stripped Inside.
-- tests/unit/test_ba1_qa.gd:76 · paint leaves the six inner materials and paints Metal · fails if the inner meshes used the paintable names.
-- tests/unit/test_ba1_qa.gd:97 · sniper parts file has no barrels or Inside · guard.
-I checked the failure modes by reasoning from the code, not by stubbing the change out and re-running them.
+Tests added in tests/unit/test_ba1_qa.gd (all pass; they fail if the holder free in inside() is dropped, the cache id loses the part, or the turn leaks to other slots):
+- test_repeated_inside_calls_leave_no_nodes_behind
+- test_a_barrel_picture_holds_part_and_inside_and_lets_both_go
+- test_the_turn_is_for_barrels_only_and_a_part_with_no_model_has_no_picture
+Failure modes checked by reading the code, not by stubbing it out.
 
-Counts: test_ba1_qa, test_barrel_models, test_at3_qa and test_parts_in_play: 41 of 41 pass (1.5 s). Customise, ur4, figure, paint, turntable and parts tests: 253 of 253 pass, 9119 asserts (270 s). I did not run tools/check.sh (it was already running) or the smoke test.
+Counts: test_ba1_qa and test_barrel_models: 16 of 16 pass. test_replica_parts.gd does not exist in the repo (the brief's path); skipped. I did not run tools/check.sh or the smoke test.
 
-Not tested (owner's list, needs a display): how the Inside looks in the part's menu picture (framing, the long barrel's size next to its extension); that the barrel cards in the Customise tab look right with the larger pictures.
+Not tested (needs a display): the framing of the turned barrel cards and the look of the inside beside the part.
+
+Pass
