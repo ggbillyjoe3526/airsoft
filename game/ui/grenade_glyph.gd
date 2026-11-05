@@ -65,7 +65,7 @@ func _take_picture() -> void:
 		_pictures = ReplicaPictures.new()
 		_pictures.name = "Pictures"
 		add_child(_pictures)
-	var on_screen := get_global_transform_with_canvas().get_scale().x
+	var on_screen := get_screen_transform().get_scale().x
 	var side := maxf(custom_minimum_size.x, custom_minimum_size.y) * absf(on_screen) * PICTURE_SCALE
 	_picture = _pictures.grenade_texture(kind, clampi(ceili(side), PICTURE_MIN, PICTURE_MAX))
 

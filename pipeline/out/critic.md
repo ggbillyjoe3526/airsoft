@@ -1,32 +1,25 @@
-Task: BL3 · AEG Rifle rework (owner's five fixes, 2026-11-05)
-Attempt: 4 of 4
-Head: bb48a2c + uncommitted working tree (aeg.glb = scratchpad aeg2/v21.glb, byte-identical); targeted GUT tests only
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept. Reports: QA (qa.md) BL3 Pass on v20, which v21 changes only by the back strap, the rail's rear
-0.2 mm and the T's front 0.2 mm (re-measured below). Performance (performance.md) BL3 Pass on v21: 39,816 tris in the
-hands; 12 meshes, 26 primitives, 7 materials. The owner called the earlier renders "Perfect" (06:47).
-Measured on the photo vs v21 (fit 1425 px/m; crit2/grp.py, trg.py, ch.py, crit3/cop.py; crit4/ = scratchpad/crit4/):
-- Charging handle ✓: 0 overlapping triangle pairs at rest and at every pull to 0.05. 3.9 mm of air under the T over
-  the tower and the stock, 1.4 mm under the shaft. The T's front stands 0.2 mm clear of the upper's back. It reads
-  free at rest and fully pulled.
-- Trigger ✓: at z -0.012 the blade spans y -0.0058..-0.0104 vs the photo's -0.0053..-0.0107. It faces the photo's
-  way, mid-guard.
-- Grip ✓: front within 0.7 mm from z -0.012 to -0.072 (finger groove -0.0389 vs -0.0389, swell -0.0375 vs -0.0368).
-  Widths within 1.0 mm from z -0.030 down. Back within 0.9 mm from z -0.030 to -0.072; at the very top (z -0.012) it
-  is 2.3 mm behind (43.5 vs 41.2 mm, +6 %). Heel -0.1054 vs -0.1047. Foot 2.3 mm short (-2 % of the grip's depth).
-- Back strap ✓: smooth from the lower's tail down. In crit4/j_closeL.png and crit4/g_closeR.png (same views as round
-  3) the ridge and the pinch are gone; what is left is the moulded edge where the lower's flank meets the grip.
-- Coplanar faces ✓: crit3/cop.py finds 10 overlaps on v20 and 0 on v21 in the receiver's rear. The black bars under
-  the T are gone (crit4/s_cB.png).
-- Mag well, rail, overall length: unchanged since round 1, which passed them. Panels as in round 3 (passed).
-Failed checks: none.
-Non-blocking, for KNOWN_ISSUES or a later polish pass (judgment):
-- The castle nut and the buffer tube's end cap show 20-24 facets on their rims in close-ups. Recorded as a known issue;
-  the hands budget has 184 triangles spare.
-- The grip panels' bottom corners are 2-segment chamfers at ZOOM 0.2 (crit3/f_closeR.png).
-- The sniper has only 64 triangles spare (performance advisory): any growth of the AEG body pushes it over.
-Owner should test in the game:
-- Inspect: the charging handle slides back with air under it and returns flush to the upper.
-- First person: no flicker on the receiver's back under the charging handle.
-- First-person hold: the finger lands on the trigger blade mid-guard, the tip curling forward.
-- Inspect turn: the back of the grip flows down from the receiver with no ridge, pinch or ledge.
+Task: MP1 · New models in the UI's pictures
+Attempt: 1 of 4
+Head: 12fad30 (touched tests and gdlint pass on it; full tools/check.sh still running, so Accept holds only if it passes)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
+Score: 7/8 → Accept (one non-blocking check fails, judgment)
+1 ✓ Replicas, parts and power sources are already drawn live from the glbs (no user:// or baked cache in game/ui). The bombs now are too: grenade_glyph.gd:62-71, replica_pictures.gd:199-218. No UI shows figures, gear or arms (no reference to models/characters in game/ui). The guard test fails the build when a model folder isn't pictured: test_model_pictures.gd:38.
+2 ✓ No contract in ARCHITECTURE › Contracts names ReplicaPictures, GrenadeGlyph or the model folders.
+3 ✓ The picture is taken only on entering the tree or on a kind change. replica_panel.gd:265-267 sets only the size and modulate each update. _draw does no heap work.
+4 ✓ The new tests use GRENADE_FILES, grenade_path and shows_model, so they fail to parse without the change. The folder and pool guards are the feature. The model draw path runs only once BL9's glbs exist: two QA tests are pending until then, and BL9's PR will turn them on.
+5 ✓ UI only, typed, the sizes are named constants (PICTURE_SCALE/MIN/MAX), no global state.
+6 ✓ No .glb added or reshaped. The model-quality checks fall to BL9.
+7 ✓ _make_model is shared with the power sources, not copied. The glyph's ReplicaPictures is its child and is freed with it (test_freed_icons_leave_no_orphan_nodes).
+Failed checks, with evidence:
+8. [judgment] Docs and labels aren't all current:
+   (a) assets/README.md:9 still calls title-backdrop.jpg "the title's backdrop … still of Depot". It is now the crash screen's, cut from assets/maps/depot.jpg (ASSETS.md got this right).
+   (b) tests/unit/test_model_pictures.gd:10 lists "props" as match-only with "no picture to keep up". But tools/eye_pictures.gd:122 bakes PropDress props into the field pictures (menu backdrop, Match page, loading screen). A new prop model leaves those jpgs out of date. Say so in the comment, or point to the re-render step in ASSETS.md.
+   (c) pipeline/out/performance.md is still BL3's report. MP1's performance verdict is only in the brief.
+Must-fix (small, this attempt): 8a, 8b, and write MP1's performance report to pipeline/out/performance.md.
+Advisory: grenade_glyph.gd:68 takes the size from get_global_transform_with_canvas(), which leaves out the window's canvas_items stretch. At 4K (2x) the HUD's held bomb (BOMB_ICON_HELD 40 → 80 physical px) is drawn from a 64 px texture, about 1.25x upscaled and soft. Using get_screen_transform().get_scale() fixes this at no cost. Also say in assets/README.md that a new model folder must be added to test_model_pictures.gd, so the Blender threads aren't surprised by a red CI.
+Owner should test in the game (after BL9 merges):
+- Loadout › Grenades: the smoke (green) and flash (violet) tiles show the 3D bombs standing upright, centred, not cropped.
+- HUD: both bomb icons read at a glance. The held one grows and stays sharp, also at 1440p/4K if you have it.
+- HUD: a bomb with none left is visibly dimmed.
+- First match after launch: no hitch when the HUD appears (one-time shader build for the bomb pictures).
+- Customise, Armory and the level-up card show each newly merged replica, part or power model without a restart of anything else.

@@ -1,15 +1,21 @@
-Task: BL3 · AEG Rifle rework · head working tree (uncommitted) · Verdict: Pass
-Run: no game run; model-only change (no GDScript, scenes or config), so measured by parsing the glb JSON chunks (python3 -I) · budget: no pipeline/perf-budget.json lines; judged against the contract (replicas 40,000 tris in hands, 2K textures, 7 materials) and main's glbs
-Metrics (main -> now, measured from glb accessors):
- aeg.glb    file 1,126,816 -> 1,131,788 B (+0.4 %) · meshes 12 -> 12 · primitives (draw calls) 26 -> 26 · materials 7 -> 7 (limit 7, ok) · textures/images 0 -> 0 · nodes 31 -> 31
- aeg.glb    triangles all meshes 40,038 -> 40,156 (+0.3 %); in the hands (minus Figure 340) 39,816 (limit 40,000, ok, 184 spare; matches the build log)
- sniper.glb file 1,157,204 -> 1,162,692 B (+0.5 %) · meshes 12 · primitives 26 -> 26 · materials 7 -> 7 (ok) · textures 0 · nodes 31
- sniper.glb triangles all meshes 40,178 -> 40,296 (+0.3 %); in the hands (minus Figure 360) 39,936 (limit 40,000, ok, only 64 spare)
-Regressions (> 10 % worse): none
-Blocking findings: none
+Task: MP1 · head 44a75b9 · Verdict: Pass
+Run: none (read-only review of the diff; nothing measured) · budget: judged against the targets
+
+Blocking findings: none.
+
+Checked and clear:
+- HUD per-frame cost: none added. The picture is taken only on entering the tree or a kind change; ReplicaPanel.refresh
+  sets only the size and modulate; ReplicaPictures has no _process; _draw is one draw_texture_rect, on redraw only.
+  The viewport is UPDATE_ONCE.
+- Lifetime: the ReplicaPictures node is the glyph's child, its viewport, model, camera, light and environment its
+  children, all freed with the glyph; the material duplicates are surface overrides inside it; created once per glyph.
+- Kind changes: the pictures are cached by kind, so at most two viewports per glyph.
+- Allocations: one formatted string and a ResourceLoader.exists per take, never per frame.
+- The power pictures' refactor into _make_model keeps their behaviour.
+- Size: 64-256 px textures, negligible.
+
 Advisory:
- - tools/blender/replicas/sniper.py (derives from aeg.py): sniper hands total is 39,936, 64 tris under the budget; any further AEG body growth will push the sniper over. Judgment, not blocking.
- - Body is 30,996 tris of the 39,816 (78 %); if later work needs room, the Body mesh is where to trim. Judgment.
- - Textures: none embedded (flat materials), so no 2K texture or VRAM cost; file size delta is mesh data only (+5 KB each). Measured.
- - No code, scene or config change: no per-frame allocations, node or resource lifetime, or prewarm impact (7 materials unchanged, so no new shader variants). Judgment.
-Fixes: not needed.
+1. Each glyph owns its own viewport (HUD and Loadout pay separately); share one owner if more icons appear.
+2. The picture's size is fixed when first taken; the 2x supersample covers the HUD's held-bomb growth.
+3. No shader prewarm for the picture's materials: a possible one-frame hitch when the first glyph appears, as with
+   the power pictures. Check on real hardware that the HUD is built before the round starts.

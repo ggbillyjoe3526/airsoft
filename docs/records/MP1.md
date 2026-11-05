@@ -1,12 +1,12 @@
 # MP1 · New models in the UI's pictures
 
-**Review:** pending
+**Review:** critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-05 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-05 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Accept | – (check 8's doc fixes made in the same attempt) |
 
 ## Goal
 
@@ -38,6 +38,9 @@ sure all new models are shown." The Blender threads (BL4 to BL13) are replacing 
 - **Model pictures on the HUD too,** not only the Loadout (owner: "make sure all new models are shown"); the flat can
   stays as the fallback. Easy to turn back to the flat icon on the HUD if it reads worse in play.
 - **Bombs stand upright, seen from the side,** in the menus' light, as the power sources are.
+- **The picture's size follows the screen** (`get_screen_transform`, so a 4K window's stretch counts), taken once.
+- **Map props are match-only here:** they are baked into the fields' pictures (`assets/maps/`), which are re-rendered
+  by hand (`docs/ASSETS.md`); map models come at Beta (owner).
 - **Verified with stand-ins:** the gas bottle and spring copied in as smoke and flash (not committed) rendered sharp at
   96, 44, 40 and 28 px under xvfb.
 

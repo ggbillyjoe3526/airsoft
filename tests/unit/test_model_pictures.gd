@@ -6,7 +6,8 @@ extends GutTest
 const MODEL_ROOT := "res://assets/models/"
 ## The folders whose models have pictures in the UI.
 const PICTURED: Array[String] = ["replicas", "replicaParts", "powerSources", "grenades"]
-## The folders whose models show only in a match, live (figures, map props): no picture to keep up.
+## The folders whose models show live only in a match (figures, map props). The props are also in the fields' pictures
+## (assets/maps/*.jpg, tools/eye_pictures.gd): re-render those after a prop changes (docs/ASSETS.md).
 const MATCH_ONLY: Array[String] = ["characters", "props"]
 
 var pool: Pool
