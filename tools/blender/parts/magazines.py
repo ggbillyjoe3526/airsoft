@@ -59,8 +59,8 @@ EXTENDED_FINE = 8
 # The AEG base plate's frame (aeg.mag_plate: its top at z 0, +y toward the muzzle): its foot, and the grip grooves cut
 # across its foot (their places along it, half width, width, depth), inside the standard plate's outline.
 PLATE_FOOT = -0.0075
-GROOVE_Y = (0.0040, 0.0100, 0.0160, 0.0220)
-GROOVE = (0.0120, 0.0016, 0.0008)
+GROOVE_Y = (0.0030, 0.0068, 0.0106, 0.0144, 0.0182, 0.0220)
+GROOVE = (0.0120, 0.0012, 0.0008)
 # The magazine catch's window cut into the left side near the top (inside the well while it is fitted, seen on a
 # reload), with a dark floor: its height in the first pass's heights, its half length, half height and depth.
 CATCH_Z = -0.046
@@ -71,8 +71,8 @@ CATCH = (0.0042, 0.0034, 0.0012)
 WHEEL_Y = -0.0115
 WHEEL_R = 0.0118
 WHEEL_DROP = 0.0034
-WHEEL_SEGMENTS = 32
-WHEEL_KNURLS = 20
+WHEEL_SEGMENTS = 36
+WHEEL_KNURLS = 24
 KNURL_W = 0.0011
 KNURL_OUT = 0.0006
 BAR_HW = (0.0098, 0.0016)
@@ -227,7 +227,7 @@ def hicap_wheel() -> object:
           "Metal")
     ob = b.build()
     ob.data.transform(aeg.mag_plate(HICAP_BOTTOM))
-    return hs.finish(ob, 0.00015, 2)
+    return hs.finish(ob, 0.00015, 1)
 
 
 def extended() -> object:

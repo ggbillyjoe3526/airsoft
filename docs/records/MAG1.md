@@ -7,7 +7,8 @@
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-05 | 1 | Claude (build thread) | targeted tests pass (88 + 4) | Retry 6/8 (QA Pass, performance Pass) | extended base pad big against generic photos; streaks and slivers round the holes; catch window raised, not cut; base plates and nozzle not the standard's; budget spent on rings; two renders cropped; .uid uncommitted, unused parameter, long line |
-| 2026-11-05 | 2 | Claude (build thread) | targeted tests pass | pending | – |
+| 2026-11-05 | 2 | Claude (build thread) | targeted tests pass (43) | Retry 7/8 | low-cap at 84 % of its budget and the test's floor lowered to let it pass |
+| 2026-11-05 | 3 | Claude (build thread) | targeted tests pass | pending | – |
 
 ## What changed
 
@@ -23,10 +24,11 @@ outline, with detail cut into it:
 
 - **Hi-Cap:** 13.0 cm below the well against the standard's 9.9 (1.32), its curve and ribs carried on down, with a
   knurled winding wheel in a collar under the base plate, a thumb bar and screw across it (the reference list's "the
-  hi-cap's wheel"). 9,700 triangles.
-- **Low-Cap:** 6.9 cm below the well (0.70). 8,410 triangles.
+  hi-cap's wheel"). 9,784 triangles.
+- **Low-Cap:** 6.9 cm below the well (0.70). 9,962 triangles.
 - **Both AEG parts:** the catch window cut 1.2 mm into the left side near the top, with a dark floor (the photos'
-  slot), and grip grooves cut across the base plate's foot (in front of the wheel on the hi-cap).
+  slot), six grip grooves cut across the base plate's foot (those clear of the wheel on the hi-cap), ribs with rounded
+  crowns whose ends slope down into the body, and the flare at the well's foot eased over its 4 mm.
 - **Extended:** 4 cm longer along the grip's rake (the old part 2.2), two staggered columns of witness holes bored
   1.2 mm into its back (the owner's pistol magazine photos), the catch notch cut into its left side, an exhaust valve
   and feed lips on top, its base pad in the frame's colour. 9,470 triangles.
@@ -48,10 +50,11 @@ outline, with detail cut into it:
 - **Outlines stay the standard's** (critic attempt 1): the first attempt's flared rim, pull tab and BB nozzle went;
   the detail is cut in, not added on.
 - **Detail to the part budget** (owner, 2026-11-05 14:13: aim close to the budget): a part has 10,000 triangles
-  (docs/CC0_ASSETS.md › Size limits), the replica's own magazine shares the rifle's 40,000. The hi-cap and extended
-  use 97 and 95 %, on the curve's rings and rounder corners where they show and on the wheel, holes and cuts. The
-  low-cap uses 84 %: it is short, and more would be rings no one sees (the critic's point in attempt 1).
-- **The hi-cap's wheel** has 20 knurls round 32 segments, bevelled 0.15 mm in two segments: about 3,900 triangles.
+  (docs/CC0_ASSETS.md › Size limits), the replica's own magazine shares the rifle's 40,000. The hi-cap uses 98 %, the
+  low-cap 99.6 %, the extended 95 %: on the curve's rings and rounder corners where they show, the ribs' crowns and
+  ends, the shoulder, and the wheel, holes and cuts; not on rings down straight faces (the critic's point in
+  attempt 1). The test holds each part between 90 and 100 %.
+- **The hi-cap's wheel** has 24 knurls round 36 segments, bevelled 0.15 mm: about 2,200 triangles.
 - **No photos of hi-cap, low-cap or extended magazines** were in `ref_images.zip`: the shapes follow the standard
   magazines and their photos (`replicas/aeg_rifle/aeg_magazine`, `replicas/gbb_pistol/gbb_pistol_magazine`).
 

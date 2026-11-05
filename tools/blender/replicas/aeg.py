@@ -161,6 +161,9 @@ MAG_HD = 0.0305
 # well are scaled to fit.
 MAG_BOTTOM = -0.1585
 
+# A magazine part's ribs slope into the body over this much at each end (tools/blender/parts/magazines.py).
+RIB_END = 0.0025
+
 # Bones: name -> head (each points +Y, 0.0313 long, roll 0, as the old file's).
 BONES = {
     "root": (0.0, 0.0, 0.0),
@@ -518,12 +521,17 @@ def mag_stations(zs: list, fine: int) -> list:
 def magazine(name: str = "Magazine", bottom: float = MAG_BOTTOM, fine: int = 1) -> object:
     """A polymer magazine, curved forward toward the base, with raised ribs down each side and a square base plate.
     A magazine part (tools/blender/parts/magazines.py) is this one with its own `name` and base height `bottom`, and
-    `fine` times the rings down its curve, rounder corners, ribs and BBs and a finer bevel (the parts' own budget)."""
+    `fine` times the rings down its curve, rounder corners, ribs and BBs, the flare at the well's foot eased, sloped
+    rib ends and a finer bevel (the parts' own budget)."""
     b = hs.Builder(name, ["Detail", "Rubber", "BB"])
     sec = hs.rounded_rect(MAG_HW, MAG_HD, 0.0055, 2 if fine == 1 else 2 + 2 * fine)
     zs = [-0.012, -0.070, -0.071, -0.075, -0.076] + mag_stations(
         [mag_z(z, bottom) for z in (-0.100, -0.130, -0.160, -0.190, -0.212, -0.222)], fine)
     scale = {-0.071: 1.0, -0.075: 1.045, -0.076: 1.045}
+    if fine > 1:
+        # The flare at the well's foot eased in over its 4 mm instead of one kinked step.
+        zs[2:4] = [-0.071, -0.072, -0.073, -0.074, -0.075]
+        scale.update({-0.072: 1.008, -0.073: 1.022, -0.074: 1.036})
 
     def place(x: float, y: float, z: float, s: float = 1.0) -> tuple:
         cy, tilt = mag_spine(z)
@@ -539,9 +547,16 @@ def magazine(name: str = "Magazine", bottom: float = MAG_BOTTOM, fine: int = 1) 
                     (sx * (MAG_HW + 0.0008), yo + 0.0027), (sx * (MAG_HW - 0.0006), yo + 0.0032)]
             if fine > 1:
                 # Rounded crowns: the rib's face eased into its sides.
-                rect[1:3] = [(sx * (MAG_HW + 0.0004), yo - 0.0030), (sx * (MAG_HW + 0.0008), yo - 0.0021),
-                             (sx * (MAG_HW + 0.0008), yo + 0.0021), (sx * (MAG_HW + 0.0004), yo + 0.0030)]
-            b.loft([[place(x, y, z) for x, y in rect] for z in rib_zs], "Detail")
+                rect[1:3] = [(sx * (MAG_HW + 0.0003), yo - 0.0030), (sx * (MAG_HW + 0.0006), yo - 0.0026),
+                             (sx * (MAG_HW + 0.0008), yo - 0.0019), (sx * (MAG_HW + 0.0008), yo + 0.0019),
+                             (sx * (MAG_HW + 0.0006), yo + 0.0026), (sx * (MAG_HW + 0.0003), yo + 0.0030)]
+            rings = [[place(x, y, z) for x, y in rect] for z in rib_zs]
+            if fine > 1:
+                # The rib's ends sloped down into the body, not cut off square.
+                flat = [(sx * min(abs(x), MAG_HW - 0.0002), y) for x, y in rect]
+                rings = ([[place(x, y, rib_zs[0] + RIB_END) for x, y in flat]] + rings
+                         + [[place(x, y, rib_zs[-1] - RIB_END) for x, y in flat]])
+            b.loft(rings, "Detail")
     # Base plate, square-cornered, its top on the body's last section (no gap) and barely proud of the body's faces.
     plate = b.prism(hs.rounded_rect(MAG_HW + 0.0009, MAG_HD + 0.0004, 0.0030, 2 * fine), "z", -0.0075, 0.0, "Rubber")
     b.transform(plate, mag_plate(bottom))

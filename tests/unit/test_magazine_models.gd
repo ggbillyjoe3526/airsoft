@@ -8,8 +8,8 @@ const REPLICAS := "res://assets/models/replicas/"
 const PARTS := "res://assets/models/replicaParts/"
 ## docs/CC0_ASSETS.md › Size limits: a part's triangles.
 const PART_TRIS := 10000
-## The owner (2026-11-05): detail up to the budget, so each part uses most of it (the short low-cap the least).
-const PART_TRIS_USED := 0.8
+## The owner (2026-11-05): detail up to the budget, so each part uses most of it.
+const PART_TRIS_USED := 0.9
 ## docs/CC0_ASSETS.md › Size limits: a replica's parts file.
 const PARTS_FILE_BYTES := 2 * 1024 * 1024
 ## How much further below the well each part reaches than its replica's own magazine (m, at least or at most).
