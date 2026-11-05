@@ -1,35 +1,28 @@
-Task: AU2 · The owner's recordings in the game (no task block; judged against the brief)
+Task: BL6 · The Cyber Pistol rebuilt in Blender from code (no task block; judged against the brief)
 Attempt: 1 of 4
-Head: 022084e (checks passed on 31cbb53; 31cbb53..HEAD is the performance report only)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
-Score: 7/8 → Accept (one non-blocking check failed, judgment)
+Head: e11a317 (checks passed on it per the brief; two match-guard jobs still running)
+Checks: 1 ✗ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
+Score: 6/8 → Retry (check 1 measured, check 8 judgment; not a near miss)
 Evidence for the passes:
-1. Motor whir as the AEG (tools/cut_recordings.py:291-296), pistol reused for Sniper/Cyber/mags (:303-319), mag rattle
-   from bb_soft_rattle (:323), cardboard on wrapped stock and drums (game/config/map_style.gd:23,34), beep as timer and
-   pip (cut_recordings.py:358-360), gas_refill unused, lock-back as slideLock_gas on the last BB (game/play/sim_audio.gd:226).
-2. No contract touched; Surface values appended, never moved (game/sim/ray_hit.gd:9); events still the only channel.
-3. Per shot only a Dictionary get and two array reads (sim_audio.gd:226, :546); string formatting in setup (:153).
-4. test_au2_qa.gd:44 fails with the lock branch removed (0 locks); test_recordings.gd:115 likewise.
-5. SimAudio reads mag after the tick, writes nothing; typed throughout; values in Resources.
-6. Owner-made sounds, toy-scale levels matched to the old cues; glass/plastic/cardboard keep metal/wood physics.
-7. Enum users all extended in step (ricochet_config.gd:34-36, minimap_field.gd:227, effects_config.gd:43).
+1a. Proportions, old glb → head glb (side silhouettes rasterised from both files): L/H 1.192→1.197 (+0.4 %), guard bottom/H 0.454→0.460 (+1.3 %), guard opening/L 0.187→0.197 (+5 %), front strap from muzzle/L 0.654→0.631 (−3.5 %), front block depth/H 0.320→0.327 (+2 %). Grip depth/L at y −80 mm is 0.222→0.273 (+23 %; photo 125621 0.247, so +11 %). The photo's L/H of 1.62 is ignored because the owner ruled to keep the old silhouette. The owner approved pictures showing the deeper grip ("I love it", "Perfect"), so I flag it rather than fail it. Hands model in v10-left and v10-trigger-close: no text or logos, the trigger joins the frame, 3.4 mm above the guard floor. A full pull swings its foot about 7 mm back and leaves 5 mm clear. 31,328 tris in the hands (brief 31,330).
+2. No ARCHITECTURE contract touched (no game/ diff). Empties, names, materials and rotation keys are unchanged. The trigger bone, its inverse bind matrix and its translation keys in all four clips moved together to 0.0045. Only selector_pose.gd:27, slide_lock_pose.gd:25 and sight_fold.gd:28 call find_bone, and none reads the trigger.
+3/5. No runtime code. cyber.py is an offline tool. 4. Asset only: test_cyber_pistol.gd and test_cp1_qa.gd load cyber.glb (sights, selector, Figure), the same precedent as BL3.
 Failed checks, with evidence:
-8. [judgment] docs/DECISIONS.md:855 still rules "Every sound starts as a recipe synthesised in code ... CC0 samples may
-   be added"; the owner's 2026-11-03 rulings (his recordings replace the synthesis; magazine and slide are the pistol;
-   the beep for any beep; gas_refill ignored) are not in DECISIONS › Audio. docs/KNOWN_ISSUES.md:15 still waits on
-   "the owner's model and sounds" for the bolt re-time; the sounds are in, so the row should say only the model is left.
-Must-fix before merge (non-blocking): add the owner's AU2 ruling under DECISIONS › Audio and amend :855; reword
-   KNOWN_ISSUES:15; write docs/records/AU2.md with the defaults taken (whistle_short 0.3 s, gains 0.45 and 0.2, which
-   kinds became plastic/cardboard/glass, set-aside takes) and the changelog note.
-Advisory: cut_recordings.py:367 sets aside slide_release ("no place for yet"), but the gas pistol's slide closes on a
-   reload from empty (game/play/replica_view.gd:248): an obvious reuse of the pistol's sound the owner asked for; a
-   follow-up or IDEAS row. SoundConfig keeps whistle_hz/warble/attack/release and ping_pip_hz/length only for the draft
-   tool (sound_config.gd:110-111, :204-208). tools/render_bolt.gd:3 and docs/wiki/Replicas.md:56 are unwrapped.
-   ASSETS.md:64 says "a gas pistol": confirm the wording with what William recorded (the brief says he owns no replicas).
+1. [measured] The Figure (bots' LOD) is broken: tools/blender/replicas/cyber.py:750. Its frame outline (52,−21)→(50.5,−23)→(54,−14) crosses its own edge at y 52, z −19.1, a bowtie. I rasterised the cap and found up to 4 overlapping faces along z −54..−51 mm, y −12..−40 mm (0 in the old file). The outline came in with f1f369e and did not move in e11a317, so the Figure's guard front stands at 54 mm while the hands model's stands at 42 (12 mm ahead).
+8. [judgment] docs/records/BL6.md is stale at head:
+   - :22 still lists "a safety blade", which f1f369e removed.
+   - :28 says the bones sit "at the old heads", but the trigger's moved.
+   - :16 says the "silhouette" stays, but the grip is 23 % deeper.
+   - The 09:52 "Perfect" on the final pictures is not recorded.
+QA and performance: performance-report.md still holds at head (tris 31,594→31,328, hands primitives 15→13, 879,740→870,916 bytes, all down). qa-report.md does not: it was run at e7725d6 and says "same local transforms", which the trigger bone and its keys broke, and it missed the Figure. It needs a short QA rerun at the new head.
+Must-fix for the next attempt:
+- cyber.py:750: build the Figure's frame from GUARD_LOOP/GUARD_WEB, or follow them (52,−14)…(42,−34)…(37.5,−47)…(−20,−47), and drop (50.5,−23). Rebuild and confirm 0 overlapping faces.
+- Render q_front and q_rear at head: no 3/4 view shows the moved guard yet, so the claim that "no notch opens under it" has no picture.
+- Fix the record's lines 16, 22 and 28 and add the 09:52 ruling.
+- Targeted QA rerun on the trigger bone, the clip keys and the Figure. Merge only after the last two match guards pass.
 Owner should test in the game:
-- AEG on full auto: does the 0.11 s motor slice per shot read as one continuous whir or stutter?
-- GBB Pistol: the slide-lock click on the last BB, and crack plus gas reading as one shot at range.
-- Sniper Rifle: the metal slide as its cocking, in time with the Fire clip.
-- A BB on a player (bodyHit, now fabric): still a clear, distinct hit at 20 to 40 m.
-- BBs on Street windows, bins and Depot drums/wrapped stock: glass, plastic and cardboard each readable.
-- Round start: two 0.3 s whistle blasts (were 0.14 s) and the ping pip at 0.2: level and timing feel right.
+- Grip: it is 23 % deeper than the old one (63 vs 50.5 mm). Does it look right in your hand view?
+- Fire: the trigger swings from its top, with no jump, and the slide kicks.
+- Aim: the front post and rear notch line up as before.
+- A bot carrying it, near and far: the guard reads right.
+- Fit the torch: it clears the teeth. Then Realistic colours: grey, no glow.

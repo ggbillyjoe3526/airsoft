@@ -747,10 +747,11 @@ def figure() -> object:
     b.box((m(-REAR_CAP_HW), m(REAR_CAP_Y[0]), m(REAR_CAP_Z[0])), (m(REAR_CAP_HW), m(REAR_CAP_Y[1]), m(REAR_CAP_Z[1])),
           "CyberMetal")
     b.lathe([(m(CAP_Y[1]), m(BARREL_R)), (m(BARREL_END), m(BARREL_R))], "CyberMetal", 8, centre=(0.0, 0.0, m(BORE_Z)))
-    b.prism([(m(p[0]), m(p[1])) for p in [(52.0, 0.0), (52.0, -21.0), (50.5, -23.0), (54.0, -14.0), (54.0, -42.5),
-                                          (49.5, -47.0), (-20.0, -47.0), (-27.5, -38.0), (-54.0, -126.0), (-115.0, -126.0),
-                                          (-86.0, -22.0), (-104.5, -10.5), (-93.5, 0.0)]], "x", m(-FRAME_HW),
-            m(FRAME_HW), "CyberSlab")
+    # The frame's outline: the guard loop's front (as the hands' model), its floor, the grip and the tang.
+    outline = ([(52.0, 0.0)] + [(p[0], p[1]) for p in GUARD_LOOP[:5]]
+               + [(-20.0, -47.0), (-27.5, -38.0), (-54.0, -126.0), (-115.0, -126.0), (-86.0, -22.0), (-104.5, -10.5),
+                  (-93.5, 0.0)])
+    b.prism([(m(p[0]), m(p[1])) for p in outline], "x", m(-FRAME_HW), m(FRAME_HW), "CyberSlab")
     b.prism([(m(p[0]), m(p[1])) for p in [(-55.5, -126.0), (-116.0, -126.0), (-114.5, -150.0), (-63.0, -150.0)]],
             "x", m(-PAD_HW), m(PAD_HW), "CyberMetal")
     for sx in (-1, 1):
