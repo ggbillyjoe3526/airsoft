@@ -34,6 +34,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import bpy  # noqa: E402
+import bmesh  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
 import hardsurface as hs  # noqa: E402
@@ -112,15 +113,17 @@ BOTTOM = [(516, 262), (517, 266), (519, 269.5), (523, 272.5), (530, 274.5), (540
 FACET = [(516, 252), (600, 254), (800, 260), (900, 265), (1000, 268), (1150, 272), (1300, 281), (1325, 284),
          (1340, 317), (1462, 392), (1470, 390), (1485, 378), (1530, 371), (1600, 375), (1700, 388), (1772, 395)]
 # Its half width (m) at its sides and at its bottom, and the top edge's chamfer, along it.
-HALF = [(516, 0.0240), (1240, 0.0240), (1330, 0.0180), (1345, 0.0175), (1446, 0.0175), (1462, 0.0200),
-        (1772, 0.0200)]
+HALF = [(516, 0.0240), (1240, 0.0240), (1330, 0.0180), (1345, 0.0175), (1446, 0.0175)] + \
+       [(1446 + k * 4, 0.0175 + 0.0025 * (lambda t: t * t * (3 - 2 * t))(k / 11)) for k in range(1, 12)] + \
+       [(1772, 0.0200)]
 HALF_FOOT = [(516, 0.0165), (1240, 0.0165), (1330, 0.0175), (1480, 0.0175), (1530, 0.0135), (1772, 0.0135)]
 CHAMFER = [(516, 0.0025), (1228, 0.0025), (1300, 0.0030), (1345, 0.0040), (1446, 0.0040), (1456, 0.0075),
            (1772, 0.0075)]
 
 # The grip: its side outline (px, py), from its top inside the chassis, down its front, along its sloping foot.
-GRIP = [(1312, 284), (1318, 300), (1327, 312), (1335, 318), (1340, 324), (1342, 330), (1344, 342), (1346, 360), (1347, 380),
-        (1348, 396), (1350, 414), (1351, 430), (1352, 441, 4), (1358, 445.5, 4), (1383, 438.5), (1413, 426.5),
+GRIP = [(1312, 284), (1318, 300), (1327, 312), (1335, 318), (1340, 324), (1342, 330), (1344, 342), (1346, 360),
+        (1347, 380), (1348, 396), (1350, 414), (1351, 430), (1352, 441, 4), (1358, 445.5, 4), (1383, 438.5),
+        (1413, 426.5),
         (1435, 414.5), (1452, 402.5), (1466, 391), (1474, 360), (1400, 325), (1340, 290)]
 GRIP_HW = 0.0175
 
@@ -142,7 +145,8 @@ CHEEK_PROUD = 0.0020
 # The first a hex head in a washer, the second a hex pocket with a round hole in its floor (head = the hex's corner
 # radius, ring = the hole's radius, px).
 SCREWS = [(1570.0, 325.0, 9.0, 15.5), (1708.0, 337.0, 9.5, 3.5)]
-POCKET_DEPTH = 0.0015
+POCKET_DEPTH = 0.0011
+INSERT_PROUD = 0.0012
 
 # Under the chassis: the magazine, the bottom metal with the trigger guard, the release paddle, the trigger.
 MAG = [(1002, 279), (1148, 279), (1148, 331.5, 2), (1010, 323.5, 4), (1002, 318, 4)]
@@ -150,7 +154,7 @@ MAG_HW = 0.0105
 MAG_WINDOW = [(1046, 310.5, 7.5), (1141, 310.5, 7.5), (1141, 325.5, 7.5), (1046, 325.5, 7.5)]
 PLATE = [(1146, 281), (1326, 281), (1326, 296), (1320, 305), (1146, 308)]
 PLATE_HW = 0.0125
-GUARD_FRONT = [(1149, 300), (1186, 300), (1186, 352), (1178, 356.5, 2), (1164, 356, 3), (1160, 348, 3), (1154, 331)]
+GUARD_FRONT = [(1149, 300), (1184, 300), (1184, 352), (1178, 356.5, 2), (1164, 356, 3), (1160, 348, 3), (1154, 331)]
 GUARD = [(1176, 300), (1292, 300), (1290, 308, 3), (1284, 316, 4), (1283.5, 337, 10), (1270, 354, 10),
          (1245, 359.5, 6), (1196, 359.5, 4), (1176, 357, 3)]
 GUARD_HOLE = [(1186, 309.5, 15), (1271, 309.5, 8), (1272.5, 336, 8), (1262, 349.5, 10), (1240, 352, 6), (1206, 352, 8),
@@ -357,15 +361,6 @@ def chassis() -> object:
     # The scallop on the receiver's left (the photo's flat) runs down into the chassis's top edge.
     # The chassis's notch reaches 0.8 mm past the receiver's flat, so the flat fills it (no shared plane).
     cutters.append(scallop_cutter("Furniture", RECEIVER_R - 0.0033))
-    # The rear screw's hex pocket either side of the stock.
-    px, py, head, _ring = SCREWS[1]
-    for sx in (1.0, -1.0):
-        c = hs.Builder("c_pocket_hex", ["Furniture"])
-        hws = at(HALF, px)
-        c.lathe([(sx * (hws - POCKET_DEPTH), 0.0), (sx * (hws - POCKET_DEPTH), head / PX_PER_M),
-                 (sx * (hws + 0.01), head / PX_PER_M), (sx * (hws + 0.01), 0.0)], "Furniture", 6,
-                centre=(0.0, Y(px), Z(py)), axis="x", start=0.0)
-        cutters.append(c.build())
     # The bolt handle's pocket on the right, and the bolt release's on the left.
     c = hs.Builder("c_pocket", ["Furniture"])
     for x0, x1 in ((0.0100, 0.0400), (-0.0400, -0.0100)):
@@ -423,7 +418,7 @@ def nose_lug() -> object:
     ob = b.build()
     c = hs.Builder("c_socket", ["Detail"])
     for sx in (1.0, -1.0):
-        c.lathe([(sx * (hw - 0.0040), 0.0), (sx * (hw - 0.0040), 0.0030), (sx * (hw + 0.01), 0.0030),
+        c.lathe([(sx * (hw - 0.0070), 0.0), (sx * (hw - 0.0070), 0.0030), (sx * (hw + 0.01), 0.0030),
                  (sx * (hw + 0.01), 0.0)], "Detail", 16, centre=(0.0, cy, cz), axis="x")
     hs.cut(ob, [c.build()])
     dark = ob.data.materials.find("Detail")
@@ -454,17 +449,24 @@ def cheek_panels() -> object:
     poly = [(y, z) for y, z in hs.fillet(pts(CHEEK), 4)]
     b.prism(poly, "x", hw - 0.002, hw + CHEEK_PROUD, "Furniture")
     b.prism(poly, "x", -hw - CHEEK_PROUD, -hw + 0.002, "Furniture")
+    # Its front follows the stock's widening behind the grip, so it stands as proud there as along the stock.
+    for v in b.bm.verts:
+        px = ORIGIN_PX[0] - v.co.y * PX_PER_M
+        v.co.x += math.copysign(at(HALF, px) - hw, v.co.x)
+    bmesh.ops.triangulate(b.bm, faces=[f for f in b.bm.faces if len(f.verts) > 4], quad_method="BEAUTY",
+                          ngon_method="BEAUTY")
     return hs.finish(b.build(), 0.0003, 1)
 
 
 def screws() -> object:
     b = hs.Builder("Screws", ["Metal", "Detail"])
-    # The rear one's pocket (cut in the chassis) has a dark round hole in its floor.
+    # The rear one's pocket (cut in its insert) has a dark round hole in its floor.
     px, py, _head, hole = SCREWS[1]
-    hw = at(HALF, px) - POCKET_DEPTH
+    hw = at(HALF, px) + INSERT_PROUD - POCKET_DEPTH
     for sx in (1.0, -1.0):
-        b.lathe([(sx * (hw - 0.0004), 0.0), (sx * (hw - 0.0004), hole / PX_PER_M), (sx * (hw + 0.0001), hole / PX_PER_M),
-                 (sx * (hw + 0.0001), 0.0)], "Detail", 14, centre=(0.0, Y(px), Z(py)), axis="x")
+        r = hole / PX_PER_M
+        x0, x1 = sx * (hw - 0.0004), sx * (hw + 0.0001)
+        b.lathe([(x0, 0.0), (x0, r), (x1, r), (x1, 0.0)], "Detail", 14, centre=(0.0, Y(px), Z(py)), axis="x")
     for px, py, head, ring in SCREWS[:1]:
         hw = at(HALF, px)
         for sx in (1.0, -1.0):
@@ -478,6 +480,30 @@ def screws() -> object:
             # The head's hex socket, as a dark disc just proud of it.
             b.lathe([(sx * (hw + 0.0020), 0.0), (sx * (hw + 0.0020), rh * 0.45), (sx * (hw + 0.0021), rh * 0.45),
                      (sx * (hw + 0.0021), 0.0)], "Detail", 6, centre=centre, axis="x", start=0.0)
+    return hs.finish(b.build(), 0.0002, 1)
+
+
+def pocket_inserts() -> object:
+    """The rear screw's hex pocket in a low round boss on the stock's side, built as rings (a boolean cut in the stock
+    itself left long thin triangles that streaked the flat side's shading)."""
+    px, py, head, _hole = SCREWS[1]
+    hw = at(HALF, px)
+    cy, cz = Y(px), Z(py)
+    corner = head / PX_PER_M
+    count = 24
+
+    def hex_r(a: float) -> float:
+        return corner * math.cos(math.pi / 6) / math.cos((a % (math.pi / 3)) - math.pi / 6)
+
+    b = hs.Builder("Inserts", ["Furniture"])
+    for sx in (1.0, -1.0):
+        rings = []
+        angles = [2 * math.pi * i / count for i in range(count)]
+        for x, rad in ((hw - 0.0030, None), (hw + INSERT_PROUD, None), (hw + INSERT_PROUD, "hex"),
+                       (hw + INSERT_PROUD - POCKET_DEPTH, "hex")):
+            rings.append([(sx * x, cy + (hex_r(a) if rad else 0.0080) * math.cos(a),
+                           cz + (hex_r(a) if rad else 0.0080) * math.sin(a)) for a in angles])
+        b.loft(rings, "Furniture")
     return hs.finish(b.build(), 0.0002, 1)
 
 
@@ -566,7 +592,7 @@ def body() -> object:
     # The grip is one piece with the chassis (its sides flush with the wrist's), as the photo's.
     ch = chassis()
     hs.cut(ch, [grip()], "UNION")
-    parts = [hs.finish(ch, 0.0012, 2), nose_lug(), cheek_panels(), screws(), rails(), receiver(),
+    parts = [hs.finish(ch, 0.0012, 2), nose_lug(), cheek_panels(), pocket_inserts(), screws(), rails(), receiver(),
              bottom_metal(), bolt_release()]
     for ob in parts:
         print("  part %-12s %6d" % (ob.name, hs.tris(ob)))
