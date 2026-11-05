@@ -78,14 +78,20 @@ LOWER_K = 0.87
 # The pistol grip: raked this far back from vertical (degrees) about its top, and this long, as in the photo.
 GRIP_RAKE = 30.0
 GRIP_LENGTH = 0.118
+# Where the grip's moulded top (the lower's width) eases into its own section: from, to, as fractions of its length.
+GRIP_BLEND = (0.30, 0.80)
 # How far the grip's foot turns from square to its rake, toward level (degrees).
-GRIP_FOOT_TURN = 17.0
+GRIP_FOOT_TURN = 20.0
 # The grip's top (in the lower; first-pass height), its front tucked under the trigger guard's back, as in the photo.
 GRIP_TOP_Y = -0.020
 GRIP_TOP_Z = -0.016
 # How far the guard, the trigger and the lower's underside round them sit below the first pass's (first-pass metres):
 # the guard as low under the rail as the photo's.
 GUARD_DROP = 0.0075
+# The bolt catch and its bosses moved down so they sit on the lower, under the seam's chamfer.
+BOLT_CATCH_DROP = 0.012
+# The chamfer along the lower's top edges, from the upper's side down to the lower's (metres down).
+SEAM_CHAMFER = 0.0033
 
 
 def lz(z: float) -> float:
@@ -108,19 +114,36 @@ EMPTIES = {
     "OpticMount": (0.0, 0.025, RAIL_TOP), "TorchMount": (0.0259, 0.195, 0.04725),
 }
 
+# The charging handle (owner, 2026-11-05: it must have room to pull out): its T's height (behind the rail's end,
+# 5 mm clear over the buffer tower, the castle nut and the stock's top, which it slides back over), its shaft's
+# bottom (in the upper's channel, under the T), the
+# T's back, its shaft's half width and front end (in the upper's channel), and how far the Inspect clip pulls it.
+CH_Z = (0.0665, 0.0750)
+CH_SHAFT_Z = 0.0640
+# The stock's top: 2.3 mm over the buffer tube's bore in it, 5 mm under the charging handle's T.
+STOCK_TOP = 0.0615
+CH_BACK = -0.0940
+CH_HW = 0.0052
+CH_SHAFT_END = -0.030
+CH_TRAVEL = 0.050
+# The channel's top, up in the rail's foot (2 mm under its top face).
+CH_CHANNEL_TOP = 0.0684
+
 # Layout.
 UPPER_Y = (-0.085, 0.100)
 UPPER_HW = 0.0150
-LOWER_HW = 0.0155
-WELL_HW = 0.0195
+# The lower and its magazine well one width (owner, 2026-11-05: one piece of material with the receiver and grip),
+# the lower's top edges chamfered in to the upper's sides.
+LOWER_HW = 0.0185
+WELL_HW = LOWER_HW
 # The quad-rail handguard (the owner's photos): 0.92 of the upper's length, its body square round the barrel with its
 # top rail level with the upper's.
 GUARD_Y = (0.100, 0.2765)
-# The delta ring's length at the handguard's back, and the raised bridge of rail over the receiver's front (y from, to)
-# and how far it stands over the rail line, as in the photo.
+# The delta ring's length at the handguard's back. The photo's raised bridge of rail over the receiver's front is left
+# off (owner, 2026-11-05): the top rail runs on level from the upper's onto the handguard, over the ring.
 DELTA_LEN = 0.019
-BRIDGE_Y = (0.070, 0.130)
-BRIDGE_RISE = 0.012
+# Where the upper's rail ends and the handguard's begins, one tooth past the upper's end so the teeth keep step.
+RAIL_JOIN = 0.1036
 # The delta ring's radius round the handguard's middle: its top 4 mm under the rail top, as in the photo.
 DELTA_R = 0.0250
 # The ring's centre below the handguard's middle, so its foot reaches down past the body, as the photo's.
@@ -141,10 +164,10 @@ MAG_BOTTOM = -0.1585
 # Bones: name -> head (each points +Y, 0.0313 long, roll 0, as the old file's).
 BONES = {
     "root": (0.0, 0.0, 0.0),
-    "trigger": (0.0, 0.004, lz(-0.031)),
+    "trigger": (0.0, -0.0067, lz(-0.031)),
     "selector": (-LOWER_HW, -0.030, lz(-0.012)),
     "magRelease": (WELL_HW, 0.034, lz(-0.012)),
-    "chargingHandle": (0.0, -0.098, 0.0599),
+    "chargingHandle": (0.0, -0.098, 0.0630),
     "dustCover": (UPPER_HW + 0.0012, 0.026, 0.0335),
     "hopDial": (0.0075, 0.026, 0.045),
     "rearSight": (0.0, REAR_SIGHT_Y, 0.0795),
@@ -163,10 +186,16 @@ MATERIALS = {
 
 # ------------------------------------------------------------------------------------------------------ picatinny
 
-def picatinny(b: hs.Builder, y0: float, y1: float, mat: str, place: Matrix, teeth_from: float = None) -> None:
-    """A rail from y0 to y1 along its own +Y, base at its z 0, built upright and moved by `place`."""
-    base = [(-0.0085, -0.004), (0.0085, -0.004), (0.0085, 0.0042), (0.0106, 0.0065), (0.0106, 0.0070),
-            (-0.0106, 0.0070), (-0.0106, 0.0065), (-0.0085, 0.0042)]
+def picatinny(b: hs.Builder, y0: float, y1: float, mat: str, place: Matrix, teeth_from: float = None,
+              notch: tuple = None) -> None:
+    """A rail from y0 to y1 along its own +Y, base at its z 0, built upright and moved by `place`; `notch` (half
+    width, top) cuts a channel up into its foot from end to end."""
+    foot = [(-0.0085, -0.004), (0.0085, -0.004)]
+    if notch is not None:
+        nw, nt = notch
+        foot = [(-0.0085, -0.004), (-nw, -0.004), (-nw, nt), (nw, nt), (nw, -0.004), (0.0085, -0.004)]
+    base = foot + [(0.0085, 0.0042), (0.0106, 0.0065), (0.0106, 0.0070), (-0.0106, 0.0070), (-0.0106, 0.0065),
+                   (-0.0085, 0.0042)]
     faces = b.prism(base, "y", y0, y1, mat)
     tooth = [(-0.0106, 0.0069), (0.0106, 0.0069), (0.0104, 0.0074), (0.0078, 0.0100), (-0.0078, 0.0100),
              (-0.0104, 0.0074)]
@@ -192,6 +221,15 @@ def rail_on(face: str, y0: float, y1: float, x: float = 0.0, z: float = 0.0) -> 
 
 # --------------------------------------------------------------------------------------------------------- parts
 
+def ch_channel() -> object:
+    """The charging handle's channel: under the rail (into its foot), open at the upper's back, as long as the
+    handle's shaft pulled home."""
+    c = hs.Builder("c_ch", ["Body"])
+    c.box((-CH_HW - 0.0004, UPPER_Y[0] - 0.01, CH_SHAFT_Z + 0.0004), (CH_HW + 0.0004, CH_SHAFT_END + 0.002,
+          CH_CHANNEL_TOP), "Body")
+    return c.build()
+
+
 def upper() -> list:
     out = []
     b = hs.Builder("Upper", ["Body"])
@@ -213,9 +251,8 @@ def upper() -> list:
     c = hs.Builder("c_port", ["Body"])
     c.box((UPPER_HW - 0.0055, 0.002, 0.0345), (0.03, 0.050, 0.0540), "Body")
     cutters.append(c.build())
-    c = hs.Builder("c_ch", ["Body"])
-    c.box((-0.0062, UPPER_Y[0] - 0.01, 0.048), (0.0062, UPPER_Y[0] + 0.012, 0.070), "Body")
-    cutters.append(c.build())
+    # The charging handle's channel under the rail, open at the back, as long as the handle's shaft pulled home.
+    cutters.append(ch_channel())
     # Machining lines along each side under the shoulder.
     for sx in (-1, 1):
         c = hs.Builder("c_groove", ["Body"])
@@ -244,7 +281,19 @@ def upper() -> list:
 
     # The upper's rail, full length.
     b = hs.Builder("UpperRail", ["Body"])
-    picatinny(b, UPPER_Y[0], UPPER_Y[1], "Body", rail_on("top", 0, 0, 0.0, RAIL_BASE))
+    # Over the charging handle's channel its foot is notched to the channel's top; on from there it is whole, its
+    # teeth in step.
+    ch_end = CH_SHAFT_END + 0.002
+    # Its back 0.2 mm in from the upper's, so no two faces share that plane.
+    picatinny(b, UPPER_Y[0] + 0.0002, ch_end, "Body", rail_on("top", 0, 0, 0.0, RAIL_BASE),
+              notch=(CH_HW + 0.0004, CH_CHANNEL_TOP - RAIL_BASE))
+    first = UPPER_Y[0] + 0.0026
+    picatinny(b, ch_end, RAIL_JOIN, "Body", rail_on("top", 0, 0, 0.0, RAIL_BASE),
+              teeth_from=first + math.ceil((ch_end - first) / 0.0100) * 0.0100)
+    # Its back 2 mm closed either side of the channel, so its side grooves don't show as holes from behind.
+    for sx in (-1, 1):
+        xa, xb = sorted((sx * (CH_HW + 0.0004), sx * 0.0106))
+        b.box((xa, UPPER_Y[0] + 0.0004, RAIL_BASE - 0.0005), (xb, UPPER_Y[0] + 0.0022, RAIL_BASE + 0.0068), "Body")
     out.append(hs.finish(b.build(), 0.0003, 1))
     return out
 
@@ -252,49 +301,62 @@ def upper() -> list:
 def lower() -> list:
     out = []
     b = hs.Builder("Lower", ["Body"])
-    # The back: a smooth round tail under the buffer tower (Chaikin-rounded so no facets show in a close-up).
+    # The back (owner, 2026-11-05, "straight then curved", from the photo): round under the buffer tower, then down
+    # to where the grip's moulded top takes over its line (the grip's back follows the photo's tail on down, see
+    # grip()) (Chaikin-rounded so no facets show in a close-up);
+    # world heights, measured on the main photo (1425 px/m).
     g = GUARD_DROP
-    tail = hs.smooth([(-0.085, 0.018), (-0.093, 0.016), (-0.098, 0.010), (-0.0995, 0.002), (-0.097, -0.008),
-                      (-0.091, -0.017), (-0.083, -0.024), (-0.074, -0.029), (-0.050, -0.033 - 0.5 * g),
-                      (-0.030, -0.033 - g)], 2)
-    prof = [(0.099, 0.0), (-0.085, 0.0)] + tail + [(0.0265, -0.034 - g), (0.0265, -0.014), (0.0935, -0.014),
-                                                   (0.0935, -0.004)]
-    b.prism([(y, lz(z)) for y, z in prof], "x", -LOWER_HW, LOWER_HW, "Body")
+    tail = hs.smooth([(-0.085, lz(0.018)), (-0.093, lz(0.016)), (-0.098, lz(0.010)), (-0.0995, lz(0.002)),
+                      (-0.0960, 0.0280), (-0.0840, 0.0245), (-0.0733, 0.0227), (-0.0681, 0.0175), (-0.0646, 0.0140),
+                      (-0.0646, 0.0140)], 2)
+    front = [(y, lz(z)) for y, z in ((0.0265, -0.034 - g), (0.0265, -0.014), (0.0935, -0.014), (0.0935, -0.004))]
+    prof = [(0.099, lz(0.0)), (-0.085, lz(0.0))] + tail + [(-0.030, lz(-0.033 - g))] + front
+    b.prism(prof, "x", -LOWER_HW, LOWER_HW, "Body")
     # Buffer tower: the round boss the tube threads into.
     b.lathe([(0.0, 0.0), (0.0, 0.0172), (0.0130, 0.0172), (0.0130, 0.0)], "Body", 28,
             centre=(0.0, -0.0980, TUBE_Z))
     # Magazine well, its front raked back, flared at the bottom.
     # Its front a little ahead of the upper's, raked back, and flaring out at the foot in one piece with it.
-    well = [(0.0260, -0.004), (0.0935, -0.004), (0.0933, -0.016), (0.0929, -0.040), (0.0925, -0.060),
-            (0.0260, -0.060)]
-    b.prism([(y, lz(z)) for y, z in well], "x", -WELL_HW, WELL_HW, "Body")
-    b.loft([[(x, y + 0.0593, lz(z)) for x, y in hs.rounded_rect(hw, hd, 0.004, 2)]
-            for z, hw, hd in ((-0.056, WELL_HW, 0.0332), (-0.064, WELL_HW + 0.0008, 0.0339),
-                              (-0.0705, WELL_HW + 0.0012, 0.0342))], "Body")
+    # Its front a little ahead of the upper's, raked back, its foot lipped forward (the photo's), all one prism as wide
+    # as the lower.
+    well = [(0.0260, -0.004, 0.0), (0.0935, -0.004, 0.0), (0.0933, -0.016, 0.0), (0.0929, -0.040, 0.0),
+            (0.0925, -0.058, 0.006), (0.0942, -0.0705, 0.0015), (0.0255, -0.0705, 0.0015), (0.0255, -0.060, 0.0)]
+    b.prism([(y, lz(z)) for y, z in hs.fillet(well, 3)], "x", -WELL_HW, WELL_HW, "Body")
     # Trigger guard: one piece with the lower, a rounded bow whose ends run up into a lug each (the front lug
     # against the well's back, the rear one ahead of the grip), so no daylight between guard and receiver.
-    guard = hs.fillet([(0.0275, -0.030, 0.0), (0.0275, -0.0675 - g, 0.011), (-0.0430, -0.0675 - g, 0.004),
-                       (-0.0510, -0.0300, 0.0), (-0.0285, -0.0300, 0.0), (-0.0225, -0.0640 - g, 0.008),
+    # Its back bar upright, as the photo's, inside the grip's front.
+    guard = hs.fillet([(0.0275, -0.030, 0.0), (0.0275, -0.0675 - g, 0.011), (-0.0300, -0.0675 - g, 0.003),
+                       (-0.0300, -0.0300, 0.0), (-0.0215, -0.0300, 0.0), (-0.0215, -0.0640 - g, 0.006),
                        (0.0235, -0.0640 - g, 0.0065), (0.0235, -0.030, 0.0)], 6)
     b.prism([(y, lz(z)) for y, z in guard], "x", -0.0052, 0.0052, "Body")
     b.prism([(y, lz(z)) for y, z in ((0.0185, -0.030), (0.0275, -0.030), (0.0275, -0.0520 - g),
                                      (0.0220, -0.0480 - g), (0.0185, -0.0400 - g))], "x", -0.0078, 0.0078, "Body")
-    # The guard's back runs down into the grip's front, blended (no shelf).
-    b.prism([(y, lz(z)) for y, z in ((-0.0360, -0.030), (-0.0255, -0.030), (-0.0255, -0.0380 - g),
-                                     (-0.0292, -0.0460 - g), (-0.0360, -0.0430 - g))], "x", -0.0072, 0.0072, "Body")
     # Mag release fence (right) and bolt-catch bosses (left).
     b.prism([(y, lz(z)) for y, z in ((0.024, -0.021), (0.044, -0.021), (0.044, -0.004), (0.024, -0.004))], "x",
             WELL_HW - 0.001, WELL_HW + 0.0018, "Body")
-    b.prism([(y, lz(z)) for y, z in ((0.004, -0.004), (0.022, -0.004), (0.022, 0.012), (0.004, 0.012))], "x",
-            -LOWER_HW - 0.0016, -LOWER_HW + 0.001, "Body")
+    b.prism([(y, lz(z) - BOLT_CATCH_DROP) for y, z in ((0.004, -0.004), (0.022, -0.004), (0.022, 0.012),
+                                                       (0.004, 0.012))], "x", -LOWER_HW - 0.0016, -LOWER_HW + 0.001,
+            "Body")
     ob = b.build()
+    # The pistol grip moulded in one piece with the lower (owner, 2026-11-05), the joins filleted by finish().
+    g, panels = grip()
+    hs.cut(ob, [g], "UNION")
     cutters = []
+    # The lower's top edges chamfered in to the upper's sides, so the two read as one body.
+    for sx in (-1, 1):
+        c = hs.Builder("c_seam", ["Body"])
+        xa = UPPER_HW + 0.0002
+        run = 0.03 - xa
+        pts = [(xa, SEAM + 0.003), (0.03, SEAM + 0.003), (0.03, SEAM - SEAM_CHAMFER * run / (LOWER_HW - xa)),
+               (xa, SEAM)]
+        c.prism([(sx * x, z) for x, z in (pts if sx > 0 else reversed(pts))], "y", -0.12, 0.12, "Body")
+        cutters.append(c.build())
     c = hs.Builder("c_mag", ["Body"])
     c.prism([(x, y + MAG_Y) for x, y in hs.rounded_rect(MAG_HW + 0.0004, MAG_HD + 0.0006, 0.0055, 3)], "z",
             lz(-0.090), lz(-0.010), "Body")
     cutters.append(c.build())
     c = hs.Builder("c_trig", ["Body"])
-    c.box((-0.0045, -0.0125, lz(-0.040 - GUARD_DROP)), (0.0045, 0.0138, lz(-0.024)), "Body")
+    c.box((-0.0045, -0.0185, lz(-0.040 - GUARD_DROP)), (0.0045, 0.0138, lz(-0.024)), "Body")
     cutters.append(c.build())
     # The mag release sits in a pocket in its fence.
     c = hs.Builder("c_mr", ["Body"])
@@ -311,6 +373,7 @@ def lower() -> list:
     hs.cut(ob, cutters)
     hs.finish(ob, 0.0009)
     out.append(ob)
+    out.append(hs.finish(panels, 0.0))
 
     # Pins, both sides.
     b = hs.Builder("Pins", ["Metal"])
@@ -323,8 +386,10 @@ def lower() -> list:
 
     # Bolt catch (left).
     b = hs.Builder("BoltCatch", ["Detail"])
-    b.prism(hs.fillet([(0.008, lz(-0.004), 0.0008), (0.018, lz(-0.002), 0.0015), (0.018, lz(0.008), 0.0015),
-                       (0.012, lz(0.010), 0.0008), (0.008, lz(0.004), 0.0008)], 2), "x", -LOWER_HW - 0.0026,
+    d = BOLT_CATCH_DROP
+    b.prism(hs.fillet([(0.008, lz(-0.004) - d, 0.0008), (0.018, lz(-0.002) - d, 0.0015),
+                       (0.018, lz(0.008) - d, 0.0015), (0.012, lz(0.010) - d, 0.0008),
+                       (0.008, lz(0.004) - d, 0.0008)], 2), "x", -LOWER_HW - 0.0026,
             -LOWER_HW - 0.0004, "Detail")
     out.append(hs.finish(b.build(), 0.0004, 1))
 
@@ -340,51 +405,88 @@ def lower() -> list:
     return out
 
 
-def grip() -> object:
-    """A pistol grip raked GRIP_RAKE back, lofted through sections with a finger swell."""
+def grip() -> tuple:
+    """A pistol grip raked GRIP_RAKE back, lofted through sections with a finger swell, its top moulded into the lower
+    (lower() unions it in and finishes the two together), and its stippled side panels."""
     rake = math.radians(GRIP_RAKE)
     down = Vector((0.0, -math.sin(rake), -math.cos(rake)))
     fwd = Vector((0.0, math.cos(rake), -math.sin(rake)))
     top = Vector((0.0, GRIP_TOP_Y, lz(GRIP_TOP_Z)))
     length = GRIP_LENGTH
     # t, half width, front, back
-    stations = [(0.00, 0.0128, 0.0085, 0.0215), (0.10, 0.0133, 0.0100, 0.0222), (0.20, 0.0140, 0.0110, 0.0228),
-                (0.30, 0.0144, 0.0118, 0.0230), (0.38, 0.0145, 0.0125, 0.0231), (0.47, 0.0145, 0.0130, 0.0232),
-                (0.53, 0.0146, 0.0150, 0.0233), (0.59, 0.0146, 0.0195, 0.0234), (0.66, 0.0147, 0.0162, 0.0236),
-                (0.80, 0.0148, 0.0165, 0.0240), (0.92, 0.0150, 0.0170, 0.0250), (0.965, 0.0156, 0.0226, 0.0275),
-                (0.988, 0.0156, 0.0226, 0.0275), (1.00, 0.0144, 0.0212, 0.0262)]
+    # Its front upright under the guard's back bar down to the guard's foot, then raked to the finger swell (the
+    # photo's, owner 2026-11-05: "straight then curved").
+    # Its back, at the top, is the receiver's tail running down from the buffer tower nearly upright (the photo's
+    # x 642 to 632 at py 197 to 232), then turning down the back strap.
+    stations = [(0.00, 0.0128, 0.0060, 0.0400), (0.10, 0.0133, 0.0060, 0.0400), (0.20, 0.0140, 0.0060, 0.0390),
+                (0.258, 0.0142, 0.0080, 0.0319), (0.329, 0.0144, 0.0108, 0.0262), (0.392, 0.0145, 0.0150, 0.0236),
+                (0.433, 0.0145, 0.0160, 0.0233), (0.47, 0.0145, 0.0148, 0.0232), (0.51, 0.0146, 0.0150, 0.0232),
+                (0.552, 0.0146, 0.0153, 0.0233), (0.568, 0.0146, 0.0162, 0.0233), (0.582, 0.0146, 0.0184, 0.0234),
+                (0.598, 0.0146, 0.0206, 0.0234), (0.614, 0.0146, 0.0214, 0.0235), (0.635, 0.0146, 0.0206, 0.0235), (0.66, 0.0147, 0.0170, 0.0236),
+                (0.80, 0.0148, 0.0165, 0.0240), (0.92, 0.0150, 0.0170, 0.0243), (0.965, 0.0156, 0.0226, 0.0241),
+                (0.988, 0.0156, 0.0226, 0.0241), (1.00, 0.0144, 0.0212, 0.0229)]
     fine = []
     for (ta, *va), (tb, *vb) in zip(stations, stations[1:]):
         steps = max(1, int(round((tb - ta) / 0.05)))
         for k in range(steps):
             u = k / steps
-            w = u * u * (3.0 - 2.0 * u) if tb - ta > 0.06 else u
+            w = u * u * (3.0 - 2.0 * u) if tb - ta > 0.072 else u
             fine.append((ta + (tb - ta) * u, *[a + (b2 - a) * w for a, b2 in zip(va, vb)]))
     fine.append(stations[-1])
-    rings = []
     # The foot cut nearer level than square to the rake (the heel lower than the toe), as the photo's.
     k = math.tan(math.radians(GRIP_FOOT_TURN))
-    for t, hw, fr, bk in fine:
-        c = top + down * (length * t)
-        w = min(1.0, max(0.0, (t - 0.80) / 0.12))
-        ring = []
-        for x, f in hs.superellipse(hw, fr, bk, 2.6, 32):
-            ring.append(c + Vector((x, 0.0, 0.0)) + fwd * f + down * (w * k * (fr - f)))
-        rings.append(ring)
-    b = hs.Builder("Grip", ["Detail"])
-    b.loft(rings, "Detail")
-    ob = b.build()
-    # Stippled panels: shallow recesses on each side.
-    cutters = []
-    for sx in (-1, 1):
-        c = hs.Builder("c_st", ["Detail"])
-        f = c.prism(hs.rounded_rect(0.0105, 0.030, 0.006, 3), "x", 0.0, 0.01, "Detail")
-        c.transform(f, Matrix.Translation(top + down * 0.064 + fwd * 0.001 + Vector((sx * 0.0141 if sx > 0 else
-                    -0.0141 - 0.01, 0.0, 0.0))) @ Matrix.Rotation(-rake, 4, "X"))
-        cutters.append(c.build())
-    hs.cut(ob, cutters)
-    return hs.finish(ob, 0.0010)
 
+    def section(t: float, hw: float) -> tuple:
+        """The ring's centre, half width, superellipse exponent and foot turn at `t`. Moulded into the lower (owner,
+        2026-11-05: one piece): its top the lower's own square section, easing to the grip's own width and section
+        over GRIP_BLEND."""
+        u = min(1.0, max(0.0, (t - GRIP_BLEND[0]) / (GRIP_BLEND[1] - GRIP_BLEND[0])))
+        e = u * u * (3.0 - 2.0 * u)
+        return (top + down * (length * t), max(hw, LOWER_HW * (1.0 - e) + hw * e), 10.0 * (1.0 - e) + 2.6 * e,
+                min(1.0, max(0.0, (t - 0.80) / 0.12)))
+
+    def at(t: float) -> tuple:
+        """The station values (half width, front, back) at `t`, as the loft interpolates them."""
+        for row in fine:
+            if row[0] >= t:
+                break
+        i = fine.index(row)
+        ta, *va = fine[max(0, i - 1)]
+        tb, *vb = row
+        u = 0.0 if tb == ta else (t - ta) / (tb - ta)
+        return tuple(a + (b2 - a) * u for a, b2 in zip(va, vb))
+
+    rings = []
+    for t, hw, fr, bk in fine:
+        c, hw, n, w = section(t, hw)
+        rings.append([c + Vector((x, 0.0, 0.0)) + fwd * f + down * (w * k * (fr - f))
+                      for x, f in hs.superellipse(hw, fr, bk, n, 28)])
+    b = hs.Builder("Grip", ["Body"])
+    b.loft(rings, "Body")
+    ob = b.build()
+    # Stippled panels on each side (the photo's checkered panel), from under the moulded top down to the foot, kept
+    # 4 mm behind the front's finger groove: thin pads standing 0.4 mm proud, their faces following the grip's side
+    # (a boolean recess this long cost over 2,000 triangles; these cost a quarter of that).
+    p0, p1, half, r, rise = 0.46, 0.93, 0.0105, 0.006, 0.0004
+    ts = sorted({p0, p1, p0 + 0.015, p1 - 0.015} | {row[0] for row in fine if p0 + 0.03 < row[0] < p1 - 0.03})
+    pb = hs.Builder("GripPanels", ["Body"])
+    for sx in (-1, 1):
+        prings = []
+        for t in ts:
+            hw, fr, bk = at(t)
+            c, hw, n, w = section(t, hw)
+            d = min(t - p0, p1 - t) * length
+            h = half - r + math.sqrt(max(0.0, r * r - (r - min(d, r)) ** 2))
+
+            def side(f: float, off: float) -> Vector:
+                e = fr if f >= 0.0 else bk
+                x = hw * max(0.0, 1.0 - abs(f / e) ** n) ** (1.0 / n) + off
+                return c + Vector((sx * x, 0.0, 0.0)) + fwd * f + down * (w * k * (fr - f))
+
+            ring = [side(h - 2.0 * h * i / 6, rise) for i in range(7)] + [side(-h, -0.0003), side(h, -0.0003)]
+            prings.append(ring if sx > 0 else list(reversed(ring)))
+        pb.loft(prings, "Body")
+    return ob, pb.build()
 
 def mag_z(z: float) -> float:
     """A height on the first magazine's body (base at -0.222) moved to the shorter one's (base at MAG_BOTTOM)."""
@@ -463,8 +565,8 @@ def stock() -> list:
     b = hs.Builder("Stock", ["Furniture"])
     hw = 0.0172
     # Its front face sloped, the top reaching forward over the castle nut, as the photo's.
-    body = hs.fillet([(front + 0.0060, 0.024, 0.0), (front + 0.0075, 0.040, 0.0), (front + 0.0055, 0.0585, 0.002),
-                      (front + 0.0015, 0.063, 0.002), (-0.330, 0.063, 0.008), (-0.3385, 0.054, 0.0),
+    body = hs.fillet([(front + 0.0060, 0.024, 0.0), (front + 0.0075, 0.040, 0.0), (front + 0.0055, 0.0570, 0.002),
+                      (front + 0.0015, STOCK_TOP, 0.002), (-0.330, STOCK_TOP, 0.008), (-0.3385, 0.054, 0.0),
                       (-0.3385, 0.0148, 0.0), (front - 0.0015, 0.0148, 0.003)], 4)
     b.prism(body, "x", -hw, hw, "Furniture")
     for sx in (-1, 1):
@@ -572,23 +674,20 @@ def handguard() -> list:
             centre=(0.0, 0.0, BORE_Z))
     out.append(hs.finish(b.build(), 0.0004, 1))
 
-    # Rails: the top one raised on a bridge over the receiver's front (as in the photo), then on along the handguard,
-    # its teeth in step with the upper's; the bottom and right ones bare.
+    # Rails: the top one level with the upper's, on from where it ends over the delta ring along the handguard, its
+    # teeth in step with the upper's; the bottom and right ones bare.
     b = hs.Builder("GuardRails", ["Furniture"])
-    by0, by1 = BRIDGE_Y
-    b.box((-0.0106, by0, RAIL_BASE - 0.0010), (0.0106, by1, RAIL_BASE + BRIDGE_RISE), "Furniture")
-    picatinny(b, by0, by1, "Furniture", rail_on("top", 0, 0, 0.0, RAIL_BASE + BRIDGE_RISE),
-              teeth_from=UPPER_Y[0] + 0.0026 + 16 * 0.0100)
-    picatinny(b, by1, GUARD_Y[1] - 0.001, "Furniture", rail_on("top", 0, 0, 0.0, RAIL_BASE),
-              teeth_from=UPPER_Y[0] + 0.0026 + 22 * 0.0100)
-    picatinny(b, ring_end + 0.001, GUARD_Y[1] - 0.001, "Furniture", rail_on("bottom", 0, 0, 0.0, z0 + 0.0006))
-    picatinny(b, ring_end + 0.001, GUARD_Y[1] - 0.001, "Furniture", rail_on("right", 0, 0, hw - 0.0006, zc))
+    picatinny(b, RAIL_JOIN, GUARD_Y[1] - 0.001, "Furniture", rail_on("top", 0, 0, 0.0, RAIL_BASE),
+              teeth_from=UPPER_Y[0] + 0.0026 + 19 * 0.0100)
+    picatinny(b, ring_end - 0.0002, GUARD_Y[1] - 0.001, "Furniture", rail_on("bottom", 0, 0, 0.0, z0 + 0.0006))
+    picatinny(b, ring_end - 0.0002, GUARD_Y[1] - 0.001, "Furniture", rail_on("right", 0, 0, hw - 0.0006, zc))
     out.append(hs.finish(b.build(), 0.0003, 1))
 
     # The left rail under a cover with raised ribs across it, as in the owner's photo; the right one stays bare for
     # the torch.
     b = hs.Builder("RailCover", ["Furniture"])
-    cy0, cy1 = ring_end + 0.001, GUARD_Y[1] - 0.003
+    # From the ring's back face, so no daylight shows between them (owner, 2026-11-05: no gaps in the body).
+    cy0, cy1 = ring_end - 0.0002, GUARD_Y[1] - 0.003
     ch_ = 0.0180
     b.prism(hs.fillet([(-hw + 0.0050, zc - ch_, 0.0), (-hw + 0.0050, zc + ch_, 0.0),
                        (-hw - 0.0030, zc + ch_, 0.0020), (-hw - 0.0045, zc + ch_ - 0.0022, 0.0020),
@@ -757,7 +856,11 @@ def moving_parts() -> dict:
              (0.0005, -0.0575 - g)]
     back = [(-0.0030, -0.0555 - g), (0.0010, -0.0500 - g), (0.0028, -0.0430 - g), (0.0030, -0.0350 - 0.4 * g),
             (0.0010, -0.0260), (0.0010, -0.0240)]
-    b.prism([(y, lz(z)) for y, z in hs.smooth(front, 2) + hs.smooth(back, 2)], "x", -0.0031, 0.0031, "Metal")
+    # Mirrored fore and aft about `mid` (owner, 2026-11-05: it faced the wrong way), 65 % across the guard's opening
+    # as the photo's: the face the finger pulls is concave and forward, the tip curls forward.
+    mid = -0.0018
+    outline = [(2.0 * mid - y, z) for y, z in hs.smooth(front, 2) + hs.smooth(back, 2)]
+    b.prism([(y, lz(z)) for y, z in reversed(outline)], "x", -0.0031, 0.0031, "Metal")
     parts["trigger"] = hs.finish(b.build(), 0.0005)
     # Selector: hub and lever pointing back (safe).
     hub = Vector(BONES["selector"])
@@ -782,12 +885,24 @@ def moving_parts() -> dict:
         cs.append(c.build())
     hs.cut(ob, cs)
     parts["magRelease"] = hs.finish(ob, 0.0003, 1)
-    # Charging handle: a T behind the upper, its shaft under the rail.
+    # Charging handle (owner, 2026-11-05: bigger, higher, able to pull back like a real one): a T behind the upper
+    # at the rail's foot, clear over the buffer tower, its latch on the left wing, and a long shaft in the upper's
+    # channel under the rail, so the handle stays in it pulled CH_TRAVEL back (Inspect).
     b = hs.Builder("ChargingHandle", ["Detail"])
-    top = [(-0.0150, -0.0905), (0.0150, -0.0905), (0.0156, -0.0880), (0.0128, -0.0858), (0.0058, -0.0852),
-           (0.0058, -0.0660), (-0.0058, -0.0660), (-0.0058, -0.0852), (-0.0128, -0.0858), (-0.0156, -0.0880)]
-    b.prism(top, "z", 0.0570, 0.0628, "Detail")
-    parts["chargingHandle"] = hs.finish(b.build(), 0.0006)
+    z0, z1 = CH_Z
+    t_back = CH_BACK
+    wing = [(-0.0175, t_back, 0.0015), (0.0175, t_back, 0.0015), (0.0182, t_back + 0.0030, 0.0012),
+            (0.0160, t_back + 0.0068, 0.0015), (0.0060, t_back + 0.0088, 0.0010), (-0.0060, t_back + 0.0088, 0.0010),
+            (-0.0160, t_back + 0.0068, 0.0015), (-0.0182, t_back + 0.0030, 0.0012)]
+    b.prism(hs.fillet(wing, 1), "z", z0, z1, "Detail")
+    # The latch: a tab on the left wing's front, standing a little proud of it.
+    b.prism(hs.fillet([(-0.0178, t_back + 0.0020, 0.0008), (-0.0115, t_back + 0.0020, 0.0008),
+                       (-0.0115, t_back + 0.0085, 0.0008), (-0.0150, t_back + 0.0085, 0.0008),
+                       (-0.0178, t_back + 0.0055, 0.0008)], 1), "z", z0 + 0.0008, z1 + 0.0010,
+            "Detail")
+    # The shaft, inside the channel.
+    b.box((-CH_HW, t_back + 0.0085, CH_SHAFT_Z + 0.0008), (CH_HW, CH_SHAFT_END, CH_CHANNEL_TOP - 0.0004), "Detail")
+    parts["chargingHandle"] = hs.finish(b.build(), 0.0006, 1)
     # Dust cover, hinged at its bottom on a rod.
     hz = BONES["dustCover"][2]
     b = hs.Builder("DustCover", ["Body", "Metal"])
@@ -829,7 +944,7 @@ def figure() -> object:
     b.lathe([(GUARD_Y[1] - 0.01, 0.0092), (MUZZLE[1], 0.0092)], "Metal", 8, centre=(0.0, 0.0, BORE_Z))
     b.lathe([(BARREL_END[1], 0.0115), (MUZZLE[1], 0.0112)], "Metal", 8, centre=(0.0, 0.0, BORE_Z))
     b.lathe([(-0.1010, 0.0176), (-0.090, 0.0176)], "Detail", 8, centre=(0.0, 0.0, TUBE_Z))
-    b.prism([(y + STOCK_IN, z) for y, z in ((-0.188, 0.033), (-0.1805, 0.0585), (-0.1845, 0.063), (-0.3515, 0.063),
+    b.prism([(y + STOCK_IN, z) for y, z in ((-0.188, 0.033), (-0.1805, 0.0570), (-0.1845, STOCK_TOP), (-0.3515, STOCK_TOP),
              (-0.3515, -0.0505), (-0.3343, -0.0505), (-0.2576, 0.0042), (-0.197, 0.0148))], "x", -0.0185, 0.0185,
             "Furniture")
     rake = math.radians(GRIP_RAKE)
@@ -896,7 +1011,8 @@ CLIPS = {
     "SightsFold": (0.3, {"rearSight": ("rx", [(0.0, 0.0), (0.3, 90.0)]),
                          "frontSight": ("rx", [(0.0, 0.0), (0.3, 90.0)])}),
     "Inspect": (3.0, {
-        "chargingHandle": ("ly", [(0.0, 0.0), (0.17, 0.0), (0.40, -0.050), (1.83, -0.050), (1.97, 0.0), (3.0, 0.0)]),
+        "chargingHandle": ("ly", [(0.0, 0.0), (0.17, 0.0), (0.40, -CH_TRAVEL), (1.83, -CH_TRAVEL), (1.97, 0.0),
+                                  (3.0, 0.0)]),
         "dustCover": ("ry", [(0.0, 0.0), (0.33, 0.0), (0.40, 100.0), (0.46, 92.0), (2.33, 92.0), (2.50, 0.0),
                              (3.0, 0.0)]),
         "hopDial": ("rx", [(0.0, 0.0), (0.67, 0.0), (1.33, 90.0), (1.75, 30.0), (3.0, 30.0)]),
@@ -968,7 +1084,6 @@ def build() -> None:
     body_parts = []
     body_parts += upper()
     body_parts += lower()
-    body_parts.append(grip())
     body_parts += stock()
     body_parts += handguard()
     body_parts.append(sight_base("RearBase", REAR_SIGHT_Y - 0.0440, REAR_SIGHT_Y + 0.0150, REAR_SIGHT_Y))
