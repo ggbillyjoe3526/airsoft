@@ -1,17 +1,16 @@
-Task: none (BL8) · head 4a17278 · Verdict: Pass
-Run: no match run (the only code change is tools/blender/parts/attachments.py, a build script that never ships; a unit test was added; no GPU in the container) · budget: no baseline yet, judged against docs/CC0_ASSETS.md > Size limits, the targets and base 106a53f
-Metrics (measured, from the glTF JSON of each .glb; 0 images in all, so no VRAM or import cost):
-- File size: aeg 1,339 KB, sniper 1,250 KB, pistol 521 KB, cyber 93 KB / 2 MB limit (ok). Was 1,208 / 1,090 / 322 / 109 KB at 61dc3d6; total about 4.4 MB of the 500 MB install.
-- Triangles per part, max: optic_scopeVar 9,960 / 10,000 (ok, 0.4 % margin; was 9,912). scope2x 6,388, grip_vertical 5,192 (was about 3,500, stipple studs), redDot 5,510, pistol max 4,926, cyber max 3,066. No part over the cap.
-- Surfaces per part, max: 6 (scopeVar), 5 (pistol, cyber), 4 (redDot, scope2x), 3 (grip_vertical). Unchanged except the torch gaining a Led surface (the last report had 4).
-- Worst-case AEG fit (scopeVar + vertical grip + torch + hiCap mag + silencer + barrel): about 20k part triangles, 24 part surfaces (24 extra draw calls, 1 blended). It fits the 40,000 hands cap only if the body is under about 20k (judgment: body not counted).
-Regressions (> 10 % worse): none at runtime. Asset growth is by design (pistol +62 % in file size, grip about +48 % in triangles).
+Task: GA1 · head a1bbbc9 · Verdict: Pass
+Run: figure_bench headless, 11 figures, 600 frames (10 s), eye in the middle, same machine, this head vs origin/main worktree · budget: no baseline yet (no pipeline/perf-budget.json), judged against targets and origin/main
+Metrics (measured, script time; noisy, single run each): animation per figure mean 116.0 us / 128.6 (ok), p99 308 / 387 (ok); skeleton per figure mean 24.5 us / 25.2 (ok), p99 59 / 89 (ok); both, 11 figures mean 1.545 ms / 1.692 ms (ok). Frame times on owner's hardware only; no rendered run (no GPU), so draw calls not measured.
+Regressions (> 10 % worse): none (the differences are inside run-to-run noise, in this head's favour).
 Blocking findings: none.
+ - Hitbox.step_walk_cycle/cycle_length/_by_speed (game/sim/hitbox.gd:173-205): judgment, no allocation. PackedFloat32Array reads, a loop of at most 3 steps, early return on moved <= 0 (standing still costs nothing). Two lerps per moving character per tick, negligible.
+ - HitPose.pose steady turn (game/sim/hit_pose.gd:97-104): judgment, Basis/float values only (stack), no heap; still_heading is cached.
+ - HitFit.still_heading (game/sim/hit_fit.gd:114-119): judgment, first call reads two samples and caches in _still_headings (Vector2 NaN sentinel); later calls are one lerp_angle. No per-tick allocation. Cache is per fit resource, not per character.
+ - FigureBend.steady_upper (game/play/figures/figure_bend.gd:85-96): measured, skeleton per figure +0 (24.5 vs 25.2 us). Two get_bone_global_pose and one set per figure per frame; Transform3D/Basis are values. Early-outs on steady <= 0.
 Advisory:
-- Prewarm (measured by reading, not drawn): play_session.gd:737 view.materials() is the FlagView's (inside the ATTACK_DEFEND branch, lines 728-737), not the replica parts. replica_view.gd:100 prewarm_glass() returns only held.window.material. shader_prewarm.gd draws only the materials it is handed as specks. So the fitted parts' own materials (metal, polymer, Lens, LensDot, Fibre, Led, reflector) are not prewarmed (judgment: whether they share an already-listed material was not checked).
-- They are still drawn before play for the replica in hand: replica_view.gd:274 shows only the active slot, and the hands are visible from the first frame (line 144), while the match holds for the prewarm (play_session.gd:1220). So the active replica's parts compile during the hold, not mid-match. A part's material first shows mid-match only on a first swap to the other slot, a first fire-mode or attachment change, or the torch Led and the blended LensDot lit for the first time (judgment, not verified, no GPU). Godot 4.x compiles pipelines asynchronously via ubershaders, which softens the hitch.
-- Because it is 4.4 MB of geometry with 24 draw calls, a rendered check on the Low preset (F3 overlay, Sniper with every part fitted) is still worth doing.
-- optic_scopeVar has 40 triangles of room: any more detail needs a trim.
-- The diff adds no per-frame or per-tick allocation, nodes, timers or connections to free (measured by reading the diff).
-Fixes: none required. Ranked if a first-swap hitch shows: (1) append each held replica's part materials (ReplicaParts.Fit) to the list in replica_view.prewarm_glass(); (2) make the inactive slot's parts drawn once during the hold.
-Unexplained: none. Frame time and draw calls need the owner's rendered run.
+ - game/sim/hit_pose.gd:5-6 doc line is now over the 120-column style (gdlint line length may flag it); not a perf matter.
+ - Asset size: human.glb 4.03 -> 4.48 MB (+11 %), robot.glb 3.25 -> 3.70 MB (+14 %; the brief's 3.54 is not what git shows), hit_fit.tres 56 -> 72 KB. About +0.9 MB install in total, from old clip data left unused in the binary chunk (splice.mjs). Judgment: within noise of a multi-hundred-MB install, but stripping the dead chunk would win it back; owner sets the install budget, none recorded. Load time unchanged: models 60.2 ms vs 59.4 ms, set_body 154 vs 157 ms (measured).
+ - hit_fit.tres phases 24 -> 32: HitFit tables built once on first use, so +33 % one-time memory/build for the tables only (judgment); no per-tick cost, since sampling is indexed with interpolation.
+ - tools/gait_pictures.gd and tools/blender/bot-figure/gait/* are dev-only; confirm they are excluded from export presets (judgment, not checked).
+Fixes: none required.
+Unexplained: none. The bench is scripted (no simulation), so Hitbox.step_walk_cycle and HitPose per tick are judged by reading, not by a measured match run; no --perf bot match was run.
