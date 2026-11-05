@@ -884,7 +884,7 @@ def build_grip_vertical() -> bpy.types.Object:
 
 # A plain tube with rounded ends and end-cap seams, its bore let into the front face (silencer): the rifle's and the
 # pistol's (slimmer, on a knurled thread adaptor), as (length, radius, adaptor length) in mm from the barrel's end.
-SILENCERS = {"rifle": (165.0, 14.2, 0.0), "pistol": (118.0, 13.2, 6.0)}
+SILENCERS = {"rifle": (150.0, 13.0, 0.0), "pistol": (118.0, 13.2, 6.0)}
 
 
 def build_silencer(kind: str = "rifle") -> bpy.types.Object:

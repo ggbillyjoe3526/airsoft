@@ -42,6 +42,8 @@ the AEG's optics, grips, silencer and torch into the Sniper Rifle's file. Unbran
 - **Parts stay in the replica's paint** (`Detail`, `Furniture`, `Metal`): every paint's Detail is a near-black, so the
   silencer and optics read black in play, and a painted kit stays one set. Glass, the fibre, the LED and the torch's
   reflector keep their own materials.
+- **The rifle silencer is 150 mm long, 26 mm across** (5.8 to 1, inside the photos' 4.9 to 6.4): a 165 mm one ran the
+  Sniper Rifle's picture out of the Customise frame (`test_ur4_qa`).
 - **The Cyber's torch clamp sits flat under its rail**: the rebuilt Cyber's shroud flanks are flush with the rail, so
   nothing rises past the rail's face outside it.
 - **The variable scope test** now checks the photo-based scope's length and budget instead of the old placeholder's.
