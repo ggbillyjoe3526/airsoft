@@ -234,7 +234,8 @@ def spline(points: list, per: int = 4) -> list:
         p0, p1, p2, p3 = pts[i - 1], pts[i], pts[i + 1], pts[i + 2]
         for s in range(per):
             t = s / per
-            out.append(tuple(0.5 * (2 * p1[c] + (-p0[c] + p2[c]) * t + (2 * p0[c] - 5 * p1[c] + 4 * p2[c] - p3[c]) * t * t
+            out.append(tuple(0.5 * (2 * p1[c] + (-p0[c] + p2[c]) * t
+                                    + (2 * p0[c] - 5 * p1[c] + 4 * p2[c] - p3[c]) * t * t
                                     + (-p0[c] + 3 * p1[c] - 3 * p2[c] + p3[c]) * t ** 3) for c in (0, 1)))
     out.append(tuple(points[-1]))
     return out
