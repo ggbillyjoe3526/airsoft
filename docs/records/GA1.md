@@ -7,7 +7,8 @@
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-05 | 1 | Claude (build thread) | figure, hit and hitbox tests pass (23 files, 243 tests) | Retry 6/8 (QA Pass, performance Pass) | every gait a bent-knee crouch-run (hips 0.86 m), no flight, the swing foot dragging; back-pedal and strafes forced onto the forward run's 2.94 m cycle (1.47 m lunges); the crouch walk sitting back on its heels, feet ahead; knees crossing on the strafes |
-| 2026-11-05 | 2 | Claude (build thread) | figure, hit, hitbox and gait tests pass (24 files, 253 tests) | pending | – |
+| 2026-11-05 | 2 | Claude (build thread) | figure, hit, hitbox and gait tests pass (24 files, 253 tests) | Retry 6/8 | run and sprint fixed; the crouch walk a full-squat duck walk, the swing knee splayed out like a frog, the thigh in the forearm; every standing gait's torso upright or back over hips pushed forward; no named references; the changelog over-claiming |
+| 2026-11-05 | 3 | Claude (build thread) | figure, hit, hitbox and gait tests pass | pending | – |
 
 ## Why
 
@@ -32,7 +33,7 @@ figure." Filming the figure in game (`tools/gait_pictures.gd`) showed three caus
   with the knee in the foot's own plane. Keys at 60 a second. The upper body keeps the old clips' (the aim covers it).
 - **Cadence by speed and way** (`HitConfig.cycle_speeds`/`cycle_metres`, crouched `crouch_cycle_*`, `back_cycle_share`,
   `side_cycle_share`; `Hitbox.cycle_length`): the walk cycle moves one cycle per the clip's own speed × seconds (walk
-  1.76 m at 2.3 m/s, run 2.94 m at 4.2, sprint 3.99 m at 6.3, crouch 1.26 m at 2.1), in line between; stepping back
+  1.76 m at 2.3 m/s, run 2.94 m at 4.2, sprint 3.99 m at 6.3, crouch 1.05 m at 2.1), in line between; stepping back
   it is 0.619 of the run's (Run_B 1.82 m) and aside 0.667 (Run_L/R 1.96 m), blended by the step's share each way.
   `strides_per_metre` is gone.
 - **Steady upper body** (`HitConfig.upper_steady`, `FigureBend.steady_upper`, the same turn in `HitPose`): over a
@@ -45,15 +46,30 @@ figure." Filming the figure in game (`tools/gait_pictures.gd`) showed three caus
 - **Hit fit** re-baked, at 32 phases (was 24): the faster crouched swing left a 5 cm gap between samples at 24.
 - `tools/gait_pictures.gd`: films the figure stepping each gait in game on a chequered floor (before/after pictures).
 
+## References
+
+No video was laid side by side. The numbers were checked against published gait norms instead: a recreational run at
+4 m/s about 160-180 steps a minute with each foot down about a quarter to a third of the cycle and a flight phase
+between; a sprint's lean and shorter ground contact; a walk always with one foot down; and the photographic running,
+walking and crouching series in Muybridge's *Animal Locomotion* (1887, public domain) for the heel kick, the foot
+landing near under the hips and the forward lean. The before pictures of the old clips are the comparison the owner
+sees (`/mnt/project-files/art/animation/ga1/`).
+
 ## Defaults taken (owner not asked)
 
 - Game speeds unchanged (walk 2.3, run 4.2, sprint 6.3, crouch 2.1 m/s); cadence set from them: walk 156, run 171,
-  sprint 190, back-pedal 277, strafe 257, crouch walk 200 steps a minute (quick short steps back and aside).
+  sprint 190, back-pedal 277, strafe 257, crouch walk 240 steps a minute (quick short steps back, aside and crouched).
+- The pelvis leans into the step: walk 4°, run 8°, back-pedal 6° (weight over the balls of the feet), strafes 3°. The
+  aim clips ride the hips, so the replica dips by about as much while stepping, as the old clips' did.
 - Run and sprint stand tall (hips 0.92 and 0.90 m at the top of the bob, ±4 to 4.5 cm with a flight phase), land the
   foot near under the hips and kick the heel straight up after toe-off.
 - Strafes turn the pelvis 35° and the feet 25° into the step, the legs on lanes apart so the knees never cross; the
   upper body stays square to the aim.
-- The crouch walk keeps the hips 0.62 m down (the crouch line) and walks on the balls of the feet, the feet under the
-  hips, the knees forward, up and a little out: with the aim owning the upper body, the low hips leave no other way
-  to keep the knees off the floor.
+- The crouch walk stays as low as the crouch rule makes it (the head's top at most 1.15 m, under 1.2 m crouch cover,
+  DECISIONS 2026-09-30): hips 0.39 m, the pelvis and torso 17° forward, short quick steps (1.05 m a cycle, 240 a
+  minute) on the balls of the feet a little ahead of the hips, the knees over the toes 10° out (the swing knee no
+  longer splays out, the trailing knee stays 16 cm or more off the floor, the thigh clears the forearm by 10 cm).
+  A taller crouch walk, hips about 0.55 m with the back bent well forward and the head and replica held up, needs
+  either a higher crouch_top_max (the owner's crouch-cover ruling) or a new crouched upper body over the aim; offered
+  to the owner as a follow-up, not built.
 - Sprint leans the pelvis 14° forward, so the shouldered replica dips 14° while sprinting (sprinting can't aim well).

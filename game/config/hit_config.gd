@@ -69,7 +69,7 @@ extends Resource
 @export var cycle_speeds: PackedFloat32Array = PackedFloat32Array([0.0, 2.3, 4.2, 6.3])
 @export var cycle_metres: PackedFloat32Array = PackedFloat32Array([1.0, 1.763, 2.94, 3.99])
 @export var crouch_cycle_speeds: PackedFloat32Array = PackedFloat32Array([0.0, 2.1])
-@export var crouch_cycle_metres: PackedFloat32Array = PackedFloat32Array([0.8, 1.26])
+@export var crouch_cycle_metres: PackedFloat32Array = PackedFloat32Array([0.8, 1.05])
 ## Stepping back or aside the standing cycle is this share of the cycle ahead at the same speed (Run_B and Run_L/R take
 ## shorter, quicker steps than Run_F: each clip's speed × seconds over Run_F's); between, by the step's share each way.
 @export var back_cycle_share: float = 0.6190

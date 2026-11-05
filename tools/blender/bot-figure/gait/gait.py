@@ -40,29 +40,28 @@ REACH = 0.996                                # the most of the leg's length a fo
 # body and foot shapes (angles in degrees, lengths in metres).
 GAITS = {
     'Walk_F': dict(speed=2.3, frames=23, duty=0.53, way=(0, 1), height=0.905, bob=0.022, run=False, sway=0.022,
-                   yaw=5.0, roll=3.5, pitch=1.0, lift=0.10, lift_at=0.45, strike=16.0, heel_off=0.55, toe_off=-38.0,
+                   yaw=5.0, roll=3.5, pitch=4.0, lift=0.10, lift_at=0.45, strike=16.0, heel_off=0.55, toe_off=-38.0,
                    toe_out=6.0, lane=0.85, bias=-0.06, swing_pitch=6.0),
     'Run_F': dict(speed=4.2, frames=21, duty=0.24, way=(0, 1), height=0.915, bob=0.042, run=True, sway=0.012,
-                  yaw=6.0, roll=4.0, pitch=3.0, lift=0.30, lift_at=0.32, kick=1.2, strike=6.0, heel_off=0.35,
+                  yaw=6.0, roll=4.0, pitch=8.0, lift=0.30, lift_at=0.32, kick=1.2, strike=6.0, heel_off=0.35,
                   toe_off=-40.0, toe_out=5.0, lane=0.55, bias=-0.12, swing_pitch=-18.0),
     'Run_B': dict(speed=4.2, frames=13, duty=0.32, way=(0, -1), height=0.905, bob=0.03, run=True, sway=0.010,
-                  yaw=3.0, roll=3.0, pitch=-1.0, lift=0.08, lift_at=0.5, strike=-18.0, heel_off=0.0, toe_off=-30.0,
-                  toe_out=8.0, lane=0.8, bias=-0.05, swing_pitch=-20.0, mid_pitch=-10.0),
+                  yaw=3.0, roll=3.0, pitch=6.0, lift=0.08, lift_at=0.5, strike=-18.0, heel_off=0.0, toe_off=-30.0,
+                  toe_out=8.0, lane=0.8, bias=0.03, swing_pitch=-20.0, mid_pitch=-10.0),
     'Run_L': dict(speed=4.2, frames=14, duty=0.30, way=(1, 0), height=0.905, bob=0.03, run=True, sway=0.0,
-                  yaw=4.0, roll=3.0, pitch=1.0, turn=35.0, foot_turn=25.0, lift=0.12, lift_at=0.42, strike=2.0,
+                  yaw=4.0, roll=3.0, pitch=3.0, turn=35.0, foot_turn=25.0, lift=0.12, lift_at=0.42, strike=2.0,
                   heel_off=0.3, toe_off=-35.0, toe_out=0.0, lane=2.6, bias=-0.03, swing_pitch=-14.0, clear=0.06),
     'Run_R': dict(speed=4.2, frames=14, duty=0.30, way=(-1, 0), height=0.905, bob=0.03, run=True, sway=0.0,
-                  yaw=4.0, roll=3.0, pitch=1.0, turn=35.0, foot_turn=25.0, lift=0.12, lift_at=0.42, strike=2.0,
+                  yaw=4.0, roll=3.0, pitch=3.0, turn=35.0, foot_turn=25.0, lift=0.12, lift_at=0.42, strike=2.0,
                   heel_off=0.3, toe_off=-35.0, toe_out=0.0, lane=2.6, bias=-0.03, swing_pitch=-14.0, clear=0.06),
     'Sprint': dict(speed=6.3, frames=19, duty=0.19, way=(0, 1), height=0.90, bob=0.045, run=True, sway=0.010,
                    yaw=8.0, roll=4.0, pitch=14.0, lift=0.40, lift_at=0.30, kick=1.6, strike=-6.0, heel_off=0.1,
                    toe_off=-48.0, toe_out=4.0, lane=0.45, bias=-0.14, swing_pitch=-26.0, mid_pitch=-3.0),
-    # crouched: on the balls of the feet, the feet under the hips, the knees forward, up and out (knee_pole: the
-    # knee's way as forward, up and out shares, not the foot's plane: a folded leg's knee stays off the floor)
-    'CrouchWalk': dict(speed=2.1, frames=18, duty=0.5, way=(0, 1), height=0.345, bob=0.012, run=False, sway=0.03,
-                       yaw=5.0, roll=3.0, pitch=14.0, lift=0.06, lift_at=0.45, strike=-22.0, heel_off=0.0,
-                       toe_off=-45.0, toe_out=12.0, lane=1.3, bias=0.06, swing_pitch=-25.0, mid_pitch=-28.0,
-                       knee_pole=(0.9, 1.0, 0.12)),
+    # crouched: short quick steps on the balls of the feet, the feet a little ahead of the hips under a torso leant
+    # forward, the knees over the toes (crouch_top_max holds the head's top at 1.15 m, so the hips stay low)
+    'CrouchWalk': dict(speed=2.1, frames=15, duty=0.5, way=(0, 1), height=0.39, bob=0.012, run=False, sway=0.03,
+                       yaw=5.0, roll=3.0, pitch=17.0, lift=0.06, lift_at=0.45, strike=-22.0, heel_off=0.0,
+                       toe_off=-45.0, toe_out=10.0, lane=1.2, bias=0.16, swing_pitch=-25.0, mid_pitch=-28.0),
 }
 
 
@@ -237,14 +236,9 @@ class Clip:
             ankle, pitch, planted = self.foot(sd, t)
             hip = hp + qrot(hr, rig.hip_off[sd])
             yaw = self.foot_yaw[sd]
-            # the knee bends in the foot's own upright plane, turned knee_out (rad) outwards; or towards knee_pole
+            # the knee bends in the foot's own upright plane, turned knee_out (rad) outwards
             hinge = qrot(qaxis(UP, math.radians(yaw) - SIDES[sd] * self.knee_out), LEFT)
-            pole = None
-            if 'knee_pole' in self.g:
-                ahead, above, aside = self.g['knee_pole']
-                pole = (qrot(qaxis(UP, math.radians(yaw)), FORWARD) * ahead + UP * above
-                        + LEFT * SIDES[sd] * aside)
-            thigh, shin, knee = self.ik(sd, hip, ankle, hinge, pole)
+            thigh, shin, knee = self.ik(sd, hip, ankle, hinge)
             foot = qmul(foot_frame(yaw, pitch), rig.rest['Foot_' + sd][1])
             toe_pitch = 0.0 if (planted and pitch < 0.0) else min(pitch, 0.0) * 0.5 + 6.0 * (not planted)
             toe_pitch = max(toe_pitch, pitch) if planted and pitch >= 0.0 else toe_pitch
@@ -273,7 +267,7 @@ class Clip:
             need = max(need, (hip[1] - ankle[1]) - limit)
         return need
 
-    def ik(self, sd, hip, ankle, hinge, pole=None):
+    def ik(self, sd, hip, ankle, hinge):
         """Thigh and shin turns and the knee for the ankle at `ankle`, the knee bending about `hinge` (its way
         ahead: hinge x the hip-to-ankle line's way down)."""
         rig = self.rig
@@ -282,7 +276,7 @@ class Clip:
         dist = float(np.linalg.norm(d))
         dist = min(max(dist, abs(l1 - l2) + 1e-4), (l1 + l2) * 0.9999)
         u = d / np.linalg.norm(d)
-        w = np.cross(u, hinge) if pole is None else pole - u * np.dot(u, pole)
+        w = np.cross(u, hinge)
         w = w / np.linalg.norm(w)
         ca = (l1 * l1 + dist * dist - l2 * l2) / (2 * l1 * dist)
         sa = math.sqrt(max(0.0, 1 - ca * ca))

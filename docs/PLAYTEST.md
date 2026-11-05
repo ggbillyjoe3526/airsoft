@@ -69,9 +69,9 @@ Play › Mode Elimination on Depot, Match › Opponents Normal. Set the mouse se
   crouched and still; crouch-walking sits between standing still and walking.
 - [ ] **Sprint up and down Depot's dock ramps.** Uphill loses about a quarter of a sprint's pace (a confirmed call).
 - [ ] **Watch bots run (GA1).** On Depot, watch bots walk, run, sprint, strafe and back-pedal past you, and crouch-walk.
-  Their feet stay planted on the floor without sliding, each step rolls heel to toe, and the legs step at a natural
-  pace for the speed (no frantic shuffle). Strafing, the legs turn into the step while the rifle stays on its aim.
-  Does any gait look wrong, especially the crouch walk (feet ahead, sitting back)?
+  Their feet stay planted on the floor without sliding, each step rolls heel to toe, and the legs keep pace with the
+  speed. Strafing, the legs turn into the step while the rifle stays on its aim. Does any gait look wrong, especially
+  the back-pedal and strafes (quick steps, about 4 a second) and the low crouch walk (short quick steps)?
 - [ ] **Controls through a vault (BP5).** Vault a low wall (Depot's office hall has one). On Semi, hold left click
   through it: one BB, not two. Hold right click: the sight drops and comes back.
 

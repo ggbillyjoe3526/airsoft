@@ -70,8 +70,8 @@
   },
   {
    "name": "CrouchWalk",
-   "seconds": 0.6,
-   "frames": 18,
+   "seconds": 0.5,
+   "frames": 15,
    "loop": true,
    "upperBodyOnly": false,
    "speed": 2.1

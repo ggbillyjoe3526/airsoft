@@ -156,3 +156,17 @@ func test_stepping_back_or_aside_takes_the_shorter_cycle() -> void:
 	assert_almost_eq(Hitbox.cycle_length(2.1, 1.0, hits, Vector2(0.0, -2.1)), Hitbox.cycle_length(2.1, 1.0, hits),
 			1e-5, "crouched, the way doesn't change it")
 
+
+
+func test_step_walk_cycle_reads_the_step_in_the_characters_own_frame() -> void:
+	# Turned a quarter left (facing -X): moving +X is a step back, moving -Z a step to its right.
+	var speed := hits.cycle_speeds[2]
+	for case: Array in [[Vector3(speed, 0.0, 0.0), hits.back_cycle_share], [Vector3(0.0, 0.0, -speed),
+			hits.side_cycle_share]]:
+		var c := Character.new(0, 0, Vector3.ZERO, PI * 0.5)
+		c.velocity = case[0]
+		c.prev_position = c.position
+		c.position += c.velocity * 0.05
+		Hitbox.step_walk_cycle(c, hits)
+		var want := speed * 0.05 / (hits.cycle_metres[2] * float(case[1])) * TAU
+		assert_almost_eq(c.walk_cycle, want, 1e-4, "moving %s turned a quarter" % case[0])
