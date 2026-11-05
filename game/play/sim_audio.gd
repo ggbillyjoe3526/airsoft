@@ -85,6 +85,8 @@ var _occlusion: SoundOcclusion = null
 ## The travel of the BB whose impact is being played (set round that one `_play`; zero, not known, otherwise), so a
 ## strike on a wall's far face is muffled from the near side (SoundOcclusion.impact_share).
 var _struck_along: Vector3 = Vector3.ZERO
+## When each bomb slot (GameState.grenades) last started its bouncing can (state time, s): -INF from its throw.
+var _bounced_at: PackedFloat64Array = PackedFloat64Array()
 ## Cue names worked out once: by power source, by surface, by surface and pace.
 var _shot: Dictionary[StringName, StringName] = {}
 var _power: Dictionary[StringName, StringName] = {}
@@ -254,10 +256,21 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				_play(&"magCatch", catcher.eye(_body) if catcher != null else e.position, e.target == player_id,
 						_cfg.mechanism_gain, Kind.MECHANISM, BUS_EFFECTS, 1.0, 0.0, catcher)
 			GameEvent.Kind.GRENADE_PIN:
-				_mechanism(&"grenade_pin", state, e, own)
+				_mechanism(&"grenade_pin", state, e, own, _cfg.pin_gain)
 			GameEvent.Kind.GRENADE_THROW:
 				_mechanism(&"magToss", state, e, own)
+				if e.target >= 0:
+					_bomb_bounce_slot(e.target, state)
+					_bounced_at[e.target] = -INF
 			GameEvent.Kind.GRENADE_BOUNCE:
+				# The owner's can bouncing, as a whole take: its later knocks are the bomb's next bounces.
+				if e.target >= 0:
+					_bomb_bounce_slot(e.target, state)
+					# A time from before `now`'s clock went back (a new match, its throw skipped unheard) is stale.
+					var since := now - _bounced_at[e.target]
+					if since >= 0.0 and since < _cfg.bounce_hold:
+						continue
+					_bounced_at[e.target] = now
 				var hard := minf(1.0, e.reach / maxf(_cfg.bounce_full_speed, 0.001))
 				_play(&"grenade_bounce", e.position, false, _cfg.bounce_gain * hard, Kind.PROP, BUS_EFFECTS, 1.0,
 						_cfg.prop_reach, null, true)
@@ -523,10 +536,10 @@ func _call(state: GameState, now: float) -> void:
 		_play(kind.cue, at, false, kind.level * _cfg.ambience_gain, Kind.CALL, BUS_AMBIENCE, pitch, far)
 
 
-func _mechanism(cue: StringName, state: GameState, e: GameEvent, own: bool) -> void:
+func _mechanism(cue: StringName, state: GameState, e: GameEvent, own: bool, gain: float = -1.0) -> void:
 	var c := state.character(e.actor)
 	var at := c.eye(_body) if c != null else e.position
-	_play(cue, at, own, _cfg.mechanism_gain, Kind.MECHANISM, BUS_EFFECTS, 1.0, 0.0, c)
+	_play(cue, at, own, gain if gain >= 0.0 else _cfg.mechanism_gain, Kind.MECHANISM, BUS_EFFECTS, 1.0, 0.0, c)
 
 
 ## The sound profile of `actor`'s replica in `slot` (its power's, or its own).
@@ -610,6 +623,16 @@ func _play(cue: StringName, at: Vector3, own: bool, gain: float, kind: Kind, bus
 		v.bus = bus if open else SoundOcclusion.bus_for(bus, share, _cfg)
 		v.global_position = at
 		v.play()
+
+
+## Makes `_bounced_at` cover every bomb slot (once: the pool is made with the state).
+func _bomb_bounce_slot(slot: int, state: GameState) -> void:
+	var n := maxi(slot + 1, state.grenades.size())
+	if _bounced_at.size() < n:
+		var was := _bounced_at.size()
+		_bounced_at.resize(n)
+		for i in range(was, n):
+			_bounced_at[i] = -INF
 
 
 ## A variant of `cue`'s `count`, never the one it played last.
