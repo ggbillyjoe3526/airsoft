@@ -79,6 +79,8 @@ PORT_DEPTH = 0.0088
 PORT_X = -0.0035
 HOOD_GAP = 0.00015
 HOOD_INSET = 0.0012
+# The hood's sloped front: it leaves the top this far behind the port's front wall and meets that wall this far down.
+HOOD_SLOPE = (0.0045, 0.0030)
 GUIDE_R = 0.0024
 GUIDE_Z = Z(104.0)
 REAR_SIGHT_HW = 0.0078
@@ -259,12 +261,14 @@ def slide() -> object:
     b.prism(inner, "y", y0 - 0.0002, y0 + 0.001, "Body")
     parts = [ob, hs.finish(b.build(), 0.0003, 1)]
     # The barrel: its hood filling the port to a hairline (HOOD_GAP) front, back and on the left, flush with the top
-    # (owner 2026-11-05: no gap between slide and barrel in the port), its right face HOOD_INSET inside the flank as
-    # the photos' chamber; its tube to the face.
+    # (owner 2026-11-05: no gap between slide and barrel in the port), its front edge sloping down to the barrel as
+    # before (owner 2026-11-05: keep the slope), its right face HOOD_INSET inside the flank as the photos' chamber;
+    # its tube to the face.
     b = hs.Builder("Barrel", ["Metal"])
     g = HOOD_GAP
-    hood = [(PORT_Y[0] + g, BORE_Z), (PORT_Y[1] - g, BORE_Z), (PORT_Y[1] - g, top - 0.0002),
-            (PORT_Y[0] + g, top - 0.0002)]
+    hood = hs.fillet([(PORT_Y[0] + g, BORE_Z, 0.0), (PORT_Y[1] - g, BORE_Z, 0.0),
+                      (PORT_Y[1] - g, top - HOOD_SLOPE[1], 0.0015), (PORT_Y[1] - HOOD_SLOPE[0], top - 0.0002, 0.001),
+                      (PORT_Y[0] + g, top - 0.0002, 0.0)], 3)
     b.prism(hood, "x", PORT_X + g, SLIDE_HW - HOOD_INSET, "Metal")
     end = BARREL_END
     b.tube([(PORT_Y[0] + 0.002, BARREL_R), (end - 0.0004, BARREL_R), (end, BARREL_R - 0.0005)],

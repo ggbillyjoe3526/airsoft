@@ -11,12 +11,12 @@ const POST_DROP := 0.001
 const UNDER_DOT := 0.0026
 const LIGHT_OUT := 0.0024
 ## The port: the slide's top is sampled every STEP (m) on lines across and along it, between the sights and inside
-## its bevelled edges (SIDE_MARGIN); a sample more than DEEP under the top is open, and no open run may be longer than
-## HAIRLINE (the hood's clearance, with its bevel).
+## its bevelled edges (SIDE_MARGIN); a sample more than DEEP under the top is open (past the hood's sloped front, 3 mm
+## down, into the port), and no open run may be longer than HAIRLINE (the hood's clearance, with its bevel).
 const STEP := 0.0001
 const LINE_PITCH := 0.004
 const SIDE_MARGIN := 0.0025
-const DEEP := 0.001
+const DEEP := 0.0035
 const HAIRLINE := 0.0004
 const SLIDE_HW := 0.01275
 

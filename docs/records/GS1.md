@@ -37,10 +37,11 @@ untouched (nothing it holds moved).
   the cut floor and bridged the notch. Heights now divide by cos(lean) and the back face is one plane (photo x 541 at
   its foot to 534 at the top; the kink at 0.7 mm is gone), so the band ends on the floor. The dot is 1.7 mm across,
   its foot on the line the notch's floor makes at the post, so a strip of dark post shows between dot and U.
-- **Port.** The hood fills the port to a 0.15 mm hairline front, back and left (`HOOD_GAP`), its top flat and flush,
+- **Port.** The hood fills the port to a 0.15 mm hairline front, back and left (`HOOD_GAP`), its top flat and flush
+  behind its sloped front edge (kept, owner 2026-11-05: 4.5 mm long, 3 mm down to the port's front wall),
   its right face 1.2 mm inside the flank (`HOOD_INSET`) as the photos' chamber; its edges bevelled 0.25 mm instead of
   0.4 mm.
-- 39,570 triangles in the hands (was 39,638; budget 40,000).
+- 39,622 triangles in the hands (was 39,638; budget 40,000).
 
 ## Defaults taken
 
