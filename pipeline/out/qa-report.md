@@ -1,21 +1,25 @@
-Task: GT1 · QA commit d5e54eb · Verdict: Pass
+Task: GT1 (attempt 2) · QA commit pending (see git log) · Verdict: Pass
 
-Blocking: none.
-Advisory:
-- game/play/figures/figure_hands.gd set_bomb_meshes: it resets bomb_shown to NONE without hiding _bomb. A second set_bombs
-  call while a bomb shows leaves it visible after the throw ends, since show_bomb(NONE) returns early. Not reachable now
-  (PlaySession calls set_bombs once, after _build_bodies). Fix: hide _bomb and clear its mesh there. Pinned by a failing
-  test (test_set_bombs_again_mid_throw_does_not_strand_a_shown_bomb); the commit carries one deliberately red test.
+Reviewed d5e54eb..de57ad5 (FigureThrow over-key, pole swing, pin key, from_hand weight; FigurePose.throw_from_hand; config).
+Blocking: none. Advisory: none new. The attempt-1 advisory (set_bomb_meshes stranding a shown bomb) is fixed in 42885a0; its test now passes.
 
-Tests added (tests/unit/test_figure_throw_qa.gd; the 8 are only checked against the same code, not against a stubbed-out feature, except where noted):
-- bombs given before the body: bomb shows (the worker's set_body path; fails if set_body skipped set_bomb_meshes).
-- rebuilt body (human to robot) mid-throw keeps drawing the bomb (fails without the set_body re-hand).
-- hit mid-windup (status CALLING, hand stopped or left set): no bomb.
-- far figure (200 m, far_stride): bomb shows, and is gone within a stride of the throw ending.
-- hidden then shown mid-throw: bomb shows after the snap.
-- readied FLASH then a thrown FLASH: same mesh, one bomb, visible.
-- set_bombs twice mid-throw: FAILS (the advisory above).
-- throws and body rebuilds: node count does not grow.
-Existing test_figure_throw.gd: 7/7 pass. QA file: 7/8 (the advisory). Full suite and check.sh not run (running elsewhere).
-Not tested: how the arms look (needs a display; tools/render_throw.gd), the PlaySession wiring itself (read: set_bombs is
-after _build_bodies at play_session.gd:719-721, correct).
+Probed and held:
+- throw_from_hand is set only when a throw starts from a held bomb, stays through windup and recovery, is cleared when the throw
+  ends, on a hit/out of play (alive false) and with no hand; a later normal throw starts from weight 0 and a second held throw
+  flags again (readied -> thrown -> readied -> thrown).
+- Config edges (throw_pin_until 0 and 1, throw_over_at 0.0001 and 1, throw_cock 0.0001 and 0.9999): right_key, left_key,
+  right_pole and weight stay finite and in range over share 0..2; pin_until 0 leaves the pin at once; the right key is
+  continuous across the over key (no step above 0.06 m per 1% of the arm coming over) and ends exactly at throw_release.
+- The left arm eases in with weight(share, false) even from a held bomb (read in figure_throw.gd pose; covered by the worker's test).
+
+Tests added to tests/unit/test_figure_throw_qa.gd (6 new; the 8 earlier pass):
+- test_throw_from_hand_lasts_only_for_that_throw: the flag across windup, recovery, end, and a later throw.
+- test_readied_thrown_readied_again_flags_each_throw_correctly: the flag on each cycle.
+- test_a_hit_or_leaving_play_clears_throw_from_hand: alive false and a null hand clear it.
+- test_throw_config_edge_values_give_finite_keys: the edge values above.
+- test_pin_until_zero_has_the_left_hand_leave_the_pin_at_once.
+- test_right_key_is_continuous_across_the_over_key_and_the_release.
+These pin new behaviour (the flag, the keys); each would fail on a missing field or key. I did not stub the feature out to confirm.
+Counts: test_figure_throw.gd 9/9, test_figure_throw_qa.gd 14/14 (0.7 s). check.sh and the full suite not run (running elsewhere).
+Not tested: how the arms look (needs a display; tools/render_throw.gd), and any real-sim path where a new throw starts with no
+read in between (read_throw runs every FigurePose.read, so none is possible from the figure's side).

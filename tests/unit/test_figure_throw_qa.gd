@@ -154,3 +154,117 @@ func test_throws_and_rebuilds_leave_no_nodes_behind() -> void:
 	await wait_process_frames(2)
 	var after := Performance.get_monitor(Performance.OBJECT_NODE_COUNT)
 	assert_lte(after, before + 2.0, "a rebuilt body frees the old one with its bomb")
+
+
+func _pose_reading() -> FigurePose:
+	var p := FigurePose.new(config)
+	p.grenades = grenades
+	return p
+
+
+func _hand(readied: int, throwing: int, released: bool = false) -> Grenades.Hand:
+	var h := Grenades.Hand.new()
+	h.readied = readied
+	h.throwing = throwing
+	h.released = released
+	h.windup_left = grenades.windup * 0.5
+	h.recover_left = grenades.recover * 0.5
+	return h
+
+
+func test_throw_from_hand_lasts_only_for_that_throw() -> void:
+	var p := _pose_reading()
+	var h := _hand(Grenade.Kind.SMOKE, Grenade.Kind.NONE)
+	p.read_throw(h, true)
+	assert_true(p.bomb_held)
+	assert_false(p.throw_from_hand)
+	h.readied = Grenade.Kind.NONE
+	h.throwing = Grenade.Kind.SMOKE
+	p.read_throw(h, true)
+	assert_true(p.throw_from_hand, "begun from the hand")
+	h.released = true
+	p.read_throw(h, true)
+	assert_true(p.throw_from_hand, "through the recovery too")
+	h.throwing = Grenade.Kind.NONE
+	p.read_throw(h, true)
+	assert_false(p.throw_from_hand, "cleared when the throw ends")
+	# A later throw with nothing held first: from weight 0.
+	h.throwing = Grenade.Kind.SMOKE
+	h.released = false
+	p.read_throw(h, true)
+	assert_false(p.throw_from_hand)
+	assert_eq(FigureThrow.weight(0.0, false, config, p.throw_from_hand), 0.0)
+
+
+func test_readied_thrown_readied_again_flags_each_throw_correctly() -> void:
+	var p := _pose_reading()
+	var h := _hand(Grenade.Kind.FLASH, Grenade.Kind.NONE)
+	p.read_throw(h, true)
+	h.readied = Grenade.Kind.NONE
+	h.throwing = Grenade.Kind.FLASH
+	p.read_throw(h, true)
+	assert_true(p.throw_from_hand)
+	h.throwing = Grenade.Kind.NONE
+	h.readied = Grenade.Kind.FLASH
+	p.read_throw(h, true)
+	assert_true(p.bomb_held)
+	assert_false(p.throw_from_hand)
+	h.readied = Grenade.Kind.NONE
+	h.throwing = Grenade.Kind.FLASH
+	h.released = false
+	p.read_throw(h, true)
+	assert_true(p.throw_from_hand, "the second held throw is from the hand again")
+
+
+func test_a_hit_or_leaving_play_clears_throw_from_hand() -> void:
+	var p := _pose_reading()
+	var h := _hand(Grenade.Kind.SMOKE, Grenade.Kind.NONE)
+	p.read_throw(h, true)
+	h.readied = Grenade.Kind.NONE
+	h.throwing = Grenade.Kind.SMOKE
+	p.read_throw(h, true)
+	assert_true(p.throw_from_hand)
+	p.read_throw(h, false)
+	assert_false(p.throw_from_hand)
+	p.read_throw(h, true)
+	assert_false(p.throw_from_hand, "the hit throw doesn't resume as from hand")
+	p.read_throw(null, true)
+	assert_false(p.throw_from_hand)
+
+
+func test_throw_config_edge_values_give_finite_keys() -> void:
+	var edges: Array[Vector3] = [Vector3(0.0, 0.0, 0.0), Vector3(1.0, 0.0, 0.0), Vector3(0.0001, 0.0001, 0.9999),
+			Vector3(0.5, 1.0, 1.0)]
+	# x: throw_pin_until, y: throw_over_at, z: throw_cock
+	for e: Vector3 in edges:
+		var c := FigureConfig.new()
+		c.throw_pin_until = e.x
+		c.throw_over_at = e.y
+		c.throw_cock = e.z
+		for i in 41:
+			var share := i / 20.0
+			for held: bool in [false, true]:
+				for key: Vector3 in [FigureThrow.right_key(share, held, c), FigureThrow.left_key(share, c),
+						FigureThrow.right_pole(share, held, c)]:
+					assert_true(is_finite(key.x) and is_finite(key.y) and is_finite(key.z),
+							"edge %s share %.2f finite" % [e, share])
+			var w := FigureThrow.weight(share, false, c, true)
+			assert_true(w >= 0.0 and w <= 1.0)
+
+
+func test_pin_until_zero_has_the_left_hand_leave_the_pin_at_once() -> void:
+	var c := FigureConfig.new()
+	c.throw_pin_until = 0.0
+	assert_eq(FigureThrow.left_key(0.0, c), c.throw_pin)
+	assert_ne(FigureThrow.left_key(0.1, c), c.throw_pin)
+	assert_lt(FigureThrow.left_key(c.throw_cock, c).distance_to(c.throw_point), 0.0001)
+
+
+func test_right_key_is_continuous_across_the_over_key_and_the_release() -> void:
+	var prev := FigureThrow.right_key(config.throw_cock, false, config)
+	for i in 101:
+		var share := config.throw_cock + (1.0 - config.throw_cock) * i / 100.0
+		var k := FigureThrow.right_key(share, false, config)
+		assert_lt(k.distance_to(prev), 0.06, "no jump at share %.2f" % share)
+		prev = k
+	assert_eq(FigureThrow.right_key(1.0, false, config), config.throw_release)
