@@ -1,17 +1,19 @@
-Task: BL1 · QA head fa46a29 · Verdict: Pass
+Task: GA1 · QA commit pending · Verdict: Pass
 
-Blocking: none. Static review (the unit tests run in tools/check.sh).
+Blocking: none.
+Advisory: none found. Checked: Hitbox.step_walk_cycle takes speed from c.velocity, not the ground moved; a vault or a
+knock that moves position with zero velocity advances the cycle at the first table point (1.0 m / 0.8 m), harmless
+(no stepping clip shows then). Walk-off and bots set velocity through Movement.step, so cadence follows speed.
+Empty, zero and repeated-speed tables stay finite (MIN_CYCLE guard); steady_turn wraps across +-PI.
 
-- Replica contract: aeg.glb and sniper.glb keep every empty (BarrelEnd, GripMount, MagWell, Muzzle, OpticMount,
-  TorchMount), every bone and the five clips; node and clip sets identical to origin/main's.
-- sight_fold.gd: scale set in setup, fold, unfold and the per-frame modifier, symmetric; HIDDEN_SCALE 0.001 keeps the
-  bone transform invertible; pistols have no sight bones, so nothing else is touched.
-- Tests: test_parts_in_play.gd asserts both sights hidden under an optic and back after unfit (fails without the
-  change); silencer z -0.439 and the sniper-minus-AEG muzzle -0.426 agree with BarrelEnd 0.339 and the sniper's 0.765.
-- Figures: human.json and robot.json carry bot14.py's RIFLE_SEAT; the residual offset is in KNOWN_ISSUES.
-- The arms are fully removed; nothing in game/ or tests/ refers to them.
-
-Advisory: HIDDEN equals BONES, so the fold rotation is no longer visible (harmless); Fire and Reload key the sight
-rotation and the modifier wins.
-
-Owner to check in game: the held rifle and iron sights, the support hand on the handguard, frame rate at 8v8.
+Tests added (tests/unit/test_gait_cycle.gd, 9 tests, 60 asserts, all pass):
+- test_cycle_length_is_in_line_between_speeds_and_held_past_the_ends · fails if lerp or end-hold is removed (old code had no table).
+- test_cycle_length_blends_to_the_crouched_table · fails if the crouch blend is dropped.
+- test_cycle_length_never_below_the_minimum_even_with_bad_tables · fails without the MIN_CYCLE clamp.
+- test_cycle_length_with_empty_or_repeated_tables_is_finite · fails without the empty/zero-span guards.
+- test_step_walk_cycle_advances_a_whole_cycle_over_the_cycle_length · old code used strides_per_metre (0.75/m), not the 1.763 m table.
+- test_each_gait_clip_covers_the_cycle_length_at_its_speed · human and robot sidecars, Walk_F/Run_F/Sprint/CrouchWalk, within 1% (fails if a clip or table is re-tuned alone).
+- test_steady_turn_wraps_to_the_short_way_round · fails without wrapf.
+- test_upper_steady_changes_the_upper_body_only_while_it_is_on · upper_steady 1 moves the strafe's upper joints, 0 reproduces the old pose.
+- test_a_vaulting_or_out_character_keeps_the_hips_upper_body · fails if the alive/not-vaulting guard is removed.
+Not run: tools/check.sh (main thread); in-game look of the gait needs a display (owner's list).
