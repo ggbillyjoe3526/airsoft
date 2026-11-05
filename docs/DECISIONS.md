@@ -203,6 +203,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   `docs/CC0_ASSETS.md` › Size limits, with LODs so distance and Low pay less. High's 250k triangle target from the
   browser game rises to 1.5 million until a Godot baseline sets the real line; Low keeps its 60 FPS floor and draws
   figures at their middle detail.
+- **Models spend their triangle budget on detail (owner, 2026-11-05: "as much detail as possible within the
+  budgets").** A model aims close to its budget in `docs/CC0_ASSETS.md` › Size limits, about 95 % (38,000 of 40,000
+  is reasonable); it need not hit it exactly.
 - **Arms and hands are modelled as realistically as possible (owner, 2026-10-18).** His arm and hand study
   (`docs/art/references/arm-hand-anatomy.jpg`) is the target for anatomy, skin and natural grips on replicas, for his
   art pass and the shared rig standard: `docs/ART.md` › Arms and hands.
