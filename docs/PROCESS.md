@@ -185,7 +185,7 @@ never changes a model or an effort level unless the owner asks.
 - **Where a decision goes.** A task's own default or tuning value goes in its record, `docs/records/<id>.md`
   (`docs/records/README.md`). An owner ruling, or a rule every later task must follow, goes in `docs/DECISIONS.md`.
 - **Before changing a number** carried from the browser game, read why it is what it is: the old records and
-  decisions are in `legacy/browser/docs/` until 0.1.
+  decisions are in `legacy/browser/docs/`, read from git at the tag `0.1-dev.1`.
 - **Known issues.** What a task leaves open is a row in `docs/KNOWN_ISSUES.md`, named in its record too. A pull
   request that fixes a row deletes it.
 - **Ask the owner at once** when a check can only pass by changing an acceptance criterion (a budget the build can't
