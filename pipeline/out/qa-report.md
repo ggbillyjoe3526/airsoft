@@ -1,17 +1,11 @@
-Task: BL1 · QA head fa46a29 · Verdict: Pass
+Task: BL9 · QA commit pending · Verdict: Fail
 
-Blocking: none. Static review (the unit tests run in tools/check.sh).
+Blocking
+- game/play/grenade_view.gd _draw_canister: a smoke bomb at rest sinks 8.4 mm into the ground. It lies by Basis(FORWARD, PI/2), which turns the lever (reaching 35.9 mm from the axis, +x; the body is 27.5 mm) downward, but LIE_RADII[SMOKE] is the body's 27.5 mm. Fix: lift by the model's real lowest reach (35.9 mm), or turn it the other way (lever up) so the body rests on the ground. Flash is fine (0.15 mm).
 
-- Replica contract: aeg.glb and sniper.glb keep every empty (BarrelEnd, GripMount, MagWell, Muzzle, OpticMount,
-  TorchMount), every bone and the five clips; node and clip sets identical to origin/main's.
-- sight_fold.gd: scale set in setup, fold, unfold and the per-frame modifier, symmetric; HIDDEN_SCALE 0.001 keeps the
-  bone transform invertible; pistols have no sight bones, so nothing else is touched.
-- Tests: test_parts_in_play.gd asserts both sights hidden under an optic and back after unfit (fails without the
-  change); silencer z -0.439 and the sniper-minus-AEG muzzle -0.426 agree with BarrelEnd 0.339 and the sniper's 0.765.
-- Figures: human.json and robot.json carry bot14.py's RIFLE_SEAT; the residual offset is in KNOWN_ISSUES.
-- The arms are fully removed; nothing in game/ or tests/ refers to them.
+Advisory: none. Checked and fine: held mesh per kind, kind change in a reused slot, the loaded model left unpainted (duplicate), prewarm covers every surface material, no node leaks, model centres within 4 mm of the origin.
 
-Advisory: HIDDEN equals BONES, so the fold rotation is no longer visible (harmless); Fire and Reload key the sight
-rotation and the modifier wins.
-
-Owner to check in game: the held rifle and iron sights, the support hand on the handguard, frame rate at 8v8.
+Tests added
+- tests/unit/test_grenade_models_qa.gd · a bomb at rest has no vertex below the ground (both kinds) · FAILS now on the smoke (pins the bug); passes once the lift covers the lever.
+- same file · a slot reused for the other kind swaps the mesh · would fail if the mesh swap were removed from _draw_canister.
+- same file · the held bomb is the kind's own mesh and follows the kind · would fail if _draw_held always used one mesh.
