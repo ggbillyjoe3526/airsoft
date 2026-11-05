@@ -1,15 +1,13 @@
-Task: BL3 · AEG Rifle rework · head working tree (uncommitted) · Verdict: Pass
-Run: no game run; model-only change (no GDScript, scenes or config), so measured by parsing the glb JSON chunks (python3 -I) · budget: no pipeline/perf-budget.json lines; judged against the contract (replicas 40,000 tris in hands, 2K textures, 7 materials) and main's glbs
-Metrics (main -> now, measured from glb accessors):
- aeg.glb    file 1,126,816 -> 1,131,788 B (+0.4 %) · meshes 12 -> 12 · primitives (draw calls) 26 -> 26 · materials 7 -> 7 (limit 7, ok) · textures/images 0 -> 0 · nodes 31 -> 31
- aeg.glb    triangles all meshes 40,038 -> 40,156 (+0.3 %); in the hands (minus Figure 340) 39,816 (limit 40,000, ok, 184 spare; matches the build log)
- sniper.glb file 1,157,204 -> 1,162,692 B (+0.5 %) · meshes 12 · primitives 26 -> 26 · materials 7 -> 7 (ok) · textures 0 · nodes 31
- sniper.glb triangles all meshes 40,178 -> 40,296 (+0.3 %); in the hands (minus Figure 360) 39,936 (limit 40,000, ok, only 64 spare)
+Task: BL9 · head 0f115be · Verdict: Pass
+Run: smoke match with --perf (fixed smoke seed), headless (no GPU), head vs origin/main worktree · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and origin/main
+Metrics: nodes_max 1339 / 1339 main (ok), orphans_max 879 / 879 main (ok, same as main), draw calls 0 (headless, not measurable). Assets: smoke.glb 152,544 B, flash.glb 82,184 B / 200 KB per file (ok); 5,292 and 2,812 tris / 5,500 per file (ok). Frame times not measured.
 Regressions (> 10 % worse): none
 Blocking findings: none
 Advisory:
- - tools/blender/replicas/sniper.py (derives from aeg.py): sniper hands total is 39,936, 64 tris under the budget; any further AEG body growth will push the sniper over. Judgment, not blocking.
- - Body is 30,996 tris of the 39,816 (78 %); if later work needs room, the Body mesh is where to trim. Judgment.
- - Textures: none embedded (flat materials), so no 2K texture or VRAM cost; file size delta is mesh data only (+5 KB each). Measured.
- - No code, scene or config change: no per-frame allocations, node or resource lifetime, or prewarm impact (7 materials unchanged, so no new shader variants). Judgment.
-Fixes: not needed.
+- assets/models/grenades/*.glb (judgment): 7 surfaces (smoke) and 6 (flash) per bomb vs 1 before = 6 to 7x draw calls per bomb. Worst case 12 bombs + 1 held = about 91 extra opaque draws (only while bombs are live; most matches far fewer). Shadows off, so no shadow-pass multiplier; fine on Ultra, worth a rendered check on Low. Merging surfaces that share a material (or fewer than ~4 materials) would cut it.
+- game/play/grenade_view.gd:197-213 (judgment): the model loads once in setup per GrenadeView (PropDressConfig.load_mesh frees its instanced scene root; duplicate() is one mesh per kind, shared by all slots). No per-bomb mesh or material; meshes are RefCounted and freed with the view. No leak.
+- grenade_view.gd:264-279 and 331-350 (judgment): per-frame path allocates nothing new (Basis/Transform3D are value types; mesh assigned only when the kind changes). No signals, timers or tweens added.
+- grenade_view.gd:182-189 (judgment): materials() now returns every surface material of both kinds, de-duplicated with Array.has, for ShaderPrewarm; it runs once, so no hot-path cost. Prewarm covers all model materials: no first-use hitch.
+- load cost (judgment): two glb loads at setup (about 235 KB total), once per match; negligible.
+Fixes: none required.
+Unexplained: none (frames 4047 vs 4469 is the smoke match ending at a different point, not a per-tick cost; script time not compared).

@@ -42,3 +42,9 @@ The smoke and flash bombs were plain cylinders; they are now modelled from the o
   the canister, so the two bombs are told apart by shape as well as colour.
 - Budget: 5,500 triangles and 200 KB a grenade (`docs/CC0_ASSETS.md` › Grenade models), a prop's budget with room
   for the hand view; at most twelve bombs fly at once.
+
+## Known issues
+
+- Each bomb draws one surface per material (smoke 7, flash 6) where the old canister drew one: at most about 90
+  extra opaque draws while twelve bombs are live, shadows off (performance, advisory). Not measured on a GPU; a Low
+  preset check in play would confirm.
