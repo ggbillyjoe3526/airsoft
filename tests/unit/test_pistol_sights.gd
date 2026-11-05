@@ -7,6 +7,8 @@ const MODEL := "res://assets/models/replicas/pistol.glb"
 const EYE_BACK := 0.36
 ## A point on the post this far under its top must be seen; the light either side is looked for this far out.
 const POST_DROP := 0.001
+## The post under its dot (the dot's foot 2.1 mm under the top) must be seen too: nothing white bridges the notch.
+const UNDER_DOT := 0.0026
 const LIGHT_OUT := 0.0024
 ## The port: the slide's top is sampled every STEP (m) on lines across and along it, between the sights and inside
 ## its bevelled edges (SIDE_MARGIN); a sample more than DEEP under the top is open, and no open run may be longer than
@@ -68,6 +70,9 @@ func test_aimed_the_eye_sees_the_front_post_in_the_notch() -> void:
 	var hit := _hit(eye, post)
 	assert_almost_eq(eye.distance_to(hit), eye.distance_to(post), 0.003,
 			"the first thing seen under the post's top is the post, not the rear sight")
+	var low := front + Vector3(0.0, -UNDER_DOT, 0.0)
+	assert_almost_eq(eye.distance_to(_hit(eye, low)), eye.distance_to(low), 0.003,
+			"the post under its dot shows over the notch's floor (no outline across the notch)")
 	for side: float in [-LIGHT_OUT, LIGHT_OUT]:
 		assert_eq(_hit(eye, post + Vector3(side, 0.0, 0.0)), Vector3.INF, "light beside the post (%+.4f m)" % side)
 

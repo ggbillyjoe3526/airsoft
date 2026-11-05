@@ -97,7 +97,7 @@ BARREL_END = Y(20.0)
 SIGHT_Z = SLIDE_TOP + 0.0030
 NOTCH_DROP = 0.0021
 FRONT_POST_HW = 0.0016
-FRONT_DOT_R = 0.0010
+FRONT_DOT_R = 0.00085
 REAR_SIGHT_Y = Y(529.0)
 FRONT_SIGHT_Y = Y(49.0)
 # The frame: half widths of its upper part (walls, dust cover), the trigger guard and the grip.
@@ -283,8 +283,7 @@ def slide() -> object:
     # Rear sight: a wide block, sloped front and back (photo: its foot x 521 to 541, its top x 524 to 534 at
     # py 35), a U notch with a white outline on its back face.
     ry = REAR_SIGHT_Y
-    rear = [(Y(541.0), top - 0.0004), (Y(521.0), top - 0.0004), (Y(524.0), Z(35.0)), (Y(534.0), Z(35.0)),
-            (Y(540.0), top + 0.0007)]
+    rear = [(Y(541.0), top - 0.0004), (Y(521.0), top - 0.0004), (Y(524.0), Z(35.0)), (Y(534.0), Z(35.0))]
     b.prism(rear, "x", -REAR_SIGHT_HW, REAR_SIGHT_HW, "Detail")
     # Front sight: a post with a white dot set into its sloped back face (one piece with it, owner 2026-11-05), the
     # dot laid on the face (tilted with it), standing 0.12 mm proud, centred where the notch's light frames it.
@@ -303,16 +302,20 @@ def slide() -> object:
     c.prism(hs.rounded_rect(NOTCH_HW, 0.0030, 0.0009, 3), "y", ry - 0.010, ry + 0.010, "Detail",
             offset=(0.0, 0.0, floor + 0.0030))
     hs.cut(bits, [c.build()])
-    # The notch's white outline: a U on the sight's sloped back face.
+    # The notch's white outline: a U laid on the sight's back face, one plane leaning forward at its top (from x 541
+    # at its foot to 534 at the top). Heights are drawn along the face, so each is its drop over cos(lean): the U's
+    # floor band ends exactly on the notch's floor, nothing white across the notch.
     b = hs.Builder("RearDot", ["Accent"])
     w = 0.0006
     zt = Z(35.0) - 0.0001
-    u = [(-NOTCH_HW - w, 0.0), (-NOTCH_HW - w, floor - w - zt), (NOTCH_HW + w, floor - w - zt),
-         (NOTCH_HW + w, 0.0), (NOTCH_HW, 0.0), (NOTCH_HW, floor - zt), (-NOTCH_HW, floor - zt), (-NOTCH_HW, 0.0)]
+    lean = math.atan2(Y(534.0) - Y(541.0), Z(35.0) - (top - 0.0004))
+    k = 1.0 / math.cos(lean)
+    u = [(-NOTCH_HW - w, 0.0), (-NOTCH_HW - w, (floor - w - zt) * k), (NOTCH_HW + w, (floor - w - zt) * k),
+         (NOTCH_HW + w, 0.0), (NOTCH_HW, 0.0), (NOTCH_HW, (floor - zt) * k), (-NOTCH_HW, (floor - zt) * k),
+         (-NOTCH_HW, 0.0)]
     f = b.prism(u, "y", -0.00012, 0.00012, "Accent")
-    # Laid on the back face, which leans forward at its top (from x 540 at its foot to 534 at the top).
-    lean = math.atan2(Y(534.0) - Y(540.0), Z(35.0) - (top + 0.0007))
-    b.transform(f, Matrix.Translation((0.0, Y(534.0), zt)) @ Matrix.Rotation(-lean, 4, "X"))
+    face_y = Y(534.0) - (Z(35.0) - zt) * math.tan(lean)
+    b.transform(f, Matrix.Translation((0.0, face_y, zt)) @ Matrix.Rotation(-lean, 4, "X"))
     dot = b.build()
     parts += [hs.finish(bits, 0.0003, 1), dot]
     return hs.join("Slide", parts)
