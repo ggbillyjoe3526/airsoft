@@ -1277,6 +1277,16 @@ The bolt-action in the grey chassis from your first sniper photo (2026-11-05). D
   silencer on the barrel's end in place of the cap.
 - [ ] **Hold:** the right hand holds the grip in first person and on the bots; the rifle sits right in the hands.
 
+## The BB model (BM1)
+
+Every BB in flight is now a proper Blender model, round from every side instead of the old eight-sided ball.
+
+- [ ] **Up close:** in the Range, fire the AEG Rifle with your eye on the muzzle: each BB leaves as a round ball with
+  an even dark rim, no corners, and joins its path as before.
+- [ ] **At range:** BBs still read as small bright dots with a faint trail at 20 to 40 m, on pale walls and the sky.
+- [ ] **Glowing BBs:** on Woodland at night, glowing BBs are round green balls with their streak, as before.
+- [ ] **Frame rate:** a full-auto magazine dump on Low keeps its frame rate (F3 box).
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
