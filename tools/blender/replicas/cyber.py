@@ -655,9 +655,10 @@ def _back_y(z: float) -> float:
 # --------------------------------------------------------------------------------------------- trigger and selector
 
 def trigger() -> object:
-    """The old model's curved blade (its outline, a little longer: its foot 3 mm above the guard's floor)."""
-    blade = [(13.9, -11.0), (20.6, -13.4, 1.0), (18.2, -19.0, 5.0), (15.7, -26.5, 8.0), (15.8, -36.0, 1.2),
-             (13.4, -37.0, 1.2), (11.0, -35.0, 1.2), (11.3, -28.0, 8.0), (12.3, -19.5, 5.0), (13.2, -11.3)]
+    """The old model's curved blade, a little longer (its foot 3 mm above the guard's floor) and stood upright:
+    the finger face hollow, the foot curling slightly forward of the root (owner, 2026-11-05)."""
+    blade = [(13.9, -11.0), (20.6, -13.4, 1.0), (19.0, -19.0, 5.0), (18.6, -27.0, 8.0), (20.2, -35.5, 1.2),
+             (18.0, -37.0, 1.2), (15.6, -35.0, 1.2), (14.6, -28.0, 8.0), (14.0, -19.5, 5.0), (13.2, -11.3)]
     ob = side("Trigger", blade, 2.8, "CyberFrame")
     return hs.finish(ob, m(0.4), 2)
 

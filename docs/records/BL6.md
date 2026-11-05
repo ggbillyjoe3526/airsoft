@@ -31,7 +31,7 @@
   Magazine and Figure; the materials CyberSlab, CyberFrame, CyberLine, CyberCore and CyberMetal with the old colours
   and glow. The old file's `Figure` node sat 0.3 m down (a leftover: the game resets the Figure's transform); the new one
   sits at the origin like the other replicas'.
-- **Budget:** 31,322 triangles in the hands (40k limit), 240 in the figure version; 6 meshes, 5 materials, no
+- **Budget:** 31,292 triangles in the hands (40k limit), 240 in the figure version; 6 meshes, 5 materials, no
   textures. The build is deterministic (two runs give the same file).
 
 ## Defaults taken
@@ -41,6 +41,9 @@
   the original trigger and guard shape". So the trigger is the old model's curved blade (its outline, 2.4 mm longer:
   z -11 to -37) and the guard the old one's: a narrow loop in front (6.5 mm either side), a full-width web behind, the
   opening y 0.5 to 45.7 and z -16.5 to -40, 3 mm under the trigger's foot.
+- **Owner's review (09:10):** "The trigger is leaning too far back." The blade now stands upright, its finger face
+  hollow and its foot curling 1 mm forward of its root. The earlier pictures showed the importer's first frame of the Fire
+  clip (trigger pulled 17°, slide back 14 mm), which made the lean look worse; the review renders now clear the pose.
 
 ## Verified
 
