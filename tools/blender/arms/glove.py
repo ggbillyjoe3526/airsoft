@@ -3,11 +3,12 @@ MakeHuman base mesh's arm and hand (CC0 1.0, `source/makehuman_arm.obj`), with p
 is this one mirrored (arms.py).
 
 The glove is the hand's skin pushed out a glove's thickness. On it, as raised shells laid onto its surface, sit the
-parts of the owner's reference gloves (ref_images/hands/gloves): a moulded knuckle guard with a dome over each knuckle,
-a two-piece pad on each finger's first bone and one on its second, a thumb pad, a suede palm patch, a neoprene cuff and
-its hook-and-loop strap with a pull tab. A shell takes the weights of the glove beneath it, and a hard part takes only
-its bone's, so it stays rigid as the fingers close. The sleeve is a loose shell over the forearm and upper arm with a
-few soft folds (bunched over the cuff, gathered in the crook of the elbow), a banded, hemmed cuff and its tab.
+parts of the owner's reference gloves (ref_images/hands/gloves, 123404 most): one smooth moulded knuckle shell with a
+raised border, a small oval pad on the back of each finger's first bone and one on the thumb's, a rounded suede palm
+patch, a neoprene cuff and its hook-and-loop strap with a pull tab; the fingertips plain. A shell takes the weights
+of the glove beneath it (the knuckle shell only its bone's, so it stays rigid). The sleeve is a loose shell over the
+forearm and upper arm with a few soft folds (bunched over the cuff, gathered in the crook of the elbow), a banded,
+hemmed cuff and its tab; it follows the forearm and upper arm only, never the wrist's turn.
 """
 
 import math
@@ -40,23 +41,24 @@ UPPER_KEEP = 0.13
 SLEEVE_OFF = (0.0080, 0.0105)
 SLEEVE_BAND = 0.030
 SLEEVE_HEM = 0.0022
+SLEEVE_NORMAL_SMOOTH = 4
 # The hard parts' heights over the glove (m).
 SHELL_THICK = 0.0016
-KNUCKLE_DOME = 0.0030
-KNUCKLE_RIM = 0.0011
-KNUCKLE_CROWN = 0.0022
-KNUCKLE_RIDGE_W = 0.11
-KNUCKLE_ROUND = 0.6
-PAD_THICK = 0.0013
+KNUCKLE_DOME = 0.0024
+KNUCKLE_RIM = 0.0012
+KNUCKLE_ROUND = 0.75
+PAD_THICK = 0.0018
 # The finger plates bend with the glove beneath them (rigid on one bone, the skin rose through their ends as the joints
 # beside them closed).
 PAD_RIGID = False
 # The knuckle shell: how far it reaches beyond the outer knuckles, back from them over the hand and on over them (m).
 KNUCKLE_SPAN = 0.006
-KNUCKLE_BACK = 0.040
+KNUCKLE_BACK = 0.050
 KNUCKLE_OVER = 0.002
-# The finger plates, as shares of each bone from its root: one on the first bone, one on the second.
-PLATES = (((0.26, 0.76),), ((0.24, 0.74),))
+# The finger pads, as shares of each finger's first bone from its root (an oval just short of the middle knuckle), and
+# how far round the finger each reaches (degrees either side of its back).
+PAD_SPAN = (0.40, 0.90)
+PAD_WRAP = 34.0
 
 
 def load_source(shoulder: Vector) -> tuple:
@@ -406,10 +408,10 @@ def _soft_box(u: float, v: float, edge: float = 0.18) -> float:
 
 
 def knuckle_guard(surf: Surface, fr: Frame) -> tuple:
-    """The moulded knuckle shell (the owner's glove photos: one hard shell, not a pad per knuckle): across the back of
-    the hand from beyond the index to beyond the little finger, over the knuckles only (from a little behind them to
-    just over them), a dome over each knuckle with a shallow groove between neighbours and a padded rim round it, its
-    edges easing down into the glove; rigid on the hand."""
+    """The moulded knuckle shell (the owner's glove photo 123404: one smooth hard shell): across the back of the hand
+    from beyond the index to beyond the little finger, from half way back over the hand to just over the knuckles, a
+    rounded oval outline, an even dome across it and a raised, stitched-looking border round it, its edges easing
+    down into the glove; rigid on the hand."""
     j, k = fr.j, fr.knuckles
     up = fr.dorsal
     across = (k[3] - k[0]).normalized()
@@ -434,25 +436,20 @@ def knuckle_guard(surf: Surface, fr: Frame) -> tuple:
     def direction(u: float, v: float) -> Vector:
         return up + across * u * 0.25
 
-    knuck_u = [-0.78, -0.26, 0.26, 0.78]
-
     def thick(u: float, v: float) -> float:
-        # A rigid moulded plate (the owner's glove photos): a flat crown, four even ridges running back from the
-        # knuckles, and a crisp raised rim round a rounded outline.
-        ridge = sum(math.exp(-((u - ku) / KNUCKLE_RIDGE_W) ** 2) for ku in knuck_u)
-        along = _smooth01((v + 0.35) / 0.55) * (1.0 - _smooth01((v - 0.85) / 0.15))
+        # One even dome, highest a little behind the knuckles, and a raised border just inside its edge.
+        dome = max(0.0, 1.0 - (u * u * 0.8 + (v - 0.2) * (v - 0.2) * 0.5))
         edge = max(abs(u), abs(v))
-        rim = KNUCKLE_RIM * math.exp(-((edge - 0.86) / 0.06) ** 2)
-        return (SHELL_THICK + KNUCKLE_CROWN + KNUCKLE_DOME * min(1.0, ridge) * along + rim) * _soft_box(u, v, 0.16) \
-            + 0.0003
+        rim = KNUCKLE_RIM * math.exp(-((edge - 0.86) / 0.05) ** 2)
+        return (SHELL_THICK + KNUCKLE_DOME * dome + rim) * _soft_box(u, v, 0.14) + 0.0003
 
     return surf.shell(origin, direction, 13, 29, thick, "GloveArmour", False, "Hand", 8, 0.0010)
 
 
 def finger_pads(surf: Surface, fr: Frame) -> list:
-    """The segmented finger plates (the owner's glove photos): one curved plate over the back of each finger's first
-    and second bones, one over the thumb's; each wraps the back of its bone, its ends rounded and its edges easing
-    down, and is rigid on it."""
+    """The finger pads (the owner's glove photo 123404): a small domed oval on the back of each finger's first bone,
+    just short of the middle knuckle, and one on the back of the thumb's; none on the palm's side, the fingertips
+    plain. Each bends with the glove beneath it."""
     j = fr.j
     out = []
 
@@ -465,29 +462,25 @@ def finger_pads(surf: Surface, fr: Frame) -> list:
             return a.lerp(b, span[0] + (span[1] - span[0]) * (v + 1.0) * 0.5)
 
         def direction(u: float, v: float) -> Vector:
-            t = math.radians(wrap) * u
+            # Narrowing towards its ends: an oval, not a cut strip.
+            t = math.radians(wrap) * u * math.sqrt(1.0 - 0.8 * v * v)
             return up * math.cos(t) + side * math.sin(t)
 
         def thick(u: float, v: float) -> float:
-            return PAD_THICK * _soft_box(u, v, grid[2]) + 0.0003
+            return PAD_THICK * max(0.0, 1.0 - u * u - v * v) ** 0.6 * _soft_box(u, v, grid[2]) + 0.0003
 
-        return surf.shell(origin, direction, grid[0], 9, thick, "GloveArmour", False, PAD_RIGID and bone, grid[1], 0.0008)
+        return surf.shell(origin, direction, grid[0], 9, thick, "GloveArmour", False, PAD_RIGID and bone, grid[1],
+                          0.0008)
 
     for f in (2, 3, 4, 5):
         name = FINGER_NAMES[f]
-        wrap = 66.0 if f != 5 else 60.0
         a, b = j["finger-%d-1" % f], j["finger-%d-2" % f]
-        for span in PLATES[0]:
-            out.append(pad(a, b, fr.dorsal, span, wrap, name + "1"))
-        a, b = j["finger-%d-2" % f], j["finger-%d-3" % f]
-        for span in PLATES[1]:
-            out.append(pad(a, b, fr.dorsal, span, wrap, name + "2"))
+        out.append(pad(a, b, fr.dorsal, PAD_SPAN, PAD_WRAP, name + "1"))
     a, b = j["finger-1-2"], j["finger-1-3"]
     d = (b - a).normalized()
     away = a - fr.palm_centre
     away = (away - d * away.dot(d)).normalized()
-    # The thumb's plate is shorter along it and less smoothed: the pistols' thumb holds are solved against this one.
-    out.append(pad(a, b, (away + fr.dorsal * 0.6), (0.20, 0.82), 46.0, "Thumb2", (5, 1, 0.4)))
+    out.append(pad(a, b, (away + fr.dorsal * 0.6), (0.30, 0.85), PAD_WRAP, "Thumb2", (5, 1, 0.4)))
     return out
 
 
@@ -533,13 +526,14 @@ def build_left(shoulder: Vector) -> tuple:
     mesh.add(*knuckle_guard(surf, fr))
     for part in finger_pads(surf, fr):
         mesh.add(*part)
-    # The palm's suede patch, over the heel of the hand and up to the fingers' roots; its thickness eases out well
-    # in from its edges, so it reads as a rounded pad (moving its corners in moved the trigger finger's solve).
+    # The palm's suede patch, over the heel of the hand and up to the fingers' roots: a rounded square (its corners
+    # pulled in to a radius of about 8 mm), its thickness easing out in from its edges.
     across = (fr.knuckles[3] - fr.knuckles[0]).normalized()
     pc = fr.palm_centre + fr.fingers * 0.002
 
     def palm_origin(u: float, v: float) -> Vector:
-        return pc + across * (u * 0.024) + fr.fingers * (v * 0.024)
+        return pc + across * (u * 0.024 * math.sqrt(1.0 - 0.35 * v * v)) + \
+            fr.fingers * (v * 0.024 * math.sqrt(1.0 - 0.35 * u * u))
 
     mesh.add(*surf.shell(palm_origin, lambda u, v: fr.palmar, 7, 11,
                          lambda u, v: 0.0021 * _soft_box(u, v, 0.6) + 0.0001, "GloveArmour", smooth=4, lift=0.0008))
@@ -563,14 +557,38 @@ def build_left(shoulder: Vector) -> tuple:
     return mesh, j, fr, pts
 
 
+def _loose(w: dict) -> dict:
+    """A sleeve vertex's weights: the skin's beneath it, with the hand's share moved onto the forearm. The sleeve is
+    loose on the arm and doesn't turn with the wrist; following the hand, it folded in on itself along the top of the
+    forearm when a pistol hold turned the wrist (the critic's dark wedges in the pistol's aimed view)."""
+    out = {}
+    for b, v in w.items():
+        k = "Forearm" if b not in ("Forearm", "UpperArm") else b
+        out[k] = out.get(k, 0.0) + v
+    return out
+
+
 def sleeve(mesh: Mesh, verts: list, faces: list, wts: list, fr: Frame) -> None:
     """The sleeve: a loose shell over the forearm and upper arm with soft folds, its cuff banded and hemmed."""
     j = fr.j
+    wts = [_loose(w) for w in wts]
     up_dir = (j["shoulder"] - j["elbow"]).normalized()
     sleeve_f = [f for f in faces if fr.along(centre(verts, f)) < SLEEVE_END
                 and (centre(verts, f) - j["elbow"]).dot(up_dir) < UPPER_KEEP]
     cuff_edges = [e for e in open_edges(sleeve_f) if all(abs(fr.along(verts[i]) - SLEEVE_END) < 0.001 for i in e)]
     snrm = vertex_normals(verts, sleeve_f)
+    # Smoothed a few rounds over its neighbours: a skewed normal at a crease of the base mesh pushed a fin out of the
+    # top of the forearm (the critic's dark wedge on the pistol's aimed view).
+    near = {}
+    for f in sleeve_f:
+        for a, b in zip(f, f[1:] + f[:1]):
+            near.setdefault(a, set()).add(b)
+            near.setdefault(b, set()).add(a)
+    for _ in range(SLEEVE_NORMAL_SMOOTH):
+        snrm = list(snrm)
+        smoothed = {i: (snrm[i] + sum((snrm[k] for k in ks), Vector())).normalized() for i, ks in near.items()}
+        for i, n in smoothed.items():
+            snrm[i] = n
     elbow_t = fr.along(j["elbow"])
     shoulder_t = fr.along(j["shoulder"])
     side_ref = fr.dorsal.cross(fr.fdir)

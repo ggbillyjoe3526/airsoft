@@ -220,6 +220,9 @@ class Hand:
                      if w.get("Hand", 0.0) > 0.85 and (sx(v) - wrist).dot(self.fingers) < reach]
         self.palm = [p for k, p in enumerate(self.palm) if k % max(1, len(self.palm) // 800) == 0]
         self.radius, self.axis, self.adduct, self.points = {}, {}, {}, {}
+        # The height (eye space) no finger's glove may rise above: a support hand's fingers rest on the handguard's
+        # side, their tips below its top (the critic: no tip showing over it from the left). None: no limit.
+        self.tip_top = None
         # The whole hand bone's glove (the knuckles and the heel of the thumb too), for seating it clear.
         whole = [hand_rest.inverted() @ sx(v) for v, w in zip(mesh.v, mesh.w) if w.get("Hand", 0.0) > 0.45]
         self.points["Hand_" + side] = [q for i, q in enumerate(whole) if i % max(1, len(whole) // 300) == 0]
@@ -286,23 +289,31 @@ class Hand:
     def touches(self, b: str, col: Collider) -> bool:
         return self.clearance(b, col) < CONTACT
 
+    def over(self, name: str) -> float:
+        """How far the finger's last two sections' glove rises above `tip_top` (m; 0 when under it or no limit)."""
+        if self.tip_top is None or name == "Thumb":
+            return 0.0
+        high = max((self.rig.pose[b] @ q).z for b in ("%s%d_%s" % (name, k, self.side) for k in (2, 3))
+                   for q in self.points[b])
+        return max(0.0, high - self.tip_top)
+
     def thumb(self, col: Collider, ratio: tuple, limit: tuple, target: Vector = None, hug: float = 0.0,
-              swing: int = THUMB_SWING, twists: tuple = (-30, 0, 30)) -> list:
+              swing: int = THUMB_SWING, twists: tuple = (-30, 0, 30), bends: tuple = (0,)) -> list:
         """Swings the thumb at its base (across the palm, round its own line and in its bend) to the clear place
         nearest the rifle (and, given a `target`, with its tip nearest that; with `hug`, its whole length kept close
-        to the rifle too; `swing` and `twists` bound its turns at the base, degrees), then curls its tip bones onto
-        it."""
+        to the rifle too; `swing` and `twists` bound its turns at the base, degrees; `bends`, the knuckle bends tried
+        with each, so it can turn round a grip's corner), then curls its tip bones onto it from there."""
         b1, b2, b3 = ("Thumb%d_%s" % (k, self.side) for k in (1, 2, 3))
         inv = self.rig.rest[b1].to_3x3().inverted()
         across = inv @ self.palmar
         twist = Vector((0.0, 1.0, 0.0))
 
-        def score_at(a: int, c: int, t: int) -> tuple:
+        def score_at(a: int, c: int, t: int, k: int = 0) -> tuple:
             rot = (Matrix.Rotation(math.radians(c), 3, across) @ Matrix.Rotation(math.radians(t), 3, twist)
                    @ Matrix.Rotation(math.radians(a), 3, self.axis[b1]))
             self.rig.fk(b1, rot)
-            self.rig.fk(b2)
-            self.rig.fk(b3)
+            self.rig.fk(b2, Matrix.Rotation(math.radians(k), 3, self.axis[b2]))
+            self.rig.fk(b3, Matrix.Rotation(math.radians(k * 0.5), 3, self.axis[b3]))
             gaps = [self.clearance(b, col) for b in (b1, b2, b3)]
             # Its root may rest on the grip (the web of the hand on the back strap), never pass into it.
             clear = min(gaps[0] + CONTACT, gaps[1], gaps[2])
@@ -314,27 +325,30 @@ class Hand:
             if target is not None:
                 m = self.rig.pose[b3]
                 score += (m.translation + m.to_3x3().col[1] * self.rig.length[b3] - target).length * 3.0
-            return score, rot, a, c, t
+            return score, rot, a, c, t, k
 
         best = None
         for a in range(-swing, swing + 1, 10):
             for c in range(-80, 85, 10):
                 for t in twists:
-                    found = score_at(a, c, t)
-                    if best is None or found[0] < best[0]:
-                        best = found
+                    for k in bends:
+                        found = score_at(a, c, t, k)
+                        if best is None or found[0] < best[0]:
+                            best = found
         # Then finer round the best, within the same bounds.
-        a0, c0, t0 = best[2:]
+        a0, c0, t0, k0 = best[2:]
         for a in range(max(-swing, a0 - 10), min(swing, a0 + 10) + 1, THUMB_FINE):
             for c in range(max(-80, c0 - 10), min(80, c0 + 10) + 1, THUMB_FINE):
                 for t in range(max(min(twists), t0 - 15), min(max(twists), t0 + 15) + 1, THUMB_FINE):
-                    found = score_at(a, c, t)
+                    found = score_at(a, c, t, k0)
                     if found[0] < best[0]:
                         best = found
         self.adduct[b1] = best[1]
         if os.environ.get("BL_DEBUG"):
             print("   thumb search: score %.4f at %s" % (best[0], best[2:]))
-        out = self.close("Thumb", col, (0.0, ratio[1], ratio[2]), (0.0, limit[1], limit[2]))
+        k0 = math.radians(best[5])
+        out = self.close("Thumb", col, (0.0, ratio[1], ratio[2]), (0.0, max(limit[1], k0), max(limit[2], k0 * 0.5)),
+                         (0.0, k0, k0 * 0.5))
         return list(best[2:]) + out[1:]
 
     def settle(self, name: str, start: tuple, col: Collider, span: int = 30, swing: float = 0.0,
@@ -355,11 +369,20 @@ class Hand:
                 self.rig.fk(bones[k], self.adduct[bones[k]] @ rot if bones[k] in self.adduct else rot)
             return angles
 
+        # The most curl that clears the replica and keeps under `tip_top`; failing that, the clear curl rising least
+        # above it.
+        lowest = None
         for t in range(span, -3 * span - 1, -2):
             angles = apply(t)
             if not (self.clearance(bones[0], col) < (0.0 if root else CONTACT)
                     or any(self.touches(b, col) for b in bones[1:])):
-                return [round(a) for a in angles]
+                high = self.over(name)
+                if not high:
+                    return [round(a) for a in angles]
+                if lowest is None or high < lowest[0] - 1e-4:
+                    lowest = (high, t)
+        if lowest is not None:
+            return [round(a) for a in apply(lowest[1])]
         print("  ! the %s finger can't clear the replica %s" % (name, [round(self.clearance(b, col) * 1000, 1)
                                                                     for b in bones]))
         return [round(a) for a in angles]
@@ -426,10 +449,11 @@ class Hand:
         print("  %s finger on its mark: pad %.1f mm off" % (name, (best[0] if best[2] >= CONTACT else -1) * 1e3))
         return [round(x) for x in best[1]]
 
-    def close(self, name: str, col: Collider, ratio: tuple, limit: tuple) -> list:
-        """Curls one finger joint by joint until each part meets the rifle (or reaches its limit)."""
+    def close(self, name: str, col: Collider, ratio: tuple, limit: tuple, start: tuple = (0.0, 0.0, 0.0)) -> list:
+        """Curls one finger joint by joint, from its bends `start` (radians), until each part meets the rifle (or
+        reaches its limit)."""
         bones = ["%s%d_%s" % (name, k, self.side) for k in (1, 2, 3)]
-        ang = [0.0, 0.0, 0.0]
+        ang = list(start)
         frozen = [False, False, False]
         step = math.radians(1.0)
 
@@ -650,9 +674,10 @@ def tighten(rig: Rig, hands: dict, objects: list, solid: list, fingers: list) ->
         for shares in (TIGHTEN_SHARES, TIGHTEN_WRAP):
             n = 0.0
             while n + TIGHTEN_STEP <= TIGHTEN_MAX:
+                high = hands[side].over(name)
                 _turn_finger(rig, hands, side, name, shares, TIGHTEN_STEP)
                 rig.write()
-                if clipping(objects, solid)[0]:
+                if hands[side].over(name) > high or clipping(objects, solid)[0]:
                     _turn_finger(rig, hands, side, name, shares, -TIGHTEN_STEP)
                     rig.write()
                     break
@@ -687,9 +712,10 @@ def wrap(rig: Rig, hands: dict, objects: list, solid: list, fingers: list) -> di
     for side, name in fingers:
         n = 0.0
         while n + WRAP_STEP <= WRAP_MAX:
+            high = hands[side].over(name)
             _turn_finger(rig, hands, side, name, shares, WRAP_STEP)
             rig.write()
-            if clipping(objects, solid)[0]:
+            if hands[side].over(name) > high or clipping(objects, solid)[0]:
                 _turn_finger(rig, hands, side, name, back, WRAP_STEP)
                 break
             n += WRAP_STEP
