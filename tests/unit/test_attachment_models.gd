@@ -187,6 +187,50 @@ func test_the_lasers_beam_is_at_its_emitter() -> void:
 	assert_almost_eq(beam.position.z, lens.get_center().z, 0.002)
 
 
+## Every vertex of a part, in its own space (x right, y up from the rail, -z forward).
+func _verts(m: MeshInstance3D) -> PackedVector3Array:
+	var out := PackedVector3Array()
+	for i in m.mesh.get_surface_count():
+		out.append_array(m.mesh.surface_get_arrays(i)[Mesh.ARRAY_VERTEX] as PackedVector3Array)
+	return out
+
+
+func test_the_laser_sits_flush_in_its_housing_with_nothing_standing_out_in_front() -> void:
+	# The owner (2026-11-05): no cylinder standing out of the laser; the emitter flush in the attachment.
+	var m := _part(_load("pistol"), "laser_redLaser")
+	var verts := _verts(m)
+	var front := INF
+	for v in verts:
+		front = minf(front, v.z)
+	var lo := INF
+	var hi := -INF
+	for v in verts:
+		if v.z < front + 0.004:
+			lo = minf(lo, v.x)
+			hi = maxf(hi, v.x)
+	assert_gt(hi - lo, 0.024, "the front 4 mm is the housing's full width, not a tube")
+	var beam := m.get_node("laser_redLaser_Beam") as Node3D
+	assert_between(beam.position.z - front, 0.0, 0.002, "the emitter is just inside the front face")
+
+
+func test_the_2x_scope_stands_low() -> void:
+	# The owner (2026-11-05): less tall; his pick, the axis 36 mm over the rail (the first build's was 46). The rifles'
+	# iron sights fold away and hide under any optic (SightFold), so nothing meets the lowered belly.
+	var m := _part(_load("aeg"), "optic_scope2x")
+	var top := -INF
+	for v in _verts(m):
+		top = maxf(top, v.y)
+	assert_lt(top, 0.066, "at least 9 mm lower than the first build")
+	var line := m.get_node("optic_scope2x_SightLine") as Node3D
+	assert_almost_eq(line.position.y, 0.036, 0.0005, "its sight line on the lowered axis")
+
+
+func test_the_variable_scope_is_a_little_smaller() -> void:
+	# The owner (2026-11-05): "a little smaller" than the first build's 146 mm.
+	var m := _part(_load("aeg"), "optic_scopeVar")
+	assert_between(m.get_aabb().size.z, 0.12, 0.135)
+
+
 func test_the_sniper_carries_the_aegs_attachments_and_a_muzzle_at_its_own_barrel() -> void:
 	var aeg := _load("aeg")
 	var sniper := _load("sniper")

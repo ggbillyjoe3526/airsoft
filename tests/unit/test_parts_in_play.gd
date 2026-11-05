@@ -298,3 +298,14 @@ func test_the_glass_is_readied_before_play_so_the_first_raise_does_not_hitch() -
 	glass.update(hands._held[0].window, 0.0)
 	assert_eq(glass._port.render_target_update_mode, SubViewport.UPDATE_ONCE, "the hip leaves the single draw to finish")
 	assert_eq(_hands(_kit(AEG, {&"grip": VERTICAL})).prewarm_glass().size(), 0)
+
+
+func test_the_sniper_rifles_iron_sights_hide_under_the_lowered_2x_scope() -> void:
+	# The 2x sits low enough (BL8b, the owner's pick) that the Sniper Rifle's rear leaf, standing, would meet its
+	# eyepiece: fitting it must hide both sights.
+	var model := _model("sniper")
+	var fit := ReplicaParts.fit(model, &"sniper", {&"optic": &"scope2x"})
+	assert_eq(fit.optic_key, &"scope2x")
+	assert_almost_eq(_bone_scale(model, "rearSight"), SightFold.HIDDEN_SCALE, Vector3.ONE * EPS, "the rear leaf hides")
+	assert_almost_eq(_bone_scale(model, "frontSight"), SightFold.HIDDEN_SCALE, Vector3.ONE * EPS, "the front one too")
+	ReplicaParts.unfit(fit)
