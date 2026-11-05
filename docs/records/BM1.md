@@ -1,12 +1,12 @@
 # BM1 · The BB model
 
-**Review:** pending
+**Review:** critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-05 | 1 | Claude (build thread) | see Checks | pending | – |
+| 2026-11-05 | 1 | Claude (build thread) | see Checks | Accept 7/8 (QA Pass, performance Pass) | – (must-fixes done: header comments rewrapped, `bb_mesh` notes the node transform is dropped) |
 
 ## Goal
 
@@ -33,4 +33,10 @@ close range next to the muzzle the old ball's eight sides showed.
 
 ## Checks
 
-Pending.
+- gdlint, changelog notes, wiki and unit tests part 2 pass locally; part 1 stopped on its local cloud timeout, so CI on
+  the pull request is the authority. `test_bb_sight.gd` and `test_glow_bbs.gd` pass 23/23.
+- Before/after render of a BB 0.25 m from the eye, white and glowing, pale and dark backgrounds (shared folder
+  `art/blender/bb/bb-before-after.png`): the old ball's eight corners and uneven rim are gone.
+- Performance kept 320 triangles over its advice of 80: the critic measured an 80-triangle outline about 2 px off round
+  at the muzzle close-up, 320 about 0.6 px.
+- Not verified here: the look in a real match and frame time on a low-spec PC (docs/PLAYTEST.md › The BB model).

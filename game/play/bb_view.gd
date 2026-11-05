@@ -2,12 +2,11 @@ class_name BBView
 extends MultiMeshInstance3D
 ## Every BB in the air, drawn between the last two ticks as one MultiMesh (one draw call, nothing allocated a frame):
 ## the Blender BB (EffectsConfig.bb_model, BM1), small bright balls with a darker rim (bb_ball.gdshader), a little
-## larger than life and never under
-## EffectsConfig.bb_min_angle on screen, each with a faint
-## short trail fading back along its flight (one more instanced draw), so they read at range. Your own BBs leave from
-## the muzzle's side of the view and join their true path from the eye over EffectsConfig.muzzle_join_time, so a shot
-## never starts in front of your face; only the muzzle's offset across the flight is drawn, never ahead along it, so a
-## drawn BB never passes the wall its true one stops on.
+## larger than life and never under EffectsConfig.bb_min_angle on screen, each with a faint short trail fading back
+## along its flight (one more instanced draw), so they read at range. Your own BBs leave from the muzzle's side of the
+## view and join their true path from the eye over EffectsConfig.muzzle_join_time, so a shot never starts in front of
+## your face; only the muzzle's offset across the flight is drawn, never ahead along it, so a drawn BB never passes the
+## wall its true one stops on.
 ## Glowing BBs (WL8, Loadout.Glow) are drawn apart: a green ball never smaller on screen than EffectsConfig.glow_min_angle
 ## and a green streak back along its flight, two more instanced draws, hidden while none flies. Which BBs glow is set
 ## once a match (`set_glowing`): presentation only, as the BBs fly the same.
@@ -93,8 +92,8 @@ func glow_materials() -> Array[Material]:
 	return [_glow_balls.material_override, (_streaks.multimesh.mesh as PrimitiveMesh).material]
 
 
-## The ball every BB is drawn as: the first mesh of the model at `path` (1 m across, centred), shared by the white and
-## the glowing BBs, each drawing it in its own material. A model that can't be read warns and leaves a code-made ball
+## The ball every BB is drawn as: the first mesh of the model at `path` (1 m across, centred, its node unmoved: the
+## node's transform is dropped), shared by the white and the glowing BBs, each drawing it in its own material. A model that can't be read warns and leaves a code-made ball
 ## of the same size, so BBs still show.
 static func bb_mesh(path: String) -> Mesh:
 	var scene := load(path) as PackedScene if ResourceLoader.exists(path) else null
