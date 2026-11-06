@@ -4,7 +4,7 @@ extends GutTest
 
 const MODEL := "res://assets/models/replicas/pistol.glb"
 ## How far the replica sits ahead of the eye aimed (ViewModelConfig.aim_forward's pistol entry).
-const EYE_BACK := 0.36
+const EYE_BACK := 0.25
 ## A point on the post this far under its top must be seen; the light either side is looked for this far out.
 const POST_DROP := 0.001
 ## The post under its dot (the dot's foot 2.1 mm under the top) must be seen too: nothing white bridges the notch.

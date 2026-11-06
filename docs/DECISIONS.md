@@ -677,6 +677,15 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **The AEG Rifle and the GBB Pistol are redesigned from the owner's reference photos, with no text or logo copied
   (owner, 2026-10-12; RM6, RM7).** Small, minimal iron sights; the old length, grip, magazine, rails and mounts stay.
   The Gas Pistol became the GBB Pistol, a blowback replica with the same numbers.
+- **Your first-person arms (BL4, 2026-11-05; defaults the owner can change).** Dark olive gloves (as the figures wear, BL10) and olive sleeves, built
+  from the MakeHuman CC0 arm with the figures' bone names, one hold per replica solved against its model with no face
+  passing into it (owner, 2026-11-04: no clipping, a natural wrist). Pistols are held in the right hand alone, the left
+  arm lowered out of view, until the two-handed thumbs-forward hold of his photos (`ref_images/hands/holding_replica`)
+  is solved: the first tries bent the left wrist past 80°. The Sniper Rifle is held as the AEG is, the right hand
+  round its raked stock grip (owner, 2026-11-06). A pistol sits high in the hand, the web on the back strap and the thumb forward along the frame;
+  the rifle's support hand comes up under the handguard from below. The arms take no shadows in game (pressed depth
+  broke the sun's shadow into patches). A robot player's arms are graphite and light grey. No arm clips for firing or reloading yet: the replica's own clips move its parts. A replica's model change
+  means re-running `tools/blender/arms/arms.py`.
 - **An optic removes a replica's iron sights completely, never folds them, on every replica now and later (owner,
   2026-11-05; GS2).** Every piece of the iron sights hangs from a bone ending in `Sight` and the game hides those
   bones' attachments (`IronSights`); a test holds every optic-taking model to it.
