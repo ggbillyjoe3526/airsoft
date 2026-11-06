@@ -27,12 +27,6 @@ var _params: PhysicsTestMotionParameters3D = PhysicsTestMotionParameters3D.new()
 var _result: PhysicsTestMotionResult3D = PhysicsTestMotionResult3D.new()
 ## Whether the last level slide was stopped by a wall (a contact steeper than ground).
 var _met_wall: bool = false
-## Each character's last ground probe (by id): where it was made, how far down it looked, and what it found (BP5).
-## The level doesn't move under anyone, so a character standing exactly where it stood gets the same answer without
-## the probe, the costliest call on sloping ground (70 to 97 µs on Woodland's terrain, a third of the moves still).
-var _probed_at: PackedVector3Array = PackedVector3Array()
-var _probed_drop: PackedFloat64Array = PackedFloat64Array()
-var _probed: PackedFloat64Array = PackedFloat64Array()
 
 
 func _init(tall_rid: RID, low_rid: RID, probe_rid: RID, body: BodyConfig) -> void:
@@ -69,26 +63,6 @@ func room_to_stand(c: Character) -> bool:
 
 
 func probe_ground(c: Character, max_drop: float) -> float:
-	var id := c.id
-	if id >= 0 and id < _probed_at.size() and _probed_at[id] == c.position and _probed_drop[id] == max_drop:
-		return _probed[id]
-	var found := _probe(c, max_drop)
-	if id >= 0:
-		if id >= _probed_at.size():
-			var was := _probed_at.size()
-			_probed_at.resize(id + 1)
-			_probed_drop.resize(id + 1)
-			_probed.resize(id + 1)
-			# a fresh slot never matches (NAN equals nothing)
-			for i in range(was, id + 1):
-				_probed_drop[i] = NAN
-		_probed_at[id] = c.position
-		_probed_drop[id] = max_drop
-		_probed[id] = found
-	return found
-
-
-func _probe(c: Character, max_drop: float) -> float:
 	var start := c.position.y + _body.max_step
 	_params.from = Transform3D(Basis.IDENTITY, Vector3(c.position.x, start + MapLevel.PROBE_THICKNESS * 0.5,
 			c.position.z))
