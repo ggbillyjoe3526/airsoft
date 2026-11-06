@@ -185,9 +185,10 @@ func test_a_match_with_aeg_gbb_and_cyber_loads_each_profile_once_and_all_sound()
 	add_child_autofree(audio)
 	audio.setup(SoundConfig.new(), profiles, BodyConfig.new(), null, null)
 	for p in profiles:
-		for table: Dictionary in [audio._shot, audio._dry, audio._mag_out, audio._mag_in]:
+		for table: Dictionary in [audio._shot, audio._mag_out, audio._mag_in]:
 			assert_true(table.has(p), "%s has its cue" % p)
 			assert_false((audio._streams[table[p]] as Array).is_empty(), "%s cue has sounds" % p)
+	assert_false((audio._streams[SimAudio.DRY_CUE] as Array).is_empty(), "every replica's dry click has sounds")
 	assert_eq(audio._power[&"cyber"], &"")
 	assert_ne(audio._power[&"gas"], &"")
 	assert_ne(audio._power[&"electric"], &"")

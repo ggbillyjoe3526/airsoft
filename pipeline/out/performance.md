@@ -1,56 +1,14 @@
-Task: DT1 (data tags) · head c39217f · Verdict: Pass
-Run: none (owner asked for no Godot, tests or check.sh while another run is in progress); read-only review · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and the SN1/SN2/BL5 records
-Metrics: not measured. Node count, orphans, static memory and draw calls need a run; the owner's hardware gives frame times.
-Regressions (> 10 % worse): none measured (judgment: no runtime code changed)
-
-Scope (judgment): the diff changes no .gd or scene. It changes tags in data/pool.md (Sniper Rifle, M130/M140/M150, Variable Scope to public), data/maps.md (The Street to dev), one en.po string (PART_BLURB_SCOPEVAR), docs, changelog and tests. Two effects follow: the Sniper Rifle and Variable Scope are in ordinary matches, and the Street leaves them.
-
-Blocking findings: none.
-
-Checked, no cost found (judgment):
-- Scope glass (game/play/optic_glass.gd:55,124-137): the SubViewport sits at UPDATE_DISABLED. It switches to UPDATE_ALWAYS only while a magnified optic's sight is raised and the model is visible, then back to DISABLED. The Variable Scope uses the same path as the already-public 2x Scope. At most one extra glass pass runs, for the local player, and bots never render one. The change adds no new cost class.
-- Sniper model and sounds in ordinary matches: SN1 and BL5 record 36,054 triangles in the hands (budget 40,000), 7 materials, and bolt sounds rendered by tools/render_bolt.gd. A bot carrying the Sniper Rifle shows the same body mesh as the other bots' replicas. Loading is data-driven, once per match; no per-frame work and no new allocations.
-- Bot kits (data/bot-kits.md): only a prose line changed. Bots already carried the Sniper Rifle with Dev content on, so the sim cost with it off matches the existing dev-on path.
-- Customise/Armory pictures (game/ui/replica_pictures.gd:162,205,255): each SubViewport renders UPDATE_ONCE, then goes idle. Three optic pictures instead of two means one more single draw, once per page open or paint change, not per frame (judgment). Check that ReplicaPictures frees its ports on close; this predates the change and is not affected by it.
-- Dropping The Street from the default catalogue lowers the load, since it is not built unless Dev content is on.
-- en.po: one string, read at load; no cost.
-
+Task: BA1 · head f8bea33 · Verdict: Pass
+Run: no match run (headless, no GPU; changes are load-time and one-off picture code, nothing per frame or per tick) · budget: no perf-budget.json in tree, judged against targets, docs/CC0_ASSETS.md > Size limits and attempt 1 (7e3b7a5). Targeted tests: test_ba1_qa + test_barrel_models, 16 passing, 0 failing.
+Metrics: aeg.glb 1,516,636 B / 2 MB parts-file limit (ok, measured; was 1,977,576, -23 %, 483 KB headroom) · inside/aeg.glb 410,012 B (ok, measured; not a parts file, loaded only for a part's own picture) · triangles a part 9,454 and 9,954 / 10,000 (ok, author-measured; 546 and 46 left) · drawn when fitted 882 and 5,014 (ok, down from 814/4,898 crown/extension plus inside, judgment) · barrel picture light: 1 extra DirectionalLight3D, no shadows set, 384 px max side (ok, judgment)
+Regressions (> 10 % worse): none. File size and fit-time work both improved.
+Blocking findings: none
+ - replica_parts.gd:73-76 (removed) fit no longer instantiates or frees _Inside, so the fit does less work and the per-fit remove_child + free is gone (judgment). A fit never loads inside/aeg.glb (judgment, read from code: fit/take do not call inside()).
+ - replica_parts.gd:187-205 inside(): loads, instantiates, detaches one node, frees the holder. The rest of the holder is freed with it; the returned node is owned by nothing and the caller adds it to the picture's model, which is freed with the port (replica_pictures.gd:147,154 queue_free the port, children go with it). No orphan path (judgment). The only per-call allocation is one format String and a find_children Array, once per uncached picture (not per frame).
+ - replica_pictures.gd:245-260 _part_shot: the picture is cached in _part_shots (:262), so the load, turn and light happen once per part per session; the port renders UPDATE_ONCE (:168,211) after _rig sets UPDATE_DISABLED (:276). The fill light is a child of shot.port and is freed with it (judgment). It draws once; a second directional light on one 384 px frame is negligible and bypasses no quality preset (menu picture, not the match).
 Advisory:
-- No rendered or --perf run was made; the shaders for the Variable Scope are the same as the 2x Scope's (judgment), so no prewarm entry looks needed. Confirm on the owner's hardware that the first raise of the Variable Scope does not hitch, which is the first time ordinary players meet it.
-- With Sniper Rifle bots now public, several on Hard may hold long sight lines on open maps; the bot senses cost is existing code (bot_senses.gd) and was not re-measured.
-
-Fixes: none needed.
-
-## DT1 bolt-press fix (8753bef)
-
-QA verdict: **Pass** (advisory items below, none blocking). Performance verdict: **Pass**. Read-only review; Godot was not run.
-
-Change: BotCombat.shoot sets cmd.fire only when `not _bolt_cycling(a)` (replica().bolt_action and cooldown > 0). The check
-sits before BotFireMode.pull in the `and` chain, so a held-back tick does not consume `next_tap` and the press is never
-handed to Armament.step's bolt_press_window buffer (armament.gd:341-345). Root cause matches the diff.
-
-QA
-- Correct and narrow: only bolt-actions (the Sniper Rifle) are affected; AEG, pistols and Cyber take the old path (second test).
-- `next_tap` is untouched while cycling (short-circuit); `burst_left` still ticks down, `pause_left` is set at burst end
-  as before, so burst/pause bookkeeping is unchanged. `trigger_was_down` falls to false during the cycle, so the first
-  tick with the bolt home is a fresh press (`not trigger_was_down` holds); it fires that same step (cooldown rests at 0 in semi).
-- Cadence change (SN3 advisory, unmeasured): before, a click in the last 0.7 s of the 1.25 s cycle (fire_rate 0.8) fired
-  the tick the bolt was home. Now the bot must be inside a burst window (skill.burst 0.2-0.45 s, then burst_pause
-  0.3-0.65 s, personality-scaled) when the bolt comes home, else it waits for the next window. Sniper bots will fire
-  somewhat slower than 0.8/s, by up to about one burst_pause, and Rushers (burst x1.2, pause x0.8) least. This is the
-  safer direction and the SN3 target is unlikely to be broken, but no test pins the cadence; suggest a one-off
-  shots-per-minute count for a Hard sniper bot over a fixed duel, and a PLAYTEST line.
-- Other buffered presses past the line check, pre-existing and NOT fixed: (1) semi/burst `press_buffer` 0.15 s + fire_hold_off
-  when a press lands during draw/reload busy (Sniper draw 0.65 s, reload 2.2 s) or cooldown > 0 on any semi replica
-  (cooldown under 0.15 s, e.g. pistols at 7/s); (2) the window is 9 ticks, so a teammate needs about 1 m of movement
-  in 0.15 s: very unlikely, not a measured failure. Note a bot that presses while reloading is possible only if shoot
-  runs then; I did not trace whether the bot code stops pressing in reload/draw. Low risk, can wait; list in KNOWN_ISSUES if wanted.
-- Tests: test_dt1_qa covers hold-during-cooldown and fire-when-home (stated to fail without the fix) and that an AEG is not
-  held. Gaps: no assertion that next_tap or burst_left is unchanged, no test with a start_mode field (the `pull` semi-tap path).
-- Restored stowed cooldown on weapon switch (armament.gd:448) is covered, as it sets `cooldown` too.
-
-Performance
-- Per shooting tick per bot: one `replica()` call (array index), two field reads, a compare. No allocation, no new
-  node or resource, static function, `RefCounted` typed `var r`. BotCombat.bolt_waits already does the same lookup.
-  On the held-back tick it also skips BotFireMode.pull. Net cost is below measurement; no budget affected.
-- Fewer pressed-and-buffered events on Armament for sniper bots; no effect on the 60 Hz step budget.
+ - The inside PackedScene is not cached by the caller: if the cache is cleared (:153-155) and a part is shown again, inside/aeg.glb (0.41 MB) is re-read. Menu-only, once per card; fine (judgment).
+ - Long barrel is at 9,954 / 10,000 triangles; the next change to it will breach the cap. Trim or raise the cap with the owner before adding detail (judgment).
+ - Parts' own materials still have no shader prewarm entry (carried from attempt 1, BL8 record); a first-draw hitch is possible in hand. Existing gap, not new; plan for Beta (judgment).
+Fixes (none required), ranked: 1. leave headroom on the long barrel's triangles; 2. add parts' materials to the shader prewarm.
+Pass

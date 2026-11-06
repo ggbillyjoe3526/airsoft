@@ -1,33 +1,33 @@
-Task: DT1 · Sniper Rifle public, The Street dev (no task block; judged against the owner's ask, docs/records/DT1.md and its CI finding)
-Attempt: 1 of 4 (re-judged after CI's Street-guards failure; whole diff origin/main...HEAD, focus 8753bef)
-Head: 39b2faf (checks passed on 8753bef's code: seed 7 0 friendly hits, match_guards street at_night, 72 sniper/bot tests, gdlint. QA Pass, performance Pass, appended)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
-Score: 7/8 → Accept
-Evidence for the passes:
-1. Data side as at 76b12ad (pool.md:151,162-164,178 public; maps.md:33 The Street dev). CI's finding: bot_combat.gd:+187
-   `not _bolt_cycling(a)` stops the press Armament would keep to the bolt's end (armament.gd:342-345, pending_press +=
-   cooldown), so every bot shot now leaves on the tick its line-of-fire check (bot_combat.gd:168) ran. Root cause, not a
-   symptom; the short-circuit also leaves BotFireMode.pull's next_tap untouched while cycling.
-2. No contract changed: Armament's buffering is kept for players; only the bot controller declines to use it.
-3. bot_combat.gd:+197-199: one replica() index, two field reads; typed `var r`, no allocation, static.
-4. test_dt1_qa.gd:+56 asserts no press at cooldown 0.3; without the fix pull() is reached with wants true (semi,
-   trigger up, next_tap 0 < time 10) and returns true, so it fails. :+60 fires once home; :+63 an AEG is never held.
-5/6. Rule in the plain AI class, typed; no new numbers. Matches the wiki's promise (Bots.md:20-21, never with a
-   teammate in the way): honest, readable bots, no gore, fits the pillars.
-7. Pass. Cosmetic: test_dt1_qa.gd:14 is 121 chars; `_bot() -> Array` follows test_bp2_qa's pattern.
-Failed checks, with evidence:
-8. [judgment] docs/PLAYTEST.md:282 still opens the Variable Scope list with "A dev item (SN2): turn on Dev content, and
-   Disable levelling (or Level up to 8)", the twin of the SN1 line fixed at :262; the scope is public since this change
-   (pool.md:178). I missed it last round.
-Fix before merge (non-blocking, one edit): PLAYTEST.md:282 "Public since 2026-11-05 (SN2): turn on Settings › Dev
-settings › Disable levelling (or Level up to 8)." Optional: wrap test_dt1_qa.gd:14 at 120.
-Noted, not failed: the fix slows sniper bots unmeasured (QA: a bolt home outside a burst window waits up to one
-burst_pause, so cycles of about 1.25 to 2 s instead of 1.25 s). SN3's Woodland lean (KNOWN_ISSUES:36) was measured
-at the old cadence; re-measure there before tuning. The 0.15 s press_buffer keep on other replicas is rightly a row.
+Task: BA1 · The barrel models (brief, no TASKS block)
+Attempt: 4 of 4
+Head: 6f9022d (= HEAD; targeted tests pass, QA's 41; full tools/check.sh still running on 6f9022d, so this verdict
+holds only once it or CI is green there). QA (50710d0) and performance (c173a5b) Pass; the diff since is one lens
+position in the glb and one light-angle line, neither on a hot path.
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
+Score: 8/8 → Accept
+Fixed since attempt 3, checked on the images: barrels.py:331 moves the Bore lens to hop -25.2, r 3.02, in front of the
+barrel's rear cap at -25 as seen from the rear and inside the lip (the lip's inner radius there is about 3.01, so the
+disc's rim tucks into the wall with no ring of light). Bucking centre, 7x7 samples: v4_cards_full.png tight (80,105)
+54-57 and long (70,305) 54-63 on a card ground of about 32, so it reads as a dark hole (attempt 3 had white there);
+tight_alone.png (260,565) min 43 and long_alone.png (213,578) min 45, a clean dark way in past a lit red lip wall.
+The 3x card hole is a few pixels ragged; that is the card's resolution, not the mesh.
+replica_pictures.gd:260 now takes the fill light from shot.camera.rotation_degrees (:284, 0/90/0) plus FILL_PITCH
+(:24, a named -20): the same angle as before, now tied to the camera. Built once per picture, not per frame.
+(a) Proportions, unchanged, pass: inner barrel 345 mm vs a real M4's 363 (-5 %); long/tight 452/345 = 1.31 vs 1.25
+(+5 %); hop unit/barrel 0.151 vs 0.152; bore/OD 6.03/8.9 vs 6.03/9 (+1 %); extension OD = the rifle barrel's (17.2).
+(b) Construction passes: hop_close.png shows the dial teeth, the window, the arm and the nose seated with no gap. The
+attempt-3 close-ups (ext_close, fit_long_close, crown_close, fit_tight_muzzle) still match this geometry.
+Budget: 9,454 and 9,954 of 10,000 (94.5 % and 99.5 %), as the brief asks.
+Failed checks: none.
+Must-fix: none.
+Advisory (not blocking):
+- The coupling's open back (barrels.py:402) is recorded as a known issue in docs/records/BA1.md, but that row is not
+  committed at 6f9022d (only in the working tree). Put it in the records push. On v4_cards_full.png (x 790-850,
+  y 280-330) it reads as a flat grey rear face, which is fine at card size.
 Owner should test in the game:
-- Dev content off: Armory lists the Sniper Rifle and M130 at 5, M140 at 7, Variable Scope at 8, M150 at 9, no DEV tag.
-- Dev content off: Match page shows Depot, Woodland, Range; a saved pick of The Street falls back to Depot cleanly.
-- Hard matches with sniper bots on your team: none ever knocks out a teammate, even one crossing its line.
-- Hard sniper bots at range: still a threat at their slower rhythm, or now too tame?
-- Hard Woodland 8v8, Dev content off: does end 0 feel stacked once snipers are about?
-- First raise of the Variable Scope in an ordinary match: any hitch?
+- Customise › Barrel: the bucking's centre reads as a dark hole on both cards, inside the red lip.
+- Customise › Barrel: the hop dial's teeth still read under the fill light (not blown out white).
+- Long barrel fitted, aimed: no line or flicker where the flats meet the round shoulder.
+- Long barrel fitted: the extension takes each paint like the rifle's barrel.
+- Tight bore fitted: the crown sits centred in the flash hider.
+- First open of the Barrel tab: no hitch from loading inside/aeg.glb.
