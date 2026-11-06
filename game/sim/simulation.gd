@@ -130,6 +130,8 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 			cmd.reset(c.yaw, c.pitch)
 		# The torch's thumb switch works through a vault too (the vault's own command drops other presses until its end).
 		var toggle_torch := in_play and cmd.toggle_torch
+		# The trigger as the controller pulls it, before a vault, a bomb in hand or a throw holds or lets it go.
+		var trigger := cmd.fire
 		# A Jump press at a low obstacle vaults it instead; while vaulting only the view follows the command, the trigger
 		# stays as it was and other presses wait for the vault's end (BP5).
 		if in_play and not c.vault.active:
@@ -145,6 +147,9 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 			cmd = Grenades.ready_command(c, cmd, _readied)
 			grenades.press(c, cmd, live, state.grenades, state.events)
 			if Grenades.throwing(c):
+				# a pull let go during the throw is spent: the next one fires once the replica is back
+				if not trigger:
+					c.grenades.trigger_held_off = false
 				cmd = Grenades.throwing_command(cmd, _throwing)
 			elif Grenades.in_hand(c) == Grenade.Kind.NONE:
 				cmd = Grenades.held_off_command(c, cmd, _readied)
