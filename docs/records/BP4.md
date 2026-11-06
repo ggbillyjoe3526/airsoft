@@ -37,6 +37,26 @@ checklists. None found a high bug.
   since BL8), four low findings logged, two stale comments (the whistle is the owner's since AU6; the range figure's
   volume is the plywood one since HV1).
 
+## Part 2: the models on main
+
+Each model, animation and sound pull request was audited as it merged (GS1, GA1, BL9, BL11, GT1, BL10, AU7, MAG1,
+BL13, CZ1, BA1, AU8, TP1, IN1, TP2/TP3, FA1, HC1, DT1, GS2, BL12, MP1, HS1, BL8b, BL4), then main as a whole at
+4b76bc2 (the arms at c6eda54):
+
+- **Budgets:** the figure in view is at most 59,078 triangles (body, the boonie, carrier, pack, radio, pads) of 60,000;
+  the replicas in the hand 34,969 to 39,250 of 40,000 (their bots' copies 3,000 apart); every part at most
+  9,984 of 10,000; the first-person arms (BL4) 38,900 of 40,000 in four materials. Every part and figure node
+  survived the merges that shared `human.glb` and `replicaParts/*.glb`.
+- **Pictures** in game (Compatibility under Xvfb): first person with every part, third person at 2, 5 and 15 m and up
+  close, Customise and the Loadout page. One bug, found on TP1's merge and fixed by TP3: bots held a pistol above
+  their fists (BL10's lower hands). Left for the figures batch (BL1): the AEG's support hand and, up close, fingers
+  that read as a claw (known issues).
+- **Gates:** `tools/check.sh` on f95100f: every gate green, 4,917 tests.
+- **Performance:** the figure bench at 252fe60 and at f95100f on one machine: 11 figures 1.58-1.66 ms a frame before,
+  1.86-1.92 ms after (TP2/TP3's shoulder and grip fit; known issues, document).
+- **Owner checks:** nine merged tasks had none in `docs/PLAYTEST.md` (BL10 to BL13, FA1, TP1 to TP3, CZ1, AU8), nor
+  BL4, merged after; they are under BP4's section now.
+
 ## Defaults taken
 
 - The skip grace keeps counting real time, not sim ticks: it guards against the player's own clicks, which are real
