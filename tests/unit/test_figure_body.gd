@@ -6,8 +6,8 @@ extends GutTest
 const BUDGET := [60000, 20000, 6000]
 const DISTANCES := [5.0, 10.0, 20.0, 40.0]
 ## The human with the largest head (HighCut, id 0) at High's lines: LOD0, LOD0, LOD1, LOD2 (step 23 plan › 2).
-## BL10: the rebuilt body (33,458 triangles; LOD1 10,999, LOD2 3,298) and the v12 knee pads as Kit_Pads.
-const HUMAN_HIGH := [46574, 46574, 15476, 4749]
+## BL10: the rebuilt body (33,458 triangles; LOD1 10,999, LOD2 3,298); BL13: the knee and elbow pads (2,964, 976, 288).
+const HUMAN_HIGH := [48886, 48886, 16123, 4894]
 const RED := Color(0.9, 0.2, 0.15)
 const BLUE := Color(0.2, 0.4, 0.95)
 
