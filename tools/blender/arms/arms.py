@@ -124,10 +124,16 @@ class Grip:
 
 class Hold:
     """How one replica is held: where it sits (its origin in eye space), its grip, the right hand's knuckles on it
-    (down the grip, forward of the back strap) and the palm's roll, and the left hand's kind and place."""
+    (down the grip, forward of the back strap) and the palm's roll, and the left hand's kind and place; `tip` turns
+    it in the hand about its origin (eye space; a bomb, as GrenadeView tips it)."""
 
-    def __init__(self, file: str, at: Vector, grip: Grip, right: dict, left: dict):
+    def __init__(self, file: str, at: Vector, grip: Grip, right: dict, left: dict, tip: Matrix = None):
         self.file, self.at, self.grip, self.right, self.left = file, at, grip, right, left
+        self.tip = tip if tip is not None else Matrix.Identity(3)
+
+    def to_eye(self) -> Matrix:
+        """The replica's own space (its model's) into eye space."""
+        return Matrix.Translation(self.at) @ self.tip.to_4x4()
 
 
 # The right hand on every grip (metres, degrees): its index finger's knuckle `d` down the back strap from its top,
@@ -227,6 +233,21 @@ SNIPER_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.100, -0.035), index=(0.030, -0.030
 SNIPER_GUARD = dict(GUARD, y=0.260, axis=(0.0, 0.030), radius=0.025, tips_below=0.052,
                     tip_at=(0.0255, 0.000, 0.040), thumb_x=-0.028, thumb_z=0.040, thumb_f=0.050, forward=0.034,
                     search=((40, 80), (20, 50), (-40, 0)), tip_drop={"Pinky": 0.015})
+# A smoke or flash bomb in the right hand alone (GT1), as a fist holds a pistol's grip: its lever under the palm on its
+# right side (the model's +X), the web of the hand round its back, the fingers closed round its front onto its left
+# side and the thumb along that side; the left arm down (the game hides it: ViewModelConfig.one_hand). The marks
+# are in the bomb's own space (Blender's: z up its length, origin at its middle), scaled to each body's radius
+# (smoke 27.5 mm, flash 20 mm). Each bomb sits where GrenadeView draws it in hand (HELD_AT, HELD_TIP: the same
+# numbers in the game's camera space, x right, y up, -z forward), so its top leans in toward the screen's middle and
+# back toward the eye.
+HELD_AT = godot_to_eye(0.15, -0.14, -0.36)
+HELD_TIP = (Matrix.Rotation(-0.45, 3, Vector((0.0, 1.0, 0.0))) @ Matrix.Rotation(0.35, 3, Vector((1.0, 0.0, 0.0))))
+BOMB_FINGERS = {"Index": (60, 60, 45), "Middle": (60, 60, 45), "Ring": (60, 60, 45), "Pinky": (55, 55, 40)}
+SMOKE_RIGHT = dict(PISTOL_RIGHT, web=(0.016, -0.042, 0.010), index=(0.030, 0.016, 0.022),
+                   pinky=(0.028, 0.012, -0.036), thumb_at=(-0.022, -0.022, 0.024), thumb_verify=0.0,
+                   fingers=BOMB_FINGERS, swing=(0.0, 0.0, 0.0), shoulder=(0.0, -0.05, 0.03), drop=0.06)
+FLASH_RIGHT = dict(SMOKE_RIGHT, web=(0.012, -0.033, 0.004), index=(0.023, 0.012, 0.016),
+                   pinky=(0.021, 0.009, -0.040), thumb_at=(-0.016, -0.016, 0.018))
 HOLDS = {
     "aeg": Hold("aeg.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.073, -0.026), 31.0, 0.046, 0.0155),
                 AEG_RIGHT, GUARD),
@@ -236,6 +257,10 @@ HOLDS = {
                   CYBER_RIGHT, DOWN),
     "sniper": Hold("sniper.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.090, 0.008), 54.0, 0.050, 0.021),
                    SNIPER_RIGHT, SNIPER_GUARD),
+    "smoke": Hold("../grenades/smoke.glb", HELD_AT, Grip((0.0, -0.0275, 0.03), 0.0, 0.055, 0.0275), SMOKE_RIGHT,
+                  DOWN, HELD_TIP),
+    "flash": Hold("../grenades/flash.glb", HELD_AT, Grip((0.0, -0.020, 0.03), 0.0, 0.040, 0.020), FLASH_RIGHT,
+                  DOWN, HELD_TIP),
 }
 
 
@@ -277,7 +302,7 @@ def replica_objects(hold: Hold) -> list:
     before = set(bpy.data.objects)
     # BL_FIT_<FILE STEM>=<glb>: fit the hold to another copy of the replica's model (the AEG's approved hold was
     # solved on its model before GS2: docs/KNOWN_ISSUES.md).
-    fit = os.environ.get("BL_FIT_" + os.path.splitext(hold.file)[0].upper())
+    fit = os.environ.get("BL_FIT_" + os.path.splitext(os.path.basename(hold.file))[0].upper())
     bpy.ops.import_scene.gltf(filepath=fit or os.path.join(REPLICAS, hold.file))
     new = [o for o in bpy.data.objects if o not in before]
     # The importer leaves the replica's first clip (Fire) playing, its slide part way back: the hold is fitted to
@@ -292,9 +317,14 @@ def replica_objects(hold: Hold) -> list:
                 pb.matrix_basis = Matrix.Identity(4)
     for o in new:
         if o.parent is None:
-            o.matrix_world = Matrix.Translation(hold.at) @ o.matrix_world
+            o.matrix_world = hold.to_eye() @ o.matrix_world
     bpy.context.view_layer.update()
     return new
+
+
+def has_trigger(objects: list) -> bool:
+    """Whether the replica has a trigger for the index finger (a bomb has none: the index closes round it)."""
+    return any(o.name.startswith("Trigger") for o in objects)
 
 
 def trigger_face(objects: list) -> Vector:
@@ -394,7 +424,7 @@ def web_pose(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, r: dict, col: Colli
     """The right hand bone's pose on a pistol: its index finger's knuckle at r["index"] and its thumb's root at
     r["web"] (replica space), rolled about the line between them to where the wrist is straightest and the hand clear
     of the grip, its palm toward the grip's right side."""
-    to_eye = Matrix.Translation(hold.at)
+    to_eye = hold.to_eye()
     sx = pose.to_side("R")
     i_rest, w_rest, t_rest = sx(j["finger-2-1"]), sx(j["finger-1-1"]), sx(j["finger-1-2"])
     i_at, w_at = to_eye @ Vector(r["index"]), to_eye @ Vector(r["web"])
@@ -437,7 +467,7 @@ def right_hand(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider, ob
     """The right hand round the pistol grip; its curls, for the log. `arms` and `frame` (the replica less its
     trigger) check a thumb on its skinned glove (`thumb_verify`)."""
     g, r = hold.grip, tuned(hold.right)
-    to_eye = Matrix.Translation(hold.at)
+    to_eye = hold.to_eye()
     if "web" in r:
         hand_m, palm = web_pose(rig, hand, j, hold, r, col)
     else:
@@ -467,6 +497,8 @@ def right_hand(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider, ob
         return sum(n for b, n in pose.clipping(arms, frame)[1].items() if b.startswith("Thumb") and b.endswith("_R"))
 
     curls = pose_fingers(hand, r, col, thumb_to, r["thumb_hug"], "thumb_at" in r, verify=thumb_clips)
+    if not has_trigger(objects):
+        return pole_r, curls
     if os.environ.get("BL_DEBUG") and thumb_to is not None:
         m = rig.pose["Thumb3_R"]
         tip = m.translation + m.to_3x3().col[1] * rig.length["Thumb3_R"]
@@ -499,7 +531,7 @@ def left_on_guard(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider)
     """The left hand under a rifle's handguard, its fingers up the right side and the index finger along the side
     rail, the thumb along the left side."""
     spec = tuned(hold.left)
-    to_eye = Matrix.Translation(hold.at)
+    to_eye = hold.to_eye()
     y = spec["y"]
     at = to_eye @ Vector((0.0, y, spec.get("axis", GUARD_AXIS)[1]))
 
@@ -646,8 +678,12 @@ def solve(rig: Rig, hands: dict, j: dict, hold: Hold, arms: list) -> tuple:
         # touches it (the trigger finger stays on its mark).
         for side in ("R", "L") if hold.left["kind"] == "guard" else ("R",):
             print("  %s palm pressed in %.1f mm" % (side, pose.press(rig, hands, arms, frame, poles, side) * 1000))
-        trigger_again(rig, hands["R"], objects, arms, frame)
+        trigger = has_trigger(objects)
+        if trigger:
+            trigger_again(rig, hands["R"], objects, arms, frame)
         fingers = [("R", n) for n in ("Middle", "Ring", "Pinky", "Thumb")]
+        if not trigger:
+            fingers.insert(0, ("R", "Index"))
         if hold.left["kind"] == "guard":
             fingers += [("L", n) for n in ("Index", "Middle", "Ring", "Pinky", "Thumb")]
         print("  tightened", pose.tighten(rig, hands, arms, frame, fingers))

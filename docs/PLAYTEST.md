@@ -1388,6 +1388,16 @@ The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built 
 - [ ] **Shape:** nothing stretches oddly at the shoulder or armpit while the arm is up, on both the soldier and the
   robot (Settings › Dev › Robots).
 
+## Your arms holding a bomb (GT2)
+
+- [ ] **In hand:** roll the mouse wheel onto your smoke, then your flash. Your replica goes down without its hands and
+  your right hand holds the bomb in a fist, low on the right, the lever under the palm; no left hand shows. No finger
+  or thumb passes into the bomb, and the bomb never draws in front of the fingers wrapped round its far side.
+- [ ] **Throw:** press 4 and 5. The hand and bomb rise a little as the pin comes out, and both are gone the moment the
+  bomb leaves; then the replica comes back up with its hands. Never two right hands at once.
+- [ ] **Walls:** hold a bomb up against a wall: the hand and bomb are drawn over the wall, as the replica is.
+- [ ] **Robot:** with Settings › Dev › Robots on and a robot player, the hand is in the robot's light grey.
+
 ## GBB Pistol sights and port (GS1)
 
 - [ ] **Aim:** aim the GBB Pistol in the Range. The front post with its white dot stands in the rear sight's notch,

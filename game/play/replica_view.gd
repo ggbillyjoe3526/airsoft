@@ -210,6 +210,8 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 		# The draw brings the next replica up from below: nothing of the last one's turn is eased onto it.
 		_drop_inspect()
 		_show(a.active)
+	# With a bomb in hand your arms hold it (GrenadeView), so the replica goes down without them.
+	_arms.set_shown(GrenadeView.in_hand(c) == Grenade.Kind.NONE)
 	var held := _held[_active]
 	var follow := 1.0 - exp(-_cfg.return_rate * delta)
 	var steady := lerpf(1.0, _cfg.aim_steady, aim)
