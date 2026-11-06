@@ -20,6 +20,12 @@ THUMB_SWING = 30
 THUMB_FINE = 5
 # How many of its turns nearest the target a thumb checked on its skinned glove (`Hand.thumb`'s `verify`) tries.
 THUMB_VERIFY = 800
+# A point read as further inside a replica than this (m) is checked by rays (`Collider.inside`): the nearest face's
+# normal alone misreads points beside a convex corner, a few centimetres out, as deep inside (GS2's AEG beside its
+# trigger guard, the model before it to the grip's right), which threw the hand off the grip.
+DEEP = 0.004
+# The rays' directions for that check: a point is inside when most first hits strike a face from behind.
+RAYS = (Vector((0.577, 0.577, 0.577)), Vector((-0.577, 0.577, -0.577)), Vector((0.577, -0.577, -0.577)))
 # How much of each finger's splay from the middle finger a hold takes out.
 ADDUCT = {2: 0.9, 4: 0.9, 5: 0.95}
 
@@ -192,6 +198,15 @@ class Collider:
         out.parts = [p for c in cols for p in c.parts]
         return out
 
+    def inside(self, p: Vector) -> bool:
+        """Whether `p` is inside this surface: most of RAYS' first hits strike a face from behind."""
+        behind = 0
+        for d in RAYS:
+            hit = self.tree.ray_cast(p, d, 1.0)
+            if hit[0] is not None and hit[1].dot(d) > 0.0:
+                behind += 1
+        return behind * 2 > len(RAYS)
+
     def dist(self, p: Vector) -> float:
         """Distance to the nearest surface; negative inside it."""
         best = 9.0
@@ -200,6 +215,8 @@ class Collider:
             if hit[0] is None:
                 continue
             d = hit[3] if (p - hit[0]).dot(hit[1]) >= 0.0 else -hit[3]
+            if d < -DEEP and not part.inside(p):
+                d = -d
             if abs(d) < abs(best):
                 best = d
         return best
@@ -226,6 +243,12 @@ class Hand:
         # The height (eye space) no finger's glove may rise above: a support hand's fingers rest on the handguard's
         # side, their tips below its top (the critic: no tip showing over it from the left). None: no limit.
         self.tip_top = None
+        # The furthest left (eye space) the trigger finger's outer bones may reach (`onto`). None: no limit.
+        self.index_left = None
+        # How far the trigger finger's joints may bend reaching the trigger (degrees, base to tip; `onto`).
+        self.index_bends = (70, 90, 70)
+        # The least its base may bend (degrees; below 0 it lifts off the frame's side).
+        self.index_from = -10
         # The whole hand bone's glove (the knuckles and the heel of the thumb too), for seating it clear.
         whole = [hand_rest.inverted() @ sx(v) for v, w in zip(mesh.v, mesh.w) if w.get("Hand", 0.0) > 0.45]
         self.points["Hand_" + side] = [q for i, q in enumerate(whole) if i % max(1, len(whole) // 300) == 0]
@@ -302,7 +325,7 @@ class Hand:
 
     def thumb(self, col: Collider, ratio: tuple, limit: tuple, target: Vector = None, hug: float = 0.0,
               swing: int = THUMB_SWING, twists: tuple = (-30, 0, 30), bends: tuple = (0,), pull: float = 3.0,
-              verify=None) -> list:
+              verify=None, pin: tuple = None) -> list:
         """Swings the thumb at its base (across the palm, round its own line and in its bend) to the clear place
         nearest the rifle (and, given a `target`, with its tip nearest that; with `hug`, its whole length kept close
         to the rifle too; `swing` and `twists` bound its turns at the base, degrees; `bends`, the knuckle bends tried
@@ -310,7 +333,8 @@ class Hand:
         curls its tip bones onto it from there. Given `verify` (a check of the skinned glove itself: how many of the
         thumb's faces pass into the replica), the THUMB_VERIFY turns whose tips come nearest the target are tried in that
         order and the first whose glove stays clear is kept: the bones'
-        sampled surface can pass a pose whose glove, swung far round the grip's corner, still cuts into it."""
+        sampled surface can pass a pose whose glove, swung far round the grip's corner, still cuts into it. Given `pin`
+        (across, twist, bend, knuckle: a turn the owner approved), the thumb takes that turn and no search runs."""
         b1, b2, b3 = ("Thumb%d_%s" % (k, self.side) for k in (1, 2, 3))
         inv = self.rig.rest[b1].to_3x3().inverted()
         across = inv @ self.palmar
@@ -337,24 +361,27 @@ class Hand:
             return score, rot, a, c, t, k
 
         tried, reach = [], {}
-        best = None
-        for a in range(-swing, swing + 1, 10):
-            for c in range(-80, 85, 10):
-                for t in twists:
-                    for k in bends:
-                        found = score_at(a, c, t, k)
+        if pin is not None:
+            best = score_at(*(int(round(v)) for v in pin))
+        else:
+            best = None
+            for a in range(-swing, swing + 1, 10):
+                for c in range(-80, 85, 10):
+                    for t in twists:
+                        for k in bends:
+                            found = score_at(a, c, t, k)
+                            tried.append(found)
+                            if best is None or found[0] < best[0]:
+                                best = found
+            # Then finer round the best, within the same bounds.
+            a0, c0, t0, k0 = best[2:]
+            for a in range(max(-swing, a0 - 10), min(swing, a0 + 10) + 1, THUMB_FINE):
+                for c in range(max(-80, c0 - 10), min(80, c0 + 10) + 1, THUMB_FINE):
+                    for t in range(max(min(twists), t0 - 15), min(max(twists), t0 + 15) + 1, THUMB_FINE):
+                        found = score_at(a, c, t, k0)
                         tried.append(found)
-                        if best is None or found[0] < best[0]:
+                        if found[0] < best[0]:
                             best = found
-        # Then finer round the best, within the same bounds.
-        a0, c0, t0, k0 = best[2:]
-        for a in range(max(-swing, a0 - 10), min(swing, a0 + 10) + 1, THUMB_FINE):
-            for c in range(max(-80, c0 - 10), min(80, c0 + 10) + 1, THUMB_FINE):
-                for t in range(max(min(twists), t0 - 15), min(max(twists), t0 + 15) + 1, THUMB_FINE):
-                    found = score_at(a, c, t, k0)
-                    tried.append(found)
-                    if found[0] < best[0]:
-                        best = found
 
         def closed(found: tuple) -> list:
             self.adduct[b1] = found[1]
@@ -363,7 +390,7 @@ class Hand:
                               (0.0, k, k * 0.5))
 
         out = closed(best)
-        if verify is not None:
+        if verify is not None and pin is None:
             # Nearest the target first: the bones' own clearance no longer ranks them, the glove's check does.
             for found in sorted(tried, key=lambda f: reach.get(f[2:], f[0]))[:THUMB_VERIFY]:
                 out = closed(found)
@@ -448,10 +475,11 @@ class Hand:
         return self.settle("Thumb", (0.0, bends[0], bends[1]), col, span)
 
     def onto(self, name: str, target: Vector, col: Collider, limits: tuple, swing: int = 20,
-             couple: float = 0.0) -> list:
+             couple: float = 0.0, pin: tuple = None) -> list:
         """Bends a finger so its last bone's pad comes to `target` (the trigger) without passing into the replica: a
         search over its three bends and its base's swing sideways (up to `swing` degrees), coarse then fine. With
-        `couple`, the last joint bends that share of the middle one, as a relaxed finger's do, and is not searched."""
+        `couple`, the last joint bends that share of the middle one, as a relaxed finger's do, and is not searched.
+        Given `pin` (swing and three bends: a pose the owner approved), the finger takes it and no search runs."""
         bones = ["%s%d_%s" % (name, k, self.side) for k in (1, 2, 3)]
         side_axis = self.axis[bones[0]].cross(Vector((0.0, 1.0, 0.0))).normalized()
 
@@ -469,13 +497,40 @@ class Hand:
             clear = min(self.clearance(b, col) for b in bones)
             m = self.rig.pose[bones[2]]
             pad = min((m @ q - target).length for q in self.points[bones[2]])
+            # No further left than `index_left` (eye space), when set: the tip kept from showing past the far side of
+            # the trigger guard.
+            over = 0.0
+            if self.index_left is not None:
+                over = max(0.0, self.index_left - min((self.rig.pose[b] @ q).x for b in bones[1:]
+                                                      for q in self.points[b]))
             # Clear of the replica first, then the pad nearest the target.
-            return pad + (0.0 if clear >= CONTACT else 1.0 + (CONTACT - clear) * 10.0), clear
+            return pad + over * 10.0 + (0.0 if clear >= CONTACT else 1.0 + (CONTACT - clear) * 10.0), clear
 
-        best = None
         swing = int(swing)
+        if pin is not None:
+            # A pinned pose (an approved hand) is kept as it is: no search.
+            sc, clear = score(pin[0], tuple(pin[1:]))
+            best = (sc, list(pin), clear)
+        else:
+            best = self.onto_search(score, swing, limits, couple)
+        apply(best[1][0], tuple(best[1][1:]))
+        if couple:
+            best[1][3] = best[1][2] * couple
+        if best[2] < CONTACT:
+            print("  ! the %s finger passes %.1f mm into the replica reaching its mark" % (
+                name, (CONTACT - best[2]) * 1e3))
+        m = self.rig.pose[bones[2]]
+        pad = min((m @ q - target).length for q in self.points[bones[2]])
+        print("  %s finger on its mark: pad %.1f mm off" % (name, (pad if best[2] >= CONTACT else -1) * 1e3))
+        return [round(x) for x in best[1]]
+
+    def onto_search(self, score, swing: int, limits: tuple, couple: float) -> tuple:
+        """`onto`'s search: a coarse grid of the finger's sideways swing and bends, then finer steps from the best,
+        each within the bends allowed (a finger told to lie nearly straight stays so). The best (score, [swing,
+        bends], clearance)."""
+        best = None
         for lat in sorted({-swing, 0, swing} | set(range(-swing, swing + 1, 10))):
-            for a1 in range(0 if couple else -10, limits[0] + 1, 10):
+            for a1 in range(0 if couple else self.index_from, limits[0] + 1, 10):
                 for a2 in range(0, limits[1] + 1, 10):
                     for a3 in range(0, 1 if couple else limits[2] + 1, 10):
                         sc, clear = score(lat, (a1, a2, a3))
@@ -490,22 +545,16 @@ class Hand:
                     trial[k] += sgn * step
                     if k == 0 and abs(trial[0]) > swing or couple and trial[1] < 0.0:
                         continue
+                    if k > 0 and (trial[k] > limits[k - 1] + 0.5 or k > 1 and trial[k] < -0.5
+                                  or k == 1 and not couple and trial[k] < self.index_from - 0.5):
+                        continue
                     sc, clear = score(trial[0], tuple(trial[1:]))
                     if sc < best[0]:
                         best = (sc, trial, clear)
                         moved = True
             if not moved:
                 step *= 0.5
-        apply(best[1][0], tuple(best[1][1:]))
-        if couple:
-            best[1][3] = best[1][2] * couple
-        if best[2] < CONTACT:
-            print("  ! the %s finger passes %.1f mm into the replica reaching its mark" % (
-                name, (CONTACT - best[2]) * 1e3))
-        m = self.rig.pose[bones[2]]
-        pad = min((m @ q - target).length for q in self.points[bones[2]])
-        print("  %s finger on its mark: pad %.1f mm off" % (name, (pad if best[2] >= CONTACT else -1) * 1e3))
-        return [round(x) for x in best[1]]
+        return best
 
     def close(self, name: str, col: Collider, ratio: tuple, limit: tuple, start: tuple = (0.0, 0.0, 0.0)) -> list:
         """Curls one finger joint by joint, from its bends `start` (radians), until each part meets the rifle (or

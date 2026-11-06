@@ -292,6 +292,8 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 		_pose_slide(held, a)
 	if held.selector != null:
 		held.selector.mode = a.fire_mode()
+	if _arms != null:
+		_arms.follow(held.anim, delta)
 
 	# Pulled back from a wall in front, at the hip.
 	var pull := 0.0

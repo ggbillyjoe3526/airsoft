@@ -1,7 +1,9 @@
 extends GutTest
 ## BL4: your arms in first person hold the replica in hand. They ride its node (so they follow its sway, kick and drop),
 ## are posed by that replica's hold clip with its hold mark on the replica's origin, hide the left arm on one-handed
-## replicas, press their depth and stay out of shadows and the optic's view, and wear the robot's colours for a robot.
+## replicas, press their depth and stay out of shadows and the optic's view, and wear the robot's colours for a robot. On a
+## bolt-action replica the right hand works the bolt: the arms' `<id>_Fire` clip plays in step with the replica's Fire,
+## then runs on as the hand goes back to the grip.
 
 const DT := 1.0 / 60.0
 const EPS := 1e-4
@@ -67,6 +69,59 @@ func test_the_arms_follow_the_replica() -> void:
 	hands.on_shot()
 	hands.update(c, 0.3, 0.0, Vector3(0.0, 1.6, 0.0), Vector3.FORWARD, DT, 0.0)
 	assert_almost_eq(mark.global_position, held.root.global_position, Vector3.ONE * EPS, "kicked and swayed")
+
+
+func test_the_hand_works_the_sniper_bolt_in_step() -> void:
+	var hands := _hands([&"sniper"])
+	_show(hands, 0)
+	var held: ReplicaView.Held = hands._held[0]
+	var anim := _model(hands).find_child("AnimationPlayer", true, false) as AnimationPlayer
+	assert_true(anim.has_animation(&"sniper_Fire"), "the arms have a clip working the bolt")
+	var fire := held.anim.get_animation(&"Fire").length
+	var work := anim.get_animation(&"sniper_Fire").length
+	assert_gt(work, fire + 0.1, "it runs on past the replica's Fire clip: the hand goes back to the grip after")
+	hands.on_shot()
+	held.anim.seek(0.4, true)
+	hands._arms.follow(held.anim, DT)
+	assert_eq(anim.assigned_animation, &"sniper_Fire", "working the bolt after a shot")
+	assert_almost_eq(anim.current_animation_position, 0.4, 0.001, "in step with the replica's clip")
+	# The replica's clip ends: the arms' runs on.
+	held.anim.seek(fire - 0.05, true)
+	hands._arms.follow(held.anim, DT)
+	held.anim.pause()
+	hands._arms.follow(held.anim, 0.1)
+	assert_eq(anim.assigned_animation, &"sniper_Fire", "still on its way back to the grip")
+	assert_almost_eq(anim.current_animation_position, fire + 0.05, 0.001, "running on at the frame's pace")
+	hands._arms.follow(held.anim, work)
+	hands._arms.follow(held.anim, DT)
+	assert_eq(anim.assigned_animation, &"sniper_Hold", "back on the grip once its clip ends")
+
+
+func test_a_clip_cutting_in_ends_the_bolts_working() -> void:
+	var hands := _hands([&"sniper"])
+	_show(hands, 0)
+	var held: ReplicaView.Held = hands._held[0]
+	var anim := _model(hands).find_child("AnimationPlayer", true, false) as AnimationPlayer
+	assert_true(held.anim.has_animation(ReplicaView.RELOAD_CLIP), "control: the rifle has a reload clip")
+	hands.on_shot()
+	held.anim.seek(0.4, true)
+	hands._arms.follow(held.anim, DT)
+	assert_eq(anim.assigned_animation, &"sniper_Fire", "control: working the bolt")
+	held.anim.play(ReplicaView.RELOAD_CLIP)
+	held.anim.pause()
+	hands._arms.follow(held.anim, DT)
+	assert_eq(anim.assigned_animation, &"sniper_Hold", "a reload takes the hand back to the grip")
+
+
+func test_replicas_without_a_bolt_keep_their_hold_through_a_shot() -> void:
+	var hands := _hands([&"aeg", &"pistol", &"cyber"])
+	for slot in 3:
+		_show(hands, slot)
+		var held: ReplicaView.Held = hands._held[slot]
+		var anim := _model(hands).find_child("AnimationPlayer", true, false) as AnimationPlayer
+		hands.on_shot()
+		hands._arms.follow(held.anim, DT)
+		assert_eq(anim.assigned_animation, StringName(String(held.id) + "_Hold"), "%s: still its hold" % held.id)
 
 
 func test_switching_moves_the_arms() -> void:

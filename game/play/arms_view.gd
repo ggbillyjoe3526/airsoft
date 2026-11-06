@@ -13,6 +13,10 @@ const MODEL := "res://assets/models/arms/arms.glb"
 ## The model's names (tools/blender/arms/arms.py).
 const HOLD_PREFIX := "Hold_"
 const CLIP_SUFFIX := "_Hold"
+## The replica's clip a shot plays (ReplicaView.FIRE_CLIP), and the suffix of the arms' clip that works it with the
+## right hand (`<id>_Fire`: a bolt-action replica's bolt, cycle.py), played in step with it.
+const FIRE_CLIP := &"Fire"
+const WORK_SUFFIX := "_Fire"
 const LEFT_ARM := "Arm_L"
 
 var _cfg: ViewModelConfig = null
@@ -29,6 +33,11 @@ var _shown: bool = true
 var _skeleton: Skeleton3D = null
 ## The throw drawn over a bomb's hold (none without the model's skeleton).
 var _throw: ArmsThrow = null
+## The hold's clip, and the clip that works the replica's Fire clip (empty when the model has none for it).
+var _hold_clip: StringName = &""
+var _work: StringName = &""
+## How far into the working clip the arms are (s).
+var _work_at: float = 0.0
 
 
 ## Loads the model; nothing shows until `hold`.
@@ -66,6 +75,7 @@ func hold(id: StringName, root: Node3D) -> void:
 	if mark == null or _anim == null or not _anim.has_animation(clip):
 		_model.visible = false
 		_on = &""
+		_work = &""
 		return
 	if _model.get_parent() != root:
 		_model.reparent(root, false)
@@ -77,6 +87,33 @@ func hold(id: StringName, root: Node3D) -> void:
 		_left.visible = not _cfg.one_hand.has(id)
 	_model.visible = _shown
 	_on = id
+	_hold_clip = clip
+	var work := StringName(id + WORK_SUFFIX)
+	_work = work if _anim.has_animation(work) else &""
+
+
+## Keeps the arms in step with the replica in hand's AnimationPlayer `anim`, each frame (`delta` s): while it plays its
+## Fire clip, the arms play their clip working it at the same point; once that clip has ended, theirs runs on to its
+## own end (the hand back on the grip); otherwise (another clip cut in) they keep the hold. Nothing for a replica the
+## model has no such clip for.
+func follow(anim: AnimationPlayer, delta: float) -> void:
+	if _work == &"" or anim == null:
+		return
+	if anim.is_playing() and anim.current_animation == FIRE_CLIP:
+		_work_at = anim.current_animation_position
+	elif _anim.assigned_animation == _work and anim.assigned_animation == FIRE_CLIP \
+			and _work_at < _anim.current_animation_length:
+		_work_at = minf(_work_at + delta, _anim.current_animation_length)
+	else:
+		if _anim.assigned_animation != _hold_clip:
+			_anim.play(_hold_clip)
+			_anim.seek(0.0, true)
+			_anim.pause()
+		return
+	if _anim.assigned_animation != _work:
+		_anim.play(_work)
+		_anim.pause()
+	_anim.seek(_work_at, true)
 
 
 ## Shows the arms on their hold, or hides them (`on` false) keeping it, for when they're holding something else.
