@@ -10,8 +10,11 @@ extends SkeletonModifier3D
 ## sets `lean`, `crouch` and `flinch`.
 ## Then (FI3, `aim`) the upper chain pitched about the spine's own joint by `aim_lean`: what the aim clips leave of the
 ## pitch (they turn the replica FigureConfig.aim_reach of it), so the replica points where the shot goes.
-## At a wall (FB5, `high_ready`), the arms bring the replica to the high ready, muzzle up (FigureReady). Last, a bomb
-## thrown or held in hand (GT1, `throw_share`, `throw_held`): the arms throw it (FigureThrow).
+## Then (TP3, `grip_fit`) the right fist reaches along the replica to its grip (both hands, for a pistol); then (TP2,
+## `shouldered`) a rifle's butt drawn into the shoulder pocket, its aim kept; then, at a wall (FB5,
+## `high_ready`), the arms bring the replica to the high ready, muzzle up (FigureReady). Aiming a rifle (`cheek`), the
+## head bows and tilts about the neck onto the stock, as the hit volume's does (HitPose, HitFit.cheek_turn). Last, a
+## bomb thrown or held in hand (GT1, `throw_share`, `throw_held`): the arms throw it (FigureThrow).
 
 ## How much the upper body's own clips show (0..1, FigurePose.upper_weight): the upper chain is turned back to standing
 ## still's heading over the stepping hips by that much of HitConfig.upper_steady (GA1, as HitPose does).
@@ -28,6 +31,14 @@ var hits: HitConfig = null
 var aim_lean: float = 0.0
 ## How far (0..1) the arms bring the replica to the high ready at a wall.
 var high_ready: float = 0.0
+## How far (0..1) the rifle in the hand is drawn into the shoulder, and its butt in the grip bone's frame (TP2).
+var shouldered: float = 0.0
+var butt_on_grip: Vector3 = Vector3.ZERO
+## How far (0..1) the head is bowed onto a rifle's stock (TP2).
+var cheek: float = 0.0
+## How far the hand reaches along the replica to its grip (TP3; the grip bone's frame), and whether both hands do.
+var grip_fit: Vector3 = Vector3.ZERO
+var grip_fit_both: bool = false
 ## A bomb's throw: its share (0..1 the windup, 1..2 the recovery; below 0 none), a bomb held in hand (MC1), and a
 ## throw begun from one.
 var throw_share: float = -1.0
@@ -40,6 +51,8 @@ var _hips: int = -1
 var _spine: int = -1
 var _head: int = -1
 var _ready: FigureReady = null
+## FigureConfig.cheek_bones: the neck, the left and the right shoulder (-1 when missing).
+var _cheek: PackedInt32Array = PackedInt32Array()
 var _throw: FigureThrow = null
 
 
@@ -52,6 +65,9 @@ func setup(skeleton: Skeleton3D, config: FigureConfig) -> void:
 	_spine = skeleton.find_bone(config.lean_bone)
 	_head = skeleton.find_bone(config.head_bone)
 	_ready = FigureReady.new(skeleton, config)
+	_cheek.clear()
+	for bone_name in config.cheek_bones:
+		_cheek.append(skeleton.find_bone(bone_name))
 	_throw = FigureThrow.new(skeleton, config)
 
 
@@ -60,7 +76,10 @@ func _process_modification_with_delta(_delta: float) -> void:
 	if skeleton != null:
 		bend(skeleton)
 		aim(skeleton)
+		bow(skeleton)
 		if _ready != null:
+			_ready.fit_grip(skeleton, grip_fit, grip_fit_both)
+			_ready.shoulder(skeleton, shouldered, butt_on_grip)
 			_ready.hold(skeleton, high_ready)
 		if _throw != null and (throw_share >= 0.0 or throw_held):
 			_throw.pose(skeleton, throw_share, throw_held, throw_from_hand)
@@ -119,3 +138,14 @@ func aim(skeleton: Skeleton3D) -> void:
 	var spine := skeleton.get_bone_global_pose(_spine)
 	var turn := Basis(Vector3.RIGHT, -aim_lean)
 	skeleton.set_bone_global_pose(_spine, Transform3D(turn * spine.basis, spine.origin))
+
+
+## Bows and tilts `skeleton`'s head `cheek` of the way onto a rifle's stock about the neck's joint (HitFit.cheek_turn).
+func bow(skeleton: Skeleton3D) -> void:
+	if cheek <= 0.0 or hits == null or _head < 0 or _cheek.size() != 3 or _cheek.has(-1):
+		return
+	var neck := skeleton.get_bone_global_pose(_cheek[0])
+	var side := skeleton.get_bone_global_pose(_cheek[1]).origin - skeleton.get_bone_global_pose(_cheek[2]).origin
+	var up := skeleton.get_bone_global_pose(_head).origin - neck.origin
+	var turn := HitFit.cheek_turn(side, up, hits, cheek)
+	skeleton.set_bone_global_pose(_cheek[0], Transform3D(turn * neck.basis, neck.origin))

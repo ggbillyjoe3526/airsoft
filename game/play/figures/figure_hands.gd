@@ -44,6 +44,15 @@ var _chest_bone: int = -1
 var _replicas: Array[MeshInstance3D] = []
 var _on_grip: Array[Transform3D] = []
 var _grip_points: PackedVector3Array = PackedVector3Array()
+## Each replica's butt (the middle of its last FigureConfig.shoulder_butt_depth) in the grip bone's frame (TP2).
+var _butts: PackedVector3Array = PackedVector3Array()
+## Each slot's site class (`hold`'s `classes`).
+var _classes: Array[StringName] = []
+## Each slot's grip fit (FigureConfig.grip_fit, TP3) in the grip bone's frame, and whether both hands move with it.
+var _fits: PackedVector3Array = PackedVector3Array()
+var _fits_both: PackedByteArray = PackedByteArray()
+## Whether this figure has the arms the fit moves (FigureReady's raise_arm_bones).
+var _can_fit: bool = false
 var _on_chest: Array[Transform3D] = []
 ## Hanging from the hand: the replica's frame in the skeleton's (its muzzle down, tilted forward).
 var _hang: Basis = Basis.IDENTITY
@@ -87,6 +96,10 @@ func setup(skeleton: Skeleton3D, models: FigureModels, kind: int, config: Figure
 	_config = config
 	_grip_bone = skeleton.find_bone(config.grip_bone)
 	_chest_bone = skeleton.find_bone(config.chest_bone)
+	# The grip fit needs the arms FigureReady moves (TP3); without them the replica keeps the sidecar's place.
+	_can_fit = config.raise_arm_bones.size() % 3 == 0 and not config.raise_arm_bones.is_empty()
+	for bone_name in config.raise_arm_bones:
+		_can_fit = _can_fit and skeleton.find_bone(bone_name) >= 0
 	# Its muzzle (-Z) down and tilted ahead (+Z in the file), its right side (+X) to the figure's right (-X).
 	var muzzle := Vector3(0.0, -cos(config.hang_tilt), sin(config.hang_tilt))
 	var right_side := Vector3(-1.0, 0.0, 0.0)
@@ -100,6 +113,7 @@ func setup(skeleton: Skeleton3D, models: FigureModels, kind: int, config: Figure
 func hold(replicas: Array[MeshInstance3D], classes: Array[StringName],
 		magazines: Array[MeshInstance3D] = []) -> void:
 	_replicas = replicas
+	_classes = classes.duplicate()
 	_magazines = magazines
 	_reloads.clear()
 	_wells.clear()
@@ -119,12 +133,23 @@ func hold(replicas: Array[MeshInstance3D], classes: Array[StringName],
 	_on_grip.clear()
 	_on_chest.clear()
 	_grip_points.clear()
+	_butts.clear()
+	_fits.clear()
+	_fits_both.clear()
 	var sling := _models.sling(_kind)
 	for i in replicas.size():
 		var r := replicas[i]
-		var grip := _models.grip(_kind, classes[i] if i < classes.size() else &"rifle")
+		var site_class := classes[i] if i < classes.size() else &"rifle"
+		var raw := _models.grip(_kind, site_class)
+		# The hand reaches `fit` along the replica (FigureBend.grip_fit), so the replica sits that much the other way
+		# in the hand, and stays where the clips put it.
+		var fit: Vector3 = _config.grip_fit.get(site_class, Vector3.ZERO) if _can_fit else Vector3.ZERO
+		var grip := raw * Transform3D(Basis.IDENTITY, -fit)
+		_fits.append(raw.basis * fit)
+		_fits_both.append(1 if _config.grip_fit_both.has(site_class) else 0)
 		_on_grip.append(grip)
 		_grip_points.append(grip.affine_inverse().origin)
+		_butts.append(grip * _butt(r, _config.shoulder_butt_depth))
 		var butt := Vector3.ZERO
 		if r != null:
 			var box := r.get_aabb()
@@ -245,6 +270,40 @@ func magazine(slot: int) -> MeshInstance3D:
 ## The replica in slot `slot` as drawn, or null.
 func replica(slot: int) -> MeshInstance3D:
 	return _replicas[slot] if slot >= 0 and slot < _replicas.size() else null
+
+
+## Slot `slot`'s site class (&"" for none).
+func site_class(slot: int) -> StringName:
+	return _classes[slot] if slot >= 0 and slot < _classes.size() else &""
+
+
+## How far the hand holding replica `slot` reaches along it to its grip (TP3), in the grip bone's frame.
+func grip_fit(slot: int) -> Vector3:
+	return _fits[slot] if slot >= 0 and slot < _fits.size() else Vector3.ZERO
+
+
+## Whether both hands reach with it (a pistol's two-handed grip).
+func grip_fit_both(slot: int) -> bool:
+	return slot >= 0 and slot < _fits_both.size() and _fits_both[slot] != 0
+
+
+## Replica `slot`'s butt in the grip bone's frame (the origin when it has none).
+func butt_on_grip(slot: int) -> Vector3:
+	return _butts[slot] if slot >= 0 and slot < _butts.size() else Vector3.ZERO
+
+
+## The middle of `replica`'s last `depth` m towards its butt (+Z), in its own frame (the origin with no replica).
+static func _butt(replica: MeshInstance3D, depth: float) -> Vector3:
+	if replica == null or replica.mesh == null:
+		return Vector3.ZERO
+	var end := replica.get_aabb().end.z
+	var lo := Vector3.INF
+	var hi := -Vector3.INF
+	for v: Vector3 in replica.mesh.get_faces():
+		if v.z >= end - depth:
+			lo = lo.min(v)
+			hi = hi.max(v)
+	return (lo + hi) * 0.5 if lo.x <= hi.x else Vector3(0.0, 0.0, end)
 
 
 ## The point of replica `slot` the grip holds, in the replica's own frame.

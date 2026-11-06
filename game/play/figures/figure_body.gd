@@ -32,6 +32,8 @@ var head: StringName = &""
 var _config: FigureConfig = null
 var _bones: Dictionary[StringName, int] = {}
 var _fade: float = 1.0
+## How far the rifle in the hand is drawn into the shoulder, eased (TP2).
+var _shoulder: float = 0.0
 ## The Vault and HitCall clips' lengths (s) and the WalkOff clip's own pace (m/s).
 var _vault_seconds: float = 0.0
 var _call_seconds: float = 0.0
@@ -176,6 +178,26 @@ func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = fals
 	bend.aim_lean = pose.aim_lean() * aiming
 	# Muzzle up at a wall (FB5), as far as the aim shows.
 	bend.high_ready = pose.raise * aiming
+	# A rifle in the hand rests in the shoulder (TP2), as far as the aim shows and the high ready leaves it; a pistol
+	# is held out. Eased over settle_shoulder, and let go through a switch, so the replica in the hand (and its butt)
+	# changes with none of it left.
+	var rifle := hands.site_class(pose.in_hand) != &"pistol" and not pose.hanging and not pose.switching
+	var target := aiming * (1.0 - pose.raise) * _config.shoulder_rifle if pose.in_hand >= 0 and rifle else 0.0
+	_shoulder = target if pose.snapped else lerpf(_shoulder, target,
+			FigurePose.settle_share(delta, _config.settle_shoulder))
+	if target == 0.0 and _shoulder < _config.raise_rest:
+		_shoulder = 0.0
+	bend.shouldered = _shoulder
+	# The cheek on the stock while a rifle is aimed, as the hit volume's head (HitPose), easing over a switch with the
+	# pistol's clips.
+	var cheek := aiming * (1.0 - pose.pistol_weight) if pose.in_hand >= 0 and not pose.hanging else 0.0
+	bend.cheek = cheek if cheek >= _config.raise_rest else 0.0
+	bend.butt_on_grip = hands.butt_on_grip(pose.in_hand)
+	# The right fist closed on the grip (TP3), while the replica is held in it.
+	var gripped := pose.in_hand >= 0 and not pose.hanging
+	bend.grip_fit = hands.grip_fit(pose.in_hand) if gripped else Vector3.ZERO
+	# Not the left hand in a reload: it takes the magazine out of the replica, as its clip does.
+	bend.grip_fit_both = hands.grip_fit_both(pose.in_hand) and not pose.reloading
 	# A bomb thrown or held in hand (GT1): the arms throw it, the bomb in the right hand until it leaves.
 	bend.throw_share = pose.throw_share
 	bend.throw_held = pose.bomb_held
