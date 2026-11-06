@@ -275,7 +275,10 @@ def tuned(spec: dict) -> dict:
 def replica_objects(hold: Hold) -> list:
     """The replica's meshes, its origin moved to the hold's place."""
     before = set(bpy.data.objects)
-    bpy.ops.import_scene.gltf(filepath=os.path.join(REPLICAS, hold.file))
+    # BL_FIT_<FILE STEM>=<glb>: fit the hold to another copy of the replica's model (the AEG's approved hold was
+    # solved on its model before GS2: docs/KNOWN_ISSUES.md).
+    fit = os.environ.get("BL_FIT_" + os.path.splitext(hold.file)[0].upper())
+    bpy.ops.import_scene.gltf(filepath=fit or os.path.join(REPLICAS, hold.file))
     new = [o for o in bpy.data.objects if o not in before]
     # The importer leaves the replica's first clip (Fire) playing, its slide part way back: the hold is fitted to
     # the replica at rest, so no clip may pose it.

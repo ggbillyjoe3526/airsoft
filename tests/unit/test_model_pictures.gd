@@ -6,9 +6,10 @@ extends GutTest
 const MODEL_ROOT := "res://assets/models/"
 ## The folders whose models have pictures in the UI.
 const PICTURED: Array[String] = ["replicas", "replicaParts", "powerSources", "grenades"]
-## The folders whose models show live only in a match (figures, the BBs in flight, map props). The props are also in
-## the fields' pictures (assets/maps/*.jpg, tools/eye_pictures.gd): re-render those after a prop changes (ASSETS.md).
-const MATCH_ONLY: Array[String] = ["characters", "effects", "props"]
+## The folders whose models show live only in a match (figures, your first-person arms, the BBs in flight, map props).
+## The props are also in the fields' pictures (assets/maps/*.jpg, tools/eye_pictures.gd): re-render those after a prop
+## changes (ASSETS.md).
+const MATCH_ONLY: Array[String] = ["arms", "characters", "effects", "props"]
 
 var pool: Pool
 

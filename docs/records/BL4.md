@@ -132,6 +132,11 @@ attempt 19 (2026-11-06 09:41: "just go with that"); the owner's ruling (2026-11-
   its shoulder moved in and down (`shoulder`, `drop`), the forearm rising 13° (GBB) and 15° (Cyber), the wrist 16.3° and
   19.0° (was 6.9° and 9.2°): with the forearm off screen the bend shows only at the cuff, and the owner took it on these
   pictures (09:41: "just go with that"). The sight tests look from the new distance.
+- **Main's GS2 models** (merged after attempt 19's review): solved on the new AEG model the AEG's right hand turned
+  12° and its middle finger left the grip. The old model's grip had faces facing inward, which had steered the
+  approved solve. So the AEG hold is fitted to the model before GS2 (`BL_FIT_AEG`, a row in KNOWN_ISSUES), and its
+  pose is the same as approved, with no more contact with the GS2 model than before. The GBB hold on the Gen5 slide
+  is unchanged to the eye (trigger pad 0.4 mm off, wrist 15.1°).
 - **Attempt 18** (the owner, 2026-11-06 04:24 to 05:15: the sniper's hold shots, the GBB thumb more forward onto
   the bump behind the trigger guard, the sniper's ring and little fingers and both rifles' support thumbs pressing on
   the rifle): the Sniper Rifle's hold (above); `Hand.press` closes a settled finger's outer joints onto the replica;
