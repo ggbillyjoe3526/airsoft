@@ -1403,6 +1403,23 @@ The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built 
 - [ ] **Flags from a roof.** On Woodland in Attack / Defend, if you can get onto the shelter roof by flag B, standing
   there does nothing to the flag; at the pole's foot it rises as before.
 
+The models and sounds merged on 2026-11-05 and 06 without checks of their own here. Look at your teammates up close
+as a round starts, then watch a few Depot matches:
+
+- [ ] **The body (BL10):** shirt, trousers, boots and gloves look like your photos at 2 m and still read as a person at
+  30 m. Nothing pokes through when a bot crouches, kneels, runs, vaults or calls its hit.
+- [ ] **Head gear and face (BL11, FA1):** each of the four looks (boonie, cap, two helmets) sits on the head with the
+  ears and goggles in place; behind the goggles you see eyes, never a bare face or a gap.
+- [ ] **Gear and pads (BL12, BL13):** plate carrier, pouches, radio, backpack, empty holster and knee and elbow pads sit
+  on the body and move with it; the pads stay on the knees when crouched and on the elbows when aiming.
+- [ ] **What bots hold (TP1, TP2, TP3):** each bot's replica is the same model you hold, with its parts (an optic hides
+  its irons). A rifle's stock sits in the shoulder with the head down on it; both fists close on a pistol's grip, not
+  under it. Up close, do the fingers look wrapped round the grip?
+- [ ] **Cyber Pistol size (CZ1):** in your hand, in Customise and on a bot it is as big as the GBB Pistol, its sights
+  showing.
+- [ ] **Dry fire (AU8):** empty each replica and pull the trigger: every one gives the gas pistol's click. The Range
+  sounds like The Street by day.
+
 ## GBB slide, AEG sights and stock (GS2)
 
 - [ ] **GBB at rest:** look at the GBB Pistol in the Loadout, Customise, in your hand and in its holster on a bot: the
