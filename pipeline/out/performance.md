@@ -1,22 +1,18 @@
-Task: none (BP5 part 1) · head b46abbf · Verdict: Pass
-Run: tools/team_bench.gd (no `--perf` flag exists for the bot match; this is the repo's tick/frame bench: whole PlaySession, autopilot, hand-stepped), seed 1, 60 s match time after 5 s warm-up, depot+street at 6v6 and 8v8, headless (no GPU). Main = /home/user/airsoft at 90b0ff4 (confirmed clean). Interleaved main, head, main, head (2 runs a side). Machine shared (4 cores, load ~2 from other agents), so run-to-run noise is about 5-7 % on means. · budget: no baseline yet (no pipeline/perf-budget.json), judged against targets and main.
-Metrics, mean tick ms (main run1/run2 -> head run1/run2), frame = views, ms:
- depot 6v6  tick 2.14/2.29 -> 2.34/2.33 (ok, +5 %)   frame 1.02/1.10 -> 1.09/1.09
- depot 8v8  tick 3.10/3.06 -> 3.10/3.13 (ok, +1 %)   frame 1.29/1.28 -> 1.29/1.37
- street 6v6 tick 2.26/2.16 -> 2.26/2.21 (ok, +1 %)   frame 1.08/1.01 -> 1.06/1.05
- street 8v8 tick 3.63/3.43 -> 3.38/3.66 (ok, 0 %)    frame 1.40/1.32 -> 1.32/1.41
- p95 tick 3.1-6.2 ms on both sides, p99 4.2-9.7 on both; worst tick 8-29 ms on both sides (street spikes in main too: 22-25 ms), not a head effect.
- Every config is far under Low's 16.7 ms frame (tick+frame <= ~5 ms mean, 8v8). Frame times are reported only (headless).
- Node count, orphans and static memory: not logged by team_bench; no scene or node code changed in the diff (judgment).
-Regressions (> 10 % worse): none. The one visible gap (depot 6v6 tick, +5 %) is inside main's own run-to-run spread (2.14 vs 2.29) and did not repeat in other configs.
+Task: none (BP5 part 2) · head c14d732 · Verdict: Pass
+Run: team_bench 8v8, 40 s, woodland+depot, seed default, headless; 2 runs a side, interleaved (main 90b0ff4 / head) · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and main
+Metrics (mean ms, main run1/run2 -> head run1/run2; tick, frame, both):
+ woodland tick 4.88/4.50 -> 4.67/4.51; frame 1.48/1.26 -> 1.34/1.23; both 6.36/5.75 -> 6.00/5.75 (ok)
+ depot    tick 2.89/3.00 -> 2.90/3.02; frame 1.28/1.41 -> 1.22/1.21; both 4.17/4.40 -> 4.11/4.22 (ok)
+ p99 both: woodland 12.5/10.5 -> 10.9/10.6; depot 8.4/8.3 -> 9.3/8.3 (noise; run-to-run spread on main alone is up to 8 %)
+ Frames over 16.7 ms (of 2400): woodland main 3/0, head 1/0; depot 0 everywhere. Worst-case spikes are single-frame noise (head 20.6 vs main 16.8 in run 1, reversed in run 2).
+Regressions (> 10 % worse): none (measured). Gain is small and within run-to-run noise on this machine (frame mean -3 to -14 %, both -0 to -6 %); the worker's larger gain in BP5.md is not reproduced here but nothing contradicts it.
 Blocking findings: none
- - game/sim/grenades.gd trigger_command (new, per tick per character): judgment+measured. Two bool reads and a return of `cmd` on the common path; copy_from into the preallocated `_throwing` only while a pull is held off. No Array, String, Callable or new object. `take_torch_back` is a bool read and write. Torch.step relight is a default bool param, no allocation. Measured cost is not distinguishable from noise.
- - game/sim/simulation.gd:134: new local `var trigger := cmd.fire` is a bool on the stack, no allocation. The `_throwing` command is the existing preallocated field, no new fields allocated per tick.
- - game/play/sim_audio.gd:746-754: push_warning with String formatting only on the missing-peak path at ambience start, not per frame.
- - game/progress/records.gd: one extra float compare in a load-time parse.
+ - Allocations (judgment, read game/sim/hitbox.gd may_touch, game/ai/bot_combat.gd _body_in_line, game/play/figure_view.gd animate): only float/Vector3 locals (values, no heap), no Array/Dictionary/String/Callable/lambda, no node or resource creation, so no new per-tick allocation and nothing to free.
+ - Freed nodes (judgment): no nodes, tweens, timers or connections added; no orphan lines in either head run.
 Advisory:
- - The diff also deletes assets/models/characters/human_bot_human_v12_{col,nrm,orm}.webp (+ .import), about 1.2 MB: a size win; the critic/QA should confirm nothing still references them (smoke ran per QA). Judgment.
- - team_bench does not print OBJECT_NODE_COUNT / orphans; adding them would give the next measured review a leak check (not needed for this diff).
-Fixes: none needed.
-Unexplained: none. Worst-tick spikes (up to ~29 ms on street 8v8) exist on main as well; on a shared machine they are not attributable to the diff.
+ - game/ai/bot_combat.gd:~370 flight_time(b, w, dist) is computed once per call lazily; if flight_max is 0 (judgment) the quick test is skipped for every mate and flight_time is not re-tried, which is correct but leaves that case unaccelerated.
+ - game/play/figure_view.gd:~364 unseen figures share _far_frames/_far_delta with the far path; fine because the branches are exclusive, but a figure switching between seen/unseen mid-stride keeps a stale partial count (at most one extra skipped frame; judgment).
+ - game/config/figure_config.gd:90 unseen_stride=2 makes shadows of unseen figures pose at 30 Hz (design trade-off, intended; play-test for visible shadow stepping).
+ - Frame times are from a GPU-less container: reported only, not a budget verdict.
+Raw: <scratchpad>/perf_{main,head}_{1,2}.txt
 Verdict: Pass

@@ -1,6 +1,6 @@
 # BP5 · The second full bug and performance pass
 
-**Review:** part 1: critic Accept 8/8 · qa Pass · performance Pass; part 2: critic pending · qa Pass · performance pending
+**Review:** part 1: critic Accept 8/8 · qa Pass · performance Pass; part 2: critic pending · qa Pass · performance Pass
 
 ## Attempts
 
@@ -57,8 +57,11 @@ a quiet machine). Tick mean / p95 / p99 / worst in ms:
 | Woodland | 4.90 / 8.28 / 9.64 / 19.61 and 4.86 / 8.24 / 10.73 / 18.15 | 4.81 / 8.21 / 10.20 / 12.75 and 4.52 / 7.31 / 8.78 / 12.18 |
 | Depot | 3.00 / 5.25 / 6.35 / 11.71 and 2.95 / 4.74 / 5.88 / 9.71 | 2.99 / 5.02 / 6.35 / 10.34 and 2.88 / 5.04 / 6.37 / 14.44 |
 
-Woodland's worst tick falls by about a third and frames over 16.7 ms from 1 and 4 to 1 and 0; Depot is within the
-noise (the 14.44 is one tick).
+The performance review's own runs (two a side, interleaved): Woodland 4.88 / 8.27 / 10.04 / 16.79 and 4.50 / 7.26 /
+8.67 / 12.67 on main, 4.67 / 7.47 / 8.78 / 20.61 and 4.51 / 7.08 / 8.87 / 12.20 here. Over the four runs a side the
+mean and p95 tick fall a few per cent on Woodland (within main's own spread), the worst tick is single spikes either
+way, and frames over 16.7 ms on Woodland fall from 8 to 2 of 9,600; Depot is within the noise. A small gain, nothing
+worse.
 
 - **Hitbox.may_touch** tests a bounding sphere round the segment and the volume's room before the capsule: most
   characters, for most BBs, are out at once. It answers as the capsule test alone (a test of 4,000 seeded rays).
