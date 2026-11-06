@@ -182,12 +182,13 @@ func table(field: StringName) -> Table:
 	return t
 
 
-## The cheek on a rifle's stock (TP2), `amount` (0..1) of it: the head's turn about the neck's joint, bowed
-## HitConfig.cheek_bow forward about `side` (the right shoulder to the left), then tilted cheek_cant to the right about
-## the way ahead (`side` across `up`, the neck to the head). Either frame (the hit volume's or the skeleton's): `side` is
-## the figure's left in both. Identity when the two are in line or none.
-static func cheek_turn(side: Vector3, up: Vector3, hits: HitConfig, amount: float) -> Basis:
+## The cheek on a rifle's stock (TP2), `amount` (0..1) of it: the head's turn about the neck's joint, bowed `bow`
+## (rad, HitConfig.cheek_bow) forward about `side` (the right shoulder to the left), then tilted `cant` (cheek_cant) to
+## the right about the way ahead (`side` across `up`, the neck to the head). Either frame (the hit volume's or the
+## skeleton's): `side` is the figure's left in both. Identity when the two are in line or none. The angles come as
+## numbers, not the HitConfig: HitConfig preloads hit_fit.tres, and naming it here made a cycle an export can't load.
+static func cheek_turn(side: Vector3, up: Vector3, bow: float, cant: float, amount: float) -> Basis:
 	var ahead := side.cross(up)
 	if amount <= 0.0 or ahead.length_squared() <= 0.0:
 		return Basis.IDENTITY
-	return Basis(ahead.normalized(), hits.cheek_cant * amount) * Basis(side.normalized(), hits.cheek_bow * amount)
+	return Basis(ahead.normalized(), cant * amount) * Basis(side.normalized(), bow * amount)

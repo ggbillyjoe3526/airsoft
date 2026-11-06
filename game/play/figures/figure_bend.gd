@@ -147,5 +147,5 @@ func bow(skeleton: Skeleton3D) -> void:
 	var neck := skeleton.get_bone_global_pose(_cheek[0])
 	var side := skeleton.get_bone_global_pose(_cheek[1]).origin - skeleton.get_bone_global_pose(_cheek[2]).origin
 	var up := skeleton.get_bone_global_pose(_head).origin - neck.origin
-	var turn := HitFit.cheek_turn(side, up, hits, cheek)
+	var turn := HitFit.cheek_turn(side, up, hits.cheek_bow, hits.cheek_cant, cheek)
 	skeleton.set_bone_global_pose(_cheek[0], Transform3D(turn * neck.basis, neck.origin))

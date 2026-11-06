@@ -13,7 +13,7 @@ so W A S D stays W A S D on any keyboard layout.
   in Settings › Controls; a toggled crouch stands you up when you sprint or jump.
 - **Lean** and **Sprint** are always held.
 - **Inspect replica** (Y) turns the replica in your hands side on to look it over while its parts move: the AEG's
-  charging handle and dust cover, a gas pistol's slide, the Cyber Pistol's battery. Firing,
+  charging handle and dust cover, the Cyber Pistol's battery (a gas pistol's slide stays home). Firing,
   aiming, reloading, switching, holstering, sprinting or being hit stops it at once.
 - **Jump** vaults when you are at a low wall: "Space to vault" shows under the crosshair (it names your own Jump
   key).
