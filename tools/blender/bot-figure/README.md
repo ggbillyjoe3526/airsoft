@@ -168,6 +168,11 @@ re-make them, for each figure:
 `tools/gait_pictures.gd`. The old figure is the file before the splice (`git show HEAD:<path>`): the script reads the
 upper body from its clips.
 
+The hit call's raised arm (HC1) is made the same way by `gait/call.py`: HitCall and WalkOff with the left arm held
+straight up, the elbow nearly straight, the wrist in line and the hand open, raised out to the side; every other bone
+keeps its keys (`tests/unit/test_hit_call_arm.gd` checks the arm). Run it
+on the current figure and splice HitCall,WalkOff (`call.py <figure.glb> donor.glb`, then `splice.mjs` as above).
+
 ## How the hands hold the replicas (bot13)
 
 - The right fist sits low and turned 40 degrees on the AEG grip (`RIFLE_SEAT`), so the web is on the backstrap, the
