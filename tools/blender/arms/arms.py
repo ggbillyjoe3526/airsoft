@@ -30,6 +30,7 @@ sys.path.insert(0, os.path.join(HERE, "..", "replicas"))
 import bpy  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
+import fabric  # noqa: E402
 import glove  # noqa: E402
 import hardsurface as hs  # noqa: E402
 import pose  # noqa: E402
@@ -56,6 +57,8 @@ ELBOW_DROP = {"R": 0.10, "L": 0.06}
 # How far each elbow may come in across the body from its shoulder (m): the right not at all, the left a little
 # (reaching across to a pistol).
 ACROSS = {"R": 0.0, "L": 0.10}
+# Per degree a forearm lies off its hold's `plan` angle (seen from above), as costly as this many degrees of wrist.
+PLAN_COST = 1.0
 # A pistol hand's palm faces the grip's right side at least this much (cosine), and each metre a placement passes into
 # the grip, to be pushed back out of it, costs this many degrees of wrist bend while it is rolled into place.
 PALM_FACING = 0.5
@@ -129,7 +132,7 @@ class Hold:
 # `slant` forward from the grip's line (the grip lies across the palm on a diagonal, which keeps the wrist straight);
 # the palm facing the grip's side, turned `wrap` toward its front (negative: round its back).
 RIGHT = {"d": 0.006, "f": 0.038, "x": 0.012, "slant": 30.0, "wrap": -30.0, "thumb_d": 0.030, "thumb_f": 0.030,
-         "thumb_hug": 0.0, "thumb_aim": 1.0, "swing": (0.0, 0.0, 0.0),
+         "thumb_hug": 0.0, "thumb_pull": 3.0, "thumb_aim": 1.0, "swing": (0.0, 0.0, 0.0),
          "fingers": {"Middle": (60, 60, 45), "Ring": (60, 60, 45), "Pinky": (55, 55, 40)},
          "thumb": ((-45.0, 0.0, 30.0), (35.0, 25.0))}
 # The left hand under a rifle's handguard (the owner's photos 123627, 123646, 123656): `y` along it (rifle +Y), its
@@ -140,7 +143,9 @@ RIGHT = {"d": 0.006, "f": 0.038, "x": 0.012, "slant": 30.0, "wrap": -30.0, "thum
 # fingers' line yawed from forward toward the right and pitched up, the palm rolled either way from facing up; the
 # turn is fixed at 80 and 25 degrees: the palm cups the handguard's underside round its lower left corner, the
 # knuckles under its lower right one, so the fingers lie along the right side with their tips below the rail (the
-# critic, photo 123656); steeper, the knuckles rise up the side and the fingers stand over the top),
+# critic, photo 123656); steeper, the knuckles rise up the side and the fingers stand over the top; the palm rolled
+# 20 degrees toward the left side and resting on the underside, not held off it: rolled less the thumb leaves the
+# left side, more the fingers fan up the right one),
 # the forearm rising toward `rise` degrees from below. The arm comes from a bladed stance: its shoulder moved
 # `shoulder` (eye space; forward and down under the rifle, higher than at 48 degrees so the forearm comes in flatter,
 # about 33 degrees, and the wrist stays near 23 degrees with the hand this flat), the elbow at least
@@ -148,10 +153,11 @@ RIGHT = {"d": 0.006, "f": 0.038, "x": 0.012, "slant": 30.0, "wrap": -30.0, "thum
 # along the handguard's left side for (thumb_x, y + thumb_f, thumb_z), its length kept close to it (thumb_hug). No
 # finger's glove rises above `tips_below` (replica space; the rail's top is 0.0735): the fingers rest on the right side
 # and none shows over the top from the left (the owner's 16:30 note, the critic).
-GUARD = {"kind": "guard", "y": 0.190, "forward": 0.052, "depth": 0.034, "standoff": 0.006,
-         "search": ((80, 80), (25, 25), (-40, 40)), "rise": 30.0, "shoulder": (-0.02, 0.12, -0.08), "drop": 0.06,
-         "across": 0.25, "thumb_x": -0.023, "thumb_f": 0.05, "thumb_z": 0.055, "thumb_hug": 3.0, "tips_below": 0.068,
-         "tip_at": (0.0275, 0.010, 0.046), "tip_swing": 8.0,
+GUARD = {"kind": "guard", "y": 0.190, "forward": 0.052, "depth": 0.034, "standoff": 0.0,
+         "search": ((80, 80), (25, 25), (-20, -20)), "rise": 30.0, "shoulder": (-0.02, 0.12, -0.08), "drop": 0.06,
+         "across": 0.25, "thumb_x": -0.023, "thumb_f": 0.05, "thumb_z": 0.055, "thumb_hug": 3.0, "thumb_pull": 3.0,
+         "tips_below": 0.068, "plan": 0.0,
+         "tip_at": (0.0275, 0.005, 0.048), "tip_swing": 8.0,
          "fingers": {"Index": (35, 35, 20), "Middle": (40, 45, 30), "Ring": (40, 45, 30), "Pinky": (35, 40, 25)},
          "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
 # A pistol is held in the right hand alone, as the game's look draws it: the left arm hangs at the side, out of view
@@ -282,8 +288,14 @@ def elbow_for(rig: Rig, side: str, hand_m: Matrix, quiet: bool = False) -> tuple
         if e.z > s.z - rig.drop.get(side, ELBOW_DROP[side]) or (s.x - e.x) * out > rig.across.get(side, ACROSS[side]):
             continue
         bend = math.degrees(straight.angle(w - e))
-        if best is None or bend < best[0]:
-            best = (bend, e)
+        # Seen from above, the forearm's angle off the bore (0: along it, 90: square across it), near `plan` when
+        # the hold asks for one (the support arm: the owner, 2026-11-06, about 40 degrees, not square across).
+        cost = bend
+        if rig.plan.get(side, 0.0) > 0.0:
+            f = w - e
+            cost += abs(math.degrees(math.atan2(abs(f.x), f.y)) - rig.plan[side]) * PLAN_COST
+        if best is None or cost < best[2]:
+            best = (bend, e, cost)
     if best is None:
         if quiet:
             return None, 180.0
@@ -295,9 +307,10 @@ def elbow_for(rig: Rig, side: str, hand_m: Matrix, quiet: bool = False) -> tuple
         ideal = w - straight * b
         print("   %s straight-wrist elbow %s, %.3f from the shoulder %s (upper arm %.3f)" % (
             side, tuple(round(c, 3) for c in ideal), (ideal - s).length, tuple(round(c, 3) for c in s), a))
-    print("  %s: reach %.3f of %.3f, elbow %s, wrist %.1f deg off the forearm, forearm rising %.0f deg" % (
-        side, (w - s).length, a + b, tuple(round(c, 3) for c in best[1]), best[0],
-        math.degrees(math.atan2(fore.z, fore.xy.length))))
+    print("  %s: reach %.3f of %.3f, elbow %s, wrist %.1f deg off the forearm, forearm rising %.0f deg, %.0f deg off "
+          "the bore from above" % (side, (w - s).length, a + b, tuple(round(c, 3) for c in best[1]), best[0],
+                                   math.degrees(math.atan2(fore.z, fore.xy.length)),
+                                   math.degrees(math.atan2(abs(fore.x), fore.y))))
     return best[1] - s, best[0]
 
 
@@ -322,7 +335,7 @@ def pose_fingers(hand: pose.Hand, spec: dict, col: Collider, thumb_to: Vector = 
         turns = (THUMB_WIDE, THUMB_TWISTS) if wide else (pose.THUMB_SWING, (-30, 0, 30))
         tip = math.radians(THUMB_TIP if wide else 45)
         curls["Thumb"] = hand.thumb(col, (0.5, 1.0, 0.8), (0.0, math.radians(40), tip), thumb_to, hug, *turns,
-                                    THUMB_BENDS if wide else (0,))
+                                    THUMB_BENDS if wide else (0,), spec.get("thumb_pull", 3.0))
     else:
         base, bends = spec["thumb"]
         curls["Thumb"] = hand.thumb_at(base, bends, col)
@@ -490,12 +503,14 @@ def cup(rig: Rig, hand: pose.Hand, j: dict, to_eye: Matrix, spec: dict, col: Col
                 rig.fk("UpperArm_L")
                 fore = m.translation - (rig.pose["UpperArm_L"].translation + pole)
                 rise = math.degrees(math.atan2(fore.z, fore.xy.length))
+                plan = math.degrees(math.atan2(abs(fore.x), fore.y))
                 gaps = []
                 for q in mcps:
                     p = to_eye.inverted() @ (m @ (rest_inv @ q))
                     gaps.append(math.hypot(p.x - axis[0], p.z - axis[1]) - GUARD_RADIUS)
                 loose = sum(max(0.0, g - CUP_GAP[1], CUP_GAP[0] - g) for g in gaps)
-                score = bend + abs(rise - spec["rise"]) * RISE_COST + loose * LOOSE_COST
+                score = bend + abs(rise - spec["rise"]) * RISE_COST + loose * LOOSE_COST + \
+                    (abs(plan - spec["plan"]) * PLAN_COST if spec.get("plan", 0.0) > 0.0 else 0.0)
                 found.append((score, yaw, pitch, roll, m, palm, bend, rise, gaps))
     # The few best then try their fingers: each should curl round the handguard and come to rest on it, neither
     # flattened along it nor closed in a fist short of it.
@@ -534,7 +549,7 @@ def solve(rig: Rig, hands: dict, j: dict, hold: Hold, arms: list) -> tuple:
     """Poses both arms holding `hold`'s replica; the replica's objects and the clipping left (face pairs)."""
     rig.pose = dict(rig.rest)
     rig.local = {}
-    rig.shift, rig.drop, rig.across = {}, {}, {}
+    rig.shift, rig.drop, rig.across, rig.plan = {}, {}, {}, {}
     for side, spec in (("R", tuned(hold.right)), ("L", tuned(hold.left))):
         if "shoulder" in spec:
             rig.shift["Shoulder_" + side] = Vector(spec["shoulder"])
@@ -542,6 +557,8 @@ def solve(rig: Rig, hands: dict, j: dict, hold: Hold, arms: list) -> tuple:
             rig.drop[side] = spec["drop"]
         if "across" in spec:
             rig.across[side] = spec["across"]
+        if "plan" in spec:
+            rig.plan[side] = spec["plan"]
     objects = replica_objects(hold)
     solid = [o for o in objects if o.type == "MESH" and not o.name.startswith(("Figure", "Icosphere"))]
     col = Collider(solid)
@@ -592,6 +609,10 @@ def build() -> None:
     arm = pose.armature(pts, fr)
     left = pose.skin_object("Arm_L", mesh, arm, "L", NAMES)
     right = pose.skin_object("Arm_R", mesh, arm, "R", NAMES)
+    # The cloth's weave over the glove, its moulded parts and the sleeve.
+    fabric.wear(fabric.weave_image())
+    for ob in (left, right):
+        fabric.unwrap(ob)
     rig = Rig(arm)
     rig.fk("Shoulder_L")
     rig.fk("Shoulder_R")

@@ -15,8 +15,9 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
   patch, a
   cuff and wrist strap, and a sleeve rolled over the cuff with a banded hem, ending 13 cm above the elbow (the view
   never shows the shoulder).
-- **Materials.** `Glove` (dark olive-brown), `GloveArmour` (guard, pads, strap, patch), `Sleeve`, `SleeveTrim`. Plain colours,
-  no textures. A robot's arms are recoloured in game (ViewModelConfig.robot_arms).
+- **Materials.** `Glove` (dark olive-brown), `GloveArmour` (guard, pads, strap, patch), `Sleeve`, `SleeveTrim`; each
+  with the woven normal map `arms_ArmsWeave.png` (256 px, `fabric.py`) over its own UVs; otherwise plain
+  colours. A robot's arms are recoloured in game (ViewModelConfig.robot_arms).
 - **Holds.** One per replica: a clip `<id>_Hold` (`aeg`, `pistol`, `cyber`) posing both arms, and an empty
   `Hold_<id>` where that replica's origin sits in it (at ViewModelConfig.hip). In game the arms ride the replica's
   node with that empty on its origin, so they follow its sway, kick, cant and drop.

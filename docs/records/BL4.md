@@ -1,6 +1,6 @@
 # BL4 · Your first-person arms
 
-**Review:** critic Retry 7/8 (attempt 10) · qa Pass (attempt 8) · performance Pass (attempt 10); the owner's ruling (2026-11-05
+**Review:** critic Retry 7/8 (attempt 11) · qa Pass (attempt 8) · performance Pass (attempt 11); the owner's ruling (2026-11-05
 18:37, 19:46): keep going past the four attempts, the critic extremely harsh, merged only once he approves
 
 ## Attempts
@@ -17,12 +17,13 @@
 | 2026-11-05 | 8 | Claude (build thread) | 7/8 | Retry | Sleeve fixed; the GBB thumb still long and off the panel from behind, support fingers splayed and their middle sections 10 to 13 mm off the side, first-section gaps 6 to 11 mm, the rifle web flat, glove pads oversized and no fabric detail, QA not yet on the head |
 | 2026-11-06 | 9 | Claude (build thread) | 7/8 | Retry | The GBB thumb's length and width now match photo 123843, but its tip hooked out to the left; support tip 5 mm over the rail; the rifle web one smooth bulge; pads long ovals; shell crease; no QA on the head |
 | 2026-11-06 | 10 | Claude (build thread) | 7/8 | Retry | Support glove still over the rail from the left (the palm to sit lower round the handguard's lower corner); the rifle web, thumb bone and index bone one form; no knuckle rises or joint creases; the thumb plate long; no fabric maps; the record's GBB thumb wording |
+| 2026-11-06 | 11 | Claude (build thread) | 7/8 | Retry | Support glove a gap above the palm and tips over the rail from the left; fingers fanned diagonally; no fabric maps; joint forms too faint; pads not round; GBB finger and thumb proportions off photo 123843; first-section gaps; QA not on the head |
 
 ## What changed
 
 - **The model** (`assets/models/arms/arms.glb`, `tools/blender/arms/`): the MakeHuman CC0 arm (`source/`) under a
   dark olive glove (skin + 1.1 mm) with a moulded knuckle guard, finger pads, a palm patch, cuff and
-  strap, and a sleeve rolled over the cuff; mirrored for the right arm; the figures' bone names; 38,900 triangles, four plain
+  strap, and a sleeve rolled over the cuff; mirrored for the right arm; the figures' bone names; 38,900 triangles, four
   materials. Each replica gets a clip `<id>_Hold` and an empty `Hold_<id>` at its origin.
 - **The holds** (attempt 11), solved against each replica's model at rest (`pose.py`), none passing into it (the build
   refuses to write otherwise; gaps are the glove's skin to the replica, mm, first / middle / last section, from the
@@ -105,6 +106,13 @@
 - **Attempt 10** (the critic's attempt 9 list): the thumb's glove fullness 0.8 mm (at 1.5 the thumb found no room on
   the panel and hooked out to the left, its pad facing the eye); round finger pads (half to 86 % of the first bone,
   28° round it); the knuckle shell's lobes 1.5 mm and its sides cast straighter (a crease at its index corner).
+- **Attempt 12** (the critic's attempt 11 list): the glove, its moulded parts and the sleeve carry a woven normal
+  map (`fabric.py`: a 256 px plain-weave tile, threads 1 mm on the glove, finer on the shell, coarser on the
+  sleeve, over UVs unwrapped by angle and scaled to the world; Godot extracts it as `arms_ArmsWeave.png`); the
+  support palm rests on the handguard's underside (`standoff` 0) at a fixed roll of 20° (rolled less the thumb
+  leaves the left side), its fingertips aimed straight up the side (5 mm ahead of the knuckle, 25.5 mm below the
+  top), so none shows over the rail from the left; rounder finger pads (56 to 84 % of the first bone, 34° round it);
+  the joints' rises 2.0 and 1.4 mm, their creases 1.5 mm.
 - **Attempt 11** (the critic's attempt 10 list): the support hand turned flatter (fingers pitched 25°, not 48°) and
   seated further back (`forward` 52 mm), so the palm cups the handguard's underside round its lower left corner and
   the knuckles sit under its lower right one; the shoulder higher (`shoulder` -0.02, 0.12, -0.08) so the forearm
@@ -130,8 +138,7 @@
   left the middle and ring tips still just show over the rail's top.
 - First finger sections stand 4 to 8 mm off the grips (rifle ring, little and index; support index); the thumb roots
   8 to 11 mm.
-- The glove has four plain materials: no woven, stitched or knitted surface detail yet (it has no UVs; a baked
-  fabric normal map is the next step).
+- The glove's weave is one tile for all its parts: no stitching, knit bands or seams yet.
 - The owner's holding photos show pistols two-handed, thumbs forward: the left hand's hold over the right is still
   to solve (first tries bent the left wrist past 80°).
 - The Sniper Rifle's new chassis grip (BL5, about 6 cm deep, its back strap raked) needs its own hold.

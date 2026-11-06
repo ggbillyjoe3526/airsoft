@@ -59,8 +59,8 @@ WEB_TOWARD_INDEX = 0.65
 # back's rise; the palm-side crease (half width along the finger, depth); how far from a joint's centre its skin lies.
 THUMB_BONE = (0.010, 0.0018)
 INDEX_BONE = (0.010, 0.0012)
-JOINT_BUMP = ((0.0055, 0.0011), (0.0045, 0.0007))
-JOINT_CREASE = (0.0016, 0.0007)
+JOINT_BUMP = ((0.0055, 0.0020), (0.0045, 0.0014))
+JOINT_CREASE = (0.0018, 0.0015)
 JOINT_REACH = 0.013
 THUMB_FULL = 0.0008
 # The finger plates bend with the glove beneath them (rigid on one bone, the skin rose through their ends as the joints
@@ -72,8 +72,8 @@ KNUCKLE_BACK = 0.050
 KNUCKLE_OVER = 0.002
 # The finger pads, as shares of each finger's first bone from its root (an oval just short of the middle knuckle), and
 # how far round the finger each reaches (degrees either side of its back).
-PAD_SPAN = (0.48, 0.86)
-PAD_WRAP = 28.0
+PAD_SPAN = (0.56, 0.84)
+PAD_WRAP = 34.0
 
 
 def load_source(shoulder: Vector) -> tuple:

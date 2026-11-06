@@ -129,6 +129,7 @@ class Rig:
         self.shift = {}
         self.drop = {}
         self.across = {}
+        self.plan = {}
 
     def fk(self, name: str, local_rot: Matrix = None) -> Matrix:
         """Poses a bone from its parent's pose, turned by `local_rot` in its own frame."""
@@ -298,11 +299,11 @@ class Hand:
         return max(0.0, high - self.tip_top)
 
     def thumb(self, col: Collider, ratio: tuple, limit: tuple, target: Vector = None, hug: float = 0.0,
-              swing: int = THUMB_SWING, twists: tuple = (-30, 0, 30), bends: tuple = (0,)) -> list:
+              swing: int = THUMB_SWING, twists: tuple = (-30, 0, 30), bends: tuple = (0,), pull: float = 3.0) -> list:
         """Swings the thumb at its base (across the palm, round its own line and in its bend) to the clear place
         nearest the rifle (and, given a `target`, with its tip nearest that; with `hug`, its whole length kept close
         to the rifle too; `swing` and `twists` bound its turns at the base, degrees; `bends`, the knuckle bends tried
-        with each, so it can turn round a grip's corner), then curls its tip bones onto it from there."""
+        with each, so it can turn round a grip's corner; `pull`, how much its tip's distance from `target` counts), then curls its tip bones onto it from there."""
         b1, b2, b3 = ("Thumb%d_%s" % (k, self.side) for k in (1, 2, 3))
         inv = self.rig.rest[b1].to_3x3().inverted()
         across = inv @ self.palmar
@@ -324,7 +325,7 @@ class Hand:
                 score += hug * sum(max(g, 0.0) for g in gaps[1:]) / 2.0
             if target is not None:
                 m = self.rig.pose[b3]
-                score += (m.translation + m.to_3x3().col[1] * self.rig.length[b3] - target).length * 3.0
+                score += (m.translation + m.to_3x3().col[1] * self.rig.length[b3] - target).length * pull
             return score, rot, a, c, t, k
 
         best = None
