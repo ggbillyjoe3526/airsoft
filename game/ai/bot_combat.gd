@@ -349,6 +349,8 @@ static func _body_in_line(b: Bot, w: BotWorld, from: Vector3, dir: Vector3, dist
 	var me := b.character
 	var cfg := w.cfg
 	var hits := w.tuning.hits
+	# The flight to `dist`, the longest any teammate's check below takes: worked out once, for the quick test (BP5).
+	var flight_max := -1.0
 	for mate in w.characters:
 		if mate == me:
 			continue
@@ -360,14 +362,21 @@ static func _body_in_line(b: Bot, w: BotWorld, from: Vector3, dir: Vector3, dist
 			if Hitbox.ray_character(from, dir, to_target, _volume) < INF:
 				return true
 			continue
-		var along := (mate.position - from).dot(dir)
-		var reach := clampf(along, 0.0, dist)
-		var flight := flight_time(b, w, reach)
 		var in_play := Elimination.is_in_play(mate)
 		# Past the target only a teammate a BB could knock out matters; before it every body stops the BBs.
 		var harmed := dist if in_play and hits.friendly_fire else to_target
-		var margin := cfg.friendly_margin + reach * stray
 		var speed := Vector2(mate.velocity.x, mate.velocity.z).length()
+		# Far off the line even with the widest room any reach along it gives: out without working out its own flight
+		# (a flight to `dist` too long to estimate, 0, says nothing of a shorter one's, so then there's no quick test).
+		if flight_max < 0.0:
+			flight_max = flight_time(b, w, dist)
+		var widest := cfg.friendly_margin + dist * stray + (cfg.friendly_mate_speed + speed) * flight_max
+		if flight_max > 0.0 and not Hitbox.may_touch(mate, from, dir, harmed, hits, widest):
+			continue
+		var along := (mate.position - from).dot(dir)
+		var reach := clampf(along, 0.0, dist)
+		var flight := flight_time(b, w, reach)
+		var margin := cfg.friendly_margin + reach * stray
 		# Nowhere near the line, even widened and walked on (below, and along its route as far): nothing to build.
 		var room := margin + cfg.friendly_mate_speed * flight + speed * flight
 		if not Hitbox.may_touch(mate, from, dir, harmed, hits, room):

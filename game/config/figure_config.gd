@@ -84,6 +84,10 @@ extends Resource
 ## Beyond the far line (LOD2) a figure's legs are posed every `far_stride`-th frame with the time gathered (0: held
 ## still out there); a hidden figure's not at all.
 @export var far_stride: int = 4
+## Out of the camera's view (FigureBody.seen false, nearer than the far line) a figure is posed every `unseen_stride`-th
+## frame with the time gathered (BP5: 0.3 to 0.5 ms a frame at 8v8; 1 or less: every frame). Only its shadow shows
+## the pose then, at 30 Hz with 2.
+@export var unseen_stride: int = 2
 ## The bones the figure code reads, each looked up by name (the two files order them differently).
 @export var bones: PackedStringArray = PackedStringArray(["Hips", "Spine", "Chest", "Head", "Grip_R", "Hand_L"])
 ## The upper body (FI3; the browser's FIGURE_RIG): the bones the legs' clips drive. Every other bone is the upper body,
