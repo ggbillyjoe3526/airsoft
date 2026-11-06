@@ -1,6 +1,6 @@
 # BP5 · The second full bug and performance pass
 
-**Review:** part 1: critic Accept 8/8 · qa Pass · performance Pass
+**Review:** part 1: critic Accept 8/8 · qa Pass · performance Pass; part 2: critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -9,6 +9,8 @@
 | 2026-11-06 | 1 | Opus 5.5 (bug pass thread) | green | Retry 6/8 | play list keys, a changelog claim, the held-trigger rule in five places, long lines |
 | 2026-11-06 | 2 | Opus 5.5 (bug pass thread) | green | Retry 8/8 | no measured performance run on the head |
 | 2026-11-06 | 3 | Opus 5.5 (bug pass thread) | green | Accept 8/8 | – |
+| 2026-11-06 | part 2: 1 | Opus 5.5 (bug pass thread) | green | Retry 6/8 | the unseen stride's visible cost; claims the numbers don't show |
+| 2026-11-06 | part 2: 2 | Opus 5.5 (bug pass thread) | green | Accept 8/8 | – |
 
 ## The bug pass
 
@@ -46,6 +48,25 @@ checklists, and the files nothing uses. None found a high bug. Every gate was gr
 - **Shared folder** (the owner's yes on a card): 235 MB of superseded review pictures of merged models deleted, each
   folder looked at first; the latest set of each model and every picture he marked up kept
   (`/mnt/project-files/playtest/bp5-shared-cleanup-list.md`).
+
+## Part 2: performance
+
+Two exact early-outs in the simulation's hottest checks; no change to what they answer.
+
+- **Hitbox.may_touch** tests a bounding sphere round the segment and the volume's room before the capsule: most
+  characters, for most BBs, are out at once. It answers as the capsule test alone (a test of 4,000 seeded rays, and
+  QA's: a wider margin or longer segment never loses a touch, an infinite segment still goes to the capsule).
+- **A bot's line of fire** (`BotCombat._body_in_line`) tests each teammate first with the widest room any reach along
+  the line gives (the flight to the target, worked out once), before that teammate's own flight; the flight estimate
+  only grows with distance, so it skips no one the old test caught (QA's test). Counted on a Woodland and Depot 8v8
+  bench: 9,718 of 20,000 teammate checks skipped by it, each without its own flight estimate.
+- Measured (`tools/team_bench.gd`, 8v8, 40 s, interleaved, four runs a side between the worker and the performance
+  review): the tick's mean and p95 a few per cent lower on Woodland, within main's own spread; worst ticks are single
+  spikes either way. A small saving, nothing worse.
+- **Tried and dropped:** posing figures out of the camera's view every second frame (the critic: their shadows on
+  Medium and up would step at 30 Hz, and a figure turned onto stays half-rate until `seen` is read again, up to 3
+  frames; about 0.15 ms a frame headless, not worth a visible loss); a ground-probe cache for a character standing
+  still (no hit in 48,000 probes).
 
 ## Decisions
 

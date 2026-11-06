@@ -1,41 +1,23 @@
-Task: none (BP5 part 1) · QA commit 7e628b3 · Verdict: Pass
+Task: none (BP5 part 2, performance) · QA commit abfcc2e (rebased 7799f56) · Verdict: Pass
 
-Scope: `git diff 90b0ff4..7e628b3`, attempt 2. Re-checked the held-trigger rule end to end by reading
-`Grenades.trigger_command`, `ready_command`, `end_throw`/`stop`, `take_torch_back`, `Torch.step` and the call order in
-`Simulation.step`, and by running the tests.
+Blocking findings: none. Advisory findings: none.
 
-Blocking: none.
-Advisory: none new.
+1. hitbox.gd may_touch: the bounding sphere is conservative (any touching point of the segment lies within half +
+   volume_top/2 + reach + margin of the sphere's centre); guarded by is_finite(max_t); assumes a unit d, as every caller
+   gives. test_bp5_perf.gd compares it with the capsule test alone over 4000 rays.
+2. bot_combat.gd _body_in_line: flight_time is monotonic in distance ((e^(k·d) - 1) / (k·v)); INF maps to 0 and the quick
+   test is skipped then; widest = margin(dist) + (mate_speed + speed) × flight(dist) ≥ the old room for any reach in
+   [0, dist]; may_touch is monotonic in margin, so it skips only teammates the old room test also skipped.
+3. figure_view.gd animate: the unseen branch is an elif after far, sharing _far_frames/_far_delta, both reset on a pose;
+   far → unseen poses next frame, unseen → seen or _snap poses at once with the gathered delta. _fired is kept over
+   skipped frames (two presses in one skipped window merge, shadow-only). Hit calls lag at most one frame out of view.
 
-Held-trigger rule, traced and covered:
-- Throw by wheel + pull: held_off set when ready_command emits the throw; the replica stays at fire=false after
-  `end_throw` until the pull is let go (test_bp5.gd, test_bp5_qa.gd). A release clears it even mid-throw.
-- Put back by slot / reload / holster: held_off set unconditionally, trigger_command clears it the same tick when the
-  trigger is not pulled, so no lost shot on a free trigger (test_bp5.gd slot + reload cases, semi case in qa).
-- Instant throws 4/5: never set held_off; a held trigger fires again after, as before (qa test).
-- Vault: `pulled` is the raw trigger taken before the vault, so a release during a vault is seen; no stray shot.
-  No vault starts mid-throw (Simulation.step guard), unchanged.
-- Hit / respawn: `stop()` on a hit with a bomb busy; a hit after the throw leaves held_off until `respawn()` clears it
-  (grenades.refill); trigger_command only runs in play. New test pins this.
-- Bots: they throw with throw_grenade only (bot_bombs.gd:36), so held_off is never set for them.
-- Torch: relight happens in Torch.step after Armament.step and step_throw, consumed once; no light in hand leaves
-  it off and silent (qa tests); stop() clears torch_back.
+Tests added (tests/unit/test_bp5_perf_qa.gd, 4 tests, 86 asserts): flight never shrinks with distance; a wider margin or
+longer segment never loses a touch; an infinite segment answers by the capsule; a press during a skipped unseen frame is
+kept.
 
-Tests added or changed:
-- tests/unit/test_bp5_qa.gd:213 · test_a_hit_after_the_throw_with_the_pull_still_held_leaves_nothing_held_off_after_the_respawn
-  · held_off and torch_back after a throw, a hit and a respawn · fails if respawn()/refill stopped clearing the
-  flag (checked by reading; the flag is asserted true before the respawn so the assertion is not vacuous).
-  Note: a shot-count version of this test was dropped, because a 1v1 hit ends the round (live false), nothing fires.
-- Earlier QA tests in the same file and tests/unit/test_bp5.gd (critic's new torch-after-reload and Loadout slot
-  key rebind tests) pass.
-
-Runs: test_bp5, test_bp5_qa, test_grenades, test_torch, test_vault: 96 passing, 0 failing (before the new test).
-test_bp5_qa, test_grenade_throw_qa, test_torch_qa, test_bot_bombs, test_loadout_screen: 72 passing, 0 failing
-(one failing run was my own discarded draft test). test_bp5_qa alone: 10 passing. Other game/ changes in the pass
-(records COUNT_MAX, sim_audio peak warning, loadout slot chips, comment edits) read and unchanged in behaviour apart
-from their stated fixes. tools/check.sh was not run (running in the background).
-
-Could not test: feel of the wheel-pull-throw and the instant return to fire (needs play); the Loadout key chips in a
-real window (display).
+Runs: test_bp5_perf, hitbox, figure_view, figure_animator, figure_view_cone_qa, figure_legs_qa: 49/49; bb_physics_edges,
+bb_step, bots, cr1_qa, cr2_qa, cr2_rules, custom_rules, hit_registration(+qa), team_sizes: 117/117.
+Not tested: the look of 30 Hz posing on shadows (owner's list).
 
 Verdict: Pass

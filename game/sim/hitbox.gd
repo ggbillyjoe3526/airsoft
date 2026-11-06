@@ -149,8 +149,18 @@ static func ray_character(o: Vector3, d: Vector3, max_t: float, v: Volume) -> fl
 
 ## Whether the unit ray `o + t·d` (0 ≤ t ≤ max_t) passes within `margin` m of the room `c`'s hit volume could take
 ## (HitConfig.volume_reach and volume_top round its feet): false means it misses the volume, so there is no need to
-## build it. Allocates nothing.
+## build it. Allocates nothing. A bounding-sphere test first (BP5): a character far from the whole segment is out at
+## once, without the capsule test (most of them, for most BBs: a BB's tick passed every body through the capsule).
 static func may_touch(c: Character, o: Vector3, d: Vector3, max_t: float, hits: HitConfig, margin: float = 0.0) -> bool:
+	if is_finite(max_t):
+		var half := 0.5 * max_t
+		var up := 0.5 * hits.volume_top
+		var reach := half + up + hits.volume_reach + margin
+		var dx := o.x + d.x * half - c.position.x
+		var dy := o.y + d.y * half - c.position.y - up
+		var dz := o.z + d.z * half - c.position.z
+		if dx * dx + dy * dy + dz * dz > reach * reach:
+			return false
 	_coarse.a = c.position
 	_coarse.b = c.position + Vector3(0.0, hits.volume_top, 0.0)
 	_coarse.r = hits.volume_reach + margin
