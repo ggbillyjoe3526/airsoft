@@ -53,7 +53,15 @@ KNUCKLE_U = (-0.75, -0.25, 0.25, 0.75)
 PAD_THICK = 0.0012
 # How far the muscle between thumb and index stands out under the glove (m).
 WEB_BULGE = 0.0040
-WEB_RADIUS = 0.020
+WEB_RADIUS = 0.017
+WEB_TOWARD_INDEX = 0.65
+# (easing past its ends, height) of the thumb's bone ridge and the index bone's edge; per joint (middle, last) the
+# back's rise; the palm-side crease (half width along the finger, depth); how far from a joint's centre its skin lies.
+THUMB_BONE = (0.010, 0.0018)
+INDEX_BONE = (0.010, 0.0012)
+JOINT_BUMP = ((0.0055, 0.0011), (0.0045, 0.0007))
+JOINT_CREASE = (0.0016, 0.0007)
+JOINT_REACH = 0.013
 THUMB_FULL = 0.0008
 # The finger plates bend with the glove beneath them (rigid on one bone, the skin rose through their ends as the joints
 # beside them closed).
@@ -457,22 +465,60 @@ def knuckle_guard(surf: Surface, fr: Frame) -> tuple:
     return surf.shell(origin, direction, 13, 29, thick, "GloveArmour", False, "Hand", 8, 0.0010)
 
 
-def web_muscle(p: Vector, n: Vector, fr: Frame) -> float:
-    """How far the glove stands out at `p` (normal `n`) over the muscle between the thumb's and the index finger's
-    bones (first dorsal interosseous): a soft rounded bulge on the back of the web, fullest toward the index, so the web
-    reads as a hand's and not a flat sheet (the critic). The glove's own surface, so it bends as the skin does."""
+def _bump(p: Vector, a: Vector, b: Vector, along: float, height: float, face: Vector, sharp: float,
+          reach: float) -> float:
+    """A soft rise of `height` over the bone or joint a-b: easing out over `along` past its ends, and round it over the
+    skin facing `face` (narrower as `sharp` grows); only skin within `reach` of it (not a neighbouring finger's)."""
+    ab = b - a
+    t = (p - a).dot(ab) / max(1e-12, ab.dot(ab))
+    q = a + ab * max(0.0, min(1.0, t))
+    off = p - q
+    radial = off - ab.normalized() * off.dot(ab.normalized()) if ab.length > 1e-9 else off
+    if radial.length > reach or radial.length < 1e-9:
+        return 0.0
+    x = (off - radial).length / along
+    if x >= 1.0:
+        return 0.0
+    facing = max(0.0, radial.normalized().dot(face))
+    return height * (1.0 - x * x) ** 2 * facing ** sharp
+
+
+def hand_forms(p: Vector, n: Vector, fr: Frame) -> float:
+    """How far the glove stands out at `p` (normal `n`) over the hand's forms, so it reads as a gloved hand and not a
+    smooth sheet (the critic): the muscle between the thumb's and the index finger's bones (first dorsal interosseous),
+    a soft bulge fullest toward the index; the thumb's own bone as a separate ridge beside it, a valley between the two;
+    the index bone's edge along the thumb's side; and the finger joints, a small rise over the back of each middle and
+    last joint, a fine crease across the palm's side of each. The glove's own surface, so it bends as the skin does."""
     j = fr.j
-    centre = j["finger-1-2"].lerp(j["finger-2-1"], 0.55).lerp(fr.wrist.lerp(j["finger-2-1"], 0.6), 0.35)
+    up = fr.dorsal
+    centre = j["finger-1-2"].lerp(j["finger-2-1"], WEB_TOWARD_INDEX).lerp(fr.wrist.lerp(j["finger-2-1"], 0.6), 0.35)
     d = p - centre
-    r = (d - fr.dorsal * d.dot(fr.dorsal)).length / WEB_RADIUS
-    facing = max(0.0, n.dot(fr.dorsal) + 0.3) / 1.3
-    return WEB_BULGE * max(0.0, 1.0 - r * r) ** 2 * facing
+    r = (d - up * d.dot(up)).length / WEB_RADIUS
+    out = WEB_BULGE * max(0.0, 1.0 - r * r) ** 2 * max(0.0, n.dot(up) + 0.3) / 1.3
+    # The thumb's bone, from its root to its first knuckle, on its back and outer side.
+    t0, t1 = j["finger-1-1"], j["finger-1-2"]
+    away = t1 - fr.palm_centre
+    away = (away - (t1 - t0).normalized() * away.dot((t1 - t0).normalized())).normalized()
+    out += _bump(p, t0.lerp(t1, 0.3), t1.lerp(t0, 0.15), THUMB_BONE[0], THUMB_BONE[1], (away + up).normalized(), 3.0,
+                 0.020)
+    # The index bone's edge on the thumb's side, from half way down the back of the hand to its knuckle.
+    radial = (j["finger-2-1"] - j["finger-3-1"]).normalized()
+    out += _bump(p, fr.wrist.lerp(j["finger-2-1"], 0.45), j["finger-2-1"].lerp(fr.wrist, 0.12), INDEX_BONE[0],
+                 INDEX_BONE[1], (up + radial).normalized(), 3.0, 0.020)
+    for f in (2, 3, 4, 5):
+        a, b = j["finger-%d-2" % f], j["finger-%d-3" % f]
+        axis = (b - j["finger-%d-1" % f]).normalized()
+        for joint, (along, h) in ((a, JOINT_BUMP[0]), (b, JOINT_BUMP[1])):
+            out += _bump(p, joint, joint + axis * 1e-6, along, h, up, 2.0, JOINT_REACH)
+            # The crease: a narrow groove across the palm's side of the joint.
+            out -= _bump(p, joint, joint + axis * 1e-6, JOINT_CREASE[0], JOINT_CREASE[1], -up, 1.0, JOINT_REACH)
+    return out
 
 
 def finger_pads(surf: Surface, fr: Frame) -> list:
     """The finger pads (the owner's glove photo 123404): a small domed oval on the back of each finger's first bone,
-    just short of the middle knuckle, and one on the back of the thumb's; none on the palm's side, the fingertips
-    plain. Each bends with the glove beneath it."""
+    just short of the middle knuckle; none on the thumb (photo 123404's thumb is plain suede; the critic) nor on the
+    palm's side, the fingertips plain. Each bends with the glove beneath it."""
     j = fr.j
     out = []
 
@@ -502,11 +548,6 @@ def finger_pads(surf: Surface, fr: Frame) -> list:
         name = FINGER_NAMES[f]
         a, b = j["finger-%d-1" % f], j["finger-%d-2" % f]
         out.append(pad(a, b, fr.dorsal, PAD_SPAN, PAD_WRAP, name + "1"))
-    a, b = j["finger-1-2"], j["finger-1-3"]
-    d = (b - a).normalized()
-    away = a - fr.palm_centre
-    away = (away - d * away.dot(d)).normalized()
-    out.append(pad(a, b, (away + fr.dorsal * 0.6), (0.30, 0.85), PAD_WRAP, "Thumb2", (9, 1, 0.5)))
     return out
 
 
@@ -547,7 +588,7 @@ def build_left(shoulder: Vector) -> tuple:
     idx = {o: k for k, o in enumerate(used)}
     # The thumb's glove a little fuller (the photos' gloved thumbs are thicker than the hand's skin makes them: the
     # critic, 123843; fuller still, the thumb found no room on the grip's panel and stood out from it).
-    gv = [verts[o] + nrm[o] * (GLOVE_THICK + web_muscle(verts[o], nrm[o], fr) +
+    gv = [verts[o] + nrm[o] * (GLOVE_THICK + hand_forms(verts[o], nrm[o], fr) +
                                THUMB_FULL * (wts[o].get("Thumb2", 0.0) + wts[o].get("Thumb3", 0.0))) for o in used]
     gf = [[idx[i] for i in f] for f in hand_f]
     gw = [wts[o] for o in used]

@@ -138,19 +138,20 @@ RIGHT = {"d": 0.006, "f": 0.038, "x": 0.012, "slant": 30.0, "wrap": -30.0, "thum
 # wrist less turned in: 19:41) and `depth` out of the palm, seated
 # on it and held `standoff` off; its turn found by `cup` over `search` ((yaw), (pitch), (roll) ranges, degrees: the
 # fingers' line yawed from forward toward the right and pitched up, the palm rolled either way from facing up; the
-# turn is fixed at 80 and 48 degrees: steeper, the knuckles rise up the side and the fingers stand over the top, flatter
-# the wrist bends past 30 degrees),
+# turn is fixed at 80 and 25 degrees: the palm cups the handguard's underside round its lower left corner, the
+# knuckles under its lower right one, so the fingers lie along the right side with their tips below the rail (the
+# critic, photo 123656); steeper, the knuckles rise up the side and the fingers stand over the top),
 # the forearm rising toward `rise` degrees from below. The arm comes from a bladed stance: its shoulder moved
-# `shoulder` (eye space; forward, down and in under the rifle, so the forearm rises about 50 degrees as in the photos
-# and the wrist needs little turn), the elbow at least
+# `shoulder` (eye space; forward and down under the rifle, higher than at 48 degrees so the forearm comes in flatter,
+# about 33 degrees, and the wrist stays near 23 degrees with the hand this flat), the elbow at least
 # `drop` below it and at most `across` in toward the body. The thumb reaches
 # along the handguard's left side for (thumb_x, y + thumb_f, thumb_z), its length kept close to it (thumb_hug). No
 # finger's glove rises above `tips_below` (replica space; the rail's top is 0.0735): the fingers rest on the right side
 # and none shows over the top from the left (the owner's 16:30 note, the critic).
-GUARD = {"kind": "guard", "y": 0.190, "forward": 0.036, "depth": 0.034, "standoff": 0.006,
-         "search": ((80, 80), (48, 48), (-40, 40)), "rise": 50.0, "shoulder": (0.04, 0.12, -0.16), "drop": 0.06,
+GUARD = {"kind": "guard", "y": 0.190, "forward": 0.052, "depth": 0.034, "standoff": 0.006,
+         "search": ((80, 80), (25, 25), (-40, 40)), "rise": 30.0, "shoulder": (-0.02, 0.12, -0.08), "drop": 0.06,
          "across": 0.25, "thumb_x": -0.023, "thumb_f": 0.05, "thumb_z": 0.055, "thumb_hug": 3.0, "tips_below": 0.068,
-         "tip_at": (0.0275, 0.005, 0.054), "tip_swing": 8.0,
+         "tip_at": (0.0275, 0.010, 0.046), "tip_swing": 8.0,
          "fingers": {"Index": (35, 35, 20), "Middle": (40, 45, 30), "Ring": (40, 45, 30), "Pinky": (35, 40, 25)},
          "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
 # A pistol is held in the right hand alone, as the game's look draws it: the left arm hangs at the side, out of view
@@ -205,7 +206,8 @@ def roll_about(v: Vector, axis: Vector, deg: float) -> Vector:
 
 
 def tuned(spec: dict) -> dict:
-    """`spec` with any value overridden from the environment (BL_<KEY>=value; BL_THUMB=across,twist,bend,tip1,tip2),
+    """`spec` with any value overridden from the environment (BL_<KEY>=value; BL_THUMB=across,twist,bend,tip1,tip2;
+    BL_SEARCH=yaw0,yaw1,pitch0,pitch1,roll0,roll1),
     for tuning a hold by eye."""
     out = dict(spec)
     for k, v in spec.items():
@@ -214,6 +216,9 @@ def tuned(spec: dict) -> dict:
             out[k] = float(env)
         elif env is not None and isinstance(v, tuple) and all(isinstance(c, float) for c in v):
             out[k] = tuple(float(x) for x in env.split(","))
+        elif env is not None and k == "search":
+            f = [int(x) for x in env.split(",")]
+            out[k] = ((f[0], f[1]), (f[2], f[3]), (f[4], f[5]))
         elif env is not None and k == "thumb":
             f = [float(x) for x in env.split(",")]
             out[k] = (tuple(f[:3]), tuple(f[3:5]))

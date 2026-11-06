@@ -34,8 +34,8 @@
     rail's top, swinging at most 8° sideways, its last joint bending 0.7 of its middle one (pads off their points:
     index 2.4, middle 11.1, ring 5.9 mm, little on it); gaps index 5.3 / 7.9 / 0.6, middle 2.2 / 14.6 / 0.8, ring
     3.6 / 10.9 / 0.4, little 4.0 / 2.9 / 0.1, thumb 7.6 / 0.2 / 1.4.
-  - GBB Pistol: right hand alone, high on the back strap; the thumb tucked against the grip's left side and reaching
-    up the frame toward the slide stop (a high-thumb hold; seen from behind it no longer stands off the panel); the
+  - GBB Pistol: right hand alone, high on the back strap; the thumb tucked against the grip's left side and pointing
+    forward and down along it, about 34° below the bore (seen from behind it no longer stands off the panel); the
     fingers closed under the guard; the trigger finger re-found after the palm seats (pad 2.5 mm off); gaps index
     3.3 / 2.1 / 0.6, middle 0.9 / 0.2 / 5.0, ring 4.4 / 0.4 / 1.7, little 3.7 / 1.2 / 0.1, thumb 10.1 / 0.9 / 0.0;
     wrist 17.3°. Its left arm hangs out of view (wrist 36.1°, never drawn).
