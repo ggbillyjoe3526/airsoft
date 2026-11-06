@@ -29,10 +29,11 @@ ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os
 FILES = ["aeg", "pistol", "cyber", "sniper"]
 SUFFIX = "_Figure"
 # A part's copy: this share of its triangles, kept between FIGURE_MIN and FIGURE_MAX (a part's small round shapes, a
-# laser's knurled body, thin out below it), and always under the part's own count.
+# laser's knurled body, thin out below it), and always under the part's own count. FIGURE_MAX 600 (from 900) keeps the
+# AEG's parts file under its 2 MiB with MAG1's magazines in it.
 FIGURE_SHARE = 0.15
 FIGURE_MIN = 120
-FIGURE_MAX = 900
+FIGURE_MAX = 600
 UNDER = 0.8
 # A magazine part's copy: as many triangles as the replica's own figure magazine (Figure_Magazine in its model file,
 # assets/models/replicas/<id>.glb, read when the file is written).

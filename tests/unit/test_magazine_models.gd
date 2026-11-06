@@ -90,7 +90,8 @@ func test_each_part_uses_its_budget_has_a_cut_down_figure_and_paints_as_the_repl
 		var fig := parts.get_node_or_null(NodePath(pair[1] + "_Figure")) as MeshInstance3D
 		assert_not_null(fig, "%s has its figures' copy" % pair[1])
 		if fig != null:
-			assert_lt(fig.mesh.get_faces().size() / 3, 100, "%s figure copy is a few faces" % pair[1])
+			# Cut down as many as its replica's own figure magazine (TP1's figure_parts.py), well under the part.
+			assert_lt(fig.mesh.get_faces().size() / 3, tris / 4, "%s figure copy is cut down" % pair[1])
 		for i in m.mesh.get_surface_count():
 			var nm := m.mesh.surface_get_material(i).resource_name
 			assert_true(nm in MATERIALS, "%s surface %d: '%s' is a replica material" % [pair[1], i, nm])
