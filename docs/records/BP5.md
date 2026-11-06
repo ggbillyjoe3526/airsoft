@@ -1,6 +1,6 @@
 # BP5 · The second full bug and performance pass
 
-**Review:** part 1: critic Accept 8/8 · qa Pass · performance Pass
+**Review:** part 1: critic Accept 8/8 · qa Pass · performance Pass; part 2: critic pending · qa Pass · performance pending
 
 ## Attempts
 
@@ -46,6 +46,29 @@ checklists, and the files nothing uses. None found a high bug. Every gate was gr
 - **Shared folder** (the owner's yes on a card): 235 MB of superseded review pictures of merged models deleted, each
   folder looked at first; the latest set of each model and every picture he marked up kept
   (`/mnt/project-files/playtest/bp5-shared-cleanup-list.md`).
+
+## Part 2: performance
+
+Measured with `tools/team_bench.gd` (8v8, 40 s, seed 1, headless; main and the branch interleaved, two runs a side, on
+a quiet machine). Tick mean / p95 / p99 / worst in ms:
+
+| Map | main | BP5 |
+|---|---|---|
+| Woodland | 4.90 / 8.28 / 9.64 / 19.61 and 4.86 / 8.24 / 10.73 / 18.15 | 4.81 / 8.21 / 10.20 / 12.75 and 4.52 / 7.31 / 8.78 / 12.18 |
+| Depot | 3.00 / 5.25 / 6.35 / 11.71 and 2.95 / 4.74 / 5.88 / 9.71 | 2.99 / 5.02 / 6.35 / 10.34 and 2.88 / 5.04 / 6.37 / 14.44 |
+
+Woodland's worst tick falls by about a third and frames over 16.7 ms from 1 and 4 to 1 and 0; Depot is within the
+noise (the 14.44 is one tick).
+
+- **Hitbox.may_touch** tests a bounding sphere round the segment and the volume's room before the capsule: most
+  characters, for most BBs, are out at once. It answers as the capsule test alone (a test of 4,000 seeded rays).
+- **A bot's line of fire** (`BotCombat._body_in_line`) tests each teammate first with the widest room any reach along
+  the line gives (the flight to the target, worked out once), before that teammate's own flight; the flight estimate
+  only grows with distance, so it skips no one the old test caught (QA's test).
+- **Figures out of the camera's view** (FigureBody.seen false) are posed every `FigureConfig.unseen_stride` (2) frames
+  with the time gathered, as far ones are; in view again they are posed at once. Only their shadows show the steps.
+- Tried and dropped: a ground-probe cache for a character standing still (no hit in 48,000 probes: nobody stands
+  bit-still).
 
 ## Decisions
 
