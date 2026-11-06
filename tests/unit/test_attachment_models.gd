@@ -57,7 +57,7 @@ func _surface_box(m: MeshInstance3D, material: String) -> AABB:
 	return AABB()
 
 
-func test_every_part_is_within_its_triangle_budget_and_every_file_within_two_megabytes() -> void:
+func test_every_part_is_within_its_triangle_budget_and_every_file_within_its_size_cap() -> void:
 	for file: String in FILES:
 		assert_lte(FileAccess.get_file_as_bytes(DIR + file + ".glb").size(), FILE_BYTES, "%s.glb size" % file)
 		var root := _load(file)

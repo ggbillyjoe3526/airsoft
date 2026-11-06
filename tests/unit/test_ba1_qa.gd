@@ -5,7 +5,9 @@ extends GutTest
 const AEG_PARTS := "res://assets/models/replicaParts/aeg.glb"
 const SNIPER_PARTS := "res://assets/models/replicaParts/sniper.glb"
 const RIFLE := "res://assets/models/replicas/aeg.glb"
-const FILE_BUDGET := 2 * 1024 * 1024
+## The parts files' cap (docs/CC0_ASSETS.md › Size limits): 3 MiB since BL8b, as the attachments, magazines and barrels
+## share the AEG's file.
+const FILE_BUDGET := 3 * 1024 * 1024
 const BARRELS: Array[StringName] = [&"tightBore", &"long"]
 const INNER_MATERIALS: Array[String] = ["Steel", "Brass", "Etch", "Chamber", "Bucking", "Bore"]
 
@@ -20,7 +22,7 @@ func _insides(root: Node) -> Array[Node]:
 	return root.find_children("*_Inside", "", true, false)
 
 
-func test_the_parts_file_is_under_two_megabytes() -> void:
+func test_the_parts_file_is_under_its_size_cap() -> void:
 	var f := FileAccess.open(AEG_PARTS, FileAccess.READ)
 	assert_not_null(f)
 	if f != null:
