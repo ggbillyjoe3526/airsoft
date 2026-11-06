@@ -87,3 +87,5 @@ the next match.
 
 Bots hold the same replicas you hold, with the parts they have fitted: their optic (the iron sights taken off under
 it), silencer, grip, torch or laser, and the magazine they reload.
+A rifle is held with its stock in the shoulder and the head down on it, looking along the sights; a pistol is held
+out in both hands.

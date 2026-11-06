@@ -78,6 +78,11 @@ extends Resource
 ## hips (GA1; 1: all, so the replica keeps its heading while the pelvis swings and turns into a step aside; 0: none, the
 ## upper body rides the hips). Applied alike to the hit volume (HitPose) and the drawn figure (FigureBend).
 @export var upper_steady: float = 1.0
+## Aiming a rifle (any replica but a pistol) the head bows forward about the neck's joint by cheek_bow (rad, TP2), then
+## tilts cheek_cant (rad) to the figure's right, the cheek onto the stock so the eye sits on the sights. Applied alike
+## to the hit volume (HitPose) and the drawn figure (FigureBend, eased over a switch with the pistol's clips).
+@export var cheek_bow: float = 0.3
+@export var cheek_cant: float = 0.2
 @export var max_stride: float = 1.0
 ## The hit area fitted to the drawn figure (HV1): its joints, baked from the figure's own clips (HitFit,
 ## tools/hit_fit_bake.gd). A character's volume hangs on them (Hitbox.build_volume); the numbers above shape only the

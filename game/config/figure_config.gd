@@ -95,9 +95,10 @@ extends Resource
 ## drawn upper body blends to a high ready by how close it is, fully raised at raise_full (m): the aim clips to level,
 ## the spine leant raise_lean (rad) back, and the replica (FigureReady) turned raise_angle (rad) muzzle up about the
 ## grip, canted raise_cant (rad, the magazine out to the right) and drawn raise_back and raise_down (m) in to the chest,
-## the arms (raise_arm_bones: upper arm, forearm, hand, an arm at a time) reaching for it. The ray looks raise_lead (s)
-## ahead at the figure's speed, once every raise_stride poses; the blend settles in settle_raise (s); a shot keeps the
-## replica level for raise_fire_hold (s). Drawn only: the aim, the hit volume and the routes never move.
+## the arms (raise_arm_bones: upper arm, forearm, hand, an arm at a time, the right arm first) reaching for it. The ray
+## looks raise_lead (s) ahead at the figure's speed, once every raise_stride poses; the blend settles in settle_raise
+## (s); a shot keeps the replica level for raise_fire_hold (s). Drawn only: the aim, the hit volume and the routes never
+## move.
 @export var raise_reach_rifle: float = 1.25
 @export var raise_reach_pistol: float = 0.7
 @export var raise_full: float = 0.35
@@ -105,16 +106,39 @@ extends Resource
 @export var raise_lead: float = 0.1
 @export var raise_stride: int = 2
 @export var settle_raise: float = 0.08
-## Below this the raise, easing back to none, is none (so the arms' IK stops running at once).
+## Below this the raise (and the shoulder and the cheek, TP2), easing back to none, is none (so the arms' IK and the
+## head's bow stop running at once).
 @export var raise_rest: float = 0.001
 @export var raise_fire_hold: float = 0.35
 @export var raise_lean: float = 0.05
 @export var raise_angle: float = 1.35
 @export var raise_cant: float = 1.3
 @export var raise_back: float = 0.2
-@export var raise_down: float = 0.2
+@export var raise_down: float = 0.205
 @export var raise_arm_bones: PackedStringArray = PackedStringArray(["UpperArm_R", "Forearm_R", "Hand_R", "UpperArm_L",
 		"Forearm_L", "Hand_L"])
+## The rifle in the shoulder (TP2, owner 2026-11-05: "the buttstock should rest at the figure's armpit"): while a rifle
+## is held, its butt (the middle of the replica's last shoulder_butt_depth m) is drawn shoulder_rifle (0..1) of the way
+## to the shoulder pocket, shoulder_pocket (m; x to the figure's left, y up, z ahead, in the skeleton's frame) from
+## shoulder_bone's joint; the replica keeps its aim and the arms (raise_arm_bones) reach for it. It gives way to the
+## high ready as that rises, and to a switch; it eases in and out over settle_shoulder (s).
+@export var shoulder_rifle: float = 1.0
+@export var settle_shoulder: float = 0.06
+@export var shoulder_bone: StringName = &"UpperArm_R"
+@export var shoulder_pocket: Vector3 = Vector3(0.04, 0.0, 0.08)
+@export var shoulder_butt_depth: float = 0.02
+## The cheek on the stock (TP2, HitFit.cheek_turn): the head turned about the first bone's joint (the neck), its sideways
+## line from the third bone's joint to the second's (the right shoulder to the left), as the hit volume's.
+@export var cheek_bones: PackedStringArray = PackedStringArray(["Neck", "UpperArm_L", "UpperArm_R"])
+## The right fist closed on the rebuilt replicas' grips (TP3): human.json's replicaOnGrip was set for the first models,
+## so the hand reaches grip_fit (m, by site class, in the replica's own frame: y up, z towards the butt) along the replica
+## from where the clips put it, the replica staying where they put it. A class in grip_fit_both moves both hands (a
+## pistol's two-handed grip); otherwise the left stays on the handguard.
+@export var grip_fit: Dictionary[StringName, Vector3] = {
+	&"rifle": Vector3(0.0, 0.035, 0.02),
+	&"pistol": Vector3(0.0, 0.022, 0.0),
+}
+@export var grip_fit_both: PackedStringArray = PackedStringArray(["pistol"])
 ## The draw from one replica to another, time-scaled to the replica's draw time (the sidecar's fitTo). Made rifle to
 ## pistol, the pistol in the hand from switch_pistol_from of it; to a rifle it plays backwards, the rifle in the hand
 ## from 1 - switch_pistol_from.

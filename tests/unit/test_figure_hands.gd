@@ -28,6 +28,10 @@ func before_all() -> void:
 	hits = HitConfig.new()
 
 
+func after_each() -> void:
+	config.shoulder_rifle = 1.0
+
+
 func _character() -> Character:
 	var c := Character.new(1, 0, Vector3.ZERO, 0.0, ReplicaStats.default_loadout())
 	c.grounded = true
@@ -531,6 +535,8 @@ func test_the_old_magazine_starts_where_the_replicas_own_clip_pulls_it() -> void
 
 
 func test_the_reload_clip_keeps_step_with_reload_left_near_far_and_after_hiding() -> void:
+	# The clip's own hand: the rifle not drawn into the shoulder (TP2), which moves both hands with it.
+	config.shoulder_rifle = 0.0
 	var c := _character()
 	var v := _view(FigureMix.HUMAN, c)
 	await _pose(v, c, 5)
