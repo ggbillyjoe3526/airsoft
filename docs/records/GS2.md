@@ -90,3 +90,6 @@ evaluated later in the build. Every review render and figure copy made by import
 - None open from the bots' copies: merged over TP1 (#220), the four replicas rebuilt (their figure copies now cut down
   from these models, `Figure_Sights` hidden under an optic), `figure_parts.py` rerun; its copies in the parts files
   came out a few bytes off main's even for the unchanged Cyber, so main's parts files stay.
+- Main's export broke with TP2 (#228): `HitFit.cheek_turn` named `HitConfig`, which preloads `hit_fit.tres`, a cycle
+  an exported build can't load (`Could not preload resource file "res://game/config/hit_fit.tres"`, smoke test dead).
+  Fixed here: `cheek_turn` takes the two angles as numbers. Reproduced and checked with a local `--export-pack` run.
