@@ -187,7 +187,7 @@ foundations).
 | A figure model | ≤ 20 MB; LOD0 ≤ 60,000 triangles (within 8 m), LOD1 ≤ 20,000, LOD2 ≤ 6,000; ≤ 8 materials; 2K textures |
 | First-person arms | ≤ 8 MB, ≤ 40,000 triangles, ≤ 4 materials, 2K textures |
 | A replica model | ≤ 6 MB, ≤ 40,000 triangles in the hands, ≤ 3,000 on a figure, ≤ 6 materials, 2K textures |
-| A replica's parts file | ≤ 2 MB, ≤ 10,000 triangles a part |
+| A replica's parts file | ≤ 3 MiB (2 MB until BL8b: the attachments, magazines and barrels share the AEG's), ≤ 10,000 triangles a part |
 | A grenade model | ≤ 200 KB, ≤ 5,500 triangles, plain colours |
 | A prop | ≤ 1 MB, ≤ 5,000 triangles (a landmark ≤ 30,000 with LODs), sharing texture sets with other props |
 | A surface texture set | ≤ 6 MB at 2K (colour, normal, ORM) |

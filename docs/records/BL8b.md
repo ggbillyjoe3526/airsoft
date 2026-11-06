@@ -77,8 +77,8 @@ reasonable") applied to the BL8 attachments (10,000 triangles each), and his thr
 - **The vertical grip spends 85% of its budget:** the AEG's parts file holds every AEG part and stands at 2.00 MB of
   its 2 MiB cap (1,998,324 of 2,097,152 bytes); hard-edged detail (the grip's crisp stipple, the silencer's knurl,
   as the critic asked) costs file size, so the cap (then 2 MiB), not the 95% rule, set the grip's count.
-- **The parts files' cap rises from 2 to 3 MiB** (`test_attachment_models.gd`, BL8's own default, not an owner
-  ruling): the AEG's file holds the attachments (2.00 MB with this task), and the open magazine (MAG1, #209, about
+- **The parts files' cap rises from 2 to 3 MiB** (`test_attachment_models.gd`, `test_magazine_models.gd` and
+  `docs/CC0_ASSETS.md` › Size limits; a default, not an owner ruling): the AEG's file holds the attachments (2.00 MB with this task), and the open magazine (MAG1, #209, about
   +0.40 MB) and barrel (BA1, #215, about +0.15 MB) tasks add their parts to the same file, about 2.55 MB together, so
   under 2 MiB whichever merged last would fail. 0.5 MB more is nothing against the install's 500 MB budget.
 - **Tests for the three fixes** (`test_attachment_models.gd`): the laser's front 4 mm is the housing's full width
@@ -87,7 +87,8 @@ reasonable") applied to the BL8 attachments (10,000 triangles each), and his thr
 
 ## Known issues left
 
-- The AEG's parts file is 2.00 MB, about 2.55 MB once the magazines and barrels land, under its new 3 MiB cap; a
+- The AEG's parts file is 2.42 MB with the magazines (MAG1), about 2.55 MB once the barrels land, under its new 3 MiB
+  cap; a
   quantised export (positions and normals) would roughly halve every parts file if size ever matters.
 - Every optic (the 2x now too) overlaps a rear sight leaf where it would stand; the leaves hide under any optic
   (SightFold), as before.
