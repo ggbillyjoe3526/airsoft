@@ -8,9 +8,11 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
   in Godot the eye looks along -z.
 - **Skeleton.** `Arms`: each side's `Shoulder`, `UpperArm`, `Forearm`, `Hand`, `Thumb1-3`, `Index1-3`, `Middle1-3`,
   `Ring1-3`, `Pinky1-3` and `Grip` with `_R` or `_L`, the figures' bone names.
-- **Mesh.** `Arm_R` and `Arm_L` (39,386 triangles together): the MakeHuman base mesh's arm and hand (CC0,
-  `tools/blender/arms/source/`) under a glove (skin + 1.1 mm, `glove.py`) with one moulded knuckle shell over the four
-  knuckles (domed, with a padded rim), a rounded plate over each finger section and the thumb, a suede palm patch, a
+- **Mesh.** `Arm_R` and `Arm_L` (38,900 triangles together): the MakeHuman base mesh's arm and hand (CC0,
+  `tools/blender/arms/source/`) under a glove (skin + 1.1 mm, `glove.py`, raised over the hand's forms: the web
+  muscle, the thumb's and index finger's bones, the finger joints, with a crease across each) with one moulded knuckle
+  shell over the four knuckles (domed, with a padded rim), a round pad on each finger's first section, a suede palm
+  patch, a
   cuff and wrist strap, and a sleeve rolled over the cuff with a banded hem, ending 13 cm above the elbow (the view
   never shows the shoulder).
 - **Materials.** `Glove` (dark olive-brown), `GloveArmour` (guard, pads, strap, patch), `Sleeve`, `SleeveTrim`. Plain colours,
