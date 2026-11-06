@@ -85,6 +85,12 @@ PILLOW = 0.005  # how far a filled bag's face bulges at its middle
 HOLSTER_DROP = 0.05  # the holster's mouth below the belt's top (a drop mount)
 HOLSTER_AT = 292.0  # degrees round the belt from the front over the left: the holster's body about 8 forward of the side
 # (further forward, at 298, it stood out of the hit volume's hips in the aim-up pose)
+# Where a pistol out of the hand sits (FigureHands, FigureConfig.holster_node): an empty at the holster's mouth on the
+# slide's line, in the replica's axes (+Z up out of the mouth, +Y the slide's top, toward the figure's front). Its place
+# in the holster's frame (x forward, z up, -y out from the hip): the front inner wall, the pocket's middle, the mouth.
+# Both pistols' figure meshes clear the pocket's walls seated 0.10 to 0.13 m deep (FigureConfig.holster_depth, 0.11).
+PISTOL_SEAT_NODE = "PistolHolster"
+PISTOL_SEAT_AT = (0.0, -0.030, 0.0)
 PLATE_GAP = 0.006  # the plate bags' inner faces off the body where they come closest
 
 
@@ -913,7 +919,9 @@ def dump_pouch(lod: int) -> list:
     return obs
 
 
-def belt_gear(kit: Kit, sheet: fit.Sheet, lod: int) -> None:
+def belt_gear(kit: Kit, sheet: fit.Sheet, lod: int) -> Matrix:
+    """The belt's holster and pouches; gives the pistol's seat in the holster (PISTOL_SEAT_NODE), in the figure's frame
+    (Blender's axes)."""
     con = sheet.c
     L = con.length
 
@@ -927,6 +935,8 @@ def belt_gear(kit: Kit, sheet: fit.Sheet, lod: int) -> None:
     # the belt rides at the waist.
     m = sheet.frame(s_at(HOLSTER_AT), BELT["top"] - HOLSTER_DROP, BELT["thick"] - 0.008)
     cant = m @ Matrix.Rotation(math.radians(10.0), 4, "Y")
+    # The pistol sits in the shell, so on the cant.
+    seat = cant @ Matrix.Translation(PISTOL_SEAT_AT)
     obs = holster(lod)
     for o in obs:
         # The shell is canted on its mount; the mount and its belt loops stay level on the belt.
@@ -945,6 +955,7 @@ def belt_gear(kit: Kit, sheet: fit.Sheet, lod: int) -> None:
     m = sheet.frame(s_at(138.0), BELT["bottom"] - 0.03, BELT["thick"] + 0.001)
     on_sheet(dump_pouch(lod), m, kit, "Hips", "DumpPouch")
     del L
+    return seat
 
 
 # ------------------------------------------------------------------------------------------------------ the radio
@@ -1240,7 +1251,8 @@ def pack(kit: Kit, tree, lod: int) -> None:
 
 # ------------------------------------------------------------------------------------------------- whole pieces
 
-def build(lod: int, tree, torso: fit.Torso, hips: fit.Torso) -> dict:
+def build(lod: int, tree, torso: fit.Torso, hips: fit.Torso) -> tuple:
+    """Every piece at level `lod`, and the pistol's seat in the holster."""
     kit = Kit("Kit", lod)
     front = front_carrier(kit, lod)
     back = back_carrier(kit, lod, False)
@@ -1249,7 +1261,7 @@ def build(lod: int, tree, torso: fit.Torso, hips: fit.Torso) -> dict:
     front_pouches(kit, front, lod)
     side_pouch(kit, sheets, lod)
     bs = belt(kit, hips, lod)
-    belt_gear(kit, bs, lod)
+    seat = belt_gear(kit, bs, lod)
     pk = Kit("Kit_Pack", lod)
     pack(pk, tree, lod)
     out = {"Kit": kit, "Kit_Pack": pk}
@@ -1257,7 +1269,7 @@ def build(lod: int, tree, torso: fit.Torso, hips: fit.Torso) -> dict:
         rd = Kit("Kit_Radio", lod)
         radio(rd, sheets, lod)
         out["Kit_Radio"] = rd
-    return out
+    return out, seat
 
 
 # ------------------------------------------------------------------------------------------- skin, paint, export
@@ -1429,8 +1441,8 @@ def load_figure() -> tuple:
     return arm, bpy.data.objects["Body"]
 
 
-def build_all(arm, body) -> dict:
-    """Every piece at every level: {node name: object}, skinned to `arm`."""
+def build_all(arm, body) -> tuple:
+    """Every piece at every level: {node name: object}, skinned to `arm`; and the pistol's seat in the holster."""
     for o in list(bpy.data.objects):
         if o.type == "MESH" and o.name.startswith("Kit"):
             bpy.data.objects.remove(o)
@@ -1441,20 +1453,23 @@ def build_all(arm, body) -> dict:
     swatch_materials()
     out = {}
     for lod in range(3):
-        for name, kit in build(lod, tree, torso, hips).items():
+        kits, seat = build(lod, tree, torso, hips)
+        for name, kit in kits.items():
             ob = finish_piece(kit)
             fit_budget(ob, BUDGET[name][lod])
             mod = ob.modifiers.new("skin", "ARMATURE")
             mod.object = arm
             out[ob.name] = ob
-    return out
+        if lod == 0:
+            seat0 = seat
+    return out, seat0
 
 
 def main() -> None:
     import splice
     args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
     arm, body = load_figure()
-    pieces = build_all(arm, body)
+    pieces, seat = build_all(arm, body)
     meshes = {}
     for name, ob in pieces.items():
         meshes[name] = extract(ob)
@@ -1467,8 +1482,33 @@ def main() -> None:
     ]
     if "--no-splice" not in args:
         report = splice.splice(HUMAN, HUMAN, meshes, mats, sibling="Kit")
+        write_seat(HUMAN, seat)
         for name in sorted(report):
             print("%-16s %6d triangles" % (name, report[name]))
+
+
+def write_seat(path: str, seat: Matrix) -> None:
+    """Writes the pistol's `seat` (belt_gear's) into the glb at `path` as the empty PISTOL_SEAT_NODE at the scene's root
+    (replacing one there): its axes turned to the replica's (x out from the hip, y forward, z up) and to glTF's
+    (x, z, -y)."""
+    import splice
+    gltf, binary = splice.read(path)
+    belt = seat.to_3x3().normalized()
+
+    def gl(v: Vector) -> Vector:
+        return Vector((v.x, v.z, -v.y))
+    axes = Matrix((gl(-belt.col[1]), gl(belt.col[0]), gl(belt.col[2]))).transposed()
+    q = axes.to_quaternion()
+    at = gl(seat.translation)
+    node = {"name": PISTOL_SEAT_NODE, "translation": [round(c, 6) for c in at],
+            "rotation": [round(q.x, 6), round(q.y, 6), round(q.z, 6), round(q.w, 6)]}
+    names = [n.get("name") for n in gltf["nodes"]]
+    if PISTOL_SEAT_NODE in names:
+        gltf["nodes"][names.index(PISTOL_SEAT_NODE)] = node
+    else:
+        gltf["nodes"].append(node)
+        gltf["scenes"][gltf.get("scene", 0)]["nodes"].append(len(gltf["nodes"]) - 1)
+    splice.write(path, gltf, binary)
 
 
 if __name__ == "__main__":

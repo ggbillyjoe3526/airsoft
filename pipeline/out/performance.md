@@ -1,17 +1,35 @@
-Task: FA1 · head aa82d86 (diff 1307710..HEAD) · Verdict: Pass
-Run: none (no GPU; CPU loaded by the background check; frame times skipped) · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and the counts
-Metrics: no --perf run made; judged from counts, all judgment:
-- Draw calls: each visible head mesh level gains one Face surface, so +1 draw per figure (the head is drawn at one LOD at a time), about +1 per figure on top of the head's existing surfaces. The shadow twin merges to one surface (figure_models.gd:206-237), so no extra shadow draw. A 10-figure match is about +10 draws at most.
-- Materials: look 0 is the source Face material itself; looks 1-3 are duplicates made once per kind/look (figure_models.gd:156-172). That is at most 4 Face materials per kind, shared by every figure (key kind/source id/look), not per-instance. All use the one head atlas, so no new textures, and no new shader variants (same BaseMaterial3D features, only uv1_offset differs).
-- Triangles: heads 9,000/3,200/900 at LOD0/1/2 (largest head 8,992/3,192/896, 99.9 % of budget); the figure 26,216/9,036/2,945 against 60k, so about 44 % of the figure budget. The face adds 1,094-1,318 / 594-708 / 82-90 triangles per head, and that is the whole change at LOD0.
-- Assets: human.glb 6,368,156 -> 6,709,628 bytes (+342 KB, +5.4 %). Atlas webps: col +7.4 KB, orm +1 KB, nrm -4 KB, net +4.4 KB, a negligible change from baseline. VRAM unchanged in dimensions (same texture sizes), so no new GPU memory.
-Regressions (> 10 % worse): none measured. Runtime: draw calls up about 1 per figure, a few percent of the figure's surfaces (judgment).
-Blocking findings: none
- - Per-frame allocations: none. face_look and face_material run once in FigureBody.setup via _paint (figure_body.gd:87, 283-297); the "%d/%d/%d" key format is setup-only. No _process code was touched.
- - Teardown: _face_materials is a Dictionary owned by FigureModels, so the materials are shared and freed with it. Figures only set surface override references, so no per-figure leaks or orphans.
- - Prewarm: FigureModels.materials() lists every Face look (figure_models.gd:182-190), so there is no first-use hitch. It lists the very materials the figures wear, because face_material caches by the same key.
-Advisory:
- - figure_models.gd:157-168: the cache key uses source.get_instance_id(), which is fine while the models stay loaded. If the kinds ever reload, the stale-keyed entries linger until the FigureModels is freed (judgment; minor).
- - figure_models.gd:182: `var name` shadows Node/Object.name only inside a RefCounted, so harmless, though gdlint may flag it (check passes it? the check is not run here).
- - Owner hardware: confirm the +1 head surface at 240 Hz Ultra with a full match, and the draw-call monitor from a rendered --perf run (F3 overlay).
-Fixes: none required.
+# Performance: HS1 (681450b..HEAD 9252cee), rest_on_back
+
+Verdict: Pass (no per-frame cost; one-time costs, one nit below).
+
+Measured headless, Godot 4.7.2, Time.get_ticks_usec, throwaway script (deleted). Dev-machine numbers; a slow laptop
+may be 2 to 3x.
+
+- Load-time _back_rest (inside FigureModels.load_kinds, both kinds): 55 to 61 ms total, once at start-up. Fine.
+- First hold, rest_on_back, per replica body mesh, kind 0 (the humanoid with kit):
+  - aeg Body 30,996 tris: 67 ms
+  - sniper Body 27,843 tris: 59 ms
+  - pistol Body 29,028 tris: 50 ms
+  - cyber Body 24,480 tris: 48 ms
+  - small parts (flash hider, mag, sights, figure proxy): 0.3 to 5 ms each
+- Kind 1 (robot, empty back_rest) returns at once: 0.01 ms.
+- Cached repeat call: 0 to 13 us (Dictionary hit). Cost is about 2 us per triangle at the 1.5 cm sample.
+- Per frame: rest_on_back is called only from figure_hands setup (game/play/figures/figure_hands.gd:139), never from
+  process/physics. Nothing per frame, no allocation in a loop beyond the one get_faces() copy per first call
+  (about 30k tris * 3 * 12 B = about 1.1 MB PackedVector3Array, freed after the call).
+
+Does the first-hold hitch matter?
+- A match has 12 figures but a handful of distinct meshes (4 bodies at most, cached per kind per Mesh): worst case
+  about 60 to 70 ms once per distinct replica, or about 225 ms total if all four replicas are equipped by figures at
+  spawn (spread over whatever frames the figures are built in). It happens at figure set-up, not mid-fight, if the
+  figures are built during the round start/loading; a single 60 ms frame there is invisible.
+- Risk to watch: if a bot's loadout is first built in the middle of a live round (e.g. a replica drawn for the first
+  time while the match runs), that is a single 50 to 70 ms frame (about 4 frames dropped at 60 Hz). Not a fail,
+  at most a one-off stutter.
+
+Nit (can wait): Body meshes alone are 25 to 30k tris at 2 us each; sampling each triangle at 1.5 cm is far finer than
+needed for a cell of 1.5 cm on mostly large flat faces. If a stutter is ever seen, warm the cache in loading
+(call rest_on_back for each replica mesh once after load_kinds) or sample coarser. No change needed now.
+
+Cached state: back_lift is Dictionary[Mesh, float] keyed on the mesh; holds Mesh refs (shared resources, not freed
+per match), no leak. back_rest is built once; no orphan nodes or duplicate signal connections seen in the diff.

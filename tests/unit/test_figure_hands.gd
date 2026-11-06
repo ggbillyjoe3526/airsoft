@@ -1,7 +1,7 @@
 extends GutTest
 ## FI3: the upper body (game/play/figures/figure_hands.gd, figure_graph.gd's upper chain, figure_body.gd, figure_bend.gd's
 ## aim, figure_view.gd): the replica in the fist and pointing where the shot goes at 0 and ±45°, the Switch's pistol
-## only past 0.35, one trigger press a SHOT, the rifle slung on the chest by the sling numbers, the hand up calling the
+## only past 0.35, one trigger press a SHOT, the rifle on the back by the back_* numbers, the hand up calling the
 ## hit with the rifle hanging from the other, the replicas kept by the figure without a body. FI4, the reloads: the clip at
 ## the reload's share of the replica's reload time (near, far, after hiding and drawn at 240 Hz), the new magazine on
 ## Hand_L over 0.389-0.509 of a 1.8 s reload and the old one where the replica's own clip pulls it, one copy on the hand
@@ -47,10 +47,11 @@ func _view(kind: int, c: Character) -> FigureView:
 	var hands := v.body().hands
 	sk.skeleton_updated.connect(func() -> void:
 		var d := {}
-		for bone: String in ["Hand_R", "Middle1_R", "Grip_R", "Hand_L", "Middle3_L", "Chest", "Hips"]:
+		for bone: String in ["Hand_R", "Middle1_R", "Grip_R", "Hand_L", "Middle3_L", "Chest", "Hips", "Thigh_R"]:
 			d[bone] = sk.get_bone_global_pose(sk.find_bone(bone))
 		d[&"in_hand"] = hands.replica(hands.in_hand).transform if hands.replica(hands.in_hand) != null else null
-		d[&"slung"] = hands.replica(hands.slung).transform if hands.replica(hands.slung) != null else null
+		d[&"on_back"] = hands.replica(hands.on_back).transform if hands.replica(hands.on_back) != null else null
+		d[&"in_holster"] = hands.replica(hands.in_holster).transform if hands.replica(hands.in_holster) != null else null
 		var mag := hands.magazine(hands.mag_slot)
 		d[&"magazine"] = mag.global_transform if mag != null and hands.mag_shown != FigureHands.MAG_NONE else null
 		_drawn[v] = d)
@@ -120,13 +121,14 @@ func test_the_switch_shows_the_pistol_only_past_its_share() -> void:
 					"time-scaled to the draw (the clip is 0.6 s)")
 		if share < config.switch_pistol_from:
 			shown_before += 1 if hands.in_hand == 0 and hands.replica(0).visible else 0
-			pistol_early += 1 if hands.replica(1).visible else 0
+			pistol_early += 1 if hands.in_hand == 1 else 0
 		else:
 			assert_eq(hands.in_hand, 1, "share %.2f: the pistol in the hand" % share)
 			assert_true(hands.replica(1).visible)
-			assert_false(hands.replica(0).visible, "the rifle put away")
+			assert_eq(hands.on_back, 0, "the rifle on the back")
+			assert_true(hands.replica(0).visible, "the rifle shows on the back")
 	assert_gt(shown_before, 0)
-	assert_eq(pistol_early, 0, "no pistol before 0.35 of the draw")
+	assert_eq(pistol_early, 0, "no pistol in the hand before 0.35 of the draw")
 	a.draw_left = 0.0
 	await _pose(v, c, 40)
 	assert_false(v.body().tree.get(FigureGraph.P_SWITCH_ACTIVE), "done with the draw")
@@ -202,7 +204,7 @@ func test_the_trigger_press_over_the_aim_draws_the_fire_clip_itself() -> void:
 	assert_lt(pressed.angle_to(press.rotation_track_interpolate(track, t)), 1e-3, "as the Fire clip has it")
 
 
-func test_holstered_the_rifle_rides_slung_on_the_chest_by_the_sling_numbers() -> void:
+func test_holstered_the_rifle_rides_on_the_back_by_the_back_numbers() -> void:
 	for kind: int in [FigureMix.HUMAN, FigureMix.ROBOT]:
 		var c := _character()
 		c.armament.holstered = true
@@ -210,23 +212,118 @@ func test_holstered_the_rifle_rides_slung_on_the_chest_by_the_sling_numbers() ->
 		var d: Dictionary = await _pose(v, c, 30)
 		var hands := v.body().hands
 		assert_eq(hands.in_hand, -1, "nothing in the hand")
-		assert_eq(hands.slung, 0, "the rifle slung")
-		assert_false(hands.replica(1).visible, "the pistol stays holstered")
-		var slung: Transform3D = d[&"slung"]
+		assert_eq(hands.on_back, 0, "the rifle on the back")
+		assert_eq(hands.replica(1).visible, kind == FigureMix.HUMAN, "the pistol in the holster (the robot has none)")
+		var worn: Transform3D = d[&"on_back"]
 		var chest: Transform3D = d["Chest"]
 		var box := hands.replica(0).get_aabb()
-		var butt := slung * Vector3(0.0, 0.0, box.end.z)
-		var back := config.sling_back_robot if kind == FigureMix.ROBOT else config.sling_back_pack
-		assert_almost_eq(butt.x, -config.sling_butt.x, 0.03, "kind %d: the butt to the figure's right" % kind)
-		assert_almost_eq(butt.y, config.sling_butt.y, 0.03, "kind %d: the butt's height" % kind)
-		assert_almost_eq(butt.z, chest.origin.z - back, 0.03, "kind %d: behind the spine line" % kind)
-		var way := _muzzle_way(slung)
-		assert_almost_eq(acos(-way.y), config.sling_tilt, 0.05, "kind %d: tilted from upright" % kind)
+		var near := Vector3(box.position.x, 0.0, box.get_center().z)
+		# Moved straight out of the back (its frame's x) onto the kit behind it; the robot has none to rest on.
+		var lift := models.rest_on_back(kind, hands.replica(0).mesh, near)
+		if kind == FigureMix.ROBOT:
+			assert_eq(lift, 0.0, "the robot's rifle keeps its depth")
+		else:
+			assert_ne(lift, 0.0, "the human's rifle moved onto the pack")
+			assert_lt(absf(lift), 0.06, "a small move")
+		var middle := worn * (near - Vector3(lift, 0.0, 0.0))
+		var depth := config.back_depth_robot if kind == FigureMix.ROBOT else config.back_depth_pack
+		var lean := 0.0 if kind == FigureMix.ROBOT else config.back_lean
+		assert_almost_eq(middle.x, -config.back_middle.x, 0.03, "kind %d: its middle by the spine" % kind)
+		assert_almost_eq(middle.y, config.back_middle.y, 0.03, "kind %d: its middle's height" % kind)
+		assert_almost_eq(middle.z, chest.origin.z - depth, 0.03, "kind %d: its near side behind the chest bone" % kind)
+		var way := _muzzle_way(worn)
+		assert_almost_eq(acos(-way.y), acos(cos(config.back_tilt) * cos(lean)), 0.05, "kind %d: tilted from upright" % kind)
+		assert_almost_eq(asin(-way.z), lean, 0.05, "kind %d: leaning on the pack (the robot has none)" % kind)
 		assert_gt(way.x, 0.0, "the muzzle to the figure's left")
-		assert_lt((slung.basis * Vector3.RIGHT).z, -0.9, "its right side out of the back")
-		var on_chest := chest.affine_inverse() * slung
-		assert_almost_eq(on_chest.origin, (models.sling(kind) * Transform3D(Basis.IDENTITY,
-				-Vector3(0.0, 0.0, box.end.z))).origin, Vector3.ONE * 1e-3, "carried by the chest bone")
+		assert_lt((worn.basis * Vector3.RIGHT).z, -0.9, "its right side out of the back")
+		var on_chest := chest.affine_inverse() * worn
+		assert_almost_eq(on_chest.origin, (models.on_back(kind) * Transform3D(Basis.IDENTITY,
+				Vector3(lift, 0.0, 0.0) - near)).origin, Vector3.ONE * 1e-3, "carried by the chest bone")
+
+
+func test_the_rifle_on_the_back_rests_on_the_pack_not_in_it_or_off_it() -> void:
+	for id: StringName in [&"aeg", &"sniper"]:
+		var loadout: Array[ReplicaConfig] = [ReplicaStats.load_replica(id), ReplicaStats.load_replica(&"pistol")]
+		var c := Character.new(1, 0, Vector3.ZERO, 0.0, loadout)
+		c.grounded = true
+		c.armament.holstered = true
+		var v := _view(FigureMix.HUMAN, c)
+		var d: Dictionary = await _pose(v, c, 30)
+		var hands := v.body().hands
+		assert_eq(hands.on_back, 0, "%s on the back" % id)
+		var rifle := hands.replica(0)
+		# Both sampled in the rifle's own frame (x out of the back) as this frame poses them, square by square: the
+		# rifle's nearest point and the pack's farthest.
+		var in_rifle := (d[&"on_back"] as Transform3D).affine_inverse()
+		var near := _surface(rifle.mesh.get_faces(), Transform3D.IDENTITY, false)
+		var pack_part := v.find_child(config.back_pack_part, true, false) as MeshInstance3D
+		assert_not_null(pack_part, "the pack")
+		if pack_part == null:
+			return
+		var chest := 0
+		for b in pack_part.skin.get_bind_count():
+			if pack_part.skin.get_bind_name(b) == config.chest_bone:
+				chest = b
+		var pack_to_rifle := in_rifle * (d["Chest"] as Transform3D) * pack_part.skin.get_bind_pose(chest)
+		var far := _surface(pack_part.mesh.get_faces(), pack_to_rifle, true)
+		var nearest := INF
+		for cell: Vector2i in near:
+			if far.has(cell):
+				nearest = minf(nearest, near[cell] - far[cell])
+		assert_lt(nearest, INF, "%s lies over the pack" % id)
+		assert_gt(nearest, -0.004, "%s: not into the pack" % id)
+		assert_lt(nearest, config.back_rest_gap + 0.01, "%s: resting on it, not floating off it" % id)
+
+
+## The triangles `faces` (a mesh's, put through `to`) sampled every 1 cm: by 1 cm square across (y) and along (z), the
+## smallest x (or with `farthest`, the largest).
+static func _surface(faces: PackedVector3Array, to: Transform3D, farthest: bool) -> Dictionary[Vector2i, float]:
+	var out: Dictionary[Vector2i, float] = {}
+	for t in range(0, faces.size() - 2, 3):
+		var a := to * faces[t]
+		var ab := to * faces[t + 1] - a
+		var ac := to * faces[t + 2] - a
+		var steps := maxi(1, ceili(maxf(ab.length(), ac.length()) / 0.01))
+		for u in steps + 1:
+			for w in steps + 1 - u:
+				var p := a + ab * (float(u) / steps) + ac * (float(w) / steps)
+				var cell := Vector2i(floori(p.y / 0.01), floori(p.z / 0.01))
+				if farthest:
+					out[cell] = maxf(out.get(cell, -INF), p.x)
+				else:
+					out[cell] = minf(out.get(cell, INF), p.x)
+	return out
+
+
+func test_out_of_the_hand_the_pistol_sits_upright_in_the_holster_on_the_right_hip() -> void:
+	var c := _character()
+	var v := _view(FigureMix.HUMAN, c)
+	var d: Dictionary = await _pose(v, c, 30)
+	var hands := v.body().hands
+	assert_true(models.has_holster(FigureMix.HUMAN), "the human's model has the holster's empty")
+	assert_false(models.has_holster(FigureMix.ROBOT), "the robot has none")
+	assert_eq(hands.in_hand, 0, "the rifle in the hand")
+	assert_eq(hands.in_holster, 1, "the pistol in the holster")
+	assert_true(hands.replica(1).visible)
+	var seat: Transform3D = d[&"in_holster"]
+	var hips: Transform3D = d["Hips"]
+	var box := hands.replica(1).get_aabb()
+	var muzzle := seat * Vector3(box.get_center().x, box.end.y, box.position.z)
+	assert_lt(muzzle.x, hips.origin.x - 0.12, "on the figure's right hip")
+	assert_lt(muzzle.y, hips.origin.y - 0.05, "its muzzle down below the belt")
+	assert_gt((seat.basis * Vector3.BACK).normalized().y, 0.9, "upright, the grip up")
+	assert_gt((seat.basis * Vector3.UP).normalized().z, 0.8, "the slide's top to the front")
+	var on_seat := Transform3D(Basis.IDENTITY, Vector3(0.0, 0.0, -config.holster_depth)
+			- Vector3(box.get_center().x, box.end.y, box.position.z))
+	var by_hips := hips * models.holster(FigureMix.HUMAN) * on_seat
+	var by_thigh: Transform3D = d["Thigh_R"] * models.holster_follow(FigureMix.HUMAN) * on_seat
+	assert_almost_eq(seat.origin, by_hips.interpolate_with(by_thigh, config.holster_follow).origin, Vector3.ONE * 1e-3,
+			"carried by the hips with a share of the thigh")
+	c.armament.active = 1
+	await _pose(v, c, 30)
+	assert_eq(hands.in_holster, -1, "drawn: out of the holster")
+	assert_eq(hands.on_back, 0, "and the rifle on the back")
+	assert_true(hands.replica(0).visible)
 
 
 func test_drawn_from_the_holster_the_rifle_comes_to_the_hand_at_half_the_draw() -> void:
@@ -241,13 +338,13 @@ func test_drawn_from_the_holster_the_rifle_comes_to_the_hand_at_half_the_draw() 
 	for share: float in [0.1, 0.4]:
 		a.draw_left = a.draw_total * (1.0 - share)
 		await _pose(v, c)
-		assert_eq(hands.slung, 0, "share %.1f: still slung" % share)
+		assert_eq(hands.on_back, 0, "share %.1f: still on the back" % share)
 		assert_eq(hands.in_hand, -1)
 	for share: float in [0.6, 0.9]:
 		a.draw_left = a.draw_total * (1.0 - share)
 		await _pose(v, c)
 		assert_eq(hands.in_hand, 0, "share %.1f: in the hand" % share)
-		assert_eq(hands.slung, -1)
+		assert_eq(hands.on_back, -1)
 	assert_false(v.body().tree.get(FigureGraph.P_SWITCH_ACTIVE), "out of the holster isn't a switch")
 
 

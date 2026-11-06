@@ -172,6 +172,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Art direction and graphics
 
+- **No rifle sling; replicas out of the hand are worn (owner, 2026-11-05, HS1).** "i don't like the rifle sling. remove
+  it completely. the player should just hold replicas in their hands. pistols are holstered and rifles (and any other
+  weapon) can just be clipped onto the plate carrier/belt or whatever when Holstered". The pistol sits in the belt
+  holster; the rifle rests directly on the backpack (owner, 18:01: "the rifles are floating. They should be holstered
+  directly onto the backpack"), or on the carrier without one. A rifle longer than the pack, like the sniper, stands
+  past its ends, with no straps (owner, 19:14). Robots have no holster, so theirs isn't drawn (robots get no further
+  work).
 - **Every graphic is an engine feature, never map-exclusive (owner, 2026-10-04: "All maps use the same engine").**
   Lighting, sky, effects, materials, prop styles and every Graphics setting live in the renderer and read from map
   data. No map name appears in render code; maps that don't use a feature draw exactly as before (pinned by tests).

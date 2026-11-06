@@ -2,13 +2,14 @@ class_name FigureModels
 extends RefCounted
 ## The rigged figures a session draws (step 23), each kind loaded once a session: its scene, its sidecar
 ## (FigureSidecar), its clips' loop modes set from the sidecar (the import leaves every clip unlooped), the fire clips'
-## additive copies, its animation graph (FigureGraph, the stepping clips' offsets measured once here), where each replica
-## class sits on the grip bone (the sidecar's replicaOnGrip turned from Blender's axes once) and where the slung rifle
-## rides on the chest, and, made once and shared by every figure that asks, the team-painted materials and the shadow
-## twins' meshes; every material its parts wear (`materials`, for ShaderPrewarm); and each replica's magazine mesh for
-## the hand-off's tosses (MH3, `magazine_mesh`), read once a replica. Loaded at the session's build,
-## behind the loading screen (FI7). A kind whose model or sidecar can't be read warns once and is not drawn (its
-## figures draw no body). Held by PlaySession; freeing it frees all of it.
+## additive copies, its animation graph (FigureGraph, the stepping clips' offsets measured once here), where each
+## replica class sits on the grip bone (the sidecar's replicaOnGrip turned from Blender's axes once), where the rifle on
+## the back rides on the chest bone and where the holster's pistol sits (its empty, on two bones), and, made once and
+## shared by every figure that asks, the team-painted materials and the shadow twins' meshes; every material its parts
+## wear (`materials`, for ShaderPrewarm); and each replica's magazine mesh for the hand-off's tosses (MH3,
+## `magazine_mesh`), read once a replica. Loaded at the session's build, behind the loading screen (FI7). A kind whose
+## model or sidecar can't be read warns once and is not drawn (its figures draw no body). Held by PlaySession; freeing
+## it frees all of it.
 
 ## One loaded kind.
 class Kind:
@@ -18,8 +19,17 @@ class Kind:
 	var graph: AnimationNodeBlendTree = null
 	## Replica class to its place on the grip bone, in Godot's axes: the replica's frame to the bone's.
 	var grip: Dictionary[StringName, Transform3D] = {}
-	## The slung rifle's butt frame (its long axis -Z, the muzzle's way) in the chest bone's frame.
-	var sling: Transform3D = Transform3D.IDENTITY
+	## The rifle on the back: its middle's frame (its long axis -Z, the muzzle's way) in the chest bone's frame.
+	var on_back: Transform3D = Transform3D.IDENTITY
+	## The kit behind the rifle on the back, in on_back's frame: by square across (y) and along (z) it, how far out of
+	## the back (x) the kit reaches (empty without one); and each replica mesh's move out onto it, once worked out.
+	var back_rest: Dictionary[Vector2i, float] = {}
+	var back_lift: Dictionary[Mesh, float] = {}
+	## The pistol's holster (FigureConfig.holster_node) in the holster bone's frame and in the follow bone's, the
+	## replica's axes; whether the kind has one.
+	var holster: Transform3D = Transform3D.IDENTITY
+	var holster_follow: Transform3D = Transform3D.IDENTITY
+	var has_holster: bool = false
 	## Every material the kind's parts wear, as modelled (each once).
 	var sources: Array[Material] = []
 
@@ -102,9 +112,61 @@ func grip(kind: int, site_class: StringName) -> Transform3D:
 	return places.get(site_class, places.get(&"rifle", Transform3D.IDENTITY))
 
 
-## The slung rifle's butt frame in `kind`'s chest bone's frame (FigureConfig sling numbers).
-func sling(kind: int) -> Transform3D:
-	return _kinds[kind].sling if has_kind(kind) else Transform3D.IDENTITY
+## The rifle on the back: its middle's frame in `kind`'s chest bone's frame (FigureConfig back_* numbers).
+func on_back(kind: int) -> Transform3D:
+	return _kinds[kind].on_back if has_kind(kind) else Transform3D.IDENTITY
+
+
+## How far out of the back (m, along on_back's x) `mesh`, its origin moved to `middle` (on its left side), goes from
+## on_back to rest FigureConfig.back_rest_gap off `kind`'s kit behind it (negative to come in to it): 0 for a kind with
+## no kit there (a robot) or a mesh that misses it. Each triangle is looked at every back_rest_cell, once per mesh.
+func rest_on_back(kind: int, mesh: Mesh, middle: Vector3) -> float:
+	if not has_kind(kind) or mesh == null or _kinds[kind].back_rest.is_empty() or config.back_rest_cell <= 0.0:
+		return 0.0
+	var k := _kinds[kind]
+	if k.back_lift.has(mesh):
+		return k.back_lift[mesh]
+	var lift := -INF
+	var faces := mesh.get_faces()
+	for t in range(0, faces.size() - 2, 3):
+		var a := faces[t] - middle
+		var ab := faces[t + 1] - faces[t]
+		var ac := faces[t + 2] - faces[t]
+		var steps := back_steps(ab, ac, config.back_rest_cell)
+		for i in steps + 1:
+			for j in steps + 1 - i:
+				var p := a + ab * (float(i) / steps) + ac * (float(j) / steps)
+				var cell := back_cell(p, config.back_rest_cell)
+				if k.back_rest.has(cell):
+					lift = maxf(lift, k.back_rest[cell] - p.x)
+	lift = lift + config.back_rest_gap if is_finite(lift) else 0.0
+	k.back_lift[mesh] = lift
+	return lift
+
+
+## How many steps along each of a triangle's sides `ab` and `ac` keep its samples within `cell` (m) of each other.
+static func back_steps(ab: Vector3, ac: Vector3, cell: float) -> int:
+	return maxi(1, ceili(maxf(ab.length(), ac.length()) / cell))
+
+
+## The square of `cell` (m) across (y) and along (z) the rifle on the back that its frame's point `p` lies over.
+static func back_cell(p: Vector3, cell: float) -> Vector2i:
+	return Vector2i(floori(p.y / cell), floori(p.z / cell))
+
+
+## Whether `kind` has a pistol holster (FigureConfig.holster_node).
+func has_holster(kind: int) -> bool:
+	return has_kind(kind) and _kinds[kind].has_holster
+
+
+## `kind`'s pistol holster in its holster bone's frame, the replica's axes (identity without one).
+func holster(kind: int) -> Transform3D:
+	return _kinds[kind].holster if has_holster(kind) else Transform3D.IDENTITY
+
+
+## `kind`'s pistol holster in its follow bone's frame (FigureConfig.holster_follow_bone; identity without one).
+func holster_follow(kind: int) -> Transform3D:
+	return _kinds[kind].holster_follow if has_holster(kind) else Transform3D.IDENTITY
 
 
 ## A replicaOnGrip matrix (Blender's axes: X right, Y forward, Z up, for both the replica and the bone) as the replica's
@@ -119,16 +181,18 @@ static func godot_from_blender(v: Vector3) -> Vector3:
 	return BLENDER_FROM_GODOT.transposed() * v
 
 
-## The slung rifle's butt frame in the chest bone's frame: the butt at `butt` (x to the figure's right, y above the
-## feet), `back` behind the chest, the long axis `tilt` from upright with the muzzle down to the figure's left and its
-## right side facing out of the back; `chest` the chest bone's pose (the skeleton's frame, facing +Z).
-static func sling_on_chest(chest: Transform3D, butt: Vector2, back: float, tilt: float) -> Transform3D:
+## The rifle on the back: the frame of its middle (on its left side, against the kit) in the chest bone's frame: at
+## `middle` (x to the figure's right, y above the feet), `back` behind the chest, the long axis `tilt` from upright
+## with the muzzle down to the figure's left, leaning `lean` (rad, the butt toward the body, as the pack's back slopes)
+## and its right side facing out of the back; `chest` the chest bone's pose (the skeleton's frame, facing +Z).
+static func on_back_frame(chest: Transform3D, middle: Vector2, back: float, tilt: float, lean: float) -> Transform3D:
 	# The file faces +Z, so the figure's left is +X and behind it is -Z.
-	var muzzle := Vector3(sin(tilt), -cos(tilt), 0.0)
-	var right_side := Vector3(0.0, 0.0, -1.0)
+	var muzzle := Vector3(sin(tilt) * cos(lean), -cos(tilt) * cos(lean), -sin(lean))
 	var z := -muzzle
+	var right_side := Vector3(0.0, 0.0, -1.0)
+	right_side = (right_side - z * right_side.dot(z)).normalized()
 	var frame := Basis(right_side, z.cross(right_side), z)
-	return chest.affine_inverse() * Transform3D(frame, Vector3(-butt.x, butt.y, chest.origin.z - back))
+	return chest.affine_inverse() * Transform3D(frame, Vector3(-middle.x, middle.y, chest.origin.z - back))
 
 
 ## `source` (a Team* material of `kind`) painted `colour` for `team`, lit with `glow` of it (TeamColours' High contrast
@@ -282,7 +346,11 @@ func _load(kind: int) -> Kind:
 			var prefix := String(probe.get_path_to(skeleton))
 			_add_additive(k.library, skeleton, prefix)
 			k.graph = FigureGraph.build(side, k.library, skeleton, prefix, config)
-			k.sling = _sling(kind, side, k.library, skeleton, prefix)
+			k.on_back = _on_back(kind, side, k.library, skeleton, prefix)
+			if side.parts.has(config.back_pack_part):
+				k.back_rest = _back_rest(probe, skeleton, k.on_back)
+	if not skeletons.is_empty():
+		k.has_holster = _holster(probe, skeletons[0] as Skeleton3D, k)
 	for site_class in side.replica_on_grip:
 		k.grip[site_class] = grip_from_blender(side.replica_on_grip[site_class])
 	probe.free()
@@ -293,6 +361,92 @@ func _load(kind: int) -> Kind:
 		push_warning("FigureModels: %s.glb has no clips; its figures draw no body" % base)
 		return null
 	return k
+
+
+## The holster empty's frame in the holster bone's and the follow bone's rest frames into `k` (all read from the scene
+## `probe`, which isn't in the tree: the frames are its nodes' own, chained up to its root); whether the scene has them.
+func _holster(probe: Node, skeleton: Skeleton3D, k: Kind) -> bool:
+	var socket := probe.find_child(config.holster_node, true, false) as Node3D
+	var bone := skeleton.find_bone(config.holster_bone)
+	var follow := skeleton.find_bone(config.holster_follow_bone)
+	if socket == null or bone < 0 or follow < 0:
+		return false
+	var rig := _to_root(skeleton, probe)
+	var at := _to_root(socket, probe)
+	k.holster = (rig * skeleton.get_bone_global_rest(bone)).affine_inverse() * at
+	k.holster_follow = (rig * skeleton.get_bone_global_rest(follow)).affine_inverse() * at
+	return true
+
+
+## The kit behind the rifle on the back (FigureConfig.back_rest_parts' triangles whose corners are all rigged at least
+## back_rest_share to the chest bone, so they move with it), in the rifle's frame `on_back`: by square (back_cell), how
+## far out of the back it reaches. Each triangle is looked at every back_rest_cell, so a wide flat face counts too.
+func _back_rest(probe: Node, skeleton: Skeleton3D, on_back: Transform3D) -> Dictionary[Vector2i, float]:
+	var rest: Dictionary[Vector2i, float] = {}
+	if config.back_rest_cell <= 0.0:
+		return rest
+	for part in config.back_rest_parts:
+		var mi := probe.find_child(part, true, false) as MeshInstance3D
+		if mi == null or mi.skin == null:
+			continue
+		var chest := -1
+		for b in mi.skin.get_bind_count():
+			var bone := mi.skin.get_bind_bone(b)
+			var named := mi.skin.get_bind_name(b)
+			if named == config.chest_bone or (bone >= 0 and skeleton.get_bone_name(bone) == config.chest_bone):
+				chest = b
+		if chest < 0:
+			continue
+		var to_back := on_back.affine_inverse() * mi.skin.get_bind_pose(chest)
+		for s in mi.mesh.get_surface_count():
+			var arrays := mi.mesh.surface_get_arrays(s)
+			var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+			var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+			var corners: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+			if points.is_empty() or bones.size() != weights.size() or bones.size() % points.size() != 0:
+				continue
+			if corners.is_empty():
+				corners = PackedInt32Array(range(points.size()))
+			var per := bones.size() / points.size()
+			var on_back_points := PackedVector3Array()
+			on_back_points.resize(points.size())
+			var on_chest := PackedByteArray()
+			on_chest.resize(points.size())
+			for i in points.size():
+				var share := 0.0
+				for w in per:
+					if bones[i * per + w] == chest:
+						share += weights[i * per + w]
+				on_chest[i] = 1 if share >= config.back_rest_share else 0
+				on_back_points[i] = to_back * points[i]
+			for t in range(0, corners.size() - 2, 3):
+				var i0 := corners[t]
+				var i1 := corners[t + 1]
+				var i2 := corners[t + 2]
+				if on_chest[i0] == 0 or on_chest[i1] == 0 or on_chest[i2] == 0:
+					continue
+				var a := on_back_points[i0]
+				var ab := on_back_points[i1] - a
+				var ac := on_back_points[i2] - a
+				var steps := back_steps(ab, ac, config.back_rest_cell)
+				for u in steps + 1:
+					for v in steps + 1 - u:
+						var p := a + ab * (float(u) / steps) + ac * (float(v) / steps)
+						var cell := back_cell(p, config.back_rest_cell)
+						rest[cell] = maxf(rest.get(cell, -INF), p.x)
+	return rest
+
+
+## `node`'s frame in `root`'s, by its own and its parents' transforms.
+static func _to_root(node: Node3D, root: Node) -> Transform3D:
+	var t := node.transform
+	var parent := node.get_parent()
+	while parent != null and parent != root:
+		if parent is Node3D:
+			t = (parent as Node3D).transform * t
+		parent = parent.get_parent()
+	return t
 
 
 ## The fire clips' additive copies (FigureConfig.additive_suffix), made once into the kind's library.
@@ -307,9 +461,9 @@ func _add_additive(library: AnimationLibrary, skeleton: Skeleton3D, prefix: Stri
 		library.add_animation(made, FigureGraph.additive(library.get_animation(clip), skeleton, prefix))
 
 
-## Kind `kind`'s sling against the chest drawn standing holstered: the Holster clip's first frame over Idle's (the rest
-## without the clips).
-func _sling(kind: int, side: FigureSidecar, library: AnimationLibrary, skeleton: Skeleton3D,
+## Kind `kind`'s rifle on the back against the chest drawn standing holstered: the Holster clip's first frame over
+## Idle's (the rest without the clips).
+func _on_back(kind: int, side: FigureSidecar, library: AnimationLibrary, skeleton: Skeleton3D,
 		prefix: String) -> Transform3D:
 	var chest_bone := skeleton.find_bone(config.chest_bone)
 	if chest_bone < 0:
@@ -320,9 +474,11 @@ func _sling(kind: int, side: FigureSidecar, library: AnimationLibrary, skeleton:
 		var idle := library.get_animation(config.idle_clip) if library.has_animation(config.idle_clip) else null
 		chest = FigureGraph.bone_pose(library.get_animation(config.holster_clip), skeleton, prefix, chest_bone, 0.0,
 				idle, config.lower_bones)
-	var back := config.sling_back_human
-	if side.parts.has(config.sling_pack_part):
-		back = config.sling_back_pack
+	var back := config.back_depth_human
+	var lean := 0.0
+	if side.parts.has(config.back_pack_part):
+		back = config.back_depth_pack
+		lean = config.back_lean
 	elif kind == FigureMix.ROBOT:
-		back = config.sling_back_robot
-	return sling_on_chest(chest, config.sling_butt, back, config.sling_tilt)
+		back = config.back_depth_robot
+	return on_back_frame(chest, config.back_middle, back, config.back_tilt, lean)

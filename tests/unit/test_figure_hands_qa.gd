@@ -57,8 +57,8 @@ func _watch(v: FigureView) -> void:
 			d[bone] = sk.get_bone_global_pose(sk.find_bone(bone))
 		var held := hands.replica(hands.in_hand)
 		d[&"in_hand"] = held.transform if held != null else null
-		var carried := hands.replica(hands.slung)
-		d[&"slung"] = carried.transform if carried != null else null
+		var carried := hands.replica(hands.on_back)
+		d[&"on_back"] = carried.transform if carried != null else null
 		_drawn[id] = d)
 
 
@@ -126,10 +126,10 @@ func test_rapid_switching_holstering_and_sprinting_never_shows_more_than_two_or_
 				v.on_shot()
 			var d: Dictionary = await _pose(v, c)
 			worst_shown = maxi(worst_shown, _shown(v))
-			for key: Variant in [&"in_hand", &"slung"]:
+			for key: Variant in [&"in_hand", &"on_back"]:
 				if d.get(key) != null:
 					assert_true(_finite(d[key] as Transform3D), "kind %d frame %d: %s finite" % [kind, frame, key])
-		assert_lte(worst_shown, 2, "kind %d: one in the hand and one slung at most" % kind)
+		assert_lte(worst_shown, 2, "kind %d: one in the hand and one on the back at most" % kind)
 		# Settled, the replica in the hand is in the fist.
 		a.holstered = false
 		a.draw_left = 0.0
@@ -142,7 +142,7 @@ func test_rapid_switching_holstering_and_sprinting_never_shows_more_than_two_or_
 		assert_false(v.body().tree.get(FigureGraph.P_SWITCH_ACTIVE), "the Switch clip is over")
 
 
-func test_a_switch_cut_short_by_a_holster_fades_the_switch_out_and_slings_the_rifle() -> void:
+func test_a_switch_cut_short_by_a_holster_fades_the_switch_out_and_puts_the_rifle_on_the_back() -> void:
 	var c := _character()
 	var v := _view(FigureMix.HUMAN, c)
 	var a := c.armament
@@ -157,14 +157,14 @@ func test_a_switch_cut_short_by_a_holster_fades_the_switch_out_and_slings_the_ri
 	var d: Dictionary = await _pose(v, c, 60)
 	assert_false(v.body().tree.get(FigureGraph.P_SWITCH_ACTIVE), "the switch cut with the draw")
 	assert_eq(v.body().hands.in_hand, -1)
-	assert_eq(v.body().hands.slung, 0, "the rifle slung")
-	assert_not_null(d[&"slung"])
-	assert_eq(_shown(v), 1, "only the rifle shows")
+	assert_eq(v.body().hands.on_back, 0, "the rifle on the back")
+	assert_not_null(d[&"on_back"])
+	assert_eq(_shown(v), 2, "the rifle on the back and the pistol in the holster")
 
 
 func test_a_holstered_figure_that_fires_or_switches_in_its_events_stays_holstered() -> void:
 	# SHOT events can't come holstered, but a late event (a shot the tick before the holster) can: the press plays on a
-	# holstered figure without moving the rifle off the sling or the hand to the replica.
+	# holstered figure without moving the rifle off the back or the hand to the replica.
 	var c := _character()
 	c.armament.holstered = true
 	var v := _view(FigureMix.HUMAN, c)
@@ -172,11 +172,11 @@ func test_a_holstered_figure_that_fires_or_switches_in_its_events_stays_holstere
 	v.on_shot()
 	var d: Dictionary = await _pose(v, c, 20)
 	assert_eq(v.body().hands.in_hand, -1)
-	assert_eq(v.body().hands.slung, 0)
-	assert_true(_finite(d[&"slung"] as Transform3D))
+	assert_eq(v.body().hands.on_back, 0)
+	assert_true(_finite(d[&"on_back"] as Transform3D))
 
 
-func test_a_pistol_only_kit_aims_holsters_and_hangs_with_nothing_slung() -> void:
+func test_a_pistol_only_kit_aims_holsters_and_hangs_with_nothing_on_the_back() -> void:
 	var kits: Array = [[&"pistol"], [&"cyber"], [&"pistol", &"cyber"]]
 	for kit: Array in kits:
 		var ids: Array[StringName] = []
@@ -186,12 +186,13 @@ func test_a_pistol_only_kit_aims_holsters_and_hangs_with_nothing_slung() -> void
 		var d: Dictionary = await _pose(v, c, 30)
 		assert_eq(v.body().hands.in_hand, 0, "%s: the pistol in the hand" % [ids])
 		assert_lt(_grip_gap(v, d), 0.03, "%s: in the fist" % [ids])
-		# Holstered: nothing in the hand, nothing slung (no rifle), nothing shown.
+		# Holstered: nothing in the hand, nothing on the back (no rifle), nothing shown.
 		c.armament.holstered = true
 		await _pose(v, c, 30)
 		assert_eq(v.body().hands.in_hand, -1)
-		assert_eq(v.body().hands.slung, -1, "%s: no rifle to sling" % [ids])
-		assert_eq(_shown(v), 0, "%s: nothing drawn holstered" % [ids])
+		assert_eq(v.body().hands.on_back, -1, "%s: no rifle for the back" % [ids])
+		assert_eq(v.body().hands.in_holster, 0, "%s: the first pistol in the holster" % [ids])
+		assert_eq(_shown(v), 1, "%s: only it drawn" % [ids])
 		# Drawn again out of the holster, then the hit call.
 		c.armament.holstered = false
 		c.armament.draw_total = 0.8
@@ -218,13 +219,13 @@ func test_a_kit_without_a_rifle_or_a_rifle_alone_works_in_every_state() -> void:
 	# A switch to a slot that does not exist is not a draw; an active slot past the kit never crashes the pose.
 	c.armament.holstered = true
 	d = await _pose(v, c, 30)
-	assert_eq(v.body().hands.slung, 0)
+	assert_eq(v.body().hands.on_back, 0)
 	assert_eq(v.body().hands.in_hand, -1)
 	c.armament.holstered = false
 	c.armament.draw_total = 1.0
 	c.armament.draw_left = 1.0
 	d = await _pose(v, c, 5)
-	assert_eq(v.body().hands.slung, 0, "still slung for the first half of the draw from the holster")
+	assert_eq(v.body().hands.on_back, 0, "still on the back for the first half of the draw from the holster")
 
 
 func test_parts_and_paint_read_through_the_figure_as_without_a_body() -> void:
@@ -273,7 +274,8 @@ func test_set_body_swaps_leave_the_replicas_attached_once_and_no_orphans() -> vo
 		await _pose(v, c, 3)
 		assert_eq(first.get_parent(), v.body().hands, "round %d: handed to the new body" % round_i)
 		assert_true(first.visible, "the rifle shown in the new body")
-		assert_eq(_shown(v), 1)
+		assert_eq(_shown(v), 1 if kind == FigureMix.ROBOT else 2,
+				"round %d: rifle in hand, pistol holstered (human)" % round_i)
 	v.set_body(null, FigureMix.HUMAN, config.lod_high)
 	await wait_process_frames(3)
 	assert_eq(first.get_parent(), v)
@@ -323,7 +325,7 @@ func test_without_a_body_shots_are_ignored_and_no_replica_shows() -> void:
 		assert_false(r.visible, "put away with the body")
 
 
-func test_a_figure_hidden_while_it_holsters_has_the_rifle_on_the_sling_when_shown_again() -> void:
+func test_a_figure_hidden_while_it_holsters_has_the_rifle_on_the_back_when_shown_again() -> void:
 	var c := _character()
 	var v := _view(FigureMix.HUMAN, c)
 	await _pose(v, c, 20)
@@ -335,10 +337,10 @@ func test_a_figure_hidden_while_it_holsters_has_the_rifle_on_the_sling_when_show
 		v.animate(c, 1.0, FRAME, NEAR)
 	v.visible = true
 	var d: Dictionary = await _pose(v, c, 30)
-	assert_eq(v.body().hands.slung, 0, "slung when shown again")
+	assert_eq(v.body().hands.on_back, 0, "on the back when shown again")
 	assert_eq(v.body().hands.in_hand, -1)
 	var chest: Transform3D = d["Chest"]
-	var on_chest := chest.affine_inverse() * (d[&"slung"] as Transform3D)
+	var on_chest := chest.affine_inverse() * (d[&"on_back"] as Transform3D)
 	assert_lt(on_chest.origin.length(), 0.6, "on the chest, not left at the hand's last place")
 	assert_true(v.body().hands.replica(0).visible)
 
@@ -384,7 +386,7 @@ func test_the_hit_call_walk_off_and_a_round_reset_put_the_rifle_back_in_the_hand
 		assert_eq(v.body().hands.in_hand, 0, "kind %d: the rifle in the hands again" % kind)
 		assert_true(v.body().hands.replica(0).visible)
 		assert_lt(_grip_gap(v, d), 0.03, "kind %d: in the fist" % kind)
-		assert_eq(_shown(v), 1)
+		assert_eq(_shown(v), 1 if kind == FigureMix.ROBOT else 2)
 
 
 func test_a_reset_while_the_figure_was_holstered_and_dead_brings_the_rifle_to_the_hands() -> void:
@@ -506,3 +508,56 @@ func test_a_shot_beyond_the_far_line_with_far_stride_0_does_not_play_when_the_fi
 	v.update(c, 1.0)
 	v.animate(c, 1.0, FRAME, NEAR)
 	assert_false(tree.get(FigureGraph.P_FIRE_ACTIVE), "no stale press when it comes near")
+
+
+func test_two_of_a_class_show_only_the_first_stowed_and_the_one_in_hand() -> void:
+	var c := _character(_loadout([&"aeg", &"pistol", &"cyber"]))
+	var v := _view(FigureMix.HUMAN, c)
+	var hands := v.body().hands
+	c.armament.active = 2
+	await _pose(v, c, 30)
+	assert_eq(hands.in_hand, 2)
+	assert_eq(hands.in_holster, 1, "the first pistol in the holster, not the one in the hand")
+	assert_eq(hands.on_back, 0)
+	c.armament.holstered = true
+	await _pose(v, c, 30)
+	assert_eq(hands.in_holster, 1)
+	assert_eq(_shown(v), 2, "the second pistol is not drawn anywhere")
+
+
+func test_a_draw_from_the_holster_keeps_the_pistol_in_the_holster_until_the_swap() -> void:
+	var c := _character(_loadout([&"aeg", &"pistol"]))
+	var v := _view(FigureMix.HUMAN, c)
+	var hands := v.body().hands
+	c.armament.holstered = true
+	c.armament.active = 1
+	await _pose(v, c, 30)
+	c.armament.holstered = false
+	c.armament.draw_total = 0.8
+	c.armament.draw_left = 0.8
+	await _pose(v, c, 1)
+	assert_eq(hands.in_hand, -1, "start of the draw")
+	assert_eq(hands.in_holster, 1)
+	c.armament.draw_left = 0.0
+	await _pose(v, c, 5)
+	assert_eq(hands.in_hand, 1)
+	assert_eq(hands.in_holster, -1)
+	assert_eq(hands.on_back, 0)
+	assert_false(hands.replica(1).get_parent() == null)
+
+
+func test_a_fading_figure_and_a_body_swap_show_nothing_then_restore_the_holster() -> void:
+	var c := _character()
+	var v := _view(FigureMix.HUMAN, c)
+	await _pose(v, c, 20)
+	c.status = Character.Status.LEAVING
+	c.status_time = hits.vanish_time * 0.5
+	await _pose(v, c, 5)
+	assert_eq(_shown(v), 0, "fading: nothing stowed left behind")
+	c.status = Character.Status.ALIVE
+	c.status_time = 0.0
+	v.set_body(models, FigureMix.HUMAN, config.lod_low)
+	_watch(v)
+	await _pose(v, c, 5)
+	assert_eq(v.body().hands.in_holster, 1)
+	assert_true(v.body().hands.replica(1).visible, "the low body holsters the pistol too")

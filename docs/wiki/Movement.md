@@ -46,6 +46,9 @@ A fresh trigger pull, aim, reload or replica key (1, 2 or the mouse wheel) draws
 takes longer than a normal switch, so holster for a long run, not in a fight. Bots holster too, on long calm runs in
 their own half, and draw as soon as there's a threat.
 
+Other players and bots wear whatever isn't in their hands: a pistol sits in the holster on the right hip and a rifle
+rests on the backpack. That's true while holstered, and also for the replica they aren't using.
+
 ## Switching replicas
 
 You carry two replicas, set in your [Loadout](Loadout). Press **1** or **2**, or roll the mouse wheel, to switch. The

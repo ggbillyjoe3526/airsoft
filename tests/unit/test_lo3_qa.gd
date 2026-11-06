@@ -125,8 +125,10 @@ func test_a_figure_puts_its_replica_away_while_fading_and_shows_it_again_after_a
 	c.status = Character.Status.ALIVE
 	c.armament.active = 1
 	_pose(f, c)
+	assert_eq(f.body().hands.in_hand, 1, "the pistol out after the reset")
 	assert_true(f._replicas[1].visible)
-	assert_false(f._replicas[0].visible)
+	assert_eq(f.body().hands.on_back, 0, "the rifle worn on the back again (HS1)")
+	assert_true(f._replicas[0].visible)
 
 
 ## `f` placed and posed from `c`, as a frame draws it.

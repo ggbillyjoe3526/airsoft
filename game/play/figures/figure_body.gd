@@ -7,11 +7,12 @@ extends Node3D
 ## mesh, shadows only) casts it at every range; the Team* materials wear the team's shared paint. Meshes and bones are
 ## found by name, never by index (the two files order their bones differently). Its legs play the kind's shared graph
 ## (FigureGraph) in an AnimationTree of its own, advanced by hand from a FigurePose (`animate`), then FigureBend lowers
-## and leans it and draws the hit flinch (`set_flinch`); it fades through GeometryInstance3D.transparency, so no material
-## is copied. Its upper body (FI3) plays over the legs in the same tree (the aim by pitch, the holster, a switch, a
-## trigger press per shot, a reload: FI4), FigureBend leans the aim the rest of the way, and FigureHands puts the
-## replicas in the hand, on the sling or hanging from the hand, and a reload's magazines on the left hand. A bomb thrown
-## (GT1): FigureBend's FigureThrow swings the arms, FigureHands holds the bomb in the right hand until it leaves.
+## and leans it and draws the hit flinch (`set_flinch`); it fades through GeometryInstance3D.transparency, so no
+## material is copied. Its upper body (FI3) plays over the legs in the same tree (the aim by pitch, the holster, a
+## switch, a trigger press per shot, a reload: FI4), FigureBend leans the aim the rest of the way, and FigureHands puts
+## the replicas in the hand, on the back, in the holster or hanging from the hand, and a reload's magazines on the left
+## hand. A bomb thrown (GT1): FigureBend's FigureThrow swings the arms, FigureHands holds the bomb in the right hand
+## until it leaves.
 
 ## A gate of the upper body (FigureGraph's Transitions) as last asked: not yet, shut (a stand-in plays), open.
 const GATE_UNSET := -1
@@ -202,7 +203,7 @@ func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = fals
 	bend.throw_share = pose.throw_share
 	bend.throw_held = pose.bomb_held
 	bend.throw_from_hand = pose.throw_from_hand
-	hands.show_hands(pose.in_hand, pose.slung, pose.hanging)
+	hands.show_hands(pose.in_hand, pose.on_back, pose.hanging, pose.in_holster)
 	hands.show_bomb(pose.bomb)
 	hands.feet = pose.feet
 	hands.velocity = pose.velocity

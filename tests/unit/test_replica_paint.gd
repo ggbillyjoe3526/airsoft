@@ -163,13 +163,18 @@ func test_a_figure_shows_the_replica_it_has_out() -> void:
 	f.set_body(models, FigureMix.HUMAN, models.config.lod_high)
 	f.update(c, 1.0)
 	f.animate(c, 1.0, 0.0, Vector3.ZERO)
+	var hands := f.body().hands
+	assert_eq(hands.in_hand, 0, "the rifle out")
 	assert_true(f._replicas[0].visible)
-	assert_false(f._replicas[1].visible)
+	assert_eq(hands.in_holster, 1, "the pistol worn in the holster (HS1)")
+	assert_true(f._replicas[1].visible)
 	c.armament.active = 1
 	f.update(c, 1.0)
 	f.animate(c, 1.0, 0.0, Vector3.ZERO)
-	assert_false(f._replicas[0].visible)
+	assert_eq(hands.in_hand, 1, "the pistol out")
 	assert_true(f._replicas[1].visible)
+	assert_eq(hands.on_back, 0, "the rifle worn on the back (HS1)")
+	assert_true(f._replicas[0].visible)
 
 
 func test_replicas_in_one_paint_share_their_materials() -> void:
