@@ -1417,6 +1417,8 @@ as a round starts, then watch a few Depot matches:
   under it. Up close, do the fingers look wrapped round the grip?
 - [ ] **Cyber Pistol size (CZ1):** in your hand, in Customise and on a bot it is as big as the GBB Pistol, its sights
   showing.
+- [ ] **Your arms (BL4):** with each replica, at the hip and aimed, only your gloved hand and a little wrist show; the
+  fingers sit on the grip with nothing passing through it, and on the rifles the other hand holds the handguard.
 - [ ] **Dry fire (AU8):** empty each replica and pull the trigger: every one gives the gas pistol's click. The Range
   sounds like The Street by day.
 
