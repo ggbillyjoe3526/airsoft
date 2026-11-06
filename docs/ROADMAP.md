@@ -283,7 +283,7 @@ After 0.1 the game grows through themed updates, each a mini expansion (owner, 2
 |---|---|---|
 | AEGs | Electric full-auto with a motor whirr; mid- or hi-cap mags | In the game |
 | GBB pistols | Blowback slide; the slide locks back on empty; gas mags (the gas pistol became the GBB Pistol, RM7) | In the game |
-| Spring sniper rifles | One shot per cocking; high velocity and long reach (the Sniper Rifle, SN1) | 0.1 Dev 2, dev |
+| Spring sniper rifles | One shot per cocking; high velocity and long reach (the Sniper Rifle, SN1) | In the game |
 | DMRs | Semi-auto only; high velocity; a minimum engagement distance, as at real sites | Maybe |
 | SMGs | Compact and quick to handle; high rate; short range | Maybe, after the sniper |
 | Shotguns | Several BBs per shell; pump every shot; shells loaded one by one | Maybe, after the sniper |

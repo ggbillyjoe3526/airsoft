@@ -118,11 +118,12 @@ func test_each_tab_offers_the_slot_as_it_comes_then_each_part_that_fits() -> voi
 	var view := _page(0).customise()
 	view.show_tab(OPTIC)
 	var page := view.part_page(OPTIC)
-	assert_eq(page.card_count(), 3, "iron sights, the red dot and the scope")
+	assert_eq(page.card_count(), 4, "iron sights, the red dot, the scope and the Variable Scope (public 2026-11-05)")
 	assert_true(page.card_text(0).begins_with("Zoom 1.2×"))
 	assert_true(page.card_text(0).contains("Nothing on the rail."))
 	assert_true(page.card_text(1).begins_with("Zoom 1.25× · aim in 0.15 s"))
 	assert_true(page.card_text(2).begins_with("Zoom 2× · aim in 0.24 s"))
+	assert_true(page.card_text(3).begins_with("Zoom 6× · aim in 0.28 s"), "the Variable Scope names its top zoom")
 	assert_true(page.card(0).is_picked(), "nothing fitted: as it comes is picked")
 	assert_null(page.card_picture(0).texture, "the slot as it comes has words, not a picture")
 	assert_not_null(page.card_picture(1).texture)
@@ -374,7 +375,7 @@ func test_the_cards_pictures_share_one_scale_within_a_tab_and_only_this_tab_is_k
 	var page := _page(0)
 	var pictures := page.pictures()
 	page.customise().show_tab(OPTIC)
-	assert_eq(pictures.part_count(), 2, "the red dot and the scope")
+	assert_eq(pictures.part_count(), 3, "the red dot and the two scopes")
 	var optic := page.customise().part_page(OPTIC)
 	var dot := optic.card_picture(1).custom_minimum_size
 	var scope := optic.card_picture(2).custom_minimum_size

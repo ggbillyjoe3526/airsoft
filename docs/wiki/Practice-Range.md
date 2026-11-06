@@ -1,7 +1,7 @@
 # Practice Range
 
 The practice range is where you learn how BBs fly: no bots, no score and no XP. It stands in its own lot beside
-[Depot](Maps#depot)'s yard, under the same sun and sky, with the sound of [The Street](Maps#the-street) by day
+[Depot](Maps#depot)'s yard, under the same sun and sky, with the sound of a quiet street by day
 around it. Pick **Range** on the Match screen (its only mode is Practice) and press **PRACTICE**. You can also
 practise on a field: see [Practice on a field](#practice-on-a-field).
 
@@ -31,8 +31,8 @@ Press **Esc** for the range's pause menu and switch **Timed challenge** on; the 
 2. A bar shows your time and hits while you clear the targets.
 3. **TIME!** shows your hits, shots and misses, and **NEW BEST** when you beat your best time.
 
-Each map keeps its own best, so the range's and Depot's are separate. A run with a Dev setting on says **NOT KEPT**
-instead.
+Each map keeps its own best, so the range's and Depot's are separate. A run with a Dev setting on, or on a map
+still in development, says **NOT KEPT** instead.
 
 ## Practice on a field
 

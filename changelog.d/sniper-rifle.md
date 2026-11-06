@@ -1,4 +1,4 @@
-### Sniper Rifle (dev content)
+### Sniper Rifle
 - A new spring-powered Sniper Rifle, like the AEG Rifle with a longer barrel.
 - Single shot: you cock it after every shot, and hear the handle drawn back and snapped home.
 - It comes with the 2x Scope fitted. Take it off or swap it in Customise.
