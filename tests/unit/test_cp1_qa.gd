@@ -240,7 +240,7 @@ func test_the_selector_pose_follows_a_mode_change_mid_burst_and_a_slot_switch() 
 	_frame(view, c)
 	var auto: Transform3D = await _selector_pose(held)
 	assert_ne(auto.origin, semi.origin)
-	assert_almost_eq(auto.origin.y, 0.0243, 1e-3)
+	assert_almost_eq(auto.origin.y, 0.0216, 1e-3, "auto: the track's end at the CZ1 size")
 
 
 func test_a_mode_outside_the_known_ones_does_not_break_the_pose() -> void:

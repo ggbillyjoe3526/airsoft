@@ -1,5 +1,10 @@
-Task: AU8 · head 10ca090 · Verdict: Pass
-Run: judged by reading (one audio event path and the range's ambience choice; no GPU in the container) · budget: no baseline yet, judged against targets and origin/main
-Metrics: install -266 KB (15 dry-click WAVs removed, the pistol's 5 renamed); the range's bed is street_day (1.43 MB QOA) instead of yard (107 KB), +1.3 MB resident on the range only, an asset already shipped and loaded on The Street.
-Regressions (> 10 % worse): none. The DRY_FIRE branch plays a constant StringName: one Dictionary lookup and the profile lookup gone, nothing allocated. Setup loads one dry cue instead of one a profile.
-Blocking findings: none. Voices unchanged (one mechanism cue a dry fire; one bed and The Street's calls in place of the yard's). Beds are SimAudio children, freed with it; no new nodes, timers or tweens.
+# Performance · CZ1 · head f1685e8 · Pass
+
+No runtime code changed (a Blender build script, two rebuilt .glb files, tests and docs), so no bot match was run.
+
+- In-hands triangles 37,824 (glTF count) of the 40,000 replica limit, about 94.5 % (the owner's ~95 % rule); main had
+  31,326. Figure copy 240 and the torch part 3,066, both unchanged. Meshes 6, materials 5, no textures.
+- replicas/cyber.glb 954,708 B against 870,868 B on main (+9.6 %); replicaParts/cyber.glb unchanged in size.
+- Regressions over 10 %: triangles +20.7 %, intended and under budget.
+- Blocking: none. No per-frame allocations, unfreed nodes or new materials or particles.
+- Unexplained: none.
