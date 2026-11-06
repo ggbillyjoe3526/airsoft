@@ -185,9 +185,10 @@ func test_a_match_with_aeg_gbb_and_cyber_loads_each_profile_once_and_all_sound()
 	add_child_autofree(audio)
 	audio.setup(SoundConfig.new(), profiles, BodyConfig.new(), null, null)
 	for p in profiles:
-		for table: Dictionary in [audio._shot, audio._dry, audio._mag_out, audio._mag_in]:
+		for table: Dictionary in [audio._shot, audio._mag_out, audio._mag_in]:
 			assert_true(table.has(p), "%s has its cue" % p)
 			assert_false((audio._streams[table[p]] as Array).is_empty(), "%s cue has sounds" % p)
+	assert_false((audio._streams[SimAudio.DRY_CUE] as Array).is_empty(), "every replica's dry click has sounds")
 	assert_eq(audio._power[&"cyber"], &"")
 	assert_ne(audio._power[&"gas"], &"")
 	assert_ne(audio._power[&"electric"], &"")
@@ -239,7 +240,7 @@ func test_the_selector_pose_follows_a_mode_change_mid_burst_and_a_slot_switch() 
 	_frame(view, c)
 	var auto: Transform3D = await _selector_pose(held)
 	assert_ne(auto.origin, semi.origin)
-	assert_almost_eq(auto.origin.y, 0.0243, 1e-3)
+	assert_almost_eq(auto.origin.y, 0.0216, 1e-3, "auto: the track's end at the CZ1 size")
 
 
 func test_a_mode_outside_the_known_ones_does_not_break_the_pose() -> void:

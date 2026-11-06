@@ -37,8 +37,11 @@ each starts (`onsets`).
 (SoundConfig.bounce_hold); `smoke_pop` is his long spray alone from its burst (the can pitched down as a pop is gone);
 `flash_bang` his balloon pop clean, SoundConfig.bang_gain making up most of the level the soft clip gave.
 
-**Placeholders** (AU3, 2026-11-03; AU5; AU6): until the owner records them, 15 cues are his recordings reused,
-re-pitched, filtered or sliced (the Sniper Rifle's and the Cyber Pistol's dry fire, BBs on concrete, soil and leaves,
+**Every replica fired empty** plays one cue, `dryFire`: the gas pistol's recorded dry click as it is, for today's
+replicas and any added later (owner, 2026-11-05: final, not a stand-in).
+
+**Placeholders** (AU3, 2026-11-03; AU5; AU6): until the owner records them, 13 cues are his recordings reused,
+re-pitched, filtered or sliced (BBs on concrete, soil and leaves,
 the steel skip, the steps on wood and soil, and the jumps onto wood, gravel, leaves and metal). The script labels each
 one with what to record; `python3 tools/cut_recordings.py <raw folder> --placeholders` prints them, and those still
 synthesised, as tables. The owner's plain status of every sound is in the shared project files, `audio/sound-status.md`

@@ -399,7 +399,9 @@ def build(folder):
     # The last shot: the slide locking back on the empty magazine.
     put("slideLock_gas", variants(pick(folder, [("Pistol magazine empty lock back .wav", None)], 0.3), 3), -24.0)
     dry = pick(folder, [("Pistol-dry fire.wav", None)], 0.25, 0.3)
-    put("dryFire_gas", variants(dry, 5), -36.9)
+    # Every replica's trigger pulled empty, today's and later ones: this click as it is (owner, 2026-11-05: final,
+    # not a stand-in). SimAudio plays the one cue for them all.
+    put("dryFire", variants(dry, 5), -36.9)
     # Its magazine, out and in: every take of each.
     mag_out = pick(folder, [("pistol magazine reload.wav", [0]),
                             ("Pistol slider locked back reload magazine.wav", [0]), ("Magazine out.wav", None)], 0.40)
@@ -415,8 +417,6 @@ def build(folder):
     put("power_electric", [onset_slice(m, 0.16, 40) for m in variants(motor, 5)], -26.3)
     cracks = [high_pass(onset_slice(s, 0.045, 20), 300.0) for s in shots]
     put("shot_electric", variants(cracks, 5, 0.9), -18.5)
-    motor3 = pick(folder, [("motor_whir3.wav", None)], 0.9, 0.05)
-    put("dryFire_electric", [onset_slice(m, 0.09, 25) for m in variants(motor3, 5)], -28.2)
     # The electric and spring replicas' plastic magazines: a TV remote's battery cover clicked off (the quieter takes)
     # and on (owner's foley, 2026-11-04), lower for the rifles' bigger magazines.
     cover_off = pick(folder, [("remote_cover_clipping.wav", [0, 2, 4, 6])], 0.25, 0.3)
@@ -426,7 +426,7 @@ def build(folder):
 
     # Sniper Rifle (spring): his recorded shots (third batch, 2026-11-04), each from where it bursts out, its spring's
     # quieter run-up before that as the power part (it plays with the shot, so the shot answers the trigger at once);
-    # its magazine lower; the pistol's dry click lower; his bolt pulled back and pushed home as its cocking, each knock
+    # its magazine lower; his bolt pulled back and pushed home as its cocking, each knock
     # moved to where the Fire clip has the handle. (The AU4 mix of the pistol's shot, a knock, a thud and a crack that
     # stood in until now is in git history, 7f1586e.)
     fire = Source.get(folder, "sniper_fire.wav").a
@@ -435,22 +435,18 @@ def build(folder):
     put("shot_spring", variants(from_onsets(fire, bursts, 0.45), 5), -16.8)
     run_ups = [shape(fire[int((t - 0.165) * RATE):int((t - 0.005) * RATE)].copy(), 0.2) for t in bursts]
     put("power_spring", [fixed(r, 0.16) for r in variants(run_ups, 5)], -27.3)
-    put("dryFire_spring", variants(dry, 5, 0.88), -37.2,
-        "a spring rifle's trigger, uncocked")
     put("magOut_spring", variants(cover_off, 5, 0.8), -30.6)
     put("magIn_spring", variants(cover_on, 5, 0.8), -26.9)
     put("boltCycle", [bolt(s) for s in pick(folder, [("sniper_bolt.wav", None)], 1.0, 0.1)[:3]], -14.0)
 
     # Cyber Pistol (electric pistol): a short whir of his electric toothbrush a little under its own pitch (owner,
     # 2026-11-04: "i prefer the cyber pistol with the toothbrush", over the motor's) under a small crack, 3 dB up, with
-    # an electric motor's whine under it ("a slight hum of an electric motor", not "too high pitched"); the pistol's
-    # dry click and magazines a little higher.
+    # an electric motor's whine under it ("a slight hum of an electric motor", not "too high pitched"); its
+    # magazines a little higher.
     brush = pick(folder, [("electric_toothbrush.wav", None)], 0.9, 0.05)
     cyber = [mix(under(1.4 * onset_slice(m, 0.09, 25), ev_hum(0.09, v), 9.0), 0.4 * resample(c, 1.15))
              for v, (m, c) in enumerate(zip(variants(brush, 5, 0.95), variants(cracks, 5)))]
     put("shot_cyber", cyber, -16.9)
-    put("dryFire_cyber", variants(dry, 5, 1.1), -30.3,
-        "an electric pistol fired empty")
     put("magOut_cyber", variants(cover_off, 5, 1.0), -30.8)
     put("magIn_cyber", variants(cover_on, 5, 1.0), -27.1)
 

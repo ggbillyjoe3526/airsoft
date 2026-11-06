@@ -1327,6 +1327,36 @@ Every BB in flight is now a proper Blender model, round from every side instead 
 - [ ] **Glowing BBs:** on Woodland at night, glowing BBs are round green balls with their streak, as before.
 - [ ] **Frame rate:** a full-auto magazine dump on Low keeps its frame rate (F3 box).
 
+## The barrel models (BA1)
+
+The AEG Rifle's two barrels are proper models now, built from the rifle's own barrel (no photos needed).
+
+- [ ] **Customise, Barrel tab:** the cards show each barrel turned at an angle, the hop-up end nearest: the Tight-Bore a
+  steel inner barrel in its hop-up unit (red bucking at the back, the toothed hop dial on the side), the Long Barrel a
+  brass inner barrel, longer, through its barrel extension. Both to one scale, so the long one is the longer. The
+  Armory's barrel pictures look the same.
+- [ ] **Fitted:** with the tight bore the rifle looks as it comes, but for a polished ring inside the flash hider; with
+  the long barrel the knurled, fluted extension sits between the front sight and the flash hider, which moves out
+  10 cm. Fit a silencer on the long barrel: it starts at the extension's end. Nothing pokes through the rifle.
+- [ ] **Paints:** the extension takes each paint like the rifle's barrel; the inner barrels keep their steel and brass.
+- [ ] **Up close:** on each card the bucking's centre is a dark hole and the hop dial's teeth read (not blown white);
+  with the long barrel fitted there's no line or flicker where the extension's flats meet its shoulder, and the brass
+  crown in the flash hider looks round. The first open of the Barrel tab doesn't hitch.
+
+## The magazine models (MAG1)
+
+The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built from its replica's standard magazine
+(2026-11-05).
+
+- [ ] **Hi-Cap (AEG Rifle):** in Customise, the magazine is about a third longer than the standard one, curving on
+  down with the same ribs, with a knurled winding wheel showing under its base plate.
+- [ ] **Low-Cap (AEG Rifle):** a short magazine, about two thirds of the standard one's length below the rifle.
+- [ ] **Extended (GBB Pistol):** the magazine sticks out about 3.5 cm below the grip, with a row of holes down its back
+  and its base pad in the frame's colour.
+- [ ] **Reload:** with each fitted, the reload drops that magazine out and brings it back in; nothing pokes through
+  the hands, the grip or the rifle.
+- [ ] **Bots:** a bot with the Support or Pointman kit carries the longer magazine on its replica.
+
 ## The smoke and flash bomb models (BL9)
 
 - [ ] **In hand:** take each bomb in hand (mouse wheel). The smoke is a grey canister with a green stripe, a black

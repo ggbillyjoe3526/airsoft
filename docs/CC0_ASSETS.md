@@ -76,6 +76,9 @@ The browser game's loader settings for every model (scale, facing, budgets) are 
 
 - **The rigged figures.** `human.glb` and `robot.glb` share a 65-bone skeleton, each with LOD1 and LOD2 meshes and 32
   clips. A new figure uses the same skeleton and clip names (`tools/blender/bot-figure/README.md`).
+- **Parts spliced in.** The human's knee and elbow pads (`Kit_Pads`, 3,000 / 1,000 / 300 triangles at LOD0, LOD1,
+  LOD2, part of the figure's budget) are built apart and spliced into `human.glb` by node name
+  (`tools/blender/figures/README.md`); a rebuilt body keeps their node names and reruns `pads.py` to refit them.
 - **Scale and facing.** A figure stands as tall as the hit volume (1.73 m, feet to the top of the head; the hitbox
   doesn't change), measured on `body` and the legs when it has them, so a raised hand doesn't shrink it. Its feet sit
   on the ground. glTF models face +Z and the figures face -Z, so a model is turned a half turn unless it already faces
@@ -127,7 +130,9 @@ A replica's file is its model in the hands, on the menus' pictures and on the fi
   `magazine_hiCap`, `muzzle_silencer` …), in the replica's space where it fits; a child `<name>_Figure` is ignored. Two
   child empties are read (RM8): an optic's `<name>_SightLine` on its sight line (aimed, the replica is raised so it
   runs through the eye) and a torch's `<name>_UnderLaser`, where the torch moves while the laser is fitted too (both
-  clip to the same rail).
+  clip to the same rail). What a part puts inside the replica (a barrel's inner barrel and hop-up unit, BA1) is
+  `<name>_Inside` in `replicaParts/inside/<id>.glb`, placed as its part: only the part's own picture draws it, so a fit
+  never loads it. It counts toward the part's triangle budget.
 - **Materials,** by name: `CyberSlab`, `CyberFrame`, `CyberLine`, `CyberCore`, `CyberMetal`, or a replica material's own
   name (`polymer`, `furniture`, `detail`, `metal`, `rubber`, `stipple`, `accent`). Plain colours: the game draws in its
   own materials, so Realistic colours, the glow and the High finish apply. No textures needed.

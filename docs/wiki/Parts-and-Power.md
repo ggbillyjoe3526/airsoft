@@ -56,6 +56,8 @@ magazine holds and **Carried** adds magazines to the replica's own (you always c
 
 <!-- wiki:parts magazines -->
 
+- **Looks:** each is its replica's own magazine at another length. The hi-cap is a third longer, with a winding wheel
+  under its base; the low-cap is short; the pistol's extended magazine sticks out below the grip, holes down its back.
 - **Rattles:** the loose BBs in a hi-cap rattle as you move, so bots close by hear you even walking.
 - The hi-cap carries as many BBs in all in fewer, rattling changes; the low-cap carries fewer BBs in all for a quick
   change and draw. The pistol's extended magazine holds half as many again, for a slower draw.
@@ -65,7 +67,9 @@ magazine holds and **Carried** adds magazines to the replica's own (you always c
 <!-- wiki:parts barrels -->
 
 The tight bore is the accuracy pick: tighter groups at no handling cost. The long barrel is the reach pick: the most
-energy and a little tighter, but front-heavy. Both count toward the site limit.
+energy and a little tighter, but front-heavy. Both count toward the site limit. Each goes inside the rifle: the tight
+bore's polished crown just shows in the flash hider, and the long barrel adds a 10 cm barrel extension that carries
+the flash hider or silencer out to its end.
 
 ## Muzzle parts
 

@@ -17,6 +17,8 @@
   replaces `Body` (and `Kit_Pads`) in `human.glb`. The build reads `human.glb` itself, so build into a copy and splice
   afterwards. The heads (`Head_*`), the carrier and gear (`Kit`, `Kit_Pack`, `Kit_Radio`) and the knee pads
   (`Kit_Pads`) are separate nodes, each owned by its own build.
+- The human's knee and elbow pads (`Kit_Pads` and its two LODs, BL13) are a part built by
+  `tools/blender/figures/pads.py` and spliced into `human.glb`; they ride the shins and forearms rigidly.
 - The human's gear (`Kit*`, `Kit_Pack*`, `Kit_Radio*`, BL12) is built by `tools/blender/figure-gear/gear.py` and spliced
   into `human.glb` by node name (`splice.py`), leaving the body, heads and clips as they are; rerun it after any other
   rebuild of the file.

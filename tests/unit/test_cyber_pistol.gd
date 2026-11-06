@@ -75,7 +75,8 @@ func test_in_hand_it_is_drawn_from_its_model_with_its_sights_marked() -> void:
 	var held := view._held[1]
 	assert_eq(held.id, &"cyber")
 	assert_not_null(held.muzzle)
-	assert_almost_eq(held.rear_sight, Vector3(0.0, 0.04, 0.0768), Vector3.ONE * 1e-4, "the rear notch, as marked")
+	assert_almost_eq(held.rear_sight, Vector3(0.0, 0.03024, 0.06835), Vector3.ONE * 1e-4,
+			"the rear notch, as marked (at the GBB's size since CZ1)")
 	assert_null(held.slide, "electric: no slide lock")
 	assert_not_null(held.selector)
 	c.armament.active = 1
@@ -110,8 +111,8 @@ func test_its_selector_shows_the_fire_mode_even_while_the_fire_clip_plays() -> v
 	_frame(view, c)
 	view.on_shot()
 	var auto: Transform3D = await _drawn_selector(held)
-	assert_almost_eq(semi.origin.y, 0.0163, 1e-3, "semi: half way along the clip")
-	assert_almost_eq(auto.origin.y, 0.0243, 1e-3, "auto: the clip's end, held through the Fire clip")
+	assert_almost_eq(semi.origin.y, 0.0145, 1e-3, "semi: half way along the clip (CZ1 size)")
+	assert_almost_eq(auto.origin.y, 0.0216, 1e-3, "auto: the clip's end, held through the Fire clip")
 
 
 func test_the_aegs_selector_turns_with_its_fire_mode_too() -> void:
@@ -143,7 +144,7 @@ func test_it_sounds_as_its_own_with_no_power_part() -> void:
 	audio.setup(SoundConfig.new(), [&"cyber", &"electric"] as Array[StringName], BodyConfig.new(), null, null)
 	assert_eq(audio._power[&"cyber"], &"", "no power part apart")
 	assert_ne(audio._power[&"electric"], &"")
-	for cue: StringName in [audio._shot[&"cyber"], audio._dry[&"cyber"], audio._mag_out[&"cyber"],
+	for cue: StringName in [audio._shot[&"cyber"], SimAudio.DRY_CUE, audio._mag_out[&"cyber"],
 			audio._mag_in[&"cyber"]]:
 		assert_false((audio._streams[cue] as Array).is_empty(), "%s has its sounds" % cue)
 	var state := GameState.new(1)
