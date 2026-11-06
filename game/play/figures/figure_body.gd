@@ -212,7 +212,10 @@ func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = fals
 	var throwing := pose.throw_share >= 0.0 or pose.bomb_held
 	var holding := gripped and not pose.switching and not throwing
 	var held := hands.held(pose.in_hand)
-	var support := aiming if holding and not pose.reloading and held != null else 0.0
+	# A pistol's left hand is lowered from the aim, not on the replica: it goes with the aim (none in the high ready).
+	var lowered := hands.site_class(pose.in_hand) == &"pistol"
+	var reach := aiming * (1.0 - pose.raise) if lowered else aiming
+	var support := reach if holding and not pose.reloading and held != null else 0.0
 	_support = _eased(_support, support, delta, pose.snapped)
 	_grasp = _eased(_grasp, aiming if holding else 0.0, delta, pose.snapped)
 	bend.held = held if seen else null

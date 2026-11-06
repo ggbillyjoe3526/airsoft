@@ -64,7 +64,8 @@ On attempt 4's labelled picture (`playtest/hg1/bot-hands-final.jpg`) the owner w
     trigger, thumb along the grip's left side.
   - **The left hand** holds a rifle under its handguard: fingers up its right side, thumb along its left. On the
     Sniper Rifle it is the open-palm rest the owner approved for first person. A pistol is held in one hand: the left
-    takes the first-person pistol hold's lowered left arm, in place of TP3's second fist.
+    takes the first-person pistol hold's lowered left arm, in place of TP3's second fist. That left hand goes with the aim alone: in the high
+    ready at a wall it lets go (it isn't on the replica, so the raised pistol would carry it out of the arm's reach).
   - **Behind a fitted grip** (the rifle model's `GripMount`), the left hand moves straight back until its knuckles are
     `support_behind_grip` (4.5 cm) behind the grip's back end (FigureView.support_mark), and the marks its fingers aim
     at move with it.
