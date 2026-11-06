@@ -65,40 +65,67 @@ func _init(skeleton: Skeleton3D, config: FigureConfig) -> void:
 	_fingers_l = _hand(skeleton, _arm_l, _bones(skeleton, left))
 
 
-## Moves the hands onto the replica held as `held` has the arms' hands: the right `grasp` (0..1) of the way to
-## `right`, the left `support` of the way to `left` (each the figure's hand in the replica's frame, FigureHands);
-## `on_grip` the replica on the grip bone as FigureReady leaves it; the left's fingers aim `left_shift` from the arms'
-## (the hand moved back behind a fitted grip).
-func hold(skeleton: Skeleton3D, held: FigureArmsHold, grasp: float, support: float, on_grip: Transform3D,
-		right: Transform3D, left: Transform3D, left_shift: Vector3) -> void:
+## Moves the hands onto the replica held as `held` has them (FigureHands): the right `grasp` (0..1) of the way to its
+## place on the replica, the left `support` of the way to its; `fingers` false leaves the clips' fingers (a figure past
+## the near line).
+func hold(skeleton: Skeleton3D, held: FigureHeld, grasp: float, support: float, fingers: bool) -> void:
 	if held == null or _grip < 0:
 		return
-	var replica := skeleton.get_bone_global_pose(_grip) * on_grip
+	var arms := held.arms
+	var replica := skeleton.get_bone_global_pose(_grip) * held.on_grip
 	if grasp > 0.0 and _arm_r.size() == 3:
-		var hand := _place(skeleton, _arm_r, replica * right, grasp)
-		if not _fingers_r.is_empty():
-			if not _closed_r.fits(held, right):
-				_close(skeleton, hand, _fingers_r, held.right, held.right_joints, held.right_tips, replica, _closed_r)
-				_closed_r.hold = held
-				_closed_r.place = right
+		var hand := _place(skeleton, _arm_r, replica * held.right, grasp)
+		if fingers and not _fingers_r.is_empty():
+			if not _closed_r.fits(arms, held.right):
+				_close(skeleton, hand, _fingers_r, arms.right, arms.right_joints, arms.right_tips, replica, _closed_r)
+				_closed_r.hold = arms
+				_closed_r.place = held.right
 			_closed_r.put(skeleton, _fingers_r, grasp)
 	if support > 0.0 and _arm_l.size() == 3:
-		var hand := _place(skeleton, _arm_l, replica * left, support)
-		if not _fingers_l.is_empty():
-			if not _closed_l.fits(held, left):
-				_close(skeleton, hand, _fingers_l, held.left, held.left_joints, held.left_tips,
-						replica * Transform3D(Basis.IDENTITY, left_shift), _closed_l)
-				_closed_l.hold = held
-				_closed_l.place = left
+		var hand := _place(skeleton, _arm_l, replica * held.left, support)
+		if fingers and not _fingers_l.is_empty():
+			if not _closed_l.fits(arms, held.left):
+				_close(skeleton, hand, _fingers_l, arms.left, arms.left_joints, arms.left_tips,
+						replica * Transform3D(Basis.IDENTITY, held.left_shift), _closed_l)
+				_closed_l.hold = arms
+				_closed_l.place = held.left
 			_closed_l.put(skeleton, _fingers_l, support)
 
 
 ## Brings `arm`'s hand `amount` of the way to `to` (its turn and place; the hand keeps its own scale); returns the
-## hand's frame at `to`.
+## hand's frame at `to`. FigureReady.reach's two-bone reach, the arm's frames read once and each bone set over its
+## parent's new frame, so the skeleton works out its frames once an arm rather than after each bone.
 static func _place(skeleton: Skeleton3D, arm: PackedInt32Array, to: Transform3D, amount: float) -> Transform3D:
+	var parent := skeleton.get_bone_parent(arm[0])
+	var above := skeleton.get_bone_global_pose(parent) if parent >= 0 else Transform3D.IDENTITY
+	var shoulder := skeleton.get_bone_global_pose(arm[0])
+	var fore := skeleton.get_bone_global_pose(arm[1])
 	var now := skeleton.get_bone_global_pose(arm[2])
 	var target := Transform3D(to.basis.orthonormalized() * Basis.from_scale(now.basis.get_scale()), to.origin)
-	FigureReady.reach(skeleton, arm[0], arm[1], arm[2], target if amount >= 1.0 else now.interpolate_with(target, amount))
+	var goal := target if amount >= 1.0 else now.interpolate_with(target, amount)
+	var elbow := fore.origin
+	var wrist := now.origin
+	var a := shoulder.origin.distance_to(elbow)
+	var b := elbow.distance_to(wrist)
+	var way := goal.origin - shoulder.origin
+	if way.length() < EPSILON or a < EPSILON or b < EPSILON:
+		return target
+	var d := clampf(way.length(), absf(a - b) + EPSILON, a + b - EPSILON)
+	way = way.normalized()
+	var side := elbow - shoulder.origin
+	side -= way * way.dot(side)
+	side = side.normalized() if side.length() > EPSILON else Vector3.DOWN
+	var along := (a * a + d * d - b * b) / (2.0 * d)
+	var bent := shoulder.origin + way * along + side * sqrt(maxf(a * a - along * along, 0.0))
+	var upper_turn := Basis(Quaternion((elbow - shoulder.origin).normalized(), (bent - shoulder.origin).normalized()))
+	var upper := Transform3D(upper_turn * shoulder.basis, shoulder.origin)
+	# The wrist where the upper arm's turn carries it, then the forearm turned from there onto the goal.
+	var carried := bent + upper_turn * (wrist - elbow)
+	var fore_turn := Basis(Quaternion((carried - bent).normalized(), (goal.origin - bent).normalized()))
+	var forearm := Transform3D(fore_turn * upper_turn * fore.basis, bent)
+	skeleton.set_bone_pose(arm[0], above.affine_inverse() * upper)
+	skeleton.set_bone_pose(arm[1], upper.affine_inverse() * forearm)
+	skeleton.set_bone_pose(arm[2], forearm.affine_inverse() * goal)
 	return target
 
 
@@ -119,6 +146,7 @@ static func _close(skeleton: Skeleton3D, hand_at: Transform3D, fingers: PackedIn
 	var second := first * skeleton.get_bone_pose(fingers[1])
 	var third := second * skeleton.get_bone_pose(fingers[2])
 	var root := first.origin
+	# The thumb's three lengths; its last bone has no next joint to measure to, so it is taken as long as the middle.
 	var lengths := Vector3(root.distance_to(second.origin), second.origin.distance_to(third.origin),
 			second.origin.distance_to(third.origin))
 	var thumb_tip := _reached(root, replica * joints[2], replica * tips[0], (lengths.x + lengths.y + lengths.z)

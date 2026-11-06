@@ -335,6 +335,8 @@ func animate(c: Character, fraction: float, delta: float, eye: Vector3) -> void:
 		return
 	var cfg := _pose.config()
 	var far := _lines.y + cfg.lod_margin
+	var near := _lines.x + cfg.lod_margin
+	_body.near = global_position.distance_squared_to(eye) <= near * near
 	if not _snap and global_position.distance_squared_to(eye) > far * far:
 		if cfg.far_stride <= 0:
 			# Held still out there: a press kept now would play stale when the figure comes near.

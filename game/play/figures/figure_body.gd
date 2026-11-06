@@ -30,6 +30,8 @@ var bend: FigureBend = null
 var hands: FigureHands = null
 ## The head it wears (&"" for a kind with one head).
 var head: StringName = &""
+## Whether the figure stands within LOD0's line of the eye, where its fingers close on the replica (HG1; FigureView).
+var near: bool = true
 var _config: FigureConfig = null
 var _bones: Dictionary[StringName, int] = {}
 var _fade: float = 1.0
@@ -207,16 +209,14 @@ func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = fals
 	# fetches the magazine); neither in a switch or a throw.
 	var throwing := pose.throw_share >= 0.0 or pose.bomb_held
 	var holding := gripped and not pose.switching and not throwing
-	var support := aiming if holding and not pose.reloading and hands.supported(pose.in_hand) else 0.0
+	var held := hands.held(pose.in_hand)
+	var support := aiming if holding and not pose.reloading and held != null else 0.0
 	_support = _eased(_support, support, delta, pose.snapped)
 	_grasp = _eased(_grasp, aiming if holding else 0.0, delta, pose.snapped)
-	bend.hold = hands.arms_hold(pose.in_hand)
+	bend.held = held
 	bend.grasp = _grasp
 	bend.support = _support
-	bend.hold_on_grip = hands.on_grip(pose.in_hand)
-	bend.hold_right = hands.right_on(pose.in_hand)
-	bend.hold_left = hands.left_on(pose.in_hand)
-	bend.hold_left_shift = hands.left_shift(pose.in_hand)
+	bend.close_fingers = near
 	hands.grasp = _grasp
 	# A bomb thrown or held in hand (GT1): the arms throw it, the bomb in the right hand until it leaves.
 	bend.throw_share = pose.throw_share

@@ -9,7 +9,8 @@
 | 2026-11-06 | 1 | Claude (BP4 thread) | parts 1-4 green | Retry 6/8 | The handguard read from vertices only (the Sniper Rifle with a grip held on its barrel); the thumb 1 cm into the handguard; no README rows; QA and performance not yet in |
 | 2026-11-06 | 2 | Claude (BP4 thread) | targeted green | Retry 6/8 | The Sniper's fingers into its side rail and barrel (a round, not the outline); the cross-section helpers in FigureHands |
 | 2026-11-06 | 3 | Claude (BP4 thread) | targeted green | Retry 4/8 | The stretched thumb and the figures' glove (the owner kept the glove); no QA or performance report yet; a switch didn't let go (QA); the fingers doubled the skeleton's cost (performance) |
-| 2026-11-06 | 4 | Claude (BP4 thread) | | | |
+| 2026-11-06 | 4 | Claude (BP4 thread) | targeted green | Retry 6/8 | Performance: 11 figures +13.5 % over main (fingers now only near, one reach update an arm); the thumb and index as the owner approved them on the labelled picture; the per-slot hold arrays gathered (FigureHeld) |
+| 2026-11-06 | 5 | Claude (BP4 thread) | | | |
 
 ## Background
 
@@ -32,6 +33,7 @@ then "the thumbs are missing" (circled where they should be). The figures' thumb
 (6.7 cm against 10.4 from root to tip), so copying the arms' turns left the thumb tip inside the grip. Pistols had kept
 TP3's second fist; he wants them one-handed, as the first-person hold is. Attempt 3's critic (Retry 4/8) also found the
 stretched thumb too long and the figures' glove plates breaking into shards; the owner then kept the bots' own gloves.
+On attempt 4's labelled picture (`playtest/hg1/bot-hands-final.jpg`) the owner wrote "perfect" (2026-11-06 16:37).
 
 ## What changed
 
@@ -39,7 +41,8 @@ stretched thumb too long and the figures' glove plates breaking into shards; the
   replica: its clip `<id>_Hold` and its empty `Hold_<id>` where the replica's origin sits. FigureModels reads each
   hold once a session at its clip's first frame. It reads each hand's turn and knuckles (Middle1's root) in the
   replica's frame, and each finger and thumb bone's turn against its hand.
-- **On the figure,** each hand is brought by FigureReady's two-bone reach to that turn. The right hand's place is set
+- **On the figure,** each hand is brought by a two-bone reach (FigureReady's, with the arm's frames read once) to that
+  turn. The right hand's place is set
   by its thumb's root, where the arms' is (`hold_thumb_share` 1), then turned `hold_wrap` (0.35 rad) round the grip
   about its knuckle line, so the thumb's root comes round the back strap. The left's is set by its knuckles
   (`hold_thumb_share_left` 0), so its fingers reach up the handguard's side. Each finger bone is turned as the arms'
@@ -50,7 +53,10 @@ stretched thumb too long and the figures' glove plates breaking into shards; the
   comes over the stock's wrist.
 - **The fingers are worked out once a hold** (FigureGrasp.Closed): a hand on the replica sits the same way on it
   whatever the body does, so each bone's turn over its parent is kept until the hold or the hand's place changes, and
-  each frame only blends the clips' turns toward them.
+  each frame only blends the clips' turns toward them. They close only within LOD0's line of the eye (FigureView sets
+  FigureBody.near); past it the hand still holds the replica but keeps the clips' fingers.
+- **Each slot's hold is one FigureHeld** (FigureHands.held): the arms' hold, both hands' places, the left's shift and
+  the replica on the grip bone as the clips hold it and as the hand holds it; FigureBend hands it to FigureGrasp.
   - **The right hand** holds the replica whenever it is in the hand: high on the grip, fingers round it, index on the
     trigger, thumb along the grip's left side.
   - **The left hand** holds a rifle under its handguard: fingers up its right side, thumb along its left. On the
@@ -99,6 +105,8 @@ stretched thumb too long and the figures' glove plates breaking into shards; the
   pull request (`playtest/hg1/bot-hands-final.jpg`, each picture labelled with what to look at).
 - `test_figure_hands_qa.gd`'s "in the fist" gap is 3.5 cm (was 3): the palm now wraps the grip's side, so the palm's
   line runs a grip's half-width off its middle (3.08 cm on the pistols).
-- `tools/figure_bench.gd`, 11 figures: skeleton per figure 54 us (main 42 us) once the fingers are kept per hold
-  (attempt 3 worked them out every frame: 90 us).
+- `tools/figure_bench.gd`, 11 figures, 60 s, three runs each against main: both together 2.12 ms against 1.96
+  (+8 %), skeleton per figure 53 us against 41. Attempt 3 worked the fingers out every frame (90 us); attempt 4's
+  first review measured +13.5 % with the fingers on at every range and FigureReady's reach (a frame update after each
+  bone it set).
 - Left for the figures batch: the glove's knuckle plates show small shards on a deep bend (KNOWN_ISSUES).

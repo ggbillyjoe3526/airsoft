@@ -39,8 +39,8 @@ func _view(slot: int, parts: Array[Dictionary] = [], first: StringName = &"") ->
 
 
 ## Poses `v` for `frames` frames, then returns each named bone's frame as drawn (in the skeleton's frame) and, under
-## &"replica", the held replica's.
-func _drawn(v: FigureView, c: Character, bones: PackedStringArray, frames: int = 40) -> Dictionary:
+## &"replica", the held replica's; seen from `eye`.
+func _drawn(v: FigureView, c: Character, bones: PackedStringArray, frames: int = 40, eye: Vector3 = EYE) -> Dictionary:
 	var sk := v.body().skeleton
 	var out := {}
 	var grab := func() -> void:
@@ -48,10 +48,10 @@ func _drawn(v: FigureView, c: Character, bones: PackedStringArray, frames: int =
 			out[b] = sk.get_bone_global_pose(sk.find_bone(b))
 	for i in frames:
 		v.update(c, 1.0)
-		v.animate(c, 1.0, FRAME, EYE)
+		v.animate(c, 1.0, FRAME, eye)
 	sk.skeleton_updated.connect(grab)
 	v.update(c, 1.0)
-	v.animate(c, 1.0, FRAME, EYE)
+	v.animate(c, 1.0, FRAME, eye)
 	await wait_process_frames(1)
 	sk.skeleton_updated.disconnect(grab)
 	var hands := v.body().hands
@@ -117,8 +117,8 @@ func test_the_right_hand_holds_each_replica_as_the_arms_do() -> void:
 		var hands := v.body().hands
 		var slot := hands.in_hand
 		assert_almost_eq(v.body().bend.grasp, 1.0, 0.01, "%s: held" % id)
-		var hold := hands.arms_hold(slot)
-		_held_as(drawn, "_R", hands.right_on(slot), hold.right_joints, hold.right_tips, String(id))
+		var hold := hands.held(slot).arms
+		_held_as(drawn, "_R", hands.held(slot).right, hold.right_joints, hold.right_tips, String(id))
 		var thumb: Transform3D = (drawn[&"replica"] as Transform3D).affine_inverse() \
 				* (drawn[config.hold_fingers[2] + "_R"] as Transform3D)
 		assert_lt((thumb.origin + thumb.basis.y.normalized() * 0.02).x, -0.015,
@@ -132,9 +132,9 @@ func test_the_left_hand_holds_each_rifle_s_handguard_as_the_arms_do() -> void:
 		var drawn := await _drawn(v, r[1], _hand_bones("_L"))
 		var hands := v.body().hands
 		var slot := hands.in_hand
-		assert_true(hands.supported(slot), "%s: a handguard to hold" % id)
+		assert_not_null(hands.held(slot), "%s: a handguard to hold" % id)
 		assert_almost_eq(v.body().bend.support, 1.0, 0.01, "%s: held" % id)
-		_held_as(drawn, "_L", hands.left_on(slot), hands.arms_hold(slot).left_joints, hands.arms_hold(slot).left_tips,
+		_held_as(drawn, "_L", hands.held(slot).left, hands.held(slot).arms.left_joints, hands.held(slot).arms.left_tips,
 				String(id))
 
 
@@ -144,12 +144,12 @@ func test_a_pistol_is_held_in_one_hand_and_a_reload_lets_go() -> void:
 	var drawn := await _drawn(pv, p[1], _hand_bones("_L"))
 	var hands := pv.body().hands
 	var slot := hands.in_hand
-	assert_true(hands.supported(slot), "the left hand takes the arms' pistol hold")
+	assert_not_null(hands.held(slot), "the left hand takes the arms' pistol hold")
 	assert_almost_eq(pv.body().bend.support, 1.0, 0.01, "held")
 	var left: Transform3D = (drawn[&"replica"] as Transform3D).affine_inverse() \
 			* (drawn[config.hold_hand + "_L"] as Transform3D)
-	assert_lt(left.origin.distance_to(hands.left_on(slot).origin), PLACE, "the left hand lowered as the arms' is")
-	assert_gt(left.origin.distance_to(hands.right_on(slot).origin), 0.2, "one hand on the pistol")
+	assert_lt(left.origin.distance_to(hands.held(slot).left.origin), PLACE, "the left hand lowered as the arms' is")
+	assert_gt(left.origin.distance_to(hands.held(slot).right.origin), 0.2, "one hand on the pistol")
 	var r := _view(0)
 	var v: FigureView = r[0]
 	var c: Character = r[1]
@@ -196,10 +196,28 @@ func test_behind_a_fitted_grip() -> void:
 		var drawn := await _drawn(v, fitted[1], _hand_bones("_L"))
 		var hands := v.body().hands
 		var slot := hands.in_hand
-		var back := hands.left_on(slot).origin - bv.body().hands.left_on(slot).origin
+		var back := hands.held(slot).left.origin - bv.body().hands.held(slot).left.origin
 		assert_gt(back.z, 0.01, "%s: the hand moved back behind the grip (%.3f m)" % [kind, back.z])
 		assert_almost_eq(back.x, 0.0, 0.0001, "%s: straight back" % kind)
-		var by := hands.left_shift(slot)
+		var by := hands.held(slot).left_shift
 		assert_almost_eq(by, back, Vector3.ONE * 0.0001, "%s: its fingers moved back with it" % kind)
-		_held_as(drawn, "_L", hands.left_on(slot), _moved(held.left_joints, by), _moved(held.left_tips, by),
+		_held_as(drawn, "_L", hands.held(slot).left, _moved(held.left_joints, by), _moved(held.left_tips, by),
 				"%s grip" % kind)
+
+
+func test_past_the_near_line_the_hand_holds_but_the_fingers_keep_the_clips() -> void:
+	var bones := _hand_bones("_R")
+	var r := _view(0)
+	var near: Dictionary = await _drawn(r[0], r[1], bones)
+	var far_view := _view(0)
+	var past := config.lod_high.x + config.lod_margin + 2.0
+	var far: Dictionary = await _drawn(far_view[0], far_view[1], bones, 40, EYE + Vector3(0.0, 0.0, past))
+	assert_true(r[0].body().near, "within the near line")
+	assert_false(far_view[0].body().near, "past it")
+	var hand: Transform3D = near[bones[0]]
+	var held: Transform3D = far[bones[0]]
+	assert_lt(hand.origin.distance_to(held.origin), PLACE, "the hand still sits on the grip out there")
+	var index := bones[bones.size() - 1]
+	var closed: Transform3D = hand.affine_inverse() * near[index]
+	var kept: Transform3D = held.affine_inverse() * far[index]
+	assert_gt(closed.origin.distance_to(kept.origin), PLACE, "but its fingers are the clips', not closed on the replica")

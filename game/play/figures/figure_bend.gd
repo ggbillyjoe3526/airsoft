@@ -41,17 +41,13 @@ var cheek: float = 0.0
 ## How far the hand reaches along the replica to its grip (TP3; the grip bone's frame), and whether both hands do.
 var grip_fit: Vector3 = Vector3.ZERO
 var grip_fit_both: bool = false
-## The hands on the replica in the hand as the first-person arms hold it (HG1; FigureHands): the arms' hold (null:
-## none), how far (0..1) the right hand holds it so (`grasp`) and the left its handguard (`support`), the replica on the
-## grip bone as the clips hold it, and each hand's place in the replica's frame (the left's moved from the arms' by
-## hold_left_shift, behind a fitted grip).
-var hold: FigureArmsHold = null
+## The hands on the replica in the hand as the first-person arms hold it (HG1; FigureHands): how (null: not so), how
+## far (0..1) the right hand holds it (`grasp`) and the left its handguard or the arms' lowered place (`support`), and
+## whether the fingers close on it too (`close_fingers`; only near the eye: past LOD0's line the clips' fingers stay).
+var held: FigureHeld = null
 var grasp: float = 0.0
 var support: float = 0.0
-var hold_on_grip: Transform3D = Transform3D.IDENTITY
-var hold_right: Transform3D = Transform3D.IDENTITY
-var hold_left: Transform3D = Transform3D.IDENTITY
-var hold_left_shift: Vector3 = Vector3.ZERO
+var close_fingers: bool = true
 ## A bomb's throw: its share (0..1 the windup, 1..2 the recovery; below 0 none), a bomb held in hand (MC1), and a
 ## throw begun from one.
 var throw_share: float = -1.0
@@ -97,7 +93,7 @@ func _process_modification_with_delta(_delta: float) -> void:
 			_ready.shoulder(skeleton, shouldered, butt_on_grip)
 			_ready.hold(skeleton, high_ready)
 		if _grasp != null:
-			_grasp.hold(skeleton, hold, grasp, support, hold_on_grip, hold_right, hold_left, hold_left_shift)
+			_grasp.hold(skeleton, held, grasp, support, close_fingers)
 		if _throw != null and (throw_share >= 0.0 or throw_held):
 			_throw.pose(skeleton, throw_share, throw_held, throw_from_hand)
 
