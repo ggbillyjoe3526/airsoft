@@ -16,17 +16,20 @@ RM9 ruling: four looks, picked per figure by its id, FigureConfig.heads):
                 cover; its navy is too near Alpha's blue) with rails, shroud and the team band; full-seal goggles;
                 the balaclava and the chin harness
 
+Under every look the face shows through the balaclava's eye opening (face.py, FA1): skin, lids and eyeballs.
+
 Every head is skinned whole to the Head bone. The materials: Headwear (one 2048 px atlas painted here, no bakes),
-TeamHeadwear (the same atlas, tinted the team's colour in game: FigureConfig.team_material_prefix) and the figure's own
-Lens. Budget: the largest head 8,000 / 2,600 / 800 triangles (LOD0 / 1 / 2), agreed with the body and carrier threads
-inside the figure's 60,000 / 20,000 / 6,000.
+TeamHeadwear (the same atlas, tinted the team's colour in game: FigureConfig.team_material_prefix), Face (the same
+atlas, its UVs offset in game to the figure's look: FigureConfig.face_offsets) and the figure's own Lens. Budget: the
+largest head 9,000 / 3,200 / 900 triangles (LOD0 / 1 / 2), agreed with the body and carrier threads inside the
+figure's 60,000 / 20,000 / 6,000 (8,000 / 2,600 / 800 before the face took the split's spare).
 
 Run with Blender 5.x or Python with the `bpy` module (pip install bpy==5.2.3), from the repository root:
 
     python tools/blender/figures/headwear.py [--renders DIR]
 
 It writes the four heads into human.glb by splice_heads.py (only the Head_* nodes, their meshes and the two head
-materials change; the body, kit, skeleton and clips stay byte for byte), so it can run again on any newer human.glb.
+materials and Face change; the body, kit, skeleton and clips stay byte for byte), so it can run again on any newer human.glb.
 """
 
 import math
@@ -39,16 +42,17 @@ sys.path.insert(0, HERE)
 import bpy  # noqa: E402  (first of Blender's modules: it brings bmesh and mathutils)
 from mathutils import Vector  # noqa: E402
 
+import face  # noqa: E402
 import head_shapes as hs  # noqa: E402
 import head_textures  # noqa: E402
-from headkit import DEG, TAU, Atlas, Drape, Part, direction, gauss, keyed, smoothstep  # noqa: E402
+from headkit import DEG, GEAR, TAU, Atlas, Drape, Part, cull, direction, gauss, keyed, smoothstep  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 HUMAN = os.path.join(ROOT, "assets/models/characters/human.glb")
 
 HEADS = ("Head_HighCut", "Head_Cap", "Head_Boonie", "Head_FullCut")
 # Triangles per head at each level (the agreed share of the figure's budget).
-BUDGET = (8000, 2600, 800)
+BUDGET = (9000, 3200, 900)
 # Resolution per level: how many columns round the head, and whether the small parts are drawn.
 LEVELS = (
     {"around": 44, "rings": 30, "shell": 40, "rows": 12, "fine": True, "small": True, "straps": True},
@@ -59,10 +63,10 @@ LEVELS = (
 # Each head's detail per level (1.0 = the counts written in the builders): tuned so every head uses about 95 to 100 %
 # of its level's budget (owner, 2026-11-05: as much detail as the budget allows). Override with HEADWEAR_DENSITY.
 DENSITY = {
-    "Head_HighCut": (1.0, 1.06, 1.17),
-    "Head_Cap": (1.18, 1.22, 1.13),
-    "Head_Boonie": (1.25, 1.28, 1.13),
-    "Head_FullCut": (1.26, 1.3, 1.17),
+    "Head_HighCut": (0.97, 1.03, 1.2),
+    "Head_Cap": (1.15, 1.12, 1.15),
+    "Head_Boonie": (1.24, 1.27, 1.13),
+    "Head_FullCut": (1.24, 1.26, 1.2),
 }
 
 
@@ -76,7 +80,6 @@ def density(name: str, level: int) -> float:
 
 
 TEAM = "TeamHeadwear"
-GEAR = "Headwear"
 LENS = "Lens"
 
 
@@ -109,13 +112,17 @@ class Kit:
 
 # --------------------------------------------------------------------------------------------------- the head
 
-def head(k: Kit, keep=None) -> Part:
-    """The balaclava'd head from the neck's foot to the crown, its UVs on the knit tile (az across, z up), the eye
-    opening painted there. `keep(point)` False drops a face hidden under the head gear."""
+def head(k: Kit, keep=None, opening: bool = False) -> Part:
+    """The balaclava'd head from the neck's foot to the crown, its UVs on the knit tile (az across, z up). With
+    `opening`, the eye opening is cut out (face.py fills it). `keep(point)` False drops a face hidden under the head
+    gear."""
     p = Part("head")
     knit = k.tile("knit")
     azs = hs.head_azimuths(k.lv["around"])
     zs, top = hs.head_rings(k.lv["around"], k.lv["rings"])
+    if opening:
+        azs = face.with_lines(azs, [-face.HOLE_AZ, face.HOLE_AZ])
+        zs = face.with_lines(zs, [face.HOLE_Z0, face.HOLE_Z1])
 
     def uv(i: int, j: int):
         a = azs[i] if i < len(azs) else math.pi
@@ -125,21 +132,11 @@ def head(k: Kit, keep=None) -> Part:
     idx = p.grid(rows, GEAR, uv, wrap=True)
     p.fan(idx[-1], top, GEAR, lambda i: uv(min(i, len(azs)), len(zs) - 1),
           knit.uv(0.5, (top.z - head_textures.KNIT_Z0) / head_textures.KNIT_SPAN))
+    if opening:
+        face.cut_hole(p)
     if keep is not None:
         cull(p, keep)
     return p
-
-
-def cull(p: Part, keep) -> None:
-    """Drops the faces whose every corner fails `keep`."""
-    out_f, out_uv, out_m, out_fl = [], [], [], []
-    for f, u, m, fl in zip(p.faces, p.uvs, p.mats, p.flat):
-        if any(keep(p.pts[i]) for i in f):
-            out_f.append(f)
-            out_uv.append(u)
-            out_m.append(m)
-            out_fl.append(fl)
-    p.faces, p.uvs, p.mats, p.flat = out_f, out_uv, out_m, out_fl
 
 
 # --------------------------------------------------------------------------------------------------- helmets
@@ -1108,8 +1105,9 @@ def build_head(name: str, k: Kit, full: Drape) -> Part:
     parts = []
     if name in ("Head_HighCut", "Head_FullCut"):
         sh = HIGH_CUT if name == "Head_HighCut" else FULL_CUT
-        bare = head(k, keep=lambda q: not sh.covers(q))
+        bare = head(k, keep=lambda q: not sh.covers(q), opening=True)
         parts.append(bare)
+        parts.append(face.face_part(k, keep=lambda q: not sh.covers(q)))
         parts += helmet_parts(k, sh, cover=(sh is FULL_CUT))
         under = full
         if name == "Head_HighCut":
@@ -1129,8 +1127,9 @@ def build_head(name: str, k: Kit, full: Drape) -> Part:
                 parts.append(chin_harness(k, under, 70 * DEG, 114 * DEG, sh.rim_el(70 * DEG), sh.rim_el(114 * DEG),
                                           sh))
     elif name == "Head_Boonie":
-        bare = head(k, keep=lambda q: q.z < BOONIE_BAND_Z + 0.006)
+        bare = head(k, keep=lambda q: q.z < BOONIE_BAND_Z + 0.006, opening=True)
         parts.append(bare)
+        parts.append(face.face_part(k, keep=lambda q: q.z < BOONIE_BAND_Z + 0.006))
         hat = boonie(k)
         parts += hat
         sc = scarf(k, full)
@@ -1139,8 +1138,10 @@ def build_head(name: str, k: Kit, full: Drape) -> Part:
         if k.lv["small"]:
             parts.append(chin_cord(k, Drape([full_part(k), sc])))
     else:
-        bare = head(k, keep=lambda q: q.z < keyed(CAP_EDGE, abs(math.degrees(math.atan2(q.x, -q.y)))) + 0.006)
+        under_cap = lambda q: q.z < keyed(CAP_EDGE, abs(math.degrees(math.atan2(q.x, -q.y)))) + 0.006  # noqa: E731
+        bare = head(k, keep=under_cap, opening=True)
         parts.append(bare)
+        parts.append(face.face_part(k, keep=under_cap))
         under = full
         m = mask(k, under, GOGGLE)
         parts.append(m)
@@ -1172,7 +1173,7 @@ def full_part(k: Kit) -> Part:
 def materials(atlas: Atlas) -> dict:
     """Plain Blender materials for the export (the splice gives the game's ones their textures)."""
     out = {}
-    for name in (GEAR, TEAM, LENS):
+    for name in (GEAR, TEAM, LENS, face.FACE):
         m = bpy.data.materials.new(name)
         out[name] = m
     return out
@@ -1190,7 +1191,7 @@ def build_all(renders: str = "") -> dict:
         for name in HEADS:
             k = Kit(atlas, level, density(name, level))
             part = build_head(name, k, full)
-            ob = part.build(mats, sharp_angle=50.0)
+            ob = part.build(mats, sharp_angle=50.0, smooth_mats=(face.FACE,))
             objects[ob.name] = ob
             tri = part.tris()
             print("%-22s %6d triangles" % (ob.name, tri))

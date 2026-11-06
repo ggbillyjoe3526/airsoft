@@ -24,6 +24,12 @@ extends Resource
 ## Materials whose name starts with this (any case) are painted in the team's colour (Team, TeamColour, TeamPaint,
 ## TeamGlow); every other material stays as modelled.
 @export var team_material_prefix: String = "team"
+## Materials whose name starts with this (any case) are the face in the balaclava's eye opening (FA1): its looks (skin
+## tone, brows and eyes) are painted side by side in the heads' atlas, and a figure wears look face_look(id), its
+## material's UVs offset by face_offsets[look] (Godot's UV space, v down). Presentation only.
+@export var face_material_prefix: String = "face"
+@export var face_offsets: PackedVector2Array = PackedVector2Array([Vector2(0.0, 0.0), Vector2(0.125, 0.0),
+		Vector2(0.0, -0.0625), Vector2(0.125, -0.0625)])
 ## The files face +Z, the figures -Z: the model is turned this far about +Y (radians).
 @export var model_yaw: float = PI
 ## The legs' clips (FI2): standing still, the gait clips by the way each steps (x to the figure's right, y ahead; placed
@@ -209,6 +215,17 @@ extends Resource
 ## Robots (Settings › Dev › Robots, the Easter egg, off by default; RB1) are picked from the match seed XOR this salt so
 ## no gameplay stream moves (the browser's ROBOT_SEED_SALT).
 @export var robot_salt: int = 0x5f3759df
+
+
+## The face look figure `figure_id` wears: the next look for each round of the heads, so the figures sharing a head
+## (id, id + heads, id + 2 heads ...) never share a look until every look is used.
+func face_look(figure_id: int) -> int:
+	if face_offsets.is_empty():
+		return 0
+	var id := absi(figure_id)  # INT_MIN stays negative: posmod keeps the look in range
+	var h := maxi(heads.size(), 1)
+	# id = head + lap * h: the look moves on one per lap, whatever the count of heads.
+	return posmod(posmod(id, h) + id / h, face_offsets.size())
 
 
 ## The two lines (m) for the Mesh detail drawn.
