@@ -27,9 +27,9 @@ the springs a painted rifle spring in each spring's colour.
 
 ## Optics
 
-An optic on the top rail. With one fitted the iron sights come off and aiming looks through it. The red dot is a lit
-dot on clear glass, with the view open round it. The 2x scope magnifies only inside its glass: the view round it stays
-as it is, with nothing dark round the edge.
+An optic on the top rail. With one fitted the iron sights come off and aiming looks through it. The red dot is a
+compact sight on a low riser: a lit dot on clear glass, with the view open round it. The 2x scope is a magnifier on a
+hinged mount; it magnifies only inside its glass: the view round it stays as it is, with nothing dark round the edge.
 
 <!-- wiki:parts optics -->
 
@@ -56,6 +56,8 @@ magazine holds and **Carried** adds magazines to the replica's own (you always c
 
 <!-- wiki:parts magazines -->
 
+- **Looks:** each is its replica's own magazine at another length. The hi-cap is a third longer, with a winding wheel
+  under its base; the low-cap is short; the pistol's extended magazine sticks out below the grip, holes down its back.
 - **Rattles:** the loose BBs in a hi-cap rattle as you move, so bots close by hear you even walking.
 - The hi-cap carries as many BBs in all in fewer, rattling changes; the low-cap carries fewer BBs in all for a quick
   change and draw. The pistol's extended magazine holds half as many again, for a slower draw.

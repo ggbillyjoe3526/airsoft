@@ -35,6 +35,8 @@ binds; the rest goes in the task's record. When this file nears 50 KB, move supe
   routes, drop rules and vault links are tuned to it.
 - **The browser game's gameplay code and tests stay in `legacy/browser/` as the reference to rewrite from (owner,
   2026-10-18).** Hidden from Godot by its `.gdignore`, read only, and deleted at 0.1 (the first public release).
+  **Removed early, on 2026-11-05 (owner, before tagging 0.1 Dev 2, to keep the size down):** every path under
+  `legacy/browser/` that a doc names is read from git at the tag `0.1-dev.1`, where the folder is unchanged.
 - **Infrastructure comes from the owner's other Godot project, katanashotgun (owner, 2026-10-18).** Its session hook,
   setup-godot action, CI shape, GUT, gdlint, smoke test, release workflow and Inno Setup installer, version and
   changelog scripts, licence notices, crash-safe save files, settings, the sound cue and voice pool system, perf
@@ -201,6 +203,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   `docs/CC0_ASSETS.md` › Size limits, with LODs so distance and Low pay less. High's 250k triangle target from the
   browser game rises to 1.5 million until a Godot baseline sets the real line; Low keeps its 60 FPS floor and draws
   figures at their middle detail.
+- **Models spend their triangle budget on detail (owner, 2026-11-05: "as much detail as possible within the
+  budgets").** A model aims close to its budget in `docs/CC0_ASSETS.md` › Size limits, about 95 % (38,000 of 40,000
+  is reasonable); it need not hit it exactly.
 - **Arms and hands are modelled as realistically as possible (owner, 2026-10-18).** His arm and hand study
   (`docs/art/references/arm-hand-anatomy.jpg`) is the target for anatomy, skin and natural grips on replicas, for his
   art pass and the shared rig standard: `docs/ART.md` › Arms and hands.
@@ -995,6 +1000,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   gains nothing there for four times the memory.
 - **Menus stay smooth (owner, 2026-10-12; IM1).** "The UI should always feel smooth and responsive", with a loading
   screen allowed for the tutorial, range, maps and matches.
+- **The human figure is built in parts, one owner each (BL10 to BL13, 2026-11-05; owner: "split the models up into
+  their own threads").** `Body` (clothes, gloves, boots) is BL10's, `Head_*` BL11's, `Kit`, `Kit_Pack` and `Kit_Radio`
+  BL12's, `Kit_Pads` BL13's; each is spliced into `human.glb` by node (`tools/blender/figures/splice_part.py`), leaving
+  the skeleton, the clips and the other parts alone. Triangles at LOD0/1/2 within the 60k/20k/6k figure budget: body
+  34k/11k/3.3k, heads 8k/2.6k/0.8k, gear 14k/4.5k/1.5k, pads 3k/1k/0.3k. Whoever merges second reruns their splice on
+  the merged file and updates `tests/unit/test_figure_body.gd`'s counts.
 - **The install size budget is 500 MB installed (Claude's recommendation, 2026-10-18; the owner asked for one and may
   change it).** Roughly 100 MB is Godot and today's assets (an estimate until a release build measures it); the rest
   leaves room for the owner's own models, two dressed fields with baked light, and sound. Per-asset limits stay in

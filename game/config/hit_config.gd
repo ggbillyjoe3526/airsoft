@@ -58,11 +58,26 @@ extends Resource
 @export var boot_heel: float = 0.058
 @export var boot_toe: float = -0.148
 @export var boot_radius: float = 0.05
-## Leg swing at full stride (rad), strides per metre, the least speed that swings them (m/s), and the longest step in a
-## tick (m; more is a teleport).
+## Leg swing at full stride (rad), the least speed that swings them (m/s), and the longest step in a tick (m; more is a
+## teleport).
 @export var leg_swing: float = 0.55
-@export var strides_per_metre: float = 0.75
 @export var walking_speed: float = 0.2
+## The walk cycle's length (m of ground a cycle of two steps covers, GA1) by speed (m/s): standing at cycle_speeds,
+## crouched at crouch_cycle_speeds, in line between them and held past the ends, the two blended by the crouch. Each
+## gait clip's speed × its seconds (the figures' sidecars: Walk_F, Run_F, Sprint, CrouchWalk), so a planted foot
+## stays put on the ground; the first point is a slow step's.
+@export var cycle_speeds: PackedFloat32Array = PackedFloat32Array([0.0, 2.3, 4.2, 6.3])
+@export var cycle_metres: PackedFloat32Array = PackedFloat32Array([1.0, 1.763, 2.94, 3.99])
+@export var crouch_cycle_speeds: PackedFloat32Array = PackedFloat32Array([0.0, 2.1])
+@export var crouch_cycle_metres: PackedFloat32Array = PackedFloat32Array([0.8, 1.05])
+## Stepping back or aside the standing cycle is this share of the cycle ahead at the same speed (Run_B and Run_L/R take
+## shorter, quicker steps than Run_F: each clip's speed × seconds over Run_F's); between, by the step's share each way.
+@export var back_cycle_share: float = 0.6190
+@export var side_cycle_share: float = 0.6667
+## How much of the hips' turn away from standing still's heading the upper body is turned back over a stepping clip's
+## hips (GA1; 1: all, so the replica keeps its heading while the pelvis swings and turns into a step aside; 0: none, the
+## upper body rides the hips). Applied alike to the hit volume (HitPose) and the drawn figure (FigureBend).
+@export var upper_steady: float = 1.0
 @export var max_stride: float = 1.0
 ## The hit area fitted to the drawn figure (HV1): its joints, baked from the figure's own clips (HitFit,
 ## tools/hit_fit_bake.gd). A character's volume hangs on them (Hitbox.build_volume); the numbers above shape only the
@@ -78,22 +93,22 @@ extends Resource
 ## the Hips joint to Spine1 up to fit_chest_high of the way from Chest to Neck; each hip a capsule from the thigh's joint
 ## fit_pelvis_up along the hips; each leg's thigh and shin between its joints, and the boot from fit_boot_heel of the
 ## foot's length behind the ankle to the toe, fit_boot_drop under them.
-@export var fit_head_centre: float = 0.3625
-@export var fit_head_radius: float = 0.1275
-@export var fit_chest_low: float = 0.3
-@export var fit_chest_high: float = 0.16
-@export var fit_chest_half_width: float = 0.057
-@export var fit_chest_ahead: float = -0.022
-@export var fit_chest_radius: float = 0.15
+@export var fit_head_centre: float = 0.374
+@export var fit_head_radius: float = 0.125
+@export var fit_chest_low: float = 0.238
+@export var fit_chest_high: float = 0.185
+@export var fit_chest_half_width: float = 0.056
+@export var fit_chest_ahead: float = -0.030
+@export var fit_chest_radius: float = 0.150
 ## And two more on the spine's line for its depth (the plate carrier's pouches, the pack): fit_chest_front ahead of it
 ## and fit_chest_back behind, of fit_chest_depth_radius.
-@export var fit_chest_front: float = 0.072
-@export var fit_chest_back: float = 0.0895
-@export var fit_chest_depth_radius: float = 0.13
-@export var fit_pelvis_up: float = 0.045
-@export var fit_hips_radius: float = 0.12
+@export var fit_chest_front: float = 0.069
+@export var fit_chest_back: float = 0.078
+@export var fit_chest_depth_radius: float = 0.130
+@export var fit_pelvis_up: float = 0.067
+@export var fit_hips_radius: float = 0.089
 @export var fit_thigh_radius: float = 0.085
 @export var fit_shin_radius: float = 0.071
-@export var fit_boot_heel: float = 0.16
-@export var fit_boot_drop: float = 0.0
-@export var fit_boot_radius: float = 0.052
+@export var fit_boot_heel: float = 0.048
+@export var fit_boot_drop: float = -0.007
+@export var fit_boot_radius: float = 0.058

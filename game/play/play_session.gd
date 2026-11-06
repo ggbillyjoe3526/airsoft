@@ -717,6 +717,8 @@ func _build_views(ui: CanvasLayer) -> void:
 	_grenades = GrenadeView.new()
 	add_child(_grenades)
 	_grenades.setup(state.grenades.size(), _tuning.grenades, _light.night)
+	for f in _figures:
+		f.set_bombs(_grenades.meshes(), _tuning.grenades)
 	var first_use: Array[Material] = [_bbs.drawn_material(), _puffs.drawn_material(), _gas.drawn_material(),
 			_kicked.drawn_material(), contact.material, _dust.drawn_material()]
 	first_use.append_array(_grenades.materials())

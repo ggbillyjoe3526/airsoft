@@ -1,16 +1,25 @@
 class_name GrenadeView
 extends Node3D
-## The smoke and flash bombs (SF1), drawn from the state: each slot of GameState.grenades as a small canister, green
-## for smoke and violet for flash (off both team hues), spinning while it flies and drawn between ticks; each smoke's
+## The smoke and flash bombs (SF1), drawn from the state: each slot of GameState.grenades as its bomb's model (BL9:
+## the smoke's canister, the flash's pull-ring tube), its stripe or band green for smoke and violet for flash (off
+## both team hues), spinning while it flies and drawn between ticks; each smoke's
 ## cloud as PUFFS soft camera-facing puffs filling its ellipsoid (Grenades.cloud_middle, cloud_scale, cloud_density),
 ## lighter at the top, turning slowly, dimmed by night; a flash's bang as a burst of light and a flare where it went off.
 ## Through the eyes the view is through, a wash over the screen: white while a flash dazzles them (fading over its last
 ## DAZZLE_FADE s; softer with Reduced motion on), and the smoke's colour while the eyes are inside a cloud. Reads the
 ## state and the tick's events; owns no rule. Made once; a frame allocates nothing.
 
-## The canister (m) and its colours by Grenade.Kind (NONE unused); its spin while flying (turns a second).
+## Each bomb's model by Grenade.Kind (NONE: none), its long axis up through its middle (tools/blender/grenades/), and
+## the material in it painted in the kind's colour; a model that won't load draws a plain canister CANISTER_RADIUS
+## by CANISTER_HEIGHT (m) in that colour instead.
+const MODELS: Array[String] = ["", "res://assets/models/grenades/smoke.glb", "res://assets/models/grenades/flash.glb"]
+const KIND_MATERIAL := "Kind"
 const CANISTER_RADIUS := 0.032
 const CANISTER_HEIGHT := 0.12
+## A bomb at rest lies on its side, turned this way about the view's forward axis: the smoke's lever (the model's +X)
+## points up, so the canister rests on its body; it is lifted by the model's own lowest reach that way.
+const LIE := -PI * 0.5
+## Each kind's colour (NONE unused); its spin while flying (turns a second).
 const BODY_COLOURS: Array[Color] = [Color("2b2d31"), Color("4f9d6a"), Color("7d5bc4")]
 const BODY_ROUGHNESS := 0.6
 const SPIN := 2.0
@@ -56,7 +65,10 @@ var soft_flash: bool = false
 
 var _cfg: GrenadeConfig = null
 var _canisters: Array[MeshInstance3D] = []
-var _bodies: Array[StandardMaterial3D] = []
+## Each kind's mesh, its Kind material painted (BODY_COLOURS), by Grenade.Kind, and how far it reaches below its
+## middle lying on its side (m).
+var _meshes: Array[Mesh] = []
+var _lie_reach := PackedFloat32Array()
 var _puffs: MultiMeshInstance3D = null
 ## Each puff's place in the unit ball and its size share, the same for every cloud.
 var _layout := PackedVector3Array()
@@ -83,14 +95,11 @@ func setup(count: int, cfg: GrenadeConfig, night: bool) -> void:
 		var paint := StandardMaterial3D.new()
 		paint.albedo_color = BODY_COLOURS[kind]
 		paint.roughness = BODY_ROUGHNESS
-		_bodies.append(paint)
-	var can := CylinderMesh.new()
-	can.top_radius = CANISTER_RADIUS
-	can.bottom_radius = CANISTER_RADIUS
-	can.height = CANISTER_HEIGHT
+		var mesh := _kind_mesh(kind, paint)
+		_meshes.append(mesh)
+		_lie_reach.append(-(_lying() * mesh.get_aabb()).position.y)
 	for i in maxi(0, count):
 		var m := MeshInstance3D.new()
-		m.mesh = can
 		m.visible = false
 		m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(m)
@@ -108,7 +117,6 @@ func setup(count: int, cfg: GrenadeConfig, night: bool) -> void:
 	_lay_out()
 	_held = MeshInstance3D.new()
 	_held.name = "Held"
-	_held.mesh = can
 	_held.visible = false
 	_held.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_held)
@@ -173,11 +181,55 @@ func update(state: GameState, fraction: float, delta: float, eyes: Character, ey
 	_draw_held(eyes, eye)
 
 
-## The puffs' and canisters' materials, for ShaderPrewarm.
+## The puffs' and the bombs' materials, for ShaderPrewarm.
 func materials() -> Array[Material]:
 	var out: Array[Material] = [(_puffs.multimesh.mesh as PrimitiveMesh).material, _flare_paint]
-	out.append_array(_bodies)
+	for mesh in _meshes:
+		for i in mesh.get_surface_count():
+			var own := mesh.surface_get_material(i)
+			if own != null and not out.has(own):
+				out.append(own)
 	return out
+
+
+## Every kind's mesh by Grenade.Kind (NONE's unused), each made once and shared: the figures hold them in the hand
+## while they throw (FigureView.set_bombs; never changed there).
+func meshes() -> Array[Mesh]:
+	return _meshes
+
+
+## Kind `kind`'s mesh, for tests.
+func mesh_of(kind: int) -> Mesh:
+	return _meshes[clampi(kind, 0, _meshes.size() - 1)]
+
+
+## How far kind `kind`'s model reaches below its middle lying on its side (m), for tests.
+func lie_reach(kind: int) -> float:
+	return _lie_reach[clampi(kind, 0, _lie_reach.size() - 1)]
+
+
+## A bomb lying on its side.
+static func _lying() -> Transform3D:
+	return Transform3D(Basis(Vector3.FORWARD, LIE), Vector3.ZERO)
+
+
+## The model of `kind` (MODELS) with its Kind material swapped for `paint`, made once; a plain canister drawn in
+## `paint` when it has none or won't load.
+static func _kind_mesh(kind: int, paint: StandardMaterial3D) -> Mesh:
+	var own := PropDressConfig.load_mesh(MODELS[kind]) as ArrayMesh if kind < MODELS.size() else null
+	if own == null:
+		var can := CylinderMesh.new()
+		can.top_radius = CANISTER_RADIUS
+		can.bottom_radius = CANISTER_RADIUS
+		can.height = CANISTER_HEIGHT
+		can.material = paint
+		return can
+	var mesh := own.duplicate() as ArrayMesh
+	for i in mesh.get_surface_count():
+		var material := mesh.surface_get_material(i)
+		if material != null and material.resource_name == KIND_MATERIAL:
+			mesh.surface_set_material(i, paint)
+	return mesh
 
 
 ## The wash's colour now (alpha 0: none), for tests.
@@ -236,13 +288,13 @@ func _draw_canister(m: MeshInstance3D, g: Grenade, fraction: float) -> void:
 	var at := g.prev_position.lerp(g.position, fraction)
 	var basis := Basis.IDENTITY
 	if g.resting:
-		basis = Basis(Vector3.FORWARD, PI * 0.5) # lying on its side
+		basis = _lying().basis
 	else:
 		basis = Basis(Vector3.RIGHT, SPIN * TAU * g.age)
-	m.transform = Transform3D(basis, at + Vector3(0.0, CANISTER_RADIUS - _cfg.radius, 0.0) if g.resting else at)
-	var paint := _bodies[clampi(g.kind, 0, _bodies.size() - 1)]
-	if m.material_override != paint:
-		m.material_override = paint
+	var kind := clampi(g.kind, 0, _meshes.size() - 1)
+	m.transform = Transform3D(basis, at + Vector3(0.0, _lie_reach[kind] - _cfg.radius, 0.0) if g.resting else at)
+	if m.mesh != _meshes[kind]:
+		m.mesh = _meshes[kind]
 	m.visible = true
 
 
@@ -311,9 +363,9 @@ func _draw_held(eyes: Character, eye: Vector3) -> void:
 	var view := Basis.from_euler(Vector3(eyes.pitch, eyes.yaw, 0.0))
 	var tip := view * Basis(Vector3.FORWARD, HELD_TIP.x) * Basis(Vector3.RIGHT, HELD_TIP.y)
 	_held.transform = Transform3D(tip, eye + view * (HELD_AT + Vector3(0.0, HELD_LIFT * ready, 0.0)))
-	var paint := _bodies[clampi(kind, 0, _bodies.size() - 1)]
-	if _held.material_override != paint:
-		_held.material_override = paint
+	var mesh := _meshes[clampi(kind, 0, _meshes.size() - 1)]
+	if _held.mesh != mesh:
+		_held.mesh = mesh
 	_held.visible = true
 
 

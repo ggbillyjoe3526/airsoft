@@ -195,4 +195,4 @@ One file per task, written by the thread in the records step (`docs/records/READ
   `docs/KNOWN_ISSUES.md`). A `tier: fix` record may leave out the Known issues section when there are none.
 
 The run's reports (never raw logs) are copied to the shared files under `pipeline/runs/<id>/attempt-<n>/`. The browser
-game's records are in `legacy/browser/docs/records/` until 0.1.0.
+game's records are in `legacy/browser/docs/records/`, read from git at the tag `0.1-dev.1`.

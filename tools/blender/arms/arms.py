@@ -43,7 +43,7 @@ FPS = 60
 # Colours from the owner's glove photos (ref_images/hands/gloves: dark olive with black moulded knuckles), the same as
 # the figures' gloves (BL10), so your arms match what other players wear.
 MATERIALS = {
-    "Glove": (0x4c4638, 0.85, 0.0), "GloveArmour": (0x242422, 0.55, 0.0), "Sleeve": (0x667052, 0.92, 0.0),
+    "Glove": (0x4c4638, 0.85, 0.0), "GloveArmour": (0x242422, 0.68, 0.0), "Sleeve": (0x667052, 0.92, 0.0),
     "SleeveTrim": (0x515a41, 0.88, 0.0),
 }
 NAMES = list(MATERIALS)
@@ -75,12 +75,19 @@ LOOSE_COST = 500.0
 CUP_TRIES = 16
 WRAP = (25.0, 80.0)
 WRAP_COST = 0.5
-# Round a pistol's grip the thumb turns further at its root than round a rifle's (degrees): across the back strap to
-# the frame's far side, twisted further one way so its tip joint bends in toward the frame; that tip joint may bend up
-# to THUMB_TIP (a rifle's thumb up to 45).
-THUMB_WIDE = 40
-THUMB_TWISTS = tuple(range(-90, 61, 15))
+OVER_COST = 4.0
+# How far a resting finger's last joint bends for each degree of its middle one (relaxed fingers curl together).
+TIP_COUPLE = 0.7
+# Round a grip with a `thumb_at` mark (the pistols', and the rifle's: the owner, 2026-11-05, its thumb round the
+# grip) the thumb turns further at its root (degrees): across the back strap to the grip's far side, twisted so its
+# tip joint bends in toward it (the web's weights are smoothed for this, glove.smooth_web); that tip joint may bend up
+# to THUMB_TIP (a support hand's thumb up to 45).
+THUMB_WIDE = 60
+THUMB_TWISTS = tuple(range(-135, 61, 15))
 THUMB_TIP = 60
+# The knuckle bends a grip's thumb tries with each turn at its root, so it can come round the back strap's corner and
+# lie along the grip's side (degrees).
+THUMB_BENDS = (0, 20, 40, 60)
 MOVE_COST = 1000.0
 # With a mark for the little finger's knuckle: its cost per metre off that mark (against degrees of bend), unless the
 # hold gives its own (`pinky_cost`).
@@ -127,15 +134,24 @@ RIGHT = {"d": 0.006, "f": 0.038, "x": 0.012, "slant": 30.0, "wrap": -30.0, "thum
          "thumb": ((-45.0, 0.0, 30.0), (35.0, 25.0))}
 # The left hand under a rifle's handguard (the owner's photos 123627, 123646, 123656): `y` along it (rifle +Y), its
 # palm centre placed with the handguard's centre line `forward` toward the fingers (far enough that the fingers rest on
-# its right side rather than reaching over its top: the owner, 2026-11-05) and `depth` out of the palm, seated
+# its right side rather than reaching over its top: the owner, 2026-11-05; the hand a little further right, its
+# wrist less turned in: 19:41) and `depth` out of the palm, seated
 # on it and held `standoff` off; its turn found by `cup` over `search` ((yaw), (pitch), (roll) ranges, degrees: the
-# fingers' line yawed from forward toward the right and pitched up, the palm rolled from facing up toward the left),
+# fingers' line yawed from forward toward the right and pitched up, the palm rolled either way from facing up; the
+# turn is fixed at 80 and 25 degrees: the palm cups the handguard's underside round its lower left corner, the
+# knuckles under its lower right one, so the fingers lie along the right side with their tips below the rail (the
+# critic, photo 123656); steeper, the knuckles rise up the side and the fingers stand over the top),
 # the forearm rising toward `rise` degrees from below. The arm comes from a bladed stance: its shoulder moved
-# `shoulder` (eye space), the elbow at least `drop` below it and at most `across` in toward the body. The thumb reaches
-# along the handguard's left side for (thumb_x, y + thumb_f, thumb_z), its length kept close to it (thumb_hug).
-GUARD = {"kind": "guard", "y": 0.190, "forward": 0.030, "depth": 0.034, "standoff": 0.006,
-         "search": ((70, 100), (30, 60), (0, 30)), "rise": 50.0, "shoulder": (-0.04, 0.02, -0.08), "drop": 0.06,
-         "across": 0.25, "thumb_x": -0.023, "thumb_f": 0.05, "thumb_z": 0.055, "thumb_hug": 3.0,
+# `shoulder` (eye space; forward and down under the rifle, higher than at 48 degrees so the forearm comes in flatter,
+# about 33 degrees, and the wrist stays near 23 degrees with the hand this flat), the elbow at least
+# `drop` below it and at most `across` in toward the body. The thumb reaches
+# along the handguard's left side for (thumb_x, y + thumb_f, thumb_z), its length kept close to it (thumb_hug). No
+# finger's glove rises above `tips_below` (replica space; the rail's top is 0.0735): the fingers rest on the right side
+# and none shows over the top from the left (the owner's 16:30 note, the critic).
+GUARD = {"kind": "guard", "y": 0.190, "forward": 0.052, "depth": 0.034, "standoff": 0.006,
+         "search": ((80, 80), (25, 25), (-40, 40)), "rise": 30.0, "shoulder": (-0.02, 0.12, -0.08), "drop": 0.06,
+         "across": 0.25, "thumb_x": -0.023, "thumb_f": 0.05, "thumb_z": 0.055, "thumb_hug": 3.0, "tips_below": 0.068,
+         "tip_at": (0.0275, 0.010, 0.046), "tip_swing": 8.0,
          "fingers": {"Index": (35, 35, 20), "Middle": (40, 45, 30), "Ring": (40, 45, 30), "Pinky": (35, 40, 25)},
          "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
 # A pistol is held in the right hand alone, as the game's look draws it: the left arm hangs at the side, out of view
@@ -149,28 +165,33 @@ DOWN = {"kind": "down", "at": (0.0, 0.06, -0.40),
 # near the front strap low down (`pinky`: the hand turned to lay all three nearest their marks, then rolled about the
 # first two to keep the wrist straightest and the little finger's knuckle near its mark); so the web of the hand wraps
 # the back strap under the beavertail, the fingers close up under the trigger guard (swung `swing` toward the index)
-# with the little finger on the grip too, and the thumb reaches forward along the frame's left side under the slide
-# (its tip toward `thumb_at`). The arm reaches out
+# with the little finger on the grip too, and the thumb comes round the back strap's corner and lies forward and a
+# little down along the grip's left side, as in 123843 (its tip toward `thumb_at`; along the frame under the slide it
+# stood out past the slide in the aimed view, the owner's 19:41 note), held close to the grip (`thumb_hug`) so it
+# doesn't stand off the panel seen from behind (the critic). The arm reaches out
 # to it, as a pistol is held: its shoulder raised and drawn back `shoulder` (eye space), its elbow free to come up
 # to the shoulder's height (`drop`).
-PISTOL_RIGHT = dict(RIGHT, web=(0.012, -0.095, -0.045), index=(0.024, -0.042, -0.040), pinky=(0.026, -0.058, -0.098),
-                    thumb_at=(-0.024, -0.045, -0.012), thumb_hug=3.0, shoulder=(0.0, -0.12, 0.10), drop=0.0,
+PISTOL_RIGHT = dict(RIGHT, web=(0.012, -0.095, -0.045), index=(0.018, -0.042, -0.040), pinky=(0.018, -0.058, -0.098),
+                    thumb_at=(-0.020, -0.058, -0.060), thumb_hug=6.0, shoulder=(0.0, -0.12, 0.10), drop=0.0,
                     swing=(-15.0, -15.0, -15.0))
-# The Cyber Pistol: the GBB's marks laid on its own grip (the owner: the two grips should look the same), the web a
-# little lower under its long tang; its frame by the rear block leaves the thumb room only high along it.
-CYBER_RIGHT = dict(PISTOL_RIGHT, web=(0.012, -0.110, -0.052), index=(0.025, -0.045, -0.040),
-                   pinky=(0.024, -0.055, -0.096), thumb_at=(-0.026, -0.048, -0.014))
-# The AEG Rifle's grip: the same three marks, the hand high on the short grip so the little finger closes round its
-# foot (the owner, 2026-11-05), the knuckles' line raked back with the grip; the shoulder drawn in and back a little
-# to keep the wrist straight.
-AEG_RIGHT = dict(RIGHT, web=(0.047, -0.097, -0.054), index=(0.030, -0.031, -0.036), pinky=(0.026, -0.064, -0.092),
-                 pinky_cost=2000.0, swing=(-10.0, -10.0, -10.0), shoulder=(-0.04, -0.03, 0.0))
+# The Cyber Pistol, resized to the GBB's proportions (CZ1): the GBB's marks (the owner: the two grips should look the
+# same), the web 2 mm further back and lower on its more upright back strap and the index knuckle 2 mm back for its
+# trigger, 5 mm further from the back strap than the GBB's.
+CYBER_RIGHT = dict(PISTOL_RIGHT, web=(0.012, -0.097, -0.047), index=(0.018, -0.044, -0.040))
+# The AEG Rifle's grip: the same three marks, the hand high on the short grip with the little finger wholly on it, its
+# knuckle above the grip's flared foot (the owner, 2026-11-05; the critic: half of it hung below), the knuckles' line
+# raked back with the grip, the web closer in over the back strap so the thumb reaches round onto the grip's left
+# side, high on it (`thumb_at`, its length kept close: the owner, 18:37, 19:41); the shoulder drawn in, back and a
+# little down to keep the wrist straighter (about 22 degrees).
+AEG_RIGHT = dict(RIGHT, web=(0.042, -0.103, -0.056), index=(0.030, -0.031, -0.036), pinky=(0.024, -0.068, -0.078),
+                 pinky_cost=2000.0, swing=(-10.0, -10.0, -10.0), shoulder=(-0.04, -0.08, -0.02),
+                 thumb_at=(-0.020, -0.062, -0.045), thumb_hug=5.0)
 HOLDS = {
     "aeg": Hold("aeg.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.073, -0.026), 31.0, 0.046, 0.0155),
                 AEG_RIGHT, GUARD),
     "pistol": Hold("pistol.glb", godot_to_eye(0.12, -0.15, -0.34), Grip((0.0, -0.070, -0.016), 27.0, 0.046, 0.0130),
                    PISTOL_RIGHT, DOWN),
-    "cyber": Hold("cyber.glb", godot_to_eye(0.12, -0.15, -0.34), Grip((0.0, -0.0905, -0.036), 17.0, 0.060, 0.0158),
+    "cyber": Hold("cyber.glb", godot_to_eye(0.12, -0.15, -0.34), Grip((0.0, -0.074, -0.024), 17.0, 0.048, 0.0128),
                   CYBER_RIGHT, DOWN),
 }
 
@@ -185,7 +206,8 @@ def roll_about(v: Vector, axis: Vector, deg: float) -> Vector:
 
 
 def tuned(spec: dict) -> dict:
-    """`spec` with any value overridden from the environment (BL_<KEY>=value; BL_THUMB=across,twist,bend,tip1,tip2),
+    """`spec` with any value overridden from the environment (BL_<KEY>=value; BL_THUMB=across,twist,bend,tip1,tip2;
+    BL_SEARCH=yaw0,yaw1,pitch0,pitch1,roll0,roll1),
     for tuning a hold by eye."""
     out = dict(spec)
     for k, v in spec.items():
@@ -194,6 +216,9 @@ def tuned(spec: dict) -> dict:
             out[k] = float(env)
         elif env is not None and isinstance(v, tuple) and all(isinstance(c, float) for c in v):
             out[k] = tuple(float(x) for x in env.split(","))
+        elif env is not None and k == "search":
+            f = [int(x) for x in env.split(",")]
+            out[k] = ((f[0], f[1]), (f[2], f[3]), (f[4], f[5]))
         elif env is not None and k == "thumb":
             f = [float(x) for x in env.split(",")]
             out[k] = (tuple(f[:3]), tuple(f[3:5]))
@@ -207,6 +232,16 @@ def replica_objects(hold: Hold) -> list:
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=os.path.join(REPLICAS, hold.file))
     new = [o for o in bpy.data.objects if o not in before]
+    # The importer leaves the replica's first clip (Fire) playing, its slide part way back: the hold is fitted to
+    # the replica at rest, so no clip may pose it.
+    for o in new:
+        if o.type == "ARMATURE":
+            if o.animation_data:
+                o.animation_data.action = None
+                for track in o.animation_data.nla_tracks:
+                    track.mute = True
+            for pb in o.pose.bones:
+                pb.matrix_basis = Matrix.Identity(4)
     for o in new:
         if o.parent is None:
             o.matrix_world = Matrix.Translation(hold.at) @ o.matrix_world
@@ -256,6 +291,10 @@ def elbow_for(rig: Rig, side: str, hand_m: Matrix, quiet: bool = False) -> tuple
     if quiet:
         return best[1] - s, best[0]
     fore = w - best[1]
+    if os.environ.get("BL_DEBUG"):
+        ideal = w - straight * b
+        print("   %s straight-wrist elbow %s, %.3f from the shoulder %s (upper arm %.3f)" % (
+            side, tuple(round(c, 3) for c in ideal), (ideal - s).length, tuple(round(c, 3) for c in s), a))
     print("  %s: reach %.3f of %.3f, elbow %s, wrist %.1f deg off the forearm, forearm rising %.0f deg" % (
         side, (w - s).length, a + b, tuple(round(c, 3) for c in best[1]), best[0],
         math.degrees(math.atan2(fore.z, fore.xy.length))))
@@ -282,7 +321,8 @@ def pose_fingers(hand: pose.Hand, spec: dict, col: Collider, thumb_to: Vector = 
     if thumb_to is not None:
         turns = (THUMB_WIDE, THUMB_TWISTS) if wide else (pose.THUMB_SWING, (-30, 0, 30))
         tip = math.radians(THUMB_TIP if wide else 45)
-        curls["Thumb"] = hand.thumb(col, (0.5, 1.0, 0.8), (0.0, math.radians(40), tip), thumb_to, hug, *turns)
+        curls["Thumb"] = hand.thumb(col, (0.5, 1.0, 0.8), (0.0, math.radians(40), tip), thumb_to, hug, *turns,
+                                    THUMB_BENDS if wide else (0,))
     else:
         base, bends = spec["thumb"]
         curls["Thumb"] = hand.thumb_at(base, bends, col)
@@ -371,6 +411,23 @@ def right_hand(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider, ob
     return pole_r, curls
 
 
+def trigger_again(rig: Rig, hand: pose.Hand, objects: list, arms: list, frame: list) -> None:
+    """After the palm has pressed in, the trigger finger finds the trigger again from where the hand now is; kept only
+    if its glove stays clear of the frame."""
+    bones = ["Index%d_R" % k for k in (1, 2, 3)]
+    before = {b: rig.local[b].copy() for b in bones}
+    col = Collider([o for o in objects if o.type == "MESH" and not o.name.startswith(("Figure", "Icosphere",
+                                                                                        "Trigger"))])
+    hand.onto("Index", trigger_face(objects), col, (70, 90, 70), 40)
+    rig.write()
+    if pose.clipping(arms, frame)[0]:
+        for b in bones:
+            rig.fk(b, before[b])
+        rig.refresh("Index1_R")
+        rig.write()
+        print("  trigger finger kept where it was (clipping)")
+
+
 def left_on_guard(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider) -> tuple:
     """The left hand under a rifle's handguard, its fingers up the right side and the index finger along the side
     rail, the thumb along the left side."""
@@ -386,13 +443,24 @@ def left_on_guard(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider)
         # Held off the handguard a little where the fingers' roots would press into it.
         return Matrix.Translation(-palm.normalized() * spec["standoff"]) @ m, palm
 
+    hand.tip_top = None
     hand_m, palm = cup(rig, hand, j, to_eye, spec, col, placed)
     hand.normal = palm
+    hand.tip_top = (to_eye @ Vector((0.0, 0.0, spec["tips_below"]))).z
     pole_l, _ = elbow_for(rig, "L", hand_m)
     pose.place_arm(rig, "L", hand_m, pole_l, quiet=True)
     # The thumb forward along the handguard's left side.
     thumb_to = to_eye @ Vector((spec["thumb_x"], spec["y"] + spec["thumb_f"], spec["thumb_z"]))
     curls = pose_fingers(hand, spec, col, thumb_to, spec["thumb_hug"], root=True)
+    # Each fingertip then reaches for its own point on the handguard's right side, level with its knuckle and below
+    # the top (`tip_at`, replica space: x, y from the knuckle, z), so the fingers rest on the side (the owner, 16:30)
+    # rather than over the rail (the critic); each curls as a relaxed finger does (TIP_COUPLE), never a claw.
+    # tip_at x 0 turns this off.
+    inv = to_eye.inverted()
+    for name in spec["fingers"] if spec["tip_at"][0] > 0.0 else ():
+        k = inv @ rig.pose["%s1_L" % name].translation
+        target = to_eye @ Vector((spec["tip_at"][0], k.y + spec["tip_at"][1], spec["tip_at"][2]))
+        curls[name] = hand.onto(name, target, col, (90, 100, 0), spec["tip_swing"], TIP_COUPLE)
     if os.environ.get("BL_DEBUG"):
         m = rig.pose["Thumb3_L"]
         tip = m.translation + m.to_3x3().col[1] * rig.length["Thumb3_L"]
@@ -437,7 +505,9 @@ def cup(rig: Rig, hand: pose.Hand, j: dict, to_eye: Matrix, spec: dict, col: Col
         rig.pose["Hand_L"] = c[4]
         curls = [hand.settle(name, start, col, root=True)[0] for name, start in spec["fingers"].items()]
         off = sum(max(0.0, WRAP[0] - a, a - WRAP[1]) for a in curls)
-        score = c[0] + off * WRAP_COST
+        # Fingertips standing over the handguard's top cost as much as fingers left open (mm over).
+        over = sum(hand.over(name) for name in spec["fingers"]) * 1000.0
+        score = c[0] + (off + over * OVER_COST) * WRAP_COST
         if os.environ.get("BL_DEBUG"):
             print("    cup yaw %d pitch %d roll %d: %.1f + fingers %s" % (c[1], c[2], c[3], c[0], curls))
         if best is None or score < best[0]:
@@ -453,6 +523,7 @@ def left_down(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider) -> 
     index_at = SHOULDER["L"] + Vector(spec["at"])
     hand_m = knuckle_pose(rig, hand, j, index_at, Vector((0.0, -1.0, 0.0)), Vector((1.0, 0.0, 0.0)))
     hand.normal = Vector((1.0, 0.0, 0.0))
+    hand.tip_top = None
     pole_l, _ = elbow_for(rig, "L", hand_m)
     pose.place_arm(rig, "L", hand_m, pole_l, quiet=True)
     curls = pose_fingers(hand, spec, col)
@@ -496,10 +567,12 @@ def solve(rig: Rig, hands: dict, j: dict, hold: Hold, arms: list) -> tuple:
         # touches it (the trigger finger stays on its mark).
         for side in ("R", "L") if hold.left["kind"] == "guard" else ("R",):
             print("  %s palm pressed in %.1f mm" % (side, pose.press(rig, hands, arms, frame, poles, side) * 1000))
+        trigger_again(rig, hands["R"], objects, arms, frame)
         fingers = [("R", n) for n in ("Middle", "Ring", "Pinky", "Thumb")]
         if hold.left["kind"] == "guard":
             fingers += [("L", n) for n in ("Index", "Middle", "Ring", "Pinky", "Thumb")]
         print("  tightened", pose.tighten(rig, hands, arms, frame, fingers))
+        print("  wrapped", pose.wrap(rig, hands, arms, frame, [f for f in fingers if f[1] != "Thumb"]))
         # Whatever the last passes did, the arms are checked once more before anything is written.
         hits, tally = pose.clipping(arms, frame)
         if hits:

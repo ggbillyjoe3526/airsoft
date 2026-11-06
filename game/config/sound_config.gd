@@ -68,13 +68,18 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 ## (m), a little past the furthest a bot hears one (DoorConfig.heard, 20 m).
 @export var door_gain: float = 0.8
 @export var door_reach: float = 26.0
-## Smoke and flash bombs (SF1): a bomb's knock where it bounces (at the gain times its speed into the surface over
-## bounce_full_speed, at most the gain) and a smoke's pop and hiss, both heard out to prop_reach; a flash's bang, heard
-## out to bang_reach (m). The pin and the throw are mechanisms (mechanism_gain).
+## Smoke and flash bombs (SF1): a bomb's bouncing can where it bounces (at the gain times its speed into the surface
+## over bounce_full_speed, at most the gain), a bounce within bounce_hold (s) of the one that started it left silent,
+## as the can's own knocks and rattle play on; a smoke going off (its spray), both heard out to prop_reach; a flash's
+## bang, heard out to bang_reach (m), at bang_gain (the owner's balloon pop is left clean, so 6 dB quieter in its file
+## than the clipped one was). The pin is a mechanism at pin_gain (his click is left at its peak, its loudest 50 ms
+## 22 dB under it, so it needs more than the other mechanisms); the throw a mechanism at mechanism_gain.
 @export var bounce_gain: float = 0.7
 @export var bounce_full_speed: float = 6.0
+@export var bounce_hold: float = 0.45
 @export var smoke_pop_gain: float = 0.8
-@export var bang_gain: float = 1.0
+@export var bang_gain: float = 1.4
+@export var pin_gain: float = 1.6
 @export var bang_reach: float = 60.0
 ## Attack / Defend's flag rope ratcheting a notch at the pole (FLAG_ROPE), heard from the pole.
 @export var rope_gain: float = 0.8
@@ -196,8 +201,8 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 @export var ambience_gain: float = 0.5
 ## The referee's pea whistle: whistle_short and whistle_long blasts, whistle_variants of each, played at whistle_gain on
 ## the Interface bus: the browser's 0.25 lifted 5 dB, as a real whistle's loudest 50 ms sit that far under the old
-## full-scale sine's. Since AU3 a stand-in pea whistle synthesised by tools/cut_recordings.py (pea_whistle) until the
-## owner records a better one; his AU2 takes are set aside. The rest are the browser game's draft's recipe
+## full-scale sine's. Since AU6 the owner's own pea whistle, cut by tools/cut_recordings.py (AU3's synthesised stand-in
+## and his AU2 takes are set aside). The rest are the browser game's draft's recipe
 ## (tools/render_whistle.gd, the browser game's whistle.ts): a sine at whistle_hz whose pitch warbles at
 ## whistle_warble_hz by whistle_warble_depth (a share of the pitch: the pea rattling), fading in over whistle_attack (s)
 ## and out over the last whistle_release (s).

@@ -76,6 +76,9 @@ The browser game's loader settings for every model (scale, facing, budgets) are 
 
 - **The rigged figures.** `human.glb` and `robot.glb` share a 65-bone skeleton, each with LOD1 and LOD2 meshes and 32
   clips. A new figure uses the same skeleton and clip names (`tools/blender/bot-figure/README.md`).
+- **Parts spliced in.** The human's knee and elbow pads (`Kit_Pads`, 3,000 / 1,000 / 300 triangles at LOD0, LOD1,
+  LOD2, part of the figure's budget) are built apart and spliced into `human.glb` by node name
+  (`tools/blender/figures/README.md`); a rebuilt body keeps their node names and reruns `pads.py` to refit them.
 - **Scale and facing.** A figure stands as tall as the hit volume (1.73 m, feet to the top of the head; the hitbox
   doesn't change), measured on `body` and the legs when it has them, so a raised hand doesn't shrink it. Its feet sit
   on the ground. glTF models face +Z and the figures face -Z, so a model is turned a half turn unless it already faces
@@ -150,6 +153,19 @@ replicas). Each power source, by its pool ID, is drawn from one file.
 - **Built by** `tools/blender/power/`: `gas_bottle.py`, `lipo_battery.py`, `standard_battery.py` (wires and plugs in
   `leads.py`) and `spring.py`.
 
+### Grenade models
+
+The smoke and flash bombs in a match (BL9): thrown, lying where they landed and in the thrower's hand. One file per
+bomb, `assets/models/grenades/<smoke|flash>.glb`, built by `tools/blender/grenades/grenades.py`.
+
+- **Space.** Metres, life size, one mesh. The long axis is up (Blender +Z, the game's +Y) through the origin, which is
+  the middle of the bomb's body; the game spins it about that point in flight and lays it on its side when it rests,
+  its +X side up (the smoke's lever), lifted by the model's own lowest reach (`GrenadeView.LIE`).
+- **Materials.** Plain colours, drawn as the file sets them. The material named `Kind` is painted in the bomb's own
+  colour (`GrenadeView.BODY_COLOURS`: green smoke, violet flash), so the model matches the HUD's bomb icons. No
+  colour within 20° of a team's hue, as for every prop.
+- **Budget.** 200 KB, 5,500 triangles a file. No textures.
+
 ## Blender, step by step
 
 For a Quaternius or Kenney character.
@@ -175,9 +191,13 @@ foundations).
 | First-person arms | ≤ 8 MB, ≤ 40,000 triangles, ≤ 4 materials, 2K textures |
 | A replica model | ≤ 6 MB, ≤ 40,000 triangles in the hands, ≤ 3,000 on a figure, ≤ 6 materials, 2K textures |
 | A replica's parts file | ≤ 2 MB, ≤ 10,000 triangles a part |
+| A grenade model | ≤ 200 KB, ≤ 5,500 triangles, plain colours |
 | A prop | ≤ 1 MB, ≤ 5,000 triangles (a landmark ≤ 30,000 with LODs), sharing texture sets with other props |
 | A surface texture set | ≤ 6 MB at 2K (colour, normal, ORM) |
 | Everything external | ≤ 25 MB |
+
+The human figure's 60,000 is shared (BL10 to BL12, 2026-11-05): the body 34,000 / 11,000 / 3,300 triangles (LOD0 /
+1 / 2), the plate carrier 14,000 / 4,500 / 1,500, the pads 3,000 / 1,000 / 300, the largest head 8,000 / 2,600 / 800.
 
 These are desktop budgets (owner, 2026-10-18). Every figure on the field (six in a 3v3) shares the model's geometry,
 so the model's triangle count, not the team size, sets the cost, and LODs keep distant figures cheap. Low draws

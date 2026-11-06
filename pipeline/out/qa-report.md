@@ -1,37 +1,21 @@
-Task: BL6 targeted rerun · head 229bd55 (e7725d6..HEAD) · Verdict: Pass
-Method: parsed assets/models/replicas/cyber.glb with python3 -I (numpy), against e7725d6 (the last passed head) and
-origin/main (74cdd35). No Godot, no check.sh (CI runs the unit tests). No tests added; nothing under game/ touched.
+Task: CZ1 (no task block) · QA commit none (no tests added) · Verdict: Pass
 
-1. Bones and clips: Pass.
-   - Against e7725d6 the only differences in the whole file are the trigger bone and its mesh node: bone translation
-     y 0.0165 -> 0.0045 (z -0.0125, x 0), the Trigger mesh node -0.0165 -> -0.0045, the trigger's inverse bind matrix
-     (origin column y -0.0165 -> -0.0045) and the trigger translation keys in Fire, Selector, Reload and Inspect
-     (every key moved by exactly -0.012 in y). All other bones, node transforms and inverse bind matrices are identical.
-   - Rotation keys of the trigger are identical to e7725d6 (Fire peak x -0.14936, w 0.98878 = -17.18 deg about X).
-     Against origin/main they differ by at most 7.5e-5 in a quaternion component (0.009 deg), which arrived with the
-     earlier BL6 rebuild, not with this change; harmless.
-2. Game and tests do not read the trigger bone: Pass. find_bone is used only for "selector" (selector_pose.gd),
-   "slide" (slide_lock_pose.gd), the sight-fold bones and figure_graph.gd's path lookup (the figure rig, not cyber).
-   No "trigger" bone name in game/ or tests/ (hits are comments and the input flag).
-3. Trigger inside the guard opening: Pass. Trigger mesh (302 vertices, mm in model space) spans y 1.2 to 8.4,
-   z -36.7 to -11.1, |x| <= 2.8. At rest and at the Fire peak (rotated -17.18 deg about the bone at y 4.5, z -12.5),
-   all 224 vertices below z -16.5 lie inside GUARD_HOLE, the nearest 1.85 mm (rest) and 1.88 mm (peak) from its edge.
-   The 78 vertices above it lie inside TRIGGER_SLOT (y -8..13, z -26..-8, half width 3.4), and |x| 2.8 < 3.4.
-   At the peak the blade reaches y -2.9, z -36.1: clear of the opening's back (-11.5) and floor (-40).
-   Body vertices in the trigger corridor (104) are all on the slot's walls (x = +-3.4); none inside the blade's path.
-4. Figure mesh: Pass. The new frame outline (13 points, GUARD_LOOP[:5] plus floor, grip and tang) has no crossing
-   edges and no vertex touching another edge: a simple polygon (clockwise, area 11468.5 mm2). In the glb, welded by
-   position the Figure is a closed manifold (144 vertices, 240 triangles, no duplicate or unpaired edges, positive
-   volume, no degenerate triangles). Each side plane (x = +-15.8) holds 11 outward triangles whose area sums to the
-   polygon's exactly (11468.5), so none overlap or are flipped; the other 2 triangles per side face inward (the
-   window prism's base), hidden.
-5. Empties, materials and clips: Pass. Against e7725d6 the empties (Muzzle, MagWell, SlideBack, TorchMount, FrontSight,
-   RearSight, the lower-case bones), material names and order, mesh primitives and clip lengths (Fire 0.1333, Selector
-   0.2, Reload 1.1, Inspect 2.0) are identical. Against origin/main the clip lengths and the five material names are
-   the same (the list order differs, and primitives index it by name-order); the empties are the same except two
-   differences that predate this rerun and passed before: the Figure node has no -0.3 y offset any more, and
-   FrontSight and RearSight are listed in a different order (same positions).
+Checked on f1685e8's committed glbs (extracted from git, since the working tree holds uncommitted sight edits by the main thread) with bpy 5.2.3.
 
-Blocking findings: none. Advisory findings: none new.
-Not testable here: how the trigger and guard look and reach in the owner's hand, and the figures' pistol in play
-(needs a display); the Godot import of the rebuilt glb and the unit tests (CI).
+Blocking: none.
+Advisory:
+- docs/ASSETS.md says 37,802 triangles in the hands; the glb has 37,800 (Body 29,080 + Magazine 4,576 + Slide 3,036 + Selector 576 + Trigger 532). Under the 40k budget either way; fix the figure.
+- Body/Magazine mesh overlap pairs rose 677 to 1,123 (nested parts, expected; the magazine is inside the grip, x 14.2 vs body 15.6, only the pad is wider at 16.1 below the body).
+
+Findings per ask:
+- Torch: TorchMount empty z -22.7, rail underside z -22.34 (Body), torch top z -22.4 (replicaParts/cyber.glb): sits on the rail within 0.3 mm; torch y 35.6..99.9 inside body front 101.5, UnderLaser at mount y 69.4.
+- Clip keys: all Fire/Inspect/Reload/Selector curves start and end at rest (magazine, slide, trigger unchanged at the ends); reload drop 193.5 mm (old 230 x 0.84), inspect 12.9, slide recoil 12.5 (old 14), trigger pull rotation unchanged (17 degrees). Rest pose puts the magazine in the well.
+- Trigger: bone at y -7.6 (GBB reach), mesh y -16.3..-3.9, z -30.9..-8.5; zero triangle overlap with Body at rest. Could not verify the pulled pose or slide-back clearance (the imported pose did not drive the evaluated mesh headlessly); check by eye in the viewer.
+- Poke-through: Selector 14.4 wide vs body 15.6 (inside); Slide x 10.1; no part exceeds the body outline except the magazine pad. Owner renders (cz1/ 1, 3) show no stray geometry.
+- Sizes: Body y -102.2..101.5, z -105.8..31.3, x +-15.6; GBB y -104.7..98.9, z -105.7..4.1 (slide 26.1), x +-15.5. Matches the brief. Empties as reported (Muzzle, Rear/FrontSight z 28.8, MagWell -72.9,-101.6).
+- Rear-sight test: new expectation (0, 0.0288, 0.06835) matches the RearSight empty (28.8, -68.4 mm) within 1e-4.
+
+Tests added or changed: none by QA. tests/unit/test_cyber_pistol.gd:78 (changed by the worker) · rear sight at the GBB's size · fails against the old value (0.04, 0.0768) since the empty moved.
+Ran: test_cyber_pistol.gd 8/8 pass; with the untracked test_cyber_sights.gd 10 tests, 56 asserts, all pass. Note: -gtest alone runs the whole suite (.gutconfig.json); pass -gdir= as tools/unit_tests.sh does. Run on the working tree, whose sight edits are uncommitted; the cyber.glb differs by 192 bytes from the commit, empties identical.
+Not run: tools/check.sh (the main thread owns it).
+Owner's list: how the hands grip the pistol in the first-person view (needs a display); torch light on the rail; trigger pull and slide recoil clearance in motion.

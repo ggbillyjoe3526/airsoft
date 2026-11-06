@@ -5,7 +5,8 @@ plays them all. A change that alters what a section describes updates that secti
 as described; anything else is worth reporting ([Reporting what you find](#reporting-what-you-find)).
 
 Each section applies once its feature lands; `docs/FEATURES.md` lists what has. The checks are carried from the
-browser game, whose guide (with the reasons and exact figures) stays readable in `legacy/browser/docs/` until 0.1.
+browser game, whose guide (with the reasons and exact figures) stays readable in `legacy/browser/docs/` at the git tag
+`0.1-dev.1`.
 
 ## Get the game running
 
@@ -68,6 +69,10 @@ Play › Mode Elimination on Depot, Match › Opponents Normal. Set the mouse se
 - [ ] **Watch the crosshair.** It opens when you run or jump, closes almost at once when you stop, and is tightest
   crouched and still; crouch-walking sits between standing still and walking.
 - [ ] **Sprint up and down Depot's dock ramps.** Uphill loses about a quarter of a sprint's pace (a confirmed call).
+- [ ] **Watch bots run (GA1).** On Depot, watch bots walk, run, sprint, strafe and back-pedal past you, and crouch-walk.
+  Their feet stay planted on the floor without sliding, each step rolls heel to toe, and the legs keep pace with the
+  speed. Strafing, the legs turn into the step while the rifle stays on its aim. Does any gait look wrong, especially
+  the back-pedal and strafes (quick steps, about 4 a second) and the low crouch walk (short quick steps)?
 - [ ] **Controls through a vault (BP5).** Vault a low wall (Depot's office hall has one). On Semi, hold left click
   through it: one BB, not two. Hold right click: the sight drops and comes back.
 
@@ -693,6 +698,9 @@ same and throw them (SF2).
   nothing happens. Throw one at your own feet: your screen goes white and the sound dips, then fades back. Is the
   blinding fair, and is it fun rather than annoying?
 - [ ] **Turn away.** Throw a flash, then turn your back on it before the bang: nothing. Side on, a short wash.
+- [ ] **Bomb sounds (AU7).** Throw a smoke and a flash on the range, near and from 10 to 20 m away: the ring pull, then
+  your tin can clattering where it lands, starting right as it hits, and again if it bounces on, the smoke hissing as it goes
+  off with no deep pop, and the flash a clean balloon pop. Do they sound like your recordings? Is the flash loud enough?
 - [ ] **Bots' smoke (SF2).** Pin a bot in cover from 10 to 30 m with steady fire: now and then it smokes the line
   between you (more often on Hard). Does it read as a bot buying time, and is it annoying how often?
 - [ ] **Bots' flash (SF2).** Let a bot hear you round a corner, then wait: it may flash the corner, turn its back and
@@ -1291,6 +1299,24 @@ The bolt-action in the grey chassis from your first sniper photo (2026-11-05). D
   silencer on the barrel's end in place of the cap.
 - [ ] **Hold:** the right hand holds the grip in first person and on the bots; the rifle sits right in the hands.
 
+## The attachments from your photos (BL8)
+
+Every attachment rebuilt from your reference photos (2026-11-05). Where a folder mixed styles, the model follows the
+style most of its photos show.
+
+- [ ] **Red dot:** a closed micro red dot on a low rail riser. Aim: the dot sits mid-window and the view round the
+  small window stays open; the rifle sits a little nearer your eye than before (the window is smaller than the old
+  round one).
+- [ ] **2x scope:** the magnifier on its hinged mount. Aim: the magnified view fills the eyepiece with no dark ring
+  or frame showing through the glass.
+- [ ] **Variable scope:** the prism scope with the red fibre front sight. Aim and wheel through 2x to 6x on the AEG
+  and the sniper rifle: the view fills the eyepiece.
+- [ ] **Grips:** the short vertical grip and the swept angled grip under the AEG's handguard, nothing poking through.
+- [ ] **Silencers:** the rifle's tube on the AEG and sniper; the pistol's short, stout one on its knurled collar.
+- [ ] **Laser and torch:** under the GBB Pistol's rail, alone and together (the torch hangs under the laser); the
+  torch on the Cyber Pistol and on the AEG's right side. At night the beam leaves the torch's head.
+- [ ] **Customise and paints:** each part in each paint; the Loadout and Armory pictures show them sharp and to scale.
+
 ## The BB model (BM1)
 
 Every BB in flight is now a proper Blender model, round from every side instead of the old eight-sided ball.
@@ -1300,6 +1326,54 @@ Every BB in flight is now a proper Blender model, round from every side instead 
 - [ ] **At range:** BBs still read as small bright dots with a faint trail at 20 to 40 m, on pale walls and the sky.
 - [ ] **Glowing BBs:** on Woodland at night, glowing BBs are round green balls with their streak, as before.
 - [ ] **Frame rate:** a full-auto magazine dump on Low keeps its frame rate (F3 box).
+
+## The magazine models (MAG1)
+
+The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built from its replica's standard magazine
+(2026-11-05).
+
+- [ ] **Hi-Cap (AEG Rifle):** in Customise, the magazine is about a third longer than the standard one, curving on
+  down with the same ribs, with a knurled winding wheel showing under its base plate.
+- [ ] **Low-Cap (AEG Rifle):** a short magazine, about two thirds of the standard one's length below the rifle.
+- [ ] **Extended (GBB Pistol):** the magazine sticks out about 3.5 cm below the grip, with a row of holes down its back
+  and its base pad in the frame's colour.
+- [ ] **Reload:** with each fitted, the reload drops that magazine out and brings it back in; nothing pokes through
+  the hands, the grip or the rifle.
+- [ ] **Bots:** a bot with the Support or Pointman kit carries the longer magazine on its replica.
+
+## The smoke and flash bomb models (BL9)
+
+- [ ] **In hand:** take each bomb in hand (mouse wheel). The smoke is a grey canister with a green stripe, a black
+  lever and a pull ring; the flash a slim olive tube with a violet band and a ring. Nothing pokes into the view.
+- [ ] **Thrown:** throw each. It tumbles in flight, bounces and comes to rest lying on its side on the ground, not
+  sunk into it or floating over it.
+- [ ] **Bots' bombs:** the ones bots throw look the same, and the HUD's bomb icons match the stripe and band colours.
+
+## Bots throwing bombs (GT1)
+
+- [ ] **The wind-up:** on the Practice Range or in a match, watch a bot throw a smoke or flash from 5 to 15 m. Its
+  replica goes to its chest, the bomb shows in its right hand and the left hand meets it to pull the pin. The arm
+  swings back by its ear with the left arm pointing ahead, then comes over beside the head, elbow first, never across
+  the face, and the bomb leaves as the hand reaches out ahead at head height.
+- [ ] **After:** the arm follows through down across the body, then the replica comes back up. No bomb is left in the
+  hand after it is thrown.
+- [ ] **Shape:** nothing stretches oddly at the shoulder or armpit while the arm is up, on both the soldier and the
+  robot (Settings › Dev › Robots).
+
+## GBB Pistol sights and port (GS1)
+
+- [ ] **Aim:** aim the GBB Pistol in the Range. The front post with its white dot stands in the rear sight's notch,
+  its top level with the rear sight's top, a sliver of light either side; the BBs land on the post's top.
+- [ ] **Port:** Inspect the pistol and look at the top of the slide: the barrel fills the ejection port with no dark
+  gap round it, and the slide still blows back and locks back cleanly.
+
+## The full bug pass before 0.1 Dev 2 (BP4)
+
+- [ ] **Switch Replica by keyboard.** On the Loadout page, Tab to SWITCH REPLICA and press Enter. Tab and the arrows
+  stay inside the list (they never land on a button behind it). Press Esc, or Enter on a replica: the keyboard is back
+  on SWITCH REPLICA, and Enter opens the list again.
+- [ ] **Flags from a roof.** On Woodland in Attack / Defend, if you can get onto the shelter roof by flag B, standing
+  there does nothing to the flag; at the pole's foot it rises as before.
 
 ## Reporting what you find
 

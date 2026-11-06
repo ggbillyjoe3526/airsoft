@@ -1,33 +1,33 @@
-Task: BL6 · The Cyber Pistol rebuilt in Blender from code (no task block; judged against the brief)
-Attempt: 2 of 4
-Head: 229bd55 (git rev-parse HEAD). CI passed on e11a317. At 229bd55, Lint, Review line, Callout guards and two match guards are green; unit tests 1-4 and 13 guard jobs are still running.
+Task: GA1 · The figures' running animations (no task block; judged against the brief and the record)
+Attempt: 3 of 4
+Head: 30fb3ba (targeted tests 38/38 per brief; full check.sh running separately. QA Pass at 30fb3ba, uncommitted
+qa-report.md; performance Pass at a1bbbc9, attempt 3 changed only clip data, the crouch cycle and the test)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept (holds only once every CI job at 229bd55 is green; any red job makes it Retry)
-Evidence:
-1. Figure fixed: tools/blender/replicas/cyber.py:750-754 builds the outline from GUARD_LOOP[:5] (cyber.py:133). (50.5,-23) is gone.
-   - No edge pair of the 13-point outline crosses. Its area is 11,468.5 mm2, and both caps in the glb have that same area.
-   - Rasterised at 0.25 mm, both caps have 0 overlapping cells (e11a317: 755 and 8,410 cells, up to 3 deep).
-   - The Figure is 240 tris, closed (360 edges each used twice) and has no degenerate faces. Its guard front stands at 52 mm, as on the hands model.
-   - Against e11a317, only the Figure mesh changed. Body, Slide, Trigger, Selector and Magazine are byte-identical, as are nodes, skins, materials, the animation data and the inverse bind matrices. So the attempt-1 ratios still hold (all within 5 %; the grip's 23 % is ruled by the owner).
-   - The renders cyber-v11-q_front and cyber-v11-q_rear at head show the moved guard joined to the front block's foot. Nothing floats, no gap opens under the loop, and the teeth sit clear in front of it.
-2. No game/ diff. The trigger bone, its inverse bind matrix and its keys moved together (QA: -0.012 in y, nothing else). No code calls find_bone on the trigger.
-3/5. No runtime code: cyber.py is an offline tool.
-4. Asset only. test_cp1_qa.gd:294-306 loads the Figure and its materials, and the material names are unchanged.
-6. Original design: no text, no logos, no brand names. Toy colours, ruled by the owner.
-7. figure() is still one short function, and the outline now comes from the shared constant instead of a second copy.
-8. docs/records/BL6.md fixes everything attempt 1 named:
-   - :17-18 records the 23 % deeper grip.
-   - The "safety blade" is gone.
-   - :30-31 records the trigger bone's move.
-   - :55 records the owner's 09:52 "Perfect".
-   - :10 adds the attempts row.
-QA (qa-report.md, 229bd55): Pass. Performance (performance-report.md, e7725d6): Pass. It still holds, because the hands' triangles are unchanged and the Figure's count stays 240.
-Nit, not failed: the record (:37) gives 31,330 triangles for the hands. The glb has 31,328 (24,480 + 3,108 + 2,760 + 544 + 436). Fix it the next time the record is touched.
-Must-fix for the next attempt: none. Merge only after every CI job at 229bd55 is green.
+Score: 8/8 → Accept (subject to the full check.sh passing on 30fb3ba)
+Evidence (frames in scratchpad c1/, c1q/, compared with b1/, b1q/):
+1. Attempt-2 must-fixes met. Crouch walk inside the 1.15 m ruling: knees forward over the toes, no frog splay
+   (c1q/crouch_008, crouch_012); the trailing knee clear of the floor (c1/crouch_024); the swing knee stops under the
+   forearm, not in it (c1/crouch_008); short heel-up steps (gait.py:61-64, 1.05 m, 240 a minute). Back-pedal: the torso
+   now upright over the feet, no longer leaning back; the knee about over the toes (c1/back_000, back_008 against
+   b1/back_000, back_008; Run_B pitch 6, bias 0.03). Run: shoulders over the hips, flight and heel kick kept
+   (c1/run_000-015). Walk, sprint and strafes still read well (c1/walk_*, sprint_*, left_*). References named honestly
+   (GA1.md › References). Rig and meshes unchanged, so the models rule's proportion ratios don't apply to clips.
+4. test_gait_cycle.gd:+160 turns the character a quarter and steps +X (back) and -Z (aside); a sign slip in
+   step_walk_cycle reads +X as ahead and fails the 0.619 share. Locks in my attempt-2 advisory.
+8. changelog.d/figure-running.md no longer over-claims; PLAYTEST.md:72-74 asks about the right things now.
+The owner's call, not a block: the crouch walk is still a deep squat walk (hips 0.39 m, the swing thigh above level,
+c1/crouch_008, c1q/crouch_028). That is what crouch_top_max 1.15 under an aim-owned, near-upright upper body allows
+(DECISIONS:279). A taller one (hips ~0.55 m, back bent forward, the replica held level) needs either his crouch-cover
+ruling changed or a new crouched upper body over the aim, which is outside GA1's clips. The record offers it
+(GA1.md › Defaults); the thread must put it to him in its report, not leave it only in the record.
+Advisory (no fix needed now): c1q/crouch_028 the swing shin flicks out a little as it passes; the dead clip data
+splice.mjs leaves in the .glb adds about 0.4 MB a figure (performance advisory); Run_F's 8° and Sprint's 14° dip the
+replica while moving (recorded default).
+Must-fix for the next attempt: none.
 Owner should test in the game:
-- Grip: it is 23 % deeper than the old one (63 vs 50.5 mm). Does it look right in your hand view?
-- Fire: the trigger swings from its top with no jump, and the slide kicks.
-- Aim: the front post and rear notch line up as before.
-- A bot carrying it, near and far: the guard front now matches your own.
-- The q_front view shows a small step at the top front corner of the guard opening. Does it read as intended up close?
-- Fit the torch: it should clear the teeth. Then switch to Realistic colours: grey, no glow.
+- Crouch-walk past a bot side on and three-quarter: is this low squat walk acceptable, or do you want the taller,
+  bent-forward crouch walk (needs crouch_top_max raised or a new crouched upper body)?
+- Back-pedal a bot (hold S): does it read as stepping back with weight forward, and do 4.6 steps a second look right?
+- Run and sprint a bot past you: does the forward lean read well, and is the replica's dip while running acceptable?
+- Strafe-duel a bot: does the 35° hip turn under a square rifle convince at range?
+- Run diagonally (W+A, S+D): do the feet slide where the clips blend?

@@ -3,11 +3,12 @@ MakeHuman base mesh's arm and hand (CC0 1.0, `source/makehuman_arm.obj`), with p
 is this one mirrored (arms.py).
 
 The glove is the hand's skin pushed out a glove's thickness. On it, as raised shells laid onto its surface, sit the
-parts of the owner's reference gloves (ref_images/hands/gloves): a moulded knuckle guard with a dome over each knuckle,
-a two-piece pad on each finger's first bone and one on its second, a thumb pad, a suede palm patch, a neoprene cuff and
-its hook-and-loop strap with a pull tab. A shell takes the weights of the glove beneath it, and a hard part takes only
-its bone's, so it stays rigid as the fingers close. The sleeve is a loose shell over the forearm and upper arm with a
-few soft folds (bunched over the cuff, gathered in the crook of the elbow), a banded, hemmed cuff and its tab.
+parts of the owner's reference gloves (ref_images/hands/gloves, 123404 most): one smooth moulded knuckle shell with a
+raised border, a small oval pad on the back of each finger's first bone and one on the thumb's, a rounded suede palm
+patch, a neoprene cuff and its hook-and-loop strap with a pull tab; the fingertips plain. A shell takes the weights
+of the glove beneath it (the knuckle shell only its bone's, so it stays rigid). The sleeve is a loose shell over the
+forearm and upper arm with a few soft folds (bunched over the cuff, gathered in the crook of the elbow), a banded,
+hemmed cuff and its tab; it follows the forearm and upper arm only, never the wrist's turn.
 """
 
 import math
@@ -40,17 +41,39 @@ UPPER_KEEP = 0.13
 SLEEVE_OFF = (0.0080, 0.0105)
 SLEEVE_BAND = 0.030
 SLEEVE_HEM = 0.0022
+SLEEVE_NORMAL_SMOOTH = 4
 # The hard parts' heights over the glove (m).
 SHELL_THICK = 0.0016
-KNUCKLE_DOME = 0.0042
-KNUCKLE_RIM = 0.0007
-PAD_THICK = 0.0013
+KNUCKLE_DOME = 0.0024
+KNUCKLE_RIM = 0.0012
+KNUCKLE_ROUND = 0.75
+KNUCKLE_LOBE = 0.0015
+KNUCKLE_SEAM = 0.0008
+KNUCKLE_U = (-0.75, -0.25, 0.25, 0.75)
+PAD_THICK = 0.0012
+# How far the muscle between thumb and index stands out under the glove (m).
+WEB_BULGE = 0.0040
+WEB_RADIUS = 0.017
+WEB_TOWARD_INDEX = 0.65
+# (easing past its ends, height) of the thumb's bone ridge and the index bone's edge; per joint (middle, last) the
+# back's rise; the palm-side crease (half width along the finger, depth); how far from a joint's centre its skin lies.
+THUMB_BONE = (0.010, 0.0018)
+INDEX_BONE = (0.010, 0.0012)
+JOINT_BUMP = ((0.0055, 0.0011), (0.0045, 0.0007))
+JOINT_CREASE = (0.0016, 0.0007)
+JOINT_REACH = 0.013
+THUMB_FULL = 0.0008
+# The finger plates bend with the glove beneath them (rigid on one bone, the skin rose through their ends as the joints
+# beside them closed).
+PAD_RIGID = False
 # The knuckle shell: how far it reaches beyond the outer knuckles, back from them over the hand and on over them (m).
 KNUCKLE_SPAN = 0.006
-KNUCKLE_BACK = 0.024
+KNUCKLE_BACK = 0.050
 KNUCKLE_OVER = 0.002
-# The finger plates, as shares of each bone from its root: one on the first bone, one on the second.
-PLATES = (((0.26, 0.76),), ((0.24, 0.74),))
+# The finger pads, as shares of each finger's first bone from its root (an oval just short of the middle knuckle), and
+# how far round the finger each reaches (degrees either side of its back).
+PAD_SPAN = (0.48, 0.86)
+PAD_WRAP = 28.0
 
 
 def load_source(shoulder: Vector) -> tuple:
@@ -142,6 +165,51 @@ def weights(verts: list, j: dict, pts: dict) -> list:
         w = {b: x / tot for b, x in w.items() if x / tot > 0.01}
         tot = sum(w.values())
         out.append({b: x / tot for b, x in w.items()})
+    return out
+
+
+# Rounds of smoothing over the thumb's root, and how far round it (edge rings): the web between thumb and index
+# finger takes the thumb's turn gradually instead of folding to a point (the owner, 2026-11-05).
+WEB_SMOOTH = 8
+WEB_RINGS = 3
+# Rounds of the same over every finger joint's crease (the skin tore at the knuckles of a tight curl).
+JOINT_SMOOTH = 3
+
+
+def smooth_web(wts: list, faces: list) -> list:
+    """`wts` with the weights round the thumb's root (Thumb1's skin and WEB_RINGS rings past it) blended with their
+    neighbours' WEB_SMOOTH times, and every finger joint's JOINT_SMOOTH times, each vertex keeping its four
+    largest."""
+    near = [set() for _ in wts]
+    for f in faces:
+        for k, a in enumerate(f):
+            b = f[(k + 1) % len(f)]
+            near[a].add(b)
+            near[b].add(a)
+    region = {i for i, w in enumerate(wts) if "Thumb1" in w}
+    for _ in range(WEB_RINGS):
+        region |= {n for i in region for n in near[i]}
+    joints = {i for i, w in enumerate(wts) if len(w) > 1 and any(b[-1].isdigit() for b in w)}
+    out = _blend(wts, near, joints, JOINT_SMOOTH)
+    return _blend(out, near, region, WEB_SMOOTH)
+
+
+def _blend(wts: list, near: list, region: set, rounds: int) -> list:
+    out = list(wts)
+    for _ in range(rounds):
+        nxt = list(out)
+        for i in region:
+            mix = {}
+            for b, x in out[i].items():
+                mix[b] = mix.get(b, 0.0) + 0.5 * x
+            share = 0.5 / max(1, len(near[i]))
+            for n in near[i]:
+                for b, x in out[n].items():
+                    mix[b] = mix.get(b, 0.0) + share * x
+            top = sorted(mix.items(), key=lambda kv: -kv[1])[:4]
+            tot = sum(x for _, x in top)
+            nxt[i] = {b: x / tot for b, x in top if x / tot > 0.01}
+        out = nxt
     return out
 
 
@@ -309,9 +377,14 @@ class Surface:
             rings.append(row)
             normals.append(nrow)
             dirs.append(drow)
+        cast = [list(row) for row in rings]
         for _ in range(smooth):
             rings = _smoothed(rings, closed)
             normals = [[n.normalized() for n in row] for row in _smoothed(normals, closed)]
+        # Smoothing a patch over a rounded finger pulls it in under the skin, and the skin then shows through its
+        # edges in a ragged line: no point may end below where its ray met the surface.
+        rings = [[p + n * max(0.0, (q - p).dot(n)) for p, q, n in zip(row, crow, nrow)]
+                 for row, crow, nrow in zip(rings, cast, normals)]
         if callable(thick):
             thick = [[thick(u, v) for u, v in row] for row in dirs]
         return self.solid(rings, normals, thick, mat, closed, bone, lift)
@@ -336,6 +409,11 @@ def _smoothed(grid: list, closed: bool) -> list:
 
 # ------------------------------------------------------------------------------------------------------ the arm
 
+def _smooth01(t: float) -> float:
+    t = min(1.0, max(0.0, t))
+    return t * t * (3.0 - 2.0 * t)
+
+
 def _soft_box(u: float, v: float, edge: float = 0.18) -> float:
     """1 inside a rounded box over u, v in -1..1, easing to 0 over `edge` at its sides and corners."""
     du = max(0.0, abs(u) - (1.0 - edge)) / edge
@@ -345,10 +423,10 @@ def _soft_box(u: float, v: float, edge: float = 0.18) -> float:
 
 
 def knuckle_guard(surf: Surface, fr: Frame) -> tuple:
-    """The moulded knuckle shell (the owner's glove photos: one hard shell, not a pad per knuckle): across the back of
-    the hand from beyond the index to beyond the little finger, over the knuckles only (from a little behind them to
-    just over them), a dome over each knuckle with a shallow groove between neighbours and a padded rim round it, its
-    edges easing down into the glove; rigid on the hand."""
+    """The moulded knuckle shell (the owner's glove photo 123404: one smooth hard shell): across the back of the hand
+    from beyond the index to beyond the little finger, from half way back over the hand to just over the knuckles, a
+    rounded oval outline, an even dome across it and a raised, stitched-looking border round it, its edges easing
+    down into the glove; rigid on the hand."""
     j, k = fr.j, fr.knuckles
     up = fr.dorsal
     across = (k[3] - k[0]).normalized()
@@ -363,33 +441,88 @@ def knuckle_guard(surf: Surface, fr: Frame) -> tuple:
 
     def origin(u: float, v: float) -> Vector:
         # From well back over the back of the hand (v = -1) to just over the knuckles (v = +1), narrowing a little
-        # towards the wrist.
+        # towards the wrist; its corners rounded (the square pulled part way to a disc: the photos' shells are
+        # rounded plates, never cut sheets).
+        u, v = (u * (1.0 - KNUCKLE_ROUND + KNUCKLE_ROUND * math.sqrt(1.0 - v * v * 0.5)),
+                v * (1.0 - KNUCKLE_ROUND + KNUCKLE_ROUND * math.sqrt(1.0 - u * u * 0.5)))
         back = KNUCKLE_BACK * (1.0 - v) * 0.5
-        return line(u * (1.0 - 0.18 * (1.0 - v) * 0.5)) + f * (KNUCKLE_OVER - back) - up * 0.006
+        # Its edge over the knuckles lobed, a rounded tongue reaching on over each (photo 123404).
+        lobe = KNUCKLE_LOBE * sum(math.exp(-((u - ku) / 0.2) ** 2) for ku in KNUCKLE_U) * max(0.0, v) ** 2
+        return line(u * (1.0 - 0.30 * (1.0 - v) * 0.5)) + f * (KNUCKLE_OVER - back + lobe) - up * 0.006
 
     def direction(u: float, v: float) -> Vector:
-        return up + across * u * 0.25
-
-    knuck_u = [-0.78, -0.26, 0.26, 0.78]
+        return up + across * u * 0.15
 
     def thick(u: float, v: float) -> float:
-        dome = sum(math.exp(-((u - ku) / 0.15) ** 2) for ku in knuck_u)
-        rise = math.exp(-((v - 0.55) / 0.45) ** 2)
+        # One even dome, highest a little behind the knuckles, and a raised border just inside its edge.
+        dome = max(0.0, 1.0 - (u * u * 0.8 + (v - 0.2) * (v - 0.2) * 0.5))
         edge = max(abs(u), abs(v))
-        rim = KNUCKLE_RIM * math.exp(-((edge - 0.80) / 0.09) ** 2)
-        return (SHELL_THICK + KNUCKLE_DOME * min(1.0, dome) * rise + rim) * _soft_box(u, v, 0.22) + 0.0003
+        rim = KNUCKLE_RIM * math.exp(-((edge - 0.86) / 0.05) ** 2)
+        # A stitched seam just inside the border: a fine groove.
+        seam = KNUCKLE_SEAM * math.exp(-((edge - 0.76) / 0.025) ** 2)
+        return (SHELL_THICK + KNUCKLE_DOME * dome + rim - seam) * _soft_box(u, v, 0.14) + 0.0003
 
-    return surf.shell(origin, direction, 13, 29, thick, "GloveArmour", False, "Hand", 4, 0.0010)
+    return surf.shell(origin, direction, 13, 29, thick, "GloveArmour", False, "Hand", 8, 0.0010)
+
+
+def _bump(p: Vector, a: Vector, b: Vector, along: float, height: float, face: Vector, sharp: float,
+          reach: float) -> float:
+    """A soft rise of `height` over the bone or joint a-b: easing out over `along` past its ends, and round it over the
+    skin facing `face` (narrower as `sharp` grows); only skin within `reach` of it (not a neighbouring finger's)."""
+    ab = b - a
+    t = (p - a).dot(ab) / max(1e-12, ab.dot(ab))
+    q = a + ab * max(0.0, min(1.0, t))
+    off = p - q
+    radial = off - ab.normalized() * off.dot(ab.normalized()) if ab.length > 1e-9 else off
+    if radial.length > reach or radial.length < 1e-9:
+        return 0.0
+    x = (off - radial).length / along
+    if x >= 1.0:
+        return 0.0
+    facing = max(0.0, radial.normalized().dot(face))
+    return height * (1.0 - x * x) ** 2 * facing ** sharp
+
+
+def hand_forms(p: Vector, n: Vector, fr: Frame) -> float:
+    """How far the glove stands out at `p` (normal `n`) over the hand's forms, so it reads as a gloved hand and not a
+    smooth sheet (the critic): the muscle between the thumb's and the index finger's bones (first dorsal interosseous),
+    a soft bulge fullest toward the index; the thumb's own bone as a separate ridge beside it, a valley between the two;
+    the index bone's edge along the thumb's side; and the finger joints, a small rise over the back of each middle and
+    last joint, a fine crease across the palm's side of each. The glove's own surface, so it bends as the skin does."""
+    j = fr.j
+    up = fr.dorsal
+    centre = j["finger-1-2"].lerp(j["finger-2-1"], WEB_TOWARD_INDEX).lerp(fr.wrist.lerp(j["finger-2-1"], 0.6), 0.35)
+    d = p - centre
+    r = (d - up * d.dot(up)).length / WEB_RADIUS
+    out = WEB_BULGE * max(0.0, 1.0 - r * r) ** 2 * max(0.0, n.dot(up) + 0.3) / 1.3
+    # The thumb's bone, from its root to its first knuckle, on its back and outer side.
+    t0, t1 = j["finger-1-1"], j["finger-1-2"]
+    away = t1 - fr.palm_centre
+    away = (away - (t1 - t0).normalized() * away.dot((t1 - t0).normalized())).normalized()
+    out += _bump(p, t0.lerp(t1, 0.3), t1.lerp(t0, 0.15), THUMB_BONE[0], THUMB_BONE[1], (away + up).normalized(), 3.0,
+                 0.020)
+    # The index bone's edge on the thumb's side, from half way down the back of the hand to its knuckle.
+    radial = (j["finger-2-1"] - j["finger-3-1"]).normalized()
+    out += _bump(p, fr.wrist.lerp(j["finger-2-1"], 0.45), j["finger-2-1"].lerp(fr.wrist, 0.12), INDEX_BONE[0],
+                 INDEX_BONE[1], (up + radial).normalized(), 3.0, 0.020)
+    for f in (2, 3, 4, 5):
+        a, b = j["finger-%d-2" % f], j["finger-%d-3" % f]
+        axis = (b - j["finger-%d-1" % f]).normalized()
+        for joint, (along, h) in ((a, JOINT_BUMP[0]), (b, JOINT_BUMP[1])):
+            out += _bump(p, joint, joint + axis * 1e-6, along, h, up, 2.0, JOINT_REACH)
+            # The crease: a narrow groove across the palm's side of the joint.
+            out -= _bump(p, joint, joint + axis * 1e-6, JOINT_CREASE[0], JOINT_CREASE[1], -up, 1.0, JOINT_REACH)
+    return out
 
 
 def finger_pads(surf: Surface, fr: Frame) -> list:
-    """The segmented finger plates (the owner's glove photos): one curved plate over the back of each finger's first
-    and second bones, one over the thumb's; each wraps the back of its bone, its ends rounded and its edges easing
-    down, and is rigid on it."""
+    """The finger pads (the owner's glove photo 123404): a small domed oval on the back of each finger's first bone,
+    just short of the middle knuckle; none on the thumb (photo 123404's thumb is plain suede; the critic) nor on the
+    palm's side, the fingertips plain. Each bends with the glove beneath it."""
     j = fr.j
     out = []
 
-    def pad(a: Vector, b: Vector, up: Vector, span: tuple, wrap: float, bone: str, grid: tuple = (7, 2, 0.5)) -> tuple:
+    def pad(a: Vector, b: Vector, up: Vector, span: tuple, wrap: float, bone: str, grid: tuple = (9, 1, 0.5)) -> tuple:
         d = (b - a).normalized()
         up = (up - d * up.dot(d)).normalized()
         side = d.cross(up)
@@ -398,29 +531,23 @@ def finger_pads(surf: Surface, fr: Frame) -> list:
             return a.lerp(b, span[0] + (span[1] - span[0]) * (v + 1.0) * 0.5)
 
         def direction(u: float, v: float) -> Vector:
-            t = math.radians(wrap) * u
+            # Narrowing towards its ends: an oval, not a cut strip.
+            t = math.radians(wrap) * u * math.sqrt(1.0 - 0.8 * v * v)
             return up * math.cos(t) + side * math.sin(t)
 
         def thick(u: float, v: float) -> float:
-            return PAD_THICK * _soft_box(u, v, grid[2]) + 0.0003
+            # A domed oval with a sunken hole in its middle (the photo's rubber knuckle pads).
+            r2 = u * u + v * v
+            hole = 1.0 - 0.9 * math.exp(-r2 / 0.12)
+            return PAD_THICK * max(0.0, 1.0 - r2) ** 0.6 * hole * _soft_box(u, v, grid[2]) + 0.0003
 
-        return surf.shell(origin, direction, grid[0], 9, thick, "GloveArmour", False, bone, grid[1], 0.0008)
+        return surf.shell(origin, direction, grid[0], 11, thick, "GloveArmour", False, PAD_RIGID and bone, grid[1],
+                          0.0008)
 
     for f in (2, 3, 4, 5):
         name = FINGER_NAMES[f]
-        wrap = 66.0 if f != 5 else 60.0
         a, b = j["finger-%d-1" % f], j["finger-%d-2" % f]
-        for span in PLATES[0]:
-            out.append(pad(a, b, fr.dorsal, span, wrap, name + "1"))
-        a, b = j["finger-%d-2" % f], j["finger-%d-3" % f]
-        for span in PLATES[1]:
-            out.append(pad(a, b, fr.dorsal, span, wrap, name + "2"))
-    a, b = j["finger-1-2"], j["finger-1-3"]
-    d = (b - a).normalized()
-    away = a - fr.palm_centre
-    away = (away - d * away.dot(d)).normalized()
-    # The thumb's plate is shorter along it and less smoothed: the pistols' thumb holds are solved against this one.
-    out.append(pad(a, b, (away + fr.dorsal * 0.6), (0.20, 0.82), 46.0, "Thumb2", (5, 1, 0.4)))
+        out.append(pad(a, b, fr.dorsal, PAD_SPAN, PAD_WRAP, name + "1"))
     return out
 
 
@@ -443,11 +570,15 @@ def build_left(shoulder: Vector) -> tuple:
     src_v, src_f, j = load_source(shoulder)
     fr = Frame(j)
     up_dir = (j["shoulder"] - j["elbow"]).normalized()
-    cuts = [(fr.wrist + fr.fdir * t, fr.fdir) for t in (SLEEVE_END + 0.004, GLOVE_TOP)]
+    # Cut where the sleeve ends and where its band does, so both run clean round the arm (a face-by-face edge left
+    # the cuff ragged and some of its edges open, which the shoulder's cap then closed in long slivers through the arm).
+    cuts = [(fr.wrist + fr.fdir * t, fr.fdir) for t in (SLEEVE_END, SLEEVE_END - SLEEVE_BAND, GLOVE_TOP)]
     cuts.append((j["elbow"] + up_dir * UPPER_KEEP, up_dir))
     verts, faces = subdivide(src_v, src_f, cuts)
     pts = bone_points(j)
     wts = weights(verts, j, pts)
+    if WEB_SMOOTH:
+        wts = smooth_web(wts, faces)
     nrm = vertex_normals(verts, faces)
     mesh = Mesh()
 
@@ -455,7 +586,10 @@ def build_left(shoulder: Vector) -> tuple:
     hand_f = [f for f in faces if fr.along(centre(verts, f)) > GLOVE_TOP]
     used = sorted({i for f in hand_f for i in f})
     idx = {o: k for k, o in enumerate(used)}
-    gv = [verts[o] + nrm[o] * GLOVE_THICK for o in used]
+    # The thumb's glove a little fuller (the photos' gloved thumbs are thicker than the hand's skin makes them: the
+    # critic, 123843; fuller still, the thumb found no room on the grip's panel and stood out from it).
+    gv = [verts[o] + nrm[o] * (GLOVE_THICK + hand_forms(verts[o], nrm[o], fr) +
+                               THUMB_FULL * (wts[o].get("Thumb2", 0.0) + wts[o].get("Thumb3", 0.0))) for o in used]
     gf = [[idx[i] for i in f] for f in hand_f]
     gw = [wts[o] for o in used]
     mesh.add(gv, gf, "Glove", gw)
@@ -464,15 +598,17 @@ def build_left(shoulder: Vector) -> tuple:
     mesh.add(*knuckle_guard(surf, fr))
     for part in finger_pads(surf, fr):
         mesh.add(*part)
-    # The palm's suede patch, over the heel of the hand and up to the fingers' roots.
+    # The palm's suede patch, over the heel of the hand and up to the fingers' roots: a rounded square (its corners
+    # pulled in to a radius of about 8 mm), its thickness easing out in from its edges.
     across = (fr.knuckles[3] - fr.knuckles[0]).normalized()
     pc = fr.palm_centre + fr.fingers * 0.002
 
     def palm_origin(u: float, v: float) -> Vector:
-        return pc + across * (u * 0.024) + fr.fingers * (v * 0.024)
+        return pc + across * (u * 0.024 * math.sqrt(1.0 - 0.35 * v * v)) + \
+            fr.fingers * (v * 0.024 * math.sqrt(1.0 - 0.35 * u * u))
 
     mesh.add(*surf.shell(palm_origin, lambda u, v: fr.palmar, 7, 11,
-                         lambda u, v: 0.0012 * _soft_box(u, v, 0.35) + 0.0009, "GloveArmour", smooth=4, lift=0.0008))
+                         lambda u, v: 0.0021 * _soft_box(u, v, 0.6) + 0.0001, "GloveArmour", smooth=4, lift=0.0008))
     # The neoprene cuff, and its strap round it with a pull tab on the little finger's side.
     mesh.add(*ring(surf, fr, CUFF[:2], CUFF[2], "Glove"))
     mesh.add(*ring(surf, fr, STRAP[:2], CUFF[2] + STRAP[2], "GloveArmour"))
@@ -493,14 +629,38 @@ def build_left(shoulder: Vector) -> tuple:
     return mesh, j, fr, pts
 
 
+def _loose(w: dict) -> dict:
+    """A sleeve vertex's weights: the skin's beneath it, with the hand's share moved onto the forearm. The sleeve is
+    loose on the arm and doesn't turn with the wrist; following the hand, it folded in on itself along the top of the
+    forearm when a pistol hold turned the wrist (the critic's dark wedges in the pistol's aimed view)."""
+    out = {}
+    for b, v in w.items():
+        k = "Forearm" if b not in ("Forearm", "UpperArm") else b
+        out[k] = out.get(k, 0.0) + v
+    return out
+
+
 def sleeve(mesh: Mesh, verts: list, faces: list, wts: list, fr: Frame) -> None:
     """The sleeve: a loose shell over the forearm and upper arm with soft folds, its cuff banded and hemmed."""
     j = fr.j
+    wts = [_loose(w) for w in wts]
     up_dir = (j["shoulder"] - j["elbow"]).normalized()
     sleeve_f = [f for f in faces if fr.along(centre(verts, f)) < SLEEVE_END
                 and (centre(verts, f) - j["elbow"]).dot(up_dir) < UPPER_KEEP]
     cuff_edges = [e for e in open_edges(sleeve_f) if all(abs(fr.along(verts[i]) - SLEEVE_END) < 0.001 for i in e)]
     snrm = vertex_normals(verts, sleeve_f)
+    # Smoothed a few rounds over its neighbours: a skewed normal at a crease of the base mesh pushed a fin out of the
+    # top of the forearm (the critic's dark wedge on the pistol's aimed view).
+    near = {}
+    for f in sleeve_f:
+        for a, b in zip(f, f[1:] + f[:1]):
+            near.setdefault(a, set()).add(b)
+            near.setdefault(b, set()).add(a)
+    for _ in range(SLEEVE_NORMAL_SMOOTH):
+        snrm = list(snrm)
+        smoothed = {i: (snrm[i] + sum((snrm[k] for k in ks), Vector())).normalized() for i, ks in near.items()}
+        for i, n in smoothed.items():
+            snrm[i] = n
     elbow_t = fr.along(j["elbow"])
     shoulder_t = fr.along(j["shoulder"])
     side_ref = fr.dorsal.cross(fr.fdir)
@@ -531,7 +691,7 @@ def sleeve(mesh: Mesh, verts: list, faces: list, wts: list, fr: Frame) -> None:
     for o in used:
         d = off(verts[o])
         # The banded cuff stands a little proud of the sleeve.
-        if fr.along(verts[o]) > SLEEVE_END - SLEEVE_BAND:
+        if fr.along(verts[o]) > SLEEVE_END - SLEEVE_BAND - 1e-6:
             d += 0.0012
         outer.append(verts[o] + snrm[o] * d)
     base = mesh.add(outer, [[idx[i] for i in f] for f in sleeve_f], smats, [wts[o] for o in used])
