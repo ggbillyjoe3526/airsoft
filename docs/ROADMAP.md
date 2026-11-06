@@ -20,8 +20,8 @@ in `docs/PROCESS.md`.
   (2026-11-01): the map (done: ST1), then its CC0 dress (done: ST2). From the owner's playtest (2026-11-01), smarter
   bots: Go there lapsing when quiet and bots seeing through glass (done: BQ1), bot teammates asking you over with a
   ping (done: BQ2) and a pass over the bots' play (done: BQ3), and a more detailed full-screen map (done: FM2). The owner pulled the spring sniper rifle into 0.1 (2026-11-02): like the
-  AEG with a longer barrel, single shot, its 2x Scope fitted, three springs, unlocked at level 5 (SN1, dev until he
-  plays it), then a variable scope (SN2). The rest of 0.1
+  AEG with a longer barrel, single shot, its 2x Scope fitted, three springs, unlocked at level 5 (SN1), then a
+  variable scope (SN2). Since DT1 (2026-11-05) the Sniper Rifle and its parts are public and The Street is dev only. The rest of 0.1
   ([What 0.1 is](#what-01-is)) follows in later Dev builds.
 - **The release path** (owner, 2026-10-12): 0.1 Dev builds, 0.1 Beta, then 0.1 (tagged `0.1.0`) opens Early
   Access to the public.
