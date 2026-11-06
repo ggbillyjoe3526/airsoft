@@ -9,8 +9,8 @@ so its grip's front at the hand's height sits where the AEG Rifle's does: the fi
 replicaOnGrip) lands on this grip too. It keeps the replica contract (docs/CC0_ASSETS.md › Replica models): the
 armature SniperRifle with the bones root, trigger, magazine, magRelease, selector (the safety), rearSight, frontSight
 and bolt; the clips Fire (the shot, then the bolt lifted, drawn, pushed home and turned down: about a second, the
-rifle's cycle), Reload, Inspect, Selector and SightsFold; the empties Muzzle, BarrelEnd, FrontSight, RearSight,
-MagWell, OpticMount, GripMount and TorchMount; the meshes Body, Bolt, Trigger, Magazine, MagRelease, Selector,
+rifle's cycle), Reload, Inspect and Selector (no SightsFold: an optic hides the sights whole); the empties Muzzle,
+BarrelEnd, FrontSight, RearSight, MagWell, OpticMount, GripMount and TorchMount; the meshes Body, Bolt, Trigger, Magazine, MagRelease, Selector,
 FrontSightLeaf, RearSightLeaf, FlashHider (the thread cap, hidden by a muzzle part) and Figure (the figures'
 cut-down copy); the paintable materials Body, Furniture (the chassis), Detail, Accent and Metal, plus Rubber and BB.
 
@@ -37,6 +37,7 @@ import bpy  # noqa: E402
 import bmesh  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
+import figure_copy  # noqa: E402
 import hardsurface as hs  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
@@ -45,6 +46,9 @@ AEG_PARTS = os.path.join(ROOT, "assets/models/replicaParts/aeg.glb")
 PARTS_OUT = os.environ.get("BL_PARTS_OUT") or os.path.join(ROOT, "assets/models/replicaParts/sniper.glb")
 ARMATURE = "SniperRifle"
 FPS = 60
+# The figures' copy (figure_copy.py): triangles per piece, 3,000 in all, the replica budget on a figure
+# (docs/CC0_ASSETS.md › Size limits), used in full (TP1, 2026-11-05).
+FIGURE_TRIS = {"Figure": 2500, "Magazine": 160, "FlashHider": 120, "Sights": 220}
 
 # ------------------------------------------------------------------------------------------------------ the photo
 
@@ -729,28 +733,6 @@ def sight(front: bool) -> object:
     return hs.finish(ob, 0.0003, 1)
 
 
-def figure() -> object:
-    """The figures' cut-down copy: the silhouette in a few hundred faces."""
-    b = hs.Builder("Figure", ["Furniture", "Body", "Detail"])
-    outline = [(516, 214), (1236, 212), (1265, 229), (1340, 255), (1400, 295), (1440, 277), (1452, 239),
-               (1772, 241), (1772, 454), (1600, 439), (1580, 404), (1466, 392), (1352, 445), (1344, 330),
-               (1325, 292), (1000, 289), (540, 276), (516, 262)]
-    b.prism([P(*p) for p in outline], "x", -0.019, 0.019, "Furniture")
-    b.prism([P(*p) for p in [(1772, 241), (1808, 242), (1810, 450), (1800, 455), (1772, 454)]], "x", -0.020, 0.020,
-            "Detail")
-    b.lathe([(Y(925), 0.0137), (Y(30), 0.0127)], "Body", 6, centre=(0.0, 0.0, BORE_Z))
-    b.box((-0.011, Y(RAIL_PX[1]), BORE_Z - 0.010), (0.011, Y(RAIL_PX[0]), RAIL_TOP), "Body")
-    b.lathe([(Y(1292), 0.0118), (Y(1240), 0.0118)], "Detail", 6, centre=(0.0, 0.0, BORE_Z))
-    b.prism([P(*p) for p in [(1002, 285), (1300, 285), (1290, 358), (1180, 358), (1148, 331), (1002, 322)]], "x",
-            -0.0105, 0.0105, "Detail")
-    ob = b.build()
-    for p in ob.data.polygons:
-        p.use_smooth = False
-    return ob
-
-
-# ------------------------------------------------------------------------------------------------------------ rig
-
 def armature() -> bpy.types.Object:
     data = bpy.data.armatures.new(ARMATURE)
     arm = bpy.data.objects.new(ARMATURE, data)
@@ -794,8 +776,6 @@ CLIPS = {
                           (2.00, (LIFT, -0.045)), (2.30, (LIFT, 0.0)), (2.50, (0.0, 0.0)), (3.0, (0.0, 0.0))]),
     }),
     "Selector": (0.5, {"selector": ("rx", [(0.0, 0.0), (0.25, -2.0 * SAFE_LEAN), (0.5, -2.0 * SAFE_LEAN)])}),
-    "SightsFold": (0.3, {"rearSight": ("rx", [(0.0, 0.0), (0.3, -90.0)]),
-                         "frontSight": ("rx", [(0.0, 0.0), (0.3, -90.0)])}),
 }
 
 
@@ -843,9 +823,8 @@ def clips(arm: bpy.types.Object) -> None:
         track = ad.nla_tracks.new()
         track.name = clip
         track.strips.new(clip, 0, act)
-    for pb in arm.pose.bones:
-        pb.rotation_quaternion = (1.0, 0.0, 0.0, 0.0)
-        pb.location = (0.0, 0.0, 0.0)
+    # At rest from here on (renders, the figure copy), the tracks muted; every one is still exported.
+    hs.rest_pose(arm)
 
 
 # ------------------------------------------------------------------------------------------------------------ main
@@ -863,21 +842,20 @@ def build() -> None:
                      (mag_release(), "magRelease"), (safety(), "selector"), (sight(True), "frontSight"),
                      (sight(False), "rearSight")):
         hs.parent_to_bone(ob, arm, bone)
-    fig = figure()
-    fig.parent = arm
     pad = butt_pad()
     hs.join("Body", [bod, pad])
     for name, loc in EMPTIES.items():
         hs.empty(name, loc, arm)
     clips(arm)
+    fig = figure_copy.make(FIGURE_TRIS)
     total = 0
     for ob in bpy.data.objects:
         if ob.type == "MESH":
             n = hs.tris(ob)
-            if ob.name != "Figure":
+            if not ob.name.startswith("Figure"):
                 total += n
             print("  %-16s %6d triangles" % (ob.name, n))
-    print("  in the hands: %d triangles; figure: %d" % (total, hs.tris(fig)))
+    print("  in the hands: %d triangles; figure: %d" % (total, sum(hs.tris(o) for o in [fig] + list(fig.children))))
     hs.export(OUT, True)
     print("wrote", OUT)
     build_parts()

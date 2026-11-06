@@ -35,12 +35,16 @@ func _load() -> void:
 	model = (load(MODEL) as PackedScene).instantiate() as Node3D
 	add_child_autofree(model)
 	await wait_process_frames(1)
-	var slide := model.find_child("Slide", true, false) as MeshInstance3D
-	assert_not_null(slide, "the slide's mesh")
-	var to_mm := Transform3D(Basis.from_scale(Vector3.ONE * MM), Vector3.ZERO) * model.global_transform.affine_inverse() \
-			* slide.global_transform
+	# The slide and the barrel, whose hood fills the port (the barrel stays with the frame as the slide cycles).
+	var all := PackedVector3Array()
+	for mesh_name: String in ["Slide", "Barrel"]:
+		var mesh := model.find_child(mesh_name, true, false) as MeshInstance3D
+		assert_not_null(mesh, "the %s's mesh" % mesh_name)
+		var to_mm := Transform3D(Basis.from_scale(Vector3.ONE * MM), Vector3.ZERO) \
+				* model.global_transform.affine_inverse() * mesh.global_transform
+		all.append_array(to_mm * mesh.mesh.get_faces())
 	faces = TriangleMesh.new()
-	faces.create_from_faces(to_mm * slide.mesh.get_faces())
+	faces.create_from_faces(all)
 	rear = (model.find_child("RearSight", true, false) as Node3D).global_position
 	front = (model.find_child("FrontSight", true, false) as Node3D).global_position
 

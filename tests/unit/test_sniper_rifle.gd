@@ -1,10 +1,10 @@
 extends GutTest
-## The Sniper Rifle (SN1; owner, 2026-11-02): a dev replica that plays by stats.md's `sniper` row, single shot, driven by
-## the springs (the M130 as it comes, the M140 and M150 stronger, as the gases are), under the sniper class's site
-## limit, comes with the 2x Scope fitted (pool.md › Comes with), is six times as wide from the hip, unlocks at level 5
-## with the scope, is drawn from sniper.glb (BL5: a bolt-action in a grey chassis from the owner's photo, its Fire clip
-## the bolt's cycle), is heard cocking after every shot, and is carried by the Sniper bot kit, whose bots fight it with
-## the sight up.
+## The Sniper Rifle (SN1; owner, 2026-11-02; public since 2026-11-05): a replica that plays by stats.md's `sniper` row,
+## single shot, driven by the springs (the M130 as it comes, the M140 and M150 stronger, as the gases are), under the
+## sniper class's site limit, comes with the 2x Scope fitted (pool.md › Comes with), is six times as wide from the hip,
+## unlocks at level 5 with the scope, is drawn from sniper.glb (BL5: a bolt-action in a grey chassis from the owner's
+## photo, its Fire clip the bolt's cycle), is heard cocking after every shot, and is carried by the Sniper bot kit,
+## whose bots fight it with the sight up.
 
 const DT := 1.0 / 60.0
 const EYE := Vector3(0.0, 1.6, 0.0)
@@ -34,16 +34,16 @@ func _sniper() -> ReplicaConfig:
 ## A loadout carrying the Sniper Rifle as its primary.
 func _loadout() -> Loadout:
 	var l := rules.default_loadout("L")
-	assert_true(rules.equip(l, Loadout.Slot.PRIMARY, SNIPER), "on offer with Dev content")
+	assert_true(rules.equip(l, Loadout.Slot.PRIMARY, SNIPER), "on offer")
 	return l
 
 
-func test_it_is_a_dev_spring_rifle_in_the_pool() -> void:
+func test_it_is_a_public_spring_rifle_in_the_pool() -> void:
 	var it := rules.pool.item(SNIPER)
 	assert_not_null(it)
 	assert_eq(it.display_name, "Sniper Rifle")
 	assert_eq(it.key, &"sniper")
-	assert_true(it.is_dev(), "dev until the owner makes it public")
+	assert_false(it.is_dev(), "public (owner, 2026-11-05)")
 	for tag: String in ["rifle", "spring", "top-rail", "under-rail", "muzzle-thread"]:
 		assert_true(it.tags.has(tag), tag)
 	assert_false(it.tags.has("barrel-mount"), "its long barrel is fixed")
@@ -53,7 +53,7 @@ func test_it_is_a_dev_spring_rifle_in_the_pool() -> void:
 	assert_eq(ids.call(rules.pool.powers_for(rules.pool.item(AEG), true)).has(M130), false, "no spring in an AEG")
 	assert_eq(ids.call(rules.pool.comes_with(it)), [SCOPE])
 	rules.dev_content = false
-	assert_false(rules.is_offered(SNIPER), "hidden without Dev content")
+	assert_true(rules.is_offered(SNIPER), "offered without Dev content")
 
 
 func test_it_plays_by_its_stats_row_single_shot() -> void:
@@ -184,9 +184,10 @@ func test_in_hand_it_is_a_bolt_action_with_a_long_barrel_and_a_bolt_cycle_fire_c
 	assert_not_null(sniper.muzzle)
 	assert_almost_eq(sniper.muzzle.position.z - aeg.muzzle.position.z, -0.379, 2e-3,
 			"its barrel ends 38 cm further out than the carbine's (BL5, the owner's photo)")
-	assert_almost_eq(sniper.rear_sight.y, aeg.rear_sight.y, 0.005, "its flip-up sights about as high as the AEG's")
+	# The AEG's sights were lowered 7.5 mm (owner, 2026-11-05: smaller, subtler); the rifle's flip-ups kept theirs.
+	assert_almost_eq(sniper.rear_sight.y, aeg.rear_sight.y, 0.012, "its flip-up sights about as high as the AEG's")
 	assert_not_null(sniper.anim)
-	for clip: StringName in [&"Fire", &"Reload", &"Inspect", &"Selector", &"SightsFold"]:
+	for clip: StringName in [&"Fire", &"Reload", &"Inspect", &"Selector"]:
 		assert_true(sniper.anim.has_animation(clip), clip)
 	var fire := sniper.anim.get_animation(&"Fire")
 	assert_almost_eq(fire.length, 1.0, 0.01, "the bolt's cycle: about a second")
@@ -215,7 +216,7 @@ func test_every_spring_has_a_picture_and_the_cocking_cue_is_there() -> void:
 	assert_true(ResourceLoader.exists("res://assets/models/powerSources/spring.glb"))
 	for n in 3:
 		assert_true(ResourceLoader.exists("%s%s_%d.wav" % [SoundConfig.CUE_DIR, SimAudio.BOLT_CUE, n + 1]))
-	for cue: String in ["shot_spring", "dryFire_spring", "magIn_spring", "magOut_spring", "power_spring"]:
+	for cue: String in ["shot_spring", "dryFire", "magIn_spring", "magOut_spring", "power_spring"]:
 		assert_true(ResourceLoader.exists("%s%s_1.wav" % [SoundConfig.CUE_DIR, cue]), cue)
 
 
@@ -230,10 +231,10 @@ func test_the_sniper_kit_carries_it_with_its_scope_and_its_bots_fight_aimed() ->
 	var kit := BotKits.kit_of(plan, rules)
 	assert_eq(kit.replicas[0].id, &"sniper")
 	assert_eq(kit.parts[0].get(&"optic"), &"scope2x", "as it comes: scoped")
-	assert_true(kit.dev, "a dev match: off the records")
+	assert_false(kit.dev, "public gear: the match counts")
 	var c := Character.new(1, 0, Vector3.ZERO, 0.0, kit.replicas)
 	assert_true(BotCombat.fights_aimed(c))
 	var aeg := Character.new(2, 0, Vector3.ZERO, 0.0, ReplicaStats.default_loadout())
 	assert_false(BotCombat.fights_aimed(aeg))
 	rules.dev_content = false
-	assert_false(BotKits.offers(rules, plan), "never without Dev content")
+	assert_true(BotKits.offers(rules, plan), "and without Dev content")

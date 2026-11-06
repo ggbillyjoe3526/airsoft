@@ -6,7 +6,9 @@ extends GutTest
 const BUDGET := [60000, 20000, 6000]
 const DISTANCES := [5.0, 10.0, 20.0, 40.0]
 ## The human with the largest head (HighCut, id 0) at High's lines: LOD0, LOD0, LOD1, LOD2 (step 23 plan › 2).
-const HUMAN_HIGH := [29130, 29130, 9526, 2995]
+## BL10: the rebuilt body (33,458 triangles; LOD1 10,999, LOD2 3,298); BL13: the knee and elbow pads (2,964, 976, 288).
+## FA1: the face in each head (the largest head 8,992 / 3,192 / 896); BL12: the gear (13,698; LOD1 4,350, LOD2 932).
+const HUMAN_HIGH := [58868, 58868, 19423, 5382]
 const RED := Color(0.9, 0.2, 0.15)
 const BLUE := Color(0.2, 0.4, 0.95)
 
@@ -140,8 +142,8 @@ func test_the_levels_cast_no_shadow_and_one_twin_casts_it() -> void:
 				assert_eq(mi.cast_shadow, GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, mi.name)
 		assert_eq(twins, 1)
 	var human := _body(FigureMix.HUMAN, 0)
-	# LOD2 body, HighCut, kit and pack.
-	assert_eq(_tris(human.meshes[-1].mesh), 2995)
+	# LOD2 body, HighCut, kit, pack and pads.
+	assert_eq(_tris(human.meshes[-1].mesh), HUMAN_HIGH[3])
 	assert_same(_body(FigureMix.HUMAN, 4).meshes[-1].mesh, human.meshes[-1].mesh, "made once a kind and head")
 
 
@@ -174,7 +176,7 @@ func test_a_teams_team_surfaces_share_one_material_and_the_rest_stay_as_modelled
 	var human := _body(FigureMix.HUMAN, 0)
 	var paint := human.meshes[0].get_surface_override_material(1) as BaseMaterial3D
 	assert_eq(paint.albedo_color, RED)
-	assert_null(human.meshes[0].get_surface_override_material(0), "Outfit as modelled")
+	assert_null(human.meshes[0].get_surface_override_material(0), "Clothing as modelled")
 
 
 func test_the_high_contrast_glow_lights_the_team_paint() -> void:
@@ -241,3 +243,66 @@ func test_no_glow_leaves_the_paint_unlit() -> void:
 	assert_false(paint.emission_enabled)
 	var source := b.meshes[0].mesh.surface_get_material(1) as BaseMaterial3D
 	assert_ne(source.albedo_color, RED, "the source stays as modelled")
+
+
+func test_figures_sharing_a_head_wear_different_face_looks_and_every_look_is_used() -> void:
+	var looks := config.face_offsets.size()
+	assert_eq(looks, 4, "four looks painted (tools/blender/figures/face.py LOOKS)")
+	_assert_looks_spread(config)
+	for id: int in [-1, -9223372036854775808, 9223372036854775807]:
+		assert_between(config.face_look(id), 0, looks - 1, "id %d" % id)
+
+
+func test_face_looks_spread_for_any_count_of_heads() -> void:
+	for count: int in [1, 2, 3, 5]:
+		var other := FigureConfig.new()
+		other.heads = PackedStringArray()
+		for i in count:
+			other.heads.append("Head_%d" % i)
+		_assert_looks_spread(other)
+
+
+func _assert_looks_spread(cfg: FigureConfig) -> void:
+	var looks := cfg.face_offsets.size()
+	var used: Dictionary[int, bool] = {}
+	for head in cfg.heads.size():
+		var seen: Dictionary[int, bool] = {}
+		for lap in looks:
+			var id := head + lap * cfg.heads.size()
+			var look := cfg.face_look(id)
+			assert_between(look, 0, looks - 1)
+			assert_false(seen.has(look), "%d heads: id %d repeats a look on its head" % [cfg.heads.size(), id])
+			seen[look] = true
+			used[look] = true
+	assert_eq(used.size(), looks, "%d heads use every look" % cfg.heads.size())
+
+
+func test_the_face_look_offsets_the_face_uvs_shared_by_every_figure_wearing_it() -> void:
+	var plain := _body(FigureMix.HUMAN, 0)
+	assert_eq(config.face_look(0), 0)
+	var a := _body(FigureMix.HUMAN, 1)
+	var b := _body(FigureMix.HUMAN, 4)
+	assert_eq(config.face_look(1), 1)
+	assert_eq(config.face_look(4), 1)
+	var faces := 0
+	for body: FigureBody in [plain, a, b]:
+		for i in body.meshes.size():
+			if body.levels[i] < 0:
+				continue
+			var mi := body.meshes[i]
+			for s in mi.mesh.get_surface_count():
+				var source := mi.mesh.surface_get_material(s)
+				if not source.resource_name.to_lower().begins_with("face"):
+					continue
+				faces += 1
+				var drawn := mi.get_surface_override_material(s) as BaseMaterial3D
+				if body == plain:
+					assert_null(drawn, "look 0 is the face as modelled")
+					continue
+				assert_not_null(drawn)
+				assert_same(drawn, models.face_material(FigureMix.HUMAN, source, 1), "one material a look")
+				var offset := config.face_offsets[1]
+				assert_almost_eq(drawn.uv1_offset, (source as BaseMaterial3D).uv1_offset + Vector3(offset.x, offset.y, 0.0),
+						Vector3.ONE * 1e-6)
+	assert_eq(faces, 9, "a face on each of the three levels of three figures")
+	assert_null(_body(FigureMix.ROBOT, 1).meshes[0].get_surface_override_material(0), "the robot has no face")

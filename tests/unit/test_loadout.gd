@@ -6,6 +6,7 @@ extends GutTest
 const AEG := "000002"
 const PISTOL := "000001"
 const CYBER := "000019"
+const SNIPER := "000021"
 const STANDARD := "000003"
 const LIPO := "000015"
 const GREEN := "000004"
@@ -82,7 +83,8 @@ func _unplayable() -> void:
 func test_only_replicas_the_game_can_play_are_offered() -> void:
 	_unplayable()
 	var offered := rules.offered().map(func(i: Pool.Item) -> String: return i.id)
-	assert_eq(offered, [PISTOL, AEG, CYBER], "the Cyber Pistol plays since CP1; a replica with no config isn't offered")
+	assert_eq(offered, [PISTOL, AEG, CYBER, SNIPER],
+			"the Cyber Pistol plays since CP1, the Sniper Rifle is public since 2026-11-05; one with no config isn't offered")
 
 
 func test_a_new_player_carries_the_browser_games_defaults() -> void:

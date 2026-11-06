@@ -69,6 +69,8 @@ Play › Mode Elimination on Depot, Match › Opponents Normal. Set the mouse se
 - [ ] **Watch the crosshair.** It opens when you run or jump, closes almost at once when you stop, and is tightest
   crouched and still; crouch-walking sits between standing still and walking.
 - [ ] **Sprint up and down Depot's dock ramps.** Uphill loses about a quarter of a sprint's pace (a confirmed call).
+- [ ] **Watch a hit call (HC1).** Hit a bot and watch it call the hit and walk off, from the front and the side: the
+  raised arm goes straight up over the shoulder, the elbow nearly straight, the hand open with the wrist in line.
 - [ ] **Watch bots run (GA1).** On Depot, watch bots walk, run, sprint, strafe and back-pedal past you, and crouch-walk.
   Their feet stay planted on the floor without sliding, each step rolls heel to toe, and the legs keep pace with the
   speed. Strafing, the legs turn into the step while the rifle stays on its aim. Does any gait look wrong, especially
@@ -109,11 +111,11 @@ The rifle holds 60 BBs and the pistol 18, each with 4 magazines a round. Nothing
 
 ## Aiming and optics
 
-The rifle comes with flip-up iron sights; a red dot or a 2× scope is a part you fit in Loadout › Customise.
+The rifle comes with iron sights; a red dot or a 2× scope is a part you fit in Loadout › Customise.
 
 - [ ] **Hold right click with iron sights.** The rifle comes up to your eye, the view narrows a touch and the
   crosshair goes: the front post sits in the rear ring.
-- [ ] **Fit the red dot and aim.** It sits on the rifle with the iron sights folded under it; the crosshair gives way
+- [ ] **Fit the red dot and aim.** It sits on the rifle with the iron sights gone; the crosshair gives way
   to the dot and you move at a quiet walk (no sprint while aiming). Let go and it all goes back.
 - [ ] **Shoot while aiming.** BBs go where the dot (or post) is. Aiming halves the spread: at 25 to 35 m it should be
   clearly tighter, and the hip up close should still feel fine.
@@ -259,7 +261,7 @@ until 10.
 
 ## Sniper Rifle
 
-A dev item (SN1): turn on Settings › Dev settings › Dev content, and Disable levelling (or Level up to 5).
+Public since 2026-11-05 (SN1): turn on Settings › Dev settings › Disable levelling (or Level up to 5).
 
 - [ ] **Equip it.** It is in the primary list as Sniper Rifle; it comes with the 2x Scope fitted and the M130 Spring.
 - [ ] **Its look.** The AEG with a 20 cm longer barrel (a placeholder until your own model). Is it clearly longer?
@@ -272,14 +274,14 @@ A dev item (SN1): turn on Settings › Dev settings › Dev content, and Disable
   Springs (pictures: a coil with a violet, crimson or black band).
 - [ ] **Springs.** The M140 and M150 shoot harder (Energy up 10 % and 20 %) and cock a little slower. Can you feel it?
 - [ ] **Levels.** In the Armory level 5 holds the Sniper Rifle, the M130 Spring, the 2x Scope and the Tight-Bore Barrel;
-  level 6 has Red Gas; the M140 is at 7 and the M150 at 9. With Dev content off none of the rifle's items show.
+  level 6 has Red Gas; the M140 is at 7 and the M150 at 9. They show with Dev content off too (public since 2026-11-05).
 - [ ] **Bots with it.** About 1 opponent in 12 on Hard (fewer on Normal and Easy) carries it: they raise the scope to
   fight and hold their fire from the hip unless you are within 8 m. Do they feel dangerous at range and beatable up
   close? Is it fair on Depot, Woodland and The Street, at 5v5 and 8v8?
 
 ## Variable Scope
 
-A dev item (SN2): turn on Dev content, and Disable levelling (or Level up to 8).
+Public since 2026-11-05 (SN2): turn on Settings › Dev settings › Disable levelling (or Level up to 8).
 
 - [ ] **Fit it.** Customise › Optic lists the Variable Scope for the AEG Rifle and the Sniper Rifle. Its look: the 2x
   Scope a little longer, with a ridged zoom ring and a white mark (a placeholder until your own model).
@@ -698,6 +700,9 @@ same and throw them (SF2).
   nothing happens. Throw one at your own feet: your screen goes white and the sound dips, then fades back. Is the
   blinding fair, and is it fun rather than annoying?
 - [ ] **Turn away.** Throw a flash, then turn your back on it before the bang: nothing. Side on, a short wash.
+- [ ] **Bomb sounds (AU7).** Throw a smoke and a flash on the range, near and from 10 to 20 m away: the ring pull, then
+  your tin can clattering where it lands, starting right as it hits, and again if it bounces on, the smoke hissing as it goes
+  off with no deep pop, and the flash a clean balloon pop. Do they sound like your recordings? Is the flash loud enough?
 - [ ] **Bots' smoke (SF2).** Pin a bot in cover from 10 to 30 m with steady fire: now and then it smokes the line
   between you (more often on Hard). Does it read as a bot buying time, and is it annoying how often?
 - [ ] **Bots' flash (SF2).** Let a bot hear you round a corner, then wait: it may flash the corner, turn its back and
@@ -1243,7 +1248,7 @@ Dev content on for the rifle. The numbers came from bots; these need you.
   anything poking into the view while you walk, sprint, lean and aim?
 - [ ] **Iron sights:** aim. The rear sight's U and the front dot line up on the crosshair.
 - [ ] **Moving parts:** fire (the slide blows back), empty it (the slide locks back), reload (the magazine release
-  presses, the magazine drops and a new one goes up the well) and Inspect (the slide draws back a little).
+  presses, the magazine drops and a new one goes up the well) and Inspect (the slide stays home, GS2).
 - [ ] **Figures:** a bot reloading its pistol pulls the old magazine out of the grip and seats the new one, both in
   the left hand.
 - [ ] **Paints and parts:** in Customise, try each paint and every part: the laser and torch sit under the dust
@@ -1324,6 +1329,36 @@ Every BB in flight is now a proper Blender model, round from every side instead 
 - [ ] **Glowing BBs:** on Woodland at night, glowing BBs are round green balls with their streak, as before.
 - [ ] **Frame rate:** a full-auto magazine dump on Low keeps its frame rate (F3 box).
 
+## The barrel models (BA1)
+
+The AEG Rifle's two barrels are proper models now, built from the rifle's own barrel (no photos needed).
+
+- [ ] **Customise, Barrel tab:** the cards show each barrel turned at an angle, the hop-up end nearest: the Tight-Bore a
+  steel inner barrel in its hop-up unit (red bucking at the back, the toothed hop dial on the side), the Long Barrel a
+  brass inner barrel, longer, through its barrel extension. Both to one scale, so the long one is the longer. The
+  Armory's barrel pictures look the same.
+- [ ] **Fitted:** with the tight bore the rifle looks as it comes, but for a polished ring inside the flash hider; with
+  the long barrel the knurled, fluted extension sits between the front sight and the flash hider, which moves out
+  10 cm. Fit a silencer on the long barrel: it starts at the extension's end. Nothing pokes through the rifle.
+- [ ] **Paints:** the extension takes each paint like the rifle's barrel; the inner barrels keep their steel and brass.
+- [ ] **Up close:** on each card the bucking's centre is a dark hole and the hop dial's teeth read (not blown white);
+  with the long barrel fitted there's no line or flicker where the extension's flats meet its shoulder, and the brass
+  crown in the flash hider looks round. The first open of the Barrel tab doesn't hitch.
+
+## The magazine models (MAG1)
+
+The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built from its replica's standard magazine
+(2026-11-05).
+
+- [ ] **Hi-Cap (AEG Rifle):** in Customise, the magazine is about a third longer than the standard one, curving on
+  down with the same ribs, with a knurled winding wheel showing under its base plate.
+- [ ] **Low-Cap (AEG Rifle):** a short magazine, about two thirds of the standard one's length below the rifle.
+- [ ] **Extended (GBB Pistol):** the magazine sticks out about 3.5 cm below the grip, with a row of holes down its back
+  and its base pad in the frame's colour.
+- [ ] **Reload:** with each fitted, the reload drops that magazine out and brings it back in; nothing pokes through
+  the hands, the grip or the rifle.
+- [ ] **Bots:** a bot with the Support or Pointman kit carries the longer magazine on its replica.
+
 ## The smoke and flash bomb models (BL9)
 
 - [ ] **In hand:** take each bomb in hand (mouse wheel). The smoke is a grey canister with a green stripe, a black
@@ -1331,6 +1366,17 @@ Every BB in flight is now a proper Blender model, round from every side instead 
 - [ ] **Thrown:** throw each. It tumbles in flight, bounces and comes to rest lying on its side on the ground, not
   sunk into it or floating over it.
 - [ ] **Bots' bombs:** the ones bots throw look the same, and the HUD's bomb icons match the stripe and band colours.
+
+## Bots throwing bombs (GT1)
+
+- [ ] **The wind-up:** on the Practice Range or in a match, watch a bot throw a smoke or flash from 5 to 15 m. Its
+  replica goes to its chest, the bomb shows in its right hand and the left hand meets it to pull the pin. The arm
+  swings back by its ear with the left arm pointing ahead, then comes over beside the head, elbow first, never across
+  the face, and the bomb leaves as the hand reaches out ahead at head height.
+- [ ] **After:** the arm follows through down across the body, then the replica comes back up. No bomb is left in the
+  hand after it is thrown.
+- [ ] **Shape:** nothing stretches oddly at the shoulder or armpit while the arm is up, on both the soldier and the
+  robot (Settings › Dev › Robots).
 
 ## GBB Pistol sights and port (GS1)
 
@@ -1346,6 +1392,58 @@ Every BB in flight is now a proper Blender model, round from every side instead 
   on SWITCH REPLICA, and Enter opens the list again.
 - [ ] **Flags from a roof.** On Woodland in Attack / Defend, if you can get onto the shelter roof by flag B, standing
   there does nothing to the flag; at the pole's foot it rises as before.
+
+## GBB slide, AEG sights and stock (GS2)
+
+- [ ] **GBB at rest:** look at the GBB Pistol in the Loadout, Customise, in your hand and in its holster on a bot: the
+  slide is always forward, flush with the frame's nose. Its slide has lines at the front and back, a chamfered nose
+  and rounded edges, like your photos.
+- [ ] **GBB firing:** fire it, then empty it. Only the slide runs back; the barrel stays and shows in front of it,
+  and the slide stays back until the reload seats the new magazine.
+- [ ] **GBB front:** in Inspect or on a bot, the muzzle and the spring hole under it (with the guide rod's cap) look
+  like your Gen5 photos; locked back, nothing but the barrel shows in front of the slide.
+- [ ] **AEG irons:** aim the AEG Rifle at a figure down the Range with no optic. The small ring at the back and the
+  front post line up easily and the figure shows clearly round the post.
+- [ ] **Optic:** fit the red dot, then the 2x Scope, on the AEG Rifle and on the Sniper Rifle. No part of the iron
+  sights shows at the hip, aimed or on the menu pictures; take the optic off and they come back.
+- [ ] **AEG stock:** the stock's sides are flat, the half-round tubes gone.
+- [ ] **AEG charging handle:** it sits lower, under the rail's back end, and on a reload it pulls straight back
+  without passing through anything.
+
+## Sniper Rifle public, The Street dev (DT1)
+
+- [ ] **Sniper gear without Dev content.** With Settings › Dev › Dev content off, the Armory lists the Sniper Rifle and
+  the M130 Spring at level 5, the M140 at 7, the Variable Scope at 8 and the M150 at 9, with no DEV tag; the Loadout
+  offers each once unlocked.
+- [ ] **The Street hidden.** With Dev content off, the Match page lists Depot, Woodland and the Range only. Turn Dev
+  content on: The Street is back, marked DEV, and a match there gives no XP.
+- [ ] **Sniper bots.** A few Hard matches with Dev content off: now and then a bot carries the Sniper Rifle. On
+  Woodland at 8v8, does one end feel stacked once snipers are about?
+- [ ] **Sniper bots never shoot a teammate.** They now wait for the bolt before each shot, so they fire a little slower;
+  do they still feel dangerous at range?
+
+## Inspect your replica (IN1)
+
+- [ ] **The key.** Press **Y** with each replica in hand (the AEG, the GBB Pistol, the Cyber Pistol, the Sniper
+  Rifle). It turns side on, its right side to you and the whole replica in view, while its parts move: the AEG's
+  charging handle back, dust cover open and hop-up dial turned; the GBB's slide stays home; the Cyber's battery eased
+  out of the grip; the sniper's bolt lifted and drawn. Small plastic clicks go with each part. It ends back in your
+  hands where it started.
+- [ ] **It stops at once** when you fire, aim, reload, switch replica, holster, sprint or are hit: the replica eases
+  back in a moment and the parts are home. Pressing Y while sprinting or aiming does nothing.
+- [ ] **Rebind.** Settings › Controls lists **Inspect replica** on Y; move it to another key and it works there.
+- [ ] **Feel.** Is about 3 s for the rifles and 2 s for the pistols right, and is the turn too much or too little?
+
+## Models in the menus and the HUD (MP1)
+
+Every picture of a replica, attachment or power source is drawn from its model each time the game starts, so new
+models show without anything else changing. The smoke and flash icons now do the same once their models are merged.
+
+- [ ] **Bomb icons:** once the new smoke and flash models are in, the Loadout's Grenades panel and the HUD's bomb icons
+  show them (green smoke, violet flash), sharp at both HUD sizes (the bomb in hand is bigger) and dimmed when none is
+  left. Before that they stay the flat drawn cans.
+- [ ] **New models everywhere:** after any new replica, attachment or power source model is merged, Loadout,
+  Customise (the turning replica and the part cards), the Armory and the level-up card show it.
 
 ## Reporting what you find
 

@@ -8,7 +8,8 @@ extends Node3D
 ## figure versions fitted (ReplicaParts). Calling a hit, "HIT!" shows above the head; it stays up on the walk off; a
 ## figure leaving the field fades out, its replicas put away. The hit flinch (`hit`, FigureFlinch): the upper body
 ## jolts the way the BB flew, through FigureBend. In a reload (FI4) the left hand carries a copy of the replica model's
-## magazine, made here once a slot in the replica's paint, and throws the old one into `thrown`. A kind the session
+## magazine, made here once a slot in the replica's paint, and throws the old one into `thrown`. A bomb thrown (GT1,
+## `set_bombs`): its model in the right hand until it leaves, the arms throwing it. A kind the session
 ## couldn't load draws no body, only the sign (the tests catch a missing model, FigureModels warns). Where the sun casts
 ## no shadows, a soft dark disc lies on the floor under it (`set_contact_shadow`: the contact shadow, one shared mesh).
 
@@ -62,6 +63,10 @@ var _wall: RayHit = null
 var _raise_wait: int = 0
 var _raise_stride: int = 1
 var _since_shot: float = INF
+## The bombs' meshes by Grenade.Kind (GrenadeView's, shared) and their timing, for a throw in the hand (GT1; empty:
+## none drawn).
+var _bomb_meshes: Array[Mesh] = []
+var _grenade_config: GrenadeConfig = null
 
 
 ## Draws `c` in `team_colour` (the body's Team* paint, set_body, and the sign's outline), glowing with `glow` of it
@@ -83,7 +88,7 @@ func setup(c: Character, team_colour: Color, hits: HitConfig, font: Font,
 	top_level = true
 	for i in c.armament.replicas.size():
 		var held := _held_replica(c.armament.replicas[i], c.team, realistic, parts[i] if i < parts.size() else {},
-				cfg.magazine_node, _magazines, _muzzles)
+				_magazines, _muzzles)
 		_replicas.append(held)
 		_classes.append(c.armament.replicas[i].site_class)
 		if held != null:
@@ -114,10 +119,24 @@ func set_body(models: FigureModels, kind: int, lines: Vector2) -> void:
 			add_child(_body)
 			_body.hands.hold(_replicas, _classes, _magazines)
 			_body.hands.thrown = thrown
+			if not _bomb_meshes.is_empty():
+				_body.hands.set_bomb_meshes(_bomb_meshes)
+			_pose.grenades = _grenade_config
 			_body.set_fade(_fade)
 		else:
 			_body.free()
 			_body = null
+
+
+## Throws drawn with `meshes` (GrenadeView.meshes, by Grenade.Kind, shared) in the hand, timed by `cfg` (GT1): the
+## bomb in the right hand from the pin to the release, the arms throwing it.
+func set_bombs(meshes: Array[Mesh], cfg: GrenadeConfig) -> void:
+	_bomb_meshes = meshes
+	_grenade_config = cfg
+	if _pose != null:
+		_pose.grenades = cfg
+	if _body != null:
+		_body.hands.set_bomb_meshes(meshes)
 
 
 ## Raises the replica, muzzle up, at level geometry `query` finds within its reach along the aim (FB5), the eyes at
@@ -142,12 +161,13 @@ func set_lod_lines(lines: Vector2) -> void:
 		_body.set_lod_lines(lines)
 
 
-## The models' figure version of `r` with `parts`' figure versions on it, hidden, painted for `team` (null without a
-## model). The figure version is one mesh, so a part shows over the standard magazine or flash hider rather than in
-## its place. A copy of the full model's `magazine_node` mesh for the reloads, in the same paint
-## (null without one), goes on the end of `magazines`, and its muzzle point in the model's space (the figure version's,
-## which is drawn at the model's origin) on the end of `muzzles`.
-func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictionary, magazine_node: String,
+## The models' figure version of `r` (its `Figure` mesh, cut down from the model) with `parts`' figure copies fitted
+## (ReplicaParts.fit_figure: a part takes the place of the magazine or flash hider it replaces, an optic hides the iron
+## sights), hidden, painted for `team` (null without a model). A copy of the magazine it carries (its figure magazine or
+## the magazine part's copy, both drawn in the model's space) for the reloads, in the same paint (null without one),
+## goes on the end of `magazines`, and its muzzle point in the model's space (where the figure version is drawn) on the
+## end of `muzzles`.
+func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictionary,
 		magazines: Array[MeshInstance3D], muzzles: PackedVector3Array) -> MeshInstance3D:
 	var scene := load(MODEL_DIR + r.id + ".glb") as PackedScene
 	if scene == null:
@@ -155,28 +175,33 @@ func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictiona
 		muzzles.append(Vector3.ZERO)
 		return null
 	var model := scene.instantiate()
-	muzzles.append(_in_model(model.find_child(ReplicaParts.MUZZLE_NODE, true, false) as Node3D, model))
+	var muzzle := _in_model(model.find_child(ReplicaParts.MUZZLE_NODE, true, false) as Node3D, model)
+	var barrel_end := _in_model(model.find_child(ReplicaParts.BARREL_END_NODE, true, false) as Node3D, model)
 	var paint := ReplicaPaint.bot_paint(team, r)
-	var mag := model.find_child(magazine_node, true, false) as MeshInstance3D
+	var held := model.find_child(ReplicaParts.FIGURE_NODE, true, false) as MeshInstance3D
 	var copy: MeshInstance3D = null
-	if mag != null and mag.mesh != null:
-		copy = MeshInstance3D.new()
-		copy.name = "Magazine_%s" % r.id
-		copy.mesh = mag.mesh
-		copy.visible = false
-		copy.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		ReplicaPaint.apply(copy, paint, realistic)
-	magazines.append(copy)
-	var held := model.find_child("Figure", true, false) as MeshInstance3D
 	if held != null:
 		held.get_parent().remove_child(held)
+		held.owner = null
+		for child in held.find_children("*", "", true, false):
+			child.owner = null
 		held.transform = Transform3D.IDENTITY
 		held.visible = false
 		held.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		for part in ReplicaParts.figure_meshes(r.id, parts):
-			part.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			held.add_child(part)
+		for piece: Node in held.find_children("*", "GeometryInstance3D", true, false):
+			(piece as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var fit := ReplicaParts.fit_figure(held, r.id, parts, barrel_end, muzzle)
+		muzzle = fit.muzzle
 		ReplicaPaint.apply(held, paint, realistic)
+		if fit.magazine != null and fit.magazine.mesh != null:
+			copy = MeshInstance3D.new()
+			copy.name = "Magazine_%s" % r.id
+			copy.mesh = fit.magazine.mesh
+			copy.visible = false
+			copy.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			ReplicaPaint.apply(copy, paint, realistic)
+	magazines.append(copy)
+	muzzles.append(muzzle)
 	model.free()
 	return held
 
@@ -321,6 +346,7 @@ func animate(c: Character, fraction: float, delta: float, eye: Vector3) -> void:
 	if _fade < 1.0:
 		_body.hands.show_hands(-1, -1, false)
 		_body.hands.show_reload(-1, 0.0, true)
+		_body.hands.show_bomb(Grenade.Kind.NONE)
 
 
 ## How far (0..1) the replica is raised at the level ahead of `c`'s aim, as `_pose` read it (FB5): by how close the
@@ -384,6 +410,7 @@ func update(c: Character, fraction: float, delta: float = 0.0) -> void:
 		if fade < 1.0:
 			_body.hands.show_hands(-1, -1, false)
 			_body.hands.show_reload(-1, 0.0, true)
+			_body.hands.show_bomb(Grenade.Kind.NONE)
 
 
 ## The contact shadow under `c`'s feet at `fraction`: narrower crouched (`_place_disc`).

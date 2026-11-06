@@ -397,7 +397,8 @@ func test_a_dev_cheat_applied_in_a_run_keeps_it_from_the_best_and_a_match_never_
 
 
 func test_a_run_with_dev_content_in_hand_is_never_a_best() -> void:
-	# BP3: the Sniper Rifle or the Variable Scope in practice made a best, though dev content stays off the records.
+	# BP3: dev gear in practice (then the Sniper Rifle or the Variable Scope) made a best, though dev content stays off
+	# the records.
 	var m := _practice()
 	var sim: Simulation = m[0]
 	var state: GameState = m[1]

@@ -78,6 +78,11 @@ extends Resource
 ## hips (GA1; 1: all, so the replica keeps its heading while the pelvis swings and turns into a step aside; 0: none, the
 ## upper body rides the hips). Applied alike to the hit volume (HitPose) and the drawn figure (FigureBend).
 @export var upper_steady: float = 1.0
+## Aiming a rifle (any replica but a pistol) the head bows forward about the neck's joint by cheek_bow (rad, TP2), then
+## tilts cheek_cant (rad) to the figure's right, the cheek onto the stock so the eye sits on the sights. Applied alike
+## to the hit volume (HitPose) and the drawn figure (FigureBend, eased over a switch with the pistol's clips).
+@export var cheek_bow: float = 0.3
+@export var cheek_cant: float = 0.2
 @export var max_stride: float = 1.0
 ## The hit area fitted to the drawn figure (HV1): its joints, baked from the figure's own clips (HitFit,
 ## tools/hit_fit_bake.gd). A character's volume hangs on them (Hitbox.build_volume); the numbers above shape only the
@@ -93,27 +98,27 @@ extends Resource
 ## the Hips joint to Spine1 up to fit_chest_high of the way from Chest to Neck; each hip a capsule from the thigh's joint
 ## fit_pelvis_up along the hips; each leg's thigh and shin between its joints, and the boot from fit_boot_heel of the
 ## foot's length behind the ankle to the toe, fit_boot_drop under them.
-@export var fit_head_centre: float = 0.3625
-@export var fit_head_radius: float = 0.128
-@export var fit_chest_low: float = 0.463
-@export var fit_chest_high: float = 0.147
-@export var fit_chest_half_width: float = 0.067
-@export var fit_chest_ahead: float = -0.071
-@export var fit_chest_radius: float = 0.158
+@export var fit_head_centre: float = 0.374
+@export var fit_head_radius: float = 0.125
+@export var fit_chest_low: float = 0.238
+@export var fit_chest_high: float = 0.185
+@export var fit_chest_half_width: float = 0.056
+@export var fit_chest_ahead: float = -0.030
+@export var fit_chest_radius: float = 0.150
 ## And two more on the spine's line for its depth (the plate carrier's pouches, the pack): fit_chest_front ahead of it,
 ## of fit_chest_depth_radius, and fit_chest_back behind, of fit_chest_back_radius, from fit_chest_back_low of the way up
 ## the torso's line to fit_chest_back_high of the way from Chest to Neck (below Chest when negative; the pack rides on
 ## the back, above the hips, and stands nearly to the shoulders).
-@export var fit_chest_front: float = 0.054
-@export var fit_chest_back: float = 0.130
-@export var fit_chest_depth_radius: float = 0.150
-@export var fit_chest_back_radius: float = 0.165
-@export var fit_chest_back_low: float = 0.250
-@export var fit_chest_back_high: float = -0.120
-@export var fit_pelvis_up: float = 0.022
-@export var fit_hips_radius: float = 0.129
-@export var fit_thigh_radius: float = 0.085
+@export var fit_chest_front: float = 0.069
+@export var fit_chest_back: float = 0.113
+@export var fit_chest_depth_radius: float = 0.130
+@export var fit_chest_back_radius: float = 0.150
+@export var fit_chest_back_low: float = 0.175
+@export var fit_chest_back_high: float = 0.160
+@export var fit_pelvis_up: float = 0.067
+@export var fit_hips_radius: float = 0.089
+@export var fit_thigh_radius: float = 0.088
 @export var fit_shin_radius: float = 0.071
-@export var fit_boot_heel: float = 0.16
-@export var fit_boot_drop: float = 0.0
-@export var fit_boot_radius: float = 0.052
+@export var fit_boot_heel: float = 0.048
+@export var fit_boot_drop: float = -0.007
+@export var fit_boot_radius: float = 0.058

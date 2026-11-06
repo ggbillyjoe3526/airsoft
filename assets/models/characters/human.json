@@ -288,7 +288,10 @@
   "Kit_Pack_LOD1",
   "Kit_Pack_LOD2",
   "Kit_Radio",
-  "Kit_Radio_LOD1"
+  "Kit_Radio_LOD1",
+  "Kit_Pads",
+  "Kit_Pads_LOD1",
+  "Kit_Pads_LOD2"
  ],
  "gripBones": [
   "Grip_R",

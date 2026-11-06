@@ -581,6 +581,10 @@ msgstr "RELOAD"
 msgid "ACT_FIRE_MODE"
 msgstr "FIRE MODE"
 
+# IN1: turn the replica in hand over to look at it.
+msgid "ACT_INSPECT"
+msgstr "INSPECT REPLICA"
+
 msgid "ACT_SLOT_1"
 msgstr "REPLICA 1"
 
@@ -1422,7 +1426,7 @@ msgid "PART_RATTLES"
 msgstr "Rattles:"
 
 msgid "PART_NOTE_OPTIC"
-msgstr "On the top rail. Aiming looks through it; the iron sights fold down."
+msgstr "On the top rail. Aiming looks through it; the iron sights come off."
 
 msgid "PART_NOTE_GRIP"
 msgstr "Under the rail. Changes how it handles and how steady the aim stays."
@@ -1558,6 +1562,9 @@ msgstr "A red dot on clear glass, quick at any range."
 
 msgid "PART_BLURB_SCOPE2X"
 msgstr "Reach for long lanes, slower to raise."
+
+msgid "PART_BLURB_SCOPEVAR"
+msgstr "Turns from 2x to 6x on the mouse wheel, slowest to raise."
 
 msgid "PART_BLURB_VERTICAL"
 msgstr "Steadies the aim after a sprint, a little slower to bring up."

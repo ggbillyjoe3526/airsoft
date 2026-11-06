@@ -241,10 +241,13 @@ class Sheet:
             v.co = self.map(v.co)
         me.update()
 
-    def frame(self, u: float, z: float, w: float = 0.0) -> Matrix:
-        """A rigid frame on the sheet at (u, z), w out from it: x along it, -y out of it, z up."""
+    def frame(self, u: float, z: float, w: float = 0.0, span: float = 0.0) -> Matrix:
+        """A rigid frame on the sheet at (u, z), w out from it: x along it, -y out of it, z up. With `span`, it leans
+        as the sheet does on average over that height above z (for something tall sewn onto it), not just at z."""
         p, tan, n = self.c.at(self.s0 + u)
         d, slope = self._drawn_in(z)
+        if span > 0.0:
+            slope = (self._drawn_in(z + span)[0] - d) / span
         w = self.w0 + w - d
         o = Vector((p.x + n.x * w, p.y + n.y * w, z))
         nn = Vector((n.x, n.y, 0.0)).normalized()
@@ -365,10 +368,14 @@ def resample(pts: list, step: float) -> list:
     return out
 
 
-def sweep(bm: bmesh.types.BMesh, path: list, outs: list, section: list) -> list:
+def sweep(bm: bmesh.types.BMesh, path: list, outs: list, section: list, drape=None) -> list:
     """Quads along `path` (3D points) of a closed `section` [(across, out)], `across` along tangent x out and `out`
-    along `outs` (each point's outward direction, made square to the path). Capped. Returns the faces."""
-    rings = []
+    along `outs` (each point's outward direction, made square to the path). Capped. Returns the faces.
+
+    drape(point, out) -> metres: how far the section's foot at `point` may come in along -out to lie on what is under
+    it, asked at both edges and the middle; each point of the section drops by those, read off by its place across
+    (evened along the path, never more than asked), so a strap settles over a curved shoulder without twisting."""
+    frames = []
     n = len(path)
     for i, p in enumerate(path):
         a = path[max(i - 1, 0)]
@@ -376,8 +383,18 @@ def sweep(bm: bmesh.types.BMesh, path: list, outs: list, section: list) -> list:
         t = (b - a).normalized()
         o = Vector(outs[i])
         o = (o - t * o.dot(t)).normalized()
-        side = t.cross(o).normalized()
-        rings.append([bm.verts.new(p + side * u + o * v) for u, v in section])
+        frames.append((p, t.cross(o).normalized(), o))
+    drops = [[0.0] * len(section) for _ in range(n)]
+    if drape is not None:
+        half = max(abs(u) for u, _ in section)
+        raw = [[drape(p + side * u, o) for u in (-half, 0.0, half)] for p, side, o in frames]
+        for i in range(n):
+            near = raw[max(0, i - 2):i + 3]
+            lo, mid, hi = (min(raw[i][k], sum(r[k] for r in near) / len(near)) for k in range(3))
+            drops[i] = [mid + ((hi if u > 0 else lo) - mid) * abs(u) / half for u, _ in section]
+    rings = []
+    for (p, side, o), dr in zip(frames, drops):
+        rings.append([bm.verts.new(p + side * u + o * (v - d)) for (u, v), d in zip(section, dr)])
     faces = []
     m = len(section)
     for ra, rb in zip(rings, rings[1:]):

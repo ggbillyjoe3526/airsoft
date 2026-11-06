@@ -43,6 +43,7 @@ var _kinds: Array[Kind] = []
 var _loaded: bool = false
 ## Team paint by kind, team, source material and glow; shadow twins' meshes by kind and head.
 var _team_materials: Dictionary[String, Material] = {}
+var _face_materials: Dictionary[String, Material] = {}
 var _shadow_meshes: Dictionary[String, ArrayMesh] = {}
 ## Each replica's magazine mesh by its id (null: its model has none).
 var _magazines: Dictionary[StringName, Mesh] = {}
@@ -61,8 +62,8 @@ func load_kinds() -> bool:
 	return not _kinds.has(null)
 
 
-## Replica `replica_id`'s own magazine mesh (its model's FigureConfig.magazine_node), as modelled, or null when its model
-## or the node can't be found: read the first time it is asked for, then shared.
+## Replica `replica_id`'s own magazine mesh (its model's FigureConfig.magazine_node, the figure version's), or null
+## when its model or the node can't be found: read the first time it is asked for, then shared.
 func magazine_mesh(replica_id: StringName) -> Mesh:
 	if _magazines.has(replica_id):
 		return _magazines[replica_id]
@@ -216,15 +217,44 @@ func team_material(kind: int, source: Material, team: int, colour: Color, glow: 
 	return m
 
 
-## Every material the loaded kinds draw with: each modelled one, and each Team* one painted for each team, `colours[team]`
-## lit with `glow` (team_material: the very ones the figures will wear), for ShaderPrewarm.
+## `source` (a Face* material of `kind`) showing face look `look`: its UVs offset by FigureConfig.face_offsets[look];
+## look 0 (no offset) is the source itself. Made the first time it is asked for, then shared.
+func face_material(kind: int, source: Material, look: int) -> Material:
+	if look <= 0 or look >= config.face_offsets.size():
+		return source
+	var key := "%d/%d/%d" % [kind, source.get_instance_id(), look]
+	var made: Material = _face_materials.get(key)
+	if made != null:
+		return made
+	var m := source.duplicate() as BaseMaterial3D
+	if m == null:
+		return source
+	var offset := config.face_offsets[look]
+	m.uv1_offset = m.uv1_offset + Vector3(offset.x, offset.y, 0.0)
+	_face_materials[key] = m
+	return m
+
+
+## How many face looks have been made (tests).
+func face_material_count() -> int:
+	return _face_materials.size()
+
+
+## Every material the loaded kinds draw with: each modelled one, each Face* one's looks (face_material), and each Team*
+## one painted for each team, `colours[team]` lit with `glow` (team_material: the very ones the figures will wear), for
+## ShaderPrewarm.
 func materials(colours: PackedColorArray, glow: float) -> Array[Material]:
 	var out: Array[Material] = []
 	for kind in _kinds.size():
 		if _kinds[kind] == null:
 			continue
 		for source in _kinds[kind].sources:
-			if not source.resource_name.to_lower().begins_with(config.team_material_prefix):
+			var mat_name := source.resource_name.to_lower()
+			if mat_name.begins_with(config.face_material_prefix):
+				for look in maxi(config.face_offsets.size(), 1):
+					out.append(face_material(kind, source, look))
+				continue
+			if not mat_name.begins_with(config.team_material_prefix):
 				out.append(source)
 				continue
 			for team in colours.size():

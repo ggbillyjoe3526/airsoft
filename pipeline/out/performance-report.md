@@ -1,27 +1,9 @@
-Task: BL6 · head e7725d6 · Verdict: Pass
-Run: none (asset-only change, no GDScript; glb JSON inspected with python, no Godot run) · budget: no baseline yet, judged against the 40k-triangle replica limit and origin/main's glb
+Task: HC1 · Verdict: Pass (no game code changed; assets only)
 
-Metrics (cyber.glb, old -> new), measured from the glb JSON:
-- Triangles in the hands (all meshes except Figure): 2,688 -> 31,594 (limit 40,000, ok, 79 %)
-- Figure (bot LOD): 148 -> 236 tris, 270 -> 426 verts (small, ok)
-- Vertices total: 5,380 -> 27,578 (Body 19,887)
-- Meshes 6 -> 6, nodes 18 -> 18, materials 5 -> 5 (shared, same set), animations 4 -> 4
-- Surfaces (primitives): 16 -> 18; hands-side draw calls ~14 -> ~14+2 (Selector 1->2, Trigger 1->2); Figure 4 prims unchanged
-- Images/textures: 0 / 0 (no textures, ok); extensions: none
-- File size: 171,708 -> 879,740 bytes (+0.7 MB, 0.17 % of the 500 MB install budget, ok)
-
-Regressions (> 10 % worse): triangle count, vertex count and file size are up, all inside budget. Only the 2 extra surfaces touch the draw-call count (+2 per viewmodel, negligible). Judgment, not blocking.
-
-Blocking findings: none
- - Per-frame work: no .gd/.tscn/.tres/config changed (diff is glb, tools/blender/replicas/cyber.py, docs, changelog); nothing runs per frame or per tick (judgment, verified by diff stat).
- - cyber.py is an offline Blender build tool under tools/, not referenced by game code or exports (judgment).
- - Materials stay shared by name (5 per file), no per-instance materials introduced (measured).
-
-Advisory:
- - Body is 24,422 tris, 77 % of the hands budget; further detail on this replica or a second pistol of this weight leaves little headroom. Re-measure on the owner's hardware at the next playtest (frame time is not measurable in the cloud container).
- - Selector and Trigger now carry 2 primitives each; if they share a material, merging them saves 2 draw calls per viewmodel (minor).
- - The record's 31,596 differs from the measured 31,594 by 2 triangles; cosmetic.
-
-Fixes: none required.
-
-Verdict: Pass
+Measured:
+- human.glb 4,425,688 -> 4,503,656 bytes (+77,968, +1.8 %); robot.glb 3,644,152 -> 3,722,120 (+77,968, +2.1 %). Install size effect about +152 KB; no budget line exists yet (perf-budget.json empty), so judged against the targets: negligible.
+- Key counts (rotation tracks, both figures identical): HitCall 1330 -> 1330 (the 18 changed tracks stay at 31 keys each). WalkOff 752 -> 1082 (+330: 15 finger tracks 2 -> 24 keys; the 3 arm tracks stay 24). WalkOff 24 keys over 0.77 s, HitCall 31 over 1.0 s.
+- Test run time: test_hit_call_arm.gd 0.46 s alone (404 asserts, 2 tests); the four-file run 3.3 s wall including Godot start. No orphan or leak lines.
+- Runtime: animation playback only. 15 more sampled rotation tracks while WalkOff plays (one figure at a time, a few seconds each, interpolated by AnimationPlayer in native code); no new nodes, scripts, materials, signals or allocations; the clips live in the existing per-figure AnimationLibrary, loaded once with the glb. Memory for the extra keys: 330 x (4 floats + time) per figure, about 7 KB.
+- Test code: per-frame Dictionary/Transform arrays in _globals are test-only (tests/), fine; skeleton copies are freed (sk.free()).
+Judgment: nothing blocking, nothing advisory. Frame time and draw calls unaffected by construction (no mesh, material or skeleton change); not measurable in the cloud container.

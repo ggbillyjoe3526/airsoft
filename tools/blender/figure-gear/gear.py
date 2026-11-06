@@ -77,11 +77,14 @@ def swatch_materials() -> None:
 FRONT = dict(bottom=1.05, top=1.375, half=0.13, top_half=0.097, cut=0.062, radius=0.32, gap=0.013, thick=0.030)
 BACK = dict(bottom=1.03, top=1.395, half=0.13, top_half=0.116, cut=0.035, radius=0.36, gap=0.012, thick=0.028)
 CUMMER = dict(bottom=1.03, top=1.20, thick=0.011, gap=0.006, tuck=0.100)
-BELT = dict(bottom=0.94, top=1.0, thick=0.013, gap=0.003)  # at the waist (the owner, 2026-11-05)
-STRAP = dict(width=0.064, thick=0.022, gap=0.004, front_x=0.078, crest_x=0.108, back_x=0.092)
+BELT = dict(bottom=0.96, top=1.02, thick=0.013, gap=0.003)  # at the waist, just under the cummerbund (the owner)
+STRAP = dict(width=0.064, thick=0.022, gap=0.004, front_x=0.078, crest_x=0.108, back_x=0.092, drape=0.025)
+STRAP_TILT_COS = 0.8  # the most a strap tips across its width to lie on the slope under it (about 37 degrees)
 MOLLE = dict(row=0.025, pitch_z=0.05, loop=0.031, pitch_x=0.038, raise_=0.005)
 PILLOW = 0.005  # how far a filled bag's face bulges at its middle
 HOLSTER_DROP = 0.05  # the holster's mouth below the belt's top (a drop mount)
+HOLSTER_AT = 292.0  # degrees round the belt from the front over the left: the holster's body about 8 forward of the side
+# (further forward, at 298, it stood out of the hit volume's hips in the aim-up pose)
 # Where a pistol out of the hand sits (FigureHands, FigureConfig.holster_node): an empty at the holster's mouth on the
 # slide's line, in the replica's axes (+Z up out of the mouth, +Y the slide's top, toward the figure's front). Its place
 # in the holster's frame (x forward, z up, -y out from the hip): the front inner wall, the pocket's middle, the mouth.
@@ -207,9 +210,24 @@ def section_rect(w: float, t: float, r: float, seg: int) -> list:
     return [(x, y + t / 2) for x, y in pts]
 
 
-def sweep_ob(name: str, path: list, outs: list, section: list, mat: str) -> bpy.types.Object:
+def section_pad(w: float, t: float, r: float, seg: int, crown: float) -> list:
+    """A padded strap's cross-section: flat against the body, its outer edges rounded by r in `seg` steps and its face
+    crowned `crown` at the middle (the side against the body is never seen, so its corners stay square)."""
+    if seg <= 0:
+        return section_rect(w, t, r, 0)
+    pts = []
+    for cx, a0 in ((w / 2 - r, 0.0), (-w / 2 + r, 90.0)):
+        for i in range(seg + 1):
+            a = math.radians(a0 + 90.0 * i / seg)
+            pts.append((cx + r * math.cos(a), t - r + r * math.sin(a)))
+        if a0 == 0.0:
+            pts.append((0.0, t + crown))
+    return pts + [(-w / 2, 0.0), (w / 2, 0.0)]
+
+
+def sweep_ob(name: str, path: list, outs: list, section: list, mat: str, drape=None) -> bpy.types.Object:
     b = builder(name)
-    faces = fit.sweep(b.bm, path, outs, section)
+    faces = fit.sweep(b.bm, path, outs, section, drape)
     b._faces(faces, mat)
     return b.build()
 
@@ -467,9 +485,11 @@ def cummerbund(kit: Kit, torso: fit.Torso, lod: int, front: fit.Sheet, back: fit
 
 
 def shoulder_path(tree, side: float, z_front: float, y_front: float, z_back: float, y_back: float,
-                  gap: float, x_front: float, x_crest: float, x_back: float, half_width: float) -> tuple:
+                  gap: float, x_front: float, x_crest: float, x_back: float, half_width: float,
+                  step: float = 0.018, hug: bool = False) -> tuple:
     """The centre line of a strap from the front plate over the shoulder to the back plate, `gap` off the body,
-    and the outward direction at each point."""
+    and the outward direction at each point; with `hug` its ends go down behind the bags on the body, else into the
+    bags' tops at y_front and y_back."""
     centre_z = 1.30
     hits = []
     for i in range(0, 61):
@@ -489,26 +509,61 @@ def shoulder_path(tree, side: float, z_front: float, y_front: float, z_back: flo
         hits.append((p, d))
     front_x = side * x_front
     back_x = side * x_back
-    path = [Vector((front_x, y_front, z_front - 0.045)), Vector((front_x, y_front, z_front - 0.005))]
-    path += [h[0] for h in hits]
-    path += [Vector((back_x, y_back, z_back - 0.005)), Vector((back_x, y_back, z_back - 0.045))]
-    path = fit.smooth_path(fit.resample(path, 0.024), 4)
-    # Push any point the smoothing pulled under the body back out, measured across the strap's whole width.
-    out_path, outs = [], []
-    for p in path:
+    if hug:
+        # Into the gap behind each bag's top, `gap` off the body, so it lies on the chest and back from the start.
+        def ends(x, z0, y, way):
+            hit = tree.ray_cast(Vector((x, 0.0, z0)), Vector((0.0, way, 0.0)), 0.5)
+            return Vector((x, y if hit[0] is None else hit[0].y + way * gap, z0))
+        path = [ends(front_x, z_front - 0.04, y_front, -1.0), ends(front_x, z_front - 0.01, y_front, -1.0)]
+        path += [h[0] for h in hits]
+        path += [ends(back_x, z_back - 0.01, y_back, 1.0), ends(back_x, z_back - 0.04, y_back, 1.0)]
+    else:
+        path = [Vector((front_x, y_front, z_front - 0.045)), Vector((front_x, y_front, z_front - 0.005))]
+        path += [h[0] for h in hits]
+        path += [Vector((back_x, y_back, z_back - 0.005)), Vector((back_x, y_back, z_back - 0.045))]
+    path = fit.smooth_path(fit.resample(path, step), 6)
+    # Each point is laid on the body across the strap's whole width (the owner: snug, no gap): the strap tilts to the
+    # slope under it, the line between its two edges' contacts, and sits `gap` off the higher of those and its middle.
+    # The ends stay where they go into the plate bags.
+    n = len(path)
+    snug, outs = [], []
+    for i, p in enumerate(path):
         o = Vector((p.x, 0.0, centre_z))
-        d = (p - o)
+        d = p - o
         d.x = 0.0
         d.normalize()
-        need = (p - o).length
-        for dx in (-half_width * 0.5, 0.0, half_width * 0.5):
-            oo = o + Vector((dx, 0.0, 0.0))
+        low = p.z < (z_front if p.y < 0.0 else z_back) + 0.01
+        if low and (hug or p.y < 0.0):
+            snug.append(p)
+            outs.append(d)
+            continue
+        tng = (path[min(i + 1, n - 1)] - path[max(i - 1, 0)]).normalized()
+        across = tng.cross(d).normalized()
+        contacts = []
+        for k in (-0.9, 0.0, 0.9):
+            oo = o + across * (half_width * k)
             hit = tree.ray_cast(oo, d, 0.5)
-            if hit[0] is not None:
-                need = max(need, (hit[0] - oo).length + gap)
-        out_path.append(o + d * need)
-        outs.append(d)
-    return out_path, outs
+            contacts.append(hit[0] if hit[0] is not None else oo + d * (p - o).length)
+        lo, mid, hi = contacts
+        nrm = tng.cross(hi - lo).normalized()
+        if nrm.dot(d) < 0.0:
+            nrm = -nrm
+        if nrm.dot(d) < STRAP_TILT_COS:  # a steeper tilt than that (a fold, a seam) is halved
+            nrm = d.lerp(nrm, 0.5).normalized()
+        base = (lo + hi) / 2.0
+        lift = max(0.0, (mid - base).dot(nrm))
+        q = base + nrm * (lift + gap)
+        b = 1.0
+        if not hug and p.y > 0.0:
+            # Behind the shoulder a strap that ends in the back bag's top (the pack's) leaves the body over 9 cm.
+            f = max(0.0, min(1.0, (p.z - z_back) / 0.09))
+            b = f * f * (3.0 - 2.0 * f)
+        snug.append(p.lerp(q, b))
+        outs.append(d.lerp(nrm, b).normalized())
+    # A light smoothing along the strap, then any point it pulled into the body goes back out.
+    smooth = fit.smooth_path(snug, 3)
+    outs = [o.normalized() for o in fit.smooth_path(outs, 3)]
+    return [q + o * max(0.0, (p - q).dot(o)) for p, q, o in zip(snug, smooth, outs)], outs
 
 
 def shoulder_straps(kit: Kit, tree, lod: int, pack: bool = False) -> list:
@@ -519,25 +574,42 @@ def shoulder_straps(kit: Kit, tree, lod: int, pack: bool = False) -> list:
     by = fit_state.back_y - fit_state.drawn_in(1.0, BACK["top"]) + BACK["thick"] / 2
     made = []
     for side in (1.0, -1.0):
+        # The carrier's strap goes down behind the bags on the body (the owner: snug, no gap); the pack's, laid on
+        # it, ends at the pack's top.
         path, outs = shoulder_path(tree, side, FRONT["top"], fy, BACK["top"], by, s["gap"], s["front_x"],
-                                   s["crest_x"], s["back_x"], s["width"] / 2)
+                                   s["crest_x"], s["back_x"], s["width"] / 2, (0.018, 0.032, 0.05)[lod], not pack)
         w, t = s["width"], s["thick"]
         mat = "team"
+        lift = 0.0
         if pack:
-            lift = s["thick"] + 0.003
+            lift = s["thick"] + 0.0065  # over the carrier strap's crowned face
             path = [p + o * lift for p, o in zip(path, outs)]
-            first = next(i for i, p in enumerate(path) if p.z > FRONT["top"] + 0.03)
+            first = next((i for i, p in enumerate(path) if p.z > FRONT["top"] + 0.075), 0)
             path, outs = path[first:], outs[first:]
             w, t = 0.058, 0.012
             mat = "ranger"
-        ob = sweep_ob("Strap", path, outs, section_rect(w, t, t * 0.45, (1, 0, 0)[lod]), mat)
+        rest = s["gap"] + (lift if pack else 0.0)
+
+        def drape(q, o, tree=tree, rest=rest):
+            # Over the shoulder each edge of the strap comes down onto the body (the pack's onto the carrier's strap),
+            # `gap` off it; not at the front buckles nor where it goes into the back bag.
+            # The pack's strap leaves the carrier's behind the shoulder for the pack's top, so its drape fades out
+            # over 9 cm there, in one curve.
+            k = max(0.0, min(1.0, (q.z - (FRONT["top"] + 0.08 if q.y < 0.0 else BACK["top"] + 0.01))
+                             / (0.09 if pack and q.y > 0.0 else 0.03)))
+            hit = tree.ray_cast(q + o * 0.03, -o, 0.15)
+            if hit[0] is None:
+                return 0.0
+            return k * max(0.0, min(STRAP["drape"], hit[3] - 0.03 - rest))
+        ob = sweep_ob("Strap", path, outs, section_pad(w, t, t * 0.45, (2, 1, 0)[lod], (0.003, 0.0, 0.0)[lod]), mat,
+                      drape)
         if not pack:
-            # Where it goes into a plate bag's top the strap thins, so it can't show through the bag's rounded edge.
+            # Behind a bag's top the strap thins where it would meet the bag's back, so it can't show through it.
             for v in ob.data.vertices:
-                if v.co.y < 0.0 and v.co.z < FRONT["top"] + 0.012:
-                    v.co.y = min(max(v.co.y, fy - 0.009), fy + 0.009)
-                elif v.co.y > 0.0 and v.co.z < BACK["top"] + 0.012:
-                    v.co.y = min(max(v.co.y, by - 0.009), by + 0.009)
+                if v.co.y < 0.0 and v.co.z < FRONT["top"] + 0.005:
+                    v.co.y = max(v.co.y, fy + FRONT["thick"] / 2 + 0.002)
+                elif v.co.y > 0.0 and v.co.z < BACK["top"] + 0.005:
+                    v.co.y = min(v.co.y, by - BACK["thick"] / 2 - 0.002)
         shade(ob)
         crest = max(p.z for p in path)
 
@@ -689,7 +761,9 @@ def on_sheet(obs: list, m: Matrix, kit: Kit, weights, name: str) -> bpy.types.Ob
 
 def front_pouches(kit: Kit, front: fit.Sheet, lod: int) -> None:
     for i, u in enumerate((-0.083, 0.0, 0.083)):
-        m = front.frame(u, FRONT["bottom"] + 0.012, FRONT["thick"] + plate_bulge(FRONT, u, FRONT["bottom"] + 0.07, lod))
+        # Their backs stand on the pillowed bag's crown, so none sinks into it (the owner, 2026-11-06).
+        out = FRONT["thick"] + max(plate_bulge(FRONT, u, FRONT["bottom"] + z, lod) for z in (0.03, 0.07, 0.11, 0.14))
+        m = front.frame(u, FRONT["bottom"] + 0.012, out + 0.002, span=0.12)
         on_sheet(mag_pouch(lod), m, kit, "Chest", "MagPouch%d" % i)
 
 
@@ -855,15 +929,18 @@ def belt_gear(kit: Kit, sheet: fit.Sheet, lod: int) -> Matrix:
         want = fit.way(math.radians(theta_deg))
         return con.s_where(lambda q: Vector((q.x, q.y, 0.0)).normalized().dot(want) > 0.9995)
 
-    # Holster, the figure's right hip, a little forward of the side, canted forward.
+    # Holster, the figure's right hip, its body a little forward of the side (the owner: side and front, not back),
+    # canted forward. Angles run from the front (0) over the left (90).
     # Hung HOLSTER_DROP below the belt's top on a drop mount, so a drawn pistol would clear the cummerbund now
     # the belt rides at the waist.
-    m = sheet.frame(s_at(258.0), BELT["top"] - HOLSTER_DROP, BELT["thick"] - 0.008)
-    m = m @ Matrix.Rotation(math.radians(10.0), 4, "Y")
-    seat = m @ Matrix.Translation(PISTOL_SEAT_AT)
+    m = sheet.frame(s_at(HOLSTER_AT), BELT["top"] - HOLSTER_DROP, BELT["thick"] - 0.008)
+    cant = m @ Matrix.Rotation(math.radians(10.0), 4, "Y")
+    # The pistol sits in the shell, so on the cant.
+    seat = cant @ Matrix.Translation(PISTOL_SEAT_AT)
     obs = holster(lod)
     for o in obs:
-        place(o, m)
+        # The shell is canted on its mount; the mount and its belt loops stay level on the belt.
+        place(o, m if o.name.startswith("Mount") else cant)
     ob = join("HolsterAll", obs)
     shade(ob)
 
@@ -874,8 +951,8 @@ def belt_gear(kit: Kit, sheet: fit.Sheet, lod: int) -> Matrix:
     # The grenade pouch on the left front of the belt.
     m = sheet.frame(s_at(62.0), BELT["top"] - 0.105, BELT["thick"] + 0.001)
     on_sheet(lid_pouch("GrenadePouch", 0.032, 0.105, 0.05, lod), m, kit, "Hips", "GrenadePouch")
-    # The dump pouch at the back, left of the spine.
-    m = sheet.frame(s_at(162.0), BELT["bottom"] - 0.03, BELT["thick"] + 0.001)
+    # The dump pouch at the back of the left hip, clear of the pack.
+    m = sheet.frame(s_at(138.0), BELT["bottom"] - 0.03, BELT["thick"] + 0.001)
     on_sheet(dump_pouch(lod), m, kit, "Hips", "DumpPouch")
     del L
     return seat
@@ -886,7 +963,7 @@ def belt_gear(kit: Kit, sheet: fit.Sheet, lod: int) -> Matrix:
 def radio(kit: Kit, sheets: dict, lod: int) -> None:
     sheet, a, b = sheets["L"]
     u = a + (b - a) * 0.62
-    m = sheet.frame(u, CUMMER["bottom"] + 0.02, CUMMER["thick"])
+    m = sheet.frame(u, CUMMER["bottom"] + 0.02, CUMMER["thick"] + 0.003)  # its back on the webbing, not in it
     obs = []
     hw, h, d = 0.033, 0.074, 0.038
     obs.append(soft_box("RadioPouch", hw, h / 2, d, "coyote", 0.008, (0.005, 0.003, 0.0)[lod], (2, 1, 0)[lod],
@@ -953,7 +1030,7 @@ def radio(kit: Kit, sheets: dict, lod: int) -> None:
 
 # ------------------------------------------------------------------------------------------------------- the pack
 
-PACK = dict(half=0.138, bottom=0.995, top=1.39, depth=0.105, top_depth=0.045)
+PACK = dict(half=0.138, bottom=1.035, top=1.40, depth=0.105, top_depth=0.045)
 
 
 def piping(name: str, outline: list, y: float, mat: str, r: float = 0.0028, step: float = 0.04) -> bpy.types.Object:
@@ -1164,8 +1241,8 @@ def pack(kit: Kit, tree, lod: int) -> None:
             m = Matrix(((x.x, -o0.x, tng.x, p0.x), (x.y, -o0.y, tng.y, p0.y), (x.z, -o0.z, tng.z, p0.z),
                         (0, 0, 0, 1)))
             tail = builder("StrapTail")
-            tail.box((-0.024, -0.016, -0.012), (0.024, -0.004, 0.004), "polymer")
-            tail.box((-0.0125, -0.009, -0.05), (0.0125, -0.006, -0.01), "ranger_web")
+            tail.box((-0.024, -0.02, -0.012), (0.024, -0.008, 0.004), "polymer")
+            tail.box((-0.0125, -0.013, -0.03), (0.0125, -0.01, -0.01), "ranger_web")
             ob = tail.build()
             place(ob, m)
             shade(ob)
@@ -1198,8 +1275,8 @@ def build(lod: int, tree, torso: fit.Torso, hips: fit.Torso) -> tuple:
 # ------------------------------------------------------------------------------------------- skin, paint, export
 
 BUDGET = {  # triangles per piece and level (the figure's gear share: 14,000 / 4,500 / 1,500, BL10-BL12 split)
-    "Kit": (10550, 3480, 1100),
-    "Kit_Pack": (2680, 780, 400),
+    "Kit": (10300, 3420, 1100),
+    "Kit_Pack": (2930, 840, 400),
     "Kit_Radio": (770, 240),
 }
 LOD_SUFFIX = ("", "_LOD1", "_LOD2")

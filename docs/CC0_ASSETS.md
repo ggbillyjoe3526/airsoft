@@ -76,6 +76,9 @@ The browser game's loader settings for every model (scale, facing, budgets) are 
 
 - **The rigged figures.** `human.glb` and `robot.glb` share a 65-bone skeleton, each with LOD1 and LOD2 meshes and 32
   clips. A new figure uses the same skeleton and clip names (`tools/blender/bot-figure/README.md`).
+- **Parts spliced in.** The human's knee and elbow pads (`Kit_Pads`, 3,000 / 1,000 / 300 triangles at LOD0, LOD1,
+  LOD2, part of the figure's budget) are built apart and spliced into `human.glb` by node name
+  (`tools/blender/figures/README.md`); a rebuilt body keeps their node names and reruns `pads.py` to refit them.
 - **Scale and facing.** A figure stands as tall as the hit volume (1.73 m, feet to the top of the head; the hitbox
   doesn't change), measured on `body` and the legs when it has them, so a raised hand doesn't shrink it. Its feet sit
   on the ground. glTF models face +Z and the figures face -Z, so a model is turned a half turn unless it already faces
@@ -110,24 +113,34 @@ A replica's file is its model in the hands, on the menus' pictures and on the fi
   frame meets the slide, above the trigger. The grip stays where the built-in pistols' is (raked back about 22°): the
   hands are posed in code.
 - **Objects.** `Body` (needed), `Magazine` (drops out on a reload), `FlashHider` (shown while no muzzle device is
-  fitted), `Figure` (the figures' cut-down version), and the empties `RearSight` and `FrontSight` (the iron sights'
-  tops: aimed, the sight line runs through the eye), `Muzzle` (needed: the centre of the muzzle's face, where BBs
-  leave), `TorchMount` and `SlideBack`. A rifle's figure is scaled so its butt-to-muzzle length is the
-  figures' rifle length; a pistol's keeps its size, the back of the slide at the figures' grip: the `SlideBack` empty's
-  depth, else the body's rearmost point at the bore's height or above (mark it when the frame reaches back past the
-  slide, as the Cyber Pistol's rear block does).
+  fitted), `Figure` (the figures' version: cut down from the rest by `tools/blender/replicas/figure_copy.py`, with its
+  `Figure_Magazine`, `Figure_FlashHider` and `Figure_Sights` as children, which a fitted part replaces), and the empties
+  `RearSight` and `FrontSight` (the iron sights' tops: aimed, the sight line runs through the eye), `Muzzle` (needed:
+  the centre of the muzzle's face, where BBs leave), `TorchMount` and `SlideBack`. A rifle's figure is scaled so its
+  butt-to-muzzle length is the figures' rifle length; a pistol's keeps its size, the back of the slide at the figures'
+  grip: the `SlideBack` empty's depth, else the body's rearmost point at the bore's height or above (mark it when the
+  frame reaches back past the slide, as the Cyber Pistol's rear block does).
 - **Moving parts (RM1).** Objects the file's animations move hang from one bone (the armature's root) and are drawn in
   the body's own meshes, so they cost no draw call. The game poses them from its state, never on a clock: `Fire` (the
   trigger, and a pistol's slide kicking back and home, each shot), `Selector` (safe at 0, semi at half its length,
-  burst at three quarters, auto at the end), `SightsFold` (while an optic is fitted), `Reload` (through the reload),
+  burst at three quarters, auto at the end), `Reload` (through the reload),
   `Inspect` (on the Inspect key, RM2) and `SlideLock` (RM7: held at its end while the magazine is empty, a GBB's slide
   caught back; put it after the others, as a later animation wins a part two of them move). The magazine is never a
-  bone: the game moves it (and the hand holding it).
+  bone: the game moves it (and the hand holding it). Only the slide rides the slide bone: the barrel stays with the
+  frame, so with the slide back it shows in front of it (owner, 2026-11-05). The file opens at rest: the build leaves
+  the armature with no active action and its tracks muted (`hardsurface.rest_pose`), and scripts that read a replica
+  file import it with `hardsurface.import_glb`, as Blender's importer otherwise shows the first clip's frame 1.
+- **Iron sights (owner, 2026-11-05, every replica).** Every piece of the iron sights (base, leaf, ears, post) hangs
+  from a bone whose name ends in `Sight` (`frontSight`, `rearSight`). With any optic fitted the game hides them whole
+  (`IronSights`): never folded, so nothing stands in the optic's way.
 - **Parts.** `replicaParts/<id>.glb`: one top-level object per part named `<kind>_<id>` (`optic_redDot`,
-  `magazine_hiCap`, `muzzle_silencer` …), in the replica's space where it fits; a child `<name>_Figure` is ignored. Two
-  child empties are read (RM8): an optic's `<name>_SightLine` on its sight line (aimed, the replica is raised so it
-  runs through the eye) and a torch's `<name>_UnderLaser`, where the torch moves while the laser is fitted too (both
-  clip to the same rail).
+  `magazine_hiCap`, `muzzle_silencer` …), in the replica's space where it fits, with its figures' copy `<name>_Figure`
+  (cut down from it by `tools/blender/parts/figure_parts.py`, run last). Two child empties are read (RM8): an optic's
+  `<name>_SightLine` on its sight line (aimed, the replica is raised so it runs through the eye) and a torch's
+  `<name>_UnderLaser`, where the torch moves while the laser is fitted too (both clip to the same rail). What a part
+  puts inside the replica (a barrel's inner barrel and hop-up unit, BA1) is `<name>_Inside` in
+  `replicaParts/inside/<id>.glb`, placed as its part: only the part's own picture draws it, so a fit never loads it. It
+  counts toward the part's triangle budget.
 - **Materials,** by name: `CyberSlab`, `CyberFrame`, `CyberLine`, `CyberCore`, `CyberMetal`, or a replica material's own
   name (`polymer`, `furniture`, `detail`, `metal`, `rubber`, `stipple`, `accent`). Plain colours: the game draws in its
   own materials, so Realistic colours, the glow and the High finish apply. No textures needed.
@@ -187,11 +200,15 @@ foundations).
 | A figure model | ≤ 20 MB; LOD0 ≤ 60,000 triangles (within 8 m), LOD1 ≤ 20,000, LOD2 ≤ 6,000; ≤ 8 materials; 2K textures |
 | First-person arms | ≤ 8 MB, ≤ 40,000 triangles, ≤ 4 materials, 2K textures |
 | A replica model | ≤ 6 MB, ≤ 40,000 triangles in the hands, ≤ 3,000 on a figure, ≤ 6 materials, 2K textures |
-| A replica's parts file | ≤ 2 MB, ≤ 10,000 triangles a part |
+| A replica's parts file | ≤ 3 MiB (2 MB until BL8b: the attachments, magazines and barrels share the AEG's), ≤ 10,000 triangles a part |
 | A grenade model | ≤ 200 KB, ≤ 5,500 triangles, plain colours |
 | A prop | ≤ 1 MB, ≤ 5,000 triangles (a landmark ≤ 30,000 with LODs), sharing texture sets with other props |
 | A surface texture set | ≤ 6 MB at 2K (colour, normal, ORM) |
 | Everything external | ≤ 25 MB |
+
+The human figure's 60,000 is shared (BL10 to BL12, 2026-11-05): the body 34,000 / 11,000 / 3,300 triangles (LOD0 /
+1 / 2), the plate carrier 14,000 / 4,500 / 1,500, the pads 3,000 / 1,000 / 300, the largest head 9,000 / 3,200 / 900
+(8,000 / 2,600 / 800 until the face, FA1, took the split's unallocated 1,000 / 600 / 100).
 
 These are desktop budgets (owner, 2026-10-18). Every figure on the field (six in a 3v3) shares the model's geometry,
 so the model's triangle count, not the team size, sets the cost, and LODs keep distant figures cheap. Low draws

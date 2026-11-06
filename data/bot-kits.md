@@ -42,7 +42,7 @@ The kits are the bots' own: what you have unlocked never changes them.
 
 The kits are first guesses for the owner's playtest. Easy carries the most factory replicas; each level up carries more
 and better matched gear; Hard never factory. The Cyber Pistol turns up now and then from Normal up, and the Sniper Rifle
-(a dev item for now, so only with Dev content on) at every level, more often on Hard. Rushers lean to Support, Pointman
+at every level, more often on Hard. Rushers lean to Support, Pointman
 and the Cyber Pistol, anchors to Marksman, Support and Sniper, flankers to Stealth and Pointman, careful bots to
 Rifleman, Marksman and Sniper.
 

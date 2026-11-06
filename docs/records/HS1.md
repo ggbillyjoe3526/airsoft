@@ -1,6 +1,6 @@
 # HS1 · Replicas worn on the figure: the pistol in the holster, the rifle on the back
 
-**Review:** 3 attempts · critic Accept 8/8 · qa Pass · performance Pass
+**Review:** 3 attempts (and a check of the port onto main) · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -35,6 +35,9 @@ sling ever reached `main`, so nothing was removed from the repo.
   0.10 to 0.13 m. At 0.17 m (attempt 1), the Cyber Pistol's trigger guard went through the narrowing back wall, and the
   GBB Pistol's grip went through the top corner. `holster_depth` is 0.11 m, so the muzzle stays clear of the foot's
   bend when crouched. Renders standing, crouched and sprinting are in this thread.
+- **After BL12 merged** (2026-11-06) the holster sits further forward on the hip (the owner: "more to the side/front
+  of the hip", BL12's HOLSTER_AT 292°) on a higher belt, its shell canted on a level mount. The seat is placed on the
+  shell's cant, so it follows the holster wherever BL12 puts it; the shell's shape is unchanged, so the depth fit holds.
 - **The rifle on the back rests on the pack** (the owner, 18:01: "the rifles are floating. They should be holstered
   directly onto the backpack"). FigureConfig's numbers are renamed from `sling_*` to `back_*` and now place the rifle's
   middle (`back_middle`, 1.28 m up on the spine), nearly upright (`back_tilt` 0.3) and leaning with the pack's sloped

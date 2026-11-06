@@ -5,12 +5,14 @@ extends GutTest
 const ROOM := Vector2i(1920, 1080)
 
 
-func _screen(picks: MatchPicks = null, size: Vector2i = ROOM) -> MenuScreen:
+## `dev_content` lists the dev maps too: The Street, the longest name and blurb, is dev (owner, 2026-11-05).
+func _screen(picks: MatchPicks = null, size: Vector2i = ROOM, dev_content: bool = false) -> MenuScreen:
 	var view := SubViewport.new()
 	view.size = size
 	view.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	add_child_autofree(view)
 	var settings := Settings.new()
+	settings.dev.dev_content = dev_content
 	var screen := MenuScreen.new(picks if picks != null else MatchPicks.new(), settings)
 	view.add_child(screen)
 	return screen
@@ -168,7 +170,7 @@ func test_longest_summary_and_blurbs_fit_their_lines() -> void:
 	picks.bots = "hard"
 	picks.teammates = "easy"
 	picks.team = PlaySession.TEAM_BETA
-	var screen := _screen(picks)
+	var screen := _screen(picks, ROOM, true)
 	await wait_process_frames(3)
 	var page := screen.match_page()
 	var line := page.find_child("SummaryLine", true, false) as Label
@@ -187,7 +189,7 @@ func test_a_plain_attack_defend_summary_fits_its_line() -> void:
 	var picks := MatchPicks.new()
 	picks.map_id = "street"
 	picks.mode = MatchOptions.MODE_ATTACK_DEFEND
-	var screen := _screen(picks)
+	var screen := _screen(picks, ROOM, true)
 	await wait_process_frames(3)
 	var line := screen.match_page().find_child("SummaryLine", true, false) as Label
 	assert_between(line.get_line_count(), 1, line.max_lines_visible, "plain Attack/Defend summary shows whole: '%s'" % line.text)

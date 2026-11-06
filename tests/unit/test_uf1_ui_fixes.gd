@@ -205,7 +205,7 @@ func test_switch_replica_opens_the_pop_up_for_its_slot() -> void:
 	assert_eq(gear.switcher().slot(), Loadout.Slot.SECONDARY)
 	assert_true(gear.replica_card(PISTOL).is_picked(), "the replica carried there is ringed")
 	assert_false(gear.replica_card(AEG).is_picked())
-	assert_eq(gear.replica_ids().size(), 3, "every public replica")
+	assert_eq(gear.replica_ids().size(), 4, "every public replica, the Sniper Rifle since 2026-11-05")
 
 
 func test_picking_a_replica_carries_it_and_closes() -> void:

@@ -28,8 +28,9 @@ An electric rifle (an AEG, "automatic electric gun"), with a motor whirr on ever
 3-round bursts or full auto**: press **B** to change mode, and the fire selector on the replica shows the mode you
 are in. On an indoor field (Depot) it starts each round on single shots: [no full auto indoors](Maps#depot).
 A battery drives it, so the battery you fit sets its rate of fire. It is a short carbine, about 67 cm long: a
-quad-rail handguard with a ribbed cover, an A-frame front sight, a flip-up rear sight, a raked grip moulded in one
-piece with the receiver, an adjustable stock and a curved magazine. Inspect it to see the charging handle pulled back.
+quad-rail handguard with a ribbed cover, an A-frame front sight, a small ghost-ring rear sight, a raked grip moulded
+in one piece with the receiver, an adjustable stock and a curved magazine. [Inspect](Controls) it (**Y**) to see the
+charging handle pulled back, the dust cover open and the hop-up dial turn.
 
 The AEG Rifle takes the most parts: an optic on its top rail, a grip under it, a barrel, a muzzle part and a different
 magazine. It is in your kit from the start.
@@ -38,10 +39,12 @@ magazine. It is in your kit from the start.
 
 A gas blowback pistol: every shot cycles the slide with a puff of gas from the muzzle and the ejection port. It fires
 **single shots** only. Its slide locks back when you fire the last BB and closes as the new magazine seats near the
-end of the reload, so you always know when it is empty: you hear it lock back on that last shot.
+end of the reload, so you always know when it is empty: you hear it lock back on that last shot. Only the slide moves:
+with it back, the barrel shows in front of it.
 
 Gas drives it, so the gas you load sets its energy: stronger gas pushes harder and kicks harder. It is a compact
-striker pistol: a squared slide with serrations at the back, a railed dust cover, a raked grip with stippled panels
+striker pistol: a squared slide with rounded edges, a chamfered nose and serrations at the front and back, a
+railed dust cover, a raked grip with stippled panels
 and finger grooves, and a thumb rest. Its sights are a white U at the back and a post with a white dot at the front:
 aimed, the post sits in the U. It takes a laser, a silencer and an extended magazine. It is in your kit from
 the start.
@@ -51,15 +54,29 @@ the start.
 A futuristic electric pistol, unlocked at level 10, the top of the [levels](Levels-and-Unlocks). It fires **single
 shots, bursts or full auto**, faster than the rifle from big magazines, with almost no kick (the table above has
 its numbers). Its battery is built in, so
-no power source fits it, and only the Weapon Torch fits it. It wears its own white, cyan and magenta colours, with
+no power source fits it, and only the Weapon Torch fits it.
+It is the same size in your hand as the GBB Pistol. It wears its own white, cyan and magenta colours, with
 glowing slashes, a pink core behind bars in its slide, a finned rear cap and three fire-mode lights; with
-**Realistic colours** on it turns plain grey with no glow. It has its own shot, dry-click and magazine sounds.
+**Realistic colours** on it turns plain grey with no glow. It has its own shot and magazine sounds.
+
+## Sniper Rifle
+
+A spring-powered bolt-action rifle, unlocked at level 5. It fires **single shots** only: after every shot you hear the
+bolt drawn back over the spring and snapped home before the next one is ready. It shoots harder and
+further than the AEG Rifle, from small magazines, and has its own [site limit](#site-limits).
+
+It comes with the **2x Scope** fitted; take it off or swap it for another optic in the Loadout. It is made to be aimed:
+from the hip its shots scatter widely, and the spread closes as the sight comes up. The spring you fit sets its energy
+([Parts and Power](Parts-and-Power#power-sources)). It takes the AEG Rifle's optics, grips and muzzle parts, but no
+barrels or other magazines. It is a long rifle in a grey chassis: a plain barrel with a thread cap, a slotted forend,
+a black receiver with a top rail, a short box magazine, a vertical grip and a stock with a cheek piece and a rubber
+butt pad.
 
 ## How they sound
 
-Every replica's shots, dry clicks and magazines are made from real recordings: a gas pistol, an electric motor's
-whirr and hands on magazines, recorded for the game. Some are stand-ins built from those recordings until each replica
-gets its own. You can tell them apart by ear: the AEG Rifle's motor whirr, the GBB Pistol's gas pop and slide, and the
+Every replica's shots and magazines are made from real recordings: a gas pistol, an electric motor's whirr and hands
+on magazines, recorded for the game. Pull the trigger with nothing loaded and every replica gives the same plastic
+dry click. You can tell them apart by ear: the AEG Rifle's motor whirr, the GBB Pistol's gas pop and slide, and the
 Cyber Pistol's short buzz. BBs sound different on metal, wood, glass, plastic,
 cardboard and on a player, so you hear what a shot hit.
 
@@ -81,3 +98,10 @@ long barrel) stop at the limit, and the Loadout's Performance sheet says when a 
 Each replica can wear one of eight bold colour schemes or four plain ones, picked in **Customise**. Bots hold theirs
 in their team's colours. **Realistic colours** shows every bold scheme as its plain colour, yours and the bots', from
 the next match.
+
+## On other players
+
+Bots hold the same replicas you hold, with the parts they have fitted: their optic (the iron sights taken off under
+it), silencer, grip, torch or laser, and the magazine they reload.
+A rifle is held with its stock in the shoulder and the head down on it, looking along the sights; a pistol is held
+out in both hands.

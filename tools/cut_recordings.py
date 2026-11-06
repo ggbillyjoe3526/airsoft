@@ -301,12 +301,6 @@ def from_onsets(a, starts, seconds, fade=0.3):
     return out
 
 
-def saturate(x, drive):
-    """`x` driven into a soft clip (tanh) `drive` times over its peak: louder for the same peak, a little rougher."""
-    x = x / max(np.abs(x).max(), 1e-9)
-    return np.tanh(drive * x) / np.tanh(drive)
-
-
 def blast_length(a, start):
     """How long a sound starting at `start` (s) holds: until its level falls 15 dB under its first 0.1 s."""
     e = db(env(a[int(start * RATE):]))
@@ -405,7 +399,9 @@ def build(folder):
     # The last shot: the slide locking back on the empty magazine.
     put("slideLock_gas", variants(pick(folder, [("Pistol magazine empty lock back .wav", None)], 0.3), 3), -24.0)
     dry = pick(folder, [("Pistol-dry fire.wav", None)], 0.25, 0.3)
-    put("dryFire_gas", variants(dry, 5), -36.9)
+    # Every replica's trigger pulled empty, today's and later ones: this click as it is (owner, 2026-11-05: final,
+    # not a stand-in). SimAudio plays the one cue for them all.
+    put("dryFire", variants(dry, 5), -36.9)
     # Its magazine, out and in: every take of each.
     mag_out = pick(folder, [("pistol magazine reload.wav", [0]),
                             ("Pistol slider locked back reload magazine.wav", [0]), ("Magazine out.wav", None)], 0.40)
@@ -421,8 +417,6 @@ def build(folder):
     put("power_electric", [onset_slice(m, 0.16, 40) for m in variants(motor, 5)], -26.3)
     cracks = [high_pass(onset_slice(s, 0.045, 20), 300.0) for s in shots]
     put("shot_electric", variants(cracks, 5, 0.9), -18.5)
-    motor3 = pick(folder, [("motor_whir3.wav", None)], 0.9, 0.05)
-    put("dryFire_electric", [onset_slice(m, 0.09, 25) for m in variants(motor3, 5)], -28.2)
     # The electric and spring replicas' plastic magazines: a TV remote's battery cover clicked off (the quieter takes)
     # and on (owner's foley, 2026-11-04), lower for the rifles' bigger magazines.
     cover_off = pick(folder, [("remote_cover_clipping.wav", [0, 2, 4, 6])], 0.25, 0.3)
@@ -432,7 +426,7 @@ def build(folder):
 
     # Sniper Rifle (spring): his recorded shots (third batch, 2026-11-04), each from where it bursts out, its spring's
     # quieter run-up before that as the power part (it plays with the shot, so the shot answers the trigger at once);
-    # its magazine lower; the pistol's dry click lower; his bolt pulled back and pushed home as its cocking, each knock
+    # its magazine lower; his bolt pulled back and pushed home as its cocking, each knock
     # moved to where the Fire clip has the handle. (The AU4 mix of the pistol's shot, a knock, a thud and a crack that
     # stood in until now is in git history, 7f1586e.)
     fire = Source.get(folder, "sniper_fire.wav").a
@@ -441,22 +435,18 @@ def build(folder):
     put("shot_spring", variants(from_onsets(fire, bursts, 0.45), 5), -16.8)
     run_ups = [shape(fire[int((t - 0.165) * RATE):int((t - 0.005) * RATE)].copy(), 0.2) for t in bursts]
     put("power_spring", [fixed(r, 0.16) for r in variants(run_ups, 5)], -27.3)
-    put("dryFire_spring", variants(dry, 5, 0.88), -37.2,
-        "a spring rifle's trigger, uncocked")
     put("magOut_spring", variants(cover_off, 5, 0.8), -30.6)
     put("magIn_spring", variants(cover_on, 5, 0.8), -26.9)
     put("boltCycle", [bolt(s) for s in pick(folder, [("sniper_bolt.wav", None)], 1.0, 0.1)[:3]], -14.0)
 
     # Cyber Pistol (electric pistol): a short whir of his electric toothbrush a little under its own pitch (owner,
     # 2026-11-04: "i prefer the cyber pistol with the toothbrush", over the motor's) under a small crack, 3 dB up, with
-    # an electric motor's whine under it ("a slight hum of an electric motor", not "too high pitched"); the pistol's
-    # dry click and magazines a little higher.
+    # an electric motor's whine under it ("a slight hum of an electric motor", not "too high pitched"); its
+    # magazines a little higher.
     brush = pick(folder, [("electric_toothbrush.wav", None)], 0.9, 0.05)
     cyber = [mix(under(1.4 * onset_slice(m, 0.09, 25), ev_hum(0.09, v), 9.0), 0.4 * resample(c, 1.15))
              for v, (m, c) in enumerate(zip(variants(brush, 5, 0.95), variants(cracks, 5)))]
     put("shot_cyber", cyber, -16.9)
-    put("dryFire_cyber", variants(dry, 5, 1.1), -30.3,
-        "an electric pistol fired empty")
     put("magOut_cyber", variants(cover_off, 5, 1.0), -30.8)
     put("magIn_cyber", variants(cover_on, 5, 1.0), -27.1)
 
@@ -573,20 +563,27 @@ def build(folder):
     put("rope_up", loudest_windows(pulls[0], 5, 0.25), -31.8)
     put("rope_down", loudest_windows(pulls[1], 5, 0.25), -32.0)
 
-    # The smoke bomb: his grenade pin, a can bouncing (its first knock), and the long deodorant spray as the smoke's
-    # hiss 9 dB under a pop (the can's knock far lower), dying over its last second as the synthesised one did.
-    # (The pin's first take is too thin to reach the old pin's level under the limiter.)
-    put("grenade_pin", pick(folder, [("pin_pull_grenade.wav", [1, 3, 2])], 0.2), -10.2)
-    cans = pick(folder, [("can_bouncing.wav", None)], 0.2, 0.4)
-    put("grenade_bounce", variants(cans, 3), -14.2)
+    # The smoke bomb: his grenade pin, his can bouncing as a whole knock group (the first knock and the rattle after it,
+    # 0.6 s: SimAudio plays it once from a bomb's bounce, SoundConfig.bounce_hold), and his long deodorant spray as the
+    # smoke going off, from its own burst (owner, 2026-11-05: "a ring pull sound and a bouncing can"; the can pitched
+    # down as a pop, and its first 0.2 s alone as each bounce, didn't sound like his).
+    # Each cut starts at its sound (`from_onsets`), a little before where the takes are found: the pin's click peaks
+    # 3 to 15 ms before them (cut from the take, its click was lost), the can's first take has 0.18 s of soft
+    # pre-sound before its knock. The pin is high-passed at 300 Hz (its room rumble; the click is mostly 6 to 12 kHz)
+    # and left at its peak, a click 22 to 24 dB over its loudest 50 ms: matched to the old pin's loudness it took
+    # 17 dB of gain and the limiter, and hissed (owner: "muffle/static noise"); SoundConfig.pin_gain lifts it instead.
+    pin_src = Source.get(folder, "pin_pull_grenade.wav")
+    pin = high_pass(pin_src.a, 300.0)
+    put("grenade_pin", [from_onsets(pin, [pin_src.takes[i][0] - 0.05], 0.25, 0.5)[0] for i in [1, 3, 2]], -24.0)
+    can = Source.get(folder, "can_bouncing.wav")
+    put("grenade_bounce", variants([from_onsets(can.a, [t[0] - 0.02], 0.6, 0.4)[0] for t in can.takes], 3), -14.2)
     sprays = variants(pick(folder, [("deodorant_spray_long.wav", None)], 3.5, 0.05), 3)
-    pops = [onset_slice(resample(k, 0.6), 0.12, 40) for k in variants(cans, 3)]
-    put("smoke_pop", [fixed(under(p, x, 9.0), 3.5, 1.0) for p, x in zip(pops, sprays)], -9.9)
-    # The flash bomb: his recording from its bang, a little higher and lower for the other two (third batch),
-    # saturated so it comes within 2 dB of the synthesised bang's loudness (its peaks would hold it 7 dB under).
+    put("smoke_pop", [fixed(x, 3.5, 1.0) for x in sprays], -14.0)
+    # The flash bomb: his balloon pop from its bang, a little higher and lower for the other two (third batch), clean:
+    # driving it into a soft clip to match the synthesised bang's loudness squashed the pop into a flat burst (owner,
+    # 2026-11-05); SoundConfig.bang_gain makes the level up instead, under the master bus's limiter.
     flash = Source.get(folder, "flash_grenade.wav").a
-    put("flash_bang", [saturate(b, 4.0) for b in variants(from_onsets(flash, onsets(flash, 6.0, 0.5)[:1], 0.45), 3)],
-        -3.4)
+    put("flash_bang", variants(from_onsets(flash, onsets(flash, 6.0, 0.5)[:1], 0.5), 3), -3.4)
 
     # Props run into, and the doors.
     put("prop_clank", variants(pick(folder, [("Knock metal shelf.wav", None)], 0.6), 3), -21.7)

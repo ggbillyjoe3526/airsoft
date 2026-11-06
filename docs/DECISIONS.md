@@ -677,6 +677,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **The AEG Rifle and the GBB Pistol are redesigned from the owner's reference photos, with no text or logo copied
   (owner, 2026-10-12; RM6, RM7).** Small, minimal iron sights; the old length, grip, magazine, rails and mounts stay.
   The Gas Pistol became the GBB Pistol, a blowback replica with the same numbers.
+- **An optic removes a replica's iron sights completely, never folds them, on every replica now and later (owner,
+  2026-11-05; GS2).** Every piece of the iron sights hangs from a bone ending in `Sight` and the game hides those
+  bones' attachments (`IronSights`); a test holds every optic-taking model to it.
+- **A gas pistol's slide is back only while firing or locked on an empty magazine, and only the slide moves: the
+  barrel stays and shows in front of it (owner, 2026-11-05; GS2).** Every model rests with its parts home.
 - **Glowing BBs are green and loaded At Night by default (owner, 2026-10-24; WL8).** A per-replica Customise choice
   (At Night, Always, Off), saved with the loadout; every bot loads At Night. Drawing only: a seeded match plays the same
   with every choice. Their greens stay more than 20 degrees of hue off every team's.
@@ -717,7 +722,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   hand, on figures and in menus, from the same model.
 - **Parts on figures wait for the art pass (owner, 2026-10-19).** A figure's replica is one cut-down mesh, so a part's
   figure copy sits over its standard magazine or flash hider; the figure models get those split out in the art pass.
-  Nothing shows it until then (bots carry no parts).
+  Nothing shows it until then (bots carry no parts). *Done in TP1 (2026-11-05): the figure copies are cut down from the
+  hands' models with the magazine, flash hider and iron sights apart, and `ReplicaParts.fit_figure` fits the parts.*
 - **The Sniper Rifle (owner, 2026-11-02, SN1).** Pulled into 0.1 from the Replica Update: like the AEG with a longer
   barrel, spring driven, **single shot** only, and it **comes with the 2x Scope fitted**, which can be taken off or
   swapped. It unlocks at **level 5** with the 2x Scope (moved from level 7 so it comes with the rifle) and the M130
@@ -900,8 +906,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   wants it back); his whistle replaces the synthesised one; his woods are Woodland's day bed, and the night keeps the
   street-at-night stand-in, as his woods have daytime birds in them; his metal steps and woods lose the wind's rumble
   (under 250 Hz and 150 Hz); his flashbang is saturated to come within 2 dB of the old bang's loudness.
-- **A replica's shot follows its power source: electric, gas or spring (owner, 2026-10-03).** An empty AEG still cycles;
-  an empty gas pistol only clicks.
+- **A replica's shot follows its power source: electric, gas or spring (owner, 2026-10-03).** Fired empty, every
+  replica clicks the gas pistol's recorded dry fire, today's and any added later (owner, 2026-11-05: "This is NOT a
+  placeholder. This is the final decision"; until then an empty AEG cycled its motor). One cue, `dryFire`.
+- **The practice range sounds like The Street by day (owner, 2026-11-05).** Its ambience is `street`; it kept the
+  yard's until then. He also kept the AEG Rifle as it is after hearing a version with more motor.
 - **Footsteps are information, so gameplay audio comes first (owner, 2026-10-05).** Every ground's step stays within
   1.5 dB of concrete overall and 3 dB in the 0.7 to 4 kHz band, so a soft ground never hides anyone.
 - **A field's ambience is map data, with a day and a night variant picked by the lighting preset, never a map name
@@ -952,6 +961,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   its weapon torch, which a night field needs (every bot carries one there), so a Woodland match counts for the records
   and XP; Neon Heights was cut. Dev content still hides whatever a row tags dev. (Before: Woodland and Neon Heights dev
   until the owner made each public, 2026-10-05, Woodland confirmed 2026-10-24.)
+- **The Sniper Rifle, its three springs and the Variable Scope are public; The Street is dev (owner, 2026-11-05).**
+  The rifle's gear unlocks at its levels (5, 7, 8, 9) for everyone, and bots carry the Sniper kit with the switch off.
+  The Street shows only with Dev content on, and a match there stays out of the records.
 - **The Dev tab is always there, with no box and no hidden unlock (owner, 2026-10-29: "Dev should always be on and not
   hidden").** Its switches apply whenever they are set, and every one starts off, so the game plays the same until
   someone turns one on. A cheat (Game speed, Bottomless magazines, Ghost, Bots hold fire, Bots run low on BBs, Spectate
@@ -998,6 +1010,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   gains nothing there for four times the memory.
 - **Menus stay smooth (owner, 2026-10-12; IM1).** "The UI should always feel smooth and responsive", with a loading
   screen allowed for the tutorial, range, maps and matches.
+- **The human figure is built in parts, one owner each (BL10 to BL13, 2026-11-05; owner: "split the models up into
+  their own threads").** `Body` (clothes, gloves, boots) is BL10's, `Head_*` BL11's, `Kit`, `Kit_Pack` and `Kit_Radio`
+  BL12's, `Kit_Pads` BL13's; each is spliced into `human.glb` by node (`tools/blender/figures/splice_part.py`), leaving
+  the skeleton, the clips and the other parts alone. Triangles at LOD0/1/2 within the 60k/20k/6k figure budget: body
+  34k/11k/3.3k, heads 8k/2.6k/0.8k, gear 14k/4.5k/1.5k, pads 3k/1k/0.3k. Whoever merges second reruns their splice on
+  the merged file and updates `tests/unit/test_figure_body.gd`'s counts.
 - **The install size budget is 500 MB installed (Claude's recommendation, 2026-10-18; the owner asked for one and may
   change it).** Roughly 100 MB is Godot and today's assets (an estimate until a release build measures it); the rest
   leaves room for the owner's own models, two dressed fields with baked light, and sound. Per-asset limits stay in
