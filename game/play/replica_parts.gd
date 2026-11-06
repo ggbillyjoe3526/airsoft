@@ -7,15 +7,19 @@ extends RefCounted
 ## through a reload; a muzzle part takes the flash hider's; a barrel with an end point carries the muzzle device and the
 ## muzzle out to it; an optic folds the iron sights down (SightFold). `unfit` undoes it all. A figure's version of the
 ## replica (`Figure`, cut down from the model) has the pieces a part replaces as its own children, so `fit_figure` does
-## the same to it with the parts' copies (TP1).
+## the same to it with the parts' copies (TP1). What a part puts inside the replica (a barrel's inner barrel and hop-up
+## unit) is in its own file, assets/models/replicaParts/inside/<replica>.glb, as <slot>_<key>_Inside: only the part's
+## own picture draws it (`inside`), so fitting never loads it.
 
 const PART_DIR := "res://assets/models/replicaParts/"
+const INSIDE_DIR := "res://assets/models/replicaParts/inside/"
 const FIGURE_SUFFIX := "_Figure"
 ## The figure version of a replica in its model: the figures hold it, the hands and the menu pictures hide it.
 const FIGURE_NODE := "Figure"
 const SIGHT_LINE_SUFFIX := "_SightLine"
 const MUZZLE_SUFFIX := "_Muzzle"
 const BARREL_END_SUFFIX := "_BarrelEnd"
+const INSIDE_SUFFIX := "_Inside"
 ## The replica's own nodes the parts work with: its magazine mesh(es) and the bone attachment that carries them through
 ## the clips, its flash hider and its muzzle point.
 const MAGAZINE_NODE := "Magazine"
@@ -245,6 +249,26 @@ static func _carry_markers(part: Node3D, copy: Node3D) -> void:
 			carried.name = marker.name
 			carried.transform = from * marker.transform
 			copy.add_child(carried)
+
+
+## What part `part` for `slot` of replica `key` puts inside the replica, placed in the replica's space, owned by nothing;
+## null if it puts nothing there. The part's own picture draws it beside the part.
+static func inside(key: StringName, slot: StringName, part: StringName) -> Node3D:
+	var path := "%s%s.glb" % [INSIDE_DIR, key]
+	if not ResourceLoader.exists(path):
+		return null
+	var scene := load(path) as PackedScene
+	if scene == null:
+		return null
+	var holder := scene.instantiate() as Node3D
+	var node := holder.get_node_or_null("%s_%s%s" % [slot, part, INSIDE_SUFFIX]) as Node3D
+	if node != null:
+		holder.remove_child(node)
+		node.owner = null
+		for child in node.find_children("*", "", true, false):
+			child.owner = null
+	holder.free()
+	return node
 
 
 static func _hide(f: Fit, node: Node3D) -> void:

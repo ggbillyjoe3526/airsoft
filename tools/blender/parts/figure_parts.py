@@ -29,10 +29,13 @@ ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os
 FILES = ["aeg", "pistol", "cyber", "sniper"]
 SUFFIX = "_Figure"
 # A part's copy: this share of its triangles, kept between FIGURE_MIN and FIGURE_MAX (a part's small round shapes, a
-# laser's knurled body, thin out below it), and always under the part's own count. FIGURE_MAX 600 (from 900) keeps the
-# AEG's parts file under its 2 MiB with MAG1's magazines in it.
+# laser's knurled body, thin out below it), and always under the part's own count. FIGURE_MAX 600 (from 900): the
+# AEG's parts file also holds MAG1's magazines and BA1's barrels (3 MiB, docs/CC0_ASSETS.md › Size limits).
 FIGURE_SHARE = 0.15
 FIGURE_MIN = 120
+# Parts whose own script builds their figures' copy, kept as it is: a barrel's (tools/blender/parts/barrels.py, BA1),
+# a plain tube in a few faces, as its inner barrel and hop-up unit take its triangles nearly to the last.
+OWN_COPY = ("barrel_",)
 FIGURE_MAX = 600
 UNDER = 0.8
 # A magazine part's copy: as many triangles as the replica's own figure magazine (Figure_Magazine in its model file,
@@ -84,6 +87,8 @@ def write(part_file: str) -> None:
     parts = [o for o in bpy.data.objects if o.type == "MESH" and o.parent is None and not o.name.endswith(SUFFIX)]
     for part in parts:
         old = bpy.data.objects.get(part.name + SUFFIX)
+        if old is not None and part.name.startswith(OWN_COPY):
+            continue
         under = old is not None and old.parent is part
         if old is not None:
             bpy.data.objects.remove(old, do_unlink=True)

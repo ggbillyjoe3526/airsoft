@@ -43,8 +43,12 @@ replicas from the Blender models in the hands, with the parts they have fitted.
 
 - **Budget: 3,000 triangles a replica**, the documented figure limit (`docs/CC0_ASSETS.md` › Size limits), used in
   full (owner rule: about 95 %). Split per piece in each script's `FIGURE_TRIS`.
-- **A part's copy:** 15 % of its own triangles, kept between 120 and 600 (900 until main's magazines took the AEG's parts file over its 2 MiB); a magazine part as many as its replica's
-  own figure magazine (read from the replica's model file, so the two can't drift apart).
+- **A part's copy:** 15 % of its own triangles, kept between 120 and 600 (900 until main's magazines and barrels
+  filled the AEG's parts file; its cap is 3 MiB, as BL8b's #216 sets it, since the copies take it to about 2.2 MB); a
+  magazine part as many as its replica's own figure magazine (read from the replica's model file, so the two can't
+  drift apart).
+- **A barrel keeps its own copy** (`figure_parts.py` OWN_COPY): BA1's `barrels.py` builds the tube that shows past the
+  handguard in a few faces, as the part's inner barrel and hop-up unit take its 10,000 triangles nearly to the last.
 - **Hard edges at 15°** (25° left a shading wedge across the GBB's slide top).
 - **Specks** the critic saw in round 2 were checked by rendering on magenta and flood-filling from the border: the
   only enclosed background was the real openings, so they are highlights, not holes.

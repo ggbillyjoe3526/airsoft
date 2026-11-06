@@ -10,7 +10,7 @@ const EPS := 1e-4
 const BUDGET := {&"aeg": 3000, &"sniper": 3000, &"pistol": 3000, &"cyber": 3000}
 const USED := 0.95
 ## A part's copy (tools/blender/parts/figure_parts.py FIGURE_MAX).
-const PART_MAX := 900
+const PART_MAX := 600
 
 var rules: LoadoutRules
 
@@ -84,7 +84,11 @@ func test_every_parts_copy_is_cut_down_from_its_part() -> void:
 				continue
 			var mesh := copy[0] as MeshInstance3D
 			assert_lte(_tris(mesh), PART_MAX, "%s/%s copy within its budget" % [file, part.name])
-			# The copy covers the part (it is made from it): their boxes in the replica's space nearly agree.
+			# The copy covers the part (it is made from it): their boxes in the replica's space nearly agree. A barrel's
+			# copy is its own script's (BA1: the tube that shows past the handguard), not cut from the part.
+			if String(part.name).begins_with("barrel_"):
+				mesh.free()
+				continue
 			var box := part.transform * part.get_aabb()
 			var cbox := mesh.transform * mesh.get_aabb()
 			assert_lt(box.get_center().distance_to(cbox.get_center()), 0.004, "%s/%s copy in place" % [file, part.name])
