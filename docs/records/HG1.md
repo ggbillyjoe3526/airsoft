@@ -41,8 +41,9 @@ On attempt 4's labelled picture (`playtest/hg1/bot-hands-final.jpg`) the owner w
   replica: its clip `<id>_Hold` and its empty `Hold_<id>` where the replica's origin sits. FigureModels reads each
   hold once a session at its clip's first frame. It reads each hand's turn and knuckles (Middle1's root) in the
   replica's frame, and each finger and thumb bone's turn against its hand.
-- **On the figure,** each hand is brought by a two-bone reach (FigureReady's, with the arm's frames read once) to that
-  turn. The right hand's place is set
+- **On the figure,** each hand is brought by FigureReady's two-bone reach to that turn. The reach now reads the arm's
+  frames once and sets each bone over its parent's new frame (it worked the skeleton's frames out after each bone),
+  which TP3's grip fit shares. The right hand's place is set
   by its thumb's root, where the arms' is (`hold_thumb_share` 1), then turned `hold_wrap` (0.35 rad) round the grip
   about its knuckle line, so the thumb's root comes round the back strap. The left's is set by its knuckles
   (`hold_thumb_share_left` 0), so its fingers reach up the handguard's side. Each finger bone is turned as the arms'
@@ -54,7 +55,9 @@ On attempt 4's labelled picture (`playtest/hg1/bot-hands-final.jpg`) the owner w
 - **The fingers are worked out once a hold** (FigureGrasp.Closed): a hand on the replica sits the same way on it
   whatever the body does, so each bone's turn over its parent is kept until the hold or the hand's place changes, and
   each frame only blends the clips' turns toward them. They close only within LOD0's line of the eye (FigureView sets
-  FigureBody.near); past it the hand still holds the replica but keeps the clips' fingers.
+  FigureBody.near); past it the hand still holds the replica but keeps the clips' fingers. Out of the camera's view
+  (FigureView.in_view: a cone round the view's corners, widened by a 1 m ball round the chest) the hands keep the
+  clips' and the replica its clips' place; the hold's easing runs on, so it is in place when the figure shows.
 - **Each slot's hold is one FigureHeld** (FigureHands.held): the arms' hold, both hands' places, the left's shift and
   the replica on the grip bone as the clips hold it and as the hand holds it; FigureBend hands it to FigureGrasp.
   - **The right hand** holds the replica whenever it is in the hand: high on the grip, fingers round it, index on the
@@ -105,8 +108,8 @@ On attempt 4's labelled picture (`playtest/hg1/bot-hands-final.jpg`) the owner w
   pull request (`playtest/hg1/bot-hands-final.jpg`, each picture labelled with what to look at).
 - `test_figure_hands_qa.gd`'s "in the fist" gap is 3.5 cm (was 3): the palm now wraps the grip's side, so the palm's
   line runs a grip's half-width off its middle (3.08 cm on the pistols).
-- `tools/figure_bench.gd`, 11 figures, 60 s, three runs each against main: both together 2.12 ms against 1.96
-  (+8 %), skeleton per figure 53 us against 41. Attempt 3 worked the fingers out every frame (90 us); attempt 4's
-  first review measured +13.5 % with the fingers on at every range and FigureReady's reach (a frame update after each
-  bone it set).
+- `tools/figure_bench.gd`, 11 figures, 60 s, three runs each alternating with main: both together 2.22 ms against
+  2.07 (+7 %), skeleton per figure 47 us against 43. The hands' own work is about 10 us a figure in view (5 the two
+  reaches, 3 the fingers). Attempt 3 worked the fingers out every frame (90 us); attempt 4's reviews measured +13.5 %
+  with every figure holding, seen or not.
 - Left for the figures batch: the glove's knuckle plates show small shards on a deep bend (KNOWN_ISSUES).

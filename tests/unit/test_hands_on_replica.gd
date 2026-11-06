@@ -217,7 +217,37 @@ func test_past_the_near_line_the_hand_holds_but_the_fingers_keep_the_clips() -> 
 	var hand: Transform3D = near[bones[0]]
 	var held: Transform3D = far[bones[0]]
 	assert_lt(hand.origin.distance_to(held.origin), PLACE, "the hand still sits on the grip out there")
-	var index := bones[bones.size() - 1]
-	var closed: Transform3D = hand.affine_inverse() * near[index]
-	var kept: Transform3D = held.affine_inverse() * far[index]
+	var tip := bones[bones.size() - 1]
+	var closed: Transform3D = hand.affine_inverse() * near[tip]
+	var kept: Transform3D = held.affine_inverse() * far[tip]
 	assert_gt(closed.origin.distance_to(kept.origin), PLACE, "but its fingers are the clips', not closed on the replica")
+
+
+func test_out_of_the_camera_s_view_the_hands_keep_the_clips() -> void:
+	var camera := Camera3D.new()
+	add_child_autofree(camera)
+	camera.global_position = EYE
+	camera.make_current()
+	var r := _view(0)
+	var v: FigureView = r[0]
+	await _drawn(v, r[1], PackedStringArray())
+	assert_true(v.body().seen, "in front of the camera")
+	assert_eq(v.body().bend.held, v.body().hands.held(0), "the hands hold the replica")
+	camera.global_rotation = Vector3(0.0, PI, 0.0)
+	await _drawn(v, r[1], PackedStringArray(), 2)
+	assert_false(v.body().seen, "behind it")
+	assert_null(v.body().bend.held, "the hands keep the clips'")
+	assert_eq(v.body().hands.grasp, 0.0, "and the replica the clips' place")
+	assert_gt(v.body().bend.grasp, 0.9, "the hold stays eased in, ready for when it shows")
+
+
+func test_in_view_is_a_cone_round_the_view_s_corners() -> void:
+	var camera := Camera3D.new()
+	add_child_autofree(camera)
+	camera.fov = 75.0
+	assert_true(FigureView.in_view(null, Vector3(0.0, 0.0, 50.0), 1.0), "no camera: always")
+	assert_true(FigureView.in_view(camera, Vector3(0.0, 0.0, -10.0), 1.0), "ahead")
+	assert_false(FigureView.in_view(camera, Vector3(0.0, 0.0, 10.0), 1.0), "behind")
+	assert_true(FigureView.in_view(camera, Vector3(0.0, 0.0, 0.5), 1.0), "round the camera")
+	assert_false(FigureView.in_view(camera, Vector3(10.0, 0.0, 0.0), 1.0), "square to the side")
+	assert_true(FigureView.in_view(camera, Vector3(10.0, 0.0, 0.0), 10.0), "unless the ball reaches into the view")

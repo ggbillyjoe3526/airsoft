@@ -167,6 +167,11 @@ extends Resource
 @export var hold_wrap: float = 0.35
 @export var hold_fingers: PackedStringArray = PackedStringArray(["Thumb1", "Thumb2", "Thumb3", "Index1", "Index2",
 		"Index3", "Middle1", "Middle2", "Middle3", "Ring1", "Ring2", "Ring3", "Pinky1", "Pinky2", "Pinky3"])
+## The hands hold the replica so only while a ball `hold_view_radius` (m) round the point `hold_view_height` (m) over
+## the figure's feet, where its hands and replica are, is in the camera's view (a cone round the view's corners); out
+## of it the clips' hands are kept, unseen.
+@export var hold_view_height: float = 1.2
+@export var hold_view_radius: float = 1.0
 @export var support_mount: String = "GripMount"
 @export var support_behind_grip: float = 0.045
 @export var settle_support: float = 0.08

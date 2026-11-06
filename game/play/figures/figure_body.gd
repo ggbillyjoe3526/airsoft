@@ -32,6 +32,8 @@ var hands: FigureHands = null
 var head: StringName = &""
 ## Whether the figure stands within LOD0's line of the eye, where its fingers close on the replica (HG1; FigureView).
 var near: bool = true
+## Whether its hands and replica may show in the camera's view (FigureView.in_view): out of it they keep the clips'.
+var seen: bool = true
 var _config: FigureConfig = null
 var _bones: Dictionary[StringName, int] = {}
 var _fade: float = 1.0
@@ -213,11 +215,11 @@ func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = fals
 	var support := aiming if holding and not pose.reloading and held != null else 0.0
 	_support = _eased(_support, support, delta, pose.snapped)
 	_grasp = _eased(_grasp, aiming if holding else 0.0, delta, pose.snapped)
-	bend.held = held
+	bend.held = held if seen else null
 	bend.grasp = _grasp
 	bend.support = _support
 	bend.close_fingers = near
-	hands.grasp = _grasp
+	hands.grasp = _grasp if seen else 0.0
 	# A bomb thrown or held in hand (GT1): the arms throw it, the bomb in the right hand until it leaves.
 	bend.throw_share = pose.throw_share
 	bend.throw_held = pose.bomb_held

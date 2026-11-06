@@ -92,40 +92,12 @@ func hold(skeleton: Skeleton3D, held: FigureHeld, grasp: float, support: float, 
 			_closed_l.put(skeleton, _fingers_l, support)
 
 
-## Brings `arm`'s hand `amount` of the way to `to` (its turn and place; the hand keeps its own scale); returns the
-## hand's frame at `to`. FigureReady.reach's two-bone reach, the arm's frames read once and each bone set over its
-## parent's new frame, so the skeleton works out its frames once an arm rather than after each bone.
+## Brings `arm`'s hand `amount` of the way to `to` (its turn and place; the hand keeps its own scale) by
+## FigureReady's reach; returns the hand's frame at `to`.
 static func _place(skeleton: Skeleton3D, arm: PackedInt32Array, to: Transform3D, amount: float) -> Transform3D:
-	var parent := skeleton.get_bone_parent(arm[0])
-	var above := skeleton.get_bone_global_pose(parent) if parent >= 0 else Transform3D.IDENTITY
-	var shoulder := skeleton.get_bone_global_pose(arm[0])
-	var fore := skeleton.get_bone_global_pose(arm[1])
 	var now := skeleton.get_bone_global_pose(arm[2])
 	var target := Transform3D(to.basis.orthonormalized() * Basis.from_scale(now.basis.get_scale()), to.origin)
-	var goal := target if amount >= 1.0 else now.interpolate_with(target, amount)
-	var elbow := fore.origin
-	var wrist := now.origin
-	var a := shoulder.origin.distance_to(elbow)
-	var b := elbow.distance_to(wrist)
-	var way := goal.origin - shoulder.origin
-	if way.length() < EPSILON or a < EPSILON or b < EPSILON:
-		return target
-	var d := clampf(way.length(), absf(a - b) + EPSILON, a + b - EPSILON)
-	way = way.normalized()
-	var side := elbow - shoulder.origin
-	side -= way * way.dot(side)
-	side = side.normalized() if side.length() > EPSILON else Vector3.DOWN
-	var along := (a * a + d * d - b * b) / (2.0 * d)
-	var bent := shoulder.origin + way * along + side * sqrt(maxf(a * a - along * along, 0.0))
-	var upper_turn := Basis(Quaternion((elbow - shoulder.origin).normalized(), (bent - shoulder.origin).normalized()))
-	var upper := Transform3D(upper_turn * shoulder.basis, shoulder.origin)
-	# The wrist where the upper arm's turn carries it, then the forearm turned from there onto the goal.
-	var carried := bent + upper_turn * (wrist - elbow)
-	var fore_turn := Basis(Quaternion((carried - bent).normalized(), (goal.origin - bent).normalized()))
-	var forearm := Transform3D(fore_turn * upper_turn * fore.basis, bent)
-	skeleton.set_bone_pose(arm[0], above.affine_inverse() * upper)
-	skeleton.set_bone_pose(arm[1], upper.affine_inverse() * forearm)
-	skeleton.set_bone_pose(arm[2], forearm.affine_inverse() * goal)
+	FigureReady.reach(skeleton, arm[0], arm[1], arm[2], target if amount >= 1.0 else now.interpolate_with(target, amount))
 	return target
 
 

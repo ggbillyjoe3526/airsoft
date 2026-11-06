@@ -337,6 +337,8 @@ func animate(c: Character, fraction: float, delta: float, eye: Vector3) -> void:
 	var far := _lines.y + cfg.lod_margin
 	var near := _lines.x + cfg.lod_margin
 	_body.near = global_position.distance_squared_to(eye) <= near * near
+	_body.seen = in_view(get_viewport().get_camera_3d(), global_position + Vector3.UP * cfg.hold_view_height,
+			cfg.hold_view_radius)
 	if not _snap and global_position.distance_squared_to(eye) > far * far:
 		if cfg.far_stride <= 0:
 			# Held still out there: a press kept now would play stale when the figure comes near.
@@ -452,3 +454,22 @@ func _place_disc() -> void:
 	_contact.global_transform = Transform3D(Basis.from_scale(Vector3(_contact_radius, 1.0, _contact_radius)),
 			Vector3(feet.x, _floor_y + _effects.contact_lift, feet.z))
 	_contact.transparency = 1.0 - _fade * up
+
+
+## Whether a ball `radius` round `point` may show in `camera`'s view: within a cone round the view's corners, widened by
+## the ball (true without a camera, and for a ball round the camera).
+static func in_view(camera: Camera3D, point: Vector3, radius: float) -> bool:
+	if camera == null:
+		return true
+	var to := point - camera.global_position
+	var far := to.length()
+	if far <= radius:
+		return true
+	var size := camera.get_viewport().get_visible_rect().size
+	var tall := tan(deg_to_rad(camera.fov) * 0.5)
+	var wide := tall * (size.x / size.y if size.y > 0.0 else 1.0)
+	if camera.keep_aspect == Camera3D.KEEP_WIDTH:
+		wide = tall
+		tall = wide * (size.y / size.x if size.x > 0.0 else 1.0)
+	var corner := atan(sqrt(tall * tall + wide * wide)) + asin(radius / far)
+	return (-camera.global_basis.z).angle_to(to) <= corner

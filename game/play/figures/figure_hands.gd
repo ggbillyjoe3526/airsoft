@@ -182,20 +182,20 @@ func hold(replicas: Array[MeshInstance3D], classes: Array[StringName],
 		_butts.append(grip * _butt(r, _config.shoulder_butt_depth))
 		# The arms' hold (HG1): each figure hand turned as the arms' is, its thumb's root where theirs is (hold_thumb_share),
 		# the right turned hold_wrap round the grip; the left moved back to the support mark when that is behind it.
-		var held := _models.arms_hold(ids[i]) if i < ids.size() else null
+		var arms_hold := _models.arms_hold(ids[i]) if i < ids.size() else null
 		var mark := supports[i] if i < supports.size() else Vector3.INF
-		if held == null:
+		if arms_hold == null:
 			_held.append(null)
 		else:
-			var right := Transform3D(held.right_hand.basis,
-					held.right_knuckle.lerp(held.right_thumb, _config.hold_thumb_share)
-					- held.right_hand.basis * knuckle_r.lerp(thumb_r, _config.hold_thumb_share))
-			right = _wrapped(right, held.right_joints, _config.hold_wrap)
-			var shift := Vector3(0.0, 0.0, maxf(0.0, mark.z - held.left_knuckle.z) if mark.is_finite() else 0.0)
-			var left := Transform3D(held.left_hand.basis,
-					held.left_knuckle.lerp(held.left_thumb, _config.hold_thumb_share_left)
-					- held.left_hand.basis * knuckle_l.lerp(thumb_l, _config.hold_thumb_share_left) + shift)
-			_held.append(FigureHeld.new(held, right, left, shift, grip, (right * grip_r).affine_inverse()))
+			var right := Transform3D(arms_hold.right_hand.basis,
+					arms_hold.right_knuckle.lerp(arms_hold.right_thumb, _config.hold_thumb_share)
+					- arms_hold.right_hand.basis * knuckle_r.lerp(thumb_r, _config.hold_thumb_share))
+			right = _wrapped(right, arms_hold.right_joints, _config.hold_wrap)
+			var shift := Vector3(0.0, 0.0, maxf(0.0, mark.z - arms_hold.left_knuckle.z) if mark.is_finite() else 0.0)
+			var left := Transform3D(arms_hold.left_hand.basis,
+					arms_hold.left_knuckle.lerp(arms_hold.left_thumb, _config.hold_thumb_share_left)
+					- arms_hold.left_hand.basis * knuckle_l.lerp(thumb_l, _config.hold_thumb_share_left) + shift)
+			_held.append(FigureHeld.new(arms_hold, right, left, shift, grip, (right * grip_r).affine_inverse()))
 		var middle := Vector3.ZERO
 		var muzzle := Vector3.ZERO
 		if r != null:
@@ -401,9 +401,9 @@ func place(skeleton: Skeleton3D) -> void:
 			held.transform = Transform3D(_hang, grip.origin - _hang * _grip_points[in_hand])
 		else:
 			var on := _on_grip[in_hand]
-			var arms := _held[in_hand] if in_hand < _held.size() else null
-			if grasp > 0.0 and arms != null:
-				on = arms.held_on_grip if grasp >= 1.0 else on.interpolate_with(arms.held_on_grip, grasp)
+			var slot_held := _held[in_hand] if in_hand < _held.size() else null
+			if grasp > 0.0 and slot_held != null:
+				on = slot_held.held_on_grip if grasp >= 1.0 else on.interpolate_with(slot_held.held_on_grip, grasp)
 			held.transform = grip * on
 	if _bomb != null and _bomb.visible and _grip_bone >= 0:
 		_bomb.transform = skeleton.get_bone_global_pose(_grip_bone) * _bomb_on_grip
