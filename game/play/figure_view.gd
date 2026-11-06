@@ -29,6 +29,11 @@ var _classes: Array[StringName] = []
 ## Each replica's magazine copy (the full model's magazine mesh, painted as the replica; null without one); where the
 ## figure throws its old magazines (null: none thrown).
 var _magazines: Array[MeshInstance3D] = []
+## Each replica's far version beyond the far line (HeldMerge.far_version; null: none) and the magazine in its well that
+## it stands in for there (null: none), BP5.
+var _fars: Array[MeshInstance3D] = []
+var _wells: Array[MeshInstance3D] = []
+var _lod_margin: float = 0.0
 var thrown: ThrownMagazines = null
 ## Seen this much (1 solid, 0 gone), as `update` last drew it; a shot since the last pose (the trigger pressed).
 var _fade: float = 1.0
@@ -90,6 +95,7 @@ func setup(c: Character, team_colour: Color, hits: HitConfig, font: Font,
 	var cfg := figures if figures != null else FigureConfig.new()
 	_flinch = FigureFlinch.new(cfg)
 	_raise_stride = maxi(cfg.raise_stride, 1)
+	_lod_margin = cfg.lod_margin
 	# Staggered, so the figures look at the view on different frames.
 	_view_frames = posmod(c.id, maxi(cfg.hold_view_stride, 1))
 	_hits = hits
@@ -100,7 +106,7 @@ func setup(c: Character, team_colour: Color, hits: HitConfig, font: Font,
 	top_level = true
 	for i in c.armament.replicas.size():
 		var held := _held_replica(c.armament.replicas[i], c.team, realistic, parts[i] if i < parts.size() else {},
-				_magazines, _muzzles, _supports, cfg)
+				_magazines, _muzzles, _supports, cfg, _fars, _wells)
 		_replicas.append(held)
 		_classes.append(c.armament.replicas[i].site_class)
 		_ids.append(c.armament.replicas[i].id)
@@ -125,6 +131,7 @@ func set_body(models: FigureModels, kind: int, lines: Vector2) -> void:
 		_body = null
 	_lines = lines
 	_snap = true
+	_set_replica_lines(lines)
 	if models != null and models.has_kind(kind):
 		_pose = FigurePose.new(models.config) if _pose == null else _pose
 		_body = FigureBody.new()
@@ -172,6 +179,23 @@ func set_lod_lines(lines: Vector2) -> void:
 	_lines = lines
 	if _body != null:
 		_body.set_lod_lines(lines)
+	_set_replica_lines(lines)
+
+
+## Each replica drawn whole up to the far line, its far version beyond it (BP5: from 8 or 9 draws to 2 or 3, the
+## magazine in its well one more at every distance), each crossed lod_margin past it as the body's levels are.
+func _set_replica_lines(lines: Vector2) -> void:
+	for i in _fars.size():
+		var far := _fars[i]
+		if far == null:
+			continue
+		# no far line yet (no body): the whole replica only
+		far.visible = lines.y > 0.0
+		far.visibility_range_begin = lines.y
+		far.visibility_range_begin_margin = _lod_margin
+		# the magazine in its well draws at every distance (one draw), so a reload far off still empties the well
+		_replicas[i].visibility_range_end = lines.y
+		_replicas[i].visibility_range_end_margin = _lod_margin
 
 
 ## The models' figure version of `r` (its `Figure` mesh, cut down from the model) with `parts`' figure copies fitted
@@ -182,8 +206,10 @@ func set_lod_lines(lines: Vector2) -> void:
 ## end of `muzzles`, and where the support hand holds it (`support_mark`) on the end of `supports`.
 func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictionary,
 		magazines: Array[MeshInstance3D], muzzles: PackedVector3Array, supports: PackedVector3Array,
-		cfg: FigureConfig) -> MeshInstance3D:
+		cfg: FigureConfig, fars: Array[MeshInstance3D], wells: Array[MeshInstance3D]) -> MeshInstance3D:
 	var scene := load(MODEL_DIR + r.id + ".glb") as PackedScene
+	fars.append(null)
+	wells.append(null)
 	if scene == null:
 		magazines.append(null)
 		muzzles.append(Vector3.ZERO)
@@ -211,6 +237,19 @@ func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictiona
 		muzzle = fit.muzzle
 		support = support_mark(support, fit.grip, cfg)
 		ReplicaPaint.apply(held, paint, realistic)
+		var key := _merge_key(r.id, paint, realistic, parts)
+		var made := HeldMerge.merge(held, fit.magazine, key)
+		var far_mesh := HeldMerge.far_version(held, (made if made != "" else key) + "/far")
+		if far_mesh != null:
+			var far := MeshInstance3D.new()
+			far.name = "Far"
+			far.mesh = far_mesh
+			far.visible = false
+			far.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			held.add_child(far)
+			fars[-1] = far
+			if fit.magazine != null and fit.magazine.get_parent() == held:
+				wells[-1] = fit.magazine
 		if fit.magazine != null and fit.magazine.mesh != null:
 			copy = MeshInstance3D.new()
 			copy.name = "Magazine_%s" % r.id
@@ -223,6 +262,17 @@ func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictiona
 	supports.append(support)
 	model.free()
 	return held
+
+
+## What a held replica is fitted and painted with, naming its merged mesh (HeldMerge): its id, paint, Realistic colours
+## and parts (slot=key, in slot order).
+static func _merge_key(id: StringName, paint: StringName, realistic: bool, parts: Dictionary) -> String:
+	var slots := parts.keys()
+	slots.sort()
+	var key := "%s/%s/%s" % [id, paint, realistic]
+	for slot: Variant in slots:
+		key += "/%s=%s" % [slot, parts[slot]]
+	return key
 
 
 ## How far forward the support hand may hold a handguard whose mount is at `mount` (the model's space; Vector3.INF:

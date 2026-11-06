@@ -1523,6 +1523,13 @@ models show without anything else changing. The smoke and flash icons now do the
   (holster) it stays off, as the rifle stays away.
 - [ ] **Slot keys on the Loadout page.** Rebind Primary and Secondary in Settings › Controls, then open the Loadout
   page: the two carried cards show your keys, not 1 and 2.
+- [ ] **Bots' replicas up close and far off (Ultra, then Low).** Look at a bot with a rifle fitted with an optic and a
+  silencer from 3 m, then from 30 m with the scope: the same parts and colours as before, no piece missing. Watch it
+  reload: the magazine leaves the well and comes back.
+- [ ] **Far off, from every side (Low, then High in sun).** Scope a teammate carrying the Cyber Pistol at 20 to 30 m
+  and walk round it: no see-through panels. Watch a bot walk slowly across 28 m (16 m on Low): its replica's metal
+  keeps its shine, no jump in colour as the simpler copy takes over.
+- [ ] **Stowed replicas.** A bot with its rifle on its back and its pistol in the holster: both sit where they did.
 
 ## Reporting what you find
 

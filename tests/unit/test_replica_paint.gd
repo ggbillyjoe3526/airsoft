@@ -40,7 +40,8 @@ func _override(model: Node, part: StringName) -> Material:
 		var mesh_node := node as MeshInstance3D
 		for i in mesh_node.mesh.get_surface_count():
 			var own := mesh_node.mesh.surface_get_material(i)
-			if own != null and own.resource_name == part:
+			# a figure's held replica merged by HeldMerge (BP5) has the paints themselves, named after their part
+			if own != null and (own.resource_name == part or own.resource_name.ends_with("_" + part)):
 				return _painted(mesh_node, i)
 	return null
 
@@ -50,7 +51,11 @@ func _painted(mesh_node: MeshInstance3D, i: int) -> Material:
 	var n: Node = mesh_node
 	while n != null and not n is ReplicaView:
 		n = n.get_parent()
-	return (n as ReplicaView).painted(mesh_node, i) if n != null else mesh_node.get_surface_override_material(i)
+	if n != null:
+		return (n as ReplicaView).painted(mesh_node, i)
+	# a figure's: painted over, or (merged by HeldMerge, BP5) the paint is the merged surface's own
+	var over := mesh_node.get_surface_override_material(i)
+	return over if over != null else mesh_node.mesh.surface_get_material(i)
 
 
 func _colour(m: Material) -> Color:

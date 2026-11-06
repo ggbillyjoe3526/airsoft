@@ -32,6 +32,9 @@ func _body(model: Node) -> Material:
 			var own := m.mesh.surface_get_material(i)
 			if own != null and own.resource_name == &"Furniture":
 				return m.get_surface_override_material(i)
+			# a figure's held replica merged by HeldMerge (BP5): the paint is the merged surface's own
+			if own != null and own.resource_name.ends_with("_Furniture"):
+				return own
 	return null
 
 

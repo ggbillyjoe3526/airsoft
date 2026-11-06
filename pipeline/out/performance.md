@@ -1,22 +1,12 @@
-Task: none (BP5 part 2) · head c14d732 · Verdict: Pass
-Run: team_bench 8v8, 40 s, woodland+depot, seed default, headless; 2 runs a side, interleaved (main 90b0ff4 / head) · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and main
-Metrics (mean ms, main run1/run2 -> head run1/run2; tick, frame, both):
- woodland tick 4.88/4.50 -> 4.67/4.51; frame 1.48/1.26 -> 1.34/1.23; both 6.36/5.75 -> 6.00/5.75 (ok)
- depot    tick 2.89/3.00 -> 2.90/3.02; frame 1.28/1.41 -> 1.22/1.21; both 4.17/4.40 -> 4.11/4.22 (ok)
- p99 both: woodland 12.5/10.5 -> 10.9/10.6; depot 8.4/8.3 -> 9.3/8.3 (noise; run-to-run spread on main alone is up to 8 %)
- Frames over 16.7 ms (of 2400): woodland main 3/0, head 1/0; depot 0 everywhere. Worst-case spikes are single-frame noise (head 20.6 vs main 16.8 in run 1, reversed in run 2).
-Regressions (> 10 % worse): none (measured). Gain is small and within run-to-run noise on this machine (frame mean -3 to -14 %, both -0 to -6 %); the worker's larger gain in BP5.md is not reproduced here but nothing contradicts it.
-Blocking findings: none
- - Allocations (judgment, read game/sim/hitbox.gd may_touch, game/ai/bot_combat.gd _body_in_line, game/play/figure_view.gd animate): only float/Vector3 locals (values, no heap), no Array/Dictionary/String/Callable/lambda, no node or resource creation, so no new per-tick allocation and nothing to free.
- - Freed nodes (judgment): no nodes, tweens, timers or connections added; no orphan lines in either head run.
-Advisory:
- - game/ai/bot_combat.gd:~370 flight_time(b, w, dist) is computed once per call lazily; if flight_max is 0 (judgment) the quick test is skipped for every mate and flight_time is not re-tried, which is correct but leaves that case unaccelerated.
- - game/play/figure_view.gd:~364 unseen figures share _far_frames/_far_delta with the far path; fine because the branches are exclusive, but a figure switching between seen/unseen mid-stride keeps a stale partial count (at most one extra skipped frame; judgment).
- - game/config/figure_config.gd:90 unseen_stride=2 makes shadows of unseen figures pose at 30 Hz (design trade-off, intended; play-test for visible shadow stepping).
- - Frame times are from a GPU-less container: reported only, not a budget verdict.
-Raw: <scratchpad>/perf_{main,head}_{1,2}.txt
+Task: none (BP5 part 3) · head ba2cdb3 · Verdict: Pass
+Run: figure_draws.gd (opengl3, xvfb, one figure, 4 distances, both line sets) and merge_cost.gd (6 figure setups), measured; budget: no baseline yet, judged against main (90b0ff4, figure code = cc6cc80)
+Draws main → head (visible, measured): human near 32 → 28, far 32 → 21; robot near 25 → 21, far 25 → 18. Matches the coordinator's probe. Primitives unchanged. (Far is less cut than at 3eee4c7 (12 / 14) because the magazine is its own node and each finish is its own surface.)
+Setup (measured): first figure setup 27 ms, later ones 10.2-11.2 ms (cache hit; same as 3eee4c7's 25 / 10); made_count 2; 6 figures +2.9 MB static, +120 objects. Judgment: a few hundred ms at match load for a few dozen distinct keys, not in play.
+Far paints: held_merge.gd:16 `_far_paints` is keyed by finish (roughness/metallic/specular to 3 decimals, :204-215), so it holds one StandardMaterial3D per distinct finish: a handful, bounded by the paints' finish values, not by the loadouts. Kept for the process on purpose (clear() empties _made and _far only); judgment: fine, a few KB. Nothing allocates per frame: _far_paint runs inside far_version at setup only.
+Prewarm: play_session.gd:748 adds HeldMerge.far_materials() to first_use, after the figures are set up (the paints exist by then); this closes the vertex-colour shader first-use advisory from the last review.
+Teardown (measured): after queue_free + ReplicaPaint.clear + HeldMerge.clear, made_count 0 and objects 1870 vs 1863 at start (+7, engine lingering, as +5 before).
+Body ORM at 1024 instead of 512: about +1 MB VRAM over 3eee4c7's estimate (body_orm ~1.4 MB, so ~4.2 MB saved against 2048 rather than 5.2); total still about 10.5 MB saved (judgment, VRAM-compressed with mips assumed).
+Regressions (> 10 % worse): none. Blocking findings: none.
+Advisory: _far_paints is not cleared at session end (held_merge.gd:16); intended and bounded, but a test that counts materials across sessions will see the earlier ones.
+Unexplained: none
 Verdict: Pass
-
-Addendum (worker, part 2 attempt 2): the unseen stride (figure_view.gd, FigureConfig.unseen_stride) is removed at the
-critic's word; it was frame-side only, so the tick numbers above stand for what remains (may_touch's bounding test and
-the bots' line-of-fire quick test). A counted bench run: the quick test skipped 9,718 of 20,000 teammate checks.

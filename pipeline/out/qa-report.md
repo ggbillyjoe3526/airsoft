@@ -1,23 +1,16 @@
-Task: none (BP5 part 2, performance) · QA commit abfcc2e (rebased 7799f56) · Verdict: Pass
+Task: none (BP5 part 3) · QA commit ba2cdb3 · Verdict: Pass
 
-Blocking findings: none. Advisory findings: none.
+Re-verified head ba2cdb3 (critic's changes) after the earlier Pass.
 
-1. hitbox.gd may_touch: the bounding sphere is conservative (any touching point of the segment lies within half +
-   volume_top/2 + reach + margin of the sphere's centre); guarded by is_finite(max_t); assumes a unit d, as every caller
-   gives. test_bp5_perf.gd compares it with the capsule test alone over 4000 rays.
-2. bot_combat.gd _body_in_line: flight_time is monotonic in distance ((e^(k·d) - 1) / (k·v)); INF maps to 0 and the quick
-   test is skipped then; widest = margin(dist) + (mate_speed + speed) × flight(dist) ≥ the old room for any reach in
-   [0, dist]; may_touch is monotonic in margin, so it skips only teammates the old room test also skipped.
-3. figure_view.gd animate: the unseen branch is an elif after far, sharing _far_frames/_far_delta, both reset on a pose;
-   far → unseen poses next frame, unseen → seen or _snap poses at once with the gathered delta. _fired is kept over
-   skipped frames (two presses in one skipped window merge, shadow-only). Hit calls lag at most one frame out of view.
+Blocking: none.
+Advisory: none new.
+- Reload past the far line: far_version no longer folds the magazine; the well node stays its own MeshInstance3D and only the replica gets visibility_range_end (figure_view.gd:196-198), so the well draws at every distance. Visibility ranges are per instance, not inherited. Covered by the rewritten far tests in test_bp5_models.gd (passing).
+- Stowed or holstered replica's far version: placement still reads HeldMerge.figure_mesh (unchanged); far version is a swap on the same node's sibling, no placement path touches it. Tests for hands and holster pass.
+- _far_paints growth: keyed by finish (roughness/metallic/specular, 3 decimals), so bounded by the number of distinct finishes in the shipped paints (a handful). HeldMerge.clear() leaves it (documented "kept for the process"); it holds no per-figure state. No unbounded growth.
+- Removed API: no remaining references to held_far_roughness or _place_arrays in game, tests, tools or docs.
+- _plain now rejects any texture slot or normal map, so the stippled grip stays as it is (tests pass).
 
-Tests added (tests/unit/test_bp5_perf_qa.gd, 4 tests, 86 asserts): flight never shrinks with distance; a wider margin or
-longer segment never loses a touch; an infinite segment answers by the capsule; a press during a skipped unseen frame is
-kept.
-
-Runs: test_bp5_perf, hitbox, figure_view, figure_animator, figure_view_cone_qa, figure_legs_qa: 49/49; bb_physics_edges,
-bb_step, bots, cr1_qa, cr2_qa, cr2_rules, custom_rules, hit_registration(+qa), team_sizes: 117/117.
-Not tested: the look of 30 Hz posing on shadows (owner's list).
+Counts: 47 files, 523 tests, 522 pass, 0 fail, 1 pending (existing Cyber test), 242 s. Import clean. Smoke and tools/check.sh not run (as told).
+Not tested (needs a display): a bot's rifle/pistol far off with a reload; the owner's playtest checks cover it.
 
 Verdict: Pass
