@@ -1444,6 +1444,17 @@ The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built 
 - [ ] **Rebind.** Settings › Controls lists **Inspect replica** on Y; move it to another key and it works there.
 - [ ] **Feel.** Is about 3 s for the rifles and 2 s for the pistols right, and is the turn too much or too little?
 
+## Models in the menus and the HUD (MP1)
+
+Every picture of a replica, attachment or power source is drawn from its model each time the game starts, so new
+models show without anything else changing. The smoke and flash icons now do the same once their models are merged.
+
+- [ ] **Bomb icons:** once the new smoke and flash models are in, the Loadout's Grenades panel and the HUD's bomb icons
+  show them (green smoke, violet flash), sharp at both HUD sizes (the bomb in hand is bigger) and dimmed when none is
+  left. Before that they stay the flat drawn cans.
+- [ ] **New models everywhere:** after any new replica, attachment or power source model is merged, Loadout,
+  Customise (the turning replica and the part cards), the Armory and the level-up card show it.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
