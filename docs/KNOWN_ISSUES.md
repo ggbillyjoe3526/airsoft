@@ -11,6 +11,7 @@ Every open bug, limit and known gap in the game, so nobody re-reports or re-meas
 
 | Area | Issue | Class | Found |
 |---|---|---|---|
+| Art | The figure's sleeve edge shows a jagged line where it meets the glove's cuff, seen only close up (BL10) | can wait | 2026-11-05 |
 | Play | The Sniper Rifle's Fire clip (since BL5 the bolt drawn back at 0.48 s, home at 0.72 s and turned down at 0.88 s) and cocking sound show the rifle cocked about 0.9 s after a shot, but the rifle is ready at 1.25 s (M130) to 1.39 s (M150); a click after the handle is home now fires as the cycle ends (BP3). The cocking is the owner's recorded pistol slide since AU2, timed to the clip; re-time with the owner's model | playtest | 2026-11-03 |
 | Play | The bolt's cocking sound plays to its end after a switch to the pistol or a hit mid-cycle (BP3) | can wait | 2026-11-03 |
 | Play | A mouse wheel notch on the tick a reload or a slot key's draw starts, aimed through the Variable Scope, neither zooms nor switches (BP3) | can wait | 2026-11-03 |

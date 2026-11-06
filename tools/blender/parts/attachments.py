@@ -42,6 +42,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 
 import bpy  # noqa: E402  first: it brings bmesh and mathutils with it
 from mathutils import Matrix, Vector  # noqa: E402
+from mathutils.bvhtree import BVHTree  # noqa: E402
 
 import hardsurface as hs  # noqa: E402
 
@@ -1087,6 +1088,9 @@ BUILDERS = {
 }
 # A torch on the AEG clamps to the handguard's right side: turned from under the rail to face out to the right.
 SIDE_MOUNTED = {("aeg", "light_weaponTorch")}
+# Parts files whose parts must not touch the replica's body anywhere (CZ1: the Cyber's torch, flush on its rail, sank
+# into the trigger guard when the replica was resized); the build stops on a touch.
+CLEAR_OF_BODY = {"cyber"}
 
 
 def mounts(replica: str) -> dict:
@@ -1094,6 +1098,20 @@ def mounts(replica: str) -> dict:
     hs.reset()
     bpy.ops.import_scene.gltf(filepath=os.path.join(ROOT, "assets/models/replicas/%s.glb" % replica))
     return {o.name: o.matrix_world.translation.copy() for o in bpy.data.objects if o.type == "EMPTY"}
+
+
+def faces_tree(ob: bpy.types.Object) -> BVHTree:
+    """A mesh's faces in model space, for overlap tests."""
+    me = ob.data
+    mw = ob.matrix_world
+    return BVHTree.FromPolygons([mw @ v.co for v in me.vertices], [tuple(p.vertices) for p in me.polygons])
+
+
+def body_tree(replica: str) -> BVHTree:
+    """The replica model's Body in its space (it hangs from the armature, not from a bone: the rest pose)."""
+    hs.reset()
+    bpy.ops.import_scene.gltf(filepath=os.path.join(ROOT, "assets/models/replicas/%s.glb" % replica))
+    return faces_tree(bpy.data.objects["Body"])
 
 
 def turn(ob: bpy.types.Object, m: Matrix) -> None:
@@ -1106,6 +1124,7 @@ def turn(ob: bpy.types.Object, m: Matrix) -> None:
 
 
 def write(part_file: str) -> None:
+    body = body_tree(part_file) if part_file in CLEAR_OF_BODY else None
     at = mounts(part_file)
     hs.reset()
     path = os.path.join(ROOT, "assets/models/replicaParts/%s.glb" % part_file)
@@ -1130,6 +1149,12 @@ def write(part_file: str) -> None:
         ob.location = at[mount]
         print("  %-12s %-20s %6d triangles (figure %d)" % (part_file, name, hs.tris(ob),
                                                             hs.tris(bpy.data.objects[name + "_Figure"])))
+        if body is not None:
+            bpy.context.view_layer.update()
+            touching = sum(len(body.overlap(faces_tree(o))) for o in [ob] + list(ob.children_recursive)
+                           if o.type == "MESH" and not o.name.endswith("_Figure"))
+            if touching:
+                raise SystemExit("%s's %s touches its body (%d face pairs)" % (part_file, name, touching))
     for m in list(bpy.data.meshes):
         if m.users == 0:
             bpy.data.meshes.remove(m)

@@ -41,6 +41,8 @@ FPS = 60
 # (docs/CC0_ASSETS.md › Size limits), used in full (TP1, 2026-11-05).
 FIGURE_TRIS = {"Figure": 2760, "Magazine": 240}
 MM = 0.001
+# Segments in each rounded corner of a side outline (CZ1: 4, from BL6's 3, spending the budget the warp left).
+FILLET_SEGMENTS = 4
 
 
 def m(v: float) -> float:
@@ -49,7 +51,7 @@ def m(v: float) -> float:
 
 def poly(points: list) -> list:
     """Millimetre (y, z[, r]) corners to a filleted outline in metres."""
-    return hs.fillet([(m(p[0]), m(p[1]), m(p[2]) if len(p) > 2 else 0.0) for p in points], 3)
+    return hs.fillet([(m(p[0]), m(p[1]), m(p[2]) if len(p) > 2 else 0.0) for p in points], FILLET_SEGMENTS)
 
 
 def side(name: str, points: list, hw: float, mat: str, x0: float = None) -> object:
@@ -77,6 +79,22 @@ def xs(sx: int, inner: float, outer: float) -> tuple:
 
 # ------------------------------------------------------------------------------------------------------- dimensions
 
+# The GBB Pistol's size (CZ1, owner 2026-11-05: "maybe the cyber pistol needs redesigned to be sized similar to the
+# gbb", so the hands hold it as they hold the GBB). The parts below are drawn at BL6's size, which the owner liked the
+# look of, then every built mesh, bone, empty and clip key is fitted to the GBB's envelope by `warp`: lengths (y) times
+# SIZE_Y; heights (z) times SIZE_Z_UP above the bore's foot (z 0) and SIZE_Z_LOW below it; widths (x) times
+# SIZE_X_UPPER over the frame (the shroud, slide, rear block and cap: 13.3 mm a side, the GBB's slide 12.75), and on the
+# frame SIZE_X_FRAME (12.4 mm, the GBB's frame) flaring to SIZE_X_GRIP (15 mm, the GBB's grip) over GRIP_FLARE.
+# 229 x 193 x 38 mm becomes 206 x 152 x 32 mm (the GBB: 204 x 140 x 31). Round parts on the sides
+# are drawn pre-squashed (`place`) so they come out round; the rail, trigger and sights keep their own widths.
+SIZE_Y = 0.89
+SIZE_Z_UP = 0.72
+SIZE_Z_LOW = 0.84
+SIZE_X_UPPER = 0.72
+GBB_FRAME_HW = 12.4
+GBB_GRIP_HW = 15.0
+GRIP_FLARE = (-20.0, -40.0)
+
 # The slide: its length (y), height (z) and half width, as the old model's; the bore's height.
 SLIDE_Y = (-64.0, 85.0)
 SLIDE_Z = (0.0, 30.5)
@@ -85,6 +103,9 @@ BORE_Z = 15.0
 # The front shroud's and rear block's half width, the frame's, the trigger guard's and the grip's.
 SHROUD_HW = 18.5
 FRAME_HW = 15.8
+# The frame's width scales (see SIZE_Y): BL6's frame to the GBB's frame and grip.
+SIZE_X_FRAME = GBB_FRAME_HW / FRAME_HW
+SIZE_X_GRIP = GBB_GRIP_HW / FRAME_HW
 GUARD_HW = 6.5
 # The shroud: its side outline (front face at 101, top at 37, the lower edge at -21 with its three teeth' gaps).
 SHROUD = [(17.0, 37.0), (95.5, 37.0), (101.0, 31.5), (101.0, -18.0), (94.5, -26.6), (52.0, -26.6), (52.0, 0.0),
@@ -96,7 +117,7 @@ TOOTH_H = 11.0
 SHROUD_FOOT = -26.6
 # The step that sinks the lower half of the shroud's sides, and the rear block's lower skirt: (z, depth).
 SHROUD_STEP = (2.0, 1.5)
-REAR_SKIRT = (-8.0, 1.2)
+REAR_SKIRT = (-8.0, 0.8)
 # The big chamfer along the shroud's and rear block's top edges, and the shroud's inset side panel.
 TOP_CHAMFER = 5.0
 SHROUD_PANEL = [(97.0, 4.0, 1.5), (56.0, 4.0, 1.5), (56.0, 31.5, 1.5), (97.0, 31.5, 1.5)]
@@ -132,20 +153,26 @@ GRIP = [(-20.0, -20.0), (-24.0, -34.0), (-27.5, -36.0, 4.0), (-31.5, -60.0, 30.0
 # The old model's shape (owner, 2026-11-05: "more like the original trigger and guard"): a narrow loop in front, a
 # full-width web behind, the opening tall enough for the trigger and a little more. The trigger and guard sit 12 mm
 # nearer the grip than the old model's (owner, 2026-11-05: "the player would need to stretch their finger"); the loop's
-# front slants up to the front block's foot, so no notch opens under it.
-GUARD_HOLE = [(33.7, -16.5, 1.0), (33.7, -35.5), (29.0, -40.0, 1.0), (-11.5, -40.0, 1.0), (-11.5, -16.5, 1.0)]
-GUARD_LOOP = [(52.0, -14.0), (52.0, -24.0, 1.0), (42.0, -34.0, 2.0), (42.0, -42.5), (37.5, -47.0, 1.5), (-2.0, -47.0),
+# front slants up to the front block's foot, so no notch opens under it. CZ1 sets the trigger TRIGGER_BACK further
+# back, nearer the GBB's reach from the back strap (BL6's was 19 mm longer, CZ1's 5 mm), and the opening's back wall
+# with it, 4 mm behind the blade and 4 mm ahead of the grip's front; the guard's front (the opening's front wall and
+# the loop's lower front) moves 7.5 mm back, so the opening stays 4.5 mm longer than BL6's behind the trigger and the
+# Weapon Torch's back end clears the loop (at the moved TorchMount it sank 2 mm into it).
+TRIGGER_BACK = 13.0
+GUARD_HOLE = [(26.2, -16.5, 1.0), (26.2, -35.5), (21.5, -40.0, 1.0), (-16.0, -40.0, 1.0), (-16.0, -16.5, 1.0)]
+GUARD_LOOP = [(52.0, -14.0), (52.0, -24.0, 1.0), (34.5, -34.0, 2.0), (34.5, -42.5), (30.0, -47.0, 1.5), (-2.0, -47.0),
               (-2.0, -14.0)]
 GUARD_WEB = [(-1.0, -20.0), (-1.0, -47.0), (-20.0, -47.0, 5.0), (-27.5, -38.0), (-26.0, -20.0)]
-TRIGGER_SLOT = ((-8.0, 13.0), (-26.0, -8.0), 3.4)
+TRIGGER_SLOT = ((-8.0 - TRIGGER_BACK, 13.0 - TRIGGER_BACK), (-26.0, -8.0), 3.4)
 # The grip's windows, where the power cell shows (inset in the frame's sides), and their depth.
 GRIP_WINDOW = [(-31.5, -27.0, 3.0), (-82.0, -27.0, 4.0), (-109.6, -118.0, 3.0), (-59.5, -118.0, 3.0)]
 WINDOW_DEPTH = 3.5
-# The magazine (the power cell): raked back like the grip, its top at -16, the base pad's foot at -151.
+# The magazine (the power cell): raked back like the grip, its top at -16, the base pad's foot at -144 (BL6's -151:
+# a shallower pad, so the grip ends near the GBB's).
 MAG = [(-27.0, -18.0), (-81.5, -18.0), (-112.0, -122.0), (-57.4, -122.0)]
 MAG_HW = 15.0
-PAD = [(-55.5, -126.3), (-114.5, -126.3, 1.0), (-117.0, -131.0, 1.0), (-115.0, -147.0, 2.0), (-63.0, -147.0, 2.0),
-       (-56.5, -131.0, 1.0)]
+PAD = [(-55.5, -126.3), (-114.5, -126.3, 1.0), (-117.0, -129.6, 1.0), (-115.0, -141.0, 2.0), (-63.0, -141.0, 2.0),
+       (-56.5, -129.6, 1.0)]
 PAD_HW = 17.0
 CELL_RING = (-67.0, -62.0)
 # The rail under the shroud (the torch's clamp at TorchMount) and its cross slots.
@@ -153,8 +180,21 @@ RAIL_Y = (57.0, 92.0)
 RAIL_Z = (-26.6, -21.0)
 RAIL_HW = 10.0
 RAIL_SLOTS = 4
-# The sights' tops on one line (z 40, the old marks).
-SIGHT_Z = 40.0
+# The sight line (the front post's top and both empties): BL6's z 40 (the old marks) raised 2 mm, so the rear sight
+# keeps 2.5 mm under its notch's floor (with the floor at 40 - NOTCH_DROP the notch cut the sight to its foot and its
+# back face split).
+SIGHT_Z = 42.0
+# SIGHT_Z is the sight line: the front post's top and the empties' height, so the eye's when aimed. The rear notch's
+# floor sits NOTCH_DROP under it and the rear sight's top REAR_SIGHT_RISE over it, so aimed the post stands in the
+# notch with light either side (owner 2026-11-05: "you can't see the cyber pistols iron sights"; BL6's notch floor sat
+# on the sight line and hid the post, the GBB's GS1 bug). Widths and heights in mm as fitted (the warp scales the
+# upper parts SIZE_X_UPPER across and SIZE_Z_UP up): the GBB's post and notch widths.
+FRONT_POST_HW = 1.6
+FRONT_DOT_R = 0.6
+REAR_SIGHT_HW = 6.5
+NOTCH_HW = 2.0
+NOTCH_DROP = 2.1
+REAR_SIGHT_RISE = 0.5
 FRONT_SIGHT_Y = 103.8
 REAR_SIGHT_Y = -76.8
 # The selector's track on the frame's sides and its three lights (semi, burst, auto: the slider's centre at half,
@@ -184,7 +224,7 @@ BONES = {
     "magazine": (0.0, -0.0819, -0.1209),
     "selector": (0.0, 0.0083, -0.0055),
     "slide": (0.0, 0.0, 0.015),
-    "trigger": (0.0, 0.0045, -0.0125),
+    "trigger": (0.0, m(4.5 - TRIGGER_BACK), -0.0125),
 }
 BONE_LENGTH = 0.01
 
@@ -219,8 +259,11 @@ def materials() -> None:
 
 def place(b: hs.Builder, faces: list, sx: int, at: tuple) -> None:
     """Moves faces built along +x (local x 0 the side's face, negative into the part) to the side sx at `at`
-    (metres), mirrored for the left side with their normals kept facing out."""
-    b.transform(faces, Matrix.Translation(at) @ Matrix.Diagonal((sx, 1.0, 1.0, 1.0)))
+    (metres), mirrored for the left side with their normals kept facing out. They are squashed by the inverse of the
+    warp's length and height scales there, so they come out round, the warp's mean scale across."""
+    sz = SIZE_Z_UP if at[2] >= 0.0 else SIZE_Z_LOW
+    u = math.sqrt(SIZE_Y * sz)
+    b.transform(faces, Matrix.Translation(at) @ Matrix.Diagonal((sx, u / SIZE_Y, u / sz, 1.0)))
     if sx < 0:
         bmesh.ops.recalc_face_normals(b.bm, faces=faces)
 
@@ -300,7 +343,7 @@ def shroud() -> list:
         cut.append(box("c_strap", (lo, 11.0, 30.0), (hi, 44.0, 38.0), "CyberSlab"))
         # The gaps between the teeth, in the flanks either side of the rail.
         for y in TEETH:
-            lo, hi = xs(sx, RAIL_HW + 0.6, 30.0)
+            lo, hi = xs(sx, (RAIL_HW + 0.6) / SIZE_X_UPPER, 30.0)
             wb, wt = TOOTH_GAP[0] * 0.5, TOOTH_GAP[1] * 0.5
             top = SHROUD_FOOT + TOOTH_H
             cut.append(side("c_tooth", [(y - wb - 1.0, SHROUD_FOOT - 3.0), (y + wb + 1.0, SHROUD_FOOT - 3.0),
@@ -317,7 +360,8 @@ def shroud() -> list:
         cut.append(side_recess("c_seam", [(52.6, -21.5), (51.8, -21.5), (51.8, 0.4), (52.6, 0.4)], sx, SHROUD_HW,
                                0.5))
     # The rail's channel under the shroud and the muzzle block's seat.
-    cut.append(box("c_rail", (-RAIL_HW - 0.2, RAIL_Y[0] - 0.5, -30.0), (RAIL_HW + 0.2, 100.5, -20.4), "CyberSlab"))
+    channel = (RAIL_HW + 0.2) / SIZE_X_UPPER
+    cut.append(box("c_rail", (-channel, RAIL_Y[0] - 0.5, -30.0), (channel, 100.5, -20.4), "CyberSlab"))
     hs.cut(ob, cut)
     hs.finish(ob, m(1.5), 3)
     parts = [ob]
@@ -369,7 +413,7 @@ def muzzle_block() -> object:
                centre=(0.0, 0.0, m(BORE_Z)))
     cut.append(hole.build())
     hs.cut(ob, cut)
-    hs.finish(ob, m(0.8), 2)
+    hs.finish(ob, m(0.8), 3)
     b = hs.Builder("Barrel", ["CyberMetal", "CyberFrame"])
     end = BARREL_END
     b.tube([(m(y0 + 2.0), m(BARREL_R)), (m(end - 1.2), m(BARREL_R)), (m(end - 0.3), m(BARREL_R - 0.4)),
@@ -381,8 +425,9 @@ def muzzle_block() -> object:
              (m(y1 + 1.0), m(BARREL_R))], "CyberFrame", 28, centre=(0.0, 0.0, m(BORE_Z)), cap=False)
     # The front sight: a post on the block's top with a glowing dot on its back.
     b.prism(poly([(106.5, z1 - 0.5), (101.0, z1 - 0.5), (101.8, SIGHT_Z, 0.5), (105.2, SIGHT_Z, 0.5)]), "x",
-            m(-1.7), m(1.7), "CyberFrame")
-    b.lathe([(0.0, 0.0), (0.0, m(0.6)), (m(0.3), m(0.6)), (m(0.3), 0.0)], "CyberLine", 12,
+            m(-FRONT_POST_HW / SIZE_X_UPPER), m(FRONT_POST_HW / SIZE_X_UPPER), "CyberFrame")
+    dot = FRONT_DOT_R / SIZE_X_UPPER
+    b.lathe([(0.0, 0.0), (0.0, m(dot)), (m(0.3), m(dot)), (m(0.3), 0.0)], "CyberLine", 12,
             centre=(0.0, m(101.45), m(SIGHT_Z - 1.4)))
     bar = b.build()
     for p in bar.data.polygons:
@@ -546,11 +591,14 @@ def rear_sight() -> object:
     """The rear sight: a wide block on the rear block's top, sloped front and back, a square notch and a glowing line
     under it on its back face."""
     y = REAR_SIGHT_Y
+    top = SIGHT_Z + REAR_SIGHT_RISE / SIZE_Z_UP
+    floor = SIGHT_Z - NOTCH_DROP / SIZE_Z_UP
+    hw, notch_hw = REAR_SIGHT_HW / SIZE_X_UPPER, NOTCH_HW / SIZE_X_UPPER
     b = hs.Builder("RearSight", ["CyberFrame"])
-    b.prism(poly([(y + 5.5, 36.6), (y - 4.0, 36.6), (y - 3.2, SIGHT_Z + 1.8, 0.4), (y + 3.2, SIGHT_Z + 1.8, 0.4)]),
-            "x", m(-6.5), m(6.5), "CyberFrame")
+    b.prism(poly([(y + 5.5, 36.6), (y - 4.0, 36.6), (y - 3.2, top, 0.4), (y + 3.2, top, 0.4)]), "x", m(-hw), m(hw),
+            "CyberFrame")
     ob = b.build()
-    notch = box("c_notch", (-1.6, y - 8.0, SIGHT_Z), (1.6, y + 8.0, SIGHT_Z + 5.0), "CyberFrame")
+    notch = box("c_notch", (-notch_hw, y - 8.0, floor), (notch_hw, y + 8.0, top + 5.0), "CyberFrame")
     hs.cut(ob, [notch])
     hs.finish(ob, m(0.3), 1)
     return ob
@@ -571,16 +619,17 @@ def frame() -> list:
     ob.name = "Frame"
     cut = [side("c_guard", GUARD_HOLE, 30.0, "CyberSlab")]
     (ty0, ty1), (tz0, tz1), thw = TRIGGER_SLOT
+    thw /= SIZE_X_FRAME
     cut.append(box("c_tslot", (-thw, ty0, tz0), (thw, ty1, tz1), "CyberSlab"))
     for sx in (-1, 1):
         cut.append(side_recess("c_window", GRIP_WINDOW, sx, FRAME_HW, WINDOW_DEPTH))
         cut.append(side_recess("c_housing", HOUSING, sx, FRAME_HW, 1.6))
         # A channel along the guard's bottom bar.
-        cut.append(side_recess("c_gch", [(32.0, -44.1, 0.6), (0.0, -44.1, 0.6), (0.0, -42.9, 0.6), (32.0, -42.9, 0.6)],
+        cut.append(side_recess("c_gch", [(24.5, -44.1, 0.6), (0.0, -44.1, 0.6), (0.0, -42.9, 0.6), (24.5, -42.9, 0.6)],
                                sx, GUARD_HW, 0.6))
         # Grooves down the guard's front and the seam lines between the dust cover and the guard.
         for z in (-37.0, -41.0):
-            cut.append(side_recess("c_gg", [(43.0, z - 0.5), (37.0, z - 0.5), (37.0, z + 0.5), (43.0, z + 0.5)], sx,
+            cut.append(side_recess("c_gg", [(35.5, z - 0.5), (29.5, z - 0.5), (29.5, z + 0.5), (35.5, z + 0.5)], sx,
                                    GUARD_HW, 0.5))
     # Serrations down the front strap (the old model's teeth), through its whole width.
     for i in range(FRONT_SERRATIONS):
@@ -600,7 +649,7 @@ def frame() -> list:
         g.box((m(-6.5), m(yb - 3.0), m(z - 1.3)), (m(6.5), m(yb + 2.0), m(z + 1.3)), "CyberSlab")
         cut.append(g.build())
     hs.cut(ob, cut)
-    hs.finish(ob, m(1.2), 2)
+    hs.finish(ob, m(1.2), 3)
     b = hs.Builder("FrameBits", ["CyberLine", "CyberMetal", "CyberFrame", "CyberSlab"])
     for sx in (-1, 1):
         # The selector's dark housing, sunk in the frame, with the track cut in it and the glowing line in the track.
@@ -669,6 +718,7 @@ def trigger() -> object:
     the finger face hollow, the foot curling slightly forward of the root (owner, 2026-11-05)."""
     blade = [(1.9, -11.0), (8.6, -13.4, 1.0), (7.0, -19.0, 5.0), (6.6, -27.0, 8.0), (8.2, -35.5, 1.2),
              (6.0, -37.0, 1.2), (3.6, -35.0, 1.2), (2.6, -28.0, 8.0), (2.0, -19.5, 5.0), (1.2, -11.3)]
+    blade = [(p[0] - TRIGGER_BACK, *p[1:]) for p in blade]
     ob = side("Trigger", blade, 2.8, "CyberFrame")
     return hs.finish(ob, m(0.4), 2)
 
@@ -712,7 +762,7 @@ def magazine() -> object:
               (m(sx * MAG_HW), m(CELL_RING[0]), m(CELL_RING[1])))
         cut.append(r.build())
     hs.cut(ob, cut)
-    hs.finish(ob, m(0.5), 1)
+    hs.finish(ob, m(0.5), 2)
     b = hs.Builder("CellBits", ["CyberCore", "CyberMetal", "CyberFrame"])
     for sx in (-1, 1):
         at = (m(sx * MAG_HW), m(CELL_RING[0]), m(CELL_RING[1]))
@@ -724,13 +774,13 @@ def magazine() -> object:
     bits.data.polygons.foreach_set("use_smooth", [True] * len(bits.data.polygons))
     bits.data.set_sharp_from_angle(angle=hs.SHARP_ANGLE)
     pad = side("Pad", PAD, PAD_HW, "CyberMetal")
-    cut = [side_recess("c_padg", [(-50.0, -134.5), (-120.0, -134.5), (-120.0, -133.0), (-50.0, -133.0)], sx, PAD_HW,
+    cut = [side_recess("c_padg", [(-50.0, -132.6), (-120.0, -132.6), (-120.0, -131.4), (-50.0, -131.4)], sx, PAD_HW,
                        0.7, "CyberMetal") for sx in (-1, 1)]
-    cut.append(side("c_foot", [(-50.0, -160.0), (-120.0, -160.0), (-120.0, -142.5), (-50.0, -142.5)], 30.0,
+    cut.append(side("c_foot", [(-50.0, -160.0), (-120.0, -160.0), (-120.0, -137.5), (-50.0, -137.5)], 30.0,
                     "CyberMetal"))
     hs.cut(pad, cut)
-    hs.finish(pad, m(0.6), 2)
-    foot = side("Foot", [(-62.5, -142.0), (-114.5, -142.0), (-113.5, -150.8, 2.0), (-64.5, -150.8, 2.0)], PAD_HW - 0.8,
+    hs.finish(pad, m(0.6), 3)
+    foot = side("Foot", [(-62.5, -137.0), (-114.5, -137.0), (-113.5, -144.0, 2.0), (-64.5, -144.0, 2.0)], PAD_HW - 0.8,
                 "CyberFrame")
     hs.finish(foot, m(0.6), 2)
     mag = hs.join("Magazine", [ob, bits, pad, foot])
@@ -742,6 +792,61 @@ def _mag_front(z: float) -> float:
     return ya + (yb - ya) * (z - za) / (zb - za)
 
 
+# ------------------------------------------------------------------------------------------------------------ warp
+
+# Which width scale each built mesh takes (see SIZE_Y above): the upper parts', the frame's (flaring to the grip's down
+# the grip) or none (the rail keeps the torch's 20 mm, the trigger its own blade).
+FRAME_PARTS = ("Frame", "FrameBits", "Housing", "Selector", "Magazine")
+OWN_WIDTH = ("Rail", "Trigger")
+
+
+def width_scale(name: str, z: float) -> tuple:
+    """The warp's width scale for mesh `name` at height z (metres, before the warp) and its rate of change with z."""
+    if name in OWN_WIDTH:
+        return 1.0, 0.0
+    if name not in FRAME_PARTS:
+        return SIZE_X_UPPER, 0.0
+    top, foot = m(GRIP_FLARE[0]), m(GRIP_FLARE[1])
+    if z >= top:
+        return SIZE_X_FRAME, 0.0
+    if z <= foot:
+        return SIZE_X_GRIP, 0.0
+    rate = (SIZE_X_GRIP - SIZE_X_FRAME) / (foot - top)
+    return SIZE_X_FRAME + rate * (z - top), rate
+
+
+def fit(p: tuple) -> tuple:
+    """A point (metres, on the replica's centre line) from BL6's size to the GBB's: lengths and heights only."""
+    return (p[0], p[1] * SIZE_Y, p[2] * (SIZE_Z_UP if p[2] >= 0.0 else SIZE_Z_LOW))
+
+
+def warp(ob: bpy.types.Object) -> bpy.types.Object:
+    """Fits a built mesh (at the origin, not yet parented) to the GBB's size, its custom normals carried through the
+    warp's Jacobian (the inverse transpose), so the weighted shading stays as `hs.finish` made it."""
+    me = ob.data
+    me.transform(ob.matrix_world)
+    ob.matrix_world = Matrix.Identity(4)
+    custom = me.has_custom_normals
+    old = [v.co.copy() for v in me.vertices]
+    if custom:
+        normals = []
+        for loop, n in zip(me.loops, me.corner_normals):
+            p = old[loop.vertex_index]
+            s, rate = width_scale(ob.name, p.z)
+            jac = Matrix(((s, 0.0, p.x * rate), (0.0, SIZE_Y, 0.0),
+                          (0.0, 0.0, SIZE_Z_UP if p.z >= 0.0 else SIZE_Z_LOW)))
+            normals.append((jac.inverted().transposed() @ Vector(n.vector)).normalized())
+    for v, p in zip(me.vertices, old):
+        s = width_scale(ob.name, p.z)[0]
+        v.co = (p.x * s, p.y * SIZE_Y, p.z * (SIZE_Z_UP if p.z >= 0.0 else SIZE_Z_LOW))
+    me.update()
+    if custom:
+        me.normals_split_custom_set(normals)
+    return ob
+
+
+# ------------------------------------------------------------------------------------------------------------- rig
+
 def armature() -> bpy.types.Object:
     data = bpy.data.armatures.new(ARMATURE)
     arm = bpy.data.objects.new(ARMATURE, data)
@@ -750,6 +855,7 @@ def armature() -> bpy.types.Object:
     bpy.ops.object.mode_set(mode="EDIT")
     for name, head in BONES.items():
         eb = data.edit_bones.new(name)
+        head = fit(head)
         eb.head = head
         eb.tail = (head[0], head[1] + BONE_LENGTH, head[2])
         eb.roll = 0.0
@@ -836,9 +942,9 @@ def clips(arm: bpy.types.Object) -> None:
                     if pb.name == "trigger":
                         rot = Matrix.Rotation(math.radians(v), 3, "X")
                     elif pb.name in ("slide", "selector"):
-                        loc = Vector((0.0, v, 0.0))
+                        loc = Vector((0.0, v * SIZE_Y, 0.0))
                     elif pb.name == "magazine":
-                        loc = Vector((0.0, v[0] - REST[0], v[1] - REST[1]))
+                        loc = Vector(fit((0.0, *v))) - Vector(fit((0.0, *REST)))
                 pb.rotation_quaternion = rot.to_quaternion()
                 pb.location = loc
                 pb.scale = Vector((1.0, 1.0, 1.0))
@@ -859,15 +965,15 @@ def build() -> None:
     hs.reset(FPS)
     materials()
     arm = armature()
-    parts = shroud() + rear_block() + frame()
+    parts = [warp(ob) for ob in shroud() + rear_block() + frame()]
     for ob in parts:
         print("  part %-14s %6d" % (ob.name, hs.tris(ob)))
     body = hs.join("Body", parts)
     body.parent = arm
     for ob, bone in ((slide(), "slide"), (trigger(), "trigger"), (selector(), "selector"), (magazine(), "magazine")):
-        hs.parent_to_bone(ob, arm, bone)
+        hs.parent_to_bone(warp(ob), arm, bone)
     for name, loc in EMPTIES.items():
-        hs.empty(name, loc, arm)
+        hs.empty(name, fit(loc), arm)
     clips(arm)
     fig = figure_copy.make(FIGURE_TRIS)
     total = 0

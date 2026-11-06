@@ -11,6 +11,14 @@
 - The human's four heads (`Head_HighCut`, `Head_Cap`, `Head_Boonie`, `Head_FullCut` and their LODs) are rebuilt from
   the owner's photos by `tools/blender/figures/` (BL11), which splices them into `human.glb` with their own atlas
   (`human_headwear_*`); the rest of the figure is left alone.
+- The human's `Body` (its clothes, gloves and boots, with `Body_LOD1` and `Body_LOD2`) is rebuilt by
+  `tools/blender/figures/body.py` (BL10) and spliced in by node, leaving the skeleton, the clips and the other parts
+  alone: `BODY_MAPS=<dir> python -I tools/blender/figures/body.py <repo> out.blend body.glb`, then the splicer
+  replaces `Body` (and `Kit_Pads`) in `human.glb`. The build reads `human.glb` itself, so build into a copy and splice
+  afterwards. The heads (`Head_*`), the carrier and gear (`Kit`, `Kit_Pack`, `Kit_Radio`) and the knee pads
+  (`Kit_Pads`) are separate nodes, each owned by its own build.
+- The human's knee and elbow pads (`Kit_Pads` and its two LODs, BL13) are a part built by
+  `tools/blender/figures/pads.py` and spliced into `human.glb`; they ride the shins and forearms rigidly.
 - Godot extracted each figure's textures beside it on import (`*_col`, `*_nrm`, `*_orm`); commit them with their
   `.import` files.
 - A CC0 figure can replace them later: node names, team colours, scale, the size budget and where to find CC0

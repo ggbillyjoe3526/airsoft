@@ -698,6 +698,9 @@ same and throw them (SF2).
   nothing happens. Throw one at your own feet: your screen goes white and the sound dips, then fades back. Is the
   blinding fair, and is it fun rather than annoying?
 - [ ] **Turn away.** Throw a flash, then turn your back on it before the bang: nothing. Side on, a short wash.
+- [ ] **Bomb sounds (AU7).** Throw a smoke and a flash on the range, near and from 10 to 20 m away: the ring pull, then
+  your tin can clattering where it lands, starting right as it hits, and again if it bounces on, the smoke hissing as it goes
+  off with no deep pop, and the flash a clean balloon pop. Do they sound like your recordings? Is the flash loud enough?
 - [ ] **Bots' smoke (SF2).** Pin a bot in cover from 10 to 30 m with steady fire: now and then it smokes the line
   between you (more often on Hard). Does it read as a bot buying time, and is it annoying how often?
 - [ ] **Bots' flash (SF2).** Let a bot hear you round a corner, then wait: it may flash the corner, turn its back and
@@ -1323,6 +1326,20 @@ Every BB in flight is now a proper Blender model, round from every side instead 
 - [ ] **At range:** BBs still read as small bright dots with a faint trail at 20 to 40 m, on pale walls and the sky.
 - [ ] **Glowing BBs:** on Woodland at night, glowing BBs are round green balls with their streak, as before.
 - [ ] **Frame rate:** a full-auto magazine dump on Low keeps its frame rate (F3 box).
+
+## The magazine models (MAG1)
+
+The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built from its replica's standard magazine
+(2026-11-05).
+
+- [ ] **Hi-Cap (AEG Rifle):** in Customise, the magazine is about a third longer than the standard one, curving on
+  down with the same ribs, with a knurled winding wheel showing under its base plate.
+- [ ] **Low-Cap (AEG Rifle):** a short magazine, about two thirds of the standard one's length below the rifle.
+- [ ] **Extended (GBB Pistol):** the magazine sticks out about 3.5 cm below the grip, with a row of holes down its back
+  and its base pad in the frame's colour.
+- [ ] **Reload:** with each fitted, the reload drops that magazine out and brings it back in; nothing pokes through
+  the hands, the grip or the rifle.
+- [ ] **Bots:** a bot with the Support or Pointman kit carries the longer magazine on its replica.
 
 ## The smoke and flash bomb models (BL9)
 
