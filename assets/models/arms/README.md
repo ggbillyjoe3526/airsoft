@@ -18,7 +18,7 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
 - **Materials.** `Glove` (dark olive-brown), `GloveArmour` (guard, pads, strap, patch), `Sleeve`, `SleeveTrim`; each
   with the woven normal map `arms_ArmsWeave.png` (256 px, `fabric.py`) over its own UVs; otherwise plain
   colours. A robot's arms are recoloured in game (ViewModelConfig.robot_arms).
-- **Holds.** One per replica: a clip `<id>_Hold` (`aeg`, `pistol`, `cyber`) posing both arms, and an empty
+- **Holds.** One per replica: a clip `<id>_Hold` (`aeg`, `pistol`, `cyber`, `sniper`) posing both arms, and an empty
   `Hold_<id>` where that replica's origin sits in it (at ViewModelConfig.hip). In game the arms ride the replica's
   node with that empty on its origin, so they follow its sway, kick, cant and drop.
   - The AEG Rifle: the right hand high on the pistol grip, the little finger round its foot, index on the trigger,
@@ -37,7 +37,6 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
   it whenever a replica's model changes.
 - **Shading.** In game the arms are drawn with pressed depth and take no shadows (ArmsView): the sun's shadow map on
   pressed depth broke into hard patches on the sleeve.
-- **Not yet.** The Sniper Rifle has no hold (its new chassis grip, BL5, is still to fit), so it shows no arms. Pistols
-  are one-handed until the two-handed, thumbs-forward hold of the owner's photos is solved. No arm clips for firing or
-  reloading: the replica's own clips move its parts as before.
+- **Not yet.** Pistols are one-handed until the two-handed, thumbs-forward hold of the owner's photos is solved. No
+  arm clips for firing, reloading or the Sniper Rifle's bolt: the replica's own clips move its parts as before.
 - **Budget.** `docs/CC0_ASSETS.md` › Size limits: first-person arms ≤ 40,000 triangles, ≤ 4 materials.

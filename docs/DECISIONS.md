@@ -674,8 +674,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   from the MakeHuman CC0 arm with the figures' bone names, one hold per replica solved against its model with no face
   passing into it (owner, 2026-11-04: no clipping, a natural wrist). Pistols are held in the right hand alone, the left
   arm lowered out of view, until the two-handed thumbs-forward hold of his photos (`ref_images/hands/holding_replica`)
-  is solved: the first tries bent the left wrist past 80°. The Sniper Rifle shows no arms until its new chassis grip
-  (BL5) is fitted. A pistol sits high in the hand, the web on the back strap and the thumb forward along the frame;
+  is solved: the first tries bent the left wrist past 80°. The Sniper Rifle is held as the AEG is, the right hand
+  round its raked stock grip (owner, 2026-11-06). A pistol sits high in the hand, the web on the back strap and the thumb forward along the frame;
   the rifle's support hand comes up under the handguard from below. The arms take no shadows in game (pressed depth
   broke the sun's shadow into patches). A robot player's arms are graphite and light grey. No arm clips for firing or reloading yet: the replica's own clips move its parts. A replica's model change
   means re-running `tools/blender/arms/arms.py`.

@@ -18,6 +18,8 @@ CONTACT = 0.0008
 THUMB_SWING = 30
 # The thumb search's finer step round its best (degrees).
 THUMB_FINE = 5
+# How many of its turns nearest the target a thumb checked on its skinned glove (`Hand.thumb`'s `verify`) tries.
+THUMB_VERIFY = 800
 # How much of each finger's splay from the middle finger a hold takes out.
 ADDUCT = {2: 0.9, 4: 0.9, 5: 0.95}
 
@@ -299,12 +301,16 @@ class Hand:
         return max(0.0, high - self.tip_top)
 
     def thumb(self, col: Collider, ratio: tuple, limit: tuple, target: Vector = None, hug: float = 0.0,
-              swing: int = THUMB_SWING, twists: tuple = (-30, 0, 30), bends: tuple = (0,), pull: float = 3.0) -> list:
+              swing: int = THUMB_SWING, twists: tuple = (-30, 0, 30), bends: tuple = (0,), pull: float = 3.0,
+              verify=None) -> list:
         """Swings the thumb at its base (across the palm, round its own line and in its bend) to the clear place
         nearest the rifle (and, given a `target`, with its tip nearest that; with `hug`, its whole length kept close
         to the rifle too; `swing` and `twists` bound its turns at the base, degrees; `bends`, the knuckle bends tried
         with each, so it can turn round a grip's corner; `pull`, how much its tip's distance from `target` counts), then
-        curls its tip bones onto it from there."""
+        curls its tip bones onto it from there. Given `verify` (a check of the skinned glove itself: how many of the
+        thumb's faces pass into the replica), the THUMB_VERIFY turns whose tips come nearest the target are tried in that
+        order and the first whose glove stays clear is kept: the bones'
+        sampled surface can pass a pose whose glove, swung far round the grip's corner, still cuts into it."""
         b1, b2, b3 = ("Thumb%d_%s" % (k, self.side) for k in (1, 2, 3))
         inv = self.rig.rest[b1].to_3x3().inverted()
         across = inv @ self.palmar
@@ -326,15 +332,18 @@ class Hand:
                 score += hug * sum(max(g, 0.0) for g in gaps[1:]) / 2.0
             if target is not None:
                 m = self.rig.pose[b3]
-                score += (m.translation + m.to_3x3().col[1] * self.rig.length[b3] - target).length * pull
+                reach[(a, c, t, k)] = (m.translation + m.to_3x3().col[1] * self.rig.length[b3] - target).length
+                score += reach[(a, c, t, k)] * pull
             return score, rot, a, c, t, k
 
+        tried, reach = [], {}
         best = None
         for a in range(-swing, swing + 1, 10):
             for c in range(-80, 85, 10):
                 for t in twists:
                     for k in bends:
                         found = score_at(a, c, t, k)
+                        tried.append(found)
                         if best is None or found[0] < best[0]:
                             best = found
         # Then finer round the best, within the same bounds.
@@ -343,14 +352,28 @@ class Hand:
             for c in range(max(-80, c0 - 10), min(80, c0 + 10) + 1, THUMB_FINE):
                 for t in range(max(min(twists), t0 - 15), min(max(twists), t0 + 15) + 1, THUMB_FINE):
                     found = score_at(a, c, t, k0)
+                    tried.append(found)
                     if found[0] < best[0]:
                         best = found
-        self.adduct[b1] = best[1]
+
+        def closed(found: tuple) -> list:
+            self.adduct[b1] = found[1]
+            k = math.radians(found[5])
+            return self.close("Thumb", col, (0.0, ratio[1], ratio[2]), (0.0, max(limit[1], k), max(limit[2], k * 0.5)),
+                              (0.0, k, k * 0.5))
+
+        out = closed(best)
+        if verify is not None:
+            # Nearest the target first: the bones' own clearance no longer ranks them, the glove's check does.
+            for found in sorted(tried, key=lambda f: reach.get(f[2:], f[0]))[:THUMB_VERIFY]:
+                out = closed(found)
+                if not verify():
+                    best = found
+                    break
+            else:
+                out = closed(best)
         if os.environ.get("BL_DEBUG"):
             print("   thumb search: score %.4f at %s" % (best[0], best[2:]))
-        k0 = math.radians(best[5])
-        out = self.close("Thumb", col, (0.0, ratio[1], ratio[2]), (0.0, max(limit[1], k0), max(limit[2], k0 * 0.5)),
-                         (0.0, k0, k0 * 0.5))
         return list(best[2:]) + out[1:]
 
     def settle(self, name: str, start: tuple, col: Collider, span: int = 30, swing: float = 0.0,
@@ -388,6 +411,30 @@ class Hand:
         print("  ! the %s finger can't clear the replica %s" % (name, [round(self.clearance(b, col) * 1000, 1)
                                                                     for b in bones]))
         return [round(a) for a in angles]
+
+    def press(self, name: str, angles: list, col: Collider, swing: float = 0.0, extra: int = 40) -> list:
+        """A settled finger (at `angles`, its base swung `swing`) closed further at its two outer joints, its root
+        kept, until they touch the replica (up to `extra` degrees, the tip a little less): a finger gripping round a
+        narrow or raked grip, its knuckle already against it, rather than lying open beside it."""
+        bones = ["%s%d_%s" % (name, k, self.side) for k in (1, 2, 3)]
+        side_axis = self.axis[bones[0]].cross(Vector((0.0, 1.0, 0.0))).normalized()
+
+        def apply(t: float) -> list:
+            out = [angles[0], angles[1] + t, angles[2] + 0.7 * t]
+            for k, ang in enumerate(out):
+                rot = Matrix.Rotation(math.radians(ang), 3, self.axis[bones[k]])
+                if k == 0 and swing:
+                    rot = Matrix.Rotation(math.radians(swing), 3, side_axis) @ rot
+                self.rig.fk(bones[k], self.adduct[bones[k]] @ rot if bones[k] in self.adduct else rot)
+            return out
+
+        best = 0
+        for t in range(2, extra + 1, 2):
+            apply(t)
+            if any(self.touches(b, col) for b in bones[1:]):
+                break
+            best = t
+        return [round(a) for a in apply(best)]
 
     def thumb_at(self, base: tuple, bends: tuple, col: Collider, span: int = 20) -> list:
         """Poses the thumb: its base turned `base` (degrees: across the palm, round its own line, in its bend), its

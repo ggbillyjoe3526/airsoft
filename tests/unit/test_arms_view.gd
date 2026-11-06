@@ -5,9 +5,7 @@ extends GutTest
 
 const DT := 1.0 / 60.0
 const EPS := 1e-4
-const HELD := [&"aeg", &"pistol", &"cyber"]
-## Its model has no hold for this one yet (its new chassis grip is still to fit).
-const NO_HOLD := &"sniper"
+const HELD := [&"aeg", &"pistol", &"cyber", &"sniper"]
 
 var cfg: ViewModelConfig = null
 
@@ -93,14 +91,13 @@ func test_one_handed_replicas_hide_the_left_arm() -> void:
 
 
 func test_a_replica_with_no_hold_shows_no_arms() -> void:
-	var hands := _hands([&"aeg", NO_HOLD])
+	var hands := _hands([&"aeg"])
 	_show(hands, 0)
 	assert_true(_model(hands).visible, "control: the rifle is held")
-	_show(hands, 1)
+	assert_eq(hands._arms.holding(), &"aeg")
+	hands._arms.hold(&"nothing", hands._held[0].root)
 	assert_false(_model(hands).visible, "no hold: no arms")
 	assert_eq(hands._arms.holding(), &"")
-	hands._arms.hold(&"nothing", hands._held[0].root)
-	assert_false(_model(hands).visible)
 
 
 func test_the_arms_draw_as_the_replica_does() -> void:
