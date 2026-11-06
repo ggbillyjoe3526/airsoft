@@ -1,6 +1,10 @@
 # BP5 · The second full bug and performance pass
 
-**Review:** part 1: critic Accept 8/8 · qa Pass · performance Pass; part 2: critic Accept 8/8 · qa Pass · performance Pass
+**Review:**
+
+- part 1: critic Accept 8/8 · qa Pass · performance Pass
+- part 2: critic Accept 8/8 · qa Pass · performance Pass
+- part 3: critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -11,6 +15,9 @@
 | 2026-11-06 | 3 | Opus 5.5 (bug pass thread) | green | Accept 8/8 | – |
 | 2026-11-06 | part 2: 1 | Opus 5.5 (bug pass thread) | green | Retry 6/8 | the unseen stride's visible cost; claims the numbers don't show |
 | 2026-11-06 | part 2: 2 | Opus 5.5 (bug pass thread) | green | Accept 8/8 | – |
+| 2026-11-06 | part 3: 1 | Opus 5.5 (bug pass thread) | green | Retry 6/8 | far version baked the magazine in and flattened every finish; body ORM too small; README row |
+| 2026-11-06 | part 3: 2 | Opus 5.5 (bug pass thread) | green | Retry 7/8 | the far version drew open shells one-sided |
+| 2026-11-06 | part 3: 3 | Opus 5.5 (bug pass thread) | green | Accept 8/8 | – |
 
 ## The bug pass
 
@@ -67,6 +74,33 @@ Two exact early-outs in the simulation's hottest checks; no change to what they 
   Medium and up would step at 30 Hz, and a figure turned onto stays half-rate until `seen` is read again, up to 3
   frames; about 0.15 ms a frame headless, not worth a visible loss); a ground-probe cache for a character standing
   still (no hit in 48,000 probes).
+
+## Part 3: models
+
+- **Bots' held replicas in fewer draws** (`HeldMerge`, game/play/figures/held_merge.gd). A figure's replica was its
+  `Figure` mesh with pieces under it (iron sights, flash hider, magazine, the parts' copies), each piece its own draw:
+  a rifle 12 and a holstered pistol 9, at every distance, for every bot. Once fitted and painted, every piece that
+  shows is merged into the replica's own mesh, one surface a material, the magazine in its well kept apart (a reload
+  hides it). The merged mesh is made once for a replica, paint and parts and the materials it was made of, and shared
+  by every figure holding the same. The hands still place it by its own `Figure` mesh (`HeldMerge.figure_mesh`): on
+  the back, in the holster and at the shoulder exactly where it was (QA's find: the merged box had moved a rifle on
+  the back 2 to 7 cm).
+- **A far version past the far line:** every plain painted surface (its colour alone: no texture or normal map, no glow,
+  opaque) folded into one surface of vertex colours for each finish (roughness, metallic, specular, and the sides drawn:
+  the Cyber Pistol's and the Sniper's open shells stay two-sided) the replica has; a lens, a glow or the pistol's
+  stippled grip kept as it is; the magazine in its well still its own node at every distance, so a reload far off
+  empties the well (the critic's finds: the first version baked the magazine in and flattened every finish to one matte
+  paint). Its paints are prewarmed with the rest (ShaderPrewarm).
+- Draws a bot (scratchpad probe, opengl3 under xvfb; the performance review measured the same): a human 32 to 28 up
+  close and 32 to 21 past the far line; a robot 25 to 21 and 25 to 18. The pictures before and after are the same up
+  close and at 30 m through a zoom (`/mnt/project-files/playtest/bp5/`).
+- **Moving models out of baked light:** characters, replicas, replica parts, bombs and the BB imported with
+  `light_baking` Static (1), so Ultra's scene GI voxelised every bot and BB as level; now Disabled (0): they still take
+  GI's light, they are just not voxelised as level. The first-person arms keep theirs (an arms change waits for the
+  owner).
+- **Four figure maps** shrunk on import (`size_limit`), kept where detail lives: the body's ORM 2048 to 1024, the
+  headwear's ORM 2048 to 1024, the pads' colour and ORM 1024 to 512 (the pads' near flat, under 0.2 % of pixels off;
+  the body's small islands, buckles and rings, kept at 1024 at the critic's word). About 10 MB of VRAM.
 
 ## Decisions
 

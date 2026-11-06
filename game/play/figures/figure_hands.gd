@@ -199,8 +199,9 @@ func hold(replicas: Array[MeshInstance3D], classes: Array[StringName],
 					site_class == &"pistol"))
 		var middle := Vector3.ZERO
 		var muzzle := Vector3.ZERO
+		var own := HeldMerge.figure_mesh(r) if r != null else null
 		if r != null:
-			var box := r.get_aabb()
+			var box := own.get_aabb() if own != null else AABB()
 			# Its middle along its length, on its left side (the side against the carrier or the pack).
 			middle = Vector3(box.position.x, 0.0, box.get_center().z)
 			# The slide's top over the muzzle's end, middle across.
@@ -209,8 +210,8 @@ func hold(replicas: Array[MeshInstance3D], classes: Array[StringName],
 			r.visible = false
 			add_child(r)
 		# Only a rifle goes on the back; a pistol's slot there is never shown.
-		var rifle := r != null and site_class != &"pistol"
-		var lift := _models.rest_on_back(_kind, r.mesh, middle) if rifle else 0.0
+		var rifle := own != null and site_class != &"pistol"
+		var lift := _models.rest_on_back(_kind, own, middle) if rifle else 0.0
 		_on_chest.append(back * Transform3D(Basis.IDENTITY, Vector3(lift, 0.0, 0.0) - middle))
 		var seat := Transform3D(Basis.IDENTITY, Vector3(0.0, 0.0, -_config.holster_depth) - muzzle)
 		_in_holster.append(holster * seat)
@@ -376,12 +377,13 @@ func butt_on_grip(slot: int) -> Vector3:
 
 ## The middle of `replica`'s last `depth` m towards its butt (+Z), in its own frame (the origin with no replica).
 static func _butt(replica: MeshInstance3D, depth: float) -> Vector3:
-	if replica == null or replica.mesh == null:
+	var mesh := HeldMerge.figure_mesh(replica) if replica != null else null
+	if mesh == null:
 		return Vector3.ZERO
-	var end := replica.get_aabb().end.z
+	var end := mesh.get_aabb().end.z
 	var lo := Vector3.INF
 	var hi := -Vector3.INF
-	for v: Vector3 in replica.mesh.get_faces():
+	for v: Vector3 in mesh.get_faces():
 		if v.z >= end - depth:
 			lo = lo.min(v)
 			hi = hi.max(v)

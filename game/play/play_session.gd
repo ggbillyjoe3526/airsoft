@@ -745,6 +745,7 @@ func _build_views(ui: CanvasLayer) -> void:
 		first_use.append_array(_overtime_flag.materials())
 	first_use.append_array(_hands.prewarm_glass())
 	first_use.append_array(_hands.arms_materials())
+	first_use.append_array(HeldMerge.far_materials())
 	first_use.append_array(range_materials)
 	if _skyline != null:
 		first_use.append_array(_skyline.materials())
@@ -1373,6 +1374,7 @@ func _exit_tree() -> void:
 		_nav_task = -1
 		_nav_out.clear()
 	ReplicaPaint.clear()
+	HeldMerge.clear()
 	if settings != null and settings.changed.is_connected(_apply_dev):
 		settings.changed.disconnect(_apply_dev)
 	if settings != null and settings.changed.is_connected(_apply_hud):

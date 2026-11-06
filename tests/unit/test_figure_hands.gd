@@ -216,10 +216,12 @@ func test_holstered_the_rifle_rides_on_the_back_by_the_back_numbers() -> void:
 		assert_eq(hands.replica(1).visible, kind == FigureMix.HUMAN, "the pistol in the holster (the robot has none)")
 		var worn: Transform3D = d[&"on_back"]
 		var chest: Transform3D = d["Chest"]
-		var box := hands.replica(0).get_aabb()
+		# placed by the replica's own mesh, not the pieces HeldMerge merged into it (BP5)
+		var own := HeldMerge.figure_mesh(hands.replica(0))
+		var box := own.get_aabb()
 		var near := Vector3(box.position.x, 0.0, box.get_center().z)
 		# Moved straight out of the back (its frame's x) onto the kit behind it; the robot has none to rest on.
-		var lift := models.rest_on_back(kind, hands.replica(0).mesh, near)
+		var lift := models.rest_on_back(kind, own, near)
 		if kind == FigureMix.ROBOT:
 			assert_eq(lift, 0.0, "the robot's rifle keeps its depth")
 		else:
@@ -307,7 +309,7 @@ func test_out_of_the_hand_the_pistol_sits_upright_in_the_holster_on_the_right_hi
 	assert_true(hands.replica(1).visible)
 	var seat: Transform3D = d[&"in_holster"]
 	var hips: Transform3D = d["Hips"]
-	var box := hands.replica(1).get_aabb()
+	var box := HeldMerge.figure_mesh(hands.replica(1)).get_aabb()
 	var muzzle := seat * Vector3(box.get_center().x, box.end.y, box.position.z)
 	assert_lt(muzzle.x, hips.origin.x - 0.12, "on the figure's right hip")
 	assert_lt(muzzle.y, hips.origin.y - 0.05, "its muzzle down below the belt")
