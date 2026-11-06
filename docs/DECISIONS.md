@@ -954,6 +954,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   its weapon torch, which a night field needs (every bot carries one there), so a Woodland match counts for the records
   and XP; Neon Heights was cut. Dev content still hides whatever a row tags dev. (Before: Woodland and Neon Heights dev
   until the owner made each public, 2026-10-05, Woodland confirmed 2026-10-24.)
+- **The Sniper Rifle, its three springs and the Variable Scope are public; The Street is dev (owner, 2026-11-05).**
+  The rifle's gear unlocks at its levels (5, 7, 8, 9) for everyone, and bots carry the Sniper kit with the switch off.
+  The Street shows only with Dev content on, and a match there stays out of the records.
 - **The Dev tab is always there, with no box and no hidden unlock (owner, 2026-10-29: "Dev should always be on and not
   hidden").** Its switches apply whenever they are set, and every one starts off, so the game plays the same until
   someone turns one on. A cheat (Game speed, Bottomless magazines, Ghost, Bots hold fire, Bots run low on BBs, Spectate

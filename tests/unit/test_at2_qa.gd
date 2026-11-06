@@ -122,7 +122,7 @@ func test_many_picks_leave_the_node_and_viewport_counts_flat() -> void:
 	await wait_process_frames(3)
 	assert_lte(Performance.get_monitor(Performance.OBJECT_NODE_COUNT), nodes, "no node grows with every pick")
 	assert_eq(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT), orphans)
-	assert_eq(page.pictures().part_count(), 2)
+	assert_eq(page.pictures().part_count(), 3, "the optic tab's three optics, nothing kept from the other tabs")
 
 
 func test_part_pictures_are_let_go_when_leaving_for_a_non_part_tab() -> void:

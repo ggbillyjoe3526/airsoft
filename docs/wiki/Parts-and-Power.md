@@ -17,7 +17,8 @@ A replica with no parts plays exactly as it comes, and bots on the other team ca
 ## Power sources
 
 What drives the replica. A **battery** sets an electric replica's rate of fire; **gas** sets a gas replica's energy,
-and a stronger gas kicks harder too. Energy still stops at the [site limit](Replicas#site-limits).
+and a stronger gas kicks harder too. A **spring** sets the Sniper Rifle's energy: a stronger one
+shoots and kicks harder and cycles a little slower. Energy still stops at the [site limit](Replicas#site-limits).
 
 The menus show each one as it looks at the field: the **Standard Battery** a red NiMH brick pack, the **11.1 V LiPo**
 a black stick pack with its balance lead, the gases one 1 litre can whose cap and shoulder are the gas's colour, and
@@ -31,6 +32,8 @@ An optic on the top rail. With one fitted the iron sights come off completely, s
 aiming looks through it. The red dot is a
 compact sight on a low riser: a lit dot on clear glass, with the view open round it. The 2x scope is a magnifier on a
 hinged mount; it magnifies only inside its glass: the view round it stays as it is, with nothing dark round the edge.
+The Variable Scope is the 2x Scope a little longer, with a zoom ring: aimed through it, the mouse wheel turns its zoom
+from 2x to 6x a step at a time (the HUD shows it), and it keeps that zoom through the match.
 
 <!-- wiki:parts optics -->
 

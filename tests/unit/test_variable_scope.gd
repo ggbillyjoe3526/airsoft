@@ -1,8 +1,8 @@
 extends GutTest
-## The Variable Scope (SN2; owner, 2026-11-02: the 2x Scope, but variable zoom and a little longer): a dev optic for the
-## top rail that zooms 2× to 6× in its glass, turned 1× a notch by the mouse wheel while aimed through it (up zooms in),
-## kept where it is left for the match, slower to raise than the 2x Scope, unlocked at level 8, and drawn from the 2x
-## Scope's model run on longer with a zoom ring.
+## The Variable Scope (SN2; owner, 2026-11-02: the 2x Scope, but variable zoom and a little longer; public since
+## 2026-11-05): an optic for the top rail that zooms 2× to 6× in its glass, turned 1× a notch by the mouse wheel while
+## aimed through it (up zooms in), kept where it is left for the match, slower to raise than the 2x Scope, unlocked at
+## level 8, and drawn from the 2x Scope's model run on longer with a zoom ring.
 
 const DT := 1.0 / 60.0
 const EYE := Vector3(0.0, 1.6, 0.0)
@@ -42,19 +42,19 @@ func _zoom_events(c: Character, cmd: PlayerCommand, aimed: bool = true) -> Array
 	return out
 
 
-func test_it_is_a_dev_top_rail_optic_that_fits_both_rifles() -> void:
+func test_it_is_a_public_top_rail_optic_that_fits_both_rifles() -> void:
 	var it := rules.pool.item(VARIABLE)
 	assert_not_null(it)
 	assert_eq(it.display_name, "Variable Scope")
 	assert_eq(it.key, &"scopeVar")
 	assert_eq(it.slot, &"optic")
-	assert_true(it.is_dev(), "dev until the owner makes it public")
+	assert_false(it.is_dev(), "public (owner, 2026-11-05)")
 	assert_true(rules.set_part(rules.default_loadout("L"), AEG, &"optic", VARIABLE), "the AEG Rifle")
 	var l := rules.default_loadout("L")
 	assert_true(rules.equip(l, Loadout.Slot.PRIMARY, SNIPER))
 	assert_true(rules.set_part(l, SNIPER, &"optic", VARIABLE), "swapped for the Sniper Rifle's 2x Scope")
 	rules.dev_content = false
-	assert_false(rules.set_part(rules.default_loadout("L"), AEG, &"optic", VARIABLE), "hidden with Dev content off")
+	assert_true(rules.set_part(rules.default_loadout("L"), AEG, &"optic", VARIABLE), "and with Dev content off")
 
 
 func test_it_zooms_2x_to_6x_in_its_glass_and_raises_slower_than_the_2x_scope() -> void:

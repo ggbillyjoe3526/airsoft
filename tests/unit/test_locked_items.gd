@@ -53,8 +53,11 @@ func test_a_locked_optic_is_greyed_with_its_level_and_cannot_be_picked() -> void
 	var page := _page()
 	var optics := page.customise().part_page(CustomiseView.Tab.OPTIC)
 	page.customise().show_tab(CustomiseView.Tab.OPTIC)
-	# None, Red Dot (level 1: unlocked at 150 XP), 2x Scope (level 5 since SN1).
-	assert_eq(optics.card_count(), 3)
+	# None, Red Dot (level 1: unlocked at 150 XP), 2x Scope (level 5 since SN1), Variable Scope (level 8, public since
+	# 2026-11-05).
+	assert_eq(optics.card_count(), 4)
+	assert_true(optics.card(3).disabled)
+	assert_eq(_tags(optics.card(3)), PackedStringArray(["LEVEL 8"]))
 	assert_false(optics.card(1).disabled)
 	assert_eq(_tags(optics.card(1)), PackedStringArray())
 	assert_true(optics.card(2).disabled)

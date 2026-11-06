@@ -259,7 +259,7 @@ until 10.
 
 ## Sniper Rifle
 
-A dev item (SN1): turn on Settings › Dev settings › Dev content, and Disable levelling (or Level up to 5).
+Public since 2026-11-05 (SN1): turn on Settings › Dev settings › Disable levelling (or Level up to 5).
 
 - [ ] **Equip it.** It is in the primary list as Sniper Rifle; it comes with the 2x Scope fitted and the M130 Spring.
 - [ ] **Its look.** The AEG with a 20 cm longer barrel (a placeholder until your own model). Is it clearly longer?
@@ -272,14 +272,14 @@ A dev item (SN1): turn on Settings › Dev settings › Dev content, and Disable
   Springs (pictures: a coil with a violet, crimson or black band).
 - [ ] **Springs.** The M140 and M150 shoot harder (Energy up 10 % and 20 %) and cock a little slower. Can you feel it?
 - [ ] **Levels.** In the Armory level 5 holds the Sniper Rifle, the M130 Spring, the 2x Scope and the Tight-Bore Barrel;
-  level 6 has Red Gas; the M140 is at 7 and the M150 at 9. With Dev content off none of the rifle's items show.
+  level 6 has Red Gas; the M140 is at 7 and the M150 at 9. They show with Dev content off too (public since 2026-11-05).
 - [ ] **Bots with it.** About 1 opponent in 12 on Hard (fewer on Normal and Easy) carries it: they raise the scope to
   fight and hold their fire from the hip unless you are within 8 m. Do they feel dangerous at range and beatable up
   close? Is it fair on Depot, Woodland and The Street, at 5v5 and 8v8?
 
 ## Variable Scope
 
-A dev item (SN2): turn on Dev content, and Disable levelling (or Level up to 8).
+Public since 2026-11-05 (SN2): turn on Settings › Dev settings › Disable levelling (or Level up to 8).
 
 - [ ] **Fit it.** Customise › Optic lists the Variable Scope for the AEG Rifle and the Sniper Rifle. Its look: the 2x
   Scope a little longer, with a ridged zoom ring and a white mark (a placeholder until your own model).
@@ -1407,6 +1407,18 @@ The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built 
 - [ ] **AEG stock:** the stock's sides are flat, the half-round tubes gone.
 - [ ] **AEG charging handle:** it sits lower, under the rail's back end, and on a reload it pulls straight back
   without passing through anything.
+
+## Sniper Rifle public, The Street dev (DT1)
+
+- [ ] **Sniper gear without Dev content.** With Settings › Dev › Dev content off, the Armory lists the Sniper Rifle and
+  the M130 Spring at level 5, the M140 at 7, the Variable Scope at 8 and the M150 at 9, with no DEV tag; the Loadout
+  offers each once unlocked.
+- [ ] **The Street hidden.** With Dev content off, the Match page lists Depot, Woodland and the Range only. Turn Dev
+  content on: The Street is back, marked DEV, and a match there gives no XP.
+- [ ] **Sniper bots.** A few Hard matches with Dev content off: now and then a bot carries the Sniper Rifle. On
+  Woodland at 8v8, does one end feel stacked once snipers are about?
+- [ ] **Sniper bots never shoot a teammate.** They now wait for the bolt before each shot, so they fire a little slower;
+  do they still feel dangerous at range?
 
 ## Inspect your replica (IN1)
 

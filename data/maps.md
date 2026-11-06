@@ -3,7 +3,7 @@
 Every map the game can load (`data/maps/<id>.json`) has one row here: its name as shown, whether it is public or still
 dev content, and a line about it. A `dev` map is listed only while the Dev tab's Dev content switch is on, and a match
 on one stays out of the records (`docs/DECISIONS.md` › Content tags and dev content). Making a map public means
-changing its Tag to `public`; every map is public now (owner, 2026-10-29), so the switch hides none.
+changing its Tag to `public`. The Street is dev (owner, 2026-11-05); every other map is public.
 
 **The game reads this file** when it starts (`game/map/map_catalog.gd`). A row it can't read is left out with a
 warning; a map with no row is not listed.
@@ -30,5 +30,5 @@ warning; a map with no row is not listed.
 |---|---|---|---|---|---|---|---|---|---|
 | depot | Depot | field | public | 5 | 6 | 8 |  | semi | An indoor airsoft hall: three lanes, two dark tunnels. |
 | woodland | Woodland | field | public | 5 | 6 | 8 | 180 |  | A big open wood over a dry stream, by day or night. |
-| street | The Street | field | public | 5 | 6 | 8 | 180 |  | A terraced street: front gardens, a back lane, a house to take. |
+| street | The Street | field | dev | 5 | 6 | 8 | 180 |  | A terraced street: front gardens, a back lane, a house to take. |
 | range | Range | range | public | 1 | 1 | 1 |  |  | Targets 10 to 60 m. No bots, no score. |

@@ -13,7 +13,7 @@ then **0.1**, which opens **Early Access**. Each build is posted on the
 
 ### Built
 
-Depot, Woodland at night with the weapon torch and glowing BBs, the AEG Rifle, the GBB Pistol and the Cyber Pistol,
+Depot, Woodland at night with the weapon torch and glowing BBs, the AEG Rifle, the GBB Pistol, the Cyber Pistol and the Sniper Rifle,
 every part and power source, the Loadout, levels and the Armory, Easy, Normal and Hard bots with names, personalities,
 kits and callouts, Elimination with its overtime flag, Attack / Defend and Custom matches, the practice range in Depot's
 site, Practice on any field and the timed challenge, squad orders, pings and the magazine hand-off, the minimap, the
@@ -27,8 +27,8 @@ The rest of this wiki describes all of it.
 
 ### In development
 
-- A **spring sniper rifle**, cocked after every shot, with the 2x Scope fitted, long reach and three springs to unlock,
-  and a **variable scope** to go with it.
+- **The Street**, a terraced street of three lanes, a house to take and a car park, by day or by night. It
+  shows only with Dev content on for now.
 
 ### Then: the art pass
 

@@ -59,6 +59,19 @@ It is the same size in your hand as the GBB Pistol. It wears its own white, cyan
 glowing slashes, a pink core behind bars in its slide, a finned rear cap and three fire-mode lights; with
 **Realistic colours** on it turns plain grey with no glow. It has its own shot and magazine sounds.
 
+## Sniper Rifle
+
+A spring-powered bolt-action rifle, unlocked at level 5. It fires **single shots** only: after every shot you hear the
+bolt drawn back over the spring and snapped home before the next one is ready. It shoots harder and
+further than the AEG Rifle, from small magazines, and has its own [site limit](#site-limits).
+
+It comes with the **2x Scope** fitted; take it off or swap it for another optic in the Loadout. It is made to be aimed:
+from the hip its shots scatter widely, and the spread closes as the sight comes up. The spring you fit sets its energy
+([Parts and Power](Parts-and-Power#power-sources)). It takes the AEG Rifle's optics, grips and muzzle parts, but no
+barrels or other magazines. It is a long rifle in a grey chassis: a plain barrel with a thread cap, a slotted forend,
+a black receiver with a top rail, a short box magazine, a vertical grip and a stock with a cheek piece and a rubber
+butt pad.
+
 ## How they sound
 
 Every replica's shots and magazines are made from real recordings: a gas pistol, an electric motor's whirr and hands
@@ -90,3 +103,5 @@ the next match.
 
 Bots hold the same replicas you hold, with the parts they have fitted: their optic (the iron sights taken off under
 it), silencer, grip, torch or laser, and the magazine they reload.
+A rifle is held with its stock in the shoulder and the head down on it, looking along the sights; a pistol is held
+out in both hands.

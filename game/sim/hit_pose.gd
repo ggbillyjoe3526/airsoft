@@ -135,6 +135,14 @@ static func pose(c: Character, hits: HitConfig, fit: HitFit) -> void:
 			for k in HitFit.UPPER:
 				var d := upper[k] - spine
 				upper[k] = spine + Vector3(d.x, d.y * cb - d.z * sb, d.y * sb + d.z * cb)
+		# FigureBend.bow: a rifle's head bowed and tilted onto its stock about the neck's joint (HitFit.cheek_turn).
+		var r := c.armament.replica() if c.armament != null else null
+		if alive and r != null and r.site_class != &"pistol":
+			var neck := upper[HitFit.NECK]
+			var turn := HitFit.cheek_turn(upper[HitFit.SHOULDER_L] - upper[HitFit.SHOULDER_R], upper[HitFit.HEAD] - neck,
+					hits, 1.0)
+			upper[HitFit.HEAD] = neck + turn * (upper[HitFit.HEAD] - neck)
+			upper[HitFit.HEAD_TOP] = neck + turn * (upper[HitFit.HEAD_TOP] - neck)
 
 
 ## Adds `w` of the gait blend space at `step` (m/s, the figure's frame) on walk cycle `cycle` to lower, weighted as

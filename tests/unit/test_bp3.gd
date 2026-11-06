@@ -5,6 +5,7 @@ const DT := 1.0 / 60.0
 const EYE := Vector3(0.0, 1.6, 0.0)
 const PISTOL := "000001"
 const SNIPER := "000021"
+const M140 := "000023"
 
 var rules: LoadoutRules
 
@@ -102,6 +103,8 @@ func test_a_bomb_in_hand_is_no_holster_to_follow() -> void:
 
 func test_with_dev_content_off_the_empty_level_7_is_never_marked_next() -> void:
 	var pool := Pool.read_file()
+	# The M140 went public with the rifle (owner, 2026-11-05); tagged dev again here, level 7 holds only dev content.
+	pool.item(M140).access = &"dev"
 	var table := LevelTable.read_file(pool)
 	var at_6 := 0
 	for l in table.levels:
@@ -113,7 +116,7 @@ func test_with_dev_content_off_the_empty_level_7_is_never_marked_next() -> void:
 	for r in facts.rows:
 		if r.number == 7:
 			seven = r
-	assert_true(seven.items.is_empty(), "level 7 holds only the dev M140 Spring")
+	assert_true(seven.items.is_empty(), "level 7 holds only the M140 Spring, dev here")
 	assert_eq(seven.state, ArmoryFacts.State.LOCKED, "not the next card")
 	assert_eq(facts.next_row().number, 8, "the next card is the one the header names")
 
