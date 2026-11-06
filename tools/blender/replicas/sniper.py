@@ -9,8 +9,8 @@ so its grip's front at the hand's height sits where the AEG Rifle's does: the fi
 replicaOnGrip) lands on this grip too. It keeps the replica contract (docs/CC0_ASSETS.md › Replica models): the
 armature SniperRifle with the bones root, trigger, magazine, magRelease, selector (the safety), rearSight, frontSight
 and bolt; the clips Fire (the shot, then the bolt lifted, drawn, pushed home and turned down: about a second, the
-rifle's cycle), Reload, Inspect, Selector and SightsFold; the empties Muzzle, BarrelEnd, FrontSight, RearSight,
-MagWell, OpticMount, GripMount and TorchMount; the meshes Body, Bolt, Trigger, Magazine, MagRelease, Selector,
+rifle's cycle), Reload, Inspect and Selector (no SightsFold: an optic hides the sights whole); the empties Muzzle,
+BarrelEnd, FrontSight, RearSight, MagWell, OpticMount, GripMount and TorchMount; the meshes Body, Bolt, Trigger, Magazine, MagRelease, Selector,
 FrontSightLeaf, RearSightLeaf, FlashHider (the thread cap, hidden by a muzzle part) and Figure (the figures'
 cut-down copy); the paintable materials Body, Furniture (the chassis), Detail, Accent and Metal, plus Rubber and BB.
 
@@ -776,8 +776,6 @@ CLIPS = {
                           (2.00, (LIFT, -0.045)), (2.30, (LIFT, 0.0)), (2.50, (0.0, 0.0)), (3.0, (0.0, 0.0))]),
     }),
     "Selector": (0.5, {"selector": ("rx", [(0.0, 0.0), (0.25, -2.0 * SAFE_LEAN), (0.5, -2.0 * SAFE_LEAN)])}),
-    "SightsFold": (0.3, {"rearSight": ("rx", [(0.0, 0.0), (0.3, -90.0)]),
-                         "frontSight": ("rx", [(0.0, 0.0), (0.3, -90.0)])}),
 }
 
 
@@ -825,9 +823,8 @@ def clips(arm: bpy.types.Object) -> None:
         track = ad.nla_tracks.new()
         track.name = clip
         track.strips.new(clip, 0, act)
-    for pb in arm.pose.bones:
-        pb.rotation_quaternion = (1.0, 0.0, 0.0, 0.0)
-        pb.location = (0.0, 0.0, 0.0)
+    # At rest from here on (renders, the figure copy), the tracks muted; every one is still exported.
+    hs.rest_pose(arm)
 
 
 # ------------------------------------------------------------------------------------------------------------ main

@@ -1096,7 +1096,7 @@ CLEAR_OF_BODY = {"cyber"}
 def mounts(replica: str) -> dict:
     """The replica model's empties by name, in its space."""
     hs.reset()
-    bpy.ops.import_scene.gltf(filepath=os.path.join(ROOT, "assets/models/replicas/%s.glb" % replica))
+    hs.import_glb(os.path.join(ROOT, "assets/models/replicas/%s.glb" % replica))
     return {o.name: o.matrix_world.translation.copy() for o in bpy.data.objects if o.type == "EMPTY"}
 
 

@@ -111,11 +111,11 @@ The rifle holds 60 BBs and the pistol 18, each with 4 magazines a round. Nothing
 
 ## Aiming and optics
 
-The rifle comes with flip-up iron sights; a red dot or a 2× scope is a part you fit in Loadout › Customise.
+The rifle comes with iron sights; a red dot or a 2× scope is a part you fit in Loadout › Customise.
 
 - [ ] **Hold right click with iron sights.** The rifle comes up to your eye, the view narrows a touch and the
   crosshair goes: the front post sits in the rear ring.
-- [ ] **Fit the red dot and aim.** It sits on the rifle with the iron sights folded under it; the crosshair gives way
+- [ ] **Fit the red dot and aim.** It sits on the rifle with the iron sights gone; the crosshair gives way
   to the dot and you move at a quiet walk (no sprint while aiming). Let go and it all goes back.
 - [ ] **Shoot while aiming.** BBs go where the dot (or post) is. Aiming halves the spread: at 25 to 35 m it should be
   clearly tighter, and the hip up close should still feel fine.
@@ -1248,7 +1248,7 @@ Dev content on for the rifle. The numbers came from bots; these need you.
   anything poking into the view while you walk, sprint, lean and aim?
 - [ ] **Iron sights:** aim. The rear sight's U and the front dot line up on the crosshair.
 - [ ] **Moving parts:** fire (the slide blows back), empty it (the slide locks back), reload (the magazine release
-  presses, the magazine drops and a new one goes up the well) and Inspect (the slide draws back a little).
+  presses, the magazine drops and a new one goes up the well) and Inspect (the slide stays home, GS2).
 - [ ] **Figures:** a bot reloading its pistol pulls the old magazine out of the grip and seats the new one, both in
   the left hand.
 - [ ] **Paints and parts:** in Customise, try each paint and every part: the laser and torch sit under the dust
@@ -1393,6 +1393,23 @@ The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built 
 - [ ] **Flags from a roof.** On Woodland in Attack / Defend, if you can get onto the shelter roof by flag B, standing
   there does nothing to the flag; at the pole's foot it rises as before.
 
+## GBB slide, AEG sights and stock (GS2)
+
+- [ ] **GBB at rest:** look at the GBB Pistol in the Loadout, Customise, in your hand and in its holster on a bot: the
+  slide is always forward, flush with the frame's nose. Its slide has lines at the front and back, a chamfered nose
+  and rounded edges, like your photos.
+- [ ] **GBB firing:** fire it, then empty it. Only the slide runs back; the barrel stays and shows in front of it,
+  and the slide stays back until the reload seats the new magazine.
+- [ ] **GBB front:** in Inspect or on a bot, the muzzle and the spring hole under it (with the guide rod's cap) look
+  like your Gen5 photos; locked back, nothing but the barrel shows in front of the slide.
+- [ ] **AEG irons:** aim the AEG Rifle at a figure down the Range with no optic. The small ring at the back and the
+  front post line up easily and the figure shows clearly round the post.
+- [ ] **Optic:** fit the red dot, then the 2x Scope, on the AEG Rifle and on the Sniper Rifle. No part of the iron
+  sights shows at the hip, aimed or on the menu pictures; take the optic off and they come back.
+- [ ] **AEG stock:** the stock's sides are flat, the half-round tubes gone.
+- [ ] **AEG charging handle:** it sits lower, under the rail's back end, and on a reload it pulls straight back
+  without passing through anything.
+
 ## Sniper Rifle public, The Street dev (DT1)
 
 - [ ] **Sniper gear without Dev content.** With Settings › Dev › Dev content off, the Armory lists the Sniper Rifle and
@@ -1409,13 +1426,24 @@ The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built 
 
 - [ ] **The key.** Press **Y** with each replica in hand (the AEG, the GBB Pistol, the Cyber Pistol, the Sniper
   Rifle). It turns side on, its right side to you and the whole replica in view, while its parts move: the AEG's
-  charging handle back, dust cover open and hop-up dial turned; the GBB's slide eased back; the Cyber's battery eased
+  charging handle back, dust cover open and hop-up dial turned; the GBB's slide stays home; the Cyber's battery eased
   out of the grip; the sniper's bolt lifted and drawn. Small plastic clicks go with each part. It ends back in your
   hands where it started.
 - [ ] **It stops at once** when you fire, aim, reload, switch replica, holster, sprint or are hit: the replica eases
   back in a moment and the parts are home. Pressing Y while sprinting or aiming does nothing.
 - [ ] **Rebind.** Settings › Controls lists **Inspect replica** on Y; move it to another key and it works there.
 - [ ] **Feel.** Is about 3 s for the rifles and 2 s for the pistols right, and is the turn too much or too little?
+
+## Models in the menus and the HUD (MP1)
+
+Every picture of a replica, attachment or power source is drawn from its model each time the game starts, so new
+models show without anything else changing. The smoke and flash icons now do the same once their models are merged.
+
+- [ ] **Bomb icons:** once the new smoke and flash models are in, the Loadout's Grenades panel and the HUD's bomb icons
+  show them (green smoke, violet flash), sharp at both HUD sizes (the bomb in hand is bigger) and dimmed when none is
+  left. Before that they stay the flat drawn cans.
+- [ ] **New models everywhere:** after any new replica, attachment or power source model is merged, Loadout,
+  Customise (the turning replica and the part cards), the Armory and the level-up card show it.
 
 ## Reporting what you find
 

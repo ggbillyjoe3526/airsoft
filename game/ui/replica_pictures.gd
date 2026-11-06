@@ -3,14 +3,17 @@ extends Node
 ## The replicas' pictures on the menus, drawn live from their models (assets/models/replicas/<key>.glb): each replica has
 ## one small viewport that looks at it from the right, flat (no perspective), in the paint it was last asked for, and every
 ## card showing that replica shows the same texture. The parts fitted to it are put on the model as they are in play
-## (ReplicaParts: the standard magazine or flash hider they replace hidden, the iron sights folded under an optic); the
+## (ReplicaParts: the standard magazine or flash hider they replace hidden, the iron sights hidden under an optic); the
 ## picture is drawn again only when its paint or parts change, and the parts it replaces are freed. Each part also has a picture of its own, alone and in the same paint, for the Customise cards, kept
 ## only for the slot on show. A viewport draws once when the picture is made and once more for each repaint (not every
 ## frame). The paints' materials are ReplicaPaint's: built once each and shared with the match. The power sources have pictures of their own, from
-## assets/models/powerSources (the Armory's). The figure copies in the models are left out. Everything it makes is its child and goes with it.
+## assets/models/powerSources (the Armory's), and the bombs from assets/models/grenades (GrenadeGlyph's). The figure copies
+## in the models are left out. Everything it makes is its child and goes with it.
 
 const MODEL_DIR := "res://assets/models/replicas/"
 const POWER_DIR := "res://assets/models/powerSources/"
+## A bomb's picture's longer side (px) when nobody asks for another.
+const GRENADE_LONG_SIDE := 128
 ## The picture's longer side (px); the other follows the replica's shape. A part's picture is smaller.
 const LONG_SIDE := 1024
 const PART_LONG_SIDE := 384
@@ -61,6 +64,8 @@ var _shots: Dictionary[StringName, Shot] = {}
 var _part_shots: Dictionary[String, Shot] = {}
 ## The power sources' pictures, "<file>/<label colour>/<tip>".
 var _power_shots: Dictionary[String, Shot] = {}
+## The bombs' pictures by Grenade.Kind.
+var _grenade_shots: Dictionary[int, Shot] = {}
 ## The longer side of a replica's picture (px): a page that shows replicas small asks for less.
 var replica_side: int = LONG_SIDE
 
@@ -191,14 +196,45 @@ func _make(key: StringName) -> Shot:
 	return shot
 
 
+## The picture of a bomb of `kind` (Grenade.Kind) from its model, standing, its `Kind` material in its colour; null with no
+## model (GrenadeGlyph then draws its flat icon), `long_side` px on its longer side (the size of the first call stays).
+## Drawn once. Needs to be in the tree.
+func grenade_texture(kind: int, long_side: int = GRENADE_LONG_SIDE) -> Texture2D:
+	var shot := _grenade_shots.get(kind) as Shot
+	if shot == null:
+		var path := grenade_path(kind)
+		if path.is_empty():
+			return null
+		shot = _make_model(path, GrenadeView.KIND_MATERIAL, GrenadeView.BODY_COLOURS[kind], 0.0, long_side,
+				"Grenade_%s" % path.get_file().get_basename())
+		if shot == null:
+			return null
+		_grenade_shots[kind] = shot
+	return shot.port.get_texture()
+
+
+## The model file of a bomb of `kind` (GrenadeView.MODELS, the match's), or "" when it has none.
+static func grenade_path(kind: int) -> String:
+	if kind <= 0 or kind >= GrenadeView.MODELS.size():
+		return ""
+	var path := GrenadeView.MODELS[kind]
+	return path if ResourceLoader.exists(path) else ""
+
+
 func _make_power(file: StringName, label: Color, tip: float) -> Shot:
-	var path := "%s%s.glb" % [POWER_DIR, file]
+	return _make_model("%s%s.glb" % [POWER_DIR, file], LABEL_MATERIAL, label, tip, PART_LONG_SIDE,
+			"Power_%s_%s" % [file, label.to_html()])
+
+
+## A picture of the model at `path`, its `material` painted `colour`, tipped about X by `tip` rad, drawn once; null if
+## there is no such model.
+func _make_model(path: String, material: String, colour: Color, tip: float, long_side: int, port_name: String) -> Shot:
 	var scene := load(path) as PackedScene if ResourceLoader.exists(path) else null
 	if scene == null:
 		return null
 	# The picture is framed on what sits inside its root, so the tip goes on a node under it.
 	var holder := Node3D.new()
-	holder.name = "Power"
+	holder.name = "Model"
 	var tipped := Node3D.new()
 	tipped.rotation.x = tip
 	holder.add_child(tipped)
@@ -206,24 +242,24 @@ func _make_power(file: StringName, label: Color, tip: float) -> Shot:
 	tipped.add_child(model)
 	# The file's materials are shared by every copy of it: each picture takes its own where it changes one.
 	for node in model.find_children("*", "MeshInstance3D", true, false):
-		_restyle(node as MeshInstance3D, label)
-	var shot := _rig(holder, PART_LONG_SIDE, "Power_%s_%s" % [file, label.to_html()])
+		_restyle(node as MeshInstance3D, material, colour)
+	var shot := _rig(holder, long_side, port_name)
 	shot.bare_extent = shot.extent
 	shot.port.render_target_update_mode = SubViewport.UPDATE_ONCE
 	return shot
 
 
-## Paints the `Label` material in `label` and holds metal back, on this mesh alone.
-func _restyle(mesh: MeshInstance3D, label: Color) -> void:
+## Paints the `material` material in `colour` and holds metal back, on this mesh alone.
+func _restyle(mesh: MeshInstance3D, material: String, colour: Color) -> void:
 	if mesh.mesh == null:
 		return
 	for i in mesh.mesh.get_surface_count():
 		var m := mesh.get_active_material(i) as BaseMaterial3D
 		if m == null:
 			continue
-		if m.resource_name == LABEL_MATERIAL:
+		if m.resource_name == material:
 			var painted := m.duplicate() as BaseMaterial3D
-			painted.albedo_color = label
+			painted.albedo_color = colour
 			mesh.set_surface_override_material(i, painted)
 		elif m.metallic > MAX_METALNESS:
 			var dull := m.duplicate() as BaseMaterial3D

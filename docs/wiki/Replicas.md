@@ -30,9 +30,9 @@ An electric rifle (an AEG, "automatic electric gun"), with a motor whirr on ever
 3-round bursts or full auto**: press **B** to change mode, and the fire selector on the replica shows the mode you
 are in. On an indoor field (Depot) it starts each round on single shots: [no full auto indoors](Maps#depot).
 A battery drives it, so the battery you fit sets its rate of fire. It is a short carbine, about 67 cm long: a
-quad-rail handguard with a ribbed cover, an A-frame front sight, a flip-up rear sight, a raked grip moulded in one
-piece with the receiver, an adjustable stock and a curved magazine. [Inspect](Controls) it (**Y**) to see the charging
-handle pulled back, the dust cover open and the hop-up dial turn.
+quad-rail handguard with a ribbed cover, an A-frame front sight, a small ghost-ring rear sight, a raked grip moulded
+in one piece with the receiver, an adjustable stock and a curved magazine. [Inspect](Controls) it (**Y**) to see the
+charging handle pulled back, the dust cover open and the hop-up dial turn.
 
 The AEG Rifle takes the most parts: an optic on its top rail, a grip under it, a barrel, a muzzle part and a different
 magazine. It is in your kit from the start.
@@ -41,10 +41,12 @@ magazine. It is in your kit from the start.
 
 A gas blowback pistol: every shot cycles the slide with a puff of gas from the muzzle and the ejection port. It fires
 **single shots** only. Its slide locks back when you fire the last BB and closes as the new magazine seats near the
-end of the reload, so you always know when it is empty: you hear it lock back on that last shot.
+end of the reload, so you always know when it is empty: you hear it lock back on that last shot. Only the slide moves:
+with it back, the barrel shows in front of it.
 
 Gas drives it, so the gas you load sets its energy: stronger gas pushes harder and kicks harder. It is a compact
-striker pistol: a squared slide with serrations at the back, a railed dust cover, a raked grip with stippled panels
+striker pistol: a squared slide with rounded edges, a chamfered nose and serrations at the front and back, a
+railed dust cover, a raked grip with stippled panels
 and finger grooves, and a thumb rest. Its sights are a white U at the back and a post with a white dot at the front:
 aimed, the post sits in the U. It takes a laser, a silencer and an extended magazine. It is in your kit from
 the start.

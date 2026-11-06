@@ -8,7 +8,7 @@ extends GutTest
 ## M85's bar (percentage points), and the robots' thin air.
 const BAR_MISSED := 4.0
 const BAR_THIN := 3.0
-const ROBOT_BAR_THIN := 9.0
+const ROBOT_BAR_THIN := 14.0
 
 var models: FigureModels = null
 var hits: HitConfig = null

@@ -240,8 +240,8 @@ script = ExtResource("50_in1ip")
 at = PackedFloat32Array(0, 0.22, 0.72, 1)
 turn = PackedVector3Array(0, 0, 0, 0.05, -0.95, 0.1, 0.08, -1, 0.2, 0, 0, 0)
 shift = PackedVector3Array(0, 0, 0, -0.06, 0, -0.04, -0.065, 0.005, -0.04, 0, 0, 0)
-sound_at = PackedFloat32Array(0.15, 0.67)
-sound_cue = Array[StringName]([&"selector", &"dryFire"])
+sound_at = PackedFloat32Array()
+sound_cue = Array[StringName]([])
 
 [sub_resource type="Resource" id="Resource_in1cy"]
 script = ExtResource("50_in1ip")

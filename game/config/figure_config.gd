@@ -188,7 +188,7 @@ extends Resource
 @export var sling_butt: Vector2 = Vector2(0.17, 1.42)
 @export var sling_tilt: float = 0.75
 @export var sling_back_human: float = 0.19
-@export var sling_back_pack: float = 0.27
+@export var sling_back_pack: float = 0.34
 @export var sling_back_robot: float = 0.17
 @export var sling_pack_part: String = "Kit_Pack"
 ## The replica in the hand sits on this bone by the sidecar's replicaOnGrip for its class (rifle, pistol).

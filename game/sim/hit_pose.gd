@@ -140,7 +140,7 @@ static func pose(c: Character, hits: HitConfig, fit: HitFit) -> void:
 		if alive and r != null and r.site_class != &"pistol":
 			var neck := upper[HitFit.NECK]
 			var turn := HitFit.cheek_turn(upper[HitFit.SHOULDER_L] - upper[HitFit.SHOULDER_R], upper[HitFit.HEAD] - neck,
-					hits, 1.0)
+					hits.cheek_bow, hits.cheek_cant, 1.0)
 			upper[HitFit.HEAD] = neck + turn * (upper[HitFit.HEAD] - neck)
 			upper[HitFit.HEAD_TOP] = neck + turn * (upper[HitFit.HEAD_TOP] - neck)
 
