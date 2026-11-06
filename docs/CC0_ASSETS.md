@@ -201,7 +201,8 @@ foundations).
 | Everything external | ≤ 25 MB |
 
 The human figure's 60,000 is shared (BL10 to BL12, 2026-11-05): the body 34,000 / 11,000 / 3,300 triangles (LOD0 /
-1 / 2), the plate carrier 14,000 / 4,500 / 1,500, the pads 3,000 / 1,000 / 300, the largest head 8,000 / 2,600 / 800.
+1 / 2), the plate carrier 14,000 / 4,500 / 1,500, the pads 3,000 / 1,000 / 300, the largest head 9,000 / 3,200 / 900
+(8,000 / 2,600 / 800 until the face, FA1, took the split's unallocated 1,000 / 600 / 100).
 
 These are desktop budgets (owner, 2026-10-18). Every figure on the field (six in a 3v3) shares the model's geometry,
 so the model's triangle count, not the team size, sets the cost, and LODs keep distant figures cheap. Low draws
