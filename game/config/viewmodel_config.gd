@@ -103,21 +103,23 @@ extends Resource
 ## recovery. Each key is a wrist's place in the eyes' frame (m: x right, y up, -z ahead), each pole the way its elbow
 ## bends. The left hand comes up from bomb_left_in to the pin's ring (its wrist bomb_left_ring off it) by bomb_pin_grab,
 ## its fingers curling bomb_pin_curl (rad a joint) round it, then draws the pin out to bomb_left_pulled off the ring
-## by bomb_pull_at and takes it away to bomb_left_away by bomb_pin_out, where it is hidden; its shoulder is drawn at bomb_left_shoulder meanwhile. From bomb_pin_grab the right hand goes out
-## aside to bomb_aside (bomb_aside_at of the way) and up to bomb_cocked by bomb_cock (both at the view's right edge, so
-## the bomb stays in sight), its wrist cocked back bomb_wrist_cocked (rad); then, quickening, over the top to bomb_over
-## (bomb_over_at of the way on) and ahead to bomb_release at the release, the wrist snapping forward to
+## (the pin slipping to hang bomb_pin_hang from the fist) by bomb_pull_at and takes it away to bomb_left_away by
+## bomb_pin_out, where it is hidden; its shoulder is drawn at bomb_left_shoulder meanwhile. From bomb_pin_grab the right
+## hand goes out aside to bomb_aside (bomb_aside_at of the way) and up to bomb_cocked by bomb_cock (both at the view's
+## right edge, so the bomb stays in sight), its wrist cocked back bomb_wrist_cocked (rad); then, quickening, over the
+## top to bomb_over (bomb_over_at of the way on) and ahead to bomb_release at the release, the wrist snapping forward to
 ## bomb_wrist_release; then its fingers open bomb_let_go (rad a joint) off the bomb by bomb_let_go_by and it follows
-## through down across to bomb_follow by bomb_follow_by, out of view. Its shoulder goes back
-## bomb_shoulder_back as it cocks and forward bomb_shoulder_ahead at the release, as the body turns into the throw.
+## through down across to bomb_follow by bomb_follow_by, out of view. Its shoulder goes back bomb_shoulder_back as it
+## cocks and forward bomb_shoulder_ahead at the release, as the body turns into the throw.
 @export var bomb_pin_grab: float = 0.3
 @export var bomb_pin_out: float = 0.6
 @export var bomb_pull_at: float = 0.45
 @export var bomb_pin_curl: float = 1.0
 @export var bomb_left_shoulder: Vector3 = Vector3(-0.15, -0.16, 0.1)
 @export var bomb_left_in: Vector3 = Vector3(-0.04, -0.4, -0.3)
-@export var bomb_left_ring: Vector3 = Vector3(-0.06, -0.03, 0.05)
+@export var bomb_left_ring: Vector3 = Vector3(-0.085, -0.045, 0.07)
 @export var bomb_left_palm: Vector3 = Vector3(0.0, -0.7, -0.7)
+@export var bomb_pin_hang: Vector3 = Vector3(0.015, -0.035, 0.0)
 @export var bomb_left_pulled: Vector3 = Vector3(-0.09, 0.01, 0.0)
 @export var bomb_left_away: Vector3 = Vector3(-0.2, -0.42, -0.12)
 @export var bomb_left_pole: Vector3 = Vector3(-1.0, -1.0, 0.3)

@@ -125,7 +125,9 @@ func test_the_left_hand_pulls_the_pin_out_and_takes_it_out_of_view() -> void:
 	v.update(s, 0.0, DT, c, EYE)
 	hand = v.arms().model_transform() * sk.get_bone_global_pose(sk.find_bone("Hand_L"))
 	assert_gt(v._pin.transform.origin.distance_to(pin_at.origin), 0.05, "pulled out")
-	assert_true((hand.affine_inverse() * v._pin.transform).is_equal_approx(grip), "in the left hand")
+	var held := hand.affine_inverse() * v._pin.transform
+	assert_true(held.basis.is_equal_approx(grip.basis), "in the left hand")
+	assert_lt(held.origin.distance_to(grip.origin), view_cfg.bomb_pin_hang.length() + 0.001, "hanging from it")
 	_throw_at(c, Grenade.Kind.SMOKE, view_cfg.bomb_pin_out + 0.01)
 	v.update(s, 0.0, DT, c, EYE)
 	assert_false(v.arms()._left.visible, "then the left hand is gone")

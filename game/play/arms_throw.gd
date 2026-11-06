@@ -130,12 +130,14 @@ func bomb_moved(skeleton: Skeleton3D) -> Transform3D:
 
 
 ## How the pin has moved from the hold, in the model's frame `share` of the way through: with the bomb until the left
-## hand grips the ring, then with the left hand.
+## hand grips the ring, then with the left hand, slipping down to hang bomb_pin_hang from the fist as it comes out
+## (so the ring shows under the fingers).
 func pin_moved(skeleton: Skeleton3D, share: float) -> Transform3D:
 	if _arms.is_empty() or share < _cfg.bomb_pin_grab:
 		return bomb_moved(skeleton)
-	return skeleton.get_bone_global_pose(_arms[5]) * _left_grab.affine_inverse() * _right_grab \
-			* _right_hold.affine_inverse()
+	var hang := _cfg.bomb_pin_hang * smoothstep(_cfg.bomb_pin_grab, maxf(_cfg.bomb_pull_at, _cfg.bomb_pin_grab), share)
+	return Transform3D(Basis.IDENTITY, hang) * skeleton.get_bone_global_pose(_arms[5]) * _left_grab.affine_inverse() \
+			* _right_grab * _right_hold.affine_inverse()
 
 
 ## Whether the left arm shows `share` of the way through: from the windup's start until the pin is away.
