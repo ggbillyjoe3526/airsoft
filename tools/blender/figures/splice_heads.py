@@ -23,6 +23,7 @@ HEAD_JOINT = "Head"
 GEAR = "Headwear"
 TEAM = "TeamHeadwear"
 LENS = "Lens"
+FACE = "Face"  # the eye opening's skin, lids and eyes (face.py): the same atlas, its UVs offset per figure in game
 TEAM_SOURCE = "TeamColour"  # the figure's team material: TeamHeadwear starts from its colour
 IMAGE_STEM = "headwear"
 FLOAT, USHORT, UINT, UBYTE = 5126, 5123, 5125, 5121
@@ -178,7 +179,7 @@ def splice(human_path: str, heads_path: str, images: dict, out_path: str) -> Non
     for m in j["materials"]:
         if m.get("name") == TEAM_SOURCE:
             team_colour = m.get("pbrMetallicRoughness", {}).get("baseColorFactor", team_colour)
-    for name, colour in ((GEAR, None), (TEAM, team_colour)):
+    for name, colour in ((GEAR, None), (TEAM, team_colour), (FACE, None)):
         m = j["materials"][_material(j, name)]
         m.clear()
         m.update({"name": name, "doubleSided": True, "normalTexture": {"index": tex["nrm"]},
