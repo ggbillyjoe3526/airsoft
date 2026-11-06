@@ -9,6 +9,7 @@ import os
 
 import numpy as np
 
+import face
 from headkit import Atlas, dashes, lines, soft_box, soft_disc, soft_round_box
 
 KNIT_Z0 = 1.43
@@ -34,7 +35,6 @@ LOOP_DARK = 0x2a2c2d
 LOOP_COYOTE = 0x5b4e3a
 TEAM_LIGHT = 0xe4e4e4
 KNIT = 0x27292b
-SKIN = 0xb58166
 BOONIE = 0x58614c
 CAP = 0x6c5842
 STEEL = 0x5b5f47
@@ -47,6 +47,7 @@ def paint() -> Atlas:
     for name, (colour, rough) in SWATCHES.items():
         a.swatch(name, colour, rough)
     _knit(a.tile("knit", 512, 0, 1024, 384))
+    face.paint(a)  # four 256 x 128 cells over the swatch area's top half
     _loop(a.tile("loop_cap", 512, 384, 512, 128), 0x5a4936, 0x4a3b2b)
     _mesh(a.tile("mesh", 1536, 0, 512, 512))
     _shemagh(a.tile("shemagh", 0, 512, 1024, 512))
@@ -84,29 +85,14 @@ def save(atlas: Atlas, stem: str) -> dict:
 # --------------------------------------------------------------------------------------------------- the tiles
 
 def _knit(t) -> None:
-    """The balaclava: fine ribs round the head, the eye opening with a rolled hem, skin and eyes inside."""
+    """The balaclava: fine ribs round the head (the eye opening is cut in the mesh; face.py fills it)."""
     t.fill(KNIT, 0.95)
-    x = t.s * 0.565  # metres round the head at the face
+    x = t.s * face.KNIT_ROUND  # metres round the head at the face
     y = t.t * KNIT_SPAN
     rib = lines(x, 0.0032, 0.0012, 0.0004)
     t.paint(np.ones_like(rib), height=0.0)
     t.paint(rib, add_height=1.2)
     t.shade(1.0 - 0.10 * rib)
-    eye_y = (1.615 - KNIT_Z0)
-    cx = 0.5 * 0.565
-    opening = soft_round_box(x, y, cx, eye_y + 0.002, 0.062, 0.0125, 0.010, 0.0008)
-    hem = soft_round_box(x, y, cx, eye_y + 0.002, 0.067, 0.0175, 0.013, 0.0008) - opening
-    t.paint(hem, add_height=2.5)
-    t.shade(1.0 + 0.12 * hem)
-    t.paint(opening, SKIN, 0.6, height=-1.0)
-    for side in (-1.0, 1.0):
-        ex = cx + side * 0.033
-        white = soft_round_box(x, y, ex, eye_y, 0.013, 0.0045, 0.0045, 0.0006)
-        t.paint(white, 0xd9d3c9, 0.35)
-        t.paint(soft_disc(x, y, ex, eye_y, 0.0046, 0.0005) * white, 0x43301f, 0.3)
-        t.paint(soft_disc(x, y, ex, eye_y, 0.0021, 0.0004) * white, 0x111111, 0.2)
-        lid = soft_round_box(x, y, ex, eye_y + 0.0062, 0.016, 0.002, 0.002, 0.0012)
-        t.paint(lid * (1 - white), 0x8f6048, 0.6)
 
 
 def _mesh(t) -> None:

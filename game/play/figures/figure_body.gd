@@ -85,7 +85,7 @@ func setup(models: FigureModels, kind: int, figure_id: int, team: int, colour: C
 			continue
 		var level := _level(part)
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		_paint(mi, models, kind, team, colour, glow)
+		_paint(mi, models, kind, team, colour, glow, _config.face_look(figure_id))
 		meshes.append(mi)
 		levels.append(level)
 		if level == _config.shadow_level:
@@ -287,12 +287,21 @@ func _head_for(parts: PackedStringArray, figure_id: int) -> StringName:
 	return StringName(_config.heads[absi(figure_id) % _config.heads.size()])
 
 
-## Team* surfaces (any case) get the team's shared paint; the rest stay as modelled.
-func _paint(mi: MeshInstance3D, models: FigureModels, kind: int, team: int, colour: Color, glow: float) -> void:
+## Team* surfaces (any case) get the team's shared paint, Face* surfaces the figure's face `look`; the rest stay as
+## modelled.
+func _paint(mi: MeshInstance3D, models: FigureModels, kind: int, team: int, colour: Color, glow: float,
+		look: int) -> void:
 	for s in mi.mesh.get_surface_count():
 		var source := mi.mesh.surface_get_material(s)
-		if source != null and source.resource_name.to_lower().begins_with(_config.team_material_prefix):
+		if source == null:
+			continue
+		var material_name := source.resource_name.to_lower()
+		if material_name.begins_with(_config.team_material_prefix):
 			mi.set_surface_override_material(s, models.team_material(kind, source, team, colour, glow))
+		elif material_name.begins_with(_config.face_material_prefix):
+			var face := models.face_material(kind, source, look)
+			if face != source:
+				mi.set_surface_override_material(s, face)
 
 
 ## `part`'s level of detail from its name (Body 0, Body_LOD1 1, Body_LOD2 2).
