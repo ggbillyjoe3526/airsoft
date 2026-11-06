@@ -175,15 +175,16 @@ DOWN = {"kind": "down", "at": (0.0, 0.06, -0.40),
 # the back strap under the beavertail, the fingers close up under the trigger guard (swung `swing` toward the index)
 # with the little finger on the grip too, and the thumb comes round the back strap's corner and lies forward along
 # the frame's left side just under the slide (its tip toward `thumb_at`, drawn there hard, `thumb_pull`: the owner,
-# 2026-11-06, "the thumb is sitting too low"), held lightly to the frame (`thumb_hug`). The marks sit high, the web
-# 3 cm under the slide (the owner's Glock photos: the web up at the beavertail), so the thumb lies high too; its
-# knuckle and tip close onto the frame at most `thumb_curl` degrees. The arm reaches out to it, as a pistol is held,
-# a little bent (the owner, 2026-11-06: not straight; the critic: not as far as 86 % of its reach either, about 94 %,
-# the elbow some 40 degrees): its shoulder raised and drawn back `shoulder` (eye space), its elbow free to come up to
-# the shoulder's height (`drop`).
-PISTOL_RIGHT = dict(RIGHT, web=(0.012, -0.097, -0.030), index=(0.018, -0.042, -0.030), pinky=(0.018, -0.060, -0.086),
-                    thumb_at=(-0.022, -0.030, -0.008), thumb_hug=2.0, thumb_pull=30.0, thumb_curl=(40.0, 60.0),
-                    shoulder=(0.0, -0.13, 0.10), drop=0.0, swing=(-15.0, -15.0, -15.0))
+# 2026-11-06, "the thumb is sitting too low"), held lightly to the frame (`thumb_hug`). The web sits high, 3 cm
+# under the slide (the owner's Glock photos: the web up at the beavertail), so the thumb lies high too, while the
+# finger marks stay a little lower so the middle finger still wraps the front strap under the trigger guard (all
+# three as high made it lie straight out under the guard); the thumb's knuckle and tip close onto the frame at most
+# `thumb_curl` degrees. The arm reaches out to it, as a pistol is held, a little bent (the owner, 2026-11-06: not
+# straight; the critic: 96 % of its reach, the elbow under 30 degrees): its shoulder raised and drawn back
+# `shoulder` (eye space), its elbow free to come up to the shoulder's height (`drop`).
+PISTOL_RIGHT = dict(RIGHT, web=(0.012, -0.097, -0.032), index=(0.018, -0.042, -0.037), pinky=(0.018, -0.058, -0.095),
+                    thumb_at=(-0.022, -0.032, -0.010), thumb_hug=2.0, thumb_pull=30.0, thumb_curl=(40.0, 60.0),
+                    shoulder=(0.0, -0.14, 0.105), drop=0.0, swing=(-15.0, -15.0, -15.0))
 # The Cyber Pistol, resized to the GBB's proportions (CZ1): its own marks, as low as the GBB's were before they rose
 # (its frame stands up beside the slide, so a thumb as high as the GBB's would pass into it): the web on its more
 # upright back strap, the index knuckle 2 mm back for its trigger (5 mm further from the back strap than the GBB's)
@@ -526,7 +527,8 @@ def cup(rig: Rig, hand: pose.Hand, j: dict, to_eye: Matrix, spec: dict, col: Col
                     p = to_eye.inverted() @ (m @ (rest_inv @ q))
                     gaps.append(math.hypot(p.x - axis[0], p.z - axis[1]) - GUARD_RADIUS)
                 loose = sum(max(0.0, g - CUP_GAP[1], CUP_GAP[0] - g) for g in gaps)
-                score = bend + abs(rise - spec["rise"]) * RISE_COST + loose * LOOSE_COST + clear * 1000.0 * CLEAR_COST + \
+                score = bend + abs(rise - spec["rise"]) * RISE_COST + loose * LOOSE_COST + \
+                    clear * 1000.0 * CLEAR_COST + \
                     (abs(plan - spec["plan"]) * PLAN_COST if spec.get("plan", 0.0) > 0.0 else 0.0)
                 found.append((score, yaw, pitch, roll, m, palm, bend, rise, gaps))
     # The few best then try their fingers: each should curl round the handguard and come to rest on it, neither

@@ -303,7 +303,8 @@ class Hand:
         """Swings the thumb at its base (across the palm, round its own line and in its bend) to the clear place
         nearest the rifle (and, given a `target`, with its tip nearest that; with `hug`, its whole length kept close
         to the rifle too; `swing` and `twists` bound its turns at the base, degrees; `bends`, the knuckle bends tried
-        with each, so it can turn round a grip's corner; `pull`, how much its tip's distance from `target` counts), then curls its tip bones onto it from there."""
+        with each, so it can turn round a grip's corner; `pull`, how much its tip's distance from `target` counts), then
+        curls its tip bones onto it from there."""
         b1, b2, b3 = ("Thumb%d_%s" % (k, self.side) for k in (1, 2, 3))
         inv = self.rig.rest[b1].to_3x3().inverted()
         across = inv @ self.palmar
