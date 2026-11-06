@@ -442,7 +442,7 @@ def build_red_dot() -> bpy.types.Object:
 # eyepiece), the hinged mount under it (mm).
 # The axis stands 20 mm lower than the first build's (the owner, 2026-11-05: "less tall", then "as much as possible"
 # with nothing in the way of the glass): the belly 5.6 mm over the rail, resting on its clamp on a thin saddle, as low
-# as the mount goes. Both rifles' iron sights come off under any optic (SightFold), so only the replica's own body
+# as the mount goes. Both rifles' iron sights come off under any optic (IronSights), so only the replica's own body
 # could come between the eye and the glass: with the AEG's smaller irons (GS2) nothing does down to a 16 mm axis.
 S2_AXIS = 26.0
 S2_R = 20.4

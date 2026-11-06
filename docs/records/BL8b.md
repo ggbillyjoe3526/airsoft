@@ -60,9 +60,9 @@ reasonable") applied to the BL8 attachments (10,000 triangles each), and his thr
 
 ## Decisions
 
-- **The 2x's axis is 26 mm, as low as the glass stays clear:** the owner picked 36 on a decision card, then asked for
-  as low as possible with nothing in the way of the view. Both rifles' sights fold and hide under any optic
-  (SightFold), so they never stand in front of it in play or in the menu pictures. At first the AEG's receiver set
+- **The 2x's axis is 26 mm, as low as its mount goes:** the owner picked 36 on a decision card, then asked for
+  as low as possible with nothing in the way of the view. Both rifles' sights come off completely under any optic
+  (IronSights), so they never stand in front of it in play or in the menu pictures. At first the AEG's receiver set
   the floor (its rear sight's base, 15 mm over the rail, cut the glass's lower edge below 25 mm); since GS2's smaller
   irons come off completely, rays from the aimed eye reach the whole glass down to a 16 mm axis on both rifles, so
   the floor is now the mount: at 26 the belly rests 0.6 mm over the clamp's top.
@@ -89,6 +89,6 @@ reasonable") applied to the BL8 attachments (10,000 triangles each), and his thr
 
 - The AEG's parts file is 2.83 MB with the magazines (MAG1), barrels (BA1) and figures' part copies (TP1), 90% of
   its new 3 MiB cap; a quantised export (positions and normals) would roughly halve every parts file if size ever matters.
-- Every optic (the 2x now too) overlaps a rear sight leaf where it would stand; the leaves hide under any optic
-  (SightFold), as before.
+- Every optic (the 2x now too) overlaps a rear sight leaf where it would stand; the sights come off under any optic
+  (IronSights), as before.
 - The Cyber's torch spends its missing jaws' triangles on a ridged grip round the bezel (9,290).

@@ -217,7 +217,7 @@ func test_the_laser_sits_flush_in_its_housing_with_nothing_standing_out_in_front
 
 func test_the_2x_scope_stands_low() -> void:
 	# The owner (2026-11-05): less tall, then "as much as possible": the axis 26 mm over the rail (the first build's was
-	# 46), its belly resting on its clamp. The rifles' iron sights come off under any optic (SightFold), so nothing
+	# 46), its belly resting on its clamp. The rifles' iron sights come off under any optic (IronSights), so nothing
 	# meets the lowered belly or stands between the eye and the glass.
 	var m := _part(_load("aeg"), "optic_scope2x")
 	var top := -INF
