@@ -30,6 +30,7 @@ sys.path.insert(0, os.path.join(HERE, "..", "replicas"))
 import bpy  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
+import cycle  # noqa: E402
 import fabric  # noqa: E402
 import glove  # noqa: E402
 import hardsurface as hs  # noqa: E402
@@ -195,17 +196,24 @@ DOWN = {"kind": "down", "at": (0.0, 0.06, -0.40),
 # sits nearer the middle and higher at the hip (ViewModelConfig.hip, matched in HOLDS), the forearm rising about 13
 # degrees to it (wrist about 16 degrees), so at the hip the wrist meets the screen's bottom edge and aimed the forearm
 # drops out of view under the hand; its shoulder moved `shoulder` (eye space), its elbow at least `drop` below it.
-PISTOL_RIGHT = dict(RIGHT, web=(0.014, -0.100, -0.048), index=(0.018, -0.042, -0.040), pinky=(0.018, -0.058, -0.098),
+# The hand sits 3 mm lower than the owner approved at 09:41 (his note, 15:39: the trigger finger "looks broken" from
+# behind, bowed up at its knuckle): from there the finger lies nearly straight to the trigger, its base never bent back
+# (`index_from`), its tip short of the trigger guard's far side (`index_left`), its bends limited (`index_bends`).
+PISTOL_RIGHT = dict(RIGHT, web=(0.014, -0.100, -0.051), index=(0.018, -0.042, -0.043), pinky=(0.018, -0.058, -0.101),
                     thumb_at=(-0.024, -0.035, -0.032), thumb_hug=2.0, thumb_pull=80.0, thumb_curl=(40.0, 60.0),
                     thumb_verify=1.0,
-                    shoulder=(-0.07, -0.15, 0.085), drop=0.04, swing=(-15.0, -15.0, -15.0))
+                    shoulder=(-0.07, -0.15, 0.085), drop=0.04, swing=(-15.0, -15.0, -15.0),
+                    rolls=(-6.0, -6.0), thumb_turn=(-20.0, 40.0, -100.0, 0.0), index_left=0.005,
+                    index_bends=(70.0, 75.0, 35.0), index_from=0.0)
 # The Cyber Pistol, resized to the GBB's proportions (CZ1; the owner, 2026-11-06: "Cyber pistol looks good"): its own
 # marks, the web right of the back strap's centre line and the thumb aimed along the frame's side under its raised edge
 # beside the slide, which a thumb as high and far forward as the GBB's would pass into; the index knuckle 2 mm back
 # for its trigger (5 mm further from the back strap than the GBB's).
 CYBER_RIGHT = dict(PISTOL_RIGHT, web=(0.012, -0.097, -0.047), index=(0.018, -0.044, -0.040),
+                   pinky=(0.018, -0.058, -0.098),
                    thumb_at=(-0.020, -0.054, -0.040), thumb_hug=2.0, thumb_pull=30.0, thumb_curl=(40.0, 60.0),
-                   thumb_verify=0.0)
+                   thumb_verify=0.0, rolls=(0.0, 0.0), thumb_turn=(25.0, -75.0, 40.0, 60.0), index_left=None,
+                   index_bends=None, index_from=None)
 # The AEG Rifle's grip: the same three marks, the hand high on the short grip with the little finger wholly on it, its
 # knuckle above the grip's flared foot (the owner, 2026-11-05; the critic: half of it hung below), the knuckles' line
 # raked back with the grip, the web closer in over the back strap so the thumb reaches round onto the grip's left
@@ -214,7 +222,12 @@ CYBER_RIGHT = dict(PISTOL_RIGHT, web=(0.012, -0.097, -0.047), index=(0.018, -0.0
 # little down to keep the wrist straighter (about 22 degrees).
 AEG_RIGHT = dict(RIGHT, web=(0.042, -0.103, -0.056), index=(0.030, -0.031, -0.036), pinky=(0.024, -0.068, -0.078),
                  pinky_cost=2000.0, swing=(-10.0, -10.0, -10.0), shoulder=(-0.04, -0.08, -0.02),
-                 thumb_at=(-0.022, -0.050, -0.026), thumb_hug=2.0, thumb_pull=30.0)
+                 thumb_at=(-0.022, -0.050, -0.026), thumb_hug=2.0, thumb_pull=30.0, rolls=(0.0, 0.0),
+                 thumb_turn=(-60.0, 60.0, -80.0, 20.0), index_turn=(-18.0, -13.0, 33.0, 60.0))
+# The pistols' and the AEG's right hands are held as the owner approved them (2026-11-06 04:28: the AEG "about as good
+# as it's going to get", the Cyber "good"; 09:41 the GBB): their roll on the grip (`rolls`) and their thumb's turn
+# (`thumb_turn`) are fixed where the solve found them then, as `Collider.inside` now reads the replica's corners truly; the
+# AEG's trigger finger too (`index_turn`: its swing and three bends).
 # The Sniper Rifle (a chassis rifle): the right hand round its stock's wrist, raked about 54 degrees, the marks set by
 # its front strap (the index knuckle at its top, level with the trigger guard's back, the little finger's knuckle
 # 5.5 cm down and back along it, the thumb's root behind and right as on the AEG's grip) and the thumb over the
@@ -222,6 +235,7 @@ AEG_RIGHT = dict(RIGHT, web=(0.042, -0.103, -0.056), index=(0.030, -0.031, -0.03
 # raked wrist otherwise bends the hand's wrist past 30 degrees).
 SNIPER_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.100, -0.035), index=(0.030, -0.030, -0.016),
                     pinky=(0.024, -0.085, -0.058), thumb_at=(-0.028, -0.060, 0.0), shoulder=(-0.04, -0.08, 0.03),
+                    rolls=(-180.0, 174.0), thumb_turn=None, index_turn=None,
                     press=("Ring", "Pinky"))
 # Its left hand as the AEG's, under the fore-end (narrower and lower than the AEG's handguard: `axis`, `radius`,
 # its top at 0.056) near its back, as far forward as the arm reaches, its turn searched (the fore-end is lower); the
@@ -243,7 +257,8 @@ SNIPER_GUARD = dict(GUARD, y=0.260, axis=(0.0, 0.030), radius=0.025, tips_below=
 HELD_AT = godot_to_eye(0.12, -0.12, -0.32)
 HELD_TIP = (Matrix.Rotation(-0.45, 3, Vector((0.0, 1.0, 0.0))) @ Matrix.Rotation(0.35, 3, Vector((1.0, 0.0, 0.0))))
 BOMB_FINGERS = {"Index": (60, 60, 45), "Middle": (60, 60, 45), "Ring": (60, 60, 45), "Pinky": (55, 55, 40)}
-SMOKE_RIGHT = dict(PISTOL_RIGHT, web=(0.016, -0.042, 0.010), index=(0.030, 0.016, 0.022),
+SMOKE_RIGHT = dict(PISTOL_RIGHT, rolls=None, thumb_turn=None, index_left=None, index_bends=None, index_from=None,
+                   web=(0.016, -0.042, 0.010), index=(0.030, 0.016, 0.022),
                    pinky=(0.028, 0.012, -0.036), thumb_at=(-0.014, -0.030, 0.024), thumb_verify=0.0,
                    fingers=BOMB_FINGERS, swing=(0.0, 0.0, 0.0), shoulder=(-0.02, -0.06, 0.10), drop=0.03)
 FLASH_RIGHT = dict(SMOKE_RIGHT, web=(0.012, -0.033, 0.004), index=(0.023, 0.012, 0.016),
@@ -300,10 +315,7 @@ def tuned(spec: dict) -> dict:
 def replica_objects(hold: Hold) -> list:
     """The replica's meshes, its origin moved to the hold's place."""
     before = set(bpy.data.objects)
-    # BL_FIT_<FILE STEM>=<glb>: fit the hold to another copy of the replica's model (the AEG's approved hold was
-    # solved on its model before GS2: docs/KNOWN_ISSUES.md).
-    fit = os.environ.get("BL_FIT_" + os.path.splitext(os.path.basename(hold.file))[0].upper())
-    bpy.ops.import_scene.gltf(filepath=fit or os.path.join(REPLICAS, hold.file))
+    bpy.ops.import_scene.gltf(filepath=os.path.join(REPLICAS, hold.file))
     new = [o for o in bpy.data.objects if o not in before]
     # The importer leaves the replica's first clip (Fire) playing, its slide part way back: the hold is fitted to
     # the replica at rest, so no clip may pose it.
@@ -413,7 +425,7 @@ def pose_fingers(hand: pose.Hand, spec: dict, col: Collider, thumb_to: Vector = 
         curls["Thumb"] = hand.thumb(col, (0.5, 1.0, 0.8), (0.0, math.radians(knuckle), math.radians(tip)), thumb_to,
                                     hug, *turns,
                                     THUMB_BENDS if wide else (0,), spec.get("thumb_pull", 3.0),
-                                    verify if spec.get("thumb_verify", 0.0) > 0.0 else None)
+                                    verify if spec.get("thumb_verify", 0.0) > 0.0 else None, spec.get("thumb_turn"))
     else:
         base, bends = spec["thumb"]
         curls["Thumb"] = hand.thumb_at(base, bends, col)
@@ -437,7 +449,7 @@ def web_pose(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, r: dict, col: Colli
         base = pose.fit_turn([w_rest, i_rest, p_rest], [w_at, i_at, p_at])
     axis = (base @ (w_rest - i_rest)).normalized()
     best = None
-    lo, hi = r.get("rolls", (-180, 174))
+    lo, hi = r.get("rolls") or (-180, 174)
     for k in range(int(lo), int(hi) + 1, ROLL_STEP):
         rot = Matrix.Rotation(math.radians(k), 3, axis) @ base
         palm = rot @ hand.palmar
@@ -506,7 +518,14 @@ def right_hand(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider, ob
     # The index finger's pad rests on the trigger: the trigger itself is left out of what it must clear.
     frame = Collider([o for o in objects if o.type == "MESH" and not o.name.startswith(("Figure", "Icosphere",
                                                                                           "Trigger"))])
-    curls["Index"] = hand.onto("Index", trigger_face(objects), frame, (70, 90, 70), 40)
+    # The trigger finger's tip kept `index_left` (m) short of the trigger's far side, when the hold asks.
+    face = trigger_face(objects)
+    hand.index_left = face.x - r["index_left"] if r.get("index_left") is not None else None
+    # How far each of its joints may bend (degrees, base to tip): a pistol's trigger finger lies nearly straight, its
+    # last pad on the trigger (the owner, 2026-11-06), never hooked round it.
+    hand.index_bends = tuple(int(v) for v in r.get("index_bends") or (70, 90, 70))
+    hand.index_from = int(r.get("index_from") or -10)
+    curls["Index"] = hand.onto("Index", face, frame, hand.index_bends, 40, pin=r.get("index_turn"))
     return pole_r, curls
 
 
@@ -517,7 +536,7 @@ def trigger_again(rig: Rig, hand: pose.Hand, objects: list, arms: list, frame: l
     before = {b: rig.local[b].copy() for b in bones}
     col = Collider([o for o in objects if o.type == "MESH" and not o.name.startswith(("Figure", "Icosphere",
                                                                                         "Trigger"))])
-    hand.onto("Index", trigger_face(objects), col, (70, 90, 70), 40)
+    hand.onto("Index", trigger_face(objects), col, hand.index_bends, 40)
     rig.write()
     if pose.clipping(arms, frame)[0]:
         for b in bones:
@@ -717,6 +736,7 @@ def build() -> None:
     hands = {s: pose.Hand(s, rig, mesh, fr, j) for s in ("L", "R")}
     only = os.environ.get("BL_ONLY")
     failed = []
+    clips = {"%s_Hold" % r for r in HOLDS}
     for rid, hold in HOLDS.items():
         if only and rid not in only.split(","):
             continue
@@ -725,6 +745,13 @@ def build() -> None:
         for side in ("R", "L"):
             print("  %s wrist bend %.1f deg" % (side, pose.wrist_bend(rig, side)))
         pose.key_pose(rig, "%s_Hold" % rid)
+        if cycle.has_bolt(objects):
+            # A bolt-action replica: the right hand leaves the grip after the shot and works the bolt.
+            bolt_hits = cycle.work_bolt(rig, hands["R"], objects, solid, [left, right], "%s_%s" % (rid, cycle.CLIP),
+                                        elbow_for)
+            if bolt_hits:
+                failed.append("%s working the bolt (%d keys)" % (rid, bolt_hits))
+            clips.add("%s_%s" % (rid, cycle.CLIP))
         hs.empty("Hold_%s" % rid, tuple(hold.at), arm)
         if hits:
             failed.append("%s (%d face pairs)" % (rid, hits))
@@ -736,7 +763,6 @@ def build() -> None:
     for pb in arm.pose.bones:
         pb.matrix_basis = Matrix.Identity(4)
     print("  arms: %d triangles" % (hs.tris(left) + hs.tris(right)))
-    clips = {"%s_Hold" % r for r in HOLDS}
     for a in list(bpy.data.actions):
         if a.name not in clips:
             bpy.data.actions.remove(a)
