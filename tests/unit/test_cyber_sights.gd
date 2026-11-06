@@ -5,7 +5,7 @@ extends GutTest
 
 const MODEL := "res://assets/models/replicas/cyber.glb"
 ## How far the replica sits ahead of the eye aimed (ViewModelConfig.aim_forward's cyber entry).
-const EYE_BACK := 0.36
+const EYE_BACK := 0.25
 ## Points on the post this far under its top must be seen: just under the top, and through its dot (the dot's centre
 ## 1 mm under the top as fitted).
 const POST_DROP := 0.0005

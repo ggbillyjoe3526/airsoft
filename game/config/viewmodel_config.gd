@@ -3,16 +3,19 @@ extends Resource
 ## The replica in your hands (the browser game's config/renderView.ts VIEWMODEL, tuned by play there). Metres in the
 ## camera's space (x right, y up, -z forward), seconds, radians. Read by ReplicaView.
 
-## Where each replica's origin (above the trigger) sits at the hip, by replica id; others use `hip_default`.
+## Where each replica's origin (above the trigger) sits at the hip, by replica id; others use `hip_default`. The
+## pistols sit nearer the middle and higher, their hand and wrist in view but not the forearm (owner, 2026-11-06); the
+## arms model (tools/blender/arms/arms.py HOLDS) is built for these places.
 @export var hip: Dictionary[StringName, Vector3] = {
 	&"aeg": Vector3(0.12, -0.19, -0.26),
-	&"pistol": Vector3(0.12, -0.15, -0.34),
-	&"cyber": Vector3(0.12, -0.15, -0.34),
+	&"pistol": Vector3(0.05, -0.07, -0.34),
+	&"cyber": Vector3(0.05, -0.07, -0.34),
 	&"sniper": Vector3(0.12, -0.19, -0.26),
 }
 @export var hip_default: Vector3 = Vector3(0.13, -0.16, -0.32)
-## Aimed, the sight line (rear to front sight) runs through the eye; the replica sits this far forward of it.
-@export var aim_forward: Dictionary[StringName, float] = {&"aeg": -0.2, &"pistol": -0.36, &"cyber": -0.36,
+## Aimed, the sight line (rear to front sight) runs through the eye; the replica sits this far forward of it (the
+## pistols near enough that the forearm drops out of view under the hand).
+@export var aim_forward: Dictionary[StringName, float] = {&"aeg": -0.2, &"pistol": -0.25, &"cyber": -0.25,
 		&"sniper": -0.2}
 @export var aim_forward_default: float = -0.25
 ## Looking through an optic, by its part Key (ReplicaView, OpticGlass): its glass's centre (z in the part's own space,

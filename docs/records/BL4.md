@@ -29,7 +29,7 @@
   dark olive glove (skin + 1.1 mm) with a moulded knuckle guard, finger pads, a palm patch, cuff and
   strap, and a sleeve rolled over the cuff; mirrored for the right arm; the figures' bone names; 38,900 triangles, four
   materials. Each replica gets a clip `<id>_Hold` and an empty `Hold_<id>` at its origin.
-- **The holds** (attempt 18), solved against each replica's model at rest (`pose.py`), none passing into it (the build
+- **The holds** (attempt 19), solved against each replica's model at rest (`pose.py`), none passing into it (the build
   refuses to write otherwise; gaps are the glove's skin to the replica, mm, first / middle / last section, from the
   build log with `BL_DEBUG`):
   - AEG Rifle: right hand high on the grip, the little finger wholly on it above the foot, the thumb over the top of
@@ -41,17 +41,18 @@
     forearm 41° off the bore seen from above and rising 38° (its sleeve kept 45 mm off the replica), wrist 25.6°; the
     fingers up the right side; gaps index 7.4 / 9.9 / 1.2, middle 6.6 / 12.9 / 0.9, ring 9.5 / 14.9 / 0.4, little
     8.5 / 0.5 / 3.5, thumb 5.2 / 0.7 / 2.2.
-  - GBB Pistol: a thumbs-forward grip (the owner, 2026-11-06 07:10: "move the thumb as needed"): the web on the
-    back strap's centre line, so the thumb's root sits at the frame's left rear corner and the thumb lies forward
-    along the frame's left side under the slide (tip 33 mm under the slide, 42 mm ahead of the back strap's top),
-    each pose checked on the skinned glove; the fingers round the front strap; the arm a little bent (reach 0.464 of
-    0.483); trigger pad 0.3 mm off; gaps index 16.0 / 15.4 / 2.0, middle 12.0 / 2.3 / 0.4, ring 17.8 / 4.2 / 0.2,
-    little 20.5 / 12.1 / 0.3, thumb 6.4 / 0.7 / 2.2; wrist 25.4°. Its left arm hangs out of view (wrist 36.1°, never
-    drawn).
+  - GBB Pistol: the Cyber's hold at its own marks (the owner, 2026-11-06 09:01: back to the attempt 18 pictures'
+    grip, "6-gbb-thumb"): the web 3 mm further back and 1 mm lower than the Cyber's, behind the back strap's right
+    corner; the thumb forward along the frame's left side at the grip's top swell, touching all along (tip 33 mm
+    under the slide), each pose checked on the skinned glove; the fingers round the front strap; trigger pad 2.0 mm
+    off; gaps index 4.3 / 1.8 / 0.9, middle 0.5 / 0.3 / 2.9, ring 3.4 / 0.5 / 3.4, little 3.6 / 2.1 / 0.4, thumb
+    3.7 / 0.7 / 0.7. The arm comes up to it from below, rising 13° (reach 0.469 of 0.483), wrist 16.3°. Its left arm
+    hangs out of view (wrist 36.1°, never drawn).
   - Cyber Pistol: resized to the GBB's proportions (CZ1, PR #225); the web 2 mm further back and lower on its more
     upright back strap, the index knuckle 2 mm back (its trigger is 5 mm further from the back strap); the thumb
     forward along the frame under its raised edge; trigger pad 1.3 mm off; gaps index 11.2 / 6.3 / 1.6, middle 0.6 /
-    3.0 / 0.6, ring 3.5 / 4.1 / 0.9, little 5.2 / 1.0 / 0.2, thumb 13.6 / 4.8 / -; wrist 9.2°; reach 0.468.
+    3.0 / 0.6, ring 3.5 / 4.1 / 0.9, little 5.2 / 1.0 / 0.2, thumb 13.6 / 4.8 / -; the arm as the GBB's (rising 15°, reach
+    0.465), wrist 19.0°.
   - Sniper Rifle (new): the right hand round the stock's wrist, raked 54°, its marks set by the front strap and the
     thumb over the wrist's top onto its left side; the ring and little fingers closed at their outer joints onto the
     grip (`press`; the owner, 2026-11-06); index on the trigger (pad 0.2 mm off), wrist 23.8°; gaps index 10.4 / 7.5 /
@@ -121,6 +122,14 @@
 - **Attempt 10** (the critic's attempt 9 list): the thumb's glove fullness 0.8 mm (at 1.5 the thumb found no room on
   the panel and hooked out to the left, its pad facing the eye); round finger pads (half to 86 % of the first bone,
   28° round it); the knuckle shell's lobes 1.5 mm and its sides cast straighter (a crease at its index corner).
+- **Attempt 19** (the owner, 2026-11-06 09:01 to 09:08: the thumbs-forward GBB grip worse, back to attempt 18's;
+  the arm took too much of the screen and was still straight; "only the hands and part of the wrist should be
+  visible, not the forearm", with Valorant's pistols as the look): the GBB grip back to attempt 18's. Both pistols
+  sit higher and nearer the middle at the hip (`ViewModelConfig.hip` (0.05, -0.07, -0.34), was (0.12, -0.15, -0.34);
+  the arms' HOLDS match), so the hand shows with the wrist at the screen's bottom edge, and aimed 0.25 m ahead of
+  the eye (was 0.36), near enough that the forearm drops out of view under the hand. The arm comes up to the grip
+  from below: its shoulder moved in and down (`shoulder`, `drop`), the forearm rising 13° (GBB) and 15° (Cyber), the
+  wrist 16.3° and 19.0° (was 6.9° and 9.2°). The sight tests look from the new distance.
 - **Attempt 18** (the owner, 2026-11-06 04:24 to 05:15: the sniper's hold shots, the GBB thumb more forward onto
   the bump behind the trigger guard, the sniper's ring and little fingers and both rifles' support thumbs pressing on
   the rifle): the Sniper Rifle's hold (above); `Hand.press` closes a settled finger's outer joints onto the replica;
@@ -128,10 +137,8 @@
   `Hand.thumb` can check its poses on the skinned glove (`thumb_verify`, the GBB's): the bones' sampled surface had
   passed forward GBB thumbs whose glove cut into the frame's top rear corner, which the relax pass then bent up past
   the slide or out to the left, seen from the eye. With the check, no thumb from the web behind the back strap
-  reaches further forward than the grip's top swell. So the GBB's web moves onto the back strap's centre line
-  (the owner, 07:10: "move the thumb as needed"), its thumb's root at the frame's left rear corner, and the thumb
-  lies forward along the frame, about 1.5 cm short of the catch (further, its glove cuts into the frame); its
-  fingers' first sections stand 12 to 21 mm off the grip's right side.
+  reaches further forward than the grip's top swell, so the GBB's thumb lies along the frame there, 5 mm higher
+  than the Cyber's and touching all along.
 - **Attempt 17** (the owner, 2026-11-06 03:58, on attempts 15 and 16: the Cyber good, the GBB thumb wrong, the
   support thumb to rest on the rifle): the GBB takes the Cyber's hold at its own marks (the raised GBB hand of
   attempts 14 to 16 is undone; the two grips now look alike from the eye), both arms at 97 % of their reach; the
@@ -181,7 +188,8 @@
   first-person arms).
 - Gloves `0x4c4638`, armour `0x242422`: the figures' gloves (BL10), from the owner's glove photos (dark olive,
   black moulded knuckles); the first build's coyote read as bare skin.
-- The pistols' hip pose is unchanged: at the hip their grip and hand sit below the screen; the hand shows aimed.
+- The pistols at the hip sit higher and nearer the middle, aimed 0.25 m ahead of the eye (the owner, 2026-11-06:
+  hand and wrist in view, never the forearm); the AEG and Sniper Rifle are unchanged.
 
 ## Known issues
 
@@ -191,8 +199,7 @@
   10.4); support fingers' middle sections 10 to 15 mm off the AEG handguard's side; thumb roots 4 to 17 mm (sniper
   17.3, Cyber 13.6, AEG 12.6).
 - The GBB thumb's tip stops about 1.5 cm short of the catch behind the trigger guard the owner pointed to: reaching
-  it, the glove cuts into the frame. Its fingers' first sections stand 12 to 21 mm off the grip's right side (the
-  hand turned onto the back strap's centre line for the thumb), out of the eye's view.
+  it, the glove cuts into the frame's top rear corner (the owner kept this grip, 2026-11-06 09:01).
 - The glove's weave is one tile for all its parts: no stitching, knit bands or seams yet.
 - The owner's holding photos show pistols two-handed, thumbs forward: the left hand's hold over the right is still
   to solve (first tries bent the left wrist past 80°).

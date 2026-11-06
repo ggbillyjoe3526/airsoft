@@ -178,20 +178,21 @@ DOWN = {"kind": "down", "at": (0.0, 0.06, -0.40),
 # strap under the beavertail, the fingers close up under the trigger guard (swung `swing` toward the index) with the
 # little finger on the grip too, and the thumb comes round the back strap's corner and lies forward along the frame's
 # left side (its tip toward `thumb_at`, drawn there by `thumb_pull`, held lightly to the frame by `thumb_hug`; its
-# knuckle and tip close onto the frame at most `thumb_curl` degrees). On the GBB the thumb is drawn forward toward
-# the raised catch behind the trigger guard (the owner, 2026-11-06: "more forward and resting on the pistol ... a
-# slight bump where the thumb should go"; 07:10 "move the thumb as needed"), each pose checked on the skinned glove
-# (`thumb_verify`), nearest the catch first. With the web behind the back strap's right corner (the Cyber's) every
-# thumb reaching past the grip's top swell ran through the frame, its root too far right to come round the corner;
-# so the web sits on the back strap's centre line, the thumb's root at the frame's left rear corner, and the thumb
-# lies forward along the frame's left side under the slide, as a thumbs-forward grip does (the fingers' first
-# sections then stand further off the grip's right side, out of the eye's view). The arm reaches out to it, a little
-# bent (the owner, 2026-11-06: not straight; the critic: 96 % of its reach, the elbow under 30 degrees): its shoulder
-# raised and drawn back `shoulder` (eye space), its elbow free to come up to the shoulder's height (`drop`).
-PISTOL_RIGHT = dict(RIGHT, web=(0.000, -0.097, -0.046), index=(0.018, -0.042, -0.040), pinky=(0.018, -0.058, -0.098),
+# knuckle and tip close onto the frame at most `thumb_curl` degrees). On the GBB the thumb is drawn forward and up
+# toward the raised catch behind the trigger guard (the owner, 2026-11-06: "more forward and resting on the pistol
+# ... a slight bump where the thumb should go"), each pose checked on the skinned glove (`thumb_verify`): from the
+# web behind the back strap's right corner, a thumb reaching further forward than the grip's top swell cuts into
+# the frame's top rear corner at its root, so it lies along the frame there, 5 mm higher than the Cyber's and
+# touching all along; the web 3 mm further back and 1 mm lower than the Cyber's, which sets it there and keeps the
+# fingers closed round the grip. The arm comes up to it from below (the owner, 2026-11-06, with Valorant's pistols as
+# the look: only the hand and a little of the wrist on screen, never the forearm, the wrist bent little): the hold
+# sits nearer the middle and higher at the hip (ViewModelConfig.hip, matched in HOLDS), the forearm rising about 13
+# degrees to it (wrist about 16 degrees), so at the hip the wrist meets the screen's bottom edge and aimed the forearm
+# drops out of view under the hand; its shoulder moved `shoulder` (eye space), its elbow at least `drop` below it.
+PISTOL_RIGHT = dict(RIGHT, web=(0.014, -0.100, -0.048), index=(0.018, -0.042, -0.040), pinky=(0.018, -0.058, -0.098),
                     thumb_at=(-0.024, -0.035, -0.032), thumb_hug=2.0, thumb_pull=80.0, thumb_curl=(40.0, 60.0),
                     thumb_verify=1.0,
-                    shoulder=(0.0, -0.14, 0.105), drop=0.0, swing=(-15.0, -15.0, -15.0))
+                    shoulder=(-0.07, -0.15, 0.085), drop=0.04, swing=(-15.0, -15.0, -15.0))
 # The Cyber Pistol, resized to the GBB's proportions (CZ1; the owner, 2026-11-06: "Cyber pistol looks good"): its own
 # marks, the web right of the back strap's centre line and the thumb aimed along the frame's side under its raised edge
 # beside the slide, which a thumb as high and far forward as the GBB's would pass into; the index knuckle 2 mm back
@@ -229,9 +230,9 @@ SNIPER_GUARD = dict(GUARD, y=0.260, axis=(0.0, 0.030), radius=0.025, tips_below=
 HOLDS = {
     "aeg": Hold("aeg.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.073, -0.026), 31.0, 0.046, 0.0155),
                 AEG_RIGHT, GUARD),
-    "pistol": Hold("pistol.glb", godot_to_eye(0.12, -0.15, -0.34), Grip((0.0, -0.070, -0.016), 27.0, 0.046, 0.0130),
+    "pistol": Hold("pistol.glb", godot_to_eye(0.05, -0.07, -0.34), Grip((0.0, -0.070, -0.016), 27.0, 0.046, 0.0130),
                    PISTOL_RIGHT, DOWN),
-    "cyber": Hold("cyber.glb", godot_to_eye(0.12, -0.15, -0.34), Grip((0.0, -0.074, -0.024), 17.0, 0.048, 0.0128),
+    "cyber": Hold("cyber.glb", godot_to_eye(0.05, -0.07, -0.34), Grip((0.0, -0.074, -0.024), 17.0, 0.048, 0.0128),
                   CYBER_RIGHT, DOWN),
     "sniper": Hold("sniper.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.090, 0.008), 54.0, 0.050, 0.021),
                    SNIPER_RIGHT, SNIPER_GUARD),
