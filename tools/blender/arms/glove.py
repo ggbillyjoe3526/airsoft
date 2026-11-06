@@ -47,14 +47,14 @@ SHELL_THICK = 0.0016
 KNUCKLE_DOME = 0.0024
 KNUCKLE_RIM = 0.0012
 KNUCKLE_ROUND = 0.75
-KNUCKLE_LOBE = 0.0025
+KNUCKLE_LOBE = 0.0015
 KNUCKLE_SEAM = 0.0008
 KNUCKLE_U = (-0.75, -0.25, 0.25, 0.75)
 PAD_THICK = 0.0012
 # How far the muscle between thumb and index stands out under the glove (m).
 WEB_BULGE = 0.0040
 WEB_RADIUS = 0.020
-THUMB_FULL = 0.0015
+THUMB_FULL = 0.0008
 # The finger plates bend with the glove beneath them (rigid on one bone, the skin rose through their ends as the joints
 # beside them closed).
 PAD_RIGID = False
@@ -64,8 +64,8 @@ KNUCKLE_BACK = 0.050
 KNUCKLE_OVER = 0.002
 # The finger pads, as shares of each finger's first bone from its root (an oval just short of the middle knuckle), and
 # how far round the finger each reaches (degrees either side of its back).
-PAD_SPAN = (0.40, 0.90)
-PAD_WRAP = 24.0
+PAD_SPAN = (0.48, 0.86)
+PAD_WRAP = 28.0
 
 
 def load_source(shoulder: Vector) -> tuple:
@@ -443,7 +443,7 @@ def knuckle_guard(surf: Surface, fr: Frame) -> tuple:
         return line(u * (1.0 - 0.30 * (1.0 - v) * 0.5)) + f * (KNUCKLE_OVER - back + lobe) - up * 0.006
 
     def direction(u: float, v: float) -> Vector:
-        return up + across * u * 0.25
+        return up + across * u * 0.15
 
     def thick(u: float, v: float) -> float:
         # One even dome, highest a little behind the knuckles, and a raised border just inside its edge.
@@ -545,8 +545,8 @@ def build_left(shoulder: Vector) -> tuple:
     hand_f = [f for f in faces if fr.along(centre(verts, f)) > GLOVE_TOP]
     used = sorted({i for f in hand_f for i in f})
     idx = {o: k for k, o in enumerate(used)}
-    # The thumb's glove a little fuller (the photos' gloved thumbs are about a quarter thicker than the hand's skin
-    # makes them: the critic, 123843).
+    # The thumb's glove a little fuller (the photos' gloved thumbs are thicker than the hand's skin makes them: the
+    # critic, 123843; fuller still, the thumb found no room on the grip's panel and stood out from it).
     gv = [verts[o] + nrm[o] * (GLOVE_THICK + web_muscle(verts[o], nrm[o], fr) +
                                THUMB_FULL * (wts[o].get("Thumb2", 0.0) + wts[o].get("Thumb3", 0.0))) for o in used]
     gf = [[idx[i] for i in f] for f in hand_f]

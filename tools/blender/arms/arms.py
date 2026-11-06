@@ -150,7 +150,7 @@ RIGHT = {"d": 0.006, "f": 0.038, "x": 0.012, "slant": 30.0, "wrap": -30.0, "thum
 GUARD = {"kind": "guard", "y": 0.190, "forward": 0.036, "depth": 0.034, "standoff": 0.006,
          "search": ((80, 80), (48, 48), (-40, 40)), "rise": 50.0, "shoulder": (0.04, 0.12, -0.16), "drop": 0.06,
          "across": 0.25, "thumb_x": -0.023, "thumb_f": 0.05, "thumb_z": 0.055, "thumb_hug": 3.0, "tips_below": 0.068,
-         "tip_at": (0.0275, 0.005, 0.054), "tip_swing": 8.0, "tip_lie": 0.0,
+         "tip_at": (0.0275, 0.005, 0.054), "tip_swing": 8.0,
          "fingers": {"Index": (35, 35, 20), "Middle": (40, 45, 30), "Ring": (40, 45, 30), "Pinky": (35, 40, 25)},
          "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
 # A pistol is held in the right hand alone, as the game's look draws it: the left arm hangs at the side, out of view
@@ -455,7 +455,7 @@ def left_on_guard(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider)
     for name in spec["fingers"] if spec["tip_at"][0] > 0.0 else ():
         k = inv @ rig.pose["%s1_L" % name].translation
         target = to_eye @ Vector((spec["tip_at"][0], k.y + spec["tip_at"][1], spec["tip_at"][2]))
-        curls[name] = hand.onto(name, target, col, (90, 100, 0), spec["tip_swing"], TIP_COUPLE, spec["tip_lie"])
+        curls[name] = hand.onto(name, target, col, (90, 100, 0), spec["tip_swing"], TIP_COUPLE)
     if os.environ.get("BL_DEBUG"):
         m = rig.pose["Thumb3_L"]
         tip = m.translation + m.to_3x3().col[1] * rig.length["Thumb3_L"]
