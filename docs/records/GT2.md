@@ -1,12 +1,13 @@
 # GT2 · Your arms hold the bomb in first person
 
-**Review:** pending
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-06 | 1 | Opus 5.5 (build thread) | – | – | – |
+| 2026-11-06 | 1 | Opus 5.5 (build thread) | – | 7/8 Retry (QA Pass, performance Pass) | the replica sank handless for 0.2 s; the bomb hand popped in and out; at rest the glove rose straight from the bottom edge; the thumb tip stood past the bomb's outline |
+| 2026-11-06 | 2 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 ## What changed
 
@@ -17,13 +18,15 @@ own before your eyes. Now your gloved right hand holds it:
   fist like a pistol's grip, the lever under the palm on its right side, the web of the hand round its back, the
   fingers (the index too: no trigger) closed round its front and the thumb round its back; the marks scaled to each
   body (smoke 27.5 mm, flash 20 mm radius). The solver's trigger steps are skipped for a replica with no `Trigger`
-  part. The wrist bends 0.8 degrees on the smoke and 2.8 on the flash as arms.py measures it (`pose.wrist_bend`, the
+  part. The wrist bends 6.8 degrees on the smoke and 6.6 on the flash as arms.py measures it (`pose.wrist_bend`, the
   hand's long axis off the forearm's; the critic's reading off the renders, a different measure, was about 15); no
   face passes into the bomb. The four replicas' clips come out of the rebuild unchanged (compared key by key), built
   with `BL_FIT_AEG` on the pre-GS2 AEG (`git show d19c079^:assets/models/replicas/aeg.glb`).
-- **Where it sits.** `GrenadeView.HELD_AT` moves from (0.26, -0.3, -0.6) to (0.17, -0.10, -0.36) m: within an arm's
-  reach, higher and further right than before, so the forearm and cuff come in diagonally from the lower right corner
-  rather than the glove rising straight from the bottom edge (critic round 1); `HELD_LIFT` 0.08 to 0.05 with it.
+- **Where it sits.** `GrenadeView.HELD_AT` moves from (0.26, -0.3, -0.6) to (0.12, -0.12, -0.32) m: within an arm's
+  reach, framed by the owner's rule for the pistols (2026-11-06: only the hand and part of the wrist on screen, never
+  the forearm): the shoulder raised (`shoulder` (-0.02, -0.06, 0.10), `drop` 0.03) so the forearm rises about 23
+  degrees and leaves the view under the wrist, which comes in from the lower right; `HELD_LIFT` 0.08 to 0.03 so the
+  windup shows little more of it. (Round 2 tried (0.17, -0.10, -0.36), which brought the cuff and sleeve in.)
   arms.py mirrors HELD_AT and HELD_TIP; a test checks each hold's mark against HELD_AT. The thumb lies across the
   bomb's back, its tip clear of the outline seen from the front (round 1).
 - **Up and down** (critic round 1): the hand comes up into view with the bomb from `ViewModelConfig.bomb_raise_drop`
@@ -45,6 +48,8 @@ own before your eyes. Now your gloved right hand holds it:
   replica. Both are KNOWN_ISSUES row 82's remaining gap.
 - **A second ArmsView** under GrenadeView rather than moving ReplicaView's: the replica keeps its hold through the
   holster and draw, and the bomb's arms need nothing from ReplicaView but its hiding its own.
+- **Both hands through the swap.** For the 0.2 s the replica goes down and the bomb comes up, both arms models are
+  drawn (about 78k triangles for some 12 frames, no allocation); after it only one (critic round 2, performance).
 
 ## Known issues left
 

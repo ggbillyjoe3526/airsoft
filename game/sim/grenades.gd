@@ -162,7 +162,8 @@ static func ready_command(c: Character, cmd: PlayerCommand, out: PlayerCommand) 
 	return out
 
 
-## The bomb `c` holds in hand waiting for a trigger pull (MC1; NONE: none).
+## The bomb `c` holds in hand waiting for a trigger pull (MC1; NONE: none). The bomb drawn in hand, the pin pull's too,
+## is `held`.
 static func in_hand(c: Character) -> Grenade.Kind:
 	return c.grenades.readied
 

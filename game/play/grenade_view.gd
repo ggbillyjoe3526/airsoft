@@ -55,8 +55,8 @@ const SMOKE_WASH := 0.94
 const WASH_LAYER := 0
 ## Through the thrower's own eyes, the bomb in hand while the pin comes out: this far right, down and ahead of the eyes
 ## (m), lifted HELD_LIFT as the windup runs out. Your arms' model holds it there (tools/blender/arms/arms.py HELD_AT).
-const HELD_AT := Vector3(0.17, -0.10, -0.36)
-const HELD_LIFT := 0.05
+const HELD_AT := Vector3(0.12, -0.12, -0.32)
+const HELD_LIFT := 0.03
 ## Tipped in the hand (rad, about the view's forward and right axes), as a fist holds it (arms.py HELD_TIP).
 const HELD_TIP := Vector2(-0.45, 0.35)
 ## Each kind's hold in your arms' model (ArmsView: `<id>_Hold`, `Hold_<id>`), by Grenade.Kind.
