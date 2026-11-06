@@ -174,10 +174,10 @@ DOWN = {"kind": "down", "at": (0.0, 0.06, -0.40),
 PISTOL_RIGHT = dict(RIGHT, web=(0.012, -0.095, -0.045), index=(0.018, -0.042, -0.040), pinky=(0.018, -0.058, -0.098),
                     thumb_at=(-0.020, -0.058, -0.060), thumb_hug=6.0, shoulder=(0.0, -0.12, 0.10), drop=0.0,
                     swing=(-15.0, -15.0, -15.0))
-# The Cyber Pistol: the GBB's marks laid on its own grip (the owner: the two grips should look the same), the web a
-# little lower under its long tang; its frame by the rear block leaves the thumb room only high along it.
-CYBER_RIGHT = dict(PISTOL_RIGHT, web=(0.012, -0.110, -0.052), index=(0.025, -0.045, -0.040),
-                   pinky=(0.024, -0.055, -0.096), thumb_at=(-0.026, -0.048, -0.014))
+# The Cyber Pistol, resized to the GBB's proportions (CZ1): the GBB's marks (the owner: the two grips should look the
+# same), the web 2 mm further back and lower on its more upright back strap and the index knuckle 2 mm back for its
+# trigger, 5 mm further from the back strap than the GBB's.
+CYBER_RIGHT = dict(PISTOL_RIGHT, web=(0.012, -0.097, -0.047), index=(0.018, -0.044, -0.040))
 # The AEG Rifle's grip: the same three marks, the hand high on the short grip with the little finger wholly on it, its
 # knuckle above the grip's flared foot (the owner, 2026-11-05; the critic: half of it hung below), the knuckles' line
 # raked back with the grip, the web closer in over the back strap so the thumb reaches round onto the grip's left
@@ -191,7 +191,7 @@ HOLDS = {
                 AEG_RIGHT, GUARD),
     "pistol": Hold("pistol.glb", godot_to_eye(0.12, -0.15, -0.34), Grip((0.0, -0.070, -0.016), 27.0, 0.046, 0.0130),
                    PISTOL_RIGHT, DOWN),
-    "cyber": Hold("cyber.glb", godot_to_eye(0.12, -0.15, -0.34), Grip((0.0, -0.0905, -0.036), 17.0, 0.060, 0.0158),
+    "cyber": Hold("cyber.glb", godot_to_eye(0.12, -0.15, -0.34), Grip((0.0, -0.074, -0.024), 17.0, 0.048, 0.0128),
                   CYBER_RIGHT, DOWN),
 }
 
