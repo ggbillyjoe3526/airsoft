@@ -1510,6 +1510,16 @@ models show without anything else changing. The smoke and flash icons now do the
 - [ ] **Letting go:** watch a bot reload, switch to its pistol and throw a bomb. The left hand leaves the handguard for
   each and comes back after, with no jump.
 
+## The second bug and performance pass (BP5)
+
+- [ ] **A held trigger after a bomb in hand.** On the AEG on full auto, take a smoke in hand (4), pull the trigger and
+  keep holding it: the smoke is thrown and, when the rifle is back up, it does not fire until you let go and pull
+  again.
+- [ ] **Your torch after a bomb in hand.** At night, with your torch on, take a bomb in hand (4 or 5), then press 1 to
+  put it back: the torch comes back on with the rifle (it stayed off before).
+- [ ] **Slot keys on the Loadout page.** Rebind Primary and Secondary in Settings › Controls, then open the Loadout
+  page: the two carried cards show your keys, not 1 and 2.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

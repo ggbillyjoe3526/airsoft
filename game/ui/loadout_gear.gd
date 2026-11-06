@@ -42,6 +42,8 @@ const NAME_SUB_GAP := 2
 ## The grenades panel: a tile a bomb (its height and padding), its icon, the count and name, and its throw key.
 const GRENADE_KEYS: Array[String] = ["", "LOADOUT_SMOKE", "LOADOUT_FLASH"]
 const GRENADE_ACTIONS: Array[StringName] = [&"", &"throw_smoke", &"throw_flash"]
+## The action that picks each carried slot, by Loadout.Slot (its key chip shows that action's key).
+const SLOT_ACTIONS: Array[StringName] = [&"slot_1", &"slot_2"]
 const GRENADE_ICON := 44.0
 const GRENADE_GAP := 10
 const GRENADE_TILE_GAP := 12
@@ -77,6 +79,7 @@ var _sheet: PerformanceSheet = null
 var _line_name: Label = null
 var _line_rest: Label = null
 var _grenade_keys: Array[Label] = []
+var _slot_keys: Array[Label] = []
 var _picked: Loadout.Slot = Loadout.Slot.PRIMARY
 var _facts: LoadoutFacts = null
 var _note: Control = null
@@ -197,6 +200,8 @@ func refresh(slot: Loadout.Slot, realistic: bool) -> void:
 	# a rebind in Settings › Controls shows when the page is shown again (LoadoutPage refreshes then)
 	for kind: int in [Grenade.Kind.SMOKE, Grenade.Kind.FLASH]:
 		_grenade_keys[kind].text = KeyNames.of_action(GRENADE_ACTIONS[kind])
+	for i in _slot_keys.size():
+		_slot_keys[i].text = KeyNames.of_action(SLOT_ACTIONS[i])
 	var names := PackedStringArray()
 	for s in LoadoutFacts.SLOTS:
 		var card := _carried[s]
@@ -266,8 +271,9 @@ func _build_carried() -> void:
 		var label := MenuParts.head_text(tr(LoadoutFacts.SLOT_KEYS[s]), SLOT_SIZE, 600, GameTheme.MUTED, SLOT_SPACING)
 		label.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		head.add_child(label)
-		var key := MenuParts.key_chip(str(s + 1), KEY_SIZE, GameTheme.DIM, KEY_PAD)
+		var key := MenuParts.key_chip(KeyNames.of_action(SLOT_ACTIONS[s]), KEY_SIZE, GameTheme.DIM, KEY_PAD)
 		key.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		_slot_keys.append(key.get_child(0) as Label)
 		head.add_child(key)
 		var room := Control.new()
 		room.mouse_filter = Control.MOUSE_FILTER_IGNORE

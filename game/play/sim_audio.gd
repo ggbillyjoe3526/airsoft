@@ -746,9 +746,12 @@ func _start_ambience(id: StringName) -> void:
 		if not ResourceLoader.exists(path):
 			push_warning("SimAudio: no ambience loop %s" % path)
 			continue
+		# a missing peak plays the bed at its raw level, 5 to 15 times too quiet: say so
 		var peak := 1.0
-		if peaks is Dictionary:
-			peak = float((peaks as Dictionary).get(String(bed.loop), 1.0))
+		if peaks is Dictionary and (peaks as Dictionary).has(String(bed.loop)):
+			peak = float((peaks as Dictionary)[String(bed.loop)])
+		else:
+			push_warning("SimAudio: no stored peak for ambience loop %s in %s" % [bed.loop, SoundConfig.PEAKS_PATH])
 		var v := AudioStreamPlayer.new()
 		v.stream = load(path)
 		v.bus = BUS_AMBIENCE

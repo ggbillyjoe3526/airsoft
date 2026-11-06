@@ -213,7 +213,7 @@ extends Resource
 @export var pistol_reload_clip: StringName = &"Pistol_Reload"
 @export var magazine_node: String = "Figure_Magazine"
 @export var thrown_max: int = 12
-## Out of the hand, the rifle lies on the figure's back from the Chest bone (the browser's FIGURE_RIG.sling): its middle
+## Out of the hand, the rifle lies on the figure's back from the Chest bone (stowed, HS1): its middle
 ## back_middle.x to the figure's right of the spine and back_middle.y above the feet, its left side (against the kit)
 ## back_depth_human behind the chest bone (back_depth_pack with a human's pack, back_pack_part; back_depth_robot on a
 ## robot), its long axis back_tilt (rad) from upright with the muzzle down to the left, leaning back_lean (rad, the butt

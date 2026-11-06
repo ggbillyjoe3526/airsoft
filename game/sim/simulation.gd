@@ -146,6 +146,8 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 			grenades.press(c, cmd, live, state.grenades, state.events)
 			if Grenades.throwing(c):
 				cmd = Grenades.throwing_command(cmd, _throwing)
+			elif Grenades.in_hand(c) == Grenade.Kind.NONE:
+				cmd = Grenades.held_off_command(c, cmd, _readied)
 			if cmd.use_door and has_doors:
 				doors.press(c, cmd.door_to_use, state)
 		elif has_doors and not c.vault.active:
@@ -179,7 +181,7 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		# The bomb leaves the hand from the eyes, as BBs do; the replica comes back up after it.
 		grenades.step_throw(c, Lean.eye(c, tuning.body, tuning.hits), state.grenades, state.events, dt)
 		# After the armament and the throw: a switch, holster or throw this tick to no light in hand puts the torch out.
-		Torch.step(c, toggle_torch, state.events, dt)
+		Torch.step(c, toggle_torch, state.events, dt, Grenades.take_torch_back(c))
 		# A ping looks where the view is now, after the turn and the shot's kick.
 		_ping(c, commands, live and not state.round_state.practice, state.events)
 	var first_bb_event := state.events.count

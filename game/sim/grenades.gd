@@ -52,6 +52,12 @@ class Hand:
 	var ready_torch_was_on: bool = false
 	## The trigger last tick while a bomb is in hand: a pull, not a held trigger, throws it.
 	var trigger_was_down: bool = false
+	## The trigger pull that threw a bomb in hand, or put it back, is still held (BP5): the replica that comes back up
+	## doesn't fire until the trigger is let go (`held_off_command`).
+	var trigger_held_off: bool = false
+	## The torch was on before the throw or the bomb in hand, and the replica is back up this tick: Torch.step puts it
+	## back on (BP5: a bomb put back by a slot, the holster or a reload left it off).
+	var torch_back: bool = false
 
 	## Left of `bomb` now.
 	func left(bomb: Grenade.Kind) -> int:
@@ -82,6 +88,8 @@ class Hand:
 	## No throw under way and no bomb in hand (a hit, a respawn).
 	func stop() -> void:
 		readied = Grenade.Kind.NONE
+		trigger_held_off = false
+		torch_back = false
 		throwing = Grenade.Kind.NONE
 		windup_left = 0.0
 		recover_left = 0.0
@@ -151,15 +159,43 @@ static func ready_command(c: Character, cmd: PlayerCommand, out: PlayerCommand) 
 		return cmd
 	if cmd.switch_to >= 0 or cmd.holster or cmd.reload or hand.left(hand.readied) <= 0:
 		hand.readied = Grenade.Kind.NONE
+		# the simulation lets the trigger go from here while it stays held (held_off_command)
+		hand.trigger_held_off = cmd.fire
+		hand.torch_back = hand.ready_torch_was_on
 		return cmd
 	out.copy_from(cmd)
 	var pull := cmd.fire and not hand.trigger_was_down
 	hand.trigger_was_down = cmd.fire
 	if pull and out.throw_grenade == Grenade.Kind.NONE:
 		out.throw_grenade = hand.readied
+	if out.throw_grenade != Grenade.Kind.NONE:
+		hand.trigger_held_off = true
 	out.fire = false
 	out.aim = false
 	return out
+
+
+## The command `c` follows once a bomb in hand is thrown or put back (BP5): while the pull that did it is still held,
+## the trigger is let go (written into `out`), so a replica on full auto doesn't fire on its own the moment it is back
+## up, nor a semi read the held pull as a fresh one. Letting go of the trigger ends it.
+static func held_off_command(c: Character, cmd: PlayerCommand, out: PlayerCommand) -> PlayerCommand:
+	var hand := c.grenades
+	if not hand.trigger_held_off:
+		return cmd
+	if not cmd.fire:
+		hand.trigger_held_off = false
+		return cmd
+	if out != cmd:
+		out.copy_from(cmd)
+	out.fire = false
+	return out
+
+
+## Whether `c`'s torch goes back on this tick (after a throw or a bomb put back), once: Torch.step lights it.
+static func take_torch_back(c: Character) -> bool:
+	var back := c.grenades.torch_back
+	c.grenades.torch_back = false
+	return back
 
 
 ## The bomb `c` holds in hand waiting for a trigger pull (MC1; NONE: none). The bomb drawn in hand, the pin pull's too,
@@ -227,10 +263,13 @@ func step_throw(c: Character, eye: Vector3, pool: Array[Grenade], events: SimEve
 	hand.recover_left -= dt
 	if hand.recover_left > 0.0:
 		return
+	# the pull that threw it may still be held: it stays let go after the throw too (held_off_command)
+	var held_off := hand.trigger_held_off
 	hand.stop()
+	hand.trigger_held_off = held_off
 	if not hand.was_holstered:
 		c.armament.bring_up(c.id, events, cfg.redraw_scale)
-		c.torch_on = hand.torch_was_on and c.armament.light_in_hand() != null
+		hand.torch_back = hand.torch_was_on
 
 
 ## Every bomb in `state` flies, bounces, pops or goes bang this tick, and every dazzle wears off. A throw by someone
