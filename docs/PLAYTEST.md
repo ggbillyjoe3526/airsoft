@@ -1499,6 +1499,17 @@ models show without anything else changing. The smoke and flash icons now do the
 - [ ] **New models everywhere:** after any new replica, attachment or power source model is merged, Loadout,
   Customise (the turning replica and the part cards), the Armory and the level-up card show it.
 
+## Bots' hands on their replicas (HG1)
+
+- [ ] **The grip:** on the Practice Range or as a round starts, walk up to a bot aiming each replica. Its right hand
+  holds the grip as your own first-person hand does: high on it, fingers wrapped round, the index finger on the
+  trigger and the thumb along the grip's left side, visible from the left. A pistol is held in the right hand only.
+- [ ] **The handguard:** on the AEG Rifle the left hand is under the handguard, fingers up its right side and the thumb
+  along its left; on the Sniper Rifle it rests open under the stock, as yours does. Fit a vertical or angled grip: the
+  hand holds the handguard just behind the grip.
+- [ ] **Letting go:** watch a bot reload, switch to its pistol and throw a bomb. The left hand leaves the handguard for
+  each and comes back after, with no jump.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

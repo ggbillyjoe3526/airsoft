@@ -47,6 +47,9 @@ var _face_materials: Dictionary[String, Material] = {}
 var _shadow_meshes: Dictionary[String, ArrayMesh] = {}
 ## Each replica's magazine mesh by its id (null: its model has none).
 var _magazines: Dictionary[StringName, Mesh] = {}
+## The first-person arms' holds by replica id (HG1), read the first time one is asked for.
+var _arms_holds: Dictionary[StringName, FigureArmsHold] = {}
+var _arms_read: bool = false
 
 
 func _init(figure_config: FigureConfig) -> void:
@@ -110,6 +113,21 @@ func grip(kind: int, site_class: StringName) -> Transform3D:
 		return Transform3D.IDENTITY
 	var places := _kinds[kind].grip
 	return places.get(site_class, places.get(&"rifle", Transform3D.IDENTITY))
+
+
+## How the first-person arms hold replica `id` (HG1), for the figures' hands; null when the arms model has no hold for
+## it. The model (FigureConfig.arms_model) is read the first time, then let go.
+func arms_hold(id: StringName) -> FigureArmsHold:
+	if not _arms_read:
+		_arms_read = true
+		var scene := load(config.arms_model) as PackedScene if ResourceLoader.exists(config.arms_model) else null
+		if scene == null:
+			push_warning("FigureModels: no arms model at %s" % config.arms_model)
+		else:
+			var model := scene.instantiate()
+			_arms_holds = FigureArmsHold.read_all(model, config)
+			model.free()
+	return _arms_holds.get(id)
 
 
 ## The rifle on the back: its middle's frame in `kind`'s chest bone's frame (FigureConfig back_* numbers).

@@ -42,6 +42,12 @@ var _glow: float = 0.0
 ## first, or the first after the legs were left still), and the frames and time gathered beyond the far line.
 var _pose: FigurePose = null
 var _lines: Vector2 = Vector2.ZERO
+## The camera's view cone (view_corner) and the camera settings it was worked out for (fov, the view's size, its kept
+## aspect), so it is worked out again only when they change.
+var _corner: Vector2 = Vector2.ZERO
+var _corner_for: Vector4 = Vector4.INF
+## Frames until the view is looked at again (FigureConfig.hold_view_stride).
+var _view_frames: int = 0
 var _snap: bool = true
 var _far_frames: int = 0
 var _far_delta: float = 0.0
@@ -49,6 +55,10 @@ var _far_delta: float = 0.0
 var _flinch: FigureFlinch = null
 ## Each replica's muzzle in its figure version's space (where a gas replica's breath comes from, GasPuffs).
 var _muzzles: PackedVector3Array = PackedVector3Array()
+## How far forward each replica's support hand may hold its handguard, in its figure version's space (HG1;
+## Vector3.INF: no handguard), and each replica's id.
+var _supports: PackedVector3Array = PackedVector3Array()
+var _ids: Array[StringName] = []
 ## The contact shadow (null until given one), its numbers, and the floor the feet last stood on (y).
 var _contact: MeshInstance3D = null
 var _effects: EffectsConfig = null
@@ -80,6 +90,8 @@ func setup(c: Character, team_colour: Color, hits: HitConfig, font: Font,
 	var cfg := figures if figures != null else FigureConfig.new()
 	_flinch = FigureFlinch.new(cfg)
 	_raise_stride = maxi(cfg.raise_stride, 1)
+	# Staggered, so the figures look at the view on different frames.
+	_view_frames = posmod(c.id, maxi(cfg.hold_view_stride, 1))
 	_hits = hits
 	_team = c.team
 	_team_colour = team_colour
@@ -88,9 +100,10 @@ func setup(c: Character, team_colour: Color, hits: HitConfig, font: Font,
 	top_level = true
 	for i in c.armament.replicas.size():
 		var held := _held_replica(c.armament.replicas[i], c.team, realistic, parts[i] if i < parts.size() else {},
-				_magazines, _muzzles)
+				_magazines, _muzzles, _supports, cfg)
 		_replicas.append(held)
 		_classes.append(c.armament.replicas[i].site_class)
+		_ids.append(c.armament.replicas[i].id)
 		if held != null:
 			add_child(held)
 		if _magazines[i] != null:
@@ -117,7 +130,7 @@ func set_body(models: FigureModels, kind: int, lines: Vector2) -> void:
 		_body = FigureBody.new()
 		if _body.setup(models, kind, character_id, _team, _team_colour, _glow, lines):
 			add_child(_body)
-			_body.hands.hold(_replicas, _classes, _magazines)
+			_body.hands.hold(_replicas, _classes, _magazines, _supports, _ids)
 			_body.hands.thrown = thrown
 			if not _bomb_meshes.is_empty():
 				_body.hands.set_bomb_meshes(_bomb_meshes)
@@ -165,18 +178,22 @@ func set_lod_lines(lines: Vector2) -> void:
 ## (ReplicaParts.fit_figure: a part takes the place of the magazine or flash hider it replaces, an optic hides the iron
 ## sights), hidden, painted for `team` (null without a model). A copy of the magazine it carries (its figure magazine or
 ## the magazine part's copy, both drawn in the model's space) for the reloads, in the same paint (null without one),
-## goes on the end of `magazines`, and its muzzle point in the model's space (where the figure version is drawn) on the
-## end of `muzzles`.
+## goes on the end of `magazines`, its muzzle point in the model's space (where the figure version is drawn) on the
+## end of `muzzles`, and where the support hand holds it (`support_mark`) on the end of `supports`.
 func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictionary,
-		magazines: Array[MeshInstance3D], muzzles: PackedVector3Array) -> MeshInstance3D:
+		magazines: Array[MeshInstance3D], muzzles: PackedVector3Array, supports: PackedVector3Array,
+		cfg: FigureConfig) -> MeshInstance3D:
 	var scene := load(MODEL_DIR + r.id + ".glb") as PackedScene
 	if scene == null:
 		magazines.append(null)
 		muzzles.append(Vector3.ZERO)
+		supports.append(Vector3.INF)
 		return null
 	var model := scene.instantiate()
 	var muzzle := _in_model(model.find_child(ReplicaParts.MUZZLE_NODE, true, false) as Node3D, model)
 	var barrel_end := _in_model(model.find_child(ReplicaParts.BARREL_END_NODE, true, false) as Node3D, model)
+	var mount := model.find_child(cfg.support_mount, true, false) as Node3D
+	var support := _in_model(mount, model) if mount != null else Vector3.INF
 	var paint := ReplicaPaint.bot_paint(team, r)
 	var held := model.find_child(ReplicaParts.FIGURE_NODE, true, false) as MeshInstance3D
 	var copy: MeshInstance3D = null
@@ -192,6 +209,7 @@ func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictiona
 			(piece as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var fit := ReplicaParts.fit_figure(held, r.id, parts, barrel_end, muzzle)
 		muzzle = fit.muzzle
+		support = support_mark(support, fit.grip, cfg)
 		ReplicaPaint.apply(held, paint, realistic)
 		if fit.magazine != null and fit.magazine.mesh != null:
 			copy = MeshInstance3D.new()
@@ -202,8 +220,19 @@ func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictiona
 			ReplicaPaint.apply(copy, paint, realistic)
 	magazines.append(copy)
 	muzzles.append(muzzle)
+	supports.append(support)
 	model.free()
 	return held
+
+
+## How far forward the support hand may hold a handguard whose mount is at `mount` (the model's space; Vector3.INF:
+## none): there, or with `grip` (a grip part's copy, in the same space) fitted, FigureConfig.support_behind_grip behind
+## its back end.
+static func support_mark(mount: Vector3, grip: MeshInstance3D, cfg: FigureConfig) -> Vector3:
+	if not mount.is_finite() or grip == null or grip.mesh == null:
+		return mount
+	var back := (grip.transform * grip.get_aabb()).end.z
+	return Vector3(mount.x, mount.y, back + cfg.support_behind_grip)
 
 
 ## Where `node` sits in `model`'s space (the model's origin when null).
@@ -314,6 +343,12 @@ func animate(c: Character, fraction: float, delta: float, eye: Vector3) -> void:
 		return
 	var cfg := _pose.config()
 	var far := _lines.y + cfg.lod_margin
+	var near := _lines.x + cfg.lod_margin
+	_body.near = global_position.distance_squared_to(eye) <= near * near
+	_view_frames -= 1
+	if _view_frames <= 0 or _snap:
+		_view_frames = cfg.hold_view_stride
+		_body.seen = _seen(get_viewport().get_camera_3d(), cfg)
 	if not _snap and global_position.distance_squared_to(eye) > far * far:
 		if cfg.far_stride <= 0:
 			# Held still out there: a press kept now would play stale when the figure comes near.
@@ -429,3 +464,48 @@ func _place_disc() -> void:
 	_contact.global_transform = Transform3D(Basis.from_scale(Vector3(_contact_radius, 1.0, _contact_radius)),
 			Vector3(feet.x, _floor_y + _effects.contact_lift, feet.z))
 	_contact.transparency = 1.0 - _fade * up
+
+
+## Whether the figure's hands and replica may show in `camera`'s view (FigureConfig.hold_view_height and _radius; true
+## without a camera).
+func _seen(camera: Camera3D, cfg: FigureConfig) -> bool:
+	if camera == null:
+		return true
+	var size := camera.get_viewport().get_visible_rect().size
+	var key := Vector4(camera.fov, size.x, size.y, camera.keep_aspect)
+	if key != _corner_for:
+		_corner_for = key
+		_corner = view_corner(camera)
+	return in_cone(camera.global_transform, _corner, global_position + Vector3.UP * cfg.hold_view_height,
+			cfg.hold_view_radius)
+
+
+## Whether a ball `radius` round `point` may show in `camera`'s view (true without a camera): in_cone with its
+## view_corner.
+static func in_view(camera: Camera3D, point: Vector3, radius: float) -> bool:
+	return camera == null or in_cone(camera.global_transform, view_corner(camera), point, radius)
+
+
+## The cosine and sine of the angle from `camera`'s view axis to its view's corners (a cone round the view).
+static func view_corner(camera: Camera3D) -> Vector2:
+	var size := camera.get_viewport().get_visible_rect().size
+	var tall := tan(deg_to_rad(camera.fov) * 0.5)
+	var wide := tall * (size.x / size.y if size.y > 0.0 else 1.0)
+	if camera.keep_aspect == Camera3D.KEEP_WIDTH:
+		wide = tall
+		tall = wide * (size.y / size.x if size.x > 0.0 else 1.0)
+	var corner := atan(sqrt(tall * tall + wide * wide))
+	return Vector2(cos(corner), sin(corner))
+
+
+## Whether a ball `radius` round `point` reaches into the cone `corner` (view_corner) round the view axis of a camera
+## at `at` (true for a ball round the camera). The ball widens the cone by the angle it fills, asin(radius / distance),
+## added through the cosines so no angle is worked out.
+static func in_cone(at: Transform3D, corner: Vector2, point: Vector3, radius: float) -> bool:
+	var to := point - at.origin
+	var far := to.length()
+	if far <= radius:
+		return true
+	var fills := radius / far
+	var widest := corner.x * sqrt(1.0 - fills * fills) - corner.y * fills
+	return -at.basis.z.normalized().dot(to) >= widest * far

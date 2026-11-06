@@ -54,6 +54,11 @@ var _classes: Array[StringName] = []
 ## Each slot's grip fit (FigureConfig.grip_fit, TP3) in the grip bone's frame, and whether both hands move with it.
 var _fits: PackedVector3Array = PackedVector3Array()
 var _fits_both: PackedByteArray = PackedByteArray()
+## How each slot's replica is held as the first-person arms hold it (HG1; null: they don't).
+var _held: Array[FigureHeld] = []
+## How far the right hand holds the replica in hand as the arms do (0..1, FigureBody, eased): the replica hangs from
+## the grip bone by that much of its held_on_grip.
+var grasp: float = 0.0
 ## Whether this figure has the arms the fit moves (FigureReady's raise_arm_bones).
 var _can_fit: bool = false
 var _on_chest: Array[Transform3D] = []
@@ -120,9 +125,12 @@ func setup(skeleton: Skeleton3D, models: FigureModels, kind: int, config: Figure
 
 ## Takes `replicas` (by slot, null for a slot with no model; `classes` their site classes) and their magazines' copies
 ## (`magazines`, by slot, null for none) onto the figure, hidden until `show_hands` and `show_reload` say otherwise;
-## each one's places worked out once here.
+## each one's places worked out once here. `ids` (by slot) name the replicas, for the first-person arms' holds the
+## hands take (HG1); `supports` (by slot, in each replica's frame; Vector3.INF or none: no handguard to hold) mark the
+## handguard's front limit for the left hand (FigureView.support_mark): behind a fitted grip it moves back to it.
 func hold(replicas: Array[MeshInstance3D], classes: Array[StringName],
-		magazines: Array[MeshInstance3D] = []) -> void:
+		magazines: Array[MeshInstance3D] = [], supports: PackedVector3Array = PackedVector3Array(),
+		ids: Array[StringName] = []) -> void:
 	_replicas = replicas
 	_classes = classes.duplicate()
 	_magazines = magazines
@@ -149,6 +157,13 @@ func hold(replicas: Array[MeshInstance3D], classes: Array[StringName],
 	_butts.clear()
 	_fits.clear()
 	_fits_both.clear()
+	_held.clear()
+	# The figure's grasp bone and knuckles in its hands' frames, at rest (HG1).
+	var grip_r := _rest_in(_config.hold_grip + "_R", _config.hold_hand + "_R")
+	var knuckle_r := _rest_in(_config.hold_knuckle + "_R", _config.hold_hand + "_R").origin
+	var knuckle_l := _rest_in(_config.hold_knuckle + "_L", _config.hold_hand + "_L").origin
+	var thumb_r := _rest_in(_config.hold_fingers[0] + "_R", _config.hold_hand + "_R").origin
+	var thumb_l := _rest_in(_config.hold_fingers[0] + "_L", _config.hold_hand + "_L").origin
 	var back := _models.on_back(_kind)
 	var holster := _models.holster(_kind)
 	var follow := _models.holster_follow(_kind)
@@ -165,6 +180,23 @@ func hold(replicas: Array[MeshInstance3D], classes: Array[StringName],
 		_on_grip.append(grip)
 		_grip_points.append(grip.affine_inverse().origin)
 		_butts.append(grip * _butt(r, _config.shoulder_butt_depth))
+		# The arms' hold (HG1): each figure hand turned as the arms' is, its thumb's root where theirs is (hold_thumb_share),
+		# the right turned hold_wrap round the grip; the left moved back to the support mark when that is behind it.
+		var arms_hold := _models.arms_hold(ids[i]) if i < ids.size() else null
+		var mark := supports[i] if i < supports.size() else Vector3.INF
+		if arms_hold == null:
+			_held.append(null)
+		else:
+			var right := Transform3D(arms_hold.right_hand.basis,
+					arms_hold.right_knuckle.lerp(arms_hold.right_thumb, _config.hold_thumb_share)
+					- arms_hold.right_hand.basis * knuckle_r.lerp(thumb_r, _config.hold_thumb_share))
+			right = _wrapped(right, arms_hold.right_joints, _config.hold_wrap)
+			var shift := Vector3(0.0, 0.0, maxf(0.0, mark.z - arms_hold.left_knuckle.z) if mark.is_finite() else 0.0)
+			var left := Transform3D(arms_hold.left_hand.basis,
+					arms_hold.left_knuckle.lerp(arms_hold.left_thumb, _config.hold_thumb_share_left)
+					- arms_hold.left_hand.basis * knuckle_l.lerp(thumb_l, _config.hold_thumb_share_left) + shift)
+			_held.append(FigureHeld.new(arms_hold, right, left, shift, grip, (right * grip_r).affine_inverse(),
+					site_class == &"pistol"))
 		var middle := Vector3.ZERO
 		var muzzle := Vector3.ZERO
 		if r != null:
@@ -320,6 +352,23 @@ func grip_fit_both(slot: int) -> bool:
 	return slot >= 0 and slot < _fits_both.size() and _fits_both[slot] != 0
 
 
+## How replica `slot` is held as the first-person arms hold it (HG1), or null when they don't.
+func held(slot: int) -> FigureHeld:
+	return _held[slot] if slot >= 0 and slot < _held.size() else null
+
+
+## Bone `bone`'s frame in bone `frame`'s, at rest, unscaled (identity when either is missing).
+func _rest_in(bone: String, frame: String) -> Transform3D:
+	var b := _skeleton.find_bone(bone)
+	var f := _skeleton.find_bone(frame)
+	if b < 0 or f < 0:
+		return Transform3D.IDENTITY
+	var of := _skeleton.get_bone_global_rest(f)
+	var at := _skeleton.get_bone_global_rest(b)
+	return Transform3D(of.basis.orthonormalized(), of.origin).affine_inverse() \
+			* Transform3D(at.basis.orthonormalized(), at.origin)
+
+
 ## Replica `slot`'s butt in the grip bone's frame (the origin when it has none).
 func butt_on_grip(slot: int) -> Vector3:
 	return _butts[slot] if slot >= 0 and slot < _butts.size() else Vector3.ZERO
@@ -352,7 +401,11 @@ func place(skeleton: Skeleton3D) -> void:
 		if hanging:
 			held.transform = Transform3D(_hang, grip.origin - _hang * _grip_points[in_hand])
 		else:
-			held.transform = grip * _on_grip[in_hand]
+			var on := _on_grip[in_hand]
+			var slot_held := _held[in_hand] if in_hand < _held.size() else null
+			if grasp > 0.0 and slot_held != null:
+				on = slot_held.held_on_grip if grasp >= 1.0 else on.interpolate_with(slot_held.held_on_grip, grasp)
+			held.transform = grip * on
 	if _bomb != null and _bomb.visible and _grip_bone >= 0:
 		_bomb.transform = skeleton.get_bone_global_pose(_grip_bone) * _bomb_on_grip
 	var carried := replica(on_back)
@@ -450,3 +503,20 @@ func _set_shown(slot: int, shown: bool) -> void:
 
 func _on_skeleton_updated() -> void:
 	place(_skeleton)
+
+
+## `hand` turned `angle` (rad) round the grip its fingers close on (`joints`, FigureArmsHold's, the thumb's first):
+## about the knuckle line (the first finger's root to the last's) through the middle of the fingers' joints, so the hand
+## slides round the grip and its thumb's root comes round the back strap toward the grip's left side.
+static func _wrapped(hand: Transform3D, joints: PackedVector3Array, angle: float) -> Transform3D:
+	var bones := FigureGrasp.BONES
+	if absf(angle) < FigureGrasp.EPSILON or joints.size() < bones * 3:
+		return hand
+	var middle := Vector3.ZERO
+	for i in range(bones, joints.size()):
+		middle += joints[i]
+	middle /= float(joints.size() - bones)
+	var axis := (joints[joints.size() - bones] - joints[bones]).normalized()
+	var turn := Transform3D(Basis(axis, angle), Vector3.ZERO)
+	var about := Transform3D(Basis.IDENTITY, middle)
+	return about * turn * about.affine_inverse() * hand

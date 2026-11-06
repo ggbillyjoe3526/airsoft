@@ -172,6 +172,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Art direction and graphics
 
+- **Bots hold replicas as the first-person arms do; pistols one-handed (owner, 2026-11-06, HG1).** The bots' hands
+  copy the first-person holds he approved (`assets/models/arms/arms.glb`), so a change to a first-person hold changes
+  the bots' too: the right hand high on the grip, index on the trigger, thumb along the grip's left side ("the thumb
+  needs to be on the left of the handle/grip … I gave reference photos for a reason"). A pistol is held in one hand
+  ("only one hand for the pistol"). The bots keep their own simpler gloves ("keep it as then. that's fine").
 - **No rifle sling; replicas out of the hand are worn (owner, 2026-11-05, HS1).** "i don't like the rifle sling. remove
   it completely. the player should just hold replicas in their hands. pistols are holstered and rifles (and any other
   weapon) can just be clipped onto the plate carrier/belt or whatever when Holstered". The pistol sits in the belt

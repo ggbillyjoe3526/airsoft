@@ -145,6 +145,39 @@ extends Resource
 	&"pistol": Vector3(0.0, 0.022, 0.0),
 }
 @export var grip_fit_both: PackedStringArray = PackedStringArray(["pistol"])
+## The hands closed on the replica as the first-person arms hold it (HG1): arms_model's hold for each replica (its clip
+## `<id>_Hold` and empty `Hold_<id>`, FigureArmsHold) gives each hand's place on the replica (hold_hand's frame, turned
+## as the arms' is, set hold_thumb_share of the way from its knuckles, hold_knuckle's root, to its thumb's root, where
+## the arms' are) and where its fingers go (hold_fingers, each with `_R` or `_L`, parents first): each finger bone
+## turned as the arms' is, then aimed at the arms' next joint. The figures' hands are a little smaller and their thumbs
+## shorter, so the right hand's place is set by its thumb's root (hold_thumb_share 1) and turned hold_wrap (rad) round
+## the grip (about its knuckle line) for its thumb to reach round the grip's left side, each thumb's tip reaching as far
+## along the arms' last thumb bone as it can; the left's by its knuckles (hold_thumb_share_left 0), so its fingers
+## reach up the handguard's side.
+## The right hand takes it while the replica is held, the left too (a pistol's one-handed: the arms' left lowered);
+## behind a grip fitted at a rifle's support_mount the left moves back support_behind_grip (m) (FigureView.support_mark).
+## Both eased in over settle_support (s) and out over settle_support_off (quicker: a reload's clip reaches for the
+## magazine at once); not in a reload (the left), a switch, a throw or calling the hit.
+@export var arms_model: String = "res://assets/models/arms/arms.glb"
+@export var hold_hand: String = "Hand"
+@export var hold_grip: String = "Grip"
+@export var hold_knuckle: String = "Middle1"
+@export var hold_thumb_share: float = 1.0
+@export var hold_thumb_share_left: float = 0.0
+@export var hold_wrap: float = 0.35
+@export var hold_fingers: PackedStringArray = PackedStringArray(["Thumb1", "Thumb2", "Thumb3", "Index1", "Index2",
+		"Index3", "Middle1", "Middle2", "Middle3", "Ring1", "Ring2", "Ring3", "Pinky1", "Pinky2", "Pinky3"])
+## The hands hold the replica so only while a ball `hold_view_radius` (m) round the point `hold_view_height` (m) over
+## the figure's feet, where its hands and replica are, is in the camera's view (a cone round the view's corners); out
+## of it the clips' hands are kept, unseen. The view is looked at every `hold_view_stride`-th frame (figures staggered
+## by id; the ball's margin covers the frames between).
+@export var hold_view_height: float = 1.2
+@export var hold_view_radius: float = 1.0
+@export var hold_view_stride: int = 4
+@export var support_mount: String = "GripMount"
+@export var support_behind_grip: float = 0.045
+@export var settle_support: float = 0.08
+@export var settle_support_off: float = 0.025
 ## The draw from one replica to another, time-scaled to the replica's draw time (the sidecar's fitTo). Made rifle to
 ## pistol, the pistol in the hand from switch_pistol_from of it; to a rifle it plays backwards, the rifle in the hand
 ## from 1 - switch_pistol_from.

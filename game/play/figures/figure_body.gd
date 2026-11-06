@@ -30,11 +30,18 @@ var bend: FigureBend = null
 var hands: FigureHands = null
 ## The head it wears (&"" for a kind with one head).
 var head: StringName = &""
+## Whether the figure stands within LOD0's line of the eye, where its fingers close on the replica (HG1; FigureView).
+var near: bool = true
+## Whether its hands and replica may show in the camera's view (FigureView's `_seen`, every hold_view_stride-th frame): out of it they keep the clips'.
+var seen: bool = true
 var _config: FigureConfig = null
 var _bones: Dictionary[StringName, int] = {}
 var _fade: float = 1.0
 ## How far the rifle in the hand is drawn into the shoulder, eased (TP2).
 var _shoulder: float = 0.0
+## How far the left hand is on a rifle's handguard, and the right hand holds the replica as the arms do, eased (HG1).
+var _support: float = 0.0
+var _grasp: float = 0.0
 ## The Vault and HitCall clips' lengths (s) and the WalkOff clip's own pace (m/s).
 var _vault_seconds: float = 0.0
 var _call_seconds: float = 0.0
@@ -199,6 +206,26 @@ func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = fals
 	bend.grip_fit = hands.grip_fit(pose.in_hand) if gripped else Vector3.ZERO
 	# Not the left hand in a reload: it takes the magazine out of the replica, as its clip does.
 	bend.grip_fit_both = hands.grip_fit_both(pose.in_hand) and not pose.reloading
+	# The hands on the replica as the first-person arms hold it (HG1), as far as the aim shows, both eased: the right on
+	# its grip, the left on a rifle's handguard or lowered from a pistol (held one-handed); the left not in a reload (it
+	# fetches the magazine); neither in a switch or a throw.
+	var throwing := pose.throw_share >= 0.0 or pose.bomb_held
+	var holding := gripped and not pose.switching and not throwing
+	var held := hands.held(pose.in_hand)
+	var support := 0.0
+	if holding and not pose.reloading and held != null:
+		# A pistol's left hand is lowered from the aim, not on the replica: it goes with the aim (none in the high ready).
+		support = aiming * (1.0 - pose.raise) if held.one_handed else aiming
+	if _support != support:
+		_support = _eased(_support, support, delta, pose.snapped)
+	var grasp := aiming if holding else 0.0
+	if _grasp != grasp:
+		_grasp = _eased(_grasp, grasp, delta, pose.snapped)
+	bend.held = held if seen else null
+	bend.grasp = _grasp
+	bend.support = _support
+	bend.close_fingers = near
+	hands.grasp = _grasp if seen else 0.0
 	# A bomb thrown or held in hand (GT1): the arms throw it, the bomb in the right hand until it leaves.
 	bend.throw_share = pose.throw_share
 	bend.throw_held = pose.bomb_held
@@ -354,3 +381,11 @@ static func _seconds(side: FigureSidecar, clip_name: StringName) -> float:
 func _base(part: String) -> String:
 	var at := part.rfind(_config.lod_suffix)
 	return part.substr(0, at) if at >= 0 and part.substr(at + _config.lod_suffix.length()).is_valid_int() else part
+
+
+## `now` eased toward `target` (HG1): in over FigureConfig.settle_support, out quicker over settle_support_off; at once
+## when the pose `snapped`, and the rest of the way once within raise_rest.
+func _eased(now: float, target: float, delta: float, snapped: bool) -> float:
+	var settle := _config.settle_support if target > now else _config.settle_support_off
+	var out := target if snapped else lerpf(now, target, FigurePose.settle_share(delta, settle))
+	return target if absf(out - target) < _config.raise_rest else out

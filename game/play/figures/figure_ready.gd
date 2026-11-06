@@ -37,6 +37,17 @@ func _init(skeleton: Skeleton3D, config: FigureConfig) -> void:
 	if _arms.size() % 3 != 0:
 		push_warning("FigureReady: raise_arm_bones is not three bones an arm")
 		_arms.clear()
+		return
+	for k in range(0, _arms.size(), 3):
+		if not chained(skeleton, _arms[k], _arms[k + 1], _arms[k + 2]):
+			push_warning("FigureReady: %s's arm bones don't hang from each other" % skeleton.get_bone_name(_arms[k]))
+			_arms.clear()
+			return
+
+
+## Whether `fore` hangs from `upper` and `hand` from `fore` (what reach sets each bone over).
+static func chained(skeleton: Skeleton3D, upper: int, fore: int, hand: int) -> bool:
+	return skeleton.get_bone_parent(fore) == upper and skeleton.get_bone_parent(hand) == fore
 
 
 ## Draws the replica `amount` (0..1) of the way to the shoulder: `butt_on_grip` (its butt, in the grip bone's frame)
@@ -92,9 +103,14 @@ func _move_hands(skeleton: Skeleton3D, move: Transform3D, bones: int = -1) -> vo
 
 ## Turns `upper` and `fore` so the `hand` bone's joint lands on `target`'s origin, the elbow bending in the plane it
 ## bends in now (down, when the arm is straight), then gives the hand `target` (a hand out of reach stretches to it).
+## The arm's frames are read once and each bone set over its parent's new frame, so the skeleton works its frames out
+## once an arm rather than after each bone (the three bones hang from each other: FigureConfig.raise_arm_bones).
 static func reach(skeleton: Skeleton3D, upper: int, fore: int, hand: int, target: Transform3D) -> void:
+	var parent := skeleton.get_bone_parent(upper)
+	var above := skeleton.get_bone_global_pose(parent) if parent >= 0 else Transform3D.IDENTITY
 	var shoulder := skeleton.get_bone_global_pose(upper)
-	var elbow := skeleton.get_bone_global_pose(fore).origin
+	var fore_pose := skeleton.get_bone_global_pose(fore)
+	var elbow := fore_pose.origin
 	var wrist := skeleton.get_bone_global_pose(hand).origin
 	var a := shoulder.origin.distance_to(elbow)
 	var b := elbow.distance_to(wrist)
@@ -109,10 +125,11 @@ static func reach(skeleton: Skeleton3D, upper: int, fore: int, hand: int, target
 	var along := (a * a + d * d - b * b) / (2.0 * d)
 	var bent := shoulder.origin + way * along + side * sqrt(maxf(a * a - along * along, 0.0))
 	var arm := Basis(Quaternion((elbow - shoulder.origin).normalized(), (bent - shoulder.origin).normalized()))
-	skeleton.set_bone_global_pose(upper, Transform3D(arm * shoulder.basis, shoulder.origin))
-	var fore_pose := skeleton.get_bone_global_pose(fore)
-	wrist = skeleton.get_bone_global_pose(hand).origin
-	var forearm := Basis(Quaternion((wrist - fore_pose.origin).normalized(),
-			(target.origin - fore_pose.origin).normalized()))
-	skeleton.set_bone_global_pose(fore, Transform3D(forearm * fore_pose.basis, fore_pose.origin))
-	skeleton.set_bone_global_pose(hand, target)
+	var upper_at := Transform3D(arm * shoulder.basis, shoulder.origin)
+	# The wrist where the upper arm's turn carries it, then the forearm turned from there onto the target.
+	var carried := bent + arm * (wrist - elbow)
+	var forearm := Basis(Quaternion((carried - bent).normalized(), (target.origin - bent).normalized()))
+	var fore_at := Transform3D(forearm * arm * fore_pose.basis, bent)
+	skeleton.set_bone_pose(upper, above.affine_inverse() * upper_at)
+	skeleton.set_bone_pose(fore, upper_at.affine_inverse() * fore_at)
+	skeleton.set_bone_pose(hand, fore_at.affine_inverse() * target)
