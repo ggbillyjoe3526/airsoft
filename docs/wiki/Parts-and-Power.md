@@ -59,6 +59,8 @@ magazine holds and **Carried** adds magazines to the replica's own (you always c
 
 <!-- wiki:parts magazines -->
 
+- **Looks:** each is its replica's own magazine at another length. The hi-cap is a third longer, with a winding wheel
+  under its base; the low-cap is short; the pistol's extended magazine sticks out below the grip, holes down its back.
 - **Rattles:** the loose BBs in a hi-cap rattle as you move, so bots close by hear you even walking.
 - The hi-cap carries as many BBs in all in fewer, rattling changes; the low-cap carries fewer BBs in all for a quick
   change and draw. The pistol's extended magazine holds half as many again, for a slower draw.
