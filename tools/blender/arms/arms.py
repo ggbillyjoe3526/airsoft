@@ -78,7 +78,10 @@ LOOSE_COST = 500.0
 CUP_TRIES = 16
 WRAP = (25.0, 80.0)
 WRAP_COST = 0.5
-OVER_COST = 4.0
+OVER_COST = float(os.environ.get("BL_OVER_COST", "4.0"))
+# How far the support forearm's axis keeps from the replica (its sleeve's radius, m) and the cost per mm closer.
+FOREARM_CLEAR = float(os.environ.get("BL_FOREARM_CLEAR", "0.045"))
+CLEAR_COST = 20.0
 # How far a resting finger's last joint bends for each degree of its middle one (relaxed fingers curl together).
 TIP_COUPLE = 0.7
 # Round a grip with a `thumb_at` mark (the pistols', and the rifle's: the owner, 2026-11-05, its thumb round the
@@ -140,24 +143,23 @@ RIGHT = {"d": 0.006, "f": 0.038, "x": 0.012, "slant": 30.0, "wrap": -30.0, "thum
 # its right side rather than reaching over its top: the owner, 2026-11-05; the hand a little further right, its
 # wrist less turned in: 19:41) and `depth` out of the palm, seated
 # on it and held `standoff` off; its turn found by `cup` over `search` ((yaw), (pitch), (roll) ranges, degrees: the
-# fingers' line yawed from forward toward the right and pitched up, the palm rolled either way from facing up; the
-# turn is fixed at 80 and 25 degrees: the palm cups the handguard's underside round its lower left corner, the
-# knuckles under its lower right one, so the fingers lie along the right side with their tips below the rail (the
-# critic, photo 123656); steeper, the knuckles rise up the side and the fingers stand over the top; the palm rolled
-# 20 degrees toward the left side and resting on the underside, not held off it: rolled less the thumb leaves the
-# left side, more the fingers fan up the right one),
-# the forearm rising toward `rise` degrees from below. The arm comes from a bladed stance: its shoulder moved
-# `shoulder` (eye space; forward and down under the rifle, higher than at 48 degrees so the forearm comes in flatter,
-# about 33 degrees, and the wrist stays near 23 degrees with the hand this flat), the elbow at least
-# `drop` below it and at most `across` in toward the body. The thumb reaches
-# along the handguard's left side for (thumb_x, y + thumb_f, thumb_z), its length kept close to it (thumb_hug). No
+# fingers' line yawed from forward toward the right and pitched up, the palm rolled either way from facing up). The
+# owner (2026-11-06): the hand holds under the rifle, the thumb slightly forward and almost relaxed, and the forearm
+# meets the rifle at about 40 degrees seen from above (`plan`), not square across it. So the turn is fixed at 60, 40
+# and -20 degrees: the fingers run a little diagonally forward up the right side, their tips below the rail (aimed at
+# `tip_at`), the palm under the handguard, the wrist about 27 degrees off the 40-degree forearm; turned further
+# forward the fingers stand over the rail, and the forearm, steeper, passes through the magazine (`cup` keeps it
+# FOREARM_CLEAR off the replica). The forearm rises toward `rise` degrees from below. The arm comes
+# from a bladed stance: its shoulder moved `shoulder` (eye space; left, a little forward and down), the elbow at
+# least `drop` below it and at most `across` in toward the body. The thumb lies forward along the handguard's left
+# side, low and loose, toward (thumb_x, y + thumb_f, thumb_z) (`thumb_pull`, held lightly: `thumb_hug`). No
 # finger's glove rises above `tips_below` (replica space; the rail's top is 0.0735): the fingers rest on the right side
-# and none shows over the top from the left (the owner's 16:30 note, the critic).
+# and none stands over the top from the left (the owner's 16:30 note, the critic).
 GUARD = {"kind": "guard", "y": 0.190, "forward": 0.052, "depth": 0.034, "standoff": 0.0,
-         "search": ((80, 80), (25, 25), (-20, -20)), "rise": 30.0, "shoulder": (-0.02, 0.12, -0.08), "drop": 0.06,
-         "across": 0.25, "thumb_x": -0.023, "thumb_f": 0.05, "thumb_z": 0.055, "thumb_hug": 3.0, "thumb_pull": 3.0,
-         "tips_below": 0.068, "plan": 0.0,
-         "tip_at": (0.0275, 0.005, 0.048), "tip_swing": 8.0,
+         "search": ((60, 60), (40, 40), (-20, -20)), "rise": 40.0, "shoulder": (-0.06, 0.04, -0.06), "drop": 0.06,
+         "across": 0.25, "thumb_x": -0.030, "thumb_f": 0.065, "thumb_z": 0.038, "thumb_hug": 2.0,
+         "thumb_pull": 30.0, "tips_below": 0.068, "plan": 40.0,
+         "tip_at": (0.0275, 0.005, 0.044), "tip_swing": 8.0,
          "fingers": {"Index": (35, 35, 20), "Middle": (40, 45, 30), "Ring": (40, 45, 30), "Pinky": (35, 40, 25)},
          "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
 # A pistol is held in the right hand alone, as the game's look draws it: the left arm hangs at the side, out of view
@@ -172,26 +174,30 @@ DOWN = {"kind": "down", "at": (0.0, 0.06, -0.40),
 # first two to keep the wrist straightest and the little finger's knuckle near its mark); so the web of the hand wraps
 # the back strap under the beavertail, the fingers close up under the trigger guard (swung `swing` toward the index)
 # with the little finger on the grip too, and the thumb comes round the back strap's corner and lies forward and a
-# little down along the grip's left side, as in 123843 (its tip toward `thumb_at`; along the frame under the slide it
-# stood out past the slide in the aimed view, the owner's 19:41 note), held close to the grip (`thumb_hug`) so it
-# doesn't stand off the panel seen from behind (the critic). The arm reaches out
-# to it, as a pistol is held: its shoulder raised and drawn back `shoulder` (eye space), its elbow free to come up
-# to the shoulder's height (`drop`).
+# forward along the frame's left side just under the slide (its tip toward `thumb_at`, drawn there hard, `thumb_pull`:
+# the owner, 2026-11-06, "the thumb is sitting too low"), held lightly to the frame (`thumb_hug`). The arm reaches
+# out to it, as a pistol is held, slightly bent (the owner, 2026-11-06: not straight; about 86 % of its reach, the
+# wrist 26 degrees): its shoulder raised and drawn back `shoulder` (eye space), its elbow free to come up to the
+# shoulder's height (`drop`).
 PISTOL_RIGHT = dict(RIGHT, web=(0.012, -0.095, -0.045), index=(0.018, -0.042, -0.040), pinky=(0.018, -0.058, -0.098),
-                    thumb_at=(-0.020, -0.058, -0.060), thumb_hug=6.0, shoulder=(0.0, -0.12, 0.10), drop=0.0,
+                    thumb_at=(-0.020, -0.050, -0.032), thumb_hug=2.0, thumb_pull=30.0, shoulder=(0.0, -0.09, 0.08),
+                    drop=0.0,
                     swing=(-15.0, -15.0, -15.0))
 # The Cyber Pistol, resized to the GBB's proportions (CZ1): the GBB's marks (the owner: the two grips should look the
 # same), the web 2 mm further back and lower on its more upright back strap and the index knuckle 2 mm back for its
-# trigger, 5 mm further from the back strap than the GBB's.
-CYBER_RIGHT = dict(PISTOL_RIGHT, web=(0.012, -0.097, -0.047), index=(0.018, -0.044, -0.040))
+# trigger, 5 mm further from the back strap than the GBB's; its thumb aimed 4 mm further back and 8 mm lower
+# along its taller frame, so it lies on the frame rather than standing out from it.
+CYBER_RIGHT = dict(PISTOL_RIGHT, web=(0.012, -0.097, -0.047), index=(0.018, -0.044, -0.040),
+                   thumb_at=(-0.020, -0.054, -0.040))
 # The AEG Rifle's grip: the same three marks, the hand high on the short grip with the little finger wholly on it, its
 # knuckle above the grip's flared foot (the owner, 2026-11-05; the critic: half of it hung below), the knuckles' line
 # raked back with the grip, the web closer in over the back strap so the thumb reaches round onto the grip's left
-# side, high on it (`thumb_at`, its length kept close: the owner, 18:37, 19:41); the shoulder drawn in, back and a
+# side, high at its top under the receiver (`thumb_at`, drawn there hard: the owner, 2026-11-06, the thumb too
+# low); the shoulder drawn in, back and a
 # little down to keep the wrist straighter (about 22 degrees).
 AEG_RIGHT = dict(RIGHT, web=(0.042, -0.103, -0.056), index=(0.030, -0.031, -0.036), pinky=(0.024, -0.068, -0.078),
                  pinky_cost=2000.0, swing=(-10.0, -10.0, -10.0), shoulder=(-0.04, -0.08, -0.02),
-                 thumb_at=(-0.020, -0.062, -0.045), thumb_hug=5.0)
+                 thumb_at=(-0.022, -0.050, -0.026), thumb_hug=2.0, thumb_pull=30.0)
 HOLDS = {
     "aeg": Hold("aeg.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.073, -0.026), 31.0, 0.046, 0.0155),
                 AEG_RIGHT, GUARD),
@@ -213,11 +219,13 @@ def roll_about(v: Vector, axis: Vector, deg: float) -> Vector:
 
 def tuned(spec: dict) -> dict:
     """`spec` with any value overridden from the environment (BL_<KEY>=value; BL_THUMB=across,twist,bend,tip1,tip2;
-    BL_SEARCH=yaw0,yaw1,pitch0,pitch1,roll0,roll1),
+    BL_SEARCH=yaw0,yaw1,pitch0,pitch1,roll0,roll1; BL_G_<KEY> for the support hand's spec alone),
     for tuning a hold by eye."""
     out = dict(spec)
     for k, v in spec.items():
         env = os.environ.get("BL_" + k.upper())
+        if spec.get("kind") == "guard":
+            env = os.environ.get("BL_G_" + k.upper(), env)
         if env is not None and isinstance(v, float):
             out[k] = float(env)
         elif env is not None and isinstance(v, tuple) and all(isinstance(c, float) for c in v):
@@ -459,7 +467,8 @@ def left_on_guard(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider)
     hand.tip_top = None
     hand_m, palm = cup(rig, hand, j, to_eye, spec, col, placed)
     hand.normal = palm
-    hand.tip_top = (to_eye @ Vector((0.0, 0.0, spec["tips_below"]))).z
+    # The fingers' highest (eye space) where they rest, level with the hand on the handguard.
+    hand.tip_top = (to_eye @ Vector((0.0, y, spec["tips_below"]))).z
     pole_l, _ = elbow_for(rig, "L", hand_m)
     pose.place_arm(rig, "L", hand_m, pole_l, quiet=True)
     # The thumb forward along the handguard's left side.
@@ -504,12 +513,16 @@ def cup(rig: Rig, hand: pose.Hand, j: dict, to_eye: Matrix, spec: dict, col: Col
                 fore = m.translation - (rig.pose["UpperArm_L"].translation + pole)
                 rise = math.degrees(math.atan2(fore.z, fore.xy.length))
                 plan = math.degrees(math.atan2(abs(fore.x), fore.y))
+                # The forearm (its sleeve) clears the replica: the magazine hangs just behind the support hand.
+                elbow = rig.pose["UpperArm_L"].translation + pole
+                clear = sum(max(0.0, FOREARM_CLEAR - col.dist(elbow.lerp(m.translation, t / 8.0)))
+                            for t in range(1, 8))
                 gaps = []
                 for q in mcps:
                     p = to_eye.inverted() @ (m @ (rest_inv @ q))
                     gaps.append(math.hypot(p.x - axis[0], p.z - axis[1]) - GUARD_RADIUS)
                 loose = sum(max(0.0, g - CUP_GAP[1], CUP_GAP[0] - g) for g in gaps)
-                score = bend + abs(rise - spec["rise"]) * RISE_COST + loose * LOOSE_COST + \
+                score = bend + abs(rise - spec["rise"]) * RISE_COST + loose * LOOSE_COST + clear * 1000.0 * CLEAR_COST + \
                     (abs(plan - spec["plan"]) * PLAN_COST if spec.get("plan", 0.0) > 0.0 else 0.0)
                 found.append((score, yaw, pitch, roll, m, palm, bend, rise, gaps))
     # The few best then try their fingers: each should curl round the handguard and come to rest on it, neither
