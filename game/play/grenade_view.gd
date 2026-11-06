@@ -53,14 +53,16 @@ const SOFT_WASH := 0.6
 const SMOKE_WASH := 0.94
 ## The wash's canvas layer: over the field, under the HUD's (1).
 const WASH_LAYER := 0
-## Through the thrower's own eyes, the bomb in hand while the pin comes out: this far right, down and ahead of the eyes
-## (m), lifted HELD_LIFT as the windup runs out. Your arms' model holds it there (tools/blender/arms/arms.py HELD_AT).
+## Through the thrower's own eyes, the bomb in hand: this far right, down and ahead of the eyes (m). Your arms' model
+## holds it there (tools/blender/arms/arms.py HELD_AT), and throws it from there (GT3, ArmsThrow).
 const HELD_AT := Vector3(0.12, -0.12, -0.32)
-const HELD_LIFT := 0.03
 ## Tipped in the hand (rad, about the view's forward and right axes), as a fist holds it (arms.py HELD_TIP).
 const HELD_TIP := Vector2(-0.45, 0.35)
 ## Each kind's hold in your arms' model (ArmsView: `<id>_Hold`, `Hold_<id>`), by Grenade.Kind.
 const HOLDS: Array[StringName] = [&"", &"smoke", &"flash"]
+## Each kind's pin (the smoke's pin and ring, the flash's split ring and hook) by its model's material, by
+## Grenade.Kind: in your arms the left hand pulls it out (GT3), so the bomb in hand draws it apart.
+const PIN_MATERIALS: Array[String] = ["", "Wire", "Steel"]
 
 ## Reduced motion on: the dazzle's wash is softer.
 var soft_flash: bool = false
@@ -83,18 +85,29 @@ var _flare: MeshInstance3D = null
 var _flare_paint: StandardMaterial3D = null
 var _flash_left: float = 0.0
 var _wash: ColorRect = null
-## The bomb in hand: `_held_root` square to the view at the bomb's middle (your arms ride it), `_held` tipped in it.
+## The bomb in hand: `_held_root` square to the view at the bomb's middle (your arms ride it), `_held` tipped in it
+## (HELD_TIP: `_held_rest`) and moved with the hand throwing it, and its pin `_pin` (with your arms) with it until the
+## left hand takes it.
 var _held_root: Node3D = null
 var _held: MeshInstance3D = null
+var _pin: MeshInstance3D = null
+var _held_rest := Transform3D.IDENTITY
 var _held_kind: int = Grenade.Kind.NONE
-## How far up into view the hand is (0 below, 1 in place) and its lift through the windup (m), kept as it goes down.
+## How far up into view the hand is (0 below, 1 in place), and how far through the throw it is (ArmsThrow's share).
 var _raise: float = 0.0
-var _lift: float = 0.0
-## Your arms holding it (none until `setup_arms`), and each kind's materials with the depth pressed as theirs, by
-## Grenade.Kind and surface.
+var _share: float = 0.0
+## Whether the empty hand is following through after a throw.
+var _following := false
+## Your arms holding it (none until `setup_arms`), and by Grenade.Kind: the bomb in hand without its pin and the pin
+## alone (null: none), each surface's material with the depth pressed as theirs, and the pin's middle (the bomb's
+## frame).
 var _arms: ArmsView = null
 var _view_cfg: ViewModelConfig = null
+var _held_meshes: Array[Mesh] = []
+var _pin_meshes: Array[Mesh] = []
 var _held_paint: Array[Array] = []
+var _pin_paint: Array[Array] = []
+var _pin_middle := PackedVector3Array()
 var _wash_layer: CanvasLayer = null
 
 
@@ -135,8 +148,14 @@ func setup(count: int, cfg: GrenadeConfig, night: bool) -> void:
 	_held = MeshInstance3D.new()
 	_held.name = "Bomb"
 	_held.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_held.basis = Basis(Vector3.FORWARD, HELD_TIP.x) * Basis(Vector3.RIGHT, HELD_TIP.y)
+	_held_rest = Transform3D(Basis(Vector3.FORWARD, HELD_TIP.x) * Basis(Vector3.RIGHT, HELD_TIP.y), Vector3.ZERO)
+	_held.transform = _held_rest
 	_held_root.add_child(_held)
+	_pin = MeshInstance3D.new()
+	_pin.name = "Pin"
+	_pin.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_pin.visible = false
+	_held_root.add_child(_pin)
 	_light = OmniLight3D.new()
 	_light.light_color = FLASH_COLOUR
 	_light.omni_range = FLASH_RANGE
@@ -195,7 +214,7 @@ func update(state: GameState, fraction: float, delta: float, eyes: Character, ey
 			_light.visible = false
 			_flare.visible = false
 	_draw_wash(state, eyes, eye)
-	_draw_held(eyes, eye, delta)
+	_draw_held(eyes, eye, delta, fraction / float(Engine.physics_ticks_per_second))
 
 
 ## Your arms holding the bomb in hand (BL4's model, `cfg`'s look) and the bomb drawn with them: its depth pressed as
@@ -209,11 +228,15 @@ func setup_arms(cfg: ViewModelConfig, kind: int) -> void:
 	_arms.setup(cfg)
 	_arms.set_kind(kind)
 	_held.layers = OpticGlass.HANDS_LAYER
-	for mesh in _meshes:
-		var paint: Array[Material] = []
-		for i in mesh.get_surface_count():
-			paint.append(_pressed(mesh.surface_get_material(i), cfg.depth_scale))
-		_held_paint.append(paint)
+	_pin.layers = OpticGlass.HANDS_LAYER
+	var pressed: Dictionary[Material, Material] = {}
+	for k in _meshes.size():
+		var parts := _split(_meshes[k], PIN_MATERIALS[k] if k < PIN_MATERIALS.size() else "")
+		_held_meshes.append(parts[0])
+		_pin_meshes.append(parts[1])
+		_held_paint.append(_paint(parts[0], pressed, cfg.depth_scale))
+		_pin_paint.append(_paint(parts[1], pressed, cfg.depth_scale))
+		_pin_middle.append(parts[1].get_aabb().get_center() if parts[1] != null else Vector3.ZERO)
 	_held.mesh = null
 	_held_kind = Grenade.Kind.NONE
 
@@ -232,7 +255,7 @@ func materials() -> Array[Material]:
 			var own := mesh.surface_get_material(i)
 			if own != null and not out.has(own):
 				out.append(own)
-	for paint: Array in _held_paint:
+	for paint: Array in _held_paint + _pin_paint:
 		for m: Material in paint:
 			if m != null and not out.has(m):
 				out.append(m)
@@ -250,6 +273,15 @@ func meshes() -> Array[Mesh]:
 ## Kind `kind`'s mesh, for tests.
 func mesh_of(kind: int) -> Mesh:
 	return _meshes[clampi(kind, 0, _meshes.size() - 1)]
+
+
+## Kind `kind`'s mesh in your arms' hand (its pin drawn apart: `pin_mesh_of`), for tests.
+func held_mesh_of(kind: int) -> Mesh:
+	return _held_meshes[clampi(kind, 0, _held_meshes.size() - 1)] if not _held_meshes.is_empty() else mesh_of(kind)
+
+
+func pin_mesh_of(kind: int) -> Mesh:
+	return _pin_meshes[clampi(kind, 0, _pin_meshes.size() - 1)] if not _pin_meshes.is_empty() else null
 
 
 ## How far kind `kind`'s model reaches below its middle lying on its side (m), for tests.
@@ -394,48 +426,124 @@ func _draw_wash(state: GameState, eyes: Character, eye: Vector3) -> void:
 	_wash.visible = true
 
 
-## The bomb in `eyes`' hand while its pin comes out, or while it waits in hand for a trigger pull (MC1), before their
-## eyes at `eye`.
-## With your arms (`setup_arms`) the hand comes up into view with it from ViewModelConfig.bomb_raise_drop below over
-## bomb_raise_time, eased as a draw, and once it has left the hand the empty hand goes back down the same way; without
-## them the bomb shows and goes at once.
-func _draw_held(eyes: Character, eye: Vector3, delta: float) -> void:
+## The bomb in `eyes`' hand while it waits for a trigger pull (MC1) or is thrown, before their eyes at `eye`, the tick
+## `ahead` s on (s) from its last step. With your arms (`setup_arms`) the hand comes up into view with it from
+## ViewModelConfig.bomb_raise_drop below over bomb_raise_time, eased as a draw, and throws it (ArmsThrow): the left
+## hand pulls the pin and the right arm swings over and lets it go, then follows through out of view, where it is
+## gone; a bomb put back goes down with the hand the way it came. Without them the bomb shows and goes at once.
+func _draw_held(eyes: Character, eye: Vector3, delta: float, ahead: float) -> void:
 	var kind := Grenades.held(eyes)
+	var through := _arms != null and eyes != null and _held_root.visible and _held_kind != Grenade.Kind.NONE \
+			and eyes.grenades.throwing != Grenade.Kind.NONE and eyes.grenades.released
 	if kind != Grenade.Kind.NONE:
-		var ready := 0.0
-		if eyes.grenades.throwing == kind:
-			ready = 1.0 - clampf(eyes.grenades.windup_left / maxf(_cfg.windup, 0.001), 0.0, 1.0)
-		_lift = HELD_LIFT * ready
+		if _following:
+			# A new bomb straight after a throw's follow-through: it comes up from below too.
+			_raise = 0.0
+		_following = false
 		_raise = 1.0 if _view_cfg == null else move_toward(_raise, 1.0, delta / _view_cfg.bomb_raise_time)
 		if kind != _held_kind:
 			_hold(kind)
+		_share = throw_share(eyes, _cfg, ahead)
+	elif through:
+		_share = throw_share(eyes, _cfg, ahead)
+		_following = true
+	elif _following:
+		# The follow-through has taken the empty hand out of view.
+		_following = false
+		_raise = 0.0
 	elif eyes != null and _view_cfg != null and _held_root.visible and _raise > 0.0:
+		# Put back, or a throw cut off (hit, round over, other eyes): down the way it came, on the hold.
+		_share = 0.0
 		_raise = move_toward(_raise, 0.0, delta / _view_cfg.bomb_raise_time)
 	else:
 		_raise = 0.0
 	if _raise <= 0.0:
+		_share = 0.0
+		_following = false
 		if _held_root.visible:
 			_held_root.visible = false
 		return
 	var low := 1.0 - _raise
 	var drop := _view_cfg.bomb_raise_drop * low * low if _view_cfg != null else 0.0
 	var view := Basis.from_euler(Vector3(eyes.pitch, eyes.yaw, 0.0))
-	_held_root.transform = Transform3D(view, eye + view * (HELD_AT + Vector3(0.0, _lift - drop, 0.0)))
+	_held_root.transform = Transform3D(view, eye + view * (HELD_AT + Vector3(0.0, -drop, 0.0)))
 	_held.visible = kind != Grenade.Kind.NONE
+	if _arms != null:
+		_arms.throw_pose(_share)
+		var model := _arms.model_transform()
+		var back := model.affine_inverse()
+		_held.transform = model * _arms.bomb_moved() * back * _held_rest
+		_pin.visible = _pin.mesh != null and _held.visible and _share < _view_cfg.bomb_pin_out
+		if _pin.visible:
+			_pin.transform = model * _arms.pin_moved(_share) * back * _held_rest
 	_held_root.visible = true
 
 
-## The bomb in hand becomes kind `kind`'s, in your arms when they're set up.
+## How far `c` is through a throw `ahead` s past its last step (ArmsThrow's share: 0..1 over the windup, 1..2 over the
+## recovery; 0 with none).
+static func throw_share(c: Character, cfg: GrenadeConfig, ahead: float) -> float:
+	var hand := c.grenades
+	if hand.throwing == Grenade.Kind.NONE:
+		return 0.0
+	if not hand.released:
+		return clampf(1.0 - (hand.windup_left - ahead) / maxf(cfg.windup, 0.001), 0.0, 1.0)
+	return 1.0 + clampf(1.0 - (hand.recover_left - ahead) / maxf(cfg.recover, 0.001), 0.0, 1.0)
+
+
+## The bomb in hand becomes kind `kind`'s, in your arms when they're set up (its pin apart, for the left hand).
 func _hold(kind: int) -> void:
 	_held_kind = kind
 	var k := clampi(kind, 0, _meshes.size() - 1)
-	_held.mesh = _meshes[k]
-	if k < _held_paint.size():
-		var paint: Array = _held_paint[k]
-		for i in paint.size():
-			_held.set_surface_override_material(i, paint[i])
-	if _arms != null:
-		_arms.hold(HOLDS[k] if k < HOLDS.size() else &"", _held_root)
+	if _arms == null:
+		_held.mesh = _meshes[k]
+		return
+	_held.mesh = _held_meshes[k]
+	_pin.mesh = _pin_meshes[k]
+	_dress(_held, _held_paint[k])
+	_dress(_pin, _pin_paint[k])
+	_arms.hold(HOLDS[k] if k < HOLDS.size() else &"", _held_root)
+	_arms.ready_throw(_arms.model_transform().affine_inverse() * (_held_rest * _pin_middle[k]))
+
+
+static func _dress(node: MeshInstance3D, paint: Array) -> void:
+	for i in paint.size():
+		node.set_surface_override_material(i, paint[i])
+
+
+## `mesh` drawn apart: [it without the surfaces whose material is named `pin`, those alone (null: none)]; `mesh` and
+## null when it has none or can't be.
+static func _split(mesh: Mesh, pin: String) -> Array[Mesh]:
+	var own := mesh as ArrayMesh
+	var out: Array[Mesh] = [mesh, null]
+	if own == null or pin.is_empty():
+		return out
+	var body := ArrayMesh.new()
+	var parts := ArrayMesh.new()
+	for i in own.get_surface_count():
+		var material := own.surface_get_material(i)
+		var into := parts if material != null and material.resource_name == pin else body
+		into.add_surface_from_arrays(own.surface_get_primitive_type(i), own.surface_get_arrays(i))
+		into.surface_set_material(into.get_surface_count() - 1, material)
+	if parts.get_surface_count() > 0 and body.get_surface_count() > 0:
+		out[0] = body
+		out[1] = parts
+	return out
+
+
+## `mesh`'s surfaces' materials with the depth pressed to `scale` (one copy for each material, kept in `pressed`).
+static func _paint(mesh: Mesh, pressed: Dictionary[Material, Material], scale: float) -> Array[Material]:
+	var out: Array[Material] = []
+	if mesh == null:
+		return out
+	for i in mesh.get_surface_count():
+		var own := mesh.surface_get_material(i)
+		if own == null:
+			out.append(null)
+			continue
+		if not pressed.has(own):
+			pressed[own] = _pressed(own, scale)
+		out.append(pressed[own])
+	return out
 
 
 ## Whether the bomb in hand is drawn, for tests.
