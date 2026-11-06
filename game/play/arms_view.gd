@@ -5,9 +5,9 @@ extends Node3D
 ## posing both arms on it and an empty `Hold_<id>` where that replica's origin sits, so the arms ride the replica's
 ## node (ReplicaView's Held.root) and follow its sway, kick, cant and drop. A replica the model has no hold for shows no
 ## arms. One-handed replicas (ViewModelConfig.one_hand) hide the left arm. A robot's arms (FigureMix.ROBOT) wear
-## ViewModelConfig.robot_arms. Holding a bomb, they can throw it (ArmsThrow, GT3: `ready_throw`, `throw_pose`). The materials press their depth as the replica's do, cast no shadow, take none (the sun's
-## shadow on pressed depth breaks into hard patches over the sleeve) and stay out of an optic's view. A child of
-## ReplicaView.
+## ViewModelConfig.robot_arms. Holding a bomb, they can throw it (ArmsThrow, GT3: `ready_throw`, `throw_pose`). The
+## materials press their depth as the replica's do, cast no shadow, take none (the sun's shadow on pressed depth breaks
+## into hard patches over the sleeve) and stay out of an optic's view. A child of ReplicaView.
 
 const MODEL := "res://assets/models/arms/arms.glb"
 ## The model's names (tools/blender/arms/arms.py).
@@ -88,8 +88,8 @@ func set_shown(on: bool) -> void:
 		_model.visible = on and _on != &""
 
 
-## Takes the hold on now as the one a throw starts from, the pin's ring's middle at `ring` (the model's frame: the hold's
-## mark at `mark`'s place, as GrenadeView draws the bomb). Call after `hold`.
+## Takes the hold on now as the one a throw starts from, the pin's ring's middle at `ring` (the model's frame: the
+## hold's mark at `mark`'s place, as GrenadeView draws the bomb). Call after `hold`.
 func ready_throw(ring: Vector3) -> void:
 	if _throw != null and _on != &"":
 		_throw.capture(_skeleton, ring)

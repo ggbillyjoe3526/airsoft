@@ -96,8 +96,11 @@ var _held_kind: int = Grenade.Kind.NONE
 ## How far up into view the hand is (0 below, 1 in place), and how far through the throw it is (ArmsThrow's share).
 var _raise: float = 0.0
 var _share: float = 0.0
+## Whether the empty hand is following through after a throw.
+var _following := false
 ## Your arms holding it (none until `setup_arms`), and by Grenade.Kind: the bomb in hand without its pin and the pin
-## alone (null: none), each surface's material with the depth pressed as theirs, and the pin's middle (the bomb's frame).
+## alone (null: none), each surface's material with the depth pressed as theirs, and the pin's middle (the bomb's
+## frame).
 var _arms: ArmsView = null
 var _view_cfg: ViewModelConfig = null
 var _held_meshes: Array[Mesh] = []
@@ -433,21 +436,30 @@ func _draw_held(eyes: Character, eye: Vector3, delta: float, ahead: float) -> vo
 	var through := _arms != null and eyes != null and _held_root.visible and _held_kind != Grenade.Kind.NONE \
 			and eyes.grenades.throwing != Grenade.Kind.NONE and eyes.grenades.released
 	if kind != Grenade.Kind.NONE:
+		if _following:
+			# A new bomb straight after a throw's follow-through: it comes up from below too.
+			_raise = 0.0
+		_following = false
 		_raise = 1.0 if _view_cfg == null else move_toward(_raise, 1.0, delta / _view_cfg.bomb_raise_time)
 		if kind != _held_kind:
 			_hold(kind)
 		_share = throw_share(eyes, _cfg, ahead)
 	elif through:
 		_share = throw_share(eyes, _cfg, ahead)
-	elif _share >= 1.0:
+		_following = true
+	elif _following:
 		# The follow-through has taken the empty hand out of view.
+		_following = false
 		_raise = 0.0
 	elif eyes != null and _view_cfg != null and _held_root.visible and _raise > 0.0:
+		# Put back, or a throw cut off (hit, round over, other eyes): down the way it came, on the hold.
+		_share = 0.0
 		_raise = move_toward(_raise, 0.0, delta / _view_cfg.bomb_raise_time)
 	else:
 		_raise = 0.0
 	if _raise <= 0.0:
 		_share = 0.0
+		_following = false
 		if _held_root.visible:
 			_held_root.visible = false
 		return

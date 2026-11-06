@@ -9,8 +9,8 @@ extends RefCounted
 ## (FigureThrow's measure); 0 is the hold. In the arms model's frame (its origin the eyes, BL4). Presentation only;
 ## allocation-free once made.
 
-## The arms model's bones (tools/blender/arms/arms.py, named as the figures' skeleton names them): each arm's upper
-## arm, forearm and hand, and the left hand's fingers, which curl round the ring (the first joint less, the thumb least).
+## The arms model's bones (tools/blender/arms/arms.py, named as the figures' skeleton names them): each arm's upper arm,
+## forearm and hand, and the left hand's fingers, which curl round the ring (the first joint less, the thumb least).
 const RIGHT_ARM: Array[String] = ["UpperArm_R", "Forearm_R", "Hand_R"]
 const LEFT_ARM: Array[String] = ["UpperArm_L", "Forearm_L", "Hand_L"]
 const LEFT_FINGERS: Array[String] = ["Index1_L", "Index2_L", "Index3_L", "Middle1_L", "Middle2_L", "Middle3_L",
@@ -67,8 +67,8 @@ func _init(skeleton: Skeleton3D, cfg: ViewModelConfig) -> void:
 	_turns.resize(_moved.size())
 
 
-## Takes `skeleton`'s pose now (its bones' turns, just put on by the hold's clip) as the hold the throw starts from, the pin's ring's middle at `ring` (the model's frame).
-## Called once each time the hold is put on.
+## Takes `skeleton`'s pose now (its bones' turns, just put on by the hold's clip) as the hold the throw starts from, the
+## pin's ring's middle at `ring` (the model's frame). Called once each time the hold is put on.
 func capture(skeleton: Skeleton3D, ring: Vector3) -> void:
 	if _arms.is_empty():
 		return
@@ -104,20 +104,22 @@ func pose(skeleton: Skeleton3D, share: float) -> void:
 	if not _posed:
 		return
 	if left_shown(share, _cfg):
-		_turn_fingers(skeleton, _fingers, _cfg.bomb_pin_curl * smoothstep(0.0, maxf(_cfg.bomb_pin_grab, EPSILON), share),
-				CURL_AXIS, THUMB_AXIS)
+		var grip := smoothstep(0.0, maxf(_cfg.bomb_pin_grab, EPSILON), share)
+		_turn_fingers(skeleton, _fingers, _cfg.bomb_pin_curl * grip, CURL_AXIS, THUMB_AXIS)
 		_shoulder(skeleton, 3, _cfg.bomb_left_shoulder)
 		ArmReach.reach(skeleton, _arms[3], _arms[4], _arms[5], left_key(share, _ring, _cfg), _cfg.bomb_left_pole,
 				1.0, Basis.IDENTITY, 0.0)
-		_turn_left(skeleton, smoothstep(0.0, maxf(_cfg.bomb_pin_grab, EPSILON), share))
+		_turn_left(skeleton, grip)
 	var w := right_weight(share, _cfg)
 	if w > 0.0:
 		var shoulder := skeleton.get_bone_global_pose(_arms[0]).origin
 		_shoulder(skeleton, 0, shoulder + shoulder_shift(share, _cfg))
 		ArmReach.reach(skeleton, _arms[0], _arms[1], _arms[2], right_key(share, _cfg), right_pole(share, _cfg), w,
 				Basis.IDENTITY, 0.0)
+		_flex(skeleton, wrist_flex(share, _cfg))
 	if share > 1.0:
-		_turn_fingers(skeleton, _right_fingers, -_cfg.bomb_let_go * smoothstep(1.0, 1.3, share), CURL_AXIS, -THUMB_AXIS)
+		var open := -_cfg.bomb_let_go * smoothstep(1.0, maxf(_cfg.bomb_let_go_by, 1.0 + EPSILON), share)
+		_turn_fingers(skeleton, _right_fingers, open, CURL_AXIS, -THUMB_AXIS)
 
 
 ## How the right hand (and the bomb in it) has moved from the hold, in the model's frame.
@@ -141,13 +143,18 @@ static func left_shown(share: float, cfg: ViewModelConfig) -> bool:
 	return share > 0.0 and share < cfg.bomb_pin_out
 
 
-## The left wrist's key: up from bomb_left_in to the ring (`ring`) by bomb_pin_grab, then away with the pin.
+## The left wrist's key: up from bomb_left_in to the ring (`ring`) by bomb_pin_grab, drawing the pin out by
+## bomb_pull_at, then away with it.
 static func left_key(share: float, ring: Vector3, cfg: ViewModelConfig) -> Vector3:
 	var grab := clampf(cfg.bomb_pin_grab, EPSILON, 1.0)
+	var pull := maxf(cfg.bomb_pull_at, grab + EPSILON)
 	var at_ring := ring + cfg.bomb_left_ring
 	if share <= grab:
 		return cfg.bomb_left_in.lerp(at_ring, smoothstep(0.0, 1.0, share / grab))
-	return at_ring.lerp(cfg.bomb_left_away, smoothstep(grab, maxf(cfg.bomb_pin_out, grab + EPSILON), share))
+	var pulled := at_ring + cfg.bomb_left_pulled
+	if share <= pull:
+		return at_ring.lerp(pulled, smoothstep(grab, pull, share))
+	return pulled.lerp(cfg.bomb_left_away, smoothstep(pull, maxf(cfg.bomb_pin_out, pull + EPSILON), share))
 
 
 ## How much of the right arm's throw is drawn: none until the left hand grips the ring, coming in as the hand goes out
@@ -159,7 +166,8 @@ static func right_weight(share: float, cfg: ViewModelConfig) -> float:
 
 
 ## The right wrist's key (drawn right_weight of the way from the hold): out aside (bomb_aside) and back to bomb_cocked
-## by bomb_cock, then quickening over the top (bomb_over) and ahead to bomb_release at the release, then down across to bomb_follow over the recovery.
+## by bomb_cock, then quickening over the top (bomb_over) and ahead to bomb_release at the release, then down across to
+## bomb_follow over the recovery.
 static func right_key(share: float, cfg: ViewModelConfig) -> Vector3:
 	var cock := clampf(cfg.bomb_cock, EPSILON, 1.0 - EPSILON)
 	if share <= cock:
@@ -176,7 +184,18 @@ static func right_key(share: float, cfg: ViewModelConfig) -> Vector3:
 		if t <= over:
 			return cfg.bomb_cocked.lerp(cfg.bomb_over, smoothstep(0.0, 1.0, t / over))
 		return cfg.bomb_over.lerp(cfg.bomb_release, (t - over) / (1.0 - over))
-	return cfg.bomb_release.lerp(cfg.bomb_follow, smoothstep(0.0, 1.0, minf(share - 1.0, 1.0)))
+	return cfg.bomb_release.lerp(cfg.bomb_follow, smoothstep(1.0, maxf(cfg.bomb_follow_by, 1.0 + EPSILON), share))
+
+
+## The right wrist's bend (rad; negative cocks it back): back to bomb_wrist_cocked as the arm goes back, then snapping
+## forward to bomb_wrist_release at the release, and held.
+static func wrist_flex(share: float, cfg: ViewModelConfig) -> float:
+	var grab := cfg.bomb_pin_grab
+	var cock := maxf(cfg.bomb_cock, grab + EPSILON)
+	if share <= cock:
+		return cfg.bomb_wrist_cocked * smoothstep(grab, cock, share)
+	var t := clampf((share - cock) / (1.0 - cock), 0.0, 1.0)
+	return lerpf(cfg.bomb_wrist_cocked, cfg.bomb_wrist_release, t * t)
 
 
 ## Where the right elbow bends: out and down while the arm goes back, swinging ahead as it comes over.
@@ -201,6 +220,12 @@ static func shoulder_shift(share: float, cfg: ViewModelConfig) -> Vector3:
 func _shoulder(skeleton: Skeleton3D, first: int, at: Vector3) -> void:
 	var upper := skeleton.get_bone_global_pose(_arms[first])
 	skeleton.set_bone_global_pose(_arms[first], Transform3D(upper.basis, at))
+
+
+## The right hand bent `angle` (rad) at the wrist towards the palm (as its fingers curl).
+func _flex(skeleton: Skeleton3D, angle: float) -> void:
+	var hand := skeleton.get_bone_global_pose(_arms[2])
+	skeleton.set_bone_global_pose(_arms[2], Transform3D(hand.basis * Basis(CURL_AXIS, angle), hand.origin))
 
 
 ## The left hand turned `w` of the way to grip the ring: its fingers (its bone's +Y) pointing from its wrist to the

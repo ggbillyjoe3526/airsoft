@@ -1403,10 +1403,12 @@ The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built 
 ## Your arms throwing a bomb (GT3)
 
 - [ ] **The pin:** press 4 (smoke), then 5 (flash), standing still. Your left hand comes up from below, closes over the
-  top of the bomb and pulls the pin and its ring away down to the left, out of view; the bomb has no pin after it.
-- [ ] **The throw:** your right arm swings out past the right edge, comes back over the top with the bomb in its fist
-  and lets it go ahead as the bomb flies; the hand opens and follows through down to the left out of view, then the
-  replica comes back up. Nothing pops or jumps, and the bomb never slips in the fist.
+  top of the bomb and draws the pin and its ring out to the left, then down out of view; the bomb has no pin after it.
+- [ ] **The throw:** your right arm takes the bomb out to the right and up to the top-right corner (it stays partly in
+  view), comes over the top and lets it go ahead with a flick of the wrist as the bomb flies; the hand opens and
+  follows through down to the left out of view, then the replica comes back up. Nothing pops or jumps, and the bomb
+  never slips in the fist.
+- [ ] **Cut off:** get hit while winding up: the hand goes back down the way it came, not frozen mid-throw.
 - [ ] **From the hand:** roll the wheel onto a bomb, wait, then pull the trigger: the same pin pull and throw.
 - [ ] **Feel:** the throw still takes the same time as before (0.3 s to the release). Say if the pin pull reads too
   quickly to see.
