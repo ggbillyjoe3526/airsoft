@@ -1246,7 +1246,7 @@ Dev content on for the rifle. The numbers came from bots; these need you.
   anything poking into the view while you walk, sprint, lean and aim?
 - [ ] **Iron sights:** aim. The rear sight's U and the front dot line up on the crosshair.
 - [ ] **Moving parts:** fire (the slide blows back), empty it (the slide locks back), reload (the magazine release
-  presses, the magazine drops and a new one goes up the well) and Inspect (the slide draws back a little).
+  presses, the magazine drops and a new one goes up the well) and Inspect (the slide stays home, GS2).
 - [ ] **Figures:** a bot reloading its pistol pulls the old magazine out of the grip and seats the new one, both in
   the left hand.
 - [ ] **Paints and parts:** in Customise, try each paint and every part: the laser and torch sit under the dust
@@ -1407,6 +1407,18 @@ The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built 
 - [ ] **AEG stock:** the stock's sides are flat, the half-round tubes gone.
 - [ ] **AEG charging handle:** it sits lower, under the rail's back end, and on a reload it pulls straight back
   without passing through anything.
+
+## Inspect your replica (IN1)
+
+- [ ] **The key.** Press **Y** with each replica in hand (the AEG, the GBB Pistol, the Cyber Pistol, the Sniper
+  Rifle). It turns side on, its right side to you and the whole replica in view, while its parts move: the AEG's
+  charging handle back, dust cover open and hop-up dial turned; the GBB's slide stays home; the Cyber's battery eased
+  out of the grip; the sniper's bolt lifted and drawn. Small plastic clicks go with each part. It ends back in your
+  hands where it started.
+- [ ] **It stops at once** when you fire, aim, reload, switch replica, holster, sprint or are hit: the replica eases
+  back in a moment and the parts are home. Pressing Y while sprinting or aiming does nothing.
+- [ ] **Rebind.** Settings › Controls lists **Inspect replica** on Y; move it to another key and it works there.
+- [ ] **Feel.** Is about 3 s for the rifles and 2 s for the pistols right, and is the turn too much or too little?
 
 ## Reporting what you find
 

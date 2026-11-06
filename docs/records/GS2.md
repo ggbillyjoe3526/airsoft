@@ -80,11 +80,13 @@ evaluated later in the build. Every review render and figure copy made by import
   reads cleanly.
 - The Sniper keeps its own flip-up sights (only the AEG's were asked to shrink); they hide whole under an optic like
   the AEG's.
+- Inspect (IN1, merged first) eased the GBB's slide 16 mm back; it now stays home there too, and the pistol's two
+  slide clicks went with it: the owner's rule is the slide is back only firing or locked empty.
 - The parts files are untouched: `gbb.py` and `fit_parts.py` would rewrite them, but nothing in them moved, and the
   open part pull requests own them.
 
 ## Known issues
 
-- The bots' copies of the AEG (`Figure`) still carry the irons baked in; TP1 (#220) splits them into `Figure_Sights`
-  hidden by `ReplicaParts.fit_figure`. Whichever merges second reruns `aeg.py`, `gbb.py`, `cyber.py`, `sniper.py`, then
-  `figure_parts.py`.
+- None open from the bots' copies: merged over TP1 (#220), the four replicas rebuilt (their figure copies now cut down
+  from these models, `Figure_Sights` hidden under an optic), `figure_parts.py` rerun; its copies in the parts files
+  came out a few bytes off main's even for the unchanged Cyber, so main's parts files stay.

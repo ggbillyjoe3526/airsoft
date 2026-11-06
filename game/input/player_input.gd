@@ -24,6 +24,8 @@ extends Node
 ## moves the map's own pointer (MapPointer) instead of the view, feet still move, the mouse wheel switches nothing, and
 ## fire and aim need a fresh press once it closes; a click (fire) there is a Go there to that point of the field and a
 ## ping's press a ping there (ping_on_map), while orders can be given. The map and the wheel never open together.
+## Inspect (IN1) is the view's alone, never part of a command: its press is latched for the play scene's next frame
+## (`take_inspect`), which turns the replica in hand over to look at (ReplicaView.inspect).
 
 ## The actions in project.godot's input map.
 const FORWARD := &"move_forward"
@@ -62,6 +64,8 @@ const MAG := &"mag_hand_off"
 const THROW_SMOKE := &"throw_smoke"
 const THROW_FLASH := &"throw_flash"
 const USE_DOOR := &"use_door"
+## Turn the replica in hand over to look at (IN1).
+const INSPECT := &"inspect"
 
 ## The view, absolute (rad): yaw 0 looks down -Z and turns left positive; pitch up positive.
 var view_yaw: float = 0.0
@@ -80,6 +84,8 @@ var _mode_latch: bool = false
 var _holster_latch: bool = false
 var _torch_latch: bool = false
 var _door_latch: bool = false
+## Inspect pressed since the play scene last took it (a frame's latch, not a tick's: `take_inspect`).
+var _inspect_latch: bool = false
 var _throw_latch: Grenade.Kind = Grenade.Kind.NONE
 var _slot_latch: int = -1
 ## Hop-up notches pressed since the last tick (more lift positive).
@@ -233,6 +239,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		_throw_latch = Grenade.Kind.FLASH
 	elif event.is_action(USE_DOOR):
 		_door_latch = true
+	elif event.is_action(INSPECT):
+		# Not behind the wheel or the map: the replica would turn over unseen.
+		_inspect_latch = not _wheel.open and not _map.open
 	elif event.is_action(HOP_UP_LESS):
 		_hop_steps -= 1
 	elif event.is_action(HOP_UP_MORE):
@@ -255,6 +264,13 @@ func _unhandled_input(event: InputEvent) -> void:
 				_slot_latch = i
 				_slot_steps = 0
 				_holster_latch = false
+
+
+## Whether Inspect was pressed since the last call, once (only while the mouse is captured).
+func take_inspect() -> bool:
+	var pressed := _inspect_latch and active
+	_inspect_latch = false
+	return pressed
 
 
 ## Whether the trigger (fire) is held: out of a round, a fresh press skips it (MC1; only while the mouse is captured).
@@ -543,6 +559,7 @@ func hold_fire() -> void:
 func release() -> void:
 	active = false
 	_clear_latches()
+	_inspect_latch = false
 	if _wheel.open:
 		_close_wheel()
 	if _map.open:

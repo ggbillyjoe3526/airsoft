@@ -29,7 +29,8 @@ An electric rifle (an AEG, "automatic electric gun"), with a motor whirr on ever
 are in. On an indoor field (Depot) it starts each round on single shots: [no full auto indoors](Maps#depot).
 A battery drives it, so the battery you fit sets its rate of fire. It is a short carbine, about 67 cm long: a
 quad-rail handguard with a ribbed cover, an A-frame front sight, a small ghost-ring rear sight, a raked grip moulded
-in one piece with the receiver, an adjustable stock and a curved magazine. Inspect it to see the charging handle pulled back.
+in one piece with the receiver, an adjustable stock and a curved magazine. [Inspect](Controls) it (**Y**) to see the
+charging handle pulled back, the dust cover open and the hop-up dial turn.
 
 The AEG Rifle takes the most parts: an optic on its top rail, a grip under it, a barrel, a muzzle part and a different
 magazine. It is in your kit from the start.
@@ -84,3 +85,8 @@ long barrel) stop at the limit, and the Loadout's Performance sheet says when a 
 Each replica can wear one of eight bold colour schemes or four plain ones, picked in **Customise**. Bots hold theirs
 in their team's colours. **Realistic colours** shows every bold scheme as its plain colour, yours and the bots', from
 the next match.
+
+## On other players
+
+Bots hold the same replicas you hold, with the parts they have fitted: their optic (the iron sights taken off under
+it), silencer, grip, torch or laser, and the magazine they reload.

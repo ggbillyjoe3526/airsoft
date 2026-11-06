@@ -60,7 +60,8 @@ func test_with_the_sights_hidden_nothing_but_the_optic_stands_over_the_rail() ->
 		var what := ""
 		for node in model.find_children("*", "MeshInstance3D", true, false):
 			var mesh := node as MeshInstance3D
-			if mesh.name == &"Figure" or _under_any(mesh, sights):
+			# The figures' copy (Figure and its pieces, TP1) is hidden in the hands; fit_figure hides its Figure_Sights.
+			if String(mesh.name).begins_with(ReplicaParts.FIGURE_NODE) or _under_any(mesh, sights):
 				continue
 			var to_model := _in_model(mesh, model)
 			for v in mesh.mesh.get_faces():

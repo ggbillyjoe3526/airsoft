@@ -30,12 +30,16 @@ import bpy  # noqa: E402
 import bmesh  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
+import figure_copy  # noqa: E402
 import hardsurface as hs  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
 OUT = os.environ.get("BL_OUT") or os.path.join(ROOT, "assets/models/replicas/cyber.glb")
 ARMATURE = "CyberPistol"
 FPS = 60
+# The figures' copy (figure_copy.py): triangles per piece, 3,000 in all, the replica budget on a figure
+# (docs/CC0_ASSETS.md › Size limits), used in full (TP1, 2026-11-05).
+FIGURE_TRIS = {"Figure": 2760, "Magazine": 240}
 MM = 0.001
 # Segments in each rounded corner of a side outline (CZ1: 4, from BL6's 3, spending the budget the warp left).
 FILLET_SEGMENTS = 4
@@ -230,6 +234,9 @@ MATERIALS = {
     "CyberFrame": ((0.017, 0.019, 0.025), 0.65, 0.0, False),
     "CyberLine": ((0.03, 0.87, 1.0), 0.35, 0.0, True),
     "CyberMetal": ((0.20, 0.22, 0.25), 0.38, 0.85, False),
+    # The bars across the slide's glowing windows: the metal, named apart so the figure's copy keeps them with the
+    # window (tools/blender/replicas/figure_copy.py MARKINGS).
+    "CyberBar": ((0.20, 0.22, 0.25), 0.38, 0.85, False),
     "CyberCore": ((1.0, 0.04, 0.39), 0.35, 0.0, True),
 }
 
@@ -472,14 +479,14 @@ def slide() -> object:
     cut.append(top.build())
     hs.cut(ob, cut)
     hs.finish(ob, m(0.9), 2)
-    b = hs.Builder("SlideBits", ["CyberCore", "CyberMetal", "CyberLine"])
+    b = hs.Builder("SlideBits", ["CyberCore", "CyberMetal", "CyberLine", "CyberBar"])
     for sx in (-1, 1):
         lo, hi = xs(sx, hw - 2.8, hw - 1.2)
         b.prism(poly(window), "x", m(lo), m(hi), "CyberCore")
         # Two bars across the window, flush with the flank.
         for y in (14.2, 19.8):
             lo, hi = xs(sx, hw - 1.7, hw - 0.05)
-            b.box((m(lo), m(y - 0.7), m(10.5)), (m(hi), m(y + 0.7), m(25.0)), "CyberMetal")
+            b.box((m(lo), m(y - 0.7), m(10.5)), (m(hi), m(y + 0.7), m(25.0)), "CyberBar")
         lo, hi = xs(sx, hw - 1.4, hw - 0.3)
         b.box((m(lo), m(-27.6), m(4.5)), (m(hi), m(4.6), m(5.5)), "CyberLine")
     b.prism(hs.rounded_rect(m(3.6), m(10.6), m(1.2), 3), "z", m(z1 - 3.0), m(z1 - 1.0), "CyberCore",
@@ -785,44 +792,11 @@ def _mag_front(z: float) -> float:
     return ya + (yb - ya) * (z - za) / (zb - za)
 
 
-# ------------------------------------------------------------------------------------------------------------ figure
-
-def figure() -> object:
-    """The figures' cut-down copy: the silhouette in a couple of hundred faces."""
-    b = hs.Builder("Figure", ["CyberSlab", "CyberMetal", "CyberFrame", "CyberLine"])
-    b.prism([(m(p[0]), m(p[1])) for p in SHROUD], "x", m(-SHROUD_HW), m(SHROUD_HW), "CyberSlab")
-    b.prism([(m(p[0]), m(p[1])) for p in REAR], "x", m(-SHROUD_HW), m(SHROUD_HW), "CyberSlab")
-    b.box((m(-SLIDE_HW), m(-31.0), m(SLIDE_Z[0])), (m(SLIDE_HW), m(40.0), m(SLIDE_Z[1])), "CyberMetal")
-    b.box((m(-CAP_HW), m(CAP_Y[0]), m(CAP_Z[0])), (m(CAP_HW), m(CAP_Y[1]), m(CAP_Z[1])), "CyberMetal")
-    b.box((m(-REAR_CAP_HW), m(REAR_CAP_Y[0]), m(REAR_CAP_Z[0])), (m(REAR_CAP_HW), m(REAR_CAP_Y[1]), m(REAR_CAP_Z[1])),
-          "CyberMetal")
-    b.lathe([(m(CAP_Y[1]), m(BARREL_R)), (m(BARREL_END), m(BARREL_R))], "CyberMetal", 8, centre=(0.0, 0.0, m(BORE_Z)))
-    for sx in (-1, 1):
-        lo, hi = xs(sx, SLIDE_HW, SLIDE_HW + 0.2)
-        b.box((m(lo), m(8.5), m(11.0)), (m(hi), m(25.5), m(24.5)), "CyberLine")
-    upper = b.build()
-    upper.data.polygons.foreach_set("use_smooth", [False] * len(upper.data.polygons))
-    # The frame's outline: the guard loop's front (as the hands' model), its floor, the grip and the tang.
-    b = hs.Builder("FigureFrame", ["CyberSlab", "CyberMetal", "CyberFrame", "CyberLine"])
-    outline = ([(52.0, 0.0)] + [(p[0], p[1]) for p in GUARD_LOOP[:5]]
-               + [(-20.0, -47.0), (-27.5, -38.0), (-54.0, -126.0), (-115.0, -126.0), (-86.0, -22.0), (-104.5, -10.5),
-                  (-93.5, 0.0)])
-    b.prism([(m(p[0]), m(p[1])) for p in outline], "x", m(-FRAME_HW), m(FRAME_HW), "CyberSlab")
-    b.prism([(m(p[0]), m(p[1])) for p in [(-55.5, -126.0), (-116.0, -126.0), (-114.5, -144.0), (-63.0, -144.0)]],
-            "x", m(-PAD_HW), m(PAD_HW), "CyberMetal")
-    for sx in (-1, 1):
-        lo, hi = xs(sx, FRAME_HW, FRAME_HW + 0.2)
-        b.prism([(m(p[0]), m(p[1])) for p in GRIP_WINDOW], "x", m(lo), m(hi), "CyberFrame")
-    lower = b.build()
-    lower.data.polygons.foreach_set("use_smooth", [False] * len(lower.data.polygons))
-    return hs.join("Figure", [warp(upper), warp(lower)])
-
-
 # ------------------------------------------------------------------------------------------------------------ warp
 
 # Which width scale each built mesh takes (see SIZE_Y above): the upper parts', the frame's (flaring to the grip's down
 # the grip) or none (the rail keeps the torch's 20 mm, the trigger its own blade).
-FRAME_PARTS = ("Frame", "FrameBits", "Housing", "Selector", "Magazine", "FigureFrame")
+FRAME_PARTS = ("Frame", "FrameBits", "Housing", "Selector", "Magazine")
 OWN_WIDTH = ("Rail", "Trigger")
 
 
@@ -997,19 +971,18 @@ def build() -> None:
     body.parent = arm
     for ob, bone in ((slide(), "slide"), (trigger(), "trigger"), (selector(), "selector"), (magazine(), "magazine")):
         hs.parent_to_bone(warp(ob), arm, bone)
-    fig = figure()
-    fig.parent = arm
     for name, loc in EMPTIES.items():
         hs.empty(name, fit(loc), arm)
     clips(arm)
+    fig = figure_copy.make(FIGURE_TRIS)
     total = 0
     for ob in bpy.data.objects:
         if ob.type == "MESH":
             n = hs.tris(ob)
-            if ob.name != "Figure":
+            if not ob.name.startswith("Figure"):
                 total += n
             print("  %-16s %6d triangles" % (ob.name, n))
-    print("  in the hands: %d triangles; figure: %d" % (total, hs.tris(fig)))
+    print("  in the hands: %d triangles; figure: %d" % (total, sum(hs.tris(o) for o in [fig] + list(fig.children))))
     hs.export(OUT, True)
     print("wrote", OUT)
 

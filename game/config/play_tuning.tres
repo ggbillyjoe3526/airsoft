@@ -28,6 +28,7 @@
 [ext_resource type="Script" path="res://game/config/ambience_config.gd" id="4_q5v06"]
 [ext_resource type="Resource" path="res://game/config/night_lighting.tres" id="15_nl3wl"]
 [ext_resource type="Script" uid="uid://i671gjdone00" path="res://game/config/look_config.gd" id="19_lk7ad"]
+[ext_resource type="Script" uid="uid://cj6ju4x7le6w4" path="res://game/config/inspect_pose.gd" id="50_in1ip"]
 
 [sub_resource type="Resource" id="Resource_01h5l"]
 script = ExtResource("1_ermsw")
@@ -218,9 +219,57 @@ colours = PackedColorArray(0.23, 0.53, 0.96, 1, 0.98, 0.55, 0.16, 1)
 [sub_resource type="Resource" id="Resource_0svsd"]
 script = ExtResource("9_3isbp")
 
+[sub_resource type="Resource" id="Resource_in1df"]
+script = ExtResource("50_in1ip")
+at = PackedFloat32Array(0, 0.17, 0.5, 0.82, 1)
+turn = PackedVector3Array(0, 0, 0, 0.08, -1.15, 0.12, 0.12, -1.2, 0.18, 0.06, -1.1, 0.1, 0, 0, 0)
+shift = PackedVector3Array(0, 0, 0, -0.2, 0.07, -0.18, -0.21, 0.08, -0.18, -0.19, 0.07, -0.17, 0, 0, 0)
+sound_at = PackedFloat32Array()
+
+[sub_resource type="Resource" id="Resource_in1ae"]
+script = ExtResource("50_in1ip")
+duration = 3.0
+at = PackedFloat32Array(0, 0.17, 0.5, 0.82, 1)
+turn = PackedVector3Array(0, 0, 0, 0.08, -1.15, 0.12, 0.12, -1.2, 0.18, 0.06, -1.1, 0.1, 0, 0, 0)
+shift = PackedVector3Array(0, 0, 0, -0.2, 0.07, -0.18, -0.21, 0.08, -0.18, -0.19, 0.07, -0.17, 0, 0, 0)
+sound_at = PackedFloat32Array(0.06, 0.13, 0.27, 0.36, 0.65, 0.83)
+sound_cue = Array[StringName]([&"selector", &"torchClick", &"selector", &"selector", &"dryFire", &"torchClick"])
+
+[sub_resource type="Resource" id="Resource_in1pi"]
+script = ExtResource("50_in1ip")
+at = PackedFloat32Array(0, 0.22, 0.72, 1)
+turn = PackedVector3Array(0, 0, 0, 0.05, -0.95, 0.1, 0.08, -1, 0.2, 0, 0, 0)
+shift = PackedVector3Array(0, 0, 0, -0.13, 0.08, -0.04, -0.135, 0.085, -0.04, 0, 0, 0)
+sound_at = PackedFloat32Array()
+sound_cue = Array[StringName]([])
+
+[sub_resource type="Resource" id="Resource_in1cy"]
+script = ExtResource("50_in1ip")
+at = PackedFloat32Array(0, 0.22, 0.72, 1)
+turn = PackedVector3Array(0, 0, 0, -0.15, -0.95, 0.1, -0.35, -1, 0.15, 0, 0, 0)
+shift = PackedVector3Array(0, 0, 0, -0.13, 0.08, -0.04, -0.135, 0.085, -0.04, 0, 0, 0)
+sound_at = PackedFloat32Array(0.17, 0.75)
+sound_cue = Array[StringName]([&"torchClick", &"magIn"])
+
+[sub_resource type="Resource" id="Resource_in1sn"]
+script = ExtResource("50_in1ip")
+duration = 3.0
+at = PackedFloat32Array(0, 0.17, 0.5, 0.82, 1)
+turn = PackedVector3Array(0, 0, 0, 0.08, -1.15, 0.12, 0.12, -1.2, 0.18, 0.06, -1.1, 0.1, 0, 0, 0)
+shift = PackedVector3Array(0, 0, 0, -0.22, 0.08, -0.3, -0.23, 0.09, -0.3, -0.21, 0.08, -0.29, 0, 0, 0)
+sound_at = PackedFloat32Array(0.1, 0.28, 0.77, 0.83)
+sound_cue = Array[StringName]([&"selector", &"dryFire", &"dryFire", &"selector"])
+
 [sub_resource type="Resource" id="Resource_k2yse"]
 script = ExtResource("10_bqp2c")
 selector_at = PackedFloat32Array(0.5, 0.75, 1)
+inspect_poses = Dictionary[StringName, ExtResource("50_in1ip")]({
+&"aeg": SubResource("Resource_in1ae"),
+&"cyber": SubResource("Resource_in1cy"),
+&"pistol": SubResource("Resource_in1pi"),
+&"sniper": SubResource("Resource_in1sn")
+})
+inspect_pose_default = SubResource("Resource_in1df")
 
 [sub_resource type="Resource" id="Resource_mm1cf"]
 script = ExtResource("11_mm1cf")

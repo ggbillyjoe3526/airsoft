@@ -581,6 +581,10 @@ msgstr "RELOAD"
 msgid "ACT_FIRE_MODE"
 msgstr "FIRE MODE"
 
+# IN1: turn the replica in hand over to look at it.
+msgid "ACT_INSPECT"
+msgstr "INSPECT REPLICA"
+
 msgid "ACT_SLOT_1"
 msgstr "REPLICA 1"
 
