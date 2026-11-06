@@ -260,6 +260,8 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 		rot.x -= _cfg.holster_tilt * _away * left * left
 	else:
 		_away = 0.0
+	# With a bomb in hand your arms hold it (GrenadeView): the replica's let go once it is down out of view.
+	_arms.set_shown(Grenades.held(c) == Grenade.Kind.NONE or _away < 1.0)
 
 	# Turned over to look at (IN1): ended by what `inspect_blocked` names here, before a reload's clip takes the parts.
 	if inspect_blocked(c, aim):

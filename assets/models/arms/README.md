@@ -18,9 +18,9 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
 - **Materials.** `Glove` (dark olive-brown), `GloveArmour` (guard, pads, strap, patch), `Sleeve`, `SleeveTrim`; each
   with the woven normal map `arms_ArmsWeave.png` (256 px, `fabric.py`) over its own UVs; otherwise plain
   colours. A robot's arms are recoloured in game (ViewModelConfig.robot_arms).
-- **Holds.** One per replica: a clip `<id>_Hold` (`aeg`, `pistol`, `cyber`, `sniper`) posing both arms, and an empty
-  `Hold_<id>` where that replica's origin sits in it (at ViewModelConfig.hip). In game the arms ride the replica's
-  node with that empty on its origin, so they follow its sway, kick, cant and drop.
+- **Holds.** One per replica and bomb: a clip `<id>_Hold` (`aeg`, `pistol`, `cyber`, `sniper`, `smoke`, `flash`)
+  posing both arms, and an empty `Hold_<id>` where that replica's origin sits in it (at ViewModelConfig.hip). In game
+  the arms ride the replica's node with that empty on its origin, so they follow its sway, kick, cant and drop.
   - The AEG Rifle: the right hand high on the pistol grip, the little finger round its foot, index on the trigger,
     thumb wrapped round the grip's left side; the left hand under the handguard's middle, its forearm rising to it from below, fingers resting on its right
     side (not over its top), thumb along its left side.
@@ -28,6 +28,10 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
     beavertail, the fingers closed up under the trigger guard with the little finger on the grip, the thumb forward
     along the frame's left side under the slide; the left arm lowered (and hidden in
     game, ViewModelConfig.one_hand).
+  - Bombs (`smoke`, `flash`; GT2): each fitted to its own model (`assets/models/grenades/`), held in a fist in the
+    right hand alone, the lever under the palm, the fingers round its front and the thumb round its back; the left arm
+    lowered and hidden. Its mark sits where GrenadeView draws the bomb in hand (HELD_AT), the bomb tipped as it tips it
+    (HELD_TIP, mirrored in arms.py); in game the arms ride the bomb's square-to-view node and lift with it.
 - **Solving.** `pose.py` places each hand on the replica's mesh (on a grip, the thumb's root and the index and little
   finger's knuckles at marks on it, rolled to the straightest wrist; on the rifle's handguard, a search for the cupped hand whose
   fingers wrap it), curls the fingers until they touch, the index onto the trigger, and bends each elbow to keep the

@@ -717,6 +717,7 @@ func _build_views(ui: CanvasLayer) -> void:
 	_grenades = GrenadeView.new()
 	add_child(_grenades)
 	_grenades.setup(state.grenades.size(), _tuning.grenades, _light.night)
+	_grenades.setup_arms(_play.viewmodel, _hands.arms_kind)
 	for f in _figures:
 		f.set_bombs(_grenades.meshes(), _tuning.grenades)
 	var first_use: Array[Material] = [_bbs.drawn_material(), _puffs.drawn_material(), _gas.drawn_material(),
@@ -1816,6 +1817,8 @@ func _pick_kinds() -> Array[int]:
 	var before := figure_kinds
 	figure_kinds = FigureMix.pick(state.match_seed, teams, robots, _play.figures.robot_salt)
 	_hands.arms_kind = figure_kinds[PLAYER_ID]
+	if _grenades != null:
+		_grenades.set_arms_kind(figure_kinds[PLAYER_ID])
 	var changed_ids: Array[int] = []
 	for i in figure_kinds.size():
 		if i >= before.size() or before[i] != figure_kinds[i]:

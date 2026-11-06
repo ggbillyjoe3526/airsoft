@@ -63,7 +63,7 @@ func test_the_bomb_in_hand_is_the_kinds_own_model_and_changes_with_the_kind() ->
 	var held: MeshInstance3D = null
 	for child in v.get_children():
 		if child.name == "Held":
-			held = child as MeshInstance3D
+			held = child.get_node("Bomb") as MeshInstance3D
 	assert_not_null(held)
 	c.grenades.throwing = Grenade.Kind.SMOKE
 	c.grenades.windup_left = cfg.windup

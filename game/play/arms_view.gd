@@ -24,6 +24,8 @@ var _meshes: Array[MeshInstance3D] = []
 var _worn: Dictionary[Material, Array] = {}
 var _kind: int = FigureMix.HUMAN
 var _on: StringName = &""
+## False while the arms are elsewhere (a bomb in hand: GrenadeView), the hold kept.
+var _shown: bool = true
 
 
 ## Loads the model; nothing shows until `hold`.
@@ -66,8 +68,17 @@ func hold(id: StringName, root: Node3D) -> void:
 	_anim.pause()
 	if _left != null:
 		_left.visible = not _cfg.one_hand.has(id)
-	_model.visible = true
+	_model.visible = _shown
 	_on = id
+
+
+## Shows the arms on their hold, or hides them (`on` false) keeping it, for when they're holding something else.
+func set_shown(on: bool) -> void:
+	if on == _shown:
+		return
+	_shown = on
+	if _model != null:
+		_model.visible = on and _on != &""
 
 
 ## The replica the arms hold now (empty when none is shown).
