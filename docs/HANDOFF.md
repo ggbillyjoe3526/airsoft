@@ -17,7 +17,7 @@ rulings `docs/DECISIONS.md`, how work runs `docs/PROCESS.md`.
 - **Arms and holds.** The first-person arms hold each replica (BL4), your hands work the bombs and the Sniper Rifle's
   bolt (GT2, GT3, BW1, BW2), and bots hold replicas as the arms do, a pistol in one hand (HG1, owner, 2026-11-06).
 - **Sound.** The owner's recordings are in (AU2 to AU8).
-- **UI.** The UI is redesigned (UF1, UF2); the Switch Replica menu takes clicks and keys.
+- **UI.** The menus and HUD are redesigned (UR1 to UR7), with fixes after (UF1, UF2).
 - **Bug passes.** BP2 to BP4 are merged. BP5 is under way.
 - **Next.** The owner's playtest of the Dev 2 list, then the release checklist after he tags (`docs/PROCESS.md`).
 
