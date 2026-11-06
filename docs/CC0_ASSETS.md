@@ -76,6 +76,9 @@ The browser game's loader settings for every model (scale, facing, budgets) are 
 
 - **The rigged figures.** `human.glb` and `robot.glb` share a 65-bone skeleton, each with LOD1 and LOD2 meshes and 32
   clips. A new figure uses the same skeleton and clip names (`tools/blender/bot-figure/README.md`).
+- **Parts spliced in.** The human's knee and elbow pads (`Kit_Pads`, 3,000 / 1,000 / 300 triangles at LOD0, LOD1,
+  LOD2, part of the figure's budget) are built apart and spliced into `human.glb` by node name
+  (`tools/blender/figures/README.md`); a rebuilt body keeps their node names and reruns `pads.py` to refit them.
 - **Scale and facing.** A figure stands as tall as the hit volume (1.73 m, feet to the top of the head; the hitbox
   doesn't change), measured on `body` and the legs when it has them, so a raised hand doesn't shrink it. Its feet sit
   on the ground. glTF models face +Z and the figures face -Z, so a model is turned a half turn unless it already faces

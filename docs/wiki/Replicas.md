@@ -53,7 +53,8 @@ the start.
 A futuristic electric pistol, unlocked at level 10, the top of the [levels](Levels-and-Unlocks). It fires **single
 shots, bursts or full auto**, faster than the rifle from big magazines, with almost no kick (the table above has
 its numbers). Its battery is built in, so
-no power source fits it, and only the Weapon Torch fits it. It wears its own white, cyan and magenta colours, with
+no power source fits it, and only the Weapon Torch fits it.
+It is the same size in your hand as the GBB Pistol. It wears its own white, cyan and magenta colours, with
 glowing slashes, a pink core behind bars in its slide, a finned rear cap and three fire-mode lights; with
 **Realistic colours** on it turns plain grey with no glow. It has its own shot, dry-click and magazine sounds.
 

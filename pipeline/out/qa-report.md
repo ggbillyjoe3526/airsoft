@@ -1,25 +1,21 @@
-Task: GT1 (attempt 2) · QA commit pending (see git log) · Verdict: Pass
+Task: CZ1 (no task block) · QA commit none (no tests added) · Verdict: Pass
 
-Reviewed d5e54eb..de57ad5 (FigureThrow over-key, pole swing, pin key, from_hand weight; FigurePose.throw_from_hand; config).
-Blocking: none. Advisory: none new. The attempt-1 advisory (set_bomb_meshes stranding a shown bomb) is fixed in 42885a0; its test now passes.
+Checked on f1685e8's committed glbs (extracted from git, since the working tree holds uncommitted sight edits by the main thread) with bpy 5.2.3.
 
-Probed and held:
-- throw_from_hand is set only when a throw starts from a held bomb, stays through windup and recovery, is cleared when the throw
-  ends, on a hit/out of play (alive false) and with no hand; a later normal throw starts from weight 0 and a second held throw
-  flags again (readied -> thrown -> readied -> thrown).
-- Config edges (throw_pin_until 0 and 1, throw_over_at 0.0001 and 1, throw_cock 0.0001 and 0.9999): right_key, left_key,
-  right_pole and weight stay finite and in range over share 0..2; pin_until 0 leaves the pin at once; the right key is
-  continuous across the over key (no step above 0.06 m per 1% of the arm coming over) and ends exactly at throw_release.
-- The left arm eases in with weight(share, false) even from a held bomb (read in figure_throw.gd pose; covered by the worker's test).
+Blocking: none.
+Advisory:
+- docs/ASSETS.md says 37,802 triangles in the hands; the glb has 37,800 (Body 29,080 + Magazine 4,576 + Slide 3,036 + Selector 576 + Trigger 532). Under the 40k budget either way; fix the figure.
+- Body/Magazine mesh overlap pairs rose 677 to 1,123 (nested parts, expected; the magazine is inside the grip, x 14.2 vs body 15.6, only the pad is wider at 16.1 below the body).
 
-Tests added to tests/unit/test_figure_throw_qa.gd (6 new; the 8 earlier pass):
-- test_throw_from_hand_lasts_only_for_that_throw: the flag across windup, recovery, end, and a later throw.
-- test_readied_thrown_readied_again_flags_each_throw_correctly: the flag on each cycle.
-- test_a_hit_or_leaving_play_clears_throw_from_hand: alive false and a null hand clear it.
-- test_throw_config_edge_values_give_finite_keys: the edge values above.
-- test_pin_until_zero_has_the_left_hand_leave_the_pin_at_once.
-- test_right_key_is_continuous_across_the_over_key_and_the_release.
-These pin new behaviour (the flag, the keys); each would fail on a missing field or key. I did not stub the feature out to confirm.
-Counts: test_figure_throw.gd 9/9, test_figure_throw_qa.gd 14/14 (0.7 s). check.sh and the full suite not run (running elsewhere).
-Not tested: how the arms look (needs a display; tools/render_throw.gd), and any real-sim path where a new throw starts with no
-read in between (read_throw runs every FigurePose.read, so none is possible from the figure's side).
+Findings per ask:
+- Torch: TorchMount empty z -22.7, rail underside z -22.34 (Body), torch top z -22.4 (replicaParts/cyber.glb): sits on the rail within 0.3 mm; torch y 35.6..99.9 inside body front 101.5, UnderLaser at mount y 69.4.
+- Clip keys: all Fire/Inspect/Reload/Selector curves start and end at rest (magazine, slide, trigger unchanged at the ends); reload drop 193.5 mm (old 230 x 0.84), inspect 12.9, slide recoil 12.5 (old 14), trigger pull rotation unchanged (17 degrees). Rest pose puts the magazine in the well.
+- Trigger: bone at y -7.6 (GBB reach), mesh y -16.3..-3.9, z -30.9..-8.5; zero triangle overlap with Body at rest. Could not verify the pulled pose or slide-back clearance (the imported pose did not drive the evaluated mesh headlessly); check by eye in the viewer.
+- Poke-through: Selector 14.4 wide vs body 15.6 (inside); Slide x 10.1; no part exceeds the body outline except the magazine pad. Owner renders (cz1/ 1, 3) show no stray geometry.
+- Sizes: Body y -102.2..101.5, z -105.8..31.3, x +-15.6; GBB y -104.7..98.9, z -105.7..4.1 (slide 26.1), x +-15.5. Matches the brief. Empties as reported (Muzzle, Rear/FrontSight z 28.8, MagWell -72.9,-101.6).
+- Rear-sight test: new expectation (0, 0.0288, 0.06835) matches the RearSight empty (28.8, -68.4 mm) within 1e-4.
+
+Tests added or changed: none by QA. tests/unit/test_cyber_pistol.gd:78 (changed by the worker) · rear sight at the GBB's size · fails against the old value (0.04, 0.0768) since the empty moved.
+Ran: test_cyber_pistol.gd 8/8 pass; with the untracked test_cyber_sights.gd 10 tests, 56 asserts, all pass. Note: -gtest alone runs the whole suite (.gutconfig.json); pass -gdir= as tools/unit_tests.sh does. Run on the working tree, whose sight edits are uncommitted; the cyber.glb differs by 192 bytes from the commit, empties identical.
+Not run: tools/check.sh (the main thread owns it).
+Owner's list: how the hands grip the pistol in the first-person view (needs a display); torch light on the rail; trigger pull and slide recoil clearance in motion.
