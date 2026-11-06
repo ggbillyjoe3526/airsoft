@@ -211,3 +211,25 @@ func test_records_counts_at_the_bound_are_kept_and_beyond_it_nan_and_inf_are_lef
 	assert_false(r2.best_challenge.has("b"))
 	assert_eq(r2.best_challenge.get("c", 0), 5)
 	assert_false(r2.results.has("normal.elimination"))
+
+
+func test_a_hit_after_the_throw_with_the_pull_still_held_leaves_nothing_held_off_after_the_respawn() -> void:
+	var m := _match()
+	var sim: Simulation = m[0]
+	var s: GameState = m[1]
+	var you := s.characters[0]
+	var cmds := _commands(s)
+	_settle(sim, s, cmds)
+	_auto(you)
+	cmds[0].ready_grenade = Grenade.Kind.SMOKE
+	_run(sim, s, cmds, 5)
+	cmds[0].fire = true
+	_run(sim, s, cmds, _long())
+	assert_true(you.grenades.trigger_held_off, "the pull that threw it is still held off")
+	you.status = Character.Status.CALLING
+	_run(sim, s, cmds, 5)
+	assert_true(you.grenades.trigger_held_off, "nothing in the hit clears it but the respawn")
+	you.status = Character.Status.ALIVE
+	you.respawn()
+	assert_false(you.grenades.trigger_held_off, "a new life with the trigger down starts clear")
+	assert_false(you.grenades.torch_back)

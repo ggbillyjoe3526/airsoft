@@ -1,19 +1,41 @@
-Task: none (BP5 part 1) · QA commit 313eb5e · Verdict: Fail
+Task: none (BP5 part 1) · QA commit 7e628b3 · Verdict: Pass
 
-Blocking (1, minor):
-- game/sim/grenades.gd held_off_command (clears only when it runs) + game/sim/simulation.gd:147-150: it is skipped while throwing/bomb in hand, so a trigger let go and pulled again DURING the throw (windup/recovery) leaves trigger_held_off true; the fresh pull is eaten after the replica is back up until the next release. Before BP5 it fired. Fix: in the throwing branch (or step_throw) clear trigger_held_off when the command's fire is false. Pinned by a failing test.
+Scope: `git diff 90b0ff4..7e628b3`, attempt 2. Re-checked the held-trigger rule end to end by reading
+`Grenades.trigger_command`, `ready_command`, `end_throw`/`stop`, `take_torch_back`, `Torch.step` and the call order in
+`Simulation.step`, and by running the tests.
 
-Advisory: none. Checked and fine: G/4/5 instant throw with held trigger fires after as before; respawn (refill->stop) clears both flags; a hit mid-throw/bomb-in-hand stops the hand; out-of-play characters are never held_off-filtered (no shots); held-off through a vault stays one held pull; semi replica doesn't re-read the held pull; torch_back is spent when the new slot has no light, on holster, and never leaks; records: COUNT_MAX kept, +1, INF, NaN, 1e300 in results pairs all left out (1e9 fits PackedInt32Array). Bots never ready bombs (only throw_grenade), unaffected.
+Blocking: none.
+Advisory: none new.
 
-Tests added (tests/unit/test_bp5_qa.gd, 9):
-- test_an_instant_throw_with_a_held_trigger_still_fires_after_it_as_before: G with fire held; guards the "as before" case (fails if held_off were set for instant throws).
-- test_a_respawn_clears_a_held_off_trigger: flags set, respawn(); fails if refill/stop did not reset them.
-- test_a_hit_while_the_trigger_is_held_off_leaves_nothing_to_fire: CALLING status, no shots.
-- test_a_semi_replica_does_not_read_the_held_pull_as_new_after_a_put_back: semi, 0 shots; fails without held_off_command.
-- test_a_pull_pressed_during_the_throw_recovery_is_let_go_until_the_next_release: FAILS (the blocking bug above).
-- test_a_held_off_trigger_through_a_vault_ends_without_a_stray_shot, test_a_bomb_put_back_to_a_slot_without_a_light_leaves_the_torch_off_and_silent, test_a_holstered_bomb_put_back_keeps_the_torch_flag_from_leaking: edge guards.
-- test_records_counts_at_the_bound_are_kept_and_beyond_it_nan_and_inf_are_left_out: fails without the COUNT_MAX bound for 1e300 (not INF/NaN, which the old check already rejected).
-Not mutation-checked individually (no production edits allowed); the first two held-trigger tests in test_bp5 cover the feature.
+Held-trigger rule, traced and covered:
+- Throw by wheel + pull: held_off set when ready_command emits the throw; the replica stays at fire=false after
+  `end_throw` until the pull is let go (test_bp5.gd, test_bp5_qa.gd). A release clears it even mid-throw.
+- Put back by slot / reload / holster: held_off set unconditionally, trigger_command clears it the same tick when the
+  trigger is not pulled, so no lost shot on a free trigger (test_bp5.gd slot + reload cases, semi case in qa).
+- Instant throws 4/5: never set held_off; a held trigger fires again after, as before (qa test).
+- Vault: `pulled` is the raw trigger taken before the vault, so a release during a vault is seen; no stray shot.
+  No vault starts mid-throw (Simulation.step guard), unchanged.
+- Hit / respawn: `stop()` on a hit with a bomb busy; a hit after the throw leaves held_off until `respawn()` clears it
+  (grenades.refill); trigger_command only runs in play. New test pins this.
+- Bots: they throw with throw_grenade only (bot_bombs.gd:36), so held_off is never set for them.
+- Torch: relight happens in Torch.step after Armament.step and step_throw, consumed once; no light in hand leaves
+  it off and silent (qa tests); stop() clears torch_back.
 
-Runs: 54 touched files (bp5, bp5_qa, mc1*, grenade*, torch*, armament, vault*, bot_vaults, loadout*, saved_loadouts, records/LoadoutPage users): 774 tests, 772 pass, 530 s. 2 fails: the bug above, and test_uf1_qa picking_the_same_dot (Camera3D physics-interpolation engine error; passes 2/2 alone: flaky, unrelated, advisory for KNOWN_ISSUES). tools/smoke_test.sh: PASS (3361 frames, 6 rounds, zero script errors). tools/check.sh not run (per brief).
-Not testable here: Loadout chips visually after a real rebind in Settings (display); sim_audio missing-peak warning (no test; audio, trivial).
+Tests added or changed:
+- tests/unit/test_bp5_qa.gd:213 · test_a_hit_after_the_throw_with_the_pull_still_held_leaves_nothing_held_off_after_the_respawn
+  · held_off and torch_back after a throw, a hit and a respawn · fails if respawn()/refill stopped clearing the
+  flag (checked by reading; the flag is asserted true before the respawn so the assertion is not vacuous).
+  Note: a shot-count version of this test was dropped, because a 1v1 hit ends the round (live false), nothing fires.
+- Earlier QA tests in the same file and tests/unit/test_bp5.gd (critic's new torch-after-reload and Loadout slot
+  key rebind tests) pass.
+
+Runs: test_bp5, test_bp5_qa, test_grenades, test_torch, test_vault: 96 passing, 0 failing (before the new test).
+test_bp5_qa, test_grenade_throw_qa, test_torch_qa, test_bot_bombs, test_loadout_screen: 72 passing, 0 failing
+(one failing run was my own discarded draft test). test_bp5_qa alone: 10 passing. Other game/ changes in the pass
+(records COUNT_MAX, sim_audio peak warning, loadout slot chips, comment edits) read and unchanged in behaviour apart
+from their stated fixes. tools/check.sh was not run (running in the background).
+
+Could not test: feel of the wheel-pull-throw and the instant return to fire (needs play); the Loadout key chips in a
+real window (display).
+
+Verdict: Pass
