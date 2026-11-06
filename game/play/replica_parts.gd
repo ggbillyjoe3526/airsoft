@@ -5,13 +5,21 @@ extends RefCounted
 ## top-level object per part named <slot>_<key>, placed where it sits on the replica, with its figures' cut-down copy
 ## (<slot>_<key>_Figure) beside it or under it. A magazine part takes the standard magazine's place and follows it
 ## through a reload; a muzzle part takes the flash hider's; a barrel with an end point carries the muzzle device and the
-## muzzle out to it; an optic folds the iron sights down (SightFold). `unfit` undoes it all.
+## muzzle out to it; an optic folds the iron sights down (SightFold). `unfit` undoes it all. A figure's version of the
+## replica (`Figure`, cut down from the model) has the pieces a part replaces as its own children, so `fit_figure` does
+## the same to it with the parts' copies (TP1). What a part puts inside the replica (a barrel's inner barrel and hop-up
+## unit) is in its own file, assets/models/replicaParts/inside/<replica>.glb, as <slot>_<key>_Inside: only the part's
+## own picture draws it (`inside`), so fitting never loads it.
 
 const PART_DIR := "res://assets/models/replicaParts/"
+const INSIDE_DIR := "res://assets/models/replicaParts/inside/"
 const FIGURE_SUFFIX := "_Figure"
+## The figure version of a replica in its model: the figures hold it, the hands and the menu pictures hide it.
+const FIGURE_NODE := "Figure"
 const SIGHT_LINE_SUFFIX := "_SightLine"
 const MUZZLE_SUFFIX := "_Muzzle"
 const BARREL_END_SUFFIX := "_BarrelEnd"
+const INSIDE_SUFFIX := "_Inside"
 ## The replica's own nodes the parts work with: its magazine mesh(es) and the bone attachment that carries them through
 ## the clips, its flash hider and its muzzle point.
 const MAGAZINE_NODE := "Magazine"
@@ -22,6 +30,13 @@ const OPTIC_SLOT := &"optic"
 const MAGAZINE_SLOT := &"magazine"
 const MUZZLE_SLOT := &"muzzle"
 const BARREL_SLOT := &"barrel"
+## The figure version's pieces a part takes the place of: its magazine (the figures' reload magazine too, drawn in the
+## replica's space), its flash hider and its iron sights, which an optic hides (folded away, as in the hands).
+const FIGURE_MAGAZINE := "Figure_Magazine"
+const FIGURE_FLASH_HIDER := "Figure_FlashHider"
+const FIGURE_SIGHTS := "Figure_Sights"
+## The replica's empty a barrel or muzzle part sits on.
+const BARREL_END_NODE := "BarrelEnd"
 
 
 ## What fitting did to one model, so it can be undone, and what the views need from it.
@@ -41,6 +56,14 @@ class Fit:
 	var sight_line: Vector3 = Vector3.ZERO
 	## Where BBs leave the replica now: the muzzle part's end, else its own muzzle point (null if the model has none).
 	var muzzle: Node3D = null
+
+
+## What fitting did to a figure's version of a replica: the magazine it carries now (its own figure magazine or the
+## part's copy, null for none) and where BBs leave it, in the replica's space.
+class FigureFit:
+	extends RefCounted
+	var magazine: MeshInstance3D = null
+	var muzzle: Vector3 = Vector3.ZERO
 
 
 ## Fits `parts` (part slot -> part Key, as Kit.parts has them) to `model`, replica `key`'s model. `animated`: its clips
@@ -129,18 +152,52 @@ static func unfit(f: Fit) -> void:
 	f.muzzle = f.model.find_child(MUZZLE_NODE, true, false) as Node3D
 
 
-## The figures' cut-down copies of `parts` for replica `key`, each placed in the replica's space (the figure version of
-## the replica shares its origin).
-static func figure_meshes(key: StringName, parts: Dictionary) -> Array[MeshInstance3D]:
-	var out: Array[MeshInstance3D] = []
+## Fits `parts`' copies to `held`, the figure version of replica `key` (its `Figure` mesh, drawn at the model's origin;
+## `barrel_end` and `muzzle` the model's BarrelEnd and Muzzle points in its space). As `fit` does to the model: a
+## magazine part takes Figure_Magazine's place, a muzzle part the flash hider's, an optic hides the iron sights, and a
+## barrel with an end point carries the flash hider, the muzzle part and the muzzle out to it. Once, at a figure's
+## setup: the figure keeps its parts.
+static func fit_figure(held: Node3D, key: StringName, parts: Dictionary, barrel_end: Vector3,
+		muzzle: Vector3) -> FigureFit:
+	var f := FigureFit.new()
+	f.muzzle = muzzle
+	f.magazine = held.get_node_or_null(FIGURE_MAGAZINE) as MeshInstance3D
+	var flash_hider := held.get_node_or_null(FIGURE_FLASH_HIDER) as Node3D
 	var taken := take(key, parts, true)
+	var shift := Vector3.ZERO
+	var barrel := taken.get(BARREL_SLOT) as Node3D
+	if barrel != null:
+		var end := barrel.find_child("*" + BARREL_END_SUFFIX, false, false) as Node3D
+		if end != null:
+			shift = barrel.transform * end.position - barrel_end
+	f.muzzle += shift
+	if flash_hider != null:
+		flash_hider.position += shift
 	for slot: StringName in taken:
-		var mesh := taken[slot] as MeshInstance3D
-		if mesh != null:
-			out.append(mesh)
-		else:
-			taken[slot].free()
-	return out
+		var node := taken[slot]
+		if not node is MeshInstance3D:
+			node.free()
+			continue
+		(node as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		match slot:
+			MAGAZINE_SLOT:
+				var own := held.get_node_or_null(FIGURE_MAGAZINE) as Node3D
+				if own != null:
+					own.visible = false
+				f.magazine = node as MeshInstance3D
+			MUZZLE_SLOT:
+				if flash_hider != null:
+					flash_hider.visible = false
+				node.position += shift
+				var end := node.find_child("*" + MUZZLE_SUFFIX, false, false) as Node3D
+				if end != null:
+					f.muzzle = node.transform * end.position
+			OPTIC_SLOT:
+				var sights := held.get_node_or_null(FIGURE_SIGHTS) as Node3D
+				if sights != null:
+					sights.visible = false
+		held.add_child(node)
+	return f
 
 
 ## The part nodes for `parts` out of the replica's part models (a menu's part picture takes one alone), owned by nothing: the parts themselves without their
@@ -167,6 +224,7 @@ static func take(key: StringName, parts: Dictionary, figure: bool) -> Dictionary
 				copy = inner
 			if copy == null:
 				continue
+			_carry_markers(node, copy)
 			node = copy
 		elif inner != null:
 			node.remove_child(inner)
@@ -178,6 +236,39 @@ static func take(key: StringName, parts: Dictionary, figure: bool) -> Dictionary
 		taken[StringName(slot)] = node
 	holder.free()
 	return taken
+
+
+## Puts `part`'s end points (a barrel's end, a silencer's muzzle) on `copy`, its figures' copy, at the same places, so
+## a figure's parts carry them as the model's do. Both are in the parts file's space (the copy not yet under the part).
+static func _carry_markers(part: Node3D, copy: Node3D) -> void:
+	var from := copy.transform.affine_inverse() * part.transform
+	for suffix: String in [BARREL_END_SUFFIX, MUZZLE_SUFFIX]:
+		var marker := part.find_child("*" + suffix, false, false) as Node3D
+		if marker != null and copy.find_child("*" + suffix, false, false) == null:
+			var carried := Node3D.new()
+			carried.name = marker.name
+			carried.transform = from * marker.transform
+			copy.add_child(carried)
+
+
+## What part `part` for `slot` of replica `key` puts inside the replica, placed in the replica's space, owned by nothing;
+## null if it puts nothing there. The part's own picture draws it beside the part.
+static func inside(key: StringName, slot: StringName, part: StringName) -> Node3D:
+	var path := "%s%s.glb" % [INSIDE_DIR, key]
+	if not ResourceLoader.exists(path):
+		return null
+	var scene := load(path) as PackedScene
+	if scene == null:
+		return null
+	var holder := scene.instantiate() as Node3D
+	var node := holder.get_node_or_null("%s_%s%s" % [slot, part, INSIDE_SUFFIX]) as Node3D
+	if node != null:
+		holder.remove_child(node)
+		node.owner = null
+		for child in node.find_children("*", "", true, false):
+			child.owner = null
+	holder.free()
+	return node
 
 
 static func _hide(f: Fit, node: Node3D) -> void:

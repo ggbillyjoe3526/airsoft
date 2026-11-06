@@ -15,8 +15,8 @@ Run with Blender 5.x, or Python with the `bpy` module (pip install bpy==5.2.3):
     python -I tools/blender/replicas/gbb.py <repo root>
 
 It writes assets/models/replicas/pistol.glb (BL_OUT overrides) and the parts file
-assets/models/replicaParts/pistol.glb (BL_PARTS_OUT): the extended magazine rebuilt on the new magazine, the silencer
-moved onto ThreadEnd, the laser and torch onto RailMount.
+assets/models/replicaParts/pistol.glb (BL_PARTS_OUT): the silencer moved onto ThreadEnd, the laser and torch onto
+RailMount. Then run tools/blender/parts/magazines.py, which builds the Extended Magazine from this magazine.
 """
 
 import math
@@ -28,6 +28,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bpy  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
+import figure_copy  # noqa: E402
 import hardsurface as hs  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
@@ -36,6 +37,9 @@ PARTS = os.path.join(ROOT, "assets/models/replicaParts/pistol.glb")
 PARTS_OUT = os.environ.get("BL_PARTS_OUT") or PARTS
 ARMATURE = "GBBPistol"
 FPS = 60
+# The figures' copy (figure_copy.py): triangles per piece, 3,000 in all, the replica budget on a figure
+# (docs/CC0_ASSETS.md › Size limits), used in full (TP1, 2026-11-05).
+FIGURE_TRIS = {"Figure": 2760, "Magazine": 240}
 
 # The owner's main photo (a side view, muzzle left) to model space: PX_PER_M pixels a metre, the photo's (ORIGIN_PX)
 # pixel at the model's origin (the old model's grip on the photo's, best overlap).
@@ -74,18 +78,32 @@ SERRATIONS = 11
 SERRATION_DEPTH = 0.0007
 PORT_Y = (-0.0095, 0.0225)
 PORT_DEPTH = 0.0088
+# The port's left edge (x) on the top; the barrel hood's clearance to the port's walls and its right face's inset from
+# the flank.
+PORT_X = -0.0035
+HOOD_GAP = 0.00015
+HOOD_INSET = 0.0012
+# The hood's sloped front: it leaves the top this far behind the port's front wall and meets that wall this far down.
+HOOD_SLOPE = (0.0045, 0.0030)
 GUIDE_R = 0.0024
 GUIDE_Z = Z(104.0)
 REAR_SIGHT_HW = 0.0078
-NOTCH_HW = 0.00175
+NOTCH_HW = 0.0020
 # The bore (the photo's muzzle: py 63 to 99), the barrel's outer radius and the BB bore's, and the barrel's end, just
 # proud of the slide's face (photo: x 20).
 BORE_Z = Z(81.0)
 BARREL_R = 0.0061
 BORE_R = 0.0031
 BARREL_END = Y(20.0)
-# The sights: the rear's notch floor and the front's top on one line.
-SIGHT_Z = SLIDE_TOP + 0.0018
+# The sights. SIGHT_Z is the sight line (the front post's top, the empties' height and so the eye's when aimed:
+# ReplicaView), a hair under the rear sight's top (Z(35)) for an equal-height picture; the rear's notch floor sits
+# NOTCH_DROP under it, so aimed the whole post stands in the notch with light either side (owner 2026-11-05: the post
+# was hidden, the floor had been on the line). The post stands taller than the photo's (1.7 mm) and its dot is bigger,
+# so the sight picture reads at arm's length.
+SIGHT_Z = SLIDE_TOP + 0.0030
+NOTCH_DROP = 0.0021
+FRONT_POST_HW = 0.0016
+FRONT_DOT_R = 0.00085
 REAR_SIGHT_Y = Y(529.0)
 FRONT_SIGHT_Y = Y(49.0)
 # The frame: half widths of its upper part (walls, dust cover), the trigger guard and the grip.
@@ -125,8 +143,6 @@ MAG_HW = 0.0112
 # The base plate's two tiers' half widths: the slab and the foot under it.
 PLATE_HW = (MAG_HW + 0.0022, MAG_HW + 0.0014)
 MAG_HD = 0.0158
-# The extended magazine part: this much longer along the rake than the standard one (the old part's 2.2 cm).
-EXTENDED = 0.022
 
 MAG_TOP = (0.0, Y(MAG_TOP_PX[0]), Z(MAG_TOP_PX[1]))
 # Under the dust cover's rail, where the parts file's laser and light sit (photo about x 100, py 152).
@@ -211,7 +227,7 @@ def slide() -> object:
     # The ejection port: open on the top's right and down the right side to PORT_DEPTH, its front corners rounded.
     c = hs.Builder("c_port", ["Body"])
     c.prism(hs.fillet([(PORT_Y[0], top - PORT_DEPTH, 0.0), (PORT_Y[1], top - PORT_DEPTH, 0.003),
-                       (PORT_Y[1], top + 0.01, 0.0), (PORT_Y[0], top + 0.01, 0.0)], 6), "x", -0.0035, 0.02, "Body")
+                       (PORT_Y[1], top + 0.01, 0.0), (PORT_Y[0], top + 0.01, 0.0)], 6), "x", PORT_X, 0.02, "Body")
     cutters.append(c.build())
     # The extractor's slot: a recess in the right flank running back from the port.
     flank = top - foot
@@ -246,18 +262,21 @@ def slide() -> object:
     b = hs.Builder("CoverPlate", ["Body"])
     b.prism(inner, "y", y0 - 0.0002, y0 + 0.001, "Body")
     parts = [ob, hs.finish(b.build(), 0.0003, 1)]
-    # The barrel: its hood filling the port, flush with the top, a step at the chamber's back; its tube to the face.
+    # The barrel: its hood filling the port to a hairline (HOOD_GAP) front, back and on the left, flush with the top
+    # (owner 2026-11-05: no gap between slide and barrel in the port), its front edge sloping down to the barrel as
+    # before (owner 2026-11-05: keep the slope), its right face HOOD_INSET inside the flank as the photos' chamber;
+    # its tube to the face.
     b = hs.Builder("Barrel", ["Metal"])
-    hood = hs.fillet([(PORT_Y[0] + 0.0010, BORE_Z, 0.0), (PORT_Y[1] - 0.0010, BORE_Z, 0.0),
-                      (PORT_Y[1] - 0.0010, top - 0.0030, 0.0015), (PORT_Y[1] - 0.0045, top - 0.0002, 0.001),
-                      (PORT_Y[0] + 0.0040, top - 0.0002, 0.0), (PORT_Y[0] + 0.0040, top - 0.0012, 0.0),
-                      (PORT_Y[0] + 0.0010, top - 0.0012, 0.0)], 3)
-    b.prism(hood, "x", -0.0026, 0.0098, "Metal")
+    g = HOOD_GAP
+    hood = hs.fillet([(PORT_Y[0] + g, BORE_Z, 0.0), (PORT_Y[1] - g, BORE_Z, 0.0),
+                      (PORT_Y[1] - g, top - HOOD_SLOPE[1], 0.0015), (PORT_Y[1] - HOOD_SLOPE[0], top - 0.0002, 0.001),
+                      (PORT_Y[0] + g, top - 0.0002, 0.0)], 3)
+    b.prism(hood, "x", PORT_X + g, SLIDE_HW - HOOD_INSET, "Metal")
     end = BARREL_END
     b.tube([(PORT_Y[0] + 0.002, BARREL_R), (end - 0.0004, BARREL_R), (end, BARREL_R - 0.0005)],
            [(PORT_Y[0] + 0.002, BORE_R), (end - 0.0008, BORE_R), (end, BORE_R + 0.0012)], "Metal", 28,
            centre=(0.0, 0.0, BORE_Z))
-    parts.append(hs.finish(b.build(), 0.0004, 1))
+    parts.append(hs.finish(b.build(), 0.00025, 1))
     # The spring guide's end, the extractor and the sights.
     b = hs.Builder("Bits", ["Detail", "Metal", "Accent"])
     b.lathe([(y1 - 0.004, GUIDE_R - 0.0008), (y1 - 0.0012, GUIDE_R - 0.0008), (y1 - 0.0008, GUIDE_R - 0.0014),
@@ -270,32 +289,39 @@ def slide() -> object:
     # Rear sight: a wide block, sloped front and back (photo: its foot x 521 to 541, its top x 524 to 534 at
     # py 35), a U notch with a white outline on its back face.
     ry = REAR_SIGHT_Y
-    rear = [(Y(541.0), top - 0.0004), (Y(521.0), top - 0.0004), (Y(524.0), Z(35.0)), (Y(534.0), Z(35.0)),
-            (Y(540.0), top + 0.0007)]
+    rear = [(Y(541.0), top - 0.0004), (Y(521.0), top - 0.0004), (Y(524.0), Z(35.0)), (Y(534.0), Z(35.0))]
     b.prism(rear, "x", -REAR_SIGHT_HW, REAR_SIGHT_HW, "Detail")
     # Front sight: a post with a white dot set into its sloped back face (one piece with it, owner 2026-11-05), the
-    # dot standing 0.12 mm proud.
-    foot, dot_z = top - 0.0004, SIGHT_Z - 0.0012
+    # dot laid on the face (tilted with it), standing 0.12 mm proud, centred where the notch's light frames it.
+    foot = top - 0.0004
     b.prism(hs.fillet([(Y(53.5), foot, 0.0), (Y(44.5), foot, 0.0), (Y(46.0), SIGHT_Z, 0.0006),
-                       (Y(51.5), SIGHT_Z, 0.0006)], 3), "x", -0.0017, 0.0017, "Detail")
-    back = Y(53.5 - 2.0 * (dot_z - foot) / (SIGHT_Z - foot))
-    b.lathe([(0.0, 0.0), (0.0, 0.0005), (0.0003, 0.0005), (0.0003, 0.0)], "Accent", 12,
-            centre=(0.0, back - 0.00012, dot_z), axis="y")
+                       (Y(51.5), SIGHT_Z, 0.0006)], 3), "x", -FRONT_POST_HW, FRONT_POST_HW, "Detail")
+    dot_z = SIGHT_Z - FRONT_DOT_R - 0.0004
+    back = Y(53.5) + (Y(51.5) - Y(53.5)) * (dot_z - foot) / (SIGHT_Z - foot)
+    tilt = math.atan2(Y(51.5) - Y(53.5), SIGHT_Z - foot)
+    f = b.lathe([(0.0, 0.0), (0.0, FRONT_DOT_R), (0.0004, FRONT_DOT_R), (0.0004, 0.0)], "Accent", 16,
+                centre=(0.0, back - 0.00012, dot_z), axis="y")
+    b.transform(f, hs.rot_about("x", -tilt, (0.0, back, dot_z)))
     bits = b.build()
+    floor = SIGHT_Z - NOTCH_DROP
     c = hs.Builder("c_notch", ["Detail"])
     c.prism(hs.rounded_rect(NOTCH_HW, 0.0030, 0.0009, 3), "y", ry - 0.010, ry + 0.010, "Detail",
-            offset=(0.0, 0.0, SIGHT_Z + 0.0030))
+            offset=(0.0, 0.0, floor + 0.0030))
     hs.cut(bits, [c.build()])
-    # The notch's white outline: a U on the sight's sloped back face.
+    # The notch's white outline: a U laid on the sight's back face, one plane leaning forward at its top (from x 541
+    # at its foot to 534 at the top). Heights are drawn along the face, so each is its drop over cos(lean): the U's
+    # floor band ends exactly on the notch's floor, nothing white across the notch.
     b = hs.Builder("RearDot", ["Accent"])
-    w = 0.0008
+    w = 0.0006
     zt = Z(35.0) - 0.0001
-    u = [(-NOTCH_HW - w, 0.0), (-NOTCH_HW - w, SIGHT_Z - w - zt), (NOTCH_HW + w, SIGHT_Z - w - zt),
-         (NOTCH_HW + w, 0.0), (NOTCH_HW, 0.0), (NOTCH_HW, SIGHT_Z - zt), (-NOTCH_HW, SIGHT_Z - zt), (-NOTCH_HW, 0.0)]
+    lean = math.atan2(Y(534.0) - Y(541.0), Z(35.0) - (top - 0.0004))
+    k = 1.0 / math.cos(lean)
+    u = [(-NOTCH_HW - w, 0.0), (-NOTCH_HW - w, (floor - w - zt) * k), (NOTCH_HW + w, (floor - w - zt) * k),
+         (NOTCH_HW + w, 0.0), (NOTCH_HW, 0.0), (NOTCH_HW, (floor - zt) * k), (-NOTCH_HW, (floor - zt) * k),
+         (-NOTCH_HW, 0.0)]
     f = b.prism(u, "y", -0.00012, 0.00012, "Accent")
-    # Laid on the back face, which leans forward at its top (from x 540 at its foot to 534 at the top).
-    lean = math.atan2(Y(534.0) - Y(540.0), Z(35.0) - (top + 0.0007))
-    b.transform(f, Matrix.Translation((0.0, Y(534.0), zt)) @ Matrix.Rotation(-lean, 4, "X"))
+    face_y = Y(534.0) - (Z(35.0) - zt) * math.tan(lean)
+    b.transform(f, Matrix.Translation((0.0, face_y, zt)) @ Matrix.Rotation(-lean, 4, "X"))
     dot = b.build()
     parts += [hs.finish(bits, 0.0003, 1), dot]
     return hs.join("Slide", parts)
@@ -774,10 +800,11 @@ def mag_release() -> object:
     return hs.finish(ob, 0.0003, 1)
 
 
-def magazine(name: str = "Magazine", extra: float = 0.0, plate_mat: str = "Detail") -> object:
+def magazine(name: str = "Magazine", extra: float = 0.0, plate_mat: str = "Detail", fine: int = 1) -> object:
     """A double-stack gas magazine raked like the grip: its body, a base plate under a flanged lip, the follower
-    with the top BBs, and its gas valve under the plate. `extra` metres longer along the rake for the extended
-    magazine part, its plate in `plate_mat`."""
+    with the top BBs, and its gas valve under the plate. `extra` metres longer along the rake for a magazine part
+    (tools/blender/parts/magazines.py), its plate in `plate_mat`; `fine` times rounder corners, BBs and valve and a
+    finer bevel (the parts' own budget)."""
     rake = math.radians(GRIP_RAKE)
     down = Vector((0.0, -math.sin(rake), -math.cos(rake)))
     top = Vector(MAG_TOP)
@@ -789,7 +816,7 @@ def magazine(name: str = "Magazine", extra: float = 0.0, plate_mat: str = "Detai
 
     def ring(t: float, s: float = 1.0) -> list:
         c = top + down * (length * t)
-        return [(x * s, c.y + y * s, c.z) for x, y in hs.rounded_rect(MAG_HW, MAG_HD, 0.0045, 2)]
+        return [(x * s, c.y + y * s, c.z) for x, y in hs.rounded_rect(MAG_HW, MAG_HD, 0.0045, 2 * fine)]
 
     b.loft([ring(0.0), ring(1.0 - 0.003 / length), ring(1.0)], "Metal")
     # The base plate (photo: x 462 to 594, py 420 to 447), in two tiers.
@@ -806,7 +833,7 @@ def magazine(name: str = "Magazine", extra: float = 0.0, plate_mat: str = "Detai
             faces += b.prism(hs.fillet(pts(m), 1), "x", sx * PLATE_HW[1] - 0.0003, sx * PLATE_HW[1] + 0.0001,
                              "Metal")
     # The gas valve's cap, flush in the plate's foot.
-    faces += b.lathe([(0.0, 0.0), (0.0, 0.0030), (0.0006, 0.0030), (0.0006, 0.0)], "Metal", 14,
+    faces += b.lathe([(0.0, 0.0), (0.0, 0.0030), (0.0006, 0.0030), (0.0006, 0.0)], "Metal", 14 * fine,
                      centre=(0.0, Y(530.0), foot_z - 0.0001), axis="z")
     if extra > 0.0:
         b.transform(faces, Matrix.Translation(down * extra))
@@ -815,10 +842,10 @@ def magazine(name: str = "Magazine", extra: float = 0.0, plate_mat: str = "Detai
     b.box((-0.0040, c.y - 0.012, c.z - 0.002), (0.0040, c.y + 0.010, c.z + 0.0005), "Detail")
     for i in range(2):
         b.lathe([(-0.003, 0.0), (-0.0026, 0.0015), (-0.0015, 0.0026), (0.0, 0.003), (0.0015, 0.0026),
-                 (0.0026, 0.0015), (0.003, 0.0)], "BB", 10, centre=(0.0, c.y + 0.006 - i * 0.0062,
+                 (0.0026, 0.0015), (0.003, 0.0)], "BB", 10 if fine == 1 else 16, centre=(0.0, c.y + 0.006 - i * 0.0062,
                  c.z + 0.0032 - i * 0.0008), axis="z")
     b.box((-0.0015, c.y - 0.011, c.z + 0.0005), (0.0015, c.y - 0.007, c.z + 0.0012), "Accent")
-    return hs.join(name, [hs.finish(b.build(), 0.0005, 1), plate])
+    return hs.join(name, [hs.finish(b.build(), 0.0005, 1 if fine == 1 else 2), plate])
 
 
 def _base_plate(mat: str) -> object:
@@ -841,24 +868,6 @@ def _base_plate(mat: str) -> object:
         hs.cut(ob, [c.build()], "INTERSECT")
         parts.append(hs.finish(ob, 0.0006, 2))
     return hs.join("Plate", parts)
-
-
-def figure() -> object:
-    """The figures' cut-down copy: the silhouette in a couple of hundred faces."""
-    b = hs.Builder("Figure", ["Body", "Furniture", "Detail", "Metal", "Accent"])
-    b.box((-SLIDE_HW, SLIDE_Y[0], SLIDE_SIDE_FOOT), (SLIDE_HW, SLIDE_Y[1], SLIDE_TOP), "Body")
-    b.prism([P(22, 99)[:2], P(22, 154), P(205, 157), P(218, 160), P(218, 246), P(386, 242), P(447, 410),
-             P(612, 410), P(545, 236), P(522, 180), P(578, 122), P(560, 99)], "x", -FRAME_HW, FRAME_HW, "Furniture")
-    b.prism([(y, z) for y, z, _r in pts([(462, 413), (597, 413), (597, 447), (462, 447)])], "x", -MAG_HW, MAG_HW,
-            "Detail")
-    b.lathe([(SLIDE_Y[1] - 0.004, BARREL_R), (SLIDE_Y[1] + 0.0004, BARREL_R)], "Metal", 8, centre=(0.0, 0.0, BORE_Z))
-    b.box((-0.004, REAR_SIGHT_Y - 0.003, SLIDE_TOP), (0.004, REAR_SIGHT_Y + 0.002, SIGHT_Z + 0.002), "Detail")
-    b.box((-0.0012, FRONT_SIGHT_Y - 0.0012, SLIDE_TOP), (0.0012, FRONT_SIGHT_Y + 0.0012, SIGHT_Z), "Accent")
-    # The frame's opening for the trigger finger, as a dark plate either side reads at a figure's distance.
-    ob = b.build()
-    for p in ob.data.polygons:
-        p.use_smooth = False
-    return ob
 
 
 # ------------------------------------------------------------------------------------------------------------- rig
@@ -984,33 +993,29 @@ def build() -> None:
     for ob, bone in ((slide(), "slide"), (trigger(), "trigger"), (magazine(), "magazine"),
                      (mag_release(), "magRelease")):
         hs.parent_to_bone(ob, arm, bone)
-    fig = figure()
-    fig.parent = arm
     for name, loc in EMPTIES.items():
         hs.empty(name, loc, arm)
     clips(arm)
+    fig = figure_copy.make(FIGURE_TRIS)
     total = 0
     for ob in bpy.data.objects:
         if ob.type == "MESH":
             n = hs.tris(ob)
-            if ob.name != "Figure":
+            if not ob.name.startswith("Figure"):
                 total += n
             print("  %-16s %6d triangles" % (ob.name, n))
-    print("  in the hands: %d triangles; figure: %d" % (total, hs.tris(fig)))
+    print("  in the hands: %d triangles; figure: %d" % (total, sum(hs.tris(o) for o in [fig] + list(fig.children))))
     hs.export(OUT, True)
     print("wrote", OUT)
     build_parts()
 
 
 def build_parts() -> None:
-    """The parts file: the silencer moved onto the new ThreadEnd, the extended magazine rebuilt from this magazine
-    (EXTENDED longer, a frame-coloured base pad), each with its origin on its mount; the laser and torch moved onto the
-    rail mount. Running it again changes nothing."""
+    """The parts file: the silencer moved onto the new ThreadEnd, its origin on its mount; the laser and torch moved
+    onto the rail mount; the magazines left as they are (tools/blender/parts/magazines.py builds them). Running it
+    again changes nothing."""
     hs.reset(FPS)
     bpy.ops.import_scene.gltf(filepath=PARTS)
-    for ob in list(bpy.data.objects):
-        if ob.name.startswith("magazine_"):
-            bpy.data.objects.remove(ob, do_unlink=True)
     sil = bpy.data.objects["muzzle_silencer"]
     sil.location += Vector(EMPTIES["ThreadEnd"]) - sil.matrix_world.translation
     # The laser and torch follow the rail mount (their roots' origins on it; the beams and figures with them).
@@ -1020,19 +1025,6 @@ def build_parts() -> None:
             ob.location += shift
     for name, (colour, rough, metal) in MATERIALS.items():
         hs.material(name, colour, rough, metal)
-    well = Vector(EMPTIES["MagWell"])
-    mag = magazine("magazine_extended", EXTENDED, "Furniture")
-    b = hs.Builder("magazine_extended_Figure", ["Detail"])
-    rake = math.radians(GRIP_RAKE)
-    down = Vector((0.0, -math.sin(rake), -math.cos(rake)))
-    lo = Vector((0.0, Y(528.0), Z(420.0)))
-    b.loft([[(x, lo.y + y, lo.z) for x, y in hs.rounded_rect(MAG_HW + 0.001, 0.021, 0.004, 1)],
-            [(x, lo.y + down.y * (EXTENDED + 0.008) + y, lo.z + down.z * (EXTENDED + 0.008))
-             for x, y in hs.rounded_rect(MAG_HW + 0.001, 0.021, 0.004, 1)]], "Detail")
-    fig = b.build()
-    for ob in (mag, fig):
-        ob.data.transform(Matrix.Translation(-well))
-        ob.location = well
     for ob in bpy.data.objects:
         if ob.type == "MESH" and ob.parent is None:
             print("  part %-26s %6d triangles" % (ob.name, hs.tris(ob)))

@@ -14,7 +14,7 @@
   after a moment out of sight, and never fires as it changes mode.
 - Bot teammates following you no longer put their replica away when you take a bomb in hand.
 
-### Sniper Rifle (dev content)
+### Sniper Rifle
 - After a Sniper Rifle shot, the pistol you switch to fires as soon as it is up; the bolt keeps cycling on the sling,
   and switching back never skips it.
 - A click once the bolt handle is home fires as the cycle ends instead of being lost; a double click still fires once.

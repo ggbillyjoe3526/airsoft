@@ -17,6 +17,10 @@ stand and how quietly you get there win more fights than fast hands.
 - **Holstered** (press 3) you run a little faster than with your replica out, never faster than a sprint, and your
   sprint is a little faster too.
 
+Every figure's legs keep pace with how fast it moves: its feet plant on the ground without sliding, a run kicks the
+heels up, a sprint leans in, and a step aside turns the legs into it while the replica stays on its aim. What you see
+of a running player's legs is what a BB has to hit.
+
 Running, sprinting, vaulting and landing all make noise that players and bots hear. Running or landing on gravel or
 steel carries further, and so does running into a noisy prop such as a container, a steel drum or a plastic barrel ([Maps](Maps#depot)).
 

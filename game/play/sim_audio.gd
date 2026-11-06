@@ -43,6 +43,12 @@ const BUS_POWER := &"Power"
 const BUS_MUFFLED := &"Muffled"
 ## The charging handle drawn back and let go after each shot of a spring rifle (assets/audio/cues/boltCycle_*.wav, SN1).
 const BOLT_CUE := &"boltCycle"
+## Every replica's trigger pulled with nothing loaded, today's and any added later: the gas pistol's recorded dry click
+## (assets/audio/cues/dryFire_*.wav; owner, 2026-11-05, final, not a stand-in).
+const DRY_CUE := &"dryFire"
+## The inspect's cues (InspectPose.sound_cue) that name the replica's own sound, not a shared one.
+const INSPECT_MAG_IN := &"magIn"
+const INSPECT_MAG_OUT := &"magOut"
 ## Cue names by RayHit.Surface (none sounds as concrete; a BB on gravel, grass or leaves as earth, a step on each as
 ## its own; a step on glass as on metal, on plastic or cardboard as on wood) and by GameEvent.Footstep.
 const SURFACE_NAMES: PackedStringArray = ["concrete", "concrete", "metal", "wood", "earth", "gravel", "grass", "leaves",
@@ -82,12 +88,13 @@ var _occlusion: SoundOcclusion = null
 ## The travel of the BB whose impact is being played (set round that one `_play`; zero, not known, otherwise), so a
 ## strike on a wall's far face is muffled from the near side (SoundOcclusion.impact_share).
 var _struck_along: Vector3 = Vector3.ZERO
+## When each bomb slot (GameState.grenades) last started its bouncing can (state time, s): -INF from its throw.
+var _bounced_at: PackedFloat64Array = PackedFloat64Array()
 ## Cue names worked out once: by power source, by surface, by surface and pace.
 var _shot: Dictionary[StringName, StringName] = {}
 var _power: Dictionary[StringName, StringName] = {}
 ## By power source: its power part's level (SoundConfig.power_gains).
 var _power_gain: Dictionary[StringName, float] = {}
-var _dry: Dictionary[StringName, StringName] = {}
 ## Each sound profile's slide locking back on the magazine's last shot (slideLock_<profile>, AU2), or none.
 var _slide_lock: Dictionary[StringName, StringName] = {}
 var _mag_out: Dictionary[StringName, StringName] = {}
@@ -149,7 +156,6 @@ func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, quer
 		var has_part := ResourceLoader.exists("%s%s_1.wav" % [SoundConfig.CUE_DIR, power_part])
 		_power[p] = _load(power_part) if has_part else &""
 		_power_gain[p] = cfg.power_gains.get(p, cfg.power_gain)
-		_dry[p] = _load("dryFire_%s" % p)
 		var lock := "slideLock_%s" % p
 		_slide_lock[p] = _load(lock) if ResourceLoader.exists("%s%s_1.wav" % [SoundConfig.CUE_DIR, lock]) else &""
 		_mag_out[p] = _load("magOut_%s" % p)
@@ -165,7 +171,7 @@ func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, quer
 	for cue: String in ["selector", "draw", "reloadRefused", "bodyHit", "hitTick", "hitMarker", "count_beep", "vault",
 			"foley_holster", "magRattle", "rope_up", "rope_down", "steelRing", "radio_ack", "foley_crouch", "foley_stand",
 			"foley_lean", "whistle_short", "whistle_long", "torchClick", "ping_pip", "magToss", "magCatch", "grenade_pin",
-			"grenade_bounce", "smoke_pop", "flash_bang", "door_open", "door_shut", BOLT_CUE]:
+			"grenade_bounce", "smoke_pop", "flash_bang", "door_open", "door_shut", BOLT_CUE, DRY_CUE]:
 		_load(cue)
 	_set_muffle(cfg.muffled_cutoff_hz)
 	for i in cfg.field_voices:
@@ -227,7 +233,7 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				if _slide_lock.get(p, &"") != &"" and _emptied(state, e.actor, e.slot):
 					_mechanism(_slide_lock[p], state, e, own)
 			GameEvent.Kind.DRY_FIRE:
-				_mechanism(_dry.get(_power_of(state, e.actor, e.slot), &""), state, e, own)
+				_mechanism(DRY_CUE, state, e, own)
 			GameEvent.Kind.RELOAD_START:
 				_mechanism(_mag_out.get(_power_of(state, e.actor, e.slot), &""), state, e, own)
 			GameEvent.Kind.RELOAD_END:
@@ -253,10 +259,21 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				_play(&"magCatch", catcher.eye(_body) if catcher != null else e.position, e.target == player_id,
 						_cfg.mechanism_gain, Kind.MECHANISM, BUS_EFFECTS, 1.0, 0.0, catcher)
 			GameEvent.Kind.GRENADE_PIN:
-				_mechanism(&"grenade_pin", state, e, own)
+				_mechanism(&"grenade_pin", state, e, own, _cfg.pin_gain)
 			GameEvent.Kind.GRENADE_THROW:
 				_mechanism(&"magToss", state, e, own)
+				if e.target >= 0:
+					_bomb_bounce_slot(e.target, state)
+					_bounced_at[e.target] = -INF
 			GameEvent.Kind.GRENADE_BOUNCE:
+				# The owner's can bouncing, as a whole take: its later knocks are the bomb's next bounces.
+				if e.target >= 0:
+					_bomb_bounce_slot(e.target, state)
+					# A time from before `now`'s clock went back (a new match, its throw skipped unheard) is stale.
+					var since := now - _bounced_at[e.target]
+					if since >= 0.0 and since < _cfg.bounce_hold:
+						continue
+					_bounced_at[e.target] = now
 				var hard := minf(1.0, e.reach / maxf(_cfg.bounce_full_speed, 0.001))
 				_play(&"grenade_bounce", e.position, false, _cfg.bounce_gain * hard, Kind.PROP, BUS_EFFECTS, 1.0,
 						_cfg.prop_reach, null, true)
@@ -377,6 +394,18 @@ func on_ping(book: Pings, player_id: int) -> void:
 		return
 	_ping_at = p.at
 	_play(&"ping_pip", Vector3.ZERO, true, _cfg.ping_pip_gain, Kind.INTERFACE, BUS_INTERFACE)
+
+
+## A part's sound as you inspect the replica in hand (IN1, ReplicaView.inspect_sound), in your ear as your own
+## mechanism's: `cue` is the replica's own magazine in or magazine out by its sound `profile`
+## (ReplicaConfig.sound_profile) for magIn and magOut, else that shared cue (selector, torchClick, dryFire, ...).
+func inspect_sound(cue: StringName, profile: StringName) -> void:
+	var stream := cue
+	if cue == INSPECT_MAG_IN:
+		stream = _mag_in.get(profile, &"")
+	elif cue == INSPECT_MAG_OUT:
+		stream = _mag_out.get(profile, &"")
+	_play(stream, Vector3.ZERO, true, _cfg.mechanism_gain, Kind.MECHANISM, BUS_EFFECTS)
 
 
 ## The calls said in `said` (CalloutLog) since the last look, each as its radio click (the browser game's radioCall): a
@@ -522,10 +551,10 @@ func _call(state: GameState, now: float) -> void:
 		_play(kind.cue, at, false, kind.level * _cfg.ambience_gain, Kind.CALL, BUS_AMBIENCE, pitch, far)
 
 
-func _mechanism(cue: StringName, state: GameState, e: GameEvent, own: bool) -> void:
+func _mechanism(cue: StringName, state: GameState, e: GameEvent, own: bool, gain: float = -1.0) -> void:
 	var c := state.character(e.actor)
 	var at := c.eye(_body) if c != null else e.position
-	_play(cue, at, own, _cfg.mechanism_gain, Kind.MECHANISM, BUS_EFFECTS, 1.0, 0.0, c)
+	_play(cue, at, own, gain if gain >= 0.0 else _cfg.mechanism_gain, Kind.MECHANISM, BUS_EFFECTS, 1.0, 0.0, c)
 
 
 ## The sound profile of `actor`'s replica in `slot` (its power's, or its own).
@@ -609,6 +638,16 @@ func _play(cue: StringName, at: Vector3, own: bool, gain: float, kind: Kind, bus
 		v.bus = bus if open else SoundOcclusion.bus_for(bus, share, _cfg)
 		v.global_position = at
 		v.play()
+
+
+## Makes `_bounced_at` cover every bomb slot (once: the pool is made with the state).
+func _bomb_bounce_slot(slot: int, state: GameState) -> void:
+	var n := maxi(slot + 1, state.grenades.size())
+	if _bounced_at.size() < n:
+		var was := _bounced_at.size()
+		_bounced_at.resize(n)
+		for i in range(was, n):
+			_bounced_at[i] = -INF
 
 
 ## A variant of `cue`'s `count`, never the one it played last.

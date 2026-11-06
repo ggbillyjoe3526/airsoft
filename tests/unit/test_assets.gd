@@ -53,13 +53,13 @@ func test_figures_have_their_clips_and_sidecars() -> void:
 
 func test_every_sound_loads_and_loops_loop() -> void:
 	var cues := _files("res://assets/audio/cues", "wav")
-	assert_eq(cues.size(), 422,
-			"the salvage's 372 (the city's calls went with Neon Heights), the whistle's 6, the pip, the bombs' 12 (SF1), the doors' 6 (DO1), the spring rifle's cocking 3 (SN1), the BBs on glass, plastic and cardboard 15 and the slide lock 3 (AU2), the doors' second takes 4 (AU5)")
+	assert_eq(cues.size(), 397,
+			"the salvage's 362 (the city's calls went with Neon Heights, the motor spin-up and spin-down with BP4), the whistle's 6, the pip, the bombs' 12 (SF1), the doors' 6 (DO1), the spring rifle's cocking 3 (SN1), the BBs on glass, plastic and cardboard 15 and the slide lock 3 (AU2), the doors' second takes 4 (AU5), less the 15 of three replicas' own dry clicks (AU8: one for all)")
 	for path: String in cues:
 		var s := load(path) as AudioStreamWAV
 		assert_true(s != null and s.get_length() > 0.0, path)
 	var loops := _files("res://assets/audio/loops", "wav")
-	assert_eq(loops.size(), 8, "the browser's 4, the owner's room and street by day and night (AU5), woods (AU6)")
+	assert_eq(loops.size(), 5, "the browser's yard (its other 3 went with BP4), the owner's room and street by day and night (AU5), woods (AU6)")
 	for path: String in loops:
 		var s := load(path) as AudioStreamWAV
 		assert_true(s != null and s.loop_mode == AudioStreamWAV.LOOP_FORWARD, "%s loops" % path)

@@ -28,6 +28,10 @@ func before_all() -> void:
 	hits = HitConfig.new()
 
 
+func after_each() -> void:
+	config.shoulder_rifle = 1.0
+
+
 func _character() -> Character:
 	var c := Character.new(1, 0, Vector3.ZERO, 0.0, ReplicaStats.default_loadout())
 	c.grounded = true
@@ -456,7 +460,8 @@ func _replica_magazine(id: String, share: float) -> Vector3:
 	player.seek(share * player.current_animation_length, true)
 	player.pause()
 	await wait_process_frames(1)
-	var mag := model.find_child(config.magazine_node, true, false) as MeshInstance3D
+	# The model's own magazine, which the clip moves (the figure magazine is the same shape, unmoved).
+	var mag := model.find_child(ReplicaParts.MAGAZINE_NODE, true, false) as MeshInstance3D
 	var centre := model.global_transform.affine_inverse() * mag.global_transform * mag.get_aabb().get_center()
 	model.free()
 	return centre
@@ -470,6 +475,7 @@ func test_a_reload_shows_the_new_magazine_on_hand_l_over_its_share_and_one_copy_
 	var total := a.replicas[0].reload_time
 	assert_eq(total, 1.8, "the AEG reloads in 1.8 s")
 	var hands := v.body().hands
+	var well := hands.replica(0).get_node(ReplicaParts.FIGURE_MAGAZINE) as Node3D
 	var new_shares := PackedFloat64Array()
 	var old_shares := PackedFloat64Array()
 	var most := 0
@@ -486,6 +492,7 @@ func test_a_reload_shows_the_new_magazine_on_hand_l_over_its_share_and_one_copy_
 		elif hands.mag_shown == FigureHands.MAG_OLD:
 			old_shares.append(share)
 		if hands.mag_shown != FigureHands.MAG_NONE:
+			assert_false(well.visible, "share %.3f: the well empty while the hand holds the magazine" % share)
 			var hand: Transform3D = d["Hand_L"]
 			var mag: Transform3D = d[&"magazine"]
 			assert_lt(mag.origin.distance_to(v.body().skeleton.global_transform * hand.origin), 0.2,
@@ -497,9 +504,10 @@ func test_a_reload_shows_the_new_magazine_on_hand_l_over_its_share_and_one_copy_
 	assert_almost_eq(new_shares[new_shares.size() - 1], 0.509, step, "to 0.509")
 	assert_almost_eq(old_shares[0], 0.0926, step, "the old one pulled from oldMagazine.from")
 	assert_almost_eq(old_shares[old_shares.size() - 1], 0.185, step, "until its release")
-	assert_eq(most, 1, "one copy on the hand at most (the figure version's own magazine can't hide)")
+	assert_eq(most, 1, "one copy on the hand at most")
 	await _pose(v, c, 5)
 	assert_false(hands.magazine(0).visible, "none after the reload")
+	assert_true(well.visible, "the new one home in the well")
 
 
 func test_the_old_magazine_starts_where_the_replicas_own_clip_pulls_it() -> void:
@@ -527,6 +535,8 @@ func test_the_old_magazine_starts_where_the_replicas_own_clip_pulls_it() -> void
 
 
 func test_the_reload_clip_keeps_step_with_reload_left_near_far_and_after_hiding() -> void:
+	# The clip's own hand: the rifle not drawn into the shoulder (TP2), which moves both hands with it.
+	config.shoulder_rifle = 0.0
 	var c := _character()
 	var v := _view(FigureMix.HUMAN, c)
 	await _pose(v, c, 5)

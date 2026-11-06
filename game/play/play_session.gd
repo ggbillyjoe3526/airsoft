@@ -717,6 +717,8 @@ func _build_views(ui: CanvasLayer) -> void:
 	_grenades = GrenadeView.new()
 	add_child(_grenades)
 	_grenades.setup(state.grenades.size(), _tuning.grenades, _light.night)
+	for f in _figures:
+		f.set_bombs(_grenades.meshes(), _tuning.grenades)
 	var first_use: Array[Material] = [_bbs.drawn_material(), _puffs.drawn_material(), _gas.drawn_material(),
 			_kicked.drawn_material(), contact.material, _dust.drawn_material()]
 	first_use.append_array(_grenades.materials())
@@ -774,6 +776,7 @@ func _build_views(ui: CanvasLayer) -> void:
 	_audio.night = _light.night
 	add_child(_audio)
 	_audio.setup(_play.sound, profiles, _tuning.body, _level.query(), _map, _tuning.footsteps)
+	_hands.inspect_sound.connect(_on_inspect_sound)
 	_mix = SoundMix.new()
 	add_child(_mix)
 	_mix.setup(_play.sound)
@@ -1137,6 +1140,9 @@ func _process(delta: float) -> void:
 	_eyes.sim_rate = _pacer.rate
 	_eyes.update(watched, _input, fraction, delta, aim, watched == player)
 	var look := -_eyes.global_basis.z
+	# Inspect (IN1): your own replica, while you are in play and looking through your own eyes.
+	if _input.take_inspect() and watched == player and Elimination.is_in_play(player):
+		_hands.inspect()
 	_hands.update(player, _input.view_yaw, _input.view_pitch, _eyes.global_position, look, delta,
 			aim if watched == player else player.aim_raise)
 	# Your replica only through your own eyes (update shows it whenever you are in play).
@@ -1291,6 +1297,12 @@ func spectated() -> Character:
 		if anyone == null:
 			anyone = c
 	return anyone if anyone != null else player
+
+
+## A part's sound while you inspect the replica in your hands (IN1), as that replica's.
+func _on_inspect_sound(cue: StringName) -> void:
+	if not player.armament.replicas.is_empty():
+		_audio.inspect_sound(cue, player.armament.replica().sound_profile())
 
 
 func _unhandled_input(event: InputEvent) -> void:

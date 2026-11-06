@@ -14,24 +14,23 @@ func test_a_gone_maps_presets_read_day_alone_and_load_refuses_it_cleanly() -> vo
 	assert_false(m.problems.is_empty(), "a refused map says why")
 
 
-func test_no_shipped_map_or_item_is_dev_but_the_sniper_and_the_range_is_listed() -> void:
+func test_no_shipped_item_is_dev_the_street_is_the_one_dev_map_and_the_range_is_listed() -> void:
 	var cat := MapCatalog.read_file()
 	for e in cat.listed(false):
 		assert_false(cat.is_dev(e.id), e.id)
 	var ids := PackedStringArray()
 	for e in cat.listed(false):
 		ids.append(e.id)
-	assert_eq(ids, PackedStringArray(["depot", "woodland", "street", "range"]))
-	assert_eq(cat.listed(true).size(), cat.listed(false).size(), "Dev content hides nothing now")
+	assert_eq(ids, PackedStringArray(["depot", "woodland", "range"]))
+	assert_eq(cat.listed(true).size(), cat.listed(false).size() + 1, "Dev content adds The Street (owner, 2026-11-05)")
 	var pool := Pool.read_file()
 	var every: Array[Pool.Item] = []
 	every.append_array(pool.replicas)
 	every.append_array(pool.powers)
 	every.append_array(pool.parts)
-	# The only dev items are the ones in development on purpose: SN1's Sniper Rifle and its springs, SN2's Variable Scope.
-	var in_development := PackedStringArray(["000021", "000022", "000023", "000024", "000025"])
+	# The Sniper Rifle, its springs and the Variable Scope went public (owner, 2026-11-05): no item is dev.
 	for it in every:
-		assert_eq(it.is_dev(), in_development.has(it.id), it.display_name)
+		assert_false(it.is_dev(), it.display_name)
 
 
 func test_the_torch_is_a_night_light_for_bots_without_dev_content() -> void:

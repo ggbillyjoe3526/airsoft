@@ -3,7 +3,9 @@
 ## The match
 
 Two teams of the same size, **Alpha** (blue) and **Beta** (orange), start at opposite ends of a field. You play one
-member of your team; everyone else is a [bot](Bots). A match is played in rounds against the clock:
+member of your team; everyone else is a [bot](Bots). Everyone wears the same field kit (an olive combat shirt,
+camouflage trousers, dark gloves and coyote boots), so you tell the teams apart by the team colour on the plate carrier
+and the armbands. A match is played in rounds against the clock:
 
 - **Elimination:** take out the whole other team to win the round.
 - **Attack / Defend:** the attackers raise their flag on the defenders' pole, or the defenders hold out.
@@ -24,7 +26,7 @@ that only clips an elbow or a muzzle flies on. F5 shows everyone's hit areas if 
 When a BB hits you:
 
 1. You hear a sharp tick, your replica jolts and drops out of view, and the field's sound dips.
-2. You raise your hand and call **HIT!** for a moment, so everyone can see you're out.
+2. You raise your hand straight up and call **HIT!** for a moment, so everyone can see you're out.
 3. You walk off to your team's **dead zone**, round cover rather than through it. Walking off, you can't shoot and
    can't be hit.
 4. From the dead zone you watch the round through a teammate's eyes until it ends.

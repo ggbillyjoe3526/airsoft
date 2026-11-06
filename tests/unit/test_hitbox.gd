@@ -148,8 +148,9 @@ func test_legs_swing_on_the_walk_cycle_one_forward_one_back() -> void:
 func test_walk_cycle_moves_with_the_ground_covered_but_not_across_a_teleport() -> void:
 	var c := character()
 	c.position.z = -0.5
+	c.velocity = Vector3(0.0, 0.0, -hits.cycle_speeds[2])
 	Hitbox.step_walk_cycle(c, hits)
-	assert_almost_eq(c.walk_cycle, 0.5 * hits.strides_per_metre * TAU, 1e-6)
+	assert_almost_eq(c.walk_cycle, 0.5 / hits.cycle_metres[2] * TAU, 1e-6)
 	var before := c.walk_cycle
 	c.prev_position.z = c.position.z
 	c.position.x = 30.0

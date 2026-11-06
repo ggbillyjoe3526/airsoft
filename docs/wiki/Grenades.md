@@ -13,10 +13,18 @@ reload or the holster, puts it back. Your replica goes down while you pull the p
 the bomb leaves your hand along your view, lofted a little, and your replica comes back up: under a second in all. You
 can't fire or aim while you throw, and a reload under way stops. Throwing on the run adds some of your own speed.
 
+Bots throw the same way: you see the bomb in a bot's hand as its arm swings back by its head, then over and out as it
+lets go.
+
 Bombs bounce off walls and the ground, then roll and settle. They don't bounce off people. If you are hit while you
 pull the pin, you keep the bomb.
 
+You can hear a bomb coming: the ring pull as the pin comes out, then a tin can clattering where it lands. A smoke bomb
+hisses as it goes off; a flash bomb goes off with a sharp pop.
+
 ## Smoke bomb
+
+A grey canister with a green stripe, a black lever down its side and a pull ring on top.
 
 A smoke bomb pops <!-- wiki:config grenade_config.smoke_fuse --> seconds after it leaves your hand and smokes where it
 lies for <!-- wiki:config grenade_config.smoke_time --> seconds: a white cloud about <!-- wiki:config grenade_config.smoke_radius --> metres out from the canister each way, thinning away at the end.
@@ -29,6 +37,8 @@ lies for <!-- wiki:config grenade_config.smoke_time --> seconds: a white cloud a
 Use it to cross open ground, to cut off a long angle, or to cover a retreat.
 
 ## Flash bomb
+
+A slim olive tube with a violet band round its top and a pull ring hanging from the rim.
 
 A flash bomb goes off <!-- wiki:config grenade_config.flash_fuse --> seconds after it leaves your hand with a bright
 flash and a bang. Anyone with a clear line from their eyes to it is **dazzled**: your screen goes white and the sound

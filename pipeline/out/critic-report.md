@@ -1,33 +1,27 @@
-Task: BL6 · The Cyber Pistol rebuilt in Blender from code (no task block; judged against the brief)
-Attempt: 2 of 4
-Head: 229bd55 (git rev-parse HEAD). CI passed on e11a317. At 229bd55, Lint, Review line, Callout guards and two match guards are green; unit tests 1-4 and 13 guard jobs are still running.
+Task: HC1 · The hit call's raised arm (no task block; judged against the owner's words of 2026-11-05, the record and attempt 2's must-fixes)
+Attempt: 3 of 4
+Head: 13f0b7c = HEAD. Checks run on it: test_hit_call_arm, the figure tests and gdlint (QA: 45/45 tests, 898 asserts). QA Pass and performance Pass, both on 13f0b7c (15:04). The full tools/check.sh runs on the PR's CI.
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept (holds only once every CI job at 229bd55 is green; any red job makes it Retry)
-Evidence:
-1. Figure fixed: tools/blender/replicas/cyber.py:750-754 builds the outline from GUARD_LOOP[:5] (cyber.py:133). (50.5,-23) is gone.
-   - No edge pair of the 13-point outline crosses. Its area is 11,468.5 mm2, and both caps in the glb have that same area.
-   - Rasterised at 0.25 mm, both caps have 0 overlapping cells (e11a317: 755 and 8,410 cells, up to 3 deep).
-   - The Figure is 240 tris, closed (360 edges each used twice) and has no degenerate faces. Its guard front stands at 52 mm, as on the hands model.
-   - Against e11a317, only the Figure mesh changed. Body, Slide, Trigger, Selector and Magazine are byte-identical, as are nodes, skins, materials, the animation data and the inverse bind matrices. So the attempt-1 ratios still hold (all within 5 %; the grip's 23 % is ruled by the owner).
-   - The renders cyber-v11-q_front and cyber-v11-q_rear at head show the moved guard joined to the front block's foot. Nothing floats, no gap opens under the loop, and the teeth sit clear in front of it.
-2. No game/ diff. The trigger bone, its inverse bind matrix and its keys moved together (QA: -0.012 in y, nothing else). No code calls find_bone on the trigger.
-3/5. No runtime code: cyber.py is an offline tool.
-4. Asset only. test_cp1_qa.gd:294-306 loads the Figure and its materials, and the material names are unchanged.
-6. Original design: no text, no logos, no brand names. Toy colours, ruled by the owner.
-7. figure() is still one short function, and the outline now comes from the shared constant instead of a second copy.
-8. docs/records/BL6.md fixes everything attempt 1 named:
-   - :17-18 records the 23 % deeper grip.
-   - The "safety blade" is gone.
-   - :30-31 records the trigger bone's move.
-   - :55 records the owner's 09:52 "Perfect".
-   - :10 adds the attempts row.
-QA (qa-report.md, 229bd55): Pass. Performance (performance-report.md, e7725d6): Pass. It still holds, because the hands' triangles are unchanged and the Figure's count stays 240.
-Nit, not failed: the record (:37) gives 31,330 triangles for the hands. The glb has 31,328 (24,480 + 3,108 + 2,760 + 544 + 436). Fix it the next time the record is touched.
-Must-fix for the next attempt: none. Merge only after every CI job at 229bd55 is green.
+Score: 8/8 → Accept
+Evidence (measured with arm2.py on human.glb and robot.glb, and from the h4/h4f/h4q renders):
+1. Held (f14+): elbow 15°, wrist 5.2°, curl 6.1° (robot 6.1°), hand 0.51 m over the shoulder. In h4f/h4/h4q call_030 at 4x, a flat open hand continues the forearm, thumb alongside.
+   Raise: hand-sh -0.31 → 0.51 rises on every frame from f03 to f13, x at most 0.41 m, wrist ≤5.5° from f02, and the elbow eases 51° → 15° with no fold.
+   Curl 45 → 34 → 22 → 11 → 6.5° at f03-f07 (robot 11° at f07). No palm-up cupped hand after f05 (h4/call_006 shows an open hand).
+   call.py:28 OUT (0.20, 0.85, 0.50); call.py:156-157 the hand and fingers on their own OPEN_BY share.
+4. test_hit_call_arm.gd:43-44: with RAISE_CURL 20 from 0.25 s, attempt 2's clip fails (28° at f08). The knuckle term at :92 closes the MCP gap. The test fails on the base glbs (QA ran it).
+2/3/5: clips and dev tools only; no runtime code, contract or per-frame path changed.
+Not blocking:
+- The raise pushes forward before it climbs: z 0.49 → 0.63 m at f05 (an arm's length).
+  From the side, h4/call_004-006 read as a palm-up "offering" hand, and call_007 as a stiff arm 45° forward.
+  It lasts 2-3 frames and the arc reads as "hand up", but a OUT z near 0.35 would keep the hand nearer the body.
+- The test's OPENED_BY is 0.25 s (:16), but call.py's OPEN_BY is 7/30 = 0.233 s, so f07 isn't checked and the comment is wrong. Use 7.0 / 30.0.
+- call.py:12 is 126 columns (house width 120).
+- QA's advisory: _globals skips a renamed bone silently. Assert that Hand_L and Middle1_L are found.
+- Scope: hc1 is stacked on GA1 (PR #207, open). origin/main...HEAD carries GA1's gait work (gait.py, glb.py, test_gait_cycle, hitbox...).
+  Open HC1's PR only after #207 merges (rebase), or base it on #207's branch, so its diff is HC1's 15 files.
+Must-fix: none.
 Owner should test in the game:
-- Grip: it is 23 % deeper than the old one (63 vs 50.5 mm). Does it look right in your hand view?
-- Fire: the trigger swings from its top with no jump, and the slide kicks.
-- Aim: the front post and rear notch line up as before.
-- A bot carrying it, near and far: the guard front now matches your own.
-- The q_front view shows a small step at the top front corner of the guard opening. Does it read as intended up close?
-- Fit the torch: it should clear the teeth. Then switch to Realistic colours: grey, no glow.
+- A bot calling a hit at 3-5 m, seen from the side: the arm swings forward and up, not like a salute or an offered hand.
+- The held hand from the front and side: flat, open, wrist in line with the forearm.
+- Crouched near a hit bot: the fingertips (2.07 m) against the HIT! sign's "!" (recorded default).
+- Walking off: the 3-4° sway looks alive; the dark shoulder edge is the KNOWN_ISSUES row.

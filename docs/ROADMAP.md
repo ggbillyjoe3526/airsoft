@@ -8,7 +8,7 @@ in `docs/PROCESS.md`.
 
 - **Building the game.** The game restarted on 2026-10-18 as an installable desktop game built with Godot and
   Blender. The browser game it replaces stopped at its 0.1 Beta 1; its old repository is no longer on GitHub, and its
-  code is in `legacy/browser/`.
+  code was in `legacy/browser/` until 2026-11-05 (in git at the tag `0.1-dev.1`).
 - **Last tag:** `0.1-dev.1`, [0.1 Dev 1](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.1)
   (2026-10-30). The owner creates tags.
 - **Building 0.1 Dev 2** (owner, 2026-10-30): basic smoke and flash bombs, thrown by bots too (done: SF1, SF2), a
@@ -283,7 +283,7 @@ After 0.1 the game grows through themed updates, each a mini expansion (owner, 2
 |---|---|---|
 | AEGs | Electric full-auto with a motor whirr; mid- or hi-cap mags | In the game |
 | GBB pistols | Blowback slide; the slide locks back on empty; gas mags (the gas pistol became the GBB Pistol, RM7) | In the game |
-| Spring sniper rifles | One shot per cocking; high velocity and long reach (the Sniper Rifle, SN1) | 0.1 Dev 2, dev |
+| Spring sniper rifles | One shot per cocking; high velocity and long reach (the Sniper Rifle, SN1) | In the game |
 | DMRs | Semi-auto only; high velocity; a minimum engagement distance, as at real sites | Maybe |
 | SMGs | Compact and quick to handle; high rate; short range | Maybe, after the sniper |
 | Shotguns | Several BBs per shell; pump every shot; shells loaded one by one | Maybe, after the sniper |

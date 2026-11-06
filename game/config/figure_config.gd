@@ -24,6 +24,12 @@ extends Resource
 ## Materials whose name starts with this (any case) are painted in the team's colour (Team, TeamColour, TeamPaint,
 ## TeamGlow); every other material stays as modelled.
 @export var team_material_prefix: String = "team"
+## Materials whose name starts with this (any case) are the face in the balaclava's eye opening (FA1): its looks (skin
+## tone, brows and eyes) are painted side by side in the heads' atlas, and a figure wears look face_look(id), its
+## material's UVs offset by face_offsets[look] (Godot's UV space, v down). Presentation only.
+@export var face_material_prefix: String = "face"
+@export var face_offsets: PackedVector2Array = PackedVector2Array([Vector2(0.0, 0.0), Vector2(0.125, 0.0),
+		Vector2(0.0, -0.0625), Vector2(0.125, -0.0625)])
 ## The files face +Z, the figures -Z: the model is turned this far about +Y (radians).
 @export var model_yaw: float = PI
 ## The legs' clips (FI2): standing still, the gait clips by the way each steps (x to the figure's right, y ahead; placed
@@ -95,9 +101,10 @@ extends Resource
 ## drawn upper body blends to a high ready by how close it is, fully raised at raise_full (m): the aim clips to level,
 ## the spine leant raise_lean (rad) back, and the replica (FigureReady) turned raise_angle (rad) muzzle up about the
 ## grip, canted raise_cant (rad, the magazine out to the right) and drawn raise_back and raise_down (m) in to the chest,
-## the arms (raise_arm_bones: upper arm, forearm, hand, an arm at a time) reaching for it. The ray looks raise_lead (s)
-## ahead at the figure's speed, once every raise_stride poses; the blend settles in settle_raise (s); a shot keeps the
-## replica level for raise_fire_hold (s). Drawn only: the aim, the hit volume and the routes never move.
+## the arms (raise_arm_bones: upper arm, forearm, hand, an arm at a time, the right arm first) reaching for it. The ray
+## looks raise_lead (s) ahead at the figure's speed, once every raise_stride poses; the blend settles in settle_raise
+## (s); a shot keeps the replica level for raise_fire_hold (s). Drawn only: the aim, the hit volume and the routes never
+## move.
 @export var raise_reach_rifle: float = 1.25
 @export var raise_reach_pistol: float = 0.7
 @export var raise_full: float = 0.35
@@ -105,16 +112,39 @@ extends Resource
 @export var raise_lead: float = 0.1
 @export var raise_stride: int = 2
 @export var settle_raise: float = 0.08
-## Below this the raise, easing back to none, is none (so the arms' IK stops running at once).
+## Below this the raise (and the shoulder and the cheek, TP2), easing back to none, is none (so the arms' IK and the
+## head's bow stop running at once).
 @export var raise_rest: float = 0.001
 @export var raise_fire_hold: float = 0.35
 @export var raise_lean: float = 0.05
 @export var raise_angle: float = 1.35
 @export var raise_cant: float = 1.3
 @export var raise_back: float = 0.2
-@export var raise_down: float = 0.2
+@export var raise_down: float = 0.205
 @export var raise_arm_bones: PackedStringArray = PackedStringArray(["UpperArm_R", "Forearm_R", "Hand_R", "UpperArm_L",
 		"Forearm_L", "Hand_L"])
+## The rifle in the shoulder (TP2, owner 2026-11-05: "the buttstock should rest at the figure's armpit"): while a rifle
+## is held, its butt (the middle of the replica's last shoulder_butt_depth m) is drawn shoulder_rifle (0..1) of the way
+## to the shoulder pocket, shoulder_pocket (m; x to the figure's left, y up, z ahead, in the skeleton's frame) from
+## shoulder_bone's joint; the replica keeps its aim and the arms (raise_arm_bones) reach for it. It gives way to the
+## high ready as that rises, and to a switch; it eases in and out over settle_shoulder (s).
+@export var shoulder_rifle: float = 1.0
+@export var settle_shoulder: float = 0.06
+@export var shoulder_bone: StringName = &"UpperArm_R"
+@export var shoulder_pocket: Vector3 = Vector3(0.04, 0.0, 0.08)
+@export var shoulder_butt_depth: float = 0.02
+## The cheek on the stock (TP2, HitFit.cheek_turn): the head turned about the first bone's joint (the neck), its sideways
+## line from the third bone's joint to the second's (the right shoulder to the left), as the hit volume's.
+@export var cheek_bones: PackedStringArray = PackedStringArray(["Neck", "UpperArm_L", "UpperArm_R"])
+## The right fist closed on the rebuilt replicas' grips (TP3): human.json's replicaOnGrip was set for the first models,
+## so the hand reaches grip_fit (m, by site class, in the replica's own frame: y up, z towards the butt) along the replica
+## from where the clips put it, the replica staying where they put it. A class in grip_fit_both moves both hands (a
+## pistol's two-handed grip); otherwise the left stays on the handguard.
+@export var grip_fit: Dictionary[StringName, Vector3] = {
+	&"rifle": Vector3(0.0, 0.035, 0.02),
+	&"pistol": Vector3(0.0, 0.022, 0.0),
+}
+@export var grip_fit_both: PackedStringArray = PackedStringArray(["pistol"])
 ## The draw from one replica to another, time-scaled to the replica's draw time (the sidecar's fitTo). Made rifle to
 ## pistol, the pistol in the hand from switch_pistol_from of it; to a rifle it plays backwards, the rifle in the hand
 ## from 1 - switch_pistol_from.
@@ -142,11 +172,13 @@ extends Resource
 @export var gate_clip: StringName = &"Holster"
 ## The reloads (FI4): Rifle_Reload or Pistol_Reload by the replica's class, played over the holster and under the
 ## switch, placed by the reload's share of the replica's reload time (the sidecar's fitTo). The magazine in the hand and
-## the old one thrown are copies of the replica model's magazine_node mesh, placed by the sidecar's magazineInHand; at
-## most thrown_max lie on the field (the oldest goes first), from one shared pool of that many.
+## the old one thrown are copies of the magazine in the figure version's well (ReplicaParts.fit_figure: its own, or a
+## magazine part's figure copy when one is fitted), placed by the sidecar's magazineInHand; at most thrown_max lie on
+## the field (the oldest goes first), from one shared pool of that many. magazine_node names the figure version's own
+## magazine for the hand-off's toss (FigureModels.magazine_mesh, MagTossView).
 @export var rifle_reload_clip: StringName = &"Rifle_Reload"
 @export var pistol_reload_clip: StringName = &"Pistol_Reload"
-@export var magazine_node: String = "Magazine"
+@export var magazine_node: String = "Figure_Magazine"
 @export var thrown_max: int = 12
 ## Holstered, the rifle rides slung on the Chest bone (the browser's FIGURE_RIG.sling): its butt sling_butt.x to the
 ## figure's right of the spine and sling_butt.y above the feet, sling_back_human behind the spine line (sling_back_pack
@@ -165,9 +197,59 @@ extends Resource
 ## straight down with the muzzle forward. Straight down (FB5): tilted 0.25 rad, a rifle reached 0.52 m ahead, through
 ## a wall the figure stood at; hanging straight, 0.36 m, about the body's 0.32 m.
 @export var hang_tilt: float = 0.0
+## A bomb thrown (SF1; GT1): the bomb's model in the right hand (on grip_bone, turned as a pistol's grip there,
+## throw_bomb_turn (rad, about its own up) further and throw_bomb_shift (m, its frame) off the grip's point), and the
+## arms reaching for each throw_* key by two-bone IK (FigureThrow) over the holster's hanging arms. The keys are each
+## hand's wrist from its own shoulder, in the figure's frame (x right, y up, z ahead) turned with its chest. The right
+## hand goes from throw_ready (the bomb at the chest; a bomb held in hand, MC1, stays there) out to the side by
+## throw_lift and back to throw_cocked (by the ear, the elbow out under the shoulder) by throw_cock of the windup
+## (throw_lift_at of the way to it); then, quickening, up beside the head to throw_over (throw_over_at of the way on, so
+## the hand never crosses the face) and out to throw_release (high ahead) at the release; then down to throw_follow
+## (across the body) over the recovery. The left hand meets the right at throw_pin over the first throw_pin_until of the
+## windup (pulling the pin), points out at the target (throw_point) by throw_cock and tucks in to the chest (throw_tuck)
+## as the right comes over. The arms take the pose over the first throw_in of the windup (all of it at once after a bomb
+## held in hand) and give it back over the last throw_out of the recovery; the upper chain turns throw_twist (rad) away
+## about the spine as the arm cocks and as far back across as it follows through. Each elbow bends towards its pole (the
+## figure's frame): the right elbow stays low and out while the arm cocks and swings ahead to throw_over_pole as it
+## comes over, as the body's skin drags at the armpit with the upper arm out above level. Drawn only: the bomb still
+## leaves the eyes (Grenades).
+@export var throw_bomb_turn: float = 0.0
+@export var throw_bomb_shift: Vector3 = Vector3.ZERO
+@export var throw_ready: Vector3 = Vector3(-0.1, -0.22, 0.3)
+@export var throw_lift: Vector3 = Vector3(0.3, -0.18, 0.12)
+@export var throw_lift_at: float = 0.45
+@export var throw_cocked: Vector3 = Vector3(0.17, 0.06, -0.12)
+@export var throw_over: Vector3 = Vector3(0.16, 0.18, 0.16)
+@export var throw_over_at: float = 0.45
+@export var throw_release: Vector3 = Vector3(0.1, 0.07, 0.5)
+@export var throw_follow: Vector3 = Vector3(-0.24, -0.3, 0.36)
+@export var throw_pin: Vector3 = Vector3(0.24, -0.22, 0.3)
+@export var throw_pin_until: float = 0.2
+@export var throw_point: Vector3 = Vector3(0.04, 0.02, 0.52)
+@export var throw_tuck: Vector3 = Vector3(0.14, -0.26, 0.2)
+@export var throw_cock: float = 0.6
+@export var throw_in: float = 0.3
+@export var throw_out: float = 0.5
+@export var throw_twist: float = 0.35
+@export var throw_right_pole: Vector3 = Vector3(0.7, -1.0, -0.2)
+@export var throw_over_pole: Vector3 = Vector3(0.1, -0.7, 1.0)
+@export var throw_left_pole: Vector3 = Vector3(-1.0, -0.8, 0.0)
+@export var throw_arm_bones: PackedStringArray = PackedStringArray(["UpperArm_R", "Forearm_R", "Hand_R", "UpperArm_L",
+		"Forearm_L", "Hand_L"])
 ## Robots (Settings › Dev › Robots, the Easter egg, off by default; RB1) are picked from the match seed XOR this salt so
 ## no gameplay stream moves (the browser's ROBOT_SEED_SALT).
 @export var robot_salt: int = 0x5f3759df
+
+
+## The face look figure `figure_id` wears: the next look for each round of the heads, so the figures sharing a head
+## (id, id + heads, id + 2 heads ...) never share a look until every look is used.
+func face_look(figure_id: int) -> int:
+	if face_offsets.is_empty():
+		return 0
+	var id := absi(figure_id)  # INT_MIN stays negative: posmod keeps the look in range
+	var h := maxi(heads.size(), 1)
+	# id = head + lap * h: the look moves on one per lap, whatever the count of heads.
+	return posmod(posmod(id, h) + id / h, face_offsets.size())
 
 
 ## The two lines (m) for the Mesh detail drawn.

@@ -30,7 +30,7 @@ func test_the_bombs_sit_on_4_and_5_the_doors_on_g_and_the_dial_on_page_down_and_
 	assert_eq(b.codes(&"hop_up_less"), PackedInt32Array([KEY_PAGEDOWN]))
 	assert_eq(b.codes(&"hop_up_more"), PackedInt32Array([KEY_PAGEUP]))
 	assert_eq(b.action_of(KEY_U), &"", "U is free")
-	assert_eq(b.action_of(KEY_Y), &"", "Y is free")
+	assert_eq(b.action_of(KEY_Y), &"inspect", "Y left the flash; Inspect took it (IN1)")
 
 
 func test_a_save_from_before_moves_what_sat_on_the_old_defaults_and_keeps_the_players_own_keys() -> void:

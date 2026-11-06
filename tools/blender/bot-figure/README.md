@@ -152,6 +152,27 @@ reproduces the clips to about 0.000001 but not the meshes to the bit):
    as in Rebuild step 5. The sidecar stays as it is while the clips' lengths, frames and speeds do (compare
    `<folder>/bot_human_v11_animations.json`).
 
+## The locomotion clips (GA1, gait/)
+
+Walk_F, Run_F, Run_B, Run_L, Run_R, Sprint and CrouchWalk are made in code, without Blender, by `gait/gait.py` (numpy;
+`gait/glb.py` reads the skeleton and writes the donor): planted feet that roll heel to toe and never slide at the
+clip's speed, a swinging pelvis, two-bone IK legs, the old clips' upper body. Each gait's numbers are in its `GAITS`
+row; a clip's speed × seconds must stay the simulation's walk cycle at that speed (`HitConfig.cycle_metres`). To
+re-make them, for each figure:
+
+    python3 tools/blender/bot-figure/gait/gait.py <old figure.glb> donor.glb assets/models/characters/human.json
+    node tools/blender/bot-figure/splice.mjs <old figure.glb> donor.glb assets/models/characters/human.glb \
+        Walk_F,Run_F,Run_B,Run_L,Run_R,Sprint,CrouchWalk
+
+(the robot the same), then re-bake the hit fit (`tools/hit_fit_bake.gd`) and film them in game with
+`tools/gait_pictures.gd`. The old figure is the file before the splice (`git show HEAD:<path>`): the script reads the
+upper body from its clips.
+
+The hit call's raised arm (HC1) is made the same way by `gait/call.py`: HitCall and WalkOff with the left arm held
+straight up, the elbow nearly straight, the wrist in line and the hand open, raised out to the side; every other bone
+keeps its keys (`tests/unit/test_hit_call_arm.gd` checks the arm). Run it
+on the current figure and splice HitCall,WalkOff (`call.py <figure.glb> donor.glb`, then `splice.mjs` as above).
+
 ## How the hands hold the replicas (bot13)
 
 - The right fist sits low and turned 40 degrees on the AEG grip (`RIFLE_SEAT`), so the web is on the backstrap, the

@@ -14,14 +14,22 @@
   },
   {
    "name": "Run_F",
-   "seconds": 0.567,
-   "frames": 17,
+   "seconds": 0.7,
+   "frames": 21,
    "loop": true,
    "upperBodyOnly": false,
    "speed": 4.2
   },
   {
    "name": "Run_B",
+   "seconds": 0.433,
+   "frames": 13,
+   "loop": true,
+   "upperBodyOnly": false,
+   "speed": 4.2
+  },
+  {
+   "name": "Run_L",
    "seconds": 0.467,
    "frames": 14,
    "loop": true,
@@ -29,33 +37,25 @@
    "speed": 4.2
   },
   {
-   "name": "Run_L",
-   "seconds": 0.4,
-   "frames": 12,
-   "loop": true,
-   "upperBodyOnly": false,
-   "speed": 4.2
-  },
-  {
    "name": "Run_R",
-   "seconds": 0.4,
-   "frames": 12,
+   "seconds": 0.467,
+   "frames": 14,
    "loop": true,
    "upperBodyOnly": false,
    "speed": 4.2
   },
   {
    "name": "Walk_F",
-   "seconds": 0.6,
-   "frames": 18,
+   "seconds": 0.767,
+   "frames": 23,
    "loop": true,
    "upperBodyOnly": false,
    "speed": 2.3
   },
   {
    "name": "Sprint",
-   "seconds": 0.5,
-   "frames": 15,
+   "seconds": 0.633,
+   "frames": 19,
    "loop": true,
    "upperBodyOnly": false,
    "speed": 6.3
@@ -70,8 +70,8 @@
   },
   {
    "name": "CrouchWalk",
-   "seconds": 0.4,
-   "frames": 12,
+   "seconds": 0.5,
+   "frames": 15,
    "loop": true,
    "upperBodyOnly": false,
    "speed": 2.1
@@ -288,7 +288,10 @@
   "Kit_Pack_LOD1",
   "Kit_Pack_LOD2",
   "Kit_Radio",
-  "Kit_Radio_LOD1"
+  "Kit_Radio_LOD1",
+  "Kit_Pads",
+  "Kit_Pads_LOD1",
+  "Kit_Pads_LOD2"
  ],
  "gripBones": [
   "Grip_R",

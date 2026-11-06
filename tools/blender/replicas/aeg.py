@@ -26,12 +26,16 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bpy  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
+import figure_copy  # noqa: E402
 import hardsurface as hs  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
 OUT = os.environ.get("BL_OUT") or os.path.join(ROOT, "assets/models/replicas/aeg.glb")
 ARMATURE = "AEGRifle"
 FPS = 60
+# The figures' copy (figure_copy.py): triangles per piece, 3,000 in all, the replica budget on a figure
+# (docs/CC0_ASSETS.md › Size limits), used in full (TP1, 2026-11-05).
+FIGURE_TRIS = {"Figure": 2400, "Magazine": 260, "FlashHider": 120, "Sights": 220}
 
 # The owner's rulings (2026-11-04): shorter than the first pass (14:12), "too short now" at CQB length (15:10), then
 # "match the reference images as close as possible" (16:49): the length of his main photo's carbine, about 67 cm with
@@ -160,6 +164,9 @@ MAG_HD = 0.0305
 # lower): 9.9 cm below the well's foot with its base plate, as in the owner's photos; the body's stations below the
 # well are scaled to fit.
 MAG_BOTTOM = -0.1585
+
+# A magazine part's ribs slope into the body over this much at each end (tools/blender/parts/magazines.py).
+RIB_END = 0.0025
 
 # Bones: name -> head (each points +Y, 0.0313 long, roll 0, as the old file's).
 BONES = {
@@ -488,9 +495,10 @@ def grip() -> tuple:
         pb.loft(prings, "Body")
     return ob, pb.build()
 
-def mag_z(z: float) -> float:
-    """A height on the first magazine's body (base at -0.222) moved to the shorter one's (base at MAG_BOTTOM)."""
-    return -0.076 + (z + 0.076) * (MAG_BOTTOM + 0.076) / (-0.222 + 0.076)
+def mag_z(z: float, bottom: float = MAG_BOTTOM) -> float:
+    """A height on the first magazine's body (base at -0.222) moved to the shorter one's (base at `bottom`: MAG_BOTTOM,
+    or a magazine part's own, tools/blender/parts/magazines.py)."""
+    return -0.076 + (z + 0.076) * (bottom + 0.076) / (-0.222 + 0.076)
 
 
 def mag_spine(z: float) -> tuple:
@@ -500,13 +508,34 @@ def mag_spine(z: float) -> tuple:
     return MAG_TOP[1] + 0.10 * d + 1.4 * d * d, math.atan(0.10 + 2.8 * d)
 
 
-def magazine() -> object:
-    """A polymer magazine, curved forward toward the base, with raised ribs down each side and a square base plate."""
-    b = hs.Builder("Magazine", ["Detail", "Rubber", "BB"])
-    sec = hs.rounded_rect(MAG_HW, MAG_HD, 0.0055, 2)
-    zs = [-0.012, -0.070, -0.071, -0.075, -0.076] + [mag_z(z) for z in (-0.100, -0.130, -0.160, -0.190, -0.212,
-                                                                          -0.222)]
+def mag_plate(bottom: float = MAG_BOTTOM) -> Matrix:
+    """The magazine's base plate's place (its top at its z 0, +y forward) on a magazine whose base is at `bottom`."""
+    cy, tilt = mag_spine(bottom)
+    return Matrix.Translation((0.0, cy, mz(bottom) + 0.0005)) @ Matrix.Rotation(tilt, 4, "X")
+
+
+def mag_stations(zs: list, fine: int) -> list:
+    """Heights `zs` with `fine` - 1 more evenly between each pair (fine 1: as they are)."""
+    out = [zs[0]]
+    for a, b in zip(zs, zs[1:]):
+        out += [a + (b - a) * (k + 1) / fine for k in range(fine)]
+    return out
+
+
+def magazine(name: str = "Magazine", bottom: float = MAG_BOTTOM, fine: int = 1) -> object:
+    """A polymer magazine, curved forward toward the base, with raised ribs down each side and a square base plate.
+    A magazine part (tools/blender/parts/magazines.py) is this one with its own `name` and base height `bottom`, and
+    `fine` times the rings down its curve, rounder corners, ribs and BBs, the flare at the well's foot eased, sloped
+    rib ends and a finer bevel (the parts' own budget)."""
+    b = hs.Builder(name, ["Detail", "Rubber", "BB"])
+    sec = hs.rounded_rect(MAG_HW, MAG_HD, 0.0055, 2 if fine == 1 else 2 + 2 * fine)
+    zs = [-0.012, -0.070, -0.071, -0.075, -0.076] + mag_stations(
+        [mag_z(z, bottom) for z in (-0.100, -0.130, -0.160, -0.190, -0.212, -0.222)], fine)
     scale = {-0.071: 1.0, -0.075: 1.045, -0.076: 1.045}
+    if fine > 1:
+        # The flare at the well's foot eased in over its 4 mm instead of one kinked step.
+        zs[2:4] = [-0.071, -0.072, -0.073, -0.074, -0.075]
+        scale.update({-0.072: 1.008, -0.073: 1.022, -0.074: 1.036})
 
     def place(x: float, y: float, z: float, s: float = 1.0) -> tuple:
         cy, tilt = mag_spine(z)
@@ -515,23 +544,33 @@ def magazine() -> object:
 
     b.loft([[place(x, y, z, scale.get(z, 1.0)) for x, y in sec] for z in zs], "Detail")
     # Five wide ribs down each side below the well, the flutes between them running its whole length.
-    rib_zs = [-0.084] + [mag_z(z) for z in (-0.100, -0.130, -0.160, -0.190, -0.212)]
+    rib_zs = mag_stations([-0.084] + [mag_z(z, bottom) for z in (-0.100, -0.130, -0.160, -0.190, -0.212)], fine)
     for sx in (-1, 1):
         for yo in (-0.0228, -0.0114, 0.0, 0.0114, 0.0228):
             rect = [(sx * (MAG_HW - 0.0006), yo - 0.0032), (sx * (MAG_HW + 0.0008), yo - 0.0027),
                     (sx * (MAG_HW + 0.0008), yo + 0.0027), (sx * (MAG_HW - 0.0006), yo + 0.0032)]
-            b.loft([[place(x, y, z) for x, y in rect] for z in rib_zs], "Detail")
+            if fine > 1:
+                # Rounded crowns: the rib's face eased into its sides.
+                rect[1:3] = [(sx * (MAG_HW + 0.0003), yo - 0.0030), (sx * (MAG_HW + 0.0006), yo - 0.0026),
+                             (sx * (MAG_HW + 0.0008), yo - 0.0019), (sx * (MAG_HW + 0.0008), yo + 0.0019),
+                             (sx * (MAG_HW + 0.0006), yo + 0.0026), (sx * (MAG_HW + 0.0003), yo + 0.0030)]
+            rings = [[place(x, y, z) for x, y in rect] for z in rib_zs]
+            if fine > 1:
+                # The rib's ends sloped down into the body, not cut off square.
+                flat = [(sx * min(abs(x), MAG_HW - 0.0002), y) for x, y in rect]
+                rings = ([[place(x, y, rib_zs[0] + RIB_END) for x, y in flat]] + rings
+                         + [[place(x, y, rib_zs[-1] - RIB_END) for x, y in flat]])
+            b.loft(rings, "Detail")
     # Base plate, square-cornered, its top on the body's last section (no gap) and barely proud of the body's faces.
-    cy, tilt = mag_spine(MAG_BOTTOM)
-    plate = b.prism(hs.rounded_rect(MAG_HW + 0.0009, MAG_HD + 0.0004, 0.0030, 2), "z", -0.0075, 0.0, "Rubber")
-    b.transform(plate, Matrix.Translation((0.0, cy, mz(MAG_BOTTOM) + 0.0005)) @ Matrix.Rotation(tilt, 4, "X"))
+    plate = b.prism(hs.rounded_rect(MAG_HW + 0.0009, MAG_HD + 0.0004, 0.0030, 2 * fine), "z", -0.0075, 0.0, "Rubber")
+    b.transform(plate, mag_plate(bottom))
     # Feed lips and the top BBs.
     b.box((-0.0045, MAG_TOP[1] + 0.012, mz(-0.012)), (0.0045, MAG_TOP[1] + 0.030, mz(-0.012) + 0.006), "Rubber")
     for i in range(3):
         b.lathe([(-0.003, 0.0), (-0.0026, 0.0015), (-0.0015, 0.0026), (0.0, 0.003), (0.0015, 0.0026),
-                 (0.0026, 0.0015), (0.003, 0.0)], "BB", 10, centre=(0.0, MAG_TOP[1] + 0.024 - i * 0.0062,
-                 mz(-0.012) + 0.0090 - i * 0.0007), axis="z")
-    return hs.finish(b.build(), 0.0006, 1)
+                 (0.0026, 0.0015), (0.003, 0.0)], "BB", 10 if fine == 1 else 16,
+                 centre=(0.0, MAG_TOP[1] + 0.024 - i * 0.0062, mz(-0.012) + 0.0090 - i * 0.0007), axis="z")
+    return hs.finish(b.build(), 0.0006, 1 if fine == 1 else 2)
 
 
 def stock() -> list:
@@ -927,55 +966,6 @@ def moving_parts() -> dict:
     return parts
 
 
-def figure() -> object:
-    """The figures' cut-down copy: the silhouette in a few hundred faces."""
-    b = hs.Builder("Figure", ["Body", "Furniture", "Detail", "Metal", "Accent"])
-    b.box((-UPPER_HW, UPPER_Y[0], SEAM), (UPPER_HW, UPPER_Y[1], RAIL_TOP - 0.004), "Body")
-    b.prism([(y, lz(z)) for y, z in ((-0.096, 0.020), (-0.096, 0.004), (-0.081, -0.021), (-0.034, -0.025),
-                                     (0.024, -0.025), (0.024, -0.066), (0.1005, -0.066), (0.104, -0.003),
-                                     (-0.085, 0.0), (-0.085, 0.020))], "x", -LOWER_HW, LOWER_HW, "Body")
-    b.prism([(y, lz(z)) for y, z in ((0.024, -0.062), (0.016, -0.068), (-0.024, -0.068), (-0.040, -0.040),
-                                     (-0.030, -0.040), (-0.022, -0.0635), (0.024, -0.0635))], "x", -0.004, 0.004,
-            "Body")
-    gw = GUARD_HW + 0.0094
-    sec = [(-gw + 0.004, GUARD_Z[0] - 0.009), (gw - 0.004, GUARD_Z[0] - 0.009), (gw, GUARD_Z[0]), (gw, RAIL_BASE),
-           (gw - 0.004, RAIL_TOP - 0.003), (-gw + 0.004, RAIL_TOP - 0.003), (-gw, RAIL_BASE), (-gw, GUARD_Z[0])]
-    b.prism(sec, "y", GUARD_Y[0], GUARD_Y[1], "Furniture")
-    b.lathe([(GUARD_Y[1] - 0.01, 0.0092), (MUZZLE[1], 0.0092)], "Metal", 8, centre=(0.0, 0.0, BORE_Z))
-    b.lathe([(BARREL_END[1], 0.0115), (MUZZLE[1], 0.0112)], "Metal", 8, centre=(0.0, 0.0, BORE_Z))
-    b.lathe([(-0.1010, 0.0176), (-0.090, 0.0176)], "Detail", 8, centre=(0.0, 0.0, TUBE_Z))
-    b.prism([(y + STOCK_IN, z) for y, z in ((-0.188, 0.033), (-0.1805, 0.0570), (-0.1845, STOCK_TOP), (-0.3515, STOCK_TOP),
-             (-0.3515, -0.0505), (-0.3343, -0.0505), (-0.2576, 0.0042), (-0.197, 0.0148))], "x", -0.0185, 0.0185,
-            "Furniture")
-    rake = math.radians(GRIP_RAKE)
-    down = Vector((0.0, -math.sin(rake), -math.cos(rake)))
-    fwd = Vector((0.0, math.cos(rake), -math.sin(rake)))
-    top = Vector((0.0, GRIP_TOP_Y, lz(GRIP_TOP_Z)))
-    rings = []
-    for t, hw, fr, bk in ((0.0, 0.0128, 0.0165, 0.0215), (0.38, 0.0144, 0.0232, 0.023), (1.0, 0.0158, 0.0228, 0.0254)):
-        c = top + down * (GRIP_LENGTH * t)
-        rings.append([c + Vector((x, 0.0, 0.0)) + fwd * f for x, f in hs.superellipse(hw, fr, bk, 2.6, 8)])
-    b.loft(rings, "Detail")
-    rings = []
-    for z in (-0.020, -0.075, MAG_BOTTOM):
-        cy = mag_spine(z)[0]
-        rings.append([(x, cy + y, mz(z)) for x, y in hs.rounded_rect(MAG_HW, MAG_HD, 0.006, 1)])
-    b.loft(rings, "Detail")
-    b.box((-0.008, -0.0721, RAIL_TOP), (0.008, -0.0691, SIGHT_Z + 0.004), "Detail")
-    b.prism([(GUARD_Y[1] + 0.006, BORE_Z), (FRONT_SIGHT_Y + 0.0065, BORE_Z), (FRONT_SIGHT_Y + 0.0065, SIGHT_Z + 0.0035),
-             (FRONT_SIGHT_Y - 0.0055, SIGHT_Z + 0.0035), (GUARD_Y[1] + 0.006, BORE_Z + 0.020)], "x", -0.0085, 0.0085,
-            "Detail")
-    # The front post's tip in the scheme's accent, so every paint slot is on the figures' copy too.
-    b.box((-0.0012, FRONT_SIGHT_Y - 0.0012, SIGHT_Z + 0.0035), (0.0012, FRONT_SIGHT_Y + 0.0012, SIGHT_Z + 0.0065),
-          "Accent")
-    ob = b.build()
-    for p in ob.data.polygons:
-        p.use_smooth = False
-    return ob
-
-
-# --------------------------------------------------------------------------------------------------------- rig
-
 def armature() -> bpy.types.Object:
     data = bpy.data.armatures.new(ARMATURE)
     arm = bpy.data.objects.new(ARMATURE, data)
@@ -1096,7 +1086,6 @@ def build() -> None:
     fh.location = (0.0, 0.0, 0.0)
     for bone, ob in moving_parts().items():
         hs.parent_to_bone(ob, arm, bone)
-    fig = figure()
     for name, loc in EMPTIES.items():
         hs.empty(name, loc, arm)
     # The flash hider's origin at the barrel's end, like the old file's (a muzzle part replaces it there).
@@ -1104,14 +1093,15 @@ def build() -> None:
     me.transform(Matrix.Translation(-Vector(BARREL_END)))
     fh.location = BARREL_END
     clips(arm)
+    fig = figure_copy.make(FIGURE_TRIS)
     total = 0
     for ob in bpy.data.objects:
         if ob.type == "MESH":
             n = hs.tris(ob)
-            if ob.name != "Figure":
+            if not ob.name.startswith("Figure"):
                 total += n
             print("  %-16s %6d triangles" % (ob.name, n))
-    print("  in the hands: %d triangles; figure: %d" % (total, hs.tris(fig)))
+    print("  in the hands: %d triangles; figure: %d" % (total, sum(hs.tris(o) for o in [fig] + list(fig.children))))
     hs.export(OUT, True)
     print("wrote", OUT)
 

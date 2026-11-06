@@ -5,9 +5,9 @@ extends GutTest
 
 const VARIANTS := 5
 ## Cues cut from the recordings with 5 variants and with 3 (tools/cut_recordings.py).
-const FIVE: PackedStringArray = ["shot_gas", "power_gas", "dryFire_gas", "magOut_gas", "magIn_gas", "power_electric",
-		"shot_electric", "dryFire_electric", "magOut_electric", "magIn_electric", "shot_spring", "dryFire_spring",
-		"magOut_spring", "magIn_spring", "shot_cyber", "dryFire_cyber", "magOut_cyber", "magIn_cyber", "reloadRefused",
+const FIVE: PackedStringArray = ["shot_gas", "power_gas", "dryFire", "magOut_gas", "magIn_gas", "power_electric",
+		"shot_electric", "magOut_electric", "magIn_electric", "shot_spring",
+		"magOut_spring", "magIn_spring", "shot_cyber", "magOut_cyber", "magIn_cyber", "reloadRefused",
 		"magRattle", "magToss", "magCatch", "torchClick", "impact_metal", "impact_wood", "bodyHit", "impact_glass",
 		"impact_plastic", "impact_cardboard", "power_spring", "selector", "radio_ack", "steelRing", "vault",
 		"impact_concrete", "impact_earth", "impact_leaves", "draw", "foley_holster", "rope_up", "rope_down",
@@ -165,6 +165,29 @@ func test_an_electric_replica_has_no_slide_to_lock() -> void:
 	audio.setup(SoundConfig.new(), [&"electric", &"gas"] as Array[StringName], body, BoxWorld.new(body), null)
 	assert_eq(audio._slide_lock[&"electric"], &"")
 	assert_eq(audio._slide_lock[&"gas"], &"slideLock_gas")
+
+
+func test_every_replica_fired_empty_clicks_the_pistols_dry_fire() -> void:
+	# Owner, 2026-11-05: every replica, today's and later ones, clicks the gas pistol's recorded dry fire, unchanged.
+	for profile: StringName in [&"gas", &"electric", &"spring", &"cyber", &"anyLaterOne"]:
+		var replica := ReplicaConfig.new()
+		replica.sound = profile
+		enemy = Character.new(1, 1, Vector3(0.0, 0.0, -6.0), 0.0, [replica] as Array[ReplicaConfig])
+		state = GameState.new(1)
+		state.characters.append(you)
+		state.characters.append(enemy)
+		audio = SimAudio.new()
+		add_child_autofree(audio)
+		audio.setup(SoundConfig.new(), [&"gas", &"electric", &"spring", &"cyber"] as Array[StringName], body,
+				BoxWorld.new(body), null)
+		var dry := state.events.add(GameEvent.Kind.DRY_FIRE)
+		dry.actor = enemy.id
+		dry.slot = 0
+		dry.position = enemy.eye(body)
+		audio.on_tick(state, you.id, you)
+		assert_eq(_playing(SimAudio.DRY_CUE), 1, profile)
+	for old: String in ["dryFire_gas", "dryFire_electric", "dryFire_spring", "dryFire_cyber"]:
+		assert_eq(_variants(old), 0, "%s went: one click for them all" % old)
 
 
 ## The first 0.1 s of a cue file's samples (16-bit mono PCM, as tools/cut_recordings.py writes them), read from the
