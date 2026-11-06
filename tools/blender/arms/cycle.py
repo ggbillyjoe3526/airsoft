@@ -5,6 +5,7 @@ ends. The game plays it in step with the replica's Fire clip, then lets it run o
 the bolt on screen."""
 
 import math
+import os
 
 import bpy
 from mathutils import Matrix, Quaternion, Vector
@@ -34,6 +35,13 @@ WRIST_MOST = 30.0
 # The hand turns this share of the bolt's turn as it lifts the handle (all of it would roll the wrist over the
 # receiver's top, where the scope sits).
 ROLL_SHARE = 0.5
+# On the knob the hand also turns about it, each key, to keep the wrist straightest (the knob turning in the curl of
+# the fingers): about the handle's line and about the bolt's axis, at most SPIN_STEP degrees from the last key's turn
+# (so it eases round), at most SPIN_MOST either way, each degree of change from the last key costing SPIN_COST of a
+# degree of bend.
+SPIN_STEP = 10.0
+SPIN_MOST = (70.0, 40.0)
+SPIN_COST = 0.3
 # The hand leaves the grip on the clip's first frame (the shot), reaches the knob as the bolt first moves, and is back
 # on the grip TRAIL seconds after the replica's clip ends (the game lets the arms' clip run on: ArmsView.follow; the
 # rifle is ready again about 1.25 s after a shot), carried this far up and out to the right (m) at the middle of each
@@ -46,6 +54,7 @@ OUT = 0.025
 OPEN_BY = 0.35
 CLEAR = Vector((0.025, -0.01, 0.005))
 CLOSE_FROM = 0.6
+STRAIGHTEN = 0.5
 OPEN_AHEAD = 0.6
 RELAXED = 0.45
 # How far (degrees, all three joints) a finger passing into the replica on the way is bent further to clear it, tried
@@ -280,7 +289,22 @@ class BoltWork:
         # They close on the knob only over the last of the way, once it is in the hand.
         v = smooth((u - CLOSE_FROM) / (1.0 - CLOSE_FROM))
         local = {b: self.relaxed[b].slerp(self.grip_local[b].to_quaternion(), v).to_matrix() for b in self.fingers}
-        return hand_m, local, self.held_pole.lerp(self.knob_pole, u)
+        # The elbow where the wrist is straightest for the hand there, eased in from the hold's.
+        pole_now, _ = self.elbow_for(self.rig, SIDE, hand_m, quiet=True)
+        pole_now = pole_now + ELBOW_OUT * u if pole_now is not None else self.knob_pole
+        pole_now = self.held_pole.lerp(pole_now, smooth(u / OPEN_BY))
+        # Mid-way the hand turns part way (STRAIGHTEN at the middle, none at either end) toward lying in line with
+        # the forearm, so the wrist doesn't stay cocked as it travels.
+        w = STRAIGHTEN * math.sin(math.pi * u)
+        if w > 0.0:
+            rig = self.rig
+            pose.place_arm(rig, SIDE, hand_m, pole_now, quiet=True)
+            fo = "Forearm_" + SIDE
+            straight = (rig.pose[fo].to_3x3() @ rig.rest[fo].to_3x3().inverted()
+                        @ rig.rest[self.bone].to_3x3()).to_quaternion()
+            rot = hand_m.to_quaternion().slerp(straight, w)
+            hand_m = Matrix.Translation(hand_m.translation) @ rot.to_matrix().to_4x4()
+        return hand_m, local, pole_now
 
     def palm_down_way(self) -> bool:
         """Whether the hand turns the long way round from the grip to the knob: the way whose palm faces up least."""
@@ -326,6 +350,50 @@ class BoltWork:
         side = {b: n for b, n in tally.items() if b.endswith("_" + SIDE)}
         return sum(n for b, n in side.items() if b.startswith(name)), sum(side.values())
 
+    def spun(self, f: int, turn: tuple) -> Matrix:
+        """The hand on the knob at frame `f` turned about the knob's centre `turn` degrees: about the handle's line,
+        then about the bolt's axis."""
+        now = bolt_at(self.arm, self.action, min(f, self.length))
+        centre = now @ self.knob
+        moved = now.to_3x3() @ self.rest.to_3x3().inverted()
+        about = (Matrix.Rotation(math.radians(turn[0]), 4, moved @ self.out)
+                 @ Matrix.Rotation(math.radians(turn[1]), 4, now.to_3x3().col[1].normalized()))
+        return Matrix.Translation(centre) @ about @ Matrix.Translation(-centre) @ self.on_knob_at(f)
+
+    def straightest(self, f: int, last: tuple) -> tuple:
+        """Within SPIN_STEP of `last`, the turn on the knob at frame `f` that bends the wrist least with the glove
+        clear of the replica: the turn, and the elbow's pole for it."""
+        rig, hand = self.rig, self.hand
+        bones = [self.bone] + self.fingers
+
+        def cost(turn: tuple) -> tuple:
+            hand_m = self.spun(f, turn)
+            pole_now, _ = self.elbow_for(rig, SIDE, hand_m, quiet=True)
+            pole_now = pole_now + ELBOW_OUT if pole_now is not None else self.knob_pole
+            self.pose_hand(hand_m, self.grip_local, pole_now)
+            inside = sum(max(0.0, FINGER_CLEAR - self.col.dist(rig.pose[b] @ q)) for b in bones
+                         for q in hand.points.get(b, ()))
+            change = abs(turn[0] - last[0]) + abs(turn[1] - last[1])
+            return pose.wrist_bend(rig, SIDE) + inside * 1e4 + change * SPIN_COST, pole_now
+
+        tried = []
+        for da in (-SPIN_STEP, 0.0, SPIN_STEP):
+            for db in (-SPIN_STEP, 0.0, SPIN_STEP):
+                turn = (last[0] + da, last[1] + db)
+                if abs(turn[0]) <= SPIN_MOST[0] and abs(turn[1]) <= SPIN_MOST[1]:
+                    tried.append((cost(turn)[0], turn))
+        # The best whose arm clears the replica (its skinned faces: the upper arm swings in toward the stock as the
+        # hand turns), else the best.
+        tried.sort()
+        best = tried[0]
+        for sc, turn in tried:
+            cost(turn)
+            self.rig.write()
+            if not any(k.endswith("_" + SIDE) and n for k, n in pose.clipping(self.arms, self.frame)[1].items()):
+                best = (sc, turn)
+                break
+        return best[1], cost(best[1])[1]
+
     def keys(self) -> tuple:
         """Each key's (frame, bases), and how many keys pass into the replica; the wrist's greatest bend on the way
         and on the knob."""
@@ -336,6 +404,7 @@ class BoltWork:
         self.long_way = self.palm_down_way()
         first, last, end = self.first, self.last, self.end
         out, hits, bend = [(0, self.held)], 0, [0.0, 0.0]
+        spin = (0.0, 0.0)
         frames = set(range(1, first + 1)) | set(range(first, last, STEP)) | set(range(last, end + 1))
         for f in sorted(frames):
             knob_hand = self.on_knob_at(f)
@@ -343,14 +412,13 @@ class BoltWork:
                 self.pose_hand(*self.way(knob_hand, f / first))
                 self.clear_fingers()
             elif f <= last:
-                # The elbow where the wrist is straightest as the knob moves; the knob turns a little in the hand as
-                # the bolt lifts (ROLL_SHARE): the fingers keep clear of it.
-                pole_now, _ = self.elbow_for(self.rig, SIDE, knob_hand, quiet=True)
-                self.pose_hand(knob_hand, self.grip_local,
-                               pole_now + ELBOW_OUT if pole_now is not None else self.knob_pole)
+                # The hand turned on the knob where the wrist is straightest, the elbow where it is straightest too;
+                # the fingers keep clear of the replica.
+                spin, pole_now = self.straightest(f, spin)
+                self.pose_hand(self.spun(f, spin), self.grip_local, pole_now)
                 self.clear_fingers()
             elif f < end:
-                self.pose_hand(*self.way(knob_hand, 1.0 - (f - last) / (end - last)))
+                self.pose_hand(*self.way(self.spun(f, spin), 1.0 - (f - last) / (end - last)))
                 self.clear_fingers()
             else:
                 out.append((f, self.held))
@@ -358,6 +426,9 @@ class BoltWork:
             self.rig.write()
             k = 1 if first <= f <= last else 0
             bend[k] = max(bend[k], pose.wrist_bend(self.rig, SIDE))
+            # BL_BOLT_TRACE=1: each key's wrist bend and turn on the knob, to check a change by.
+            if os.environ.get("BL_BOLT_TRACE"):
+                print("   frame %d: wrist %.0f deg, turn on the knob %s" % (f, pose.wrist_bend(self.rig, SIDE), spin))
             n, tally = pose.clipping(self.arms, self.frame)
             if n:
                 hits += 1
