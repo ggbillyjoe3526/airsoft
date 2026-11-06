@@ -19,8 +19,8 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
   with the woven normal map `arms_ArmsWeave.png` (256 px, `fabric.py`) over its own UVs; otherwise plain
   colours. A robot's arms are recoloured in game (ViewModelConfig.robot_arms).
 - **Holds.** One per replica and bomb: a clip `<id>_Hold` (`aeg`, `pistol`, `cyber`, `sniper`, `smoke`, `flash`)
-  posing both arms, and an empty `Hold_<id>` where that replica's origin sits in it (at ViewModelConfig.hip). In game the arms ride the replica's
-  node with that empty on its origin, so they follow its sway, kick, cant and drop.
+  posing both arms, and an empty `Hold_<id>` where that replica's origin sits in it (at ViewModelConfig.hip). In game
+  the arms ride the replica's node with that empty on its origin, so they follow its sway, kick, cant and drop.
   - The AEG Rifle: the right hand high on the pistol grip, the little finger round its foot, index on the trigger,
     thumb wrapped round the grip's left side; the left hand under the handguard's middle, its forearm rising to it from below, fingers resting on its right
     side (not over its top), thumb along its left side.
