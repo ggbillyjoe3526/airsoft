@@ -134,47 +134,8 @@ static func in_skeleton(v: Vector3) -> Vector3:
 	return Vector3(-v.x, v.y, v.z)
 
 
-## Arm `first` (0 right, 3 left) reaching `w` of the way from its pose to its wrist at `key` from its shoulder by
-## two-bone IK, its elbow towards `pole` as far. The upper arm turns the shortest way from its rest pose carried by the
-## chest (`chest`), not from the clip's hanging pose: from hanging, the shortest way up over the shoulder rolls the arm
-## about itself and drags the side of the chest with it. The forearm then points the wrist at its place, and the hand
-## turns as the forearm turned.
+## Arm `first` (0 right, 3 left) reaching `w` of the way from its pose to its wrist at `key` from its shoulder
+## (ArmReach), its elbow towards `pole` as far.
 func _reach(skeleton: Skeleton3D, first: int, key: Vector3, pole: Vector3, w: float, chest: Basis) -> void:
-	var upper := _arms[first]
-	var fore := _arms[first + 1]
-	var hand := _arms[first + 2]
-	var upper_pose := skeleton.get_bone_global_pose(upper)
-	var shoulder := upper_pose.origin
-	var was_fore := skeleton.get_bone_global_pose(fore)
-	var was_hand := skeleton.get_bone_global_pose(hand)
-	var target := was_hand.origin.lerp(shoulder + key, w)
-	var a := shoulder.distance_to(was_fore.origin)
-	var b := was_fore.origin.distance_to(was_hand.origin)
-	var to := target - shoulder
-	if to.length() < EPSILON or a < EPSILON or b < EPSILON:
-		return
-	var way := to.normalized()
-	var d := clampf(to.length(), absf(a - b) + EPSILON, a + b - EPSILON)
-	var side := was_fore.origin - shoulder
-	side -= way * way.dot(side)
-	var bend := pole - way * way.dot(pole)
-	if side.length() > EPSILON and bend.length() > EPSILON:
-		side = side.normalized().lerp(bend.normalized(), w)
-	elif bend.length() > EPSILON:
-		side = bend
-	side = side.normalized() if side.length() > EPSILON else Vector3.DOWN
-	var along := (a * a + d * d - b * b) / (2.0 * d)
-	var elbow := shoulder + way * along + side * sqrt(maxf(a * a - along * along, 0.0))
-	var aim := (elbow - shoulder).normalized()
-	var from_pose := Basis(Quaternion((was_fore.origin - shoulder).normalized(), aim)) * upper_pose.basis
-	var rest := skeleton.get_bone_global_rest(upper)
-	var rest_way := chest * (skeleton.get_bone_global_rest(fore).origin - rest.origin).normalized()
-	var from_rest := Basis(Quaternion(rest_way, aim)) * chest * rest.basis
-	# Both point the upper arm at the elbow; between them only its roll about itself differs.
-	skeleton.set_bone_global_pose(upper, Transform3D(from_pose.slerp(from_rest, w), shoulder))
-	var fore_pose := skeleton.get_bone_global_pose(fore)
-	var wrist := skeleton.get_bone_global_pose(hand).origin
-	var forearm := Basis(Quaternion((wrist - fore_pose.origin).normalized(), (target - fore_pose.origin).normalized()))
-	skeleton.set_bone_global_pose(fore, Transform3D(forearm * fore_pose.basis, fore_pose.origin))
-	var turn := (skeleton.get_bone_global_pose(fore).basis * was_fore.basis.inverse()).orthonormalized()
-	skeleton.set_bone_global_pose(hand, Transform3D(turn * was_hand.basis, target))
+	var shoulder := skeleton.get_bone_global_pose(_arms[first]).origin
+	ArmReach.reach(skeleton, _arms[first], _arms[first + 1], _arms[first + 2], shoulder + key, pole, w, chest, w)

@@ -31,7 +31,8 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
   - Bombs (`smoke`, `flash`; GT2): each fitted to its own model (`assets/models/grenades/`), held in a fist in the
     right hand alone, the lever under the palm, the fingers round its front and the thumb round its back; the left arm
     lowered and hidden. Its mark sits where GrenadeView draws the bomb in hand (HELD_AT), the bomb tipped as it tips it
-    (HELD_TIP, mirrored in arms.py); in game the arms ride the bomb's square-to-view node and lift with it.
+    (HELD_TIP, mirrored in arms.py); in game the arms ride the bomb's square-to-view node, and throw it posed by IK
+    over the hold (ArmsThrow, GT3: the left arm shown while it pulls the pin).
 - **Solving.** `pose.py` places each hand on the replica's mesh (on a grip, the thumb's root and the index and little
   finger's knuckles at marks on it, rolled to the straightest wrist; on the rifle's handguard, a search for the cupped hand whose
   fingers wrap it), curls the fingers until they touch, the index onto the trigger, and bends each elbow to keep the

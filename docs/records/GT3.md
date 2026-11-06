@@ -1,0 +1,49 @@
+# GT3 · Your arms pull the pin and throw the bomb in first person
+
+**Review:** pending
+
+## Attempts
+
+| Date | Attempt | Worker model | checks | Critic | Retry reason |
+|---|---|---|---|---|---|
+| 2026-11-06 | 1 | Opus 5.5 (build thread) | – | – | – |
+
+## What changed
+
+GT2's known issue (KNOWN_ISSUES, the bombs row), at the owner's ask of 2026-11-06: in first person your left hand now pulls
+the pin, and your right arm throws the bomb, where before the bomb in hand only rose a little through the windup.
+
+- **ArmsThrow** (`game/play/arms_throw.gd`): your arms posed over the bomb's hold (BL4's `<id>_Hold` clip) by two-bone
+  IK, `share` running 0..1 over the windup and 1..2 over the recovery, as FigureThrow measures a figure's throw. The
+  left hand comes up from below to the pin's ring by `bomb_pin_grab` (0.3), turned to grip it (fingers to the ring,
+  palm down and ahead) and its fingers curled round it, then pulls it away down to the left out of view by
+  `bomb_pin_out` (0.55), where the left arm is hidden again. From the grip the right hand goes out aside, back by the
+  ear (`bomb_cocked`, off screen), then, quickening, over the top and out ahead to the release, its shoulder turning
+  back and then forward into the throw; over the recovery its fingers open and it follows through down across out of
+  view, where the arms are gone at once (no second lowering). Keys and timings are ViewModelConfig's `bomb_*` (the
+  eyes' frame). Nothing is rebuilt in Blender: arms.glb is unchanged.
+- **ArmReach** (`game/play/arm_reach.gd`): FigureThrow's two-bone IK moved out to be shared; FigureThrow's pose is
+  the same (its upper arm's roll still blended from the rest pose; ArmsThrow keeps the hold's).
+- **The pin drawn apart** (`GrenadeView.PIN_MATERIALS`: the smoke's `Wire` pin and ring, the flash's `Steel` split
+  ring and hook): the bomb in your hand draws its body and its pin as two meshes (made once at `setup_arms`), the bomb
+  in the right hand's fist (`ArmsView.bomb_moved`), the pin with it until the left hand grips the ring and then in the
+  left hand (`pin_moved`). The thrown bombs and the figures' keep the whole model.
+- **Timing unchanged** (default): the windup stays 0.3 s and the recovery 0.15 s (GrenadeConfig), so the pin pull is
+  about a tenth of a second at full speed; a bomb waiting in hand (MC1) keeps its pin until the throw, as the sim's
+  GRENADE_PIN event says. The view reads the throw between ticks (`GrenadeView.throw_share`, the tick's fraction).
+- `HELD_LIFT` (GT2's rise through the windup) is gone: the arm's swing replaces it.
+- `tools/render_held_bomb.gd` pictures each step of the throw, or every frame of one (`clip`) for a moving picture.
+
+## Decisions
+
+- **IK in game, not baked clips.** Posing the throw over the hold at run time keeps arms.glb untouched (the arms
+  thread is re-fitting the AEG and sniper holds in it), reuses the figures' IK, and keeps every key tunable as data.
+- **The left hand grips the ring's middle** (the pin surface's bounds' middle), the same offset for both bombs.
+- **Thrown bombs keep their pin** (SF1's whole model, shared with the figures): seen at 13 m/s spinning; noted in
+  KNOWN_ISSUES.
+
+## Known issues left
+
+- The bomb still leaves from the eyes, not the hand (SF1), and a thrown bomb keeps its pin (KNOWN_ISSUES).
+- The over-the-top swing shows the forearm and sleeve for a few frames: an overhand throw passes the arm over the
+  eyes, unlike the owner's hand-and-wrist rule for holds.

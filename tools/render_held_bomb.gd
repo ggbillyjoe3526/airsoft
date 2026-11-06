@@ -1,10 +1,12 @@
 extends SceneTree
-## Pictures of your arms holding a smoke or flash bomb in first person (GT1), for review: a field drawn at eye height on
-## High by day (as tools/eye_pictures.gd draws it), the bomb in hand as a match draws it (GrenadeView with your arms),
-## readied in hand and at the end of the windup, for each kind and figure kind, to
-## `<folder>/held_<kind>_<state>_<figure>.jpg`. Needs a display and OpenGL, so under xvfb:
+## Pictures of your arms holding and throwing a smoke or flash bomb in first person (GT2, GT3), for review: a field drawn
+## at eye height on High by day (as tools/eye_pictures.gd draws it), the bomb in hand as a match draws it (GrenadeView
+## with your arms), readied in hand and at each of STEPS through the throw (ArmsThrow's share: 0..1 the windup, 1..2 the
+## recovery), for each kind and figure kind, to `<folder>/held_<kind>_<step>_<figure>.jpg`; with `clip` after the spot,
+## every frame of a throw instead, to `<folder>/clip_<kind>_<figure>_<frame>.jpg` (for a moving picture). Needs a
+## display and OpenGL, so under xvfb:
 ##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . --rendering-driver opengl3 -s res://tools/render_held_bomb.gd \
-##       -- <folder> [<map id> <x>,<z>,<yaw degrees>,<pitch degrees>]
+##       -- <folder> [<map id> <x>,<z>,<yaw degrees>,<pitch degrees> [clip]]
 ## Dev only: tools/ never ships.
 
 const SIZE := Vector2i(1600, 900)
@@ -13,6 +15,9 @@ const SETTLE_FRAMES := 40
 const DT := 1.0 / 60.0
 const MAP := "depot"
 const SPOT := Vector4(0.0, 0.0, -90.0, 2.0)
+## The throw's steps pictured (ArmsThrow's share; 0 readied in hand), and the frames a clip holds before and after one.
+const STEPS: Array[float] = [0.0, 0.15, 0.3, 0.45, 0.72, 0.86, 0.97, 1.3]
+const CLIP_LEAD := 12
 
 
 func _initialize() -> void:
@@ -24,6 +29,7 @@ func _run() -> void:
 	var folder := args[0] if not args.is_empty() else "user://held_bomb"
 	var map_id := args[1] if args.size() > 2 else MAP
 	var spot := SPOT
+	var clip := args.size() > 3 and args[3] == "clip"
 	if args.size() > 2:
 		var f := args[2].split_floats(",")
 		spot = Vector4(f[0], f[1], f[2], f[3])
@@ -81,20 +87,69 @@ func _run() -> void:
 	var failed := 0
 	for figure: int in [FigureMix.HUMAN, FigureMix.ROBOT]:
 		grenades.set_arms_kind(figure)
+		var dress := "robot" if figure == FigureMix.ROBOT else "human"
 		for kind: int in [Grenade.Kind.SMOKE, Grenade.Kind.FLASH]:
-			for windup: bool in [false, true]:
-				c.grenades.stop()
-				if windup:
-					c.grenades.throwing = kind
-					c.grenades.windup_left = 0.0
-				else:
-					c.grenades.readied = kind
+			var id: String = GrenadeView.HOLDS[kind]
+			if clip:
+				failed += await _clip(port, grenades, state, c, eye, kind, tuning.grenades,
+						"%s/clip_%s_%s" % [folder.trim_suffix("/"), id, dress])
+				continue
+			for step in STEPS:
+				_ready(c, kind)
 				for i in SETTLE_FRAMES:
 					grenades.update(state, 0.0, DT, c, eye)
-					await RenderingServer.frame_post_draw
-				var path := "%s/held_%s_%s_%s.jpg" % [folder.trim_suffix("/"), GrenadeView.HOLDS[kind],
-						"windup" if windup else "ready", "robot" if figure == FigureMix.ROBOT else "human"]
-				if port.get_texture().get_image().save_jpg(path, QUALITY) != OK:
-					failed += 1
-				print("[render_held_bomb] %s" % path)
+				_at(c, kind, step, tuning.grenades)
+				grenades.update(state, 0.0, DT, c, eye)
+				await RenderingServer.frame_post_draw
+				await RenderingServer.frame_post_draw
+				var path := "%s/held_%s_%03d_%s.jpg" % [folder.trim_suffix("/"), id, roundi(step * 100.0), dress]
+				failed += _save(port, path)
+		if clip:
+			break
 	quit(1 if failed > 0 else 0)
+
+
+## Every frame of a throw of `kind` from the hand, CLIP_LEAD frames of the bomb readied first, to `<stem>_<frame>.jpg`.
+func _clip(port: SubViewport, grenades: GrenadeView, state: GameState, c: Character, eye: Vector3, kind: int,
+		cfg: GrenadeConfig, stem: String) -> int:
+	_ready(c, kind)
+	for i in SETTLE_FRAMES:
+		grenades.update(state, 0.0, DT, c, eye)
+	await RenderingServer.frame_post_draw
+	var failed := 0
+	var frame := 0
+	var share := 0.0
+	var step := DT / cfg.windup
+	while share < 2.0 + CLIP_LEAD * DT / cfg.recover:
+		if frame >= CLIP_LEAD:
+			share += step if share < 1.0 else DT / cfg.recover
+		_at(c, kind, minf(share, 2.0), cfg)
+		if share >= 2.0:
+			c.grenades.stop()
+		grenades.update(state, 0.0, DT, c, eye)
+		await RenderingServer.frame_post_draw
+		failed += _save(port, "%s_%03d.jpg" % [stem, frame])
+		frame += 1
+	return failed
+
+
+## `c` with a bomb of `kind` readied in hand.
+static func _ready(c: Character, kind: int) -> void:
+	c.grenades.stop()
+	c.grenades.readied = kind
+
+
+## `c` `share` of the way through a throw of `kind` (0: readied in hand).
+static func _at(c: Character, kind: int, share: float, cfg: GrenadeConfig) -> void:
+	if share <= 0.0:
+		return
+	c.grenades.readied = Grenade.Kind.NONE
+	c.grenades.throwing = kind
+	c.grenades.released = share >= 1.0
+	c.grenades.windup_left = cfg.windup * (1.0 - minf(share, 1.0))
+	c.grenades.recover_left = cfg.recover * (2.0 - maxf(share, 1.0))
+
+
+static func _save(port: SubViewport, path: String) -> int:
+	print("[render_held_bomb] %s" % path)
+	return 1 if port.get_texture().get_image().save_jpg(path, QUALITY) != OK else 0

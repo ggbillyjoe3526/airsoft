@@ -5,7 +5,7 @@ extends Node3D
 ## posing both arms on it and an empty `Hold_<id>` where that replica's origin sits, so the arms ride the replica's
 ## node (ReplicaView's Held.root) and follow its sway, kick, cant and drop. A replica the model has no hold for shows no
 ## arms. One-handed replicas (ViewModelConfig.one_hand) hide the left arm. A robot's arms (FigureMix.ROBOT) wear
-## ViewModelConfig.robot_arms. The materials press their depth as the replica's do, cast no shadow, take none (the sun's
+## ViewModelConfig.robot_arms. Holding a bomb, they can throw it (ArmsThrow, GT3: `ready_throw`, `throw_pose`). The materials press their depth as the replica's do, cast no shadow, take none (the sun's
 ## shadow on pressed depth breaks into hard patches over the sleeve) and stay out of an optic's view. A child of
 ## ReplicaView.
 
@@ -26,6 +26,9 @@ var _kind: int = FigureMix.HUMAN
 var _on: StringName = &""
 ## False while the arms are elsewhere (a bomb in hand: GrenadeView), the hold kept.
 var _shown: bool = true
+var _skeleton: Skeleton3D = null
+## The throw drawn over a bomb's hold (none without the model's skeleton).
+var _throw: ArmsThrow = null
 
 
 ## Loads the model; nothing shows until `hold`.
@@ -41,6 +44,10 @@ func setup(cfg: ViewModelConfig) -> void:
 	add_child(_model)
 	_anim = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	_left = _model.find_child(LEFT_ARM, true, false) as MeshInstance3D
+	var skeletons := _model.find_children("*", "Skeleton3D", true, false)
+	_skeleton = skeletons[0] as Skeleton3D if not skeletons.is_empty() else null
+	if _skeleton != null:
+		_throw = ArmsThrow.new(_skeleton, cfg)
 	for node: Node in _model.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node := node as MeshInstance3D
 		mesh_node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -79,6 +86,37 @@ func set_shown(on: bool) -> void:
 	_shown = on
 	if _model != null:
 		_model.visible = on and _on != &""
+
+
+## Takes the hold on now as the one a throw starts from, the pin's ring's middle at `ring` (the model's frame: the hold's
+## mark at `mark`'s place, as GrenadeView draws the bomb). Call after `hold`.
+func ready_throw(ring: Vector3) -> void:
+	if _throw != null and _on != &"":
+		_throw.capture(_skeleton, ring)
+
+
+## The arms `share` of the way through a throw (ArmsThrow; 0: the hold): the left arm shown while it pulls the pin.
+func throw_pose(share: float) -> void:
+	if _throw == null or _on == &"":
+		return
+	_throw.pose(_skeleton, share)
+	if _left != null:
+		_left.visible = ArmsThrow.left_shown(share, _cfg) or not _cfg.one_hand.has(_on)
+
+
+## How the right hand (and the bomb in its fist) has moved from the hold, in the model's frame.
+func bomb_moved() -> Transform3D:
+	return _throw.bomb_moved(_skeleton) if _throw != null else Transform3D.IDENTITY
+
+
+## How the pin has moved from the hold `share` of the way through the throw, in the model's frame.
+func pin_moved(share: float) -> Transform3D:
+	return _throw.pin_moved(_skeleton, share) if _throw != null else Transform3D.IDENTITY
+
+
+## The model's place under the node it rides (its hold's mark on that node's origin).
+func model_transform() -> Transform3D:
+	return _model.transform if _model != null else Transform3D.IDENTITY
 
 
 ## The replica the arms hold now (empty when none is shown).

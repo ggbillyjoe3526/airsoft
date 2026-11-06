@@ -1394,11 +1394,23 @@ The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built 
   your right hand comes up from below holding the bomb in a fist, low on the right with only the hand and part of the
   wrist in view (no forearm), the lever under the palm; no left hand shows, and nothing floats without a hand. No finger
   or thumb passes into the bomb, and the bomb never draws in front of the fingers wrapped round its far side.
-- [ ] **Throw:** press 4 and 5. The hand comes up with the bomb and rises a little as the pin comes out; the bomb leaves
-  and the empty hand goes down as the replica comes back up with its hands.
+- [ ] **Put back:** with a bomb in hand, roll on or press a replica key: the hand goes back down with the bomb as the
+  replica comes back up with its hands.
 - [ ] **Walls:** hold a bomb up against a wall: the hand and bomb are drawn over the wall, as the replica is.
 - [ ] **Robot:** with Settings › Dev › Robots on and a robot player, the hand is in the robot's light grey.
 
+
+## Your arms throwing a bomb (GT3)
+
+- [ ] **The pin:** press 4 (smoke), then 5 (flash), standing still. Your left hand comes up from below, closes over the
+  top of the bomb and pulls the pin and its ring away down to the left, out of view; the bomb has no pin after it.
+- [ ] **The throw:** your right arm swings out past the right edge, comes back over the top with the bomb in its fist
+  and lets it go ahead as the bomb flies; the hand opens and follows through down to the left out of view, then the
+  replica comes back up. Nothing pops or jumps, and the bomb never slips in the fist.
+- [ ] **From the hand:** roll the wheel onto a bomb, wait, then pull the trigger: the same pin pull and throw.
+- [ ] **Feel:** the throw still takes the same time as before (0.3 s to the release). Say if the pin pull reads too
+  quickly to see.
+- [ ] **Robot:** with Settings › Dev › Robots on and a robot player, both hands are in the robot's light grey.
 ## GBB Pistol sights and port (GS1)
 
 - [ ] **Aim:** aim the GBB Pistol in the Range. The front post with its white dot stands in the rear sight's notch,
