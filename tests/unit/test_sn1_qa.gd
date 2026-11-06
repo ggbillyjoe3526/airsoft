@@ -2,6 +2,8 @@ extends GutTest
 ## QA for the Sniper Rifle (SN1; owner, 2026-11-02): what must never leak to a player with Dev content off, the unlock
 ## levels as the owner set them, a save from before the move, a held trigger, every spring under the sniper limit with
 ## any muzzle part, the Armory's words for the rifle, and a bot match in which every bot carries the Sniper kit.
+## The rifle, its springs and the Variable Scope went public (owner, 2026-11-05): the dev checks here tag them dev again
+## in this file's own pool, so they keep guarding the Dev content switch, and one test checks the shipped tags.
 
 const DT := 1.0 / 60.0
 const EYE := Vector3(0.0, 1.6, 0.0)
@@ -12,6 +14,7 @@ const BLACK_GAS := "000009"
 const M130 := "000022"
 const M140 := "000023"
 const M150 := "000024"
+const VARIABLE_SCOPE := "000025"
 const DEV_IDS: Array[String] = [SNIPER, M130, M140, M150]
 
 var pool: Pool
@@ -21,6 +24,8 @@ var rules: LoadoutRules
 
 func before_all() -> void:
 	pool = Pool.read_file()
+	for id: String in DEV_IDS + [VARIABLE_SCOPE]:
+		pool.item(id).access = &"dev"
 	table = LevelTable.read_file(pool)
 
 
@@ -98,6 +103,18 @@ func test_an_old_player_at_level_5_keeps_red_gas_after_it_moved_to_6() -> void:
 
 
 # --- nothing dev shows to a player with Dev content off ---
+
+func test_the_shipped_rifle_springs_and_variable_scope_are_public_and_listed_without_dev_content() -> void:
+	var shipped := Pool.read_file()
+	var levels := LevelTable.read_file(shipped)
+	var listed := PackedStringArray()
+	for r in ArmoryFacts.new(levels, shipped, levels.levels[10].total, false, false).rows:
+		for it in r.items:
+			listed.append(it.id)
+	for id: String in DEV_IDS + [VARIABLE_SCOPE]:
+		assert_false(shipped.item(id).is_dev(), "%s public (owner, 2026-11-05)" % id)
+		assert_true(listed.has(id), "%s listed with Dev content off" % id)
+
 
 func test_the_armory_names_no_sniper_gear_without_dev_content_and_with_it_names_all() -> void:
 	var plain := ArmoryFacts.new(table, pool, table.levels[10].total, false, false)

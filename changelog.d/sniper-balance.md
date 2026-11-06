@@ -5,6 +5,6 @@
 ### Maps
 - The Street: wheelie bins put out halfway down the Path's long straight give attackers somewhere to stop on it.
 
-### Sniper Rifle (dev content)
+### Sniper Rifle
 - Sniper bots see further through a raised scope, aim steadier through it, and wait for their aim to settle before
   their one shot.

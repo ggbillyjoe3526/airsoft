@@ -21,6 +21,8 @@ var _corners: Dictionary[FigureView, PackedVector3Array] = {}
 var _muzzle: Dictionary[FigureView, Vector3] = {}
 ## The higher hand's height over the Head bone's (m), as last drawn.
 var _hands_over_head: Dictionary[FigureView, float] = {}
+## The replica's butt off the shoulder pocket (m), as last drawn (TP2).
+var _butt_off: Dictionary[FigureView, float] = {}
 
 
 ## A level whose rays are counted.
@@ -63,11 +65,22 @@ func _view(kind: int, c: Character, world: WorldQuery) -> FigureView:
 		_hands_over_head[v] = maxf(sk.get_bone_global_pose(sk.find_bone("Hand_L")).origin.y,
 				sk.get_bone_global_pose(sk.find_bone("Hand_R")).origin.y) - head
 		var r := hands.replica(hands.in_hand)
+		if r != null:
+			var chest := sk.find_bone(config.chest_bone)
+			var pocket := sk.get_bone_global_pose(sk.find_bone(config.shoulder_bone)).origin \
+					+ sk.get_bone_global_pose(chest).basis * sk.get_bone_global_rest(chest).basis.inverse() \
+					* config.shoulder_pocket
+			_butt_off[v] = (r.transform * FigureHands._butt(r, config.shoulder_butt_depth)).distance_to(pocket)
 		if r == null or not r.visible:
 			_corners.erase(v)
 			return
 		var to_figure := v.global_transform.affine_inverse() * r.global_transform
+		# The replica as drawn: its figure version and the pieces on it (the flash hider at its muzzle among them).
 		var box := r.get_aabb()
+		for piece: Node in r.find_children("*", "MeshInstance3D", true, false):
+			var m := piece as MeshInstance3D
+			if m.visible:
+				box = box.merge(r.global_transform.affine_inverse() * m.global_transform * m.get_aabb())
 		var corners := PackedVector3Array()
 		for i in 8:
 			corners.append(to_figure * box.get_endpoint(i))
@@ -140,9 +153,10 @@ func test_level_with_nothing_in_reach() -> void:
 	_wall(world, 2.0)
 	var v := _view(FigureMix.HUMAN, c, world)
 	await _pose(v, c)
-	# The BL1 rifle is the owner's ~67 cm carbine (2026-11-04 "as short as the photos"), so it reaches 0.72 m ahead.
-	assert_almost_eq(_ahead(v), 0.72, 0.03, "the rifle held out level")
-	assert_almost_eq(_muzzle[v].y, 1.52, 0.03, "at the shoulder")
+	# The BL1 rifle is the owner's ~67 cm carbine (2026-11-04 "as short as the photos"), its butt in the shoulder pocket
+	# (TP2), so it reaches 0.62 m ahead.
+	assert_almost_eq(_ahead(v), 0.62, 0.03, "the rifle held out level")
+	assert_almost_eq(_muzzle[v].y, 1.42, 0.03, "from the shoulder")
 
 
 func test_a_shot_holds_the_replica_level_and_it_rises_after() -> void:
@@ -151,7 +165,7 @@ func test_a_shot_holds_the_replica_level_and_it_rises_after() -> void:
 	_wall(world, 0.5)
 	var v := _view(FigureMix.HUMAN, c, world)
 	await _pose(v, c, 40, true)
-	assert_gt(_ahead(v), 0.65, "firing, level (the BB leaves where it points; the BL1 carbine reaches 0.72 m)")
+	assert_gt(_ahead(v), 0.55, "firing, level (the BB leaves where it points; the BL1 carbine reaches 0.62 m)")
 	await _pose(v, c, 40)
 	assert_lte(_ahead(v), 0.5 + SLACK, "raised once the shot's hold is over")
 
@@ -168,6 +182,59 @@ func test_holstered_or_calling_the_hit_nothing_is_raised_and_the_hang_stays_in()
 	c.status = Character.Status.CALLING
 	await _pose(v, c, 60)
 	assert_lte(_ahead(v), 0.4, "calling the hit, the rifle hangs within reach of the body")
+
+
+func test_a_rifle_rests_in_the_shoulder_and_a_pistol_is_held_out() -> void:
+	# TP2 (owner 2026-11-05): the rifle's butt at the shoulder pocket, by the right shoulder's joint; the pistol is not
+	# drawn in.
+	var c := _character(0)
+	var v := _view(FigureMix.HUMAN, c, null)
+	await _pose(v, c)
+	assert_lt(_butt_off[v], 0.01, "the butt in the shoulder pocket")
+	for lean: float in [-1.0, 1.0]:
+		c.lean = lean
+		c.prev_lean = lean
+		await _pose(v, c)
+		assert_lt(_butt_off[v], 0.01, "and leaning %+.0f, the pocket turned with the chest" % lean)
+	c.lean = 0.0
+	c.prev_lean = 0.0
+	await _pose(v, c)
+	assert_lt(_hands_over_head[v], 0.0, "the hands under the head")
+	var p := _character(1)
+	var pv := _view(FigureMix.HUMAN, p, null)
+	await _pose(pv, p)
+	assert_eq(pv.body().bend.shouldered, 0.0, "a pistol held out")
+	assert_eq(v.body().bend.cheek, 1.0, "the cheek on the rifle's stock")
+	assert_eq(pv.body().bend.cheek, 0.0, "not on a pistol")
+
+
+func test_a_switch_lets_go_of_the_shoulder_before_the_replica_changes() -> void:
+	# QA (TP2): the butt's place changes with the replica in the hand, so none of the shoulder may be left then.
+	var c := _character(0)
+	var v := _view(FigureMix.HUMAN, c, null)
+	await _pose(v, c)
+	var bend := v.body().bend
+	var hands := v.body().hands
+	assert_gt(bend.shouldered, 0.99, "in the shoulder")
+	var a := c.armament
+	a.active = 1
+	a.draw_total = 0.6
+	a.draw_left = a.draw_total
+	var held := hands.in_hand
+	var flipped := false
+	var last_cheek := bend.cheek
+	for i in 50:
+		var before := bend.shouldered
+		a.draw_left = maxf(0.0, a.draw_left - FRAME)
+		await _pose(v, c, 1)
+		assert_lte(absf(bend.cheek - last_cheek), 0.5, "the cheek eases, frame %d" % i)
+		last_cheek = bend.cheek
+		if hands.in_hand != held:
+			flipped = true
+			assert_lt(before, 0.05, "let go before the pistol came")
+			held = hands.in_hand
+	assert_true(flipped, "the pistol came")
+	assert_eq(bend.shouldered, 0.0, "and is held out")
 
 
 func test_one_ray_every_raise_stride_poses() -> void:

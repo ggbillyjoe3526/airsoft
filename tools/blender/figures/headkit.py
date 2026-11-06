@@ -18,6 +18,8 @@ from mathutils import Vector
 from mathutils.bvhtree import BVHTree
 
 TAU = math.tau
+## The head gear's material (the knit, the hem and every piece of gear but the team panels, the lenses and the face).
+GEAR = "Headwear"
 DEG = math.pi / 180.0
 
 
@@ -57,7 +59,8 @@ class Atlas:
     (Blender's pixel order, so v = row / size). Swatches are flat 32 px cells; tiles are named rectangles."""
 
     SWATCH = 32
-    SWATCH_AREA = 512  # swatches fill the bottom-left 512 px square
+    SWATCH_AREA = 512  # swatches fill the bottom-left 512 px square's lower half (rows)
+    SWATCH_TOP = 256   # above it: the face's four cells (face.FACE_CELLS)
 
     def __init__(self):
         n = ATLAS
@@ -74,7 +77,7 @@ class Atlas:
             i = len(self.swatches)
             per = self.SWATCH_AREA // self.SWATCH
             x, y = (i % per) * self.SWATCH, (i // per) * self.SWATCH
-            assert y < self.SWATCH_AREA, "out of swatches"
+            assert y < self.SWATCH_TOP, "out of swatches"
             self.col[y:y + self.SWATCH, x:x + self.SWATCH] = hex_rgb(colour)
             self.rough[y:y + self.SWATCH, x:x + self.SWATCH] = rough
             self.swatches[name] = ((x + self.SWATCH / 2) / ATLAS, (y + self.SWATCH / 2) / ATLAS)
@@ -336,7 +339,7 @@ class Part:
         self.mats.append(mat)
         self.flat.append(True)
 
-    def build(self, materials: dict, sharp_angle: float = 40.0) -> bpy.types.Object:
+    def build(self, materials: dict, sharp_angle: float = 40.0, smooth_mats: tuple = ()) -> bpy.types.Object:
         """The mesh object: welds coincident points, makes each island's winding consistent (outward where it is
         closed), sets the UVs, materials and smooth shading split at `sharp_angle` degrees."""
         me = bpy.data.meshes.new(self.name)
@@ -362,6 +365,19 @@ class Part:
         for p in me.polygons:
             p.use_smooth = True
         me.set_sharp_from_angle(angle=math.radians(sharp_angle))
+        if smooth_mats:
+            # Edges inside a smooth material's surface (the face's skin) are never split, however steep.
+            smooth = {i for i, m in enumerate(me.materials) if m.name in smooth_mats}
+            sharp = me.attributes.get("sharp_edge")
+            if sharp is not None and smooth:
+                seen: dict = {}
+                for poly in me.polygons:
+                    for e in poly.edge_keys:
+                        seen.setdefault(e, []).append(poly.material_index in smooth)
+                index = {e.key: e.index for e in me.edges}
+                for key, flags in seen.items():
+                    if all(flags):
+                        sharp.data[index[key]].value = False
         ob = bpy.data.objects.new(self.name, me)
         bpy.context.scene.collection.objects.link(ob)
         return ob
@@ -409,3 +425,15 @@ class Drape:
             p = self.toward(start, c, offset)
             out.append(p if p is not None else c + d * 0.08)
         return out
+
+
+def cull(p: Part, keep) -> None:
+    """Drops the faces of `p` whose every corner fails `keep` (a test of a point)."""
+    out_f, out_uv, out_m, out_fl = [], [], [], []
+    for f, u, m, fl in zip(p.faces, p.uvs, p.mats, p.flat):
+        if any(keep(p.pts[i]) for i in f):
+            out_f.append(f)
+            out_uv.append(u)
+            out_m.append(m)
+            out_fl.append(fl)
+    p.faces, p.uvs, p.mats, p.flat = out_f, out_uv, out_m, out_fl

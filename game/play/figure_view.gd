@@ -88,7 +88,7 @@ func setup(c: Character, team_colour: Color, hits: HitConfig, font: Font,
 	top_level = true
 	for i in c.armament.replicas.size():
 		var held := _held_replica(c.armament.replicas[i], c.team, realistic, parts[i] if i < parts.size() else {},
-				cfg.magazine_node, _magazines, _muzzles)
+				_magazines, _muzzles)
 		_replicas.append(held)
 		_classes.append(c.armament.replicas[i].site_class)
 		if held != null:
@@ -161,12 +161,13 @@ func set_lod_lines(lines: Vector2) -> void:
 		_body.set_lod_lines(lines)
 
 
-## The models' figure version of `r` with `parts`' figure versions on it, hidden, painted for `team` (null without a
-## model). The figure version is one mesh, so a part shows over the standard magazine or flash hider rather than in
-## its place. A copy of the full model's `magazine_node` mesh for the reloads, in the same paint
-## (null without one), goes on the end of `magazines`, and its muzzle point in the model's space (the figure version's,
-## which is drawn at the model's origin) on the end of `muzzles`.
-func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictionary, magazine_node: String,
+## The models' figure version of `r` (its `Figure` mesh, cut down from the model) with `parts`' figure copies fitted
+## (ReplicaParts.fit_figure: a part takes the place of the magazine or flash hider it replaces, an optic hides the iron
+## sights), hidden, painted for `team` (null without a model). A copy of the magazine it carries (its figure magazine or
+## the magazine part's copy, both drawn in the model's space) for the reloads, in the same paint (null without one),
+## goes on the end of `magazines`, and its muzzle point in the model's space (where the figure version is drawn) on the
+## end of `muzzles`.
+func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictionary,
 		magazines: Array[MeshInstance3D], muzzles: PackedVector3Array) -> MeshInstance3D:
 	var scene := load(MODEL_DIR + r.id + ".glb") as PackedScene
 	if scene == null:
@@ -174,28 +175,33 @@ func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictiona
 		muzzles.append(Vector3.ZERO)
 		return null
 	var model := scene.instantiate()
-	muzzles.append(_in_model(model.find_child(ReplicaParts.MUZZLE_NODE, true, false) as Node3D, model))
+	var muzzle := _in_model(model.find_child(ReplicaParts.MUZZLE_NODE, true, false) as Node3D, model)
+	var barrel_end := _in_model(model.find_child(ReplicaParts.BARREL_END_NODE, true, false) as Node3D, model)
 	var paint := ReplicaPaint.bot_paint(team, r)
-	var mag := model.find_child(magazine_node, true, false) as MeshInstance3D
+	var held := model.find_child(ReplicaParts.FIGURE_NODE, true, false) as MeshInstance3D
 	var copy: MeshInstance3D = null
-	if mag != null and mag.mesh != null:
-		copy = MeshInstance3D.new()
-		copy.name = "Magazine_%s" % r.id
-		copy.mesh = mag.mesh
-		copy.visible = false
-		copy.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		ReplicaPaint.apply(copy, paint, realistic)
-	magazines.append(copy)
-	var held := model.find_child("Figure", true, false) as MeshInstance3D
 	if held != null:
 		held.get_parent().remove_child(held)
+		held.owner = null
+		for child in held.find_children("*", "", true, false):
+			child.owner = null
 		held.transform = Transform3D.IDENTITY
 		held.visible = false
 		held.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		for part in ReplicaParts.figure_meshes(r.id, parts):
-			part.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			held.add_child(part)
+		for piece: Node in held.find_children("*", "GeometryInstance3D", true, false):
+			(piece as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var fit := ReplicaParts.fit_figure(held, r.id, parts, barrel_end, muzzle)
+		muzzle = fit.muzzle
 		ReplicaPaint.apply(held, paint, realistic)
+		if fit.magazine != null and fit.magazine.mesh != null:
+			copy = MeshInstance3D.new()
+			copy.name = "Magazine_%s" % r.id
+			copy.mesh = fit.magazine.mesh
+			copy.visible = false
+			copy.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			ReplicaPaint.apply(copy, paint, realistic)
+	magazines.append(copy)
+	muzzles.append(muzzle)
 	model.free()
 	return held
 

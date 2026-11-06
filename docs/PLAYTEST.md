@@ -69,6 +69,8 @@ Play › Mode Elimination on Depot, Match › Opponents Normal. Set the mouse se
 - [ ] **Watch the crosshair.** It opens when you run or jump, closes almost at once when you stop, and is tightest
   crouched and still; crouch-walking sits between standing still and walking.
 - [ ] **Sprint up and down Depot's dock ramps.** Uphill loses about a quarter of a sprint's pace (a confirmed call).
+- [ ] **Watch a hit call (HC1).** Hit a bot and watch it call the hit and walk off, from the front and the side: the
+  raised arm goes straight up over the shoulder, the elbow nearly straight, the hand open with the wrist in line.
 - [ ] **Watch bots run (GA1).** On Depot, watch bots walk, run, sprint, strafe and back-pedal past you, and crouch-walk.
   Their feet stay planted on the floor without sliding, each step rolls heel to toe, and the legs keep pace with the
   speed. Strafing, the legs turn into the step while the rifle stays on its aim. Does any gait look wrong, especially
@@ -259,7 +261,7 @@ until 10.
 
 ## Sniper Rifle
 
-A dev item (SN1): turn on Settings › Dev settings › Dev content, and Disable levelling (or Level up to 5).
+Public since 2026-11-05 (SN1): turn on Settings › Dev settings › Disable levelling (or Level up to 5).
 
 - [ ] **Equip it.** It is in the primary list as Sniper Rifle; it comes with the 2x Scope fitted and the M130 Spring.
 - [ ] **Its look.** The AEG with a 20 cm longer barrel (a placeholder until your own model). Is it clearly longer?
@@ -272,14 +274,14 @@ A dev item (SN1): turn on Settings › Dev settings › Dev content, and Disable
   Springs (pictures: a coil with a violet, crimson or black band).
 - [ ] **Springs.** The M140 and M150 shoot harder (Energy up 10 % and 20 %) and cock a little slower. Can you feel it?
 - [ ] **Levels.** In the Armory level 5 holds the Sniper Rifle, the M130 Spring, the 2x Scope and the Tight-Bore Barrel;
-  level 6 has Red Gas; the M140 is at 7 and the M150 at 9. With Dev content off none of the rifle's items show.
+  level 6 has Red Gas; the M140 is at 7 and the M150 at 9. They show with Dev content off too (public since 2026-11-05).
 - [ ] **Bots with it.** About 1 opponent in 12 on Hard (fewer on Normal and Easy) carries it: they raise the scope to
   fight and hold their fire from the hip unless you are within 8 m. Do they feel dangerous at range and beatable up
   close? Is it fair on Depot, Woodland and The Street, at 5v5 and 8v8?
 
 ## Variable Scope
 
-A dev item (SN2): turn on Dev content, and Disable levelling (or Level up to 8).
+Public since 2026-11-05 (SN2): turn on Settings › Dev settings › Disable levelling (or Level up to 8).
 
 - [ ] **Fit it.** Customise › Optic lists the Variable Scope for the AEG Rifle and the Sniper Rifle. Its look: the 2x
   Scope a little longer, with a ridged zoom ring and a white mark (a placeholder until your own model).
@@ -1390,6 +1392,30 @@ The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built 
   on SWITCH REPLICA, and Enter opens the list again.
 - [ ] **Flags from a roof.** On Woodland in Attack / Defend, if you can get onto the shelter roof by flag B, standing
   there does nothing to the flag; at the pole's foot it rises as before.
+
+## Sniper Rifle public, The Street dev (DT1)
+
+- [ ] **Sniper gear without Dev content.** With Settings › Dev › Dev content off, the Armory lists the Sniper Rifle and
+  the M130 Spring at level 5, the M140 at 7, the Variable Scope at 8 and the M150 at 9, with no DEV tag; the Loadout
+  offers each once unlocked.
+- [ ] **The Street hidden.** With Dev content off, the Match page lists Depot, Woodland and the Range only. Turn Dev
+  content on: The Street is back, marked DEV, and a match there gives no XP.
+- [ ] **Sniper bots.** A few Hard matches with Dev content off: now and then a bot carries the Sniper Rifle. On
+  Woodland at 8v8, does one end feel stacked once snipers are about?
+- [ ] **Sniper bots never shoot a teammate.** They now wait for the bolt before each shot, so they fire a little slower;
+  do they still feel dangerous at range?
+
+## Inspect your replica (IN1)
+
+- [ ] **The key.** Press **Y** with each replica in hand (the AEG, the GBB Pistol, the Cyber Pistol, the Sniper
+  Rifle). It turns side on, its right side to you and the whole replica in view, while its parts move: the AEG's
+  charging handle back, dust cover open and hop-up dial turned; the GBB's slide eased back; the Cyber's battery eased
+  out of the grip; the sniper's bolt lifted and drawn. Small plastic clicks go with each part. It ends back in your
+  hands where it started.
+- [ ] **It stops at once** when you fire, aim, reload, switch replica, holster, sprint or are hit: the replica eases
+  back in a moment and the parts are home. Pressing Y while sprinting or aiming does nothing.
+- [ ] **Rebind.** Settings › Controls lists **Inspect replica** on Y; move it to another key and it works there.
+- [ ] **Feel.** Is about 3 s for the rifles and 2 s for the pistols right, and is the turn too much or too little?
 
 ## Reporting what you find
 

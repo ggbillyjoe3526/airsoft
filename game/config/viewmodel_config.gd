@@ -95,3 +95,44 @@ extends Resource
 	&"SleeveTrim": Color(0.22, 0.23, 0.24),
 }
 @export var robot_arms_roughness: float = 0.45
+
+## Inspecting the replica in hand (IN1, the Inspect key; the browser game's renderView.ts inspect, RM2): it is turned
+## in the hands to show itself, by its replica id's pose (others take `inspect_pose_default`), while its model's Inspect
+## clip works its parts (the AEG's charging handle, dust cover and hop dial, the gas pistol's slide, the Cyber Pistol's
+## battery, the sniper's bolt). A shot, a hit, a reload, a draw, a switch, the holster, a sprint or raising the sight
+## (past `inspect_aim_cancel` of the way) ends it: the pose eases back over `inspect_cancel_time` seconds and the parts
+## are at rest at once.
+@export var inspect_poses: Dictionary[StringName, InspectPose] = {
+	# Side on, the right side to the eye: the charging handle back, the dust cover open on the hop dial, set a notch.
+	&"aeg": InspectPose.make(3.0, PackedFloat32Array([0.0, 0.17, 0.5, 0.82, 1.0]), RIFLE_TURN, RIFLE_SHIFT,
+			PackedFloat32Array([0.06, 0.13, 0.27, 0.36, 0.65, 0.83]),
+			[&"selector", &"torchClick", &"selector", &"selector", &"dryFire", &"torchClick"]),
+	# Side on, the top a little to the eye: the slide eased back a finger's width and let forward.
+	&"pistol": InspectPose.make(2.0, PackedFloat32Array([0.0, 0.22, 0.72, 1.0]),
+			[Vector3.ZERO, Vector3(0.05, -0.95, 0.1), Vector3(0.08, -1.0, 0.2), Vector3.ZERO],
+			PISTOL_SHIFT, PackedFloat32Array([0.15, 0.67]), [&"selector", &"dryFire"]),
+	# Side on, the butt of the grip to the eye: the battery eased out of the grip and pushed home.
+	&"cyber": InspectPose.make(2.0, PackedFloat32Array([0.0, 0.22, 0.72, 1.0]),
+			[Vector3.ZERO, Vector3(-0.15, -0.95, 0.1), Vector3(-0.35, -1.0, 0.15), Vector3.ZERO],
+			PISTOL_SHIFT, PackedFloat32Array([0.17, 0.75]), [&"torchClick", &"magIn"]),
+	# Side on as the AEG, held further off (a longer rifle): the bolt lifted, drawn back, held and closed.
+	&"sniper": InspectPose.make(3.0, PackedFloat32Array([0.0, 0.17, 0.5, 0.82, 1.0]), RIFLE_TURN, LONG_SHIFT,
+			PackedFloat32Array([0.1, 0.28, 0.77, 0.83]), [&"selector", &"dryFire", &"dryFire", &"selector"]),
+}
+@export var inspect_pose_default: InspectPose = InspectPose.make(2.0, PackedFloat32Array([0.0, 0.17, 0.5, 0.82, 1.0]),
+		RIFLE_TURN, RIFLE_SHIFT, PackedFloat32Array(), [])
+@export var inspect_cancel_time: float = 0.15
+@export var inspect_aim_cancel: float = 0.05
+
+## The rifles' inspect keys (the browser game's rifle pose): turns, and shifts inwards, up and forward.
+const RIFLE_TURN: Array[Vector3] = [Vector3.ZERO, Vector3(0.08, -1.15, 0.12), Vector3(0.12, -1.2, 0.18),
+		Vector3(0.06, -1.1, 0.1), Vector3.ZERO]
+const RIFLE_SHIFT: Array[Vector3] = [Vector3.ZERO, Vector3(-0.2, 0.07, -0.18), Vector3(-0.21, 0.08, -0.18),
+		Vector3(-0.19, 0.07, -0.17), Vector3.ZERO]
+## The sniper rifle's inspect shifts: the rifles' further out, so its long stock stays in view.
+const LONG_SHIFT: Array[Vector3] = [Vector3.ZERO, Vector3(-0.22, 0.08, -0.3), Vector3(-0.23, 0.09, -0.3),
+		Vector3(-0.21, 0.08, -0.29), Vector3.ZERO]
+## The pistols' inspect shifts (the browser game's pistol and Cyber poses, to the same place from their higher, more
+## central hip).
+const PISTOL_SHIFT: Array[Vector3] = [Vector3.ZERO, Vector3(-0.06, 0.0, -0.04), Vector3(-0.065, 0.005, -0.04),
+		Vector3.ZERO]

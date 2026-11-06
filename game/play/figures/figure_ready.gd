@@ -9,10 +9,15 @@ extends RefCounted
 
 ## Below this (m) a length counts as none.
 const EPSILON := 0.0001
+## The right arm's bones: the first three of raise_arm_bones (FigureConfig lists the right arm first).
+const RIGHT_ARM := 3
 
 ## Each arm's upper arm, forearm and hand, one arm after another (FigureConfig.raise_arm_bones); the bone turned about.
 var _arms: PackedInt32Array = PackedInt32Array()
 var _grip: int = -1
+var _shoulder: int = -1
+## The chest: the shoulder pocket turns with it (a lean, the aim's pitch, the upper body's steadying).
+var _chest: int = -1
 var _config: FigureConfig = null
 
 
@@ -20,6 +25,8 @@ var _config: FigureConfig = null
 func _init(skeleton: Skeleton3D, config: FigureConfig) -> void:
 	_config = config
 	_grip = skeleton.find_bone(config.grip_bone)
+	_shoulder = skeleton.find_bone(config.shoulder_bone)
+	_chest = skeleton.find_bone(config.chest_bone)
 	for bone_name in config.raise_arm_bones:
 		var index := skeleton.find_bone(bone_name)
 		if index < 0:
@@ -32,6 +39,34 @@ func _init(skeleton: Skeleton3D, config: FigureConfig) -> void:
 		_arms.clear()
 
 
+## Draws the replica `amount` (0..1) of the way to the shoulder: `butt_on_grip` (its butt, in the grip bone's frame)
+## onto the shoulder pocket (`pocket`), the replica's aim kept, both hands moved with it.
+func shoulder(skeleton: Skeleton3D, amount: float, butt_on_grip: Vector3) -> void:
+	if amount <= 0.0 or _grip < 0 or _shoulder < 0 or _arms.is_empty():
+		return
+	var butt := skeleton.get_bone_global_pose(_grip) * butt_on_grip
+	_move_hands(skeleton, Transform3D(Basis.IDENTITY, (pocket(skeleton) - butt) * amount))
+
+
+## The shoulder pocket in `skeleton`'s frame: FigureConfig.shoulder_pocket from the shoulder's joint, turned as the
+## chest is from its rest (so it stays on the shoulder through a lean, the aim's pitch and the upper body's steadying).
+func pocket(skeleton: Skeleton3D) -> Vector3:
+	var offset := _config.shoulder_pocket
+	if _chest >= 0:
+		offset = skeleton.get_bone_global_pose(_chest).basis * (skeleton.get_bone_global_rest(_chest).basis.inverse()
+				* offset)
+	return skeleton.get_bone_global_pose(_shoulder).origin + offset
+
+
+## Moves the right hand (`both`: and the left) by `fit` (the grip bone's frame) along the replica in it, to its grip
+## (TP3); the replica's place in the hand (FigureHands) is shifted the other way, so it stays where it was.
+func fit_grip(skeleton: Skeleton3D, fit: Vector3, both: bool) -> void:
+	if fit == Vector3.ZERO or _grip < 0 or _arms.is_empty():
+		return
+	var move := skeleton.get_bone_global_pose(_grip).basis * fit
+	_move_hands(skeleton, Transform3D(Basis.IDENTITY, move), _arms.size() if both else RIGHT_ARM)
+
+
 ## Brings `skeleton`'s arms and replica `amount` (0..1) of the way to the high ready from the pose they have.
 func hold(skeleton: Skeleton3D, amount: float) -> void:
 	if amount <= 0.0 or _grip < 0 or _arms.is_empty():
@@ -40,10 +75,16 @@ func hold(skeleton: Skeleton3D, amount: float) -> void:
 	var turn := Basis(Vector3.RIGHT, -_config.raise_angle * amount) \
 			* Basis(Vector3.BACK, -_config.raise_cant * amount)
 	var shift := Vector3(0.0, -_config.raise_down, -_config.raise_back) * amount
-	var move := Transform3D(turn, grip - turn * grip + shift)
+	_move_hands(skeleton, Transform3D(turn, grip - turn * grip + shift))
+
+
+## Moves the hands of the first `bones` of raise_arm_bones (all of them: both hands) by `move` (the skeleton's frame),
+## each arm reaching for its hand's new place.
+func _move_hands(skeleton: Skeleton3D, move: Transform3D, bones: int = -1) -> void:
 	# One arm at a time: each reaches from its own shoulder, so the other's hand stays where it was posed.
+	var last := _arms.size() if bones < 0 else mini(bones, _arms.size())
 	var k := 0
-	while k < _arms.size():
+	while k + 2 < last:
 		var hand := skeleton.get_bone_global_pose(_arms[k + 2])
 		reach(skeleton, _arms[k], _arms[k + 1], _arms[k + 2], move * hand)
 		k += 3

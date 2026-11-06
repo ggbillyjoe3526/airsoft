@@ -719,7 +719,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   hand, on figures and in menus, from the same model.
 - **Parts on figures wait for the art pass (owner, 2026-10-19).** A figure's replica is one cut-down mesh, so a part's
   figure copy sits over its standard magazine or flash hider; the figure models get those split out in the art pass.
-  Nothing shows it until then (bots carry no parts).
+  Nothing shows it until then (bots carry no parts). *Done in TP1 (2026-11-05): the figure copies are cut down from the
+  hands' models with the magazine, flash hider and iron sights apart, and `ReplicaParts.fit_figure` fits the parts.*
 - **The Sniper Rifle (owner, 2026-11-02, SN1).** Pulled into 0.1 from the Replica Update: like the AEG with a longer
   barrel, spring driven, **single shot** only, and it **comes with the 2x Scope fitted**, which can be taken off or
   swapped. It unlocks at **level 5** with the 2x Scope (moved from level 7 so it comes with the rifle) and the M130
@@ -957,6 +958,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   its weapon torch, which a night field needs (every bot carries one there), so a Woodland match counts for the records
   and XP; Neon Heights was cut. Dev content still hides whatever a row tags dev. (Before: Woodland and Neon Heights dev
   until the owner made each public, 2026-10-05, Woodland confirmed 2026-10-24.)
+- **The Sniper Rifle, its three springs and the Variable Scope are public; The Street is dev (owner, 2026-11-05).**
+  The rifle's gear unlocks at its levels (5, 7, 8, 9) for everyone, and bots carry the Sniper kit with the switch off.
+  The Street shows only with Dev content on, and a match there stays out of the records.
 - **The Dev tab is always there, with no box and no hidden unlock (owner, 2026-10-29: "Dev should always be on and not
   hidden").** Its switches apply whenever they are set, and every one starts off, so the game plays the same until
   someone turns one on. A cheat (Game speed, Bottomless magazines, Ghost, Bots hold fire, Bots run low on BBs, Spectate

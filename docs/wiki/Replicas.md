@@ -31,7 +31,8 @@ An electric rifle (an AEG, "automatic electric gun"), with a motor whirr on ever
 are in. On an indoor field (Depot) it starts each round on single shots: [no full auto indoors](Maps#depot).
 A battery drives it, so the battery you fit sets its rate of fire. It is a short carbine, about 67 cm long: a
 quad-rail handguard with a ribbed cover, an A-frame front sight, a flip-up rear sight, a raked grip moulded in one
-piece with the receiver, an adjustable stock and a curved magazine. Inspect it to see the charging handle pulled back.
+piece with the receiver, an adjustable stock and a curved magazine. [Inspect](Controls) it (**Y**) to see the charging
+handle pulled back, the dust cover open and the hop-up dial turn.
 
 The AEG Rifle takes the most parts: an optic on its top rail, a grip under it, a barrel, a muzzle part and a different
 magazine. It is in your kit from the start.
@@ -57,6 +58,19 @@ no power source fits it, and only the Weapon Torch fits it.
 It is the same size in your hand as the GBB Pistol. It wears its own white, cyan and magenta colours, with
 glowing slashes, a pink core behind bars in its slide, a finned rear cap and three fire-mode lights; with
 **Realistic colours** on it turns plain grey with no glow. It has its own shot and magazine sounds.
+
+## Sniper Rifle
+
+A spring-powered bolt-action rifle, unlocked at level 5. It fires **single shots** only: after every shot you hear the
+bolt drawn back over the spring and snapped home before the next one is ready. It shoots harder and
+further than the AEG Rifle, from small magazines, and has its own [site limit](#site-limits).
+
+It comes with the **2x Scope** fitted; take it off or swap it for another optic in the Loadout. It is made to be aimed:
+from the hip its shots scatter widely, and the spread closes as the sight comes up. The spring you fit sets its energy
+([Parts and Power](Parts-and-Power#power-sources)). It takes the AEG Rifle's optics, grips and muzzle parts, but no
+barrels or other magazines. It is a long rifle in a grey chassis: a plain barrel with a thread cap, a slotted forend,
+a black receiver with a top rail, a short box magazine, a vertical grip and a stock with a cheek piece and a rubber
+butt pad.
 
 ## How they sound
 
@@ -84,3 +98,10 @@ long barrel) stop at the limit, and the Loadout's Performance sheet says when a 
 Each replica can wear one of eight bold colour schemes or four plain ones, picked in **Customise**. Bots hold theirs
 in their team's colours. **Realistic colours** shows every bold scheme as its plain colour, yours and the bots', from
 the next match.
+
+## On other players
+
+Bots hold the same replicas you hold, with the parts they have fitted: their optic (the iron sights taken off under
+it), silencer, grip, torch or laser, and the magazine they reload.
+A rifle is held with its stock in the shoulder and the head down on it, looking along the sights; a pistol is held
+out in both hands.

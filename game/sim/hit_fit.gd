@@ -180,3 +180,14 @@ func table(field: StringName) -> Table:
 			t.steps.append((rest(j).inverse() * q).normalized())
 	_tables[field] = t
 	return t
+
+
+## The cheek on a rifle's stock (TP2), `amount` (0..1) of it: the head's turn about the neck's joint, bowed
+## HitConfig.cheek_bow forward about `side` (the right shoulder to the left), then tilted cheek_cant to the right about
+## the way ahead (`side` across `up`, the neck to the head). Either frame (the hit volume's or the skeleton's): `side` is
+## the figure's left in both. Identity when the two are in line or none.
+static func cheek_turn(side: Vector3, up: Vector3, hits: HitConfig, amount: float) -> Basis:
+	var ahead := side.cross(up)
+	if amount <= 0.0 or ahead.length_squared() <= 0.0:
+		return Basis.IDENTITY
+	return Basis(ahead.normalized(), hits.cheek_cant * amount) * Basis(side.normalized(), hits.cheek_bow * amount)

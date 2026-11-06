@@ -143,9 +143,10 @@ func test_there_are_three_levels_and_a_new_player_starts_on_normal() -> void:
 
 # --- maps ---
 
-func test_every_shipped_map_is_public_and_a_dev_one_is_tagged() -> void:
+func test_the_public_maps_are_listed_and_a_dev_one_is_tagged() -> void:
 	var page := _page(false)
-	assert_eq(page.map_ids(), PackedStringArray(["depot", "woodland", "street", "range"]), "listed with Dev content off")
+	assert_eq(page.map_ids(), PackedStringArray(["depot", "woodland", "range"]),
+			"listed with Dev content off: The Street is dev (owner, 2026-11-05)")
 	for id: String in page.map_ids():
 		assert_false(_labels(page.map_card(id)).has("DEV"), id)
 		assert_false(page.is_unloadable(id), id)
@@ -153,6 +154,7 @@ func test_every_shipped_map_is_public_and_a_dev_one_is_tagged() -> void:
 	var dev := _page(true)
 	DevContent.restore_map(was)
 	assert_true(_labels(dev.map_card("woodland")).has("DEV"), "a dev map is tagged")
+	assert_true(_labels(dev.map_card("street")).has("DEV"), "the shipped dev map too")
 	assert_false(_labels(dev.map_card("woodland")).has("LATER"))
 	assert_false(_labels(dev.map_card("depot")).has("DEV"))
 	for id: String in ["depot", "woodland"]:
@@ -185,7 +187,8 @@ func test_no_dev_maps_listed_with_dev_content_off() -> void:
 	var was := DevContent.use_map()
 	var page := _page(false)
 	DevContent.restore_map(was)
-	assert_eq(page.map_ids(), PackedStringArray(["depot", "street", "range"]))
+	assert_eq(page.map_ids(), PackedStringArray(["depot", "range"]),
+			"Woodland tagged dev here, The Street dev since 2026-11-05")
 	assert_true(page.map_card("depot").is_picked())
 
 

@@ -122,7 +122,7 @@ func test_a_kind_that_could_not_load_draws_no_body() -> void:
 	v.set_body(m, -1, c.lod_high)
 	assert_null(v.body())
 	assert_eq(v.find_children("*", "MeshInstance3D", true, false).filter(
-			func(n: Node) -> bool: return (n as MeshInstance3D).visible).size(), 0, "nothing drawn but the sign")
+			func(n: Node) -> bool: return (n as MeshInstance3D).is_visible_in_tree()).size(), 0, "nothing drawn but the sign")
 
 
 func _detail(detail: GraphicsQuality.MeshDetail) -> void:
