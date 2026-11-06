@@ -710,7 +710,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   hand, on figures and in menus, from the same model.
 - **Parts on figures wait for the art pass (owner, 2026-10-19).** A figure's replica is one cut-down mesh, so a part's
   figure copy sits over its standard magazine or flash hider; the figure models get those split out in the art pass.
-  Nothing shows it until then (bots carry no parts).
+  Nothing shows it until then (bots carry no parts). *Done in TP1 (2026-11-05): the figure copies are cut down from the
+  hands' models with the magazine, flash hider and iron sights apart, and `ReplicaParts.fit_figure` fits the parts.*
 - **The Sniper Rifle (owner, 2026-11-02, SN1).** Pulled into 0.1 from the Replica Update: like the AEG with a longer
   barrel, spring driven, **single shot** only, and it **comes with the 2x Scope fitted**, which can be taken off or
   swapped. It unlocks at **level 5** with the 2x Scope (moved from level 7 so it comes with the rifle) and the M130
@@ -893,8 +894,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   wants it back); his whistle replaces the synthesised one; his woods are Woodland's day bed, and the night keeps the
   street-at-night stand-in, as his woods have daytime birds in them; his metal steps and woods lose the wind's rumble
   (under 250 Hz and 150 Hz); his flashbang is saturated to come within 2 dB of the old bang's loudness.
-- **A replica's shot follows its power source: electric, gas or spring (owner, 2026-10-03).** An empty AEG still cycles;
-  an empty gas pistol only clicks.
+- **A replica's shot follows its power source: electric, gas or spring (owner, 2026-10-03).** Fired empty, every
+  replica clicks the gas pistol's recorded dry fire, today's and any added later (owner, 2026-11-05: "This is NOT a
+  placeholder. This is the final decision"; until then an empty AEG cycled its motor). One cue, `dryFire`.
+- **The practice range sounds like The Street by day (owner, 2026-11-05).** Its ambience is `street`; it kept the
+  yard's until then. He also kept the AEG Rifle as it is after hearing a version with more motor.
 - **Footsteps are information, so gameplay audio comes first (owner, 2026-10-05).** Every ground's step stays within
   1.5 dB of concrete overall and 3 dB in the 0.7 to 4 kHz band, so a soft ground never hides anyone.
 - **A field's ambience is map data, with a day and a night variant picked by the lighting preset, never a map name

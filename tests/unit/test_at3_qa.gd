@@ -84,7 +84,7 @@ func test_cyber_pistol_without_a_parts_model_fits_nothing_and_still_shoots() -> 
 	var fit := ReplicaParts.fit(model, &"cyber", {&"muzzle": &"silencer", &"optic": &"redDot"})
 	assert_eq(fit.nodes.size(), 0)
 	assert_eq(fit.muzzle, muzzle)
-	assert_eq(ReplicaParts.figure_meshes(&"cyber", {&"muzzle": &"silencer"}).size(), 0)
+	assert_eq(ReplicaParts.take(&"cyber", {&"muzzle": &"silencer"}, true).size(), 0)
 	ReplicaParts.unfit(fit)
 
 
@@ -213,5 +213,5 @@ func test_the_muffled_bus_is_not_a_settings_volume() -> void:
 
 
 func test_a_figure_without_parts_gets_no_extra_meshes() -> void:
-	assert_eq(ReplicaParts.figure_meshes(&"aeg", {}).size(), 0)
+	assert_eq(ReplicaParts.take(&"aeg", {}, true).size(), 0)
 	assert_eq(ReplicaParts.take(&"aeg", {}, false).size(), 0)

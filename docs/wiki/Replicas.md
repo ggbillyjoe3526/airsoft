@@ -54,13 +54,13 @@ its numbers). Its battery is built in, so
 no power source fits it, and only the Weapon Torch fits it.
 It is the same size in your hand as the GBB Pistol. It wears its own white, cyan and magenta colours, with
 glowing slashes, a pink core behind bars in its slide, a finned rear cap and three fire-mode lights; with
-**Realistic colours** on it turns plain grey with no glow. It has its own shot, dry-click and magazine sounds.
+**Realistic colours** on it turns plain grey with no glow. It has its own shot and magazine sounds.
 
 ## How they sound
 
-Every replica's shots, dry clicks and magazines are made from real recordings: a gas pistol, an electric motor's
-whirr and hands on magazines, recorded for the game. Some are stand-ins built from those recordings until each replica
-gets its own. You can tell them apart by ear: the AEG Rifle's motor whirr, the GBB Pistol's gas pop and slide, and the
+Every replica's shots and magazines are made from real recordings: a gas pistol, an electric motor's whirr and hands
+on magazines, recorded for the game. Pull the trigger with nothing loaded and every replica gives the same plastic
+dry click. You can tell them apart by ear: the AEG Rifle's motor whirr, the GBB Pistol's gas pop and slide, and the
 Cyber Pistol's short buzz. BBs sound different on metal, wood, glass, plastic,
 cardboard and on a player, so you hear what a shot hit.
 
@@ -82,3 +82,8 @@ long barrel) stop at the limit, and the Loadout's Performance sheet says when a 
 Each replica can wear one of eight bold colour schemes or four plain ones, picked in **Customise**. Bots hold theirs
 in their team's colours. **Realistic colours** shows every bold scheme as its plain colour, yours and the bots', from
 the next match.
+
+## On other players
+
+Bots hold the same replicas you hold, with the parts they have fitted: their optic (the iron sights taken off under
+it), silencer, grip, torch or laser, and the magazine they reload.

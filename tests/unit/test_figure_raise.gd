@@ -67,7 +67,12 @@ func _view(kind: int, c: Character, world: WorldQuery) -> FigureView:
 			_corners.erase(v)
 			return
 		var to_figure := v.global_transform.affine_inverse() * r.global_transform
+		# The replica as drawn: its figure version and the pieces on it (the flash hider at its muzzle among them).
 		var box := r.get_aabb()
+		for piece: Node in r.find_children("*", "MeshInstance3D", true, false):
+			var m := piece as MeshInstance3D
+			if m.visible:
+				box = box.merge(r.global_transform.affine_inverse() * m.global_transform * m.get_aabb())
 		var corners := PackedVector3Array()
 		for i in 8:
 			corners.append(to_figure * box.get_endpoint(i))

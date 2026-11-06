@@ -113,12 +113,13 @@ A replica's file is its model in the hands, on the menus' pictures and on the fi
   frame meets the slide, above the trigger. The grip stays where the built-in pistols' is (raked back about 22°): the
   hands are posed in code.
 - **Objects.** `Body` (needed), `Magazine` (drops out on a reload), `FlashHider` (shown while no muzzle device is
-  fitted), `Figure` (the figures' cut-down version), and the empties `RearSight` and `FrontSight` (the iron sights'
-  tops: aimed, the sight line runs through the eye), `Muzzle` (needed: the centre of the muzzle's face, where BBs
-  leave), `TorchMount` and `SlideBack`. A rifle's figure is scaled so its butt-to-muzzle length is the
-  figures' rifle length; a pistol's keeps its size, the back of the slide at the figures' grip: the `SlideBack` empty's
-  depth, else the body's rearmost point at the bore's height or above (mark it when the frame reaches back past the
-  slide, as the Cyber Pistol's rear block does).
+  fitted), `Figure` (the figures' version: cut down from the rest by `tools/blender/replicas/figure_copy.py`, with its
+  `Figure_Magazine`, `Figure_FlashHider` and `Figure_Sights` as children, which a fitted part replaces), and the empties
+  `RearSight` and `FrontSight` (the iron sights' tops: aimed, the sight line runs through the eye), `Muzzle` (needed:
+  the centre of the muzzle's face, where BBs leave), `TorchMount` and `SlideBack`. A rifle's figure is scaled so its
+  butt-to-muzzle length is the figures' rifle length; a pistol's keeps its size, the back of the slide at the figures'
+  grip: the `SlideBack` empty's depth, else the body's rearmost point at the bore's height or above (mark it when the
+  frame reaches back past the slide, as the Cyber Pistol's rear block does).
 - **Moving parts (RM1).** Objects the file's animations move hang from one bone (the armature's root) and are drawn in
   the body's own meshes, so they cost no draw call. The game poses them from its state, never on a clock: `Fire` (the
   trigger, and a pistol's slide kicking back and home, each shot), `Selector` (safe at 0, semi at half its length,
@@ -127,12 +128,13 @@ A replica's file is its model in the hands, on the menus' pictures and on the fi
   caught back; put it after the others, as a later animation wins a part two of them move). The magazine is never a
   bone: the game moves it (and the hand holding it).
 - **Parts.** `replicaParts/<id>.glb`: one top-level object per part named `<kind>_<id>` (`optic_redDot`,
-  `magazine_hiCap`, `muzzle_silencer` …), in the replica's space where it fits; a child `<name>_Figure` is ignored. Two
-  child empties are read (RM8): an optic's `<name>_SightLine` on its sight line (aimed, the replica is raised so it
-  runs through the eye) and a torch's `<name>_UnderLaser`, where the torch moves while the laser is fitted too (both
-  clip to the same rail). What a part puts inside the replica (a barrel's inner barrel and hop-up unit, BA1) is
-  `<name>_Inside` in `replicaParts/inside/<id>.glb`, placed as its part: only the part's own picture draws it, so a fit
-  never loads it. It counts toward the part's triangle budget.
+  `magazine_hiCap`, `muzzle_silencer` …), in the replica's space where it fits, with its figures' copy `<name>_Figure`
+  (cut down from it by `tools/blender/parts/figure_parts.py`, run last). Two child empties are read (RM8): an optic's
+  `<name>_SightLine` on its sight line (aimed, the replica is raised so it runs through the eye) and a torch's
+  `<name>_UnderLaser`, where the torch moves while the laser is fitted too (both clip to the same rail). What a part
+  puts inside the replica (a barrel's inner barrel and hop-up unit, BA1) is `<name>_Inside` in
+  `replicaParts/inside/<id>.glb`, placed as its part: only the part's own picture draws it, so a fit never loads it. It
+  counts toward the part's triangle budget.
 - **Materials,** by name: `CyberSlab`, `CyberFrame`, `CyberLine`, `CyberCore`, `CyberMetal`, or a replica material's own
   name (`polymer`, `furniture`, `detail`, `metal`, `rubber`, `stipple`, `accent`). Plain colours: the game draws in its
   own materials, so Realistic colours, the glow and the High finish apply. No textures needed.
@@ -192,7 +194,7 @@ foundations).
 | A figure model | ≤ 20 MB; LOD0 ≤ 60,000 triangles (within 8 m), LOD1 ≤ 20,000, LOD2 ≤ 6,000; ≤ 8 materials; 2K textures |
 | First-person arms | ≤ 8 MB, ≤ 40,000 triangles, ≤ 4 materials, 2K textures |
 | A replica model | ≤ 6 MB, ≤ 40,000 triangles in the hands, ≤ 3,000 on a figure, ≤ 6 materials, 2K textures |
-| A replica's parts file | ≤ 2 MB, ≤ 10,000 triangles a part |
+| A replica's parts file | ≤ 3 MiB (2 MB until BL8b: the attachments, magazines and barrels share the AEG's), ≤ 10,000 triangles a part |
 | A grenade model | ≤ 200 KB, ≤ 5,500 triangles, plain colours |
 | A prop | ≤ 1 MB, ≤ 5,000 triangles (a landmark ≤ 30,000 with LODs), sharing texture sets with other props |
 | A surface texture set | ≤ 6 MB at 2K (colour, normal, ORM) |
