@@ -265,7 +265,7 @@ func _load(key: StringName) -> void:
 		return
 	_model = scene.instantiate() as Node3D
 	_model.name = "Model"
-	var figure := _model.find_child(ReplicaPictures.FIGURE_NODE, true, false) as Node3D
+	var figure := _model.find_child(ReplicaParts.FIGURE_NODE, true, false) as Node3D
 	if figure != null:
 		figure.visible = false
 	_holder.add_child(_model)

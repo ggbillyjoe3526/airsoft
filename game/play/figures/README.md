@@ -16,12 +16,13 @@ screen. Tuning: `FigureConfig` (`game/config/figure_config.gd`, on PlayTuning).
 | `figure_bend.gd` | `FigureBend`: a SkeletonModifier3D after the tree: the crouched head kept under 1.15 m, the upper chain leaned about the hip pivot, and flinched about it (FI5), then pitched about the spine by what the aim clips leave of the pitch (FI3), then the high ready at a wall (FB5, FigureReady) |
 | `figure_ready.gd` | `FigureReady`: the high ready at a wall (FB5): the replica turned muzzle up about the grip, canted and drawn in to the chest, each arm reaching its hand's new place by two-bone IK; FigureView's ray sets how far (`FigurePose.raise`) |
 | `figure_flinch.gd` | `FigureFlinch`: the hit flinch (FI5): the upper body's tilt the way the BB flew, in over flinch_rise and eased back over flinch_time, a second hit starting from the tilt drawn; pure, one per figure, no allocation |
-| `figure_hands.gd` | `FigureHands`: the figure's replicas (FigureView's figure versions) placed each time the skeleton is posed: in the hand on Grip_R by the sidecar's replicaOnGrip, slung on Chest when holstered, hanging from the hand calling the hit; in a reload a copy of the replica model's magazine on Hand_L by the sidecar's magazineInHand (the old one, then the new), the old one thrown at its release |
+| `figure_hands.gd` | `FigureHands`: the figure's replicas (FigureView's figure versions) placed each time the skeleton is posed: in the hand on Grip_R by the sidecar's replicaOnGrip, slung on Chest when holstered, hanging from the hand calling the hit; in a reload a copy of the replica's figure magazine (or its magazine part's) on Hand_L by the sidecar's magazineInHand (the old one, then the new), the old one thrown at its release, the well's own hidden while it is empty |
 | `thrown_magazines.gd` | `ThrownMagazines`: the thrown magazines (FI4), a fixed pool of `thrown_max` copies built once a session, each taking the thrower's magazine mesh and paint: each falls under gravity, comes to rest on its side at the thrower's feet and goes after its lifetime; `thrown_max` out at most, the oldest first; cleared at ROUND_START |
 | `figure_mix.gd` | `FigureMix`: who is a robot: half of each team, from the match seed on a stream of its own; only while Settings › Dev › Robots is on (`DevSettings.robots`, the Easter egg, RB1); otherwise everyone is human |
 
 Tests: `tests/unit/test_figure_models.gd`, `test_figure_body.gd`, `test_figure_mix.gd`, `test_figure_view.gd`,
 `test_figure_pose.gd`, `test_figure_animator.gd`, `test_figure_flinch.gd`, `test_figure_legs_qa.gd`, `test_figure_hands.gd`,
-`test_figure_hands_qa.gd`, `test_figure_flinch_qa.gd`, `test_thrown_magazines.gd`, `test_figure_raise.gd` (FB5); the hit area against the drawn figure
+`test_figure_hands_qa.gd`, `test_figure_flinch_qa.gd`, `test_thrown_magazines.gd`, `test_figure_raise.gd` (FB5),
+`test_figure_copies.gd` (the replicas' figure copies and their parts, TP1); the hit area against the drawn figure
 `test_figure_hit_area.gd` (`tests/support/hit_area_probe.gd`, FI7). The bench: `tools/figure_bench.gd` (11 figures on
 Depot for 30 s; dev only).
