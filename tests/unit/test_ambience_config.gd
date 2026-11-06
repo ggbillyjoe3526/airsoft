@@ -118,8 +118,9 @@ func test_a_set_is_picked_by_id_and_time_of_day_an_unknown_one_plays_the_yard() 
 	assert_false(AmbienceConfig.known(&"swamp"))
 
 
+## The range plays The Street's sound (owner, 2026-11-05).
 func test_each_map_reads_its_ambience() -> void:
-	var want: Dictionary[String, StringName] = {"depot": &"indoor", "woodland": &"woods", "range": &"yard",
+	var want: Dictionary[String, StringName] = {"depot": &"indoor", "woodland": &"woods", "range": &"street",
 			"street": &"street"}
 	for id: String in want:
 		var map := MapData.load_map(id, MapStyle.new(), 1)

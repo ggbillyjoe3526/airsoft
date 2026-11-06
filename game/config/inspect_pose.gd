@@ -15,8 +15,8 @@ extends Resource
 ## Each key's shift (m, in the camera's space): x right (negative: inwards, towards the centre of view), y up, z
 ## towards the eye.
 @export var shift: PackedVector3Array = PackedVector3Array()
-## The parts' sounds: each at a share of the inspect, a SimAudio.inspect_sound cue (the replica's own dryFire, magIn
-## and magOut, or a shared cue such as selector or torchClick).
+## The parts' sounds: each at a share of the inspect, a SimAudio.inspect_sound cue (the replica's own magIn and
+## magOut, or a shared cue such as selector, torchClick or dryFire).
 @export var sound_at: PackedFloat32Array = PackedFloat32Array()
 @export var sound_cue: Array[StringName] = []
 

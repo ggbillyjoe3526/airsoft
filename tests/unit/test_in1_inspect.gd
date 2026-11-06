@@ -100,7 +100,7 @@ func test_every_pose_samples_and_names_sounds_the_game_has() -> void:
 		for i in p.sound_at.size():
 			assert_between(p.sound_at[i], 0.0, 1.0, "a sound inside the inspect")
 			var cue := p.sound_cue[i]
-			var own := cue in [SimAudio.INSPECT_DRY, SimAudio.INSPECT_MAG_IN, SimAudio.INSPECT_MAG_OUT]
+			var own := cue in [SimAudio.INSPECT_MAG_IN, SimAudio.INSPECT_MAG_OUT]
 			var file := "%s%s_1.wav" % [SoundConfig.CUE_DIR, cue]
 			assert_true(own or ResourceLoader.exists(file), "cue %s has a sound" % cue)
 

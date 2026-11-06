@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://b756a0g2ddsyx"
-path="res://.godot/imported/dryFire_gas_3.wav-1eb00fda23fc62fcee724dc99b0d931a.sample"
+path="res://.godot/imported/dryFire_3.wav-25c106172bd11a0b38b3abd9773c23dd.sample"
 
 [deps]
 
-source_file="res://assets/audio/cues/dryFire_gas_3.wav"
-dest_files=["res://.godot/imported/dryFire_gas_3.wav-1eb00fda23fc62fcee724dc99b0d931a.sample"]
+source_file="res://assets/audio/cues/dryFire_3.wav"
+dest_files=["res://.godot/imported/dryFire_3.wav-25c106172bd11a0b38b3abd9773c23dd.sample"]
 
 [params]
 

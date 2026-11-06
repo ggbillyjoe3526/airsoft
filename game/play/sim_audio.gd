@@ -43,8 +43,10 @@ const BUS_POWER := &"Power"
 const BUS_MUFFLED := &"Muffled"
 ## The charging handle drawn back and let go after each shot of a spring rifle (assets/audio/cues/boltCycle_*.wav, SN1).
 const BOLT_CUE := &"boltCycle"
+## Every replica's trigger pulled with nothing loaded, today's and any added later: the gas pistol's recorded dry click
+## (assets/audio/cues/dryFire_*.wav; owner, 2026-11-05, final, not a stand-in).
+const DRY_CUE := &"dryFire"
 ## The inspect's cues (InspectPose.sound_cue) that name the replica's own sound, not a shared one.
-const INSPECT_DRY := &"dryFire"
 const INSPECT_MAG_IN := &"magIn"
 const INSPECT_MAG_OUT := &"magOut"
 ## Cue names by RayHit.Surface (none sounds as concrete; a BB on gravel, grass or leaves as earth, a step on each as
@@ -93,7 +95,6 @@ var _shot: Dictionary[StringName, StringName] = {}
 var _power: Dictionary[StringName, StringName] = {}
 ## By power source: its power part's level (SoundConfig.power_gains).
 var _power_gain: Dictionary[StringName, float] = {}
-var _dry: Dictionary[StringName, StringName] = {}
 ## Each sound profile's slide locking back on the magazine's last shot (slideLock_<profile>, AU2), or none.
 var _slide_lock: Dictionary[StringName, StringName] = {}
 var _mag_out: Dictionary[StringName, StringName] = {}
@@ -155,7 +156,6 @@ func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, quer
 		var has_part := ResourceLoader.exists("%s%s_1.wav" % [SoundConfig.CUE_DIR, power_part])
 		_power[p] = _load(power_part) if has_part else &""
 		_power_gain[p] = cfg.power_gains.get(p, cfg.power_gain)
-		_dry[p] = _load("dryFire_%s" % p)
 		var lock := "slideLock_%s" % p
 		_slide_lock[p] = _load(lock) if ResourceLoader.exists("%s%s_1.wav" % [SoundConfig.CUE_DIR, lock]) else &""
 		_mag_out[p] = _load("magOut_%s" % p)
@@ -171,7 +171,7 @@ func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, quer
 	for cue: String in ["selector", "draw", "reloadRefused", "bodyHit", "hitTick", "hitMarker", "count_beep", "vault",
 			"foley_holster", "magRattle", "rope_up", "rope_down", "steelRing", "radio_ack", "foley_crouch", "foley_stand",
 			"foley_lean", "whistle_short", "whistle_long", "torchClick", "ping_pip", "magToss", "magCatch", "grenade_pin",
-			"grenade_bounce", "smoke_pop", "flash_bang", "door_open", "door_shut", BOLT_CUE]:
+			"grenade_bounce", "smoke_pop", "flash_bang", "door_open", "door_shut", BOLT_CUE, DRY_CUE]:
 		_load(cue)
 	_set_muffle(cfg.muffled_cutoff_hz)
 	for i in cfg.field_voices:
@@ -233,7 +233,7 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				if _slide_lock.get(p, &"") != &"" and _emptied(state, e.actor, e.slot):
 					_mechanism(_slide_lock[p], state, e, own)
 			GameEvent.Kind.DRY_FIRE:
-				_mechanism(_dry.get(_power_of(state, e.actor, e.slot), &""), state, e, own)
+				_mechanism(DRY_CUE, state, e, own)
 			GameEvent.Kind.RELOAD_START:
 				_mechanism(_mag_out.get(_power_of(state, e.actor, e.slot), &""), state, e, own)
 			GameEvent.Kind.RELOAD_END:
@@ -397,13 +397,11 @@ func on_ping(book: Pings, player_id: int) -> void:
 
 
 ## A part's sound as you inspect the replica in hand (IN1, ReplicaView.inspect_sound), in your ear as your own
-## mechanism's: `cue` is the replica's own dry fire, magazine in or magazine out by its sound `profile`
-## (ReplicaConfig.sound_profile) for dryFire, magIn and magOut, else that shared cue (selector, torchClick, ...).
+## mechanism's: `cue` is the replica's own magazine in or magazine out by its sound `profile`
+## (ReplicaConfig.sound_profile) for magIn and magOut, else that shared cue (selector, torchClick, dryFire, ...).
 func inspect_sound(cue: StringName, profile: StringName) -> void:
 	var stream := cue
-	if cue == INSPECT_DRY:
-		stream = _dry.get(profile, &"")
-	elif cue == INSPECT_MAG_IN:
+	if cue == INSPECT_MAG_IN:
 		stream = _mag_in.get(profile, &"")
 	elif cue == INSPECT_MAG_OUT:
 		stream = _mag_out.get(profile, &"")
