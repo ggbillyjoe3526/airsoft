@@ -87,7 +87,8 @@ reasonable") applied to the BL8 attachments (10,000 triangles each), and his thr
 
 ## Known issues left
 
-- The AEG's parts file is 2.57 MB with the magazines (MAG1) and barrels (BA1), under its new 3 MiB cap; a quantised export (positions and normals) would roughly halve every parts file if size ever matters.
+- The AEG's parts file is 2.83 MB with the magazines (MAG1), barrels (BA1) and figures' part copies (TP1), 90% of
+  its new 3 MiB cap; a quantised export (positions and normals) would roughly halve every parts file if size ever matters.
 - Every optic (the 2x now too) overlaps a rear sight leaf where it would stand; the leaves hide under any optic
   (SightFold), as before.
 - The Cyber's torch spends its missing jaws' triangles on a ridged grip round the bezel (9,290).

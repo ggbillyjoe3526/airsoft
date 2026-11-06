@@ -33,7 +33,6 @@ const SUN_ENERGY := 1.15
 const AMBIENT_ENERGY := 0.75
 const AMBIENT := Color("c8d4ea")
 const MSAA := Viewport.MSAA_4X
-const FIGURE_NODE := "Figure"
 ## The gas bottle's label material (one model for every gas, its colour set per power source), and the most metallic a
 ## power source's metal is drawn: the picture has no reflections, so full metal turns black.
 const LABEL_MATERIAL := "Label"
@@ -184,7 +183,7 @@ func _make(key: StringName) -> Shot:
 	if scene == null:
 		return null
 	var model := scene.instantiate() as Node3D
-	var figure := model.find_child(FIGURE_NODE, true, false) as Node3D
+	var figure := model.find_child(ReplicaParts.FIGURE_NODE, true, false) as Node3D
 	if figure != null:
 		figure.visible = false
 	var shot := _rig(model, replica_side, "Picture_%s" % key)

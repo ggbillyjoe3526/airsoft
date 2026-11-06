@@ -5,9 +5,7 @@ extends GutTest
 const AEG_PARTS := "res://assets/models/replicaParts/aeg.glb"
 const SNIPER_PARTS := "res://assets/models/replicaParts/sniper.glb"
 const RIFLE := "res://assets/models/replicas/aeg.glb"
-## The parts files' cap (docs/CC0_ASSETS.md › Size limits): 3 MiB since BL8b, as the attachments, magazines and barrels
-## share the AEG's file.
-const FILE_BUDGET := 3 * 1024 * 1024
+const FILE_BUDGET := 3 * 1024 * 1024  # the parts-file cap (3 MiB since BL8b, #216; docs/CC0_ASSETS.md)
 const BARRELS: Array[StringName] = [&"tightBore", &"long"]
 const INNER_MATERIALS: Array[String] = ["Steel", "Brass", "Etch", "Chamber", "Bucking", "Bore"]
 
@@ -22,7 +20,7 @@ func _insides(root: Node) -> Array[Node]:
 	return root.find_children("*_Inside", "", true, false)
 
 
-func test_the_parts_file_is_under_its_size_cap() -> void:
+func test_the_parts_file_is_under_two_megabytes() -> void:
 	var f := FileAccess.open(AEG_PARTS, FileAccess.READ)
 	assert_not_null(f)
 	if f != null:
@@ -55,9 +53,10 @@ func test_a_fitted_barrel_among_other_parts_shows_no_inside_and_other_parts_surv
 
 func test_figure_copies_carry_no_inside() -> void:
 	for key: StringName in BARRELS:
-		var meshes := ReplicaParts.figure_meshes(&"aeg", {&"barrel": key})
-		assert_gt(meshes.size(), 0, "%s has a figure copy" % key)
-		for m in meshes:
+		var copies := ReplicaParts.take(&"aeg", {&"barrel": key}, true)
+		assert_gt(copies.size(), 0, "%s has a figure copy" % key)
+		for slot: StringName in copies:
+			var m: Node3D = copies[slot]
 			assert_eq(_insides(m).size(), 0)
 			assert_false(String(m.name).ends_with("_Inside"))
 			m.free()
