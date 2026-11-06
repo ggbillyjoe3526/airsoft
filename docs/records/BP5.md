@@ -1,6 +1,6 @@
 # BP5 · The second full bug and performance pass
 
-**Review:** part 1: critic Accept 8/8 · qa Pass · performance Pass; part 2: critic pending · qa Pass · performance Pass
+**Review:** part 1: critic Accept 8/8 · qa Pass · performance Pass; part 2: critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -9,8 +9,8 @@
 | 2026-11-06 | 1 | Opus 5.5 (bug pass thread) | green | Retry 6/8 | play list keys, a changelog claim, the held-trigger rule in five places, long lines |
 | 2026-11-06 | 2 | Opus 5.5 (bug pass thread) | green | Retry 8/8 | no measured performance run on the head |
 | 2026-11-06 | 3 | Opus 5.5 (bug pass thread) | green | Accept 8/8 | – |
-| 2026-11-06 | part 2: 1 | Opus 5.5 (bug pass thread) | pending | Retry 6/8 | the unseen stride's visible cost; claims the numbers don't show |
-| 2026-11-06 | part 2: 2 | Opus 5.5 (bug pass thread) | pending | pending | – |
+| 2026-11-06 | part 2: 1 | Opus 5.5 (bug pass thread) | green | Retry 6/8 | the unseen stride's visible cost; claims the numbers don't show |
+| 2026-11-06 | part 2: 2 | Opus 5.5 (bug pass thread) | green | Accept 8/8 | – |
 
 ## The bug pass
 
