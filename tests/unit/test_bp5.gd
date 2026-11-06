@@ -197,6 +197,25 @@ func test_the_torch_comes_back_on_when_a_slot_puts_the_bomb_back() -> void:
 	assert_eq(back["torch_on"], 0, "as after a throw")
 
 
+func test_the_torch_comes_back_on_when_a_reload_puts_the_bomb_back() -> void:
+	var m := _match()
+	var sim: Simulation = m[0]
+	var s: GameState = m[1]
+	var you := s.characters[0]
+	var cmds := _commands(s)
+	_with_torch(you)
+	_run(sim, s, cmds, 30)
+	you.torch_on = true
+	cmds[0].ready_grenade = Grenade.Kind.SMOKE
+	_run(sim, s, cmds, 5)
+	assert_false(you.torch_on)
+	cmds[0].reload = true
+	var back := _run(sim, s, cmds, 2)
+	assert_eq(you.grenades.readied, Grenade.Kind.NONE, "put back")
+	assert_true(you.torch_on, "on again")
+	assert_eq(back["torch_on"], 0, "silently")
+
+
 func test_a_torch_off_before_the_bomb_stays_off() -> void:
 	var m := _match()
 	var sim: Simulation = m[0]
@@ -238,3 +257,18 @@ func test_the_loadout_s_slot_keys_show_the_bound_keys() -> void:
 	var chip := page.find_children("*", "Label", true, false).filter(func(n: Node) -> bool:
 			return (n as Label).text == shown)
 	assert_gt(chip.size(), 0, "the PRIMARY card's chip shows %s" % shown)
+
+
+func test_the_loadout_s_slot_keys_follow_a_rebind_made_while_the_page_is_built() -> void:
+	var page := LoadoutPage.new(SavedLoadouts.new(LoadoutRules.standard()), Settings.new())
+	add_child_autofree(page)
+	InputMap.action_erase_events(&"slot_2")
+	var key := InputEventKey.new()
+	key.physical_keycode = KEY_F8
+	InputMap.action_add_event(&"slot_2", key)
+	var shown := KeyNames.of_action(&"slot_2")
+	page.visible = false
+	page.visible = true
+	var chip := page.find_children("*", "Label", true, false).filter(func(n: Node) -> bool:
+			return (n as Label).text == shown)
+	assert_gt(chip.size(), 0, "back from Settings, the SECONDARY card's chip shows %s" % shown)

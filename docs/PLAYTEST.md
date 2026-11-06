@@ -100,11 +100,11 @@ The rifle holds 60 BBs and the pistol 18, each with 4 magazines a round. Nothing
   first, spares fullest first, an empty one dark.
 - [ ] **Empty the GBB Pistol and press R the instant the last BB goes.** The slide still snaps back and stays back
   through the reload, closing near the end as above.
-- [ ] **Hear the bots fight (AU1).** With the volumes at their defaults, play Woodland or The Street (Dev content on) and hang back
-  while the bots engage. Their gunfire is clear from across the field: a rifle's motor whir and shots, a pistol's
-  gas pop, a spring's twang, loud up close and duller and quieter the further off (and through walls). A bot right by
-  you is no louder than your own replica. A silenced bot carries about half as far. Does a full-auto burst ever crackle
-  or distort?
+- [ ] **Hear the bots fight (AU1).** With the volumes at their defaults, play Woodland or The Street (Dev content on)
+  and hang back while the bots engage. Their gunfire is clear from across the field: a rifle's motor whir and shots, a
+  pistol's gas pop, a spring's twang, loud up close and duller and quieter the further off (and through walls). A bot
+  right by you is no louder than your own replica. A silenced bot carries about half as far. Does a full-auto burst ever
+  crackle or distort?
 - [ ] **Quieter ambience (AU1).** Settings › Audio › Ambience starts at 20 % on a new save (or a save you never changed
   it on). Birds, insects and the yard's hum sit well under the footsteps and gunfire; does it still give the field
   life without distracting?
@@ -602,8 +602,8 @@ opens every row (the Modes Update adds the other rule sets).
 - [ ] **The rows.** Rounds to win (3 to 10), Round time (1:30 to 5:00), Team size (the picked map's own: 5v5 to
   8v8 on every field, TS1), Opponents, Teammates, Friendly fire and
   Ricochets count.
-- [ ] **Team size follows the map (WL2, TS1).** Custom 8v8 on Depot, pick Woodland and The Street (Dev content on, Settings › Dev): each shows 8v8,
-  and after a restart still 8v8. Skirmish plays each map's standard: 6v6 on all three.
+- [ ] **Team size follows the map (WL2, TS1).** Custom 8v8 on Depot, pick Woodland and The Street (Dev content on,
+  Settings › Dev): each shows 8v8, and after a restart still 8v8. Skirmish plays each map's standard: 6v6 on all three.
 - [ ] **A 1v1, a 2v2, first to 3.** The scoreboard and pips match the sizes; first to 3 swaps ends after round 2 and
   ends at 3. Do rounds feel too long or quick at that size?
 - [ ] **Opponents Easy, Teammates Hard.** Your teammates win clearly more often. The rules text says this match won't
@@ -715,7 +715,8 @@ same and throw them (SF2).
 
 Every field plays 6v6 by default; Custom offers 5v5, 6v6, 7v7 and 8v8 on each (owner, 2026-11-01).
 
-- [ ] **The default.** Skirmish on Depot, Woodland and The Street (Dev content on, Settings › Dev): the chips say 6 v 6 and twelve play.
+- [ ] **The default.** Skirmish on Depot, Woodland and The Street (Dev content on, Settings › Dev): the chips say 6 v 6
+  and twelve play.
 - [ ] **Every size, every map.** A Custom match at 5v5 and at 8v8 on each field. Every player starts on a spot of
   their own; everyone hit walks to a spot of their own in the dead zone. Is each size fair and fun? 5v5 should feel
   slower and more careful, 8v8 faster and busier, with rounds about as long.
@@ -725,8 +726,8 @@ Every field plays 6v6 by default; Custom offers 5v5, 6v6, 7v7 and 8v8 on each (o
   and its max, and the `[perf-summary]` line at exit; the same on Depot and The Street. The cloud measured the CPU
   only (`tools/team_bench.gd`, `docs/records/TS1.md`): about 6 ms a frame on average on Woodland, 14 ms at its
   slowest 1 %. Note any hitch, and whether BBs ever vanish mid-flight in a big fight.
-- [ ] **The Street's ends.** Elimination on The Street (Dev content on, Settings › Dev) from each end: does the north end (the embankment) feel
-  stronger? Bots win 53 to 64 % of rounds from it, more the bigger the teams (KNOWN_ISSUES).
+- [ ] **The Street's ends.** Elimination on The Street (Dev content on, Settings › Dev) from each end: does the north
+  end (the embankment) feel stronger? Bots win 53 to 64 % of rounds from it, more the bigger the teams (KNOWN_ISSUES).
 - [ ] **Woodland's Attack / Defend.** Attack and defend a few rounds each: do the attackers have it too easy? Bots
   attacking win about 64 % of rounds at every size, at the edge of the 40 to 65 % band.
 
@@ -894,12 +895,12 @@ Every field plays 6v6 by default; Custom offers 5v5, 6v6, 7v7 and 8v8 on each (o
   and pings show; an enemy only where your side heard them. The mouse moves a pointer instead of the view and you can
   still walk. Let go of M: the view turns again and the trigger needs a fresh pull. Out: the map shows but has no
   pointer. Is it big and clear enough? Is the pointer's speed right?
-- [ ] **The full-screen map's detail (FM2).** Hold M on Depot, Woodland and The Street (Dev content on, Settings › Dev): the field fills the screen
-  beside the key. The header names the round and says what your side must do (attack, then defend after half time;
-  "Knock out the other team" in Elimination). A and B badges sit by the flags; both starts are boxed in their team's
-  colour (swapped after half time) with the dead zones hatched; doors show as wood-coloured bars. No place names
-  overlap. Woodland's hills, tracks and dry river and The Street's gardens and roads read apart, on the minimap too.
-  Is anything missing you'd look for? Is the ground too busy?
+- [ ] **The full-screen map's detail (FM2).** Hold M on Depot, Woodland and The Street (Dev content on, Settings › Dev):
+  the field fills the screen beside the key. The header names the round and says what your side must do (attack, then
+  defend after half time; "Knock out the other team" in Elimination). A and B badges sit by the flags; both starts are
+  boxed in their team's colour (swapped after half time) with the dead zones hatched; doors show as wood-coloured bars.
+  No place names overlap. Woodland's hills, tracks and dry river and The Street's gardens and roads read apart, on the
+  minimap too. Is anything missing you'd look for? Is the ground too busy?
 - [ ] **Go there (click on the map, Mouse 4, or the wheel's Go There).** Click a far corner of the map: a radio
   click, both teammates set off side by side, the marker reads "GO · 40 M", then "HOLD · 40 M" once they're there,
   facing on the way they went. Mouse 4 at a spot you look at does the same; at the sky the wheel says "Nowhere there
@@ -1438,8 +1439,8 @@ as a round starts, then watch a few Depot matches:
 - [ ] **Gear and pads (BL12, BL13):** plate carrier, pouches, radio, backpack, empty holster and knee and elbow pads sit
   on the body and move with it; the pads stay on the knees when crouched and on the elbows when aiming.
 - [ ] **What bots hold (TP1, TP2, TP3):** each bot's replica is the same model you hold, with its parts (an optic hides
-  its irons). A rifle's stock sits in the shoulder with the head down on it; a pistol is held in the right hand only, the fingers round
-  the grip. Up close, do the fingers look wrapped round it?
+  its irons). A rifle's stock sits in the shoulder with the head down on it; a pistol is held in the right hand only,
+  the fingers round the grip. Up close, do the fingers look wrapped round it?
 - [ ] **Cyber Pistol size (CZ1):** in your hand, in Customise and on a bot it is as big as the GBB Pistol, its sights
   showing.
 - [ ] **Your arms (BL4):** with each replica, at the hip and aimed, only your gloved hand and a little wrist show; the
@@ -1512,11 +1513,14 @@ models show without anything else changing. The smoke and flash icons now do the
 
 ## The second bug and performance pass (BP5)
 
-- [ ] **A held trigger after a bomb in hand.** On the AEG on full auto, take a smoke in hand (4), pull the trigger and
-  keep holding it: the smoke is thrown and, when the rifle is back up, it does not fire until you let go and pull
-  again.
-- [ ] **Your torch after a bomb in hand.** At night, with your torch on, take a bomb in hand (4 or 5), then press 1 to
-  put it back: the torch comes back on with the rifle (it stayed off before).
+- [ ] **A held trigger after a bomb in hand.** On the AEG on full auto, roll the mouse wheel to the smoke (it comes
+  into your hand), pull the trigger and keep holding it: the smoke is thrown and, when the rifle is back up, it does
+  not fire until you let go and pull again. Let go and pull again during the throw: it fires as soon as the rifle is
+  up. Pressing 4 with the trigger held (an instant throw) still fires after the throw, as before: does the
+  difference feel right?
+- [ ] **Your torch after a bomb in hand.** At night, with your torch on, roll the wheel to a bomb, then press 1 to put
+  it back (and again with R): the torch comes back on with the rifle, with no click (it stayed off before). With 3
+  (holster) it stays off, as the rifle stays away.
 - [ ] **Slot keys on the Loadout page.** Rebind Primary and Secondary in Settings › Controls, then open the Loadout
   page: the two carried cards show your keys, not 1 and 2.
 

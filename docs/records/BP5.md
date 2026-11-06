@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-06 | 1 | Opus 5.5 (bug pass thread) | pending | pending | – |
+| 2026-11-06 | 1 | Opus 5.5 (bug pass thread) | green | Retry 6/8 | play list keys, a changelog claim, the held-trigger rule in five places, long lines |
+| 2026-11-06 | 2 | Opus 5.5 (bug pass thread) | pending | pending | – |
 
 ## The bug pass
 
@@ -25,11 +26,13 @@ checklists, and the files nothing uses. None found a high bug. Every gate was gr
   bomb was in hand and in the air, so a held trigger read as fire once the replica was back up: an AEG on full auto
   fired about ten BBs on its own (a semi or burst only escaped because the redraw outlasts press_buffer). The pull
   that throws it, or is held as a slot, the holster or a reload puts it back, is now let go
-  (`Grenades.held_off_command`) until the trigger is released; one let go during the throw is spent then (QA's find).
-  An instant throw (4 or 5) keeps a held full auto firing after it, as before.
-- **The torch after a bomb in hand.** Put back by a slot, the holster or a reload, the bomb left the torch off (only a
-  throw restored it). It comes back on now, silently, as after a throw (`Grenades.take_torch_back`, Torch.step's
-  `relight`); a bot's torch still holds its minimum hold.
+  (`Grenades.trigger_command`, the one place the rule lives, reading the controller's own trigger so a vault can't
+  end it) until the trigger is released; one let go during the throw is spent then (QA's find). An instant throw (4
+  or 5) keeps a held full auto firing after it, as before.
+- **The torch after a bomb in hand.** Put back by a slot or a reload, the bomb left the torch off (only a throw
+  restored it). It comes back on now, silently, as after a throw (`Grenades.take_torch_back`, Torch.step's
+  `relight`); a bot's torch still holds its minimum hold. Put back by the holster it stays off: the replica stays
+  away, and the torch is on it.
 - **The Loadout's slot keys** show slot_1's and slot_2's own keys (`KeyNames.of_action`), refreshed with the bombs'
   (the known-issues row from BP3 is gone).
 - **Records** leave out a count over `COUNT_MAX` (a hand-edited 1e300 overflowed `int()`).
@@ -37,7 +40,8 @@ checklists, and the files nothing uses. None found a high bug. Every gate was gr
 - **Files:** three unused figure textures (`human_bot_human_v12_*`, an old figure's, not in human.glb, 9.1 MB in the
   pack) and 21 old raw QA logs under `pipeline/out/qa/` (git-ignored, from long-merged tasks). Two stale "sling"
   comments.
-- **Docs:** the known issues, the play list, HANDOFF, README, ROADMAP, CC0_ASSETS and the wiki brought up to date.
+- **Docs:** the known issues (the "pistols one-handed" row dropped: HG1 made it the owner's ruling, DECISIONS; the
+  flaky UF1 QA camera test added), the play list, HANDOFF, README, ROADMAP, CC0_ASSETS and the wiki brought up to date.
 - **Shared folder** (the owner's yes on a card): 235 MB of superseded review pictures of merged models deleted, each
   folder looked at first; the latest set of each model and every picture he marked up kept
   (`/mnt/project-files/playtest/bp5-shared-cleanup-list.md`).
