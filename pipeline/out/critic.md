@@ -1,19 +1,33 @@
-Task: CZ1 · The Cyber Pistol at the GBB Pistol's size (owner request, no task block)
-Attempt: 2 of 4
-Head: 4418577 (verdict holds only if the tools/check.sh rerun on 4418577 passes; QA Pass on f1685e8, performance Pass on f1685e8)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
-Score: 7/8 → Accept
-Ratios vs the GBB (bpy on 4418577's glb): length 206/204 (+1 %); height 152/140 (+8.6 %); half width where the thumb goes, z -30..+30: 13.3-14.4/12.9-14.2 (≤ 3 %); grip depth 54-59/58-61 (-5 %); bore 10.8/10.5 (+3 %); trigger reach at z -25: 73.6/68.3 mm (+7.8 %, now described honestly). All within 10 %.
-1. Torch fixed: my overlap test now finds 0 face pairs against Body, Magazine and Trigger (242 before). In the side and under renders the torch's back end clears the guard, which is shorter in front (cyber.py:158-160) and still reads as BL6's. attachments.py:1152-1157 stops the build if a CLEAR_OF_BODY part touches the body, so this can't come back silently. The sights (cz1/5, test_cyber_sights.gd) and the resize meet the ask. The look is kept, round parts stay round and the normals are right.
-4. test_cyber_sights.gd fails on 0283c69, and the selector expectations (test_cyber_pistol.gd:114-115, test_cp1_qa.gd:242) follow the length scale ×0.89.
-5. The scales are now named (GBB_FRAME_HW / FRAME_HW, cyber.py:90-91, 103-104).
-Failed checks, with evidence:
-8. [judgment] Two leftovers:
-- cyber.py:153 still says the trigger moved "to the GBB's reach from the back strap". The changelog, ASSETS and the record now correctly say it isn't (73.6 vs 68.3).
-- cyber.py:179 is 138 characters, past the house's 120.
-Must-fix (fold into this PR or the next one): reword cyber.py:153 ("nearer the grip, 5 mm longer reach than the GBB's") and wrap cyber.py:179.
+Task: BA1 · The barrel models (brief, no TASKS block)
+Attempt: 4 of 4
+Head: 6f9022d (= HEAD; targeted tests pass, QA's 41; full tools/check.sh still running on 6f9022d, so this verdict
+holds only once it or CI is green there). QA (50710d0) and performance (c173a5b) Pass; the diff since is one lens
+position in the glb and one light-angle line, neither on a hot path.
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
+Score: 8/8 → Accept
+Fixed since attempt 3, checked on the images: barrels.py:331 moves the Bore lens to hop -25.2, r 3.02, in front of the
+barrel's rear cap at -25 as seen from the rear and inside the lip (the lip's inner radius there is about 3.01, so the
+disc's rim tucks into the wall with no ring of light). Bucking centre, 7x7 samples: v4_cards_full.png tight (80,105)
+54-57 and long (70,305) 54-63 on a card ground of about 32, so it reads as a dark hole (attempt 3 had white there);
+tight_alone.png (260,565) min 43 and long_alone.png (213,578) min 45, a clean dark way in past a lit red lip wall.
+The 3x card hole is a few pixels ragged; that is the card's resolution, not the mesh.
+replica_pictures.gd:260 now takes the fill light from shot.camera.rotation_degrees (:284, 0/90/0) plus FILL_PITCH
+(:24, a named -20): the same angle as before, now tied to the camera. Built once per picture, not per frame.
+(a) Proportions, unchanged, pass: inner barrel 345 mm vs a real M4's 363 (-5 %); long/tight 452/345 = 1.31 vs 1.25
+(+5 %); hop unit/barrel 0.151 vs 0.152; bore/OD 6.03/8.9 vs 6.03/9 (+1 %); extension OD = the rifle barrel's (17.2).
+(b) Construction passes: hop_close.png shows the dial teeth, the window, the arm and the nose seated with no gap. The
+attempt-3 close-ups (ext_close, fit_long_close, crown_close, fit_tight_muzzle) still match this geometry.
+Budget: 9,454 and 9,954 of 10,000 (94.5 % and 99.5 %), as the brief asks.
+Failed checks: none.
+Must-fix: none.
+Advisory (not blocking):
+- The coupling's open back (barrels.py:402) is recorded as a known issue in docs/records/BA1.md, but that row is not
+  committed at 6f9022d (only in the working tree). Put it in the records push. On v4_cards_full.png (x 790-850,
+  y 280-330) it reads as a flat grey rear face, which is fine at card size.
 Owner should test in the game:
-- Fit the Weapon Torch and look along it from the side and from under: there should be a gap at the guard.
-- Aim: the post and its cyan dot stand in the notch with light on both sides.
-- Once the arms hold (#204) is refitted, the thumb lies on the frame and rear block without sinking in. Say whether the trigger finger feels stretched compared with the GBB (the reach is 5 mm longer).
-- Next to the GBB in the Armory: same size, still the Cyber's look.
+- Customise › Barrel: the bucking's centre reads as a dark hole on both cards, inside the red lip.
+- Customise › Barrel: the hop dial's teeth still read under the fill light (not blown out white).
+- Long barrel fitted, aimed: no line or flicker where the flats meet the round shoulder.
+- Long barrel fitted: the extension takes each paint like the rifle's barrel.
+- Tight bore fitted: the crown sits centred in the flash hider.
+- First open of the Barrel tab: no hitch from loading inside/aeg.glb.

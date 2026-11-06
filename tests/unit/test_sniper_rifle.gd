@@ -216,7 +216,7 @@ func test_every_spring_has_a_picture_and_the_cocking_cue_is_there() -> void:
 	assert_true(ResourceLoader.exists("res://assets/models/powerSources/spring.glb"))
 	for n in 3:
 		assert_true(ResourceLoader.exists("%s%s_%d.wav" % [SoundConfig.CUE_DIR, SimAudio.BOLT_CUE, n + 1]))
-	for cue: String in ["shot_spring", "dryFire_spring", "magIn_spring", "magOut_spring", "power_spring"]:
+	for cue: String in ["shot_spring", "dryFire", "magIn_spring", "magOut_spring", "power_spring"]:
 		assert_true(ResourceLoader.exists("%s%s_1.wav" % [SoundConfig.CUE_DIR, cue]), cue)
 
 

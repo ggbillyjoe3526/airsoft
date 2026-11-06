@@ -898,8 +898,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   wants it back); his whistle replaces the synthesised one; his woods are Woodland's day bed, and the night keeps the
   street-at-night stand-in, as his woods have daytime birds in them; his metal steps and woods lose the wind's rumble
   (under 250 Hz and 150 Hz); his flashbang is saturated to come within 2 dB of the old bang's loudness.
-- **A replica's shot follows its power source: electric, gas or spring (owner, 2026-10-03).** An empty AEG still cycles;
-  an empty gas pistol only clicks.
+- **A replica's shot follows its power source: electric, gas or spring (owner, 2026-10-03).** Fired empty, every
+  replica clicks the gas pistol's recorded dry fire, today's and any added later (owner, 2026-11-05: "This is NOT a
+  placeholder. This is the final decision"; until then an empty AEG cycled its motor). One cue, `dryFire`.
+- **The practice range sounds like The Street by day (owner, 2026-11-05).** Its ambience is `street`; it kept the
+  yard's until then. He also kept the AEG Rifle as it is after hearing a version with more motor.
 - **Footsteps are information, so gameplay audio comes first (owner, 2026-10-05).** Every ground's step stays within
   1.5 dB of concrete overall and 3 dB in the 0.7 to 4 kHz band, so a soft ground never hides anyone.
 - **A field's ambience is map data, with a day and a night variant picked by the lighting preset, never a map name
