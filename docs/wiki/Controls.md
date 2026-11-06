@@ -12,6 +12,9 @@ so W A S D stays W A S D on any keyboard layout.
 - **Crouch** and **Aim** are held by default: let go to stand up or lower the replica. Either can be set to toggle
   in Settings › Controls; a toggled crouch stands you up when you sprint or jump.
 - **Lean** and **Sprint** are always held.
+- **Inspect replica** (Y) turns the replica in your hands side on to look it over while its parts move: the AEG's
+  charging handle and dust cover, a gas pistol's slide, the Cyber Pistol's battery. Firing,
+  aiming, reloading, switching, holstering, sprinting or being hit stops it at once.
 - **Jump** vaults when you are at a low wall: "Space to vault" shows under the crosshair (it names your own Jump
   key).
 - **Loadout (practice)** opens the Loadout from the [Practice Range](Practice-Range); in a match it does nothing.

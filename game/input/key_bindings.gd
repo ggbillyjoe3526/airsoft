@@ -15,7 +15,7 @@ const NONE := 0
 ## Actions the settings list, in the order the screen shows them.
 const ACTIONS: Array[StringName] = [
 	&"move_forward", &"move_back", &"move_left", &"move_right", &"walk", &"sprint", &"crouch", &"jump",
-	&"lean_left", &"lean_right", &"fire", &"aim", &"reload", &"fire_mode", &"slot_1", &"slot_2", &"holster",
+	&"lean_left", &"lean_right", &"fire", &"aim", &"reload", &"fire_mode", &"inspect", &"slot_1", &"slot_2", &"holster",
 	&"torch", &"slot_next", &"slot_previous", &"hop_up_less", &"hop_up_more", &"scoreboard", &"field_map", &"order_follow",
 	&"order_hold", &"order_regroup", &"order_wheel", &"ping", &"ping_move", &"mag_hand_off", &"throw_smoke", &"throw_flash",
 	&"use_door",
@@ -39,6 +39,7 @@ const DEFAULTS: Dictionary = {
 	&"aim": [-MOUSE_BUTTON_RIGHT],
 	&"reload": [KEY_R],
 	&"fire_mode": [KEY_B],
+	&"inspect": [KEY_Y],
 	&"slot_1": [KEY_1],
 	&"slot_2": [KEY_2],
 	&"holster": [KEY_3],
