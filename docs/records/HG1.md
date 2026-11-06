@@ -1,6 +1,6 @@
 # HG1 · The bots' hands hold their replicas as the first-person arms do
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass (by the owner's ruling on the cost, 2026-11-06 18:51)
 
 ## Attempts
 
@@ -10,7 +10,7 @@
 | 2026-11-06 | 2 | Claude (BP4 thread) | targeted green | Retry 6/8 | The Sniper's fingers into its side rail and barrel (a round, not the outline); the cross-section helpers in FigureHands |
 | 2026-11-06 | 3 | Claude (BP4 thread) | targeted green | Retry 4/8 | The stretched thumb and the figures' glove (the owner kept the glove); no QA or performance report yet; a switch didn't let go (QA); the fingers doubled the skeleton's cost (performance) |
 | 2026-11-06 | 4 | Claude (BP4 thread) | targeted green | Retry 6/8 | Performance: 11 figures +13.5 % over main (fingers now only near, one reach update an arm); the thumb and index as the owner approved them on the labelled picture; the per-slot hold arrays gathered (FigureHeld) |
-| 2026-11-06 | 5 | Claude (BP4 thread) | | | |
+| 2026-11-06 | 5 | Claude (BP4 thread) | green (one fix: a pistol's left arm stretched at a wall) | Accept 8/8 | Performance +9.8 % in all, skeleton +15.8 % a figure: the owner accepted the cost (18:51) |
 
 ## Background
 
@@ -56,7 +56,7 @@ On attempt 4's labelled picture (`playtest/hg1/bot-hands-final.jpg`) the owner w
   whatever the body does, so each bone's turn over its parent is kept until the hold or the hand's place changes, and
   each frame only blends the clips' turns toward them. They close only within LOD0's line of the eye (FigureView sets
   FigureBody.near); past it the hand still holds the replica but keeps the clips' fingers. Out of the camera's view
-  (FigureView.in_view: a cone round the view's corners, widened by a 1 m ball round the chest, looked at every 4th
+  (FigureView's `_seen` through `in_cone`: a cone round the view's corners, widened by a 1 m ball round the chest, looked at every 4th
   frame, the figures staggered by id) the hands keep the clips' and the replica its clips' place; the hold's easing runs on, so it is in place when the figure shows.
 - **Each slot's hold is one FigureHeld** (FigureHands.held): the arms' hold, both hands' places, the left's shift and
   the replica on the grip bone as the clips hold it and as the hand holds it; FigureBend hands it to FigureGrasp.
@@ -109,9 +109,13 @@ On attempt 4's labelled picture (`playtest/hg1/bot-hands-final.jpg`) the owner w
   pull request (`playtest/hg1/bot-hands-final.jpg`, each picture labelled with what to look at).
 - `test_figure_hands_qa.gd`'s "in the fist" gap is 3.5 cm (was 3): the palm now wraps the grip's side, so the palm's
   line runs a grip's half-width off its middle (3.08 cm on the pistols).
-- `tools/figure_bench.gd`, 11 figures, 30 s, four runs each pinned to one core (`taskset -c 1`, the unpinned runs
-  drifted 10 % between runs), alternating with main: both together 2.18 ms against 2.11 (+3 %), skeleton per figure
-  47 us against 43, animation level. The hands' own work is about 10-17 us a figure in view; looking at the view
-  every frame cost about 10 us a figure (the camera and viewport calls), hence the stride. Attempt 3 worked the
-  fingers out every frame (90 us); attempt 4's reviews measured +13.5 % with every figure holding, seen or not.
+- `tools/figure_bench.gd`, 11 figures, 30 s, pinned to one core (`taskset -c 1`; unpinned runs drifted 10 %),
+  alternating with main. Performance's runs: both together 2.195 ms against 1.999 (+9.8 %), skeleton per figure 47.9
+  us against 41.4 (+15.8 %), animation +8 %; the worker's own: +3 %. The hands' own work is about 10-17 us a figure in
+  view. Looking at the view every frame cost about 10 us a figure (the camera and viewport calls), hence the 4-frame
+  stride. Attempt 3 worked the fingers out every frame (90 us); attempt 4's reviews measured +13.5 % with every figure
+  holding, seen or not.
+- **The owner accepted the cost** (2026-11-06 18:51, on the question "Accept the bots' new hands costing about 10 %
+  more figure time?": "Accept the cost and merge"), over simplifying the fingers to within about 8 m. Performance's
+  skeleton line stands at +15.8 % by his ruling.
 - Left for the figures batch: the glove's knuckle plates show small shards on a deep bend (KNOWN_ISSUES).

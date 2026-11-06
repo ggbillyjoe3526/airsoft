@@ -54,8 +54,8 @@ class Closed:
 ## keeps the clips' fingers.
 func _init(skeleton: Skeleton3D, config: FigureConfig) -> void:
 	_grip = skeleton.find_bone(config.grip_bone)
-	_arm_r = _bones(skeleton, config.raise_arm_bones.slice(0, 3))
-	_arm_l = _bones(skeleton, config.raise_arm_bones.slice(3, 6))
+	_arm_r = _arm(skeleton, config.raise_arm_bones.slice(0, 3))
+	_arm_l = _arm(skeleton, config.raise_arm_bones.slice(3, 6))
 	var right := PackedStringArray()
 	var left := PackedStringArray()
 	for finger in config.hold_fingers:
@@ -177,6 +177,12 @@ static func _reached(root: Vector3, from: Vector3, to: Vector3, reach: float) ->
 	if a < EPSILON or under < 0.0:
 		return root + (to - root).normalized() * reach
 	return from + way * maxf(0.0, (-b + sqrt(under)) / a)
+
+
+## `names`' three bones as an arm FigureReady.reach can move (each hanging from the one before); empty otherwise.
+static func _arm(skeleton: Skeleton3D, names: PackedStringArray) -> PackedInt32Array:
+	var arm := _bones(skeleton, names)
+	return arm if arm.size() == 3 and FigureReady.chained(skeleton, arm[0], arm[1], arm[2]) else PackedInt32Array()
 
 
 ## `names`' bones; empty when any is missing.

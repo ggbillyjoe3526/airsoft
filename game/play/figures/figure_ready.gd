@@ -37,6 +37,17 @@ func _init(skeleton: Skeleton3D, config: FigureConfig) -> void:
 	if _arms.size() % 3 != 0:
 		push_warning("FigureReady: raise_arm_bones is not three bones an arm")
 		_arms.clear()
+		return
+	for k in range(0, _arms.size(), 3):
+		if not chained(skeleton, _arms[k], _arms[k + 1], _arms[k + 2]):
+			push_warning("FigureReady: %s's arm bones don't hang from each other" % skeleton.get_bone_name(_arms[k]))
+			_arms.clear()
+			return
+
+
+## Whether `fore` hangs from `upper` and `hand` from `fore` (what reach sets each bone over).
+static func chained(skeleton: Skeleton3D, upper: int, fore: int, hand: int) -> bool:
+	return skeleton.get_bone_parent(fore) == upper and skeleton.get_bone_parent(hand) == fore
 
 
 ## Draws the replica `amount` (0..1) of the way to the shoulder: `butt_on_grip` (its butt, in the grip bone's frame)

@@ -32,7 +32,7 @@ var hands: FigureHands = null
 var head: StringName = &""
 ## Whether the figure stands within LOD0's line of the eye, where its fingers close on the replica (HG1; FigureView).
 var near: bool = true
-## Whether its hands and replica may show in the camera's view (FigureView.in_view): out of it they keep the clips'.
+## Whether its hands and replica may show in the camera's view (FigureView's `_seen`, every hold_view_stride-th frame): out of it they keep the clips'.
 var seen: bool = true
 var _config: FigureConfig = null
 var _bones: Dictionary[StringName, int] = {}
