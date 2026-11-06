@@ -380,6 +380,8 @@ func _no_shared_keys(b: KeyBindings) -> bool:
 func _layout_1_save() -> Dictionary:
 	var saved := KeyBindings.new().to_dict()
 	saved.erase(KeyBindings.LAYOUT_KEY)
+	# Inspect (IN1, on Y) came after layout 1: no layout-1 save holds it.
+	saved.erase("inspect")
 	for action: StringName in KeyBindings.LAYOUT_1_MOVED:
 		saved[String(action)] = KeyBindings.LAYOUT_1_MOVED[action]
 	return saved

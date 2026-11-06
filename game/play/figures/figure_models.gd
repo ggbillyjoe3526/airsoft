@@ -51,8 +51,8 @@ func load_kinds() -> bool:
 	return not _kinds.has(null)
 
 
-## Replica `replica_id`'s own magazine mesh (its model's FigureConfig.magazine_node), as modelled, or null when its model
-## or the node can't be found: read the first time it is asked for, then shared.
+## Replica `replica_id`'s own magazine mesh (its model's FigureConfig.magazine_node, the figure version's), or null
+## when its model or the node can't be found: read the first time it is asked for, then shared.
 func magazine_mesh(replica_id: StringName) -> Mesh:
 	if _magazines.has(replica_id):
 		return _magazines[replica_id]

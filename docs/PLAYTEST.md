@@ -1403,6 +1403,18 @@ The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built 
 - [ ] **Sniper bots never shoot a teammate.** They now wait for the bolt before each shot, so they fire a little slower;
   do they still feel dangerous at range?
 
+## Inspect your replica (IN1)
+
+- [ ] **The key.** Press **Y** with each replica in hand (the AEG, the GBB Pistol, the Cyber Pistol, the Sniper
+  Rifle). It turns side on, its right side to you and the whole replica in view, while its parts move: the AEG's
+  charging handle back, dust cover open and hop-up dial turned; the GBB's slide eased back; the Cyber's battery eased
+  out of the grip; the sniper's bolt lifted and drawn. Small plastic clicks go with each part. It ends back in your
+  hands where it started.
+- [ ] **It stops at once** when you fire, aim, reload, switch replica, holster, sprint or are hit: the replica eases
+  back in a moment and the parts are home. Pressing Y while sprinting or aiming does nothing.
+- [ ] **Rebind.** Settings › Controls lists **Inspect replica** on Y; move it to another key and it works there.
+- [ ] **Feel.** Is about 3 s for the rifles and 2 s for the pistols right, and is the turn too much or too little?
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
