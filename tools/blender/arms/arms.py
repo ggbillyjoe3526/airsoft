@@ -152,13 +152,15 @@ RIGHT = {"d": 0.006, "f": 0.038, "x": 0.012, "slant": 30.0, "wrap": -30.0, "thum
 # FOREARM_CLEAR off the replica). The forearm rises toward `rise` degrees from below. The arm comes
 # from a bladed stance: its shoulder moved `shoulder` (eye space; left, a little forward and down), the elbow at
 # least `drop` below it and at most `across` in toward the body. The thumb lies forward along the handguard's left
-# side, low and loose, toward (thumb_x, y + thumb_f, thumb_z) (`thumb_pull`, held lightly: `thumb_hug`). No
+# side, low and loose, toward (thumb_x, y + thumb_f, thumb_z) (`thumb_pull`, held lightly: `thumb_hug`); the palm
+# only 34 mm (`forward`) to the right of the handguard's centre line, so the thumb's base sits under its left side
+# and the whole thumb rests on it (the owner, 2026-11-06), not just its tip. No
 # finger's glove rises above `tips_below` (replica space; the rail's top is 0.0735): the fingers rest on the right side
 # and none stands over the top from the left (the owner's 16:30 note, the critic).
-GUARD = {"kind": "guard", "y": 0.190, "forward": 0.052, "depth": 0.034, "standoff": 0.0,
+GUARD = {"kind": "guard", "y": 0.190, "forward": 0.034, "depth": 0.034, "standoff": 0.0,
          "search": ((60, 60), (40, 40), (-20, -20)), "rise": 40.0, "shoulder": (-0.06, 0.04, -0.06), "drop": 0.06,
          "across": 0.25, "thumb_x": -0.030, "thumb_f": 0.065, "thumb_z": 0.038, "thumb_hug": 2.0,
-         "thumb_pull": 30.0, "tips_below": 0.068, "plan": 40.0,
+         "thumb_pull": 30.0, "thumb_wide": 0.0, "tips_below": 0.068, "plan": 40.0,
          "tip_at": (0.0275, 0.005, 0.044), "tip_swing": 8.0,
          "fingers": {"Index": (35, 35, 20), "Middle": (40, 45, 30), "Ring": (40, 45, 30), "Pinky": (35, 40, 25)},
          "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
@@ -176,21 +178,23 @@ DOWN = {"kind": "down", "at": (0.0, 0.06, -0.40),
 # with the little finger on the grip too, and the thumb comes round the back strap's corner and lies forward along
 # the frame's left side just under the slide (its tip toward `thumb_at`, drawn there hard, `thumb_pull`: the owner,
 # 2026-11-06, "the thumb is sitting too low"), held lightly to the frame (`thumb_hug`). The web sits high, 3 cm
-# under the slide (the owner's Glock photos: the web up at the beavertail), so the thumb lies high too, while the
+# under the slide (the owner's Glock photos: the web up at the beavertail), and on the back strap's centre line (to
+# its right, the thumb's base stood off the frame and the thumb ran across the back strap, seen from the eye), so
+# the thumb lies high and forward along the frame, while the
 # finger marks stay a little lower so the middle finger still wraps the front strap under the trigger guard (all
 # three as high made it lie straight out under the guard); the thumb's knuckle and tip close onto the frame at most
 # `thumb_curl` degrees. The arm reaches out to it, as a pistol is held, a little bent (the owner, 2026-11-06: not
 # straight; the critic: 96 % of its reach, the elbow under 30 degrees): its shoulder raised and drawn back
 # `shoulder` (eye space), its elbow free to come up to the shoulder's height (`drop`).
-PISTOL_RIGHT = dict(RIGHT, web=(0.012, -0.097, -0.032), index=(0.018, -0.042, -0.037), pinky=(0.018, -0.058, -0.095),
-                    thumb_at=(-0.022, -0.032, -0.010), thumb_hug=2.0, thumb_pull=30.0, thumb_curl=(40.0, 60.0),
+PISTOL_RIGHT = dict(RIGHT, web=(0.012, -0.095, -0.045), index=(0.018, -0.042, -0.040), pinky=(0.018, -0.058, -0.098),
+                    thumb_at=(-0.020, -0.050, -0.040), thumb_hug=2.0, thumb_pull=30.0, thumb_curl=(40.0, 60.0),
                     shoulder=(0.0, -0.14, 0.105), drop=0.0, swing=(-15.0, -15.0, -15.0))
-# The Cyber Pistol, resized to the GBB's proportions (CZ1): its own marks, as low as the GBB's were before they rose
-# (its frame stands up beside the slide, so a thumb as high as the GBB's would pass into it): the web on its more
-# upright back strap, the index knuckle 2 mm back for its trigger (5 mm further from the back strap than the GBB's)
+# The Cyber Pistol, resized to the GBB's proportions (CZ1): its own marks, 1 cm lower than the GBB's (its frame
+# stands up beside the slide, so a thumb as high as the GBB's would pass into it): the web on its more upright back
+# strap's centre line, the index knuckle 2 mm back for its trigger (5 mm further from the back strap than the GBB's)
 # and the thumb aimed along the frame's side under that raised edge.
 CYBER_RIGHT = dict(PISTOL_RIGHT, web=(0.012, -0.097, -0.047), index=(0.018, -0.044, -0.040),
-                   pinky=(0.018, -0.058, -0.098), thumb_at=(-0.020, -0.054, -0.040))
+                   thumb_at=(-0.020, -0.054, -0.040))
 # The AEG Rifle's grip: the same three marks, the hand high on the short grip with the little finger wholly on it, its
 # knuckle above the grip's flared foot (the owner, 2026-11-05; the critic: half of it hung below), the knuckles' line
 # raked back with the grip, the web closer in over the back strap so the thumb reaches round onto the grip's left
@@ -478,7 +482,7 @@ def left_on_guard(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider)
     pose.place_arm(rig, "L", hand_m, pole_l, quiet=True)
     # The thumb forward along the handguard's left side.
     thumb_to = to_eye @ Vector((spec["thumb_x"], spec["y"] + spec["thumb_f"], spec["thumb_z"]))
-    curls = pose_fingers(hand, spec, col, thumb_to, spec["thumb_hug"], root=True)
+    curls = pose_fingers(hand, spec, col, thumb_to, spec["thumb_hug"], spec.get("thumb_wide", 0.0) > 0.0, root=True)
     # Each fingertip then reaches for its own point on the handguard's right side, level with its knuckle and below
     # the top (`tip_at`, replica space: x, y from the knuckle, z), so the fingers rest on the side (the owner, 16:30)
     # rather than over the rail (the critic); each curls as a relaxed finger does (TIP_COUPLE), never a claw.
