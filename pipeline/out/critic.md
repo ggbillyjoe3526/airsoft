@@ -1,27 +1,33 @@
-Task: HC1 · The hit call's raised arm (no task block; judged against the owner's words of 2026-11-05, the record and attempt 2's must-fixes)
-Attempt: 3 of 4
-Head: 13f0b7c = HEAD. Checks run on it: test_hit_call_arm, the figure tests and gdlint (QA: 45/45 tests, 898 asserts). QA Pass and performance Pass, both on 13f0b7c (15:04). The full tools/check.sh runs on the PR's CI.
+Task: BA1 · The barrel models (brief, no TASKS block)
+Attempt: 4 of 4
+Head: 6f9022d (= HEAD; targeted tests pass, QA's 41; full tools/check.sh still running on 6f9022d, so this verdict
+holds only once it or CI is green there). QA (50710d0) and performance (c173a5b) Pass; the diff since is one lens
+position in the glb and one light-angle line, neither on a hot path.
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
 Score: 8/8 → Accept
-Evidence (measured with arm2.py on human.glb and robot.glb, and from the h4/h4f/h4q renders):
-1. Held (f14+): elbow 15°, wrist 5.2°, curl 6.1° (robot 6.1°), hand 0.51 m over the shoulder. In h4f/h4/h4q call_030 at 4x, a flat open hand continues the forearm, thumb alongside.
-   Raise: hand-sh -0.31 → 0.51 rises on every frame from f03 to f13, x at most 0.41 m, wrist ≤5.5° from f02, and the elbow eases 51° → 15° with no fold.
-   Curl 45 → 34 → 22 → 11 → 6.5° at f03-f07 (robot 11° at f07). No palm-up cupped hand after f05 (h4/call_006 shows an open hand).
-   call.py:28 OUT (0.20, 0.85, 0.50); call.py:156-157 the hand and fingers on their own OPEN_BY share.
-4. test_hit_call_arm.gd:43-44: with RAISE_CURL 20 from 0.25 s, attempt 2's clip fails (28° at f08). The knuckle term at :92 closes the MCP gap. The test fails on the base glbs (QA ran it).
-2/3/5: clips and dev tools only; no runtime code, contract or per-frame path changed.
-Not blocking:
-- The raise pushes forward before it climbs: z 0.49 → 0.63 m at f05 (an arm's length).
-  From the side, h4/call_004-006 read as a palm-up "offering" hand, and call_007 as a stiff arm 45° forward.
-  It lasts 2-3 frames and the arc reads as "hand up", but a OUT z near 0.35 would keep the hand nearer the body.
-- The test's OPENED_BY is 0.25 s (:16), but call.py's OPEN_BY is 7/30 = 0.233 s, so f07 isn't checked and the comment is wrong. Use 7.0 / 30.0.
-- call.py:12 is 126 columns (house width 120).
-- QA's advisory: _globals skips a renamed bone silently. Assert that Hand_L and Middle1_L are found.
-- Scope: hc1 is stacked on GA1 (PR #207, open). origin/main...HEAD carries GA1's gait work (gait.py, glb.py, test_gait_cycle, hitbox...).
-  Open HC1's PR only after #207 merges (rebase), or base it on #207's branch, so its diff is HC1's 15 files.
+Fixed since attempt 3, checked on the images: barrels.py:331 moves the Bore lens to hop -25.2, r 3.02, in front of the
+barrel's rear cap at -25 as seen from the rear and inside the lip (the lip's inner radius there is about 3.01, so the
+disc's rim tucks into the wall with no ring of light). Bucking centre, 7x7 samples: v4_cards_full.png tight (80,105)
+54-57 and long (70,305) 54-63 on a card ground of about 32, so it reads as a dark hole (attempt 3 had white there);
+tight_alone.png (260,565) min 43 and long_alone.png (213,578) min 45, a clean dark way in past a lit red lip wall.
+The 3x card hole is a few pixels ragged; that is the card's resolution, not the mesh.
+replica_pictures.gd:260 now takes the fill light from shot.camera.rotation_degrees (:284, 0/90/0) plus FILL_PITCH
+(:24, a named -20): the same angle as before, now tied to the camera. Built once per picture, not per frame.
+(a) Proportions, unchanged, pass: inner barrel 345 mm vs a real M4's 363 (-5 %); long/tight 452/345 = 1.31 vs 1.25
+(+5 %); hop unit/barrel 0.151 vs 0.152; bore/OD 6.03/8.9 vs 6.03/9 (+1 %); extension OD = the rifle barrel's (17.2).
+(b) Construction passes: hop_close.png shows the dial teeth, the window, the arm and the nose seated with no gap. The
+attempt-3 close-ups (ext_close, fit_long_close, crown_close, fit_tight_muzzle) still match this geometry.
+Budget: 9,454 and 9,954 of 10,000 (94.5 % and 99.5 %), as the brief asks.
+Failed checks: none.
 Must-fix: none.
+Advisory (not blocking):
+- The coupling's open back (barrels.py:402) is recorded as a known issue in docs/records/BA1.md, but that row is not
+  committed at 6f9022d (only in the working tree). Put it in the records push. On v4_cards_full.png (x 790-850,
+  y 280-330) it reads as a flat grey rear face, which is fine at card size.
 Owner should test in the game:
-- A bot calling a hit at 3-5 m, seen from the side: the arm swings forward and up, not like a salute or an offered hand.
-- The held hand from the front and side: flat, open, wrist in line with the forearm.
-- Crouched near a hit bot: the fingertips (2.07 m) against the HIT! sign's "!" (recorded default).
-- Walking off: the 3-4° sway looks alive; the dark shoulder edge is the KNOWN_ISSUES row.
+- Customise › Barrel: the bucking's centre reads as a dark hole on both cards, inside the red lip.
+- Customise › Barrel: the hop dial's teeth still read under the fill light (not blown out white).
+- Long barrel fitted, aimed: no line or flicker where the flats meet the round shoulder.
+- Long barrel fitted: the extension takes each paint like the rifle's barrel.
+- Tight bore fitted: the crown sits centred in the flash hider.
+- First open of the Barrel tab: no hitch from loading inside/aeg.glb.

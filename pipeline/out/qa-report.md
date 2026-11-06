@@ -1,21 +1,20 @@
-Task: HC1 · QA commit none (nothing committed, as briefed; head 13f0b7c) · Verdict: Pass
+Task: BA1 attempt 3 · QA commit (see git log, "Agent: qa BA1 attempt 3") · Verdict: Pass
 
 Blocking: none.
-Advisory:
-- tests/unit/test_hit_call_arm.gd (_globals, `if bone < 0: continue`): a track whose bone name stops matching is skipped, so that bone sits at rest and the arm at rest (straight, flat hand) would pass the held checks. The tests fail on the old glbs today, so they do measure; a one-line `assert_true(sk.find_bone("Hand_L") >= 0)` per kind would guard a rename. Judgment.
-- The held-pose limits are loose for the hand (30 deg curl allowed, 6 measured) but close for the elbow (20 allowed, 15 measured on HitCall, 14.0 to 15.9 on WalkOff). Fine today; a re-tune of ARM/FOREARM past 5 deg trips it by design.
-- Nothing pins the head clearance the OUT swing exists for (hand not crossing the visor); it is a look-and-see item for the owner (hit0z/hit1z pictures).
+Advisory: unchanged from attempt 2 (ReplicaParts.inside and take cast `instantiate() as Node3D` unchecked; not reachable with the shipped files).
 
-call.py checked (human and robot glbs read back with glb.py, compared with base_*.glb):
-- Bones outside the left arm and fingers: every track equal to the old glb (np.array_equal on times and values), HitCall and WalkOff, both figures; no track added or dropped. Changed tracks: 18 per clip (3 arm + 15 finger), all *_L arm or finger bones.
-- Key counts: HitCall 31 each, unchanged; WalkOff fingers 2 -> 24 keys (the arm's times), arm 24 -> 24.
-- Rotation tracks: unit length to 1e-4, no sign flip between neighbouring keys (dot > 0 everywhere), from the explicit pass after the loop.
-- Curve: De Casteljau with the same share s for both levels; s=0 gives the old hold (RAISE_FROM key equals the old pose, keys before it are the old clip's own), s=1 gives the target, so no pop at RAISE_TO; fingers/hand use the OPEN_BY share and reach the target by frame 7. arm2.py per frame (human HitCall): elbow 51 at f02 falling to 15.0 from f14, wrist 5.2, curl 49 at f00 to 6.1 by f07; no frame-to-frame jump beyond the old clip's own f01 to f02 elbow step (34 to 51, before the raise starts, unchanged old data).
-- Finger parent chain: Thumb1 keeps its root; each other joint turns by its least swing to the bone before it, composed with the straightened parent (parent updated with the STRAIGHTEN-blended `out`, not the fully straight one); rest bone axes are +Y for Index2/3, Thumb2, Pinky2 in both figures, so qrot(.., UP) is right and matches the test's TIP.
-- Joins: HitCall's last key equals WalkOff's first (elbow 15.0, wrist 5.2, curl 6.1 both); WalkOff's sway is sin(2 pi t / span), 0 at both ends, so it loops/joins without a pop.
+Regression checks at f8bea33 (diff 09ce678..f8bea33):
+- Fill light: added in _part_shot only when PART_FILL has the slot (barrel); an optic picture keeps the sun alone (1 light), a barrel picture has 2. Replica pictures go through a different path and never reach it.
+- Cached path: the fill is added before the Shot is stored in _part_shots, and a repeat ask returns the cached Shot early, so no second light (barrel stays at 2 after repeated part_texture and part_extent calls).
+- Freeing: the light is a child of the port, so let_go_parts (queue_free of the port) frees it with the viewport; zero part lights remain after two frames.
+- Barrel models: test_barrel_models still passes against the rebuilt glbs (counts 9,454 and 9,954 under the 10,000 cap, aspect, chamber material, inside split); the parts file stays under the 2 MB guard.
 
-Tests (godot, run from W; gdlint tests/unit/test_hit_call_arm.gd tools/gait_pictures.gd: no problems):
-- 4 files, 45 tests, 45 passing, 898 asserts, 3.3 s wall; test_hit_call_arm.gd alone 2 tests, 404 asserts, 0.46 s; no orphan, leak or error lines.
-- test_hit_call_arm.gd:36 (HitCall) and :56 (WalkOff) · bones posed from the clips' own tracks over the skeleton rest, per 1/30 s, elbow/wrist/curl measured on joint positions · fails on the old glbs: run in a copy of W (scratchpad/wt_old) with base_human.glb and base_robot.glb, 2 of 2 tests fail: HitCall elbow folded 106-130 deg at 0.17-0.33 s, wrist 37 deg at 0.97-1.0 s, hand open and WalkOff held-pose failures (156 elbow, 156 wrist, 156 curl failed asserts, 92 curl on the way up, 108 wrist on the way up).
-- Bone placing in the test matches call.py's pose maths (Basis from the track quaternion times the rest scale, parent chain by bone index): same readings as arm2.py to the degree on spot frames.
-Not tested: how the arm looks (needs a display; pictures were filmed by the worker); head clearance in motion.
+Test added:
+- tests/unit/test_ba1_qa.gd:136 · barrel picture has exactly two DirectionalLight3D, optic one, a repeated ask adds none, none left after let_go_parts · fails if PART_FILL leaks to the optic slot (2 lights), if the fill is added after the cache check (3 lights), or if the light is parented outside the port (survives let_go). Checked by reading the code, not by stubbing it out.
+
+Run: test_ba1_qa, test_barrel_models, test_customise_parts: 41 of 41 pass, 319 asserts.
+I did not run tools/check.sh (already running) or the smoke test.
+
+Not tested (needs a display): how the fill-lit barrel cards look, the shoulder where the flats meet, and the thread and O-ring detail. These go to the owner's list.
+
+Pass
