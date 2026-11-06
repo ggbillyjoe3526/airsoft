@@ -11,7 +11,7 @@ Every open bug, limit and known gap in the game, so nobody re-reports or re-meas
 
 | Area | Issue | Class | Found |
 |---|---|---|---|
-| Art | The AEG's parts file (`replicaParts/aeg.glb`) is 2.42 MB with the attachments' detail (BL8b) and the separate magazines (MAG1), about 2.55 MB once the barrels (BA1) land, under its 3 MiB cap (raised from 2 in BL8b): the vertical grip stopped at 85 % of its triangle budget under the old cap; a quantised export would cut every parts file by about half, if file size ever matters | can wait | 2026-11-05 |
+| Art | The AEG's parts file (`replicaParts/aeg.glb`) is 2.57 MB with the attachments' detail (BL8b), the separate magazines (MAG1) and the barrels (BA1), under its 3 MiB cap (raised from 2 in BL8b): the vertical grip stopped at 85 % of its triangle budget under the old cap; a quantised export would cut every parts file by about half, if file size ever matters | can wait | 2026-11-05 |
 | Art | The figure's sleeve edge shows a jagged line where it meets the glove's cuff, seen only close up (BL10) | can wait | 2026-11-05 |
 | Play | The Sniper Rifle's Fire clip (since BL5 the bolt drawn back at 0.48 s, home at 0.72 s and turned down at 0.88 s) and cocking sound show the rifle cocked about 0.9 s after a shot, but the rifle is ready at 1.25 s (M130) to 1.39 s (M150); a click after the handle is home now fires as the cycle ends (BP3). The cocking is the owner's recorded pistol slide since AU2, timed to the clip; re-time with the owner's model | playtest | 2026-11-03 |
 | Play | The bolt's cocking sound plays to its end after a switch to the pistol or a hit mid-cycle (BP3) | can wait | 2026-11-03 |

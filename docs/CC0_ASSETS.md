@@ -130,7 +130,9 @@ A replica's file is its model in the hands, on the menus' pictures and on the fi
   `magazine_hiCap`, `muzzle_silencer` …), in the replica's space where it fits; a child `<name>_Figure` is ignored. Two
   child empties are read (RM8): an optic's `<name>_SightLine` on its sight line (aimed, the replica is raised so it
   runs through the eye) and a torch's `<name>_UnderLaser`, where the torch moves while the laser is fitted too (both
-  clip to the same rail).
+  clip to the same rail). What a part puts inside the replica (a barrel's inner barrel and hop-up unit, BA1) is
+  `<name>_Inside` in `replicaParts/inside/<id>.glb`, placed as its part: only the part's own picture draws it, so a fit
+  never loads it. It counts toward the part's triangle budget.
 - **Materials,** by name: `CyberSlab`, `CyberFrame`, `CyberLine`, `CyberCore`, `CyberMetal`, or a replica material's own
   name (`polymer`, `furniture`, `detail`, `metal`, `rubber`, `stipple`, `accent`). Plain colours: the game draws in its
   own materials, so Realistic colours, the glow and the High finish apply. No textures needed.
