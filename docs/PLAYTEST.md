@@ -1319,6 +1319,16 @@ style most of its photos show.
   torch on the Cyber Pistol and on the AEG's right side. At night the beam leaves the torch's head.
 - [ ] **Customise and paints:** each part in each paint; the Loadout and Armory pictures show them sharp and to scale.
 
+## The attachments' detail and your three fixes (BL8b)
+
+- [ ] **Laser:** one closed unit under the GBB Pistol's rail, the red emitter flush in its front face, no gap under
+  the frame; the beam leaves the emitter.
+- [ ] **2x scope:** as low as it goes (the axis at 26 mm) on the AEG and the Sniper Rifle; the iron sights come
+  off with it fitted; aimed, the view fills the eyepiece with nothing of the replica across its lower edge.
+- [ ] **Variable scope:** 10% smaller; aimed and wheeled 2x to 6x, the view through the glass looks as before.
+- [ ] **Detail up close:** the vertical grip's stipple, the angled grip's serrations, the silencers' knurling, the
+  torch's reflector in first person and in Customise.
+
 ## The BB model (BM1)
 
 Every BB in flight is now a proper Blender model, round from every side instead of the old eight-sided ball.

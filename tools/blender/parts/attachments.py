@@ -14,7 +14,7 @@ the style most of its photos show, unbranded (no logos, words or trademarked sha
 - `grip_vertical`: a short stubby vertical grip with a textured panel and ribbed sides (vertical_grip).
 - `grip_angled`: a swept angled handstop (angled_grip: the two kinesthetic grips), grooved down its front.
 - `muzzle_silencer`: a plain tube with rounded ends (silencer); the pistol's slimmer, on a knurled thread adaptor.
-- `laser_redLaser`: a small knurled laser module in a rail block (red_laser).
+- `laser_redLaser`: a closed laser module under the rail, its emitter flush in the front face (red_laser).
 - `light_weaponTorch`: a compact pistol light (weapon_torch: the four X300-style photos): a bezelled head, a squared
   body under a rail clamp with a cross latch, rocker paddles at the back.
 
@@ -229,7 +229,8 @@ def face_axis(faces: list, x: float, z: float) -> None:
 
 
 def spline(points: list, per: int = 4) -> list:
-    """A Catmull-Rom curve through (y, z) points, `per` steps between each pair, the ends kept."""
+    """A Catmull-Rom curve through points ((y, z), or longer tuples), `per` steps between each pair, the ends
+    kept."""
     out = []
     pts = [points[0]] + list(points) + [points[-1]]
     for i in range(1, len(pts) - 2):
@@ -238,7 +239,7 @@ def spline(points: list, per: int = 4) -> list:
             t = s / per
             out.append(tuple(0.5 * (2 * p1[c] + (-p0[c] + p2[c]) * t
                                     + (2 * p0[c] - 5 * p1[c] + 4 * p2[c] - p3[c]) * t * t
-                                    + (-p0[c] + 3 * p1[c] - 3 * p2[c] + p3[c]) * t ** 3) for c in (0, 1)))
+                                    + (-p0[c] + 3 * p1[c] - 3 * p2[c] + p3[c]) * t ** 3) for c in range(len(p1))))
     out.append(tuple(points[-1]))
     return out
 
@@ -346,7 +347,7 @@ def rd_window(grow: float = 0.0) -> list:
     zc = RD_SIGHT_LINE - RD_RISER_TOP
     b0, t0 = zc - 7.6 - grow, zc + 7.9 + grow
     return hs.fillet([(-11.0 - grow, b0, 1.6), (11.0 + grow, b0, 1.6), (9.4 + grow, t0, 3.6),
-                      (-9.4 - grow, t0, 3.6)], 4)
+                      (-9.4 - grow, t0, 3.6)], 8)
 
 
 def build_red_dot() -> bpy.types.Object:
@@ -368,7 +369,7 @@ def build_red_dot() -> bpy.types.Object:
                               Matrix.Rotation(math.radians(-28), 4, "X") @ Matrix.Translation(Vector(mm(0, 22, -4)))),
                    box_cutter((-20, 20, -2), (20, 40, 30), Matrix.Translation(Vector(mm(0, 20, 4))) @
                               Matrix.Rotation(math.radians(28), 4, "X") @ Matrix.Translation(Vector(mm(0, -20, -4))))])
-    hs.finish(riser, bevel=0.0004)
+    hs.finish(riser, bevel=0.0004, segments=3)
     hw = hs.Builder("rd_hardware", ["Metal", "Rubber"])
     hex_x(hw, -13.6, -16.4, -1.0, -1.6, 3.3, "Metal")
     hex_x(hw, -16.45, -16.5, -1.0, -1.6, 1.0, "Rubber")
@@ -382,11 +383,11 @@ def build_red_dot() -> bpy.types.Object:
     hh, dk = RD_HOOD, RD_DECK
     side = hs.fillet([(RD_REAR, 0.0, 0.6), (RD_FRONT, 0.0, 0.6), (RD_FRONT, 2.5, 0.0), (RD_FRONT - 4.8, hh - 2.0, 2.5),
                       (RD_FRONT - 7.0, hh, 2.0), (5.0, hh, 4.0), (1.0, dk + 2.0, 3.0), (-5.0, dk, 2.0),
-                      (-21.0, dk, 1.6), (RD_REAR, dk - 3.0, 1.0)], 4)
+                      (-21.0, dk, 1.6), (RD_REAR, dk - 3.0, 1.0)], 8)
     sb.prism(mmp([(y, z0 + z) for y, z in side]), "x", -RD_HALF * MM, RD_HALF * MM, "Detail")
     sight = sb.build()
     front = hs.fillet([(-RD_HALF, -1.0, 0.0), (RD_HALF, -1.0, 0.0), (RD_HALF, 12.0, 3.0), (11.4, hh, 7.0),
-                       (-11.4, hh, 7.0), (-RD_HALF, 12.0, 3.0)], 6)
+                       (-11.4, hh, 7.0), (-RD_HALF, 12.0, 3.0)], 10)
     hs.cut(sight, [prism_cutter([(x, z0 + z) for x, z in front], "y", RD_REAR - 2, RD_FRONT + 2)], "INTERSECT")
     win = [(x, z0 + z) for x, z in rd_window()]
     hs.cut(sight, [prism_cutter(win, "y", -3.0, RD_FRONT + 3.0),
@@ -400,7 +401,7 @@ def build_red_dot() -> bpy.types.Object:
            + [box_cutter((s * RD_HALF - 0.7, -0.45, -8), (s * RD_HALF + 2, 0.45, 8),
                          Matrix.Translation(Vector(mm(0, y, z0 + 5.5))) @ Matrix.Rotation(math.radians(40), 4, "X"))
               for s in (-1.0, 1.0) for y in (-18.0, -14.5)])
-    hs.finish(sight, bevel=0.0005)
+    hs.finish(sight, bevel=0.0005, segments=3)
 
     db = hs.Builder("rd_controls", ["Detail", "Metal", "Rubber", "LensDot"])
     # Elevation on top of the rear deck, windage on the right, the battery cap on the left (nothing stands on the
@@ -415,7 +416,7 @@ def build_red_dot() -> bpy.types.Object:
                             (7.0, z0 + 12.0, 2.0)], 3)), "x", (-RD_HALF + 0.3) * MM, (-RD_HALF - 0.6) * MM, "Detail")
     db.box(mm(-RD_HALF - 0.66, 12.6, z0 + 4.4), mm(-RD_HALF - 0.6, 13.4, z0 + 9.8), "Rubber")
     controls = db.build()
-    hs.finish(controls, bevel=0.0002, segments=1, angle=math.radians(50.0))
+    hs.finish(controls, bevel=0.0002, segments=2, angle=math.radians(50.0))
 
     gb = hs.Builder("rd_glass", ["LensDot"])
     f = gb.prism(mmp([(x, z0 + z) for x, z in rd_window(0.8)]), "y", -0.6 * MM, 0.6 * MM, "LensDot")
@@ -439,7 +440,11 @@ def build_red_dot() -> bpy.types.Object:
 
 # The magnifier: its axis over the rail, its body (front and back of the flat-topped section, the round nose and the
 # eyepiece), the hinged mount under it (mm).
-S2_AXIS = 46.0
+# The axis stands 20 mm lower than the first build's (the owner, 2026-11-05: "less tall", then "as much as possible"
+# with nothing in the way of the glass): the belly 5.6 mm over the rail, resting on its clamp on a thin saddle, as low
+# as the mount goes. Both rifles' iron sights come off under any optic (IronSights), so only the replica's own body
+# could come between the eye and the glass: with the AEG's smaller irons (GS2) nothing does down to a 16 mm axis.
+S2_AXIS = 26.0
 S2_R = 20.4
 S2_BACK, S2_BODY_FRONT, S2_FRONT = -30.0, 17.0, 26.0
 S2_EYE_GLASS = -28.6
@@ -450,18 +455,18 @@ def s2_section(axis: float) -> list:
     """The body's section (x, z mm): a flat top, chamfered shoulders, flat sides and a round belly."""
     top, shoulder, side_lo = 19.6, 10.5, -3.0
     pts = [(11.0, axis + top, 2.0), (S2_R - 0.4, axis + shoulder, 2.0), (S2_R - 0.4, axis + side_lo, 3.0)]
-    for i in range(1, 12):
-        a = math.radians(-12.0 - 156.0 * i / 12)
+    for i in range(1, 24):
+        a = math.radians(-12.0 - 156.0 * i / 24)
         pts.append((math.cos(a) * S2_R, axis + math.sin(a) * S2_R, 0.0))
     pts += [(-(S2_R - 0.4), axis + side_lo, 3.0), (-(S2_R - 0.4), axis + shoulder, 2.0), (-11.0, axis + top, 2.0)]
-    return hs.fillet(pts, 3)
+    return hs.fillet(pts, 6)
 
 
 def turret(b: hs.Builder, p: hs.Builder, axis: str, base: float, pos: tuple, sign: float, mat: str) -> None:
     """A capped adjustment turret standing out of a face: a boss, a knurled cap, a slotted top (mm). `axis` is the
     turret's axis ("z" up or "x" sideways), `base` the face it stands on, `pos` its place on that face, `sign` its
     direction along the axis. Its knurling and slot go in `p`, which isn't bevelled."""
-    def ring(a0: float, a1: float, r: float, seg: int = 28) -> None:
+    def ring(a0: float, a1: float, r: float, seg: int = 40) -> None:
         lo, hi = base + sign * a0, base + sign * a1
         if axis == "z":
             disc_z(b, pos[0], pos[1], min(lo, hi), max(lo, hi), r, mat, seg, 0.3)
@@ -470,9 +475,9 @@ def turret(b: hs.Builder, p: hs.Builder, axis: str, base: float, pos: tuple, sig
     ring(-1.0, 1.8, 9.0)
     lo, hi = base + sign * 1.8, base + sign * 7.2
     if axis == "z":
-        ridged(p, min(lo, hi), max(lo, hi), 6.9, 7.4, 24, mat, x=pos[0], z=pos[1], axis="z")
+        ridged(p, min(lo, hi), max(lo, hi), 6.95, 7.35, 40, mat, x=pos[0], z=pos[1], axis="z")
     else:
-        ridged(p, min(lo, hi), max(lo, hi), 6.9, 7.4, 24, mat, x=pos[0], z=pos[1], axis="x")
+        ridged(p, min(lo, hi), max(lo, hi), 6.95, 7.35, 40, mat, x=pos[0], z=pos[1], axis="x")
     ring(7.0, 8.4, 6.6)
     if axis == "z":
         slot_z(p, pos[0], pos[1], base + sign * 8.4, 9.0, 1.0, 0.0, "Rubber")
@@ -493,49 +498,47 @@ def build_scope_2x() -> bpy.types.Object:
                              Matrix.Translation(Vector(mm(0, S2_BACK + 7, h + 18.8))) @
                              Matrix.Rotation(math.radians(20), 4, "X") @
                              Matrix.Translation(-Vector(mm(0, S2_BACK + 7, h + 18.8))))])
-    hs.finish(body, bevel=0.0006)
+    hs.finish(body, bevel=0.0006, segments=3)
     eb = hs.Builder("s2_ends", ["Detail", "Metal", "Rubber", "Lens"])
     pb = hs.Builder("s2_plain", ["Detail", "Rubber", "Lens"])
     # The round nose and its lens, the eyepiece and its lens, each in a dark retaining ring.
     lathe_y(eb, [(S2_BODY_FRONT - 0.5, S2_R - 0.6), (S2_FRONT - 3.0, S2_R - 0.6), (S2_FRONT - 2.2, S2_R),
-                 (S2_FRONT - 0.6, S2_R), (S2_FRONT, S2_R - 0.6)], "Detail", 40, z=h, cap=False)
+                 (S2_FRONT - 0.6, S2_R), (S2_FRONT, S2_R - 0.6)], "Detail", 64, z=h, cap=False)
     # The objective sits back in its bezel behind a chamfered lip.
     tube_y(pb, [(S2_FRONT, S2_R - 0.6), (S2_FRONT + 0.6, S2_R - 1.4)], [(S2_FRONT, 17.4), (S2_FRONT + 0.6, 17.4)],
-           "Rubber", 40, z=h)
-    face_axis(lathe_y(pb, [(S2_FRONT + 0.6, 17.4), (S2_FRONT - 1.6, 15.2), (S2_FRONT - 4.0, 15.2)], "Rubber", 40, z=h,
+           "Rubber", 64, z=h)
+    face_axis(lathe_y(pb, [(S2_FRONT + 0.6, 17.4), (S2_FRONT - 1.6, 15.2), (S2_FRONT - 4.0, 15.2)], "Rubber", 64, z=h,
                       cap=False), 0.0, h)
-    lens(pb, S2_FRONT - 4.0, 15.2, "Lens", 40, z=h, facing=1.0)
+    lens(pb, S2_FRONT - 4.0, 15.2, "Lens", 64, z=h, facing=1.0)
     lathe_y(eb, [(S2_BACK + 4.5, S2_R - 0.6), (S2_BACK + 1.6, S2_R - 0.6), (S2_BACK + 1.0, S2_R - 2.2),
-                 (S2_BACK, S2_R - 2.2), (S2_BACK - 0.6, S2_R - 2.8)], "Detail", 40, z=h, cap=False)
+                 (S2_BACK, S2_R - 2.2), (S2_BACK - 0.6, S2_R - 2.8)], "Detail", 64, z=h, cap=False)
     tube_y(pb, [(S2_BACK - 0.6, S2_R - 2.8), (S2_BACK - 1.2, S2_R - 3.4)],
-           [(S2_BACK - 0.6, 15.8), (S2_BACK - 1.2, 15.8)], "Rubber", 40, z=h)
-    lens(pb, S2_EYE_GLASS, 15.9, "Lens", 40, z=h, facing=-1.0)
+           [(S2_BACK - 0.6, 15.8), (S2_BACK - 1.2, 15.8)], "Rubber", 64, z=h)
+    lens(pb, S2_EYE_GLASS, 15.9, "Lens", 64, z=h, facing=-1.0)
     # Turrets at the back: elevation on top, windage on the left; the round cap on the left flank.
     turret(eb, pb, "z", h + 19.4, (0.0, -17.5), 1.0, "Detail")
     turret(eb, pb, "x", -(S2_R - 0.6), (-17.5, h + 2.0), -1.0, "Detail")
     disc_x(eb, -(S2_R - 1.2), -(S2_R + 1.4), 3.5, h - 6.0, 7.6, "Detail", 36, 0.6)
     ends = eb.build()
-    hs.finish(ends, bevel=0.0003, segments=1, angle=math.radians(50.0))
+    hs.finish(ends, bevel=0.0003, segments=2, angle=math.radians(50.0))
     plain = pb.build()
     hs.finish(plain, bevel=0.0)
 
-    # The hinged mount: a rail clamp, the lower block, the hinge knuckle along the bore (left), the upper block and
-    # the saddle the body sits in.
+    # The hinged mount, as low as it goes: a rail clamp, a thin base plate, the hinge knuckle along the bore (left,
+    # tucked under the body's flank) and the saddle the body sits in.
     mb = hs.Builder("s2_mount", ["Detail", "Metal", "Rubber"])
     rail_clamp(mb, PICATINNY, -13.0, 17.0, 5.0, 3.2, "Detail")
-    mb.prism(mmp(hs.fillet([(-12.6, 4.5, 0.0), (12.6, 4.5, 0.0), (12.6, 15.0, 1.5), (-12.6, 15.0, 1.5)], 2)), "y",
+    mb.prism(mmp(hs.fillet([(-12.6, 4.5, 0.0), (12.6, 4.5, 0.0), (12.6, 6.6, 0.8), (-12.6, 6.6, 0.8)], 2)), "y",
              -12.0 * MM, 16.0 * MM, "Detail")
-    mb.prism(mmp(hs.fillet([(-12.6, 15.0, 1.0), (12.6, 15.0, 1.0), (12.6, 22.0, 1.0), (-12.6, 22.0, 1.0)], 2)), "y",
-             -11.0 * MM, 15.0 * MM, "Detail")
-    saddle = [(-13.0, 21.0), (13.0, 21.0), (13.0, h - 14.0)] + \
+    saddle = [(-13.0, 4.5), (13.0, 4.5), (13.0, h - 14.0)] + \
              [(math.cos(math.radians(-38.0 - 104.0 * i / 8)) * (S2_R + 0.2),
                h + math.sin(math.radians(-38.0 - 104.0 * i / 8)) * (S2_R + 0.2)) for i in range(9)] + \
              [(-13.0, h - 14.0)]
     mb.prism(mmp(saddle), "y", -11.0 * MM, 15.0 * MM, "Detail")
-    cyl(mb, -11.0, 15.0, 4.2, "Detail", 20, x=-12.8, z=18.5, chamfer=0.6)
-    cyl(mb, -11.6, -11.0, 2.0, "Metal", 14, x=-12.8, z=18.5)
-    cyl(mb, 15.0, 15.6, 2.0, "Metal", 14, x=-12.8, z=18.5)
-    disc_x(mb, 12.4, 13.4, 2.0, 10.0, 1.8, "Metal", 14, 0.3)
+    cyl(mb, -11.0, 15.0, 3.0, "Detail", 24, x=-14.0, z=7.6, chamfer=0.5)
+    cyl(mb, -11.6, -11.0, 1.5, "Metal", 16, x=-14.0, z=7.6)
+    cyl(mb, 15.0, 15.6, 1.5, "Metal", 16, x=-14.0, z=7.6)
+    disc_x(mb, 12.4, 13.4, 2.0, 8.6, 1.4, "Metal", 16, 0.3)
     hex_x(mb, -15.8, -13.4, 2.0, -1.8, 3.2, "Metal")
     disc_x(mb, 15.6, 13.6, 2.0, -1.8, 3.4, "Metal", 18, 0.4)
     mount = mb.build()
@@ -562,6 +565,25 @@ SV_HOUSING = (-34.0, 15.0)
 SV_BOX = (33.0, 80.0)
 SV_BOX_HW, SV_BOX_LO, SV_BOX_HI = 20.5, 14.5, 52.5
 SV_GLASS_R = 12.0
+# The objective's bore: inside the housing's belly where it rises to the front (17.4 mm up at the glass, the axis 32.6),
+# so neither the bore nor the glass's ring breaks through underneath.
+SV_BORE_R = 14.6
+# The scope is built at the photo's size, then shrunk by SV_SCALE (the owner, 2026-11-05: "a little smaller") towards
+# the rail's face (SV_SCALE_Z, mm up), so it sits lower on its neck as on the photo; the clamp and neck are built apart,
+# only shortened by it, so they keep the rail's section and the photo's clamp-to-scope length.
+SV_SCALE, SV_SCALE_Z = 0.9, 0.0
+
+
+def sv_shrink(ob: bpy.types.Object) -> None:
+    """Shrinks a mesh by SV_SCALE towards the rail's face at SV_SCALE_Z."""
+    z0 = SV_SCALE_Z * MM
+    for v in ob.data.vertices:
+        v.co = Vector((v.co.x * SV_SCALE, v.co.y * SV_SCALE, z0 + (v.co.z - z0) * SV_SCALE))
+
+
+def sv_scaled_z(z: float) -> float:
+    """Where a height z (mm) over the clamp ends up once the scope is shrunk."""
+    return SV_SCALE_Z + (z - SV_SCALE_Z) * SV_SCALE
 
 
 def ring_super(n_pts: int, y: float, hw: float, hh: float, cz: float, n: float) -> list:
@@ -603,7 +625,7 @@ def build_scope_var() -> bpy.types.Object:
     slant = math.atan2(21.5 - SV_BOX_LO, SV_BOX[1] - 46.0)
     hs.cut(box, [box_cutter((-40, 0, -30), (40, 60, 0), Matrix.Translation(Vector(mm(0, 46.0, SV_BOX_LO + 0.01))) @
                             Matrix.Rotation(slant, 4, "X")),
-                 cutter("bore", lambda b: cyl(b, 60.0, SV_BOX[1] + 5.0, 17.0, "Detail", 32, z=h))])
+                 cutter("bore", lambda b: cyl(b, 60.0, SV_BOX[1] + 5.0, SV_BORE_R, "Detail", 32, z=h))])
     hs.finish(box, bevel=0.0005)
 
     hb = hs.Builder("sv_housing", ["Detail", "Metal", "Rubber"])
@@ -646,8 +668,9 @@ def build_scope_var() -> bpy.types.Object:
     pb.tube([(-66.0 * MM, 15.4 * MM), (-65.0 * MM, 15.4 * MM)], [(-66.0 * MM, 12.6 * MM), (-65.0 * MM, 12.6 * MM)],
             "Rubber", 40, centre=(0.0, 0.0, h * MM))
     lens(pb, SV_EYE_GLASS, 12.8, "Lens", 40, z=h, facing=-1.0)
-    lens(pb, 62.0, 17.2, "Lens", 40, z=h, facing=1.0)
-    pb.tube([(62.0 * MM, 17.2 * MM), (63.5 * MM, 17.2 * MM)], [(62.0 * MM, 15.0 * MM), (63.5 * MM, 15.0 * MM)],
+    lens(pb, 62.0, SV_BORE_R + 0.1, "Lens", 40, z=h, facing=1.0)
+    pb.tube([(62.0 * MM, (SV_BORE_R + 0.1) * MM), (63.5 * MM, (SV_BORE_R + 0.1) * MM)],
+            [(62.0 * MM, (SV_BORE_R - 2.0) * MM), (63.5 * MM, (SV_BORE_R - 2.0) * MM)],
             "Rubber", 40, centre=(0.0, 0.0, h * MM))
     # Rails on the objective housing: the top one carrying the fibre front sight, one each side.
     db.box(mm(-8.0, SV_BOX[0] + 2.0, SV_BOX_HI - 1.5), mm(8.0, SV_BOX[1] - 0.6, SV_BOX_HI + 2.6), "Detail")
@@ -677,28 +700,42 @@ def build_scope_var() -> bpy.types.Object:
     db.prism(mmp(leaf), "y", -62.0 * MM, -59.0 * MM, "Detail")
     disc_x(db, 9.0, 10.4, -50.5, 60.0, 3.0, "Metal", 18, 0.3)
     hex_x(pb, 10.4, 10.46, -50.5, 60.0, 1.2, "Rubber")
-    # The mount: a two-bolt clamp, the neck up into the housing.
-    rail_clamp(db, PICATINNY, -31.7, 31.7, 8.7, 3.2, "Detail")
-    db.prism(mmp(hs.fillet([(-12.0, 8.0, 0.0), (12.0, 8.0, 0.0), (12.0, 18.0, 0.0), (-12.0, 18.0, 0.0)], 1)),
-             "y", -30.0 * MM, 14.0 * MM, "Detail")
-    for y in (-19.3, 20.0):
-        disc_x(db, 13.4, 16.2, y, 2.6, 5.0, "Metal", 24, 0.6)
-        hex_x(pb, 16.2, 16.26, y, 2.6, 1.8, "Rubber")
-        hex_x(db, -13.4, -16.4, y, 2.6, 4.6, "Metal")
     dials = db.build()
     hs.finish(dials, bevel=0.0003, segments=1, angle=math.radians(50.0))
     plain = pb.build()
     hs.finish(plain, bevel=0.0)
 
-    ob = hs.join("optic_scopeVar", [box, housing, dials, plain])
+    scope = hs.join("sv_scope", [box, housing, dials, plain])
+    sv_shrink(scope)
+    # The mount, apart from the shrink: a two-bolt clamp, the neck up into the housing; its length along the rail
+    # shortened with the scope, its section and bolts the rail's size.
+    k = SV_SCALE
+    mb = hs.Builder("sv_mount", ["Detail", "Metal", "Rubber"])
+    nb = hs.Builder("sv_mount_plain", ["Rubber"])
+    rail_clamp(mb, PICATINNY, -31.7 * k, 31.7 * k, 8.7, 3.2, "Detail")
+    mb.prism(mmp(hs.fillet([(-12.0, 8.0, 0.0), (12.0, 8.0, 0.0), (12.0, 18.0, 0.0), (-12.0, 18.0, 0.0)], 1)),
+             "y", -30.0 * k * MM, 14.0 * k * MM, "Detail")
+    for y in (-19.3 * k, 20.0 * k):
+        disc_x(mb, 13.4, 16.2, y, 2.6, 5.0, "Metal", 24, 0.6)
+        hex_x(nb, 16.2, 16.26, y, 2.6, 1.8, "Rubber")
+        hex_x(mb, -13.4, -16.4, y, 2.6, 4.6, "Metal")
+    mount = mb.build()
+    hs.finish(mount, bevel=0.0003, segments=1, angle=math.radians(50.0))
+    mount_plain = nb.build()
+    hs.finish(mount_plain, bevel=0.0)
+    ob = hs.join("optic_scopeVar", [scope, mount, mount_plain])
     fig = hs.Builder("optic_scopeVar_Figure", ["Detail"])
     fig.lathe([(SV_EYE_BACK * MM, 0.0), (SV_EYE_BACK * MM, 16.0 * MM), (24.0 * MM, 16.0 * MM),
                (SV_BOX[0] * MM, SV_BOX_HW * MM), (SV_BOX[1] * MM, SV_BOX_HW * MM), (SV_BOX[1] * MM, 0.0)],
               "Detail", 8, centre=(0.0, 0.0, h * MM))
-    fig.box(mm(-12.6, -31.7, 0.0), mm(12.6, 31.7, 18.0), "Detail")
     fig.box(mm(-8.0, -32.0, 46.0), mm(8.0, -6.0, 62.0), "Detail")
-    fig.build().parent = ob
-    child_empty("optic_scopeVar_SightLine", mm(0.0, 0.0, h), ob)
+    fig_ob = fig.build()
+    sv_shrink(fig_ob)
+    fig_mount = hs.Builder("optic_scopeVar_FigureMount", ["Detail"])
+    fig_mount.box(mm(-12.6, -31.7 * k, 0.0), mm(12.6, 31.7 * k, 18.0), "Detail")
+    fig_ob = hs.join("optic_scopeVar_Figure", [fig_ob, fig_mount.build()])
+    fig_ob.parent = ob
+    child_empty("optic_scopeVar_SightLine", mm(0.0, 0.0, sv_scaled_z(h)), ob)
     return ob
 
 
@@ -710,14 +747,14 @@ def build_scope_var() -> bpy.types.Object:
 AG_SWEEP = [(-42.6, -5.4), (-38.0, -5.9), (-30.0, -7.2), (-18.0, -9.6), (-8.0, -13.4), (0.0, -19.0), (5.0, -26.0),
             (7.0, -33.0), (6.4, -39.5), (4.6, -44.0)]
 AG_SIDE = ([(42.0, 0.0, 0.0), (-42.7, 0.0, 0.0), (-42.6, -5.4, 1.0)] +
-           [(y, z, 0.0) for y, z in spline(AG_SWEEP[1:], 3)] +
+           [(y, z, 0.0) for y, z in spline(AG_SWEEP[1:], 6)] +
            [(3.4, -46.8, 2.0), (16.5, -48.0, 6.0), (28.0, -46.6, 4.0), (30.5, -41.0, 0.0), (33.0, -24.3, 0.0),
             (35.2, -9.0, 0.0), (40.6, -2.1, 1.5)])
 AG_HALF = 10.5
 # The side pocket, following the swept face and the raked front, and the X across it (each bar's two ends).
 AG_POCKET = [(35.6, -7.0, 1.5), (6.0, -9.5, 1.5), (9.5, -22.0, 4.0), (11.0, -30.0, 3.0), (10.8, -42.0, 2.0),
              (24.8, -43.2, 2.0), (27.2, -40.0, 2.0), (31.4, -20.0, 2.0)]
-AG_X = [((33.6, -8.0), (12.6, -42.0)), ((7.4, -10.0), (26.0, -42.0))]
+AG_X = [((32.8, -9.6), (12.6, -41.6)), ((8.2, -11.4), (25.6, -41.6))]
 
 
 def bar(p0: tuple, p1: tuple, width: float) -> list:
@@ -729,9 +766,9 @@ def bar(p0: tuple, p1: tuple, width: float) -> list:
 
 
 def sweep_ridges(b: hs.Builder, path: list, count: int, half: float, height: float, mat: str,
-                 inward: float = 1.0) -> None:
+                 inward: float = 1.0, w: float = 0.75) -> None:
     """`count` small ridges spaced evenly along a side path (y, z mm), each across the grip (x +-half), standing
-    `height` off the face along its normal (the side `inward` says, 1 to the path's left)."""
+    `height` off the face along its normal (the side `inward` says, 1 to the path's left), each 2 w along it."""
     seg = []
     total = 0.0
     for (ya, za), (yb, zb) in zip(path, path[1:]):
@@ -746,7 +783,6 @@ def sweep_ridges(b: hs.Builder, path: list, count: int, half: float, height: flo
                 y, z = ya + (yb - ya) * t, za + (zb - za) * t
                 ty, tz = (yb - ya) / d, (zb - za) / d
                 ny, nz = -tz * inward, ty * inward
-                w = 0.75
                 pts = [(y - ty * w, z - tz * w), (y + ty * w, z + tz * w),
                        (y + ty * w * 0.5 + ny * height, z + tz * w * 0.5 + nz * height),
                        (y - ty * w * 0.5 + ny * height, z - tz * w * 0.5 + nz * height)]
@@ -757,25 +793,28 @@ def sweep_ridges(b: hs.Builder, path: list, count: int, half: float, height: flo
 
 def build_grip_angled() -> bpy.types.Object:
     gb = hs.Builder("ag_body", ["Furniture"])
-    gb.prism(mmp(hs.fillet(AG_SIDE, 4)), "x", -AG_HALF * MM, AG_HALF * MM, "Furniture")
+    gb.prism(mmp(hs.fillet(AG_SIDE, 10)), "x", -AG_HALF * MM, AG_HALF * MM, "Furniture")
     body = gb.build()
-    pockets = [prism_cutter(hs.fillet(AG_POCKET, 3), "x", s * (AG_HALF - 1.3), s * (AG_HALF + 2.0))
+    pockets = [prism_cutter(hs.fillet(AG_POCKET, 6), "x", s * (AG_HALF - 1.3), s * (AG_HALF + 2.0))
                for s in (-1.0, 1.0)]
     hs.cut(body, pockets)
-    hs.finish(body, bevel=0.0009, segments=2)
+    hs.finish(body, bevel=0.0009, segments=4)
     rb = hs.Builder("ag_ribs", ["Furniture", "Metal", "Rubber"])
     # The X in each pocket, the swept face's fine serrations and the raked front's teeth, the rail clamp and its bar.
-    sweep_ridges(rb, spline(AG_SWEEP[1:-2], 3), 30, AG_HALF - 1.2, 0.8, "Furniture", inward=1.0)
-    sweep_ridges(rb, [(30.6, -40.5), (33.0, -24.3), (35.2, -9.0), (36.0, -5.5)], 13, AG_HALF - 1.0, 1.3, "Furniture",
-                 inward=1.0)
+    sweep_ridges(rb, spline(AG_SWEEP[3:], 6), 30, AG_HALF - 1.2, 1.4, "Furniture", inward=-1.0, w=0.6)
+    sweep_ridges(rb, [(30.6, -40.5), (33.0, -24.3), (35.2, -9.0), (36.0, -5.5)], 16, AG_HALF - 1.0, 1.3, "Furniture",
+                 inward=-1.0)
+    ribs = rb.build()
+    hs.finish(ribs, bevel=0.0003, segments=1, angle=math.radians(50.0))
+    rb = hs.Builder("ag_clamp", ["Furniture", "Metal", "Rubber"])
     rail_clamp_under(rb, PICATINNY, -8.0, 38.0, -3.2, 1.8, "Furniture")
     rb.prism(mmp(hs.fillet([(-42.6, 0.0, 0.0), (-36.0, 0.0, 0.0), (-36.0, -3.0, 0.6), (-42.6, -3.0, 0.6)], 2)), "x",
              -8.0 * MM, 8.0 * MM, "Furniture")
     rb.prism(mmp([(-14.2, 1.2), (-12.6, 1.2), (-12.6, -4.2), (-14.2, -3.6)]), "y", 0.0 * MM, 28.0 * MM, "Metal")
     hex_x(rb, -14.2, -14.26, 14.0, -1.6, 1.4, "Rubber")
-    disc_x(rb, 12.6, 14.0, 14.0, -1.6, 2.6, "Metal", 16, 0.3)
-    ribs = rb.build()
-    hs.finish(ribs, bevel=0.0003, segments=1, angle=math.radians(50.0))
+    disc_x(rb, 12.6, 14.0, 14.0, -1.6, 2.6, "Metal", 32, 0.3)
+    clamp = rb.build()
+    hs.finish(clamp, bevel=0.0004, segments=2, angle=math.radians(50.0))
     xb = hs.Builder("ag_x", ["Furniture"])
     for side in (-1.0, 1.0):
         xb.prism(mmp(bar(*AG_X[0], 3.0)), "x", side * (AG_HALF - 1.4) * MM, side * (AG_HALF - 0.35) * MM, "Furniture")
@@ -783,8 +822,8 @@ def build_grip_angled() -> bpy.types.Object:
     hs.cut(cross, [cutter("ag_x2", lambda b: [b.prism(mmp(bar(*AG_X[1], 3.0)), "x", side * (AG_HALF - 1.4) * MM,
                                                       side * (AG_HALF - 0.35) * MM, "Furniture")
                                              for side in (-1.0, 1.0)])], "UNION")
-    hs.finish(cross, bevel=0.0003, segments=1, angle=math.radians(50.0))
-    ob = hs.join("grip_angled", [body, ribs, cross])
+    hs.finish(cross, bevel=0.0004, segments=3, angle=math.radians(50.0))
+    ob = hs.join("grip_angled", [body, ribs, clamp, cross])
     fig = hs.Builder("grip_angled_Figure", ["Furniture"])
     fig.prism(mmp([(42.0, 0.0), (-42.7, 0.0), (-8.0, -13.4), (7.0, -33.0), (3.4, -47.0), (28.0, -47.0), (40.6, -2.0)]),
               "x", -AG_HALF * MM, AG_HALF * MM, "Furniture")
@@ -798,18 +837,27 @@ def build_grip_angled() -> bpy.types.Object:
 VG_RINGS = [(-6.0, 13.2, 20.2), (-9.0, 12.9, 19.4), (-12.5, 12.5, 16.6), (-16.0, 12.2, 15.0), (-30.0, 12.1, 14.5),
             (-49.0, 12.2, 14.6), (-54.0, 13.2, 15.6),
             (-57.5, 13.4, 15.8), (-59.5, 12.6, 15.1)]
-VG_RIBS = 22
+VG_RIBS = 17
+# The body below its flared top is 15% shorter than first traced: its height against the clamp's length now matches
+# the photos' (about 1.4).
+VG_K = 0.85
+
+
+def vz(z: float) -> float:
+    """A traced height under the flare (mm) on the shortened body."""
+    return z if z >= -16.0 else -16.0 + (z + 16.0) * VG_K
 
 
 def vg_hl(z: float) -> float:
     """The body's half length fore and aft at z (mm), between its rings."""
     for (za, _, la), (zb, _, lb) in zip(VG_RINGS, VG_RINGS[1:]):
+        za, zb = vz(za), vz(zb)
         if zb <= z <= za:
             return la + (lb - la) * (z - za) / (zb - za)
     return VG_RINGS[-1][2]
 
 
-def vg_ring(z: float, hw: float, hl: float, n: int = 32) -> list:
+def vg_ring(z: float, hw: float, hl: float, n: int = 64) -> list:
     """A rounded oblong ring across the grip at z (mm), its sides flatter than its ends."""
     pts = []
     for i in range(n):
@@ -821,13 +869,15 @@ def vg_ring(z: float, hw: float, hl: float, n: int = 32) -> list:
     return pts
 
 
-def stud(b: hs.Builder, side: float, x: float, y: float, z: float, r: float, height: float, mat: str) -> None:
-    """A small four-sided stud on a side face (the face at x, `side` its direction): one grain of a stippled panel."""
+def stud(b: hs.Builder, side: float, x: float, y: float, z: float, r: float, height: float, mat: str, n: int = 4,
+         turn: float = 0.0) -> None:
+    """A small n-sided stud on a side face (the face at x, `side` its direction), turned `turn` rad: one grain of a
+    stippled panel."""
     bm = b.bm
-    base = [bm.verts.new(((side * x) * MM, (y + r * math.cos(a)) * MM, (z + r * math.sin(a)) * MM))
-            for a in (0.0, math.pi / 2, math.pi, 1.5 * math.pi)]
+    base = [bm.verts.new(((side * x) * MM, (y + r * math.cos(turn + math.tau * i / n)) * MM,
+                          (z + r * math.sin(turn + math.tau * i / n)) * MM)) for i in range(n)]
     tip = bm.verts.new((side * (x + height) * MM, y * MM, z * MM))
-    faces = [bm.faces.new((base[i], base[(i + 1) % 4], tip)) for i in range(4)]
+    faces = [bm.faces.new((base[i], base[(i + 1) % n], tip)) for i in range(n)]
     for f in faces:
         f.normal_update()
         if f.normal.x * side < 0:
@@ -837,33 +887,36 @@ def stud(b: hs.Builder, side: float, x: float, y: float, z: float, r: float, hei
 
 def build_grip_vertical() -> bpy.types.Object:
     gb = hs.Builder("vg_body", ["Furniture", "Rubber"])
-    gb.loft([vg_ring(z, hw, hl) for z, hw, hl in VG_RINGS], "Furniture")
+    gb.loft([vg_ring(vz(z), hw, hl) for z, hw, hl in spline(VG_RINGS, 3)], "Furniture")
     body = gb.build()
     # A textured panel let into each side.
-    cuts = [prism_cutter(hs.fillet([(-9.8, -16.0, 3.0), (9.8, -16.0, 3.0), (9.8, -48.0, 3.0), (-9.8, -48.0, 3.0)], 3),
-                         "x", s * 10.4, s * 18.0) for s in (-1.0, 1.0)]
+    panel = [(-9.8, -16.0, 3.0), (9.8, -16.0, 3.0), (9.8, vz(-48.0), 3.0), (-9.8, vz(-48.0), 3.0)]
+    cuts = [prism_cutter(hs.fillet(panel, 3), "x", s * 10.4, s * 18.0) for s in (-1.0, 1.0)]
     hs.cut(body, cuts)
-    hs.finish(body, bevel=0.0008, segments=2)
+    hs.finish(body, bevel=0.0008, segments=3)
     db = hs.Builder("vg_detail", ["Furniture", "Rubber", "Metal"])
     pb = hs.Builder("vg_stipple", ["Furniture"])
     # The panels: a stippled face at the pocket's floor, its small studs scattered (seeded, so a rebuild matches).
     rng = random.Random(8)
     for s in (-1.0, 1.0):
-        db.prism(mmp(hs.fillet([(-9.6, -16.2, 2.8), (9.6, -16.2, 2.8), (9.6, -47.8, 2.8), (-9.6, -47.8, 2.8)], 2)),
+        db.prism(mmp(hs.fillet([(-9.6, -16.2, 2.8), (9.6, -16.2, 2.8), (9.6, vz(-47.8), 2.8), (-9.6, vz(-47.8), 2.8)],
+                               2)),
                  "x", s * 10.0 * MM, s * 10.85 * MM, "Furniture")
-        for row in range(23):
+        for row in range(22):
             for col in range(15):
-                y = -8.4 + col * 1.2 + (0.6 if row % 2 else 0.0) + rng.uniform(-0.4, 0.4)
-                z = -17.6 + row * -1.32 + rng.uniform(-0.4, 0.4)
-                if abs(y) > 8.6 or z < -46.8:
+                y = -8.4 + col * 1.2 + (0.6 if row % 2 else 0.0) + rng.uniform(-0.35, 0.35)
+                z = -17.6 + row * -1.15 + rng.uniform(-0.35, 0.35)
+                if abs(y) > 8.6 or z < vz(-46.8):
                     continue
-                stud(pb, s, 10.8, y, z, rng.uniform(0.4, 0.65), rng.uniform(0.18, 0.38), "Furniture")
+                stud(pb, s, 10.8, y, z, rng.uniform(0.45, 0.7), rng.uniform(0.2, 0.4), "Furniture", 4,
+                     rng.uniform(0.0, math.tau))
     # The fine ribs down the front and back faces, each set into the body's curve.
+    kb = hs.Builder("vg_ribs", ["Furniture"])
     for end in (-1.0, 1.0):
         for i in range(VG_RIBS):
             z = -16.5 - i * 1.65
             hl = vg_hl(z - 0.5)
-            pb.prism(mmp([(-6.0, z), (6.0, z), (5.6, z - 0.9), (-5.6, z - 0.9)]), "y",
+            kb.prism(mmp([(-6.0, z), (6.0, z), (5.6, z - 0.9), (-5.6, z - 0.9)]), "y",
                      end * (hl - 0.4) * MM, end * (hl + 0.35) * MM, "Furniture")
     # The clamp, as long as the grip's flared top; its cross screw (a big slotted head) and nut.
     rail_clamp_under(db, PICATINNY, -20.0, 20.0, -7.0, 2.6, "Furniture")
@@ -874,9 +927,11 @@ def build_grip_vertical() -> bpy.types.Object:
     hs.finish(detail, bevel=0.0003, segments=1, angle=math.radians(50.0))
     stipple = pb.build()
     hs.finish(stipple, bevel=0.0)
-    ob = hs.join("grip_vertical", [body, detail, stipple])
+    ribs = kb.build()
+    hs.finish(ribs, bevel=0.0)
+    ob = hs.join("grip_vertical", [body, detail, stipple, ribs])
     fig = hs.Builder("grip_vertical_Figure", ["Furniture"])
-    fig.box(mm(-13.2, -18.0, -59.5), mm(13.2, 18.0, 0.0), "Furniture")
+    fig.box(mm(-13.2, -18.0, vz(VG_RINGS[-1][0])), mm(13.2, 18.0, 0.0), "Furniture")
     fig.build().parent = ob
     return ob
 
@@ -885,31 +940,73 @@ def build_grip_vertical() -> bpy.types.Object:
 
 # A plain tube with rounded ends and end-cap seams, its bore let into the front face (silencer): the rifle's and the
 # pistol's (slimmer, on a knurled thread adaptor), as (length, radius, adaptor length) in mm from the barrel's end.
-SILENCERS = {"rifle": (150.0, 13.0, 0.0), "pistol": (118.0, 13.2, 6.0)}
+SILENCERS = {"rifle": (150.0, 13.0, 0.0), "pistol": (118.0, 13.2, 10.0)}
+# Segments round each tube: the rifle's plain tube spends its budget on a smoother round.
+SIL_SEG = {"rifle": 96, "pistol": 96}
+# The rifle silencer's rear coupling: a knurled band let into the tube behind its seam (mm from the back face).
+SIL_BAND = (2.4, 12.0)
+
+
+def cap_arc(y: float, r: float, e: float, sign: float, n: int = 6) -> list:
+    """A rounded end cap's edge as (y, r) points: a quarter round of radius e from the face (at y) to the side."""
+    pts = []
+    for i in range(n + 1):
+        a = math.pi / 2 * i / n
+        pts.append((y - sign * e * (1.0 - math.sin(a)), r - e * (1.0 - math.cos(a))))
+    return pts if sign > 0 else list(reversed(pts))
 
 
 def build_silencer(kind: str = "rifle") -> bpy.types.Object:
     length, r, adaptor = SILENCERS[kind]
     y0, y1 = adaptor, length
-    e = 2.4
-    prof = [(y0, 6.0), (y0, r - e), (y0 + e * 0.3, r - e * 0.35), (y0 + e, r), (y0 + 5.6, r), (y0 + 5.8, r - 0.45),
-            (y0 + 6.3, r - 0.45), (y0 + 6.5, r), (y1 - 7.5, r), (y1 - 7.3, r - 0.45), (y1 - 6.8, r - 0.45),
-            (y1 - 6.6, r), (y1 - e, r), (y1 - e * 0.3, r - e * 0.35), (y1, r - e), (y1, 6.4), (y1 - 1.2, 5.0),
-            (y1 - 4.0, 4.6), (y1 - 4.0, 0.0)]
-    b = hs.Builder("muzzle_silencer", ["Detail", "Metal", "Rubber"])
-    lathe_y(b, prof, "Detail", 48)
-    pb = hs.Builder("sil_plain", ["Metal", "Rubber"])
-    tube_y(pb, [(y1 - 3.9, 4.6), (y1 - 3.0, 4.6)], [(y1 - 3.9, 3.4), (y1 - 3.0, 3.4)], "Rubber", 20)
+    e = 2.0
+    # The tube's profile from the back face to the front face: rounded caps, a seam groove near each end, the front
+    # face stepped in to the bore, the bore going in past its first baffle.
+    seam = [(r, 0.0), (r - 0.45, 0.2), (r - 0.45, 0.7), (r, 0.9)]
+    prof = [(y0, 5.2), (y0 + 0.6, 5.8), (y0 + 0.6, 6.8), (y0, 7.2), (y0, 8.2)] + cap_arc(y0, r, e, -1.0)[1:]
     if adaptor > 0.0:
-        # The thread spigot (mostly in the replica's thread), a narrow step, then the full-width knurled collar.
-        lathe_y(b, [(-6.0, 0.0), (-6.0, 4.0), (-5.5, 4.6), (0.6, 4.6), (0.6, 8.6), (1.4, 8.6), (1.4, r - 0.8),
-                    (1.9, r - 0.3)], "Metal", 32)
-        knurl(pb, 1.9, adaptor, r - 0.45, r + 0.05, 64, 0.8, "Metal")
+        prof += [(y0 + 5.6 + d, rr) for rr, d in seam]
+    else:
+        prof += [(y0 + SIL_BAND[0] - 0.2, r), (y0 + SIL_BAND[0], r - 0.4), (y0 + SIL_BAND[1], r - 0.4),
+                 (y0 + SIL_BAND[1] + 0.2, r)]
+        prof += [(y0 + SIL_BAND[1] + 1.2 + d, rr) for rr, d in seam]
+        # The front cap's grip grooves: two more seams ahead of the end seam.
+        prof += [(y1 - 16.5 + d, rr) for rr, d in seam]
+        prof += [(y1 - 12.0 + d, rr) for rr, d in seam]
+    prof += [(y1 - 7.5 + d, rr) for rr, d in seam]
+    prof += cap_arc(y1, r, e, 1.0)[1:]
+    prof += [(y1, r - e - 0.6), (y1 - 0.5, r - e - 1.0), (y1 - 0.5, 7.4), (y1, 6.8), (y1, 5.6), (y1 - 1.0, 4.8)]
+    b = hs.Builder("muzzle_silencer", ["Detail", "Metal", "Rubber"])
+    lathe_y(b, prof, "Detail", SIL_SEG[kind], cap=False)
+    pb = hs.Builder("sil_plain", ["Metal", "Rubber", "Detail"])
+    # The bore: its wall in to the first baffle, the baffle's cone and its hole, all seen from the front.
+    face_axis(lathe_y(pb, [(y1 - 1.0, 4.8), (y1 - 6.0, 4.8), (y1 - 7.5, 3.2), (y1 - 8.0, 3.2)], "Rubber", 64,
+                      cap=False), 0.0, 0.0)
+    lathe_y(pb, [(y1 - 8.0, 3.2), (y1 - 8.0, 0.0)], "Rubber", 64, cap=False)
+    # The back: the threaded insert (rifle) or the spigot, neck and knurled collar (pistol).
+    face_axis(lathe_y(pb, [(y0, 5.2), (y0 + 3.0, 5.2)], "Metal", 48, cap=False), 0.0, 0.0)
+    lathe_y(pb, [(y0 + 3.0, 5.2), (y0 + 3.0, 0.0)], "Metal", 48, cap=False)
+    if adaptor > 0.0:
+        lathe_y(b, [(-6.0, 0.0), (-6.0, 4.0), (-5.5, 4.6), (0.6, 4.6), (0.6, 7.0), (1.0, 7.4), (4.8, 7.4),
+                    (5.2, 8.6), (5.2, r - 0.8), (5.6, r - 0.3)], "Metal", 64)
+        knurl(pb, 5.6, adaptor - 0.4, r - 0.35, r + 0.02, 100, 0.5, "Metal")
+        lathe_y(b, [(adaptor - 0.4, r - 0.3), (adaptor, r - 0.6), (adaptor, 8.2)], "Metal", 64, cap=False)
+        for i in range(12):
+            t = math.tau * i / 12
+            pb.box(mm(math.cos(t) * 4.62 - 0.12, -5.0, math.sin(t) * 4.62 - 0.12),
+                   mm(math.cos(t) * 4.62 + 0.12, 0.4, math.sin(t) * 4.62 + 0.12), "Metal")
     ob = b.build()
     hs.finish(ob, bevel=0.0)
     plain = pb.build()
     hs.finish(plain, bevel=0.0)
-    ob = hs.join("muzzle_silencer", [ob, plain])
+    kb_ob = None
+    if adaptor == 0.0:
+        # The coupling's knurl: coarse, few points, hard-edged, so it reads at arm's length and stays light in the file.
+        kb = hs.Builder("sil_knurl", ["Detail"])
+        knurl(kb, y0 + SIL_BAND[0], y0 + SIL_BAND[1], r - 0.4, r + 0.1, 40, 1.0, "Detail")
+        kb_ob = kb.build()
+        hs.finish(kb_ob, bevel=0.0, weighted=False)
+    ob = hs.join("muzzle_silencer", [ob, plain, kb_ob])
     fig = hs.Builder("muzzle_silencer_Figure", ["Detail"])
     fig.lathe([(y0 * MM, 0.0), (y0 * MM, r * MM), (y1 * MM, r * MM), (y1 * MM, 0.0)], "Detail", 8)
     fig.build().parent = ob
@@ -919,12 +1016,13 @@ def build_silencer(kind: str = "rifle") -> bpy.types.Object:
 
 # ---------------------------------------------------------------------------------------------------- red laser
 
-# The laser module under a pistol's rail (red_laser: the knurled module in a rail block): the block, the tube through
-# it and its knurled nose, the emitter (mm, under the rail's face).
+# The laser module under a pistol's rail (red_laser): one closed housing, its clamp at the back, the emitter set flush
+# in its front face behind a short bezel (the owner, 2026-11-05: no tube standing out of it). mm, under the rail's face.
 LZ_AXIS = -13.2
 LZ_BLOCK = (-12.0, 12.0, -4.0, -21.0)
-LZ_NOSE = 37.0
-LZ_TUBE_R = 5.0
+LZ_FRONT = 30.0
+LZ_PORT_R = 3.4
+LZ_LENS_Y = LZ_FRONT - 1.4
 
 
 def build_laser(rail_name: str = "pistol") -> bpy.types.Object:
@@ -932,47 +1030,69 @@ def build_laser(rail_name: str = "pistol") -> bpy.types.Object:
     y0, y1, ztop, zbot = LZ_BLOCK
     bb = hs.Builder("lz_block", ["Detail", "Metal", "Rubber", "LaserLens"])
     rail_clamp_under(bb, rail, y0, y1, ztop, 2.2, "Detail")
-    bb.prism(mmp(hs.fillet([(-13.4, ztop + 0.2, 0.0), (13.4, ztop + 0.2, 0.0), (13.4, zbot, 2.4), (-13.4, zbot, 2.4)],
-                           3)), "y", y0 * MM, y1 * MM, "Detail")
+    # The housing: from the clamp's back to the front face, its top up against the rail's face (no daylight under the
+    # frame ahead of the clamp), its front lower edge swept up.
+    sec = hs.fillet([(-13.4, -0.2, 0.0), (13.4, -0.2, 0.0), (13.4, zbot, 2.4), (-13.4, zbot, 2.4)], 10)
+    bb.prism(mmp(sec), "y", y0 * MM, (LZ_FRONT - 4.0) * MM, "Detail")
+    nose = [(x, z if z > zbot + 2.4 else z + 1.6) for x, z in sec]
+    bb.loft([[(x * MM, (LZ_FRONT - 4.0) * MM, z * MM) for x, z in sec],
+             [(x * MM, LZ_FRONT * MM, z * MM) for x, z in nose]], "Detail", cap0=False, cap1=True)
     block = bb.build()
-    hs.cut(block, [box_cutter((-20, y0 - 1, ztop - 3.0), (20, y0 + 2.0, ztop - 2.2)),
-                   box_cutter((-20, y1 - 2.0, ztop - 3.0), (20, y1 + 1, ztop - 2.2))])
-    hs.finish(block, bevel=0.0004)
-    tb = hs.Builder("lz_tube", ["Detail", "Metal", "Rubber", "LaserLens"])
-    r = LZ_TUBE_R
-    # The tube: its tail out of the block's back with a plain end cap, the collar at the block's front, the knurled
-    # barrel and the nose with the emitter.
-    lathe_y(tb, [(y0 - 6.0, 0.0), (y0 - 6.0, r - 0.8), (y0 - 5.2, r), (y0, r)], "Detail", 28, z=LZ_AXIS)
-    lathe_y(tb, [(y0 - 4.2, r + 0.05), (y0 - 3.6, r + 0.05)], "Detail", 28, z=LZ_AXIS, cap=False)
-    lathe_y(tb, [(y1, r + 0.5), (y1 + 2.0, r + 0.5), (y1 + 2.4, r)], "Detail", 28, z=LZ_AXIS)
-    lathe_y(tb, [(LZ_NOSE - 2.4, r), (LZ_NOSE - 0.6, r), (LZ_NOSE, r - 0.6), (LZ_NOSE, 2.0), (LZ_NOSE - 0.6, 1.5),
-                 (LZ_NOSE - 0.6, 0.0)], "Detail", 28, z=LZ_AXIS)
-    # The adjusting screws: elevation under the block, windage a knurled wheel on its right; the clamp's cross
-    # screws on the left, its bolt on the right.
-    disc_z(tb, 0.0, 2.0, zbot - 1.2, zbot + 0.2, 2.6, "Detail", 16, 0.3)
-    disc_x(tb, 13.2, 13.9, 2.0, LZ_AXIS + 0.6, 2.4, "Detail", 16, 0.3)
-    disc_x(tb, 13.9, 15.9, 2.0, LZ_AXIS + 0.6, 4.4, "Detail", 28, 0.4)
+    # The seam down each flank where the housing's front cap meets it (stopping over the rounded bottom edge, so the
+    # outline stays whole), a shallow panel let into the right side, and the emitter's port.
+    port = cutter("lz_port", lambda b: lathe_y(b, [(LZ_LENS_Y - 0.2, 0.0), (LZ_LENS_Y - 0.2, LZ_PORT_R),
+                                                    (LZ_FRONT + 2.0, LZ_PORT_R), (LZ_FRONT + 2.0, 0.0)], "Detail",
+                                                64, z=LZ_AXIS))
+    seam = LZ_FRONT - 7.6, LZ_FRONT - 7.0
+    hs.cut(block, [box_cutter((-20, seam[0], zbot + 3.0), (-12.9, seam[1], 1.0)),
+                   box_cutter((12.9, seam[0], zbot + 3.0), (20, seam[1], 1.0)),
+                   prism_cutter(hs.fillet([(y1 + 0.5, -7.0, 1.5), (LZ_FRONT - 8.6, -7.0, 1.5),
+                                           (LZ_FRONT - 8.6, -19.0, 1.5), (y1 + 0.5, -19.0, 1.5)], 4), "x",
+                                12.8, 14.0),
+                   port])
+    hs.finish(block, bevel=0.0004, segments=4)
+    tb = hs.Builder("lz_parts", ["Detail", "Metal", "Rubber", "LaserLens"])
+    # The emitter's bezel: a thin bright ring round the port's mouth, its wall stepping in to the glass.
+    bezel = lathe_y(tb, [(LZ_FRONT + 0.15, LZ_PORT_R + 0.9), (LZ_FRONT + 0.15, LZ_PORT_R - 0.1),
+                         (LZ_FRONT - 0.5, LZ_PORT_R - 0.6), (LZ_LENS_Y + 0.3, LZ_PORT_R - 0.6),
+                         (LZ_LENS_Y + 0.1, 1.9)], "Metal", 64, z=LZ_AXIS, cap=False)
+    face_axis(bezel, 0.0, LZ_AXIS)
+    # The adjusting screws: elevation under the housing, windage a knurled wheel in its right side; the clamp's cross
+    # screws on the left, its bolt on the right; the switch pad in the left panel.
+    disc_z(tb, 0.0, 2.0, zbot - 0.3, zbot + 0.2, 2.6, "Detail", 24, 0.15)
+    disc_x(tb, 12.7, 13.9, LZ_FRONT - 13.0, LZ_AXIS, 2.4, "Detail", 24, 0.3)
+    disc_x(tb, 13.9, 15.6, LZ_FRONT - 13.0, LZ_AXIS, 4.2, "Detail", 40, 0.4)
     for y in (-6.0, 6.0):
-        disc_x(tb, -14.4, -15.4, y, -1.8, 1.6, "Metal", 14, 0.3)
-    disc_x(tb, 14.4, 15.6, 0.0, -1.8, 2.4, "Metal", 16, 0.3)
-    tube = tb.build()
-    hs.finish(tube, bevel=0.0003, segments=1, angle=math.radians(50.0))
+        disc_x(tb, -14.4, -15.4, y, -1.8, 1.6, "Metal", 20, 0.3)
+        hex_x(tb, -15.4, -15.46, y, -1.8, 0.8, "Rubber")
+    disc_x(tb, 14.4, 15.6, 0.0, -1.8, 2.4, "Metal", 24, 0.3)
+    tb.prism(mmp(hs.fillet([(y1 + 3.0, -9.0, 1.8), (LZ_FRONT - 8.4, -9.0, 1.8), (LZ_FRONT - 8.4, -16.0, 1.8),
+                            (y1 + 3.0, -16.0, 1.8)], 4)), "x", -13.0 * MM, -13.9 * MM, "Rubber")
+    # Grip ribs down the front cap's flanks.
+    for sx in (-1.0, 1.0):
+        for i in range(7):
+            y = LZ_FRONT - 6.3 + i * 0.85
+            tb.box(mm(min(sx * 13.3, sx * 13.75), y, zbot + 3.5), mm(max(sx * 13.3, sx * 13.75), y + 0.45, -3.0),
+                   "Detail")
+    parts = tb.build()
+    hs.finish(parts, bevel=0.0003, segments=2, angle=math.radians(50.0))
     pb = hs.Builder("lz_plain", ["Detail", "Rubber", "LaserLens", "Metal"])
-    knurl(pb, y1 + 2.4, LZ_NOSE - 2.4, r - 0.2, r + 0.15, 40, 0.8, "Detail", z=LZ_AXIS)
-    ridged(pb, 14.0, 15.85, 4.4, 4.75, 18, "Detail", x=2.0, z=LZ_AXIS + 0.6, axis="x")
-    lens(pb, LZ_NOSE - 0.55, 1.55, "LaserLens", 16, z=LZ_AXIS)
-    slot_z(pb, 0.0, 2.0, zbot - 1.25, 3.2, 0.6, 0.0, "Rubber")
-    hex_x(pb, 15.9, 15.96, 2.0, LZ_AXIS + 0.6, 1.0, "Rubber")
+    ridged(pb, 13.95, 15.55, 4.2, 4.5, 40, "Detail", x=LZ_FRONT - 13.0, z=LZ_AXIS, axis="x")
+    lens(pb, LZ_LENS_Y, 1.95, "LaserLens", 64, z=LZ_AXIS)
+    slot_z(pb, 0.0, 2.0, zbot - 0.35, 3.2, 0.6, 0.0, "Rubber")
+    hex_x(pb, 15.6, 15.66, LZ_FRONT - 13.0, LZ_AXIS, 1.0, "Rubber")
     hex_x(pb, 15.6, 15.66, 0.0, -1.8, 1.1, "Rubber")
+    # Fine grip lines across the switch pad.
+    for i in range(7):
+        y = y1 + 3.8 + i * 0.8
+        pb.box(mm(-14.1, y, -15.2), mm(-13.85, y + 0.4, -9.8), "Rubber")
     plain = pb.build()
     hs.finish(plain, bevel=0.0)
-    ob = hs.join("laser_redLaser", [block, tube, plain])
+    ob = hs.join("laser_redLaser", [block, parts, plain])
     fig = hs.Builder("laser_redLaser_Figure", ["Detail"])
-    fig.box(mm(-13.4, y0, zbot), mm(13.4, y1, 0.0), "Detail")
-    fig.lathe([(y1 * MM, LZ_TUBE_R * MM), (LZ_NOSE * MM, LZ_TUBE_R * MM)], "Detail", 6,
-              centre=(0.0, 0.0, LZ_AXIS * MM))
+    fig.box(mm(-13.4, y0, zbot), mm(13.4, LZ_FRONT, 0.0), "Detail")
     fig.build().parent = ob
-    child_empty("laser_redLaser_Beam", mm(0.0, LZ_NOSE + 0.1, LZ_AXIS), ob)
+    child_empty("laser_redLaser_Beam", mm(0.0, LZ_LENS_Y + 0.1, LZ_AXIS), ob)
     return ob
 
 
@@ -993,7 +1113,7 @@ def build_torch(rail_name: str = "pistol") -> bpy.types.Object:
     bb = hs.Builder("wt_body", ["Detail", "Metal", "Rubber", "TorchLens"])
     # The body as a prism of its section, eased into the round head by a loft.
     sec = hs.fillet([(-WT_HALF, WT_TOP, 1.5), (WT_HALF, WT_TOP, 1.5), (WT_HALF, WT_BOTTOM, 7.0),
-                     (-WT_HALF, WT_BOTTOM, 7.0)], 6)
+                     (-WT_HALF, WT_BOTTOM, 7.0)], 18)
     bb.prism(mmp(sec), "y", WT_BODY[0] * MM, (WT_HEAD[0] - 4.5) * MM, "Detail")
     circle_ring = []
     for x, z in sec:
@@ -1007,14 +1127,14 @@ def build_torch(rail_name: str = "pistol") -> bpy.types.Object:
     hs.cut(body, [prism_cutter(hs.fillet([(-21.0, -12.0, 1.5), (-4.0, -12.0, 1.5), (-4.0, -21.0, 1.5),
                                           (-21.0, -21.0, 1.5)], 2), "x", s * (WT_HALF - 0.7), s * (WT_HALF + 3.0))
                   for s in (-1.0, 1.0)])
-    hs.finish(body, bevel=0.0005)
+    hs.finish(body, bevel=0.0005, segments=3)
     hb = hs.Builder("wt_head", ["Detail", "Metal", "Rubber", "TorchLens"])
     lathe_y(hb, [(WT_HEAD[0] - 1.0, WT_HEAD_R - 0.4), (WT_HEAD[0] + 0.5, WT_HEAD_R),
                  (WT_HEAD[1] - 5.0, WT_HEAD_R),
                  (WT_HEAD[1] - 4.8, WT_HEAD_R - 0.4), (WT_HEAD[1] - 4.3, WT_HEAD_R - 0.4),
                  (WT_HEAD[1] - 4.1, WT_HEAD_R + 0.3), (WT_HEAD[1] - 0.7, WT_HEAD_R + 0.3),
                  (WT_HEAD[1], WT_HEAD_R - 0.5), (WT_HEAD[1], WT_HEAD_R - 1.7), (WT_HEAD[1] - 1.0, WT_HEAD_R - 2.3)],
-            "Detail", 40, z=WT_AXIS, cap=False)
+            "Detail", 96, z=WT_AXIS, cap=False)
     # The clamp: its housing on the body's top, the jaws round the rail, the cross latch (left) and its screw (right).
     # The Cyber's rail sits flush between its shroud's flanks: there the clamp can't hook round the rail, so nothing
     # outside the rail rises past its face (a flat top, a lower latch, no jaw screws).
@@ -1031,7 +1151,7 @@ def build_torch(rail_name: str = "pistol") -> bpy.types.Object:
     lx = -(rail["half"] + 2.4)
     hb.prism(mmp(hs.fillet([(-4.0, top, 1.0), (4.0, top, 1.0), (5.0, -6.5, 1.5), (-5.0, -6.5, 1.5)], 2)), "x",
              lx * MM, (lx - 2.2) * MM, "Detail", offset=(0.0, -2.0 * MM, 0.0))
-    disc_x(hb, -lx, -lx + 1.4, -2.0, -2.4, 2.4, "Metal", 16, 0.3)
+    disc_x(hb, -lx, -lx + 1.4, -2.0, -2.4, 2.4, "Metal", 32, 0.3)
     # The rocker paddles at the back, one each side, and the tail cap.
     for s in (-1.0, 1.0):
         hb.prism(mmp(hs.fillet([(-32.0, -9.0, 1.0), (-23.0, -9.0, 2.0), (-25.0, -21.0, 2.0), (-34.0, -21.0, 1.0)],
@@ -1040,27 +1160,40 @@ def build_torch(rail_name: str = "pistol") -> bpy.types.Object:
                             (WT_HALF - 1.5, WT_BOTTOM + 1.0, 5.5), (-WT_HALF + 1.5, WT_BOTTOM + 1.0, 5.5)], 4)),
              "y", (WT_BODY[0] - 1.8) * MM, (WT_BODY[0] + 0.2) * MM, "Detail")
     head = hb.build()
-    hs.finish(head, bevel=0.0003, segments=1, angle=math.radians(50.0))
+    hs.finish(head, bevel=0.0003, segments=2, angle=math.radians(50.0))
     pb = hs.Builder("wt_plain", ["Detail", "Metal", "Rubber", "TorchLens", "Led"])
     # The polished reflector cone behind the bezel (its faces turned to the front, where it's seen from), the LED's
     # dark base and its yellow die; the latch's ribs, the paddles' grip lines, the screw slot.
-    cone = lathe_y(pb, [(WT_HEAD[1] - 1.0, WT_HEAD_R - 2.3), (WT_HEAD[1] - 4.5, WT_HEAD_R - 4.2),
-                        (WT_HEAD[1] - 7.5, 3.6), (WT_HEAD[1] - 8.6, 2.2)], "TorchLens", 40, z=WT_AXIS, cap=False)
+    # (A parabolic bowl, in rings.)
+    bowl = [(WT_HEAD[1] - 1.0 - 7.6 * (1.0 - (k / 8) ** 0.5), 2.2 + (WT_HEAD_R - 4.5) * k / 8) for k in range(9)]
+    cone = lathe_y(pb, list(reversed(bowl)), "TorchLens", 96, z=WT_AXIS, cap=False)
     face_axis(cone, 0.0, WT_AXIS)
-    lathe_y(pb, [(WT_HEAD[1] - 8.6, 2.2), (WT_HEAD[1] - 8.6, 0.0)], "Rubber", 20, z=WT_AXIS, cap=False)
+    lathe_y(pb, [(WT_HEAD[1] - 8.6, 2.2), (WT_HEAD[1] - 8.6, 0.0)], "Rubber", 32, z=WT_AXIS, cap=False)
     pb.box(mm(-1.1, WT_HEAD[1] - 8.6, WT_AXIS - 1.1), mm(1.1, WT_HEAD[1] - 8.0, WT_AXIS + 1.1), "Led")
     for s in (-1.0, 1.0):
         for y in () if flush else (-8.0, 0.0, 8.0):
             disc_x(pb, s * (rail["half"] + 2.4), s * (rail["half"] + 2.46), y, 2.0, 0.9, "Rubber", 10)
-    for i in range(5):
-        y = -5.6 + i * 1.8
+    for i in range(8):
+        y = -6.2 + i * 1.6
         pb.box(mm(lx - 2.7, y, -5.4), mm(lx - 2.1, y + 0.7, min(0.6, top - 0.9)), "Detail")
     for s in (-1.0, 1.0):
-        for i in range(4):
-            y = -31.0 + i * 2.0
-            pb.box(mm(min(s * (WT_HALF + 1.6), s * (WT_HALF + 2.1)), y, -19.5),
-                   mm(max(s * (WT_HALF + 1.6), s * (WT_HALF + 2.1)), y + 0.8, -10.5), "Detail")
+        for i in range(7):
+            y = -31.4 + i * 1.2
+            pb.box(mm(min(s * (WT_HALF + 1.6), s * (WT_HALF + 2.0)), y, -19.5),
+                   mm(max(s * (WT_HALF + 1.6), s * (WT_HALF + 2.0)), y + 0.55, -10.5), "Detail")
     hex_x(pb, -lx + 1.4, -lx + 1.46, -2.0, -2.4, 1.0, "Rubber")
+    if flush:
+        # The Cyber's flush clamp has no jaws: its triangles go to a ridged grip on the bezel instead.
+        def bezel_ring(y: float, ridges: bool) -> list:
+            ring = []
+            for i in range(120):
+                t = math.tau * (i + 0.5 * (i % 2)) / 120
+                r = WT_HEAD_R + (0.75 if ridges and i % 2 == 0 else 0.2)
+                ring.append((math.cos(t) * r * MM, y * MM, (WT_AXIS + math.sin(t) * r) * MM))
+            return ring
+        by0, by1 = WT_HEAD[1] - 3.9, WT_HEAD[1] - 1.0
+        pb.loft([bezel_ring(by0, False), bezel_ring(by0, True), bezel_ring(by1, True), bezel_ring(by1, False)],
+                "Detail", cap0=False, cap1=False)
     plain = pb.build()
     hs.finish(plain, bevel=0.0)
     ob = hs.join("light_weaponTorch", [body, head, plain])

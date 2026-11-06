@@ -29,11 +29,11 @@ the springs a painted rifle spring in each spring's colour.
 ## Optics
 
 An optic on the top rail. With one fitted the iron sights come off completely, so nothing stands in its way, and
-aiming looks through it. The red dot is a
-compact sight on a low riser: a lit dot on clear glass, with the view open round it. The 2x scope is a magnifier on a
-hinged mount; it magnifies only inside its glass: the view round it stays as it is, with nothing dark round the edge.
-The Variable Scope is the 2x Scope a little longer, with a zoom ring: aimed through it, the mouse wheel turns its zoom
-from 2x to 6x a step at a time (the HUD shows it), and it keeps that zoom through the match.
+aiming looks through it. The red dot is a compact sight on a low riser: a lit dot on clear glass, with the view open
+round it. The 2x scope is a magnifier on a low hinged mount; it magnifies only inside its glass: the view round it
+stays as it is, with nothing dark round the edge. The Variable Scope is a compact prism scope with a zoom: aimed
+through it, the mouse wheel turns its zoom from 2x to 6x a step at a time (the HUD shows it), and it keeps that zoom
+through the match.
 
 <!-- wiki:parts optics -->
 
@@ -51,7 +51,7 @@ A vertical grip is slower to bring up but steadier after a sprint; an angled gri
 
 <!-- wiki:parts lasers -->
 
-The laser tightens the pistol's groups.
+The laser is a closed unit under the pistol's rail, its emitter flush in the front. It tightens the pistol's groups.
 
 ## Magazines
 

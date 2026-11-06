@@ -20,10 +20,10 @@ extends Resource
 ## aimed (m, so the glass shows as the approved sight concepts do); and the mark on the glass (dot: a lit red dot;
 ## cross: a scope's reticle). An optic not listed is aimed along its sight line with no glass drawn.
 @export var optic_glass_z: Dictionary[StringName, float] = {&"redDot": -0.013, &"scope2x": 0.0286,
-		&"scopeVar": 0.0646}
+		&"scopeVar": 0.0581}
 @export var optic_glass_radius: Dictionary[StringName, float] = {&"redDot": 0.0075, &"scope2x": 0.015,
-		&"scopeVar": 0.0122}
-@export var optic_eye_back: Dictionary[StringName, float] = {&"redDot": 0.15, &"scope2x": 0.1728, &"scopeVar": 0.1728}
+		&"scopeVar": 0.011}
+@export var optic_eye_back: Dictionary[StringName, float] = {&"redDot": 0.15, &"scope2x": 0.1728, &"scopeVar": 0.1555}
 @export var optic_mark: Dictionary[StringName, StringName] = {&"redDot": &"dot", &"scope2x": &"cross", &"scopeVar": &"cross"}
 ## The view through the glass is drawn this much wider than the glass shows on screen (room for sway), into a square
 ## picture this share of the screen's height on a side.

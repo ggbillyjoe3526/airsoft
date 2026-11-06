@@ -5,6 +5,6 @@
 - The angled handstop sweeps forward and has serrations.
 - The rifles' silencer is a long black tube.
 - The GBB Pistol's silencer is short and stout, with a knurled collar.
-- The GBB Pistol's red laser is knurled and sits in a rail block.
+- The GBB Pistol's red laser is a closed unit under the rail.
 - The weapon torch is a compact pistol light with a polished reflector and an LED. It fits the GBB Pistol, the Cyber Pistol and the AEG's right-side rail.
 - Aiming the red dot holds the replica a little further from your eye, so the smaller window shows in full.
