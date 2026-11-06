@@ -88,6 +88,10 @@ extends Resource
 ## of 2026-11-05: two-handed pistol holds clipped or bent the wrist; a smoke or flash bomb in hand, GT1), and a robot's
 ## arms' colours (sRGB) by the arms model's material name, with their roughness (satin, as the robot figure's plates).
 @export var one_hand: Array[StringName] = [&"pistol", &"cyber", &"smoke", &"flash"]
+## A bomb taken in hand comes up into view with your hand from this far below (m) over this long (s), eased as a draw,
+## while the replica goes down (holster_time); the empty hand goes back down the same way once the bomb has left it.
+@export var bomb_raise_drop: float = 0.3
+@export var bomb_raise_time: float = 0.2
 @export var robot_arms: Dictionary[StringName, Color] = {
 	&"Glove": Color(0.80, 0.81, 0.82),
 	&"GloveArmour": Color(0.16, 0.17, 0.18),

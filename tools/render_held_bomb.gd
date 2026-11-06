@@ -89,8 +89,8 @@ func _run() -> void:
 					c.grenades.windup_left = 0.0
 				else:
 					c.grenades.readied = kind
-				grenades.update(state, 0.0, DT, c, eye)
 				for i in SETTLE_FRAMES:
+					grenades.update(state, 0.0, DT, c, eye)
 					await RenderingServer.frame_post_draw
 				var path := "%s/held_%s_%s_%s.jpg" % [folder.trim_suffix("/"), GrenadeView.HOLDS[kind],
 						"windup" if windup else "ready", "robot" if figure == FigureMix.ROBOT else "human"]

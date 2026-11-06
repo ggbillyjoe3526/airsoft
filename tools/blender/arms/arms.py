@@ -240,14 +240,14 @@ SNIPER_GUARD = dict(GUARD, y=0.260, axis=(0.0, 0.030), radius=0.025, tips_below=
 # (smoke 27.5 mm, flash 20 mm). Each bomb sits where GrenadeView draws it in hand (HELD_AT, HELD_TIP: the same
 # numbers in the game's camera space, x right, y up, -z forward), so its top leans in toward the screen's middle and
 # back toward the eye.
-HELD_AT = godot_to_eye(0.15, -0.14, -0.36)
+HELD_AT = godot_to_eye(0.17, -0.10, -0.36)
 HELD_TIP = (Matrix.Rotation(-0.45, 3, Vector((0.0, 1.0, 0.0))) @ Matrix.Rotation(0.35, 3, Vector((1.0, 0.0, 0.0))))
 BOMB_FINGERS = {"Index": (60, 60, 45), "Middle": (60, 60, 45), "Ring": (60, 60, 45), "Pinky": (55, 55, 40)}
 SMOKE_RIGHT = dict(PISTOL_RIGHT, web=(0.016, -0.042, 0.010), index=(0.030, 0.016, 0.022),
-                   pinky=(0.028, 0.012, -0.036), thumb_at=(-0.022, -0.022, 0.024), thumb_verify=0.0,
-                   fingers=BOMB_FINGERS, swing=(0.0, 0.0, 0.0), shoulder=(0.0, -0.05, 0.03), drop=0.06)
+                   pinky=(0.028, 0.012, -0.036), thumb_at=(-0.014, -0.030, 0.024), thumb_verify=0.0,
+                   fingers=BOMB_FINGERS, swing=(0.0, 0.0, 0.0), shoulder=(0.02, -0.02, 0.05), drop=0.04)
 FLASH_RIGHT = dict(SMOKE_RIGHT, web=(0.012, -0.033, 0.004), index=(0.023, 0.012, 0.016),
-                   pinky=(0.021, 0.009, -0.040), thumb_at=(-0.016, -0.016, 0.018))
+                   pinky=(0.021, 0.009, -0.040), thumb_at=(-0.010, -0.022, 0.018))
 HOLDS = {
     "aeg": Hold("aeg.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.073, -0.026), 31.0, 0.046, 0.0155),
                 AEG_RIGHT, GUARD),

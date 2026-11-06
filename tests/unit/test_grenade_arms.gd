@@ -36,6 +36,12 @@ func _thrower() -> Character:
 	return c
 
 
+## Updates `v` for `seconds` and a frame more.
+func _frames(v: GrenadeView, s: GameState, c: Character, seconds: float) -> void:
+	for i in ceili(seconds / DT) + 1:
+		v.update(s, 0.0, DT, c, EYE)
+
+
 func _wind_up(c: Character, kind: int, left: float) -> void:
 	c.grenades.throwing = kind
 	c.grenades.windup_left = left
@@ -62,7 +68,7 @@ func test_the_arms_hold_the_bomb_in_hand_and_go_with_it() -> void:
 	v.update(s, 0.0, DT, c, EYE)
 	assert_false(v.held_shown(), "nothing in hand")
 	_wind_up(c, Grenade.Kind.SMOKE, cfg.windup)
-	v.update(s, 0.0, DT, c, EYE)
+	_frames(v, s, c, view_cfg.bomb_raise_time)
 	var arms := v.arms()
 	assert_true(v.held_shown())
 	assert_eq(arms.holding(), &"smoke")
@@ -73,7 +79,9 @@ func test_the_arms_hold_the_bomb_in_hand_and_go_with_it() -> void:
 	c.grenades.released = true
 	v.update(s, 0.0, DT, c, EYE)
 	assert_false(v.held_shown(), "gone once thrown")
-	assert_false(arms._model.is_visible_in_tree(), "the arms go with it")
+	assert_true(arms._model.is_visible_in_tree(), "the empty hand goes down")
+	_frames(v, s, c, view_cfg.bomb_raise_time)
+	assert_false(arms._model.is_visible_in_tree(), "and out of view")
 
 
 func test_the_arms_lift_with_the_bomb_through_the_windup() -> void:
@@ -81,7 +89,7 @@ func test_the_arms_lift_with_the_bomb_through_the_windup() -> void:
 	var v := _view(s)
 	var c := _thrower()
 	_wind_up(c, Grenade.Kind.FLASH, cfg.windup)
-	v.update(s, 0.0, DT, c, EYE)
+	_frames(v, s, c, view_cfg.bomb_raise_time)
 	var start := v.arms()._model.global_position
 	var bomb_start := v._held.global_position
 	_wind_up(c, Grenade.Kind.FLASH, 0.0)
@@ -156,13 +164,40 @@ func test_the_replicas_arms_let_go_while_a_bomb_is_in_hand_and_come_back_after()
 	var model: Node3D = hands._arms._model
 	assert_true(model.visible, "on the replica")
 	c.grenades.readied = Grenade.Kind.SMOKE
+	c.armament.holstered = true
 	hands.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 0.0)
-	assert_false(model.visible, "the bomb's arms hold it instead")
+	assert_true(model.visible, "the replica goes down in its hands")
+	for i in ceili(view_cfg.holster_time / DT) + 1:
+		hands.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 0.0)
+	assert_false(model.visible, "then the bomb's arms hold it instead")
 	_wind_up(c, Grenade.Kind.SMOKE, cfg.windup)
 	c.grenades.readied = Grenade.Kind.NONE
 	hands.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 0.0)
 	assert_false(model.visible, "nor through the windup")
 	c.grenades.released = true
+	c.armament.holstered = false
 	hands.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 0.0)
 	assert_true(model.visible, "back on the replica once it's thrown")
 	assert_ne(hands._arms.holding(), &"", "the hold kept throughout")
+
+
+func test_the_hand_comes_up_into_view_with_the_bomb_eased_as_a_draw() -> void:
+	var s := GameState.new(5, tuning)
+	var v := _view(s)
+	var c := _thrower()
+	c.grenades.readied = Grenade.Kind.SMOKE
+	v.update(s, 0.0, DT, c, EYE)
+	var first := v._held_root.position.y - EYE.y
+	assert_lt(first, GrenadeView.HELD_AT.y - view_cfg.bomb_raise_drop * 0.7, "starts from well below")
+	_frames(v, s, c, view_cfg.bomb_raise_time)
+	assert_almost_eq(v._held_root.position.y - EYE.y, GrenadeView.HELD_AT.y, 0.001, "then in place")
+
+
+func test_a_bomb_seen_through_no_eyes_goes_at_once() -> void:
+	var s := GameState.new(5, tuning)
+	var v := _view(s)
+	var c := _thrower()
+	c.grenades.readied = Grenade.Kind.SMOKE
+	_frames(v, s, c, view_cfg.bomb_raise_time)
+	v.update(s, 0.0, DT, null, Vector3.ZERO)
+	assert_false(v._held_root.visible)

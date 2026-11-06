@@ -1390,11 +1390,12 @@ The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built 
 
 ## Your arms holding a bomb (GT2)
 
-- [ ] **In hand:** roll the mouse wheel onto your smoke, then your flash. Your replica goes down without its hands and
-  your right hand holds the bomb in a fist, low on the right, the lever under the palm; no left hand shows. No finger
+- [ ] **In hand:** roll the mouse wheel onto your smoke, then your flash. Your replica goes down in its hands while
+  your right hand comes up from below holding the bomb in a fist, low on the right with the forearm coming in from the
+  corner, the lever under the palm; no left hand shows, and nothing floats without a hand. No finger
   or thumb passes into the bomb, and the bomb never draws in front of the fingers wrapped round its far side.
-- [ ] **Throw:** press 4 and 5. The hand and bomb rise a little as the pin comes out, and both are gone the moment the
-  bomb leaves; then the replica comes back up with its hands. Never two right hands at once.
+- [ ] **Throw:** press 4 and 5. The hand comes up with the bomb and rises a little as the pin comes out; the bomb leaves
+  and the empty hand goes down as the replica comes back up with its hands.
 - [ ] **Walls:** hold a bomb up against a wall: the hand and bomb are drawn over the wall, as the replica is.
 - [ ] **Robot:** with Settings › Dev › Robots on and a robot player, the hand is in the robot's light grey.
 

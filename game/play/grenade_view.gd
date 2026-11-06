@@ -55,7 +55,7 @@ const SMOKE_WASH := 0.94
 const WASH_LAYER := 0
 ## Through the thrower's own eyes, the bomb in hand while the pin comes out: this far right, down and ahead of the eyes
 ## (m), lifted HELD_LIFT as the windup runs out. Your arms' model holds it there (tools/blender/arms/arms.py HELD_AT).
-const HELD_AT := Vector3(0.15, -0.14, -0.36)
+const HELD_AT := Vector3(0.17, -0.10, -0.36)
 const HELD_LIFT := 0.05
 ## Tipped in the hand (rad, about the view's forward and right axes), as a fist holds it (arms.py HELD_TIP).
 const HELD_TIP := Vector2(-0.45, 0.35)
@@ -87,9 +87,13 @@ var _wash: ColorRect = null
 var _held_root: Node3D = null
 var _held: MeshInstance3D = null
 var _held_kind: int = Grenade.Kind.NONE
+## How far up into view the hand is (0 below, 1 in place) and its lift through the windup (m), kept as it goes down.
+var _raise: float = 0.0
+var _lift: float = 0.0
 ## Your arms holding it (none until `setup_arms`), and each kind's materials with the depth pressed as theirs, by
 ## Grenade.Kind and surface.
 var _arms: ArmsView = null
+var _view_cfg: ViewModelConfig = null
 var _held_paint: Array[Array] = []
 var _wash_layer: CanvasLayer = null
 
@@ -191,7 +195,7 @@ func update(state: GameState, fraction: float, delta: float, eyes: Character, ey
 			_light.visible = false
 			_flare.visible = false
 	_draw_wash(state, eyes, eye)
-	_draw_held(eyes, eye)
+	_draw_held(eyes, eye, delta)
 
 
 ## Your arms holding the bomb in hand (BL4's model, `cfg`'s look) and the bomb drawn with them: its depth pressed as
@@ -199,6 +203,7 @@ func update(state: GameState, fraction: float, delta: float, eyes: Character, ey
 func setup_arms(cfg: ViewModelConfig, kind: int) -> void:
 	if _arms != null:
 		return
+	_view_cfg = cfg
 	_arms = ArmsView.new()
 	add_child(_arms)
 	_arms.setup(cfg)
@@ -391,19 +396,32 @@ func _draw_wash(state: GameState, eyes: Character, eye: Vector3) -> void:
 
 ## The bomb in `eyes`' hand while its pin comes out, or while it waits in hand for a trigger pull (MC1), before their
 ## eyes at `eye`.
-func _draw_held(eyes: Character, eye: Vector3) -> void:
-	var kind := in_hand(eyes)
-	var ready := 0.0
-	if kind != Grenade.Kind.NONE and eyes.grenades.throwing == kind:
-		ready = 1.0 - clampf(eyes.grenades.windup_left / maxf(_cfg.windup, 0.001), 0.0, 1.0)
-	if kind == Grenade.Kind.NONE:
+## With your arms (`setup_arms`) the hand comes up into view with it from ViewModelConfig.bomb_raise_drop below over
+## bomb_raise_time, eased as a draw, and once it has left the hand the empty hand goes back down the same way; without
+## them the bomb shows and goes at once.
+func _draw_held(eyes: Character, eye: Vector3, delta: float) -> void:
+	var kind := Grenades.held(eyes)
+	if kind != Grenade.Kind.NONE:
+		var ready := 0.0
+		if eyes.grenades.throwing == kind:
+			ready = 1.0 - clampf(eyes.grenades.windup_left / maxf(_cfg.windup, 0.001), 0.0, 1.0)
+		_lift = HELD_LIFT * ready
+		_raise = 1.0 if _view_cfg == null else move_toward(_raise, 1.0, delta / _view_cfg.bomb_raise_time)
+		if kind != _held_kind:
+			_hold(kind)
+	elif eyes != null and _view_cfg != null and _held_root.visible and _raise > 0.0:
+		_raise = move_toward(_raise, 0.0, delta / _view_cfg.bomb_raise_time)
+	else:
+		_raise = 0.0
+	if _raise <= 0.0:
 		if _held_root.visible:
 			_held_root.visible = false
 		return
+	var low := 1.0 - _raise
+	var drop := _view_cfg.bomb_raise_drop * low * low if _view_cfg != null else 0.0
 	var view := Basis.from_euler(Vector3(eyes.pitch, eyes.yaw, 0.0))
-	_held_root.transform = Transform3D(view, eye + view * (HELD_AT + Vector3(0.0, HELD_LIFT * ready, 0.0)))
-	if kind != _held_kind:
-		_hold(kind)
+	_held_root.transform = Transform3D(view, eye + view * (HELD_AT + Vector3(0.0, _lift - drop, 0.0)))
+	_held.visible = kind != Grenade.Kind.NONE
 	_held_root.visible = true
 
 
@@ -420,22 +438,9 @@ func _hold(kind: int) -> void:
 		_arms.hold(HOLDS[k] if k < HOLDS.size() else &"", _held_root)
 
 
-## The bomb in `c`'s hand (Grenade.Kind; NONE: none, or `c` null): while its pin comes out, or while it waits in hand
-## for a trigger pull (MC1) in play. Your arms hold it then, not the replica (ReplicaView).
-static func in_hand(c: Character) -> int:
-	var hand := c.grenades if c != null else null
-	if hand == null:
-		return Grenade.Kind.NONE
-	if hand.throwing != Grenade.Kind.NONE and not hand.released:
-		return hand.throwing
-	if hand.readied != Grenade.Kind.NONE and Elimination.is_in_play(c):
-		return hand.readied
-	return Grenade.Kind.NONE
-
-
 ## Whether the bomb in hand is drawn, for tests.
 func held_shown() -> bool:
-	return _held_root.visible
+	return _held_root.visible and _held.visible
 
 
 ## Your arms holding the bomb (null until `setup_arms`), for tests.

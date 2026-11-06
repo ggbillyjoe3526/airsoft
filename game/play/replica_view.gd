@@ -210,8 +210,6 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 		# The draw brings the next replica up from below: nothing of the last one's turn is eased onto it.
 		_drop_inspect()
 		_show(a.active)
-	# With a bomb in hand your arms hold it (GrenadeView), so the replica goes down without them.
-	_arms.set_shown(GrenadeView.in_hand(c) == Grenade.Kind.NONE)
 	var held := _held[_active]
 	var follow := 1.0 - exp(-_cfg.return_rate * delta)
 	var steady := lerpf(1.0, _cfg.aim_steady, aim)
@@ -262,6 +260,8 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 		rot.x -= _cfg.holster_tilt * _away * left * left
 	else:
 		_away = 0.0
+	# With a bomb in hand your arms hold it (GrenadeView): the replica's let go once it is down out of view.
+	_arms.set_shown(Grenades.held(c) == Grenade.Kind.NONE or _away < 1.0)
 
 	# Turned over to look at (IN1): ended by what `inspect_blocked` names here, before a reload's clip takes the parts.
 	if inspect_blocked(c, aim):

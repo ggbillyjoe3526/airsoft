@@ -167,6 +167,19 @@ static func in_hand(c: Character) -> Grenade.Kind:
 	return c.grenades.readied
 
 
+## The bomb shown in `c`'s hand (NONE: none, or `c` null): while its pin comes out, or while it waits in hand for a
+## trigger pull (MC1) in play. Your arms hold it then (GrenadeView), and the replica's let go (ReplicaView).
+static func held(c: Character) -> Grenade.Kind:
+	var hand := c.grenades if c != null else null
+	if hand == null:
+		return Grenade.Kind.NONE
+	if hand.throwing != Grenade.Kind.NONE and not hand.released:
+		return hand.throwing
+	if hand.readied != Grenade.Kind.NONE and Elimination.is_in_play(c):
+		return hand.readied
+	return Grenade.Kind.NONE
+
+
 ## Whether `c` is throwing a bomb (from the pin to the redraw).
 static func throwing(c: Character) -> bool:
 	return c.grenades.throwing != Grenade.Kind.NONE
