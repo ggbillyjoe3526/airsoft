@@ -5,8 +5,9 @@ extends SceneTree
 ## of the locomotion clips (GA1). Needs a display and OpenGL, so under xvfb:
 ##   xvfb-run -a -s "-screen 0 960x720x24" godot --path . --rendering-driver opengl3 -s res://tools/gait_pictures.gd \
 ##       -- <folder> [gait ...] [view=side|front|quarter]
-## Gaits: walk, run, back, left, right, sprint, crouch (all by default). Each gait writes <folder>/<gait>_<nnn>.png, one
-## a frame at 30 fps over SECONDS. Dev only: tools/ never ships.
+## Gaits: walk, run, back, left, right, sprint, crouch, kneel (crouched still), call (the hit call), off (walking off);
+## all by default. Each gait writes <folder>/<gait>_<nnn>.png, one a frame at 30 fps over SECONDS. Dev only: tools/
+## never ships.
 
 const SIZE := Vector2i(960, 720)
 const TICK := 1.0 / 60.0
@@ -28,7 +29,12 @@ const GAITS := {
 	"right": [Vector2(4.2, 0.0), 0.0, false],
 	"sprint": [Vector2(0.0, 6.3), 0.0, true],
 	"crouch": [Vector2(0.0, 2.1), 1.0, false],
+	"kneel": [Vector2.ZERO, 1.0, false],
+	"call": [Vector2.ZERO, 0.0, false],
+	"off": [Vector2(0.0, 1.4), 0.0, false],
 }
+## The gaits filmed from their first tick (the hit call and the walk off after it), and each one's Character.Status.
+const STATUS := {"call": Character.Status.CALLING, "off": Character.Status.WALKING_OFF}
 
 
 func _initialize() -> void:
@@ -75,24 +81,27 @@ func _run() -> void:
 		var step: Vector2 = spec[0]
 		# The figure faces -Z (yaw 0): ahead is -Z, its right +X.
 		c.velocity = Vector3(step.x, 0.0, -step.y)
+		c.status = STATUS.get(g, Character.Status.ALIVE)
+		var warm := 0.0 if g == "call" else WARM
 		var v := FigureView.new()
 		field.add_child(v)
 		v.setup(c, Color(0.24, 0.55, 1.0), tuning.hits, font, false, [], 0.0, play.figures)
 		v.set_body(models, FigureMix.HUMAN, play.figures.lod_high)
-		var ticks := int((WARM + SECONDS) / TICK)
+		var ticks := int((warm + SECONDS) / TICK)
 		var shot := 0
 		for n in ticks:
 			c.prev_position = c.position
 			c.prev_walk_cycle = c.walk_cycle
 			c.position += c.velocity * TICK
 			Hitbox.step_walk_cycle(c, tuning.hits)
+			c.status_time += TICK
 			var eye := _place_camera(camera, c.position, view)
 			v.update(c, 1.0, TICK)
 			v.animate(c, 1.0, TICK, eye)
 			if v.body() != null and v.body().skeleton != null:
 				v.body().skeleton.notification(Skeleton3D.NOTIFICATION_UPDATE_SKELETON)
 			await process_frame
-			if n * TICK >= WARM and n % (60 / FPS) == 0:
+			if n * TICK >= warm and n % (60 / FPS) == 0:
 				await RenderingServer.frame_post_draw
 				var image := root.get_texture().get_image()
 				image.save_png("%s/%s_%03d.png" % [folder, g, shot])
