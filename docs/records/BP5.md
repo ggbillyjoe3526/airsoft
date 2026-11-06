@@ -7,7 +7,8 @@
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-06 | 1 | Opus 5.5 (bug pass thread) | green | Retry 6/8 | play list keys, a changelog claim, the held-trigger rule in five places, long lines |
-| 2026-11-06 | 2 | Opus 5.5 (bug pass thread) | pending | pending | – |
+| 2026-11-06 | 2 | Opus 5.5 (bug pass thread) | green | Retry 8/8 | no measured performance run on the head |
+| 2026-11-06 | 3 | Opus 5.5 (bug pass thread) | pending | pending | – |
 
 ## The bug pass
 
@@ -25,7 +26,7 @@ checklists, and the files nothing uses. None found a high bug. Every gate was gr
 - **A held trigger after a bomb in hand.** The pull that throws a bomb taken in hand (MC1) was let go only while the
   bomb was in hand and in the air, so a held trigger read as fire once the replica was back up: an AEG on full auto
   fired about ten BBs on its own (a semi or burst only escaped because the redraw outlasts press_buffer). The pull
-  that throws it, or is held as a slot, the holster or a reload puts it back, is now let go
+  that throws it, or a trigger held while a slot, the holster or a reload puts it back, is now let go
   (`Grenades.trigger_command`, the one place the rule lives, reading the controller's own trigger so a vault can't
   end it) until the trigger is released; one let go during the throw is spent then (QA's find). An instant throw (4
   or 5) keeps a held full auto firing after it, as before.
