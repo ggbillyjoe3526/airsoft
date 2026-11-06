@@ -434,7 +434,10 @@ def strap(sheets: Sheets, fit: Fit, y: float, segments: int, buckle_too: bool) -
     u_edge, v = design_m(CX + edge, y)
     buckle_u = u_edge + BUCKLE_AT_EDGE + BUCKLE_LENGTH * 0.45  # its apex over the cushion's edge, the stud on the edge
     u_out = buckle_u + BUCKLE_LENGTH * 0.55 - 0.004  # loops round the buckle's far bar, under it
-    round_m = 2 * math.pi * fit.front / fit.scale  # once round the limb, in design metres
+    # Once round the limb at the strap's own height, in design metres: point() turns u into an angle by the front
+    # radius there, so at the thigh (wider than the knee) a round measured at the knee would leave the back uncovered.
+    front = fit.radius(0.0, v * fit.scale) + CLEAR * 0.001
+    round_m = 2 * math.pi * front / fit.scale
     u_in = u_out
     u_end = -u_edge + 0.012 + round_m  # round the back, ending under the cushion's inner edge
     half = STRAP_WIDTH * 0.5
@@ -458,8 +461,9 @@ def strap(sheets: Sheets, fit: Fit, y: float, segments: int, buckle_too: bool) -
     # Rings run along the strap; the sheet wants rings round it, so the cross-sections are transposed.
     cross = [[ring[k] for ring in rings] for k in range(2)]
     cross_uvs = [[ring[k] for ring in ring_uvs] for k in range(2)]
-    mid_u = u_in + total * 0.5
-    outward = fit.direction(mid_u * fit.scale / fit.front)
+    # Faced away from the limb where the sheet's facing is tested (its last segment, under the cushion's inner edge).
+    rel = rings[-1][0] - fit.centre
+    outward = rel - fit.axis * rel.dot(fit.axis)
     sheets.sheet(cross, cross_uvs, closed=False, outward=outward, hugs=[ring_hugs] * 2)
     if buckle_too:
         buckle(sheets, fit, buckle_u, v, u_edge)
