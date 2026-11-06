@@ -92,7 +92,13 @@ func _drawn(slot: int, fit: Dictionary[StringName, Vector3], reloading: bool = f
 
 
 func test_the_fist_reaches_the_grip_and_the_replica_stays() -> void:
-	# Critic (TP3): each fails with grip_fit empty.
+	# Critic (TP3): each fails with grip_fit empty. In view the hands take the first-person hold's places instead (HG1),
+	# so the fit is checked with the figure out of the camera's view, where the clips' hands stand.
+	var camera := Camera3D.new()
+	add_child_autofree(camera)
+	camera.global_position = EYE
+	camera.global_rotation = Vector3(0.0, PI, 0.0)
+	camera.make_current()
 	var none: Dictionary[StringName, Vector3] = {}
 	for slot: int in [0, 1]:
 		var cls := &"rifle" if slot == 0 else &"pistol"
