@@ -195,7 +195,8 @@ func hold(replicas: Array[MeshInstance3D], classes: Array[StringName],
 			var left := Transform3D(arms_hold.left_hand.basis,
 					arms_hold.left_knuckle.lerp(arms_hold.left_thumb, _config.hold_thumb_share_left)
 					- arms_hold.left_hand.basis * knuckle_l.lerp(thumb_l, _config.hold_thumb_share_left) + shift)
-			_held.append(FigureHeld.new(arms_hold, right, left, shift, grip, (right * grip_r).affine_inverse()))
+			_held.append(FigureHeld.new(arms_hold, right, left, shift, grip, (right * grip_r).affine_inverse(),
+					site_class == &"pistol"))
 		var middle := Vector3.ZERO
 		var muzzle := Vector3.ZERO
 		if r != null:

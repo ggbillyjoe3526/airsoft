@@ -12,13 +12,16 @@ var left: Transform3D = Transform3D.IDENTITY
 var left_shift: Vector3 = Vector3.ZERO
 var on_grip: Transform3D = Transform3D.IDENTITY
 var held_on_grip: Transform3D = Transform3D.IDENTITY
+## Whether it is held in one hand (a pistol): the left hand is lowered from the aim, not on the replica.
+var one_handed: bool = false
 
 
 func _init(hold: FigureArmsHold, right_on: Transform3D, left_on: Transform3D, shift: Vector3, clips_on_grip: Transform3D,
-		on_grip_held: Transform3D) -> void:
+		on_grip_held: Transform3D, in_one_hand: bool) -> void:
 	arms = hold
 	right = right_on
 	left = left_on
 	left_shift = shift
 	on_grip = clips_on_grip
 	held_on_grip = on_grip_held
+	one_handed = in_one_hand

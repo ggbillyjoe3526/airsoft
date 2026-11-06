@@ -42,6 +42,12 @@ var _glow: float = 0.0
 ## first, or the first after the legs were left still), and the frames and time gathered beyond the far line.
 var _pose: FigurePose = null
 var _lines: Vector2 = Vector2.ZERO
+## The camera's view cone (view_corner) and the camera settings it was worked out for (fov, the view's size, its kept
+## aspect), so it is worked out again only when they change.
+var _corner: Vector2 = Vector2.ZERO
+var _corner_for: Vector4 = Vector4.INF
+## Frames until the view is looked at again (FigureConfig.hold_view_stride).
+var _view_frames: int = 0
 var _snap: bool = true
 var _far_frames: int = 0
 var _far_delta: float = 0.0
@@ -84,6 +90,8 @@ func setup(c: Character, team_colour: Color, hits: HitConfig, font: Font,
 	var cfg := figures if figures != null else FigureConfig.new()
 	_flinch = FigureFlinch.new(cfg)
 	_raise_stride = maxi(cfg.raise_stride, 1)
+	# Staggered, so the figures look at the view on different frames.
+	_view_frames = posmod(c.id, maxi(cfg.hold_view_stride, 1))
 	_hits = hits
 	_team = c.team
 	_team_colour = team_colour
@@ -337,8 +345,10 @@ func animate(c: Character, fraction: float, delta: float, eye: Vector3) -> void:
 	var far := _lines.y + cfg.lod_margin
 	var near := _lines.x + cfg.lod_margin
 	_body.near = global_position.distance_squared_to(eye) <= near * near
-	_body.seen = in_view(get_viewport().get_camera_3d(), global_position + Vector3.UP * cfg.hold_view_height,
-			cfg.hold_view_radius)
+	_view_frames -= 1
+	if _view_frames <= 0 or _snap:
+		_view_frames = cfg.hold_view_stride
+		_body.seen = _seen(get_viewport().get_camera_3d(), cfg)
 	if not _snap and global_position.distance_squared_to(eye) > far * far:
 		if cfg.far_stride <= 0:
 			# Held still out there: a press kept now would play stale when the figure comes near.
@@ -456,20 +466,46 @@ func _place_disc() -> void:
 	_contact.transparency = 1.0 - _fade * up
 
 
-## Whether a ball `radius` round `point` may show in `camera`'s view: within a cone round the view's corners, widened by
-## the ball (true without a camera, and for a ball round the camera).
-static func in_view(camera: Camera3D, point: Vector3, radius: float) -> bool:
+## Whether the figure's hands and replica may show in `camera`'s view (FigureConfig.hold_view_height and _radius; true
+## without a camera).
+func _seen(camera: Camera3D, cfg: FigureConfig) -> bool:
 	if camera == null:
 		return true
-	var to := point - camera.global_position
-	var far := to.length()
-	if far <= radius:
-		return true
+	var size := camera.get_viewport().get_visible_rect().size
+	var key := Vector4(camera.fov, size.x, size.y, camera.keep_aspect)
+	if key != _corner_for:
+		_corner_for = key
+		_corner = view_corner(camera)
+	return in_cone(camera.global_transform, _corner, global_position + Vector3.UP * cfg.hold_view_height,
+			cfg.hold_view_radius)
+
+
+## Whether a ball `radius` round `point` may show in `camera`'s view (true without a camera): in_cone with its
+## view_corner.
+static func in_view(camera: Camera3D, point: Vector3, radius: float) -> bool:
+	return camera == null or in_cone(camera.global_transform, view_corner(camera), point, radius)
+
+
+## The cosine and sine of the angle from `camera`'s view axis to its view's corners (a cone round the view).
+static func view_corner(camera: Camera3D) -> Vector2:
 	var size := camera.get_viewport().get_visible_rect().size
 	var tall := tan(deg_to_rad(camera.fov) * 0.5)
 	var wide := tall * (size.x / size.y if size.y > 0.0 else 1.0)
 	if camera.keep_aspect == Camera3D.KEEP_WIDTH:
 		wide = tall
 		tall = wide * (size.y / size.x if size.x > 0.0 else 1.0)
-	var corner := atan(sqrt(tall * tall + wide * wide)) + asin(radius / far)
-	return (-camera.global_basis.z).angle_to(to) <= corner
+	var corner := atan(sqrt(tall * tall + wide * wide))
+	return Vector2(cos(corner), sin(corner))
+
+
+## Whether a ball `radius` round `point` reaches into the cone `corner` (view_corner) round the view axis of a camera
+## at `at` (true for a ball round the camera). The ball widens the cone by the angle it fills, asin(radius / distance),
+## added through the cosines so no angle is worked out.
+static func in_cone(at: Transform3D, corner: Vector2, point: Vector3, radius: float) -> bool:
+	var to := point - at.origin
+	var far := to.length()
+	if far <= radius:
+		return true
+	var fills := radius / far
+	var widest := corner.x * sqrt(1.0 - fills * fills) - corner.y * fills
+	return -at.basis.z.normalized().dot(to) >= widest * far

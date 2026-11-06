@@ -56,8 +56,8 @@ On attempt 4's labelled picture (`playtest/hg1/bot-hands-final.jpg`) the owner w
   whatever the body does, so each bone's turn over its parent is kept until the hold or the hand's place changes, and
   each frame only blends the clips' turns toward them. They close only within LOD0's line of the eye (FigureView sets
   FigureBody.near); past it the hand still holds the replica but keeps the clips' fingers. Out of the camera's view
-  (FigureView.in_view: a cone round the view's corners, widened by a 1 m ball round the chest) the hands keep the
-  clips' and the replica its clips' place; the hold's easing runs on, so it is in place when the figure shows.
+  (FigureView.in_view: a cone round the view's corners, widened by a 1 m ball round the chest, looked at every 4th
+  frame, the figures staggered by id) the hands keep the clips' and the replica its clips' place; the hold's easing runs on, so it is in place when the figure shows.
 - **Each slot's hold is one FigureHeld** (FigureHands.held): the arms' hold, both hands' places, the left's shift and
   the replica on the grip bone as the clips hold it and as the hand holds it; FigureBend hands it to FigureGrasp.
   - **The right hand** holds the replica whenever it is in the hand: high on the grip, fingers round it, index on the
@@ -109,8 +109,9 @@ On attempt 4's labelled picture (`playtest/hg1/bot-hands-final.jpg`) the owner w
   pull request (`playtest/hg1/bot-hands-final.jpg`, each picture labelled with what to look at).
 - `test_figure_hands_qa.gd`'s "in the fist" gap is 3.5 cm (was 3): the palm now wraps the grip's side, so the palm's
   line runs a grip's half-width off its middle (3.08 cm on the pistols).
-- `tools/figure_bench.gd`, 11 figures, 60 s, three runs each alternating with main: both together 2.22 ms against
-  2.07 (+7 %), skeleton per figure 47 us against 43. The hands' own work is about 10 us a figure in view (5 the two
-  reaches, 3 the fingers). Attempt 3 worked the fingers out every frame (90 us); attempt 4's reviews measured +13.5 %
-  with every figure holding, seen or not.
+- `tools/figure_bench.gd`, 11 figures, 30 s, four runs each pinned to one core (`taskset -c 1`, the unpinned runs
+  drifted 10 % between runs), alternating with main: both together 2.18 ms against 2.11 (+3 %), skeleton per figure
+  47 us against 43, animation level. The hands' own work is about 10-17 us a figure in view; looking at the view
+  every frame cost about 10 us a figure (the camera and viewport calls), hence the stride. Attempt 3 worked the
+  fingers out every frame (90 us); attempt 4's reviews measured +13.5 % with every figure holding, seen or not.
 - Left for the figures batch: the glove's knuckle plates show small shards on a deep bend (KNOWN_ISSUES).
