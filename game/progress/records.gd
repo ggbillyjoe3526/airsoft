@@ -17,6 +17,8 @@ const KNOWN_KEYS: Array[String] = ["results", "best_accuracy", "streak", "best_s
 ## A match counts towards best accuracy only with at least this many BBs fired, so three lucky shots aren't a record
 ## (the browser game's minBBsForAccuracyRecord).
 const ACCURACY_MIN_BBS := 30
+## The largest count a save may hold: far above any real streak or time, well inside an int.
+const COUNT_MAX := 1_000_000_000
 ## "normal.elimination" or "hard.attack_defend": a difficulty and a mode id (MatchOptions.MODES, "_" and all).
 const RESULT_KEY_PATTERN := "^[a-z][a-zA-Z0-9]*\\.[a-z][a-zA-Z0-9_]*$"
 ## "range": a timed challenge course (RangeChallenge.course, a map's id).
@@ -213,8 +215,8 @@ func from_dict(data: Dictionary) -> Array[String]:
 	return problems
 
 
-## A whole number from 0, or -1.
+## A whole number from 0 up to COUNT_MAX, or -1 (a hand-edited 1e300 would overflow int()).
 static func _count(v: Variant) -> int:
-	if (v is int or v is float) and float(v) >= 0.0 and float(v) == floorf(float(v)):
+	if (v is int or v is float) and float(v) >= 0.0 and float(v) <= COUNT_MAX and float(v) == floorf(float(v)):
 		return int(v)
 	return -1

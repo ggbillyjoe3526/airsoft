@@ -1,45 +1,25 @@
 # Handoff
 
-What is happening now (as of 2026-10-30), for a session picking up the work. The plan is `docs/ROADMAP.md`, the
+What is happening now (as of 2026-11-06), for a session picking up the work. The plan is `docs/ROADMAP.md`, the
 rulings `docs/DECISIONS.md`, how work runs `docs/PROCESS.md`.
 
 ## Now
 
-- **The game has moved from the browser to Godot (owner, 2026-10-18).** This repository restarts at 0.1 Dev 1. The
-  browser game (frozen at `0.1-beta.1`; its repository is no longer on GitHub) was copied into `legacy/browser/` as the
-  reference to rewrite from, and removed on 2026-11-05 (owner): read it from git at the tag `0.1-dev.1`, its handover
-  pack at `legacy/browser/docs/handover/` there.
-- **The salvage runs as three pull requests** from the "Salvage audit and roadmap" thread: the docs, the owner's data
-  tables and the legacy reference (merged); the Godot bootstrap (project, boot screen, CI, tests, release, agents and
-  pipeline, from the owner's katanashotgun project, whose remaining useful scripts are in `legacy/katanashotgun/`);
-  then the assets (models, fonts, sounds, map layouts).
-- **The salvage is done** (pull requests #1 to #3).
-- **The simulation core is done (SC1):** BBs, hit calling, Elimination rounds, the AEG Rifle and GBB Pistol, and
-  movement as plain, tested GDScript on the 60 Hz tick (`game/sim/README.md`).
-- **The first playable is done (FP1):** Play Depot from the title screen, walk, sprint, crouch, jump, aim and shoot
-  both replicas against four Beta stand-ins that call their hits (`game/map/`, `game/play/`, `game/input/`).
-- **Bots and Elimination are done (BE1):** you and two bot teammates against three bots on Depot, first to five; the nav
-  grid is ported (`game/nav/`), bots are controllers (`game/ai/README.md`), lean (Q, E) and vault are in.
-- **Magazines on the HUD are done (MZ1):** a gauge per magazine, and the GBB Pistol's slide locks back on empty.
-- **The BB physics pass is done (BB1):** a breeze per match, the hop-up dial on 4 and 5 in play, and ricochets off
-  concrete and steel (they only tick you unless the match counts them).
-- **The holster and a smoother lean and vault are done (MO1):** 3 puts the replica away for a faster run (bots too),
-  a lean a wall cuts short eases out, a vault dips and tips the view, and "Space to vault" shows when Jump would vault.
-- **Bots vault low walls (BV1):** the nav grid links low walls a body can vault, bots take a link where it saves more
-  than 3 m on foot and press Jump there; on Depot that is the hall wall.
-- **Settings are done (SE1):** Controls (sensitivity as a slider or cm/360, invert, crouch and aim hold or toggle, two
-  keys per action), Audio (five volumes) and Display (window mode, V-Sync, field of view, show FPS), from the title and
-  the pause menu, saved in `user://settings.save`.
-- **The debug view is done (DV1):** F3 also shows the match seed, your position and the entity count, F4 draws BB paths
-  and F5 hit areas in the world (made only while on, keys reserved), and `-- --seed <n>` replays a match.
-- **Step 27 is done (2026-10-29).** Steps 1 to 26 are built (parity with the browser's 0.1 Beta 1), plus three bot
-  levels. Step 27 added bot callouts (CO1, CO2; #124, #125), the overtime flag (OV1 to OV3; #126 to #128), pings and
-  ping markers (PN1, PN2; #129, #131) and the magazine hand-off (MH1 to MH3; #133, #134 and this one).
-- **0.1 Dev 1 is out (2026-10-30):** the owner tagged `0.1-dev.1` on 33271ac after his playtest and the bug pass, and
-  its installer check passed. `config/version` reads "0.1 Dev 2", the build being made (owner, 2026-10-30).
-- **0.1 Dev 2 (owner, 2026-10-30):** basic smoke and flash bombs first, thrown by bots too; the Depot and Woodland
-  redesign and CC0 dressing come later. Blender starts when he says (Depot, then Woodland).
-- **Crouch and aim are both held** (owner, 2026-10-18), changed in the Depot thread.
+- **0.1 Dev 1 is out (2026-10-30)** (tag `0.1-dev.1`). 0.1 Dev 2 is being built: `config/version` reads "0.1 Dev 2".
+  The browser game is frozen at `0.1-beta.1`, removed from the repository on 2026-11-05 (owner) and read from git at
+  the tag `0.1-dev.1`.
+- **Fields.** Woodland and the Depot are redesigned (WR1, DR1). The Street is a new field, dev only since DT1.
+- **Replicas.** The Sniper Rifle (bolt-action, Variable Scope) is public since DT1 (SN1 to SN3).
+- **Bombs.** Smoke and flash bombs, thrown by you and by bots (SF1, SF2, GT1 to GT3).
+- **Models.** The Blender series is built from the owner's photos: replicas (BL1 to BL6), power sources (BL7),
+  attachments (BL8), magazines (MAG1), barrels (BA1), bombs (BL9), the figure's body (BL10), head gear (BL11), gear
+  (BL12), pads (BL13) and faces (FA1).
+- **Arms and holds.** The first-person arms hold each replica (BL4), your hands work the bombs and the Sniper Rifle's
+  bolt (GT2, GT3, BW1, BW2), and bots hold replicas as the arms do, a pistol in one hand (HG1, owner, 2026-11-06).
+- **Sound.** The owner's recordings are in (AU2 to AU8).
+- **UI.** The menus and HUD are redesigned (UR1 to UR7), with fixes after (UF1, UF2).
+- **Bug passes.** BP2 to BP4 are merged. BP5 is under way.
+- **Next.** The owner's playtest of the Dev 2 list, then the release checklist after he tags (`docs/PROCESS.md`).
 
 ## Where to look
 

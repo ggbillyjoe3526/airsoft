@@ -12,7 +12,9 @@ the panel says **SMOKE IN HAND** or **FLASH IN HAND** and the crosshair stays to
 Rolling on, or a replica key, reload or the holster, puts it back. Your replica goes down while your left hand pulls
 the pin and your arm swings the bomb over, it leaves your hand along your view, lofted a little, and your replica comes
 back up: under a second in all. You
-can't fire or aim while you throw, and a reload under way stops. Throwing on the run adds some of your own speed.
+can't fire or aim while you throw, and a reload under way stops. If you keep the trigger held after the pull that
+threw the bomb, your replica doesn't fire when it comes back up: let go and pull again. Throwing on the run adds some
+of your own speed.
 
 Bots throw the same way: you see the bomb in a bot's hand as its arm swings back by its head, then over and out as it
 lets go.

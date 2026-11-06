@@ -100,11 +100,11 @@ The rifle holds 60 BBs and the pistol 18, each with 4 magazines a round. Nothing
   first, spares fullest first, an empty one dark.
 - [ ] **Empty the GBB Pistol and press R the instant the last BB goes.** The slide still snaps back and stays back
   through the reload, closing near the end as above.
-- [ ] **Hear the bots fight (AU1).** With the volumes at their defaults, play Woodland or The Street and hang back
-  while the bots engage. Their gunfire is clear from across the field: a rifle's motor whir and shots, a pistol's
-  gas pop, a spring's twang, loud up close and duller and quieter the further off (and through walls). A bot right by
-  you is no louder than your own replica. A silenced bot carries about half as far. Does a full-auto burst ever crackle
-  or distort?
+- [ ] **Hear the bots fight (AU1).** With the volumes at their defaults, play Woodland or The Street (Dev content on)
+  and hang back while the bots engage. Their gunfire is clear from across the field: a rifle's motor whir and shots, a
+  pistol's gas pop, a spring's twang, loud up close and duller and quieter the further off (and through walls). A bot
+  right by you is no louder than your own replica. A silenced bot carries about half as far. Does a full-auto burst ever
+  crackle or distort?
 - [ ] **Quieter ambience (AU1).** Settings › Audio › Ambience starts at 20 % on a new save (or a save you never changed
   it on). Birds, insects and the yard's hum sit well under the footsteps and gunfire; does it still give the field
   life without distracting?
@@ -277,7 +277,7 @@ Public since 2026-11-05 (SN1): turn on Settings › Dev settings › Disable lev
   level 6 has Red Gas; the M140 is at 7 and the M150 at 9. They show with Dev content off too (public since 2026-11-05).
 - [ ] **Bots with it.** About 1 opponent in 12 on Hard (fewer on Normal and Easy) carries it: they raise the scope to
   fight and hold their fire from the hip unless you are within 8 m. Do they feel dangerous at range and beatable up
-  close? Is it fair on Depot, Woodland and The Street, at 5v5 and 8v8?
+  close? Is it fair on Depot, Woodland and The Street (Dev content on), at 5v5 and 8v8?
 
 ## Variable Scope
 
@@ -602,8 +602,8 @@ opens every row (the Modes Update adds the other rule sets).
 - [ ] **The rows.** Rounds to win (3 to 10), Round time (1:30 to 5:00), Team size (the picked map's own: 5v5 to
   8v8 on every field, TS1), Opponents, Teammates, Friendly fire and
   Ricochets count.
-- [ ] **Team size follows the map (WL2, TS1).** Custom 8v8 on Depot, pick Woodland and The Street: each shows 8v8,
-  and after a restart still 8v8. Skirmish plays each map's standard: 6v6 on all three.
+- [ ] **Team size follows the map (WL2, TS1).** Custom 8v8 on Depot, pick Woodland and The Street (Dev content on,
+  Settings › Dev): each shows 8v8, and after a restart still 8v8. Skirmish plays each map's standard: 6v6 on all three.
 - [ ] **A 1v1, a 2v2, first to 3.** The scoreboard and pips match the sizes; first to 3 swaps ends after round 2 and
   ends at 3. Do rounds feel too long or quick at that size?
 - [ ] **Opponents Easy, Teammates Hard.** Your teammates win clearly more often. The rules text says this match won't
@@ -715,7 +715,8 @@ same and throw them (SF2).
 
 Every field plays 6v6 by default; Custom offers 5v5, 6v6, 7v7 and 8v8 on each (owner, 2026-11-01).
 
-- [ ] **The default.** Skirmish on Depot, Woodland and The Street: the chips say 6 v 6 and twelve play.
+- [ ] **The default.** Skirmish on Depot, Woodland and The Street (Dev content on, Settings › Dev): the chips say 6 v 6
+  and twelve play.
 - [ ] **Every size, every map.** A Custom match at 5v5 and at 8v8 on each field. Every player starts on a spot of
   their own; everyone hit walks to a spot of their own in the dead zone. Is each size fair and fun? 5v5 should feel
   slower and more careful, 8v8 faster and busier, with rounds about as long.
@@ -725,8 +726,8 @@ Every field plays 6v6 by default; Custom offers 5v5, 6v6, 7v7 and 8v8 on each (o
   and its max, and the `[perf-summary]` line at exit; the same on Depot and The Street. The cloud measured the CPU
   only (`tools/team_bench.gd`, `docs/records/TS1.md`): about 6 ms a frame on average on Woodland, 14 ms at its
   slowest 1 %. Note any hitch, and whether BBs ever vanish mid-flight in a big fight.
-- [ ] **The Street's ends.** Elimination on The Street from each end: does the north end (the embankment) feel
-  stronger? Bots win 53 to 64 % of rounds from it, more the bigger the teams (KNOWN_ISSUES).
+- [ ] **The Street's ends.** Elimination on The Street (Dev content on, Settings › Dev) from each end: does the north
+  end (the embankment) feel stronger? Bots win 53 to 64 % of rounds from it, more the bigger the teams (KNOWN_ISSUES).
 - [ ] **Woodland's Attack / Defend.** Attack and defend a few rounds each: do the attackers have it too easy? Bots
   attacking win about 64 % of rounds at every size, at the edge of the 40 to 65 % band.
 
@@ -894,12 +895,12 @@ Every field plays 6v6 by default; Custom offers 5v5, 6v6, 7v7 and 8v8 on each (o
   and pings show; an enemy only where your side heard them. The mouse moves a pointer instead of the view and you can
   still walk. Let go of M: the view turns again and the trigger needs a fresh pull. Out: the map shows but has no
   pointer. Is it big and clear enough? Is the pointer's speed right?
-- [ ] **The full-screen map's detail (FM2).** Hold M on Depot, Woodland and The Street: the field fills the screen
-  beside the key. The header names the round and says what your side must do (attack, then defend after half time;
-  "Knock out the other team" in Elimination). A and B badges sit by the flags; both starts are boxed in their team's
-  colour (swapped after half time) with the dead zones hatched; doors show as wood-coloured bars. No place names
-  overlap. Woodland's hills, tracks and dry river and The Street's gardens and roads read apart, on the minimap too.
-  Is anything missing you'd look for? Is the ground too busy?
+- [ ] **The full-screen map's detail (FM2).** Hold M on Depot, Woodland and The Street (Dev content on, Settings › Dev):
+  the field fills the screen beside the key. The header names the round and says what your side must do (attack, then
+  defend after half time; "Knock out the other team" in Elimination). A and B badges sit by the flags; both starts are
+  boxed in their team's colour (swapped after half time) with the dead zones hatched; doors show as wood-coloured bars.
+  No place names overlap. Woodland's hills, tracks and dry river and The Street's gardens and roads read apart, on the
+  minimap too. Is anything missing you'd look for? Is the ground too busy?
 - [ ] **Go there (click on the map, Mouse 4, or the wheel's Go There).** Click a far corner of the map: a radio
   click, both teammates set off side by side, the marker reads "GO · 40 M", then "HOLD · 40 M" once they're there,
   facing on the way they went. Mouse 4 at a spot you look at does the same; at the sky the wheel says "Nowhere there
@@ -1150,7 +1151,7 @@ The 0.1 Dev 2 bug pass's fixes that need eyes on a real display or hands on the 
 
 ## Bug pass fixes (BP3)
 
-The fixes from the bug pass after the Sniper Rifle that need hands on the keys. Dev content on for the rifle and scope.
+The fixes from the bug pass after the Sniper Rifle that need hands on the keys.
 
 - [ ] **Sniper Rifle, then switch to the pistol at once and fire:** the pistol fires as soon as it is up.
 - [ ] **Sniper Rifle, click again as the handle snaps home:** the next shot goes as the rifle is ready, not lost.
@@ -1178,15 +1179,15 @@ The fixes from the second half of the bug pass that need hands on the keys.
 
 ## Sniper balance (SN3)
 
-Dev content on for the rifle. The numbers came from bots; these need you.
+The numbers came from bots; these need you.
 
 - [ ] **The Street, the Path:** the wheelie bins halfway down its straight. Is it a stop you would use going up it, and
   does it look right where it stands?
 - [ ] **Sniper Rifle at 55 to 65 m, at a bot that hasn't seen you:** miss it on purpose. It turns and answers within a
   moment, where before it never could see you. Fair, or too quick?
-- [ ] **Against sniper bots (Hard, Dev content on):** their first shot comes once their aim has settled, and through
+- [ ] **Against sniper bots (Hard):** their first shot comes once their aim has settled, and through
   the scope it lands. Dangerous at range, beatable up close?
-- [ ] **Each field at 6v6 with Dev content on:** does any end or side feel stacked once snipers are about?
+- [ ] **Each field at 6v6:** does any end or side feel stacked once snipers are about?
 
 ## UI fixes from your playtest (UF1)
 
@@ -1237,7 +1238,7 @@ Dev content on for the rifle. The numbers came from bots; these need you.
   magazines sit on the rifle, not floating or sunk in. The long barrel and silencer start at the new barrel's
   end, and the torch sits on the rail beside the handguard.
 - [ ] **Menus:** the Loadout and Armory pictures show the new rifle, sharp and to scale.
-- [ ] **Sniper Rifle (Dev content on):** it is the new AEG with its long barrel for now (as long overall as before);
+- [ ] **Sniper Rifle:** it is the new AEG with its long barrel for now (as long overall as before);
   the bolt-action model is next (since BL5: its own model, below).
 - [ ] **Frame rate:** no drop against before, at 8v8 on Ultra and Low.
 
@@ -1286,7 +1287,7 @@ Your five fixes from the marked-up render (2026-11-05), worked from your origina
 
 ## The new Sniper Rifle model (BL5)
 
-The bolt-action in the grey chassis from your first sniper photo (2026-11-05). Dev content on.
+The bolt-action in the grey chassis from your first sniper photo (2026-11-05).
 
 - [ ] **Look:** in Customise and first person, the rifle reads as your photo: the long barrel and its cap, the M-LOK
   forend, the black receiver and rail, the short box magazine, the trigger guard and paddle, the grip and the stock
@@ -1438,8 +1439,8 @@ as a round starts, then watch a few Depot matches:
 - [ ] **Gear and pads (BL12, BL13):** plate carrier, pouches, radio, backpack, empty holster and knee and elbow pads sit
   on the body and move with it; the pads stay on the knees when crouched and on the elbows when aiming.
 - [ ] **What bots hold (TP1, TP2, TP3):** each bot's replica is the same model you hold, with its parts (an optic hides
-  its irons). A rifle's stock sits in the shoulder with the head down on it; both fists close on a pistol's grip, not
-  under it. Up close, do the fingers look wrapped round the grip?
+  its irons). A rifle's stock sits in the shoulder with the head down on it; a pistol is held in the right hand only,
+  the fingers round the grip. Up close, do the fingers look wrapped round it?
 - [ ] **Cyber Pistol size (CZ1):** in your hand, in Customise and on a bot it is as big as the GBB Pistol, its sights
   showing.
 - [ ] **Your arms (BL4):** with each replica, at the hip and aimed, only your gloved hand and a little wrist show; the
@@ -1509,6 +1510,19 @@ models show without anything else changing. The smoke and flash icons now do the
   hand holds the handguard just behind the grip.
 - [ ] **Letting go:** watch a bot reload, switch to its pistol and throw a bomb. The left hand leaves the handguard for
   each and comes back after, with no jump.
+
+## The second bug and performance pass (BP5)
+
+- [ ] **A held trigger after a bomb in hand.** On the AEG on full auto, roll the mouse wheel to the smoke (it comes
+  into your hand), pull the trigger and keep holding it: the smoke is thrown and, when the rifle is back up, it does
+  not fire until you let go and pull again. Let go and pull again during the throw: it fires as soon as the rifle is
+  up. Pressing 4 with the trigger held (an instant throw) still fires after the throw, as before: does the
+  difference feel right?
+- [ ] **Your torch after a bomb in hand.** At night, with your torch on, roll the wheel to a bomb, then press 1 to put
+  it back (and again with R): the torch comes back on with the rifle, with no click (it stayed off before). With 3
+  (holster) it stays off, as the rifle stays away.
+- [ ] **Slot keys on the Loadout page.** Rebind Primary and Secondary in Settings › Controls, then open the Loadout
+  page: the two carried cards show your keys, not 1 and 2.
 
 ## Reporting what you find
 

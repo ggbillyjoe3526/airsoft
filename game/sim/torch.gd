@@ -38,13 +38,18 @@ static func lit(c: Character) -> bool:
 
 ## One tick of `c`'s torch, in play, after its armament (a switch or holster this tick counts): `toggle` (the command's
 ## press) switches it, with a TORCH event, only while a light is in hand; with none in hand a lit torch goes out (also
-## an event: the thumb's click as the replica goes away). `c.torch_time` counts the seconds since the last switch.
-static func step(c: Character, toggle: bool, events: SimEvents, dt: float) -> void:
+## an event: the thumb's click as the replica goes away). `relight` (a throw ended, or a bomb went back, with the torch
+## on before it: Grenades.take_torch_back) puts it back on when a light is in hand again, silently and without counting
+## as a switch (as the throw always did; a bot's torch held its minimum hold through it).
+## `c.torch_time` counts the seconds since the last switch.
+static func step(c: Character, toggle: bool, events: SimEvents, dt: float, relight: bool = false) -> void:
 	c.torch_time += dt
 	if c.armament.light_in_hand() == null:
 		if c.torch_on:
 			_switch(c, false, events)
 		return
+	if relight:
+		c.torch_on = true
 	if toggle:
 		_switch(c, not c.torch_on, events)
 

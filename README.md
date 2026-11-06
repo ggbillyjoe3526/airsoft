@@ -23,8 +23,9 @@ three difficulty levels, with squad orders, callouts and the magazine hand-off; 
 dead zone; settings, saves, accessibility options and a bug report button. Its full notes are `CHANGELOG.md` ›
 0.1 Dev 1.
 
-**Coming in 0.1 Dev 2:** basic smoke and flash bombs, thrown by bots too, then Depot and Woodland redesigned larger and
-dressed in the new art direction.
+**Built for 0.1 Dev 2 so far:** smoke and flash bombs (bots throw them too), Depot and Woodland redesigned and dressed,
+The Street (dev content only), a public Sniper Rifle, models built in Blender for the replicas, attachments, figures
+and gear, first-person arms, and the owner's own recorded sounds.
 
 ## Run it
 

@@ -48,7 +48,8 @@ var _eliminated: PlayerCommand = PlayerCommand.new()
 ## presses made during it (Vault).
 var _vaulting: PlayerCommand = PlayerCommand.new()
 var _after_vault: PlayerCommand = PlayerCommand.new()
-## Followed while throwing a bomb: the command with its trigger and sights let go (Grenades.throwing_command).
+## Followed while throwing a bomb, the command with its trigger and sights let go, and after a bomb in hand while the
+## pull that threw or put it back is held, the trigger let go (Grenades.trigger_command).
 var _throwing: PlayerCommand = PlayerCommand.new()
 ## Followed with a bomb in hand: a trigger pull its throw, the trigger and sights let go (Grenades.ready_command).
 var _readied: PlayerCommand = PlayerCommand.new()
@@ -130,6 +131,8 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 			cmd.reset(c.yaw, c.pitch)
 		# The torch's thumb switch works through a vault too (the vault's own command drops other presses until its end).
 		var toggle_torch := in_play and cmd.toggle_torch
+		# The trigger as the controller pulls it, before a vault, a bomb in hand or a throw holds or lets it go.
+		var trigger := cmd.fire
 		# A Jump press at a low obstacle vaults it instead; while vaulting only the view follows the command, the trigger
 		# stays as it was and other presses wait for the vault's end (BP5).
 		if in_play and not c.vault.active:
@@ -144,8 +147,7 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		if in_play:
 			cmd = Grenades.ready_command(c, cmd, _readied)
 			grenades.press(c, cmd, live, state.grenades, state.events)
-			if Grenades.throwing(c):
-				cmd = Grenades.throwing_command(cmd, _throwing)
+			cmd = Grenades.trigger_command(c, cmd, trigger, _throwing)
 			if cmd.use_door and has_doors:
 				doors.press(c, cmd.door_to_use, state)
 		elif has_doors and not c.vault.active:
@@ -179,7 +181,7 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		# The bomb leaves the hand from the eyes, as BBs do; the replica comes back up after it.
 		grenades.step_throw(c, Lean.eye(c, tuning.body, tuning.hits), state.grenades, state.events, dt)
 		# After the armament and the throw: a switch, holster or throw this tick to no light in hand puts the torch out.
-		Torch.step(c, toggle_torch, state.events, dt)
+		Torch.step(c, toggle_torch, state.events, dt, Grenades.take_torch_back(c))
 		# A ping looks where the view is now, after the turn and the shot's kick.
 		_ping(c, commands, live and not state.round_state.practice, state.events)
 	var first_bb_event := state.events.count

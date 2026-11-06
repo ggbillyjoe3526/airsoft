@@ -1,35 +1,22 @@
-# Performance: HS1 (681450b..HEAD 9252cee), rest_on_back
-
-Verdict: Pass (no per-frame cost; one-time costs, one nit below).
-
-Measured headless, Godot 4.7.2, Time.get_ticks_usec, throwaway script (deleted). Dev-machine numbers; a slow laptop
-may be 2 to 3x.
-
-- Load-time _back_rest (inside FigureModels.load_kinds, both kinds): 55 to 61 ms total, once at start-up. Fine.
-- First hold, rest_on_back, per replica body mesh, kind 0 (the humanoid with kit):
-  - aeg Body 30,996 tris: 67 ms
-  - sniper Body 27,843 tris: 59 ms
-  - pistol Body 29,028 tris: 50 ms
-  - cyber Body 24,480 tris: 48 ms
-  - small parts (flash hider, mag, sights, figure proxy): 0.3 to 5 ms each
-- Kind 1 (robot, empty back_rest) returns at once: 0.01 ms.
-- Cached repeat call: 0 to 13 us (Dictionary hit). Cost is about 2 us per triangle at the 1.5 cm sample.
-- Per frame: rest_on_back is called only from figure_hands setup (game/play/figures/figure_hands.gd:139), never from
-  process/physics. Nothing per frame, no allocation in a loop beyond the one get_faces() copy per first call
-  (about 30k tris * 3 * 12 B = about 1.1 MB PackedVector3Array, freed after the call).
-
-Does the first-hold hitch matter?
-- A match has 12 figures but a handful of distinct meshes (4 bodies at most, cached per kind per Mesh): worst case
-  about 60 to 70 ms once per distinct replica, or about 225 ms total if all four replicas are equipped by figures at
-  spawn (spread over whatever frames the figures are built in). It happens at figure set-up, not mid-fight, if the
-  figures are built during the round start/loading; a single 60 ms frame there is invisible.
-- Risk to watch: if a bot's loadout is first built in the middle of a live round (e.g. a replica drawn for the first
-  time while the match runs), that is a single 50 to 70 ms frame (about 4 frames dropped at 60 Hz). Not a fail,
-  at most a one-off stutter.
-
-Nit (can wait): Body meshes alone are 25 to 30k tris at 2 us each; sampling each triangle at 1.5 cm is far finer than
-needed for a cell of 1.5 cm on mostly large flat faces. If a stutter is ever seen, warm the cache in loading
-(call rest_on_back for each replica mesh once after load_kinds) or sample coarser. No change needed now.
-
-Cached state: back_lift is Dictionary[Mesh, float] keyed on the mesh; holds Mesh refs (shared resources, not freed
-per match), no leak. back_rest is built once; no orphan nodes or duplicate signal connections seen in the diff.
+Task: none (BP5 part 1) · head b46abbf · Verdict: Pass
+Run: tools/team_bench.gd (no `--perf` flag exists for the bot match; this is the repo's tick/frame bench: whole PlaySession, autopilot, hand-stepped), seed 1, 60 s match time after 5 s warm-up, depot+street at 6v6 and 8v8, headless (no GPU). Main = /home/user/airsoft at 90b0ff4 (confirmed clean). Interleaved main, head, main, head (2 runs a side). Machine shared (4 cores, load ~2 from other agents), so run-to-run noise is about 5-7 % on means. · budget: no baseline yet (no pipeline/perf-budget.json), judged against targets and main.
+Metrics, mean tick ms (main run1/run2 -> head run1/run2), frame = views, ms:
+ depot 6v6  tick 2.14/2.29 -> 2.34/2.33 (ok, +5 %)   frame 1.02/1.10 -> 1.09/1.09
+ depot 8v8  tick 3.10/3.06 -> 3.10/3.13 (ok, +1 %)   frame 1.29/1.28 -> 1.29/1.37
+ street 6v6 tick 2.26/2.16 -> 2.26/2.21 (ok, +1 %)   frame 1.08/1.01 -> 1.06/1.05
+ street 8v8 tick 3.63/3.43 -> 3.38/3.66 (ok, 0 %)    frame 1.40/1.32 -> 1.32/1.41
+ p95 tick 3.1-6.2 ms on both sides, p99 4.2-9.7 on both; worst tick 8-29 ms on both sides (street spikes in main too: 22-25 ms), not a head effect.
+ Every config is far under Low's 16.7 ms frame (tick+frame <= ~5 ms mean, 8v8). Frame times are reported only (headless).
+ Node count, orphans and static memory: not logged by team_bench; no scene or node code changed in the diff (judgment).
+Regressions (> 10 % worse): none. The one visible gap (depot 6v6 tick, +5 %) is inside main's own run-to-run spread (2.14 vs 2.29) and did not repeat in other configs.
+Blocking findings: none
+ - game/sim/grenades.gd trigger_command (new, per tick per character): judgment+measured. Two bool reads and a return of `cmd` on the common path; copy_from into the preallocated `_throwing` only while a pull is held off. No Array, String, Callable or new object. `take_torch_back` is a bool read and write. Torch.step relight is a default bool param, no allocation. Measured cost is not distinguishable from noise.
+ - game/sim/simulation.gd:134: new local `var trigger := cmd.fire` is a bool on the stack, no allocation. The `_throwing` command is the existing preallocated field, no new fields allocated per tick.
+ - game/play/sim_audio.gd:746-754: push_warning with String formatting only on the missing-peak path at ambience start, not per frame.
+ - game/progress/records.gd: one extra float compare in a load-time parse.
+Advisory:
+ - The diff also deletes assets/models/characters/human_bot_human_v12_{col,nrm,orm}.webp (+ .import), about 1.2 MB: a size win; the critic/QA should confirm nothing still references them (smoke ran per QA). Judgment.
+ - team_bench does not print OBJECT_NODE_COUNT / orphans; adding them would give the next measured review a leak check (not needed for this diff).
+Fixes: none needed.
+Unexplained: none. Worst-tick spikes (up to ~29 ms on street 8v8) exist on main as well; on a shared machine they are not attributable to the diff.
+Verdict: Pass

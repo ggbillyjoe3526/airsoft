@@ -45,8 +45,8 @@ var ammo: Array[Ammo] = []
 var active: int = 0
 ## Seconds until the next shot may go (slightly negative keeps an auto rate exact).
 var cooldown: float = 0.0
-## Each slot's cooldown while it is put away (s, 0 for the slot in hand): a bolt still cycling keeps cycling on the
-## sling, and never holds up the replica switched to (BP3: the Sniper Rifle's 1.25 s blocked the pistol's first shot).
+## Each slot's cooldown while it is put away (s, 0 for the slot in hand): a bolt still cycling keeps cycling while
+## stowed, and never holds up the replica switched to (BP3: the Sniper Rifle's 1.25 s blocked the pistol's first shot).
 var stowed_cooldowns: PackedFloat64Array = PackedFloat64Array()
 ## The replica is put away (the holster): nothing in hand fires, aims, reloads, turns its dial or switches its selector.
 var holstered: bool = false

@@ -1,29 +1,41 @@
-Task: BL8b · QA on the attempt-2 worktree (head 724956a plus the BL8b changes, since rebased onto main as this branch) · Verdict: Pass
+Task: none (BP5 part 1) · QA commit 7e628b3 · Verdict: Pass
+
+Scope: `git diff 90b0ff4..7e628b3`, attempt 2. Re-checked the held-trigger rule end to end by reading
+`Grenades.trigger_command`, `ready_command`, `end_throw`/`stop`, `take_torch_back`, `Torch.step` and the call order in
+`Simulation.step`, and by running the tests.
 
 Blocking: none.
+Advisory: none new.
 
-Part contracts
-- test_attachment_models.gd 14/14 and test_at3_qa.gd 14/14 on that build: markers (_Figure, _SightLine, _Muzzle,
-  _Beam, _UnderLaser), sight lines on their lenses, the laser's beam at its emitter, the new laser, 2x and variable
-  scope tests.
-- Read from the glb: the laser's Beam sits 0.1 mm ahead of its LaserLens (LZ_LENS_Y + 0.1).
+Held-trigger rule, traced and covered:
+- Throw by wheel + pull: held_off set when ready_command emits the throw; the replica stays at fire=false after
+  `end_throw` until the pull is let go (test_bp5.gd, test_bp5_qa.gd). A release clears it even mid-throw.
+- Put back by slot / reload / holster: held_off set unconditionally, trigger_command clears it the same tick when the
+  trigger is not pulled, so no lost shot on a free trigger (test_bp5.gd slot + reload cases, semi case in qa).
+- Instant throws 4/5: never set held_off; a held trigger fires again after, as before (qa test).
+- Vault: `pulled` is the raw trigger taken before the vault, so a release during a vault is seen; no stray shot.
+  No vault starts mid-throw (Simulation.step guard), unchanged.
+- Hit / respawn: `stop()` on a hit with a bomb busy; a hit after the throw leaves held_off until `respawn()` clears it
+  (grenades.refill); trigger_command only runs in play. New test pins this.
+- Bots: they throw with throw_grenade only (bot_bombs.gd:36), so held_off is never set for them.
+- Torch: relight happens in Torch.step after Armament.step and step_throw, consumed once; no light in hand leaves
+  it off and silent (qa tests); stop() clears torch_back.
 
-Scaled viewmodel values (scopeVar)
-- sv_shrink scales about the rail's face: the eyepiece glass lands at -64.6 x 0.9 = -58.14 mm; config 0.0581,
-  eye 0.1728 x 0.9 = 0.1555, radius 0.0122 x 0.9 = 0.01098 (config 0.011, inside the 11.52 mm lens).
-- The mount is built apart and only shortened (k 0.9), its section and bolts rail-sized; the neck (z 8 to 18) still
-  overlaps the shrunk housing's underside (17.3 mm); the figure copy is shrunk the same way.
+Tests added or changed:
+- tests/unit/test_bp5_qa.gd:213 · test_a_hit_after_the_throw_with_the_pull_still_held_leaves_nothing_held_off_after_the_respawn
+  · held_off and torch_back after a throw, a hit and a respawn · fails if respawn()/refill stopped clearing the
+  flag (checked by reading; the flag is asserted true before the respawn so the assertion is not vacuous).
+  Note: a shot-count version of this test was dropped, because a 1v1 hit ends the round (live false), nothing fires.
+- Earlier QA tests in the same file and tests/unit/test_bp5.gd (critic's new torch-after-reload and Loadout slot
+  key rebind tests) pass.
 
-Budgets and sizes
-- Every part under 10,000 triangles; every parts file under 2 MiB (the test pins 2 x 1024 x 1024).
+Runs: test_bp5, test_bp5_qa, test_grenades, test_torch, test_vault: 96 passing, 0 failing (before the new test).
+test_bp5_qa, test_grenade_throw_qa, test_torch_qa, test_bot_bombs, test_loadout_screen: 72 passing, 0 failing
+(one failing run was my own discarded draft test). test_bp5_qa alone: 10 passing. Other game/ changes in the pass
+(records COUNT_MAX, sim_audio peak warning, loadout slot chips, comment edits) read and unchanged in behaviour apart
+from their stated fixes. tools/check.sh was not run (running in the background).
 
-Hard-coded old values
-- No 46 mm 2x height or laser nose constant left in game/ or tests/; LZ_NOSE is gone.
-
-Advisory
-- The scope and laser in the viewmodel need the owner's eye: aimed through the variable scope, the glass should fill
-  the lens with no clipping.
-- Later attempts (3, 4: the 2x at 36 mm, the laser's pad and wheel, the silencer's knurl, the grip and serration
-  changes) are geometry inside the same contracts; tools/check.sh on the final head covers them.
+Could not test: feel of the wheel-pull-throw and the instant return to fire (needs play); the Loadout key chips in a
+real window (display).
 
 Verdict: Pass
