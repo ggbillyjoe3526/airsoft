@@ -5,9 +5,9 @@ It keeps the old model's contract (docs/CC0_ASSETS.md › Replica models): the e
 FrontSight, MagWell, GripMount, OpticMount, TorchMount); the rear ones where they were, so the sight line and the
 figures' hold don't move, and the front ones (Muzzle, BarrelEnd, FrontSight, TorchMount) SHORT metres back with the
 carbine-length handguard (owner, 2026-11-04: shorter, then "too short now"; tools/blender/parts/fit_parts.py moves
-the parts); the armature AEGRifle with the same bones and the same five clips (Fire, Reload,
-Selector, SightsFold, Inspect) of the same lengths; the paintable materials Body, Furniture, Detail, Accent and Metal
-(plus Rubber and BB, kept as drawn). `Figure` is the figures' cut-down copy.
+the parts); the armature AEGRifle with the same bones and four clips (Fire, Reload, Selector, Inspect; no
+SightsFold: an optic hides the iron sights whole, game/play/iron_sights.gd); the paintable materials Body, Furniture,
+Detail, Accent and Metal (plus Rubber and BB, kept as drawn). `Figure` is the figures' cut-down copy.
 
 Run with Blender 5.x, or Python with the `bpy` module (pip install bpy==5.2.3):
 
@@ -51,11 +51,21 @@ BARREL_END = (0.0, 0.570 - SHORT, BORE_Z)
 MUZZLE = (0.0, 0.611 - SHORT, BORE_Z)
 RAIL_TOP = 0.0735
 RAIL_BASE = 0.0635
-# The iron sights' line: 2.45 cm over the rail, so the flip-up sights stand as tall as the owner's photos'
-# (it was 1.45).
-SIGHT_Z = 0.098
+# The iron sights' line: 1.7 cm over the rail, a low, subtle pair (owner, 2026-11-05: "smaller and more subtle", the
+# rear especially, still easy to line up; it was 2.45 cm, as tall as the photos').
+SIGHT_Z = 0.0905
 # The rear sight's leaf (its hinge, the rearSight bone): 13 cm behind the receiver's front, as in the photo.
 REAR_SIGHT_Y = -0.032
+# The rear sight's base on the rail: its back and front (y) and its top, where the leaf stands (the bone's head).
+REAR_BASE_Y = (REAR_SIGHT_Y - 0.0200, REAR_SIGHT_Y + 0.0110)
+REAR_BASE_TOP = RAIL_TOP + 0.0035
+# The leaf: a thin plate with a ghost ring at its top (the hole's radius, the ring's wall), its half width and
+# thickness; an aperture this open shows the target round the front post (owner: "easily line up the sights and see
+# a target").
+RING_R = 0.0042
+RING_WALL = 0.0018
+LEAF_HW = 0.0062
+LEAF_HY = 0.0016
 # The front sight base on the barrel against the quad rail's front, as on the owner's photos' carbines; the post
 # stands between its ears.
 FRONT_SIGHT_Y = 0.318
@@ -118,13 +128,14 @@ EMPTIES = {
     "OpticMount": (0.0, 0.025, RAIL_TOP), "TorchMount": (0.0259, 0.195, 0.04725),
 }
 
-# The charging handle (owner, 2026-11-05: it must have room to pull out): its T's height (behind the rail's end,
-# 5 mm clear over the buffer tower, the castle nut and the stock's top, which it slides back over), its shaft's
-# bottom (in the upper's channel, under the T), the
-# T's back, its shaft's half width and front end (in the upper's channel), and how far the Inspect clip pulls it.
-CH_Z = (0.0665, 0.0750)
+# The charging handle (owner, 2026-11-05: it must have room to pull out; later the same day: "down slightly further
+# but not enough to clip"): its T's height (behind the rail's end, its top under the rail's, 1.9 mm clear over the
+# castle nut and the stock's top, which it slides back over), its shaft's bottom (in the upper's channel, under the
+# T), the T's back, its shaft's half width and front end (in the upper's channel), and how far the Inspect clip
+# pulls it.
+CH_Z = (0.0635, 0.0720)
 CH_SHAFT_Z = 0.0640
-# The stock's top: 2.3 mm over the buffer tube's bore in it, 5 mm under the charging handle's T.
+# The stock's top: 2.3 mm over the buffer tube's bore in it, 2 mm under the charging handle's T.
 STOCK_TOP = 0.0615
 CH_BACK = -0.0940
 CH_HW = 0.0052
@@ -177,7 +188,7 @@ BONES = {
     "chargingHandle": (0.0, -0.098, 0.0630),
     "dustCover": (UPPER_HW + 0.0012, 0.026, 0.0335),
     "hopDial": (0.0075, 0.026, 0.045),
-    "rearSight": (0.0, REAR_SIGHT_Y, 0.0795),
+    "rearSight": (0.0, REAR_SIGHT_Y, REAR_BASE_TOP),
     "frontSight": (0.0, FRONT_SIGHT_Y, FSB_TOP),
     "magazine": MAG_TOP,
 }
@@ -574,18 +585,19 @@ def magazine(name: str = "Magazine", bottom: float = MAG_BOTTOM, fine: int = 1) 
 
 
 def stock() -> list:
-    """The buffer tube with its end plate and castle nut, and a crane stock as in the owner's photos (built fully out,
-    then slid STOCK_IN in): a body round the tube with a battery tube along each side, a toe plate under its back half
-    with a slot along it, a slot down it and a pin hole, the adjustment lever in front of it, and a ribbed butt pad."""
+    """The buffer tube with its end plate and castle nut, and a stock as in the owner's photos (built fully out, then
+    slid STOCK_IN in): a flat-sided body round the tube (the photo's half-round battery tubes along each side removed,
+    owner 2026-11-05), a toe plate under its back half with a slot along it, a slot down it and a pin hole, the
+    adjustment lever in front of it, and a ribbed butt pad."""
     out = []
     front = -0.186
     slid = Matrix.Translation((0.0, STOCK_IN, 0.0))
     # Buffer tube with its end plate (a QD sling socket on its left) and castle nut, against the receiver's tower.
     b = hs.Builder("Tube", ["Detail", "Metal"])
     b.lathe([(TUBE_Y[0], 0.0), (TUBE_Y[0], TUBE_R - 0.002), (TUBE_Y[0] + 0.002, TUBE_R), (TUBE_Y[1], TUBE_R),
-             (TUBE_Y[1], 0.0)], "Detail", 20, centre=(0.0, 0.0, TUBE_Z))
+             (TUBE_Y[1], 0.0)], "Detail", 32, centre=(0.0, 0.0, TUBE_Z))
     b.lathe([(-0.0965, 0.0), (-0.0965, 0.0170), (-0.0959, 0.0176), (-0.0941, 0.0176), (-0.0935, 0.0170),
-             (-0.0935, 0.0)], "Detail", 20, centre=(0.0, 0.0, TUBE_Z))
+             (-0.0935, 0.0)], "Detail", 32, centre=(0.0, 0.0, TUBE_Z))
     b.lathe([(-0.1010, 0.0), (-0.1010, 0.0166), (-0.1003, 0.0176), (-0.0972, 0.0176), (-0.0965, 0.0166),
              (-0.0965, 0.0)], "Metal", 24, centre=(0.0, 0.0, TUBE_Z))
     b.lathe([(0.0, 0.0), (0.0, 0.0026), (0.0040, 0.0026), (0.0040, 0.0014), (0.0030, 0.0014), (0.0030, 0.0)],
@@ -608,9 +620,6 @@ def stock() -> list:
                       (front + 0.0015, STOCK_TOP, 0.002), (-0.330, STOCK_TOP, 0.008), (-0.3385, 0.054, 0.0),
                       (-0.3385, 0.0148, 0.0), (front - 0.0015, 0.0148, 0.003)], 4)
     b.prism(body, "x", -hw, hw, "Furniture")
-    for sx in (-1, 1):
-        b.lathe([(front - 0.012, 0.0), (front - 0.012, 0.0112), (front - 0.006, 0.0146), (-0.3225, 0.0150),
-                 (-0.3235, 0.0)], "Furniture", 22, centre=(sx * 0.0162, 0.0, TUBE_Z - 0.004))
     # The toe plate under the body's back half, its lower edge running diagonally down to the toe.
     b.prism(hs.fillet([(-0.212, 0.016, 0.0), (-0.3385, 0.016, 0.0), (-0.3385, -0.0470, 0.0), (-0.3343, -0.0505, 0.002),
                        (-0.2576, 0.0042, 0.003), (-0.212, 0.0042, 0.002)], 3), "x", -0.0058, 0.0058, "Furniture")
@@ -640,15 +649,8 @@ def stock() -> list:
     ob.data.transform(slid)
     out.append(hs.finish(ob, 0.0012))
 
-    # Battery-tube caps, the adjustment lever on the toe plate's front with its knob, and the bracket's pin.
+    # The adjustment lever on the toe plate's front with its knob, and the bracket's pin.
     b = hs.Builder("StockDetail", ["Detail", "Metal"])
-    for sx in (-1, 1):
-        cap = [(-0.3225, 0.0), (-0.3225, 0.0146), (-0.3235, 0.0157)]
-        for i in range(2):
-            a = -0.3255 - i * 0.0050
-            cap += [(a, 0.0157), (a - 0.0008, 0.0163), (a - 0.0022, 0.0163), (a - 0.0030, 0.0157)]
-        cap += [(-0.3365, 0.0152), (-0.3375, 0.0)]
-        b.lathe(cap, "Detail", 16, centre=(sx * 0.0162, 0.0, TUBE_Z - 0.004))
     b.prism(hs.fillet([(-0.2118, 0.0, 0.001), (-0.2128, 0.0155, 0.0), (-0.2542, 0.0155, 0.0),
                        (-0.2759, -0.0126, 0.001), (-0.2759, -0.0217, 0.001), (-0.2702, -0.0217, 0.001),
                        (-0.2485, 0.0, 0.001)], 2), "x", -0.0070, 0.0070, "Detail")
@@ -745,21 +747,21 @@ def handguard() -> list:
     b = hs.Builder("Barrel", ["Metal"])
     b.lathe([(UPPER_Y[1] - 0.004, 0.0), (UPPER_Y[1] - 0.004, 0.0110), (0.13, 0.0110), (0.135, 0.0092),
              (FSB_Y[1], 0.0092), (FSB_Y[1] + 0.0015, 0.0086), (BARREL_END[1] + 0.003, 0.0086),
-             (BARREL_END[1] + 0.003, 0.0)], "Metal", 20, centre=(0.0, 0.0, BORE_Z))
+             (BARREL_END[1] + 0.003, 0.0)], "Metal", 32, centre=(0.0, 0.0, BORE_Z))
     out.append(hs.finish(b.build(), 0.0004, 1))
 
     # The front sight base, open as in the owner's photo: a collar round the barrel at each end (the rear one against
     # the handguard's cap), a post up from each to the bar the ears stand on, the bare barrel and a slot of daylight
     # between them, a bayonet lug under the front collar and a sling swivel under the rear one. Its ears and post are
     # the front sight's leaf (sight_leaf), on the frontSight bone, so they disappear under an optic
-    # (game/play/sight_fold.gd).
+    # (game/play/iron_sights.gd).
     yb, yf = FSB_Y
     rc, fc = (yb + 0.001, 0.2925), (0.3155, yf)
     bar = 0.0565
     b = hs.Builder("FrontSightBase", ["Detail", "Metal"])
     for c0, c1 in (rc, fc):
         b.lathe([(c0, 0.0), (c0, 0.0090), (c0 + 0.0010, 0.0100), (c1 - 0.0010, 0.0100), (c1, 0.0090), (c1, 0.0)],
-                "Detail", 20, centre=(0.0, 0.0, BORE_Z))
+                "Detail", 28, centre=(0.0, 0.0, BORE_Z))
     b.prism(hs.fillet([(rc[0], BORE_Z, 0.0), (rc[1], BORE_Z, 0.0), (rc[1] + 0.0025, bar, 0.0015),
                        (fc[0], bar, 0.0015), (fc[0], BORE_Z, 0.0), (yf, BORE_Z, 0.0), (yf, FSB_TOP, 0.0),
                        (rc[0], FSB_TOP, 0.0)], 2), "x", -0.0085, 0.0085, "Detail")
@@ -782,7 +784,7 @@ def flash_hider() -> object:
         outer += [(a + 0.0004, 0.0110), (a + 0.0046, 0.0110), (a + 0.0050, 0.0085)]
     outer += [(y0 + 0.0154, 0.0085), (y0 + 0.0158, 0.0112), (y1 - 0.0025, 0.0112), (y1, 0.0100)]
     inner = [(y0, 0.0060), (y1, 0.0060)]
-    b.tube(outer, inner, "Metal", 20, centre=(0.0, 0.0, BORE_Z))
+    b.tube(outer, inner, "Metal", 28, centre=(0.0, 0.0, BORE_Z))
     ob = b.build()
     cutters = []
     for ang in (90.0, 150.0, 210.0, 330.0, 30.0):
@@ -795,43 +797,63 @@ def flash_hider() -> object:
     return hs.finish(ob, 0.0004, 1)
 
 
-def sight_base(name: str, y0: float, y1: float, leaf: float) -> object:
-    """A flip-up sight's body on the rail: a clamp (its back half 4 mm lower), a short cheek either side of the leaf's
-    hinge (at y `leaf`), an ear at its back and a windage drum low on its left front, as the photo's rear sight."""
-    b = hs.Builder(name, ["Detail", "Metal"])
-    split = leaf - 0.0110
-    for ya, yb_, top in ((split, y1, 0.0800), (y0, split + 0.001, 0.0760)):
-        sec = [(-0.0128, RAIL_TOP - 0.0062), (-0.0110, RAIL_TOP - 0.0080), (0.0110, RAIL_TOP - 0.0080),
-               (0.0128, RAIL_TOP - 0.0062), (0.0128, top - 0.0010), (0.0118, top), (-0.0118, top),
-               (-0.0128, top - 0.0010)]
-        b.prism(sec, "y", ya, yb_, "Detail")
-    cheek = hs.fillet([(leaf - 0.0110, 0.0795, 0.0), (leaf + 0.0110, 0.0795, 0.0), (leaf + 0.0090, 0.0870, 0.002),
-                       (leaf - 0.0090, 0.0870, 0.002)], 3)
-    for x0, x1 in ((0.0100, 0.0128), (-0.0128, -0.0100)):
-        b.prism(cheek, "x", x0, x1, "Detail")
-    # The ear at its back, as the photo's: a thin upright with a hook forward at its top, 9 mm long.
-    top = RAIL_TOP + 0.0150
-    b.prism(hs.fillet([(y0 + 0.0010, 0.0755, 0.0), (y0 + 0.0042, 0.0755, 0.0), (y0 + 0.0042, top - 0.0024, 0.0008),
-                       (y0 + 0.0100, top - 0.0024, 0.0006), (y0 + 0.0100, top, 0.0006), (y0 + 0.0022, top, 0.0012),
-                       (y0 + 0.0010, top - 0.0012, 0.0)], 2), "x", -0.0100, 0.0100, "Detail")
-    drum = [(0.0, 0.0), (0.0, 0.0046)]
+def rear_sight(name: str) -> object:
+    """The rear sight, all of it on the rearSight bone so an optic hides it whole (owner, 2026-11-05: iron sights are
+    removed, never folded, under an optic): a low clamp on the rail, sloped front and back, a cross bolt's nut on its
+    left and a windage knob on its right; a thin wing either side of the leaf; and the leaf, a thin plate with a round
+    ghost ring at its top on the sight line, its hinge pin across its foot."""
+    y = REAR_SIGHT_Y
+    y0, y1 = REAR_BASE_Y
+    base = hs.Builder(name + "Base", ["Detail", "Metal"])
+    foot = RAIL_TOP - 0.0074
+    base.prism(hs.fillet([(y0, foot, 0.0), (y1, foot, 0.0), (y1, RAIL_TOP + 0.0008, 0.0008),
+                          (y1 - 0.0045, REAR_BASE_TOP, 0.0015), (y0 + 0.0040, REAR_BASE_TOP, 0.0015),
+                          (y0, RAIL_TOP + 0.0008, 0.0008)], 2), "x", -0.0118, 0.0118, "Detail")
+    # The wings, either side of the leaf, their tops rounded just under the sight line.
+    wing = hs.fillet([(y - 0.0068, REAR_BASE_TOP - 0.0004, 0.0), (y + 0.0068, REAR_BASE_TOP - 0.0004, 0.0),
+                      (y + 0.0038, SIGHT_Z - 0.0012, 0.0016), (y - 0.0038, SIGHT_Z - 0.0012, 0.0016)], 3)
+    for x0, x1 in ((0.0072, 0.0094), (-0.0094, -0.0072)):
+        base.prism(wing, "x", x0, x1, "Detail")
+    # The cross bolt's nut (left) and the windage knob, finely ribbed (right).
+    base.lathe([(0.0, 0.0), (0.0, 0.0026), (0.0012, 0.0026), (0.0016, 0.0020), (0.0016, 0.0)], "Metal", 16,
+               centre=(-0.0118, y0 + 0.0075, RAIL_TOP - 0.0030), axis="x", start=0.0)
+    knob = [(0.0, 0.0), (0.0, 0.0030)]
     for k in range(3):
-        a = 0.0006 + k * 0.0010
-        drum += [(a, 0.0046), (a + 0.0002, 0.0050), (a + 0.0006, 0.0050), (a + 0.0008, 0.0046)]
-    drum += [(0.0036, 0.0046), (0.0040, 0.0040), (0.0040, 0.0)]
-    b.lathe([(-u, r) for u, r in drum], "Metal", 14, centre=(-0.0126, y1 - 0.0060, RAIL_TOP + 0.0030), axis="x")
-    b.lathe([(0.0, 0.0), (0.0, 0.0032), (0.0016, 0.0032), (0.0020, 0.0024), (0.0020, 0.0)], "Metal", 16,
-            centre=(-0.0128, 0.5 * (y0 + y1), RAIL_TOP - 0.0030), axis="x", start=0.0)
-    ob = b.build()
+        u = 0.0004 + k * 0.0009
+        knob += [(u, 0.0030), (u + 0.0002, 0.0033), (u + 0.0005, 0.0033), (u + 0.0007, 0.0030)]
+    knob += [(0.0031, 0.0030), (0.0034, 0.0025), (0.0034, 0.0)]
+    base.lathe(knob, "Metal", 16, centre=(0.0118, y1 - 0.0062, RAIL_TOP - 0.0012), axis="x")
+    ob = base.build()
     c = hs.Builder("c_rail", ["Detail"])
     c.prism([(-0.0108, RAIL_TOP - 0.0100), (0.0108, RAIL_TOP - 0.0100), (0.0108, RAIL_TOP), (-0.0108, RAIL_TOP)],
             "y", y0 - 0.01, y1 + 0.01, "Detail")
     hs.cut(ob, [c.build()])
-    return hs.finish(ob, 0.0004)
+    hs.finish(ob, 0.0004)
+    # The leaf: straight sides up to the ring, round over it.
+    leaf = hs.Builder(name + "Leaf", ["Detail", "Metal"])
+    outer = RING_R + RING_WALL
+    side = SIGHT_Z - math.sqrt(max(0.0, outer * outer - LEAF_HW * LEAF_HW)) - 0.0010
+    pts = [(-LEAF_HW, REAR_BASE_TOP - 0.0004), (LEAF_HW, REAR_BASE_TOP - 0.0004), (LEAF_HW, side)]
+    a0 = math.asin(max(-1.0, min(1.0, (side + 0.0010 - SIGHT_Z) / outer)))
+    for i in range(1, 18):
+        a = a0 + (math.pi - 2.0 * a0) * i / 18
+        pts.append((outer * math.cos(a), SIGHT_Z + outer * math.sin(a)))
+    pts.append((-LEAF_HW, side))
+    leaf.prism(pts, "y", y - LEAF_HY, y + LEAF_HY, "Detail")
+    lob = leaf.build()
+    c = hs.Builder("c_ring", ["Detail"])
+    c.lathe([(-0.02, 0.0), (-0.02, RING_R), (0.02, RING_R), (0.02, 0.0)], "Detail", 28, centre=(0.0, y, SIGHT_Z))
+    hs.cut(lob, [c.build()])
+    hs.finish(lob, 0.0003)
+    # The hinge pin across the leaf's foot, between the wings.
+    pin = hs.Builder(name + "Pin", ["Metal"])
+    pin.lathe([(-0.0094, 0.0), (-0.0094, 0.0013), (0.0094, 0.0013), (0.0094, 0.0)], "Metal", 12,
+              centre=(0.0, y, REAR_BASE_TOP + 0.0006), axis="x")
+    return hs.join(name, [ob, lob, hs.finish(pin.build(), 0.0002, 1)])
 
 
 def sight_leaf(name: str, y: float, front: bool) -> object:
-    """A sight's part on its bone: the front's ears (on the front sight base) and post, or the rear's flip-up leaf."""
+    """A sight's part on its bone: the front's ears (on the front sight base) and post, or the whole rear sight."""
     pz = BONES["rearSight" if not front else "frontSight"][2]
     if front:
         # The ears: an A on the base's platform round the post, a triangular window through each, the post between.
@@ -862,28 +884,7 @@ def sight_leaf(name: str, y: float, front: bool) -> object:
         b.prism([(-0.0011, SIGHT_Z - 0.0012), (0.0011, SIGHT_Z - 0.0012), (0.0009, SIGHT_Z), (-0.0009, SIGHT_Z)], "y",
                 y - 0.0011, y + 0.0011, "Accent")
         return hs.join(name, [hs.finish(b.build(), 0.0003), ears])
-    # The rear leaf, as the photo's flip-up sight: leaning back 8 degrees on its hinge, a hook forward at its top, a
-    # wide hole through it on the sight line half way up with a thin aperture disc in it, and the aperture's boss
-    # on its left side.
-    b = hs.Builder(name, ["Detail", "Metal"])
-    hy = 0.0070
-    top = SIGHT_Z + 0.0150
-    f = b.prism(hs.fillet([(y - hy, pz, 0.0), (y + hy, pz, 0.0), (y + hy, top - 0.0040, 0.0010),
-                           (y + hy + 0.0030, top - 0.0022, 0.0010), (y + hy + 0.0030, top, 0.0008),
-                           (y - hy + 0.0030, top, 0.0030), (y - hy, top - 0.0035, 0.0)], 3), "x", -0.0090, 0.0090,
-                "Detail")
-    b.transform(f, hs.rot_about("x", math.radians(8.0), (0.0, y, pz)))
-    b.lathe([(0.0, 0.0), (0.0, 0.0040), (-0.0010, 0.0040), (-0.0015, 0.0034), (-0.0015, 0.0)], "Metal", 16,
-            centre=(-0.0088, y - 0.0015, SIGHT_Z - 0.0002), axis="x")
-    ob = b.build()
-    c = hs.Builder("c_ap", ["Detail"])
-    c.lathe([(-0.02, 0.0), (-0.02, 0.0058), (0.02, 0.0058), (0.02, 0.0)], "Detail", 20, centre=(0.0, y, SIGHT_Z))
-    hs.cut(ob, [c.build()])
-    hs.finish(ob, 0.0004)
-    d = hs.Builder(name + "Disc", ["Detail"])
-    d.tube([(-0.0010, 0.0060), (0.0010, 0.0060)], [(-0.0010, 0.0016), (0.0010, 0.0016)], "Detail", 20,
-           centre=(0.0, y, SIGHT_Z))
-    return hs.join(name, [ob, hs.finish(d.build(), 0.0002, 1)])
+    return rear_sight(name)
 
 
 def moving_parts() -> dict:
@@ -998,8 +999,6 @@ CLIPS = {
                              (0.9001, (0.04, -0.155)), (1.40, (0.0, 0.0)), (1.8, (0.0, 0.0))]),
     }),
     "Selector": (0.5, {"selector": ("rx", [(0.0, 0.0), (0.5, 180.0)])}),
-    "SightsFold": (0.3, {"rearSight": ("rx", [(0.0, 0.0), (0.3, 90.0)]),
-                         "frontSight": ("rx", [(0.0, 0.0), (0.3, 90.0)])}),
     "Inspect": (3.0, {
         "chargingHandle": ("ly", [(0.0, 0.0), (0.17, 0.0), (0.40, -CH_TRAVEL), (1.83, -CH_TRAVEL), (1.97, 0.0),
                                   (3.0, 0.0)]),
@@ -1059,9 +1058,8 @@ def clips(arm: bpy.types.Object) -> None:
         track = ad.nla_tracks.new()
         track.name = clip
         track.strips.new(clip, 0, act)
-    for pb in arm.pose.bones:
-        pb.rotation_quaternion = (1.0, 0.0, 0.0, 0.0)
-        pb.location = (0.0, 0.0, 0.0)
+    # At rest from here on (renders, the figure copy), the tracks muted; every one is still exported.
+    hs.rest_pose(arm)
 
 
 # --------------------------------------------------------------------------------------------------------- main
@@ -1076,7 +1074,6 @@ def build() -> None:
     body_parts += lower()
     body_parts += stock()
     body_parts += handguard()
-    body_parts.append(sight_base("RearBase", REAR_SIGHT_Y - 0.0440, REAR_SIGHT_Y + 0.0150, REAR_SIGHT_Y))
     for ob in body_parts:
         print("  part %-14s %6d" % (ob.name, hs.tris(ob)))
     body = hs.join("Body", body_parts)

@@ -92,10 +92,10 @@ extends Resource
 	&"aeg": InspectPose.make(3.0, PackedFloat32Array([0.0, 0.17, 0.5, 0.82, 1.0]), RIFLE_TURN, RIFLE_SHIFT,
 			PackedFloat32Array([0.06, 0.13, 0.27, 0.36, 0.65, 0.83]),
 			[&"selector", &"torchClick", &"selector", &"selector", &"dryFire", &"torchClick"]),
-	# Side on, the top a little to the eye: the slide eased back a finger's width and let forward.
+	# Side on, the top a little to the eye; nothing moves, the slide only ever back firing or locked empty (GS2).
 	&"pistol": InspectPose.make(2.0, PackedFloat32Array([0.0, 0.22, 0.72, 1.0]),
 			[Vector3.ZERO, Vector3(0.05, -0.95, 0.1), Vector3(0.08, -1.0, 0.2), Vector3.ZERO],
-			PISTOL_SHIFT, PackedFloat32Array([0.15, 0.67]), [&"selector", &"dryFire"]),
+			PISTOL_SHIFT, PackedFloat32Array(), []),
 	# Side on, the butt of the grip to the eye: the battery eased out of the grip and pushed home.
 	&"cyber": InspectPose.make(2.0, PackedFloat32Array([0.0, 0.22, 0.72, 1.0]),
 			[Vector3.ZERO, Vector3(-0.15, -0.95, 0.1), Vector3(-0.35, -1.0, 0.15), Vector3.ZERO],

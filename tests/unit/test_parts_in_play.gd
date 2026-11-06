@@ -1,6 +1,6 @@
 extends GutTest
 ## Parts in play (AT3): a replica's parts fitted from their models the one way the hands, the figures and the menu
-## pictures share (ReplicaParts), the iron sights folded under an optic, aiming along the optic's sight line, the red
+## pictures share (ReplicaParts), the iron sights hidden whole under an optic, aiming along the optic's sight line, the red
 ## dot's and the scope's glass (OpticGlass: the scope magnifies only inside it), and a silenced shot played muffled.
 
 const AEG := "000002"
@@ -42,19 +42,13 @@ func _in_model(node: Node3D, model: Node3D) -> Transform3D:
 	return ReplicaParts._in_model(node, model)
 
 
-func _bone_rotation(model: Node3D, bone: String) -> Quaternion:
-	var s := model.find_child("Skeleton3D", true, false) as Skeleton3D
-	return s.get_bone_pose_rotation(s.find_bone(bone))
-
-
-func _bone_scale(model: Node3D, bone: String) -> Vector3:
-	var s := model.find_child("Skeleton3D", true, false) as Skeleton3D
-	return s.get_bone_pose_scale(s.find_bone(bone))
-
-
-func _bone_rest(model: Node3D, bone: String) -> Quaternion:
-	var s := model.find_child("Skeleton3D", true, false) as Skeleton3D
-	return s.get_bone_rest(s.find_bone(bone)).basis.get_rotation_quaternion()
+## Whether `model`'s sight bone `bone` is drawn (its bone attachment visible).
+func _sight_shown(model: Node3D, bone: String) -> bool:
+	for sight in IronSights.of(model):
+		if (sight as BoneAttachment3D).bone_name == bone:
+			return sight.visible
+	fail_test("no %s attachment" % bone)
+	return false
 
 
 # --- fitting ---
@@ -77,21 +71,17 @@ func test_parts_take_the_place_of_the_standard_ones_and_come_off_again() -> void
 	var silencer := model.find_child("muzzle_silencer", true, false) as Node3D
 	assert_almost_eq(silencer.position.z, -0.439, EPS)
 	assert_almost_eq(fit.sight_line, Vector3(0.0, 0.104, -0.025), Vector3.ONE * EPS)
-	assert_false(_bone_rotation(model, "frontSight").is_equal_approx(_bone_rest(model, "frontSight")),
-			"the iron sights fold under an optic")
-	assert_almost_eq(_bone_scale(model, "frontSight"), SightFold.HIDDEN_SCALE, Vector3.ONE * EPS,
-			"the A-frame front sight disappears under an optic")
-	assert_almost_eq(_bone_scale(model, "rearSight"), SightFold.HIDDEN_SCALE, Vector3.ONE * EPS,
-			"and the rear leaf with it")
+	assert_false(_sight_shown(model, "frontSight"), "the front sight's ears and post disappear under an optic")
+	assert_false(_sight_shown(model, "rearSight"), "and the whole rear sight with them")
 	ReplicaParts.unfit(fit)
-	assert_almost_eq(_bone_scale(model, "frontSight"), Vector3.ONE, Vector3.ONE * EPS, "and comes back without it")
+	assert_true(_sight_shown(model, "frontSight"), "and come back without it")
+	assert_true(_sight_shown(model, "rearSight"))
 	assert_eq(model.find_children("muzzle_silencer*", "", true, false).size(), 0)
 	assert_true(mag.visible)
 	assert_true(hider.visible)
 	assert_almost_eq(hider.position, hider_at, Vector3.ONE * EPS)
 	assert_almost_eq(muzzle.position, muzzle_at, Vector3.ONE * EPS)
 	assert_eq(fit.muzzle, muzzle)
-	assert_true(_bone_rotation(model, "frontSight").is_equal_approx(_bone_rest(model, "frontSight")))
 
 
 func test_a_long_barrel_carries_the_flash_hider_and_the_muzzle_out() -> void:
@@ -106,7 +96,7 @@ func test_a_long_barrel_carries_the_flash_hider_and_the_muzzle_out() -> void:
 	assert_almost_eq(muzzle.position.z, muzzle_z - 0.1, EPS)
 	assert_eq(fit.muzzle, muzzle)
 	assert_null(fit.optic)
-	assert_true(_bone_rotation(model, "frontSight").is_equal_approx(_bone_rest(model, "frontSight")),
+	assert_true(_sight_shown(model, "frontSight") and _sight_shown(model, "rearSight"),
 			"no optic, the iron sights stay up")
 
 
@@ -128,22 +118,6 @@ func test_an_unknown_part_or_replica_fits_nothing() -> void:
 	fit = ReplicaParts.fit(model, &"noSuchReplica", {&"optic": &"redDot"})
 	assert_eq(fit.nodes.size(), 0)
 	assert_not_null(fit.muzzle, "the replica's own muzzle still")
-
-
-func test_held_in_play_the_sights_stay_folded_over_the_clips() -> void:
-	var model := _model("aeg")
-	var fit := ReplicaParts.fit(model, &"aeg", {&"optic": &"scope2x"}, true)
-	assert_not_null(fit.fold)
-	var skeleton := model.find_child("Skeleton3D", true, false) as Skeleton3D
-	assert_eq(fit.fold.get_parent(), skeleton)
-	# A clip poses the sights upright; the modifier folds them again.
-	var b := skeleton.find_bone("rearSight")
-	skeleton.set_bone_pose_rotation(b, skeleton.get_bone_rest(b).basis.get_rotation_quaternion())
-	fit.fold._process_modification_with_delta(0.0)
-	assert_true(skeleton.get_bone_pose_rotation(b).is_equal_approx(SightFold.folded(skeleton, b)))
-	ReplicaParts.unfit(fit)
-	assert_null(fit.fold)
-	assert_eq(skeleton.find_children("SightFold", "", false, false).size(), 0)
 
 
 func test_the_figures_get_the_parts_cut_down_copies_in_place() -> void:
@@ -200,7 +174,7 @@ func test_without_an_optic_the_iron_sights_aim_as_before() -> void:
 	var hands := _hands(_kit(AEG, {&"grip": VERTICAL}))
 	var held: ReplicaView.Held = hands._held[0]
 	assert_null(held.window)
-	assert_almost_eq(held.rear_sight, Vector3(0.0, 0.098, 0.0307), Vector3.ONE * EPS)
+	assert_almost_eq(held.rear_sight, Vector3(0.0, 0.0905, 0.0307), Vector3.ONE * EPS, "the lower, subtler sights (2026-11-05)")
 
 
 func test_a_silenced_replica_shoots_from_the_silencer() -> void:

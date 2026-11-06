@@ -62,10 +62,10 @@ reasonable") applied to the BL8 attachments (10,000 triangles each), and his thr
 
 - **The 2x's axis is 26 mm, as low as the glass stays clear:** the owner picked 36 on a decision card, then asked for
   as low as possible with nothing in the way of the view. Both rifles' sights fold and hide under any optic
-  (SightFold), so they never stand in front of it in play or in the menu pictures; what limits it is the AEG's own
-  receiver: rays from the aimed eye to the eyepiece's glass all pass at 26 mm, and at 24 its back (15 mm over the
-  rail, 95 mm behind the mount) cuts the glass's lower edge (3 of 120 rays at 24). The Sniper Rifle alone is clear
-  to 16; one axis serves both rifles.
+  (SightFold), so they never stand in front of it in play or in the menu pictures. At first the AEG's receiver set
+  the floor (its rear sight's base, 15 mm over the rail, cut the glass's lower edge below 25 mm); since GS2's smaller
+  irons come off completely, rays from the aimed eye reach the whole glass down to a 16 mm axis on both rifles, so
+  the floor is now the mount: at 26 the belly rests 0.6 mm over the clamp's top.
   At 26 the belly is 5.6 mm over the rail; a new test fits the 2x
   to the Sniper Rifle and checks both sights hide (`test_parts_in_play.gd`).
 - **The variable scope shrinks towards the rail's face:** the scope is scaled by 0.9 about the rail's face; the

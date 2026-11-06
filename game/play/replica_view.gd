@@ -421,7 +421,7 @@ func _load(r: ReplicaConfig, paint: StringName, realistic: bool, parts: Dictiona
 		return held
 	var model := scene.instantiate() as Node3D
 	held.root.add_child(model)
-	held.fit = ReplicaParts.fit(model, r.id, parts, true)
+	held.fit = ReplicaParts.fit(model, r.id, parts)
 	ReplicaPaint.apply(model, paint, realistic)
 	held.anim = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	held.selector = SelectorPose.attach(model, held.anim)

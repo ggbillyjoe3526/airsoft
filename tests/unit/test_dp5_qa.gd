@@ -54,7 +54,8 @@ func test_each_replicas_muzzle_is_read_from_its_own_model() -> void:
 	assert_eq(f._muzzles.size(), c.armament.replicas.size(), "one muzzle a replica, in slot order")
 	var pistol := c.armament.replicas.find_custom(func(r: ReplicaConfig) -> bool: return r.id == &"pistol")
 	assert_gte(pistol, 0)
-	assert_almost_eq(f._muzzles[pistol], Vector3(0.0, 0.0105, -0.0996), Vector3.ONE * 1e-3, "the pistol's own (BL2's flush barrel)")
+	assert_almost_eq(f._muzzles[pistol], Vector3(0.0, 0.0119, -0.1006), Vector3.ONE * 1e-3,
+			"the pistol's own (GS2: 1.7 mm proud, 48 % down)")
 	for i in f._muzzles.size():
 		if i != pistol:
 			assert_ne(f._muzzles[i], f._muzzles[pistol], "slot %d is not the pistol's muzzle" % i)

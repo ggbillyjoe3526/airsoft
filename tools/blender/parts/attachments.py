@@ -441,10 +441,9 @@ def build_red_dot() -> bpy.types.Object:
 # The magnifier: its axis over the rail, its body (front and back of the flat-topped section, the round nose and the
 # eyepiece), the hinged mount under it (mm).
 # The axis stands 20 mm lower than the first build's (the owner, 2026-11-05: "less tall", then "as much as possible"
-# with nothing in the way of the glass): the belly 5.6 mm over the rail on a low saddle. Both rifles' iron sights fold
-# away and hide under any optic (SightFold), so only the replica's own body could come between the eye and the glass:
-# on the AEG its receiver's back (15 mm over the rail, 95 mm behind the mount) starts to cut the glass's lower edge
-# below a 26 mm axis; the Sniper Rifle has nothing there.
+# with nothing in the way of the glass): the belly 5.6 mm over the rail, resting on its clamp on a thin saddle, as low
+# as the mount goes. Both rifles' iron sights come off under any optic (SightFold), so only the replica's own body
+# could come between the eye and the glass: with the AEG's smaller irons (GS2) nothing does down to a 16 mm axis.
 S2_AXIS = 26.0
 S2_R = 20.4
 S2_BACK, S2_BODY_FRONT, S2_FRONT = -30.0, 17.0, 26.0
@@ -1230,7 +1229,7 @@ CLEAR_OF_BODY = {"cyber"}
 def mounts(replica: str) -> dict:
     """The replica model's empties by name, in its space."""
     hs.reset()
-    bpy.ops.import_scene.gltf(filepath=os.path.join(ROOT, "assets/models/replicas/%s.glb" % replica))
+    hs.import_glb(os.path.join(ROOT, "assets/models/replicas/%s.glb" % replica))
     return {o.name: o.matrix_world.translation.copy() for o in bpy.data.objects if o.type == "EMPTY"}
 
 
