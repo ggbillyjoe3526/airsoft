@@ -1,6 +1,6 @@
 # GT3 · Your arms pull the pin and throw the bomb in first person
 
-**Review:** pending
+**Review:** 3 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | 2026-11-06 | 1 | Opus 5.5 (build thread) | – | 6/8 Retry (QA Fail, performance Pass) | the pin never visibly left the bomb; the windup went empty for half its time with the bomb off screen; the release wrist was bent back on a straight arm and the follow-through lingered; a throw cut off mid-windup lowered the arms frozen mid-throw (QA) |
 | 2026-11-06 | 2 | Opus 5.5 (build thread) | – | 7/8 Retry (QA's bug fixed, performance Pass) | the pin never showed: the ring sat inside the curled fist |
-| 2026-11-06 | 3 | Opus 5.5 (build thread) | – | – | – |
+| 2026-11-06 | 3 | Opus 5.5 (build thread) | 8/8 | 8/8 Accept | – |
 
 ## What changed
 
@@ -52,3 +52,5 @@ pulls the pin, and your right arm throws the bomb, where before the bomb in hand
 - The bomb still leaves from the eyes, not the hand (SF1), and a thrown bomb keeps its pin (KNOWN_ISSUES).
 - The over-the-top swing shows the forearm and sleeve for a few frames: an overhand throw passes the arm over the
   eyes, unlike the owner's hand-and-wrist rule for holds.
+- A throw cut off mid-swing snaps to the hold in one frame before lowering; a short blend back would hide it (can
+  wait). The ring's hang slides in the model's frame, not the fist's, which reads fine at 4 cm.
