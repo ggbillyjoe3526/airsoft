@@ -16,3 +16,7 @@ Advisory:
  - Frame times are from a GPU-less container: reported only, not a budget verdict.
 Raw: <scratchpad>/perf_{main,head}_{1,2}.txt
 Verdict: Pass
+
+Addendum (worker, part 2 attempt 2): the unseen stride (figure_view.gd, FigureConfig.unseen_stride) is removed at the
+critic's word; it was frame-side only, so the tick numbers above stand for what remains (may_touch's bounding test and
+the bots' line-of-fire quick test). A counted bench run: the quick test skipped 9,718 of 20,000 teammate checks.

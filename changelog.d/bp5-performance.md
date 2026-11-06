@@ -1,2 +1,2 @@
-### Smoother big matches
-- Bots check their line of fire and BBs check who they pass near with a quicker first test, and figures behind you are posed at half rate (only their shadows show it): a little less work each step, and fewer slow steps on Woodland at 8v8.
+### A little less work in big fights
+- BBs and bots check who stands near a line of fire with a quicker first test: the same answers, a little less work each step with many players on the field.

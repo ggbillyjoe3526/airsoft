@@ -361,14 +361,6 @@ func animate(c: Character, fraction: float, delta: float, eye: Vector3) -> void:
 		if _far_frames < cfg.far_stride:
 			return
 		delta = _far_delta
-	elif not _snap and not _body.seen and cfg.unseen_stride > 1:
-		# Out of view (BP5): posed every unseen_stride-th frame with the time gathered, as a far figure is; only its
-		# shadow could show the steps between.
-		_far_delta += delta
-		_far_frames += 1
-		if _far_frames < cfg.unseen_stride:
-			return
-		delta = _far_delta
 	_far_frames = 0
 	_far_delta = 0.0
 	_pose.read(c, fraction, _hits)
