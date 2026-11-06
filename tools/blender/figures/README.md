@@ -6,6 +6,7 @@ The human figure's four heads, built from the owner's photos (`ref_images.zip` â
 | Script | What it holds |
 |---|---|
 | `headwear.py` | The heads (`Head_HighCut`, `Head_Cap`, `Head_Boonie`, `Head_FullCut`, each with `_LOD1` and `_LOD2`): what each wears, the levels of detail and the budget check. Run it to rebuild. |
+| `face.py` | The face in the balaclava's eye opening (FA1): the knit's hole, the skin (constrained Delaunay round the lids), the lids, the eyeballs and the knit hem; its four looks painted in the atlas. |
 | `head_shapes.py` | The head and the helmet shells as formulas: the head's radius by azimuth and height, the shells' superellipsoid and rim curves. |
 | `head_textures.py` | The 2048 px atlas (colour, normal, ORM) painted with numpy: the knit, loop, mesh, shells, brims and straps. |
 | `headkit.py` | Shared helpers: mesh building (`Part`), draping on the head (`Drape`), the atlas (`Atlas`, `Tile`). |
@@ -22,12 +23,16 @@ HEADWEAR_PARTS=1 python3 tools/blender/figures/headwear.py  # also print each pa
 then `godot --headless --import`, and update `HUMAN_HIGH` in `tests/unit/test_figure_body.gd` if the largest head's
 count changed.
 
-- **Budget:** the largest head 8,000 / 2,600 / 800 triangles (LOD0 / 1 / 2), the head's share of the figure's 60k,
-  agreed with the body (BL10) and carrier (BL12) work. The build stops if a head goes over. Every head aims at 95 to
+- **Budget:** the largest head 9,000 / 3,200 / 900 triangles (LOD0 / 1 / 2), the head's share of the figure's 60k,
+  agreed with the body (BL10) and carrier (BL12) work; the face (FA1) took the split's spare 1,000 / 600 / 100. The build stops if a head goes over. Every head aims at 95 to
   100 % of each level's budget (owner, 2026-11-05): `DENSITY` scales a head's counts per level; after changing a
   part, retune it (`HEADWEAR_DENSITY=Head_Cap:1:1.2 HEADWEAR_PARTS=1 ... --out x.glb` tries a value).
 - **Team marks:** every surface on `TeamHeadwear` is tinted in game (the high cut's back patch, the full cut's band,
   the cap's front patch, the boonie's band).
+- **Face looks:** `Face` surfaces share the atlas; four looks (skin, brows, eyes) are painted in cells above the
+  swatches (`face.FACE_CELLS`, `LOOKS`) and the game offsets the material's UVs per figure (`FigureConfig.face_offsets`,
+  `face_look`). A new look is a new cell, a `LOOKS` entry and an offset; the mesh doesn't change. Nothing of the face
+  stands out of the knit's surface but the lids (1.5 mm at most), so gear fitted to the head clears it.
 - **Space:** Blender metres, +Z up, the figure facing -Y, +X its left, at the rest pose. Everything sits on the whole
   LOD0 head, so the gear lands in the same place at every level.
 

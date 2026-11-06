@@ -32,6 +32,8 @@ var head: StringName = &""
 var _config: FigureConfig = null
 var _bones: Dictionary[StringName, int] = {}
 var _fade: float = 1.0
+## How far the rifle in the hand is drawn into the shoulder, eased (TP2).
+var _shoulder: float = 0.0
 ## The Vault and HitCall clips' lengths (s) and the WalkOff clip's own pace (m/s).
 var _vault_seconds: float = 0.0
 var _call_seconds: float = 0.0
@@ -85,7 +87,7 @@ func setup(models: FigureModels, kind: int, figure_id: int, team: int, colour: C
 			continue
 		var level := _level(part)
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		_paint(mi, models, kind, team, colour, glow)
+		_paint(mi, models, kind, team, colour, glow, _config.face_look(figure_id))
 		meshes.append(mi)
 		levels.append(level)
 		if level == _config.shadow_level:
@@ -176,6 +178,26 @@ func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = fals
 	bend.aim_lean = pose.aim_lean() * aiming
 	# Muzzle up at a wall (FB5), as far as the aim shows.
 	bend.high_ready = pose.raise * aiming
+	# A rifle in the hand rests in the shoulder (TP2), as far as the aim shows and the high ready leaves it; a pistol
+	# is held out. Eased over settle_shoulder, and let go through a switch, so the replica in the hand (and its butt)
+	# changes with none of it left.
+	var rifle := hands.site_class(pose.in_hand) != &"pistol" and not pose.hanging and not pose.switching
+	var target := aiming * (1.0 - pose.raise) * _config.shoulder_rifle if pose.in_hand >= 0 and rifle else 0.0
+	_shoulder = target if pose.snapped else lerpf(_shoulder, target,
+			FigurePose.settle_share(delta, _config.settle_shoulder))
+	if target == 0.0 and _shoulder < _config.raise_rest:
+		_shoulder = 0.0
+	bend.shouldered = _shoulder
+	# The cheek on the stock while a rifle is aimed, as the hit volume's head (HitPose), easing over a switch with the
+	# pistol's clips.
+	var cheek := aiming * (1.0 - pose.pistol_weight) if pose.in_hand >= 0 and not pose.hanging else 0.0
+	bend.cheek = cheek if cheek >= _config.raise_rest else 0.0
+	bend.butt_on_grip = hands.butt_on_grip(pose.in_hand)
+	# The right fist closed on the grip (TP3), while the replica is held in it.
+	var gripped := pose.in_hand >= 0 and not pose.hanging
+	bend.grip_fit = hands.grip_fit(pose.in_hand) if gripped else Vector3.ZERO
+	# Not the left hand in a reload: it takes the magazine out of the replica, as its clip does.
+	bend.grip_fit_both = hands.grip_fit_both(pose.in_hand) and not pose.reloading
 	# A bomb thrown or held in hand (GT1): the arms throw it, the bomb in the right hand until it leaves.
 	bend.throw_share = pose.throw_share
 	bend.throw_held = pose.bomb_held
@@ -287,12 +309,21 @@ func _head_for(parts: PackedStringArray, figure_id: int) -> StringName:
 	return StringName(_config.heads[absi(figure_id) % _config.heads.size()])
 
 
-## Team* surfaces (any case) get the team's shared paint; the rest stay as modelled.
-func _paint(mi: MeshInstance3D, models: FigureModels, kind: int, team: int, colour: Color, glow: float) -> void:
+## Team* surfaces (any case) get the team's shared paint, Face* surfaces the figure's face `look`; the rest stay as
+## modelled.
+func _paint(mi: MeshInstance3D, models: FigureModels, kind: int, team: int, colour: Color, glow: float,
+		look: int) -> void:
 	for s in mi.mesh.get_surface_count():
 		var source := mi.mesh.surface_get_material(s)
-		if source != null and source.resource_name.to_lower().begins_with(_config.team_material_prefix):
+		if source == null:
+			continue
+		var material_name := source.resource_name.to_lower()
+		if material_name.begins_with(_config.team_material_prefix):
 			mi.set_surface_override_material(s, models.team_material(kind, source, team, colour, glow))
+		elif material_name.begins_with(_config.face_material_prefix):
+			var face := models.face_material(kind, source, look)
+			if face != source:
+				mi.set_surface_override_material(s, face)
 
 
 ## `part`'s level of detail from its name (Body 0, Body_LOD1 1, Body_LOD2 2).

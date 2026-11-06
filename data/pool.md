@@ -148,7 +148,7 @@ The cases an Extraction run places (M44, dev content for now). Each run's seed p
 | 000001 | GBB Pistol | pistol | pistol, gas, pistol-mag, pistol-rail, muzzle-thread | | public |
 | 000002 | AEG Rifle | aeg | rifle, electric, aeg-mag, top-rail, under-rail, barrel-mount, muzzle-thread | | public |
 | 000019 | Cyber Pistol | cyber | pistol, built-in-power | | public |
-| 000021 | Sniper Rifle | sniper | rifle, spring, top-rail, under-rail, muzzle-thread | 2x Scope | dev |
+| 000021 | Sniper Rifle | sniper | rifle, spring, top-rail, under-rail, muzzle-thread | 2x Scope | public |
 
 ### Power sources
 
@@ -159,9 +159,9 @@ The cases an Extraction run places (M44, dev content for now). Each run's seed p
 | 000004 | Green Gas | gas | gas | public |
 | 000008 | Red Gas | gas | gas | public |
 | 000009 | Black Gas | gas | gas | public |
-| 000022 | M130 Spring | spring | spring | dev |
-| 000023 | M140 Spring | spring | spring | dev |
-| 000024 | M150 Spring | spring | spring | dev |
+| 000022 | M130 Spring | spring | spring | public |
+| 000023 | M140 Spring | spring | spring | public |
+| 000024 | M150 Spring | spring | spring | public |
 
 ### Springs
 
@@ -175,7 +175,7 @@ and a little slower to cock).
 |---|---|---|---|---|
 | 000007 | Red Dot | redDot | top-rail | public |
 | 000010 | 2x Scope | scope2x | top-rail | public |
-| 000025 | Variable Scope | scopeVar | top-rail | dev |
+| 000025 | Variable Scope | scopeVar | top-rail | public |
 
 ### Grips
 

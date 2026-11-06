@@ -11,6 +11,7 @@ const CYBER := "000019"
 const LIPO := "000015"
 const RED_DOT := "000007"
 const SCOPE := "000010"
+const VARIABLE_SCOPE := "000025"
 const VERTICAL := "000006"
 const ANGLED := "000011"
 const LASER := "000005"
@@ -55,7 +56,7 @@ func test_the_shipped_pool_lists_the_parts_by_slot() -> void:
 	assert_eq(pool.item(SILENCER).slot, &"muzzle")
 	var aeg := pool.item(AEG)
 	var pistol := pool.item(PISTOL)
-	assert_eq(_ids(pool.parts_for(aeg, &"optic", false)), [RED_DOT, SCOPE])
+	assert_eq(_ids(pool.parts_for(aeg, &"optic", false)), [RED_DOT, SCOPE, VARIABLE_SCOPE], "public since 2026-11-05")
 	assert_eq(_ids(pool.parts_for(aeg, &"grip", false)), [VERTICAL, ANGLED])
 	assert_eq(_ids(pool.parts_for(aeg, &"magazine", false)), [HI_CAP, LOW_CAP])
 	assert_eq(_ids(pool.parts_for(aeg, &"barrel", false)), [TIGHT_BORE, LONG])
