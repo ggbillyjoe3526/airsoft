@@ -78,7 +78,7 @@ LOOSE_COST = 500.0
 CUP_TRIES = 16
 WRAP = (25.0, 80.0)
 WRAP_COST = 0.5
-OVER_COST = float(os.environ.get("BL_OVER_COST", "4.0"))
+OVER_COST = 4.0
 # How far the support forearm's axis keeps from the replica (its sleeve's radius, m) and the cost per mm closer.
 FOREARM_CLEAR = float(os.environ.get("BL_FOREARM_CLEAR", "0.045"))
 CLEAR_COST = 20.0
@@ -173,22 +173,23 @@ DOWN = {"kind": "down", "at": (0.0, 0.06, -0.40),
 # near the front strap low down (`pinky`: the hand turned to lay all three nearest their marks, then rolled about the
 # first two to keep the wrist straightest and the little finger's knuckle near its mark); so the web of the hand wraps
 # the back strap under the beavertail, the fingers close up under the trigger guard (swung `swing` toward the index)
-# with the little finger on the grip too, and the thumb comes round the back strap's corner and lies forward and a
-# forward along the frame's left side just under the slide (its tip toward `thumb_at`, drawn there hard, `thumb_pull`:
-# the owner, 2026-11-06, "the thumb is sitting too low"), held lightly to the frame (`thumb_hug`). The arm reaches
-# out to it, as a pistol is held, slightly bent (the owner, 2026-11-06: not straight; about 86 % of its reach, the
-# wrist 26 degrees): its shoulder raised and drawn back `shoulder` (eye space), its elbow free to come up to the
-# shoulder's height (`drop`).
-PISTOL_RIGHT = dict(RIGHT, web=(0.012, -0.095, -0.045), index=(0.018, -0.042, -0.040), pinky=(0.018, -0.058, -0.098),
-                    thumb_at=(-0.020, -0.050, -0.032), thumb_hug=2.0, thumb_pull=30.0, shoulder=(0.0, -0.09, 0.08),
-                    drop=0.0,
-                    swing=(-15.0, -15.0, -15.0))
-# The Cyber Pistol, resized to the GBB's proportions (CZ1): the GBB's marks (the owner: the two grips should look the
-# same), the web 2 mm further back and lower on its more upright back strap and the index knuckle 2 mm back for its
-# trigger, 5 mm further from the back strap than the GBB's; its thumb aimed 4 mm further back and 8 mm lower
-# along its taller frame, so it lies on the frame rather than standing out from it.
+# with the little finger on the grip too, and the thumb comes round the back strap's corner and lies forward along
+# the frame's left side just under the slide (its tip toward `thumb_at`, drawn there hard, `thumb_pull`: the owner,
+# 2026-11-06, "the thumb is sitting too low"), held lightly to the frame (`thumb_hug`). The marks sit high, the web
+# 3 cm under the slide (the owner's Glock photos: the web up at the beavertail), so the thumb lies high too; its
+# knuckle and tip close onto the frame at most `thumb_curl` degrees. The arm reaches out to it, as a pistol is held,
+# a little bent (the owner, 2026-11-06: not straight; the critic: not as far as 86 % of its reach either, about 94 %,
+# the elbow some 40 degrees): its shoulder raised and drawn back `shoulder` (eye space), its elbow free to come up to
+# the shoulder's height (`drop`).
+PISTOL_RIGHT = dict(RIGHT, web=(0.012, -0.097, -0.030), index=(0.018, -0.042, -0.030), pinky=(0.018, -0.060, -0.086),
+                    thumb_at=(-0.022, -0.030, -0.008), thumb_hug=2.0, thumb_pull=30.0, thumb_curl=(40.0, 60.0),
+                    shoulder=(0.0, -0.13, 0.10), drop=0.0, swing=(-15.0, -15.0, -15.0))
+# The Cyber Pistol, resized to the GBB's proportions (CZ1): its own marks, as low as the GBB's were before they rose
+# (its frame stands up beside the slide, so a thumb as high as the GBB's would pass into it): the web on its more
+# upright back strap, the index knuckle 2 mm back for its trigger (5 mm further from the back strap than the GBB's)
+# and the thumb aimed along the frame's side under that raised edge.
 CYBER_RIGHT = dict(PISTOL_RIGHT, web=(0.012, -0.097, -0.047), index=(0.018, -0.044, -0.040),
-                   thumb_at=(-0.020, -0.054, -0.040))
+                   pinky=(0.018, -0.058, -0.098), thumb_at=(-0.020, -0.054, -0.040))
 # The AEG Rifle's grip: the same three marks, the hand high on the short grip with the little finger wholly on it, its
 # knuckle above the grip's flared foot (the owner, 2026-11-05; the critic: half of it hung below), the knuckles' line
 # raked back with the grip, the web closer in over the back strap so the thumb reaches round onto the grip's left
@@ -341,8 +342,11 @@ def pose_fingers(hand: pose.Hand, spec: dict, col: Collider, thumb_to: Vector = 
         curls[name] = hand.settle(name, start, col, swing=swing.get(name, 0.0), root=root)
     if thumb_to is not None:
         turns = (THUMB_WIDE, THUMB_TWISTS) if wide else (pose.THUMB_SWING, (-30, 0, 30))
-        tip = math.radians(THUMB_TIP if wide else 45)
-        curls["Thumb"] = hand.thumb(col, (0.5, 1.0, 0.8), (0.0, math.radians(40), tip), thumb_to, hug, *turns,
+        # How far its knuckle and tip joints may then close onto the replica (`thumb_curl`, degrees: a pistol's
+        # thumb lies nearly straight forward along the frame, as in the owner's photos).
+        knuckle, tip = spec.get("thumb_curl", (40.0, THUMB_TIP if wide else 45.0))
+        curls["Thumb"] = hand.thumb(col, (0.5, 1.0, 0.8), (0.0, math.radians(knuckle), math.radians(tip)), thumb_to,
+                                    hug, *turns,
                                     THUMB_BENDS if wide else (0,), spec.get("thumb_pull", 3.0))
     else:
         base, bends = spec["thumb"]

@@ -1,6 +1,6 @@
 # BL4 · Your first-person arms
 
-**Review:** critic Retry 7/8 (attempt 11) · qa Pass (attempt 11) · performance Pass (attempt 11); the owner's ruling (2026-11-05
+**Review:** critic Retry 7/8 (attempt 13) · qa Pass (attempt 13) · performance Pass (attempt 13); the owner's ruling (2026-11-05
 18:37, 19:46): keep going past the four attempts, the critic extremely harsh, merged only once he approves
 
 ## Attempts
@@ -18,6 +18,7 @@
 | 2026-11-06 | 9 | Claude (build thread) | 7/8 | Retry | The GBB thumb's length and width now match photo 123843, but its tip hooked out to the left; support tip 5 mm over the rail; the rifle web one smooth bulge; pads long ovals; shell crease; no QA on the head |
 | 2026-11-06 | 10 | Claude (build thread) | 7/8 | Retry | Support glove still over the rail from the left (the palm to sit lower round the handguard's lower corner); the rifle web, thumb bone and index bone one form; no knuckle rises or joint creases; the thumb plate long; no fabric maps; the record's GBB thumb wording |
 | 2026-11-06 | 11 | Claude (build thread) | 7/8 | Retry | Support glove a gap above the palm and tips over the rail from the left; fingers fanned diagonally; no fabric maps; joint forms too faint; pads not round; GBB finger and thumb proportions off photo 123843; first-section gaps; QA not on the head |
+| 2026-11-06 | 13 | Claude (build thread) | 7/8 | Retry | Support forearm at 40° met; pistol thumbs short of the frame's front and low in the owner's photos' terms, the GBB arm bent about 60°, the support palm showing from the eye with the thumb off the side, tips over the rail from the left; glove seams and the sleeve's weave reading as dots |
 
 ## What changed
 
@@ -25,7 +26,7 @@
   dark olive glove (skin + 1.1 mm) with a moulded knuckle guard, finger pads, a palm patch, cuff and
   strap, and a sleeve rolled over the cuff; mirrored for the right arm; the figures' bone names; 38,900 triangles, four
   materials. Each replica gets a clip `<id>_Hold` and an empty `Hold_<id>` at its origin.
-- **The holds** (attempt 13), solved against each replica's model at rest (`pose.py`), none passing into it (the build
+- **The holds** (attempt 14), solved against each replica's model at rest (`pose.py`), none passing into it (the build
   refuses to write otherwise; gaps are the glove's skin to the replica, mm, first / middle / last section, from the
   build log with `BL_DEBUG`):
   - AEG Rifle: right hand high on the grip, the little finger wholly on it above the foot, the thumb over the top of
@@ -37,14 +38,16 @@
     side below the rail (pads off their points: index 6.5, middle 15.3, ring 12.0, little 3.8 mm); the thumb relaxed
     and a little forward on the left side; gaps index 3.3 / 1.2 / 0.8, middle 3.5 / 4.1 / 0.7, ring 6.4 / 3.6 / 0.1,
     little 4.4 / 3.2 / 0.3, thumb 23.3 / 10.7 / 0.9.
-  - GBB Pistol: right hand alone, high on the back strap; the thumb high, forward along the frame just under the slide
-    (the owner's photos 4 to 6); the arm a little bent (reach 86 % of its length); the fingers closed under the guard;
-    trigger pad 0.8 mm off; gaps index 7.8 / 10.5 / 1.4, middle 2.0 / 0.2 / 4.7, ring 5.4 / 0.3 / 1.6, little
-    4.7 / 1.7 / 0.2, thumb 10.5 / 1.0 / 0.7; wrist 26.4°. Its left arm hangs out of view (wrist 36.1°, never drawn).
-  - Cyber Pistol: resized to the GBB's proportions (CZ1, PR #225); the GBB's marks, the web 2 mm further back and
-    lower on its more upright back strap, the index knuckle 2 mm back, the thumb aimed 4 mm back and 8 mm lower on
-    its taller frame; trigger pad 1.3 mm off; gaps index 11.2 / 6.3 / 1.6, middle 0.6 / 3.0 / 0.6, ring 3.5 / 4.1 /
-    0.9, little 5.2 / 1.0 / 0.2, thumb 13.6 / 4.8 / -; wrist 23.6°.
+  - GBB Pistol: right hand alone, high on the back strap (the web 3 cm under the slide); the thumb right under the
+    slide, forward along the frame (tip 15 mm under it); the arm a little bent (reach 94 % of its length); the fingers
+    closed under the guard; trigger pad 0.3 mm off; gaps index 8.0 / 10.5 / 1.5, middle 4.9 / 7.1 / 1.0, ring 4.2 /
+    0.1 / 1.3, little 5.7 / 1.1 / 0.0, thumb 11.5 / 0.9 / 0.8; wrist 19.4°. Its left arm hangs out of view (wrist
+    36.1°, never drawn).
+  - Cyber Pistol: resized to the GBB's proportions (CZ1, PR #225); its own marks at the GBB's former height (its frame
+    stands up beside the slide, so the GBB's higher thumb would pass into it): the web on its more upright back strap,
+    the index knuckle 2 mm back, the thumb along the frame under that edge; trigger pad 1.3 mm off; gaps index 11.2 /
+    6.3 / 1.6, middle 0.6 / 3.0 / 0.6, ring 3.5 / 4.1 / 0.9, little 5.2 / 1.0 / 0.2, thumb 13.6 / 4.8 / -; wrist
+    12.1°; reach 95 %.
 - **In the game** (`game/play/arms_view.gd`): ArmsView rides the replica in hand (ReplicaView's `Held.root`), its
   `Hold_<id>` on the replica's origin, posed by `<id>_Hold`; pressed depth, no shadow, out of the optic's view; the
   left arm hidden on one-handed replicas (ViewModelConfig.one_hand); a robot's colours (ViewModelConfig.robot_arms).
@@ -105,6 +108,12 @@
 - **Attempt 10** (the critic's attempt 9 list): the thumb's glove fullness 0.8 mm (at 1.5 the thumb found no room on
   the panel and hooked out to the left, its pad facing the eye); round finger pads (half to 86 % of the first bone,
   28° round it); the knuckle shell's lobes 1.5 mm and its sides cast straighter (a crease at its index corner).
+- **Attempt 14** (the critic's attempt 13 list): the GBB's marks 1.5 cm higher (web, index, little finger), so the
+  hand sits up at the beavertail and the thumb lies right under the slide; both pistols' arms less bent (reach 94 to
+  95 %, the elbow about 40°, from 86 %); `thumb_curl` bounds how far a grip's thumb closes onto the frame. Tried and
+  left: the support palm flatter (within 20° of facing up) needs a 46 to 48° wrist at the 40° forearm, over the
+  owner's 30° limit; the GBB thumb's tip cannot reach further forward than 5 cm ahead of the back strap without
+  passing into the frame (its root sits at the web).
 - **Attempt 13** (the owner's notes, 2026-11-06 01:40 to 01:59, and his eight hold photos): every thumb higher
   (`thumb_pull` makes the tip's target count over the hug); the pistol arm bent from a shoulder moved forward and up;
   the support forearm at 40° from above (`plan`, scored in `elbow_for` and `cup`), the cup search keeping the
