@@ -15,8 +15,8 @@ Run with Blender 5.x, or Python with the `bpy` module (pip install bpy==5.2.3):
     python -I tools/blender/replicas/gbb.py <repo root>
 
 It writes assets/models/replicas/pistol.glb (BL_OUT overrides) and the parts file
-assets/models/replicaParts/pistol.glb (BL_PARTS_OUT): the extended magazine rebuilt on the new magazine, the silencer
-moved onto ThreadEnd, the laser and torch onto RailMount.
+assets/models/replicaParts/pistol.glb (BL_PARTS_OUT): the silencer moved onto ThreadEnd, the laser and torch onto
+RailMount. Then run tools/blender/parts/magazines.py, which builds the Extended Magazine from this magazine.
 """
 
 import math
@@ -139,8 +139,6 @@ MAG_HW = 0.0112
 # The base plate's two tiers' half widths: the slab and the foot under it.
 PLATE_HW = (MAG_HW + 0.0022, MAG_HW + 0.0014)
 MAG_HD = 0.0158
-# The extended magazine part: this much longer along the rake than the standard one (the old part's 2.2 cm).
-EXTENDED = 0.022
 
 MAG_TOP = (0.0, Y(MAG_TOP_PX[0]), Z(MAG_TOP_PX[1]))
 # Under the dust cover's rail, where the parts file's laser and light sit (photo about x 100, py 152).
@@ -798,10 +796,11 @@ def mag_release() -> object:
     return hs.finish(ob, 0.0003, 1)
 
 
-def magazine(name: str = "Magazine", extra: float = 0.0, plate_mat: str = "Detail") -> object:
+def magazine(name: str = "Magazine", extra: float = 0.0, plate_mat: str = "Detail", fine: int = 1) -> object:
     """A double-stack gas magazine raked like the grip: its body, a base plate under a flanged lip, the follower
-    with the top BBs, and its gas valve under the plate. `extra` metres longer along the rake for the extended
-    magazine part, its plate in `plate_mat`."""
+    with the top BBs, and its gas valve under the plate. `extra` metres longer along the rake for a magazine part
+    (tools/blender/parts/magazines.py), its plate in `plate_mat`; `fine` times rounder corners, BBs and valve and a
+    finer bevel (the parts' own budget)."""
     rake = math.radians(GRIP_RAKE)
     down = Vector((0.0, -math.sin(rake), -math.cos(rake)))
     top = Vector(MAG_TOP)
@@ -813,7 +812,7 @@ def magazine(name: str = "Magazine", extra: float = 0.0, plate_mat: str = "Detai
 
     def ring(t: float, s: float = 1.0) -> list:
         c = top + down * (length * t)
-        return [(x * s, c.y + y * s, c.z) for x, y in hs.rounded_rect(MAG_HW, MAG_HD, 0.0045, 2)]
+        return [(x * s, c.y + y * s, c.z) for x, y in hs.rounded_rect(MAG_HW, MAG_HD, 0.0045, 2 * fine)]
 
     b.loft([ring(0.0), ring(1.0 - 0.003 / length), ring(1.0)], "Metal")
     # The base plate (photo: x 462 to 594, py 420 to 447), in two tiers.
@@ -830,7 +829,7 @@ def magazine(name: str = "Magazine", extra: float = 0.0, plate_mat: str = "Detai
             faces += b.prism(hs.fillet(pts(m), 1), "x", sx * PLATE_HW[1] - 0.0003, sx * PLATE_HW[1] + 0.0001,
                              "Metal")
     # The gas valve's cap, flush in the plate's foot.
-    faces += b.lathe([(0.0, 0.0), (0.0, 0.0030), (0.0006, 0.0030), (0.0006, 0.0)], "Metal", 14,
+    faces += b.lathe([(0.0, 0.0), (0.0, 0.0030), (0.0006, 0.0030), (0.0006, 0.0)], "Metal", 14 * fine,
                      centre=(0.0, Y(530.0), foot_z - 0.0001), axis="z")
     if extra > 0.0:
         b.transform(faces, Matrix.Translation(down * extra))
@@ -839,10 +838,10 @@ def magazine(name: str = "Magazine", extra: float = 0.0, plate_mat: str = "Detai
     b.box((-0.0040, c.y - 0.012, c.z - 0.002), (0.0040, c.y + 0.010, c.z + 0.0005), "Detail")
     for i in range(2):
         b.lathe([(-0.003, 0.0), (-0.0026, 0.0015), (-0.0015, 0.0026), (0.0, 0.003), (0.0015, 0.0026),
-                 (0.0026, 0.0015), (0.003, 0.0)], "BB", 10, centre=(0.0, c.y + 0.006 - i * 0.0062,
+                 (0.0026, 0.0015), (0.003, 0.0)], "BB", 10 if fine == 1 else 16, centre=(0.0, c.y + 0.006 - i * 0.0062,
                  c.z + 0.0032 - i * 0.0008), axis="z")
     b.box((-0.0015, c.y - 0.011, c.z + 0.0005), (0.0015, c.y - 0.007, c.z + 0.0012), "Accent")
-    return hs.join(name, [hs.finish(b.build(), 0.0005, 1), plate])
+    return hs.join(name, [hs.finish(b.build(), 0.0005, 1 if fine == 1 else 2), plate])
 
 
 def _base_plate(mat: str) -> object:
@@ -1027,14 +1026,11 @@ def build() -> None:
 
 
 def build_parts() -> None:
-    """The parts file: the silencer moved onto the new ThreadEnd, the extended magazine rebuilt from this magazine
-    (EXTENDED longer, a frame-coloured base pad), each with its origin on its mount; the laser and torch moved onto the
-    rail mount. Running it again changes nothing."""
+    """The parts file: the silencer moved onto the new ThreadEnd, its origin on its mount; the laser and torch moved
+    onto the rail mount; the magazines left as they are (tools/blender/parts/magazines.py builds them). Running it
+    again changes nothing."""
     hs.reset(FPS)
     bpy.ops.import_scene.gltf(filepath=PARTS)
-    for ob in list(bpy.data.objects):
-        if ob.name.startswith("magazine_"):
-            bpy.data.objects.remove(ob, do_unlink=True)
     sil = bpy.data.objects["muzzle_silencer"]
     sil.location += Vector(EMPTIES["ThreadEnd"]) - sil.matrix_world.translation
     # The laser and torch follow the rail mount (their roots' origins on it; the beams and figures with them).
@@ -1044,19 +1040,6 @@ def build_parts() -> None:
             ob.location += shift
     for name, (colour, rough, metal) in MATERIALS.items():
         hs.material(name, colour, rough, metal)
-    well = Vector(EMPTIES["MagWell"])
-    mag = magazine("magazine_extended", EXTENDED, "Furniture")
-    b = hs.Builder("magazine_extended_Figure", ["Detail"])
-    rake = math.radians(GRIP_RAKE)
-    down = Vector((0.0, -math.sin(rake), -math.cos(rake)))
-    lo = Vector((0.0, Y(528.0), Z(420.0)))
-    b.loft([[(x, lo.y + y, lo.z) for x, y in hs.rounded_rect(MAG_HW + 0.001, 0.021, 0.004, 1)],
-            [(x, lo.y + down.y * (EXTENDED + 0.008) + y, lo.z + down.z * (EXTENDED + 0.008))
-             for x, y in hs.rounded_rect(MAG_HW + 0.001, 0.021, 0.004, 1)]], "Detail")
-    fig = b.build()
-    for ob in (mag, fig):
-        ob.data.transform(Matrix.Translation(-well))
-        ob.location = well
     for ob in bpy.data.objects:
         if ob.type == "MESH" and ob.parent is None:
             print("  part %-26s %6d triangles" % (ob.name, hs.tris(ob)))

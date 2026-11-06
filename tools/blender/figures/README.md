@@ -30,3 +30,20 @@ count changed.
   the cap's front patch, the boonie's band).
 - **Space:** Blender metres, +Z up, the figure facing -Y, +X its left, at the rest pose. Everything sits on the whole
   LOD0 head, so the gear lands in the same place at every level.
+
+## Knee and elbow pads (BL13)
+
+Parts of the human figure built apart from its body and spliced into `assets/models/characters/human.glb` by node
+name (BL13, 2026-11-05), so a part and the body can each be rebuilt without the other.
+
+| Script | What it does |
+|---|---|
+| `pads.py` | The knee and elbow pads, `Kit_Pads` with `_LOD1` and `_LOD2` (budget 3,000 / 1,000 / 300 triangles), from the owner's knee pad photos: imports `human.glb`, fits the pads to its `Body` in the rest pose, paints their 1024 maps, exports them with a copy of the figure's armature, splices them in and lists them in `human.json`'s parts |
+| `splice_part.py` | Plain Python (no Blender): copies every node whose name starts with a prefix from one glTF binary into the figure's, with its mesh, materials and textures, the joints mapped to the figure's skin by bone name after checking both rest poses match; everything else in the figure file is kept |
+
+Run from the repository root with Blender 5.2's Python module (`pip install bpy==5.2.3`), then reimport in Godot:
+
+    python -I tools/blender/figures/pads.py .
+    godot --headless --import
+
+After the body is rebuilt, run `pads.py` again: it refits the pads to the new body's surface.
