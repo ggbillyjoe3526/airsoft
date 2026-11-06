@@ -105,5 +105,6 @@ the next match.
 
 Bots hold the same replicas you hold, with the parts they have fitted: their optic (the iron sights taken off under
 it), silencer, grip, torch or laser, and the magazine they reload.
-A rifle is held with its stock in the shoulder and the head down on it, looking along the sights; a pistol is held
-out in both hands.
+A rifle is held with its stock in the shoulder and the head down on it, looking along the sights, the other hand
+under the handguard (just behind a fitted grip); a pistol is held out in one hand. Their hands hold each replica as
+yours do in first person: high on the grip, index finger on the trigger, thumb round the grip's left side.

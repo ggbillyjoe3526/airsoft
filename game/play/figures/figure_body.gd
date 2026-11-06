@@ -35,6 +35,9 @@ var _bones: Dictionary[StringName, int] = {}
 var _fade: float = 1.0
 ## How far the rifle in the hand is drawn into the shoulder, eased (TP2).
 var _shoulder: float = 0.0
+## How far the left hand is on a rifle's handguard, and the right hand holds the replica as the arms do, eased (HG1).
+var _support: float = 0.0
+var _grasp: float = 0.0
 ## The Vault and HitCall clips' lengths (s) and the WalkOff clip's own pace (m/s).
 var _vault_seconds: float = 0.0
 var _call_seconds: float = 0.0
@@ -199,6 +202,22 @@ func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = fals
 	bend.grip_fit = hands.grip_fit(pose.in_hand) if gripped else Vector3.ZERO
 	# Not the left hand in a reload: it takes the magazine out of the replica, as its clip does.
 	bend.grip_fit_both = hands.grip_fit_both(pose.in_hand) and not pose.reloading
+	# The hands on the replica as the first-person arms hold it (HG1), as far as the aim shows, both eased: the right on
+	# its grip, the left on a rifle's handguard or lowered from a pistol (held one-handed); the left not in a reload (it
+	# fetches the magazine); neither in a switch or a throw.
+	var throwing := pose.throw_share >= 0.0 or pose.bomb_held
+	var holding := gripped and not pose.switching and not throwing
+	var support := aiming if holding and not pose.reloading and hands.supported(pose.in_hand) else 0.0
+	_support = _eased(_support, support, delta, pose.snapped)
+	_grasp = _eased(_grasp, aiming if holding else 0.0, delta, pose.snapped)
+	bend.hold = hands.arms_hold(pose.in_hand)
+	bend.grasp = _grasp
+	bend.support = _support
+	bend.hold_on_grip = hands.on_grip(pose.in_hand)
+	bend.hold_right = hands.right_on(pose.in_hand)
+	bend.hold_left = hands.left_on(pose.in_hand)
+	bend.hold_left_shift = hands.left_shift(pose.in_hand)
+	hands.grasp = _grasp
 	# A bomb thrown or held in hand (GT1): the arms throw it, the bomb in the right hand until it leaves.
 	bend.throw_share = pose.throw_share
 	bend.throw_held = pose.bomb_held
@@ -354,3 +373,11 @@ static func _seconds(side: FigureSidecar, clip_name: StringName) -> float:
 func _base(part: String) -> String:
 	var at := part.rfind(_config.lod_suffix)
 	return part.substr(0, at) if at >= 0 and part.substr(at + _config.lod_suffix.length()).is_valid_int() else part
+
+
+## `now` eased toward `target` (HG1): in over FigureConfig.settle_support, out quicker over settle_support_off; at once
+## when the pose `snapped`, and the rest of the way once within raise_rest.
+func _eased(now: float, target: float, delta: float, snapped: bool) -> float:
+	var settle := _config.settle_support if target > now else _config.settle_support_off
+	var out := target if snapped else lerpf(now, target, FigurePose.settle_share(delta, settle))
+	return target if absf(out - target) < _config.raise_rest else out

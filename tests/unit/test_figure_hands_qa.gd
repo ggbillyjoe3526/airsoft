@@ -7,6 +7,9 @@ extends GutTest
 const NEAR := Vector3(0.0, 1.6, 3.0)
 const FAR := Vector3(0.0, 1.6, 300.0)
 const FRAME := 1.0 / 60.0
+## How near (m) the replica's grip point stays to the palm's line (wrist to knuckles): the hand wraps round the grip,
+## its palm on the grip's side (HG1), so the line runs a grip's half-width and a palm's thickness off its middle.
+const FIST := 0.035
 
 var config: FigureConfig = null
 var models: FigureModels = null
@@ -138,7 +141,7 @@ func test_rapid_switching_holstering_and_sprinting_never_shows_more_than_two_or_
 		c.prev_pitch = 0.0
 		var done: Dictionary = await _pose(v, c, 60)
 		assert_eq(v.body().hands.in_hand, a.active)
-		assert_lt(_grip_gap(v, done), 0.03, "kind %d: in the fist after the shuffle" % kind)
+		assert_lt(_grip_gap(v, done), FIST, "kind %d: in the fist after the shuffle" % kind)
 		assert_false(v.body().tree.get(FigureGraph.P_SWITCH_ACTIVE), "the Switch clip is over")
 
 
@@ -185,7 +188,7 @@ func test_a_pistol_only_kit_aims_holsters_and_hangs_with_nothing_on_the_back() -
 		var v := _view(FigureMix.HUMAN, c)
 		var d: Dictionary = await _pose(v, c, 30)
 		assert_eq(v.body().hands.in_hand, 0, "%s: the pistol in the hand" % [ids])
-		assert_lt(_grip_gap(v, d), 0.03, "%s: in the fist" % [ids])
+		assert_lt(_grip_gap(v, d), FIST, "%s: in the fist" % [ids])
 		# Holstered: nothing in the hand, nothing on the back (no rifle), nothing shown.
 		c.armament.holstered = true
 		await _pose(v, c, 30)
@@ -202,7 +205,7 @@ func test_a_pistol_only_kit_aims_holsters_and_hangs_with_nothing_on_the_back() -
 			await _pose(v, c)
 		d = await _pose(v, c, 30)
 		assert_eq(v.body().hands.in_hand, 0)
-		assert_lt(_grip_gap(v, d), 0.03, "%s: back in the fist" % [ids])
+		assert_lt(_grip_gap(v, d), FIST, "%s: back in the fist" % [ids])
 		c.status = Character.Status.CALLING
 		d = await _pose(v, c, 60)
 		assert_true(v.body().hands.hanging)
@@ -215,7 +218,7 @@ func test_a_kit_without_a_rifle_or_a_rifle_alone_works_in_every_state() -> void:
 	var c := _character(_loadout([&"aeg"]))
 	var v := _view(FigureMix.ROBOT, c)
 	var d: Dictionary = await _pose(v, c, 30)
-	assert_lt(_grip_gap(v, d), 0.03)
+	assert_lt(_grip_gap(v, d), FIST)
 	# A switch to a slot that does not exist is not a draw; an active slot past the kit never crashes the pose.
 	c.armament.holstered = true
 	d = await _pose(v, c, 30)
@@ -358,7 +361,7 @@ func test_a_far_figure_has_its_replica_in_the_fist_when_it_comes_near() -> void:
 	var d: Dictionary = await _pose(v, c, 80, FAR)
 	assert_eq(v.body().hands.in_hand, 1, "the far figure took the pistol")
 	d = await _pose(v, c, 80, NEAR)
-	assert_lt(_grip_gap(v, d), 0.03, "the pistol in the fist after approaching")
+	assert_lt(_grip_gap(v, d), FIST, "the pistol in the fist after approaching")
 
 
 func test_the_hit_call_walk_off_and_a_round_reset_put_the_rifle_back_in_the_hands() -> void:
@@ -385,7 +388,7 @@ func test_the_hit_call_walk_off_and_a_round_reset_put_the_rifle_back_in_the_hand
 		assert_false(v.body().hands.hanging)
 		assert_eq(v.body().hands.in_hand, 0, "kind %d: the rifle in the hands again" % kind)
 		assert_true(v.body().hands.replica(0).visible)
-		assert_lt(_grip_gap(v, d), 0.03, "kind %d: in the fist" % kind)
+		assert_lt(_grip_gap(v, d), FIST, "kind %d: in the fist" % kind)
 		assert_eq(_shown(v), 1 if kind == FigureMix.ROBOT else 2)
 
 
@@ -401,7 +404,7 @@ func test_a_reset_while_the_figure_was_holstered_and_dead_brings_the_rifle_to_th
 	c.armament.refill()
 	var d: Dictionary = await _pose(v, c, 90)
 	assert_eq(v.body().hands.in_hand, 0)
-	assert_lt(_grip_gap(v, d), 0.03)
+	assert_lt(_grip_gap(v, d), FIST)
 
 
 func test_an_extreme_pitch_keeps_the_replica_in_the_fist_pointing_the_right_way() -> void:
@@ -418,7 +421,7 @@ func test_an_extreme_pitch_keeps_the_replica_in_the_fist_pointing_the_right_way(
 			var way := (held.basis * Vector3.FORWARD).normalized()
 			var drawn := rad_to_deg(asin(way.y))
 			gut.p("kind %d pitch %.0f: muzzle %.1f°, grip gap %.3f" % [kind, degrees, drawn, _grip_gap(v, d)])
-			assert_lt(_grip_gap(v, d), 0.03, "kind %d at %.0f°: the fist holds it" % [kind, degrees])
+			assert_lt(_grip_gap(v, d), FIST, "kind %d at %.0f°: the fist holds it" % [kind, degrees])
 			assert_almost_eq(drawn, degrees, 8.0, "kind %d at %.0f°: pointing where the BBs go" % [kind, degrees])
 
 
@@ -434,7 +437,7 @@ func test_a_pistol_at_the_extremes_points_where_the_shot_goes() -> void:
 			var held: Transform3D = d[&"in_hand"]
 			var way := (held.basis * Vector3.FORWARD).normalized()
 			assert_almost_eq(rad_to_deg(asin(way.y)), degrees, 8.0, "kind %d pistol at %.0f°" % [kind, degrees])
-			assert_lt(_grip_gap(v, d), 0.03)
+			assert_lt(_grip_gap(v, d), FIST)
 
 
 func _session() -> PlaySession:

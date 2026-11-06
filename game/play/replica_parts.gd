@@ -30,6 +30,7 @@ const OPTIC_SLOT := &"optic"
 const MAGAZINE_SLOT := &"magazine"
 const MUZZLE_SLOT := &"muzzle"
 const BARREL_SLOT := &"barrel"
+const GRIP_SLOT := &"grip"
 ## The figure version's pieces a part takes the place of: its magazine (the figures' reload magazine too, drawn in the
 ## replica's space), its flash hider and its iron sights, which an optic hides, as in the hands.
 const FIGURE_MAGAZINE := "Figure_Magazine"
@@ -62,6 +63,8 @@ class FigureFit:
 	extends RefCounted
 	var magazine: MeshInstance3D = null
 	var muzzle: Vector3 = Vector3.ZERO
+	## The grip part's copy fitted (null: none), in the replica's space (HG1: the support hand goes behind it).
+	var grip: MeshInstance3D = null
 
 
 ## Fits `parts` (part slot -> part Key, as Kit.parts has them) to `model`, replica `key`'s model. A part the models
@@ -182,6 +185,8 @@ static func fit_figure(held: Node3D, key: StringName, parts: Dictionary, barrel_
 				var sights := held.get_node_or_null(FIGURE_SIGHTS) as Node3D
 				if sights != null:
 					sights.visible = false
+			GRIP_SLOT:
+				f.grip = node as MeshInstance3D
 		held.add_child(node)
 	return f
 

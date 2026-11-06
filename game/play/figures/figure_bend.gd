@@ -13,8 +13,10 @@ extends SkeletonModifier3D
 ## Then (TP3, `grip_fit`) the right fist reaches along the replica to its grip (both hands, for a pistol); then (TP2,
 ## `shouldered`) a rifle's butt drawn into the shoulder pocket, its aim kept; then, at a wall (FB5,
 ## `high_ready`), the arms bring the replica to the high ready, muzzle up (FigureReady). Aiming a rifle (`cheek`), the
-## head bows and tilts about the neck onto the stock, as the hit volume's does (HitPose, HitFit.cheek_turn). Last, a
-## bomb thrown or held in hand (GT1, `throw_share`, `throw_held`): the arms throw it (FigureThrow).
+## head bows and tilts about the neck onto the stock, as the hit volume's does (HitPose, HitFit.cheek_turn). Then (HG1)
+## the hands take the replica as the first-person arms hold it (FigureGrasp): the right on its grip (`grasp`), the left
+## on a rifle's handguard (`support`). Last, a bomb thrown or held in hand (GT1, `throw_share`, `throw_held`): the arms
+## throw it (FigureThrow).
 
 ## How much the upper body's own clips show (0..1, FigurePose.upper_weight): the upper chain is turned back to standing
 ## still's heading over the stepping hips by that much of HitConfig.upper_steady (GA1, as HitPose does).
@@ -39,6 +41,17 @@ var cheek: float = 0.0
 ## How far the hand reaches along the replica to its grip (TP3; the grip bone's frame), and whether both hands do.
 var grip_fit: Vector3 = Vector3.ZERO
 var grip_fit_both: bool = false
+## The hands on the replica in the hand as the first-person arms hold it (HG1; FigureHands): the arms' hold (null:
+## none), how far (0..1) the right hand holds it so (`grasp`) and the left its handguard (`support`), the replica on the
+## grip bone as the clips hold it, and each hand's place in the replica's frame (the left's moved from the arms' by
+## hold_left_shift, behind a fitted grip).
+var hold: FigureArmsHold = null
+var grasp: float = 0.0
+var support: float = 0.0
+var hold_on_grip: Transform3D = Transform3D.IDENTITY
+var hold_right: Transform3D = Transform3D.IDENTITY
+var hold_left: Transform3D = Transform3D.IDENTITY
+var hold_left_shift: Vector3 = Vector3.ZERO
 ## A bomb's throw: its share (0..1 the windup, 1..2 the recovery; below 0 none), a bomb held in hand (MC1), and a
 ## throw begun from one.
 var throw_share: float = -1.0
@@ -54,6 +67,7 @@ var _ready: FigureReady = null
 ## FigureConfig.cheek_bones: the neck, the left and the right shoulder (-1 when missing).
 var _cheek: PackedInt32Array = PackedInt32Array()
 var _throw: FigureThrow = null
+var _grasp: FigureGrasp = null
 
 
 ## Bends `skeleton`'s bones by `config`'s crouch line and the hit volume's lean geometry (`hits`).
@@ -69,6 +83,7 @@ func setup(skeleton: Skeleton3D, config: FigureConfig) -> void:
 	for bone_name in config.cheek_bones:
 		_cheek.append(skeleton.find_bone(bone_name))
 	_throw = FigureThrow.new(skeleton, config)
+	_grasp = FigureGrasp.new(skeleton, config)
 
 
 func _process_modification_with_delta(_delta: float) -> void:
@@ -81,6 +96,8 @@ func _process_modification_with_delta(_delta: float) -> void:
 			_ready.fit_grip(skeleton, grip_fit, grip_fit_both)
 			_ready.shoulder(skeleton, shouldered, butt_on_grip)
 			_ready.hold(skeleton, high_ready)
+		if _grasp != null:
+			_grasp.hold(skeleton, hold, grasp, support, hold_on_grip, hold_right, hold_left, hold_left_shift)
 		if _throw != null and (throw_share >= 0.0 or throw_held):
 			_throw.pose(skeleton, throw_share, throw_held, throw_from_hand)
 

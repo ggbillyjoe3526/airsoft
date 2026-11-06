@@ -49,6 +49,10 @@ var _far_delta: float = 0.0
 var _flinch: FigureFlinch = null
 ## Each replica's muzzle in its figure version's space (where a gas replica's breath comes from, GasPuffs).
 var _muzzles: PackedVector3Array = PackedVector3Array()
+## How far forward each replica's support hand may hold its handguard, in its figure version's space (HG1;
+## Vector3.INF: no handguard), and each replica's id.
+var _supports: PackedVector3Array = PackedVector3Array()
+var _ids: Array[StringName] = []
 ## The contact shadow (null until given one), its numbers, and the floor the feet last stood on (y).
 var _contact: MeshInstance3D = null
 var _effects: EffectsConfig = null
@@ -88,9 +92,10 @@ func setup(c: Character, team_colour: Color, hits: HitConfig, font: Font,
 	top_level = true
 	for i in c.armament.replicas.size():
 		var held := _held_replica(c.armament.replicas[i], c.team, realistic, parts[i] if i < parts.size() else {},
-				_magazines, _muzzles)
+				_magazines, _muzzles, _supports, cfg)
 		_replicas.append(held)
 		_classes.append(c.armament.replicas[i].site_class)
+		_ids.append(c.armament.replicas[i].id)
 		if held != null:
 			add_child(held)
 		if _magazines[i] != null:
@@ -117,7 +122,7 @@ func set_body(models: FigureModels, kind: int, lines: Vector2) -> void:
 		_body = FigureBody.new()
 		if _body.setup(models, kind, character_id, _team, _team_colour, _glow, lines):
 			add_child(_body)
-			_body.hands.hold(_replicas, _classes, _magazines)
+			_body.hands.hold(_replicas, _classes, _magazines, _supports, _ids)
 			_body.hands.thrown = thrown
 			if not _bomb_meshes.is_empty():
 				_body.hands.set_bomb_meshes(_bomb_meshes)
@@ -165,18 +170,22 @@ func set_lod_lines(lines: Vector2) -> void:
 ## (ReplicaParts.fit_figure: a part takes the place of the magazine or flash hider it replaces, an optic hides the iron
 ## sights), hidden, painted for `team` (null without a model). A copy of the magazine it carries (its figure magazine or
 ## the magazine part's copy, both drawn in the model's space) for the reloads, in the same paint (null without one),
-## goes on the end of `magazines`, and its muzzle point in the model's space (where the figure version is drawn) on the
-## end of `muzzles`.
+## goes on the end of `magazines`, its muzzle point in the model's space (where the figure version is drawn) on the
+## end of `muzzles`, and where the support hand holds it (`support_mark`) on the end of `supports`.
 func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictionary,
-		magazines: Array[MeshInstance3D], muzzles: PackedVector3Array) -> MeshInstance3D:
+		magazines: Array[MeshInstance3D], muzzles: PackedVector3Array, supports: PackedVector3Array,
+		cfg: FigureConfig) -> MeshInstance3D:
 	var scene := load(MODEL_DIR + r.id + ".glb") as PackedScene
 	if scene == null:
 		magazines.append(null)
 		muzzles.append(Vector3.ZERO)
+		supports.append(Vector3.INF)
 		return null
 	var model := scene.instantiate()
 	var muzzle := _in_model(model.find_child(ReplicaParts.MUZZLE_NODE, true, false) as Node3D, model)
 	var barrel_end := _in_model(model.find_child(ReplicaParts.BARREL_END_NODE, true, false) as Node3D, model)
+	var mount := model.find_child(cfg.support_mount, true, false) as Node3D
+	var support := _in_model(mount, model) if mount != null else Vector3.INF
 	var paint := ReplicaPaint.bot_paint(team, r)
 	var held := model.find_child(ReplicaParts.FIGURE_NODE, true, false) as MeshInstance3D
 	var copy: MeshInstance3D = null
@@ -192,6 +201,7 @@ func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictiona
 			(piece as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var fit := ReplicaParts.fit_figure(held, r.id, parts, barrel_end, muzzle)
 		muzzle = fit.muzzle
+		support = support_mark(support, fit.grip, cfg)
 		ReplicaPaint.apply(held, paint, realistic)
 		if fit.magazine != null and fit.magazine.mesh != null:
 			copy = MeshInstance3D.new()
@@ -202,8 +212,19 @@ func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictiona
 			ReplicaPaint.apply(copy, paint, realistic)
 	magazines.append(copy)
 	muzzles.append(muzzle)
+	supports.append(support)
 	model.free()
 	return held
+
+
+## How far forward the support hand may hold a handguard whose mount is at `mount` (the model's space; Vector3.INF:
+## none): there, or with `grip` (a grip part's copy, in the same space) fitted, FigureConfig.support_behind_grip behind
+## its back end.
+static func support_mark(mount: Vector3, grip: MeshInstance3D, cfg: FigureConfig) -> Vector3:
+	if not mount.is_finite() or grip == null or grip.mesh == null:
+		return mount
+	var back := (grip.transform * grip.get_aabb()).end.z
+	return Vector3(mount.x, mount.y, back + cfg.support_behind_grip)
 
 
 ## Where `node` sits in `model`'s space (the model's origin when null).

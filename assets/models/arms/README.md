@@ -40,6 +40,8 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
   thumb waiting for its hand), then seat each holding palm and close each holding finger until its glove all but
   touches. `arms.py` stops without writing if any face of the arms passes into a replica. Re-run
   it whenever a replica's model changes.
+- **The bots' hands take the same holds** (HG1, FigureArmsHold): a change to a hold here changes how every bot
+  holds that replica too.
 - **Shading.** In game the arms are drawn with pressed depth and take no shadows (ArmsView): the sun's shadow map on
   pressed depth broke into hard patches on the sleeve.
 - **Not yet.** Pistols are one-handed until the two-handed, thumbs-forward hold of the owner's photos is solved. No
