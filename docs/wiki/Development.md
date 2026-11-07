@@ -58,7 +58,8 @@ intentions, Time of day or Disable levelling changed, or on dev content, stays o
 - **Game speed** from 25 % to 200 %, **Bottomless magazines**, **Ghost** (BBs pass through you), **Bots hold fire**, **Bots run low on BBs** (8 s into each round one bot a team, in
   turn, is put on its last magazine, to watch the hand-off).
 - **Spectate any bot** (the fire key moves to the next) and **Bot intentions** (a label over each bot saying what it
-  is doing, including bringing or waiting for a magazine).
+  is doing, including bringing or waiting for a magazine; hidden while the order wheel, the field map or your sight
+  is up).
 - **Dev content** shows what is still being built (below), and **Time of day** plays any map by day or at night.
 - **Disable levelling** unlocks everything and gives no XP; **Reset level** goes back to level 0.
 - **Retro pixels**, **Pretend slow frames** (to try the graphics step-down), **Log a test error** and **Crash the game

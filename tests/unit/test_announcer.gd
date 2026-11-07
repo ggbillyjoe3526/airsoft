@@ -296,3 +296,21 @@ func test_project_settings_run_access_kit_only_with_a_screen_reader() -> void:
 	assert_eq(ProjectSettings.get_setting("accessibility/general/accessibility_support"), 0, "Auto")
 	var text := FileAccess.get_file_as_string("res://project.godot")
 	assert_string_contains(text, "[accessibility]\n\ngeneral/accessibility_support=0", "stated, not left to the default")
+
+
+## BP6: your squad orders are read in the wheel's words, and one that waits for the next round says so; a bot's are not.
+func test_your_squad_orders_are_read() -> void:
+	var a := _announcer()
+	_event(GameEvent.Kind.SQUAD_ORDER, SquadOrder.Kind.FOLLOW)
+	_state.events.items[0].actor = YOU
+	assert_eq(_out(a), "Order · Follow Me")
+	_event(GameEvent.Kind.SQUAD_ORDER, SquadOrder.Kind.HOLD)
+	_state.events.items[0].actor = MATE
+	assert_eq(_out(a), "", "a teammate's order is not yours")
+	_event(GameEvent.Kind.SQUAD_ORDER_REFUSED, SquadOrder.Kind.REGROUP)
+	_state.events.items[0].actor = YOU
+	assert_eq(_out(a), "Orders wait for the next round")
+	a.set_on(false)
+	_event(GameEvent.Kind.SQUAD_ORDER, SquadOrder.Kind.FOLLOW)
+	_state.events.items[0].actor = YOU
+	assert_eq(_out(a), "", "nothing while off")

@@ -419,8 +419,25 @@ class View:
 		_team = team
 		_enemy = enemy
 		_ppm = size.x * maxf(zoom, HudPrefs.MINIMAP_ZOOM_RANGE.x) / (2.0 * _cfg.view_radius)
+		_centre = on_field(centre)
 		_you_at = centre
 		_clear()
+
+	## The panel's middle for a character at `at` (x, z): `at`, moved in where the panel would show past the field's
+	## drawing (BP6: at a spawn by the edge a third of it was empty), so the field fills it and the arrow leaves the
+	## middle instead; a field narrower than the panel is centred on that axis. The same reach whichever way the view
+	## turns (a turned panel's corners may still show a little past the field), so turning on the spot never slides it.
+	func on_field(at: Vector2) -> Vector2:
+		var world := field_size()
+		if world == Vector2.ZERO or _ppm <= 0.0:
+			return at
+		var reach := size * 0.5 / _ppm
+		var out := at
+		for axis in 2:
+			var lo := _origin[axis] + reach[axis]
+			var hi := _origin[axis] + world[axis] - reach[axis]
+			out[axis] = (lo + hi) * 0.5 if lo > hi else clampf(at[axis], lo, hi)
+		return out
 
 	## Starts a frame of the whole field (the full-screen map, FM1): the field's drawing fitted in the panel, `fit` of
 	## the room it allows, north up, the white arrow at the world's `you` turned by `yaw`; otherwise as begin.

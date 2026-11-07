@@ -312,3 +312,78 @@ func test_every_pattern_is_linear() -> void:
 				worst = ms
 				worst_run = "%s (%s)" % [run, ["capped", "whole"][i]]
 	gut.p("60,000 characters, the slowest run: %s %.1f ms" % [worst_run, worst])
+
+
+## BP6: an IPv6 address of hex letters only goes; a C++ name (a capital, then a small letter) stays.
+func test_a_hex_letter_ipv6_address_goes_and_cpp_names_stay() -> void:
+	var s := ReportScrub.new()
+	assert_eq(s.line("peer dead::beef up"), "peer <address> up")
+	assert_eq(s.line("DEAD::BEEF"), "<address>")
+	assert_eq(s.line("fdab:cdef::face"), "<address>")
+	assert_eq(s.line("ip:cafe::"), "ip:<address>")
+	assert_eq(s.line("fade::1"), "<address>", "written small, an address")
+	for kept: String in ["Face::bad", "Fade::1", "Vec3::ab", "Bad::add_child", "Node3D::_ready"]:
+		assert_eq(s.line(kept), kept)
+
+
+## BP6: a version and the card's driver as the report writes them aren't addresses; an address still is.
+func test_a_version_and_the_driver_stay() -> void:
+	var s := ReportScrub.new()
+	for kept: String in ["v1.2.3.4", "build V10.0.0.1 ok", "Graphics card: Some GPU (driver 10.0.0.1)"]:
+		assert_eq(s.line(kept), kept)
+	assert_eq(s.line("driver at 10.0.0.1"), "driver at <address>")
+	assert_eq(s.line("dev1.2.3.4"), "dev<address>", "a v inside a word is no version mark")
+
+
+## BP6: an account named with an ordinary word leaves that word in the report; its folders still go.
+func test_a_common_word_account_goes_from_paths_only() -> void:
+	var s := ReportScrub.new("/home/player/.local/share/Airsoft", "/home/player", "Player", "desktop")
+	assert_eq(s.line("the player shot the desktop test"), "the player shot the desktop test")
+	assert_eq(s.line("/home/player/x and C:\\Users\\Player\\y"), "~/x and C:\\Users\\<you>\\y")
+	assert_eq(s.line("/home/player/.local/share/Airsoft/a.save"), "<save folder>/a.save")
+	assert_eq(ReportScrub.new("", "", "zandra", "").line("zandra"), "<you>", "a name still goes")
+
+
+## BP6: a user folder's spaced name stops where an account name can't go on, so the sentence after it stays.
+func test_a_sentence_after_a_user_folder_stays() -> void:
+	var s := ReportScrub.new()
+	assert_eq(s.line("in C:\\Users\\Bob, see a/b"), "in C:\\Users\\<you>, see a/b")
+	assert_eq(s.line("C:\\Users\\Bob and then a sentence well over forty-eight characters long / x"),
+			"C:\\Users\\<you> and then a sentence well over forty-eight characters long / x")
+	assert_eq(s.line("C:\\Users\\Jo Bloggs\\x"), "C:\\Users\\<you>\\x")
+	assert_eq(s.line("C:\\Users\\Jo Bloggs.CONTOSO.000\\x"), "C:\\Users\\<you>\\x")
+
+
+## BP6: a cut at the space inside "Jo Bloggs" leaves no "Jo", in a line and in the note.
+func test_a_cut_inside_a_spaced_name_leaves_no_first_word() -> void:
+	var config := ReportConfig.new()
+	var s := ReportScrub.new(ZED_SAVE, "/home/zed", "Jo Bloggs", "")
+	var text := _straddling("Jo Bloggs", 3, config.max_line_chars * 2)
+	assert_eq(text.substr(config.max_line_chars * 2 - 3, 3), "Jo ", "the cut falls at the name's space")
+	var out := s.line(text)
+	assert_false(out.contains("Jo"), "…" + out.right(30))
+	assert_eq(s.cut("a b Jo Bloggs", 7), "a b …")
+	assert_eq(s.cut("a b JO", 7), "a b JO", "uncut: kept, the whole-word scrub's to judge")
+	assert_eq(s.cut("a bJo Bloggs x", 6), "a bJo…", "only a whole word")
+	var info := BugReport.ReportInfo.new()
+	info.note_chars = 500
+	info.scrub = s
+	var at := info.note_chars * BugReport.SCRUB_MARGIN
+	var filler := (ZED_SAVE + " ").repeat(at / ZED_SAVE.length() + 2).left(at - 4) + " "
+	info.note = filler + "Jo Bloggs said hi"
+	assert_eq(info.note.substr(at - 3, 3), "Jo ")
+	assert_false(BugReport.write(info).contains("Jo"), "report")
+	assert_false(IssueLink.make(info, ReportConfig.new()).url.uri_decode().contains("Jo"), "issue")
+
+
+## BP6 critic: the cheap edges QA found. A mixed-case address with a digit goes ("Fe80::1"), as do zero-padded IPv4
+## and WSL's path to another account; a name split by a tab or two spaces gets the cut's guard.
+func test_mixed_case_padded_and_wsl_addresses_go_and_odd_spaced_names_are_cut_clean() -> void:
+	var s := ReportScrub.new()
+	assert_eq(s.line("route Fe80::1 up"), "route <address> up")
+	assert_eq(s.line("Fade::1 and Bad::add_child"), "Fade::1 and Bad::add_child", "C++ names stay")
+	assert_eq(s.line("at 010.001.002.003 now"), "at <address> now")
+	assert_eq(s.line("open /mnt/c/Users/Other/x"), "open /mnt/c/Users/<you>/x")
+	for spaced: String in ["Jo\tBloggs", "Jo  Bloggs"]:
+		var t := ReportScrub.new("", "", spaced, "")
+		assert_eq(t.cut("a b " + spaced, 7), "a b …", "no first word left of %s" % spaced.c_escape())

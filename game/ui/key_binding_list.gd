@@ -3,7 +3,8 @@ extends VBoxContainer
 ## The rebinding rows of the settings screen: an action's name and a button for each of its keys. Click a button, then
 ## press the key or mouse button to put there; Esc cancels, Backspace or Delete clears it. A key another action uses
 ## swaps the two (the rules are KeyBindings'), and what happened is said in a note. Every key and click made while it
-## waits is taken here and goes no further, so it can't reach play.
+## waits is taken here and goes no further, so it can't reach play. The wait ends with the list hidden (another tab),
+## its button's focus gone or the window's.
 
 ## A change was made (the bindings are already applied to the InputMap).
 signal rebound
@@ -42,11 +43,25 @@ func _ready() -> void:
 			GameTheme.small_button(b)
 			b.custom_minimum_size.x = KEY_BUTTON_WIDTH
 			b.pressed.connect(begin.bind(action, slot))
+			b.focus_exited.connect(_on_focus_left.bind(action, slot))
 			row.add_child(b)
 			pair.append(b)
 		_buttons[action] = pair
 		add_child(row)
 	refresh()
+
+
+func _notification(what: int) -> void:
+	if not capturing():
+		return
+	if what == NOTIFICATION_WM_WINDOW_FOCUS_OUT or what == NOTIFICATION_VISIBILITY_CHANGED and not is_visible_in_tree():
+		cancel()
+
+
+## The waiting button lost focus: the wait ends.
+func _on_focus_left(action: StringName, slot: int) -> void:
+	if _action == action and _slot == slot:
+		cancel()
 
 
 ## The translation key of an action's name.

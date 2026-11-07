@@ -4,7 +4,9 @@ extends Control
 ## line teal up to the player's level and on into the next by the share of its XP earned; the reached dots filled teal,
 ## the next one large and white, the rest rings. KIT and the level numbers sit under them. A click on a dot sends
 ## `level_picked`, so the cards under it can show that level, and marks that dot picked: a white ring round it and its
-## label in teal under a teal bar (owner, 2026-11-03), until another dot is clicked.
+## label in teal under a teal bar (owner, 2026-11-03), until another dot is clicked. It takes keyboard and controller
+## focus too (BP6): left and right (ui_left, ui_right) pick the dot beside the picked one (the next level's first), and
+## the theme's focus ring shows round the track while it has focus.
 
 ## A dot was clicked: its level (0 for the starting kit).
 signal level_picked(number: int)
@@ -34,6 +36,7 @@ var _font: Font = null
 var _words: PackedStringArray = []
 ## The dot clicked last (-1: none yet).
 var _picked: int = -1
+var _focus_ring: StyleBoxFlat = GameTheme.focus_box()
 
 
 ## `count` dots (the starting kit and each level), the player at `level`, `fraction` of the way to the next.
@@ -45,6 +48,10 @@ func _init(count: int = 1, level: int = 0, fraction_in: float = 0.0) -> void:
 	custom_minimum_size = Vector2(0.0, HEIGHT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	focus_mode = Control.FOCUS_ALL
+	accessibility_name = tr("ARMORY_LEVELS_NAME")
+	focus_entered.connect(queue_redraw)
+	focus_exited.connect(queue_redraw)
 	_font = GameTheme.heading_font(700, GameTheme.SPACING_TAB, LABEL_SIZE)
 	for i in _count:
 		_words.append(tr("ARMORY_DOT_KIT") if i == 0 else str(i))
@@ -96,9 +103,27 @@ func _gui_input(event: InputEvent) -> void:
 		set_picked(i)
 		level_picked.emit(i)
 		accept_event()
+		return
+	var step := 0
+	if event.is_action_pressed(&"ui_left", true):
+		step = -1
+	elif event.is_action_pressed(&"ui_right", true):
+		step = 1
+	if step == 0:
+		return
+	var from := _picked if _picked >= 0 else mini(_level + 1, _count - 1) - step
+	var to := from + step
+	# past either end the key goes on to the focus beside the track
+	if to < 0 or to >= _count:
+		return
+	set_picked(to)
+	level_picked.emit(to)
+	accept_event()
 
 
 func _draw() -> void:
+	if has_focus():
+		draw_style_box(_focus_ring, Rect2(Vector2.ZERO, size))
 	var first := dot_position(0)
 	var last := dot_position(_count - 1)
 	draw_line(first, last, RING_COLOUR, LINE)

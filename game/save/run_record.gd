@@ -42,7 +42,8 @@ var score: Array[int] = []
 var previous: Dictionary = {}
 
 
-## The record at `path`: a missing or damaged file is a closed one (nothing to recover from).
+## The record at `path`: a missing or damaged file is a closed one (nothing to recover from), and so is a run under
+## way with its clean quit's mark beside it (`save_closed`), the mark then gone.
 static func load_file(path: String = PATH) -> RunRecord:
 	var r := RunRecord.new()
 	var read := SaveFile.read(path, KIND)
@@ -50,7 +51,17 @@ static func load_file(path: String = PATH) -> RunRecord:
 		r.from_dict(read.data)
 	elif read.found:
 		push_warning("run record: %s is damaged; starting as closed" % path)
+	var mark := closed_mark(path, r.pid, r.started)
+	if r.state == State.RUNNING and FileAccess.file_exists(mark):
+		r.state = State.CLOSED
+		SaveFile.remove(mark)
 	return r
+
+
+## The empty file a clean quit leaves beside `path` when it can't write the record: named for the run (its process
+## and start), as a full disk may still take a name but no bytes, and a locked record leaves its folder free.
+static func closed_mark(path: String, run_pid: int, run_started: int) -> String:
+	return "%s.closed-%d-%d" % [path, run_pid, run_started]
 
 
 func save(path: String = PATH) -> bool:
@@ -133,6 +144,21 @@ func to_menus() -> void:
 ## A clean quit.
 func close() -> void:
 	state = State.CLOSED
+
+
+## A clean quit, written to `path`, so the next start doesn't take it for a crash. If the write fails (a full disk, a
+## locked file) the run's closed mark goes beside it instead, and failing that the record's files go (a missing record
+## reads as closed; `previous` goes with them). Whether the next start will read the run as closed.
+func save_closed(path: String = PATH) -> bool:
+	var mark := closed_mark(path, pid, started)
+	close()
+	if save(path):
+		return true
+	if SaveFile.touch(mark):
+		push_warning("run record: %s not written; its clean quit marked beside it" % path)
+		return true
+	push_warning("run record: %s not written nor marked; taking it away" % path)
+	return SaveFile.remove(path)
 
 
 ## Whether the last run closed unexpectedly (and the crash screen hasn't shown it yet).

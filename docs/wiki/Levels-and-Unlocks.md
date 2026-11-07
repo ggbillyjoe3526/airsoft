@@ -20,7 +20,8 @@ A finished match pays:
 - **The bots' level multiplies the total:** the lower of your opponents' and your teammates' levels (the opponents'
   alone when you have no teammates). A [Custom](Modes#skirmish-and-custom) match pays at most the Custom multiplier.
   The card after the match names the one that counted: "Hard bots", "Easy teammates" or "Custom rules".
-- **A round won counts only if you took part in it:** you hit an opponent in it, or were still in when it ended.
+- **A round won counts only if you took part in it:** you hit an opponent in it, or were still in when it ended. The
+  card calls them "Rounds won with you in them", so it can count fewer than the match's score.
 - **A shorter Custom match pays less:** Match played, Match won and each Round won are scaled by its rounds to win
   divided by 5 (never more than in full).
 - A first-to-5 match on Normal gives about 250 XP, so the first level comes after your first match and the top level
@@ -49,7 +50,8 @@ level and on into the next by the XP you have earned.
 Below the track are four level cards, starting at your level. Each card shows its items with their pictures (hover an
 item to see what it does), marked **UNLOCKED**, **NEXT** (edged in teal: the next level with something new) or with
 the XP that reaches it. Browse the levels with the arrows at the top right, or click a dot on the track: the dot you
-clicked is ringed and its level's card is edged in white.
+clicked is ringed and its level's card is edged in white. With the keyboard or a controller, move the focus to the
+track and press left or right to pick the level beside it.
 
 Your level, unlocks and records are saved in their own file, apart from your settings, so a crash never loses them
 ([Saving and Bug Reports](Saving-and-Bug-Reports)).

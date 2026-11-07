@@ -96,6 +96,10 @@ const TILE_PAD := 8.0
 const SWATCH_HEIGHT := 46.0
 const TILE_NAME_SIZE := 13
 const TILE_NAME_GAP := 7
+## A paint's name too long for its tile ("Ranger green") is set smaller to fit, keeping this much room each side, down
+## to TILE_NAME_MIN (BP6: it ran to the tile's edges).
+const TILE_NAME_ROOM := 3.0
+const TILE_NAME_MIN := 10
 const BOLD_COLUMNS := 8
 const PLAIN_COLUMNS := 4
 const TOGGLE_TOP := 22
@@ -653,6 +657,7 @@ func _tile_grid(paints: Array, columns: int) -> Control:
 func _tile(paint: StringName) -> MenuCard:
 	var card := MenuCard.new()
 	card.name = "Paint_%s" % paint
+	card.accessibility_name = ReplicaSchemes.paint_name(paint, false)
 	card.ring = true
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	card.custom_minimum_size = Vector2(0.0, SWATCH_HEIGHT + TILE_NAME_SIZE * 1.4 + TILE_PAD * 2.0 + TILE_NAME_GAP +
@@ -673,12 +678,28 @@ func _tile(paint: StringName) -> MenuCard:
 	column.add_child(swatch)
 	var label := MenuParts.text(ReplicaSchemes.paint_name(paint, false), TILE_NAME_SIZE, 700, GameTheme.TEXT)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# its width is the tile's, not the name's: `fit_name` sizes the name to it
+	label.clip_text = true
+	label.resized.connect(fit_name.bind(label))
 	column.add_child(label)
 	pad.add_child(column)
 	card.add_content(pad)
 	card.pressed.connect(func() -> void: paint_picked.emit(paint))
 	_tiles[paint] = card
 	return card
+
+
+## A tile's name at TILE_NAME_SIZE, or smaller where that would run past the label (never cut).
+static func fit_name(label: Label) -> void:
+	var room := label.size.x - TILE_NAME_ROOM * 2.0
+	if room <= 0.0:
+		return
+	var font := label.get_theme_font("font")
+	var fitted := TILE_NAME_SIZE
+	while fitted > TILE_NAME_MIN and font.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, fitted).x > room:
+		fitted -= 1
+	if label.get_theme_font_size("font_size") != fitted:
+		label.add_theme_font_size_override("font_size", fitted)
 
 
 func _build_bbs() -> Control:
@@ -789,10 +810,13 @@ func _build_power() -> Control:
 func _refresh_power(item: Pool.Item, t: ReplicaTune) -> void:
 	var rules := _facts.rules()
 	var fitting := rules.pool.powers_for(item, rules.dev_content)
-	var ids := PackedStringArray()
+	# the cards are rebuilt only when the batteries that fit change (a slider's refresh builds no list: BP6)
+	var same := fitting.size() == _power_cards.size()
 	for pw in fitting:
-		ids.append(pw.id)
-	if ids != PackedStringArray(_power_cards.keys()):
+		if not same:
+			break
+		same = _power_cards.has(pw.id)
+	if not same:
 		for id: String in _power_cards:
 			_power_box.remove_child(_power_cards[id])
 			_power_cards[id].queue_free()

@@ -1,8 +1,19 @@
-Task: none · BP6 part 3 (models) · Verdict: Pass
-Performance, BP6 models, head fbdf498: PASS, no blocking. figure_bench 11 figs: main 2.07/2.15 ms vs head 2.28/2.09 (noise); load and set_body equal.
-Materials (glb JSON): AEG 7->6, Sniper 7->6, human 9->8 (one draw less per instance and shadow pass); pistol 7.
-Triangles summed over all meshes in each glb: AEG 40,781 and Sniper 37,966 unchanged; human 122,301 unchanged; GBB 42,250 -> 42,590 (+340) while the worker states 39,638 -> 39,590: confirm which LODs.
-Install: AEG glb +259 KB, Sniper +243 KB, human +79 KB, pistol +7 KB (net ~+590 KB, why do the replicas grow?).
-VRAM: human_pads_col BC1->BC7 +175 KB. New 4x4 rubber textures negligible.
-Hold re-check: no heap allocs, <1 us per figure per frame. Advisory: stacked doc comments at figure_view.gd:524-529; cos(deg_to_rad(hold_view_turn)) per figure per frame could be cached.
-RETRY (head 40d954c): PASS. human.glb 9,496,840 -> 9,574,920 bytes (+0.8 %), 122,301 tris unchanged, 9 -> 8 materials, 12 -> 10 images. AEG/Sniper 6 materials, pistol 7 (42,590 summed, +340 in Body). figure_bench mean head 1.525/1.624 vs main 1.601/1.541 ms (noise); one 22.6 ms max spike in a noisy run. Merged body draws: 8 a level by material count (test_bp6_graphics asserts 8 surfaces).
+Task: BP6 menus · head (worktree-agent-a112c05c41620d0ad on 158e93b) · Verdict: Pass
+Run: static diff review only (no headless --perf run; check.sh running separately) · budget: no baseline yet, judged against targets and the diff
+Metrics: not measured. Regressions: none measured.
+Blocking findings: none.
+Advisory:
+- game/debug/debug_ribbons.gd:83-96 (judgment) end() clears and re-adds one ArrayMesh surface per frame, and hands the engine the whole grown buffer (kept at the busiest frame's size, doubling), not just the used part. Debug-only (F4), arrays reused, no per-frame GDScript allocation, nulls the array refs so writes don't COW-copy. Acceptable. A frame with F4 on and no trails still calls clear_surfaces (cheap).
+- debug_ribbons.gd:75 (judgment) stale vertices past _vert_count stay in the buffer; harmless because the indices past the frame's are zeroed.
+- game/debug/debug_view.gd set_bb_paths(false): _path_lines.free() frees node + mesh + material (RefCounted, released with it). Off: no leak. Toggling on builds a new ArrayMesh and StandardMaterial3D (not shared, fine for debug).
+- game/play/bot_intent_view.gd:_space (judgment) per frame while Bot intentions is on: reuses _order/_placed/_depth, cached Callable _nearer, no new arrays; Rect2 values only. sort_custom of <=~20 bots fine. Dev-only toggle; hidden (no update) when covered.
+- game/play/bot_intent_view.gd:71 font.get_string_size only when the intent text changes. Good.
+- game/ui/customise_view.gd fit_name: a Callable bind per paint tile at build, not per frame; tiles free with the card, so the connection goes with its emitter. The loop is bounded (size 10..TILE_NAME_SIZE) and only runs on label resize; the override is set only on change, so no resize loop.
+- customise_view power cards: the rebuild check no longer allocates a PackedStringArray on a slider refresh. Improvement.
+Checked, clean:
+- Signal connections: DebugPerf (_ready connect / _exit_tree guarded disconnect), ReplicaTurntable (ENTER_TREE connect guarded by is_connected, EXIT_TREE disconnect), settings_screen size_changed (connect/disconnect pair), armory_dots focus_entered/exited (self-owned), key_binding_list focus_exited.bind (button-owned). No duplicates found.
+- Nodes/resources: PlaySession _skip_said created once under skip_layer (freed with it); RetroPixels keeps one ShaderMaterial, set_look only updates uniforms (called from _apply_dev, not per frame), queue_free on off. hud.set_paused only flips visible + redraw-if-changed. StyleBoxEmpty/GameTheme.focus_box are one per instance, built once. FontVariation cache in key names is a static dict keyed by size (bounded).
+- Per frame: PlaySession.intents_covered is a few bool/field reads. HUD _cross_drawn is a bool. Minimap on_field is a 2-iteration loop on Vector2s, no allocation; the turntable draws once a change (physics interpolation off).
+- ReportScrub RegEx are compiled in _init / once per machine, not per line. SaveFile.touch/remove, RunRecord save_closed run at quit/start only, file handle closed.
+- Shader prewarm: no new shader or particle (retro shader already existed). No preset bypass.
+Fixes: none required.

@@ -180,6 +180,16 @@ func test_key_names_follow_the_layout_and_name_mouse_buttons() -> void:
 	assert_eq(KeyNames.describe(PackedInt32Array()), KeyNames.NO_KEY)
 
 
+func test_punctuation_and_numpad_keys_are_named_by_their_marks() -> void:
+	# BP6: rebound to these, Controls and the prompts said "BracketLeft", "BackSlash", "Kp 5"
+	var marks := {KEY_QUOTELEFT: "`", KEY_BRACKETLEFT: "[", KEY_BRACKETRIGHT: "]", KEY_BACKSLASH: "\\",
+		KEY_SLASH: "/", KEY_SEMICOLON: ";", KEY_COMMA: ",", KEY_PERIOD: ".", KEY_APOSTROPHE: "'", KEY_EQUAL: "=",
+		KEY_MINUS: "Minus", KEY_KP_5: "Num 5", KEY_KP_SUBTRACT: "Num -", KEY_KP_ENTER: "Num Enter", KEY_W: "W", KEY_1: "1", KEY_SPACE: "Space"}
+	for k: int in marks:
+		assert_eq(KeyNames.name_of(k), marks[k])
+	assert_ne(KeyNames.name_of(KEY_MINUS), KeyNames.NO_KEY, "minus is never read as no key")
+
+
 func test_a_hint_names_the_key_an_action_has_now() -> void:
 	InputMap.load_from_project_settings()
 	assert_eq(KeyNames.of_action(&"jump"), "Space")

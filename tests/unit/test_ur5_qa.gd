@@ -118,10 +118,11 @@ func test_arrow_focus_when_it_becomes_disabled() -> void:
 	assert_not_null(owner_focus, "keyboard focus is lost when the focused arrow disables")
 
 
-func test_arrows_are_keyboard_focusable_and_dots_are_not() -> void:
+func test_arrows_and_the_dots_are_keyboard_focusable() -> void:
 	var page := _page(920)
 	assert_ne(page.back_arrow().focus_mode, Control.FOCUS_NONE)
-	assert_eq(page.summary().bar().focus_mode, Control.FOCUS_NONE, "dots have no keyboard path")
+	# BP6: the track takes focus too, left and right picking a level (test_bp6_menus)
+	assert_eq(page.summary().bar().focus_mode, Control.FOCUS_ALL, "the dots have a keyboard path")
 
 
 func test_dot_click_ignores_right_button_and_release() -> void:

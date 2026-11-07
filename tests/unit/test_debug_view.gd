@@ -152,3 +152,61 @@ func test_the_overlay_line_shows_seed_position_and_entities() -> void:
 	assert_string_contains(line, "entities %d" % (play.state.characters.size() + play.state.bbs.active_count()))
 	perf.watch(null)
 	assert_eq(perf.match_line(), "")
+	# BP6: the overlay sits bottom left, never over the minimap and its caption top left
+	perf.watch(play)
+	perf.toggle()
+	assert_gt(perf.plate_rect().position.y, 0.0, "seated as it shows, not top left until a refresh")
+	await wait_seconds(DebugPerf.REFRESH + 0.2)
+	var screen := perf.get_viewport().get_visible_rect().size
+	var plate := perf.plate_rect()
+	assert_gt(plate.size.y, 0.0, "drawn")
+	assert_almost_eq(plate.end.y, screen.y - DebugPerf.CORNER.y, 0.5, "its foot on the screen's bottom edge")
+	assert_gt(plate.position.y, screen.y * 0.5, "the lower half, clear of the minimap")
+	perf.watch(null)
+
+
+## BP6: the trails are ribbons, as wide on screen near and far, a quad (two triangles) a segment.
+func test_bb_paths_are_ribbons_of_a_fixed_screen_width() -> void:
+	view.set_bb_paths(true)
+	var bb := state.bbs.spawn(0, Vector3(0, 1, 0), Vector3.FORWARD, 100.0, 0.0, 0.0002, 0.0)
+	for i in 5:
+		bb.position = Vector3(0, 1, -i * 10.0)
+		view.on_tick()
+	await wait_process_frames(2)
+	var ribbons := view.get_child(0) as DebugRibbons
+	assert_eq(ribbons.segment_count, 4)
+	var arrays := (ribbons.mesh as ArrayMesh).surface_get_arrays(0)
+	assert_eq((arrays[Mesh.ARRAY_INDEX] as PackedInt32Array).size(), 4 * 6)
+	var verts := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+	var near := verts[0].distance_to(verts[1])
+	var far := verts[8].distance_to(verts[9])
+	assert_gt(near, 0.0)
+	assert_almost_eq(far / near, 41.0 / 1.0, 41.0 * 0.05, "width grows with distance from the eye: a fixed width on screen")
+
+
+## The ribbons' kept arrays go over whole each frame: a frame with fewer segments than the last leaves the rest of the
+## indices zero, triangles with no area, and makes no arrays of its own.
+func test_ribbons_hand_over_their_kept_arrays_with_a_tail_that_draws_nothing() -> void:
+	var trails := BBTrails.new(2, 8)
+	for slot in 2:
+		for k in 5:
+			trails._points[slot * 8 + k] = Vector3(slot, 1.0, -k)
+		trails._count[slot] = 5
+		trails._head[slot] = 5
+	var r := DebugRibbons.new()
+	add_child_autofree(r)
+	r.begin(null, 3.0)
+	r.strip(trails, 0, Color.WHITE, Color.WHITE)
+	r.strip(trails, 1, Color.WHITE, Color.WHITE)
+	r.end()
+	r.begin(null, 3.0)
+	r.strip(trails, 0, Color.WHITE, Color.WHITE)
+	r.end()
+	assert_eq(r.segment_count, 4)
+	var idx := (r.mesh as ArrayMesh).surface_get_arrays(0)[Mesh.ARRAY_INDEX] as PackedInt32Array
+	assert_eq(idx.size(), 2 * 4 * 6, "the busiest frame's arrays, whole")
+	var drawn := 0
+	for t in idx.size() / 3:
+		if idx[t * 3] != idx[t * 3 + 1] or idx[t * 3 + 1] != idx[t * 3 + 2]:
+			drawn += 1
+	assert_eq(drawn, 4 * 2, "two triangles a segment of this frame's, the rest draw nothing")

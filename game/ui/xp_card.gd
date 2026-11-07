@@ -74,7 +74,7 @@ func _multiplier_words(e: MatchXp.Earned) -> String:
 	return tr("XP_LINE_DIFFICULTY") % level
 
 
-## "Match played", "Rounds won · 5 × 20" (an uneven share says just the count).
+## "Match played", "Rounds won with you in them · 5 × 20" (an uneven share says just the count).
 func _line_words(l: MatchXp.Line) -> String:
 	var key := "XP_LINE_" + String(l.key).to_upper()
 	if l.key == &"match_played" or l.key == &"match_won":

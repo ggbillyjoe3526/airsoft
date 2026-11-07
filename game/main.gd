@@ -159,8 +159,7 @@ func _exit_tree() -> void:
 	if run != null:
 		if crash_screen != null:
 			run.previous = {}
-		run.close()
-		run.save(run_path)
+		run.save_closed(run_path)
 	OS.remove_logger(error_log)
 	var window := get_window()
 	if window.size_changed.is_connected(_scale_menus):

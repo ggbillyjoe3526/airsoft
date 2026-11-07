@@ -1,15 +1,19 @@
 class_name DebugPerf
 extends CanvasLayer
 ## The performance overlay, from the owner's katanashotgun project: F3 toggles it in any build and shows FPS, frame
-## time, draw calls, primitives, live nodes, orphan nodes and nodes added per second. `--perf` also logs a line every
-## 2 s and a summary at exit, so two runs of the same seed can be compared on one machine. Frame times only mean
-## something on real hardware; the node, object and draw-call counts match on any machine.
-## While a match is on (`watch`) it also shows the match's seed, your position and the entity count. F4 and F5 draw the
-## BB paths and hit areas (DebugView). It samples only while it is shown or logging, so a normal session pays nothing for it.
+## time, draw calls, primitives, live nodes, orphan nodes and nodes added per second. `--perf` also logs a line every 2
+## s and a summary at exit, so two runs of the same seed can be compared on one machine. Frame times only mean something
+## on real hardware; the node, object and draw-call counts match on any machine. While a match is on (`watch`) it also
+## shows the match's seed, your position and the entity count. F4 and F5 draw the BB paths and hit areas (DebugView). It
+## sits in the bottom left corner, clear of the minimap top left (BP6). It samples only while it is shown or logging, so
+## a normal session pays nothing for it.
 
 const LOG_EVERY := 2.0
 const REFRESH := 0.5
 const LAYER := 100
+## From the screen's bottom left corner to the plate's, and from the plate's corner to the text (px).
+const CORNER := Vector2(8, 8)
+const TEXT_PAD := Vector2(6, 2)
 
 var _session: PlaySession = null
 var _label: Label
@@ -33,19 +37,20 @@ func _ready() -> void:
 	_plate = ColorRect.new()
 	_plate.color = Color(0, 0, 0, 0.72)
 	_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_plate.position = Vector2(8, 8)
 	add_child(_plate)
 	_label = Label.new()
-	_label.position = Vector2(14, 10)
 	_label.add_theme_color_override("font_color", Color(0.75, 1.0, 0.8))
 	add_child(_label)
 	get_tree().node_added.connect(_on_node_added)
+	get_viewport().size_changed.connect(_seat)
 	_set_shown(false)
 
 
 func _exit_tree() -> void:
 	if get_tree().node_added.is_connected(_on_node_added):
 		get_tree().node_added.disconnect(_on_node_added)
+	if get_viewport().size_changed.is_connected(_seat):
+		get_viewport().size_changed.disconnect(_seat)
 	if _log and _frames > 0:
 		print("[perf-summary] frames=%d draw_max=%d nodes_max=%d orphans_max=%d" % [_frames, _draw_max, _nodes_max, _orphans_max])
 
@@ -78,10 +83,28 @@ func _set_shown(on: bool) -> void:
 	_label.visible = on
 
 
+## Shows or hides the overlay, as F3 does; shown, it is seated at once, not top left until its first refresh fills it.
+func toggle() -> void:
+	_set_shown(not _label.visible)
+	if _label.visible:
+		_seat()
+
+
+## Where the plate is on the screen.
+func plate_rect() -> Rect2:
+	return Rect2(_plate.position, _plate.size)
+
+
+func _seat() -> void:
+	var screen := get_viewport().get_visible_rect().size
+	_plate.position = Vector2(CORNER.x, screen.y - CORNER.y - _plate.size.y)
+	_label.position = _plate.position + TEXT_PAD
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	var k := event as InputEventKey
 	if k and k.pressed and not k.echo and k.physical_keycode == KEY_F3:
-		_set_shown(not _label.visible)
+		toggle()
 		get_viewport().set_input_as_handled()
 
 
@@ -106,7 +129,8 @@ func _process(delta: float) -> void:
 				roundi(fps), 1000.0 / maxf(fps, 0.001), _ms_max, draw, prims / 1000, nodes, orphans, roundi(_added / _fps_t),
 				match_line()]
 			_label.size = Vector2.ZERO
-			_plate.size = _label.get_minimum_size() + Vector2(12, 4)
+			_plate.size = _label.get_minimum_size() + TEXT_PAD * 2.0
+			_seat()
 		_fps_t = 0.0
 		_fps_frames = 0
 		_ms_max = 0.0

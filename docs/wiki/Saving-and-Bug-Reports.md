@@ -32,8 +32,9 @@ characters.
 
 The report lists the map, mode and rules, your system and graphics preset, the settings you changed, the round's last
 shots and hits, frame timing and recent errors. Personal details are taken out first: your user folder names, your
-computer's name and any IP, MAC or e-mail address become placeholders. The pause menu shows how many errors have
-happened in the match.
+computer's name and any IP, MAC or e-mail address become placeholders (an account named with an ordinary word, such as
+"player", is taken out of folder paths only, so the word stays in the rest of the report). The pause menu shows how many
+errors have happened in the match.
 
 ## If the game crashes
 

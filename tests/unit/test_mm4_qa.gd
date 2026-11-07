@@ -89,7 +89,7 @@ func test_the_panel_turns_with_your_mouse_look_and_with_the_teammate_you_watch_o
 	await wait_process_frames(2)
 	assert_eq(s.spectated(), mate)
 	assert_almost_eq(view._rot, -0.7, 0.0001, "out: the teammate's yaw")
-	assert_eq(view._centre, Vector2(mate.position.x, mate.position.z), "and centred on them")
+	assert_eq(view._centre, view.on_field(Vector2(mate.position.x, mate.position.z)), "and centred on them, kept on the field (BP6)")
 
 
 func test_the_minimap_goes_with_the_session() -> void:

@@ -749,7 +749,7 @@ func test_the_accessibility_tab_has_the_concept_s_rows() -> void:
 			"SOUND CUES", "Red is the default.", "Two dots a step (up to 22 m)",
 			"Arrowhead a shot (up to 60 m)", "HIT tag a hit call (up to 60 m)", "Shown through walls", "REDUCED MOTION",
 			"Follow system uses your computer's", "Off: the replica sways", "On: no weapon sway or drifting dust",
-			"The recoil climb stays", "Your system asks for reduced motion: It doesn't say"]:
+			"The recoil climb stays", "Your system doesn't say whether it wants reduced motion"]:
 		assert_string_contains(words, want)
 	# the switches' row labels, in capitals as every row label is (UI1)
 	for want: String in ["PATTERNS", "READ OUT", "SHOW CUES"]:
@@ -762,6 +762,9 @@ func test_the_accessibility_tab_has_the_concept_s_rows() -> void:
 	assert_string_contains(_words(page), "reduced motion: Yes")
 	page._show_system(0)
 	assert_string_contains(_words(page), "reduced motion: No")
+	page._show_system(-1)
+	assert_string_contains(_words(page), "Your system doesn't say whether it wants reduced motion")
+	assert_false(_words(page).contains("reduced motion: "), "never as if it were the answer (BP6)")
 
 
 func test_the_rows_of_later_tasks_are_greyed_with_later() -> void:
@@ -835,3 +838,21 @@ func test_the_hud_tab_s_preview_and_samples_follow_the_set_picked() -> void:
 	for thumb in page._thumbs:
 		assert_eq(thumb._view._team, hc.colours[0], "the minimap sample's team")
 		assert_eq(thumb._view._enemy, hc.colours[1])
+
+
+## BP6 (BP5's UI reader): a slot waiting for a key stops waiting when the tab changes or its button loses focus.
+func test_a_waiting_key_slot_lets_go_on_another_tab_or_lost_focus() -> void:
+	var controls := screen.current_tab()
+	screen._keys.begin(&"reload", 0)
+	screen.show_about()
+	assert_false(screen._keys.capturing(), "another tab")
+	screen._tabs.current_tab = controls
+	var button := screen._keys._buttons[&"reload"][0] as Button
+	button.grab_focus()
+	screen._keys.begin(&"reload", 0)
+	screen._back.grab_focus()
+	assert_false(screen._keys.capturing(), "focus left its button")
+	assert_eq(button.text, KeyNames.name_of(s.bindings.codes(&"reload")[0]), "it shows its key again")
+	screen._keys.begin(&"reload", 0)
+	screen._keys.notification(Node.NOTIFICATION_WM_WINDOW_FOCUS_OUT)
+	assert_false(screen._keys.capturing(), "the window's focus left")

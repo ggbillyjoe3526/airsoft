@@ -35,6 +35,8 @@ const TOP_WIDTH := 800.0
 ## line first and a banner under them. Without a score bar (the range) it starts MARGIN down.
 const MIDDLE_WIDTH := 1500.0
 const MIDDLE_GAP := 12.0
+## Room under the walk-off line, so a banner under the hit call (the hit that ends the round) never touches it (BP6).
+const HIT_SUB_GAP := 12.0
 ## The finished match's XP (XpCard) and the round's table hang this far under the stack.
 const XP_GAP := 28.0
 ## The match summary's row (its panels either side of the XP card) keeps this far from the screen's sides (px): at a
@@ -163,6 +165,8 @@ var _banner_left: float = 0.0
 var _hop_left: float = 0.0
 var _gap: float = 0.0
 var _show_cross: bool = true
+## The pause menu is up: its panel is see-through, so the crosshair would show through it (BP6).
+var _paused: bool = false
 ## What the crosshair and the hit marker were last drawn with (gap, marker left, crosshair shown, HUD size) and the
 ## size drawn at: drawn again only when one changes (BP2), never every frame for nothing. NAN: draw on the next frame.
 var _drawn_with: Vector4 = Vector4(NAN, NAN, NAN, NAN)
@@ -289,6 +293,9 @@ func setup(cfg: HudConfig, teams: TeamConfig, view: ViewConfig, sim: SimTuning, 
 	_hit_label.text = tr("HUD_YOU_ARE_HIT")
 	_hit_sub = HudStyle.label(middle, GameTheme.BODY_SIZE, 600, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_CENTER)
 	_hit_sub.text = tr("HUD_WALK_OFF")
+	var under := StyleBoxEmpty.new()
+	under.content_margin_bottom = HIT_SUB_GAP
+	_hit_sub.add_theme_stylebox_override("normal", under)
 	for l: Label in [_hit_label, _hit_sub]:
 		l.add_theme_constant_override("outline_size", 8)
 		l.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.55))
@@ -771,7 +778,7 @@ func what_got_you() -> WhatGotYouCard:
 	return _what_got_you
 
 
-## Whether "SPACE Hold to skip the round" shows (you are out and the round plays on); the key is Jump's as bound now.
+## Whether "SPACE Hold to skip the round" shows (you are out and the round plays on); the key is Fire's as bound now.
 func set_skip_hint(show: bool) -> void:
 	if show == _skip_hint.visible:
 		return
@@ -784,14 +791,23 @@ func skip_hint_shown() -> bool:
 	return _skip_hint.visible
 
 
-## Whose eyes the view is from: a bot's name, or "" for your own (or a bot with no name). The line shows only then.
+## Whose eyes the view is from: a bot's name, or "" for your own (or a bot with no name). The line shows only then,
+## and not while the round's result is up (its click line sits where it would, BP6).
 func set_watching(bot_name: String) -> void:
 	if bot_name == _watching_name:
 		return
 	_watching_name = bot_name
-	_watching.visible = bot_name != ""
-	if _watching.visible:
+	if bot_name != "":
 		_watching.text = tr("HUD_WATCHING") % bot_name
+	_show_watching()
+
+
+func _show_watching() -> void:
+	_watching.visible = _watching_name != "" and not _round_result.is_open()
+
+
+func watching_shown() -> bool:
+	return _watching.visible
 
 
 ## The tick's events: your hits, the round's turns, the magazine hand-off's line (`mag_from_wheel`: your last Need a
@@ -934,6 +950,7 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 		# only the round's stamp goes with its table: in a live round the hit call and banners stay as they were
 		_middle.visible = not over_table
 		_round_result.update(state, _stats, _player)
+		_show_watching()
 		_board.update(state, _stats, _player, board)
 		if _board.visible:
 			_fit_board()
@@ -1016,10 +1033,30 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 	_redraw_if_changed()
 
 
+## While the pause menu is up the crosshair is not drawn and the teammates' markers are hidden (the panel is
+## see-through); they come back as the pause ends.
+func set_paused(on: bool) -> void:
+	_paused = on
+	_team_markers.visible = not on
+	_redraw_if_changed()
+
+
+func team_markers_shown() -> bool:
+	return _team_markers.visible
+
+
+func crosshair_drawn() -> bool:
+	return _cross_drawn()
+
+
+func _cross_drawn() -> bool:
+	return _show_cross and not _paused
+
+
 ## Draws the crosshair and the hit marker again if what they show changed since they were last drawn.
 func _redraw_if_changed() -> void:
 	var marker := _marker_left if _prefs.marker else 0.0
-	var now := Vector4(_gap, marker, 1.0 if _show_cross else 0.0, _hud_size)
+	var now := Vector4(_gap, marker, 1.0 if _cross_drawn() else 0.0, _hud_size)
 	if now == _drawn_with and size == _drawn_at:
 		return
 	_drawn_with = now
@@ -1251,7 +1288,7 @@ func _draw() -> void:
 	var centre := size * 0.5
 	# The crosshair and the hit marker keep their own size whatever the HUD's: drawn about the middle at 1 / HUD size.
 	draw_set_transform(centre * (1.0 - 1.0 / _hud_size), 0.0, Vector2.ONE / _hud_size)
-	if _show_cross:
+	if _cross_drawn():
 		CrosshairDraw.cross(self, centre, _prefs, _gap)
 	if _marker_left > 0.0 and _prefs.marker:
 		CrosshairDraw.marker(self, centre, _prefs, _gap, _cfg.marker_size, _cfg.marker_width,

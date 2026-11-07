@@ -104,10 +104,13 @@ var practice: bool = false
 var challenge_on: bool = false
 ## Practice, coming back from the Loadout: where you stood. Set before the session enters the tree.
 var resume: PracticeSpot = null
-## Practice, when `counts`: where a timed challenge run's best is kept and saved (null: Records.shared(), saved to its
-## file as a settled match's records are). Tests give their own and a path of their own.
+## When `counts`: where a timed challenge run's best and a settled match's records are kept and saved (null:
+## Records.shared()), and where a settled match's XP goes (null: Progress.shared()). Tests give their own and paths of
+## their own (BP6: a match settled with `counts` on is tested so).
 var records: Records = null
 var records_path: String = Records.PATH
+var progress_book: Progress = null
+var progress_path: String = Progress.PATH
 ## Practice, when `counts`: where the pause menu's Timed challenge switch is saved (Settings.practice_challenge).
 var settings_path: String = Settings.PATH
 ## This run's ErrorLog (the entry scene's), for the pause menu's error line and Report a Bug (null: none kept).
@@ -219,6 +222,9 @@ var _skip_armed: bool = false
 var _out_for: float = 0.0
 var _skip_cover: ColorRect = null
 var _skip_note: Label = null
+## The skip said to a screen reader (the HUD's live region hides with the HUD): a live region over the cover, never
+## drawn, "Skipping the round" once as a skip starts.
+var _skip_said: Label = null
 var _skip_clock_shown: int = -1
 ## The rendered frame the skip last ticked in, and the microseconds of ticks spent in it (`_play_out`).
 var _skip_frame: int = -1
@@ -821,6 +827,12 @@ func _build_views(ui: CanvasLayer) -> void:
 			SKIP_NOTE_MARGIN)
 	_skip_note.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_skip_note.visible = false
+	_skip_said = Label.new()
+	_skip_said.name = "SkipSaid"
+	_skip_said.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	_skip_said.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_skip_said.accessibility_live = AccessibilityServer.LIVE_OFF
+	skip_layer.add_child(_skip_said)
 	_pause = PauseMenu.new()
 	ui.add_child(_pause)
 	_pause.resumed.connect(_resume)
@@ -1222,7 +1234,9 @@ func _process(delta: float) -> void:
 	# After the flag's and Hold here's markers, so pinned pings stack under them; through your own eyes only.
 	_hud.place_pings(_eyes.camera, _bots.pings, state.time, watched == player and not _input.field_map().open)
 	if _intents != null:
-		_intents.update(state, fraction)
+		_intents.visible = not intents_covered(watched)
+		if _intents.visible:
+			_intents.update(state, fraction)
 	if _first_frame_due:
 		_first_frame_due = false
 		_held_for = 0.0
@@ -1408,6 +1422,7 @@ func _open_pause() -> void:
 	_hud.show_board(false)
 	_hud.close_order_wheel()
 	_hud.hide_pings()
+	_hud.set_paused(true)
 	# The hint comes back on resume naming the trigger's key as bound then (Settings can rebind it); a trigger held
 	# through the pause doesn't skip.
 	_hud.set_skip_hint(false)
@@ -1456,7 +1471,12 @@ func start_skip() -> void:
 	_skip_armed = false
 	state.round_state.hold_next = true
 	_hud.set_skip_hint(false)
+	# the HUD's live region goes with it: its last line is not left standing for the round's end (BP6)
+	_hud.announce().text = ""
 	_hud.visible = false
+	if settings.read_out:
+		_skip_said.accessibility_live = AccessibilityServer.LIVE_POLITE
+		_skip_said.text = tr("HUD_SKIPPING")
 	_skip_cover.visible = true
 	_skip_note.visible = true
 	# Under the cover nothing of the field needs drawing: the frame's time goes to the ticks.
@@ -1470,6 +1490,8 @@ func _stop_skip() -> void:
 		return
 	_skipping = false
 	get_viewport().disable_3d = false
+	_skip_said.text = ""
+	_skip_said.accessibility_live = AccessibilityServer.LIVE_OFF
 	_hud.visible = true
 	_skip_cover.visible = false
 	_skip_note.visible = false
@@ -1540,6 +1562,7 @@ func _on_challenge_toggled(on: bool) -> void:
 func _resume() -> void:
 	_pause.close()
 	get_tree().paused = false
+	_hud.set_paused(false)
 	_capture()
 	# the settings, opened from the pause menu, may have rebound the Reload key, the door's (and in practice the
 	# Loadout's)
@@ -1549,9 +1572,17 @@ func _resume() -> void:
 		_hud.range_readout().refresh_key()
 
 
+## The Dev tab's bot intention labels stay under the order wheel, the field map and a raised sight (BP6): the wheel and
+## the map are see-through and the sight's glass is drawn over the world, so the labels showed through them.
+func intents_covered(watched: Character) -> bool:
+	var wheel := _hud.order_wheel()
+	return (wheel != null and wheel.draws_wheel()) or _input.field_map().open \
+			or (watched == player and player.aim_raise >= BotIntentView.SIGHT_UP)
+
+
 ## Practice: where you stand now, for the range built again after the Loadout.
 func practice_spot() -> PracticeSpot:
-	return PracticeSpot.of(player, _input.view_yaw, _input.view_pitch, _input.crouch_chosen(), challenge_on,
+	return PracticeSpot.of(player, _input.view_yaw, _input.view_pitch, _input.crouch_kept(), challenge_on,
 			match_seed)
 
 
@@ -1640,15 +1671,15 @@ func counts_for_records() -> bool:
 
 ## Gives the finished match's XP and adds it to the records, then saves both (once a match: a few small writes).
 func _settle() -> void:
-	var progress := Progress.shared()
-	var kept := Records.shared()
+	var progress := progress_book if progress_book != null else Progress.shared()
+	var kept := _records()
 	var mates := teammates_level() if _tuning.rounds.team_size > 1 else &""
 	var s := _tally.settle(progress, kept if counts_for_records() else null, state.off_record or _kit_unlocked_all,
 			player_team, _tuning.rounds.wins_needed, mode, difficulty, mates, custom_rules != null)
 	if s == null:
 		return
-	progress.save_if_dirty()
-	kept.save_if_dirty()
+	progress.save_if_dirty(progress_path)
+	kept.save_if_dirty(records_path)
 	settled = s
 	_hud.show_xp(s, progress, (settings if settings != null else Settings.shared()).dev.dev_content)
 	_hud.summary().set_records(kept, kept.win_loss(difficulty, mode), s.news,
@@ -1809,7 +1840,9 @@ func _apply_dev() -> void:
 	if dev.retro_pixels and _retro == null:
 		_retro = RetroPixels.new()
 		add_child(_retro)
-	elif not dev.retro_pixels and _retro != null:
+	if _retro != null:
+		_retro.set_look(dev.retro_pixel_size, dev.retro_shades)
+	if not dev.retro_pixels and _retro != null:
 		_retro.queue_free()
 		_retro = null
 

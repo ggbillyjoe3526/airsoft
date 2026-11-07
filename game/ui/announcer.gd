@@ -7,7 +7,8 @@ extends RefCounted
 ## score, your team first), Elimination's overtime flag going up ("Overtime · touch the flag", as its banner), the
 ## match's end (the stamp and the match's score) and each of your team's callouts the feed shows ("Brick: Two, Crate
 ## yard!") and each notice of the magazine hand-off's line (MH3, HudMagLine: "+1 mag from Brick · 60 BBs", "Nobody near
-## has a mag to spare"). Lines that come inside JOIN_WINDOW of
+## has a mag to spare"), and each squad order you give ("Order · Follow Me"), or that waits for the next round (BP6).
+## Lines that come inside JOIN_WINDOW of
 ## the first are joined into one message, so a round's end and the match's end, or a burst of hits, are read as one.
 ## Your hit and the match's result make the message assertive (read at once); the rest are polite (read when the reader
 ## is free). Off, nothing is kept. Builds strings only on those events, never per frame.
@@ -18,6 +19,10 @@ const JOIN_WINDOW := 0.3
 const JOIN := ". "
 ## Between the parts of one line, as on the HUD's banners.
 const PART := " · "
+## A squad order's name by SquadOrder.Kind, as the order wheel says it ("" for none).
+const ORDER_KEYS: Dictionary[int, String] = {SquadOrder.Kind.FOLLOW: "ORDER_FOLLOW", SquadOrder.Kind.HOLD: "ORDER_HOLD",
+		SquadOrder.Kind.REGROUP: "ORDER_REGROUP", SquadOrder.Kind.TEAM_PLAN: "ORDER_TEAM_PLAN",
+		SquadOrder.Kind.MAG: "ORDER_MAG", SquadOrder.Kind.MOVE: "ORDER_MOVE"}
 
 ## Whether messages are made (Settings.read_out).
 var on: bool = true
@@ -79,6 +84,12 @@ func on_tick(state: GameState) -> void:
 					add(round_over_line(state.round_state, e.value, e.value2 as GameEvent.RoundEnd), false)
 			GameEvent.Kind.MATCH_OVER:
 				add(match_over_line(e.value, state.round_state.score), true)
+			GameEvent.Kind.SQUAD_ORDER:
+				if e.actor == _you.id:
+					add(order_line(e.value), false)
+			GameEvent.Kind.SQUAD_ORDER_REFUSED:
+				if e.actor == _you.id:
+					add(tr("HUD_ORDER_NOT_NOW").replace("\n", " "), false)
 
 
 ## Gathers `line` into the message (opening one if none is gathered); `assertive` makes the whole message so.
@@ -135,6 +146,12 @@ func add_call(speaker: Character, words: String) -> void:
 ## "Brick: Two, Crate yard!".
 func call_line(speaker: Character, words: String) -> String:
 	return tr("HUD_SR_CALL") % [_name(speaker), words]
+
+
+## "Order · Follow Me": the squad order `kind` (SquadOrder.Kind) you gave; "" for none.
+func order_line(kind: int) -> String:
+	var key: String = ORDER_KEYS.get(kind, "")
+	return tr("HUD_SR_ORDER") % tr(key) if key != "" else ""
 
 
 ## "You're hit · Rook".

@@ -149,8 +149,12 @@ func greyed(section: Section) -> bool:
 
 
 ## The system line for its answer to "reduce animation?" (`answer`: 1 yes, 0 no, -1 it can't say).
+## A system that can't say gets a line of its own (BP6: "asks for reduced motion: It doesn't say" read as a yes).
 func _show_system(answer: int) -> void:
-	_system.text = tr("SETTINGS_SYSTEM_ASKS") % tr(SYSTEM_KEYS.get(answer, SYSTEM_KEYS[-1]))
+	if answer != 0 and answer != 1:
+		_system.text = tr(SYSTEM_KEYS[-1])
+		return
+	_system.text = tr("SETTINGS_SYSTEM_ASKS") % tr(SYSTEM_KEYS[answer])
 
 
 # --- Team colours ---

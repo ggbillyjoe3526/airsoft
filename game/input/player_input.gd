@@ -194,6 +194,12 @@ func crouch_chosen() -> bool:
 	return _crouched if _controls.crouch_toggle else Input.is_action_pressed(CROUCH)
 
 
+## The crouch a trip to the Loadout keeps: the toggle's only. A held crouch key is up on the way back, so you come
+## back standing at once rather than crouched for a tick and then standing up (BP6).
+func crouch_kept() -> bool:
+	return _crouched and _controls.crouch_toggle
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not active:
 		return

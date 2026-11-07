@@ -543,6 +543,8 @@ func _picture(map_id: String, box: Vector2) -> Control:
 	var picture := MenuParts.picture(box)
 	picture.texture = texture
 	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	# drawn at a fifth of its size: smoothed from its mipmaps (the map pictures import with them, BP6)
+	picture.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	return picture
 
 

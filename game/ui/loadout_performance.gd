@@ -97,6 +97,10 @@ class Row:
 	## The row belongs to some Customise tabs only (`TAB_ROWS`); `present` is false for the Moving row without a rattle.
 	var tab_only: bool = false
 	var present: bool = true
+	## The Magazines row's two numbers, each with its own verdict, as the part tabs' cards colour them (BP6): the
+	## magazine's size ("120 ×") and how many ("2"). Empty for every other row.
+	var parts: PackedStringArray = PackedStringArray()
+	var part_verdicts: PackedInt32Array = PackedInt32Array()
 
 	## True if the sheet draws the row when the Customise tab asks for the rows in `extra`.
 	func is_shown(extra: PackedStringArray = PackedStringArray()) -> bool:
@@ -180,8 +184,19 @@ static func compare(carried: Figures, comes: Figures, capped: bool, limit: float
 		var better: Better = spec["better"]
 		if better != Better.NONE and is_finite(diff) and not is_zero_approx(diff):
 			r.verdict = int(signf(diff)) * (1 if better == Better.HIGHER else -1)
+		if field == &"magazines":
+			_split_magazines(r, carried, comes)
 		sheet.rows.append(r)
 	return sheet
+
+
+## The Magazines row's size and count apart, more of either the better ("%d × %d": the text up to the second number,
+## then the second number).
+static func _split_magazines(r: Row, carried: Figures, comes: Figures) -> void:
+	var size_text := (TranslationServer.translate("PERF_MAGAZINES_FORMAT") % [carried.mag_size, carried.mags])
+	var count := str(carried.mags)
+	r.parts = PackedStringArray([size_text.trim_suffix(count).strip_edges(), count])
+	r.part_verdicts = PackedInt32Array([signi(carried.mag_size - comes.mag_size), signi(carried.mags - comes.mags)])
 
 
 ## The Moving row: "Rattles" in red, and only when a magazine rattles.

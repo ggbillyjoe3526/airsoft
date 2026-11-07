@@ -102,6 +102,8 @@ func setup(cfg: HudConfig) -> void:
 	counts.add_theme_constant_override("separation", ROW_GAP)
 	rows.add_child(counts)
 	_mag = HudStyle.label(counts, HudStyle.COUNT_SIZE, 800, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
+	# the concept's line height 1: the count's line as tall as its size
+	_mag.add_theme_font_override("font", HudStyle.tight_font(800, HudStyle.COUNT_SIZE))
 	_spare = HudStyle.label(counts, HudStyle.SPARE_SIZE, 700, GameTheme.MUTED, HORIZONTAL_ALIGNMENT_LEFT)
 	_spare.size_flags_vertical = Control.SIZE_SHRINK_END
 	_gauges = MagGauges.new()

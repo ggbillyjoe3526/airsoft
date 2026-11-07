@@ -254,3 +254,17 @@ func test_the_round_table_under_the_call_banner_step_line_and_gauge_stays_readab
 		_inside(hud._round_result, HudSizeTest.canvas_of(Vector2(1280.0, 720.0)), "round table, gauge %s" % gauge)
 		assert_gte(hud._round_result.scale.x * 1.5, 0.6, "row text still readable (gauge %s)" % gauge)
 		hud.get_parent().queue_free()
+
+
+## BP6: the hit that ends the round showed the walk-off line ~5 px over the LOST banner; it keeps HIT_SUB_GAP clear.
+func test_the_walk_off_line_keeps_clear_of_a_banner_under_it() -> void:
+	var hud := _hud(Vector2(1920.0, 1080.0), 1.0)
+	hud._show_banner("LOST", "ROUND 1 · BETA TAKE THE ROUND")
+	you.status = Character.Status.CALLING
+	hud.update(state, 1.0, 0.0)
+	await wait_process_frames(3)
+	var sub: Label = hud._hit_sub
+	var words := sub.get_theme_font(&"font").get_height(sub.get_theme_font_size(&"font_size"))
+	var room := hud._banner.get_global_rect().position.y - (sub.get_global_rect().position.y + words)
+	assert_gte(room, Hud.HIT_SUB_GAP, "a clear gap between the line's words and the banner")
+	hud.get_parent().queue_free()

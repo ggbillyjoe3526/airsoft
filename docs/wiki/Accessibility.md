@@ -39,4 +39,7 @@ never moves the camera, with or without it.
 On by default. A screen reader such as NVDA on Windows or Orca on Linux reads out the match: hit calls ("Rook called
 HIT · You"), your own hit ("You're hit · Rook"), each round's start and end with the score, and the match result. Your
 hit and the result interrupt; the rest wait their turn. Your teammates' callouts are read too, each as it shows in the
-feed ("Rook: Two, Box yard!"), waiting their turn. Squad orders and the menus are not read yet.
+feed ("Rook: Two, Box yard!"), waiting their turn. Your squad orders are read ("Order · Follow Me"), and so is an
+order that has to wait for the next round. Skipping the rest of a round is read as it starts, and the round's end
+after it. In the menus, Settings' choices, switches and sliders, Customise's paint tiles and the Armory's level track
+have spoken names; the Match page's and the Loadout's cards don't yet.

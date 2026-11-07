@@ -99,7 +99,8 @@ func test_it_follows_the_one_the_view_is_through_and_their_team() -> void:
 	_follow(mate)
 	assert_eq(mm.area_text(), MapAreas.area_at(map.areas, mate.position))
 	var view := mm.view()
-	assert_eq(view._centre, Vector2(mate.position.x, mate.position.z))
+	assert_eq(view._you_at, Vector2(mate.position.x, mate.position.z))
+	assert_eq(view._centre, view.on_field(view._you_at), "the panel kept on the field (BP6)")
 	assert_eq(view._dot_count, 2, "you and the hurt teammate: the others on their team")
 	assert_eq(view._team, teams.colours[0])
 	_follow(enemy)
@@ -114,13 +115,13 @@ func test_rotating_turns_the_field_and_fixed_turns_the_arrow() -> void:
 	_follow(you, yaw, HudPrefs.MinimapTurn.ROTATING)
 	assert_almost_eq(view._rot, yaw, 0.0001)
 	assert_eq(view._arrow_rot, 0.0, "the arrow always points up")
-	var east := view._to_panel(Vector2(you.position.x + 10.0, you.position.z))
+	var east := view._to_panel(view._centre + Vector2(10.0, 0.0))
 	assert_almost_eq(east.x, 0.0, 0.001, "what is east is straight up")
 	assert_almost_eq(east.y, -10.0 * view._ppm, 0.001)
 	_follow(you, yaw, HudPrefs.MinimapTurn.FIXED)
 	assert_eq(view._rot, 0.0, "north stays up")
 	assert_almost_eq(view._arrow_rot, PI / 2.0, 0.0001, "the arrow turns to face east")
-	var again := view._to_panel(Vector2(you.position.x + 10.0, you.position.z))
+	var again := view._to_panel(view._centre + Vector2(10.0, 0.0))
 	assert_almost_eq(again.x, 10.0 * view._ppm, 0.001, "east is to the right")
 	assert_almost_eq(again.y, 0.0, 0.001)
 
@@ -345,3 +346,29 @@ func test_what_got_you_and_the_pinned_flag_marker_sit_under_the_panel_and_the_su
 	hud.summary().open(s.state, s.match_stats(), s.player, false, "")
 	hud.update(s.state, 1.0, 0.0)
 	assert_false(panel.visible, "hidden under the match summary")
+
+
+## BP6 (the UI audit): by the field's edge the panel stays on the field and the arrow leaves the middle; inside, the
+## arrow is the middle; a field narrower than the panel is centred.
+func test_by_the_edge_the_panel_stays_on_the_field() -> void:
+	_panel()
+	var view := mm.view()
+	_follow()
+	var world := view.field_size()
+	var reach := view.size.x * 0.5 / view._ppm
+	var origin := view._origin
+	gut.p("field %s at %s, reach %.1f m" % [world, origin, reach])
+	var corner := origin + Vector2(0.5, world.y - 0.5)
+	var at := view.on_field(corner)
+	for axis in 2:
+		if world[axis] > reach * 2.0:
+			assert_gte(at[axis] - reach, origin[axis] - 0.001, "no panel past the field's start")
+			assert_lte(at[axis] + reach, origin[axis] + world[axis] + 0.001, "nor past its end")
+		else:
+			assert_almost_eq(at[axis], origin[axis] + world[axis] * 0.5, 0.001, "narrower: centred")
+	var middle := origin + world * 0.5
+	assert_eq(view.on_field(middle), middle, "in the middle it follows you")
+	you.position = Vector3(corner.x, 0.0, corner.y)
+	you.prev_position = you.position
+	_follow(you, 0.0, HudPrefs.MinimapTurn.FIXED)
+	assert_ne(view._to_panel(view._you_at), Vector2.ZERO, "your arrow off the middle, where you stand")
