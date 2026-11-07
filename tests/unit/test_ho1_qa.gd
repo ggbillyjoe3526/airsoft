@@ -196,17 +196,17 @@ func test_the_tabs_buttons_take_keyboard_focus() -> void:
 	screen.open()
 	var page: SettingsHudPage = screen._hud_page
 	for choice: MenuChoice in [page._shape, page._colour, page._spread, page._marker_colour, page._corner, page._lines,
-			page._what_got_you]:
+			screen._what_got_you]:
 		for b in choice.get_children():
 			assert_ne((b as Button).focus_mode, Control.FOCUS_NONE)
 
 
-## The What got you choice on the HUD tab still sets the setting the card reads.
-func test_what_got_you_on_the_hud_tab_sets_the_setting() -> void:
+## The What got you choice (on the Gameplay tab since BP7) still sets the setting the card reads.
+func test_what_got_you_on_the_gameplay_tab_sets_the_setting() -> void:
 	var s := Settings.new(PlayTuning.new())
 	var screen := _screen(s)
 	screen.open()
-	screen._hud_page._what_got_you.button(Settings.WhatGotYou.OFF).pressed.emit()
+	screen._what_got_you.button(Settings.WhatGotYou.OFF).pressed.emit()
 	assert_eq(s.what_got_you, Settings.WhatGotYou.OFF)
 	assert_false(s.dirty, "saved at once")
 

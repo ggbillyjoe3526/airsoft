@@ -177,6 +177,9 @@ func test_the_strip_creates_renames_duplicates_replaces_and_removes() -> void:
 	assert_eq(strip.mode, LoadoutStrip.Mode.REPLACING)
 	strip.card(2).pressed.emit()
 	assert_eq(saved.rules.tune_of(saved.slots[2], AEG).bb_weight, 0.3, "the carried loadout took its place")
+	# BP7: its Undo stands where the actions were; Esc puts it away and they come back
+	assert_true(strip.action(&"undo").visible)
+	assert_true(strip.cancel())
 	strip.action(&"remove").pressed.emit()
 	assert_eq(strip.mode, LoadoutStrip.Mode.REMOVING)
 	strip.action(&"keep").pressed.emit()
@@ -184,6 +187,48 @@ func test_the_strip_creates_renames_duplicates_replaces_and_removes() -> void:
 	strip.action(&"remove").pressed.emit()
 	strip.action(&"remove_yes").pressed.emit()
 	assert_eq(saved.slots.size(), 2)
+
+
+## BP7 (row 89): a Replace is undone by its Undo, offered for a few seconds: the loadout it wrote over comes back
+## whole, name and parts.
+func test_a_replace_can_be_undone_for_a_few_seconds() -> void:
+	saved.create()
+	saved.rename(1, "Long Lanes")
+	var before := saved.slots[1].to_dict()
+	saved.use(0)
+	saved.rules.set_bb_weight(saved.carried(), AEG, 0.3)
+	var page := _page()
+	var strip := page.strip()
+	strip.start_replace()
+	strip.card(1).pressed.emit()
+	assert_eq(saved.rules.tune_of(saved.slots[1], AEG).bb_weight, 0.3, "replaced")
+	assert_eq(strip.mode, LoadoutStrip.Mode.NORMAL)
+	assert_string_contains(strip.prompt_text(), "Long Lanes")
+	assert_eq(strip.action(&"undo").text, tr("LOADOUT_UNDO"))
+	assert_false(strip._actions.has(&"remove"), "the actions wait while Undo stands")
+	strip.action(&"undo").pressed.emit()
+	assert_eq(saved.slots[1].to_dict(), before, "the loadout written over is back as it was")
+	assert_eq(saved.current, 0, "the carried one still carried")
+	assert_true(saved.dirty, "and saved like any change")
+	assert_false(strip._actions.has(&"undo"), "Undo is gone once used")
+	assert_true(strip._actions.has(&"remove"), "the actions are back")
+	# the offer runs out by itself
+	strip.start_replace()
+	strip.card(1).pressed.emit()
+	assert_true(strip._actions.has(&"undo"))
+	strip._undo_expired(strip._replaces)
+	assert_false(strip._actions.has(&"undo"), "gone after UNDO_SECONDS")
+	assert_eq(saved.undo_index(), -1)
+	assert_gt(LoadoutStrip.UNDO_SECONDS, 3.0, "a few seconds")
+	# an older Replace's timer never takes a newer one's Undo
+	strip.start_replace()
+	strip.card(1).pressed.emit()
+	strip._undo_expired(strip._replaces - 1)
+	assert_true(strip._actions.has(&"undo"), "still offered")
+	# a click on a card puts it away
+	strip.card(0).pressed.emit()
+	assert_eq(saved.undo_index(), -1)
+	assert_false(strip._actions.has(&"undo"))
 
 
 func test_escape_leaves_replace_then_customise_and_the_menus_keep_theirs_for_the_quit_question() -> void:

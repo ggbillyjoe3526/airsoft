@@ -6,8 +6,9 @@ extends RefCounted
 ## practice its map), each round start the round and score, leaving play the menus, and a clean quit CLOSED. A start
 ## that finds RUNNING from a process no longer running keeps that run as `previous`: the last run closed unexpectedly
 ## (a crash, a freeze closed by hand, a power cut). RUNNING from a process still running is a second copy beside the
-## first: it leaves the record alone. `previous` stays until the crash screen has shown it (SV6); a newer crash
-## replaces it. Not kept for the smoke run, headless runs or an editor run (main.gd), and started after the safe start
+## first: it leaves the record alone, unless its heartbeat (the record's `beat`, or the newer one RunBeat writes beside
+## it every BEAT_SECONDS) is over STALE_SECONDS old, when another copy of the game has the crashed run's id since (a
+## reboot, say) and it is a crash. `previous` stays until the crash screen has shown it (SV6); a newer crash replaces it. Not kept for the smoke run, headless runs or an editor run (main.gd), and started after the safe start
 ## (GraphicsGuard), so its own restart never counts as a crash and the restarted start sees the run that crashed.
 
 const PATH := "user://run.save"
@@ -21,6 +22,10 @@ const MENUS := "menus"
 const MATCH := "match"
 const PRACTICE := "practice"
 const PLACES: Array[String] = [MENUS, MATCH, PRACTICE]
+## How often a running game writes its heartbeat (s, game/main.gd through RunBeat, off the main thread), and how old
+## one is when no game is beating it.
+const BEAT_SECONDS := 10.0
+const STALE_SECONDS := 60
 
 var state: State = State.CLOSED
 ## Version.current() of the run.
@@ -29,6 +34,9 @@ var version: String = ""
 var started: int = 0
 ## The process that wrote the record (OS.get_process_id), 0 when not known.
 var pid: int = 0
+## The run's last heartbeat (Unix time, s): its start, then every BEAT_SECONDS while it runs (a record from before BP7
+## reads its start).
+var beat: int = 0
 ## MENUS, MATCH or PRACTICE.
 var place: String = MENUS
 ## The match (MATCH: seed, map, mode, rules, team, difficulties, team sizes; see `play`) or the range (PRACTICE: map);
@@ -40,6 +48,12 @@ var score: Array[int] = []
 ## The run before this one, as it was when it closed unexpectedly (this record's fields, without its own `previous`);
 ## empty when the last run closed cleanly or the crash screen has shown it.
 var previous: Dictionary = {}
+## Whose record the file holds as far as this run knows (not saved): the run read from it or last written to it, and
+## whether that one is under way. A start whose own write failed leaves the run before it there, so its clean quit
+## marks that run, the one the next start will read.
+var _disk_pid: int = 0
+var _disk_started: int = 0
+var _disk_running: bool = false
 
 
 ## The record at `path`: a missing or damaged file is a closed one (nothing to recover from), and so is a run under
@@ -53,8 +67,12 @@ static func load_file(path: String = PATH) -> RunRecord:
 		push_warning("run record: %s is damaged; starting as closed" % path)
 	var mark := closed_mark(path, r.pid, r.started)
 	if r.state == State.RUNNING and FileAccess.file_exists(mark):
+		# the mark stays until a newer run's record is written over this one (`save` sweeps it): a start that can't
+		# write leaves this record, and its mark, for the next start to read
 		r.state = State.CLOSED
-		SaveFile.remove(mark)
+	r._disk_pid = r.pid
+	r._disk_started = r.started
+	r._disk_running = r.state == State.RUNNING
 	return r
 
 
@@ -64,8 +82,29 @@ static func closed_mark(path: String, run_pid: int, run_started: int) -> String:
 	return "%s.closed-%d-%d" % [path, run_pid, run_started]
 
 
+## The record written to `path`. The first write of a run over another run's record sweeps every closed mark beside
+## it: they name runs whose records are gone, and would otherwise pile up.
 func save(path: String = PATH) -> bool:
-	return SaveFile.write(path, KIND, VERSION, to_dict())
+	if not SaveFile.write(path, KIND, VERSION, to_dict()):
+		return false
+	var newer := _disk_pid != pid or _disk_started != started
+	_disk_pid = pid
+	_disk_started = started
+	_disk_running = state == State.RUNNING
+	if newer:
+		sweep_marks(path)
+	return true
+
+
+## Takes away every closed mark beside `path` (closed_mark's, whatever run it names). False if one stays.
+static func sweep_marks(path: String) -> bool:
+	var dir := path.get_base_dir()
+	var prefix := path.get_file() + ".closed-"
+	var ok := true
+	for f in DirAccess.get_files_at(dir):
+		if f.begins_with(prefix) and not SaveFile.remove(dir.path_join(f)):
+			ok = false
+	return ok
 
 
 func to_dict() -> Dictionary:
@@ -82,6 +121,7 @@ func from_dict(data: Dictionary) -> void:
 	version = v if v is String else ""
 	started = _whole(data.get("started"))
 	pid = _whole(data.get("pid"))
+	beat = _whole(data.get("beat")) if data.has("beat") else started
 	var where: Variant = data.get("place")
 	place = where if where is String and PLACES.has(where) else MENUS
 	var facts: Variant = data.get("match")
@@ -97,9 +137,19 @@ func from_dict(data: Dictionary) -> void:
 
 
 ## Whether a run under way belongs to another copy of the game, still running (`running` says whether a process id
-## is): a second copy opened beside the first, not a crash.
-func held_by_other(me: int, running: Callable) -> bool:
-	return state == State.RUNNING and pid > 0 and pid != me and bool(running.call(pid))
+## is) and beating (its heartbeat at most STALE_SECONDS before `now`, Unix s): a second copy opened beside the first,
+## not a crash. `seen` is RunBeat.read's newest beat beside the record, counted when it is this run's process's. A
+## heartbeat ahead of `now` (the clock set back) is fresh.
+func held_by_other(me: int, running: Callable, now: int, seen: PackedInt64Array = PackedInt64Array()) -> bool:
+	if state != State.RUNNING or pid <= 0 or pid == me:
+		return false
+	var last := maxi(beat, seen[1]) if seen.size() == 2 and seen[0] == pid else beat
+	return now - last <= STALE_SECONDS and bool(running.call(pid))
+
+
+## The heartbeat: the run is still going at `now` (Unix s). Write it after (`save`).
+func heartbeat(now: int) -> void:
+	beat = now
 
 
 ## A start: `version`, the time (Unix s) and this process. A run still RUNNING closed unexpectedly and becomes
@@ -111,6 +161,7 @@ func start(run_version: String, now: int, me: int) -> void:
 	version = run_version
 	started = now
 	pid = me
+	beat = now
 	_to(MENUS, {})
 
 
@@ -147,12 +198,16 @@ func close() -> void:
 
 
 ## A clean quit, written to `path`, so the next start doesn't take it for a crash. If the write fails (a full disk, a
-## locked file) the run's closed mark goes beside it instead, and failing that the record's files go (a missing record
-## reads as closed; `previous` goes with them). Whether the next start will read the run as closed.
+## locked file) the closed mark goes beside it instead, for the run whose record the file still holds (this run's, or
+## the one before it when this run's start couldn't write), and failing that the record's files go (a missing record
+## reads as closed; `previous` goes with them). A file holding no run under way needs neither. Whether the next start
+## will read the run as closed.
 func save_closed(path: String = PATH) -> bool:
-	var mark := closed_mark(path, pid, started)
+	var mark := closed_mark(path, _disk_pid, _disk_started)
 	close()
 	if save(path):
+		return true
+	if not _disk_running:
 		return true
 	if SaveFile.touch(mark):
 		push_warning("run record: %s not written; its clean quit marked beside it" % path)
@@ -175,7 +230,8 @@ func _to(where: String, facts: Dictionary) -> void:
 
 ## The run's own fields (to_dict without `previous`).
 func _run_dict() -> Dictionary:
-	return {"state": STATE_NAMES[state], "version": version, "started": started, "pid": pid, "place": place,
+	return {"state": STATE_NAMES[state], "version": version, "started": started, "pid": pid, "beat": beat,
+			"place": place,
 			"match": match_facts.duplicate(true), "round": round_number, "score": score.duplicate()}
 
 

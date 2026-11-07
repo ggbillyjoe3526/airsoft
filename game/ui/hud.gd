@@ -1201,6 +1201,7 @@ func place_pings(camera: Camera3D, book: Pings, now: float, show: bool) -> void:
 	stack.floor_y = _left_stack_floor()
 	stack.right_top = pin_right_top()
 	stack.right_x = stack.left.x
+	stack.avoid = Rect2()
 	var flag := _flag_marker.occupied()
 	var side := _flag_marker.pinned_side()
 	if side < 0:
@@ -1209,6 +1210,7 @@ func place_pings(camera: Camera3D, book: Pings, now: float, show: bool) -> void:
 		stack.right_top = maxf(stack.right_top, flag.end.y + gap)
 	if _hold_marker != null and _hold_marker.visible:
 		var hold := _hold_marker.get_rect()
+		stack.avoid = hold
 		if _hold_marker.pin == HudHoldMarker.Pin.LEFT and hold.position.x < size.x * 0.5:
 			stack.left.y = maxf(stack.left.y, hold.end.y + gap)
 		elif _hold_marker.pin == HudHoldMarker.Pin.LEFT or _hold_marker.pin == HudHoldMarker.Pin.RIGHT:

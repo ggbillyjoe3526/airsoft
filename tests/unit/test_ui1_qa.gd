@@ -572,7 +572,7 @@ func test_the_choices_that_replaced_switches_save_the_same_values_when_clicked_w
 func test_display_window_mode_and_frame_rate_limit_keep_their_values_and_the_new_words() -> void:
 	SettingsApply.use_screens(FakeScreens.new())
 	screen.open()
-	screen._tabs.current_tab = 2
+	screen._tabs.current_tab = screen._display_page.get_parent().get_parent().get_index()
 	await wait_process_frames(2)
 	var page := screen._display_page
 	var window := page.window_choice()

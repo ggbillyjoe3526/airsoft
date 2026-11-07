@@ -7,8 +7,9 @@ extends RefCounted
 ## SETTLED. A start that finds STARTING trips: the player's graphics are kept in `previous`, the settings go safe and
 ## the state RESTARTING, so the restarted start (or the next, if the restart never came) asks. While an answer waits,
 ## or when the graphics in force are already the safe ones, a start that never settled trips nothing: one automatic
-## restart per crash, never a loop. A start that finds STARTING written by a copy still running (`pid`) is a second
-## copy, not a crash: it leaves the record alone. Also remembers the reason the title last gave for the simpler
+## restart per crash, never a loop. A start that finds STARTING written by a copy still running (`pid`) and beating
+## (the run's heartbeat, RunBeat, or the start's own time `at`, at most RunRecord.STALE_SECONDS old) is a second copy,
+## not a crash: it leaves the record alone. A stale one is a crash whose id another copy holds since (a reboot, say). Also remembers the reason the title last gave for the simpler
 ## renderer, so it says so once per change.
 
 const PATH := "user://graphics_guard.save"
@@ -32,6 +33,8 @@ var previous: Dictionary = {}
 var renderer_notice: String = ""
 ## The process that wrote the record (OS.get_process_id), 0 when not known.
 var pid: int = 0
+## When that start wrote it (Unix s), -1 when not known (a record from before BP7: its process id alone decides).
+var at: int = -1
 
 
 ## The record at `path`: a missing or damaged file is a settled one (nothing to recover from).
@@ -51,13 +54,13 @@ func save(path: String = PATH) -> bool:
 
 func to_dict() -> Dictionary:
 	return {"state": STATE_NAMES[state], "previous": previous.duplicate(true), "renderer_notice": renderer_notice,
-			"pid": pid}
+			"pid": pid, "at": at}
 
 
 ## Each value checked on its own: an unknown state reads as settled, a `previous` without every key as none.
 func from_dict(data: Dictionary) -> void:
-	var at := STATE_NAMES.find(str(data.get("state", "")))
-	state = (at if at >= 0 else State.SETTLED) as State
+	var named := STATE_NAMES.find(str(data.get("state", "")))
+	state = (named if named >= 0 else State.SETTLED) as State
 	previous = {}
 	var kept: Variant = data.get("previous")
 	if kept is Dictionary and (kept as Dictionary).has_all(KEEP_KEYS):
@@ -66,12 +69,22 @@ func from_dict(data: Dictionary) -> void:
 	renderer_notice = notice if notice is String else ""
 	var by: Variant = data.get("pid")
 	pid = maxi(int(by), 0) if by is int or by is float else 0
+	var when: Variant = data.get("at")
+	at = maxi(int(when), -1) if when is int or when is float else -1
 
 
 ## Whether a start under way belongs to another copy of the game, still running (`running` says whether a process id
-## is): a second copy opened beside the first, not a crash.
-func held_by_other(me: int, running: Callable) -> bool:
-	return state == State.STARTING and pid > 0 and pid != me and bool(running.call(pid))
+## is) and beating at `now` (Unix s): its start's `at` or `seen` (RunBeat.read: [pid, time], counted when it is that
+## process's) at most RunRecord.STALE_SECONDS old. A second copy opened beside the first, not a crash. A heartbeat
+## ahead of `now` (the clock set back) is fresh.
+func held_by_other(me: int, running: Callable, now: int, seen: PackedInt64Array = PackedInt64Array()) -> bool:
+	if state != State.STARTING or pid <= 0 or pid == me:
+		return false
+	if at >= 0:
+		var last := maxi(at, seen[1]) if seen.size() == 2 and seen[0] == pid else at
+		if now - last > RunRecord.STALE_SECONDS:
+			return false
+	return bool(running.call(pid))
 
 
 ## Whether an answer waits (the notice shows on the title).

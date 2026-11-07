@@ -36,8 +36,8 @@ func _yard(dressing: String) -> MapData:
 
 ## What a sweep of rays through the whole physics world meets: straight down over a grid of the field from far above,
 ## and across it along the x axis at the crowns' and the forest's heights.
-func _sweep() -> PackedVector3Array:
-	var space := get_viewport().world_3d.direct_space_state
+func _sweep(run: MatchRunner) -> PackedVector3Array:
+	var space := run.level.get_world_3d().direct_space_state
 	var field := WoodsShapes.field_rect(woodland)
 	var out := PackedVector3Array()
 	var n := 40
@@ -62,12 +62,12 @@ func _cast(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3) -> Vect
 func test_the_wood_in_the_tree_changes_no_ray_through_the_physics_world() -> void:
 	var run := MatchRunner.new(self, "woodland", tuning)
 	await wait_physics_frames(3)
-	var bare := _sweep()
+	var bare := _sweep(run)
 	var dressed := WoodsView.build(run.map, play.woods, play.skyline, night, play.map_style)
-	add_child(dressed)
+	run.world.add_child(dressed)
 	dressed.set_quality(GraphicsQuality.MeshDetail.ULTRA, 1.0)
 	await wait_physics_frames(3)
-	var with_it := _sweep()
+	var with_it := _sweep(run)
 	dressed.free()
 	run.free_level()
 	assert_gt(bare.size(), 1000, "a real sweep")
@@ -78,9 +78,9 @@ func test_the_sweep_would_see_a_collider_on_a_crown() -> void:
 	# the guard above is worth something only if it fails for a leak: a body on the first crown, found by a ray
 	var run := MatchRunner.new(self, "woodland", tuning)
 	var dressed := WoodsView.build(run.map, play.woods, play.skyline, night, play.map_style)
-	add_child(dressed)
+	run.world.add_child(dressed)
 	await wait_physics_frames(3)
-	var before := _sweep()
+	var before := _sweep(run)
 	var x := WoodsShapes.crowns(run.map, play.woods).xforms[0]
 	var body := StaticBody3D.new()
 	var shape := CollisionShape3D.new()
@@ -91,7 +91,7 @@ func test_the_sweep_would_see_a_collider_on_a_crown() -> void:
 	body.position = x.origin + Vector3(0.0, sphere.radius, 0.0)
 	dressed.add_child(body)
 	await wait_physics_frames(3)
-	var after := _sweep()
+	var after := _sweep(run)
 	dressed.free()
 	run.free_level()
 	assert_false(before == after, "a leaked collider on a crown shows in the sweep")

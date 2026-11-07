@@ -17,6 +17,8 @@ var guard: GraphicsGuard = null
 var guard_path: String = ""
 var renderer_path: String = RendererOverride.PATH
 var settings_path: String = Settings.PATH
+## The run record whose heartbeat (RunBeat) says a start under way is still going.
+var run_path: String = RunRecord.PATH
 var restart: Callable = Callable()
 var process_running: Callable = Callable()
 ## Tests: the first start's notice in a headless run.
@@ -39,11 +41,13 @@ func start(smoke: bool) -> GraphicsGuard.Action:
 	var machine := GraphicsApply.machine()
 	RendererOverride.sync(s.renderer, renderer_path)
 	guard = GraphicsGuard.load_file(guard_path)
-	if guard.held_by_other(OS.get_process_id(), process_running):
+	var now := int(Time.get_unix_time_from_system())
+	if guard.held_by_other(OS.get_process_id(), process_running, now, RunBeat.read(run_path)):
 		# a second copy beside the first: the first one's record, untouched
 		guard = null
 		return GraphicsGuard.Action.NONE
 	guard.pid = OS.get_process_id()
+	guard.at = now
 	var low := GraphicsTable.shared().preset(GraphicsGuard.SAFE_PRESET)
 	var safe_now := machine.rendering_method == GraphicsPick.COMPATIBILITY \
 			and s.graphics_in_force(machine.preset).equals(low)

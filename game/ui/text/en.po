@@ -404,6 +404,12 @@ msgstr "Off"
 msgid "SETTINGS_STANCE"
 msgstr "CROUCH, AIM AND RELOAD"
 
+msgid "SETTINGS_GAMEPLAY"
+msgstr "GAMEPLAY"
+
+msgid "SETTINGS_AFTER_A_HIT"
+msgstr "AFTER A HIT"
+
 msgid "SETTINGS_CROUCH"
 msgstr "CROUCH"
 
@@ -1175,6 +1181,12 @@ msgstr "Click the loadout to replace with %s, or Esc"
 msgid "LOADOUT_REMOVE_PROMPT"
 msgstr "Remove %s?"
 
+msgid "LOADOUT_REPLACED"
+msgstr "%s replaced"
+
+msgid "LOADOUT_UNDO"
+msgstr "Undo"
+
 msgid "PERF_TITLE"
 msgstr "PERFORMANCE"
 
@@ -1255,6 +1267,9 @@ msgstr "CAPPED"
 
 msgid "CUSTOMISE_BACK"
 msgstr "‹ LOADOUT"
+
+msgid "CUSTOMISE_VIEWS_NAME"
+msgstr "View"
 
 msgid "CUSTOMISE_VIEW_3_4"
 msgstr "3/4"
@@ -1785,7 +1800,7 @@ msgid "ARMORY_MULTIPLIER"
 msgstr "%s ×%s"
 
 msgid "ARMORY_EARN_NOTE"
-msgstr "Then times the difficulty: %s. A first-to-5 win on Normal gives about %d XP. Practice, and matches with Dev settings, give none."
+msgstr "Then times the difficulty: %s. A first-to-5 win on Normal gives %d XP and %d more a hit. Practice, and matches with Dev settings, give none."
 
 msgid "ARMORY_LEVELS_NOTE"
 msgstr "Everything unlocked stays yours. Settings › Dev › Disable levelling unlocks it all."

@@ -255,16 +255,12 @@ func test_a_body_walks_every_lane_end_to_end_on_the_bots_routes() -> void:
 
 
 func test_bots_play_a_whole_match_at_today_s_team_size() -> void:
-	# The match builds its own level in the same physics space as this file's: this one's doors stand open meanwhile,
-	# or a door the match opens would still be shut here, in the way of its movers (WR2).
-	var q := level.query()
-	for i in q.door_count():
-		q.set_door_shut(i, false)
+	# The match builds its level in a world of its own, so this file's level, its doors shut, stays out of its way
+	# (WR2; BP7 row 25).
 	var runner := MatchRunner.new(self, "woodland")
+	assert_ne(runner.level.get_world_3d().space, level.get_world_3d().space, "the match plays in its own space")
 	var t := runner.play(7, MATCH_SECONDS)
 	runner.free_level()
-	for i in q.door_count():
-		q.set_door_shut(i, q.door_starts_shut[i] != 0)
 	gut.p("%d rounds in %.0f s of play, %d hits, held up %d, stayed home %d" % [t.rounds.size(), t.ticks * DT, t.hits,
 			t.held_up, t.stayed_home])
 	assert_true(t.finished, "the match is won")

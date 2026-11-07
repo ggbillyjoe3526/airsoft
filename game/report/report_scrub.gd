@@ -35,18 +35,20 @@ const ONEDRIVE := r"(?i)(OneDrive - )[^\\/:*?\"<>|\r\n]+"
 ## An IPv4 part, zero-padded too ("010.001.002.003").
 const OCTET := r"0{0,2}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)"
 const HEX := r"[0-9a-f]{1,4}"
-## A full stop may follow an address (the end of a sentence), never another number. A version ("v1.2.3.4") and the
-## graphics card's driver as the report writes it ("(driver 10.0.0.1)") aren't addresses.
-const IPV4 := r"(?<![\d.])(?<!\b[vV])(?<!\(driver )(?:" + OCTET + r"\.){3}" + OCTET + r"(?!\d|\.\d)"
+## A full stop may follow an address (the end of a sentence), never another number. A version ("v1.2.3.4") isn't an
+## address; nor is this machine's graphics driver as the report writes it ("(driver 10.0.0.1)", `_driver_kept`), but
+## any other address after "(driver " is.
+const IPV4 := r"(?<![\d.])(?<!\b[vV])(?:" + OCTET + r"\.){3}" + OCTET + r"(?!\d|\.\d)"
 ## Every IPv6 form: full, compressed ("2001:db8::1", "fe80::1ff:fe23:4567:890a", "::ffff:c0a8:105") and with an IPv4
-## tail ("::ffff:1.2.3.4"), with its zone ("%eth0", "%Ethernet 2", "%12"); hex letters alone too ("dead::beef"). One
-## whose first group is a capital and then small letters only is a C++ name ("Face::bad", "Fade::1"), as no tool writes
-## an address so; with a digit in it ("Fe80::1") it is an address. Clocks have no "::" and too few groups. A label may
+## tail ("::ffff:1.2.3.4"), with its zone ("%eth0", "%Ethernet 2", "%12"); hex letters alone too ("dead::beef"), in
+## any case ("Dead::beef", "Fe80::1": a C++ name of hex letters and short hex groups alone is no real class, so it
+## goes rather than an address leak). C++ names stay: a word or "_" runs on past a group ("Bad::add_child",
+## "Node3D::_ready"). Clocks have no "::" and too few groups. A label may
 ## run into it ("ip:fe80::1", "host:::1": one colon before it, never two) and a colon may follow it ("2001:db8::1:
 ## refused"), not a word or another colon. Linear on any line: a start is tried only with a "::" or an IPv4 tail's "."
 ## within its first eight groups, or as exactly eight groups, each look-ahead never giving back; so a long run of
 ## numbers and colons ("1:1:1:…") fails at each start in a few steps rather than through every form.
-const IPV6 := r"(?i)(?<![\w.])(?<!::)(?!(?-i)[A-F][a-f]++(?![0-9A-Fa-f]))" \
+const IPV6 := r"(?i)(?<![\w.])(?<!::)" \
 		+ r"(?=(?:[0-9a-f]{1,4}+:){0,7}+(?::|\d{1,3}\.)|(?:" + HEX + r":){7}" + HEX + r"(?!\w|:[\w:]))(?:" \
 		+ r"(?:[0-9a-f]{0,4}:){2,6}" + OCTET + r"(?:\." + OCTET + r"){3}(?!\d|\.\d)" \
 		+ r"|(?:" + HEX + r":){7}" + HEX \
@@ -90,15 +92,20 @@ var _credentials := RegEx.create_from_string(CREDENTIALS_IN_URL)
 ## IPv6 before IPv4, so an IPv4 tail goes with its address.
 var _addresses: Array[RegEx] = [RegEx.create_from_string(IPV6), RegEx.create_from_string(IPV4),
 		RegEx.create_from_string(MAC)]
+## This machine's graphics driver as the report writes it ("(driver 10.0.0.1)"), kept whole though it reads as an
+## address; "" when the driver isn't known (then an address-like version goes too, over-scrubbed).
+var _driver_kept: String = ""
 
 
 ## `save_folder` (OS.get_user_data_dir), `home`, `account` and `machine` as this machine gives them ("" for one not
 ## known); names shorter than `config`'s min_name_chars are taken out of paths only, and a line is cut to its
 ## max_line_chars. A machine's full name ("box.corp.example") goes
-## and so does its first part ("box").
+## and so does its first part ("box"). `driver` is the graphics driver's version (ReportFacts.card_text), kept.
 func _init(save_folder: String = "", home: String = "", account: String = "", machine: String = "",
-		config: ReportConfig = null) -> void:
+		config: ReportConfig = null, driver: String = "") -> void:
 	var c := config if config != null else ReportConfig.new()
+	if driver.strip_edges() != "":
+		_driver_kept = ReportFacts.DRIVER_TEXT % driver
 	var min_chars := c.min_name_chars
 	_common = c.common_names
 	_max_chars = c.max_line_chars
@@ -115,7 +122,7 @@ func _init(save_folder: String = "", home: String = "", account: String = "", ma
 
 
 ## This machine's: the save folder, the home folder (USERPROFILE or HOME), the account (USERNAME or USER, else the home
-## folder's name) and the machine's name (COMPUTERNAME, HOSTNAME or /etc/hostname).
+## folder's name), the machine's name (COMPUTERNAME, HOSTNAME or /etc/hostname) and the graphics driver's version.
 static func for_this_machine(config: ReportConfig = null) -> ReportScrub:
 	var home := _env(["USERPROFILE", "HOME"])
 	var account := _env(["USERNAME", "USER", "LOGNAME"])
@@ -124,7 +131,9 @@ static func for_this_machine(config: ReportConfig = null) -> ReportScrub:
 	var machine := _env(["COMPUTERNAME", "HOSTNAME"])
 	if machine == "" and FileAccess.file_exists("/etc/hostname"):
 		machine = FileAccess.get_file_as_string("/etc/hostname").strip_edges()
-	return ReportScrub.new(OS.get_user_data_dir(), home, account, machine, config)
+	var driver_info := OS.get_video_adapter_driver_info()
+	var driver := driver_info[1] if driver_info.size() > 1 else ""
+	return ReportScrub.new(OS.get_user_data_dir(), home, account, machine, config, driver)
 
 
 ## `text` with the folders, names and addresses taken out, cut to max_line_chars. E-mail addresses go before the names,
@@ -141,9 +150,21 @@ func line(text: String) -> String:
 	out = _email.sub(out, ADDRESS, true)
 	for i in _names.size():
 		out = _names[i].sub(out, _name_words[i], true)
+	if _driver_kept != "" and out.contains(_driver_kept):
+		var parts := out.split(_driver_kept)
+		for i in parts.size():
+			parts[i] = _addresses_out(parts[i])
+		out = _driver_kept.join(parts)
+	else:
+		out = _addresses_out(out)
+	return out.left(_max_chars) if _max_chars > 0 else out
+
+
+func _addresses_out(text: String) -> String:
+	var out := text
 	for r in _addresses:
 		out = r.sub(out, ADDRESS, true)
-	return out.left(_max_chars) if _max_chars > 0 else out
+	return out
 
 
 ## `text` cut to at most `chars` characters without splitting a word: back to the last of CUT_AT before the cut, the

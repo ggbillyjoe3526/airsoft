@@ -197,6 +197,15 @@ func fire_mode() -> ReplicaConfig.FireMode:
 	return modes[active] if active < modes.size() else ReplicaConfig.FireMode.SEMI
 
 
+## Fills the loaded magazine of the replica in hand (the Dev settings' Bottomless switched on, DevCheats.apply); a
+## dry pull clicks again once it runs out, and spares are untouched.
+func top_up_in_hand() -> void:
+	if active >= replicas.size():
+		return
+	ammo[active].mag = replicas[active].mag_size
+	dry_fired_this_pull = false
+
+
 ## BBs in the loaded magazine of the replica in hand, and in its spares together.
 func mag() -> int:
 	return ammo[active].mag if active < ammo.size() else 0

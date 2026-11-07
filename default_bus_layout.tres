@@ -15,6 +15,14 @@ cutoff_hz = 3549.648
 resource_name = "LowPassFilter"
 cutoff_hz = 700.0
 
+[sub_resource type="AudioEffectPanner" id="AudioEffectPanner_ambience_left"]
+resource_name = "Panner"
+pan = -0.6129
+
+[sub_resource type="AudioEffectPanner" id="AudioEffectPanner_ambience_right"]
+resource_name = "Panner"
+pan = 0.6129
+
 [sub_resource type="AudioEffectLowPassFilter" id="AudioEffectLowPassFilter_muffled"]
 resource_name = "LowPassFilter"
 cutoff_hz = 1400.0
@@ -108,3 +116,19 @@ bus/11/volume_db = 0.0
 bus/11/send = &"Power"
 bus/11/effect/0/effect = SubResource("AudioEffectLowPassFilter_power_full")
 bus/11/effect/0/enabled = true
+bus/12/name = &"AmbienceLeft"
+bus/12/solo = false
+bus/12/mute = false
+bus/12/bypass_fx = false
+bus/12/volume_db = 0.0
+bus/12/send = &"Ambience"
+bus/12/effect/0/effect = SubResource("AudioEffectPanner_ambience_left")
+bus/12/effect/0/enabled = true
+bus/13/name = &"AmbienceRight"
+bus/13/solo = false
+bus/13/mute = false
+bus/13/bypass_fx = false
+bus/13/volume_db = 0.0
+bus/13/send = &"Ambience"
+bus/13/effect/0/effect = SubResource("AudioEffectPanner_ambience_right")
+bus/13/effect/0/enabled = true

@@ -499,12 +499,48 @@ func test_only_a_start_under_way_can_belong_to_another_copy() -> void:
 	for state: GraphicsGuard.State in [GraphicsGuard.State.SETTLED, GraphicsGuard.State.RESTARTING]:
 		var g := _guard(state)
 		g.pid = 42
-		assert_false(g.held_by_other(7, yes), "the restart's own parent may still be closing")
+		assert_false(g.held_by_other(7, yes, 1000), "the restart's own parent may still be closing")
 	var mine := _guard(GraphicsGuard.State.STARTING)
 	mine.pid = 7
-	assert_false(mine.held_by_other(7, yes))
+	assert_false(mine.held_by_other(7, yes, 1000))
 	var unknown := _guard(GraphicsGuard.State.STARTING)
-	assert_false(unknown.held_by_other(7, yes))
+	assert_false(unknown.held_by_other(7, yes, 1000))
+
+
+## BP7 (row 85): a start under way whose writer stopped beating crashed, even if another copy of the game holds its id.
+func test_a_stale_start_is_a_crash_though_another_copy_holds_the_id() -> void:
+	var yes := func(_id: int) -> bool: return true
+	var g := _guard(GraphicsGuard.State.STARTING)
+	g.pid = 42
+	g.at = 1000
+	assert_true(g.held_by_other(7, yes, 1000 + RunRecord.STALE_SECONDS), "just started: a second copy")
+	assert_false(g.held_by_other(7, yes, 1001 + RunRecord.STALE_SECONDS), "stale: a crash")
+	assert_true(g.held_by_other(7, yes, 5000, PackedInt64Array([42, 4990])), "its run beats: still going")
+	assert_false(g.held_by_other(7, yes, 5000, PackedInt64Array([43, 4990])), "another process's beat")
+	assert_true(g.held_by_other(7, yes, 900), "a start ahead of the clock is fresh")
+	var back := GraphicsGuard.new()
+	back.from_dict(g.to_dict())
+	assert_eq(back.at, 1000, "kept in the file")
+	var before_bp7 := g.to_dict()
+	before_bp7.erase("at")
+	back.from_dict(before_bp7)
+	assert_eq(back.at, -1)
+	assert_true(back.held_by_other(7, yes, 999999), "a record from before BP7: its process id alone decides")
+
+
+func test_a_start_names_when_it_began_and_a_stale_one_beside_a_running_id_still_trips() -> void:
+	var g := _guard(GraphicsGuard.State.STARTING)
+	g.pid = OS.get_process_id() + 1
+	g.at = 1000
+	var main := _main_with(g)
+	var graphics := main.graphics as GraphicsStartUp
+	graphics.process_running = (func(_id: int) -> bool: return true)
+	graphics.run_path = _guard_path + ".no-run"
+	add_child(main)
+	assert_true(main.has_meta(&"restarted"), "an id held by another copy, but no beat for an hour: a crash")
+	main.free()
+	var kept := GraphicsGuard.load_file(_guard_path)
+	assert_almost_eq(float(kept.at), Time.get_unix_time_from_system(), 5.0, "the new start's time")
 
 
 func test_the_pid_survives_the_file_and_a_bad_one_reads_as_unknown() -> void:

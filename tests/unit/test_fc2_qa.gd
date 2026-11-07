@@ -93,6 +93,55 @@ func test_the_sightline_search_finds_the_brute_force_longest_line() -> void:
 		assert_true(measure.sees(found.from, found.to, measure.stand_eye, measure.stand_eye), "the line it names is clear")
 
 
+## BP7 row 65: the quick search (seeded on a share of the points, boxes that blocked tried before a ray) and the plain
+## one find one line, on listed boxes (as a map's level lists them) in a BoxWorld and on Depot's own Jolt level.
+func test_the_quick_search_finds_the_plain_searchs_line() -> void:
+	var m := _depot()
+	var world := BoxWorld.new(tuning.body)
+	for b in m.blocks:
+		if b.rise == MapData.Rise.NONE:
+			world.add_prop(b.kind, b.center, b.size, b.surface)
+	var measure := FieldMeasure.new(m, nav, world, tuning.body)
+	var points := measure.stand_points(3.0)
+	assert_gt(points.size(), FieldMeasure.SEED_FROM, "enough points to be seeded")
+	var quick := measure.longest_sightline(points)
+	measure.quick = false
+	var plain := measure.longest_sightline(points)
+	assert_not_null(quick)
+	assert_not_null(plain)
+	if quick != null and plain != null:
+		assert_eq([quick.metres, quick.from, quick.to], [plain.metres, plain.from, plain.to], "on a BoxWorld")
+	var level := MapLevel.new()
+	add_child_autofree(level)
+	level.build(m, style, tuning.body)
+	var jolt := FieldMeasure.new(m, nav, level.query(), tuning.body)
+	var on_jolt := jolt.longest_sightline(points)
+	jolt.quick = false
+	var plain_jolt := jolt.longest_sightline(points)
+	assert_not_null(on_jolt)
+	if on_jolt != null and plain_jolt != null:
+		assert_eq([on_jolt.metres, on_jolt.from, on_jolt.to], [plain_jolt.metres, plain_jolt.from, plain_jolt.to],
+				"on Depot's Jolt level")
+
+
+func test_a_line_through_a_listed_box_core_is_blocked_and_one_past_its_edge_is_not() -> void:
+	var m := _open_yard()
+	var world := BoxWorld.new(tuning.body)
+	world.add_prop(&"wall", Vector3(0.0, 1.5, 0.0), Vector3(1.0, 3.0, 1.0), RayHit.Surface.CONCRETE)
+	var measure := FieldMeasure.new(m, nav, world, tuning.body)
+	measure._index_boxes()
+	var core := measure._cores[0]
+	assert_true(core.intersects_segment(Vector3(-5.0, 1.6, 0.0), Vector3(5.0, 1.6, 0.0)) != null, "through it")
+	assert_true(core.intersects_segment(Vector3(-5.0, 1.6, 0.47), Vector3(5.0, 1.6, 0.47)) == null,
+			"inside the box but past its core: left to the ray")
+	var hit := RayHit.new()
+	assert_true(world.ray(Vector3(-5.0, 1.6, 0.47), Vector3(5.0, 1.6, 0.47), hit), "which finds it")
+	assert_eq(measure._box_hit(Vector3(-5.0, 1.6, 0.0), Vector3(5.0, 1.6, 0.0), Vector3(-0.5, 1.6, 0.0)), 0,
+			"a hit on its face is the box")
+	assert_eq(measure._box_hit(Vector3(-0.52, 1.6, 0.0), Vector3(5.0, 1.6, 0.0), Vector3(0.5, 1.6, 0.0)), -1,
+			"not from an eye at its face: a ray from inside a box misses it")
+
+
 func test_stretching_a_line_never_shortens_it_and_leaves_it_clear() -> void:
 	var measure := _measure(_depot(), nav)
 	var coarse := measure.longest_sightline(measure.stand_points(3.0))

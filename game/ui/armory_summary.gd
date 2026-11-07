@@ -14,8 +14,6 @@ const LINE_SIZE := 18
 const FACT_SIZE := 15
 const LINE_GAP := 4
 const EARN_SIZE := 15
-## The XP a typical first-to-5 win on Normal gives, in levels.md's pace note ("about 250 XP").
-const TYPICAL_WIN_XP := 250
 const JOIN := " · "
 
 var _facts: ArmoryFacts = null
@@ -103,5 +101,18 @@ func _earn_line() -> Label:
 	_earn.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_earn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_earn.mouse_filter = Control.MOUSE_FILTER_PASS
-	_earn.tooltip_text = tr("ARMORY_EARN_NOTE") % [JOIN.join(multipliers), TYPICAL_WIN_XP]
+	_earn.tooltip_text = tr("ARMORY_EARN_NOTE") % [JOIN.join(multipliers), win_xp(_facts.table, 0),
+			win_xp(_facts.table, 1) - win_xp(_facts.table, 0)]
 	return _earn
+
+
+## What a first-to-5 win on Normal with `hits` hits gives, worked out from `table` (levels.md's XP, MatchXp's rules)
+## rather than typed (BP7: the note said "about 250" while the table gave 300 before a hit).
+static func win_xp(table: LevelTable, hits: int) -> int:
+	var o := MatchXp.Outcome.new()
+	o.won = true
+	o.wins_needed = MatchXp.FULL_MATCH_WINS
+	o.rounds_won = MatchXp.FULL_MATCH_WINS
+	o.hits = hits
+	o.difficulty = &"normal"
+	return MatchXp.earned(table, o).total

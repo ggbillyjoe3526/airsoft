@@ -28,6 +28,8 @@ Table numbers are never typed into a page, and a rule number in a sentence uses 
 | `<!-- wiki:personalities -->`, `<!-- wiki:bot-kits -->` | bot personalities and kits | `data/bots.md`, `data/bot-kits.md` |
 | `<!-- wiki:rules -->` | Skirmish beside Custom | `game/config/round_config.gd`, `hit_config.gd`, `game/save/custom_rules.gd` |
 | `<!-- wiki:config file.name -->` | one tuning number, in a sentence | `game/config/<file>.gd` |
+| `<!-- wiki:count dir.file.NAME -->` | a whole-number constant in words (three), in a sentence | `game/<dir>/<file>.gd` |
+| `<!-- wiki:key action -->` | an action's default keys (Z; F or G), in a sentence or a table cell | `game/input/key_bindings.gd`, `en.po` |
 | `<!-- wiki:dev-content -->` | what the Dev content switch shows | `data/maps.md`, `data/pool.md` |
 | `<!-- wiki:version -->`, `<!-- wiki:latest -->`, `<!-- wiki:godot -->` | the version, the latest download, the Godot version | `project.godot`, `CHANGELOG.md`, `ci.yml` |
 

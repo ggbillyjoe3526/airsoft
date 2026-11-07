@@ -46,17 +46,18 @@ is played again under the same number.
 
 Once you've been out for a moment (1.5 seconds, so the clicks of the fight that put you out don't count), click
 (**Fire**) and the rest of the round is played out unseen, as fast as your computer allows: a plain screen says
-**Skipping the round** with the round's clock counting down, then the round's result shows. Click it for the next
-round, which waits for you; after the match's last round the results follow. A hint at the bottom of the screen shows
-once a click will skip, using your own Fire key, and the pause menu has **Skip to next round** while you can skip. The
-trigger held as you were hit doesn't skip: let go and click again.
+**Skipping the round** with the round's clock counting down and a bar under it filling as the rest of the round plays
+(the round is played honestly, so a long one can take a while on a slower computer), then the round's result shows.
+Click it for the next round, which waits for you; after the match's last round the results follow. A hint at the bottom
+of the screen shows once a click will skip, using your own Fire key, and the pause menu has **Skip to next round** while
+you can skip. The trigger held as you were hit doesn't skip: let go and click again.
 
 ## BBs are real projectiles
 
 Nothing in Airsoft is hitscan. Every BB leaves the muzzle at a real speed, slows in the air, falls, and is lifted by
 its backspin (the **hop-up**), so you can watch it fly and lead a moving target.
 
-- The AEG Rifle stays on target to about **38 m**, the GBB Pistol to about **26 m**. Past that, aim a little higher.
+- The AEG Rifle stays on target to about **39 m**, the GBB Pistol to about **26 m**. Past that, aim a little higher.
 - A white BB in flight is drawn a little larger than life with a faint short trail, so you can follow it against a
   pale wall or the sky.
 - BBs puff on what they hit, in its colour: metal, wood, concrete or earth.
@@ -87,7 +88,7 @@ included.
 You carry a set of magazines, and nothing refills during a round. Press **R** to swap in your fullest spare; the old
 magazine keeps what was left in it. When your magazine runs empty a trigger pull only clicks dry, and a small
 **R RELOAD** prompt under the crosshair shows the key to press (it names your own key if you rebound it). With
-[Settings](Settings#controls) › Controls › Reload on Automatic, an empty trigger pull clicks dry and starts a reload at
+[Settings](Settings#gameplay) › Gameplay › Reload on Automatic, an empty trigger pull clicks dry and starts a reload at
 once instead. The replica panel shows a gauge for every magazine you carry, and a low magazine turns yellow. The GBB
 Pistol's slide locks back on its last BB and closes as the new magazine seats.
 

@@ -11,10 +11,16 @@ screen.
 ## Controls
 
 Hip and aimed mouse sensitivity (also as centimetres per 360° at your mouse's DPI; aimed, the view turns slower the
-more your sight zooms, through a scope's glass too), invert vertical look, crouch and
-aim as hold or toggle, Reload: Manual (the default: you press the Reload key) or Automatic (an empty trigger pull
-reloads), two keys for every action, and the **Squad orders** section with Order wheel: Hover or Click.
-The default keys are on [Controls](Controls).
+more your sight zooms, through a scope's glass too), invert vertical look, two keys for every action, and the
+**Squad orders** section with Order wheel: Hover or Click. The default keys are on [Controls](Controls).
+
+## Gameplay
+
+- **Crouch, aim and reload:** Crouch and Aim down sights as Hold or Toggle, and Reload: Manual (the default: you
+  press the Reload key) or Automatic (an empty trigger pull reloads).
+- **After a hit:** **What got you**, Auto, On or Off ([HUD and Minimap](HUD-and-Minimap#what-got-you)).
+
+These were on Controls and HUD before; your saved choices are kept.
 
 ## Audio
 
@@ -79,7 +85,6 @@ If the game stutters, lower the preset or the render scale first.
 - **HUD opacity** fades the backgrounds of the ammo and bomb panel and the minimap in a match, from solid down to
   20 %. Their icons, numbers and words stay solid.
 - **HUD size** from 80 % to 150 %. The crosshair and hit marker keep their size.
-- **What got you:** Auto, On or Off ([HUD and Minimap](HUD-and-Minimap#what-got-you)).
 - **Minimap:** Rotating or Fixed, and its **Zoom**, 50 % to 200 % (how close it shows the field).
 - **Callouts:** On (the default) shows your teammates' calls in the hit feed with a radio click, and lets you hear
   enemies close by keying their radios. Off hides the calls and stops every call's click at once; a squad order a

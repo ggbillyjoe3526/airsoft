@@ -28,6 +28,7 @@ on:
       - "tools/version.sh"
       - "tools/changelog_section.sh"
       - "tools/changelog.sh"
+      - "tools/exe_icon.py"
 
 permissions:
   contents: read
@@ -79,6 +80,7 @@ jobs:
     timeout-minutes: 30
     env:
       NAME: ${{ needs.version.outputs.name }}
+      NUMBER: ${{ needs.version.outputs.number }}
     steps:
       - uses: actions/checkout@v6
 
@@ -87,6 +89,9 @@ jobs:
           set -euo pipefail
           sed -i "s/^config\/version=\".*\"$/config\/version=\"$NAME\"/" project.godot
           grep -qx "config/version=\"$NAME\"" project.godot
+          # the exe's own version (its Properties › Details), the four numbers Windows needs, as the installer's
+          sed -i "s/^application\/file_version=\".*\"$/application\/file_version=\"$NUMBER\"/; s/^application\/product_version=\".*\"$/application\/product_version=\"$NUMBER\"/" export_presets.cfg
+          grep -qx "application/file_version=\"$NUMBER\"" export_presets.cfg
 
       - uses: ./.github/actions/setup-godot
         with:
@@ -105,6 +110,8 @@ jobs:
           godot --headless --path . --export-release "Linux" build/linux/Airsoft.x86_64
           test -s build/windows/Airsoft.exe
           test -s build/linux/Airsoft.x86_64
+          # the exe shows our icon in Explorer and the taskbar, not Godot's (the export writes it in, no rcedit)
+          python3 tools/exe_icon.py build/windows/Airsoft.exe installer/icon.ico
           chmod +x build/linux/Airsoft.x86_64
           ls -la build/*
 

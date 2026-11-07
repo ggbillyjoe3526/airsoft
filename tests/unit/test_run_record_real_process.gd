@@ -9,7 +9,7 @@ func test_a_running_process_that_is_not_a_child_reads_as_running() -> void:
 	var r := RunRecord.new()
 	r.start("0.1 Dev 1", 100, OS.get_process_id())
 	# the first copy is this very process, running; "me" is another copy's pid
-	assert_true(r.held_by_other(OS.get_process_id() + 1, ProcessCheck.is_running))
+	assert_true(r.held_by_other(OS.get_process_id() + 1, ProcessCheck.is_running, 100))
 
 
 ## A copy of the game: this executable, waiting (killed by the test).
@@ -50,7 +50,7 @@ func test_another_copy_of_the_game_reads_as_running_until_it_is_gone() -> void:
 	assert_true(ProcessCheck.is_running(copy), "the same executable")
 	var r := RunRecord.new()
 	r.start("0.1 Dev 1", 100, copy)
-	assert_true(r.held_by_other(OS.get_process_id(), ProcessCheck.is_running), "a second copy")
+	assert_true(r.held_by_other(OS.get_process_id(), ProcessCheck.is_running, 100), "a second copy")
 	OS.kill(copy)
 	await wait_until(func() -> bool: return not ProcessCheck.is_running(copy), 5.0)
 	assert_false(ProcessCheck.is_running(copy), "gone once killed (a zombie left unreaped reads as gone too)")

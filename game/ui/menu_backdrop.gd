@@ -1,11 +1,12 @@
 class_name MenuBackdrop
 extends Control
-## The menus' backdrop (UI concept B, owner 2026-11-02): the picked field's picture (assets/maps/<id>.jpg), softly
-## blurred, under a night shade that is darker at the left (behind the rail and the page's first column) than at the
-## right. The blur is made once per field on the CPU (shrunk, then grown again with a smooth filter), so drawing it
-## costs one textured rect a frame. A field with no picture leaves the plain night colour.
+## The menus' backdrop (UI concept B, owner 2026-11-02): the picked field's picture (its small copy,
+## assets/maps/cards/<id>.jpg), softly blurred, under a night shade that is darker at the left (behind the rail and
+## the page's first column) than at the right. The blur is made once per field on the CPU (shrunk, then grown again
+## with a smooth filter), so drawing it costs one textured rect a frame. A field with no picture leaves the plain night
+## colour.
 
-const PICTURE_DIR := "res://assets/maps/"
+const PICTURE_DIR := "res://assets/maps/cards/"
 ## The blur: the picture is shrunk to SMALL, then grown to SOFT; the window stretches SOFT with a linear filter.
 const SMALL := Vector2i(48, 27)
 const SOFT := Vector2i(384, 216)

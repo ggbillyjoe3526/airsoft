@@ -10,7 +10,7 @@ so W A S D stays W A S D on any keyboard layout.
 <!-- wiki:controls -->
 
 - **Crouch** and **Aim** are held by default: let go to stand up or lower the replica. Either can be set to toggle
-  in Settings › Controls; a toggled crouch stands you up when you sprint or jump.
+  in Settings › Gameplay; a toggled crouch stands you up when you sprint or jump.
 - **Lean** and **Sprint** are always held.
 - **Inspect replica** (Y) turns the replica in your hands side on to look it over while its parts move: the AEG's
   charging handle and dust cover, the Cyber Pistol's battery (a gas pistol's slide stays home). Firing,

@@ -3,7 +3,9 @@ extends HBoxContainer
 ## The saved loadouts strip (concept `.saved`): a card for each saved loadout with its key 1 to 5, the carried one lit, then
 ## "+ NEW LOADOUT" while there is room, and Rename, Duplicate, Replace and Remove on the right. Every action is
 ## SavedLoadouts'; the strip only asks for it. Rename types over the carried one's name, Replace asks which loadout takes
-## the carried one's place and Remove asks once more, each left again with Esc (`cancel`).
+## the carried one's place and Remove asks once more, each left again with Esc (`cancel`). A Replace can be undone for
+## UNDO_SECONDS (BP7): "<name> replaced" and Undo stand where the actions were, until then, a click on a card, Esc or any
+## other change.
 
 enum Mode { NORMAL, RENAMING, REPLACING, REMOVING }
 
@@ -18,6 +20,8 @@ const ACTION_GAP := 8
 const ACTION_PAD := 10
 const DASH := 6.0
 const EDIT_WIDTH := 260.0
+## How long a Replace's Undo stays offered (s).
+const UNDO_SECONDS := 6.0
 ## The most room a loadout's name takes on its card (px): a longer one ends in "…" and the card's tooltip is the whole
 ## name, so five cards of the longest names and the actions fit the window (UI1).
 const NAME_WIDTH := 170.0
@@ -36,6 +40,8 @@ var _edit: LineEdit = null
 var _actions: Dictionary[StringName, Button] = {}
 var _prompt: Label = null
 var _signature: String = ""
+## Counts Replaces, so a timer left from an earlier one never takes a later one's Undo away.
+var _replaces: int = 0
 
 
 func _init(saved_in: SavedLoadouts) -> void:
@@ -68,17 +74,28 @@ func prompt_text() -> String:
 	return _prompt.text if _prompt != null else ""
 
 
-## Leaves rename, replace or remove without doing anything; false if the strip was not in one.
+## Leaves rename, replace or remove without doing anything, or puts a Replace's Undo away; false if the strip was in
+## none of them.
 func cancel() -> bool:
 	if mode == Mode.NORMAL:
-		return false
+		if saved.undo_index() < 0:
+			return false
+		saved.forget_undo()
+		refresh()
+		return true
 	_set_mode(Mode.NORMAL)
 	return true
 
 
+## Puts back the loadout the last Replace wrote over (the Undo link).
+func undo() -> void:
+	saved.undo_replace()
+	refresh()
+
+
 ## Rebuilds the cards if the loadouts, the carried one or the mode changed since they were drawn.
 func refresh() -> void:
-	var sig := "%d|%d|%d|%s" % [saved.current, mode, saved.slots.size(), ",".join(saved.slots.map(
+	var sig := "%d|%d|%d|%d|%s" % [saved.current, mode, saved.slots.size(), saved.undo_index(), ",".join(saved.slots.map(
 			func(l: Loadout) -> String: return l.name))]
 	if sig == _signature:
 		return
@@ -175,6 +192,9 @@ func _rebuild() -> void:
 			_link(&"keep", "LOADOUT_KEEP", cancel)
 		Mode.RENAMING:
 			_say("LOADOUT_RENAME_PROMPT", "")
+		_ when saved.undo_index() >= 0:
+			_say("LOADOUT_REPLACED", saved.slots[saved.undo_index()].name)
+			_link(&"undo", "LOADOUT_UNDO", undo)
 		_:
 			_link(&"rename", "LOADOUT_RENAME", start_rename)
 			_link(&"duplicate", "LOADOUT_DUPLICATE", _duplicate)
@@ -278,10 +298,32 @@ func _link(id: StringName, key: String, on_press: Callable) -> void:
 
 func _pressed(index: int) -> void:
 	if mode == Mode.REPLACING:
-		saved.replace(index)
+		if saved.replace(index):
+			_offer_undo()
 		_set_mode(Mode.NORMAL)
+		if _actions.has(&"undo"):
+			_actions[&"undo"].grab_focus()
 	elif mode == Mode.NORMAL:
 		saved.use(index)
+		# a click on the carried card changes nothing, but puts the Undo away too
+		if saved.undo_index() >= 0:
+			saved.forget_undo()
+			refresh()
+
+
+## Takes the Undo away UNDO_SECONDS after this Replace, unless another came since.
+func _offer_undo() -> void:
+	_replaces += 1
+	if not is_inside_tree():
+		return
+	# a method, not a lambda: a strip freed first drops the connection with it
+	get_tree().create_timer(UNDO_SECONDS, true).timeout.connect(_undo_expired.bind(_replaces))
+
+
+func _undo_expired(replace_number: int) -> void:
+	if replace_number == _replaces and saved.undo_index() >= 0:
+		saved.forget_undo()
+		refresh()
 
 
 func _create() -> void:

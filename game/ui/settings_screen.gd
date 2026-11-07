@@ -1,11 +1,11 @@
 class_name SettingsScreen
 extends Control
-## The settings, in seven tabs: Controls (the mouse, sensitivity as cm/360, the crouch and aim toggles, rebinding),
-## Audio (a volume for each bus), Display (SettingsDisplayPage: the window, the frame rate, the view), Graphics
-## (SettingsGraphicsPage), HUD (SettingsHudPage), Accessibility (SettingsAccessPage) and Save file (SettingsSavePage:
-## restore points, Undo and delete, which restart the game, so only from the title's settings); and an eighth, Dev,
-## always there, each of its switches off until you turn it on (owner, 2026-10-29; docs/DECISIONS.md › Content
-## tags and dev content). Opened from the title screen and the pause menu; works while the tree is paused. Every change
+## The settings, in ten tabs: Controls (the mouse, sensitivity as cm/360, the order wheel, rebinding), Gameplay (how
+## crouch, aim and reload work, and What got you after a hit; BP7, owner 2026-11-07), Audio (a volume for each bus),
+## Display (SettingsDisplayPage: the window, the frame rate, the view), Graphics (SettingsGraphicsPage), HUD
+## (SettingsHudPage), Accessibility (SettingsAccessPage), Save file (SettingsSavePage: restore points, Undo and delete,
+## which restart the game, so only from the title's settings), About (SettingsAboutPage) and Dev, always there, each
+## of its switches off until you turn it on (owner, 2026-10-29; docs/DECISIONS.md › Content tags and dev content). Opened from the title screen and the pause menu; works while the tree is paused. Every change
 ## is applied at once through SettingsApply and saved: a slider a moment after it stops moving, anything else straight
 ## away, and the last change always on close. Back closes it, and Esc does too when `esc_closes` (the pause menu's: in a
 ## match Esc stays the pause menu's; in the menus Esc asks QUIT GAME?, owner 2026-10-29). While it is open, keys the
@@ -86,6 +86,8 @@ var _crouch: MenuChoice = null
 var _aim: MenuChoice = null
 var _wheel_pick: MenuChoice = null
 var _auto_reload: MenuChoice = null
+## Gameplay's After a hit: the card of what got you (Auto, On, Off).
+var _what_got_you: MenuChoice = null
 var _volume: Dictionary[StringName, HSlider] = {}
 var _display_page: SettingsDisplayPage = null
 var _graphics_page: SettingsGraphicsPage = null
@@ -145,6 +147,7 @@ func _ready() -> void:
 	_tabs.add_theme_constant_override("side_margin", 0)
 	box.add_child(_tabs)
 	_build_controls()
+	_build_gameplay()
 	_build_audio()
 	_build_display()
 	_build_graphics()
@@ -305,21 +308,6 @@ func _build_controls() -> void:
 	_invert.toggled.connect(func(on: bool) -> void:
 		settings.invert_y = on
 		_applied(SettingsApply.apply_controls, true))
-	add_section(page, tr("SETTINGS_STANCE"))
-	var hold_toggle: Array[String] = ["SETTINGS_HOLD", "SETTINGS_TOGGLE"]
-	_crouch = add_choice_row(page, "SETTINGS_CROUCH", hold_toggle)
-	_crouch.picked.connect(func(i: int) -> void:
-		settings.crouch_toggle = i == 1
-		_applied(SettingsApply.apply_controls, true))
-	_aim = add_choice_row(page, "SETTINGS_AIM", hold_toggle)
-	_aim.picked.connect(func(i: int) -> void:
-		settings.aim_toggle = i == 1
-		_applied(SettingsApply.apply_controls, true))
-	# Manual or Automatic (RL2), a choice like Crouch and Aim (UI1)
-	_auto_reload = add_choice_row(page, "SETTINGS_RELOAD", ["SETTINGS_RELOAD_MANUAL", "SETTINGS_RELOAD_AUTO"])
-	_auto_reload.picked.connect(func(i: int) -> void:
-		settings.auto_reload = i == 1
-		_applied(SettingsApply.apply_controls, true))
 	add_section(page, tr("SETTINGS_ORDERS"))
 	_wheel_pick = add_choice_row(page, "SETTINGS_ORDER_WHEEL", ["SETTINGS_WHEEL_HOVER", "SETTINGS_WHEEL_CLICK"])
 	_wheel_pick.picked.connect(func(i: int) -> void:
@@ -339,6 +327,36 @@ func _build_controls() -> void:
 	reset.pressed.connect(_keys.reset_all)
 	ButtonWidth.group([reset])
 	keys.add_child(reset)
+
+
+# --- Gameplay ---
+
+## How play works for you, not which keys or what the HUD draws (BP7, owner 2026-11-07): Crouch, Aim and Reload (from
+## Controls) and What got you (from HUD). Their settings are the same fields as before, so a saved file loads into them.
+func _build_gameplay() -> void:
+	var page := _page(tr("SETTINGS_GAMEPLAY"))
+	add_section(page, tr("SETTINGS_STANCE"))
+	var hold_toggle: Array[String] = ["SETTINGS_HOLD", "SETTINGS_TOGGLE"]
+	_crouch = add_choice_row(page, "SETTINGS_CROUCH", hold_toggle)
+	_crouch.picked.connect(func(i: int) -> void:
+		settings.crouch_toggle = i == 1
+		_applied(SettingsApply.apply_controls, true))
+	_aim = add_choice_row(page, "SETTINGS_AIM", hold_toggle)
+	_aim.picked.connect(func(i: int) -> void:
+		settings.aim_toggle = i == 1
+		_applied(SettingsApply.apply_controls, true))
+	# Manual or Automatic (RL2), a choice like Crouch and Aim (UI1)
+	_auto_reload = add_choice_row(page, "SETTINGS_RELOAD", ["SETTINGS_RELOAD_MANUAL", "SETTINGS_RELOAD_AUTO"])
+	_auto_reload.picked.connect(func(i: int) -> void:
+		settings.auto_reload = i == 1
+		_applied(SettingsApply.apply_controls, true))
+	add_section(page, tr("SETTINGS_AFTER_A_HIT"))
+	_what_got_you = add_choice_row(page, "SETTINGS_WHAT_GOT_YOU", ["SETTINGS_AUTO", "SETTINGS_ON", "SETTINGS_OFF"])
+	# what Auto means would surprise: said beside it
+	add_note(_what_got_you.get_parent() as Control, tr("SETTINGS_WHAT_GOT_YOU_NOTE"))
+	_what_got_you.picked.connect(func(i: int) -> void:
+		settings.what_got_you = i as Settings.WhatGotYou
+		_changed(true))
 
 
 func _on_sensitivity(v: float) -> void:
@@ -637,6 +655,7 @@ func _refresh() -> void:
 	_crouch.put(int(settings.crouch_toggle))
 	_aim.put(int(settings.aim_toggle))
 	_auto_reload.put(int(settings.auto_reload))
+	_what_got_you.put(settings.what_got_you)
 	_wheel_pick.put(int(settings.wheel_pick == ControlsConfig.WheelPick.CLICK))
 	_keys.refresh()
 	for bus: StringName in Settings.VOLUME_BUSES:

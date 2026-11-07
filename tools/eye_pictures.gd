@@ -2,22 +2,28 @@ extends SceneTree
 ## Renders a field at eye height from named spots, as a match draws it on High by day (its level with its bake, its
 ## light as the map sets it, its site dress, its roof, its doors and Attack / Defend poles, and an outdoor field's wood,
 ## bushes and skyline; the eye stands on the ground), to `<folder>/<name>.jpg`: pictures for the owner of a map
-## that is being built (DR1). Needs a display and OpenGL, so under xvfb:
-##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . --rendering-driver opengl3 -s res://tools/eye_pictures.gd \
+## that is being built (DR1). Needs a display, so under xvfb; on Forward+ (Vulkan: lavapipe in the cloud) it draws as
+## the game does, where `--rendering-driver opengl3` draws the compatibility renderer's harsher light:
+##   xvfb-run -a -s "-screen 0 1920x1080x24" godot --path . -s res://tools/eye_pictures.gd \
 ##       -- <map id> <folder> <name>:<x>,<z>,<yaw degrees>,<pitch degrees> ...
 ## Yaw 0 looks along -z (north), 90 along -x (west); pitch is up from level. An argument `preset=<low|medium|high|ultra>`
-## draws that Graphics preset's values (GraphicsApply) instead of High. An argument `card` writes a field's Match
-## picture instead: cut from the centre to 7:4, scaled to 700 x 400 at the map cards' quality (UR2; the spots are in
-## docs/ASSETS.md). Dev only: tools/ never ships.
+## draws that Graphics preset's values (GraphicsApply) instead of High; `fov=<degrees>` a narrower or wider view (the
+## range's card is 40). An argument `card` writes a map's pictures instead: the loading screen's, drawn at 1920 x 1080
+## (BP7 row 93: it draws it full screen), and beside it in `cards/` the Match page's and the menus' backdrop's copy at
+## THUMB_SIZE (BP7: the page shows all four at once, so it holds the small ones), each at the map
+## pictures' quality (UR2; the spots are in docs/ASSETS.md). The range stands its targets and markings (RangeView,
+## RangeTargetsView) as you start it. Dev only: tools/ never ships.
 
 const SIZE := Vector2i(1600, 900)
 const QUALITY := 0.9
 const FOV := 75.0
 const MSAA := Viewport.MSAA_4X
 const SETTLE_FRAMES := 6
-## `card`: a field's Match picture, its size (px) and JPEG quality, as tools/map_pictures.gd writes the range's.
-const CARD_SIZE := Vector2i(700, 400)
+## `card`: a map's picture, its size (px: a full screen's) and JPEG quality.
+const CARD_SIZE := Vector2i(1920, 1080)
 const CARD_QUALITY := 0.85
+## `card`: the Match page's copy (px): its cards draw at most about 272 x 152 (136 x 76 at 1080p, twice that at 4K).
+const THUMB_SIZE := Vector2i(480, 270)
 ## Frames to settle under the whole scene's bounce light (SDFGI converges over about 30) and before the first picture
 ## (the reflection probes capture once, a face a frame).
 const GI_SETTLE_FRAMES := 40
@@ -32,9 +38,13 @@ func _run() -> void:
 	var args := OS.get_cmdline_user_args()
 	var preset := &"high"
 	var card := false
+	var fov := FOV
 	for a: String in args.duplicate():
 		if a.begins_with("preset="):
 			preset = StringName(a.trim_prefix("preset="))
+			args.erase(a)
+		elif a.begins_with("fov="):
+			fov = a.trim_prefix("fov=").to_float()
 			args.erase(a)
 		elif a == "card":
 			card = true
@@ -45,14 +55,16 @@ func _run() -> void:
 		return
 	var play := PlayTuning.load_default()
 	var tuning := SimTuning.load_default()
-	var map := MapData.load_map(args[0], play.map_style, tuning.rounds.team_size)
+	var entry := MapCatalog.shared().find(args[0])
+	var team := MatchOptions.check_size(entry, tuning.rounds.team_size) if entry != null else tuning.rounds.team_size
+	var map := MapData.load_map(args[0], play.map_style, team)
 	if not map.ok():
 		push_error("eye_pictures: %s refused: %s" % [args[0], "; ".join(map.problems)])
 		quit(1)
 		return
 	DirAccess.make_dir_recursive_absolute(args[1])
 	var port := SubViewport.new()
-	port.size = SIZE
+	port.size = CARD_SIZE if card else SIZE
 	port.msaa_3d = MSAA
 	port.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	root.add_child(port)
@@ -89,6 +101,8 @@ func _run() -> void:
 		pole.setup(play.flag, teams, map.poles[i], tuning.flag.radius, Flag.LETTERS[i] if map.poles.size() > 1 else "")
 		port.add_child(pole)
 		poles.append(pole)
+	if not map.targets.is_empty():
+		add_range(port, play, tuning, map)
 	var values := GraphicsTable.shared().preset(preset)
 	GraphicsApply.apply(values, port)
 	GraphicsApply.apply_field(values, lighting, null, null, level)
@@ -104,7 +118,7 @@ func _run() -> void:
 		site.props().relight(lights)
 	print("[eye_pictures] drawn on %s" % preset)
 	var camera := Camera3D.new()
-	camera.fov = FOV
+	camera.fov = fov
 	port.add_child(camera)
 	var failed := 0
 	for spec in args.slice(2):
@@ -132,6 +146,14 @@ func _run() -> void:
 			failed += 1
 			continue
 		print("[eye_pictures] %s" % path)
+		if card:
+			var thumb_path := "%s/cards/%s.jpg" % [args[1].trim_suffix("/"), parts[0]]
+			DirAccess.make_dir_recursive_absolute(thumb_path.get_base_dir())
+			if thumb(image).save_jpg(thumb_path, CARD_QUALITY) != OK:
+				push_error("eye_pictures: %s could not be written" % thumb_path)
+				failed += 1
+				continue
+			print("[eye_pictures] %s" % thumb_path)
 	quit(1 if failed > 0 else 0)
 
 
@@ -150,7 +172,27 @@ static func add_woods(port: Node, map: MapData, play: PlayTuning) -> void:
 		port.add_child(bushes)
 
 
-## A render cut from its centre to CARD_SIZE's shape and scaled to it: a field's Match picture.
+## The range's markings and its targets standing, as you start it (RangeView, RangeTargetsView).
+static func add_range(port: Node, play: PlayTuning, tuning: SimTuning, map: MapData) -> void:
+	var font := GameTheme.font(800)
+	var marks := RangeView.new()
+	port.add_child(marks)
+	marks.setup(play.range_view, tuning.targets, font)
+	var targets := RangeTargets.create(map.targets, tuning)
+	var view := RangeTargetsView.new()
+	port.add_child(view)
+	view.setup(targets, play.range_view, tuning, font)
+	view.update(targets, 1.0, 0.0)
+
+
+## A render cut from its centre to CARD_SIZE's shape and scaled to it: a map's picture.
+## A map's picture scaled to THUMB_SIZE: the Match page's copy.
+static func thumb(image: Image) -> Image:
+	var small := image.duplicate() as Image
+	small.resize(THUMB_SIZE.x, THUMB_SIZE.y, Image.INTERPOLATE_LANCZOS)
+	return small
+
+
 static func card_cut(image: Image) -> Image:
 	var aspect := float(CARD_SIZE.x) / CARD_SIZE.y
 	var w := mini(image.get_width(), roundi(image.get_height() * aspect))

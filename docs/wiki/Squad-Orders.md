@@ -5,13 +5,13 @@ teammate still in play.
 
 | Order | Key | What your teammates do |
 | --- | --- | --- |
-| **Follow Me** | F | Stay with you and keep up as you move. One that ducked into cover comes out to keep up once nobody is in sight. |
-| **Hold Here** | X | Spread out across the spot you are looking at and hold it (where they stand, if you look at nothing in reach). |
-| **Go There** | Mouse 4 | Go to the spot you are looking at, however far, and hold it once they are all there ([below](#go-there)). |
-| **Regroup** | V | Come back to you. |
+| **Follow Me** | <!-- wiki:key order_follow --> | Stay with you and keep up as you move. One that ducked into cover comes out to keep up once nobody is in sight. |
+| **Hold Here** | <!-- wiki:key order_hold --> | Spread out across the spot you are looking at and hold it (where they stand, if you look at nothing in reach). |
+| **Go There** | <!-- wiki:key ping_move --> | Go to the spot you are looking at, however far, and hold it once they are all there ([below](#go-there)). |
+| **Regroup** | <!-- wiki:key order_regroup --> | Come back to you. |
 | **Team Plan** | wheel only | Drop your order and go back to the team's own plan. |
 
-Hold **Z** to open the **order wheel** round the crosshair: point at an order with the mouse and let go (or click,
+Hold **<!-- wiki:key order_wheel -->** to open the **order wheel** round the crosshair: point at an order with the mouse and let go (or click,
 with **Order wheel: Click** in Settings › Controls › Squad orders). The slice you point at lights yellow, and the order
 in force wears a blue band and an **ACTIVE** tag. While the wheel is open the mouse aims it instead of turning your
 view.
@@ -44,7 +44,7 @@ and a marker shows it over the field and on the minimap ([HUD and Minimap](HUD-a
 
 ## Go There
 
-Press **mouse button 4** (Squad: go there in Settings › Controls), pick **Go There** on the order wheel (lower right),
+Press **<!-- wiki:key ping_move -->** (Squad: go there in Settings › Controls), pick **Go There** on the order wheel (lower right),
 or click anywhere on the [full-screen map](HUD-and-Minimap#the-full-screen-map) to send your teammates to a spot, even
 one where nobody has been seen. They spread out side by side across the way there and set off; once all of them have
 arrived it becomes a **Hold Here** on that spot, everyone looking on the way they came. While they are on their way the
@@ -60,7 +60,7 @@ held until you end it.
 
 ## Need a Mag
 
-Press **H** (Squad: need a mag in Settings › Controls), or pick **Need a Mag**, the order wheel's last
+Press **<!-- wiki:key mag_hand_off -->** (Squad: need a mag in Settings › Controls), or pick **Need a Mag**, the order wheel's last
 item at its upper left. It does what fits now: when a teammate who asked you for a magazine is close enough and in
 sight, you toss them one (the item then reads **Toss a Mag**); otherwise, when you are down to less than one full spare
 magazine, you ask the nearest teammate within <!-- wiki:config mag_share_config.ask_range --> m who has one to spare,

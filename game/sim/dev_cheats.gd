@@ -30,7 +30,8 @@ func any() -> bool:
 
 
 ## Puts `cheats` into `state` (a copy is kept): the player `player_id`'s ghost and bottomless magazines, the rest read
-## from `state.cheats`; and a cheat on now marks the match off the record.
+## from `state.cheats`; and a cheat on now marks the match off the record. Switching Bottomless on fills the magazine in
+## hand, so one already run dry fires at once instead of clicking until a reload (DV2).
 static func apply(state: GameState, cheats: DevCheats, player_id: int) -> void:
 	var kept := state.cheats
 	kept.game_speed = clampf(cheats.game_speed, SPEED_MIN, SPEED_MAX)
@@ -43,7 +44,10 @@ static func apply(state: GameState, cheats: DevCheats, player_id: int) -> void:
 	for c in state.characters:
 		var mine := c.id == player_id
 		c.ghost = mine and kept.ghost
+		var switched_on := mine and kept.bottomless and not c.armament.bottomless
 		c.armament.bottomless = mine and kept.bottomless
+		if switched_on:
+			c.armament.top_up_in_hand()
 	if kept.any():
 		state.off_record = true
 

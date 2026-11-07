@@ -2,8 +2,8 @@ class_name SettingsHudPage
 extends HBoxContainer
 ## The settings' HUD tab (concept `hud-options.png`; the browser game's Settings › HUD and Crosshair): on the left the
 ## crosshair (shape, colour, size, thickness, gap, opacity, dynamic or static spread, outline) and the hit marker (on or
-## off, colour, size), then the HUD opacity and What got you; on the right a live preview (HudPreview), the HUD size
-## (marked at 100 %, concept `settings-hud-size.png`), the ammo counter, where the hit feed sits and whether its lines
+## off, colour, size), then the HUD opacity (What got you moved to Gameplay, BP7); on the right a live preview
+## (HudPreview), the HUD size (marked at 100 %, concept `settings-hud-size.png`), the ammo counter, where the hit feed sits and whether its lines
 ## fade or stay, your team's callouts in it (CO2), the ping markers (PN2), the magazine hand-off's line (MH3), and the
 ## minimap's turn (Rotating or Fixed, drawn as two small samples) and zoom. All of it shows at 1080p without scrolling.
 ## Every choice lands in the settings' HudPrefs at once and `changed` asks the screen to save it.
@@ -48,7 +48,6 @@ var _pings: CheckButton = null
 var _mag: CheckButton = null
 var _panels: HSlider = null
 var _hud_size: HSlider = null
-var _what_got_you: MenuChoice = null
 var _turn: MenuChoice = null
 var _zoom: HSlider = null
 var _thumbs: Array[Thumb] = []
@@ -125,13 +124,6 @@ func build(screen: SettingsScreen) -> void:
 	_panels.value_changed.connect(func(v: float) -> void:
 		_prefs().panel_opacity = v / 100.0
 		_after(false))
-	_what_got_you = _choice(left, "SETTINGS_WHAT_GOT_YOU", ["SETTINGS_AUTO", "SETTINGS_ON", "SETTINGS_OFF"],
-			LEFT_LABEL, "")
-	# what Auto means would surprise: said beside it
-	_screen.add_note(_what_got_you.get_parent() as Control, tr("SETTINGS_WHAT_GOT_YOU_NOTE"))
-	_what_got_you.picked.connect(func(i: int) -> void:
-		_screen.settings.what_got_you = i as Settings.WhatGotYou
-		changed.emit(true))
 	var right := _column(0.0)
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_preview = HudPreview.new()
@@ -194,7 +186,6 @@ func refresh() -> void:
 	_screen.set_check(_mag, p.mag_hand_off)
 	_screen.set_slider(_panels, p.panel_opacity * 100.0)
 	_screen.set_slider(_hud_size, p.hud_size * 100.0)
-	_what_got_you.put(_screen.settings.what_got_you)
 	_turn.put(p.minimap_turn)
 	_show_turn(p.minimap_turn)
 	_screen.set_slider(_zoom, p.minimap_zoom * 100.0)

@@ -24,10 +24,15 @@ const ARM_WEIGHT := 0.5
 const ARM_CORNERS := 2
 const ARM_BONES: PackedStringArray = ["UpperArm", "ElbowHelper", "Forearm", "Hand", "Grip", "Index", "Middle", "Ring",
 		"Pinky", "Thumb"]
-## The poses measured, each a Character's state (`character`).
+## The poses measured, each a Character's state (`character`): HitPose's every branch (BP7 row 67: the jump, the
+## pistol held, holstered standing and on a sprint, a crouched lean and a vault early on, too).
 const POSES: Array[StringName] = [&"stand", &"crouch", &"lean_left", &"lean_right", &"walk_0", &"walk_1", &"walk_2",
 		&"walk_3", &"run_0", &"run_1", &"run_2", &"run_3", &"crouch_walk", &"vault", &"aim_up", &"aim_down",
-		&"between", &"crouch_half", &"crouch_back"]
+		&"between", &"crouch_half", &"crouch_back", &"jump", &"pistol", &"holstered", &"holstered_run",
+		&"crouch_lean", &"vault_early"]
+## The jump's time in the air (s) and the early vault's share of its rise.
+const JUMP_AIR_TIME := 0.15
+const VAULT_EARLY := 0.25
 ## Between the fitted volume's samples (HV1): a way, a speed and a walk-cycle phase none of HitFit's samples sits on.
 const BETWEEN_WAY := PI / 8.0
 const BETWEEN_PHASE := PI / 8.0
@@ -143,6 +148,27 @@ func character(pose_name: StringName) -> Character:
 			c.crouch_amount = 1.0
 			c.velocity = Vector3(0.0, 0.0, _moves.crouch_speed)
 			c.walk_cycle = PI * 0.5 + BETWEEN_PHASE
+		&"jump":
+			c.grounded = false
+			c.air_time = JUMP_AIR_TIME
+		&"pistol":
+			c.armament.active = _pistol_slot(c.armament)
+		&"holstered":
+			c.armament.holstered = true
+		&"holstered_run":
+			c.armament.holstered = true
+			c.velocity = Vector3(0.0, 0.0, -_moves.sprint_speed)
+			c.sprinting = true
+			c.walk_cycle = PI * 0.5
+		&"crouch_lean":
+			c.crouch_amount = 1.0
+			c.lean = 1.0
+		&"vault_early":
+			c.vault.active = true
+			c.vault.rise_end = 0.3
+			c.vault.end = 0.6
+			c.vault.time = 0.3 * VAULT_EARLY
+			c.grounded = false
 	if name.begins_with("walk_"):
 		c.velocity = Vector3(0.0, 0.0, -_moves.walk_speed)
 		c.walk_cycle = phase
@@ -160,6 +186,14 @@ func character(pose_name: StringName) -> Character:
 	c.holster_weight = UpperBlend.holster_target(c.armament, _hits.holster_swap)
 	c.sprint_weight = 1.0 if c.sprinting else 0.0
 	return c
+
+
+## The loadout slot holding a pistol (site_class), -1 when none does.
+static func _pistol_slot(a: Armament) -> int:
+	for i in a.replicas.size():
+		if a.replicas[i].site_class == &"pistol":
+			return i
+	return -1
 
 
 ## Kind `kind` wearing `head` (heads()) in pose `pose_name`, against the volume.

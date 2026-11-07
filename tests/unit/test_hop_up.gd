@@ -66,3 +66,22 @@ func test_a_lighter_bb_gets_to_10_and_20_m_sooner() -> void:
 		assert_lt(light, heavy, r.id)
 		assert_lt(Ballistics.flight_time(r, r.hop_up_dial, 20.0, tuning, DT, 0.2),
 				Ballistics.flight_time(r, r.hop_up_dial, 20.0, tuning, DT, 0.28), r.id)
+
+
+## BP7 row 33: How to Play's flat ranges are the simulation's, from the replicas as data/stats.md sets them out of the
+## box (a drift check on numbers the page types, as a sentence reads).
+func test_the_wikis_flat_ranges_are_the_simulations() -> void:
+	var page := FileAccess.get_file_as_string("res://docs/wiki/How-to-Play.md")
+	var said := RegEx.create_from_string(
+			"The AEG Rifle stays on target to about \\*\\*(\\d+) m\\*\\*, the GBB Pistol to about \\*\\*(\\d+) m\\*\\*")
+	var m := said.search(page)
+	assert_not_null(m, "How to Play still says how far each stays on target")
+	if m == null:
+		return
+	var loadout := ReplicaStats.default_loadout()
+	assert_eq(loadout.size(), 2, "the AEG Rifle and the GBB Pistol")
+	for k in loadout.size():
+		var r := loadout[k]
+		var flat := reach(r, r.hop_up_dial).on_target_to
+		assert_almost_eq(float(m.get_string(k + 1)), flat, 1.0, "%s: the wiki's %s m, the simulation's %.1f m" % [r.id,
+				m.get_string(k + 1), flat])

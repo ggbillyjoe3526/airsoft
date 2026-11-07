@@ -53,7 +53,7 @@ drawing its graphics, it restarts on safe graphics by itself ([Settings](Setting
 
 ### Where is my save?
 
-**Settings › Save file** shows the folder and has an **Open folder** button. The game also keeps three daily restore
+**Settings › Save file** shows the folder and has an **Open folder** button. The game also keeps <!-- wiki:count save.save_keeper.RESTORE_POINTS --> daily restore
 points ([Saving and Bug Reports](Saving-and-Bug-Reports)).
 
 ### Why are there only two fields?

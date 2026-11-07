@@ -3,12 +3,15 @@ extends Button
 ## A card you click: a flat box with a border and content laid inside it (the Match page's maps, modes and teams).
 ## Picked, its border takes the accent (safety yellow; a team's colour on the team cards) and its fill the picked
 ## fill; with `ring` the border is doubled outwards, as the concept's picked map. Greyed: faded and not clickable.
-## An optional bar runs down the inside of its left edge (the team cards).
+## An optional bar runs down the inside of its left edge (the team cards). A screen reader names it by its words (its
+## labels in order: the map, mode, replica or part on it; AC6, BP7) unless its builder named it (`accessibility_name`).
 
 const GREYED_ALPHA := 0.55
 const RING := 2
 const BAR_WIDTH := 6.0
 const HOVER_LIGHTEN := 0.06
+## Between one label's words and the next in the spoken name.
+const SPOKEN_JOIN := ", "
 
 var fill: Color = GameTheme.CARD
 var picked_fill: Color = GameTheme.CARD_HI
@@ -23,6 +26,8 @@ var text_pad: int = 0
 
 var _picked: bool = false
 var _bar: ColorRect = null
+## The name this card last gave itself from its words ("" none): a name that differs was set by its builder and is kept.
+var _named_by_words: String = ""
 
 
 func _init() -> void:
@@ -30,6 +35,49 @@ func _init() -> void:
 	action_mode = BaseButton.ACTION_MODE_BUTTON_RELEASE
 	clip_contents = false
 	_restyle()
+
+
+## Names the card for a screen reader as one asks (Godot sends the update only while one is listening): its words now,
+## so a card whose words change says the new ones.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_ACCESSIBILITY_UPDATE or what == NOTIFICATION_READY:
+		name_by_words()
+
+
+## The words on the card, its visible labels' in order, joined ("" with none).
+func spoken_words() -> String:
+	var words := PackedStringArray()
+	if text != "":
+		words.append(text)
+	_gather_words(self, words)
+	return SPOKEN_JOIN.join(words)
+
+
+## Takes the card's words as its accessibility_name, unless its builder named it; true if the name changed.
+func name_by_words() -> bool:
+	if accessibility_name != "" and accessibility_name != _named_by_words:
+		return false
+	var words := spoken_words()
+	if words == accessibility_name:
+		return false
+	accessibility_name = words
+	_named_by_words = words
+	return true
+
+
+func _gather_words(node: Node, words: PackedStringArray) -> void:
+	for child in node.get_children():
+		if child is CanvasItem and not (child as CanvasItem).visible:
+			continue
+		if child is Label:
+			var said := (child as Label).text.strip_edges()
+			if said != "":
+				words.append(said)
+		elif child is RichTextLabel:
+			var said := (child as RichTextLabel).get_parsed_text().strip_edges()
+			if said != "":
+				words.append(said)
+		_gather_words(child, words)
 
 
 ## Lays `content` inside the border and lets clicks through it to the card.

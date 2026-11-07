@@ -183,6 +183,45 @@ func test_a_notice_sits_clear_of_play_and_takes_the_keyboard_then_gives_it_back(
 	assert_eq(get_viewport().gui_get_focus_owner(), play, "and the keyboard is back on PLAY")
 
 
+## BP7 (row 96): PLAY takes the keyboard as the menus open with no focus ring drawn (the concept has none); Enter
+## starts the match at once, and the first arrow or Tab shows the ring where the focus goes.
+func test_play_takes_the_keyboard_without_a_ring_until_a_key_moves_it() -> void:
+	var host := Control.new()
+	host.size = Vector2(1920.0, 1080.0)
+	add_child_autofree(host)
+	var menus := MenuScreen.new()
+	host.add_child(menus)
+	await wait_process_frames(2)
+	var play := menus.match_page().play_button()
+	var started := [0]
+	menus.match_page().play_pressed.connect(func() -> void: started[0] += 1)
+	menus.focus_play()
+	await wait_process_frames(1)
+	assert_true(play.has_focus(), "PLAY has the keyboard")
+	assert_false(play.has_focus(true), "its ring hidden")
+	_push_key(KEY_ENTER)
+	await wait_process_frames(1)
+	assert_eq(started[0], 1, "Enter starts the match at once")
+	menus.focus_play()
+	await wait_process_frames(1)
+	_push_key(KEY_TAB)
+	await wait_process_frames(1)
+	var owner := get_viewport().gui_get_focus_owner()
+	assert_not_null(owner)
+	assert_true(owner.has_focus(true), "a key that moves the focus shows its ring")
+
+
+func _push_key(code: Key) -> void:
+	var down := InputEventKey.new()
+	down.keycode = code
+	down.physical_keycode = code
+	down.pressed = true
+	get_viewport().push_input(down)
+	var up := down.duplicate() as InputEventKey
+	up.pressed = false
+	get_viewport().push_input(up)
+
+
 func test_about_names_the_renderer_in_words() -> void:
 	var screen := SettingsScreen.new()
 	screen.settings = Settings.new()

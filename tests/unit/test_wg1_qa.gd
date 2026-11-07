@@ -140,6 +140,43 @@ func test_skipping_plays_the_round_out_at_once_then_holds_the_next_for_a_click()
 	session.player.status = Character.Status.ALIVE
 
 
+## B5 (owner 2026-11-07): the skip stays honest, and a bar under its line shows how far the rest of the round has
+## played: empty as it starts, filling as the clock runs down, never back, full once the clock is out.
+func test_a_skip_shows_a_bar_of_how_far_the_rest_has_played() -> void:
+	session = _session()
+	await wait_physics_frames(2)
+	session.player.status = Character.Status.OUT
+	session.state.round_state.clock = 4.0
+	session.start_skip()
+	var bar := session._skip_bar
+	assert_true(bar.is_visible_in_tree(), "on the cover, under the line")
+	assert_eq(bar.get_parent(), session._skip_note)
+	assert_eq(bar.value, 0.0, "nothing played yet")
+	assert_false(bar.show_percentage)
+	assert_eq(bar.accessibility_name, tr("HUD_SKIPPING"), "named for a screen reader")
+	session.state.round_state.clock = 3.0
+	session._show_skip_clock()
+	assert_almost_eq(session.skip_progress(), 0.25, 1e-6)
+	assert_almost_eq(bar.value, 25.0, 1e-4, "a quarter of the rest played")
+	session.state.round_state.clock = 3.5
+	session._show_skip_clock()
+	assert_almost_eq(bar.value, 25.0, 1e-4, "never back")
+	session.state.round_state.clock = 0.0
+	session._show_skip_clock()
+	assert_eq(bar.value, 100.0, "the clock out (overtime too): full")
+	var shown := bar.get_global_rect()
+	assert_gt(shown.position.y, session._skip_note.get_global_rect().end.y, "under the line")
+	assert_gt(shown.size.x, 0.0)
+	session._stop_skip()
+	assert_false(bar.is_visible_in_tree(), "gone with the cover")
+	# a second skip starts empty again
+	session.state.round_state.clock = 10.0
+	session.start_skip()
+	assert_eq(session._skip_bar.value, 0.0)
+	session._stop_skip()
+	session.player.status = Character.Status.ALIVE
+
+
 func test_autopilot_never_offers_the_skip() -> void:
 	session = _session()
 	await wait_physics_frames(2)
@@ -313,7 +350,7 @@ func test_the_settings_screen_maps_its_options_to_the_setting() -> void:
 	add_child_autofree(screen)
 	s.what_got_you = Settings.WhatGotYou.OFF
 	screen.open()
-	var choice: MenuChoice = screen._hud_page._what_got_you
+	var choice: MenuChoice = screen._what_got_you # on Gameplay since BP7
 	assert_eq(choice.get_child_count(), Settings.WhatGotYou.size())
 	assert_eq(choice.selected(), Settings.WhatGotYou.OFF)
 	assert_eq(choice.button(Settings.WhatGotYou.AUTO).text, tr("SETTINGS_AUTO").to_upper())

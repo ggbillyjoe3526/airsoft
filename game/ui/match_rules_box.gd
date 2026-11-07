@@ -303,6 +303,8 @@ func _choice_row(key: String, label: String, words: PackedStringArray) -> MenuCh
 	right.add_theme_constant_override("separation", SUB_GAP)
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var choice := MenuChoice.new(words, true)
+	# a screen reader names the row's choice by its label (AC6, as Settings' since BP6)
+	choice.accessibility_name = label
 	right.add_child(choice)
 	# the row's line says what the pick does: its tooltip, so a pick whose line wraps differently moves no row (UI1)
 	var sub := MenuParts.text("", SUB_SIZE, 500, GameTheme.MUTED)
@@ -342,6 +344,7 @@ func _build_time_of_day() -> void:
 	right.add_theme_constant_override("separation", SUB_GAP)
 	_time = MenuChoice.new(words, true)
 	_time.name = "TimeOfDay"
+	_time.accessibility_name = tr("RULES_TIME_OF_DAY")
 	right.add_child(_time)
 	_time_sub = MenuParts.text("", SUB_SIZE, 500, GameTheme.MUTED)
 	_time_sub.visible = false

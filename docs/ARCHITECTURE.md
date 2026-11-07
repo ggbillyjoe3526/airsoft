@@ -42,7 +42,7 @@ the rulings behind them are in `docs/DECISIONS.md` › Engine and stack. Each `g
 | `game/loadout/` | The loadout carried: `SavedLoadouts` (five named, the current one carried, its own `SaveFile` store), `Loadout` and each replica's `ReplicaTune`, `LoadoutRules` (what's offered, the edits, the `Kit` a loadout plays as: power sources and the site limit); colours in `game/config/replica_schemes.gd` | built |
 | `game/progress/`, `game/stats/` | Levels, records | later |
 | `data/` | The owner's six tables, read at start with `FileAccess`; `data/maps/*.json`, the map layouts | copied |
-| `assets/` | Models, fonts and sounds from the browser game, and the map pictures `tools/eye_pictures.gd` and `tools/map_pictures.gd` render (`assets/README.md`) | copied |
+| `assets/` | Models, fonts and sounds from the browser game, and the map pictures `tools/eye_pictures.gd` renders (`assets/README.md`) | copied |
 | `tests/unit/` | GUT tests, `test_*.gd` | built |
 | `tests/guards/`, `tests/balance/`, `tests/support/` | The match guards (16 seeds a field, CI jobs of their own), the balance report (`tools/balance.sh`, by hand) and `MatchRunner`, the headless bot match both play (`tests/README.md`) | built |
 | `legacy/` | Read-only reference, hidden from Godot by `.gdignore`, never exported | copied |
