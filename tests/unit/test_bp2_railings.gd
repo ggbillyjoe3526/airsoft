@@ -68,9 +68,13 @@ func test_a_held_angle_runs_on_past_a_railing_to_the_corner_beyond_it() -> void:
 			assert_eq(far, 0, "behind a wall it is out of sight")
 
 
-func test_a_ping_through_a_railing_lands_on_the_ground_beyond_it() -> void:
-	for railing: bool in [true, false]:
-		var w := _world(railing)
+func test_a_ping_through_a_railing_or_glass_lands_on_the_ground_beyond_it() -> void:
+	for kind: String in ["railing", "glass", "wall"]:
+		var w := _world(kind == "railing")
+		if kind == "glass":
+			w = BoxWorld.new(tuning.body)
+			w.add_floor(80.0, 80.0)
+			w.add_clear_box(Vector3(4.0, 1.0, 0.0), Vector3(0.08, 2.0, 60.0))
 		var ends: Array[MapEnd] = []
 		for e in 2:
 			var end := MapEnd.new()
@@ -99,7 +103,7 @@ func test_a_ping_through_a_railing_lands_on_the_ground_beyond_it() -> void:
 			if e.kind == GameEvent.Kind.PING and e.value == 1:
 				reach = e.reach
 		assert_gt(reach, 0.0, "the ping met something")
-		if railing:
-			assert_gt(reach, 5.0, "the ground beyond the bars, not the railing")
+		if kind != "wall":
+			assert_gt(reach, 5.0, "the ground beyond the %s, not the %s itself" % [kind, kind])
 		else:
 			assert_lt(reach, 4.5, "the wall")

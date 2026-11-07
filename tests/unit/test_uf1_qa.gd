@@ -168,6 +168,11 @@ func test_picking_the_same_dot_twice_and_a_dot_off_the_end_stay_on_one_card() ->
 	assert_eq(edged, 0, "no card is left edged after an unknown level")
 	dots.set_picked(9999)
 	assert_lte(dots.picked(), 0 if dots.picked() < 0 else 99999)
+	# The pictures' cameras are placed outside the physics ticks: never interpolated, so no engine error in a long run.
+	var cams := page.pictures().find_children("*", "Camera3D", true, false)
+	assert_gt(cams.size(), 0, "a camera to check")
+	for cam: Node in cams:
+		assert_false((cam as Camera3D).is_physics_interpolated(), "a picture's camera is not interpolated")
 
 
 # --- the HUD opacity ---

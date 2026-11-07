@@ -193,3 +193,25 @@ static func _worst(a: Variant, b: Variant) -> float:
 		elif x is Vector2:
 			worst = maxf(worst, (x as Vector2).distance_to(y as Vector2))
 	return worst
+
+
+## BP6: a match makes every lower body table before it starts, so a pose first met mid-match (a jump, a vault, a
+## crouch) allocates nothing: with a player no bot drives, one such first was seen allocating after warm-up.
+func test_a_simulation_makes_every_table_before_its_match() -> void:
+	var tuning := SimTuning.new()
+	var fit := tuning.hits.fit.duplicate() as HitFit
+	tuning.hits.fit = fit
+	assert_eq(fit.tables_made(), 0, "a fresh copy has none")
+	var world := BoxWorld.new(tuning.body)
+	var sim := Simulation.new(tuning, world, world.mover(), [] as Array[MapEnd], -10.0)
+	assert_not_null(sim)
+	assert_eq(fit.tables_made(), HitFit.Lower.size(), "every table a pose can ask for")
+	assert_eq(HitFit.FIELDS.size(), HitFit.Lower.size())
+	var c := Character.new(0, 0, Vector3.ZERO, 0.0, ReplicaStats.default_loadout())
+	c.vault.active = true
+	var before := Performance.get_monitor(Performance.OBJECT_COUNT)
+	HitPose.pose(c, tuning.hits, fit)
+	c.vault.active = false
+	c.crouch_amount = 1.0
+	HitPose.pose(c, tuning.hits, fit)
+	assert_eq(Performance.get_monitor(Performance.OBJECT_COUNT), before, "a vault and a crouch first met make nothing")

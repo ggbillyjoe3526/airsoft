@@ -170,14 +170,16 @@ func test_a_teammate_on_another_storey_is_an_arrow_up_or_down() -> void:
 	assert_eq(mm.area_text(), MapAreas.area_at(tower.areas, you.position))
 	_patch(enemy, Vector3(3.0, 6.0, -4.0))
 	_follow()
-	assert_eq(view._patch_count, 0, "a patch heard on another storey is not on this drawing")
+	assert_eq(view._patch_count, 1, "a patch heard on another storey shows on this drawing too (BP6)")
+	var faint := view._patch_alphas[0]
 	you.position = Vector3(8.5, 6.0, 7.3)
 	you.prev_position = you.position
 	_follow()
 	assert_eq(view._patch_count, 1, "up there it is")
+	assert_almost_eq(faint, view._patch_alphas[0] * cfg.other_storey_patch, 0.05, "fainter from another storey")
 
 
-func test_patches_are_anonymous_and_only_those_on_your_storey_and_live() -> void:
+func test_patches_are_anonymous_and_only_those_live() -> void:
 	_panel()
 	_patch(enemy, Vector3(3.0, 0.0, -4.0), 4.0, true)
 	_follow()

@@ -88,6 +88,15 @@ var _occlusion: SoundOcclusion = null
 ## The travel of the BB whose impact is being played (set round that one `_play`; zero, not known, otherwise), so a
 ## strike on a wall's far face is muffled from the near side (SoundOcclusion.impact_share).
 var _struck_along: Vector3 = Vector3.ZERO
+## The voice each character's bolt cycle plays on (BOLT_CUE; by character id: the voice, -1 none, its play's serial,
+## whether in your ear, and the slot it cocks), so a switch away or a hit mid-cycle cuts it short (_cut_bolts).
+var _bolt_voice: PackedInt32Array = PackedInt32Array()
+var _bolt_serial: PackedInt64Array = PackedInt64Array()
+var _bolt_own: PackedByteArray = PackedByteArray()
+var _bolt_slot: PackedInt32Array = PackedInt32Array()
+## The voice the last `_play` took (-1: it played nothing) and whether it was in your ear.
+var _played_voice: int = -1
+var _played_own: bool = false
 ## When each bomb slot (GameState.grenades) last started its bouncing can (state time, s): -INF from its throw.
 var _bounced_at: PackedFloat64Array = PackedFloat64Array()
 ## Cue names worked out once: by power source, by surface, by surface and pace.
@@ -138,9 +147,11 @@ var _call_serial: int = 0
 ## `map` are the level's (either may be null: no map plays the default ambience); `footsteps` says how soft a landing
 ## still thuds (null: the default).
 func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, query: WorldQuery, map: MapData,
-		footsteps: FootstepConfig = null) -> void:
+		footsteps: FootstepConfig = null, characters: int = 0) -> void:
 	_cfg = cfg
 	_body = body
+	# Each character's bolt cycle (_keep_bolt), sized for the match's characters before it starts.
+	_size_bolts(characters)
 	_land_min = footsteps.land_min_speed if footsteps != null else FootstepConfig.new().land_min_speed
 	_kinds(cfg)
 	_occlusion = SoundOcclusion.new(cfg, query)
@@ -229,6 +240,7 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				# A spring rifle is cocked by hand after every shot: the charging handle back and home (SN1).
 				if _bolt_action(state, e.actor, e.slot):
 					_mechanism(BOLT_CUE, state, e, own)
+					_keep_bolt(e.actor, e.slot)
 				# A gas pistol's slide locks back on the magazine's last BB (AU2).
 				if _slide_lock.get(p, &"") != &"" and _emptied(state, e.actor, e.slot):
 					_mechanism(_slide_lock[p], state, e, own)
@@ -368,6 +380,7 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				_blasts.round_over(now)
 			GameEvent.Kind.MATCH_OVER:
 				_blasts.match_over(now)
+	_cut_bolts(state)
 	_blow_due(now)
 	_rustle(state, player_id, now)
 	_call(state, now)
@@ -600,6 +613,7 @@ static func _set_muffle(cutoff_hz: float) -> void:
 ## pool drops it.
 func _play(cue: StringName, at: Vector3, own: bool, gain: float, kind: Kind, bus: StringName, pitch: float = 1.0,
 		reach: float = 0.0, source: Character = null, impact: bool = false) -> void:
+	_played_voice = -1
 	if not _streams.has(cue):
 		return
 	var variants: Array = _streams[cue]
@@ -612,6 +626,8 @@ func _play(cue: StringName, at: Vector3, own: bool, gain: float, kind: Kind, bus
 	var i := pool.acquire(cue, VoicePool.Priority.OWN if own else _priority[kind], _cue_voices[kind])
 	if i < 0:
 		return
+	_played_voice = i
+	_played_own = own
 	var stream: AudioStream = variants[_variant(cue, variants.size())]
 	var scale := pitch + _rng.randf_range(-_pitch_spread[kind], _pitch_spread[kind])
 	var db := linear_to_db(gain) + _rng.randf_range(-_level_spread[kind], _level_spread[kind])
@@ -638,6 +654,55 @@ func _play(cue: StringName, at: Vector3, own: bool, gain: float, kind: Kind, bus
 		v.bus = bus if open else SoundOcclusion.bus_for(bus, share, _cfg)
 		v.global_position = at
 		v.play()
+
+
+## Keeps the voice the bolt cycle of `actor`'s replica in `slot` just took (by the last `_play`).
+func _keep_bolt(actor: int, slot: int) -> void:
+	if actor < 0 or _played_voice < 0:
+		return
+	_size_bolts(actor + 1)
+	var pool := _own_pool if _played_own else _field_pool
+	_bolt_voice[actor] = _played_voice
+	_bolt_serial[actor] = pool.last_serial()
+	_bolt_own[actor] = 1 if _played_own else 0
+	_bolt_slot[actor] = slot
+
+
+## Makes the bolt cycles' lists cover `n` characters (setup sizes them for the match; a later id grows them).
+func _size_bolts(n: int) -> void:
+	var was := _bolt_voice.size()
+	if was >= n:
+		return
+	_bolt_voice.resize(n)
+	_bolt_serial.resize(n)
+	_bolt_own.resize(n)
+	_bolt_slot.resize(n)
+	for i in range(was, n):
+		_bolt_voice[i] = -1
+
+
+## Cuts short each bolt cycle still sounding whose character switched away from that replica, holstered it or is out
+## of play (hit mid-cycle): the cocking stops with the hands that worked it. A voice since taken by another play is
+## left alone.
+func _cut_bolts(state: GameState) -> void:
+	for id in _bolt_voice.size():
+		var i := _bolt_voice[id]
+		if i < 0:
+			continue
+		var own := _bolt_own[id] == 1
+		var pool := _own_pool if own else _field_pool
+		var playing := _own[i].playing if own else _field[i].playing
+		if pool.serial_of(i) != _bolt_serial[id] or not playing:
+			_bolt_voice[id] = -1
+			continue
+		var c := state.character(id)
+		if c != null and Elimination.is_in_play(c) and c.armament.active == _bolt_slot[id] and not c.armament.holstered:
+			continue
+		if own:
+			_own[i].stop()
+		else:
+			_field[i].stop()
+		_bolt_voice[id] = -1
 
 
 ## Makes `_bounced_at` cover every bomb slot (once: the pool is made with the state).

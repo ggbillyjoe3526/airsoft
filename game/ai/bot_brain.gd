@@ -216,9 +216,9 @@ static func _choose_mode(b: Bot, w: BotWorld, target: Character, dt: float) -> v
 		b.wait_for_team = false
 		b.hold_left = 0.0
 		b.hold_cover = false
-		# Back to the lane point it left.
+		# Back on its lane at the point ahead nearest where it now stands (BP6: not walking back to the one it left).
 		if not b.hunting and b.lane_index >= 0:
-			b.lane_index -= b.lane_dir
+			b.lane_index = BotMovement.resume_point(b, w) - b.lane_dir
 	elif holds_post and not fresh:
 		# Holding its post: stop watching where a noise was once it is old news.
 		b.has_last_known = false

@@ -368,7 +368,8 @@ func _watch_asks(i: int, state: GameState, w: BotWorld) -> void:
 
 
 ## A walkable floor spot Asks' round_offset to the side of an enemy at `enemy` that a bot at `from` holds (across the
-## line between them), on your side first, then the other; NO_SPOT when neither has one near (SquadOrders).
+## line between them), on your side first, then the other, that you can reach from where you stand on foot or over a
+## vault (BP6: NavGrid.linked; not a floor no route joins to yours); NO_SPOT when neither has one near (SquadOrders).
 func _round_spot(from: Vector3, enemy: Vector3, w: BotWorld) -> Vector3:
 	if w.nav == null:
 		return SquadOrders.NO_SPOT
@@ -379,9 +380,12 @@ func _round_spot(from: Vector3, enemy: Vector3, w: BotWorld) -> Vector3:
 	var mine := 1.0 if across.dot(Vector2(you.position.x - enemy.x, you.position.z - enemy.z)) >= 0.0 else -1.0
 	var side := Vector3(across.x, 0.0, across.y) * _file.asks.round_offset * mine
 	var lift := Vector3(0.0, _cfg.ask_lift, 0.0)
+	var yours := w.nav.nearest_walkable(you.position + lift, _cfg.ask_snap)
 	var k := w.nav.nearest_walkable(enemy + side + lift, _cfg.ask_snap)
-	if k < 0:
+	if k < 0 or yours >= 0 and not w.nav.linked(yours, k, true):
 		k = w.nav.nearest_walkable(enemy - side + lift, _cfg.ask_snap)
+		if k >= 0 and yours >= 0 and not w.nav.linked(yours, k, true):
+			k = -1
 	return w.nav.node_position(k) if k >= 0 else SquadOrders.NO_SPOT
 
 

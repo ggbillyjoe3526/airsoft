@@ -11,6 +11,9 @@ class_name BotMovement
 const GLANCE_ACROSS := 0.7548776662466927
 const GLANCE_OUT := 0.5698402909980532
 
+## keep_apart's ray (used only within one call).
+static var _apart_hit: RayHit = RayHit.new()
+
 
 ## Moves per mode. Returns whether the bot walks (direction in b.move_dir). `target`: whom it fights.
 static func move(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float, target: Character) -> bool:
@@ -216,12 +219,13 @@ static func glance(b: Bot, w: BotWorld) -> void:
 		w.mark_visited(me.team, spot)
 
 
-## Steers `b` off anyone in play close by (bodies pass through each other in the physics), harder the closer. Walking,
-## the push bends the walk; standing with nothing else to do, it walks out of the way, never off a floor. Returns
-## whether it walks now.
+## Steers `b` off anyone in play close by (bodies pass through each other in the physics), harder the closer: an enemy
+## only with nothing solid between (BP6), so none is nudged through a thin wall. Walking, the push bends the walk;
+## standing with nothing else to do, it walks out of the way, never off a floor. Returns whether it walks now.
 static func keep_apart(b: Bot, w: BotWorld, moving: bool, cmd: PlayerCommand) -> bool:
 	var me := b.character
 	var reach := w.cfg.separation_distance
+	var lift := Vector3(0.0, w.cfg.separation_line_height, 0.0)
 	var push := Vector2.ZERO
 	for o in w.characters:
 		if o == me or not Elimination.is_in_play(o) or absf(o.position.y - me.position.y) > w.tuning.body.height:
@@ -229,6 +233,8 @@ static func keep_apart(b: Bot, w: BotWorld, moving: bool, cmd: PlayerCommand) ->
 		var away := Vector2(me.position.x - o.position.x, me.position.z - o.position.z)
 		var d := away.length()
 		if d >= reach:
+			continue
+		if o.team != me.team and w.query != null and w.query.ray(me.position + lift, o.position + lift, _apart_hit):
 			continue
 		var k := (reach - d) / reach
 		if d > 1e-4:
@@ -327,6 +333,36 @@ static func _advance(b: Bot, w: BotWorld, dt: float, at_post: bool = false) -> b
 		b.route_state = Bot.RouteState.NONE
 		BotRoutes.want(b, b.hunt_goal if b.hunting else b.lane_goal, cfg)
 	return BotRoutes.follow(b, w, dt)
+
+
+## The lane point `b` resumes its lane at, back from a search or a fight (BP6): the far end of the lane segment it now
+## stands nearest, of those it still walks from the point it left (the one before b.lane_index) on, so it walks on
+## along the lane, never back to a point it passed, and never past the points it walks (b.lane_points). b.lane_index
+## itself without a lane, and when it stands nearest the point it was making for before it got there.
+static func resume_point(b: Bot, w: BotWorld) -> int:
+	if b.lane < 0 or b.lane >= w.lanes.size() or not _walks(b, w.lanes[b.lane], b.lane_index):
+		return b.lane_index
+	var lane := w.lanes[b.lane]
+	var at := b.character.position
+	var best := b.lane_index
+	var k := b.lane_index - b.lane_dir
+	var best_d := INF
+	if not _walks(b, lane, k):
+		# The first point it walks: nothing behind it, only the point itself.
+		k = b.lane_index
+		best_d = lane[k].distance_squared_to(at)
+	while _walks(b, lane, k + b.lane_dir):
+		var d := Geometry3D.get_closest_point_to_segment(at, lane[k], lane[k + b.lane_dir]).distance_squared_to(at)
+		if d < best_d:
+			best_d = d
+			best = k + b.lane_dir
+		k += b.lane_dir
+	return best
+
+
+## Whether lane point `k` of `lane` is one `b` walks: on the lane and within its b.lane_points from the end it set out.
+static func _walks(b: Bot, lane: PackedVector3Array, k: int) -> bool:
+	return k >= 0 and k < lane.size() and (k if b.lane_dir > 0 else lane.size() - 1 - k) < b.lane_points
 
 
 ## The next place to go while advancing, into lane_goal (the next lane point, moved a little at random) or, the lane

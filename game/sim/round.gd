@@ -94,7 +94,7 @@ static func _step_elimination_clock(rs: RoundState, characters: Array[Character]
 		var taken := flag.step(characters, tuning.overtime, dt)
 		if taken >= 0:
 			_end_round(rs, taken, GameEvent.RoundEnd.OVERTIME_FLAG, tuning.rounds, events)
-		elif flag.left <= 0.0:
+		elif flag.left <= 0.0 or flag.cut:
 			_end_round(rs, -1, GameEvent.RoundEnd.TIME, tuning.rounds, events)
 		return
 	if rs.clock > 0.0:
@@ -115,7 +115,10 @@ static func run_clock_out(rs: RoundState) -> bool:
 		return false
 	rs.clock = 0.0
 	rs.overtime = INF
-	rs.overtime_flag.left = 0.0
+	if rs.overtime_flag.up:
+		rs.overtime_flag.cut = true # its time left kept: the round's table counts what was played
+	else:
+		rs.overtime_flag.left = 0.0
 	return true
 
 

@@ -47,35 +47,49 @@ static func select(b: Bot, w: BotWorld, target: Character, cmd: PlayerCommand) -
 	if not shown and b.auto_open:
 		b.auto_open = false
 		b.burst_left = 0.0
-	var wanted := ReplicaConfig.FireMode.AUTO if shown and b.auto_open and b.auto_for == target.id \
+	var wanted := ReplicaConfig.FireMode.AUTO if shown and b.auto_open and b.goes_auto_for(target.id) \
 			else Armament.start_mode(replica, w.start_mode)
 	if a.fire_mode() != wanted and replica.fire_modes.has(wanted):
 		cmd.cycle_fire_mode = true
 
 
 ## As a burst begins at `target` from `eye` along the unit `dir`: whether this target gets full auto. Only once per
-## target (a bot doesn't roll again each burst); an open shot no longer open takes it back to the start mode.
+## target in a round, remembered through fights with others between (BP6: a bot doesn't roll again each burst or each
+## return); an open shot no longer open takes it back to the start mode, for good with that target.
 static func on_burst(b: Bot, w: BotWorld, target: Character, eye: Vector3, dir: Vector3) -> void:
 	if w.start_mode == ReplicaConfig.FireMode.AUTO or target == null:
 		return
 	var a := b.character.armament
+	var bit := Bot.target_bit(target.id)
 	if a.replicas.is_empty() or not a.replicas[a.active].fire_modes.has(ReplicaConfig.FireMode.AUTO):
-		b.auto_for = -1
-		return
-	# Decided against for this target: nothing to check again.
-	if b.auto_rolled_for == target.id and b.auto_for != target.id:
-		return
-	if not open_shot(w, eye, dir, target.position):
-		b.auto_for = -1
+		b.auto_won &= ~bit
 		b.auto_open = false
 		return
-	if b.auto_for == target.id:
+	# Decided against for this target: nothing to check again.
+	if b.auto_rolled & bit != 0 and b.auto_won & bit == 0:
+		b.auto_open = false
+		return
+	if not open_shot(w, eye, dir, target.position):
+		b.auto_won &= ~bit # taken back: rolled, so never again for this target
+		b.auto_open = false
+		return
+	if b.auto_won & bit != 0:
 		b.auto_open = true
 		return
-	b.auto_rolled_for = target.id
+	b.auto_rolled |= bit
+	b.auto_open = false
 	if b.rng.randf() < w.cfg.auto_chance:
-		b.auto_for = target.id
+		b.auto_won |= bit
 		b.auto_open = true
+
+
+## A burst held up (glass or leaves in the line, the sight not up) and picked up again at `target`: its full auto stays
+## only if the shot is still the open one from where they now stand (BP6), else the burst finishes on the start mode.
+static func on_resume(b: Bot, w: BotWorld, target: Character, eye: Vector3, dir: Vector3) -> void:
+	if not b.auto_open or w.start_mode == ReplicaConfig.FireMode.AUTO or target == null:
+		return
+	if not open_shot(w, eye, dir, target.position):
+		b.auto_open = false
 
 
 ## Whether a shot from `eye` along `dir` at someone standing at `feet` is the open one full auto is for: `feet` on open

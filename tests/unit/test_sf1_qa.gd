@@ -139,10 +139,22 @@ func test_a_bang_lights_up_and_fades_out_by_itself() -> void:
 	s.events.clear()
 	v.update(s, 0.0, DT, null, Vector3.ZERO)
 	assert_gt(v.flash_energy(), 0.0, "lit at the bang")
-	v.update(s, 0.0, GrenadeView.FLASH_TIME * 2.0, null, Vector3.ZERO)
+	for i in ceili(GrenadeView.FLASH_TIME / GrenadeView.FLASH_STEP):
+		v.update(s, 0.0, GrenadeView.FLASH_TIME * 2.0, null, Vector3.ZERO)
 	assert_eq(v.flash_energy(), 0.0, "out after its time")
 	v.on_tick(s)
 	assert_eq(v.flash_energy(), 0.0, "a tick with no bang lights nothing")
+
+
+func test_a_frame_hitch_at_the_bang_still_shows_the_flare_for_some_frames() -> void:
+	var s := GameState.new(5, tuning)
+	var v := _view(s.grenades.size())
+	s.events.add(GameEvent.Kind.FLASH_BANG).position = Vector3(3.0, 1.0, 0.0)
+	v.on_tick(s)
+	s.events.clear()
+	for i in 8:
+		v.update(s, 0.0, 0.5, null, Vector3.ZERO)
+		assert_gt(v.flash_energy(), 0.0, "half-second frames still show the flare, frame %d" % i)
 
 
 func test_the_wash_is_white_while_dazzled_softer_with_reduced_motion_and_gone_when_it_wears_off() -> void:
@@ -315,8 +327,12 @@ func test_no_default_key_is_bound_to_two_actions() -> void:
 	var seen := {}
 	for action: StringName in KeyBindings.ACTIONS:
 		for code: int in b.codes(action):
-			assert_false(seen.has(code), "%s shares a key with %s" % [action, seen.get(code, &"")])
-			seen[code] = action
+			# Only a zoom and Next or Previous replica share a key, the wheel (KeyBindings.may_share, BP6).
+			for other: StringName in seen.get(code, []):
+				assert_true(KeyBindings.may_share(action, other), "%s shares a key with %s" % [action, other])
+			if not seen.has(code):
+				seen[code] = []
+			seen[code].append(action)
 
 
 func test_taking_the_flash_key_for_smoke_swaps_the_two() -> void:

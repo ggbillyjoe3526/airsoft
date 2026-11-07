@@ -64,6 +64,10 @@ func test_the_replica_on_show_is_the_carried_one_in_its_paint() -> void:
 	page.show_customise(1)
 	assert_not_null(table.model(), "the pistol")
 	assert_ne(table.model().scene_file_path, "", "loaded from its model file")
+	var cams := table.find_children("*", "Camera3D", true, false)
+	assert_gt(cams.size(), 0, "a camera to check")
+	for cam: Node in cams:
+		assert_false((cam as Camera3D).is_physics_interpolated(), "turned by hand, never interpolated (BP6)")
 
 
 func test_the_frame_is_one_height_on_every_tab() -> void:

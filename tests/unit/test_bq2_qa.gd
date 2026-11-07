@@ -212,3 +212,19 @@ func test_you_going_out_after_an_ask_is_offered_but_before_it_is_said_cancels_it
 	for n in 120:
 		said.append_array(_tick())
 	assert_false(said.has("1: Cover me") or said.has("2: Cover me"), str(said))
+
+
+## BP6: a Go round spot you can't reach from where you stand (a floor no route joins to yours) is never asked.
+func test_a_go_round_spot_you_cannot_reach_is_not_asked() -> void:
+	var m := MapData.new()
+	for part: Array in [[Vector3(-18.0, -0.25, -18.0), Vector3(4.0, 0.5, 4.0)], [Vector3(4.0, -0.25, 0.0),
+			Vector3(24.0, 0.5, 24.0)]]:
+		var b := MapData.Block.new()
+		b.kind = &"floor"
+		b.center = part[0]
+		b.size = part[1]
+		m.blocks.append(b)
+	var tuning := SimTuning.load_default()
+	_rig(_file(), 0, NavGrid.build(m, tuning.nav, tuning.body))
+	var said := _fight([1], [3], 12.0)
+	assert_false(said.has("1: Go round"), "you stand on a floor of your own: " + str(said))

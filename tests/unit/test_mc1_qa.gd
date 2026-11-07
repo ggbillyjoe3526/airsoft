@@ -366,14 +366,17 @@ func test_go_while_not_holding_does_nothing_and_a_second_go_is_harmless() -> voi
 # --- old saves under partly changed bindings ---
 
 
-## True if no key is on two actions.
+## True if no key is on two actions that may not share one (a zoom and Next or Previous replica may: BP6).
 func _no_shared_keys(b: KeyBindings) -> bool:
-	var seen: Dictionary[int, StringName] = {}
+	var seen: Dictionary[int, Array] = {}
 	for action: StringName in KeyBindings.ACTIONS:
 		for c in b.codes(action):
-			if seen.has(c):
-				return false
-			seen[c] = action
+			for other: StringName in seen.get(c, []):
+				if not KeyBindings.may_share(action, other):
+					return false
+			if not seen.has(c):
+				seen[c] = []
+			seen[c].append(action)
 	return true
 
 

@@ -603,6 +603,12 @@ msgstr "NEXT REPLICA"
 msgid "ACT_SLOT_PREVIOUS"
 msgstr "PREVIOUS REPLICA"
 
+msgid "ACT_ZOOM_IN"
+msgstr "ZOOM IN (AIMED)"
+
+msgid "ACT_ZOOM_OUT"
+msgstr "ZOOM OUT (AIMED)"
+
 msgid "ACT_HOP_UP_LESS"
 msgstr "HOP-UP LESS"
 

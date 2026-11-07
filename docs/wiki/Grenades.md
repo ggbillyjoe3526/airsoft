@@ -19,8 +19,9 @@ of your own speed.
 Bots throw the same way: you see the bomb in a bot's hand as its arm swings back by its head, then over and out as it
 lets go.
 
-Bombs bounce off walls and the ground, then roll and settle. They don't bounce off people. If you are hit while you
-pull the pin, you keep the bomb.
+Bombs bounce off walls, the ground and anyone in the game standing in the way (it doesn't hit them), then roll and
+settle. Just after the throw a bomb passes through the thrower's teammates, so one thrown past a teammate at your side
+never bounces back at you. If you are hit while you pull the pin, you keep the bomb.
 
 You can hear a bomb coming: the ring pull as the pin comes out, then a tin can clattering where it lands. A smoke bomb
 hisses as it goes off; a flash bomb goes off with a sharp pop.

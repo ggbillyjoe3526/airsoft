@@ -77,6 +77,8 @@ func _init() -> void:
 	_port = SubViewport.new()
 	_port.name = "Port"
 	_port.own_world_3d = true
+	# Turned and framed by hand between the physics ticks: the engine's interpolation stays off (BP6).
+	_port.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	_port.transparent_bg = true
 	_port.msaa_3d = ReplicaPictures.MSAA
 	_port.render_target_update_mode = SubViewport.UPDATE_DISABLED

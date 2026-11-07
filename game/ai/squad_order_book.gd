@@ -137,9 +137,34 @@ func give_move(giver: Character, spot: Vector3) -> SquadOrder.Kind:
 	return SquadOrder.Kind.MOVE
 
 
+## Hold here's key on the full-screen map (BP6) from `giver` at `spot` (the map's floor spot; NO_SPOT off the field):
+## a Hold here at that spot for its bot teammates in play, as one looked at, held until it ends, each its own spot side
+## by side across the way from the giver to it and looking on along it. Given again near the spot held it stays (no key
+## on the map cancels). Written into order_outcome; returns the order in force afterwards.
+func give_hold_at(giver: Character, spot: Vector3) -> SquadOrder.Kind:
+	if giver == null or giver.id < 0 or giver.id >= _given.size():
+		return SquadOrder.Kind.NONE
+	if not Elimination.is_in_play(giver):
+		_drop_order(giver)
+		order_outcome.record(giver.id, SquadOrder.Kind.NONE, SquadOrders.Notice.NOT_NOW)
+		return SquadOrder.Kind.NONE
+	var before := order_of(giver.id)
+	if not SquadOrders.is_spot(spot):
+		order_outcome.record(giver.id, before, SquadOrders.Notice.NOWHERE)
+		return before
+	var now := _hand_out(giver, SquadOrder.Kind.HOLD, false, spot)
+	var notice := SquadOrders.Notice.NONE
+	if now == SquadOrder.Kind.NONE:
+		notice = SquadOrders.Notice.CANCELLED if before != SquadOrder.Kind.NONE else SquadOrders.Notice.NOBODY
+	order_outcome.record(giver.id, now, notice)
+	return now
+
+
 ## Hands `kind` out to `giver`'s bot teammates in play; `toggle`: the order in force given again cancels it (see
-## give_order). Returns the order in force afterwards.
-func _hand_out(giver: Character, kind: SquadOrder.Kind, toggle: bool) -> SquadOrder.Kind:
+## give_order); `at`: Hold here's spot picked on the map (give_hold_at), else NO_SPOT and it is the one looked at.
+## Returns the order in force afterwards.
+func _hand_out(giver: Character, kind: SquadOrder.Kind, toggle: bool, at: Vector3 = SquadOrders.NO_SPOT) \
+		-> SquadOrder.Kind:
 	var w := _world
 	var team := _order_team
 	team.clear()
@@ -149,8 +174,11 @@ func _hand_out(giver: Character, kind: SquadOrder.Kind, toggle: bool) -> SquadOr
 	if team.is_empty():
 		_drop_order(giver)
 		return SquadOrder.Kind.NONE
-	var point := SquadOrders.hold_point(giver, w) if kind == SquadOrder.Kind.HOLD else SquadOrders.NO_SPOT
+	var on_map := SquadOrders.is_spot(at)
+	var point := at if on_map else (SquadOrders.hold_point(giver, w) if kind == SquadOrder.Kind.HOLD
+			else SquadOrders.NO_SPOT)
 	var looked := SquadOrders.is_spot(point)
+	var yaw := SquadOrders.yaw_towards(giver.position, point, giver.yaw) if on_map else giver.yaw
 	if order_of(giver.id) == kind:
 		var same := true
 		if kind == SquadOrder.Kind.HOLD:
@@ -166,13 +194,17 @@ func _hand_out(giver: Character, kind: SquadOrder.Kind, toggle: bool) -> SquadOr
 			_drop_order(giver)
 			return SquadOrder.Kind.NONE
 	if kind == SquadOrder.Kind.HOLD:
-		_sort_across(team, giver.yaw)
+		_sort_across(team, yaw)
 	for b in w.bots:
 		if b.order_giver == giver and not team.has(b):
 			SquadOrders.end(b, w)
 	for slot in team.size():
 		SquadOrders.start(team[slot], giver, kind, slot)
-	if kind == SquadOrder.Kind.HOLD:
+		if on_map:
+			team[slot].order_yaw = yaw
+	if on_map:
+		SquadOrders.place_across(team, yaw, point, w)
+	elif kind == SquadOrder.Kind.HOLD:
 		SquadOrders.place_hold(team, giver, point, w)
 	_given[giver.id] = kind
 	_own_spot[giver.id] = 1 if kind == SquadOrder.Kind.HOLD and not looked else 0

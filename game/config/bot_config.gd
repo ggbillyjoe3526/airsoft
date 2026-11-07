@@ -205,6 +205,8 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var edge_lookahead: float = 0.6
 ## Keeping apart (bodies pass through each other in the physics): a bot steers off anyone in play closer than this (m).
 @export var separation_distance: float = 0.8
+## Off an enemy only with nothing solid between (BP6): the line between them runs this high over both their feet (m).
+@export var separation_line_height: float = 1.0
 
 @export_group("Cover")
 ## Cover search: random spots within this radius (m) and no nearer than the minimum, how many, and the least time

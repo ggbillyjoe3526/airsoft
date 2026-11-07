@@ -84,7 +84,10 @@ kits that suit it.
 
 <!-- wiki:bot-kits -->
 
-Your teammates carry the AEG Rifle and the GBB Pistol as they come. Bots fire full auto wherever their replica has it, except on an indoor field (Depot, [no full auto indoors](Maps#depot)): there they fire single shots and only now and then switch to full auto, at someone out in the open down a long sight line.
+Your teammates carry the AEG Rifle and the GBB Pistol as they come. Bots fire full auto wherever their replica has it,
+except on an indoor field (Depot, [no full auto indoors](Maps#depot)): there they fire single shots and only now and
+then switch to full auto, at someone out in the open down a long sight line. Each bot decides that once per opponent
+each round.
 
 ## Bots in Attack / Defend
 
@@ -109,10 +112,10 @@ only your own team's words; an enemy close by is heard keying their radio.
 
 A bot on your team can ask you over with a ping as well as words, when you are far from it: **Need help** when it is
 fighting two or more at once, or defends the pole the other team starts raising the flag on; **Go round** when it has
-traded looks with one enemy for a while, pinging a spot to their side for you to flank from; **Cover me** when it
-starts raising the flag. The team asks at most once every 30 s and three times a round, so an ask always means
-something. The ping shows like yours, marked HELP, GO or COVER with its distance; nobody else changes what they do for
-it, so it's your call whether to go.
+traded looks with one enemy for a while, pinging a spot to their side for you to flank from (never on a floor no route
+joins to yours); **Cover me** when it starts raising the flag. The team asks at most once every 30 s and three times a
+round, so an ask always means something. The ping shows like yours, marked HELP, GO or COVER with its distance; nobody
+else changes what they do for it, so it's your call whether to go.
 
 ## The overtime flag
 

@@ -329,6 +329,70 @@ func test_a_bomb_bounces_back_off_a_wall() -> void:
 	assert_true(g.resting)
 
 
+func test_a_bomb_bounces_off_a_body_in_its_way_and_hits_nobody() -> void:
+	var m := _match(_world())
+	var sim: Simulation = m[0]
+	var s: GameState = m[1]
+	var cmds := _commands(s)
+	var c := s.characters[0]
+	_place(c, Vector3(-10.0, 0.0, 0.0), -PI * 0.5)
+	_place(s.characters[3], Vector3(-7.0, 0.0, 0.0), PI * 0.5)
+	cmds[0].yaw = -PI * 0.5
+	cmds[0].pitch = -0.2
+	cmds[0].throw_grenade = Grenade.Kind.SMOKE
+	var bounces := _run(sim, s, cmds, 150, GameEvent.Kind.GRENADE_BOUNCE)
+	var g := s.grenades[0]
+	assert_gt(bounces, 0)
+	assert_lt(g.position.x, -7.0 - tuning.body.radius, "stopped short of the body it struck")
+	assert_true(g.resting, "settled on the floor, not on the body")
+	assert_almost_eq(g.position.y, cfg.radius, 0.01)
+	for x in s.characters:
+		assert_true(Elimination.is_in_play(x), "a bomb hits nobody")
+
+
+func test_a_bomb_passes_its_thrower_and_those_out_of_play() -> void:
+	var m := _match(_world())
+	var sim: Simulation = m[0]
+	var s: GameState = m[1]
+	var cmds := _commands(s)
+	var c := s.characters[0]
+	_place(c, Vector3(-10.0, 0.0, 0.0), -PI * 0.5)
+	_place(s.characters[3], Vector3(-7.0, 0.0, 0.0), PI * 0.5)
+	s.characters[3].status = Character.Status.OUT
+	cmds[0].yaw = -PI * 0.5
+	cmds[0].pitch = -0.2
+	cmds[0].throw_grenade = Grenade.Kind.SMOKE
+	_run(sim, s, cmds, 150)
+	assert_gt(s.grenades[0].position.x, -7.0 + tuning.body.radius, "through the one out of play")
+
+
+## BP6: a bomb thrown from cover past a teammate at the thrower's side passes through them for the first moment of its
+## flight (GrenadeConfig.team_pass_time), so it never bounces back off them onto the thrower; an enemy there stops it.
+func test_a_fresh_bomb_passes_a_teammate_beside_the_thrower_but_not_an_enemy() -> void:
+	for mate: bool in [true, false]:
+		var m := _match(_world())
+		var sim: Simulation = m[0]
+		var s: GameState = m[1]
+		var cmds := _commands(s)
+		_place(s.characters[0], Vector3(-10.0, 0.0, 0.0), -PI * 0.5)
+		var near := s.characters[1] if mate else s.characters[3]
+		_place(near, Vector3(-7.8, 0.0, 0.1), PI * 0.5)
+		var away := s.characters[3] if mate else s.characters[1]
+		_place(away, Vector3(-10.0, 0.0, 12.0), PI * 0.5)
+		cmds[0].yaw = -PI * 0.5
+		cmds[0].pitch = -0.1
+		cmds[0].throw_grenade = Grenade.Kind.SMOKE
+		var bounces := _run(sim, s, cmds, 150, GameEvent.Kind.GRENADE_BOUNCE)
+		var g := s.grenades[0]
+		if mate:
+			assert_gt(g.position.x, -7.8 + tuning.body.radius, "on past the teammate, never back at the thrower")
+		else:
+			assert_gt(bounces, 0)
+			assert_lt(g.position.x, -7.8, "off the enemy, back on the thrower's side")
+	assert_gt(cfg.team_pass_time, 0.0)
+	assert_lt(cfg.team_pass_time * cfg.throw_speed, 5.0, "past a few metres a teammate stops it, as anyone does")
+
+
 func test_a_bomb_off_the_level_is_gone() -> void:
 	var m := _match(_world())
 	var sim: Simulation = m[0]

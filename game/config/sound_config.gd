@@ -179,7 +179,9 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 ## occlusion_muffled_hz on a log scale and the level from 1 to occlusion_muffled_gain. The half and full buses sit at
 ## shares 0.5 and 1. A BB impact casts one ray to occlusion_impact_back (m) back along the BB's way in from where it
 ## struck, on its own side of the surface however thin the wall (BP2), or, with no way in known, stopping
-## occlusion_surface_gap (m) short of it. No ray beyond occlusion_reach (m): the last share closes to full over
+## occlusion_surface_gap (m) short of it; that line blocked within occlusion_corner_reach (m) of the impact (a tight
+## inside corner, BP6) looks back along the way in from occlusion_impact_skin (m) off the surface, and casts again to a
+## point short of what it meets. No ray beyond occlusion_reach (m): the last share closes to full over
 ## occlusion_far_ramp (m) more, in occlusion_far_step (m) steps. A character's share is reused for
 ## occlusion_refresh_ticks; a tick casts at most occlusion_ray_budget rays.
 @export var occlusion_ray_heights: PackedFloat32Array = PackedFloat32Array([0.45, 1.5])
@@ -188,6 +190,8 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 @export var occlusion_muffled_gain: float = 0.55
 @export var occlusion_surface_gap: float = 0.2
 @export var occlusion_impact_back: float = 0.05
+@export var occlusion_corner_reach: float = 0.5
+@export var occlusion_impact_skin: float = 0.001
 @export var occlusion_reach: float = 60.0
 @export var occlusion_far_ramp: float = 60.0
 @export var occlusion_far_step: float = 5.0

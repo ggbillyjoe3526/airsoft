@@ -70,6 +70,17 @@ func acquire(cue: StringName, priority: int, max_voices: int) -> int:
 	return pick
 
 
+## The play number voice `i` took for its last cue (acquire's order; 0: never taken), so a caller that kept it can tell
+## whether that voice still holds its own play.
+func serial_of(i: int) -> int:
+	return _started[i] if i >= 0 and i < _started.size() else -1
+
+
+## The serial of the play acquire last handed out.
+func last_serial() -> int:
+	return _serial
+
+
 ## At most `max` starts of one kind of sound within `window` seconds (the browser game's VoiceLimit), so a busy moment
 ## stays readable: six sprinters, a hose of BBs.
 class StartLimit:

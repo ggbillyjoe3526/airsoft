@@ -42,6 +42,8 @@ extends Resource
 @export var shot_blur_share: float = 0.12
 @export var blur_min: float = 1.5
 @export var blur_max: float = 7.0
+## A patch heard on another storey than the one drawn shows at this share of its strength (BP6): heard, not placed.
+@export var other_storey_patch: float = 0.5
 ## A patch's radius is its blur plus this (m), so the enemy is always inside it.
 @export var patch_pad: float = 1.0
 ## An enemy heard beyond the panel's edge shows as a patch this big (px) on the rim, towards them.

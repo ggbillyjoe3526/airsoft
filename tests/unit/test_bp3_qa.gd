@@ -83,7 +83,9 @@ func test_a_new_round_clears_the_open_burst_flag() -> void:
 	var me := Character.new(0, 0, Vector3.ZERO, 0.0, ReplicaStats.default_loadout())
 	var b := Bot.new(me, 1, cfg.skill_for(&"normal"), 2)
 	b.auto_open = true
-	b.auto_for = 5
+	b.auto_won = Bot.target_bit(5)
+	b.auto_rolled = Bot.target_bit(5)
 	b.reset(0, 0, 0.0, cfg)
 	assert_false(b.auto_open)
-	assert_eq(b.auto_for, -1)
+	assert_eq(b.auto_won, 0)
+	assert_eq(b.auto_rolled, 0)

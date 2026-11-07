@@ -187,3 +187,44 @@ func test_a_hint_names_the_key_an_action_has_now() -> void:
 	b.apply()
 	assert_eq(KeyNames.of_action(&"jump"), "X", "the vault prompt follows a rebind")
 	assert_eq(KeyNames.of_action(&"no_such_action"), KeyNames.NO_KEY)
+
+
+## Zoom in and Zoom out (BP6) are read only aimed through a variable optic: by default they share the wheel with Next and
+## Previous replica, the one sharing allowed (DECISIONS › Zoom on the wheel); any other key a zoom takes swaps, as every
+## key does.
+func test_the_zoom_keys_share_the_wheel_with_the_switches_and_swap_any_other_key() -> void:
+	assert_eq(_codes(&"zoom_in"), [-MOUSE_BUTTON_WHEEL_UP])
+	assert_eq(_codes(&"zoom_out"), [-MOUSE_BUTTON_WHEEL_DOWN])
+	assert_true(KeyBindings.may_share(&"zoom_in", &"slot_next") and KeyBindings.may_share(&"slot_previous", &"zoom_out"))
+	assert_false(KeyBindings.may_share(&"zoom_in", &"reload") or KeyBindings.may_share(&"zoom_in", &"zoom_out"))
+	assert_false(KeyBindings.may_share(&"slot_next", &"slot_previous"))
+	assert_eq(b.action_of(-MOUSE_BUTTON_WHEEL_UP), &"slot_previous")
+	assert_eq(b.action_of(-MOUSE_BUTTON_WHEEL_UP, &"zoom_out"), &"zoom_in", "the one zoom_out may not share it with")
+	assert_eq(b.rebind(&"slot_previous", KEY_K), KeyBindings.Result.BOUND, "the zoom keeps the wheel")
+	assert_eq(_codes(&"zoom_in"), [-MOUSE_BUTTON_WHEEL_UP])
+	assert_eq(b.rebind(&"zoom_in", KEY_R), KeyBindings.Result.SWAPPED, "Reload's key: a swap, never shared")
+	assert_eq(b.last_other, &"reload")
+	assert_eq(_codes(&"reload"), [-MOUSE_BUTTON_WHEEL_UP])
+	assert_eq(b.rebind(&"zoom_in", -MOUSE_BUTTON_WHEEL_DOWN), KeyBindings.Result.SWAPPED, "within the zooms: a swap")
+	assert_eq(_codes(&"zoom_out"), [KEY_R])
+	assert_eq(_codes(&"slot_next"), [-MOUSE_BUTTON_WHEEL_DOWN], "Next replica keeps it with the zoom")
+	assert_eq(b.rebind(&"reload", -MOUSE_BUTTON_WHEEL_DOWN), KeyBindings.Result.SWAPPED,
+			"a key a zoom and a switch share: both give it up")
+	assert_eq(_codes(&"zoom_in"), [-MOUSE_BUTTON_WHEEL_UP])
+	assert_eq(_codes(&"slot_next"), [-MOUSE_BUTTON_WHEEL_UP])
+	assert_eq(b.rebind(&"zoom_out", KEY_W), KeyBindings.Result.SWAPPED, "a move's key swaps too")
+	assert_eq(_codes(&"move_forward"), [KEY_R, KEY_UP])
+
+
+func test_a_save_from_before_the_zoom_keys_gives_them_the_wheel_and_only_the_wheels_pairs_share() -> void:
+	assert_true(b.load_dict({"slot_next": [KEY_K], "slot_previous": [KEY_J], "layout": KeyBindings.LAYOUT}))
+	assert_eq(_codes(&"zoom_in"), [-MOUSE_BUTTON_WHEEL_UP], "keys moved off the wheel switch; the wheel zooms")
+	assert_eq(_codes(&"zoom_out"), [-MOUSE_BUTTON_WHEEL_DOWN])
+	var saved := b.to_dict()
+	var again := KeyBindings.new()
+	assert_true(again.load_dict(saved))
+	assert_true(again.load_dict({"zoom_in": [KEY_K], "slot_next": [KEY_K]}), "a zoom and a switch may share")
+	assert_false(again.load_dict({"zoom_in": [KEY_K], "zoom_out": [KEY_K]}), "one key on two zooms is unusable")
+	assert_false(again.load_dict({"zoom_in": [KEY_K], "reload": [KEY_K]}), "and on a zoom and Reload")
+	assert_true(again.load_dict({"zoom_in": [KEY_R]}), "a save without Reload")
+	assert_eq(again.codes(&"reload"), PackedInt32Array(), "Reload's default gives way to the zoom saved on it")
