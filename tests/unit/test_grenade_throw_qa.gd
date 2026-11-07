@@ -192,7 +192,7 @@ func test_the_pose_depends_on_the_share_not_the_frame_rate() -> void:
 	assert_true(out[0].is_equal_approx(out[1]))
 
 
-func test_a_throw_cut_off_mid_windup_goes_down_on_the_hold() -> void:
+func test_a_throw_cut_off_mid_windup_eases_back_to_the_hold_as_the_hand_goes_down() -> void:
 	var s := GameState.new(5, tuning)
 	var v := _view()
 	var c := _char()
@@ -200,14 +200,20 @@ func test_a_throw_cut_off_mid_windup_goes_down_on_the_hold() -> void:
 	_frames(v, s, c, view_cfg.bomb_raise_time)
 	_throw_at(c, Grenade.Kind.SMOKE, 0.8)
 	v.update(s, 0.0, DT, c, EYE)
-	assert_false(v.arms().bomb_moved().is_equal_approx(Transform3D.IDENTITY), "mid-throw")
+	var at_cut := v.arms().bomb_moved().origin.length()
+	assert_gt(at_cut, 0.01, "mid-throw")
 	c.grenades.stop()
 	v.update(s, 0.0, DT, c, EYE)
 	assert_true(v._held_root.visible, "the empty hand goes down")
+	var next := v.arms().bomb_moved().origin.length()
+	assert_gt(next, 0.0, "not snapped to the hold in one frame")
+	assert_lt(next, at_cut, "already on its way back")
+	_frames(v, s, c, view_cfg.bomb_unwind_time)
+	assert_true(v._held_root.visible, "back before the hand is gone")
 	assert_true(v.arms().bomb_moved().is_equal_approx(Transform3D.IDENTITY), "on the hold, not frozen mid-throw")
 
 
-func test_turning_to_eyes_with_nothing_in_hand_mid_windup_goes_down_on_the_hold() -> void:
+func test_turning_to_eyes_with_nothing_in_hand_mid_windup_eases_back_to_the_hold() -> void:
 	var s := GameState.new(5, tuning)
 	var v := _view()
 	var thrower := _char(1)
@@ -217,4 +223,77 @@ func test_turning_to_eyes_with_nothing_in_hand_mid_windup_goes_down_on_the_hold(
 	_throw_at(thrower, Grenade.Kind.FLASH, 0.9)
 	v.update(s, 0.0, DT, thrower, EYE)
 	v.update(s, 0.0, DT, bare, EYE)
+	assert_false(v.arms().bomb_moved().is_equal_approx(Transform3D.IDENTITY), "easing, not snapped")
+	_frames(v, s, bare, view_cfg.bomb_unwind_time)
 	assert_true(v.arms().bomb_moved().is_equal_approx(Transform3D.IDENTITY))
+
+
+func test_the_ease_back_runs_its_time_eased_out_whatever_the_frame_rate() -> void:
+	var s := GameState.new(5, tuning)
+	var out: Array[float] = []
+	# A time both rates step evenly to half of.
+	view_cfg.bomb_unwind_time = 0.2
+	for dt: float in [1.0 / 30.0, 1.0 / 120.0]:
+		var v := _view()
+		var c := _char()
+		c.grenades.readied = Grenade.Kind.SMOKE
+		for i in ceili(view_cfg.bomb_raise_time / dt) + 2:
+			v.update(s, 0.0, dt, c, EYE)
+		_throw_at(c, Grenade.Kind.SMOKE, 0.8)
+		v.update(s, 0.0, dt, c, EYE)
+		var at_cut := v.arms().bomb_moved().origin.length()
+		c.grenades.stop()
+		for i in roundi(view_cfg.bomb_unwind_time * 0.5 / dt):
+			v.update(s, 0.0, dt, c, EYE)
+		out.append(v.arms().bomb_moved().origin.length() / at_cut)
+	assert_almost_eq(out[0], out[1], 0.02, "the same way back at half its time")
+	assert_lt(out[0], 0.5, "eased out: over half way back at half its time")
+
+
+func test_the_left_hand_cut_off_on_the_pin_eases_down_shown_then_hides() -> void:
+	var s := GameState.new(5, tuning)
+	var v := _view()
+	var c := _char()
+	c.grenades.readied = Grenade.Kind.SMOKE
+	_frames(v, s, c, view_cfg.bomb_raise_time)
+	_throw_at(c, Grenade.Kind.SMOKE, 0.4)
+	v.update(s, 0.0, DT, c, EYE)
+	var left := v.arms()._left
+	assert_true(left.visible, "pulling the pin")
+	c.grenades.stop()
+	v.update(s, 0.0, DT, c, EYE)
+	assert_true(left.visible, "still shown as it eases down")
+	_frames(v, s, c, view_cfg.bomb_unwind_time)
+	assert_false(left.visible, "hidden once back")
+
+
+func test_a_new_bomb_or_throw_while_easing_back_starts_from_its_own_hold() -> void:
+	var s := GameState.new(5, tuning)
+	var fresh := _view()
+	var f := _char()
+	f.grenades.readied = Grenade.Kind.FLASH
+	_frames(fresh, s, f, view_cfg.bomb_raise_time)
+	var want := _bone_turns(fresh)
+	var v := _view()
+	var c := _char()
+	c.grenades.readied = Grenade.Kind.SMOKE
+	_frames(v, s, c, view_cfg.bomb_raise_time)
+	_throw_at(c, Grenade.Kind.SMOKE, 0.5)
+	v.update(s, 0.0, DT, c, EYE)
+	c.grenades.stop()
+	v.update(s, 0.0, DT, c, EYE)
+	c.grenades.readied = Grenade.Kind.FLASH
+	_frames(v, s, c, view_cfg.bomb_raise_time)
+	var got := _bone_turns(v)
+	for i in want.size():
+		assert_true(got[i].is_equal_approx(want[i]), "bone %d on the flash's hold" % i)
+	_throw_at(c, Grenade.Kind.FLASH, 0.5)
+	v.update(s, 0.0, DT, c, EYE)
+	c.grenades.stop()
+	v.update(s, 0.0, DT, c, EYE)
+	_throw_at(c, Grenade.Kind.FLASH, 0.2)
+	v.update(s, 0.0, DT, c, EYE)
+	fresh.update(s, 0.0, DT, f, EYE)
+	_throw_at(f, Grenade.Kind.FLASH, 0.2)
+	fresh.update(s, 0.0, DT, f, EYE)
+	assert_true(v._held.transform.is_equal_approx(fresh._held.transform), "a throw mid-ease is drawn as from the hold")

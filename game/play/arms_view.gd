@@ -5,9 +5,10 @@ extends Node3D
 ## posing both arms on it and an empty `Hold_<id>` where that replica's origin sits, so the arms ride the replica's
 ## node (ReplicaView's Held.root) and follow its sway, kick, cant and drop. A replica the model has no hold for shows no
 ## arms. One-handed replicas (ViewModelConfig.one_hand) hide the left arm. A robot's arms (FigureMix.ROBOT) wear
-## ViewModelConfig.robot_arms. Holding a bomb, they can throw it (ArmsThrow, GT3: `ready_throw`, `throw_pose`). The
-## materials press their depth as the replica's do, cast no shadow, take none (the sun's shadow on pressed depth breaks
-## into hard patches over the sleeve) and stay out of an optic's view. A child of ReplicaView.
+## ViewModelConfig.robot_arms. Holding a bomb, they can throw it (ArmsThrow, GT3: `ready_throw`, `throw_pose`; cut off,
+## `cut_throw` and `unwind_throw`). The materials press their depth as the replica's do, cast no shadow, take none (the
+## sun's shadow on pressed depth breaks into hard patches over the sleeve) and stay out of an optic's view. A child of
+## ReplicaView.
 
 const MODEL := "res://assets/models/arms/arms.glb"
 ## The model's names (tools/blender/arms/arms.py).
@@ -33,6 +34,8 @@ var _shown: bool = true
 var _skeleton: Skeleton3D = null
 ## The throw drawn over a bomb's hold (none without the model's skeleton).
 var _throw: ArmsThrow = null
+## Whether the left arm showed when the throw was cut off (`cut_throw`), so it shows while the arms ease back.
+var _cut_left := false
 ## The hold's clip, and the clip that works the replica's Fire clip (empty when the model has none for it).
 var _hold_clip: StringName = &""
 var _work: StringName = &""
@@ -150,6 +153,24 @@ func throw_pose(share: float) -> void:
 	_throw.pose(_skeleton, share)
 	if _left != null:
 		_left.visible = ArmsThrow.left_shown(share, _cfg) or not _cfg.one_hand.has(_on)
+
+
+## Takes the throw's pose now, `share` of the way through, as cut off: `unwind_throw` eases the arms back from it.
+func cut_throw(share: float) -> void:
+	if _throw == null or _on == &"":
+		return
+	_throw.cut(_skeleton)
+	_cut_left = ArmsThrow.left_shown(share, _cfg)
+
+
+## The arms `w` (0..1) of the way back from a cut-off throw to its start (ArmsThrow.unwind), the left arm shown until
+## they're back if it showed at the cut.
+func unwind_throw(w: float) -> void:
+	if _throw == null or _on == &"":
+		return
+	_throw.unwind(_skeleton, w)
+	if _left != null:
+		_left.visible = (_cut_left and w < 1.0) or not _cfg.one_hand.has(_on)
 
 
 ## How the right hand (and the bomb in its fist) has moved from the hold, in the model's frame.

@@ -104,6 +104,10 @@ extends Resource
 ## while the replica goes down (holster_time); the empty hand goes back down the same way once the bomb has left it.
 @export var bomb_raise_drop: float = 0.3
 @export var bomb_raise_time: float = 0.2
+## A throw cut off in its windup (a hit, the round's end, other eyes) eases your arms back from where they were to its
+## start (the right hand on the hold, the left down out of view) over this long (s), easing out, while the hand goes
+## down; at most bomb_raise_time, or the hand is gone before the arms are back.
+@export var bomb_unwind_time: float = 0.15
 @export var robot_arms: Dictionary[StringName, Color] = {
 	&"Glove": Color(0.80, 0.81, 0.82),
 	&"GloveArmour": Color(0.16, 0.17, 0.18),

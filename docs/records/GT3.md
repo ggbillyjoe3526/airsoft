@@ -53,4 +53,4 @@ pulls the pin, and your right arm throws the bomb, where before the bomb in hand
 - The over-the-top swing shows the forearm and sleeve for a few frames: an overhand throw passes the arm over the
   eyes, unlike the owner's hand-and-wrist rule for holds.
 - A throw cut off mid-swing snaps to the hold in one frame before lowering; a short blend back would hide it (can
-  wait). The ring's hang slides in the model's frame, not the fist's, which reads fine at 4 cm.
+  wait; fixed in GT4). The ring's hang slides in the model's frame, not the fist's, which reads fine at 4 cm.

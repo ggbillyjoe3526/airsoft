@@ -108,6 +108,9 @@ var _raise: float = 0.0
 var _share: float = 0.0
 ## Whether the empty hand is following through after a throw.
 var _following := false
+## How much of the arms' ease back from a throw cut off in its windup is left (1 at the cut, 0 none: ArmsView's
+## `unwind_throw`, over ViewModelConfig.bomb_unwind_time).
+var _unwind: float = 0.0
 ## Your arms holding it (none until `setup_arms`), and by Grenade.Kind: the bomb in hand without its pin and the pin
 ## alone (null: none), each surface's material with the depth pressed as theirs, and the pin's middle (the bomb's
 ## frame).
@@ -475,7 +478,9 @@ func _draw_wash(state: GameState, eyes: Character, eye: Vector3) -> void:
 ## `ahead` s on (s) from its last step. With your arms (`setup_arms`) the hand comes up into view with it from
 ## ViewModelConfig.bomb_raise_drop below over bomb_raise_time, eased as a draw, and throws it (ArmsThrow): the left
 ## hand pulls the pin and the right arm swings over and lets it go, then follows through out of view, where it is
-## gone; a bomb put back goes down with the hand the way it came. Without them the bomb shows and goes at once.
+## gone; a bomb put back goes down with the hand the way it came, and a throw cut off in its windup (a hit, the round's
+## end, other eyes) eases the arms back to its start as the hand goes (bomb_unwind_time) instead of snapping them to
+## the hold. Without them the bomb shows and goes at once.
 func _draw_held(eyes: Character, eye: Vector3, delta: float, ahead: float) -> void:
 	var kind := Grenades.held(eyes)
 	var through := _arms != null and eyes != null and _held_root.visible and _held_kind != Grenade.Kind.NONE \
@@ -487,6 +492,7 @@ func _draw_held(eyes: Character, eye: Vector3, delta: float, ahead: float) -> vo
 		_following = false
 		_raise = 1.0 if _view_cfg == null else move_toward(_raise, 1.0, delta / _view_cfg.bomb_raise_time)
 		if kind != _held_kind:
+			_end_unwind()
 			_hold(kind)
 		_share = throw_share(eyes, _cfg, ahead)
 	elif through:
@@ -497,13 +503,22 @@ func _draw_held(eyes: Character, eye: Vector3, delta: float, ahead: float) -> vo
 		_following = false
 		_raise = 0.0
 	elif eyes != null and _view_cfg != null and _held_root.visible and _raise > 0.0:
-		# Put back, or a throw cut off (hit, round over, other eyes): down the way it came, on the hold.
+		# Put back, or a throw cut off (hit, round over, other eyes): down the way it came, the arms easing back from
+		# where the throw left them.
+		if _share > 0.0 and _arms != null:
+			_arms.cut_throw(_share)
+			_unwind = 1.0
 		_share = 0.0
 		_raise = move_toward(_raise, 0.0, delta / _view_cfg.bomb_raise_time)
 	else:
 		_raise = 0.0
+	if _share > 0.0:
+		_unwind = 0.0
+	elif _unwind > 0.0 and _view_cfg != null:
+		_unwind = move_toward(_unwind, 0.0, delta / _view_cfg.bomb_unwind_time)
 	if _raise <= 0.0:
 		_share = 0.0
+		_unwind = 0.0
 		_following = false
 		if _held_root.visible:
 			_held_root.visible = false
@@ -514,7 +529,10 @@ func _draw_held(eyes: Character, eye: Vector3, delta: float, ahead: float) -> vo
 	_held_root.transform = Transform3D(view, eye + view * (HELD_AT + Vector3(0.0, -drop, 0.0)))
 	_held.visible = kind != Grenade.Kind.NONE
 	if _arms != null:
-		_arms.throw_pose(_share)
+		if _unwind > 0.0:
+			_arms.unwind_throw(1.0 - _unwind)
+		else:
+			_arms.throw_pose(_share)
 		var model := _arms.model_transform()
 		var back := model.affine_inverse()
 		_held.transform = model * _arms.bomb_moved() * back * _held_rest
@@ -522,6 +540,13 @@ func _draw_held(eyes: Character, eye: Vector3, delta: float, ahead: float) -> vo
 		if _pin.visible:
 			_pin.transform = model * _arms.pin_moved(_share) * back * _held_rest
 	_held_root.visible = true
+
+
+## The arms put back on the hold if they were easing back from a cut-off throw (before another hold goes on).
+func _end_unwind() -> void:
+	if _unwind > 0.0 and _arms != null:
+		_arms.throw_pose(0.0)
+	_unwind = 0.0
 
 
 ## How far `c` is through a throw `ahead` s past its last step (ArmsThrow's share: 0..1 over the windup, 1..2 over the

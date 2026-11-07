@@ -1410,6 +1410,9 @@ The Hi-Cap, Low-Cap and Extended magazines are now their own models, each built 
   follows through down to the left out of view, then the replica comes back up. Nothing pops or jumps, and the bomb
   never slips in the fist.
 - [ ] **Cut off:** get hit while winding up: the hand goes back down the way it came, not frozen mid-throw.
+- [ ] **Cut off, eased (GT4):** get hit (or let the round end) at each point of the windup, early with your left hand on
+  the pin and late with the arm cocked back at the top right: both arms ease back over about 0.15 s as the hand goes
+  down, the left hand down out of view. Nothing jumps to the hold in one frame. Say if it reads too slow or too quick.
 - [ ] **From the hand:** roll the wheel onto a bomb, wait, then pull the trigger: the same pin pull and throw.
 - [ ] **Feel:** the throw still takes the same time as before (0.3 s to the release). Say if the pin pull reads too
   quickly to see.
