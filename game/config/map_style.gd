@@ -125,6 +125,24 @@ extends Resource
 @export var occluder_height: float = 1.8
 @export var occluder_length: float = 1.2
 @export var occluder_inset: float = 0.03
+## Prop models that are round (BP7: Woodland's and The Street's trunks, Depot's drums and barrels): BBs and bodies
+## meet each prop as a few stepped boxes that hug it (RoundSteps), not as its block's square box; the nav grid, the
+## bots' cover, the noisy props, the bake and the minimap still take the block's box. Where each prop stands comes
+## from PropDressConfig (its lay, cluster cell and pallet), as PropLayout lays it. Each model's boxes in its own frame,
+## a box a pair of corners (min, max), the prop's half-widths at -1 and 1: u along the block's long side, v across it,
+## +v the prop's front (towards the field's middle, PropLayout's FIT). Worked out from the models, the smallest three
+## that hold every vertex (tests/unit/test_round_steps.gd checks that they hold the props as laid and hug them). A
+## model laid in cells (CLUSTER, ROW) is turned a random quarter, so its boxes must hold it turned. A model not
+## listed meets its box.
+@export var round_steps: Dictionary[StringName, PackedVector2Array] = {
+	# The trunk's roots fill its back corners; its front ones are open.
+	&"trunk": PackedVector2Array([Vector2(-1.0, -0.95), Vector2(1.0, 0.1), Vector2(-0.7, -1.0), Vector2(0.55, 1.0),
+			Vector2(-0.879, -0.971), Vector2(0.747, 0.559)]),
+	&"drum": PackedVector2Array([Vector2(-1.0, -0.55), Vector2(1.0, 0.55), Vector2(-0.55, -1.0), Vector2(0.55, 1.0),
+			Vector2(-0.883, -0.883), Vector2(0.883, 0.883)]),
+	&"barrel": PackedVector2Array([Vector2(-1.0, -0.55), Vector2(1.0, 0.55), Vector2(-0.55, -1.0), Vector2(0.55, 1.0),
+			Vector2(-0.883, -0.883), Vector2(0.883, 0.883)]),
+}
 ## The ground beyond the field's walls, out to `ground_extent` metres each way from the middle, just below the floor.
 @export var ground_colour: Color = Color8(0x8a, 0xa8, 0x60)
 @export var ground_extent: float = 120.0

@@ -61,12 +61,13 @@ const SKIP_BAR_GAP := 8
 const STEP_KEYS: Array[String] = ["LOAD_MAP", "LOAD_LEVEL", "LOAD_TEAMS", "LOAD_VIEWS"]
 ## The loading screen's line once it is left (leave_loading).
 const LEAVE_KEY := "LOAD_LEAVING"
-## The level step (staged, its ground a frame and its dressing the next; Woodland's are about 0.9 and 0.6 s), the views
-## step, and the main thread's time a loading frame gives the bots' vault links before it (µs; about two
-## frames at 60 fps, so the screen draws at about 30 fps while they are found).
+## The level step (staged, its ground built BUILD_SLICE_USEC a frame, MapLevel.build_some, then its dressing a part a
+## frame, DRESS_PARTS of them: BP7), the views step, and the main thread's time a loading frame gives the level's ground
+## and the bots' vault links (µs; about two frames at 60 fps, so the screen draws at about 30 fps meanwhile).
 const LEVEL_STEP := 1
 const VIEWS_STEP := 3
 const BUILD_SLICE_USEC := 25000
+const DRESS_PARTS := 6
 ## The teams' numbers in the simulation: Alpha 0, Beta 1.
 const TEAM_ALPHA := 0
 const TEAM_BETA := 1
@@ -296,6 +297,8 @@ var _bot_parts: Dictionary[int, Array] = {}
 var _identities: Dictionary[int, BotRoster.Identity] = {}
 var _bot_config: BotConfig = null
 var _ticks: int = 0
+## The level's dressing parts built so far (_dress_part).
+var _dressed: int = 0
 ## What the smoke test checks: your shots, everyone's, BBs that landed anywhere, rounds played and matches finished.
 var shots: int = 0
 var all_shots: int = 0
@@ -372,52 +375,71 @@ func _load_map() -> void:
 func _build_level() -> void:
 	if not _map.ok():
 		return
-	if _level == null:
+	if _level == null or not _level.built():
 		_build_ground()
-	_play.look.push_globals()
-	_lighting = FieldLighting.build(_light, _play.look)
-	_lighting.add_probes(_map)
-	add_child(_lighting)
-	_site = SiteDress.build(_map, _play.site_look, _level.site_material())
-	if _site != null:
-		add_child(_site)
-		if not _light.night:
-			SiteDress.dress_sky(_lighting, _play.site_look)
-	else:
-		_props = PropDress.build(_map, _play.site_look.props)
-		if _props != null:
-			add_child(_props)
-	_skyline = SkylineView.build(_map, _play.skyline, _light, _tuning.body.stand_eye_height)
-	if _skyline != null:
-		add_child(_skyline)
-	_roof = RoofView.build(_map, _play.roof)
-	if _roof != null:
-		add_child(_roof)
-	_doors = DoorView.build(_map, _play.map_style, _tuning.doors.swing_time)
-	if _doors != null:
-		add_child(_doors)
-	_pools = LightPools.build(_map, _light)
-	if _pools != null:
-		add_child(_pools)
-	_woods = WoodsView.build(_map, _play.woods, _play.skyline, _light, _play.map_style)
-	if _woods != null:
-		add_child(_woods)
-	_bushes = BushView.build(_map, _play.woods)
-	if _bushes != null:
-		add_child(_bushes)
-	# What the tall solid blocks hide is left out of the frame with Occlusion culling on (GraphicsApply.apply).
-	_occluders = MapOccluders.build(_map, _play.map_style)
-	if _occluders != null:
-		add_child(_occluders)
+	while _dressed < DRESS_PARTS:
+		_dress_part(_dressed)
+		_dressed += 1
 
 
-## The level's blocks, ground and collision (MapLevel): staged, a frame of its own before the rest of the level step.
-func _build_ground() -> void:
-	_level = MapLevel.new()
-	add_child(_level)
-	# The bake is of the day's sun as this map sets it (an indoor field's overhead lamps, DR1), whichever preset plays.
-	var baked_sun := LightingConfig.for_map(_play.lighting, null, _map, LightingConfig.DAY)
-	_level.build(_map, _play.map_style, _tuning.body, _play.baked_light, baked_sun, _light.night, _play.site_look)
+## Part `part` of the level's dressing (staged, a part a frame): the light and the site's dress or props, the skyline,
+## the roof, doors and pools of light, the wood beyond the fence, the bushes, the occluders.
+func _dress_part(part: int) -> void:
+	match part:
+		0:
+			_play.look.push_globals()
+			_lighting = FieldLighting.build(_light, _play.look)
+			_lighting.add_probes(_map)
+			add_child(_lighting)
+			_site = SiteDress.build(_map, _play.site_look, _level.site_material())
+			if _site != null:
+				add_child(_site)
+				if not _light.night:
+					SiteDress.dress_sky(_lighting, _play.site_look)
+			else:
+				_props = PropDress.build(_map, _play.site_look.props)
+				if _props != null:
+					add_child(_props)
+		1:
+			_skyline = SkylineView.build(_map, _play.skyline, _light, _tuning.body.stand_eye_height)
+			if _skyline != null:
+				add_child(_skyline)
+		2:
+			_roof = RoofView.build(_map, _play.roof)
+			if _roof != null:
+				add_child(_roof)
+			_doors = DoorView.build(_map, _play.map_style, _tuning.doors.swing_time)
+			if _doors != null:
+				add_child(_doors)
+			_pools = LightPools.build(_map, _light)
+			if _pools != null:
+				add_child(_pools)
+		3:
+			_woods = WoodsView.build(_map, _play.woods, _play.skyline, _light, _play.map_style)
+			if _woods != null:
+				add_child(_woods)
+		4:
+			_bushes = BushView.build(_map, _play.woods)
+			if _bushes != null:
+				add_child(_bushes)
+		5:
+			# What the tall solid blocks hide is left out of the frame with Occlusion culling on (GraphicsApply.apply).
+			_occluders = MapOccluders.build(_map, _play.map_style)
+			if _occluders != null:
+				add_child(_occluders)
+
+
+## The level's blocks, ground and collision (MapLevel). Staged, it is built over frames of its own before the rest of
+## the level step, BUILD_SLICE_USEC a frame (MapLevel.build_some); true once it is built.
+func _build_ground() -> bool:
+	if _level == null:
+		_level = MapLevel.new()
+		add_child(_level)
+		# The bake is of the day's sun as this map sets it (an indoor field's overhead lamps, DR1), whichever preset
+		# plays.
+		var baked_sun := LightingConfig.for_map(_play.lighting, null, _map, LightingConfig.DAY)
+		_level.begin(_map, _play.map_style, _tuning.body, _play.baked_light, baked_sun, _light.night, _play.site_look)
+	return _level.build_some(Time.get_ticks_usec() + BUILD_SLICE_USEC if staged else 0)
 
 
 func _build_teams() -> void:
@@ -500,8 +522,11 @@ func _advance_build() -> void:
 			return
 		_take_nav()
 		_end_step()
-	elif _step == LEVEL_STEP and _map.ok() and _level == null:
+	elif _step == LEVEL_STEP and _map.ok() and (_level == null or not _level.built()):
 		_build_ground()
+	elif _step == LEVEL_STEP and _map.ok() and _dressed < DRESS_PARTS - 1:
+		_dress_part(_dressed)
+		_dressed += 1
 	elif _step == VIEWS_STEP and _map.ok() and not _prepare_bots():
 		return
 	else:

@@ -2,8 +2,9 @@ extends GutTest
 ## FB4 (the owner's 0.1 Dev 1 playtest, note 11: "may possibly be going through wall models"): no BB passes a wall. BBs
 ## from the fastest replica, fired through the simulation's own BBStep at the middle and near each edge of every face of
 ## every thin wall on Depot (walls, plywood, barriers, containers) and Woodland (fences, logs), square on and at 40
-## degrees, from point-blank, 5 m and 25 m, never run inside the block they were fired at nor end inside any block. (The
-## full sweep of every block, 54 176 shots, is in docs/records/FB4.md.)
+## degrees, from point-blank, 5 m and 25 m, never run inside the block they were fired at nor end inside any block (a
+## round prop's block: inside its stepped boxes, BP7). (The full sweep of every block, 54 176 shots, is in
+## docs/records/FB4.md.)
 
 const DT := 1.0 / 60.0
 ## How far inside a block (m) counts as through it: the BB stops on the face, within float rounding.
@@ -31,10 +32,22 @@ func test_no_bb_passes_a_thin_wall_on_depot_or_woodland() -> void:
 		level.build(m, style, tuning.body)
 		var lo: Array[Vector3] = []
 		var hi: Array[Vector3] = []
+		# What is solid, for "ends inside a block": each block's box, a round prop's its stepped boxes (BP7).
+		var solid_lo: Array[Vector3] = []
+		var solid_hi: Array[Vector3] = []
+		var middle := PropLayout.field_middle(m)
+		var steps: Array[AABB] = []
 		for b in m.blocks:
 			# Ramps are wedges: their boxes hold air above the slope.
 			lo.append(b.center - b.size * 0.5 if b.rise == MapData.Rise.NONE else Vector3.INF)
 			hi.append(b.center + b.size * 0.5 if b.rise == MapData.Rise.NONE else -Vector3.INF)
+			RoundSteps.boxes(b, style, PropDressConfig.new(), middle, steps)
+			if steps.is_empty():
+				solid_lo.append(lo[-1])
+				solid_hi.append(hi[-1])
+			for box in steps:
+				solid_lo.append(box.position)
+				solid_hi.append(box.end)
 		var pool := BBPool.new(1)
 		var events := SimEvents.new()
 		var nobody: Array[Character] = []
@@ -58,7 +71,7 @@ func test_no_bb_passes_a_thin_wall_on_depot_or_woodland() -> void:
 					for ang: float in [0.0, 40.0]:
 						for dist: float in [0.4, 5.0, 25.0]:
 							var o := p + n.rotated(Vector3.UP, deg_to_rad(ang) * (1.0 if u >= 0.0 else -1.0)) * dist
-							if _inside_any(o, lo, hi, -0.01):
+							if _inside_any(o, solid_lo, solid_hi, -0.01):
 								continue
 							shots += 1
 							var bb := pool.spawn(0, o, (p - o).normalized(), speed, Ballistics.hop_up_lift(fastest, 0.5,
@@ -71,7 +84,7 @@ func test_no_bb_passes_a_thin_wall_on_depot_or_woodland() -> void:
 								if not bb.active:
 									break
 							bb.active = false
-							if passed or _inside_any(bb.position, lo, hi, IN):
+							if passed or _inside_any(bb.position, solid_lo, solid_hi, IN):
 								through += 1
 		assert_gt(shots, 500, "control: %s's thin walls were shot at" % map_id)
 		assert_eq(through, 0, "%s: no BB through a wall (%d shots)" % [map_id, shots])

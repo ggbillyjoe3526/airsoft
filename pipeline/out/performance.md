@@ -1,6 +1,6 @@
-# Performance 2: bp7-bots c438d5a..bb6dbd2
-Verdict: PASS (no baseline; judged by reading)
-- can_toss_to is ordered cheap checks first (team, play, vault, spare, range <= toss_range 6 m); the rays only run for a pair within 6 m with a fitting spare. Now up to 4 rays (was 1), each short (<= 6 m).
-- Callers per tick: (1) a bot in MAG mode bringing a mag: can_toss_to plus, while it cannot toss yet, _up_to -> toss_line_clear: at most ~8 rays per bringing bot per tick, and only bots with a job (a few at once, asks stand 15 s, one giver per ask). Not every bot pair. (2) The press, once per press (_toss and nearest_asker over the askers, capped by team size). (3) HUD mag line each frame only for the player when someone asked: nearest_asker(in_reach) over askers, up to ~5 askers x 4 rays; render-rate, still small ray count; acceptable, could be cached per tick if it ever shows.
-- In flight: rays only when a piece boundary is crossed (reached > checked), so at most 4 rays over a toss's life of 0.3-0.6 s, not per tick. Fewer than before in the ticks between pieces (old code raycast every tick).
-- No allocations: floats and Vector3 values; no arrays or lambdas; Toss.checked is a preallocated int.
+# Perf 2: bp7-maps 082d04f..2c5aed6
+Verdict: PASS. Headless, busy machine, 2 runs (25 ms slice): Depot 1 call 23-24 ms; Woodland 11-14 calls, worst piece 157-193 ms (grass
+trimesh), total 474-615 ms; Street 1 call 46-51 ms. Same as 082d04f (Woodland 168-189, Depot 27-29). Shapes/nodes unchanged (409/1840/565).
+Allocation: the only new allocation is one `PropDressConfig.new()` in _add_block_colliders when no site look is given (once per map load, in
+the COLLIDERS piece, not per piece or frame; freed as RefCounted). RoundSteps.boxes adds only locals (a PackedVector2Array ref, no copy);
+the `match` and model_of/lay_of dictionary reads are per block at setup. Nothing per frame/tick. Orphans: none seen in the tests.

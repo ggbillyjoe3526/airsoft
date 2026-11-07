@@ -4,9 +4,12 @@ extends Node3D
 ## blocks and the ground beyond the walls drawn as one vertex-coloured mesh in the shared light, any sloping ground in
 ## tiles of about TERRAIN_TILE m a side in the same material (each culled on its own, in the view and in every shadow
 ## cascade; WL4), and the blocks and the sloping ground's very triangles (a trimesh) as Jolt static colliders, one body
-## per surface so a ray knows what it met. It hands the simulation its two views of the level:
+## per surface so a ray knows what it met (a round prop's block, a trunk or a drum, as the stepped boxes that hug it:
+## RoundSteps, BP7). It hands the simulation its two views of the level:
 ## `query()` (WorldQuery: BB rays, what is underfoot) and `mover()` (CharacterMover), the only code that asks Jolt
-## (docs/ARCHITECTURE.md › Contracts 4). Add it to the tree, then call `build`.
+## (docs/ARCHITECTURE.md › Contracts 4). Add it to the tree, then call `build`, or behind a loading screen `begin` and
+## `build_some` a slice a frame (BP7): the same level, its pieces a frame's work but for each sloping ground surface's
+## collider (Jolt builds a trimesh whole).
 ##
 ## Baked light (DP2, Settings › Graphics › Baked light): with it on, a map naming a bake (BakedLight) is drawn as the same
 ## faces cut into tiles (GreyboxFaces.tile), each vertex's colour darkened by the sky it can't see and warmed by the sun's bounce.
@@ -20,6 +23,11 @@ extends Node3D
 ## in the site's one material (SiteSurface) instead of the greybox's: each vertex tells the shader its box and finish,
 ## its colour the bake's light alone. Colliders, the nav and the shadow caster are the greybox's, unchanged.
 
+## The staged build's pieces (`begin`, `build_some`), in order: the greybox's mesh, sloping ground's lattice
+## (TERRAIN_ROWS a piece), its tiles' plan and its tiles one at a time, the blocks' colliders, the ground's triangles
+## (TERRAIN_ROWS a piece), its colliders a surface at a time, and the rest.
+enum Piece { MESH, LATTICE, TILE_PLAN, TILES, COLLIDERS, FACES, TERRAIN, REST, DONE }
+
 ## The physics layer the level's colliders are on, and the one the movers' bodies are on (nothing collides with them).
 const WORLD_LAYER := 1
 const CHARACTER_LAYER := 2
@@ -29,6 +37,9 @@ const PROBE_THICKNESS := 0.02
 const REBAKE := "rebake with tools/bake_light.gd"
 ## Sloping ground is drawn in tiles of whole ground squares at most this many metres a side (WL4).
 const TERRAIN_TILE := 32.0
+## The staged build works out sloping ground's heights and triangles this many rows of squares a piece (Woodland's
+## 240 rows: about 10 ms a piece on a busy machine, headless).
+const TERRAIN_ROWS := 32
 ## An indoor field's ceiling collider's thickness (m), over the roof's height (DR1).
 const CEILING_THICKNESS := 0.2
 ## A dressed block's core (core_box) is inset at most this share of the box's width a side, and a side counts as
@@ -77,17 +88,39 @@ var _mover_body: RID
 ## The mover's crouched body (BodyConfig.crouch_height tall, CT1).
 var _low_mover_body: RID
 var _probe_body: RID
+## The staged build (`begin`, `build_some`): the piece due next, and what the pieces hand on (the ground's lattice and
+## tile plan, its Ground node, its surfaces' triangles, the tile or surface due next, the bodies' shape, the clear
+## and railing bodies until the query takes them).
+var _piece: Piece = Piece.DONE
+var _lattice: PackedFloat64Array = PackedFloat64Array()
+var _plan: GreyboxFaces.TerrainPlan = null
+var _ground: Node3D = null
+var _faces_due: TerrainGrid.Faces = null
+var _faces: Array[PackedVector3Array] = []
+var _next: int = 0
+var _body: BodyConfig = null
+var _clear_bodies: Dictionary[int, StaticBody3D] = {}
+var _railing_bodies: Dictionary[int, StaticBody3D] = {}
 
 
 ## Builds `m`'s greybox and colliders with `style`, for characters shaped as `body`, its baked light (off until
 ## `set_baked_light`) drawn with `light` and checked against the sun in `lighting` (null: the built-in ones), the
 ## preset bakes are made under (the day's), not the one playing; `night` draws it with its sky share alone; `site` dresses
-## a map that names a site dress (null: greybox). Call once, inside the tree.
+## a map that names a site dress (null: greybox). Call once, inside the tree; or, to spread it over frames (a loading
+## screen), `begin` with the same arguments and then `build_some` each frame until it says it is done: the same level.
 func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = null,
+		lighting: LightingConfig = null, night: bool = false, site: SiteLook = null) -> void:
+	begin(m, style, body, light, lighting, night, site)
+	build_some(0)
+
+
+## Starts `build` (its arguments), building nothing yet: `build_some` does it.
+func begin(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = null,
 		lighting: LightingConfig = null, night: bool = false, site: SiteLook = null) -> void:
 	assert(is_inside_tree(), "MapLevel.build needs the level in the tree (its physics space)")
 	map = m
 	_style = style
+	_body = body
 	_light = light if light != null else BakeConfig.new()
 	_lighting = lighting if lighting != null else LightingConfig.new()
 	_night = night
@@ -97,9 +130,82 @@ func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 	if m.site != null and site != null:
 		_site = site
 		_site_material = SiteSurface.material(site, m)
+	_piece = Piece.MESH
+
+
+## Builds the next pieces of the level `begin` started, until the clock passes `until_usec` (Time.get_ticks_usec; at
+## least one piece a call) or, with 0, to the end. True once the level is built. A piece is a few milliseconds' work
+## but for the greybox's mesh and each sloping ground surface's collider, which Jolt builds whole (Woodland's grass:
+## about 0.15 s on a busy machine, headless).
+func build_some(until_usec: int) -> bool:
+	while _piece != Piece.DONE:
+		_build_piece()
+		if until_usec > 0 and Time.get_ticks_usec() >= until_usec:
+			break
+	return _piece == Piece.DONE
+
+
+## Whether the level is built (`build`, or `build_some` to the end).
+func built() -> bool:
+	return _piece == Piece.DONE and map != null
+
+
+func _build_piece() -> void:
+	var t := map.terrain
+	match _piece:
+		Piece.MESH:
+			_add_meshes()
+			_piece = Piece.LATTICE if t != null else Piece.COLLIDERS
+		Piece.LATTICE:
+			if _next == 0:
+				_lattice.resize((t.ground_cols + 1) * (t.ground_rows + 1))
+			t.fill_lattice(_lattice, _next, _next + TERRAIN_ROWS)
+			_next += TERRAIN_ROWS
+			if _next >= t.ground_rows + 1:
+				_next = 0
+				_piece = Piece.TILE_PLAN
+		Piece.TILE_PLAN:
+			_plan = GreyboxFaces.terrain_plan(t, _style, TERRAIN_TILE, _lattice)
+			_ground = Node3D.new()
+			_ground.name = "Ground"
+			add_child(_ground)
+			_next = 0
+			_piece = Piece.TILES
+		Piece.TILES:
+			if _next < _plan.tiles.size():
+				_add_ground_tile(t)
+			if _next >= _plan.tiles.size():
+				_plan = null
+				_piece = Piece.COLLIDERS
+		Piece.COLLIDERS:
+			_add_block_colliders()
+			_piece = Piece.FACES if t != null else Piece.REST
+		Piece.FACES:
+			if _faces_due == null:
+				_faces_due = t.faces_begin(_bodies.size())
+				_next = 0
+			t.fill_faces(_faces_due, _lattice, _next, _next + TERRAIN_ROWS)
+			_next += TERRAIN_ROWS
+			if _next >= t.ground_rows:
+				_faces = t.faces_cut(_faces_due)
+				_faces_due = null
+				_lattice = PackedFloat64Array()
+				_next = 0
+				_piece = Piece.TERRAIN
+		Piece.TERRAIN:
+			if not _add_terrain_shape():
+				_faces.clear()
+				_piece = Piece.REST
+		Piece.REST:
+			_add_rest()
+			_piece = Piece.DONE
+
+
+## The greybox's (or the site's) mesh and the see-through blocks'.
+func _add_meshes() -> void:
 	_mesh = _make_mesh()
 	add_child(_mesh)
-	var glass := _glass_mesh(m, style)
+	var glass := _glass_mesh(map, _style)
 	if glass != null:
 		_glass = MeshInstance3D.new()
 		_glass.name = "Glass"
@@ -107,8 +213,12 @@ func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 		_glass.material_override = LookMaterials.clear_colour(GLASS_ROUGHNESS)
 		_glass.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(_glass)
-	if m.terrain != null:
-		_add_ground_tiles(m.terrain)
+
+
+## Every block's collider, one body a surface, the bodies out of the tree until `_add_rest` (with sloping ground's
+## shapes and the roof's too, so each joins the physics space whole). A round prop's block (RoundSteps) stands as its
+## stepped boxes.
+func _add_block_colliders() -> void:
 	for s in RayHit.Surface.size():
 		var sb := StaticBody3D.new()
 		sb.name = "Colliders_%s" % RayHit.Surface.keys()[s]
@@ -117,9 +227,22 @@ func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 		_bodies.append(sb)
 	# The clear blocks (glass, BQ1) and the railings (SR1) go on bodies of their own, one a surface they use, which
 	# the sight ray is blind to (and the ray past the railings to the railings').
-	var clear_bodies: Dictionary[int, StaticBody3D] = {}
-	var railing_bodies: Dictionary[int, StaticBody3D] = {}
-	for b in m.blocks:
+	var middle := PropLayout.field_middle(map)
+	var steps: Array[AABB] = []
+	# A level built without a site look (the tests' and the match guards') steps by the built-in lay, which the
+	# shipped look keeps (test_round_steps), so its BBs meet what the game's do.
+	var props := _props if _props != null else PropDressConfig.new()
+	for b in map.blocks:
+		RoundSteps.boxes(b, _style, props, middle, steps)
+		for box in steps:
+			var step := CollisionShape3D.new()
+			step.position = box.get_center()
+			var step_box := BoxShape3D.new()
+			step_box.size = box.size
+			step.shape = step_box
+			_bodies[b.surface].add_child(step)
+		if not steps.is_empty():
+			continue
 		var shape := CollisionShape3D.new()
 		shape.position = b.center
 		if b.rise == MapData.Rise.NONE:
@@ -130,59 +253,68 @@ func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 			var wedge := ConvexPolygonShape3D.new()
 			wedge.points = GreyboxFaces.wedge_points(b, Vector3.ZERO)
 			shape.shape = wedge
-		if style.is_clear(b.kind):
-			_own_body(clear_bodies, b.surface, "Colliders_Clear_%s").add_child(shape)
-		elif style.is_railing(b.kind) and b.rise == MapData.Rise.NONE:
-			_own_body(railing_bodies, b.surface, "Colliders_Railing_%s").add_child(shape)
+		if _style.is_clear(b.kind):
+			_own_body(_clear_bodies, b.surface, "Colliders_Clear_%s").add_child(shape)
+		elif _style.is_railing(b.kind) and b.rise == MapData.Rise.NONE:
+			_own_body(_railing_bodies, b.surface, "Colliders_Railing_%s").add_child(shape)
 		else:
 			_bodies[b.surface].add_child(shape)
-	if m.terrain != null:
-		_add_terrain_shapes(m.terrain)
+
+
+## The rest, once the colliders are in: the indoor roof, the level's rays and query, the railings' mesh, the doors and
+## the movers' bodies.
+func _add_rest() -> void:
+	var m := map
+	var style := _style
 	if m.roof_height > 0.0:
 		_add_ceiling(m)
 	# Each body enters the tree, and so the physics space, with all its shapes (BP7): one that went in first and took
 	# its shapes after answered rays and sweeps a rounding apart (about 5e-7 m) until the space's first step, so a
 	# match whose first ticks or vault links came before that step played differently from one built a frame slower
 	# (the seed that didn't replay bit-exact, MN2's QA).
+	# Filled out of the tree, they also cost Jolt one shape build each, not one an added shape.
 	for sb in _bodies:
 		add_child(sb)
-	for sb: StaticBody3D in clear_bodies.values():
+	for sb: StaticBody3D in _clear_bodies.values():
 		add_child(sb)
-	for sb: StaticBody3D in railing_bodies.values():
+	for sb: StaticBody3D in _railing_bodies.values():
 		add_child(sb)
 	_cast = _level_ray("LevelRay")
 	var surface_rids: Array[RID] = []
 	for sb in _bodies:
 		surface_rids.append(sb.get_rid())
-	_query = JoltQuery.new(_cast, surface_rids, body)
+	_query = JoltQuery.new(_cast, surface_rids, _body)
 	_query.railings = Railings.new(style.railing)
 	for b in m.blocks:
 		if style.is_railing(b.kind) and b.rise == MapData.Rise.NONE:
 			_query.railings.add(b.center, b.size, b.surface)
-	if not clear_bodies.is_empty() or not railing_bodies.is_empty():
+	if not _clear_bodies.is_empty() or not _railing_bodies.is_empty():
 		var sight := _level_ray("SightRay")
 		var rids: Array[RID] = []
 		var surfaces := PackedInt32Array()
-		_body_rids(clear_bodies, rids, surfaces)
+		_body_rids(_clear_bodies, rids, surfaces)
 		_query.set_clear_bodies(rids, surfaces, sight)
-		if not railing_bodies.is_empty():
+		if not _railing_bodies.is_empty():
 			var bar_rids: Array[RID] = []
 			var bar_surfaces := PackedInt32Array()
-			_body_rids(railing_bodies, bar_rids, bar_surfaces)
+			_body_rids(_railing_bodies, bar_rids, bar_surfaces)
 			_query.set_railing_bodies(bar_rids, bar_surfaces, sight, _level_ray("PastRailingsRay"))
 			_railings = MeshInstance3D.new()
 			_railings.name = "Railings"
 			_railings.mesh = _railing_mesh(m, style, _query.railings)
 			_railings.material_override = _material
 			add_child(_railings)
+	_clear_bodies.clear()
+	_railing_bodies.clear()
 	# Bushes are no collider: only leaves the simulation counts along a line (WL5).
 	_query.foliage = m.foliage
-	# What each box is, for the rules that ask (the noisy props, NP1); a ramp's wedge never makes a noise.
+	# What each box is, for the rules that ask (the noisy props, NP1); a ramp's wedge never makes a noise. A round
+	# prop's block counts as its box.
 	for b in m.blocks:
 		if b.rise == MapData.Rise.NONE:
 			_query.add_block(b.kind, b.center, b.size, b.surface)
 	_add_doors(m)
-	_make_mover_bodies(body)
+	_make_mover_bodies(_body)
 
 
 ## Draws the map's baked light, or not (Settings › Graphics › Baked light), rebuilding the greybox mesh alone and only
@@ -255,6 +387,14 @@ func _notification(what: int) -> void:
 		for rid in _rids:
 			PhysicsServer3D.free_rid(rid)
 		_rids.clear()
+		# A level freed part built: its bodies not yet in the tree are freed with it.
+		for sb in _bodies:
+			if is_instance_valid(sb) and sb.get_parent() == null:
+				sb.free()
+		for bodies: Dictionary[int, StaticBody3D] in [_clear_bodies, _railing_bodies]:
+			for sb: StaticBody3D in bodies.values():
+				if is_instance_valid(sb) and sb.get_parent() == null:
+					sb.free()
 
 
 ## An indoor field's roof as BBs meet it (DR1): steel sheeting over the blocks' whole footprint at the roof's height,
@@ -297,34 +437,34 @@ func _add_doors(m: MapData) -> void:
 		_query.set_door_shape(i, shape, sb.get_rid())
 
 
-## Sloping ground drawn in tiles under one node, each in the greybox's material, casting shadows: built once, the
-## baked light's switch leaves them be (no bake covers sloping ground).
-func _add_ground_tiles(t: TerrainGrid) -> void:
-	var ground := Node3D.new()
-	ground.name = "Ground"
-	add_child(ground)
-	var meshes := GreyboxFaces.terrain_tiles(t, _style, TERRAIN_TILE)
-	for i in meshes.size():
-		var mi := MeshInstance3D.new()
-		mi.name = "Tile%d" % i
-		mi.mesh = meshes[i]
-		mi.material_override = _material
-		ground.add_child(mi)
-		_tiles.append(mi)
+## The next of sloping ground's tiles (`_plan`), under the Ground node, in the greybox's material, casting shadows:
+## built once, the baked light's switch leaves them be (no bake covers sloping ground).
+func _add_ground_tile(t: TerrainGrid) -> void:
+	var mi := MeshInstance3D.new()
+	mi.name = "Tile%d" % _next
+	mi.mesh = GreyboxFaces.terrain_tile(t, _plan, _next)
+	mi.material_override = _material
+	_ground.add_child(mi)
+	_tiles.append(mi)
+	_next += 1
 
 
-## The sloping ground's triangles as one trimesh per ground surface, each on that surface's body.
-func _add_terrain_shapes(t: TerrainGrid) -> void:
-	var faces := t.surface_faces(_bodies.size())
-	for s in faces.size():
-		if faces[s].is_empty():
-			continue
-		var trimesh := ConcavePolygonShape3D.new()
-		trimesh.set_faces(faces[s])
-		var shape := CollisionShape3D.new()
-		shape.name = "Terrain"
-		shape.shape = trimesh
-		_bodies[s].add_child(shape)
+## The next ground surface's triangles (from `_next` on) as one trimesh on that surface's body; false when none is
+## left.
+func _add_terrain_shape() -> bool:
+	while _next < _faces.size() and _faces[_next].is_empty():
+		_next += 1
+	if _next >= _faces.size():
+		return false
+	var trimesh := ConcavePolygonShape3D.new()
+	trimesh.set_faces(_faces[_next])
+	var shape := CollisionShape3D.new()
+	shape.name = "Terrain"
+	shape.shape = trimesh
+	_bodies[_next].add_child(shape)
+	_faces[_next] = PackedVector3Array()
+	_next += 1
+	return true
 
 
 func _make_mover_bodies(body: BodyConfig) -> void:
@@ -456,7 +596,8 @@ static func _railing_mesh(m: MapData, style: MapStyle, railings: Railings) -> Ar
 	return st.commit()
 
 
-## The body of `bodies` for `surface`, made (named `name` with the surface) and added the first time it is asked for.
+## The body of `bodies` for `surface`, made (named `name` with the surface; it joins the tree in `_add_rest`) the
+## first time it is asked for.
 func _own_body(bodies: Dictionary[int, StaticBody3D], surface: int, name_format: String) -> StaticBody3D:
 	if not bodies.has(surface):
 		var sb := StaticBody3D.new()

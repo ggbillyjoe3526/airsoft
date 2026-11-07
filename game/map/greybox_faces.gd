@@ -85,8 +85,20 @@ static func ground_top(m: MapData) -> float:
 ## indices or none for a plain list): each ground square its four corners in its surface's colour (`style`), lit as the
 ## ground slopes there (smooth across squares), and its two triangles split and wound as TerrainGrid's.
 static func add_terrain(arrays: Array, t: TerrainGrid, style: MapStyle) -> void:
-	_add_squares(arrays, t, _palette(style), t.ground_lattice(), lattice_normals(t),
+	var lattice := t.ground_lattice()
+	_add_squares(arrays, t, _palette(style), lattice, lattice_normals(t, lattice),
 			Rect2i(0, 0, t.ground_cols, t.ground_rows))
+
+
+## What sloping ground's tiles are cut from (`terrain_plan`, each tile made by `terrain_tile`): the ground's lattice of
+## heights, its corners' normals, the surfaces' colours, and each tile's squares (columns and rows), row by row from the
+## (min_x, min_z) corner.
+class TerrainPlan:
+	extends RefCounted
+	var lattice: PackedFloat64Array = PackedFloat64Array()
+	var normals: PackedVector3Array = PackedVector3Array()
+	var palette: PackedColorArray = PackedColorArray()
+	var tiles: Array[Rect2i] = []
 
 
 ## Sloping ground `t` cut into meshes of whole squares at most `size` m a side (WL4), row by row from its (min_x, min_z)
@@ -94,29 +106,45 @@ static func add_terrain(arrays: Array, t: TerrainGrid, style: MapStyle) -> void:
 ## colours and split), so together they are the whole ground's very faces.
 static func terrain_tiles(t: TerrainGrid, style: MapStyle, size: float) -> Array[ArrayMesh]:
 	var out: Array[ArrayMesh] = []
-	var per := maxi(1, floori(size / t.ground_cell + TILE_SLACK))
-	var palette := _palette(style)
-	var lattice := t.ground_lattice()
-	var normals := lattice_normals(t)
-	for j0 in range(0, t.ground_rows, per):
-		for i0 in range(0, t.ground_cols, per):
-			var arrays := []
-			arrays.resize(Mesh.ARRAY_MAX)
-			arrays[Mesh.ARRAY_VERTEX] = PackedVector3Array()
-			arrays[Mesh.ARRAY_NORMAL] = PackedVector3Array()
-			arrays[Mesh.ARRAY_COLOR] = PackedColorArray()
-			arrays[Mesh.ARRAY_INDEX] = PackedInt32Array()
-			_add_squares(arrays, t, palette, lattice, normals,
-					Rect2i(i0, j0, mini(per, t.ground_cols - i0), mini(per, t.ground_rows - j0)))
-			var mesh := ArrayMesh.new()
-			mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-			out.append(mesh)
+	var plan := terrain_plan(t, style, size)
+	for i in plan.tiles.size():
+		out.append(terrain_tile(t, plan, i))
 	return out
 
 
-## Each ground lattice corner's normal, from the heights a square either side of it (the edge's own past the edge).
-static func lattice_normals(t: TerrainGrid) -> PackedVector3Array:
-	var lattice := t.ground_lattice()
+## The plan `terrain_tiles` cuts `t` by; `lattice` is t.ground_lattice() when it is already worked out (else worked
+## out here).
+static func terrain_plan(t: TerrainGrid, style: MapStyle, size: float,
+		lattice: PackedFloat64Array = PackedFloat64Array()) -> TerrainPlan:
+	var plan := TerrainPlan.new()
+	plan.lattice = lattice if not lattice.is_empty() else t.ground_lattice()
+	plan.normals = lattice_normals(t, plan.lattice)
+	plan.palette = _palette(style)
+	var per := maxi(1, floori(size / t.ground_cell + TILE_SLACK))
+	for j0 in range(0, t.ground_rows, per):
+		for i0 in range(0, t.ground_cols, per):
+			plan.tiles.append(Rect2i(i0, j0, mini(per, t.ground_cols - i0), mini(per, t.ground_rows - j0)))
+	return plan
+
+
+## Tile `i` of `plan` (made for `t`) as a mesh.
+static func terrain_tile(t: TerrainGrid, plan: TerrainPlan, i: int) -> ArrayMesh:
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = PackedVector3Array()
+	arrays[Mesh.ARRAY_NORMAL] = PackedVector3Array()
+	arrays[Mesh.ARRAY_COLOR] = PackedColorArray()
+	arrays[Mesh.ARRAY_INDEX] = PackedInt32Array()
+	_add_squares(arrays, t, plan.palette, plan.lattice, plan.normals, plan.tiles[i])
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return mesh
+
+
+## Each ground lattice corner's normal, from the heights a square either side of it (the edge's own past the edge);
+## `given` is t.ground_lattice() when it is already worked out.
+static func lattice_normals(t: TerrainGrid, given: PackedFloat64Array = PackedFloat64Array()) -> PackedVector3Array:
+	var lattice := given if not given.is_empty() else t.ground_lattice()
 	var vx := t.ground_cols + 1
 	var vz := t.ground_rows + 1
 	var gc := t.ground_cell

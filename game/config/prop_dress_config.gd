@@ -2,7 +2,8 @@ class_name PropDressConfig
 extends Resource
 ## A field's CC0 props (DR2, WR3): which blocks are drawn as models instead of their box (Depot's by kind, Woodland's
 ## by the prop each block names, MapData.Block.dress), and how the models are laid in the box. Each prop fills its
-## block's box (never past it), so cover, collision and the nav grid stay the box's; the box's own faces are not
+## block's box (never past it), so cover and the nav grid stay the box's and collision the box's (a round prop's,
+## its stepped boxes that hug it: MapStyle.round_steps, RoundSteps); the box's own faces are not
 ## drawn (SiteSurface.core_of). The models are Kenney's (CC0), recoloured off the teams' hues by
 ## tools/props/build_props.py into assets/models/props/ (docs/ASSETS.md).
 
