@@ -6,8 +6,9 @@ extends RefCounted
 ## reaches its key (ViewModelConfig's bomb_* keys, in the eyes' frame) by two-bone IK (ArmReach) from the hold's pose,
 ## its elbow bent towards its pole; the hand turns with its forearm, so the bomb in the fist (and the pin in the left
 ## hand's) goes with it (`bomb_moved`, `pin_moved`). `share` runs 0..1 over the windup and 1..2 over the recovery
-## (FigureThrow's measure); 0 is the hold. In the arms model's frame (its origin the eyes, BL4). Presentation only;
-## allocation-free once made.
+## (FigureThrow's measure); 0 is the hold. A throw cut off in its windup eases back to its start from where it was
+## (`cut`, `unwind`) rather than snapping to the hold. In the arms model's frame (its origin the eyes, BL4).
+## Presentation only; allocation-free once made.
 
 ## The arms model's bones (tools/blender/arms/arms.py, named as the figures' skeleton names them): each arm's upper arm,
 ## forearm and hand, and the left hand's fingers, which curl round the ring (the first joint less, the thumb least).
@@ -25,6 +26,9 @@ const THUMB_FIRST := 12
 const RIGHT_FINGERS: Array[String] = ["Index1_R", "Index2_R", "Index3_R", "Middle1_R", "Middle2_R", "Middle3_R",
 		"Ring1_R", "Ring2_R", "Ring3_R", "Pinky1_R", "Pinky2_R", "Pinky3_R", "Thumb1_R", "Thumb2_R", "Thumb3_R"]
 const EPSILON := 0.0001
+## The share an unwind eases to: the windup's first pose (the left hand down at bomb_left_in, open; the right on the
+## hold).
+const START := EPSILON
 
 var _cfg: ViewModelConfig = null
 ## The right arm's three bones, then the left's (none found: nothing is ever moved), and the left hand's fingers.
@@ -35,6 +39,12 @@ var _right_fingers := PackedInt32Array()
 var _moved := PackedInt32Array()
 var _at := PackedVector3Array()
 var _turns: Array[Quaternion] = []
+## The same bones' pose at the windup's start (START), which an unwind eases to, and where a cut-off throw left them,
+## which it eases from.
+var _start_at := PackedVector3Array()
+var _start_turns: Array[Quaternion] = []
+var _cut_at := PackedVector3Array()
+var _cut_turns: Array[Quaternion] = []
 ## The right hand on the hold, and both hands as the left grips the ring (its share bomb_pin_grab), in the model's
 ## frame; the ring's middle there.
 var _right_hold := Transform3D.IDENTITY
@@ -64,7 +74,11 @@ func _init(skeleton: Skeleton3D, cfg: ViewModelConfig) -> void:
 		if index >= 0:
 			_moved.append(index)
 	_at.resize(_moved.size())
+	_start_at.resize(_moved.size())
+	_cut_at.resize(_moved.size())
 	_turns.resize(_moved.size())
+	_start_turns.resize(_moved.size())
+	_cut_turns.resize(_moved.size())
 
 
 ## Takes `skeleton`'s pose now (its bones' turns, just put on by the hold's clip) as the hold the throw starts from, the
@@ -82,6 +96,8 @@ func capture(skeleton: Skeleton3D, ring: Vector3) -> void:
 	pose(skeleton, _cfg.bomb_pin_grab)
 	_right_grab = skeleton.get_bone_global_pose(_arms[2])
 	_left_grab = skeleton.get_bone_global_pose(_arms[5])
+	pose(skeleton, START)
+	_keep(skeleton, _start_at, _start_turns)
 	restore(skeleton)
 	_posed = false
 
@@ -120,6 +136,26 @@ func pose(skeleton: Skeleton3D, share: float) -> void:
 	if share > 1.0:
 		var open := -_cfg.bomb_let_go * smoothstep(1.0, maxf(_cfg.bomb_let_go_by, 1.0 + EPSILON), share)
 		_turn_fingers(skeleton, _right_fingers, open, CURL_AXIS, -THUMB_AXIS)
+
+
+## Takes `skeleton`'s pose now (a throw's, cut off) as the one `unwind` eases back from.
+func cut(skeleton: Skeleton3D) -> void:
+	if _arms.is_empty():
+		return
+	_keep(skeleton, _cut_at, _cut_turns)
+
+
+## Poses `skeleton` `w` (0..1) of the way back from the cut-off throw (`cut`) to the windup's start, easing out (quick
+## at first, as the throw was moving, then settling); the hold's own pose is put back by the next `pose`.
+func unwind(skeleton: Skeleton3D, w: float) -> void:
+	if _arms.is_empty():
+		return
+	var rest := 1.0 - clampf(w, 0.0, 1.0)
+	var e := 1.0 - rest * rest
+	for k in _moved.size():
+		skeleton.set_bone_pose_position(_moved[k], _cut_at[k].lerp(_start_at[k], e))
+		skeleton.set_bone_pose_rotation(_moved[k], _cut_turns[k].slerp(_start_turns[k], e))
+	_posed = true
 
 
 ## How the right hand (and the bomb in it) has moved from the hold, in the model's frame.
@@ -216,6 +252,13 @@ static func shoulder_shift(share: float, cfg: ViewModelConfig) -> Vector3:
 	if share <= cock:
 		return cfg.bomb_shoulder_back * smoothstep(grab, cock, share)
 	return cfg.bomb_shoulder_back.lerp(cfg.bomb_shoulder_ahead, smoothstep(cock, 1.0, minf(share, 1.0)))
+
+
+## The moved bones' pose now (their places and turns in their parents') into `at` and `turns`.
+func _keep(skeleton: Skeleton3D, at: PackedVector3Array, turns: Array[Quaternion]) -> void:
+	for k in _moved.size():
+		at[k] = skeleton.get_bone_pose_position(_moved[k])
+		turns[k] = skeleton.get_bone_pose_rotation(_moved[k])
 
 
 ## Arm `first`'s upper arm (0 right, 3 left) moved to `at`, the arm with it.
