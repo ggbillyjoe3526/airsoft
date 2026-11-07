@@ -53,5 +53,4 @@ where you stood.
 
 ## Bots' replicas
 
-Your bot teammates carry the replicas as they come. The other team's bots carry kits picked by difficulty
-([Bots](Bots#kits)).
+Every bot, your teammates as well as the other team's, carries a kit picked by difficulty ([Bots](Bots#kits)).

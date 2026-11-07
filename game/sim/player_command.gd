@@ -12,6 +12,9 @@ var yaw: float = 0.0
 ## Absolute view pitch (rad), positive looks up.
 var pitch: float = 0.0
 var sprint: bool = false
+## A bot following a leader from far behind sprints faster than a sprint (MovementConfig.catch_up_sprint_scale, B6);
+## the player's controller never sets it.
+var catch_up: bool = false
 ## Walk held: slow and quiet. Wins over sprint.
 var walk: bool = false
 var crouch: bool = false
@@ -78,6 +81,7 @@ func reset(view_yaw: float = 0.0, view_pitch: float = 0.0) -> void:
 	yaw = view_yaw
 	pitch = view_pitch
 	sprint = false
+	catch_up = false
 	walk = false
 	crouch = false
 	jump = false
@@ -112,6 +116,7 @@ func copy_from(other: PlayerCommand) -> void:
 	yaw = other.yaw
 	pitch = other.pitch
 	sprint = other.sprint
+	catch_up = other.catch_up
 	walk = other.walk
 	crouch = other.crouch
 	jump = other.jump

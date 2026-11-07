@@ -285,6 +285,10 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var angle_max_distance: float = 30.0
 @export var angle_best_distance: float = 10.0
 @export var angle_separation_deg: float = 15.0
+## A bush at least this tall (m) stops a held angle's ray where it enters the leaves, as a wall does, so its edge is a
+## corner someone could step round (the browser game's angleBushMinHeight, M40; BP7). The bushes are picked once as the
+## bots are made (BotWorld.angle_bushes).
+@export var angle_bush_min_height: float = 1.0
 ## Holding, it switches between its angles every this many seconds; it looks for them afresh every angle_refresh
 ## seconds, or once it has moved angle_move_refresh (m).
 @export var angle_switch_time: float = 3.0

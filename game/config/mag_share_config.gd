@@ -11,6 +11,12 @@ extends Resource
 ## A toss's flight: this long, plus this much a metre of toss (s).
 @export var flight_base: float = 0.3
 @export var flight_per_metre: float = 0.05
+## Its arc over the straight line from hand to chest at the middle (m): this much a metre of toss, never more than
+## arc_max. A toss whose arc meets the level on the way (the catcher moved behind a wall meanwhile) is lost there.
+@export var arc_per_metre: float = 0.1
+@export var arc_max: float = 0.6
+## That path is checked against the level as this many straight pieces, the same ones before a toss and in flight.
+@export var path_pieces: int = 4
 ## The catch is this far under the catcher's eyes (m), about the chest; the toss leaves the hand this far under the
 ## thrower's (where presentation starts drawing it).
 @export var catch_drop: float = 0.4

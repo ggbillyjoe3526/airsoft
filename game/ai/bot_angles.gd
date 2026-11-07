@@ -1,6 +1,7 @@
 class_name BotAngles
-## Held angles (the browser game's ai/angles.ts, walls only): where someone would step into view. A bot holding still
-## fans rays out at eye height across the enemy side and looks for an edge: a ray that stops at a wall next to one that
+## Held angles (the browser game's ai/angles.ts: walls and, since BP7, bushes): where someone would step into view. A
+## bot holding still fans rays out at eye height across the enemy side and looks for an edge: a ray that stops at a wall,
+## or where it enters a bush tall enough to hide someone (BotWorld.angle_bushes, picked once at load), next to one that
 ## runs on. Someone coming round that corner, or through that doorway, appears just past the edge, so that is where a Hard
 ## bot aims, at head height. Built from the level's geometry alone: where the enemies are never enters it. Allocates
 ## nothing.
@@ -9,6 +10,8 @@ class_name BotAngles
 const MAX_RAYS := 64
 ## Angles a bot keeps (the best first).
 const KEPT := 2
+## The most bushes one fan looks at (the nearest are not picked first: the map's order, as the browser's MAX_NEAR).
+const MAX_NEAR := 128
 
 
 ## One angle held: the look at it, the aim point (just past the edge, at head height), the edge's open side (-1 left,
@@ -34,11 +37,24 @@ static var _hit: RayHit = RayHit.new()
 static var _candidate: HeldAngle = HeldAngle.new()
 
 
+## The bushes of `foliage` tall enough to hide someone (BotConfig.angle_bush_min_height), as (x, z, radius): once, as
+## the bots are made.
+static func bushes_of(foliage: Foliage, cfg: BotConfig) -> PackedVector3Array:
+	var out := PackedVector3Array()
+	if foliage == null:
+		return out
+	for i in foliage.size():
+		if foliage.heights[i] >= cfg.angle_bush_min_height:
+			out.append(Vector3(foliage.feet[i].x, foliage.feet[i].z, foliage.radii[i]))
+	return out
+
+
 ## Fills `out` (best first) with up to out.size() angles held from `eye`, facing about `facing_yaw` (the enemy side),
 ## someone's head at `head_y`. Two picks are at least angle_separation_deg apart. Returns how many were found. Its
-## rays pass a bar railing (SR1): someone can shoot through one, so the angle runs on past it.
+## rays pass a bar railing (SR1): someone can shoot through one, so the angle runs on past it. Each ray stops where it
+## enters one of `bushes` (bushes_of; the one the holder stands in excepted), as at a wall.
 static func find(query: WorldQuery, eye: Vector3, head_y: float, facing_yaw: float, cfg: BotConfig,
-		out: Array[HeldAngle]) -> int:
+		out: Array[HeldAngle], bushes: PackedVector3Array = PackedVector3Array()) -> int:
 	var n := mini(cfg.angle_rays, MAX_RAYS)
 	var fan := deg_to_rad(cfg.angle_fan_deg)
 	var step := fan / (n - 1) if n > 1 else 0.0
@@ -47,6 +63,7 @@ static func find(query: WorldQuery, eye: Vector3, head_y: float, facing_yaw: flo
 	for i in n:
 		var to := eye + _dir(first + i * step) * reach
 		_dists[i] = _hit.fraction * reach if query.ray_past_railings(eye, to, _hit) else reach
+	_stop_at_bushes(bushes, eye, reach, first, step, n)
 	for a in out:
 		a.score = -INF
 	var found := 0
@@ -103,6 +120,39 @@ static func _keep_best(c: HeldAngle, out: Array[HeldAngle], separation: float, f
 	return mini(found + 1, out.size())
 
 
+## Shortens each of the `n` fan rays (yaw `first` + i * `step`, distances in _dists) to where it enters one of
+## `bushes` within `reach` of `eye` in plan (not the one it stands in: its own leaves don't hide its view; at most
+## MAX_NEAR bushes). Each bush is tried only on the rays its width spans, a ray either side to spare.
+static func _stop_at_bushes(bushes: PackedVector3Array, eye: Vector3, reach: float, first: float, step: float,
+		n: int) -> void:
+	var count := 0
+	for b in bushes:
+		if count == MAX_NEAR:
+			return
+		var ox := b.x - eye.x
+		var oz := b.y - eye.z
+		var dist := sqrt(ox * ox + oz * oz)
+		if dist - b.z > reach or dist <= b.z:
+			continue
+		count += 1
+		var lo := 0
+		var hi := n - 1
+		if step > 0.0:
+			var middle := wrapf(atan2(-ox, -oz) - first, -PI, PI)
+			var half := asin(minf(1.0, b.z / dist))
+			lo = maxi(0, floori((middle - half) / step) - 1)
+			hi = mini(n - 1, ceili((middle + half) / step) + 1)
+		for i in range(lo, hi + 1):
+			var d := _dir(first + i * step)
+			var along := ox * d.x + oz * d.z
+			if along <= 0.0:
+				continue
+			var off2 := dist * dist - along * along
+			var r2 := b.z * b.z
+			if off2 < r2:
+				_dists[i] = minf(_dists[i], along - sqrt(r2 - off2))
+
+
 ## The flat unit direction `yaw` looks along (yaw 0 down -Z, positive turning left).
 static func _dir(yaw: float) -> Vector3:
 	return Vector3(-sin(yaw), 0.0, -cos(yaw))
@@ -112,3 +162,4 @@ static func _sized(n: int) -> PackedFloat64Array:
 	var a := PackedFloat64Array()
 	a.resize(n)
 	return a
+

@@ -17,11 +17,15 @@ extends Resource
 @export var windup: float = 0.3
 @export var recover: float = 0.15
 @export var redraw_scale: float = 0.6
-## The bomb leaves the eyes this fast (m/s) along the view lifted by loft (rad), plus this share of the thrower's own
+## The bomb leaves the hand this fast (m/s) along the view lifted by loft (rad), plus this share of the thrower's own
 ## velocity.
 @export var throw_speed: float = 13.0
 @export var loft: float = 0.12
 @export var carry_share: float = 0.5
+## Where the throwing hand lets the bomb go (m: right, up and ahead of the eyes on the level, whatever the pitch; your
+## arms' wrist at the release, ViewModelConfig.bomb_release). Something between the eyes and there (a wall the thrower
+## stands against) and it leaves from just short of it (Grenades.release_from).
+@export var release_offset: Vector3 = Vector3(0.18, 0.02, 0.32)
 
 @export_group("Flight")
 @export var gravity: float = 9.81

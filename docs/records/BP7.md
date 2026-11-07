@@ -4,6 +4,7 @@
 
 - part 1: critic Accept 8/8 · qa Pass · performance Pass
 - part 2: critic Accept 7/8 · qa Pass · performance Pass
+- part 3: critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -13,6 +14,8 @@
 | 2026-11-07 | part 1: 2 | Opus 5.5 | green | Accept 8/8 | – |
 | 2026-11-07 | part 2: 1 | Opus 5.5 | green | Retry 5/8 | row 85's stale rule, bus layout order, full-size map cards, heartbeat on the main thread |
 | 2026-11-07 | part 2: 2 | Opus 5.5 | green | Accept 7/8 | – (the ping test made to reach its line, e1194c9) |
+| 2026-11-07 | part 3: 1 | Opus 5.5 | green | Retry 6/8 | a toss allowed then lost under a lintel or behind low cover; notes said it drops at the wall |
+| 2026-11-07 | part 3: 2 | Opus 5.5 | green | Accept 7/8 | – (two comments still said the bomb leaves the eyes, fixed in bea5b1d) |
 
 ## The pass
 
@@ -291,3 +294,134 @@ done (the planned-group row narrowed to what's left).
 - The loading screen's picture on a 1080p and a 4K screen; the range's picture: on High the range draws its floor
   plain under its bake, where the old greybox render showed the concrete texture (worth a look in game).
 - Airsoft.exe's icon in Explorer after the next CI build.
+
+### Part 3: bots and simulation
+
+Branch `bp7-bots` (from origin/main 5004551), head bea5b1d, squashed into this pull request. Rows from triage A1, plus the
+owner's picks 21 (B4) and 39 (B6).
+
+#### What changed
+- **Kits both sides (B4, owner: "Same kits both sides").** `PlaySession` gives every bot a kit from `BotKits`, your
+  teammates too (before, only the other team's bots got kits). data/bot-kits.md and the Bots and Loadout wiki pages
+  are updated to match.
+- **Follow me catch-up (B6, owner: "Yes, when over 7.5 m behind").** A follower sprinting after a leader that is more
+  than `SquadConfig.catch_up_boost_from` (7.5 m) away sets `PlayerCommand.catch_up`. `Movement` then scales the
+  sprint by `MovementConfig.catch_up_sprint_scale` (1.2). Inside that distance it matches the leader's pace. The owner
+  entry is in docs/DECISIONS.md (2026-11-07).
+- **One seed replays bit-exact (root cause).** `MapLevel` put each static body into the physics space before its
+  shapes. Until the space's first step, Jolt answered rays and sweeps up to about 5e-7 m differently. So a match
+  built in one frame (unstaged) split from a staged build at tick 217 of seed 5. Bodies now go into the tree after
+  their shapes (doors too). The mover bodies are unchanged.
+- **The bomb leaves from the hand, its pin pulled.**
+  - `Grenades.hand_point` / `release_from`: the bomb leaves from the throwing hand at `GrenadeConfig.release_offset`.
+  - Up against a wall, it leaves from a radius short of the wall along eye to hand, never from inside it.
+  - Bots' clear-pitch check uses the same point.
+  - `GrenadeView` draws a thrown bomb without its pin and ring (`thrown_mesh_of`).
+- **Magazine asks and tosses.**
+  - A bot waiting on a bot giver that is in a fight (FIGHT or COVER with a last known) waits behind cover
+    (`BotMagShare.fighting_giver`, `BotBrain` waiting branch).
+  - A toss checks its arc against the level in flight (`MagShare.flight_point`, `MagShareConfig.arc_per_metre` and
+    `arc_max`, which the view shares now). If the arc meets the level, the toss is lost there. Nothing draws a drop:
+    the magazine vanishes at the wall.
+  - Critic retry 1: `can_toss_to` and `toss_line_clear` (the bots' walk-up too) used to test the straight line from
+    the eyes to the chest. They now test the same `MagShareConfig.path_pieces` (4) straight pieces of the arc, from
+    the hand to the chest, that the step rays in flight, one piece at a time as the magazine passes each piece's end.
+    So a toss allowed with nobody moving is always caught.
+    - Under a 1.6 m lintel 5.5 m apart, and from a crouch against 1.0 m cover, the toss is now refused. Before, it
+      was allowed and then lost.
+    - test_bp1_qa's last check moved to the new rule. A giver right up to 1.4 m cover has its hand below the cover's
+      top, so its toss is refused. Right up to 1.2 m cover, it passes. The walk-up never-parked sweeps still pass.
+  - An ask to a teammate whose own ask stands ends at once, so the asker may go elsewhere.
+  - A toss wears its thrower's replica paint (`MagTossView.setup` takes the player's kit paints).
+- **Hard's held angles see bushes.**
+  - `BotAngles.bushes_of`, once in `BotController` init, keeps every bush at least `BotConfig.angle_bush_min_height`
+    (1.0 m) tall as (x, z, radius) in `BotWorld.angle_bushes`.
+  - `BotAngles.find` shortens the fan's rays across each bush's angular span, so a bush's edge reads as a corner. The
+    bush the holder stands in is skipped.
+  - Never per tick: on Woodland's 99 bushes a fan costs about 0.5 ms headless either way.
+  - The result is identical to a brute-force ray-per-bush version (364 angles).
+- **Route cost (row 45): measured, no code change.** The measurements are in the narrowed row.
+
+#### Rows fixed and deleted
+- 21: bot teammates' kits (B4).
+- 39: the Follow me follower may catch up (B6).
+- 95: one seed not bit-exact.
+- 64: the bomb leaves from the eyes, pin in.
+- 40: Hard's held angles ignore bushes.
+
+#### Rows left
+- **41 (magazine asks), narrowed.** What is left:
+  - An ask to a bot already bringing one, or to a bot off to the pole. The simulation has no way for a bot to turn an
+    ask down through its command, and adding one is a design change.
+  - The HUD line "is bringing you a mag" shows before the giver sets off. That is in game/ui, which another worker
+    owns.
+  - A toss's line sees no bushes. A magazine goes through leaves, by design.
+- **45 (route cost), narrowed with BP7 numbers.** Headless, 300 seeded pairs, on a loaded machine:
+  - Depot: 3.9 ms mean (2.4 ms search, 2.0 ms pull), worst 50 ms.
+  - Woodland: 6.1 ms mean (3.4 ms search, 2.7 ms pull), worst 149 ms.
+  - One search a tick is already in force (BE1). The vault toggle costs 0.1 ms.
+  - Every cut that keeps routes identical fails:
+    - A cache would almost never hit. Over 120 s of seed 3, Depot ran 466 searches over 464 distinct pairs, and
+      Woodland 263 over 262.
+    - A coarser grid or our own search changes routes.
+    - Time-slicing changes when a route arrives.
+  - Left: a native pull, or the owner ruling that a route may arrive a tick or two late.
+- **38 (bot smoke and flash use): re-measured, no code change.** Headless, Normal, 6 a side:
+  - Depot: 1.0 smokes and 2.3 flashes a round (6 seeds, 40 rounds).
+  - Woodland: 0.5 smokes and 0.5 flashes a round (3 seeds, 23 rounds).
+  - Each missing use is a new bot play that moves who wins and needs its own balance run: smoking a crossing or a
+    plant, a flash to clear a held room, a route cost for a cloud. That is a design pass, not a bug fix. I didn't
+    force it.
+
+#### Defaults
+- `MovementConfig.catch_up_sprint_scale` = 1.2. 1.15 didn't close 12 m within the test's time. 1.2 closes 12 m to
+  7.5 m in about 6 s.
+- `GrenadeConfig.release_offset` = (0.18, 0.02, 0.32) m right, up, ahead: the first-person arms' `bomb_release`.
+- `BotConfig.angle_bush_min_height` = 1.0 m. A bush lower than that is seen and shot over, so it is no corner.
+- `MagShareConfig.path_pieces` = 4. One piece is at most 1.5 m of a 6 m toss, and a chord sits at most a few cm
+  under the arc. The check and the flight use the very same pieces, so they always agree.
+- `MagShareConfig.arc_per_metre` 0.1 and `arc_max` 0.6. These are the old view constants, moved to the config so the
+  simulation and the view share one arc.
+
+#### Checks
+- Critic retry: 13 files touching the hand-off and bombs, 201/201 passing: test_mag_share (new lintel and
+  crouch-cover cases, which fail on the old check), test_bp1_qa, test_bot_mag_share, test_mh1/2/3_qa,
+  test_mag_hand_off_hud, test_mag_gauges, test_hud_hunt, test_play_session, test_rl2_qa, test_grenades,
+  test_seed_replay.
+- Docs (critic 8):
+  - The note and the Squad-Orders wiki now say a toss is "lost at the wall".
+  - The bomb line moved to changelog.d/smoke-and-flash-bombs.md. Bombs aren't in 0.1 Dev 1.
+  - PLAYTEST.md now says bot teammates carry kits.
+  - The MAG_LOST comment and the sim README are updated.
+- GUT, the targeted files, 192/192 passing: test_grenades, test_grenade_models, test_grenade_models_qa,
+  test_seed_replay (new), test_bot_kits, test_squad_follow, test_mag_share, test_bot_mag_share, test_mh3_qa,
+  test_mag_hand_off_hud, test_bot_angles, test_bot_bombs. Before this pass the level, door, vault and railing files
+  passed too (166).
+- test_seed_replay's two tests fail on the old map_level.gd and pass on the new one.
+- gdlint on all 34 changed .gd files: clean. `tools/changelog.sh check`: OK. `python3 tools/wiki.py check`: OK.
+- Match guards, all passing, on the final code. I ran the same GUT call as tools/match_guards.sh, one test at a time
+  with a longer timeout: on this shared 4-core machine (load about 12), the script's 1700 s limit ran out.
+  - Depot Normal: 106 rounds over 16 seeds, 0 on time, 1 to overtime.
+  - Depot Easy: 64 rounds, 0 on time. Depot Hard: 59 rounds, 0 on time, 3 to overtime.
+  - Depot follow: worst 7.89 m (seed 3), 96.7–100 % near, standing 0.93 %, 103 chasing ticks.
+  - Magazine guard (Depot and Woodland): passed, and passed again after the critic retry.
+  - Woodland Normal (night): 117 rounds over 16 seeds, 0 on time.
+  - Woodland Hard (night), for row 40, after the critic retry: 60 rounds over 8 seeds, 0 on time.
+- Head: bea5b1d (README and GRENADE_THROW comment: the bomb leaves the hand).
+- Pictures:
+  - /mnt/project-files/playtest/bp7/bots/thrown_bomb_before_pin_in.png
+  - /mnt/project-files/playtest/bp7/bots/thrown_bomb_after_pin_pulled.png
+  - Both show the thrown bomb in the world (GrenadeView, not the arms or a figure), smoke and flash, close up.
+
+#### For the owner to test
+- Throw a smoke and a flash, standing and right up against a wall. Each should leave from your right hand without
+  its pin, and never pop out on the wall's far side.
+- Play with bot teammates. They should carry kits like the other team's bots.
+- Give Follow me and sprint away. A teammate far behind should catch up to about 7.5 m, then keep pace without
+  overtaking you.
+- On Woodland at Hard, bots holding near tall bushes should watch the bush's edge.
+- Run low on BBs next to a teammate who is fighting. They should wait in cover. A magazine tossed as they duck
+  behind a wall should drop at the wall.
+- Toss a magazine over low cover and through a doorway with nobody moving. It should never be lost; if the arc
+  has no clear path, the press waits.
+- Replay a match from its `--seed` twice. The bots should play the same.

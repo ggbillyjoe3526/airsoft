@@ -268,7 +268,7 @@ func test_no_vault_starts_mid_throw_but_one_does_after_it() -> void:
 	assert_true(c.vault.active, "the same wall is vaulted once the throw is over")
 
 
-func test_the_bomb_leaves_the_eyes_along_the_lofted_view_at_the_throw_speed() -> void:
+func test_the_bomb_leaves_the_throwing_hand_along_the_lofted_view_at_the_throw_speed() -> void:
 	var m := _match(_world())
 	var sim: Simulation = m[0]
 	var s: GameState = m[1]
@@ -286,9 +286,32 @@ func test_the_bomb_leaves_the_eyes_along_the_lofted_view_at_the_throw_speed() ->
 			assert_almost_eq(found.direction.length(), cfg.throw_speed, 0.05)
 			assert_gt(found.direction.x, 0.0, "yaw -90 degrees faces +X")
 			assert_almost_eq(found.direction.y / found.direction.x, tan(cfg.loft), 0.01, "lofted")
-			assert_almost_eq(found.position, Lean.eye(c, tuning.body, tuning.hits), Vector3.ONE * 1e-3)
+			# From the hand (SF1 threw it from the eyes): right of the view (+X ahead, so +Z), a little up, ahead.
+			var eye := Lean.eye(c, tuning.body, tuning.hits)
+			var o := cfg.release_offset
+			assert_almost_eq(found.position, eye + Vector3(o.z, o.y, o.x), Vector3.ONE * 1e-3, "from the hand")
+			assert_almost_eq(s.grenades[found.target].position.x, eye.x + o.z + found.direction.x * DT, 0.05,
+					"the bomb starts there")
 			e = found
 	assert_not_null(e)
+
+
+func test_against_a_wall_the_bomb_leaves_from_just_short_of_it_never_inside() -> void:
+	# A thin wall 0.2 m ahead of the eyes (its face at x 0.2), nearer than the hand's 0.32 m.
+	var w := _world()
+	w.add_box(Vector3(0.25, 1.5, 0.0), Vector3(0.1, 3.0, 30.0))
+	var eye := Vector3(0.0, 1.6, 0.0)
+	var yaw := -PI * 0.5
+	var hit := RayHit.new()
+	var hand := Grenades.hand_point(eye, yaw, cfg)
+	assert_gt(hand.x, 0.2, "the hand would be in the wall")
+	var from := Grenades.release_from(eye, yaw, cfg, w, hit)
+	assert_lt(from.x, 0.2, "short of the wall's face")
+	assert_gt(from.x, 0.0, "ahead of the eyes")
+	assert_almost_eq(from.distance_to(eye) + cfg.radius, eye.distance_to(eye.lerp(hand, hit.fraction)), 1e-4,
+			"a bomb's radius short of where the line meets it")
+	assert_eq(Grenades.release_from(eye, yaw, cfg, null, hit), hand, "no level: the hand")
+	assert_eq(Grenades.release_from(eye, yaw, cfg, _world(), hit), hand, "nothing in the way: the hand")
 
 
 # --- Flight ---

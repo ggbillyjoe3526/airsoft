@@ -2,7 +2,7 @@ class_name GrenadeView
 extends Node3D
 ## The smoke and flash bombs (SF1), drawn from the state: each slot of GameState.grenades as its bomb's model (BL9:
 ## the smoke's canister, the flash's pull-ring tube), its stripe or band green for smoke and violet for flash (off
-## both team hues), spinning while it flies and drawn between ticks; each smoke's
+## both team hues), spinning while it flies and drawn between ticks, its pin pulled once thrown (BP7); each smoke's
 ## cloud as up to PUFFS soft camera-facing puffs filling its ellipsoid (Grenades.cloud_middle, cloud_scale,
 ## cloud_density; as many as the Mesh detail's EffectsConfig.smoke_puffs, the fewer the larger: `set_puffs`), lighter
 ## at the top, turning slowly, dimmed by night; a flash's bang as a burst of light and a flare where it went off.
@@ -77,6 +77,9 @@ var _canisters: Array[MeshInstance3D] = []
 ## middle lying on its side (m).
 var _meshes: Array[Mesh] = []
 var _lie_reach := PackedFloat32Array()
+## Each kind's mesh as it flies and lies once thrown: its pin pulled (PIN_MATERIALS' surfaces left out; the whole mesh
+## for a model with none), by Grenade.Kind.
+var _thrown_meshes: Array[Mesh] = []
 var _puffs: MultiMeshInstance3D = null
 ## Each puff's place in the unit ball and its size share, the same for every cloud.
 var _layout := PackedVector3Array()
@@ -131,6 +134,7 @@ func setup(count: int, cfg: GrenadeConfig, night: bool) -> void:
 		var mesh := _kind_mesh(kind, paint)
 		_meshes.append(mesh)
 		_lie_reach.append(-(_lying() * mesh.get_aabb()).position.y)
+		_thrown_meshes.append(_split(mesh, PIN_MATERIALS[kind] if kind < PIN_MATERIALS.size() else "")[0])
 	for i in maxi(0, count):
 		var m := MeshInstance3D.new()
 		m.visible = false
@@ -311,6 +315,11 @@ func mesh_of(kind: int) -> Mesh:
 	return _meshes[clampi(kind, 0, _meshes.size() - 1)]
 
 
+## Kind `kind`'s mesh once thrown (its pin pulled), for tests.
+func thrown_mesh_of(kind: int) -> Mesh:
+	return _thrown_meshes[clampi(kind, 0, _thrown_meshes.size() - 1)]
+
+
 ## Kind `kind`'s mesh in your arms' hand (its pin drawn apart: `pin_mesh_of`), for tests.
 func held_mesh_of(kind: int) -> Mesh:
 	return _held_meshes[clampi(kind, 0, _held_meshes.size() - 1)] if not _held_meshes.is_empty() else mesh_of(kind)
@@ -410,8 +419,8 @@ func _draw_canister(m: MeshInstance3D, g: Grenade, fraction: float) -> void:
 		basis = Basis(Vector3.RIGHT, SPIN * TAU * g.age)
 	var kind := clampi(g.kind, 0, _meshes.size() - 1)
 	m.transform = Transform3D(basis, at + Vector3(0.0, _lie_reach[kind] - _cfg.radius, 0.0) if g.resting else at)
-	if m.mesh != _meshes[kind]:
-		m.mesh = _meshes[kind]
+	if m.mesh != _thrown_meshes[kind]:
+		m.mesh = _thrown_meshes[kind]
 	m.visible = true
 
 

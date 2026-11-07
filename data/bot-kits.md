@@ -1,8 +1,8 @@
-# Bot kits: what the other team's bots carry
+# Bot kits: what the bots carry
 
-The kits the opposing bots pick from, and how often each difficulty picks each one. Every opponent picks its own kit
-at the start of a match: replicas, parts and power sources from [pool.md](pool.md). Your teammates carry the replicas
-as they come, and everyone does under the Factory kit house rule. Read it to change what bots carry, or how often.
+The kits the bots pick from, and how often each difficulty picks each one. Every bot, your teammates as well as the
+other team's, picks its own kit at the start of a match: replicas, parts and power sources from [pool.md](pool.md).
+Everyone carries the replicas as they come under the Factory kit house rule. Read it to change what bots carry, or how often.
 
 **The game reads this file.** It is bundled into the build and read when the game starts
 (`game/loadout/bot_kits.gd`). Change a name or a number, run the game, and the bots change. After editing, run
@@ -31,7 +31,7 @@ The kits are the bots' own: what you have unlocked never changes them.
   for now the column is read and checked against bots.md, and every kit keeps its weight). Kits with nothing in
   Suits, such as the Factory, keep their chance, and a weight of 0 stays 0: the difficulty decides how often a bot
   carries gear, its personality which. The column may be left out.
-- **Easy**, **Normal** and **Hard** are each difficulty's weight for the kit: how likely an opponent on that
+- **Easy**, **Normal** and **Hard** are each difficulty's weight for the kit: how likely a bot on that
   difficulty is to carry it, against the other kits in the same column. Each column here adds up to 100, so the weights
   read as a chance in 100, but they don't have to: a kit weighted 2 is picked twice as often as one weighted 1. 0 (or
   empty) means never. A column with no weight above 0 means that difficulty's bots all carry the replicas as they come.

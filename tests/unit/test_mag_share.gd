@@ -264,6 +264,99 @@ func test_a_toss_is_lost_with_the_catcher_out_of_play_or_the_round_decided() -> 
 		assert_eq(_held(s), before - rifle.mag_size, how)
 
 
+func test_a_toss_whose_catcher_steps_behind_a_wall_is_lost_where_it_meets_it() -> void:
+	# BP7: before, the magazine flew on through the wall to the catcher's chest.
+	var s := _state([Vector3.ZERO, Vector3(3.0, 0.0, 0.0)])
+	s.mag_tosses = MagShare.make_tosses(2)
+	var w := _world()
+	# A wall at z 1.5 from x 0 to 6: not between them now, between them once the catcher steps round behind it.
+	w.add_box(Vector3(3.0, 1.5, 1.5), Vector3(6.0, 3.0, 0.2))
+	var ms := MagShare.new(tuning, w)
+	var b := s.characters[1]
+	_last_mag(b)
+	b.mag.asked = 0
+	var before := _held(s)
+	ms.press(s.characters[0], s, true)
+	assert_not_null(s.events.first(GameEvent.Kind.MAG_TOSS))
+	b.position = Vector3(3.0, 0.0, 3.0)
+	var lost: GameEvent = null
+	for i in 120:
+		s.events.clear()
+		ms.step(s, true, DT)
+		assert_null(s.events.first(GameEvent.Kind.MAG_CATCH), "never caught through the wall")
+		if lost == null:
+			lost = s.events.first(GameEvent.Kind.MAG_LOST)
+	assert_not_null(lost, "it was lost")
+	if lost != null:
+		assert_almost_eq(lost.position.z, 1.4, 0.05, "at the wall's near face")
+		assert_eq(lost.value, rifle.mag_size, "its BBs with it")
+	assert_eq(_held(s), before - rifle.mag_size)
+	assert_eq(b.mag.coming, 0)
+	assert_eq(b.mag.asked, -1, "the ask ends with it")
+
+
+## Character 0 presses to toss character 1 (asking it) and the step flies it out: whether it was caught, never lost.
+func _caught(s: GameState, ms: MagShare) -> bool:
+	s.mag_tosses = MagShare.make_tosses(2)
+	var b := s.characters[1]
+	_last_mag(b)
+	b.mag.asked = 0
+	s.events.clear()
+	ms.press(s.characters[0], s, true)
+	if s.events.first(GameEvent.Kind.MAG_TOSS) == null:
+		return false
+	var caught := false
+	for i in 120:
+		s.events.clear()
+		ms.step(s, true, DT)
+		if s.events.first(GameEvent.Kind.MAG_LOST) != null:
+			return false
+		caught = caught or s.events.first(GameEvent.Kind.MAG_CATCH) != null
+	return caught
+
+
+func test_a_toss_allowed_with_nobody_moving_is_caught_under_a_lintel_or_over_low_cover() -> void:
+	# BP7 critic: the check took the straight eye-to-chest line while the flight rays its arc from the hand, so a
+	# standing pair under a low lintel, or a crouched thrower against crouch cover, had the toss allowed and then lost.
+	# Now both check the same pieces of the arc: allowed means caught, else refused.
+	for under: float in [1.6, 1.9, 2.1]:
+		var s := _state([Vector3.ZERO, Vector3(5.5, 0.0, 0.0)])
+		var w := _world()
+		# A lintel across the middle, its underside at `under`.
+		w.add_box(Vector3(2.75, under + 0.5, 0.0), Vector3(0.3, 1.0, 4.0))
+		var ms := MagShare.new(tuning, w)
+		_last_mag(s.characters[1])
+		var allowed := ms.can_toss_to(s.characters[0], s.characters[1], MagShare.SparePick.new())
+		assert_eq(_caught(s, ms), allowed, "under a lintel at %.1f m: caught exactly when allowed" % under)
+		if is_equal_approx(under, 1.6):
+			assert_false(allowed, "the arc meets a 1.6 m lintel: refused, never lost")
+		if is_equal_approx(under, 2.1):
+			assert_true(allowed, "a 2.1 m lintel is over the arc")
+	for top: float in [0.8, 1.0]:
+		var s := _state([Vector3.ZERO, Vector3(4.0, 0.0, 0.0)])
+		s.characters[0].crouch_amount = 1.0
+		var w := _world()
+		# Crouch cover `top` tall, its face touching the crouched thrower's body.
+		w.add_box(Vector3(tuning.body.radius + 0.16, top * 0.5, 0.0), Vector3(0.3, top, 4.0))
+		var ms := MagShare.new(tuning, w)
+		_last_mag(s.characters[1])
+		var allowed := ms.can_toss_to(s.characters[0], s.characters[1], MagShare.SparePick.new())
+		assert_eq(_caught(s, ms), allowed, "over %.1f m cover from a crouch: caught exactly when allowed" % top)
+		if is_equal_approx(top, 1.0):
+			assert_false(allowed, "the hand is below 1.0 m cover: refused, never lost in its own cover")
+		else:
+			assert_true(allowed, "over 0.8 m cover")
+
+
+func test_a_toss_with_nothing_in_the_way_follows_the_arc_presentation_draws() -> void:
+	var c := MagShareConfig.new()
+	var mid := MagShare.flight_point(Vector3.ZERO, Vector3(4.0, 0.0, 0.0), 0.5, c)
+	assert_almost_eq(mid, Vector3(2.0, 0.4, 0.0), Vector3.ONE * 1e-4, "arc_per_metre at the middle")
+	assert_almost_eq(MagShare.flight_point(Vector3.ZERO, Vector3(10.0, 0.0, 0.0), 0.5, c).y, c.arc_max, 1e-4)
+	assert_eq(MagTossView.flight_at(Vector3.ZERO, Vector3(4.0, 0.0, 0.0), 0.3, 0.5, c).origin,
+			MagShare.flight_point(Vector3.ZERO, Vector3(4.0, 0.0, 0.0), 0.3, c), "the view draws the same arc")
+
+
 # --- Asking ---
 
 
@@ -382,6 +475,26 @@ func test_an_ask_ends_when_its_giver_is_out_or_can_spare_none() -> void:
 	s.characters[1].status = Character.Status.CALLING
 	ms.step(s, true, DT)
 	assert_eq(me.mag.asked, -1)
+
+
+func test_an_ask_to_a_teammate_that_asks_for_its_own_ends_at_once_and_may_go_elsewhere() -> void:
+	# BP7: before, it stood its 15 s unanswered (a giver asking never gives).
+	var s := _state([Vector3.ZERO, Vector3(5.0, 0.0, 0.0), Vector3(12.0, 0.0, 0.0)])
+	var ms := MagShare.new(tuning, _world())
+	var me := s.characters[0]
+	_last_mag(me)
+	ms.press(me, s, true)
+	assert_eq(me.mag.asked, 1, "the nearest")
+	# The giver runs low and asks the third.
+	_last_mag(s.characters[1])
+	s.characters[1].mag.asked = 2
+	s.time = 1.0
+	ms.step(s, true, DT)
+	assert_eq(me.mag.asked, -1, "over at once")
+	assert_eq(me.mag.next_ask, 1.0, "with no wait")
+	s.events.clear()
+	ms.press(me, s, true)
+	assert_eq(me.mag.asked, 2, "asked of the next teammate")
 
 
 func test_the_toss_goes_to_the_nearest_asker_in_reach() -> void:

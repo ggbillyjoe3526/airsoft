@@ -70,6 +70,7 @@ func _init(state: GameState, player_id: int, map: MapData, nav: NavGrid, query: 
 		cover = BotCover.find_cover(map, nav, config, tuning)
 	w.low_cover = cover.low
 	w.tall_cover = cover.tall
+	w.angle_bushes = BotAngles.bushes_of(query.foliage, config)
 	w.planner = RoundPlanner.new(state.match_seed)
 	w.mag_share = MagShare.new(tuning, query)
 	w.grenades = state.grenades

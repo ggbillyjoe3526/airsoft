@@ -38,7 +38,7 @@ one; "Follow opponents" puts them back.
 | --- | --- |
 | **Easy** | A fair fight to learn on: its first BBs up close can miss. |
 | **Normal** | Reacts faster, aims steadier, leads moving targets more, takes cover more and flanks more often. |
-| **Hard** | Careful, not twitchier: aims at the corners and doorways you would step out of, and plays as a team. |
+| **Hard** | Careful, not twitchier: aims at the corners, doorways and bush edges you would step out of, and plays as a team. |
 
 **Hard bots** in more detail:
 
@@ -75,7 +75,7 @@ never over heads.
 
 ## Kits
 
-The other team's bots carry kits: a replica set with parts and power picked from the same items you unlock. Each bot
+Every bot, on your team and the other, carries a kit: a replica set with parts and power picked from the same items you unlock. Each bot
 picks its kit at the start of a match, by difficulty, and leans towards kits that suit its personality. Parts work
 in their hands exactly as in yours and show on their replicas. The same match seed gives the same kits.
 
@@ -84,7 +84,7 @@ kits that suit it.
 
 <!-- wiki:bot-kits -->
 
-Your teammates carry the AEG Rifle and the GBB Pistol as they come. Bots fire full auto wherever their replica has it,
+Under the Factory kit house rule every bot carries the AEG Rifle and the GBB Pistol as they come. Bots fire full auto wherever their replica has it,
 except on an indoor field (Depot, [no full auto indoors](Maps#depot)): there they fire single shots and only now and
 then switch to full auto, at someone out in the open down a long sight line. Each bot decides that once per opponent
 each round.
@@ -137,6 +137,7 @@ A bot running low on BBs for its rifle asks the nearest teammate within 30 m who
 saying "Need a mag!". A bot asked, by a teammate or by you, calls "Mag coming!", sprints over while it is far, runs the
 last metres and tosses it once you are in reach and in sight; a bot never gives away its last full spare of the replica
 it fights with, but hands over its unused pistol's freely. A bot that asked you walks up to you and waits for your toss;
-one that asked another bot waits where it is. A fight or cover comes first, then bringing one, then your squad order,
+one that asked another bot waits where it is, behind cover while that bot is held up in a fight. An ask to a teammate
+who then asks for one of its own ends at once, so the asker can try someone else. A fight or cover comes first, then bringing one, then your squad order,
 then waiting for one; the same at every level. A catch gets a "Thanks for the mag!" now and then. You toss yours, and ask
 for one, with [Need a Mag](Squad-Orders#need-a-mag).

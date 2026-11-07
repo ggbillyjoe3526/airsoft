@@ -120,7 +120,8 @@ static func _held_angle_look(b: Bot, w: BotWorld, eye: Vector3, facing_yaw: floa
 		b.held_angles_from = p
 		# The fan runs at standing eye height (over low cover), whatever the bot's own crouch; heads are at the same.
 		var head := p.y + w.tuning.body.stand_eye_height
-		b.held_angle_count = BotAngles.find(w.query, Vector3(p.x, head, p.z), head, facing_yaw, cfg, b.held_angles)
+		b.held_angle_count = BotAngles.find(w.query, Vector3(p.x, head, p.z), head, facing_yaw, cfg, b.held_angles,
+				w.angle_bushes)
 	if b.held_angle_count == 0:
 		return null
 	var a: BotAngles.HeldAngle = b.held_angles[floori(b.team_wait / cfg.angle_switch_time) % b.held_angle_count]

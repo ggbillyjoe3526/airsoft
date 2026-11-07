@@ -60,6 +60,8 @@ static func step(c: Character, cmd: PlayerCommand, cfg: MovementConfig, accuracy
 	var s := sin(c.yaw)
 	var co := cos(c.yaw)
 	var speed := target_speed(c, cfg, cmd.walk)
+	if cmd.catch_up and c.sprinting:
+		speed *= cfg.catch_up_sprint_scale
 	var wish_x := (-s * f + co * r) * speed
 	var wish_z := (-co * f - s * r) * speed
 	var has_input := mag > cfg.input_deadzone

@@ -14,6 +14,9 @@ var bots: Array[Bot] = []
 var lanes: Array[PackedVector3Array] = []
 var low_cover: Array[BotCover.Block] = []
 var tall_cover: Array[BotCover.Block] = []
+## The bushes tall enough to hide someone (BotConfig.angle_bush_min_height), as (x, z, radius) in plan, which held
+## angles stop at (BotAngles); picked once from the level's foliage as the bots are made (BotAngles.bushes_of).
+var angle_bushes: PackedVector3Array = PackedVector3Array()
 var planner: RoundPlanner = null
 ## Seconds of match time, and whether the round is live (bots hold fire otherwise).
 var time: float = 0.0

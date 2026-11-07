@@ -114,7 +114,6 @@ func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 		sb.name = "Colliders_%s" % RayHit.Surface.keys()[s]
 		sb.collision_layer = WORLD_LAYER
 		sb.collision_mask = 0
-		add_child(sb)
 		_bodies.append(sb)
 	# The clear blocks (glass, BQ1) and the railings (SR1) go on bodies of their own, one a surface they use, which
 	# the sight ray is blind to (and the ray past the railings to the railings').
@@ -141,6 +140,16 @@ func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 		_add_terrain_shapes(m.terrain)
 	if m.roof_height > 0.0:
 		_add_ceiling(m)
+	# Each body enters the tree, and so the physics space, with all its shapes (BP7): one that went in first and took
+	# its shapes after answered rays and sweeps a rounding apart (about 5e-7 m) until the space's first step, so a
+	# match whose first ticks or vault links came before that step played differently from one built a frame slower
+	# (the seed that didn't replay bit-exact, MN2's QA).
+	for sb in _bodies:
+		add_child(sb)
+	for sb: StaticBody3D in clear_bodies.values():
+		add_child(sb)
+	for sb: StaticBody3D in railing_bodies.values():
+		add_child(sb)
 	_cast = _level_ray("LevelRay")
 	var surface_rids: Array[RID] = []
 	for sb in _bodies:
@@ -275,14 +284,15 @@ func _add_doors(m: MapData) -> void:
 		sb.name = "Door%d" % i
 		sb.collision_layer = WORLD_LAYER
 		sb.collision_mask = 0
-		add_child(sb)
 		var shape := CollisionShape3D.new()
 		var box := BoxShape3D.new()
 		box.size = d.size
 		shape.shape = box
 		shape.position = d.center
 		shape.disabled = not d.shut
+		# With its shape, as the other bodies (above).
 		sb.add_child(shape)
+		add_child(sb)
 		_query.add_door(d.center, d.size, d.shut)
 		_query.set_door_shape(i, shape, sb.get_rid())
 
@@ -453,7 +463,6 @@ func _own_body(bodies: Dictionary[int, StaticBody3D], surface: int, name_format:
 		sb.name = name_format % RayHit.Surface.keys()[surface]
 		sb.collision_layer = WORLD_LAYER
 		sb.collision_mask = 0
-		add_child(sb)
 		bodies[surface] = sb
 	return bodies[surface]
 

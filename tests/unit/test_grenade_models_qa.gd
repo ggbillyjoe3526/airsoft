@@ -47,12 +47,13 @@ func test_a_slot_reused_for_the_other_kind_draws_that_kinds_model() -> void:
 	g.launch(Grenade.Kind.SMOKE, 0, Vector3(0.0, 1.0, 0.0), Vector3.ZERO)
 	v.update(s, 0.0, DT, null, Vector3.ZERO)
 	var m := v.get_child(0) as MeshInstance3D
-	assert_eq(m.mesh, v.mesh_of(Grenade.Kind.SMOKE))
+	# Drawn with its pin pulled once thrown (BP7).
+	assert_eq(m.mesh, v.thrown_mesh_of(Grenade.Kind.SMOKE))
 	g.active = false
 	v.update(s, 0.0, DT, null, Vector3.ZERO)
 	g.launch(Grenade.Kind.FLASH, 0, Vector3(0.0, 1.0, 0.0), Vector3.ZERO)
 	v.update(s, 0.0, DT, null, Vector3.ZERO)
-	assert_eq(m.mesh, v.mesh_of(Grenade.Kind.FLASH), "the flash's model, not the smoke's left behind")
+	assert_eq(m.mesh, v.thrown_mesh_of(Grenade.Kind.FLASH), "the flash's model, not the smoke's left behind")
 	assert_ne(v.mesh_of(Grenade.Kind.FLASH), v.mesh_of(Grenade.Kind.SMOKE))
 
 

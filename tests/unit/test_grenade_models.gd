@@ -92,3 +92,15 @@ func test_the_view_prewarms_every_material_its_models_draw() -> void:
 		var mesh := v.mesh_of(kind)
 		for i in mesh.get_surface_count():
 			assert_has(materials, mesh.surface_get_material(i))
+
+
+func test_a_thrown_bomb_is_drawn_with_its_pin_pulled() -> void:
+	var v := _view()
+	for kind: int in KINDS:
+		var whole := v.mesh_of(kind)
+		var thrown := v.thrown_mesh_of(kind)
+		assert_lt(thrown.get_surface_count(), whole.get_surface_count(), "kind %d: fewer parts once thrown" % kind)
+		for i in thrown.get_surface_count():
+			var m := thrown.surface_get_material(i)
+			assert_false(m != null and m.resource_name == GrenadeView.PIN_MATERIALS[kind], "kind %d: no pin" % kind)
+	assert_eq(v.thrown_mesh_of(Grenade.Kind.NONE), v.mesh_of(Grenade.Kind.NONE), "a plain canister has none to pull")

@@ -146,7 +146,10 @@ func test_a_crouched_catcher_behind_low_cover_blocks_the_toss_and_a_standing_one
 	assert_false(w.mag_share.can_toss_to(giver, asker, pick), "crouched, it is under the line's reach")
 	assert_false(w.mag_share.toss_line_clear(giver, asker))
 	giver.position = Vector3(0.0, 0.0, -0.3)
-	assert_true(w.mag_share.toss_line_clear(giver, asker), "right up to the cover, the line passes over it")
+	# BP7: the check is the arc from the hand (0.3 m under the eyes), the path the toss flies, not a line from the eyes.
+	assert_false(w.mag_share.toss_line_clear(giver, asker), "right up to 1.4 m cover the hand is under its top")
+	slab.height = 1.2
+	assert_true(w.mag_share.toss_line_clear(giver, asker), "right up to cover under the hand, the arc passes over it")
 
 
 func test_a_blocked_line_that_clears_as_the_catcher_moves_tosses_the_next_tick() -> void:

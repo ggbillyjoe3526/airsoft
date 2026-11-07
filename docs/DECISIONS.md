@@ -476,6 +476,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   from cover can't gain on a leader sprinting at its own top speed, and bots never outrun the player's sprint. Stuck,
   standing, lost or slower followers still fail it (`MatchRunner.chasing`). A follower a flash dazzles isn't judged
   while it ducks blind (SF1), and gets the usual 3 s to rejoin after (TS1, 2026-11-02; Claude's default).
+- **A Follow me follower more than 7.5 m behind its leader may sprint faster than the leader (owner, 2026-11-07, card
+  B6; BP7).** It sprints `MovementConfig.catch_up_sprint_scale` (1.2) times the sprint while further than
+  `SquadConfig.catch_up_boost_from` (7.5 m) from a moving leader, then keeps the leader's pace: the lead ruling's "bots
+  never outrun the player's sprint" no longer holds for a follower catching up. The guard's chasing rule stays.
 - **The match guards play each field at the team size and time of day it is played (2026-10-25, WL10; Claude's
   defaults).** Woodland at its standard size (6v6 since TS1, from `data/maps.md` through `MatchRunner.sized_for`) at
   night, in Elimination and Attack / Defend, 16 seeds at Normal and 8 at Easy, Hard and Pro each, as five CI jobs of 16
