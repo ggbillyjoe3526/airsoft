@@ -37,8 +37,8 @@ const GLARE_POWER := 6.0
 ## nothing at the torch's reach, SPOT_LIFT m off the surface.
 const SPOT_STRENGTH := 0.5
 const SPOT_LIFT := 0.04
-## Where a figure's torch sits: MUZZLE_BACK m back along its beam from the muzzle of the replica in its hand; with no
-## replica shown, EYE_DROP m under its eyes.
+## Where a figure's torch sits: the lens of the torch drawn on the replica in its hand (FigureView.lens_position, BP7),
+## else MUZZLE_BACK m back along its beam from its muzzle; with no replica shown, EYE_DROP m under its eyes.
 const MUZZLE_BACK := 0.3
 const EYE_DROP := 0.3
 ## Your own torch on the rail, in the view's space (m: right, up, forward is -z), and its real spot's strength and
@@ -139,7 +139,9 @@ func update(characters: Array[Character], watched: Character, fraction: float, f
 			dir = Vector3(-sin(yaw) * cp, sin(pitch), -cos(yaw) * cp)
 			var f: FigureView = figure_of[c.id] if c.id < figure_of.size() else null
 			var slot := c.armament.active
-			if f != null and f.muzzle_shown(slot):
+			if f != null and f.muzzle_shown(slot) and f.has_lens(slot):
+				origin = f.lens_position(slot)
+			elif f != null and f.muzzle_shown(slot):
 				origin = f.muzzle_position(slot) - dir * MUZZLE_BACK
 			else:
 				var feet := c.prev_position.lerp(c.position, fraction)

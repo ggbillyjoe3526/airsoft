@@ -50,6 +50,8 @@ class Held:
 	var window: OpticGlass.Sight = null
 	## Holds its fire selector at the mode it is set to (null: the model has none).
 	var selector: SelectorPose = null
+	## How fast a shot plays its Fire clip: 1, or for a bolt-action replica its cycle stretched to its ready time.
+	var fire_speed: float = 1.0
 
 var _cfg: ViewModelConfig = null
 ## Whose arms you see holding the replica (FigureMix.HUMAN or FigureMix.ROBOT), set by PlaySession from the match's
@@ -129,6 +131,11 @@ func arms_materials() -> Array[Material]:
 	return _arms.materials() if _arms != null else [] as Array[Material]
 
 
+## The optic glass's camera while it draws a raised sight's view (OpticGlass.drawing_camera), or null.
+func glass_camera() -> Camera3D:
+	return _glass.drawing_camera() if _glass != null else null
+
+
 ## The optics' glass materials, for ShaderPrewarm, with the glass's picture readied now (none without an optic's glass).
 func prewarm_glass() -> Array[Material]:
 	var out: Array[Material] = []
@@ -154,7 +161,7 @@ func on_shot() -> void:
 	_cut_inspect()
 	if _active >= 0 and _held[_active].anim != null and _held[_active].anim.has_animation(FIRE_CLIP):
 		_held[_active].anim.stop()
-		_held[_active].anim.play(FIRE_CLIP)
+		_held[_active].anim.play(FIRE_CLIP, -1.0, _held[_active].fire_speed)
 
 
 ## You were hit: the replica jolts ViewModelConfig.hit_jolt kicks and drops hit_drop out of view over hit_drop_time,
@@ -294,6 +301,12 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 		held.selector.mode = a.fire_mode()
 	if _arms != null:
 		_arms.follow(held.anim, delta)
+		# Working a bolt at the hip: canted toward the eye so the right hand stays on screen (BP7, row 17).
+		var work := _arms.work_share()
+		if work > 0.0:
+			var bell := sin(PI * work) * _motion.reload_cant * (1.0 - raise)
+			rot += Vector3(_cfg.bolt_tilt, _cfg.bolt_turn, _cfg.bolt_roll) * bell
+			pos += Vector3(-_cfg.bolt_inward, _cfg.bolt_lift, 0.0) * bell
 
 	# Pulled back from a wall in front, at the hip.
 	var pull := 0.0
@@ -431,6 +444,9 @@ func _seek(held: Held, clip: StringName, share: float) -> void:
 func _load(r: ReplicaConfig, paint: StringName, realistic: bool, parts: Dictionary) -> Held:
 	var held := Held.new()
 	held.id = r.id
+	# A bolt-action replica's cycle stretched to its ready time with its parts (the loadout's stats carry them; row 19).
+	if r.bolt_action and r.fire_rate > 0.0:
+		held.fire_speed = _cfg.bolt_cycle_end * r.fire_rate
 	held.root = Node3D.new()
 	held.root.name = "Held_%s" % r.id
 	held.root.visible = false

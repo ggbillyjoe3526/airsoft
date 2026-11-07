@@ -25,6 +25,9 @@ var view_zoom: float = 1.0
 ## is turned; its target, not eased, so the figures' detail lines (FigureConfig.zoomed_lines) change once a raise or a
 ## turn, never every frame (BP6).
 var detail_zoom: float = 1.0
+## The view's own zoom with the sight fully up (1: lowered), not eased: the detail lines of the figures a scope's glass
+## doesn't show (FigureView.fit_zoomed_lines), so they change once a raise, never every frame of it (BP7).
+var view_zoom_target: float = 1.0
 ## Seconds of simulation time per real second (the pacer's rate: the Dev settings' game speed); the recoil follows over
 ## the simulation's time, so slowed it eases between the ticks instead of stepping with them.
 var sim_rate: float = 1.0
@@ -121,7 +124,14 @@ func update(c: Character, input: PlayerInput, fraction: float, delta: float, aim
 	view_zoom = zoom
 	var raised := maxf(aimed_zoom(r, _view), glass_zoom_of(r, c.armament.zoom_now()))
 	detail_zoom = maxf(raised, 1.0) if aim > 0.0 else 1.0
+	view_zoom_target = target_view_zoom(r, _view, aim)
 	camera.fov = _view.vertical_fov(zoom)
+
+
+## The view's zoom `r`'s sight eases toward at `aim` (its share raised): aimed_zoom once raised at all, 1 lowered; the
+## same all through a raise, so what it sets changes once (view_zoom_target).
+static func target_view_zoom(r: ReplicaConfig, view: ViewConfig, aim: float) -> float:
+	return maxf(aimed_zoom(r, view), 1.0) if aim > 0.0 else 1.0
 
 
 ## The view's zoom with `r`'s sight fully raised: its optic's, unless that zooms only inside its glass (a scope, drawn by

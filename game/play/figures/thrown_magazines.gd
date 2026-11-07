@@ -4,8 +4,9 @@ extends Node3D
 ## thrownMagazines): a fixed pool of `size` MeshInstance3D built once a session, so a throw allocates nothing. A throw
 ## takes a free copy (or the oldest out) and gives it the thrower's magazine mesh and paint, flies it from the hand
 ## with the sidecar's velocity and spin plus the figure's own velocity, falls under gravity and comes to rest on its
-## side at the thrower's feet (no world query from presentation: the plan's default 15); it goes after its lifetime
-## (from the throw). At most `size` are out: the oldest goes first. Cleared at ROUND_START.
+## side where it comes down: the thrower's feet, or with a world (set_world) the floor one ray finds under where it
+## would land at the feet's height (BP7: a ledge's foot below, a step up), at most `drop` m under the feet; it goes after
+## its lifetime (from the throw). At most `size` are out: the oldest goes first. Cleared at ROUND_START.
 ## Presentation only, in the world's frame (top level), moved on each frame's time by `update`.
 
 ## The copies and each one's flight: its mesh's box (read once a throw), velocity and spin (rad/s, axis times rate) in
@@ -24,6 +25,12 @@ var _landed: PackedByteArray = PackedByteArray()
 ## The copies out, oldest first (indices into the pool); `_count` of them.
 var _order: PackedInt32Array = PackedInt32Array()
 var _count: int = 0
+## The level the landing ray reads (none: every magazine lands at its thrower's feet), how far under the feet it reaches
+## (m) and over them it starts (m), and its hit, kept.
+var _world: WorldQuery = null
+var _drop: float = 0.0
+var _above: float = 0.0
+var _hit: RayHit = null
 
 
 ## Builds the `size` copies, hidden, with no mesh until thrown.
@@ -50,9 +57,20 @@ func setup(size: int) -> void:
 	_landed.resize(n)
 
 
+## Each throw from now on lands on the floor `world` has under where it comes down, from `above` m over the thrower's
+## feet to `drop` m under them (null: at the feet).
+func set_world(world: WorldQuery, drop: float, above: float) -> void:
+	_world = world
+	_drop = maxf(drop, 0.0)
+	_above = maxf(above, 0.0)
+	if _hit == null:
+		_hit = RayHit.new()
+
+
 ## Throws a copy of `source` (a figure's magazine in the hand: its mesh and paint are worn) from `at` (the world's)
-## with `velocity` and `spin`, to land at height `ground` under `gravity` and go after `lifetime` (s). The oldest goes
-## first when `size` are out. False without a source mesh or a pool.
+## with `velocity` and `spin`, to land at height `ground` (the feet's; with a world, the floor under where it would
+## land there: landing_height) under `gravity` and go after `lifetime` (s). The oldest goes first when `size` are out.
+## False without a source mesh or a pool.
 func throw(source: MeshInstance3D, at: Transform3D, velocity: Vector3, spin: Vector3, ground: float, gravity: float,
 		lifetime: float) -> bool:
 	if source == null or source.mesh == null or _size == 0:
@@ -70,7 +88,7 @@ func throw(source: MeshInstance3D, at: Transform3D, velocity: Vector3, spin: Vec
 	m.visible = true
 	_velocity[at_index] = velocity
 	_spin[at_index] = spin
-	_ground[at_index] = ground
+	_ground[at_index] = landing_height(at.origin, velocity, ground, gravity)
 	_gravity[at_index] = gravity
 	_lifetime[at_index] = lifetime
 	_age[at_index] = 0.0
@@ -136,6 +154,22 @@ func _fly(i: int, delta: float) -> void:
 		t = _lying(t, _box[i], _ground[i])
 		_landed[i] = 1
 	m.transform = t
+
+
+## The height (m) a magazine let go at `from` with `velocity` comes to rest on: without a world, `ground` (the feet's);
+## with one, the floor one ray finds from `above` over `ground` down to `drop` under it, under the point where it would
+## come down to `ground` under `gravity` (one ray a throw; a lower floor found lands it there, a little short of where
+## its longer fall would carry it). A table or a crate's top over the feet is never taken (the ray starts under it), so
+## at a step up it lands at the feet's height, inside the step, as before BP7. Nothing found: `ground`.
+func landing_height(from: Vector3, velocity: Vector3, ground: float, gravity: float) -> float:
+	if _world == null or gravity <= 0.0:
+		return ground
+	var fall := maxf(from.y - ground, 0.0)
+	var t := (velocity.y + sqrt(velocity.y * velocity.y + 2.0 * gravity * fall)) / gravity
+	var at := Vector3(from.x + velocity.x * t, ground + _above, from.z + velocity.z * t)
+	if not _world.ray(at, Vector3(at.x, ground - _drop, at.z), _hit):
+		return ground
+	return _hit.position.y
 
 
 ## Copy `k` of those out goes (hidden), the rest kept in order.

@@ -65,7 +65,8 @@ glowing slashes, a pink core behind bars in its slide, a finned rear cap and thr
 
 A spring-powered bolt-action rifle, unlocked at level 5. It fires **single shots** only: after every shot your right
 hand leaves the grip, draws the bolt back over the spring and snaps it home, and is back on the grip as the next shot
-is ready. It shoots harder and further than the AEG Rifle, from small magazines, and has its own [site limit](#site-limits).
+is ready: the bolt and its sound finish just as the rifle can fire again, and from the hip the rifle tips toward you
+while you work it, so your hand stays in view. It shoots harder and further than the AEG Rifle, from small magazines, and has its own [site limit](#site-limits).
 
 It comes with the **2x Scope** fitted; take it off or swap it for another optic in the Loadout. It is made to be aimed:
 from the hip its shots scatter widely, and the spread closes as the sight comes up. The spring you fit sets its energy

@@ -10,7 +10,12 @@ extends SceneTree
 ## Arguments after `--`: `--perf`, `--seconds N` (default 30), `--far` (the eye at the Alpha spawn headless too, so the
 ## far figures take far_stride; by default it stands in the middle, every figure posed every frame), `--no-raise` (no
 ## wall ray, FB5's before), `--zoom N` (the detail lines at N times, as through an N x scope: FigureConfig.zoomed_lines;
-## with `--perf` it logs the frame's draws and primitives too).
+## with `--perf` it logs the frame's draws and primitives too), `--contact` (the contact shadows on, as on Low, and the
+## time of their ground rays a tick, FigureView.on_tick, logged on its own: BP7), `--cone` (with `--zoom`, a scope's glass
+## camera along the eye's view, a quarter of the screen tall over the zoom: only the figures it may show keep the zoomed
+## lines, FigureView.fit_zoomed_lines, timed a frame and the figures it zooms counted: BP7), `--night` (the night preset,
+## each figure carrying the weapon torch on both replicas as a bot does at night: BP7 row 69). Every run logs the mesh
+## surfaces the figures draw (each shown mesh's surfaces, shadows not counted: the draws they ask for, headless too).
 
 const FIGURES := 11
 const SECONDS := 30.0
@@ -29,6 +34,9 @@ const PITCH := 0.5
 const PITCH_PERIOD := 4.0
 ## The frames not counted at the start (models, materials and the first poses settling).
 const WARM_FRAMES := 30
+## `--cone`'s glass: its picture's side (px) and its share of the screen's height, as ViewModelConfig glass_share.
+const CONE_PICTURE := 512
+const CONE_SHARE := 0.25
 
 
 func _initialize() -> void:
@@ -60,7 +68,13 @@ func _run() -> void:
 	var level := MapLevel.new()
 	field.add_child(level)
 	level.build(map, play.map_style, tuning.body)
-	field.add_child(FieldLighting.build(play.lighting, play.look))
+	var night := args.has("--night")
+	field.add_child(FieldLighting.build(play.night_lighting if night else play.lighting, play.look))
+	var torch := Torch.Light.new()
+	torch.key = &"weaponTorch"
+	var lights: Array[Torch.Light] = []
+	if night:
+		lights.assign([torch, torch])
 	var spawn := map.ends[0].spawns[0]
 	var eye := spawn.position + Vector3.UP * tuning.body.stand_eye_height if far else \
 			Vector3.UP * tuning.body.stand_eye_height
@@ -69,6 +83,18 @@ func _run() -> void:
 	camera.global_position = eye
 	camera.global_rotation = Vector3(0.0, spawn.yaw if far else 0.0, 0.0)
 	var view_lines := play.figures.zoomed_lines(GraphicsQuality.MeshDetail.HIGH, zoom)
+	var plain_lines := play.figures.zoomed_lines(GraphicsQuality.MeshDetail.HIGH, 1.0)
+	var glass: Camera3D = null
+	if args.has("--cone") and zoom > 1.0:
+		var port := SubViewport.new()
+		port.size = Vector2i(CONE_PICTURE, CONE_PICTURE)
+		port.render_target_update_mode = SubViewport.UPDATE_DISABLED
+		field.add_child(port)
+		glass = Camera3D.new()
+		glass.keep_aspect = Camera3D.KEEP_HEIGHT
+		port.add_child(glass)
+		glass.fov = rad_to_deg(2.0 * atan(CONE_SHARE * tan(deg_to_rad(camera.fov) * 0.5) / zoom))
+		glass.transform = camera.global_transform
 	var load_start := Time.get_ticks_usec()
 	var models := FigureModels.new(play.figures)
 	models.load_kinds()
@@ -83,29 +109,45 @@ func _run() -> void:
 	var build_start := Time.get_ticks_usec()
 	for i in FIGURES:
 		var team := i % 2
-		var c := Character.new(i + 1, team, _loop_centre(i), 0.0, ReplicaStats.default_loadout())
+		var loadout := ReplicaStats.default_loadout()
+		var c := Character.new(i + 1, team, _loop_centre(i), 0.0, loadout)
 		c.grounded = true
 		cast.append(c)
 		var v := FigureView.new()
 		field.add_child(v)
 		v.thrown = thrown
-		v.setup(c, Color.RED if team == 0 else Color.BLUE, tuning.hits, font, false, [], 0.0,
-				play.figures)
+		v.setup(c, Color.RED if team == 0 else Color.BLUE, tuning.hits, font, false,
+				FigureView.with_lights([] as Array[Dictionary], lights, loadout.size()), 0.0, play.figures)
 		v.set_body(models, kinds[i + 1], view_lines)
 		if not args.has("--no-raise"):
 			v.set_world(level.query(), tuning.body)
+		if args.has("--contact"):
+			v.add_contact_shadow(FigureView.contact_mesh(play.effects), play.effects)
+			v.set_contact_shadow(true)
 		views.append(v)
 	var built := Time.get_ticks_usec() - build_start
 	var frames := int(seconds / TICK)
 	var animation := PackedFloat64Array()
 	var skeleton := PackedFloat64Array()
 	var frame := PackedFloat64Array()
+	var ground := PackedFloat64Array()
+	var fit := PackedFloat64Array()
+	var zoomed := PackedFloat64Array()
+	var surfaces := PackedFloat64Array()
 	var last := Time.get_ticks_usec()
 	var t := 0.0
 	for n in frames + WARM_FRAMES:
 		t += TICK
 		for i in FIGURES:
 			_script(cast[i], i, t, tuning.hits)
+		var g0 := Time.get_ticks_usec()
+		for i in FIGURES:
+			views[i].on_tick(cast[i])
+		var g1 := Time.get_ticks_usec()
+		var f0 := Time.get_ticks_usec()
+		if glass != null:
+			FigureView.fit_zoomed_lines(views, glass, view_lines, plain_lines, play.figures)
+		var f1 := Time.get_ticks_usec()
 		var a0 := Time.get_ticks_usec()
 		for i in FIGURES:
 			views[i].update(cast[i], 1.0, TICK)
@@ -124,9 +166,17 @@ func _run() -> void:
 			animation.append(float(a1 - a0) / FIGURES)
 			skeleton.append(float(a2 - a1) / FIGURES)
 			frame.append(float(now - last))
+			ground.append(float(g1 - g0))
+			fit.append(float(f1 - f0))
+			var n_zoomed := 0
+			for v in views:
+				n_zoomed += 1 if v.lod_lines() == view_lines else 0
+			zoomed.append(float(n_zoomed))
+			surfaces.append(float(_surfaces(field, camera.global_position)))
 		last = now
-	print("[figure_bench] %d figures, %d frames (%.0f s), models %.1f ms, set_body %.1f ms, eye %s, lines x%.1f" % [
-			FIGURES, frames, seconds, loaded / 1000.0, built / 1000.0, "at the spawn" if far else "in the middle", zoom])
+	print("[figure_bench] %d figures, %d frames (%.0f s), models %.1f ms, set_body %.1f ms, eye %s, lines x%.1f, %s" % [
+			FIGURES, frames, seconds, loaded / 1000.0, built / 1000.0, "at the spawn" if far else "in the middle", zoom,
+			"night, torches lit" if night else "day"])
 	var merged := models.merged_bytes()
 	print("[figure_bench] merged body meshes: %d, %d bytes" % [merged.x, merged.y])
 	if perf:
@@ -136,11 +186,35 @@ func _run() -> void:
 	_report("animation per figure (us)", animation)
 	_report("skeleton per figure (us)", skeleton)
 	_report("both, 11 figures (ms)", _sum_scaled(animation, skeleton, FIGURES / 1000.0))
+	_report("mesh surfaces the figures draw", surfaces)
+	if args.has("--contact"):
+		_report("contact shadow rays, 11 figures a tick (us)", ground)
+	if glass != null:
+		_report("glass cone fit, 11 figures a frame (us)", fit)
+		_report("figures on the zoomed lines", zoomed)
 	if perf:
 		_report("frame (ms)", _scaled(frame, 0.001))
 	field.queue_free()
 	await process_frame
 	quit(0)
+
+
+## The mesh surfaces drawn under the figures (each FigureView's shown meshes inside their visibility range from `eye`):
+## the draws they ask for, without the shadow passes'. A bench's count, allocating a little.
+static func _surfaces(field: Node, eye: Vector3) -> int:
+	var n := 0
+	for v in field.get_children():
+		if not v is FigureView:
+			continue
+		for m: Node in (v as Node).find_children("*", "MeshInstance3D", true, false):
+			var mi := m as MeshInstance3D
+			if mi.mesh == null or not mi.is_visible_in_tree():
+				continue
+			var d := eye.distance_to(mi.global_position)
+			if d < mi.visibility_range_begin or (mi.visibility_range_end > 0.0 and d > mi.visibility_range_end):
+				continue
+			n += mi.mesh.get_surface_count()
+	return n
 
 
 ## Team of each character (you on Alpha, five teammates, six on Beta), as FigureMix wants them.

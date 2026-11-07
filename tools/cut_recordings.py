@@ -346,6 +346,12 @@ def ev_hum(seconds, variant=0):
     return x * np.minimum(1.0, t / 0.008) * np.clip((seconds - t) / 0.03, 0.0, 1.0) ** 2
 
 
+# The Sniper Rifle's Fire clip has the bolt home and turned down at BOLT_CYCLE_END s (sniper.py; ViewModelConfig
+# bolt_cycle_end); it is ready to fire again BOLT_READY s after a shot (stats.md: 0.8 a second).
+BOLT_CYCLE_END = 0.88
+BOLT_READY = 1.25
+
+
 def bolt(x, length=0.85, back_at=0.50, home_at=0.71):
     """A slide's pull back and its run home, each moved so its knock lands where the Sniper Rifle's Fire clip has the
     handle reach the back and snap home (tools/render_bolt.gd's timings)."""
@@ -437,7 +443,11 @@ def build(folder):
     put("power_spring", [fixed(r, 0.16) for r in variants(run_ups, 5)], -27.3)
     put("magOut_spring", variants(cover_off, 5, 0.8), -30.6)
     put("magIn_spring", variants(cover_on, 5, 0.8), -26.9)
-    put("boltCycle", [bolt(s) for s in pick(folder, [("sniper_bolt.wav", None)], 1.0, 0.1)[:3]], -14.0)
+    # Stretched as the game stretches the Fire clip (BP7, row 19, the owner's pick): the handle is home and turned
+    # down as the rifle is ready, 1.25 s after the shot (its 0.8 a second), not at the clip's own 0.88 s.
+    k = BOLT_READY / BOLT_CYCLE_END
+    put("boltCycle", [bolt(s, 0.85 * k, 0.50 * k, 0.71 * k)
+                      for s in pick(folder, [("sniper_bolt.wav", None)], 1.0, 0.1)[:3]], -14.0)
 
     # Cyber Pistol (electric pistol): a short whir of his electric toothbrush a little under its own pitch (owner,
     # 2026-11-04: "i prefer the cyber pistol with the toothbrush", over the motor's) under a small crack, 3 dB up, with

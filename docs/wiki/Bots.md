@@ -2,7 +2,8 @@
 
 Every other player in Airsoft is a bot: your teammates and the whole other team. Bots play like airsoft players, not
 aimbots. They walk lanes, hold corners, take cover, peek and lean, flank, search where they last saw or heard you,
-and call their hits honestly, by the same rules as you.
+and call their hits honestly, by the same rules as you. A bot firing over cover tips its replica up a little so the
+barrel clears the top.
 
 ## What bots know
 
@@ -25,7 +26,7 @@ Bots know only what they see and hear:
 At night bots see only as far as the light lets them: about 40 m if you stand in the light of a fire, a lantern or a
 torch beam, 25 m in the open under the moon, 15 m indoors and only 10 m under the trees. Bots on Normal and up keep out
 of the light when they hold a spot or hunt for you; Easy bots stand wherever their lane takes them. Every bot carries a
-[weapon torch](Parts-and-Power#lights) and loads glowing BBs.
+[weapon torch](Parts-and-Power#lights), which you can see on its replica, its light glowing, and loads glowing BBs.
 
 ## Difficulty
 

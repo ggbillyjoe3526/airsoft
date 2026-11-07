@@ -56,6 +56,9 @@ by `bot20`-`bot22` on top of the earlier layers; the robot's redesign is the rob
   the cloud).
 - `splice.mjs` (IM8): swaps named clips of an export for the same clips of another export of the same figure, by bone
   name, leaving everything else in the file as it is.
+- `compact_glb.py` (BP7): drops the accessors and buffer views a splice leaves unused and repacks the buffer, every
+  mesh, skin, clip and image byte kept (`python3 -I tools/blender/bot-figure/compact_glb.py <figure.glb>`); run it
+  after a splice.
 - `unpack.mjs` (BP4): turns a packed game file back into a plain export, so a clip can be spliced into a figure whose
   Blender export isn't kept; `pack.mjs` then packs it to the same bytes plus the new clips.
 - `check/`: `arms-check.mjs` (wrists, elbows, skin and snaps per clip) and `render/` (the picture page and its shooter).
