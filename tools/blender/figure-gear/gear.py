@@ -14,8 +14,9 @@ assets/models/characters/human.glb in place of the old ones (splice.py), so the 
 - The radio: an unbranded dual-band handheld with a display, a knob and a 6 cm stub antenna, in an open pouch on the
   left of the cummerbund.
 
-No brand marks. Plain colours from a small swatch texture (`gear_col`, `gear_orm`, `teamgear_col`), each surface a
-soft vertical gradient; detail is geometry. Fitted to the body in the file by rays (fit.py), clear of it at rest.
+No brand marks. Plain colours from a small swatch texture (the Gear strip in the knee pads' maps, `PADS_AT`, and
+`teamgear_col`), each surface a soft vertical gradient; detail is geometry. Fitted to the body in the file by rays
+(fit.py), clear of it at rest.
 
 Run with Blender 5.x's Python, or Python with the `bpy` module (pip install bpy==5.2.3), from the repo root:
 
@@ -65,6 +66,13 @@ SWATCHES = {
 COLUMNS = 16          # swatch columns in each texture
 TEX_W, TEX_H = 256, 32
 GRADIENT = (0.84, 1.0)  # a surface's colour at its foot and its top
+# The Gear strip lives in the knee pads' maps (BP6: one material fewer, the figure within its 8): pads.py paints it
+# (pads_patch) with its top left PADS_AT pixels into the pads' PADS_TEX maps, below their islands, and the Gear
+# surfaces draw with the pads' material there (pads_uv), so rerun pads.py before this after changing a Gear swatch.
+PADS_MATERIAL = "Pads"
+PADS_TEX = 1024
+PADS_AT = (32, 928)
+PADS_WRAP = 32
 
 
 def swatch_materials() -> None:
@@ -1355,34 +1363,53 @@ def png(width: int, height: int, rows: list) -> bytes:
     return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", head) + chunk(b"IDAT", zlib.compress(raw, 9)) + chunk(b"IEND", b"")
 
 
-def textures() -> dict:
-    """PNG bytes of each family's colour strip (sRGB, each column a swatch, lighter towards the top) and the Gear
-    ORM strip (occlusion 1, roughness, metal)."""
-    out = {}
+def strip(fam: str) -> tuple:
+    """The family's colour strip (sRGB, each column a swatch, lighter towards the top) and its ORM strip (occlusion 1,
+    roughness, metal) as rows of (r, g, b) byte tuples, top row first."""
     cw = TEX_W // COLUMNS
-    for fam in ("Gear", "TeamGear"):
-        col_rows, orm_rows = [], []
-        for y in range(TEX_H):
-            # Row 0 is the image's top: glTF v 0, the top of each part.
-            k = GRADIENT[1] - (GRADIENT[1] - GRADIENT[0]) * y / (TEX_H - 1)
-            crow, orow = [], []
-            for x in range(TEX_W):
-                c = x // cw
-                hit = [v for v in SWATCHES.values() if v[0] == fam and v[1] == c]
-                if hit:
-                    _f, _c, rgb, rough, metal = hit[0]
-                    lin = [_lin(((rgb >> s) & 255) / 255.0) * k for s in (16, 8, 0)]
-                    crow.append(tuple(int(round(_srgb(min(1.0, v)) * 255)) for v in lin))
-                    orow.append((255, int(round(rough * 255)), int(round(metal * 255))))
-                else:
-                    crow.append((128, 128, 128))
-                    orow.append((255, 230, 0))
-            col_rows.append(crow)
-            orm_rows.append(orow)
-        out[(fam, "col")] = png(TEX_W, TEX_H, col_rows)
-        if fam == "Gear":
-            out[(fam, "orm")] = png(TEX_W, TEX_H, orm_rows)
-    return out
+    col_rows, orm_rows = [], []
+    for y in range(TEX_H):
+        # Row 0 is the image's top: glTF v 0, the top of each part.
+        k = GRADIENT[1] - (GRADIENT[1] - GRADIENT[0]) * y / (TEX_H - 1)
+        crow, orow = [], []
+        for x in range(TEX_W):
+            c = x // cw
+            hit = [v for v in SWATCHES.values() if v[0] == fam and v[1] == c]
+            if hit:
+                _f, _c, rgb, rough, metal = hit[0]
+                lin = [_lin(((rgb >> s) & 255) / 255.0) * k for s in (16, 8, 0)]
+                crow.append(tuple(int(round(_srgb(min(1.0, v)) * 255)) for v in lin))
+                orow.append((255, int(round(rough * 255)), int(round(metal * 255))))
+            else:
+                crow.append((128, 128, 128))
+                orow.append((255, 230, 0))
+        col_rows.append(crow)
+        orm_rows.append(orow)
+    return col_rows, orm_rows
+
+
+def textures() -> dict:
+    """PNG bytes of the TeamGear colour strip (the Gear strip is painted into the pads' maps: pads_patch)."""
+    col_rows, _orm = strip("TeamGear")
+    return {("TeamGear", "col"): png(TEX_W, TEX_H, col_rows)}
+
+
+def pads_patch() -> tuple:
+    """The Gear strip as pads.py paints it into the pads' maps at PADS_AT: (colour, ORM) uint8 arrays, the strip with
+    PADS_WRAP pixels of itself wrapped round it (the next column and row over, as a repeating strip's), so its mip
+    levels blend as the strip's own did."""
+    import numpy as np
+    col_rows, orm_rows = strip("Gear")
+    out = []
+    for rows in (col_rows, orm_rows):
+        tiled = np.tile(np.array(rows, np.uint8), (3, 3, 1))
+        out.append(tiled[TEX_H - PADS_WRAP:2 * TEX_H + PADS_WRAP, TEX_W - PADS_WRAP:2 * TEX_W + PADS_WRAP])
+    return tuple(out)
+
+
+def pads_uv(u: float, v: float) -> tuple:
+    """A Gear surface's glTF UV on its strip (0-1 across it) where pads_patch puts the strip in the pads' maps."""
+    return ((PADS_AT[0] + u * TEX_W) / PADS_TEX, (PADS_AT[1] + v * TEX_H) / PADS_TEX)
 
 
 def extract(ob: bpy.types.Object, max_index_family: dict = None) -> list:
@@ -1427,6 +1454,9 @@ def extract(ob: bpy.types.Object, max_index_family: dict = None) -> list:
     for fam in ("TeamGear", "Gear"):
         if fam in prims:
             prims[fam].pop("_key")
+            if fam == "Gear":
+                prims[fam]["material"] = PADS_MATERIAL
+                prims[fam]["uvs"] = [pads_uv(u, v) for u, v in prims[fam]["uvs"]]
             out.append(prims[fam])
     return out
 
@@ -1475,8 +1505,6 @@ def main() -> None:
         meshes[name] = extract(ob)
     tex = textures()
     mats = [
-        {"name": "Gear", "col": tex[("Gear", "col")], "col_name": "gear_col", "orm": tex[("Gear", "orm")],
-         "orm_name": "gear_orm"},
         {"name": "TeamGear", "col": tex[("TeamGear", "col")], "col_name": "teamgear_col", "metallic": 0.0,
          "roughness": SWATCHES["team"][3]},
     ]

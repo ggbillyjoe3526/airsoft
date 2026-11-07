@@ -15,6 +15,7 @@ and buckles, where they lie on the body, take the body's own weights there.
 
 Out: three meshes, `Kit_Pads`, `Kit_Pads_LOD1`, `Kit_Pads_LOD2` (budget LOD_BUDGET), one material `Pads` with its
 colour, normal and roughness-metal maps; spliced into human.glb by splice_part.py, and listed in human.json's parts.
+The maps also carry the figure gear's swatch strip (figure-gear/gear.py PADS_AT, BP6), so rerun gear.py after this.
 
 Run with Python and the `bpy` module (pip install bpy==5.2.3), from the repository root:
 
@@ -35,6 +36,8 @@ from mathutils.bvhtree import BVHTree
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
 sys.path.insert(0, os.path.join(ROOT, "tools/blender/figures"))
+sys.path.insert(0, os.path.join(ROOT, "tools/blender/figure-gear"))
+import gear  # noqa: E402
 import splice_part  # noqa: E402
 
 FIGURE = os.path.join(ROOT, "assets/models/characters/human.glb")
@@ -665,6 +668,17 @@ def textures(folder: str) -> dict:
     gy, gx = np.gradient(h, mm_per_texel)
     n = np.dstack((-gx, gy, np.ones_like(h)))
     n /= np.linalg.norm(n, axis=2, keepdims=True)
+    # The figure gear's swatch strip below the islands (BP6): its Gear surfaces draw with this material (gear.py
+    # PADS_AT), so the figure keeps to its 8 materials. Flat and unshaded there: no height, no cavity.
+    assert gear.PADS_TEX == TEX
+    gear_col, gear_orm = gear.pads_patch()
+    y0, x0 = gear.PADS_AT[1] - gear.PADS_WRAP, gear.PADS_AT[0] - gear.PADS_WRAP
+    rows, cols = gear_col.shape[:2]
+    spot = (slice(y0, y0 + rows), slice(x0, x0 + cols))
+    assert not col[spot].any() and not h[spot].any(), "the gear strip's place in the pads' maps is taken"
+    col[spot] = gear_col
+    rough[spot] = gear_orm[..., 1] / 255.0
+    metal[spot] = gear_orm[..., 2] / 255.0
     paths = {}
     for name, data in (("col", np.clip(col, 0, 255).astype(np.uint8)),
                        ("nrm", ((n * 0.5 + 0.5) * 255).round().astype(np.uint8)),
@@ -827,7 +841,9 @@ def main() -> None:
     rig, body, bvh = load_figure()
     for ob in list(bpy.data.objects):
         if ob.type == "MESH" and ob.name.startswith(PART):
+            mesh = ob.data
             bpy.data.objects.remove(ob)
+            bpy.data.meshes.remove(mesh)  # so the new meshes keep their names (no ".001")
     old = bpy.data.materials.get(MATERIAL)  # a figure built by an earlier run carries the pads' material already
     if old is not None:
         bpy.data.materials.remove(old)

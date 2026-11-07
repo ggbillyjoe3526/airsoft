@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c8bg1oo4pohbs"
-path="res://.godot/imported/human_gear_orm.png-d22b16b1853336964ddbc3f7cefe0b68.ctex"
+uid="uid://6ywnda3sc14o"
+path="res://.godot/imported/sniper_rubber_orm.png-e7529e9cbb69f3542bd16045d037103f.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "51808e7560260b73aac1cc72ae3e630a"
+"md5": "4c8660655b5d9a60a3c0cc8abc0b5a83"
 }
 
 [deps]
 
-source_file="res://assets/models/characters/human_gear_orm.png"
-dest_files=["res://.godot/imported/human_gear_orm.png-d22b16b1853336964ddbc3f7cefe0b68.ctex"]
+source_file="res://assets/models/replicas/sniper_rubber_orm.png"
+dest_files=["res://.godot/imported/sniper_rubber_orm.png-e7529e9cbb69f3542bd16045d037103f.ctex"]
 
 [params]
 
@@ -26,8 +26,8 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
-mipmaps/limit=4
+mipmaps/generate=false
+mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
 process/channel_remap/red=0
@@ -40,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

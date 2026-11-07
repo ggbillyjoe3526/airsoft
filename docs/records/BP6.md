@@ -4,6 +4,7 @@
 
 - part 1: critic Accept 7/8 · qa Pass · performance Pass
 - part 2: critic Accept 7/8 · qa Pass · performance Pass
+- part 3: critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -14,6 +15,9 @@
 | 2026-11-07 | part 1: 3 | Opus 5.5 | green | Accept 7/8 | – (two wording fixes made) |
 | 2026-11-07 | part 2: 1 | Opus 5.5 | green | Retry 5/8 | Hold Here on the map, lane resume, MI1 unproven, zoom keys |
 | 2026-11-07 | part 2: 2 | Opus 5.5 | green | Accept 7/8 | – (the flaky test logged, a record line fixed) |
+| 2026-11-07 | part 3: 1 | Opus 5.5 | green | Retry 5/8 | collarbone drop backwards, glove clipping, GBB nose, docs |
+| 2026-11-07 | part 3: 2 | Opus 5.5 | green | Retry 6/8 | a cloth flap under the raised arm, a changelog claim |
+| 2026-11-07 | part 3: 3 | Opus 5.5 | green | Accept 8/8 | – |
 
 ## The pass
 
@@ -196,3 +200,118 @@ test_bp3_qa, test_start_mode_bots and others). Attempt 1's whole check.sh: 3,945
 test_parts_in_play's silenced shot, passes alone (a headless voice that finished between two ticks under load). Depot
 match guard: 121 rounds over 16 seeds, 0 on time at attempt 1; 118, 0 on time and 1 to the overtime flag at attempt 2
 (the lane resume and the vault gate; earlier baselines 129 and 121).
+
+### Part 3: models
+
+Rows of docs/KNOWN_ISSUES.md this part took, after the critic's retry (attempt 2). Pictures:
+`/mnt/project-files/playtest/bp6/models/` (01-12, each labelled: model, bot figure or first-person replica, view, what
+changed, where to look; 07 and 08 one sheet each for the AEG and the Sniper Rifle). 12 is new: the owner's locked-back
+photo beside our render from its angle.
+
+#### Hit call shoulder (row deleted)
+- **Goal:** no dark shirt flap between the helmet and the raised arm in the hit call and walk off.
+- **Approach:** the root fault was weights, not the clip: the chest's side under each arm (rest y 1.17-1.30 m, about
+  11 cm from the upper arm's line) was weighted 70-98 % to the upper arm, so it swung up over the carrier's strap.
+  `tools/blender/figures/body_weights.py` (new, numpy, in place) gives up the upper arm's share on the arm's inner
+  side from 5 cm of its line (the sleeve) to all of it at 11 cm, near the shoulder (eased out 30-55 % down the arm;
+  past 13 cm at any point), every factor eased (the inner side, the distance, the start at the joint) and the share
+  given up averaged 12 times over neighbouring points; it goes to the point's other bones or to Chest/Spine1. It
+  changes both arms on all three Body levels; the tests below check LOD0's strap and all three levels' weight steps,
+  and the pictures are LOD0.
+- **Attempt 2's flap (critic):** its fade ran over only 2.6 cm (6.4 to 9 cm) with a hard inner-side cut, so the cloth
+  folded where the share ran out: a pointed flap with stepped edges hung under the raised arm (sheet 01, the old
+  close-up; a step in sheet 02's front view). Now the arm's underside curves into the chest in one line (sheets 01-03
+  re-rendered, 01 with a side view of the armpit). What remains: with the arm straight up the armpit is a smooth
+  web of shirt from the arm to the chest's side, a soft bulge in the quarter view (sheet 02, bottom), not a fold; the
+  reload clip and others not in the picture tool were not looked at.
+- **Collarbone:** the first attempt's 24 degree drop is reverted: `gait/call.py` and the HitCall/WalkOff clips are
+  main's. The strap buckle sits straight and the shoulder's cap keeps its weights.
+- **Tests:** test_hit_call_arm `test_with_the_arm_up_the_shirt_stays_under_the_shoulder_strap` skins Body and Kit in
+  software every 0.1 s of both clips and counts shirt points ahead of the strap's front: 0 (5-23 on main).
+  test_bp6_models `test_the_chest_s_side_eases_off_the_upper_arms_with_no_step`: on every level and both arms no edge
+  by the armpit changes the upper arm's weight by more than 0.25 / 0.35 / 0.45 (LOD0/1/2); attempt 2's weights failed
+  it at 0.77-0.92.
+
+#### Glove knuckle shards (row narrowed)
+- **Goal:** plates stay whole when a finger bends round a grip.
+- **Approach:** body_weights.py finds the 28 plates (14 a glove: back plate, its border, four knuckle domes, eight
+  finger guards; shells of the LOD0 Body of at most 300 points all led by a hand bone, a tie counting as the arm's)
+  and puts each on one weight set: the bone it leans on most, a dome (under 70 points) its top two bones' mean so it
+  turns part way with the finger. Cloth within 2.5 mm of a plate takes its weights, fading out by 6 mm; other small
+  shells (the wrist strap tab) are skipped. LOD1/LOD2 have no separate plates.
+- **What remains (the row now):** a few cloth slivers past the back plate's top edge and a small dark gap by a dome at a
+  deep bend; closing them needs inset plate borders or a split dome in body.py (a full body rebuild).
+- **Rebuild order:** body.py splice -> pads.py -> gear.py -> body_weights.py last. A splice brings back the blended
+  weights; the script marks the Body's mesh (extras BP6_WEIGHTS), which a splice replaces, so a rerun after a splice
+  is not skipped. Written in body.py's docstring, the figures README and the script.
+- **Test:** test_bp6_models `test_each_glove_plate_moves_whole` (every plate's points share one weight set; 28 plates).
+
+#### Material budget (row narrowed to the pistol)
+- AEG and Sniper Rifle 7 -> 6 (Rubber and BB folded into one material on a 4x4 px swatch, hardsurface.py
+  `fold_material`), the figure 9 -> 8 (the gear's swatches painted into the pads' maps). The GBB Pistol stays at 7:
+  its unpainted pair, the grip's tiling stipple normal map and the BB, can't share one texture without the stipple
+  tiling over the BB. Test: test_bp6_models `test_every_model_is_within_the_material_budget`.
+- **File growth:** the fold adds a UV layer to every Rubber/BB mesh (AEG +259 KB, Sniper +243 KB on disk). Kept: a
+  vertex colour would be smaller but carries only the albedo, not the BB's own roughness and metal (the swatch's
+  ORM), so it would not keep the look exactly (critic's optional point 6).
+- **VRAM:** `human_pads_col` imports as BC7 (BC1 darkened the gear's flat swatches): +175 KB VRAM.
+
+#### GBB dust cover (row kept, reworded)
+- **Goal:** the locked-back front as the owner's photo 83c82df7: walls up to the barrel, one rounded front (~0.3
+  barrel widths at the top edge).
+- **Approach:** BP6 rounded the nose (top corners from above, the foot curving into the face, the lip channel's floor).
+  Triangles in the hands 39,250 -> 39,590 (+340, Body 29,064 -> 29,404; budget 40,000); figure copy 3,000 (Figure
+  2,760 + Figure_Magazine 240), unchanged. Sight picture untouched.
+- **Not done, plainly:** retried on the retry and rendered from the photo's angle (sheet 12). The frame's walls stop
+  4.2 mm (0.3 barrel widths: frame top py 110, barrel bottom py 97.7) under the barrel because the slide's solid lower
+  front sits there in battery; raising them means grooves in the slide's underside beside the barrel (only 1.5 mm of
+  room between the lip channel at 7.3 mm and the chamfered nose at 8.8 mm a side) or a higher slide foot, which
+  changes the side view the owner matched from his second photo. A recoil spring in the open channel was weighed and
+  dropped: a real one sits behind the slide's front wall, so it would not be in his photo. Kept as a known gap.
+- **Risk:** none new; pistol.glb and the parts files are unchanged since attempt 1 (no replica rebuild in the retry, so
+  figure_parts.py had nothing to remake).
+
+#### Sights: left as is (brief). Sleeve/cuff: left; the fix is a full body rebuild (row says so).
+
+#### Hand settling on a camera cut (row deleted)
+- figure_view.gd `_camera_cut`: the hold is re-checked at once when the camera is another one, moved more than
+  `hold_view_radius` or turned more than `hold_view_turn` (2 degrees, FigureConfig) since the last check, not only
+  every 4th frame. `_seen` notes the camera's place and facing, so while the camera keeps turning faster than 2
+  degrees a frame every figure re-checks each frame (cheap: a cone test). Test: test_hands_on_replica's camera-cut test.
+
+#### Tests and gates
+- Rebased on origin/claude/project-thread-d2dpfd (PR #241, on main with #240's BodyMerge): no conflicts (only
+  docs/KNOWN_ISSUES.md touched by both, merged cleanly). After it: test_bp6_models, test_hit_call_arm,
+  test_hands_on_replica, test_model_pictures, test_replica_paint, test_bp6_graphics, test_figure_body,
+  test_figure_view, test_figure_models, test_figure_pads: 87/87 (10 scripts, with the armpit test) after one
+  fix: #240's test_bp6_graphics expected the
+  human to draw 9 surfaces near and far; with the gear in the pads' maps it draws 8, so the test now expects 8.
+  gdlint, changelog notes, wiki: pass.
+- test_replica_paint's "keeps its own" test checks the AEG's Rubber exists (BB is folded into it); its helper
+  `_has_part` has its own doc comment, `_override` keeps its.
+
+#### Rows deleted vs narrowed
+- Deleted: the hit call shoulder, the hold settling on a camera cut. Narrowed: the glove plates (to the cloth slivers
+  and the dark gap by a dome), the material budget (to the GBB Pistol's 7). Reworded: the GBB dust cover. Sleeve/cuff
+  row: notes it waits for the body's next rebuild.
+
+#### The critic's attempt-1 points and how each was met
+1. Shoulder: the collarbone drop reverted; fixed at the root in the body's weights; the strap test checks the shirt
+   against the strap, not an angle; attempt 2's flap then cleared by the eased, smoothed fade (above).
+2. Gloves: plates on one weight set each, domes part way, the cloth under a plate pinned to it; the slivers and the
+   dark gap that remain are the narrowed row.
+3. GBB dust cover: retried, rendered from the photo's angle (sheet 12); not done, the row says why.
+4. Code: figure_view's doc comments un-stacked; float weights asserted, normalised integers scaled on read; the
+   rebuild chain written in body.py, the figures README and the script; test_replica_paint checks the folded Rubber.
+5. Docs: ASSETS.md figure copy 3,000 (2,760 + 240), "4x4 px swatch", GBB 39,250 -> 39,590; the materials bullet
+   dropped; 120-column wrap.
+6. Pictures: every changed sheet re-rendered, 12 added, none stale.
+7. This record.
+
+#### For the owner to test
+- Hit call and walk off from the front, the side and close up: no shirt over the strap, no flap under the raised arm;
+  whether the armpit's web reads as cloth. Also a bot reloading and aiming close up (not in the pictures).
+- Bots holding replicas close up (spectate, scope): plates whole; the cloth slivers that remain are the known row.
+- Spectate cuts and fast turns past a bot: hands on the replica from the first frame.
+- AEG, Sniper Rifle and bots' gear: look unchanged.
+- GBB Pistol locked back next to his photo (sheet 12): whether the gap under the barrel is worth re-cutting the slide.

@@ -111,6 +111,9 @@ LIP_FOOT = Z(143.0)
 LIP_DEPTH = 0.0030
 LIP_HW = 0.0070
 LIP_ROUND = 0.0030
+# The dust cover's front (photo px), LIP_DEPTH and a 0.4 mm gap behind the slide's face.
+NOSE_PX = 22.0 + (LIP_DEPTH + 0.0004) * PX_PER_M
+NOSE_ROUND = 0.0030
 # The recoil spring's hole in the lip under the barrel, the guide rod's flat cap in it with its centre hole: about
 # 2.2 mm of metal under it and over it to the barrel's hole, 1.8 mm either side.
 GUIDE_R = 0.0052
@@ -593,8 +596,10 @@ def frame_upper() -> object:
     the trigger guard."""
     b = hs.Builder("Frame", ["Furniture"])
     # The dust cover's underside at py 155 to 159, a slimmer body than the main photo's to match the owner's second
-    # photo (2026-11-05).
-    out = pts([(22, 110), (22, 136, 4), (26, 145, 6), (34, 151, 6), (48, 154.5, 6), (100, 155), (145, 156),
+    # photo (2026-11-05). Its front behind the slide's nose lip (NOSE_PX), a rounded nose as his locked-back photo
+    # (83c82df7; BP6): the top's edge rounded a little, the foot's in a wide curve up into the face.
+    nose = NOSE_PX
+    out = pts([(nose, 110, 3), (nose, 147, 14), (48, 154.5, 6), (100, 155), (145, 156),
                (175, 156.5), (212, 157.5, 8), (232, 158.5, 6), (340, 159),
                (380, 172, 6), (392, 200, 6), (394, 236), (420, 236), (432, 150), (440, 100), (172, 100), (160, 110, 4)])
     b.prism(hs.fillet(out, 4), "x", -FRAME_HW, FRAME_HW, "Furniture")
@@ -612,18 +617,31 @@ def frame_upper() -> object:
         xa, xb = sorted((sx * (FRAME_HW - RAIL_SLOT_DEPTH), sx * 0.02))
         c.box((xa, Y(166.0), Z(141.5)), (xb, Y(10.0), Z(131.0)), "Furniture")
         cutters.append(c.build())
-    # The dust cover's front behind the slide's nose lip, and the channel the lip runs back in as the slide cycles.
+    # The channel the lip runs back in as the slide cycles, the lip's own section with a hair's clearance: its
+    # floor's corners rounded as the lip's, not box-edged (BP6).
     y1 = SLIDE_Y[1]
-    c = hs.Builder("c_lip_front", ["Furniture"])
-    c.box((-0.02, y1 - LIP_DEPTH - 0.0004, -0.05), (0.02, y1 + 0.01, 0.01), "Furniture")
-    cutters.append(c.build())
     c = hs.Builder("c_lip_way", ["Furniture"])
-    c.box((-(LIP_HW + 0.0003), y1 - SLIDE_TRAVEL - LIP_DEPTH - 0.0008, LIP_FOOT - 0.0003),
-          (LIP_HW + 0.0003, y1, 0.01), "Furniture")
+    way_hh = 0.5 * (0.01 - LIP_FOOT + 0.0003)
+    c.prism(hs.rounded_rect(LIP_HW + 0.0003, way_hh, LIP_ROUND + 0.0003, 4), "y",
+            y1 - SLIDE_TRAVEL - LIP_DEPTH - 0.0008, y1 + 0.001, "Furniture",
+            offset=(0.0, 0.0, LIP_FOOT - 0.0003 + way_hh))
     cutters.append(c.build())
     c = hs.Builder("c_slot", ["Furniture"])
     c.box((-(FRAME_HW - 0.0014), Y(92.0), Z(170.0)), (FRAME_HW - 0.0014, Y(78.0), Z(145.0)), "Furniture")
     cutters.append(c.build())
+    # The nose's front corners rounded NOSE_ROUND seen from above, as the locked-back photo's (BP6); the arc meets the
+    # face and the flank a hair outside them, so the cut leaves no sliver.
+    yf, r, e = Y(NOSE_PX), NOSE_ROUND, 0.00002
+    for sx in (-1, 1):
+        cx, cy = FRAME_HW - r + e, yf - r + e
+        arc = [(cx + r * math.cos(a), cy + r * math.sin(a))
+               for a in (0.5 * math.pi * (1.0 - k / 6) for k in range(7))]
+        corner = [(cx, yf + 0.003)] + arc + [(FRAME_HW + 0.003, cy), (FRAME_HW + 0.003, yf + 0.003)]
+        if sx < 0:
+            corner = [(-x, y) for x, y in reversed(corner)]
+        c = hs.Builder("c_nose_corner", ["Furniture"])
+        c.prism(corner, "z", Z(165.0), Z(100.0), "Furniture")
+        cutters.append(c.build())
     for sx in (-1, 1):
         # The takedown lever's shallow recess, its walls curving softly into the side, and the slot under the lever.
         cutters.append(takedown_recess(sx))

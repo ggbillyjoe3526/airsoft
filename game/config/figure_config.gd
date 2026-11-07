@@ -170,10 +170,12 @@ extends Resource
 ## The hands hold the replica so only while a ball `hold_view_radius` (m) round the point `hold_view_height` (m) over
 ## the figure's feet, where its hands and replica are, is in the camera's view (a cone round the view's corners); out
 ## of it the clips' hands are kept, unseen. The view is looked at every `hold_view_stride`-th frame (figures staggered
-## by id; the ball's margin covers the frames between).
+## by id; the ball's margin covers the frames between), and at once when the camera has turned more than
+## `hold_view_turn` (degrees) or moved more than `hold_view_radius` since, or is another camera (a fast turn, a cut).
 @export var hold_view_height: float = 1.2
 @export var hold_view_radius: float = 1.0
 @export var hold_view_stride: int = 4
+@export var hold_view_turn: float = 2.0
 @export var support_mount: String = "GripMount"
 @export var support_behind_grip: float = 0.045
 @export var settle_support: float = 0.08

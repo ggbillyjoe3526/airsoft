@@ -1099,6 +1099,7 @@ def build() -> None:
                 total += n
             print("  %-16s %6d triangles" % (ob.name, n))
     print("  in the hands: %d triangles; figure: %d" % (total, sum(hs.tris(o) for o in [fig] + list(fig.children))))
+    hs.fold_material("Rubber", "BB")  # BP6: within the 6 materials, looking the same
     hs.export(OUT, True)
     print("wrote", OUT)
 

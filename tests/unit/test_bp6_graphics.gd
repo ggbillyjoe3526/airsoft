@@ -161,8 +161,9 @@ func test_each_merged_surface_is_its_parts_bytes_and_picks_their_lods_at_every_d
 						picked.append_array(_shift(_pick(d, x), base))
 						base += d["vertex_count"] as int
 					assert_eq(_pick(got, x), picked, "%s: the LOD picked at %.3f" % [name, x])
-		assert_eq(_draws(b, 5.0), 9 if kind == FigureMix.HUMAN else 7, "kind %d: draws near" % kind)
-		assert_eq(_draws(b, 40.0), 9 if kind == FigureMix.HUMAN else 7, "kind %d: draws far" % kind)
+		# The human draws its 8 materials (BP6 models: the gear folded into the pads), the robot its 7.
+		assert_eq(_draws(b, 5.0), 8 if kind == FigureMix.HUMAN else 7, "kind %d: draws near" % kind)
+		assert_eq(_draws(b, 40.0), 8 if kind == FigureMix.HUMAN else 7, "kind %d: draws far" % kind)
 
 
 ## The surfaces drawn at `distance` (shadow twin aside).
