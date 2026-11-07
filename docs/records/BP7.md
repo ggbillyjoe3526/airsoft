@@ -5,6 +5,7 @@
 - part 1: critic Accept 8/8 · qa Pass · performance Pass
 - part 2: critic Accept 7/8 · qa Pass · performance Pass
 - part 3: critic Accept 7/8 · qa Pass · performance Pass
+- part 4: critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -16,6 +17,9 @@
 | 2026-11-07 | part 2: 2 | Opus 5.5 | green | Accept 7/8 | – (the ping test made to reach its line, e1194c9) |
 | 2026-11-07 | part 3: 1 | Opus 5.5 | green | Retry 6/8 | a toss allowed then lost under a lintel or behind low cover; notes said it drops at the wall |
 | 2026-11-07 | part 3: 2 | Opus 5.5 | green | Accept 7/8 | – (two comments still said the bomb leaves the eyes, fixed in bea5b1d) |
+| 2026-11-07 | part 4: 1 | Opus 5.5 | green | Retry 6/8 | the round props' sizes copied from the dress config, notes that overclaimed the loading |
+| 2026-11-07 | part 4: 2 | Opus 5.5 | green | Accept 8/8 | – (merge over parts 1 to 3 re-checked; an orphan test past COLLIDERS added) |
+| 2026-11-07 | part 4: 3 | Opus 5.5 | CI: magazine guard red | Accept 8/8 | – (a toss lost to the level now ends the ask with no wait, 3b06375) |
 
 ## The pass
 
@@ -425,3 +429,103 @@ owner's picks 21 (B4) and 39 (B6).
 - Toss a magazine over low cover and through a doorway with nobody moving. It should never be lost; if the arc
   has no clear path, the press waits.
 - Replay a match from its `--seed` twice. The bots should play the same.
+
+### Part 4: maps, balance and loading
+
+Branch `bp7-maps` (from origin/main 5004551), head 2c5aed6, merged over parts 1 to 3 as `bp7-maps-r` (831f737, then
+514e8bd), squashed into this pull request. Merged with part 3, every static body still joins the tree only after all its
+shapes, now in the level's last piece (REST); a level freed part-built frees the bodies that never joined.
+
+#### What changed
+- **Round props step (rows 34, 35).** A round prop's block now collides in Jolt as three stepped boxes taken from
+  its model's footprint, stored by model as data in `MapStyle.round_steps`. The new `RoundSteps`
+  (`game/map/round_steps.gd`) places them per block from PropDressConfig, the one source PropLayout lays by (the
+  block's model, its lay, `cluster_cell`, `pallet` and `pallet_height`): a fitted trunk faces the field middle; drums
+  stand 2 x 2 in 0.9 m cells on a 0.15 m pallet; barrels stand in a row. A level built without a site look (the
+  tests', MatchRunner's) steps by PropDressConfig's built-in values, which the shipped look keeps (a test). Woodland's
+  and The Street's round trunks, Depot's drums and barrels. BoxWorld, the nav grid, bot cover, the noisy props, the
+  bake and the minimap still use the block's box, as the lead asked (a new document row says so).
+- **Retry 1 (critic 6/8).** One source for the cell and pallet (above); a hug test (each step's side within 0.12 of
+  its width of a laid prop's vertex, the steps' outline no wider than the props', and a cluster open where its cells
+  meet: a 4 % wider drum step and a doubled cell each fail it); the changelog notes made true (the round props moved
+  into the unreleased woodland-cc0-props.md and depot-props.md, bp7-maps.md keeps the loading change); row 49's
+  reason; game/map/README.md rows; QA's guard on an empty tile plan.
+- **The level builds in pieces (row 49).** `MapLevel.build` is now `begin` plus `build_some(deadline)`: meshes, the
+  terrain lattice (32 rows a piece), the tile plan, each ground tile, the block colliders, the terrain faces (32
+  rows a piece), each terrain surface's shape, then the rest. `build()` still builds whole. Block colliders are
+  filled before their bodies join the tree (Jolt rebuilt a body in the tree on every added shape: about 170 ms on
+  Woodland, now about 8 ms). `PlaySession` gives the ground a frame-sliced deadline and dresses the level one part a
+  frame (lighting and site props, skyline, roof and doors and pools, woods, bushes). The level is the same: a test
+  compares every node of a staged build to a whole one.
+- **Practice swinger (row 92).** Already fixed on main (Depot 4, Woodland 3, The Street 2 swingers); the test now
+  asserts every field sets out at least one.
+- **Balance (rows 28, 29, 30).** Measured at 16 seeds; no map change shipped (see below).
+
+#### Rows fixed and deleted
+- 35 (Depot's drums and barrels in square blocks): deleted.
+- 92 (no practice swinger on Depot or Woodland): deleted; stale on main, now asserted.
+- None of the balance rows: see Rows left.
+
+#### Rows left
+- 34, narrowed to the spruces and thickets: a spruce's boughs reach its block's corners (the footprint's support is
+  1.21 of the half-width at 45 degrees), so steps would open holes a BB passes through boughs; a thicket is hedges on
+  a grid, already near its box.
+- 49, narrowed: MapLevel's build is now in pieces, its longest Woodland's grass collider (one trimesh, 130k
+  triangles, 0.2 to 0.6 s headless on this busy machine). Left: Woodland's woods view (0.55 to 0.9 s; WoodsView
+  builds in one call, its tufts 0.24 to 0.27 s and floor 0.23 to 0.26 s the most, so a part a frame would leave
+  about 0.3 s; the lead's ask was MapLevel.build), its map load (0.3 to 0.6 s) and every map's views and HUD step
+  (0.5 to 1.7 s, partly `game/ui`, outside this area).
+- 28 (The Street leans north), new numbers. Before (main, 5v5, 16 seeds): south 39.1 % of 115. Tried, 5v5 16 seeds
+  unless said: the north's middle lane point (-10, 5) moved behind the jog's privet to (-14.5, 0.5): 43.1 % of 123;
+  plus two bin stores staggered down the Path's straight: 39.1 % of 115; a bin store at the straight's mouth (6v6, 8
+  seeds): 38.5 % of 65. None beyond noise (about 4.5 points at this count), so none shipped. The Path's 45 m, 3.5 m
+  wide straight seen from a covered jog is the lean; reshaping it is a map design call for the owner.
+- 29 (Depot's Attack / Defend leans to the attackers), new numbers. 6v6, 16 seeds: main 67.2 % of 131; with round
+  drums 64.8 % of 125 (in band, but within noise of the edge); flags deeper (A 46.5,-24.5, B 46.5,24.5) 70.2 % of
+  124; flags out toward the walls (A 44,-29.5, B 45,30.5) 67.8 % of 121. Nearly every attacker win is a capture.
+  The flags stay where they were.
+- 30 (Woodland leans to end 0 with Sniper Rifle bots), narrowed to 7v7. At 16 seeds, Sniper Rifle bots: 5v5 50.0 %
+  of 122 and 6v6 45.4 % of 119 (main), 8v8 53.0 % of 117 (this branch, round trunks), all in band where 8 seeds gave
+  55, 55 and 60 %. The 7v7 run at 16 seeds didn't finish on this machine (its 8-seed 58 % stands), so the row keeps
+  7v7 only.
+
+#### Defaults
+- Spruces and thickets stay boxes: a stepped spruce would let BBs through its boughs, and the box is the safer miss.
+- No balance change shipped where a change didn't beat noise at 16 seeds: a map edit that doesn't measurably help
+  adds a prop that isn't strategic.
+- `PlaySession` slices the ground with its existing `BUILD_SLICE_USEC`. Every call runs at least one piece, so a
+  slow machine still finishes.
+
+#### Checks
+- Retry 1, GUT (targeted, 170 pass): test_round_steps (8), test_staged_level, test_bb_walls, test_map_level,
+  test_terrain, test_props, test_noisy_props, the three layout tests, test_dr2_qa, test_wr3_qa, test_play_session,
+  test_practice_spots and test_site_dress.
+- GUT (targeted): test_round_steps (new, 6 tests), test_staged_level (new, 2), test_bb_walls, test_practice_spots,
+  test_map_level, test_terrain, test_props, test_noisy_props, test_baked_light, test_depot_layout,
+  test_woodland_layout, test_street, test_field_layout, test_field_rules, test_play_session,
+  test_play_session_state, test_levels, test_three_levels, test_woods_view, test_site_dress, test_nav_grid,
+  test_map_areas, test_bp6_round2 and the DP1, DP2, DR2, ST1, ST2, WL1, WL2, WL9 and WR3 QA files: all pass.
+- Depot match guards (`tools/match_guards.sh test_match_guards depot`, 16 seeds): every seed plays out (122 rounds,
+  normal) and easy and hard pass (the easy and hard test ran on its own after the first run hit the 1700 s cap on
+  this busy machine).
+- Woodland match guard, Elimination at Normal (test_woodland_guards, 16 seeds, stepped trunks, run on its own with a
+  long timeout): passes, 128 rounds, 1 to the overtime flag.
+- gdlint on every changed file, `tools/changelog.sh check`, `python3 tools/wiki.py check`: pass.
+- Load, headless, busy cloud machine (load 7 to 14): Woodland's MapLevel build was one 0.6 to 1.1 s frame; its
+  pieces are now 10 to 120 ms each, and the grass collider is 0.2 to 0.6 s.
+- No pictures: the changes are collision and loading only, and nothing on screen changes.
+
+#### For the owner to test
+- Woodland and The Street: graze BBs past a tree trunk's front corners (they fly on) and past its back (the roots
+  stop them). Depot: shoot past a drum cluster's corner and between two barrels' curves.
+- Load Woodland, Depot and The Street: the loading screen should keep moving. Note any frame that freezes.
+- The Street's Elimination and Depot's Attack / Defend: does either lean show in play?
+
+#### CI fix: a magazine lost to the level
+
+CI's magazine guard failed on the first push (Woodland, seed 5): the stepped trunk left a corner open that the old box
+closed, so a bot tossed from 2.6 m; the asker kept walking, the re-aimed arc met the bark and the magazine was lost,
+and the ask ended with the full 20 s `bot_ask_gap`, past the guard's 10 s. The steps are right there (the bark itself
+is hit about 7 cm further on). `MagShare.step` now ends an ask whose last toss met the level with no wait, as it already
+did when a giver asks for its own; caught tosses and lapsed asks keep their gaps, for players too. `test_mag_share`'s
+wall test asserts it (the old code fails it). Critic 8/8, QA and performance Pass on the commit.

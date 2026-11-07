@@ -43,7 +43,8 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
   spread over the hall so the team colours stay the loudest.
 - **Props:** the drums, barrels, the Lounge's sofa and the racking are free CC0 models: teal drums four to a pallet,
   crimson steel barrels in pairs, a violet sofa, and steel shelving stocked with cartons on every rack. Each fills the
-  space its block did, so what you see is what stops a BB. The walls, crates and containers are still plain blocks in
+  space its block did, so what you see is what stops a BB; a BB grazing past a round drum or barrel flies on by its
+  curve instead of stopping at a square corner. The walls, crates and containers are still plain blocks in
   the site's colours until the final models.
 
 ![The West tunnel, lit only from its ends](images/depot-tunnel.jpg)
@@ -82,7 +83,8 @@ defenders in the east camp.
   meadow floor, and the violet truck and teal crates carrying the colour, with nothing near a team's blue or orange.
 - **Long views, few walls:** the Ridge looks 86 m down onto the Fort; elsewhere a lane's longest line is under 80 m.
   Cover is logs, log stacks, tyres, crates, the violet truck and the trunks of the trees themselves, all free CC0
-  models; each stops a BB at its block, a little wide of a round trunk. The thickets of spruce at the edges and between
+  models; each stops a BB about where you see it, a round trunk by its bark (its roots fill its back corners). The
+  thickets of spruce at the edges and between
   the lanes can't be entered or seen through.
 - **Ferns** grow knee to hip high in eight beds where you'd want to hide, and **bushes** stand taller. Nobody sees you
   through more than about half a metre of leaves, so crouch in a fern bed to vanish; you walk straight through ferns

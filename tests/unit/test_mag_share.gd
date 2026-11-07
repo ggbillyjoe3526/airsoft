@@ -293,6 +293,12 @@ func test_a_toss_whose_catcher_steps_behind_a_wall_is_lost_where_it_meets_it() -
 	assert_eq(_held(s), before - rifle.mag_size)
 	assert_eq(b.mag.coming, 0)
 	assert_eq(b.mag.asked, -1, "the ask ends with it")
+	# BP7 (maps): nothing came of the ask, so the catcher may ask again at once rather than wait its gap (a bot's 20 s)
+	# empty-handed, as a bot whose toss met a trunk on Woodland did.
+	assert_eq(b.mag.next_ask, s.time, "free to ask again at once")
+	s.events.clear()
+	ms.press(b, s, true)
+	assert_eq(b.mag.asked, 0, "and asks again")
 
 
 ## Character 0 presses to toss character 1 (asking it) and the step flies it out: whether it was caught, never lost.

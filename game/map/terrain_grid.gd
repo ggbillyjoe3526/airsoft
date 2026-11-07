@@ -180,53 +180,85 @@ static func _quad_indices(out: PackedInt32Array, a: int, b: int, c: int, d: int)
 func ground_lattice() -> PackedFloat64Array:
 	var out := PackedFloat64Array()
 	out.resize((ground_cols + 1) * (ground_rows + 1))
-	for j in ground_rows + 1:
+	fill_lattice(out, 0, ground_rows + 1)
+	return out
+
+
+## Rows `from_row` to `to_row` (not included) of ground_lattice() written into `out`, already sized as it is: a
+## loading screen's slice of it (MapLevel).
+func fill_lattice(out: PackedFloat64Array, from_row: int, to_row: int) -> void:
+	for j in range(from_row, mini(to_row, ground_rows + 1)):
 		for i in ground_cols + 1:
 			out[j * (ground_cols + 1) + i] = height_at(min_x + i * ground_cell, min_z + j * ground_cell)
-	return out
 
 
 ## The ground's triangles on each surface (indexed by RayHit.Surface, `count` of them), three vertices a triangle:
 ## each ground square two, split as its cell is (a square lies inside one of its cell's triangles or across the
 ## diagonal, so these are the very triangles height_at reads) and wound as `mesh_indices`. Jolt's trimesh, a body per
-## surface.
-func surface_faces(count: int) -> Array[PackedVector3Array]:
-	# Counted first, then each surface's squares written into one array at its own offset, then cut apart.
-	var start := PackedInt32Array()
-	start.resize(count + 1)
+## surface. `given` is ground_lattice() when it is already worked out. In slices: `faces_begin`, `fill_faces` over
+## every row, then `faces_cut`.
+func surface_faces(count: int, given: PackedFloat64Array = PackedFloat64Array()) -> Array[PackedVector3Array]:
+	var faces := faces_begin(count)
+	fill_faces(faces, given if not given.is_empty() else ground_lattice(), 0, ground_rows)
+	return faces_cut(faces)
+
+
+## surface_faces under way: each surface's triangles written into one array at its own offset (counted first), then
+## cut apart.
+class Faces:
+	extends RefCounted
+	var count: int = 0
+	var start: PackedInt32Array = PackedInt32Array()
+	var fill: PackedInt32Array = PackedInt32Array()
+	var all: PackedVector3Array = PackedVector3Array()
+
+
+## surface_faces' start: the squares counted on each of `count` surfaces.
+func faces_begin(count: int) -> Faces:
+	var f := Faces.new()
+	f.count = count
+	f.start.resize(count + 1)
 	for s in surfaces:
 		if s < count:
-			start[s + 1] += 6
+			f.start[s + 1] += 6
 	for s in count:
-		start[s + 1] += start[s]
-	var all := PackedVector3Array()
-	all.resize(start[count])
-	var fill := start.slice(0, count)
-	var lattice := ground_lattice()
+		f.start[s + 1] += f.start[s]
+	f.all.resize(f.start[count])
+	f.fill = f.start.slice(0, count)
+	return f
+
+
+## Ground rows `from_row` to `to_row` (not included) of squares written into `f`, their corners from `lattice`
+## (ground_lattice()).
+func fill_faces(f: Faces, lattice: PackedFloat64Array, from_row: int, to_row: int) -> void:
 	var vx := ground_cols + 1
-	for j in ground_rows:
+	for j in range(from_row, mini(to_row, ground_rows)):
 		var z0 := min_z + j * ground_cell
 		var z1 := z0 + ground_cell
 		for i in ground_cols:
 			var s := surfaces[j * ground_cols + i]
-			if s >= count:
+			if s >= f.count:
 				continue
 			var x0 := min_x + i * ground_cell
 			var x1 := x0 + ground_cell
 			var k := j * vx + i
 			var a := Vector3(x0, lattice[k], z0)
 			var d := Vector3(x1, lattice[k + vx + 1], z1)
-			var f := fill[s]
-			all[f] = a
-			all[f + 1] = Vector3(x1, lattice[k + 1], z0)
-			all[f + 2] = d
-			all[f + 3] = a
-			all[f + 4] = d
-			all[f + 5] = Vector3(x0, lattice[k + vx], z1)
-			fill[s] = f + 6
+			var at := f.fill[s]
+			f.all[at] = a
+			f.all[at + 1] = Vector3(x1, lattice[k + 1], z0)
+			f.all[at + 2] = d
+			f.all[at + 3] = a
+			f.all[at + 4] = d
+			f.all[at + 5] = Vector3(x0, lattice[k + vx], z1)
+			f.fill[s] = at + 6
+
+
+## surface_faces' end: `f`'s triangles, a surface's array each.
+func faces_cut(f: Faces) -> Array[PackedVector3Array]:
 	var out: Array[PackedVector3Array] = []
-	for s in count:
-		out.append(all.slice(start[s], start[s + 1]))
+	for s in f.count:
+		out.append(f.all.slice(f.start[s], f.start[s + 1]))
 	return out
 
 

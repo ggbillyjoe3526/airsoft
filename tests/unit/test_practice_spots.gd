@@ -191,12 +191,13 @@ func test_lane_points_face_back_down_their_lane_and_the_other_end_faces_your_sta
 func test_crouched_figures_movers_and_swingers_stand_where_they_fit() -> void:
 	var crouched := 0
 	var movers := 0
-	var swingers := 0
+	var swingers: Dictionary[String, int] = {}
 	for id in cases:
+		swingers[id] = 0
 		for s in cases[id].specs:
 			crouched += 1 if s.crouched else 0
 			movers += 1 if s.motion == RangeTarget.Motion.MOVER else 0
-			swingers += 1 if s.motion == RangeTarget.Motion.SWINGER else 0
+			swingers[id] += 1 if s.motion == RangeTarget.Motion.SWINGER else 0
 			if s.motion == RangeTarget.Motion.MOVER:
 				assert_eq(s.track, cfg.field_mover_track)
 				assert_true(cfg.field_mover_speeds.has(s.speed))
@@ -204,8 +205,9 @@ func test_crouched_figures_movers_and_swingers_stand_where_they_fit() -> void:
 				assert_eq(s.kind, RangeTarget.Kind.FIGURE)
 	assert_gt(crouched, 0, "behind low cover")
 	assert_gt(movers, 0, "on a lane's leg")
-	# No steel spot on Depot or Woodland has room for a frame; The Street's have (BP3: 9 over its spots).
-	gut.p("swingers on the fields: %d" % swingers)
+	# Every field sets out swingers (BP7: Depot 4, Woodland 3, The Street 2).
+	for id in MAPS:
+		assert_gt(swingers[id], 0, "%s sets out a swinger" % id)
 
 
 ## A swinger's frame fits on open level floor, and not with a wall within its legs' reach.

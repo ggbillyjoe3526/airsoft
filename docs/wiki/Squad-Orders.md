@@ -66,7 +66,7 @@ clear path for its arc, you toss them one (the item then reads **Toss a Mag**); 
 than one full spare magazine, you ask the nearest teammate within <!-- wiki:config mag_share_config.ask_range --> m who has one to spare,
 and a radio click says they heard. Your magazine flies in a short arc into their hands, and theirs into yours, in the
 thrower's own replica colours: nothing is made, the BBs come out of the thrower's pouch. If the catcher steps behind
-a wall while it flies, it is lost at the wall, BBs and all. A toss reaches <!-- wiki:config mag_share_config.toss_range --> m.
+a wall while it flies, it is lost at the wall, BBs and all, and they can ask again at once. A toss reaches <!-- wiki:config mag_share_config.toss_range --> m.
 After an ask ends you can ask again <!-- wiki:config mag_share_config.player_ask_gap --> seconds later. A press that
 can't do anything says why: on the line under the crosshair, or in the wheel's middle when you picked it there
 ("Nobody near has a spare mag that fits", "You still have a full spare mag", "Get closer to Rook to toss a mag"). It

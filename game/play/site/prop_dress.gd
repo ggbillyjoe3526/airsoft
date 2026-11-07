@@ -7,7 +7,7 @@ extends Node3D
 ## drum, barrel or sofa casts its own shadow (its box draws nothing, SiteSurface.core_of, and leaves MapLevel's shadow
 ## caster); shelving casts none, its rack's backing box still does. Each prop is drawn in its own shade times, while a
 ## bake is drawn, the baked light near it (`relight`, BP7). Scenery only: no collider, no nav cell; the blocks' boxes
-## are still what BBs and bodies meet.
+## are what BBs and bodies meet, a round prop's (a trunk, a drum, a barrel) as its stepped boxes (RoundSteps).
 
 ## A prop takes the baked light near this far (m) over its foot, from faces facing any way (BakedLightNear.at).
 const LIGHT_LIFT := 0.5
