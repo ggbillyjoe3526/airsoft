@@ -19,6 +19,7 @@
 | 2026-11-07 | part 3: 2 | Opus 5.5 | green | Accept 7/8 | – (two comments still said the bomb leaves the eyes, fixed in bea5b1d) |
 | 2026-11-07 | part 4: 1 | Opus 5.5 | green | Retry 6/8 | the round props' sizes copied from the dress config, notes that overclaimed the loading |
 | 2026-11-07 | part 4: 2 | Opus 5.5 | green | Accept 8/8 | – (merge over parts 1 to 3 re-checked; an orphan test past COLLIDERS added) |
+| 2026-11-07 | part 4: 3 | Opus 5.5 | CI: magazine guard red | Accept 8/8 | – (a toss lost to the level now ends the ask with no wait, 3b06375) |
 
 ## The pass
 
@@ -519,3 +520,12 @@ shapes, now in the level's last piece (REST); a level freed part-built frees the
   stop them). Depot: shoot past a drum cluster's corner and between two barrels' curves.
 - Load Woodland, Depot and The Street: the loading screen should keep moving. Note any frame that freezes.
 - The Street's Elimination and Depot's Attack / Defend: does either lean show in play?
+
+#### CI fix: a magazine lost to the level
+
+CI's magazine guard failed on the first push (Woodland, seed 5): the stepped trunk left a corner open that the old box
+closed, so a bot tossed from 2.6 m; the asker kept walking, the re-aimed arc met the bark and the magazine was lost,
+and the ask ended with the full 20 s `bot_ask_gap`, past the guard's 10 s. The steps are right there (the bark itself
+is hit about 7 cm further on). `MagShare.step` now ends an ask whose last toss met the level with no wait, as it already
+did when a giver asks for its own; caught tosses and lapsed asks keep their gaps, for players too. `test_mag_share`'s
+wall test asserts it (the old code fails it). Critic 8/8, QA and performance Pass on the commit.

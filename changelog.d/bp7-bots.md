@@ -5,8 +5,8 @@
   keeps your pace.
 - A bot waiting for a magazine from a teammate who is in a fight now waits behind cover instead of in the open.
 - A magazine tossed to a teammate who steps behind a wall while it flies is now lost at the wall, instead of flying
-  through it. You can only toss when the magazine's arc has a clear path: under a low lintel, or from a crouch
-  behind cover taller than your hand, the toss waits.
+  through it, and the catcher (you or a bot) can ask again at once. You can only toss when the magazine's arc has a
+  clear path: under a low lintel, or from a crouch behind cover taller than your hand, the toss waits.
 - A bot doesn't wait 15 s for a magazine from a teammate who is asking for one too. It looks elsewhere at once.
 - A magazine in flight now shows the thrower's replica paint, as it does in their hands.
 - Hard bots hold the edge of a tall bush as a corner, the way they hold a wall's edge.

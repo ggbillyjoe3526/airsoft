@@ -57,3 +57,32 @@ Notes (not blocking):
   never tests the new out-of-tree window that the predelete code handles. Building past COLLIDERS (about 40 pieces) would
   cover it.
 - I did not re-run test_seed_replay or test_bp7_graphics; the worker reports them passing.
+Task: none (BP7 maps, CI magazine-guard fix) · commit 3b06375 on bp7-maps-r (parent 514e8bd)
+Attempt: short review of one commit
+Head: 3b06375
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
+Score: 8/8 → Accept
+Root cause:
+- The loss itself is the rule working. BP7 decided that a toss whose path meets the level is lost, and the
+  catcher moved, so the arc met the trunk. What broke the guard is what came after: an asker whose magazine was lost
+  to the level, through no fault of its own, sat out the full bot_ask_gap (20 s) empty-handed.
+- Ending the ask with no wait matches the BP7 rule for a giver that asks for one of its own (mag_share.gd, the
+  `_giver_asking` branch). This fixes the guard's real failure, not a symptom.
+- Refusing tosses to a moving catcher would be wrong:
+  - Players toss to and catch on the move as a matter of course.
+  - The catcher can move after the release anyway, so the check would block most tosses without preventing this.
+  - Neither path (the check before the toss or the one in flight) can know where the catcher will go.
+Optional, Beta polish: a bot catcher with mag.coming > 0 could hold still while it flies. BotMagShare.waiting
+already returns true for it, but fights, cover, orders and the pole come first.
+Players: the rule is sound.
+- The gap stops ask spam. A loss to the level costs the giver a whole magazine of BBs, so asking again at once gains
+  the catcher nothing.
+- A player who dodges behind walls can drain a bot giver only down to keep_mags.
+- Caught tosses and lapsed asks keep their gaps. The reset fires only when the last toss in the air was the one lost
+  (inside `coming == 0`).
+Test: it fails without the fix. In the wall test s.time stays 0 and the catcher is not a player (mag.player is false),
+so the old code sets next_ask to 20.0, not 0, and the assert_eq fails. The follow-up press would then be refused as
+WAIT, leaving asked at -1, not 0.
+Docs: the note and the wiki are true. The note says "A teammate whose magazine was lost". "You or a teammate" would
+also cover the player case that the wiki states. That is wording only, not a fail.
+Before merge: CI's magazine guard (Woodland seed 5) must pass on this head. The commit doesn't say it was re-run.

@@ -316,6 +316,10 @@ func step(state: GameState, live: bool, dt: float) -> void:
 			r.mag.coming = maxi(0, r.mag.coming - 1)
 			if r.mag.asked >= 0 and r.mag.coming == 0:
 				_end_ask(r, state.time)
+				if met:
+					# Lost to the level on its way (BP7): nothing came of the ask, so the catcher may ask again at once,
+					# as when its giver asks (below), rather than wait its gap empty-handed.
+					r.mag.next_ask = state.time
 		var caught := live and r != null and Elimination.is_in_play(r) and not met
 		var e := state.events.add(GameEvent.Kind.MAG_CATCH if caught else GameEvent.Kind.MAG_LOST)
 		e.actor = t.from_id
