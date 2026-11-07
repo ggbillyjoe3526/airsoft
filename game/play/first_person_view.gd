@@ -21,11 +21,10 @@ var camera: Camera3D = null
 ## The view's own zoom right now (1: none), as the camera draws it: the HUD's crosshair is sized on it, not on the
 ## turn's zoom, which through a scope's glass is the glass's (BP3).
 var view_zoom: float = 1.0
-## How much the view and a scope's glass magnify with the sight up at all (BP6): the view's zoom raised (1 lowered) and
-## the glass's as it is turned (0: no glass zooms); their targets, not eased, so the figures' detail lines
-## (FigureConfig.zoomed_lines) change once a raise or a turn, never every frame.
+## The most the eye magnifies with the sight up at all (1: lowered): the view's zoom raised, or a scope's glass's as it
+## is turned; its target, not eased, so the figures' detail lines (FigureConfig.zoomed_lines) change once a raise or a
+## turn, never every frame (BP6).
 var detail_zoom: float = 1.0
-var glass_zoom: float = 0.0
 ## Seconds of simulation time per real second (the pacer's rate: the Dev settings' game speed); the recoil follows over
 ## the simulation's time, so slowed it eases between the ticks instead of stepping with them.
 var sim_rate: float = 1.0
@@ -120,8 +119,8 @@ func update(c: Character, input: PlayerInput, fraction: float, delta: float, aim
 	# Scope), not the view round it (BP3: Scale with zoom did nothing through a scope).
 	input.zoom = lerpf(1.0, maxf(c.armament.zoom_now(), 1.0), aim) if r != null and r.zoom_in_glass else zoom
 	view_zoom = zoom
-	detail_zoom = maxf(aimed_zoom(r, _view), 1.0) if aim > 0.0 else 1.0
-	glass_zoom = glass_zoom_of(r, c.armament.zoom_now()) if aim > 0.0 else 0.0
+	var raised := maxf(aimed_zoom(r, _view), glass_zoom_of(r, c.armament.zoom_now()))
+	detail_zoom = maxf(raised, 1.0) if aim > 0.0 else 1.0
 	camera.fov = _view.vertical_fov(zoom)
 
 

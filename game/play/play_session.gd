@@ -167,8 +167,6 @@ var _figure_lines: Vector2 = Vector2.ZERO
 ## The Mesh detail and the eye's zoom the lines were drawn for (FigureConfig.zoomed_lines).
 var _figure_detail: GraphicsQuality.MeshDetail = GraphicsQuality.MeshDetail.HIGH
 var _figure_zoom: float = 1.0
-## A scope glass's zoom while raised (0: none): the figures in its view cone take its lines (BP6), the rest the view's.
-var _glass_zoom: float = 0.0
 ## The magazines the rigged figures throw in their reloads (FI4): a fixed pool built with the models, cleared each
 ## round.
 var _thrown: ThrownMagazines = null
@@ -1147,12 +1145,9 @@ func _process(delta: float) -> void:
 	var aim := _aim.update(watched, _tuning.movement, delta * _pacer.rate)
 	_eyes.sim_rate = _pacer.rate
 	_eyes.update(watched, _input, fraction, delta, aim, watched == player)
-	if _eyes.detail_zoom != _figure_zoom or _eyes.glass_zoom != _glass_zoom:
+	if _eyes.detail_zoom != _figure_zoom:
 		_figure_zoom = _eyes.detail_zoom
-		_glass_zoom = _eyes.glass_zoom
 		_set_figure_lines()
-	if _glass_zoom > _figure_zoom:
-		_set_glass_lines()
 	var look := -_eyes.global_basis.z
 	# Inspect (IN1): your own replica, while you are in play and looking through your own eyes.
 	if _input.take_inspect() and watched == player and Elimination.is_in_play(player):
@@ -1721,23 +1716,13 @@ func _apply_graphics(values: GraphicsQuality) -> void:
 	_set_figure_lines()
 
 
-## The figures' detail lines for the Mesh detail and the view's zoom (a sight raised: BP6), set when they change.
+## The figures' detail lines for the Mesh detail and the eye's zoom (a sight raised: BP6), set when they change.
 func _set_figure_lines() -> void:
 	_figure_lines = _play.figures.zoomed_lines(_figure_detail, _figure_zoom)
 	for f in _figures:
 		if f.lod_lines() != _figure_lines:
 			f.set_lod_lines(_figure_lines)
 
-
-## While a scope's glass zooms past the view (BP6): a figure in the glass's view cone (as wide as the unzoomed view over
-## the glass's zoom, its corners included, so never narrower than the glass draws) takes the glass's lines, the rest
-## the view's, so only what the glass shows is drawn nearer. A figure's lines change only as it crosses the cone's edge.
-func _set_glass_lines() -> void:
-	var size := _eyes.camera.get_viewport().get_visible_rect().size
-	var corner := FigureView.corner_of(_play.view.vertical_fov(_glass_zoom), size.x / size.y if size.y > 0.0 else 1.0)
-	var glass := _play.figures.zoomed_lines(_figure_detail, _glass_zoom)
-	FigureView.set_glass_lines(_figures, _eyes.camera.global_transform, corner, glass, _figure_lines,
-			_play.figures.glass_cone_radius)
 
 
 ## The automatic step-down's watch.

@@ -40,16 +40,6 @@ func test_the_view_zooms_as_raised_and_a_scopes_glass_as_turned() -> void:
 	assert_almost_eq(FirstPersonView.glass_zoom_of(_scope(4.0, 0.0), 0.0), 4.0, 1e-6, "a fixed scope")
 
 
-func test_the_glass_cone_holds_what_the_glass_shows_and_not_the_view_round_it() -> void:
-	var corner := FigureView.corner_of(view.vertical_fov(6.0), 16.0 / 9.0)
-	var eye := Transform3D.IDENTITY
-	assert_true(FigureView.in_cone(eye, corner, Vector3(0.0, 0.0, -40.0), 1.1), "straight down the scope")
-	assert_true(FigureView.in_cone(eye, corner, Vector3(2.0, 0.0, -40.0), 1.1), "inside the glass's edge")
-	assert_false(FigureView.in_cone(eye, corner, Vector3(15.0, 0.0, -40.0), 1.1), "out at the view's side")
-	var wide := FigureView.corner_of(view.vertical_fov(1.0), 16.0 / 9.0)
-	assert_lt(corner.y, wide.y, "narrower than the unzoomed view")
-
-
 func test_a_figure_40_m_off_through_6x_draws_its_nearest_level_and_its_radio() -> void:
 	var b := FigureBody.new()
 	assert_true(b.setup(models, FigureMix.HUMAN, 0, 0, Color.RED, 0.0,
@@ -280,22 +270,3 @@ func test_only_parts_on_the_bodys_skin_fold_and_heads_that_dont_fold_share_one_m
 			else (c.skeleton.get_node(^"Body") as MeshInstance3D).skin)
 	assert_true(pack.visible, "the pack, on another skin, draws itself")
 
-
-func test_through_the_glass_only_the_figures_it_shows_take_its_lines() -> void:
-	var figures: Array[FigureView] = []
-	for x: float in [0.0, 15.0]:
-		var c := Character.new(figures.size() + 1, 1, Vector3(x, 0.0, -40.0), 0.0, ReplicaStats.default_loadout())
-		var v := FigureView.new()
-		add_child_autofree(v)
-		v.setup(c, Color.BLUE, HitConfig.new(), GameTheme.font(800), false, [], 0.0, config)
-		v.set_body(models, FigureMix.HUMAN, config.lod_high)
-		v.update(c, 1.0)
-		figures.append(v)
-	var glass := config.zoomed_lines(GraphicsQuality.MeshDetail.HIGH, 6.0)
-	var plain := config.zoomed_lines(GraphicsQuality.MeshDetail.HIGH, view.aim_zoom)
-	var corner := FigureView.corner_of(view.vertical_fov(6.0), 16.0 / 9.0)
-	FigureView.set_glass_lines(figures, Transform3D.IDENTITY, corner, glass, plain, config.glass_cone_radius)
-	assert_eq(figures[0].lod_lines(), glass, "the figure in the glass: drawn as near as it looks")
-	assert_eq(figures[1].lod_lines(), plain, "the one beside it, in the view round the glass: the view's lines")
-	assert_eq(figures[0].body().merged[0].visibility_range_end, glass.x, "its body takes them")
-	await get_tree().process_frame

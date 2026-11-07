@@ -10,9 +10,7 @@ extends SceneTree
 ## Arguments after `--`: `--perf`, `--seconds N` (default 30), `--far` (the eye at the Alpha spawn headless too, so the
 ## far figures take far_stride; by default it stands in the middle, every figure posed every frame), `--no-raise` (no
 ## wall ray, FB5's before), `--zoom N` (the detail lines at N times, as through an N x scope: FigureConfig.zoomed_lines;
-## with `--perf` it logs the frame's draws and primitives too), `--glass` (with `--zoom`: as PlaySession does through a
-## scope's glass, only the figures in the glass's cone, the eye looking at the field's middle, take those lines; the
-## rest the view's aim zoom; the check timed with the animation).
+## with `--perf` it logs the frame's draws and primitives too).
 
 const FIGURES := 11
 const SECONDS := 30.0
@@ -70,12 +68,7 @@ func _run() -> void:
 	field.add_child(camera)
 	camera.global_position = eye
 	camera.global_rotation = Vector3(0.0, spawn.yaw if far else 0.0, 0.0)
-	var glass := args.has("--glass") and zoom > 1.0
-	if glass:
-		camera.look_at(Vector3.UP, Vector3.UP)
-	var corner := FigureView.corner_of(play.view.vertical_fov(zoom), 16.0 / 9.0)
-	var glass_lines := play.figures.zoomed_lines(GraphicsQuality.MeshDetail.HIGH, zoom)
-	var view_lines := play.figures.zoomed_lines(GraphicsQuality.MeshDetail.HIGH, play.view.aim_zoom if glass else zoom)
+	var view_lines := play.figures.zoomed_lines(GraphicsQuality.MeshDetail.HIGH, zoom)
 	var load_start := Time.get_ticks_usec()
 	var models := FigureModels.new(play.figures)
 	models.load_kinds()
@@ -114,9 +107,6 @@ func _run() -> void:
 		for i in FIGURES:
 			_script(cast[i], i, t, tuning.hits)
 		var a0 := Time.get_ticks_usec()
-		if glass:
-			FigureView.set_glass_lines(views, camera.global_transform, corner, glass_lines, view_lines,
-					play.figures.glass_cone_radius)
 		for i in FIGURES:
 			views[i].update(cast[i], 1.0, TICK)
 			views[i].animate(cast[i], 1.0, TICK, eye)
@@ -137,11 +127,6 @@ func _run() -> void:
 		last = now
 	print("[figure_bench] %d figures, %d frames (%.0f s), models %.1f ms, set_body %.1f ms, eye %s, lines x%.1f" % [
 			FIGURES, frames, seconds, loaded / 1000.0, built / 1000.0, "at the spawn" if far else "in the middle", zoom])
-	if glass:
-		var inside := 0
-		for v in views:
-			inside += 1 if v.lod_lines() == glass_lines else 0
-		print("[figure_bench] through the glass: %d of %d figures in its cone at the end" % [inside, FIGURES])
 	var merged := models.merged_bytes()
 	print("[figure_bench] merged body meshes: %d, %d bytes" % [merged.x, merged.y])
 	if perf:
