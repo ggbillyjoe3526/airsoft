@@ -85,6 +85,46 @@ func test_a_piece_no_one_sees_over_the_walls_is_left_out() -> void:
 	v.free()
 
 
+func test_a_piece_seen_only_past_a_nearer_one_is_left_out() -> void:
+	var low := '{"kind": "shed", "x": 0, "z": -14, "width": 6, "depth": 4, "height": 3}'
+	var near := '{"kind": "shed", "x": 0, "z": -16, "width": 30, "depth": 4, "height": 10}'
+	var far := '{"kind": "shed", "x": 0, "z": -30, "width": 6, "depth": 4, "height": 10}'
+	var alone := _yard(YARD.replace(low, far))
+	var v := SkylineView.build(alone, play.skyline, play.lighting, body.stand_eye_height)
+	assert_eq(v.kept.size(), 2, "alone, the far 10 m shed shows over the wall, as the chimney does")
+	v.free()
+	var both := _yard(YARD.replace(low, "%s, %s" % [far, near]))
+	v = SkylineView.build(both, play.skyline, play.lighting, body.stand_eye_height)
+	assert_eq(v.left_out.size(), 1, "the far shed hides behind the near one")
+	if v.left_out.size() == 1:
+		assert_eq(v.left_out[0].at, Vector2(0, -30), "the far shed is the one left out")
+	assert_eq(v.kept.size(), 2, "the near shed and the chimney, which rises over it")
+	v.free()
+
+
+func test_only_solid_pieces_hide_and_a_hill_s_core_stays_inside_its_mound() -> void:
+	for kind: String in ["crane", "mast", "watchTower", "chimney", "fuselage", "waterTower"]:
+		var p := SkylinePiece.new()
+		p.kind = StringName(kind)
+		p.width = 6.0
+		p.depth = 6.0
+		p.height = 20.0
+		assert_eq(SkylineShapes.hides_of(p, play.skyline).size(), 0, "%s hides nothing" % kind)
+	var hill := SkylinePiece.new()
+	hill.kind = &"hill"
+	hill.width = 40.0
+	hill.depth = 20.0
+	hill.height = 10.0
+	var box := SkylineShapes.hides_of(hill, play.skyline)
+	assert_eq(box.size(), 2, "one core box")
+	if box.size() == 2:
+		var corner := Vector2(box[1].x / 20.0, box[1].z / 10.0).length()
+		var under := 10.0 * SkylineShapes.mound_at(corner / cos(PI / play.skyline.sides), play.skyline)
+		assert_true(box[1].y <= under + 1e-4, "the core's top (%.2f m) stays under the mound at its corner (%.2f m)"
+				% [box[1].y, under])
+		assert_gt(box[1].y, 3.0, "and it hides something")
+
+
 func test_one_mesh_no_collider_and_the_layout_unchanged() -> void:
 	var meshes := view.find_children("*", "MeshInstance3D", true, false)
 	assert_eq(meshes.size(), 1, "one mesh, one draw call")

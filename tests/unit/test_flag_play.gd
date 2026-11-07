@@ -57,7 +57,11 @@ func test_the_ring_takes_the_colour_of_the_side_working_the_rope() -> void:
 
 
 func test_the_pole_hands_its_materials_to_the_prewarm() -> void:
-	assert_eq(_view().materials().size(), 2, "the cloth and the ring")
+	# the pole's, fittings' and rope's paints too, since they draw in the shared light (BP7)
+	var materials := _view().materials()
+	assert_eq(materials.size(), 5, "the cloth, the ring, the pole, its fittings and the rope")
+	for m in materials:
+		assert_not_null(m, "every one made")
 
 
 func test_the_pole_is_only_drawn_so_bbs_pass_through_it() -> void:

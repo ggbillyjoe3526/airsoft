@@ -103,9 +103,11 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID }
 ## detail step's mesh_lod_threshold, GraphicsApply; the simpler meshes are generated on import). The other models are
 ## one MultiMesh each, few draw calls for few triangles.
 @export var chunk: float = 20.0
-## A model laid this many times or more is chunked too (Woodland's trunks, spruces and cordwood, WR3), so a field's
-## worth of it culls by area; fewer are one MultiMesh.
+## A model laid this many times or more is chunked too (Woodland's trunks, spruces and cordwood, WR3), in squares
+## `many_chunk` m across, so a field's worth of it culls by area; fewer are one MultiMesh. Twice the shelving's chunk
+## (BP7): Woodland's props drew 167 of a High frame's 445 draws in 20 m chunks, 93 in 40 m ones.
 @export var chunk_from: int = 64
+@export var many_chunk: float = 40.0
 ## The props' material: roughness, and metalness.
 @export var roughness: float = 0.7
 @export var metallic: float = 0.0

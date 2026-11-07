@@ -3,8 +3,9 @@ extends Node3D
 ## The smoke and flash bombs (SF1), drawn from the state: each slot of GameState.grenades as its bomb's model (BL9:
 ## the smoke's canister, the flash's pull-ring tube), its stripe or band green for smoke and violet for flash (off
 ## both team hues), spinning while it flies and drawn between ticks; each smoke's
-## cloud as PUFFS soft camera-facing puffs filling its ellipsoid (Grenades.cloud_middle, cloud_scale, cloud_density),
-## lighter at the top, turning slowly, dimmed by night; a flash's bang as a burst of light and a flare where it went off.
+## cloud as up to PUFFS soft camera-facing puffs filling its ellipsoid (Grenades.cloud_middle, cloud_scale,
+## cloud_density; as many as the Mesh detail's EffectsConfig.smoke_puffs, the fewer the larger: `set_puffs`), lighter
+## at the top, turning slowly, dimmed by night; a flash's bang as a burst of light and a flare where it went off.
 ## Through the eyes the view is through, a wash over the screen: white while a flash dazzles them (fading over its last
 ## DAZZLE_FADE s; softer with Reduced motion on), and the smoke's colour while the eyes are inside a cloud. Reads the
 ## state and the tick's events; owns no rule. Made once; a frame allocates nothing.
@@ -23,7 +24,7 @@ const LIE := -PI * 0.5
 const BODY_COLOURS: Array[Color] = [Color("2b2d31"), Color("4f9d6a"), Color("7d5bc4")]
 const BODY_ROUGHNESS := 0.6
 const SPIN := 2.0
-## Each cloud's puffs: how many, each one's size as a share of the cloud's width (at most; each its own share of it),
+## Each cloud's puffs: how many at most, each one's size as a share of the cloud's width (at most; each its own share),
 ## its colour from the bottom of the cloud to the top, its alpha at full density, and how fast the cloud turns (rad/s).
 ## The puffs' places come from their own seeded stream: every cloud alike.
 const PUFFS := 28
@@ -82,6 +83,9 @@ var _layout := PackedVector3Array()
 var _sizes := PackedFloat32Array()
 ## Whether each slot's puffs are shown now (hidden ones are scaled away once).
 var _clouded := PackedByteArray()
+## How many of each cloud's PUFFS are drawn (the first ones of the layout), and how much larger each is drawn for it.
+var _shown: int = PUFFS
+var _grow: float = 1.0
 var _shade: float = 1.0
 var _light: OmniLight3D = null
 var _flare: MeshInstance3D = null
@@ -250,6 +254,35 @@ func set_arms_kind(kind: int) -> void:
 		_arms.set_kind(kind)
 
 
+## Each cloud drawn as `count` of its PUFFS (at least 1), each sqrt(PUFFS / count) times as wide, so the cloud covers
+## as much and looks as thick: set by the graphics' Mesh detail (EffectsConfig.smoke_puffs_at), on a change only. The
+## puffs left out are scaled away at once; a cloud in the air is drawn again on the next frame.
+func set_puffs(count: int) -> void:
+	var n := clampi(count, 1, PUFFS)
+	if n == _shown:
+		return
+	_shown = n
+	_grow = sqrt(float(PUFFS) / n)
+	if _puffs == null:
+		return
+	var mm := _puffs.multimesh
+	for i in mm.instance_count:
+		mm.set_instance_transform(i, Transform3D(Basis.from_scale(Vector3.ZERO), Vector3.ZERO))
+	_clouded.fill(0)
+
+
+## How many puffs each cloud draws now, for tests.
+func puffs_shown() -> int:
+	return _shown
+
+
+## Puff `k`'s width (m) in a cloud `rx` m wide across its radius: none for one not drawn (`set_puffs`).
+func puff_width(k: int, rx: float) -> float:
+	if k < 0 or k >= _shown:
+		return 0.0
+	return rx * 2.0 * PUFF_SIZE * _sizes[k] * _grow
+
+
 ## The puffs' and the bombs' materials, and your arms' and the bomb in hand's (depth pressed), for ShaderPrewarm.
 func materials() -> Array[Material]:
 	var out: Array[Material] = [(_puffs.multimesh.mesh as PrimitiveMesh).material, _flare_paint]
@@ -400,9 +433,9 @@ func _draw_cloud(i: int, g: Grenade) -> void:
 	var ry := _cfg.smoke_height * size
 	# The cloud's own time turns it: every cloud turns as its smoke ages.
 	var turn := Basis(Vector3.UP, TURN * g.smoking)
-	for k in PUFFS:
+	for k in _shown:
 		var u := turn * _layout[k]
-		var width := rx * 2.0 * PUFF_SIZE * _sizes[k]
+		var width := puff_width(k, rx)
 		var at := middle + Vector3(u.x * rx, u.y * ry, u.z * rx)
 		at.y = maxf(at.y, g.position.y + width * PUFF_FLOOR)
 		mm.set_instance_transform(first + k, Transform3D(Basis.from_scale(Vector3.ONE * width), at))

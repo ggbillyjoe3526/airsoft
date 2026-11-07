@@ -111,6 +111,10 @@ var areas: Array[MapAreas.Area] = []
 var ambience: StringName = AmbienceConfig.DEFAULT_ID
 ## The bake of its light (`bakedLight.file` in the file: BakeConfig.path_for), or empty for a map drawn without one.
 var baked_light_file: String = ""
+## Its dim rooms (`bakedLight.dim` in the file, BP7: Depot's Lounge): each a box on the ground (x from position.x to
+## end.x, z from position.y to end.y) where the bake's light is `baked_dim_light`'s share of the rest's, at every height.
+var baked_dim_boxes: Array[Rect2] = []
+var baked_dim_light: PackedFloat32Array = PackedFloat32Array()
 ## The skyline round the field (`dressing.skyline` in the file, its known kinds): scenery out of reach, drawn by
 ## SkylineView; empty on a map without one.
 var skyline: Array[SkylinePiece] = []
@@ -500,6 +504,29 @@ func _read_baked_light(raw: Variant) -> void:
 		baked_light_file = file
 	else:
 		warnings.append("bakedLight is not {\"file\": a file name}; drawn without it")
+		return
+	var dims: Variant = (raw as Dictionary).get("dim", [])
+	for d: Variant in dims if dims is Array else []:
+		var box: Variant = (d as Dictionary).get("box") if d is Dictionary else null
+		var light: Variant = (d as Dictionary).get("light") if d is Dictionary else null
+		if not (box is Array and (box as Array).size() == 4 and (light is float or light is int)
+				and float(light) >= 0.0 and float(light) <= 1.0):
+			warnings.append("bakedLight.dim %s is not {\"box\": [x1, x2, z1, z2], \"light\": 0 to 1}; left out"
+					% JSON.stringify(d))
+			continue
+		var b: Array = box
+		var x1 := minf(float(b[0]), float(b[1]))
+		var z1 := minf(float(b[2]), float(b[3]))
+		baked_dim_boxes.append(Rect2(x1, z1, absf(float(b[1]) - float(b[0])), absf(float(b[3]) - float(b[2]))))
+		baked_dim_light.append(float(light))
+
+
+## The share of the bake's light at `at` (x, z): its dim room's (the first holding it), or 1 outside every one.
+func baked_light_at(at: Vector2) -> float:
+	for i in baked_dim_boxes.size():
+		if baked_dim_boxes[i].has_point(at):
+			return baked_dim_light[i]
+	return 1.0
 
 
 ## `lighting`: the presets offered (unknown ones left out; none known keeps day), moonOver and each preset's overrides.

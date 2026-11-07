@@ -2406,6 +2406,12 @@ msgstr "TEXTURE FILTERING"
 msgid "GRAPHICS_MESH_DETAIL"
 msgstr "MESH DETAIL"
 
+msgid "GRAPHICS_OCCLUSION_CULLING"
+msgstr "OCCLUSION CULLING"
+
+msgid "GRAPHICS_OCCLUSION_CULLING_NOTE"
+msgstr "Skips drawing what walls hide. Saves the graphics card, costs the processor a little."
+
 msgid "GRAPHICS_WIND_DUST"
 msgstr "WIND DUST"
 

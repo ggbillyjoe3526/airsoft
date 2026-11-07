@@ -153,6 +153,8 @@ var _torches: TorchBeams = null
 var _own_light: bool = false
 ## The skyline round the field, or null on a map without one (SkylineView).
 var _skyline: SkylineView = null
+## The tall solid blocks as the renderer's occluder (BP7); null on a map with none.
+var _occluders: MapOccluders = null
 ## An indoor field's roof, or null on a field open to the sky (RoofView, DR1).
 var _roof: RoofView = null
 ## The field's hinged doors, or null on a field without (DoorView, DO1).
@@ -165,6 +167,8 @@ var _bushes: BushView = null
 var _site: SiteDress = null
 ## A field with no site dress drawn with CC0 props all the same (Woodland's, WR3; a site's are its SiteDress's).
 var _props: PropDress = null
+## Whether the doors, poles and props were last lit by the baked light (`_relight`, BP7).
+var _relit: bool = false
 ## Scratch for the vault prompt's look ahead each tick.
 var _vault_probe: VaultState = VaultState.new()
 var _figures: Array[FigureView] = []
@@ -395,6 +399,10 @@ func _build_level() -> void:
 	_bushes = BushView.build(_map, _play.woods)
 	if _bushes != null:
 		add_child(_bushes)
+	# What the tall solid blocks hide is left out of the frame with Occlusion culling on (GraphicsApply.apply).
+	_occluders = MapOccluders.build(_map, _play.map_style)
+	if _occluders != null:
+		add_child(_occluders)
 
 
 ## The level's blocks, ground and collision (MapLevel): staged, a frame of its own before the rest of the level step.
@@ -1834,6 +1842,8 @@ func _apply_graphics(values: GraphicsQuality) -> void:
 	GraphicsApply.apply_field(values, _lighting, _dust, null, _level, _kicked, _woods)
 	if _level != null:
 		_level.set_detail(values.mesh_detail)
+		if _level.baked_light_drawn() != _relit:
+			_relight()
 	var contact := GraphicsApply.contact_shadows(values)
 	for f in _figures:
 		f.set_contact_shadow(contact)
@@ -1846,8 +1856,26 @@ func _apply_graphics(values: GraphicsQuality) -> void:
 		_torches.set_own_haze(torch == TorchBeams.Mode.HAZE)
 	if _pools != null:
 		_pools.set_real_count(GraphicsApply.pool_lights(values, _light, _torches != null and _own_light))
+	if _grenades != null:
+		_grenades.set_puffs(_play.effects.smoke_puffs_at(values.mesh_detail))
 	_figure_detail = values.mesh_detail
 	_set_figure_lines()
+
+
+## The doors, poles and props in the baked light near them while it is drawn, in the shared light alone while it
+## isn't (BakedLightNear, BP7): as Baked light switches (they are built in the shared light alone).
+func _relight() -> void:
+	_relit = _level.baked_light_drawn()
+	var lights := _level.baked_lights()
+	if _doors != null:
+		_doors.relight(lights)
+	for f in _flags:
+		f.relight(lights)
+	if _overtime_flag != null:
+		_overtime_flag.relight(lights)
+	var props := _site.props() if _site != null else _props
+	if props != null:
+		props.relight(lights)
 
 
 ## The figures' detail lines for the Mesh detail and the eye's zoom (a sight raised: BP6), set when they change.

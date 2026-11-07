@@ -9,7 +9,9 @@ extends SceneTree
 ## cosine-weighted, against the level's faces (a TriangleMesh: the engine's own ray tree, no physics frame needed).
 ## A ray that meets nothing within `reach`, or meets the open ground where the ground sees the sky straight up, counts as
 ## sky; a ray that meets a face the sun reaches brings back that face's colour times the sun's slant on it: the sun's
-## one bounce. The same blocks give the same bytes.
+## one bounce. In a dim room (`bakedLight.dim`) both are that room's share of what they would be. A vertex hidden
+## inside an abutting block takes its face's nearest open vertex's light (`fill_hidden`). The same blocks give the same
+## bytes.
 
 ## The golden angle (radians): each ray turns this far round the normal from the last, so any number of rays spread
 ## evenly.
@@ -106,13 +108,81 @@ static func bake_map(m: MapData, style: MapStyle, lighting: LightingConfig, cfg:
 			var slant := hn.dot(sun)
 			if slant > 0.0 and world.intersect_segment(lifted, lifted + sun * cfg.sun_reach).is_empty():
 				light += face_albedo[face] * slant
-		bake.sky[v] = _byte(float(open) / dirs.size())
+		# a dim room (MapData.baked_dim_boxes: Depot's Lounge) sees less sky and less of the sun's bounce
+		var dim := m.baked_light_at(Vector2(t.positions[v].x, t.positions[v].z))
+		bake.sky[v] = _byte(dim * float(open) / dirs.size())
 		var k := v * 3
-		var share := 1.0 / dirs.size()
+		var share := dim / dirs.size()
 		bake.bounce[k] = _byte(light.r * share * sun_colour.r)
 		bake.bounce[k + 1] = _byte(light.g * share * sun_colour.g)
 		bake.bounce[k + 2] = _byte(light.b * share * sun_colour.b)
+	fill_hidden(bake, t, m, cfg.lift)
 	return bake
+
+
+## Each vertex whose rays start inside another block (a face's part hidden where a block abuts it) takes the light of
+## the nearest vertex on its face that is not (DP2's row: a hidden vertex's dark spread up to a cell over the face in
+## sight, a soft shade at every joint); a face hidden whole keeps its own. Grid steps over each face (Tiles.grids),
+## breadth first from the vertices in the open.
+static func fill_hidden(bake: BakedLight, t: GreyboxFaces.Tiles, m: MapData, lift: float) -> void:
+	var lo := PackedVector3Array()
+	var hi := PackedVector3Array()
+	for b in m.blocks:
+		lo.append(b.center - b.size * 0.5)
+		hi.append(b.center + b.size * 0.5)
+	var queue := PackedInt32Array()
+	var hidden := PackedByteArray()
+	for g in range(0, t.grids.size(), 3):
+		var first := t.grids[g]
+		var cols := t.grids[g + 1]
+		var count := cols * t.grids[g + 2]
+		var own := t.blocks[first]
+		var face := AABB(t.positions[first], Vector3.ZERO)
+		face = face.expand(t.positions[first + count - 1]).expand(t.positions[first + cols - 1])
+		face = face.expand(t.positions[first + count - cols]).grow(lift * 2.0)
+		var near: Array[int] = []
+		for i in m.blocks.size():
+			if i != own and m.blocks[i].rise == MapData.Rise.NONE and AABB(lo[i], hi[i] - lo[i]).intersects(face):
+				near.append(i)
+		if near.is_empty():
+			continue
+		hidden.resize(count)
+		hidden.fill(0)
+		queue.clear()
+		var any := false
+		for k in count:
+			var p := t.positions[first + k] + t.normals[first + k] * lift
+			for i in near:
+				if p.x > lo[i].x and p.x < hi[i].x and p.y > lo[i].y and p.y < hi[i].y and p.z > lo[i].z \
+						and p.z < hi[i].z:
+					hidden[k] = 1
+					any = true
+					break
+			if hidden[k] == 0:
+				queue.append(k)
+		if not any or queue.is_empty():
+			continue
+		var at := 0
+		while at < queue.size():
+			var k := queue[at]
+			at += 1
+			var row := k / cols
+			var col := k % cols
+			for step: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var c := col + step.x
+				var r := row + step.y
+				if c < 0 or c >= cols or r < 0 or r >= t.grids[g + 2]:
+					continue
+				var n := r * cols + c
+				if hidden[n] != 1:
+					continue
+				hidden[n] = 2
+				var from := first + k
+				var to := first + n
+				bake.sky[to] = bake.sky[from]
+				for ch in 3:
+					bake.bounce[to * 3 + ch] = bake.bounce[from * 3 + ch]
+				queue.append(n)
 
 
 ## Face `f` (a convex polygon, anticlockwise from outside) as triangles, each with its outward normal and colour.

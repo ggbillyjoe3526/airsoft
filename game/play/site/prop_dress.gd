@@ -3,15 +3,23 @@ extends Node3D
 ## A map's CC0 props (DR2, WR3): the drums, barrels, pallets and sofa that stand in the blocks of the kinds
 ## PropDressConfig dresses, and Woodland's trunks, logs, cordwood, spruces, tyres, crates and truck in the blocks that
 ## name them, where PropLayout lays them, one MultiMesh a model (a model laid often, or tiled, one a chunk,
-## PropDressConfig.chunk, so it culls and takes its level of detail by area) in one vertex-coloured material. A
+## PropDressConfig.many_chunk or chunk, so it culls and takes its level of detail by area) in one vertex-coloured material. A
 ## drum, barrel or sofa casts its own shadow (its box draws nothing, SiteSurface.core_of, and leaves MapLevel's shadow
-## caster); shelving casts none, its rack's backing box still does. Scenery only: no collider, no nav cell; the blocks'
-## boxes are still what BBs and bodies meet.
+## caster); shelving casts none, its rack's backing box still does. Each prop is drawn in its own shade times, while a
+## bake is drawn, the baked light near it (`relight`, BP7). Scenery only: no collider, no nav cell; the blocks' boxes
+## are still what BBs and bodies meet.
+
+## A prop takes the baked light near this far (m) over its foot, from faces facing any way (BakedLightNear.at).
+const LIGHT_LIFT := 0.5
 
 var _material: ShaderMaterial = null
 var _views: Dictionary[StringName, Array] = {} # each model's MultiMeshInstance3Ds, a chunk each
 var _meshes: Dictionary[StringName, Mesh] = {}
 var _placed: Dictionary[StringName, PropLayout.Placed] = {}
+## Each view's instances, as indices into its model's Placed (in `_views`' order), and each prop's light while a bake
+## is drawn (empty with none).
+var _picks: Dictionary[StringName, Array] = {}
+var _lights: Dictionary[StringName, PackedColorArray] = {}
 
 
 ## The props of `map` dressed by `cfg`, or null when it dresses none of its blocks. A model that won't load leaves
@@ -38,7 +46,8 @@ static func build(map: MapData, cfg: PropDressConfig) -> PropDress:
 	for model: StringName in placed:
 		var tiled := _tiled(cfg, model)
 		var many := placed[model].transforms.size() >= cfg.chunk_from
-		dress._add(model, meshes[model], placed[model], not tiled, cfg.chunk if tiled or many else INF)
+		var chunk := cfg.chunk if tiled else cfg.many_chunk if many else INF
+		dress._add(model, meshes[model], placed[model], not tiled, chunk)
 	return dress
 
 
@@ -80,6 +89,38 @@ func materials() -> Array[Material]:
 	return [_material]
 
 
+## Draws each prop in its shade times the baked light near it (BakedLightNear.at, LIGHT_LIFT m over its foot), or in
+## its shade alone with `lights` null (no bake drawn). Once a switch; nothing to do on a map with no bake.
+func relight(lights: BakedLightNear) -> void:
+	if lights == null and _lights.is_empty():
+		return
+	_lights.clear()
+	for model: StringName in _views:
+		var p := _placed[model]
+		var each := PackedColorArray()
+		each.resize(p.transforms.size())
+		for i in each.size():
+			each[i] = lights.at(p.transforms[i].origin + Vector3(0.0, LIGHT_LIFT, 0.0)) if lights != null \
+					else Color.WHITE
+		if lights != null:
+			_lights[model] = each
+		var views: Array = _views[model]
+		var picks: Array = _picks[model]
+		for c in views.size():
+			var mm := (views[c] as MultiMeshInstance3D).multimesh
+			var pick: PackedInt32Array = picks[c]
+			for k in pick.size():
+				var shade := p.shades[pick[k]]
+				var l := each[pick[k]]
+				mm.set_instance_color(k, Color(shade * l.r, shade * l.g, shade * l.b))
+
+
+## Prop `i` of `model`'s light (PropLayout.Placed order; a linear multiplier of its shade, white with no bake drawn).
+func light_of(model: StringName, i: int) -> Color:
+	var each: PackedColorArray = _lights.get(model, PackedColorArray())
+	return each[i] if i < each.size() else Color.WHITE
+
+
 ## The models some block of `map` is dressed with, the pallet too when a cluster stands on one.
 static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName]:
 	var used: Array[StringName] = []
@@ -114,6 +155,7 @@ func _add(model: StringName, mesh: Mesh, p: PropLayout.Placed, shadow: bool, chu
 			cells[cell] = PackedInt32Array()
 		cells[cell].append(i)
 	var views: Array[MultiMeshInstance3D] = []
+	var picked: Array[PackedInt32Array] = []
 	for cell: Vector2i in cells:
 		var picks := cells[cell]
 		var mm := MultiMesh.new()
@@ -133,4 +175,6 @@ func _add(model: StringName, mesh: Mesh, p: PropLayout.Placed, shadow: bool, chu
 			view.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(view)
 		views.append(view)
+		picked.append(picks)
 	_views[model] = views
+	_picks[model] = picked

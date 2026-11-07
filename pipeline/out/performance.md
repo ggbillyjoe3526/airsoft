@@ -1,5 +1,7 @@
-Task: bp6-shoulder · Verdict: Pass
-human.glb: 9574920 bytes on origin/main and on HEAD (no size change; content differs, hash changed, skin weights only).
-No other asset changed (no .import, texture or png in the diff); only human.glb, tests, docs, changelog and blender scripts.
-Tri/material budget: test_bp6_models (material limits, 8 a figure) and figure tests pass; vertex/index data unchanged in structure (weights only).
-No runtime code changed; no new allocations, nodes or resources.
+Performance verdict (retry, 3fa357f): PASS
+- Per frame: nothing new. DoorView.refresh is unchanged, and the shader reads two instance attributes. _apply_graphics adds one bool compare on settings changes. relight, BakedLightNear.at and the PropDress loops run only on a Baked light switch or at load. at() allocates (range arrays, Vector3i keys), but only once per switch.
+- BakedLightNear: it holds about 40 B a vertex plus a Dictionary of cell to PackedInt32Array. Depot (117,801 vertices) is about 5 MB, shared copy-on-write with MapLevel's _lit_* arrays (no doubling), held while the bake is drawn and cleared when it is off or the map is freed. Built once, on first baked_lights() at match start (the 91 ms in the record; I did not re-time it). A Mesh-detail rebuild re-slices the arrays and drops _near; the overtime flag can hold the old one until the next relight (transient, up to about 10 MB).
+- Props relight: one at() (27 cells) per prop plus one set_instance_color, once a switch. Woodland has no bake and never runs it. Depot's props are few.
+- Memory/leaks: PropDress._picks (index arrays) and _lights (a colour per prop) are small and freed with the node. No new nodes or connections on toggle; nothing orphaned. Bakes are unchanged: depot.res 133,141 B, range.res 7,037 B.
+- Shaders/prewarm: door_leaf.gdshader is a new shader and DoorView.materials() returns it, so it is prewarmed. Pole/fittings/rope are now in FlagView/OvertimeFlagView.materials() (5 and 4 entries), which closes the earlier prewarm note. Doors use a new MultiMesh format (colours and custom data), and only a GPU run would show a hitch.
+- Draw calls: unchanged (doors are still one draw, poles the same meshes). Triangle numbers are unchanged from the first verdict. No GPU, so frame time is the owner's check.

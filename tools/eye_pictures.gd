@@ -1,7 +1,7 @@
 extends SceneTree
 ## Renders a field at eye height from named spots, as a match draws it on High by day (its level with its bake, its
-## light as the map sets it, its site dress, its roof, and an outdoor field's wood, bushes and skyline; the eye stands
-## on the ground), to `<folder>/<name>.jpg`: pictures for the owner of a map
+## light as the map sets it, its site dress, its roof, its doors and Attack / Defend poles, and an outdoor field's wood,
+## bushes and skyline; the eye stands on the ground), to `<folder>/<name>.jpg`: pictures for the owner of a map
 ## that is being built (DR1). Needs a display and OpenGL, so under xvfb:
 ##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . --rendering-driver opengl3 -s res://tools/eye_pictures.gd \
 ##       -- <map id> <folder> <name>:<x>,<z>,<yaw degrees>,<pitch degrees> ...
@@ -78,11 +78,30 @@ func _run() -> void:
 	var skyline := SkylineView.build(map, play.skyline, play.lighting, tuning.body.stand_eye_height)
 	if skyline != null:
 		port.add_child(skyline)
+	# Its doors, shut, and its Attack / Defend poles, as a match of that mode draws them (BP7: the shared light).
+	var doors := DoorView.build(map, play.map_style, tuning.doors.swing_time)
+	if doors != null:
+		port.add_child(doors)
+	var teams := TeamColours.resolve(TeamColours.Set.STANDARD, false, null, play.teams).figures
+	var poles: Array[FlagView] = []
+	for i in map.poles.size():
+		var pole := FlagView.new()
+		pole.setup(play.flag, teams, map.poles[i], tuning.flag.radius, Flag.LETTERS[i] if map.poles.size() > 1 else "")
+		port.add_child(pole)
+		poles.append(pole)
 	var values := GraphicsTable.shared().preset(preset)
 	GraphicsApply.apply(values, port)
 	GraphicsApply.apply_field(values, lighting, null, null, level)
 	if site != null:
 		level.set_detail(values.mesh_detail)
+	# The doors, poles and a site's props in the baked light near them, as a match draws them (BP7).
+	var lights := level.baked_lights()
+	if doors != null:
+		doors.relight(lights)
+	for pole in poles:
+		pole.relight(lights)
+	if site != null and site.props() != null:
+		site.props().relight(lights)
 	print("[eye_pictures] drawn on %s" % preset)
 	var camera := Camera3D.new()
 	camera.fov = FOV

@@ -81,8 +81,11 @@ Woodland's look in placeholders (WL4, `WoodsView` from `WoodsConfig`), until the
   timber. Every one is more than 20 degrees from a team's hue or greyer than 0.3: the palette in
   `tests/unit/test_look.gd`, the woods' own colours in `test_woods_view.gd`.
 - **In the shared light** (WA1): the greybox and the ground (clean, no metre grid), the crowns, the forest, the floor
-  pieces, the bushes and the CC0 props on `look_vertex.gdshader`, the puddles on `look_clear.gdshader`. The grass
-  tufts keep their own light (two-sided blades would take the rim on every back face), and the skyline is unshaded.
+  pieces, the bushes, the CC0 props and (BP7) the skyline and the flag poles on `look_vertex.gdshader`
+  (`LookMaterials.paint` for a mesh in one colour), the doors on `door_leaf.gdshader`, the puddles on
+  `look_clear.gdshader`. On a baked map the doors, poles and props take the bake's light near them
+  (`BakedLightNear`), a door's each face its own side's. The grass tufts keep their
+  own light (two-sided blades would take the rim on every back face).
 
 ## Colour
 

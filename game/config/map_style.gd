@@ -115,6 +115,16 @@ extends Resource
 @export var railing_kinds: Array[StringName] = [&"railing"]
 ## The railings' bars and rails.
 @export var railing: RailingConfig = RailingConfig.new()
+## Kinds whose box hides what stands behind it from the renderer (MapOccluders; Settings › Graphics › Occlusion
+## culling): solid and opaque, drawn as their own box. A block of one of them is an occluder when it is no ramp, names
+## no prop (a prop's model is not its box), stands at least `occluder_height` m tall and `occluder_length` m long across
+## its wider side; each occluder is its box drawn `occluder_inset` m in from every face, so it never hides what shows
+## round an edge.
+@export var occluder_kinds: Array[StringName] = [&"plywood", &"crate", &"container", &"wall", &"house", &"brick",
+		&"hoarding", &"shed", &"hedge"]
+@export var occluder_height: float = 1.8
+@export var occluder_length: float = 1.2
+@export var occluder_inset: float = 0.03
 ## The ground beyond the field's walls, out to `ground_extent` metres each way from the middle, just below the floor.
 @export var ground_colour: Color = Color8(0x8a, 0xa8, 0x60)
 @export var ground_extent: float = 120.0

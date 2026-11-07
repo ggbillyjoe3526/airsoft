@@ -2,12 +2,15 @@ class_name DoorView
 extends Node3D
 ## The hinged doors (DO1; MapData.doors): each two painted plywood leaves hinged at their jambs, swinging out to the
 ## side the door hangs on over DoorConfig.swing_time and folding back flat against the wall's face when open. One
-## MultiMesh, one draw call, casting shadows. Reads GameState.doors each frame and moves only the leaves of a door whose
-## swing changed; nothing here is read by the simulation (a shut door's collider is MapLevel's). Built once; a frame
-## allocates nothing.
+## MultiMesh, one draw call, casting shadows, in the shared light (door_leaf.gdshader, BP7), each face of a leaf in the
+## baked light of the wall beside its jamb on its own side while a bake is drawn (`relight`), so it sits at that wall's
+## share of its paint: a door into a dim room is dim on the room's side. Reads
+## GameState.doors each frame and moves only the leaves of a door whose swing changed; nothing here is read by the
+## simulation (a shut door's collider is MapLevel's). Built once; a frame allocates nothing.
 
-## The colour MapStyle gives a door's leaves.
+## The colour MapStyle gives a door's leaves, and their shader.
 const KIND := &"door"
+const LEAF_SHADER := preload("res://game/play/door_leaf.gdshader")
 ## The gap left between the two leaves and at each jamb (m), so the leaves read as two.
 const LEAF_GAP := 0.02
 ## A leaf folds back by up to half a turn, flat against its wall, and stops short where another block stands in its way
@@ -18,9 +21,11 @@ const REACH_STEP := 0.005
 ## The heights up a leaf (shares of it, from its middle) and the points along it tried against the blocks.
 const REACH_HEIGHTS: Array[float] = [-0.45, 0.0, 0.45]
 const REACH_POINTS := 12
+## A leaf takes the baked light of the wall this far (m) past its jamb, at its middle height (`relight`).
+const JAMB_STEP := 0.4
 
 var _mesh: MultiMeshInstance3D = null
-var _material: StandardMaterial3D = null
+var _material: ShaderMaterial = null
 var _swing_time: float = 0.4
 ## Per door: each leaf's hinge (on the door's middle plane at its jamb), its direction from the hinge to the middle,
 ## its size, the sign of its turn to open, and how open the door was last drawn (-1: not yet).
@@ -28,6 +33,11 @@ var _hinges: PackedVector3Array = PackedVector3Array()
 var _dirs: PackedVector3Array = PackedVector3Array()
 var _sizes: PackedVector3Array = PackedVector3Array()
 var _turns: PackedFloat32Array = PackedFloat32Array()
+## Each leaf's thin axis (the world x or z its faces look along when shut), and the light on its face looking down
+## that axis and on its face looking up it (white: no bake).
+var _outs: PackedVector3Array = PackedVector3Array()
+var _lights_down: PackedColorArray = PackedColorArray()
+var _lights_up: PackedColorArray = PackedColorArray()
 ## How far each leaf turns open (rad): half a turn, or less where a block stops it (`reach`).
 var _reach: PackedFloat64Array = PackedFloat64Array()
 var _drawn: PackedFloat32Array = PackedFloat32Array()
@@ -42,11 +52,14 @@ static func build(map: MapData, style: MapStyle, swing_time: float) -> DoorView:
 	var view := DoorView.new()
 	view.name = "Doors"
 	view._swing_time = maxf(swing_time, 0.001)
-	view._material = StandardMaterial3D.new()
-	view._material.albedo_color = style.colour_of(KIND, 0)
-	view._material.roughness = style.roughness
+	view._material = ShaderMaterial.new()
+	view._material.shader = LEAF_SHADER
+	view._material.set_shader_parameter(&"tint", style.colour_of(KIND, 0))
+	view._material.set_shader_parameter(&"roughness", style.roughness)
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.use_colors = true
+	mm.use_custom_data = true
 	mm.mesh = BoxMesh.new()
 	mm.instance_count = map.doors.size() * 2
 	for d in map.doors:
@@ -61,7 +74,29 @@ static func build(map: MapData, style: MapStyle, swing_time: float) -> DoorView:
 	view.add_child(view._mesh)
 	for i in map.doors.size():
 		view._place(i, 0.0 if map.doors[i].shut else 1.0)
+	view._lights_down.resize(mm.instance_count)
+	view._lights_up.resize(mm.instance_count)
+	view.relight(null)
 	return view
+
+
+## Draws each face of each leaf in the light of the wall's face on its side, JAMB_STEP m past the jamb at the leaf's
+## middle height (BakedLightNear.on_side), or in the shared light alone with `lights` null (no bake drawn). Once a
+## switch.
+func relight(lights: BakedLightNear) -> void:
+	var mm := _mesh.multimesh
+	for j in _hinges.size():
+		var at := _hinges[j] - _dirs[j] * JAMB_STEP
+		_lights_down[j] = lights.on_side(at, -_outs[j]) if lights != null else Color.WHITE
+		_lights_up[j] = lights.on_side(at, _outs[j]) if lights != null else Color.WHITE
+		mm.set_instance_color(j, _lights_down[j])
+		mm.set_instance_custom_data(j, _lights_up[j])
+
+
+## Leaf `j`'s light on its face looking up its thin axis (`up`) or down it (a linear multiplier of its paint; white
+## with no bake drawn).
+func light_of(j: int, up: bool) -> Color:
+	return _lights_up[j] if up else _lights_down[j]
 
 
 ## Draws each door as `doors` has it: shut, open, or part way through its swing.
@@ -101,6 +136,7 @@ func _add_leaves(d: MapData.Door, blocks: Array[MapData.Block]) -> void:
 		var dir := axis * -end
 		_hinges.append(d.center + axis * (width * 0.5 - LEAF_GAP) * end)
 		_dirs.append(dir)
+		_outs.append(out.abs())
 		_sizes.append(Vector3(leaf, d.size.y, thick) if not along_z else Vector3(thick, d.size.y, leaf))
 		# Turning by a small angle a about y moves the leaf's free end along (dir.z, 0, -dir.x) × a: out, to its side.
 		_turns.append(signf(dir.z * out.x - dir.x * out.z))

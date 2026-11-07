@@ -21,6 +21,26 @@ static func vertex_colour(roughness: float, metallic: float, tint: Color = Color
 	return m
 
 
+## A material painting a whole mesh without vertex colours `colour` (sRGB) in the shared light, `roughness` and
+## `metallic` over it: a door's leaves, a flag pole (BP7). A mesh without colours reads as white, so the tint is its
+## paint.
+static func paint(colour: Color, roughness: float, metallic: float = 0.0) -> ShaderMaterial:
+	return vertex_colour(roughness, metallic, colour)
+
+
+## Sets each of `paints` (made by `paint`) to its colour in `colours` (sRGB) lit by `light`, a linear multiplier of a
+## paint (BakedLightNear's, BP7), so it draws at that share of its paint; white draws it as painted.
+static func light_paints(paints: Array[ShaderMaterial], colours: PackedColorArray, light: Color) -> void:
+	for i in paints.size():
+		paints[i].set_shader_parameter(&"tint", lit_paint(colours[i], light))
+
+
+## Paint `colour` (sRGB) lit by `light` (a linear multiplier), in sRGB again.
+static func lit_paint(colour: Color, light: Color) -> Color:
+	var lin := colour.srgb_to_linear()
+	return Color(lin.r * light.r, lin.g * light.g, lin.b * light.b, lin.a).linear_to_srgb()
+
+
 ## A see-through material in the shared light: sRGB vertex colours, their alpha its opacity, `roughness` over all of
 ## it (Woodland's puddles and mud), drawn before the rest of the see-through things.
 static func clear_colour(roughness: float) -> ShaderMaterial:

@@ -1,8 +1,8 @@
 class_name SkylineView
 extends Node3D
 ## The map's skyline (`MapData.skyline`; DP3): every piece some player can see over the walls (SkylineSight) built in
-## greybox by SkylineShapes as one vertex-coloured mesh in one material (one draw call, casting no shadow), each vertex
-## faded toward the sky's horizon colour by its distance from the field's middle, and the smoke of the chimneys marked
+## greybox by SkylineShapes as one vertex-coloured mesh in the shared light (one draw call, casting no shadow), each
+## vertex faded toward the sky's horizon colour by its distance from the field's middle, and the smoke of the chimneys marked
 ## `smoke` as one particle system, drawn from Medium (`set_smoke`) and frozen under Reduced motion. Under a night preset
 ## the masts' lamps are a second surface, self-lit (SkylineConfig.mast_lamp_glow) through the haze, with no real light;
 ## by day they are part of the one mesh. Scenery out of reach: no collider, no nav cell, nothing the simulation reads.
@@ -30,12 +30,18 @@ static func build(map: MapData, cfg: SkylineConfig, lighting: LightingConfig, ey
 	view._cfg = cfg
 	var parts: Array[SkylineShapes.Part] = []
 	var chimneys := PackedVector3Array()
+	var each: Array[Array] = []
 	for p in map.skyline:
-		var mine := SkylineShapes.parts_of(p, cfg, middle)
-		if not sight.sees(SkylineShapes.samples_of(mine)):
+		each.append(SkylineShapes.parts_of(p, cfg, middle))
+	var seen := seen_of(map.skyline, each, sight, cfg, middle)
+	for i in map.skyline.size():
+		var p := map.skyline[i]
+		if not seen[i]:
 			view.left_out.append(p)
 			continue
 		view.kept.append(p)
+		var mine: Array[SkylineShapes.Part] = []
+		mine.assign(each[i])
 		parts.append_array(mine)
 		if p.smoke and p.kind == &"chimney":
 			chimneys.append(SkylineShapes.smoke_from(p))
@@ -46,11 +52,8 @@ static func build(map: MapData, cfg: SkylineConfig, lighting: LightingConfig, ey
 	view._mesh.name = "Pieces"
 	view._mesh.mesh = mesh_of(parts, cfg, lighting.sky_horizon, middle, lighting.night)
 	view._mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
-	mat.vertex_color_is_srgb = true
-	mat.roughness = cfg.roughness
-	view._mesh.mesh.surface_set_material(0, mat)
+	# In the shared light (BP7), as the field's own blocks are: its sRGB vertex colours, already faded.
+	view._mesh.mesh.surface_set_material(0, LookMaterials.vertex_colour(cfg.roughness, 0.0, Color.WHITE, true))
 	if view._mesh.mesh.get_surface_count() > 1:
 		var glow := StandardMaterial3D.new()
 		glow.albedo_color = Color.BLACK
@@ -64,6 +67,43 @@ static func build(map: MapData, cfg: SkylineConfig, lighting: LightingConfig, ey
 	if not chimneys.is_empty():
 		view._make_smoke(chimneys, lighting)
 	return view
+
+
+## Whether some player sees each of `pieces` (their parts `parts`, in order) through `sight`: tried nearest the field's
+## `middle` first, each one seen hiding what stands beyond it (SkylineShapes.hides_of) from the pieces tried after it,
+## so a piece seen only past a nearer one is left out (DP3's row). Only pieces built hide, so nothing left out ever
+## stands in front of one.
+static func seen_of(pieces: Array[SkylinePiece], parts: Array[Array], sight: SkylineSight, cfg: SkylineConfig,
+		middle: Vector2) -> Array[bool]:
+	var order: Array[int] = []
+	var near: Array[float] = []
+	for i in pieces.size():
+		order.append(i)
+		near.append(nearest_to(pieces[i], middle))
+	order.sort_custom(func(a: int, b: int) -> bool: return near[a] < near[b] or (near[a] == near[b] and a < b))
+	var seen: Array[bool] = []
+	seen.resize(pieces.size())
+	seen.fill(false)
+	for i in order:
+		var mine: Array[SkylineShapes.Part] = []
+		mine.assign(parts[i])
+		if not sight.sees(SkylineShapes.samples_of(mine)):
+			continue
+		seen[i] = true
+		var boxes := SkylineShapes.hides_of(pieces[i], cfg)
+		for k in range(0, boxes.size() - 1, 2):
+			sight.add_box(boxes[k], boxes[k + 1])
+	return seen
+
+
+## How near `p` stands to `middle` (x, z, m): its spot's distance, or a line's nearest point's.
+static func nearest_to(p: SkylinePiece, middle: Vector2) -> float:
+	if p.points.is_empty():
+		return p.at.distance_to(middle)
+	var best := INF
+	for q in p.points:
+		best = minf(best, q.distance_to(middle))
+	return best
 
 
 ## The middle of the map's blocks (x, z), where the skyline faces and fades from.

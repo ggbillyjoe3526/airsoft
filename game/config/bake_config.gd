@@ -8,7 +8,8 @@ extends Resource
 ## are read as the level is drawn, free to tune without one.
 
 ## The bake's own version: part of the hash, so a change to how it is worked out asks for a rebake.
-const VERSION := 1
+## 2: a vertex hidden inside an abutting block takes its face's nearest open vertex's light (BP7).
+const VERSION := 2
 ## Where the bakes live, each named by its map's `bakedLight.file`.
 const DIR := "res://assets/maps/bakes/"
 const EXTENSION := ".res"
