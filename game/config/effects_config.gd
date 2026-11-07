@@ -135,7 +135,10 @@ extends Resource
 ## Contact shadows (FigureView, the browser game's CONTACT_SHADOWS): where the sun casts no shadows, a soft dark disc on
 ## the floor under every figure, `contact_radius` m across its radius standing and `contact_crouched_radius` fully
 ## crouched, `contact_darkness` at its middle, `contact_middle_shade` of that `contact_middle` of the way out, lifted
-## `contact_lift` m off the floor; off the ground it stays where the feet last stood, gone `contact_fade_height` m up.
+## `contact_lift` m off the floor, gone `contact_fade_height` m up. The floor is found by one ray a tick (BP7) from
+## `contact_ray_up` m over the feet straight down past `contact_fade_height`: the disc lies tilted on a ramp and stays on
+## the floor under a figure off a ledge or a crate; a hit steeper than `contact_steepest` (its normal's up share) lies
+## flat. Without a world to ask it stays where the feet last stood.
 @export var contact_radius: float = 0.42
 @export var contact_crouched_radius: float = 0.36
 @export var contact_darkness: float = 0.42
@@ -143,6 +146,8 @@ extends Resource
 @export var contact_middle: float = 0.5
 @export var contact_lift: float = 0.015
 @export var contact_fade_height: float = 1.5
+@export var contact_ray_up: float = 0.3
+@export var contact_steepest: float = 0.5
 
 
 ## A smoke cloud's puffs at Mesh detail `detail` (GraphicsQuality.MeshDetail): `smoke_puffs`' entry, the last one past

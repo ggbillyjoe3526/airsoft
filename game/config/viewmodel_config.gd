@@ -71,6 +71,18 @@ extends Resource
 @export var reload_turn: float = 0.35
 @export var reload_lift: float = 0.14
 @export var reload_inward: float = 0.1
+## Working a bolt at the hip (BP7, row 17): while the arms' bolt clip runs, the replica is canted toward the eye
+## so the right hand stays on screen (rad at the clip's middle: muzzle up, roll, turn; m: lift, inward), eased in and out
+## over the clip as a bell and drawn less as the sight comes up (none aimed); Reduced motion draws its reload_cant share.
+@export var bolt_tilt: float = 0.0
+@export var bolt_roll: float = 0.3
+@export var bolt_turn: float = 0.0
+@export var bolt_lift: float = 0.0
+@export var bolt_inward: float = 0.035
+## A bolt-action replica's Fire clip has its bolt home and turned down this far in (s: sniper.py's keys); a shot plays
+## the clip stretched so that moment lands as the replica can fire again (its fire rate with its parts: the Sniper
+## Rifle's 1.25 s, 1.39 s with the M150), and the arms' bolt clip with it (BP7, row 19).
+@export var bolt_cycle_end: float = 0.88
 ## A gas pistol's slide locks back this long (s) into its last shot's Fire clip, when the slide is fully back, and closes
 ## this far (share) through the reload that follows.
 @export var slide_lock_after: float = 0.05

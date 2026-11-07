@@ -156,6 +156,12 @@ func update(w: Sight, raise: float) -> void:
 	m.set_shader_parameter(&"mark_uv", _eyes.unproject_position(aim) / screen)
 
 
+## The glass's camera while it draws the view through a raised sight, or null (at the hip, no glass in hand): what it
+## shows is the cone round its view (FigureView.view_corner, in_cone), for the figures' zoomed detail (BP7).
+func drawing_camera() -> Camera3D:
+	return _camera if _port != null and _port.render_target_update_mode == SubViewport.UPDATE_ALWAYS else null
+
+
 ## Readies the picture before the match is played, so the first raise of a sight doesn't build it mid-aim: the
 ## environment copied, the picture sized and drawn once (its disc's shader is warmed with ShaderPrewarm's specks).
 func prewarm() -> void:

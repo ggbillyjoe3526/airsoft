@@ -40,6 +40,12 @@ SWAY_ARM = 3.0
 SWAY_FOREARM = 4.0
 SWAY_LAG = 0.6
 ARM_BONES = ('UpperArm_L', 'Forearm_L', 'Hand_L')
+# The collarbone with the arm held up (BP7, row 15): Shoulder_L turned SHRUG degrees about the figure's forward
+# axis in the held pose (negative: its outer end down), eased in with the raise. The arm's ways (ARM, FOREARM, HAND)
+# are kept, so the hand stays where it was; the chest's side, weighted to both bones, folds less up between the helmet
+# and the raised arm. The shoulder's weights (33fa48b's) are untouched.
+SHRUG = -14.0
+SHRUG_AXIS = np.array([0.0, 0.0, 1.0])
 FINGERS = ('Thumb', 'Index', 'Middle', 'Ring', 'Pinky')
 FORWARD = np.array([0.0, 0.0, 1.0])
 UP = np.array([0.0, 1.0, 0.0])
@@ -89,7 +95,10 @@ def held(skel, rot, move, sway=0.0):
     the arm about the figure's forward axis."""
     out = {}
     w = skel.world(rot, move)
-    parent = w['Shoulder_L'][1]
+    shoulder = w['Shoulder_L'][1]
+    chest = qmul(shoulder, qinv(rot['Shoulder_L']))
+    out['Shoulder_L'] = unit(qmul(qinv(chest), qmul(qaxis(SHRUG_AXIS, math.radians(SHRUG)), shoulder)))
+    parent = qmul(chest, out['Shoulder_L'])
     child = {'UpperArm_L': 'Forearm_L', 'Forearm_L': 'Hand_L', 'Hand_L': 'Middle1_L'}
     ways = {'UpperArm_L': qrot(qaxis(FORWARD, math.radians(-SWAY_ARM * sway)), ARM),
             'Forearm_L': qrot(qaxis(FORWARD, math.radians(-SWAY_FOREARM * sway)), FOREARM),
@@ -125,7 +134,11 @@ def raise_share(t, by=RAISE_TO):
 
 def make(skel, name, tracks):
     times = tracks[('UpperArm_L', 'rotation')][0]
-    bones = list(ARM_BONES) + finger_bones()          # each keyed again at the upper arm's times
+    if ('Shoulder_L', 'rotation') not in tracks:
+        rest = skel.r[skel.index['Shoulder_L']]
+        tracks = dict(tracks)
+        tracks[('Shoulder_L', 'rotation')] = (times, np.array([rest for _ in times]))
+    bones = ['Shoulder_L'] + list(ARM_BONES) + finger_bones()      # each keyed again at the upper arm's times
     span = float(times[-1])
     start, start_move = pose(tracks, RAISE_FROM)
     keys = {bone: [] for bone in bones}
@@ -143,18 +156,23 @@ def make(skel, name, tracks):
             else:
                 # a quadratic curve through the old hold (s 0), swinging past OUT, to the held pose (s 1)
                 out = {}
+                shrug = slerp(start['Shoulder_L'], target['Shoulder_L'], s)
+                start = dict(start)
+                start['Shoulder_L'] = shrug
+                target = dict(target)
+                target['Shoulder_L'] = shrug
                 w = skel.world(start, start_move)
                 upper = qmul(w['Shoulder_L'][1], start['UpperArm_L'])
                 way = qrot(upper, skel.t[skel.index['Forearm_L']])
                 out['UpperArm_L'] = unit(qmul(qinv(w['Shoulder_L'][1]), qmul(swing(way, OUT), upper)))
-                for bone in bones[1:]:
+                for bone in bones[2:]:
                     out[bone] = slerp(start[bone], target[bone], 0.5)
-                local = {}
+                local = {'Shoulder_L': shrug}
                 for bone in ARM_BONES[:2]:
                     a = slerp(start[bone], out[bone], s)
                     b = slerp(out[bone], target[bone], s)
                     local[bone] = slerp(a, b, s)
-                for bone in bones[2:]:
+                for bone in bones[3:]:
                     local[bone] = slerp(start[bone], target[bone], raise_share(t, OPEN_BY))
         for bone in bones:
             keys[bone].append(local[bone])

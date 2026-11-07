@@ -143,8 +143,12 @@ def turn_between(a: Quaternion, b: Quaternion, u: float, long_way: bool) -> Quat
 class BoltWork:
     """The hand's way from the stock's grip to the bolt's knob and back, keyed over the replica's Fire clip."""
 
-    def __init__(self, rig: Rig, hand: pose.Hand, objects: list, solid: list, arms: list, elbow_for):
+    def __init__(self, rig: Rig, hand: pose.Hand, objects: list, solid: list, arms: list, elbow_for,
+                 optics: list = ()):
         self.rig, self.hand, self.arms, self.elbow_for = rig, hand, arms, elbow_for
+        # The fitted optics, in the check only (BP7): the hand's path never reads them.
+        self.optics = list(optics)
+        self.optic_hits = 0
         self.arm, self.action = fire_action(objects)
         self.length = int(round(self.action.frame_range[1]))
         self.rest = bolt_at(self.arm, self.action, 0.0)
@@ -430,6 +434,13 @@ class BoltWork:
             if os.environ.get("BL_BOLT_TRACE"):
                 print("   frame %d: wrist %.0f deg, turn on the knob %s" % (f, pose.wrist_bend(self.rig, SIDE), spin))
             n, tally = pose.clipping(self.arms, self.frame)
+            if self.optics:
+                on, otally = pose.clipping(self.arms, self.optics)
+                if on:
+                    self.optic_hits += 1
+                    print("   frame %d: %d face pairs pass into a fitted optic %s" % (
+                        f, on, sorted(otally.items(), key=lambda x: -x[1])[:4]))
+                n += on
             if n:
                 hits += 1
                 print("   frame %d: %d face pairs pass into the replica %s" % (
@@ -438,10 +449,12 @@ class BoltWork:
         return out, hits, bend
 
 
-def work_bolt(rig: Rig, hand: pose.Hand, objects: list, solid: list, arms: list, clip: str, elbow_for) -> int:
-    """Keys `clip` from the hold now posed; how many of its keys have the arms passing into the replica."""
+def work_bolt(rig: Rig, hand: pose.Hand, objects: list, solid: list, arms: list, clip: str, elbow_for,
+              optics: list = ()) -> int:
+    """Keys `clip` from the hold now posed; how many of its keys have the arms passing into the replica or into one
+    of `optics` (the fitted optics, checked only)."""
     kept = (dict(hand.adduct), hand.normal, hand.tip_top, dict(rig.local))
-    work = BoltWork(rig, hand, objects, solid, arms, elbow_for)
+    work = BoltWork(rig, hand, objects, solid, arms, elbow_for, optics)
     keys, hits, bend = work.keys()
     work.arm.animation_data.action = None
     for pb in work.arm.pose.bones:
@@ -449,6 +462,7 @@ def work_bolt(rig: Rig, hand: pose.Hand, objects: list, solid: list, arms: list,
     key_frames(rig, clip, keys)
     hand.adduct, hand.normal, hand.tip_top, rig.local = kept
     print("  bolt: the hand on the knob %d-%d, back on the grip at %d (the replica's clip %d frames); %d keys pass "
-          "into the replica; the wrist bends %.0f deg at most on the way, %.0f on the knob" % (
-              work.first, work.last, work.end, work.length, hits, bend[0], bend[1]))
+          "into the replica (%d into a fitted optic of %d checked); the wrist bends %.0f deg at most on the way, %.0f "
+          "on the knob" % (work.first, work.last, work.end, work.length, hits, work.optic_hits, len(work.optics),
+                           bend[0], bend[1]))
     return hits

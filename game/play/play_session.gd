@@ -815,6 +815,9 @@ func _build_views(ui: CanvasLayer) -> void:
 		var f := FigureView.new()
 		var parts: Array[Dictionary] = []
 		parts.assign(_bot_parts.get(c.id, []))
+		# At night its replicas carry the torch it lights (WL7), drawn on the figure too (BP7 row 69).
+		if not c.armament.lights.is_empty():
+			parts = FigureView.with_lights(parts, c.armament.lights, c.armament.replicas.size())
 		f.setup(c, _colours.figures.colours[c.team], _tuning.hits, sign_font, realistic, parts,
 				_colours.figures.glow, _play.figures)
 		f.set_world(_level.query(), _tuning.body)
@@ -1172,6 +1175,10 @@ func _after_tick() -> void:
 	if _targets_view != null:
 		_targets_view.on_tick(state)
 	_grenades.on_tick(state)
+	if heard:
+		# The contact shadows' floors, a ray a figure a tick (none under a skip's cover).
+		for f in _figures:
+			f.on_tick(state.characters[f.character_id])
 	var events := state.events
 	for i in events.count:
 		var e := events.items[i]
@@ -1301,6 +1308,10 @@ func _process(delta: float) -> void:
 		_hands.inspect()
 	_hands.update(player, _input.view_yaw, _input.view_pitch, _eyes.global_position, look, delta,
 			aim if watched == player else player.aim_raise)
+	# Through your own scope only the figures its glass shows take the zoomed detail (BP7); the view round it keeps its own.
+	if _figure_zoom > 1.0:
+		FigureView.fit_zoomed_lines(_figures, _hands.glass_camera() if watched == player else null, _figure_lines,
+				_play.figures.zoomed_lines(_figure_detail, _eyes.view_zoom_target), _play.figures)
 	# Your replica only through your own eyes (update shows it whenever you are in play).
 	_hands.visible = _hands.visible and watched == player
 	_bbs.update(state.bbs, PLAYER_ID, _hands.muzzle_position() - _eyes.global_position, fraction, TICK,
@@ -2093,10 +2104,12 @@ func _build_bodies() -> Array[Material]:
 
 
 ## The thrown magazines' pool, once a session with the models: FigureConfig.thrown_max copies, each taking the
-## thrower's magazine; each figure throws into it.
+## thrower's magazine, landing on the level's floor (thrown_drop); each figure throws into it.
 func _build_thrown() -> void:
 	_thrown = ThrownMagazines.new()
 	_thrown.setup(_play.figures.thrown_max)
+	if _level != null:
+		_thrown.set_world(_level.query(), _play.figures.thrown_drop, _play.figures.thrown_land_above)
 	add_child(_thrown)
 	for f in _figures:
 		f.thrown = _thrown

@@ -50,15 +50,17 @@ every preset; turn it on if you want it.
 <!-- wiki:graphics -->
 
 - **Low** is for speed: no sun shadows, ambient occlusion, baked light, wind dust or light effects, and a lower render
-  scale. Every player gets a soft shadow under their feet instead. The game's look (its colours and soft, stylised
+  scale. Every player gets a soft shadow under their feet instead, lying on a ramp's slope and on the floor below a
+  ledge they drop from. The game's look (its colours and soft, stylised
   light) is the same on every preset.
 - **Ultra** is the top end, for the most powerful cards: bounce light from the whole field, reflections on screen,
   volumetric haze and the softest shadows, sharp at their foot and soft away from it.
 - **Baked light** gives Depot soft shade in its corners, warm light bounced off sunlit walls and its dim Lounge; its
   doors, flag poles and props take the same light.
 - **Mesh detail** sets how near a player must be to be drawn in full detail. Through a scope that is how near they
-  look, so a far player seen at 6x keeps the detail of one six times nearer. It also sets how many puffs make up a
-  smoke cloud: fewer, bigger ones on Low and Medium, so standing in smoke costs less.
+  look, so a far player seen at 6x keeps the detail of one six times nearer; only the players in the scope's glass do,
+  the rest of the view keeps its own. It also sets how many puffs make up a smoke cloud: fewer, bigger ones on Low and
+  Medium, so standing in smoke costs less.
 - **Occlusion culling** skips drawing what walls, containers and houses hide from you, such as a player behind a wall.
   It saves the graphics card work and costs the processor a little, so it is off on Low and on from Medium.
 - **Light effects:** **Bounce light** is light bouncing off the field: Screen bounces what you see, Scene the whole

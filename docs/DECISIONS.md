@@ -384,6 +384,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   counter, so a bot can look away from its own). 0.5 to 3.5 s. A blinded bot stops shooting,
   loses its target and crouches; a blinded player gets a white wash and a dip in the sound, softer with reduced motion.
   No ringing, no lasting tinnitus: a toy's bang (pillar 2).
+- **A figure firing over cover lifts its replica a little (owner, 2026-11-07 12:07, BP7 row 55: he answered "Yes
+  all" to the four trials' pictures, this the third).** FB5 held the replica level for 0.35 s after each
+  shot, so a bot firing just over cover pushed its barrel into it. While a shot holds it, the wall ray may still lift
+  the shouldered replica up to `FigureConfig.raise_fire_most` (0.12 of the raise, about 9°); never the full high ready
+  while firing. Presentation only: the BB and the hit volume are unchanged.
 
 ## Bots and balance
 

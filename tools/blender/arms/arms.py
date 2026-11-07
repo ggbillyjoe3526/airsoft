@@ -40,6 +40,7 @@ from pose import Collider, Rig, basis  # noqa: E402
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
 OUT = os.environ.get("BL_OUT") or os.path.join(ROOT, "assets/models/arms/arms.glb")
 REPLICAS = os.path.join(ROOT, "assets/models/replicas")
+PARTS = os.path.join(ROOT, "assets/models/replicaParts")
 FPS = 60
 
 # Colours from the owner's glove photos (ref_images/hands/gloves: dark olive with black moulded knuckles), the same as
@@ -332,6 +333,30 @@ def replica_objects(hold: Hold) -> list:
             o.matrix_world = hold.to_eye() @ o.matrix_world
     bpy.context.view_layer.update()
     return new
+
+
+def fitted_optics(hold: Hold) -> tuple:
+    """Everything the replica's parts file brought in, and of it the optics it fits on its top rail (`optic_*`, their
+    own meshes, not their figure copies), moved to the hold's place as the replica is (BP7): what the right hand
+    working a bolt must also clear. Both empty for a replica without a parts file."""
+    path = os.path.join(PARTS, hold.file)
+    if not os.path.isfile(path):
+        return [], []
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=path)
+    new = [o for o in bpy.data.objects if o not in before]
+    keep = []
+    for o in new:
+        top = o
+        while top.parent is not None:
+            top = top.parent
+        if o.type == "MESH" and top.name.startswith("optic_") and "Figure" not in o.name:
+            keep.append(o)
+    for o in new:
+        if o.parent is None:
+            o.matrix_world = hold.to_eye() @ o.matrix_world
+    bpy.context.view_layer.update()
+    return new, keep
 
 
 def has_trigger(objects: list) -> bool:
@@ -747,8 +772,13 @@ def build() -> None:
         pose.key_pose(rig, "%s_Hold" % rid)
         if cycle.has_bolt(objects):
             # A bolt-action replica: the right hand leaves the grip after the shot and works the bolt.
+            # Each optic it can fit is checked too (BP7): the hand's path keeps it under the receiver's top, and
+            # this proves it clears every scope (a check only: the optics never steer the hand).
+            optics, optic_meshes = fitted_optics(hold)
             bolt_hits = cycle.work_bolt(rig, hands["R"], objects, solid, [left, right], "%s_%s" % (rid, cycle.CLIP),
-                                        elbow_for)
+                                        elbow_for, optic_meshes)
+            for o in optics:
+                bpy.data.objects.remove(o, do_unlink=True)
             if bolt_hits:
                 failed.append("%s working the bolt (%d keys)" % (rid, bolt_hits))
             clips.add("%s_%s" % (rid, cycle.CLIP))

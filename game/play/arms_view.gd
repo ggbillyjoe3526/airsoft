@@ -38,6 +38,8 @@ var _hold_clip: StringName = &""
 var _work: StringName = &""
 ## How far into the working clip the arms are (s).
 var _work_at: float = 0.0
+## The pace the replica's Fire clip last played at, which the run-on keeps.
+var _work_speed: float = 1.0
 
 
 ## Loads the model; nothing shows until `hold`.
@@ -101,9 +103,11 @@ func follow(anim: AnimationPlayer, delta: float) -> void:
 		return
 	if anim.is_playing() and anim.current_animation == FIRE_CLIP:
 		_work_at = anim.current_animation_position
+		_work_speed = anim.get_playing_speed()
 	elif _anim.assigned_animation == _work and anim.assigned_animation == FIRE_CLIP \
 			and _work_at < _anim.current_animation_length:
-		_work_at = minf(_work_at + delta, _anim.current_animation_length)
+		# Run on at the pace the replica's clip played (stretched to its ready time, row 19).
+		_work_at = minf(_work_at + delta * _work_speed, _anim.current_animation_length)
 	else:
 		if _anim.assigned_animation != _hold_clip:
 			_anim.play(_hold_clip)
@@ -114,6 +118,13 @@ func follow(anim: AnimationPlayer, delta: float) -> void:
 		_anim.play(_work)
 		_anim.pause()
 	_anim.seek(_work_at, true)
+
+
+## How far (0..1) through its bolt clip the right hand is (BP7, row 17); 0 on the hold or with no bolt to work.
+func work_share() -> float:
+	if _work == &"" or _anim == null or _anim.assigned_animation != _work:
+		return 0.0
+	return clampf(_work_at / maxf(_anim.current_animation_length, 0.001), 0.0, 1.0)
 
 
 ## Shows the arms on their hold, or hides them (`on` false) keeping it, for when they're holding something else.

@@ -98,6 +98,8 @@ HOLSTER_AT = 292.0  # degrees round the belt from the front over the left: the h
 # in the holster's frame (x forward, z up, -y out from the hip): the front inner wall, the pocket's middle, the mouth.
 # Both pistols' figure meshes clear the pocket's walls seated 0.10 to 0.13 m deep (FigureConfig.holster_depth, 0.11).
 PISTOL_SEAT_NODE = "PistolHolster"
+# The right thigh's share in the holster's weights, all over: FigureConfig.holster_follow's, so it moves as the pistol.
+HOLSTER_THIGH = 0.1
 PISTOL_SEAT_AT = (0.0, -0.030, 0.0)
 PLATE_GAP = 0.006  # the plate bags' inner faces off the body where they come closest
 
@@ -952,9 +954,11 @@ def belt_gear(kit: Kit, sheet: fit.Sheet, lod: int) -> Matrix:
     ob = join("HolsterAll", obs)
     shade(ob)
 
+    # Weighted as the rigid pistol in it is carried (FigureConfig.holster_follow: the hips with a tenth of the right
+    # thigh's swing), all over, so the two move as one and crouched no speck of the pistol shows through its foot (BP7,
+    # row 101; before, the foot took up to 0.35 of the thigh and bent away from the pistol).
     def holster_rule(co):
-        k = max(0.0, min(1.0, (BELT["bottom"] - co.z) / 0.12)) * 0.35
-        return {"Hips": 1.0 - k, "Thigh_R": k}
+        return {"Hips": 1.0 - HOLSTER_THIGH, "Thigh_R": HOLSTER_THIGH}
     kit.add(ob, holster_rule)
     # The grenade pouch on the left front of the belt.
     m = sheet.frame(s_at(62.0), BELT["top"] - 0.105, BELT["thick"] + 0.001)

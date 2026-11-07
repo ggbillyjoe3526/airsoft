@@ -91,7 +91,11 @@ func test_the_hand_works_the_sniper_bolt_in_step() -> void:
 	held.anim.pause()
 	hands._arms.follow(held.anim, 0.1)
 	assert_eq(anim.assigned_animation, &"sniper_Fire", "still on its way back to the grip")
-	assert_almost_eq(anim.current_animation_position, fire + 0.05, 0.001, "running on at the frame's pace")
+	var speed := held.fire_speed
+	assert_almost_eq(speed, cfg.bolt_cycle_end * ReplicaStats.load_replica(&"sniper").fire_rate, 1e-4,
+			"the bolt's cycle stretched to the rifle's ready time (row 19)")
+	assert_almost_eq(anim.current_animation_position, fire - 0.05 + 0.1 * speed, 0.001,
+			"running on at the stretched clip's pace")
 	hands._arms.follow(held.anim, work)
 	hands._arms.follow(held.anim, DT)
 	assert_eq(anim.assigned_animation, &"sniper_Hold", "back on the grip once its clip ends")

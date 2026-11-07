@@ -70,12 +70,25 @@ var _muzzles: PackedVector3Array = PackedVector3Array()
 ## Vector3.INF: no handguard), and each replica's id.
 var _supports: PackedVector3Array = PackedVector3Array()
 var _ids: Array[StringName] = []
+## A replica carrying its night torch (BP7, row 69): its merged mesh with the torch and without it (drawn in the
+## holster; null: no torch), and the torch's lens in its figure version's space (Vector3.INF: none), where the beam
+## starts (TorchBeams).
+var _lit_meshes: Array[Mesh] = []
+var _bare_meshes: Array[Mesh] = []
+var _lenses: PackedVector3Array = PackedVector3Array()
 ## The contact shadow (null until given one), its numbers, and the floor the feet last stood on (y).
 var _contact: MeshInstance3D = null
 var _effects: EffectsConfig = null
 var _floor_y: float = 0.0
 ## The disc's radius as last placed (m: narrower crouched).
 var _contact_radius: float = 0.0
+## The floor under the feet as the last tick's ground ray found it (`on_tick`): a point on it, its normal (up when
+## flat or too steep) and whether a ray has found one yet (until then, and without a world, the floor the feet last
+## stood on, flat); the ray's own scratch.
+var _ground_at: Vector3 = Vector3.ZERO
+var _ground_normal: Vector3 = Vector3.UP
+var _ground_found: bool = false
+var _ground: RayHit = null
 ## Muzzle up at a wall (FB5): the level the ray asks (null: never raised), the body's eye heights, the ray's scratch,
 ## poses left until the next ray, and the time since the last shot (s; a shot holds the replica level).
 var _world: WorldQuery = null
@@ -114,6 +127,7 @@ func setup(c: Character, team_colour: Color, hits: HitConfig, font: Font,
 		var held := _held_replica(c.armament.replicas[i], c.team, realistic, parts[i] if i < parts.size() else {},
 				_magazines, _muzzles, _supports, cfg, _fars, _wells)
 		_replicas.append(held)
+		_lit_meshes.append(held.mesh if held != null and _bare_meshes.size() > i and _bare_meshes[i] != null else null)
 		_classes.append(c.armament.replicas[i].site_class)
 		_ids.append(c.armament.replicas[i].id)
 		if held != null:
@@ -173,6 +187,8 @@ func set_world(query: WorldQuery, body_config: BodyConfig) -> void:
 	_body_config = body_config
 	if _wall == null:
 		_wall = RayHit.new()
+	if _ground == null:
+		_ground = RayHit.new()
 	_raise_wait = absi(character_id) % _raise_stride
 
 
@@ -210,6 +226,22 @@ func _set_replica_lines(lines: Vector2) -> void:
 		_replicas[i].visibility_range_end_margin = _lod_margin
 
 
+## `parts` (Kit.parts, one a replica) with each replica's night light (`lights[i]`, Armament.lights: null for none) in
+## its light slot, as new dictionaries (`parts` is left alone), for `count` replicas: a bot's figure carries the weapon
+## torch it lights at night, its lens and LED glowing as the hands' do (owner, 2026-11-07, BP7 row 69: up close 2 draws
+## more on a rifle, the lens and the LED, its rubber sharing the rifle's; 3 on a pistol, which has no rubber of its
+## own; none beyond the far line or in the holster, which draw it without the torch).
+static func with_lights(parts: Array[Dictionary], lights: Array[Torch.Light], count: int) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for i in count:
+		var own: Dictionary = parts[i].duplicate() if i < parts.size() else {}
+		var light := lights[i] if i < lights.size() else null
+		if light != null:
+			own[Pool.LIGHT_SLOT] = light.key
+		out.append(own)
+	return out
+
+
 ## The models' figure version of `r` (its `Figure` mesh, cut down from the model) with `parts`' figure copies fitted
 ## (ReplicaParts.fit_figure: a part takes the place of the magazine or flash hider it replaces, an optic hides the iron
 ## sights), hidden, painted for `team` (null without a model). A copy of the magazine it carries (its figure magazine or
@@ -222,6 +254,8 @@ func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictiona
 	var scene := load(MODEL_DIR + r.id + ".glb") as PackedScene
 	fars.append(null)
 	wells.append(null)
+	_bare_meshes.append(null)
+	_lenses.append(Vector3.INF)
 	if scene == null:
 		magazines.append(null)
 		muzzles.append(Vector3.ZERO)
@@ -250,8 +284,26 @@ func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictiona
 		support = support_mark(support, fit.grip, cfg)
 		ReplicaPaint.apply(held, paint, realistic)
 		var key := _merge_key(r.id, paint, realistic, parts)
+		# A night torch (row 69): its plain pieces share the replica's own paint of the same name (its rubber), and a
+		# copy without it is kept for the holster and the far version (a few pixels wide there).
+		var bare: ArrayMesh = null
+		if fit.light != null:
+			share_own_paint(fit.light, held)
+			_lenses[-1] = lens_of(fit.light)
+			bare = HeldMerge.merged_without(held, fit.magazine, key + "/bare", fit.light)
+			_bare_meshes[-1] = bare
 		var made := HeldMerge.merge(held, fit.magazine, key)
-		var far_mesh := HeldMerge.far_version(held, (made if made != "" else key) + "/far")
+		if made == "":
+			bare = null
+			_bare_meshes[-1] = null
+		var far_mesh: ArrayMesh = null
+		if bare != null:
+			var lit := held.mesh
+			held.mesh = bare
+			far_mesh = HeldMerge.far_version(held, key + "/bare/far")
+			held.mesh = lit
+		else:
+			far_mesh = HeldMerge.far_version(held, (made if made != "" else key) + "/far")
 		if far_mesh != null:
 			var far := MeshInstance3D.new()
 			far.name = "Far"
@@ -274,6 +326,42 @@ func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictiona
 	supports.append(support)
 	model.free()
 	return held
+
+
+## Gives each surface of `piece` (a part's figure copy on `held`) the material of `held`'s own surface whose material
+## has the same name, where they differ (a night torch's Rubber takes the replica's), so the merge draws them as one.
+static func share_own_paint(piece: MeshInstance3D, held: MeshInstance3D) -> void:
+	if piece.mesh == null or held.mesh == null:
+		return
+	var own: Dictionary[String, Material] = {}
+	for i in held.mesh.get_surface_count():
+		var m := held.get_surface_override_material(i)
+		m = m if m != null else held.mesh.surface_get_material(i)
+		if m != null and m.resource_name != "":
+			own[m.resource_name] = m
+	for i in piece.mesh.get_surface_count():
+		var m := piece.get_surface_override_material(i)
+		m = m if m != null else piece.mesh.surface_get_material(i)
+		if m != null and own.has(m.resource_name) and own[m.resource_name] != m:
+			piece.set_surface_override_material(i, own[m.resource_name])
+
+
+## The front of a night torch's figure copy `light` (the middle of its box's forward face, -Z), in its replica's space:
+## the lens the beam leaves from.
+static func lens_of(light: MeshInstance3D) -> Vector3:
+	var box := light.transform * light.get_aabb()
+	var middle := box.get_center()
+	return Vector3(middle.x, middle.y, box.position.z)
+
+
+## Whether replica `slot` carries a night torch (with_lights) whose lens the beam leaves from.
+func has_lens(slot: int) -> bool:
+	return slot >= 0 and slot < _lenses.size() and _lenses[slot] != Vector3.INF and _replicas[slot] != null
+
+
+## Where replica `slot`'s night torch's lens is in the world (has_lens first).
+func lens_position(slot: int) -> Vector3:
+	return _replicas[slot].global_transform * _lenses[slot]
 
 
 ## What a held replica is fitted and painted with, naming its merged mesh (HeldMerge): its id, paint, Realistic colours
@@ -380,6 +468,24 @@ func set_shadow_cast(on: bool) -> void:
 		_body.set_shadow_twin(on)
 
 
+## Once a simulation tick: the floor under `c`'s feet for the contact shadow, one ray straight down (EffectsConfig
+## contact_ray_up, contact_fade_height); nothing while the disc is hidden or there is no world to ask, and the floor
+## forgotten while the figure is (shown again, it is found afresh). A miss (nothing within reach under the feet) keeps
+## the floor last found, as the disc fades out over that height anyway.
+func on_tick(c: Character) -> void:
+	if not visible:
+		_ground_found = false
+		return
+	if _contact == null or not _contact.visible or _world == null:
+		return
+	var from := c.position + Vector3.UP * _effects.contact_ray_up
+	if not _world.ray(from, c.position + Vector3.DOWN * _effects.contact_fade_height, _ground):
+		return
+	_ground_found = true
+	_ground_at = _ground.position
+	_ground_normal = _ground.normal if _ground.normal.y >= _effects.contact_steepest else Vector3.UP
+
+
 ## The contact shadow drawn, or null.
 func contact_shadow() -> MeshInstance3D:
 	return _contact
@@ -411,6 +517,7 @@ func animate(c: Character, fraction: float, delta: float, eye: Vector3) -> void:
 		_snap = true
 		_fired = false
 		return
+	_fit_torches()
 	var cfg := _pose.config()
 	var far := _lines.y + cfg.lod_margin
 	var near := _lines.x + cfg.lod_margin
@@ -457,16 +564,24 @@ func animate(c: Character, fraction: float, delta: float, eye: Vector3) -> void:
 
 ## How far (0..1) the replica is raised at the level ahead of `c`'s aim, as `_pose` read it (FB5): by how close the
 ## level comes within the replica's reach (ahead of the figure's speed by raise_lead), eased out, one ray every
-## raise_stride poses; none for a replica held level after a shot, holstered, out of the hand or out of play.
+## raise_stride poses; none holstered, out of the hand or out of play, and after a shot at most raise_fire_most (a few
+## degrees lift near cover, the replica all but level: BP7, row 55, owner 2026-11-07).
 func _raise_target(c: Character) -> float:
 	var cfg := _pose.config()
-	if _world == null or c.status != Character.Status.ALIVE or _pose.in_hand < 0 or _pose.holster > 0.0 \
-			or _since_shot < cfg.raise_fire_hold:
+	if _world == null or c.status != Character.Status.ALIVE or _pose.in_hand < 0 or _pose.holster > 0.0:
+		return 0.0
+	var most := cfg.raise_fire_most if _since_shot < cfg.raise_fire_hold else 1.0
+	if most <= 0.0:
 		return 0.0
 	if _raise_wait > 0:
 		_raise_wait -= 1
-		return _pose.raise_target
+		return minf(_pose.raise_target, most)
 	_raise_wait = _raise_stride - 1
+	return minf(_raise_share(cfg), most)
+
+
+## The raise the ray asks for now (0..1), for _raise_target.
+func _raise_share(cfg: FigureConfig) -> float:
 	var yaw := rotation.y
 	var h := Character.eye_height(_pose.crouch, _body_config)
 	var from := _pose.feet + Vector3(0.0, h - cfg.raise_drop, 0.0) \
@@ -506,7 +621,7 @@ func update(c: Character, fraction: float, delta: float = 0.0) -> void:
 		fade = clampf(1.0 - c.status_time / maxf(_hits.vanish_time, 0.001), 0.0, 1.0)
 	visible = fade > 0.0
 	_fade = fade
-	if c.grounded:
+	if c.grounded and not _ground_found:
 		_floor_y = global_position.y
 	if _contact != null and _contact.visible:
 		_place_contact(c, fraction)
@@ -526,15 +641,34 @@ func _place_contact(c: Character, fraction: float) -> void:
 	_place_disc()
 
 
-## The contact shadow under the figure as last placed: on the floor its feet last stood on, fading with the figure and
-## as the feet rise off that floor, and gone once they drop below it (off a crate or a ledge, until they land).
+## The contact shadow under the figure as last placed: on the floor the last tick's ray found under the feet (`on_tick`),
+## tilted to it (a ramp) and met where the feet are now, fading with the figure and as the feet rise off it; without a
+## ray yet, flat on the floor the feet last stood on, and gone once they drop below it.
 func _place_disc() -> void:
 	var feet := global_position
-	var height := feet.y - _floor_y
+	var floor_y := _floor_y
+	var tilt := Basis.IDENTITY
+	if _ground_found:
+		var n := _ground_normal
+		floor_y = _ground_at.y - (n.x * (feet.x - _ground_at.x) + n.z * (feet.z - _ground_at.z)) / n.y
+		if n.y < 1.0:
+			tilt = Basis(Quaternion(Vector3.UP, n))
+	var height := feet.y - floor_y
 	var up := clampf(1.0 - height / maxf(_effects.contact_fade_height, 0.001), 0.0, 1.0) if height >= 0.0 else 0.0
-	_contact.global_transform = Transform3D(Basis.from_scale(Vector3(_contact_radius, 1.0, _contact_radius)),
-			Vector3(feet.x, _floor_y + _effects.contact_lift, feet.z))
+	_contact.global_transform = Transform3D(tilt * Basis.from_scale(Vector3(_contact_radius, 1.0, _contact_radius)),
+			Vector3(feet.x, floor_y, feet.z) + tilt.y * _effects.contact_lift)
 	_contact.transparency = 1.0 - _fade * up
+
+
+## A replica carrying a night torch draws it in the hand and on the back, not in the holster (it would poke through).
+func _fit_torches() -> void:
+	for i in _bare_meshes.size():
+		var bare := _bare_meshes[i]
+		if bare == null or _replicas[i] == null:
+			continue
+		var want: Mesh = bare if _body.hands.in_holster == i else _lit_meshes[i]
+		if _replicas[i].mesh != want:
+			_replicas[i].mesh = want
 
 
 ## Whether `camera` turned more than FigureConfig.hold_view_turn or moved more than hold_view_radius since the view
@@ -564,6 +698,27 @@ func _seen(camera: Camera3D, cfg: FigureConfig) -> bool:
 		_corner = view_corner(camera)
 	return in_cone(camera.global_transform, _corner, global_position + Vector3.UP * cfg.hold_view_height,
 			cfg.hold_view_radius)
+
+
+## Gives each of `figures` its detail lines for a zoomed eye (BP7): `zoomed` for those the scope's glass camera `glass`
+## may show (in_cone round its view, FigureConfig zoom_view_*), `plain` (the eye's own) for the rest, which the optic's
+## disc hides; all `zoomed` without a glass. One already zoomed keeps them within zoom_view_margin more (hysteresis at
+## the glass's edge). Only a figure whose lines change is set (a cone test each, no allocation).
+static func fit_zoomed_lines(figures: Array[FigureView], glass: Camera3D, zoomed: Vector2, plain: Vector2,
+		cfg: FigureConfig) -> void:
+	if glass == null:
+		for f in figures:
+			if f.lod_lines() != zoomed:
+				f.set_lod_lines(zoomed)
+		return
+	var corner := view_corner(glass)
+	var at := glass.global_transform
+	var up := Vector3.UP * cfg.zoom_view_height
+	for f in figures:
+		var radius := cfg.zoom_view_radius + (cfg.zoom_view_margin if f.lod_lines() == zoomed else 0.0)
+		var want := zoomed if in_cone(at, corner, f.global_position + up, radius) else plain
+		if f.lod_lines() != want:
+			f.set_lod_lines(want)
 
 
 ## Whether a ball `radius` round `point` may show in `camera`'s view (true without a camera): in_cone with its

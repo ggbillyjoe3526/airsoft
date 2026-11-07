@@ -6,6 +6,7 @@
 - part 2: critic Accept 7/8 · qa Pass · performance Pass
 - part 3: critic Accept 7/8 · qa Pass · performance Pass
 - part 4: critic Accept 8/8 · qa Pass · performance Pass
+- part 5: critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -20,6 +21,10 @@
 | 2026-11-07 | part 4: 1 | Opus 5.5 | green | Retry 6/8 | the round props' sizes copied from the dress config, notes that overclaimed the loading |
 | 2026-11-07 | part 4: 2 | Opus 5.5 | green | Accept 8/8 | – (merge over parts 1 to 3 re-checked; an orphan test past COLLIDERS added) |
 | 2026-11-07 | part 4: 3 | Opus 5.5 | CI: magazine guard red | Accept 8/8 | – (a toss lost to the level now ends the ask with no wait, 3b06375) |
+| 2026-11-07 | part 5: 1 | Opus 5.5 | green | Retry 6/8 | two blocking checks (tests and docs) |
+| 2026-11-07 | part 5: 2 | Opus 5.5 | green | Retry 6/8 | the merged trials untested (rows 55, 17, 15), row 15 deleted though not whole |
+| 2026-11-07 | part 5: 3 | Opus 5.5 | green | Retry 5/8 | the torch's cost unchecked (far copies, holster), the row 15 test passed on main |
+| 2026-11-07 | part 5: 4 | Opus 5.5 | green | Accept 7/8 | – (the night load cost row and the record's WalkOff note added, 2b5747c) |
 
 ## The pass
 
@@ -529,3 +534,221 @@ and the ask ended with the full 20 s `bot_ask_gap`, past the guard's 10 s. The s
 is hit about 7 cm further on). `MagShare.step` now ends an ask whose last toss met the level with no wait, as it already
 did when a giver asks for its own; caught tosses and lapsed asks keep their gaps, for players too. `test_mag_share`'s
 wall test asserts it (the old code fails it). Critic 8/8, QA and performance Pass on the commit.
+
+### Part 5: figures and models
+
+Branch `bp7-figures` (from main 5004551), head 2b5747c, merged over parts 1 to 4 as `bp7-figures-r` (9647313),
+squashed into this pull request. Rows from triage A5: 14, 16, 18, 69, 71, 81, 99, 100, 101, 104;
+from A2: 68, 78. The four trials (rows 15, 17, 19, 55) were approved by the owner on 2026-11-07 ("Yes all") and are
+merged in. Attempts 2 and 3 after the critic's 6/8 twice; row 69 built on the owner's pick, "Glow" (2026-11-07).
+
+#### What changed
+
+- **Contact shadow on ramps and ledges (row 81).** `FigureView.on_tick` runs once a simulation tick, from
+  `PlaySession._after_tick`, and only while the disc and the figure show. It casts one ray from
+  `EffectsConfig.contact_ray_up` (0.3 m) over the feet down to `contact_fade_height` under them. The disc lies on the
+  plane the ray finds, tilted to its normal (a floor steeper than `contact_steepest` 0.5 lies flat). Off a ledge it
+  lies on the floor below and fades with the drop. A miss keeps the last floor a ray found, tilted as it was. Before
+  any ray hits, it keeps the last grounded height.
+- **The bolt hand checked against fitted optics (row 18).** `tools/blender/arms/arms.py` `fitted_optics` brings the
+  Sniper Rifle's `optic_*` parts into the build. `cycle.BoltWork` counts every key the hand meets one; it is a check
+  only and never steers the path. Result: 0 keys into the Scope 2x, the Variable Scope or the Red Dot. `arms.glb` is
+  not rebuilt.
+- **Zoomed figure detail only in the glass (row 68).**
+  - `OpticGlass.drawing_camera` and `ReplicaView.glass_camera` hand over the glass's camera while it draws.
+  - `FigureView.fit_zoomed_lines` gives the zoomed lines only to figures whose ball reaches into the camera's cone:
+    `zoom_view_radius` 1.0 m round a point `zoom_view_height` 0.9 m over the feet.
+  - A figure already zoomed keeps the lines within `zoom_view_margin` (0.75 m) more of cone. This hysteresis stops a
+    figure at the edge flipping detail as the scope sways.
+  - The figures outside take the view's own lines at `FirstPersonView.view_zoom_target`. That is the target zoom,
+    not the eased `view_zoom`, so their lines are set once a raise, not every frame of it.
+  - Without a glass (a red dot zooms the whole view) or while spectating, every figure is zoomed as before.
+  - `tools/figure_bench.gd --cone` times it.
+- **Thrown magazines land on the floor below (row 99).** `ThrownMagazines.set_world` is called from
+  `PlaySession._build_thrown`, and `landing_height` casts one ray a throw where the magazine would come down at the
+  feet's height. The ray runs from `FigureConfig.thrown_land_above` (0.05 m) over the feet down to `thrown_drop`
+  (6 m) under them, so a table or crate top over the feet is never taken.
+- **Holster weighted as the pistol in it (row 101).**
+  - `tools/blender/figure-gear/gear.py` now weights `HolsterAll` 0.9 Hips and 0.1 Thigh_R all over
+    (`HOLSTER_THIGH`, the value of `FigureConfig.holster_follow`). Before, the foot took up to 0.35 of the thigh.
+  - Rebuilt and spliced into human.glb. `body_weights.py` ran after it and reported "done already".
+  - The Body meshes' points, joints and weights are byte-identical before and after (Body.001, Body_LOD1.001,
+    Body_LOD2.001), so the shoulders keep 33fa48b's weights. `body.py` is untouched.
+  - The rebuild also rewrote the Kit_Pack and Kit_Radio meshes, and human.glb went from 9.65 to 9.50 MB.
+- **The trials, merged (owner 2026-11-07):**
+  - **Row 15:** the hit call turns Shoulder_L by -14° about the figure's forward (`gait/call.py`; human.glb and
+    robot.glb spliced).
+  - **Row 17:** working the bolt at the hip cants the rifle toward the eye (ViewModelConfig `bolt_*`,
+    `ArmsView.work_share`).
+  - **Row 19:** the Sniper's Fire clip and the arms' bolt clip play stretched to its ready time
+    (`bolt_cycle_end * fire_rate`), and boltCycle 1-3 are re-cut to 1.21 s.
+  - **Row 55:** while a shot holds the replica level, the wall ray may still lift it up to
+    `FigureConfig.raise_fire_most` (0.12, about 9°).
+  - Rows 17 and 19 merged with one conflict in `viewmodel_config.gd`, where both sets of fields were kept. Together
+    they work: the cant's bell runs over the stretched clip (combined strip below).
+- **Bots' night torch on their figures (row 69, owner's pick "Glow", 2026-11-07).**
+  - `FigureView.with_lights` puts each replica's night light (`Armament.lights`) in its light slot.
+  - `PlaySession` passes those parts to a bot's figure at night, so `fit_figure` fits the torch's figure copy
+    (`light_weaponTorch_Figure`) with its own Rubber, TorchLens and glowing Led.
+  - Draws, measured headless in the GUT test, as fixed in critic attempt 3 (below): up close the rifle's held mesh
+    goes from 6 to 8 surfaces (TorchLens and Led; the torch's Rubber shares the rifle's) and the pistol's from 6 to 9
+    (it has no Rubber of its own). The far version and the holstered copy draw without the torch: 0 more.
+- **Critic attempt 2:**
+  - New tests that fail without each trial: row 55 (a lift above 0 at a wall through the hold, never past
+    `raise_fire_most`), row 17 (the bolt cant above 0 at the hip mid-cycle, 0 aimed), row 15 (rewritten in attempt
+    3: attempt 2's claim that main's HitCall had no Shoulder_L key was wrong).
+  - `call.py`'s A5_SHRUG environment knobs are removed (SHRUG fixed at -14°, about the figure's forward).
+  - robot.glb compacted by the new `tools/blender/bot-figure/compact_glb.py`: 753 accessors and 226 buffer views
+    dropped, 3.80 to 3.68 MB. Every mesh, clip, skin and image is byte-identical.
+- **Critic attempt 3:**
+  - **The torch's cost.** `HeldMerge.merged_without` makes the held replica's merged mesh without the torch, once a
+    replica, paint and parts. The far version is built from it, so beyond the far line the torch costs nothing.
+    `FigureView.share_own_paint` gives the torch's Rubber the replica's own, so the merge draws them as one.
+  - **The holster.** `FigureView._fit_torches` draws the holstered replica's mesh without the torch, swapping it back
+    in the hand (on the back it keeps it). The torch sat inside the holster, so this saves draws (9 to 6 on the
+    pistol) and looks the same.
+  - **The beam.** TorchBeams starts a figure's beam at its torch's lens (`FigureView.lens_position`: the middle of the
+    torch copy's front face) instead of 0.3 m behind the muzzle. Without a torch it is as before.
+  - **Row 15's test** now checks HitCall and WalkOff at their middles, 18.3 ± 1° from Idle's Shoulder_L key. On the
+    branch HitCall is 18.3° and WalkOff 18.1°, on both kinds. With main's human.glb and robot.glb (5004551) swapped
+    in, it fails: 11.9° and 12.0°. Main's human.glb file has no WalkOff Shoulder_L channel, but Godot's import adds one, at 12.0° from Idle; the test reads the imported clip.
+  - **`tools/figure_bench.gd --night`:** the night preset, each figure's torch lit on both replicas. Every run now
+    logs the mesh surfaces the figures draw (headless too).
+  - **docs/KNOWN_ISSUES.md:** a new Performance row for the torch's draws at night (below).
+  - **Pictures:** the radio close-up re-shot, and the torch picture's costs corrected with a holster row (below).
+- **Docs:**
+  - docs/DECISIONS.md: an owner entry for row 55, which changes FB5's level-hold rule. It quotes his "Yes all"
+    (2026-11-07 12:07) to the four trials' pictures.
+  - Wiki: Settings (contact shadow, scope detail), Replicas (Sniper Rifle timing and cant), Bots (lift over cover).
+  - The changelog note is updated to match.
+
+#### Rows fixed and deleted
+
+- **Row 15, narrowed, not deleted (owner approved the trial, 2026-11-07).** The dark edge is smaller. Close from the
+  front, a jagged patch of the shirt still shows through the strap's opening, with a light sliver at the strap's outer
+  edge; the rest waits for the body rebuild.
+- **Row 17, deleted (owner approved, 2026-11-07).** The hand stays on screen while it works the bolt.
+- **Row 18, deleted.** The build check covers the optics. The GUT test guards the shipped arms.glb: it passes on main
+  too, since the clip didn't change, and it checks the hand's joints, not its skin.
+- **Row 68, deleted.**
+  - Headless, `figure_bench --far --zoom 6`, 11 figures, animation plus skeleton: 2.31-3.16 ms mean without the cone,
+    1.10-1.70 ms with it.
+  - 3.2-3.6 of the 11 figures are on the zoomed lines.
+  - The fit costs 18-26 us mean and 48-64 us p99 a frame (hysteresis included).
+- **Row 101, the speck clause removed.**
+  - What's left: the rifle on the back, the robot's lack of a holster, and a note that a deep-bent thigh may press
+    into the now-rigid holster (not seen in the pictures).
+  - The test fails on main's glb (0.349 at the foot) and passes now (0.1).
+- **Row 81, narrowed** to its by-design half: figures in a wall's shade on Medium and up get no disc.
+  - The ledge test now stands on a ledge's top, then falls over its 1 m drop. On main the disc goes (transparency 1);
+    now it is on the floor below at 0.4 transparency.
+  - Ray cost, headless, `figure_bench --contact`, 11 figures a tick: 59.8 us mean, p99 109 us. The critic saw a
+    one-off 4.7-5.7 ms max in runs of 8 s or more, likely the shared machine and unconfirmed.
+- **Row 99, narrowed.** The thrown-magazine clause is replaced by its edge cases: at a step up it lands inside it at
+  the feet's height as before, and under a table it lands on the floor.
+- **Row 19, narrowed (owner approved, 2026-11-07).** What's left: the cocking sound is cut for the M130's 1.25 s, so
+  with the M150 (1.39 s) its last knock lands about 0.14 s early.
+- **Row 55, narrowed (owner approved, 2026-11-07).** What's left: a top lower than 0.2 m under the eyes can still meet
+  the magazine.
+
+#### Rows left
+
+- **Row 14 (parts file size).** It sits at 90 % of a repo cap, not an install budget. A quantised export would change
+  every parts file and need each parts test and sight picture re-checked, for no player gain now.
+- **Rows 16 and 104 (sleeve edge, glove plates).**
+  - Blocker: `body.py` rebuilds the whole Body and weights it from the old body by nearest face.
+  - So the owner's byte-identical shoulder rule only holds if an unchanged `body.py` first reproduces 33fa48b's Body
+    exactly. That is unproven, and it is the first step.
+- **Row 69, deleted (owner's pick, "Glow").** A bot's figure carries its glowing torch at night; the GUT test checks
+  it and logs the draws.
+- **New row: the night torch's draws.** Up close each lit rifle draws 2 more (a pistol in hand 3), none beyond the far
+  line, so 11 bots close is 22 more. Measured with figure_bench, 11 figures:
+  - Headless, the figures' own mesh surfaces (shadows not counted): with the eye in the middle (every figure close)
+    235 by day and 257 at night (+22). From the Alpha spawn, 184 both (the torches beyond the far line).
+  - Forward+ on software Vulkan (lavapipe) under Xvfb, the frame's draws, not the owner's PC: from the spawn 133 by
+    day, 143 at night, 143 at night with no torches (the +10 is the night preset's own). From the middle, facing the
+    figures ahead, 52 by day, 49 at night with no torches, 53 with them (+4, two rifles close).
+  - So the spawn view stays under the 150-draw High ceiling. A close fight with many lit rifles in view adds 2 a
+    rifle on top. Classed document: measure on the owner's PC.
+- **New row, can wait: the torch's load time.** At night a figure's setup takes about 14 ms more headless (about
+  25 ms against 11), once a match, at the load. It is `ReplicaParts.take` instancing the whole parts file
+  (`replicaParts/aeg.glb`, 2.8 MB) for each figure, which any bot kit with parts already pays by day.
+- **New row: Compatibility doesn't fade the contact disc.** Compatibility, the Low fallback (GR4), ignores
+  GeometryInstance3D transparency, so the contact shadow shows at full strength while jumping or falling.
+- **Row 71 (GBB's 7 materials).** An owner choice: a vertex colour would lose the BB's 0.3 roughness. The GBB keeps
+  7 materials.
+- **Row 78 (figures not lit by baked light).**
+  - Blocker: the bake writes vertex colours only, no probes.
+  - Every figure of a paint shares one StandardMaterial3D, which has no per-instance parameter to carry a figure's own
+    light.
+  - It needs those paints turned into shaders first, then a probe grid in the bake, which changes every bake's hash
+    and rebakes every map.
+- **Row 99 (the rest).** The run clips' foot slide and Idle's held frame need clip work. The fading replicas need a
+  fading copy of the shared paint. The switch items are as designed.
+- **Row 100 (hit volume's raise share), narrowed with measurements.** The ray is not the problem: about 5 us headless.
+  The real work is moving the raise into the simulation (ray, lead, fire hold and ease on simulation time) and
+  reworking FB5's tests, which should be a task of its own.
+
+#### Defaults
+
+- `contact_ray_up` 0.3 m, `contact_steepest` 0.5.
+- `zoom_view_radius` 1.0 m, `zoom_view_height` 0.9 m, `zoom_view_margin` 0.75 m.
+- While spectating, every figure stays zoomed.
+- `thrown_drop` 6 m, `thrown_land_above` 0.05 m.
+- `HOLSTER_THIGH` 0.1, the same as `holster_follow`.
+
+#### Checks
+
+- **GUT, targeted, after critic attempt 3:** 30 files passed 313 of 313, with no script errors: test_bp7_figures,
+  test_figure_body, test_bp6_models, test_hit_call_arm, test_figure_hit_area, test_figure_raise and _qa,
+  test_figure_hands and _qa, test_arms_view, test_play_session, test_figure_view and _cone_qa, test_torch and _qa,
+  test_bp5_models and _qa, test_bp5_perf, test_figure_copies, test_bp6_graphics, test_parts_in_play,
+  test_replica_paint, test_barrel_models, test_at3_qa, test_ba1_qa, test_bp2_perf_qa, test_dust_effects,
+  test_iron_sights, test_lo3_qa and test_hd2_hit_call_stack.
+- **GUT, earlier:** test_bp7_figures now has 14 tests: the ramp, the real ledge, the hidden disc, the bolt optics
+  guard, the glass cone, the cone's hysteresis, the view zoom target, the thrown magazine off a ledge and under a
+  table, the holster weights, the night torch (row 69), the bolt cant (17), the lift over cover (55) and the hit
+  call's collarbone (15).
+  - After row 69, the critic's fixes and robot.glb's compaction (reimported), 15 files passed 173 of 173:
+    test_bp7_figures, test_figure_body, test_bp6_models, test_hit_call_arm, test_figure_hit_area, test_figure_raise
+    and _qa, test_figure_hands and _qa, test_arms_view, test_play_session, test_figure_view, test_torch,
+    test_bp5_models and test_bp5_perf.
+  - The last run of 18 files passed 174 of 174: test_bp7_figures, test_thrown_magazines, test_figure_raise and _qa,
+    test_figure_body, test_bp6_models, test_figure_hands and _qa, test_hit_call_arm, test_figure_hit_area,
+    test_arms_view, test_sniper_rifle, test_play_session, test_figure_view and _cone_qa, test_view_easing,
+    test_dp5_qa and test_dust_effects.
+  - The run before it, of 23 files (adding test_bq1_glass_sight, test_variable_scope, test_bw1_qa,
+    test_hands_on_replica and test_bp6_graphics), passed 214 of 214.
+- **Hit volume and gameplay timing:** unchanged. The rate of fire is unchanged and the clips are presentation only.
+  test_sniper_rifle, test_figure_hit_area and test_hit_call_arm pass.
+- gdlint on every changed script: no problems. `tools/changelog.sh check`: OK. `python3 tools/wiki.py check`: OK.
+- **Frame time:** all numbers above are headless, except the night draws, which are Forward+ on software Vulkan
+  under Xvfb. There has been no windowed run on the owner's PC.
+- Not run: tools/check.sh (per the brief) and an export build.
+
+#### For the owner to test
+
+- **Pictures** in /mnt/project-files/playtest/bp7/figures/:
+  - `row81_bot_figure_contact_shadow_ramp_ledge.png`: Forward+ (Vulkan). BEFORE is rendered from main's own code. The
+    earlier Compatibility picture was wrong, because Compatibility ignores the disc's fade.
+  - `row101_bot_figure_holster_weighted_as_pistol.png`
+  - `row101_bot_figure_back_pack_and_radio_after_gear_rebuild.png`: the radio close up (about 0.27 m), by day,
+    Forward+, from behind-left and from the left, main's human.glb (5004551) against the branch's. No seam visible.
+  - `row69_bot_figure_night_weapon_torch_glow.png`: night, Forward+. Close 3/4 and side views, main's no torch
+    against the glowing torch; and the holstered pistol, attempt 2's torch inside the holster against none (it looks
+    the same). The far version is a few pixels wide there, so it isn't pictured.
+  - `rows17_19_first_person_arms_sniper_cant_and_stretched_clip.png`: main, the stretched clip alone, and both merged.
+  - `trial1_bot_figure_hit_call_shoulder_turn.png` to `trial4_first_person_arms_sniper_fire_clip_stretched.png`.
+- **Low preset:** walk a ramp, then step off a 1-2 m ledge. Jump onto and off a crate: the shadow shouldn't pop.
+- **Sniper Rifle at the hip:** the hand stays in view while it works the bolt. The clack lands as the handle goes home
+  at 1.25 s (with the M150, about 0.14 s early).
+- **Sniper Rifle at 6x over a busy field:** no detail popping just outside the glass as it sways.
+- **Reload near a ledge and by a crate:** the magazine lands on the floor below, or at the feet by the crate.
+- **Crouch with a pistol holstered:** look at the holster's foot from the thigh's side.
+- **Bots firing over a 1.5 m stack:** the barrel clears the top, and the BBs don't look as if they leave below the
+  muzzle.
+- **At night:** bots' rifles and pistols show the torch, its LED a small bright dot, and their beam starts at its
+  lens. Holstered pistols show none. Check the draws and frame time with a full field of bots close (2 draws a lit
+  rifle more, none far off; the new KNOWN_ISSUES row).
+- **Low on the Compatibility renderer:** a jumping or falling player's foot shadow doesn't fade (new row).
+- **Hit call and walk off, close from the front:** the strap by the helmet (row 15).

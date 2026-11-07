@@ -54,6 +54,27 @@ static func merge(held: MeshInstance3D, keep: MeshInstance3D, key: String) -> St
 	return key
 
 
+## `held` merged as `merge` would merge it with `leave` (one of its pieces) and what is under it left out, made once for
+## `key` and shared, `held` itself unchanged; null if it can't be merged. Called before `merge`: a bot's holstered
+## pistol and every far version draw this, without the night torch (BP7, row 69).
+static func merged_without(held: MeshInstance3D, keep: MeshInstance3D, key: String, leave: Node3D) -> ArrayMesh:
+	if held.mesh == null or not _mergeable(held):
+		return null
+	var was := leave.visible
+	leave.visible = false
+	var pieces: Array[MeshInstance3D] = []
+	var places: Array[Transform3D] = []
+	for child: Node in held.get_children():
+		_gather(child, Transform3D.IDENTITY, keep, pieces, places)
+	leave.visible = was
+	key += _materials_named(held, pieces)
+	var merged: ArrayMesh = _made.get(key)
+	if merged == null:
+		merged = _build(held, pieces, places)
+		_made[key] = merged
+	return merged
+
+
 ## `held`'s own `Figure` mesh, as it was before `merge` (its own mesh if never merged): where a figure's hands set it
 ## on the back, in the holster and against the shoulder is worked out from this, not the pieces merged in.
 static func figure_mesh(held: MeshInstance3D) -> Mesh:

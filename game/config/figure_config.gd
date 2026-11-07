@@ -116,6 +116,10 @@ extends Resource
 ## head's bow stop running at once).
 @export var raise_rest: float = 0.001
 @export var raise_fire_hold: float = 0.35
+## Through that hold, near cover the replica is still lifted up to this share of the raise (BP7, row 55): a few
+## degrees muzzle up (0.12 of raise_angle is about 9 degrees, canted as much), so a bot firing just over a 1.5 m stack
+## keeps its barrel over the top with the muzzle near the aim, never the high ready.
+@export var raise_fire_most: float = 0.12
 @export var raise_lean: float = 0.05
 @export var raise_angle: float = 1.35
 @export var raise_cant: float = 1.3
@@ -216,6 +220,12 @@ extends Resource
 @export var pistol_reload_clip: StringName = &"Pistol_Reload"
 @export var magazine_node: String = "Figure_Magazine"
 @export var thrown_max: int = 12
+## How far under the thrower's feet (m) the thrown magazine's landing ray reaches for a floor below (BP7: a ledge's
+## foot; ThrownMagazines.set_world).
+@export var thrown_drop: float = 6.0
+## The ray starts this far over the feet (m): a floor at their height or under is found, a table or crate top over them
+## never is.
+@export var thrown_land_above: float = 0.05
 ## Out of the hand, the rifle lies on the figure's back from the Chest bone (stowed, HS1): its middle
 ## back_middle.x to the figure's right of the spine and back_middle.y above the feet, its left side (against the kit)
 ## back_depth_human behind the chest bone (back_depth_pack with a human's pack, back_pack_part; back_depth_robot on a
@@ -239,8 +249,7 @@ extends Resource
 ## Out of the hand, a pistol sits in the belt holster: its frame is the kind's model's empty holster_node (the replica's
 ## axes: +Z up out of the mouth toward the grip, +Y the slide's top, toward the figure's front; its origin at the mouth
 ## on the slide's line), carried by holster_bone with holster_follow of holster_follow_bone's swing (the holster's own
-## skin: Hips, up to 0.35 Thigh_R at its foot; a rigid pistol can't bend with it, and a tenth kept the Cyber Pistol
-## inside it crouched); the pistol's muzzle holster_depth (m) below the mouth (both pistols' figure meshes clear the
+## skin is weighted the same, 0.9 Hips and 0.1 Thigh_R all over (gear.py HOLSTER_THIGH, BP7), so the two move as one); the pistol's muzzle holster_depth (m) below the mouth (both pistols' figure meshes clear the
 ## pocket's walls standing from 0.10 to 0.13 m; 0.11 sits the muzzle clear of the foot's bend). A kind without the
 ## empty (the robot) shows no pistol out of the hand.
 @export var holster_node: String = "PistolHolster"
@@ -320,3 +329,13 @@ func lod_lines(detail: GraphicsQuality.MeshDetail) -> Vector2:
 ## through a 6x scope changes level where it looks as big as one unzoomed at its line (BP6).
 func zoomed_lines(detail: GraphicsQuality.MeshDetail, zoom: float) -> Vector2:
 	return lod_lines(detail) * maxf(zoom, 1.0)
+
+
+## Through a zoomed scope only the figures its glass shows take the zoomed lines (BP7): a ball `zoom_view_radius` (m)
+## round the point `zoom_view_height` (m) over a figure's feet reaching into the glass camera's cone; the rest keep the
+## eye's own lines, as the optic's disc hides them (FigureView.fit_zoomed_lines).
+@export var zoom_view_height: float = 0.9
+@export var zoom_view_radius: float = 1.0
+## A figure already on the zoomed lines keeps them until its ball, this much wider (m), leaves the cone, so one at the
+## glass's edge doesn't flip detail every frame as the scope sways (BP7).
+@export var zoom_view_margin: float = 0.75

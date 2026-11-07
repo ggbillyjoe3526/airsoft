@@ -1,10 +1,6 @@
-# Perf 2: bp7-maps 082d04f..2c5aed6
-Verdict: PASS. Headless, busy machine, 2 runs (25 ms slice): Depot 1 call 23-24 ms; Woodland 11-14 calls, worst piece 157-193 ms (grass
-trimesh), total 474-615 ms; Street 1 call 46-51 ms. Same as 082d04f (Woodland 168-189, Depot 27-29). Shapes/nodes unchanged (409/1840/565).
-Allocation: the only new allocation is one `PropDressConfig.new()` in _add_block_colliders when no site look is given (once per map load, in
-the COLLIDERS piece, not per piece or frame; freed as RefCounted). RoundSteps.boxes adds only locals (a PackedVector2Array ref, no copy);
-the `match` and model_of/lay_of dictionary reads are per block at setup. Nothing per frame/tick. Orphans: none seen in the tests.
-# Performance 3: 3b06375
-Verdict: PASS
-- One field write, on a lost-toss path only; no allocation, no extra rays, no per-tick work.
-- Spam bound: re-ask rate is limited by mag_press_gap (1 s), a giver's walk and a 0.3 s+ flight, so at worst events (3), one radio click and <=4+4 rays a cycle per bot every >1 s. Pool of 6 tosses bounds it further. Acceptable.
+Performance verdict (0765d76): PASS
+- Bench reproduced (figure_bench, 11 figures, 4 s, headless): close (eye in the middle) 235 surfaces by day vs 257 with --night (+22, i.e. 2 a bot, matching the rifle's lens and LED); at the spawn (--far) 184 vs 184 (the torches are on the bare far copies, 0 extra). Both claims hold.
+- Per frame: _fit_torches loops the figure's replicas (at most 2) and compares one Mesh reference. No allocation and no rebuild. A holster toggle costs one assignment of a cached Mesh. lens_position is one Transform3D times Vector3 (value types), no heap, once per lit bot per frame in TorchBeams. The fallback path is the old arithmetic.
+- Draws: the holstered pistol and every far version drop the torch (bare meshes), so the cost is only inside the far line and in hand. That is down from my earlier 3 and 3 per replica to 2 on a rifle (its Rubber shares the rifle's material) and 3 on a pistol. The 11-bot worst case at night is +22 close and 0 far. Reaching 15 bots, about +30 close.
+- Night load: set_body 392 vs 275 ms close and 335 vs 191 ms far, i.e. about 11 to 13 ms per figure, in line with the claimed 14. The cause is ReplicaParts.take instantiating the parts glb scene per figure per replica (load is cached; the instantiate and free is not), plus the extra bare and bare-far merges (cached by key, so only the first of a kind builds). It is a one-off at match build, not in play, so about 0.2 s more for a 15-bot night match; a cache of the instantiated parts scene would remove most of it if loading time matters.
+- Memory: up to three more cached meshes per lit kit (lit, bare, bare far); bounded by the kits in the match. Freed: take() frees its holder, with no new orphans in the test run.
