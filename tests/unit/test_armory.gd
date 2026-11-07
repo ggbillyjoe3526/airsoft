@@ -94,7 +94,7 @@ func test_level_3_lists_ten_of_twenty_with_the_silencer_next() -> void:
 			"Every match 100 XP · a win +100 · round won 20 · hit 10 · Easy ×0.5 · Normal ×1 · Hard ×1.5"]:
 		assert_true(words.has(w), w)
 	# the multipliers and the rest of what XP means: the earn line's tooltip (UI1)
-	assert_eq(page.summary().earn_line().tooltip_text, "Then times the difficulty: Easy ×0.5 · Normal ×1 · Hard ×1.5. A first-to-5 win on Normal gives about 250 XP. Practice, and matches with Dev settings, give none.")
+	assert_eq(page.summary().earn_line().tooltip_text, "Then times the difficulty: Easy ×0.5 · Normal ×1 · Hard ×1.5. A first-to-5 win on Normal gives 300 XP and 10 more a hit. Practice, and matches with Dev settings, give none.")
 	var track := _words(page.track())
 	for w: String in ["STARTING KIT", "LEVEL 1", "UNLOCKED", "NEXT · 1,300 XP", "1,900 XP", "6,500 XP", "Red Dot",
 			"Cyber Pistol", "Replica", "Power", "Muzzle"]:
@@ -105,6 +105,23 @@ func test_level_3_lists_ten_of_twenty_with_the_silencer_next() -> void:
 	assert_eq((page.track().row(4).find_child("Item_" + SILENCER, true, false) as Control).tooltip_text,
 			ArmoryFacts.blurb(_item(SILENCER)), "an item's words are its tooltip")
 	assert_almost_eq(page.summary().bar().fraction(), 120.0 / 500.0, 0.001)
+
+
+## BP7 (row 90): the earn line's "first-to-5 win on Normal" figure is worked out from the table, never typed: change
+## the table and it follows.
+func test_the_win_figure_is_worked_out_from_the_table() -> void:
+	var o := MatchXp.Outcome.new()
+	o.won = true
+	o.rounds_won = MatchXp.FULL_MATCH_WINS
+	assert_eq(ArmorySummary.win_xp(table, 0), MatchXp.earned(table, o).total, "MatchXp's own sum")
+	assert_eq(ArmorySummary.win_xp(table, 0), table.earn[&"match_played"] + table.earn[&"match_won"]
+			+ MatchXp.FULL_MATCH_WINS * table.earn[&"round_won"])
+	assert_eq(ArmorySummary.win_xp(table, 3) - ArmorySummary.win_xp(table, 0), 3 * table.earn[&"hit"])
+	var richer := LevelTable.read_file(pool)
+	richer.earn[&"match_won"] = 150
+	richer.earn[&"hit"] = 12
+	assert_eq(ArmorySummary.win_xp(richer, 0), ArmorySummary.win_xp(table, 0) + 50)
+	assert_eq(ArmorySummary.win_xp(richer, 1) - ArmorySummary.win_xp(richer, 0), 12)
 
 
 func test_level_1_and_a_new_player_list_the_start_and_the_first_unlock() -> void:

@@ -17,6 +17,9 @@ func _init(label_text: String, note_text: String) -> void:
 	focus_mode = Control.FOCUS_ALL
 	action_mode = BaseButton.ACTION_MODE_BUTTON_RELEASE
 	tooltip_text = note_text
+	# its words are a label of its own, not the button's text: a screen reader is given them (AC6, BP7)
+	accessibility_name = label_text
+	accessibility_description = note_text
 	var none := StyleBoxEmpty.new()
 	GameTheme.dress(self, none, none, none)
 	add_theme_stylebox_override("focus", GameTheme.focus_box())

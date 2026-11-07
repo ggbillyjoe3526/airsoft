@@ -439,12 +439,38 @@ MOUSE_KEYS = {"LEFT": "KEY_MOUSE_LEFT", "RIGHT": "KEY_MOUSE_RIGHT", "MIDDLE": "K
               "XBUTTON2": "KEY_MOUSE_5"}
 
 
-def gen_controls(_arg: str) -> str:
-    """The default keys, in the order Settings › Controls lists them (game/input/key_bindings.gd, en.po names)."""
-    path = ROOT / "game/input/key_bindings.gd"
-    src = path.read_text(encoding="utf-8")
+KEY_BINDINGS = ROOT / "game/input/key_bindings.gd"
+
+
+def key_actions() -> tuple:
+    """The actions Settings › Controls lists, in its order, and each one's default key codes (game/input/key_bindings.gd)."""
+    src = KEY_BINDINGS.read_text(encoding="utf-8")
     order = re.findall(r'&"(\w+)"', re.search(r"const ACTIONS[^=]*=\s*\[(.*?)\]", src, re.S).group(1))
     defaults = dict(re.findall(r'^\s*&"(\w+)":\s*\[(.*?)\],?$', src, re.M))
+    return order, defaults
+
+
+def default_keys(action: str, defaults: dict, po: dict) -> list:
+    """Action `action`'s default keys by the names the game shows (en.po for the mouse's)."""
+    keys = []
+    for code in filter(None, (c.strip() for c in defaults.get(action, "").split(","))):
+        m = re.fullmatch(r"KEY_(\w+)", code)
+        mm = re.fullmatch(r"-MOUSE_BUTTON_(\w+)", code)
+        if m:
+            k = m.group(1)
+            keys.append(KEY_NAMES.get(k, k if len(k) == 1 else None))
+        elif mm and mm.group(1) in MOUSE_KEYS:
+            keys.append(po.get(MOUSE_KEYS[mm.group(1)]))
+        else:
+            keys.append(None)
+        if keys[-1] is None:
+            raise WikiError(f"{rel(KEY_BINDINGS)}: no name for the key {code}; add it to KEY_NAMES in tools/wiki.py")
+    return keys
+
+
+def gen_controls(_arg: str) -> str:
+    """The default keys, in the order Settings › Controls lists them (game/input/key_bindings.gd, en.po names)."""
+    order, defaults = key_actions()
     po = po_strings()
     public = public_names()
     rows = []
@@ -454,21 +480,20 @@ def gen_controls(_arg: str) -> str:
         label = po.get(f"ACT_{action.upper()}")
         if not label:
             raise WikiError(f"game/ui/text/en.po has no ACT_{action.upper()} for the '{action}' key")
-        keys = []
-        for code in filter(None, (c.strip() for c in defaults.get(action, "").split(","))):
-            m = re.fullmatch(r"KEY_(\w+)", code)
-            mm = re.fullmatch(r"-MOUSE_BUTTON_(\w+)", code)
-            if m:
-                k = m.group(1)
-                keys.append(KEY_NAMES.get(k, k if len(k) == 1 else None))
-            elif mm and mm.group(1) in MOUSE_KEYS:
-                keys.append(po.get(MOUSE_KEYS[mm.group(1)]))
-            else:
-                keys.append(None)
-            if keys[-1] is None:
-                raise WikiError(f"{rel(path)}: no name for the key {code}; add it to KEY_NAMES in tools/wiki.py")
+        keys = default_keys(action, defaults, po)
         rows.append([sentence(label), " or ".join(f"**{k}**" for k in keys) or "–"])
     return table(["Action", "Keys"], rows)
+
+
+def gen_key(action: str) -> str:
+    """One action's default keys for a sentence or a table cell (`wiki:key order_wheel` -> Z; two as 'F or G')."""
+    order, defaults = key_actions()
+    if action not in order:
+        raise WikiError(f"'wiki:key {action}': no such action in {rel(KEY_BINDINGS)}'s ACTIONS")
+    keys = default_keys(action, defaults, po_strings())
+    if not keys:
+        raise WikiError(f"'wiki:key {action}': it has no default key")
+    return " or ".join(keys)
 
 
 def gen_graphics(_arg: str) -> str:
@@ -595,6 +620,22 @@ def gen_config(arg: str) -> str:
         raise WikiError(f"{rel(path)}: {name} = {value} isn't a plain number") from e
 
 
+NUMBER_WORDS = ["none", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"]
+
+
+def gen_count(arg: str) -> str:
+    """A whole-number constant in words for a sentence: `dir.file.NAME` reads `const NAME` in game/dir/file.gd (3 shows
+    as three)."""
+    file, _, name = arg.rpartition(".")
+    path = ROOT / "game" / f"{file.replace('.', '/')}.gd"
+    if not file or not name or not path.is_file():
+        raise WikiError(f"'wiki:count {arg}' needs dir.file.NAME, with game/dir/file.gd existing")
+    value = gd_const(path, name)
+    if not value.isdigit() or int(value) >= len(NUMBER_WORDS):
+        raise WikiError(f"{rel(path)}: {name} = {value} isn't a whole number up to {len(NUMBER_WORDS) - 1}")
+    return NUMBER_WORDS[int(value)]
+
+
 def gen_version(_arg: str) -> str:
     m = re.search(r'^config/version="(.*)"$', (ROOT / "project.godot").read_text(encoding="utf-8"), re.M)
     if not m:
@@ -628,6 +669,8 @@ GENERATORS = {
     "dev-content": gen_dev_content,
     "godot": gen_godot,
     "config": gen_config,
+    "count": gen_count,
+    "key": gen_key,
     "version": gen_version,
     "latest": gen_latest,
 }

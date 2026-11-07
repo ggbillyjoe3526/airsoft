@@ -76,6 +76,30 @@ func test_replace_copies_the_carried_one_over_another_keeping_its_name() -> void
 	assert_false(saved.replace(0), "not over itself")
 
 
+## BP7 (row 89): the last Replace can be undone until any other change.
+func test_the_last_replace_is_undone_until_another_change() -> void:
+	saved.create()
+	saved.rename(1, "Long lanes")
+	var before := saved.slots[1].to_dict()
+	saved.use(0)
+	saved.rules.set_power(saved.carried(), AEG, LIPO)
+	assert_eq(saved.undo_index(), -1, "nothing to undo yet")
+	assert_false(saved.undo_replace())
+	assert_true(saved.replace(1))
+	assert_eq(saved.undo_index(), 1)
+	assert_true(saved.undo_replace())
+	assert_eq(saved.slots[1].to_dict(), before, "back as it was")
+	assert_eq(saved.undo_index(), -1, "once")
+	assert_false(saved.undo_replace())
+	for change: Callable in [func() -> void: saved.use(1), func() -> void: saved.rename(0, "Short"),
+			func() -> void: saved.mark_changed(), func() -> void: saved.create()]:
+		saved.use(0)
+		assert_true(saved.replace(1))
+		change.call()
+		assert_eq(saved.undo_index(), -1, "another change forgets it")
+		assert_false(saved.undo_replace())
+
+
 func test_remove_never_takes_the_last_and_keeps_the_carried_one() -> void:
 	assert_false(saved.remove(0))
 	saved.create()

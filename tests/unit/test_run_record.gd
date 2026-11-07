@@ -43,18 +43,24 @@ func _yes(_id: int) -> bool:
 	return true
 
 
-## A record left by a run (`pid`) that got as far as `step` (it calls the record's own steps), never closed.
+## A record left by a run (`pid`) that got as far as `step` (it calls the record's own steps), never closed; its
+## heartbeat now, as a copy still running would have written it.
 func _left_running(step: Callable, pid: int = GONE) -> void:
 	var r := RunRecord.new()
 	r.start("0.1 Dev 1", 1000, pid)
 	step.call(r)
+	r.heartbeat(_now())
 	assert_true(r.save(_run_path))
+
+
+func _now() -> int:
+	return int(Time.get_unix_time_from_system())
 
 
 ## The next start, as the entry scene makes it (RunRecord's own steps, `running` for ProcessCheck.is_running).
 func _next_start(running: Callable = _no) -> RunRecord:
 	var r := RunRecord.load_file(_run_path)
-	if r.held_by_other(OS.get_process_id(), running):
+	if r.held_by_other(OS.get_process_id(), running, _now()):
 		return null
 	r.start("0.1 Dev 2", 2000, OS.get_process_id())
 	r.save(_run_path)
@@ -155,11 +161,75 @@ func test_a_second_copy_leaves_the_running_record_alone() -> void:
 	assert_null(_next_start(_yes))
 	assert_eq(FileAccess.get_file_as_string(_run_path), before)
 	var r := RunRecord.load_file(_run_path)
-	assert_true(r.held_by_other(OS.get_process_id(), _yes))
-	assert_false(r.held_by_other(OS.get_process_id(), _no), "its writer gone: a crash")
-	assert_false(r.held_by_other(r.pid, _yes), "this process's own record is not another copy")
+	assert_true(r.held_by_other(OS.get_process_id(), _yes, _now()))
+	assert_false(r.held_by_other(OS.get_process_id(), _no, _now()), "its writer gone: a crash")
+	assert_false(r.held_by_other(r.pid, _yes, _now()), "this process's own record is not another copy")
 	r.close()
-	assert_false(r.held_by_other(OS.get_process_id(), _yes), "only a run under way")
+	assert_false(r.held_by_other(OS.get_process_id(), _yes, _now()), "only a run under way")
+
+
+## BP7 (row 85): a run under way whose heartbeat is stale crashed, even if another copy of the game holds its id now.
+func test_a_stale_heartbeat_is_a_crash_though_another_copy_holds_the_id() -> void:
+	var r := RunRecord.new()
+	r.start("0.1 Dev 1", 1000, OS.get_process_id() + 1)
+	assert_eq(r.beat, 1000, "a start beats")
+	assert_true(r.held_by_other(OS.get_process_id(), _yes, 1000 + RunRecord.STALE_SECONDS), "fresh enough")
+	assert_false(r.held_by_other(OS.get_process_id(), _yes, 1001 + RunRecord.STALE_SECONDS), "stale: a crash")
+	assert_true(r.held_by_other(OS.get_process_id(), _yes, 900), "a beat ahead of the clock is fresh")
+	r.heartbeat(5000)
+	assert_true(r.save(_run_path))
+	var read := RunRecord.load_file(_run_path)
+	assert_eq(read.beat, 5000, "the heartbeat is written")
+	assert_true(read.held_by_other(OS.get_process_id(), _yes, 5030))
+	assert_false(read.held_by_other(OS.get_process_id(), _yes, 5100))
+	var older := read.to_dict()
+	older.erase("beat")
+	var before_bp7 := RunRecord.new()
+	before_bp7.from_dict(older)
+	assert_eq(before_bp7.beat, 1000, "a record with no heartbeat reads its start")
+	assert_lt(RunRecord.BEAT_SECONDS * 3.0, float(RunRecord.STALE_SECONDS), "a few beats missed before it is stale")
+
+
+## The entry scene beats: its timer writes the run's heartbeat beside the record, paused or not, off the main thread
+## (BP7 performance: the record itself, an atomic write, is not rewritten every beat).
+func test_the_entry_scene_writes_a_heartbeat() -> void:
+	var main: Node = _main()
+	add_child_autofree(main)
+	await wait_process_frames(1)
+	var beat: Timer = main.get("_beat")
+	assert_not_null(beat)
+	assert_almost_eq(beat.wait_time, RunRecord.BEAT_SECONDS, 0.001)
+	assert_eq(beat.process_mode, Node.PROCESS_MODE_ALWAYS)
+	main.run.beat = 7
+	main.run.save(main.run_path)
+	beat.timeout.emit()
+	(main.get("_run_beat") as RunBeat).finish()
+	var seen := RunBeat.read(_run_path)
+	assert_eq(seen[0], OS.get_process_id(), "this run's process")
+	assert_gt(seen[1], 7, "beating now")
+	assert_eq(RunRecord.load_file(_run_path).beat, 7, "the record not rewritten for it")
+
+
+## BP7: the two beat files are written in turn, so a write cut short leaves the other one to read.
+func test_the_newer_whole_beat_is_read_and_a_cut_one_is_passed_over() -> void:
+	var beat := RunBeat.new(_run_path)
+	assert_eq(RunBeat.read(_run_path), PackedInt64Array([0, 0]), "none yet")
+	beat.beat(41, 1000)
+	beat.finish()
+	beat.beat(41, 1010)
+	beat.finish()
+	assert_eq(RunBeat.read(_run_path), PackedInt64Array([41, 1010]), "the newer")
+	var cut := FileAccess.open(RunBeat.file_of(_run_path, 1), FileAccess.WRITE)
+	cut.store_string("airsoft-be")
+	cut.close()
+	assert_eq(RunBeat.read(_run_path), PackedInt64Array([41, 1000]), "a cut write: the other one")
+	var r := RunRecord.new()
+	r.start("0.1 Dev 1", 900, 41)
+	assert_false(r.held_by_other(OS.get_process_id(), _yes, 900 + RunRecord.STALE_SECONDS + 50), "its record alone: stale")
+	assert_true(r.held_by_other(OS.get_process_id(), _yes, 900 + RunRecord.STALE_SECONDS + 50, RunBeat.read(_run_path)),
+			"its beat beside the record: still going")
+	assert_false(r.held_by_other(OS.get_process_id(), _yes, 900 + RunRecord.STALE_SECONDS + 50,
+			PackedInt64Array([42, 2000])), "another process's beat does not count")
 
 
 func test_damaged_and_odd_files_read_as_closed() -> void:
@@ -358,7 +428,9 @@ func test_a_clean_quit_whose_write_fails_is_still_no_crash() -> void:
 	var mark := RunRecord.closed_mark(_run_path, GONE, 1000)
 	assert_true(FileAccess.file_exists(mark), "the mark beside the record")
 	assert_eq(RunRecord.load_file(_run_path).state, RunRecord.State.CLOSED)
-	assert_false(FileAccess.file_exists(mark), "read once, then gone")
+	assert_true(FileAccess.file_exists(mark), "kept while its run's record is the one on disk")
+	assert_false(_next_start().crashed_before())
+	assert_false(FileAccess.file_exists(mark), "gone once a newer run's record is written")
 	_left_running(_back_to_menus)
 	assert_true(_next_start().crashed_before(), "the mark used up: a run left running is a crash again")
 	_left_running(_back_to_menus)
@@ -368,6 +440,64 @@ func test_a_clean_quit_whose_write_fails_is_still_no_crash() -> void:
 	FileAccess.open(mark, FileAccess.WRITE).close()
 	assert_true(_next_start().crashed_before(), "another run's mark: still a crash")
 
+
+
+## BP7 (row 83): a full disk that takes names but no bytes, two runs running: the second start can't write its own
+## record, so its clean quit marks the run before it, still the one on disk, and the third start reads no crash.
+func test_a_start_that_cannot_write_marks_the_run_on_disk_at_its_quit() -> void:
+	_left_running(_back_to_menus)
+	var first := RunRecord.load_file(_run_path)
+	SaveFile.hold(PackedStringArray([_run_path]))
+	assert_true(first.save_closed(_run_path), "first run: marked")
+	var second := RunRecord.load_file(_run_path)
+	assert_false(second.crashed_before())
+	second.start("0.1 Dev 2", 2000, OS.get_process_id())
+	assert_false(second.save(_run_path), "the second start can't write")
+	assert_true(second.save_closed(_run_path), "second run: marked")
+	SaveFile.release(PackedStringArray([_run_path]))
+	assert_true(FileAccess.file_exists(RunRecord.closed_mark(_run_path, GONE, 1000)), "the first run's mark, kept")
+	assert_false(FileAccess.file_exists(RunRecord.closed_mark(_run_path, OS.get_process_id(), 2000)),
+			"no mark for a run no record names")
+	assert_false(_next_start().crashed_before(), "the third start: no false crash")
+
+
+## A start that can't write over a closed record needs no mark at its quit: the record already reads as closed.
+func test_a_quit_over_a_closed_record_it_could_not_write_makes_no_mark() -> void:
+	_left_running(_quit)
+	var r := RunRecord.load_file(_run_path)
+	r.close()
+	assert_true(r.save(_run_path))
+	var next := RunRecord.load_file(_run_path)
+	next.start("0.1 Dev 2", 2000, OS.get_process_id())
+	SaveFile.hold(PackedStringArray([_run_path]))
+	assert_true(next.save_closed(_run_path))
+	SaveFile.release(PackedStringArray([_run_path]))
+	assert_eq(_marks(), 0)
+	assert_false(_next_start().crashed_before())
+
+
+## Marks whose runs' records are gone go with a newer run's first write, so none pile up.
+func test_stale_marks_are_swept_by_the_next_written_start() -> void:
+	for i in 3:
+		FileAccess.open(RunRecord.closed_mark(_run_path, GONE + i, 1000 + i), FileAccess.WRITE).close()
+	FileAccess.open(ROOT.path_join("other.save.closed-1-1"), FileAccess.WRITE).close()
+	assert_eq(_marks(), 3)
+	_next_start()
+	assert_eq(_marks(), 0, "swept")
+	assert_true(FileAccess.file_exists(ROOT.path_join("other.save.closed-1-1")), "another file's marks are not ours")
+	var r := RunRecord.load_file(_run_path)
+	FileAccess.open(RunRecord.closed_mark(_run_path, GONE, 1), FileAccess.WRITE).close()
+	r.round_started(2, PackedInt32Array([1, 0]))
+	assert_true(r.save(_run_path))
+	assert_eq(_marks(), 1, "a run's later writes don't list the folder again")
+
+
+func _marks() -> int:
+	var n := 0
+	for f in DirAccess.get_files_at(ROOT):
+		if f.begins_with(_run_path.get_file() + ".closed-"):
+			n += 1
+	return n
 
 
 ## A folder locked whole (the record and its mark both held, as SaveFile.hold keeps a replaced save): no mark is made

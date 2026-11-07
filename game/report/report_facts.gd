@@ -12,6 +12,8 @@ const EXPORTED := "exported, %s"
 const SOURCE_RUN := "source run"
 const RELEASE := "release"
 const DEBUG := "debug"
+## The graphics driver's version after the card's name; ReportScrub keeps this machine's whole.
+const DRIVER_TEXT := "(driver %s)"
 ## DisplayServer.WindowMode, in its order.
 const WINDOW_MODES: PackedStringArray = ["windowed", "minimized", "maximized", "borderless fullscreen", "fullscreen"]
 const RENDERING_METHODS: Dictionary[String, String] = {
@@ -153,7 +155,7 @@ static func card_text(adapter: String, driver_info: PackedStringArray) -> String
 	if adapter == "":
 		return ""
 	var version := driver_info[1] if driver_info.size() > 1 else ""
-	return adapter if version == "" else "%s (driver %s)" % [adapter, version]
+	return adapter if version == "" else adapter + " " + DRIVER_TEXT % version
 
 
 ## "Forward+ (Vulkan) · High".

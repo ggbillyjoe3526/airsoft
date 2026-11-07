@@ -49,7 +49,7 @@ one; "Follow opponents" puts them back.
 - When a teammate is hit, nearby Hard bots run to trade it. A Hard bot that hears you tells its team where.
 - Two Hard bots on one lane move in pairs, one covering while the other moves, and in Attack / Defend two defenders on
   a lane set up a crossfire.
-- A Hard team that's behind with 30 seconds or less left stops holding and comes looking.
+- A Hard team that's behind with <!-- wiki:config bot_config.late_push_time --> seconds or less left stops holding and comes looking.
 - Against Hard bots the scoreboard shows a **Pro tip** each round.
 
 **Normal and Hard bots** also play as a team, and fight smarter:

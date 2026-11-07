@@ -463,9 +463,39 @@ func test_a_mode_shows_its_blurb_on_the_card() -> void:
 
 func test_a_field_picture_is_cut_from_the_render_centre_to_the_cards_size() -> void:
 	var pictures: GDScript = load("res://tools/eye_pictures.gd")
-	var render := Image.create(1600, 900, false, Image.FORMAT_RGB8)
+	var render := Image.create(2400, 1080, false, Image.FORMAT_RGB8)
 	render.fill(Color.BLACK)
-	render.fill_rect(Rect2i(780, 430, 40, 40), Color.WHITE)
+	render.fill_rect(Rect2i(1180, 520, 40, 40), Color.WHITE)
 	var cut: Image = pictures.card_cut(render)
-	assert_eq(cut.get_size(), Vector2i(700, 400))
-	assert_gt(cut.get_pixel(350, 200).r, 0.9, "the render's middle stays in the middle")
+	assert_eq(cut.get_size(), Vector2i(1920, 1080), "a full screen's (BP7 row 93)")
+	assert_gt(cut.get_pixel(960, 540).r, 0.9, "the render's middle stays in the middle")
+
+
+## BP7 row 93: the map pictures are drawn full screen by the loading screen, so they are a full screen's, and they ship
+## compressed (lossy, as they were taken), smaller than the 700 x 400 pictures were; each has a small copy for the
+## Match page's cards.
+func test_the_map_pictures_are_full_screen_and_ship_compressed() -> void:
+	for map_id: String in ["depot", "range", "street", "woodland"]:
+		var path := "res://assets/maps/%s.jpg" % map_id
+		var picture := load(path) as Texture2D
+		assert_eq(Vector2i(picture.get_size()), Vector2i(1920, 1080), map_id)
+		var import := ConfigFile.new()
+		assert_eq(import.load(path + ".import"), OK)
+		assert_eq(import.get_value("params", "compress/mode"), 1, "%s: lossy" % map_id)
+		assert_true(import.get_value("params", "mipmaps/generate"), "%s: smooth on its card" % map_id)
+		var copy := load("res://assets/maps/cards/%s.jpg" % map_id) as Texture2D
+		assert_eq(Vector2i(copy.get_size()), Vector2i(480, 270), "%s: the Match page's copy" % map_id)
+		assert_true(copy.get_image().has_mipmaps(), "%s: its copy smooth on its card" % map_id)
+
+
+## BP7 performance: the Match page shows every map at once, so it holds the small copies, never the loading screen's
+## full-screen pictures (about 5 MB of texture memory where the full ones took about 35 MB).
+func test_the_match_page_shows_the_small_copies() -> void:
+	var page := _page(false)
+	var shown := 0
+	for picture: TextureRect in page.find_children("*", "TextureRect", true, false):
+		if picture.texture != null and picture.texture.resource_path.begins_with("res://assets/maps/"):
+			assert_string_starts_with(picture.texture.resource_path, "res://assets/maps/cards/", picture.name)
+			assert_lte(picture.texture.get_width(), 480)
+			shown += 1
+	assert_gt(shown, 1, "the map cards and PLAY's picture")

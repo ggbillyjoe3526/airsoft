@@ -19,6 +19,20 @@ const SORT_MM := 1000.0
 const SORT_SLOTS := 1 << 24
 ## The stand points are bucketed in squares this wide (m), so a far end of the field is reached without every pair.
 const BUCKET := 4.0
+## Over more than SEED_FROM points the search first runs on every SEED_STRIDE-th of them, and only lines longer than the
+## one found there, less SEED_SLACK (m), are tried on them all (BP7 row 65: the same line, a small share of the rays).
+const SEED_FROM := 600
+const SEED_STRIDE := 4
+const SEED_SLACK := 0.01
+## The boxes that lately blocked lines from a bucket's points (WorldQuery.block_centers, a map's listed boxes: solid to
+## `ray`) are tried with a box test before a Jolt ray: a line through one's core, shrunk BOX_CORE (m) from each face
+## (past Jolt's rounded corners), from outside it grown by twice that, is blocked, as `ray` would find. A ray's hit is
+## matched to a box it lies within HIT_REACH (m) of; the boxes are bucketed in squares BOX_BUCKET wide (m) for that.
+## BOX_CACHE boxes a bucket, most recent first.
+const BOX_CORE := 0.05
+const HIT_REACH := 0.02
+const BOX_BUCKET := 4.0
+const BOX_CACHE := 8
 
 
 ## A clear line between two standing eyes, and how long it is across the ground (m), floor point to floor point.
@@ -58,6 +72,8 @@ var size_x: float = 0.0
 var size_z: float = 0.0
 var area: float = 0.0
 var spacing: float = 0.0
+## False: the plain search, neither seeded nor box-tested (for the test that the two find one line).
+var quick: bool = true
 
 var _x0: float = INF
 var _z0: float = INF
@@ -66,6 +82,14 @@ var _z1: float = -INF
 var _hit := RayHit.new()
 var _route := PackedVector3Array()
 var _measured: Dictionary[String, Variant] = {}
+## The listed boxes' cores (half size less BOX_CORE; none for a box thinner) and the boxes grown by 2 BOX_CORE, and
+## their buckets (squares of BOX_BUCKET from _box0, _box_cols wide), made the first time a search asks.
+var _cores: Array[AABB] = []
+var _grown: Array[AABB] = []
+var _box_buckets: Array[PackedInt32Array] = []
+var _box0 := Vector2.ZERO
+var _box_cols: int = 0
+var _box_rows: int = 0
 
 
 func _init(m: MapData, n: NavGrid, w: WorldQuery, body: BodyConfig) -> void:
@@ -124,8 +148,25 @@ func sees(a: Vector3, b: Vector3, eye_a: float, eye_b: float) -> bool:
 ## The longest clear line from a standing eye to a standing eye between any two of `points` (across the ground), or
 ## null. Each point, taken far from the middle first so a long line turns up early, tries the points before it farthest
 ## first and stops at its first clear one (so each pair is tried once); a square of points no farther than the longest
-## found is never looked at.
+## found is never looked at. Many points are seeded first (SEED_FROM): the longest line among a share of them is one
+## among them all too, so only longer pairs are tried; it finds the line the search unseeded finds (each point still
+## takes its farthest clear pair over what is known), and runs unseeded if the seeded search finds none.
 func longest_sightline(points: PackedVector3Array) -> Sightline:
+	var n := points.size()
+	if quick and n > SEED_FROM:
+		var fewer := PackedVector3Array()
+		for i in range(0, n, SEED_STRIDE):
+			fewer.append(points[i])
+		var seed := longest_sightline(fewer)
+		if seed != null:
+			var found := _longest_over(points, seed.metres - SEED_SLACK)
+			if found != null:
+				return found
+	return _longest_over(points, 0.0)
+
+
+## longest_sightline's search over `points`, trying only pairs longer than `least` (m).
+func _longest_over(points: PackedVector3Array, least: float) -> Sightline:
 	var n := points.size()
 	var bx := maxi(1, ceili((_x1 - _x0) / BUCKET) + 1)
 	var bz := maxi(1, ceili((_z1 - _z0) / BUCKET) + 1)
@@ -140,11 +181,23 @@ func longest_sightline(points: PackedVector3Array) -> Sightline:
 		keys.append(_sort_key(Vector2(points[i].x - cx, points[i].z - cz).length(), i))
 	keys.sort()
 	var best: Sightline = null
-	var least := 0.0
 	var cand := PackedInt64Array()
+	_index_boxes()
+	# each stand bucket's recent blocking boxes, BOX_CACHE a bucket, and the ones the point searched from is outside
+	var cache := PackedInt32Array()
+	cache.resize(bx * bz * BOX_CACHE)
+	cache.fill(-1)
+	var fronts: Array[AABB] = []
 	for r in range(n - 1, -1, -1):
 		var i := keys[r] % SORT_SLOTS
 		var a := points[i]
+		var eye := eyes[i]
+		var from := _bucket_of(a, bx, bz) * BOX_CACHE
+		fronts.clear()
+		for k in BOX_CACHE:
+			var box := cache[from + k]
+			if box >= 0 and not _grown[box].has_point(eye):
+				fronts.append(_cores[box])
 		cand.clear()
 		for b in bx * bz:
 			if buckets[b].is_empty():
@@ -158,17 +211,96 @@ func longest_sightline(points: PackedVector3Array) -> Sightline:
 				continue
 			for j in buckets[b]:
 				var d := Vector2(a.x - points[j].x, a.z - points[j].z).length()
-				if d > least:
+				if d <= least:
+					continue
+				var hidden := false
+				for core in fronts:
+					if core.intersects_segment(eye, eyes[j]) != null:
+						hidden = true
+						break
+				if not hidden:
 					cand.append(_sort_key(d, j))
 		cand.sort()
 		for c in range(cand.size() - 1, -1, -1):
 			var j := cand[c] % SORT_SLOTS
-			if not world.ray(eyes[i], eyes[j], _hit):
+			var hidden := false
+			for core in fronts:
+				if core.intersects_segment(eye, eyes[j]) != null:
+					hidden = true
+					break
+			if hidden:
+				continue
+			if world.ray(eye, eyes[j], _hit):
+				var box := _box_hit(eye, eyes[j], _hit.position) if quick else -1
+				if box >= 0 and _remember(cache, from, box):
+					fronts.append(_cores[box])
+			else:
 				least = Vector2(a.x - points[j].x, a.z - points[j].z).length()
 				best = Sightline.new(least, a, points[j])
 				break
 		buckets[_bucket_of(a, bx, bz)].append(i)
 	return best
+
+
+## Lists the world's boxes' cores and grown boxes and buckets them, once.
+func _index_boxes() -> void:
+	if _box_cols > 0:
+		return
+	var lo := Vector2(INF, INF)
+	var hi := Vector2(-INF, -INF)
+	for b in world.block_centers.size():
+		var c := world.block_centers[b]
+		var h := world.block_halves[b]
+		var core := h - Vector3.ONE * BOX_CORE
+		_cores.append(AABB(c - core, core * 2.0) if core.x > 0.0 and core.y > 0.0 and core.z > 0.0 else AABB())
+		_grown.append(AABB(c - h, h * 2.0).grow(BOX_CORE * 2.0))
+		lo = Vector2(minf(lo.x, c.x - h.x), minf(lo.y, c.z - h.z))
+		hi = Vector2(maxf(hi.x, c.x + h.x), maxf(hi.y, c.z + h.z))
+	_box_cols = 1
+	if _cores.is_empty():
+		return
+	_box0 = lo
+	_box_cols = maxi(1, ceili((hi.x - lo.x) / BOX_BUCKET))
+	_box_rows = maxi(1, ceili((hi.y - lo.y) / BOX_BUCKET))
+	_box_buckets.resize(_box_cols * _box_rows)
+	for b in _cores.size():
+		var reach := _grown[b].grow(HIT_REACH)
+		var i0 := clampi(floori((reach.position.x - lo.x) / BOX_BUCKET), 0, _box_cols - 1)
+		var i1 := clampi(floori((reach.end.x - lo.x) / BOX_BUCKET), 0, _box_cols - 1)
+		var j0 := clampi(floori((reach.position.z - lo.y) / BOX_BUCKET), 0, _box_rows - 1)
+		var j1 := clampi(floori((reach.end.z - lo.y) / BOX_BUCKET), 0, _box_rows - 1)
+		for j in range(j0, j1 + 1):
+			for i in range(i0, i1 + 1):
+				_box_buckets[j * _box_cols + i].append(b)
+
+
+## The listed box that the ray from eye `a` to eye `b` hit at `at`: one the hit lies within HIT_REACH of whose core the
+## line crosses, from outside the box grown; -1 for none (a ramp, the ground, a door, the ceiling).
+func _box_hit(a: Vector3, b: Vector3, at: Vector3) -> int:
+	if _box_rows == 0:
+		return -1
+	var i := floori((at.x - _box0.x) / BOX_BUCKET)
+	var j := floori((at.z - _box0.y) / BOX_BUCKET)
+	if i < 0 or j < 0 or i >= _box_cols or j >= _box_rows:
+		return -1
+	for box in _box_buckets[j * _box_cols + i]:
+		var near := AABB(_cores[box].position, _cores[box].size).grow(BOX_CORE + HIT_REACH)
+		if _cores[box].has_volume() and near.has_point(at) and not _grown[box].has_point(a) \
+				and _cores[box].intersects_segment(a, b) != null:
+			return box
+	return -1
+
+
+## Puts `box` first in the stand bucket's recent blocking boxes at `from` in `cache`; false if it was there already.
+func _remember(cache: PackedInt32Array, from: int, box: int) -> bool:
+	var at := BOX_CACHE - 1
+	for k in BOX_CACHE:
+		if cache[from + k] == box:
+			return false
+	for k in range(at, 0, -1):
+		cache[from + k] = cache[from + k - 1]
+	cache[from] = box
+	return true
 
 
 ## `line` stretched to its full length: every walkable cell within `reach` of either end (on its floor) tried against

@@ -174,8 +174,10 @@ func test_the_ambience_plays_at_its_share_of_its_level() -> void:
 	var peaks: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(SoundConfig.PEAKS_PATH))
 	assert_false(audio._beds.is_empty(), "a bed plays")
 	if not audio._beds.is_empty():
-		var want := linear_to_db(bed.gain * float(peaks[String(bed.loop)]) * cfg.ambience_gain)
-		assert_almost_eq(audio._beds[0].volume_db, want, 1e-3)
+		var want := linear_to_db(bed.gain * float(peaks[String(bed.loop)]) * cfg.ambience_gain
+				* AmbienceBed.pair_gains(bed.width).x)
+		assert_almost_eq(audio._beds[0].volume_db, want, 1e-3, "each copy of the pair (BP7 row 59)")
+		assert_almost_eq(audio._beds[1].volume_db, want, 1e-3)
 
 
 func test_the_ambience_volume_starts_at_20_percent() -> void:

@@ -11,7 +11,7 @@ version, and the **Save folder** with an **Open folder** button.
 
 ## Restore points
 
-The game keeps up to **three restore points** of your save, at most one a day, taken at start-up when the save has
+The game keeps up to **<!-- wiki:count save.save_keeper.RESTORE_POINTS --> restore points** of your save, at most one a day, taken at start-up when the save has
 changed. On the Save file tab:
 
 - **Restore** brings a restore point back, settings and key bindings included.

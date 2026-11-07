@@ -55,7 +55,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "..\build\windows\Airsoft.exe"; DestDir: "{app}"; Flags: ignoreversion
-; The exe keeps Godot's icon (it is exported on Linux without rcedit), so shortcuts use this one.
+; The exe carries this icon itself since BP7 (the export writes it in); the shortcuts still name this copy.
 Source: "icon.ico"; DestDir: "{app}"; DestName: "Airsoft.ico"; Flags: ignoreversion
 ; Licences for the engine and everything third-party, shipped next to the game.
 Source: "..\THIRD_PARTY_NOTICES.txt"; DestDir: "{app}"; Flags: ignoreversion

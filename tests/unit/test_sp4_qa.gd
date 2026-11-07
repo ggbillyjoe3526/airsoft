@@ -124,11 +124,13 @@ func test_every_shipped_maps_ambience_loads_and_its_calls_sound() -> void:
 		var map := MapData.load_map(id, MapStyle.new(), 1)
 		_sound(map)
 		var amb := cfg.ambiences.set_for(map.ambience, false)
-		assert_eq(audio._beds.size(), amb.beds.size(), "%s: every bed found" % id)
+		assert_eq(audio._beds.size(), amb.beds.size() * 2, "%s: every bed found, as its pair" % id)
 		audio.start_ambience() # the match starts it (UF1: silent under the loading screen)
-		for bed in audio._beds:
-			assert_true(bed.playing, id)
-			assert_eq(bed.bus, SimAudio.BUS_AMBIENCE, id)
+		for i in audio._beds.size():
+			assert_true(audio._beds[i].playing, id)
+			var bus := SimAudio.BUS_AMBIENCE_RIGHT if i % 2 == 1 else SimAudio.BUS_AMBIENCE_LEFT
+			assert_eq(audio._beds[i].bus, bus, id)
+			assert_eq(AudioServer.get_bus_send(AudioServer.get_bus_index(bus)), SimAudio.BUS_AMBIENCE, id)
 		for kind in amb.calls:
 			assert_gt((audio._streams[kind.cue] as Array).size(), 0, "%s: %s has its variants" % [id, kind.cue])
 		var fired := PackedInt32Array()

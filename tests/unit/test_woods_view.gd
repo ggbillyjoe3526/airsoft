@@ -312,11 +312,10 @@ func test_it_is_look_only_the_field_checks_nav_grid_and_a_seeded_match_come_out_
 	# with the dressing, drawn at its fullest and at night in the tree beside the level, then without it
 	var on := MatchRunner.new(self, "woodland", tuning)
 	var dressed := WoodsView.build(on.map, play.woods, play.skyline, night, play.map_style)
-	add_child(dressed)
+	on.world.add_child(dressed)
 	dressed.set_quality(GraphicsQuality.MeshDetail.ULTRA, 1.0)
 	var with_it := on.play(MATCH_SEED, MATCH_SECONDS)
-	on.free_level()
-	dressed.free()
+	on.free_level() # the dressing with it
 	# before_all's view leaves the tree too, so nothing of any wood is in the world for this run
 	remove_child(view)
 	var off := MatchRunner.new(self, "woodland", tuning, null, bare)

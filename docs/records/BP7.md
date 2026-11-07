@@ -3,6 +3,7 @@
 **Review:**
 
 - part 1: critic Accept 8/8 · qa Pass · performance Pass
+- part 2: critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -10,6 +11,8 @@
 |---|---|---|---|---|---|
 | 2026-11-07 | part 1: 1 | Opus 5.5 | green | Retry 6/8 | doors and poles outside the bake's light, the Lounge not dim, rows 68/78, changelog |
 | 2026-11-07 | part 1: 2 | Opus 5.5 | green | Accept 8/8 | – |
+| 2026-11-07 | part 2: 1 | Opus 5.5 | green | Retry 5/8 | row 85's stale rule, bus layout order, full-size map cards, heartbeat on the main thread |
+| 2026-11-07 | part 2: 2 | Opus 5.5 | green | Accept 7/8 | – (the ping test made to reach its line, e1194c9) |
 
 ## The pass
 
@@ -159,3 +162,130 @@ for the figures and puffs) are A2's too but went to the figures part (part 2 or 
 - The green doors and the flag poles on both maps: do they sit in the walls round them, or look pasted on? (On the
   simpler renderer they stand out: a known row.) Woodland's far treeline, paler toward the horizon.
 - Woodland on High with the overlay: draws (Forward+'s count) against the 150 line.
+
+### Part 2: menus, HUD, controls and reports
+
+Branch `bp7-menus` (from origin/main 5004551), head e1194c9, 22 commits (20, then retry 1 after the critic's 5/8 and
+QA's and performance's notes, then the ping test), squashed into this pull request. Rows from triage A4: 25, 26, 33, 43,
+46, 59, 62, 65, 66, 67, 83, 84, 85, 89, 90, 93, 96, 102, plus the owner's picks 22 (B5) and 61 (B8), each in its own
+commit.
+
+#### What changed
+
+- **Bottomless (66).** Switching it on tops up the magazine in hand (`Armament.top_up_in_hand`, `DevCheats`).
+- **Report scrub (84).** An IPv4 address after "(driver " is scrubbed: only the real driver version
+  (`ReportFacts.DRIVER_TEXT`, passed in by `for_this_machine`) is kept; IPv6 lost the Capital-then-lowercase C++ name
+  exemption.
+- **Run record (83, 85).** A heartbeat (every 10 s from `main.gd`, in play too; stale after 60 s) tells a copy still
+  running from a crashed run whose process id another copy now holds. Retry: the beat is `RunBeat`, two small files
+  beside the record written in turn on a WorkerThreadPool task (a write cut short leaves the other to read; a beat is
+  skipped while the last one is still writing), so no atomic record write on the main thread every 10 s (performance's
+  1–2 ms hitch); the record is no longer rewritten each beat. The graphics' safe start (`GraphicsGuard`) now keeps the
+  same rule: STARTING saves when it began (`at`), and a start older than 60 s whose run has not beaten since is a
+  crash even if another copy holds its id; a record from before BP7 (no `at`) is decided by its id alone (tests).
+  A start whose own write failed leaves the run before it on disk, and its clean quit marks that run. The first write
+  of a newer run sweeps every closed mark.
+- **Tests (25, 26, 46, 67).** `MatchRunner` plays in its own SubViewport world, so a test's own level is out of its
+  physics space (the Woodland door workaround is gone); the silenced-shot test reads its own voice by serial; a new
+  check fails on any shipped map with a one-way nav step; the hit-area probe measures 6 more poses (25), each branch
+  asserted.
+- **Settings Gameplay tab (61, owner's pick).** Second tab, after Controls. Moved there: **Crouch** (hold/toggle),
+  **Aim down sights** (hold/toggle), **Reload** (manual/auto) from Controls, and **What got you** from HUD. Kept: the
+  Order wheel (hold/click) in Controls, beside its key; every HUD display row (sizes, colours, minimap) in HUD; key
+  bindings in Controls. Saved settings are the same keys, so nothing moves on disk (test). Wiki: Settings, Controls,
+  HUD and Minimap, How to Play.
+- **Skip bar (22, owner's pick).** The skip cover shows a bar of how far the rest of the round has played (honest skip).
+- **Exe icon (102).** `application/modify_resources` on with `installer/icon.ico`; the release workflow checks the
+  built exe's icon with `tools/exe_icon.py`, and now stamps the exe's version too (`NUMBER`, the four Windows numbers from `tools/version.sh`, a sed of
+  `file_version`/`product_version` in `export_presets.cfg` before the export). AppId untouched. Signing not done
+  (owner: not now).
+- **Retry, small.** `default_bus_layout.tres` committed in the order Godot writes it (the Panner sub-resources moved;
+  buses, effects and sends unchanged; a fresh `--import` leaves it clean). `settings_screen.gd`'s header names its ten
+  tabs.
+- **Undo Replace (89).** Replace on the Loadout strip offers Undo for 6 s (`SavedLoadouts.undo_replace`).
+- **Armory XP (90).** The earn note's numbers come from the levels table (`ArmorySummary.win_xp`).
+- **PLAY focus (96).** The menus open with PLAY focused and its ring hidden (`grab_focus(true)`).
+- **Spoken names (62).** `MenuCard` names itself by its visible words as the screen reader asks, unless its builder
+  named it; every MenuChoice outside Settings has a name.
+- **Ping declutter (43).** On-field ping markers that meet each other or Hold here's plate step apart up and down,
+  eased (`HudConfig.ping_clear_gap` 4 px, `ping_clear_rate` 14/s), fixed arrays, no allocation. Retry (QA): the push
+  is limited by the screen as it is made, so one marker against the top or bottom edge leaves the whole step to the
+  other, and a marker with no room above the plate goes under it (test at the top edge: the plate sits under the ping's
+  middle with less room above than the push needs, and the test fails with the under-the-plate line removed, checked).
+- **Ambience pair (59).** Each bed is two copies half a loop apart (`copy_offset` more) on new buses AmbienceLeft and
+  AmbienceRight (into Ambience), whose panners take the set's width; the copies' gains reproduce the browser's
+  equal-power StereoPanner exactly in each ear (Godot's panner measured: left 1 - pan, right 1 + pan of a mono voice),
+  so the level is unchanged. The row's "3 dB under" was the pair summed without the pan law: Godot's single centred
+  copy was already at the browser's level, and still is.
+- **Sightline search (65).** Seeded on a quarter of the stand points, and each stand bucket's recent blocking boxes
+  (`WorldQuery.block_centers`, cores 5 cm in) are box-tested with `AABB.intersects_segment` before a Jolt ray. Same
+  line on every field (64.583 / 161.204 / 81.789 m stretched, to the mm). On this loaded machine: Depot 90 s to 14 s,
+  Woodland 30 s to 6.5 s, The Street 133 s to 17 s; Jolt rays on Depot 12.7 M to 0.4 M. `test_field_layout` 73 s.
+- **Map pictures (93).** `tools/eye_pictures.gd card` renders at 1920x1080 on Forward+ and dresses the range (targets,
+  markings, `fov=40`); `tools/map_pictures.gd` is gone. Depot's spot moved to 3,0 (0,0 now faces a wall). Imported
+  lossy at 0.85 with mipmaps. Retry: it also writes `assets/maps/cards/<id>.jpg` at 480x270 (Lanczos; the cards draw
+  at most about 272x152 at 4K), which the Match page and the menus' backdrop load; only the loading screen loads the
+  full 1920x1080 picture, in its `setup()` when shown. Measured (menus' first open, `MenuScreen.new()` plus 5 frames,
+  llvmpipe on a loaded machine): before 504–640 ms and +35.0 MB texture memory, three full pictures cached; after
+  294–340 ms and +5.3 MB, no full picture cached.
+- **Wiki numbers (33).** New markers `wiki:key <action>` and `wiki:count <dir.file.CONST>`; the squad keys, the
+  minimap's step/shot reach, the late push and the restore points are generated. The flat ranges are checked against
+  the simulation by `test_hop_up.gd`, which found the AEG Rifle's at 39 m, not 38 (fixed).
+
+#### Rows fixed and deleted
+
+22, 25, 26, 43, 46, 59, 62, 65, 66, 67, 84, 85 (the run and the safe start), 93 (rows deleted from KNOWN_ISSUES); 61
+done (the planned-group row narrowed to what's left).
+
+#### Rows added
+
+- **Graphics, range floor:** on High the range draws its floor plain under its bake, where the unbaked render showed
+  the concrete texture; its new pictures show it so. Not looked into (site dress or bake material), can wait.
+
+#### Rows left
+
+- **83, narrowed:** a save folder that takes no file at all still shows the last crash on each start; nothing can be
+  written to say the run closed.
+- **33, narrowed:** Patch Notes' features added and later replaced need CHANGELOG.md edits, which no pull request
+  makes (the release checklist could). Keys outside the squad orders are still typed.
+- **89, 90, 96 narrowed** to the real-display checks (4K, mouse, typing a rename, focus order).
+- **102, narrowed** to signing: the owner's B10 default is not now.
+
+#### Defaults
+
+- Gameplay is the second tab; the Order wheel's hold/click stays in Controls beside its key; What got you moved.
+- Undo lasts 6 s; the skip bar reads full in overtime; PLAY's ring stays hidden for every `focus_play`.
+- Heartbeat every 10 s, stale at 60 s.
+- Ping plates 4 px apart, easing at 14/s, snapping on a marker's first frame and under Reduced motion.
+- Each ambience set pans one width (tested); a set whose beds differ warns and uses its first bed's.
+- Map pictures lossy at 0.85. VRAM: the first pass's line ("about 8 MB each while shown") left out that the Match
+  page held all four full pictures (about 35 MB measured); now the menus hold the four 480x270 copies (about 5 MB with
+  the backdrop's blur) and the loading screen one full picture (about 8 MB with mipmaps) only while shown.
+- Card copies 480x270 (twice the card's 1080p size, the 4K size).
+
+#### Checks
+
+- Retry, GUT targeted: run record, run record real process, graphics guard, ping markers, PN2, match page, BP6 menus,
+  title and menus, UR1, NR1, ambience pair, SP1, card names, model pictures: 211 tests pass. gdlint on every changed
+  script, `tools/changelog.sh check`, `python3 tools/wiki.py check`: pass. `godot --import` leaves the tree clean.
+- GUT, targeted: ping markers, PN2, SO4 (2), ambience pair (new), ambient calls, AU1 loudness and QA, SP4, UF1,
+  ambience config, SP1, FC2 (2 new), ST1, field rules, field layout, match page, BP6 menus, hop-up, and per earlier
+  row its own files (settings gameplay, card names, exe icon, nav one-way steps, run record, report scrub, dev cheats,
+  loadout, armory, title and menus, WG1, UI1, HO1, HUD prefs, woods, figure hit area, parts in play): all pass.
+- gdlint on every changed script; `tools/changelog.sh check`; `python3 tools/wiki.py check`: pass.
+- Not run: tools/check.sh (the lead's), an export (no templates here; the release dry run checks the exe icon).
+- Pictures in /mnt/project-files/playtest/bp7/menus/: row61-settings-* (before/after), row22-skip-cover-*,
+  row89-loadout-after-replace-*, row96-menus-open-play-focus-* and row96-play-ring crop,
+  row43-pings-and-hold-close_before/after (1920x1080 and crops), row93-map-pictures_old-700x400-left_new-1920x1080-right,
+  row93-range-picture_after_1920x1080. UI only, no models.
+
+#### For the owner to test
+
+- Settings › Gameplay with a keyboard and a pad; NVDA on the Match page and the Loadout.
+- PLAY's ring as the menus open, then after a key or pad press.
+- The skip bar's feel; Undo after Replace.
+- Two pings close together and a ping on Hold here's sign: they part, gently.
+- The ambience's width on headphones on each field (it should feel wider, no louder).
+- The loading screen's picture on a 1080p and a 4K screen; the range's picture: on High the range draws its floor
+  plain under its bake, where the old greybox render showed the concrete texture (worth a look in game).
+- Airsoft.exe's icon in Explorer after the next CI build.

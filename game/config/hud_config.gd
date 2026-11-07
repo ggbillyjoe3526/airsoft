@@ -93,7 +93,9 @@ extends Resource
 ## high over its floor spot (m), a contact's diamond this high over the enemy's chest where they were seen (m: over
 ## their head); each pops in over ping_pop (s; at once under Reduced motion) from ping_pop_from of its size and fades
 ## over the last ping_fade (s) of PingConfig.lifetime. Over the field a marker keeps ping_marker_edge (px) inside the
-## screen's top and bottom; pinned to a side, plates stack ping_stack_gap (px) apart.
+## screen's top and bottom; pinned to a side, plates stack ping_stack_gap (px) apart. Over the field markers that meet
+## (each other or Hold here's plate) step apart up and down to ping_clear_gap (px) between them, easing there at
+## ping_clear_rate (1/s).
 @export var ping_spot_height: float = 0.3
 @export var ping_contact_lift: float = 0.8
 @export var ping_pop: float = 0.35
@@ -101,6 +103,8 @@ extends Resource
 @export var ping_fade: float = 1.0
 @export var ping_marker_edge: float = 48.0
 @export var ping_stack_gap: float = 8.0
+@export var ping_clear_gap: float = 4.0
+@export var ping_clear_rate: float = 14.0
 ## The magazine hand-off (MH3; concept `step27/mag-hand-off.png`): its line's plate centred this share of the screen's
 ## height down, padded mag_line_pad (px) and underlined mag_line_rule (px) in your team's colour once a toss is in
 ## reach; a notice up mag_notice_time (s); the magazine glyph by a teammate's chevron, mag_glyph (px: width, height)

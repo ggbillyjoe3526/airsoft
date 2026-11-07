@@ -36,6 +36,9 @@ extends Node
 const BUS_EFFECTS := &"Effects"
 const BUS_FOOTSTEPS := &"Footsteps"
 const BUS_AMBIENCE := &"Ambience"
+## A bed's two copies (AmbienceBed): the left one's and the right one's, each with its panner (first effect) into Ambience.
+const BUS_AMBIENCE_LEFT := &"AmbienceLeft"
+const BUS_AMBIENCE_RIGHT := &"AmbienceRight"
 const BUS_INTERFACE := &"Interface"
 ## The shot's power source part (gas, the motor) has its own bus under Effects, for its own volume (settings).
 const BUS_POWER := &"Power"
@@ -124,8 +127,10 @@ var _whistle: AudioStreamPlayer = null
 var _blasts: WhistleQueue = null
 ## Plays the ambience's night set (the playing preset's night flag, LightingConfig.night); set before `setup`.
 var night: bool = false
-## The map's ambience: a voice per bed, and its calls with the match they were last timed for.
+## The map's ambience: two voices per bed (its left copy, then its right) and where in the loop each starts (s), and its
+## calls with the match they were last timed for.
 var _beds: Array[AudioStreamPlayer] = []
+var _bed_from := PackedFloat32Array()
 var _calls: AmbientCalls = null
 var _calls_match: int = -1
 ## The squad order outcome last heard (SquadOrders.Outcome.serial).
@@ -790,9 +795,9 @@ func _load(cue: String) -> StringName:
 ## The ambience's beds start: none plays until this is called, so the loading screen is silent (owner, 2026-11-03: the
 ## ambience starts when the match does, on Continue). Calling it again does nothing.
 func start_ambience() -> void:
-	for v in _beds:
-		if not v.playing:
-			v.play()
+	for i in _beds.size():
+		if not _beds[i].playing:
+			_beds[i].play(_bed_from[i])
 
 
 ## Whether the beds have started (start_ambience).
@@ -800,12 +805,27 @@ func ambience_started() -> bool:
 	return not _beds.is_empty() and _beds[0].playing
 
 
-## Lays out ambience `id`'s beds by day or by `night`, each to loop on the Ambience bus at its gain times its loop's
-## stored peak (start_ambience plays them), and makes its calls (timed in play). One copy of each bed, unpanned:
-## a plain voice has no pan for the browser's two copies spread `width` apart.
+## Pans bus `bus`'s panner (its first effect) to `pan`; a layout without the bus plays its copies unpanned, and says so.
+func _set_pan(bus: StringName, pan: float) -> void:
+	var at := AudioServer.get_bus_index(bus)
+	var panner: AudioEffectPanner = null
+	if at >= 0 and AudioServer.get_bus_effect_count(at) > 0:
+		panner = AudioServer.get_bus_effect(at, 0) as AudioEffectPanner
+	if panner == null:
+		push_warning("SimAudio: no panner on the %s bus" % bus)
+		return
+	panner.pan = pan
+
+
+## Lays out ambience `id`'s beds by day or by `night`, each as the browser's panned pair (AmbienceBed) looping on the
+## AmbienceLeft and AmbienceRight buses at its gain times its loop's stored peak (start_ambience plays them), and makes
+## its calls (timed in play). The two buses' panners are set to the set's width: its beds share one (tested).
 func _start_ambience(id: StringName) -> void:
 	var ambience := _cfg.ambiences.set_for(id, night)
 	var peaks: Variant = JSON.parse_string(FileAccess.get_file_as_string(SoundConfig.PEAKS_PATH))
+	var pair := AmbienceBed.pair_gains(ambience.beds[0].width if not ambience.beds.is_empty() else 0.0)
+	_set_pan(BUS_AMBIENCE_LEFT, pair.y)
+	_set_pan(BUS_AMBIENCE_RIGHT, -pair.y)
 	for bed in ambience.beds:
 		var path := "%s%s.wav" % [SoundConfig.LOOP_DIR, bed.loop]
 		if not ResourceLoader.exists(path):
@@ -817,12 +837,18 @@ func _start_ambience(id: StringName) -> void:
 			peak = float((peaks as Dictionary)[String(bed.loop)])
 		else:
 			push_warning("SimAudio: no stored peak for ambience loop %s in %s" % [bed.loop, SoundConfig.PEAKS_PATH])
-		var v := AudioStreamPlayer.new()
-		v.stream = load(path)
-		v.bus = BUS_AMBIENCE
-		v.volume_db = linear_to_db(bed.gain * peak * _cfg.ambience_gain)
-		add_child(v)
-		_beds.append(v)
+		if bed.width != ambience.beds[0].width:
+			push_warning("SimAudio: ambience %s's bed %s pans %.2f, played at its first bed's %.2f" % [id, bed.loop,
+					bed.width, ambience.beds[0].width])
+		var stream: AudioStream = load(path)
+		for right: bool in [false, true]:
+			var v := AudioStreamPlayer.new()
+			v.stream = stream
+			v.bus = BUS_AMBIENCE_RIGHT if right else BUS_AMBIENCE_LEFT
+			v.volume_db = linear_to_db(bed.gain * peak * _cfg.ambience_gain * pair.x)
+			add_child(v)
+			_beds.append(v)
+			_bed_from.append(bed.second_start(stream.get_length()) if right else 0.0)
 	_calls = AmbientCalls.new(ambience.calls)
 	for call in ambience.calls:
 		_load(String(call.cue))

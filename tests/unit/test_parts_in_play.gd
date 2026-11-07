@@ -252,15 +252,32 @@ func test_a_silenced_shot_plays_duller_and_quieter() -> void:
 	var e := state.events.add(GameEvent.Kind.SHOT)
 	e.actor = 0
 	e.slot = 0
+	# Each voice is found by the play it took (its serial), not by its place in the pool: the headless mixer may free a
+	# voice between plays, so the motor could take the shot's (BP7, row 26).
+	var before := audio._own_pool.last_serial()
 	audio.on_tick(state, 0, null)
-	var shot := audio._own[0]
+	var shot := _own_voice(audio, before + 1)
+	assert_not_null(shot, "the shot took a voice")
 	assert_eq(shot.bus, SimAudio.BUS_MUFFLED)
 	assert_almost_eq(shot.volume_db, linear_to_db(cfg.shot_gain * cfg.muffled_gain), 0.01)
-	assert_eq(audio._own[1].bus, SimAudio.BUS_POWER, "the motor sounds as it is")
+	var motor := _own_voice(audio, before + 2)
+	assert_not_null(motor, "the motor took a voice")
+	assert_eq(motor.bus, SimAudio.BUS_POWER, "the motor sounds as it is")
 	kit = _kit(AEG, {})
 	state.characters[0] = Character.new(0, 0, Vector3.ZERO, 0.0, kit.replicas, kit.bb_weights)
+	before = audio._own_pool.last_serial()
 	audio.on_tick(state, 0, null)
-	assert_eq(audio._own[2].bus, SimAudio.BUS_EFFECTS)
+	var plain := _own_voice(audio, before + 1)
+	assert_not_null(plain)
+	assert_eq(plain.bus, SimAudio.BUS_EFFECTS)
+
+
+## Your own voice that took play number `serial` (VoicePool.serial_of), or null.
+func _own_voice(audio: SimAudio, serial: int) -> AudioStreamPlayer:
+	for i in audio._own.size():
+		if audio._own_pool.serial_of(i) == serial:
+			return audio._own[i]
+	return null
 
 
 func test_the_glass_is_readied_before_play_so_the_first_raise_does_not_hitch() -> void:

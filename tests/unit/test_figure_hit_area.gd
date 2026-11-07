@@ -40,8 +40,22 @@ func after_all() -> void:
 
 func test_every_kind_head_and_pose_is_measured() -> void:
 	assert_eq(probe.heads(FigureMix.HUMAN).size(), 4, "the human's four heads")
-	assert_eq(HitAreaProbe.POSES.size(), 19, "stand, crouch, two leans, walk and run at four phases, crouch-walk, "
-			+ "mid-vault, aim up and down, between the fit's samples, half crouched and crouch-walking back")
+	assert_eq(HitAreaProbe.POSES.size(), 25, "stand, crouch, two leans, walk and run at four phases, crouch-walk, "
+			+ "mid-vault, aim up and down, between the fit's samples, half crouched and crouch-walking back; the jump, "
+			+ "the pistol held, holstered standing and sprinting, a crouched lean and an early vault")
+	# each pose added for HitPose's own branch is really in that branch
+	var pistol := probe.character(&"pistol")
+	assert_eq(pistol.armament.replica().site_class, &"pistol", "a pistol in hand")
+	assert_eq(probe.character(&"stand").armament.replica().site_class != &"pistol", true, "the rifle by default")
+	assert_eq(HitPose.holster_share(probe.character(&"holstered")), 1.0, "put away")
+	var run := probe.character(&"holstered_run")
+	assert_true(run.sprinting and HitPose.holster_share(run) == 1.0, "put away on a sprint")
+	var jump := probe.character(&"jump")
+	assert_true(not jump.grounded and not jump.vault.active and jump.air_time > 0.0, "in the air")
+	var lean := probe.character(&"crouch_lean")
+	assert_true(lean.crouch_amount == 1.0 and lean.lean != 0.0, "crouched and leaning")
+	var early := probe.character(&"vault_early")
+	assert_lt(early.vault.time, probe.character(&"vault").vault.time, "earlier in the vault")
 	assert_eq(results.size(), (probe.heads(FigureMix.HUMAN).size() + 1) * HitAreaProbe.POSES.size(), "every one")
 
 

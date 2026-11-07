@@ -185,7 +185,7 @@ func test_the_tab_shows_the_saved_choices() -> void:
 	assert_eq(page._marker_size.value, 150.0)
 	assert_eq(page._lines.selected(), HudPrefs.FeedLines.KEEP)
 	assert_eq(page._turn.selected(), HudPrefs.MinimapTurn.FIXED)
-	assert_eq(page._what_got_you.selected(), s.what_got_you)
+	assert_eq(screen._what_got_you.selected(), s.what_got_you, "on the Gameplay tab")
 
 
 func _hud() -> Hud:

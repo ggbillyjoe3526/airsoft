@@ -156,6 +156,105 @@ func test_off_screen_it_is_pinned_inside_the_edge_under_what_is_there() -> void:
 	assert_true(Rect2(Vector2.ZERO, _hud.size).encloses(r), "inside the screen")
 
 
+## Two rects `gap` apart or more, or side by side.
+func _clear_of(a: Rect2, b: Rect2, gap: float) -> bool:
+	return a.position.x >= b.end.x + gap - 0.01 or b.position.x >= a.end.x + gap - 0.01 \
+			or a.position.y >= b.end.y + gap - 0.01 or b.position.y >= a.end.y + gap - 0.01
+
+
+func test_over_the_field_two_pings_close_on_screen_step_clear_of_each_other() -> void:
+	# BP7 row 43: they no longer overlap, and they part up and down, each by half, about where they were.
+	_ping(YOU, Vector3(0.0, 0.0, -20.0))
+	_ping(BRICK, Vector3(0.3, 0.0, -20.5))
+	_place(1.0)
+	var a := _marker()
+	var b := _marker(BRICK)
+	assert_false(a.pinned() or b.pinned())
+	assert_ne(_hud.ping_markers().nudge_of(0), 0.0, "they met and moved")
+	assert_true(_clear_of(a.get_rect(), b.get_rect(), _cfg.ping_clear_gap), "%s %s" % [a.get_rect(), b.get_rect()])
+	var mid := (_camera.unproject_position(Vector3(0.0, _cfg.ping_spot_height, -20.0))
+			+ _camera.unproject_position(Vector3(0.3, _cfg.ping_spot_height, -20.5))) * 0.5
+	var spread := (a.get_rect().get_center() + b.get_rect().get_center()) * 0.5
+	assert_almost_eq(spread.y + a.pivot_offset.y - a.size.y * 0.5, mid.y, 2.0, "they part about where they are")
+	_book.of(BRICK).spot = Vector3(8.0, 0.0, -20.0)
+	for i in 60:
+		_place(1.1 + i * 0.016)
+	assert_almost_eq(_hud.ping_markers().nudge_of(0), 0.0, 0.1, "far apart again: back where they belong")
+
+
+func test_a_ping_moving_into_another_eases_clear() -> void:
+	_ping(YOU, Vector3(0.0, 0.0, -20.0))
+	_ping(BRICK, Vector3(6.0, 0.0, -20.0))
+	_place(1.0)
+	var markers := _hud.ping_markers()
+	assert_eq(markers.nudge_of(0), 0.0, "apart: not nudged")
+	_book.of(BRICK).spot = Vector3(0.2, 0.0, -20.0)
+	_place(1.016)
+	var first := absf(markers.nudge_of(0))
+	assert_gt(first, 0.0, "on its way")
+	for i in 60:
+		_place(1.032 + i * 0.016)
+	var settled := absf(markers.nudge_of(0))
+	assert_gt(settled, first, "it eases, not jumps")
+	assert_true(_clear_of(_marker().get_rect(), _marker(BRICK).get_rect(), _cfg.ping_clear_gap - 0.5), "and gets clear")
+
+
+func test_over_the_field_a_ping_steps_clear_of_the_hold_plate() -> void:
+	var spot := Vector3(0.0, 0.0, -20.0)
+	_hud.setup_orders(ControlsConfig.new())
+	_hud.place_hold_marker(_camera, spot, true)
+	var hold := _hud.hold_marker()
+	assert_eq(hold.pin, HudHoldMarker.Pin.NONE, "Hold here's plate over the field")
+	_ping(YOU, spot + Vector3(0.0, 1.0, 0.0))
+	_place(1.0)
+	assert_false(_marker().pinned())
+	assert_ne(_hud.ping_markers().nudge_of(0), 0.0, "it met the plate and moved")
+	assert_true(_clear_of(_marker().get_rect(), hold.get_rect(), _cfg.ping_clear_gap),
+			"%s %s" % [_marker().get_rect(), hold.get_rect()])
+
+
+## BP7 QA: at the screen's top the step stays on the screen, and a ping with no room over Hold here's plate goes under it.
+func test_at_the_top_edge_they_step_clear_and_stay_on_the_screen() -> void:
+	_hud.setup_orders(ControlsConfig.new())
+	_ping(YOU, Vector3(0.0, 40.0, -20.0))
+	_ping(BRICK, Vector3(0.3, 40.0, -20.0))
+	_place(1.0)
+	var screen := Rect2(Vector2.ZERO, _hud.size)
+	var a := _marker().get_rect()
+	var b := _marker(BRICK).get_rect()
+	assert_lt(minf(a.position.y, b.position.y), _cfg.ping_marker_edge, "held at the top")
+	assert_true(screen.encloses(a) and screen.encloses(b), "%s %s on the screen" % [a, b])
+	assert_true(_clear_of(a, b, _cfg.ping_clear_gap), "%s %s" % [a, b])
+	_book.of(BRICK).spot = Vector3(30.0, 0.0, -20.0)
+	for i in 60:
+		_place(1.02 + i * 0.016)
+	a = _marker().get_rect()
+	assert_almost_eq(_hud.ping_markers().nudge_of(0), 0.0, 0.5, "settled where its ping is, at the screen's top")
+	# Hold here's plate just under the ping's middle: pushed up clear of it, the ping would leave the screen
+	var tip := _camera.project_position(Vector2(a.get_center().x, a.position.y + 12.0 + 43.0), 20.0)
+	_hud.place_hold_marker(_camera, tip - Vector3.UP * _cfg.hold_marker_height, true)
+	var hold := _hud.hold_marker().get_rect()
+	assert_lt(hold.position.y, a.end.y, "the plate meets the ping")
+	assert_gt(hold.get_center().y, a.get_center().y, "its middle under the ping's: the ping would go over it")
+	assert_gt(a.end.y + _cfg.ping_clear_gap - hold.position.y, a.position.y, "no room over the plate")
+	for i in 60:
+		_place(2.0 + i * 0.016)
+	a = _marker().get_rect()
+	assert_true(screen.encloses(a), "%s on the screen" % a)
+	assert_gte(a.position.y, hold.end.y, "under the plate")
+	assert_true(_clear_of(a, hold, _cfg.ping_clear_gap), "%s clear of the plate %s" % [a, hold])
+
+
+func test_a_frame_of_pings_stepping_clear_allocates_no_object() -> void:
+	_ping(YOU, Vector3(0.0, 0.0, -20.0))
+	_ping(BRICK, Vector3(0.3, 0.0, -20.5))
+	_place(1.0)
+	var objects := Performance.get_monitor(Performance.OBJECT_COUNT)
+	for i in 100:
+		_hud.place_pings(_camera, _book, 1.0 + i * 0.016, true)
+	assert_eq(Performance.get_monitor(Performance.OBJECT_COUNT), objects)
+
+
 func test_pinned_on_the_left_it_sits_under_a_flag_pinned_there() -> void:
 	var flag_pole := Vector3(-60.0, 0.0, -10.0)
 	_hud.place_flag_marker(_camera, flag_pole, true)

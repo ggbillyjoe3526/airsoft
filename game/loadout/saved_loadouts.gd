@@ -30,6 +30,10 @@ var load_message: String = ""
 ## The file is from a newer build: it is never written over.
 var _newer_on_disk: bool = false
 var _extra: Dictionary = {}
+## The last Replace while it may still be undone (`undo_replace`): the place it wrote over and the loadout that was
+## there; -1 when there is none. Any other change forgets it.
+var _undo_index: int = -1
+var _undo_was: Loadout = null
 
 static var _shared: SavedLoadouts = null
 
@@ -111,13 +115,38 @@ func duplicate_slot(index: int) -> int:
 	return slots.size() - 1
 
 
-## Copies the carried loadout over loadout `index` (another one), keeping that one's name.
+## Copies the carried loadout over loadout `index` (another one), keeping that one's name. It may be undone
+## (`undo_replace`) until any other change.
 func replace(index: int) -> bool:
 	if index < 0 or index >= slots.size() or index == current:
 		return false
-	slots[index] = carried().copy(slots[index].name)
+	var was := slots[index]
+	slots[index] = carried().copy(was.name)
+	_undo_index = index
+	_undo_was = was
+	_mark()
+	return true
+
+
+## Whether the last Replace may still be undone, and the place it wrote over (-1: none).
+func undo_index() -> int:
+	return _undo_index
+
+
+## Puts back the loadout the last Replace wrote over, as it was; false when there is nothing to undo.
+func undo_replace() -> bool:
+	if _undo_index < 0 or _undo_index >= slots.size() or _undo_was == null:
+		forget_undo()
+		return false
+	slots[_undo_index] = _undo_was
 	_changed()
 	return true
+
+
+## The last Replace can't be undone any more (its moment passed). Changes nothing saved.
+func forget_undo() -> void:
+	_undo_index = -1
+	_undo_was = null
 
 
 ## Removes loadout `index`; never the last one. The one carried stays carried; if it was removed, the next one is
@@ -250,5 +279,10 @@ func _loadout_from(entry: Dictionary, problems: Array[String]) -> Loadout:
 
 
 func _changed() -> void:
+	forget_undo()
+	_mark()
+
+
+func _mark() -> void:
 	dirty = true
 	changed.emit()

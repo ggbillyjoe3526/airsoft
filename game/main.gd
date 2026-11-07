@@ -106,6 +106,11 @@ var error_log: ErrorLog = ErrorLog.new()
 var run: RunRecord = null
 var run_path: String = ""
 var run_process_running: Callable = Callable()
+## Writes the run's heartbeat (RunBeat, off the main thread) every RunRecord.BEAT_SECONDS while a run is recorded (null
+## otherwise), in play or not, so a later start tells this run, still going, from a crashed one whose id another copy
+## holds since.
+var _beat: Timer = null
+var _run_beat: RunBeat = null
 ## The crash screen while it shows, else null. Tests give what it opens (OS.shell_open) and copies to (the clipboard),
 ## and the folder its log is read from.
 var crash_screen: CrashScreen = null
@@ -123,6 +128,8 @@ func _ready() -> void:
 	print(RendererOverride.boot_line(GraphicsApply.machine()))
 	if not graphics.restart.is_valid():
 		graphics.restart = _restart
+	if run_path != "":
+		graphics.run_path = run_path
 	if graphics.start(_smoke) == GraphicsGuard.Action.RESTART_SAFE:
 		return
 	# today's restore point, the save as it was at start; never from the smoke run, a headless one or the editor's
@@ -160,6 +167,8 @@ func _exit_tree() -> void:
 		if crash_screen != null:
 			run.previous = {}
 		run.save_closed(run_path)
+	if _run_beat != null:
+		_run_beat.finish()
 	OS.remove_logger(error_log)
 	var window := get_window()
 	if window.size_changed.is_connected(_scale_menus):
@@ -460,11 +469,26 @@ func _start_run() -> void:
 	if not run_process_running.is_valid():
 		run_process_running = ProcessCheck.is_running
 	var r := RunRecord.load_file(run_path)
-	if r.held_by_other(OS.get_process_id(), run_process_running):
+	if r.held_by_other(OS.get_process_id(), run_process_running, int(Time.get_unix_time_from_system()),
+			RunBeat.read(run_path)):
 		return
 	r.start(Version.current(), int(Time.get_unix_time_from_system()), OS.get_process_id())
 	run = r
 	run.save(run_path)
+	_run_beat = RunBeat.new(run_path)
+	_beat = Timer.new()
+	_beat.wait_time = RunRecord.BEAT_SECONDS
+	_beat.process_mode = Node.PROCESS_MODE_ALWAYS
+	_beat.timeout.connect(_on_beat)
+	add_child(_beat)
+	_beat.start()
+
+
+## The run's heartbeat, written on a worker thread: no match waits on the disk for it.
+func _on_beat() -> void:
+	if run == null or _run_beat == null:
+		return
+	_run_beat.beat(OS.get_process_id(), int(Time.get_unix_time_from_system()))
 
 
 ## The match (or the range) about to open, `custom` its Custom rules (null for the mode's own).

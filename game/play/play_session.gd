@@ -54,6 +54,9 @@ const PLAYER_ID := 0
 ## "Skipping the round": its size and how far over the bottom edge (px).
 const SKIP_NOTE_SIZE := 18
 const SKIP_NOTE_MARGIN := 64
+## The bar under it of how far the rest of the round has played (B5, owner 2026-11-07): its height and gap (px).
+const SKIP_BAR_HEIGHT := 6
+const SKIP_BAR_GAP := 8
 ## The build steps, in order, as the keys of the words the loading screen shows.
 const STEP_KEYS: Array[String] = ["LOAD_MAP", "LOAD_LEVEL", "LOAD_TEAMS", "LOAD_VIEWS"]
 ## The loading screen's line once it is left (leave_loading).
@@ -250,6 +253,9 @@ var _skip_note: Label = null
 ## drawn, "Skipping the round" once as a skip starts.
 var _skip_said: Label = null
 var _skip_clock_shown: int = -1
+## The bar under the line (0..100: the share of the round's clock played since the skip began), and the clock then (s).
+var _skip_bar: ProgressBar = null
+var _skip_from: float = 0.0
 ## The rendered frame the skip last ticked in, and the microseconds of ticks spent in it (`_play_out`).
 var _skip_frame: int = -1
 var _skip_spent_usec: int = 0
@@ -906,6 +912,26 @@ func _build_views(ui: CanvasLayer) -> void:
 			SKIP_NOTE_MARGIN)
 	_skip_note.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_skip_note.visible = false
+	# honest, so it can take a while on a slow machine: the bar shows it moving (B5)
+	_skip_bar = ProgressBar.new()
+	_skip_bar.name = "SkipBar"
+	_skip_bar.show_percentage = false
+	_skip_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_skip_bar.accessibility_name = tr("HUD_SKIPPING")
+	var track := StyleBoxFlat.new()
+	track.bg_color = Color(GameTheme.TEXT, 0.18)
+	_skip_bar.add_theme_stylebox_override("background", track)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = GameTheme.ACCENT
+	_skip_bar.add_theme_stylebox_override("fill", fill)
+	_skip_bar.anchor_left = 0.0
+	_skip_bar.anchor_right = 1.0
+	_skip_bar.anchor_top = 1.0
+	_skip_bar.anchor_bottom = 1.0
+	_skip_bar.offset_top = SKIP_BAR_GAP
+	_skip_bar.offset_bottom = SKIP_BAR_GAP + SKIP_BAR_HEIGHT
+	_skip_bar.custom_minimum_size = Vector2(0.0, SKIP_BAR_HEIGHT)
+	_skip_note.add_child(_skip_bar)
 	_skip_said = Label.new()
 	_skip_said.name = "SkipSaid"
 	_skip_said.modulate = Color(1.0, 1.0, 1.0, 0.0)
@@ -1592,6 +1618,8 @@ func start_skip() -> void:
 	# Under the cover nothing of the field needs drawing: the frame's time goes to the ticks.
 	get_viewport().disable_3d = true
 	_skip_clock_shown = -1
+	_skip_from = state.round_state.clock
+	_skip_bar.value = 0.0
 	_show_skip_clock()
 
 
@@ -1608,13 +1636,23 @@ func _stop_skip() -> void:
 
 
 ## "Skipping the round · 1:12": the round's clock as the skip plays it down, so a long one is seen to move; written
-## only when its second changes.
+## only when its second changes. The bar under it fills as the clock runs down from where the skip began (full in
+## overtime; never back).
 func _show_skip_clock() -> void:
+	_skip_bar.value = maxf(_skip_bar.value, skip_progress() * 100.0)
 	var left := ceili(state.round_state.clock)
 	if left == _skip_clock_shown and _skip_note.text != "":
 		return
 	_skip_clock_shown = left
 	_skip_note.text = "%s · %s" % [HudStyle.caps("HUD_SKIPPING"), HudStyle.clock_text(left)]
+
+
+## How far the skip under way has played the rest of the round (0..1): the share of the round's clock, as it stood
+## when the skip began, that has run down since; 1 with no clock left to play.
+func skip_progress() -> float:
+	if _skip_from <= 0.0:
+		return 1.0
+	return clampf(1.0 - state.round_state.clock / _skip_from, 0.0, 1.0)
 
 
 func _skip_from_pause() -> void:

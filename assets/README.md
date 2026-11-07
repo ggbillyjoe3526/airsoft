@@ -8,7 +8,7 @@
 | `models/grenades/` | The smoke and flash bombs, shown in a match and as the Loadout's and the HUD's bomb icons |
 | `fonts/` | Inter (SIL OFL 1.1, `fonts/OFL.txt`), the HUD and menu font |
 | `ui/` | The crash screen's backdrop, `title-backdrop.jpg`: Depot's field picture blurred and darkened, no replica in it |
-| `maps/` | One picture of each match field for the Match page and the loading screen, each field from a player's eye height by `tools/eye_pictures.gd`, the range by `tools/map_pictures.gd` (our own renders; see `docs/ASSETS.md` for re-running them) |
+| `maps/` | One picture of each match field for the Match page and the loading screen, each from a player's eye height by `tools/eye_pictures.gd`, 1920x1080 (our own renders; see `docs/ASSETS.md` for re-running them) |
 | `maps/bakes/` | Each map's baked light (`BakedLight`, binary `.res`), written by `tools/bake_light.gd` (our own bake; `docs/ASSETS.md`) |
 | `audio/` | The rendered sounds and ambience loops (`audio/README.md`) |
 

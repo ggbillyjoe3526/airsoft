@@ -47,6 +47,33 @@ func test_bottomless_magazines_never_run_dry() -> void:
 	assert_false(s.characters[1].armament.bottomless, "a bot's magazines are as normal")
 
 
+func test_switching_bottomless_on_fills_a_magazine_already_dry() -> void:
+	var s := _state()
+	var you := s.characters[0]
+	var full := you.armament.mag()
+	you.armament.ammo[you.armament.active].mag = 0
+	you.armament.dry_fired_this_pull = true
+	var spares := you.armament.ammo[you.armament.active].spare_bbs()
+	DevCheats.apply(s, _cheats(func(c: DevCheats) -> void: c.bottomless = true), 0)
+	assert_eq(you.armament.mag(), full, "the dry magazine in hand is full again")
+	assert_false(you.armament.dry_fired_this_pull, "the next pull fires, not a dry click")
+	assert_eq(you.armament.ammo[you.armament.active].spare_bbs(), spares, "the spares are untouched")
+	var cmd := PlayerCommand.new()
+	cmd.fire = true
+	var events := SimEvents.new()
+	Armament.step(you, cmd, EYE, 1.0, true, BBPool.new(64), s.rng, events, tuning, DT)
+	assert_eq(events.count_of(GameEvent.Kind.SHOT), 1, "it fires on the first tick")
+	# Applied again with Bottomless still on (a round restart, another switch): nothing more is filled.
+	you.armament.ammo[you.armament.active].mag = 3
+	DevCheats.apply(s, _cheats(func(c: DevCheats) -> void: c.bottomless = true), 0)
+	assert_eq(you.armament.mag(), 3, "only switching it on fills the magazine")
+	var bot := s.characters[1]
+	bot.armament.ammo[bot.armament.active].mag = 0
+	DevCheats.apply(s, _cheats(func(c: DevCheats) -> void: c.bottomless = false), 0)
+	DevCheats.apply(s, _cheats(func(c: DevCheats) -> void: c.bottomless = true), 0)
+	assert_eq(bot.armament.mag(), 0, "a bot's magazine is left as it is")
+
+
 func test_ghost_lets_bbs_through_you_onto_whoever_is_behind() -> void:
 	var s := _state(3)
 	var shooter := s.characters[2]

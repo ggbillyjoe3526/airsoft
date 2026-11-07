@@ -151,7 +151,7 @@ func test_every_ipv6_form_goes_whole() -> void:
 
 func test_clocks_and_cpp_names_stay() -> void:
 	var s := ReportScrub.new()
-	for kept: String in ["at 12:40:05 then", "00:01:02.5", "Round: 4, 3:12 in", "Face::bad and Node3D::_ready",
+	for kept: String in ["at 12:40:05 then", "00:01:02.5", "Round: 4, 3:12 in", "Face::bad_x and Node3D::_ready",
 			"[1] RendererSceneRenderRD::_render_scene", "t11402 Beta 2 SHOT ×4"]:
 		assert_eq(s.line(kept), kept)
 
@@ -193,7 +193,7 @@ func test_an_ipv6_address_after_a_label_or_before_a_colon() -> void:
 	assert_eq(s.line("IPv6:2001:db8::1"), "IPv6:<address>")
 	assert_eq(s.line("host:::1"), "host:<address>")
 	assert_eq(s.line("connect to 2001:db8::1: refused"), "connect to <address>: refused")
-	for kept: String in ["12:40:05", "res://a.gd:12:5", "Face::bad", "std::vector<int>::iterator", "Vector2::ZERO",
+	for kept: String in ["12:40:05", "res://a.gd:12:5", "Face::bad_x", "std::vector<int>::iterator", "Vector2::ZERO",
 			"x:y", "at: _load (res://game/x.gd:12)"]:
 		assert_eq(s.line(kept), kept)
 
@@ -314,7 +314,7 @@ func test_every_pattern_is_linear() -> void:
 	gut.p("60,000 characters, the slowest run: %s %.1f ms" % [worst_run, worst])
 
 
-## BP6: an IPv6 address of hex letters only goes; a C++ name (a capital, then a small letter) stays.
+## BP6: an IPv6 address of hex letters only goes, in any case (BP7: "Dead::beef" too); a C++ name stays.
 func test_a_hex_letter_ipv6_address_goes_and_cpp_names_stay() -> void:
 	var s := ReportScrub.new()
 	assert_eq(s.line("peer dead::beef up"), "peer <address> up")
@@ -322,15 +322,27 @@ func test_a_hex_letter_ipv6_address_goes_and_cpp_names_stay() -> void:
 	assert_eq(s.line("fdab:cdef::face"), "<address>")
 	assert_eq(s.line("ip:cafe::"), "ip:<address>")
 	assert_eq(s.line("fade::1"), "<address>", "written small, an address")
-	for kept: String in ["Face::bad", "Fade::1", "Vec3::ab", "Bad::add_child", "Node3D::_ready"]:
+	assert_eq(s.line("peer Dead::beef up"), "peer <address> up", "a capital, then hex letters: an address")
+	assert_eq(s.line("Fade::1"), "<address>")
+	assert_eq(s.line("Cafe::dead:beef"), "<address>")
+	for kept: String in ["Vec3::ab", "Bad::add_child", "Node3D::_ready", "Face::bad_call"]:
 		assert_eq(s.line(kept), kept)
 
 
-## BP6: a version and the card's driver as the report writes them aren't addresses; an address still is.
+## BP6: a version and this machine's driver as the report writes it aren't addresses; an address still is, after
+## "(driver " too (BP7).
 func test_a_version_and_the_driver_stay() -> void:
-	var s := ReportScrub.new()
-	for kept: String in ["v1.2.3.4", "build V10.0.0.1 ok", "Graphics card: Some GPU (driver 10.0.0.1)"]:
+	var s := ReportScrub.new("", "", "", "", null, "10.0.0.1")
+	var card := "Graphics card: Some GPU " + ReportFacts.DRIVER_TEXT % "10.0.0.1"
+	assert_eq(card, "Graphics card: Some GPU (driver 10.0.0.1)")
+	for kept: String in ["v1.2.3.4", "build V10.0.0.1 ok", card, card + " and " + card]:
 		assert_eq(s.line(kept), kept)
+	assert_eq(s.line("(driver 192.168.1.5) refused"), "(driver <address>) refused", "not this machine's driver")
+	assert_eq(s.line(card + " via 10.0.0.1"), card + " via <address>", "the driver alone is kept")
+	assert_eq(ReportScrub.new().line("Some GPU (driver 10.0.0.1)"), "Some GPU (driver <address>)",
+			"a driver not known: over-scrubbed")
+	assert_eq(ReportScrub.new("", "", "", "", null, "566.36").line("Some GPU (driver 566.36)"),
+			"Some GPU (driver 566.36)")
 	assert_eq(s.line("driver at 10.0.0.1"), "driver at <address>")
 	assert_eq(s.line("dev1.2.3.4"), "dev<address>", "a v inside a word is no version mark")
 
@@ -381,7 +393,7 @@ func test_a_cut_inside_a_spaced_name_leaves_no_first_word() -> void:
 func test_mixed_case_padded_and_wsl_addresses_go_and_odd_spaced_names_are_cut_clean() -> void:
 	var s := ReportScrub.new()
 	assert_eq(s.line("route Fe80::1 up"), "route <address> up")
-	assert_eq(s.line("Fade::1 and Bad::add_child"), "Fade::1 and Bad::add_child", "C++ names stay")
+	assert_eq(s.line("Fade::1 and Bad::add_child"), "<address> and Bad::add_child", "a C++ name stays")
 	assert_eq(s.line("at 010.001.002.003 now"), "at <address> now")
 	assert_eq(s.line("open /mnt/c/Users/Other/x"), "open /mnt/c/Users/<you>/x")
 	for spaced: String in ["Jo\tBloggs", "Jo  Bloggs"]:

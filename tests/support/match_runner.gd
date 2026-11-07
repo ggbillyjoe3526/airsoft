@@ -1,7 +1,8 @@
 class_name MatchRunner
 extends RefCounted
 ## Whole matches of bots against bots (Elimination, or Attack / Defend on a map with a pole), headless and as fast as
-## the machine allows: the map's level built once (its Jolt colliders, so it must be in the tree), then each match
+## the machine allows: the map's level built once (its Jolt colliders, so it must be in the tree) in a world of its own
+## (`world`: another level a test file built, its doors shut, never stands in this match's way, WR2), then each match
 ## stepped tick by tick with no rendering and no waiting for frames. Each match comes back as a MatchTally of what the
 ## guards (tests/guards/) and the balance report (BR1) read. Test-only (tests/ never ships).
 
@@ -190,6 +191,9 @@ var _kit_rules: LoadoutRules = null
 var config: BotConfig = null
 var map: MapData = null
 var level: MapLevel = null
+## The match level's own world (a SubViewport with its own World3D and physics space, never drawn): a test adds what
+## must share the match's physics (a dressing that must change no ray) under it.
+var world: SubViewport = null
 var nav: NavGrid = null
 ## The lowest floor's top (or the terrain's lowest point, WL10) and the highest block's or terrain's top on the map (m),
 ## for the height guards.
@@ -206,8 +210,13 @@ func _init(parent: Node, map_id: String, sim_tuning: SimTuning = null, bot_confi
 	config = bot_config if bot_config != null else BotConfig.load_default()
 	var style := MapStyle.new()
 	map = given if given != null else MapData.load_map(map_id, style, tuning.rounds.team_size)
+	world = SubViewport.new()
+	world.own_world_3d = true
+	world.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	world.size = Vector2i(2, 2)
+	parent.add_child(world)
 	level = MapLevel.new()
-	parent.add_child(level)
+	world.add_child(level)
 	level.build(map, style, tuning.body)
 	nav = NavGrid.build(map, tuning.nav, tuning.body)
 	night = map.ok() and not map.lighting_presets.has(LightingConfig.DAY)
@@ -249,8 +258,9 @@ func team_level(team: int) -> StringName:
 
 
 func free_level() -> void:
-	if level != null:
-		level.free()
+	if world != null:
+		world.free()
+		world = null
 		level = null
 
 

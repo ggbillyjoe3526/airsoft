@@ -110,17 +110,19 @@ func test_no_listener_hears_no_calls() -> void:
 
 func test_the_maps_day_beds_loop_on_ambience_and_no_map_plays_the_yard() -> void:
 	var none := _audio(null)
-	assert_eq(none._beds.size(), 1)
-	assert_eq(none._beds[0].bus, SimAudio.BUS_AMBIENCE)
-	assert_eq(none._beds[0].stream.resource_path, "res://assets/audio/loops/yard.wav")
-	assert_true(none._beds[0].playing)
+	assert_eq(none._beds.size(), 2, "the yard's bed as its pair")
+	assert_eq(none._beds[0].bus, SimAudio.BUS_AMBIENCE_LEFT)
+	assert_eq(none._beds[1].bus, SimAudio.BUS_AMBIENCE_RIGHT)
+	for v in none._beds:
+		assert_eq(v.stream.resource_path, "res://assets/audio/loops/yard.wav")
+		assert_true(v.playing)
 	var woods := MapData.new()
 	woods.ambience = &"woods"
 	var wood := _audio(woods)
 	var loops: Array[String] = []
 	for v in wood._beds:
 		loops.append(v.stream.resource_path.get_file())
-	assert_eq(loops, ["woods_day.wav"], "the woods by day: the owner's woods (AU6)")
+	assert_eq(loops, ["woods_day.wav", "woods_day.wav"], "the woods by day: the owner's woods (AU6), a pair")
 	var calls: Array[StringName] = []
 	for kind in wood._calls.calls:
 		calls.append(kind.cue)

@@ -58,7 +58,8 @@ under it ("PING · 9 M"), and a soft pip in your ear. A teammate's Contact mark 
 over the enemy's head where they were seen ("CONTACT · 13 M"); it stays there and never follows them. A teammate
 [asking for you](Bots#your-teammates-ask-for-you) pings a ring marked with what it wants: "HELP · 40 M", "GO · 25 M"
 or "COVER · 30 M". Markers are seen
-through cover, pop in, stay 7 seconds and fade over the last one. Off screen they are pinned inside the edge under the
+through cover, pop in, stay 7 seconds and fade over the last one. Markers close together, or on Hold here's sign, step
+apart up and down so each stays readable. Off screen they are pinned inside the edge under the
 minimap with an arrow the way they are. They hide while you watch a teammate, with the scoreboard up and in the pause
 menu. Settings › HUD › Ping markers turns them off.
 
@@ -82,10 +83,10 @@ everything, so it stays down over them.
 
 ## What got you
 
-When your hit is called, a card on the left shows the shooter's name and side, how far away they were and a dial of
-the shot's line, whether they were holding that angle, how long you were in their view and whether you were moving,
-then that bot's personality note. **Settings › HUD › What got you** is Auto (only against Hard bots, the default), On
-or Off.
+When your hit is called, a card on the left shows the shooter's name and side, how far away they were and a dial of the
+shot's line, whether they were holding that angle, how long you were in their view and whether you were moving, then
+that bot's personality note. **Settings › Gameplay › What got you** is Auto (only against Hard bots, the default), On or
+Off.
 
 ## The match summary
 
@@ -100,7 +101,7 @@ Top left, the minimap shows the field from above:
 - You are the **white arrow**; teammates are dots in your team's colour, grey once hit. Near the field's edge the
   minimap stays on the field and your arrow moves off its middle.
 - The other team shows only where your side **heard** them: a dashed ring for footsteps, a disc for a shot, fading
-  after a few seconds. Steps carry about 22 m and shots about 60 m. One heard on another storey shows fainter.
+  after a few seconds. Steps carry about <!-- wiki:config minimap_config.step_reach --> m and shots about <!-- wiki:config minimap_config.shot_reach --> m. One heard on another storey shows fainter.
 - The area you stand in is named at the top, with the map and round under it.
 - In Attack / Defend the pole (both on Depot) shows while the round is live, and your Hold Here spot shows as a
   diamond.

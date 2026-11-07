@@ -270,9 +270,10 @@ func test_every_field_by_day_and_night_plays_its_beds_at_the_scaled_level() -> v
 		for night: bool in [false, true]:
 			_setup_audio(night, id)
 			var amb_set := cfg.ambiences.set_for(id, night)
-			assert_eq(audio._beds.size(), amb_set.beds.size(), "%s night=%s" % [id, night])
+			assert_eq(audio._beds.size(), amb_set.beds.size() * 2, "%s night=%s: a pair a bed" % [id, night])
 			for i in audio._beds.size():
-				var old_db := linear_to_db(amb_set.beds[i].gain * float(peaks[String(amb_set.beds[i].loop)]))
+				var bed := amb_set.beds[i / 2]
+				var old_db := linear_to_db(bed.gain * float(peaks[String(bed.loop)]) * AmbienceBed.pair_gains(bed.width).x)
 				assert_almost_eq(audio._beds[i].volume_db, old_db + linear_to_db(cfg.ambience_gain), 1e-3)
 			audio.free()
 			audio = null

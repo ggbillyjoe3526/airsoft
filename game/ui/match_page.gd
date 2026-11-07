@@ -147,8 +147,10 @@ func play_button() -> Button:
 	return _play
 
 
+## PLAY takes the keyboard, its focus ring hidden (MN1; BP7: the concept draws none) until a key or the pad moves the
+## focus; Enter starts the match at once all the same.
 func focus_play() -> void:
-	_play.grab_focus()
+	_play.grab_focus(true)
 
 
 ## The map cards by map id, in the order listed.
@@ -531,8 +533,8 @@ func _map_card(e: MapCatalog.Entry, later: bool) -> MenuCard:
 	return card
 
 
-## The map's picture (assets/maps/<id>.jpg: an eye-height view, made by tools/eye_pictures.gd) cut to `box`; a plain
-## plate when the map has none.
+## The map's picture (its small copy, _map_texture: an eye-height view, made by tools/eye_pictures.gd) cut to `box`; a
+## plain plate when the map has none.
 func _picture(map_id: String, box: Vector2) -> Control:
 	var texture := _map_texture(map_id)
 	if texture == null:
@@ -548,8 +550,10 @@ func _picture(map_id: String, box: Vector2) -> Control:
 	return picture
 
 
+## The map's small copy (assets/maps/cards/<id>.jpg, 480 x 270): the page shows every map's at once, so never the
+## loading screen's full-screen picture (BP7 performance).
 static func _map_texture(map_id: String) -> Texture2D:
-	var path := "res://assets/maps/%s.jpg" % map_id
+	var path := "res://assets/maps/cards/%s.jpg" % map_id
 	return load(path) as Texture2D if ResourceLoader.exists(path) else null
 
 

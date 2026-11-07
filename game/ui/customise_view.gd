@@ -557,6 +557,7 @@ func _build_turntable() -> Control:
 		words.append(tr(key))
 	_views = MenuChoice.new(words, true)
 	_views.name = "Views"
+	_views.accessibility_name = tr("CUSTOMISE_VIEWS_NAME")
 	row.add_child(_views)
 	var gap := Control.new()
 	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -729,6 +730,7 @@ func _build_bbs() -> Control:
 		words.append(tr(key))
 	_glow_bbs = MenuChoice.new(words)
 	_glow_bbs.name = "GlowBbs"
+	_glow_bbs.accessibility_name = tr("CUSTOMISE_GLOW_BBS")
 	_glow_bbs.picked.connect(func(i: int) -> void: glow_picked.emit(i as Loadout.Glow))
 	var choice_wrap := MenuParts.padded(0, SUB_GAP, 0, 0)
 	choice_wrap.add_child(_glow_bbs)
