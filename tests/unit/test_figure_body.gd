@@ -8,7 +8,9 @@ const DISTANCES := [5.0, 10.0, 20.0, 40.0]
 ## The human with the largest head (HighCut, id 0) at High's lines: LOD0, LOD0, LOD1, LOD2 (step 23 plan › 2).
 ## BL10: the rebuilt body (33,458 triangles; LOD1 10,999, LOD2 3,298); BL13: the knee and elbow pads (2,964, 976, 288).
 ## FA1: the face in each head (the largest head 8,992 / 3,192 / 896); BL12: the gear (13,698; LOD1 4,350, LOD2 932).
-const HUMAN_HIGH := [58868, 58868, 19423, 5382]
+## BP6: the radio's LOD1 (240) drawn past the far line too, so LOD2 5,622.
+const HUMAN_HIGH := [58868, 58868, 19423, 5622]
+const RADIO_LOD1 := 240
 const RED := Color(0.9, 0.2, 0.15)
 const BLUE := Color(0.2, 0.4, 0.95)
 
@@ -43,9 +45,10 @@ static func _tris(mesh: Mesh) -> int:
 ## The triangles the view draws at `distance` (m), settled (past each line's margin): the levels whose range holds it.
 static func _drawn(b: FigureBody, distance: float) -> int:
 	var n := 0
-	for i in b.meshes.size():
-		var mi := b.meshes[i]
-		if b.levels[i] < 0 or not mi.visible:
+	var all: Array[MeshInstance3D] = b.meshes.duplicate()
+	all.append_array(b.merged)
+	for mi in all:
+		if not mi.visible or mi.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY:
 			continue
 		var past_begin := distance >= mi.visibility_range_begin
 		var before_end := mi.visibility_range_end <= 0.0 or distance < mi.visibility_range_end
@@ -91,7 +94,7 @@ func test_the_lines_follow_mesh_detail() -> void:
 	assert_eq(_drawn(b, 20.0), HUMAN_HIGH[3], "LOD2 at 20 m on Low")
 
 
-func test_each_line_has_its_margin_and_the_radio_ends_at_the_far_line() -> void:
+func test_each_line_has_its_margin_and_the_radio_is_drawn_past_the_far_line() -> void:
 	var b := _body(FigureMix.HUMAN, 1)
 	for i in b.meshes.size():
 		var mi := b.meshes[i]
@@ -99,7 +102,7 @@ func test_each_line_has_its_margin_and_the_radio_ends_at_the_far_line() -> void:
 			0:
 				assert_eq(mi.visibility_range_end, 12.0, mi.name)
 				assert_eq(mi.visibility_range_end_margin, config.lod_margin)
-			1:
+			1 when mi.name != "Kit_Radio_LOD1":
 				assert_eq([mi.visibility_range_begin, mi.visibility_range_end], [12.0, 28.0], mi.name)
 				assert_eq(mi.visibility_range_begin_margin, config.lod_margin)
 				assert_eq(mi.visibility_range_end_margin, config.lod_margin)
@@ -107,7 +110,8 @@ func test_each_line_has_its_margin_and_the_radio_ends_at_the_far_line() -> void:
 				assert_eq(mi.visibility_range_begin, 28.0, mi.name)
 				assert_eq(mi.visibility_range_end, 0.0, "no end")
 	var radio := b.skeleton.get_node(^"Kit_Radio_LOD1") as MeshInstance3D
-	assert_eq(radio.visibility_range_end, 28.0, "no LOD2: gone past the far line")
+	assert_eq(radio.visibility_range_end, 0.0, "no LOD2: its LOD1 to every distance (BP6)")
+	assert_eq(radio.visibility_range_end_margin, 0.0)
 	assert_null(b.skeleton.get_node_or_null(^"Kit_Radio_LOD2"))
 
 
@@ -142,8 +146,8 @@ func test_the_levels_cast_no_shadow_and_one_twin_casts_it() -> void:
 				assert_eq(mi.cast_shadow, GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, mi.name)
 		assert_eq(twins, 1)
 	var human := _body(FigureMix.HUMAN, 0)
-	# LOD2 body, HighCut, kit, pack and pads.
-	assert_eq(_tris(human.meshes[-1].mesh), HUMAN_HIGH[3])
+	# LOD2 body, HighCut, kit, pack and pads (the radio, drawn there at its LOD1, casts none).
+	assert_eq(_tris(human.meshes[-1].mesh), HUMAN_HIGH[3] - RADIO_LOD1)
 	assert_same(_body(FigureMix.HUMAN, 4).meshes[-1].mesh, human.meshes[-1].mesh, "made once a kind and head")
 
 

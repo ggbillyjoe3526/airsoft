@@ -45,6 +45,8 @@ var _loaded: bool = false
 var _team_materials: Dictionary[String, Material] = {}
 var _face_materials: Dictionary[String, Material] = {}
 var _shadow_meshes: Dictionary[String, ArrayMesh] = {}
+## Each level's merged parts (BodyMerge) by kind, head and level; null kept where they couldn't be merged.
+var _merged_meshes: Dictionary[String, ArrayMesh] = {}
 ## Each replica's magazine mesh by its id (null: its model has none).
 var _magazines: Dictionary[StringName, Mesh] = {}
 ## The first-person arms' holds by replica id (HG1), read the first time one is asked for.
@@ -318,6 +320,15 @@ func shadow_mesh(kind: int, head: StringName, sources: Array[Mesh]) -> ArrayMesh
 	made.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	_shadow_meshes[key] = made
 	return made
+
+
+## `sources`, the foldable parts `kind` wearing `head` draws at `level`, merged into one mesh (BodyMerge.merge; null
+## when they can't be). Made once a kind, head and level, then shared.
+func merged_mesh(kind: int, head: StringName, level: int, sources: Array[Mesh]) -> ArrayMesh:
+	var key := "%d/%s/%d" % [kind, head, level]
+	if not _merged_meshes.has(key):
+		_merged_meshes[key] = BodyMerge.merge(sources)
+	return _merged_meshes[key]
 
 
 func _load(kind: int) -> Kind:

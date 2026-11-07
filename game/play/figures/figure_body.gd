@@ -22,6 +22,15 @@ const GATE_OPEN := 1
 ## The parts it draws (the shadow twin last) and each one's level (0, 1, 2; -1 for the twin).
 var meshes: Array[MeshInstance3D] = []
 var levels: PackedInt32Array = PackedInt32Array()
+## Each level's opaque parts folded into one mesh (BodyMerge, BP6: a draw a material, not a part's), drawn in place of
+## them while the figure is solid; the parts show again while it fades (each sorted by its own depth, as before). Each
+## one's level beside it.
+var merged: Array[MeshInstance3D] = []
+var merged_levels: PackedInt32Array = PackedInt32Array()
+## The parts the merged meshes draw (hidden while solid), and each part's coarsest level by `meshes`' index: a part
+## with no coarser level (the human's radio, no LOD2) draws its last one to every distance.
+var _folded: Array[MeshInstance3D] = []
+var _last_level: PackedInt32Array = PackedInt32Array()
 var skeleton: Skeleton3D = null
 ## The legs' tree (its graph the kind's, its parameters its own) and the bend after it; null without a skeleton.
 var tree: AnimationTree = null
@@ -84,6 +93,9 @@ func setup(models: FigureModels, kind: int, figure_id: int, team: int, colour: C
 	head = _head_for(side.parts, figure_id)
 	var coarsest: Array[Mesh] = []
 	var skin: Skin = null
+	var last_of: Dictionary[String, int] = {}
+	for part in side.parts:
+		last_of[_base(part)] = maxi(last_of.get(_base(part), 0), _level(part))
 	for part in side.parts:
 		var mi := skeleton.get_node_or_null(NodePath(part)) as MeshInstance3D
 		if mi == null:
@@ -98,6 +110,7 @@ func setup(models: FigureModels, kind: int, figure_id: int, team: int, colour: C
 		_paint(mi, models, kind, team, colour, glow, _config.face_look(figure_id))
 		meshes.append(mi)
 		levels.append(level)
+		_last_level.append(last_of[part_base])
 		if level == _config.shadow_level:
 			coarsest.append(mi.mesh)
 			skin = mi.skin
@@ -115,6 +128,8 @@ func setup(models: FigureModels, kind: int, figure_id: int, team: int, colour: C
 		twin.skeleton = NodePath("..")
 		meshes.append(twin)
 		levels.append(-1)
+		_last_level.append(-1)
+	_merge_levels(models, kind, team, colour, glow, _config.face_look(figure_id), skin)
 	set_lod_lines(lines)
 	for bone in _config.bones:
 		var index := skeleton.find_bone(bone)
@@ -311,14 +326,54 @@ func bone(bone_name: StringName) -> int:
 ## margin past it. A part with no LOD2 (the human's radio) ends at the far line; the twin casts at every range.
 func set_lod_lines(lines: Vector2) -> void:
 	for i in meshes.size():
-		var mi := meshes[i]
-		var level := levels[i]
-		if level < 0:
+		if levels[i] >= 0:
+			_set_range(meshes[i], levels[i], levels[i] == _last_level[i], lines)
+	for i in merged.size():
+		_set_range(merged[i], merged_levels[i], merged_levels[i] == _config.shadow_level, lines)
+
+
+## `mi`, at `level`, drawn between its lines (to every distance when it is its part's `last`).
+func _set_range(mi: MeshInstance3D, level: int, last: bool, lines: Vector2) -> void:
+	mi.visibility_range_begin = 0.0 if level == 0 else (lines.x if level == 1 else lines.y)
+	mi.visibility_range_begin_margin = 0.0 if level == 0 else _config.lod_margin
+	mi.visibility_range_end = 0.0 if last else (lines.x if level == 0 else lines.y)
+	mi.visibility_range_end_margin = 0.0 if last else _config.lod_margin
+
+
+## Each level's foldable parts (BodyMerge.foldable) as one merged mesh, made once a kind, head and level and shared,
+## painted as the parts are; a part's last level folds into the coarser levels too (the radio's LOD1 into LOD2). The
+## parts it draws are hidden while the figure is solid (`set_fade`). A level that can't be merged keeps its parts.
+func _merge_levels(models: FigureModels, kind: int, team: int, colour: Color, glow: float, look: int,
+		skin: Skin) -> void:
+	for level in _config.shadow_level + 1:
+		var parts: Array[MeshInstance3D] = []
+		var sources: Array[Mesh] = []
+		for i in meshes.size():
+			var at := levels[i]
+			if at < 0 or not BodyMerge.foldable(meshes[i].mesh):
+				continue
+			if at == level or (at == _last_level[i] and at < level):
+				parts.append(meshes[i])
+				sources.append(meshes[i].mesh)
+		if parts.size() < 2:
 			continue
-		mi.visibility_range_begin = 0.0 if level == 0 else (lines.x if level == 1 else lines.y)
-		mi.visibility_range_begin_margin = 0.0 if level == 0 else _config.lod_margin
-		mi.visibility_range_end = lines.x if level == 0 else (lines.y if level == 1 else 0.0)
-		mi.visibility_range_end_margin = _config.lod_margin if level < 2 else 0.0
+		var mesh := models.merged_mesh(kind, head, level, sources)
+		if mesh == null:
+			continue
+		var mi := MeshInstance3D.new()
+		mi.name = "Merged_LOD%d" % level
+		mi.mesh = mesh
+		mi.skin = skin
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_paint(mi, models, kind, team, colour, glow, look)
+		skeleton.add_child(mi)
+		mi.skeleton = NodePath("..")
+		merged.append(mi)
+		merged_levels.append(level)
+		for part in parts:
+			part.visible = false
+			if not _folded.has(part):
+				_folded.append(part)
 
 
 ## Draws the shadow twin (shadows only) or not: hidden while no light casts shadows.
@@ -331,8 +386,16 @@ func set_shadow_twin(on: bool) -> void:
 func set_fade(fade: float) -> void:
 	if fade == _fade:
 		return
+	var whole := fade >= 1.0
+	if whole != (_fade >= 1.0):
+		for mi in _folded:
+			mi.visible = not whole
+		for mi in merged:
+			mi.visible = whole
 	_fade = fade
 	for mi in meshes:
+		mi.transparency = 1.0 - fade
+	for mi in merged:
 		mi.transparency = 1.0 - fade
 
 

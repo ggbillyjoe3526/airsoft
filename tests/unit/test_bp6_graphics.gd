@@ -1,6 +1,7 @@
 extends GutTest
 ## BP6, the known-issues pass's graphics: the figures' detail lines scaled by the eye's zoom (a scope raised), and the
-## shadow twin hidden while no light casts shadows.
+## shadow twin hidden while no light casts shadows; each level's opaque parts drawn as one merged mesh (BodyMerge), its
+## bytes and mesh LODs exactly the parts'.
 
 var config: FigureConfig = FigureConfig.new()
 var view: ViewConfig = ViewConfig.new()
@@ -44,7 +45,7 @@ func test_a_figure_40_m_off_through_6x_draws_its_nearest_level_and_its_radio() -
 			config.zoomed_lines(GraphicsQuality.MeshDetail.HIGH, 6.0)))
 	add_child_autofree(b)
 	var radio := b.skeleton.get_node(^"Kit_Radio_LOD1") as MeshInstance3D
-	assert_gt(radio.visibility_range_end, 40.0, "the radio still drawn at 40 m")
+	assert_eq(radio.visibility_range_end, 0.0, "the radio drawn at 40 m (and every distance past its line)")
 	for i in b.meshes.size():
 		if b.levels[i] == 0:
 			assert_gt(b.meshes[i].visibility_range_end, 40.0, "%s drawn at 40 m, as at 6.7 m unzoomed" % b.meshes[i].name)
@@ -65,8 +66,9 @@ func test_the_shadow_twin_hides_while_nothing_casts_shadows_and_a_new_body_keeps
 	assert_false(v.body().meshes[-1].visible, "a new body (a rematch's kind) keeps it hidden")
 	v.set_shadow_cast(true)
 	assert_true(v.body().meshes[-1].visible)
-	for i in v.body().meshes.size() - 1:
-		assert_true(v.body().meshes[i].visible, "the levels are untouched")
+	assert_false(v.body().merged.is_empty())
+	for mi in v.body().merged:
+		assert_true(mi.visible, "the levels are untouched")
 	await get_tree().process_frame
 
 
@@ -77,3 +79,130 @@ func test_only_the_sun_casts_shadows() -> void:
 	assert_ne(GraphicsApply.torch_mode(q, LightingConfig.new(), true), TorchBeams.Mode.SHADOWED, "nor the torch then")
 	q.sun_shadows = true
 	assert_true(GraphicsApply.any_shadows(q))
+
+
+## Godot's pick of a surface's mesh LOD at `x` (edge length over distance, as the threshold scales it): the last one at
+## or under it, else the full indices (RenderingServer mesh_surface_get_lod).
+static func _pick(surface: Dictionary, x: float) -> PackedByteArray:
+	var out := surface["index_data"] as PackedByteArray
+	for lod: Dictionary in surface.get("lods", []) as Array:
+		if (lod["edge_length"] as float) > x:
+			break
+		out = lod["index_data"] as PackedByteArray
+	return out
+
+
+## The vertex arrays compared (positions, normals, tangents, colours, UVs, bones, weights), and the indices.
+const ARRAYS: Array[int] = [Mesh.ARRAY_VERTEX, Mesh.ARRAY_NORMAL, Mesh.ARRAY_TANGENT, Mesh.ARRAY_COLOR,
+		Mesh.ARRAY_TEX_UV, Mesh.ARRAY_BONES, Mesh.ARRAY_WEIGHTS, Mesh.ARRAY_INDEX]
+
+
+## `more`'s arrays after `into`'s, its indices shifted past `into`'s vertices.
+static func _append(into: Array, more: Array) -> void:
+	var base := (into[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() if into[Mesh.ARRAY_VERTEX] != null else 0
+	for a: int in ARRAYS:
+		if more[a] == null:
+			continue
+		var add: Variant = more[a]
+		if a == Mesh.ARRAY_INDEX:
+			var shifted := (more[a] as PackedInt32Array).duplicate()
+			for i in shifted.size():
+				shifted[i] += base
+			add = shifted
+		if into[a] == null:
+			into[a] = add
+		else:
+			into[a] = into[a] + add
+
+
+static func _shift(indices: PackedByteArray, base: int) -> PackedByteArray:
+	var out := PackedByteArray()
+	out.resize(indices.size())
+	for i in range(0, indices.size(), 2):
+		out.encode_u16(i, indices.decode_u16(i) + base)
+	return out
+
+
+func test_each_merged_surface_is_its_parts_bytes_and_picks_their_lods_at_every_distance() -> void:
+	for kind: int in [FigureMix.HUMAN, FigureMix.ROBOT]:
+		var b := FigureBody.new()
+		assert_true(b.setup(models, kind, 2, 1, Color.BLUE, 0.0, config.lod_high))
+		add_child_autofree(b)
+		assert_eq(b.merged.size(), 3, "kind %d: a merged mesh a level" % kind)
+		for m in b.merged.size():
+			var level := b.merged_levels[m]
+			var merged := b.merged[m].mesh as ArrayMesh
+			var sources: Array[Mesh] = []
+			for i in b.meshes.size():
+				var at := b.levels[i]
+				if at >= 0 and not b.meshes[i].visible and (at == level or (at < level and b.meshes[i].name == "Kit_Radio_LOD1")):
+					sources.append(b.meshes[i].mesh)
+			for s in merged.get_surface_count():
+				var material := merged.surface_get_material(s)
+				var got := RenderingServer.mesh_get_surface(merged.get_rid(), s)
+				var parts: Array[Dictionary] = []
+				var want := []
+				want.resize(Mesh.ARRAY_MAX)
+				for mesh in sources:
+					for t in mesh.get_surface_count():
+						if mesh.surface_get_material(t) == material:
+							parts.append(RenderingServer.mesh_get_surface(mesh.get_rid(), t))
+							_append(want, mesh.surface_get_arrays(t))
+				var name := "kind %d level %d %s" % [kind, level, material.resource_name]
+				assert_false(parts.is_empty(), "%s from its parts" % name)
+				var arrays := merged.surface_get_arrays(s)
+				for a: int in ARRAYS:
+					assert_eq(arrays[a], want[a], "%s: array %d read back as the parts'" % [name, a])
+				for x: float in [0.0, 0.001, 0.01, 0.03, 0.06, 0.1, 0.2, 0.5, 1.0, 5.0]:
+					var picked := PackedByteArray()
+					var base := 0
+					for d in parts:
+						picked.append_array(_shift(_pick(d, x), base))
+						base += d["vertex_count"] as int
+					assert_eq(_pick(got, x), picked, "%s: the LOD picked at %.3f" % [name, x])
+		assert_eq(_draws(b, 5.0), 9 if kind == FigureMix.HUMAN else 7, "kind %d: draws near" % kind)
+		assert_eq(_draws(b, 40.0), 9 if kind == FigureMix.HUMAN else 7, "kind %d: draws far" % kind)
+
+
+## The surfaces drawn at `distance` (shadow twin aside).
+static func _draws(b: FigureBody, distance: float) -> int:
+	var n := 0
+	var all: Array[MeshInstance3D] = b.meshes.duplicate()
+	all.append_array(b.merged)
+	for mi in all:
+		var inside := distance >= mi.visibility_range_begin and (mi.visibility_range_end <= 0.0
+				or distance < mi.visibility_range_end)
+		if mi.visible and inside and mi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY:
+			n += mi.mesh.get_surface_count()
+	return n
+
+
+func test_while_it_fades_the_parts_draw_in_place_of_the_merged_meshes() -> void:
+	var b := FigureBody.new()
+	assert_true(b.setup(models, FigureMix.HUMAN, 0, 0, Color.RED, 0.0, config.lod_high))
+	add_child_autofree(b)
+	var folded := b.skeleton.get_node(^"Kit_Pack") as MeshInstance3D
+	assert_false(folded.visible, "solid: the pack is in the merged mesh")
+	assert_true(b.merged[0].visible)
+	assert_true((b.skeleton.get_node(NodePath(String(b.head))) as MeshInstance3D).visible, "the head (its lens see-through) draws itself")
+	b.set_fade(0.5)
+	assert_true(folded.visible, "fading: each part sorted by its own depth again")
+	assert_false(b.merged[0].visible)
+	assert_almost_eq(folded.transparency, 0.5, 1e-6)
+	b.set_fade(1.0)
+	assert_false(folded.visible)
+	assert_true(b.merged[0].visible)
+	assert_eq(b.merged[0].transparency, 0.0)
+
+
+func test_the_merged_paint_is_the_parts_paint() -> void:
+	var b := FigureBody.new()
+	assert_true(b.setup(models, FigureMix.ROBOT, 3, 1, Color.BLUE, 0.4, config.lod_high))
+	add_child_autofree(b)
+	var body := b.skeleton.get_node(^"Body") as MeshInstance3D
+	var merged := b.merged[0]
+	for s in body.mesh.get_surface_count():
+		var material := body.mesh.surface_get_material(s)
+		for t in merged.mesh.get_surface_count():
+			if merged.mesh.surface_get_material(t) == material:
+				assert_eq(merged.get_active_material(t), body.get_active_material(s), material.resource_name)
