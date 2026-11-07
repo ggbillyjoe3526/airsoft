@@ -46,6 +46,9 @@ const FLASH_RANGE := 16.0
 const FLASH_TIME := 0.3
 const FLASH_COLOUR := Color(1.0, 0.97, 0.9)
 const FLARE_SIZE := 2.4
+## A frame runs the bang's light down by at most this (s), so a long frame hitch at the bang still shows its flare for
+## FLASH_TIME / FLASH_STEP frames or more.
+const FLASH_STEP := 1.0 / 30.0
 ## The wash: the dazzle's white fades out over its last DAZZLE_FADE s (at most SOFT_WASH with Reduced motion); inside
 ## a cloud the smoke's colour, up to SMOKE_WASH as the eyes near its middle.
 const DAZZLE_FADE := 1.2
@@ -205,7 +208,7 @@ func update(state: GameState, fraction: float, delta: float, eyes: Character, ey
 		var g: Grenade = pool[i] if i < pool.size() else null
 		_draw_canister(_canisters[i], g, fraction)
 		_draw_cloud(i, g)
-	_flash_left = maxf(0.0, _flash_left - delta)
+	_flash_left = maxf(0.0, _flash_left - minf(delta, FLASH_STEP))
 	var lit := _flash_left / FLASH_TIME
 	if _light.visible:
 		_light.light_energy = FLASH_ENERGY * lit * lit

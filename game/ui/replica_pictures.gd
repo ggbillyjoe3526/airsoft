@@ -308,6 +308,8 @@ func _rig(model: Node3D, long_side: int, port_name: String) -> Shot:
 	shot.port = SubViewport.new()
 	shot.port.name = port_name
 	shot.port.own_world_3d = true
+	# Placed by hand and drawn once, outside the physics ticks: the engine's interpolation stays off (BP6).
+	shot.port.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	shot.port.transparent_bg = true
 	shot.port.msaa_3d = MSAA
 	shot.port.render_target_update_mode = SubViewport.UPDATE_DISABLED

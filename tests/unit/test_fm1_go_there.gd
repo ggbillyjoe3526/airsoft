@@ -141,14 +141,15 @@ func test_the_command_carries_go_there_and_a_map_point_and_reset_and_copy_from_i
 	var c := PlayerCommand.new()
 	c.ping = true
 	c.ping_move = true
+	c.ping_hold = true
 	c.ping_on_map = true
 	c.ping_target = Vector3(3.0, 1.0, -4.0)
 	var copy := PlayerCommand.new()
 	copy.copy_from(c)
-	assert_true(copy.ping_move and copy.ping_on_map)
+	assert_true(copy.ping_move and copy.ping_hold and copy.ping_on_map)
 	assert_eq(copy.ping_target, Vector3(3.0, 1.0, -4.0))
 	c.reset()
-	assert_false(c.ping_move or c.ping_on_map)
+	assert_false(c.ping_move or c.ping_hold or c.ping_on_map)
 	assert_eq(c.ping_target, Vector3.ZERO)
 
 
@@ -171,6 +172,16 @@ func test_the_simulation_makes_a_ping_on_the_map_an_event_at_the_point_picked() 
 		assert_eq(e.value2, 1, "a Go there")
 		assert_eq(e.position, Vector3(10.0, 0.0, -10.0))
 	bots.observe(state)
+	cmd.ping_hold = true
+	bots.think(state, commands, DT)
+	sim.step(state, commands, DT)
+	var hold := -1
+	for i in state.events.count:
+		if state.events.items[i].kind == GameEvent.Kind.PING:
+			hold = state.events.items[i].value2
+	assert_eq(hold, GameEvent.PING_HOLD, "Hold here's key on the map")
+	bots.observe(state)
+	cmd.ping_hold = false
 	cmd.ping = false
 
 
@@ -376,3 +387,35 @@ func test_a_hold_here_given_as_one_never_lapses() -> void:
 	assert_eq(_order(SquadOrder.Kind.HOLD), SquadOrder.Kind.HOLD)
 	_run(squad.go_there_quiet + 5.0)
 	assert_eq(bots.order_of(YOU), SquadOrder.Kind.HOLD)
+
+
+## BP6: Hold here's key on the open map is a Hold here at the map's spot, as one looked at: no walk that lapses after
+## the quiet (a Go there's), held until it ends, side by side across the way there and looking on along it.
+func test_hold_heres_key_on_the_map_holds_that_spot_until_it_ends() -> void:
+	_squad()
+	var spot := Vector3(10.0, 0.0, -10.0)
+	cmd.ping_hold = true
+	_ping(false, true, spot)
+	cmd.ping_hold = false
+	assert_eq(bots.order_of(YOU), SquadOrder.Kind.HOLD, "a Hold here, never a Go there")
+	assert_eq(bots.order_outcome.notice, SquadOrders.Notice.NONE)
+	assert_true(bots.hold_spot(YOU))
+	assert_lt(_flat(bots.held_middle, spot), 1.0, "at the map's spot, not along the view")
+	var way := SquadOrders.yaw_towards(you.position, spot, 0.0)
+	for b in mates:
+		assert_eq(b.order, SquadOrder.Kind.HOLD)
+		assert_almost_eq(b.order_yaw, way, 0.02, "looking on the way there")
+	assert_gt(_flat(mates[0].order_goal, mates[1].order_goal), squad.hold_spacing - 0.6, "side by side")
+	_run(squad.go_there_quiet + 15.0)
+	assert_eq(bots.order_of(YOU), SquadOrder.Kind.HOLD, "never lapses")
+	for b in mates:
+		assert_lt(_flat(b.character.position, b.order_goal), squad.hold_arrive + 0.3, "they went there")
+	cmd.ping_hold = true
+	_ping(false, true, spot + Vector3(0.5, 0.0, 0.0))
+	cmd.ping_hold = false
+	assert_eq(bots.order_of(YOU), SquadOrder.Kind.HOLD, "pressed again by the spot: it stays, never cancels")
+	cmd.ping_hold = true
+	_ping(false, true, Vector3(0.0, 0.0, 200.0))
+	cmd.ping_hold = false
+	assert_eq(bots.order_outcome.notice, SquadOrders.Notice.NOWHERE, "off the field")
+	assert_eq(_order(SquadOrder.Kind.TEAM_PLAN), SquadOrder.Kind.NONE, "Team plan ends it, as any order")

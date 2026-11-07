@@ -149,9 +149,15 @@ class Table:
 	var steps: Array[Quaternion] = []
 
 
-## The rests (HitFit.rests) as turns, and the tables ready to blend: built once, on first use.
+## The lower body tables `table` makes, each from its sample field (FIELDS): asked for by these names only, so
+## `prepare` makes every one a pose can ask for.
+enum Lower { STAND_STILL, CROUCH_STILL, GAIT, CROUCH, JUMP, VAULT }
+## Each Lower table's sample field, in Lower's order.
+const FIELDS: Array[StringName] = [&"stand_still", &"crouch_still", &"gait", &"crouch", &"jump", &"vault_lower"]
+
+## The rests (HitFit.rests) as turns, and the tables ready to blend: built once, on first use (or `prepare`).
 var _rests: Array[Quaternion] = []
-var _tables: Dictionary[StringName, Table] = {}
+var _tables: Array[Table] = []
 ## The hips' heading standing still and crouched still (still_heading), read once.
 var _still_headings: Vector2 = Vector2(NAN, NAN)
 
@@ -164,13 +170,27 @@ func rest(j: int) -> Quaternion:
 	return _rests[j]
 
 
-## The lower body table `field` (stand_still, crouch_still, gait, crouch, jump or vault_lower) ready to blend.
-func table(field: StringName) -> Table:
-	var t: Table = _tables.get(field)
+## Every lower body table (`table`) made at once (BP6): a match warms them when it starts, so none is made mid-match
+## the first time a pose needs it (a jump, a crouch, a vault) and a tick allocates nothing.
+func prepare() -> void:
+	for kind: Lower in Lower.values():
+		table(kind)
+
+
+## How many lower body tables are made so far.
+func tables_made() -> int:
+	return _tables.size() - _tables.count(null)
+
+
+## The lower body table `kind` ready to blend.
+func table(kind: Lower) -> Table:
+	if _tables.is_empty():
+		_tables.resize(Lower.size())
+	var t := _tables[kind]
 	if t != null:
 		return t
 	t = Table.new()
-	var floats: PackedFloat32Array = get(field)
+	var floats: PackedFloat32Array = get(FIELDS[kind])
 	var turns := (SAMPLE - HIPS_TURN) / 4
 	for at in range(0, floats.size(), SAMPLE):
 		t.places.append(Vector3(floats[at], floats[at + 1], floats[at + 2]))
@@ -178,7 +198,7 @@ func table(field: StringName) -> Table:
 			var i := at + HIPS_TURN + 4 * j
 			var q := Quaternion(floats[i], floats[i + 1], floats[i + 2], floats[i + 3]).normalized()
 			t.steps.append((rest(j).inverse() * q).normalized())
-	_tables[field] = t
+	_tables[kind] = t
 	return t
 
 

@@ -781,7 +781,7 @@ func _build_views(ui: CanvasLayer) -> void:
 	_audio = SimAudio.new()
 	_audio.night = _light.night
 	add_child(_audio)
-	_audio.setup(_play.sound, profiles, _tuning.body, _level.query(), _map, _tuning.footsteps)
+	_audio.setup(_play.sound, profiles, _tuning.body, _level.query(), _map, _tuning.footsteps, state.characters.size())
 	_hands.inspect_sound.connect(_on_inspect_sound)
 	_mix = SoundMix.new()
 	add_child(_mix)
@@ -886,8 +886,9 @@ func _tick() -> void:
 	elif _spectate_any and not autopilot:
 		_follow_next_on_pull()
 	elif not autopilot:
+		# The wheel zooms if the sight will be up this tick (not last tick's: BP6), through a variable optic.
 		_input.fill(_commands[PLAYER_ID], player.armament.active, player.grenades, player.armament.holstered,
-				player.aiming and player.armament.zoom_turns())
+				Aiming.zoom_turns(player))
 	else:
 		# a bot plays you (the smoke test): your squad order keys still reach your teammates
 		_input.fill_order(_commands[PLAYER_ID])

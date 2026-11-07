@@ -238,3 +238,37 @@ func test_the_sniper_kit_carries_it_with_its_scope_and_its_bots_fight_aimed() ->
 	assert_false(BotCombat.fights_aimed(aeg))
 	rules.dev_content = false
 	assert_true(BotKits.offers(rules, plan), "and without Dev content")
+
+
+## The cocking sound stops with the hands that work the bolt: a switch to the other replica or a hit mid-cycle cuts it
+## short; left alone it plays on (BP6).
+func test_the_cocking_sound_stops_on_a_switch_or_a_hit_mid_cycle() -> void:
+	var sniper := _sniper()
+	var audio := SimAudio.new()
+	add_child_autofree(audio)
+	audio.setup(SoundConfig.new(), [sniper.sound_profile()] as Array[StringName], BodyConfig.new(), null, null, null, 4)
+	assert_eq(audio._bolt_voice.size(), 4, "sized for the match before it starts: no tick grows it")
+	for cut: String in ["none", "switch", "hit"]:
+		var state := GameState.new(1)
+		var you := Character.new(0, 0, Vector3.ZERO, 0.0, [sniper, ReplicaStats.default_loadout()[1]] as Array[ReplicaConfig])
+		state.characters.append(you)
+		var shot := state.events.add(GameEvent.Kind.SHOT)
+		shot.actor = 0
+		shot.slot = 0
+		audio.on_tick(state, 0, null)
+		var bolt := -1
+		for i in audio._own.size():
+			if audio._own[i].playing and audio._own[i].stream in (audio._streams[SimAudio.BOLT_CUE] as Array):
+				bolt = i
+		assert_gte(bolt, 0, "the bolt's cocking plays after the shot")
+		state.events.clear()
+		match cut:
+			"switch":
+				you.armament.active = 1
+			"hit":
+				you.status = Character.Status.OUT
+		audio.on_tick(state, 0, null)
+		if cut == "switch" or cut == "hit":
+			assert_false(audio._own[bolt].playing, "cut short by the %s" % cut)
+		else:
+			assert_true(audio._own[bolt].playing, "plays on")

@@ -281,6 +281,18 @@ func test_end_the_round_now_before_the_buzzer_keeps_the_flag_down_and_during_it_
 	assert_true(_over(-1, GameEvent.RoundEnd.TIME))
 
 
+func test_end_the_round_now_during_the_flag_keeps_only_its_played_time_for_the_table() -> void:
+	_to_overtime()
+	_run(5.0)
+	assert_true(Round.run_clock_out(rs))
+	_run(DT)
+	assert_true(_over(-1, GameEvent.RoundEnd.TIME))
+	assert_true(rs.overtime_flag.up, "the flag stays up through the pause")
+	assert_almost_eq(cfg.time - rs.overtime_flag.left, 5.0 + DT, 2.0 * DT, "only the flag's played time counts")
+	_run(tuning.rounds.reset_delay + DT)
+	assert_false(rs.overtime_flag.cut, "the next round's flag is whole again")
+
+
 func test_a_round_lasts_at_most_its_clock_and_its_overtime() -> void:
 	assert_eq(Round.longest_overtime(tuning, RoundState.Mode.ELIMINATION), cfg.time)
 	assert_eq(Round.longest_overtime(tuning, RoundState.Mode.ATTACK_DEFEND), tuning.flag.max_overtime)

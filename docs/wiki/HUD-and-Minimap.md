@@ -99,7 +99,7 @@ Top left, the minimap shows the field from above:
 
 - You are the **white arrow**; teammates are dots in your team's colour, grey once hit.
 - The other team shows only where your side **heard** them: a dashed ring for footsteps, a disc for a shot, fading
-  after a few seconds. Steps carry about 22 m and shots about 60 m.
+  after a few seconds. Steps carry about 22 m and shots about 60 m. One heard on another storey shows fainter.
 - The area you stand in is named at the top, with the map and round under it.
 - In Attack / Defend the pole (both on Depot) shows while the round is live, and your Hold Here spot shows as a
   diamond.
@@ -135,9 +135,10 @@ other team only where your side heard them) the map marks what never moves:
 It shows the storey you stand on.
 
 While it is open the mouse moves a pointer on the map instead of turning your view, and your feet still move. **Click**
-to send your teammates there ([Go There](Squad-Orders#go-there)), or press the ping's key (the middle mouse button) to
-ping that spot for them. Let go of M and you look around again; the trigger needs a fresh pull. Once you are out you
-can still look at the map, but not ping on it. There is no map on the [Practice Range](Practice-Range).
+(or press Go There's key) to send your teammates there ([Go There](Squad-Orders#go-there)), press Hold Here's key to
+have them hold that spot until the order ends ([Hold Here](Squad-Orders)), or press the ping's key (the middle mouse
+button) to ping that spot for them. Let go of M and you look around again; the trigger needs a fresh pull. Once you are
+out you can still look at the map, but not ping on it. There is no map on the [Practice Range](Practice-Range).
 
 ## Sounds that carry information
 

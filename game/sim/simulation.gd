@@ -68,6 +68,9 @@ func _init(sim_tuning: SimTuning, world: WorldQuery, character_mover: CharacterM
 	mag_share = MagShare.new(sim_tuning, world)
 	grenades = Grenades.new(sim_tuning, world)
 	doors = Doors.new(sim_tuning, world)
+	# The fitted hit volume's tables, made before the match (BP6): a pose first met mid-match makes none.
+	if sim_tuning.hits.fit != null:
+		sim_tuning.hits.fit.prepare()
 
 
 ## A fresh match: a new breeze, everyone at their end's spawns with the bombs everyone carries, round 1 live.
@@ -232,7 +235,7 @@ static func _squad_order(c: Character, commands: Array[PlayerCommand], live: boo
 ## event along its view, recoil and all, from its eyes, saying where that view meets the field within PingConfig.reach
 ## (or nothing: the sky). The bots' controller makes it a ping (Pings); nothing changes here. One placed on the
 ## full-screen map (FM1) has value 2 and the point picked as its position; a Go there (ping_move) has value2 1, and the
-## controller hands it out as that order.
+## controller hands it out as that order; Hold here's key on the map (ping_hold) has value2 PING_HOLD, a Hold here there.
 func _ping(c: Character, commands: Array[PlayerCommand], live: bool, events: SimEvents) -> void:
 	var cmd: PlayerCommand = commands[c.id] if c.id >= 0 and c.id < commands.size() else null
 	if cmd == null or not cmd.ping or not live:
@@ -241,7 +244,7 @@ func _ping(c: Character, commands: Array[PlayerCommand], live: bool, events: Sim
 		var on_map := events.add(GameEvent.Kind.PING)
 		on_map.actor = c.id
 		on_map.value = GameEvent.PING_ON_MAP
-		on_map.value2 = 1 if cmd.ping_move else 0
+		on_map.value2 = GameEvent.PING_HOLD if cmd.ping_hold else (1 if cmd.ping_move else 0)
 		on_map.position = cmd.ping_target
 		return
 	var eye := Lean.eye(c, tuning.body, tuning.hits)
@@ -254,7 +257,7 @@ func _ping(c: Character, commands: Array[PlayerCommand], live: bool, events: Sim
 	e.value2 = 1 if cmd.ping_move else 0
 	e.position = eye
 	e.direction = dir
-	if reach > 0.0 and query.ray_past_railings(eye, eye + dir * reach, _ping_hit):
+	if reach > 0.0 and query.sight_ray(eye, eye + dir * reach, _ping_hit):
 		e.value = 1
 		e.reach = _ping_hit.fraction * reach
 

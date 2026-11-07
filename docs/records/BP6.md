@@ -3,6 +3,7 @@
 **Review:**
 
 - part 1: critic Accept 7/8 · qa Pass · performance Pass
+- part 2: critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -11,6 +12,8 @@
 | 2026-11-07 | part 1: 1 | Opus 5.5 | green | Retry 6/8 | stale comment, no skin check, torch row, long line |
 | 2026-11-07 | part 1: 2 | Opus 5.5 | green | Retry 7/8 | the glass cone's edge could pop detail in view |
 | 2026-11-07 | part 1: 3 | Opus 5.5 | green | Accept 7/8 | – (two wording fixes made) |
+| 2026-11-07 | part 2: 1 | Opus 5.5 | green | Retry 5/8 | Hold Here on the map, lane resume, MI1 unproven, zoom keys |
+| 2026-11-07 | part 2: 2 | Opus 5.5 | green | Accept 7/8 | – (the flaky test logged, a record line fixed) |
 
 ## The pass
 
@@ -113,3 +116,83 @@ Each area goes out as its own pull request with the critic, QA and performance a
 - A walk-off fade: no flicker as the merged mesh hands over to the parts.
 - Frame time on Low and High with 5v5 to 8v8, scoped and not.
 - On Ultra, the merged bodies under SDFGI and SSAO look as before.
+
+### Part 2: play and bots
+
+#### What changed
+
+- **Zoom keys of their own.** Zoom in and Zoom out are actions (Settings › Controls), on the wheel by default with
+  Next and Previous replica; the one sharing allowed (`KeyBindings.may_share`), any other key swaps. Aimed through
+  the Variable Scope a shared key zooms only. The zoom decision is read before the tick (`Aiming.zoom_turns`), so a
+  notch on the tick a reload or draw starts switches.
+- **Hold Here's key on the open map** is a Hold Here at the pointer (`PlayerCommand.ping_hold`, a PING with value2
+  `PING_HOLD`, `SquadOrderBook.give_hold_at`), held until the order ends.
+- **Bombs** bounce off the bodies of those in play (surface NONE, never resting on one; `Grenades._body_hit`), and
+  pass through the thrower's team for `team_pass_time` (0.3 s), so one thrown past a teammate at the thrower's side
+  doesn't bounce back onto the thrower (without it the test's bomb landed 1.6 m behind the thrower).
+- **A ping** looks through glass as sight does (`sight_ray`).
+- **The bolt's cocking sound** stops on a switch, a holster or leaving play (`SimAudio._cut_bolts`, VoicePool
+  serials); its lists are sized at setup.
+- **A BB's second impact in a tight inside corner** in view is heard open (`SoundOcclusion.impact_share`,
+  `occlusion_corner_reach`, `occlusion_impact_skin`).
+- **The flash's flare** runs down at most 1/30 s a frame, so a hitch at the bang still shows it.
+- **The minimap** draws a patch heard on another storey at `other_storey_patch` (0.5) strength.
+- **End the round now** in Elimination's overtime keeps the flag's time played (`OvertimeFlag.cut`).
+- **The menus' picture and turntable cameras** are never physics-interpolated (the flaky UF1 camera test).
+- **HitFit's lower body tables** are made when a Simulation is made (`HitFit.prepare`), keyed by `HitFit.Lower` so
+  every table a pose asks for is one prepare makes.
+- **Bots:** full auto indoors decided once per target a round (bitmasks) and re-checked when a held burst resumes;
+  keep_apart skips an enemy behind something solid (`separation_line_height`); back from a search a bot resumes past
+  the lane segment nearest it (`BotMovement.resume_point`); a fresh semi or burst pull waits until the replica, and a
+  vault's fire lockout, let it fire that tick (`BotCombat.press_kept`); a real noise by a pinged spot is news; Go
+  round's spot is on a floor a route joins (`NavGrid.linked`).
+
+#### Rows fixed and deleted
+
+The bolt sound; the wheel notch as a reload or draw starts; NA1's two targets and its held burst; the zoom on Next and
+Previous; the ping through glass; the UF1 camera test; the BB's second impact in a corner; the search walk-back; Go
+round's spot; the real noise after a ping; the order keys on the full-screen map; press_buffer; keep_apart;
+`Simulation.step` allocations (MI1); the flare after a hitch; End the round now; the minimap's heard patch. Trimmed:
+the seed row (`--seed` is refused, test_launch_seed) and the thrown bomb row (its arms part left).
+
+**MI1's evidence.** Its own scenario (Depot, Normal, seed 9, player 0 not driven, every allocating `Simulation.step`
+after 5 s, events not counted, 150 s, each run alone in a fresh process): main cf1705d makes one object at 11.02 s, a
+HitFit table made the first time a pose needs it; the head makes none. Both make about 90 on the match's first shot
+(10.82 s), the hit volumes growing once (`BBStep`), the warm-up test_bb_step names, so no row. The row's own times
+(48.9 s, 56.0 s) were from an older build.
+
+#### Rows left
+
+- Follow me can't close on a sprinting leader: a lead ruling (DP4); a fix needs followers faster than the player.
+- An ask to a bot already bringing a magazine: design, HUD and art items (MH2, MH3), mostly others' areas.
+- The one-way step region: no failed search ever measured; directional regions over the 528k-node grid are a nav
+  build refactor.
+- BotAngles and bushes: a per-ray leaf test across Woodland is a frame-time risk and moves Hard bots' Woodland play.
+- The figure's muzzle up at a wall: figure_view.gd is the graphics worker's, and it is an art call.
+- The pacer above 100 % game speed: needs a second past tick kept across every view.
+- Leaving a match while it loads: menus (main.gd), the menus worker's.
+- The thrown bomb from the eyes, keeping its pin: the arms, out of bounds for this pass.
+
+#### Defaults
+
+- The zooms default to the wheel with the switches: the feel on default keys is unchanged.
+- Only a zoom and a switch share a key: the swap rule stands for every other key (DECISIONS › Zoom on the wheel).
+- Hold Here on the map holds the pointer's spot, looking on the way there: the hidden view can't be read
+  (DECISIONS).
+- Bombs bounce off in-play bodies only: one out of play has walked off and can't be in the way.
+- The thrower's team passes for 0.3 s (about 4 m of throw): far enough for a teammate at the side, short enough that
+  a teammate down the hall still stops it.
+- keep_apart checks a clear line for enemies only: teammates push a few cm, wall or none, as before.
+- Go round's spot is checked by nav region, not route length: linked is cheap, and while it doesn't promise a
+  route it never marks a floor no route joins to yours.
+- Other-storey patches at 0.5: seen, yet plainly not your floor.
+- The torch going off for a throw stays: by design (the hand holds the bomb).
+
+#### Checks
+
+Touched tests green (test_bp6_bots, test_fm1_go_there, test_fm1_field_map, test_key_bindings, test_mc1_qa,
+test_sf1_qa, test_variable_scope, test_grenades, test_sniper_rifle, test_hit_fit, test_bp2_perf_qa, test_hitbox,
+test_bp3_qa, test_start_mode_bots and others). Attempt 1's whole check.sh: 3,945 of 3,946 passed; the one failure,
+test_parts_in_play's silenced shot, passes alone (a headless voice that finished between two ticks under load). Depot
+match guard: 121 rounds over 16 seeds, 0 on time at attempt 1; 118, 0 on time and 1 to the overtime flag at attempt 2
+(the lane resume and the vault gate; earlier baselines 129 and 121).

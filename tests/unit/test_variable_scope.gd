@@ -176,6 +176,83 @@ func test_aimed_the_mouse_wheel_zooms_instead_of_switching() -> void:
 	input.active = false
 
 
+## Zoom in and Zoom out are actions of their own (BP6): Next and Previous replica moved to keys switch while aimed and the
+## wheel still zooms; the wheel moved off the zooms switches, aimed or not, and the zoom keys zoom.
+func test_the_zoom_keys_are_their_own_and_the_switch_keys_switch_while_aimed() -> void:
+	var b := KeyBindings.new()
+	b.rebind(&"slot_next", KEY_K)
+	b.rebind(&"slot_previous", KEY_J)
+	b.apply()
+	var input := PlayerInput.new()
+	add_child_autofree(input)
+	input.setup(ControlsConfig.new(), 1.5)
+	input.active = true
+	var cmd := PlayerCommand.new()
+	Input.action_press(PlayerInput.AIM)
+	_key(input, KEY_K)
+	input.fill(cmd, 0, null, false, true)
+	assert_eq(cmd.zoom_steps, 0, "a switch key never zooms")
+	assert_eq(cmd.switch_to, 1, "it switches, aimed or not")
+	_notch(input, MOUSE_BUTTON_WHEEL_UP)
+	input.fill(cmd, 0, null, false, true)
+	assert_eq(cmd.zoom_steps, 1, "the wheel still zooms in")
+	assert_eq(cmd.switch_to, -1)
+	_notch(input, MOUSE_BUTTON_WHEEL_UP)
+	input.fill(cmd, 0, null, false, false)
+	assert_eq(cmd.zoom_steps, 0, "no variable optic: a zoom key does nothing")
+	assert_eq(cmd.switch_to, -1, "and the wheel, off the switches, switches nothing")
+	b.reset()
+	b.rebind(&"zoom_in", KEY_I)
+	b.rebind(&"zoom_out", KEY_O)
+	b.apply()
+	_notch(input, MOUSE_BUTTON_WHEEL_DOWN)
+	input.fill(cmd, 0, null, false, true)
+	assert_eq(cmd.zoom_steps, 0, "the wheel off the zooms switches, aimed through it")
+	assert_eq(cmd.switch_to, 1)
+	_key(input, KEY_I)
+	_key(input, KEY_I)
+	_key(input, KEY_O)
+	input.fill(cmd, 0, null, false, true)
+	assert_eq(cmd.zoom_steps, 1, "its own keys zoom")
+	Input.action_release(PlayerInput.AIM)
+	input.active = false
+	InputMap.load_from_project_settings()
+
+
+func test_a_notch_on_the_tick_after_a_reload_or_a_draw_starts_switches() -> void:
+	var c := _character(_aeg_with(VARIABLE))
+	c.aiming = true # the sight was up last tick
+	assert_true(Aiming.can_aim(c))
+	c.armament.reload_left = 1.0
+	assert_false(Aiming.can_aim(c), "a reload under way lowers it this tick")
+	c.armament.reload_left = 0.0
+	c.armament.draw_left = 0.5
+	assert_false(Aiming.can_aim(c), "as a draw does")
+	assert_false(Aiming.zoom_turns(c))
+	c.armament.draw_left = 0.0
+	assert_true(Aiming.zoom_turns(c), "the variable optic in hand, ready")
+	c.grenades.readied = Grenade.Kind.SMOKE
+	assert_false(Aiming.zoom_turns(c), "not with a bomb in hand")
+	c.grenades.readied = Grenade.Kind.NONE
+	c.grenades.throwing = Grenade.Kind.FLASH
+	assert_false(Aiming.zoom_turns(c), "nor while throwing one")
+	c.grenades.throwing = Grenade.Kind.NONE
+	assert_false(Aiming.zoom_turns(_character(_aeg_with(SCOPE))), "a fixed scope: never")
+	c.armament.draw_left = 0.5
+	var input := PlayerInput.new()
+	add_child_autofree(input)
+	input.setup(ControlsConfig.new(), 1.5)
+	input.active = true
+	Input.action_press(PlayerInput.AIM)
+	_notch(input, MOUSE_BUTTON_WHEEL_DOWN)
+	var cmd := PlayerCommand.new()
+	input.fill(cmd, 0, null, false, Aiming.zoom_turns(c))
+	Input.action_release(PlayerInput.AIM)
+	assert_eq(cmd.zoom_steps, 0)
+	assert_eq(cmd.switch_to, 1, "not lost: it switches")
+	input.active = false
+
+
 func test_a_turn_made_mid_vault_is_kept_and_a_bomb_in_hand_drops_it() -> void:
 	var c := _character(_aeg_with(VARIABLE))
 	var cmd := PlayerCommand.new()
@@ -212,6 +289,13 @@ func test_both_rifles_parts_files_carry_it_longer_than_the_2x_scope() -> void:
 		assert_not_null(v.find_child("optic_scopeVar_SightLine", true, false), "%s: its sight line" % file)
 		assert_gt(v.get_aabb().size.z, fixed.get_aabb().size.z + 0.05, "%s: longer than the 2x Scope" % file)
 		assert_lt(v.mesh.get_faces().size() / 3, 10000, "%s: within a part's 10,000 triangles" % file)
+
+
+func _key(input: PlayerInput, key: Key) -> void:
+	var event := InputEventKey.new()
+	event.physical_keycode = key
+	event.pressed = true
+	input._unhandled_input(event)
 
 
 func _notch(input: PlayerInput, button: MouseButton) -> void:

@@ -82,6 +82,22 @@ func test_an_impact_with_no_direction_keeps_the_old_gap_and_one_with_a_direction
 	assert_eq(occ.impact_share(near_side, Vector3(0.0, 0.0, 60.0)), 0.0, "the near face, struck from this side: open")
 
 
+func test_a_second_impact_in_a_tight_inside_corner_in_view_is_open() -> void:
+	var cfg := SoundConfig.new()
+	var world := BoxWorld.new(body)
+	# A corner 10 m ahead: a wall across at z 10.0 and one along at x 1.0, both facing you.
+	world.add_box(Vector3(0.0, 1.5, 10.5), Vector3(6.0, 3.0, 1.0))
+	world.add_box(Vector3(1.5, 1.5, 7.0), Vector3(1.0, 3.0, 6.0))
+	var occ := SoundOcclusion.new(cfg, world)
+	occ.begin_tick(state.characters, you, you.eye(body))
+	# Bounced off the side wall (x 1.0) and onto the end wall 5 mm from it: 5 cm back along its way in is in the side wall.
+	var at := Vector3(0.995, you.eye(body).y, 10.0)
+	var came := Vector3(-0.2, 0.0, 1.0).normalized() * 40.0
+	assert_eq(occ.impact_share(at, came), 0.0, "the corner is in view: open, not muffled behind the side wall")
+	var behind := Vector3(0.0, you.eye(body).y, 11.0)
+	assert_eq(occ.impact_share(behind, Vector3(0.0, 0.0, -60.0)), 1.0, "the end wall's far face is still muffled")
+
+
 func test_a_thick_wall_is_still_blocked_by_either_ray() -> void:
 	var cfg := SoundConfig.new()
 	var world := BoxWorld.new(body)

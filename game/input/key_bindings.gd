@@ -5,6 +5,9 @@ extends RefCounted
 ## the key was only that action's second one, just removes it there; a take that would leave an essential action
 ## (fire, the four moves) with no key is refused, and so are the keys in `unbindable`. Plain data and rules: `apply`
 ## writes them into Godot's InputMap, which PlayerInput and the HUD read at once.
+## One exception (BP6, DECISIONS › Zoom on the wheel): Zoom in and Zoom out, read only aimed through a variable optic,
+## may share a key with the replicas' Next and Previous (SHARES_WITH), so by default the mouse wheel is both, the zoom
+## aimed through the Variable Scope. Every other key belongs to one action, a zoom key included.
 ## A binding is an int: a physical key (the Key enum, by position, so WASD stays WASD on any layout) or, negative, a
 ## mouse button (minus its MouseButton index; the wheel's two directions are buttons 4 and 5).
 
@@ -16,11 +19,15 @@ const NONE := 0
 const ACTIONS: Array[StringName] = [
 	&"move_forward", &"move_back", &"move_left", &"move_right", &"walk", &"sprint", &"crouch", &"jump",
 	&"lean_left", &"lean_right", &"fire", &"aim", &"reload", &"fire_mode", &"inspect", &"slot_1", &"slot_2", &"holster",
-	&"torch", &"slot_next", &"slot_previous", &"hop_up_less", &"hop_up_more", &"scoreboard", &"field_map", &"order_follow",
-	&"order_hold", &"order_regroup", &"order_wheel", &"ping", &"ping_move", &"mag_hand_off", &"throw_smoke", &"throw_flash",
-	&"use_door",
+	&"torch", &"slot_next", &"slot_previous", &"zoom_in", &"zoom_out", &"hop_up_less", &"hop_up_more", &"scoreboard",
+	&"field_map", &"order_follow", &"order_hold", &"order_regroup", &"order_wheel", &"ping", &"ping_move", &"mag_hand_off",
+	&"throw_smoke", &"throw_flash", &"use_door",
 	&"loadout",
 ]
+## The actions read only while aimed through a variable optic: their keys may also be one of SHARES_WITH's.
+const AIMED: Array[StringName] = [&"zoom_in", &"zoom_out"]
+## The actions an AIMED one may share its key with: the wheel's other pair, which aimed through the scope it outranks.
+const SHARES_WITH: Array[StringName] = [&"slot_next", &"slot_previous"]
 ## Actions that can never be left keyless (owner rule, DECISIONS › Menus, HUD, settings and accessibility).
 const ESSENTIAL: Array[StringName] = [&"fire", &"move_forward", &"move_back", &"move_left", &"move_right"]
 ## project.godot's input map, by physical key; a test checks the two agree.
@@ -46,6 +53,8 @@ const DEFAULTS: Dictionary = {
 	&"torch": [KEY_T],
 	&"slot_next": [-MOUSE_BUTTON_WHEEL_DOWN],
 	&"slot_previous": [-MOUSE_BUTTON_WHEEL_UP],
+	&"zoom_in": [-MOUSE_BUTTON_WHEEL_UP],
+	&"zoom_out": [-MOUSE_BUTTON_WHEEL_DOWN],
 	&"hop_up_less": [KEY_PAGEDOWN],
 	&"hop_up_more": [KEY_PAGEUP],
 	&"scoreboard": [KEY_TAB],
@@ -107,12 +116,19 @@ func codes(action: StringName) -> PackedInt32Array:
 	return _map.get(action, PackedInt32Array())
 
 
-## The action `code` is bound to, or an empty name.
-func action_of(code: int) -> StringName:
-	for action: StringName in ACTIONS:
-		if _map[action].has(code):
-			return action
+## The action `code` is bound to, or an empty name; given `action`, the first one holding it that `action` may not share
+## a key with (may_share; `action` itself among them).
+func action_of(code: int, action: StringName = &"") -> StringName:
+	for other: StringName in ACTIONS:
+		if _map[other].has(code) and not may_share(action, other):
+			return other
 	return &""
+
+
+## Whether actions `a` and `b` may hold one key: a zoom and Next or Previous replica (AIMED, SHARES_WITH), never two
+## others.
+static func may_share(a: StringName, b: StringName) -> bool:
+	return AIMED.has(a) and SHARES_WITH.has(b) or AIMED.has(b) and SHARES_WITH.has(a)
 
 
 ## Whether `code` can be bound at all.
@@ -164,9 +180,13 @@ func rebind(action: StringName, code: int, slot: int = 0) -> Result:
 	var mine := _map[action]
 	var has_old := slot < mine.size()
 	var old := mine[slot] if has_old else NONE
-	var other := action_of(code)
-	if other != &"" and other != action:
-		last_other = other
+	# Each action holding the key that this one may not share it with gives it up (a zoom and Next replica can hold
+	# one key together, so a take can meet two).
+	for other: StringName in ACTIONS:
+		if other == action or may_share(action, other) or not _map[other].has(code):
+			continue
+		if last_other == &"":
+			last_other = other
 		var theirs := _map[other]
 		var swap_in := has_old and theirs.find(code) == 0 and not theirs.has(old)
 		var rest := PackedInt32Array()
@@ -194,7 +214,7 @@ func rebind(action: StringName, code: int, slot: int = 0) -> Result:
 ## The essential action that putting `code` in `action`'s `slot` would leave with no key (it is that action's only key
 ## and the slot has none to swap in), or an empty name.
 func strands(action: StringName, code: int, slot: int = 0) -> StringName:
-	var other := action_of(code)
+	var other := action_of(code, action)
 	if other == &"" or other == action or not ESSENTIAL.has(other):
 		return &""
 	var theirs := _map[other]
@@ -225,9 +245,9 @@ func to_dict() -> Dictionary:
 
 ## Takes saved bindings over the defaults, ignoring what is malformed or unknown: an action whose saved list is bad
 ## keeps its default. An action the save lacks (added by a later build) takes its default unless another action holds
-## the key. A key on two actions, or an essential action left keyless, makes the whole set unusable and the defaults
-## stand. A save from before LAYOUT holding a moved action on its old default gives it the new one. Returns whether the
-## saved set was used as it came.
+## the key. A key on two actions that may not share one (may_share), or an essential action left keyless, makes the
+## whole set unusable and the defaults stand. A save from before LAYOUT holding a moved action on its old default gives
+## it the new one. Returns whether the saved set was used as it came.
 func load_dict(data: Variant) -> bool:
 	reset()
 	if not data is Dictionary:
@@ -237,7 +257,8 @@ func load_dict(data: Variant) -> bool:
 	var old_layout := not (layout is int or layout is float) or int(layout) < LAYOUT
 	var ok := true
 	var loaded: Dictionary[StringName, PackedInt32Array] = {}
-	var taken: Dictionary[int, bool] = {}
+	# The actions holding each key the save gives.
+	var taken: Dictionary[int, Array] = {}
 	for action: StringName in ACTIONS:
 		var name := String(action)
 		if not saved.has(name):
@@ -251,10 +272,13 @@ func load_dict(data: Variant) -> bool:
 			continue
 		loaded[action] = list
 		for c in loaded[action]:
-			if taken.has(c):
-				reset()
-				return false
-			taken[c] = true
+			if not taken.has(c):
+				taken[c] = []
+			for holder: StringName in taken[c]:
+				if not may_share(action, holder):
+					reset()
+					return false
+			taken[c].append(action)
 	for action: StringName in ACTIONS:
 		if loaded.has(action):
 			_map[action] = loaded[action]
@@ -262,7 +286,10 @@ func load_dict(data: Variant) -> bool:
 		# on its default: dropped where the player's own keys hold it
 		var kept := PackedInt32Array()
 		for c in _map[action]:
-			if not taken.has(c):
+			var free := true
+			for holder: StringName in taken.get(c, []):
+				free = free and may_share(action, holder)
+			if free:
 				kept.append(c)
 		_map[action] = kept
 	for action: StringName in ESSENTIAL:

@@ -38,6 +38,9 @@ extends Resource
 @export var radius: float = 0.04
 ## A bomb still going after this long (s) is gone: lost off the field.
 @export var max_flight: float = 20.0
+## For this long after the throw (s) a bomb passes through the thrower's team (BP6): one thrown from cover past a
+## teammate at the thrower's side never bounces back off them onto the thrower. Bodies of the other team stop it at once.
+@export var team_pass_time: float = 0.3
 
 @export_group("Smoke")
 ## Pops this long after it leaves the hand (s), then smokes for smoke_time: the cloud grows to its full size over

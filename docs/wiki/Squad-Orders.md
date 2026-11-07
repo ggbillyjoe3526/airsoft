@@ -20,7 +20,8 @@ view.
   on the HUD. An order nobody can take is silent, and the wheel's middle says why (for example "No teammates in play
   to order").
 - **Hold Here** puts a "HOLD · 18 M" marker over the spot, with a dashed ring on the floor. Turn away and it slides to
-  the screen edge with an arrow. The minimap shows it as a diamond.
+  the screen edge with an arrow. The minimap shows it as a diamond. With the full-screen map open, Hold Here's key
+  holds the spot under the map's pointer instead, your teammates side by side across the way there and looking on.
 - An order lasts until you give another, until you are hit, or until the round (or the match) ends. In Attack / Defend it overrides
   your teammates' work at the pole.
 - Orders do nothing on the [Practice Range](Practice-Range), where there's nobody to order.
@@ -30,7 +31,8 @@ All the keys can be rebound in Settings › Controls ([Controls](Controls)).
 ## Pings
 
 Press the **middle mouse button** (Squad: ping a spot in Settings › Controls) to mark where your crosshair
-meets the field, up to <!-- wiki:config ping_config.reach --> m away, for your bot teammates; the sky marks nothing.
+meets the field, up to <!-- wiki:config ping_config.reach --> m away, for your bot teammates; the sky marks nothing,
+and a ping through a window or a bar railing marks what lies beyond it.
 An opponent under your crosshair that you can see is marked as a contact instead, and counts as a threat. Your
 teammates take a ping as somewhere worth a look, kept in mind for <!-- wiki:config bot_config.ping_memory --> seconds
 unless they see or hear something newer: one sets off to check it the way it plays (a rusher runs, a careful bot walks

@@ -15,6 +15,9 @@ var foot: Vector3 = Vector3.ZERO
 var left: float = 0.0
 ## Players of both teams at it this tick: nobody takes it.
 var contested: bool = false
+## Its time was cut short (the Dev tab's End the round now, Round.run_clock_out): the round ends as a draw on the next
+## tick unless a team takes it then, and `left` keeps what was unplayed, so the round's table counts only what was.
+var cut: bool = false
 
 
 ## Down again with the whole of its time, for a new round.
@@ -22,6 +25,7 @@ func reset(cfg: OvertimeConfig) -> void:
 	up = false
 	left = cfg.time
 	contested = false
+	cut = false
 
 
 ## Up at `spot`, with the time it has left.

@@ -847,6 +847,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   stays, never cancels. Held rather than toggled, as the scoreboard; Mouse 4 because every key near WASD is taken.
   A ping with your view stops at the first thing it meets (a wall: its foot on your side); a click on the map goes
   anywhere on the field, seen or not (owner, 2026-10-31).
+- **Hold Here's key on the open full-screen map is a Hold Here at the map's pointer (2026-11-07, BP6; Claude's
+  default).** Behind the map the view it would read is hidden, so the key holds the spot under the pointer instead: the
+  squad side by side across the way there, looking on along it, held until the order ends as any Hold Here (no
+  quiet lapse, which only a Go there's hold has). Pressed again by the spot held it stays; off the field it says
+  nowhere. Follow me and Regroup act as ever, being about you, not the view.
 - **The full-screen map marks what never moves, and still no enemy (owner's playtest, 2026-11-01: "show objectives,
   location names, etc. make it more detailed"; FM2, Claude's defaults).** Over the minimap's view it adds the flags'
   letters (or Elimination's overtime spot), each end's start in the colour of the team starting there, the dead zones,
@@ -868,6 +873,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   mag-check key (owner, 2026-10-06).
 - **Key bindings: a key belongs to one action, and taking a used key swaps the two (2026-09-30).** Esc, PrintScreen,
   Pause, F11 (fullscreen) and the debug keys can't be bound. Fire and the four move keys can never be left keyless.
+- **Zoom on the wheel: Zoom in and Zoom out share their keys with Next and Previous replica, and nothing else
+  (2026-11-07, BP6; Claude's default).** The one exception to a key belonging to one action: the Variable Scope's
+  zoom is two actions of its own, read only aimed through it, on the mouse wheel by default with the switches, so the
+  wheel zooms aimed through the scope and switches otherwise, as before. A zoom put on any other action's key swaps
+  with it as every key does (`KeyBindings.may_share`), so no key ever does Reload, Jump or fire one moment and zoom
+  the next; one a zoom shares with a switch zooms only while aimed through the scope.
 - **The hit marker has its own settings: on or off, colour and size (owner, 2026-10-13, Dev 5 playtest note 4; as the
   HUD tab concept he approved 2026-10-22, HO1).** The concept shows it on and white, so it starts as the HUD always drew
   it: on, a white X; red is one of its six colours. This replaces the 2026-10-13 "bold red X, off by default"; whether

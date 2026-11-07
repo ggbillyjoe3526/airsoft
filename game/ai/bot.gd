@@ -146,11 +146,13 @@ var bursting: bool = false
 ## Whether its kneeling eye had the shot when this burst began (BQ3): it kneels only then, never down out of the fight
 ## behind low cover.
 var knee_clear: bool = false
-## On a field with a start mode (NA1, BotFireMode): the id of the target it went to full auto for (-1: none), and of
-## the last target it decided for (once per target).
-var auto_for: int = -1
-var auto_rolled_for: int = -1
-## The burst under way found auto_for's target in the open (BotFireMode.on_burst): full auto only then (BP3).
+## On a field with a start mode (NA1, BotFireMode): the targets it went to full auto for and the targets it decided
+## for, by `target_bit` of their ids, so it decides once per target this round however often it turns from one to
+## another and back (BP6).
+var auto_won: int = 0
+var auto_rolled: int = 0
+## The burst under way found its target, one it went to full auto for, in the open (BotFireMode.on_burst): full auto
+## only then (BP3).
 var auto_open: bool = false
 ## There, on semi: the world time it may next pull (BotFireMode.pull, BotConfig.semi_tap_gap).
 var next_tap: float = -INF
@@ -242,6 +244,16 @@ var bomb_away_until: float = -INF
 var bomb_away_yaw: float = 0.0
 
 
+## A character id's bit in auto_won and auto_rolled (0 for an id past the mask's 63 bits: decided afresh each burst).
+static func target_bit(id: int) -> int:
+	return 1 << id if id >= 0 and id < 63 else 0
+
+
+## Whether it went to full auto for the target with `id` (NA1).
+func goes_auto_for(id: int) -> bool:
+	return auto_won & target_bit(id) != 0
+
+
 func _init(body: Character, seed_value: int, bot_skill: BotSkill, roster_size: int) -> void:
 	character = body
 	rng = Seeds.stream(seed_value)
@@ -320,8 +332,8 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	pause_left = 0.0
 	bursting = false
 	knee_clear = false
-	auto_for = -1
-	auto_rolled_for = -1
+	auto_won = 0
+	auto_rolled = 0
 	auto_open = false
 	next_tap = -INF
 	revealed_id = -1

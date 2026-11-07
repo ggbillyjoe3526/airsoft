@@ -32,8 +32,8 @@ An optic on the top rail. With one fitted the iron sights come off completely, s
 aiming looks through it. The red dot is a compact sight on a low riser: a lit dot on clear glass, with the view open
 round it. The 2x scope is a magnifier on a low hinged mount; it magnifies only inside its glass: the view round it
 stays as it is, with nothing dark round the edge. The Variable Scope is a compact prism scope with a zoom: aimed
-through it, the mouse wheel turns its zoom from 2x to 6x a step at a time (the HUD shows it), and it keeps that zoom
-through the match.
+through it, the mouse wheel (Zoom in and Zoom out in Settings › Controls) turns its zoom from 2x to 6x a step at a
+time (the HUD shows it), and it keeps that zoom through the match.
 
 <!-- wiki:parts optics -->
 

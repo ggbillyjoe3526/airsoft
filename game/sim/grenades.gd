@@ -12,7 +12,8 @@ extends RefCounted
 ## command's `ready_grenade` puts the replica down as a throw does and holds the bomb (Hand.readied) until a trigger pull
 ## throws it (`ready_command`), after which the replica comes back up as after any throw. A slot, the holster or a
 ## reload puts the bomb back and the armament does as asked.
-## In the air a bomb falls and bounces off the level (GRENADE_BOUNCE), slides and rolls, and settles. A flash goes bang
+## In the air a bomb falls and bounces off the level and off the bodies of those in play (GRENADE_BOUNCE; a body's
+## surface is NONE; it hits nobody and never rests on one), slides and rolls, and settles. A flash goes bang
 ## at its fuse (FLASH_BANG) and dazzles everyone in play with a clear line from the eyes to it, by distance and by how
 ## directly they look (DAZZLED; Character.dazzle_left), the thrower and its team too. A smoke pops at its fuse
 ## (SMOKE_POP) and smokes where it lies: an upright ellipsoid cloud that grows, holds and thins (`cloud_scale`,
@@ -111,6 +112,8 @@ var cfg: GrenadeConfig = null
 var _tuning: SimTuning = null
 var _query: WorldQuery = null
 var _hit: RayHit = RayHit.new()
+## A character's collision body, widened by the bomb's radius (`_body_hit`; used only within one call).
+var _body: Hitbox.Capsule = Hitbox.Capsule.new()
 
 
 func _init(tuning: SimTuning, world: WorldQuery) -> void:
@@ -293,7 +296,7 @@ func step(state: GameState, dt: float, kill_y: float) -> void:
 		g.prev_position = g.position
 		g.age += dt
 		if not g.resting:
-			_fly(g, i, state.events, dt)
+			_fly(g, i, state.characters, state.events, dt)
 		if g.position.y < kill_y or (not g.popped and g.age > cfg.max_flight):
 			g.active = false
 			continue
@@ -448,16 +451,20 @@ func _release(c: Character, eye: Vector3, pool: Array[Grenade], events: SimEvent
 
 
 ## One tick of `g`'s flight (slot `index`): falling, and bouncing off, sliding along or rolling on the level where it
-## meets it, and settling. The line cast runs a radius past the move; one moved clear probes a radius down for the
-## ground, so a bomb rolling on it touches it every tick.
-func _fly(g: Grenade, index: int, events: SimEvents, dt: float) -> void:
+## meets it, and settling; bouncing off or sliding along the body of anyone in play in `characters` it meets first. The
+## line cast runs a radius past the move; one moved clear probes a radius down for the ground, so a bomb rolling on it
+## touches it every tick.
+func _fly(g: Grenade, index: int, characters: Array[Character], events: SimEvents, dt: float) -> void:
 	g.velocity.y -= cfg.gravity * dt
 	var move := g.velocity * dt
 	var length := move.length()
 	if length < EPSILON:
 		return
 	var dir := move / length
-	var met := _query.ray(g.position, g.position + dir * (length + cfg.radius), _hit)
+	var reach := length + cfg.radius
+	var met := _query.ray(g.position, g.position + dir * reach, _hit)
+	var on_body := _body_hit(g, dir, (_hit.fraction * reach - cfg.radius) if met else length, characters)
+	met = met or on_body
 	if not met:
 		g.position += move
 		met = g.velocity.y <= 0.0 \
@@ -468,8 +475,51 @@ func _fly(g: Grenade, index: int, events: SimEvents, dt: float) -> void:
 	var into := -g.velocity.dot(_hit.normal)
 	if into > cfg.bounce_speed:
 		_bounce(g, index, into, events)
+	elif on_body:
+		g.velocity -= _hit.normal * minf(0.0, g.velocity.dot(_hit.normal)) # slides off: never rests on a body
 	else:
 		_roll(g, dt)
+
+
+## Whether bomb `g` moving along the unit `dir` meets the body (BodyConfig's capsule, its height now) of someone in
+## play in `characters` within `most` m; if so `_hit` holds the nearest, its surface NONE. A body the bomb is already
+## inside (the thrower's, at the throw) is passed through, and so is the thrower's team for team_pass_time after it.
+func _body_hit(g: Grenade, dir: Vector3, most: float, characters: Array[Character]) -> bool:
+	if most <= 0.0:
+		return false
+	var from := g.position
+	var body := _tuning.body
+	var r := body.radius + cfg.radius
+	var best := INF
+	var best_axis := Vector3.ZERO
+	var passing := -1
+	if g.age < cfg.team_pass_time:
+		for c in characters:
+			if c.id == g.owner:
+				passing = c.team
+	for c in characters:
+		if not Elimination.is_in_play(c) or c.team == passing:
+			continue
+		var dx := c.position.x - from.x
+		var dz := c.position.z - from.z
+		if dx * dx + dz * dz > (most + r) * (most + r):
+			continue
+		_body.a = c.position + Vector3(0.0, body.radius, 0.0)
+		_body.b = c.position + Vector3(0.0, maxf(body.radius, c.body_height(body) - body.radius), 0.0)
+		_body.r = r
+		var t := Hitbox.ray_vertical_capsule(from, dir, minf(most, best), _body)
+		if t > 0.0 and t < best:
+			best = t
+			best_axis = _body.a
+			best_axis.y = clampf(from.y + dir.y * t, _body.a.y, _body.b.y)
+	if is_inf(best):
+		return false
+	var centre := from + dir * best
+	_hit.normal = (centre - best_axis).normalized() if not centre.is_equal_approx(best_axis) else -dir
+	_hit.position = centre - _hit.normal * cfg.radius
+	_hit.fraction = best / maxf(most, EPSILON)
+	_hit.surface = RayHit.Surface.NONE
+	return true
 
 
 ## `g` bounces off the surface in `_hit`, struck `into` m/s: GRENADE_BOUNCE.

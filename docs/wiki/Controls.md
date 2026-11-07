@@ -28,6 +28,11 @@ so W A S D stays W A S D on any keyboard layout.
 - **Next / previous replica** (the mouse wheel) steps through your two replicas and then your bombs left, smoke then
   flash, and round again. It never stops on the holster: with your replica holstered, a notch draws a replica. With a
   bomb in hand, a trigger pull throws it.
+- **Zoom in / Zoom out (aimed)** (the mouse wheel) turn the Variable Scope's zoom while you aim through it
+  ([Parts and Power](Parts-and-Power)); then the wheel zooms instead of switching. They are keys of their own: put Next
+  and Previous replica on keys and those still switch while you aim, or put the zooms on keys and the wheel always
+  switches. A zoom shares its key only with Next or Previous replica; any other key you give it swaps, as every key
+  does.
 - **Open / shut door** (G) opens or shuts the door within reach, the one nearest where you look. A line under the
   crosshair says which while you stand by one ([Maps](Maps#doors)).
 - **Fire** also skips the rest of a round once you are out ([How to Play](How-to-Play#skipping-the-rest-of-the-round)).

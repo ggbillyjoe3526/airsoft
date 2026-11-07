@@ -37,7 +37,7 @@ static func pose(c: Character, hits: HitConfig, fit: HitFit) -> void:
 	# The aim clips' blend (-1 down .. 1 up, FigurePose.aim_blend).
 	var blend := clampf(c.pitch / fit.aim_pitch, -1.0, 1.0) if fit.aim_pitch > 0.0 else 0.0
 	if vaulting:
-		var vault := fit.table(&"vault_lower")
+		var vault := fit.table(HitFit.Lower.VAULT)
 		var share := c.vault.clip_share(fit.vault_top) * float(fit.vault_samples - 1)
 		var k := mini(int(share), fit.vault_samples - 2)
 		var t := share - float(k)
@@ -47,7 +47,7 @@ static func pose(c: Character, hits: HitConfig, fit: HitFit) -> void:
 		_add_upper(fit.vault_upper, HitFit.UPPER * (k + 1), t)
 	else:
 		if alive and not c.grounded:
-			var jump := fit.table(&"jump")
+			var jump := fit.table(HitFit.Lower.JUMP)
 			var span := fit.jump_to - fit.jump_from
 			var share := clampf(maxf(c.air_time, 0.0) / span, 0.0, 1.0) if span > 0.0 else 1.0
 			share *= float(fit.jump_samples - 1)
@@ -68,7 +68,7 @@ static func pose(c: Character, hits: HitConfig, fit: HitFit) -> void:
 				if stepping:
 					_add_gait(fit, Vector2(right, ahead), c.walk_cycle, 1.0 - crouch)
 				else:
-					_add_lower(fit.table(&"stand_still"), 0, 1.0 - crouch)
+					_add_lower(fit.table(HitFit.Lower.STAND_STILL), 0, 1.0 - crouch)
 			if crouch > 0.0:
 				if stepping:
 					# Backwards, the crouched walk mirrored about its forward swing (FigureBody.animate).
@@ -76,7 +76,7 @@ static func pose(c: Character, hits: HitConfig, fit: HitFit) -> void:
 					var cycle := fit.forward_phase * 2.0 - c.walk_cycle if back else c.walk_cycle
 					_add_crouch(fit, Vector2(right, ahead).length(), cycle, crouch)
 				else:
-					_add_lower(fit.table(&"crouch_still"), 0, crouch)
+					_add_lower(fit.table(HitFit.Lower.CROUCH_STILL), 0, crouch)
 		var a := c.armament
 		if a != null and a.holstered:
 			# Put away, the arms hang, or pump on a sprint (the holster's mix, FigureBody._animate_upper).
@@ -177,9 +177,9 @@ static func _add_gait(fit: HitFit, step: Vector2, cycle: float, w: float) -> voi
 					_blend_weight[1] = share
 					_blend_weight[2] = 0.0
 		if is_inf(best):
-			_add_lower(fit.table(&"stand_still"), 0, w)
+			_add_lower(fit.table(HitFit.Lower.STAND_STILL), 0, w)
 			return
-	var steps := fit.table(&"gait")
+	var steps := fit.table(HitFit.Lower.GAIT)
 	for k in 3:
 		_add_stepped(fit, steps, _blend_point[k], cycle, w * _blend_weight[k])
 
@@ -214,17 +214,17 @@ static func _add_crouch(fit: HitFit, speed: float, cycle: float, w: float) -> vo
 	var points := fit.crouch_points
 	var last := points.size() - 1
 	if speed <= points[0]:
-		_add_stepped(fit, fit.table(&"crouch"), 0, cycle, w)
+		_add_stepped(fit, fit.table(HitFit.Lower.CROUCH), 0, cycle, w)
 		return
 	if speed >= points[last]:
-		_add_stepped(fit, fit.table(&"crouch"), last, cycle, w)
+		_add_stepped(fit, fit.table(HitFit.Lower.CROUCH), last, cycle, w)
 		return
 	var i := 0
 	while points[i + 1] < speed:
 		i += 1
 	var t := (speed - points[i]) / (points[i + 1] - points[i])
-	_add_stepped(fit, fit.table(&"crouch"), i, cycle, w * (1.0 - t))
-	_add_stepped(fit, fit.table(&"crouch"), i + 1, cycle, w * t)
+	_add_stepped(fit, fit.table(HitFit.Lower.CROUCH), i, cycle, w * (1.0 - t))
+	_add_stepped(fit, fit.table(HitFit.Lower.CROUCH), i + 1, cycle, w * t)
 
 
 ## Adds `w` of blend point `point`'s clip in `samples` on walk cycle `cycle`: the two phases either side.

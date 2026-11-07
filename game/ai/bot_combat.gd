@@ -177,20 +177,34 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 	if b.burst_left > 0.0:
 		if begun or not was_bursting:
 			# A burst begun (on whoever it now aims at), or picked up again after a tick it couldn't fire in: is the
-			# knee's shot clear?
+			# knee's shot clear? Picked up again, is its full auto's shot still open (BP6)?
 			b.knee_clear = b.skill.kneels_to_fire and _knee_has_shot(b, w)
+			if not begun:
+				BotFireMode.on_resume(b, w, target, eye, dir)
 		b.bursting = true
 		var a := b.character.armament
 		# Never on a tick the selector moves: on the way back from burst to semi it passes full auto (BP3). Never while
 		# a bolt-action still cycles either: that press is kept until the bolt is home (Armament, bolt_press_window),
 		# up to most of a second after this tick's line-of-fire check, and a teammate can step in front meanwhile (DT1).
-		cmd.fire = not cmd.cycle_fire_mode and not _bolt_cycling(a) and BotFireMode.pull(b, w,
-				a.fire_mode() != ReplicaConfig.FireMode.SEMI or not a.trigger_was_down)
+		# Nor a fresh semi or burst pull that would only be kept, the replica or a vault not ready this tick (BP6).
+		cmd.fire = not cmd.cycle_fire_mode and not _bolt_cycling(a) and not press_kept(b.character, dt) \
+				and BotFireMode.pull(b, w, a.fire_mode() != ReplicaConfig.FireMode.SEMI or not a.trigger_was_down)
 		b.burst_left -= dt
 		if b.burst_left <= 0.0:
 			b.pause_left = b.pick(b.skill.burst_pause)
 	else:
 		b.pause_left -= dt
+
+
+## Whether a pull now, on semi or burst, would be a fresh press `c` can't fire this tick: the replica in hand still
+## cycling, drawing or reloading after this tick's `dt` runs off, or `c` vaulting or in the vault's fire lockout after
+## it (Armament keeps such a press press_buffer, and fire_hold_off more after a vault, and fires it later, after the
+## line-of-fire check that let it go). A held trigger, and full auto, are never kept.
+static func press_kept(c: Character, dt: float) -> bool:
+	var a := c.armament
+	if a.replicas.is_empty() or a.trigger_was_down or a.fire_mode() == ReplicaConfig.FireMode.AUTO:
+		return false
+	return a.cooldown > dt or a.draw_left > dt or a.reload_left > dt or c.vault.active or c.fire_lockout > dt
 
 
 ## True while the bolt-action replica in hand is still being worked (its cycle's cooldown not run out).

@@ -27,8 +27,10 @@ static func think(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> void:
 	# Dazzled by a flash (SF1): it sees nothing (BotSenses), so it ducks where it stands until it can see again.
 	if me.dazzle_left > 0.0:
 		b.target_visible = false
-		# a burst it was firing is over: once it sees again, a new one checks its knee's shot afresh (BP2)
+		# a burst it was firing is over: once it sees again, a new one checks its knee's shot afresh (BP2), and none is
+		# left hanging through the duck (BP6: still down on it for the whole dazzle, as if kneeling to fire)
 		b.bursting = false
+		b.burst_left = 0.0
 		b.aim_yaw = me.yaw
 		b.aim_pitch = me.pitch
 		cmd.crouch = true
@@ -216,9 +218,9 @@ static func _choose_mode(b: Bot, w: BotWorld, target: Character, dt: float) -> v
 		b.wait_for_team = false
 		b.hold_left = 0.0
 		b.hold_cover = false
-		# Back to the lane point it left.
+		# Back on its lane at the point ahead nearest where it now stands (BP6: not walking back to the one it left).
 		if not b.hunting and b.lane_index >= 0:
-			b.lane_index -= b.lane_dir
+			b.lane_index = BotMovement.resume_point(b, w) - b.lane_dir
 	elif holds_post and not fresh:
 		# Holding its post: stop watching where a noise was once it is old news.
 		b.has_last_known = false

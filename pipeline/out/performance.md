@@ -1,5 +1,4 @@
-Task: none · BP6 part 1 (graphics) · Verdict: Pass
-- figure_bench 11 figures, shared machine: animation+skeleton mean 2.46/2.37 ms (main) vs 2.31/2.40 (head);
-  set_body one-time 191.7/186.3 vs 277.7(outlier)/201.6 ms, behind the loading screen.
-- Delta to 078b11b: no per-frame work or allocation added; 6 merged meshes, 5,796,912 bytes; 1x 2.48 ms, 6x 2.39 ms
-  with the eye mid-field.
+Task: none · BP6 part 2 (play and bots) · Verdict: Pass
+- team_bench 8v8, seed 1, 25 s: Depot tick mean main 4.04 / head 4.12 ms; Woodland 6.23 / 5.77 (within noise).
+- Head 8a77975: Depot tick 3.66 mean; no per-tick allocation added (bolt arrays sized at setup, HitFit tables by
+  enum built once, team pass one loop per flying bomb for 0.3 s).

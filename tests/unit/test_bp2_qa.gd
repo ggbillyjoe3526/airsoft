@@ -46,3 +46,4 @@ func test_a_dazzled_bot_forgets_its_burst() -> void:
 	b.character.dazzle_left = 2.0
 	BotBrain.think(b, w, PlayerCommand.new(), DT)
 	assert_false(b.bursting, "no burst carried through the dazzle")
+	assert_eq(b.burst_left, 0.0, "nor left hanging, to keep it down on a burst it can't fire (BP6)")

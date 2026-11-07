@@ -11,6 +11,7 @@ extends RefCounted
 ## A cast so long ago that any tick refreshes it.
 const NEVER := -1_000_000
 
+
 ## Rays cast this tick; the most in one tick, all of them, the ticks counted and the time the rays took (µs).
 var rays: int = 0
 var rays_max: int = 0
@@ -95,7 +96,18 @@ func impact_share(at: Vector3, came: Vector3 = Vector3.ZERO) -> float:
 	var start := Time.get_ticks_usec()
 	var blocked := false
 	if came.length_squared() > 0.0:
-		blocked = _query.ray_past_railings(_ear, at - came.normalized() * _cfg.occlusion_impact_back, _hit)
+		var dir := came.normalized()
+		var back := _cfg.occlusion_impact_back
+		blocked = _query.ray_past_railings(_ear, at - dir * back, _hit)
+		# Blocked close by the impact: perhaps a tight inside corner, the point back along the way in lying behind the
+		# surface the BB bounced off just before. Then the way back is looked along, and the line cast again to a point
+		# short of what it meets (two rays more, in such cases only, within the budget).
+		var skin := _cfg.occlusion_impact_skin
+		if blocked and _hit.position.distance_to(at) <= _cfg.occlusion_corner_reach and _take(2):
+			var from := at - dir * skin
+			if _query.ray_past_railings(from, at - dir * back, _hit):
+				var short := skin + 0.5 * _hit.fraction * (back - skin)
+				blocked = _query.ray_past_railings(_ear, at - dir * short, _hit)
 	else:
 		blocked = SoundPath.line_blocked(_query, _ear, at, _cfg.occlusion_surface_gap, _hit)
 	ray_usec += Time.get_ticks_usec() - start

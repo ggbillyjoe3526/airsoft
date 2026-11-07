@@ -206,9 +206,11 @@ func fill(view: View, state: GameState, watched: Character, fraction: float, sto
 			arrow = 1 if level > storey else -1
 		view.add_dot(Vector2(at.x, at.z), _cfg.out_colour if out else team, arrow)
 	for p in _heard.patches:
-		if p.live and _field.storey_of(p.centre.y) == storey:
+		if p.live:
+			# One heard on another storey shows too, fainter (BP6): a step overhead is still news.
+			var share := 1.0 if _field.storey_of(p.centre.y) == storey else _cfg.other_storey_patch
 			view.add_patch(Vector2(p.centre.x, p.centre.z), p.radius, p.sound == MinimapHearing.Sound.SHOT,
-					_heard.shade(p))
+					_heard.shade(p) * share)
 	if rs.mode == RoundState.Mode.ATTACK_DEFEND and rs.attackers >= 0 and rs.is_live():
 		for p in rs.poles:
 			view.set_pole(Vector2(p.x, p.z))

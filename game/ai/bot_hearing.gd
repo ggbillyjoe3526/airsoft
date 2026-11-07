@@ -144,7 +144,8 @@ static func _hear(w: BotWorld, source: Character, heard_at: Vector3, source_feet
 			b.heard_other_at = w.time
 			continue
 		var margin := dist * cfg.hearing_error + cfg.replan_distance
-		var same := b.has_last_known and w.time - b.heard_at < cfg.hearing_contact_time \
+		# A ping taken is a teammate's word, not a sound: a real noise is news of its own, however close (BP6).
+		var same := b.has_last_known and w.time - b.heard_at < cfg.hearing_contact_time and not b.on_ping_spot() \
 				and Vector2(where.x - b.last_known.x, where.z - b.last_known.z).length() <= margin
 		if not same:
 			b.last_known = _guess(w, b, where, dist)

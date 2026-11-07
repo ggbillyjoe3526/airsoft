@@ -244,6 +244,9 @@ func _ping(e: GameEvent, state: GameState) -> void:
 	if e.value2 == 1:
 		orders.give_move(state.character(e.actor), pings.move_spot(e, world))
 		return
+	if e.value2 == GameEvent.PING_HOLD:
+		orders.give_hold_at(state.character(e.actor), pings.move_spot(e, world))
+		return
 	var p := pings.place(e, state.time, world)
 	if p == null:
 		return

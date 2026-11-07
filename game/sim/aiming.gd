@@ -8,12 +8,26 @@ class_name Aiming
 
 
 static func step(c: Character, cmd: PlayerCommand, cfg: MovementConfig, dt: float) -> void:
-	var a := c.armament
 	# Reload and draw are as the last tick left them: a reload started this tick lowers the sight on the next.
 	# Not mid-vault: an aim held through one comes up again after it (BP5).
-	c.aiming = cmd.aim and not a.holstered and not a.reloading() and not a.drawing() and not c.vault.active
+	c.aiming = cmd.aim and can_aim(c)
 	var raise := dt / raise_time(c, cfg)
 	c.aim_raise = minf(1.0, c.aim_raise + raise) if c.aiming else maxf(0.0, c.aim_raise - raise)
+
+
+## Whether `c`'s sight can be up this tick if aim is held, by the armament as the last tick left it: a replica in hand,
+## not mid-reload, draw or vault. The player's input reads it before the tick (BP6), so a mouse wheel notch on the tick a
+## reload or draw has just started switches rather than turning a zoom the sight no longer shows.
+static func can_aim(c: Character) -> bool:
+	var a := c.armament
+	return not a.holstered and not a.reloading() and not a.drawing() and not c.vault.active
+
+
+## Whether the zoom keys turn `c`'s optic this tick if aim is held (SN2, BP6): a variable optic in hand whose sight can
+## be up (can_aim), no bomb thrown or in hand. Read before the tick, as can_aim.
+static func zoom_turns(c: Character) -> bool:
+	return c.armament.zoom_turns() and can_aim(c) and not Grenades.throwing(c) \
+			and Grenades.in_hand(c) == Grenade.Kind.NONE
 
 
 ## The seconds `c`'s sight takes to come all the way up (or down): aim_raise_time times its replica's raise_scale.
