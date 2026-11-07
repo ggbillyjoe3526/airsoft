@@ -1,26 +1,20 @@
-Task: none (BP6 round 2) · known-issue fixes: loading, the hit volume's eases, Esc on loading
-Attempt: 2 of 4
-Head: 1b47627 (= git rev-parse HEAD; QA re-check Pass, performance re-check Pass; my targeted GUT 42/42 pass: bp6_round2, figure_raise(+qa), hit_fit, figure_hit_area, holster_edges; gdlint clean)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept
-Round 1 must-fix, each checked:
-- (a) play_session.gd `_prepare_bots`: `_prep_config` is set once when the search starts, shared with the cover task and `finish`, then cleared. No per-frame duplicate is left.
-- (b) FB5's level hold is back: figure_view.gd, test_figure_raise.gd and test_figure_raise_qa.gd are byte-identical to origin/main (empty diff). KNOWN_ISSUES keeps the muzzle row with an honest reason ("the 77° high ready while firing reads worse") and names the later option. Restoring the hold also undoes the raise-share mismatch while firing.
-- (c) The record's balance line holds real numbers (16 seeds, 119 rounds, 0 on time), and its count of seven rows in six items is right.
-- (d) A new row records the remaining stall: Woodland 0.7-0.9 s (MapLevel.build), Depot 1.2 s on the same machine.
-- (e) `UpperBlend.snap` is gone, and the tests set the weights inline. `FigurePose.settle_share` calls `UpperBlend.share`, one formula. `gate_below` defaults to `HitPose.GATE`; no .tres overrides it, and the test that only pinned the two equal is gone, as it should be. The doc comment is back on `_box`, and play_session.gd:26 is rewrapped.
-- Esc feedback: `leave_loading` emits `progressed(_step, size, LOAD_LEAVING)` at once, "Leaving…" is in en.po (the only locale), and the test asserts the line. It is idempotent (`or _leaving`). `go()` and `_physics_process` return early while leaving, so a Continue in the gap can't take the mouse or tick the match (test: `go()` does nothing, mouse not captured).
-New breakage looked for, none found:
-- `_process` returns early while leaving, so no later `progressed` or `ready_to_go` overwrites "Leaving…".
-- At Continue, `left` is synchronous, so the screen is freed in the same frame.
-- `_on_continue` calls `play.go()`, which is now a no-op once leaving.
-- The worker is still waited on before `finish` and in `_exit_tree`.
-- The simulation is deterministic: UpperBlend runs on the tick with no RNG, and the time-sliced vault search gives identical links (test_bot_vaults).
-- Changelog: the muzzle entry is gone and the Leaving line added. Wiki Controls and Getting-Started are correct.
-Advisory (not scored): a respawned character starts with its weights at 0 and eases in over 0.06 s or 0.12 s, the same as the drawn figure (QA's advisory 2). Fine as it is.
-Owner should test in the game:
-1. Load Woodland: the loading animation should keep moving. One stop of under a second may remain, as on every map.
-2. Press Esc right after PLAY on Woodland: "Leaving…" should show at once, then the Match page within a few seconds.
-3. Press Esc at Continue: you should land on the Match page at once with the mouse free.
-4. Shoot bots as they holster, draw or start a sprint: hits should land where the arms and torso are drawn.
-5. Watch bots fire over a ~1.5 m stack: the barrel may graze the top while firing (kept by default). Say if it bothers you.
+Task: BP6 shoulder · the bot's raised-arm shoulder back to 33fa48b's (owner 2026-11-07), #242's other fixes kept
+Attempt: 1 of 4
+Head: 8ef75d7 (= git rev-parse HEAD in worktree-bp6-shoulder; my targeted GUT: test_bp6_models 3/3, test_hit_call_arm 3/3, test_hands_on_replica 10/10, test_figure_models 10/10, test_bp6_graphics 10/10; gdlint clean on both tests)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
+Score: 7/8 → Accept, but only once QA and performance pass on 8ef75d7: neither report exists for this head (pipeline/out holds other tasks'), and while one is missing the rule makes it Retry
+Evidence for the passes:
+1. The restore is exact, measured from the three human.glb files (33fa48b, main 8d62be4, head). Positions are identical on all levels. Body: weights within 6e-8 of 33fa48b everywhere except 2,074 points, all led by hand or finger bones (|x| >= 0.495 m, y 0.80 to 0.92), with no upper-arm weight changed, and on those points head = main exactly (the plates kept). LOD1/LOD2: within 1.2e-7 of 33fa48b everywhere. Skin IBMs, joint TRS and all 32 clips are byte-equal to 33fa48b, so skinned positions match at every frame. Rerunning the new body_weights.py on 33fa48b's weights spliced into head reproduces head (0 points > 1e-5).
+   #242 not regressed: head vs main has identical glTF JSON (8 materials, the BP6_WEIGHTS mark, nodes, skins) and differs only in the 12 Body/LOD JOINTS/WEIGHTS bufferViews, at points with |x| <= 0.33 and y 1.10 to 1.46 (the shoulders). The diff touches no other model, code or scene.
+4. On main's eased glb (copied into a scratch project) test_bp6_models fails 6 asserts (mean 0.18 to 0.30 < 0.33). On head the strap count's worst is exactly 10 (WalkOff 0.30 s), so STRAP_MOST pins 33fa48b with no slack. The old step test had to go: 33fa48b's max edge step is 0.44 to 0.84 against the 0.25 to 0.45 limits.
+Failed checks, with evidence:
+8. [judgment] changelog.d/bp6-shoulder.md:1-3 tells players their shoulder is "back as it was before this update" and that "the small dark fold ... comes back". The easing (#242) never shipped (only 0.1-dev.1 is tagged), and this note and bp6-models.md go out together, so players see a revert of something they never had. Per changelog.d/README.md, a later change to a merged feature edits that note or adds to it. Dropping the bp6-models bullet was right; this note has to say something true relative to 0.1 Dev 1, or nothing about the shoulder at all.
+8. [judgment] docs/KNOWN_ISSUES.md:15 still blames "the `Shoulder_L` bone's turn in those clips". Measured on head: Shoulder_L is a constant 12° in HitCall, the same as Idle, while UpperArm_L turns 153° (155° in WalkOff). Your own record names that as the measured cause ("a still collarbone"). Fix the row's cause. The row also drops 33fa48b's fix option of a shoulder turn in gait/call.py without saying why.
+Non-blocking notes: BLEND_LEAST 0.33 is one floor for all levels, while LOD1/LOD2 sit at 0.45 to 0.53, so an easing that halves the LODs' share would still pass. Per-level floors (about 0.34/0.44/0.48) would pin "exactly 33fa48b" more tightly. The "## Point `v`'s weights by bone" comment at tests/unit/test_bp6_models.gd:96 belongs to _mix, not the renamed test (it was misplaced before this change). Judged against the models bar, the restored shoulder is not finished work: on sheet 05 the front view shows the dark fold between the strap and the helmet, and the side view shows the armpit stretched over a large brown chest patch. The owner chose it knowingly and the KNOWN_ISSUES row records it, so it is not failed here.
+Must-fix for the next attempt: rewrite changelog.d/bp6-shoulder.md so it is true for players since 0.1 Dev 1. Correct KNOWN_ISSUES row 15's cause to the upper arm's 153° turn from a still collarbone. Get QA and performance Pass on the head.
+Owner should test in the game (at most 6, one line each):
+- Get hit near a bot (or spectate one) and watch its hit call from the front and side: the shoulder should look as it did on 33fa48b, fuller, with the small dark fold by the helmet.
+- Watch a bot walk off with its arm up: same shoulder, with no flap worse than before.
+- Close up, a bot gripping a rifle and pistol: the glove plates stay whole when the fingers bend (#242 kept).
+- Spectate, respawn, or turn fast past a bot: its hands stay on the replica after the camera cut (#242 kept).
+- Look at a dropped or held GBB Pistol's nose, and the AEG and Sniper close up: no change from main.

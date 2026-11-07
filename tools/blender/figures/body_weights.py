@@ -1,16 +1,8 @@
 """The figure body's weights where it went wrong in close-ups (BP6, 2026-11-07), rewritten in place in the figure's
 glTF binary.
 
-body.py weights the body from the old body under it by nearest face. Two places came out wrong:
+body.py weights the body from the old body under it by nearest face. Where that went wrong in close-ups:
 
-- Armpits. The side of the chest under each arm, up to 11 cm from the upper arm's line at rest, was weighted almost
-  wholly to the upper arm, so with the arm raised (the hit call, the walk off) that cloth swung up with it and folded
-  out, dark, over the carrier's shoulder strap beside the helmet (HC1's close-ups). On the arm's inner side the upper
-  arm's share of every `Body` level's point, both arms, is given up from ARM_IN of the arm's line (its sleeve) to all
-  of it by ARM_OUT, along the upper arm only, every factor eased and the share given up averaged over neighbouring
-  points (a fade over 2.6 cm with hard edges folded the cloth into a stepped flap under the raised arm, BP6 critic);
-  what it gives up goes to the point's other bones (to the chest's bones when it has none). The shoulder's cap,
-  outside, keeps its weights.
 - Plates. The gloves' moulded pieces (details.py `gloves`: the back plate and its border, a dome over each knuckle,
   a guard over each finger's first and second section) are shells of the full-detail `Body`, pieces joined by faces
   (points closer than WELD are one) of at most PLATE_MOST points, each led by a hand bone; blended point by point,
@@ -20,6 +12,9 @@ body.py weights the body from the old body under it by nearest face. Two places 
   turns part way with the finger as the cloth over the knuckle does (on the hand alone a gap opened under it and the
   first guard pushed into it). The glove's cloth within PIN of a plate takes that plate's weights too, fading out by
   PIN_FADE, so it doesn't come up through the plate's edge.
+
+Only the gloves' points change: the shoulders and the chest keep body.py's weights (owner, 2026-11-07: the BP6 easing
+of the chest's side off the upper arms thinned the raised shoulder; he preferred the shoulder as it was).
 
 Plain Python with numpy, nothing else in the file changed. Run it last, after a splice of the body (which brings back
 the blended weights), `pads.py` and `tools/blender/figure-gear/gear.py` (tools/blender/figures/README.md):
@@ -36,7 +31,8 @@ import sys
 
 import numpy as np
 
-BODY = ("Body", "Body_LOD1", "Body_LOD2")
+# Only the full-detail level carries the gloves' plates (LOD1 and LOD2 have none apart).
+BODY = "Body"
 HAND = ("Hand_", "Thumb", "Index", "Middle", "Ring", "Pinky")
 PLATE_MOST = 300
 DOME_MOST = 70
@@ -44,22 +40,6 @@ WELD = 1e-6
 # The cloth taken whole by a plate within PIN (m), fading back to its own weights by PIN_FADE.
 PIN = 0.0025
 PIN_FADE = 0.006
-# The upper arm's share on its inner side (towards the chest: the point's way from the arm's line past MEDIAL[0] of
-# straight in, wholly by MEDIAL[1]) given up from ARM_IN (m) of its line (the sleeve is 5 to 7 cm round it) to all of
-# it by ARM_OUT; from the shoulder's joint (easing in over ARM_START of the bone's length) down the bone to ARM_ALONG[0]
-# of its length, easing out by ARM_ALONG[1] (the chest's side ends there, the armband and the sleeve below keep
-# theirs), but all the way down past ARM_CLEAR (m) from it. The share given up is then averaged RELAX times over the
-# mesh's neighbouring points, so the cloth drapes between the arm and the chest with no fold where it runs out. Its
-# outer side, the shoulder's cap and deltoid (up to 9 cm out), keeps its own.
-ARM_IN = 0.050
-ARM_OUT = 0.110
-MEDIAL = (0.0, 0.6)
-ARM_START = (-0.15, 0.05)
-ARM_ALONG = (0.30, 0.55)
-ARM_CLEAR = 0.130
-RELAX = 12
-ARMS = (("UpperArm_L", "Forearm_L"), ("UpperArm_R", "Forearm_R"))
-CHEST_BONES = ("Chest", "Spine1")
 MARK = "BP6_WEIGHTS"
 GLB_MAGIC = 0x46546C67
 CHUNK_JSON = 0x4E4F534A
@@ -229,97 +209,19 @@ def plates(body: Mesh, names: list, dense: np.ndarray) -> int:
     return len(found)
 
 
-def heads(doc: dict, binary: bytearray, names: list) -> dict:
-    """Each bone's head at rest, from the skin's inverse bind matrices."""
-    off, _, count, _ = span(doc, doc["skins"][0]["inverseBindMatrices"])
-    ibm = np.frombuffer(bytes(binary[off:off + 64 * count]), np.float32).reshape(count, 4, 4)
-    return {n: np.linalg.inv(m.T.astype(np.float64))[:3, 3] for n, m in zip(names, ibm)}
-
-
-def smooth(x: float, a: float, b: float) -> np.ndarray:
-    """0 at a, 1 at b, smoothly (either order)."""
-    u = np.clip((x - a) / (b - a), 0.0, 1.0)
-    return u * u * (3.0 - 2.0 * u)
-
-
-def neighbours(points: np.ndarray, tris: np.ndarray) -> tuple:
-    """The mesh's edges over welded points (each point's weld index, the edges' two ends, both ways)."""
-    _, weld = np.unique(np.round(points / WELD).astype(np.int64), axis=0, return_inverse=True)
-    weld = weld.ravel()
-    w = weld[tris]
-    a = np.concatenate([w[:, 0], w[:, 1], w[:, 2]])
-    b = np.concatenate([w[:, 1], w[:, 2], w[:, 0]])
-    return weld, np.concatenate([a, b]), np.concatenate([b, a])
-
-
-def relax(field: np.ndarray, weld: np.ndarray, a: np.ndarray, b: np.ndarray, rounds: int) -> np.ndarray:
-    """`field` (one value a point) averaged with its neighbours' `rounds` times, over the welded mesh."""
-    n = weld.max() + 1
-    f = np.zeros(n)
-    np.maximum.at(f, weld, field)
-    count = np.bincount(a, minlength=n).astype(np.float64)
-    for _ in range(rounds):
-        total = np.bincount(a, weights=f[b], minlength=n)
-        f = 0.5 * f + 0.5 * np.where(count > 0, total / np.maximum(count, 1.0), f)
-    return f[weld]
-
-
-def armpits(body: Mesh, names: list, rest: dict, dense: np.ndarray) -> int:
-    """Fades each upper arm's share with the distance from its line, past its sleeve; returns the points changed."""
-    changed = np.zeros(len(body.points), bool)
-    chest = [names.index(n) for n in CHEST_BONES]
-    weld, ea, eb = neighbours(body.points, body.tris)
-    for bone, child in ARMS:
-        b = names.index(bone)
-        a, length = rest[bone], np.linalg.norm(rest[child] - rest[bone])
-        axis = (rest[child] - a) / length
-        rel = body.points - a
-        t = rel @ axis
-        perp = rel - t[:, None] * axis
-        r = np.linalg.norm(perp, axis=1)
-        inward = np.array([-np.sign(a[0]), 0.0, 0.0])
-        inward -= axis * (inward @ axis)
-        inward /= np.linalg.norm(inward)
-        # Every factor eases in, so no edge of the share's change runs between two neighbouring points.
-        medial = smooth(perp @ inward / np.maximum(r, 1e-9), MEDIAL[0], MEDIAL[1])
-        off = smooth(r, ARM_IN, ARM_OUT)
-        strength = np.maximum(1.0 - smooth(t / length, ARM_ALONG[0], ARM_ALONG[1]), smooth(r, ARM_OUT, ARM_CLEAR))
-        strength *= smooth(t / length, ARM_START[0], ARM_START[1])
-        gone_share = relax(off * strength * medial, weld, ea, eb, RELAX)
-        gone = dense[:, b] * gone_share
-        hit = gone > 1e-6
-        dense[hit, b] -= gone[hit]
-        others = dense[hit].copy()
-        others[:, b] = 0.0
-        total = others.sum(axis=1)
-        to_others = total > 0.05
-        rows = np.nonzero(hit)[0]
-        dense[rows[to_others]] += others[to_others] / total[to_others, None] * gone[rows[to_others], None]
-        rest_rows = rows[~to_others]
-        for k in chest:
-            dense[rest_rows, k] += gone[rest_rows] / len(chest)
-        changed |= hit
-    return int(changed.sum())
-
-
 def main() -> None:
     path = sys.argv[1]
     data, doc, start, blen = read(path)
     binary = bytearray(data[start:start + blen])
     names = [doc["nodes"][j]["name"] for j in doc["skins"][0]["joints"]]
-    meshes = {n: Mesh(doc, binary, n) for n in BODY}
-    if meshes["Body"].mesh.get("extras", {}).get(MARK):
+    body = Mesh(doc, binary, BODY)
+    if body.mesh.get("extras", {}).get(MARK):
         print("body_weights: %s is done already" % path)
         return
-    rest = heads(doc, binary, names)
-    for name in BODY:
-        body = meshes[name]
-        dense = body.dense(len(names))
-        print("  %s: %d points of the chest's sides off the upper arms" % (name, armpits(body, names, rest, dense)))
-        if name == "Body":
-            plates(body, names, dense)
-        body.store(dense)
-    meshes["Body"].mesh.setdefault("extras", {})[MARK] = 1
+    dense = body.dense(len(names))
+    plates(body, names, dense)
+    body.store(dense)
+    body.mesh.setdefault("extras", {})[MARK] = 1
     text = json.dumps(doc, separators=(",", ":")).encode()
     text += b" " * (-len(text) % 4)
     with open(path, "wb") as out:

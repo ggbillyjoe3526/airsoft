@@ -19,12 +19,14 @@ const STEP := 1.0 / 30.0
 ## The phalanx past the third finger joint (m along that bone): its tip.
 const TIP := 0.025
 const FINGERS: PackedStringArray = ["Index", "Middle", "Ring", "Pinky"]
-## BP6: with the arm held up no point of the human's shirt comes out in front of the carrier's left shoulder strap
-## (the strap: the gear's points over the shoulder, above STRAP_FROM m at rest) by more than OVER (m), seen along the
-## chest's forward way, within STRAP_SIDE (m) across it of the strap's points (tools/blender/figures/body_weights.py).
+## With the arm held up the human's shirt comes out in front of the carrier's left shoulder strap (the strap: the
+## gear's points over the shoulder, above STRAP_FROM m at rest) by more than OVER (m), seen along the chest's forward
+## way, within STRAP_SIDE (m) across it of the strap's points, at no more than STRAP_MOST points at once: the known
+## fold of 33fa48b's shoulder, which the owner kept (2026-11-07; docs/KNOWN_ISSUES.md), and no worse.
 const STRAP_FROM := 1.40
 const STRAP_SIDE := 0.004
 const OVER := 0.001
+const STRAP_MOST := 10
 ## Every this many seconds of the held arm.
 const STRAP_STEP := 0.1
 
@@ -67,7 +69,7 @@ func test_the_walk_off_holds_the_arm_straight_and_the_hand_open() -> void:
 		sk.free()
 
 
-func test_with_the_arm_up_the_shirt_stays_under_the_shoulder_strap() -> void:
+func test_with_the_arm_up_the_shirt_over_the_strap_is_no_worse_than_the_known_fold() -> void:
 	var root := models.scene(FigureMix.HUMAN).instantiate()
 	add_child_autofree(root)
 	var sk := root.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
@@ -89,7 +91,7 @@ func test_with_the_arm_up_the_shirt_stays_under_the_shoulder_strap() -> void:
 		var t := RAISED_BY if clip == config.call_clip else 0.0
 		while t <= anim.length + 1e-4:
 			var n := _in_front(sk, body, kit, strap, anim, t)
-			assert_eq(n, 0, "%s at %.2f s: %d shirt points out over the strap" % [clip, t, n])
+			assert_lte(n, STRAP_MOST, "%s at %.2f s: %d shirt points out over the strap" % [clip, t, n])
 			t += STRAP_STEP
 
 
