@@ -19,7 +19,7 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
 ![Depot's Chrono hall under the violet ceiling and its lamps](images/depot-chrono-hall.jpg)
 
 - **Three lanes** wind from end to end between plywood rooms and racking you can't enter: the **Shoot House** and
-  the **Lounge** to the north, the open **Chrono hall** in the middle, the **Huts** and the **Box yard** to the
+  the dim **Lounge** to the north, the open **Chrono hall** in the middle, the **Huts** and the **Box yard** to the
   south. No lane runs straight; each bends round the dead space.
 - **Links** join the lanes: open cuts and galleries, two tight alleys, and two **tunnels**, one in each half. The
   tunnels are unlit and bend twice: dark, but never pitch black.

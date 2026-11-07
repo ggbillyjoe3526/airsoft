@@ -1,7 +1,9 @@
-Task: bp6-shoulder · QA commit 8ef75d7 (no tests added by QA) · Verdict: Pass
-Blocking: none. Import of human.glb clean (no import errors).
-Ran 10 files (test_bp6_models, hit_call_arm, hands_on_replica, figure_body, figure_hit_area, hit_registration, figure_view, figure_models, bp6_graphics, figure_pads): 76/76 pass, 542511 asserts, 87.6 s, 2 warnings.
-Surface counts, BodyMerge cache, LOD counts (Body, Body_LOD1, Body_LOD2): covered by those tests, all green. Changed test_bp6_models asserts upper-arm mean share >= 0.33 by the armpit on all 3 levels.
-Advisory: 'Parameter "material" is null' appears twice in free_all during figure_body/figure_models teardown; not compared with origin/main, likely pre-existing (not a test failure). Orphan counts printed by figure_view are the usual headless leak lines.
-Not tested: how the raised shoulder looks in play (owner to eyeball); check.sh/smoke not run per instructions.
-Raw output: /tmp/claude-0/bp6-reports/shoulder-raw.txt
+QA verdict (retry, 3fa357f): PASS
+Run: --import clean; GUT test_bp7_graphics, test_play_session, test_graphics_apply, test_flag_play, test_overtime_flag_play, test_baked_light: 6 scripts, 80 tests, 647 asserts, 0 failures. No edits.
+- Prewarm counts are honest: FlagView.materials() went from 2 to 5 because it now appends _paints (alu, fittings, rope); OvertimeFlagView from 2 to 4 (alu, fittings). The tests were raised because the code adds those materials, and the FlagView test also asserts each is non-null.
+- Relight on toggle: PlaySession._apply_graphics calls _relight only when baked_light_drawn() != _relit. It sets _relit, then relights doors, flags, overtime flag and props. Off passes null: doors/poles go white, props are cleared. PropDress.relight(null) with no lights does nothing. The _picks order matches the multimesh instance order (set in _add).
+- Leaks on repeated toggles: MapLevel clears _lit_*/_near when the bake is not drawn, and rebuilds them on each bake mesh. DoorView/PropDress/FlagView keep only colours, no references. OvertimeFlagView alone keeps a BakedLightNear reference (_lights): relight(null) clears it, and it is freed when the view is freed on leaving the map. Minor: a Mesh-detail rebuild with the bake on makes a fresh _near while the overtime flag holds the old copy (about 5 MB, up to 2 copies) until the next relight. Not a leak.
+- Maps without a bake (Range, Woodland, Street): baked_lights() returns null, _relit stays false, so relight never runs. Doors keep white custom data and colour, so they draw as painted.
+- Lounge / depot.json: the roof lamp panels over the Lounge are removed (4 points), and build_map.py now skips every non-lit zone. The bake file and its hash (blocks and dim boxes) are unchanged, so depot.res stays valid and the test passes.
+- door_leaf.gdshader: it picks the thin axis from MODEL_MATRIX scale, so it is correct while open or swinging. COLOR and INSTANCE_CUSTOM are both set for every leaf in relight(null) too. Not viewed (no GPU), so the look stays an owner check.
+Non-blocking: the 27-cell loop in BakedLightNear.at() is fine for a one-off.

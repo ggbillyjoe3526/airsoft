@@ -34,6 +34,12 @@ var _rise_left: float = 0.0
 ## What the colours last showed: the team that touched it (-1 none) and whether both teams were at it.
 var _toucher: int = -2
 var _contested: bool = false
+## The pole's and base's paints, their colours, the baked light near (null: none drawn) and the light they are drawn in,
+## the floor's at the flag's foot, taken where it goes up (`relight`, BP7).
+var _paints: Array[ShaderMaterial] = []
+var _paint_colours: PackedColorArray = PackedColorArray()
+var _lights: BakedLightNear = null
+var _light: Color = Color.WHITE
 
 
 ## Builds the flag at `foot` with the touch's reach `reach` (m), the team colours from `teams`; hidden until it goes up.
@@ -46,13 +52,11 @@ func setup(cfg: FlagViewConfig, teams: TeamConfig, foot: Vector3, reach: float) 
 	_standing = Node3D.new()
 	_standing.name = "Standing"
 	add_child(_standing)
-	var alu := StandardMaterial3D.new()
-	alu.albedo_color = cfg.pole_colour
-	alu.metallic = cfg.pole_metallic
-	alu.roughness = cfg.pole_roughness
-	var dark := StandardMaterial3D.new()
-	dark.albedo_color = cfg.fittings_colour
-	dark.roughness = FITTINGS_ROUGHNESS
+	# The pole and its fittings in the shared light (BP7); the cloth has its own shader, the ring stays flat paint.
+	var alu := LookMaterials.paint(cfg.pole_colour, cfg.pole_roughness, cfg.pole_metallic)
+	var dark := LookMaterials.paint(cfg.fittings_colour, FITTINGS_ROUGHNESS)
+	_paints = [alu, dark]
+	_paint_colours = [cfg.pole_colour, cfg.fittings_colour]
 	var h := cfg.overtime_pole_height
 	var r := cfg.overtime_pole_radius
 	_add(_standing, FlagView.cylinder(r, r, h, POLE_SEGMENTS), alu, Vector3(0.0, h * 0.5, 0.0))
@@ -93,6 +97,7 @@ func refresh(flag: OvertimeFlag, toucher: int, delta: float) -> void:
 		_up = true
 		visible = true
 		position = flag.foot
+		_light_pole()
 		_rise_left = _cfg.overtime_rise if rises and _cfg.overtime_rise > 0.0 else 0.0
 		_toucher = -2
 		_set_rise(0.0 if _rise_left > 0.0 else 1.0)
@@ -136,7 +141,27 @@ static func toucher_of(rs: RoundState) -> int:
 
 ## The materials drawn first in a match (ShaderPrewarm), so the flag's first sight never hitches.
 func materials() -> Array[Material]:
-	return [_cloth_mat, _ring_mat]
+	var out: Array[Material] = [_cloth_mat, _ring_mat]
+	out.append_array(_paints)
+	return out
+
+
+## Draws the pole and its base in the baked light of the floor at its foot (`lights`; FlagView.relight), now and each
+## time it goes up, or in the shared light alone with `lights` null (no bake drawn).
+func relight(lights: BakedLightNear) -> void:
+	_lights = lights
+	_light_pole()
+
+
+## The light the pole is drawn in (a linear multiplier of its paint; white with no bake drawn).
+func pole_light() -> Color:
+	return _light
+
+
+func _light_pole() -> void:
+	var foot := position + Vector3(0.0, FlagView.FOOT_LIFT, 0.0)
+	_light = _lights.at(foot, Vector3.UP) if _lights != null else Color.WHITE
+	LookMaterials.light_paints(_paints, _paint_colours, _light)
 
 
 ## The way the cloth faces (radians about the pole), for tests.

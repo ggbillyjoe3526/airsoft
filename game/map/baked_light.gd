@@ -24,13 +24,17 @@ func whole() -> bool:
 
 ## The hash of everything a bake of `m` reads: the bake's version and settings, the sun it is baked under (`lighting`:
 ## the day preset's, whatever preset plays, so a night never marks a bake stale), and each block's kind, place, size,
-## slope, surface and colour, in the file's order.
+## slope, surface and colour, in the file's order, and its dim rooms (MapData.baked_dim_boxes).
 static func hash_of(m: MapData, style: MapStyle, lighting: LightingConfig, cfg: BakeConfig) -> String:
 	var parts := PackedStringArray()
 	parts.append("v%d cell %.4f rays %d reach %.4f lift %.4f ground %.4f sun %.4f" % [BakeConfig.VERSION, cfg.cell,
 			cfg.rays, cfg.reach, cfg.lift, cfg.ground_y, cfg.sun_reach])
 	parts.append("sun %.4f %.4f %s" % [lighting.sun_elevation, lighting.sun_heading, lighting.sun_colour.to_html()])
 	parts.append("ground %s %.4f %.4f" % [style.ground_colour.to_html(), style.ground_extent, style.ground_drop])
+	for i in m.baked_dim_boxes.size():
+		var r := m.baked_dim_boxes[i]
+		parts.append("dim %.4f %.4f %.4f %.4f %.4f" % [r.position.x, r.position.y, r.size.x, r.size.y,
+				m.baked_dim_light[i]])
 	for b in m.blocks:
 		parts.append("%s %.4f %.4f %.4f %.4f %.4f %.4f %d %d %s" % [b.kind, b.center.x, b.center.y, b.center.z, b.size.x,
 				b.size.y, b.size.z, b.rise, b.surface, style.block_colour(b).to_html()])

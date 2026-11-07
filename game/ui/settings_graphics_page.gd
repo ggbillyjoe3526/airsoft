@@ -41,7 +41,8 @@ const RIGHT_SECTIONS: Dictionary[String, Array] = {
 	"GRAPHICS_SHADOWS": [GraphicsQuality.SUN_SHADOWS, GraphicsQuality.SHADOW_DETAIL, GraphicsQuality.SHADOW_SOFTNESS,
 			GraphicsQuality.SHADOW_RANGE],
 	"GRAPHICS_LIGHT_AND_DETAIL": [GraphicsQuality.AMBIENT_OCCLUSION, GraphicsQuality.BAKED_LIGHT,
-			GraphicsQuality.TEXTURE_FILTERING, GraphicsQuality.MESH_DETAIL, GraphicsQuality.WIND_DUST],
+			GraphicsQuality.TEXTURE_FILTERING, GraphicsQuality.MESH_DETAIL, GraphicsQuality.OCCLUSION_CULLING,
+			GraphicsQuality.WIND_DUST],
 }
 ## A range row's figure, and the note beside a row (none for the others).
 const RANGE_FORMATS: Dictionary[StringName, String] = {
@@ -54,6 +55,7 @@ const NOTES: Dictionary[StringName, String] = {
 	GraphicsQuality.UPSCALER: "GRAPHICS_UPSCALER_NOTE",
 	GraphicsQuality.TEMPORAL_SMOOTHING: "GRAPHICS_TEMPORAL_SMOOTHING_NOTE",
 	GraphicsQuality.GLOBAL_ILLUMINATION: "GRAPHICS_GLOBAL_ILLUMINATION_NOTE",
+	GraphicsQuality.OCCLUSION_CULLING: "GRAPHICS_OCCLUSION_CULLING_NOTE",
 }
 ## The two choices a row shown as a switch offers, off then on.
 const SWITCH_CHOICES: Array = ["off", "on"]

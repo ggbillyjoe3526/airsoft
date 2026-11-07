@@ -19,6 +19,9 @@ class Tiles:
 	## Each vertex's block, an index into MapData.blocks.
 	var blocks: PackedInt32Array = PackedInt32Array()
 	var indices: PackedInt32Array = PackedInt32Array()
+	## Each parallelogram face's grid of vertices, three ints a face: its first vertex, its columns and its rows (the
+	## vertices run a row at a time), for the bake's neighbours (tools/bake_light.gd).
+	var grids: PackedInt32Array = PackedInt32Array()
 
 
 ## Block `b`'s faces, each a convex polygon given anticlockwise as seen from outside: a box's top, bottom, +z, -z, +x and
@@ -243,6 +246,7 @@ static func _tile_quad(t: Tiles, f: PackedVector3Array, n: Vector3, block: int, 
 	var nu := _cuts(u.length(), cell)
 	var nv := _cuts(v.length(), cell)
 	var base := t.positions.size()
+	t.grids.append_array(PackedInt32Array([base, nu + 1, nv + 1]))
 	for j in nv + 1:
 		for i in nu + 1:
 			t.positions.append(a + u * (float(i) / nu) + v * (float(j) / nv))

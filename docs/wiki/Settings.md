@@ -48,9 +48,13 @@ every preset; turn it on if you want it.
   light) is the same on every preset.
 - **Ultra** is the top end, for the most powerful cards: bounce light from the whole field, reflections on screen,
   volumetric haze and the softest shadows, sharp at their foot and soft away from it.
-- **Baked light** gives Depot soft shade in its corners and warm light bounced off sunlit walls.
+- **Baked light** gives Depot soft shade in its corners, warm light bounced off sunlit walls and its dim Lounge; its
+  doors, flag poles and props take the same light.
 - **Mesh detail** sets how near a player must be to be drawn in full detail. Through a scope that is how near they
-  look, so a far player seen at 6x keeps the detail of one six times nearer.
+  look, so a far player seen at 6x keeps the detail of one six times nearer. It also sets how many puffs make up a
+  smoke cloud: fewer, bigger ones on Low and Medium, so standing in smoke costs less.
+- **Occlusion culling** skips drawing what walls, containers and houses hide from you, such as a player behind a wall.
+  It saves the graphics card work and costs the processor a little, so it is off on Low and on from Medium.
 - **Light effects:** **Bounce light** is light bouncing off the field: Screen bounces what you see, Scene the whole
   field. **Reflections** on Probes show the room a shiny surface is in; Screen adds what is on screen. **Glow** makes
   lamps bloom softly. **Volumetric haze** is a faint haze the light shines through.

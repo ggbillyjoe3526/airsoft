@@ -66,6 +66,8 @@ def blocks() -> list[dict]:
 
 # Two blocks may share no more than this every way (FieldStandard.SEAM_SLACK is 0.025 m).
 SEAM = 0.02
+# A dim room's baked light (the sky it sees and the sun's bounce) as a share of a lit room's (BP7: the Lounge).
+DIM_LIGHT = 0.35
 
 
 def _overlap(a: list, b: list, axis: int) -> float:
@@ -116,13 +118,19 @@ def areas() -> list[dict]:
     return [{"name": z["name"], "box": [z["x1"], z["x2"], z["z1"], z["z2"]]} for z in rooms + links]
 
 
+def dims() -> list[dict]:
+    """The dim rooms (the Lounge, as the concept has it): the bake's light there is DIM_LIGHT of the rest's (BP7)."""
+    return [{"box": [z["x1"], z["x2"], z["z1"], z["z2"]], "light": DIM_LIGHT} for z in L.zones if z["light"] == "dim"]
+
+
 def roof() -> dict:
-    """The roof (look only): its height and its lamp panels, every 7 m over each lit room, none over the tunnels."""
+    """The roof (look only): its height and its lamp panels, every 7 m over each lit room, none over a dim room (the
+    Lounge, whose light the bake dims, BP7) or the tunnels."""
     lamps = []
     for z in L.zones:
-        if z["light"] == "dark" or z["lane"] == "x":
+        if z["light"] != "lit" or z["lane"] == "x":
             continue
-        step = 7.0 if z["light"] == "lit" else 10.0
+        step = 7.0
         x = z["x1"] + 3.0
         while x < z["x2"] - 1.0:
             zz = z["z1"] + 3.0
@@ -185,7 +193,7 @@ def build() -> dict:
             "key": {"elevation": 76, "heading": 25, "intensity": 1.1}, "hemi": {"intensity": 0.55},
             # the art direction's darker hall floor (AD1) takes a little less exposure
             "exposureScale": 0.85}}},
-        "bakedLight": {"file": "depot"},
+        "bakedLight": {"file": "depot", "dim": dims()},
         # The yard's dust: motes in the lamps' light and the grey puff feet kick up off the slab.
         "dressing": {"seed": 4127, "motes": {"tint": 14210767}, "kickedDust": {"tint": 12171184, "scale": 1},
                      "site": site()},

@@ -11,7 +11,10 @@ extends Node3D
 ## Baked light (DP2, Settings › Graphics › Baked light): with it on, a map naming a bake (BakedLight) is drawn as the same
 ## faces cut into tiles (GreyboxFaces.tile), each vertex's colour darkened by the sky it can't see and warmed by the sun's bounce.
 ## Switching it rebuilds the mesh alone; a map with no bake draws as without it. A bake is checked against the day sun it
-## was baked under, whatever preset plays; at night it draws its sky share alone (no sun to bounce; WL3).
+## was baked under, whatever preset plays; at night it draws its sky share alone (no sun to bounce; WL3). A dim room
+## (MapData.baked_dim_boxes) draws its whole light at its share: the bake dims its sky and bounce, the draw the rest.
+## What stands beside the baked faces with no bake of its own (doors, poles, props) takes the light near it from
+## `baked_lights` (BakedLightNear, BP7).
 ##
 ## Site dress (DD1): a map naming one (`dressing.site`) built with a SiteLook draws the very same faces, baked or not,
 ## in the site's one material (SiteSurface) instead of the greybox's: each vertex tells the shader its box and finish,
@@ -59,6 +62,12 @@ var _tiles: Array[MeshInstance3D] = []
 var _baked: bool = false
 var _bake: BakedLight = null
 var _bake_looked: bool = false
+## The baked vertices drawn, each one's normal and its light (a linear multiplier), kept while the bake is drawn for
+## `baked_lights`, made from them when first asked.
+var _lit_at: PackedVector3Array = PackedVector3Array()
+var _lit_normals: PackedVector3Array = PackedVector3Array()
+var _lit: PackedColorArray = PackedColorArray()
+var _near: BakedLightNear = null
 var _bodies: Array[StaticBody3D] = []
 var _cast: RayCast3D = null
 var _query: JoltQuery = null
@@ -185,6 +194,16 @@ func set_baked_light(on: bool) -> void:
 ## Whether the baked light is drawn.
 func baked_light_drawn() -> bool:
 	return _baked
+
+
+## The baked light near what stands beside the baked faces (BakedLightNear), made the first time it is asked for after
+## the bake is drawn; null while it isn't (no bake, or Baked light off).
+func baked_lights() -> BakedLightNear:
+	if not _baked:
+		return null
+	if _near == null:
+		_near = BakedLightNear.new(_lit_at, _lit_normals, _lit)
+	return _near
 
 
 ## The see-through blocks' material, for the shader prewarm (empty on a map with no glass).
@@ -338,6 +357,10 @@ func _make_mesh() -> MeshInstance3D:
 	var baked := _baked_mesh() if _baked else null
 	if baked == null:
 		_baked = false
+		_lit_at = PackedVector3Array()
+		_lit_normals = PackedVector3Array()
+		_lit = PackedColorArray()
+		_near = null
 		mi.mesh = _greybox_mesh(map, _style, null, _props) if _site == null else _site_mesh(map, _style, _site)
 		return mi
 	mi.mesh = baked
@@ -539,12 +562,18 @@ func _baked_mesh() -> ArrayMesh:
 	var warm := 0.0 if _night else _light.bounce_gain / BakedLight.FULL
 	var sky := _bake.sky
 	var bounce := _bake.bounce
+	var lights := PackedColorArray()
+	lights.resize(n)
 	for v in n:
 		var c := block_linear[t.blocks[v]]
-		var lit := 1.0 - _light.sky_share + dark * sky[v]
+		var at := t.positions[v]
+		# a dim room's open share too (its sky and bounce are dimmed in the bake)
+		var open := (1.0 - _light.sky_share) * map.baked_light_at(Vector2(at.x, at.z))
+		var lit := open + dark * sky[v]
 		var k := v * 3
-		var lin := Color(c.r * (lit + warm * bounce[k]), c.g * (lit + warm * bounce[k + 1]),
-				c.b * (lit + warm * bounce[k + 2]))
+		var light := Color(lit + warm * bounce[k], lit + warm * bounce[k + 1], lit + warm * bounce[k + 2])
+		lights[v] = light
+		var lin := Color(c.r * light.r, c.g * light.g, c.b * light.b)
 		colours[v] = lin.linear_to_srgb() if _site == null else lin
 	for p in GreyboxFaces.ground_face(_style, GreyboxFaces.ground_top(map)):
 		t.positions.append(p)
@@ -563,6 +592,10 @@ func _baked_mesh() -> ArrayMesh:
 		_site_customs(t.blocks, n, arrays)
 		_site_cores(t)
 		format = SiteSurface.CUSTOM_FORMAT
+	_lit_at = t.positions.slice(0, n)
+	_lit_normals = t.normals.slice(0, n)
+	_lit = lights
+	_near = null
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, format)
 	return mesh

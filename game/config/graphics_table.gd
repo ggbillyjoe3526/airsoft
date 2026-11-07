@@ -49,6 +49,7 @@ const BUILT_IN: Dictionary[StringName, Array] = {
 			"16x", "16x"],
 	GraphicsQuality.MESH_DETAIL: ["GRAPHICS_MESH_DETAIL", "low, medium, high, ultra", "1", "all", "low", "medium",
 			"high", "ultra"],
+	GraphicsQuality.OCCLUSION_CULLING: ["GRAPHICS_OCCLUSION_CULLING", "off, on", "0", "all", "off", "on", "on", "on"],
 	GraphicsQuality.WIND_DUST: ["GRAPHICS_WIND_DUST", "0–100 %", "0", "all", "0 %", "50 %", "100 %", "100 %"],
 	GraphicsQuality.GLOBAL_ILLUMINATION: ["GRAPHICS_GLOBAL_ILLUMINATION", "off, screen, scene", "3", "forward_plus",
 			"off", "off", "screen", "scene"],

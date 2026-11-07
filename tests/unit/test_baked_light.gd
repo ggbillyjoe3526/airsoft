@@ -144,7 +144,17 @@ func test_open_ground_sees_the_sky_and_a_sunlit_wall_warms_the_ground_beside_it(
 	assert_gt(bake.sky[beside], 0)
 	assert_gt(bake.bounce[beside * 3], 0, "the sunlit wall bounces light onto it")
 	assert_gt(bake.bounce[beside * 3], bake.bounce[beside * 3 + 2], "warm: more red than blue")
-	assert_eq(bake.sky[under], 0, "under the crate is dark")
+	# Under the crate no one sees: it takes an open neighbour's light (BP7), so the slab round the crate is not drawn
+	# darkening toward a vertex hidden in it.
+	var round_it: Array[int] = []
+	for step: Vector3 in [Vector3.RIGHT, Vector3.LEFT, Vector3.FORWARD, Vector3.BACK]:
+		round_it.append(bake.sky[_vertex(t, Vector3(-8.0, 0.0, -8.0) + step, Vector3.UP)])
+	assert_has(round_it, bake.sky[under], "under the crate takes the light of an open vertex beside it")
+	assert_gt(bake.sky[under], 0, "not the dark inside the crate")
+	var foot := _vertex(t, Vector3(0.2, 0.0, 0.0), Vector3.RIGHT)
+	assert_true(foot >= 0, "the wall's foot")
+	assert_lt(bake.sky[foot], bake.sky[_vertex(t, Vector3(0.2, 4.0, 0.0), Vector3.RIGHT)],
+			"the wall's foot keeps its shade where it meets the slab")
 	var shade := _vertex(t, Vector3(-1.0 * lit, 0.0, 0.0), Vector3.UP)
 	assert_eq(bake.bounce[shade * 3], 0, "the wall's shaded side sends no sun back")
 

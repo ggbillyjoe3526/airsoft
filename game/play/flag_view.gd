@@ -3,7 +3,8 @@ extends Node3D
 ## Attack / Defend's flagpole in the world (concept `pole.png`; the browser game's FLAG_VISUALS): the pole and its base,
 ## the rope, the attacking team's flag at the height the rules have it, and the ring on the floor at the rope's reach,
 ## coloured by who is working it. Scenery only: no collider, so BBs pass through. Reads the round state; owns no rule.
-## Built once a match; `refresh` changes only what moved (the cloth's height, the ring's and cloth's colours).
+## Built once a match; `refresh` changes only what moved (the cloth's height, the ring's and cloth's colours). The pole,
+## its fittings and rope take the baked light at its foot while a bake is drawn (`relight`, BP7).
 
 const CLOTH_SHADER := preload("res://game/play/flag_cloth.gdshader")
 ## Segments of the ring and of the cloth's mesh (along and up).
@@ -17,6 +18,8 @@ const RING_LIFT := 0.025
 const EDGE_LIFT := 0.024
 const FITTINGS_ROUGHNESS := 0.7
 const ROPE_ROUGHNESS := 0.9
+## The baked light a pole takes is the floor's (facing up) this far (m) over its foot.
+const FOOT_LIFT := 0.05
 
 var _cfg: FlagViewConfig = null
 var _teams: TeamConfig = null
@@ -27,6 +30,10 @@ var _height: float = -1.0
 var _attackers: int = -1
 var _status: int = -1
 var _letter: Label3D = null
+## The pole's, fittings' and rope's paints, their colours, and the light they are drawn in (white: no bake).
+var _paints: Array[ShaderMaterial] = []
+var _paint_colours: PackedColorArray = PackedColorArray()
+var _light: Color = Color.WHITE
 
 
 ## Builds the pole at `foot` with the rope's reach `reach` (m), the team colours from `teams`; with a `letter` (a map
@@ -38,16 +45,12 @@ func setup(cfg: FlagViewConfig, teams: TeamConfig, foot: Vector3, reach: float, 
 	position = foot
 	if not letter.is_empty():
 		_add_letter(letter)
-	var alu := StandardMaterial3D.new()
-	alu.albedo_color = cfg.pole_colour
-	alu.metallic = cfg.pole_metallic
-	alu.roughness = cfg.pole_roughness
-	var dark := StandardMaterial3D.new()
-	dark.albedo_color = cfg.fittings_colour
-	dark.roughness = FITTINGS_ROUGHNESS
-	var rope_mat := StandardMaterial3D.new()
-	rope_mat.albedo_color = cfg.rope_colour
-	rope_mat.roughness = ROPE_ROUGHNESS
+	# The pole and its fittings in the shared light (BP7); the cloth has its own shader, the ring stays flat paint.
+	var alu := LookMaterials.paint(cfg.pole_colour, cfg.pole_roughness, cfg.pole_metallic)
+	var dark := LookMaterials.paint(cfg.fittings_colour, FITTINGS_ROUGHNESS)
+	var rope_mat := LookMaterials.paint(cfg.rope_colour, ROPE_ROUGHNESS)
+	_paints = [alu, dark, rope_mat]
+	_paint_colours = [cfg.pole_colour, cfg.fittings_colour, cfg.rope_colour]
 	var h := cfg.pole_height
 	_add(cylinder(cfg.pole_radius, cfg.pole_radius, h, POLE_SEGMENTS), alu, Vector3(0.0, h * 0.5, 0.0))
 	_add(cylinder(cfg.base_radius.y, cfg.base_radius.x, cfg.base_height, BASE_SEGMENTS), dark,
@@ -113,7 +116,21 @@ func refresh(flag: FlagState, attackers: int) -> void:
 
 ## The materials drawn first in a match (ShaderPrewarm), so the flag's first sight never hitches.
 func materials() -> Array[Material]:
-	return [_cloth_mat, _ring_mat]
+	var out: Array[Material] = [_cloth_mat, _ring_mat]
+	out.append_array(_paints)
+	return out
+
+
+## Draws the pole, its fittings and rope in the baked light of the floor at its foot (BakedLightNear), or in the
+## shared light alone with `lights` null (no bake drawn). Once a switch.
+func relight(lights: BakedLightNear) -> void:
+	_light = lights.at(position + Vector3(0.0, FOOT_LIFT, 0.0), Vector3.UP) if lights != null else Color.WHITE
+	LookMaterials.light_paints(_paints, _paint_colours, _light)
+
+
+## The light the pole is drawn in (a linear multiplier of its paint; white with no bake drawn).
+func pole_light() -> Color:
+	return _light
 
 
 ## The letter over the pole (AB1), "" without one: for tests.

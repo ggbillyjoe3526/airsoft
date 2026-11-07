@@ -7,6 +7,10 @@ extends RefCounted
 
 ## A part on the ground (its first section this low, m) has no bottom face.
 const GROUND := 0.01
+## For `hides_of`: the square inside a drum, as a share of its radius (inside its sides, a polygon), and a hill's solid
+## core, a box this share of its footprint across, as tall as the mound stands at the box's corners.
+const INSCRIBED := 0.68
+const HILL_CORE := 0.35
 
 
 ## One part: the section `a` at its start and `b` at its end (the same number of points, joined side by side), its
@@ -51,6 +55,47 @@ static func parts_of(p: SkylinePiece, cfg: SkylineConfig, middle: Vector2) -> Ar
 		&"treeline":
 			_treeline(out, p, cfg)
 	return out
+
+
+## The solid boxes inside `p` that hide what stands beyond it (DP3's row): a shed's walls, a container stack, each
+## silo's drum (the square inside it) and a hill's core (the box inside its mound to `HILL_CORE` of its footprint);
+## none for the open or thin kinds (towers, cranes, masts, lines, chimneys, the fuselage, treelines). Plain data, the
+## box's low corner then its high one, two entries a box.
+static func hides_of(p: SkylinePiece, cfg: SkylineConfig) -> PackedVector3Array:
+	var out := PackedVector3Array()
+	match p.kind:
+		&"shed", &"containers":
+			out.append(Vector3(p.at.x - p.width * 0.5, 0.0, p.at.y - p.depth * 0.5))
+			out.append(Vector3(p.at.x + p.width * 0.5, p.height, p.at.y + p.depth * 0.5))
+		&"silo":
+			var along_x := p.width >= p.depth
+			var r := minf(p.width, p.depth) * 0.5
+			var step := 2.0 * r + cfg.silo_gap
+			var n := maxi(1, floori((maxf(p.width, p.depth) + cfg.silo_gap) / step))
+			var dir := Vector3(1.0, 0.0, 0.0) if along_x else Vector3(0.0, 0.0, 1.0)
+			var half := Vector3(r * INSCRIBED, 0.0, r * INSCRIBED)
+			for i in n:
+				var c := Vector3(p.at.x, 0.0, p.at.y) + dir * (i - (n - 1) * 0.5) * step
+				out.append(c - half)
+				out.append(c + half + Vector3.UP * (p.height - r * cfg.silo_roof))
+		&"hill":
+			var core := Vector3(p.width * 0.5 * HILL_CORE, 0.0, p.depth * 0.5 * HILL_CORE)
+			var c := Vector3(p.at.x, 0.0, p.at.y)
+			out.append(c - core)
+			out.append(c + core + Vector3.UP * p.height * mound_at(HILL_CORE * sqrt(2.0) / cos(PI / cfg.sides), cfg))
+	return out
+
+
+## A hill's height, as a share of its top, `r` of the way out to its foot (a share of its footprint): its rings' faces
+## joined straight, under the curve through them.
+static func mound_at(r: float, cfg: SkylineConfig) -> float:
+	var rings := maxi(1, cfg.hill_rings)
+	if r >= 1.0:
+		return 0.0
+	var k := clampi(floori((1.0 - r) * rings), 0, rings - 1)
+	var r0 := 1.0 - float(k) / rings
+	var r1 := 1.0 - float(k + 1) / rings
+	return lerpf(cos(r0 * PI * 0.5), cos(r1 * PI * 0.5), (r0 - maxf(r, 0.0)) / (r0 - r1))
 
 
 ## Where a sight line may see each part: the points of its highest section, or of both when they stand level (a beam).

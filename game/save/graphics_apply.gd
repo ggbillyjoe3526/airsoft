@@ -1,7 +1,7 @@
 class_name GraphicsApply
 ## Puts GraphicsQuality values into the game (data/graphics.md, Settings › Graphics). `apply` sets the root viewport's
-## knobs (render scale and upscaler, edge and temporal smoothing, texture filtering, mesh detail) and the
-## RenderingServer's sun-shadow map and filter; `apply_field` sets the match's sun, its environment's ambient occlusion
+## knobs (render scale and upscaler, edge and temporal smoothing, texture filtering, mesh detail, occlusion culling)
+## and the RenderingServer's sun-shadow map and filter; `apply_field` sets the match's sun, its environment's ambient occlusion
 ## and the wind and kicked dust, without rebuilding them, and the level's baked light (its mesh alone);
 ## `contact_shadows` says whether the figures draw theirs (no sun shadows), `torch_mode` how your own weapon torch is
 ## drawn and `pool_lights` how many real lights that leaves the light pools. `apply_settings`
@@ -217,6 +217,8 @@ static func apply(values: GraphicsQuality, viewport: Viewport, rs: Server = null
 	var lod := MESH_LOD[values.mesh_detail]
 	if not is_equal_approx(viewport.mesh_lod_threshold, lod):
 		viewport.mesh_lod_threshold = lod
+	if viewport.use_occlusion_culling != values.occlusion_culling:
+		viewport.use_occlusion_culling = values.occlusion_culling
 	to.set_shadow_size(values.shadow_detail)
 	to.set_soft_shadows(SOFTNESS[values.shadow_softness])
 

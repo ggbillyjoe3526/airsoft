@@ -27,7 +27,7 @@ never stops the game from starting.
   `gl_compatibility` (the simpler one, for older cards), or `all`. A row the renderer in use can't draw is greyed.
 - **Low, Medium, High, Ultra** are each preset's value: one of the row's choices, or a number in its range.
 - **The choices the game knows:** upscaler `bilinear, fsr1, fsr2`; edge smoothing `off, fxaa, smaa, msaa_2x, msaa_4x`;
-  temporal smoothing, sun shadows and baked light `off, on`; shadow detail `1024, 2048, 4096, 8192` (the sun's shadow map, in
+  temporal smoothing, sun shadows, baked light and occlusion culling `off, on`; shadow detail `1024, 2048, 4096, 8192` (the sun's shadow map, in
   pixels); shadow softness `hard, soft, softer, softest`; ambient occlusion `off, half, full`; texture filtering
   `off, 2x, 4x, 8x, 16x`; mesh detail `low, medium, high, ultra`; global illumination `off, screen, scene`;
   reflections `off, probes, screen`; glow and volumetric fog `off, on`. Render scale is 10–200 % at most, shadow range
@@ -49,6 +49,7 @@ never stops the game from starting.
 | baked_light | GRAPHICS_BAKED_LIGHT | off, on | 1 | all | off | on | on | on |
 | texture_filtering | GRAPHICS_TEXTURE_FILTERING | off, 2x, 4x, 8x, 16x | 1 | all | 2x | 4x | 16x | 16x |
 | mesh_detail | GRAPHICS_MESH_DETAIL | low, medium, high, ultra | 1 | all | low | medium | high | ultra |
+| occlusion_culling | GRAPHICS_OCCLUSION_CULLING | off, on | 0 | all | off | on | on | on |
 | wind_dust | GRAPHICS_WIND_DUST | 0–100 % | 0 | all | 0 % | 50 % | 100 % | 100 % |
 | global_illumination | GRAPHICS_GLOBAL_ILLUMINATION | off, screen, scene | 3 | forward_plus | off | off | screen | scene |
 | reflections | GRAPHICS_REFLECTIONS | off, probes, screen | 2 | all | off | probes | probes | screen |
@@ -60,7 +61,10 @@ never stops the game from starting.
   light, palette and grade are the same on every preset, so Low keeps the art direction.
 - **Baked light** is the map's sky shade in corners and under roofs and the sun's warm bounce off the ground and walls,
   worked out ahead by `tools/bake_light.gd` and drawn on the map's mesh cut into half-metre tiles (more triangles, no
-  other cost). A map with no bake draws the same either way.
+  other cost). A map with no bake draws the same either way. A map's dim rooms (`bakedLight.dim` in its file:
+  Depot's Lounge) draw their whole light at their share, and the doors, flag poles and props take the baked light
+  of the faces near them (each face of a door its own side's). A face's part hidden inside a block that abuts it
+  takes the light of its nearest part in the open, lifting the joint a little.
 - **Ultra** is the top end: the whole scene's bounce light (SDFGI with screen-space bounce at full size and its
   finest probes), screen-space reflections over the probes, volumetric fog the sun and the bounce light up, the
   sharpest and farthest shadows with contact hardening (Softest: the sun given a size, so a shadow is sharp at its
@@ -87,6 +91,11 @@ never stops the game from starting.
   (`GraphicsApply.TORCH_SHADOWS_FROM`); on Low, with none, a haze. Everyone else's torch is a
   drawn beam on every preset: a cone, a lens glare and a lit spot.
 - **Sun shadows** off draws a soft dark disc under every other player instead (a contact shadow, free).
+- **Mesh detail** also sets a smoke cloud's puffs (`game/config/effects_config.gd`, `smoke_puffs`): fewer and larger
+  on Low and Medium, so from inside a cloud fewer see-through layers are drawn over the screen.
+- **Occlusion culling** leaves out what the map's tall solid blocks hide from the eye (plywood, containers, walls,
+  houses: `MapStyle.occluder_kinds`), so a bot behind a wall costs no draws. It costs the processor a little each
+  frame and the graphics card nothing (Cost 0), so it is off on Low, where the processor is the tighter budget.
 
 ## Choices only some renderers draw
 

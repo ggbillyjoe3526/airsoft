@@ -36,6 +36,7 @@ const AMBIENT_OCCLUSION := &"ambient_occlusion"
 const BAKED_LIGHT := &"baked_light"
 const TEXTURE_FILTERING := &"texture_filtering"
 const MESH_DETAIL := &"mesh_detail"
+const OCCLUSION_CULLING := &"occlusion_culling"
 const WIND_DUST := &"wind_dust"
 const GLOBAL_ILLUMINATION := &"global_illumination"
 const REFLECTIONS := &"reflections"
@@ -44,7 +45,7 @@ const VOLUMETRIC_FOG := &"volumetric_fog"
 ## Every row, in the Graphics tab's order (data/graphics.md's).
 const ROWS: Array[StringName] = [RENDER_SCALE, UPSCALER, EDGE_SMOOTHING, TEMPORAL_SMOOTHING, SUN_SHADOWS,
 		SHADOW_DETAIL, SHADOW_SOFTNESS, SHADOW_RANGE, AMBIENT_OCCLUSION, BAKED_LIGHT, TEXTURE_FILTERING, MESH_DETAIL,
-		WIND_DUST, GLOBAL_ILLUMINATION, REFLECTIONS, GLOW, VOLUMETRIC_FOG]
+		OCCLUSION_CULLING, WIND_DUST, GLOBAL_ILLUMINATION, REFLECTIONS, GLOW, VOLUMETRIC_FOG]
 ## Every choice the game knows for each choice row, by level. The file offers these, or some of them. (Values are Arrays:
 ## Godot 4.7 keeps a const typed dictionary's array values as Arrays, so a PackedStringArray value type misreads them.)
 const CHOICES: Dictionary[StringName, Array] = {
@@ -58,6 +59,7 @@ const CHOICES: Dictionary[StringName, Array] = {
 	BAKED_LIGHT: ["off", "on"],
 	TEXTURE_FILTERING: ["off", "2x", "4x", "8x", "16x"],
 	MESH_DETAIL: ["low", "medium", "high", "ultra"],
+	OCCLUSION_CULLING: ["off", "on"],
 	GLOBAL_ILLUMINATION: ["off", "screen", "scene"],
 	REFLECTIONS: ["off", "probes", "screen"],
 	GLOW: ["off", "on"],
@@ -87,6 +89,9 @@ var ambient_occlusion: AmbientOcclusion = AmbientOcclusion.OFF
 var baked_light: bool = false
 var texture_filtering: TextureFiltering = TextureFiltering.OFF
 var mesh_detail: MeshDetail = MeshDetail.LOW
+## What the map's tall solid blocks hide is not drawn (MapOccluders): a little work on the processor each frame to
+## save the graphics card the figures and props behind walls.
+var occlusion_culling: bool = false
 ## The wind dust's specks, in percent of EffectsConfig.dust_count.
 var wind_dust: int = 0
 var global_illumination: GlobalIllumination = GlobalIllumination.OFF
@@ -169,6 +174,8 @@ func level(row: StringName) -> int:
 			return texture_filtering
 		MESH_DETAIL:
 			return mesh_detail
+		OCCLUSION_CULLING:
+			return int(occlusion_culling)
 		WIND_DUST:
 			return wind_dust
 		GLOBAL_ILLUMINATION:
@@ -210,6 +217,8 @@ func set_level(row: StringName, value: int) -> void:
 			texture_filtering = value as TextureFiltering
 		MESH_DETAIL:
 			mesh_detail = value as MeshDetail
+		OCCLUSION_CULLING:
+			occlusion_culling = value != 0
 		WIND_DUST:
 			wind_dust = value
 		GLOBAL_ILLUMINATION:

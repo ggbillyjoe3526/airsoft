@@ -74,6 +74,10 @@ extends Resource
 ## round the eye they appear in (half extents, m), their size (m) and colour, and how often (s) their drift follows the
 ## wind's gusts.
 @export var dust_count: int = 90
+## A smoke cloud's puffs (GrenadeView) by the graphics' Mesh detail, Low to Ultra, at most GrenadeView.PUFFS: fewer and
+## larger on the lower presets, so from inside a cloud, where every puff covers the screen, fewer layers are drawn over
+## each pixel; the cloud keeps its size and how thick it looks.
+@export var smoke_puffs: PackedInt32Array = PackedInt32Array([12, 20, 28, 28])
 @export var dust_life: float = 6.0
 @export var dust_box: Vector3 = Vector3(8.0, 2.5, 8.0)
 @export var dust_size: float = 0.024
@@ -139,3 +143,11 @@ extends Resource
 @export var contact_middle: float = 0.5
 @export var contact_lift: float = 0.015
 @export var contact_fade_height: float = 1.5
+
+
+## A smoke cloud's puffs at Mesh detail `detail` (GraphicsQuality.MeshDetail): `smoke_puffs`' entry, the last one past
+## its end, at least 1.
+func smoke_puffs_at(detail: int) -> int:
+	if smoke_puffs.is_empty():
+		return 1
+	return maxi(1, smoke_puffs[clampi(detail, 0, smoke_puffs.size() - 1)])

@@ -121,6 +121,45 @@ func test_a_flying_bomb_is_drawn_and_a_popped_smoke_gets_a_cloud_until_it_is_gon
 	assert_false(v.cloud_shown(2), "a smoke that has ended takes its puffs with it")
 
 
+func test_lower_mesh_detail_draws_fewer_larger_puffs_covering_as_much() -> void:
+	var effects := EffectsConfig.new()
+	var low := effects.smoke_puffs_at(GraphicsQuality.MeshDetail.LOW)
+	var high := effects.smoke_puffs_at(GraphicsQuality.MeshDetail.HIGH)
+	assert_lt(low, high, "Low draws fewer puffs a cloud than High (BP7, KNOWN_ISSUES' smoke row)")
+	assert_eq(high, GrenadeView.PUFFS, "High and Ultra draw every puff, as before")
+	assert_eq(effects.smoke_puffs_at(GraphicsQuality.MeshDetail.ULTRA), GrenadeView.PUFFS)
+	assert_eq(effects.smoke_puffs_at(99), GrenadeView.PUFFS, "past the end, the last entry")
+	var s := GameState.new(5, tuning)
+	var v := _view(s.grenades.size())
+	_smoke_at(s, 2, Vector3(5.0, 0.04, 0.0), cfg.smoke_grow)
+	v.update(s, 0.5, DT, null, Vector3.ZERO)
+	var full := PackedFloat32Array()
+	for k in GrenadeView.PUFFS:
+		full.append(v.puff_width(k, 3.0))
+	v.set_puffs(low)
+	assert_eq(v.puffs_shown(), low)
+	assert_false(v.cloud_shown(2), "a change hides the cloud's puffs until it is drawn again")
+	v.update(s, 0.5, DT, null, Vector3.ZERO)
+	assert_true(v.cloud_shown(2))
+	var area_full := 0.0
+	var area_fewer := 0.0
+	var drawn := 0
+	for k in GrenadeView.PUFFS:
+		var w := v.puff_width(k, 3.0)
+		area_full += full[k] * full[k]
+		area_fewer += w * w
+		drawn += 1 if w > 0.0 else 0
+		if k < low:
+			assert_gt(w, full[k] * 1.4, "puff %d drawn larger" % k)
+	assert_eq(drawn, low, "only the first %d puffs drawn" % low)
+	assert_almost_eq(area_fewer / area_full, 1.0, 0.35, "the cloud covers about as much with fewer puffs")
+	v.set_puffs(GrenadeView.PUFFS)
+	for k in GrenadeView.PUFFS:
+		assert_almost_eq(v.puff_width(k, 3.0), full[k], 1e-5, "back to every puff, drawn as before")
+	v.set_puffs(0)
+	assert_eq(v.puffs_shown(), 1, "never fewer than one")
+
+
 func test_a_smoke_in_the_air_that_has_not_popped_has_no_cloud() -> void:
 	var s := GameState.new(5, tuning)
 	var v := _view(s.grenades.size())

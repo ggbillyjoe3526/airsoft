@@ -4,7 +4,9 @@ extends RefCounted
 ## built). A player's eye stands over every stand point: each lane's points, each spawn, and the corners and middle of
 ## each raised floor. A piece is seen when a straight line from one eye to one of its sample points passes through no
 ## block. Plain maths over the blocks' boxes (a ramp counts as its whole box), no physics, nothing kept per frame; the
-## largest blocks are tried first, so a hidden line usually stops at the first wall it tries.
+## largest blocks are tried first, so a hidden line usually stops at the first wall it tries. A skyline piece already
+## built hides what stands beyond it too (`add_box`: its solid boxes, SkylineShapes.hides_of), so a piece seen only
+## past a nearer one is left out.
 
 var _eyes: PackedVector3Array = PackedVector3Array()
 var _lo: PackedVector3Array = PackedVector3Array()
@@ -53,6 +55,13 @@ static func stands(map: MapData, raised_from: float, inset: float) -> PackedVect
 			out.append(Vector3(b.center.x + half.x * (1.0 if i & 1 else -1.0), top,
 					b.center.z + half.y * (1.0 if i & 2 else -1.0)))
 	return out
+
+
+## Adds the box `lo`..`hi` as something no sight line passes through (a built skyline piece's solid part), tried
+## after the map's blocks.
+func add_box(lo: Vector3, hi: Vector3) -> void:
+	_lo.append(lo)
+	_hi.append(hi)
 
 
 ## The eyes it looks from.
