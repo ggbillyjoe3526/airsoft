@@ -198,7 +198,9 @@ commit.
 - **Exe icon (102).** `application/modify_resources` on with `installer/icon.ico`; the release workflow checks the
   built exe's icon with `tools/exe_icon.py`, and now stamps the exe's version too (`NUMBER`, the four Windows numbers from `tools/version.sh`, a sed of
   `file_version`/`product_version` in `export_presets.cfg` before the export). AppId untouched. Signing not done
-  (owner: not now).
+  (owner: not now). The pull request's first Release dry run found the export writes every image of the .ico but the
+  24x24 one (Godot's own icon has no 24x24), so the check now asks for the sizes the export writes (`EXPORT_SIZES`);
+  Explorer scales the 32x32 where it wants 24.
 - **Retry, small.** `default_bus_layout.tres` committed in the order Godot writes it (the Panner sub-resources moved;
   buses, effects and sends unchanged; a fresh `--import` leaves it clean). `settings_screen.gd`'s header names its ten
   tabs.
