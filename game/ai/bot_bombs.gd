@@ -133,10 +133,12 @@ static func _aim(b: Bot, w: BotWorld, eye: Vector3, at: Vector3, kind: Grenade.K
 	return true
 
 
-## The pitch of the low or `high` arc from `eye` along `yaw` to `aim` if it comes down within `longest` s, clear of the
-## level all the way (the last stretch, into the ground, unchecked), else NAN.
-static func _clear_pitch(w: BotWorld, eye: Vector3, yaw: float, aim: Vector3, high: bool, longest: float) -> float:
+## The pitch of the low or `high` arc from the hand of a bot with eyes at `eye` (Grenades.release_from) along `yaw` to
+## `aim` if it comes down within `longest` s, clear of the level all the way (the last stretch, into the ground,
+## unchecked), else NAN.
+static func _clear_pitch(w: BotWorld, eyes: Vector3, yaw: float, aim: Vector3, high: bool, longest: float) -> float:
 	var g := w.tuning.grenades
+	var eye := Grenades.release_from(eyes, yaw, g, w.query, _hit)
 	var pitch := Grenades.throw_pitch(eye, aim, g, high)
 	if is_nan(pitch):
 		return NAN

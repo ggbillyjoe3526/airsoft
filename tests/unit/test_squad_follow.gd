@@ -270,6 +270,68 @@ func test_followers_keep_moving_with_you_at_your_pace_a_few_metres_back() -> voi
 		assert_lte(weaving[2][i], 3.0, "weaving: the sprint doesn't flick on and off")
 
 
+## You sprint east with Follow me given and teammate 0 put `gap` m straight behind you; over `seconds`, returns its
+## gap to you at the end and the most it was boosted (PlayerCommand.catch_up) while within catch_up_boost_from.
+func _chase_from(gap: float, seconds: float) -> PackedFloat32Array:
+	_squad()
+	_run(0.1)
+	_order(SquadOrder.Kind.FOLLOW)
+	cmd.forward = 1.0
+	cmd.sprint = true
+	_run(1.0)
+	var c := mates[0].character
+	c.position = you.position - Vector3(gap, 0.0, 0.0)
+	c.velocity = you.velocity
+	var boosted_near := 0.0
+	var boosted := 0.0
+	for k in roundi(seconds / DT):
+		_tick()
+		if commands[c.id].catch_up:
+			boosted += 1.0
+			if _flat(c.position, you.position) < squad.catch_up_boost_from - 0.5:
+				boosted_near += 1.0
+	return PackedFloat32Array([_flat(c.position, you.position), boosted, boosted_near])
+
+
+func test_a_follower_far_behind_a_sprinting_leader_runs_faster_until_within_reach_then_keeps_pace() -> void:
+	# The owner's card B6 (2026-11-07): more than catch_up_boost_from behind, faster than a sprint; nearer, the
+	# leader's pace. Without the boost (scale 1) the gap stays about where it was.
+	var move := tuning.movement
+	var scale := move.catch_up_sprint_scale
+	assert_gt(scale, 1.0)
+	move.catch_up_sprint_scale = 1.0
+	var flat := _chase_from(12.0, 6.0)
+	move.catch_up_sprint_scale = scale
+	var r := _chase_from(12.0, 6.0)
+	gut.p("12 m behind a sprinting leader, 6 s on: %.2f m with the boost, %.2f m without; boosted %d ticks" % [r[0],
+			flat[0], int(r[1])])
+	assert_gt(r[1], 0.0, "the far follower is boosted")
+	assert_eq(r[2], 0.0, "never boosted within catch_up_boost_from")
+	assert_lt(r[0], squad.catch_up_boost_from + 0.5, "it closes to within reach")
+	assert_lt(r[0], flat[0] - 2.0, "faster than without the boost")
+
+
+func test_the_catch_up_boost_speeds_only_a_sprint() -> void:
+	var move := tuning.movement
+	var c := Character.new(1, 0, Vector3.ZERO, 0.0, ReplicaStats.default_loadout())
+	c.sprinting = true
+	var base := Movement.target_speed(c, move, false)
+	var w := BoxWorld.new(tuning.body)
+	w.add_floor(40.0, 40.0)
+	var command := PlayerCommand.new()
+	command.forward = 1.0
+	command.sprint = true
+	command.catch_up = true
+	for i in 120:
+		Movement.step(c, command, move, tuning.accuracy, DT, w.mover())
+	assert_almost_eq(_speed(c), base * move.catch_up_sprint_scale, 1e-3, "a boosted sprint")
+	command.sprint = false
+	command.walk = true
+	for i in 120:
+		Movement.step(c, command, move, tuning.accuracy, DT, w.mover())
+	assert_almost_eq(_speed(c), move.walk_speed, 1e-3, "never a walk")
+
+
 func test_regroup_sprints_back_to_you_then_follows() -> void:
 	_squad()
 	cmd.pitch = -0.2

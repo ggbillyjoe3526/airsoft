@@ -166,7 +166,7 @@ func test_what_you_have_unlocked_never_changes_a_bots_kit() -> void:
 	assert_eq(BotKits.kit_of(_kit(k, "Marksman"), bot_rules).parts[0][&"optic"], &"scope2x", "the 2x Scope (level 5) fitted")
 
 
-func test_in_a_session_the_opponents_carry_their_kits_and_your_teammates_theirs_as_they_come() -> void:
+func test_in_a_session_every_bot_on_both_teams_carries_its_kit() -> void:
 	var s := PlaySession.new()
 	s.autopilot = true
 	s.settings = Settings.new()
@@ -176,16 +176,14 @@ func test_in_a_session_the_opponents_carry_their_kits_and_your_teammates_theirs_
 	await wait_physics_frames(3)
 	var k := BotKits.shared()
 	var kitted := 0
+	var teammates := 0
 	for c in s.state.characters:
 		if c.id == PlaySession.PLAYER_ID:
 			continue
-		if c.team == s.player_team:
-			assert_eq(c.armament.replicas[0].id, &"aeg", "a teammate carries the AEG as it comes")
-			assert_false(s._bot_parts.has(c.id))
-			continue
-		# Its kit leans towards its personality (BN1).
+		# Its kit leans towards its personality (BN1); your teammates pick theirs the same way (B4).
 		var plan := k.pick(&"hard", s._bot_kit_rules(), Seeds.kit_seed(11, c.id), s._identities[c.id].personality,
 				s._bot_config.kit_suit_lean)
+		assert_not_null(plan, "Hard never carries the replicas as they come")
 		var kit := BotKits.kit_of(plan, s._bot_kit_rules())
 		assert_eq(c.armament.replicas.size(), kit.size())
 		for i in kit.size():
@@ -193,4 +191,7 @@ func test_in_a_session_the_opponents_carry_their_kits_and_your_teammates_theirs_
 			assert_eq(c.armament.replicas[i].mag_size, kit.replicas[i].mag_size)
 		assert_eq(s._bot_parts[c.id], kit.parts)
 		kitted += 1
-	assert_eq(kitted, s._tuning.rounds.team_size)
+		if c.team == s.player_team:
+			teammates += 1
+	assert_eq(kitted, s._tuning.rounds.team_size * 2 - 1, "every bot on both teams")
+	assert_eq(teammates, s._tuning.rounds.team_size - 1, "your teammates too")

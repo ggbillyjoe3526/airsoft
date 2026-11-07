@@ -221,6 +221,8 @@ var order_yaw: float = 0.0
 ## up or regrouping), whether it is settled at its spot, and whether it is catching up on it or dropping back to it.
 var order_heading: float = 0.0
 var order_rush: bool = false
+## Follow me: sprinting faster than a sprint to close on a giver more than SquadConfig.catch_up_boost_from away (B6).
+var order_boost: bool = false
 var order_settled: bool = false
 var order_catching_up: bool = false
 var order_dropping_back: bool = false
@@ -360,6 +362,7 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	order = SquadOrder.Kind.NONE
 	order_giver = null
 	order_rush = false
+	order_boost = false
 	mag_for = null
 	mag_for_at = -INF
 	mag_rush = false

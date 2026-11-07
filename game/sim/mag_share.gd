@@ -10,7 +10,8 @@ extends RefCounted
 ## stands ask_time unless a magazine lands first, and the asker may ask again its gap after it ends. A toss takes its BBs
 ## out of the thrower's spare at once and puts the magazine in the air (GameState.mag_tosses, made once); after its
 ## flight they go into the catcher's emptiest spares for the replica it was tossed for, or it is lost: a catcher out of
-## play, or the round decided meanwhile. Nothing is made out of nothing, and nothing random happens.
+## play, the round decided meanwhile, or the level met on the way (lost there). Nothing is made out of nothing, and
+## nothing random happens.
 ##
 ## Events: MAG_ASK, MAG_TOSS, MAG_CATCH, MAG_LOST and MAG_REFUSED (value: a Refusal). Nothing is allocated per tick.
 
@@ -18,6 +19,9 @@ extends RefCounted
 ## yours fits the asker's replica; your last ask ended too lately (or your toss is still in the air, or every toss
 ## slot is); one is already coming to you; the asker is out of reach or sight; you are out, or the round is not live.
 enum Refusal { NOBODY, NOT_LOW, NO_SPARE, WAIT, ALREADY, TOO_FAR, NOT_NOW }
+
+## A flight's shortest length in the share of it flown (s).
+const EPSILON := 1e-4
 
 
 ## A magazine in the air: one slot of GameState.mag_tosses, made once and reused.
@@ -34,8 +38,12 @@ class Toss:
 	## Seconds in the air so far, and its whole flight.
 	var age: float = 0.0
 	var flight: float = 0.0
-	## Where it left the thrower's hand. Presentation draws it on to the catcher's chest wherever they are now.
+	## Where it left the thrower's hand. It flies on to the catcher's chest wherever they are now (flight_point); the
+	## pieces of that path checked against the level so far (MagShareConfig.path_pieces), and where the last ended, or
+	## where it met the level (`at`).
 	var from: Vector3 = Vector3.ZERO
+	var at: Vector3 = Vector3.ZERO
+	var checked: int = 0
 
 
 ## One character's side of the hand-off (Character.mag): its ask, and what is coming to it. Cleared at each respawn but
@@ -214,7 +222,7 @@ func toss_distance(giver: Character, receiver: Character) -> float:
 
 ## Whether `giver` can toss `receiver` a magazine now, with the spare it would take in `out`: teammates both in play,
 ## the thrower not vaulting, the catcher's replica in hand with room in a spare, a spare that fits, within
-## MagShareConfig.toss_range and nothing of the level in between (eye to chest).
+## MagShareConfig.toss_range and nothing of the level on the path it would fly (toss_line_clear).
 func can_toss_to(giver: Character, receiver: Character, out: SparePick) -> bool:
 	if giver == receiver or giver.team != receiver.team or not Elimination.is_in_play(giver) \
 			or not Elimination.is_in_play(receiver) or giver.vault.active:
@@ -229,10 +237,25 @@ func can_toss_to(giver: Character, receiver: Character, out: SparePick) -> bool:
 	return toss_line_clear(giver, receiver)
 
 
-## Whether nothing of the level is between a toss from `giver` and `receiver`: the line from the giver's eye to the
-## receiver's chest (the toss's own test, and the one a bot walking up to toss or catch stops by).
+## Whether nothing of the level is on the path a toss from `giver` to `receiver` would fly: its arc from the giver's
+## hand to the receiver's chest, in MagShareConfig.path_pieces straight pieces, the very pieces `step` checks in flight
+## (BP7), so a toss allowed with nobody moving is caught. The toss's own test, and the one a bot walking up to toss or
+## catch stops by.
 func toss_line_clear(giver: Character, receiver: Character) -> bool:
-	return not query.ray(Lean.eye(giver, body, hits), catch_point(receiver), _hit)
+	return not _path_meets(throw_point(giver), catch_point(receiver), 0, cfg.path_pieces)
+
+
+## Whether pieces `first` to `last` - 1 of the flown path from `from` to `to` (of MagShareConfig.path_pieces) meet the
+## level, the first that does leaving where in `_hit`.
+func _path_meets(from: Vector3, to: Vector3, first: int, last: int) -> bool:
+	var n := maxi(1, cfg.path_pieces)
+	var a := flight_point(from, to, float(first) / n, cfg)
+	for k in range(first, last):
+		var b := flight_point(from, to, float(k + 1) / n, cfg)
+		if query.ray(a, b, _hit):
+			return true
+		a = b
+	return false
 
 
 ## `c`'s press of the hand-off this tick (`live`: the round is in play and not practice): a toss to the nearest
@@ -274,24 +297,40 @@ func step(state: GameState, live: bool, dt: float) -> void:
 		if not t.active:
 			continue
 		t.age += dt
-		if live and t.age < t.flight:
+		var r := _by_id(chars, t.to_id)
+		# On its way: it is lost where its path meets the level (BP7; before, it flew through whatever came between),
+		# checked a piece at a time as it passes each piece's end, the pieces toss_line_clear allowed it on.
+		var met := false
+		if live and r != null and Elimination.is_in_play(r):
+			var n := maxi(1, cfg.path_pieces)
+			var reached := mini(n, floori(clampf(t.age / maxf(t.flight, EPSILON), 0.0, 1.0) * n))
+			if reached > t.checked:
+				var to := catch_point(r)
+				met = _path_meets(t.from, to, t.checked, reached)
+				t.at = _hit.position if met else flight_point(t.from, to, float(reached) / n, cfg)
+				t.checked = reached
+		if live and t.age < t.flight and not met:
 			continue
 		t.active = false
-		var r := _by_id(chars, t.to_id)
 		if r != null:
 			r.mag.coming = maxi(0, r.mag.coming - 1)
 			if r.mag.asked >= 0 and r.mag.coming == 0:
 				_end_ask(r, state.time)
-		var caught := live and r != null and Elimination.is_in_play(r)
+		var caught := live and r != null and Elimination.is_in_play(r) and not met
 		var e := state.events.add(GameEvent.Kind.MAG_CATCH if caught else GameEvent.Kind.MAG_LOST)
 		e.actor = t.from_id
 		e.target = t.to_id
 		e.slot = t.slot
 		e.value2 = t.from_slot
-		e.position = catch_point(r) if r != null else t.from
+		e.position = t.at if met else (catch_point(r) if r != null else t.from)
 		e.value = fill_spares(r.armament, t.slot, t.bbs) if caught else t.bbs
 	for c in chars:
-		if c.mag.asked >= 0 and not _still_asking(c, chars, live, state.time):
+		if c.mag.asked >= 0 and c.mag.coming == 0 and live and _giver_asking(c, chars):
+			# Its giver asked for one of its own (BP7): it never gives while it asks, so the ask ends with no wait, free
+			# to go to someone else.
+			_end_ask(c, state.time)
+			c.mag.next_ask = state.time
+		elif c.mag.asked >= 0 and not _still_asking(c, chars, live, state.time):
 			_end_ask(c, state.time)
 
 
@@ -306,6 +345,12 @@ func _still_asking(c: Character, chars: Array[Character], live: bool, time: floa
 		return false
 	var giver := _by_id(chars, c.mag.asked)
 	return giver != null and Elimination.is_in_play(giver) and has_mag_for(giver, c)
+
+
+## Whether the teammate `c` asked has an ask of its own standing.
+static func _giver_asking(c: Character, chars: Array[Character]) -> bool:
+	var giver := _by_id(chars, c.mag.asked)
+	return giver != null and giver.mag.asked >= 0
 
 
 func _end_ask(c: Character, time: float) -> void:
@@ -362,6 +407,8 @@ func _toss(giver: Character, receiver: Character, state: GameState) -> void:
 	free.age = 0.0
 	free.flight = cfg.flight_base + cfg.flight_per_metre * d
 	free.from = throw_point(giver)
+	free.at = free.from
+	free.checked = 0
 	receiver.mag.coming += 1
 	receiver.mag.coming_from = giver.id
 	var e := state.events.add(GameEvent.Kind.MAG_TOSS)
@@ -372,6 +419,13 @@ func _toss(giver: Character, receiver: Character, state: GameState) -> void:
 	e.value2 = free.from_slot
 	e.position = free.from
 	e.reach = d
+
+
+## Where a magazine tossed from `from` to `to` is `p` of the way through its flight (0 to 1): along the line, raised by
+## its arc (MagShareConfig.arc_per_metre a metre, at most arc_max, at the middle). Presentation draws it there too.
+static func flight_point(from: Vector3, to: Vector3, p: float, c: MagShareConfig) -> Vector3:
+	var arc := minf(c.arc_per_metre * from.distance_to(to), c.arc_max)
+	return from.lerp(to, p) + Vector3.UP * arc * 4.0 * p * (1.0 - p)
 
 
 ## The nearest teammate of `me` in play whose ask to it stands with nothing in the air to it yet: only one `me` can

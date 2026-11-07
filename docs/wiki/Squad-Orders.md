@@ -5,7 +5,7 @@ teammate still in play.
 
 | Order | Key | What your teammates do |
 | --- | --- | --- |
-| **Follow Me** | <!-- wiki:key order_follow --> | Stay with you and keep up as you move. One that ducked into cover comes out to keep up once nobody is in sight. |
+| **Follow Me** | <!-- wiki:key order_follow --> | Stay with you and keep up as you move. One that ducked into cover comes out to keep up once nobody is in sight, and one left far behind runs a little faster than a sprint until it has caught up. |
 | **Hold Here** | <!-- wiki:key order_hold --> | Spread out across the spot you are looking at and hold it (where they stand, if you look at nothing in reach). |
 | **Go There** | <!-- wiki:key ping_move --> | Go to the spot you are looking at, however far, and hold it once they are all there ([below](#go-there)). |
 | **Regroup** | <!-- wiki:key order_regroup --> | Come back to you. |
@@ -61,11 +61,12 @@ held until you end it.
 ## Need a Mag
 
 Press **<!-- wiki:key mag_hand_off -->** (Squad: need a mag in Settings › Controls), or pick **Need a Mag**, the order wheel's last
-item at its upper left. It does what fits now: when a teammate who asked you for a magazine is close enough and in
-sight, you toss them one (the item then reads **Toss a Mag**); otherwise, when you are down to less than one full spare
-magazine, you ask the nearest teammate within <!-- wiki:config mag_share_config.ask_range --> m who has one to spare,
-and a radio click says they heard. Your magazine flies in a short arc into their hands, and theirs into yours: nothing
-is made, the BBs come out of the thrower's pouch. A toss reaches <!-- wiki:config mag_share_config.toss_range --> m.
+item at its upper left. It does what fits now: when a teammate who asked you for a magazine is close enough, with a
+clear path for its arc, you toss them one (the item then reads **Toss a Mag**); otherwise, when you are down to less
+than one full spare magazine, you ask the nearest teammate within <!-- wiki:config mag_share_config.ask_range --> m who has one to spare,
+and a radio click says they heard. Your magazine flies in a short arc into their hands, and theirs into yours, in the
+thrower's own replica colours: nothing is made, the BBs come out of the thrower's pouch. If the catcher steps behind
+a wall while it flies, it is lost at the wall, BBs and all. A toss reaches <!-- wiki:config mag_share_config.toss_range --> m.
 After an ask ends you can ask again <!-- wiki:config mag_share_config.player_ask_gap --> seconds later. A press that
 can't do anything says why: on the line under the crosshair, or in the wheel's middle when you picked it there
 ("Nobody near has a spare mag that fits", "You still have a full spare mag", "Get closer to Rook to toss a mag"). It

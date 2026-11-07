@@ -37,10 +37,10 @@ enum Kind {
 	MAG_ASK, ## actor (low on BBs for the replica in slot) asked teammate target for a magazine, standing at position (MagShare).
 	MAG_TOSS, ## actor tossed target a magazine of value BBs from its slot value2, for target's slot, from its hand at position, reach m to target's chest.
 	MAG_CATCH, ## target caught actor's magazine at position (its chest): value BBs went into its spares of slot; value2 the thrower's slot.
-	MAG_LOST, ## actor's magazine to target fell at position with its value BBs: target out of play, or the round decided; slot, value2 as MAG_CATCH.
+	MAG_LOST, ## actor's magazine to target was lost at position with its value BBs: target out of play, the round decided, or its path met the level (position where); slot, value2 as MAG_CATCH.
 	MAG_REFUSED, ## actor's hand-off press did nothing: value the MagShare.Refusal, target the teammate it concerns (-1: none).
 	GRENADE_PIN, ## actor (standing at position) pulled the pin of a bomb of kind value (Grenade.Kind): its replica goes down for the throw.
-	GRENADE_THROW, ## actor threw bomb target (its GameState.grenades slot) of kind value from its eyes at position, flying at direction (m/s).
+	GRENADE_THROW, ## actor threw bomb target (its GameState.grenades slot) of kind value from its hand at position (Grenades.release_from), flying at direction (m/s).
 	GRENADE_BOUNCE, ## actor's bomb target (kind value) struck the level at position on value2 (RayHit.Surface), reach m/s into it.
 	SMOKE_POP, ## actor's smoke bomb target popped at position: its cloud grows from there.
 	FLASH_BANG, ## actor's flash bomb went bang at position.

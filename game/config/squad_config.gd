@@ -31,6 +31,9 @@ extends Resource
 ## or sprint), until rush_ease inside it.
 @export var catch_up: float = 8.0
 @export var rush_ease: float = 3.0
+## Further than this from a moving giver (m), a follower sprinting after it runs faster than a sprint
+## (MovementConfig.catch_up_sprint_scale) until back within it, then keeps the giver's pace (the owner's card B6).
+@export var catch_up_boost_from: float = 7.5
 ## Hurrying followers sprint while at least this much of their move is forward (bots' own gate is stricter).
 @export var sprint_forward: float = 0.6
 ## The giver's heading is the way they move, once they move at least this fast (m/s); standing still keeps it.

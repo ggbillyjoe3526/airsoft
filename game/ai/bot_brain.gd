@@ -84,6 +84,7 @@ static func think(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> void:
 		# sprint at each one.
 		if (b.mode == Bot.Mode.ORDER and b.order_rush) or (b.mode == Bot.Mode.MAG and b.mag_rush):
 			cmd.sprint = cmd.forward > cfg.squad.sprint_forward
+			cmd.catch_up = cmd.sprint and b.mode == Bot.Mode.ORDER and b.order_boost
 		else:
 			cmd.sprint = going and (calm or pusher) and cmd.forward > cfg.sprint_forward
 		# Closing in on where someone was: walk, so its feet don't give it away (not while trading or pushing in).
@@ -196,7 +197,13 @@ static func _choose_mode(b: Bot, w: BotWorld, target: Character, dt: float) -> v
 		if b.mode != Bot.Mode.FLAG:
 			BotMovement.enter_flag(b, w)
 	elif BotMagShare.waiting(b, w):
-		# Low on BBs, it asked a teammate for a magazine: it waits for it, or goes over to the player it asked.
+		# Low on BBs, it asked a teammate for a magazine: it waits for it, or goes over to the player it asked. A bot
+		# giver held up in a fight leaves it waiting, so it waits behind cover from what that giver fights (BP7).
+		var giver := BotMagShare.fighting_giver(b, w)
+		if giver != null and b.cover_cooldown <= 0.0 \
+				and _take_cover(b, w, _known_threat_eye(giver, w), 0.0, cfg.contact_cover_radius, 0, false):
+			b.cover_cooldown = cfg.cover_cooldown
+			return
 		_enter_mag(b, fresh)
 	elif fresh and (_trade_hit(b, w) or _reload_from_cover(b, w)):
 		return

@@ -1,6 +1,6 @@
 ### Smoke and flash bombs
 - You carry one smoke bomb and one flash bomb each round. Press G to throw smoke and Y to throw a flash (both rebindable in Settings › Controls).
-- Your replica drops for a moment while you throw, then comes back up. The canister bounces and rolls.
+- Your replica drops for a moment while you throw, then comes back up. The bomb leaves from your throwing hand, its pin and ring already pulled, and never from inside a wall you stand against. The canister bounces and rolls.
 - A smoke pops about a second after it leaves your hand and makes a big pale cloud for about 15 seconds. Bots can't see through it, but BBs still fly through.
 - Standing inside a smoke cloud turns your screen milky.
 - A flash goes bang about 1.5 seconds after the throw and blinds anyone facing it, up to 22 m, including your own team and you.

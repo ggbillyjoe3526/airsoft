@@ -4,7 +4,7 @@ extends RefCounted
 ## `PlayerCommand.throw_grenade` is one press: in play, in a live round (or on the range), not vaulting or already
 ## throwing, with one of that kind left and a slot free in GameState.grenades, the replica goes down (a reload or a draw
 ## under way stops, as a switch's do) and the pin comes out (GRENADE_PIN); GrenadeConfig.windup later the bomb leaves the
-## eyes along the view, lofted, with a share of the thrower's own speed (GRENADE_THROW), and `recover` after that the
+## throwing hand (GrenadeConfig.release_offset, never from inside a wall) along the view, lofted, with a share of the thrower's own speed (GRENADE_THROW), and `recover` after that the
 ## replica is drawn again (a holstered one stays away; a torch that was on comes back on). Meanwhile the command's
 ## trigger, sights, reload, switch, selector and dial are let go (`throwing_command`). A hit drops the throw: the bomb
 ## is kept.
@@ -399,6 +399,25 @@ static func dazzle_strength(eye: Vector3, look: Vector3, at: Vector3, c: Grenade
 	return clampf(near * facing, 0.0, 1.0)
 
 
+## Where the throwing hand of someone with eyes at `eye` looking along `yaw` lets a bomb go: release_offset right, up
+## and ahead of the eyes on the level (whatever the pitch, so a bot can aim from it before it picks one).
+static func hand_point(eye: Vector3, yaw: float, c: GrenadeConfig) -> Vector3:
+	var o := c.release_offset
+	var s := sin(yaw)
+	var co := cos(yaw)
+	return eye + Vector3(co * o.x - s * o.z, o.y, -s * o.x - co * o.z)
+
+
+## hand_point, or with the level (through `query`, into `hit`) between the eyes and there, a bomb's radius short of it
+## along that line, so a bomb never starts inside a wall.
+static func release_from(eye: Vector3, yaw: float, c: GrenadeConfig, query: WorldQuery, hit: RayHit) -> Vector3:
+	var hand := hand_point(eye, yaw, c)
+	if query == null or not query.ray(eye, hand, hit):
+		return hand
+	var reach := eye.distance_to(hand)
+	return eye.lerp(hand, maxf(0.0, hit.fraction * reach - c.radius) / maxf(reach, EPSILON))
+
+
 ## The view pitch (rad) that throws a bomb from `eye`, standing still, to come down at `at` by the release's speed and
 ## loft: the low arc, or the high one with `high`; NAN where `at` is out of reach (or straight above or below). The
 ## bounce and roll after are left to the thrower (BotBombs aims short).
@@ -440,13 +459,14 @@ func _release(c: Character, eye: Vector3, pool: Array[Grenade], events: SimEvent
 	var flat := cos(pitch)
 	var dir := Vector3(-sin(c.yaw) * flat, sin(pitch), -cos(c.yaw) * flat)
 	var speed := dir * cfg.throw_speed + c.velocity * cfg.carry_share
-	g.launch(bomb, c.id, eye, speed)
+	var hand := release_from(eye, c.yaw, cfg, _query, _hit)
+	g.launch(bomb, c.id, hand, speed)
 	c.grenades.spend(bomb)
 	var e := events.add(GameEvent.Kind.GRENADE_THROW)
 	e.actor = c.id
 	e.target = slot
 	e.value = bomb
-	e.position = eye
+	e.position = hand
 	e.direction = speed
 
 

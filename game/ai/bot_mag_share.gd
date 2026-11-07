@@ -10,8 +10,9 @@ class_name BotMagShare
 ##   nearest ask standing to it, sets off sprinting while further than mag_hurry_distance, walks on to within
 ##   mag_walk_up_to, and presses once the catcher is in reach and in sight (MagShare.can_toss_to). It lets the job go
 ##   when the ask ends, either of them is out, it has none to spare any more or it wants the pole.
-## - A bot that asked a bot waits where it is while that bot brings it; one that asked a player walks up to within
-##   mag_walk_up_to of them and waits for their toss.
+## - A bot that asked a bot waits where it is while that bot brings it, behind cover from what the giver fights while
+##   the giver is held up in a fight (BotBrain); one that asked a player walks up to within mag_walk_up_to of them and
+##   waits for their toss.
 ##
 ## In a bot's priorities (BotBrain): fights and cover first, then bringing one, then a squad order, the pole, then
 ## waiting for one. The same at every level and for both teams. Callouts put the asks and answers into words. Allocates
@@ -82,6 +83,19 @@ static func waiting(b: Bot, w: BotWorld) -> bool:
 		return false
 	var gb := bot_of(giver, w)
 	return gb == null or gb.mag_for == me
+
+
+## The bot giver `b` waits on, when that giver is held up fighting or in cover with a threat it knows of
+## (Bot.last_known); null otherwise (no bot giver, or one on its way).
+static func fighting_giver(b: Bot, w: BotWorld) -> Bot:
+	var me := b.character
+	if me.mag.coming > 0 or me.mag.asked < 0:
+		return null
+	var giver := _character(w, me.mag.asked)
+	var gb := bot_of(giver, w) if giver != null else null
+	if gb == null or not gb.has_last_known or (gb.mode != Bot.Mode.FIGHT and gb.mode != Bot.Mode.COVER):
+		return null
+	return gb
 
 
 ## The bot driving `c`, or null (the player).

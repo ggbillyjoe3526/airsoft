@@ -13,6 +13,10 @@ extends Resource
 ## 12; the browser game had none: its holster never added to the sprint). Players and bots alike.
 @export var holster_sprint_scale: float = 1.1
 @export var crouch_speed: float = 2.1
+## A Follow me follower further than SquadConfig.catch_up_boost_from behind its leader sprints this much faster than
+## the sprint (PlayerCommand.catch_up), so it can close on a leader sprinting at its own top speed (the owner's card
+## B6, 2026-11-07); nearer, it matches the leader's pace.
+@export var catch_up_sprint_scale: float = 1.2
 ## Horizontal acceleration on the ground pushing a direction, deceleration letting go, and in the air (m/s²).
 @export var ground_accel: float = 45.0
 @export var ground_decel: float = 38.0

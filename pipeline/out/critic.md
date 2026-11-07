@@ -1,24 +1,44 @@
-Task: BP7 A4 · Menus, HUD, audio, report, tests, wiki, release (rows 22, 25, 26, 33, 43, 46, 59, 61, 62, 65, 66, 67, 83, 84, 85, 89, 90, 93, 96, 102)
+Task: none (BP7 bots: rows 21, 39, 95, 64, 40, 41 narrowed, 45 and 38 narrowed) · bug pass
 Attempt: 2 of 4
-Head: 8fc90d0 (`git rev-parse HEAD` matches. `--import` clean and leaves the tree clean. Targeted GUT: graphics_guard, run_record, run_record_real_process, ping_markers, match_page, title_and_menus, settings_gameplay, ambience_pair, crash_screen, boot_screen: 179/179 pass, no script errors)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✗ | 8 ✓
-Score: 7/8 → Accept (one non-blocking check failed, judgment). Condition: the QA and performance passes are for 0269307, so they should re-confirm 8fc90d0 (RunBeat's thread, the card copies) before merge.
-Failed checks, with evidence:
-7. [judgment] hud_ping_markers.gd, in _clear: the under-the-plate flip has no test. The second half of test_ping_markers' `test_at_the_top_edge_they_step_clear_and_stay_on_the_screen` says it covers "a ping with no room over Hold here's plate goes under it". But the plate sits 9 px under the ping's top, so the needed push is smaller than the ping's distance from the top. The ping goes up with room to spare, and the test passes without the line (the worker says so, record :49). That test claims coverage it doesn't have. Not a Retry: the row's feature is covered by the four tests that fail on main. Fix it in this pull request: put the ping at the very top, so the push it needs is more than its y (then the test fails without the line), or drop the line.
-Must-fix list, attempt 1 → 2:
-- Row 85: fixed. graphics_guard.gd saves `at`. held_by_other goes stale after RunRecord.STALE_SECONDS unless that pid's RunBeat is fresh. A pre-BP7 record (at = -1) is decided by pid alone. Tests: test_graphics_guard (stale, beating, another pid's beat, clock set back, a file without `at`), and a whole-Main start that trips on a stale id.
-- Bus layout: in Godot's order. A fresh `--import` leaves no diff.
-- Pictures: match_page.gd and menu_backdrop.gd use assets/maps/cards/*.jpg (480x270, lossy, mipmapped, 61 KB the four). That is about 0.7 MB of RGBA8 texture each, against the record's +35.0 MB → +5.3 MB on the menus' first open (llvmpipe). test_match_page fails if a card holds a full picture. Only the loading screen keeps the 1920x1080 picture, one at a time.
-- Range floor: KNOWN_ISSUES row filed. Tab count corrected (settings_screen.gd:1). The release.yml version stamping is in the record (:35).
-RunBeat (game/save/run_beat.gd), new:
-- Thread-safe. `_write` is static and touches only its bound arguments (a path, a pid, a time) and its own FileAccess. No member, node or resource is read off the main thread. `beat()` waits for each finished task before adding the next and skips a beat while a write is still going. `_next` changes only on the main thread.
-- Shutdown is sound. main.gd `_exit_tree` calls `finish()` after `save_closed`. The Timer is a child, out of the tree first, so no beat can start after `finish()`.
-- A write cut short is safe: it truncates to an older time or a bad field count, which `read` passes over (tested). The record isn't rewritten each beat.
-- Cost: one bound Callable and one task every 10 s, nothing per frame (check 3).
+Head: bb6dbd2 (b6f8e55 + bb6dbd2 over c438d5a). Re-run here: test_mag_share, test_bp1_qa, test_bot_mag_share, test_mh3_qa 74/74.
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
+Score: 7/8 → Accept (one non-blocking check failed). This needs QA and performance to pass again on bb6dbd2: both
+passed c438d5a and are re-checking now.
+Must-fix 1 (attempt 1), fixed:
+- `toss_line_clear` and `MagShare.step` now both use `_path_meets` (game/sim/mag_share.gd @@ +240, +298). Both check
+  the same `MagShareConfig.path_pieces` (4) chords of `flight_point`, from throw_point to catch_point. In flight each
+  piece is checked once the toss passes its end. The bots' walk-up uses the same check. A toss allowed with nobody
+  moving is caught.
+- My attempt-1 probe re-run on bb6dbd2:
+  - Lintel at 1.6 m: refused, not lost.
+  - Crouched against 0.8 to 1.0 m cover: every case is now either allowed and caught, or refused. None is lost.
+    0.9 m cover at 0.33 m is now refused: the chords are a little stricter than the old fine check, which is safe.
+- The new test_mag_share case (lintels at 1.6, 1.9 and 2.1 m; crouch cover at 0.8 and 1.0 m) asserts "caught exactly
+  when allowed". It would fail on c438d5a: the 1.6 m case was allowed and then lost.
+test_bp1_qa (tests/unit/test_bp1_qa.gd @@ +146) changed with the rule; the test is not loosened:
+- The old check asserted that a standing giver right up to 1.4 m cover could toss, by the eye line (1.62 m). Its hand
+  is at 1.32 m, so under the flown path that toss would hit the cover and be lost. Refusing it is the fix itself.
+- The original intent (from right up to cover, the toss passes over it) is kept by the new 1.2 m case, asserted true.
+  Slab.ray reads `height` live, so the change takes effect. The test is stricter, not looser. The survey test in the
+  same file (bots never parked) still passes.
+Must-fix 2 (attempt 1), fixed:
+- The note and the wiki now say "lost at the wall". The bomb line is now part of smoke-and-flash-bombs.md, where
+  bombs are described.
+- PLAYTEST.md:237 and the MAG_LOST comment are updated.
+- The note now names the new limit in player words: under a low lintel, or crouched behind cover taller than your
+  hand, the toss waits.
+Failed check, with evidence:
+8. [judgment] Two stale lines from row 64 (bombs leave from the hand now):
+   - game/sim/README.md, grenades row: "0.3 s later the bomb leaves the eyes at 13 m/s".
+   - game/sim/game_event.gd:43: GRENADE_THROW "from its eyes at position". Its position is the hand now
+     (grenades.gd @@ +459).
+   Fix both in passing. This doesn't block.
+Notes: QA's MAX_NEAR note stands. A toss to a player behind a lintel is refused with the "get closer" line, which
+names the wrong cause (that wording predates this branch).
 Owner should test in the game (at most 6, one line each):
-- Settings › Gameplay with keyboard and pad. Should the Order wheel's Hover/Click move there too?
-- NVDA on the Match page and the Loadout: do cards read their words, and the new ones after a pick?
-- Headphones on each field: is the ambience wider and no louder?
-- The first open of the Match page (no hitch?), the cards' sharpness at 4K, and the loading picture at 1080p and 4K.
-- Two pings close together, and one on Hold here's sign near the top of the screen: do they part gently and stay on screen?
-- Open the game twice quickly and wait in the menus a few minutes: does the second copy leave the first alone (no safe-graphics prompt)? Also check Airsoft.exe's icon from the pull request's Release dry run.
+- Throw a smoke and a flash looking level, steeply up and down, and against a wall: does each leave your right hand?
+- Follow me, then sprint off from a teammate 15 m back: does it close to about 7.5 m and keep pace without surging?
+- Toss a mag over chest-high cover and from a crouch behind low cover: does refusing these feel fair, or too strict?
+- Woodland at Hard: do bots near tall bushes watch the bush edges, and not stare at every bush?
+- Run low beside a fighting teammate: does the asker take cover and stay there, or pop up to peek?
+- With bot teammates on kits: is your side as strong as theirs, and do sniper teammates leave you short of mags?

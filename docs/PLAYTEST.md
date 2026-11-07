@@ -234,8 +234,8 @@ parts. To try every part before you have levelled, turn on Settings › Dev › 
   Pistol too, with Dev content off (public with Woodland, NR1). Fit it, quit, start again: still fitted. On Depot by day
   it does nothing and your replica in hand shows no torch.
 - [ ] **Your setup is kept.** Quit and start the game again: every pick is still
-  there. Teammates carry replicas as they come;
-  opponents carry kits of their own ([Bots](#bots)).
+  there. Bot teammates and opponents alike carry kits
+  of their own ([Bots](#bots)).
 - [ ] **Edit `data/stats.md`.** Set the AEG's `Fire rate (BBs/s)` to 20 and start the game again: the panel says 20
   and every rifle fires faster. A typo keeps the built-in value with a warning in Godot's output, and
   `tools/unit_tests.sh` names its line.

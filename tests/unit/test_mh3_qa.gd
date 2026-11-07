@@ -211,6 +211,37 @@ func test_each_toss_wears_its_throwers_replica_magazine_slot_and_all() -> void:
 		assert_eq(view.mesh_of(1), want1, "slot 1: the pistol's own")
 
 
+func test_each_toss_wears_its_throwers_replica_paint() -> void:
+	# BP7: before, the magazine flew in its model's own paint.
+	_match()
+	var models := FigureModels.new(FigureConfig.new())
+	var view := MagTossView.new()
+	add_child_autofree(view)
+	var mine: Array[StringName] = [&"", &""]
+	view.setup(state.mag_tosses.size(), state.characters, models, sim.mag_share, YOU, mine, false)
+	var t := state.mag_tosses[0]
+	t.active = true
+	t.from_id = ROOK
+	t.from_slot = 0
+	t.to_id = YOU
+	t.from = Vector3(4.0, 1.3, 0.0)
+	t.age = 0.1
+	t.flight = 0.6
+	view.update(state, 0.0, DT)
+	var rook := state.characters[ROOK]
+	var want := ReplicaPaint.materials(ReplicaPaint.bot_paint(rook.team, rook.armament.replicas[0]), false)
+	var copy := view.get_child(0) as MeshInstance3D
+	var painted := 0
+	for i in copy.get_surface_override_material_count():
+		var m := copy.get_surface_override_material(i)
+		if m != null and want.has(m):
+			painted += 1
+	assert_gt(painted, 0, "in Rook's team paint for its rifle")
+	var prewarmed := view.materials()
+	for m in want:
+		assert_has(prewarmed, m, "its paint is prewarmed")
+
+
 func test_every_replica_model_has_a_magazine_mesh_to_toss() -> void:
 	var models := FigureModels.new(FigureConfig.new())
 	for id: StringName in [&"aeg", &"cyber", &"pistol"]:

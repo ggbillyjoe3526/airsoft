@@ -1,6 +1,6 @@
 class_name BotKits
 extends RefCounted
-## What the other team's bots carry (the browser game's pool/botKit.ts): data/bot-kits.md's kits read against the pool,
+## What the bots carry, on both teams (B4) (the browser game's pool/botKit.ts): data/bot-kits.md's kits read against the pool,
 ## and each opposing bot's pick by its difficulty's weights, seeded by the match's seed and the bot's id so a seed
 ## replays the same kits. A kit is built as the player's loadout is (LoadoutRules.carried), from rules that follow no
 ## progress: what the player has unlocked never changes a bot's kit. Never throws: a row it can't read is left out and

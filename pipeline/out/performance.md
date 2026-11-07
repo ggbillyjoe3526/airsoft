@@ -1,5 +1,6 @@
-PERFORMANCE retry: PASS (bp7-menus 8fc90d0). No baseline; judged by reading the diff; no --perf match run.
-- Heartbeat: the disk write is off the main thread (WorkerThreadPool, low priority); the main thread does one is_task_completed and one add_task every 10 s. The Callable bind allocates once per 10 s, not per frame. The write is one small file (about 30 bytes), no read-back, so the previous 1 to 2 ms main-thread hitch is gone. Alternating two files; Main joins on exit. OK.
-- Map memory claim: the cards are 480x270 JPEGs (11 to 19 KB each, 62 KB total), about 0.7 MB decoded each with mipmaps, about 2.8 MB for all four, against about 44 MB before. The claim holds. The menu backdrop blur also reads the card copies, so the 8 MB map pictures are loaded only by the loading screen and freed with it (about 11 MB with mipmaps, the full jpgs keep mipmaps: dropping mipmaps from the full pictures would save about 2.7 MB during loading, optional).
-- Ping stepping: still fixed arrays and value types; the new up_room/down_room are floats. No per-frame allocation.
-- Ambience bus layout diff is only a reorder of the panner sub-resources. No change in cost.
+# Performance 2: bp7-bots c438d5a..bb6dbd2
+Verdict: PASS (no baseline; judged by reading)
+- can_toss_to is ordered cheap checks first (team, play, vault, spare, range <= toss_range 6 m); the rays only run for a pair within 6 m with a fitting spare. Now up to 4 rays (was 1), each short (<= 6 m).
+- Callers per tick: (1) a bot in MAG mode bringing a mag: can_toss_to plus, while it cannot toss yet, _up_to -> toss_line_clear: at most ~8 rays per bringing bot per tick, and only bots with a job (a few at once, asks stand 15 s, one giver per ask). Not every bot pair. (2) The press, once per press (_toss and nearest_asker over the askers, capped by team size). (3) HUD mag line each frame only for the player when someone asked: nearest_asker(in_reach) over askers, up to ~5 askers x 4 rays; render-rate, still small ray count; acceptable, could be cached per tick if it ever shows.
+- In flight: rays only when a piece boundary is crossed (reached > checked), so at most 4 rays over a toss's life of 0.3-0.6 s, not per tick. Fewer than before in the ticks between pieces (old code raycast every tick).
+- No allocations: floats and Vector3 values; no arrays or lambdas; Toss.checked is a preallocated int.

@@ -614,8 +614,8 @@ func _start_simulation(map: MapData) -> void:
 		# Elimination's overtime flag, on a map with a spot for it (OV1).
 		state.round_state.has_overtime_spot = map.has_overtime_flag
 		state.round_state.overtime_spot = map.overtime_flag
-	# Every bot's name and personality, drawn on the match's seed. Your teammates carry their replicas as they come;
-	# the other team's bots each pick a kit by the difficulty, leaning towards kits that suit their personality.
+	# Every bot's name and personality, drawn on the match's seed. Every bot, your teammates as well as the other team's
+	# (B4), picks a kit by the difficulty, leaning towards kits that suit its personality.
 	_bot_parts.clear()
 	_bot_config = BotConfig.load_default()
 	if practice:
@@ -633,7 +633,7 @@ func _start_simulation(map: MapData) -> void:
 		var team := teams[i]
 		var who: BotRoster.Identity = _identities.get(id)
 		var plan := BotKits.shared().pick(difficulty, kit_rules, Seeds.kit_seed(match_seed, id),
-				who.personality if who != null else &"", _bot_config.kit_suit_lean) if team != player_team else null
+				who.personality if who != null else &"", _bot_config.kit_suit_lean)
 		if plan == null:
 			state.characters.append(Character.new(id, team, Vector3.ZERO, 0.0, loadout))
 			continue
@@ -807,7 +807,8 @@ func _build_views(ui: CanvasLayer) -> void:
 	if not practice:
 		_mag_tosses = MagTossView.new()
 		add_child(_mag_tosses)
-		_mag_tosses.setup(state.mag_tosses.size(), state.characters, _figure_models, _sim.mag_share)
+		_mag_tosses.setup(state.mag_tosses.size(), state.characters, _figure_models, _sim.mag_share, PLAYER_ID,
+				kit.paints, realistic)
 	_grenades = GrenadeView.new()
 	add_child(_grenades)
 	_grenades.setup(state.grenades.size(), _tuning.grenades, _light.night)

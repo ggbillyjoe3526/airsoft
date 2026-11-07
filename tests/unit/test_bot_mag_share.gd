@@ -516,6 +516,31 @@ func test_a_fight_comes_first() -> void:
 	assert_eq(giver.mag_for, you, "the job still stands")
 
 
+func test_a_bot_waiting_on_a_bot_giver_held_up_in_a_fight_waits_behind_cover() -> void:
+	# BP7: before, it stood where it was (MAG mode) until the ask lapsed. Crouch cover by the asker to wait behind; the
+	# giver's fight is set by hand (a threat it knows of to the east), and the asker's next choice is taken.
+	var walls := [[Vector3(-28.5, 0.6, 20.0), Vector3(0.4, 1.2, 2.0)]]
+	_squad([YOU_AWAY, Vector3(-30.0, 0.0, 20.0), Vector3(-18.0, 0.0, 20.0), FAR_ORANGE], &"normal", [0, 0, 0, 1], YOU,
+			false, walls)
+	var asker := _bot(1)
+	var giver := _bot(2)
+	_empty(asker.character)
+	_run(0.1)
+	assert_eq(asker.character.mag.asked, 2, "it asked the bot")
+	assert_true(BotMagShare.waiting(asker, bots.world), "it waits for it")
+	assert_null(BotMagShare.fighting_giver(asker, bots.world), "the giver is on its way")
+	giver.mode = Bot.Mode.FIGHT
+	giver.has_last_known = true
+	giver.last_known = Vector3(-6.0, 0.0, 20.0)
+	assert_eq(BotMagShare.fighting_giver(asker, bots.world), giver, "held up in a fight")
+	asker.cover_cooldown = 0.0
+	BotBrain._choose_mode(asker, bots.world, null, DT)
+	assert_eq(asker.mode, Bot.Mode.COVER, "it waits behind cover meanwhile")
+	var eye := giver.last_known + Vector3(0.0, tuning.body.stand_eye_height, 0.0)
+	assert_true(BotCover.hides_from(asker.cover.position, eye, bots.world), "from what the giver fights")
+	assert_eq(asker.character.mag.asked, 2, "its ask still stands")
+
+
 # --- The calls (callouts.md: Need a mag, Mag coming, Thanks for the mag) ---
 
 func test_the_ask_the_answer_and_the_thanks_are_called() -> void:

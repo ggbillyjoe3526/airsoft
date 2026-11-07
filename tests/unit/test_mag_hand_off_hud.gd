@@ -501,15 +501,16 @@ func test_the_setting_is_on_by_default_and_saved() -> void:
 # --- criterion 4: the magazine in the air ---
 
 func test_the_toss_arcs_a_tenth_a_metre_up_to_0_6_m_and_spins_2_5_turns_a_second() -> void:
-	var mid := MagTossView.flight_at(Vector3.ZERO, Vector3(4.0, 0.0, 0.0), 0.5, 0.5)
+	var c := MagShareConfig.new()
+	var mid := MagTossView.flight_at(Vector3.ZERO, Vector3(4.0, 0.0, 0.0), 0.5, 0.5, c)
 	assert_almost_eq(mid.origin, Vector3(2.0, 0.4, 0.0), Vector3.ONE * 0.001, "0.1 m a metre at the middle")
-	var far := MagTossView.flight_at(Vector3.ZERO, Vector3(10.0, 0.0, 0.0), 0.5, 0.8)
+	var far := MagTossView.flight_at(Vector3.ZERO, Vector3(10.0, 0.0, 0.0), 0.5, 0.8, c)
 	assert_almost_eq(far.origin.y, 0.6, 0.001, "never over 0.6 m")
-	assert_almost_eq(MagTossView.flight_at(Vector3.ZERO, Vector3(4.0, 0.0, 0.0), 1.0, 0.5).origin,
+	assert_almost_eq(MagTossView.flight_at(Vector3.ZERO, Vector3(4.0, 0.0, 0.0), 1.0, 0.5, c).origin,
 			Vector3(4.0, 0.0, 0.0), Vector3.ONE * 0.001, "lands at the chest")
-	var a_turn := MagTossView.flight_at(Vector3.ZERO, Vector3(4.0, 0.0, 0.0), 0.8, 0.5)
+	var a_turn := MagTossView.flight_at(Vector3.ZERO, Vector3(4.0, 0.0, 0.0), 0.8, 0.5, c)
 	assert_almost_eq(a_turn.basis.y, Vector3.UP, Vector3.ONE * 0.001, "0.4 s in: one whole turn")
-	var half := MagTossView.flight_at(Vector3.ZERO, Vector3(4.0, 0.0, 0.0), 0.4, 0.5)
+	var half := MagTossView.flight_at(Vector3.ZERO, Vector3(4.0, 0.0, 0.0), 0.4, 0.5, c)
 	assert_almost_eq(half.basis.y, Vector3.DOWN, Vector3.ONE * 0.001, "0.2 s in: half a turn")
 
 

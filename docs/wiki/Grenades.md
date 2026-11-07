@@ -10,8 +10,9 @@ Press **Throw smoke** (4) or **Throw flash** (5) ([Controls](Controls)) to throw
 your replicas to take a bomb in hand: your replica goes down, your gloved hand comes up holding the bomb in a fist,
 the panel says **SMOKE IN HAND** or **FLASH IN HAND** and the crosshair stays to throw by; a trigger pull throws it.
 Rolling on, or a replica key, reload or the holster, puts it back. Your replica goes down while your left hand pulls
-the pin and your arm swings the bomb over, it leaves your hand along your view, lofted a little, and your replica comes
-back up: under a second in all. You
+the pin and your arm swings the bomb over, it leaves your hand (a little right of and ahead of your eyes, never from
+inside a wall you stand against) along your view, lofted a little, and your replica comes back up: under a second in
+all. A thrown bomb flies and lands without its pin. You
 can't fire or aim while you throw, and a reload under way stops. If you keep the trigger held after the pull that
 threw the bomb, your replica doesn't fire when it comes back up: let go and pull again. Throwing on the run adds some
 of your own speed.

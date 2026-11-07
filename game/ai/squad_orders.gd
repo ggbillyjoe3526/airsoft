@@ -55,6 +55,7 @@ static func start(b: Bot, giver: Character, kind: SquadOrder.Kind, slot: int) ->
 	b.order_yaw = giver.yaw
 	b.order_heading = giver.yaw
 	b.order_rush = false
+	b.order_boost = false
 	b.order_settled = false
 	b.order_catching_up = false
 	b.order_dropping_back = false
@@ -70,6 +71,7 @@ static func end(b: Bot, w: BotWorld) -> void:
 	b.order = SquadOrder.Kind.NONE
 	b.order_giver = null
 	b.order_rush = false
+	b.order_boost = false
 	if BotFlag.role(b, w) == BotFlag.Role.NONE:
 		b.hunting = true
 
@@ -229,6 +231,7 @@ static func move(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> bool:
 	var cfg := w.cfg.squad
 	var was_rushing := b.order_rush
 	b.order_rush = false
+	b.order_boost = false
 	var giver := b.order_giver
 	if giver == null:
 		return false
@@ -303,9 +306,12 @@ static func _follow_move(b: Bot, w: BotWorld, giver: Character, was_rushing: boo
 	if pace < WALK:
 		_stand(b)
 		return false
-	if _flat(giver.position, p) > cfg.catch_up - (cfg.rush_ease if was_rushing else 0.0):
+	var apart := _flat(giver.position, p)
+	if apart > cfg.catch_up - (cfg.rush_ease if was_rushing else 0.0):
 		pace = SPRINT
 	b.order_rush = pace == SPRINT
+	# Far behind a giver on the move: faster than a sprint until back within catch_up_boost_from (B6).
+	b.order_boost = b.order_rush and moving and apart > cfg.catch_up_boost_from
 	cmd.walk = pace == WALK
 	if w.nav.clear_line(p, g):
 		BotRoutes.drop(b)

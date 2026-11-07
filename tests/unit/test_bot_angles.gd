@@ -122,6 +122,53 @@ func test_holds_both_sides_of_a_doorway_and_nothing_in_the_open() -> void:
 	assert_eq(BotAngles.find(WorldQuery.new(), Vector3(0.0, EYE, 0.0), EYE, 0.0, config, out), 0, "the open field")
 
 
+func test_a_tall_bush_ahead_is_a_corner_and_a_low_one_or_the_one_it_stands_in_is_not() -> void:
+	# BP7 (the browser's angleFeatures, M40): a bush 2 m across, 10 m ahead, stops the rays that meet it as a wall does.
+	var f := Foliage.new()
+	f.add(Vector3(-1.5, 0.0, -10.0), 1.0, 1.6)
+	var bushes := BotAngles.bushes_of(f, config)
+	assert_eq(bushes.size(), 1, "tall enough to hide someone")
+	var eye := Vector3(0.0, EYE, 0.0)
+	var out := _angles(2)
+	var found := BotAngles.find(WorldQuery.new(), eye, EYE, 0.0, config, out, bushes)
+	assert_gt(found, 0, "its edges are corners")
+	var beside := false
+	for i in found:
+		var p := out[i].point
+		# Just past the bush's side, not inside its leaves.
+		if absf(Vector2(p.x + 1.5, p.z + 10.0).length() - 1.0) < 1.5:
+			beside = true
+		assert_gt(Vector2(p.x + 1.5, p.z + 10.0).length(), 1.0 - 1e-3, "not in the leaves")
+	assert_true(beside, "beside the bush")
+	assert_eq(BotAngles.find(WorldQuery.new(), eye, EYE, 0.0, config, out), 0, "without the bushes, the open field")
+	# A low bush (under angle_bush_min_height) hides nobody standing.
+	var low := Foliage.new()
+	low.add(Vector3(-1.5, 0.0, -10.0), 1.0, config.angle_bush_min_height - 0.1)
+	assert_eq(BotAngles.bushes_of(low, config).size(), 0)
+	# Standing in it: its own leaves don't hide the holder's view.
+	assert_eq(BotAngles.find(WorldQuery.new(), Vector3(-1.5, EYE, -10.0), EYE, 0.0, config, out, bushes), 0)
+
+
+func test_the_bots_pick_the_tall_bushes_once_as_they_are_made() -> void:
+	var map := MapData.new()
+	map.id = "bushes"
+	var floor_block := MapData.Block.new()
+	floor_block.kind = &"floor"
+	floor_block.center = Vector3(0.0, -0.25, 0.0)
+	floor_block.size = Vector3(30.0, 0.5, 30.0)
+	map.blocks.append(floor_block)
+	var q := BoxWorld.new(tuning.body)
+	q.add_floor(30.0, 30.0)
+	q.foliage.add(Vector3(3.0, 0.0, -6.0), 1.2, 2.0)
+	q.foliage.add(Vector3(-3.0, 0.0, -6.0), 1.2, 0.5)
+	var state := GameState.new(1, tuning)
+	var loadout := ReplicaStats.default_loadout()
+	state.characters.append(Character.new(0, 0, Vector3.ZERO, 0.0, loadout))
+	state.characters.append(Character.new(1, 1, Vector3(0.0, 0.0, -10.0), 0.0, loadout))
+	var bots := BotController.new(state, -1, map, NavGrid.build(map, tuning.nav, tuning.body), q, tuning, config)
+	assert_eq(bots.world.angle_bushes, PackedVector3Array([Vector3(3.0, -6.0, 1.2)]), "x, z and radius of the tall one")
+
+
 func test_keeps_the_better_of_two_close_picks() -> void:
 	var q := BoxWorld.new()
 	# Two wall ends a few degrees apart: one pick for both, the better scoring.
