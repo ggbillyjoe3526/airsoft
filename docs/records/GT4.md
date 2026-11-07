@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-07 | 1 | Opus 5.5 (build thread) | – | pending | – |
+| 2026-11-07 | 1 | Opus 5.5 (build thread) | – | 7/8 Retry (QA Pass, performance Pass) | the changelog note wasn't committed; the frame-rate test passed without the feature; the unwind's limit to the hand's way down was only a comment |
+| 2026-11-07 | 2 | Opus 5.5 (build thread) | – | pending | – |
 
 ## What changed
 
@@ -21,7 +22,7 @@ down. Now they ease back from where the throw left them.
 - **ArmsView** (`cut_throw`, `unwind_throw`): the left arm stays shown while it eases down if it showed at the cut
   (pulling the pin), then hides as before.
 - **GrenadeView** (`_unwind`): on the cut it takes the pose and eases over `ViewModelConfig.bomb_unwind_time` while
-  the hand goes down (`bomb_raise_time`, unchanged). A new throw mid-ease starts from the hold; a bomb of another kind
+  the hand goes down (`bomb_raise_time`, unchanged; the ease is held to that at most). A new throw mid-ease starts from the hold; a bomb of another kind
   puts the hold back first.
 - `tools/render_held_bomb.gd` `cut<share>` renders every frame of a throw cut off at that share.
 

@@ -206,7 +206,7 @@ func test_a_throw_cut_off_mid_windup_eases_back_to_the_hold_as_the_hand_goes_dow
 	v.update(s, 0.0, DT, c, EYE)
 	assert_true(v._held_root.visible, "the empty hand goes down")
 	var next := v.arms().bomb_moved().origin.length()
-	assert_gt(next, 0.0, "not snapped to the hold in one frame")
+	assert_gt(next, 0.5 * at_cut, "not snapped to the hold in one frame")
 	assert_lt(next, at_cut, "already on its way back")
 	_frames(v, s, c, view_cfg.bomb_unwind_time)
 	assert_true(v._held_root.visible, "back before the hand is gone")
@@ -247,7 +247,25 @@ func test_the_ease_back_runs_its_time_eased_out_whatever_the_frame_rate() -> voi
 			v.update(s, 0.0, dt, c, EYE)
 		out.append(v.arms().bomb_moved().origin.length() / at_cut)
 	assert_almost_eq(out[0], out[1], 0.02, "the same way back at half its time")
+	assert_gt(out[0], 0.1, "still on its way at half its time")
 	assert_lt(out[0], 0.5, "eased out: over half way back at half its time")
+
+
+func test_an_ease_back_longer_than_the_hand_going_down_is_held_to_it() -> void:
+	var s := GameState.new(5, tuning)
+	view_cfg.bomb_unwind_time = 1.0
+	var v := _view()
+	var c := _char()
+	c.grenades.readied = Grenade.Kind.SMOKE
+	_frames(v, s, c, view_cfg.bomb_raise_time)
+	_throw_at(c, Grenade.Kind.SMOKE, 0.8)
+	v.update(s, 0.0, DT, c, EYE)
+	var at_cut := v.arms().bomb_moved().origin.length()
+	c.grenades.stop()
+	for i in floori(view_cfg.bomb_raise_time / DT) - 1:
+		v.update(s, 0.0, DT, c, EYE)
+	assert_true(v._held_root.visible, "the hand is still going down")
+	assert_lt(v.arms().bomb_moved().origin.length(), 0.05 * at_cut, "the arms nearly home as the hand goes")
 
 
 func test_the_left_hand_cut_off_on_the_pin_eases_down_shown_then_hides() -> void:

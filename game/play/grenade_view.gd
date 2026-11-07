@@ -515,7 +515,9 @@ func _draw_held(eyes: Character, eye: Vector3, delta: float, ahead: float) -> vo
 	if _share > 0.0:
 		_unwind = 0.0
 	elif _unwind > 0.0 and _view_cfg != null:
-		_unwind = move_toward(_unwind, 0.0, delta / _view_cfg.bomb_unwind_time)
+		# Never longer than the hand takes to go down, or it is gone before the arms are back.
+		_unwind = move_toward(_unwind, 0.0,
+				delta / minf(_view_cfg.bomb_unwind_time, _view_cfg.bomb_raise_time))
 	if _raise <= 0.0:
 		_share = 0.0
 		_unwind = 0.0

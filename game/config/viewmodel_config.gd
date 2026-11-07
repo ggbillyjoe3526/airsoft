@@ -106,7 +106,7 @@ extends Resource
 @export var bomb_raise_time: float = 0.2
 ## A throw cut off in its windup (a hit, the round's end, other eyes) eases your arms back from where they were to its
 ## start (the right hand on the hold, the left down out of view) over this long (s), easing out, while the hand goes
-## down; at most bomb_raise_time, or the hand is gone before the arms are back.
+## down; held to bomb_raise_time at most, so the arms are back before the hand is gone.
 @export var bomb_unwind_time: float = 0.15
 @export var robot_arms: Dictionary[StringName, Color] = {
 	&"Glove": Color(0.80, 0.81, 0.82),
