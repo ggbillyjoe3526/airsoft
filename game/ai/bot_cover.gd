@@ -44,25 +44,22 @@ class _Search:
 static var _s: _Search = _Search.new()
 
 
+## A map's floor-standing cover, low and tall (`find_cover`), in the map's block order.
+class Found:
+	extends RefCounted
+	var low: Array[Block] = []
+	var tall: Array[Block] = []
+
+
 ## The map's blocks standing on the floor (bottom within low_cover_floor_gap over the floor under them, or sunk at most
 ## low_cover_floor_sink into it) whose top is between `min_top` and `max_top` above it.
 static func floor_blocks(map: MapData, nav: NavGrid, cfg: BotConfig, cell: float, min_top: float,
 		max_top: float) -> Array[Block]:
 	var out: Array[Block] = []
 	for b in map.blocks:
-		if b.kind == &"floor" or b.kind == &"ramp":
-			continue
-		var bottom := b.center.y - b.size.y * 0.5
-		var floor_y := _floor_under(nav, b, cell)
-		if is_nan(floor_y) or bottom > floor_y + cfg.low_cover_floor_gap or bottom < floor_y - cfg.low_cover_floor_sink:
-			continue
-		var top := b.center.y + b.size.y * 0.5 - floor_y
-		if top <= min_top or top >= max_top:
-			continue
-		var k := Block.new()
-		k.center = Vector2(b.center.x, b.center.z)
-		k.half = Vector2(b.size.x, b.size.z) * 0.5
-		out.append(k)
+		var top := _top_on_floor(b, nav, cfg, cell)
+		if not is_nan(top) and top > min_top and top < max_top:
+			out.append(_footprint(b))
 	return out
 
 
@@ -74,6 +71,41 @@ static func low_blocks(map: MapData, nav: NavGrid, cfg: BotConfig, tuning: SimTu
 ## Full cover: at least as tall as a body.
 static func tall_blocks(map: MapData, nav: NavGrid, cfg: BotConfig, tuning: SimTuning) -> Array[Block]:
 	return floor_blocks(map, nav, cfg, tuning.nav.cell, tuning.body.height - EPSILON, INF)
+
+
+## Both: low_blocks and tall_blocks in one look at each block's floor. Pure data (the map and the nav grid), so
+## PlaySession finds it on a worker thread.
+static func find_cover(map: MapData, nav: NavGrid, cfg: BotConfig, tuning: SimTuning) -> Found:
+	var out := Found.new()
+	var body := tuning.body
+	for b in map.blocks:
+		var top := _top_on_floor(b, nav, cfg, tuning.nav.cell)
+		if is_nan(top):
+			continue
+		if top > body.crouch_eye_height and top < body.stand_eye_height:
+			out.low.append(_footprint(b))
+		if top > body.height - EPSILON:
+			out.tall.append(_footprint(b))
+	return out
+
+
+## How far block `b`'s top is above the floor it stands on, or NAN if it is a floor or ramp or stands on none.
+static func _top_on_floor(b: MapData.Block, nav: NavGrid, cfg: BotConfig, cell: float) -> float:
+	if b.kind == &"floor" or b.kind == &"ramp":
+		return NAN
+	var bottom := b.center.y - b.size.y * 0.5
+	var floor_y := _floor_under(nav, b, cell)
+	if is_nan(floor_y) or bottom > floor_y + cfg.low_cover_floor_gap or bottom < floor_y - cfg.low_cover_floor_sink:
+		return NAN
+	return b.center.y + b.size.y * 0.5 - floor_y
+
+
+## Block `b`'s footprint on the floor.
+static func _footprint(b: MapData.Block) -> Block:
+	var k := Block.new()
+	k.center = Vector2(b.center.x, b.center.z)
+	k.half = Vector2(b.size.x, b.size.z) * 0.5
+	return k
 
 
 ## Which way (1 right, -1 left, 0 neither) someone standing at `spot` and facing `threat_eye` can lean to see it: the

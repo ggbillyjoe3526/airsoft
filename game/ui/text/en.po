@@ -1055,6 +1055,9 @@ msgstr "Starting the match"
 msgid "LOAD_READY"
 msgstr "Ready"
 
+msgid "LOAD_LEAVING"
+msgstr "Leaving…"
+
 msgid "LOAD_CONTINUE"
 msgstr "Continue"
 

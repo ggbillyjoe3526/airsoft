@@ -78,6 +78,30 @@ func test_links_a_low_wall_a_body_can_vault_and_nothing_taller_or_shorter() -> v
 				"linked once per grid")
 
 
+## The loading screen spreads the search over frames (PlaySession._prepare_bots): stopped at every clock look, it finds
+## the very links one whole search does, with the same search points and routes.
+func test_a_search_spread_over_calls_finds_the_same_links() -> void:
+	var f := _field(0.85)
+	var whole := _linked(f[0], f[1])
+	var spread := NavGrid.build(f[0], tuning.nav, tuning.body)
+	var finder := NavVaults.Finder.new()
+	var calls := 1
+	while not NavVaults.find(finder, spread, f[1], tuning.vault, tuning.body, 0):
+		calls += 1
+	assert_gt(calls, 2, "stopped along the way")
+	assert_eq(NavVaults.finish(finder, spread, config.vault_price), whole.vault_to.size())
+	assert_gt(whole.vault_to.size(), 0)
+	assert_eq(spread.vault_start, whole.vault_start)
+	assert_eq(spread.vault_to, whole.vault_to)
+	assert_eq(spread.vault_region, whole.vault_region)
+	assert_eq(spread.astar.get_point_count(), whole.astar.get_point_count())
+	var a := PackedVector3Array()
+	var b := PackedVector3Array()
+	assert_true(whole.find_route(Vector3(6.0, 0.0, -6.0), Vector3(-6.0, 0.0, -6.0), a, true))
+	assert_true(spread.find_route(Vector3(6.0, 0.0, -6.0), Vector3(-6.0, 0.0, -6.0), b, true))
+	assert_eq(b, a)
+
+
 func test_a_bots_route_goes_over_where_that_saves_the_walk_and_a_walk_off_never_does() -> void:
 	var f := _field(0.85)
 	var nav := _linked(f[0], f[1])

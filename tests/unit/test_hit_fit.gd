@@ -90,6 +90,51 @@ func test_the_fitted_joints_sit_on_the_drawn_skeleton() -> void:
 	body.free()
 
 
+## BP6: part way into or out of the holster and the sprint's arms (as the simulation eases them, UpperBlend), the
+## joints sit on the drawn ones as they do settled; snapped straight to the holster instead (as before BP6), they don't.
+func test_the_joints_follow_the_drawn_arms_part_way_into_the_holster_and_the_sprint() -> void:
+	var body := FigureBody.new()
+	body.setup(models, FigureMix.HUMAN, 0, 0, Color.RED, 0.0, models.config.lod_high)
+	holder.add_child(body)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = SEED + 1
+	var lower := PackedVector3Array()
+	var upper := PackedVector3Array()
+	var worst := 0.0
+	var worst_at := ""
+	var snapped_worst := 0.0
+	for h: float in [0.2, 0.5, 0.8]:
+		for sprint: float in [0.0, 0.5, 1.0]:
+			var c := _state(rng, 0)
+			c.lean = 0.0
+			c.prev_lean = 0.0
+			c.pitch = rng.randf_range(-0.6, 0.6)
+			c.prev_pitch = c.pitch
+			c.armament.holstered = true
+			c.sprinting = sprint > 0.0
+			c.holster_weight = h
+			c.sprint_weight = sprint
+			var drawn := _drawn(body, c)
+			Hitbox.fitted_joints(c, hits, lower, upper)
+			for k in UPPER_BONES.size():
+				var bone := UPPER_BONES[k] if UPPER_BONES[k] != "" else "HeadTop"
+				var e := upper[k].distance_to(drawn[bone])
+				if e > worst:
+					worst = e
+					worst_at = "holster %.1f sprint %.1f %s" % [h, sprint, bone]
+			# The hard switch the hit volume made before: all the way into the holster's pose at once.
+			c.holster_weight = 1.0
+			Hitbox.fitted_joints(c, hits, lower, upper)
+			for k in UPPER_BONES.size():
+				var bone := UPPER_BONES[k] if UPPER_BONES[k] != "" else "HeadTop"
+				snapped_worst = maxf(snapped_worst, upper[k].distance_to(drawn[bone]))
+	assert_lte(worst, JOINT_CLOSE, "every joint within %.0f cm of the drawn one part way (worst %.1f cm, %s)" % [
+			JOINT_CLOSE * 100.0, worst * 100.0, worst_at])
+	assert_gt(snapped_worst, worst, "snapped to the holster, further off (%.1f cm)" % (snapped_worst * 100.0))
+	gut.p("part way: worst %.1f cm (%s); snapped: %.1f cm" % [worst * 100.0, worst_at, snapped_worst * 100.0])
+	body.free()
+
+
 func test_a_crouched_volume_stays_under_crouch_cover() -> void:
 	# DECISIONS 2026-09-30: a crouched head's top stays at or below crouch_top_max, because crouch cover is 1.2 m.
 	var volume := Hitbox.Volume.new()
@@ -148,6 +193,9 @@ func _state(rng: RandomNumberGenerator, i: int) -> Character:
 	c.prev_lean = c.lean
 	c.prev_crouch_amount = c.crouch_amount
 	c.prev_walk_cycle = c.walk_cycle
+	# The arms as eased into the holster or the sprint by now, as the drawn figure's are once snapped.
+	c.holster_weight = UpperBlend.holster_target(c.armament, hits.holster_swap)
+	c.sprint_weight = 1.0 if c.sprinting else 0.0
 	return c
 
 
@@ -157,6 +205,9 @@ func _drawn(body: FigureBody, c: Character) -> Dictionary[String, Vector3]:
 	var pose := FigurePose.new(models.config)
 	pose.read(c, 1.0, hits)
 	pose.snap()
+	# Part way into the holster or the sprint: drawn as far as the simulation has eased them (UpperBlend).
+	pose.holster_weight = c.holster_weight
+	pose.sprint_weight = c.sprint_weight
 	body.animate(pose, hits, 0.0)
 	body.animate(pose, hits, 0.0)
 	var sk := body.skeleton

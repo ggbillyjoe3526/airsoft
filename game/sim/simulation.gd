@@ -174,6 +174,7 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		Accuracy.step(c, tuning.movement, tuning.accuracy, dt)
 		if not in_play:
 			Elimination.step(c, tuning.hits, dt)
+			UpperBlend.step(c, tuning.hits, dt)
 			continue
 		Footsteps.step(c, tuning.footsteps, state.events, query, tuning.noise)
 		# Fired on the run the kick grows, as the spread does (the owner's 0.1 Dev 5 note 9).
@@ -187,6 +188,8 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		Torch.step(c, toggle_torch, state.events, dt, Grenades.take_torch_back(c))
 		# A ping looks where the view is now, after the turn and the shot's kick.
 		_ping(c, commands, live and not state.round_state.practice, state.events)
+		# The arms into or out of the holster and the sprint as this tick left them, for the hit volume (and as drawn).
+		UpperBlend.step(c, tuning.hits, dt)
 	var first_bb_event := state.events.count
 	BBStep.step(state.bbs, state.characters, query, tuning, kill_y, not live, ends, state.events, dt,
 			state.wind.at(state.time), state.rng, state.targets)

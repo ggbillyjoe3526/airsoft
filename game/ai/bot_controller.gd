@@ -7,6 +7,16 @@ extends RefCounted
 ## happened, hands out the squad orders given in it and gives each new round a fresh plan. Bots are just another controller: they act only through their commands (ARCHITECTURE
 ## contract 2). Pure: no nodes.
 
+
+## How the bots are set up: with `talk` they call to their team (Callouts, data/callouts.md; off, they play exactly the
+## same and say nothing); `cover` is the map's cover if already found (BotCover.find_cover, as PlaySession finds it off
+## the main thread), else it is found here.
+class Options:
+	extends RefCounted
+	var talk: bool = true
+	var cover: BotCover.Found = null
+
+
 var world: BotWorld = BotWorld.new()
 ## The last hit on the player, for the "What got you" card (one record, reused; time -INF until the first).
 var last_hit: HitFacts = HitFacts.new()
@@ -37,11 +47,14 @@ var _ran_low: bool = false
 ## Bots for every character in `state` but `player_id` (-1: everyone), on `map` with its nav grid and level rays, each
 ## team at its level in `team_levels` (team: a MatchOptions.BOT_LEVELS id; a team not in it plays Easy, the baseline),
 ## each with its name and personality in `identities` (by character id, BotRoster.draw; a bot not in it has neither).
-## Their first plan comes with the match's first ROUND_START (observe). With `talk` the bots call to their team
-## (Callouts, data/callouts.md); off, they play exactly the same and say nothing.
+## Their first plan comes with the match's first ROUND_START (observe). `options` (null: the defaults) says whether
+## they talk and may bring the map's cover already found; the vault links are found here unless the grid has them
+## (NavVaults.link does nothing on a grid already linked).
 func _init(state: GameState, player_id: int, map: MapData, nav: NavGrid, query: WorldQuery, tuning: SimTuning,
 		config: BotConfig, team_levels: Dictionary[int, StringName] = {},
-		identities: Dictionary[int, BotRoster.Identity] = {}, talk: bool = true) -> void:
+		identities: Dictionary[int, BotRoster.Identity] = {}, options: Options = null) -> void:
+	if options == null:
+		options = Options.new()
 	_player_id = player_id
 	config = config.for_map(map)
 	var w := world
@@ -52,8 +65,11 @@ func _init(state: GameState, player_id: int, map: MapData, nav: NavGrid, query: 
 	NavVaults.link(nav, query, tuning.vault, tuning.body, config.vault_price)
 	w.characters = state.characters
 	w.lanes = map.lanes
-	w.low_cover = BotCover.low_blocks(map, nav, config, tuning)
-	w.tall_cover = BotCover.tall_blocks(map, nav, config, tuning)
+	var cover := options.cover
+	if cover == null:
+		cover = BotCover.find_cover(map, nav, config, tuning)
+	w.low_cover = cover.low
+	w.tall_cover = cover.tall
 	w.planner = RoundPlanner.new(state.match_seed)
 	w.mag_share = MagShare.new(tuning, query)
 	w.grenades = state.grenades
@@ -74,7 +90,7 @@ func _init(state: GameState, player_id: int, map: MapData, nav: NavGrid, query: 
 	w.setup_sectors(w.planner.bounds_lo, w.planner.bounds_hi)
 	orders = SquadOrderBook.new(w)
 	pings = Pings.new(state.characters, tuning.pings)
-	if talk:
+	if options.talk:
 		callouts = Callouts.new(CalloutsFile.shared(), config.callouts, map.areas, state.match_seed)
 		callouts.pings = pings
 		# The bots on your team ask for you (BQ2); with no player (the autopilot), nobody asks.

@@ -83,6 +83,13 @@ extends Resource
 ## to the hit volume (HitPose) and the drawn figure (FigureBend, eased over a switch with the pistol's clips).
 @export var cheek_bow: float = 0.3
 @export var cheek_cant: float = 0.2
+## The holster's arms and the sprint's (UpperBlend, BP6): drawn out of the holster, the replica comes to the hand
+## holster_swap of the way through the draw and the arms rise to the aim over the rest; in and out of the holster the
+## arms ease over settle_holster (s), into and out of the sprint's pumping arms over settle_sprint (s). Applied alike to
+## the hit volume (HitPose, eased each tick in the simulation) and the drawn figure (FigurePose, each frame).
+@export var holster_swap: float = 0.5
+@export var settle_holster: float = 0.06
+@export var settle_sprint: float = 0.12
 @export var max_stride: float = 1.0
 ## The hit area fitted to the drawn figure (HV1): its joints, baked from the figure's own clips (HitFit,
 ## tools/hit_fit_bake.gd). A character's volume hangs on them (Hitbox.build_volume); the numbers above shape only the

@@ -42,6 +42,7 @@ and, on the range, `test_range_map.gd`).
 | `ricochet.gd` | A BB bouncing off concrete and steel; whether a bounced BB knocks anyone out is the match's rule |
 | `hitbox.gd`, `bb_step.gd` | The hit volume (a head sphere, four torso capsules, the hips, each leg's thigh, shin and boot) on the drawn figure's joints, or the built-in one for the range's plywood figures, and its ray tests; each tick's BB flight against the level, bushes (0.6 m of leaves over a flight stops a BB) and bodies, building a body's volume only once a BB comes near it |
 | `hit_fit.gd`, `hit_pose.gd` | HV1: the human figure's joints baked from its own animation graph (`tools/hit_fit_bake.gd`), and posed from them as the graph and FigureBend pose the drawn figure |
+| `upper_blend.gd` | BP6: the arms' eases into and out of the holster and the sprint, each tick, as the drawn figure eases them, so the hit volume follows them |
 | `elimination.gd` | Hit calling: alive, calling, walking off, leaving, out |
 | `round.gd`, `round_state.gd` | Rounds in Elimination and Attack / Defend: clock, score, half time, reset, match over; the flag's time-out and overtime; Elimination's overtime flag at the buzzer; the practice switch (no rounds, no clock) |
 | `range_target.gd`, `range_targets.gd` | Practice range targets: steel plates (front only, on posts), figures with a player's hit volume that fall and rise, pop-ups, movers and swingers on seeded times; BBs stop on them as `TARGET_HIT`; full spares in practice |
