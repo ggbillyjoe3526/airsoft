@@ -1724,7 +1724,6 @@ func _set_figure_lines() -> void:
 			f.set_lod_lines(_figure_lines)
 
 
-
 ## The automatic step-down's watch.
 func frame_watch() -> FrameWatch:
 	return _watch
