@@ -395,6 +395,63 @@ def import_glb(path: str) -> list:
     return new
 
 
+def fold_material(base: str, extra: str) -> None:
+    """Draws material `extra`'s faces with `base` (BP6: a replica within its 6 materials, looking the same): `base`
+    takes a 4 x 4 px colour and ORM map (glTF's metallic-roughness), its own colour, roughness and metal all round and
+    `extra`'s in the middle 2 x 2 px. `extra`'s faces move to `base` with their UVs on the middle, `base`'s own read
+    the corner (0, 0), where every pixel round it is `base`'s; every mesh drawing either gets UVs (without them on all,
+    Blender's exporter writes `base` twice). Both plain colours, no texture before; run it last, before the export,
+    after the figures' copy (which drops the BB's faces)."""
+    def finish(name: str) -> tuple:
+        bsdf = bpy.data.materials[name].node_tree.nodes["Principled BSDF"]
+        lin = bsdf.inputs["Base Color"].default_value[:3]
+        srgb = [(c * 12.92 if c <= 0.0031308 else 1.055 * c ** (1 / 2.4) - 0.055) for c in lin]
+        return ([round(c * 255) / 255.0 for c in srgb], bsdf.inputs["Roughness"].default_value,
+                bsdf.inputs["Metallic"].default_value)
+
+    own, other = finish(base), finish(extra)
+    col, orm = [], []
+    for y in range(4):
+        for x in range(4):
+            colour, rough, metal = other if 1 <= x <= 2 and 1 <= y <= 2 else own
+            col += [*colour, 1.0]
+            orm += [1.0, round(rough * 255) / 255.0, round(metal * 255) / 255.0, 1.0]
+    m = bpy.data.materials[base]
+    nt = m.node_tree
+    bsdf = nt.nodes["Principled BSDF"]
+    images = []
+    for key, pixels, space in (("col", col, "sRGB"), ("orm", orm, "Non-Color")):
+        img = bpy.data.images.new("%s_%s" % (base.lower(), key), 4, 4, alpha=False)
+        img.colorspace_settings.name = space
+        img.pixels.foreach_set(pixels)
+        img.file_format = "PNG"
+        img.pack()
+        tex = nt.nodes.new("ShaderNodeTexImage")
+        tex.image = img
+        images.append(tex)
+    nt.links.new(images[0].outputs["Color"], bsdf.inputs["Base Color"])
+    split = nt.nodes.new("ShaderNodeSeparateColor")
+    nt.links.new(images[1].outputs["Color"], split.inputs["Color"])
+    nt.links.new(split.outputs["Green"], bsdf.inputs["Roughness"])
+    nt.links.new(split.outputs["Blue"], bsdf.inputs["Metallic"])
+    gone = bpy.data.materials[extra]
+    for ob in bpy.data.objects:
+        if ob.type != "MESH" or not any(s in (m, gone) for s in ob.data.materials):
+            continue
+        me = ob.data
+        if base not in me.materials:
+            me.materials.append(m)
+        to = list(me.materials).index(m)
+        uv = (me.uv_layers.active or me.uv_layers.new(name="UVMap", do_init=False)).data
+        for p in me.polygons:
+            slot = me.materials[p.material_index]
+            if slot == gone or slot == m:
+                for li in p.loop_indices:
+                    uv[li].uv = (0.5, 0.5) if slot == gone else (0.0, 0.0)
+                p.material_index = to
+    bpy.data.materials.remove(gone)
+
+
 def export(path: str, animated: bool) -> None:
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=False, export_apply=True,
                               export_animations=animated, export_animation_mode="NLA_TRACKS", export_yup=True,

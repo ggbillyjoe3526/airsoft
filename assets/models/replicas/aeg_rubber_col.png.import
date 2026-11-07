@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://db3vi6812ae4k"
-path="res://.godot/imported/human_gear_col.png-f4cd27556eeb87edcd49eb9532249764.ctex"
+uid="uid://bm0bhyecy2rho"
+path="res://.godot/imported/aeg_rubber_col.png-577faec8edeb2f2fccd071f62236decb.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "c82829e761b4909b741344de5735db0c"
+"md5": "4a9a50d099134c61887ec93216a37ff2"
 }
 
 [deps]
 
-source_file="res://assets/models/characters/human_gear_col.png"
-dest_files=["res://.godot/imported/human_gear_col.png-f4cd27556eeb87edcd49eb9532249764.ctex"]
+source_file="res://assets/models/replicas/aeg_rubber_col.png"
+dest_files=["res://.godot/imported/aeg_rubber_col.png-577faec8edeb2f2fccd071f62236decb.ctex"]
 
 [params]
 
@@ -26,8 +26,8 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
-mipmaps/limit=4
+mipmaps/generate=false
+mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
 process/channel_remap/red=0
@@ -40,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

@@ -53,8 +53,12 @@ var _casts: bool = true
 ## aspect), so it is worked out again only when they change.
 var _corner: Vector2 = Vector2.ZERO
 var _corner_for: Vector4 = Vector4.INF
-## Frames until the view is looked at again (FigureConfig.hold_view_stride).
+## Frames until the view is looked at again (FigureConfig.hold_view_stride), and the camera, its place and its view
+## axis when it last was (a turn or a cut past them looks again at once).
 var _view_frames: int = 0
+var _view_camera: Camera3D = null
+var _view_at: Vector3 = Vector3.ZERO
+var _view_axis: Vector3 = Vector3.ZERO
 var _snap: bool = true
 var _far_frames: int = 0
 var _far_delta: float = 0.0
@@ -412,9 +416,10 @@ func animate(c: Character, fraction: float, delta: float, eye: Vector3) -> void:
 	var near := _lines.x + cfg.lod_margin
 	_body.near = global_position.distance_squared_to(eye) <= near * near
 	_view_frames -= 1
-	if _view_frames <= 0 or _snap:
+	var camera := get_viewport().get_camera_3d()
+	if _view_frames <= 0 or _snap or _camera_cut(camera, cfg):
 		_view_frames = cfg.hold_view_stride
-		_body.seen = _seen(get_viewport().get_camera_3d(), cfg)
+		_body.seen = _seen(camera, cfg)
 	if not _snap and global_position.distance_squared_to(eye) > far * far:
 		if cfg.far_stride <= 0:
 			# Held still out there: a press kept now would play stale when the figure comes near.
@@ -532,11 +537,26 @@ func _place_disc() -> void:
 	_contact.transparency = 1.0 - _fade * up
 
 
+## Whether `camera` turned more than FigureConfig.hold_view_turn or moved more than hold_view_radius since the view
+## was last looked at, or is another camera (BP6: a fast turn or a cut would keep the clips' hands for frames).
+func _camera_cut(camera: Camera3D, cfg: FigureConfig) -> bool:
+	if camera != _view_camera:
+		return true
+	if camera == null:
+		return false
+	var at := camera.global_transform
+	return (at.origin.distance_squared_to(_view_at) > cfg.hold_view_radius * cfg.hold_view_radius
+			or at.basis.z.dot(_view_axis) < cos(deg_to_rad(cfg.hold_view_turn)) * at.basis.z.length())
+
+
 ## Whether the figure's hands and replica may show in `camera`'s view (FigureConfig.hold_view_height and _radius; true
-## without a camera).
+## without a camera). Notes the camera's place and facing for _camera_cut.
 func _seen(camera: Camera3D, cfg: FigureConfig) -> bool:
+	_view_camera = camera
 	if camera == null:
 		return true
+	_view_at = camera.global_transform.origin
+	_view_axis = camera.global_transform.basis.z.normalized()
 	var size := camera.get_viewport().get_visible_rect().size
 	var key := Vector4(camera.fov, size.x, size.y, camera.keep_aspect)
 	if key != _corner_for:

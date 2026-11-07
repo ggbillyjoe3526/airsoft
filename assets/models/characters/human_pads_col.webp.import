@@ -3,24 +3,24 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://v3i6meun0bnx"
-path.s3tc="res://.godot/imported/human_pads_col.webp-dac91b5d55131116eb1b1610cdefa7f2.s3tc.ctex"
+path.bptc="res://.godot/imported/human_pads_col.webp-dac91b5d55131116eb1b1610cdefa7f2.bptc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "5bb90e9efb8723de20cdec19cedabfaf"
+"md5": "4b213a6ab56c617b422b6e912a19c43a"
 }
 
 [deps]
 
 source_file="res://assets/models/characters/human_pads_col.webp"
-dest_files=["res://.godot/imported/human_pads_col.webp-dac91b5d55131116eb1b1610cdefa7f2.s3tc.ctex"]
+dest_files=["res://.godot/imported/human_pads_col.webp-dac91b5d55131116eb1b1610cdefa7f2.bptc.ctex"]
 
 [params]
 
 compress/mode=2
-compress/high_quality=false
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

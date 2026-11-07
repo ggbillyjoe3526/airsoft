@@ -7,6 +7,7 @@ Run with Python 3.13 and pip's bpy==5.2.3, numpy and Pillow (installed with bpy)
     BODY_MAPS=<maps dir> python -I tools/blender/figures/body.py <root> [out.blend] [body.glb] [--fast]
     python -I tools/blender/figures/splice_part.py <figure.glb> body.glb Body
     python -I tools/blender/figures/splice_part.py <figure.glb> body.glb Kit_Pads   (only while it carries v12's pads)
+    python -I tools/blender/figures/body_weights.py <figure.glb>   (BP6: armpits, glove plates; after pads.py, gear.py)
 
 <root> holds assets/models/characters/human.glb, which the build reads (its Rig, and its Body for the weights): use a
 copy of the figure file, never the one being replaced. The weights come from that file's Body by nearest face, so

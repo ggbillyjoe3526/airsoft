@@ -241,6 +241,31 @@ func test_out_of_the_camera_s_view_the_hands_keep_the_clips() -> void:
 	assert_gt(v.body().bend.grasp, 0.9, "the hold stays eased in, ready for when it shows")
 
 
+func test_a_fast_turn_or_a_camera_cut_looks_at_the_view_at_once() -> void:
+	var camera := Camera3D.new()
+	add_child_autofree(camera)
+	camera.global_position = EYE
+	camera.global_rotation = Vector3(0.0, PI, 0.0)
+	camera.make_current()
+	var r := _view(0)
+	var v: FigureView = r[0]
+	var stride := config.hold_view_stride
+	config.hold_view_stride = 1000
+	await _drawn(v, r[1], PackedStringArray(), 2)
+	assert_false(v.body().seen, "behind the camera")
+	camera.global_rotation = Vector3.ZERO
+	await _drawn(v, r[1], PackedStringArray(), 0)
+	assert_true(v.body().seen, "turned to it: held on the next frame, not after the stride")
+	var cut := Camera3D.new()
+	add_child_autofree(cut)
+	cut.global_position = EYE
+	cut.global_rotation = Vector3(0.0, PI, 0.0)
+	cut.make_current()
+	await _drawn(v, r[1], PackedStringArray(), 0)
+	config.hold_view_stride = stride
+	assert_false(v.body().seen, "cut to another camera looking away: at once too")
+
+
 func test_in_view_is_a_cone_round_the_view_s_corners() -> void:
 	var camera := Camera3D.new()
 	add_child_autofree(camera)

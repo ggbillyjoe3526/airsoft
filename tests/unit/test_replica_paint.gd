@@ -29,6 +29,17 @@ func _cyber() -> ReplicaConfig:
 	return r
 
 
+## Whether any surface of `model` (or below it) has its own material named `part` (or ending in `_part`).
+func _has_part(model: Node, part: StringName) -> bool:
+	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
+		var mesh := (node as MeshInstance3D).mesh
+		for i in mesh.get_surface_count():
+			var own := mesh.surface_get_material(i)
+			if own != null and (own.resource_name == part or own.resource_name.ends_with("_" + part)):
+				return true
+	return false
+
+
 ## The paint on the first surface of `model` (or below it) whose own material is named `part` (ReplicaView.painted: as
 ## painted, before the hands press its depth), or null.
 func _override(model: Node, part: StringName) -> Material:
@@ -132,8 +143,10 @@ func test_a_cyber_pistol_picture_repainted_from_realistic_gets_its_glow_back() -
 
 func test_parts_the_scheme_does_not_name_keep_their_own() -> void:
 	var view := _hands([_aeg()] as Array[ReplicaConfig], [&"cobalt"] as Array[StringName], false)
-	assert_null(_override(view._held[0].root, &"Rubber"))
-	assert_null(_override(view._held[0].root, &"BB"))
+	var model := view._held[0].root
+	# The AEG's one part no scheme names: its Rubber, which carries the BBs too since BP6.
+	assert_true(_has_part(model, &"Rubber"), "the AEG has its Rubber")
+	assert_null(_override(model, &"Rubber"))
 
 
 func test_bots_wear_their_teams_paints() -> void:

@@ -19,6 +19,14 @@ const STEP := 1.0 / 30.0
 ## The phalanx past the third finger joint (m along that bone): its tip.
 const TIP := 0.025
 const FINGERS: PackedStringArray = ["Index", "Middle", "Ring", "Pinky"]
+## BP6: with the arm held up no point of the human's shirt comes out in front of the carrier's left shoulder strap
+## (the strap: the gear's points over the shoulder, above STRAP_FROM m at rest) by more than OVER (m), seen along the
+## chest's forward way, within STRAP_SIDE (m) across it of the strap's points (tools/blender/figures/body_weights.py).
+const STRAP_FROM := 1.40
+const STRAP_SIDE := 0.004
+const OVER := 0.001
+## Every this many seconds of the held arm.
+const STRAP_STEP := 0.1
 
 var config: FigureConfig = null
 var models: FigureModels = null
@@ -57,6 +65,86 @@ func test_the_walk_off_holds_the_arm_straight_and_the_hand_open() -> void:
 			_assert_held(_arm(sk, anim, t), "kind %d WalkOff at %.2f s" % [kind, t])
 			t += STEP
 		sk.free()
+
+
+func test_with_the_arm_up_the_shirt_stays_under_the_shoulder_strap() -> void:
+	var root := models.scene(FigureMix.HUMAN).instantiate()
+	add_child_autofree(root)
+	var sk := root.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+	var body := root.find_child("Body", true, false) as MeshInstance3D
+	var kit := root.find_child("Kit", true, false) as MeshInstance3D
+	assert_not_null(body)
+	assert_not_null(kit)
+	if body == null or kit == null:
+		return
+	var strap := PackedInt32Array()
+	var kit_rest := kit.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array
+	for i in kit_rest.size():
+		if kit_rest[i].y > STRAP_FROM and kit_rest[i].x > 0.0 and kit_rest[i].z > 0.0:
+			strap.append(i)
+	assert_gt(strap.size(), 0, "the left strap's points")
+	assert_eq(_in_front(sk, body, kit, strap, null, 0.0), 0, "at rest")
+	for clip: StringName in [config.call_clip, config.walk_off_clip]:
+		var anim := models.library(FigureMix.HUMAN).get_animation(clip)
+		var t := RAISED_BY if clip == config.call_clip else 0.0
+		while t <= anim.length + 1e-4:
+			var n := _in_front(sk, body, kit, strap, anim, t)
+			assert_eq(n, 0, "%s at %.2f s: %d shirt points out over the strap" % [clip, t, n])
+			t += STRAP_STEP
+
+
+## How many of `body`'s points stand out in front of the strap's (`strap`, of the gear's first surface) at time t of
+## `anim`, both skinned over the clip's pose.
+func _in_front(sk: Skeleton3D, body: MeshInstance3D, kit: MeshInstance3D, strap: PackedInt32Array, anim: Animation,
+		t: float) -> int:
+	var g := _globals(sk, anim, t)
+	var ahead: Vector3 = (g["Chest"].basis * Vector3.BACK).normalized()
+	var kit_at := _skinned(g, kit, 0)
+	var front: Array[Vector3] = []
+	for i in strap:
+		front.append(kit_at[i])
+	var lo := Vector3.INF
+	var hi := -Vector3.INF
+	for p in front:
+		lo = lo.min(p)
+		hi = hi.max(p)
+	var n := 0
+	for s in body.mesh.get_surface_count():
+		var posed := _skinned(g, body, s)
+		for v in posed.size():
+			var p := posed[v]
+			if not AABB(lo, hi - lo).grow(STRAP_SIDE).has_point(p):
+				continue
+			var most := -INF
+			for q in front:
+				var d := p - q
+				if (d - ahead * d.dot(ahead)).length() < STRAP_SIDE:
+					most = maxf(most, q.dot(ahead))
+			if most > -INF and p.dot(ahead) > most + OVER:
+				n += 1
+	return n
+
+
+## Surface `s` of `mi` skinned over the bones' places `g` (in the skeleton's frame; the meshes sit on its origin).
+static func _skinned(g: Dictionary[String, Transform3D], mi: MeshInstance3D, s: int) -> PackedVector3Array:
+	var a := mi.mesh.surface_get_arrays(s)
+	var points := a[Mesh.ARRAY_VERTEX] as PackedVector3Array
+	var bones := a[Mesh.ARRAY_BONES] as PackedInt32Array
+	var weights := a[Mesh.ARRAY_WEIGHTS] as PackedFloat32Array
+	var per := bones.size() / points.size()
+	var moves: Array[Transform3D] = []
+	for b in mi.skin.get_bind_count():
+		moves.append(g[String(mi.skin.get_bind_name(b))] * mi.skin.get_bind_pose(b))
+	var out := PackedVector3Array()
+	out.resize(points.size())
+	for v in points.size():
+		var p := Vector3.ZERO
+		for k in per:
+			var w := weights[v * per + k]
+			if w > 0.0:
+				p += moves[bones[v * per + k]] * points[v] * w
+		out[v] = p
+	return out
 
 
 func _assert_held(arm: Vector3, at: String) -> void:
@@ -103,7 +191,7 @@ func _globals(sk: Skeleton3D, anim: Animation, t: float) -> Dictionary[String, T
 	var local: Array[Transform3D] = []
 	for b in sk.get_bone_count():
 		local.append(sk.get_bone_rest(b))
-	for i in anim.get_track_count():
+	for i in anim.get_track_count() if anim != null else 0:
 		var bone := sk.find_bone(String(anim.track_get_path(i).get_concatenated_subnames()))
 		if bone < 0:
 			continue
