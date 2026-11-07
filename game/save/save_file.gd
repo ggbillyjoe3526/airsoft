@@ -169,6 +169,18 @@ static func remove(path: String) -> bool:
 	return ok
 
 
+## Makes an empty file at `path`, a mark whose name is all it says (RunRecord's clean quit). False for a held path or
+## one that can't be made. A mark goes as any save does (`remove`).
+static func touch(path: String) -> bool:
+	if _refuse_held(path, "marked"):
+		return false
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	if f == null:
+		return false
+	f.close()
+	return true
+
+
 ## Keeps `paths` from being written, removed or set aside for the rest of the run (the save was replaced and the
 ## game restarts to read it).
 static func hold(paths: PackedStringArray) -> void:

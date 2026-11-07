@@ -180,3 +180,23 @@ func test_the_last_round_holds_the_results_until_a_click_or_table_hold() -> void
 	assert_false(hud.holds_results(), "table_hold later it makes way")
 	assert_false(hud.round_result().is_up())
 	session._rematch_left = -1.0
+
+
+func test_the_watching_line_steps_aside_while_the_round_result_is_up() -> void:
+	# BP6: "WATCHING KITE" drew over the table's "CLICK FOR THE NEXT ROUND"
+	session = _session()
+	await wait_physics_frames(2)
+	var hud := session.hud()
+	hud.set_watching("Kite")
+	assert_true(hud.watching_shown(), "spectating in a live round")
+	_end_round(1, 30.0)
+	_wait(5.0)
+	assert_true(hud.round_result().is_up())
+	assert_false(hud.watching_shown(), "not under the click line")
+	var state := session.state
+	state.events.clear()
+	state.events.add(K.ROUND_START).value = 2
+	hud.on_tick(state)
+	state.events.clear()
+	_wait(0.1)
+	assert_true(hud.watching_shown(), "back once the next round starts")

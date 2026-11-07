@@ -345,3 +345,42 @@ func test_a_round_start_write_costs_under_two_ms() -> void:
 		total += took
 	gut.p("round-start write: mean %.3f ms, worst %.3f ms over %d" % [total / 1000.0 / WRITES, worst / 1000.0, WRITES])
 	assert_lt(total / 1000.0 / WRITES, WRITE_BUDGET_MS)
+
+
+## BP6: a clean quit whose write fails leaves its closed mark, so the next start keeps no crash; the mark then goes.
+func test_a_clean_quit_whose_write_fails_is_still_no_crash() -> void:
+	_left_running(_back_to_menus)
+	var r := RunRecord.load_file(_run_path)
+	SaveFile.hold(PackedStringArray([_run_path]))
+	var marked := r.save_closed(_run_path)
+	SaveFile.release(PackedStringArray([_run_path]))
+	assert_true(marked)
+	var mark := RunRecord.closed_mark(_run_path, GONE, 1000)
+	assert_true(FileAccess.file_exists(mark), "the mark beside the record")
+	assert_eq(RunRecord.load_file(_run_path).state, RunRecord.State.CLOSED)
+	assert_false(FileAccess.file_exists(mark), "read once, then gone")
+	_left_running(_back_to_menus)
+	assert_true(_next_start().crashed_before(), "the mark used up: a run left running is a crash again")
+	_left_running(_back_to_menus)
+	FileAccess.open(mark, FileAccess.WRITE).close()
+	assert_false(_next_start().crashed_before(), "the run's own mark: no crash")
+	_left_running(_back_to_menus, GONE + 1)
+	FileAccess.open(mark, FileAccess.WRITE).close()
+	assert_true(_next_start().crashed_before(), "another run's mark: still a crash")
+
+
+
+## A folder locked whole (the record and its mark both held, as SaveFile.hold keeps a replaced save): no mark is made
+## and nothing is taken away, so the next start honestly reads a crash.
+func test_a_clean_quit_in_a_locked_folder_writes_no_mark_past_the_hold() -> void:
+	_left_running(_back_to_menus)
+	var r := RunRecord.load_file(_run_path)
+	var mark := RunRecord.closed_mark(_run_path, GONE, 1000)
+	var locked := PackedStringArray([_run_path, mark])
+	SaveFile.hold(locked)
+	var marked := r.save_closed(_run_path)
+	SaveFile.release(locked)
+	assert_false(marked, "the hold kept the mark out")
+	assert_false(FileAccess.file_exists(mark))
+	assert_true(FileAccess.file_exists(_run_path), "the held record is not taken away")
+	assert_true(_next_start().crashed_before(), "so the next start says it closed unexpectedly")

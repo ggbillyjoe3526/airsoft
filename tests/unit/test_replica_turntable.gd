@@ -219,3 +219,41 @@ func test_letting_go_of_one_button_while_the_other_is_held_keeps_turning() -> vo
 	move.relative = Vector2(10.0, 0.0)
 	table._gui_input(move)
 	assert_almost_eq(table.yaw(), 10.0 * ReplicaTurntable.DRAG, 0.001, "the right button still turns it")
+
+
+## BP6 (the UI audit): placed by hand, the turntable is drawn where it is put, never part way by the engine's physics
+## interpolation (the 3/4 view came out zoomed in, more with each draw, at 1080p and 4K).
+func test_the_turntable_is_drawn_without_physics_interpolation() -> void:
+	var table := _page(0).customise().turntable()
+	assert_false(table.find_child("Port", true, false).is_physics_interpolated())
+	for n in table.find_child("Port", true, false).find_children("*", "Node3D", true, false):
+		assert_false(n.is_physics_interpolated(), n.name)
+
+
+## BP6: a window going from 1080p to 4K at the same aspect keeps the rect's size but doubles its pixels: the viewport
+## follows (up to MAX_SUPERSAMPLE) and the frame stays.
+func test_a_screen_of_another_size_resizes_the_viewport() -> void:
+	var host := SubViewport.new()
+	host.size = Vector2i(1920, 1080)
+	host.size_2d_override = Vector2i(1920, 1080)
+	host.size_2d_override_stretch = true
+	add_child_autofree(host)
+	var page := LoadoutPage.new(saved, settings)
+	page.save_path = LOADOUTS
+	page.settings_path = SETTINGS
+	host.add_child(page)
+	page.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	page.show_customise(0)
+	await wait_process_frames(3)
+	var table := page.customise().turntable()
+	var port := table.find_child("Port", true, false) as SubViewport
+	var at_1080 := port.size
+	var distance := table.camera_distance()
+	assert_gt(at_1080.x, 1)
+	host.size = Vector2i(3840, 2160)
+	await wait_process_frames(2)
+	assert_eq(port.size, at_1080 * 2, "4K: twice the pixels")
+	assert_almost_eq(table.camera_distance(), distance, 0.0001, "the same frame")
+	host.size = Vector2i(1920, 1080)
+	await wait_process_frames(2)
+	assert_eq(port.size, at_1080, "and back")

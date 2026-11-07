@@ -97,7 +97,8 @@ for the last five times you were hit; and, against Hard bots, the next Pro tip.
 
 Top left, the minimap shows the field from above:
 
-- You are the **white arrow**; teammates are dots in your team's colour, grey once hit.
+- You are the **white arrow**; teammates are dots in your team's colour, grey once hit. Near the field's edge the
+  minimap stays on the field and your arrow moves off its middle.
 - The other team shows only where your side **heard** them: a dashed ring for footsteps, a disc for a shot, fading
   after a few seconds. Steps carry about 22 m and shots about 60 m. One heard on another storey shows fainter.
 - The area you stand in is named at the top, with the map and round under it.

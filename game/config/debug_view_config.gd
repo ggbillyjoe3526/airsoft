@@ -11,6 +11,8 @@ extends Resource
 ## A BB's trail runs from the first colour (the oldest point, faded out) to the second (the BB).
 @export var trail_old_colour: Color = Color(1.0, 0.1, 0.55, 0.15)
 @export var trail_new_colour: Color = Color(1.0, 0.1, 0.55, 1.0)
+## A trail's width on screen (pixels), at any distance.
+@export var trail_width_px: float = 3.0
 ## A hit volume's lines, by team (Alpha, Beta); a character out of play isn't drawn.
 @export var hit_colours: PackedColorArray = PackedColorArray([Color(0.3, 0.7, 1.0, 0.9), Color(1.0, 0.45, 0.2, 0.9)])
 ## Segments round a wireframe capsule's rings and in each quarter arc of its ends.

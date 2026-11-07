@@ -515,6 +515,9 @@ msgstr "%s: key cleared."
 msgid "KEYS_NEEDS_ONE"
 msgstr "%s needs a key."
 
+msgid "KEYS_KEYLESS"
+msgstr "No key since an update: %s. Set one below."
+
 msgid "KEY_MOUSE_LEFT"
 msgstr "Left mouse"
 
@@ -538,6 +541,17 @@ msgstr "Mouse 5"
 
 msgid "KEY_MOUSE_OTHER"
 msgstr "Mouse button"
+
+# Keys whose own names read badly (KeyNames): the main minus key is a word so it is never taken for "no key" (-);
+# the number pad's keys say Num and what they print.
+msgid "KEY_MINUS"
+msgstr "Minus"
+
+msgid "KEY_NUM"
+msgstr "Num %s"
+
+msgid "KEY_NUM_ENTER"
+msgstr "Num Enter"
 
 msgid "ACT_MOVE_FORWARD"
 msgstr "MOVE FORWARD"
@@ -689,6 +703,18 @@ msgstr "RETRO PIXELS"
 
 msgid "DEV_RETRO_PIXELS_HELP"
 msgstr "The 3D view in chunky pixels and a small dithered palette. Changes only what you see."
+
+msgid "DEV_RETRO_SIZE"
+msgstr "PIXEL SIZE"
+
+msgid "DEV_RETRO_SIZE_HELP"
+msgstr "How big Retro pixels' blocks are, in screen pixels."
+
+msgid "DEV_RETRO_SHADES"
+msgstr "SHADES"
+
+msgid "DEV_RETRO_SHADES_HELP"
+msgstr "How many shades of red, green and blue Retro pixels keeps. Fewer looks older."
 
 msgid "DEV_ROBOTS"
 msgstr "ROBOTS"
@@ -1764,6 +1790,9 @@ msgstr "Everything unlocked stays yours. Settings › Dev › Disable levelling 
 msgid "ARMORY_LINE"
 msgstr "Level up by playing; every level unlocks kit"
 
+msgid "ARMORY_LEVELS_NAME"
+msgstr "Levels: left and right pick one"
+
 msgid "ARMORY_DOT_KIT"
 msgstr "KIT"
 
@@ -1846,10 +1875,10 @@ msgid "XP_LINE_MATCH_WON"
 msgstr "Match won"
 
 msgid "XP_LINE_ROUND_WON"
-msgstr "Rounds won · %d × %d"
+msgstr "Rounds won with you in them · %d × %d"
 
 msgid "XP_LINE_ROUND_WON_COUNT"
-msgstr "Rounds won · %d"
+msgstr "Rounds won with you in them · %d"
 
 msgid "XP_LINE_HIT"
 msgstr "Hits · %d × %d"
@@ -1896,6 +1925,10 @@ msgstr "Lost"
 # Screen reader messages (Announcer): who called the hit, then whose BB it was.
 msgid "HUD_SR_CALLED_HIT"
 msgstr "%s called HIT · %s"
+
+# A squad order you gave, read out: the order's name ("Order · Follow Me").
+msgid "HUD_SR_ORDER"
+msgstr "Order · %s"
 
 # A teammate's callout, as the feed shows it: who, then the words ("Brick: Two, Crate yard!").
 msgid "HUD_SR_CALL"
@@ -3202,7 +3235,7 @@ msgid "SETTINGS_SYSTEM_NO"
 msgstr "No"
 
 msgid "SETTINGS_SYSTEM_UNKNOWN"
-msgstr "It doesn't say"
+msgstr "Your system doesn't say whether it wants reduced motion"
 
 # Settings › Save file (SettingsSavePage) and its questions (SettingsSaveConfirm).
 

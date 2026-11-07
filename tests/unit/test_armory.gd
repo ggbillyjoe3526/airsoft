@@ -311,7 +311,7 @@ func test_the_xp_card_shows_each_line_the_total_and_the_level_up() -> void:
 	var card := _card(_settled(0, true, 5, 4, &"normal", p), p)
 	await wait_process_frames(2)
 	var words := _words(card)
-	for w: String in ["Match played", "Match won", "Rounds won · 5 × 20", "Hits · 4 × 10", "Normal bots", "× 1", "XP EARNED", "+340",
+	for w: String in ["Match played", "Match won", "Rounds won with you in them · 5 × 20", "Hits · 4 × 10", "Normal bots", "× 1", "XP EARNED", "+340",
 			"LEVEL 4!", "Unlocked: Silencer", "40 / 600 XP", "560 XP to level 5"]:
 		assert_true(words.has(w), w)
 	assert_eq(words.count("100"), 3, "match played, match won and the rounds")
@@ -394,7 +394,7 @@ func test_an_uneven_share_says_just_the_count() -> void:
 	var p := Progress.new(odd)
 	s.level_up = p.add_xp(s.earned.total)
 	var words := _words(_card(s, p))
-	assert_true(words.has("Rounds won · 3"), "8 XP over 3 rounds is no whole share")
+	assert_true(words.has("Rounds won with you in them · 3"), "8 XP over 3 rounds is no whole share")
 	assert_true(words.has("Hits · 2 × 10"))
 
 

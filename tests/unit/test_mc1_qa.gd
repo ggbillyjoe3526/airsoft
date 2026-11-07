@@ -438,3 +438,112 @@ func test_the_layout_marker_in_any_shape_never_breaks_a_load() -> void:
 		b.load_dict(saved)
 		assert_true(_no_shared_keys(b), "marker %s" % [marker])
 		assert_eq(b.codes(&"fire"), PackedInt32Array([-MOUSE_BUTTON_LEFT]))
+
+
+## BP6: an old save whose own keys hold a moved action's new default takes its old one where that is free, else is
+## listed keyless; and Settings says so on opening, until the action has a key again.
+func test_a_moved_action_stranded_by_an_old_save_keeps_its_old_key_or_is_named() -> void:
+	var free_g := _layout_1_save()
+	free_g["crouch"] = [KEY_4]
+	free_g["hop_up_less"] = [KEY_PAGEDOWN]
+	free_g["use_door"] = [KEY_J]
+	var b := KeyBindings.new()
+	b.load_dict(free_g)
+	assert_eq(b.codes(&"throw_smoke"), PackedInt32Array([KEY_G]), "4 is the player's: the old G, free")
+	assert_false(b.keyless.has(&"throw_smoke"))
+	assert_true(_no_shared_keys(b))
+	var held_g := _layout_1_save()
+	held_g["crouch"] = [KEY_4]
+	held_g["hop_up_less"] = [KEY_PAGEDOWN]
+	var c := KeyBindings.new()
+	c.load_dict(held_g)
+	assert_eq(c.codes(&"use_door"), PackedInt32Array([KEY_G]), "the door moved to G")
+	assert_true(c.codes(&"throw_smoke").is_empty())
+	assert_eq(c.keyless, [&"throw_smoke"] as Array[StringName])
+	var cleared := KeyBindings.new().to_dict()
+	cleared["torch"] = []
+	var d := KeyBindings.new()
+	d.load_dict(cleared)
+	assert_true(d.keyless.is_empty(), "an action the player cleared is not listed")
+	var screen := SettingsScreen.new()
+	var s := Settings.new(PlayTuning.new())
+	s.bindings.load_dict(held_g)
+	screen.settings = s
+	screen.save_path = "user://test-bp6-keyless/settings.save"
+	add_child_autofree(screen)
+	screen.open()
+	assert_string_contains(screen._note.text, tr("ACT_THROW_SMOKE"))
+	s.bindings.rebind(&"throw_smoke", KEY_K, 0)
+	screen.close()
+	screen.open()
+	assert_eq(screen._note.text, "", "said no more once it has a key")
+	InputMap.load_from_project_settings()
+
+
+## BP6: a skip clears the HUD's live region (its last line is not left standing) and says "Skipping the round" from a
+## live region of its own, over the cover; the end of the skip quiets it again.
+func test_a_skip_is_said_to_a_screen_reader_and_leaves_no_stale_line() -> void:
+	session = _session()
+	session.settings.read_out = true
+	await wait_physics_frames(2)
+	session._hud.announce().text = "Beta 2 hit Alpha 1"
+	session.player.status = Character.Status.OUT
+	session.start_skip()
+	assert_eq(session._hud.announce().text, "", "no stale line")
+	assert_eq(session._skip_said.text, tr("HUD_SKIPPING"))
+	assert_eq(session._skip_said.accessibility_live, AccessibilityServer.LIVE_POLITE)
+	assert_true(session._skip_said.is_visible_in_tree(), "outside the hidden HUD")
+	session._stop_skip()
+	assert_eq(session._skip_said.text, "")
+	assert_eq(session._skip_said.accessibility_live, AccessibilityServer.LIVE_OFF)
+
+
+## BP6: a match settled with `counts` on (as a real match) shows the XP card and saves its progress and records, to the
+## files the session is given, never the player's own.
+func test_a_counted_match_settles_shows_its_xp_and_saves_to_its_files() -> void:
+	var dir := "user://test-bp6-settle"
+	DirAccess.make_dir_recursive_absolute(dir)
+	session = PlaySession.new()
+	session.bots_active = false
+	session.difficulty = &"easy"
+	session.settings = Settings.new()
+	session.counts = true
+	session.progress_book = Progress.new(LevelTable.shared())
+	session.progress_path = dir.path_join("progress.save")
+	session.records = Records.new()
+	session.records_path = dir.path_join("records.save")
+	add_child_autofree(session)
+	await wait_physics_frames(2)
+	var rs := session.state.round_state
+	rs.score[session.player.team] = tuning.rounds.wins_needed - 1
+	for c in session.state.characters:
+		if c.team != session.player.team:
+			c.status = Character.Status.OUT
+	var frames := 0
+	while rs.phase != RoundState.Phase.MATCH_OVER and frames < 600:
+		session._physics_process(0.0)
+		frames += 1
+	assert_eq(rs.phase, RoundState.Phase.MATCH_OVER)
+	assert_not_null(session.settled, "settled")
+	assert_not_null(session.hud()._xp, "Hud.show_xp: the XP card is up")
+	assert_true(FileAccess.file_exists(session.progress_path), "progress saved to the session's file")
+	assert_true(FileAccess.file_exists(session.records_path), "and the records")
+	for f: String in DirAccess.get_files_at(dir):
+		DirAccess.remove_absolute(dir.path_join(f))
+	DirAccess.remove_absolute(dir)
+
+
+## An old save lacks zoom in and out (added later): they take the wheel beside Next and Previous replica, which may
+## share it, so neither is keyless nor named in Settings' note.
+func test_zoom_added_after_an_old_save_shares_the_wheel_and_is_never_keyless() -> void:
+	var old := _layout_1_save()
+	old.erase("zoom_in")
+	old.erase("zoom_out")
+	var b := KeyBindings.new()
+	b.load_dict(old)
+	assert_eq(b.codes(&"zoom_in"), PackedInt32Array([-MOUSE_BUTTON_WHEEL_UP]))
+	assert_eq(b.codes(&"zoom_out"), PackedInt32Array([-MOUSE_BUTTON_WHEEL_DOWN]))
+	assert_eq(b.codes(&"slot_previous"), PackedInt32Array([-MOUSE_BUTTON_WHEEL_UP]), "the replica actions keep it too")
+	assert_false(b.keyless.has(&"zoom_in"))
+	assert_false(b.keyless.has(&"zoom_out"))
+	assert_true(b.keyless.is_empty())

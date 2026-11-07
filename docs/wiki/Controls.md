@@ -37,7 +37,9 @@ so W A S D stays W A S D on any keyboard layout.
   crosshair says which while you stand by one ([Maps](Maps#doors)).
 - **Fire** also skips the rest of a round once you are out ([How to Play](How-to-Play#skipping-the-rest-of-the-round)).
 - A save from before these keys moved keeps your own changes: an action still on its old default key (smoke on G, flash
-  on Y, doors on U, the hop-up dial on 4 and 5 as well as Page Down and Page Up) takes its new one.
+  on Y, doors on U, the hop-up dial on 4 and 5 as well as Page Down and Page Up) takes its new one. If your own keys
+  already use the new one, it keeps its old key when nothing else has it; otherwise it has no key, and Settings ›
+  Controls says which actions those are when it opens.
 
 ## Keys you can't change
 
@@ -45,7 +47,7 @@ so W A S D stays W A S D on any keyboard layout.
 | --- | --- |
 | **Esc** | Pause in a match. In the menus it closes what is open first (a dialog, a key waiting to be rebound, a rename), then asks **Quit game?** |
 | **F11** or **Alt+Enter** | Switch between windowed and fullscreen |
-| **F3** | Performance readout: frame rate, frame time, the match seed and more |
+| **F3** | Performance readout in the bottom left corner: frame rate, frame time, the match seed and more |
 | **F4** | Show every BB's flight path in the world |
 | **F5** | Show the hit areas on every character, through walls |
 
@@ -55,6 +57,8 @@ F4 and F5 are views for checking how the game works; they are off by default and
 
 - Pick an action in **Settings › Controls** and press the new key or mouse button.
 - Taking a key another action already uses swaps the two, so nothing is left without a key by accident.
+- Punctuation keys show the mark they print (`[`, `;`, `/`), the minus key shows as "Minus", and the number pad's
+  keys as "Num 5", "Num Enter" and so on.
 - Fire and the four move keys can never be left without a key.
 - Mouse sensitivity can be set for the hip and for aiming, also as centimetres per 360° turn at your mouse's DPI.
   You can invert vertical look too.

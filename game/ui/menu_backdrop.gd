@@ -79,6 +79,8 @@ static func _blur(path: String) -> Texture2D:
 	image = image.duplicate() as Image
 	if image.is_compressed():
 		image.decompress()
+	# the map pictures import with mipmaps (for the Match page's cards); the blur needs none
+	image.clear_mipmaps()
 	image.resize(SMALL.x, SMALL.y, Image.INTERPOLATE_BILINEAR)
 	# bilinear: the window's filter smooths it further, and cubic cost a frame (UR1 performance review)
 	image.resize(SOFT.x, SOFT.y, Image.INTERPOLATE_BILINEAR)

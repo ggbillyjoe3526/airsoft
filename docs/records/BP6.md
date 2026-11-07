@@ -5,6 +5,7 @@
 - part 1: critic Accept 7/8 · qa Pass · performance Pass
 - part 2: critic Accept 7/8 · qa Pass · performance Pass
 - part 3: critic Accept 8/8 · qa Pass · performance Pass
+- part 4: critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -18,6 +19,8 @@
 | 2026-11-07 | part 3: 1 | Opus 5.5 | green | Retry 5/8 | collarbone drop backwards, glove clipping, GBB nose, docs |
 | 2026-11-07 | part 3: 2 | Opus 5.5 | green | Retry 6/8 | a cloth flap under the raised arm, a changelog claim |
 | 2026-11-07 | part 3: 3 | Opus 5.5 | green | Accept 8/8 | – |
+| 2026-11-07 | part 4: 1 | Opus 5.5 | green | Retry 4/8 | bare FileAccess mark, ribbon slices, scrub edges, docs |
+| 2026-11-07 | part 4: 2 | Opus 5.5 | green | Accept 7/8 | – (record SHAs fixed) |
 
 ## The pass
 
@@ -315,3 +318,133 @@ photo beside our render from its angle.
 - Spectate cuts and fast turns past a bot: hands on the replica from the first frame.
 - AEG, Sniper Rifle and bots' gear: look unchanged.
 - GBB Pistol locked back next to his photo (sheet 12): whether the gap under the barrel is worth re-cutting the slide.
+
+### Part 4: menus, HUD, controls, debug and reports
+
+The commits from ec8512c to d5c28ed, rebased onto main 158e93b (#241, #242 merged). The critic's first verdict was
+4/8 Retry; the retry commits are 85c7c85, 006aadf and d5c28ed; the second verdict was 7/8 Accept. QA and performance
+passed on d5c28ed.
+
+#### Known issues closed
+- **Report, clean quit not written.** `RunRecord.save_closed`: when the record can't be written, an empty closed mark
+  named for the run (`closed_mark`: pid and start) goes beside it. Failing that, the record goes. The mark is made
+  with `SaveFile.touch`, new and refused for a held path, and removed with `SaveFile.remove`, so `hold` covers both.
+  Tests: test_run_record (a write that fails; a folder locked whole writes no mark and reads as a crash).
+- **ReportScrub rows.**
+  - IPv6 in hex letters only (`dead::beef`) goes, and mixed case with a digit (`Fe80::1`) goes. A capital then
+    small letters only is a C++ name and stays (`Fade::1`, `Face::bad`).
+  - Versions (`v1.2.3.4`) and `(driver 10.0.0.1)` stay. Zero-padded IPv4 goes, and so does WSL's
+    `/mnt/c/Users/<other>`.
+  - Common-word account names (`ReportConfig.common_names`) go from paths only.
+  - A spaced user folder stops at the characters Windows bars, within 48 characters, so a sentence after it stays.
+  - `cut` drops a name's trailing first words ("Jo" of "Jo Bloggs"), split at spaces or tabs.
+  - Tests: test_report_scrub, 6 new.
+- **Controls, moved default stranded.** `KeyBindings._keep_moved_keys` gives the action its layout-1 key if free;
+  else it goes in `keyless`, and Settings › Controls' note names it (KEYS_KEYLESS). Zoom in and out, which old saves
+  lack, share the wheel with Next and Previous replica (`may_share`) and are never keyless. A slot waiting for a key
+  stops waiting on a tab change or when the window loses focus. Tests: test_mc1_qa, test_settings_screen.
+- **Debug.**
+  - F4 trails are ribbons (`DebugRibbons`): kept arrays, handed over whole with a degenerate index tail.
+  - Intent labels are depth-tested and step up a line when they overlap. They hide under the order wheel, the field
+    map and a raised sight.
+  - Retro pixels has Pixel size and Shades sliders, 2–16.
+  - Tests: test_debug_view, test_dev_play, test_dev_settings, test_bp6_menus.
+- **Customise keeps its resolution.** The root cause was physics interpolation drawing the hand-placed camera part
+  way, the creeping zoom included. It is now off on the turntable, its port and the picture ports. The port is resized
+  on show and when the window's size changes. Test: test_replica_turntable, 1080p to 4K.
+- **Screen reader.** Squad orders are read ("Order · %s"), and so is a refused order. Skipping a round is read in its
+  own live label, and the last hit line is cleared. Settings rows, paint tiles and the Armory track have names. Tests:
+  test_announcer, test_mc1_qa, test_bp6_menus.
+- **`_settle` untested with counts on.** `_settle` still calls `Hud.show_xp`. What changed is that its progress and
+  records go to paths a test sets (`progress_path`, `records_path`), so it is now tested with counts on its own files
+  (test_mc1_qa).
+- **Armory dots by mouse only.** They take focus, left and right step a level, and a focus ring is drawn (test_ur5_qa,
+  test_bp6_menus).
+- **Replica panel 8 px taller.** The count uses `HudStyle.tight_font` (line height 1).
+- **Magazines row.** Size and count are coloured apart (test_customise_parts).
+- **Crouch.** A held crouch comes back standing from the practice Loadout; a toggled one is kept (test_rg5_qa).
+
+#### Rows kept, narrowed or new
+- **Narrowed.**
+  - The screen reader row: only the Match page's and Loadout's cards are left.
+  - The practice Loadout row: the crouch clause is gone.
+  - The AT2 row: only "checked headless/xvfb" is left.
+- **New.**
+  - Run record: a folder unwritable across two runs still gives a false crash on the third start, and stale empty
+    marks can pile up.
+  - ReportScrub edges: an address right after "(driver " is kept; capital-then-letters hex (`Dead::beef`) is kept.
+- **Kept.**
+  - Second-copy pid: Windows has no cheap process start time.
+  - Map pictures at 700x400: the crops come from eye_pictures.
+
+#### UI audit
+- **Fixed.**
+  - The minimap is clamped to the field.
+  - The reduced-motion line reads as a sentence.
+  - "Ranger green" shrinks to fit, 10 px at the least.
+  - The credits title is a page title.
+  - The map jpgs have mipmaps.
+  - WATCHING hides while the round result is up.
+  - Key marks: `[ ; /`, "Minus", "Num 5" and "Num -", all through translation keys.
+  - The XP line reads "Rounds won with you in them".
+  - F3 sits bottom left, is seated as it shows and follows a resize.
+  - The crosshair and the teammates' markers hide while paused. This was also the first list's stray 1 px mark.
+  - The walk-off line keeps 12 px above a banner.
+  - Intent labels hide under the wheel, the map and the scope.
+  - The skip comment is corrected.
+- **Left by ruling.**
+  - Pause buttons as wide as their words: DECISIONS ~779 (owner, 2026-10-29, FB1).
+  - Card text at 720p: the menus scale with the window, DECISIONS ~804 (UX1). A floor would be the owner's call.
+
+#### QA and performance
+- QA passed, with non-blocking edges. They are now fixed (mixed case, zero-padding, WSL, tabs, the F3 seat) or are
+  KNOWN_ISSUES rows (driver address, run record).
+- Performance passed. team_bench, Depot 6v6, seed 1, 40 s:
+  - tick 2.35 to 2.45 ms;
+  - views and HUD 1.23 to 1.30 ms;
+  - both 3.58 to 3.75 ms, noise size;
+  - 0 of 2400 frames over 16.7 ms.
+- The ribbons no longer slice arrays each frame (the critic's point).
+
+#### Defaults (one line each)
+- Common names list: ordinary words would blank the report otherwise.
+- 48 characters a spaced user folder: longer than any account name Windows makes.
+- CamelCase letters only = C++ name: no tool writes an address so.
+- Closed mark beside the record: a full disk may still take a name.
+- Moved keys fall back to the old key, else Settings names them: never a silent keyless action.
+- Retro sliders 2–16: past 16 the picture is unreadable.
+- Labels hide at any raised sight, iron sights too: the glass draws over them.
+- A held crouch comes back standing: the key is up by then.
+- Minus as a word: "-" already means no key.
+- F3 bottom left: the minimap holds the top left, and the feed defaults top right.
+- Teammates' markers hide while paused: they showed through the see-through panel, as the crosshair did.
+
+#### Pictures
+`/mnt/project-files/playtest/bp6/menus/`, before and after pairs:
+- turntable at 1080p and 4K
+- minimap at the edge
+- tile names
+- credits font
+- reduced-motion line
+- retro sliders
+- Armory focus
+- map mipmaps
+- replica panel height
+- intents under the wheel, the map and the scope
+- F3 corner
+- pause (full screen and crop)
+- walk-off over LOST (crop, re-shot without the crash screen)
+
+#### For the owner to test
+- At 1080p and 4K on a real display, Customise's 3/4 view is framed whole and steady.
+- A spawn by Depot's edge: the minimap is full.
+- The Armory track with keyboard and pad.
+- A screen reader: orders and skips.
+- Rebind to `[ ; / -` and numpad keys and read the prompts.
+- Pause: no crosshair or teammates' markers through it.
+- Spectating at a round's end.
+- HIT! over LOST.
+- F3 with the hit feed set bottom left.
+- Intent labels while aiming a red dot.
+- F4 during a long spray: the ribbons look right and the frame rate holds.
+- Skip a round, then press Esc during the skip: the crosshair and markers come back after both close.

@@ -297,3 +297,28 @@ func test_a_bad_catalogue_row_is_left_out_and_reported() -> void:
 	assert_string_contains(cat.problems[0], "maps.md:6")
 	assert_eq(MapCatalog.parse("no table here").problems.size(), 1)
 	assert_eq(MapCatalog.read_file("res://nowhere.md").fields(false).size(), 1, "no file: Depot alone")
+
+
+## BP6: Retro pixels' size and shades are saved, read back and held to their ends, with sliders on the Dev tab.
+func test_retro_pixels_size_and_shades() -> void:
+	s.dev.retro_pixel_size = 8
+	s.dev.retro_shades = 3
+	assert_true(s.save(path))
+	var again := Settings.new(PlayTuning.new())
+	again.load_file(path)
+	assert_eq(again.dev.retro_pixel_size, 8)
+	assert_eq(again.dev.retro_shades, 3)
+	var d := DevSettings.new()
+	d.from_dict({"retro_pixel_size": 99, "retro_shades": "x"})
+	assert_eq(d.retro_pixel_size, RetroPixels.PIXEL_SIZE, "out of range: the default")
+	assert_eq(d.retro_shades, RetroPixels.SHADES)
+	var r := RetroPixels.new()
+	r.set_look(1, 40)
+	add_child_autofree(r)
+	var mat := (r.get_child(0) as ColorRect).material as ShaderMaterial
+	assert_eq(float(mat.get_shader_parameter(&"pixel_size")), float(RetroPixels.PIXEL_SIZE_MIN), "held to the ends")
+	assert_eq(float(mat.get_shader_parameter(&"shades")), float(RetroPixels.SHADES_MAX))
+	var screen := _screen()
+	assert_eq(screen._retro_size.value, 8.0)
+	screen._retro_shades.value = 5.0
+	assert_eq(s.dev.retro_shades, 5)

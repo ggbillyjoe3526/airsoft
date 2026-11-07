@@ -131,7 +131,11 @@ static func write_lines(info: ReportInfo, cut: Cut = null, scrub: ReportScrub = 
 ## Scrubbed before it is cut, so a cut can't leave part of a name ("Willia") that no longer matches.
 static func note_line(info: ReportInfo, scrub: ReportScrub = null) -> String:
 	var by := scrub if scrub != null else info.scrub
-	var note := one_line(ReportScrub.cut_whole(info.note, info.note_chars * SCRUB_MARGIN) if info.note_chars > 0 else info.note)
+	var chars := info.note_chars * SCRUB_MARGIN
+	var cut := info.note
+	if info.note_chars > 0:
+		cut = by.cut(info.note, chars) if by != null else ReportScrub.cut_whole(info.note, chars)
+	var note := one_line(cut)
 	if by != null:
 		note = by.line(note)
 	if info.note_chars > 0:

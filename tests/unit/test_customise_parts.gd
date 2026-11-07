@@ -304,7 +304,11 @@ func test_moving_shows_rattles_in_red_only_with_a_rattling_magazine() -> void:
 	assert_true(sheet.row_shown(&"moving"))
 	assert_eq(sheet.value_label(&"moving").text, "Rattles")
 	assert_eq(sheet.value_label(&"moving").get_theme_color("font_color"), GameTheme.BAD)
-	assert_eq(sheet.value_label(&"magazines").text, "120 × 2")
+	assert_eq(sheet.value_label(&"magazines").text, "120 ×")
+	assert_eq(sheet.second_label(&"magazines").text, "2")
+	# BP6: coloured apart, as the cards are: a bigger magazine green, fewer of them red
+	assert_eq(sheet.value_label(&"magazines").get_theme_color("font_color"), GameTheme.GOOD)
+	assert_eq(sheet.second_label(&"magazines").get_theme_color("font_color"), GameTheme.BAD)
 	_pick(page, MAGAZINE, 2)
 	assert_false(sheet.row_shown(&"moving"), "the low-cap is quiet")
 	assert_eq(sheet.value_label(&"reload").get_theme_color("font_color"), GameTheme.GOOD)

@@ -74,6 +74,9 @@ func _init() -> void:
 	size_flags_vertical = Control.SIZE_EXPAND_FILL
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	mouse_default_cursor_shape = Control.CURSOR_DRAG
+	# The camera and the turn are placed by hand and drawn once a change: the engine's physics interpolation would draw
+	# them part way from where they were (BP6: the 3/4 view came out zoomed in, more with each draw).
+	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	_port = SubViewport.new()
 	_port.name = "Port"
 	_port.own_world_3d = true
@@ -229,11 +232,23 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	get_viewport().set_input_as_handled()
 
 
+## The viewport is sized on a resize, on showing and when the window changes size (a screen of another size at the
+## same aspect leaves the rect's size alone but not its pixels).
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_RESIZED:
-		_size_port()
-	elif what == NOTIFICATION_VISIBILITY_CHANGED and not is_visible_in_tree():
-		_held = 0
+	match what:
+		NOTIFICATION_RESIZED:
+			_size_port()
+		NOTIFICATION_VISIBILITY_CHANGED:
+			if is_visible_in_tree():
+				_size_port()
+			else:
+				_held = 0
+		NOTIFICATION_ENTER_TREE:
+			if not get_viewport().size_changed.is_connected(_size_port):
+				get_viewport().size_changed.connect(_size_port)
+		NOTIFICATION_EXIT_TREE:
+			if get_viewport().size_changed.is_connected(_size_port):
+				get_viewport().size_changed.disconnect(_size_port)
 
 
 ## Turns by a drag of `pixels` (across turns, up and down tilts).
@@ -308,7 +323,7 @@ func _place_camera() -> void:
 
 
 func _size_port() -> void:
-	if size.x < 1.0 or size.y < 1.0:
+	if size.x < 1.0 or size.y < 1.0 or _model == null:
 		return
 	var sharpness := 1.0
 	if is_inside_tree():

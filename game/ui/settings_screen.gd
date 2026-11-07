@@ -99,6 +99,8 @@ var _dev_checks: Dictionary[StringName, CheckButton] = {}
 ## Dev › Time of day: the map's own, then each preset (DEV_TIMES).
 var _time_of_day: MenuChoice = null
 var _speed: HSlider = null
+var _retro_size: HSlider = null
+var _retro_shades: HSlider = null
 var _end_round: Button = null
 var _confirm_level: ConfirmationDialog = null
 var _confirm_crash: ConfirmationDialog = null
@@ -187,10 +189,20 @@ func _notification(what: int) -> void:
 func open() -> void:
 	_refresh()
 	_keys.cancel()
-	_note.text = ""
+	_note.text = _keyless_note(settings.bindings)
 	visible = true
 	# take focus, so Tab and Enter can't reach the screen underneath
 	_back.grab_focus()
+
+
+## What the controls' note says on opening: the actions an old save's load left keyless and still are (KeyBindings
+## `keyless`), else nothing.
+func _keyless_note(bindings: KeyBindings) -> String:
+	var names := PackedStringArray()
+	for action in bindings.keyless:
+		if bindings.codes(action).is_empty():
+			names.append(tr(KeyBindingList.label_key(action)))
+	return tr("KEYS_KEYLESS") % ", ".join(names) if not names.is_empty() else ""
 
 
 ## Shows the Graphics tab (the first start's notice's Graphics settings).
@@ -476,6 +488,8 @@ func _build_dev() -> void:
 		check.toggled.connect(_on_dev_switch.bind(field))
 		_dev_checks[field] = check
 		explain(check.get_parent() as Control, tr(key + "_HELP"))
+		if field == &"retro_pixels":
+			_build_retro_sliders(page)
 	_build_time_of_day(page)
 	add_section(page, tr("DEV_ACTIONS"))
 	var end_row := add_row(page, "DEV_END_ROUND")
@@ -508,6 +522,7 @@ func _build_dev() -> void:
 func _build_time_of_day(page: VBoxContainer) -> void:
 	var row := add_row(page, "DEV_TIME_OF_DAY")
 	_time_of_day = MenuChoice.new(PackedStringArray([tr("DEV_TIME_MAP"), tr("DEV_TIME_DAY"), tr("DEV_TIME_NIGHT")]))
+	_time_of_day.accessibility_name = tr("DEV_TIME_OF_DAY")
 	_time_of_day.name = "TimeOfDay"
 	row.add_child(_time_of_day)
 	_time_of_day.picked.connect(func(i: int) -> void:
@@ -546,6 +561,21 @@ func _build_dev_checks(page: VBoxContainer) -> Array[Button]:
 	add_child(_confirm_crash)
 	crash.pressed.connect(_ask_crash)
 	return [error, crash]
+
+
+## Retro pixels' block size and shades, under its switch (BP6).
+func _build_retro_sliders(page: Control) -> void:
+	_retro_size = add_slider_row(page, "DEV_RETRO_SIZE", RetroPixels.PIXEL_SIZE_MIN, RetroPixels.PIXEL_SIZE_MAX, 1.0,
+			"%d px")
+	_retro_size.value_changed.connect(func(v: float) -> void:
+		settings.dev.retro_pixel_size = roundi(v)
+		_changed(true))
+	explain(_retro_size.get_parent() as Control, tr("DEV_RETRO_SIZE_HELP"))
+	_retro_shades = add_slider_row(page, "DEV_RETRO_SHADES", RetroPixels.SHADES_MIN, RetroPixels.SHADES_MAX, 1.0, "%d")
+	_retro_shades.value_changed.connect(func(v: float) -> void:
+		settings.dev.retro_shades = roundi(v)
+		_changed(true))
+	explain(_retro_shades.get_parent() as Control, tr("DEV_RETRO_SHADES_HELP"))
 
 
 func _on_dev_switch(on: bool, field: StringName) -> void:
@@ -616,6 +646,8 @@ func _refresh() -> void:
 	_hud_page.refresh()
 	_access_page.refresh()
 	set_slider(_speed, settings.dev.game_speed * 100.0)
+	set_slider(_retro_size, settings.dev.retro_pixel_size)
+	set_slider(_retro_shades, settings.dev.retro_shades)
 	for field: StringName in DEV_SWITCHES:
 		set_check(_dev_checks[field], settings.dev.get(field) as bool)
 	_time_of_day.put(maxi(0, DEV_TIMES.find(settings.dev.time_of_day)))
@@ -695,6 +727,8 @@ func add_choice_row(page: Control, label_key: String, keys: Array[String],
 		words.append(tr(key))
 	var choice := MenuChoice.new(words)
 	choice.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	# a screen reader names the custom-drawn control by its row (BP6)
+	choice.accessibility_name = tr(label_key)
 	row.add_child(choice)
 	return choice
 
@@ -709,6 +743,7 @@ func add_slider_row(page: Control, label_key: String, lo: float, hi: float, step
 	slider.step = step
 	slider.custom_minimum_size = Vector2(SLIDER_WIDTH, 0.0)
 	slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	slider.accessibility_name = tr(label_key)
 	row.add_child(slider)
 	var readout := Label.new()
 	readout.custom_minimum_size = Vector2(READOUT_WIDTH, 0.0)
@@ -793,6 +828,7 @@ func add_check_row(page: Control, label_key: String, on_key: String, off_key: St
 		width: float = ROW_LABEL_WIDTH) -> CheckButton:
 	var row := add_row(page, label_key, width)
 	var check := MenuSwitch.new(tr(on_key), tr(off_key))
+	check.accessibility_name = tr(label_key)
 	row.add_child(check)
 	return check
 

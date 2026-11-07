@@ -63,6 +63,14 @@ func value_label(field: StringName) -> Label:
 	return null
 
 
+## The Magazines row's count label beside its value (hidden on the other rows), for the tests.
+func second_label(field: StringName) -> Label:
+	for r in _rows:
+		if r["field"] == field:
+			return r["second"]
+	return null
+
+
 ## The CAPPED tag on the energy row.
 func capped_tag() -> Control:
 	return _rows[0]["tag"]
@@ -104,13 +112,16 @@ func show_sheet(sheet: LoadoutPerformance.Sheet, sub: String, extra: PackedStrin
 		var row := sheet.rows[i]
 		var ui: Dictionary = _rows[i]
 		(ui["row"] as Control).visible = row.is_shown(extra)
-		var colour := GameTheme.TEXT
-		if row.verdict > 0:
-			colour = GameTheme.GOOD
-		elif row.verdict < 0:
-			colour = GameTheme.BAD
-		(ui["value"] as Label).text = row.text
-		(ui["value"] as Label).add_theme_color_override("font_color", colour)
+		var colour := verdict_colour(row.verdict)
+		var split := row.parts.size() == 2
+		(ui["value"] as Label).text = row.parts[0] if split else row.text
+		(ui["value"] as Label).add_theme_color_override("font_color",
+				verdict_colour(row.part_verdicts[0]) if split else colour)
+		var second := ui["second"] as Label
+		second.visible = split
+		if split:
+			second.text = row.parts[1]
+			second.add_theme_color_override("font_color", verdict_colour(row.part_verdicts[1]))
 		(ui["fill"] as ColorRect).anchor_right = row.bar
 		(ui["fill"] as ColorRect).color = colour
 		var unit: String = TranslationServer.translate(row.unit_key) if row.unit_key != "" else ""
@@ -176,10 +187,20 @@ func _build_row(into: Control, spec: Dictionary) -> Dictionary:
 	var value := MenuParts.text("", VALUE_SIZE, 800, GameTheme.TEXT)
 	value.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	cell.add_child(value)
+	# the Magazines row's count, coloured apart from its size (Row.parts)
+	var second := MenuParts.text("", VALUE_SIZE, 800, GameTheme.TEXT)
+	second.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	second.visible = false
+	cell.add_child(second)
 	var unit := MenuParts.text("", UNIT_SIZE, 700, GameTheme.MUTED)
 	unit.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	cell.add_child(unit)
-	return {"field": spec["field"], "row": row, "fill": fill, "value": value, "unit": unit, "tag": tag}
+	return {"field": spec["field"], "row": row, "fill": fill, "value": value, "second": second, "unit": unit, "tag": tag}
+
+
+## Better green, worse red, the same in the text's colour.
+static func verdict_colour(verdict: int) -> Color:
+	return GameTheme.GOOD if verdict > 0 else GameTheme.BAD if verdict < 0 else GameTheme.TEXT
 
 
 func _gap(height: int) -> Control:

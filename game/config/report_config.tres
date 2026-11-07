@@ -19,6 +19,7 @@ frame_rate_held = 500
 hitch_ms = 50.0
 log_lines = 40
 min_name_chars = 3
+common_names = PackedStringArray("player", "test", "tester", "user", "admin", "administrator", "guest", "owner", "default", "public", "home", "game", "gamer", "student", "laptop", "desktop", "computer", "windows", "linux", "ubuntu", "deck", "steamdeck", "localhost")
 max_line_chars = 2000
 crouched_at = 0.5
 team_names = PackedStringArray("Alpha", "Beta")

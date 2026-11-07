@@ -177,6 +177,11 @@ func test_the_spot_taken_in_play_keeps_the_toggled_crouch_you_chose_not_the_body
 	play._input.set_crouched(false)
 	play.player.crouch_amount = 0.9 # still coming up
 	assert_false(play.practice_spot().crouched, "standing as you chose")
+	# BP6: a held crouch key is up on the way back: the spot comes back standing at once, not crouched for a tick
+	play._play.controls.crouch_toggle = false
+	Input.action_press(&"crouch")
+	assert_false(play.practice_spot().crouched, "a held crouch is not kept")
+	Input.action_release(&"crouch")
 
 
 func test_without_the_crouch_toggle_the_range_comes_back_standing_once_the_key_is_not_held() -> void:

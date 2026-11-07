@@ -98,6 +98,9 @@ enum Result { BOUND, SWAPPED, REFUSED_KEY, REFUSED_STRANDS }
 var _map: Dictionary[StringName, PackedInt32Array] = {}
 ## The action a refusal or a swap named (the one left keyless or given a key), after `rebind`.
 var last_other: StringName = &""
+## The actions the last `load_dict` left with no key though they have defaults (the player's own keys hold them all):
+## the settings screen says so. An action the player cleared is not one.
+var keyless: Array[StringName] = []
 
 
 func _init() -> void:
@@ -107,6 +110,7 @@ func _init() -> void:
 ## Back to the defaults.
 func reset() -> void:
 	_map.clear()
+	keyless.clear()
 	for action: StringName in ACTIONS:
 		_map[action] = PackedInt32Array(DEFAULTS[action] as Array)
 
@@ -247,7 +251,8 @@ func to_dict() -> Dictionary:
 ## keeps its default. An action the save lacks (added by a later build) takes its default unless another action holds
 ## the key. A key on two actions that may not share one (may_share), or an essential action left keyless, makes the
 ## whole set unusable and the defaults stand. A save from before LAYOUT holding a moved action on its old default gives
-## it the new one. Returns whether the saved set was used as it came.
+## it the new one, or, where the player's keys hold the new one, the old one if no action holds that; one left with
+## none is in `keyless`. Returns whether the saved set was used as it came.
 func load_dict(data: Variant) -> bool:
 	reset()
 	if not data is Dictionary:
@@ -292,11 +297,29 @@ func load_dict(data: Variant) -> bool:
 			if free:
 				kept.append(c)
 		_map[action] = kept
+	_keep_moved_keys(loaded, old_layout)
 	for action: StringName in ESSENTIAL:
 		if _map[action].is_empty():
 			reset()
 			return false
 	return ok
+
+
+## After a load: an action on its default that lost every key to the player's own gets its layout-1 keys (an old save)
+## that no action holds; still keyless, it goes in `keyless`.
+func _keep_moved_keys(loaded: Dictionary[StringName, PackedInt32Array], old_layout: bool) -> void:
+	keyless.clear()
+	for action: StringName in ACTIONS:
+		if loaded.has(action) or not _map[action].is_empty() or (DEFAULTS[action] as Array).is_empty():
+			continue
+		if old_layout and LAYOUT_1_MOVED.has(action):
+			var keys := PackedInt32Array()
+			for c: int in LAYOUT_1_MOVED[action]:
+				if action_of(c) == &"" and keys.size() < SLOTS:
+					keys.append(c)
+			_map[action] = keys
+		if _map[action].is_empty():
+			keyless.append(action)
 
 
 ## Writes the bindings into the InputMap (and lets go of every action whose keys changed, so a key held across the

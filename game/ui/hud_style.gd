@@ -43,6 +43,7 @@ const SPARE_SIZE := 16
 const BOX_ALPHA := &"hud_alpha"
 const OPACITY := &"hud_opacity"
 const BOX_SLOTS: Array[StringName] = [&"panel", &"normal"]
+static var _tight: Dictionary[int, Font] = {}
 ## How dark each backing is (the page colour at this opacity).
 const BACKING_SIDE := 0.82
 const BACKING_CLOCK := 0.92
@@ -293,6 +294,22 @@ static func caps(key: String) -> String:
 ## A flat panel in the page colour at `alpha` with the given margins.
 static func panel_box(alpha: float, margin_x: int, margin_y: int) -> StyleBoxFlat:
 	return navy_box(alpha, Color(0.0, 0.0, 0.0, 0.0), margin_x, margin_y)
+
+
+## Inter at `weight` whose line is `font_size` tall, as the concept's line-height 1 sets it: the font's own leading
+## taken off evenly above and below (BP6: the replica panel's 40 px count stood in a 48 px line). One per weight and
+## size.
+static func tight_font(weight: int, font_size: int) -> Font:
+	var key := weight * 1000 + font_size
+	if _tight.has(key):
+		return _tight[key]
+	var v := FontVariation.new()
+	v.base_font = GameTheme.font(weight)
+	var extra := roundi(v.base_font.get_height(font_size)) - font_size
+	v.spacing_top = -(extra / 2)
+	v.spacing_bottom = -(extra - extra / 2)
+	_tight[key] = v
+	return v
 
 
 ## A Label under `parent` in Inter at `weight`, with `em_spacing` between letters (0 for none).

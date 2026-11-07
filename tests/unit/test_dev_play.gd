@@ -101,6 +101,16 @@ func test_bot_intentions_are_built_while_on_and_freed_once_off() -> void:
 	var labels := views[0].find_children("*", "Label3D", true, false)
 	assert_eq(labels.size(), session.state.characters.size() - 1, "one over every bot, none over you")
 	assert_ne((labels[0] as Label3D).text, "", "says what it is doing")
+	assert_false((labels[0] as Label3D).no_depth_test, "hidden by walls (BP6)")
+	# BP6: under the see-through wheel and field map and a raised sight's glass they would show through
+	var you := session.player
+	assert_false(session.intents_covered(you), "nothing over them at the hip")
+	you.aim_raise = 1.0
+	assert_true(session.intents_covered(you), "a raised sight")
+	you.aim_raise = 0.0
+	session._input.field_map().open = true
+	assert_true(session.intents_covered(you), "the field map")
+	session._input.field_map().open = false
 	s.dev.bot_intent = false
 	s.mark_changed()
 	await wait_process_frames(1)
@@ -110,8 +120,17 @@ func test_bot_intentions_are_built_while_on_and_freed_once_off() -> void:
 func test_retro_pixels_are_built_while_on_and_freed_once_off() -> void:
 	s.dev.retro_pixels = true
 	await _play()
-	assert_eq(session.find_children("*", "RetroPixels", true, false).size(), 1)
+	var retro: Array[Node] = session.find_children("*", "RetroPixels", true, false)
+	assert_eq(retro.size(), 1)
 	assert_false(session.state.off_record, "a look only")
+	# BP6: the Dev tab's sliders reach the shader while it is up
+	s.dev.retro_pixel_size = 9
+	s.dev.retro_shades = 3
+	s.mark_changed()
+	await wait_process_frames(1)
+	var mat := ((retro[0] as RetroPixels).get_child(0) as ColorRect).material as ShaderMaterial
+	assert_eq(float(mat.get_shader_parameter(&"pixel_size")), 9.0)
+	assert_eq(float(mat.get_shader_parameter(&"shades")), 3.0)
 	s.dev.retro_pixels = false
 	s.mark_changed()
 	await wait_process_frames(1)

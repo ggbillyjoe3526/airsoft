@@ -26,11 +26,8 @@ func _ready() -> void:
 	box.offset_right = -48
 	box.offset_bottom = -32
 	add_child(box)
-	var heading := Label.new()
-	heading.text = tr("CREDITS_TITLE").to_upper()
-	heading.add_theme_font_override("font", GameTheme.spaced_font(800, GameTheme.SPACING_TAB, GameTheme.LARGE_SIZE))
-	heading.add_theme_font_size_override("font_size", GameTheme.LARGE_SIZE)
-	box.add_child(heading)
+	# the other pages' title: condensed display capitals (BP6: it was the body font)
+	box.add_child(MenuParts.page_title(tr("CREDITS_TITLE")))
 	_text = TextEdit.new()
 	_text.editable = false
 	# long lines wrap: unwrapped, a licence's copyright line ran past the box's right edge (UI1)
