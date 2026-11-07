@@ -7,6 +7,7 @@
 - part 3: critic Accept 8/8 · qa Pass · performance Pass
 - part 4: critic Accept 7/8 · qa Pass · performance Pass
 - part 5: critic Accept 8/8 · qa Pass · performance Pass
+- part 6: critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -24,6 +25,7 @@
 | 2026-11-07 | part 4: 2 | Opus 5.5 | green | Accept 7/8 | – (record SHAs fixed) |
 | 2026-11-07 | part 5: 1 | Opus 5.5 | green | Retry 4/8 | per-frame config copy, fire hold reversed FB5, record gaps |
 | 2026-11-07 | part 5: 2 | Opus 5.5 | green | Accept 8/8 | – |
+| 2026-11-07 | part 6: 1 | Opus 5.5 | green | Accept 7/8 | – (the changelog note dropped, the row's cause fixed) |
 
 ## The pass
 
@@ -551,3 +553,55 @@ The retry reverts only drawn code (the muzzle) and adds the leave hardening, not
 - Press Esc on the loading screen, mid-load and at Continue: back to the Match page.
 - Press Esc right after PLAY on Woodland: the line should read "Leaving…" at once, then the Match page.
 - Shoot bots as they holster, draw or break into a sprint: hits should land where the arms and torso are drawn.
+
+### Part 6: the bots' shoulder back as on 33fa48b (owner, 2026-11-07)
+
+The owner said "Shoulder joint on the bot figure doesn't look natural. It's too thin" and "When calling hit". After
+the first try he said "That's even worse. It looked better on 33fa48b", so the shoulder is restored to 33fa48b's.
+
+Branch worktree-bp6-shoulder, reset to origin/main 8d62be4. The deltoids() weights and the collarbone clip work
+(v1, and v2 before it was shown) were dropped.
+
+- **Goal:** the bot figure's shoulder and upper-arm weights exactly as on 33fa48b, on all three Body levels, keeping
+  #242's other fixes (glove plates, the material folds, the hands after a camera cut, the GBB nose).
+- **Approach:** `tools/blender/figures/body_weights.py` now does the glove plates only. The chest easing off the upper
+  arms (armpits() and its constants and helpers) is removed, and the script touches the full-detail Body only, since
+  LOD1 and LOD2 have no plates. For the rebuild, the body splice's weights came from 33fa48b's human.glb: same
+  geometry and same joints, so it is the same as a fresh splice. The script was then run last. pads.py and gear.py
+  outputs, the gear fold and the pads' maps are unchanged, so nothing else was rebuilt. No parts file changed.
+- **Proof:**
+  - Weights: on all three levels the shoulders and chest (above 1 m, |x| < 0.30 m) are within 6e-8 of 33fa48b.
+    LOD1 and LOD2 are within 1.2e-7 everywhere. The only Body points that differ (2,074) are on the gloves (all
+    led by hand or forearm bones, |x| >= 0.495 m).
+  - Hit call 0.5 s skinned: the shoulder points are within 1.8e-7 m of 33fa48b on every level.
+  - Clips: HitCall, WalkOff, Idle and Rifle_Aim are key for key the same as 33fa48b.
+  - Renders: the restore and 33fa48b differ in at most 2 pixels of 691,200 per view.
+- **Sheet:** `/mnt/project-files/playtest/bp6/shoulder/05_bot_figure_hit_call_shoulder_restored_to_33fa48b.png`.
+  Three columns: 33fa48b, main now (8d62be4) and the restore. Hit call from the front, 3/4, side and back, every
+  panel labelled. Sheets 01-04 are the earlier tries (v1), kept as history.
+- **Rows:** the shoulder fold row is restored from 33fa48b, with a note that the owner preferred that shoulder and
+  that a fix must keep its volume. The bp6-models changelog bullet about the fold is dropped, and no shoulder note
+  is added: #242's easing never shipped, so against 0.1 Dev 1 players see no change (critic). The row's cause is corrected: the upper arm turns about 153° while
+  `Shoulder_L` stays at its idle 12°.
+- **Tests:**
+  - test_bp6_models: the step test became `test_the_chest_s_side_keeps_the_upper_arm_s_blend`. On every level and
+    both arms, the upper arm's mean share by the armpit must be at least 0.33 (33fa48b: 0.36 to 0.53; the easing:
+    0.18 to 0.30).
+  - test_hit_call_arm: the strap test became `..._no_worse_than_the_known_fold`. At most 10 shirt points stand out
+    over the strap at once, which is 33fa48b's worst, measured every 0.1 s of both clips.
+  - Nothing is skipped.
+  - Results: test_bp6_models, test_hit_call_arm, test_hands_on_replica, test_figure_body, test_figure_hit_area,
+    test_hit_registration, test_figure_view, test_figure_models, test_bp6_graphics, test_figure_pads,
+    test_model_pictures and test_replica_paint pass 96/96. gdlint, the changelog notes and the wiki checks pass.
+- **Lessons:**
+  - v1 (the cap led by the upper arm) made the girth 31 to 27 cm.
+  - v2 (the collarbone raised 30° and the upper arm's -127° roll taken off) read as worse to the owner.
+  - The measured cause stays on file: the hit call's upper arm is turned 153° from a still collarbone, much of it
+    roll, and skinning collapses it.
+- **For the owner:** the hit call's shoulder should look exactly as it did on 33fa48b, including the small dark fold
+  by the helmet.
+
+#### Review
+
+critic Accept 7/8 (two docs fixed after: the changelog note dropped, the row's cause corrected) · qa Pass ·
+performance Pass, on 8ef75d7.

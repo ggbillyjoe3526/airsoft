@@ -44,7 +44,7 @@ name (BL13, 2026-11-05), so a part and the body can each be rebuilt without the 
 | Script | What it does |
 |---|---|
 | `pads.py` | The knee and elbow pads, `Kit_Pads` with `_LOD1` and `_LOD2` (budget 3,000 / 1,000 / 300 triangles), from the owner's knee pad photos: imports `human.glb`, fits the pads to its `Body` in the rest pose, paints their 1024 maps, exports them with a copy of the figure's armature, splices them in and lists them in `human.json`'s parts |
-| `body_weights.py` | Plain Python with numpy (BP6): two fixes to the `Body` levels' weights, rewritten in place. The chest's side under each arm comes off the upper arm (it swung up over the shoulder strap with the arm raised); each hard plate of the gloves (the back plate and its border, the knuckle domes, the finger guards: small shells of the full-detail `Body` led by hand bones) moves whole, so a bent finger turns a plate instead of shearing it. Run last |
+| `body_weights.py` | Plain Python with numpy (BP6): the gloves' hard plates (the back plate and its border, the knuckle domes, the finger guards: small shells of the full-detail `Body` led by hand bones) each on one set of weights, so a bent finger turns a plate whole instead of shearing it. Nothing else changes: the shoulders keep body.py's weights (owner, 2026-11-07). Run last |
 | `splice_part.py` | Plain Python (no Blender): copies every node whose name starts with a prefix from one glTF binary into the figure's, with its mesh, materials and textures, the joints mapped to the figure's skin by bone name after checking both rest poses match; everything else in the figure file is kept |
 
 Run from the repository root with Blender 5.2's Python module (`pip install bpy==5.2.3`), then reimport in Godot:
@@ -55,5 +55,5 @@ Run from the repository root with Blender 5.2's Python module (`pip install bpy=
 After the body is rebuilt, run `pads.py` again: it refits the pads to the new body's surface; then
 `tools/blender/figure-gear/gear.py` (its swatch strip lives in the pads' maps, painted by `pads.py` at `gear.PADS_AT`),
 and last `python -I tools/blender/figures/body_weights.py assets/models/characters/human.glb` (the body's splice brings
-back the blended weights under the arms and on the gloves' plates). `human_pads_col.webp` imports with high-quality
-compression (BC7): BC1 darkened the gear's flat swatches.
+back the blended weights on the gloves' plates). `human_pads_col.webp` imports with high-quality compression (BC7): BC1
+darkened the gear's flat swatches.
