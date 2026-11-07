@@ -164,6 +164,9 @@ var figure_kinds: PackedInt32Array = PackedInt32Array()
 ## the range, which has no figures), and the lines (m) their levels of detail change at (the graphics' Mesh detail).
 var _figure_models: FigureModels = null
 var _figure_lines: Vector2 = Vector2.ZERO
+## The Mesh detail and the eye's zoom the lines were drawn for (FigureConfig.zoomed_lines).
+var _figure_detail: GraphicsQuality.MeshDetail = GraphicsQuality.MeshDetail.HIGH
+var _figure_zoom: float = 1.0
 ## The magazines the rigged figures throw in their reloads (FI4): a fixed pool built with the models, cleared each
 ## round.
 var _thrown: ThrownMagazines = null
@@ -708,7 +711,7 @@ func _build_views(ui: CanvasLayer) -> void:
 		_torches.setup(state.characters.size(), _level.query(), _tuning.body)
 		add_child(_torches)
 	_pick_kinds()
-	_figure_lines = _play.figures.lod_high
+	_figure_lines = _play.figures.zoomed_lines(_figure_detail, _figure_zoom)
 	var figure_materials := _build_bodies()
 	if not practice:
 		_mag_tosses = MagTossView.new()
@@ -1142,6 +1145,9 @@ func _process(delta: float) -> void:
 	var aim := _aim.update(watched, _tuning.movement, delta * _pacer.rate)
 	_eyes.sim_rate = _pacer.rate
 	_eyes.update(watched, _input, fraction, delta, aim, watched == player)
+	if _eyes.detail_zoom != _figure_zoom:
+		_figure_zoom = _eyes.detail_zoom
+		_set_figure_lines()
 	var look := -_eyes.global_basis.z
 	# Inspect (IN1): your own replica, while you are in play and looking through your own eyes.
 	if _input.take_inspect() and watched == player and Elimination.is_in_play(player):
@@ -1697,6 +1703,7 @@ func _apply_graphics(values: GraphicsQuality) -> void:
 	var contact := GraphicsApply.contact_shadows(values)
 	for f in _figures:
 		f.set_contact_shadow(contact)
+		f.set_shadow_cast(GraphicsApply.any_shadows(values))
 	if _skyline != null:
 		_skyline.set_smoke(SkylineView.smokes(values))
 	if _torches != null:
@@ -1705,7 +1712,13 @@ func _apply_graphics(values: GraphicsQuality) -> void:
 		_torches.set_own_haze(torch == TorchBeams.Mode.HAZE)
 	if _pools != null:
 		_pools.set_real_count(GraphicsApply.pool_lights(values, _light, _torches != null and _own_light))
-	var lines := _play.figures.lod_lines(values.mesh_detail)
+	_figure_detail = values.mesh_detail
+	_set_figure_lines()
+
+
+## The figures' detail lines for the Mesh detail and the eye's zoom (a scope raised: BP6), set when they change.
+func _set_figure_lines() -> void:
+	var lines := _play.figures.zoomed_lines(_figure_detail, _figure_zoom)
 	if lines != _figure_lines:
 		_figure_lines = lines
 		for f in _figures:

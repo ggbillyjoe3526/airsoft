@@ -311,3 +311,9 @@ func lod_lines(detail: GraphicsQuality.MeshDetail) -> Vector2:
 	if detail == GraphicsQuality.MeshDetail.HIGH or detail == GraphicsQuality.MeshDetail.ULTRA:
 		return lod_high
 	return lod_low
+
+
+## The lines (m) drawn for `detail` seen at `zoom` (the eye's magnification, 1 unzoomed): scaled by it, so a figure
+## through a 6x scope changes level where it looks as big as one unzoomed at its line (BP6).
+func zoomed_lines(detail: GraphicsQuality.MeshDetail, zoom: float) -> Vector2:
+	return lod_lines(detail) * maxf(zoom, 1.0)

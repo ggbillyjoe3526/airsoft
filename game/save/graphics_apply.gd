@@ -271,6 +271,12 @@ static func contact_shadows(values: GraphicsQuality) -> bool:
 	return not values.sun_shadows
 
 
+## Whether any light casts shadows with `values`: the sun, and the torch's spot only with it (torch_mode); no other
+## light ever does. Without, the figures' shadow twins are hidden.
+static func any_shadows(values: GraphicsQuality) -> bool:
+	return values.sun_shadows
+
+
 ## How the view's weapon torch is drawn at night with `values` (WL7): a real spot while your kit carries a light this
 ## match (`fitted`) and the preset gives `lighting`'s night at least one real light (Medium and up,
 ## LightingConfig.real_lights_for), casting shadows from TORCH_SHADOWS_FROM with Sun shadows on; else a haze

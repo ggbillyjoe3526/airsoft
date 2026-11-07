@@ -321,6 +321,12 @@ func set_lod_lines(lines: Vector2) -> void:
 		mi.visibility_range_end_margin = _config.lod_margin if level < 2 else 0.0
 
 
+## Draws the shadow twin (shadows only) or not: hidden while no light casts shadows.
+func set_shadow_twin(on: bool) -> void:
+	if not levels.is_empty() and levels[levels.size() - 1] == -1:
+		meshes[meshes.size() - 1].visible = on
+
+
 ## Seen `fade` of the way (1 solid, 0 gone), through each mesh's transparency: drawn see-through only while it fades.
 func set_fade(fade: float) -> void:
 	if fade == _fade:
