@@ -6,6 +6,9 @@ extends RefCounted
 ## they are, only the indices offset, and each mesh LOD the engine would pick for a part at a distance is the one the
 ## merged surface picks there (its LODs are every part's edge lengths, each holding the coarsest LOD a part has at or
 ## under it). A part with a see-through material keeps its own draw (merged, its sort by depth would change).
+## It reads and writes ArrayMesh's private `_surfaces` (the engine's stored surface data: positions, then normals and
+## tangents, as one stream; attributes and skin per vertex), a layout pinned by tests/unit/test_bp6_graphics.gd on
+## Godot 4.7.2: a new engine version must pass those tests before this is trusted.
 
 const INDEX_BYTES := 2
 ## A position's bytes: three floats. The vertex data holds every position, then every normal and tangent.

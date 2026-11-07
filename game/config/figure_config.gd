@@ -19,6 +19,9 @@ extends Resource
 @export var lod_high: Vector2 = Vector2(12.0, 28.0)
 @export var lod_low: Vector2 = Vector2(6.0, 16.0)
 @export var lod_margin: float = 0.5
+## A figure is in a scope glass's view (and draws at the glass's zoomed lines, BP6) when a ball this wide (m) round its
+## middle, this high off its feet, reaches into the glass's cone: a standing figure's reach, its replica raised.
+@export var glass_cone_radius: float = 1.1
 ## The level the shadow twin is made from: one cheap shadow a figure at every range (BD1).
 @export var shadow_level: int = 2
 ## Materials whose name starts with this (any case) are painted in the team's colour (Team, TeamColour, TeamPaint,

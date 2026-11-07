@@ -26,8 +26,9 @@ screen. Tuning: `FigureConfig` (`game/config/figure_config.gd`, on PlayTuning).
 | `figure_mix.gd` | `FigureMix`: who is a robot: half of each team, from the match seed on a stream of its own; only while Settings › Dev › Robots is on (`DevSettings.robots`, the Easter egg, RB1); otherwise everyone is human |
 
 Tests: `tests/unit/test_figure_models.gd`, `test_figure_body.gd`, `test_figure_mix.gd`, `test_figure_view.gd`,
-`test_figure_pose.gd`, `test_figure_animator.gd`, `test_figure_flinch.gd`, `test_figure_legs_qa.gd`, `test_figure_hands.gd`,
-`test_figure_hands_qa.gd`, `test_figure_flinch_qa.gd`, `test_thrown_magazines.gd`, `test_figure_raise.gd` (FB5),
-`test_figure_copies.gd` (the replicas' figure copies and their parts, TP1), `test_bp6_graphics.gd` (BodyMerge, the zoomed lines, the twin), `test_hands_on_replica.gd` (HG1); the hit area against the drawn figure
-`test_figure_hit_area.gd` (`tests/support/hit_area_probe.gd`, FI7). The bench: `tools/figure_bench.gd` (11 figures on
-Depot for 30 s; dev only).
+`test_figure_pose.gd`, `test_figure_animator.gd`, `test_figure_flinch.gd`, `test_figure_legs_qa.gd`,
+`test_figure_hands.gd`, `test_figure_hands_qa.gd`, `test_figure_flinch_qa.gd`, `test_thrown_magazines.gd`,
+`test_figure_raise.gd` (FB5), `test_figure_copies.gd` (the replicas' figure copies and their parts, TP1),
+`test_bp6_graphics.gd` (BodyMerge, the zoomed lines, the twin), `test_hands_on_replica.gd` (HG1); the hit area against
+the drawn figure `test_figure_hit_area.gd` (`tests/support/hit_area_probe.gd`, FI7). The bench: `tools/figure_bench.gd`
+(11 figures on Depot for 30 s; dev only).

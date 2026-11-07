@@ -29,14 +29,25 @@ func test_the_lines_scale_with_the_zoom_and_never_shrink() -> void:
 	assert_eq(config.zoomed_lines(high, 0.5), config.lod_high, "no zoom below 1")
 
 
-func test_the_sight_zoom_is_the_glass_turned_or_the_view_raised() -> void:
-	assert_almost_eq(FirstPersonView.sight_zoom(null, view, 0.0), view.aim_zoom, 1e-6, "iron sights")
+func test_the_view_zooms_as_raised_and_a_scopes_glass_as_turned() -> void:
+	assert_almost_eq(FirstPersonView.aimed_zoom(null, view), view.aim_zoom, 1e-6, "iron sights: the view")
+	assert_eq(FirstPersonView.glass_zoom_of(null, 0.0), 0.0, "no glass")
 	var dot := ReplicaConfig.new()
 	dot.aim_zoom = 1.5
-	assert_almost_eq(FirstPersonView.sight_zoom(dot, view, 1.5), 1.5, 1e-6, "an optic that zooms the view")
-	assert_almost_eq(FirstPersonView.sight_zoom(_scope(2.0, 6.0), view, 6.0), 6.0, 1e-6, "the Variable Scope at 6x")
-	assert_almost_eq(FirstPersonView.sight_zoom(_scope(2.0, 6.0), view, 2.0), 2.0, 1e-6, "turned to 2x")
-	assert_almost_eq(FirstPersonView.sight_zoom(_scope(4.0, 0.0), view, 0.0), 4.0, 1e-6, "a fixed scope, no glass zoom")
+	assert_eq(FirstPersonView.glass_zoom_of(dot, 1.5), 0.0, "an optic that zooms the view has no zooming glass")
+	assert_almost_eq(FirstPersonView.glass_zoom_of(_scope(2.0, 6.0), 6.0), 6.0, 1e-6, "the Variable Scope at 6x")
+	assert_almost_eq(FirstPersonView.glass_zoom_of(_scope(2.0, 6.0), 2.0), 2.0, 1e-6, "turned to 2x")
+	assert_almost_eq(FirstPersonView.glass_zoom_of(_scope(4.0, 0.0), 0.0), 4.0, 1e-6, "a fixed scope")
+
+
+func test_the_glass_cone_holds_what_the_glass_shows_and_not_the_view_round_it() -> void:
+	var corner := FigureView.corner_of(view.vertical_fov(6.0), 16.0 / 9.0)
+	var eye := Transform3D.IDENTITY
+	assert_true(FigureView.in_cone(eye, corner, Vector3(0.0, 0.0, -40.0), 1.1), "straight down the scope")
+	assert_true(FigureView.in_cone(eye, corner, Vector3(2.0, 0.0, -40.0), 1.1), "inside the glass's edge")
+	assert_false(FigureView.in_cone(eye, corner, Vector3(15.0, 0.0, -40.0), 1.1), "out at the view's side")
+	var wide := FigureView.corner_of(view.vertical_fov(1.0), 16.0 / 9.0)
+	assert_lt(corner.y, wide.y, "narrower than the unzoomed view")
 
 
 func test_a_figure_40_m_off_through_6x_draws_its_nearest_level_and_its_radio() -> void:
@@ -238,3 +249,53 @@ func test_an_open_leaf_stops_short_of_a_wall_across_its_fold_and_every_other_fol
 						var p := leaf * (Vector3(t / 10.0 - 0.5, 0.0, s) if absf(leaf.basis.x.x) + absf(leaf.basis.x.z)
 								> absf(leaf.basis.z.x) + absf(leaf.basis.z.z) else Vector3(s, 0.0, t / 10.0 - 0.5))
 						assert_false(inside.has_point(p), "%s door %d leaf %d: no part in a %s" % [id, j / 2, j % 2, b.kind])
+
+
+func test_only_parts_on_the_bodys_skin_fold_and_heads_that_dont_fold_share_one_merged_mesh() -> void:
+	var a := FigureBody.new()
+	assert_true(a.setup(models, FigureMix.HUMAN, 0, 0, Color.RED, 0.0, config.lod_high))
+	add_child_autofree(a)
+	var b := FigureBody.new()
+	assert_true(b.setup(models, FigureMix.HUMAN, 1, 0, Color.RED, 0.0, config.lod_high))
+	add_child_autofree(b)
+	assert_ne(a.head, b.head)
+	for m in a.merged.size():
+		assert_same(a.merged[m].mesh, b.merged[m].mesh, "level %d: one merged mesh for both heads" % a.merged_levels[m])
+	for i in a.meshes.size():
+		if a.levels[i] >= 0 and not a.meshes[i].visible:
+			assert_eq(a.meshes[i].skin, a.merged[0].skin, "%s folded only on the body's skin" % a.meshes[i].name)
+	# A part on a skin of its own keeps its own draw.
+	var c := FigureBody.new()
+	var pack: MeshInstance3D = null
+	assert_true(c.setup(models, FigureMix.HUMAN, 2, 0, Color.RED, 0.0, config.lod_high))
+	add_child_autofree(c)
+	pack = c.skeleton.get_node(^"Kit_Pack") as MeshInstance3D
+	pack.skin = pack.skin.duplicate() as Skin
+	for mi in c.merged:
+		mi.free()
+	c.merged.clear()
+	c.merged_levels.clear()
+	pack.visible = true
+	c.call("_merge_levels", models, FigureMix.HUMAN, 0, Color.RED, 0.0, 0, c.merged[0].skin if not c.merged.is_empty()
+			else (c.skeleton.get_node(^"Body") as MeshInstance3D).skin)
+	assert_true(pack.visible, "the pack, on another skin, draws itself")
+
+
+func test_through_the_glass_only_the_figures_it_shows_take_its_lines() -> void:
+	var figures: Array[FigureView] = []
+	for x: float in [0.0, 15.0]:
+		var c := Character.new(figures.size() + 1, 1, Vector3(x, 0.0, -40.0), 0.0, ReplicaStats.default_loadout())
+		var v := FigureView.new()
+		add_child_autofree(v)
+		v.setup(c, Color.BLUE, HitConfig.new(), GameTheme.font(800), false, [], 0.0, config)
+		v.set_body(models, FigureMix.HUMAN, config.lod_high)
+		v.update(c, 1.0)
+		figures.append(v)
+	var glass := config.zoomed_lines(GraphicsQuality.MeshDetail.HIGH, 6.0)
+	var plain := config.zoomed_lines(GraphicsQuality.MeshDetail.HIGH, view.aim_zoom)
+	var corner := FigureView.corner_of(view.vertical_fov(6.0), 16.0 / 9.0)
+	FigureView.set_glass_lines(figures, Transform3D.IDENTITY, corner, glass, plain, config.glass_cone_radius)
+	assert_eq(figures[0].lod_lines(), glass, "the figure in the glass: drawn as near as it looks")
+	assert_eq(figures[1].lod_lines(), plain, "the one beside it, in the view round the glass: the view's lines")
+	assert_eq(figures[0].body().merged[0].visibility_range_end, glass.x, "its body takes them")
+	await get_tree().process_frame

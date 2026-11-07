@@ -172,6 +172,30 @@ func set_world(query: WorldQuery, body_config: BodyConfig) -> void:
 	_raise_wait = absi(character_id) % _raise_stride
 
 
+## The lines (m) the figure's levels change at now.
+func lod_lines() -> Vector2:
+	return _lines
+
+
+## view_corner for a camera of vertical field of view `fov` (degrees) on a view `aspect` wide to its height: the cone
+## round a scope's glass, drawn by a narrower camera on the same axis (OpticGlass; never wider than this).
+static func corner_of(fov: float, aspect: float) -> Vector2:
+	var tall := tan(deg_to_rad(fov) * 0.5)
+	var wide := tall * aspect
+	var corner := atan(sqrt(tall * tall + wide * wide))
+	return Vector2(cos(corner), sin(corner))
+
+
+## Each of `figures` in the cone `corner` round `eye`'s view axis (a ball `reach` round its middle, `reach` off its feet)
+## drawn at the `glass` lines, the rest at `plain`; set only where they change.
+static func set_glass_lines(figures: Array[FigureView], eye: Transform3D, corner: Vector2, glass: Vector2,
+		plain: Vector2, reach: float) -> void:
+	for f in figures:
+		var lines := glass if in_cone(eye, corner, f.global_position + Vector3.UP * reach, reach) else plain
+		if f.lod_lines() != lines:
+			f.set_lod_lines(lines)
+
+
 ## The figure drawn, or null.
 func body() -> FigureBody:
 	return _body

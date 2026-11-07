@@ -323,7 +323,8 @@ func bone(bone_name: StringName) -> int:
 
 
 ## Each level drawn between its lines (m): LOD0 to `lines.x`, LOD1 to `lines.y`, LOD2 beyond, each line crossed a
-## margin past it. A part with no LOD2 (the human's radio) ends at the far line; the twin casts at every range.
+## margin past it. A part's coarsest level draws to every distance, so one with no LOD2 (the human's radio) keeps its
+## LOD1 past the far line; the twin casts at every range. The merged meshes take the same lines.
 func set_lod_lines(lines: Vector2) -> void:
 	for i in meshes.size():
 		if levels[i] >= 0:
@@ -341,8 +342,9 @@ func _set_range(mi: MeshInstance3D, level: int, last: bool, lines: Vector2) -> v
 
 
 ## Each level's foldable parts (BodyMerge.foldable) as one merged mesh, made once a kind, head and level and shared,
-## painted as the parts are; a part's last level folds into the coarser levels too (the radio's LOD1 into LOD2). The
-## parts it draws are hidden while the figure is solid (`set_fade`). A level that can't be merged keeps its parts.
+## painted as the parts are; a part's last level folds into the coarser levels too (the radio's LOD1 into LOD2). Only
+## parts on the body's own skin fold (one skin binds the merged mesh); a part on another keeps its own draw. The parts it
+## draws are hidden while the figure is solid (`set_fade`). A level that can't be merged keeps its parts.
 func _merge_levels(models: FigureModels, kind: int, team: int, colour: Color, glow: float, look: int,
 		skin: Skin) -> void:
 	for level in _config.shadow_level + 1:
@@ -350,14 +352,14 @@ func _merge_levels(models: FigureModels, kind: int, team: int, colour: Color, gl
 		var sources: Array[Mesh] = []
 		for i in meshes.size():
 			var at := levels[i]
-			if at < 0 or not BodyMerge.foldable(meshes[i].mesh):
+			if at < 0 or meshes[i].skin != skin or not BodyMerge.foldable(meshes[i].mesh):
 				continue
 			if at == level or (at == _last_level[i] and at < level):
 				parts.append(meshes[i])
 				sources.append(meshes[i].mesh)
 		if parts.size() < 2:
 			continue
-		var mesh := models.merged_mesh(kind, head, level, sources)
+		var mesh := models.merged_mesh(kind, level, sources)
 		if mesh == null:
 			continue
 		var mi := MeshInstance3D.new()
