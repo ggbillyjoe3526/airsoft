@@ -10,6 +10,14 @@ extends Node3D
 const KIND := &"door"
 ## The gap left between the two leaves and at each jamb (m), so the leaves read as two.
 const LEAF_GAP := 0.02
+## A leaf folds back by up to half a turn, flat against its wall, and stops short where another block stands in its way
+## (a wall meeting its own at a corner): looked for in REACH_STEP steps (rad) back from flat, a point within REACH_SKIN
+## (m) of a block's face touching it, not in it.
+const REACH_SKIN := 0.002
+const REACH_STEP := 0.005
+## The heights up a leaf (shares of it, from its middle) and the points along it tried against the blocks.
+const REACH_HEIGHTS: Array[float] = [-0.45, 0.0, 0.45]
+const REACH_POINTS := 12
 
 var _mesh: MultiMeshInstance3D = null
 var _material: StandardMaterial3D = null
@@ -20,6 +28,8 @@ var _hinges: PackedVector3Array = PackedVector3Array()
 var _dirs: PackedVector3Array = PackedVector3Array()
 var _sizes: PackedVector3Array = PackedVector3Array()
 var _turns: PackedFloat32Array = PackedFloat32Array()
+## How far each leaf turns open (rad): half a turn, or less where a block stops it (`reach`).
+var _reach: PackedFloat64Array = PackedFloat64Array()
 var _drawn: PackedFloat32Array = PackedFloat32Array()
 ## Each leaf's transform as last placed (the MultiMesh's own copy is the renderer's).
 var _leaves: Array[Transform3D] = []
@@ -40,7 +50,7 @@ static func build(map: MapData, style: MapStyle, swing_time: float) -> DoorView:
 	mm.mesh = BoxMesh.new()
 	mm.instance_count = map.doors.size() * 2
 	for d in map.doors:
-		view._add_leaves(d)
+		view._add_leaves(d, map.blocks)
 	view._drawn.resize(map.doors.size())
 	view._leaves.resize(map.doors.size() * 2)
 	view._drawn.fill(-1.0)
@@ -80,7 +90,7 @@ func materials() -> Array[Material]:
 
 
 ## Door `d`'s two leaves: each from its jamb to the middle, turning out to the door's side.
-func _add_leaves(d: MapData.Door) -> void:
+func _add_leaves(d: MapData.Door, blocks: Array[MapData.Block]) -> void:
 	var along_z := d.size.x < d.size.z
 	var width := d.size.z if along_z else d.size.x
 	var thick := d.size.x if along_z else d.size.z
@@ -94,6 +104,41 @@ func _add_leaves(d: MapData.Door) -> void:
 		_sizes.append(Vector3(leaf, d.size.y, thick) if not along_z else Vector3(thick, d.size.y, leaf))
 		# Turning by a small angle a about y moves the leaf's free end along (dir.z, 0, -dir.x) × a: out, to its side.
 		_turns.append(signf(dir.z * out.x - dir.x * out.z))
+		_reach.append(reach(_hinges[-1], dir, _sizes[-1], _turns[-1], blocks))
+
+
+## How far (rad) a leaf hinged at `hinge`, lying along `dir`, sized `size`, turning by `turn`'s sign, folds open: half a
+## turn (flat against its wall, which it only touches), or the first step back from that with no point of it inside a
+## block (floors and ramps aside). Worked out once a door, at the build.
+static func reach(hinge: Vector3, dir: Vector3, size: Vector3, turn: float, blocks: Array[MapData.Block]) -> float:
+	var near: Array[AABB] = []
+	var span := absf(dir.x) * size.x + absf(dir.z) * size.z
+	for b in blocks:
+		if b.kind == &"floor" or b.kind == &"ramp":
+			continue
+		var box := AABB(b.center - b.size * 0.5, b.size).grow(-REACH_SKIN)
+		if box.intersects(AABB(hinge - Vector3(span, size.y, span), Vector3(span, size.y, span) * 2.0)):
+			near.append(box)
+	var thick := absf(dir.z) * size.x + absf(dir.x) * size.z
+	var side := Vector3(dir.z, 0.0, -dir.x) * thick * 0.5
+	var angle := PI
+	while angle > PI * 0.5:
+		var fold := Basis(Vector3.UP, angle * turn)
+		var clear := true
+		for k in REACH_POINTS + 1:
+			var along := hinge + fold * (dir * span * float(k) / REACH_POINTS)
+			for h in REACH_HEIGHTS:
+				var up := Vector3(0.0, size.y * h, 0.0)
+				for p: Vector3 in [along + fold * side + up, along - fold * side + up]:
+					for box in near:
+						if box.has_point(p):
+							clear = false
+			if not clear:
+				break
+		if clear:
+			return angle
+		angle -= REACH_STEP
+	return angle
 
 
 ## Places door `i`'s leaves `open` of the way (0 shut, 1 folded flat against the wall), eased in and out.
@@ -103,7 +148,7 @@ func _place(i: int, open: float) -> void:
 	var mm := _mesh.multimesh
 	for k in 2:
 		var j := i * 2 + k
-		var turn := Basis(Vector3.UP, PI * eased * _turns[j])
+		var turn := Basis(Vector3.UP, _reach[j] * eased * _turns[j])
 		var leaf := _sizes[j]
 		var middle := _hinges[j] + turn * (_dirs[j] * (absf(_dirs[j].x) * leaf.x + absf(_dirs[j].z) * leaf.z) * 0.5)
 		_leaves[j] = Transform3D(turn * Basis.from_scale(leaf), middle)

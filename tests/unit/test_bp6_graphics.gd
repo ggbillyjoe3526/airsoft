@@ -206,3 +206,35 @@ func test_the_merged_paint_is_the_parts_paint() -> void:
 		for t in merged.mesh.get_surface_count():
 			if merged.mesh.surface_get_material(t) == material:
 				assert_eq(merged.get_active_material(t), body.get_active_material(s), material.resource_name)
+
+
+func test_an_open_leaf_stops_short_of_a_wall_across_its_fold_and_every_other_folds_flat() -> void:
+	var play := PlayTuning.load_default()
+	var sim := SimTuning.load_default()
+	for id: String in ["depot", "woodland", "street"]:
+		var map := MapData.load_map(id, play.map_style, sim.rounds.team_size)
+		var view := DoorView.build(map, play.map_style, sim.doors.swing_time)
+		if view == null:
+			continue
+		add_child_autofree(view)
+		var doors := DoorState.new()
+		doors.shut.resize(map.doors.size())
+		doors.swing_left.resize(map.doors.size())
+		view.refresh(doors)
+		var reach: PackedFloat64Array = view.get("_reach")
+		for j in map.doors.size() * 2:
+			var stopped := id == "depot" and (j == 10 or j == 16)
+			if stopped:
+				assert_between(reach[j], PI * 0.8, PI - 0.01, "depot door %d's leaf 0 stops short of the wall across it" % (j / 2))
+			else:
+				assert_eq(reach[j], PI, "%s door %d leaf %d folds flat" % [id, j / 2, j % 2])
+			var leaf := view.leaf_at(j)
+			for b in map.blocks:
+				if b.kind == &"floor" or b.kind == &"ramp":
+					continue
+				var inside := AABB(b.center - b.size * 0.5, b.size).grow(-0.003)
+				for t in 11:
+					for s: float in [-0.5, 0.5]:
+						var p := leaf * (Vector3(t / 10.0 - 0.5, 0.0, s) if absf(leaf.basis.x.x) + absf(leaf.basis.x.z)
+								> absf(leaf.basis.z.x) + absf(leaf.basis.z.z) else Vector3(s, 0.0, t / 10.0 - 0.5))
+						assert_false(inside.has_point(p), "%s door %d leaf %d: no part in a %s" % [id, j / 2, j % 2, b.kind])
