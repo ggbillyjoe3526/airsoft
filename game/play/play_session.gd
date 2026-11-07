@@ -22,11 +22,12 @@ extends Node3D
 ## The build is four steps (the map, the level, the teams, the views). Staged, one runs each rendered frame and
 ## `progressed` reports each, for the loading screen; `started` follows the frame the match is first drawn. Staged, the
 ## nav grid (about 6 s on Woodland) is built on a worker thread, so the loading screen keeps drawing, and the teams step
-## ends once it is in. Not staged, all four run in `_ready` (tests and tools). With `wait_for_go` (MC1, owner
-## 2026-11-01) the match is drawn but holds still once built, the mouse free, until `go`: `ready_to_go` says when it is
-## fully loaded (drawn once and its shaders warm, or PlayTuning.go_fallback after the first frame at the latest), for
-## the loading screen's Continue. Nothing sounds under the loading screen: the ambience starts with the match, at
-## Continue or, without it, as the screen goes (owner, 2026-11-03).
+## ends once it is in; the bots' vault links and cover are found over the frames before the views step (BP6). Not
+## staged, all four run in `_ready` (tests and tools). With `wait_for_go` (MC1, owner 2026-11-01) the match is drawn
+## but holds still once built, the mouse free, until `go`: `ready_to_go` says when it is fully loaded (drawn once and
+## its shaders warm, or PlayTuning.go_fallback after the first frame at the latest), for the loading screen's Continue.
+## Nothing sounds under the loading screen: the ambience starts with the match, at Continue or, without it, as the
+## screen goes (owner, 2026-11-03).
 ## Out of a live round, a fresh press of the trigger (or the pause menu's Skip to next round) skips the rest of it (MC1,
 ## owner 2026-11-01): it is played out at once, as fast as the frame allows (PlayTuning.skip_budget_ms a rendered frame),
 ## silently and under a plain cover, never shown fast-forwarded; then the round's table shows and the next round waits
@@ -55,6 +56,14 @@ const SKIP_NOTE_SIZE := 18
 const SKIP_NOTE_MARGIN := 64
 ## The build steps, in order, as the keys of the words the loading screen shows.
 const STEP_KEYS: Array[String] = ["LOAD_MAP", "LOAD_LEVEL", "LOAD_TEAMS", "LOAD_VIEWS"]
+## The loading screen's line once it is left (leave_loading).
+const LEAVE_KEY := "LOAD_LEAVING"
+## The level step (staged, its ground a frame and its dressing the next; Woodland's are about 0.9 and 0.6 s), the views
+## step, and the main thread's time a loading frame gives the bots' vault links before it (µs; about two
+## frames at 60 fps, so the screen draws at about 30 fps while they are found).
+const LEVEL_STEP := 1
+const VIEWS_STEP := 3
+const BUILD_SLICE_USEC := 25000
 ## The teams' numbers in the simulation: Alpha 0, Beta 1.
 const TEAM_ALPHA := 0
 const TEAM_BETA := 1
@@ -197,7 +206,18 @@ var _running: bool = false
 ## Staged: the worker thread task building the nav grid (-1: none under way), and where it puts the grid.
 var _nav_task: int = -1
 var _nav_out: Array[NavGrid] = []
+## Staged, the bots' groundwork before the views step's frame: the vault links' search, spread over frames (null before
+## it starts) and the map's bot tuning it runs by (worked out once, BotConfig.for_map), the worker thread task finding
+## the cover (-1: none under way), where it puts it, and the cover found.
+var _vaults: NavVaults.Finder = null
+var _prep_config: BotConfig = null
+var _cover_task: int = -1
+var _cover_out: Array[BotCover.Found] = []
+var _cover: BotCover.Found = null
 var _first_frame_due: bool = false
+## Left from the loading screen (leave_loading), and whether `left` was said for it.
+var _leaving: bool = false
+var _left_said: bool = false
 ## Waiting for `go` (wait_for_go), whether `ready_to_go` was said, and seconds since the first frame was drawn.
 var _holding: bool = false
 var _go_said: bool = false
@@ -342,12 +362,8 @@ func _load_map() -> void:
 func _build_level() -> void:
 	if not _map.ok():
 		return
-	_level = MapLevel.new()
-	add_child(_level)
-	# a bake is checked against the day sun it was baked under, whatever preset plays
-	# The bake is of the day's sun as this map sets it (an indoor field's overhead lamps, DR1), whichever preset plays.
-	var baked_sun := LightingConfig.for_map(_play.lighting, null, _map, LightingConfig.DAY)
-	_level.build(_map, _play.map_style, _tuning.body, _play.baked_light, baked_sun, _light.night, _play.site_look)
+	if _level == null:
+		_build_ground()
 	_play.look.push_globals()
 	_lighting = FieldLighting.build(_light, _play.look)
 	_lighting.add_probes(_map)
@@ -381,6 +397,15 @@ func _build_level() -> void:
 		add_child(_bushes)
 
 
+## The level's blocks, ground and collision (MapLevel): staged, a frame of its own before the rest of the level step.
+func _build_ground() -> void:
+	_level = MapLevel.new()
+	add_child(_level)
+	# The bake is of the day's sun as this map sets it (an indoor field's overhead lamps, DR1), whichever preset plays.
+	var baked_sun := LightingConfig.for_map(_play.lighting, null, _map, LightingConfig.DAY)
+	_level.build(_map, _play.map_style, _tuning.body, _play.baked_light, baked_sun, _light.night, _play.site_look)
+
+
 func _build_teams() -> void:
 	if _map.ok():
 		_start_simulation(_map)
@@ -396,7 +421,7 @@ func _build_views_and_start() -> void:
 	var nobody := -1
 	var levels: Dictionary[int, StringName] = {player_team: teammates_level(), opponent_team(): difficulty}
 	_bots = BotController.new(state, nobody if autopilot and not practice else PLAYER_ID, _map, _sim.nav,
-			_level.query(), _tuning, _bot_config, levels, _identities)
+			_level.query(), _tuning, _bot_config, levels, _identities, _bot_options())
 	# The dark the bots see by, from the map's data once, when the preset played is a night one (WL6; null by day).
 	_bots.world.night = NightField.build(_map, _bot_config, _light.night)
 	# On the range the pilot shoots a plate instead (there is no one to play against).
@@ -450,8 +475,9 @@ func _bot_kit_rules() -> LoadoutRules:
 	return rules
 
 
-## Staged build, a step a frame. The match runs from the frame after the last step, and `started` follows that frame's
-## update (so the first picture it draws is the match, camera placed).
+## Staged build, a step a frame (the level's ground a frame before the rest of it, the teams step until the nav grid is
+## in, the views step after the bots' groundwork, `_prepare_bots`). The match runs from the frame after the last step,
+## and `started` follows that frame's update (so the first picture it draws is the match, camera placed).
 func _advance_build() -> void:
 	if _step >= STEP_KEYS.size():
 		return
@@ -460,6 +486,10 @@ func _advance_build() -> void:
 			return
 		_take_nav()
 		_end_step()
+	elif _step == LEVEL_STEP and _map.ok() and _level == null:
+		_build_ground()
+	elif _step == VIEWS_STEP and _map.ok() and not _prepare_bots():
+		return
 	else:
 		_build_step()
 	if _step >= STEP_KEYS.size():
@@ -469,6 +499,47 @@ func _advance_build() -> void:
 			_holding = wait_for_go
 		else:
 			started.emit()
+
+
+## Staged, the bots' groundwork, a slice a frame before the views step runs (Woodland's took 2.2 s in one frame, BP6):
+## the cover found on a worker thread (pure data) while the vault links' rays, which only the main thread casts, run
+## BUILD_SLICE_USEC a frame, so the loading screen keeps drawing. True on the frame after both are in: the bots get
+## them as BotController would find them.
+func _prepare_bots() -> bool:
+	if _cover != null:
+		return true
+	if _vaults == null:
+		_vaults = NavVaults.Finder.new()
+		_prep_config = _bot_config.for_map(_map)
+		_cover_out.clear()
+		_cover_task = WorkerThreadPool.add_task(_find_cover.bind(_cover_out, _map, _sim.nav, _prep_config, _tuning),
+				false, "Bot cover")
+	if not NavVaults.find(_vaults, _sim.nav, _level.query(), _tuning.vault, _tuning.body,
+			Time.get_ticks_usec() + BUILD_SLICE_USEC):
+		return false
+	# The cover's task reads the grid: it is done before the links join its search.
+	WorkerThreadPool.wait_for_task_completion(_cover_task)
+	_cover_task = -1
+	NavVaults.finish(_vaults, _sim.nav, _prep_config.vault_price)
+	_vaults = null
+	_cover = _cover_out.pop_back() if not _cover_out.is_empty() \
+			else BotCover.find_cover(_map, _sim.nav, _prep_config, _tuning)
+	_prep_config = null
+	return false
+
+
+## The bots' options: talking, with the cover found before the views step (staged; once).
+func _bot_options() -> BotController.Options:
+	var options := BotController.Options.new()
+	options.cover = _cover
+	_cover = null
+	return options
+
+
+## On a worker thread: `map`'s cover into `out` (BotCover.find_cover; pure data, the grid only read).
+static func _find_cover(out: Array[BotCover.Found], map: MapData, nav: NavGrid, cfg: BotConfig,
+		tuning: SimTuning) -> void:
+	out.append(BotCover.find_cover(map, nav, cfg, tuning))
 
 
 ## On a worker thread: `map`'s nav grid into `out`. Pure data (NavGrid's contract), so nothing else is touched.
@@ -846,7 +917,7 @@ func _build_views(ui: CanvasLayer) -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if not _running or _holding:
+	if not _running or _holding or _leaving:
 		return
 	if _skipping:
 		_play_out()
@@ -1135,6 +1206,9 @@ func _breathe(e: GameEvent, ears: Character) -> void:
 
 
 func _process(delta: float) -> void:
+	if _leaving:
+		_leave_when_idle()
+		return
 	if not _running:
 		if staged:
 			_advance_build()
@@ -1267,9 +1341,33 @@ func ready_for_go() -> bool:
 	return _go_said
 
 
+## Left from the loading screen (Esc, main.gd), building or held for Continue: the build stops where it is, the
+## screen's line says so (`progressed` with LEAVE_KEY), and `left` follows once no worker thread is busy with it (the
+## nav grid or the cover, which can't be stopped), so the screen keeps drawing meanwhile rather than freezing in
+## `_exit_tree`'s wait.
+func leave_loading() -> void:
+	if (_running and not _holding) or _leaving:
+		return
+	_leaving = true
+	progressed.emit(_step, STEP_KEYS.size(), LEAVE_KEY)
+	_leave_when_idle()
+
+
+## Leaving the loading screen: `left`, once no worker task of the build is under way (once only).
+func _leave_when_idle() -> void:
+	if _left_said:
+		return
+	if _nav_task >= 0 and not WorkerThreadPool.is_task_completed(_nav_task):
+		return
+	if _cover_task >= 0 and not WorkerThreadPool.is_task_completed(_cover_task):
+		return
+	_left_said = true
+	left.emit()
+
+
 ## The match starts (the loading screen's Continue): it ticks from now on and takes the mouse.
 func go() -> void:
-	if not _holding:
+	if not _holding or _leaving:
 		return
 	_holding = false
 	_audio.start_ambience()
@@ -1394,6 +1492,10 @@ func _exit_tree() -> void:
 		WorkerThreadPool.wait_for_task_completion(_nav_task)
 		_nav_task = -1
 		_nav_out.clear()
+	if _cover_task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_cover_task)
+		_cover_task = -1
+		_cover_out.clear()
 	ReplicaPaint.clear()
 	HeldMerge.clear()
 	if settings != null and settings.changed.is_connected(_apply_dev):

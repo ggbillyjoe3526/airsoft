@@ -297,7 +297,9 @@ func play(seed_value: int, max_seconds: float) -> MatchTally:
 		var light := BotKits.night_light(light_rules)
 		for c in state.characters:
 			c.armament.lights = BotKits.lights_for(c.armament.replicas, light_rules, light)
-	var bots := BotController.new(state, -1, map, nav, level.query(), tuning, config, levels, identities, talk)
+	var options := BotController.Options.new()
+	options.talk = talk
+	var bots := BotController.new(state, -1, map, nav, level.query(), tuning, config, levels, identities, options)
 	bots.world.night = NightField.build(map, config, night)
 	t.kits = kit_names
 	kits_now = kit_names

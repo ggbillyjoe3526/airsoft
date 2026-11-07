@@ -6,6 +6,7 @@
 - part 2: critic Accept 7/8 · qa Pass · performance Pass
 - part 3: critic Accept 8/8 · qa Pass · performance Pass
 - part 4: critic Accept 7/8 · qa Pass · performance Pass
+- part 5: critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -21,6 +22,8 @@
 | 2026-11-07 | part 3: 3 | Opus 5.5 | green | Accept 8/8 | – |
 | 2026-11-07 | part 4: 1 | Opus 5.5 | green | Retry 4/8 | bare FileAccess mark, ribbon slices, scrub edges, docs |
 | 2026-11-07 | part 4: 2 | Opus 5.5 | green | Accept 7/8 | – (record SHAs fixed) |
+| 2026-11-07 | part 5: 1 | Opus 5.5 | green | Retry 4/8 | per-frame config copy, fire hold reversed FB5, record gaps |
+| 2026-11-07 | part 5: 2 | Opus 5.5 | green | Accept 8/8 | – |
 
 ## The pass
 
@@ -448,3 +451,103 @@ passed on d5c28ed.
 - Intent labels while aiming a red dot.
 - F4 during a long spray: the ribbons look right and the frame rate holds.
 - Skip a round, then press Esc during the skip: the crosshair and markers come back after both close.
+
+### Part 5: the remaining known issues (loading, figures at cover, the hit volume's eases)
+
+The owner asked to "attempt to fix the remaining known issues". Seven rows in six items: three fixed and deleted
+(Woodland's load freeze, the hit volume's holster and sprint eases, leaving while it loads), three left with measured
+reasons (the nav grid's memory, one-way steps, the hit volume's raise share), and the muzzle-at-cover row kept by
+default (critic round 1). A new row records the load stall that remains.
+
+#### 1. Woodland's loading screen froze in its views step (fixed, row deleted)
+
+- **Goal:** the loading screen keeps drawing through Woodland's load; the bots' links and cover identical.
+- **Approach:** `NavVaults.link` split into a resumable `Finder` (`find` until a deadline, then `finish`); PlaySession's
+  `_prepare_bots` runs it 25 ms (`BUILD_SLICE_USEC`) a frame before the views step, while `BotCover.find_cover` (one
+  pass for low and tall cover; pure data) runs on a worker thread; the bots get both through `BotController.Options`
+  (its `talk` flag moved there too, gdlint's 10-argument limit). The level step's ground (`MapLevel.build`) takes a
+  frame of its own before the level's dressing. `_exit_tree` waits for the cover task as for the nav task.
+- **Risks:** the vault rays now run before the views and the practice targets are laid out: neither adds a collider
+  (only MapLevel does), so the rays see the same level. Load takes a few frames longer (the slices share frames).
+- **Measured** (staged load, `started` reached, headless, busy shared cloud machine): Woodland's longest frame
+  2,725–2,744 ms (views step; of it vault links 1,560 ms, cover 673 ms) before; 905–925 ms after (views step 844–925,
+  level step 713–905). Whole load 8.2–8.8 s before, 8.6–9.0 s after. Depot's longest frame on the same machine was
+  1,236 ms (its views step), so Woodland's is no longer the outlier. The remaining frames are the views and HUD
+  (about 0.46 s and 0.48 s here) and MapLevel.build (about 0.9 s here); WL2 measured these at about a third of that
+  on a quiet machine.
+- **Tests:** `test_bot_vaults` (a search stopped at every clock look finds the same links, search points and route),
+  `test_woodland_layout` (one-pass cover equals low_blocks and tall_blocks on Woodland), `test_bp6_round2` (a staged
+  Depot load gives the bots the unstaged build's links and cover; a Woodland load left mid-search leaves nothing).
+
+#### 2. Woodland's nav grid memory (left, row updated)
+
+Measured: 529,096 nodes, 330,832 walkable, 3.7 s to build (6.2 s in WR1), 303 MB, 275 MB of it AStar3D (832 bytes a
+walkable node). No exact change: replacing AStar3D keeps the same routes only if its tie-breaks are copied, and a
+GDScript search is far slower per route; a coarser cell changes routes.
+
+#### 3. A figure's muzzle held level for 0.35 s after each shot (kept by default, row reworded)
+
+Tried in attempt 1: within the fire hold the raise could rise but not fall, so a figure firing over cover kept its
+barrel out of it. The critic failed it: a figure firing at geometry within reach then fired from the 77° high ready (the
+BB level, the gas puff at a skyward muzzle), and its drawn head left the hit volume (the raise share, item 4) exactly
+while trading shots. The owner can't be asked, so the safe default is FB5's rule (a shot holds the replica level: it
+points where the BB goes, FB5.md) and the reversal is reverted with its tests. The row stays with that reason; lifting
+the shouldered replica a few degrees to clear a cover's top is the later option it names.
+
+#### 4. The hit volume's holster and sprint eases (fixed, row deleted); its raise share (left, row updated)
+
+- **Goal:** HitPose follows the drawn arms into and out of the holster and the sprint, eased in the simulation.
+- **Approach:** `UpperBlend` (game/sim, new): each tick the Character's `holster_weight` and `sprint_weight` ease to
+  their targets (holstered, or a draw from the holster before `holster_swap` of it; sprinting) at `settle_holster` and
+  `settle_sprint`, now HitConfig's (moved from FigureConfig's holster_swap and settle_hold/settle_mode, so the drawn
+  FigurePose eases by the same numbers). `Armament.drawn_from_holster` says where a draw came from. HitPose blends
+  the aim, holster and sprint samples by those weights, scales the aim bend and the cheek by the aim's share, and puts
+  the cheek on the stock only with the replica in hand (as FigureBody does), gated as the drawn figure (HitPose.GATE).
+- **Measured:** part way in (holster 0.2 to 0.8, sprint 0 to 1, aim ±0.6 rad) every upper joint is within 3.6 cm of
+  the drawn one (the fit's bar is 4 cm); snapped to the holster as before, up to 32.8 cm off.
+- **Tests:** `test_hit_fit` (the part-way joints, settled states unchanged), `test_figure_hit_area`, `test_bp6_round2`
+  (the simulation's eases equal FigurePose's tick by tick at 60 fps; one tick into the holster the shoulder has moved
+  only that share).
+- **Left, the raise share:** fully raised, the head's top sits 3 cm off level, 21 cm at a 0.3 rad aim, 38 cm at
+  0.6 rad (measured against the drawn skeleton). Following it exactly needs FB5's ray (with its lead, stride and the
+  fire hold) in the simulation, a ray a character a tick, and the drawn figure reading it: a rework of FB5 and
+  its 20 tests, left for a task of its own.
+
+#### 5. Leaving a match while it loads (fixed, row deleted)
+
+- **Approach:** `main.gd` `_unhandled_input`: Esc (ui_cancel or pause) on the loading screen calls
+  `PlaySession.leave_loading`, which stops the build and says `left` once no worker task is busy (so the screen keeps
+  drawing rather than freezing in `_exit_tree`'s wait for the nav grid); `left` goes to `_end_play`, the Match page.
+  Works while building and while held for Continue.
+- **Tests:** `test_bp6_round2` (Esc mid nav build and at Continue both land on the Match page, no PlaySession left).
+
+#### 6. A route to a region joined only by a one-way step (left, row updated)
+
+Measured: 0 one-way steps on Depot, Woodland, The Street and the range (every AStar3D link checked both ways), so a
+directed region check would add build time for nothing.
+
+#### Balance
+
+Only the hit volume's change touches play (transitions into and out of the holster and the sprint). Depot match guard
+(`tools/match_guards.sh test_match_guards depot_matches_play_out_on_every_seed`, 16 seeds, attempt 1's tree): pass,
+119 rounds over 16 seeds, 0 on time, 0 to the overtime flag, 0 teammates reached by a bounce, 106 knocks, 298 rings.
+The retry reverts only drawn code (the muzzle) and adds the leave hardening, nothing the guard plays.
+
+#### Attempt 2 (critic round 1)
+
+- `_prepare_bots` works out the map's BotConfig once a load (`_prep_config`), not every loading frame.
+- The muzzle's fire hold back to FB5's rule (item 3); its row kept and reworded.
+- A new KNOWN_ISSUES row: the remaining load stall (Woodland 0.7 to 0.9 s, MapLevel.build alone; Depot 1.2 s on the
+  same busy machine).
+- `UpperBlend.snap` removed (tests set the weights); FigurePose.settle_share calls `UpperBlend.share`, the one ease;
+  `FigureConfig.gate_below` defaults to `HitPose.GATE`, one number.
+- Esc on the loading screen: the line reads "Leaving…" (`LOAD_LEAVING`, en.po, sent through `progressed`) until the
+  worker is done; `go()` and `_physics_process` do nothing once leaving (QA's hardening); tested.
+
+#### What the owner should test
+
+- Load Woodland: the loading screen's animation should keep moving to the end (a short stop of under a second may
+  remain where every map has one).
+- Press Esc on the loading screen, mid-load and at Continue: back to the Match page.
+- Press Esc right after PLAY on Woodland: the line should read "Leaving…" at once, then the Match page.
+- Shoot bots as they holster, draw or break into a sprint: hits should land where the arms and torso are drawn.

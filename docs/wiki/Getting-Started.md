@@ -52,7 +52,7 @@ on its own, and the menus say so once. Mouse and keyboard; there is no controlle
    the right shows the field and everything you picked, with **PLAY** under it. Next time, Match opens on the map and
    team you last played.
 2. Press **PLAY**. A loading screen shows the map until the match is ready, then **CONTINUE** comes up: click it, or
-   press Enter or Space, to start.
+   press Enter or Space, to start. Esc on the loading screen goes back to the Match page.
 3. You start at your team's end with two bot teammates, against three bots. The round starts on two short whistle
    blasts.
 4. Move with **W A S D**, aim with the right mouse button, fire with the left. One BB hit takes anyone out, you

@@ -130,6 +130,10 @@ func test_bots_take_cover_at_its_pieces_sunk_into_the_slope() -> void:
 	gut.p("cover: %d low, %d tall" % [low.size(), tall.size()])
 	assert_gt(low.size(), 40, "logs, stacks and crates hide a crouched bot")
 	assert_gt(tall.size(), 400, "trunks, huts and thickets hide a standing one")
+	# The one look at each block's floor the bots are given (BotCover.find_cover) finds the very same blocks.
+	var both := BotCover.find_cover(map, nav, cfg, tuning)
+	assert_eq(_footprints(both.low), _footprints(low), "low cover found in one pass")
+	assert_eq(_footprints(both.tall), _footprints(tall), "tall cover found in one pass")
 	# On a flat floor: a crate on it and one sunk 0.3 m count; one sunk 0.5 m or floating 0.1 m over it does not.
 	var crates := [_box("floor", Vector3(0.0, -0.5, 0.0), Vector3(30.0, 1.0, 12.0))]
 	for c: Vector3 in [Vector3(-10.0, 0.0, 1.3), Vector3(-4.0, -0.3, 1.6), Vector3(2.0, -0.5, 1.8),
@@ -266,6 +270,14 @@ func test_bots_play_a_whole_match_at_today_s_team_size() -> void:
 	assert_true(t.finished, "the match is won")
 	assert_gt(t.hits, 0, "BBs land")
 	assert_eq(t.held_up, 0, "no bot held up")
+
+
+## Each block's centre and half extents, in order.
+static func _footprints(blocks: Array[BotCover.Block]) -> Array[Rect2]:
+	var out: Array[Rect2] = []
+	for k in blocks:
+		out.append(Rect2(k.center, k.half))
+	return out
 
 
 ## A block's entry in a map file.

@@ -156,6 +156,9 @@ func character(pose_name: StringName) -> Character:
 	c.prev_lean = c.lean
 	c.prev_crouch_amount = c.crouch_amount
 	c.prev_walk_cycle = c.walk_cycle
+	# The arms as eased into the holster or the sprint by now, as the drawn figure's are once snapped.
+	c.holster_weight = UpperBlend.holster_target(c.armament, _hits.holster_swap)
+	c.sprint_weight = 1.0 if c.sprinting else 0.0
 	return c
 
 

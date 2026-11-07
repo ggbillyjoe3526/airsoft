@@ -56,8 +56,10 @@ var aim_was_down: bool = false
 ## holster.
 var reload_left: float = 0.0
 var draw_left: float = 0.0
-## Seconds the draw under way takes in all (presentation shows draw_left / draw_total).
+## Seconds the draw under way takes in all (presentation shows draw_left / draw_total), and whether it came out of the
+## holster (the arms rise from it partway through: UpperBlend).
 var draw_total: float = 0.0
+var drawn_from_holster: bool = false
 ## Seconds left to honour a semi or burst press that came while the replica wasn't ready.
 var pending_press: float = 0.0
 ## A reload pressed during a draw: it starts once the replica is up.
@@ -114,6 +116,7 @@ func refill() -> void:
 	reload_left = 0.0
 	draw_left = 0.0
 	draw_total = 0.0
+	drawn_from_holster = false
 	pending_press = 0.0
 	reload_queued = false
 	dry_fired_this_pull = false
@@ -448,6 +451,7 @@ func _draw(slot: int, actor: int, events: SimEvents, scale: float = 1.0) -> void
 		cooldown = stowed_cooldowns[slot]
 		stowed_cooldowns[slot] = 0.0
 	active = slot
+	drawn_from_holster = holstered
 	holstered = false
 	# A press kept for the replica put away never fires the one drawn (BP3: a bolt-window click fired the pistol).
 	pending_press = 0.0

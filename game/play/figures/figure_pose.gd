@@ -91,6 +91,8 @@ var _was_drawing: bool = false
 var _drawn_slot: int = -1
 var _reload_left: float = 0.0
 var _config: FigureConfig = null
+## The hit rules last read by (the holster's and the sprint's timing, shared with the hit volume: UpperBlend).
+var _hits: HitConfig = null
 
 
 func _init(config: FigureConfig) -> void:
@@ -105,6 +107,7 @@ func config() -> FigureConfig:
 ## The targets for `c` at `fraction` of the way from its last tick to this one, by `hits`' rules.
 func read(c: Character, fraction: float, hits: HitConfig) -> void:
 	snapped = false
+	_hits = hits
 	feet = c.prev_position.lerp(c.position, fraction)
 	velocity = c.velocity
 	var yaw := lerp_angle(c.prev_yaw, c.yaw, fraction)
@@ -157,9 +160,9 @@ func read_throw(hand: Grenades.Hand, alive: bool) -> void:
 		bomb_held = true
 
 
-## The upper body's targets from armament `a`: what is in the hand, on the back, in the holster or put away, the draw
-## and a switch under way; `called` the hand raised (the replica in the hand hangs from the other); a reload counts only
-## while `alive`.
+## The upper body's targets from armament `a` (by `read`'s hit rules): what is in the hand, on the back, in the
+## holster or put away, the draw and a switch under way; `called` the hand raised (the replica in the hand hangs from
+## the other); a reload counts only while `alive`.
 func read_hands(a: Armament, called: bool, alive: bool = true) -> void:
 	switch_started = false
 	reload_started = false
@@ -190,7 +193,7 @@ func read_hands(a: Armament, called: bool, alive: bool = true) -> void:
 	_drawn_slot = a.active
 	draw_seconds = a.draw_total
 	var share := 1.0 - a.draw_left / a.draw_total if drawing else 1.0
-	var swap := _config.holster_swap
+	var swap := _hits.holster_swap
 	var put_away := a.holstered or (_from_holster and share < swap)
 	holster = 1.0 if a.holstered else 0.0
 	if _from_holster and drawing:
@@ -275,8 +278,13 @@ func settle(delta: float) -> void:
 	vault_weight = lerpf(vault_weight, vault, settle_share(delta, _config.settle_vault))
 	var hold := settle_share(delta, _config.settle_hold)
 	pistol_weight = lerpf(pistol_weight, pistol, hold)
-	holster_weight = lerpf(holster_weight, holster, hold)
-	sprint_weight = lerpf(sprint_weight, sprinting, mode)
+	# As the hit volume's (UpperBlend, each tick), at the same settle times.
+	if _hits != null:
+		holster_weight = lerpf(holster_weight, holster, settle_share(delta, _hits.settle_holster))
+		sprint_weight = lerpf(sprint_weight, sprinting, settle_share(delta, _hits.settle_sprint))
+	else:
+		holster_weight = holster
+		sprint_weight = sprinting
 	raise = lerpf(raise, raise_target, settle_share(delta, _config.settle_raise))
 	if raise_target == 0.0 and raise < _config.raise_rest:
 		raise = 0.0
@@ -316,7 +324,7 @@ func stepping() -> bool:
 
 ## The share of the way to the target `delta` seconds of easing covers with settle time `settle` (s).
 static func settle_share(delta: float, settle: float) -> float:
-	return 1.0 - exp(-maxf(delta, 0.0) / settle) if settle > 0.0 else 1.0
+	return UpperBlend.share(delta, settle)
 
 
 ## Where in the Vault clip (0..1) vault `v` is: its first `top` over the rise onto the top, the rest across it to the

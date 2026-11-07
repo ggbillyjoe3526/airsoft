@@ -46,7 +46,8 @@ docs/ARCHITECTURE.md › Contracts 1).
 - **Vault links** (`nav_vaults.gd`, browser M102): where `Vault.plan` vaults a body from a standstill on a node, along
   the grid's four axes, a one-way search point between that node and the first walkable one past the obstacle, priced
   at its length plus `BotConfig.vault_price` (3 m). A bot's route may take one (`find_route(..., vaults = true)`); a
-  walk-off never does. Depot has 10, all over the hall wall, found in about 120 ms once per grid.
+  walk-off never does. Depot has 10, all over the hall wall, found in about 120 ms once per grid. The search can be
+  spread over calls (`NavVaults.find` and `finish`, the same links): a staged load gives it 25 ms a frame (BP6).
 
 Tuning: `NavConfig` (`game/config/nav_config.gd`, `SimTuning.nav`); the body's radius, height and step from
 `BodyConfig`. Tests: `tests/unit/test_nav_grid.gd` (the browser's grid tests, a two-storey map, Depot's dock, spawns

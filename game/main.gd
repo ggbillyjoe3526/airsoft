@@ -555,8 +555,14 @@ func _open_graphics_settings() -> void:
 
 ## Esc in the menus asks QUIT GAME? (owner, 2026-10-29). Whatever has Esc of its own took it first
 ## (a dialog or popup, a key being rebound, the Loadout's rename and Customise, the credits): this only sees what is left.
-## In a match Esc is the pause menu's.
+## In a match Esc is the pause menu's; on the loading screen it leaves the match (back to the Match page, as the pause
+## menu's Leave), building or waiting for Continue.
 func _unhandled_input(event: InputEvent) -> void:
+	if _loading != null and _play != null and crash_screen == null and not _smoke and not event.is_echo() \
+			and (event.is_action_pressed(&"ui_cancel") or event.is_action_pressed(&"pause")):
+		get_viewport().set_input_as_handled()
+		_play.leave_loading()
+		return
 	if _play != null or _loading != null or crash_screen != null or _quit_prompt != null or event.is_echo():
 		return
 	if event.is_action_pressed(&"ui_cancel"):

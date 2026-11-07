@@ -191,19 +191,20 @@ extends Resource
 @export var pistol_fire_clip: StringName = &"Pistol_Fire"
 @export var additive_suffix: String = "_Add"
 ## Holstered, the arms hang (Holster; in a sprint Holster_Sprint's pumping arms, in step with the Sprint clip's legs).
-## Drawn from the holster, the replica comes to the hand holster_swap of the way through the draw and the arms rise to
-## the aim over the rest of it.
+## How a draw from the holster brings the replica to the hand and the arms to the aim, and how fast the arms ease in and
+## out of the holster and the sprint, are HitConfig's (holster_swap, settle_holster, settle_sprint): the hit volume
+## follows them too.
 @export var holster_clip: StringName = &"Holster"
 @export var holster_sprint_clip: StringName = &"Holster_Sprint"
 @export var holster_sprint_pace_clip: StringName = &"Sprint"
-@export var holster_swap: float = 0.5
-## How fast the upper body settles (s, as the legs' settle times): between the rifle's and the pistol's aim and in and
-## out of the holster (hold); the switch and the trigger press faded in (overlay).
+## How fast the upper body settles (s, as the legs' settle times): between the rifle's and the pistol's aim (hold); the
+## switch and the trigger press faded in (overlay).
 @export var settle_hold: float = 0.06
 @export var settle_overlay: float = 0.08
 ## An upper-body branch eased under this weight (the whole upper body calling the hit, the holster's arms, the aim under
-## a full holster) isn't evaluated: gate_clip (one frame long) stands in and its weight is drawn as 0.
-@export var gate_below: float = 0.001
+## a full holster) isn't evaluated: gate_clip (one frame long) stands in and its weight is drawn as 0. The hit volume
+## gates the holster's arms the same (HitPose.GATE).
+@export var gate_below: float = HitPose.GATE
 @export var gate_clip: StringName = &"Holster"
 ## The reloads (FI4): Rifle_Reload or Pistol_Reload by the replica's class, played over the holster and under the
 ## switch, placed by the reload's share of the replica's reload time (the sidecar's fitTo). The magazine in the hand and

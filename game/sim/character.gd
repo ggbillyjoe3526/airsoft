@@ -77,6 +77,10 @@ var shake_carry: float = 0.0
 ## Aiming down the sights of the replica in hand, and how far the sight is raised to the eye (0..1).
 var aiming: bool = false
 var aim_raise: float = 0.0
+## The upper body's holster and sprint arms as the drawn figure eases them (UpperBlend, 0..1): how far the arms are in
+## the holster's pose, and of that how far in the sprint's pumping arms. The hit volume (HitPose) poses by them.
+var holster_weight: float = 0.0
+var sprint_weight: float = 0.0
 ## How far it leans: -1 fully left, 1 fully right, 0 upright (Lean); last tick's for drawing between ticks.
 var lean: float = 0.0
 var prev_lean: float = 0.0
@@ -196,5 +200,7 @@ func respawn() -> void:
 	mag.clear()
 	armament.refill()
 	grenades.refill()
+	holster_weight = 0.0
+	sprint_weight = 0.0
 	dazzle_left = 0.0
 	dazzle_total = 0.0

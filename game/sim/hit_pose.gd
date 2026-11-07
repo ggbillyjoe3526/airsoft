@@ -5,6 +5,8 @@ class_name HitPose
 ## and hold, turned back to standing still's heading) and then bent as FigureBend draws it. Hitbox.build_volume hangs
 ## the capsules on them. Allocates nothing.
 
+## A blend this little is none, and this near full is full: the drawn figure's gate too (FigureConfig.gate_below).
+const GATE := 0.001
 ## A point this little outside a gait triangle (a share of its weights) still counts as in it: on a shared edge.
 const BARYCENTRIC_EDGE := 1e-6
 
@@ -78,16 +80,20 @@ static func pose(c: Character, hits: HitConfig, fit: HitFit) -> void:
 				else:
 					_add_lower(fit.table(HitFit.Lower.CROUCH_STILL), 0, crouch)
 		var a := c.armament
-		if a != null and a.holstered:
-			# Put away, the arms hang, or pump on a sprint (the holster's mix, FigureBody._animate_upper).
-			_add_upper(fit.sprint if c.sprinting else fit.holster, 0, 1.0)
-		else:
-			var r := a.replica() if a != null else null
+		# Put away, the arms hang, or pump on a sprint (the holster's mix, FigureBody._animate_upper), each as far as
+		# its ease has come (UpperBlend); the aim the rest.
+		var put_away := holster_share(c)
+		if put_away > 0.0:
+			var sprint := clampf(c.sprint_weight, 0.0, 1.0)
+			_add_upper(fit.holster, 0, put_away * (1.0 - sprint))
+			_add_upper(fit.sprint, 0, put_away * sprint)
+		if put_away < 1.0:
+			var r := a.replica() if a != null and not a.replicas.is_empty() else null
 			var aims := fit.aim_pistol if r != null and r.site_class == &"pistol" else fit.aim_rifle
 			var lo := 0 if blend < 0.0 else 1
 			var t := blend + 1.0 if blend < 0.0 else blend
-			_add_upper(aims, HitFit.UPPER * lo, 1.0 - t)
-			_add_upper(aims, HitFit.UPPER * (lo + 1), t)
+			_add_upper(aims, HitFit.UPPER * lo, (1.0 - t) * (1.0 - put_away))
+			_add_upper(aims, HitFit.UPPER * (lo + 1), t * (1.0 - put_away))
 	_legs(fit)
 	# The upper body on the blended hips, turned back to standing still's heading (HitConfig.upper_steady), as
 	# FigureBend draws it while the upper body's clips show (not vaulting, not out).
@@ -124,10 +130,11 @@ static func pose(c: Character, hits: HitConfig, fit: HitFit) -> void:
 			var p := upper[k]
 			var h := p.y - pivot
 			upper[k] = Vector3(p.x * cr + h * sr, pivot + h * cr - p.x * sr, p.z)
-	# The aim clips show, and the spine leans with them, unless vaulting, holstered or out (FigureBody.animate).
-	var aiming := alive and not vaulting and not (c.armament != null and c.armament.holstered)
-	if aiming:
-		var bend := c.pitch - fit.aim_reach * fit.aim_pitch * blend
+	# The aim clips show, and the spine leans with them, as far as the holster leaves them, unless vaulting or out
+	# (FigureBody.animate).
+	var aiming := (1.0 - holster_share(c)) if alive and not vaulting else 0.0
+	if aiming > 0.0:
+		var bend := (c.pitch - fit.aim_reach * fit.aim_pitch * blend) * aiming
 		if bend != 0.0:
 			var spine := upper[HitFit.SPINE]
 			var cb := cos(bend)
@@ -135,14 +142,24 @@ static func pose(c: Character, hits: HitConfig, fit: HitFit) -> void:
 			for k in HitFit.UPPER:
 				var d := upper[k] - spine
 				upper[k] = spine + Vector3(d.x, d.y * cb - d.z * sb, d.y * sb + d.z * cb)
-		# FigureBend.bow: a rifle's head bowed and tilted onto its stock about the neck's joint (HitFit.cheek_turn).
-		var r := c.armament.replica() if c.armament != null else null
+		# FigureBend.bow: a rifle's head bowed and tilted onto its stock about the neck's joint (HitFit.cheek_turn),
+		# while it is in the hand (FigureBody's cheek).
+		var r := c.armament.replica() if UpperBlend.in_hand(c.armament, hits.holster_swap) else null
 		if alive and r != null and r.site_class != &"pistol":
 			var neck := upper[HitFit.NECK]
 			var turn := HitFit.cheek_turn(upper[HitFit.SHOULDER_L] - upper[HitFit.SHOULDER_R], upper[HitFit.HEAD] - neck,
-					hits.cheek_bow, hits.cheek_cant, 1.0)
+					hits.cheek_bow, hits.cheek_cant, aiming)
 			upper[HitFit.HEAD] = neck + turn * (upper[HitFit.HEAD] - neck)
 			upper[HitFit.HEAD_TOP] = neck + turn * (upper[HitFit.HEAD_TOP] - neck)
+
+
+## How far `c`'s arms are in the holster's pose (0..1, UpperBlend's ease), as FigureBody gates the drawn one: none under
+## GATE (no armament, none), all over 1 - GATE.
+static func holster_share(c: Character) -> float:
+	if c.armament == null or c.armament.replicas.is_empty():
+		return 0.0
+	var h := c.holster_weight
+	return 0.0 if h < GATE else (1.0 if h > 1.0 - GATE else h)
 
 
 ## Adds `w` of the gait blend space at `step` (m/s, the figure's frame) on walk cycle `cycle` to lower, weighted as
