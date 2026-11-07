@@ -45,6 +45,9 @@ var _loaded: bool = false
 var _team_materials: Dictionary[String, Material] = {}
 var _face_materials: Dictionary[String, Material] = {}
 var _shadow_meshes: Dictionary[String, ArrayMesh] = {}
+## Each level's merged parts (BodyMerge) by kind, level and the parts merged (so heads that don't fold share one);
+## null kept where they couldn't be merged.
+var _merged_meshes: Dictionary[String, ArrayMesh] = {}
 ## Each replica's magazine mesh by its id (null: its model has none).
 var _magazines: Dictionary[StringName, Mesh] = {}
 ## The first-person arms' holds by replica id (HG1), read the first time one is asked for.
@@ -318,6 +321,33 @@ func shadow_mesh(kind: int, head: StringName, sources: Array[Mesh]) -> ArrayMesh
 	made.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	_shadow_meshes[key] = made
 	return made
+
+
+## How many merged meshes are kept, and their stored bytes (vertices, attributes, skin, indices and mesh LODs).
+func merged_bytes() -> Vector2i:
+	var total := 0
+	for mesh: ArrayMesh in _merged_meshes.values():
+		if mesh == null:
+			continue
+		for d: Dictionary in mesh.get("_surfaces") as Array:
+			for k: String in ["vertex_data", "attribute_data", "skin_data", "index_data"]:
+				total += (d.get(k, PackedByteArray()) as PackedByteArray).size()
+			var lods := d.get("lods", []) as Array
+			for i in range(1, lods.size(), 2):
+				total += (lods[i] as PackedByteArray).size()
+	return Vector2i(_merged_meshes.size(), total)
+
+
+## `sources`, the foldable parts `kind` draws at `level`, merged into one mesh (BodyMerge.merge; null when they can't
+## be). Made once a kind, level and set of parts, then shared: the human's heads keep their own draws (a see-through
+## lens), so its four heads share one merged mesh a level.
+func merged_mesh(kind: int, level: int, sources: Array[Mesh]) -> ArrayMesh:
+	var key := "%d/%d" % [kind, level]
+	for mesh in sources:
+		key += "/%d" % mesh.get_instance_id()
+	if not _merged_meshes.has(key):
+		_merged_meshes[key] = BodyMerge.merge(sources)
+	return _merged_meshes[key]
 
 
 func _load(kind: int) -> Kind:

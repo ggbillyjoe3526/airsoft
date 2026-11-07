@@ -1,19 +1,9 @@
-Task: none · BP5 part 3 (models: held replicas merged, far versions, light_baking 0, figure maps shrunk)
+Task: none · BP6 part 1 (graphics: detail lines under a scope's zoom, body parts merged, shadow twin, Depot doors 5 and 8)
 Attempt: 3 of 4
-Head: f331439 (QA and performance Pass on ba2cdb3; 23769d5 only adds cull_mode to the far fold and a typed class;
-the coordinator's 47-file re-run on f331439 was still running at review: Accept stands only if it is green)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept
-Failed checks, with evidence: none.
-1: held_merge.gd `_finish` keys on cull_mode and `_far_paint` copies it, so the Cyber and Sniper open shells stay
-two-sided; the magazine stays its own node at every distance; the finishes are kept per material and prewarmed; body ORM
-is at 1024; pictures 1 and 3 match main. 4: test_an_open_shell_drawn_from_both_sides_stays_so_far_off would fail without
-the cull key (2 surfaces, both sides kept), and the finish test compares cull_mode; 9/9 tests in test_bp5_models pass.
-7: `Painted` replaces the untyped lists. 8: record, changelog, README row and PLAYTEST are current.
-Must-fix for the next attempt: none.
-Owner should test in the game (at most 6, one line each):
-- Low, a teammate with the Cyber Pistol at 20-30 m, scoped, from all sides: no see-through panels.
-- Low, a bot reloading at 20-30 m, scoped: one magazine, the well empty while it is out.
-- High, sunny field, bot at 30-40 m scoped: metal parts keep their shine, no jump at the far line.
-- Stand 1 m from a bot: belt, buckles and cap look as before.
-- Rifle on the back and pistol in the holster sit where they did.
+Head: 8aec32e, then bfcccb4 (the two wording fixes the critic asked for) and the record
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗ (non-blocking: two wording fixes, made)
+Score: 7/8 → Accept
+- Pictures: body-merge before/after pixel-identical (human 4 and 20 m, robot 4 and 40 m); human 40 m differs only by
+  the radio now drawn; 6x scope shows LOD0 detail (/mnt/project-files/playtest/bp6/graphics/).
+- Attempt 1: stale doc comment, no skin check, wrong torch row, long README line. Attempt 2: glass cone could pop.
+  Attempt 3: cone dropped, every figure takes the zoomed lines while a glass zooms; cost logged as a known issue.

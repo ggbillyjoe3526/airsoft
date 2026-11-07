@@ -47,6 +47,8 @@ var _glow: float = 0.0
 ## first, or the first after the legs were left still), and the frames and time gathered beyond the far line.
 var _pose: FigurePose = null
 var _lines: Vector2 = Vector2.ZERO
+## Whether the body's shadow twin is drawn: only while a light casts shadows (the sun's on; BP6).
+var _casts: bool = true
 ## The camera's view cone (view_corner) and the camera settings it was worked out for (fov, the view's size, its kept
 ## aspect), so it is worked out again only when they change.
 var _corner: Vector2 = Vector2.ZERO
@@ -143,6 +145,7 @@ func set_body(models: FigureModels, kind: int, lines: Vector2) -> void:
 				_body.hands.set_bomb_meshes(_bomb_meshes)
 			_pose.grenades = _grenade_config
 			_body.set_fade(_fade)
+			_body.set_shadow_twin(_casts)
 		else:
 			_body.free()
 			_body = null
@@ -167,6 +170,11 @@ func set_world(query: WorldQuery, body_config: BodyConfig) -> void:
 	if _wall == null:
 		_wall = RayHit.new()
 	_raise_wait = absi(character_id) % _raise_stride
+
+
+## The lines (m) the figure's levels change at now.
+func lod_lines() -> Vector2:
+	return _lines
 
 
 ## The figure drawn, or null.
@@ -358,6 +366,14 @@ func set_contact_shadow(on: bool) -> void:
 	if on and not _contact.visible:
 		_place_disc()
 	_contact.visible = on
+
+
+## Draws the body's shadow twin or not: off while no light casts shadows (Sun shadows off: Low), where it would still be
+## culled and skinned every frame for nothing.
+func set_shadow_cast(on: bool) -> void:
+	_casts = on
+	if _body != null:
+		_body.set_shadow_twin(on)
 
 
 ## The contact shadow drawn, or null.

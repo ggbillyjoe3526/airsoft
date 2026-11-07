@@ -49,6 +49,8 @@ every preset; turn it on if you want it.
 - **Ultra** is the top end, for the most powerful cards: bounce light from the whole field, reflections on screen,
   volumetric haze and the softest shadows, sharp at their foot and soft away from it.
 - **Baked light** gives Depot soft shade in its corners and warm light bounced off sunlit walls.
+- **Mesh detail** sets how near a player must be to be drawn in full detail. Through a scope that is how near they
+  look, so a far player seen at 6x keeps the detail of one six times nearer.
 - **Light effects:** **Bounce light** is light bouncing off the field: Screen bounces what you see, Scene the whole
   field. **Reflections** on Probes show the room a shiny surface is in; Screen adds what is on screen. **Glow** makes
   lamps bloom softly. **Volumetric haze** is a faint haze the light shines through.
