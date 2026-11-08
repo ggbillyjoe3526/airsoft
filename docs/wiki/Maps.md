@@ -87,8 +87,9 @@ defenders in the east camp.
   thickets of spruce at the edges and between
   the lanes can't be entered or seen through.
 - **Ferns** grow knee to hip high in eight beds where you'd want to hide, and **bushes** stand taller. Nobody sees you
-  through more than about half a metre of leaves, so crouch in a fern bed to vanish; you walk straight through ferns
-  and bushes, and a BB that pushes 0.6 m into leaves stops there. The minimap marks them. Grass never hides you.
+  through more than about half a metre of leaves, so crouch in a fern bed to vanish; you can walk through ferns and
+  bushes, but they slow you and a run through them rustles loudly ([Movement](Movement)), and a BB that pushes 0.6 m
+  into leaves stops there. The minimap marks them. Grass never hides you.
 - **Three crouch tunnels,** 1.4 m high: the Crawl box, a plywood crawl through the Berm between the Ridge and the
   Clearing; the Badger run, a log-lined run through the Knoll between the middle and the south; and the Culvert, the
   stream bed under the road. Crouch to go through; inside you stay down until you're out, and bots crouch through

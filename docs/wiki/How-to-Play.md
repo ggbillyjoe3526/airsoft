@@ -52,6 +52,11 @@ Click it for the next round, which waits for you; after the match's last round t
 of the screen shows once a click will skip, using your own Fire key, and the pause menu has **Skip to next round** while
 you can skip. The trigger held as you were hit doesn't skip: let go and click again.
 
+Don't want to wait? Turn on **Simulate skipped rounds** in [Settings](Settings#gameplay) (it starts off). While the
+round is skipping, a **SIMULATE** button shows above the countdown: click it, or press Fire again, and the round is
+decided at once instead of played out. The side with more players still in has the better chance, and attackers who
+already have their flag part way up get a boost. The result says **Simulated**.
+
 ## BBs are real projectiles
 
 Nothing in Airsoft is hitscan. Every BB leaves the muzzle at a real speed, slows in the air, falls, and is lifted by

@@ -24,6 +24,10 @@ of a running player's legs is what a BB has to hit.
 Running, sprinting, vaulting and landing all make noise that players and bots hear. Running or landing on gravel or
 steel carries further, and so does running into a noisy prop such as a container, a steel drum or a plastic barrel ([Maps](Maps#depot)).
 
+Pushing through **bushes and ferns** slows you to three quarters of your speed, whatever your pace, and running or
+sprinting through them rustles the leaves loudly enough to be heard further than on open ground. Walk or crouch through
+quietly ([Maps](Maps#woodland)). Bots are slowed and heard the same way.
+
 ## Lean
 
 Hold **Q** or **E** to lean left or right round a corner. You slow to a walk while leaning. A lean that a wall cuts
