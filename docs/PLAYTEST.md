@@ -180,10 +180,10 @@ never players.
   from a forearm running back about level, the thumb where it was.
 - [ ] **Hands on a grip, a magazine change, bare hands** (BP8). Fit the vertical grip, then the angled one, to the AEG
   Rifle and the Sniper Rifle: your left hand holds the grip at the hip and aimed, and goes back to the handguard
-  with none. Reload each replica: your left hand pulls the magazine, drops out of view and seats a fresh one, never
-  through the replica, its fingers closed round the magazine, and only your hand and wrist show (no forearm across the
-  screen; on the rifles you see the old magazine come off, on a pistol it drops just under the screen). Does the
-  rifles' steeper tip-up (the stock down out of view) read well? Settings › Dev › Skin-only arms swaps the gloves for
+  with none. Reload each replica: your left hand takes the old magazine out of the well, carries it down out of view
+  and brings the fresh one up in the hand to push it home, never through the replica; a magazine never floats on
+  its own, and no forearm comes across the screen (at most the sleeve's hem at its edge). Do the rifles' steeper
+  tip-up (the stock down out of view) and the pistols' tip toward you read well? Settings › Dev › Skin-only arms swaps the gloves for
   bare hands at once.
 - [ ] **Look straight down.** Standing, crouched and in a vault: you see the ground, never your own body (Beta 1
   item 24).
