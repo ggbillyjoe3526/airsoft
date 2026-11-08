@@ -126,6 +126,11 @@ extends Resource
 	&"SleeveTrim": Color(0.22, 0.23, 0.24),
 }
 @export var robot_arms_roughness: float = 0.45
+## Skin-only arms (Dev › Skin-only arms; BP8, the owner's playtest note 11): the arms model's materials shown as bare
+## skin (sRGB, by name: the glove's surface, a glove's thickness over the hand), the cloth's weave taken off, with
+## their roughness. The glove's kit hides and the fingernails show (ArmsView).
+@export var skin_arms: Dictionary[StringName, Color] = {&"Glove": Color(0.78, 0.60, 0.48)}
+@export var skin_arms_roughness: float = 0.62
 ## Your arms' throw (GT3, ArmsThrow), `share` running 0..1 over the windup (GrenadeConfig.windup) and 1..2 over the
 ## recovery. Each key is a wrist's place in the eyes' frame (m: x right, y up, -z ahead), each pole the way its elbow
 ## bends. The left hand comes up from bomb_left_in to the pin's ring (its wrist bomb_left_ring off it) by bomb_pin_grab,

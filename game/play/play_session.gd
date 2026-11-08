@@ -2112,6 +2112,11 @@ func _apply_dev() -> void:
 		_intents.queue_free()
 		_intents = null
 	_pretend_slow = dev.pretend_slow_frames
+	# Your arms gloved or skin only, switched live (BP8).
+	if _hands != null:
+		_hands.skin_arms = dev.skin_arms
+	if _grenades != null:
+		_grenades.set_arms_skin(dev.skin_arms)
 	if dev.retro_pixels and _retro == null:
 		_retro = RetroPixels.new()
 		add_child(_retro)

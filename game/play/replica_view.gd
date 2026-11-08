@@ -52,6 +52,8 @@ class Held:
 	var selector: SelectorPose = null
 	## How fast a shot plays its Fire clip: 1, or for a bolt-action replica its cycle stretched to its ready time.
 	var fire_speed: float = 1.0
+	## The grip part fitted (its Key; empty: none), which your left hand holds (BP8).
+	var grip: StringName = &""
 
 var _cfg: ViewModelConfig = null
 ## Whose arms you see holding the replica (FigureMix.HUMAN or FigureMix.ROBOT), set by PlaySession from the match's
@@ -61,6 +63,12 @@ var arms_kind: int = FigureMix.HUMAN:
 		arms_kind = kind
 		if _arms != null:
 			_arms.set_kind(kind)
+## Your arms skin only (Dev › Skin-only arms, BP8), switched live: ArmsView.
+var skin_arms: bool = false:
+	set(on):
+		skin_arms = on
+		if _arms != null:
+			_arms.set_skin(on)
 var _arms: ArmsView = null
 var _held: Array[Held] = []
 var _active: int = -1
@@ -110,6 +118,7 @@ func setup(cfg: ViewModelConfig, loadout: Array[ReplicaConfig], query: WorldQuer
 	add_child(_arms)
 	_arms.setup(cfg)
 	_arms.set_kind(arms_kind)
+	_arms.set_skin(skin_arms)
 	if view != null and eyes != null:
 		_glass = OpticGlass.new()
 		_glass.setup(cfg, view, eyes)
@@ -283,7 +292,8 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 	rot += _inspect_turn
 	pos += _inspect_shift
 
-	# Canted through a reload, its clip following the reload's progress.
+	# Canted through a reload, its clip following the reload's progress (and your left hand changing the magazine).
+	var reload_share := -1.0
 	if a.reload_left > 0.0:
 		var r := a.replica()
 		var progress := clampf(1.0 - a.reload_left / maxf(r.reload_time, 0.001), 0.0, 1.0)
@@ -292,6 +302,7 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 		pos += Vector3(-_cfg.reload_inward, _cfg.reload_lift, 0.0) * bell
 		_seek(held, RELOAD_CLIP, progress)
 		held.in_reload = true
+		reload_share = progress
 	elif held.in_reload:
 		# Finished or cut short (a switch, a new round): back to the clip's end, magazine home.
 		_seek(held, RELOAD_CLIP, 1.0)
@@ -302,7 +313,7 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 	if held.selector != null:
 		held.selector.mode = a.fire_mode()
 	if _arms != null:
-		_arms.follow(held.anim, delta)
+		_arms.follow(held.anim, delta, reload_share)
 		# Working a bolt at the hip: canted toward the eye so the right hand stays on screen (BP7, row 17).
 		var work := _arms.work_share()
 		if work > 0.0:
@@ -431,7 +442,7 @@ func _show(slot: int) -> void:
 	_active = slot
 	_kick = 0.0
 	if slot >= 0 and slot < _held.size():
-		_arms.hold(_held[slot].id, _held[slot].root)
+		_arms.hold(_held[slot].id, _held[slot].root, _held[slot].grip)
 
 
 func _seek(held: Held, clip: StringName, share: float) -> void:
@@ -460,6 +471,7 @@ func _load(r: ReplicaConfig, paint: StringName, realistic: bool, parts: Dictiona
 	var model := scene.instantiate() as Node3D
 	held.root.add_child(model)
 	held.fit = ReplicaParts.fit(model, r.id, parts)
+	held.grip = StringName(parts.get(ReplicaParts.GRIP_SLOT, &""))
 	ReplicaPaint.apply(model, paint, realistic)
 	held.anim = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	held.selector = SelectorPose.attach(model, held.anim)

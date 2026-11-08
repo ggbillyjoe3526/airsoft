@@ -12,8 +12,9 @@ extends RefCounted
 ## map from the next match by Day or Night whatever it offers (the browser's M90; LightingConfig.PRESETS), or as the map
 ## and the Match page pick (""); forcing one keeps the match out of the records, as the browser's cheat did
 ## (DevCheats.watching: it changes only what you see). Lasers (LZ1, an Easter egg) makes every replica on the field fire
-## lasers, instant hits with a beam, instead of BBs, at once; a cheat, so the match is kept out of the records. A saved
-## key no switch reads any more (Rigged figures, gone with FI7) is passed over.
+## lasers, instant hits with a beam, instead of BBs, at once; a cheat, so the match is kept out of the records.
+## Skin-only arms (BP8, the owner's playtest note 11) shows your first-person arms as bare hands instead of gloved, live;
+## only the look. A saved key no switch reads any more (Rigged figures, gone with FI7) is passed over.
 
 const SPEED_STEP := 0.25
 
@@ -33,6 +34,7 @@ var retro_shades: int = RetroPixels.SHADES
 var robots: bool = false
 var lasers: bool = false
 var pretend_slow_frames: bool = false
+var skin_arms: bool = false
 ## A preset id (LightingConfig.PRESETS), or &"" for the map's own.
 var time_of_day: StringName = &""
 
@@ -58,7 +60,7 @@ func to_dict() -> Dictionary:
 		"bots_hold_fire": bots_hold_fire, "bots_run_low": bots_run_low, "spectate_bots": spectate_bots, "bot_intent": bot_intent,
 		"retro_pixels": retro_pixels, "retro_pixel_size": retro_pixel_size, "retro_shades": retro_shades, "robots": robots, "pretend_slow_frames": pretend_slow_frames,
 		"lasers": lasers,
-		"time_of_day": String(time_of_day),
+		"skin_arms": skin_arms, "time_of_day": String(time_of_day),
 	}
 
 
@@ -83,6 +85,7 @@ func from_dict(data: Dictionary) -> void:
 	robots = _flag(data, "robots")
 	lasers = _flag(data, "lasers")
 	pretend_slow_frames = _flag(data, "pretend_slow_frames")
+	skin_arms = _flag(data, "skin_arms")
 	var time: Variant = data.get("time_of_day")
 	time_of_day = StringName(time) if time is String and LightingConfig.PRESETS.has(StringName(time)) else &""
 

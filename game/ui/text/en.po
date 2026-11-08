@@ -750,6 +750,12 @@ msgstr "PRETEND SLOW FRAMES"
 msgid "DEV_PRETEND_SLOW_FRAMES_HELP"
 msgstr "Counts every frame of a round as slow, so the automatic graphics step down a preset at the round's end (only while the graphics are the automatic pick). Changes nothing else."
 
+msgid "DEV_SKIN_ARMS"
+msgstr "SKIN-ONLY ARMS"
+
+msgid "DEV_SKIN_ARMS_HELP"
+msgstr "Shows your arms in first person as bare hands instead of gloves, at once. Changes only what you see."
+
 msgid "DEV_TIME_OF_DAY"
 msgstr "TIME OF DAY"
 
