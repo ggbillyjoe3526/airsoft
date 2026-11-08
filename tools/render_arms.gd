@@ -5,10 +5,12 @@ extends SceneTree
 ## `grips`: each replica that takes a grip with none, the vertical and the angled one fitted, at the hip and aimed, to
 ## `<folder>/grip_<id>_<grip>_<hip|aim>.jpg`; `reload`: every frame of a reload at 30 a second for each replica (the
 ## AEG Rifle with a vertical grip too), to `<folder>/reload_<id>[_<grip>]_<frame>.jpg`; `skin`: each replica at the hip
-## (and the AEG Rifle aimed) with gloves and skin only, to `<folder>/skin_<id>_<view>_<gloves|skin>.jpg`. Needs a
-## display and OpenGL, so under xvfb:
+## (and the AEG Rifle aimed) with gloves and skin only, to `<folder>/skin_<id>_<view>_<gloves|skin>.jpg`; `outside`:
+## a close-up of your left hand from outside, in front of it and to its left (OUTSIDE), on each grip at the hip and at
+## each share of a reload in OUTSIDE_SHARES, to `<folder>/outside_<id>_<grip|reload>[_<share>].jpg`. Replica ids after
+## the mode draw only those. Needs a display and OpenGL, so under xvfb:
 ##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . --rendering-driver opengl3 -s res://tools/render_arms.gd \
-##       -- <folder> [grips|reload|skin]
+##       -- <folder> [grips|reload|skin|outside] [ids...]
 ## Dev only: tools/ never ships.
 
 const SIZE := Vector2i(1280, 720)
@@ -23,9 +25,19 @@ const GRIPS: Array[StringName] = [&"", &"vertical", &"angled"]
 const HELD: Array[StringName] = [&"aeg", &"pistol", &"cyber", &"sniper"]
 ## Reload frames a second.
 const RELOAD_RATE := 30.0
+## The outside camera: this far from your left hand (m, along the eye camera's axes: to the left, down, forward), its
+## vertical field of view (degrees), and the shares of a reload it draws (the magazine coming out, carried away, the
+## fresh one going in).
+const OUTSIDE := Vector3(-0.1, -0.1, -0.3)
+## On a grip it looks from in front, a little to the left and below, at the fingers round the grip.
+const GRIP_OUTSIDE := Vector3(-0.14, -0.08, -0.26)
+const OUTSIDE_FOV := 40.0
+const OUTSIDE_SHARES: Array[float] = [0.2, 0.26, 0.65, 0.75]
 
 var _port: SubViewport = null
 var _camera: Camera3D = null
+var _outside: Camera3D = null
+var _only: Array[StringName] = []
 var _play: PlayTuning = null
 var _eye := Vector3.ZERO
 var _feet := Vector3.ZERO
@@ -42,33 +54,52 @@ func _run() -> void:
 	var args := OS.get_cmdline_user_args()
 	var folder := (args[0] if not args.is_empty() else "user://arms").trim_suffix("/")
 	var what := args[1] if args.size() > 1 else "grips"
+	for i in range(2, args.size()):
+		_only.append(StringName(args[i]))
 	DirAccess.make_dir_recursive_absolute(folder)
 	_play = PlayTuning.load_default()
+	if what == "outside":
+		# Seen from outside, the hands draw at their true depth.
+		_play.viewmodel.depth_scale = 1.0
 	if not _build_scene():
 		quit(1)
 		return
 	var failed := 0
 	match what:
 		"grips":
-			for id in GRIPPED:
+			for id in _ids(GRIPPED):
 				for grip in GRIPS:
 					for aim: float in [0.0, 1.0]:
 						var view := "aim" if aim > 0.0 else "hip"
 						var path := "%s/grip_%s_%s_%s.jpg" % [folder, id, grip if grip != &"" else &"none", view]
 						failed += await _still(id, grip, false, aim, -1.0, path)
 		"reload":
-			for id in HELD:
+			for id in _ids(HELD):
 				failed += await _reload(id, &"", folder)
-			failed += await _reload(&"aeg", &"vertical", folder)
+			if _ids(GRIPPED).has(&"aeg"):
+				failed += await _reload(&"aeg", &"vertical", folder)
 		"skin":
-			for id in HELD:
+			for id in _ids(HELD):
 				for skin: bool in [false, true]:
 					var path := "%s/skin_%s_hip_%s.jpg" % [folder, id, "skin" if skin else "gloves"]
 					failed += await _still(id, &"", skin, 0.0, -1.0, path)
 			for skin: bool in [false, true]:
 				var path := "%s/skin_aeg_aim_%s.jpg" % [folder, "skin" if skin else "gloves"]
 				failed += await _still(&"aeg", &"", skin, 1.0, -1.0, path)
+		"outside":
+			for id in _ids(GRIPPED):
+				for grip: StringName in [&"vertical", &"angled"]:
+					failed += await _from_outside(id, grip, -1.0, "%s/outside_%s_%s.jpg" % [folder, id, grip])
+			for id in _ids(HELD):
+				for share in OUTSIDE_SHARES:
+					var path := "%s/outside_%s_reload_%02d.jpg" % [folder, id, roundi(share * 100.0)]
+					failed += await _from_outside(id, &"", share, path)
 	quit(1 if failed > 0 else 0)
+
+
+## `ids` less any not asked for.
+func _ids(ids: Array[StringName]) -> Array[StringName]:
+	return ids.filter(func(id: StringName) -> bool: return _only.is_empty() or _only.has(id))
 
 
 func _build_scene() -> bool:
@@ -117,6 +148,10 @@ func _build_scene() -> bool:
 	_camera.global_position = _eye
 	_camera.global_rotation = Vector3(_pitch, _yaw, 0.0)
 	_look = -_camera.global_basis.z
+	_outside = Camera3D.new()
+	_outside.near = 0.01
+	_outside.fov = OUTSIDE_FOV
+	_port.add_child(_outside)
 	return true
 
 
@@ -161,6 +196,9 @@ func _reload(id: StringName, grip: StringName, folder: String) -> int:
 	var hands: ReplicaView = made[0]
 	var c: Character = made[1]
 	_pose(hands, c, 0.0, -1.0, SETTLE_FRAMES)
+	# A fresh view's first draw is not the settled one.
+	await RenderingServer.frame_post_draw
+	await RenderingServer.frame_post_draw
 	var length := c.armament.replica().reload_time
 	var count := ceili(length * RELOAD_RATE)
 	var failed := 0
@@ -169,6 +207,41 @@ func _reload(id: StringName, grip: StringName, folder: String) -> int:
 		_pose(hands, c, 0.0, minf(float(frame) / count, 0.9999) if frame < count else -1.0, 1)
 		await RenderingServer.frame_post_draw
 		failed += _save("%s_%03d.jpg" % [stem, frame])
+	hands.queue_free()
+	return failed
+
+
+## Your left hand on `id` (with `grip` fitted), at the hip and `reload` of the way through a reload (below 0: none),
+## seen from outside (OUTSIDE).
+func _from_outside(id: StringName, grip: StringName, reload: float, path: String) -> int:
+	var made := _hands(id, grip, false)
+	var hands: ReplicaView = made[0]
+	var c: Character = made[1]
+	_pose(hands, c, 0.0, -1.0, SETTLE_FRAMES)
+	if reload >= 0.0:
+		var length := c.armament.replica().reload_time
+		var ticks := roundi(reload * length / DT)
+		c.armament.reload_left = length
+		for i in ticks:
+			c.armament.reload_left = maxf(length * (1.0 - float(i + 1) / ticks * reload), 0.0001)
+			hands.update(c, _yaw, _pitch, _eye, _look, DT, 0.0)
+	var bones: Skeleton3D = null
+	for node: Node in hands.find_children("*", "Skeleton3D", true, false):
+		if (node as Skeleton3D).find_bone("Hand_L") >= 0:
+			bones = node as Skeleton3D
+	var failed := 0
+	if bones == null:
+		push_error("render_arms: no arms on %s" % id)
+		failed = 1
+	else:
+		var at := bones.global_transform * bones.get_bone_global_pose(bones.find_bone("Hand_L")).origin
+		_outside.global_position = at + _camera.global_basis * (OUTSIDE if reload >= 0.0 else GRIP_OUTSIDE)
+		_outside.look_at(at, Vector3.UP)
+		_outside.current = true
+		await RenderingServer.frame_post_draw
+		await RenderingServer.frame_post_draw
+		failed = _save(path)
+		_camera.current = true
 	hands.queue_free()
 	return failed
 

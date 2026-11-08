@@ -86,6 +86,8 @@ CUP_GAP = (0.010, 0.015)
 CUP_STEP = 10
 RISE_COST = 1.0
 LOOSE_COST = 500.0
+# A hold's spec may cap the wrist (`bend_most`, degrees): each degree past it costs this many (BP8: the angled grip's).
+BEND_COST = 50.0
 # The best CUP_TRIES turns try their fingers, which should come to rest round it curled WRAP degrees at their roots;
 # each degree outside that costs WRAP_COST.
 CUP_TRIES = 16
@@ -279,7 +281,7 @@ VERTICAL_LEFT = dict(GRIP_LEFT, web=(-0.012, -0.027, -0.028), index=(-0.017, 0.0
 # it): held as it is made to be, the hand cupping the handguard as on the replica's own hold (its spec, `guard`) just
 # behind it, drawn back `y` (m, from the grip's mount) so the front of the palm rests against the swept face (further
 # forward the palm would sit inside the grip); the hand seats onto the grip as onto the handguard.
-ANGLED_LEFT = {"kind": "guard", "y": -0.060, "search": ((50, 70), (20, 50), (-30, -10))}
+ANGLED_LEFT = {"kind": "guard", "y": -0.060, "search": ((30, 90), (0, 60), (-90, 0)), "bend_most": 28.0}
 GRIP_HOLDS = {"grip_vertical": VERTICAL_LEFT, "grip_angled": ANGLED_LEFT}
 # The Sniper Rifle's grip sits further forward than its fore-end hold (GripMount 6 cm ahead of the hand): the
 # shoulder comes further forward to reach it.
@@ -685,7 +687,7 @@ def cup(rig: Rig, hand: pose.Hand, j: dict, to_eye: Matrix, spec: dict, col: Col
                     gaps.append(math.hypot(p.x - axis[0], p.z - axis[1]) - radius)
                 loose = sum(max(0.0, g - CUP_GAP[1], CUP_GAP[0] - g) for g in gaps)
                 score = bend + abs(rise - spec["rise"]) * RISE_COST + loose * LOOSE_COST + \
-                    clear * 1000.0 * CLEAR_COST + \
+                    clear * 1000.0 * CLEAR_COST + max(0.0, bend - spec.get("bend_most", 180.0)) * BEND_COST + \
                     (abs(plan - spec["plan"]) * PLAN_COST if spec.get("plan", 0.0) > 0.0 else 0.0)
                 found.append((score, yaw, pitch, roll, m, palm, bend, rise, gaps))
     # The few best then try their fingers: each should curl round the handguard and come to rest on it, neither
@@ -796,7 +798,7 @@ def solve_grip(rig: Rig, hands: dict, j: dict, hold: Hold, rid: str, arms: list,
     reset_left(rig, held)
     mesh, mount = grip
     if spec["kind"] == "guard":
-        spec = dict(hold.left, y=mount.y + spec["y"], search=spec["search"])
+        spec = dict(hold.left, **{k: v for k, v in spec.items() if k != "y"}, y=mount.y + spec["y"])
     else:
         spec = tuned(in_replica(spec, mount))
     rig.shift["Shoulder_L"] = Vector(GRIP_SHOULDER.get(rid, spec["shoulder"]))
@@ -980,7 +982,7 @@ def build() -> None:
         # The magazine change, from each hold (BP8).
         if os.environ.get("BL_RELOAD") != "0":
             reload_hits, reload_clips = magazine.change_mag(rig, hands["L"], rid, hold.to_eye(), objects, solid,
-                                                          [left, right], elbow_for, holds)
+                                                          [left, right], holds)
             clips.update(reload_clips)
             if reload_hits:
                 failed.append("%s changing the magazine (%d keys)" % (rid, reload_hits))

@@ -4,21 +4,29 @@ foregrip's hold, `<id>_<grip>_Reload`) as long as the replica's own Reload clip,
 share of the reload (ArmsView.follow), so the game's reload times and rules don't change.
 
 The replica's Reload clip moves its magazine: down out of the well, away, a fresh one back in partway and seated home.
-The hand leaves its hold, takes the magazine as it starts down (CATCH of the way), carries it down along the clip's own
-path, dips out of view while the replica's clip has no magazine (DIP), comes back with the fresh one where the clip
-shows it, pushes it home along its path, and goes back to its hold. Following the clip's magazine, the hand and the
+The hand leaves its hold (a one-handed replica's comes up from below the view, LOW), takes the magazine as it starts
+down (CATCH of the way), its fingers and thumb closing on it, pulls it down along the clip's own path, dips out of
+view while the replica's clip has no magazine (DIP), comes back with the fresh one where the clip shows it, pushes it
+home along its path and goes back to its hold (or down out of view). Following the clip's magazine, the hand and the
 magazine move as one: the magazine rides in the hand.
 
-How the hand takes each replica's magazine (GRASP, replica space): a rifle's from its left side, the palm on it and
-the fingers round its front (`side`); a pistol's and the Sniper Rifle's, whose magazine sits in the grip or the stock
-with only its base out, from below, the palm under the base plate (`under`). The hand's turn is searched for the
-straightest wrist, then the fingers close on the magazine (and never into the right hand)."""
+Only the hand and the wrist show (the standing ruling for the arms in first person): away from its hold the elbow
+goes where the least of the arm shows on screen (View: the game's eye camera through the reload, the replica canted
+as ReplicaView cants it), so the forearm comes in from below the view, pointing back at you, never across it.
+
+How the hand takes each replica's magazine (GRASP), as the magazine is when the hand takes it (partly out): a
+rifle's or a pistol's from its left side, the palm on it, the knuckles at its front, the fingers round its front and
+the thumb round its back (`side`); the Sniper Rifle's small box from below, the palm under it, the knuckles at its
+right edge, the fingers up its right side and the thumb up its left (`under`). The hand's turn is searched for the
+least arm on screen and the straightest wrist through the change, then the fingers close on the magazine (and never
+into the right hand)."""
 
 import math
 import os
+import re
 
 import bpy
-from mathutils import Matrix, Quaternion, Vector
+from mathutils import Matrix, Vector
 
 import cycle
 import pose
@@ -28,25 +36,75 @@ CLIP = "Reload"
 MAG = "magazine"
 SIDE = "L"
 # How the hand takes the magazine, by replica: `kind` (side: palm on its left side, the fingers forward round its
-# front; under: palm up under its base), `at` (a side grasp's point, replica space: in the magazine below the well,
-# which the palm seats against), the fingers' pitch down from forward (side) or yaw from forward toward the right
-# (under) searched over `turn` (degrees, from, to), the start bends the fingers settle from, and where the thumb's tip
-# reaches for (`thumb`, m from the grasp's point in the replica's axes: on the magazine's left side, toward its back
-# for a side grasp, up beside the base for one from below), its base turn the clear one of cycle.THUMB_TURNS whose
-# tip comes nearest. The Sniper Rifle's fingers point right, so the forearm comes from the left, clear of the
-# pistol grip just behind the magazine (fingers forward, it would pass through it while the magazine is seated).
-SIDE_FINGERS = {"Index": (35, 40, 25), "Middle": (40, 45, 30), "Ring": (40, 45, 30), "Pinky": (35, 40, 25)}
-UNDER_FINGERS = {"Index": (15, 20, 10), "Middle": (15, 20, 10), "Ring": (20, 25, 15), "Pinky": (25, 30, 20)}
+# front; under: palm up under its base, the fingers over the edge they point at), `up` (a side grasp's palm centre, as a
+# share of the magazine's height out of the well when the hand takes it, from its base), the fingers' pitch up from
+# forward (side) or yaw from forward toward the right (under) searched over `turn` (degrees, from, to), the start
+# bends the fingers settle from, and where the thumb's tip reaches for (`thumb`, m from the middle knuckle's point,
+# in the replica's axes: round the magazine's back), its base turn the clear one of cycle.THUMB_TURNS whose tip comes
+# nearest. `one_hand` (ViewModelConfig.one_hand's replicas): the hand comes up from below the view and goes back
+# down there, not from a hold the game never shows. `catch`: the share of the magazine's first move down the hand
+# takes it at, if not CATCH (a pistol's falls clear of your right hand's fingers first); `push`: the share of the
+# fresh one's way home the hand lets it go over, if not PUSH_SHARE (a pistol's goes right up into the grip).
+SIDE_FINGERS = {"Index": (70, 40, 30), "Middle": (70, 45, 30), "Ring": (70, 45, 30), "Pinky": (65, 45, 30)}
+UNDER_FINGERS = {"Index": (70, 40, 30), "Middle": (70, 40, 30), "Ring": (70, 45, 30), "Pinky": (70, 50, 35)}
 GRASP = {
-    "aeg": {"kind": "side", "at": (0.0, 0.068, -0.085), "turn": (-75, -15), "fingers": SIDE_FINGERS,
-            "thumb": (-0.02, -0.03, 0.02)},
-    "sniper": {"kind": "under", "turn": (75, 90), "fingers": UNDER_FINGERS, "thumb": (-0.02, 0.0, 0.015)},
-    "pistol": {"kind": "under", "turn": (0, 90), "fingers": UNDER_FINGERS, "thumb": (-0.02, 0.0, 0.015)},
-    "cyber": {"kind": "under", "turn": (0, 90), "fingers": UNDER_FINGERS, "thumb": (-0.02, 0.0, 0.015)},
+    "aeg": {"kind": "side", "up": 0.45, "turn": (0, 60), "fingers": SIDE_FINGERS, "thumb": (-0.01, -0.045, 0.0)},
+    "pistol": {"kind": "side", "up": 0.15, "turn": (0, 60), "fingers": SIDE_FINGERS, "thumb": (-0.01, -0.04, 0.0),
+               "one_hand": True, "catch": 0.7, "push": 0.8},
+    "cyber": {"kind": "side", "up": 0.15, "turn": (0, 60), "fingers": SIDE_FINGERS, "thumb": (-0.01, -0.04, 0.0),
+              "one_hand": True, "catch": 0.7, "push": 0.8},
+    "sniper": {"kind": "side", "up": 0.5, "turn": (0, 60), "fingers": SIDE_FINGERS, "thumb": (-0.01, -0.045, 0.0)},
 }
 TURN_STEP = 15
+# A side grasp's palm centre sits on the magazine's points within BAND (m) of its height; the well's mouth is the
+# replica's lowest point over the magazine's footprint, MOUTH_MARGIN (m) either side.
+BAND = 0.01
+MOUTH_MARGIN = 0.01
+# The knuckles sit this far (m) behind the magazine's front (below 0: past it), so the fingers' first bones turn
+# across its front and the rest round its far side (not further on, closing on nothing; nor further back, lying
+# flat along its near side).
+KNUCKLE_BACK = -0.005
+# Pushing the fresh magazine home the hand lets go over the last PUSH_SHARE of its way in: it stays where it is, its
+# fingers opening, as the magazine slides up out of it into the well.
+PUSH_SHARE = 0.35
+# Settled on the magazine, each finger's two outer joints close up to PRESS degrees more until they touch it: the
+# fingers grip it rather than lie open beside it.
+PRESS = 20
+# A finger that finds nothing to close on (past a small magazine's end) curls only this far (degrees, base to tip),
+# loose beside the others rather than in a fist; SETTLE_SPAN is how far past its start a finger may curl looking.
+FREE_CURL = (45, 50, 35)
+SETTLE_SPAN = 30
 # The palm's roll either way about the fingers' line tried with each turn (degrees).
 ROLLS = (-20, -10, 0, 10, 20)
+# Away from its hold the elbow's place round the shoulder-to-wrist line is searched every POLE_STEP degrees for the
+# least cost: VIS_COST for the whole screen covered by the arm (the upper arm, and the forearm up to WRIST_SHOWS m
+# short of the wrist; as capsules of UPPER_R and FOREARM_R m drawn on a GRID of cells), BEND_COST a degree of wrist
+# bend over BEND_FREE (BEND_HARD_COST over BEND_HARD), PLACE_COST a metre the elbow rises over the shoulder
+# (ELBOW_RISE), crosses the body's middle
+# (ELBOW_X) or sinks into the chest (CHEST: behind y, inside |x|), and MOVE_COST a metre it moves from the last key's.
+POLE_STEP = 15
+VIS_COST = 100.0
+WRIST_SHOWS = 0.05
+UPPER_R = 0.065
+FOREARM_R = 0.05
+GRID = (48, 27)
+SAMPLE = 0.02
+BEND_COST = 1.0
+BEND_FREE = 30.0
+BEND_HARD_COST = 10.0
+BEND_HARD = 40.0
+PLACE_COST = 1000.0
+ELBOW_RISE = 0.05
+ELBOW_X = 0.1
+CHEST = (0.0, 0.15)
+MOVE_COST = 30.0
+# The game's tuning the view is read from (ReplicaView's reload cant; the eye camera's field of view and near plane).
+ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
+VIEWMODEL = os.path.join(ROOT, "game", "config", "viewmodel_config.gd")
+VIEW = os.path.join(ROOT, "game", "config", "view_config.gd")
+# A one-handed replica's hand starts from and ends at this far (m, eye space) from where it takes the magazine: below
+# the view, its fingers OPEN_TURN open.
+LOW = Vector((-0.02, -0.06, -0.2))
 # The hand takes the magazine this share of the way through its first move down (it has just started), keyed every
 # STEP frames while it carries it; on its way to and from the hold it swings OUT (m, eye space) to the left at its
 # middle, so it passes round the magazine and the handguard; away for the fresh magazine it dips DIP (m) down at its
@@ -54,7 +112,7 @@ ROLLS = (-20, -10, 0, 10, 20)
 CATCH = 0.3
 STEP = 2
 OUT = Vector((-0.04, 0.0, -0.02))
-DIP = Vector((-0.03, -0.04, -0.12))
+DIP = Vector((-0.06, -0.06, -0.25))
 # Leaving its hold the hand first uncurls each finger's joints OPEN_TURN (degrees, as the solver's relax opens them)
 # over OPEN_FIRST of CLEAR_SHARE of its way to the magazine, then draws CLEAR (m, eye space: straight down) off it, its
 # elbow where the hold had it, so the fingers come off the handguard or the grip rather than through it; coming back,
@@ -71,13 +129,100 @@ EASE_TURN = 1.5
 EASE_BACK = 0.0008
 EASE_SWING = 2.0
 EASE_STEPS = 40
-# The elbow may come this far across the body while the hand is at the magazine (a pistol's is under the middle of
-# the view), and hangs at least DROP below the shoulder.
-ACROSS = 0.30
-DROP = 0.03
 # A magazine counts as moved (m) once this far from its rest, and as still once a frame moves it less than this.
 MOVED = 0.001
 STILL = 0.0001
+
+
+def exported(path: str) -> dict:
+    """Each `@export var <name>: <type> = <value>` of a config script (its value may go on over indented lines):
+    name -> the value's text."""
+    out, name = {}, None
+    with open(path) as f:
+        for line in f:
+            m = re.match(r"@export var (\w+)\s*:[^=]*=\s*(.+)$", line.rstrip())
+            if m:
+                name = m.group(1)
+                out[name] = m.group(2)
+            elif name is not None and line.startswith("\t"):
+                out[name] += " " + line.strip()
+            else:
+                name = None
+    return out
+
+
+def listed(text: str, rid: str):
+    """Replica `rid`'s entry of a dictionary's text (a float, or a vector's numbers as a tuple); None if not there."""
+    m = re.search(r'&"%s"\s*:\s*(Vector[23]\(([^)]*)\)|[-\d.]+)' % re.escape(rid), text)
+    if m is None:
+        return None
+    if m.group(2) is not None:
+        return tuple(float(v) for v in m.group(2).split(","))
+    return float(m.group(1))
+
+
+def smoothstep(a: float, b: float, x: float) -> float:
+    t = min(1.0, max(0.0, (x - a) / (b - a)))
+    return t * t * (3.0 - 2.0 * t)
+
+
+class View:
+    """The game's eye camera through one replica's reload, in the build's eye space: ReplicaView cants the replica
+    (and the arms on it) about its origin (`pivot`, eye space) by ViewModelConfig's reload cant, as much as its
+    reload bell has at that share of the reload; the camera sees ViewConfig's field of view (16:9) from its near
+    plane."""
+
+    def __init__(self, rid: str, pivot: Vector):
+        vm, vc = exported(VIEWMODEL), exported(VIEW)
+        self.cant = listed(vm["reload_cant_by"], rid) or tuple(
+            float(vm[k]) for k in ("reload_tilt", "reload_turn", "reload_roll"))
+        self.move = listed(vm["reload_move_by"], rid) or (float(vm["reload_lift"]), float(vm["reload_inward"]), 0.0)
+        self.rise = listed(vm["reload_rise"], rid) or 0.0
+        self.pivot = pivot.copy()
+        self.tan_h = math.tan(math.radians(float(vc["horizontal_fov_16x9"])) * 0.5)
+        self.tan_v = self.tan_h * 9.0 / 16.0
+        self.near = float(vc["near"])
+
+    def bell(self, share: float) -> float:
+        """ViewModelConfig.reload_bell."""
+        if self.rise <= 0.0:
+            return math.sin(math.pi * min(1.0, max(0.0, share)))
+        return smoothstep(0.0, self.rise, share) * smoothstep(0.0, self.rise, 1.0 - share)
+
+    def at(self, share: float) -> Matrix:
+        """Eye space as built into the game's eye space, `share` of the way through the reload. The game's Euler
+        (YXZ: turn about up, tilt about right, roll about back) and moves (lift, inward, forward) in eye space."""
+        b = self.bell(share)
+        tilt, turn, roll = (v * b for v in self.cant)
+        lift, inward, forward = (v * b for v in self.move)
+        r = (Matrix.Rotation(turn, 4, "Z") @ Matrix.Rotation(tilt, 4, "X")
+             @ Matrix.Rotation(-roll, 4, "Y"))
+        return Matrix.Translation(self.pivot + Vector((-inward, forward, lift))) @ r @ Matrix.Translation(-self.pivot)
+
+    def covered(self, cam: Matrix, capsules: list) -> float:
+        """The share of the screen the capsules ((from, to, radius), eye space as built) cover through `cam`."""
+        nx, nz = GRID
+        cells = set()
+        for a, b, r in capsules:
+            a, b = cam @ a, cam @ b
+            n = max(1, int((b - a).length / SAMPLE))
+            for k in range(n + 1):
+                q = a.lerp(b, k / n)
+                if q.y < self.near:
+                    continue
+                sx, sz = q.x / (q.y * self.tan_h), q.z / (q.y * self.tan_v)
+                rx, rz = r / (q.y * self.tan_h), r / (q.y * self.tan_v)
+                if sx - rx > 1.0 or sx + rx < -1.0 or sz - rz > 1.0 or sz + rz < -1.0:
+                    continue
+                i0, i1 = max(0, int((sx - rx + 1.0) * 0.5 * nx)), min(nx - 1, int((sx + rx + 1.0) * 0.5 * nx))
+                j0, j1 = max(0, int((sz - rz + 1.0) * 0.5 * nz)), min(nz - 1, int((sz + rz + 1.0) * 0.5 * nz))
+                for i in range(i0, i1 + 1):
+                    cx = ((i + 0.5) / nx * 2.0 - 1.0 - sx) / rx
+                    for j in range(j0, j1 + 1):
+                        cz = ((j + 0.5) / nz * 2.0 - 1.0 - sz) / rz
+                        if cx * cx + cz * cz <= 1.0:
+                            cells.add((i, j))
+        return len(cells) / float(nx * nz)
 
 
 def reload_action(objects: list) -> tuple:
@@ -99,7 +244,7 @@ def mag_at(arm, action, frame: int) -> Matrix:
     return (arm.matrix_world @ arm.pose.bones[MAG].matrix).copy()
 
 
-def phases(path: list) -> dict:
+def phases(path: list, catch_at: float = None) -> dict:
     """The magazine's moves through the clip (frames): it starts down (`first`), comes to rest out of the well
     (`out`), the fresh one shows (`back`) and is home (`home`); the hand takes it at `catch`."""
     rest = path[0].translation
@@ -110,7 +255,7 @@ def phases(path: list) -> dict:
                jump)
     back = jump + 1
     home = next((f for f in range(back, n + 1) if (path[f].translation - rest).length < MOVED), n)
-    catch = first + int(round((out - first) * CATCH))
+    catch = first + int(round((out - first) * (CATCH if catch_at is None else catch_at)))
     return {"first": first, "catch": catch, "out": out, "back": back, "home": home, "end": n}
 
 
@@ -131,8 +276,8 @@ class MagChange:
     """The left hand's magazine change for one replica, from one hold."""
 
     def __init__(self, rig: Rig, hand: pose.Hand, rid: str, hold_to_eye: Matrix, objects: list, solid: list,
-                 arms: list, elbow_for):
-        self.rig, self.hand, self.rid, self.arms, self.elbow_for = rig, hand, rid, arms, elbow_for
+                 arms: list):
+        self.rig, self.hand, self.rid, self.arms = rig, hand, rid, arms
         # The replica's own space into eye space (its hold), and the hand's grasp once found (`grasp`).
         self.hold_to_eye = hold_to_eye
         self.grip = None
@@ -140,88 +285,157 @@ class MagChange:
         # bring it forward): away at the magazine it is the handguard hold's, so the forearm keeps behind a grip.
         self.shifts = (Vector(), Vector())
         self.spec = GRASP[rid]
+        self.solid = solid
+        self.view = View(rid, hold_to_eye.translation)
+        # The frame being keyed (its view) and the last key's elbow (`pose` keeps it near).
+        self.now, self.elbow = 0, None
         self.arm, self.action = reload_action(objects)
         if self.action is None:
             return
         self.length = int(round(self.action.frame_range[1]))
         self.path = [mag_at(self.arm, self.action, f) for f in range(self.length + 1)]
+        self.at = phases(self.path, self.spec.get("catch"))
+        self.rest()
+        self.mags = [o for o in objects if o.type == "MESH" and o.parent_bone == MAG]
+        # The checks leave the magazine out (it moves with the hand; the clip's poses aren't on the meshes here) and
+        # the trigger (the right index finger's pad rests on it).
+        self.frame = [o for o in solid if o not in self.mags and not o.name.startswith("Trigger")]
+        self.fingers = [b for b in rig.rest if b.endswith("_" + SIDE) and b.split("_")[0][:-1] in
+                        ("Index", "Middle", "Ring", "Pinky", "Thumb")]
+
+    def rest(self) -> None:
+        """The replica's armature back at rest, no clip on it."""
         self.arm.animation_data.action = None
         for pb in self.arm.pose.bones:
             pb.matrix_basis = Matrix.Identity(4)
         bpy.context.scene.frame_set(0)
         bpy.context.view_layer.update()
-        self.at = phases(self.path)
-        self.mags = [o for o in objects if o.type == "MESH" and o.parent_bone == MAG]
-        # The checks leave the magazine out (it moves with the hand; the clip's poses aren't on the meshes here) and
-        # the trigger (the right index finger's pad rests on it).
-        self.frame = [o for o in solid if o not in self.mags and not o.name.startswith("Trigger")]
-        self.col = Collider(solid)
-        self.fingers = [b for b in rig.rest if b.endswith("_" + SIDE) and b.split("_")[0][:-1] in
-                        ("Index", "Middle", "Ring", "Pinky", "Thumb")]
-        # The magazine's way down out of the well (eye space).
-        self.down = (self.path[self.at["out"]].translation - self.path[0].translation).normalized()
+
+    def elbow_for(self, hand_m: Matrix, f: int, near: Vector = None) -> tuple:
+        """The least cost (POLE_STEP ...) elbow for the left hand at `hand_m` at frame `f`, kept near `near`: (cost,
+        the pole, the elbow, the share of the screen the arm covers, the wrist's bend)."""
+        rig = self.rig
+        up, fo, hn = "UpperArm_" + SIDE, "Forearm_" + SIDE, "Hand_" + SIDE
+        rig.fk("Shoulder_" + SIDE)
+        rig.fk(up)
+        s = rig.pose[up].translation.copy()
+        a = (rig.rest[fo].translation - rig.rest[up].translation).length
+        b = (rig.rest[hn].translation - rig.rest[fo].translation).length
+        w = hand_m.translation
+        line = (w - s).normalized()
+        u0 = line.orthogonal().normalized()
+        straight = (hand_m.to_3x3() @ rig.rest[hn].to_3x3().inverted() @ rig.rest[fo].to_3x3()).col[1]
+        cam = self.view.at(f / max(self.length, 1))
+        best = None
+        for k in range(0, 360, POLE_STEP):
+            pole = Matrix.Rotation(math.radians(k), 3, line) @ u0
+            e = pose.two_bone(s, w, a, b, pole)
+            fore = w - e
+            shown = w - fore.normalized() * WRIST_SHOWS
+            cover = self.view.covered(cam, [(s, e, UPPER_R), (e, shown, FOREARM_R)])
+            bend = math.degrees(straight.angle(fore))
+            wrong = (max(0.0, e.z - s.z - ELBOW_RISE) + max(0.0, e.x - ELBOW_X)
+                     + (min(CHEST[0] - e.y, CHEST[1] - abs(e.x)) if e.y < CHEST[0] and abs(e.x) < CHEST[1] else 0.0))
+            cost = (cover * VIS_COST + max(0.0, bend - BEND_FREE) * BEND_COST
+                    + max(0.0, bend - BEND_HARD) * BEND_HARD_COST + wrong * PLACE_COST
+                    + ((e - near).length * MOVE_COST if near is not None else 0.0))
+            if best is None or cost < best[0]:
+                best = (cost, pole, e, cover, bend)
+        return best
+
+    def reach(self, hand_m: Matrix, f: int) -> tuple:
+        """The left arm reaching hand pose `hand_m` at frame `f`, its elbow where `elbow_for` puts it; that."""
+        found = self.elbow_for(hand_m, f)
+        pose.place_arm(self.rig, SIDE, hand_m, found[1], quiet=True)
+        return found
 
     def grasp(self) -> None:
-        """The hand round the magazine at rest (`self.grip`: its pose, the elbow's pole, the fingers' turns)."""
+        """The hand round the magazine as it is at CATCH (`self.grip`: its pose there, the fingers' turns)."""
         rig, hand, spec = self.rig, self.hand, self.spec
         right = [o for o in self.arms if o.name.endswith("_R")]
         rig.write()
-        col = Collider.joined(self.col, Collider.posed(right))
+        self.arm.animation_data.action = self.action
+        bpy.context.scene.frame_set(self.at["catch"])
+        bpy.context.view_layer.update()
+        col = Collider.joined(Collider(self.solid), Collider.posed(right))
         pts = [o.matrix_world @ v.co for o in self.mags for v in o.data.vertices]
+        self.rest()
+        to_eye = self.hold_to_eye.to_3x3()
+        forward = (to_eye @ Vector((0.0, 1.0, 0.0))).normalized()
+        up = (to_eye @ Vector((0.0, 0.0, 1.0))).normalized()
+        left = -(to_eye @ Vector((1.0, 0.0, 0.0))).normalized()
+        # The magazine's part out of the well (eye space heights along the replica's up): from its base to the well's
+        # mouth, the replica's lowest point over the magazine's footprint.
+        low = min(p.dot(up) for p in pts)
+        fwd = (min(p.dot(forward) for p in pts), max(p.dot(forward) for p in pts))
+        side = (min(p.dot(left) for p in pts) - MOUTH_MARGIN, max(p.dot(left) for p in pts) + MOUTH_MARGIN)
+        body = [q for o in self.frame for q in (o.matrix_world @ v.co for v in o.data.vertices)
+                if fwd[0] <= q.dot(forward) <= fwd[1] and side[0] <= q.dot(left) <= side[1]]
+        mouth = min((q.dot(up) for q in body if q.dot(up) > low), default=max(p.dot(up) for p in pts))
+        top = min(max(p.dot(up) for p in pts), mouth)
         if spec["kind"] == "side":
-            at = self.hold_to_eye @ Vector(spec["at"])
-            palm = Vector((1.0, 0.0, 0.0))
-            forward = (self.hold_to_eye.to_3x3() @ Vector((0.0, 1.0, 0.0))).normalized()
+            height = low + (top - low) * spec["up"]
+            # The points near that height (a low-poly box has its corners only at its ends: then all of them).
+            face = [p for p in pts if abs(p.dot(up) - height) < BAND] or pts
+            mid = (min(p.dot(forward) for p in face) + max(p.dot(forward) for p in face)) * 0.5
+            centre = forward * mid + up * height + left * max(p.dot(left) for p in face)
+            palm = -left
         else:
-            # Under its base plate: the plate's middle (the magazine's lowest points along its way down), the palm
-            # facing back up the magazine.
-            low = max(p.dot(self.down) for p in pts)
-            base = [p for p in pts if p.dot(self.down) > low - 0.004]
-            at = sum(base, Vector()) / len(base)
-            palm = -self.down
-            forward = (self.hold_to_eye.to_3x3() @ Vector((0.0, 1.0, 0.0)))
-            forward = (forward - palm * forward.dot(palm)).normalized()
+            face = [p for p in pts if p.dot(up) < low + 0.004]
+            centre = sum(face, Vector()) / len(face)
+            palm = up
+        # The palm's centre to its middle knuckle, along the fingers.
+        knuckle = (rig.rest["Middle1_" + SIDE].translation - hand.palm_centre).dot(hand.fingers)
         best = None
+        catch_inv = self.path[self.at["catch"]].inverted()
         for turn in range(spec["turn"][0], spec["turn"][1] + 1, TURN_STEP):
             for roll in ROLLS:
                 if spec["kind"] == "side":
                     fingers = Matrix.Rotation(math.radians(turn), 3, palm) @ forward
-                    p = Matrix.Rotation(math.radians(roll), 3, fingers) @ palm
                 else:
                     fingers = Matrix.Rotation(math.radians(-turn), 3, palm) @ forward
-                    p = Matrix.Rotation(math.radians(roll), 3, fingers) @ palm
-                m = hand.place(at, fingers, p, 0.0, 0.0 if spec["kind"] == "under" else 0.03)
+                p = Matrix.Rotation(math.radians(roll), 3, fingers) @ palm
+                # The knuckles at the face's edge the fingers point over.
+                at = centre + fingers * (max(q.dot(fingers) for q in face) - KNUCKLE_BACK - centre.dot(fingers))
+                m = hand.place(at, fingers, p, knuckle, 0.0)
                 m = hand.seat(m, p, col, whole=True)
-                pole, bend = self.elbow_for(rig, SIDE, m, quiet=True)
-                if pole is None:
-                    continue
-                if best is None or bend < best[0]:
-                    best = (bend, turn, roll, m, pole, p)
-        if best is None:
-            raise SystemExit("%s: no elbow for the left hand on the magazine" % self.rid)
-        bend, turn, roll, m, pole, p = best
+                cost = sum(self.elbow_for(self.path[self.at[k]] @ catch_inv @ m, self.at[k])[0]
+                           for k in ("catch", "out", "back", "home"))
+                if best is None or cost < best[0]:
+                    best = (cost, turn, roll, m, p, at)
+        cost, turn, roll, m, p, at = best
         hand.normal = p
         hand.tip_top = None
-        pose.place_arm(rig, SIDE, m, pole, quiet=True)
+        found = self.reach(m, self.at["catch"])
         rig.refresh("Hand_" + SIDE)
-        curls = {name: hand.settle(name, start, col, span=30, root=True) for name, start in spec["fingers"].items()}
-        curls["Thumb"] = cycle.clear_thumb(hand, col, at + self.hold_to_eye.to_3x3() @ Vector(spec["thumb"]))
+        curls = {}
+        for name, start in spec["fingers"].items():
+            settled = hand.settle(name, start, col, span=SETTLE_SPAN, root=True)
+            if settled[0] >= start[0] + SETTLE_SPAN:
+                curls[name] = hand.settle(name, FREE_CURL, col, span=0, root=True)
+            else:
+                curls[name] = hand.press(name, settled, col, extra=PRESS)
+        curls["Thumb"] = cycle.clear_thumb(hand, col, at + to_eye @ Vector(spec["thumb"]))
         rig.write()
-        print("  reload: the hand takes the magazine turned %d, rolled %d: wrist %.0f deg, fingers %s" % (
-            turn, roll, pose.wrist_bend(rig, SIDE), curls))
-        self.grip = (m, pole, {b: rig.local.get(b, Matrix.Identity(3)).copy() for b in self.fingers})
+        print("  reload: the hand takes the magazine turned %d, rolled %d: wrist %.0f deg, arm on %.0f%% of the "
+              "screen, fingers %s" % (turn, roll, pose.wrist_bend(rig, SIDE), found[3] * 100.0, curls))
+        self.grip = (m, {b: rig.local.get(b, Matrix.Identity(3)).copy() for b in self.fingers})
 
-    def pose(self, hand_m: Matrix, turns: dict, pole: Vector, kept: Vector = None, free: float = 1.0) -> Vector:
-        """The left arm reaching the hand pose `hand_m`, its fingers at `turns`; the elbow's pole used. With `kept`,
-        the pole is that much `free` of the way from it to its own, and the shoulder as far to the handguard
-        hold's."""
+    def pose(self, hand_m: Matrix, turns: dict, kept: Vector = None, free: float = 1.0) -> Vector:
+        """The left arm reaching the hand pose `hand_m` at frame `self.now`, its fingers at `turns`; the elbow's pole
+        used. With `kept` (the hold's pole), the pole is `free` of the way from it to `elbow_for`'s, and the shoulder
+        as far to the handguard hold's."""
         rig = self.rig
         rig.shift["Shoulder_" + SIDE] = self.shifts[0].lerp(self.shifts[1], smooth(free))
-        p, _ = self.elbow_for(rig, SIDE, hand_m, quiet=True)
-        pole = p if p is not None else pole
+        found = self.elbow_for(hand_m, self.now, self.elbow)
+        pole = found[1]
         if kept is not None:
             pole = kept.lerp(pole, smooth(free))
         pose.place_arm(rig, SIDE, hand_m, pole, quiet=True)
+        self.elbow = rig.pose["Forearm_" + SIDE].translation.copy()
+        if os.environ.get("BL_DEBUG"):
+            print("   frame %d: arm on %.1f%% of the screen at best, wrist %.0f deg, elbow %s" % (
+                self.now, found[3] * 100.0, found[4], tuple(round(v, 3) for v in self.elbow)))
         for b in self.fingers:
             rig.local[b] = turns[b]
         rig.refresh("Hand_" + SIDE)
@@ -278,22 +492,83 @@ class MagChange:
         s = smooth(u)
         return {k: a[k].to_quaternion().slerp(b[k].to_quaternion(), s).to_matrix() for k in self.fingers}
 
+    def push_start(self) -> int:
+        """The frame the fresh magazine's last PUSH_SHARE of its way home starts."""
+        at = self.at
+        return int(round(at["home"] - (at["home"] - at["back"]) * self.spec.get("push", PUSH_SHARE)))
+
+    def pushing(self, f: int, turns: dict) -> dict:
+        """The fingers' turns at frame `f` while the hand carries the magazine: from `turns` round it, opening
+        (`opened`) over the last PUSH_SHARE of its way home, as it slides up out of the hand into the well."""
+        at = self.at
+        if f < at["back"]:
+            return turns
+        start = self.push_start()
+        return self.turns_between(turns, self.opened(turns), (f - start) / max(at["home"] - start, 1.0))
+
+    def opened(self, turns: dict) -> dict:
+        """`turns` with each finger's joints (not the thumb's) uncurled OPEN_TURN."""
+        axis = self.hand.axis
+        return {b: turns[b] @ Matrix.Rotation(math.radians(-OPEN_TURN), 3, axis[b])
+                if b in axis and not b.startswith("Thumb") else turns[b] for b in self.fingers}
+
     def keys(self, held: dict, held_hand: Matrix, held_turns: dict, held_pole: Vector) -> tuple:
         """Each key's (frame, bases) from the hold (`held`: every bone's basis; the hand's pose, its fingers' turns
-        and its elbow's pole) and back, and how many keys pass into the replica."""
+        and its elbow's pole) and back, and how many keys pass into the replica. A one-handed replica's starts and
+        ends below the view instead (LOW)."""
         at = self.at
-        grip_m, grip_pole, grip_turns = self.grip
-        rest_inv = self.path[0].inverted()
+        grip_m, grip_turns = self.grip
+        catch_inv = self.path[at["catch"]].inverted()
+        push = self.push_start()
 
         def carried(f: int) -> Matrix:
-            return self.path[f] @ rest_inv @ grip_m
+            # Pushing it home the hand stays where it is as the magazine slides up out of it into the well.
+            m = self.path[f] @ catch_inv @ grip_m
+            if at["back"] <= f and f > push:
+                m = Matrix.Translation(self.path[push].translation - self.path[f].translation) @ m
+            return m
+
+        clear_at = max(1, int(round(at["catch"] * CLEAR_SHARE)))
+        back_at = at["end"] - max(1, int(round((at["end"] - at["home"]) * CLEAR_SHARE)))
+        frames = (set(range(1, at["catch"] + 1, STEP)) | set(range(at["catch"], at["out"] + 1, STEP))
+                  | set(range(at["out"], at["back"] + 1, STEP)) | set(range(at["back"], at["home"] + 1, STEP))
+                  | set(range(at["home"], at["end"], STEP))
+                  | {clear_at, at["catch"], at["out"], at["back"], at["home"], back_at})
+        if self.spec.get("one_hand"):
+            low_m = Matrix.Translation(LOW) @ carried(at["catch"])
+            low_turns = self.opened(grip_turns)
+            self.now, self.elbow = 0, None
+            self.pose(low_m, low_turns)
+            self.rig.write()
+            low = cycle.snapshot(self.rig)
+            out, hits = [(0, low)], 0
+            for f in sorted(frames):
+                if f >= at["end"]:
+                    continue
+                self.now = f
+                if f < at["catch"]:
+                    u = f / at["catch"]
+                    pole = self.pose(between(low_m, carried(at["catch"]), u, Vector()),
+                                     self.turns_between(low_turns, grip_turns, u))
+                elif f <= at["out"] or at["back"] <= f <= at["home"]:
+                    pole = self.pose(carried(f), self.pushing(f, grip_turns))
+                elif f < at["back"]:
+                    u = (f - at["out"]) / (at["back"] - at["out"])
+                    pole = self.pose(between(carried(at["out"]), carried(at["back"]), u, DIP), grip_turns)
+                else:
+                    u = (f - at["home"]) / (at["end"] - at["home"])
+                    pole = self.pose(between(carried(at["home"]), low_m, u, Vector()),
+                                     self.turns_between(self.opened(grip_turns), low_turns, u))
+                hits += self.key(f, pole, out)
+            out.append((at["end"], low))
+            return out, hits
 
         cleared = Matrix.Translation(CLEAR) @ held_hand
-        axis = self.hand.axis
-        open_turns = {b: held_turns[b] @ Matrix.Rotation(math.radians(-OPEN_TURN), 3, axis[b])
-                      if b in axis and not b.startswith("Thumb") else held_turns[b] for b in self.fingers}
+        open_turns = self.opened(held_turns)
+        open_turns.update({b: held_turns[b] for b in self.fingers if b.startswith("Thumb")})
         # A finger hooked round a corner (a pinky curled under the handguard) would open into it: it stays closed.
-        self.pose(held_hand, open_turns, held_pole, held_pole, 0.0)
+        self.now, self.elbow = 0, None
+        self.pose(held_hand, open_turns, held_pole, 0.0)
         self.rig.write()
         for b in pose.clipping(self.arms, self.frame)[1]:
             finger = b.split("_")[0][:-1]
@@ -301,59 +576,60 @@ class MagChange:
                 name = "%s%d_%s" % (finger, k, SIDE)
                 if name in open_turns:
                     open_turns[name] = held_turns[name]
-        clear_at = max(1, int(round(at["catch"] * CLEAR_SHARE)))
-        back_at = at["end"] - max(1, int(round((at["end"] - at["home"]) * CLEAR_SHARE)))
-
-        frames = (set(range(1, at["catch"] + 1, STEP)) | set(range(at["catch"], at["out"] + 1, STEP))
-                  | set(range(at["out"], at["back"] + 1, STEP)) | set(range(at["back"], at["home"] + 1, STEP))
-                  | set(range(at["home"], at["end"], STEP))
-                  | {clear_at, at["catch"], at["out"], at["back"], at["home"], back_at})
-        out, hits, pole = [(0, held)], 0, held_pole
+        out, hits = [(0, held)], 0
         for f in sorted(frames):
             if f >= at["end"]:
                 continue
+            self.now = f
+            # The elbow goes from the hold's over the whole way to the magazine, and back over the whole way home.
+            leaving, returning = f / at["catch"], (at["end"] - f) / (at["end"] - at["home"])
             if f < clear_at:
                 u = f / clear_at
                 pole = self.pose(between(held_hand, cleared, max(0.0, u - OPEN_FIRST) / (1.0 - OPEN_FIRST),
                                          Vector()),
-                                 self.turns_between(held_turns, open_turns, min(1.0, u / OPEN_FIRST)), pole,
-                                 held_pole, 0.0)
+                                 self.turns_between(held_turns, open_turns, min(1.0, u / OPEN_FIRST)), held_pole,
+                                 leaving)
             elif f < at["catch"]:
                 u = (f - clear_at) / (at["catch"] - clear_at)
                 pole = self.pose(between(cleared, carried(at["catch"]), u, OUT),
-                                 self.turns_between(open_turns, grip_turns, u), pole, held_pole, u)
+                                 self.turns_between(open_turns, grip_turns, u), held_pole, leaving)
             elif f <= at["out"] or at["back"] <= f <= at["home"]:
-                pole = self.pose(carried(f), grip_turns, pole)
+                pole = self.pose(carried(f), self.pushing(f, grip_turns))
             elif f < at["back"]:
                 u = (f - at["out"]) / (at["back"] - at["out"])
-                pole = self.pose(between(carried(at["out"]), carried(at["back"]), u, DIP), grip_turns, pole)
+                pole = self.pose(between(carried(at["out"]), carried(at["back"]), u, DIP), grip_turns)
             elif f < back_at:
                 u = (f - at["home"]) / (back_at - at["home"])
                 pole = self.pose(between(carried(at["home"]), cleared, u, OUT),
-                                 self.turns_between(grip_turns, open_turns, u), pole, held_pole, 1.0 - u)
+                                 self.turns_between(self.opened(grip_turns), open_turns, u), held_pole, returning)
             else:
                 u = (f - back_at) / (at["end"] - back_at)
                 pole = self.pose(between(cleared, held_hand, min(1.0, u / (1.0 - OPEN_FIRST)), Vector()),
                                  self.turns_between(open_turns, held_turns, max(0.0, u - (1.0 - OPEN_FIRST))
-                                                    / OPEN_FIRST), pole, held_pole, 0.0)
-            n, tally = self.ease(pole)
-            if n:
-                hits += 1
-                print("   reload frame %d: %d face pairs pass into the replica %s" % (
-                    f, n, sorted(tally.items(), key=lambda x: -x[1])[:4]))
-            out.append((f, cycle.snapshot(self.rig)))
+                                                    / OPEN_FIRST), held_pole, returning)
+            hits += self.key(f, pole, out)
         out.append((at["end"], held))
         return out, hits
 
+    def key(self, f: int, pole: Vector, out: list) -> int:
+        """The pose as it stands, eased out of the replica, appended to `out` as frame `f`'s key; 1 if it still
+        passes in."""
+        n, tally = self.ease(pole)
+        out.append((f, cycle.snapshot(self.rig)))
+        if n:
+            print("   reload frame %d: %d face pairs pass into the replica %s" % (
+                f, n, sorted(tally.items(), key=lambda x: -x[1])[:4]))
+        return 1 if n else 0
+
 
 def change_mag(rig: Rig, hand: pose.Hand, rid: str, hold_to_eye: Matrix, objects: list, solid: list, arms: list,
-               elbow_for, holds: dict) -> tuple:
+               holds: dict) -> tuple:
     """Keys `<rid>_Reload` and `<rid>_<grip>_Reload` from each of `holds` ("" or the grip -> the rig on that hold:
     its pose, turns, shifts, drops, across and plan, as arms.kept takes them); how many keys pass into the replica in
     all, and the clips keyed. Nothing for a replica without a GRASP or a Reload clip."""
     if rid not in GRASP:
         return 0, []
-    change = MagChange(rig, hand, rid, hold_to_eye, objects, solid, arms, elbow_for)
+    change = MagChange(rig, hand, rid, hold_to_eye, objects, solid, arms)
     if change.action is None:
         return 0, []
     kept = (dict(hand.adduct), hand.normal, hand.tip_top)
@@ -363,10 +639,6 @@ def change_mag(rig: Rig, hand: pose.Hand, rid: str, hold_to_eye: Matrix, objects
     for name, kept_hold in holds.items():
         rig.pose, rig.local = dict(kept_hold[0]), dict(kept_hold[1])
         rig.shift, rig.drop, rig.across, rig.plan = (dict(d) for d in kept_hold[2:6])
-        # The elbow free to come across under a pistol, and the forearm's angle from above left to the wrist.
-        rig.plan.pop(SIDE, None)
-        rig.across[SIDE] = max(rig.across.get(SIDE, 0.0), ACROSS)
-        rig.drop[SIDE] = min(rig.drop.get(SIDE, DROP), DROP)
         rig.write()
         held = cycle.snapshot(rig)
         held_hand = rig.pose["Hand_" + SIDE].copy()

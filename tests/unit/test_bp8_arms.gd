@@ -11,6 +11,17 @@ const GRIPPED: Array[StringName] = [&"aeg", &"sniper"]
 const HELD: Array[StringName] = [&"aeg", &"pistol", &"cyber", &"sniper"]
 ## How far (m) the left hand may drift from the magazine it carries between the clip's keys.
 const CARRY_SLACK := 0.004
+## Where each replica's left hand carries a magazine (shares of the reload, from its Reload clip): the old one pulled
+## out (from the hand taking it to it out of the well), then the fresh one pushed up (from it showing to the hand
+## letting it slide home; tools/blender/arms/magazine.py phases, CATCH and PUSH_SHARE or the replica's own).
+const CARRIES := {
+	&"aeg": [[0.12, 0.18, 0.235], [0.52, 0.6, 0.67]],
+	&"sniper": [[0.12, 0.18, 0.235], [0.52, 0.6, 0.67]],
+	&"pistol": [[0.22, 0.25, 0.27], [0.52, 0.545, 0.565]],
+	&"cyber": [[0.25, 0.27, 0.295], [0.54, 0.56, 0.585]],
+}
+## How far (m) the left hand may be from its hold as a reload starts (no jump into the clip).
+const START_SLACK := 0.002
 
 var cfg: ViewModelConfig = null
 
@@ -132,6 +143,13 @@ func test_a_reload_in_play_drives_the_left_hand() -> void:
 	assert_eq(anim.assigned_animation, StringName(String(r.id) + ArmsView.CLIP_SUFFIX), "done: the hold")
 
 
+## The left hand bone's place in the arms' model.
+func _left_hand(hands: ReplicaView) -> Vector3:
+	var skeleton := hands._arms._skeleton
+	skeleton.force_update_all_bone_transforms()
+	return skeleton.get_bone_global_pose(skeleton.find_bone("Hand_L")).origin
+
+
 ## Where the left hand is against the magazine at `share` of the reload, in the replica's frame.
 func _hand_on_mag(hands: ReplicaView, held: ReplicaView.Held, share: float) -> Vector3:
 	hands._seek(held, ReplicaView.RELOAD_CLIP, share)
@@ -152,21 +170,24 @@ func test_the_magazine_rides_in_the_left_hand() -> void:
 	for slot in HELD.size():
 		hands._show(slot)
 		var held: ReplicaView.Held = hands._held[slot]
-		# The fresh magazine pushed home: from just after it shows to just before it is in (each replica's clip has
-		# it in hand over this stretch).
-		var shares: Array[float] = []
-		match held.id:
-			&"pistol":
-				shares = [0.56, 0.66, 0.76]
-			&"cyber":
-				shares = [0.58, 0.68, 0.78]
-			_:
-				shares = [0.56, 0.64, 0.72]
-		var first := _hand_on_mag(hands, held, shares[0])
-		for share: float in shares.slice(1):
-			var now := _hand_on_mag(hands, held, share)
-			assert_almost_eq(now, first, Vector3.ONE * CARRY_SLACK, "%s at %.2f: the hand with the magazine" % [
-					held.id, share])
+		# The old magazine pulled out, then the fresh one pushed up: the hand keeps its place on it each way.
+		for stretch: Array in CARRIES[held.id]:
+			var first := _hand_on_mag(hands, held, stretch[0])
+			for share: float in stretch.slice(1):
+				var now := _hand_on_mag(hands, held, share)
+				assert_almost_eq(now, first, Vector3.ONE * CARRY_SLACK, "%s at %.2f: the hand with the magazine" % [
+						held.id, share])
+
+
+func test_a_reload_starts_from_the_hold() -> void:
+	for id: StringName in GRIPPED:
+		var hands := _hands([id])
+		hands._show(0)
+		var held: ReplicaView.Held = hands._held[0]
+		hands._arms.follow(held.anim, DT)
+		var holding := _left_hand(hands)
+		hands._arms.follow(held.anim, DT, 0.0)
+		assert_almost_eq(_left_hand(hands), holding, Vector3.ONE * START_SLACK, "%s: no jump as it starts" % id)
 
 
 func test_skin_only_arms_switch_live() -> void:

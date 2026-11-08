@@ -297,9 +297,10 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 	if a.reload_left > 0.0:
 		var r := a.replica()
 		var progress := clampf(1.0 - a.reload_left / maxf(r.reload_time, 0.001), 0.0, 1.0)
-		var bell := sin(PI * progress) * _motion.reload_cant
-		rot += Vector3(_cfg.reload_tilt, _cfg.reload_turn, _cfg.reload_roll) * bell
-		pos += Vector3(-_cfg.reload_inward, _cfg.reload_lift, 0.0) * bell
+		var bell := _cfg.reload_bell(held.id, progress) * _motion.reload_cant
+		var move := _cfg.reload_move(held.id)
+		rot += _cfg.reload_cant(held.id) * bell
+		pos += Vector3(-move.y, move.x, -move.z) * bell
 		_seek(held, RELOAD_CLIP, progress)
 		held.in_reload = true
 		reload_share = progress

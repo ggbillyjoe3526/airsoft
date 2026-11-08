@@ -36,6 +36,8 @@ const GRIP_PART := "grip_"
 
 ## What each mesh shows on: both looks, the gloves only, or skin only.
 enum Look { BOTH, GLOVES, SKIN }
+## The arms worn: a human's gloves, a robot's, or skin only (each model material's copies in _worn, in this order).
+enum Worn { HUMAN, ROBOT, SKIN }
 
 var _cfg: ViewModelConfig = null
 var _model: Node3D = null
@@ -45,7 +47,7 @@ var _meshes: Array[MeshInstance3D] = []
 ## Each mesh's Look, and whether it is a left one (as _meshes).
 var _looks: PackedInt32Array = PackedInt32Array()
 var _lefts: Array[bool] = []
-## Each look's material, by the model's material: [human, robot, skin], the depth pressed in all.
+## Each Worn's material, by the model's material (indexed by Worn), the depth pressed in all.
 var _worn: Dictionary[Material, Array] = {}
 var _kind: int = FigureMix.HUMAN
 ## Skin-only arms (Dev), worn by a human's arms.
@@ -300,6 +302,8 @@ func _to_root(mark: Node3D) -> Transform3D:
 
 ## Shows the left arm (`on`) or hides it, each of its meshes as the look worn asks.
 func _set_left(on: bool) -> void:
+	if on == _left_on:
+		return
 	_left_on = on
 	_show_looks()
 
@@ -314,7 +318,7 @@ func _show_looks() -> void:
 
 
 func _dress() -> void:
-	var look := 2 if skin_worn() else (1 if _kind == FigureMix.ROBOT else 0)
+	var look: Worn = Worn.SKIN if skin_worn() else (Worn.ROBOT if _kind == FigureMix.ROBOT else Worn.HUMAN)
 	for mesh_node in _meshes:
 		for i in mesh_node.mesh.get_surface_count():
 			var own := mesh_node.mesh.surface_get_material(i)
