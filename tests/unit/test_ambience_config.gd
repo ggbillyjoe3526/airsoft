@@ -40,11 +40,10 @@ func test_the_sets_are_the_browsers() -> void:
 	assert_eq(_loops(amb.day[&"yard"]), ["yard"])
 	assert_eq(_cues(amb.day[&"yard"]), ["ambience_bird", "ambience_crow", "ambience_dog"])
 	assert_eq(_cues(amb.night[&"yard"]), ["ambience_dog"])
-	# Woodland's beds are the owner's woods by day (AU6) and his street at night until he records the woods at night
-	# (AU5); its calls are the browser's.
+	# Woodland's beds are the owner's woods by day (AU6) and by night (AU9); its calls are the browser's.
 	assert_eq(_loops(amb.day[&"woods"]), ["woods_day"])
 	assert_eq(_cues(amb.day[&"woods"]), ["ambience_bird", "ambience_creak"])
-	assert_eq(_loops(amb.night[&"woods"]), ["street_night"])
+	assert_eq(_loops(amb.night[&"woods"]), ["woods_night"])
 	assert_eq(_cues(amb.night[&"woods"]), ["ambience_owl", "ambience_creak"])
 	var yard_bed := amb.day[&"yard"].beds[0]
 	assert_almost_eq(yard_bed.gain, 0.035, 1e-6, "the browser's yard bed")
@@ -62,6 +61,8 @@ func test_every_loop_and_cue_named_is_on_disk() -> void:
 		for bed in _sets()[at].beds:
 			assert_true(ResourceLoader.exists("%s%s.wav" % [SoundConfig.LOOP_DIR, bed.loop]), "%s: loop %s" % [at, bed.loop])
 			assert_true(peaks is Dictionary and (peaks as Dictionary).has(String(bed.loop)), "%s: %s's peak" % [at, bed.loop])
+			var stream := load("%s%s.wav" % [SoundConfig.LOOP_DIR, bed.loop]) as AudioStreamWAV
+			assert_true(stream != null and stream.loop_mode == AudioStreamWAV.LOOP_FORWARD, "%s: %s loops" % [at, bed.loop])
 		for c in _sets()[at].calls:
 			var path := "%s%s_1.wav" % [SoundConfig.CUE_DIR, c.cue]
 			assert_true(ResourceLoader.exists(path), "%s: %s" % [at, path])

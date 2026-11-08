@@ -1,5 +1,5 @@
 extends GutTest
-## The owner's recordings (AU2, AU5, AU6, and the placeholders cut from them, AU3): every cue they replaced still has
+## The owner's recordings (AU2, AU5, AU6, AU9, and the placeholders cut from them, AU3): every cue they replaced still has
 ## its variants, the three surfaces they added (glass, plastic, cardboard) sound as themselves and otherwise behave as the
 ## metal and wood they were before, and a gas pistol's last shot locks its slide back.
 
@@ -14,7 +14,7 @@ const FIVE: PackedStringArray = ["shot_gas", "power_gas", "dryFire", "magOut_gas
 		"door_open", "door_shut", "hitTick", "hitMarker", "foley_crouch", "foley_stand", "foley_lean",
 		"step_concrete_run", "step_concrete_sprint", "step_concrete_land", "step_gravel_run", "step_leaves_run",
 		"step_gravel_sprint", "step_grass_run", "step_grass_sprint", "step_grass_land", "step_metal_run",
-		"step_metal_sprint"]
+		"step_metal_sprint", "step_wood_run", "step_wood_sprint", "step_wood_land"]
 const THREE: PackedStringArray = ["slideLock_gas", "boltCycle", "prop_clank", "prop_rattle", "prop_plastic",
 		"prop_wood", "whistle_short", "whistle_long", "prop_steel", "prop_glass", "flash_bang"]
 
@@ -218,3 +218,38 @@ func test_every_ground_steps_as_loud_as_concrete() -> void:
 				power += _onset_power("step_%s_%s" % [ground, pace], n + 1)
 			var off := 10.0 * log(power / concrete) / log(10.0)
 			assert_lt(absf(off), 1.5, "%s %s: %.2f dB" % [ground, pace, off])
+
+
+func test_a_steel_props_ring_is_over_before_it_can_be_set_off_again() -> void:
+	# A prop makes a noise at most once in NoiseConfig.quiet (s), so no variant of the ring (AU9's metal bang, 0.9 s)
+	# plays over the next one.
+	var quiet := NoiseConfig.new().quiet
+	for n in 3:
+		assert_lt(_length("prop_steel", n + 1), quiet, "prop_steel_%d" % (n + 1))
+
+
+func _edges(cue: String, n: int) -> Vector2:
+	# The first and last samples of a cue's variant, each over its peak.
+	var bytes := FileAccess.get_file_as_bytes("%s%s_%d.wav" % [SoundConfig.CUE_DIR, cue, n])
+	var at := 12
+	while at + 8 <= bytes.size() and bytes.slice(at, at + 4).get_string_from_ascii() != "data":
+		at += 8 + bytes.decode_u32(at + 4)
+	var count := mini(bytes.decode_u32(at + 4), bytes.size() - at - 8) / 2
+	var peak := 1.0
+	for i in count:
+		peak = maxf(peak, absf(bytes.decode_s16(at + 8 + 2 * i)))
+	return Vector2(absf(bytes.decode_s16(at + 8)), absf(bytes.decode_s16(at + 8 + 2 * (count - 1)))) / peak
+
+
+func test_every_step_and_prop_knock_starts_and_ends_at_silence() -> void:
+	# AU9: balancing the steps' band once left their cut edges off zero, a tick at every footstep. Every step and prop
+	# variant starts and ends within 1 % of its peak.
+	for ground: String in ["concrete", "wood", "metal", "gravel", "grass", "leaves", "earth"]:
+		for pace: String in ["run", "sprint", "land"]:
+			for n in VARIANTS:
+				var e := _edges("step_%s_%s" % [ground, pace], n + 1)
+				assert_true(e.x <= 0.01 and e.y <= 0.01, "step_%s_%s_%d edges %s" % [ground, pace, n + 1, e])
+	for s in NoiseConfig.SOUND_NAMES:
+		for n in 3:
+			var e := _edges("prop_%s" % s, n + 1)
+			assert_true(e.x <= 0.01 and e.y <= 0.01, "prop_%s_%d edges %s" % [s, n + 1, e])

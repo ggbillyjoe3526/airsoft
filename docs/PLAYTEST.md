@@ -1450,6 +1450,10 @@ as a round starts, then watch a few Depot matches:
   fingers sit on the grip with nothing passing through it, and on the rifles the other hand holds the handguard.
 - [ ] **Dry fire (AU8):** empty each replica and pull the trigger: every one gives the gas pistol's click. The Range
   sounds like The Street by day.
+- [ ] **Your new recordings (AU9):** walk, sprint and jump on Woodland's wooden platforms (the Tower's top): the steps
+  are your wooden-floor recordings, stay as easy to hear as on concrete and have no tick at either end. Run into a steel
+  skip or container: your metal bang rings out. Woodland at night (Dev › Time of day): your woods at night, not the
+  street, as loud as by day, with no hum and no jump where its minute loops.
 
 ## GBB slide, AEG sights and stock (GS2)
 

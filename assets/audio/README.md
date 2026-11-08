@@ -17,7 +17,7 @@ selector, the radio, the electric, spring and cyber magazines, the grenades' pin
 doors each way. Every ground's steps are then balanced to the recorded concrete, within
 1 dB overall and 2 dB in the 0.7 to 4 kHz band (`balance_steps`; the rule is in `docs/DECISIONS.md` › Audio). With
 `--loops` the script also makes the beds `loops/indoor.wav` (the Depot), `street_day.wav` and `street_night.wav` (The
-Street; the night one is Woodland's night too for now): a stretch of each recording, its spikes ridden
+Street; the night one was Woodland's night too until AU9): a stretch of each recording, its spikes ridden
 down, cross-faded into a seamless loop and stored at its peak, with `peaks.json` holding the factor that brings it to
 an RMS of 1, so a bed's gain in `play_tuning.tres` is its loudness.
 
@@ -37,12 +37,17 @@ each starts (`onsets`).
 (SoundConfig.bounce_hold); `smoke_pop` is his long spray alone from its burst (the can pitched down as a pop is gone);
 `flash_bang` his balloon pop clean, SoundConfig.bang_gain making up most of the level the soft clip gave.
 
+**The batch of 2026-11-08** (AU9): 5 more give the steps on wood (`step_wood_run`, `_sprint`, `_land`: his walk and
+run on a wooden floor cut where each step starts, his jumps as takes, then balanced like every ground), the steel skip
+run into (`prop_steel`: about 0.9 s of each of his two metal bangs) and `loops/woods_night.wav`, Woodland's night bed (his
+woods at night, which also leaves The Street's night bed to The Street).
+
 **Every replica fired empty** plays one cue, `dryFire`: the gas pistol's recorded dry click as it is, for today's
 replicas and any added later (owner, 2026-11-05: final, not a stand-in).
 
-**Placeholders** (AU3, 2026-11-03; AU5; AU6): until the owner records them, 13 cues are his recordings reused,
-re-pitched, filtered or sliced (BBs on concrete, soil and leaves,
-the steel skip, the steps on wood and soil, and the jumps onto wood, gravel, leaves and metal). The script labels each
+**Placeholders** (AU3, 2026-11-03; AU5; AU6): until the owner records them, 9 cues are his recordings reused,
+re-pitched, filtered or sliced (BBs on concrete, soil and leaves, the steps on soil, and the jumps onto gravel, leaves
+and metal). The script labels each
 one with what to record; `python3 tools/cut_recordings.py <raw folder> --placeholders` prints them, and those still
 synthesised, as tables. The owner's plain status of every sound is in the shared project files, `audio/sound-status.md`
 (keep it current with every audio change).
