@@ -1569,9 +1569,9 @@ models show without anything else changing. The smoke and flash icons now do the
 
 - [ ] **Grenade slots.** On the Loadout page pick Flash in both grenade slots, then play a round: 5 throws a flash,
   then another, and 4 has nothing. Try two smokes the same way. Restart the game: the pick is kept.
-- [ ] **Raise and hold.** Attack / Defend on Depot: the flag takes 7.5 s to go up, then the FLAG gauge counts
-  HOLD 5, 4, 3. Step off the rope: it still counts. Have a defender step on: the flag comes down and the hold starts
-  again. Is 7.5 s plus 5 s too long for a 3-minute round?
+- [ ] **Raise and hold.** Attack / Defend on Depot: the flag takes 7 s to go up, then the FLAG gauge counts
+  HOLD 3, 2, 1. Step off the rope: it still counts. Have a defender step on: the flag comes down and the hold starts
+  again. Do 7 s plus 3 s feel long enough to fight over?
 - [ ] **Default mode.** Open the Match screen on a fresh start: Attack / Defend is picked.
 - [ ] **Still camera.** Get hit early, let the round end while watching a teammate: the view holds still on the round
   banner and table, no swaying. Win a round alive: the same.

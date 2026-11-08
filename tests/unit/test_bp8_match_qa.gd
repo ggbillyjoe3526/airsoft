@@ -18,7 +18,8 @@ func _end(x: float, zs: Array[float]) -> MapEnd:
 ## Attack / Defend with two attackers (team 0) and two defenders, the clock short.
 func _flag_round() -> Array:
 	var t := SimTuning.new()
-	t.rounds.round_time = 10.0
+	# The clock runs out half a second after a raise: the hold always plays out in overtime, whatever the tuning.
+	t.rounds.round_time = t.flag.raise_time + 0.5
 	t.rounds.reset_delay = 1.0
 	t.rounds.wins_needed = 5
 	t.rounds.half_time_after = 9
@@ -58,8 +59,8 @@ func test_a_flag_still_being_held_at_the_buzzer_wins_the_round_for_the_attackers
 		_tick_round(m)
 		ticks += 1
 	var t: SimTuning = m[0]
-	assert_eq(rs.winner, attackers, "raised at 7.5 s, held 5 s: past the 10 s clock, the attackers still win")
-	assert_gt(ticks * DT, t.rounds.round_time + 2.0, "overtime ran while the raised flag was held")
+	assert_eq(rs.winner, attackers, "raised, then held past the clock: the attackers still win")
+	assert_gt(ticks * DT, t.rounds.round_time + t.flag.hold_time - 1.0, "overtime ran while the raised flag was held")
 
 
 func test_a_defender_on_the_rope_in_overtime_breaks_the_hold_and_the_defenders_take_the_round() -> void:

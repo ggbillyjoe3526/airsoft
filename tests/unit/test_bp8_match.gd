@@ -142,8 +142,8 @@ func _flag_step(flag: FlagState, cs: Array[Character], cfg: FlagConfig, seconds:
 
 func test_the_raise_takes_longer_and_a_raised_flag_must_be_held() -> void:
 	var cfg := SimTuning.load_default().flag
-	assert_eq(cfg.raise_time, 7.5, "half as long again as 5 s")
-	assert_eq(cfg.hold_time, 5.0)
+	assert_eq(cfg.raise_time, 7.0, "longer than the 5 s it was, tuned on the balance report")
+	assert_eq(cfg.hold_time, 3.0, "a hold where there was none")
 	var flag := FlagState.new()
 	flag.reset(Vector3.ZERO)
 	var none: Array[ReplicaConfig] = []

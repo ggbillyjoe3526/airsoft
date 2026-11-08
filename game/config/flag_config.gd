@@ -11,12 +11,13 @@ extends Resource
 ## radius flat, doesn't work the rope (OvertimeConfig.reach_height's rule).
 @export var reach_height: float = 1.0
 ## Seconds for the attackers to raise the flag from the bottom to the top (BP8, owner: longer, 5 s made a raise too
-## quick to answer; 6 s once made the pole rarely decide a round, before the hold).
-@export var raise_time: float = 7.5
+## quick to answer). 7 s with a 3 s hold put Depot's attackers at 52.6 % ±4.7 (16 seeds, Normal); 7.5 s with 5 s
+## held them to 35.5 %.
+@export var raise_time: float = 7.0
 ## Once fully raised, the flag must stay up this long (s) for the attackers to win (BP8, owner: hold the flag): a
 ## defender on the rope pulls it off the top and the hold starts again from nothing; both teams on the rope pause it.
 ## 0: raised wins at once.
-@export var hold_time: float = 5.0
+@export var hold_time: float = 3.0
 ## Seconds for the defenders to pull it from the top to the bottom: a retake needs no long stand in the open.
 @export var lower_time: float = 3.0
 ## Time running out while the attackers work the rope (raising, or contesting it) or hold a raised flag goes on until
