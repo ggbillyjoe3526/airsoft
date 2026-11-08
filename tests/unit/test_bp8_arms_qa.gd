@@ -265,3 +265,257 @@ func test_a_corrupt_or_older_save_leaves_skin_arms_off() -> void:
 	assert_true(d.skin_arms)
 	d.from_dict({})
 	assert_false(d.skin_arms, "an empty file falls back to off")
+
+
+# ---- Run 2: the magazine carried in the left hand, and what cuts it short ----
+
+const CARRY_AT := 0.4
+
+
+## The magazine bone's pose in the replica's space, as the skeleton has it now.
+func _mag(hands: ReplicaView, slot: int) -> Transform3D:
+	var held: ReplicaView.Held = hands._held[slot]
+	return held.carry.in_root(held.root)
+
+
+## The magazine bone's pose with the replica's reload clip home (share 1), the pose a cut must leave it in.
+func _mag_home(hands: ReplicaView, slot: int) -> Transform3D:
+	var held: ReplicaView.Held = hands._held[slot]
+	hands._seek(held, ReplicaView.RELOAD_CLIP, 1.0)
+	return _mag(hands, slot)
+
+
+func _into_carry(hands: ReplicaView, c: Character, share: float = CARRY_AT) -> void:
+	c.armament.reload_left = c.armament.replica().reload_time * (1.0 - share)
+	_step(hands, c)
+
+
+func _same(a: Transform3D, b: Transform3D, msg: String) -> void:
+	assert_almost_eq(a.origin, b.origin, Vector3.ONE * 1e-3, msg)
+
+
+func test_every_cut_of_a_reload_in_the_carry_puts_the_magazine_back_in_the_well() -> void:
+	for id in HELD:
+		var hands := _hands([id])
+		var c := _character(id)
+		_step(hands, c)
+		var home := _mag_home(hands, 0)
+		_step(hands, c)
+		# Sprint, a grenade, a switch, a round's end and a pause all end in the armament's reload_left = 0.
+		_into_carry(hands, c)
+		var carried := _mag(hands, 0)
+		assert_gt(carried.origin.distance_to(home.origin), 0.01, "%s: the magazine is out of the well at %.1f" % [id, CARRY_AT])
+		c.armament.reload_left = 0.0
+		_step(hands, c)
+		_same(_mag(hands, 0), home, "%s: back in the well after the cut" % id)
+		assert_false(hands._arms.reloading(), "%s: hand back on the hold" % id)
+		assert_eq(_anim(hands).assigned_animation, StringName(String(id) + "_Hold"))
+
+
+func test_a_cut_at_the_edges_of_the_carry_leaves_nothing_in_the_hand() -> void:
+	for id in HELD:
+		var span: Vector2 = cfg.reload_carry[id]
+		for share: float in [span.x, span.y, span.x + 1e-4, span.y - 1e-4, 0.0, 1.0]:
+			var hands := _hands([id])
+			var c := _character(id)
+			_step(hands, c)
+			var home := _mag_home(hands, 0)
+			_into_carry(hands, c, share)
+			c.armament.reload_left = 0.0
+			_step(hands, c)
+			_same(_mag(hands, 0), home, "%s cut at %.4f" % [id, share])
+
+
+func test_a_reload_finishing_by_itself_leaves_the_magazine_home() -> void:
+	var hands := _hands([&"aeg"])
+	var c := _character(&"aeg")
+	_step(hands, c)
+	var home := _mag_home(hands, 0)
+	c.armament.reload_left = c.armament.replica().reload_time
+	for i in 400:
+		c.armament.reload_left = maxf(c.armament.reload_left - DT, 0.0)
+		_step(hands, c)
+		if c.armament.reload_left <= 0.0:
+			break
+	assert_eq(c.armament.reload_left, 0.0)
+	_same(_mag(hands, 0), home, "the magazine home")
+	assert_false(hands._arms.reloading())
+
+
+func test_switching_away_mid_carry_and_back_finds_the_magazine_home() -> void:
+	var loadout: Array[ReplicaConfig] = [ReplicaStats.load_replica(&"aeg"), ReplicaStats.load_replica(&"pistol")]
+	var c := Character.new(0, 0, Vector3.ZERO, 0.0, loadout)
+	var hands := ReplicaView.new()
+	add_child_autofree(hands)
+	hands.setup(cfg, loadout, BoxWorld.new())
+	_step(hands, c)
+	var home := _mag_home(hands, 0)
+	_step(hands, c)
+	_into_carry(hands, c)
+	assert_gt(_mag(hands, 0).origin.distance_to(home.origin), 0.01, "in the hand")
+	# The switch ends the reload (armament.reload_left = 0, a new active), then the first one is drawn again.
+	c.armament.reload_left = 0.0
+	c.armament.active = 1
+	_step(hands, c)
+	assert_false(hands._arms.reloading(), "the pistol is on its hold")
+	assert_false(_mesh(hands, ArmsView.LEFT_ARM).visible, "the pistol's left arm hidden")
+	c.armament.active = 0
+	_step(hands, c)
+	_same(_mag(hands, 0), home, "the rifle's magazine is in its well when it comes back")
+	assert_true(_mesh(hands, ArmsView.LEFT_ARM).visible)
+
+
+func test_the_magazine_part_goes_with_the_hand_and_home_again() -> void:
+	var fits: Array = [[&"aeg", &"hiCap"], [&"aeg", &"lowCap"], [&"pistol", &"extended"]]
+	for fit: Array in fits:
+		var id: StringName = fit[0]
+		var loadout: Array[ReplicaConfig] = [ReplicaStats.load_replica(id)]
+		var hands := ReplicaView.new()
+		add_child_autofree(hands)
+		var parts: Array[Dictionary] = [{ReplicaParts.MAGAZINE_SLOT: fit[1]}]
+		hands.setup(cfg, loadout, BoxWorld.new(), [], false, parts)
+		var c := _character(id)
+		_step(hands, c)
+		var held: ReplicaView.Held = hands._held[0]
+		var mark := held.root.find_child(ReplicaParts.MAGAZINE_ATTACHMENT, true, false) as Node3D
+		assert_not_null(held.carry, "%s %s: the bone is carried" % [id, fit[1]])
+		assert_gt(mark.get_child_count(), 0, "%s %s: the part rides the bone's attachment" % [id, fit[1]])
+		var part := mark.get_child(0) as Node3D
+		var home := _mag_home(hands, 0)
+		_into_carry(hands, c)
+		var hand := hands._arms.left_hand(held.root)
+		var carried := held.carry.in_root(held.root)
+		# The part is on the bone: its place in the hand does not drift while the bone moves.
+		(mark.get_parent() as Skeleton3D).force_update_all_bone_transforms()
+		(mark as BoneAttachment3D).on_skeleton_update()
+		var at: Vector3 = held.root.global_transform.affine_inverse() * part.global_position
+		assert_almost_eq(at.distance_to(carried.origin), mark.transform.origin.length() + part.position.length(), 0.5,
+				"%s %s: part near the bone" % [id, fit[1]])
+		assert_lt(hand.origin.distance_to(carried.origin), 0.5, "%s %s: bone near the hand" % [id, fit[1]])
+		c.armament.reload_left = 0.0
+		_step(hands, c)
+		_same(held.carry.in_root(held.root), home, "%s %s: home after the cut" % [id, fit[1]])
+
+
+func test_a_reload_with_the_carry_follows_while_aimed_and_comes_home() -> void:
+	var hands := _hands([&"aeg"], &"vertical")
+	var c := _character(&"aeg")
+	_step(hands, c, 1.0)
+	var home := _mag_home(hands, 0)
+	_step(hands, c, 1.0)
+	_into_carry(hands, c)
+	var held: ReplicaView.Held = hands._held[0]
+	var hand := hands._arms.left_hand(held.root)
+	var in_hand := hand.affine_inverse() * _mag(hands, 0).origin
+	c.armament.reload_left = c.armament.replica().reload_time * 0.45
+	hands.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 1.0)
+	hand = hands._arms.left_hand(held.root)
+	assert_almost_eq(hand.affine_inverse() * _mag(hands, 0).origin, in_hand, Vector3.ONE * 0.01, "aimed: still in the hand")
+	c.armament.reload_left = 0.0
+	hands.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 1.0)
+	_same(_mag(hands, 0), home, "aimed: home after the reload")
+
+
+func test_two_reloads_in_a_row_carry_the_same_way() -> void:
+	var hands := _hands([&"aeg"])
+	var c := _character(&"aeg")
+	_step(hands, c)
+	var home := _mag_home(hands, 0)
+	_step(hands, c)
+	var first := Transform3D.IDENTITY
+	for round in 2:
+		_into_carry(hands, c)
+		var held: ReplicaView.Held = hands._held[0]
+		var rel := hands._arms.left_hand(held.root).affine_inverse() * _mag(hands, 0).origin
+		if round == 0:
+			first = Transform3D(Basis.IDENTITY, rel)
+		else:
+			assert_almost_eq(rel, first.origin, Vector3.ONE * 1e-3, "the second reload takes it the same place")
+		c.armament.reload_left = 0.0
+		_step(hands, c)
+		_same(_mag(hands, 0), home, "reload %d ends home" % round)
+
+
+func test_skin_only_switched_mid_carry_keeps_the_carry_and_the_left_arm() -> void:
+	var hands := _hands([&"pistol"])
+	var c := _character(&"pistol")
+	_step(hands, c)
+	var home := _mag_home(hands, 0)
+	_step(hands, c)
+	_into_carry(hands, c)
+	var before := _mag(hands, 0)
+	hands.skin_arms = true
+	_into_carry(hands, c)
+	_same(_mag(hands, 0), before, "the same place in the hand")
+	assert_true(_mesh(hands, ArmsView.LEFT_ARM).visible, "the left arm shows through the reload")
+	assert_false(_mesh(hands, "GloveKit_L").visible, "no glove kit in skin only")
+	c.armament.reload_left = 0.0
+	_step(hands, c)
+	_same(_mag(hands, 0), home, "home after")
+	assert_false(_mesh(hands, ArmsView.LEFT_ARM).visible, "one-handed again")
+	assert_false(_mesh(hands, "Nails_L").visible, "and no left nails either")
+	hands.skin_arms = false
+	assert_false(_mesh(hands, ArmsView.LEFT_ARM).visible, "gloves back: the left arm stays hidden")
+
+
+func test_a_red_laser_fitted_does_not_break_the_reload_or_the_carry() -> void:
+	var loadout: Array[ReplicaConfig] = [ReplicaStats.load_replica(&"aeg")]
+	var hands := ReplicaView.new()
+	add_child_autofree(hands)
+	var parts: Array[Dictionary] = [{&"laser": &"redLaser", ReplicaParts.GRIP_SLOT: &"angled"}]
+	hands.setup(cfg, loadout, BoxWorld.new(), [], false, parts)
+	var c := _character(&"aeg")
+	_step(hands, c)
+	var home := _mag_home(hands, 0)
+	_step(hands, c)
+	_into_carry(hands, c)
+	assert_true(hands._arms.reloading())
+	assert_gt(_mag(hands, 0).origin.distance_to(home.origin), 0.01, "carried")
+	c.armament.reload_left = 0.0
+	_step(hands, c)
+	_same(_mag(hands, 0), home, "home")
+	assert_eq(_anim(hands).assigned_animation, &"aeg_grip_angled_Hold")
+
+
+func test_both_dev_switches_are_saved_and_read_back_together() -> void:
+	var d := DevSettings.new()
+	d.lasers = true
+	d.skin_arms = true
+	var again := DevSettings.new()
+	again.from_dict(d.to_dict())
+	assert_true(again.lasers, "lasers kept")
+	assert_true(again.skin_arms, "skin only kept")
+	var only_skin := DevSettings.new()
+	only_skin.from_dict({"skin_arms": true})
+	assert_true(only_skin.skin_arms)
+	assert_false(only_skin.lasers, "a save with one switch leaves the other off")
+	assert_true(again.cheats().any(), "lasers is still a cheat")
+	var skin := DevSettings.new()
+	skin.skin_arms = true
+	assert_false(skin.cheats().any(), "skin only alone is not")
+
+
+func test_an_inspect_after_a_reload_starts_with_the_magazine_home() -> void:
+	var hands := _hands([&"aeg"])
+	var c := _character(&"aeg")
+	_step(hands, c)
+	var home := _mag_home(hands, 0)
+	_step(hands, c)
+	_into_carry(hands, c)
+	c.armament.reload_left = 0.0
+	_step(hands, c)
+	hands.inspect()
+	_step(hands, c)
+	var held: ReplicaView.Held = hands._held[0]
+	var anim := held.anim
+	assert_true(hands.inspecting(), "the inspect runs")
+	assert_eq(anim.assigned_animation, ReplicaView.INSPECT_CLIP, "the replica plays its inspect clip")
+	assert_false(hands._arms.reloading())
+	anim.seek(0.0, true)
+	_same(held.carry.in_root(held.root), home, "the magazine home at the inspect's start")
+	# A reload cutting the inspect short, then the carry again: the magazine still goes home after.
+	_into_carry(hands, c)
+	assert_true(hands._arms.reloading(), "a reload ends the inspect and runs")
+	c.armament.reload_left = 0.0
+	_step(hands, c)
+	_same(held.carry.in_root(held.root), home, "home after the second reload")
