@@ -176,6 +176,14 @@ straight up, the elbow nearly straight, the wrist in line and the hand open, rai
 keeps its keys (`tests/unit/test_hit_call_arm.gd` checks the arm). Run it
 on the current figure and splice HitCall,WalkOff (`call.py <figure.glb> donor.glb`, then `splice.mjs` as above).
 
+The holstered sprint's arms (BP8, William: "too exaggerated") are re-made the same way by `gait/pump.py`:
+Holster_Sprint's arms swing from Holster's hanging arm about the chest's side axis (`SWING_FRONT`, `SWING_BACK`),
+turned in a little (`TURN_IN`), the elbows held about a right angle (`BEND`, `BEND_SWING`), each in step with the old
+clip's swing; the fists keep their mean and the spine, neck and head keep `TURN_SHARE` of their turn. Run it on the
+current figure (`pump.py <figure.glb> donor.glb`), splice Holster_Sprint into human.glb and robot.glb, re-bake the hit
+fit (the sprint row) and check with `tests/unit/test_holster_sprint_arms.gd`; film it with `tools/gait_pictures.gd`
+(`sprint_away`, `run_away`). The shoulder weights (33fa48b) are untouched.
+
 ## How the hands hold the replicas (bot13)
 
 - The right fist sits low and turned 40 degrees on the AEG grip (`RIFLE_SEAT`), so the web is on the backstrap, the

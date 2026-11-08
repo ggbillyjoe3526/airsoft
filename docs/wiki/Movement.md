@@ -44,7 +44,8 @@ Bots vault the same low walls the same way, when it saves them a long walk round
 Press **3** to holster your replica: it drops out of view, the panel says **HOLSTERED** and the crosshair goes.
 A fresh trigger pull, aim, reload or replica key (1, 2 or the mouse wheel) draws it again. Drawing from the holster
 takes longer than a normal switch, so holster for a long run, not in a fight. Bots holster too, on long calm runs in
-their own half, and draw as soon as there's a threat.
+their own half, and draw as soon as there's a threat. Sprinting with it away, a bot runs with its elbows bent and its
+hands low and close in, swinging easily opposite its legs.
 
 Other players and bots wear whatever isn't in their hands: a pistol sits in the holster on the right hip and a rifle
 rests on the backpack. That's true while holstered, and also for the replica they aren't using.
