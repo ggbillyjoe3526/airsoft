@@ -37,7 +37,7 @@ PEAK_CAP_DB = -1.0
 PLACEHOLDERS = {}
 # Cues still synthesised, nothing reused yet, and what to record for each.
 STILL_SYNTH = {
-    "ambience_* and the woods at night": "the woods at night; birds, crows, a dog, an owl, a creaking tree",
+    "ambience_*": "birds, crows, a dog, an owl, a creaking tree",
 }
 LIMIT_DB = 6.0
 
@@ -486,8 +486,8 @@ def build(folder):
 
     # Placeholders for the sounds not recorded yet (owner, 2026-11-03: "reuse any sounds where possible but label them
     # placeholder"), each edited to fit: BBs on concrete, the first knock on wood higher; on earth, a BB on cloth
-    # lower; in leaves, the BBs' rattle; a steel skip run into, the stacked shelf far lower. (The flag rope's is the pen
-    # click, in the second batch below.)
+    # lower; in leaves, the BBs' rattle. (The steel skip's stand-in, the stacked shelf far lower, gave way to his metal
+    # bang of 2026-11-08, below with the props.)
     put("impact_concrete", [onset_slice(w, 0.05, 20) for w in variants(wood[:5], 5, 1.25)], -32.1,
         "a BB hitting concrete or brick")
     cloth = pick(folder, [("BB_fabric.wav", [0, 1, 3])], 0.15, 0.4)
@@ -495,15 +495,14 @@ def build(folder):
     rattle = pick(folder, [("bb_soft_rattle.wav", [1, 3, 4, 5, 6])], 0.4)
     put("impact_leaves", [onset_slice(r, 0.1, 40) for r in variants(rattle, 5)], -28.4,
         "a BB going through leaves and a bush")
-    stack = pick(folder, [("Knock into stacked metal shelf.wav", None)], 0.6)
-    put("prop_steel", [onset_slice(resample(s, 0.6), 0.5, 150) for s in variants(stack, 3)], -15.6,
-        "running into a steel skip or container")
 
     # The owner's steps (second and third batches, 2026-11-04). His steps on a solid floor ("not concrete but close")
-    # are concrete's run, sprint and landing, and stand in for wood's a little lower. Gravel, grass, leaves and metal
-    # are his own: walked as the run, run (or the walk's later takes) as the sprint, and jumped onto (grass); the
-    # landings he hasn't recorded are the steps lower. Earth stands in from gravel, softened. His metal and running
-    # gravel never fall quiet between steps, so they are cut where each step starts.
+    # are concrete's run, sprint and landing. Gravel, grass, leaves and metal are his own: walked as the run, run (or
+    # the walk's later takes) as the sprint, and jumped onto (grass); the landings he hasn't recorded are the steps
+    # lower. Earth stands in from gravel, softened. His metal and running gravel never fall quiet between steps, so
+    # they are cut where each step starts. Wood is his own since his batch of 2026-11-08: walking, running and
+    # jumping on a wooden floor, the walk and the run cut where each step starts (the walk's creaks between steps, the
+    # run's steps 0.25 s apart), the jumps as takes.
     def steps(name, longest, which=None):
         cuts = pick(folder, [(name, which)], longest + 0.2, 0.3)
         return [shape(tight(t, longest).copy(), 0.3) for t in cuts if len(t) > int(0.06 * RATE)]
@@ -527,9 +526,9 @@ def build(folder):
     put("step_concrete_run", variants(steady(floor_walk, 5), 5), -22.4)
     put("step_concrete_sprint", variants(steady(floor_run, 5), 5), -21.0)
     put("step_concrete_land", variants(steady(jumps, 5), 5), -17.9)
-    put("step_wood_run", variants(steady(steps("Walking.wav", 0.22), 5), 5, 0.9), -20.2, "footsteps on a wooden floor")
-    put("step_wood_sprint", variants(steady(floor_run, 5, 5), 5, 0.9), -19.7, "running on a wooden floor")
-    put("step_wood_land", variants(steady(jumps, 5), 5, 0.88), -17.9, "landing a jump on a wooden floor")
+    put("step_wood_run", variants(steady(run_together("walking_wood.wav", 0.22, 20.0, 0.8), 5), 5), -20.2)
+    put("step_wood_sprint", variants(steady(run_together("running_wood.wav", 0.22, 20.0, 0.2), 5), 5), -19.7)
+    put("step_wood_land", variants(steady(steps("jumping_wood.wav", 0.35), 5), 5), -17.9)
     put("step_gravel_run", variants(steady(gravel, 5), 5), -21.2)
     put("step_gravel_sprint", variants(steady(gravel_run, 5), 5), -20.3)
     put("step_gravel_land", variants(steady(gravel_run, 5, 10), 5, 0.85), -17.7, "landing a jump on gravel")
@@ -600,6 +599,11 @@ def build(folder):
     put("prop_rattle", variants(pick(folder, [("Knock into stacked metal shelf.wav", None)], 0.6), 3), -29.8)
     put("prop_plastic", variants(pick(folder, [("Knock plastic crate.wav", None)], 0.5), 3), -21.2)
     put("prop_wood", variants(pick(folder, [("Knock wooden surface.wav", None)], 0.5), 3), -23.0)
+    # A steel skip or container run into: his metal bang (batch of 2026-11-08), each of his two bangs from where it
+    # strikes, 0.9 s of its ring faded out (the first starts with the file, so it is found by its rise, not as a take),
+    # the first again a little lower as the third.
+    bang = Source.get(folder, "metal_bang.wav").a
+    put("prop_steel", variants(from_onsets(bang, onsets(bang, 10.0, 2.0), 0.9, 0.5), 3), -15.6)
     # The doors: his first takes and two of his second (2026-11-04, "a different sound to give doors a variety"), the
     # second's opens the quieter, brighter takes.
     put("door_open", variants(pick(folder, [("door_open.wav", None)], 1.2, 0.2), 3)
@@ -651,8 +655,8 @@ def loops(folder):
     """The owner's ambience recordings as beds (2026-11-04), each `loops/<id>.wav` stored at its peak and with the
     peak (in loops/peaks.json) that brings it to an RMS of 1, as the browser game's beds were: an indoor room for
     Depot, his two outdoor recordings run together for The Street by day ("for choice/variety"), and his street at
-    night for The Street at night and, until he records the woods at night, Woodland's night; his woods for Woodland
-    by day."""
+    night for The Street at night; his woods for Woodland by day, and his woods at night (batch of 2026-11-08) for
+    Woodland's night."""
     def take(name, start, seconds):
         a = high_pass(read(os.path.join(folder, name)), 40.0)
         return a[int(start * RATE):int((start + seconds) * RATE)]
@@ -662,6 +666,8 @@ def loops(folder):
         "street_night": bed([take("street_night.wav", 3.0, 62.0)]),
         # His woods (third batch), the wind's rumble on the phone under 150 Hz taken out: Woodland by day.
         "woods_day": bed([high_pass(high_pass(take("woodlands.wav", 1.0, 58.0), 150.0), 150.0)]),
+        # His woods at night: no wind rumble to take out, so only the beds' 40 Hz high-pass.
+        "woods_night": bed([take("night_forest.wav", 3.0, 62.0)]),
     }
 
 

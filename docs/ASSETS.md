@@ -76,7 +76,7 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
   Sniper Rifle and the Cyber Pistol from the pistol's), one dry click for every replica (the pistol's, owner
   2026-11-05), the pistol's slide locking back, BBs on metal, wood, glass, plastic, cardboard and players, the gear,
   the props, the doors, the whistle, the shot timer and the ping. Since AU3 they also stand in, labelled placeholders,
-  for cues until he records them (25 at AU3, 13 since AU8; the script's `--placeholders` lists them), and the
+  for cues until he records them (25 at AU3, 13 at AU8, 9 since AU9; the script's `--placeholders` lists them), and the
   whistle is a pea whistle the script synthesises (his takes set aside).
   His second batch (AU5, 2026-11-04, 30 recordings: footsteps on a solid floor, concrete, gravel and leaves,
   clothes and keys, a holster, a strap swung up, a vault, a BB on goggles, a tap, a steel target, glass, a switch, a
@@ -86,6 +86,8 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
   His third (AU6, 2026-11-04, 11 recordings: a pea whistle, steps on metal, grass and gravel, jumps on grass, a rope,
   a flashbang, a spring rifle's shot and bolt, woods by day) adds those, the toothbrush becomes the Cyber Pistol's
   motor, and his woods Woodland's day bed.
+  His batch of 2026-11-08 (AU9, 5 recordings: walking, running and jumping on a wooden floor, a metal bin banged,
+  woods at night) gives the steps on wood, the steel skip run into and Woodland's night bed.
   Owner-made for the game; same licence as the code. To re-cut: `python3 tools/cut_recordings.py <raw folder>`,
   then `godot --headless --path . --import`.
 - **Sounds:** the rest of the sounds and 4 ambience loops are still rendered from the browser game's synthesis
