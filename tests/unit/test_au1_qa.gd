@@ -337,8 +337,8 @@ func _flash_event(at: Vector3) -> void:
 	bang.position = at
 
 
-## Every playing field voice's cap against its cue: a shot, its power part and the bang at their own level, the rest at
-## the field's.
+## Every playing field voice's cap against its cue: a shot, its power part, the bang and a smoke going off (BP8) at
+## their own level, the rest at the field's.
 func _check_caps(label: String) -> int:
 	var checked := 0
 	for v in audio._field:
@@ -348,7 +348,7 @@ func _check_caps(label: String) -> int:
 		var own_level := false
 		for cue: StringName in audio._streams:
 			var name := String(cue)
-			if (name.begins_with("shot_") or name.begins_with("power_") or name == "flash_bang") \
+			if (name.begins_with("shot_") or name.begins_with("power_") or name == "flash_bang" or name == "smoke_pop") \
 					and (audio._streams[cue] as Array).has(v.stream):
 				own_level = true
 		if own_level:

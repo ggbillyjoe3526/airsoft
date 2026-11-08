@@ -381,3 +381,48 @@ func test_foliage_holds_a_point_among_its_leaves() -> void:
 	assert_false(f.holds(Vector3(0.0, 1.7, 0.0)), "over its top")
 	assert_true(f.holds(Vector3(30.0, 0.5, 0.0)))
 	assert_false(Foliage.new().holds(Vector3.ZERO))
+
+
+# --- 7: louder bombs, and the flash's echo ---
+
+
+## A cue file's samples, read from its source WAV (as tools/cut_recordings.py writes them).
+func _cue_samples(cue: String, n: int) -> PackedFloat32Array:
+	var bytes := FileAccess.get_file_as_bytes("%s%s_%d.wav" % [SoundConfig.CUE_DIR, cue, n])
+	var at := 12
+	while at + 8 <= bytes.size() and bytes.slice(at, at + 4).get_string_from_ascii() != "data":
+		at += 8 + bytes.decode_u32(at + 4)
+	var out := PackedFloat32Array()
+	out.resize((bytes.size() - at - 8) / 2)
+	for i in out.size():
+		out[i] = bytes.decode_s16(at + 8 + 2 * i) / 32768.0
+	return out
+
+
+## The loudest 50 ms's level (dB, RMS) of `x` from `from` s to `to` s.
+func _loudest_db(x: PackedFloat32Array, from: float, to: float) -> float:
+	var window := int(0.05 * 44100.0)
+	var best := 0.0
+	var i := int(from * 44100.0)
+	while i + window <= mini(x.size(), int(to * 44100.0)):
+		var sum := 0.0
+		for j in window:
+			sum += x[i + j] * x[i + j]
+		best = maxf(best, sum / window)
+		i += window / 2
+	return 10.0 * log(maxf(best, 1e-12)) / log(10.0)
+
+
+func test_both_bombs_go_off_louder_and_the_flash_rings_out() -> void:
+	var cfg := SoundConfig.new()
+	assert_almost_eq(linear_to_db(cfg.smoke_pop_gain) - linear_to_db(0.8), 6.0, 0.1, "the smoke 6 dB louder")
+	assert_almost_eq(linear_to_db(cfg.bang_gain) - linear_to_db(1.4), 4.0, 0.2, "the bang 4 dB louder")
+	assert_true(SimAudio.OWN_CAP_CUES.has(&"smoke_pop"), "a smoke's raise is heard up close too")
+	for n in 3:
+		var x := _cue_samples("flash_bang", n + 1)
+		assert_gt(x.size() / 44100.0, 2.0, "flash_bang_%d rings for 2 s" % (n + 1))
+		var pop := _loudest_db(x, 0.0, 0.1)
+		var echo := _loudest_db(x, 0.6, 0.8) - pop
+		assert_between(echo, -32.0, -12.0, "flash_bang_%d still echoing 0.6 s on: %.1f dB" % [n + 1, echo])
+		assert_lt(_loudest_db(x, 1.0, 1.2) - pop, echo, "and dying away")
+		assert_lt(absf(x[x.size() - 1]), 0.001, "faded out, never cut off")
