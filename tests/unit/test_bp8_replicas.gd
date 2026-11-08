@@ -277,6 +277,65 @@ func test_at_the_hip_a_scopes_glass_is_plain_glass_and_aimed_it_is_the_sight() -
 	hands._glass.update(null, 0.0)
 
 
+func _hip_scope() -> ReplicaView:
+	var hands := _hands(_kit(AEG, {&"optic": SCOPE}))
+	hands._show(0)
+	(hands._held[0] as ReplicaView.Held).root.position = Vector3(0.13, -0.16, -0.32)
+	return hands
+
+
+func test_the_hip_glass_draws_without_the_dearer_effects_and_aimed_keeps_them() -> void:
+	var field := Environment.new()
+	field.ssao_enabled = true
+	field.ssil_enabled = true
+	field.glow_enabled = true
+	field.volumetric_fog_enabled = true
+	field.ssr_enabled = true
+	field.fog_enabled = true
+	var world_env := WorldEnvironment.new()
+	world_env.environment = field
+	add_child_autofree(world_env)
+	var hands := _hip_scope()
+	var held: ReplicaView.Held = hands._held[0]
+	var glass := hands._glass
+	glass.update(held.window, 0.0)
+	var hip := glass._camera.environment
+	assert_not_null(hip)
+	assert_eq(hip, glass._env_hip, "the hip glass's own environment")
+	for on: StringName in [&"ssao_enabled", &"ssil_enabled", &"glow_enabled", &"volumetric_fog_enabled",
+			&"ssr_enabled", &"sdfgi_enabled"]:
+		assert_false(hip.get(on), "no %s at the hip" % on)
+	assert_true(hip.fog_enabled, "the depth fog (no pass of its own) stays, so distance hazes as round it")
+	held.root.position = Vector3(0.0, 0.0, ViewModelConfig.new().aim_forward[&"aeg"]) - held.rear_sight
+	glass.update(held.window, 1.0)
+	var aimed := glass._camera.environment
+	assert_eq(aimed, glass._env_aimed, "aimed: the field's own effects, as before")
+	assert_true(aimed.ssao_enabled and aimed.glow_enabled and aimed.volumetric_fog_enabled)
+	glass.update(null, 0.0)
+
+
+func test_on_low_the_hip_glass_is_a_still_tint_and_no_camera_draws() -> void:
+	var hands := _hip_scope()
+	var held: ReplicaView.Held = hands._held[0]
+	var glass := hands._glass
+	var table := GraphicsTable.shared()
+	glass._follow(table.preset(&"low"))
+	glass.update(held.window, 0.0)
+	assert_true(held.window.disc.visible, "the glass still shows")
+	assert_eq(held.window.disc.material_override, held.window.hip_material)
+	assert_false(held.window.hip_material.get_shader_parameter(&"see_through"), "a still tint")
+	assert_ne(glass._port.render_target_update_mode, SubViewport.UPDATE_ALWAYS, "no camera draws on Low")
+	held.root.position = Vector3(0.0, 0.0, ViewModelConfig.new().aim_forward[&"aeg"]) - held.rear_sight
+	glass.update(held.window, 1.0)
+	assert_eq(glass._port.render_target_update_mode, SubViewport.UPDATE_ALWAYS, "aimed on Low: the sight as ever")
+	held.root.position = Vector3(0.13, -0.16, -0.32)
+	glass._follow(table.preset(&"medium"))
+	glass.update(held.window, 0.0)
+	assert_true(held.window.hip_material.get_shader_parameter(&"see_through"), "from Medium: the field behind it")
+	assert_eq(glass._port.render_target_update_mode, SubViewport.UPDATE_ALWAYS)
+	glass.update(null, 0.0)
+
+
 func test_neither_glass_copies_the_screen_and_both_are_prewarmed() -> void:
 	# Performance (BP8): no screen copy (hint_screen_texture) for any optic's glass.
 	assert_false(OpticGlass.SHADER.code.contains("hint_screen_texture"), "the sight's glass takes no screen copy")

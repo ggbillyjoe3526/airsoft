@@ -1554,8 +1554,9 @@ models show without anything else changing. The smoke and flash icons now do the
 - [ ] **Inspect.** Press Y with each replica: the muzzle points to the left and the left side faces you.
 - [ ] **Bombs.** Press 4: the smoke comes into your hand and stays there. Click: it is thrown. Take another, hold the
   button: your arm stays back, pin out, until you let go. Same with 5. Bots still throw theirs on their own.
-- [ ] **Scope glass.** At the hip, the 2x Scope's and the Variable Scope's glass looks like tinted glass showing what is
-  ahead, not a dark disc; aim (right mouse) and the zoomed view and reticle show.
+- [ ] **Scope glass.** At the hip, the 2x Scope's and the Variable Scope's glass is clear, lightly tinted glass showing
+  what is behind it, lined up with the view round it, while turning and walking; aim (right mouse) and the zoomed view
+  and reticle show. On Low graphics the hip glass is a still tinted glass instead: check Low's frame rate with a scope.
 - [ ] **BBs from the muzzle.** Aim down the GBB Pistol and the Cyber Pistol and fire while turning and strafing: no BB
   shows between your eye and the pistol; each first shows at the muzzle.
 - [ ] **Variable Scope.** Fit it and inspect: no rails, fibre sight or rear sight on top, and one small dial.

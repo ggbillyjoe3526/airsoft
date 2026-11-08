@@ -7,8 +7,10 @@ extends Node
 ## nothing dark round it. The second camera draws only while a sight is raised, into a small square picture, or while a
 ## scope is held at the hip (BP8, the owner): then its disc is clear glass you see through, the second camera drawing
 ## the field behind it at the main view's own scale, lined up with the view round it, lightly tinted with a reflection
-## and no reticle (its own material, optic_glass_hip.gdshader). Neither shader copies the screen. A red dot's glass at
-## the hip is its model's own, clear.
+## and no reticle (its own material, optic_glass_hip.gdshader), drawn without the dearer effects (no ambient occlusion,
+## bounce light, reflections, glow or volumetric fog); below `hip_glass_camera_from`'s Mesh detail (Low) the hip glass
+## is a still tint and no camera draws. Neither shader copies the screen. A red dot's glass at the hip is its model's
+## own, clear.
 ## Children: the picture and its camera. The picture
 ## follows the graphics' render scale and edge smoothing (GraphicsApply's `applied`), and copies the field's environment
 ## again after a change, so its ambient occlusion matches the view round it.
@@ -49,6 +51,11 @@ var _side: int = 0
 var _env_ready: bool = false
 ## Whether the glass's camera draws a scope's hip glass (not a raised sight's view).
 var _at_hip: bool = false
+## Whether a scope's hip glass shows the field behind it (the graphics' Mesh detail at hip_glass_camera_from or up).
+var _hip_camera: bool = true
+## The field's environment for a raised sight's view, and the cheaper one for the hip glass.
+var _env_aimed: Environment = null
+var _env_hip: Environment = null
 
 
 ## Builds the picture and its camera for the eyes `eyes`, sized as `cfg` says.
@@ -93,6 +100,7 @@ func _follow(values: GraphicsQuality) -> void:
 	if _port == null:
 		return
 	GraphicsApply.apply_picture(values, _port)
+	_hip_camera = values.mesh_detail >= _cfg.hip_glass_camera_from
 	_env_ready = false
 
 
@@ -120,6 +128,7 @@ func add_window(model: Node3D, optic: Node3D, key: StringName, sight_line: Vecto
 		w.hip_material.set_shader_parameter(&"z_clip_scale", _cfg.depth_scale)
 		w.hip_material.set_shader_parameter(&"hip_tint", _cfg.hip_glass_tint)
 		w.hip_material.set_shader_parameter(&"hip_shine", _cfg.hip_glass_shine)
+		w.hip_material.set_shader_parameter(&"still_colour", _cfg.hip_glass_still)
 	w.disc = MeshInstance3D.new()
 	w.disc.name = "Glass"
 	w.disc.mesh = quad
@@ -147,9 +156,18 @@ func update(w: Sight, raise: float) -> void:
 		return
 	var m := w.hip_material if hip else w.material
 	_wear(w, m)
+	if hip:
+		m.set_shader_parameter(&"see_through", _hip_camera)
+		if not _hip_camera:
+			_stop_drawing()
+			w.disc.visible = true
+			return
 	_at_hip = hip
 	if not _env_ready:
 		_ready_environment()
+	var env := _env_hip if hip else _env_aimed
+	if _camera.environment != env:
+		_camera.environment = env
 	var screen := _eyes.get_viewport().get_visible_rect().size
 	_fit_side(screen.y)
 	if _port.render_target_update_mode != SubViewport.UPDATE_ALWAYS:
@@ -231,7 +249,16 @@ func _ready_environment() -> void:
 	if world == null or world.environment == null:
 		return
 	_env_ready = true
-	var env := world.environment.duplicate() as Environment
-	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
-	env.tonemap_exposure = 1.0
-	_camera.environment = env
+	_env_aimed = world.environment.duplicate() as Environment
+	_env_aimed.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	_env_aimed.tonemap_exposure = 1.0
+	# The hip glass, a small lightly tinted picture, leaves out the screen-space and volume passes; the depth fog (no
+	# pass of its own) stays, so distance hazes as round the glass.
+	_env_hip = _env_aimed.duplicate() as Environment
+	_env_hip.ssao_enabled = false
+	_env_hip.ssil_enabled = false
+	_env_hip.sdfgi_enabled = false
+	_env_hip.ssr_enabled = false
+	_env_hip.glow_enabled = false
+	_env_hip.volumetric_fog_enabled = false
+	_camera.environment = _env_hip if _at_hip else _env_aimed

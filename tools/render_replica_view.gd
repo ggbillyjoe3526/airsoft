@@ -9,7 +9,8 @@ extends SceneTree
 ## `inspect` the share of an inspect (-1: none); `bb seconds` draws one BB that long after the shot (none if left out),
 ## fired `turn` degrees left of the view (a turn the view made since the tick: `:<bb seconds>:<turn>`).
 ## A shot named `part_<name>` instead draws one part alone from a parts file, close up: `part_<name>:<file>:<node>:
-## <x>,<y>,<z>:<x>,<y>,<z>` (camera place and the point it looks at, in the part's space, m). Dev only: tools/ never ships.
+## <x>,<y>,<z>:<x>,<y>,<z>` (camera place and the point it looks at, in the part's space, m). A shot named `*_low` draws
+## the optic glass as the Low preset does (the field itself stays High). Dev only: tools/ never ships.
 
 const SIZE := Vector2i(1600, 900)
 const QUALITY := 0.92
@@ -86,6 +87,8 @@ func _run() -> void:
 		var hands := ReplicaView.new()
 		camera.add_child(hands)
 		hands.setup(play.viewmodel, kit.replicas, level.query(), kit.paints, false, kit.parts, play.view, camera)
+		if f[0].ends_with("_low"):
+			hands._glass._follow(GraphicsTable.shared().preset(&"low"))
 		var aim := f[3].to_float()
 		var r := c.armament.replica()
 		camera.fov = play.view.vertical_fov(lerpf(1.0, FirstPersonView.aimed_zoom(r, play.view), aim))

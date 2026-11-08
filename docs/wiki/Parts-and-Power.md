@@ -31,7 +31,7 @@ the springs a painted rifle spring in each spring's colour.
 An optic on the top rail. With one fitted the iron sights come off completely, so nothing stands in its way, and
 aiming looks through it. The red dot is a compact sight on a low riser: a lit dot on clear glass, with the view open
 round it. The 2x scope is a magnifier on a low hinged mount; it magnifies only inside its glass: the view round it
-stays as it is, with nothing dark round the edge. At the hip a scope's glass is plain glass you see through; the
+stays as it is, with nothing dark round the edge. At the hip a scope's glass is clear glass you see through (on Low graphics, tinted glass); the
 magnified view and its reticle show only while you aim. The Variable Scope is a plain compact prism scope, one small
 dial on top, with a zoom: aimed
 through it, the mouse wheel (Zoom in and Zoom out in Settings › Controls) turns its zoom from 2x to 6x a step at a

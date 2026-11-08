@@ -1,7 +1,8 @@
 // A scope's glass in your hands at the hip (OpticGlass, BP8, the owner): clear glass you see through. The glass's camera
 // draws the field behind the disc at the main view's own scale (no magnification, your replica left out), so the lens
 // shows what really lies behind it, lined up with the view round it; lightly tinted, with a soft reflection across it
-// and the sheen at its edge, so it reads as glass. No reticle, and no screen copy (as optic_glass.gdshader).
+// and the sheen at its edge, so it reads as glass. No reticle, and no screen copy (as optic_glass.gdshader). On Low
+// (`see_through` off) no camera draws: the glass is a still tint, `still_colour`, under the same reflection.
 shader_type spatial;
 render_mode unshaded, cull_back, depth_draw_never, shadows_disabled, fog_disabled;
 
@@ -11,6 +12,9 @@ uniform vec2 centre_uv = vec2(0.5);
 uniform float span = 0.25;
 // The screen's width over its height.
 uniform float aspect = 1.7778;
+// Whether the glass's camera draws the field behind it; if not, the glass's still colour.
+uniform bool see_through = true;
+uniform vec3 still_colour : source_color = vec3(0.2, 0.25, 0.3);
 // The view's tint, and the reflection band's strength at its brightest.
 uniform vec3 hip_tint : source_color = vec3(0.8, 0.87, 0.92);
 uniform float hip_shine = 0.22;
@@ -38,8 +42,11 @@ void fragment() {
 	if (inside <= 0.0) {
 		discard;
 	}
-	vec2 from_centre = (SCREEN_UV - centre_uv) * vec2(aspect, 1.0);
-	vec3 behind = texture(glass, vec2(0.5) + from_centre / span).rgb;
+	vec3 behind = still_colour;
+	if (see_through) {
+		vec2 from_centre = (SCREEN_UV - centre_uv) * vec2(aspect, 1.0);
+		behind = texture(glass, vec2(0.5) + from_centre / span).rgb;
+	}
 	float along = (UV.x + UV.y - BAND_AT) * BAND_SHARP;
 	vec3 col = mix(behind * hip_tint, sheen_colour, exp(-along * along) * hip_shine);
 	float rim = clamp((r - (1.0 - sheen_px * edge)) / (sheen_px * edge), 0.0, 1.0) * sheen;
