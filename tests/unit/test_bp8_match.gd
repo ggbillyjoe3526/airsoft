@@ -182,3 +182,120 @@ func test_the_gauge_counts_the_hold_down() -> void:
 	assert_eq(gauge.label_text(), "HOLD 4")
 	gauge.set_hold(-1)
 	assert_eq(gauge.label_text(), "FLAG")
+
+
+# --- 22: a still view once the round is over ---
+
+
+func test_the_view_holds_still_once_the_round_is_over_unless_it_is_yours_in_play() -> void:
+	var none: Array[ReplicaConfig] = []
+	var you := Character.new(0, 0, Vector3.ZERO, 0.0, none)
+	var bot := Character.new(1, 0, Vector3.ZERO, 0.0, none)
+	var rs := RoundState.new()
+	assert_false(FirstPersonView.holds_still(rs, bot, you), "live: the view follows whoever you watch")
+	rs.phase = RoundState.Phase.OVER
+	assert_true(FirstPersonView.holds_still(rs, bot, you), "over: the bot you watch glances about, the view doesn't")
+	assert_false(FirstPersonView.holds_still(rs, you, you), "your own view, in play, is still yours to turn")
+	you.status = Character.Status.WALKING_OFF
+	assert_true(FirstPersonView.holds_still(rs, you, you), "your walk-off doesn't turn the view")
+	rs.phase = RoundState.Phase.MATCH_OVER
+	assert_true(FirstPersonView.holds_still(rs, bot, you))
+
+
+# --- 20: Attack / Defend by default ---
+
+
+func test_attack_defend_is_the_default_mode() -> void:
+	assert_eq(MatchPicks.new().mode, MatchOptions.MODE_ATTACK_DEFEND)
+	assert_eq(MatchOptions.DEFAULT_MODE, MatchOptions.MODE_ATTACK_DEFEND)
+
+
+# --- 24: SIMULATE a skipped round ---
+
+
+func _simulated(alpha: int, beta: int, seed_value: int, flag: float = 0.0) -> Array:
+	var none: Array[ReplicaConfig] = []
+	var cs: Array[Character] = []
+	for i in alpha + beta:
+		cs.append(Character.new(i, 0 if i < alpha else 1, Vector3.ZERO, 0.0, none))
+	var rs := RoundState.new()
+	if flag > 0.0:
+		rs.mode = RoundState.Mode.ATTACK_DEFEND
+		rs.attackers = 0
+		rs.pole = Vector3.ZERO
+		rs.flags[0].progress = flag
+	var events := SimEvents.new()
+	var won := Round.simulate(rs, cs, tuning, events, Seeds.stream(seed_value))
+	return [won, rs, events]
+
+
+func test_simulate_decides_the_round_at_once_by_a_seeded_roll_weighted_by_who_is_left() -> void:
+	var first: Array = _simulated(3, 2, 7)
+	var rs: RoundState = first[1]
+	var events: SimEvents = first[2]
+	assert_ne(first[0], -1)
+	assert_false(rs.is_live(), "decided")
+	assert_eq(rs.reason, GameEvent.RoundEnd.SIMULATED)
+	assert_eq(rs.score[first[0]], 1)
+	assert_eq(events.count, 1)
+	assert_eq(events.items[0].kind, GameEvent.Kind.ROUND_OVER)
+	assert_eq(_simulated(3, 2, 7)[0], first[0], "the same seed, the same result")
+	var alpha_wins := 0
+	var flag_wins := 0
+	for i in 400:
+		alpha_wins += 1 if _simulated(4, 2, i)[0] == 0 else 0
+		flag_wins += 1 if _simulated(2, 2, i, 0.9)[0] == 0 else 0
+	# 4 v 2 squared: 16 to 4, Alpha wins about 80 %; level with the flag 90 % up, 2.8 to 1, about 74 %
+	assert_between(alpha_wins, 280, 360, "a man up counts for more than his share")
+	assert_between(flag_wins, 255, 335, "a flag going up favours the attackers")
+	assert_eq(_simulated(3, 0, 1)[0], 0, "nobody left never wins it")
+	var over: Array = _simulated(3, 2, 7)
+	assert_eq(Round.simulate(over[1], [] as Array[Character], tuning, SimEvents.new(), Seeds.stream(1)), -1,
+			"a round already over isn't simulated again")
+	assert_ne(Seeds.simulate_seed(5, 1, 2), Seeds.simulate_seed(5, 1, 3), "each round its own roll")
+
+
+func test_simulate_skipped_rounds_is_a_gameplay_setting_off_by_default() -> void:
+	var s := Settings.new()
+	assert_false(s.simulate_skips)
+	s.simulate_skips = true
+	var back := Settings.new()
+	back.from_dict(s.to_dict())
+	assert_true(back.simulate_skips)
+	var screen := SettingsScreen.new()
+	screen.settings = Settings.new()
+	screen.save_path = SETTINGS
+	add_child_autofree(screen)
+	screen.open()
+	assert_eq(screen._simulate_skips.selected(), 0, "Off")
+	screen._simulate_skips.button(1).pressed.emit()
+	assert_true(screen.settings.simulate_skips)
+	assert_eq(screen._simulate_skips.accessibility_name, tr("SETTINGS_SIMULATE_SKIPS"))
+
+
+func test_simulate_on_a_skip_ends_the_round_at_once_and_only_with_the_setting_on() -> void:
+	var session := PlaySession.new()
+	session.bots_active = false
+	session.difficulty = &"easy"
+	session.settings = Settings.new()
+	add_child_autofree(session)
+	await wait_physics_frames(2)
+	session.player.status = Character.Status.OUT
+	session.start_skip()
+	assert_true(session.skipping())
+	assert_false(session.simulate_offered(), "off by default: the skip only fast-forwards")
+	session.simulate_skip()
+	assert_true(session.skipping(), "nothing simulated with the setting off")
+	session._stop_skip()
+	session.state.round_state.hold_next = false
+	session.settings.simulate_skips = true
+	session.start_skip()
+	assert_true(session.simulate_offered(), "SIMULATE beside the skip")
+	session._skip_simulate.button().pressed.emit()
+	var rs := session.state.round_state
+	assert_false(session.skipping(), "the skip is over")
+	assert_false(rs.is_live(), "decided at once")
+	assert_eq(rs.reason, GameEvent.RoundEnd.SIMULATED)
+	assert_true(rs.hold_next, "the round's table waits for a click, as after any skip")
+	assert_false(session._skip_simulate.visible)
+	assert_true(session.hud().visible)

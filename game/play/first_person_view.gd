@@ -10,6 +10,7 @@ extends Node3D
 ## easing runs on rendered frames; the rules stay on the tick. At night the weapon torch of whoever the view is through
 ## is a real spot from the rail while lit (WL7, `set_torch`): with a light in your kit, on Medium and up, one of the
 ## preset's real lights, casting shadows on High and Ultra with Sun shadows on; else TorchBeams draws it as a haze.
+## Once a round is over the view holds still where it was (`holds_still`, BP8), unless it is your own in play.
 
 ## Recoil on screen follows the simulation's at this rate (1/s of simulation time), so a 60 Hz kick reads smoothly at
 ## any frame rate and game speed.
@@ -126,6 +127,13 @@ func update(c: Character, input: PlayerInput, fraction: float, delta: float, aim
 	detail_zoom = maxf(raised, 1.0) if aim > 0.0 else 1.0
 	view_zoom_target = target_view_zoom(r, _view, aim)
 	camera.fov = _view.vertical_fov(zoom)
+
+
+## Whether the view through `watched` holds still where it was this frame (BP8, owner: no sway once a round has ended):
+## the round is over (or the match) and the view isn't your own character in play, which you still turn yourself. A
+## view through someone else (a bot you watch, or your own walk-off) would otherwise follow its glances and steps.
+static func holds_still(rs: RoundState, watched: Character, player: Character) -> bool:
+	return not rs.is_live() and not (watched == player and Elimination.is_in_play(player))
 
 
 ## The view's zoom `r`'s sight eases toward at `aim` (its share raised): aimed_zoom once raised at all, 1 lowered; the

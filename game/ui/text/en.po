@@ -2166,6 +2166,15 @@ msgstr "Round %d · overtime %s"
 msgid "SETTINGS_WHAT_GOT_YOU"
 msgstr "What got you"
 
+msgid "SETTINGS_SKIPPED_ROUNDS"
+msgstr "Skipped rounds"
+
+msgid "SETTINGS_SIMULATE_SKIPS"
+msgstr "Simulate skipped rounds"
+
+msgid "SETTINGS_SIMULATE_SKIPS_NOTE"
+msgstr "On: a skip offers SIMULATE, which decides the round at once."
+
 msgid "SETTINGS_AUTO"
 msgstr "Auto"
 
@@ -2225,6 +2234,12 @@ msgstr "Settings › Graphics to pick your own"
 
 msgid "HUD_SKIPPING"
 msgstr "Skipping the round"
+
+msgid "HUD_SIMULATE"
+msgstr "Simulate"
+
+msgid "HUD_SIMULATED"
+msgstr "Simulated"
 
 msgid "PAUSE_SKIP_ROUND"
 msgstr "Skip to next round"

@@ -31,7 +31,8 @@ extends Node3D
 ## Out of a live round, a fresh press of the trigger (or the pause menu's Skip to next round) skips the rest of it (MC1,
 ## owner 2026-11-01): it is played out at once, as fast as the frame allows (PlayTuning.skip_budget_ms a rendered frame),
 ## silently and under a plain cover, never shown fast-forwarded; then the round's table shows and the next round waits
-## for a click on it (RoundState.hold_next), or the match's summary follows the last round's.
+## for a click on it (RoundState.hold_next), or the match's summary follows the last round's. With Settings › Gameplay ›
+## Simulate skipped rounds on (BP8), the cover offers SIMULATE: the rest decided at once by a roll (`simulate_skip`).
 
 signal left
 ## Practice: the Loadout was asked for (its key, or the pause menu's row); the entry screen takes `practice_spot`, frees
@@ -256,6 +257,8 @@ var _skip_said: Label = null
 var _skip_clock_shown: int = -1
 ## The bar under the line (0..100: the share of the round's clock played since the skip began), and the clock then (s).
 var _skip_bar: ProgressBar = null
+## SIMULATE above the skip line while a skip runs, with the setting on (BP8).
+var _skip_simulate: SkipSimulate = null
 var _skip_from: float = 0.0
 ## The rendered frame the skip last ticked in, and the microseconds of ticks spent in it (`_play_out`).
 var _skip_frame: int = -1
@@ -964,6 +967,9 @@ func _build_views(ui: CanvasLayer) -> void:
 	_skip_bar.offset_bottom = SKIP_BAR_GAP + SKIP_BAR_HEIGHT
 	_skip_bar.custom_minimum_size = Vector2(0.0, SKIP_BAR_HEIGHT)
 	_skip_note.add_child(_skip_bar)
+	_skip_simulate = SkipSimulate.new()
+	_skip_simulate.seat_above(_skip_note)
+	_skip_simulate.simulate_pressed.connect(simulate_skip)
 	_skip_said = Label.new()
 	_skip_said.name = "SkipSaid"
 	_skip_said.modulate = Color(1.0, 1.0, 1.0, 0.0)
@@ -1301,7 +1307,8 @@ func _process(delta: float) -> void:
 	_debug.viewer_id = watched.id
 	var aim := _aim.update(watched, _tuning.movement, delta * _pacer.rate)
 	_eyes.sim_rate = _pacer.rate
-	_eyes.update(watched, _input, fraction, delta, aim, watched == player)
+	if not FirstPersonView.holds_still(state.round_state, watched, player):
+		_eyes.update(watched, _input, fraction, delta, aim, watched == player)
 	if _eyes.detail_zoom != _figure_zoom:
 		_figure_zoom = _eyes.detail_zoom
 		_set_figure_lines()
@@ -1529,6 +1536,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		start_skip()
 		_input.hold_fire()
 		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(&"fire") and not event.is_echo() and _input.active and simulate_offered():
+		# Skipping, with SIMULATE on offer: a fresh press of the trigger presses it (BP8).
+		simulate_skip()
+		_input.hold_fire()
+		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(&"fire") and not event.is_echo() and _input.active and _hud.summary_up():
 		_start_now()
 		get_viewport().set_input_as_handled()
@@ -1663,7 +1675,27 @@ func start_skip() -> void:
 	_skip_clock_shown = -1
 	_skip_from = state.round_state.clock
 	_skip_bar.value = 0.0
+	_skip_simulate.show_for(settings.simulate_skips, KeyNames.of_action(&"fire"))
 	_show_skip_clock()
+
+
+## SIMULATE on a skip's cover (BP8): the rest of the round decided at once by a roll (Round.simulate), seeded on the
+## match and the round so a seed replays it; its end is heard and shown as a played-out skip's, and the round's table
+## waits for a click as after any skip. Only while a skip runs, with Simulate skipped rounds on.
+func simulate_skip() -> void:
+	var rs := state.round_state
+	if not _skipping or not settings.simulate_skips or not rs.is_live():
+		return
+	state.events.clear()
+	var rng := Seeds.stream(Seeds.simulate_seed(state.match_seed, state.match_number, rs.number))
+	Round.simulate(rs, state.characters, _tuning, state.events, rng)
+	_stop_skip()
+	_after_tick()
+
+
+## SIMULATE shown on the skip's cover now.
+func simulate_offered() -> bool:
+	return _skipping and _skip_simulate.visible
 
 
 func _stop_skip() -> void:
@@ -1676,6 +1708,7 @@ func _stop_skip() -> void:
 	_hud.visible = true
 	_skip_cover.visible = false
 	_skip_note.visible = false
+	_skip_simulate.show_for(false)
 
 
 ## "Skipping the round · 1:12": the round's clock as the skip plays it down, so a long one is seen to move; written

@@ -193,6 +193,33 @@ static func place_teams(rs: RoundState, characters: Array[Character], ends: Arra
 		c.spawn_yaw = s.yaw
 
 
+## Decides the live round in `rs` at once (BP8: a skipped round simulated): a roll from `rng` between the two teams,
+## each weighted by its players in play to RoundConfig.simulate_power, the attackers' by their highest flag too
+## (simulate_flag_lead); a team with nobody in play never wins it. Ends it as SIMULATED with a ROUND_OVER event, as
+## any round end; the winner, or -1 when the round wasn't live.
+static func simulate(rs: RoundState, characters: Array[Character], tuning: SimTuning, events: SimEvents,
+		rng: RandomNumberGenerator) -> int:
+	if not rs.is_live():
+		return -1
+	var in_play := PackedFloat64Array([0.0, 0.0])
+	for c in characters:
+		if Elimination.is_in_play(c) and (c.team == 0 or c.team == 1):
+			in_play[c.team] += 1.0
+	var cfg := tuning.rounds
+	var weight := PackedFloat64Array([pow(in_play[0], cfg.simulate_power), pow(in_play[1], cfg.simulate_power)])
+	if rs.mode == RoundState.Mode.ATTACK_DEFEND and rs.attackers >= 0:
+		var top := Flag.highest(rs.flags)
+		var up := rs.flags[top].progress if top >= 0 else 0.0
+		weight[rs.attackers] *= 1.0 + cfg.simulate_flag_lead * up
+	var total := weight[0] + weight[1]
+	var winner := 0 if total <= 0.0 or rng.randf() * total < weight[0] else 1
+	if total <= 0.0:
+		# nobody in play on either side: as the clock would leave it, the defenders' or a draw
+		winner = 1 - rs.attackers if rs.mode == RoundState.Mode.ATTACK_DEFEND and rs.attackers >= 0 else -1
+	_end_round(rs, winner, GameEvent.RoundEnd.SIMULATED, cfg, events)
+	return winner
+
+
 static func _end_round(rs: RoundState, winner: int, reason: GameEvent.RoundEnd, rounds: RoundConfig,
 		events: SimEvents) -> void:
 	rs.winner = winner

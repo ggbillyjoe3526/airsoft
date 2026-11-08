@@ -189,6 +189,9 @@ func round_over_line(rs: RoundState, winner: int, reason: GameEvent.RoundEnd) ->
 		if reason == GameEvent.RoundEnd.OVERTIME_FLAG:
 			parts.append(tr(&"HUD_FLAG_TOUCHED"))
 			parts.append(tr(&"HUD_ROUND_WON") % team)
+		elif reason == GameEvent.RoundEnd.SIMULATED:
+			parts.append(tr(&"HUD_SIMULATED"))
+			parts.append(tr(&"HUD_ROUND_WON") % team)
 		elif rs.mode == RoundState.Mode.ATTACK_DEFEND and reason != GameEvent.RoundEnd.ELIMINATED:
 			var captured := reason == GameEvent.RoundEnd.CAPTURED
 			parts.append(tr(&"HUD_FLAG_RAISED" if captured else &"HUD_DEFENDED"))
