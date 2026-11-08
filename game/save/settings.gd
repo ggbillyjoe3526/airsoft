@@ -291,6 +291,7 @@ func from_dict(data: Dictionary) -> void:
 	crouch_toggle = _flag(data, "crouch_toggle", false)
 	aim_toggle = _flag(data, "aim_toggle", false)
 	auto_reload = _flag(data, "auto_reload", false)
+	simulate_skips = _flag(data, "simulate_skips", false)
 	var picks := ControlsConfig.WheelPick.size() - 1.0
 	wheel_pick = roundi(_number(data, "wheel_pick", ControlsConfig.WheelPick.HOVER, 0.0, picks)) as ControlsConfig.WheelPick
 	mouse_dpi = roundi(_number(data, "mouse_dpi", Sensitivity.DPI_DEFAULT, Sensitivity.DPI_MIN, Sensitivity.DPI_MAX))
@@ -474,7 +475,6 @@ func _accessibility_from(data: Dictionary) -> void:
 	if motion is bool:
 		reduced_motion = ReducedMotion.ON if motion else ReducedMotion.OFF
 	read_out = _flag(data, "read_out", true)
-	simulate_skips = _flag(data, "simulate_skips", false)
 
 
 static func _flag(data: Dictionary, key: String, fallback: bool) -> bool:

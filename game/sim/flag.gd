@@ -5,6 +5,8 @@ class_name Flag
 ## The most poles a map has, and what each is called, in the map's order.
 const MOST := 2
 const LETTERS: PackedStringArray = ["A", "B"]
+## A hold counted in ticks of dt falls short of hold_time by float error only: within this (s) it is held.
+const HOLD_SLACK := 1e-6
 
 
 ## One tick of every pole (`step` on each); true once any is raised and held (FlagConfig.hold_time).
@@ -111,7 +113,7 @@ static func step(flag: FlagState, characters: Array[Character], attackers: int, 
 	elif before >= 1.0 and flag.status != FlagState.Status.CONTESTED:
 		# Counted from the tick after it reached the top, so a hold of 0 wins on the tick it is raised, as before.
 		flag.held += dt
-	return flag.progress >= 1.0 and flag.held >= cfg.hold_time - 1e-6
+	return flag.progress >= 1.0 and flag.held >= cfg.hold_time - HOLD_SLACK
 
 
 ## True if `c` is in play, close enough to the pole (flat) to work the rope and on its floor (not on a roof above it).

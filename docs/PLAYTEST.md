@@ -1576,7 +1576,8 @@ models show without anything else changing. The smoke and flash icons now do the
 - [ ] **Still camera.** Get hit early, let the round end while watching a teammate: the view holds still on the round
   banner and table, no swaying. Win a round alive: the same.
 - [ ] **SIMULATE.** Settings › Gameplay › Simulate skipped rounds: On. Get hit, click to skip: SIMULATE shows above
-  the countdown; click it (or press Fire): the round ends at once, marked Simulated. With the setting Off it never
+  the countdown with the pointer; click it: the round ends at once, marked Simulated. Double-click to skip: the
+  second click doesn't simulate. With the setting Off it never
   shows. Do the results feel fair (more players left usually wins)?
 - [ ] **Bushes.** Woodland: sprint through a bush and a fern bed: you slow down, and a running step sounds of leaves.
   Do bots turn towards you from further off when you run through one? Walking or crouching stays quiet.

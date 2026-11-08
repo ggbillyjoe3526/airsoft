@@ -1536,11 +1536,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		start_skip()
 		_input.hold_fire()
 		get_viewport().set_input_as_handled()
-	elif event.is_action_pressed(&"fire") and not event.is_echo() and _input.active and simulate_offered():
-		# Skipping, with SIMULATE on offer: a fresh press of the trigger presses it (BP8).
-		simulate_skip()
-		_input.hold_fire()
-		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed(&"fire") and not event.is_echo() and _input.active and _hud.summary_up():
 		_start_now()
 		get_viewport().set_input_as_handled()
@@ -1675,7 +1670,8 @@ func start_skip() -> void:
 	_skip_clock_shown = -1
 	_skip_from = state.round_state.clock
 	_skip_bar.value = 0.0
-	_skip_simulate.show_for(settings.simulate_skips, KeyNames.of_action(&"fire"))
+	_skip_simulate.show_for(settings.simulate_skips)
+	_free_cursor_for_simulate()
 	_show_skip_clock()
 
 
@@ -1698,6 +1694,13 @@ func simulate_offered() -> bool:
 	return _skipping and _skip_simulate.visible
 
 
+## SIMULATE is a button only (BP8: a trigger press could simulate a double-click's skip by accident), so the pointer
+## shows while it is on offer, and is captured again when the skip ends.
+func _free_cursor_for_simulate() -> void:
+	if simulate_offered():
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+
 func _stop_skip() -> void:
 	if not _skipping:
 		return
@@ -1708,7 +1711,10 @@ func _stop_skip() -> void:
 	_hud.visible = true
 	_skip_cover.visible = false
 	_skip_note.visible = false
+	var offered := _skip_simulate.visible
 	_skip_simulate.show_for(false)
+	if offered and _input.active and get_tree() != null and not get_tree().paused:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 ## "Skipping the round · 1:12": the round's clock as the skip plays it down, so a long one is seen to move; written
@@ -1788,6 +1794,7 @@ func _resume() -> void:
 	get_tree().paused = false
 	_hud.set_paused(false)
 	_capture()
+	_free_cursor_for_simulate()
 	# the settings, opened from the pause menu, may have rebound the Reload key, the door's (and in practice the
 	# Loadout's)
 	_hud.reload_prompt().refresh_key()

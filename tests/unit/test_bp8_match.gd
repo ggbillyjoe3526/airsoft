@@ -301,6 +301,34 @@ func test_simulate_on_a_skip_ends_the_round_at_once_and_only_with_the_setting_on
 	assert_true(session.hud().visible)
 
 
+func test_simulate_is_a_button_only_a_second_click_keeps_skipping() -> void:
+	var session := PlaySession.new()
+	session.bots_active = false
+	session.difficulty = &"easy"
+	session.settings = Settings.new()
+	session.settings.simulate_skips = true
+	add_child_autofree(session)
+	await wait_physics_frames(2)
+	session._input.active = true
+	session.player.status = Character.Status.OUT
+	session.start_skip()
+	assert_true(session.simulate_offered())
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	session._unhandled_input(click)
+	var fire := InputEventAction.new()
+	fire.action = &"fire"
+	fire.pressed = true
+	session._unhandled_input(fire)
+	assert_true(session.skipping(), "a double click to skip doesn't simulate: the skip plays on")
+	assert_true(session.state.round_state.is_live())
+	session._skip_simulate.button().pressed.emit()
+	assert_false(session.skipping(), "the button does")
+	# (The pointer shown for the button and captured again after can't be seen headless: the mouse mode stays put.)
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+
 # --- 25: bushes slow you and rustle louder ---
 
 
