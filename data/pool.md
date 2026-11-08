@@ -34,15 +34,15 @@ Rifle, and so on. The player's save remembers the ID, so:
 Compatibility works by **tags**, not by naming replicas, so a part is never tied to one replica:
 
 - **Tags** (on a replica) describe it: what drives it (`electric`, `gas`, `spring`), what rails it has (`top-rail` for
-  an optic, `under-rail` for a grip, `pistol-rail` for a laser), what magazines it takes (`aeg-mag`, `pistol-mag`),
+  an optic, `under-rail` for a grip, `pistol-rail` or `side-rail` for a laser), what magazines it takes (`aeg-mag`, `pistol-mag`),
   whether its barrel can be swapped (`barrel-mount`) and whether its muzzle is threaded for a silencer
   (`muzzle-thread`).
 - **Fits** (on a part) lists the tags the part needs. It fits every replica that has **any one** of them.
 - **By ID.** Fits can also name a replica by its ID (for example `000002`), for a part that goes on one replica only.
 
 So Green Gas (`Fits: gas`) works with the GBB Pistol today and with any gas replica added later, with no change to
-Green Gas. To let the AEG Rifle take the Red Laser, either add `under-rail` to the Red Laser's Fits or add
-`pistol-rail` to the AEG Rifle's Tags. Tags are lower case, words joined with `-`, separated by commas.
+Green Gas. The AEG Rifle takes the Red Laser on its handguard's side rail (owner, 2026-11-08): `side-rail` in its
+Tags and in the Red Laser's Fits; the Sniper Rifle has no side rail. Tags are lower case, words joined with `-`, separated by commas.
 
 ### The Key column
 
@@ -146,7 +146,7 @@ The cases an Extraction run places (M44, dev content for now). Each run's seed p
 | ID | Name | Key | Tags | Comes with | Access |
 |---|---|---|---|---|---|
 | 000001 | GBB Pistol | pistol | pistol, gas, pistol-mag, pistol-rail, muzzle-thread | | public |
-| 000002 | AEG Rifle | aeg | rifle, electric, aeg-mag, top-rail, under-rail, barrel-mount, muzzle-thread | | public |
+| 000002 | AEG Rifle | aeg | rifle, electric, aeg-mag, top-rail, under-rail, side-rail, barrel-mount, muzzle-thread | | public |
 | 000019 | Cyber Pistol | cyber | pistol, built-in-power | | public |
 | 000021 | Sniper Rifle | sniper | rifle, spring, top-rail, under-rail, muzzle-thread | 2x Scope | public |
 
@@ -188,7 +188,7 @@ and a little slower to cock).
 
 | ID | Name | Key | Fits | Access |
 |---|---|---|---|---|
-| 000005 | Red Laser | redLaser | pistol-rail | public |
+| 000005 | Red Laser | redLaser | pistol-rail, side-rail | public |
 
 ### Magazines
 

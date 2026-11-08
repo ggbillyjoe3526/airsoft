@@ -34,8 +34,8 @@ quad-rail handguard with a ribbed cover, an A-frame front sight, a small ghost-r
 in one piece with the receiver, an adjustable stock and a curved magazine. [Inspect](Controls) it (**Y**) to see the
 charging handle pulled back, the dust cover open and the hop-up dial turn.
 
-The AEG Rifle takes the most parts: an optic on its top rail, a grip under it, a barrel, a muzzle part and a different
-magazine. It is in your kit from the start.
+The AEG Rifle takes the most parts: an optic on its top rail, a grip under it, a laser on its side rail, a barrel, a
+muzzle part and a different magazine. It is in your kit from the start.
 
 ## GBB Pistol
 

@@ -875,12 +875,12 @@ def butt_pad() -> object:
 
 def build_parts() -> None:
     """The parts file: the AEG Rifle's optics, grips, torch and silencer moved from its mounts onto this rifle's
-    (each top-level part by the mount its name's prefix sits on); its barrels and magazines dropped. Running it again
-    changes nothing."""
+    (each top-level part by the mount its name's prefix sits on); its barrels, magazines and laser (the AEG's alone,
+    BP8) dropped. Running it again changes nothing."""
     hs.reset(FPS)
     bpy.ops.import_scene.gltf(filepath=AEG_PARTS)
     for ob in list(bpy.data.objects):
-        if ob.name.startswith(("barrel_", "magazine_")):
+        if ob.name.startswith(("barrel_", "magazine_", "laser_")):
             bpy.data.objects.remove(ob, do_unlink=True)
     for ob in bpy.data.objects:
         if ob.parent is not None:

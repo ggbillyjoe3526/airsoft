@@ -283,8 +283,9 @@ func _own_voice(audio: SimAudio, serial: int) -> AudioStreamPlayer:
 func test_the_glass_is_readied_before_play_so_the_first_raise_does_not_hitch() -> void:
 	var hands := _hands(_kit(AEG, {&"optic": SCOPE}))
 	var warm := hands.prewarm_glass()
-	assert_eq(warm.size(), 1)
+	assert_eq(warm.size(), 2, "the sight's glass and its hip glass (BP8)")
 	assert_eq(warm[0], hands._held[0].window.material)
+	assert_eq(warm[1], hands._held[0].window.hip_material)
 	var glass := hands._glass
 	assert_eq(glass._port.render_target_update_mode, SubViewport.UPDATE_ONCE)
 	assert_gt(glass._port.size.x, 1)

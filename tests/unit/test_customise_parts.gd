@@ -63,16 +63,14 @@ func _tune(id: String) -> ReplicaTune:
 
 # --- which tabs are on ---
 
-func test_the_rifle_takes_an_optic_grip_barrel_muzzle_and_magazine_but_no_laser() -> void:
+func test_the_rifle_takes_an_optic_grip_laser_barrel_muzzle_and_magazine() -> void:
 	var view := _page(0).customise()
-	for t: CustomiseView.Tab in [OPTIC, GRIP, BARREL, MUZZLE, MAGAZINE]:
+	# BP8 (the owner): the AEG takes the laser on its side rail too.
+	for t: CustomiseView.Tab in [OPTIC, GRIP, LASER_TAB, BARREL, MUZZLE, MAGAZINE]:
 		assert_true(view.part_available(t), CustomiseView.Tab.keys()[t])
 		assert_eq(view.part_mount_text(t), "")
 		assert_false(view.part_card(t).disabled)
-	assert_false(view.part_available(LASER_TAB))
-	assert_true(view.part_card(LASER_TAB).disabled)
-	assert_eq(view.part_mount_text(LASER_TAB), "PISTOL RAIL", "greyed with the mount it needs")
-	assert_eq(view.later_count(), 1, "the laser: the light is on offer")
+	assert_eq(view.later_count(), 0, "nothing greyed: the light is on offer")
 
 
 func test_the_pistol_takes_a_laser_muzzle_part_and_magazine_and_greys_the_rest_with_their_mounts() -> void:
@@ -92,7 +90,7 @@ func test_what_fits_comes_from_the_pool_and_the_cyber_pistol_takes_only_the_ligh
 			assert_true(rules.parts_for(CYBER, slot).is_empty(), "the Cyber Pistol takes no %s" % slot)
 	assert_eq(rules.parts_for(CYBER, &"light").size(), 1, "the Weapon Torch fits it (RM8)")
 	assert_eq(rules.parts_for(PISTOL, &"magazine").size(), 1, "the pistol's magazine is the extended one")
-	assert_true(rules.parts_for(AEG, &"laser").is_empty())
+	assert_eq(rules.parts_for(AEG, &"laser").size(), 1, "the Red Laser fits the AEG's side rail (BP8)")
 
 
 func test_the_light_is_on_offer_since_the_torch_went_public() -> void:

@@ -13,7 +13,8 @@ extends Node
 ## the range); the simulation drops one while you are out. Need a Mag (MH3: its key, or the wheel's item) fills the next
 ## tick's mag_hand_off once, dead on the range and while you are out (where the wheel is); `mag_from_wheel` says
 ## whether the last one sent was picked on the wheel, for where its refusal shows. Throw smoke and Throw flash (SF1)
-## fill the next tick's throw_grenade once (the last pressed, if both). Open / shut door (DO1) fills the next tick's
+## fill the next tick's ready_grenade once (the last pressed, if both): the bomb comes into hand and a trigger pull
+## throws it (BP8, the owner: never thrown on the key alone). Open / shut door (DO1) fills the next tick's
 ## use_door once. The mouse wheel (MC1, owner 2026-11-01) steps through the replicas and then the bombs left, smoke then
 ## flash, round again, never onto the holster: a step onto a bomb takes it in hand (PlayerCommand.ready_grenade), a step
 ## onto a replica draws it (`wheel_item`). With the replica holstered a notch steps past the bombs and draws the other
@@ -67,7 +68,7 @@ const FIELD_MAP := &"field_map"
 const PING_MOVE := &"ping_move"
 ## The magazine hand-off (MH3): toss one to a teammate asking you in reach, else ask for one (MagShare).
 const MAG := &"mag_hand_off"
-## Throw a smoke bomb or a flash bomb (SF1).
+## Take a smoke bomb or a flash bomb in hand to throw (SF1; BP8).
 const THROW_SMOKE := &"throw_smoke"
 const THROW_FLASH := &"throw_flash"
 const USE_DOOR := &"use_door"
@@ -93,7 +94,7 @@ var _torch_latch: bool = false
 var _door_latch: bool = false
 ## Inspect pressed since the play scene last took it (a frame's latch, not a tick's: `take_inspect`).
 var _inspect_latch: bool = false
-var _throw_latch: Grenade.Kind = Grenade.Kind.NONE
+var _bomb_latch: Grenade.Kind = Grenade.Kind.NONE
 var _slot_latch: int = -1
 ## Hop-up notches pressed since the last tick (more lift positive).
 var _hop_steps: int = 0
@@ -262,9 +263,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action(TORCH):
 		_torch_latch = true
 	elif event.is_action(THROW_SMOKE):
-		_throw_latch = Grenade.Kind.SMOKE
+		_bomb_latch = Grenade.Kind.SMOKE
 	elif event.is_action(THROW_FLASH):
-		_throw_latch = Grenade.Kind.FLASH
+		_bomb_latch = Grenade.Kind.FLASH
 	elif event.is_action(USE_DOOR):
 		_door_latch = true
 	elif event.is_action(INSPECT):
@@ -547,8 +548,8 @@ func fill(cmd: PlayerCommand, held_slot: int = 0, hand: Grenades.Hand = null, ho
 	cmd.hop_up_steps = _hop_steps
 	cmd.holster = _holster_latch
 	cmd.toggle_torch = _torch_latch
-	cmd.throw_grenade = _throw_latch
-	cmd.ready_grenade = Grenade.Kind.NONE
+	cmd.throw_grenade = Grenade.Kind.NONE
+	cmd.ready_grenade = _bomb_latch
 	cmd.use_door = _door_latch
 	cmd.zoom_steps = 0
 	if zoom_turns and cmd.aim:
@@ -632,7 +633,7 @@ func _clear_latches() -> void:
 	_holster_latch = false
 	_torch_latch = false
 	_door_latch = false
-	_throw_latch = Grenade.Kind.NONE
+	_bomb_latch = Grenade.Kind.NONE
 	_slot_latch = -1
 	_slot_steps = 0
 	_zoom_steps = 0

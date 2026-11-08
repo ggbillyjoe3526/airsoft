@@ -142,6 +142,8 @@ func prewarm_glass() -> Array[Material]:
 	for held in _held:
 		if held.window != null:
 			out.append(held.window.material)
+			if held.window.hip_material != null:
+				out.append(held.window.hip_material)
 	if not out.is_empty():
 		_glass.prewarm()
 	return out
