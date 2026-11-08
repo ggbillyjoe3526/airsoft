@@ -300,6 +300,7 @@ class MagChange:
         # The checks leave the magazine out (it moves with the hand; the clip's poses aren't on the meshes here) and
         # the trigger (the right index finger's pad rests on it).
         self.frame = [o for o in solid if o not in self.mags and not o.name.startswith("Trigger")]
+        self.frame_col = None
         self.fingers = [b for b in rig.rest if b.endswith("_" + SIDE) and b.split("_")[0][:-1] in
                         ("Index", "Middle", "Ring", "Pinky", "Thumb")]
 
@@ -581,18 +582,18 @@ class MagChange:
             if f >= at["end"]:
                 continue
             self.now = f
-            # The elbow goes from the hold's over the whole way to the magazine, and back over the whole way home.
-            leaving, returning = f / at["catch"], (at["end"] - f) / (at["end"] - at["home"])
+            # The elbow stays as the hold has it while the fingers come off (so the thumb stays clear of a grip), goes
+            # over on the way to the magazine, and comes back over the whole way home (the replica still canted).
+            returning = (at["end"] - f) / (at["end"] - at["home"])
             if f < clear_at:
                 u = f / clear_at
                 pole = self.pose(between(held_hand, cleared, max(0.0, u - OPEN_FIRST) / (1.0 - OPEN_FIRST),
                                          Vector()),
-                                 self.turns_between(held_turns, open_turns, min(1.0, u / OPEN_FIRST)), held_pole,
-                                 leaving)
+                                 self.turns_between(held_turns, open_turns, min(1.0, u / OPEN_FIRST)), held_pole, 0.0)
             elif f < at["catch"]:
                 u = (f - clear_at) / (at["catch"] - clear_at)
                 pole = self.pose(between(cleared, carried(at["catch"]), u, OUT),
-                                 self.turns_between(open_turns, grip_turns, u), held_pole, leaving)
+                                 self.turns_between(open_turns, grip_turns, u), held_pole, u)
             elif f <= at["out"] or at["back"] <= f <= at["home"]:
                 pole = self.pose(carried(f), self.pushing(f, grip_turns))
             elif f < at["back"]:
@@ -615,6 +616,16 @@ class MagChange:
         """The pose as it stands, eased out of the replica, appended to `out` as frame `f`'s key; 1 if it still
         passes in."""
         n, tally = self.ease(pole)
+        if any(b.startswith("Thumb") and b.endswith("_" + SIDE) and k for b, k in tally.items()):
+            # A thumb still in (laid round a grip's face as the hold has it, dragged as the hand comes off): the
+            # clear turn of it nearest where its tip is.
+            rig, tip = self.rig, "Thumb3_" + SIDE
+            if self.frame_col is None:
+                self.frame_col = Collider(self.frame)
+            t3 = rig.pose[tip]
+            cycle.clear_thumb(self.hand, self.frame_col, t3.translation + t3.to_3x3().col[1] * rig.length[tip])
+            rig.write()
+            n, tally = pose.clipping(self.arms, self.frame)
         out.append((f, cycle.snapshot(self.rig)))
         if n:
             print("   reload frame %d: %d face pairs pass into the replica %s" % (
