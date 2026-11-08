@@ -3,6 +3,7 @@
 **Review:**
 
 - part 1 (bots): critic Accept 7/8 · qa Pass · performance Pass
+- part 2 (replicas): critic Accept 8/8 (attempt 3) · qa Pass · performance Pass
 
 William's playtest notes of 2026-11-08 (26 items, before he tags 0.1 Dev 2) went out as a bug pass in parts by area.
 The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-summary.md`.
@@ -12,6 +13,9 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-08 | part 1: 1 | Opus 5.5 | targeted + smoke; CI | Accept 7/8 | – (known issues rows and the same-spot helper added after) |
+| 2026-11-08 | part 2: 1 | Opus 5.5 | targeted + smoke | Retry 6/8 | hip glass sampled the screen, not lined up; known issues rows; Pointman laser |
+| 2026-11-08 | part 2: 2 | Opus 5.5 | targeted + smoke | Retry 7/8 | hip glass off-centre shrink and flat inspect lens; Variable Scope shoulder shading |
+| 2026-11-08 | part 2: 3 | Opus 5.5 | targeted + smoke; CI | Accept 8/8 | – |
 
 ## Part 1: bots (items 17 and 23)
 
@@ -30,12 +34,44 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
   re-baked (sprint row moved under 1 cm). Running with the replica in hand uses the aim pose and was already calm.
   Test: `test_holster_sprint_arms.gd`. Pictures: `/mnt/project-files/playtest/bp8/bots/` (William: "looks good").
 
+## Part 2: replicas (items 4, 5, 8, 10, 12, 26)
+
+- **4, a laser on the AEG.** The Red Laser now fits the AEG Rifle (`side-rail` in `data/pool.md`). The AEG's parts
+  file has it on the handguard's left side rail, just behind the left hand; the torch keeps the right rail, so the two
+  never share one. 9,306 triangles. The Sniper doesn't take it. Bots' kits unchanged.
+- **5, inspect with the muzzle to the left.** Every inspect pose turned the other way (`play_tuning.tres`,
+  `ViewModelConfig`), so the left side faces you. The Sniper's inspect comes closer so the arms run off the foot of
+  the screen (William: "perfect").
+- **8, a bomb waits in hand.** The smoke and flash keys only bring the bomb to hand (`ready_grenade`). A click throws
+  it; holding the button keeps the arm cocked at `GrenadeConfig.hold_at` (0.72, the arms' cocked key) until it is let
+  go. Bots never wait. A hit while cocked drops the throw.
+- **10, scope glass at the hip.** At the hip the 2x Scope's and Variable Scope's lens shows the field behind it,
+  lined up, tinted with a reflection band; the zoomed view and reticle only aimed. A glass camera keeps the main
+  camera's transform and draws only the lens's square of the view (`PROJECTION_FRUSTUM`, `frustum_offset`), with
+  SSAO, SSIL, SDFGI, SSR, glow and volumetric fog off; reflection probes sit on a layer it skips
+  (`AreaProbes.LAYER`). Below Mesh detail Medium (Low) no camera draws: the lens is a still light sky-grey tint.
+  Own shader `optic_glass_hip.gdshader`; no shader copies the screen.
+- **12, BBs from the muzzle.** `BBView.before_muzzle` hides your own BB while it is still short of the muzzle plane
+  (turning, or aimed down a pistol's sights). Drawing only; the sim's ballistics unchanged.
+- **26, a minimal Variable Scope.** Rebuilt in `attachments.py`: no rails, fibre sight, rear sight or illumination
+  dial; one small dial on the turret housing; the collar's shoulder lofted smooth. 8,022 triangles; `aeg.glb` 2.99 MB
+  of its 3 MiB cap.
+- Tests: `test_bp8_replicas.gd` (20), `test_bp8_replicas_qa.gd` (24, incl. a world point landing on the same pixel
+  through the main view and the lens, off-centre). Tool: `tools/render_replica_view.gd`. Pictures:
+  `/mnt/project-files/playtest/bp8/replicas/`.
+
 ## Decisions
 
 - **Watching Here is wheel-only.** William asked for a wheel option; a key would need a Settings row he didn't ask for.
 - **"Free" teammate:** in play, not fighting, in cover or seeing a target; with none free nobody joins ("at most one").
 - **It lasts until you walk 6 m off the spot you marked it from**, another order, a hit or the round's end.
+- **AEG laser on the left side rail**, behind the left hand: the right side is hidden at the hip and in the new inspect.
+- **The Sniper takes no laser:** it has no side rail and William asked only for the AEG.
+- **A held bomb waits cocked at 0.72 of the windup**, the arms' cocked key, so it looks ready.
+- **Low draws no hip glass camera:** a still tint keeps Low's frame rate; Medium and up see through.
 
 ## Known issues left
 
 - The two rows in `docs/KNOWN_ISSUES.md` dated 2026-11-08: held angles (Hard bots only) and the holstered run's still arms.
+- Replicas: the hip glass camera's second draw from Medium up (frame time unmeasured on William's PC), the pistol's
+  torch and laser overlapping at night (pre-existing), and `aeg.glb` near its 3 MiB cap.
