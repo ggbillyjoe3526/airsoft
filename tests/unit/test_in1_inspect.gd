@@ -112,7 +112,8 @@ func test_every_model_with_an_inspect_clip_has_its_own_pose() -> void:
 		assert_almost_eq(p.turn_at(0.0), Vector3.ZERO, Vector3.ONE * EPS, "starts at the hold")
 		assert_almost_eq(p.turn_at(1.0), Vector3.ZERO, Vector3.ONE * EPS, "ends at the hold")
 		assert_almost_eq(p.shift_at(1.0), Vector3.ZERO, Vector3.ONE * EPS)
-		assert_lt(p.turn_at(0.5).y, -0.5, "turned side on, the right side to the eye")
+		# BP8 (the owner): the muzzle points to the left of the view, the left side to the eye.
+		assert_gt(p.turn_at(0.5).y, 0.5, "turned side on, the muzzle to the left")
 
 
 func test_the_saved_play_tuning_holds_every_pose_as_the_script_does() -> void:
@@ -155,7 +156,7 @@ func test_an_inspect_turns_the_replica_plays_its_clip_and_ends_back_at_the_hold(
 	assert_eq(_held().anim.assigned_animation, String(ReplicaView.INSPECT_CLIP), "the model's clip plays")
 	assert_true(_held().anim.is_playing())
 	_frames(_length_frames() / 2)
-	assert_lt(_held().root.rotation.y, hold_rot.y - 0.5, "turned side on halfway through")
+	assert_gt(_held().root.rotation.y, hold_rot.y + 0.5, "turned side on halfway through, the muzzle left (BP8)")
 	_frames(_length_frames())
 	assert_false(view.inspecting(), "over")
 	assert_almost_eq(_held().root.position, hold_pos, Vector3.ONE * EPS, "back at the hold")
@@ -210,7 +211,7 @@ func test_a_shot_ends_it_and_the_pose_eases_back_over_the_cancel_time() -> void:
 	_frames(5)
 	var hold_rot := _held().root.rotation
 	_cut_by(view.on_shot, "a shot")
-	assert_lt(_held().root.rotation.y, hold_rot.y - 0.1, "not snapped back")
+	assert_gt(_held().root.rotation.y, hold_rot.y + 0.1, "not snapped back")
 	_frames(ceili(cfg.inspect_cancel_time / DT) + 1)
 	assert_almost_eq(view._inspect_turn, Vector3.ZERO, Vector3.ONE * EPS, "eased back in the cancel time")
 	assert_almost_eq(view._inspect_shift, Vector3.ZERO, Vector3.ONE * EPS)
