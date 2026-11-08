@@ -75,7 +75,8 @@ func setup(cfg: ViewModelConfig, view: ViewConfig, eyes: Camera3D) -> void:
 	_port.size = Vector2i.ONE
 	add_child(_port)
 	_camera = Camera3D.new()
-	_camera.cull_mask = ALL_LAYERS & ~HANDS_LAYER
+	# Nor the reflection probes: seen by this camera too, they broke the field's reflections up (AreaProbes.LAYER).
+	_camera.cull_mask = ALL_LAYERS & ~HANDS_LAYER & ~AreaProbes.LAYER
 	_camera.near = view.near
 	_camera.far = view.far
 	_camera.keep_aspect = Camera3D.KEEP_HEIGHT

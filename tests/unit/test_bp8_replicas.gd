@@ -316,6 +316,22 @@ func test_the_hip_glass_draws_without_the_dearer_effects_and_aimed_keeps_them() 
 	glass.update(null, 0.0)
 
 
+func test_the_glass_camera_leaves_the_reflection_probes_to_the_view() -> void:
+	# BP8: while the glass's camera saw the probes, the field's reflections broke up into patches round the scope.
+	var play := PlayTuning.load_default()
+	var depot := MapData.load_map("depot", play.map_style, SimTuning.load_default().rounds.team_size)
+	var probes := AreaProbes.build(depot, play.look)
+	add_child_autofree(probes)
+	var view_mask := (autofree(Camera3D.new()) as Camera3D).cull_mask
+	for p: ReflectionProbe in probes.get_children():
+		assert_eq(p.layers, AreaProbes.LAYER, "on the probes' own layer: %s" % p.name)
+		assert_true(view_mask & p.layers != 0, "the view still sees %s" % p.name)
+	var hands := _hip_scope()
+	var glass := hands._glass
+	assert_eq(glass._camera.cull_mask & AreaProbes.LAYER, 0, "the glass's camera leaves them out")
+	assert_eq(glass._camera.cull_mask & OpticGlass.HANDS_LAYER, 0, "and the hands, as before")
+
+
 func test_off_centre_the_hip_glass_shows_exactly_the_patch_of_the_view_behind_it() -> void:
 	# The critic (BP8): a world point lands on the same screen pixel through the main view and through the glass's
 	# picture as its shader maps it, wherever the glass is on screen.

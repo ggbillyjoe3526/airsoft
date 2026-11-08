@@ -8,6 +8,11 @@ extends Node3D
 ## highest, and captures from eye height over the ground at its middle, never from inside a hill (BP2). Nothing per
 ## frame. FieldLighting shows or hides them all with the Reflections row.
 
+## The visual layer the probes sit on, which a scope's glass camera (OpticGlass) leaves out: while that second camera
+## saw them, the field's own reflections broke up into patches on the floor round a scope at the hip (BP8, seen in
+## tools/render_replica_view.gd's pictures). It sets only which cameras see a probe, not what it captures or lights.
+const LAYER := 1 << 18
+
 
 ## The probes for `map` in `look`, or null for a map with no blocks.
 static func build(map: MapData, look: LookConfig) -> AreaProbes:
@@ -76,4 +81,5 @@ func _add(box: Rect2, height: float, interior: bool, look: LookConfig, kind: Str
 	probe.blend_distance = look.probe_margin
 	probe.intensity = look.probe_intensity
 	probe.update_mode = ReflectionProbe.UPDATE_ONCE
+	probe.layers = LAYER
 	add_child(probe)
