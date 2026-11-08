@@ -5,7 +5,7 @@ extends RefCounted
 ## keep one.
 
 enum Kind {
-	SHOT, ## actor fired a BB from slot at position, along direction.
+	SHOT, ## actor fired a BB from slot at position, along direction; value2 SHOT_LASER: a laser (Dev › Lasers, LZ1).
 	DRY_FIRE, ## actor pulled the trigger on an empty magazine (slot).
 	RELOAD_START, ## actor started swapping magazines (slot).
 	RELOAD_END, ## actor's fresh magazine is in (slot).
@@ -47,6 +47,7 @@ enum Kind {
 	DAZZLED, ## actor's flash at position dazzled target for reach s; value its strength in hundredths.
 	DOOR, ## actor toggled door target (WorldQuery's order) at position (its leaf's middle): value 1 shutting, 0 opening; heard out to reach through walls (Doors, DO1).
 	ZOOM, ## actor turned the variable optic on slot to value (hundredths of ×); value2 0 if it was already at an end (SN2).
+	LASER, ## actor's laser from slot (Dev › Lasers, LZ1) ended at position, reach m along direction (unit) from the eyes it left: its beam, drawn; what it stopped on is that tick's BB_IMPACT, CHARACTER_HIT or TARGET_HIT.
 	ROUND_COUNT, ## the round's start countdown reached value whole seconds left (3, 2, 1): everyone is held until GO.
 	ROUND_GO, ## the start countdown is over (or there is none): the round's clock and everyone's hands are free.
 }
@@ -57,6 +58,8 @@ enum Footstep { RUN, SPRINT, LAND, RATTLE }
 ## (the toucher's team wins).
 ## SIMULATED: a skipped round decided at once by a roll (Round.simulate, BP8).
 enum RoundEnd { ELIMINATED, TIME, CAPTURED, OVERTIME_FLAG, SIMULATED }
+## A SHOT's value2 for a laser (Dev › Lasers, LZ1); 0 for a BB.
+const SHOT_LASER := 1
 ## A PING's value for one placed on the full-screen map (FM1).
 const PING_ON_MAP := 2
 ## A PING's value2 for Hold here's key pressed on the full-screen map (BP6): a Hold here at the spot.

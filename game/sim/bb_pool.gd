@@ -49,6 +49,7 @@ func spawn(owner_id: int, origin: Vector3, dir: Vector3, speed: float, hop_up: f
 	bb.mass = mass
 	bb.bounces = 0
 	bb.leaf = 0.0
+	bb.laser = false
 	return bb
 
 

@@ -961,6 +961,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   their power parts are at full level within 10 m and carry 120 m (other sounds keep 4 m and 60 m); the power parts
   are lifted: the motor 4.0, gas 2.2, spring 2.5 (were 1.4). Ambience starts at 20 % and every bed and call plays at
   half its old level; a save still on the old 30 % moves to 20 %. Master has a limiter, so the louder mix never clips.
+- **Dev › Lasers' shot ships from free YouTube sound effects (owner, 2026-11-08, LZ1: "Yes, ship B").** The four
+  files from FreeSFX and Mine Sound FX are used on the terms he quoted, "Free for personal and commercial use. No
+  attribution required.", though one line speaks of videos; credited in `docs/ASSETS.md` › External assets.
 
 ## Save and settings storage
 

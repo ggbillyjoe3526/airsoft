@@ -3,8 +3,8 @@ extends RefCounted
 ## The Dev settings that change play (the browser game's config/dev.ts devCheating), as the simulation takes them. A
 ## match played with any of them on is kept out of the records for the rest of that match (docs/DECISIONS.md › Content
 ## tags and dev content): `GameState.off_record`. Ghost and bottomless magazines are the player's own, written onto
-## their character; the bots' controller reads `bots_hold_fire` and `bots_run_low` (run_low); the play loop reads
-## `game_speed`.
+## their character; Lasers is everyone's (Character.lasers: the player's and every bot's replica); the bots' controller
+## reads `bots_hold_fire` and `bots_run_low` (run_low); the play loop reads `game_speed`.
 
 const SPEED_MIN := 0.25
 const SPEED_MAX := 2.0
@@ -20,13 +20,16 @@ var bots_run_low: bool = false
 ## A cheat that only changes what you see or follow (spectate any bot, bot intentions): no rule changes, but the
 ## match still stays out of the records.
 var watching: bool = false
+## Lasers (LZ1, the Easter egg): everyone's replica fires lasers, instant hits, instead of BBs (Character.lasers).
+var lasers: bool = false
 ## Disable levelling: every item unlocked to carry, so the match gives no XP (the loadout reads it, not the rules).
 var levelling_off: bool = false
 
 
 ## Any cheat on.
 func any() -> bool:
-	return game_speed != 1.0 or bottomless or ghost or bots_hold_fire or bots_run_low or watching or levelling_off
+	return game_speed != 1.0 or bottomless or ghost or bots_hold_fire or bots_run_low or watching or levelling_off \
+			or lasers
 
 
 ## Puts `cheats` into `state` (a copy is kept): the player `player_id`'s ghost and bottomless magazines, the rest read
@@ -41,9 +44,11 @@ static func apply(state: GameState, cheats: DevCheats, player_id: int) -> void:
 	kept.bots_run_low = cheats.bots_run_low
 	kept.watching = cheats.watching
 	kept.levelling_off = cheats.levelling_off
+	kept.lasers = cheats.lasers
 	for c in state.characters:
 		var mine := c.id == player_id
 		c.ghost = mine and kept.ghost
+		c.lasers = kept.lasers
 		var switched_on := mine and kept.bottomless and not c.armament.bottomless
 		c.armament.bottomless = mine and kept.bottomless
 		if switched_on:

@@ -34,6 +34,18 @@ extends Resource
 @export var glow_streak_opacity: float = 0.75
 ## A BB you fired is drawn from the muzzle, joining its true path from the eye over this long (s).
 @export var muzzle_join_time: float = 0.12
+## Dev › Lasers' beams (LZ1, LaserBeams): `laser_width` m wide, never thinner than `laser_min_angle` rad of the view,
+## in the team's HUD colour at `laser_strength` (above 1 it blooms where glow is on), whitening down the middle by
+## `laser_core_mix`. A single or semi shot's beam shows `laser_flash_time` s; a burst's each shot a `laser_burst_share`
+## of the gap to the next (at most `laser_flash_time`), so its three flash apart; full auto's the gap and
+## `laser_auto_margin` s, so it stays on while the trigger is held.
+@export var laser_width: float = 0.01
+@export var laser_min_angle: float = 0.0022
+@export var laser_strength: float = 3.0
+@export var laser_core_mix: float = 0.35
+@export var laser_flash_time: float = 0.06
+@export var laser_burst_share: float = 0.5
+@export var laser_auto_margin: float = 0.03
 ## Puffs: how many can show at once, how long one lasts (s), its size at the start and end (m).
 @export var puff_pool: int = 48
 @export var puff_life: float = 0.35

@@ -49,6 +49,9 @@ const BOLT_CUE := &"boltCycle"
 ## Every replica's trigger pulled with nothing loaded, today's and any added later: the gas pistol's recorded dry click
 ## (assets/audio/cues/dryFire_*.wav; owner, 2026-11-05, final, not a stand-in).
 const DRY_CUE := &"dryFire"
+## Dev › Lasers' shot (LZ1), every replica's alike, in place of its shot and power part: the owner's sound goes in
+## assets/audio/cues/shot_laser_1.wav onwards, mixed from the owner's laser recordings (tools/laser_sound.py).
+const LASER_CUE := &"shot_laser"
 ## The inspect's cues (InspectPose.sound_cue) that name the replica's own sound, not a shared one.
 const INSPECT_MAG_IN := &"magIn"
 const INSPECT_MAG_OUT := &"magOut"
@@ -190,7 +193,7 @@ func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, quer
 	for cue: String in ["selector", "draw", "reloadRefused", "bodyHit", "hitTick", "hitMarker", "count_beep", "vault",
 			"foley_holster", "magRattle", "rope_up", "rope_down", "steelRing", "radio_ack", "foley_crouch", "foley_stand",
 			"foley_lean", "whistle_short", "whistle_long", "torchClick", "ping_pip", "magToss", "magCatch", "grenade_pin",
-			"grenade_bounce", "smoke_pop", "flash_bang", "door_open", "door_shut", BOLT_CUE, DRY_CUE]:
+			"grenade_bounce", "smoke_pop", "flash_bang", "door_open", "door_shut", BOLT_CUE, DRY_CUE, LASER_CUE]:
 		_load(cue)
 	_set_muffle(cfg.muffled_cutoff_hz)
 	for i in cfg.field_voices:
@@ -241,10 +244,14 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				var muffled := _muffled(state, e.actor, e.slot)
 				var shooter := state.character(e.actor)
 				var reach := _cfg.shot_reach * (MinimapHearing.heard_scale(shooter, e.slot) if shooter != null else 1.0)
-				_play(_shot.get(p, &""), e.position, own, _cfg.shot_gain * (_cfg.muffled_gain if muffled else 1.0),
-						Kind.SHOT, BUS_MUFFLED if muffled else BUS_EFFECTS, 1.0, reach, shooter)
-				_play(_power.get(p, &""), e.position, own, _power_gain.get(p, _cfg.power_gain), Kind.SHOT, BUS_POWER, 1.0,
-						reach, shooter)
+				if e.value2 == GameEvent.SHOT_LASER:
+					_play(LASER_CUE, e.position, own, _cfg.laser_gain * (_cfg.muffled_gain if muffled else 1.0), Kind.SHOT,
+							BUS_MUFFLED if muffled else BUS_EFFECTS, 1.0, reach, shooter)
+				else:
+					_play(_shot.get(p, &""), e.position, own, _cfg.shot_gain * (_cfg.muffled_gain if muffled else 1.0),
+							Kind.SHOT, BUS_MUFFLED if muffled else BUS_EFFECTS, 1.0, reach, shooter)
+					_play(_power.get(p, &""), e.position, own, _power_gain.get(p, _cfg.power_gain), Kind.SHOT, BUS_POWER,
+							1.0, reach, shooter)
 				# A spring rifle is cocked by hand after every shot: the charging handle back and home (SN1).
 				if _bolt_action(state, e.actor, e.slot):
 					_mechanism(BOLT_CUE, state, e, own)

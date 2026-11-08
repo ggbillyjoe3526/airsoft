@@ -309,8 +309,11 @@ static func _heading_for_cover(b: Bot, w: BotWorld) -> bool:
 			>= w.cfg.cover_arrive
 
 
-## Seconds `b`'s BB takes to fly `dist` m: the replica in its hands, with the BBs it loads.
+## Seconds `b`'s BB takes to fly `dist` m: the replica in its hands, with the BBs it loads; none for a laser (Dev ›
+## Lasers, LZ1), which hits at once, so a bot leads nobody and its friendly-fire check has no flight to cover.
 static func flight_time(b: Bot, w: BotWorld, dist: float) -> float:
+	if b.character.lasers:
+		return 0.0
 	var a := b.character.armament
 	var r := a.replica()
 	if r == null:

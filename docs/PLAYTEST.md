@@ -190,6 +190,12 @@ never players.
   Start a match: everyone is human. Turn on Settings › Dev › Robots (off at first) in the pause menu: this match is
   unchanged; start the next one: both teams mix humans and robots. Turn Robots off and the match after is all human
   again.
+- [ ] **Lasers, the Dev Easter egg** (LZ1). With Settings › Dev › Lasers off (it starts off), BBs fly, arc and hit
+  exactly as before. Turn it on: every replica, yours and the bots', fires a solid beam in its team colour that hits at
+  once (no flight, no drop). Semi and the Sniper Rifle flash once a shot, burst flashes three times, and full auto keeps
+  the beam on while the trigger is held (try the AEG outdoors: indoor maps start on semi). The beam starts at the
+  muzzle, ends on what it hit, and plays the laser sound instead of the shot. Bots hit more often (nothing to dodge);
+  is it fun? Turn it off mid-match: the next shot is a BB again.
 - [ ] **Hit flinch.** Hit a bot side-on, then one from behind (with Dev › Robots on, try a robot too): its upper body
   snaps the way the BB flew (sideways, then forward) and eases back upright in under half a second while the hand
   goes up; a far bot's flinch is as quick. Get hit yourself: the replica jolts and drops out of view in a quarter of a
