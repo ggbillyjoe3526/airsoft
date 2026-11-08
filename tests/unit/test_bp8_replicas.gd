@@ -254,23 +254,33 @@ func test_at_the_hip_a_scopes_glass_is_plain_glass_and_aimed_it_is_the_sight() -
 	hands._glass.update(held.window, 0.0)
 	assert_true(held.window.disc.visible, "the glass shows at the hip")
 	assert_not_null(held.window.hip_material, "a scope has a hip glass")
-	assert_eq(held.window.disc.material_override, held.window.hip_material, "as plain glass, its own material")
+	assert_eq(held.window.disc.material_override, held.window.hip_material, "as clear glass, its own material")
 	assert_eq((held.window.hip_material.shader as Shader).resource_path, "res://game/play/optic_glass_hip.gdshader")
-	assert_eq(hands._glass._port.render_target_update_mode, SubViewport.UPDATE_DISABLED, "no second camera drawing")
+	var glass := hands._glass
+	assert_eq(glass._port.render_target_update_mode, SubViewport.UPDATE_ALWAYS, "the field behind it drawn")
+	var span: float = held.window.hip_material.get_shader_parameter(&"span")
+	var eye_fov := glass._eyes.fov
+	assert_almost_eq(tan(deg_to_rad(glass._camera.fov) * 0.5), span * tan(deg_to_rad(eye_fov) * 0.5), 1e-5,
+			"at the main view's own scale: what lies behind the glass, lined up, unmagnified")
+	assert_null(glass.drawing_camera(), "no zoomed detail for figures at the hip")
 	held.root.position = Vector3(0.0, 0.0, ViewModelConfig.new().aim_forward[&"aeg"]) - held.rear_sight
-	hands._glass.update(held.window, 1.0)
+	glass.update(held.window, 1.0)
 	assert_eq(held.window.disc.material_override, held.window.material, "aimed: the magnified sight's material")
-	assert_eq(hands._glass._port.render_target_update_mode, SubViewport.UPDATE_ALWAYS)
+	assert_eq(glass._port.render_target_update_mode, SubViewport.UPDATE_ALWAYS)
+	assert_eq(glass.drawing_camera(), glass._camera)
+	span = held.window.material.get_shader_parameter(&"span")
+	assert_almost_eq(tan(deg_to_rad(glass._camera.fov) * 0.5),
+			span * tan(deg_to_rad(ViewConfig.new().vertical_fov()) * 0.5) / held.window.magnify, 1e-5, "magnified")
 	held.root.position = Vector3(0.13, -0.16, -0.32)
 	hands._glass.update(held.window, 0.0)
 	assert_eq(held.window.disc.material_override, held.window.hip_material, "back at the hip: the hip glass again")
 	hands._glass.update(null, 0.0)
 
 
-func test_only_the_hip_glass_samples_the_screen_and_both_are_prewarmed() -> void:
-	# Performance (BP8): the screen copy hint_screen_texture takes is paid only while a scope is at the hip.
+func test_neither_glass_copies_the_screen_and_both_are_prewarmed() -> void:
+	# Performance (BP8): no screen copy (hint_screen_texture) for any optic's glass.
 	assert_false(OpticGlass.SHADER.code.contains("hint_screen_texture"), "the sight's glass takes no screen copy")
-	assert_true(OpticGlass.HIP_SHADER.code.contains("hint_screen_texture"))
+	assert_false(OpticGlass.HIP_SHADER.code.contains("hint_screen_texture"), "nor the hip glass")
 	var scope := _hands(_kit(AEG, {&"optic": SCOPE}))
 	var warmed := scope.prewarm_glass()
 	var held: ReplicaView.Held = scope._held[0]

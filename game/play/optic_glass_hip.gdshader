@@ -1,14 +1,16 @@
-// A scope's glass in your hands at the hip (OpticGlass, BP8, the owner): plain tinted glass you see through, the main
-// view (drawn before the glass) round where the sight line points, as it is, with a soft reflection across it; no
-// magnification, no reticle and no second camera. Its own shader, swapped in only while a scope is at the hip, so only
-// then does the frame pay the screen copy that hint_screen_texture takes (optic_glass.gdshader takes none).
+// A scope's glass in your hands at the hip (OpticGlass, BP8, the owner): clear glass you see through. The glass's camera
+// draws the field behind the disc at the main view's own scale (no magnification, your replica left out), so the lens
+// shows what really lies behind it, lined up with the view round it; lightly tinted, with a soft reflection across it
+// and the sheen at its edge, so it reads as glass. No reticle, and no screen copy (as optic_glass.gdshader).
 shader_type spatial;
 render_mode unshaded, cull_back, depth_draw_never, shadows_disabled, fog_disabled;
 
-uniform sampler2D screen_view : hint_screen_texture, filter_linear, repeat_disable;
-// Where the glass's centre is on screen, and where the optic aims (a point far along its sight line).
+// The view behind the glass: a square picture centred on the glass, `span` screen heights across.
+uniform sampler2D glass : filter_linear, repeat_disable;
 uniform vec2 centre_uv = vec2(0.5);
-uniform vec2 mark_uv = vec2(0.5);
+uniform float span = 0.25;
+// The screen's width over its height.
+uniform float aspect = 1.7778;
 // The view's tint, and the reflection band's strength at its brightest.
 uniform vec3 hip_tint : source_color = vec3(0.8, 0.87, 0.92);
 uniform float hip_shine = 0.22;
@@ -36,9 +38,10 @@ void fragment() {
 	if (inside <= 0.0) {
 		discard;
 	}
-	vec3 ahead = texture(screen_view, clamp(mark_uv + SCREEN_UV - centre_uv, vec2(0.0), vec2(1.0))).rgb;
+	vec2 from_centre = (SCREEN_UV - centre_uv) * vec2(aspect, 1.0);
+	vec3 behind = texture(glass, vec2(0.5) + from_centre / span).rgb;
 	float along = (UV.x + UV.y - BAND_AT) * BAND_SHARP;
-	vec3 col = mix(ahead * hip_tint, sheen_colour, exp(-along * along) * hip_shine);
+	vec3 col = mix(behind * hip_tint, sheen_colour, exp(-along * along) * hip_shine);
 	float rim = clamp((r - (1.0 - sheen_px * edge)) / (sheen_px * edge), 0.0, 1.0) * sheen;
 	ALBEDO = mix(col, sheen_colour, rim);
 	ALPHA = inside;

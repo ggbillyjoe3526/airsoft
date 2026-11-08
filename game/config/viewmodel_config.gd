@@ -32,8 +32,8 @@ extends Resource
 ## picture this share of the screen's height on a side.
 @export var glass_margin: float = 1.15
 @export var glass_share: float = 0.25
-## At the hip a scope's glass (one that magnifies) reads as plain glass you see through (BP8, the owner): the view
-## ahead along its sight line, unmagnified, tinted `hip_glass_tint` with a soft reflection `hip_glass_shine` strong;
+## At the hip a scope's glass (one that magnifies) reads as clear glass you see through (BP8, the owner): the field
+## behind it, unmagnified, tinted `hip_glass_tint` with a soft reflection `hip_glass_shine` strong;
 ## its magnified picture and reticle show only with the sight raised.
 @export var hip_glass_tint: Color = Color(0.8, 0.87, 0.92)
 @export var hip_glass_shine: float = 0.22
