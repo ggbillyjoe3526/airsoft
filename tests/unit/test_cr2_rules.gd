@@ -47,7 +47,7 @@ func test_skirmish_shows_the_chips_and_its_blurb_and_no_rows() -> void:
 	assert_eq(box.blurb_text(), "The match as you know it: 6v6, first to 5, 2:30 rounds, friendly fire on.")
 	assert_eq(page.chip_texts(), PackedStringArray(["6 v 6", "First to 5", "Rounds 2:30", "Ends swap after 4",
 			"Ricochets Don't count", "Friendly fire On"]))
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Normal bots")
+	assert_eq(page.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Normal bots")
 
 
 func test_picking_custom_shows_the_rows_and_its_blurb_and_reaches_the_picks() -> void:
@@ -181,15 +181,15 @@ func test_a_change_tells_the_settings_listeners_once() -> void:
 
 func test_the_summary_line_adds_custom_and_its_team_size() -> void:
 	var page := _page()
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Normal bots")
+	assert_eq(page.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Normal bots")
 	_custom(page)
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Normal bots · Custom 6v6")
+	assert_eq(page.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Normal bots · Custom 6v6")
 	page.rules_box().team_size_choice().button(7).pressed.emit()
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Normal bots · Custom 8v8")
+	assert_eq(page.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Normal bots · Custom 8v8")
 	page.bot_button("hard").pressed.emit()
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Hard bots · Custom 8v8")
+	assert_eq(page.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Hard bots · Custom 8v8")
 	page.rules_box().rules_button(SKIRMISH).pressed.emit()
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Hard bots")
+	assert_eq(page.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Hard bots")
 
 
 func test_the_summary_in_attack_defend_keeps_custom_last() -> void:
@@ -243,7 +243,7 @@ func test_a_page_built_with_custom_picked_reads_custom_from_the_start() -> void:
 	add_child_autofree(page)
 	assert_eq(page.map_check_size(), 6)
 	assert_eq(page.mode_blurb(MatchOptions.MODE_ELIMINATION), "Knock out the other team. First to 10 rounds.")
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Normal bots · Custom 6v6")
+	assert_eq(page.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Normal bots · Custom 6v6")
 
 
 # --- the words and the code behind them ---
