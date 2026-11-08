@@ -39,9 +39,10 @@ extends Resource
 @export var hip_glass_shine: float = 0.22
 ## The hip glass shows the field behind it from this Mesh detail up (the glass's camera drawing it, without the dearer
 ## effects: OpticGlass); below it (Low) a scope's glass at the hip is a still tinted glass, `hip_glass_still`, under its
-## reflection, and no camera draws (BP8 performance: Low holds 60 FPS on a low-powered PC).
+## reflection, and no camera draws (BP8 performance: Low holds 60 FPS on a low-powered PC). The still tint is a light
+## sky-grey, so the glass reads as clear glass catching the sky rather than a dark lens cap.
 @export var hip_glass_camera_from: GraphicsQuality.MeshDetail = GraphicsQuality.MeshDetail.MEDIUM
-@export var hip_glass_still: Color = Color(0.2, 0.25, 0.3)
+@export var hip_glass_still: Color = Color(0.68, 0.74, 0.8)
 ## How far the replica lags behind a turn (m per rad of turn), at most sway_max, springing back at return_rate (1/s).
 @export var sway_per_radian: float = 0.05
 @export var sway_max: float = 0.035

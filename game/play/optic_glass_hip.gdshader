@@ -14,7 +14,7 @@ uniform float span = 0.25;
 uniform float aspect = 1.7778;
 // Whether the glass's camera draws the field behind it; if not, the glass's still colour.
 uniform bool see_through = true;
-uniform vec3 still_colour : source_color = vec3(0.2, 0.25, 0.3);
+uniform vec3 still_colour : source_color = vec3(0.68, 0.74, 0.8);
 // The view's tint, and the reflection band's strength at its brightest.
 uniform vec3 hip_tint : source_color = vec3(0.8, 0.87, 0.92);
 uniform float hip_shine = 0.22;
