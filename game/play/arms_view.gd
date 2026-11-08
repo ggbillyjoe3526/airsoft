@@ -29,6 +29,8 @@ const RELOAD_SUFFIX := "_Reload"
 const LEFT_ARM := "Arm_L"
 ## The model's left meshes end so; the glove's kit and the fingernails begin so (tools/blender/arms/arms.py).
 const LEFT_SUFFIX := "_L"
+## Your left hand's bone, which carries the magazine through a reload.
+const LEFT_HAND := "Hand_L"
 const KIT_PREFIX := "GloveKit_"
 const NAILS_PREFIX := "Nails_"
 ## A grip part's name in the clips' (ReplicaParts: <slot>_<key>).
@@ -58,6 +60,8 @@ var _on: StringName = &""
 ## False while the arms are elsewhere (a bomb in hand: GrenadeView), the hold kept.
 var _shown: bool = true
 var _skeleton: Skeleton3D = null
+## The left hand's bone (-1 without the model's skeleton).
+var _hand: int = -1
 ## The throw drawn over a bomb's hold (none without the model's skeleton).
 var _throw: ArmsThrow = null
 ## Whether the left arm showed when the throw was cut off (`cut_throw`), so it shows while the arms ease back.
@@ -90,6 +94,7 @@ func setup(cfg: ViewModelConfig) -> void:
 	_skeleton = skeletons[0] as Skeleton3D if not skeletons.is_empty() else null
 	if _skeleton != null:
 		_throw = ArmsThrow.new(_skeleton, cfg)
+		_hand = _skeleton.find_bone(LEFT_HAND)
 	for node: Node in _model.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node := node as MeshInstance3D
 		mesh_node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -190,6 +195,19 @@ func follow(anim: AnimationPlayer, delta: float, reload: float = -1.0) -> void:
 ## Whether the left hand is changing the magazine now (its clip posed).
 func reloading() -> bool:
 	return _reload != &"" and _anim != null and _anim.assigned_animation == _reload
+
+
+## The clip changing the magazine on the replica in hand (empty when the model has none for it).
+func reload_clip() -> StringName:
+	return _reload
+
+
+## Your left hand's pose as posed now, in `root`'s space (`root` an ancestor of the arms, as `hold` puts them).
+func left_hand(root: Node3D) -> Transform3D:
+	if _skeleton == null or _hand < 0:
+		return Transform3D.IDENTITY
+	_skeleton.force_update_all_bone_transforms()
+	return root.global_transform.affine_inverse() * _skeleton.global_transform * _skeleton.get_bone_global_pose(_hand)
 
 
 ## Shows the arms skin only (`on`; Dev › Skin-only arms) or gloved, from now; a robot's arms stay as they are.

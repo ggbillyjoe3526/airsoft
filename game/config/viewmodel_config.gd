@@ -86,15 +86,23 @@ extends Resource
 ## through a reload instead (others: the reload_* above, none forward). BP8, only your hand and wrist in view as the
 ## left hand changes the magazine: the rifles tip their muzzles up further and turn less, so their stocks drop out of
 ## the screen's lower right, and come up and out, so your hand is seen taking the magazine off; they and the pistols
-## roll less, so your forearms run down out of view, not across it.
+## roll less, so your forearms run down out of view, not across it; the pistols tip their muzzles well up and come up
+## a little, so their grips' base sits over a third of the way up the screen (your left hand seen taking the magazine
+## out and seating the fresh one) while your right forearm stays below it.
 @export var reload_cant_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.6, 0.0, -0.25),
-		&"sniper": Vector3(0.5, 0.1, -0.25), &"pistol": Vector3(0.3, 0.2, -0.3), &"cyber": Vector3(0.3, 0.2, -0.3)}
+		&"sniper": Vector3(0.5, 0.1, -0.25), &"pistol": Vector3(0.9, 0.2, -0.3), &"cyber": Vector3(0.9, 0.2, -0.3)}
 @export var reload_move_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.1, 0.04, 0.06),
-		&"sniper": Vector3(0.06, 0.1, -0.05), &"pistol": Vector3(0.08, 0.06, 0.0), &"cyber": Vector3(0.08, 0.06, 0.0)}
+		&"sniper": Vector3(0.06, 0.1, -0.05), &"pistol": Vector3(0.1, 0.06, 0.0), &"cyber": Vector3(0.1, 0.06, 0.0)}
 ## A replica listed here comes into its cant over this share of the reload, holds it and goes back over the same share
 ## at the end (a rifle's magazine is out of the well in the first quarter: the cant is there by then, BP8); others ease
 ## in and out as one bell, sin(PI * share).
-@export var reload_rise: Dictionary[StringName, float] = {&"aeg": 0.15, &"sniper": 0.15}
+@export var reload_rise: Dictionary[StringName, float] = {&"aeg": 0.15, &"sniper": 0.15, &"pistol": 0.2, &"cyber": 0.2}
+## Your left hand carries the magazine from this share of a replica's reload to this one (x, y; BP8): it takes the old
+## one as the replica's clip starts it down, takes it down out of view, brings the fresh one up in hand and lets go as
+## it slides home, the magazine going where the hand goes (MagazineCarry). The arms' build keys the hand's catch and
+## let-go at these shares (tools/blender/arms/magazine.py), so each is a whole frame of the clip (60 a second).
+@export var reload_carry: Dictionary[StringName, Vector2] = {&"aeg": Vector2(0.1111, 0.6759),
+		&"sniper": Vector2(0.1111, 0.6759), &"pistol": Vector2(0.1389, 0.5694), &"cyber": Vector2(0.1515, 0.5909)}
 ## Working a bolt at the hip (BP7, row 17): while the arms' bolt clip runs, the replica is canted toward the eye
 ## so the right hand stays on screen (rad at the clip's middle: muzzle up, roll, turn; m: lift, inward), eased in and out
 ## over the clip as a bell and drawn less as the sight comes up (none aimed); Reduced motion draws its reload_cant share.
