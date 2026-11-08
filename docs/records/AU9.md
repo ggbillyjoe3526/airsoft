@@ -1,13 +1,13 @@
 # AU9 · The owner's wood steps, metal bin and woods at night
 
-**Review:** pending
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-08 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | balanced wood steps started and ended off zero (a tick) |
-| 2026-11-08 | 2 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-08 | 2 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 ## Decisions
 
