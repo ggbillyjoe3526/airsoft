@@ -2,7 +2,8 @@ class_name HudFlagGauge
 extends Control
 ## Attack / Defend's flag gauge under the score bar (concept `hud-attack.png`): "FLAG", one notch per ratchet step of the
 ## rope filled up to the flag's height in the attacking team's colour, a white line where the flag is, and a flag at
-## the top end. With gauge patterns on (set_patterned), a striped team's fill (HudStyle.STRIPED_TEAM, Beta's) is striped
+## the top end. While a raised flag is held (FlagConfig.hold_time, BP8) "FLAG" reads "HOLD 4", the whole seconds left.
+## With gauge patterns on (set_patterned), a striped team's fill (HudStyle.STRIPED_TEAM, Beta's) is striped
 ## too: each notch's GaugePattern is built again only when the gauge's size changes. Redraws only when the filled
 ## notches, the line, the colour or the stripes change.
 
@@ -23,6 +24,8 @@ var _notches: int = 12
 var _progress: float = -1.0
 var _colour: Color = Color.WHITE
 var _label: Label = null
+## The hold's whole seconds left shown in the label; -1: none ("FLAG").
+var _hold_left: int = -1
 var _pennant := PackedVector2Array([Vector2.ZERO, Vector2.ZERO, Vector2.ZERO])
 var _mast := Rect2()
 var _patterned: bool = false
@@ -58,6 +61,20 @@ func set_flag(progress: float, colour: Color, striped: bool = false) -> void:
 	_colour = colour
 	_striped = striped
 	queue_redraw()
+
+
+## The raised flag's hold: `left` whole seconds to go ("HOLD 4"), or -1 for none ("FLAG"). Words change only when
+## `left` does.
+func set_hold(left: int) -> void:
+	if left == _hold_left:
+		return
+	_hold_left = left
+	_label.text = HudStyle.caps("HUD_FLAG") if left < 0 else (tr("HUD_FLAG_HOLD") % left).to_upper()
+
+
+## The label's words, for tests.
+func label_text() -> String:
+	return _label.text
 
 
 ## Gauge patterns on or off.

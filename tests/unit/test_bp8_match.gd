@@ -124,3 +124,61 @@ func test_the_loadout_page_picks_each_slot() -> void:
 	var bomb := slot1.find_child("Bomb", true, false) as Label
 	assert_eq(bomb.text, "FLASH", "the tile shows its bomb")
 	assert_eq((slot1.find_children("*", "GrenadeGlyph", true, false)[0] as GrenadeGlyph).kind, Grenade.Kind.FLASH)
+
+
+# --- 16: the flag's raise and hold ---
+
+
+func _flag_step(flag: FlagState, cs: Array[Character], cfg: FlagConfig, seconds: float) -> bool:
+	var events := SimEvents.new()
+	var won := false
+	for i in ceili(seconds * 60.0 - 1e-6):
+		events.clear()
+		won = Flag.step(flag, cs, 0, cfg, events, 1.0 / 60.0)
+		if won:
+			return true
+	return won
+
+
+func test_the_raise_takes_longer_and_a_raised_flag_must_be_held() -> void:
+	var cfg := SimTuning.load_default().flag
+	assert_eq(cfg.raise_time, 7.5, "half as long again as 5 s")
+	assert_eq(cfg.hold_time, 5.0)
+	var flag := FlagState.new()
+	flag.reset(Vector3.ZERO)
+	var none: Array[ReplicaConfig] = []
+	var attacker := Character.new(0, 0, Vector3(0.5, 0.0, 0.0), 0.0, none)
+	var defender := Character.new(1, 1, Vector3(50.0, 0.0, 0.0), 0.0, none)
+	var cs: Array[Character] = [attacker, defender]
+	assert_false(_flag_step(flag, cs, cfg, cfg.raise_time - 0.1), "not up yet")
+	assert_false(_flag_step(flag, cs, cfg, 0.2), "raised, not yet held")
+	assert_eq(flag.progress, 1.0)
+	attacker.position = Vector3(50.0, 0.0, 5.0)
+	assert_false(_flag_step(flag, cs, cfg, cfg.hold_time - 1.0), "held by nobody: it stays up and counts")
+	assert_gt(flag.held, cfg.hold_time - 1.2)
+	defender.position = Vector3(0.5, 0.0, 0.0)
+	attacker.position = Vector3(-0.5, 0.0, 0.0)
+	_flag_step(flag, cs, cfg, 2.0)
+	assert_eq(flag.status, FlagState.Status.CONTESTED)
+	assert_gt(flag.held, cfg.hold_time - 1.2, "both on the rope pause the hold")
+	assert_lt(flag.held, cfg.hold_time)
+	attacker.position = Vector3(50.0, 0.0, 5.0)
+	_flag_step(flag, cs, cfg, 0.1)
+	assert_lt(flag.progress, 1.0, "a defender alone pulls it off the top")
+	assert_eq(flag.held, 0.0, "and the hold starts again")
+	defender.position = Vector3(50.0, 0.0, 0.0)
+	attacker.position = Vector3(0.5, 0.0, 0.0)
+	assert_false(_flag_step(flag, cs, cfg, 0.5))
+	assert_true(_flag_step(flag, cs, cfg, cfg.hold_time + 0.1), "held the whole hold: the attackers win")
+	assert_true(Flag.rope_worked([flag] as Array[FlagState]), "a raised flag held plays on past the buzzer")
+
+
+func test_the_gauge_counts_the_hold_down() -> void:
+	var gauge := HudFlagGauge.new()
+	gauge.setup(12, 300.0)
+	add_child_autofree(gauge)
+	assert_eq(gauge.label_text(), "FLAG")
+	gauge.set_hold(4)
+	assert_eq(gauge.label_text(), "HOLD 4")
+	gauge.set_hold(-1)
+	assert_eq(gauge.label_text(), "FLAG")

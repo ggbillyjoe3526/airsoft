@@ -25,6 +25,8 @@ func before_each() -> void:
 	rules.wins_needed = 3
 	rules.half_time_after = 2
 	flag_cfg = tuning.flag
+	# The raise wins at once here; the hold after it (BP8) is test_bp8_match.gd's.
+	flag_cfg.hold_time = 0.0
 	ends = [_end(-20.0, [0.0, 1.0]), _end(20.0, [2.0, 3.0])]
 	events = SimEvents.new()
 	rs = RoundState.new()

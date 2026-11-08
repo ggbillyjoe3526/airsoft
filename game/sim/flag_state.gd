@@ -11,6 +11,8 @@ enum Status { IDLE, RAISING, LOWERING, CONTESTED }
 var position: Vector3 = Vector3.ZERO
 ## How far up the pole the attackers' flag is: 0 the bottom, 1 raised (the attackers win).
 var progress: float = 0.0
+## Seconds the flag has stayed fully raised (FlagConfig.hold_time of them win); 0 off the top.
+var held: float = 0.0
 var status: Status = Status.IDLE
 
 
@@ -18,4 +20,5 @@ var status: Status = Status.IDLE
 func reset(at: Vector3) -> void:
 	position = at
 	progress = 0.0
+	held = 0.0
 	status = Status.IDLE

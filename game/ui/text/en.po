@@ -138,6 +138,9 @@ msgstr "OT"
 msgid "HUD_FLAG"
 msgstr "Flag"
 
+msgid "HUD_FLAG_HOLD"
+msgstr "Hold %d"
+
 msgid "HUD_FLAG_DISTANCE"
 msgstr "· %d m"
 

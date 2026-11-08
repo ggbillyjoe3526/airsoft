@@ -1022,6 +1022,8 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 		_shown_pole = _next_shown(rs)
 		var top := rs.flags[_shown_pole]
 		_gauge.set_flag(top.progress, _teams.colours[rs.attackers], rs.attackers == HudStyle.STRIPED_TEAM)
+		var holding := top.progress >= 1.0 and _sim.flag.hold_time > 0.0 and rs.is_live()
+		_gauge.set_hold(ceili(_sim.flag.hold_time - top.held) if holding else -1)
 	_update_warning(rs, delta)
 	if _readout != null:
 		_readout.visible = state.challenge.phase == RangeChallenge.Phase.OFF

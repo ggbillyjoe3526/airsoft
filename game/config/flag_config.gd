@@ -10,13 +10,17 @@ extends Resource
 ## ... with their feet within this height of the pole's foot (m, BP4): a player on a roof or a floor above, inside the
 ## radius flat, doesn't work the rope (OvertimeConfig.reach_height's rule).
 @export var reach_height: float = 1.0
-## Seconds for the attackers to raise the flag from the bottom to the top: short enough to finish between two peeks
-## (6 s made the pole rarely decide a round).
-@export var raise_time: float = 5.0
+## Seconds for the attackers to raise the flag from the bottom to the top (BP8, owner: longer, 5 s made a raise too
+## quick to answer; 6 s once made the pole rarely decide a round, before the hold).
+@export var raise_time: float = 7.5
+## Once fully raised, the flag must stay up this long (s) for the attackers to win (BP8, owner: hold the flag): a
+## defender on the rope pulls it off the top and the hold starts again from nothing; both teams on the rope pause it.
+## 0: raised wins at once.
+@export var hold_time: float = 5.0
 ## Seconds for the defenders to pull it from the top to the bottom: a retake needs no long stand in the open.
 @export var lower_time: float = 3.0
-## Time running out while the attackers work the rope (raising, or contesting it) goes on until they stop, for at most
-## this long (s): long enough to finish a raise well under way.
+## Time running out while the attackers work the rope (raising, or contesting it) or hold a raised flag goes on until
+## they stop, for at most this long (s): long enough to finish a raise well under way and its hold.
 @export var max_overtime: float = 15.0
 ## The rope ratchets audibly every this share of the pole (a FLAG_ROPE event).
 @export var rope_step: float = 1.0 / 12.0
