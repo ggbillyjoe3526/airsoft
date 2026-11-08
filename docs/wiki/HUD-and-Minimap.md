@@ -121,7 +121,7 @@ Hold **M** (Map in Settings › Controls) to see the whole field, north up, as b
 screen. The header names the map, the round and the mode, and says what your side must do this round ("You attack:
 raise the flag at A / B", "You defend", "Knock out the other team"). A key down the right explains every mark.
 
-On top of what the minimap shows (you, your teammates, your Hold Here or Go There spot, your team's pings, and the
+On top of what the minimap shows (you, your teammates, your Hold Here, Go There or Watching Here spot, your team's pings, and the
 other team only where your side heard them) the map marks what never moves:
 
 - **The flags:** in Attack / Defend each flag has a yellow ring and its letter, **A** or **B**. In Elimination a faint

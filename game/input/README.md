@@ -25,6 +25,7 @@ focus loss (`release`), once you are out, and on the range (`allow_orders`). The
 Ping (PN1, the middle mouse button, "Squad: ping a spot"): a press fills the next tick's `PlayerCommand.ping` once,
 dead on the range as the order keys are (`allow_orders`); the simulation drops one while you are out or between rounds.
 Go there (FM1, mouse button 4, "Squad: go there", and the order wheel's Go There) is a ping with `ping_move` set.
+Watching here (BP8, the order wheel's Watching Here, no key) is a ping with `ping_watch` set.
 
 The full-screen map (FM1, M held, "Map (hold)"): like the wheel, the mouse moves its own pointer (`MapPointer`,
 `ControlsConfig.map_gain` times the sensitivity, kept on the map's square, which the HUD frames each frame) instead of

@@ -121,7 +121,8 @@ func in_enemy_half(b: Bot) -> bool:
 ## field first: there the other team, sweeping its own lane the other way, comes back through. A spot the bot sees empty
 ## from where it stands is checked there and then, and picked only if every spot drawn was one. A spot is on the highest
 ## walkable floor over it a route from the bot reaches (inside a hut, not on its roof); one with none is drawn again. At
-## night a bot that keeps dark moves its pick out of the light. False if none turned up.
+## night a bot that keeps dark moves its pick out of the light. A spot in the area a player of its team covers (Watching
+## here, BotWorld.covered) is never picked. False if none turned up.
 func hunt_point(b: Bot, w: BotWorld) -> bool:
 	var cfg := w.cfg
 	var team := b.character.team
@@ -138,8 +139,11 @@ func hunt_point(b: Bot, w: BotWorld) -> bool:
 		var k := _reached_floor(w.nav, home, w.nav.node_at(spot))
 		if k < 0:
 			continue
-		found += 1
 		spot.y = w.nav.floor_y[k]
+		# Watching here (BP8): the area a teammate player covers is theirs; the bot hunts elsewhere.
+		if w.covered(team, spot):
+			continue
+		found += 1
 		var score := maxf(w.visited_at(team, spot), stale) + Vector2(spot.x - mid.x, spot.z - mid.z).length() \
 				* cfg.hunt_middle_bias
 		if cfg.hunt_clear_range > 0.0 and BotSenses.sees_spot(b.character, spot, cfg.hunt_clear_range, w):

@@ -5,8 +5,8 @@ extends SceneTree
 ## of the locomotion clips (GA1). Needs a display and OpenGL, so under xvfb:
 ##   xvfb-run -a -s "-screen 0 960x720x24" godot --path . --rendering-driver opengl3 -s res://tools/gait_pictures.gd \
 ##       -- <folder> [gait ...] [view=side|front|quarter]
-## Gaits: walk, run, back, left, right, sprint, crouch, kneel (crouched still), call (the hit call), off (walking off);
-## all by default. Each gait writes <folder>/<gait>_<nnn>.png, one a frame at 30 fps over SECONDS. Dev only: tools/
+## Gaits: walk, run, back, left, right, sprint, crouch, kneel (crouched still), call (the hit call), off (walking off),
+## run_away and sprint_away (the replica put away: Holster's and Holster_Sprint's arms, BP8); all by default. Each gait writes <folder>/<gait>_<nnn>.png, one a frame at 30 fps over SECONDS. Dev only: tools/
 ## never ships.
 
 const SIZE := Vector2i(960, 720)
@@ -20,7 +20,7 @@ const FOV := 40.0
 const DISTANCE := 5.2
 const LOOK_HEIGHT := 0.9
 const CHECKER := 0.5
-## Each gait: the step in the figure's frame (x right, y ahead, m/s), crouched, sprinting.
+## Each gait: the step in the figure's frame (x right, y ahead, m/s), crouched, sprinting and (optional) holstered.
 const GAITS := {
 	"walk": [Vector2(0.0, 2.3), 0.0, false],
 	"run": [Vector2(0.0, 4.2), 0.0, false],
@@ -32,6 +32,8 @@ const GAITS := {
 	"kneel": [Vector2.ZERO, 1.0, false],
 	"call": [Vector2.ZERO, 0.0, false],
 	"off": [Vector2(0.0, 1.4), 0.0, false],
+	"run_away": [Vector2(0.0, 4.2), 0.0, false, true],
+	"sprint_away": [Vector2(0.0, 6.3), 0.0, true, true],
 }
 ## The gaits filmed from their first tick (the hit call and the walk off after it), and each one's Character.Status.
 const STATUS := {"call": Character.Status.CALLING, "off": Character.Status.WALKING_OFF}
@@ -78,6 +80,7 @@ func _run() -> void:
 		c.crouch_amount = spec[1]
 		c.prev_crouch_amount = spec[1]
 		c.sprinting = spec[2]
+		c.armament.holstered = spec.size() > 3 and spec[3]
 		var step: Vector2 = spec[0]
 		# The figure faces -Z (yaw 0): ahead is -Z, its right +X.
 		c.velocity = Vector3(step.x, 0.0, -step.y)

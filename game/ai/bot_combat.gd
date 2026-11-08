@@ -61,6 +61,10 @@ static func aim(b: Bot, w: BotWorld, target: Character, eye: Vector3, walking: b
 		var spot := Vector3(b.last_known.x, y, b.last_known.z)
 		_look_yaw = BotAim.look_yaw(eye, spot)
 		_look_pitch = BotAim.look_pitch(eye, spot)
+	elif b.mode == Bot.Mode.ORDER and not walking and b.order == SquadOrder.Kind.WATCH \
+			and _watch_look(b, w, eye):
+		# Watching here (BP8): beside the giver, looking at the spot they marked, at head height there.
+		pass
 	elif b.mode == Bot.Mode.ORDER and (not walking or (b.order == SquadOrder.Kind.FOLLOW and not b.order_rush)):
 		# A squad order: at its spot, look the way the order says; keeping up behind its giver, keep covering their back
 		# on the move too (only hurrying, it looks where it runs).
@@ -124,12 +128,26 @@ static func _held_angle_look(b: Bot, w: BotWorld, eye: Vector3, facing_yaw: floa
 				w.angle_bushes)
 	if b.held_angle_count == 0:
 		return null
-	var a: BotAngles.HeldAngle = b.held_angles[floori(b.team_wait / cfg.angle_switch_time) % b.held_angle_count]
+	# Watching here (BP8): an angle into the area a teammate player covers is theirs; the others first, unless none is.
+	var open := 0
+	for i in b.held_angle_count:
+		if not _covered(b, w, b.held_angles[i]):
+			open += 1
+	var skip := open > 0
+	var turn := floori(b.team_wait / cfg.angle_switch_time) % (open if skip else b.held_angle_count)
+	var a: BotAngles.HeldAngle = null
+	for i in b.held_angle_count:
+		if skip and _covered(b, w, b.held_angles[i]):
+			continue
+		if turn == 0:
+			a = b.held_angles[i]
+			break
+		turn -= 1
 	if nearest:
 		a = null
 		for i in b.held_angle_count:
 			var o := b.held_angles[i]
-			if Vector2(o.point.x - p.x, o.point.z - p.z).length() > within:
+			if Vector2(o.point.x - p.x, o.point.z - p.z).length() > within or (skip and _covered(b, w, o)):
 				continue
 			if a == null or absf(wrapf(o.yaw - facing_yaw, -PI, PI)) < absf(wrapf(a.yaw - facing_yaw, -PI, PI)):
 				a = o
@@ -138,6 +156,25 @@ static func _held_angle_look(b: Bot, w: BotWorld, eye: Vector3, facing_yaw: floa
 	_look_yaw = BotAim.look_yaw(eye, a.point)
 	_look_pitch = BotAim.look_pitch(eye, a.point)
 	return a
+
+
+## Whether held angle `a` looks into the area `b`'s team's player covers (BotWorld.covered): one to leave to them,
+## unless `b` is the teammate that joined them on it.
+static func _covered(b: Bot, w: BotWorld, a: BotAngles.HeldAngle) -> bool:
+	return b.order != SquadOrder.Kind.WATCH and w.covered(b.character.team, a.point)
+
+
+## Watching here's teammate (BP8): looks from `eye` at the spot its team's player marked, at head height there. False
+## with no spot marked.
+static func _watch_look(b: Bot, w: BotWorld, eye: Vector3) -> bool:
+	var team := b.character.team
+	if team < 0 or team >= w.watched.size() or not SquadOrders.is_spot(w.watched[team]):
+		return false
+	var spot := w.watched[team]
+	var head := Vector3(spot.x, spot.y + w.tuning.body.stand_eye_height, spot.z)
+	_look_yaw = BotAim.look_yaw(eye, head)
+	_look_pitch = BotAim.look_pitch(eye, head)
+	return true
 
 
 ## Bursts at the target once reacted and on aim (within fire_cone_deg), never with cover, a close wall, a teammate or

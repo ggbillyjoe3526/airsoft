@@ -22,7 +22,7 @@ so W A S D stays W A S D on any keyboard layout.
 - **Squad: ping a spot** (the middle mouse button) marks where you look for your bot teammates
   ([Squad Orders](Squad-Orders#pings)).
 - **Squad: need a mag** (H) tosses a magazine to a teammate who asked you, or asks for one when you are low
-  ([Squad Orders](Squad-Orders#need-a-mag)); it is also the order wheel's fifth item.
+  ([Squad Orders](Squad-Orders#need-a-mag)); it is also the order wheel's last item, at its upper left.
 - **Throw smoke** (4) and **Throw flash** (5) throw a smoke bomb or a flash bomb where you look at once
   ([Grenades](Grenades)).
 - **Next / previous replica** (the mouse wheel) steps through your two replicas and then your bombs left, smoke then

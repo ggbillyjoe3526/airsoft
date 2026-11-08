@@ -114,6 +114,8 @@ var _order_from_wheel: bool = false
 ## Ping pressed since the last tick, whether a Go there (FM1), and whether on the map at _ping_target.
 var _ping_latch: bool = false
 var _ping_move_latch: bool = false
+## The ping latched is a Watching here (BP8: the wheel's Watching Here).
+var _ping_watch_latch: bool = false
 var _ping_on_map: bool = false
 var _ping_hold_latch: bool = false
 var _ping_target: Vector3 = Vector3.ZERO
@@ -346,14 +348,20 @@ func _latch_order(kind: SquadOrder.Kind, from_wheel: bool) -> void:
 		if _orders_allowed:
 			_latch_ping(true)
 		return
+	if kind == SquadOrder.Kind.WATCH:
+		# Watching here (BP8) is a ping along the view too: the spot you looked at opening the wheel is yours to cover.
+		if _orders_allowed:
+			_latch_ping(false, true)
+		return
 	_order_latch = kind
 	_order_from_wheel = from_wheel
 
 
-## A ping along the view latched for the next tick (`move`: a Go there).
-func _latch_ping(move: bool) -> void:
+## A ping along the view latched for the next tick (`move`: a Go there; `watch`: a Watching here).
+func _latch_ping(move: bool, watch: bool = false) -> void:
 	_ping_latch = true
 	_ping_move_latch = move
+	_ping_watch_latch = watch
 	_ping_on_map = false
 	_ping_hold_latch = false
 
@@ -365,6 +373,7 @@ func _latch_map_ping(move: bool, hold: bool = false) -> void:
 		return
 	_ping_latch = true
 	_ping_move_latch = move
+	_ping_watch_latch = false
 	_ping_hold_latch = hold
 	_ping_on_map = true
 	_ping_target = _map.world()
@@ -373,6 +382,7 @@ func _latch_map_ping(move: bool, hold: bool = false) -> void:
 func _clear_ping() -> void:
 	_ping_latch = false
 	_ping_move_latch = false
+	_ping_watch_latch = false
 	_ping_on_map = false
 	_ping_hold_latch = false
 
@@ -581,6 +591,7 @@ func fill_order(cmd: PlayerCommand) -> void:
 	cmd.order_from_wheel = _order_from_wheel
 	cmd.ping = _ping_latch
 	cmd.ping_move = _ping_latch and _ping_move_latch
+	cmd.ping_watch = _ping_latch and _ping_watch_latch and not _ping_on_map
 	cmd.ping_on_map = _ping_latch and _ping_on_map
 	cmd.ping_hold = _ping_latch and _ping_on_map and _ping_hold_latch
 	cmd.ping_target = _ping_target

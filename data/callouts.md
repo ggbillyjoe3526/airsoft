@@ -61,6 +61,10 @@ plays: the calls are what it already does, put into words.
   it says so. Fills `{area}` (the spot's). Its Checking, Pushing or Flanking is not called as well.
 - **Watching your ping.** As above, when none of them goes (under your order, at its post, holding): the nearest that
   took it says it watches. Fills `{area}`. One answer per ping, so a line with no `{area}` is worth keeping.
+- **Watching with you.** You pick Watching Here on the order wheel: the teammate that comes to cover the spot beside
+  you says so (the rest spread out to other angles). Fills `{area}` (the spot's).
+- **Leaving it to you.** As above, when nobody is free to come: the nearest teammate says they leave the spot to you.
+  Fills `{area}`.
 - **Need a mag.** It runs low on BBs (less than a full spare left) and asks the nearest teammate with one to spare:
   you, when you are nearest, or a bot. Said as soon as its own gap lets it, while it still asks. Fills nothing.
 - **Mag coming.** It sets off to bring a teammate a magazine: one who asked it, or you, when you asked (the Mag key or
@@ -86,6 +90,8 @@ Hit players never talk: they raise a hand, call their hit and walk off, as on a 
 | Tagged | 0.6 | 3 |
 | Going to your ping | 1 | 0 |
 | Watching your ping | 1 | 0 |
+| Watching with you | 1 | 0 |
+| Leaving it to you | 1 | 0 |
 | Need a mag | 1 | 3 |
 | Mag coming | 1 | 0 |
 | Need help | 1 | 0 |
@@ -183,6 +189,13 @@ Hit players never talk: they raise a hand, call their hit and walk off, as on a 
 | Watching your ping | Any | Watching {area}. |
 | Watching your ping | Any | Copy, watching it. |
 | Watching your ping | Anchor | Got {area} covered. |
+| Watching with you | Any | With you. Watching {area}. |
+| Watching with you | Any | Coming, I'll watch it with you. |
+| Watching with you | Any | On your side, eyes on {area}. |
+| Watching with you | Careful | Coming over. Two on {area}. |
+| Leaving it to you | Any | {area} is yours. We'll cover the rest. |
+| Leaving it to you | Any | Copy, you watch it. We'll spread out. |
+| Leaving it to you | Anchor | {area} is yours. I've got the rest. |
 | Need help | Any | Need a hand, {area}! |
 | Need help | Any | Need help, {area}! |
 | Need help | Any | They're all over me, {area}! |
