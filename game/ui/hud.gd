@@ -1124,6 +1124,26 @@ func place_flag_marker(camera: Camera3D, pole: Vector3, show: bool, letter: Stri
 	_flag_eye = camera.global_position
 	_flag_marker.set_letter(letter)
 	_flag_marker.place(camera, pole, show and not _board.visible, size, pin_point(), pin_right_top(), _left_stack_floor())
+	# Never over the round banner or the countdown's plate: it comes back as they go.
+	if _flag_marker.visible and overlaps_any(_flag_marker.occupied(), _stack_rects()):
+		_flag_marker.visible = false
+
+
+## Where the banner and the countdown's plate are now (HUD coordinates), those showing.
+func _stack_rects() -> Array[Rect2]:
+	var out: Array[Rect2] = []
+	for plate: Control in [_banner, _count]:
+		if plate.visible:
+			out.append(Rect2(_middle.position + plate.position, plate.size))
+	return out
+
+
+## Whether `rect` touches any of `others`.
+static func overlaps_any(rect: Rect2, others: Array[Rect2]) -> bool:
+	for other in others:
+		if rect.intersects(other):
+			return true
+	return false
 
 
 ## The pole the flag marker and the gauge show (AB1), as the last update left it.

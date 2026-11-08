@@ -83,6 +83,7 @@ func test_a_bomb_icon_stands_on_a_lighter_plate_and_is_big_enough_to_read() -> v
 	var plate := r._glyph_plates[Grenade.Kind.FLASH - Grenade.Kind.SMOKE][0] as PanelContainer
 	var box := plate.get_theme_stylebox("panel") as StyleBoxFlat
 	assert_gt(box.bg_color.get_luminance(), 0.6, "a light plate under a dark model")
+	assert_gte(box.bg_color.a, 0.75, "mostly opaque, so a dimmed row's plate still stands out from the dark glass")
 	assert_gte(r._glyphs[1][0].custom_minimum_size.y, 44.0, "the icon is the row's height")
 
 
@@ -124,3 +125,28 @@ func test_the_pole_marker_is_not_drawn_through_the_tab_board() -> void:
 	hud._board.visible = false
 	hud.place_flag_marker(camera, Vector3(0.0, 1.0, -20.0), true)
 	assert_true(hud._flag_marker.visible)
+
+
+func test_the_pole_marker_never_sits_on_the_banner_or_the_countdown_plate() -> void:
+	var hud := _hud()
+	hud._banner.show_text("ROUND 1 · DEFEND", "HOLD THE POLE")
+	hud._count.count(2)
+	await wait_process_frames(3)
+	var camera := Camera3D.new()
+	add_child_autofree(camera)
+	var pole := Vector3(0.0, 0.0, -20.0)
+	hud._flag_marker.place(camera, pole, true, hud.size, Vector2.ZERO, 0.0, 1080.0)
+	# slide the stack down to where the marker over the pole is
+	var shift := hud._flag_marker.occupied().position.y - hud._stack_rects()[0].position.y
+	hud._middle.offset_top += shift
+	hud._middle.offset_bottom += shift
+	await wait_process_frames(3)
+	assert_true(Hud.overlaps_any(hud._flag_marker.occupied(), hud._stack_rects()), "the control: left alone it would sit on them")
+	hud.place_flag_marker(camera, pole, true)
+	assert_false(hud._flag_marker.visible, "so it is held back")
+	assert_true(Hud.overlaps_any(Rect2(Vector2(10.0, 10.0), Vector2(5.0, 5.0)), [Rect2(0.0, 0.0, 20.0, 20.0)] as Array[Rect2]))
+	assert_false(Hud.overlaps_any(Rect2(30.0, 30.0, 5.0, 5.0), [Rect2(0.0, 0.0, 20.0, 20.0)] as Array[Rect2]))
+	hud._banner.visible = false
+	hud._count.end()
+	hud.place_flag_marker(camera, pole, true)
+	assert_true(hud._flag_marker.visible, "it is back once they are gone")

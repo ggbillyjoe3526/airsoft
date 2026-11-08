@@ -18,7 +18,7 @@ const ROW_GAP := 8
 const INNER_GAP := 6
 const PLATE_PAD := Vector2i(8, 5)
 ## The plate under a bomb's icon: light, so its dark model stands out (its corner radius, px).
-const GLYPH_PLATE := Color(0.82, 0.86, 0.92, 0.5)
+const GLYPH_PLATE := Color(0.82, 0.86, 0.92, 0.8)
 const GLYPH_RADIUS := 8
 ## The replicas' pictures are drawn this many px on their longer side (drawn once each).
 const PICTURE_SIDE := 256
@@ -38,12 +38,12 @@ var _glyphs: Array = []
 var _glyph_plates: Array = []
 var _lit_box: StyleBoxFlat = null
 var _dim_box: StyleBoxFlat = null
-## Rows: the replica slots first, then SMOKE and FLASH. What is lit now (-1: none) and each bomb's count shown.
+## Rows: the replica slots first, then SMOKE and FLASH. What is lit now (-1: none) and how many of each bomb is left.
 var _slots: int = 0
 var _shown_lit: int = -2
 var _shown_left: PackedInt32Array = PackedInt32Array()
 ## The most of each bomb kind seen carried: a kind never carried has no row (a loadout with 2 smoke and no flash shows
-## one row, "4 smoke 2"); one carried and thrown stays, dim at 0.
+## the smoke row, two icons, and no flash row); one carried and thrown stays, dim at 0.
 var _carried: PackedInt32Array = PackedInt32Array()
 
 

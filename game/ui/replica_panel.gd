@@ -2,11 +2,11 @@ class_name ReplicaPanel
 extends VBoxContainer
 ## The replica panel, bottom right (UI concept B v2 `hud.png`): a compact rounded glass panel with the loaded count and
 ## the spare BBs, then a box per magazine (MagGauges) at the left with the fire modes the replica offers as S / B / A
-## chips beside them, the one in use lit. The replica's name and the bombs are not here (BP8): the weapon rail down the
-## screen's right edge (WeaponRail) shows what you carry and what is in hand. Above the panel two small notes: the hop-up readout while you turn the dial, and the status
-## (reloading, out of BBs, last magazine, holstered, a bomb in hand; nothing while a bomb is thrown). With the HUD tab's
-## ammo counter off there are no counts and each box shows only whether its magazine holds BBs. Text is rebuilt only
-## when what it shows changes.
+## chips beside them (under them with many magazines), the one in use lit. The replica's name and the bombs are not
+## here (BP8): the weapon rail just above the panel (WeaponRail) shows what you carry and what is in hand. Above the
+## panel two small notes: the hop-up readout while you turn the dial, and the status (reloading, out of BBs, last
+## magazine, holstered, a bomb in hand; nothing while a bomb is thrown). With the HUD tab's ammo counter off there are
+## no counts and each box shows only whether its magazine holds BBs. Text is rebuilt only when what it shows changes.
 
 ## The panel's width (px at 1080p), its padding (left, top, right, bottom) and the space between its rows.
 const WIDTH := 176.0

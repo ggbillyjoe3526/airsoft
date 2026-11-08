@@ -78,8 +78,32 @@ func test_the_counter_off_keeps_the_chips() -> void:
 	p.refresh(c.armament, c.grenades)
 	await wait_process_frames(2)
 	assert_false(p.counted())
+	var shown := 0
 	for chip in p._chips:
-		assert_true(chip.is_visible_in_tree() or not chip.visible)
+		if chip.is_visible_in_tree():
+			shown += 1
+	assert_eq(shown, c.armament.replica().fire_modes.size(), "a chip for each fire mode the replica offers")
+	assert_false(p._counts.visible, "and the counts are the part that went")
+
+
+func test_the_fire_chips_sit_beside_a_few_boxes_and_under_many() -> void:
+	var few := _panel(_mags_character(2))
+	await wait_process_frames(3)
+	var box_row := few.gauges().get_global_rect()
+	for chip in few._chips:
+		if chip.visible:
+			assert_eq(chip.get_parent(), few._foot, "beside the boxes")
+			assert_gte(chip.get_global_rect().position.x, box_row.end.x, "to their right")
+	var many := _panel(_mags_character(6))
+	await wait_process_frames(3)
+	var boxes := many.gauges().get_global_rect()
+	var frame := _frame_of(many).get_global_rect()
+	for chip in many._chips:
+		if chip.visible:
+			assert_eq(chip.get_parent(), many._chip_row, "in a row of their own")
+			assert_gte(chip.get_global_rect().position.y, boxes.end.y, "under the boxes")
+			assert_lte(chip.get_global_rect().end.x, frame.end.x + 0.5, "inside the panel")
+	assert_almost_eq(frame.size.x, ReplicaPanel.WIDTH, 0.5)
 
 
 func test_the_score_plate_takes_the_panel_opacity() -> void:
