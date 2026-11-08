@@ -10,7 +10,8 @@ extends SceneTree
 ## fired `turn` degrees left of the view (a turn the view made since the tick: `:<bb seconds>:<turn>`).
 ## A shot named `part_<name>` instead draws one part alone from a parts file, close up: `part_<name>:<file>:<node>:
 ## <x>,<y>,<z>:<x>,<y>,<z>` (camera place and the point it looks at, in the part's space, m). A shot named `*_low` draws
-## the optic glass as the Low preset does (the field itself stays High). Dev only: tools/ never ships.
+## the optic glass as the Low preset does (the field itself stays High); a name with `~<metres>` stands that far to the
+## view's right of the spot (negative: left; the picture named `_x<metres>`). Dev only: tools/ never ships.
 
 const SIZE := Vector2i(1600, 900)
 const QUALITY := 0.92
@@ -42,6 +43,8 @@ func _run() -> void:
 	port.size = SIZE
 	port.msaa_3d = Viewport.MSAA_4X
 	port.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	# As PlaySession: the view is posed on the frame, never interpolated (a new camera's would read a stale place).
+	port.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	root.add_child(port)
 	var sun := LightingConfig.for_map(play.lighting, null, map, LightingConfig.DAY)
 	var level := MapLevel.new()
@@ -64,7 +67,8 @@ func _run() -> void:
 	var failed := 0
 	for shot: String in args.slice(1):
 		var f := shot.split(":")
-		var path := "%s/%s.jpg" % [folder, f[0]]
+		var step := f[0].get_slice("~", 1).to_float() if f[0].contains("~") else 0.0
+		var path := "%s/%s.jpg" % [folder, f[0].replace("~", "_x")]
 		if f[0].begins_with("part_"):
 			failed += await _part(port, f, path)
 			continue
@@ -73,8 +77,9 @@ func _run() -> void:
 		camera.near = play.view.near
 		camera.far = play.view.far
 		port.add_child(camera)
-		camera.global_position = eye
 		camera.global_rotation = Vector3(deg_to_rad(SPOT.w), deg_to_rad(SPOT.z), 0.0)
+		var at := eye + Vector3(camera.global_basis.x.x, 0.0, camera.global_basis.x.z).normalized() * step
+		camera.global_position = at
 		var loadout := rules.default_loadout("render")
 		loadout.equipped[Loadout.Slot.PRIMARY] = f[1]
 		if f[2] != "-":
@@ -83,7 +88,7 @@ func _run() -> void:
 				if not rules.set_part(loadout, f[1], StringName(kv[0]), kv[1]):
 					push_error("render_replica_view: %s won't take %s" % [f[1], pair])
 		var kit := rules.carried(loadout)
-		var c := Character.new(0, 0, Vector3(SPOT.x, ground, SPOT.y), deg_to_rad(SPOT.z), kit.replicas)
+		var c := Character.new(0, 0, Vector3(at.x, ground, at.z), deg_to_rad(SPOT.z), kit.replicas)
 		var hands := ReplicaView.new()
 		camera.add_child(hands)
 		hands.setup(play.viewmodel, kit.replicas, level.query(), kit.paints, false, kit.parts, play.view, camera)
@@ -96,21 +101,21 @@ func _run() -> void:
 		var yaw := deg_to_rad(SPOT.z)
 		var pitch := deg_to_rad(SPOT.w)
 		for i in SETTLE_FRAMES:
-			hands.update(c, yaw, pitch, eye, look, DT, aim)
+			hands.update(c, yaw, pitch, at, look, DT, aim)
 		var inspect := f[4].to_float()
 		if inspect >= 0.0:
 			hands.inspect()
 			var pose: InspectPose = play.viewmodel.inspect_poses.get(r.id, play.viewmodel.inspect_pose_default)
 			var steps := roundi(inspect * pose.duration / DT)
 			for i in maxi(steps, 1):
-				hands.update(c, yaw, pitch, eye, look, DT, aim)
+				hands.update(c, yaw, pitch, at, look, DT, aim)
 		var bbs: BBView = null
 		if f.size() > 5:
 			# The shot kicks the replica as it goes (on_shot), the BB that long on.
 			hands.on_shot()
-			hands.update(c, yaw, pitch, eye, look, f[5].to_float(), aim)
+			hands.update(c, yaw, pitch, at, look, f[5].to_float(), aim)
 			var off := f[6].to_float() if f.size() > 6 else 0.0
-			bbs = _shot(port, play, tuning, c, eye, look.rotated(Vector3.UP, deg_to_rad(off)), hands, f[5].to_float())
+			bbs = _shot(port, play, tuning, c, at, look.rotated(Vector3.UP, deg_to_rad(off)), hands, f[5].to_float())
 		await RenderingServer.frame_post_draw
 		await RenderingServer.frame_post_draw
 		print("[render_replica_view] %s" % path)

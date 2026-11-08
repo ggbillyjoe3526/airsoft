@@ -23,6 +23,8 @@ const SHADER := preload("res://game/play/optic_glass.gdshader")
 const HIP_SHADER := preload("res://game/play/optic_glass_hip.gdshader")
 ## How far along the sight line the optic's aim point is taken (m): far enough to read as straight ahead.
 const AIM_DISTANCE := 100.0
+## The points round a disc's rim measured for its reach on screen at the hip.
+const RIM_POINTS := 8
 ## The disc sits this far nearer the eye than the glass, so the two never fight over depth (m).
 const DISC_LIFT := 0.0005
 
@@ -179,18 +181,52 @@ func update(w: Sight, raise: float) -> void:
 	var centre := w.disc.global_position
 	var centre_px := _eyes.unproject_position(centre)
 	var rim_px := _eyes.unproject_position(centre + _eyes.global_basis.x * w.radius)
-	var span := minf(2.0 * centre_px.distance_to(rim_px) * _cfg.glass_margin / screen.y, _cfg.glass_share)
-	var tan_glass := span * tan(deg_to_rad(_eyes.fov) * 0.5)
-	if w.magnify > 0.0 and not hip:
-		tan_glass = span * tan(deg_to_rad(_view.vertical_fov()) * 0.5) / w.magnify
-	_camera.fov = rad_to_deg(2.0 * atan(tan_glass))
-	_camera.transform = Transform3D(Basis.looking_at(centre - eye, _eyes.global_basis.y), eye)
+	var reach := centre_px.distance_to(rim_px)
+	if hip:
+		reach = _rim_reach(w, centre_px)
+	var span := minf(2.0 * reach * _cfg.glass_margin / screen.y, _cfg.glass_share)
+	if hip:
+		_frame_patch(centre_px / screen, span, screen.x / screen.y)
+	else:
+		var tan_glass := span * tan(deg_to_rad(_eyes.fov) * 0.5)
+		if w.magnify > 0.0:
+			tan_glass = span * tan(deg_to_rad(_view.vertical_fov()) * 0.5) / w.magnify
+		if _camera.projection != Camera3D.PROJECTION_PERSPECTIVE:
+			_camera.projection = Camera3D.PROJECTION_PERSPECTIVE
+		_camera.fov = rad_to_deg(2.0 * atan(tan_glass))
+		_camera.transform = Transform3D(Basis.looking_at(centre - eye, _eyes.global_basis.y), eye)
 	m.set_shader_parameter(&"span", span)
 	m.set_shader_parameter(&"aspect", screen.x / screen.y)
 	m.set_shader_parameter(&"centre_uv", centre_px / screen)
 	if not hip:
 		m.set_shader_parameter(&"screen_h", screen.y)
 		_place_mark(w, screen)
+
+
+## How far from `centre_px` the rim of `w`'s disc reaches on screen (px), at its farthest of RIM_POINTS round it: a
+## disc seen at a slant, off the view's centre, stretches out of round.
+func _rim_reach(w: Sight, centre_px: Vector2) -> float:
+	var b := w.disc.global_basis
+	var centre := w.disc.global_position
+	var reach := 0.0
+	for i in RIM_POINTS:
+		var t := TAU * i / RIM_POINTS
+		var rim := centre + (b.x * cos(t) + b.y * sin(t)) * w.radius
+		reach = maxf(reach, _eyes.unproject_position(rim).distance_to(centre_px))
+	return reach
+
+
+## The glass's camera at the eye, facing as the eye does, its frustum cropped to the square `span` screen heights across
+## centred on `centre_uv` (the screen's width over its height `aspect`): the picture is exactly the patch of the main
+## view behind the glass, wherever the glass is on screen.
+func _frame_patch(centre_uv: Vector2, span: float, aspect: float) -> void:
+	var near := _eyes.near
+	var half_h := near * tan(deg_to_rad(_eyes.fov) * 0.5)
+	if _eyes.keep_aspect == Camera3D.KEEP_WIDTH:
+		half_h /= aspect
+	_camera.transform = _eyes.global_transform
+	_camera.set_frustum(span * 2.0 * half_h,
+			Vector2((2.0 * centre_uv.x - 1.0) * half_h * aspect, (1.0 - 2.0 * centre_uv.y) * half_h), near, _eyes.far)
 
 
 ## Whether `w`'s glass shows as plain glass now, its sight raised `raise` (0..1): a scope's (one that magnifies) at the
