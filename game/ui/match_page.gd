@@ -636,6 +636,8 @@ func _refresh() -> void:
 		_field_mode = picks.mode
 	_last_kind = kind
 	if not MatchOptions.mode_pickable(picks.mode, entry, pole):
+		picks.mode = MatchOptions.DEFAULT_MODE
+	if not MatchOptions.mode_pickable(picks.mode, entry, pole):
 		for mode in MatchOptions.MODES:
 			if MatchOptions.mode_pickable(mode, entry, pole):
 				picks.mode = mode
