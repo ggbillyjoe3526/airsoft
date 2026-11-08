@@ -6,7 +6,8 @@ extends Node
 ## dot on it (optic_glass.gdshader). Round the glass the optic's own model shows and the view is the main camera's, with
 ## nothing dark round it. The second camera draws only while a sight is raised, into a small square picture. At the
 ## hip a scope's disc shows plain tinted glass you see through (BP8, the owner): the main view ahead along its sight
-## line, unmagnified, with no reticle and no second camera drawing; a red dot's glass is its model's own, clear.
+## line, unmagnified, with no reticle and no second camera drawing (its own material, optic_glass_hip.gdshader, swapped
+## in only then: only it pays a screen copy); a red dot's glass is its model's own, clear.
 ## Children: the picture and its camera. The picture
 ## follows the graphics' render scale and edge smoothing (GraphicsApply's `applied`), and copies the field's environment
 ## again after a change, so its ambient occlusion matches the view round it.
@@ -16,6 +17,7 @@ const HANDS_LAYER := 1 << 19
 const ALL_LAYERS := (1 << 20) - 1
 const MARK_DOT := &"dot"
 const SHADER := preload("res://game/play/optic_glass.gdshader")
+const HIP_SHADER := preload("res://game/play/optic_glass_hip.gdshader")
 ## How far along the sight line the optic's aim point is taken (m): far enough to read as straight ahead.
 const AIM_DISTANCE := 100.0
 ## The disc sits this far nearer the eye than the glass, so the two never fight over depth (m).
@@ -27,6 +29,8 @@ class Sight:
 	extends RefCounted
 	var disc: MeshInstance3D = null
 	var material: ShaderMaterial = null
+	## A scope's glass at the hip (null: an optic that doesn't magnify), on the disc only then.
+	var hip_material: ShaderMaterial = null
 	var radius: float = 0.0
 	## How much the glass magnifies (a scope's zoom; 0: it shows the view as it is).
 	var magnify: float = 0.0
@@ -106,8 +110,12 @@ func add_window(model: Node3D, optic: Node3D, key: StringName, sight_line: Vecto
 	w.material.set_shader_parameter(&"glass", _port.get_texture())
 	w.material.set_shader_parameter(&"mark", 0 if _cfg.optic_mark.get(key, MARK_DOT) == MARK_DOT else 1)
 	w.material.set_shader_parameter(&"z_clip_scale", _cfg.depth_scale)
-	w.material.set_shader_parameter(&"hip_tint", _cfg.hip_glass_tint)
-	w.material.set_shader_parameter(&"hip_shine", _cfg.hip_glass_shine)
+	if magnify > 0.0:
+		w.hip_material = ShaderMaterial.new()
+		w.hip_material.shader = HIP_SHADER
+		w.hip_material.set_shader_parameter(&"z_clip_scale", _cfg.depth_scale)
+		w.hip_material.set_shader_parameter(&"hip_tint", _cfg.hip_glass_tint)
+		w.hip_material.set_shader_parameter(&"hip_shine", _cfg.hip_glass_shine)
 	w.disc = MeshInstance3D.new()
 	w.disc.name = "Glass"
 	w.disc.mesh = quad
@@ -135,12 +143,12 @@ func update(w: Sight, raise: float) -> void:
 		return
 	if hip:
 		_stop_drawing()
+		_wear(w, w.hip_material)
 		w.disc.visible = true
 		var size := _eyes.get_viewport().get_visible_rect().size
-		_place_marks(w, size, _eyes.unproject_position(w.disc.global_position))
-		w.material.set_shader_parameter(&"hip", true)
+		_place_marks(w, w.hip_material, size, _eyes.unproject_position(w.disc.global_position))
 		return
-	w.material.set_shader_parameter(&"hip", false)
+	_wear(w, w.material)
 	if not _env_ready:
 		_ready_environment()
 	var screen := _eyes.get_viewport().get_visible_rect().size
@@ -161,7 +169,9 @@ func update(w: Sight, raise: float) -> void:
 	_camera.fov = rad_to_deg(2.0 * atan(tan_glass))
 	_camera.transform = Transform3D(Basis.looking_at(centre - eye, _eyes.global_basis.y), eye)
 	w.material.set_shader_parameter(&"span", span)
-	_place_marks(w, screen, centre_px)
+	w.material.set_shader_parameter(&"aspect", screen.x / screen.y)
+	w.material.set_shader_parameter(&"screen_h", screen.y)
+	_place_marks(w, w.material, screen, centre_px)
 
 
 ## Whether `w`'s glass shows as plain glass now, its sight raised `raise` (0..1): a scope's (one that magnifies) at the
@@ -170,14 +180,17 @@ static func hip_glass(w: Sight, raise: float) -> bool:
 	return w != null and raise <= 0.0 and w.magnify > 0.0
 
 
+## `w`'s disc drawn with `m` (its sight's material or its hip glass's), set only when it changes.
+static func _wear(w: Sight, m: ShaderMaterial) -> void:
+	if w.disc.material_override != m:
+		w.disc.material_override = m
+
+
 ## Where on the `screen` (px) `w`'s glass is (its centre at `centre_px`) and where its sight line points, for its
-## shader.
-func _place_marks(w: Sight, screen: Vector2, centre_px: Vector2) -> void:
+## shader material `m`.
+func _place_marks(w: Sight, m: ShaderMaterial, screen: Vector2, centre_px: Vector2) -> void:
 	var aim := w.model.global_transform * (w.sight_line + Vector3(0.0, 0.0, -AIM_DISTANCE))
-	var m := w.material
 	m.set_shader_parameter(&"centre_uv", centre_px / screen)
-	m.set_shader_parameter(&"aspect", screen.x / screen.y)
-	m.set_shader_parameter(&"screen_h", screen.y)
 	m.set_shader_parameter(&"mark_uv", _eyes.unproject_position(aim) / screen)
 
 

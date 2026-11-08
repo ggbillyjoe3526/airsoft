@@ -253,13 +253,32 @@ func test_at_the_hip_a_scopes_glass_is_plain_glass_and_aimed_it_is_the_sight() -
 	held.root.position = Vector3(0.13, -0.16, -0.32)
 	hands._glass.update(held.window, 0.0)
 	assert_true(held.window.disc.visible, "the glass shows at the hip")
-	assert_true(held.window.material.get_shader_parameter(&"hip"), "as plain glass")
+	assert_not_null(held.window.hip_material, "a scope has a hip glass")
+	assert_eq(held.window.disc.material_override, held.window.hip_material, "as plain glass, its own material")
+	assert_eq((held.window.hip_material.shader as Shader).resource_path, "res://game/play/optic_glass_hip.gdshader")
 	assert_eq(hands._glass._port.render_target_update_mode, SubViewport.UPDATE_DISABLED, "no second camera drawing")
 	held.root.position = Vector3(0.0, 0.0, ViewModelConfig.new().aim_forward[&"aeg"]) - held.rear_sight
 	hands._glass.update(held.window, 1.0)
-	assert_false(held.window.material.get_shader_parameter(&"hip"), "aimed: the magnified sight")
+	assert_eq(held.window.disc.material_override, held.window.material, "aimed: the magnified sight's material")
 	assert_eq(hands._glass._port.render_target_update_mode, SubViewport.UPDATE_ALWAYS)
+	held.root.position = Vector3(0.13, -0.16, -0.32)
+	hands._glass.update(held.window, 0.0)
+	assert_eq(held.window.disc.material_override, held.window.hip_material, "back at the hip: the hip glass again")
 	hands._glass.update(null, 0.0)
+
+
+func test_only_the_hip_glass_samples_the_screen_and_both_are_prewarmed() -> void:
+	# Performance (BP8): the screen copy hint_screen_texture takes is paid only while a scope is at the hip.
+	assert_false(OpticGlass.SHADER.code.contains("hint_screen_texture"), "the sight's glass takes no screen copy")
+	assert_true(OpticGlass.HIP_SHADER.code.contains("hint_screen_texture"))
+	var scope := _hands(_kit(AEG, {&"optic": SCOPE}))
+	var warmed := scope.prewarm_glass()
+	var held: ReplicaView.Held = scope._held[0]
+	assert_true(warmed.has(held.window.material), "the sight's glass warmed")
+	assert_true(warmed.has(held.window.hip_material), "and its hip glass, so its first use doesn't hitch")
+	var dot := _hands(_kit(AEG, {&"optic": RED_DOT}))
+	assert_null((dot._held[0] as ReplicaView.Held).window.hip_material, "a red dot has no hip glass")
+	assert_eq(dot.prewarm_glass().size(), 1)
 
 
 func test_a_red_dot_draws_no_glass_at_the_hip() -> void:
