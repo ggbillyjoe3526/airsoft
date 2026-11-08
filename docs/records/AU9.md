@@ -16,12 +16,14 @@
   raw files sit with the others in the shared `audio/william/raw/`.
 - **Cut, not processed:** the walk (a step every 0.93 s with creaks between) and the run (steps 0.25 s apart that never
   fall quiet) are cut where each step starts (`onsets`, 20 dB rise), the jumps and bangs as his takes; 5 steady steps
-  of each (13, 16 and 11 found), no re-pitching. Each bang is 0.9 s of its ring with a fade, under NoiseConfig.quiet
-  (1.2 s), so one knock never overlaps the next; his two bangs make 3 variants (the third the first 4 % lower).
+  of each (13, 16 and 11 found), no re-pitching. Each bang is 0.9 s of its ring with a fade (0.94 s for the lower
+  third), under NoiseConfig.quiet (1.2 s), so one knock never overlaps the next; his two bangs make 3 variants (the
+  third the first 4 % lower).
 - **Footsteps stay information:** his wood steps are a hollow floor's thuds, almost all under 300 Hz, so the existing
   `balance_steps` rule (DECISIONS › Audio, every ground within 1 dB of concrete overall and 2 dB in 0.7 to 4 kHz)
   lifts their 0.7 to 4 kHz band 12.4 dB (run), 11.2 dB (sprint) and 4.9 dB (land), the rest 2 to 3 dB down. Default:
-  keep the rule (bots and players read the ground by ear); the preview has old and new side by side.
+  keep the rule (bots and players read the ground by ear). The owner heard old and new side by side
+  (`audio/william/preview/au9/`) and answered "perfect" (2026-11-08).
 - **Woods at night** keeps the beds' 40 Hz high-pass only (no wind rumble in it, unlike his woods by day) and the
   night bed's gain, 0.02; the owl and creak calls still play over it. Its 60 s loop adds 5.3 MB to the repository
   (QOA-compressed in exports, like the other beds).
