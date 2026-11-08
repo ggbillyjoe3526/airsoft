@@ -11,8 +11,9 @@ extends RefCounted
 ## machine; it changes nothing else. Retro pixels' block size and shades are its sliders' (BP6). Time of day plays every
 ## map from the next match by Day or Night whatever it offers (the browser's M90; LightingConfig.PRESETS), or as the map
 ## and the Match page pick (""); forcing one keeps the match out of the records, as the browser's cheat did
-## (DevCheats.watching: it changes only what you see). A saved key no switch reads any more (Rigged figures, gone with
-## FI7) is passed over.
+## (DevCheats.watching: it changes only what you see). Lasers (LZ1, an Easter egg) makes every replica on the field fire
+## lasers, instant hits with a beam, instead of BBs, at once; a cheat, so the match is kept out of the records. A saved
+## key no switch reads any more (Rigged figures, gone with FI7) is passed over.
 
 const SPEED_STEP := 0.25
 
@@ -30,6 +31,7 @@ var retro_pixels: bool = false
 var retro_pixel_size: int = RetroPixels.PIXEL_SIZE
 var retro_shades: int = RetroPixels.SHADES
 var robots: bool = false
+var lasers: bool = false
 var pretend_slow_frames: bool = false
 ## A preset id (LightingConfig.PRESETS), or &"" for the map's own.
 var time_of_day: StringName = &""
@@ -45,6 +47,7 @@ func cheats() -> DevCheats:
 	c.bots_run_low = bots_run_low
 	c.watching = spectate_bots or bot_intent or not time_of_day.is_empty()
 	c.levelling_off = disable_levelling
+	c.lasers = lasers
 	return c
 
 
@@ -54,6 +57,7 @@ func to_dict() -> Dictionary:
 		"bottomless": bottomless, "ghost": ghost,
 		"bots_hold_fire": bots_hold_fire, "bots_run_low": bots_run_low, "spectate_bots": spectate_bots, "bot_intent": bot_intent,
 		"retro_pixels": retro_pixels, "retro_pixel_size": retro_pixel_size, "retro_shades": retro_shades, "robots": robots, "pretend_slow_frames": pretend_slow_frames,
+		"lasers": lasers,
 		"time_of_day": String(time_of_day),
 	}
 
@@ -77,6 +81,7 @@ func from_dict(data: Dictionary) -> void:
 			RetroPixels.PIXEL_SIZE_MAX)
 	retro_shades = _whole(data, "retro_shades", RetroPixels.SHADES, RetroPixels.SHADES_MIN, RetroPixels.SHADES_MAX)
 	robots = _flag(data, "robots")
+	lasers = _flag(data, "lasers")
 	pretend_slow_frames = _flag(data, "pretend_slow_frames")
 	var time: Variant = data.get("time_of_day")
 	time_of_day = StringName(time) if time is String and LightingConfig.PRESETS.has(StringName(time)) else &""

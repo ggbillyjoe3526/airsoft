@@ -732,6 +732,12 @@ msgstr "ROBOTS"
 msgid "DEV_ROBOTS_HELP"
 msgstr "Mixes robots in among the humans on both teams, from the next match. Changes only what you see."
 
+msgid "DEV_LASERS"
+msgstr "LASERS"
+
+msgid "DEV_LASERS_HELP"
+msgstr "Every replica on the field fires a laser instead of a BB: an instant hit with a beam you can see. Bots too. Keeps the match out of the records."
+
 msgid "DEV_PRETEND_SLOW_FRAMES"
 msgstr "PRETEND SLOW FRAMES"
 

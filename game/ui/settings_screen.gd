@@ -41,7 +41,8 @@ const PERCENT_STEP := 1.0
 ## Dev › Time of day's choices in order: the map's own (&""), then LightingConfig's presets.
 const DEV_TIMES: Array[StringName] = [&"", LightingConfig.DAY, LightingConfig.NIGHT]
 const DEV_SWITCHES: Array[StringName] = [&"dev_content", &"disable_levelling", &"bottomless", &"ghost",
-		&"bots_hold_fire", &"bots_run_low", &"spectate_bots", &"bot_intent", &"retro_pixels", &"robots", &"pretend_slow_frames"]
+		&"bots_hold_fire", &"bots_run_low", &"spectate_bots", &"bot_intent", &"retro_pixels", &"robots", &"lasers",
+		&"pretend_slow_frames"]
 ## Dev › Actions' error and crash, in the log (English: the log is read by the developer).
 const DEV_TEST_ERROR := "Dev: a test error (Settings › Dev › Log a test error)"
 const DEV_CRASH := "Dev: Settings › Dev › Crash the game now"

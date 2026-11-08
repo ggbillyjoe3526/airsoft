@@ -45,6 +45,11 @@ woods at night, which also leaves The Street's night bed to The Street).
 **Every replica fired empty** plays one cue, `dryFire`: the gas pistol's recorded dry click as it is, for today's
 replicas and any added later (owner, 2026-11-05: final, not a stand-in).
 
+**The laser** (LZ1, 2026-11-08): Dev › Lasers' shot, `shot_laser_1.wav` to `_5`, is the owner's pick, B, of three
+mixes `tools/laser_sound.py` makes from four free laser sound effects he sent (`audio/william/raw/laser/` in the shared
+project files; source and licence in `docs/ASSETS.md`): `--samples` writes the three, `--pick B` its five variants
+(each from its own takes of the pew and zap, a little quicker or slower; the first B as he heard it).
+
 **Placeholders** (AU3, 2026-11-03; AU5; AU6): until the owner records them, 9 cues are his recordings reused,
 re-pitched, filtered or sliced (BBs on concrete, soil and leaves, the steps on soil, and the jumps onto gravel, leaves
 and metal). The script labels each

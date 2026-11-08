@@ -21,6 +21,9 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 ## and the spring's 7 dB, so each is lifted to be heard over a firefight at full Power volume (owner, 2026-11-01: AU1).
 @export var power_gain: float = 2.5
 @export var power_gains: Dictionary[StringName, float] = {&"electric": 4.0, &"gas": 2.2, &"spring": 2.5}
+## Dev › Lasers' shot (LZ1, LASER_CUE in SimAudio) plays alone, in place of the shot and its power part, at this gain:
+## the owner's pick (B, the pew) of three mixes of free laser effects he sent, five variants (tools/laser_sound.py).
+@export var laser_gain: float = 1.0
 @export var mechanism_gain: float = 0.8
 @export var mechanism_pitch: float = 0.04
 @export var step_gain: float = 0.54

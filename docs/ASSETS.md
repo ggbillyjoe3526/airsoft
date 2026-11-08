@@ -5,9 +5,9 @@ licences. No real brand names or trademarked replica designs.
 
 ## External assets
 
-The menus' fonts, Depot's two photo texture sets (its temporary site dress, DD1) and its five CC0 prop models (DR2)
-are the only external files. The game's own models and sounds (made for it, listed below) are the only other asset
-files; there are no external sounds yet. The rest is greybox geometry and materials made in Godot.
+The menus' fonts, Depot's two photo texture sets (its temporary site dress, DD1), its five CC0 prop models (DR2) and
+Dev › Lasers' shot (LZ1, mixed from four free sound effects) are the only external files. The game's own models and
+sounds (made for it, listed below) are the only other asset files. The rest is greybox geometry and materials made in Godot.
 
 CC0 models and textures can replace parts of this later. Record each one here, one row per file, in the format below
 ([CC0_ASSETS.md](CC0_ASSETS.md) is the how-to). A player model goes in `assets/models/characters/`, a replica's in
@@ -40,6 +40,7 @@ CC0 models and textures can replace parts of this later. Record each one here, o
 | `assets/models/props/settee.glb`, `table.glb`, `units.glb`, `fridge.glb` | Lounge Sofa, Table, Kitchen Cabinet and Kitchen Fridge (Kenney Furniture Kit, `furniture/loungeSofa.glb`, `table.glb`, `kitchenCabinet.glb`, `kitchenFridge.glb`; 128, 120, 114 and 250 triangles): the House's settees, dining table, kitchen units and fridge on The Street (ST2), recoloured as above (12 to 44 KB each) | https://kenney.nl/assets/furniture-kit (mirror as above) | CC0 1.0 | Kenney |
 | `tools/blender/figures/source/makehuman_body.obj` (and through it the body under the clothes in `assets/models/characters/human.glb`) | The figure body's anatomy (BL10): the MakeHuman 1.x base mesh (hm08, `makehuman/data/3dobjs/base.obj`) from the neck down, shaped as a young man by MPFB2's macro targets (`caucasian-`, `african-`, `asian-male-young` a third each, a fifth of `universal-male-young-maxmuscle-averageweight`), cut and converted by `tools/blender/figures/source/extract_body.py`; the clothes, gloves and boots are our own, built over it by `tools/blender/figures/body.py`. Licence note: `tools/blender/figures/source/LICENSE.txt` | https://github.com/makehumancommunity/makehuman (master at `a8bc2d5`) and https://github.com/makehumancommunity/mpfb2 (master at `6ff1eb3`), fetched 2026-11-05 | CC0 1.0 (the base mesh and targets) | The MakeHuman Community |
 | `assets/fonts/Inter-marks-500.woff2`, `Inter-marks-600.woff2`, `Inter-marks-700.woff2`, `Inter-marks-800.woff2` | Inter's three symbols the latin subset lacks, ← → ✓ (about 0.6 KB a weight; cut from the same four weights of Inter 4.1.1 in the `inter-ui` npm package, because `@fontsource/inter` 5.3.0 has no subset with them), a fallback for the four weights above (M100) | https://github.com/rsms/inter | SIL OFL 1.1 (`assets/fonts/OFL.txt`) | Rasmus Andersson, The Inter Project Authors |
+| `assets/audio/cues/shot_laser_1.wav` to `_5.wav` | Dev › Lasers' shot (LZ1, 2026-11-08): the owner's pick B of three mixes `tools/laser_sound.py` makes from four free laser sound effects he downloaded (`audio/william/raw/laser/` laser_1 to laser_4 in the shared project files, not the repository); which file came from which channel isn't known (owner, 13:31: "that's all") | https://www.youtube.com/watch?v=3_PYjtIK1YM (the one video link the owner gave) | The channels' terms as the owner quoted them (2026-11-08): "You can use these sound effects in your videos without infringing copyright." and "Free for personal and commercial use. No attribution required." The owner ruled them clearly permissive for the game (2026-11-08, `docs/DECISIONS.md` › Audio). | FreeSFX and Mine Sound FX (YouTube channels) |
 
 **Made for the game** (original work, no external source; licensed with the game's code):
 
