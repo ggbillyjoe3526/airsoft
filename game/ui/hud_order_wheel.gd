@@ -33,6 +33,8 @@ const SCRIM_BAKE := 128
 ## room a slice's words are given, how far the words dim under a notice, and the notice's type size and side padding.
 const NAME_SIZE := 24
 const NAME_SPACING := 0.05
+## The gap (px) between a long name's two lines.
+const NAME_LEADING := 2.0
 const KEY_SIZE := 17
 const KEY_PAD := Vector2(10.0, 3.0)
 ## Room (px) a key chip keeps for its border, added to its padding.
@@ -307,7 +309,19 @@ func _draw_words(i: int) -> void:
 	var top := box.y + (SLICE_BOX.y - column) * 0.5
 	var mid := _label_at[i].x
 	var base := top + (NAME_SIZE - _name_font.get_height(NAME_SIZE)) * 0.5 + _name_font.get_ascent(NAME_SIZE)
-	draw_string(_name_font, Vector2(box.x, base), _names[i], HORIZONTAL_ALIGNMENT_CENTER, SLICE_BOX.x, NAME_SIZE, ink)
+	# A name wider than its slice (Watching Here, BP8) goes onto two lines where no key is under it, else a size smaller.
+	var name := _names[i]
+	var size := NAME_SIZE
+	var wide := _name_font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, NAME_SIZE).x
+	if wide > SLICE_BOX.x:
+		var cut := name.rfind(" ")
+		if not has_key and cut > 0:
+			draw_string(_name_font, Vector2(box.x, base + NAME_SIZE + NAME_LEADING), name.substr(cut + 1),
+					HORIZONTAL_ALIGNMENT_CENTER, SLICE_BOX.x, NAME_SIZE, ink)
+			name = name.substr(0, cut)
+		else:
+			size = floori(NAME_SIZE * SLICE_BOX.x / wide)
+	draw_string(_name_font, Vector2(box.x, base), name, HORIZONTAL_ALIGNMENT_CENTER, SLICE_BOX.x, size, ink)
 	if has_key:
 		var text_w := _key_font.get_string_size(_keys[i], HORIZONTAL_ALIGNMENT_LEFT, -1, KEY_SIZE).x
 		var w := maxf(KEY_MIN, text_w + KEY_PAD.x * 2.0 + KEY_EDGE)

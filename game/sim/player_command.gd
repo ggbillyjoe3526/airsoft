@@ -53,6 +53,9 @@ var toggle_torch: bool = false
 var ping: bool = false
 ## The ping is a Go there (FM1): the bot teammates go to its spot and hold it (SquadOrder.Kind.MOVE).
 var ping_move: bool = false
+## The ping is a Watching here (BP8): the spot is yours to cover; one teammate joins you on it, the rest keep off it
+## (SquadOrder.Kind.WATCH).
+var ping_watch: bool = false
 ## The ping on the map is Hold here's key (BP6): the bot teammates hold its spot until the order ends, as a Hold here at
 ## the spot looked at (SquadOrder.Kind.HOLD).
 var ping_hold: bool = false
@@ -100,6 +103,7 @@ func reset(view_yaw: float = 0.0, view_pitch: float = 0.0) -> void:
 	toggle_torch = false
 	ping = false
 	ping_move = false
+	ping_watch = false
 	ping_hold = false
 	ping_on_map = false
 	ping_target = Vector3.ZERO
@@ -135,6 +139,7 @@ func copy_from(other: PlayerCommand) -> void:
 	toggle_torch = other.toggle_torch
 	ping = other.ping
 	ping_move = other.ping_move
+	ping_watch = other.ping_watch
 	ping_hold = other.ping_hold
 	ping_on_map = other.ping_on_map
 	ping_target = other.ping_target

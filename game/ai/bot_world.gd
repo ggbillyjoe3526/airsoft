@@ -45,6 +45,9 @@ var doors: DoorState = null
 ## The field's start mode (RoundState.start_mode, NA1): below AUTO, the bots keep to it and go full auto only for an
 ## open shot (BotFireMode).
 var start_mode: ReplicaConfig.FireMode = ReplicaConfig.FireMode.AUTO
+## Watching here (BP8, SquadOrderBook.give_watch): per team, the spot one of its players marked to cover themselves
+## (NAN: none). The team's bots on the team plan keep their hunts and held angles off the area round it (covered).
+var watched: PackedVector3Array = PackedVector3Array([Vector3(NAN, NAN, NAN), Vector3(NAN, NAN, NAN)])
 
 ## The field split into square sectors (BotConfig.hunt_sector_size) from (min_x, min_z): when each team last checked
 ## each one (-INF never).
@@ -66,6 +69,18 @@ func setup_sectors(lo: Vector2, hi: Vector2) -> void:
 		v.resize(_sector_cols * _sector_rows)
 		v.fill(-INF)
 		_visited.append(v)
+
+
+## Whether `p` lies in the area `team`'s player covers (watched, within SquadConfig.watch_radius in plan): somewhere the
+## team's bots on the team plan leave to them.
+func covered(team: int, p: Vector3) -> bool:
+	if team < 0 or team >= watched.size():
+		return false
+	var spot := watched[team]
+	if is_nan(spot.x):
+		return false
+	var r := cfg.squad.watch_radius
+	return Vector2(p.x - spot.x, p.z - spot.z).length_squared() <= r * r
 
 
 ## Every sector unchecked again (a new round).

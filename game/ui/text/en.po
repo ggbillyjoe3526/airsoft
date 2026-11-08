@@ -168,6 +168,10 @@ msgstr "Hold · %d m"
 msgid "HUD_GO_MARKER"
 msgstr "Go · %d m"
 
+# Watching here's marker (BP8): the spot you mark for yourself to cover, your teammates keeping off it.
+msgid "HUD_WATCH_MARKER"
+msgstr "Watching · %d m"
+
 # A ping's marker (PN2): your spot, or an enemy seen there, and how far it is.
 msgid "HUD_PING_MARKER"
 msgstr "Ping · %d m"
@@ -2075,13 +2079,18 @@ msgstr "Hold Here"
 msgid "ORDER_MOVE"
 msgstr "Go There"
 
+# The order wheel's Watching Here (BP8): the spot you look at is yours to cover; one teammate joins you, the rest
+# spread to other angles.
+msgid "ORDER_WATCH"
+msgstr "Watching Here"
+
 msgid "ORDER_REGROUP"
 msgstr "Regroup"
 
 msgid "ORDER_TEAM_PLAN"
 msgstr "Team Plan"
 
-# The order wheel's fifth item (MH3): the magazine hand-off, asking for one, or tossing one to a teammate in reach.
+# The order wheel's last item (MH3): the magazine hand-off, asking for one, or tossing one to a teammate in reach.
 msgid "ORDER_MAG"
 msgstr "Need a Mag"
 

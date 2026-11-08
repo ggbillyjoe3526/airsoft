@@ -158,11 +158,11 @@ func test_letting_go_in_the_middle_or_in_click_mode_gives_nothing() -> void:
 func test_a_click_gives_the_order_either_way_and_is_no_shot() -> void:
 	for pick: ControlsConfig.WheelPick in [ControlsConfig.WheelPick.CLICK, ControlsConfig.WheelPick.HOVER]:
 		controls.wheel_pick = pick
-		_point(-120.0, 165.0)
+		_point(-195.0, 45.0)
 		_event(&"fire", true)
 		assert_false(input.wheel().open, "the click closed it")
 		input.fill(cmd)
-		assert_eq(cmd.squad_order, SquadOrder.Kind.TEAM_PLAN, "the lower left slice: Team Plan")
+		assert_eq(cmd.squad_order, SquadOrder.Kind.TEAM_PLAN, "the left slice, a little low: Team Plan (BP8's seven)")
 		assert_true(cmd.order_from_wheel)
 		assert_false(cmd.fire, "the click is the wheel's")
 		_event(&"order_wheel", false)

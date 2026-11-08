@@ -19,6 +19,14 @@ var _from_move: PackedByteArray = PackedByteArray()
 var _quiet_since: PackedFloat64Array = PackedFloat64Array()
 ## The teammates an order goes to, gathered afresh for each order given.
 var _order_team: Array[Bot] = []
+## Per giver, Watching here's spot (BP8; NO_SPOT none) and where the giver stood marking it.
+var _watch_spot: PackedVector3Array = PackedVector3Array()
+var _watch_from: PackedVector3Array = PackedVector3Array()
+## Watching here's answer on the radio (Callouts): the teammate that joined the giver, or with none the nearest that keeps
+## off the spot (null: nobody to say it), whether it joined, and a count that grows with each one given.
+var watch_speaker: Bot = null
+var watch_joined: bool = false
+var watch_serial: int = 0
 
 
 ## The orders of the field in `world` (its characters never change mid-match).
@@ -28,6 +36,9 @@ func _init(world: BotWorld) -> void:
 	_own_spot.resize(world.characters.size())
 	_from_move.resize(world.characters.size())
 	_quiet_since.resize(world.characters.size())
+	_watch_spot.resize(world.characters.size())
+	_watch_spot.fill(SquadOrders.NO_SPOT)
+	_watch_from.resize(world.characters.size())
 
 
 ## A new round: no order outlasts one (each bot's reset forgets its own).
@@ -35,6 +46,8 @@ func clear() -> void:
 	_given.fill(SquadOrder.Kind.NONE)
 	_own_spot.fill(0)
 	_from_move.fill(0)
+	_watch_spot.fill(SquadOrders.NO_SPOT)
+	_world.watched.fill(SquadOrders.NO_SPOT)
 
 
 ## An order from `giver_id` the simulation refused (out, or between rounds): the order in force stays, with NOT_NOW.
@@ -76,10 +89,14 @@ func order_of(giver_id: int) -> SquadOrder.Kind:
 	return _given[giver_id] as SquadOrder.Kind
 
 
-## While the bot teammates of `giver_id` hold a spot it looked at, or go to one it pinged (Go there): true, with the middle of the held spots in
-## held_middle. False for a hold where each stood (they may be far apart: no one spot to mark), and with no hold.
+## While the bot teammates of `giver_id` hold a spot it looked at, or go to one it pinged (Go there): true, with the
+## middle of the held spots in held_middle; while it watches a spot itself (Watching here, BP8), that spot. False for a
+## hold where each stood (they may be far apart: no one spot to mark), and with no hold.
 func hold_spot(giver_id: int) -> bool:
 	var kind := order_of(giver_id)
+	if kind == SquadOrder.Kind.WATCH:
+		held_middle = _watch_spot[giver_id]
+		return SquadOrders.is_spot(held_middle)
 	if (kind != SquadOrder.Kind.HOLD and kind != SquadOrder.Kind.MOVE) or _own_spot[giver_id] == 1:
 		return false
 	var giver := _character(giver_id)
@@ -133,6 +150,7 @@ func give_move(giver: Character, spot: Vector3) -> SquadOrder.Kind:
 	_given[giver.id] = SquadOrder.Kind.MOVE
 	_own_spot[giver.id] = 0
 	_from_move[giver.id] = 0
+	_unwatch(giver.id)
 	order_outcome.record(giver.id, SquadOrder.Kind.MOVE, SquadOrders.Notice.NONE)
 	return SquadOrder.Kind.MOVE
 
@@ -158,6 +176,66 @@ func give_hold_at(giver: Character, spot: Vector3) -> SquadOrder.Kind:
 		notice = SquadOrders.Notice.CANCELLED if before != SquadOrder.Kind.NONE else SquadOrders.Notice.NOBODY
 	order_outcome.record(giver.id, now, notice)
 	return now
+
+
+## Watching here (BP8) from `giver` at `spot` (the floor in front of what the view met; NO_SPOT for nothing there),
+## written into order_outcome: the area round the spot is the giver's to cover. Any order in force ends, its teammates
+## back on the team plan, keeping their hunts and held angles off the area (BotWorld.watched); the nearest of them in
+## play and not fighting, within watch_join_range of the giver, joins them (watch_post: beside them, looking at the
+## spot). Given again within hold_move of the spot watched it stays. Returns the order in force afterwards (WATCH, or
+## NONE with no teammate in play).
+func give_watch(giver: Character, spot: Vector3) -> SquadOrder.Kind:
+	if giver == null or giver.id < 0 or giver.id >= _given.size():
+		return SquadOrder.Kind.NONE
+	if not Elimination.is_in_play(giver):
+		_drop_order(giver)
+		order_outcome.record(giver.id, SquadOrder.Kind.NONE, SquadOrders.Notice.NOT_NOW)
+		return SquadOrder.Kind.NONE
+	var before := order_of(giver.id)
+	if not SquadOrders.is_spot(spot):
+		order_outcome.record(giver.id, before, SquadOrders.Notice.NOWHERE)
+		return before
+	var w := _world
+	var squad := w.cfg.squad
+	var nearest: Bot = null
+	var helper: Bot = null
+	var near := INF
+	var help := INF
+	for b in w.bots:
+		if b.character == giver or b.character.team != giver.team or not Elimination.is_in_play(b.character):
+			continue
+		var d := _flat(b.character.position, giver.position)
+		if d < near:
+			near = d
+			nearest = b
+		if d < help and d <= squad.watch_join_range and not b.target_visible and b.mode != Bot.Mode.FIGHT \
+				and b.mode != Bot.Mode.COVER:
+			help = d
+			helper = b
+	if nearest == null:
+		_drop_order(giver)
+		order_outcome.record(giver.id, SquadOrder.Kind.NONE,
+				SquadOrders.Notice.CANCELLED if before != SquadOrder.Kind.NONE else SquadOrders.Notice.NOBODY)
+		return SquadOrder.Kind.NONE
+	var watched := _watch_spot[giver.id]
+	if before == SquadOrder.Kind.WATCH and Vector2(spot.x - watched.x, spot.z - watched.z).length() < squad.hold_move:
+		order_outcome.record(giver.id, before, SquadOrders.Notice.NONE)
+		return before
+	_drop_order(giver)
+	if helper != null:
+		SquadOrders.start(helper, giver, SquadOrder.Kind.WATCH, 0)
+		helper.order_goal = SquadOrders.watch_post(giver, helper.character.position, spot, w)
+		helper.order_yaw = SquadOrders.yaw_towards(helper.order_goal, spot, giver.yaw)
+	_given[giver.id] = SquadOrder.Kind.WATCH
+	_watch_spot[giver.id] = spot
+	_watch_from[giver.id] = giver.position
+	if giver.team >= 0 and giver.team < w.watched.size():
+		w.watched[giver.team] = spot
+	watch_speaker = helper if helper != null else nearest
+	watch_joined = helper != null
+	watch_serial += 1
+	order_outcome.record(giver.id, SquadOrder.Kind.WATCH, SquadOrders.Notice.NONE)
+	return SquadOrder.Kind.WATCH
 
 
 ## Hands `kind` out to `giver`'s bot teammates in play; `toggle`: the order in force given again cancels it (see
@@ -209,6 +287,7 @@ func _hand_out(giver: Character, kind: SquadOrder.Kind, toggle: bool, at: Vector
 	_given[giver.id] = kind
 	_own_spot[giver.id] = 1 if kind == SquadOrder.Kind.HOLD and not looked else 0
 	_from_move[giver.id] = 0
+	_unwatch(giver.id)
 	return kind
 
 
@@ -234,6 +313,19 @@ func _drop_order(giver: Character) -> void:
 	_given[giver.id] = SquadOrder.Kind.NONE
 	_own_spot[giver.id] = 0
 	_from_move[giver.id] = 0
+	_unwatch(giver.id)
+
+
+## Watching here's spot of the character `id` gone (its team's bots back over the area too).
+func _unwatch(id: int) -> void:
+	var spot := _watch_spot[id]
+	if not SquadOrders.is_spot(spot):
+		return
+	_watch_spot[id] = SquadOrders.NO_SPOT
+	var giver := _character(id)
+	if giver != null and giver.team >= 0 and giver.team < _world.watched.size() \
+			and _world.watched[giver.team].is_equal_approx(spot):
+		_world.watched[giver.team] = SquadOrders.NO_SPOT
 
 
 ## After each step: an order ends for a bot that is out, and for everyone given it once its giver is out (hit, or the
@@ -252,6 +344,13 @@ func update() -> void:
 			_given[id] = SquadOrder.Kind.NONE
 			_own_spot[id] = 0
 			_from_move[id] = 0
+			continue
+		if _given[id] == SquadOrder.Kind.WATCH:
+			# Watching here stands while its giver keeps near where they marked it, with or without a teammate beside
+			# them; walked off, everyone is back on the team plan.
+			if _flat(giver.position, _watch_from[id]) > _world.cfg.squad.watch_leave:
+				_drop_order(giver)
+				order_outcome.record(id, SquadOrder.Kind.NONE, SquadOrders.Notice.CANCELLED)
 			continue
 		var carried := false
 		for b in _world.bots:
@@ -336,3 +435,7 @@ func _character(id: int) -> Character:
 		if c.id == id:
 			return c
 	return null
+
+
+static func _flat(a: Vector3, b: Vector3) -> float:
+	return Vector2(a.x - b.x, a.z - b.z).length()

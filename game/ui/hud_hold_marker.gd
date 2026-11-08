@@ -54,6 +54,8 @@ var _ring: Ring = null
 var _metres: int = -1
 ## Go there's (FM1: "GO · 30 M" while your teammates are on their way) rather than Hold here's words.
 var _going: bool = false
+## Watching here's ("WATCHING · 12 M", BP8: the spot you cover yourself), over Go there's and Hold here's.
+var _watching: bool = false
 var _tail := PackedVector2Array([Vector2.ZERO, Vector2.ZERO, Vector2.ZERO])
 var _ring_ground := PackedVector3Array()
 
@@ -102,6 +104,13 @@ func set_going(on: bool) -> void:
 		_metres = -1
 
 
+## Watching here's words (`on`, BP8: the spot you marked to cover yourself), from the next place().
+func set_watching(on: bool) -> void:
+	if on != _watching:
+		_watching = on
+		_metres = -1
+
+
 ## Places the marker over the held spots' middle `spot` as seen by `camera`, inside `area` (the HUD's size); hidden when
 ## `show` is false. Held at the left or right it takes its place in that side's stack in `slots` (under the flag
 ## marker's plate when that is pinned there too; past the left stack's floor it goes to the right instead); never over
@@ -116,7 +125,8 @@ func place(camera: Camera3D, spot: Vector3, show: bool, area: Vector2, avoid: Re
 	var metres := roundi(Vector2(spot.x - eye.x, spot.z - eye.z).length())
 	if metres != _metres:
 		_metres = metres
-		_words.text = (tr("HUD_GO_MARKER" if _going else "HUD_HOLD_MARKER") % metres).to_upper()
+		var key := "HUD_WATCH_MARKER" if _watching else "HUD_GO_MARKER" if _going else "HUD_HOLD_MARKER"
+		_words.text = (tr(key) % metres).to_upper()
 	var top := spot + Vector3.UP * _cfg.hold_marker_height
 	var at: Vector2
 	var behind := camera.is_position_behind(top)
