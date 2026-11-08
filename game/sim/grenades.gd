@@ -11,7 +11,9 @@ extends RefCounted
 ## A bomb can also be taken in hand first (MC1: the mouse wheel steps from the replicas onto the bombs left): the
 ## command's `ready_grenade` puts the replica down as a throw does and holds the bomb (Hand.readied) until a trigger pull
 ## throws it (`ready_command`), after which the replica comes back up as after any throw. A slot, the holster or a
-## reload puts the bomb back and the armament does as asked.
+## reload puts the bomb back and the armament does as asked. A pull still held when the windup reaches
+## GrenadeConfig.hold_at keeps the bomb there, the arm cocked, until the trigger is let go (BP8, the owner: click to
+## throw, or hold and throw on the release).
 ## In the air a bomb falls and bounces off the level and off the bodies of those in play (GRENADE_BOUNCE; a body's
 ## surface is NONE; it hits nobody and never rests on one), slides and rolls, and settles. A flash goes bang
 ## at its fuse (FLASH_BANG) and dazzles everyone in play with a clear line from the eyes to it, by distance and by how
@@ -56,6 +58,9 @@ class Hand:
 	## The trigger pull that threw a bomb in hand, or put it back, is still held (BP5): the replica that comes back up
 	## doesn't fire until the trigger is let go (`trigger_command`).
 	var trigger_held_off: bool = false
+	## The trigger pull that threw the bomb in hand is still held (BP8): the windup waits at GrenadeConfig.hold_at until
+	## it is let go (`step_throw`).
+	var throw_held: bool = false
 	## The torch was on before the throw or the bomb in hand, and the replica is back up this tick: Torch.step puts it
 	## back on (BP5: a bomb put back by a slot, the holster or a reload left it off).
 	var torch_back: bool = false
@@ -99,6 +104,7 @@ class Hand:
 		windup_left = 0.0
 		recover_left = 0.0
 		released = false
+		throw_held = false
 
 	## One of `bomb` fewer.
 	func spend(bomb: Grenade.Kind) -> void:
@@ -175,6 +181,7 @@ static func ready_command(c: Character, cmd: PlayerCommand, out: PlayerCommand) 
 	hand.trigger_was_down = cmd.fire
 	if pull and out.throw_grenade == Grenade.Kind.NONE:
 		out.throw_grenade = hand.readied
+		hand.throw_held = true
 	if out.throw_grenade != Grenade.Kind.NONE:
 		hand.trigger_held_off = true
 	out.fire = false
@@ -191,6 +198,7 @@ static func trigger_command(c: Character, cmd: PlayerCommand, pulled: bool, out:
 	var hand := c.grenades
 	if not pulled:
 		hand.trigger_held_off = false
+		hand.throw_held = false
 	if throwing(c):
 		return throwing_command(cmd, out)
 	if not hand.trigger_held_off or hand.readied != Grenade.Kind.NONE:
@@ -246,6 +254,8 @@ func press(c: Character, cmd: PlayerCommand, allowed: bool, pool: Array[Grenade]
 	hand.released = false
 	# A bomb taken in hand first: the replica was put down then, and comes back as it was then.
 	var from_hand := hand.readied != Grenade.Kind.NONE
+	# Only a pull on a bomb in hand can hold the throw (a bot's or a range's press never waits).
+	hand.throw_held = hand.throw_held and from_hand
 	hand.was_holstered = hand.ready_was_holstered if from_hand else c.armament.holstered
 	hand.torch_was_on = hand.ready_torch_was_on if from_hand else c.torch_on
 	hand.readied = Grenade.Kind.NONE
@@ -258,13 +268,17 @@ func press(c: Character, cmd: PlayerCommand, allowed: bool, pool: Array[Grenade]
 
 
 ## The throw under way for `c` (in play) this tick, its eyes at `eye`: the release at the windup's end, the redraw at
-## the recovery's.
+## the recovery's. While the pull that threw it is held the windup waits at hold_at of the way, cocked.
 func step_throw(c: Character, eye: Vector3, pool: Array[Grenade], events: SimEvents, dt: float) -> void:
 	var hand := c.grenades
 	if hand.throwing == Grenade.Kind.NONE:
 		return
 	if not hand.released:
 		hand.windup_left -= dt
+		var held_at := cfg.windup * (1.0 - clampf(cfg.hold_at, 0.0, 1.0))
+		if hand.throw_held and hand.windup_left <= held_at:
+			hand.windup_left = held_at
+			return
 		if hand.windup_left > 0.0:
 			return
 		hand.released = true

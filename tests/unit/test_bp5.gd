@@ -95,11 +95,14 @@ func test_a_trigger_held_after_the_pull_that_throws_a_bomb_in_hand_doesn_t_fire_
 	_run(sim, s, cmds, 10)
 	cmds[0].fire = true
 	var held := _run(sim, s, cmds, _throw_ticks() + _redraw_ticks(you))
-	assert_false(Grenades.throwing(you), "thrown")
-	assert_false(you.armament.holstered, "the replica is back up")
+	# BP8 (the owner): the held pull keeps the throw cocked; letting go throws it.
+	assert_true(Grenades.throwing(you), "held cocked while the pull is held")
 	assert_eq(held["shots"], 0, "the held pull fired nothing (it fired on its own before BP5)")
 	cmds[0].fire = false
-	_run(sim, s, cmds, 1)
+	var after := _run(sim, s, cmds, _throw_ticks() + _redraw_ticks(you))
+	assert_false(Grenades.throwing(you), "thrown on letting go")
+	assert_false(you.armament.holstered, "the replica is back up")
+	assert_eq(after["shots"], 0, "nothing fired after it")
 	cmds[0].fire = true
 	assert_gt(_run(sim, s, cmds, 10)["shots"], 0, "a fresh pull fires")
 
@@ -117,8 +120,12 @@ func test_a_trigger_held_as_a_slot_puts_the_bomb_back_doesn_t_fire_until_let_go(
 	cmds[0].fire = true
 	_run(sim, s, cmds, 1)
 	assert_true(Grenades.throwing(you), "that pull threw it")
-	# a new bomb in hand, the trigger still down from the pull, and a slot press puts it back
-	_run(sim, s, cmds, _throw_ticks() + 2)
+	# a click (BP8: a held pull keeps it cocked), then a pull held through the throw: a new bomb in hand with the
+	# trigger down, and a slot press puts it back
+	cmds[0].fire = false
+	_run(sim, s, cmds, 1)
+	cmds[0].fire = true
+	_run(sim, s, cmds, _throw_ticks() + 1)
 	cmds[0].ready_grenade = Grenade.Kind.FLASH
 	_run(sim, s, cmds, 5)
 	assert_eq(you.grenades.readied, Grenade.Kind.FLASH, "a held trigger doesn't throw it")

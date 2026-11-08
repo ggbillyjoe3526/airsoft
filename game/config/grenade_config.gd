@@ -17,6 +17,10 @@ extends Resource
 @export var windup: float = 0.3
 @export var recover: float = 0.15
 @export var redraw_scale: float = 0.6
+## A bomb in hand thrown by a trigger pull that is still held waits at this share of the windup (the pin out, the arm
+## cocked: your arms' ViewModelConfig.bomb_cock) until the trigger is let go, then goes on; let go sooner, it never
+## waits (BP8, the owner: a click throws, or hold the button and the bomb leaves on its release).
+@export var hold_at: float = 0.72
 ## The bomb leaves the hand this fast (m/s) along the view lifted by loft (rad), plus this share of the thrower's own
 ## velocity.
 @export var throw_speed: float = 13.0

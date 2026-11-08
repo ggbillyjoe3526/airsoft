@@ -404,17 +404,20 @@ func _player_input() -> PlayerInput:
 	return input
 
 
-func test_a_throw_key_press_reaches_the_next_command_once() -> void:
+func test_a_throw_key_press_takes_the_bomb_in_hand_on_the_next_command_once() -> void:
+	# BP8 (the owner): the key brings the bomb to hand; a click throws it (Grenades.ready_command), never the key.
 	var input := _player_input()
 	var cmd := PlayerCommand.new()
 	_input_press(input, &"throw_smoke")
 	input.fill(cmd)
-	assert_eq(cmd.throw_grenade, Grenade.Kind.SMOKE)
+	assert_eq(cmd.ready_grenade, Grenade.Kind.SMOKE)
+	assert_eq(cmd.throw_grenade, Grenade.Kind.NONE, "never thrown by the key")
 	input.fill(cmd)
-	assert_eq(cmd.throw_grenade, Grenade.Kind.NONE, "a press is one throw")
+	assert_eq(cmd.ready_grenade, Grenade.Kind.NONE, "a press is taken in hand once")
 	_input_press(input, &"throw_flash")
 	input.fill(cmd)
-	assert_eq(cmd.throw_grenade, Grenade.Kind.FLASH)
+	assert_eq(cmd.ready_grenade, Grenade.Kind.FLASH)
+	assert_eq(cmd.throw_grenade, Grenade.Kind.NONE)
 
 
 func test_both_throw_keys_in_one_tick_send_the_last_pressed() -> void:
@@ -423,7 +426,7 @@ func test_both_throw_keys_in_one_tick_send_the_last_pressed() -> void:
 	_input_press(input, &"throw_smoke")
 	_input_press(input, &"throw_flash")
 	input.fill(cmd)
-	assert_eq(cmd.throw_grenade, Grenade.Kind.FLASH)
+	assert_eq(cmd.ready_grenade, Grenade.Kind.FLASH)
 
 
 func test_a_throw_pressed_while_inactive_or_before_a_release_never_arrives() -> void:
@@ -433,12 +436,12 @@ func test_a_throw_pressed_while_inactive_or_before_a_release_never_arrives() -> 
 	_input_press(input, &"throw_smoke")
 	input.active = true
 	input.fill(cmd)
-	assert_eq(cmd.throw_grenade, Grenade.Kind.NONE, "a press in a menu is dropped")
+	assert_eq(cmd.ready_grenade, Grenade.Kind.NONE, "a press in a menu is dropped")
 	_input_press(input, &"throw_flash")
 	input.release()
 	input.active = true
 	input.fill(cmd)
-	assert_eq(cmd.throw_grenade, Grenade.Kind.NONE, "focus lost drops a latched press")
+	assert_eq(cmd.ready_grenade, Grenade.Kind.NONE, "focus lost drops a latched press")
 
 
 func test_a_filled_command_clears_a_stale_throw_when_nothing_is_pressed() -> void:

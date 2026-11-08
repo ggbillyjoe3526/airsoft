@@ -226,9 +226,11 @@ func test_a_hit_after_the_throw_with_the_pull_still_held_leaves_nothing_held_off
 	cmds[0].fire = true
 	_run(sim, s, cmds, _long())
 	assert_true(you.grenades.trigger_held_off, "the pull that threw it is still held off")
+	assert_true(Grenades.throwing(you), "held cocked while the pull is held (BP8)")
 	you.status = Character.Status.CALLING
 	_run(sim, s, cmds, 5)
-	assert_true(you.grenades.trigger_held_off, "nothing in the hit clears it but the respawn")
+	assert_false(Grenades.throwing(you), "a hit while cocked drops the throw")
+	assert_false(you.grenades.trigger_held_off, "and with it the held-off pull: the hit can't fire anyway")
 	you.status = Character.Status.ALIVE
 	you.respawn()
 	assert_false(you.grenades.trigger_held_off, "a new life with the trigger down starts clear")
