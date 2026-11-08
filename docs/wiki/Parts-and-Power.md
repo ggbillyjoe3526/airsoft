@@ -47,7 +47,9 @@ A grip under the rail. **Shake** is how long the wobble of a sprint or a landing
 
 <!-- wiki:parts grips -->
 
-A vertical grip is slower to bring up but steadier after a sprint; an angled grip is quicker but shakier.
+A vertical grip is slower to bring up but steadier after a sprint; an angled grip is quicker but shakier. Your left
+hand holds the grip you fit: it wraps a vertical grip, and with an angled one cups the handguard with the palm
+against its swept face.
 
 ## Lasers
 

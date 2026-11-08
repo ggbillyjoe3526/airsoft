@@ -82,6 +82,27 @@ extends Resource
 @export var reload_turn: float = 0.35
 @export var reload_lift: float = 0.14
 @export var reload_inward: float = 0.1
+## A replica listed here cants by its own (tilt, turn, roll: rad) and moves by its own (lift, inward, out forward: m)
+## through a reload instead (others: the reload_* above, none forward). BP8, only your hand and wrist in view as the
+## left hand changes the magazine: the rifles tip their muzzles up further and turn less, so their stocks drop out of
+## the screen's lower right, and come up and out, so your hand is seen taking the magazine off; they and the pistols
+## roll less, so your forearms run down out of view, not across it; the pistols tip their muzzles well up and come up
+## a little, so their grips' base sits over a third of the way up the screen (your left hand seen taking the magazine
+## out and seating the fresh one) while your right forearm stays below it.
+@export var reload_cant_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.6, 0.0, -0.25),
+		&"sniper": Vector3(0.5, 0.1, -0.25), &"pistol": Vector3(0.9, 0.2, -0.3), &"cyber": Vector3(0.9, 0.2, -0.3)}
+@export var reload_move_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.1, 0.04, 0.06),
+		&"sniper": Vector3(0.06, 0.1, -0.05), &"pistol": Vector3(0.1, 0.06, 0.0), &"cyber": Vector3(0.1, 0.06, 0.0)}
+## A replica listed here comes into its cant over this share of the reload, holds it and goes back over the same share
+## at the end (a rifle's magazine is out of the well in the first quarter: the cant is there by then, BP8); others ease
+## in and out as one bell, sin(PI * share).
+@export var reload_rise: Dictionary[StringName, float] = {&"aeg": 0.15, &"sniper": 0.15, &"pistol": 0.2, &"cyber": 0.2}
+## Your left hand carries the magazine from this share of a replica's reload to this one (x, y; BP8): it takes the old
+## one as the replica's clip starts it down, takes it down out of view, brings the fresh one up in hand and lets go as
+## it slides home, the magazine going where the hand goes (MagazineCarry). The arms' build keys the hand's catch and
+## let-go at these shares (tools/blender/arms/magazine.py), so each is a whole frame of the clip (60 a second).
+@export var reload_carry: Dictionary[StringName, Vector2] = {&"aeg": Vector2(0.1111, 0.6759),
+		&"sniper": Vector2(0.1111, 0.6759), &"pistol": Vector2(0.1389, 0.5694), &"cyber": Vector2(0.1515, 0.5909)}
 ## Working a bolt at the hip (BP7, row 17): while the arms' bolt clip runs, the replica is canted toward the eye
 ## so the right hand stays on screen (rad at the clip's middle: muzzle up, roll, turn; m: lift, inward), eased in and out
 ## over the clip as a bell and drawn less as the sight comes up (none aimed); Reduced motion draws its reload_cant share.
@@ -126,6 +147,11 @@ extends Resource
 	&"SleeveTrim": Color(0.22, 0.23, 0.24),
 }
 @export var robot_arms_roughness: float = 0.45
+## Skin-only arms (Dev › Skin-only arms; BP8, the owner's playtest note 11): the arms model's materials shown as bare
+## skin (sRGB, by name: the glove's surface, a glove's thickness over the hand), the cloth's weave taken off, with
+## their roughness. The glove's kit hides and the fingernails show (ArmsView).
+@export var skin_arms: Dictionary[StringName, Color] = {&"Glove": Color(0.78, 0.60, 0.48)}
+@export var skin_arms_roughness: float = 0.62
 ## Your arms' throw (GT3, ArmsThrow), `share` running 0..1 over the windup (GrenadeConfig.windup) and 1..2 over the
 ## recovery. Each key is a wrist's place in the eyes' frame (m: x right, y up, -z ahead), each pole the way its elbow
 ## bends. The left hand comes up from bomb_left_in to the pin's ring (its wrist bomb_left_ring off it) by bomb_pin_grab,
@@ -215,3 +241,21 @@ const LONG_SHIFT: Array[Vector3] = [Vector3.ZERO, Vector3(-0.15, 0.03, -0.2), Ve
 ## central hip).
 const PISTOL_SHIFT: Array[Vector3] = [Vector3.ZERO, Vector3(-0.06, 0.0, -0.04), Vector3(-0.065, 0.005, -0.04),
 		Vector3.ZERO]
+
+
+## Replica `id`'s reload cant (tilt, turn, roll: rad) at the middle of a reload.
+func reload_cant(id: StringName) -> Vector3:
+	return reload_cant_by.get(id, Vector3(reload_tilt, reload_turn, reload_roll))
+
+
+## Replica `id`'s reload lift, inward and forward moves (m) at the middle of a reload.
+func reload_move(id: StringName) -> Vector3:
+	return reload_move_by.get(id, Vector3(reload_lift, reload_inward, 0.0))
+
+
+## How much of its reload cant replica `id` has `share` (0..1) of the way through a reload.
+func reload_bell(id: StringName, share: float) -> float:
+	var rise: float = reload_rise.get(id, 0.0)
+	if rise <= 0.0:
+		return sin(PI * clampf(share, 0.0, 1.0))
+	return smoothstep(0.0, rise, share) * smoothstep(0.0, rise, 1.0 - share)

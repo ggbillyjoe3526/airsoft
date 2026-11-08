@@ -177,7 +177,8 @@ func test_a_reload_cants_the_replica_half_as_much() -> void:
 		_pose(hands, c)
 		tilts.append(hands._held[c.armament.active].root.rotation)
 	var cfg := ViewModelConfig.new()
-	assert_almost_eq(tilts[0], Vector3(cfg.reload_tilt, cfg.reload_turn, cfg.reload_roll), Vector3.ONE * 1e-4,
+	var id := ReplicaStats.default_loadout()[0].id
+	assert_almost_eq(tilts[0], cfg.reload_cant(id) * cfg.reload_bell(id, 0.5), Vector3.ONE * 1e-4,
 			"the full cant half way through")
 	assert_almost_eq(tilts[1], tilts[0] * 0.5, Vector3.ONE * 1e-5, "half of it")
 

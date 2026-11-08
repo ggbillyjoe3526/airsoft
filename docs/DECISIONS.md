@@ -701,8 +701,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   is solved: the first tries bent the left wrist past 80°. The Sniper Rifle is held as the AEG is, the right hand
   round its raked stock grip (owner, 2026-11-06). A pistol sits high in the hand, the web on the back strap and the thumb forward along the frame;
   the rifle's support hand comes up under the handguard from below. The arms take no shadows in game (pressed depth
-  broke the sun's shadow into patches). A robot player's arms are graphite and light grey. No arm clips for firing or reloading yet: the replica's own clips move its parts. A replica's model change
-  means re-running `tools/blender/arms/arms.py`.
+  broke the sun's shadow into patches). A robot player's arms are graphite and light grey. The arms work the Sniper
+  Rifle's bolt (BP7) and, since BP8, change the magazine with the left hand on every replica, in step with its Reload
+  clip: the hand takes the old magazine out, carries it down out of view and brings the fresh one up in hand
+  (`ViewModelConfig.reload_carry`, `MagazineCarry`). Through it no more of either arm shows than the hand, the
+  glove's cuff and the sleeve's hem at the screen's edge, or than the approved hold shows (tested at every key): the
+  elbow is placed for the least arm on screen and each rifle and pistol is canted its own way
+  (`ViewModelConfig.reload_cant_by`). On a fitted grip the left wrist bends 30° at most. A replica's model change means re-running `tools/blender/arms/arms.py`.
 - **An optic removes a replica's iron sights completely, never folds them, on every replica now and later (owner,
   2026-11-05; GS2).** Every piece of the iron sights hangs from a bone ending in `Sight` and the game hides those
   bones' attachments (`IronSights`); a test holds every optic-taking model to it.

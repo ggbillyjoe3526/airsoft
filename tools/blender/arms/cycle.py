@@ -102,6 +102,23 @@ def knob_centre(objects: list, rest: Matrix) -> Vector:
     return sum(knob, Vector()) / len(knob)
 
 
+def clear_thumb(hand: pose.Hand, col: Collider, target: Vector) -> list:
+    """The thumb's base turn (THUMB_TURNS, tip joints THUMB_BENDS) that clears `col` with its tip nearest `target`,
+    settled onto it; its curls."""
+    rig, side = hand.rig, hand.side
+    bones = ["Thumb%d_%s" % (k, side) for k in (1, 2, 3)]
+    best = None
+    for turn in THUMB_TURNS:
+        hand.thumb_at(turn, THUMB_BENDS, col, span=40)
+        t3 = rig.pose[bones[2]]
+        tip = t3.translation + t3.to_3x3().col[1] * rig.length[bones[2]]
+        clear = min(hand.clearance(b, col) for b in bones)
+        score = (tip - target).length + (0.0 if clear >= 0.0 else 1.0 - clear * 100.0)
+        if best is None or score < best[0]:
+            best = (score, turn)
+    return hand.thumb_at(best[1], THUMB_BENDS, col, span=40)
+
+
 def snapshot(rig: Rig) -> dict:
     return {b: rig.basis_of(b) for b in rig.rest}
 
@@ -450,9 +467,10 @@ class BoltWork:
 
 
 def work_bolt(rig: Rig, hand: pose.Hand, objects: list, solid: list, arms: list, clip: str, elbow_for,
-              optics: list = ()) -> int:
+              optics: list = ()) -> tuple:
     """Keys `clip` from the hold now posed; how many of its keys have the arms passing into the replica or into one
-    of `optics` (the fitted optics, checked only)."""
+    of `optics` (the fitted optics, checked only), and the keys (each (frame, bases): a foregrip's hold keys its own
+    clip from them, its left arm's bases in place of these, BP8)."""
     kept = (dict(hand.adduct), hand.normal, hand.tip_top, dict(rig.local))
     work = BoltWork(rig, hand, objects, solid, arms, elbow_for, optics)
     keys, hits, bend = work.keys()
@@ -465,4 +483,4 @@ def work_bolt(rig: Rig, hand: pose.Hand, objects: list, solid: list, arms: list,
           "into the replica (%d into a fitted optic of %d checked); the wrist bends %.0f deg at most on the way, %.0f "
           "on the knob" % (work.first, work.last, work.end, work.length, hits, work.optic_hits, len(work.optics),
                            bend[0], bend[1]))
-    return hits
+    return hits, keys

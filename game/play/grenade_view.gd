@@ -261,6 +261,12 @@ func set_arms_kind(kind: int) -> void:
 		_arms.set_kind(kind)
 
 
+## Shows your arms skin only (`on`; Dev › Skin-only arms, BP8) or gloved.
+func set_arms_skin(on: bool) -> void:
+	if _arms != null:
+		_arms.set_skin(on)
+
+
 ## Each cloud drawn as `count` of its PUFFS (at least 1), each sqrt(PUFFS / count) times as wide, so the cloud covers
 ## as much and looks as thick: set by the graphics' Mesh detail (EffectsConfig.smoke_puffs_at), on a change only. The
 ## puffs left out are scaled away at once; a cloud in the air is drawn again on the next frame.

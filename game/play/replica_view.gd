@@ -52,6 +52,12 @@ class Held:
 	var selector: SelectorPose = null
 	## How fast a shot plays its Fire clip: 1, or for a bolt-action replica its cycle stretched to its ready time.
 	var fire_speed: float = 1.0
+	## The grip part fitted (its Key; empty: none), which your left hand holds (BP8).
+	var grip: StringName = &""
+	## Holds the magazine in your left hand through a reload (null: the model has no magazine bone), and the
+	## magazine's place in the hand by the arms' reload clip, taken where the hand takes it (BP8).
+	var carry: MagazineCarry = null
+	var in_hand: Dictionary[StringName, Transform3D] = {}
 
 var _cfg: ViewModelConfig = null
 ## Whose arms you see holding the replica (FigureMix.HUMAN or FigureMix.ROBOT), set by PlaySession from the match's
@@ -61,6 +67,12 @@ var arms_kind: int = FigureMix.HUMAN:
 		arms_kind = kind
 		if _arms != null:
 			_arms.set_kind(kind)
+## Your arms skin only (Dev › Skin-only arms, BP8), switched live: ArmsView.
+var skin_arms: bool = false:
+	set(on):
+		skin_arms = on
+		if _arms != null:
+			_arms.set_skin(on)
 var _arms: ArmsView = null
 var _held: Array[Held] = []
 var _active: int = -1
@@ -110,6 +122,7 @@ func setup(cfg: ViewModelConfig, loadout: Array[ReplicaConfig], query: WorldQuer
 	add_child(_arms)
 	_arms.setup(cfg)
 	_arms.set_kind(arms_kind)
+	_arms.set_skin(skin_arms)
 	if view != null and eyes != null:
 		_glass = OpticGlass.new()
 		_glass.setup(cfg, view, eyes)
@@ -283,15 +296,18 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 	rot += _inspect_turn
 	pos += _inspect_shift
 
-	# Canted through a reload, its clip following the reload's progress.
+	# Canted through a reload, its clip following the reload's progress (and your left hand changing the magazine).
+	var reload_share := -1.0
 	if a.reload_left > 0.0:
 		var r := a.replica()
 		var progress := clampf(1.0 - a.reload_left / maxf(r.reload_time, 0.001), 0.0, 1.0)
-		var bell := sin(PI * progress) * _motion.reload_cant
-		rot += Vector3(_cfg.reload_tilt, _cfg.reload_turn, _cfg.reload_roll) * bell
-		pos += Vector3(-_cfg.reload_inward, _cfg.reload_lift, 0.0) * bell
+		var bell := _cfg.reload_bell(held.id, progress) * _motion.reload_cant
+		var move := _cfg.reload_move(held.id)
+		rot += _cfg.reload_cant(held.id) * bell
+		pos += Vector3(-move.y, move.x, -move.z) * bell
 		_seek(held, RELOAD_CLIP, progress)
 		held.in_reload = true
+		reload_share = progress
 	elif held.in_reload:
 		# Finished or cut short (a switch, a new round): back to the clip's end, magazine home.
 		_seek(held, RELOAD_CLIP, 1.0)
@@ -302,7 +318,8 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 	if held.selector != null:
 		held.selector.mode = a.fire_mode()
 	if _arms != null:
-		_arms.follow(held.anim, delta)
+		_arms.follow(held.anim, delta, reload_share)
+		_carry_magazine(held, reload_share)
 		# Working a bolt at the hip: canted toward the eye so the right hand stays on screen (BP7, row 17).
 		var work := _arms.work_share()
 		if work > 0.0:
@@ -431,7 +448,26 @@ func _show(slot: int) -> void:
 	_active = slot
 	_kick = 0.0
 	if slot >= 0 and slot < _held.size():
-		_arms.hold(_held[slot].id, _held[slot].root)
+		_arms.hold(_held[slot].id, _held[slot].root, _held[slot].grip)
+
+
+## Your left hand carries the magazine over its share of the reload (`share`; below 0, none): ViewModelConfig.
+## reload_carry. The magazine's place in the hand is taken once for each of the arms' reload clips, where the hand takes
+## it; then each frame the magazine goes where the hand is, down out of view and back up with the fresh one.
+func _carry_magazine(held: Held, share: float) -> void:
+	if held.carry == null:
+		return
+	var span: Vector2 = _cfg.reload_carry.get(held.id, Vector2.ZERO)
+	var clip := _arms.reload_clip()
+	if clip == &"" or share < span.x or share > span.y or span.y <= span.x:
+		return
+	if not held.in_hand.has(clip):
+		_seek(held, RELOAD_CLIP, span.x)
+		_arms.follow(held.anim, 0.0, span.x)
+		held.in_hand[clip] = _arms.left_hand(held.root).affine_inverse() * held.carry.in_root(held.root)
+		_seek(held, RELOAD_CLIP, share)
+		_arms.follow(held.anim, 0.0, share)
+	held.carry.place(held.root, _arms.left_hand(held.root) * held.in_hand[clip])
 
 
 func _seek(held: Held, clip: StringName, share: float) -> void:
@@ -460,9 +496,11 @@ func _load(r: ReplicaConfig, paint: StringName, realistic: bool, parts: Dictiona
 	var model := scene.instantiate() as Node3D
 	held.root.add_child(model)
 	held.fit = ReplicaParts.fit(model, r.id, parts)
+	held.grip = StringName(parts.get(ReplicaParts.GRIP_SLOT, &""))
 	ReplicaPaint.apply(model, paint, realistic)
 	held.anim = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	held.selector = SelectorPose.attach(model, held.anim)
+	held.carry = MagazineCarry.attach(model, ReplicaParts.MAGAZINE_ATTACHMENT)
 	held.muzzle = held.fit.muzzle
 	var rear := model.find_child("RearSight", true, false) as Node3D
 	if r.power == SLIDE_LOCK_POWER:

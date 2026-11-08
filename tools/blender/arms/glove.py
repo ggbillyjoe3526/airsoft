@@ -74,6 +74,13 @@ KNUCKLE_OVER = 0.002
 # how far round the finger each reaches (degrees either side of its back).
 PAD_SPAN = (0.56, 0.84)
 PAD_WRAP = 34.0
+# The fingernails (skin-only arms): shares of each finger's last bone from its root, how far round the finger each
+# reaches (degrees either side of its back), its thickness (m) and its grid (rows along, columns across; kept small:
+# the arms' 40k triangle budget).
+NAIL_SPAN = (0.42, 0.98)
+NAIL_WRAP = 38.0
+NAIL_THICK = 0.0004
+NAIL_GRID = (4, 5)
 
 
 def load_source(shoulder: Vector) -> tuple:
@@ -262,6 +269,11 @@ class Mesh:
 
     def __init__(self):
         self.v, self.f, self.m, self.w = [], [], [], []
+        # The faces of the glove's kit laid over the hand (the knuckle shell, the pads, the palm patch, the cuff, its
+        # strap and tab), first and past the last (BP8: the skin-only arms hide them); and the fingernails, a mesh of
+        # their own that only the skin-only arms show (none until built).
+        self.kit = (0, 0)
+        self.nails = None
 
     def add(self, verts: list, faces: list, mat, wts: list) -> int:
         base = len(self.v)
@@ -551,6 +563,31 @@ def finger_pads(surf: Surface, fr: Frame) -> list:
     return out
 
 
+def nails(surf: Surface, fr: Frame) -> Mesh:
+    """The fingernails (BP8, the owner's playtest note 11: skin-only arms): a thin rounded plate on the back of each
+    finger's last bone, from NAIL_SPAN of it to its tip, NAIL_WRAP degrees round either side; the thumb's faces away
+    from the palm. Each bends with the skin beneath it. A mesh of its own: only the skin-only arms show it."""
+    j = fr.j
+    out = Mesh()
+    for f, name in FINGER_NAMES.items():
+        a, b = j["finger-%d-3" % f], j["finger-%d-4" % f]
+        d = (b - a).normalized()
+        up = fr.dorsal if f != 1 else (a - (fr.palm_centre + fr.palmar * 0.02))
+        up = (up - d * up.dot(d)).normalized()
+        side = d.cross(up)
+
+        def origin(u: float, v: float, a: Vector = a, b: Vector = b) -> Vector:
+            return a.lerp(b, NAIL_SPAN[0] + (NAIL_SPAN[1] - NAIL_SPAN[0]) * (v + 1.0) * 0.5)
+
+        def direction(u: float, v: float, up: Vector = up, side: Vector = side) -> Vector:
+            t = math.radians(NAIL_WRAP) * u
+            return up * math.cos(t) + side * math.sin(t)
+
+        out.add(*surf.shell(origin, direction, NAIL_GRID[0], NAIL_GRID[1],
+                            lambda u, v: NAIL_THICK * _soft_box(u, v, 0.4) + 0.0001, "Nail", smooth=1, lift=0.0002))
+    return out
+
+
 def ring(surf: Surface, fr: Frame, span: tuple, thick: float, mat: str, cols: int = 32) -> tuple:
     """A band round the wrist between `span` (m along the forearm from the wrist joint)."""
     side = fr.dorsal.cross(fr.fdir)
@@ -595,6 +632,7 @@ def build_left(shoulder: Vector) -> tuple:
     mesh.add(gv, gf, "Glove", gw)
 
     surf = Surface(gv, gf, gw)
+    kit_from = len(mesh.f)
     mesh.add(*knuckle_guard(surf, fr))
     for part in finger_pads(surf, fr):
         mesh.add(*part)
@@ -624,6 +662,8 @@ def build_left(shoulder: Vector) -> tuple:
 
     mesh.add(*surf.shell(tab_origin, tab_dir, 5, 9, lambda u, v: (CUFF[2] + STRAP[2] + 0.0022) * _soft_box(u, v, 0.3),
                          "GloveArmour", smooth=3))
+    mesh.kit = (kit_from, len(mesh.f))
+    mesh.nails = nails(surf, fr)
 
     sleeve(mesh, verts, faces, wts, fr)
     return mesh, j, fr, pts

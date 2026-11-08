@@ -12,6 +12,13 @@ the trigger and the thumb round the back. The left hand holds a rifle's handguar
 side, or wraps a pistol's grip over the right hand's fingers. The build checks every pose's arms against its replica
 (and the left hand against the right) and stops without writing if any face passes into another.
 
+BP8 (the owner's playtest notes 6, 9 and 11): a replica that takes a foregrip gets `<id>_grip_<key>_Hold` for each
+(the left hand wraps a vertical grip and cups an angled one's swept face; the right hand as approved), and a
+bolt-action one `<id>_grip_<key>_Fire` too. Every replica with a Reload clip gets `<id>[_grip_<key>]_Reload` from each
+hold, as long as that clip (`magazine.py`): the left hand pulls the magazine, takes it down out of view and seats the
+fresh one. The glove's kit is an object of its own (GloveKit_<side>) and the fingernails another (Nails_<side>), so
+the game can show skin-only arms on the same skeleton and clips.
+
 Run with Blender 5.x, or Python with the `bpy` module (pip install bpy==5.2.3), after the replicas:
 
     python -I tools/blender/arms/arms.py <repo root>
@@ -27,13 +34,15 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "replicas"))
 
-import bpy  # noqa: E402
+import bpy  # noqa: E402  first: it brings bmesh and mathutils with it
+import bmesh  # noqa: E402
 from mathutils import Matrix, Vector  # noqa: E402
 
 import cycle  # noqa: E402
 import fabric  # noqa: E402
 import glove  # noqa: E402
 import hardsurface as hs  # noqa: E402
+import magazine  # noqa: E402
 import pose  # noqa: E402
 from pose import Collider, Rig, basis  # noqa: E402
 
@@ -50,6 +59,8 @@ MATERIALS = {
     "SleeveTrim": (0x515a41, 0.88, 0.0),
 }
 NAMES = list(MATERIALS)
+# The skin-only arms' fingernails (BP8): a pale, slightly glossy pink over the skin ArmsView gives the hands.
+NAIL = (0xe0b8aa, 0.35, 0.0)
 
 # The shoulders, bladed as a right-handed shooter stands: the left one forward, the right one back (eye space: +X
 # right, +Y forward, +Z up).
@@ -75,6 +86,8 @@ CUP_GAP = (0.010, 0.015)
 CUP_STEP = 10
 RISE_COST = 1.0
 LOOSE_COST = 500.0
+# A hold's spec may cap the wrist (`bend_most`, degrees): each degree past it costs this many (BP8: the angled grip's).
+BEND_COST = 50.0
 # The best CUP_TRIES turns try their fingers, which should come to rest round it curled WRAP degrees at their roots;
 # each degree outside that costs WRAP_COST.
 CUP_TRIES = 16
@@ -248,6 +261,31 @@ SNIPER_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.100, -0.035), index=(0.030, -0.030
 SNIPER_GUARD = dict(GUARD, y=0.260, axis=(0.0, 0.030), radius=0.025, tips_below=0.052,
                     tip_at=(0.0255, 0.000, 0.040), thumb_x=-0.028, thumb_z=0.040, thumb_f=0.050, forward=0.034,
                     search=((40, 80), (20, 50), (-40, 0)), tip_drop={"Pinky": 0.015})
+# A foregrip fitted under the handguard (BP8, the owner's playtest note 6: "If a weapon has a grip attachment the
+# players left hand should hold it"): the left hand wraps the grip as the right hand wraps a pistol's, mirrored: its
+# palm on the grip's left side, the thumb's root (`web`) behind its back face, the index finger's knuckle high under
+# the rail by its front face and the little finger's knuckle below it (`pinky`; on these short grips the little
+# finger curls in under the grip's foot), the fingers closed round the front onto the right side, and the thumb round
+# the back over them, forward along the right side toward `thumb_at`. The marks are in the grip part's own space
+# (x right, y forward, z up, its origin on the replica's GripMount: tools/blender/parts/attachments.py), so one spec
+# serves every replica that takes the grip; the shoulder comes forward with the hand (`shoulder`, `drop` as the
+# guard's). Without a grip the approved handguard hold stays as it is.
+GRIP_LEFT = {"kind": "grip", "pinky_cost": 300.0, "thumb_hug": 2.0, "thumb_pull": 30.0, "thumb_curl": (40.0, 45.0),
+             "swing": (8.0, 8.0, 8.0), "shoulder": (-0.06, 0.04, -0.06), "drop": 0.06, "across": 0.25,
+             "fingers": {"Index": (60, 60, 40), "Middle": (60, 60, 45), "Ring": (60, 60, 45), "Pinky": (55, 55, 40)},
+             "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
+# The short vertical grip (its body 30 mm fore and aft, 24 mm across, 6 to 53 mm under the rail's face).
+VERTICAL_LEFT = dict(GRIP_LEFT, web=(-0.012, -0.027, -0.028), index=(-0.017, 0.010, -0.019),
+                     pinky=(-0.017, 0.004, -0.076), thumb_at=(0.020, 0.008, -0.020))
+# The angled handstop (a kinesthetic grip: its tall end in front, down to 48 mm under the rail, the swept face behind
+# it): held as it is made to be, the hand cupping the handguard as on the replica's own hold (its spec, `guard`) just
+# behind it, drawn back `y` (m, from the grip's mount) so the front of the palm rests against the swept face (further
+# forward the palm would sit inside the grip); the hand seats onto the grip as onto the handguard.
+ANGLED_LEFT = {"kind": "guard", "y": -0.060, "search": ((30, 90), (0, 60), (-90, 0)), "bend_most": 28.0}
+GRIP_HOLDS = {"grip_vertical": VERTICAL_LEFT, "grip_angled": ANGLED_LEFT}
+# The Sniper Rifle's grip sits further forward than its fore-end hold (GripMount 6 cm ahead of the hand): the
+# shoulder comes further forward to reach it.
+GRIP_SHOULDER = {"sniper": (-0.06, 0.10, -0.06)}
 # A smoke or flash bomb in the right hand alone (GT1), as a fist holds a pistol's grip: its lever under the palm on its
 # right side (the model's +X), the web of the hand round its back, the fingers closed round its front onto its left
 # side and the thumb along that side; the left arm down (the game hides it: ViewModelConfig.one_hand). The marks
@@ -457,12 +495,14 @@ def pose_fingers(hand: pose.Hand, spec: dict, col: Collider, thumb_to: Vector = 
     return curls
 
 
-def web_pose(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, r: dict, col: Collider) -> Matrix:
+def web_pose(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, r: dict, col: Collider, side: str = "R") -> Matrix:
     """The right hand bone's pose on a pistol: its index finger's knuckle at r["index"] and its thumb's root at
     r["web"] (replica space), rolled about the line between them to where the wrist is straightest and the hand clear
-    of the grip, its palm toward the grip's right side."""
+    of the grip, its palm toward the grip's right side. With `side` "L", the left hand's on a foregrip, as the mirror
+    of that: its palm toward the grip's left side (BP8)."""
     to_eye = hold.to_eye()
-    sx = pose.to_side("R")
+    sx = pose.to_side(side)
+    out = 1.0 if side == "R" else -1.0
     i_rest, w_rest, t_rest = sx(j["finger-2-1"]), sx(j["finger-1-1"]), sx(j["finger-1-2"])
     i_at, w_at = to_eye @ Vector(r["index"]), to_eye @ Vector(r["web"])
     p_rest = sx(j["finger-5-1"])
@@ -478,24 +518,24 @@ def web_pose(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, r: dict, col: Colli
     for k in range(int(lo), int(hi) + 1, ROLL_STEP):
         rot = Matrix.Rotation(math.radians(k), 3, axis) @ base
         palm = rot @ hand.palmar
-        if palm.x > -PALM_FACING:
+        if palm.x * out > -PALM_FACING:
             continue
-        m0 = Matrix.Translation(i_at) @ rot.to_4x4() @ Matrix.Translation(-i_rest) @ rig.rest["Hand_R"]
+        m0 = Matrix.Translation(i_at) @ rot.to_4x4() @ Matrix.Translation(-i_rest) @ rig.rest["Hand_" + side]
         m = hand.seat(m0, palm, col, whole=True)
         moved = (m.translation - m0.translation).length
-        _, bend = elbow_for(rig, "R", m, quiet=True)
+        _, bend = elbow_for(rig, side, m, quiet=True)
         score = bend + moved * MOVE_COST
-        p5 = m @ (rig.rest["Hand_R"].inverted() @ p_rest)
+        p5 = m @ (rig.rest["Hand_" + side].inverted() @ p_rest)
         if p_at is not None:
             score += (p5 - p_at).length * r.get("pinky_cost", PINKY_COST)
-        mcp = to_eye.inverted() @ (m @ (rig.rest["Hand_R"].inverted() @ t_rest))
+        mcp = to_eye.inverted() @ (m @ (rig.rest["Hand_" + side].inverted() @ t_rest))
         if os.environ.get("BL_DEBUG"):
             print("    roll %4d: bend %5.1f moved %5.1f mm palm %s thumb knuckle %s pinky knuckle %s" % (
                 k, bend, moved * 1000, tuple(round(c, 2) for c in palm), tuple(round(c, 3) for c in mcp),
                 tuple(round(c, 3) for c in to_eye.inverted() @ p5)))
         if best is None or score < best[0]:
             best = (score, k, m, palm)
-    print("  R: web roll %d deg" % best[1])
+    print("  %s: web roll %d deg" % (side, best[1]))
     return best[2], best[3]
 
 
@@ -571,10 +611,10 @@ def trigger_again(rig: Rig, hand: pose.Hand, objects: list, arms: list, frame: l
         print("  trigger finger kept where it was (clipping)")
 
 
-def left_on_guard(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider) -> tuple:
+def left_on_guard(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider, spec: dict = None) -> tuple:
     """The left hand under a rifle's handguard, its fingers up the right side and the index finger along the side
-    rail, the thumb along the left side."""
-    spec = tuned(hold.left)
+    rail, the thumb along the left side (as the hold's spec, or `spec`)."""
+    spec = tuned(hold.left if spec is None else spec)
     to_eye = hold.to_eye()
     y = spec["y"]
     at = to_eye @ Vector((0.0, y, spec.get("axis", GUARD_AXIS)[1]))
@@ -647,7 +687,7 @@ def cup(rig: Rig, hand: pose.Hand, j: dict, to_eye: Matrix, spec: dict, col: Col
                     gaps.append(math.hypot(p.x - axis[0], p.z - axis[1]) - radius)
                 loose = sum(max(0.0, g - CUP_GAP[1], CUP_GAP[0] - g) for g in gaps)
                 score = bend + abs(rise - spec["rise"]) * RISE_COST + loose * LOOSE_COST + \
-                    clear * 1000.0 * CLEAR_COST + \
+                    clear * 1000.0 * CLEAR_COST + max(0.0, bend - spec.get("bend_most", 180.0)) * BEND_COST + \
                     (abs(plan - spec["plan"]) * PLAN_COST if spec.get("plan", 0.0) > 0.0 else 0.0)
                 found.append((score, yaw, pitch, roll, m, palm, bend, rise, gaps))
     # The few best then try their fingers: each should curl round the handguard and come to rest on it, neither
@@ -683,6 +723,126 @@ def left_down(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider) -> 
     return pole_l, curls
 
 
+def grip_parts(hold: Hold) -> tuple:
+    """Everything the replica's parts file brought in, and of it each grip part's own mesh (`grip_*`, not its figure
+    copy) by name, with its mount (the part's origin, replica space), moved to the hold's place as the replica is
+    (BP8). Both empty for a replica without a parts file."""
+    path = os.path.join(PARTS, hold.file)
+    if not os.path.isfile(path):
+        return [], {}
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=path)
+    new = [o for o in bpy.data.objects if o not in before]
+    grips = {}
+    for o in new:
+        if o.type == "MESH" and o.parent is None and o.name.split(".")[0] in GRIP_HOLDS:
+            grips[o.name.split(".")[0]] = (o, o.matrix_world.translation.copy())
+    for o in new:
+        if o.parent is None:
+            o.matrix_world = hold.to_eye() @ o.matrix_world
+    bpy.context.view_layer.update()
+    return new, grips
+
+
+def in_replica(spec: dict, mount: Vector) -> dict:
+    """A grip hold's spec with its marks moved from the grip part's space onto the replica's (the part's origin at
+    `mount`)."""
+    out = dict(spec)
+    for k in ("web", "index", "pinky", "thumb_at"):
+        out[k] = tuple(Vector(spec[k]) + mount)
+    return out
+
+
+def left_on_grip(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, spec: dict, col: Collider, arms: list,
+                 frame: list) -> tuple:
+    """The left hand round a foregrip (spec in replica space): placed by its marks as the right hand is on a pistol's
+    grip (web_pose, mirrored), its fingers closed round the grip's front and its thumb round the back over them."""
+    to_eye = hold.to_eye()
+    hand.tip_top = None
+    hand_m, palm = web_pose(rig, hand, j, hold, spec, col, "L")
+    hand.normal = palm
+    pole_l, _ = elbow_for(rig, "L", hand_m)
+    pose.place_arm(rig, "L", hand_m, pole_l, quiet=True)
+    rig.refresh("Hand_L")
+
+    def thumb_clips() -> int:
+        rig.write()
+        return sum(n for b, n in pose.clipping(arms, frame)[1].items() if b.startswith("Thumb") and b.endswith("_L"))
+
+    curls = pose_fingers(hand, spec, col, to_eye @ Vector(spec["thumb_at"]), spec["thumb_hug"], True,
+                         verify=thumb_clips)
+    return pole_l, curls
+
+
+def left_bases(rig: Rig) -> dict:
+    """Every left-side bone's basis as posed now (the left arm's part of a key)."""
+    return {b: rig.basis_of(b) for b in rig.rest if b.endswith("_L")}
+
+
+def kept(rig: Rig) -> tuple:
+    """The hold as posed now: every bone's pose and turn, and the arms' shoulder shifts, drops, across and plan."""
+    return (dict(rig.pose), dict(rig.local), dict(rig.shift), dict(rig.drop), dict(rig.across), dict(rig.plan))
+
+
+def reset_left(rig: Rig, held: tuple) -> None:
+    """The rig back to the hold `held` (as `kept` took it)."""
+    rig.pose, rig.local = dict(held[0]), dict(held[1])
+    rig.shift, rig.drop, rig.across, rig.plan = (dict(d) for d in held[2:6])
+    rig.write()
+
+
+def solve_grip(rig: Rig, hands: dict, j: dict, hold: Hold, rid: str, arms: list, solid: list, grip,
+               spec: dict, held: tuple) -> int:
+    """With the hold `held` posed (the right hand as approved), the left hand re-solved round the fitted grip `grip`
+    (its mesh and mount) as `spec` asks, settled and closed onto it as `solve` does; the clipping left (face pairs)."""
+    reset_left(rig, held)
+    mesh, mount = grip
+    if spec["kind"] == "guard":
+        spec = dict(hold.left, **{k: v for k, v in spec.items() if k != "y"}, y=mount.y + spec["y"])
+    else:
+        spec = tuned(in_replica(spec, mount))
+    rig.shift["Shoulder_L"] = Vector(GRIP_SHOULDER.get(rid, spec["shoulder"]))
+    rig.drop["L"], rig.across["L"] = spec["drop"], spec["across"]
+    if spec["kind"] == "guard" and "plan" in spec:
+        rig.plan["L"] = spec["plan"]
+    else:
+        rig.plan.pop("L", None)
+    for b in rig.rest:
+        if b.endswith("_L"):
+            rig.local.pop(b, None)
+            rig.pose[b] = rig.rest[b]
+    rig.fk("Shoulder_L")
+    frame = [o for o in solid if not o.name.startswith("Trigger")] + [mesh]
+    col = Collider(solid + [mesh])
+    if spec["kind"] == "guard":
+        pole_l, curls = left_on_guard(rig, hands["L"], j, hold, col, spec)
+    else:
+        pole_l, curls = left_on_grip(rig, hands["L"], j, hold, spec, col, arms, frame)
+    rig.fk("Grip_L")
+    # A thumb laid where the hold asks may pass into the grip or the replica (an angled grip's swept face, a vertical
+    # grip's top): the clear turn nearest that spot instead.
+    rig.write()
+    thumb = [b for b, n in pose.clipping(arms, frame)[1].items() if b.startswith("Thumb") and b.endswith("_L") and n]
+    if thumb:
+        t3 = rig.pose["Thumb3_L"]
+        tip = t3.translation + t3.to_3x3().col[1] * rig.length["Thumb3_L"]
+        curls["Thumb"] = cycle.clear_thumb(hands["L"], col, tip)
+        rig.fk("Grip_L")
+    print("  left curls", curls)
+    poles = {"R": rig.poles["R"], "L": pole_l}
+    hits = 0 if os.environ.get("BL_NORELAX") else pose.relax(rig, hands, arms, frame, poles)
+    if not hits and not os.environ.get("BL_NORELAX"):
+        print("  L palm pressed in %.1f mm" % (pose.press(rig, hands, arms, frame, poles, "L") * 1000))
+        fingers = [("L", n) for n in ("Index", "Middle", "Ring", "Pinky", "Thumb")]
+        print("  tightened", pose.tighten(rig, hands, arms, frame, fingers))
+        print("  wrapped", pose.wrap(rig, hands, arms, frame, [f for f in fingers if f[1] != "Thumb"]))
+        hits, tally = pose.clipping(arms, frame)
+        if hits:
+            print("  still passing into the replica:", sorted(tally.items(), key=lambda x: -x[1]))
+    print("  L wrist bend %.1f deg" % pose.wrist_bend(rig, "L"))
+    return hits
+
+
 def solve(rig: Rig, hands: dict, j: dict, hold: Hold, arms: list) -> tuple:
     """Poses both arms holding `hold`'s replica; the replica's objects and the clipping left (face pairs)."""
     rig.pose = dict(rig.rest)
@@ -716,6 +876,7 @@ def solve(rig: Rig, hands: dict, j: dict, hold: Hold, arms: list) -> tuple:
     print("  right curls", curls_r)
     print("  left curls", curls_l)
     poles = {"R": pole_r, "L": pole_l}
+    rig.poles = poles
     hits = 0 if os.environ.get("BL_NORELAX") else pose.relax(rig, hands, arms, frame, poles)
     if not hits and not os.environ.get("BL_NORELAX"):
         # Then each holding palm seats on the replica and every holding finger closes until its glove all but
@@ -740,6 +901,21 @@ def solve(rig: Rig, hands: dict, j: dict, hold: Hold, arms: list) -> tuple:
             for side in ("R", "L") if hold.left["kind"] == "guard" else ("R",):
                 print("   %s skin gaps (mm)" % side, pose.skin_gaps(arms, frame, side))
     return objects, solid, hits
+
+
+def split_off(ob: bpy.types.Object, name: str, faces: set) -> bpy.types.Object:
+    """Moves the faces `faces` (by index) of `ob` into an object of their own named `name`, skinned as `ob` is."""
+    part = ob.copy()
+    part.data = ob.data.copy()
+    part.name = part.data.name = name
+    bpy.context.scene.collection.objects.link(part)
+    for o, drop in ((ob, lambda i: i in faces), (part, lambda i: i not in faces)):
+        bm = bmesh.new()
+        bm.from_mesh(o.data)
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if drop(f.index)], context="FACES")
+        bm.to_mesh(o.data)
+        bm.free()
+    return part
 
 
 def build() -> None:
@@ -770,18 +946,49 @@ def build() -> None:
         for side in ("R", "L"):
             print("  %s wrist bend %.1f deg" % (side, pose.wrist_bend(rig, side)))
         pose.key_pose(rig, "%s_Hold" % rid)
+        holds = {"": kept(rig)}
+        bolt_keys = None
         if cycle.has_bolt(objects):
             # A bolt-action replica: the right hand leaves the grip after the shot and works the bolt.
             # Each optic it can fit is checked too (BP7): the hand's path keeps it under the receiver's top, and
             # this proves it clears every scope (a check only: the optics never steer the hand).
             optics, optic_meshes = fitted_optics(hold)
-            bolt_hits = cycle.work_bolt(rig, hands["R"], objects, solid, [left, right], "%s_%s" % (rid, cycle.CLIP),
-                                        elbow_for, optic_meshes)
+            bolt_hits, bolt_keys = cycle.work_bolt(rig, hands["R"], objects, solid, [left, right],
+                                                   "%s_%s" % (rid, cycle.CLIP), elbow_for, optic_meshes)
             for o in optics:
                 bpy.data.objects.remove(o, do_unlink=True)
             if bolt_hits:
                 failed.append("%s working the bolt (%d keys)" % (rid, bolt_hits))
             clips.add("%s_%s" % (rid, cycle.CLIP))
+        # Each foregrip it takes (BP8): the left hand round it, the right hand as approved; a bolt-action replica's
+        # bolt worked from that hold too (the same right hand's keys, the left arm on the grip throughout).
+        parts, grips = grip_parts(hold) if os.environ.get("BL_GRIPS") != "0" else ([], {})
+        for name, grip in sorted(grips.items()):
+            if os.environ.get("BL_GRIP_ONLY") and name not in os.environ["BL_GRIP_ONLY"].split(","):
+                continue
+            print("%s with %s:" % (rid, name))
+            grip_hits = solve_grip(rig, hands, j, hold, rid, [left, right], solid, grip, GRIP_HOLDS[name],
+                                   holds[""])
+            pose.key_pose(rig, "%s_%s_Hold" % (rid, name))
+            clips.add("%s_%s_Hold" % (rid, name))
+            holds[name] = kept(rig)
+            if grip_hits:
+                failed.append("%s with %s (%d face pairs)" % (rid, name, grip_hits))
+            if bolt_keys is not None:
+                on_grip = left_bases(rig)
+                cycle.key_frames(rig, "%s_%s_%s" % (rid, name, cycle.CLIP),
+                                 [(f, dict(bases, **on_grip)) for f, bases in bolt_keys])
+                clips.add("%s_%s_%s" % (rid, name, cycle.CLIP))
+        # The magazine change, from each hold (BP8).
+        if os.environ.get("BL_RELOAD") != "0":
+            reload_hits, reload_clips = magazine.change_mag(rig, hands["L"], rid, hold.to_eye(), objects, solid,
+                                                          [left, right], holds)
+            clips.update(reload_clips)
+            if reload_hits:
+                failed.append("%s changing the magazine (%d keys)" % (rid, reload_hits))
+        reset_left(rig, holds[""])
+        for o in parts:
+            bpy.data.objects.remove(o, do_unlink=True)
         hs.empty("Hold_%s" % rid, tuple(hold.at), arm)
         if hits:
             failed.append("%s (%d face pairs)" % (rid, hits))
@@ -792,7 +999,18 @@ def build() -> None:
                 bpy.data.objects.remove(o, do_unlink=True)
     for pb in arm.pose.bones:
         pb.matrix_basis = Matrix.Identity(4)
-    print("  arms: %d triangles" % (hs.tris(left) + hs.tris(right)))
+    # The skin-only arms (BP8, the owner's playtest note 11): the glove's kit (its moulded shell, pads, palm patch,
+    # cuff and strap) an object of its own, GloveKit_<side>, which they hide, and the fingernails, Nails_<side>, which
+    # only they show; the glove's own surface, a glove's thickness over the skin, stands for the skin (ArmsView). The
+    # same skeleton and clips: only what the game shows changes.
+    hs.material("Nail", *NAIL)
+    parts = []
+    for side, ob in (("L", left), ("R", right)):
+        parts.append(split_off(ob, "GloveKit_" + side, set(range(*mesh.kit))))
+        parts.append(pose.skin_object("Nails_" + side, mesh.nails, arm, side, ["Nail"]))
+    print("  arms: %d triangles (%d with the gloves, %d skin only)" % (
+        sum(hs.tris(o) for o in [left, right] + parts), sum(hs.tris(o) for o in [left, right] + parts[0::2]),
+        sum(hs.tris(o) for o in [left, right] + parts[1::2])))
     for a in list(bpy.data.actions):
         if a.name not in clips:
             bpy.data.actions.remove(a)

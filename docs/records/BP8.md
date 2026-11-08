@@ -6,6 +6,7 @@
 - part 2 (replicas): critic Accept 8/8 (attempt 3) · qa Pass · performance Pass
 - part 3 (match): critic Accept 7/8 · qa Pass · performance Pass
 - part 4 (hud): critic Accept 7/8 (attempt 2) · qa Pass · performance Pass
+- part 5 (arms): critic Accept 8/8 (attempt 3) · qa Pass · performance Pass
 
 William's playtest notes of 2026-11-08 (26 items, before he tags 0.1 Dev 2) went out as a bug pass in parts by area.
 The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-summary.md`.
@@ -21,6 +22,9 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
 | 2026-11-08 | part 3: 1 | Opus 5.5 | targeted + smoke; balance 16 seeds; CI | Accept 7/8 | – (stale DECISIONS and KNOWN_ISSUES rows, SIMULATE button-only, named constants after) |
 | 2026-11-08 | part 4: 1 | Opus 5.5 | 195-file round sweep + smoke | Retry 5/8 | banner left before GO, notes moved the rail, flash icon unreadable, A/D start not rendered |
 | 2026-11-08 | part 4: 2 | Opus 5.5 | 223-file sweep + smoke; CI | Accept 7/8 | – (header text, chip-row test, plate alpha, pole marker after) |
+| 2026-11-08 | part 5: 1 | Opus 5.5 | targeted + smoke | Retry 5/8 | forearm and sleeve in view, magazine not held, angled-grip wrist 41° |
+| 2026-11-08 | part 5: 2 | Opus 5.5 | targeted + smoke | Retry 5/8 | pistol reload unseen, magazines hovering, sleeve on the way home |
+| 2026-11-08 | part 5: 3 | Opus 5.5 | targeted + smoke; CI | Accept 8/8 | – |
 
 ## Part 1: bots (items 17 and 23)
 
@@ -110,6 +114,24 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
 - Tests: `test_bp8_hud.gd`, `test_bp8_hud_qa.gd` (14), `test_bp8_hud_round2.gd`; a 223-file sweep of round, HUD and
   PlaySession tests passed. Pictures: `/mnt/project-files/playtest/bp8/hud/` (William: "great" on the rail).
 
+## Part 5: first-person arms (items 6, 9 and 11)
+
+- **6, the left hand on a grip.** With a Vertical Grip fitted to the AEG or the Sniper the left hand wraps it; with
+  an Angled Grip the palm rests on its swept face, the wrist bent under 30° (23.7° AEG, 18.6° Sniper). Grip holds are
+  their own clips in `arms.glb`; pistols take no grip.
+- **9, the reload.** Each replica has its own left-hand reload clip, the length of its reload. The hand comes up
+  from below the view, takes the old magazine out of the well with the fingers closed on it, carries it down out of
+  view, brings the fresh one up in hand and seats it, then goes back to the hold; only the hand and wrist show. The
+  replica's magazine bone rides in the hand between `ViewModelConfig.reload_carry` shares
+  (`game/play/magazine_carry.gd`). The replica tips and lifts per replica (`reload_cant_by`, `reload_move_by`,
+  `reload_rise`); the pistols tip up 0.9 rad so the well is in view. A cut reload puts the magazine home and the hand
+  on the hold. The approved hold and fire clips are unchanged.
+- **11, skin-only arms.** Settings › Dev › Skin-only arms (off by default, saved, switched live): bare hands, sleeves
+  unchanged. 38,900 tris drawn with gloves, 33,772 skin-only (budget 40k).
+- Tests: `test_bp8_arms.gd` (16, incl. both arms projected through the view at every reload key),
+  `test_bp8_arms_qa.gd` (26, every cut of the carry). Tool: `tools/render_arms.gd`. Pictures:
+  `/mnt/project-files/playtest/bp8/arms/` (William's OK before merge).
+
 ## Decisions
 
 - **Watching Here is wheel-only.** William asked for a wheel option; a key would need a Settings row he didn't ask for.
@@ -126,6 +148,8 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
 - **The countdown runs every round**, with no beeps (the whistle at GO only), and not on the Range.
 - **In the countdown you can look round but not swap or reload:** nobody acts until GO, one rule for player, bots and sim.
 - **The rail shows keys 1, 2, 4 and 5 only** (3 is the holster), icons with no names, as William marked up.
+- **An Angled Grip is held behind, palm on its swept face:** that is how the part is shaped to be held.
+- **Skin-only arms use one mid skin tone**, set in the data.
 
 ## Known issues left
 
@@ -134,3 +158,4 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
   torch and laser overlapping at night (pre-existing), and `aeg.glb` near its 3 MiB cap.
 - Match: simulated rounds count for XP and records, and bot routes ignore the bush slowdown (rows dated 2026-11-08).
 - HUD: rail key labels are read once a match (a rebind mid-match isn't shown); HIT! over an unhit bot not reproduced.
+- Arms: a sleeve hem can show at a rifle's magazine well; loose fingers past short magazines; the pistols' tip is new.

@@ -197,7 +197,12 @@ func test_a_robot_wears_the_robot_colours() -> void:
 func test_every_arms_material_is_offered_to_the_prewarm() -> void:
 	var hands := _hands([&"aeg"])
 	var offered := hands.arms_materials()
-	assert_eq(offered.size(), 2 * cfg.robot_arms.size(), "each of the four materials, human and robot")
+	var own := {}
+	for node: Node in _model(hands).find_children("*", "MeshInstance3D", true, false):
+		var mesh_node := node as MeshInstance3D
+		for i in mesh_node.mesh.get_surface_count():
+			own[mesh_node.mesh.surface_get_material(i)] = true
+	assert_eq(offered.size(), 3 * own.size(), "each of the model's materials, human, robot and skin only (BP8)")
 	_show(hands, 0)
 	var arm := _model(hands).find_child("Arm_R", true, false) as MeshInstance3D
 	for i in arm.mesh.get_surface_count():
@@ -205,6 +210,10 @@ func test_every_arms_material_is_offered_to_the_prewarm() -> void:
 	hands.arms_kind = FigureMix.ROBOT
 	for i in arm.mesh.get_surface_count():
 		assert_has(offered, arm.get_surface_override_material(i), "the robot one worn is prewarmed")
+	hands.arms_kind = FigureMix.HUMAN
+	hands.skin_arms = true
+	for i in arm.mesh.get_surface_count():
+		assert_has(offered, arm.get_surface_override_material(i), "the skin one worn is prewarmed")
 
 
 func test_the_arms_are_freed_with_the_view() -> void:
