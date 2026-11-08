@@ -23,6 +23,10 @@ and boots, whether they're standing, crouched, running, leaning or vaulting. Arm
 that only clips an elbow or a muzzle flies on. F5 shows everyone's hit areas if you want to check
 ([Controls](Controls#keys-you-cant-change)).
 
+Every round starts the same way: everyone is held still while **3, 2, 1, GO!** shows under the round's banner, and the
+referee's whistle blows at **GO!**, when the clock starts. You can still look round while you wait. Nothing sounds
+under the loading screen, so the first thing you hear in a match is the field and then the whistle.
+
 When a BB hits you:
 
 1. You hear a sharp tick, your replica jolts and drops out of view, and the field's sound dips.

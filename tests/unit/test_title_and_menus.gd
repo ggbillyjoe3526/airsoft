@@ -71,7 +71,7 @@ func test_the_level_chip_reads_the_level_and_hides_with_levelling_off() -> void:
 	add_child_autofree(bar)
 	bar.set_level(3)
 	var chip := bar.find_child("Level", true, false) as Control
-	assert_eq(bar.level_text(), "LV 3")
+	assert_eq(bar.level_text(), "LVL 3")
 	bar.set_level(-1)
 	assert_false(chip.visible, "no chip while levelling is off")
 	assert_eq(bar.level_text(), "")

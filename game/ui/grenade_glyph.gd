@@ -39,6 +39,8 @@ var kind: int = Grenade.Kind.SMOKE:
 ## The model's picture (null: the flat icon), and what draws it (made only for a kind with a model).
 var _picture: Texture2D = null
 var _pictures: ReplicaPictures = null
+## A set of pictures owned by someone else (the weapon rail's): used instead of making one of its own.
+var shared_pictures: ReplicaPictures = null
 
 
 func _init(kind_in: int = Grenade.Kind.SMOKE, side: float = 48.0) -> void:
@@ -61,7 +63,9 @@ func _take_picture() -> void:
 	_picture = null
 	if not is_inside_tree() or ReplicaPictures.grenade_path(kind).is_empty():
 		return
-	if _pictures == null:
+	if shared_pictures != null:
+		_pictures = shared_pictures
+	elif _pictures == null:
 		_pictures = ReplicaPictures.new()
 		_pictures.name = "Pictures"
 		add_child(_pictures)

@@ -41,6 +41,9 @@ const DEFAULT_PATH := "res://game/config/play_tuning.tres"
 ## Seconds out of the round before a press of the trigger can skip it (owner, 2026-11-03: the clicks of the fight that
 ## put you out skipped the round at once). The skip hint shows once it can.
 @export var skip_grace: float = 1.5
+## The countdown at every match round's start (s: 3, 2, 1, then GO! and the whistle; BP8). Everyone is held still and the
+## clock waits; 0 for none. The range has none. Put into the round tuning (RoundConfig.start_countdown) as a match loads.
+@export var round_countdown: float = 3.0
 ## With the loading screen's Continue (MC1): the longest (s) the shaders' warm-up may keep it hidden after the match is
 ## first drawn.
 @export var go_fallback: float = 10.0

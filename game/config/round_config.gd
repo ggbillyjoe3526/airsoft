@@ -10,6 +10,9 @@ extends Resource
 @export var round_time: float = 150.0
 ## Seconds from a round's end to everyone respawning (the result, then the round's table; RE1).
 @export var reset_delay: float = 6.0
+## The countdown at every round's start (s, whole seconds read 3, 2, 1, then GO): everyone is held still and the clock
+## waits, the referee's whistle blows at GO. 0: none, the round is live at once. A match gets PlayTuning.round_countdown.
+@export var start_countdown: float = 0.0
 ## Round wins needed, and the lead needed once there (1: the first there wins).
 @export var wins_needed: int = 5
 @export var win_by: int = 1

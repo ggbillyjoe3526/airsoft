@@ -14,12 +14,21 @@ slanted banners call the round start, half time with the ends swapped, and who t
 
 ## The replica panel
 
-Bottom right, on a rounded panel: your smoke and flash bombs as icons with how many are left (dimmed at none, and the
-one in your hand larger on a light chip), your BB count, a gauge for every magazine you carry, the loaded one first,
-then your spares, fullest first, and the replica's name with its fire-mode chips (**S**, **B**, **A**: single, burst,
-auto), the current one lit. An empty magazine shows dark, so you can read them without colour. A low magazine turns
+Bottom right, on a small rounded panel: your BB count, a gauge for every magazine you carry, the loaded one first,
+then your spares, fullest first, and the replica's fire-mode chips (**S**, **B**, **A**: single, burst, auto), the
+current one lit. An empty magazine shows dark, so you can read them without colour. A low magazine turns
 yellow, and **HOLSTERED**, **RELOADING**, **LAST MAG**, **OUT OF BBS** or a bomb **IN HAND** show when they apply.
 Turning the hop-up dial shows its setting here for a moment.
+
+### The weapon rail
+
+Bottom right, just above the ammo panel, a picture of each thing you carry with the key that takes it in hand at the
+right of its row: your two replicas (1 and 2), then your smoke (4) and flash (5) bombs, one icon for each bomb you
+carry (two icons side by side for two, each on a light plate so the dark bombs read), with no numbers. A bomb you never
+carried has no row. The one in your hand is bright with a teal edge; the rest are dim, and a bomb you have thrown stays
+as one dim icon. Nothing is lit while your replica is holstered. The notes above the ammo panel (RELOADING,
+a bomb in hand, the hop-up readout) show above the rail, so it never moves. The pictures come from the models
+themselves, so a new paint or replica shows as it is.
 
 The crosshair opens with your spread, so it tells you how steady you are. Under it, a **RELOAD** prompt with your
 Reload key shows while your magazine is empty and you have one to load, unless reloads are Automatic in Settings; it

@@ -34,6 +34,8 @@ extends Resource
 @export var ricochet_time: float = 1.5
 ## A round's banner shows this long (s).
 @export var banner_time: float = 2.5
+## "GO!" shows this long (s) as the round's start countdown ends.
+@export var go_time: float = 0.8
 ## Attack / Defend (concepts `hud-attack.png`, `hud-defend.png`; the gauge's notches are the rope's ratchet steps): the
 ## marker over the pole, this high over its foot (m), hidden within this distance (m) and kept this far inside the
 ## screen's edges (px); and the warning that the other team's flag is going up, pulsing this many times a second.

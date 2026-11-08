@@ -5,6 +5,7 @@
 - part 1 (bots): critic Accept 7/8 · qa Pass · performance Pass
 - part 2 (replicas): critic Accept 8/8 (attempt 3) · qa Pass · performance Pass
 - part 3 (match): critic Accept 7/8 · qa Pass · performance Pass
+- part 4 (hud): critic Accept 7/8 (attempt 2) · qa Pass · performance Pass
 
 William's playtest notes of 2026-11-08 (26 items, before he tags 0.1 Dev 2) went out as a bug pass in parts by area.
 The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-summary.md`.
@@ -18,6 +19,8 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
 | 2026-11-08 | part 2: 2 | Opus 5.5 | targeted + smoke | Retry 7/8 | hip glass off-centre shrink and flat inspect lens; Variable Scope shoulder shading |
 | 2026-11-08 | part 2: 3 | Opus 5.5 | targeted + smoke; CI | Accept 8/8 | – |
 | 2026-11-08 | part 3: 1 | Opus 5.5 | targeted + smoke; balance 16 seeds; CI | Accept 7/8 | – (stale DECISIONS and KNOWN_ISSUES rows, SIMULATE button-only, named constants after) |
+| 2026-11-08 | part 4: 1 | Opus 5.5 | 195-file round sweep + smoke | Retry 5/8 | banner left before GO, notes moved the rail, flash icon unreadable, A/D start not rendered |
+| 2026-11-08 | part 4: 2 | Opus 5.5 | 223-file sweep + smoke; CI | Accept 7/8 | – (header text, chip-row test, plate alpha, pole marker after) |
 
 ## Part 1: bots (items 17 and 23)
 
@@ -82,6 +85,31 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
 - Tests: `test_bp8_match.gd`, `test_bp8_match_qa.gd`; nine menu tests for the new default. Pictures:
   `/mnt/project-files/playtest/bp8/match/`.
 
+## Part 4: HUD (items 1, 3, 13, 14, 15, 18, 19, 21)
+
+- **1, LVL.** The level chip reads "LVL 4", not "LV 4" (`en.po`).
+- **3, grey switches.** An off switch is a plain grey outline with one small grey knob (`MenuSwitch.colours`).
+- **13, the weapon rail.** The ammo panel is compact (no replica name, no bomb icons). A rail sits just above it on
+  the right: one row per slot (keys 1, 2, 4, 5 at the right, no names, no counts), model pictures for the replicas
+  and one 44 px icon per bomb carried on a light plate; the one in hand is lit with a teal edge. RELOADING, a bomb in
+  hand and the hop dial rise above the rail, so it never moves. Two of one kind show as two icons in one row.
+- **14, 3-2-1-GO.** Every round starts held (`RoundState.hold`): you can look round but not move, fire, swap or
+  reload; bots wait; the clock and time in play don't run (`is_live()` false; `under_way()` true for pole cues).
+  `ROUND_COUNT` and `ROUND_GO` drive a plate under the round banner (`HudCountdown`), and the banner stays up through
+  GO. Pause freezes it and hides the plate. `Round.end_countdown` emits GO; the Dev end-the-round cheat runs the
+  clock out and the next step gives one GO and ends the round. Tests that act in a live round call
+  `RoundHold.release`.
+- **15, the whistle.** It blows on GO only. The first tick no longer queues sounds under the loading screen
+  (`PlaySession.is_heard`).
+- **18, HIT!.** Your own HIT! goes when the round result or scoreboard shows, and no longer shows while you watch a
+  teammate (`hit_call_shown`). HIT! over an unhit bot was not reproduced otherwise.
+- **19, the pause menu** is centred.
+- **21, no overlaps.** Tab's board hangs under the score column, hides the middle stack and the flag warning, and the
+  pole marker is not drawn through it or over the banner and countdown plate. Fire-mode chips drop to their own row
+  when many magazine boxes would push them out.
+- Tests: `test_bp8_hud.gd`, `test_bp8_hud_qa.gd` (14), `test_bp8_hud_round2.gd`; a 223-file sweep of round, HUD and
+  PlaySession tests passed. Pictures: `/mnt/project-files/playtest/bp8/hud/` (William: "great" on the rail).
+
 ## Decisions
 
 - **Watching Here is wheel-only.** William asked for a wheel option; a key would need a Settings row he didn't ask for.
@@ -95,6 +123,9 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
 - **A raised flag keeps counting its hold with nobody on the rope:** nobody pulls it down, so it stands; William's play decides.
 - **SIMULATE is a seeded roll that counts for XP and records**, and is button-only so a double-click to skip can't simulate.
 - **Attack / Defend falls back to Elimination** on a map with no pole.
+- **The countdown runs every round**, with no beeps (the whistle at GO only), and not on the Range.
+- **In the countdown you can look round but not swap or reload:** nobody acts until GO, one rule for player, bots and sim.
+- **The rail shows keys 1, 2, 4 and 5 only** (3 is the holster), icons with no names, as William marked up.
 
 ## Known issues left
 
@@ -102,3 +133,4 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
 - Replicas: the hip glass camera's second draw from Medium up (frame time unmeasured on William's PC), the pistol's
   torch and laser overlapping at night (pre-existing), and `aeg.glb` near its 3 MiB cap.
 - Match: simulated rounds count for XP and records, and bot routes ignore the bush slowdown (rows dated 2026-11-08).
+- HUD: rail key labels are read once a match (a rebind mid-match isn't shown); HIT! over an unhit bot not reproduced.

@@ -15,6 +15,9 @@ msgstr "Beta"
 msgid "HUD_HIT_SIGN"
 msgstr "HIT!"
 
+msgid "HUD_ROUND_GO"
+msgstr "GO!"
+
 msgid "HUD_YOU_ARE_HIT"
 msgstr "HIT!"
 
@@ -3685,7 +3688,7 @@ msgid "MAP_KEY_GREEN"
 msgstr "Hedge, thicket"
 
 msgid "MENU_LEVEL_SHORT"
-msgstr "LV %d"
+msgstr "LVL %d"
 
 msgid "SETTINGS_ABOUT"
 msgstr "About"

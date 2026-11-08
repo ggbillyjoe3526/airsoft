@@ -30,6 +30,7 @@ func _play(warm: bool = true) -> void:
 	add_child_autofree(session)
 	await wait_physics_frames(2)
 	session.set("_warm", warm)
+	RoundHold.release(session.state)
 
 
 ## Two slow windows of live-round frames, as the session's own `_process` hands them over.

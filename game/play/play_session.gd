@@ -365,6 +365,11 @@ func _load_map() -> void:
 	else:
 		_tuning = MatchOptions.match_tuning(_tuning, MapCatalog.shared().find(map_id), custom_rules)
 	_play = PlayTuning.load_default()
+	if not practice and not is_equal_approx(_tuning.rounds.start_countdown, _play.round_countdown):
+		# a copy: the shared default tuning is never written to
+		_tuning = _tuning.duplicate() as SimTuning
+		_tuning.rounds = _tuning.rounds.duplicate() as RoundConfig
+		_tuning.rounds.start_countdown = _play.round_countdown
 	_map = MapData.load_map(map_id, _play.map_style, _tuning.rounds.team_size)
 	var dev := (settings if settings != null else Settings.shared()).dev
 	_light = lighting_for(_map, _play, lighting_pick, dev.time_of_day)
@@ -925,6 +930,7 @@ func _build_views(ui: CanvasLayer) -> void:
 	_hud = Hud.new()
 	ui.add_child(_hud)
 	_hud.setup(_play.hud, _colours.hud, _play.view, _tuning, player)
+	_hud.setup_weapon_rail(player.armament.replicas, kit.paints, realistic)
 	_hud.setup_sound_cues(_cues, _access)
 	_hud.setup_orders(_play.controls)
 	if not practice:
@@ -1062,6 +1068,12 @@ func _tick() -> void:
 	_after_tick()
 
 
+## Whether a tick's sound is played: not while skipping under the cover, and not before the match runs and is let go
+## (BP8: nothing sounds under the loading screen, not even the first tick's events).
+static func is_heard(skipping: bool, running: bool, holding: bool) -> bool:
+	return running and not holding and not skipping
+
+
 ## Ticks the simulation has run.
 func ticks() -> int:
 	return _ticks
@@ -1168,7 +1180,7 @@ func _after_tick() -> void:
 	var ears := spectated()
 	_heard.on_tick(state, ears)
 	# Played out under the cover (a skip): nothing of it is heard, nor its sound cues shown.
-	var heard := not _skipping
+	var heard := is_heard(_skipping, _running, _holding)
 	if settings.sound_cues and heard:
 		_cues.on_tick(state, ears)
 	_debug.on_tick()
@@ -1385,7 +1397,7 @@ func _process(delta: float) -> void:
 		for i in mini(_flags.size(), rs.flags.size()):
 			_flags[i].refresh(rs.flags[i], rs.attackers)
 		var shown := mini(_hud.shown_pole(), rs.flags.size() - 1)
-		_hud.place_flag_marker(_eyes.camera, rs.flags[shown].position, rs.attackers >= 0 and rs.is_live(),
+		_hud.place_flag_marker(_eyes.camera, rs.flags[shown].position, rs.attackers >= 0 and rs.under_way(),
 				Flag.LETTERS[shown] if rs.flags.size() > 1 else "")
 	elif _overtime_flag != null:
 		var rs := state.round_state
@@ -1393,7 +1405,7 @@ func _process(delta: float) -> void:
 		_overtime_flag.refresh(ot, OvertimeFlagView.toucher_of(rs), delta)
 		_overtime_flag.face(_eyes.global_position)
 		# Placed only while it stands in a live round; hidden once, then left alone.
-		var standing := ot.up and rs.is_live()
+		var standing := ot.up and rs.under_way()
 		if standing or _hud.flag_marker_shown():
 			_hud.place_flag_marker(_eyes.camera, ot.foot, standing)
 	_hud.set_watching(_bots.name_of(watched.id) if watched != player else "")

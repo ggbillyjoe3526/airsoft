@@ -304,23 +304,6 @@ func _panel(c: Character) -> ReplicaPanel:
 	return p
 
 
-func test_the_panel_counts_the_bombs_left_and_follows_a_throw() -> void:
-	var c := Character.new(0, 0, Vector3.ZERO, 0.0, loadout)
-	c.grenades.carry(1, 1)
-	var p := _panel(c)
-	var texts := p.bomb_texts()
-	assert_eq(texts[Grenade.Kind.SMOKE], "SMOKE 1")
-	assert_eq(texts[Grenade.Kind.FLASH], "FLASH 1")
-	assert_eq(texts[Grenade.Kind.NONE], "")
-	c.grenades.spend(Grenade.Kind.FLASH)
-	p.refresh(c.armament, c.grenades)
-	assert_eq(p.bomb_texts()[Grenade.Kind.FLASH], "FLASH 0")
-	assert_eq(p.bomb_texts()[Grenade.Kind.SMOKE], "SMOKE 1")
-	c.respawn()
-	p.refresh(c.armament, c.grenades)
-	assert_eq(p.bomb_texts()[Grenade.Kind.FLASH], "FLASH 1", "a respawn shows them back")
-
-
 func test_a_replica_put_down_for_a_throw_is_not_said_to_be_holstered() -> void:
 	var c := Character.new(0, 0, Vector3.ZERO, 0.0, loadout)
 	c.grenades.carry(1, 1)
@@ -338,13 +321,13 @@ func test_a_replica_put_down_for_a_throw_is_not_said_to_be_holstered() -> void:
 	assert_false(p._status.visible)
 
 
-func test_a_refresh_with_no_hand_leaves_the_bomb_row_alone() -> void:
+func test_a_refresh_with_no_hand_leaves_the_panel_alone() -> void:
 	var c := Character.new(0, 0, Vector3.ZERO, 0.0, loadout)
 	var p := ReplicaPanel.new()
 	add_child_autofree(p)
 	p.setup(HudConfig.new())
 	p.refresh(c.armament)
-	assert_eq(p.bomb_texts()[Grenade.Kind.SMOKE], "")
+	assert_false(p._status.visible, "no hand to read: nothing flickers")
 
 
 # --- Key bindings and input ---

@@ -103,6 +103,7 @@ func test_the_clock_counts_down_overtime_after_ot() -> void:
 	session = _session(MatchOptions.MODE_ATTACK_DEFEND)
 	await wait_physics_frames(2)
 	var rs := session.state.round_state
+	RoundHold.release(session.state)
 	rs.clock = 0.0
 	rs.overtime = 4.2
 	session.hud().update(session.state, 1.0, 0.0)

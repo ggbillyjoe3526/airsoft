@@ -211,10 +211,10 @@ func fill(view: View, state: GameState, watched: Character, fraction: float, sto
 			var share := 1.0 if _field.storey_of(p.centre.y) == storey else _cfg.other_storey_patch
 			view.add_patch(Vector2(p.centre.x, p.centre.z), p.radius, p.sound == MinimapHearing.Sound.SHOT,
 					_heard.shade(p) * share)
-	if rs.mode == RoundState.Mode.ATTACK_DEFEND and rs.attackers >= 0 and rs.is_live():
+	if rs.mode == RoundState.Mode.ATTACK_DEFEND and rs.attackers >= 0 and rs.under_way():
 		for p in rs.poles:
 			view.set_pole(Vector2(p.x, p.z))
-	elif rs.overtime_flag.up and rs.is_live():
+	elif rs.overtime_flag.up and rs.under_way():
 		view.set_pole(Vector2(rs.overtime_flag.foot.x, rs.overtime_flag.foot.z), true)
 	if holding:
 		view.set_hold(Vector2(hold.x, hold.z))

@@ -12,6 +12,7 @@ func before_each() -> void:
 	session.autopilot = true # no mouse here: a bot plays you
 	add_child_autofree(session)
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 
 
 func after_each() -> void:

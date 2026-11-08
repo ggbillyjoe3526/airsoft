@@ -37,6 +37,8 @@ const BANNER_SUB_SIZE := 20
 const CHIP_SIZE := 13
 const NOTE_SIZE := 15
 const COUNT_SIZE := 40
+## The start countdown's padding (left, top, right, bottom): a square-ish plate round a single digit.
+const COUNT_PAD := Vector4(48.0, 6.0, 48.0, 10.0)
 const SPARE_SIZE := 16
 ## A navy box's alpha before the panel opacity (a meta on the box), the panel opacity a part draws at (a meta on the
 ## part), and the slots restyle() looks in.

@@ -1,6 +1,5 @@
 extends GutTest
-## UR7: the HUD as UI concept B v2 `hud.png`: the bombs as icons with the one in hand larger on a chip, the replica's
-## name by its fire modes, and the score bar and the feed on rounded plates.
+## UR7: the HUD as UI concept B v2 `hud.png`: the weapon rail, the compact replica panel (BP8), and the score bar and the feed on rounded plates.
 
 var loadout: Array[ReplicaConfig] = []
 
@@ -17,54 +16,58 @@ func _panel(c: Character) -> ReplicaPanel:
 	return p
 
 
-func test_each_bomb_is_an_icon_and_the_one_in_hand_is_larger_on_a_chip() -> void:
+func _rail(c: Character) -> WeaponRail:
+	var r := WeaponRail.new()
+	add_child_autofree(r)
+	var paints: Array[StringName] = []
+	for i in c.armament.replicas.size():
+		paints.append(&"cobalt")
+	r.setup(c.armament.replicas, paints)
+	r.refresh(c.armament, c.grenades)
+	return r
+
+
+func test_the_rail_has_a_row_per_replica_and_per_bomb_with_its_key() -> void:
 	var c := Character.new(0, 0, Vector3.ZERO, 0.0, loadout)
 	c.grenades.carry(1, 1)
-	var p := _panel(c)
-	var smoke := p.bomb_icon(Grenade.Kind.SMOKE)
-	var flash := p.bomb_icon(Grenade.Kind.FLASH)
-	assert_eq(smoke.kind, Grenade.Kind.SMOKE)
-	assert_eq(flash.kind, Grenade.Kind.FLASH)
-	assert_eq(smoke.custom_minimum_size.x, ReplicaPanel.BOMB_ICON)
+	var r := _rail(c)
+	assert_eq(r.rows(), c.armament.replicas.size() + 2)
+	assert_eq(WeaponRail.key_text(&"slot_1"), "1")
+	assert_eq(WeaponRail.key_text(&"throw_flash"), "5")
+	assert_eq(WeaponRail.key_text(&"no_such_action"), KeyNames.NO_KEY)
+
+
+func test_the_replica_in_hand_is_lit_and_a_swap_moves_the_light() -> void:
+	var c := Character.new(0, 0, Vector3.ZERO, 0.0, loadout)
+	var r := _rail(c)
+	assert_eq(r.lit(), c.armament.active)
+	c.armament.active = 1
+	r.refresh(c.armament, c.grenades)
+	assert_eq(r.lit(), 1)
+	c.armament.holstered = true
+	r.refresh(c.armament, c.grenades)
+	assert_eq(r.lit(), -1, "nothing is lit while holstered")
+
+
+func test_a_bomb_in_hand_is_lit_and_one_with_none_left_is_dim() -> void:
+	var c := Character.new(0, 0, Vector3.ZERO, 0.0, loadout)
+	c.grenades.carry(1, 1)
+	var r := _rail(c)
+	var slots := c.armament.replicas.size()
 	c.grenades.readied = Grenade.Kind.SMOKE
-	p.refresh(c.armament, c.grenades)
-	assert_eq(smoke.custom_minimum_size.x, ReplicaPanel.BOMB_ICON_HELD, "the bomb in hand is larger")
-	assert_eq(flash.custom_minimum_size.x, ReplicaPanel.BOMB_ICON)
-	var chip := smoke.get_parent().get_parent() as PanelContainer
-	assert_eq(chip.get_theme_stylebox("panel"), p._chip_held, "on a chip")
+	r.refresh(c.armament, c.grenades)
+	assert_eq(r.lit(), slots)
 	c.grenades.readied = Grenade.Kind.NONE
-	p.refresh(c.armament, c.grenades)
-	assert_eq(smoke.custom_minimum_size.x, ReplicaPanel.BOMB_ICON, "back to size once put away")
-	assert_eq(chip.get_theme_stylebox("panel"), p._chip_clear)
-
-
-func test_a_bomb_with_none_left_is_dimmed() -> void:
-	var c := Character.new(0, 0, Vector3.ZERO, 0.0, loadout)
-	c.grenades.carry(1, 1)
-	var p := _panel(c)
 	c.grenades.spend(Grenade.Kind.FLASH)
-	p.refresh(c.armament, c.grenades)
-	assert_lt(p.bomb_icon(Grenade.Kind.FLASH).modulate.a, 1.0)
-	assert_eq(p.bomb_icon(Grenade.Kind.SMOKE).modulate.a, 1.0)
+	r.refresh(c.armament, c.grenades)
+	assert_lt(r._glyphs[1][0].self_modulate.a, r._glyphs[0][0].self_modulate.a, "the spent bomb is the dimmer")
 
 
-func test_the_panel_names_the_replica_by_its_fire_modes() -> void:
+func test_the_panel_no_longer_names_the_replica_or_shows_bombs() -> void:
 	var c := Character.new(0, 0, Vector3.ZERO, 0.0, loadout)
 	var p := _panel(c)
-	var label := p.find_child("ReplicaName", true, false) as Label
-	assert_eq(label.text, c.armament.replica().display_name.to_upper())
-	c.armament.active = 1 - c.armament.active
-	p.refresh(c.armament, c.grenades)
-	assert_eq(label.text, c.armament.replica().display_name.to_upper(), "follows a swap")
-
-
-func test_the_bombs_sit_above_the_count() -> void:
-	var c := Character.new(0, 0, Vector3.ZERO, 0.0, loadout)
-	c.grenades.carry(1, 1)
-	var p := _panel(c)
-	await wait_process_frames(2)
-	var bombs := p.find_child("Bombs", true, false) as Control
-	assert_lt(bombs.get_global_rect().end.y, p._mag.get_global_rect().position.y + 1.0)
+	assert_null(p.find_child("ReplicaName", true, false))
+	assert_null(p.find_child("Bombs", true, false))
 
 
 func test_the_score_bar_draws_rounded_team_blocks_inside_its_plate() -> void:
@@ -108,8 +111,8 @@ func test_the_magazine_boxes_sit_at_the_panel_s_left_edge() -> void:
 	var gauges := p.gauges()
 	var row := gauges.get_global_rect()
 	assert_almost_eq(row.size.x, gauges.row_width(gauges._count), 0.5, "as wide as its boxes")
-	var name_label := p.find_child("ReplicaName", true, false) as Control
-	assert_almost_eq(row.position.x, name_label.get_global_rect().position.x, 1.0, "left edge with the name's (owner)")
+	var frame := p.find_child("Frame", true, false) as Control
+	assert_almost_eq(row.position.x, frame.get_global_rect().position.x + ReplicaPanel.PAD.x, 1.0, "at the panel's left edge")
 
 
 func test_readying_a_bomb_does_not_move_the_panel() -> void:

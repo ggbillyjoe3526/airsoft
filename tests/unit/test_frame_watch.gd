@@ -203,6 +203,7 @@ func _make_due() -> void:
 func test_the_step_waits_for_the_rounds_end_and_goes_one_preset_down_unsaved() -> void:
 	GraphicsApply.pick_for_run(&"high")
 	await _play()
+	RoundHold.release(session.state)
 	_make_due()
 	await wait_physics_frames(10)
 	assert_true(session.state.round_state.is_live())

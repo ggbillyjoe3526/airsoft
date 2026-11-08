@@ -605,6 +605,7 @@ func test_the_dress_adds_no_collider_light_or_body_to_a_match() -> void:
 	assert_eq(dress.find_children("*", "CollisionObject3D", true, false).size(), 0)
 	assert_eq(dress.find_children("*", "Light3D", true, false).size(), 0)
 	assert_eq(dress.find_children("*", "NavigationRegion3D", true, false).size(), 0)
+	RoundHold.release(session.state)
 	assert_true(session.state.round_state.is_live())
 
 

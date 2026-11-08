@@ -15,6 +15,8 @@ const RING_GAP := 3.0
 ## A greyed switch's opacity, and how much the pointer lightens it.
 const DIM_ALPHA := 0.45
 const HOVER_LIGHTEN := 0.12
+## The off switch's outline (px at 1080p).
+const OFF_OUTLINE := 2.0
 
 ## An empty icon, so CheckButton keeps no room of its own for one; the focus ring's box. Made once.
 static var _none: ImageTexture = null
@@ -63,21 +65,48 @@ func words() -> String:
 	return both[1] if button_pressed else both[0]
 
 
+## The pill, knob and outline colours for a state: on is the accent with an ink knob; off is a plain grey outline with a
+## small grey knob and no fill, so a switched-off pill is quiet and its two ends never read as two spheres (BP8).
+static func colours(on: bool, hovered: bool, dimmed: bool) -> PackedColorArray:
+	var fill := Color(0.0, 0.0, 0.0, 0.0)
+	var knob := GameTheme.DIM
+	var outline := GameTheme.DIM
+	if on:
+		fill = GameTheme.ACCENT
+		knob = GameTheme.ACCENT_INK
+		outline = fill
+	if hovered and not dimmed:
+		fill = fill.lightened(HOVER_LIGHTEN)
+		outline = outline.lightened(HOVER_LIGHTEN) if on else GameTheme.MUTED
+		knob = knob if on else GameTheme.MUTED
+	if dimmed:
+		fill.a *= DIM_ALPHA
+		knob.a *= DIM_ALPHA
+		outline.a *= DIM_ALPHA
+	return PackedColorArray([fill, knob, outline])
+
+
 func _draw() -> void:
 	var on := button_pressed
 	var pill := Rect2((size - PILL) * 0.5, PILL)
 	var radius := PILL.y * 0.5
-	var fill := GameTheme.ACCENT if on else GameTheme.LINE
-	if is_hovered() and not disabled:
-		fill = fill.lightened(HOVER_LIGHTEN)
-	var knob := GameTheme.ACCENT_INK if on else GameTheme.TEXT
-	if disabled:
-		fill.a = DIM_ALPHA
-		knob.a = DIM_ALPHA
-	draw_rect(Rect2(pill.position.x + radius, pill.position.y, pill.size.x - radius * 2.0, pill.size.y), fill)
-	draw_circle(Vector2(pill.position.x + radius, pill.get_center().y), radius, fill)
-	draw_circle(Vector2(pill.end.x - radius, pill.get_center().y), radius, fill)
+	var col := colours(on, is_hovered(), disabled)
+	var mid := pill.get_center().y
+	if on:
+		draw_rect(Rect2(pill.position.x + radius, pill.position.y, pill.size.x - radius * 2.0, pill.size.y), col[0])
+		draw_circle(Vector2(pill.position.x + radius, mid), radius, col[0])
+		draw_circle(Vector2(pill.end.x - radius, mid), radius, col[0])
+	else:
+		var inset := OFF_OUTLINE * 0.5
+		var r := radius - inset
+		var left := Vector2(pill.position.x + radius, mid)
+		var right := Vector2(pill.end.x - radius, mid)
+		draw_line(Vector2(left.x, pill.position.y + inset), Vector2(right.x, pill.position.y + inset), col[2], OFF_OUTLINE)
+		draw_line(Vector2(left.x, pill.end.y - inset), Vector2(right.x, pill.end.y - inset), col[2], OFF_OUTLINE)
+		draw_arc(left, r, PI * 0.5, PI * 1.5, 16, col[2], OFF_OUTLINE)
+		draw_arc(right, r, -PI * 0.5, PI * 0.5, 16, col[2], OFF_OUTLINE)
 	var knob_x := pill.end.x - radius if on else pill.position.x + radius
-	draw_circle(Vector2(knob_x, pill.get_center().y), radius - KNOB_INSET, knob)
+	var knob_r := radius - KNOB_INSET if on else radius - KNOB_INSET - OFF_OUTLINE
+	draw_circle(Vector2(knob_x, mid), knob_r, col[1])
 	if has_focus():
 		draw_style_box(_ring, pill.grow(RING_GAP))

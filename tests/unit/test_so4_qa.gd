@@ -44,6 +44,7 @@ func _move(session: PlaySession, dx: float, dy: float) -> void:
 
 func _started(session: PlaySession) -> void:
 	await wait_physics_frames(3)
+	RoundHold.release(session.state)
 	session._input.active = true
 
 

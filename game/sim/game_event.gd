@@ -48,6 +48,8 @@ enum Kind {
 	DOOR, ## actor toggled door target (WorldQuery's order) at position (its leaf's middle): value 1 shutting, 0 opening; heard out to reach through walls (Doors, DO1).
 	ZOOM, ## actor turned the variable optic on slot to value (hundredths of ×); value2 0 if it was already at an end (SN2).
 	LASER, ## actor's laser from slot (Dev › Lasers, LZ1) ended at position, reach m along direction (unit) from the eyes it left: its beam, drawn; what it stopped on is that tick's BB_IMPACT, CHARACTER_HIT or TARGET_HIT.
+	ROUND_COUNT, ## the round's start countdown reached value whole seconds left (3, 2, 1): everyone is held until GO.
+	ROUND_GO, ## the start countdown is over (or there is none): the round's clock and everyone's hands are free.
 }
 
 ## RATTLE: a rattling magazine (ReplicaConfig.rattles) while walking or moving crouched, otherwise silent.

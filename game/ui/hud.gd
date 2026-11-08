@@ -80,8 +80,10 @@ var _rounds: RoundConfig = null
 var _sim: SimTuning = null
 
 var _replica: ReplicaPanel = null
+var _rail: WeaponRail = null
 var _score: HudScore = null
 var _banner: HudBanner = null
+var _count: HudCountdown = null
 var _hit_label: Label = null
 var _hit_sub: Label = null
 ## The hit call and banner stack (`_seat_middle`), the empty slot that keeps a banner where it is as the hit call ends,
@@ -302,6 +304,10 @@ func setup(cfg: HudConfig, teams: TeamConfig, view: ViewConfig, sim: SimTuning, 
 	_banner = HudBanner.new()
 	_banner.setup()
 	middle.add_child(_banner)
+	# The round's start countdown under the banner in the same stack, so the two never overlap.
+	_count = HudCountdown.new()
+	_count.setup(HudStyle.COUNT_PAD)
+	middle.add_child(_count)
 	# The round's table, under the stamp where the match's XP goes.
 	_round_result = HudRoundResult.new()
 	_place(_round_result, Vector4(0.5, 0.5, 0.5, 0.5), Rect2())
@@ -344,6 +350,20 @@ func setup(cfg: HudConfig, teams: TeamConfig, view: ViewConfig, sim: SimTuning, 
 	middle.sort_children.connect(_hang_cards)
 	resized.connect(_hang_cards)
 	_seat_middle()
+
+
+## The weapon rail, a row per replica in `replicas` drawn in `paints` and per bomb kind carried, in the replica panel's
+## stack right-aligned just above the ammo panel, and under its notes (the hop-up readout, the status), which rise above
+## it as they come, so the rail stays where it is. Call once, after setup.
+func setup_weapon_rail(replicas: Array[ReplicaConfig], paints: Array[StringName], realistic: bool) -> void:
+	_rail = WeaponRail.new()
+	_rail.custom_minimum_size.x = ReplicaPanel.WIDTH
+	_rail.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_replica.add_child(_rail)
+	_replica.move_child(_rail, _replica.find_child("Frame", false, false).get_index())
+	_rail.setup(replicas, paints, realistic)
+	if not is_equal_approx(_opacity, 1.0):
+		HudStyle.restyle(_rail, _opacity)
 
 
 ## Makes this the practice range's HUD: no score bar, rounds or hit feed, and the readout and the timed challenge in
@@ -627,7 +647,7 @@ func _fit_round_result() -> void:
 ## Holds the Tab scoreboard at the share of its size that fits between BOARD_TOP and the screen's bottom edge less
 ## SUMMARY_EDGE (TS1: an 8v8's sixteen rows under a large HUD size would run off the screen).
 func _fit_board() -> void:
-	var room := size.y - SUMMARY_EDGE - BOARD_TOP
+	var room := size.y - SUMMARY_EDGE - _board.offset_top
 	var fit := clampf(room / maxf(_board.get_combined_minimum_size().y, 1.0), CARDS_FIT_FLOOR, 1.0)
 	if not is_equal_approx(_board.scale.x, fit):
 		_board.scale = Vector2.ONE * fit
@@ -843,7 +863,13 @@ func on_tick(state: GameState, mag_from_wheel: bool = false) -> void:
 				if e.actor == _player.id and e.target < 0 and e.value == BBStep.IN_LEAVES \
 						and e.position.distance_to(Lean.eye(_player, _sim.body, _sim.hits)) <= _cfg.leaves_notice_near:
 					_leaves_left = _cfg.leaves_notice_time
+			GameEvent.Kind.ROUND_COUNT:
+				_count.count(e.value)
+			GameEvent.Kind.ROUND_GO:
+				if not state.round_state.practice:
+					_count.go(tr("HUD_ROUND_GO"), _cfg.go_time)
 			GameEvent.Kind.ROUND_START:
+				_count.end()
 				_round_result.close()
 				hide_what_got_you()
 				_hits.release_kept()
@@ -867,8 +893,10 @@ func on_tick(state: GameState, mag_from_wheel: bool = false) -> void:
 				_show_banner(HudStyle.caps("HUD_OVERTIME"), HudStyle.caps("HUD_TOUCH_FLAG"))
 				_banner_left = _cfg.overtime_banner_time
 			GameEvent.Kind.ROUND_OVER:
+				_count.end()
 				_round_over(state.round_state, e, state.time)
 			GameEvent.Kind.MATCH_OVER:
+				_count.end()
 				_round_result.match_over()
 				_show_banner(HudStyle.round_stamp(e.value, _player.team), _match_stamp_sub(state.round_state.score),
 						_teams.colours[e.value] if e.value >= 0 else Color.TRANSPARENT)
@@ -920,6 +948,12 @@ func xp_card() -> XpCard:
 	return _xp
 
 
+## Whether your "HIT!" call shows: you are out but still calling or walking off (`out`), through your own eyes (not
+## `watching` a teammate), the round `live`, and no scoreboard or result `covering` the middle.
+static func hit_call_shown(out: bool, watching: bool, live: bool, covering: bool) -> bool:
+	return out and not watching and live and not covering
+
+
 ## Refreshes from `state` and the eye's zoom, `delta` seconds since the last frame.
 func update(state: GameState, zoom: float, delta: float) -> void:
 	var c := _player
@@ -931,6 +965,7 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 		if _hop_left <= 0.0:
 			_replica.hide_hop()
 	_vault_left = maxf(0.0, _vault_left - delta)
+	_count.tick(delta)
 	if _step_left > 0.0:
 		_step_left -= delta
 		_step_line.visible = _step_left > 0.0
@@ -947,8 +982,8 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 		var board := _board_wanted and not (_summary.is_open() and not _round_result.holds_results())
 		var over_table := board and _round_result.is_open()
 		_round_result.set_covered(over_table)
-		# only the round's stamp goes with its table: in a live round the hit call and banners stay as they were
-		_middle.visible = not over_table
+		# the board covers the middle stack (hit call, banner, countdown) while held: nothing draws over anything (BP8)
+		_middle.visible = not board
 		_round_result.update(state, _stats, _player)
 		_show_watching()
 		_board.update(state, _stats, _player, board)
@@ -979,8 +1014,15 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 	if _banner_left > 0.0 and _xp == null and not _summary.is_open() and not _round_result.is_open():
 		_banner_left -= delta
 		if _banner_left <= 0.0:
-			_banner.visible = false
-	var hit_call := not in_play and c.status != Character.Status.OUT
+			if _count.visible:
+				# the countdown's plate sits under it: the banner stays through GO, so the plate never moves up
+				_banner_left = delta
+			else:
+				_banner.visible = false
+	# Your own hit call: only through your own eyes (watching a teammate it was shown over a bot that was not hit), and
+	# gone once the round is decided, the board is held or a result is up (BP8).
+	var hit_call := hit_call_shown(not in_play and c.status != Character.Status.OUT, _watching_name != "",
+			state.round_state.is_live(), _board.visible or _round_result.is_open() or _summary.is_open())
 	_hit_label.visible = hit_call
 	_hit_sub.visible = hit_call
 	# A banner up with the hit call keeps its place as the call ends: an empty slot as tall as the call stays above it
@@ -1003,6 +1045,8 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 		_gap = CrosshairDraw.gap(_prefs, tan(spread) / tan(half_fov) * size.y * _hud_size * 0.5)
 	if not a.replicas.is_empty():
 		_replica.refresh(a, c.grenades)
+		if _rail != null:
+			_rail.refresh(a, c.grenades)
 		if a.active != _hop_slot and _hop_left > 0.0:
 			_hop_left = 0.0
 			_replica.hide_hop()
@@ -1035,11 +1079,12 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 	_redraw_if_changed()
 
 
-## While the pause menu is up the crosshair is not drawn and the teammates' markers are hidden (the panel is
-## see-through); they come back as the pause ends.
+## While the pause menu is up the crosshair is not drawn and the teammates' markers and the countdown's plate are hidden
+## (the panel is see-through); they come back as the pause ends.
 func set_paused(on: bool) -> void:
 	_paused = on
 	_team_markers.visible = not on
+	_count.modulate.a = 0.0 if on else 1.0
 	_redraw_if_changed()
 
 
@@ -1078,7 +1123,27 @@ func use_overtime_flag() -> void:
 func place_flag_marker(camera: Camera3D, pole: Vector3, show: bool, letter: String = "") -> void:
 	_flag_eye = camera.global_position
 	_flag_marker.set_letter(letter)
-	_flag_marker.place(camera, pole, show, size, pin_point(), pin_right_top(), _left_stack_floor())
+	_flag_marker.place(camera, pole, show and not _board.visible, size, pin_point(), pin_right_top(), _left_stack_floor())
+	# Never over the round banner or the countdown's plate: it comes back as they go.
+	if _flag_marker.visible and overlaps_any(_flag_marker.occupied(), _stack_rects()):
+		_flag_marker.visible = false
+
+
+## Where the banner and the countdown's plate are now (HUD coordinates), those showing.
+func _stack_rects() -> Array[Rect2]:
+	var out: Array[Rect2] = []
+	for plate: Control in [_banner, _count]:
+		if plate.visible:
+			out.append(Rect2(_middle.position + plate.position, plate.size))
+	return out
+
+
+## Whether `rect` touches any of `others`.
+static func overlaps_any(rect: Rect2, others: Array[Rect2]) -> bool:
+	for other in others:
+		if rect.intersects(other):
+			return true
+	return false
 
 
 ## The pole the flag marker and the gauge show (AB1), as the last update left it.
@@ -1274,9 +1339,9 @@ func score() -> HudScore:
 func _update_warning(rs: RoundState, delta: float) -> void:
 	var c := _player
 	var up := Flag.in_play(rs.flags)
-	var show := rs.mode == RoundState.Mode.ATTACK_DEFEND and rs.is_live() and rs.attackers >= 0 \
+	var show := rs.mode == RoundState.Mode.ATTACK_DEFEND and rs.under_way() and rs.attackers >= 0 \
 			and c.team != rs.attackers and up >= 0 and rs.flags[up].status == FlagState.Status.RAISING \
-			and not Flag.at_pole(c, rs.flags[up], _sim.flag)
+			and not Flag.at_pole(c, rs.flags[up], _sim.flag) and not _board_wanted # Tab's board replaces it
 	_warning.visible = show
 	if show and rs.flags.size() > 1 and up != _warning_pole:
 		# Which pole, on a map with two (AB1); the text built only when that changes.
@@ -1429,6 +1494,8 @@ func _seat_middle() -> void:
 		edge = _top.position.y + _top.size.y + MIDDLE_GAP
 	_middle.offset_top = edge
 	_middle.offset_bottom = edge
+	# The Tab board hangs under the score column, whatever it holds (Attack / Defend's flag gauge makes it taller).
+	_board.offset_top = maxf(BOARD_TOP, _top.position.y + _top.size.y + MIDDLE_GAP)
 	_hang_cards()
 
 

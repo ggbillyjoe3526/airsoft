@@ -31,6 +31,10 @@ var number: int = 1
 var draws: int = 0
 ## Seconds left in the live round.
 var clock: float = 0.0
+## Seconds left of the round's start countdown (0: it is over or there is none): while above 0 nobody moves or fires
+## and `clock` waits. `counted` is the whole second last announced.
+var hold: float = 0.0
+var counted: int = 0
 ## Seconds left before the next round starts, while OVER.
 var timer: float = 0.0
 ## The next round waits past `timer` for Round.end_wait (a click on the round's table): set while a skipped round is
@@ -74,7 +78,20 @@ func reset_flags() -> void:
 		flags[i].reset(poles[i] if i < poles.size() else Vector3.ZERO)
 
 
+## Whether the start countdown is still running.
+func held() -> bool:
+	return phase == Phase.LIVE and hold > 0.0
+
+
+## Whether the round is being played: not decided, and past its start countdown (held ones are not live: no time in play,
+## bots do not plan or count as stuck).
 func is_live() -> bool:
+	return phase == Phase.LIVE and hold <= 0.0
+
+
+## Whether the round is under way: not decided, the start countdown included. What players see to find their way
+## (the Attack / Defend pole marker and its minimap dot) shows from the countdown on; what is played waits for is_live().
+func under_way() -> bool:
 	return phase == Phase.LIVE
 
 

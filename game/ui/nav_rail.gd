@@ -254,7 +254,7 @@ func _fit_back(b: Button, pad: Control) -> void:
 		b.custom_minimum_size.y = pad.get_combined_minimum_size().y
 
 
-## The level: "LV 3" over a thin bar of the XP into it.
+## The level: "LVL 3" over a thin bar of the XP into it.
 func _build_level() -> VBoxContainer:
 	var box := VBoxContainer.new()
 	box.name = "Level"
