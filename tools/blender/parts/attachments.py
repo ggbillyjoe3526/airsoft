@@ -565,6 +565,9 @@ SV_EYE_BACK, SV_EYE_GLASS = -66.0, -64.6
 SV_HOUSING = (-34.0, 15.0)
 SV_BOX = (33.0, 80.0)
 SV_BOX_HW, SV_BOX_LO, SV_BOX_HI = 20.5, 14.5, 52.5
+# Rings a few mm in from each end of the squared run, so its plain top (no rail since BP8) shades flat along its
+# length instead of easing its normals from the loft's turn at the front all the way back (mm).
+SV_BOX_HOLD = 4.0
 SV_GLASS_R = 12.0
 # The one dial on top (BP8, the owner: smaller; the first build's illumination dial was 13.6 mm across its radius and
 # stood 13 mm over its pad, beside an elevation turret): its middle along the housing, radius and height over the pad (mm).
@@ -611,8 +614,8 @@ def build_scope_var() -> bpy.types.Object:
     ob_b.loft([ring_super(n, SV_HOUSING[1] - 1.0, 15.6, 15.6, h, 2.0),
                ring_super(n, 24.0, 15.6, 15.6, h, 2.0),
                ring_super(n, 28.5, 18.4, 17.6, h + 0.4, 2.8),
-               ring_super(n, SV_BOX[0], SV_BOX_HW, (SV_BOX_HI - SV_BOX_LO) / 2, (SV_BOX_HI + SV_BOX_LO) / 2, 4.5),
-               ring_super(n, SV_BOX[1], SV_BOX_HW, (SV_BOX_HI - SV_BOX_LO) / 2, (SV_BOX_HI + SV_BOX_LO) / 2, 4.5)],
+               *[ring_super(n, y, SV_BOX_HW, (SV_BOX_HI - SV_BOX_LO) / 2, (SV_BOX_HI + SV_BOX_LO) / 2, 4.5)
+                 for y in (SV_BOX[0], SV_BOX[0] + SV_BOX_HOLD, SV_BOX[1] - SV_BOX_HOLD, SV_BOX[1])]],
               "Detail")
     box = ob_b.build()
     slant = math.atan2(21.5 - SV_BOX_LO, SV_BOX[1] - 46.0)
