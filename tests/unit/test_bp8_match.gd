@@ -299,3 +299,85 @@ func test_simulate_on_a_skip_ends_the_round_at_once_and_only_with_the_setting_on
 	assert_true(rs.hold_next, "the round's table waits for a click, as after any skip")
 	assert_false(session._skip_simulate.visible)
 	assert_true(session.hud().visible)
+
+
+# --- 25: bushes slow you and rustle louder ---
+
+
+func _bush_match(w: BoxWorld) -> Array:
+	var ends: Array[MapEnd] = []
+	for e in 2:
+		var end := MapEnd.new()
+		end.spawns.append(SpawnPoint.new(Vector3(-15.0 if e == 0 else 15.0, 0.0, 0.0), 0.0))
+		end.dead_zone.append(SpawnPoint.new(Vector3(-18.0 if e == 0 else 18.0, 0.0, 0.0), 0.0))
+		ends.append(end)
+	var sim := Simulation.new(tuning, w, w.mover(), ends, -10.0)
+	var s := GameState.new(3, tuning)
+	s.characters.append(Character.new(0, 0, Vector3.ZERO, 0.0, ReplicaStats.default_loadout()))
+	s.characters.append(Character.new(1, 1, Vector3.ZERO, 0.0, ReplicaStats.default_loadout()))
+	sim.start_match(s)
+	return [sim, s]
+
+
+## Runs character 0 north (-z) from `from` for `seconds`; its pace over the last half second (m/s).
+func _run_north(sim: Simulation, s: GameState, from: Vector3, seconds: float, steps: Array[GameEvent]) -> float:
+	var c := s.characters[0]
+	c.position = from
+	c.prev_position = from
+	c.yaw = 0.0
+	var cmds: Array[PlayerCommand] = [PlayerCommand.new(), PlayerCommand.new()]
+	cmds[0].forward = 1.0
+	var ticks := roundi(seconds * 60.0)
+	var half_at := Vector3.ZERO
+	for i in ticks:
+		if i == ticks - 30:
+			half_at = c.position
+		sim.step(s, cmds, 1.0 / 60.0)
+		for j in s.events.count:
+			var e := s.events.items[j]
+			if e.kind == GameEvent.Kind.FOOTSTEP and e.actor == 0:
+				var copy := GameEvent.new()
+				copy.value2 = e.value2
+				copy.carry = e.carry
+				steps.append(copy)
+	return Vector2(c.position.x - half_at.x, c.position.z - half_at.z).length() / 0.5
+
+
+func test_a_bush_slows_whoever_pushes_through_it_and_its_steps_rustle_further() -> void:
+	var move := tuning.movement
+	assert_eq(move.bush_speed_scale, 0.75)
+	assert_eq(tuning.noise.bush_carry, 1.75)
+	var w := BoxWorld.new(tuning.body)
+	w.add_box(Vector3(0.0, -0.25, 0.0), Vector3(60.0, 0.5, 60.0), RayHit.Surface.EARTH)
+	w.add_bush(Vector3(0.0, 0.0, -10.0), 6.0, 1.6)
+	var m := _bush_match(w)
+	var sim: Simulation = m[0]
+	var s: GameState = m[1]
+	var open: Array[GameEvent] = []
+	var pace := _run_north(sim, s, Vector3(20.0, 0.0, 10.0), 2.0, open)
+	assert_almost_eq(pace, move.run_speed, 0.1, "a run in the open")
+	assert_false(s.characters[0].in_bush)
+	var leafy: Array[GameEvent] = []
+	var slowed := _run_north(sim, s, Vector3(0.0, 0.0, -6.0), 2.0, leafy)
+	assert_true(s.characters[0].in_bush, "deep in the bush")
+	assert_almost_eq(slowed, move.run_speed * move.bush_speed_scale, 0.1, "a quarter slower through the leaves")
+	assert_gt(open.size(), 0)
+	assert_gt(leafy.size(), 0)
+	assert_eq(open[-1].value2, RayHit.Surface.EARTH)
+	assert_eq(open[-1].carry, 1.0)
+	assert_eq(leafy[-1].value2, RayHit.Surface.LEAVES, "a step in a bush sounds as leaves")
+	assert_eq(leafy[-1].carry, tuning.noise.bush_carry, "and carries further: bots hear it the further too")
+	var bots := BotConfig.load_default()
+	assert_gt(bots.footstep_hearing_run * leafy[-1].carry, bots.footstep_hearing_run * 1.5)
+
+
+func test_foliage_holds_a_point_among_its_leaves() -> void:
+	var f := Foliage.new()
+	f.add(Vector3(0.0, 0.0, 0.0), 2.0, 1.6)
+	f.add(Vector3(30.0, 0.0, 0.0), 1.0, 1.0)
+	assert_true(f.holds(Vector3(0.0, 0.5, 0.0)))
+	assert_true(f.holds(Vector3(1.5, 0.8, 0.0)))
+	assert_false(f.holds(Vector3(2.2, 0.8, 0.0)), "past its radius")
+	assert_false(f.holds(Vector3(0.0, 1.7, 0.0)), "over its top")
+	assert_true(f.holds(Vector3(30.0, 0.5, 0.0)))
+	assert_false(Foliage.new().holds(Vector3.ZERO))

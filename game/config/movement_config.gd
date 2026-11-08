@@ -13,6 +13,11 @@ extends Resource
 ## 12; the browser game had none: its holster never added to the sprint). Players and bots alike.
 @export var holster_sprint_scale: float = 1.1
 @export var crouch_speed: float = 2.1
+## Pushing through a bush (BP8, owner: slower, and louder, Footsteps): every pace is this share of itself while the body
+## is in one, players and bots alike; a body is in a bush when a point this high (m) over its feet is among its leaves
+## (Foliage.holds), so brushing a bush's rim or stepping by a low one doesn't count.
+@export var bush_speed_scale: float = 0.75
+@export var bush_probe_height: float = 0.5
 ## A Follow me follower further than SquadConfig.catch_up_boost_from behind its leader sprints this much faster than
 ## the sprint (PlayerCommand.catch_up), so it can close on a leader sprinting at its own top speed (the owner's card
 ## B6, 2026-11-07); nearer, it matches the leader's pace.
