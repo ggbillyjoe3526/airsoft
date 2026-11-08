@@ -6,7 +6,9 @@ whatever it came from.
 
 You carry two at once, a primary and a sidearm, picked in your [Loadout](Loadout). In play you see your own arms, in
 dark olive gloves and sleeves, holding the one in your hands: the AEG Rifle and the Sniper Rifle in both hands, a pistol
-in your right hand, held right of the middle of the screen with only your hand and wrist in view.
+in your right hand, held right of the middle of the screen with only your hand and wrist in view. With a grip fitted
+your left hand holds the grip, and on a reload it pulls the empty magazine, takes it down out of view and seats a
+fresh one.
 
 ## Stats
 

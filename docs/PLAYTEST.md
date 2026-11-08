@@ -178,6 +178,10 @@ never players.
 - [ ] **Your hands.** Dark gloves, sleeves in your team's camo (Hand detail High) and the team armband on the left
   forearm. Inspect (Y) the rifle and each pistol: the firing hand's wrist sits low behind the grip, bent a little up
   from a forearm running back about level, the thumb where it was.
+- [ ] **Hands on a grip, a magazine change, bare hands** (BP8). Fit the vertical grip, then the angled one, to the AEG
+  Rifle and the Sniper Rifle: your left hand holds the grip at the hip and aimed, and goes back to the handguard
+  with none. Reload each replica: your left hand pulls the magazine, drops out of view and seats a fresh one, never
+  through the replica. Settings › Dev › Skin-only arms swaps the gloves for bare hands at once.
 - [ ] **Look straight down.** Standing, crouched and in a vault: you see the ground, never your own body (Beta 1
   item 24).
 - [ ] **Hit call.** Hit a bot: the HIT! sign, the hand up, the replica hanging straight down; readable at 20 to 30 m.
