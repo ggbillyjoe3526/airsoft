@@ -218,3 +218,11 @@ func test_every_ground_steps_as_loud_as_concrete() -> void:
 				power += _onset_power("step_%s_%s" % [ground, pace], n + 1)
 			var off := 10.0 * log(power / concrete) / log(10.0)
 			assert_lt(absf(off), 1.5, "%s %s: %.2f dB" % [ground, pace, off])
+
+
+func test_a_steel_props_ring_is_over_before_it_can_be_set_off_again() -> void:
+	# A prop makes a noise at most once in NoiseConfig.quiet (s), so no variant of the ring (AU9's metal bang, 0.9 s)
+	# plays over the next one.
+	var quiet := NoiseConfig.new().quiet
+	for n in 3:
+		assert_lt(_length("prop_steel", n + 1), quiet, "prop_steel_%d" % (n + 1))
