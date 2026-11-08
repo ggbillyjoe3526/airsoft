@@ -6,10 +6,10 @@ extends SceneTree
 ## `<folder>/grip_<id>_<grip>_<hip|aim>.jpg`; `reload`: every frame of a reload at 30 a second for each replica (the
 ## AEG Rifle with a vertical grip too), to `<folder>/reload_<id>[_<grip>]_<frame>.jpg`; `skin`: each replica at the hip
 ## (and the AEG Rifle aimed) with gloves and skin only, to `<folder>/skin_<id>_<view>_<gloves|skin>.jpg`; `outside`:
-## a close-up of your left hand from outside, in front of it and to its left (OUTSIDE), on each grip at the hip and at
-## each share of a reload in OUTSIDE_SHARES, to `<folder>/outside_<id>_<grip|reload>[_<share>].jpg`; `laser`: the AEG
-## Rifle with the Red Laser fitted (LASER) and each grip, at the hip, in view and from outside, and from outside at each
-## share of a reload, to `<folder>/laser_aeg_<grip>_<hip|outside>.jpg` and `<folder>/laser_aeg_reload_<share>.jpg`.
+## a close-up of your left hand from outside, about half a metre in front of it, left and below (OUTSIDE), on each
+## grip at the hip and at each share of a reload in OUTSIDE_SHARES, to
+## `<folder>/outside_<id>_<grip|reload>[_<share>].jpg`; `laser`: the AEG Rifle with the Red Laser fitted (LASER) and
+## each grip, at the hip, in view and from outside, and from outside at each share of a reload, to `<folder>/laser_aeg_<grip>_<hip|outside>.jpg` and `<folder>/laser_aeg_reload_<share>.jpg`.
 ## Replica ids after the mode draw only those. Needs a display and OpenGL, so under xvfb:
 ##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . --rendering-driver opengl3 -s res://tools/render_arms.gd \
 ##       -- <folder> [grips|reload|skin|outside|laser] [ids...]
@@ -27,14 +27,21 @@ const GRIPS: Array[StringName] = [&"", &"vertical", &"angled"]
 const HELD: Array[StringName] = [&"aeg", &"pistol", &"cyber", &"sniper"]
 ## Reload frames a second.
 const RELOAD_RATE := 30.0
-## The outside camera: this far from your left hand (m, along the eye camera's axes: to the left, down, forward), its
-## vertical field of view (degrees), and the shares of a reload it draws (the magazine coming out, carried away, the
-## fresh one going in).
-const OUTSIDE := Vector3(-0.1, -0.1, -0.3)
-## On a grip it looks from in front, a little to the left and below, at the fingers round the grip.
-const GRIP_OUTSIDE := Vector3(-0.14, -0.08, -0.26)
+## The outside camera: OUTSIDE_FAR m from what it looks at, that way from it (along the eye camera's axes: to the
+## left, down, forward), its vertical field of view (degrees), a fill light by it (OUTSIDE_FILL: energy, range m) so
+## the hand isn't lit only from behind, looking at a point OUTSIDE_LIFT m above what it shows. On a reload it looks
+## from the left, a little below and in front, at the middle of your left hand and the magazine, at the shares
+## OUTSIDE_SHARES has for the replica: the old magazine taken out of the well, carried down (out of your view), the
+## fresh one brought up in the hand, and pushed home. On a grip it looks at the hand from in front, left and below, so
+## the fingers round the grip and the grip show whole.
+const OUTSIDE := Vector3(-0.45, -0.35, -1.0)
+const GRIP_OUTSIDE := Vector3(-0.6, -0.3, -1.0)
+const OUTSIDE_FAR := 0.55
 const OUTSIDE_FOV := 40.0
-const OUTSIDE_SHARES: Array[float] = [0.2, 0.26, 0.65, 0.75]
+const OUTSIDE_FILL := Vector2(1.2, 2.0)
+const OUTSIDE_LIFT := 0.07
+const OUTSIDE_SHARES: Dictionary[StringName, Array] = {&"aeg": [0.18, 0.3, 0.47, 0.62],
+		&"sniper": [0.18, 0.3, 0.47, 0.62], &"pistol": [0.25, 0.36, 0.48, 0.6], &"cyber": [0.27, 0.37, 0.5, 0.62]}
 ## The laser the `laser` mode fits, and its slot (data/pool.md; the part model's `laser_redLaser`).
 const LASER := &"redLaser"
 const LASER_SLOT := &"laser"
@@ -42,6 +49,7 @@ const LASER_SLOT := &"laser"
 var _port: SubViewport = null
 var _camera: Camera3D = null
 var _outside: Camera3D = null
+var _fill: OmniLight3D = null
 var _only: Array[StringName] = []
 ## The parts fitted besides the grip (`laser` mode: the Red Laser on the AEG's side rail).
 var _extra: Dictionary = {}
@@ -98,7 +106,7 @@ func _run() -> void:
 				for grip: StringName in [&"vertical", &"angled"]:
 					failed += await _from_outside(id, grip, -1.0, "%s/outside_%s_%s.jpg" % [folder, id, grip])
 			for id in _ids(HELD):
-				for share in OUTSIDE_SHARES:
+				for share: float in OUTSIDE_SHARES[id]:
 					var path := "%s/outside_%s_reload_%02d.jpg" % [folder, id, roundi(share * 100.0)]
 					failed += await _from_outside(id, &"", share, path)
 		"laser":
@@ -107,7 +115,7 @@ func _run() -> void:
 				var stem := "%s/laser_aeg_%s" % [folder, grip if grip != &"" else &"none"]
 				failed += await _still(&"aeg", grip, false, 0.0, -1.0, stem + "_hip.jpg")
 				failed += await _from_outside(&"aeg", grip, -1.0, stem + "_outside.jpg")
-			for share in OUTSIDE_SHARES:
+			for share: float in OUTSIDE_SHARES[&"aeg"]:
 				var path := "%s/laser_aeg_reload_%02d.jpg" % [folder, roundi(share * 100.0)]
 				failed += await _from_outside(&"aeg", &"", share, path)
 	quit(1 if failed > 0 else 0)
@@ -168,6 +176,11 @@ func _build_scene() -> bool:
 	_outside.near = 0.01
 	_outside.fov = OUTSIDE_FOV
 	_port.add_child(_outside)
+	_fill = OmniLight3D.new()
+	_fill.light_energy = OUTSIDE_FILL.x
+	_fill.omni_range = OUTSIDE_FILL.y
+	_fill.visible = false
+	_port.add_child(_fill)
 	return true
 
 
@@ -254,12 +267,23 @@ func _from_outside(id: StringName, grip: StringName, reload: float, path: String
 		failed = 1
 	else:
 		var at := bones.global_transform * bones.get_bone_global_pose(bones.find_bone("Hand_L")).origin
-		_outside.global_position = at + _camera.global_basis * (OUTSIDE if reload >= 0.0 else GRIP_OUTSIDE)
+		if reload >= 0.0:
+			var mag := hands.find_child(ReplicaParts.MAGAZINE_ATTACHMENT, true, false) as BoneAttachment3D
+			if mag != null:
+				(mag.get_parent() as Skeleton3D).force_update_all_bone_transforms()
+				mag.on_skeleton_update()
+				at = at.lerp(mag.global_position, 0.5)
+		at += _camera.global_basis.y * OUTSIDE_LIFT
+		var way := (OUTSIDE if reload >= 0.0 else GRIP_OUTSIDE).normalized()
+		_outside.global_position = at + _camera.global_basis * way * OUTSIDE_FAR
 		_outside.look_at(at, Vector3.UP)
 		_outside.current = true
+		_fill.global_position = _outside.global_position
+		_fill.visible = true
 		await RenderingServer.frame_post_draw
 		await RenderingServer.frame_post_draw
 		failed = _save(path)
+		_fill.visible = false
 		_camera.current = true
 	hands.queue_free()
 	return failed
