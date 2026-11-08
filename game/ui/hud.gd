@@ -1172,9 +1172,12 @@ func update_orders(wheel: OrderWheelPointer, in_force: SquadOrder.Kind, outcome:
 
 
 ## Places Hold here's marker over `spot` (the middle of the spots held) as seen by `camera`, hidden when `show` is false;
-## held at the edge clear of the flag marker. `going`: Go there's (FM1), your teammates still on their way.
-func place_hold_marker(camera: Camera3D, spot: Vector3, show: bool, going: bool = false) -> void:
+## held at the edge clear of the flag marker. `going`: Go there's (FM1), your teammates still on their way; `watching`:
+## Watching here's (BP8), the spot you cover yourself.
+func place_hold_marker(camera: Camera3D, spot: Vector3, show: bool, going: bool = false,
+		watching: bool = false) -> void:
 	_hold_marker.set_going(going)
+	_hold_marker.set_watching(watching)
 	var slots := _hold_slots
 	slots.left = pin_point()
 	slots.right_top = pin_right_top()

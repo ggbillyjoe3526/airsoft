@@ -60,12 +60,13 @@ func test_it_draws_the_wheels_items_each_with_its_key() -> void:
 	assert_eq(w.slice_name(0), "FOLLOW ME")
 	assert_eq(w.slice_name(1), "HOLD HERE")
 	assert_eq(w.slice_name(2), "GO THERE", "the third, lower right (FM1)")
-	assert_eq(w.slice_name(3), "REGROUP")
-	assert_eq(w.slice_name(4), "TEAM PLAN")
-	assert_eq(w.slice_name(5), "NEED A MAG", "the last, upper left (MH3)")
-	assert_eq([w.slice_key(0), w.slice_key(1), w.slice_key(2), w.slice_key(3), w.slice_key(4), w.slice_key(5)],
-			["F", "X", "Mouse 4", "V", "", "H"], "Team Plan has no key")
-	assert_eq(w.slice_name(6), "", "only the wheel's own items")
+	assert_eq(w.slice_name(3), "WATCHING HERE", "the fourth, below Go There (BP8)")
+	assert_eq(w.slice_name(4), "REGROUP")
+	assert_eq(w.slice_name(5), "TEAM PLAN")
+	assert_eq(w.slice_name(6), "NEED A MAG", "the last, upper left (MH3)")
+	assert_eq([w.slice_key(0), w.slice_key(1), w.slice_key(2), w.slice_key(3), w.slice_key(4), w.slice_key(5),
+			w.slice_key(6)], ["F", "X", "Mouse 4", "", "V", "", "H"], "Team Plan and Watching Here have no key")
+	assert_eq(w.slice_name(7), "", "only the wheel's own items")
 
 
 func test_a_different_wheel_is_drawn_from_its_data() -> void:

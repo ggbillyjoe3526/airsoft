@@ -1534,6 +1534,18 @@ models show without anything else changing. The smoke and flash icons now do the
   keeps its shine, no jump in colour as the simpler copy takes over.
 - [ ] **Stowed replicas.** A bot with its rifle on its back and its pistol in the holster: both sit where they did.
 
+## Dev 2 playtest fixes: bots (BP8)
+
+- [ ] **Watching Here.** In a match, hold the order wheel's key, point at **Watching Here** (below Go There) and let
+  go while looking at a doorway 10 to 20 m off: a "WATCHING · 15 M" marker sits over the spot with a ring on the floor,
+  and the minimap shows the diamond. The nearest teammate not fighting comes to stand beside you, looks at the spot and
+  says so in the hit feed ("With you. Watching …"); nobody else comes. Watch the others for a minute: they hunt and
+  hold elsewhere, not round your spot. Team Plan, another order, walking about 6 m away, being hit or the next round
+  ends it. Does one helper feel right, and is the area (about 8 m round the spot) the right size?
+- [ ] **Bots' running arms.** Watch a bot sprint out of spawn with its rifle on its back (side on, then from the front):
+  elbows bent about a right angle, hands low and close in, a small easy swing, the shoulders barely turning. Then a bot
+  running with its rifle up: unchanged, held at the ready.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

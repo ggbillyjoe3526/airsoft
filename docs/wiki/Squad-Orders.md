@@ -8,6 +8,7 @@ teammate still in play.
 | **Follow Me** | <!-- wiki:key order_follow --> | Stay with you and keep up as you move. One that ducked into cover comes out to keep up once nobody is in sight, and one left far behind runs a little faster than a sprint until it has caught up. |
 | **Hold Here** | <!-- wiki:key order_hold --> | Spread out across the spot you are looking at and hold it (where they stand, if you look at nothing in reach). |
 | **Go There** | <!-- wiki:key ping_move --> | Go to the spot you are looking at, however far, and hold it once they are all there ([below](#go-there)). |
+| **Watching Here** | wheel only | Leave the spot you are looking at to you: one teammate comes to watch it beside you and the rest spread out to other angles ([below](#watching-here)). |
 | **Regroup** | <!-- wiki:key order_regroup --> | Come back to you. |
 | **Team Plan** | wheel only | Drop your order and go back to the team's own plan. |
 
@@ -57,6 +58,21 @@ next <!-- wiki:config squad_config.go_there_quiet --> s (no enemy seen, no fight
 the <!-- wiki:config squad_config.go_there_contact_radius --> m round them), they read "All quiet" and go back to the
 team plan. Any contact starts the wait again, and so does Go There at the same spot. A Hold Here you give yourself is
 held until you end it.
+
+## Watching Here
+
+Pick **Watching Here** on the order wheel (below Go There) to tell your team you have the spot you are looking at
+covered. A marker over it reads "WATCHING · 15 M", with a dashed ring on the floor, and the minimap shows it as Hold
+Here's diamond. Any order in force ends: the nearest teammate who isn't fighting, within about
+the <!-- wiki:config squad_config.watch_join_range --> m round you, comes to stand beside you looking at the spot and
+says so on the radio; at most one comes. The rest go back to the team plan and leave the area to you: they don't hunt
+within the <!-- wiki:config squad_config.watch_radius --> m round the spot or hold angles into it, so they spread out to
+cover the rest. With nobody free to come, the nearest says the spot is yours.
+
+It lasts until you give another order (Team Plan ends it), walk more than
+the <!-- wiki:config squad_config.watch_leave --> m from where you marked it, are hit, or the round ends. Watching Here
+at the same spot again keeps it; somewhere else moves it. Aimed at the sky, it marks nothing and the wheel's middle
+says so.
 
 ## Need a Mag
 

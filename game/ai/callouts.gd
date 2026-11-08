@@ -25,14 +25,15 @@ const TEAMS := 2
 const TEAM_EVENTS: Array[int] = [
 	CalloutsFile.Event.DOWN, CalloutsFile.Event.LAST_ONE, CalloutsFile.Event.TAGGED, CalloutsFile.Event.RAISING,
 	CalloutsFile.Event.FLAG, CalloutsFile.Event.OVERTIME, CalloutsFile.Event.PING_GOING,
-	CalloutsFile.Event.PING_WATCHING, CalloutsFile.Event.COVER_ME,
+	CalloutsFile.Event.PING_WATCHING, CalloutsFile.Event.COVER_ME, CalloutsFile.Event.WATCH_JOIN,
+	CalloutsFile.Event.WATCH_REST,
 ]
 ## The answers to a player's ping and the asks and answers for a magazine: a personality's Talks (×) never makes them
 ## less likely.
 const ANSWERS: Array[int] = [
 	CalloutsFile.Event.PING_GOING, CalloutsFile.Event.PING_WATCHING, CalloutsFile.Event.NEED_MAG,
 	CalloutsFile.Event.MAG_COMING, CalloutsFile.Event.NEED_HELP, CalloutsFile.Event.GO_ROUND,
-	CalloutsFile.Event.COVER_ME,
+	CalloutsFile.Event.COVER_ME, CalloutsFile.Event.WATCH_JOIN, CalloutsFile.Event.WATCH_REST,
 ]
 ## The asks (BQ2), and what each one's ping asks (Pings.Ask), in the same order.
 const ASK_EVENTS: Array[int] = [
@@ -84,6 +85,11 @@ class TeamTalk:
 var said: CalloutLog = null
 ## The ping book a Contact call marks its enemy in (BotController's; null marks nothing).
 var pings: Pings = null
+## The squad orders (BotController's): a player's Watching here (BP8) is answered by the teammate joining them, or with
+## none the nearest (SquadOrderBook.watch_speaker). Null: no answer.
+var orders: SquadOrderBook = null
+## The last Watching here answered (SquadOrderBook.watch_serial).
+var _watch_answered: int = 0
 ## You (the player's character): the bots on your team ask for you (BQ2). Null: nobody asks.
 var you: Character = null
 var _file: CalloutsFile = null
@@ -140,6 +146,7 @@ func observe(state: GameState, w: BotWorld) -> void:
 		elif live:
 			_on_event(e, state, bots)
 	if live:
+		_answer_watch(w)
 		for t in TEAMS:
 			_answer_ping(t, w)
 		for i in bots.size():
@@ -426,6 +433,23 @@ func _answer_ping(t: int, w: BotWorld) -> void:
 	if speaker >= 0:
 		var event := CalloutsFile.Event.PING_GOING if going else CalloutsFile.Event.PING_WATCHING
 		_offer(t, event, speaker, bots, area_of(bots[speaker].ping_spot), 0, 0, -1)
+
+
+## A player's Watching here given since the last one answered (BP8): the teammate joining them says Watching with you,
+## or with none joining the nearest says Leaving it to you. The spot names the area.
+func _answer_watch(w: BotWorld) -> void:
+	if orders == null or orders.watch_serial == _watch_answered:
+		return
+	_watch_answered = orders.watch_serial
+	var b := orders.watch_speaker
+	if b == null or not Elimination.is_in_play(b.character):
+		return
+	var team := b.character.team
+	var i := _bot_index(w.bots, b.character.id)
+	if i < 0 or team < 0 or team >= TEAMS:
+		return
+	var event := CalloutsFile.Event.WATCH_JOIN if orders.watch_joined else CalloutsFile.Event.WATCH_REST
+	_offer(team, event, i, w.bots, area_of(w.watched[team]), 0, 0, -1)
 
 
 ## Whether any bot on `team` has an enemy in sight now.

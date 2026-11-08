@@ -8,5 +8,7 @@ class_name SquadOrder
 ## a Mag (MH3), never given as an order: PlayerInput turns it into the command's mag_hand_off (MagShare). MOVE: Go
 ## there (FM1), never given as an order either: the order wheel's Go There, its key and a click on the full-screen map
 ## are a ping (PlayerCommand.ping_move) that the bots' controller hands out as this order, to a spot, which reads Hold
-## here once they are all there.
-enum Kind { NONE, FOLLOW, HOLD, REGROUP, TEAM_PLAN, MAG, MOVE }
+## here once they are all there. WATCH: Watching here (BP8), never given as an order either: the order wheel's Watching
+## Here is a ping along the view (PlayerCommand.ping_watch) that the bots' controller hands out as this order: the spot
+## is yours to cover, the nearest free teammate joins you on it and the rest keep off it (SquadOrderBook.give_watch).
+enum Kind { NONE, FOLLOW, HOLD, REGROUP, TEAM_PLAN, MAG, MOVE, WATCH }

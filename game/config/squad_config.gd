@@ -62,3 +62,10 @@ extends Resource
 @export var go_there_contact_radius: float = 30.0
 ## Regroup: teammates sprint back to the giver and follow once this close (m).
 @export var regroup_arrive: float = 4.0
+## Watching here (BP8): the area the giver marks to cover is the spot and this far round it (m): their teammates on the
+## team plan keep their hunts and held angles off it. Of the teammates in play and not fighting, the nearest to the
+## giver within watch_join_range (m) joins them, hold_spacing beside them, looking at the spot. The giver walking off
+## more than watch_leave (m) from where they marked it ends it, everyone back on the team plan.
+@export var watch_radius: float = 8.0
+@export var watch_join_range: float = 45.0
+@export var watch_leave: float = 6.0

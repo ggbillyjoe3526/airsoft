@@ -1453,12 +1453,15 @@ func _on_shaders_warmed() -> void:
 
 
 ## Squad orders on screen (SO4): the order wheel while its key is held, and Hold here's marker over the spots your
-## teammates hold (or go to: Go there's), through your own eyes only and not under the full-screen map.
+## teammates hold (or go to: Go there's; or the spot you watch yourself: Watching here's, BP8), through your own eyes
+## only and not under the full-screen map.
 func _show_orders(watched: Character, delta: float) -> void:
 	_hud.update_orders(_input.wheel(), _bots.order_of(PLAYER_ID), _bots.order_outcome, delta)
 	# Not under the full-screen map (FM1): the map shows the spot, and the marker's floor ring draws over everything.
 	var held := watched == player and _bots.hold_spot(PLAYER_ID) and not _input.field_map().open
-	_hud.place_hold_marker(_eyes.camera, _bots.held_middle, held, _bots.order_of(PLAYER_ID) == SquadOrder.Kind.MOVE)
+	var order := _bots.order_of(PLAYER_ID)
+	_hud.place_hold_marker(_eyes.camera, _bots.held_middle, held, order == SquadOrder.Kind.MOVE,
+			order == SquadOrder.Kind.WATCH)
 
 
 ## Where `watched` looks as the view shows it: your own mouse-look while you are in play, else their yaw `fraction` of

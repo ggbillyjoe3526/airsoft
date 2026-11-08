@@ -5,7 +5,8 @@ class_name SquadOrders
 ## giver looks at, the teammates side by side across their view, all looking their way. Regroup: sprint back to the
 ## giver, then follow (`regrouped`). Go there (FM1): a pinged spot, the teammates side by side across the way there,
 ## looking on that way; once all are there it is a Hold here (SquadOrderBook.move_arrivals). Tuning is BotConfig.squad
-## (SquadConfig). Allocates nothing.
+## (SquadConfig). Watching here (BP8): the one teammate that joins the giver stands beside them looking at the spot
+## (watch_post), as a Hold here; the rest are on the team plan, off the spot. Allocates nothing.
 
 ## What came of the last order given, for the presentation: CANCELLED, back to the team plan (the order given again, Team
 ## plan, or no teammate left to take it); ON_PLAN, Team plan with no order in force; NOBODY, no teammate in play to
@@ -143,6 +144,28 @@ static func held_centre(bots: Array[Bot], giver: Character) -> Vector3:
 	return sum / n if n > 0 else NO_SPOT
 
 
+## Watching here (BP8): where the teammate joining `giver` (standing at `from`) stands to cover `spot` with them:
+## hold_spacing beside the giver across their line to the spot, on the teammate's side, or the other side, or
+## follow_distance behind the giver on that line (each walkable and in a straight walkable line from the giver), else
+## the giver's own spot.
+static func watch_post(giver: Character, from: Vector3, spot: Vector3, w: BotWorld) -> Vector3:
+	var cfg := w.cfg.squad
+	var nav := w.nav
+	var p := giver.position
+	var way := Vector2(spot.x - p.x, spot.z - p.z)
+	if way.length() < 1e-3:
+		way = Vector2(-sin(giver.yaw), -cos(giver.yaw))
+	way = way.normalized()
+	var right := Vector3(-way.y, 0.0, way.x)
+	var side := 1.0 if (from - p).dot(right) >= 0.0 else -1.0
+	for k in 3:
+		var at := p + (right * side * cfg.hold_spacing if k == 0 else right * -side * cfg.hold_spacing if k == 1
+				else Vector3(-way.x, 0.0, -way.y) * cfg.follow_distance)
+		if nav.is_walkable_at(at) and nav.clear_line(p, at):
+			return Vector3(at.x, nav.floor_at(at), at.z)
+	return p
+
+
 ## Regroup: true once `b` is back within regroup_arrive of its giver, when it turns to Follow me (SquadOrderBook's,
 ## before the bots think), its spots behind the way the giver faces.
 static func regrouped(b: Bot, w: BotWorld) -> bool:
@@ -236,7 +259,7 @@ static func move(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> bool:
 	if giver == null:
 		return false
 	match b.order:
-		SquadOrder.Kind.HOLD, SquadOrder.Kind.MOVE:
+		SquadOrder.Kind.HOLD, SquadOrder.Kind.MOVE, SquadOrder.Kind.WATCH:
 			# No way there: it holds where it got to.
 			if b.route_state == Bot.RouteState.FAILED:
 				b.order_goal = b.character.position

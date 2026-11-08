@@ -22,7 +22,7 @@ const PART := " · "
 ## A squad order's name by SquadOrder.Kind, as the order wheel says it ("" for none).
 const ORDER_KEYS: Dictionary[int, String] = {SquadOrder.Kind.FOLLOW: "ORDER_FOLLOW", SquadOrder.Kind.HOLD: "ORDER_HOLD",
 		SquadOrder.Kind.REGROUP: "ORDER_REGROUP", SquadOrder.Kind.TEAM_PLAN: "ORDER_TEAM_PLAN",
-		SquadOrder.Kind.MAG: "ORDER_MAG", SquadOrder.Kind.MOVE: "ORDER_MOVE"}
+		SquadOrder.Kind.MAG: "ORDER_MAG", SquadOrder.Kind.MOVE: "ORDER_MOVE", SquadOrder.Kind.WATCH: "ORDER_WATCH"}
 
 ## Whether messages are made (Settings.read_out).
 var on: bool = true

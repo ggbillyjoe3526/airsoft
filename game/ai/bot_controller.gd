@@ -94,6 +94,7 @@ func _init(state: GameState, player_id: int, map: MapData, nav: NavGrid, query: 
 	if options.talk:
 		callouts = Callouts.new(CalloutsFile.shared(), config.callouts, map.areas, state.match_seed)
 		callouts.pings = pings
+		callouts.orders = orders
 		# The bots on your team ask for you (BQ2); with no player (the autopilot), nobody asks.
 		callouts.you = state.character(player_id) if player_id >= 0 else null
 
@@ -256,13 +257,16 @@ func _record_hit(state: GameState, shooter_id: int, bounced: bool) -> void:
 ## A PING event `e` in `state`'s tick (PN1): the pinger's ping in the book (Pings.place) and, if it marks anything, taken by
 ## each of their bot teammates (Pings.take: a bot fighting, in cover or with a target in view doesn't). A Go there ping
 ## (FM1) is an order instead: its floor spot (Pings.move_spot) goes to SquadOrderBook.give_move, and its marker is
-## Hold here's.
+## Hold here's; so is a Watching here (BP8: SquadOrderBook.give_watch), marked by Hold here's marker as Watching.
 func _ping(e: GameEvent, state: GameState) -> void:
 	if e.value2 == 1:
 		orders.give_move(state.character(e.actor), pings.move_spot(e, world))
 		return
 	if e.value2 == GameEvent.PING_HOLD:
 		orders.give_hold_at(state.character(e.actor), pings.move_spot(e, world))
+		return
+	if e.value2 == GameEvent.PING_WATCH:
+		orders.give_watch(state.character(e.actor), pings.move_spot(e, world))
 		return
 	var p := pings.place(e, state.time, world)
 	if p == null:
