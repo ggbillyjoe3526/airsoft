@@ -6,7 +6,8 @@ extends MultiMeshInstance3D
 ## along its flight (one more instanced draw), so they read at range. Your own BBs leave from the muzzle's side of the
 ## view and join their true path from the eye over EffectsConfig.muzzle_join_time, so a shot never starts in front of
 ## your face; only the muzzle's offset across the flight is drawn, never ahead along it, so a drawn BB never passes the
-## wall its true one stops on.
+## wall its true one stops on. Until it has passed the muzzle along its flight your own BB isn't drawn at all
+## (`before_muzzle`, BP8): it leaves from the eye, so aimed down a pistol's sights it was seen behind the replica.
 ## Glowing BBs (WL8, Loadout.Glow) are drawn apart: a green ball never smaller on screen than EffectsConfig.glow_min_angle
 ## and a green streak back along its flight, two more instanced draws, hidden while none flies. Which BBs glow is set
 ## once a match (`set_glowing`): presentation only, as the BBs fly the same.
@@ -132,6 +133,8 @@ func update(pool: BBPool, player_id: int, muzzle_offset: Vector3, fraction: floa
 			continue
 		var at := drawn_at(_cfg, bb, player_id, muzzle_offset, fraction, tick)
 		var age := bb.age + fraction * tick
+		if before_muzzle(_cfg, bb, player_id, at, eye + muzzle_offset, age):
+			continue
 		if not (_any and _glows(bb)):
 			multimesh.set_instance_transform(n, ball(_cfg, at, eye, _cfg.bb_min_angle))
 			n += 1
@@ -166,6 +169,17 @@ static func drawn_at(cfg: EffectsConfig, bb: BB, player_id: int, muzzle_offset: 
 	if bb.owner_id == player_id and age < cfg.muzzle_join_time:
 		at += across_flight(muzzle_offset, bb.velocity) * (1.0 - age / cfg.muzzle_join_time)
 	return at
+
+
+## Whether `bb`, drawn at `at` `age` s into its flight, is `player_id`'s own and not yet past `muzzle` (the muzzle
+## drawn, in the world) along its flight: hidden until then, so your BB shows only from the muzzle on (BP8), wherever
+## the view has moved since the tick it left the eye. Only on its way out: never once it has bounced or flown longer
+## than `cfg.muzzle_join_time`.
+static func before_muzzle(cfg: EffectsConfig, bb: BB, player_id: int, at: Vector3, muzzle: Vector3,
+		age: float) -> bool:
+	if bb.owner_id != player_id or bb.bounces > 0 or age >= cfg.muzzle_join_time:
+		return false
+	return (at - muzzle).dot(bb.velocity) < 0.0
 
 
 ## The part of `offset` square to `velocity`'s line (all of it with no velocity): a BB drawn from the muzzle joins its

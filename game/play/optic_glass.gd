@@ -4,8 +4,10 @@ extends Node
 ## glass shows the view through it, drawn by a second camera at your eye that leaves your replica out, so the optic's
 ## inside never darkens it. A scope's is magnified by its zoom, only inside the glass; a red dot's is clear, with the lit
 ## dot on it (optic_glass.gdshader). Round the glass the optic's own model shows and the view is the main camera's, with
-## nothing dark round it. The second camera draws only while a sight is raised, into a small square picture; the disc
-## shows only then, so at the hip the optic looks as its model does. Children: the picture and its camera. The picture
+## nothing dark round it. The second camera draws only while a sight is raised, into a small square picture. At the
+## hip a scope's disc shows plain tinted glass you see through (BP8, the owner): the main view ahead along its sight
+## line, unmagnified, with no reticle and no second camera drawing; a red dot's glass is its model's own, clear.
+## Children: the picture and its camera. The picture
 ## follows the graphics' render scale and edge smoothing (GraphicsApply's `applied`), and copies the field's environment
 ## again after a change, so its ambient occlusion matches the view round it.
 
@@ -104,6 +106,8 @@ func add_window(model: Node3D, optic: Node3D, key: StringName, sight_line: Vecto
 	w.material.set_shader_parameter(&"glass", _port.get_texture())
 	w.material.set_shader_parameter(&"mark", 0 if _cfg.optic_mark.get(key, MARK_DOT) == MARK_DOT else 1)
 	w.material.set_shader_parameter(&"z_clip_scale", _cfg.depth_scale)
+	w.material.set_shader_parameter(&"hip_tint", _cfg.hip_glass_tint)
+	w.material.set_shader_parameter(&"hip_shine", _cfg.hip_glass_shine)
 	w.disc = MeshInstance3D.new()
 	w.disc.name = "Glass"
 	w.disc.mesh = quad
@@ -119,15 +123,24 @@ func add_window(model: Node3D, optic: Node3D, key: StringName, sight_line: Vecto
 
 
 ## Draws the view through `w` with the sight `raise` of the way up (0..1), or stops drawing (`w` null: no glass in
-## hand). Every rendered frame, after the replica is posed.
+## hand). At the hip (`raise` 0) a scope's glass shows as plain glass (`hip_glass`). Every rendered frame, after the
+## replica is posed.
 func update(w: Sight, raise: float) -> void:
-	if w == null or raise <= 0.0 or not w.model.is_visible_in_tree() or _eyes.is_position_behind(w.disc.global_position):
+	var hip := hip_glass(w, raise)
+	if w == null or (raise <= 0.0 and not hip) or not w.model.is_visible_in_tree() \
+			or _eyes.is_position_behind(w.disc.global_position):
 		if w != null:
 			w.disc.visible = false
-		# A prewarm's single draw (UPDATE_ONCE) is left to finish.
-		if _port.render_target_update_mode == SubViewport.UPDATE_ALWAYS:
-			_port.render_target_update_mode = SubViewport.UPDATE_DISABLED
+		_stop_drawing()
 		return
+	if hip:
+		_stop_drawing()
+		w.disc.visible = true
+		var size := _eyes.get_viewport().get_visible_rect().size
+		_place_marks(w, size, _eyes.unproject_position(w.disc.global_position))
+		w.material.set_shader_parameter(&"hip", true)
+		return
+	w.material.set_shader_parameter(&"hip", false)
 	if not _env_ready:
 		_ready_environment()
 	var screen := _eyes.get_viewport().get_visible_rect().size
@@ -147,13 +160,31 @@ func update(w: Sight, raise: float) -> void:
 		tan_glass = span * tan(deg_to_rad(_view.vertical_fov()) * 0.5) / w.magnify
 	_camera.fov = rad_to_deg(2.0 * atan(tan_glass))
 	_camera.transform = Transform3D(Basis.looking_at(centre - eye, _eyes.global_basis.y), eye)
+	w.material.set_shader_parameter(&"span", span)
+	_place_marks(w, screen, centre_px)
+
+
+## Whether `w`'s glass shows as plain glass now, its sight raised `raise` (0..1): a scope's (one that magnifies) at the
+## hip. A red dot's model glass is clear of itself, so it draws none.
+static func hip_glass(w: Sight, raise: float) -> bool:
+	return w != null and raise <= 0.0 and w.magnify > 0.0
+
+
+## Where on the `screen` (px) `w`'s glass is (its centre at `centre_px`) and where its sight line points, for its
+## shader.
+func _place_marks(w: Sight, screen: Vector2, centre_px: Vector2) -> void:
 	var aim := w.model.global_transform * (w.sight_line + Vector3(0.0, 0.0, -AIM_DISTANCE))
 	var m := w.material
 	m.set_shader_parameter(&"centre_uv", centre_px / screen)
-	m.set_shader_parameter(&"span", span)
 	m.set_shader_parameter(&"aspect", screen.x / screen.y)
 	m.set_shader_parameter(&"screen_h", screen.y)
 	m.set_shader_parameter(&"mark_uv", _eyes.unproject_position(aim) / screen)
+
+
+## The glass's camera stops drawing (a prewarm's single draw, UPDATE_ONCE, is left to finish).
+func _stop_drawing() -> void:
+	if _port.render_target_update_mode == SubViewport.UPDATE_ALWAYS:
+		_port.render_target_update_mode = SubViewport.UPDATE_DISABLED
 
 
 ## The glass's camera while it draws the view through a raised sight, or null (at the hip, no glass in hand): what it

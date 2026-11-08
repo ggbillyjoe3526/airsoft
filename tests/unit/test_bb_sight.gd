@@ -80,7 +80,8 @@ func test_drawing_makes_nothing() -> void:
 	var view := _view(64)
 	var pool := BBPool.new(64)
 	for i in 60:
-		_fire(pool, Vector3(-5.0 + 0.1 * i, 1.0, -10.0), Vector3.RIGHT.rotated(Vector3.UP, 0.01 * i))
+		# Flying away ahead of the muzzle: your own BBs show only once past it (BP8).
+		_fire(pool, Vector3(-5.0 + 0.1 * i, 1.0, -10.0), Vector3.FORWARD.rotated(Vector3.UP, 0.01 * i))
 	var nodes := Performance.get_monitor(Performance.OBJECT_NODE_COUNT)
 	var objects := Performance.get_monitor(Performance.OBJECT_COUNT)
 	for frame in 30:
