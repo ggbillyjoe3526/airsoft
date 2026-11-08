@@ -632,7 +632,7 @@ func test_customise_offers_the_light_slot_and_a_dev_one_stays_later_without_dev_
 	DevContent.restore_item(was)
 	assert_true(off.part_later(CustomiseView.Tab.LIGHT), "a dev torch: LIGHT stays LATER")
 	assert_false(off.part_card(CustomiseView.Tab.LIGHT).visible)
-	assert_eq(off.later_count(), 2, "the laser greyed and the light LATER")
+	assert_eq(off.later_count(), 1, "the light LATER (the AEG takes the laser since BP8)")
 	var view := _customise(false)
 	assert_false(view.part_later(CustomiseView.Tab.LIGHT))
 	assert_true(view.part_available(CustomiseView.Tab.LIGHT), "the rifle takes it")

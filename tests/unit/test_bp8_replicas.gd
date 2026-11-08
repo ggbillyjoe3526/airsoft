@@ -86,8 +86,9 @@ func test_the_aegs_laser_sits_on_the_handguards_left_rail_behind_the_hand() -> v
 	var beam := laser.get_node("laser_redLaser_Beam") as Node3D
 	assert_lt(beam.position.z, -0.02, "its emitter faces forward")
 	assert_lt(laser.mesh.get_faces().size() / 3, 10000, "within a part's budget")
-	assert_null((load(PARTS % "sniper") as PackedScene).instantiate().get_node_or_null("laser_redLaser"),
-			"the sniper's parts file leaves the AEG's laser out")
+	var sniper := (load(PARTS % "sniper") as PackedScene).instantiate()
+	add_child_autofree(sniper)
+	assert_null(sniper.get_node_or_null("laser_redLaser"), "the sniper's parts file leaves the AEG's laser out")
 
 
 func test_the_laser_and_the_torch_each_keep_their_own_rail() -> void:
