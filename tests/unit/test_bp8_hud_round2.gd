@@ -1,7 +1,7 @@
 extends GutTest
 ## BP8 HUD, the critic's second look: the round banner stays up through the whole countdown and GO (so the plate under it
-## never jumps into its place), the weapon rail keeps its place whatever notes show under it, the bomb icons stand on a
-## lighter plate, and the sim's end_countdown says GO.
+## never jumps into its place), the weapon rail keeps its place whatever notes show under it, the bomb icons sit straight
+## on their row with no plate behind them (William: no grey box), and the sim's end_countdown says GO.
 
 var loadout: Array[ReplicaConfig] = []
 var you: Character = null
@@ -75,15 +75,14 @@ func test_the_rail_keeps_its_place_whatever_notes_show_under_it_or_over_it() -> 
 	assert_almost_eq(rail.global_position.y, rest, 0.5, "and back")
 
 
-func test_a_bomb_icon_stands_on_a_lighter_plate_and_is_big_enough_to_read() -> void:
+func test_a_bomb_icon_has_no_plate_behind_it_and_is_big_enough_to_read() -> void:
 	var r := WeaponRail.new()
 	add_child_autofree(r)
 	var paints: Array[StringName] = [&"cobalt", &"cobalt"]
 	r.setup(loadout, paints)
-	var plate := r._glyph_plates[Grenade.Kind.FLASH - Grenade.Kind.SMOKE][0] as PanelContainer
-	var box := plate.get_theme_stylebox("panel") as StyleBoxFlat
-	assert_gt(box.bg_color.get_luminance(), 0.6, "a light plate under a dark model")
-	assert_gte(box.bg_color.a, 0.75, "mostly opaque, so a dimmed row's plate still stands out from the dark glass")
+	for kind in WeaponRail.BOMB_ACTIONS.size():
+		for glyph: Control in r._glyphs[kind]:
+			assert_true(glyph.get_parent() is HBoxContainer, "the icon sits straight on its row, with no panel behind it")
 	assert_gte(r._glyphs[1][0].custom_minimum_size.y, 44.0, "the icon is the row's height")
 
 

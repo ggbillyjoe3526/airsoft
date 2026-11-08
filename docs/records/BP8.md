@@ -7,6 +7,7 @@
 - part 3 (match): critic Accept 7/8 · qa Pass · performance Pass
 - part 4 (hud): critic Accept 7/8 (attempt 2) · qa Pass · performance Pass
 - part 5 (arms): critic Accept 8/8 (attempt 3) · qa Pass · performance Pass
+- part 6 (rail bomb icons): critic Accept 7/8 · qa Pass · performance Pass
 
 William's playtest notes of 2026-11-08 (26 items, before he tags 0.1 Dev 2) went out as a bug pass in parts by area.
 The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-summary.md`.
@@ -25,6 +26,7 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
 | 2026-11-08 | part 5: 1 | Opus 5.5 | targeted + smoke | Retry 5/8 | forearm and sleeve in view, magazine not held, angled-grip wrist 41° |
 | 2026-11-08 | part 5: 2 | Opus 5.5 | targeted + smoke | Retry 5/8 | pistol reload unseen, magazines hovering, sleeve on the way home |
 | 2026-11-08 | part 5: 3 | Opus 5.5 | targeted + smoke; CI | Accept 8/8 | – |
+| 2026-11-08 | part 6: 1 | Opus 5.5 | 4 HUD test files (43) + lint; CI | Accept 7/8 | – (PLAYTEST rail line and wiki wrap after) |
 
 ## Part 1: bots (items 17 and 23)
 
@@ -95,7 +97,7 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
 - **3, grey switches.** An off switch is a plain grey outline with one small grey knob (`MenuSwitch.colours`).
 - **13, the weapon rail.** The ammo panel is compact (no replica name, no bomb icons). A rail sits just above it on
   the right: one row per slot (keys 1, 2, 4, 5 at the right, no names, no counts), model pictures for the replicas
-  and one 44 px icon per bomb carried on a light plate; the one in hand is lit with a teal edge. RELOADING, a bomb in
+  and one 44 px icon per bomb carried (no plate behind it since part 6); the one in hand is lit with a teal edge. RELOADING, a bomb in
   hand and the hop dial rise above the rail, so it never moves. Two of one kind show as two icons in one row.
 - **14, 3-2-1-GO.** Every round starts held (`RoundState.hold`): you can look round but not move, fire, swap or
   reload; bots wait; the clock and time in play don't run (`is_live()` false; `under_way()` true for pole cues).
@@ -131,6 +133,13 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
 - Tests: `test_bp8_arms.gd` (16, incl. both arms projected through the view at every reload key),
   `test_bp8_arms_qa.gd` (26, every cut of the carry). Tool: `tools/render_arms.gd`. Pictures:
   `/mnt/project-files/playtest/bp8/arms/` (William's OK before merge).
+
+## Part 6: no grey box behind the rail's bomb icons (William's follow-up)
+
+William, after part 4 merged: "The grenades icon on the UI have a grey background, remove it to the way it was
+before." The light plate that part 4's second attempt put behind each bomb icon is gone, and the icons sit straight on
+their row as before. That plate answered the critic's "flash icon unreadable"; William's word overrides it, and he
+checks the flash icon's read in play. Picture: `/mnt/project-files/playtest/bp8/hud/11_rail_bomb_icons_no_grey_box.png`.
 
 ## Decisions
 

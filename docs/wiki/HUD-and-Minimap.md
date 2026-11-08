@@ -24,10 +24,10 @@ Turning the hop-up dial shows its setting here for a moment.
 
 Bottom right, just above the ammo panel, a picture of each thing you carry with the key that takes it in hand at the
 right of its row: your two replicas (1 and 2), then your smoke (4) and flash (5) bombs, one icon for each bomb you
-carry (two icons side by side for two, each on a light plate so the dark bombs read), with no numbers. A bomb you never
-carried has no row. The one in your hand is bright with a teal edge; the rest are dim, and a bomb you have thrown stays
-as one dim icon. Nothing is lit while your replica is holstered. The notes above the ammo panel (RELOADING,
-a bomb in hand, the hop-up readout) show above the rail, so it never moves. The pictures come from the models
+carry (two icons side by side for two), with no numbers. A bomb you never carried has no row. The one in your hand is
+bright with a teal edge; the rest are dim, and a bomb you have thrown stays as one dim icon. Nothing is lit while your
+replica is holstered. The notes above the ammo panel (RELOADING, a bomb in hand, the hop-up readout) show above the
+rail, so it never moves. The pictures come from the models
 themselves, so a new paint or replica shows as it is.
 
 The crosshair opens with your spread, so it tells you how steady you are. Under it, a **RELOAD** prompt with your
