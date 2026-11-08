@@ -7,20 +7,21 @@ the style most of its photos show, unbranded (no logos, words or trademarked sha
   puts its window on the old sight line, 30.5 mm over the rail.
 - `optic_scope2x`: a flip-to-side magnifier (2x_scope: the two magnifier photos): a short body, flat-topped with
   chamfered shoulders, two capped turrets and a side cap, on a hinged mount.
-- `optic_scopeVar`: a compact prism scope (variable_scope: all six photos): a boxy objective housing with a sunshade,
-  three rails and a fibre front sight, a tapered body to the turret housing (an illumination dial and an elevation
-  turret on top, windage on the right), the eyepiece with its diopter ring and a rear aperture sight, on a two-bolt
-  clamp.
+- `optic_scopeVar`: a compact prism scope (variable_scope: all six photos), kept minimal (BP8, the owner): a boxy
+  objective housing with a sunshade, a tapered body to the turret housing (one small dial on top, windage on the
+  right), the eyepiece with its diopter ring, on a two-bolt clamp; no rails, fibre front sight or rear aperture sight.
 - `grip_vertical`: a short stubby vertical grip with a textured panel and ribbed sides (vertical_grip).
 - `grip_angled`: a swept angled handstop (angled_grip: the two kinesthetic grips), grooved down its front.
 - `muzzle_silencer`: a plain tube with rounded ends (silencer); the pistol's slimmer, on a knurled thread adaptor.
-- `laser_redLaser`: a closed laser module under the rail, its emitter flush in the front face (red_laser).
+- `laser_redLaser`: a closed laser module under the rail, its emitter flush in the front face (red_laser); on the
+  AEG, on the handguard's left side rail behind the left hand, where it shows at the hip and in the inspect (BP8).
 - `light_weaponTorch`: a compact pistol light (weapon_torch: the four X300-style photos): a bezelled head, a squared
   body under a rail clamp with a cross latch, rocker paddles at the back.
 
 Space and contract as docs/CC0_ASSETS.md › Replica models: metres, +Y forward, +Z up, each part's origin on its mount
 (the replica's OpticMount, GripMount, BarrelEnd, ThreadEnd or TorchMount / RailMount empty), with its `_Figure`
-copy, an optic's `_SightLine`, a silencer's `_Muzzle`, a torch's or laser's `_Beam` and the torch's `_UnderLaser`.
+copy, an optic's `_SightLine`, a silencer's `_Muzzle`, a torch's or laser's `_Beam` and the pistols' torch's
+`_UnderLaser`.
 The materials are the parts files' own names (Detail, Furniture, Metal, Rubber, Accent, Lens, LaserLens, TorchLens,
 plus LensDot, the red dot's clear coated glass), so ReplicaPaint paints the attachments as it did.
 
@@ -52,7 +53,7 @@ MM = 0.001
 # The parts files written, the replica whose empties place them, and the parts each carries.
 FILES = {
     "aeg": ["optic_redDot", "optic_scope2x", "optic_scopeVar", "grip_vertical", "grip_angled", "muzzle_silencer",
-            "light_weaponTorch"],
+            "light_weaponTorch", "laser_redLaser"],
     "pistol": ["muzzle_silencer", "laser_redLaser", "light_weaponTorch"],
     "cyber": ["light_weaponTorch"],
 }
@@ -565,6 +566,9 @@ SV_HOUSING = (-34.0, 15.0)
 SV_BOX = (33.0, 80.0)
 SV_BOX_HW, SV_BOX_LO, SV_BOX_HI = 20.5, 14.5, 52.5
 SV_GLASS_R = 12.0
+# The one dial on top (BP8, the owner: smaller; the first build's illumination dial was 13.6 mm across its radius and
+# stood 13 mm over its pad, beside an elevation turret): its middle along the housing, radius and height over the pad (mm).
+SV_DIAL_Y, SV_DIAL_R, SV_DIAL_H = -12.0, 8.0, 6.0
 # The objective's bore: inside the housing's belly where it rises to the front (17.4 mm up at the glass, the axis 32.6),
 # so neither the bore nor the glass's ring breaks through underneath.
 SV_BORE_R = 14.6
@@ -598,17 +602,6 @@ def ring_super(n_pts: int, y: float, hw: float, hh: float, cz: float, n: float) 
     return pts
 
 
-def rail_teeth(b: hs.Builder, a0: float, a1: float, count: int, at: float, half: float, depth: float,
-               mat: str) -> None:
-    """Picatinny teeth on top of a spine: `count` teeth evenly between a0 and a1 along Y, standing `depth` up from z
-    `at`, `half` either side across (mm)."""
-    pitch = (a1 - a0) / count
-    for i in range(count):
-        y0, y1 = a0 + i * pitch + pitch * 0.18, a0 + (i + 1) * pitch - pitch * 0.18
-        b.prism(mmp([(-half, at), (half, at), (half - 1.0, at + depth), (-half + 1.0, at + depth)]), "y",
-                y0 * MM, y1 * MM, mat)
-
-
 def build_scope_var() -> bpy.types.Object:
     h = SV_AXIS
     # The objective housing: lofted from the tube in front of the turrets out to a squared section, run on to the
@@ -633,34 +626,32 @@ def build_scope_var() -> bpy.types.Object:
     hb.prism(mmp(hs.fillet([(-17.0, 15.6, 6.0), (17.0, 15.6, 6.0), (17.0, 50.0, 11.0), (-17.0, 50.0, 11.0)], 4)),
              "y", SV_HOUSING[0] * MM, SV_HOUSING[1] * MM, "Detail")
     lathe_y(hb, [(-35.5, 15.5), (-35.0, 17.6), (-28.0, 17.6), (-27.0, 16.8)], "Detail", 32, z=h)
-    # Pads under the dials, the side caps' bosses.
-    disc_z(hb, 0.0, -18.5, 44.0, 51.0, 13.4, "Detail", 32, 0.6)
-    disc_z(hb, 0.0, 4.6, 44.0, 50.6, 8.0, "Detail", 28, 0.5)
+    # The pad under the dial, the side caps' bosses.
+    disc_z(hb, 0.0, SV_DIAL_Y, 44.0, 51.0, SV_DIAL_R + 0.6, "Detail", 32, 0.6)
     for s in (-1.0, 1.0):
         disc_x(hb, s * 12.0, s * 18.6, 5.2, h - 1.1, 8.6, "Detail", 28, 0.5)
     housing = hb.build()
     hs.finish(housing, bevel=0.0006, segments=1)
 
     db = hs.Builder("sv_dials", ["Detail", "Metal", "Rubber", "Accent"])
-    pb = hs.Builder("sv_plain", ["Detail", "Rubber", "Lens", "Fibre", "Accent", "Metal"])
-    # The illumination dial (a plain numbered skirt, the knurled cap, a slotted top), the elevation turret.
-    disc_z(db, 0.0, -18.5, 50.5, 57.0, 13.6, "Detail", 32, 0.4)
-    ridged(pb, 57.0, 62.6, 13.4, 13.95, 30, "Detail", x=0.0, z=-18.5, axis="z")
-    disc_z(db, 0.0, -18.5, 62.4, 64.0, 13.0, "Detail", 32, 0.6)
-    slot_z(pb, 0.0, -18.5, 64.0, 15.0, 1.2, 0.0, "Rubber")
-    for a in (-50.0, -25.0, 0.0, 25.0, 50.0):
+    pb = hs.Builder("sv_plain", ["Detail", "Rubber", "Lens", "Accent", "Metal"])
+    # One small low dial on top (BP8, the owner: "more minimalistic", "the dial on top smaller"): a plain skirt, the
+    # knurled cap and a slotted top, three ticks on the skirt.
+    top = 51.0 + SV_DIAL_H
+    disc_z(db, 0.0, SV_DIAL_Y, 50.5, 53.5, SV_DIAL_R, "Detail", 32, 0.3)
+    ridged(pb, 53.5, top - 1.2, SV_DIAL_R - 0.3, SV_DIAL_R + 0.25, 24, "Detail", x=0.0, z=SV_DIAL_Y, axis="z")
+    disc_z(db, 0.0, SV_DIAL_Y, top - 1.4, top, SV_DIAL_R - 0.5, "Detail", 32, 0.5)
+    slot_z(pb, 0.0, SV_DIAL_Y, top, SV_DIAL_R * 1.1, 1.0, 0.0, "Rubber")
+    for a in (-30.0, 0.0, 30.0):
         t = math.radians(180.0 + a)
-        pb.box(mm(math.cos(t) * 13.62 - 0.3, -18.5 + math.sin(t) * 13.62 - 0.6, 53.0),
-               mm(math.cos(t) * 13.62 + 0.3, -18.5 + math.sin(t) * 13.62 + 0.6, 55.0), "Accent")
-    disc_z(db, 0.0, 4.6, 50.0, 52.0, 7.4, "Detail", 28, 0.3)
-    ridged(pb, 52.0, 59.4, 7.0, 7.45, 22, "Detail", x=0.0, z=4.6, axis="z")
-    disc_z(db, 0.0, 4.6, 59.2, 60.4, 6.8, "Detail", 28, 0.5)
+        r = SV_DIAL_R + 0.02
+        pb.box(mm(math.cos(t) * r - 0.25, SV_DIAL_Y + math.sin(t) * r - 0.5, 51.4),
+               mm(math.cos(t) * r + 0.25, SV_DIAL_Y + math.sin(t) * r + 0.5, 53.0), "Accent")
     # The side caps: windage on the right, the battery cap on the left, each with a groove ring.
     for s in (-1.0, 1.0):
         disc_x(db, s * 18.4, s * 21.6, 5.2, h - 1.1, 7.8, "Detail", 28, 0.7)
         disc_x(pb, s * 21.62, s * 21.66, 5.2, h - 1.1, 6.0, "Rubber", 32)
         disc_x(db, s * 21.6, s * 22.1, 5.2, h - 1.1, 5.9, "Detail", 28, 0.3)
-    db.box(mm(-19.6, -30.0, h - 6.0), mm(-16.0, -24.0, h + 0.4), "Detail")
     # The eyepiece: a flange, the tube, the knurled diopter ring and its face, the glass.
     lathe_y(db, [(SV_HOUSING[0] - 1.0, 16.7), (-41.0, 16.7), (-41.6, 14.0), (-56.0, 14.0), (-56.0, 15.0),
                  (-57.0, 15.0)], "Detail", 32, z=h)
@@ -672,34 +663,7 @@ def build_scope_var() -> bpy.types.Object:
     pb.tube([(62.0 * MM, (SV_BORE_R + 0.1) * MM), (63.5 * MM, (SV_BORE_R + 0.1) * MM)],
             [(62.0 * MM, (SV_BORE_R - 2.0) * MM), (63.5 * MM, (SV_BORE_R - 2.0) * MM)],
             "Rubber", 40, centre=(0.0, 0.0, h * MM))
-    # Rails on the objective housing: the top one carrying the fibre front sight, one each side.
-    db.box(mm(-8.0, SV_BOX[0] + 2.0, SV_BOX_HI - 1.5), mm(8.0, SV_BOX[1] - 0.6, SV_BOX_HI + 2.6), "Detail")
-    rail_teeth(db, SV_BOX[0] + 2.0, SV_BOX[1] - 0.6, 5, SV_BOX_HI + 2.6, 10.6, 3.6, "Detail")
-    for s in (-1.0, 1.0):
-        db.box(mm(s * (SV_BOX_HW - 1.5), 36.0, 24.0), mm(s * (SV_BOX_HW + 1.6), 64.0, 41.0), "Detail")
-        pitch = 28.0 / 3
-        for i in range(3):
-            y0, y1 = 36.0 + i * pitch + 1.6, 36.0 + (i + 1) * pitch - 1.6
-            db.prism(mmp([(s * (SV_BOX_HW + 1.6), 22.4), (s * (SV_BOX_HW + 1.6), 42.6), (s * (SV_BOX_HW + 4.4), 41.6),
-                          (s * (SV_BOX_HW + 4.4), 23.4)]), "y", y0 * MM, y1 * MM, "Detail")
-    # The fibre sight along the whole top rail: a low tapered base on the teeth, a post at each end, the red fibre
-    # between them on a thin web.
-    fy0, fy1, ftop = SV_BOX[0] + 3.0, 78.5, SV_BOX_HI + 6.2
-    db.prism(mmp([(-4.6, ftop), (4.6, ftop), (2.6, ftop + 3.2), (-2.6, ftop + 3.2)]), "y", fy0 * MM, fy1 * MM, "Detail")
-    for ya, yb in ((fy0, fy0 + 3.0), (fy1 - 6.0, fy1)):
-        db.prism(mmp(hs.fillet([(-4.6, ftop, 0.0), (4.6, ftop, 0.0), (4.6, ftop + 2.0, 1.0), (2.4, ftop + 7.0, 1.0),
-                                (-2.4, ftop + 7.0, 1.0), (-4.6, ftop + 2.0, 1.0)], 2)), "y", ya * MM, yb * MM, "Detail")
-    db.box(mm(-0.7, fy0 + 3.0, ftop + 3.0), mm(0.7, fy1 - 6.0, ftop + 5.0), "Detail")
-    cyl(pb, fy0 + 2.6, fy1 - 0.6, 0.85, "Fibre", 10, z=ftop + 5.8)
-    # The rear aperture sight: a stem off the collar, its block over the eyepiece, the leaf and its windage screw.
-    db.box(mm(-3.0, -37.0, 46.0), mm(3.0, -33.0, 54.0), "Detail")
-    db.prism(mmp(hs.fillet([(-33.0, 52.6, 1.0), (-33.0, 58.0, 1.0), (-57.0, 64.5, 1.5),
-                            (-59.0, 64.5, 0.5), (-59.0, 52.6, 0.5)], 2)), "x", -9.0 * MM, 9.0 * MM, "Detail")
-    leaf = [(-9.0, 52.6), (9.0, 52.6), (9.0, 66.0), (6.5, 69.5), (2.2, 69.5), (1.4, 67.2), (-1.4, 67.2),
-            (-2.2, 69.5), (-6.5, 69.5), (-9.0, 66.0)]
-    db.prism(mmp(leaf), "y", -62.0 * MM, -59.0 * MM, "Detail")
-    disc_x(db, 9.0, 10.4, -50.5, 60.0, 3.0, "Metal", 18, 0.3)
-    hex_x(pb, 10.4, 10.46, -50.5, 60.0, 1.2, "Rubber")
+    # The objective housing stays clean (BP8): no rails, no fibre front sight and no rear aperture sight on top.
     dials = db.build()
     hs.finish(dials, bevel=0.0003, segments=1, angle=math.radians(50.0))
     plain = pb.build()
@@ -728,7 +692,8 @@ def build_scope_var() -> bpy.types.Object:
     fig.lathe([(SV_EYE_BACK * MM, 0.0), (SV_EYE_BACK * MM, 16.0 * MM), (24.0 * MM, 16.0 * MM),
                (SV_BOX[0] * MM, SV_BOX_HW * MM), (SV_BOX[1] * MM, SV_BOX_HW * MM), (SV_BOX[1] * MM, 0.0)],
               "Detail", 8, centre=(0.0, 0.0, h * MM))
-    fig.box(mm(-8.0, -32.0, 46.0), mm(8.0, -6.0, 62.0), "Detail")
+    fig.box(mm(-SV_DIAL_R, SV_DIAL_Y - SV_DIAL_R, 46.0), mm(SV_DIAL_R, SV_DIAL_Y + SV_DIAL_R, 51.0 + SV_DIAL_H),
+            "Detail")
     fig_ob = fig.build()
     sv_shrink(fig_ob)
     fig_mount = hs.Builder("optic_scopeVar_FigureMount", ["Detail"])
@@ -1026,7 +991,7 @@ LZ_LENS_Y = LZ_FRONT - 1.4
 
 
 def build_laser(rail_name: str = "pistol") -> bpy.types.Object:
-    rail = PISTOL_RAIL if rail_name == "pistol" else CYBER_RAIL
+    rail = {"pistol": PISTOL_RAIL, "cyber": CYBER_RAIL, "rifle": PICATINNY}[rail_name]
     y0, y1, ztop, zbot = LZ_BLOCK
     bb = hs.Builder("lz_block", ["Detail", "Metal", "Rubber", "LaserLens"])
     rail_clamp_under(bb, rail, y0, y1, ztop, 2.2, "Detail")
@@ -1216,11 +1181,16 @@ BUILDERS = {
     "grip_vertical": lambda f: build_grip_vertical(),
     "grip_angled": lambda f: build_grip_angled(),
     "muzzle_silencer": lambda f: build_silencer("rifle" if f == "aeg" else "pistol"),
-    "laser_redLaser": lambda f: build_laser(f),
+    "laser_redLaser": lambda f: build_laser({"aeg": "rifle"}.get(f, f)),
     "light_weaponTorch": lambda f: build_torch({"aeg": "rifle"}.get(f, f)),
 }
-# A torch on the AEG clamps to the handguard's right side: turned from under the rail to face out to the right.
-SIDE_MOUNTED = {("aeg", "light_weaponTorch")}
+# Parts that clamp to a side rail, in degrees about the bore's axis from under the rail: -90 faces out to the right,
+# 90 to the left. The AEG's torch takes the handguard's right side rail; its laser (BP8, the owner: the AEG takes the
+# laser) the left one, so the two never share a rail and the laser shows at the hip and in the inspect.
+SIDE_TURN = {("aeg", "light_weaponTorch"): -90.0, ("aeg", "laser_redLaser"): 90.0}
+# Parts placed on the other side of the bore from their mount, at their own distance along it (metres, +Y forward):
+# the AEG's laser at the left side rail's rear, behind the left hand's thumb and just ahead of the delta ring.
+MIRRORED_AT = {("aeg", "laser_"): 0.132}
 # Parts files whose parts must not touch the replica's body anywhere (CZ1: the Cyber's torch, flush on its rail, sank
 # into the trigger guard when the replica was resized); the build stops on a touch.
 CLEAR_OF_BODY = {"cyber"}
@@ -1273,13 +1243,15 @@ def write(part_file: str) -> None:
     materials()
     for name in FILES[part_file]:
         ob = BUILDERS[name](part_file)
-        if (part_file, name) in SIDE_MOUNTED:
-            turn(ob, Matrix.Rotation(math.radians(-90.0), 4, "Y"))
+        if (part_file, name) in SIDE_TURN:
+            turn(ob, Matrix.Rotation(math.radians(SIDE_TURN[(part_file, name)]), 4, "Y"))
         if name.startswith("light_") and part_file != "aeg":
             child_empty(name + "_UnderLaser", mm(0.0, 0.0, LZ_BLOCK[3]), ob)
         prefix = name.split("_")[0] + "_"
         mount = MOUNT_OVERRIDE.get((part_file, prefix), MOUNT[prefix])
         ob.location = at[mount]
+        if (part_file, prefix) in MIRRORED_AT:
+            ob.location = (-at[mount].x, MIRRORED_AT[(part_file, prefix)], at[mount].z)
         print("  %-12s %-20s %6d triangles (figure %d)" % (part_file, name, hs.tris(ob),
                                                             hs.tris(bpy.data.objects[name + "_Figure"])))
         if body is not None:
