@@ -177,6 +177,7 @@ func test_a_night_match_without_dev_content_gives_every_bot_the_torch() -> void:
 
 func test_spectating_shows_the_watched_bots_torch_not_yours() -> void:
 	var session := _session("woodland", _settings(true), _kit_with_torch())
+	RoundHold.release(session.state)
 	session._apply_graphics(GraphicsTable.shared().preset(&"high"))
 	var spot := session._eyes.torch()
 	assert_not_null(spot)

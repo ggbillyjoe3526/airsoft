@@ -280,6 +280,7 @@ func test_simulate_on_a_skip_ends_the_round_at_once_and_only_with_the_setting_on
 	session.settings = Settings.new()
 	add_child_autofree(session)
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)
 	session.player.status = Character.Status.OUT
 	session.start_skip()
 	assert_true(session.skipping())
@@ -309,6 +310,7 @@ func test_simulate_is_a_button_only_a_second_click_keeps_skipping() -> void:
 	session.settings.simulate_skips = true
 	add_child_autofree(session)
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)
 	session._input.active = true
 	session.player.status = Character.Status.OUT
 	session.start_skip()
