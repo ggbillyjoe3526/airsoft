@@ -7,10 +7,12 @@ extends SceneTree
 ## AEG Rifle with a vertical grip too), to `<folder>/reload_<id>[_<grip>]_<frame>.jpg`; `skin`: each replica at the hip
 ## (and the AEG Rifle aimed) with gloves and skin only, to `<folder>/skin_<id>_<view>_<gloves|skin>.jpg`; `outside`:
 ## a close-up of your left hand from outside, in front of it and to its left (OUTSIDE), on each grip at the hip and at
-## each share of a reload in OUTSIDE_SHARES, to `<folder>/outside_<id>_<grip|reload>[_<share>].jpg`. Replica ids after
-## the mode draw only those. Needs a display and OpenGL, so under xvfb:
+## each share of a reload in OUTSIDE_SHARES, to `<folder>/outside_<id>_<grip|reload>[_<share>].jpg`; `laser`: the AEG
+## Rifle with the Red Laser fitted (LASER) and each grip, at the hip, in view and from outside, and from outside at each
+## share of a reload, to `<folder>/laser_aeg_<grip>_<hip|outside>.jpg` and `<folder>/laser_aeg_reload_<share>.jpg`.
+## Replica ids after the mode draw only those. Needs a display and OpenGL, so under xvfb:
 ##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . --rendering-driver opengl3 -s res://tools/render_arms.gd \
-##       -- <folder> [grips|reload|skin|outside] [ids...]
+##       -- <folder> [grips|reload|skin|outside|laser] [ids...]
 ## Dev only: tools/ never ships.
 
 const SIZE := Vector2i(1280, 720)
@@ -33,11 +35,16 @@ const OUTSIDE := Vector3(-0.1, -0.1, -0.3)
 const GRIP_OUTSIDE := Vector3(-0.14, -0.08, -0.26)
 const OUTSIDE_FOV := 40.0
 const OUTSIDE_SHARES: Array[float] = [0.2, 0.26, 0.65, 0.75]
+## The laser the `laser` mode fits, and its slot (data/pool.md; the part model's `laser_redLaser`).
+const LASER := &"redLaser"
+const LASER_SLOT := &"laser"
 
 var _port: SubViewport = null
 var _camera: Camera3D = null
 var _outside: Camera3D = null
 var _only: Array[StringName] = []
+## The parts fitted besides the grip (`laser` mode: the Red Laser on the AEG's side rail).
+var _extra: Dictionary = {}
 var _play: PlayTuning = null
 var _eye := Vector3.ZERO
 var _feet := Vector3.ZERO
@@ -58,7 +65,7 @@ func _run() -> void:
 		_only.append(StringName(args[i]))
 	DirAccess.make_dir_recursive_absolute(folder)
 	_play = PlayTuning.load_default()
-	if what == "outside":
+	if what == "outside" or what == "laser":
 		# Seen from outside, the hands draw at their true depth.
 		_play.viewmodel.depth_scale = 1.0
 	if not _build_scene():
@@ -94,6 +101,15 @@ func _run() -> void:
 				for share in OUTSIDE_SHARES:
 					var path := "%s/outside_%s_reload_%02d.jpg" % [folder, id, roundi(share * 100.0)]
 					failed += await _from_outside(id, &"", share, path)
+		"laser":
+			_extra = {LASER_SLOT: LASER}
+			for grip in GRIPS:
+				var stem := "%s/laser_aeg_%s" % [folder, grip if grip != &"" else &"none"]
+				failed += await _still(&"aeg", grip, false, 0.0, -1.0, stem + "_hip.jpg")
+				failed += await _from_outside(&"aeg", grip, -1.0, stem + "_outside.jpg")
+			for share in OUTSIDE_SHARES:
+				var path := "%s/laser_aeg_reload_%02d.jpg" % [folder, roundi(share * 100.0)]
+				failed += await _from_outside(&"aeg", &"", share, path)
 	quit(1 if failed > 0 else 0)
 
 
@@ -160,7 +176,10 @@ func _build_scene() -> bool:
 func _hands(id: StringName, grip: StringName, skin: bool) -> Array:
 	var r := ReplicaStats.load_replica(id)
 	var loadout: Array[ReplicaConfig] = [r]
-	var parts: Array[Dictionary] = [{ReplicaParts.GRIP_SLOT: grip} if grip != &"" else {}]
+	var fitted := _extra.duplicate()
+	if grip != &"":
+		fitted[ReplicaParts.GRIP_SLOT] = grip
+	var parts: Array[Dictionary] = [fitted]
 	var hands := ReplicaView.new()
 	hands.skin_arms = skin
 	_camera.add_child(hands)
