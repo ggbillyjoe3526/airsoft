@@ -17,8 +17,8 @@ const CARRY_SLACK := 0.004
 const CARRIES := {
 	&"aeg": [[0.12, 0.18, 0.235], [0.52, 0.6, 0.67]],
 	&"sniper": [[0.12, 0.18, 0.235], [0.52, 0.6, 0.67]],
-	&"pistol": [[0.22, 0.25, 0.27], [0.52, 0.545, 0.565]],
-	&"cyber": [[0.25, 0.27, 0.295], [0.54, 0.56, 0.585]],
+	&"pistol": [[0.24, 0.26, 0.28], [0.54, 0.56]],
+	&"cyber": [[0.26, 0.28, 0.3], [0.54, 0.58]],
 }
 ## How far (m) the left hand may be from its hold as a reload starts (no jump into the clip).
 const START_SLACK := 0.002
@@ -161,8 +161,8 @@ func _hand_on_mag(hands: ReplicaView, held: ReplicaView.Held, share: float) -> V
 	var replica_skeleton := mag.get_parent() as Skeleton3D
 	replica_skeleton.force_update_all_bone_transforms()
 	(mag as BoneAttachment3D).on_skeleton_update()
-	return held.root.global_transform.affine_inverse() * hand - \
-			held.root.global_transform.affine_inverse() * mag.global_position
+	# In the magazine's own frame, so a magazine that tips as it comes out still reads as held.
+	return mag.global_transform.affine_inverse() * hand
 
 
 func test_the_magazine_rides_in_the_left_hand() -> void:

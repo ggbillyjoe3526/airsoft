@@ -93,6 +93,8 @@ func test_a_reload_ends_on_the_hold_it_began_from() -> void:
 	for base in clips:
 		var hold := anim.get_animation(StringName(base + "_Hold"))
 		var reload := anim.get_animation(StringName(base + "_Reload"))
+		# A one-handed replica's left arm is hidden on the hold: its reload starts and ends below the view instead.
+		var hidden_left := cfg.one_hand.has(StringName(base.get_slice("_", 0)))
 		for t in reload.get_track_count():
 			var other := hold.find_track(reload.track_get_path(t), reload.track_get_type(t))
 			if other < 0:
@@ -100,6 +102,9 @@ func test_a_reload_ends_on_the_hold_it_began_from() -> void:
 			var from: Variant = reload.track_get_key_value(t, 0)
 			var to: Variant = reload.track_get_key_value(t, reload.track_get_key_count(t) - 1)
 			var rest: Variant = hold.track_get_key_value(other, 0)
+			if hidden_left and String(reload.track_get_path(t)).ends_with("_L"):
+				assert_almost_eq(_dist(from, to), 0.0, BACK_SLACK, "%s ends where it began (%s)" % [base, reload.track_get_path(t)])
+				continue
 			if from is Vector3 or from is Quaternion:
 				assert_almost_eq(_dist(from, rest), 0.0, BACK_SLACK, "%s starts on the hold (%s)" % [base, reload.track_get_path(t)])
 				assert_almost_eq(_dist(to, rest), 0.0, BACK_SLACK, "%s ends on the hold (%s)" % [base, reload.track_get_path(t)])
