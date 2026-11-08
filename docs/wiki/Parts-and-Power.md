@@ -31,7 +31,9 @@ the springs a painted rifle spring in each spring's colour.
 An optic on the top rail. With one fitted the iron sights come off completely, so nothing stands in its way, and
 aiming looks through it. The red dot is a compact sight on a low riser: a lit dot on clear glass, with the view open
 round it. The 2x scope is a magnifier on a low hinged mount; it magnifies only inside its glass: the view round it
-stays as it is, with nothing dark round the edge. The Variable Scope is a compact prism scope with a zoom: aimed
+stays as it is, with nothing dark round the edge. At the hip a scope's glass is plain glass you see through; the
+magnified view and its reticle show only while you aim. The Variable Scope is a plain compact prism scope, one small
+dial on top, with a zoom: aimed
 through it, the mouse wheel (Zoom in and Zoom out in Settings › Controls) turns its zoom from 2x to 6x a step at a
 time (the HUD shows it), and it keeps that zoom through the match.
 
@@ -51,7 +53,9 @@ A vertical grip is slower to bring up but steadier after a sprint; an angled gri
 
 <!-- wiki:parts lasers -->
 
-The laser is a closed unit under the pistol's rail, its emitter flush in the front. It tightens the pistol's groups.
+The laser is a closed unit under the GBB Pistol's rail, or on the left side rail of the AEG Rifle's handguard, just
+behind your left hand, its emitter flush in the front. It tightens the groups. The AEG's torch takes the right side
+rail, so the two fit together.
 
 ## Magazines
 

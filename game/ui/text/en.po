@@ -1495,7 +1495,7 @@ msgid "PART_NOTE_MAGAZINE"
 msgstr "How many BBs, in how many changes."
 
 msgid "PART_NOTE_LASER"
-msgstr "On the pistol rail. Tightens the spread."
+msgstr "On the pistol rail, or the AEG's left side rail. Tightens the spread."
 
 msgid "PART_NOTE_LIGHT"
 msgstr "On its own mount. T switches it at night; by day it isn't fitted."
@@ -1508,6 +1508,9 @@ msgstr "UNDER RAIL"
 
 msgid "PART_MOUNT_PISTOL_RAIL"
 msgstr "PISTOL RAIL"
+
+msgid "PART_MOUNT_SIDE_RAIL"
+msgstr "SIDE RAIL"
 
 msgid "PART_MOUNT_BARREL_MOUNT"
 msgstr "BARREL MOUNT"

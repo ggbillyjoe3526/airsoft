@@ -60,7 +60,7 @@ func test_the_shipped_pool_lists_the_parts_by_slot() -> void:
 	assert_eq(_ids(pool.parts_for(aeg, &"grip", false)), [VERTICAL, ANGLED])
 	assert_eq(_ids(pool.parts_for(aeg, &"magazine", false)), [HI_CAP, LOW_CAP])
 	assert_eq(_ids(pool.parts_for(aeg, &"barrel", false)), [TIGHT_BORE, LONG])
-	assert_eq(_ids(pool.parts_for(aeg, &"laser", false)), [])
+	assert_eq(_ids(pool.parts_for(aeg, &"laser", false)), [LASER], "on its side rail (BP8)")
 	assert_eq(_ids(pool.parts_for(pistol, &"optic", false)), [])
 	assert_eq(_ids(pool.parts_for(pistol, &"laser", false)), [LASER])
 	assert_eq(_ids(pool.parts_for(pistol, &"magazine", false)), [EXTENDED])
@@ -133,7 +133,7 @@ func test_parts_are_saved_and_loaded_with_the_setup() -> void:
 func test_a_part_is_fitted_only_where_it_fits_and_taken_off_with_nothing() -> void:
 	var l := rules.default_loadout("Test")
 	assert_true(rules.set_part(l, AEG, &"optic", SCOPE))
-	assert_false(rules.set_part(l, AEG, &"laser", LASER), "the AEG has no pistol rail")
+	assert_false(rules.set_part(l, PISTOL, &"grip", VERTICAL), "the pistol has no under rail")
 	assert_false(rules.set_part(l, AEG, &"grip", SCOPE), "a scope isn't a grip")
 	assert_false(rules.set_part(l, AEG, &"stock", SCOPE), "no such slot")
 	assert_false(rules.set_part(l, PISTOL, &"optic", RED_DOT), "the pistol has no top rail")
@@ -148,9 +148,10 @@ func test_clean_takes_off_a_part_that_wont_do() -> void:
 	t.parts = {&"optic": RED_DOT, &"laser": LASER, &"grip": SCOPE, &"muzzle": "999999", &"barrel": LONG}
 	l.tunes[AEG] = t
 	var said := rules.clean(l)
-	assert_eq(t.parts, {&"optic": RED_DOT, &"barrel": LONG} as Dictionary[StringName, String])
-	assert_eq(said.size(), 3)
-	assert_string_contains(said[0] + said[1] + said[2], "AEG Rifle's laser \"%s\" won't do" % LASER)
+	assert_eq(t.parts, {&"optic": RED_DOT, &"laser": LASER, &"barrel": LONG} as Dictionary[StringName, String],
+			"the AEG keeps its laser (BP8)")
+	assert_eq(said.size(), 2)
+	assert_string_contains(said[0] + said[1], "AEG Rifle's grip \"%s\" won't do" % SCOPE)
 
 
 func test_as_it_comes_a_replica_plays_as_before() -> void:

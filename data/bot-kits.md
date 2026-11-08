@@ -55,6 +55,6 @@ Rifleman, Marksman and Sniper.
 | Marksman | AEG Rifle | 2x Scope, Tight-Bore Barrel, Vertical Grip | GBB Pistol | Red Laser | anchor, careful | 10 | 15 | 20 |
 | Support | AEG Rifle | Red Dot, Vertical Grip, Hi-Cap Magazine, 11.1 V LiPo Battery | GBB Pistol | Extended Magazine | anchor, rusher | 10 | 20 | 20 |
 | Stealth | AEG Rifle | Red Dot, Silencer, Low-Cap Magazine | GBB Pistol | Silencer | flanker | 10 | 15 | 20 |
-| Pointman | AEG Rifle | Red Dot, Angled Grip | GBB Pistol | Red Laser, Extended Magazine, Red Gas | rusher, flanker | 15 | 18 | 23 |
+| Pointman | AEG Rifle | Red Dot, Angled Grip, Red Laser | GBB Pistol | Red Laser, Extended Magazine, Red Gas | rusher, flanker | 15 | 18 | 23 |
 | Cyber | Cyber Pistol | | GBB Pistol | Red Laser | rusher | 0 | 2 | 2 |
 | Sniper | Sniper Rifle | | GBB Pistol | | anchor, careful | 3 | 6 | 8 |

@@ -1546,6 +1546,20 @@ models show without anything else changing. The smoke and flash icons now do the
   elbows bent about a right angle, hands low and close in, a small easy swing, the shoulders barely turning. Then a bot
   running with its rifle up: unchanged, held at the ready.
 
+## Replicas, scopes and bombs from your Dev 2 playtest (BP8)
+
+- [ ] **AEG laser.** Customise the AEG Rifle: the Laser tab offers the Red Laser; fitted, it sits on the left side of
+  the handguard, just behind your left hand, and shows at the hip and in the inspect. On a night field the torch is on
+  the right side; the two never touch.
+- [ ] **Inspect.** Press Y with each replica: the muzzle points to the left and the left side faces you.
+- [ ] **Bombs.** Press 4: the smoke comes into your hand and stays there. Click: it is thrown. Take another, hold the
+  button: your arm stays back, pin out, until you let go. Same with 5. Bots still throw theirs on their own.
+- [ ] **Scope glass.** At the hip, the 2x Scope's and the Variable Scope's glass looks like tinted glass showing what is
+  ahead, not a dark disc; aim (right mouse) and the zoomed view and reticle show.
+- [ ] **BBs from the muzzle.** Aim down the GBB Pistol and the Cyber Pistol and fire while turning and strafing: no BB
+  shows between your eye and the pistol; each first shows at the muzzle.
+- [ ] **Variable Scope.** Fit it and inspect: no rails, fibre sight or rear sight on top, and one small dial.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

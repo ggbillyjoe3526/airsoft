@@ -12,7 +12,8 @@ so W A S D stays W A S D on any keyboard layout.
 - **Crouch** and **Aim** are held by default: let go to stand up or lower the replica. Either can be set to toggle
   in Settings › Gameplay; a toggled crouch stands you up when you sprint or jump.
 - **Lean** and **Sprint** are always held.
-- **Inspect replica** (Y) turns the replica in your hands side on to look it over while its parts move: the AEG's
+- **Inspect replica** (Y) turns the replica in your hands side on, its muzzle to the left, to look it over while its
+  parts move: the AEG's
   charging handle and dust cover, the Cyber Pistol's battery (a gas pistol's slide stays home). Firing,
   aiming, reloading, switching, holstering, sprinting or being hit stops it at once.
 - **Jump** vaults when you are at a low wall: "Space to vault" shows under the crosshair (it names your own Jump
@@ -23,11 +24,11 @@ so W A S D stays W A S D on any keyboard layout.
   ([Squad Orders](Squad-Orders#pings)).
 - **Squad: need a mag** (H) tosses a magazine to a teammate who asked you, or asks for one when you are low
   ([Squad Orders](Squad-Orders#need-a-mag)); it is also the order wheel's last item, at its upper left.
-- **Throw smoke** (4) and **Throw flash** (5) throw a smoke bomb or a flash bomb where you look at once
-  ([Grenades](Grenades)).
+- **Throw smoke** (4) and **Throw flash** (5) take a smoke bomb or a flash bomb in hand; a click throws it, or hold the
+  button and it goes when you let go ([Grenades](Grenades)).
 - **Next / previous replica** (the mouse wheel) steps through your two replicas and then your bombs left, smoke then
   flash, and round again. It never stops on the holster: with your replica holstered, a notch draws a replica. With a
-  bomb in hand, a trigger pull throws it.
+  bomb in hand, a click throws it.
 - **Zoom in / Zoom out (aimed)** (the mouse wheel) turn the Variable Scope's zoom while you aim through it
   ([Parts and Power](Parts-and-Power)); then the wheel zooms instead of switching. They are keys of their own: put Next
   and Previous replica on keys and those still switch while you aim, or put the zooms on keys and the wheel always
