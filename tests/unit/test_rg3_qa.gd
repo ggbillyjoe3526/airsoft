@@ -270,6 +270,7 @@ func test_a_match_on_depot_is_as_it_was() -> void:
 	s.autopilot = true
 	add_child_autofree(s)
 	await wait_physics_frames(2)
+	RoundHold.release(s.state)
 	assert_false(s.practice)
 	assert_eq(s.state.characters.size(), MapCatalog.shared().find("depot").team_standard * 2)
 	assert_eq(s.state.targets.size(), 0)
@@ -283,10 +284,10 @@ func test_a_match_on_depot_is_as_it_was() -> void:
 	assert_eq(s.state.challenge.phase, RangeChallenge.Phase.OFF, "no timed challenge in a match")
 	var audio := s.find_child("Sound", true, false) as SimAudio
 	var st := GameState.new(1)
-	st.events.add(GameEvent.Kind.ROUND_START)
+	st.events.add(GameEvent.Kind.ROUND_GO)
 	audio.on_tick(st, 0, null)
 	assert_true((audio._streams[&"whistle_short"] as Array).has(audio._whistle.stream),
-			"rounds start with the referee's whistle (SP4)")
+			"rounds start with the referee's whistle at GO (SP4, BP8)")
 
 
 func test_a_ring_is_one_sound_not_two() -> void:

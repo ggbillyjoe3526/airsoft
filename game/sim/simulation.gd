@@ -42,6 +42,8 @@ var grenades: Grenades = null
 var doors: Doors = null
 ## Followed by characters with no command this tick.
 var _idle: PlayerCommand = PlayerCommand.new()
+## A character's command while the round's start countdown holds everyone: the view only.
+var _held: PlayerCommand = PlayerCommand.new()
 ## Followed by characters that have been hit: they take no orders from their controller.
 var _eliminated: PlayerCommand = PlayerCommand.new()
 ## Followed while vaulting (the view, the trigger as the vault found it), and the first command after a vault, with the
@@ -96,6 +98,7 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		return
 	# Once the round is decided it's a cease-fire, as after the end whistle at a site: nobody can fire, and BBs still in
 	# the air stop on whoever they reach without knocking them out.
+	var held := state.round_state.held()
 	var live := state.round_state.is_live()
 	# The hand-off is for rounds only: never on the range, where the spares stay full.
 	var sharing := live and not state.round_state.practice
@@ -132,6 +135,10 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		if cmd == null:
 			cmd = _idle
 			cmd.reset(c.yaw, c.pitch)
+		elif held and in_play:
+			# held still until GO: the view follows the mouse, nothing else does
+			_held.reset(cmd.yaw, cmd.pitch)
+			cmd = _held
 		# The torch's thumb switch works through a vault too (the vault's own command drops other presses until its end).
 		var toggle_torch := in_play and cmd.toggle_torch
 		# The trigger as the controller pulls it, before a vault, a bomb in hand or a throw holds or lets it go.

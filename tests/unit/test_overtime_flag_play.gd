@@ -179,6 +179,7 @@ func test_built_once_in_elimination_on_a_map_with_a_spot_and_never_in_attack_def
 func test_the_clock_running_out_puts_it_up_with_the_banner_and_the_ot_clock() -> void:
 	_session()
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 	var rs := session.state.round_state
 	rs.clock = 0.01
 	await wait_physics_frames(3)
@@ -198,6 +199,7 @@ func test_the_clock_running_out_puts_it_up_with_the_banner_and_the_ot_clock() ->
 func test_the_marker_and_the_minimap_show_the_flag_while_it_stands() -> void:
 	_session()
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 	var rs := session.state.round_state
 	var hud := session.hud()
 	var camera := Camera3D.new()

@@ -137,7 +137,8 @@ static func follow(b: Bot, w: BotWorld, dt: float, while_planning: bool = false)
 		return false
 	b.move_dir = Vector3(flat.x / d, 0.0, flat.y / d)
 	var speed := Vector2(b.character.velocity.x, b.character.velocity.z).length()
-	b.stuck_for = b.stuck_for + dt if speed < cfg.stuck_speed else 0.0
+	# A bot held at the start (BotWorld.live is false) is standing still on purpose: not stuck.
+	b.stuck_for = b.stuck_for + dt if speed < cfg.stuck_speed and w.live else 0.0
 	if b.stuck_for > cfg.stuck_time and not planning:
 		b.stuck_for = 0.0
 		b.route_state = Bot.RouteState.WANTED
@@ -159,7 +160,8 @@ static func step_onto(b: Bot, w: BotWorld, spot: Vector3, cmd: PlayerCommand, dt
 	if d <= cfg.lean_spot_arrive * 0.5 or d > cfg.cover_arrive or b.stuck_for > cfg.stuck_time:
 		return false
 	var speed := Vector2(b.character.velocity.x, b.character.velocity.z).length()
-	b.stuck_for = b.stuck_for + dt if speed < cfg.stuck_speed else 0.0
+	# A bot held at the start (BotWorld.live is false) is standing still on purpose: not stuck.
+	b.stuck_for = b.stuck_for + dt if speed < cfg.stuck_speed and w.live else 0.0
 	var ahead := p + Vector3(flat.x, 0.0, flat.y) * (minf(d, cfg.edge_lookahead) / d)
 	if w.nav.drop_on_line(p, ahead):
 		return false

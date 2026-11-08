@@ -139,11 +139,13 @@ func _ready() -> void:
 	title.text = tr("PAUSE_TITLE").to_upper()
 	title.add_theme_font_override("font", GameTheme.spaced_font(800, TITLE_SPACING, TITLE_SIZE))
 	title.add_theme_font_size_override("font_size", TITLE_SIZE)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 	_subtitle_gap = _gap(SUBTITLE_TOP)
 	box.add_child(_subtitle_gap)
 	var line := HBoxContainer.new()
 	line.add_theme_constant_override("separation", 0)
+	line.alignment = BoxContainer.ALIGNMENT_CENTER
 	_subtitle_lead = Label.new()
 	_subtitle_lead.add_theme_font_override("font", GameTheme.font(700))
 	_subtitle_lead.add_theme_font_size_override("font_size", SUBTITLE_SIZE)
@@ -177,7 +179,7 @@ func _ready() -> void:
 	_leave = _button(buttons, tr("PAUSE_QUIT"), false)
 	_leave.pressed.connect(func() -> void: left.emit())
 	# the buttons are one width, the widest one's (owner, 2026-10-29)
-	ButtonWidth.group([_resume, _challenge, _loadout, _skip, _settings_button, _leave])
+	ButtonWidth.group([_resume, _challenge, _loadout, _skip, _settings_button, _leave], Control.SIZE_SHRINK_CENTER)
 	box.add_child(_gap(SEED_TOP))
 	box.add_child(_seed_row_box())
 	box.add_child(_gap(PANEL_BOTTOM))
@@ -412,11 +414,11 @@ func _seed_row_box() -> Control:
 	holder.add_child(foot)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", SEED_NUMBER_GAP)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	foot.add_child(row)
 	_seed_word = Label.new()
 	_seed_word.text = tr("PAUSE_SEED")
 	_seed = Label.new()
-	_seed.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for l: Label in [_seed_word, _seed]:
 		l.add_theme_font_size_override("font_size", SEED_SIZE)
 		l.add_theme_color_override("font_color", GameTheme.MUTED)
@@ -427,7 +429,7 @@ func _seed_row_box() -> Control:
 	_report_button = Button.new()
 	_report_button.name = "ReportBug"
 	_report_button.text = tr("REPORT_BUG").to_upper()
-	_report_button.size_flags_horizontal = Control.SIZE_SHRINK_END | Control.SIZE_EXPAND
+	_report_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_report_button.add_theme_font_override("font", GameTheme.spaced_font(800, GameTheme.SPACING_HEADING, REPORT_SIZE))
 	_report_button.add_theme_font_size_override("font_size", REPORT_SIZE)
 	var chip := GameTheme.box(GameTheme.CARD, GameTheme.LINE, REPORT_PAD.x, REPORT_PAD.y)
@@ -458,6 +460,7 @@ func _error_row() -> HBoxContainer:
 	_error_line.add_child(dot_box)
 	_error_text = MenuParts.text("", ERROR_SIZE, 600, ERROR_INK)
 	_error_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_error_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_error_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_error_line.add_child(_error_text)
 	_error_line.visible = false
@@ -528,11 +531,11 @@ func _toggle_challenge() -> void:
 	challenge_toggled.emit(_challenge_on)
 
 
-## A full-width menu button, its words left-aligned in capitals; `main` is the yellow one.
+## A menu button, its words centred in capitals; `main` is the yellow one.
 func _button(parent: Control, text: String, main: bool) -> Button:
 	var b := Button.new()
 	b.text = text.to_upper()
-	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	b.alignment = HORIZONTAL_ALIGNMENT_CENTER
 	b.add_theme_font_override("font", GameTheme.spaced_font(800, GameTheme.SPACING_MAIN, BUTTON_SIZE))
 	b.add_theme_font_size_override("font_size", BUTTON_SIZE)
 	if main:

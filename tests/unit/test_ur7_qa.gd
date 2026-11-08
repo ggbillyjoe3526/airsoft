@@ -1,5 +1,5 @@
 extends GutTest
-## UR7 QA: the replica panel's bombs and name, the score bar's rounded plate and blocks, and the feed's pills, at the
+## UR7 QA: the replica panel, the score bar's rounded plate and blocks, and the feed's pills, at the
 ## edges: one fire mode, a long name, the counter off, no bombs, the HUD opacity and size, gauge patterns on either
 ## side and High contrast colours.
 
@@ -42,7 +42,7 @@ func _inside(poly: PackedVector2Array, p: Vector2) -> bool:
 			or Geometry2D.is_point_in_polygon(p - Vector2(0.01, 0.0), poly)
 
 
-func test_a_one_mode_replica_shows_one_chip_and_its_name() -> void:
+func test_a_one_mode_replica_shows_one_chip() -> void:
 	var one: Array[ReplicaConfig.FireMode] = [ReplicaConfig.FireMode.SEMI]
 	var c := _character("Plinker", one)
 	var p := _panel(c)
@@ -52,12 +52,10 @@ func test_a_one_mode_replica_shows_one_chip_and_its_name() -> void:
 		if chip.visible:
 			visible_chips += 1
 	assert_eq(visible_chips, 1)
-	var label := p.find_child("ReplicaName", true, false) as Label
-	assert_eq(label.text, "PLINKER")
-	assert_gt(label.size.x, 60.0, "with one chip the name has room")
+	assert_null(p.find_child("ReplicaName", true, false), "the name is the rail's business now (BP8): none in the panel")
 
 
-func test_a_long_name_is_clipped_and_never_widens_the_panel() -> void:
+func test_the_panel_holds_its_width_with_three_chips_and_big_counts() -> void:
 	var all: Array[ReplicaConfig.FireMode] = [ReplicaConfig.FireMode.SEMI, ReplicaConfig.FireMode.BURST,
 			ReplicaConfig.FireMode.AUTO]
 	var c := _character("Extraordinarily Long Replica Display Name Mk Twelve", all)
@@ -65,74 +63,23 @@ func test_a_long_name_is_clipped_and_never_widens_the_panel() -> void:
 	c.grenades.readied = Grenade.Kind.SMOKE
 	var p := _panel(c)
 	await wait_process_frames(3)
-	var frame := p.find_child("ReplicaName", true, false).get_parent().get_parent().get_parent() as Control
-	assert_almost_eq(frame.size.x, ReplicaPanel.WIDTH, 0.5, "held at its width with 3 chips, a long name, 2-digit bombs")
+	var frame := _frame_of(p)
+	assert_almost_eq(frame.size.x, ReplicaPanel.WIDTH, 0.5, "held at its width with 3 chips")
 	assert_lte(p.size.x, ReplicaPanel.WIDTH + 0.5)
-	var label := p.find_child("ReplicaName", true, false) as Label
-	assert_true(label.clip_text)
-	assert_gt(label.size.x, 0.0, "some of the name still shows")
 	for chip in p._chips:
 		assert_gte(chip.get_global_rect().end.x, 0.0)
 		assert_lte(chip.get_global_rect().end.x, frame.get_global_rect().end.x + 0.5, "chips stay inside the panel")
 
 
-func test_the_counter_off_keeps_the_bombs_the_name_and_the_chips() -> void:
+func test_the_counter_off_keeps_the_chips() -> void:
 	var c := _character()
-	c.grenades.carry(2, 1)
 	var p := _panel(c)
 	p.set_counted(false)
 	p.refresh(c.armament, c.grenades)
 	await wait_process_frames(2)
 	assert_false(p.counted())
-	assert_true((p.find_child("Bombs", true, false) as Control).is_visible_in_tree(), "bombs are not BB counts")
-	assert_true((p.find_child("ReplicaName", true, false) as Control).is_visible_in_tree())
-	assert_eq(p.bomb_texts()[Grenade.Kind.SMOKE], "SMOKE 2")
-
-
-func test_zero_bombs_carried_dims_both_and_shows_zeroes() -> void:
-	var c := _character()
-	c.grenades.carry(0, 0)
-	var p := _panel(c)
-	assert_eq(p._bombs[Grenade.Kind.SMOKE].text, "0")
-	assert_eq(p._bombs[Grenade.Kind.FLASH].text, "0")
-	assert_lt(p.bomb_icon(Grenade.Kind.SMOKE).modulate.a, 1.0)
-	assert_lt(p.bomb_icon(Grenade.Kind.FLASH).modulate.a, 1.0)
-
-
-func test_a_refilled_bomb_lights_again() -> void:
-	var c := _character()
-	c.grenades.carry(1, 1)
-	var p := _panel(c)
-	c.grenades.spend(Grenade.Kind.SMOKE)
-	p.refresh(c.armament, c.grenades)
-	assert_lt(p.bomb_icon(Grenade.Kind.SMOKE).modulate.a, 1.0)
-	c.grenades.refill()
-	p.refresh(c.armament, c.grenades)
-	assert_eq(p.bomb_icon(Grenade.Kind.SMOKE).modulate.a, 1.0, "a respawn brings the bomb back to full")
-
-
-func test_the_last_bomb_in_hand_stays_large_on_its_chip_and_dims_once_thrown() -> void:
-	var c := _character()
-	c.grenades.carry(1, 1)
-	c.grenades.readied = Grenade.Kind.FLASH
-	var p := _panel(c)
-	c.grenades.spend(Grenade.Kind.FLASH)
-	p.refresh(c.armament, c.grenades)
-	assert_eq(p.bomb_icon(Grenade.Kind.FLASH).custom_minimum_size.x, ReplicaPanel.BOMB_ICON_HELD)
-	assert_lt(p.bomb_icon(Grenade.Kind.FLASH).modulate.a, 1.0)
-	c.grenades.readied = Grenade.Kind.NONE
-	p.refresh(c.armament, c.grenades)
-	assert_eq(p.bomb_icon(Grenade.Kind.FLASH).custom_minimum_size.x, ReplicaPanel.BOMB_ICON)
-
-
-func test_the_panel_without_a_hand_shows_no_stale_counts() -> void:
-	var c := _character()
-	var p := ReplicaPanel.new()
-	add_child_autofree(p)
-	p.setup(HudConfig.new())
-	p.refresh(c.armament)
-	for text: String in p.bomb_texts():
-		assert_eq(text, "", "no hand, no bomb words")
+	for chip in p._chips:
+		assert_true(chip.is_visible_in_tree() or not chip.visible)
 
 
 func test_the_score_plate_takes_the_panel_opacity() -> void:
@@ -255,7 +202,7 @@ func _mags_character(mags: int, name_in: String = "") -> Character:
 
 
 func _frame_of(p: ReplicaPanel) -> Control:
-	return p.gauges().get_parent().get_parent() as Control
+	return p.find_child("Frame", false, false) as Control
 
 
 func test_ur8_the_boxes_stay_at_the_left_edge_with_the_ammo_counter_off() -> void:
@@ -263,8 +210,7 @@ func test_ur8_the_boxes_stay_at_the_left_edge_with_the_ammo_counter_off() -> voi
 	p.set_counted(false)
 	await wait_process_frames(3)
 	var gauges := p.gauges()
-	var name_label := p.find_child("ReplicaName", true, false) as Control
-	assert_almost_eq(gauges.get_global_rect().position.x, name_label.get_global_rect().position.x, 1.0)
+	assert_almost_eq(gauges.get_global_rect().position.x, _frame_of(p).get_global_rect().position.x + ReplicaPanel.PAD.x, 1.0)
 	assert_almost_eq(gauges.size.x, gauges.row_width(4), 0.5, "the counts' row going away does not stretch the boxes")
 	assert_true(gauges.get_global_rect().position.x < _frame_of(p).get_global_rect().get_center().x)
 
@@ -293,8 +239,9 @@ func test_ur8_a_replica_swap_with_another_magazine_count_resizes_the_row_from_th
 	assert_almost_eq(_frame_of(p).size.x, ReplicaPanel.WIDTH, 0.5)
 
 
-func test_ur8_up_to_ten_magazines_fit_inside_the_panel() -> void:
-	for n: int in [1, 2, 3, 6, 10]:
+func test_ur8_up_to_six_magazines_fit_inside_the_panel() -> void:
+	# the data caps a replica at 6 magazines; the chips drop under the boxes once they would not fit beside them
+	for n: int in [1, 2, 3, 6]:
 		var p := _panel(_mags_character(n))
 		await wait_process_frames(3)
 		var frame := _frame_of(p).get_global_rect()
@@ -305,7 +252,7 @@ func test_ur8_up_to_ten_magazines_fit_inside_the_panel() -> void:
 
 
 func test_ur8_many_magazines_never_draw_outside_the_panel() -> void:
-	# 11 or more boxes need over 168 px: the panel widens (as before UR8) rather than draw them outside; the data caps at 6
+	# 10 or more boxes need over 150 px: the panel widens (as before UR8) rather than draw them outside; the data caps at 6
 	var p := _panel(_mags_character(14))
 	await wait_process_frames(3)
 	var frame := _frame_of(p).get_global_rect()
@@ -340,8 +287,7 @@ func test_ur8_a_hud_at_150_percent_keeps_the_boxes_inside_the_scaled_panel() -> 
 	await wait_process_frames(3)
 	var frame := _frame_of(p).get_global_rect()
 	var row := p.gauges().get_global_rect()
-	var name_label := p.find_child("ReplicaName", true, false) as Control
-	assert_almost_eq(row.position.x, name_label.get_global_rect().position.x, 1.0)
+	assert_almost_eq(row.position.x, frame.position.x + ReplicaPanel.PAD.x * 1.5, 1.0, "at the panel's left padding")
 	assert_gte(row.position.x, frame.position.x - 0.5)
 	assert_lte(row.end.x, frame.end.x + 0.5)
 	assert_almost_eq(row.size.x, p.gauges().row_width(6) * 1.5, 1.0, "scaled with the HUD")

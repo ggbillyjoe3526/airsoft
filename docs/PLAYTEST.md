@@ -1584,6 +1584,27 @@ models show without anything else changing. The smoke and flash icons now do the
 - [ ] **Bomb sounds.** Throw a smoke and a flash 5 m and 25 m away: both are clearly louder than before, and the
   flash's pop rings out for about a second instead of stopping short. Nothing clips or crackles.
 
+## The HUD pass (BP8)
+
+- [ ] **Level.** The bottom left of the menus reads **LVL 3**, not LV 3.
+- [ ] **Switches.** In Settings, a switch that is off is a plain grey outline with one small grey knob: no second
+  sphere. On, it is teal with the knob at the right.
+- [ ] **Weapon rail.** In a match, icons for your rifle, pistol, smoke and flash sit just above the ammo panel with
+  their keys at the right of each row (a bomb you carry two of shows its icon twice, no numbers; each bomb is on a
+  light plate). Press 1, 2, 4, 5 and roll the wheel: the one in your hand lights, the others dim; holster (3) and none
+  lights. Reload, take a bomb in hand and turn the hop-up dial: the rail does not move. Can you read the flash icon?
+  The bottom panel has no replica name or bomb icons and is smaller: BB count, magazines, fire mode.
+- [ ] **Countdown.** Load into a match and press Continue: no sound at all on the loading screen. Then 3, 2, 1, GO!
+  shows under the round banner (which stays up through GO!), you can look but not move, shoot, swap or reload, and the
+  whistle blows at GO!. Every later round does the same. Does three seconds feel right? Is it right that you cannot
+  swap or reload in it?
+- [ ] **HIT! call.** Shoot a bot: HIT! shows over that bot only. Get hit yourself: HIT! shows in the middle under the
+  score bar, and goes when the round result or the scoreboard (hold Tab) comes up.
+- [ ] **Pause menu.** Esc: the title, the line under it, the three buttons and the seed line are all centred on the
+  panel, and a GO! or a digit on the screen is not drawn through it.
+- [ ] **Nothing over anything.** Hold Tab at the start of a round: the scoreboard replaces the round banner and the
+  countdown instead of drawing over them. Try 1280x720 and 2560x1440 too.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

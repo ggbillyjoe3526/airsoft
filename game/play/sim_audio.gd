@@ -378,8 +378,9 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 			GameEvent.Kind.CHALLENGE when own:
 				var pitch := _cfg.go_pitch if e.value == RangeChallenge.Cue.GO else 1.0
 				_play(&"count_beep", Vector3.ZERO, true, _cfg.beep_gain, Kind.INTERFACE, BUS_INTERFACE, pitch)
-			# Practice has no rounds to start: no whistle on the range. A new round's whistle cuts the last short.
-			GameEvent.Kind.ROUND_START when not state.round_state.practice:
+			# The round's whistle blows at GO, as the start countdown ends (BP8), never under the loading screen. Practice
+			# has no rounds to start: no whistle on the range. A new round's whistle cuts the last short.
+			GameEvent.Kind.ROUND_GO when not state.round_state.practice:
 				_whistle.stop()
 				_blasts.round_start(now)
 			GameEvent.Kind.OVERTIME:

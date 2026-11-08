@@ -70,7 +70,11 @@ func test_sim_audio_blows_the_round_start_and_cuts_the_last_blast() -> void:
 	state.time += 0.2
 	state.events.add(GameEvent.Kind.ROUND_START)
 	audio.on_tick(state, 0, null)
-	assert_true((audio._streams[&"whistle_short"] as Array).has(audio._whistle.stream), "a new round cuts in")
+	assert_false((audio._streams[&"whistle_short"] as Array).has(audio._whistle.stream), "the round's start is silent (BP8)")
+	state.events.clear()
+	state.events.add(GameEvent.Kind.ROUND_GO)
+	audio.on_tick(state, 0, null)
+	assert_true((audio._streams[&"whistle_short"] as Array).has(audio._whistle.stream), "the whistle blows at GO")
 	assert_eq(audio._blasts.waiting(), cfg.round_start_blasts - 1, "the match's blasts gone")
 	state.events.clear()
 	var voices := audio.get_child_count()

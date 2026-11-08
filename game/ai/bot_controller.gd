@@ -117,6 +117,9 @@ func think(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 			w.mark_visited(c.team, c.position)
 	_next_route = BotRoutes.plan(w, state.characters, _next_route)
 	var sharing := w.live and not state.round_state.practice
+	# The round's time for the run-low cheat starts at GO, not through the start countdown.
+	if not w.live:
+		_round_started_at = state.time
 	if state.cheats.bots_run_low and sharing and not _ran_low and w.time - _round_started_at >= w.cfg.mag_dev_low_after:
 		_ran_low = true
 		DevCheats.run_low(state, _player_id)

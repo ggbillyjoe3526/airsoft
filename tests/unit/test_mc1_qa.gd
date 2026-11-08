@@ -231,6 +231,7 @@ func _session() -> PlaySession:
 func test_leaving_the_match_mid_skip_draws_the_window_again() -> void:
 	session = _session()
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # a skip starts from a live round
 	session.player.status = Character.Status.OUT
 	session.start_skip()
 	assert_true(session.skipping())
@@ -244,6 +245,7 @@ func test_leaving_the_match_mid_skip_draws_the_window_again() -> void:
 func test_a_skip_to_the_end_of_the_match_shows_the_results_and_the_rematch_starts_unheld() -> void:
 	session = _session()
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # a skip starts from a live round
 	var rs := session.state.round_state
 	var mine := session.player.team
 	rs.score[mine] = tuning.rounds.wins_needed - 1
@@ -280,6 +282,7 @@ func test_a_skip_to_the_end_of_the_match_shows_the_results_and_the_rematch_start
 func test_a_click_on_the_table_after_a_skip_starts_the_next_round() -> void:
 	session = _session()
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # a skip starts from a live round
 	var rs := session.state.round_state
 	session._input.active = true
 	session.player.status = Character.Status.OUT
@@ -486,6 +489,7 @@ func test_a_skip_is_said_to_a_screen_reader_and_leaves_no_stale_line() -> void:
 	session = _session()
 	session.settings.read_out = true
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # a skip starts from a live round
 	session._hud.announce().text = "Beta 2 hit Alpha 1"
 	session.player.status = Character.Status.OUT
 	session.start_skip()

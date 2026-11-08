@@ -125,7 +125,7 @@ func test_tab_in_a_live_round_leaves_nothing_hidden_after_it() -> void:
 	var hud := session.hud()
 	hud.show_board(true)
 	_wait(0.1)
-	assert_true(hud._middle.visible, "in a live round the hit call and banners stay (critic, attempt 1)")
+	assert_false(hud._middle.visible, "the held board replaces the banners and the hit call: nothing draws over anything (BP8)")
 	hud.show_board(false)
 	_wait(0.1)
 	assert_true(hud._middle.visible, "the banners' stack is back once Tab is let go")

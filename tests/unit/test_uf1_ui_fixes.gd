@@ -52,7 +52,7 @@ func test_the_opacity_fades_the_panel_s_background_not_its_words() -> void:
 	var frame := panel.find_child("Frame", false, false) as PanelContainer
 	var box := frame.get_theme_stylebox("panel") as StyleBoxFlat
 	assert_almost_eq(box.bg_color.a, HudStyle.BACKING_PANEL * 0.3, 0.001, "the glass fades")
-	for l: Label in [panel._mag, panel._spare, panel._name]:
+	for l: Label in [panel._mag, panel._spare]:
 		assert_almost_eq(l.modulate.a, 1.0, 0.001, l.name)
 	var count := panel._mag.get_theme_color("font_color")
 	assert_almost_eq(count.a, GameTheme.TEXT.a, 0.001, "the count keeps its own colour")

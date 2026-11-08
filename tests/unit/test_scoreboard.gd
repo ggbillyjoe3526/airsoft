@@ -125,6 +125,7 @@ func test_in_overtime_the_board_counts_the_overtime_down_and_keeps_moving() -> v
 	add_child_autofree(s)
 	session = s
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)
 	var hud := session.hud()
 	var state := session.state
 	var rs := state.round_state

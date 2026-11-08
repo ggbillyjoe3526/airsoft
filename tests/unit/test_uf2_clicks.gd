@@ -134,6 +134,7 @@ func test_the_grace_is_between_one_and_two_seconds() -> void:
 func test_clicks_in_the_grace_do_not_skip_and_one_after_it_does() -> void:
 	session = _session()
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 	session._input.active = true
 	session.player.status = Character.Status.OUT
 	var grace := session._play.skip_grace
@@ -156,6 +157,7 @@ func test_clicks_in_the_grace_do_not_skip_and_one_after_it_does() -> void:
 func test_the_grace_starts_again_each_time_you_are_out() -> void:
 	session = _session()
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 	session._input.active = true
 	session.player.status = Character.Status.OUT
 	session._follow_skip(session._play.skip_grace)

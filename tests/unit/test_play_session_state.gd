@@ -10,6 +10,7 @@ func before_each() -> void:
 	session = PlaySession.new()
 	add_child_autofree(session)
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 
 
 func after_each() -> void:
@@ -59,7 +60,7 @@ func test_a_finished_match_rematches_after_the_delay() -> void:
 	await wait_physics_frames(2)
 	for c in session.state.characters:
 		assert_eq(c.status, Character.Status.ALIVE, "everyone is back on their feet")
-	assert_true(rounds.is_live() or session.state.round_state.is_live())
+	assert_true(rounds.under_way() or session.state.round_state.under_way(), "a new match is under way (its first round is held for the countdown)")
 
 
 func test_making_and_freeing_sessions_in_turn_leaves_the_node_count_where_it_was() -> void:

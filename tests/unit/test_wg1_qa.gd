@@ -50,6 +50,7 @@ func _labels(card: Control) -> Array[String]:
 func test_the_skipping_note_never_draws_over_the_pause_menu() -> void:
 	session = _session()
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 	session.player.status = Character.Status.OUT
 	session.start_skip()
 	assert_true(session.skipping())
@@ -69,6 +70,7 @@ func test_the_skipping_note_never_draws_over_the_pause_menu() -> void:
 func test_the_hint_names_fire_as_bound_after_a_rebind_from_the_pause_menu() -> void:
 	session = _session()
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 	session.player.status = Character.Status.OUT
 	session._follow_skip(session._play.skip_grace)  # out the grace (UF2)
 	var hud := session.hud()
@@ -90,6 +92,7 @@ func test_the_hint_names_fire_as_bound_after_a_rebind_from_the_pause_menu() -> v
 func test_the_last_player_out_ending_the_match_stops_the_skip_and_brings_the_hud_back() -> void:
 	session = _session()
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 	session.counts = false
 	session.player.status = Character.Status.OUT
 	session.start_skip()
@@ -113,6 +116,7 @@ func test_the_last_player_out_ending_the_match_stops_the_skip_and_brings_the_hud
 func test_skipping_plays_the_round_out_at_once_then_holds_the_next_for_a_click() -> void:
 	session = _session()
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 	session.player.status = Character.Status.OUT
 	# Two seconds left: a skip plays them out within a few frames, whatever the Dev game speed.
 	session.state.cheats.game_speed = 0.5
@@ -145,6 +149,7 @@ func test_skipping_plays_the_round_out_at_once_then_holds_the_next_for_a_click()
 func test_a_skip_shows_a_bar_of_how_far_the_rest_has_played() -> void:
 	session = _session()
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 	session.player.status = Character.Status.OUT
 	session.state.round_state.clock = 4.0
 	session.start_skip()
@@ -194,6 +199,7 @@ func test_autopilot_never_offers_the_skip() -> void:
 func test_a_trigger_held_through_the_hit_does_not_skip_and_a_fresh_press_does() -> void:
 	session = _session()
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 	session._input.active = true
 	Input.action_press(&"fire")
 	session.player.status = Character.Status.OUT

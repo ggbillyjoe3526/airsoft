@@ -43,6 +43,14 @@ static func step(rs: RoundState, characters: Array[Character], ends: Array[MapEn
 		elif rs.timer <= 0.0:
 			_start_round(rs, characters, ends, pool, tuning, events, rs.number if rs.drawn() else rs.number + 1)
 		return
+	# The start countdown: nobody acts and the clock waits; 3, 2, 1, then GO.
+	if rs.hold > 0.0:
+		# The Dev tab's End the round now ran the clock out in it: the countdown is over and the round plays out below.
+		if rs.clock <= 0.0:
+			end_countdown(rs, events)
+		else:
+			_step_countdown(rs, events, dt)
+			return
 	# Live. A team with members but nobody left in play is wiped out (an empty team never is).
 	var alpha := 0
 	var beta := 0
@@ -111,7 +119,7 @@ static func _step_elimination_clock(rs: RoundState, characters: Array[Character]
 ## unless a team has a hand on it that tick, which takes the round (the touch is checked before the time).
 ## False when no round is live.
 static func run_clock_out(rs: RoundState) -> bool:
-	if not rs.is_live():
+	if rs.phase != RoundState.Phase.LIVE:
 		return false
 	rs.clock = 0.0
 	rs.overtime = INF
@@ -262,3 +270,28 @@ static func _start_round(rs: RoundState, characters: Array[Character], ends: Arr
 		for bb in pool.bbs:
 			bb.active = false
 	events.add(GameEvent.Kind.ROUND_START).value = number
+	rs.hold = 0.0 if rs.practice else maxf(0.0, tuning.rounds.start_countdown)
+	rs.counted = ceili(rs.hold)
+	if rs.hold > 0.0:
+		events.add(GameEvent.Kind.ROUND_COUNT).value = rs.counted
+	else:
+		events.add(GameEvent.Kind.ROUND_GO)
+
+
+## Ends the start countdown now: the round is live from here, and ROUND_GO says so (the whistle, the "GO!").
+static func end_countdown(rs: RoundState, events: SimEvents) -> void:
+	rs.hold = 0.0
+	rs.counted = 0
+	events.add(GameEvent.Kind.ROUND_GO)
+
+
+## One tick of the start countdown: a ROUND_COUNT as each whole second is reached, ROUND_GO as it ends.
+static func _step_countdown(rs: RoundState, events: SimEvents, dt: float) -> void:
+	rs.hold = maxf(0.0, rs.hold - dt)
+	if rs.hold <= 0.0:
+		end_countdown(rs, events)
+		return
+	var whole := ceili(rs.hold)
+	if whole < rs.counted:
+		rs.counted = whole
+		events.add(GameEvent.Kind.ROUND_COUNT).value = whole

@@ -150,6 +150,7 @@ func test_auto_shows_the_card_against_pro_bots_and_off_never() -> void:
 func test_out_a_click_skips_the_round_with_the_hud_hidden() -> void:
 	session = _session(Settings.WhatGotYou.OFF)
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 	assert_false(session.can_skip(), "not while you are in play")
 	session.player.status = Character.Status.OUT
 	assert_true(session.can_skip())
@@ -175,6 +176,7 @@ func test_out_a_click_skips_the_round_with_the_hud_hidden() -> void:
 func test_the_trigger_held_through_the_hit_does_not_skip_until_pressed_again() -> void:
 	session = _session(Settings.WhatGotYou.OFF)
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 	session._input.active = true
 	Input.action_press(&"fire")
 	session.player.status = Character.Status.OUT
@@ -193,6 +195,7 @@ func test_the_trigger_held_through_the_hit_does_not_skip_until_pressed_again() -
 func test_the_pause_menu_offers_skip_only_while_you_are_out() -> void:
 	session = _session(Settings.WhatGotYou.OFF)
 	await wait_physics_frames(2)
+	RoundHold.release(session.state)  # these tests play a live round, not the start countdown
 	var menu := session.find_child("PauseMenu", true, false) as PauseMenu
 	session._open_pause()
 	assert_false(menu.can_skip())
