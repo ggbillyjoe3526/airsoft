@@ -183,8 +183,9 @@ extends Resource
 	&"cyber": InspectPose.make(2.0, PackedFloat32Array([0.0, 0.22, 0.72, 1.0]),
 			[Vector3.ZERO, Vector3(-0.15, 0.95, -0.1), Vector3(-0.35, 1.0, -0.15), Vector3.ZERO],
 			PISTOL_SHIFT, PackedFloat32Array([0.17, 0.75]), [&"torchClick", &"magIn"]),
-	# Side on as the AEG, held further off (a longer rifle): the bolt lifted, drawn back, held and closed.
-	&"sniper": InspectPose.make(3.0, PackedFloat32Array([0.0, 0.17, 0.5, 0.82, 1.0]), RIFLE_TURN, LONG_SHIFT,
+	# Side on as the AEG, turned a little less and held close, so both forearms run off the screen's foot (BP8, the
+	# owner): the bolt lifted, drawn back, held and closed.
+	&"sniper": InspectPose.make(3.0, PackedFloat32Array([0.0, 0.17, 0.5, 0.82, 1.0]), LONG_TURN, LONG_SHIFT,
 			PackedFloat32Array([0.1, 0.28, 0.77, 0.83]), [&"selector", &"dryFire", &"dryFire", &"selector"]),
 }
 @export var inspect_pose_default: InspectPose = InspectPose.make(2.0, PackedFloat32Array([0.0, 0.17, 0.5, 0.82, 1.0]),
@@ -198,10 +199,12 @@ const RIFLE_TURN: Array[Vector3] = [Vector3.ZERO, Vector3(0.08, 1.15, -0.12), Ve
 		Vector3(0.06, 1.1, -0.1), Vector3.ZERO]
 const RIFLE_SHIFT: Array[Vector3] = [Vector3.ZERO, Vector3(-0.2, 0.07, -0.18), Vector3(-0.21, 0.08, -0.18),
 		Vector3(-0.19, 0.07, -0.17), Vector3.ZERO]
-## The sniper rifle's inspect shifts: the rifles' further out and less inwards, so its long barrel and stock stay in
-## view either side.
-const LONG_SHIFT: Array[Vector3] = [Vector3.ZERO, Vector3(-0.18, 0.08, -0.36), Vector3(-0.19, 0.09, -0.36),
-		Vector3(-0.17, 0.08, -0.35), Vector3.ZERO]
+## The sniper rifle's inspect: turned less than the rifles' and held close (BP8, the owner: held further off, its arms
+## ended in mid-air), so its forearms run off the screen's foot and its long barrel still points off to the left.
+const LONG_TURN: Array[Vector3] = [Vector3.ZERO, Vector3(0.07, 0.9, -0.1), Vector3(0.1, 0.95, -0.15),
+		Vector3(0.05, 0.88, -0.08), Vector3.ZERO]
+const LONG_SHIFT: Array[Vector3] = [Vector3.ZERO, Vector3(-0.15, 0.03, -0.2), Vector3(-0.16, 0.035, -0.2),
+		Vector3(-0.14, 0.03, -0.19), Vector3.ZERO]
 ## The pistols' inspect shifts (the browser game's pistol and Cyber poses, to the same place from their higher, more
 ## central hip).
 const PISTOL_SHIFT: Array[Vector3] = [Vector3.ZERO, Vector3(-0.06, 0.0, -0.04), Vector3(-0.065, 0.005, -0.04),
