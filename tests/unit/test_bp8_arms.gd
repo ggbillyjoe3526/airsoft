@@ -9,17 +9,24 @@ const GRIPS: Array[StringName] = [&"vertical", &"angled"]
 ## The replicas that take a grip (data/pool.md: under-rail), and every replica you reload.
 const GRIPPED: Array[StringName] = [&"aeg", &"sniper"]
 const HELD: Array[StringName] = [&"aeg", &"pistol", &"cyber", &"sniper"]
-## How far (m) the left hand may drift from the magazine it carries between the clip's keys.
+## How far (m) the magazine may sit from its place in the left hand while the hand carries it, and may jump as the
+## hand takes it or lets it go.
 const CARRY_SLACK := 0.004
-## Where each replica's left hand carries a magazine (shares of the reload, from its Reload clip): the old one pulled
-## out (from the hand taking it to it out of the well), then the fresh one pushed up (from it showing to the hand
-## letting it slide home; tools/blender/arms/magazine.py phases, CATCH and PUSH_SHARE or the replica's own).
-const CARRIES := {
-	&"aeg": [[0.12, 0.18, 0.235], [0.52, 0.6, 0.67]],
-	&"sniper": [[0.12, 0.18, 0.235], [0.52, 0.6, 0.67]],
-	&"pistol": [[0.24, 0.26, 0.28], [0.54, 0.56]],
-	&"cyber": [[0.26, 0.28, 0.3], [0.54, 0.58]],
-}
+const CARRY_STEPS := 16
+const EDGE := 1e-4
+## How far (m) the magazine may move as the hand takes it or lets it go (the hand eased off the replica a little).
+const EDGE_SLACK := 0.008
+## Through a reload, your arm (upper arm and forearm, ARM_CUFF m short of the wrist: the hand, the glove's cuff and
+## the sleeve's banded hem, tools/blender/arms/glove.py, may show at the screen's edge) stays off the screen, ARM_R m
+## clear of its edges along its middle line, at every key of every reload clip (the standing ruling: in first person
+## only your hand and part of your wrist show), or no more than HOLD_SLACK m more than the replica's approved hold
+## shows.
+const ARM_CUFF := 0.07
+const ARM_R := 0.02
+const HOLD_SLACK := 0.015
+const ARM_SAMPLES := 24
+const UPPER_FROM := 0.4
+const EYE := Vector3(0.0, 1.6, 0.0)
 ## How far (m) the left hand may be from its hold as a reload starts (no jump into the clip).
 const START_SLACK := 0.002
 
@@ -150,19 +157,17 @@ func _left_hand(hands: ReplicaView) -> Vector3:
 	return skeleton.get_bone_global_pose(skeleton.find_bone("Hand_L")).origin
 
 
-## Where the left hand is against the magazine at `share` of the reload, in the replica's frame.
-func _hand_on_mag(hands: ReplicaView, held: ReplicaView.Held, share: float) -> Vector3:
+## The magazine at `share` of the reload, posed as the game poses it (its clip, the arms' clip, the carry), and the
+## left hand: [magazine, hand], in the replica's space.
+func _mag_and_hand(hands: ReplicaView, held: ReplicaView.Held, share: float) -> Array[Transform3D]:
 	hands._seek(held, ReplicaView.RELOAD_CLIP, share)
 	hands._arms.follow(held.anim, DT, share)
-	var skeleton := hands._arms._skeleton
-	skeleton.force_update_all_bone_transforms()
-	var hand := skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone("Hand_L")).origin
-	var mag := held.root.find_child(ReplicaParts.MAGAZINE_ATTACHMENT, true, false) as Node3D
-	var replica_skeleton := mag.get_parent() as Skeleton3D
-	replica_skeleton.force_update_all_bone_transforms()
-	(mag as BoneAttachment3D).on_skeleton_update()
-	# In the magazine's own frame, so a magazine that tips as it comes out still reads as held.
-	return mag.global_transform.affine_inverse() * hand
+	hands._carry_magazine(held, share)
+	var hand := hands._arms.left_hand(held.root)
+	var mag := held.root.find_child(ReplicaParts.MAGAZINE_ATTACHMENT, true, false) as BoneAttachment3D
+	(mag.get_parent() as Skeleton3D).force_update_all_bone_transforms()
+	mag.on_skeleton_update()
+	return [held.root.global_transform.affine_inverse() * mag.global_transform, hand]
 
 
 func test_the_magazine_rides_in_the_left_hand() -> void:
@@ -170,13 +175,121 @@ func test_the_magazine_rides_in_the_left_hand() -> void:
 	for slot in HELD.size():
 		hands._show(slot)
 		var held: ReplicaView.Held = hands._held[slot]
-		# The old magazine pulled out, then the fresh one pushed up: the hand keeps its place on it each way.
-		for stretch: Array in CARRIES[held.id]:
-			var first := _hand_on_mag(hands, held, stretch[0])
-			for share: float in stretch.slice(1):
-				var now := _hand_on_mag(hands, held, share)
-				assert_almost_eq(now, first, Vector3.ONE * CARRY_SLACK, "%s at %.2f: the hand with the magazine" % [
-						held.id, share])
+		var span: Vector2 = cfg.reload_carry[held.id]
+		# From taking the old one to letting the fresh one go: out of view and back, the magazine stays in the hand.
+		var start := _mag_and_hand(hands, held, span.x)
+		var in_hand := start[1].affine_inverse() * start[0].origin
+		for k in range(1, CARRY_STEPS + 1):
+			var share := lerpf(span.x, span.y, k / float(CARRY_STEPS))
+			var now := _mag_and_hand(hands, held, share)
+			assert_almost_eq(now[1].affine_inverse() * now[0].origin, in_hand, Vector3.ONE * CARRY_SLACK,
+					"%s at %.3f: the magazine in the hand" % [held.id, share])
+
+
+func test_the_magazine_goes_into_and_out_of_the_hand_without_a_jump() -> void:
+	var hands := _hands(HELD)
+	for slot in HELD.size():
+		hands._show(slot)
+		var held: ReplicaView.Held = hands._held[slot]
+		var span: Vector2 = cfg.reload_carry[held.id]
+		# Just inside the carry, the hand has the magazine where the replica's own clip has it then.
+		for edge: float in [span.x + EDGE, span.y - EDGE]:
+			var carried := _mag_and_hand(hands, held, edge)[0].origin
+			hands._seek(held, ReplicaView.RELOAD_CLIP, edge)
+			var mag := held.root.find_child(ReplicaParts.MAGAZINE_ATTACHMENT, true, false) as BoneAttachment3D
+			(mag.get_parent() as Skeleton3D).force_update_all_bone_transforms()
+			mag.on_skeleton_update()
+			var own := held.root.global_transform.affine_inverse() * mag.global_position
+			assert_almost_eq(carried, own, Vector3.ONE * EDGE_SLACK, "%s at %.3f: taken or let go in place" % [
+					held.id, edge])
+
+
+## Where `world` is on the screen of the eye ReplicaView `hands` draws for (its own frame: the game's eye camera,
+## ViewConfig's field of view): x and y in -1..1 across it, z its depth (m; below the near plane, behind the eye).
+func _on_screen(hands: ReplicaView, world: Vector3) -> Vector3:
+	var view := ViewConfig.new()
+	var tan_h := tan(deg_to_rad(view.horizontal_fov_16x9) * 0.5)
+	var p := hands.global_transform.affine_inverse() * world
+	var depth := -p.z
+	if depth < view.near:
+		return Vector3(INF, INF, depth)
+	return Vector3(p.x / (depth * tan_h), p.y / (depth * tan_h * 9.0 / 16.0), depth)
+
+
+## How far from the wrist (m) your arm on `side` ("L" or "R") shows on screen as posed now (0: none of it past the hand).
+func _arm_shown(hands: ReplicaView, side: String = "L") -> float:
+	var skeleton := hands._arms._skeleton
+	skeleton.force_update_all_bone_transforms()
+	var joints: Array[Vector3] = []
+	for bone: String in ["UpperArm_", "Forearm_", "Hand_"]:
+		joints.append(skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone(bone + side)).origin)
+	var tan_h := tan(deg_to_rad(ViewConfig.new().horizontal_fov_16x9) * 0.5)
+	var shown := 0.0
+	for part in 2:
+		# The upper arm from UPPER_FROM of the way down it: above that it is beside your head, behind the screen.
+		var a := joints[part].lerp(joints[part + 1], UPPER_FROM if part == 0 else 0.0)
+		var b := joints[part + 1]
+		for k in ARM_SAMPLES + 1:
+			var q := a.lerp(b, k / float(ARM_SAMPLES))
+			var from_wrist := q.distance_to(joints[1]) + joints[1].distance_to(joints[2]) if part == 0 \
+					else q.distance_to(joints[2])
+			var s := _on_screen(hands, q)
+			var edge := ARM_R / (s.z * tan_h)
+			if s.z > 0.0 and absf(s.x) < 1.0 + edge and absf(s.y) < 1.0 + edge * 16.0 / 9.0:
+				shown = maxf(shown, from_wrist)
+	return shown
+
+
+func test_only_the_hand_and_wrist_show_through_a_reload() -> void:
+	for grip: StringName in [&"", &"vertical", &"angled"]:
+		for id: StringName in (HELD if grip == &"" else GRIPPED):
+			var hands := _hands([id], grip)
+			var c := Character.new(0, 0, Vector3.ZERO, 0.0, [ReplicaStats.load_replica(id)] as Array[ReplicaConfig])
+			hands.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 0.0)
+			# No more than the approved hold shows, where it shows a sliver of sleeve at the screen's edge; your right
+			# arm too, the replica canted in it.
+			var most := ARM_CUFF if cfg.one_hand.has(id) else maxf(ARM_CUFF, _arm_shown(hands) + HOLD_SLACK)
+			var most_right := maxf(ARM_CUFF, _arm_shown(hands, "R") + HOLD_SLACK)
+			var clip := _anim(hands).get_animation(hands._arms.reload_clip())
+			var track := clip.find_track(NodePath("%s:Forearm_L" % _skeleton_path(hands)), Animation.TYPE_ROTATION_3D)
+			assert_true(track >= 0, "%s: the forearm is keyed" % hands._arms.reload_clip())
+			var time := c.armament.replica().reload_time
+			for k in clip.track_get_key_count(track):
+				var share := clip.track_get_key_time(track, k) / clip.length
+				c.armament.reload_left = maxf(time * (1.0 - share), 1e-4)
+				hands.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 0.0)
+				assert_lt(_arm_shown(hands), most, "%s at %.2f: no left arm past the wrist on screen" % [
+						hands._arms.reload_clip(), share])
+				assert_lt(_arm_shown(hands, "R"), most_right, "%s at %.2f: no right arm past the wrist on screen" % [
+						hands._arms.reload_clip(), share])
+
+
+func test_a_one_handed_reload_brings_the_hand_up_from_below_the_screen() -> void:
+	for id: StringName in cfg.one_hand:
+		if not HELD.has(id):
+			continue
+		var hands := _hands([id])
+		var c := Character.new(0, 0, Vector3.ZERO, 0.0, [ReplicaStats.load_replica(id)] as Array[ReplicaConfig])
+		hands.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 0.0)
+		for share: float in [0.0, 1.0]:
+			c.armament.reload_left = maxf(c.armament.replica().reload_time * (1.0 - share), 1e-4)
+			hands.update(c, 0.0, 0.0, EYE, Vector3.FORWARD, DT, 0.0)
+			var skeleton := hands._arms._skeleton
+			skeleton.force_update_all_bone_transforms()
+			for bone in skeleton.get_bone_count():
+				# The hand and its fingers' joints (Index1_L ...).
+				var bone_name := skeleton.get_bone_name(bone)
+				if bone_name != "Hand_L" and not (bone_name.ends_with("_L")
+						and bone_name.substr(bone_name.length() - 3, 1).is_valid_int()):
+					continue
+				var s := _on_screen(hands, skeleton.global_transform * skeleton.get_bone_global_pose(bone).origin)
+				assert_true(s.y < -1.0 or s.z <= 0.0, "%s at %.0f%%: %s below the screen" % [id, share * 100.0,
+						bone_name])
+
+
+func _skeleton_path(hands: ReplicaView) -> String:
+	var anim := _anim(hands)
+	return String(anim.get_node(anim.root_node).get_path_to(hands._arms._skeleton))
 
 
 func test_a_reload_starts_from_the_hold() -> void:
