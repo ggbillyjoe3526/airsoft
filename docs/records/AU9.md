@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-08 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-08 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | balanced wood steps started and ended off zero (a tick) |
+| 2026-11-08 | 2 | Opus 5.5 (build thread) | pending | pending | – |
 
 ## Decisions
 
@@ -24,6 +25,12 @@
   lifts their 0.7 to 4 kHz band 12.4 dB (run), 11.2 dB (sprint) and 4.9 dB (land), the rest 2 to 3 dB down. Default:
   keep the rule (bots and players read the ground by ear). The owner heard old and new side by side
   (`audio/william/preview/au9/`) and answered "perfect" (2026-11-08).
+- **Clean edges after balancing (critic, attempt 1):** `band_part`'s FFT wrapped its ringing round from one end of a
+  step to the other, so a strongly balanced step (wood's +12 dB) started and ended at up to 17 % of its peak, a tick
+  at every footstep. It now pads to twice the length, and every balanced step is faded in over 2 ms and out over
+  10 ms (`edges`); every balanced ground's cues were re-cut (only step files changed), and
+  `test_every_step_and_prop_knock_starts_and_ends_at_silence` holds each step and prop variant's ends within 1 % of
+  its peak.
 - **Woods at night** keeps the beds' 40 Hz high-pass only (no wind rumble in it, unlike his woods by day) and the
   night bed's gain, 0.02; the owl and creak calls still play over it. Its 60 s loop adds 5.3 MB to the repository
   (QOA-compressed in exports, like the other beds).

@@ -33,6 +33,9 @@ FADE_IN = 0.002
 # Pitch steps for repeated takes.
 PITCHES = [1.0, 0.96, 1.04, 0.93, 1.07, 0.98, 1.02]
 PEAK_CAP_DB = -1.0
+# The fade out (s) that brings a step back to zero after balancing: its tail is already faded, so this only meets
+# the cut.
+EDGE_OUT = 0.01
 # Filled by build(): each placeholder cue and what to record for it.
 PLACEHOLDERS = {}
 # Cues still synthesised, nothing reused yet, and what to record for each.
@@ -690,12 +693,23 @@ STEP_GROUNDS = ("wood", "metal", "gravel", "grass", "leaves", "earth")
 
 
 def band_part(x):
-    """The part of `x` inside STEP_BAND (100 Hz cosine edges), by FFT."""
-    hz = np.fft.rfftfreq(len(x), 1.0 / RATE)
+    """The part of `x` inside STEP_BAND (100 Hz cosine edges), by FFT, padded to twice its length so the filter's
+    ringing doesn't wrap round from one end to the other (AU9: it left the balanced steps' edges off zero)."""
+    n = 2 * len(x)
+    hz = np.fft.rfftfreq(n, 1.0 / RATE)
     lo, hi = STEP_BAND
     m = np.clip(np.minimum((hz - lo + 50.0) / 100.0, (hi + 50.0 - hz) / 100.0), 0.0, 1.0)
     m = 0.5 - 0.5 * np.cos(np.pi * m)
-    return np.fft.irfft(np.fft.rfft(x) * m, len(x))
+    return np.fft.irfft(np.fft.rfft(x, n) * m, n)[:len(x)]
+
+
+def edges(x):
+    """`x` faded in over FADE_IN and out over EDGE_OUT (linear), so it starts and ends at zero: no tick at a cut."""
+    x = x.copy()
+    n_in, n_out = int(FADE_IN * RATE), int(EDGE_OUT * RATE)
+    x[:n_in] *= np.linspace(0.0, 1.0, n_in)
+    x[-n_out:] *= np.linspace(1.0, 0.0, n_out)
+    return x
 
 
 def step_power(vs, band):
@@ -736,7 +750,7 @@ def balance_steps(cues):
                 g = 10 ** (-10 * np.log10(step_power(ys, False) / ref_all) / 20.0)
                 g_band, g_rest = g_band * g, g_rest * g
             if max(abs(np.log10(g_band)), abs(np.log10(g_rest))) > 0.0025:  # 0.05 dB
-                out[cue] = ys
+                out[cue] = [edges(y) for y in ys]
                 print("balanced %-18s band %+.1f dB, rest %+.1f dB"
                       % (cue, 20 * np.log10(g_band), 20 * np.log10(g_rest)))
     return out

@@ -226,3 +226,30 @@ func test_a_steel_props_ring_is_over_before_it_can_be_set_off_again() -> void:
 	var quiet := NoiseConfig.new().quiet
 	for n in 3:
 		assert_lt(_length("prop_steel", n + 1), quiet, "prop_steel_%d" % (n + 1))
+
+
+func _edges(cue: String, n: int) -> Vector2:
+	# The first and last samples of a cue's variant, each over its peak.
+	var bytes := FileAccess.get_file_as_bytes("%s%s_%d.wav" % [SoundConfig.CUE_DIR, cue, n])
+	var at := 12
+	while at + 8 <= bytes.size() and bytes.slice(at, at + 4).get_string_from_ascii() != "data":
+		at += 8 + bytes.decode_u32(at + 4)
+	var count := mini(bytes.decode_u32(at + 4), bytes.size() - at - 8) / 2
+	var peak := 1.0
+	for i in count:
+		peak = maxf(peak, absf(bytes.decode_s16(at + 8 + 2 * i)))
+	return Vector2(absf(bytes.decode_s16(at + 8)), absf(bytes.decode_s16(at + 8 + 2 * (count - 1)))) / peak
+
+
+func test_every_step_and_prop_knock_starts_and_ends_at_silence() -> void:
+	# AU9: balancing the steps' band once left their cut edges off zero, a tick at every footstep. Every step and prop
+	# variant starts and ends within 1 % of its peak.
+	for ground: String in ["concrete", "wood", "metal", "gravel", "grass", "leaves", "earth"]:
+		for pace: String in ["run", "sprint", "land"]:
+			for n in VARIANTS:
+				var e := _edges("step_%s_%s" % [ground, pace], n + 1)
+				assert_true(e.x <= 0.01 and e.y <= 0.01, "step_%s_%s_%d edges %s" % [ground, pace, n + 1, e])
+	for s in NoiseConfig.SOUND_NAMES:
+		for n in 3:
+			var e := _edges("prop_%s" % s, n + 1)
+			assert_true(e.x <= 0.01 and e.y <= 0.01, "prop_%s_%d edges %s" % [s, n + 1, e])

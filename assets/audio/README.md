@@ -39,7 +39,7 @@ each starts (`onsets`).
 
 **The batch of 2026-11-08** (AU9): 5 more give the steps on wood (`step_wood_run`, `_sprint`, `_land`: his walk and
 run on a wooden floor cut where each step starts, his jumps as takes, then balanced like every ground), the steel skip
-run into (`prop_steel`: 0.9 s of each of his two metal bangs) and `loops/woods_night.wav`, Woodland's night bed (his
+run into (`prop_steel`: about 0.9 s of each of his two metal bangs) and `loops/woods_night.wav`, Woodland's night bed (his
 woods at night, which also leaves The Street's night bed to The Street).
 
 **Every replica fired empty** plays one cue, `dryFire`: the gas pistol's recorded dry click as it is, for today's
