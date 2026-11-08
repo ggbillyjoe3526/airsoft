@@ -73,7 +73,7 @@ func _init(sim_tuning: SimTuning, world: WorldQuery, character_mover: CharacterM
 		sim_tuning.hits.fit.prepare()
 
 
-## A fresh match: a new breeze, everyone at their end's spawns with the bombs everyone carries, round 1 live.
+## A fresh match: a new breeze, everyone at their end's spawns with the bombs each picked, round 1 live.
 func start_match(state: GameState) -> void:
 	state.events.clear()
 	state.match_number += 1
@@ -84,7 +84,7 @@ func start_match(state: GameState) -> void:
 	Grenades.clear(state.grenades)
 	doors.reset(state.doors)
 	for c in state.characters:
-		c.grenades.carry(tuning.grenades.smoke_carried, tuning.grenades.flash_carried)
+		c.grenades.carry_picked(tuning.grenades)
 	Round.start_match(state.round_state, state.characters, ends, state.bbs, tuning, state.events)
 
 

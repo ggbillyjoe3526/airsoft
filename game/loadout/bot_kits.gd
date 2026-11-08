@@ -13,6 +13,8 @@ const BOTS_PATH := "res://data/bots.md"
 const PERSONALITY_COLUMN := "Personality"
 const KIT_COLUMN := "Kit"
 const SUITS_COLUMN := "Suits"
+## The bombs a kit carries (BP8), a slot each, by Loadout.BOMB_NAMES; optional, empty: the default pick.
+const GRENADES_COLUMN := "Grenades"
 ## Each replica column, primary first, and its parts column.
 const REPLICA_COLUMNS: PackedStringArray = ["Primary", "Secondary"]
 const PARTS_COLUMNS: PackedStringArray = ["Primary parts", "Secondary parts"]
@@ -40,6 +42,8 @@ class Plan:
 	var slots: Array[Slot] = []
 	var suits: PackedStringArray = PackedStringArray()
 	var weights: Dictionary[StringName, float] = {}
+	## The bomb in each grenade slot (empty: the default pick, GrenadeConfig.default_picks).
+	var bombs: Array[Grenade.Kind] = []
 
 	## Every pool ID it holds: its replicas and what is fitted to them.
 	func items() -> PackedStringArray:
@@ -174,9 +178,11 @@ static func offers(rules: LoadoutRules, plan: Plan) -> bool:
 
 
 ## What a bot carrying `plan` plays with, built by `rules` as a loadout is (its parts' and power source's numbers worked
-## in), with only the kit's replicas, each on full auto where it has it: bots never touch the selector.
+## in), with only the kit's replicas, each on full auto where it has it: bots never touch the selector. Its bombs are the
+## kit's Grenades as the slots allow them (LoadoutRules.bombs_of: the default pick where they won't do).
 static func kit_of(plan: Plan, rules: LoadoutRules) -> Kit:
 	var l := rules.default_loadout(plan.kit_name)
+	l.bombs = plan.bombs.duplicate()
 	for i in plan.slots.size():
 		var s := plan.slots[i]
 		rules.equip(l, i as Loadout.Slot, s.replica)
@@ -255,6 +261,11 @@ func _read_row(row: DataTable.Row, pool: Pool, known: PackedStringArray) -> Stri
 			return "Suits \"%s\" isn't a bot personality (bots.md: %s)" % [suit, ", ".join(known)]
 		if not plan.suits.has(lower):
 			plan.suits.append(lower)
+	for bomb in DataTable.names(row.cell(GRENADES_COLUMN)):
+		var k := Loadout.BOMB_NAMES.find(bomb.to_lower())
+		if k != Grenade.Kind.SMOKE and k != Grenade.Kind.FLASH:
+			return "Grenades \"%s\" isn't Smoke or Flash" % bomb
+		plan.bombs.append(k as Grenade.Kind)
 	for difficulty: StringName in WEIGHT_COLUMNS:
 		var raw := row.cell(WEIGHT_COLUMNS[difficulty])
 		var w := 0.0 if raw == "" else DataTable.parse_number(raw)

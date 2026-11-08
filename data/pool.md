@@ -229,9 +229,10 @@ on a night field. It fits every replica, the Cyber Pistol too. Public with Woodl
 
 ### Grenades
 
-A basic smoke bomb and flash bomb arrive in 0.1 Dev 2 (SF1): everyone carries one of each every round, with their
-numbers in `game/config/grenade_config.gd`, so they are not items in this table. Picking what you carry, and more
-grenades (the CO2 sound grenade), come with chest rigs and pouches in the Replica Update.
+A basic smoke bomb and flash bomb arrive in 0.1 Dev 2 (SF1), with their numbers in `game/config/grenade_config.gd`, so
+they are not items in this table. Every loadout has two grenade slots, each a smoke or a flash, the same kind twice if
+you like (BP8); a bot's kit lists its own (bot-kits.md). More grenades (the CO2 sound grenade), chest rigs and pouches
+come in the Replica Update.
 
 | ID | Name | Key | Fits | Access |
 |---|---|---|---|---|

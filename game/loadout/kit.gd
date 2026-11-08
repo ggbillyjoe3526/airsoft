@@ -2,9 +2,12 @@ class_name Kit
 extends RefCounted
 ## What a loadout plays as (the browser game's PlayerKit): each slot's replica as carried (its power source, parts and
 ## hop-up dial applied), the BB weight loaded, its paint and Glowing BBs choice, and whether the site limit cut its
-## energy. Made by LoadoutRules.carried; Armament takes the replicas and weights.
+## energy, and the bombs it carries. Made by LoadoutRules.carried; Armament takes the replicas and weights, the hand the
+## bombs.
 
 var replicas: Array[ReplicaConfig] = []
+## The bomb in each grenade slot (LoadoutRules.bombs_of), for Grenades.Hand.picks.
+var bombs: Array[Grenade.Kind] = []
 var bb_weights: PackedFloat64Array = PackedFloat64Array()
 var paints: Array[StringName] = []
 ## Each slot's Glowing BBs choice (WL8): how its BBs are drawn, never how they fly.

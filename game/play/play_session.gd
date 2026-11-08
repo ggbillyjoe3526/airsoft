@@ -621,6 +621,7 @@ func _start_simulation(map: MapData) -> void:
 		_kit_unlocked_all = s.dev.disable_levelling
 	state.dev_content = state.dev_content or kit.dev_under(_light.night)
 	player = Character.new(PLAYER_ID, player_team, Vector3.ZERO, 0.0, kit.replicas, kit.bb_weights)
+	player.grenades.picks = kit.bombs
 	# Your weapon light is fitted only at night (WL7): by day the kit plays exactly as one without.
 	player.armament.lights = kit.lights_for(_light.night)
 	_own_light = false
@@ -663,7 +664,9 @@ func _start_simulation(map: MapData) -> void:
 			state.characters.append(Character.new(id, team, Vector3.ZERO, 0.0, loadout))
 			continue
 		var bot_kit := BotKits.kit_of(plan, kit_rules)
-		state.characters.append(Character.new(id, team, Vector3.ZERO, 0.0, bot_kit.replicas, bot_kit.bb_weights))
+		var bot := Character.new(id, team, Vector3.ZERO, 0.0, bot_kit.replicas, bot_kit.bb_weights)
+		bot.grenades.picks = bot_kit.bombs
+		state.characters.append(bot)
 		_bot_parts[id] = bot_kit.parts
 		state.dev_content = state.dev_content or bot_kit.dev
 	# On a night field every bot carries the weapon torch the pool offers (WL7, BotKits.night_light), on both teams.

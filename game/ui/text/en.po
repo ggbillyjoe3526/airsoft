@@ -1111,13 +1111,22 @@ msgid "LOADOUT_GRENADES"
 msgstr "GRENADES"
 
 msgid "LOADOUT_GRENADES_TIP"
-msgstr "Carried every round: one smoke and one flash bomb, thrown with Throw smoke and Throw flash. Picking what you carry comes with chest rigs and pouches."
+msgstr "Two grenade slots, carried every round: pick a smoke or a flash for each, the same twice if you like. Smokes are thrown with Throw smoke, flashes with Throw flash."
 
 msgid "LOADOUT_SMOKE"
-msgstr "%d × SMOKE"
+msgstr "SMOKE"
 
 msgid "LOADOUT_FLASH"
-msgstr "%d × FLASH"
+msgstr "FLASH"
+
+msgid "LOADOUT_PICK_SMOKE"
+msgstr "Smoke"
+
+msgid "LOADOUT_PICK_FLASH"
+msgstr "Flash"
+
+msgid "LOADOUT_GRENADE_SLOT"
+msgstr "Grenade slot %d"
 
 msgid "LOADOUT_CUSTOMISE"
 msgstr "CUSTOMISE"

@@ -11,6 +11,8 @@ extends RefCounted
 var pool: Pool = null
 var stats: ReplicaStats = null
 var rules: ReplicaRulesConfig = null
+## The grenade slots and the default pick (BP8).
+var bombs: GrenadeConfig = GrenadeConfig.new()
 ## Dev content on: dev items are offered too.
 var dev_content: bool = false
 ## The levels and the player's progress, read live (a Reset level shows at once); null: everything is unlocked
@@ -30,7 +32,10 @@ func _init(pool_in: Pool, stats_in: ReplicaStats, rules_in: ReplicaRulesConfig) 
 static func standard() -> LoadoutRules:
 	var s := ReplicaStats.read_file()
 	s.warn()
-	return LoadoutRules.new(Pool.shared(), s, SimTuning.load_default().replica_rules)
+	var t := SimTuning.load_default()
+	var out := LoadoutRules.new(Pool.shared(), s, t.replica_rules)
+	out.bombs = t.grenades
+	return out
 
 
 ## Locks what `progress` hasn't unlocked, unless `levelling_off` (Settings › Dev › Disable levelling) unlocks it all.
@@ -248,11 +253,28 @@ func clean(loadout: Loadout) -> Array[String]:
 	return out
 
 
+## The bomb in each of `loadout`'s grenade slots: its pick, or the default pick where it has none that will do.
+func bombs_of(loadout: Loadout) -> Array[Grenade.Kind]:
+	return bombs.carried_picks(loadout.bombs)
+
+## Puts `kind` (a smoke or a flash) in `loadout`'s grenade slot `slot`; false when it was there already or won't do.
+func set_bomb(loadout: Loadout, slot: int, kind: Grenade.Kind) -> bool:
+	var picks := bombs_of(loadout)
+	if slot < 0 or slot >= picks.size() or (kind != Grenade.Kind.SMOKE and kind != Grenade.Kind.FLASH) \
+			or picks[slot] == kind:
+		return false
+	picks[slot] = kind
+	loadout.bombs = picks
+	return true
+
+
 ## What `loadout` plays as: each slot's replica (the slot's default if it isn't on offer or unlocked now) with its power
 ## source (the default one if it isn't), its parts (as it comes where a part isn't) and dial, its weapon light (fitted
-## only at night, Kit.lights_for), and its BB weight and paint. A slot whose replica the game can't play is left out.
+## only at night, Kit.lights_for), and its BB weight and paint, and its bombs (`bombs_of`). A slot whose replica the game
+## can't play is left out.
 func carried(loadout: Loadout) -> Kit:
 	var kit := Kit.new()
+	kit.bombs = bombs_of(loadout)
 	var used := PackedStringArray()
 	for slot: Loadout.Slot in [Loadout.Slot.PRIMARY, Loadout.Slot.SECONDARY]:
 		var id := loadout.equipped[slot]
