@@ -1,12 +1,14 @@
 # LZ1 · Lasers, a Dev Easter egg
 
-**Review:** REVIEW_LINE
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-08 | 1 | Opus 5.5 (build thread) | CHECKS | CRITIC | – |
+| 2026-11-08 | 1 | build thread | pass, 5,235 of 5,235 (1 pending) | 6/8 Retry (QA Pass, performance Pass) | the laser files' source unknown (check 6); the credit inside the AU2 entry (check 8) |
+| 2026-11-08 | 2 | build thread | pass, 5,300 of 5,300 (1 pending), after the prewarm count fix | 6/8 Retry | the files' terms partly scoped to videos and not ruled on (check 6); the credit under Made by the project (check 8) |
+| 2026-11-08 | 3 | build thread | pass (docs-only change; doc gates re-run) | 8/8 Accept | – |
 
 ## Goal
 
@@ -70,3 +72,6 @@ sent four laser recordings the same morning).
 ## Known issues left
 
 - Bots are not retuned for lasers: with no flight to dodge they hit more often. The owner judges it in play.
+- Advisories from QA and performance (can wait): with no BB pool a laser shot falls back to the BB sound; a beam is
+  drawn one frame past its hold, so even the shortest flash is seen; two lasers can trade hits in the same tick; bots
+  hear a laser's impact as a near miss, as for a BB; LaserBeams is built every match (two nodes), whatever the switch.

@@ -5,9 +5,9 @@ licences. No real brand names or trademarked replica designs.
 
 ## External assets
 
-The menus' fonts, Depot's two photo texture sets (its temporary site dress, DD1), its five CC0 prop models (DR2) and
-Dev › Lasers' shot (LZ1, mixed from four free sound effects) are the only external files. The game's own models and
-sounds (made for it, listed below) are the only other asset files. The rest is greybox geometry and materials made in Godot.
+The menus' fonts, Depot's two photo texture sets (its temporary site dress, DD1), its five CC0 prop models (DR2)
+and Dev › Lasers' shot (LZ1, mixed from four free sound effects) are the only external files. The game's own models
+and sounds (made for it, listed below) are the only other asset files. The rest is greybox geometry and materials made in Godot.
 
 CC0 models and textures can replace parts of this later. Record each one here, one row per file, in the format below
 ([CC0_ASSETS.md](CC0_ASSETS.md) is the how-to). A player model goes in `assets/models/characters/`, a replica's in
