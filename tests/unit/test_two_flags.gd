@@ -19,6 +19,8 @@ var ends: Array[MapEnd] = []
 func before_each() -> void:
 	tuning = SimTuning.new()
 	tuning.rounds.round_time = 10.0
+	# The raise wins at once here; the hold after it (BP8) is test_bp8_match.gd's.
+	tuning.flag.hold_time = 0.0
 	events = SimEvents.new()
 	rs = RoundState.new()
 	rs.mode = RoundState.Mode.ATTACK_DEFEND

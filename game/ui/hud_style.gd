@@ -231,11 +231,12 @@ static func flag_round_sub(reason: GameEvent.RoundEnd, team_name_key: String) ->
 
 
 ## Whether a round that ended for `reason` in `mode` ended by a flag (flag_round_won's lines): Attack / Defend's other
-## than by eliminations, or Elimination's overtime flag touched.
+## than by eliminations or a simulated skip (BP8), or Elimination's overtime flag touched.
 static func ended_by_flag(mode: RoundState.Mode, reason: GameEvent.RoundEnd) -> bool:
 	if reason == GameEvent.RoundEnd.OVERTIME_FLAG:
 		return true
-	return mode == RoundState.Mode.ATTACK_DEFEND and reason != GameEvent.RoundEnd.ELIMINATED
+	return mode == RoundState.Mode.ATTACK_DEFEND and reason != GameEvent.RoundEnd.ELIMINATED \
+			and reason != GameEvent.RoundEnd.SIMULATED
 
 
 ## The overtime seconds the clock shows after "OT" while the live round in `rs` is in overtime, or -1 when it isn't:
@@ -270,6 +271,8 @@ static func round_stamp_sub(number: int, winner: int, team_name_key: String, by_
 		return "%s · %s" % [head, caps("HUD_ROUND_DRAW_SUB")]
 	if by_flag:
 		return "%s · %s · %s" % [head, flag_round_won(reason), flag_round_sub(reason, team_name_key)]
+	if reason == GameEvent.RoundEnd.SIMULATED:
+		return "%s · %s · %s" % [head, caps("HUD_SIMULATED"), round_won(team_name_key)]
 	return "%s · %s" % [head, round_won(team_name_key)]
 
 

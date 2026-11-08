@@ -75,13 +75,16 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 ## over bounce_full_speed, at most the gain), a bounce within bounce_hold (s) of the one that started it left silent,
 ## as the can's own knocks and rattle play on; a smoke going off (its spray), both heard out to prop_reach; a flash's
 ## bang, heard out to bang_reach (m), at bang_gain (the owner's balloon pop is left clean, so 6 dB quieter in its file
-## than the clipped one was). The pin is a mechanism at pin_gain (his click is left at its peak, its loudest 50 ms
-## 22 dB under it, so it needs more than the other mechanisms); the throw a mechanism at mechanism_gain.
+## than the clipped one was). Both went up for BP8 (owner: louder): the smoke 6 dB (0.8 was its level), the bang 4 dB
+## (1.4), its echo ringing out after it in its file; a smoke going off is capped at its own level up close, as the bang
+## is (SimAudio.OWN_CAP_CUES), so the raise is heard there too. The pin is a mechanism at pin_gain (his click is left at
+## its peak, its loudest 50 ms 22 dB under it, so it needs more than the other mechanisms); the throw a mechanism at
+## mechanism_gain.
 @export var bounce_gain: float = 0.7
 @export var bounce_full_speed: float = 6.0
 @export var bounce_hold: float = 0.45
-@export var smoke_pop_gain: float = 0.8
-@export var bang_gain: float = 1.4
+@export var smoke_pop_gain: float = 1.6
+@export var bang_gain: float = 2.2
 @export var pin_gain: float = 1.6
 @export var bang_reach: float = 60.0
 ## Attack / Defend's flag rope ratcheting a notch at the pole (FLAG_ROPE), heard from the pole.

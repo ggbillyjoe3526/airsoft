@@ -332,6 +332,56 @@ def mix(*parts):
     return sum(np.pad(p, (0, n - len(p))) for p in parts)
 
 
+# The flash bomb's echo (BP8, owner: "more of an echo sound to it as it fades out ... it seems to cut out too early"):
+# the pop's slap back off the field's walls and trees (ECHO_TAPS: delay s, level), then a diffuse tail (four
+# feedback combs, ECHO_COMBS s, ringing down over ECHO_RT60 s, through two all-passes), both darker than the pop, the
+# whole ECHO_SECONDS long and eased out over its last ECHO_FADE s so it dies away instead of stopping.
+ECHO_TAPS = [(0.07, 0.42), (0.145, 0.30), (0.23, 0.22), (0.36, 0.15), (0.52, 0.10)]
+ECHO_COMBS = [0.0311, 0.0373, 0.0419, 0.0457]
+ECHO_RT60 = 1.5
+ECHO_WET = (0.5, 0.45)
+ECHO_DARK_HZ = (3500.0, 2500.0)
+ECHO_SECONDS = 2.2
+ECHO_FADE = 0.5
+
+
+def comb(x, delay, g):
+    """A feedback comb, y[n] = x[n] + g y[n - delay], a delay's worth of samples at a time."""
+    d = int(delay * RATE)
+    y = x.copy()
+    for i in range(d, len(y), d):
+        y[i:i + d] += g * y[i - d:i - d + len(y[i:i + d])]
+    return y
+
+
+def all_pass(x, delay, g):
+    """A Schroeder all-pass, y[n] = -g x[n] + x[n - delay] + g y[n - delay], a delay's worth at a time."""
+    d = int(delay * RATE)
+    y = -g * x
+    y[d:] += x[:-d]
+    for i in range(d, len(y), d):
+        y[i:i + d] += g * y[i - d:i - d + len(y[i:i + d])]
+    return y
+
+
+def echoed(x):
+    """`x` with its echo (ECHO_TAPS, ECHO_COMBS): ECHO_SECONDS long, the pop itself untouched at its head."""
+    n = int(ECHO_SECONDS * RATE)
+    dry = np.pad(x, (0, max(0, n - len(x))))[:n]
+    taps = np.zeros(n)
+    for delay, gain in ECHO_TAPS:
+        at = int(delay * RATE)
+        taps[at:] += gain * dry[:n - at]
+    taps = low_pass(taps, ECHO_DARK_HZ[0])
+    feed = low_pass(dry, ECHO_DARK_HZ[1])
+    tail = sum(comb(feed, d, 10 ** (-3.0 * d / ECHO_RT60)) for d in ECHO_COMBS) / len(ECHO_COMBS)
+    tail = all_pass(all_pass(tail, 0.005, 0.7), 0.0017, 0.7)
+    out = dry + ECHO_WET[0] * taps + ECHO_WET[1] * tail
+    k = int(ECHO_FADE * RATE)
+    out[-k:] *= np.linspace(1.0, 0.0, k) ** 2
+    return out
+
+
 def under(x, bed, db):
     """`bed` scaled so its loudest 50 ms sit `db` dB under `x`'s, mixed under it."""
     return mix(x, bed * 10 ** ((loud50(x) - db - loud50(bed)) / 20.0))
@@ -593,9 +643,11 @@ def build(folder):
     put("smoke_pop", [fixed(x, 3.5, 1.0) for x in sprays], -14.0)
     # The flash bomb: his balloon pop from its bang, a little higher and lower for the other two (third batch), clean:
     # driving it into a soft clip to match the synthesised bang's loudness squashed the pop into a flat burst (owner,
-    # 2026-11-05); SoundConfig.bang_gain makes the level up instead, under the master bus's limiter.
+    # 2026-11-05); SoundConfig.bang_gain makes the level up instead, under the master bus's limiter. Each with its echo
+    # ringing out after it (`echoed`, BP8: it cut out too early).
     flash = Source.get(folder, "flash_grenade.wav").a
-    put("flash_bang", variants(from_onsets(flash, onsets(flash, 6.0, 0.5)[:1], 0.5), 3), -3.4)
+    pops = variants(from_onsets(flash, onsets(flash, 6.0, 0.5)[:1], 0.5), 3)
+    put("flash_bang", [echoed(x) for x in pops], -3.4)
 
     # Props run into, and the doors.
     put("prop_clank", variants(pick(folder, [("Knock metal shelf.wav", None)], 0.6), 3), -21.7)

@@ -5,9 +5,11 @@ class_name Flag
 ## The most poles a map has, and what each is called, in the map's order.
 const MOST := 2
 const LETTERS: PackedStringArray = ["A", "B"]
+## A hold counted in ticks of dt falls short of hold_time by float error only: within this (s) it is held.
+const HOLD_SLACK := 1e-6
 
 
-## One tick of every pole (`step` on each); true once any is fully raised.
+## One tick of every pole (`step` on each); true once any is raised and held (FlagConfig.hold_time).
 static func step_all(flags: Array[FlagState], characters: Array[Character], attackers: int, cfg: FlagConfig,
 		events: SimEvents, dt: float) -> bool:
 	var raised := false
@@ -16,10 +18,10 @@ static func step_all(flags: Array[FlagState], characters: Array[Character], atta
 	return raised
 
 
-## Whether the attackers work any pole's rope (raising it, or contesting it there).
+## Whether the attackers work any pole's rope (raising it, or contesting it there) or hold a flag fully raised.
 static func rope_worked(flags: Array[FlagState]) -> bool:
 	for f in flags:
-		if f.status == FlagState.Status.RAISING or f.status == FlagState.Status.CONTESTED:
+		if f.status == FlagState.Status.RAISING or f.status == FlagState.Status.CONTESTED or f.progress >= 1.0:
 			return true
 	return false
 
@@ -77,7 +79,8 @@ static func nearest(flags: Array[FlagState], at: Vector3) -> int:
 
 ## One tick (`dt` s) of the flag: attackers in play at the pole raise it, defenders pull it down, both at once hold it
 ## still, nobody leaves it where it is. A FLAG_ROPE event each time it passes a rope step (value 1 raising, 0
-## lowering). True once it is fully raised.
+## lowering). Fully raised, it is held while no defender pulls it down alone (both at once pause the hold); true once
+## it has been held FlagConfig.hold_time.
 static func step(flag: FlagState, characters: Array[Character], attackers: int, cfg: FlagConfig, events: SimEvents,
 		dt: float) -> bool:
 	var raising := false
@@ -105,7 +108,12 @@ static func step(flag: FlagState, characters: Array[Character], attackers: int, 
 		var rope := events.add(GameEvent.Kind.FLAG_ROPE)
 		rope.position = flag.position
 		rope.value = 1 if flag.progress > before else 0
-	return flag.progress >= 1.0
+	if flag.progress < 1.0:
+		flag.held = 0.0
+	elif before >= 1.0 and flag.status != FlagState.Status.CONTESTED:
+		# Counted from the tick after it reached the top, so a hold of 0 wins on the tick it is raised, as before.
+		flag.held += dt
+	return flag.progress >= 1.0 and flag.held >= cfg.hold_time - HOLD_SLACK
 
 
 ## True if `c` is in play, close enough to the pole (flat) to work the rope and on its floor (not on a roof above it).

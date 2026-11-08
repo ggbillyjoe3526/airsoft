@@ -130,7 +130,7 @@ func test_freeing_and_rebuilding_the_page_keeps_the_picks_and_leaks_nothing() ->
 	var again := _page(picks, settings)
 	assert_true(again.rules_box().rows_visible())
 	assert_eq(again.rules_box().team_size_choice().selected(), 5)
-	assert_eq(again.summary_text(), "Depot · Elimination · Alpha · Normal bots · Custom 6v6")
+	assert_eq(again.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Normal bots · Custom 6v6")
 	assert_eq(again.mode_blurb(MatchOptions.MODE_ELIMINATION), page_blurb(5))
 
 

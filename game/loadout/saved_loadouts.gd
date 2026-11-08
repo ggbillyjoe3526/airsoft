@@ -6,7 +6,8 @@ extends RefCounted
 ## A missing file is one default loadout. A damaged file, or one of a newer version, falls back to that with
 ## `load_message` (a newer one is never written over: the default lasts for the session); a saved value that won't do
 ## keeps its default and warns. Fields this build doesn't know are kept. A
-## loadout saved before Glowing BBs (WL8) loads them At Night on every replica.
+## loadout saved before Glowing BBs (WL8) loads them At Night on every replica; one saved before grenade slots (BP8)
+## carries the default pick (one smoke, one flash).
 
 ## Sent after any change to the loadouts or which one is current.
 signal changed
@@ -274,6 +275,18 @@ func _loadout_from(entry: Dictionary, problems: Array[String]) -> Loadout:
 				problems.append("%s: Glowing BBs \"%s\" for \"%s\" won't read: At Night" % [l.name, picks[id], id])
 	elif glow != null:
 		problems.append("%s: Glowing BBs won't read: At Night" % l.name)
+	# Grenade slots (BP8): a save from before them has none, so it carries the default pick.
+	var bombs: Variant = entry.get("bombs")
+	if bombs != null:
+		var picks: Array[Grenade.Kind] = []
+		if bombs is Array:
+			for name_in: Variant in bombs:
+				var k := Loadout.BOMB_NAMES.find(str(name_in)) if name_in is String else -1
+				picks.append(k as Grenade.Kind)
+		if picks != rules.bombs.carried_picks(picks):
+			problems.append("%s: grenades %s won't do: the default pick" % [l.name, bombs])
+		else:
+			l.bombs = picks
 	problems.append_array(rules.clean(l))
 	return l
 

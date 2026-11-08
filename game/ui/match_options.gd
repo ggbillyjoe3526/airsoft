@@ -7,6 +7,9 @@ extends RefCounted
 const MODE_ELIMINATION := "elimination"
 const MODE_ATTACK_DEFEND := "attack_defend"
 const MODE_PRACTICE := "practice"
+## The mode picked first, and taken first wherever the picked one can't be played there (BP8, owner: Attack / Defend);
+## a map without a pole falls back to the first of MODES it hosts.
+const DEFAULT_MODE := MODE_ATTACK_DEFEND
 ## Every mode, in the order the cards show them.
 const MODES: PackedStringArray = ["elimination", "attack_defend", "practice"]
 ## The modes that are built; the others show greyed with a LATER tag.

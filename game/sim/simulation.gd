@@ -73,7 +73,7 @@ func _init(sim_tuning: SimTuning, world: WorldQuery, character_mover: CharacterM
 		sim_tuning.hits.fit.prepare()
 
 
-## A fresh match: a new breeze, everyone at their end's spawns with the bombs everyone carries, round 1 live.
+## A fresh match: a new breeze, everyone at their end's spawns with the bombs each picked, round 1 live.
 func start_match(state: GameState) -> void:
 	state.events.clear()
 	state.match_number += 1
@@ -84,7 +84,7 @@ func start_match(state: GameState) -> void:
 	Grenades.clear(state.grenades)
 	doors.reset(state.doors)
 	for c in state.characters:
-		c.grenades.carry(tuning.grenades.smoke_carried, tuning.grenades.flash_carried)
+		c.grenades.carry_picked(tuning.grenades)
 	Round.start_match(state.round_state, state.characters, ends, state.bbs, tuning, state.events)
 
 
@@ -160,6 +160,9 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		else:
 			c.aiming = false
 			c.aim_raise = 0.0
+		# In a bush (BP8): slower, and louder underfoot.
+		c.in_bush = query.foliage != null and query.foliage.holds(c.position + Vector3(0.0,
+				tuning.movement.bush_probe_height, 0.0))
 		# A vault under way finishes even if its vaulter is hit meanwhile: nobody is left hanging over the obstacle.
 		if c.vault.active:
 			Vault.step(c, cmd, tuning, dt, mover)

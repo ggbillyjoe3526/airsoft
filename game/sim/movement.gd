@@ -16,7 +16,7 @@ static func approach(current: float, target: float, max_delta: float) -> float:
 
 ## The pace (m/s) the character is aiming for in its stance: walking, sprinting or the run (both faster holstered),
 ## blended towards the crouch pace as it crouches. A lean slows it smoothly to walking pace, reached at lean_quiet_from of a full lean. Walk held
-## while aiming down sights creeps below the aiming pace (M84).
+## while aiming down sights creeps below the aiming pace (M84). In a bush every pace is bush_speed_scale of itself (BP8).
 static func target_speed(c: Character, cfg: MovementConfig, walk_held: bool) -> float:
 	var holstered := c.armament.holstered
 	var run := minf(cfg.holster_run_speed, cfg.sprint_speed) if holstered else cfg.run_speed
@@ -26,6 +26,8 @@ static func target_speed(c: Character, cfg: MovementConfig, walk_held: bool) -> 
 	if lean > 0.0 and not c.walking:
 		base += (cfg.walk_speed - base) * minf(1.0, lean / cfg.lean_quiet_from)
 	var speed := base + (cfg.crouch_speed - base) * c.crouch_amount
+	if c.in_bush:
+		speed *= cfg.bush_speed_scale
 	return speed * cfg.aim_walk_scale if c.aiming and walk_held else speed
 
 

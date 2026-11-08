@@ -57,6 +57,7 @@ func _init(saved_in: SavedLoadouts = null, settings_in: Settings = null) -> void
 	_gear.slot_picked.connect(_pick_slot)
 	_gear.replica_picked.connect(_pick_replica)
 	_gear.customise_requested.connect(show_customise)
+	_gear.bomb_picked.connect(_pick_bomb)
 	add_child(_gear)
 	_customise = CustomiseView.new(_pictures, _facts)
 	_customise.visible = false
@@ -292,6 +293,12 @@ func _pick_replica(id: String) -> void:
 	if _facts.slot_of(id) == _slot:
 		return
 	if saved.rules.equip(saved.carried(), _slot, id):
+		saved.mark_changed()
+
+
+## A grenade slot's pick (BP8): a smoke or a flash, kept with the loadout.
+func _pick_bomb(slot: int, kind: Grenade.Kind) -> void:
+	if saved.rules.set_bomb(saved.carried(), slot, kind):
 		saved.mark_changed()
 
 

@@ -1571,6 +1571,25 @@ models show without anything else changing. The smoke and flash icons now do the
   shows between your eye and the pistol; each first shows at the muzzle.
 - [ ] **Variable Scope.** Fit it and inspect: no rails, fibre sight or rear sight on top, and one small dial.
 
+## Matches from the playtest notes (BP8)
+
+- [ ] **Grenade slots.** On the Loadout page pick Flash in both grenade slots, then play a round: 5 throws a flash,
+  then another, and 4 has nothing. Try two smokes the same way. Restart the game: the pick is kept.
+- [ ] **Raise and hold.** Attack / Defend on Depot: the flag takes 7 s to go up, then the FLAG gauge counts
+  HOLD 3, 2, 1. Step off the rope: it still counts. Have a defender step on: the flag comes down and the hold starts
+  again. Do 7 s plus 3 s feel long enough to fight over?
+- [ ] **Default mode.** Open the Match screen on a fresh start: Attack / Defend is picked.
+- [ ] **Still camera.** Get hit early, let the round end while watching a teammate: the view holds still on the round
+  banner and table, no swaying. Win a round alive: the same.
+- [ ] **SIMULATE.** Settings › Gameplay › Simulate skipped rounds: On. Get hit, click to skip: SIMULATE shows above
+  the countdown with the pointer; click it: the round ends at once, marked Simulated. Double-click to skip: the
+  second click doesn't simulate. With the setting Off it never
+  shows. Do the results feel fair (more players left usually wins)?
+- [ ] **Bushes.** Woodland: sprint through a bush and a fern bed: you slow down, and a running step sounds of leaves.
+  Do bots turn towards you from further off when you run through one? Walking or crouching stays quiet.
+- [ ] **Bomb sounds.** Throw a smoke and a flash 5 m and 25 m away: both are clearly louder than before, and the
+  flash's pop rings out for about a second instead of stopping short. Nothing clips or crackles.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

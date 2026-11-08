@@ -102,7 +102,7 @@ func test_a_saved_file_loads_into_the_gameplay_tab_with_nothing_lost() -> void:
 
 func test_each_choice_is_named_and_takes_focus_in_order() -> void:
 	var names := {screen._crouch: "SETTINGS_CROUCH", screen._aim: "SETTINGS_AIM", screen._auto_reload: "SETTINGS_RELOAD",
-			screen._what_got_you: "SETTINGS_WHAT_GOT_YOU"}
+			screen._what_got_you: "SETTINGS_WHAT_GOT_YOU", screen._simulate_skips: "SETTINGS_SIMULATE_SKIPS"}
 	for choice: MenuChoice in names:
 		assert_eq(choice.accessibility_name, tr(names[choice]), "a screen reader names it by its row")
 		for b in choice.get_children():
@@ -112,11 +112,12 @@ func test_each_choice_is_named_and_takes_focus_in_order() -> void:
 	var first := screen._crouch.get_child(0) as Button
 	first.grab_focus()
 	await wait_process_frames(1)
-	# Tab walks the rows top to bottom: crouch's choices, then aim's, reload's and What got you's
-	var order: Array[MenuChoice] = [screen._crouch, screen._aim, screen._auto_reload, screen._what_got_you]
+	# Tab walks the rows top to bottom: crouch's choices, then aim's, reload's, What got you's and Simulate's (BP8)
+	var order: Array[MenuChoice] = [screen._crouch, screen._aim, screen._auto_reload, screen._what_got_you,
+			screen._simulate_skips]
 	var reached: Array[MenuChoice] = []
 	var at: Control = first
-	for i in 12:
+	for i in 14:
 		var parent := at.get_parent() as MenuChoice
 		if parent != null and (reached.is_empty() or reached.back() != parent):
 			reached.append(parent)

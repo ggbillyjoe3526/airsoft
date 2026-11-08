@@ -3,17 +3,20 @@ extends Control
 ## The Loadout tab's gear page body (UI concept B v2, `loadout.png`, owner 2026-11-02): LOADOUT and its line (the loadout
 ## carried and what is in it), then the glass panels: the PRIMARY card (its replica large, its name and what it carries,
 ## SWITCH REPLICA at its top right, CUSTOMISE on the picked card), the SECONDARY card the same beside the GRENADES carried
-## every round (SF1), and the Performance sheet at the right. SWITCH REPLICA picks that card's slot and opens the
+## every round (SF1; its two slots, each a smoke or a flash, BP8), and the Performance sheet at the right. SWITCH REPLICA picks that card's slot and opens the
 ## pop-up of every replica to carry in it (LoadoutSwitch; owner, 2026-11-03: it replaced the SWAP row); the one carried
 ## in the other slot swaps the two.
 ## Every replica on the page is drawn at one scale (owner, 2026-10-19 and 2026-11-02: replicas to scale), the cards'
 ## sized so the longest fits a card's picture box: a rifle in either slot is the same size, a pistol beside it true to
-## size. The page owner reads `slot_picked`, `replica_picked` and `customise_requested` and calls `refresh`.
+## size. The page owner reads `slot_picked`, `replica_picked`, `customise_requested` and `bomb_picked` and calls
+## `refresh`.
 ## LoadoutPage puts the saved loadouts' strip in the row under the title.
 
 signal slot_picked(slot: Loadout.Slot)
 signal replica_picked(id: String)
 signal customise_requested
+## A grenade slot's bomb was picked (Grenade.Kind: a smoke or a flash).
+signal bomb_picked(slot: int, kind: Grenade.Kind)
 
 ## Where the panels start (the page's margins, title and panels are MenuParts'): under the title row and LoadoutPage's
 ## strip (its STRIP_TOP plus the strip's height and a gap). The Performance column's width.
@@ -39,9 +42,12 @@ const SUB_SIZE := 16
 ## CUSTOMISE's words: smaller than PLAY's, a button on a card.
 const CUSTOMISE_SIZE := 20
 const NAME_SUB_GAP := 2
-## The grenades panel: a tile a bomb (its height and padding), its icon, the count and name, and its throw key.
+## The grenades panel: a tile a slot (its height and padding), its bomb's icon and name, its throw key, and the pick of
+## smoke or flash under them (by Grenade.Kind; the pick's index + 1 is the kind).
 const GRENADE_KEYS: Array[String] = ["", "LOADOUT_SMOKE", "LOADOUT_FLASH"]
 const GRENADE_ACTIONS: Array[StringName] = [&"", &"throw_smoke", &"throw_flash"]
+const GRENADE_PICKS: Array[Grenade.Kind] = [Grenade.Kind.SMOKE, Grenade.Kind.FLASH]
+const GRENADE_PICK_KEYS: Array[String] = ["LOADOUT_PICK_SMOKE", "LOADOUT_PICK_FLASH"]
 ## The action that picks each carried slot, by Loadout.Slot (its key chip shows that action's key).
 const SLOT_ACTIONS: Array[StringName] = [&"slot_1", &"slot_2"]
 const GRENADE_ICON := 44.0
@@ -78,7 +84,11 @@ var _switch: LoadoutSwitch = null
 var _sheet: PerformanceSheet = null
 var _line_name: Label = null
 var _line_rest: Label = null
+## Each grenade slot's icon, bomb name, throw key and smoke-or-flash pick.
+var _grenade_icons: Array[GrenadeGlyph] = []
+var _grenade_names: Array[Label] = []
 var _grenade_keys: Array[Label] = []
+var _grenade_picks: Array[MenuChoice] = []
 var _slot_keys: Array[Label] = []
 var _picked: Loadout.Slot = Loadout.Slot.PRIMARY
 var _facts: LoadoutFacts = null
@@ -198,8 +208,13 @@ func refresh(slot: Loadout.Slot, realistic: bool) -> void:
 	var f := _facts
 	_picked = slot
 	# a rebind in Settings › Controls shows when the page is shown again (LoadoutPage refreshes then)
-	for kind: int in [Grenade.Kind.SMOKE, Grenade.Kind.FLASH]:
-		_grenade_keys[kind].text = KeyNames.of_action(GRENADE_ACTIONS[kind])
+	var bombs := f.saved.rules.bombs_of(f.saved.carried())
+	for i in _grenade_keys.size():
+		var kind: Grenade.Kind = bombs[i] if i < bombs.size() else Grenade.Kind.SMOKE
+		_grenade_icons[i].kind = kind
+		_grenade_names[i].text = tr(GRENADE_KEYS[kind])
+		_grenade_keys[i].text = KeyNames.of_action(GRENADE_ACTIONS[kind])
+		_grenade_picks[i].put(GRENADE_PICKS.find(kind))
 	for i in _slot_keys.size():
 		_slot_keys[i].text = KeyNames.of_action(SLOT_ACTIONS[i])
 	var names := PackedStringArray()
@@ -335,9 +350,9 @@ func _build_carried() -> void:
 		_carried_switch.append(switch)
 
 
-## The grenades every loadout carries each round (SF1), on a glass panel: a tile a bomb, its canister (GrenadeGlyph),
-## its count and name, and the key that throws it. Nothing to pick yet: chest rigs and pouches decide what you carry in a
-## later version.
+## The grenades every loadout carries each round (SF1), on a glass panel: a tile a grenade slot (BP8, owner: pick which,
+## two at most, the same kind twice if you like), its bomb's canister (GrenadeGlyph), its name and the key that throws
+## it, and the pick of smoke or flash under them. `refresh` shows the loadout's picks.
 func _build_grenades() -> Control:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", HEADING_GAP)
@@ -345,11 +360,12 @@ func _build_grenades() -> Control:
 	var tiles := HBoxContainer.new()
 	tiles.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	tiles.add_theme_constant_override("separation", GRENADE_TILE_GAP)
-	var bombs := SimTuning.load_default().grenades
-	var carried: Array[int] = [0, bombs.smoke_carried, bombs.flash_carried]
-	_grenade_keys.resize(GRENADE_KEYS.size())
-	for kind: int in [Grenade.Kind.SMOKE, Grenade.Kind.FLASH]:
+	var words := PackedStringArray()
+	for key in GRENADE_PICK_KEYS:
+		words.append(tr(key))
+	for slot in _facts.saved.rules.bombs.slots:
 		var tile := PanelContainer.new()
+		tile.name = "GrenadeSlot%d" % (slot + 1)
 		tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		tile.custom_minimum_size = Vector2(0.0, GRENADE_TILE_HEIGHT)
 		tile.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -359,17 +375,26 @@ func _build_grenades() -> Control:
 		var column := VBoxContainer.new()
 		column.alignment = BoxContainer.ALIGNMENT_CENTER
 		column.add_theme_constant_override("separation", GRENADE_GAP)
-		var icon := GrenadeGlyph.new(kind, GRENADE_ICON)
+		var icon := GrenadeGlyph.new(Grenade.Kind.SMOKE, GRENADE_ICON)
 		icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		column.add_child(icon)
-		var item := MenuParts.text(tr(GRENADE_KEYS[kind]) % carried[kind], GRENADE_SIZE, 700, GameTheme.TEXT)
-		item.name = GRENADE_KEYS[kind]
+		_grenade_icons.append(icon)
+		var item := MenuParts.text("", GRENADE_SIZE, 700, GameTheme.TEXT)
+		item.name = "Bomb"
 		item.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		column.add_child(item)
+		_grenade_names.append(item)
 		var key := MenuParts.key_chip("", KEY_SIZE, GameTheme.DIM, KEY_PAD)
 		key.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		_grenade_keys[kind] = key.get_child(0) as Label
+		_grenade_keys.append(key.get_child(0) as Label)
 		column.add_child(key)
+		var pick := MenuChoice.new(words, true)
+		pick.name = "Pick"
+		pick.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		pick.accessibility_name = tr("LOADOUT_GRENADE_SLOT") % (slot + 1)
+		pick.picked.connect(func(i: int) -> void: bomb_picked.emit(slot, GRENADE_PICKS[i]))
+		column.add_child(pick)
+		_grenade_picks.append(pick)
 		tile.add_child(column)
 		tiles.add_child(tile)
 	box.add_child(tiles)
@@ -378,6 +403,11 @@ func _build_grenades() -> Control:
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel.tooltip_text = tr("LOADOUT_GRENADES_TIP")
 	return panel
+
+
+## Grenade slot `slot`'s smoke-or-flash pick.
+func grenade_pick(slot: int) -> MenuChoice:
+	return _grenade_picks[slot]
 
 
 ## Shows or hides the note from the range (Loadout opened from practice): what is carried here is the match loadout too.

@@ -58,6 +58,9 @@ var ground_rise: float = 0.0
 var sprinting: bool = false
 ## Walking slowly and quietly (walk held or aiming, not crouched).
 var walking: bool = false
+## Pushing through a bush this tick (Simulation, from Foliage.holds; BP8): slower (MovementConfig.bush_speed_scale)
+## and its steps louder (NoiseConfig.bush_carry).
+var in_bush: bool = false
 ## This tick's move as Movement wanted it and as the level let it happen (CharacterMover), for a run into a noisy prop
 ## (PropNoise); a vault leaves them as they were.
 var wanted_move: Vector3 = Vector3.ZERO

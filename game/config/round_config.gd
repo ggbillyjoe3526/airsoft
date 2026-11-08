@@ -17,3 +17,8 @@ extends Resource
 @export var half_time_after: int = 4
 ## The end (0 or 1) Alpha starts at: the east, which wins a little over half Depot's rounds (DECISIONS 2026-10-03).
 @export var first_end: int = 1
+## A skipped round simulated at once (Round.simulate, BP8): each team's chance is its players in play raised to this
+## power (2: Lanchester's square law, so a man up counts for more than his share), times one plus this share of the
+## attackers' highest flag in Attack / Defend (a flag going up favours them).
+@export var simulate_power: float = 2.0
+@export var simulate_flag_lead: float = 2.0

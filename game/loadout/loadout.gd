@@ -1,8 +1,8 @@
 class_name Loadout
 extends RefCounted
 ## One saved loadout (the browser game's pool/savedLoadouts.ts slot): its name, the replica in each slot (pool.md IDs:
-## primary, then secondary), each replica's setup and its Glowing BBs choice. Plain data; LoadoutRules says what is
-## allowed and what it plays as.
+## primary, then secondary), each replica's setup and its Glowing BBs choice, and the bombs picked for its grenade slots.
+## Plain data; LoadoutRules says what is allowed and what it plays as.
 
 enum Slot { PRIMARY, SECONDARY }
 ## Glowing BBs (the browser game's config/glowBBs.ts, WL8): green BBs with a longer streak, loaded on night fields only
@@ -11,6 +11,8 @@ enum Glow { NIGHT, ALWAYS, OFF }
 
 ## Each Glow as saved, in its order.
 const GLOW_NAMES: PackedStringArray = ["night", "always", "off"]
+## Each Grenade.Kind as saved, in its order.
+const BOMB_NAMES: PackedStringArray = ["none", "smoke", "flash"]
 
 var name: String = ""
 ## The replica's pool.md ID in each Slot.
@@ -19,6 +21,9 @@ var equipped: PackedStringArray = PackedStringArray(["", ""])
 var tunes: Dictionary[String, ReplicaTune] = {}
 ## Each replica's Glowing BBs choice by its pool.md ID; a replica not here loads them At Night.
 var glow: Dictionary[String, Glow] = {}
+## The bomb in each grenade slot (BP8: any kind in each, the same twice if you like); empty: the default pick
+## (GrenadeConfig.default_picks; a save from before picking has none). LoadoutRules.bombs_of reads it.
+var bombs: Array[Grenade.Kind] = []
 
 
 ## The replica in `slot`.
@@ -52,6 +57,7 @@ func copy(new_name: String) -> Loadout:
 	for id: String in tunes:
 		l.tunes[id] = tunes[id].copy()
 	l.glow = glow.duplicate()
+	l.bombs = bombs.duplicate()
 	return l
 
 
@@ -62,4 +68,10 @@ func to_dict() -> Dictionary:
 	var g := {}
 	for id: String in glow:
 		g[id] = GLOW_NAMES[glow[id]]
-	return {"name": name, "equipped": Array(equipped), "tunes": t, "glow": g}
+	var out := {"name": name, "equipped": Array(equipped), "tunes": t, "glow": g}
+	if not bombs.is_empty():
+		var b: Array = []
+		for k in bombs:
+			b.append(BOMB_NAMES[k])
+		out["bombs"] = b
+	return out

@@ -4,12 +4,16 @@ extends Resource
 ## The simulation keeps them (Grenades); how bots use them is BotConfig's. The same for every character at every
 ## difficulty. Part of SimTuning (sim_tuning.tres).
 
-## Carried each round, by everyone (refilled at each respawn, and on the range after every throw).
+## The bombs a loadout carries each round (BP8, owner: pick which): this many slots, each a smoke or a flash, the same
+## kind twice if you like (refilled at each respawn, and on the range after every throw).
+@export var slots: int = 2
+## The pick before one is made (a new loadout, a save from before picking, a bot kit with none listed): this many smokes,
+## then this many flashes, cut to `slots`.
 @export var smoke_carried: int = 1
 @export var flash_carried: int = 1
 ## Most bombs in the air or smoking at once (GameState.grenades, made once with the state): a throw with none free is
-## refused.
-@export var max_grenades: int = 12
+## refused. Room for every bomb of two full teams of eight (CustomRules.TEAM_SIZES).
+@export var max_grenades: int = 32
 
 @export_group("Throw")
 ## From the press the replica goes down and the pin comes out for this long (s), then the bomb leaves the hand; the
@@ -77,3 +81,25 @@ extends Resource
 @export var dazzle_max: float = 3.5
 @export var dazzle_min: float = 0.5
 @export var dazzle_least: float = 0.1
+
+
+## The pick before one is made: smoke_carried smokes, then flash_carried flashes, cut to `slots`.
+func default_picks() -> Array[Grenade.Kind]:
+	var out: Array[Grenade.Kind] = []
+	for i in maxi(0, smoke_carried):
+		out.append(Grenade.Kind.SMOKE)
+	for i in maxi(0, flash_carried):
+		out.append(Grenade.Kind.FLASH)
+	out.resize(mini(out.size(), maxi(0, slots)))
+	return out
+
+
+## `picks` as carried: each slot a smoke or a flash, `slots` of them; a pick of the wrong size, or with anything but a
+## smoke or a flash in it, is the default pick.
+func carried_picks(picks: Array[Grenade.Kind]) -> Array[Grenade.Kind]:
+	if picks.size() != slots:
+		return default_picks()
+	for k in picks:
+		if k != Grenade.Kind.SMOKE and k != Grenade.Kind.FLASH:
+			return default_picks()
+	return picks.duplicate()

@@ -86,7 +86,7 @@ func test_picking_the_range_picks_practice_and_greys_team_bots_and_rules() -> vo
 	assert_string_contains(page.summary_text(), "No bots, no score")
 	assert_false(page.is_unloadable("range"), "checked as a team of one")
 	page.map_card("depot").pressed.emit()
-	assert_eq(page.picks.mode, "elimination")
+	assert_eq(page.picks.mode, "attack_defend", "a field's default mode (BP8)")
 	assert_eq(page.play_button().text, "PLAY")
 	assert_false(page.rules_box().is_unused())
 	assert_false(page.bots_box().is_unused())

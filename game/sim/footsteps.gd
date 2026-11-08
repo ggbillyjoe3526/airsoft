@@ -3,7 +3,8 @@ class_name Footsteps
 ## a footstep event every stride while running or sprinting, and a landing when it comes down hard. Walking and moving
 ## crouched are silent, but for a rattling magazine (a rattle every stride). Each says what it came down on when the
 ## world can tell, for its sound; a landing says how hard it came down too. A run, sprint or landing step on loud ground
-## (`noise`'s ground: gravel, steel plate) carries further, by the event's carry; a rattle carries as ever.
+## (`noise`'s ground: gravel, steel plate) carries further, by the event's carry; a rattle carries as ever. One pushing
+## through a bush (Character.in_bush, BP8) sounds as leaves and carries NoiseConfig.bush_carry as far.
 
 
 static func step(c: Character, cfg: FootstepConfig, events: SimEvents, query: WorldQuery,
@@ -44,4 +45,7 @@ static func _send(c: Character, kind: GameEvent.Footstep, events: SimEvents, que
 	e.position = c.position
 	if noise != null:
 		e.carry = noise.carry(e.value2)
+		if c.in_bush:
+			e.value2 = RayHit.Surface.LEAVES
+			e.carry = maxf(e.carry, noise.bush_carry)
 	return e

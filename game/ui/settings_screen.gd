@@ -1,9 +1,9 @@
 class_name SettingsScreen
 extends Control
 ## The settings, in ten tabs: Controls (the mouse, sensitivity as cm/360, the order wheel, rebinding), Gameplay (how
-## crouch, aim and reload work, and What got you after a hit; BP7, owner 2026-11-07), Audio (a volume for each bus),
-## Display (SettingsDisplayPage: the window, the frame rate, the view), Graphics (SettingsGraphicsPage), HUD
-## (SettingsHudPage), Accessibility (SettingsAccessPage), Save file (SettingsSavePage: restore points, Undo and delete,
+## crouch, aim and reload work, What got you after a hit, and Simulate skipped rounds; BP7, BP8), Audio (a volume
+## for each bus), Display (SettingsDisplayPage: the window, the frame rate, the view), Graphics
+## (SettingsGraphicsPage), HUD (SettingsHudPage), Accessibility (SettingsAccessPage), Save file (SettingsSavePage: restore points, Undo and delete,
 ## which restart the game, so only from the title's settings), About (SettingsAboutPage) and Dev, always there, each
 ## of its switches off until you turn it on (owner, 2026-10-29; docs/DECISIONS.md › Content tags and dev content). Opened from the title screen and the pause menu; works while the tree is paused. Every change
 ## is applied at once through SettingsApply and saved: a slider a moment after it stops moving, anything else straight
@@ -89,6 +89,8 @@ var _wheel_pick: MenuChoice = null
 var _auto_reload: MenuChoice = null
 ## Gameplay's After a hit: the card of what got you (Auto, On, Off).
 var _what_got_you: MenuChoice = null
+## Gameplay's Skipped rounds: Simulate skipped rounds (Off, On; BP8).
+var _simulate_skips: MenuChoice = null
 var _volume: Dictionary[StringName, HSlider] = {}
 var _display_page: SettingsDisplayPage = null
 var _graphics_page: SettingsGraphicsPage = null
@@ -357,6 +359,12 @@ func _build_gameplay() -> void:
 	add_note(_what_got_you.get_parent() as Control, tr("SETTINGS_WHAT_GOT_YOU_NOTE"))
 	_what_got_you.picked.connect(func(i: int) -> void:
 		settings.what_got_you = i as Settings.WhatGotYou
+		_changed(true))
+	add_section(page, tr("SETTINGS_SKIPPED_ROUNDS"))
+	_simulate_skips = add_choice_row(page, "SETTINGS_SIMULATE_SKIPS", ["SETTINGS_OFF", "SETTINGS_ON"])
+	add_note(_simulate_skips.get_parent() as Control, tr("SETTINGS_SIMULATE_SKIPS_NOTE"))
+	_simulate_skips.picked.connect(func(i: int) -> void:
+		settings.simulate_skips = i == 1
 		_changed(true))
 
 
@@ -657,6 +665,7 @@ func _refresh() -> void:
 	_aim.put(int(settings.aim_toggle))
 	_auto_reload.put(int(settings.auto_reload))
 	_what_got_you.put(settings.what_got_you)
+	_simulate_skips.put(int(settings.simulate_skips))
 	_wheel_pick.put(int(settings.wheel_pick == ControlsConfig.WheelPick.CLICK))
 	_keys.refresh()
 	for bus: StringName in Settings.VOLUME_BUSES:

@@ -35,7 +35,8 @@ each starts (`onsets`).
 17 dB and the limiter, and hissed), lifted by SoundConfig.pin_gain; `grenade_bounce` is his can's knock group
 (0.6 s: the knock and its rattle, 30 dB down by 0.3 to 0.4 s), played once from a bomb's bounce
 (SoundConfig.bounce_hold); `smoke_pop` is his long spray alone from its burst (the can pitched down as a pop is gone);
-`flash_bang` his balloon pop clean, SoundConfig.bang_gain making up most of the level the soft clip gave.
+`flash_bang` his balloon pop clean, SoundConfig.bang_gain making up most of the level the soft clip gave, with an echo
+after it (BP8: slap echoes and a diffuse tail, `echoed` in tools/cut_recordings.py, 2.2 s in all, eased out).
 
 **The batch of 2026-11-08** (AU9): 5 more give the steps on wood (`step_wood_run`, `_sprint`, `_land`: his walk and
 run on a wooden floor cut where each step starts, his jumps as takes, then balanced like every ground), the steel skip

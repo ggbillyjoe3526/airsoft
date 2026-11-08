@@ -69,7 +69,7 @@ func test_the_range_remembered_opens_the_page_on_practice_and_a_field_pick_leave
 	assert_eq(page.play_button().text, "PRACTICE")
 	assert_eq(picks.team, PlaySession.TEAM_BETA, "the team is kept for the next field")
 	page.map_card("depot").pressed.emit()
-	assert_eq(picks.mode, MatchOptions.MODE_ELIMINATION, "off the range, a field's mode again")
+	assert_eq(picks.mode, MatchOptions.MODE_ATTACK_DEFEND, "off the range, the default mode again (BP8)")
 	assert_eq(page.play_button().text, "PLAY")
 
 

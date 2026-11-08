@@ -24,6 +24,10 @@ const CALLOUT_XOR := 0x5ca11
 ## A bot's bombs' stream (BotBombs, SF2) is its own stream's seed with these bits flipped: whether it throws never moves
 ## another of its rolls.
 const BOMB_XOR := 0xb0b5
+const SIMULATE_MULTIPLIER := 1597334677
+const SIMULATE_PER_ROUND := 2654435769
+## Rounds a match can have before two rounds' simulate seeds could meet (simulate_seed): far more than any match plays.
+const SIMULATE_ROUNDS_A_MATCH := 1000
 
 
 ## `seed × multiplier + add`, wrapped to 32 bits (GDScript's 64-bit integers wrap on overflow, keeping the low 32 bits
@@ -71,6 +75,12 @@ static func roster_seed(seed_value: int) -> int:
 ## calls replay with the seed and play is the same with them or without.
 static func callout_seed(seed_value: int) -> int:
 	return (seed_value & MASK_32) ^ CALLOUT_XOR
+
+
+## A simulated round's roll's seed (Round.simulate, BP8) for round `round_number` of match `match_number` on a state
+## seeded with `seed_value`: apart from every other stream, so simulating a round moves no other roll.
+static func simulate_seed(seed_value: int, match_number: int, round_number: int) -> int:
+	return derive(seed_value, SIMULATE_MULTIPLIER, ((match_number * SIMULATE_ROUNDS_A_MATCH + round_number) * SIMULATE_PER_ROUND) & MASK_32)
 
 
 ## A generator seeded with `seed_value`: every random draw in the simulation comes from one of these.

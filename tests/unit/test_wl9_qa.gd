@@ -108,7 +108,7 @@ func test_a_saved_range_and_practice_then_a_field_does_not_come_back_as_practice
 	var page := MatchPage.new(picks, settings)
 	add_child_autofree(page)
 	page.map_card("depot").pressed.emit()
-	assert_eq(picks.mode, MatchOptions.MODE_ELIMINATION, "the Range forced Practice: a field opens on its first mode")
+	assert_eq(picks.mode, MatchOptions.DEFAULT_MODE, "the Range forced Practice: a field opens on the default mode")
 	# Practice picked on a field still carries to the next field.
 	page.mode_card(MatchOptions.MODE_PRACTICE).pressed.emit()
 	page.map_card("woodland").pressed.emit()

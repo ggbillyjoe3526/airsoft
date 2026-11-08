@@ -166,16 +166,16 @@ func test_following_hands_the_session_no_teammate_level() -> void:
 
 func test_the_summary_names_both_levels_when_they_differ() -> void:
 	var page := _page()
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Normal bots", "the same level: said once")
+	assert_eq(page.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Normal bots", "the same level: said once")
 	page.bot_button("hard").pressed.emit()
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Hard bots", "following Hard")
+	assert_eq(page.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Hard bots", "following Hard")
 	page.teammate_button("normal").pressed.emit()
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Hard bots · Normal teammates")
+	assert_eq(page.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Hard bots · Normal teammates")
 	page.bot_button("easy").pressed.emit()
 	page.bots_box().follow_button().pressed.emit()
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Easy bots", "following Easy: said once")
+	assert_eq(page.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Easy bots", "following Easy: said once")
 	page.teammate_button("easy").pressed.emit()
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Easy bots", "picked the same level")
+	assert_eq(page.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Easy bots", "picked the same level")
 
 
 func test_the_summary_keeps_custom_last() -> void:
@@ -203,7 +203,7 @@ func test_a_1v1_has_no_teammates_and_the_row_keeps_its_place() -> void:
 	assert_false(alone.bots_box().follow_button().visible)
 	assert_eq(alone.teammate_button("normal").size.y, height)
 	assert_almost_eq(alone.teammate_button("normal").global_position.y, top, 0.5, "the row stays where it was")
-	assert_eq(alone.summary_text(), "Depot · Elimination · Alpha · Normal bots · Custom 1v1", "no teammates named")
+	assert_eq(alone.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Normal bots · Custom 1v1", "no teammates named")
 
 
 func test_a_pick_made_before_a_1v1_is_not_named_and_comes_back_after() -> void:
@@ -211,10 +211,10 @@ func test_a_pick_made_before_a_1v1_is_not_named_and_comes_back_after() -> void:
 	page.teammate_button("easy").pressed.emit()
 	page.rules_box().rules_button(MatchOptions.RULES_CUSTOM).pressed.emit()
 	page.rules_box().team_size_choice().button(0).pressed.emit()
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Normal bots · Custom 1v1")
+	assert_eq(page.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Normal bots · Custom 1v1")
 	assert_eq(_picks.teammates, "easy", "kept")
 	page.rules_box().team_size_choice().button(2).pressed.emit()
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Normal bots · Easy teammates · Custom 3v3")
+	assert_eq(page.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Normal bots · Easy teammates · Custom 3v3")
 	assert_false(page.teammate_button("easy").disabled)
 	assert_true(page.teammate_button("easy").is_picked())
 

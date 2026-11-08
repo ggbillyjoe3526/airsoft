@@ -31,7 +31,8 @@ extends Node3D
 ## Out of a live round, a fresh press of the trigger (or the pause menu's Skip to next round) skips the rest of it (MC1,
 ## owner 2026-11-01): it is played out at once, as fast as the frame allows (PlayTuning.skip_budget_ms a rendered frame),
 ## silently and under a plain cover, never shown fast-forwarded; then the round's table shows and the next round waits
-## for a click on it (RoundState.hold_next), or the match's summary follows the last round's.
+## for a click on it (RoundState.hold_next), or the match's summary follows the last round's. With Settings › Gameplay ›
+## Simulate skipped rounds on (BP8), the cover offers SIMULATE: the rest decided at once by a roll (`simulate_skip`).
 
 signal left
 ## Practice: the Loadout was asked for (its key, or the pause menu's row); the entry screen takes `practice_spot`, frees
@@ -258,6 +259,8 @@ var _skip_said: Label = null
 var _skip_clock_shown: int = -1
 ## The bar under the line (0..100: the share of the round's clock played since the skip began), and the clock then (s).
 var _skip_bar: ProgressBar = null
+## SIMULATE above the skip line while a skip runs, with the setting on (BP8).
+var _skip_simulate: SkipSimulate = null
 var _skip_from: float = 0.0
 ## The rendered frame the skip last ticked in, and the microseconds of ticks spent in it (`_play_out`).
 var _skip_frame: int = -1
@@ -623,6 +626,7 @@ func _start_simulation(map: MapData) -> void:
 		_kit_unlocked_all = s.dev.disable_levelling
 	state.dev_content = state.dev_content or kit.dev_under(_light.night)
 	player = Character.new(PLAYER_ID, player_team, Vector3.ZERO, 0.0, kit.replicas, kit.bb_weights)
+	player.grenades.picks = kit.bombs
 	# Your weapon light is fitted only at night (WL7): by day the kit plays exactly as one without.
 	player.armament.lights = kit.lights_for(_light.night)
 	_own_light = false
@@ -665,7 +669,9 @@ func _start_simulation(map: MapData) -> void:
 			state.characters.append(Character.new(id, team, Vector3.ZERO, 0.0, loadout))
 			continue
 		var bot_kit := BotKits.kit_of(plan, kit_rules)
-		state.characters.append(Character.new(id, team, Vector3.ZERO, 0.0, bot_kit.replicas, bot_kit.bb_weights))
+		var bot := Character.new(id, team, Vector3.ZERO, 0.0, bot_kit.replicas, bot_kit.bb_weights)
+		bot.grenades.picks = bot_kit.bombs
+		state.characters.append(bot)
 		_bot_parts[id] = bot_kit.parts
 		state.dev_content = state.dev_content or bot_kit.dev
 	# On a night field every bot carries the weapon torch the pool offers (WL7, BotKits.night_light), on both teams.
@@ -968,6 +974,9 @@ func _build_views(ui: CanvasLayer) -> void:
 	_skip_bar.offset_bottom = SKIP_BAR_GAP + SKIP_BAR_HEIGHT
 	_skip_bar.custom_minimum_size = Vector2(0.0, SKIP_BAR_HEIGHT)
 	_skip_note.add_child(_skip_bar)
+	_skip_simulate = SkipSimulate.new()
+	_skip_simulate.seat_above(_skip_note)
+	_skip_simulate.simulate_pressed.connect(simulate_skip)
 	_skip_said = Label.new()
 	_skip_said.name = "SkipSaid"
 	_skip_said.modulate = Color(1.0, 1.0, 1.0, 0.0)
@@ -1307,7 +1316,8 @@ func _process(delta: float) -> void:
 	_debug.viewer_id = watched.id
 	var aim := _aim.update(watched, _tuning.movement, delta * _pacer.rate)
 	_eyes.sim_rate = _pacer.rate
-	_eyes.update(watched, _input, fraction, delta, aim, watched == player)
+	if not FirstPersonView.holds_still(state.round_state, watched, player):
+		_eyes.update(watched, _input, fraction, delta, aim, watched == player)
 	if _eyes.detail_zoom != _figure_zoom:
 		_figure_zoom = _eyes.detail_zoom
 		_set_figure_lines()
@@ -1672,7 +1682,35 @@ func start_skip() -> void:
 	_skip_clock_shown = -1
 	_skip_from = state.round_state.clock
 	_skip_bar.value = 0.0
+	_skip_simulate.show_for(settings.simulate_skips)
+	_free_cursor_for_simulate()
 	_show_skip_clock()
+
+
+## SIMULATE on a skip's cover (BP8): the rest of the round decided at once by a roll (Round.simulate), seeded on the
+## match and the round so a seed replays it; its end is heard and shown as a played-out skip's, and the round's table
+## waits for a click as after any skip. Only while a skip runs, with Simulate skipped rounds on.
+func simulate_skip() -> void:
+	var rs := state.round_state
+	if not _skipping or not settings.simulate_skips or not rs.is_live():
+		return
+	state.events.clear()
+	var rng := Seeds.stream(Seeds.simulate_seed(state.match_seed, state.match_number, rs.number))
+	Round.simulate(rs, state.characters, _tuning, state.events, rng)
+	_stop_skip()
+	_after_tick()
+
+
+## SIMULATE shown on the skip's cover now.
+func simulate_offered() -> bool:
+	return _skipping and _skip_simulate.visible
+
+
+## SIMULATE is a button only (BP8: a trigger press could simulate a double-click's skip by accident), so the pointer
+## shows while it is on offer, and is captured again when the skip ends.
+func _free_cursor_for_simulate() -> void:
+	if simulate_offered():
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 func _stop_skip() -> void:
@@ -1685,6 +1723,10 @@ func _stop_skip() -> void:
 	_hud.visible = true
 	_skip_cover.visible = false
 	_skip_note.visible = false
+	var offered := _skip_simulate.visible
+	_skip_simulate.show_for(false)
+	if offered and _input.active and get_tree() != null and not get_tree().paused:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 ## "Skipping the round · 1:12": the round's clock as the skip plays it down, so a long one is seen to move; written
@@ -1764,6 +1806,7 @@ func _resume() -> void:
 	get_tree().paused = false
 	_hud.set_paused(false)
 	_capture()
+	_free_cursor_for_simulate()
 	# the settings, opened from the pause menu, may have rebound the Reload key, the door's (and in practice the
 	# Loadout's)
 	_hud.reload_prompt().refresh_key()

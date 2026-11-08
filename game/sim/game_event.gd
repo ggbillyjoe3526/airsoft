@@ -54,7 +54,8 @@ enum Kind {
 enum Footstep { RUN, SPRINT, LAND, RATTLE }
 ## CAPTURED: Attack / Defend's flag raised (the attackers win). OVERTIME_FLAG: Elimination's overtime flag touched
 ## (the toucher's team wins).
-enum RoundEnd { ELIMINATED, TIME, CAPTURED, OVERTIME_FLAG }
+## SIMULATED: a skipped round decided at once by a roll (Round.simulate, BP8).
+enum RoundEnd { ELIMINATED, TIME, CAPTURED, OVERTIME_FLAG, SIMULATED }
 ## A SHOT's value2 for a laser (Dev › Lasers, LZ1); 0 for a BB.
 const SHOT_LASER := 1
 ## A PING's value for one placed on the full-screen map (FM1).
