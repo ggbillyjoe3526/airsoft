@@ -8,7 +8,8 @@ You carry two at once, a primary and a sidearm, picked in your [Loadout](Loadout
 dark olive gloves and sleeves, holding the one in your hands: the AEG Rifle and the Sniper Rifle in both hands, a pistol
 in your right hand, held right of the middle of the screen with only your hand and wrist in view. With a grip fitted
 your left hand holds the grip, and on a reload it pulls the empty magazine, takes it down out of view and seats a
-fresh one.
+fresh one, your fingers round it; the replica tips up toward you while it does, so you see your hand at work and only
+your hand and wrist.
 
 ## Stats
 
