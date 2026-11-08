@@ -53,7 +53,7 @@ func test_the_page_shows_the_chips_the_summary_and_play() -> void:
 	var page := _page(false)
 	assert_eq(page.chip_texts(), PackedStringArray(["6 v 6", "First to 5", "Rounds 2:30", "Ends swap after 4",
 			"Ricochets Don't count", "Friendly fire On"]))
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Normal bots")
+	assert_eq(page.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Normal bots")
 	assert_eq(page.play_button().text, "PLAY")
 	var words := _labels(page)
 	for expected: String in ["FIELD", "MODE", "YOUR TEAM", "BOTS", "RULES", "DEPOT"]:
@@ -97,7 +97,7 @@ func test_a_pole_mode_on_a_map_without_a_pole_says_so_rather_than_later() -> voi
 
 func test_every_mode_can_be_picked_on_a_field_and_none_says_range_only() -> void:
 	var page := _page(false)
-	assert_true(page.mode_card("elimination").is_picked())
+	assert_true(page.mode_card("attack_defend").is_picked(), "Attack / Defend by default (BP8)")
 	for mode: String in ["elimination", "attack_defend"]:
 		assert_false(page.mode_card(mode).disabled, mode)
 		assert_false(_labels(page.mode_card(mode)).has("LATER"), mode)
@@ -113,6 +113,7 @@ func test_every_mode_can_be_picked_on_a_field_and_none_says_range_only() -> void
 
 func test_picking_attack_defend_names_who_attacks_first() -> void:
 	var page := _page(false)
+	page.mode_card("elimination").pressed.emit()
 	assert_eq(page.attack_line(), "", "Elimination has no attackers")
 	page.mode_card("attack_defend").pressed.emit()
 	assert_eq(page.picks.mode, "attack_defend")
@@ -227,7 +228,7 @@ func test_your_team_is_alpha_or_beta_and_the_cards_say_nothing_else() -> void:
 	assert_eq(page.picks.team, PlaySession.TEAM_BETA)
 	assert_true(page.team_card(1).is_picked())
 	assert_false(page.team_card(0).is_picked())
-	assert_eq(page.summary_text(), "Depot · Elimination · Beta · Normal bots")
+	assert_eq(page.summary_text(), "Depot · Attack / Defend · Beta attacks first · Normal bots")
 
 
 func test_the_picks_survive_the_page_being_built_again() -> void:
@@ -410,7 +411,7 @@ func test_play_frees_the_menus_shows_loading_and_frees_it_once_the_match_runs() 
 	main._picks.team = PlaySession.TEAM_BETA
 	main._start_play()
 	assert_not_null(main._loading)
-	assert_eq(main._loading.kicker_text(), "ELIMINATION · 6 V 6 · YOU'RE BETA")
+	assert_eq(main._loading.kicker_text(), "ATTACK / DEFEND · 6 V 6 · YOU'RE BETA")
 	assert_eq(main._loading.title_text(), "DEPOT")
 	assert_null(main._menus, "no menu nodes live during a match")
 	assert_true(await wait_until(func() -> bool: return main._loading == null, LOAD_LIMIT))

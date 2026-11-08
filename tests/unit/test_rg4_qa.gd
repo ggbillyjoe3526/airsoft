@@ -150,10 +150,10 @@ func test_the_field_mode_comes_back_in_every_order_of_picks() -> void:
 	var picks := MatchPicks.new()
 	var page := MatchPage.new(picks, Settings.new())
 	add_child_autofree(page)
-	# The Range picked first on a fresh page, then a field: the field's first mode.
+	# The Range picked first on a fresh page, then a field: the default mode (BP8).
 	page.map_card("range").pressed.emit()
 	page.map_card("depot").pressed.emit()
-	assert_eq(picks.mode, "elimination")
+	assert_eq(picks.mode, "attack_defend")
 	# A mode changed on the field after coming back is the one that returns next.
 	page.mode_card("attack_defend").pressed.emit()
 	page.map_card("range").pressed.emit()

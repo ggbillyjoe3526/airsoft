@@ -14,8 +14,11 @@ secondary's sits under it beside your grenades, and every replica shows at its t
 card to pick that slot (or press its key). To change the replica in a slot, press **SWITCH REPLICA** on its card and
 pick one from the list that pops up; picking the one in your other slot swaps the two. Esc, CLOSE or a click outside
 the list leaves it as it was. Replicas you haven't unlocked yet show greyed out with their level. A new player
-starts with the AEG Rifle and the GBB Pistol. Every loadout carries the same **grenades** each round: one smoke bomb
-and one flash bomb ([Grenades](Grenades)). Picking what you carry comes with chest rigs and pouches in a later update
+starts with the AEG Rifle and the GBB Pistol.
+
+Beside the secondary are your **grenades**: two slots, each showing its bomb and the key that throws it. Pick **Smoke**
+or **Flash** under each slot: one of each, two smokes or two flashes ([Grenades](Grenades)). The pick is kept with the
+loadout, and a new loadout carries one of each. More grenades, chest rigs and pouches come in a later update
 ([Roadmap](Roadmap)).
 
 ## The Performance sheet

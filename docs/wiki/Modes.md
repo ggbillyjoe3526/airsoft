@@ -1,6 +1,7 @@
 # Modes
 
-Pick the mode on the **Match** screen, with the map, your team, the [bots](Bots) and the rules. Every mode is played
+Pick the mode on the **Match** screen, with the map, your team, the [bots](Bots) and the rules. Attack / Defend is
+picked to start with (on a map without a flagpole, Elimination). Every mode is played
 in rounds against the clock, and the first team to the rounds to win takes the match. Teams swap ends at half time,
 one round before the win, so the deciding round is always played in the second half.
 
@@ -26,12 +27,15 @@ One team attacks, the other defends a flagpole at the defenders' end. The team y
 swap at half time; the Match card says who attacks first. Depot and Woodland have two poles, **A** and **B**, one on
 each site: the attackers win by raising their flag on either, and each pole's flag goes up and down on its own.
 
-- **Attackers** win the round by raising their flag: stand at the pole, on the rope, for **<!-- wiki:config flag_config.raise_time --> seconds**.
+- **Attackers** raise their flag by standing at the pole, on the rope, for **<!-- wiki:config flag_config.raise_time --> seconds**, then
+  win the round by **holding it up for <!-- wiki:config flag_config.hold_time --> seconds**. The flag stays up on its own, but a defender on the
+  rope pulls it off the top and the hold starts again; with both teams on the rope the hold waits. The FLAG gauge
+  counts the hold down: **HOLD 3, 2, 1**
 - **Defenders** win by holding out until the clock runs out, or by taking out every attacker. Defenders at the pole
   pull a raised flag down in **<!-- wiki:config flag_config.lower_time --> seconds**.
 - With both teams at the pole, the flag holds still.
-- **Overtime:** if attackers are on the rope when time runs out, the round goes on for up to <!-- wiki:config flag_config.max_overtime --> seconds while they
-  keep working it. "OT" on the clock shows what is left.
+- **Overtime:** if attackers are on the rope, or a raised flag is being held, when time runs out, the round goes on
+  for up to <!-- wiki:config flag_config.max_overtime --> seconds while they keep at it. "OT" on the clock shows what is left.
 
 On the field a ring round the pole shows its reach: white with nobody on the rope, the attackers' colour as they
 raise, the defenders' as they pull down, and yellow with both there. The flag climbs in the attackers' colour and the

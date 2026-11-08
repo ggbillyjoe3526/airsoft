@@ -31,6 +31,9 @@ The kits are the bots' own: what you have unlocked never changes them.
   for now the column is read and checked against bots.md, and every kit keeps its weight). Kits with nothing in
   Suits, such as the Factory, keep their chance, and a weight of 0 stays 0: the difficulty decides how often a bot
   carries gear, its personality which. The column may be left out.
+- **Grenades** lists the bombs the kit carries, one a grenade slot (two slots, as on your Loadout), separated by commas:
+  Smoke or Flash, the same twice if you like ("Flash, Flash"). Empty, or not two: the default pick, one smoke and one
+  flash. The column may be left out.
 - **Easy**, **Normal** and **Hard** are each difficulty's weight for the kit: how likely a bot on that
   difficulty is to carry it, against the other kits in the same column. Each column here adds up to 100, so the weights
   read as a chance in 100, but they don't have to: a kit weighted 2 is picked twice as often as one weighted 1. 0 (or
@@ -38,7 +41,7 @@ The kits are the bots' own: what you have unlocked never changes them.
 - **Dev gear.** A kit holding a pool.md asset whose Access is `dev` is picked only with Dev content on, and such a
   match stays out of the records.
 - **Not here.** Weapon torches: on a night field every bot carries one by rule (pool.md › Lights). BB weight and the
-  hop-up stay as each replica comes. Every bot carries one smoke and one flash bomb a round, as you do (SF1), and throws them (SF2).
+  hop-up stay as each replica comes. Bots throw their bombs as they see fit (SF2).
 
 The kits are first guesses for the owner's playtest. Easy carries the most factory replicas; each level up carries more
 and better matched gear; Hard never factory. The Cyber Pistol turns up now and then from Normal up, and the Sniper Rifle
@@ -48,13 +51,13 @@ Rifleman, Marksman and Sniper.
 
 ## Kits
 
-| Kit | Primary | Primary parts | Secondary | Secondary parts | Suits | Easy | Normal | Hard |
-|---|---|---|---|---|---|---|---|---|
-| Factory | AEG Rifle | | GBB Pistol | | | 30 | 10 | 0 |
-| Rifleman | AEG Rifle | Red Dot, Vertical Grip | GBB Pistol | | careful | 25 | 20 | 15 |
-| Marksman | AEG Rifle | 2x Scope, Tight-Bore Barrel, Vertical Grip | GBB Pistol | Red Laser | anchor, careful | 10 | 15 | 20 |
-| Support | AEG Rifle | Red Dot, Vertical Grip, Hi-Cap Magazine, 11.1 V LiPo Battery | GBB Pistol | Extended Magazine | anchor, rusher | 10 | 20 | 20 |
-| Stealth | AEG Rifle | Red Dot, Silencer, Low-Cap Magazine | GBB Pistol | Silencer | flanker | 10 | 15 | 20 |
-| Pointman | AEG Rifle | Red Dot, Angled Grip | GBB Pistol | Red Laser, Extended Magazine, Red Gas | rusher, flanker | 15 | 18 | 23 |
-| Cyber | Cyber Pistol | | GBB Pistol | Red Laser | rusher | 0 | 2 | 2 |
-| Sniper | Sniper Rifle | | GBB Pistol | | anchor, careful | 3 | 6 | 8 |
+| Kit | Primary | Primary parts | Secondary | Secondary parts | Suits | Grenades | Easy | Normal | Hard |
+|---|---|---|---|---|---|---|---|---|---|
+| Factory | AEG Rifle | | GBB Pistol | | | Smoke, Flash | 30 | 10 | 0 |
+| Rifleman | AEG Rifle | Red Dot, Vertical Grip | GBB Pistol | | careful | Smoke, Flash | 25 | 20 | 15 |
+| Marksman | AEG Rifle | 2x Scope, Tight-Bore Barrel, Vertical Grip | GBB Pistol | Red Laser | anchor, careful | Smoke, Smoke | 10 | 15 | 20 |
+| Support | AEG Rifle | Red Dot, Vertical Grip, Hi-Cap Magazine, 11.1 V LiPo Battery | GBB Pistol | Extended Magazine | anchor, rusher | Smoke, Flash | 10 | 20 | 20 |
+| Stealth | AEG Rifle | Red Dot, Silencer, Low-Cap Magazine | GBB Pistol | Silencer | flanker | Flash, Flash | 10 | 15 | 20 |
+| Pointman | AEG Rifle | Red Dot, Angled Grip | GBB Pistol | Red Laser, Extended Magazine, Red Gas | rusher, flanker | Flash, Flash | 15 | 18 | 23 |
+| Cyber | Cyber Pistol | | GBB Pistol | Red Laser | rusher | Flash, Flash | 0 | 2 | 2 |
+| Sniper | Sniper Rifle | | GBB Pistol | | anchor, careful | Smoke, Smoke | 3 | 6 | 8 |

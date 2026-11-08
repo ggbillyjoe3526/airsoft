@@ -1,8 +1,9 @@
 # Grenades
 
-Everyone carries <!-- wiki:config grenade_config.smoke_carried --> **smoke bomb** and <!-- wiki:config grenade_config.flash_carried --> **flash bomb** each round, you and every bot alike. They come back at
-the start of every round, and on the [Practice Range](Practice-Range) after every throw. The replica panel at the bottom
-right shows how many you have left.
+Every loadout has <!-- wiki:config grenade_config.slots --> **grenade slots**, and you pick a **smoke bomb** or a **flash bomb** for each on
+the [Loadout](Loadout) screen: one of each, two smokes or two flashes. A new loadout carries one of each. Bots carry
+what their kit lists. Your bombs come back at the start of every round, and on the [Practice Range](Practice-Range)
+after every throw. The replica panel at the bottom right shows how many you have left.
 
 ## Throwing
 
@@ -26,7 +27,8 @@ settle. Just after the throw a bomb passes through the thrower's teammates, so o
 never bounces back at you. If you are hit while you pull the pin, you keep the bomb.
 
 You can hear a bomb coming: the ring pull as the pin comes out, then a tin can clattering where it lands. A smoke bomb
-hisses as it goes off; a flash bomb goes off with a sharp pop.
+hisses loudly as it goes off; a flash bomb goes off with a loud, sharp pop that echoes round the field as it dies
+away.
 
 ## Smoke bomb
 
@@ -58,7 +60,7 @@ is dulled, and a dazzled bot can't see anything and ducks where it stands.
 
 ## Bots
 
-Bots carry the same bombs, throw them, and react to yours: smoke hides you from them, and a flash blinds them for a
+Bots carry two bombs each, as their kit lists (some carry two smokes or two flashes), throw them, and react to yours: smoke hides you from them, and a flash blinds them for a
 moment.
 
 - **A bot pinned in cover** by someone shooting at it from range may smoke the line between them.

@@ -150,7 +150,8 @@ func test_the_flag_goes_up_in_raise_time_to_within_a_tick() -> void:
 		_tick()
 		ticks += 1
 	assert_eq(rs.reason, GameEvent.RoundEnd.CAPTURED)
-	assert_almost_eq(ticks, roundi(flag_cfg.raise_time / DT), 1, "ticks to raise")
+	# Raised, then held at the top for hold_time (BP8)
+	assert_almost_eq(ticks, roundi((flag_cfg.raise_time + flag_cfg.hold_time) / DT), 1, "ticks to raise and hold")
 
 
 func test_rope_steps_match_up_and_down_and_never_fire_on_a_still_flag() -> void:

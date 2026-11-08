@@ -19,8 +19,9 @@ extends RefCounted
 ## at its fuse (FLASH_BANG) and dazzles everyone in play with a clear line from the eyes to it, by distance and by how
 ## directly they look (DAZZLED; Character.dazzle_left), the thrower and its team too. A smoke pops at its fuse
 ## (SMOKE_POP) and smokes where it lies: an upright ellipsoid cloud that grows, holds and thins (`cloud_scale`,
-## `cloud_density`), which BBs fly through and eyes don't (`smoke_depth`, BotSenses). Everyone carries
-## GrenadeConfig.smoke_carried and flash_carried each round; on the range they come back after every throw.
+## `cloud_density`), which BBs fly through and eyes don't (`smoke_depth`, BotSenses). Everyone carries the bombs it picked
+## (Hand.picks: GrenadeConfig.slots of them, each a smoke or a flash) each round; on the range they come back after every
+## throw.
 ## Allocates nothing per tick.
 
 ## The share of a bomb's radius it is lifted off the ground before the flash's lines to the eyes are cast (so a line
@@ -35,6 +36,9 @@ const GROUND_PROBE := 0.02
 ## One character's bombs (Character.grenades): how many it carries and has left, and its throw under way.
 class Hand:
 	extends RefCounted
+	## What it picked to carry (BP8: its loadout's or bot kit's slots, any kind in each; empty: GrenadeConfig's default
+	## pick), counted into `carried_*` when the match starts (`carry_picked`).
+	var picks: Array[Grenade.Kind] = []
 	## Carried each round (set by whoever starts the match) and left now.
 	var carried_smoke: int = 0
 	var carried_flash: int = 0
@@ -79,6 +83,17 @@ class Hand:
 		carried_smoke = maxi(0, smokes)
 		carried_flash = maxi(0, flashes)
 		refill()
+
+	## Carries `picks` as `cfg` allows them (GrenadeConfig.carried_picks) each round from now on, and has them now.
+	func carry_picked(cfg: GrenadeConfig) -> void:
+		var smokes := 0
+		var flashes := 0
+		for k in cfg.carried_picks(picks):
+			if k == Grenade.Kind.SMOKE:
+				smokes += 1
+			else:
+				flashes += 1
+		carry(smokes, flashes)
 
 	## Every carried bomb back, and no throw under way (a respawn).
 	func refill() -> void:

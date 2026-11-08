@@ -53,7 +53,8 @@ enum Kind {
 enum Footstep { RUN, SPRINT, LAND, RATTLE }
 ## CAPTURED: Attack / Defend's flag raised (the attackers win). OVERTIME_FLAG: Elimination's overtime flag touched
 ## (the toucher's team wins).
-enum RoundEnd { ELIMINATED, TIME, CAPTURED, OVERTIME_FLAG }
+## SIMULATED: a skipped round decided at once by a roll (Round.simulate, BP8).
+enum RoundEnd { ELIMINATED, TIME, CAPTURED, OVERTIME_FLAG, SIMULATED }
 ## A PING's value for one placed on the full-screen map (FM1).
 const PING_ON_MAP := 2
 ## A PING's value2 for Hold here's key pressed on the full-screen map (BP6): a Hold here at the spot.

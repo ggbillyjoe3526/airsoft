@@ -124,7 +124,7 @@ func test_the_picks_survive_the_menus_being_freed_for_a_match() -> void:
 	assert_eq(_picked(again, true), ["easy"])
 	assert_false(again.bots_box().says_follows())
 	assert_true(again.bots_box().follow_button().visible)
-	assert_eq(again.summary_text(), "Depot · Elimination · Alpha · Hard bots · Easy teammates")
+	assert_eq(again.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Hard bots · Easy teammates")
 
 
 func test_a_following_teammate_still_follows_after_the_menus_are_rebuilt() -> void:
@@ -187,7 +187,7 @@ func test_custom_1v1_greys_the_row_and_2v2_restores_the_pick() -> void:
 	assert_eq(_picked(page, true), ["hard"])
 	assert_true(page.bots_box().follow_button().visible)
 	assert_eq(page.teammate_button("hard").modulate.a, 1.0, "not faded")
-	assert_eq(page.summary_text(), "Depot · Elimination · Alpha · Normal bots · Hard teammates · Custom 2v2")
+	assert_eq(page.summary_text(), "Depot · Attack / Defend · Alpha attacks first · Normal bots · Hard teammates · Custom 2v2")
 	await wait_process_frames(2)
 
 

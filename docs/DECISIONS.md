@@ -373,8 +373,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   asked for basic ones in 0.1 Dev 2; on 4 and 5 since MC1, owner 2026-11-01, was G and Y).** The mouse wheel steps
   through the two replicas and then the bombs left, never onto the holster; a bomb taken in hand that way waits for a
   trigger pull (owner, 2026-11-01). Doors open and shut on G (was U, which he found awkward); the hop-up dial keeps
-  Page Down and Page Up. Every player and bot carries one smoke and one flash, refilled each round and
-  on the range after each throw; nothing is chosen in the Loadout yet. A throw is a quick 0.3 s windup (the replica
+  Page Down and Page Up. Every loadout has two grenade slots, each a smoke or a flash, picked on the Loadout page
+  (one of each by default, two of a kind allowed; bots carry what their kit lists), refilled each round and on the
+  range after each throw (BP8, owner 2026-11-08; was one of each for everyone). A throw is a quick 0.3 s windup (the replica
   lowered), the canister thrown where you look a little lofted, then the replica back up. Bombs bounce and roll; they
   never hit or eliminate anyone. Numbers are in `game/config/grenade_config.gd`.
 - **Smoke hides, it never stops BBs (SF1).** The cloud (8 m across, about 15 s at full) blocks bots' sight like a wall
@@ -519,8 +520,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **Elimination's first end goes by team, not by the Your team pick (owner, 2026-10-12, BP3).** Alpha starts at the
   east end; Beta starts in the west. Attack / Defend follows the pick.
 - **Attack / Defend is the flag mode, named so Capture the Flag can be its own mode later (owner, 2026-10-01).** Standing
-  within 1.6 m of the pole for 5 s raises the flag; defenders at the pole pull it down. A raised flag wins for the
-  attackers, a time-out for the defenders; overtime lasts at most 15 s if attackers are on the rope at the buzzer. The
+  within 1.6 m of the pole for 7 s raises the flag, and it must then stay up for 3 s to win: no longer an instant win
+  (BP8, owner 2026-11-08: longer raise and hold; was 5 s and none; tuned on the balance report). Defenders at the
+  pole pull it down, and a defender on the rope restarts the hold. A time-out wins for the defenders; overtime lasts
+  at most 15 s if attackers are on the rope, or a raised flag is held, at the buzzer. The
   pole is visual only: no collider, and BBs pass through.
 - **Elimination's overtime flag: a time-out with nobody ahead puts a flag up near the middle, and the first team to
   touch it wins the round (2026-10-15, OT1; Claude's defaults).** Untouched after 30 s, the round is a draw, played

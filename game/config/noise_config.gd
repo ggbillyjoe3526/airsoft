@@ -75,6 +75,11 @@ const SOUND_NAMES: PackedStringArray = ["steel", "clank", "rattle", "glass", "pl
 }
 
 
+## Run, sprint and landing steps pushing through a bush (Character.in_bush, BP8) carry this many times as far, and
+## sound as leaves: bots hear them further, you hear them louder and further.
+@export var bush_carry: float = 1.75
+
+
 ## How far a step on `surface` carries (×).
 func carry(surface: int) -> float:
 	return ground.get(surface, 1.0)

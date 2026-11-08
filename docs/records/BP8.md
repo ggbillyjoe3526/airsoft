@@ -4,6 +4,7 @@
 
 - part 1 (bots): critic Accept 7/8 · qa Pass · performance Pass
 - part 2 (replicas): critic Accept 8/8 (attempt 3) · qa Pass · performance Pass
+- part 3 (match): critic Accept 7/8 · qa Pass · performance Pass
 
 William's playtest notes of 2026-11-08 (26 items, before he tags 0.1 Dev 2) went out as a bug pass in parts by area.
 The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-summary.md`.
@@ -16,6 +17,7 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
 | 2026-11-08 | part 2: 1 | Opus 5.5 | targeted + smoke | Retry 6/8 | hip glass sampled the screen, not lined up; known issues rows; Pointman laser |
 | 2026-11-08 | part 2: 2 | Opus 5.5 | targeted + smoke | Retry 7/8 | hip glass off-centre shrink and flat inspect lens; Variable Scope shoulder shading |
 | 2026-11-08 | part 2: 3 | Opus 5.5 | targeted + smoke; CI | Accept 8/8 | – |
+| 2026-11-08 | part 3: 1 | Opus 5.5 | targeted + smoke; balance 16 seeds; CI | Accept 7/8 | – (stale DECISIONS and KNOWN_ISSUES rows, SIMULATE button-only, named constants after) |
 
 ## Part 1: bots (items 17 and 23)
 
@@ -60,6 +62,26 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
   through the main view and the lens, off-centre). Tool: `tools/render_replica_view.gd`. Pictures:
   `/mnt/project-files/playtest/bp8/replicas/`.
 
+## Part 3: match (items 2, 7, 16, 20, 22, 24, 25)
+
+- **2, any two bombs.** Two grenade slots per loadout, each Smoke or Flash, picked on the Loadout page (one of each
+  by default). Saved loadouts from before read as one of each; bots carry what their kit lists.
+- **7, louder bombs.** The smoke pop +6 dB, the flash bang +4 dB with a 2.2 s echo tail. Sound status updated in
+  `/mnt/project-files/audio/sound-status.md`.
+- **16, a longer flag.** The raise takes 7 s (was 5 s), then a raised flag must hold 3 s before it wins (it won at
+  once). A defender alone on the rope resets it; both teams on it pause it; a flag held at the buzzer plays on in
+  overtime. Balance at 7 s / 3 s (Attack / Defend, Normal, 6v6, 16 seeds, bushes in): Depot attackers 52.6 % ±4.7,
+  Woodland 57.4 % ±4.6, The Street 49.1 % ±4.7, all in band (`FlagConfig`).
+- **20, Attack / Defend by default.** `MatchOptions.DEFAULT_MODE`; a map that can't play it falls back to Elimination.
+- **22, a still camera at round end.** The view holds still once the round is over, alive or watching a bot.
+- **24, SIMULATE.** A Gameplay setting, off by default. With it on, a SIMULATE button shows during the round-end skip
+  and settles the rest of the round with a seeded roll (more players left usually wins; attackers are helped by flag
+  progress). Button only: a second click keeps skipping. The fast-forward skip is unchanged.
+- **25, bushes.** Inside a bush everyone moves at 0.75 pace, and running steps sound as leaves heard 1.75 times as
+  far (`MovementConfig`, `NoiseConfig`, `Foliage.holds`, no allocation). Ferns count too.
+- Tests: `test_bp8_match.gd`, `test_bp8_match_qa.gd`; nine menu tests for the new default. Pictures:
+  `/mnt/project-files/playtest/bp8/match/`.
+
 ## Decisions
 
 - **Watching Here is wheel-only.** William asked for a wheel option; a key would need a Settings row he didn't ask for.
@@ -69,9 +91,14 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
 - **The Sniper takes no laser:** it has no side rail and William asked only for the AEG.
 - **A held bomb waits cocked at 0.72 of the windup**, the arms' cocked key, so it looks ready.
 - **Low draws no hip glass camera:** a still tint keeps Low's frame rate; Medium and up see through.
+- **Each bomb slot is Smoke or Flash, never empty:** the note says "equip two"; a new loadout is one of each.
+- **A raised flag keeps counting its hold with nobody on the rope:** nobody pulls it down, so it stands; William's play decides.
+- **SIMULATE is a seeded roll that counts for XP and records**, and is button-only so a double-click to skip can't simulate.
+- **Attack / Defend falls back to Elimination** on a map with no pole.
 
 ## Known issues left
 
 - The two rows in `docs/KNOWN_ISSUES.md` dated 2026-11-08: held angles (Hard bots only) and the holstered run's still arms.
 - Replicas: the hip glass camera's second draw from Medium up (frame time unmeasured on William's PC), the pistol's
   torch and laser overlapping at night (pre-existing), and `aeg.glb` near its 3 MiB cap.
+- Match: simulated rounds count for XP and records, and bot routes ignore the bush slowdown (rows dated 2026-11-08).

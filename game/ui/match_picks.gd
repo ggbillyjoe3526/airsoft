@@ -7,7 +7,7 @@ extends RefCounted
 ## only. The Custom rule set's switches are options, kept in Settings.custom_rules.
 
 var map_id: String = "depot"
-var mode: String = MatchOptions.MODE_ELIMINATION
+var mode: String = MatchOptions.DEFAULT_MODE
 ## PlaySession.TEAM_ALPHA or TEAM_BETA.
 var team: int = PlaySession.TEAM_ALPHA
 ## The other team's level, and your teammates': "" while they follow the opponents' (MatchOptions.teammates_level).

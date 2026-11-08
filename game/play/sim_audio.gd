@@ -59,6 +59,9 @@ const SURFACE_NAMES: PackedStringArray = ["concrete", "concrete", "metal", "wood
 const IMPACT_NAMES: PackedStringArray = ["concrete", "concrete", "metal", "wood", "earth", "earth", "earth", "earth",
 		"glass", "plastic", "cardboard"]
 const STEP_NAMES: PackedStringArray = ["run", "sprint", "land"]
+## Cues other than a shot's capped at their own level up close, not the field's (BP8: a smoke going off, raised with
+## the bang, which plays as a shot).
+const OWN_CAP_CUES: Array[StringName] = [&"smoke_pop"]
 ## What a play is, for its pitch and level spread, its priority in the field's pool and how many of its cue may sound.
 enum Kind { SHOT, MECHANISM, STEP, VAULT, ROPE, IMPACT, HIT, STEEL, INTERFACE, RADIO, FOLEY, CALL, PROP, RADIO_CALL }
 ## How far past the ears' distance a call's voice still carries, so the far edge of its ring is never cut off.
@@ -654,7 +657,8 @@ func _play(cue: StringName, at: Vector3, own: bool, gain: float, kind: Kind, bus
 		v.unit_size = _unit_size[kind]
 		# A shot's cap is its own level, so a bot's lifted motor beside you is as loud as yours, but never under the
 		# field's (a quiet shot-kind play up close is as loud as it was); the rest keep the field's.
-		v.max_db = maxf(v.volume_db, _cfg.field_max_db) if kind == Kind.SHOT else _cfg.field_max_db
+		v.max_db = maxf(v.volume_db, _cfg.field_max_db) if kind == Kind.SHOT or OWN_CAP_CUES.has(cue) \
+				else _cfg.field_max_db
 		v.max_distance = far
 		v.bus = bus if open else SoundOcclusion.bus_for(bus, share, _cfg)
 		v.global_position = at

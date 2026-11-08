@@ -23,7 +23,7 @@ const KNOWN_KEYS: Array[String] = [
 	"what_got_you", "hud", "custom_rules", "practice_challenge", "dev", "dev_enabled", "graphics_base",
 	"graphics_choice", "graphics_custom", "frame_limit", "monitor", "last_fullscreen", "renderer", "first_start_seen",
 	"team_colours", "gauge_patterns", "sound_cues", "sound_cue_size", "sound_cue_colour", "read_out", "reduced_motion",
-	"robots",
+	"robots", "simulate_skips",
 ]
 ## Windowed leaves the window as it is (the project starts maximised); the other two are the DisplayServer's
 ## borderless and exclusive fullscreen. The first start is Exclusive (WINDOW_MODE_DEFAULT).
@@ -123,6 +123,9 @@ var first_start_seen: bool = false
 var realistic_colours: bool = false
 ## The "What got you" card once you are hit: Auto shows it against Hard bots only.
 var what_got_you: WhatGotYou = WhatGotYou.AUTO
+## Simulate skipped rounds (BP8, owner: off by default): a skip's cover offers SIMULATE, which decides the rest of the
+## round at once by a roll (Round.simulate) instead of playing it out.
+var simulate_skips: bool = false
 ## The HUD tab's choices: the crosshair, the hit marker, the ammo counter, the hit feed and the panels' opacity.
 var hud: HudPrefs = HudPrefs.new()
 ## Settings › Accessibility (AC1): the team colour set (TeamColours), shown from the next match.
@@ -259,6 +262,7 @@ func to_dict() -> Dictionary:
 		"wheel_pick": int(wheel_pick), "mouse_dpi": mouse_dpi,
 		"bindings": bindings.to_dict(), "volumes": vol, "window_mode": int(window_mode), "vsync": vsync,
 		"fov": fov, "show_fps": show_fps, "realistic_colours": realistic_colours, "what_got_you": int(what_got_you),
+		"simulate_skips": simulate_skips,
 		"hud": hud.to_dict(), "custom_rules": custom_rules.to_dict(), "practice_challenge": practice_challenge,
 		"dev": dev.to_dict(), "graphics_base": String(graphics_base),
 		"graphics_custom": graphics_custom.duplicate(), "frame_limit": frame_limit, "monitor": monitor,
@@ -287,6 +291,7 @@ func from_dict(data: Dictionary) -> void:
 	crouch_toggle = _flag(data, "crouch_toggle", false)
 	aim_toggle = _flag(data, "aim_toggle", false)
 	auto_reload = _flag(data, "auto_reload", false)
+	simulate_skips = _flag(data, "simulate_skips", false)
 	var picks := ControlsConfig.WheelPick.size() - 1.0
 	wheel_pick = roundi(_number(data, "wheel_pick", ControlsConfig.WheelPick.HOVER, 0.0, picks)) as ControlsConfig.WheelPick
 	mouse_dpi = roundi(_number(data, "mouse_dpi", Sensitivity.DPI_DEFAULT, Sensitivity.DPI_MIN, Sensitivity.DPI_MAX))

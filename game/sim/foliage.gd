@@ -141,6 +141,36 @@ func leaf_surface(at: Vector3, back: Vector3, reach: float) -> Vector3:
 	return at + back * _back.exit
 
 
+## Whether `at` is among a bush's leaves (inside its ellipsoid), through the index: allocates nothing. Someone is in a
+## bush when a point over their feet is (Character.in_bush, BP8).
+func holds(at: Vector3) -> bool:
+	if feet.is_empty():
+		return false
+	if _squares(at, at):
+		for r in range(_r0, _r1 + 1):
+			for c in range(_c0, _c1 + 1):
+				var s := r * _cols + c
+				for k in range(_cell_start[s], _cell_start[s + 1]):
+					if _inside(_cell_items[k], at):
+						return true
+		return false
+	for i in feet.size():
+		if _inside(i, at):
+			return true
+	return false
+
+
+## Whether `at` is inside bush `i`'s ellipsoid.
+func _inside(i: int, at: Vector3) -> bool:
+	var f := feet[i]
+	var r := radii[i]
+	var half := heights[i] * 0.5
+	var dx := (at.x - f.x) / r
+	var dy := (at.y - f.y - half) / half
+	var dz := (at.z - f.z) / r
+	return dx * dx + dy * dy + dz * dz <= 1.0
+
+
 ## The ground under the bush `at` is in or on (its foot), for the leaves a BB knocks out of it to come to rest on; -INF
 ## when `at` is in no bush. The lowest foot of those it is in, as bushes overlap.
 func leaf_floor(at: Vector3) -> float:

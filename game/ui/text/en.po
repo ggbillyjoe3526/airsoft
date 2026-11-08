@@ -138,6 +138,9 @@ msgstr "OT"
 msgid "HUD_FLAG"
 msgstr "Flag"
 
+msgid "HUD_FLAG_HOLD"
+msgstr "Hold %d"
+
 msgid "HUD_FLAG_DISTANCE"
 msgstr "· %d m"
 
@@ -1111,13 +1114,22 @@ msgid "LOADOUT_GRENADES"
 msgstr "GRENADES"
 
 msgid "LOADOUT_GRENADES_TIP"
-msgstr "Carried every round: one smoke and one flash bomb, thrown with Throw smoke and Throw flash. Picking what you carry comes with chest rigs and pouches."
+msgstr "Two grenade slots, carried every round: pick a smoke or a flash for each, the same twice if you like. Smokes are thrown with Throw smoke, flashes with Throw flash."
 
 msgid "LOADOUT_SMOKE"
-msgstr "%d × SMOKE"
+msgstr "SMOKE"
 
 msgid "LOADOUT_FLASH"
-msgstr "%d × FLASH"
+msgstr "FLASH"
+
+msgid "LOADOUT_PICK_SMOKE"
+msgstr "Smoke"
+
+msgid "LOADOUT_PICK_FLASH"
+msgstr "Flash"
+
+msgid "LOADOUT_GRENADE_SLOT"
+msgstr "Grenade slot %d"
 
 msgid "LOADOUT_CUSTOMISE"
 msgstr "CUSTOMISE"
@@ -2154,6 +2166,15 @@ msgstr "Round %d · overtime %s"
 msgid "SETTINGS_WHAT_GOT_YOU"
 msgstr "What got you"
 
+msgid "SETTINGS_SKIPPED_ROUNDS"
+msgstr "Skipped rounds"
+
+msgid "SETTINGS_SIMULATE_SKIPS"
+msgstr "Simulate skipped rounds"
+
+msgid "SETTINGS_SIMULATE_SKIPS_NOTE"
+msgstr "On: a skip offers SIMULATE, which decides the round at once."
+
 msgid "SETTINGS_AUTO"
 msgstr "Auto"
 
@@ -2213,6 +2234,12 @@ msgstr "Settings › Graphics to pick your own"
 
 msgid "HUD_SKIPPING"
 msgstr "Skipping the round"
+
+msgid "HUD_SIMULATE"
+msgstr "Simulate"
+
+msgid "HUD_SIMULATED"
+msgstr "Simulated"
 
 msgid "PAUSE_SKIP_ROUND"
 msgstr "Skip to next round"
