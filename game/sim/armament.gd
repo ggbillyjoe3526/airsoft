@@ -493,5 +493,10 @@ func _fire(c: Character, r: ReplicaConfig, eye: Vector3, kick_scale: float, pool
 	# The BB's path starts at the eye: its first step catches cover right in front of the shooter and anyone point-blank,
 	# and it never hits its owner. Presentation draws it leaving the muzzle.
 	var grams := bb_weights[active]
-	pool.spawn(c.id, eye, dir, Ballistics.muzzle_velocity(r, rules, grams), Ballistics.hop_up_lift(r, hop_ups[active], rules),
-			Ballistics.bb_mass(r, grams), tuning.ballistics.spin_per_hop, active)
+	var bb := pool.spawn(c.id, eye, dir, Ballistics.muzzle_velocity(r, rules, grams),
+			Ballistics.hop_up_lift(r, hop_ups[active], rules), Ballistics.bb_mass(r, grams), tuning.ballistics.spin_per_hop,
+			active)
+	# Dev › Lasers (LZ1): the same shot, spread and kick, but a laser that BBStep resolves this tick.
+	if c.lasers and bb != null:
+		bb.laser = true
+		e.value2 = GameEvent.SHOT_LASER

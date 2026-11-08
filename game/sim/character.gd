@@ -98,6 +98,8 @@ var torch_on: bool = false
 var torch_time: float = 0.0
 ## BBs pass straight through: the Dev settings' Ghost, the player's only, kept between rounds (DevCheats).
 var ghost: bool = false
+## Fires lasers instead of BBs: the Dev settings' Lasers (LZ1), everyone's alike, kept between rounds (DevCheats).
+var lasers: bool = false
 ## Its side of the magazine hand-off (MagShare): its ask and what is coming to it, cleared at each respawn.
 var mag: MagShare.Hand = MagShare.Hand.new()
 ## Its smoke and flash bombs and its throw under way (Grenades, SF1), refilled at each respawn.

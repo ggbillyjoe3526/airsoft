@@ -24,3 +24,6 @@ var mass: float = 0.0
 var bounces: int = 0
 ## Metres of bush leaves it has pushed through so far (Foliage, BBStep): at BallisticsConfig.leaf_stop_depth it stops.
 var leaf: float = 0.0
+## A laser, not a BB (Dev › Lasers, LZ1): it never flies, BBStep resolves it in the tick it is fired, and it is free
+## again before anything draws it.
+var laser: bool = false

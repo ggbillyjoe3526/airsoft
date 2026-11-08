@@ -9,12 +9,14 @@ class_name BBStep
 ## is knocked out, and not a teammate when friendly fire is off, and nobody once the round is decided. A ricochet knocks
 ## someone out only when the match counts ricochets (HitConfig.ricochets_count); otherwise it ticks them and stops, and
 ## they play on. A BB never hits whoever fired it until it has bounced (its first segment starts at their eye, inside
-## them).
+## them). A laser (Dev › Lasers, LZ1) never flies: it is resolved in the tick it is fired (_laser).
 
 ## A BB_IMPACT's value when the BB stopped in a bush's leaves (0: on the level or a body).
 const IN_LEAVES := 1
 ## A tick's path shorter than this (m) is no path: nothing to test.
 const MIN_SEGMENT := 1e-9
+## A laser out of a bush's leaves looks for the next bush from this far past the edge (m), not the edge itself.
+const LEAF_STEP := 1e-3
 
 ## This tick's hit volume of each character, by index in the roster: characters don't move while BBs fly, so each is
 ## built at most once a tick, and only once a BB's path comes near it (Hitbox.may_touch; _built: 1 once built this
@@ -52,6 +54,12 @@ static func step(pool: BBPool, characters: Array[Character], query: WorldQuery, 
 	for bb: BB in pool.bbs:
 		if not bb.active:
 			continue
+		if bb.laser:
+			if not prepared:
+				_prepare(characters)
+				prepared = true
+			_laser(bb, characters, query, tuning, cease_fire, ends, events, rng, targets)
+			continue
 		bb.prev_position = bb.position
 		Ballistics.step_flight(bb, air, dt, wind)
 		var segment := bb.position - bb.prev_position
@@ -83,31 +91,7 @@ static func step(pool: BBPool, characters: Array[Character], query: WorldQuery, 
 			if not targets.is_empty() and not cease_fire and _stop_on_target(bb, dir, targets, tuning, events, rng):
 				continue
 			if _reached >= 0:
-				# The BB stops on the body, whatever happens to its owner.
-				var body := characters[_reached]
-				bb.position = bb.prev_position + dir * _reached_at
-				bb.active = false
-				var ricochet := bb.bounces > 0
-				var knocks := _knocks_out(body, bb.owner_id, characters, tuning.hits, cease_fire)
-				if knocks and ricochet and not tuning.hits.ricochets_count:
-					var tick := events.add(GameEvent.Kind.RICOCHET_TICK)
-					tick.actor = bb.owner_id
-					tick.target = body.id
-					tick.position = bb.position
-					tick.direction = dir
-				elif knocks:
-					Elimination.eliminate(body, bb.owner_id, characters, ends)
-					var hit := events.add(GameEvent.Kind.CHARACTER_HIT)
-					hit.actor = bb.owner_id
-					hit.target = body.id
-					hit.position = bb.position
-					hit.direction = dir
-					hit.value = 1 if ricochet else 0
-				else:
-					var knock := events.add(GameEvent.Kind.BB_IMPACT)
-					knock.actor = bb.owner_id
-					knock.target = body.id
-					knock.position = bb.position
+				_stop_on_body(bb, dir, characters, tuning.hits, cease_fire, ends, events)
 				continue
 			if leaf_end >= 0.0:
 				_leave_leaves(bb, dir, leaf_end, leaf_stop, cfg, events, rng)
@@ -138,6 +122,110 @@ static func step(pool: BBPool, characters: Array[Character], query: WorldQuery, 
 			var lost := events.add(GameEvent.Kind.BB_LOST)
 			lost.actor = bb.owner_id
 			lost.position = bb.position
+
+
+## The BB stops on the body _first_body reached (_reached, _reached_at along `dir`), whatever happens to its owner: a
+## CHARACTER_HIT that knocks it out, a RICOCHET_TICK for a bounced BB when ricochets don't count, or a BB_IMPACT on a
+## body not knocked out (_knocks_out).
+static func _stop_on_body(bb: BB, dir: Vector3, characters: Array[Character], hits: HitConfig, cease_fire: bool,
+		ends: Array[MapEnd], events: SimEvents) -> void:
+	var body := characters[_reached]
+	bb.position = bb.prev_position + dir * _reached_at
+	bb.active = false
+	var ricochet := bb.bounces > 0
+	var knocks := _knocks_out(body, bb.owner_id, characters, hits, cease_fire)
+	if knocks and ricochet and not hits.ricochets_count:
+		var tick := events.add(GameEvent.Kind.RICOCHET_TICK)
+		tick.actor = bb.owner_id
+		tick.target = body.id
+		tick.position = bb.position
+		tick.direction = dir
+	elif knocks:
+		Elimination.eliminate(body, bb.owner_id, characters, ends)
+		var hit := events.add(GameEvent.Kind.CHARACTER_HIT)
+		hit.actor = bb.owner_id
+		hit.target = body.id
+		hit.position = bb.position
+		hit.direction = dir
+		hit.value = 1 if ricochet else 0
+	else:
+		var knock := events.add(GameEvent.Kind.BB_IMPACT)
+		knock.actor = bb.owner_id
+		knock.target = body.id
+		knock.position = bb.position
+
+
+## A laser (Dev › Lasers, LZ1; `bb.laser`, fired this tick from its owner's eyes along its velocity): no flight, no
+## gravity, wind, hop-up or bounce. It reaches at once the first of a range target (outside a `cease_fire`), a body
+## and the level along a straight line up to LaserConfig.reach, and through bushes as far as a BB pushes through their
+## leaves (_laser_leaves), and stops there as a BB would (a body by the same rules, _stop_on_body; a range target; a
+## BB_IMPACT in the leaves, or on the level with no speed, so it rings no prop). A LASER event gives its beam. It is
+## free again at once.
+static func _laser(bb: BB, characters: Array[Character], query: WorldQuery, tuning: SimTuning, cease_fire: bool,
+		ends: Array[MapEnd], events: SimEvents, rng: RandomNumberGenerator, targets: Array[RangeTarget]) -> void:
+	var from := bb.position
+	var speed := bb.velocity.length()
+	var dir := bb.velocity / speed if speed > MIN_SEGMENT else Vector3.FORWARD
+	var length := tuning.lasers.reach
+	bb.prev_position = from
+	bb.active = false
+	var wall := INF
+	if query.bb_ray(from, from + dir * length, _ray_hit):
+		wall = _ray_hit.fraction * length
+	var reach := minf(wall, length)
+	var leaf_end := _laser_leaves(from, dir, reach, query.foliage, tuning)
+	_first_body(bb, dir, leaf_end if leaf_end >= 0.0 else reach, characters, tuning.hits)
+	bb.position = from + dir * _reached_at
+	if targets.is_empty() or cease_fire or not _stop_on_target(bb, dir, targets, tuning, events, rng):
+		_laser_stop(bb, dir, not is_inf(wall), leaf_end >= 0.0, characters, tuning, cease_fire, ends, events)
+	var beam := events.add(GameEvent.Kind.LASER)
+	beam.actor = bb.owner_id
+	beam.slot = bb.slot
+	beam.position = bb.position
+	beam.direction = dir
+	beam.reach = from.distance_to(bb.position)
+
+
+## Where a laser that reached no range target stops (at bb.position): on the body _first_body reached, else in the
+## leaves (`in_leaves`), else on the level (`on_level`, _ray_hit), else nowhere, its reach run out in the air.
+static func _laser_stop(bb: BB, dir: Vector3, on_level: bool, in_leaves: bool, characters: Array[Character],
+		tuning: SimTuning, cease_fire: bool, ends: Array[MapEnd], events: SimEvents) -> void:
+	if _reached >= 0:
+		_stop_on_body(bb, dir, characters, tuning.hits, cease_fire, ends, events)
+	elif in_leaves:
+		var stopped := events.add(GameEvent.Kind.BB_IMPACT)
+		stopped.actor = bb.owner_id
+		stopped.position = bb.position
+		stopped.value = IN_LEAVES
+		stopped.value2 = RayHit.Surface.LEAVES
+		stopped.direction = dir
+		stopped.reach = tuning.ballistics.leaf_stop_depth
+	elif on_level:
+		var impact := events.add(GameEvent.Kind.BB_IMPACT)
+		impact.actor = bb.owner_id
+		impact.position = bb.position
+		impact.value2 = _ray_hit.surface
+
+
+## How far along `dir` from `from` a laser stops in leaves (`foliage`, null for none): where it has crossed
+## leaf_stop_depth of them, over every bush on its line before `reach` (LaserConfig.most_bushes at most); -1 if it
+## comes through them all.
+static func _laser_leaves(from: Vector3, dir: Vector3, reach: float, foliage: Foliage, tuning: SimTuning) -> float:
+	if foliage == null or foliage.is_empty():
+		return -1.0
+	var start := 0.0
+	var left := tuning.ballistics.leaf_stop_depth
+	for i in tuning.lasers.most_bushes:
+		if not foliage.first_leaves(from + dir * start, dir, reach - start, _crossing):
+			return -1.0
+		var depth := _crossing.exit - _crossing.enter
+		if depth >= left:
+			return start + _crossing.enter + left
+		left -= depth
+		if not _crossing.through:
+			return -1.0
+		start += _crossing.exit + LEAF_STEP
+	return -1.0
 
 
 ## The BB's path this tick ends `leaf_end` m along `dir` in a bush (_crossing): stopped in the leaves (`stop`, a

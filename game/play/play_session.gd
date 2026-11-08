@@ -153,6 +153,8 @@ var _light: LightingConfig = null
 var _pools: LightPools = null
 ## The weapon torches drawn at night (TorchBeams; null by day).
 var _torches: TorchBeams = null
+## Dev › Lasers' beams (LZ1): made for every match, drawing only while lasers are fired.
+var _lasers: LaserBeams = null
 ## Whether your kit carries a weapon light this match (fitted at night): only then does the view's torch take one of
 ## the light pools' real lights (GraphicsApply.pool_lights).
 var _own_light: bool = false
@@ -835,6 +837,9 @@ func _build_views(ui: CanvasLayer) -> void:
 		_torches = TorchBeams.new()
 		_torches.setup(state.characters.size(), _level.query(), _tuning.body)
 		add_child(_torches)
+	_lasers = LaserBeams.new()
+	_lasers.setup(_play.effects, state.characters.size(), _colours.hud.colours, _tuning.body)
+	add_child(_lasers)
 	_pick_kinds()
 	_figure_lines = _play.figures.zoomed_lines(_figure_detail, _figure_zoom)
 	var figure_materials := _build_bodies()
@@ -895,6 +900,8 @@ func _build_views(ui: CanvasLayer) -> void:
 		first_use.append_array(_props.materials())
 	if _torches != null:
 		first_use.append_array(_torches.materials())
+	# whatever the switch: it can be turned on mid-match, and its first beam mustn't hitch
+	first_use.append(_lasers.draws().multimesh.mesh.surface_get_material(0))
 	# the sky (by night its own shader) is no speck: it is the background of the prewarm's frames, so it compiles there
 	var warm := ShaderPrewarm.new()
 	warm.setup(_eyes.camera, first_use, FigureView.make_sign(sign_font, Color.WHITE), figure_materials)
@@ -1184,6 +1191,7 @@ func _after_tick() -> void:
 	if _targets_view != null:
 		_targets_view.on_tick(state)
 	_grenades.on_tick(state)
+	_lasers.on_tick(state)
 	if heard:
 		# The contact shadows' floors, a ray a figure a tick (none under a skip's cover).
 		for f in _figures:
@@ -1244,6 +1252,7 @@ func _after_tick() -> void:
 			GameEvent.Kind.ROUND_START:
 				_input.face(player.spawn_yaw)
 				_puffs.clear()
+				_lasers.clear()
 				_gas.clear()
 				_kicked.clear()
 				_reset_flinches()
@@ -1355,6 +1364,9 @@ func _process(delta: float) -> void:
 	# After the figures: a torch hangs from the muzzle as just drawn.
 	if _torches != null:
 		_torches.update(state.characters, watched, fraction, _figure_of, _eyes.camera)
+	# After the figures and your replica: a beam leaves the muzzle as just drawn.
+	_lasers.update(state.characters, watched, _hands.muzzle_position(), watched == player and _hands.visible,
+			_eyes.camera, fraction, delta * _pacer.rate, _figure_of)
 	_hud.show_board(_input.scoreboard_held())
 	_hud.manual_reload = _commands[PLAYER_ID].manual_reload # the prompt follows the rule the sim used (RL2)
 	_hud.update(state, _eyes.view_zoom, delta)
