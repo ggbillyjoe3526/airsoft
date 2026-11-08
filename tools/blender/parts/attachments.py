@@ -568,6 +568,9 @@ SV_BOX_HW, SV_BOX_LO, SV_BOX_HI = 20.5, 14.5, 52.5
 # Rings a few mm in from each end of the squared run, so its plain top (no rail since BP8) shades flat along its
 # length instead of easing its normals from the loft's turn at the front all the way back (mm).
 SV_BOX_HOLD = 4.0
+# The shoulder from the round collar to the squared box (mm along the bore), and the rings it is lofted through.
+SV_SHOULDER = (24.0, SV_BOX[0])
+SV_SHOULDER_RINGS = 8
 SV_GLASS_R = 12.0
 # The one dial on top (BP8, the owner: smaller; the first build's illumination dial was 13.6 mm across its radius and
 # stood 13 mm over its pad, beside an elevation turret): its middle along the housing, radius and height over the pad (mm).
@@ -611,11 +614,20 @@ def build_scope_var() -> bpy.types.Object:
     # sunshade, its underside cut rising to the front and its bore hollowed.
     ob_b = hs.Builder("sv_box", ["Detail"])
     n = 48
-    ob_b.loft([ring_super(n, SV_HOUSING[1] - 1.0, 15.6, 15.6, h, 2.0),
-               ring_super(n, 24.0, 15.6, 15.6, h, 2.0),
-               ring_super(n, 28.5, 18.4, 17.6, h + 0.4, 2.8),
-               *[ring_super(n, y, SV_BOX_HW, (SV_BOX_HI - SV_BOX_LO) / 2, (SV_BOX_HI + SV_BOX_LO) / 2, 4.5)
-                 for y in (SV_BOX[0], SV_BOX[0] + SV_BOX_HOLD, SV_BOX[1] - SV_BOX_HOLD, SV_BOX[1])]],
+    collar = (15.6, 15.6, h, 2.0)
+    squared = (SV_BOX_HW, (SV_BOX_HI - SV_BOX_LO) / 2, (SV_BOX_HI + SV_BOX_LO) / 2, 4.5)
+    # The shoulder from the round collar out to the squared box eases in and out (smoothstep), in SV_SHOULDER_RINGS
+    # steps, so its shading runs smooth with no crease at either end (BP8 critic: a dark V and a pinched highlight).
+    shoulder = []
+    for i in range(SV_SHOULDER_RINGS + 1):
+        t = i / SV_SHOULDER_RINGS
+        e = t * t * (3.0 - 2.0 * t)
+        y = SV_SHOULDER[0] + (SV_SHOULDER[1] - SV_SHOULDER[0]) * t
+        shoulder.append(ring_super(n, y, *[a + (b - a) * e for a, b in zip(collar, squared)]))
+    ob_b.loft([ring_super(n, SV_HOUSING[1] - 1.0, *collar),
+               ring_super(n, SV_SHOULDER[0] - SV_BOX_HOLD, *collar),
+               *shoulder,
+               *[ring_super(n, y, *squared) for y in (SV_BOX[0] + SV_BOX_HOLD, SV_BOX[1] - SV_BOX_HOLD, SV_BOX[1])]],
               "Detail")
     box = ob_b.build()
     slant = math.atan2(21.5 - SV_BOX_LO, SV_BOX[1] - 46.0)
