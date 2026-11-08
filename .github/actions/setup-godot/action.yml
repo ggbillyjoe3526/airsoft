@@ -33,8 +33,9 @@ runs:
         BASE="https://github.com/godotengine/godot/releases/download/${V}"
         DL="$HOME/.cache/godot-dl"
         mkdir -p "$DL"
+        # Long retries: the release host has 504ed for half an hour at a time (2026-11-08) while the cache was cold.
         if [ ! -f "$DL/Godot_v${V}_linux.x86_64" ]; then
-          curl -fsSL --retry 4 -o "$DL/godot.zip" "${BASE}/Godot_v${V}_linux.x86_64.zip"
+          curl -fsSL --retry 10 --retry-delay 30 --retry-max-time 900 --retry-all-errors -o "$DL/godot.zip" "${BASE}/Godot_v${V}_linux.x86_64.zip"
           unzip -q -o "$DL/godot.zip" -d "$DL"
           rm "$DL/godot.zip"
         fi
@@ -43,7 +44,7 @@ runs:
         if [ "$WANT_TEMPLATES" = "true" ]; then
           # Only the Windows and Linux templates are kept (the full archive is 1.3 GB).
           if [ ! -f "$DL/templates/windows_release_x86_64.exe" ]; then
-            curl -fsSL --retry 4 -o "$DL/templates.tpz" "${BASE}/Godot_v${V}_export_templates.tpz"
+            curl -fsSL --retry 10 --retry-delay 30 --retry-max-time 900 --retry-all-errors -o "$DL/templates.tpz" "${BASE}/Godot_v${V}_export_templates.tpz"
             unzip -q -o "$DL/templates.tpz" -d "$DL" \
               templates/windows_release_x86_64.exe templates/linux_release.x86_64 \
               templates/version.txt
