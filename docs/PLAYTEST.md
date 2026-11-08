@@ -1603,9 +1603,9 @@ models show without anything else changing. The smoke and flash icons now do the
 - [ ] **Switches.** In Settings, a switch that is off is a plain grey outline with one small grey knob: no second
   sphere. On, it is teal with the knob at the right.
 - [ ] **Weapon rail.** In a match, icons for your rifle, pistol, smoke and flash sit just above the ammo panel with
-  their keys at the right of each row (a bomb you carry two of shows its icon twice, no numbers; each bomb is on a
-  light plate). Press 1, 2, 4, 5 and roll the wheel: the one in your hand lights, the others dim; holster (3) and none
-  lights. Reload, take a bomb in hand and turn the hop-up dial: the rail does not move. Can you read the flash icon?
+  their keys at the right of each row (a bomb you carry two of shows its icon twice, no numbers; no grey box behind a
+  bomb). Press 1, 2, 4, 5 and roll the wheel: the one in your hand lights, the others dim; holster (3) and none
+  lights. Reload, take a bomb in hand and turn the hop-up dial: the rail does not move.
   The bottom panel has no replica name or bomb icons and is smaller: BB count, magazines, fire mode.
 - [ ] **Countdown.** Load into a match and press Continue: no sound at all on the loading screen. Then 3, 2, 1, GO!
   shows under the round banner (which stays up through GO!), you can look but not move, shoot, swap or reload, and the
