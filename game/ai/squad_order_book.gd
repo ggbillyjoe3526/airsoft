@@ -218,7 +218,9 @@ func give_watch(giver: Character, spot: Vector3) -> SquadOrder.Kind:
 				SquadOrders.Notice.CANCELLED if before != SquadOrder.Kind.NONE else SquadOrders.Notice.NOBODY)
 		return SquadOrder.Kind.NONE
 	var watched := _watch_spot[giver.id]
-	if before == SquadOrder.Kind.WATCH and Vector2(spot.x - watched.x, spot.z - watched.z).length() < squad.hold_move:
+	# The same spot again keeps the watch, unless its helper is gone and a free teammate can take its place.
+	if before == SquadOrder.Kind.WATCH and Vector2(spot.x - watched.x, spot.z - watched.z).length() < squad.hold_move \
+			and (helper == null or _watch_helped(giver)):
 		order_outcome.record(giver.id, before, SquadOrders.Notice.NONE)
 		return before
 	_drop_order(giver)
@@ -314,6 +316,14 @@ func _drop_order(giver: Character) -> void:
 	_own_spot[giver.id] = 0
 	_from_move[giver.id] = 0
 	_unwatch(giver.id)
+
+
+## Whether a teammate in play still carries `giver`'s Watching here.
+func _watch_helped(giver: Character) -> bool:
+	for b in _world.bots:
+		if b.order_giver == giver and b.order == SquadOrder.Kind.WATCH and Elimination.is_in_play(b.character):
+			return true
+	return false
 
 
 ## Watching here's spot of the character `id` gone (its team's bots back over the area too).

@@ -2,7 +2,7 @@
 
 **Review:**
 
-- part 1 (bots): pending
+- part 1 (bots): critic Accept 7/8 · qa Pass · performance Pass
 
 William's playtest notes of 2026-11-08 (26 items, before he tags 0.1 Dev 2) went out as a bug pass in parts by area.
 The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-summary.md`.
@@ -11,7 +11,7 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-08 | part 1: 1 | Opus 5.5 | CI | pending | – |
+| 2026-11-08 | part 1: 1 | Opus 5.5 | targeted + smoke; CI | Accept 7/8 | – (known issues rows and the same-spot helper added after) |
 
 ## Part 1: bots (items 17 and 23)
 
@@ -19,7 +19,8 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
   (`PlayerCommand.ping_watch`, `SquadOrder.Kind.WATCH`) and puts a "WATCHING · 15 M" marker and floor ring on the
   spot (minimap diamond). Any order in force ends; the nearest free teammate (in play, not fighting, in cover or
   seeing a target, within `SquadConfig.watch_join_range` 45 m) stands beside you looking at it, and only one. The
-  rest stay on the team plan and keep hunt picks and held angles out of `watch_radius` (8 m) round the spot. It ends
+  rest stay on the team plan and keep hunt picks and held angles out of `watch_radius` (8 m) round the spot. If the
+  helper goes out, marking the same spot again brings a free teammate in (critic, part 1). It ends
   on another order, walking `watch_leave` (6 m) off, being hit, or round end. Tests: `test_bp8_watching_here.gd`,
   `test_bp8_bots_qa.gd`; four wheel tests moved to the seven-item wheel.
 - **23, bots' running arms.** The exaggerated arms were the sprint with the replica put away (bots do it on calm
@@ -37,5 +38,4 @@ The play list and the defaults taken are in `/mnt/project-files/playtest/bp8-sum
 
 ## Known issues left
 
-- Covered held angles only change Hard bots (the ones that hold angles); Normal bots just avoid hunting there.
-- A helper hit while watching isn't replaced until you mark the spot again.
+- The two rows in `docs/KNOWN_ISSUES.md` dated 2026-11-08: held angles (Hard bots only) and the holstered run's still arms.

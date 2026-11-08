@@ -124,3 +124,21 @@ func test_covered_ignores_a_team_out_of_range_and_a_nan_spot() -> void:
 	assert_false(bots.world.covered(-1, Vector3.ZERO))
 	assert_false(bots.world.covered(7, Vector3.ZERO))
 	assert_false(bots.world.covered(0, Vector3.ZERO), "nothing watched")
+
+
+func test_marking_the_same_spot_again_after_the_helper_went_out_brings_a_free_teammate() -> void:
+	bots.orders.give_watch(you, SPOT_A)
+	Elimination.eliminate(near_mate.character, 3, state.characters, map.ends)
+	for t in 3:
+		_tick()
+	assert_eq(bots.orders.give_watch(you, SPOT_A + Vector3(0.5, 0.0, 0.0)), SquadOrder.Kind.WATCH)
+	assert_eq(far_mate.order, SquadOrder.Kind.WATCH, "the free teammate takes the helper's place")
+	assert_eq(bots.world.watched[0], SPOT_A + Vector3(0.5, 0.0, 0.0))
+
+
+func test_marking_the_same_spot_again_with_the_helper_in_play_keeps_it() -> void:
+	bots.orders.give_watch(you, SPOT_A)
+	var helper := near_mate if near_mate.order == SquadOrder.Kind.WATCH else far_mate
+	bots.orders.give_watch(you, SPOT_A + Vector3(0.5, 0.0, 0.0))
+	assert_eq(helper.order, SquadOrder.Kind.WATCH, "the same helper stays")
+	assert_eq(bots.world.watched[0], SPOT_A, "the spot isn't moved by a nudge")
