@@ -302,3 +302,34 @@ func _in_palette(what: String, colour: Color, off: Array[String]) -> void:
 func _depot() -> MapData:
 	var play := PlayTuning.load_default()
 	return MapData.load_map("depot", play.map_style, SimTuning.load_default().rounds.team_size)
+
+
+func test_grass_is_its_own_palette_colour_and_not_a_team_hue() -> void:
+	assert_true(look.palette.has(&"grass"), "the palette has grass")
+	assert_ne(look.colour(&"grass"), look.colour(&"meadow"), "meadow keeps The Street's floors")
+	var teams := AccessibilityTable.read_file().colours
+	teams.append_array(PlayTuning.load_default().teams.colours)
+	assert_false(FieldChecks.reads_as_team(look.colour(&"grass"), teams), "grass is off every team's hue")
+
+
+func test_the_map_style_ground_and_grass_terrain_are_the_palettes_grass() -> void:
+	var style := PlayTuning.load_default().map_style
+	var want := look.colour(&"grass")
+	assert_eq(style.ground_colour.to_html(false), want.to_html(false), "the ground beyond the walls")
+	assert_eq(style.terrain_colour(RayHit.Surface.GRASS).to_html(false), want.to_html(false), "sloping grass")
+
+
+func test_the_night_preset_keeps_its_own_light() -> void:
+	var play := PlayTuning.load_default()
+	var night := load("res://game/config/night_lighting.tres") as LightingConfig
+	assert_true(night.night)
+	assert_almost_eq(night.sun_energy, 0.18, 0.0001, "the moon")
+	assert_almost_eq(night.ambient_energy, 0.3, 0.0001)
+	assert_almost_eq(night.exposure, 1.2, 0.0001)
+	assert_ne(night.sun_energy, play.lighting.sun_energy, "the day's sun is not the night's")
+
+
+func test_team_cloth_is_not_muted_by_the_paint_grade() -> void:
+	var src := FileAccess.get_file_as_string("res://game/play/flag_cloth.gdshader")
+	assert_false(src.contains("look_paint"), "flag cloth keeps its team colour")
+	assert_false(src.contains("look_light"), "and does not take the shared light")
