@@ -5,8 +5,9 @@ extends Node3D
 ## name them, where PropLayout lays them, one MultiMesh a model (a model laid often, or tiled, one a chunk,
 ## PropDressConfig.many_chunk or chunk, so it culls and takes its level of detail by area) in one vertex-coloured material. A
 ## drum, barrel or sofa casts its own shadow (its box draws nothing, SiteSurface.core_of, and leaves MapLevel's shadow
-## caster); shelving casts none, its rack's backing box still does. Each prop is drawn in its own shade times, while a
-## bake is drawn, the baked light near it (`relight`, BP7). Scenery only: no collider, no nav cell; the blocks' boxes
+## caster); shelving casts none, its rack's backing box still does. Depot's crate walls, plywood walls and containers
+## are map models of the game's own (DM1, tools/blender/maps). Each prop is drawn in its own shade times its paint (a
+## container's unit colour, DM1) times, while a bake is drawn, the baked light near it (`relight`, BP7). Scenery only: no collider, no nav cell; the blocks' boxes
 ## are what BBs and bodies meet, a round prop's (a trunk, a drum, a barrel) as its stepped boxes (RoundSteps).
 
 ## A prop takes the baked light near this far (m) over its foot, from faces facing any way (BakedLightNear.at).
@@ -24,7 +25,7 @@ var _lights: Dictionary[StringName, PackedColorArray] = {}
 
 ## The props of `map` dressed by `cfg`, or null when it dresses none of its blocks. A model that won't load leaves
 ## its kind's blocks as boxes (with a warning) and its props out.
-static func build(map: MapData, cfg: PropDressConfig) -> PropDress:
+static func build(map: MapData, cfg: PropDressConfig, paint: Callable = Callable()) -> PropDress:
 	if map == null or cfg == null:
 		return null
 	var meshes: Dictionary[StringName, Mesh] = {}
@@ -35,7 +36,7 @@ static func build(map: MapData, cfg: PropDressConfig) -> PropDress:
 			continue
 		meshes[model] = mesh
 		boxes[model] = mesh.get_aabb()
-	var placed := PropLayout.layout(map, cfg, boxes)
+	var placed := PropLayout.layout(map, cfg, boxes, paint)
 	if placed.is_empty():
 		return null
 	var dress := PropDress.new()
@@ -89,7 +90,7 @@ func materials() -> Array[Material]:
 	return [_material]
 
 
-## Draws each prop in its shade times the baked light near it (BakedLightNear.at, LIGHT_LIFT m over its foot), or in
+## Draws each prop in its shade and paint times the baked light near it (BakedLightNear.at, LIGHT_LIFT m over its foot), or in
 ## its shade alone with `lights` null (no bake drawn). Once a switch; nothing to do on a map with no bake.
 func relight(lights: BakedLightNear) -> void:
 	if lights == null and _lights.is_empty():
@@ -111,7 +112,7 @@ func relight(lights: BakedLightNear) -> void:
 			var pick: PackedInt32Array = picks[c]
 			for k in pick.size():
 				var shade := p.shades[pick[k]]
-				var l := each[pick[k]]
+				var l := each[pick[k]] * p.paints[pick[k]]
 				mm.set_instance_color(k, Color(shade * l.r, shade * l.g, shade * l.b))
 
 
@@ -165,8 +166,9 @@ func _add(model: StringName, mesh: Mesh, p: PropLayout.Placed, shadow: bool, chu
 		mm.instance_count = picks.size()
 		for k in picks.size():
 			var shade := p.shades[picks[k]]
+			var paint := p.paints[picks[k]]
 			mm.set_instance_transform(k, p.transforms[picks[k]])
-			mm.set_instance_color(k, Color(shade, shade, shade))
+			mm.set_instance_color(k, Color(shade * paint.r, shade * paint.g, shade * paint.b))
 		var view := MultiMeshInstance3D.new()
 		view.name = "%s_%d_%d" % [String(model).capitalize(), cell.x, cell.y]
 		view.multimesh = mm

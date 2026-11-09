@@ -234,6 +234,14 @@ func container_split_of(b: MapData.Block) -> Vector2i:
 	return Vector2i(units, tiers)
 
 
+## Block `b`'s paint as a map model draws it (PropLayout's UNIT, DM1, passes the first block of the ones joined to
+## it), a linear multiplier: a container in its piece's first unit's paint, any other block white.
+func prop_paint(b: MapData.Block) -> Color:
+	if b.kind != &"container" or container_paint.is_empty():
+		return Color.WHITE
+	return container_colour(b.piece, 0, 0).srgb_to_linear()
+
+
 ## The paint of unit `unit`, tier `tier` of the `piece`-th container; site_surface.gdshader's container_paint() picks
 ## the same.
 func container_colour(piece: int, unit: int, tier: int) -> Color:

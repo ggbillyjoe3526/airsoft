@@ -122,7 +122,15 @@ func test_a_propped_box_draws_no_faces_and_leaves_the_baked_shadow_caster() -> v
 			var core := SiteSurface.core_of(look, b, m)
 			assert_eq(core * (b.center + b.size * 0.5), b.center, "a drum's or barrel's box folds to its middle")
 		drawn += GreyboxFaces.faces_of(b).size() if not SiteSurface.hidden(look, b) else 0
-	assert_eq(hidden, _count(m, &"drum") + _count(m, &"barrel") + _count(m, &"sofa"))
+	var crates := _count(m, &"crate", look.props.kind_min_height[&"crate"])
+	assert_gt(crates, 0, "Depot's crate stacks are crates (DM1)")
+	assert_lt(crates, _count(m, &"crate"), "its desks stay boxes")
+	var walls := m.blocks.filter(func(b: MapData.Block) -> bool: return b.kind == &"plywood" \
+			and minf(b.size.x, b.size.z) <= look.props.kind_max_depth[&"plywood"]).size()
+	assert_gt(walls, 0, "its plywood walls are wall modules (DM1)")
+	assert_lt(walls, _count(m, &"plywood"), "its wardrobe stays a box")
+	assert_eq(hidden, _count(m, &"drum") + _count(m, &"barrel") + _count(m, &"sofa") + crates + walls
+			+ _count(m, &"container"), "and every container block is a container model")
 	var caster := MapLevel._greybox_mesh(m, play.map_style, look)
 	var full := MapLevel._greybox_mesh(m, play.map_style)
 	assert_lt(caster.surface_get_array_len(0), full.surface_get_array_len(0), "the caster leaves them out")
@@ -391,7 +399,8 @@ func test_shelving_is_drawn_in_chunks_that_cull_and_take_a_simpler_mesh_far_off(
 		var views := dress.views_of(model)
 		assert_eq(dress.count(model), placed[model].transforms.size(), "%s: each drawn once" % model)
 		if model != &"shelf":
-			assert_eq(views.size(), 1, "%s: one view" % model)
+			var many := placed[model].transforms.size() >= look.props.chunk_from
+			assert_eq(views.size() > 1, many, "%s: one view, or chunks when laid often (Depot's crates)" % model)
 			continue
 		var cells: Dictionary[Vector2i, bool] = {}
 		for t in placed[model].transforms:

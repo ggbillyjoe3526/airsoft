@@ -1,7 +1,8 @@
-// A door's leaves (DoorView): a flat paint in the shared light (look_light.gdshaderinc), each face in the baked light
-// of its own side of the wall (BP7, BakedLightNear): the instance colour is the light on the side of the leaf's thin
-// axis it faces negatively, the instance's custom data the light on the other side, mixed across the leaf's edges.
-// White both ways (no bake drawn) leaves the paint as it is.
+// A door's leaves (DoorView): the leaf model's vertex colours times a paint (white for the timber model, DM1; the
+// door colour on a plain box) in the shared light (look_light.gdshaderinc), each face in the baked light of its own
+// side of the wall (BP7, BakedLightNear): the instance colour is the light on the faces looking down the model's z (its
+// thickness), the instance's custom data the other side's light as a share of it, mixed across the leaf's edges.
+// White both ways (no bake drawn) leaves the colours as they are.
 shader_type spatial;
 render_mode blend_mix, cull_back;
 
@@ -14,10 +15,8 @@ uniform float metallic : hint_range(0.0, 1.0) = 0.0;
 varying vec3 lit;
 
 void vertex() {
-	// the leaf's thin axis is the unit box's x or z, whichever it is scaled less along
-	bool thin_x = length(MODEL_MATRIX[0].xyz) < length(MODEL_MATRIX[2].xyz);
-	float side = thin_x ? NORMAL.x : NORMAL.z;
-	lit = mix(COLOR.rgb, INSTANCE_CUSTOM.rgb, clamp(0.5 + 0.5 * side, 0.0, 1.0));
+	// COLOR is the vertex colour times the instance colour (the light down the model's z)
+	lit = COLOR.rgb * mix(vec3(1.0), INSTANCE_CUSTOM.rgb, clamp(0.5 + 0.5 * NORMAL.z, 0.0, 1.0));
 }
 
 void fragment() {

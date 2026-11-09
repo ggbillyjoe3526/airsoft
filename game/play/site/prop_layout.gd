@@ -9,20 +9,25 @@ extends RefCounted
 const FACE_SLAB := 0.04
 
 
-## One model's instances: a transform and a shade (1 is the model's own colours) each.
+## One model's instances: a transform, a shade (1 is the model's own colours) and a paint (a linear multiplier, white
+## for the model's own colours; a container's unit paint, DM1) each.
 class Placed:
 	extends RefCounted
 	var transforms: Array[Transform3D] = []
 	var shades: PackedFloat32Array = PackedFloat32Array()
+	var paints: PackedColorArray = PackedColorArray()
 
-	func add(t: Transform3D, shade: float) -> void:
+	func add(t: Transform3D, shade: float, paint: Color = Color.WHITE) -> void:
 		transforms.append(t)
 		shades.append(shade)
+		paints.append(paint)
 
 
 ## The props of `map`: each model's Placed, by model name. `boxes` is each model's own bounds (its mesh's AABB);
-## a kind whose model has none is left as its box (and warned once by PropDress, which loads them).
-static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringName, AABB]) -> Dictionary[StringName, Placed]:
+## a kind whose model has none is left as its box (and warned once by PropDress, which loads them). `paint`, when
+## valid, gives each block's paint (block -> linear Color, SiteLook.prop_paint) to its UNIT props.
+static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringName, AABB],
+		paint: Callable = Callable()) -> Dictionary[StringName, Placed]:
 	var out: Dictionary[StringName, Placed] = {}
 	var rng := RandomNumberGenerator.new()
 	rng.seed = map.dressing_seed
@@ -49,6 +54,12 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 				_tile(_placed(out, model), boxes[model], b, foot, cfg, map)
 			PropDressConfig.Lay.GRID:
 				_grid(_placed(out, model), boxes[model], foot, b.size, cfg.grid_cells.get(model, b.size), cfg, rng)
+			PropDressConfig.Lay.UNIT:
+				_placed(out, model).add(_unit(boxes[model], b, foot, map, middle, cfg), 1.0,
+						paint.call(_first_joined(b, map, cfg)) if paint.is_valid() else Color.WHITE)
+			PropDressConfig.Lay.RUN:
+				_run(_placed(out, model), boxes[model], foot, b.size, cfg.run_lengths.get(model, maxf(b.size.x, b.size.z)),
+						cfg, rng)
 			_:
 				_placed(out, model).add(_fit_facing(boxes[model], b, foot, middle), 1.0)
 	return out
@@ -133,6 +144,103 @@ static func _grid(p: Placed, model: AABB, foot: Vector3, size: Vector3, cell: Ve
 				var turn := yaw + (_quarter_turn(rng) if square else PI * float(rng.randi_range(0, 1)))
 				p.add(fit(model, at + Vector3(0.0, j * step.y, 0.0), _turned(step, turn - yaw), turn),
 						_shade(cfg, rng))
+
+
+## A wall's modules end to end along the box's long side, about `length` m each (stretched so a whole number fill
+## it), each as tall and as thick as the box, its x along the wall, turned end for end at random so a long wall never
+## reads as one module repeated.
+static func _run(p: Placed, model: AABB, foot: Vector3, size: Vector3, length: float, cfg: PropDressConfig,
+		rng: RandomNumberGenerator) -> void:
+	var along_x := size.x >= size.z
+	var long := size.x if along_x else size.z
+	var across := size.z if along_x else size.x
+	var n := maxi(1, roundi(long / maxf(length, 1e-6)))
+	var step := long / n
+	var yaw := 0.0 if along_x else PI * 0.5
+	for i in n:
+		var u := (i + 0.5) * step - long * 0.5
+		var at := foot + (Vector3(u, 0.0, 0.0) if along_x else Vector3(0.0, 0.0, u))
+		p.add(fit(model, at, Vector3(step, size.y, across), yaw + PI * float(rng.randi_range(0, 1))), _shade(cfg, rng))
+
+
+## One model fitted to block `b`'s box, its x along the axis a block of its kind touches one of its ends on (a cut
+## length between two units lies along their row), else along the box's long side; its +x end turned away from a
+## block of its kind against one of those ends (PropDressConfig.unit_reach), else away from the field's middle: a
+## container's doors at the free end of each unit, never into the port cut between two.
+static func _unit(model: AABB, b: MapData.Block, foot: Vector3, map: MapData, middle: Vector3,
+		cfg: PropDressConfig) -> Transform3D:
+	var ends := Vector2(_end_touches(b, 0, map, cfg), _end_touches(b, 2, map, cfg)) # x, z: -1 low end, +1 high end
+	var touched := Vector2(_touch_count(b, 0, map, cfg), _touch_count(b, 2, map, cfg))
+	var along_x := b.size.x >= b.size.z
+	if touched.x > 0.0 and touched.y == 0.0:
+		along_x = true
+	elif touched.y > 0.0 and touched.x == 0.0:
+		along_x = false
+	var axis := 0 if along_x else 2
+	var side := 2 if along_x else 0
+	var end := -(ends.x if along_x else ends.y) # the doors away from the touching blocks
+	if end == 0.0:
+		end = 1.0 if b.center[axis] >= middle[axis] else -1.0
+	# The model's +x to world +x unturned, -x a half turn; to world -z a quarter turn, +z three quarters.
+	var yaw := (0.0 if end > 0.0 else PI) if along_x else (PI * 0.5 if end < 0.0 else -PI * 0.5)
+	return fit(model, foot, Vector3(b.size[axis], b.size.y, b.size[side]), yaw)
+
+
+## The blocks of `b`'s kind against its ends along `axis` (0 x, 2 z), overlapping it across and up: the high end's
+## count less the low end's (so +1: a block at its high end only).
+static func _end_touches(b: MapData.Block, axis: int, map: MapData, cfg: PropDressConfig) -> float:
+	var sum := 0.0
+	for o in _against(b, axis, map, cfg):
+		sum += 1.0 if o.center[axis] > b.center[axis] else -1.0
+	return sum
+
+
+static func _touch_count(b: MapData.Block, axis: int, map: MapData, cfg: PropDressConfig) -> float:
+	return float(_against(b, axis, map, cfg).size())
+
+
+## The blocks of `b`'s kind whose faces meet one of `b`'s end faces along `axis` (within PropDressConfig.unit_reach),
+## overlapping it on the other two axes.
+static func _against(b: MapData.Block, axis: int, map: MapData, cfg: PropDressConfig) -> Array[MapData.Block]:
+	var out: Array[MapData.Block] = []
+	var lo := b.center - b.size * 0.5
+	var hi := b.center + b.size * 0.5
+	var other := 2 if axis == 0 else 0
+	for o in map.blocks:
+		if o == b or o.kind != b.kind:
+			continue
+		var olo := o.center - o.size * 0.5
+		var ohi := o.center + o.size * 0.5
+		if olo[other] >= hi[other] or ohi[other] <= lo[other] or olo.y >= hi.y or ohi.y <= lo.y:
+			continue
+		if absf(olo[axis] - hi[axis]) <= cfg.unit_reach or absf(ohi[axis] - lo[axis]) <= cfg.unit_reach:
+			out.append(o)
+	return out
+
+
+## The first block (in file order) of the blocks of `b`'s kind joined to it by touching (within
+## PropDressConfig.unit_reach on every side): one cut container's units, ports and roof are painted as one.
+static func _first_joined(b: MapData.Block, map: MapData, cfg: PropDressConfig) -> MapData.Block:
+	var group: Array[MapData.Block] = [b]
+	var i := 0
+	while i < group.size():
+		var g := group[i]
+		var glo := g.center - g.size * 0.5 - Vector3.ONE * cfg.unit_reach
+		var ghi := g.center + g.size * 0.5 + Vector3.ONE * cfg.unit_reach
+		for o in map.blocks:
+			if o.kind != b.kind or group.has(o):
+				continue
+			var olo := o.center - o.size * 0.5
+			var ohi := o.center + o.size * 0.5
+			if olo.x <= ghi.x and ohi.x >= glo.x and olo.y <= ghi.y and ohi.y >= glo.y and olo.z <= ghi.z \
+					and ohi.z >= glo.z:
+				group.append(o)
+		i += 1
+	var first := b
+	for g in group:
+		if map.blocks.find(g) < map.blocks.find(first):
+			first = g
+	return first
 
 
 ## A cell's size in the model's own axes once it is turned `turn` more than its first lay: x and z swap a quarter turn

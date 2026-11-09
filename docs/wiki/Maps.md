@@ -36,7 +36,7 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
 - **Spawn rooms** open by two crate chicanes each, so nobody sees into a spawn from the floor outside it.
 - **Noisy props:** running into a container, a steel drum, a plastic barrel, a rack or a crate stack makes a noise
   bots hear, and a BB rings off the steel ([Movement](Movement#paces)).
-- **Doors:** some of the plywood rooms and huts have green [doors](#doors), some starting open and some shut.
+- **Doors:** some of the plywood rooms and huts have wooden [doors](#doors), some starting open and some shut.
 - **Attack / Defend** puts two flagpoles at the defenders' end, **A** on A site and **B** on B site; the attackers
   raise either ([Modes](Modes#attack--defend)).
 - **The look:** clean painted surfaces in soft, stylised light, with crimson, violet, yellow, teal, green and cream
@@ -44,8 +44,9 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
 - **Props:** the drums, barrels, the Lounge's sofa and the racking are free CC0 models: teal drums four to a pallet,
   crimson steel barrels in pairs, a violet sofa, and steel shelving stocked with cartons on every rack. Each fills the
   space its block did, so what you see is what stops a BB; a BB grazing past a round drum or barrel flies on by its
-  curve instead of stopping at a square corner. The walls, crates and containers are still plain blocks in
-  the site's colours until the final models.
+  curve instead of stopping at a square corner. The plywood walls (birch sheets, battens and screws), the wooden
+  crates on their runners and the corrugated shipping containers, each in its own paint, are the game's own models,
+  made from photos of real airsoft sites, and fill their blocks the same way.
 
 ![The West tunnel, lit only from its ends](images/depot-tunnel.jpg)
 
@@ -58,7 +59,8 @@ The minimap names the area you stand in. Depot's areas:
 
 ### Doors
 
-Depot has 15 hinged doors and Woodland's huts 8, painted green so they stand out from the plywood. Every round starts with the same doors
+Depot has 15 hinged doors and Woodland's huts 8: two-panel timber doors in a frame, darker than the plywood so they
+stand out from it. Every round starts with the same doors
 open and the same ones shut. Press **Open / shut door** (G, [Controls](Controls)) within reach of one to open or shut
 it; a line under the crosshair tells you which.
 
@@ -80,10 +82,10 @@ defenders in the east camp.
 - **The stream:** its bed is 1.7 m under its banks, which are too steep to climb. Cross on the North bridge or the road,
   or walk in and out at the Ford and the gentle slides. Down in the bed you're out of sight of the wood above.
 - **The look:** the game's soft, stylised light over a bright green wood: lime-lit crowns, pine-green spruces, a
-  meadow floor, and the violet truck and teal crates carrying the colour, with nothing near a team's blue or orange.
+  meadow floor, and the violet truck carrying the colour, with nothing near a team's blue or orange.
 - **Long views, few walls:** the Ridge looks 86 m down onto the Fort; elsewhere a lane's longest line is under 80 m.
-  Cover is logs, log stacks, tyres, crates, the violet truck and the trunks of the trees themselves, all free CC0
-  models; each stops a BB about where you see it, a round trunk by its bark (its roots fill its back corners). The
+  Cover is logs, log stacks, tyres, wooden crates, the violet truck and the trunks of the trees themselves, free CC0
+  models and the game's own; each stops a BB about where you see it, a round trunk by its bark (its roots fill its back corners). The
   thickets of spruce at the edges and between
   the lanes can't be entered or seen through.
 - **Ferns** grow knee to hip high in eight beds where you'd want to hide, and **bushes** stand taller. Nobody sees you
@@ -94,7 +96,7 @@ defenders in the east camp.
   Clearing; the Badger run, a log-lined run through the Knoll between the middle and the south; and the Culvert, the
   stream bed under the road. Crouch to go through; inside you stay down until you're out, and bots crouch through
   too. The stream bed under the North bridge is crouch height as well, a fourth low way along the bed.
-- **The huts:** the Cabin, the two huts of Hut row and the Box on A site have windows and two green [doors](#doors)
+- **The huts:** the Cabin, the two huts of Hut row and the Box on A site have windows and two wooden [doors](#doors)
   each. The door facing the other team's end starts each round shut and the one facing your own end open, so a hut
   is walked into from its own side and opened, loudly, from the other. The Tower is a platform 3.4 m up a stair, the
   Sawmill an open shed.
