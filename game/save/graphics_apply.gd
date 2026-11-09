@@ -35,6 +35,13 @@ const SOFTNESS: Array[int] = [RenderingServer.SHADOW_QUALITY_HARD, RenderingServ
 		RenderingServer.SHADOW_QUALITY_SOFT_LOW, RenderingServer.SHADOW_QUALITY_SOFT_HIGH]
 ## The project settings kept as they are when the presets change the shadow map or ambient occlusion's size.
 const SHADOW_16_BITS := "rendering/lights_and_shadows/directional_shadow/16_bits"
+## The shadow atlas's four quadrants, cut into shadows (Viewport.PositionalShadowAtlasQuadrantSubdiv): the project's
+## (4, 4, 16 and 64: 88 shadows), and while the roof lamps are real lights 4, 16, 64 and 64 (148), so all of Depot's 93
+## lamps, the night's pools and the torch keep a shadow; the engine gives the biggest slots to the lights nearest.
+const PROJECT_SLOTS: Array[int] = [Viewport.SHADOW_ATLAS_QUADRANT_SUBDIV_4, Viewport.SHADOW_ATLAS_QUADRANT_SUBDIV_4,
+		Viewport.SHADOW_ATLAS_QUADRANT_SUBDIV_16, Viewport.SHADOW_ATLAS_QUADRANT_SUBDIV_64]
+const LAMP_SLOTS: Array[int] = [Viewport.SHADOW_ATLAS_QUADRANT_SUBDIV_4, Viewport.SHADOW_ATLAS_QUADRANT_SUBDIV_16,
+		Viewport.SHADOW_ATLAS_QUADRANT_SUBDIV_64, Viewport.SHADOW_ATLAS_QUADRANT_SUBDIV_64]
 ## The project's shadow atlas for the lights other than the sun (spots and omnis).
 const LAMP_ATLAS_SIZE := "rendering/lights_and_shadows/positional_shadow/atlas_size"
 const SSAO_QUALITY := "rendering/environment/ssao/quality"
@@ -235,6 +242,11 @@ static func apply(values: GraphicsQuality, viewport: Viewport, rs: Server = null
 	var atlas := lamp_atlas(values)
 	if viewport.positional_shadow_atlas_size != atlas:
 		viewport.positional_shadow_atlas_size = atlas
+	var slots := LAMP_SLOTS if values.lamp_lights != GraphicsQuality.LampLights.OFF else PROJECT_SLOTS
+	for q in slots.size():
+		var subdiv := slots[q] as Viewport.PositionalShadowAtlasQuadrantSubdiv
+		if viewport.get_positional_shadow_atlas_quadrant_subdiv(q) != subdiv:
+			viewport.set_positional_shadow_atlas_quadrant_subdiv(q, subdiv)
 	to.set_lamp_soft(SOFTNESS[values.shadow_softness])
 
 

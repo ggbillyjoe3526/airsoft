@@ -8,6 +8,7 @@ var table: GraphicsTable = null
 var play: PlayTuning = PlayTuning.new()
 var depot: MapData = null
 var _atlas: int = 0
+var _slots: Array[int] = []
 
 
 func before_all() -> void:
@@ -17,10 +18,15 @@ func before_all() -> void:
 func before_each() -> void:
 	table = GraphicsTable.shared()
 	_atlas = get_tree().root.positional_shadow_atlas_size
+	_slots.clear()
+	for q in 4:
+		_slots.append(get_tree().root.get_positional_shadow_atlas_quadrant_subdiv(q))
 
 
 func after_each() -> void:
 	get_tree().root.positional_shadow_atlas_size = _atlas
+	for q in 4:
+		get_tree().root.set_positional_shadow_atlas_quadrant_subdiv(q, _slots[q] as Viewport.PositionalShadowAtlasQuadrantSubdiv)
 
 
 func _roof() -> RoofView:
@@ -101,6 +107,10 @@ func test_their_shadows_follow_the_shadow_rows() -> void:
 	assert_eq(root.positional_shadow_atlas_size, default_atlas, "the torch's atlas as tuned, lamps off")
 	GraphicsApply.apply(table.preset(&"ultra"), root, rs)
 	assert_eq(root.positional_shadow_atlas_size, 8192, "Ultra's Shadow detail")
+	var slots := 0
+	for q in 4:
+		slots += [0, 1, 4, 16, 64, 256, 1024][root.get_positional_shadow_atlas_quadrant_subdiv(q)] as int
+	assert_gte(slots, 93 + 8 + 1, "a shadow for every lamp, the pools and the torch")
 	assert_eq(rs.lamp_soft, RenderingServer.SHADOW_QUALITY_SOFT_HIGH, "Softest's filter")
 	assert_eq(GraphicsApply.glass_atlas(table.preset(&"ultra")), 4096, "the optic glass at half")
 	assert_eq(GraphicsApply.glass_atlas(table.preset(&"medium")), 0, "and none with the lamps off, as before")
