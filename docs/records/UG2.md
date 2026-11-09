@@ -1,13 +1,13 @@
 # UG2 · Rooflight sun: the roof shades the sun but at its rooflights, with shafts in the haze
 
-**Review:** pending
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-09 | 1 | thread | see Checks | Retry 7/8 | the shade and lamps didn't cover the hall past 70 m from the eye; Sun shadows off still shaded |
-| 2026-11-09 | 2 | thread | see Checks | pending | – |
+| 2026-11-09 | 2 | thread | see Checks | Accept 8/8 | – |
 
 ## Goal
 
@@ -48,7 +48,9 @@ in the volumetric haze, while the roof lamps (UG1) light the rest of the hall.
 ## Checks
 
 - gdlint clean; `test_sun_shade` 6/6 (spans, gaps on the rooflights, Far shows and Near hides, none with Sun shadows
-  off, the lamps and sun shadows over the whole roof, no shade without the bay model) and QA's `test_sun_shade_qa` 3/3; `test_lamp_lights`, `test_lamp_lights_qa`, `test_depot_hall`, `test_graphics_apply`, `test_baked_light` pass.
+  off, the lamps and sun shadows over the whole roof, no shade without the bay model) and QA's `test_sun_shade_qa` 6/6;
+  `test_lamp_lights`, `test_lamp_lights_qa`, `test_depot_hall`, `test_graphics_apply`, `test_night_light_qa` and
+  `test_torch` pass; CI runs the whole suite (see the pull request).
 - Before/after renders (Ultra, same cameras, Sunlit Concrete light; the fourth from one corner of the hall to the far
   one, even to the far end): `/mnt/project-files/art/graphics/ug2/`.
 
@@ -56,4 +58,7 @@ in the volumetric haze, while the roof lamps (UG1) light the rest of the hall.
 
 - Frame cost on Ultra is unmeasured (no GPU in the cloud): the shade (one more caster for the sun's four splits), the
   haze volume, all 93 lamps lit and the sun's shadows stretched to about 166 m (coarser near splits). The owner's
-  check is in the playtest list. The blue shade and missing purlin shadows: `docs/KNOWN_ISSUES.md`.
+  check is in the playtest list. Performance's ranking if it is too dear: cap the lamps' shadows (not their light) by
+  distance, then shorten the sun's stretch, then a cheaper lamp filter than Softest's. The stretch takes the sun's
+  shadows past the Shadow range row's own 120 m, on Far with the shade only (an exception, `data/graphics.md`).
+  The blue shade and missing purlin shadows: `docs/KNOWN_ISSUES.md`.

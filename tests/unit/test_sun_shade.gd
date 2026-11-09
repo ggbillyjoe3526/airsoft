@@ -2,8 +2,8 @@ extends GutTest
 ## Lamp light Far's sun shade (UG2, RoofView.sun_shade): on Ultra an indoor field's roof shades the sun but at its
 ## rooflights, halfway between the trusses where the bay model's rooflight strips lie, with a thicker haze under it so
 ## the sun shows in shafts; the lamps shine brighter and the sun keeps its share for it; Near and Off show neither, nor
-## does Far where the sun's shadows don't reach the lit hall (Sun shadows off, a short Shadow range). A roof without the
-## bay model has no shade. Headless: geometry and properties, never pixels.
+## does Far with Sun shadows off; shaded, every lamp and the sun's shadows reach the roof's far corner. A roof without
+## the bay model has no shade. Headless: geometry and properties, never pixels.
 
 var play: PlayTuning = PlayTuning.new()
 var depot: MapData = null

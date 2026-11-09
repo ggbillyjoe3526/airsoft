@@ -1023,8 +1023,9 @@ Settings › Graphics › Quality: Low, Medium, High, Ultra or Custom.
 - [ ] **Rooflight sun (UG2, your graphics card).** On Depot at Ultra, the sun comes in only through the pale rooflight
   strips halfway between the trusses: bright strips across the floor and crates, shafts slanting down through the
   haze, the rest of the hall lit by the lamps. Switch to High: the strips go and the hall is lit evenly again. Far
-  figures down the 65 m hall should still read clearly through the haze. Note the frame rate (F3) on Ultra beside
-  the High figure.
+  figures down the 65 m hall should still read clearly through the haze. Note the frame rate (F3) on Ultra looking
+  down the hall's length with 6v6, beside the same view with Sun shadows off (Custom), and with Softness at Softest;
+  are near shadows (your hands, cover beside you) still crisp?
 
 ## Accessibility
 

@@ -102,20 +102,20 @@ func set_mode(wanted: GraphicsQuality.LampLights, soft: bool, sun_shadows: bool 
 	var on := wanted != GraphicsQuality.LampLights.OFF
 	if visible != on:
 		visible = on
-	var shaded := _shaded(wanted)
+	var shade_on := _shaded(wanted)
 	for node in _shaded_nodes:
-		if node.visible != shaded:
-			node.visible = shaded
-	if not on or (wanted == _mode and soft == _soft and shaded == was_shaded):
+		if node.visible != shade_on:
+			node.visible = shade_on
+	if not on or (wanted == _mode and soft == _soft and shade_on == was_shaded):
 		_mode = wanted
 		return
 	_mode = wanted
 	_soft = soft
 	var reach := _cfg.lamp_near if wanted == GraphicsQuality.LampLights.NEAR else _cfg.lamp_far
-	if shaded:
+	if shade_on:
 		reach = maxf(reach, _cover + _cfg.lamp_fade)
 	var size := _cfg.lamp_lens_size if soft else 0.0
-	var energy := _cfg.lamp_shaded_energy if shaded else _cfg.lamp_light_energy
+	var energy := _cfg.lamp_shaded_energy if shade_on else _cfg.lamp_light_energy
 	for spot in _lights:
 		spot.light_energy = energy
 		spot.distance_fade_begin = maxf(0.0, reach - _cfg.lamp_fade)

@@ -62,3 +62,69 @@ func test_span_edges() -> void:
 				at = s.y
 	cfg.rooflight_half = 5.0
 	assert_eq(RoofView.shade_spans(Rect2(0, 0, 40, 3), cfg).size(), 0, "rooflights wider than bays: no shade")
+
+
+func _apply(values: GraphicsQuality, lighting: FieldLighting, roof: RoofView) -> void:
+	GraphicsApply.apply_field(values, lighting, null, GraphicsApply.Server.new(), null, null, null, roof.lamp_lights())
+
+
+func test_preset_round_trip_restores_shadow_distance_and_fades() -> void:
+	table = GraphicsTable.shared()
+	var roof := _roof()
+	var lighting := FieldLighting.build(LightingConfig.new())
+	add_child_autofree(lighting)
+	var lamps := roof.lamp_lights()
+	var hi := table.preset(&"high").copy()
+	_apply(hi, lighting, roof)
+	var d_high := lighting.sun.directional_shadow_max_distance
+	var fade_high := lamps.lights()[0].distance_fade_begin
+	var e_high := lamps.lights()[0].light_energy
+	var sun_high := lighting.sun.light_energy
+	var ultra := table.preset(&"ultra").copy()
+	_apply(ultra, lighting, roof)
+	assert_true(lamps.shaded())
+	assert_gte(lighting.sun.directional_shadow_max_distance * lighting.sun.directional_shadow_fade_start, lamps.shade_reach() - 0.01)
+	_apply(hi, lighting, roof)
+	assert_false(lamps.shaded())
+	assert_almost_eq(lighting.sun.directional_shadow_max_distance, d_high, 0.001)
+	assert_almost_eq(lamps.lights()[0].distance_fade_begin, fade_high, 0.001)
+	assert_almost_eq(lamps.lights()[0].light_energy, e_high, 0.001)
+	assert_almost_eq(lighting.sun.light_energy, sun_high, 0.001)
+	assert_false(roof.sun_shade().visible)
+
+
+func test_custom_far_short_range_and_mid_match_sun_shadow_toggle() -> void:
+	table = GraphicsTable.shared()
+	var roof := _roof()
+	var lighting := FieldLighting.build(LightingConfig.new())
+	add_child_autofree(lighting)
+	var lamps := roof.lamp_lights()
+	var v := table.preset(&"ultra").copy()
+	v.shadow_range = 10 if v.shadow_range > 10 else v.shadow_range
+	var short := v.shadow_range
+	_apply(v, lighting, roof)
+	assert_gte(lighting.sun.directional_shadow_max_distance, float(short))
+	assert_gte(lighting.sun.directional_shadow_max_distance * lighting.sun.directional_shadow_fade_start, lamps.shade_reach() - 0.01)
+	var full := lighting.sun.light_energy
+	v.sun_shadows = false
+	_apply(v, lighting, roof)
+	assert_false(lamps.shaded())
+	assert_false(roof.sun_shade().visible)
+	assert_almost_eq(lighting.sun.directional_shadow_max_distance, float(short), 0.001)
+	assert_almost_eq(lamps.lights()[0].light_energy, play.roof.lamp_light_energy, 0.001)
+	v.sun_shadows = true
+	_apply(v, lighting, roof)
+	assert_true(lamps.shaded())
+	assert_almost_eq(lamps.lights()[0].light_energy, play.roof.lamp_shaded_energy, 0.001)
+	assert_almost_eq(lighting.sun.light_energy, full, 0.001)
+
+
+func test_null_lighting_and_lamps() -> void:
+	var roof := _roof()
+	var v := GraphicsTable.shared().preset(&"ultra").copy()
+	GraphicsApply.apply_field(v, null, null, GraphicsApply.Server.new(), null, null, null, roof.lamp_lights())
+	assert_true(roof.lamp_lights().shaded())
+	var lighting := FieldLighting.build(LightingConfig.new())
+	add_child_autofree(lighting)
+	GraphicsApply.apply_field(v, lighting, null, GraphicsApply.Server.new(), null, null, null, null)
+	assert_true(true)
