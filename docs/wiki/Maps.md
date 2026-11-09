@@ -43,7 +43,8 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
 - **Attack / Defend** puts two flagpoles at the defenders' end, **A** on A site and **B** on B site; the attackers
   raise either ([Modes](Modes#attack--defend)).
 - **The look:** a real warehouse in daylight: concrete and plywood with their grain, weathered paint in muted
-  crimson, violet, yellow, teal, green and cream, so the team colours stay the loudest.
+  crimson, violet, yellow, teal, green and cream, so the team colours stay the loudest. Walls, crates and containers
+  are worn: grime at their feet, streaks down their sides, dust on top.
 - **Props:** the hall's racking, drums, barrels, sofa, desks and lockers are the game's own models: navy and yellow
   pallet racking stocked three different ways (cartons, sacks, wrapped loads, drums, some slots empty) and mixed along
   every rack, violet steel drums stacked two

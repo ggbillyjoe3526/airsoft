@@ -303,3 +303,15 @@ look_paint_saturation={
 "type": "float",
 "value": 0.6
 }
+look_wear={
+"type": "float",
+"value": 1.0
+}
+look_grime={
+"type": "color",
+"value": Color(0.0684782, 0.0528606, 0.0368894, 1)
+}
+look_dust={
+"type": "color",
+"value": Color(0.4507858, 0.3967552, 0.2961383, 1)
+}

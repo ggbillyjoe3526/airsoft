@@ -22,6 +22,9 @@ const GLOBAL_RIM := &"look_rim"
 const GLOBAL_RIM_POWER := &"look_rim_power"
 const GLOBAL_SPEC := &"look_spec"
 const GLOBAL_PAINT_SATURATION := &"look_paint_saturation"
+const GLOBAL_WEAR := &"look_wear"
+const GLOBAL_GRIME := &"look_grime"
+const GLOBAL_DUST := &"look_dust"
 
 @export_group("Light")
 ## What the sun adds where it doesn't reach: a dark warm grey, so the far side falls to the ambient and bounce light
@@ -41,6 +44,15 @@ const GLOBAL_PAINT_SATURATION := &"look_paint_saturation"
 @export var spec: float = 0.3
 ## How much of its colour every surface's paint keeps (0 grey, 1 as painted): the palette as weathered material.
 @export_range(0.0, 1.0) var paint_saturation: float = 0.6
+
+@export_group("Wear")
+## The models' wear (look_vertex.gdshader's `wear`, SL2): grime up a model's foot, streaks down its sides, broad
+## stains and dust on its tops, in world space so no two props wear alike. This scales every material's own share (a
+## prop's PropDressConfig.wear, a tree's crown none); 0 draws every model clean.
+@export_range(0.0, 1.0) var wear: float = 1.0
+## The grime's colour (dark earth) and the dust's (pale and dry), mixed over a worn surface's paint.
+@export var grime: Color = Color8(0x4a, 0x41, 0x36)
+@export var dust: Color = Color8(0xb3, 0xa9, 0x94)
 
 @export_group("Picture")
 ## AgX's contrast and the grade over it: a natural picture, a little contrasty, the team colours still the loudest.
@@ -154,7 +166,8 @@ func globals() -> Dictionary[StringName, Variant]:
 	return {
 		GLOBAL_SHADE: shade.srgb_to_linear(), GLOBAL_BAND: band, GLOBAL_BAND_SOFT: band_soft, GLOBAL_MID_BAND: mid_band,
 		GLOBAL_RIM: rim.srgb_to_linear(), GLOBAL_RIM_POWER: rim_power, GLOBAL_SPEC: spec,
-		GLOBAL_PAINT_SATURATION: paint_saturation,
+		GLOBAL_PAINT_SATURATION: paint_saturation, GLOBAL_WEAR: wear, GLOBAL_GRIME: grime.srgb_to_linear(),
+		GLOBAL_DUST: dust.srgb_to_linear(),
 	}
 
 

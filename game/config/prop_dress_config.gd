@@ -356,6 +356,15 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"pine_young_crown": 0.95, &"pine_grown_crown": 0.95, &"pine_old_crown": 0.95, &"oak_crown": 0.95,
 	&"birch_crown": 0.95,
 }
+## How worn the props are drawn (SL2, look_vertex.gdshader's `wear`; LookConfig.wear scales it): grime up their feet,
+## streaks, stains and dust on top. Models worn otherwise (each its own material): the trees' crowns are clean, as
+## leaves don't gather grime, nor does the earth bank under the ground's props (it is the ground), and the racking's
+## goods lightly (its model's foot is the floor, under its bottom pallets).
+@export_range(0.0, 1.0) var wear: float = 1.0
+@export var model_wear: Dictionary[StringName, float] = {
+	&"shelf": 0.35, &"shelf_b": 0.35, &"shelf_c": 0.35, &"earth_bank": 0.0,
+	&"pine_young_crown": 0.0, &"pine_grown_crown": 0.0, &"pine_old_crown": 0.0, &"oak_crown": 0.0, &"birch_crown": 0.0,
+}
 
 ## Each model path's mesh as loaded (null when it won't load), so a kind is dressed only by a model that loads.
 var _meshes: Dictionary[String, Mesh] = {}
