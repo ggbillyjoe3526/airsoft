@@ -3,9 +3,9 @@ extends Node3D
 ## An indoor field's roof (DR1; MapData.roof_height): the ceiling over the whole field, the roof's bays under it (Dev 3:
 ## RoofConfig.bay_model, a truss, purlins, the sheet and services a bay, on the trusses' grid, a MultiMesh every
 ## RoofConfig.bay_chunk truss lines; plain truss beams in one mesh without it) and its lamps (MapData.roof_lamps, one
-## MultiMesh: the high-bay model with its glowing lens, or a glowing panel without it), none of it casting a shadow, so
-## the preset's overhead sun keeps lighting the hall as the roof lamps would; with Graphics › Lamp light, a real light
-## under each lamp too (RoofLamps). Look only: the BB ceiling is MapLevel's;
+## MultiMesh: the high-bay model with its glowing lens, or a glowing panel without it), and a real light under each lamp
+## (RoofLamps) that Graphics › Lamp light switches on. The roof and lamps themselves cast no shadow, so the preset's
+## overhead sun lights the hall through them where the lamps aren't real lights (Low, Medium). Look only: the BB ceiling is MapLevel's;
 ## nothing here is read by the simulation. Built once, nothing per frame.
 
 ## How far (m) over the roof's underside the ceiling slab starts when the bays' sheet is drawn under it.

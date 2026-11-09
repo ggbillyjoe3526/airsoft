@@ -45,12 +45,12 @@ extends Resource
 @export var lamp_cone: float = 36.0
 @export var lamp_cone_falloff: float = 0.6
 @export var lamp_range: float = 17.0
-@export var lamp_light_energy: float = 12.0
+@export var lamp_light_energy: float = 26.0
 @export var lamp_falloff: float = 1.0
 @export var lamp_fog: float = 0.6
 ## While the lamps shine the preset's overhead sun, which stands in for them on Low and Medium, is turned down to this
 ## share of itself, so the hall keeps about its brightness and reads as lit by its lamps.
-@export var lamp_sun_share: float = 0.35
+@export var lamp_sun_share: float = 0.55
 ## How far (m) from the eye the lamps are lit (Near, Far), each fading out over its last `lamp_fade` m; past that a
 ## lamp is not lit at all, as an unshadowed one would shine through the rooms' roofs. Far keeps Depot's 65 m hall
 ## sight line lit.

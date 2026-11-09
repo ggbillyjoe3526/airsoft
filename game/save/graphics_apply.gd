@@ -42,6 +42,8 @@ const PROJECT_SLOTS: Array[int] = [Viewport.SHADOW_ATLAS_QUADRANT_SUBDIV_4, View
 		Viewport.SHADOW_ATLAS_QUADRANT_SUBDIV_16, Viewport.SHADOW_ATLAS_QUADRANT_SUBDIV_64]
 const LAMP_SLOTS: Array[int] = [Viewport.SHADOW_ATLAS_QUADRANT_SUBDIV_4, Viewport.SHADOW_ATLAS_QUADRANT_SUBDIV_16,
 		Viewport.SHADOW_ATLAS_QUADRANT_SUBDIV_64, Viewport.SHADOW_ATLAS_QUADRANT_SUBDIV_64]
+## The optic glass's shadow atlas is the main view's cut by this while the lamps are real lights (its picture is small).
+const GLASS_ATLAS_SHARE := 2
 ## The project's shadow atlas for the lights other than the sun (spots and omnis).
 const LAMP_ATLAS_SIZE := "rendering/lights_and_shadows/positional_shadow/atlas_size"
 const SSAO_QUALITY := "rendering/environment/ssao/quality"
@@ -251,7 +253,7 @@ static func apply(values: GraphicsQuality, viewport: Viewport, rs: Server = null
 
 
 ## The root viewport's shadow atlas for the lamps and the torch's spot with `values`: the sun's Shadow detail while the
-## roof lamps are real lights (Lamp light), else the project's (LAMP_ATLAS_DEFAULT), which the torch was tuned on.
+## roof lamps are real lights (Lamp light), else the project's (LAMP_ATLAS_SIZE), which the torch was tuned on.
 static func lamp_atlas(values: GraphicsQuality) -> int:
 	if values.lamp_lights == GraphicsQuality.LampLights.OFF:
 		return ProjectSettings.get_setting(LAMP_ATLAS_SIZE) as int
@@ -263,7 +265,7 @@ static func lamp_atlas(values: GraphicsQuality) -> int:
 static func glass_atlas(values: GraphicsQuality) -> int:
 	if values.lamp_lights == GraphicsQuality.LampLights.OFF:
 		return 0
-	return values.shadow_detail / 2
+	return values.shadow_detail / GLASS_ATLAS_SHARE
 
 
 ## The render scale and edge smoothing alone, which the optic glass's own picture follows too.

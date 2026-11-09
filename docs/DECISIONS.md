@@ -295,6 +295,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   and the game culls those as holes. Every lathe, tube and band in `tools/blender/maps/` turns its faces out through
   `vertex_paint.py` (`lathe`, `orient_loft`), and `tests/unit/test_model_faces.gd` fails a model when more than 2 % of
   rays from all round and above first meet a face turned away. New map models follow both.
+- **Ultra pushes Godot's light as far as it goes, for the whole game (owner, 2026-11-09, UG1).** "Use all of Godot's
+  graphics abilities": baked path-traced-like light on Ultra only, every effect scaling down per preset, every map
+  (he said twice it is not one map). Baked path tracing comes before any live ray tracing (his card answer). Built as
+  shared code in five steps (`docs/ROADMAP.md`); step 1 is Graphics › Lamp light: roof lamps and a night's light
+  pools as real shadowed lights, near on High, far on Ultra, off on Low and Medium (`data/graphics.md`).
 - **Every figure keeps its team-colour plate carrier (owner, 2026-10-17, AX1).** The carrier reads like a site's team
   bib and is the strongest team cue at range. A civilian outfit is in `docs/IDEAS.md`.
 
@@ -1058,7 +1063,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   field beats a stutter in round 1; the time to round 1 may grow for it. A 60 s limit only guards against a build that
   never settles.
 - **What each quality preset drops (owner, 2026-10-04 to 2026-10-16).** Real light counts are fixed: Low none, Medium
-  2, High 4 (owner, 2026-10-04). Torch shadows only on High and Ultra, and Medium's Player detail is Low (Art
+  2, High 4 (owner, 2026-10-04); Ultra's Lamp light Far gives a night's pools 8, with shadows (UG1, 2026-11-09). Torch shadows only on High and Ultra, and Medium's Player detail is Low (Art
   direction). High and Ultra draw the city's flat finishes at 512², as Medium does (owner, 2026-10-05; M78): 1024²
   gains nothing there for four times the memory.
 - **Menus stay smooth (owner, 2026-10-12; IM1).** "The UI should always feel smooth and responsive", with a loading

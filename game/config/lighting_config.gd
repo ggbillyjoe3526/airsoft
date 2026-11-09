@@ -87,8 +87,8 @@ const PRESETS: Array[StringName] = [DAY, NIGHT]
 ## and fires alike); on Far the nearest `real_lights_far` pools get one, if that is more than Mesh detail's.
 @export var real_lights_far: int = 8
 ## A real light reaches `real_reach` times its pool's radius at `real_energy` (its shadow, with Lamp light, blurred
-## `real_shadow_blur`); it moves to another
-## pool only when that one is `real_hysteresis` m nearer, fading out and in over `real_fade` s.
+## `real_shadow_blur`); it moves to another pool only when that one is `real_hysteresis` m nearer, fading out and in
+## over `real_fade` s.
 @export var real_reach: float = 1.5
 @export var real_energy: float = 1.6
 @export var real_hysteresis: float = 3.0

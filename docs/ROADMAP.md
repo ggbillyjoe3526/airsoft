@@ -27,7 +27,11 @@ in `docs/PROCESS.md`.
   models of replicas, attachments, figures, gear and first-person arms.
 - **Building 0.1 Dev 3** (owner, 2026-11-07): Blender models for Depot and the practice range, and perhaps Woodland's.
   A league and cup mode is noted for Dev 3 but waits for the owner's word (`docs/IDEAS.md`); the Modes Update is
-  deferred until later (owner, 2026-11-07: `docs/DECISIONS.md` › Versions, releases and branches).
+  deferred until later (owner, 2026-11-07: `docs/DECISIONS.md` › Versions, releases and branches). The owner pulled in
+  the top graphics for the whole game (2026-11-09: Ultra as close to path-traced light as Godot gets, scaling per
+  preset, baked path tracing before live ray tracing), in five steps: real lamp lights with shadows (done: UG1), a
+  roof that lets the sun in only at its skylights, eye adaptation, finer bounce light, reflections, ambient occlusion
+  and wear decals, then baked path-traced light.
 - **The release path** (owner, 2026-10-12): 0.1 Dev builds, 0.1 Beta, then 0.1 (tagged `0.1.0`) opens Early
   Access to the public.
   Themed updates follow (Replica, Modes, Maps, Progression and any more), up to 1.0, the full launch. See
