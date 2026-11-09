@@ -1,12 +1,12 @@
 # FL1 · Bots' flashes no longer blind their own teammates
 
-**Review:** pending
+**Review:** 1 attempt · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-09 | 1 | Opus 5.5 (Dev 3 checklist thread) | – | – | – |
+| 2026-11-09 | 1 | Opus 5.5 (Dev 3 checklist thread) | 8/8 | 8/8 Accept (QA Pass, performance Pass) | – |
 
 ## What changed
 
@@ -33,3 +33,6 @@ fix: 3 enemies, 0 teammates (4 flashes thrown, against 9).
 ## Known issues left
 
 - A bounce off something the arc didn't foresee can still put the bang where a teammate is; not seen in the probe.
+- The lead looks at where a teammate will be by the bang, not its nearest pass; one crossing the bang's spot with the
+  line blocked at both ends could slip through (critic advisory, rare).
+- Bots' flashes are rarer (9 thrown to 4 on the same seeds): the owner judges in play whether they still matter.
