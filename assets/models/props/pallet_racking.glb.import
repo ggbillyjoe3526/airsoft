@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://ckbix76afmybf"
-path="res://.godot/imported/shelf.glb-bc7c1749bc04849e782c7a93e7757a67.scn"
+uid="uid://cllxn2lo6mdnk"
+path="res://.godot/imported/pallet_racking.glb-4dcb8cdb5d54be1bdc91032afd123397.scn"
 
 [deps]
 
-source_file="res://assets/models/props/shelf.glb"
-dest_files=["res://.godot/imported/shelf.glb-bc7c1749bc04849e782c7a93e7757a67.scn"]
+source_file="res://assets/models/props/pallet_racking.glb"
+dest_files=["res://.godot/imported/pallet_racking.glb-4dcb8cdb5d54be1bdc91032afd123397.scn"]
 
 [params]
 

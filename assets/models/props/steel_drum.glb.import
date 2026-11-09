@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cm4ck3oa1cfpr"
-path="res://.godot/imported/drum.glb-5baab1c8f922eb5a8bdde14845a3d903.scn"
+uid="uid://qipeh5nmpp3a"
+path="res://.godot/imported/steel_drum.glb-ac05d257f2276020a3ba510efd1dedb1.scn"
 
 [deps]
 
-source_file="res://assets/models/props/drum.glb"
-dest_files=["res://.godot/imported/drum.glb-5baab1c8f922eb5a8bdde14845a3d903.scn"]
+source_file="res://assets/models/props/steel_drum.glb"
+dest_files=["res://.godot/imported/steel_drum.glb-ac05d257f2276020a3ba510efd1dedb1.scn"]
 
 [params]
 

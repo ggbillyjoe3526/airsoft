@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cdatc1ferqksn"
-path="res://.godot/imported/barrel.glb-d39252c0b23c896c6728ae6f0441488c.scn"
+uid="uid://bpjl5k16pq0o6"
+path="res://.godot/imported/kit_rack.glb-db30c77406361a57406144b45708747b.scn"
 
 [deps]
 
-source_file="res://assets/models/props/barrel.glb"
-dest_files=["res://.godot/imported/barrel.glb-d39252c0b23c896c6728ae6f0441488c.scn"]
+source_file="res://assets/models/props/kit_rack.glb"
+dest_files=["res://.godot/imported/kit_rack.glb-db30c77406361a57406144b45708747b.scn"]
 
 [params]
 
