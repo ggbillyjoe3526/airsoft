@@ -90,9 +90,7 @@ def net(b: hs.Builder, side: float, rng: random.Random) -> None:
         row = []
         for c in range(COLS + 1):
             x = -HALF + 2.0 * HALF * c / COLS
-            z = top_of(x) * r / ROWS
-            y = side * (SHEET + fold(x, z, side) - BACK + (0.02 if r == 0 else 0.0))  # the hem bunches on the ground
-            row.append(bm.verts.new((x, y, z)))
+            row.append(bm.verts.new((x, sheet_y(x, r, side), top_of(x) * r / ROWS)))
         grid.append(row)
     mesh = b.mat("NetMesh")
     for r in range(ROWS):
@@ -140,6 +138,28 @@ def net(b: hs.Builder, side: float, rng: random.Random) -> None:
         bm.faces.new([bm.verts.new(p) for p in pts]).material_index = b.mat(tone)
 
 
+def sheet_y(x: float, r: int, side: float) -> float:
+    """The dark mesh's depth at grid row r (its height top_of(x) * r / ROWS) on the side `side`."""
+    z = top_of(x) * r / ROWS
+    return side * (SHEET + fold(x, z, side) - BACK + (0.02 if r == 0 else 0.0))  # the hem bunches on the ground
+
+
+def closing(b: hs.Builder) -> None:
+    """The dark mesh closed between the two nets: over their tops and across each end, so a net wall is solid from
+    above and at its ends (its sections' end caps meet back to back, unseen, where they join)."""
+    for c in range(COLS):
+        x0, x1 = -HALF + 2.0 * HALF * c / COLS, -HALF + 2.0 * HALF * (c + 1) / COLS
+        mk.quad(b, [(x0, sheet_y(x0, ROWS, -1.0), top_of(x0)), (x1, sheet_y(x1, ROWS, -1.0), top_of(x1)),
+                    (x1, sheet_y(x1, ROWS, 1.0), top_of(x1)), (x0, sheet_y(x0, ROWS, 1.0), top_of(x0))], "NetMesh")
+    for end in (-1.0, 1.0):
+        x = end * HALF
+        for r in range(ROWS):
+            z0, z1 = top_of(x) * r / ROWS, top_of(x) * (r + 1) / ROWS
+            pts = [(x, sheet_y(x, r, -1.0), z0), (x, sheet_y(x, r, 1.0), z0), (x, sheet_y(x, r + 1, 1.0), z1),
+                   (x, sheet_y(x, r + 1, -1.0), z1)]
+            mk.quad(b, pts if end > 0.0 else pts[::-1], "NetMesh")
+
+
 def scaffold(b: hs.Builder) -> None:
     """The scaffold: the upright in the middle on its base plate, the top rail along, a right-angle coupler where they
     meet."""
@@ -174,6 +194,7 @@ def main() -> None:
     scaffold(b)
     for side in (-1.0, 1.0):
         net(b, side, rng)
+    closing(b)
     ob = b.build()
     # the nets' outermost folds and leaves reach the box's faces exactly
     out = max(v.co.y for v in ob.data.vertices)
