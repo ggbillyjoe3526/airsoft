@@ -36,3 +36,6 @@
 
 - Depot's roof and trusses keep their baked violet and crimson, so they draw dark and dull until SL3 repaints them.
 - Model surfaces have no wear yet (SL2).
+- The site surfaces' wear (grit 0.6) costs a few more noise samples a pixel on every preset, Low included
+  (performance advisory: no frame times in the cloud). If Low drops under 60 FPS on the owner's card, gate the fine
+  noise by preset or set grit 0 on Low.
