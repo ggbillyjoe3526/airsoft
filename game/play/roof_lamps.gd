@@ -3,20 +3,26 @@ extends Node3D
 ## An indoor field's roof lamps as real lights (Settings › Graphics › Lamp light, data/graphics.md): a SpotLight3D under
 ## each lamp RoofView hangs, shining straight down and casting a shadow, lit out to the row's reach from the eye by the
 ## engine's own distance fade (nothing here runs per frame). Off, the node is hidden and the preset's overhead sun
-## lights the hall alone, as on Low and Medium; while it shines, FieldLighting.set_key_share turns that sun down to
-## RoofConfig.lamp_sun_share (`key_share`). Built once with the roof; `set_mode` only sets what changes. Look only.
+## lights the hall alone, as on Low and Medium; on Near, FieldLighting.set_key_share turns that sun down to
+## RoofConfig.lamp_sun_share (`key_share`). On Far, with the roof's sun shade, the roof shades the sun but at its
+## rooflights instead, the sun keeps RoofConfig.shade_sun_share and the lamps shine lamp_shaded_energy. Built once
+## with the roof; `set_mode` only sets what changes. Look only.
 
 var _cfg: RoofConfig = null
 var _lights: Array[SpotLight3D] = []
+## RoofView's sun shade and hall haze, shown on Far; empty on a roof without them.
+var _shaded_nodes: Array[Node3D] = []
 var _mode: GraphicsQuality.LampLights = GraphicsQuality.LampLights.OFF
 var _soft: bool = false
 
 
-## A light under each of `spots` (each lamp's lowest point), as `cfg` sets them, all off.
-static func build(spots: Array[Vector3], cfg: RoofConfig) -> RoofLamps:
+## A light under each of `spots` (each lamp's lowest point), as `cfg` sets them, all off; `shaded` (may be empty) are
+## the roof's sun shade and its haze, shown on Far.
+static func build(spots: Array[Vector3], cfg: RoofConfig, shaded: Array[Node3D] = []) -> RoofLamps:
 	var lamps := RoofLamps.new()
 	lamps.name = "LampLights"
 	lamps._cfg = cfg
+	lamps._shaded_nodes = shaded
 	lamps.visible = false
 	var down := Basis(Vector3.RIGHT, -PI * 0.5)
 	for i in spots.size():
@@ -56,17 +62,29 @@ func mode() -> GraphicsQuality.LampLights:
 	return _mode
 
 
-## The share of its strength the overhead sun keeps with `wanted`: all of it with the lamps off.
+## The share of its strength the overhead sun keeps with `wanted`: all of it with the lamps off, shade_sun_share
+## shaded (Far with the roof's sun shade), else lamp_sun_share.
 func key_share(wanted: GraphicsQuality.LampLights) -> float:
-	return 1.0 if wanted == GraphicsQuality.LampLights.OFF or _lights.is_empty() else _cfg.lamp_sun_share
+	if wanted == GraphicsQuality.LampLights.OFF or _lights.is_empty():
+		return 1.0
+	return _cfg.shade_sun_share if _shaded(wanted) else _cfg.lamp_sun_share
 
 
-## Lights the lamps out to `wanted`'s reach (off: hidden), their shadows contact-hardening when `soft` (Softest). Only
-## what changes is set; never per frame.
+## Whether the roof shades the sun with `wanted`: on Far, with a sun shade.
+func _shaded(wanted: GraphicsQuality.LampLights) -> bool:
+	return not _shaded_nodes.is_empty() and wanted == GraphicsQuality.LampLights.FAR
+
+
+## Lights the lamps out to `wanted`'s reach (off: hidden), their shadows contact-hardening when `soft` (Softest), and
+## shows the sun shade on Far. Only what changes is set; never per frame.
 func set_mode(wanted: GraphicsQuality.LampLights, soft: bool) -> void:
 	var on := wanted != GraphicsQuality.LampLights.OFF
 	if visible != on:
 		visible = on
+	var shaded := _shaded(wanted)
+	for node in _shaded_nodes:
+		if node.visible != shaded:
+			node.visible = shaded
 	if not on or (wanted == _mode and soft == _soft):
 		_mode = wanted
 		return
@@ -74,7 +92,9 @@ func set_mode(wanted: GraphicsQuality.LampLights, soft: bool) -> void:
 	_soft = soft
 	var reach := _cfg.lamp_near if wanted == GraphicsQuality.LampLights.NEAR else _cfg.lamp_far
 	var size := _cfg.lamp_lens_size if soft else 0.0
+	var energy := _cfg.lamp_shaded_energy if _shaded(wanted) else _cfg.lamp_light_energy
 	for spot in _lights:
+		spot.light_energy = energy
 		spot.distance_fade_begin = maxf(0.0, reach - _cfg.lamp_fade)
 		spot.distance_fade_shadow = reach
 		spot.light_size = size

@@ -83,7 +83,8 @@ func test_the_sun_dims_while_the_lamps_shine_and_comes_back() -> void:
 	var rs := GraphicsApply.Server.new()
 	GraphicsApply.apply_field(table.preset(&"ultra"), lighting, null, rs, null, null, null, lamps)
 	assert_true(lamps.visible)
-	assert_almost_eq(lighting.sun.light_energy, full * play.roof.lamp_sun_share, 0.001)
+	assert_almost_eq(lighting.sun.light_energy, full * play.roof.shade_sun_share, 0.001,
+			"on Far the roof shades the sun but at its rooflights instead (test_sun_shade)")
 	GraphicsApply.apply_field(table.preset(&"high"), lighting, null, rs, null, null, null, lamps)
 	assert_eq(lamps.mode(), GraphicsQuality.LampLights.NEAR)
 	assert_almost_eq(lighting.sun.light_energy, full * play.roof.lamp_sun_share, 0.001)

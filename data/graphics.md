@@ -84,8 +84,11 @@ never stops the game from starting.
   `lamp_fade` m, with no lamp lit past that (an unshadowed lamp would shine through the rooms' roofs). Their shadows
   follow the shadow rows: Shadow detail is their atlas, Softness their filter (Softest gives each the lens's size, so
   its shadows harden at their foot). At night it also gives a field's fires and lanterns (its light pools) shadows,
-  and Far gives real lights to `LightingConfig.real_lights_far` of them. Off (Low, Medium), and on a field with no
-  roof lamps or light pools, it costs nothing.
+  and Far gives real lights to `LightingConfig.real_lights_far` of them. On Far a roof drawn with its bay model also
+  shades the sun but at its rooflights (UG2, `RoofView`'s sun shade, a shadow-only slab): the sun keeps
+  `RoofConfig.shade_sun_share` and falls through them in bright strips on the floor and shafts in a thicker haze under
+  the roof (`shade_haze`, with Volumetric fog), while the lamps shine `lamp_shaded_energy` to light the rest. Off (Low,
+  Medium), and on a field with no roof lamps or light pools, it costs nothing.
 - **Glow** blooms only what is brighter than white (lamp panels, a lit sky), softly. **Volumetric fog** is a faint
   haze lit by the sun and the bounce light (LookConfig's Volumetric fog group).
 - **Temporal smoothing** is off on every preset: it smears the thin, fast BB streaks. It and FSR 2 are there for

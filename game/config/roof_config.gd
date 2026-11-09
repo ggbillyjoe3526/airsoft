@@ -2,7 +2,8 @@ class_name RoofConfig
 extends Resource
 ## An indoor field's roof (DR1, MapData.roof_height and roof_lamps), drawn by RoofView: the ceiling's sheeting, the
 ## steel trusses under it every `truss_step` m across the hall, and the lamp panels. Look only: the light itself is the
-## preset's sun, set nearly overhead by the map (its `lighting.overrides`), which the roof never shades. Colours are
+## preset's sun, set nearly overhead by the map (its `lighting.overrides`), which the roof shades only on Lamp light Far
+## (but at its rooflights), and the lamps as real lights on High and Ultra (Lamp light). Colours are
 ## sRGB, the look's (LookConfig.palette), off both team hues (docs/ART.md › Colour).
 
 ## The ceiling: its sheeting's paint (in the shared light, so its underside takes the look's shade and the bounce),
@@ -61,3 +62,12 @@ extends Resource
 ## sharp at its foot and soft away from it, as the sun's.
 @export var lamp_shadow_blur: float = 1.0
 @export var lamp_lens_size: float = 0.35
+## On Far (Ultra) the roof also shades the sun but at its rooflights (RoofView's sun shade, with the bay model): strips
+## `rooflight_half` m either side of each bay's edge, halfway between the trusses (tools/blender/maps/roof_truss.py's
+## ROOFLIGHT), so the sun falls through them in shafts on the haze and patches on the floor. Shaded, the sun keeps
+## `shade_sun_share` of itself and each lamp shines `lamp_shaded_energy`, so the hall keeps about its brightness, and
+## the haze under the roof thickens by `shade_haze` (a FogVolume's density) so the sun's shafts show.
+@export var rooflight_half: float = 0.8
+@export var shade_haze: float = 0.012
+@export var shade_sun_share: float = 1.0
+@export var lamp_shaded_energy: float = 34.0
