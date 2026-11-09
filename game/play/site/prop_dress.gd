@@ -147,6 +147,9 @@ static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName
 		if cfg.lay_of(b) == PropDressConfig.Lay.CLUSTER \
 				and not used.has(cfg.pallet):
 			used.append(cfg.pallet)
+		var crown: StringName = cfg.tree_crowns.get(model, &"")
+		if cfg.lay_of(b) == PropDressConfig.Lay.TREE and crown != &"" and not used.has(crown):
+			used.append(crown)
 		if cfg.lay_of(b) == PropDressConfig.Lay.BAY:
 			for feature: String in cfg.bay_features.get(model, PackedStringArray()):
 				if not used.has(StringName(feature)):

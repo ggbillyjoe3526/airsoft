@@ -5,9 +5,10 @@ tree's height).
 From the owner's photos (references/maps/woodland/01-pine-tree): a Scots-type pine. Young (6 to 10 m): a slim stem
 with whorls of up-swept branches all the way down, long-needled tufts at their tips, a cone that's still open. Grown
 (12 to 17 m): the lower stem cleared to a few dead stubs, a tall, rounded cone of whorls over the upper half. Old (19
-to 25 m): a tall clean bole, furrowed grey-brown at the foot turning smooth golden-tan above (the photos' orange
-upper bark, kept off Beta's orange: the look's palette has no orange that isn't a team's), and a flat-topped,
-irregular crown of a few heavy limbs carrying clouds of foliage, the open sky showing between them.
+to 25 m): a clean bole half its height, furrowed grey-brown below turning smooth golden-tan in its upper third (the
+photos' orange upper bark, kept off Beta's orange: the look's palette has no orange that isn't a team's), and a
+narrow, deep, lopsided crown (about 0.4 as wide as the tree is tall) of heavy limbs carrying clouds of foliage, the
+sky showing between them.
 
 Each fills its block's box exactly at the trunk: the game stands the tree on the ground under the box's middle, its
 foot's radius (`FOOT_R`) to the box's half-width and its top to the box's top (PropDressConfig.Lay.TREE); the crown
@@ -30,7 +31,7 @@ P = tk.PALETTE
 UP = Vector((0.0, 1.0, 0.0))
 
 # Colours (sRGB): the bark's foot in umber, its upper bole golden tan, the foliage the palette's pine greens.
-BARK_FOOT = tk.mix(tk.srgb(P["bark"]), tk.srgb(P["stone"]), 0.4)
+BARK_FOOT = tk.mix(tk.srgb(P["bark"], 0.86), tk.srgb(P["stone"], 0.8), 0.3)  # furrowed grey-brown
 BARK_FURROW = tk.srgb(P["bark"], 0.6)
 BARK_UPPER = tk.srgb(0xB0A472)      # golden tan: the photos' orange upper bark, 30 degrees of hue clear of Beta
 BARK_YOUNG = tk.srgb(0x9C9470)
@@ -98,28 +99,30 @@ def young() -> None:
     height, foot_r = 8.0, 0.2
     bark = bark_of(2.0, BARK_YOUNG, BARK_YOUNG, tk.srgb(0x9C9470, 0.8), rng)
     path = stem(tree, height, foot_r, 0.02, 8, 8, Vector((0.04, 0.0, -0.03)), bark, 0.03)
-    centre = Vector((0.0, height * 0.68, 0.0))
-    whorls = 6
+    centre = Vector((0.0, height * 0.7, 0.0))
+    # a slim, open cone (about 0.3 as wide as tall): whorls of short up-swept branches, each tipped with a long
+    # upright tuft of needles, the gaps between whorls showing the stem
+    whorls = 8
     for w in range(whorls):
         t = w / (whorls - 1)
-        y = height * (CLEAR_YOUNG / height + 0.03 + (0.84 - CLEAR_YOUNG / height) * t)
-        reach = 1.25 * (1.0 - t) ** 0.9 + 0.25
+        y = CLEAR_YOUNG + 0.1 + (height * 0.86 - CLEAR_YOUNG - 0.1) * t + rng.uniform(-0.12, 0.12)
+        reach = 0.78 * (1.0 - t) ** 0.85 + 0.15
         at = axis_at(path, y)
-        n = 4 if w < whorls - 1 else 3
+        n = 4 if w < whorls - 2 else 3
         spin = rng.uniform(0.0, math.tau)
         for k in range(n):
-            a = spin + math.tau * k / n + rng.uniform(-0.25, 0.25)
+            a = spin + math.tau * k / n + rng.uniform(-0.3, 0.3)
             out = Vector((math.cos(a), 0.0, math.sin(a)))
             ln = reach * rng.uniform(0.85, 1.1)
-            bp = branch(tree, at, out, ln, ln * 0.45, 0.035, 3, 1, BARK_YOUNG)
-            size = 0.8 + 0.75 * (1.0 - t)
-            tree.tuft(bp[-1] + UP * 0.1 - out * 0.2, size, out, 2 if w < 2 else 1, NEEDLE_YOUNG, NEEDLE_UNDER, centre,
-                      flat=1.25, spread=0.5)
-    # the leader: its tufts round the top bud
+            bp = branch(tree, at, out, ln, ln * 0.8, 0.03, 3, 1, BARK_YOUNG)
+            size = 0.5 + 0.3 * (1.0 - t)
+            tree.tuft(bp[-1] + UP * size * 0.35, size, out, 1, NEEDLE_YOUNG, NEEDLE_UNDER, centre, flat=1.9,
+                      lean=0.6)
+    # the leader: a tall tuft round the top bud and the ring of shoots under it
     top = path[-1]
-    tree.tuft(top + UP * -0.55, 0.85, Vector((1.0, 0.0, 0.0)), 3, NEEDLE_YOUNG, NEEDLE_UNDER, centre, flat=1.1,
-              spread=0.5)
-    tree.export(1000, foot_r, CLEAR_YOUNG)
+    tree.tuft(top + UP * -0.45, 0.55, Vector((1.0, 0.0, 0.0)), 3, NEEDLE_YOUNG, NEEDLE_UNDER, centre, flat=2.1,
+              spread=0.4, lean=0.6)
+    tree.export(1000, foot_r, CLEAR_YOUNG, crown=True)
 
 
 def grown() -> None:
@@ -137,7 +140,7 @@ def grown() -> None:
     whorls = 8
     for w in range(whorls):
         t = w / (whorls - 1)
-        y = height * (0.3 + 0.6 * t)
+        y = height * (0.3 + 0.6 * t + rng.uniform(-0.025, 0.025))  # whorls a little irregular, as grown
         # a long, narrow cone with rounded shoulders, widest at its foot, to a point
         reach = 0.35 + 2.1 * (1.0 - t) ** 0.8
         at = axis_at(path, y)
@@ -147,61 +150,69 @@ def grown() -> None:
             a = spin + math.tau * k / n + rng.uniform(-0.3, 0.3)
             out = Vector((math.cos(a), 0.0, math.sin(a)))
             ln = reach * rng.uniform(0.8, 1.12)
-            bp = branch(tree, at, out, ln, ln * rng.uniform(0.15, 0.35), 0.06, 3, 1, BARK_UPPER)
+            bp = branch(tree, at, out, ln, ln * rng.uniform(0.05, 0.25), 0.06, 3, 1, BARK_UPPER)
             size = 1.25 + 1.1 * (1.0 - t)
-            tree.tuft(bp[-1] + UP * 0.1 - out * 0.25, size, out, 2, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.72,
-                      spread=0.55)
-            if ln > 2.3:
-                tree.tuft(tk.along(bp, 0.5) + UP * 0.2, size * 0.9, out, 1, NEEDLE_TOP, NEEDLE_UNDER, centre,
-                          flat=0.72)
+            # the tip's tuft droops a little under the branch's end; the branch is clothed to the stem
+            tree.tuft(bp[-1] - UP * 0.12 * size - out * 0.25, size, out, 2, NEEDLE_TOP, NEEDLE_UNDER, centre,
+                      flat=0.72, spread=0.55)
+            if ln > 1.75:
+                tree.tuft(tk.along(bp, 0.45) + UP * 0.15, size * 0.85, out, 1, NEEDLE_TOP, NEEDLE_UNDER, centre,
+                          flat=0.8)
     # the crown's core round the stem, so it never reads as a stack of plates, and the top
     for y in (0.56, 0.7, 0.82):
         tree.tuft(axis_at(path, height * y), 2.4 - 0.9 * y, Vector((1.0, 0.0, 0.0)), 2, NEEDLE_TOP, NEEDLE_UNDER,
                   centre, flat=0.9, spread=0.6)
     tree.tuft(path[-1] + UP * -0.7, 1.0, Vector((0.0, 0.0, 1.0)), 3, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=1.2,
               spread=0.5)
-    tree.export(2000, foot_r, CLEAR_GROWN)
+    tree.export(2000, foot_r, CLEAR_GROWN, crown=True)
 
 
 def old() -> None:
     tree = tk.Tree("pine_old", 3303)
     rng = tree.rng
     height, foot_r = 22.0, 0.42
-    bark = bark_of(0.4, BARK_UPPER, BARK_FOOT, BARK_FURROW, rng)
-    path = stem(tree, height, foot_r, 0.05, 16, 12, Vector((0.16, 0.0, -0.1)), bark, 0.06)
-    for y in (CLEAR_OLD + 0.2, 4.6, 6.1, 7.8, 9.5, 11.0):
+    bark = bark_of(0.6, BARK_UPPER, BARK_FOOT, BARK_FURROW, rng)
+    path = stem(tree, height, foot_r, 0.05, 16, 12, Vector((0.2, 0.0, -0.12)), bark, 0.06)
+    for y in (CLEAR_OLD + 0.2, 4.6, 6.1, 7.8, 9.3, 10.6):
         a = rng.uniform(0.0, math.tau)
         out = Vector((math.cos(a), 0.0, math.sin(a)))
         branch(tree, axis_at(path, y), out, rng.uniform(0.4, 0.9), rng.uniform(-0.1, 0.1), 0.05, 3, 1, STUB)
-    centre = Vector((0.0, height * 0.82, 0.0))
-    # the crown: a few heavy limbs from the upper bole, each forking, foliage clouds along and at their ends, the
-    # whole a broad, flat-topped canopy
-    limbs = 7
+    centre = Vector((0.0, height * 0.76, 0.0))
+    # the crown over the bole's upper half, about 0.4 as wide as the tree is tall: heavy limbs from the upper bole,
+    # longer to one side (the photos' lopsided crowns), each forking, clouds of foliage along and at their ends, its
+    # top flattish
+    limbs = 9
     spin = rng.uniform(0.0, math.tau)
+    lop = rng.uniform(0.0, math.tau)
     for k in range(limbs):
         t = k / (limbs - 1)
-        y = height * (0.55 + 0.3 * t)
+        y = height * (0.52 + 0.33 * t)
         a = spin + k * 2.4 + rng.uniform(-0.3, 0.3)  # a golden-angle spiral round the bole
         out = Vector((math.cos(a), 0.0, math.sin(a)))
-        ln = (6.0 - 2.8 * t) * rng.uniform(0.85, 1.15)
-        rise = ln * rng.uniform(0.35, 0.55) + (height * 0.86 - y) * 0.35
+        ln = (3.0 - 1.3 * t) * rng.uniform(0.85, 1.15) * (1.0 + 0.3 * math.cos(a - lop))
+        rise = ln * rng.uniform(0.3, 0.5) + (height * 0.88 - y) * 0.15
         at = axis_at(path, y)
-        lp = branch(tree, at, out, ln, rise, 0.16 - 0.06 * t, 5, 4, BARK_UPPER, droop=-0.25 * ln)
-        for f in range(2):
-            side = out.cross(UP).normalized() * (1 if f == 0 else -1)
-            start = tk.along(lp, 0.55 + 0.2 * f)
-            fo = (out + side * rng.uniform(0.6, 1.0)).normalized()
-            fl = ln * rng.uniform(0.35, 0.5)
-            fp = branch(tree, start, fo, fl, fl * 0.4, 0.06, 4, 2, BARK_UPPER)
-            tree.tuft(fp[-1] + UP * 0.15, 2.7 + 0.6 * (1.0 - t), fo, 4, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.6,
-                      spread=0.6)
-        tree.tuft(lp[-1] + UP * 0.2, 3.1 + 0.6 * (1.0 - t), out, 5, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.6,
+        lp = branch(tree, at, out, ln, rise, 0.14 - 0.05 * t, 5, 3, BARK_UPPER, droop=-0.2 * ln)
+        side = out.cross(UP).normalized() * rng.choice((-1.0, 1.0))
+        start = tk.along(lp, 0.6)
+        fo = (out + side * rng.uniform(0.6, 1.0)).normalized()
+        fl = ln * rng.uniform(0.4, 0.55)
+        fp = branch(tree, start, fo, fl, fl * 0.35, 0.05, 4, 2, BARK_UPPER)
+        tree.tuft(fp[-1] + UP * 0.15, 2.0 + 0.4 * (1.0 - t), fo, 3, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.62,
                   spread=0.6)
-        tree.tuft(tk.along(lp, 0.4) + UP * 0.35, 2.2, out, 1, NEEDLE_TOP, NEEDLE_UNDER, centre)
+        # a second, shorter fork to the other side, nearer the bole
+        fo2 = (out - side * rng.uniform(0.5, 0.9)).normalized()
+        fl2 = ln * rng.uniform(0.3, 0.42)
+        fp2 = branch(tree, tk.along(lp, 0.4), fo2, fl2, fl2 * 0.45, 0.045, 4, 2, BARK_UPPER)
+        tree.tuft(fp2[-1] + UP * 0.15, 1.7 + 0.3 * (1.0 - t), fo2, 2, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.65,
+                  spread=0.55)
+        tree.tuft(lp[-1] + UP * 0.2, 2.4 + 0.5 * (1.0 - t), out, 4, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.62,
+                  spread=0.6)
+        tree.tuft(tk.along(lp, 0.35) + UP * 0.3, 1.8, out, 1, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.7)
     # the top: the leader's own cloud over the middle
-    tree.tuft(path[-1] + UP * -1.0, 2.6, Vector((1.0, 0.0, 0.0)), 6, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.7,
-              spread=0.9)
-    tree.export(3000, foot_r, CLEAR_OLD)
+    tree.tuft(path[-1] + UP * -0.9, 2.3, Vector((1.0, 0.0, 0.0)), 5, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=0.65,
+              spread=0.8)
+    tree.export(3000, foot_r, CLEAR_OLD, crown=True)
 
 
 if __name__ == "__main__":

@@ -63,7 +63,7 @@ func _outside(m: MapData, dress: PropDress) -> Array[String]:
 		var mesh := dress.mesh_of(model)
 		var verts: PackedVector3Array = mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 		var middle := mesh.get_aabb().get_center()
-		var tree: bool = look.props.model_lays.get(model, PropDressConfig.Lay.FIT) == PropDressConfig.Lay.TREE
+		var tree: bool = look.props.is_tree_part(model)
 		for i in placed[model].transforms.size():
 			var t := placed[model].transforms[i]
 			var home := -1
@@ -289,6 +289,14 @@ func test_woodland_is_dressed_without_a_site_each_prop_inside_the_block_that_nam
 			trunks += 1
 	for model in trees:
 		assert_eq(dress.count(model), named[model], "one %s a tree that names it" % model)
+		var crown: StringName = look.props.tree_crowns[model]
+		assert_eq(dress.count(crown), named[model], "one %s crown over each" % model)
+		# the crown keeps the shape it was modelled in (scaled evenly), however its trunk's box is proportioned
+		var worst := 0.0
+		for t in dress.placed()[crown].transforms:
+			var sc := t.basis.get_scale()
+			worst = maxf(worst, absf(sc.x / sc.y - 1.0) + absf(sc.z / sc.y - 1.0))
+		assert_lt(worst, 0.02, "%s's crowns keep their modelled proportions" % model)
 	assert_eq(named.get(&"trunk", 0), 0, "no Woodland tree is the old trunk")
 	assert_gt(trunks, 400)
 	assert_eq(dress.count(&"truck"), 1)

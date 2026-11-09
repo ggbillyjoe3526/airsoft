@@ -90,7 +90,7 @@ def main() -> None:
         tree.tuft(at, rng.uniform(0.7, 0.95), out, 1, LEAF_TOP, LEAF_UNDER, centre, flat=0.8, lean=0.55)
     tree.tuft(path[-1] + UP * -0.2, 0.8, Vector((1.0, 0.0, 0.0)), 2, LEAF_TOP, LEAF_UNDER, centre, flat=1.0,
               lean=0.55, spread=0.5)
-    tree.export(BUDGET, FOOT_R, CLEAR)
+    tree.export(BUDGET, FOOT_R, CLEAR, crown=True)
 
 
 if __name__ == "__main__":

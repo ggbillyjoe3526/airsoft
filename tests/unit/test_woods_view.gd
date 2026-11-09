@@ -124,6 +124,19 @@ func test_woodland_s_trees_carry_their_own_crowns_and_the_forest_is_the_far_tree
 	var day := WoodsView.build(woodland, play.woods, play.skyline, play.lighting, play.map_style)
 	assert_null(day.crowns(), "the game's wood draws no cones on Woodland")
 	day.free()
+	var props: PropDressConfig = play.site_look.props
+	assert_eq(WoodsShapes.crowns(woodland, play.woods, props).size(), 0, "none where the models load")
+	# a tree model that won't load (or has no foot to lay it by) keeps its box, and so its cone
+	var broken: PropDressConfig = props.duplicate(true)
+	broken.models[&"oak"] = "res://assets/models/props/no_such_oak.glb"
+	broken.tree_feet.erase(&"birch")
+	var kept := 0
+	for b in woodland.blocks:
+		if b.kind == WoodsShapes.TREE and (b.dress == &"oak" or b.dress == &"birch"):
+			assert_false(broken.dresses(b), "a %s with no model to lay keeps its box" % b.dress)
+			kept += 1
+	assert_gt(kept, 0)
+	assert_eq(WoodsShapes.crowns(woodland, play.woods, broken).size(), kept, "each keeps a cone crown")
 
 
 func test_crowns_draw_on_every_preset_and_low_draws_nothing_else() -> void:

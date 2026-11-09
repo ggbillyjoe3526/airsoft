@@ -11,11 +11,12 @@ replaces (radius 1 at its foot, 1 tall, its foot at its origin): the game scales
 it in its instance colour (the forest's greens, faded toward the horizon), the vertex colours only its light, darker
 low in each tier.
 
-The treeline band: two staggered rows of spruces 2.4 m apart (the cones' spacing), seeded heights from 0.7 of the
-band's to all of it, each five drooping tiers to the ground and a spire, so the band's top is the photos' saw-tooth
-line and its foot a solid wall of branches. 20 m long, 5 m deep, 16 m tall (a treeline's height in the map file; the
-game stretches it to each piece), painted as the skyline paints its models: every vertex the piece's colour times its
-shade (vertex_paint.BODY). Budget 2,000 triangles.
+The treeline band: a 20 m section the game lays end to end along each treeline piece (SkylineModels), two staggered
+rows of spruces 2.4 m apart (the cones' spacing), seeded heights from 0.7 of the band's to all of it, each the far
+tree's three stepped tiers, so the band's top is the photos' saw-tooth line. 5 m deep, 16 m tall (a treeline's height
+in the map file; the game stretches it to each piece), painted as the skyline paints its models: every vertex the
+piece's colour times its shade (vertex_paint.BODY), each tree its own shade. Budget 2,000 triangles a band (the model
+list: Woodland's four bands, up to 188 m), so 200 a section.
 
     python -I tools/blender/maps/far_tree.py <repo root>
 """
@@ -54,16 +55,20 @@ def main() -> None:
     tree.export(BUDGET, 1.0)
 
 
-BAND = (20.0, 5.0, 16.0)       # length, depth, height (m)
-BAND_BUDGET = 2000
+BAND = (20.0, 5.0, 16.0)       # length, depth, height (m) of one section
+BAND_BUDGET = 200              # a section's: 2,000 a band (the model list), the game tiles sections along it
 BAND_SPACING = 2.4
 BAND_LOW = 0.7
 BAND_WIDTH = 0.27              # a tree's radius, of its height (SkylineConfig.treeline_width)
-BAND_LIT = (0.95, 0.95, 0.95)  # shades of the piece's colour (sRGB)
-BAND_SHADE = (0.55, 0.55, 0.55)
+# Each tree's tiers as the far tree's (skirt height and radius of the tree's, the tip's height), stretched a little
+# each tree so no two spires match.
+BAND_TIERS = ((0.0, 1.0, 0.5), (0.3, 0.74, 0.78), (0.56, 0.46, 1.0))
 
 
 def treeline() -> None:
+    """A section of the band: two staggered rows of spruces, each three stacked, turned four-sided tiers (the far
+    tree's saw-tooth outline), every vertex the piece's colour times its shade (BODY), each tree its own shade so the
+    band reads as trees, not a wall."""
     tree = tk.Tree("treeline", 1616)
     tree.alpha = 0.0
     rng = tree.rng
@@ -75,24 +80,24 @@ def treeline() -> None:
             x = -length * 0.5 + (k + 0.25 + 0.5 * row) * length / n + rng.uniform(-0.3, 0.3)
             h = height * rng.uniform(BAND_LOW, 1.0)
             r = h * BAND_WIDTH
-            centre = Vector((x, h * 0.45, z))
-            tiers = 5
-            for t in range(tiers):
-                f = t / tiers
-                foot = 0.4 + (h - 2.2) * f
-                tr = r * (1.0 - f) ** 0.85
-                at = len(tree.verts)
-                tree.cone_tier(foot, tr, h * 0.28, 0.5 * (1.0 - f) + 0.15, 6 if t < tiers - 1 else 4, BAND_LIT,
-                               BAND_SHADE, centre - Vector((x, 0, z)), yaw=rng.uniform(0.0, math.tau), lean=0.5,
-                               notch=0.62)
-                for i in range(at, len(tree.verts)):
-                    tree.verts[i] += Vector((x, 0.0, z))
-            at = len(tree.verts)
-            tree.cone_tier(h - 1.6, r * 0.12, 1.6, 0.1, 3, BAND_LIT, BAND_SHADE, centre - Vector((x, 0, z)), yaw=0.4,
-                           lean=0.4)
-            for i in range(at, len(tree.verts)):
-                tree.verts[i] += Vector((x, 0.0, z))
-    # the band's own top at exactly its height (the tallest spire), so the game's stretch keeps the map's height
+            lit = rng.uniform(0.78, 1.0)
+            for t, (foot, tr, tip) in enumerate(BAND_TIERS):
+                foot *= h * rng.uniform(0.95, 1.05)
+                tip *= h if t == len(BAND_TIERS) - 1 else h * rng.uniform(0.95, 1.05)
+                rad = r * tr * rng.uniform(0.9, 1.1)
+                top = Vector((x, tip, z))
+                top_id = tree.vert(top, (lit, lit, lit), Vector((0.0, 1.0, 0.0)))
+                turn = rng.uniform(0.0, math.pi * 0.5)
+                ids = []
+                for c in range(4):
+                    a = turn + math.pi * 0.5 * c
+                    p = Vector((x + math.cos(a) * rad, foot, z + math.sin(a) * rad))
+                    dark = lit * 0.58
+                    ids.append(tree.vert(p, (dark, dark, dark), Vector((math.cos(a), 0.55, math.sin(a)))))
+                inside = Vector((x, foot + (tip - foot) * 0.3, z))
+                for c in range(4):
+                    tree.face_out(inside, ids[c], ids[(c + 1) % 4], top_id)
+    # the section's own top at exactly its height (the tallest spire), so the game's stretch keeps the map's height
     top = max(v.y for v in tree.verts)
     for v in tree.verts:
         if v.y > 0.0:

@@ -28,10 +28,10 @@ UP = Vector((0.0, 1.0, 0.0))
 
 HEIGHT = 14.0
 FOOT_R = 0.85            # the buttresses' widest reach: the box's half-width
-BOLE_R = 0.64            # the bole's radius over the buttresses
-SPLIT = 3.9              # where the bole splits into its limbs (m)
-CROWN = Vector((0.0, 9.0, 0.0))
-CROWN_R = Vector((7.4, 5.0, 7.4))
+BOLE_R = 0.55            # the bole's radius over the buttresses (they flare to 1.5 times it)
+SPLIT = 3.45             # where the bole splits into its limbs (m)
+CROWN = Vector((0.0, 8.6, 0.0))
+CROWN_R = Vector((9.6, 5.8, 9.6))   # half again as wide as the tree is tall, as in the photos
 CROWN_FLOOR = 3.7
 CLEAR = 3.1              # 2.6 m over the ground at the smallest oak the map stands (12 m of 14)
 BUDGET = 8000
@@ -67,7 +67,7 @@ def main() -> None:
         radii.append(r)
     first = len(tree.verts)
     tree.limb(bole, radii, 16, bark, ridges=0.03, lobes=4, lobe_depth=FOOT_R / BOLE_R - 1.0,
-              lobe_until=0.24, cap=False, twist=0.5, reach=FOOT_R)
+              lobe_until=0.32, cap=False, twist=0.5, reach=FOOT_R)
     tree.mark_stem(first)
     top = bole[-1]
     tips = []
@@ -76,9 +76,9 @@ def main() -> None:
     for k in range(limbs):
         a = spin + math.tau * k / limbs + rng.uniform(-0.35, 0.35)
         out = Vector((math.cos(a), 0.0, math.sin(a)))
-        start = top + out * 0.18 + UP * rng.uniform(-0.6, 0.1)
-        reach = rng.uniform(4.6, 5.6)
-        rise = rng.uniform(3.0, 4.2)
+        start = top + out * 0.18 + UP * rng.uniform(-0.3, 0.1)
+        reach = rng.uniform(6.0, 7.2)
+        rise = rng.uniform(2.8, 3.8)
         end = start + out * reach + UP * rise
         bend = out * 0.6 - UP * 0.7 + out.cross(UP) * rng.uniform(-0.6, 0.6)  # crooked: out first, then up
         path = tk.curve(start, end, bend, 5)
@@ -90,7 +90,7 @@ def main() -> None:
             side = out.cross(UP).normalized() * rng.choice((-1.0, 1.0))
             d = (out * rng.uniform(0.9, 1.3) + side * rng.uniform(0.3, 0.8) + UP * rng.uniform(0.25, 0.7))
             d.normalize()
-            ln = rng.uniform(2.6, 3.8)
+            ln = rng.uniform(3.0, 4.4)
             e = s + d * ln
             fp = tk.curve(s, e, UP * 0.25, 3)
             tree.limb(fp, [0.13, 0.1, 0.07, 0.045], 6, bark, cap=True)
@@ -100,33 +100,34 @@ def main() -> None:
     # ones so the middle reads solid
     for e in tips:
         put(tree, e, rng.uniform(2.0, 2.6), rng)
-    n_surface = 54
+    n_surface = 59
     golden = math.pi * (3.0 - math.sqrt(5.0))
     laid = 0
     i = 0
     while laid < n_surface:
-        y = 1.0 - (i + 0.5) / (n_surface * 1.3) * 1.55     # the upper part of the dome, down to just under its belly
+        y = 1.0 - (i + 0.5) / (n_surface * 1.3) * 2.25     # the dome, down to its rim over head height
         i += 1
         rr = math.sqrt(max(0.0, 1.0 - y * y))
         a = golden * i
         d = Vector((math.cos(a) * rr, y, math.sin(a) * rr))
         p = CROWN + Vector((d.x * CROWN_R.x, d.y * CROWN_R.y, d.z * CROWN_R.z)) * rng.uniform(0.82, 0.95)
-        put(tree, p, rng.uniform(1.8, 2.4) * (1.1 if y > 0.6 else 1.0), rng)
+        put(tree, p, rng.uniform(2.1, 2.7) * (1.1 if y > 0.6 else 1.0), rng)
         laid += 1
     for c in (Vector((0.0, 9.6, 0.0)), Vector((2.6, 8.6, 1.2)), Vector((-2.4, 8.8, -1.6)), Vector((0.8, 8.4, -2.8)),
               Vector((-1.2, 8.3, 2.7)), Vector((3.0, 9.8, -1.8)), Vector((-3.1, 9.9, 1.0))):
-        put(tree, c * 1.2 - Vector((0.0, 1.6, 0.0)), 3.4, rng)
-    tree.export(BUDGET, FOOT_R, CLEAR)
+        put(tree, Vector((c.x * 1.5, c.y * 1.2 - 2.0, c.z * 1.5)), 3.6, rng)
+    tree.export(BUDGET, FOOT_R, CLEAR, crown=True)
 
 
 def put(tree: tk.Tree, at: Vector, size: float, rng) -> None:
     """A rounded foliage clump `size` m across at `at`, its underside kept over CROWN_FLOOR."""
-    r = Vector((size, size * rng.uniform(0.75, 0.9), size)) * 0.62
+    # uneven across and flatter than tall, knobbly with a few bulges: leafy masses, not balls (owner, 2026-11-09)
+    r = Vector((size * rng.uniform(0.9, 1.15), size * rng.uniform(0.62, 0.75), size * rng.uniform(0.9, 1.15))) * 0.62
     at = at.copy()
     at.y = max(at.y, CROWN_FLOOR + r.y * 0.6)
     top = at.y > CROWN.y + CROWN_R.y * 0.25
     tree.blob(at, r, LEAF_TOP if top else tk.mix(LEAF_TOP, LEAF_MID, 0.5), LEAF_UNDER, CROWN, level=2, lean=0.72,
-              rough=0.16)
+              rough=0.22, flat_top=0.85, lumps=3, lump=0.45)
 
 
 if __name__ == "__main__":

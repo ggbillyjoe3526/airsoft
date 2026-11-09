@@ -17,8 +17,9 @@ extends Resource
 ## a feature bay (`bay_features`) in some cells with nothing standing in front of them (Dev 3: Depot's hall walls,
 ## their columns under the roof's trusses); TREE stands one tree in the box (Dev 3, WT1: Woodland's pines, oaks and
 ## birches): the model's origin on the ground under the box's middle, its trunk's foot (`tree_feet` m round its
-## origin) stretched to the box's half-width and its top to the box's top, turned a random quarter; its crown
-## spreads past the box over head height, look only, as the cone crowns WoodsView drew before.
+## origin) stretched to the box's half-width and the tree's top to the box's top, turned a random quarter; its crown
+## (`tree_crowns`, a model of its own) scaled evenly by the tree's height over it, so it keeps its shape however the
+## box is proportioned, spreading past the box over head height, look only, as the cone crowns WoodsView drew before.
 enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY, TREE }
 
 ## Each prop's model (a .glb of one vertex-coloured mesh).
@@ -66,12 +67,17 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY, TREE }
 	&"pillar": "res://assets/models/props/pillar.glb",
 	&"camo_net": "res://assets/models/props/camo_net.glb",
 	# Woodland's trees (Dev 3, WT1, tools/blender/maps/): the pine's three ages, the oak and the birch, each block of
-	# kind tree naming one; and the thickets' spruce.
+	# kind tree naming one, its trunk and its crown apart (tree_crowns); and the thickets' spruce.
 	&"pine_young": "res://assets/models/props/pine_young.glb",
 	&"pine_grown": "res://assets/models/props/pine_grown.glb",
 	&"pine_old": "res://assets/models/props/pine_old.glb",
 	&"oak": "res://assets/models/props/oak.glb",
 	&"birch": "res://assets/models/props/birch.glb",
+	&"pine_young_crown": "res://assets/models/props/pine_young_crown.glb",
+	&"pine_grown_crown": "res://assets/models/props/pine_grown_crown.glb",
+	&"pine_old_crown": "res://assets/models/props/pine_old_crown.glb",
+	&"oak_crown": "res://assets/models/props/oak_crown.glb",
+	&"birch_crown": "res://assets/models/props/birch_crown.glb",
 	&"spruce": "res://assets/models/props/spruce.glb",
 }
 ## Each dressed block kind's prop, and how it is laid. A kind not listed keeps its box.
@@ -114,6 +120,12 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY, TREE }
 ## birch.py). A tree model not listed keeps its box.
 @export var tree_feet: Dictionary[StringName, float] = {
 	&"pine_young": 0.2, &"pine_grown": 0.33, &"pine_old": 0.42, &"oak": 0.85, &"birch": 0.17,
+}
+## Each TREE model's crown (its limbs and leaves, written apart by the build script): laid over the trunk scaled evenly
+## by the tree's height (PropLayout.crown_fit). A tree without one is all trunk.
+@export var tree_crowns: Dictionary[StringName, StringName] = {
+	&"pine_young": &"pine_young_crown", &"pine_grown": &"pine_grown_crown", &"pine_old": &"pine_old_crown",
+	&"oak": &"oak_crown", &"birch": &"birch_crown",
 }
 ## A dressed kind's block lower than this (m) keeps its box: a rack's shelf boards stay boards, its racking is
 ## shelving; only a hall's 8 m walls are its bays (the Range's and The Street's lower walls keep their boxes).
@@ -158,9 +170,10 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY, TREE }
 ## (BP7): Woodland's props drew 167 of a High frame's 445 draws in 20 m chunks, 93 in 40 m ones.
 @export var chunk_from: int = 64
 @export var many_chunk: float = 40.0
-## Models chunked as `many_chunk` however few are laid: spread round a field's edge (Depot's hall walls, DH1), one
-## MultiMesh would draw them all wherever you look.
-@export var spread_models: PackedStringArray = PackedStringArray(["hall_wall", "camo_net"])
+## Models chunked as `many_chunk` however few are laid: spread round a field's edge (Depot's hall walls, DH1) or
+## heavy and spread over it (Woodland's oaks and birches, WT1), one MultiMesh would draw them all wherever you look.
+@export var spread_models: PackedStringArray = PackedStringArray(["hall_wall", "camo_net", "oak", "oak_crown", "birch",
+		"birch_crown"])
 ## The props' material: roughness, and metalness.
 @export var roughness: float = 0.7
 @export var metallic: float = 0.0
@@ -168,21 +181,31 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY, TREE }
 ## matt, so its soft crown normals never shine like plastic (WT1).
 @export var model_roughness: Dictionary[StringName, float] = {
 	&"pine_young": 0.95, &"pine_grown": 0.95, &"pine_old": 0.95, &"oak": 0.95, &"birch": 0.95, &"spruce": 0.95,
+	&"pine_young_crown": 0.95, &"pine_grown_crown": 0.95, &"pine_old_crown": 0.95, &"oak_crown": 0.95,
+	&"birch_crown": 0.95,
 }
 
 ## Each model path's mesh as loaded (null when it won't load), so a kind is dressed only by a model that loads.
 var _meshes: Dictionary[String, Mesh] = {}
 
 
-## Whether block `b` is drawn as props: the prop it names, or else its kind's, has a model that loads, the kind's is
-## tall enough, and the block is no ramp (else it keeps its box).
+## Whether block `b` is drawn as props: the prop it names, or else its kind's, has a model that loads (a tree's with
+## its foot's reach), the kind's is tall enough, and the block is no ramp (else it keeps its box).
 func dresses(b: MapData.Block) -> bool:
 	if b.rise != MapData.Rise.NONE:
 		return false
 	if b.dress != &"":
-		return mesh_of(b.dress) != null
+		# a tree model is laid only with its foot's reach (tree_feet)
+		var tree_ok: bool = model_lays.get(b.dress, Lay.FIT) != Lay.TREE or tree_feet.has(b.dress)
+		return tree_ok and mesh_of(b.dress) != null
 	var model: StringName = kind_props.get(b.kind, &"")
 	return model != &"" and b.size.y >= kind_min_height.get(b.kind, 0.0) and mesh_of(model) != null
+
+
+## Whether `model` is part of a tree (Lay.TREE's trunk, or its crown): stood by its origin on the ground, its crown
+## spreading past its box over head height.
+func is_tree_part(model: StringName) -> bool:
+	return model_lays.get(model, Lay.FIT) == Lay.TREE or tree_crowns.values().has(model)
 
 
 ## The prop block `b` is drawn as: the one it names (MapData.Block.dress), else its kind's; empty for none.

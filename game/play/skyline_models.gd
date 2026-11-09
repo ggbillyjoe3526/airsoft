@@ -24,6 +24,8 @@ class Placed:
 ## The models `p` stands, the field's middle at `middle`; none when its kind has no model (it keeps its greybox).
 static func placed_of(p: SkylinePiece, cfg: SkylineConfig, middle: Vector2) -> Array[Placed]:
 	var out: Array[Placed] = []
+	if p.kind == &"treeline":
+		return _band(p, cfg)
 	var mesh := cfg.model_of(p.kind)
 	if mesh == null:
 		return out
@@ -161,6 +163,40 @@ static func _fit(mesh: Mesh, foot: Vector3, x_axis: Vector3, z_axis: Vector3, si
 			* Transform3D(Basis.IDENTITY, -anchor)
 	placed.body = body
 	return placed
+
+
+## A treeline's band (SkylineConfig.treeline_model): along each run of its points, whole sections end to end, each
+## stretched to an even share of the run, as deep as the piece and as tall as it from `treeline_sink` m under the
+## ground (as the cones are sunk, so none floats on lower ground), every other one mirrored, each a seeded one of
+## `treeline_colours` (the same every build). None without the model: the cones stand.
+static func _band(p: SkylinePiece, cfg: SkylineConfig) -> Array[Placed]:
+	var out: Array[Placed] = []
+	var mesh := cfg.treeline_mesh()
+	if mesh == null:
+		return out
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(p.points)
+	var depth := p.depth if p.depth > 0.0 else cfg.treeline_section.y
+	var up := (p.height + cfg.treeline_sink) / maxf(mesh.get_aabb().end.y, 1e-3)
+	var flip := 1.0
+	for i in p.points.size() - 1:
+		var a := p.points[i]
+		var b := p.points[i + 1]
+		var run := b - a
+		var n := maxi(1, roundi(run.length() / cfg.treeline_section.x))
+		var along := Vector3(run.x, 0.0, run.y).normalized()
+		var across := along.cross(Vector3.UP)
+		var long := run.length() / n / cfg.treeline_section.x
+		for k in n:
+			var at := a.lerp(b, (k + 0.5) / n)
+			var one := Placed.new()
+			one.mesh = mesh
+			one.at = Transform3D(Basis(along * long * flip, Vector3.UP * up, across * depth / cfg.treeline_section.y),
+					Vector3(at.x, -cfg.treeline_sink, at.y))
+			one.body = p.colour_or(cfg.treeline_colours[rng.randi() % cfg.treeline_colours.size()])
+			out.append(one)
+			flip = -flip
+	return out
 
 
 ## How far `p` reaches along the level axis `axis` (+-x or +-z), m.

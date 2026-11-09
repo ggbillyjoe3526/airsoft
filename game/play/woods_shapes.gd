@@ -72,13 +72,14 @@ static func cone(sides: int, capped: bool) -> ArrayMesh:
 	return _mesh(pos, nor, PackedColorArray())
 
 
-## Every tree's crown (blocks of kind tree), sRGB instance colours.
-static func crowns(map: MapData, cfg: WoodsConfig) -> Placed:
+## Every tree's crown (blocks of kind tree), sRGB instance colours; none for a tree dressed in a model that carries
+## its own (WoodsConfig.own_crowns) and that `props` draws (a model that won't load keeps its box and its cone).
+static func crowns(map: MapData, cfg: WoodsConfig, props: PropDressConfig = null) -> Placed:
 	var rng := _rng(map, SALT_CROWNS)
 	var xforms: Array[Transform3D] = []
 	var colours := PackedColorArray()
 	for b in map.blocks:
-		if b.kind != TREE or cfg.own_crowns.has(String(b.dress)):
+		if b.kind != TREE or (cfg.own_crowns.has(String(b.dress)) and (props == null or props.dresses(b))):
 			continue
 		var foot := _ground_at(map, b.center.x, b.center.z, b.center.y - b.size.y * 0.5)
 		var top := b.center.y + b.size.y * 0.5
