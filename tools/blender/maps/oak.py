@@ -35,8 +35,9 @@ CROWN_R = Vector((10.0, 8.4, 10.0))   # half again as wide as the tree is tall, 
 CROWN_FLOOR = 3.35
 CLEAR = 3.1              # 2.6 m over the ground at the smallest oak the map stands (12 m of 14)
 BUDGET = 8000
-N_SURFACE = 47   # clumps over the dome's surface
+N_SURFACE = 45   # clumps over the dome's surface
 N_INNER = 9      # clumps filling its upper half from inside
+SHOULDER_IN = 0.3    # how far the dome's top clumps are drawn in at its crest
 
 BARK = tk.srgb(P["bark"])
 BARK_DARK = tk.srgb(P["bark"], 0.62)
@@ -117,7 +118,7 @@ def main() -> None:
     while laid < n_surface:
         y = 1.0 - (i + 0.5) / (n_surface * 1.3) * 2.2      # the dome, its skirt flattened at CROWN_FLOOR
         i += 1
-        rr = math.sqrt(max(0.0, 1.0 - y * y))
+        rr = dome(y)
         a = golden * i
         d = Vector((math.cos(a) * rr, y, math.sin(a) * rr))
         p = CROWN + Vector((d.x * CROWN_R.x, d.y * CROWN_R.y, d.z * CROWN_R.z)) * rng.uniform(0.82, 0.95)
@@ -127,17 +128,28 @@ def main() -> None:
               Vector((-1.2, 8.3, 2.7))):
         put(tree, Vector((c.x * 1.5, CROWN.y + (c.y - 8.6) * 1.6 + 1.0, c.z * 1.5)), 3.8, rng)
     # the dome's top closed: a small ring of clumps just under its crest, so it rounds over rather than squares off
-    for k in range(5):
-        a = math.tau * k / 5 + 0.3
-        put(tree, CROWN + Vector((math.cos(a) * 2.4, CROWN_R.y * 0.8, math.sin(a) * 2.4)), 2.6, rng)
+    for k in range(6):
+        a = math.tau * k / 6 + 0.3
+        put(tree, CROWN + Vector((math.cos(a) * 2.6, CROWN_R.y * 0.8, math.sin(a) * 2.6)), 2.6, rng)
     # and its upper half filled from inside, so no sky shows through between the surface clumps
     for k in range(N_INNER):
         a = golden * k * 1.7 + 0.9
-        f = 0.0 if k == 0 else rng.uniform(0.35, 0.65)    # the first caps the crest
         h = 0.92 if k == 0 else 0.3 + 0.6 * (k - 0.5) / (N_INNER - 1)
+        f = 0.0 if k == 0 else rng.uniform(0.5, 0.75) * dome(h)    # the first caps the crest
         put(tree, CROWN + Vector((math.cos(a) * CROWN_R.x * f, CROWN_R.y * h, math.sin(a) * CROWN_R.z * f)),
             rng.uniform(2.6, 3.1), rng)
+    # a dark leaf core behind them all, so what shows between the clumps is shaded leaves, not sky
+    tree.blob(CROWN + Vector((0.0, CROWN_R.y * 0.45, 0.0)),
+              Vector((CROWN_R.x * 0.64, CROWN_R.y * 0.42, CROWN_R.z * 0.64)), tk.mix(LEAF_UNDER, LEAF_MID, 0.35),
+              LEAF_UNDER, CROWN, level=2, lean=0.72, rough=0.2, flat_top=0.85, lumps=5, lump=0.25, tilt=0.2)
     tree.export(BUDGET, FOOT_R, CLEAR, crown=True)
+
+
+def dome(y: float) -> float:
+    """The dome's radius at height `y` (-1 to 1 of CROWN_R.y over CROWN), as a share of CROWN_R across: a sphere's,
+    its shoulder drawn in by SHOULDER_IN toward the crest so it rounds over."""
+    y = min(max(y, -1.0), 1.0)
+    return math.sqrt(1.0 - y * y) * (1.0 - SHOULDER_IN * max(0.0, (y - 0.3) / 0.7))
 
 
 def put(tree: tk.Tree, at: Vector, size: float, rng) -> None:

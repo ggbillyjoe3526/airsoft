@@ -10,7 +10,8 @@
 | 2026-11-09 | 2 | build thread | as attempt 1 | Retry 7/8 | fidelity: oak's foot flare and low limbs, holes atop its dome; grown pine widest at its foot; young pine's tufts; birch's twigs and marks |
 | 2026-11-09 | 3 | build thread | as attempt 1 | Retry 7/8 | fidelity: oak's dome widest too high with sky through it; grown pine's spire top; young pine's closed cone above 4 m; birch's twigs don't hang, marks don't read |
 | 2026-11-09 | 4 | build thread | see Verified | Retry 7/8 (no auto-accept: check 1) | fidelity (measured): oak's dome still shows sky in its upper half (2,692 px in the quarter view, 5,531 square on) and its shoulder is square (W/H at 0.85 of the height 0.98 against the photo's 0.82); pines and birch met |
-| 2026-11-09 | 5 (owner's extra oak pass, decision card) | build thread | as attempt 4 | pending | – |
+| 2026-11-09 | 5 (owner's extra oak pass, decision card) | build thread | as attempt 4 | Retry 7/8 (no auto-accept: check 1) | fidelity (measured): shoulder fixed (width at 0.85 of the height 0.77 against the photo's 0.82), but sky still shows through the upper dome (2,876 px square on, 1,625 in the quarter view: 7.9 % and 3.7 % of its crown against the photo's 1.0 %) |
+| 2026-11-09 | 5, the critic's must-fix | build thread | as attempt 4 | pending | – |
 
 ## Goal
 
@@ -26,8 +27,8 @@ sight lines don't change; crowns are look only, over head height. 60 FPS on Low 
   `pine.py` (young 940, grown 1,956, old 2,866), `oak.py` (7,966), `birch.py` (1,996), `spruce.py` (474),
   `far_tree.py` (the far tree 12, the treeline band's 20 m section 192). Each tree is written as its trunk and its
   crown apart (`<model>.glb`, `<model>_crown.glb`). The oak's leaf clumps are knobbly and flatter, not round (owner,
-  2026-11-09); its dome's top is a small ring and a crest clump, rounding over, and nine clumps fill its upper half from
-  inside so no sky shows through (owner's fifth pass). Normals lean out from each crown's middle, the stylised
+  2026-11-09); its dome draws its shoulder in toward the crest (`dome()`), nine clumps fill its upper half from inside and a
+  dark leaf core sits behind them, so it rounds over and no sky shows through (owner's fifth pass). Normals lean out from each crown's middle, the stylised
   tree look; every colour a palette entry, none within 20° of a team's hue. The build gates fail a model over its
   budget, with a team hue, with its trunk past its foot radius, or with any other part outside that radius under its
   clearance.
