@@ -1,25 +1,17 @@
-Task: BL8b · head 823d6eb · Verdict: Pass
-Run: none (static analysis; Godot busy with tools/check.sh) · budget: no baseline yet (pipeline/perf-budget.json has no lines)
+# Performance report, FL1 (head d53525f vs origin/main e133c2f)
 
-Scope: runtime code is game/config/viewmodel_config.gd only (three scopeVar optic constants). The rest is four .glb
-files, the Blender build script (dev code, never ships), tests and docs. No new per-frame or per-tick work, nodes,
-signals or materials.
+Verdict: **Pass**
 
-Metrics
-- File sizes (measured): aeg.glb 2,003,184 of 2,097,152 (95.5%, 94 KB headroom); sniper.glb 1,912,476 (91.2%);
-  pistol.glb 848,632 (40%); cyber.glb 206,284 (10%). Growth against main: aeg +46%, sniper +49%, pistol +59%,
-  cyber +116%: load-time and disk, about 5 MB for all four.
-- Triangles per part: 8,508 to 9,984 of 10,000.
-- Frame time (judgment): static meshes, only fitted parts instanced, at most about 10k triangles each in first
-  person; shadow pass negligible.
-- Bots: the _Figure copies are separate few-primitive meshes, untouched by the detail; per-bot cost unchanged.
+Basis: no baseline in pipeline/perf-budget.json; judged by reading the diff (one file, game/ai/bot_bombs.gd) against the
+targets. No --perf A/B run: the path only runs on a passed flash roll, so a 60 Hz match would not isolate it.
 
-Regressions over 10%: none in game metrics (file growth is not a budget line).
-
-Advisory
-- aeg.glb at 95.5% of its cap, sniper.glb (a copy of its parts) at 91%: one more detail pass on an AEG part breaks
-  the cap. Next step quantised positions and normals or a split file, the owner's budget call (recorded in BL8b).
-- Triangle margins as small as 16 (variable scope): re-count after any geometry change.
-- Shader prewarm unchanged: no new materials (the BL8 advisory on parts' own materials stands).
-
-Verdict: Pass
+- Per-tick cost: none added. `_mate_sees` runs only after the flash roll passes (gated by bomb_roll_gap, 1.5 s per bot)
+  and once more when the bot presses its throw (bot_bombs.gd:36-38), a one-off per throw.
+- Worst case per call: (1 + flash_route_points) candidate spots x teammates in play x 2 `sight_clear` rays. A ray is cast
+  only when the teammate is inside flash_mate_sight (16 m) and not already inside flash_mate_clear (8 m); the short
+  circuit stops at the first catch. The led check is skipped for a stationary mate (EPSILON guard, :178).
+- Allocations: no Array, Dictionary, String or Callable per call. Vector3 values are stack-only; `_caught` is a static
+  helper. `g`, `lead` and `eye` are computed per mate, not per ray. Bot gains one Vector3 (`bomb_bang`, 12 bytes).
+- Nodes and resources: none created, no signals, timers or tweens, so no orphan or teardown risk.
+- Minor, can wait: `eye_of` is computed once per mate per call and the two `_caught` calls share it, so nothing to hoist.
+  With many bots rolling in one tick the rays add up, but bomb_roll_gap spreads them out.
