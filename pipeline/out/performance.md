@@ -1,6 +1,13 @@
-Performance verdict (0765d76): PASS
-- Bench reproduced (figure_bench, 11 figures, 4 s, headless): close (eye in the middle) 235 surfaces by day vs 257 with --night (+22, i.e. 2 a bot, matching the rifle's lens and LED); at the spawn (--far) 184 vs 184 (the torches are on the bare far copies, 0 extra). Both claims hold.
-- Per frame: _fit_torches loops the figure's replicas (at most 2) and compares one Mesh reference. No allocation and no rebuild. A holster toggle costs one assignment of a cached Mesh. lens_position is one Transform3D times Vector3 (value types), no heap, once per lit bot per frame in TorchBeams. The fallback path is the old arithmetic.
-- Draws: the holstered pistol and every far version drop the torch (bare meshes), so the cost is only inside the far line and in hand. That is down from my earlier 3 and 3 per replica to 2 on a rifle (its Rubber shares the rifle's material) and 3 on a pistol. The 11-bot worst case at night is +22 close and 0 far. Reaching 15 bots, about +30 close.
-- Night load: set_body 392 vs 275 ms close and 335 vs 191 ms far, i.e. about 11 to 13 ms per figure, in line with the claimed 14. The cause is ReplicaParts.take instantiating the parts glb scene per figure per replica (load is cached; the instantiate and free is not), plus the extra bare and bare-far merges (cached by key, so only the first of a kind builds). It is a one-off at match build, not in play, so about 0.2 s more for a 15-bot night match; a cache of the instantiated parts scene would remove most of it if loading time matters.
-- Memory: up to three more cached meshes per lit kit (lit, bare, bare far); bounded by the kits in the match. Freed: take() frees its holder, with no new orphans in the test run.
+Task: SX1 · head 32f364e · Verdict: Pass
+Run: none (no match run: suite and benches busy on a 4-core machine, per brief) · budget: pipeline/perf-budget.json does not exist in this repo; no baseline yet, judged against targets and the diff (judgment only)
+Metrics: not measured. Nodes, orphans, static memory and script time cannot change for the remaining maps: the diff only removes content.
+Regressions (> 10 % worse): none expected (judgment)
+
+What changed at runtime (game/, 10 files in the stat): comments only, plus prop_dress_config.gd (-30/+2 lines): 23 model_paths entries, 4 model_lays and 4 grid_cells entries for Street-only kinds removed. No new code, no allocation, no signal, no node, material or shader added. Fewer dictionary entries means a slightly smaller config resource at load; no per-frame effect.
+Dangling references: git grep of the 23 removed model keys, street.json and Street paths in game/, data/, scenes, project.godot, export_presets.cfg and tools/*.sh finds none. The &"skip", &"lamp", &"fridge" hits (map_style.gd, noise_config.gd, site_look.gd, site_dress.gd) are box-kind keys used by Depot/Woodland dressing, not model paths: a missing model would only fall back to a box, and none is missing.
+Ambience "street" stays (data/maps/range.json:3, play_tuning.tres loops): audio kept on purpose, unchanged cost.
+
+Install size: 46 .glb removed (23 props plus .import/.uid pairs counted by file; 50 binary/asset files in all) and 2.76 MB of asset/data bytes (glb, png, jpg, ogg, wav, json, bin) deleted from the tree. The install and export shrink by about that much; nothing grows. The pooled/prewarmed paths (BBs, puffs, shader prewarm) are untouched; removed props carried no prewarm entries.
+Blocking findings: none
+Advisory: none. A rendered/headless --perf run on this head vs 53234c6 would only confirm "no change" for Depot/Woodland; not required for a deletion-only diff.
+Fixes: none needed.
