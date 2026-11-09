@@ -248,14 +248,22 @@ func test_depots_probes_cover_the_field_and_its_large_areas_as_interiors() -> vo
 		assert_almost_eq(p.size.y, depot.roof_height, 0.001, "reaches the roof: %s" % p.name)
 
 
-func test_depot_is_drawn_clean_without_its_photos() -> void:
+func test_depot_is_drawn_with_its_grain_and_wear() -> void:
 	var play := PlayTuning.load_default()
-	assert_eq(play.site_look.grit, 0.0, "the look's clean surfaces")
+	assert_gt(play.site_look.grit, 0.0, "Sunlit Concrete's real grain and light wear (SL1)")
 	var m := SiteSurface.material(play.site_look, _depot())
-	# no photo grain, so the plywood's photo isn't loaded; the floor's own slab set is (DH1, SiteLook.slab_grain)
+	assert_not_null(m.get_shader_parameter(&"ply_col"), "the plywood's photo grain is loaded")
+	assert_not_null(m.get_shader_parameter(&"slab_col"), "and the floor's slab set")
+	assert_almost_eq(m.get_shader_parameter(&"grit") as float, play.site_look.grit, 0.0001)
+	assert_gt(m.get_shader_parameter(&"gradient") as float, 0.0, "the soft vertical gradient")
+
+
+func test_a_clean_look_loads_no_plywood_photo() -> void:
+	var look := PlayTuning.load_default().site_look.duplicate(true) as SiteLook
+	look.grit = 0.0
+	var m := SiteSurface.material(look, _depot())
 	assert_null(m.get_shader_parameter(&"ply_col"), "no photo grain, so no photo loaded")
 	assert_almost_eq(m.get_shader_parameter(&"grit") as float, 0.0, 0.0001)
-	assert_gt(m.get_shader_parameter(&"gradient") as float, 0.0, "the soft vertical gradient")
 
 
 func test_the_roofs_faces_are_wound_to_face_out() -> void:

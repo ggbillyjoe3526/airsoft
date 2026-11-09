@@ -42,8 +42,8 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
 - **Doors:** some of the plywood rooms and huts have wooden [doors](#doors), some starting open and some shut.
 - **Attack / Defend** puts two flagpoles at the defenders' end, **A** on A site and **B** on B site; the attackers
   raise either ([Modes](Modes#attack--defend)).
-- **The look:** clean painted surfaces in soft, stylised light, with crimson, violet, yellow, teal, green and cream
-  spread over the hall so the team colours stay the loudest.
+- **The look:** a real warehouse in daylight: concrete and plywood with their grain, weathered paint in muted
+  crimson, violet, yellow, teal, green and cream, so the team colours stay the loudest.
 - **Props:** the hall's racking, drums, barrels, sofa, desks and lockers are the game's own models: navy and yellow
   pallet racking stocked three different ways (cartons, sacks, wrapped loads, drums, some slots empty) and mixed along
   every rack, violet steel drums stacked two
@@ -87,8 +87,8 @@ defenders in the east camp.
 
 - **The stream:** its bed is 1.7 m under its banks, which are too steep to climb. Cross on the North bridge or the road,
   or walk in and out at the Ford and the gentle slides. Down in the bed you're out of sight of the wood above.
-- **The look:** the game's soft, stylised light over a bright green wood: lime-lit crowns, pine-green spruces, a
-  meadow floor, and the violet truck carrying the colour, with nothing near a team's blue or orange.
+- **The look:** warm afternoon sun over a natural green wood: sunlit crowns, dark spruces, a grassy floor and the
+  weathered violet truck, with nothing near a team's blue or orange.
 - **Long views, few walls:** the Ridge looks 86 m down onto the Fort; elsewhere a lane's longest line is under 80 m.
   Cover is logs, log stacks, tyres, wooden crates, the violet truck and the trunks of the trees themselves, free CC0
   models and the game's own; each stops a BB about where you see it, a round trunk by its bark (its roots fill its back corners). The

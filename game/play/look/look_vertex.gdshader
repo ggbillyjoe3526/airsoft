@@ -46,7 +46,7 @@ void fragment() {
 		hole = mix(hole, row, smoothstep(0.5, 1.0, pixel / perforation_radius));
 		own *= mix(1.0, perforation_shade, hole);
 	}
-	ALBEDO = own * paint * tint.rgb;
+	ALBEDO = look_paint(own * paint * tint.rgb);
 	ROUGHNESS = roughness;
 	METALLIC = metallic;
 }

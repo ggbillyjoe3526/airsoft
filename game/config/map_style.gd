@@ -145,14 +145,14 @@ extends Resource
 			Vector2(-0.883, -0.883), Vector2(0.883, 0.883)]),
 }
 ## The ground beyond the field's walls, out to `ground_extent` metres each way from the middle, just below the floor.
-@export var ground_colour: Color = Color8(0x8a, 0xa8, 0x60)
+@export var ground_colour: Color = Color8(0x5f, 0x8a, 0x3a)
 @export var ground_extent: float = 120.0
 @export var ground_drop: float = 0.02
 ## Sloping ground's colour on each of its surfaces (RayHit.Surface to sRGB, the palette's meadow, litter, earth, pebble
 ## and timber), each far enough from a team's hue or dull enough to read as no team; a surface not listed is drawn in
 ## `ground_colour`.
 @export var terrain_colours: Dictionary[int, Color] = {
-	RayHit.Surface.GRASS: Color8(0x8a, 0xa8, 0x60),
+	RayHit.Surface.GRASS: Color8(0x5f, 0x8a, 0x3a),
 	RayHit.Surface.LEAVES: Color8(0x7c, 0x7a, 0x58),
 	RayHit.Surface.EARTH: Color8(0x8a, 0x80, 0x70),
 	RayHit.Surface.GRAVEL: Color8(0xa0, 0x9a, 0x92),

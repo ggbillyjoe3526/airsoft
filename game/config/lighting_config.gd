@@ -19,8 +19,8 @@ const PRESETS: Array[StringName] = [DAY, NIGHT]
 ## how soft they are.
 @export var sun_elevation: float = 52.0
 @export var sun_heading: float = 35.0
-@export var sun_colour: Color = Color(1.0, 0.95, 0.86)
-@export var sun_energy: float = 1.25
+@export var sun_colour: Color = Color(1.0, 0.92, 0.8)
+@export var sun_energy: float = 2.0
 @export var shadow_distance: float = 70.0
 @export var shadow_blur: float = 1.5
 ## The sky: top, horizon, and the ground's colour below the horizon.
@@ -30,14 +30,14 @@ const PRESETS: Array[StringName] = [DAY, NIGHT]
 @export var ground_bottom: Color = Color(0.36, 0.34, 0.3)
 ## The fill on shaded sides: part sky, part a warm ground bounce, so they stay warm grey, never black or blue.
 @export var ambient_colour: Color = Color(0.86, 0.8, 0.7)
-@export var ambient_energy: float = 0.9
+@export var ambient_energy: float = 0.55
 @export var sky_contribution: float = 0.45
 ## Contact shade in corners (screen-space ambient occlusion).
 @export var ssao: bool = true
 @export var ssao_radius: float = 1.0
 @export var ssao_intensity: float = 1.4
 ## Exposure for the AgX tonemapper.
-@export var exposure: float = 1.0
+@export var exposure: float = 0.9
 ## A night preset: the one flag every night system reads (the ambience's night set, the figures' paint without its
 ## glow (TeamColours.resolve), the light pools, the skyline's lamps, a bake's sky share alone).
 @export var night: bool = false

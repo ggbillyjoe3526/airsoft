@@ -123,7 +123,7 @@ enum Canvas {
 ## look's clean surfaces (0 leaves it to `grit`).
 @export_file("*.jpg", "*.png") var slab_colour: String = "res://assets/textures/site/hall_concrete_col_2k.jpg"
 @export_file("*.jpg", "*.png") var slab_normal: String = "res://assets/textures/site/hall_concrete_nor_gl_2k.jpg"
-@export_range(0.0, 1.0) var slab_grain: float = 0.75
+@export_range(0.0, 1.0) var slab_grain: float = 1.0
 @export var slab_scale: float = 4.0
 @export var slab_mix: float = 0.9
 @export var slab_depth: float = 0.7
@@ -137,12 +137,12 @@ enum Canvas {
 @export var ply_luma: float = 0.142
 ## The lighter bevel on every box edge within this many metres of it (the "CS edge highlight"), this much lighter.
 @export var edge_width: float = 0.04
-@export var edge_light: float = 0.3
+@export var edge_light: float = 0.08
 ## The look's clean surfaces (docs/ART.md › Surfaces): how much wear and grain the canvases show (0 clean painted, 1
 ## the old worn site: stains, chips, rust, grime and photo grain), and the soft vertical gradient on every side,
 ## `gradient` darker at its foot, full paint `gradient_height` m up.
-@export_range(0.0, 1.0) var grit: float = 0.0
-@export var gradient: float = 0.22
+@export_range(0.0, 1.0) var grit: float = 0.6
+@export var gradient: float = 0.3
 @export var gradient_height: float = 2.6
 ## Puddles (the map's own) are drawn into a mask this many pixels a metre.
 @export var wet_pixels: float = 4.0

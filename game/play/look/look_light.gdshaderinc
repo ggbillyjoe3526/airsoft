@@ -12,6 +12,13 @@ global uniform float look_mid_band;
 global uniform vec4 look_rim;
 global uniform float look_rim_power;
 global uniform float look_spec;
+global uniform float look_paint_saturation;
+
+// A surface's paint as the look draws it (LookConfig.paint_saturation, docs/ART.md › Colour): `c` (linear) pulled
+// toward its own grey, so every map's paint reads as weathered, real material rather than candy colour.
+vec3 look_paint(vec3 c) {
+	return mix(vec3(dot(c, vec3(0.2126, 0.7152, 0.0722))), c, look_paint_saturation);
+}
 
 void light() {
 	float ndl = dot(NORMAL, LIGHT);
