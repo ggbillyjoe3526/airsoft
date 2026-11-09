@@ -59,7 +59,7 @@ const PROP_PARTS := {
 	"shelf": {"shelf-boxes": &"steel", "carton": &"crate", "box": &"cream"},
 	"trunk": {"woodBark": &"bark", "woodInner": &"heartwood"}, "log": {"woodBark": &"bark", "woodInner": &"heartwood"},
 	"logstack": {"woodBark": &"bark", "woodInner": &"heartwood", "woodDark": &"umber"},
-	"pine": {"woodBarkDark": &"umber", "leafsDark": &"pine"}, "tyre": {"all": &"rubber"}, "crate": {"all": &"teal"},
+	"pine": {"woodBarkDark": &"umber", "leafsDark": &"pine"}, "tyre": {"all": &"rubber"},
 	"truck": {"body": &"violet", "wheel-front-right": &"rubber", "wheel-front-left": &"rubber",
 			"wheel-back-right": &"rubber", "wheel-back-left": &"rubber"},
 }
