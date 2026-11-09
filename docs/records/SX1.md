@@ -1,12 +1,12 @@
 # SX1 · The Street removed
 
-**Review:** pending
+**Review:** 1 attempt · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-09 | 1 | Opus 5.5 (project thread) | pending | pending | – |
+| 2026-11-09 | 1 | Opus 5.5 (project thread) | lint, unit 1 to 4, smoke, notices green in CI on b01bf72 | Accept 8/8 | – |
 
 ## What changed
 
@@ -24,7 +24,8 @@ anything the rest of the game uses". The Street was dev only (DT1).
   Range's sound, owner 2026-11-05); window glass (`MapStyle.clear_kinds`, BQ1) and bar railings (`Railings`, SR1),
   each tested on fixtures; a block's own colour; the flag head start exception; `MapStyle`'s town kinds (bins'
   plastic, the van's steel sound and the hoarding's finish are read elsewhere); the palette's town colours; the doors'
-  narrow size (DM1 builds it); the trunk prop (Woodland's); the props tool's `paint` parts.
+  narrow size (DM1 builds it); the trunk prop (Woodland's). The props tool keeps its `paint` parts, unused now, for
+  a later vehicle.
 - **Tests moved off the map:** the sniper balance tests hear over a flat 160 m floor instead of The Street's grid; the
   layout, summary, field map and frame-allocation tests use Depot or Woodland. New: The Street's files and props are
   gone, and a pick saved on it opens on Depot.

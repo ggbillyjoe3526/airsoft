@@ -710,8 +710,8 @@ def loops(folder):
     """The owner's ambience recordings as beds (2026-11-04), each `loops/<id>.wav` stored at its peak and with the
     peak (in loops/peaks.json) that brings it to an RMS of 1, as the browser game's beds were: an indoor room for
     Depot, his two outdoor recordings run together for a street by day ("for choice/variety"; the Range's since
-    2026-11-05, The Street's until the map went, 2026-11-09), and his street at night for it at night; his woods for Woodland by day, and his woods at night (batch of 2026-11-08) for
-    Woodland's night."""
+    2026-11-05, The Street's until the map went, 2026-11-09), and his street at night for it at night; his woods for
+    Woodland by day, and his woods at night (batch of 2026-11-08) for Woodland's night."""
     def take(name, start, seconds):
         a = high_pass(read(os.path.join(folder, name)), 40.0)
         return a[int(start * RATE):int((start + seconds) * RATE)]

@@ -1,38 +1,37 @@
-Task: BP7 · Part N: figures (A5, A2 68 and 78, trial rows 15, 17, 19, 55, row 69 "Glow")
-Attempt: 4 of 4
-Head: 0765d76 (--import, then 7 targeted GUT files 111/111 pass; tools/check.sh not run per brief)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
-Score: 7/8 → Accept (one non-blocking judgment fail). This holds only if QA's and the performance agent's reports
-pass (I wasn't given either) and tools/check.sh is green on the head merged with main, which has moved to b4a1d5c.
-Failed check, with evidence:
-8. [judgment] The night load cost isn't in KNOWN_ISSUES. Each figure takes about 14 ms more to set up at night
-   (ReplicaParts.take), about 150 ms a match load. The record says "Not a row, can wait", but a can-wait cost needs
-   its row. The record's "main's WalkOff keys Shoulder_L too" is half true. Main's glb has no WalkOff Shoulder_L
-   channel (57 channels; also absent when loaded at runtime with GLTFDocument). Godot's editor import adds one: I
-   imported main's human.glb with the project's .import options and got track 57, at 12.0° from Idle. So the worker
-   is right in-game and my attempt-3 note was right for the file; say which.
-Against the attempt-3 must-fix list (all met):
-- Far version: no torch. fars stay 3 to 3 in the test log, built by HeldMerge.merged_without (held_merge.gd +60).
-- Holster: _fit_torches (figure_view.gd +664) swaps in the bare mesh; the test checks the surfaces and that nothing
-  glows. The new picture shows it. The swap runs once a pose, with no allocation; it changes the mesh only on a
-  change.
-- Draws: the rifle +2 (its Rubber shares the replica's through share_own_paint), the pistol +3 in hand, +0 far.
-  Logged by the test and in a new KNOWN_ISSUES document row: headless 235 to 257 mid-field; Forward+ on lavapipe at
-  the spawn 133 to 143 (night lighting; the torches are past the far line there). Forward+ with every bot close is
-  not measured: that's the owner's PC check, and the row says so.
-- Beam: torch_beams.gd +142 starts at FigureView.lens_position (the front face of the torch's box), with a test.
-  Presentation only.
-- Row 15 test: 18.3 ± 1° for HitCall and WalkOff on both kinds. It fails on main: my editor import of main's glb
-  gives 11.9° and 12.0°. The head's 18.3 is 14.0 past main's call key, so it agrees with call.py's -14° and
-  KNOWN_ISSUES.
-- The "about 2" comment is corrected.
-- Radio picture re-shot at 0.27 m: no seam or facet before or after. The torch picture is updated and correct.
-Carried from earlier attempts and still sound: robot.glb compaction is byte-clean; the contact ray, cone and thrown
-magazine are presentation only with no per-frame allocation; body.py's shoulder weights are untouched.
+Task: SX1 · The Street removed (no task block; judged against the owner's words of 2026-11-09)
+Attempt: 1 of 4
+Head: b01bf72 (checks passed on it, CI run 42637597319); SX1 judged on 53234c6..b198fde, merge b198fde..b01bf72 for interactions
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
+Score: 8/8 → Accept
+Evidence:
+1. "Completely remove": data/maps.md:33 row, data/maps/street.json, both pictures, tools/street/, the 23 props (glb, .import,
+   PropDressConfig entries, build_props.py recipes, ASSETS rows), the guards and their ci.yml job, FieldStandard's
+   exceptions, Street-only tests, the wiki's In development entry all gone. A grep of the tree outside history finds only
+   the generic word "street" (balconies over a street in fixtures) and the kept ambience. "Don't break": the `street`
+   ambience stays (ambience_config.gd:12, range.json, test_ambience_config pins it); glass, railings, block colours and
+   the head-start exception stay, each tested on fixtures (test_st1_qa.gd, test_sr1_railings.gd); the palette's town
+   colours are still read by tools/blender/maps/mapkit.py (Depot's roof uses lilac, sage, butter). CI green.
+2. No contract changed: world_query.gd:39 and the map files change comments only.
+3. Runtime diff is comments plus removed dictionary entries in prop_dress_config.gd; nothing per frame. Perf Pass.
+4. test_st1_qa.gd:101 (files, catalogue row and model entries gone) and test_match_page.gd:216 (a "street" pick with Dev
+   content on falls back to Depot) both fail on 53234c6. test_sx1_qa.gd covers old saves. The re-hosted night test
+   (test_sn3_qa.gd:116) ran, not pending (unit-1.log's only pending is unrelated).
+5. Pass: no new gameplay code; test helpers typed.
+6. Pass: owner-ordered removal; shared assets and policy rows kept consistent.
+7. Pass, with two small notes (not failing): `_flat_map()` is copied verbatim in test_sn3_balance.gd:47 and
+   test_sn3_qa.gd:43 (one helper in tests/support/ would do); tools/cut_recordings.py:713 is a 182-character docstring line
+   (house wrap is 120), as is the prose line docs/ASSETS.md "Map layouts ... Same licence as the code.".
+8. Pass: changelog.d/street-removed.md, DECISIONS, KNOWN_ISSUES, PLAYTEST, FEATURES, HANDOFF, ROADMAP and the wiki updated;
+   history untouched. GONE_RE (tools/wiki.py:41) is case-sensitive "The Street"; CHANGELOG.md has no other casing, so
+   nothing leaks today. Record nit: docs/records/SX1.md lists the props tool's `paint` parts under "used by the rest",
+   but no recipe in tools/props/build_props.py uses "paint" any more; it is kept tool code, not used code.
+Merge (FS1): no reference to any removed prop, map, palette entry or test; no interaction.
+Decisions judged sound: keeping the map-format features (engine code other maps can use, tested on fixtures), keeping
+the `street` ambience id (names a sound the Range plays), leaving history alone, and GONE_RE for a never-public map.
+Must-fix for the next attempt: none. Optional: move `_flat_map()` to tests/support/, wrap cut_recordings.py:713, fix the
+record's `paint` line.
 Owner should test in the game:
-- A night map with a full field: frame time and draws against a day map, on Forward+ on your PC.
-- A bot at night, close: the torch on its rifle, the LED dot, and the beam leaving the lens.
-- A bot at night switching to its pistol and back: the torch appears in the hand and not in the holster.
-- The hit call and walk off from the front: the shirt patch by the strap (row 15, narrowed).
-- Sniper Rifle at the hip: the cant, and the clack at 1.25 s (with the M150, 0.14 s early).
-- Low: a ramp and a ledge drop (the shadow lies on the slope, then on the floor below).
+- Match page with Dev content on and off: Depot, Woodland, Range only; no blank card or "LATER" entry.
+- A save whose last map was The Street opens the Match page on Depot without an error.
+- The Range still plays its street ambience by day.
+- Depot's and Woodland's props all show (no box where a model was).
