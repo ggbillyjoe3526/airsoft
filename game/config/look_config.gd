@@ -75,11 +75,12 @@ const GLOBAL_SPEC := &"look_spec"
 ## captures from (about eye height).
 @export var probe_height: float = 8.0
 @export var probe_eye: float = 1.6
-## How far (m) a probe sees from where it captures, at least, past its own box: without it each face stops at the box's
-## side, which on sloping ground is a metre or two under the eye, so the hill is cut off there (sky drawn below the
-## ground) and on Woodland's north bridge the cut left bad values in the probe's blurred levels that drew everything
-## shiny near it black with a white glow (GL1).
-@export var probe_reach: float = 40.0
+## How far (m) each of a probe's six views reaches at least (GL1). Godot ends each view at its box's side, which for
+## a probe on Woodland's slopes is a metre or two under the eye and a few metres off to each side, so the views stopped
+## in the hillside and trees close round it; on the north bridge that left bad values in the probe's blurred levels,
+## which drew everything shiny near it black with a white glow. 12 m cleared it; 40 m did too but darkened the
+## Clearing (its views took in the dark wood far past its area), so the reach stays short.
+@export var probe_reach: float = 12.0
 ## Screen-space reflections (Screen): steps, fades and depth tolerance.
 @export var ssr_steps: int = 96
 @export var ssr_fade_in: float = 0.15

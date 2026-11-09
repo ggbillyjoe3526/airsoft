@@ -5,8 +5,8 @@ extends Node3D
 ## box-projected over its area from eye height and captured once at the start (UPDATE_ONCE), so a shiny surface
 ## reflects the hall it stands in, not the sky; on a roofed field they are interiors and reach the roof. On sloping
 ## ground (MapData.terrain) each box stands on the ground under it, from its lowest corner to `height` over its
-## highest, and captures from eye height over the ground at its middle, never from inside a hill (BP2), seeing at
-## least `probe_reach` m, so no face stops short at its box's side in the hill under the eye (GL1). Nothing per
+## highest, and captures from eye height over the ground at its middle, never from inside a hill (BP2); each of its views
+## reaches at least `probe_reach` m, so none stops in the hill or the trees close round it (GL1). Nothing per
 ## frame. FieldLighting shows or hides them all with the Reflections row.
 
 ## The visual layer the probes sit on, which a scope's glass camera (OpticGlass) leaves out: while that second camera
