@@ -1,12 +1,12 @@
 # CI2 · Unit tests in seven parts
 
-**Review:** pending
+**Review:** critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-09 | 1 | Opus 5.5 (build thread) | see Checks | pending | – |
+| 2026-11-09 | 1 | Opus 5.5 (build thread) | see Checks | Accept 7/8 | – (the time comment said CI for a cloud session's times: fixed) |
 
 ## Goal
 
@@ -45,6 +45,7 @@ on a slow runner (part 1 took 702 s on #263 and 1,020 s on main), so every part 
 
 - **Part 4 split too.** Not in the brief, but at 838 s on main it was nearer the limit than part 3.
 - **Old part 2 kept whole.** At about 10 minutes it has room; the slowest run seen (903 s) is inside the limit.
+- **Part 3 next.** Now the part nearest the limit (903 s seen); if it times out, split it at about `test_f`.
 - **The 1,080 s limit kept.** Smaller parts give the headroom; a hang still stops inside the job's 20 minutes.
 
 ## Known issues left

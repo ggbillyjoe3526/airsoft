@@ -11,8 +11,8 @@ set -uo pipefail
 GODOT="${GODOT:-godot}"
 cd "$(dirname "$0")/.."
 
-# Where each part after the first starts, by file name, byte by byte whatever the locale. Moving one keeps the parts
-# about even (CI2 measured them, docs/records/CI2.md); adding one adds a part, and CI's unit jobs list every part.
+# Where each part after the first starts, by file name, byte by byte whatever the locale. Move a bound to even out the
+# parts (CI2 timed them, docs/records/CI2.md); a new bound adds a part, which CI's unit matrix must list too.
 BOUNDS=(test_bots_ test_df test_g test_mc test_rg test_torch_)
 parts=$(( ${#BOUNDS[@]} + 1 ))
 
@@ -51,8 +51,8 @@ list="$(IFS=,; echo "${files[*]}")"
 # Always import first, so a new class_name or asset is known to the tests whatever ran before.
 "$GODOT" --headless --path . --import > import.log 2>&1
 
-# A part takes about 6 to 10 minutes on CI (CI2), and CI's runners vary by half again; the limit catches a hang or a
-# part grown too big to split again, inside the CI job's 20 minutes.
+# A part took about 8 to 10 minutes on a cloud session (CI2); a slow CI runner takes half as long again (part 3 has run
+# 15 minutes there). The limit catches a hang or a part grown too big, inside the CI job's 20 minutes.
 timeout 1080 "$GODOT" --headless --path . -s res://addons/gut/gut_cmdln.gd -gdir= -gtest="$list" > "$LOG" 2>&1
 status=$?
 
