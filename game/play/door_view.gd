@@ -11,6 +11,31 @@ extends Node3D
 ## The colour MapStyle gives a door's leaves, and their shader.
 const KIND := &"door"
 const LEAF_SHADER := preload("res://game/play/door_leaf.gdshader")
+## The leaf's models (DM1, tools/blender/maps/door.py): two-panel timber leaves in their own colours, each built for
+## a leaf the size (m, wide and high) given here, its body a 1 m cube (x the width, the hinge at -x; y up; z the
+## thickness) scaled to each leaf. A map's doors take the one built nearest their first leaf's shape, so stiles and
+## handles stretch little (Depot's, the huts', a narrow house door's); a plain box painted the style's door colour when it won't
+## load.
+const LEAF_MODELS: Dictionary[String, Vector2] = {
+	"res://assets/models/props/door_leaf.glb": Vector2(0.97, 2.6),
+	"res://assets/models/props/door_leaf_mid.glb": Vector2(0.78, 2.5),
+	"res://assets/models/props/door_leaf_narrow.glb": Vector2(0.43, 2.1),
+}
+## The frame's models: the opening's linings and architraves (and a head over it, where a wall is above), each built
+## for an opening the size given (m: wide, high, in a wall z thick), its origin at the opening's foot, stretched to
+## each door's opening and wall; the nearest to the map's first door.
+const FRAME_MODELS: Dictionary[String, Vector3] = {
+	"res://assets/models/props/door_frame.glb": Vector3(2.0, 2.6, 0.3),
+	"res://assets/models/props/door_frame_mid.glb": Vector3(1.6, 2.5, 0.3),
+	"res://assets/models/props/door_frame_narrow.glb": Vector3(0.9, 2.1, 0.3),
+}
+## A door's wall is the thinnest block across it this far (m) past a jamb, at the door's middle height; its thickness
+## the frame's depth (a wall's end meeting it at a corner is thicker that way, so it isn't taken).
+const WALL_PROBE := 0.05
+## A frame is at least this deep (m), whatever thin block stands at its jamb.
+const MIN_WALL := 0.1
+## A frame takes the baked light this far (m) over its foot.
+const FRAME_LIGHT_LIFT := 1.0
 ## The gap left between the two leaves and at each jamb (m), so the leaves read as two.
 const LEAF_GAP := 0.02
 ## A leaf folds back by up to half a turn, flat against its wall, and stops short where another block stands in its way
@@ -26,6 +51,12 @@ const JAMB_STEP := 0.4
 
 var _mesh: MultiMeshInstance3D = null
 var _material: ShaderMaterial = null
+var _frames: MultiMeshInstance3D = null
+var _frame_material: ShaderMaterial = null
+## Each frame's transform (one a door) and each leaf's turn from the model's axes to its hinge's (its +x along the
+## leaf from the hinge, a quarter or half turn about up).
+var _frame_at: Array[Transform3D] = []
+var _bases: Array[Basis] = []
 var _swing_time: float = 0.4
 ## Per door: each leaf's hinge (on the door's middle plane at its jamb), its direction from the hinge to the middle,
 ## its size, the sign of its turn to open, and how open the door was last drawn (-1: not yet).
@@ -52,15 +83,19 @@ static func build(map: MapData, style: MapStyle, swing_time: float) -> DoorView:
 	var view := DoorView.new()
 	view.name = "Doors"
 	view._swing_time = maxf(swing_time, 0.001)
+	var first := map.doors[0]
+	var first_width := maxf(first.size.x, first.size.z)
+	var leaf_path := _nearest(LEAF_MODELS, Vector3(first_width * 0.5 - LEAF_GAP * 1.5, first.size.y, 0.0))
+	var leaf_mesh := PropDressConfig.load_mesh(leaf_path)
 	view._material = ShaderMaterial.new()
 	view._material.shader = LEAF_SHADER
-	view._material.set_shader_parameter(&"tint", style.colour_of(KIND, 0))
+	view._material.set_shader_parameter(&"tint", style.colour_of(KIND, 0) if leaf_mesh == null else Color.WHITE)
 	view._material.set_shader_parameter(&"roughness", style.roughness)
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.use_colors = true
 	mm.use_custom_data = true
-	mm.mesh = BoxMesh.new()
+	mm.mesh = leaf_mesh if leaf_mesh != null else BoxMesh.new()
 	mm.instance_count = map.doors.size() * 2
 	for d in map.doors:
 		view._add_leaves(d, map.blocks)
@@ -72,6 +107,7 @@ static func build(map: MapData, style: MapStyle, swing_time: float) -> DoorView:
 	view._mesh.multimesh = mm
 	view._mesh.material_override = view._material
 	view.add_child(view._mesh)
+	view._add_frames(map, style)
 	for i in map.doors.size():
 		view._place(i, 0.0 if map.doors[i].shut else 1.0)
 	view._lights_down.resize(mm.instance_count)
@@ -89,8 +125,19 @@ func relight(lights: BakedLightNear) -> void:
 		var at := _hinges[j] - _dirs[j] * JAMB_STEP
 		_lights_down[j] = lights.on_side(at, -_outs[j]) if lights != null else Color.WHITE
 		_lights_up[j] = lights.on_side(at, _outs[j]) if lights != null else Color.WHITE
-		mm.set_instance_color(j, _lights_down[j])
-		mm.set_instance_custom_data(j, _lights_up[j])
+		# The instance colour lights the faces looking down the leaf model's z; its custom data is the faces looking up
+		# it, as a share of that (door_leaf.gdshader), the model's z turned to the wall's thin axis either way.
+		var flipped := (_bases[j] * Vector3.BACK).dot(_outs[j]) < 0.0
+		var down := _lights_up[j] if flipped else _lights_down[j]
+		var up := _lights_down[j] if flipped else _lights_up[j]
+		mm.set_instance_color(j, down)
+		mm.set_instance_custom_data(j, Color(up.r / maxf(down.r, 0.001), up.g / maxf(down.g, 0.001),
+				up.b / maxf(down.b, 0.001)))
+	if _frames != null:
+		var fm := _frames.multimesh
+		for i in _frame_at.size():
+			fm.set_instance_color(i, lights.at(_frame_at[i].origin + Vector3(0.0, FRAME_LIGHT_LIFT, 0.0))
+					if lights != null else Color.WHITE)
 
 
 ## Leaf `j`'s light on its face looking up its thin axis (`up`) or down it (a linear multiplier of its paint; white
@@ -114,14 +161,70 @@ func drawn_open(i: int) -> float:
 	return _drawn[i]
 
 
-## Leaf `j`'s transform as last placed (door j / 2's leaf j % 2): a unit box scaled to the leaf, turned and moved.
+## Leaf `j`'s transform as last placed (door j / 2's leaf j % 2): the leaf model's unit cube (its x along the leaf
+## from the hinge) scaled to the leaf, turned and moved.
 func leaf_at(j: int) -> Transform3D:
 	return _leaves[j]
 
 
 ## The materials drawn, to warm their shaders before play.
 func materials() -> Array[Material]:
-	return [_material]
+	return [_material] if _frame_material == null else [_material, _frame_material]
+
+
+## Each door's frame (DM1): the frame model stretched to the opening and its wall's thickness, in one MultiMesh;
+## none when the model won't load.
+func _add_frames(map: MapData, style: MapStyle) -> void:
+	var first := map.doors[0]
+	var path := _nearest(FRAME_MODELS, Vector3(maxf(first.size.x, first.size.z), first.size.y, 0.0))
+	var opening: Vector3 = FRAME_MODELS[path]
+	var mesh := PropDressConfig.load_mesh(path)
+	if mesh == null:
+		return
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.use_colors = true
+	mm.mesh = mesh
+	mm.instance_count = map.doors.size()
+	for i in map.doors.size():
+		var d := map.doors[i]
+		var along_z := d.size.x < d.size.z
+		var width := d.size.z if along_z else d.size.x
+		var axis := Vector3(0.0, 0.0, 1.0) if along_z else Vector3(1.0, 0.0, 0.0)
+		var wall := INF
+		var probe := d.center + axis * (width * 0.5 + WALL_PROBE)
+		for b in map.blocks:
+			if AABB(b.center - b.size * 0.5, b.size).has_point(probe):
+				wall = minf(wall, b.size.x if along_z else b.size.z)
+		wall = opening.z if wall == INF else maxf(wall, MIN_WALL)
+		var turn := Basis(Vector3.UP, PI * 0.5) if along_z else Basis.IDENTITY
+		var at := Transform3D(turn * Basis.from_scale(Vector3(width / opening.x, d.size.y / opening.y,
+				wall / opening.z)), d.center - Vector3(0.0, d.size.y * 0.5, 0.0))
+		_frame_at.append(at)
+		mm.set_instance_transform(i, at)
+		mm.set_instance_color(i, Color.WHITE)
+	_frame_material = LookMaterials.vertex_colour(style.roughness, 0.0)
+	_frames = MultiMeshInstance3D.new()
+	_frames.name = "Frames"
+	_frames.multimesh = mm
+	_frames.material_override = _frame_material
+	# The frame sits in its wall, which casts the shadow already.
+	_frames.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_frames)
+
+
+## Of `models` (path: the size each is built for, x wide and y high), the one nearest `size` in width and height by
+## ratio.
+static func _nearest(models: Dictionary, size: Vector3) -> String:
+	var best := ""
+	var best_gap := INF
+	for path: String in models:
+		var built: Vector3 = Vector3(models[path].x, models[path].y, 0.0)
+		var gap := absf(log(maxf(size.x, 0.01) / built.x)) + absf(log(maxf(size.y, 0.01) / built.y))
+		if gap < best_gap:
+			best = path
+			best_gap = gap
+	return best
 
 
 ## Door `d`'s two leaves: each from its jamb to the middle, turning out to the door's side.
@@ -138,6 +241,7 @@ func _add_leaves(d: MapData.Door, blocks: Array[MapData.Block]) -> void:
 		_dirs.append(dir)
 		_outs.append(out.abs())
 		_sizes.append(Vector3(leaf, d.size.y, thick) if not along_z else Vector3(thick, d.size.y, leaf))
+		_bases.append(Basis(Vector3.UP, atan2(-dir.z, dir.x)))
 		# Turning by a small angle a about y moves the leaf's free end along (dir.z, 0, -dir.x) × a: out, to its side.
 		_turns.append(signf(dir.z * out.x - dir.x * out.z))
 		_reach.append(reach(_hinges[-1], dir, _sizes[-1], _turns[-1], blocks))
@@ -186,6 +290,8 @@ func _place(i: int, open: float) -> void:
 		var j := i * 2 + k
 		var turn := Basis(Vector3.UP, _reach[j] * eased * _turns[j])
 		var leaf := _sizes[j]
-		var middle := _hinges[j] + turn * (_dirs[j] * (absf(_dirs[j].x) * leaf.x + absf(_dirs[j].z) * leaf.z) * 0.5)
-		_leaves[j] = Transform3D(turn * Basis.from_scale(leaf), middle)
+		var width := absf(_dirs[j].x) * leaf.x + absf(_dirs[j].z) * leaf.z
+		var thick := absf(_dirs[j].z) * leaf.x + absf(_dirs[j].x) * leaf.z
+		var middle := _hinges[j] + turn * (_dirs[j] * width * 0.5)
+		_leaves[j] = Transform3D(turn * _bases[j] * Basis.from_scale(Vector3(width, leaf.y, thick)), middle)
 		mm.set_instance_transform(j, _leaves[j])

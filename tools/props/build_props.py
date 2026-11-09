@@ -53,8 +53,6 @@ RECIPES = {
     # A tyre lying flat (the tyre walls and stacks), in rubber.
     "tyre": {"source": "car/debris-tire.glb", "parts": "texture", "turn": "x_up",
              "colours": {"all": (0.239, 0.231, 0.271)}},
-    # A painted crate, teal.
-    "crate": {"source": "survival/box-large.glb", "parts": "texture", "colours": {"all": (0.165, 0.612, 0.565)}},
     # The Truck bend's truck: a violet cab and bed on dark wheels.
     "truck": {"source": "car/truck.glb", "parts": "nodes",
               "colours": {"body": (0.463, 0.345, 0.667), "wheel-front-right": (0.239, 0.231, 0.271),

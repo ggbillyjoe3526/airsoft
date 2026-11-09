@@ -407,7 +407,7 @@ func _dress_part(part: int) -> void:
 				if not _light.night:
 					SiteDress.dress_sky(_lighting, _play.site_look)
 			else:
-				_props = PropDress.build(_map, _play.site_look.props)
+				_props = PropDress.build(_map, _play.site_look.props, _play.site_look.prop_paint)
 				if _props != null:
 					add_child(_props)
 		1:
