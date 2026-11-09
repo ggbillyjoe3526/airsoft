@@ -95,7 +95,7 @@ func test_a_screen_with_no_room_for_the_field_holds_the_pointer_in_the_middle_an
 # --- the pointer on a room that isn't square ---
 
 func test_the_pointer_maps_the_field_s_corners_back_to_the_world_on_every_map() -> void:
-	for id: String in ["depot", "woodland", "street"]:
+	for id: String in ["depot", "woodland"]:
 		var map := _load(id)
 		var fm := _field_map(map)
 		_show(fm)
@@ -296,7 +296,7 @@ func test_a_word_is_never_left_where_its_floor_band_is_not_the_storey_shown() ->
 # --- marks keep clear of each other ---
 
 func test_words_keep_inside_the_field_and_clear_of_starts_dead_zones_flags_and_the_scale() -> void:
-	for id: String in ["depot", "woodland", "street"]:
+	for id: String in ["depot", "woodland"]:
 		var fm := _field_map(_load(id))
 		_attack_defend(0)
 		_show(fm)
@@ -355,7 +355,7 @@ func test_lay_out_with_a_word_wider_than_the_bounds_does_not_crash_or_hang() -> 
 
 func test_dead_zone_hatch_covers_the_zone_on_every_map() -> void:
 	# The hatch is capped at HATCH_MOST lines; a zone so big that the cap runs out leaves its far corner bare.
-	for id: String in ["depot", "woodland", "street"]:
+	for id: String in ["depot", "woodland"]:
 		var fm := _field_map(_load(id))
 		_show(fm)
 		var ov := fm.overlay()
@@ -437,7 +437,7 @@ func test_the_other_team_is_not_marked_where_it_was_not_heard() -> void:
 # --- the zone words and the compass ---
 
 func test_the_start_and_dead_zone_words_do_not_cover_each_other_or_the_compass_on_any_map() -> void:
-	for id: String in ["depot", "woodland", "street"]:
+	for id: String in ["depot", "woodland"]:
 		var fm := _field_map(_load(id))
 		_show(fm)
 		var ov := fm.overlay()
@@ -463,7 +463,7 @@ func test_the_start_and_dead_zone_words_do_not_cover_each_other_or_the_compass_o
 
 func test_ultra_wide_and_tall_windows_keep_the_field_the_pointer_and_the_words_in_step() -> void:
 	for s: Vector2 in [Vector2(3440.0, 1080.0), Vector2(1920.0, 3400.0), Vector2(2560.0, 1080.0)]:
-		var fm := _field_map(_load("street"), s)
+		var fm := _field_map(_load("woodland"), s)
 		_attack_defend(0)
 		_show(fm)
 		var v := fm.view()
@@ -484,7 +484,7 @@ func test_ultra_wide_and_tall_windows_keep_the_field_the_pointer_and_the_words_i
 # --- the zone words, laid out clear of everything (0dc04a8) ---
 
 func test_zone_words_stay_on_the_field_and_never_overlap_a_zone_a_flag_the_compass_or_each_other() -> void:
-	for id: String in ["depot", "woodland", "street"]:
+	for id: String in ["depot", "woodland"]:
 		for screen: Vector2 in [Vector2(1920.0, 1080.0), Vector2(1280.0, 720.0), Vector2(1024.0, 600.0)]:
 			var fm := _field_map(_load(id), screen)
 			_attack_defend(0)
@@ -518,7 +518,7 @@ func test_zone_words_stay_on_the_field_and_never_overlap_a_zone_a_flag_the_compa
 
 
 func test_a_zone_box_never_leaves_the_field_and_a_zone_without_a_box_has_no_word() -> void:
-	for id: String in ["depot", "woodland", "street"]:
+	for id: String in ["depot", "woodland"]:
 		var fm := _field_map(_load(id), Vector2(1280.0, 720.0))
 		_show(fm)
 		var ov := fm.overlay()
@@ -596,7 +596,7 @@ func test_on_woodland_the_layer_is_clear_where_the_ground_picture_lies_and_the_v
 
 
 func test_a_map_without_terrain_has_no_ground_picture_and_the_views_draw_none() -> void:
-	for id: String in ["depot", "street"]:
+	for id: String in ["depot"]:
 		var map := _load(id)
 		var f := MinimapField.build(map, cfg)
 		assert_null(f.ground, "%s: no ground image" % id)

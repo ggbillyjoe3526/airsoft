@@ -40,9 +40,9 @@ extends Resource
 	&"tyre": RayHit.Surface.WOOD,
 	&"truck": RayHit.Surface.METAL,
 	&"thicket": RayHit.Surface.LEAVES,
-	# The Street (ST1): hedges and the scrub are leaves; railings, vehicles, lamps, bollards, cabinets, the fridge
-	# and the bus shelter ring; window glass is glass and the bins plastic (AU2); the roadworks' boards, the shed and
-	# the furniture tick like wood.
+	# Town kinds (ST1, kept for any map when The Street went, 2026-11-09): hedges and the scrub are leaves; railings,
+	# vehicles, lamps, bollards, cabinets, a fridge and a bus shelter ring; window glass is glass and bins plastic (AU2);
+	# boards, a shed and furniture tick like wood.
 	&"hedge": RayHit.Surface.LEAVES,
 	&"scrub": RayHit.Surface.LEAVES,
 	&"railing": RayHit.Surface.METAL,
@@ -106,10 +106,10 @@ extends Resource
 	Color(0.22, 0.40, 0.29), Color(0.79, 0.68, 0.19), Color(0.37, 0.43, 0.49), Color(0.18, 0.48, 0.48),
 ]
 @export var default_colour: Color = Color(0.7, 0.7, 0.7)
-## Kinds drawn see-through (MapLevel's Glass mesh, in the shared light), each at this opacity (0..1): The Street's
-## window glass and bus shelter (ST1). Still solid to BBs, sight and movement: only drawn clear.
+## Kinds drawn see-through (MapLevel's Glass mesh, in the shared light), each at this opacity (0..1): window glass
+## (ST1). Still solid to BBs, sight and movement: only drawn clear.
 @export var clear_kinds: Dictionary[StringName, float] = {&"glass": 0.35}
-## Kinds built as bar railings (SR1: The Street's waist-high metal railings): drawn as bars and rails, solid to movers
+## Kinds built as bar railings (SR1: waist-high metal railings): drawn as bars and rails, solid to movers
 ## and thrown bombs, see-through to sight, and a BB meets only the bars and rails its path crosses (Railings). A ramp
 ## of one of these kinds is an ordinary block.
 @export var railing_kinds: Array[StringName] = [&"railing"]
@@ -125,7 +125,7 @@ extends Resource
 @export var occluder_height: float = 1.8
 @export var occluder_length: float = 1.2
 @export var occluder_inset: float = 0.03
-## Prop models that are round (BP7: Woodland's and The Street's trunks, Depot's drums and barrels): BBs and bodies
+## Prop models that are round (BP7: Woodland's trunks, Depot's drums and barrels): BBs and bodies
 ## meet each prop as a few stepped boxes that hug it (RoundSteps), not as its block's square box; the nav grid, the
 ## bots' cover, the noisy props, the bake and the minimap still take the block's box. Where each prop stands comes
 ## from PropDressConfig (its lay, cluster cell and pallet), as PropLayout lays it. Each model's boxes in its own frame,

@@ -653,6 +653,15 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   The layout lives in `tools/woodland/layout.py` and `world.py`, and `build_map.py` writes `data/maps/woodland.json`:
   change the scripts, never the JSON. The game's blocks are axis-aligned, so pieces are squared and the stream runs
   straight north to south under both crossings. The old wood is a test fixture (`tests/support/maps/old_woodland.json`).
+- **The Street is removed from the game (owner, 2026-11-09: "completely remove the street map from the game", SX1).**
+  It was dev only (DT1). Its map file, pictures, layout scripts (`tools/street/`), guards and CI job, its tests and
+  the 23 Kenney props only it used (cars, vans, lorries, bins, skip, lamp, the House's furniture) went; nothing the rest
+  of the game uses did ("make sure not to remove/break anything the rest of the game uses"). The map format keeps what
+  it brought, held on test fixtures: a block's own colour, window glass (`MapStyle.clear_kinds`, BQ1), bar railings
+  (`Railings`, SR1), the flag head start exception, and the town kinds' surfaces and colours. The Range keeps the
+  `street` ambience and its two recorded beds (2026-11-05), the doors keep their narrow size, the props tool its
+  `paint` parts. A pick or a best saved for it falls back as Neon Heights' did; its old changelog notes stay off the
+  wiki (`tools/wiki.py` GONE_RE). The entries below are its history.
 - **The Street is a third field, built from concept 3 (owner, 2026-11-01, ST1).** A terraced street 104 x 162 m from
   the owner's own plan (never named or pictured in the repository): the left road behind the west terrace, the Path
   between the terraces' fronts and the back lane with the right road, linked by the Lane, the Pend (under the west
@@ -955,7 +964,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   replica clicks the gas pistol's recorded dry fire, today's and any added later (owner, 2026-11-05: "This is NOT a
   placeholder. This is the final decision"; until then an empty AEG cycled its motor). One cue, `dryFire`.
 - **The practice range sounds like The Street by day (owner, 2026-11-05).** Its ambience is `street`; it kept the
-  yard's until then. He also kept the AEG Rifle as it is after hearing a version with more motor.
+  yard's until then, and keeps it now The Street is gone (2026-11-09). He also kept the AEG Rifle as it is after
+  hearing a version with more motor.
 - **Footsteps are information, so gameplay audio comes first (owner, 2026-10-05).** Every ground's step stays within
   1.5 dB of concrete overall and 3 dB in the 0.7 to 4 kHz band, so a soft ground never hides anyone.
 - **A field's ambience is map data, with a day and a night variant picked by the lighting preset, never a map name
@@ -1011,7 +1021,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   until the owner made each public, 2026-10-05, Woodland confirmed 2026-10-24.)
 - **The Sniper Rifle, its three springs and the Variable Scope are public; The Street is dev (owner, 2026-11-05).**
   The rifle's gear unlocks at its levels (5, 7, 8, 9) for everyone, and bots carry the Sniper kit with the switch off.
-  The Street shows only with Dev content on, and a match there stays out of the records.
+  The Street shows only with Dev content on, and a match there stays out of the records (removed 2026-11-09, Maps and
+  modes).
 - **The Dev tab is always there, with no box and no hidden unlock (owner, 2026-10-29: "Dev should always be on and not
   hidden").** Its switches apply whenever they are set, and every one starts off, so the game plays the same until
   someone turns one on. A cheat (Game speed, Bottomless magazines, Ghost, Bots hold fire, Bots run low on BBs, Spectate

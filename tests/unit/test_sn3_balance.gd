@@ -22,8 +22,8 @@ func before_each() -> void:
 	w.cfg = config
 	w.query = BoxWorld.new()
 	w.characters = [me, foe]
-	# Hearing guesses a floor off the nav grid: The Street's spans these 65 m (its floor is at 0 too).
-	w.nav = _street_nav()
+	# Hearing guesses a floor off the nav grid: a flat one spanning these 65 m.
+	w.nav = _flat_nav()
 	b = Bot.new(me, 1, config.skill_for(&"normal"), 2)
 	w.bots = [b]
 
@@ -35,11 +35,18 @@ func _sniper_loadout() -> Array[ReplicaConfig]:
 static var _nav: NavGrid = null
 
 
-func _street_nav() -> NavGrid:
+func _flat_nav() -> NavGrid:
 	if _nav == null:
 		var t := SimTuning.load_default()
-		_nav = NavGrid.build(MapData.load_map("street", MapStyle.new(), t.rounds.team_size), t.nav, t.body)
+		_nav = NavGrid.build(_flat_map(), t.nav, t.body)
 	return _nav
+
+
+## A flat open floor 160 m across, its top at 0, spanning the 65 m between the two (hearing guesses a floor off the nav
+## grid; The Street's grid did this until the map was removed, 2026-11-09).
+static func _flat_map() -> MapData:
+	var slab := '{"kind": "floor", "center": {"x": 0, "y": -0.5, "z": -30}, "size": {"x": 160, "y": 1, "z": 160}}'
+	return MapData.parse('{"blocks": [%s]}' % slab, MapStyle.new(), 1)
 
 
 func test_a_bot_makes_out_only_its_view_until_shot_at() -> void:

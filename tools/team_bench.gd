@@ -12,7 +12,7 @@ extends SceneTree
 const SECONDS := 120.0
 ## Match time not counted at the start (the first frames' loads and the bots leaving their spawns).
 const WARM_SECONDS := 5.0
-const MAPS: Array[String] = ["depot", "woodland", "street"]
+const MAPS: Array[String] = ["depot", "woodland"]
 const SIZES: Array[int] = [5, 6, 7, 8]
 ## Low's frame at 60 fps (ms): a frame whose CPU work alone takes longer drops a frame whatever the GPU.
 const LOW_FRAME_MS := 1000.0 / 60.0

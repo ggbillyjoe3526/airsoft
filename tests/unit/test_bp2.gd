@@ -74,7 +74,7 @@ func test_woodlands_reflection_probes_capture_over_the_ground_not_inside_a_hill(
 func test_every_maps_open_doors_fold_back_in_sight_not_inside_a_wall() -> void:
 	var play := PlayTuning.load_default()
 	var swing := SimTuning.load_default().doors.swing_time
-	for id: String in ["depot", "woodland", "street"]:
+	for id: String in ["depot", "woodland"]:
 		var map := MapData.load_map(id, play.map_style, SimTuning.load_default().rounds.team_size)
 		var view := DoorView.build(map, play.map_style, swing)
 		if view == null:

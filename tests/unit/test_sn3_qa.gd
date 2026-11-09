@@ -1,9 +1,8 @@
 extends GutTest
 ## QA for the sniper balance pass (SN3): a reveal is cleared with the round, never outlasts its shooter, keeps the
-## dark and a dazzle, a bolt-action bot never holds fire for good, and the new Path bins leave The Street walkable.
+## dark and a dazzle, and a bolt-action bot never holds fire for good.
 
 const SNIPER := "000021"
-const BIN := Vector3(-10.25, 0.0, 25.0)
 
 var config: BotConfig = BotConfig.load_default()
 var rules: LoadoutRules
@@ -34,9 +33,16 @@ static var _map: MapData = null
 func _nav() -> NavGrid:
 	if _grid == null:
 		var t := SimTuning.load_default()
-		_map = MapData.load_map("street", MapStyle.new(), t.rounds.team_size)
+		_map = _flat_map()
 		_grid = NavGrid.build(_map, t.nav, t.body)
 	return _grid
+
+
+## A flat open floor 160 m across, its top at 0, spanning the 65 m between the two (hearing guesses a floor off the nav
+## grid; The Street's grid did this until the map was removed, 2026-11-09).
+static func _flat_map() -> MapData:
+	var slab := '{"kind": "floor", "center": {"x": 0, "y": -0.5, "z": -30}, "size": {"x": 160, "y": 1, "z": 160}}'
+	return MapData.parse('{"blocks": [%s]}' % slab, MapStyle.new(), 1)
 
 
 func _miss(shooter: Character) -> void:
@@ -138,23 +144,3 @@ func test_a_bolt_bot_with_no_contact_does_not_hold_fire() -> void:
 	var sniper := Character.new(4, 0, Vector3.ZERO, 0.0, [rules.config(rules.pool.item(SNIPER))] as Array[ReplicaConfig])
 	var sb := Bot.new(sniper, 1, config.skill_for(&"normal"), 2)
 	assert_false(BotCombat.bolt_waits(sb, w, 40.0))
-
-
-func test_the_path_bins_leave_the_path_walkable_both_sides_and_end_to_end() -> void:
-	var g := _nav()
-	assert_false(g.is_walkable_at(BIN + Vector3(0.0, 0.0, 0.0)), "the bins themselves are solid")
-	assert_true(g.is_walkable_at(Vector3(-11.4, 0.0, 25.0)), "west of the bins")
-	assert_true(g.is_walkable_at(Vector3(-9.1, 0.0, 25.0)), "east of the bins")
-	var out := PackedVector3Array()
-	assert_true(g.find_route(Vector3(-10.0, 0.0, 30.0), Vector3(-10.0, 0.0, 5.0), out), "down the Path past the bins")
-	for p in out:
-		assert_false(absf(p.x - BIN.x) < 0.35 and absf(p.z - BIN.z) < 0.7, "no route leg through the bins")
-
-
-func test_every_spawn_still_reaches_the_other_end_of_the_street() -> void:
-	var g := _nav()
-	_nav()
-	var out := PackedVector3Array()
-	for s0 in _map.ends[0].spawns:
-		for s1 in _map.ends[1].spawns:
-			assert_true(g.find_route(s0.position, s1.position, out), "spawn to spawn")

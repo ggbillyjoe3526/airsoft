@@ -29,7 +29,7 @@ func test_the_shipped_maps_offer_the_owner_s_sizes() -> void:
 	var cat := MapCatalog.read_file()
 	assert_eq(cat.problems, [] as Array[String])
 	var want: Dictionary[String, Array] = {
-		"depot": [5, 6, 8], "woodland": [5, 6, 8], "street": [5, 6, 8], "range": [1, 1, 1],
+		"depot": [5, 6, 8], "woodland": [5, 6, 8], "range": [1, 1, 1],
 	}
 	for id: String in want:
 		var e := cat.find(id)
@@ -173,8 +173,6 @@ func test_a_saved_custom_size_is_kept_where_the_map_allows_it() -> void:
 	page.map_card("depot").pressed.emit()
 	assert_eq(page.map_check_size(), 8, "Depot plays the saved 8v8 too")
 	assert_eq(box.team_size_choice().selected(), CustomRules.TEAM_SIZES.find(8))
-	page.map_card("street").pressed.emit()
-	assert_eq(page.map_check_size(), 8, "The Street plays the saved 8v8 too")
 	page.map_card("woodland").pressed.emit()
 	assert_eq(page.map_check_size(), 8, "Woodland plays the saved 8v8 again")
 	assert_eq(box.row_blurbs()[0], "You and seven bot teammates against eight bots.")

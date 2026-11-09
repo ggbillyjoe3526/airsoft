@@ -1,8 +1,8 @@
 extends GutTest
 ## DH1 (Dev 3, Depot's hall shell, tools/blender/maps/): the hall's 8 m walls are drawn as bays whose columns stand
 ## under the roof's trusses, a roller shutter or a fire exit in some bays (two at most a wall, never side by side,
-## only where nothing stands in front, each kind at least once), every bay facing the field; the Range's and The
-## Street's lower walls keep their boxes; the roof draws one truss bay a truss line and cell, all of it up under the
+## only where nothing stands in front, each kind at least once), every bay facing the field; the Range's lower walls
+## keep their boxes; the roof draws one truss bay a truss line and cell, all of it up under the
 ## roof, and its lamps' lenses glow; the floor draws its own slab set on the clean look, at the brightness its file
 ## has; every model keeps to its triangle budget.
 
@@ -86,9 +86,9 @@ func test_every_hall_wall_is_drawn_as_bays_with_its_columns_under_the_trusses() 
 					"a column at x %.2f stands under a truss" % edges[i])
 
 
-func test_the_range_and_the_street_keep_their_walls_as_boxes() -> void:
-	for id: String in ["range", "street"]:
-		var m := MapData.load_map(id, play.map_style, 1 if id == "range" else tuning.rounds.team_size)
+func test_the_ranges_lower_walls_keep_their_boxes() -> void:
+	for id: String in ["range"]:
+		var m := MapData.load_map(id, play.map_style, 1)
 		assert_true(m.ok(), "%s loads" % id)
 		for b in m.blocks:
 			if b.kind == &"wall" and b.size.y < HALL_WALL:

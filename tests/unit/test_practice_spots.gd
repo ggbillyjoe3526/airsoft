@@ -6,7 +6,7 @@ extends GutTest
 ## swingers where they fit), the START plate ahead of your start, the challenge lighting only what you can see, a best
 ## per map, and a practice session on Depot by day and on Woodland at night with your torch.
 
-const MAPS: Array[String] = ["depot", "woodland", "street"]
+const MAPS: Array[String] = ["depot", "woodland"]
 const RECORDS := "user://test_wl9_records.save"
 const AEG := "000002"
 const TORCH := "000020"
@@ -205,7 +205,7 @@ func test_crouched_figures_movers_and_swingers_stand_where_they_fit() -> void:
 				assert_eq(s.kind, RangeTarget.Kind.FIGURE)
 	assert_gt(crouched, 0, "behind low cover")
 	assert_gt(movers, 0, "on a lane's leg")
-	# Every field sets out swingers (BP7: Depot 4, Woodland 3, The Street 2).
+	# Every field sets out swingers (BP7: Depot 4, Woodland 3).
 	for id in MAPS:
 		assert_gt(swingers[id], 0, "%s sets out a swinger" % id)
 

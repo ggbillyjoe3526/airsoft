@@ -9,7 +9,7 @@ rulings `docs/DECISIONS.md`, how work runs `docs/PROCESS.md`.
   Its plan (owner, 2026-11-07): Blender models for Depot and the practice range, perhaps Woodland's.
   The browser game is frozen at `0.1-beta.1`, removed from the repository on 2026-11-05 (owner) and read from git at
   the tag `0.1-dev.1`.
-- **Fields.** Woodland and the Depot are redesigned (WR1, DR1). The Street is a new field, dev only since DT1.
+- **Fields.** Woodland and the Depot are redesigned (WR1, DR1). The Street was removed (owner, 2026-11-09, SX1).
 - **Replicas.** The Sniper Rifle (bolt-action, Variable Scope) is public since DT1 (SN1 to SN3).
 - **Bombs.** Smoke and flash bombs, thrown by you and by bots (SF1, SF2, GT1 to GT3).
 - **Models.** The Blender series is built from the owner's photos: replicas (BL1 to BL6), power sources (BL7),

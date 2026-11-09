@@ -98,8 +98,8 @@ func test_no_bed_and_no_set_of_beds_together_is_louder_than_the_yards() -> void:
 
 
 func test_the_owners_recorded_beds() -> void:
-	# AU5: Depot's big quiet room (its creaks for calls); The Street's two outdoor takes by day (the yard's calls) and
-	# the street at night (the dog).
+	# AU5: Depot's big quiet room (its creaks for calls); the owner's two outdoor takes by day (the yard's calls) and
+	# a street at night (the dog): the street ambience, the Range's (owner, 2026-11-05).
 	assert_eq(_loops(amb.day[&"indoor"]), ["indoor"])
 	assert_eq(_loops(amb.night[&"indoor"]), ["indoor"])
 	assert_eq(_cues(amb.day[&"indoor"]), ["ambience_creak"])
@@ -119,10 +119,9 @@ func test_a_set_is_picked_by_id_and_time_of_day_an_unknown_one_plays_the_yard() 
 	assert_false(AmbienceConfig.known(&"swamp"))
 
 
-## The range plays The Street's sound (owner, 2026-11-05).
+## The range plays the street ambience (owner, 2026-11-05: it kept The Street's sound when the map went, 2026-11-09).
 func test_each_map_reads_its_ambience() -> void:
-	var want: Dictionary[String, StringName] = {"depot": &"indoor", "woodland": &"woods", "range": &"street",
-			"street": &"street"}
+	var want: Dictionary[String, StringName] = {"depot": &"indoor", "woodland": &"woods", "range": &"street"}
 	for id: String in want:
 		var map := MapData.load_map(id, MapStyle.new(), 1)
 		assert_eq(map.ambience, want[id], id)

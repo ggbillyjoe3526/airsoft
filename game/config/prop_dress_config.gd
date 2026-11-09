@@ -32,30 +32,6 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY }
 	&"tyre": "res://assets/models/props/tyre.glb",
 	&"crate": "res://assets/models/props/crate.glb",
 	&"truck": "res://assets/models/props/truck.glb",
-	# The Street's (ST2).
-	&"car_crimson": "res://assets/models/props/car_crimson.glb",
-	&"car_teal": "res://assets/models/props/car_teal.glb",
-	&"car_cream": "res://assets/models/props/car_cream.glb",
-	&"car_lilac": "res://assets/models/props/car_lilac.glb",
-	&"car_yellow": "res://assets/models/props/car_yellow.glb",
-	&"car_green": "res://assets/models/props/car_green.glb",
-	&"car_grey": "res://assets/models/props/car_grey.glb",
-	&"van_cream": "res://assets/models/props/van_cream.glb",
-	&"van_plaster": "res://assets/models/props/van_plaster.glb",
-	&"van_teal": "res://assets/models/props/van_teal.glb",
-	&"van_grey": "res://assets/models/props/van_grey.glb",
-	&"lorry_crimson": "res://assets/models/props/lorry_crimson.glb",
-	&"lorry_teal": "res://assets/models/props/lorry_teal.glb",
-	&"lorry_cream": "res://assets/models/props/lorry_cream.glb",
-	&"bin_green": "res://assets/models/props/bin_green.glb",
-	&"bin_steel": "res://assets/models/props/bin_steel.glb",
-	&"bin_teal": "res://assets/models/props/bin_teal.glb",
-	&"skip": "res://assets/models/props/skip.glb",
-	&"lamp": "res://assets/models/props/lamp.glb",
-	&"settee": "res://assets/models/props/settee.glb",
-	&"table": "res://assets/models/props/table.glb",
-	&"units": "res://assets/models/props/units.glb",
-	&"fridge": "res://assets/models/props/fridge.glb",
 	# Depot's hall shell (Dev 3, tools/blender/maps/): the walls' bays, its pillars and its camouflage nets.
 	&"hall_wall": "res://assets/models/props/hall_wall.glb",
 	&"hall_shutter": "res://assets/models/props/hall_shutter.glb",
@@ -76,16 +52,12 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY }
 ## side along the box's).
 @export var model_lays: Dictionary[StringName, Lay] = {
 	&"logstack": Lay.GRID, &"crate": Lay.GRID, &"tyre": Lay.GRID, &"pine": Lay.GRID,
-	&"bin_green": Lay.GRID, &"bin_steel": Lay.GRID, &"bin_teal": Lay.GRID, &"units": Lay.GRID,
 }
 ## GRID's cells (m): x along the box's long side, y up (0: one layer the box's height), z across. Cordwood a metre and
-## a half long a stack, crates about a metre, tyres in stacks, a spruce every metre and a half; The Street's bins side
-## by side, about 0.7 m each, and its kitchen units about 0.6 m a cupboard.
+## a half long a stack, crates about a metre, tyres in stacks, a spruce every metre and a half.
 @export var grid_cells: Dictionary[StringName, Vector3] = {
 	&"logstack": Vector3(1.6, 0.9, 1.4), &"crate": Vector3(0.9, 0.9, 1.0), &"tyre": Vector3(0.9, 0.45, 0.9),
 	&"pine": Vector3(1.5, 0.0, 1.5),
-	&"bin_green": Vector3(0.7, 0.0, 0.7), &"bin_steel": Vector3(0.7, 0.0, 0.7), &"bin_teal": Vector3(0.7, 0.0, 0.7),
-	&"units": Vector3(0.6, 0.0, 0.6),
 	# a camouflage net's scaffold sections, a pole every 2 m
 	&"camo_net": Vector3(2.0, 0.0, 0.3),
 }
@@ -98,7 +70,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY }
 ## and sight below the tops of its trees.
 @export var model_cores: Dictionary[StringName, Vector2] = {&"pine": Vector2(0.7, 0.6)}
 ## A dressed kind's block lower than this (m) keeps its box: a rack's shelf boards stay boards, its racking is
-## shelving; only a hall's 8 m walls are its bays (the Range's and The Street's lower walls keep their boxes).
+## shelving; only a hall's 8 m walls are its bays (the Range's lower walls keep their boxes).
 @export var kind_min_height: Dictionary[StringName, float] = {&"rack": 2.0, &"wall": 6.0}
 ## BAY's cells (m) by model: their edges at `bay_anchor` plus whole `bay_pitch`es along the world's x (anchor x) or z
 ## (anchor y), a wall's end cell shorter than half a pitch joined to the next. Depot's hall: the roof's trusses stand

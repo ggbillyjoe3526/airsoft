@@ -1,6 +1,6 @@
 class_name Railings
 extends RefCounted
-## A map's bar railings (SR1; The Street's waist-high metal railings): upright square bars between a top rail and a
+## A map's bar railings (SR1; waist-high metal railings): upright square bars between a top rail and a
 ## bottom rail, each run filling a level block's box along its long side (RailingConfig). A run's box is still solid to
 ## movers and the level ray (no one walks or throws a bomb through it), but sight and the BBs' level ray pass it
 ## (WorldQuery.sight_ray, ray_past_railings): here a BB meets only the bars and rails its path actually crosses, and

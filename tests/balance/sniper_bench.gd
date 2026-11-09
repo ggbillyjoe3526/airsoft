@@ -7,7 +7,7 @@ extends SceneTree
 ## Arguments after `--`: the report's path, the seed count, a map filter (empty: all), the sizes (comma-separated,
 ## 5,6,7,8 by default), the modes ("elimination", "flag" or both, both by default).
 
-const MAPS: Array[String] = ["depot", "woodland", "street"]
+const MAPS: Array[String] = ["depot", "woodland"]
 const MAX_MATCH_SECONDS := 30.0 * 60.0
 const LEVEL := &"normal"
 ## The kit rows added after the Sniper row (Normal weight 8 each, so about 32 of every 126 bots carry a Sniper Rifle).

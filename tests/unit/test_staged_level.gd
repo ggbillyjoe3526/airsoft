@@ -73,7 +73,7 @@ static func _sum(v: PackedVector3Array) -> Vector3:
 
 
 func test_a_level_built_in_pieces_is_the_level_built_whole() -> void:
-	for id: String in ["woodland", "depot", "street"]:
+	for id: String in ["woodland", "depot"]:
 		var m := MapData.load_map(id, play.map_style, tuning.rounds.team_size)
 		var whole := _level()
 		whole.build(m, play.map_style, tuning.body, play.baked_light, LightingConfig.for_map(play.lighting, null, m,

@@ -14,7 +14,7 @@ func test_a_gone_maps_presets_read_day_alone_and_load_refuses_it_cleanly() -> vo
 	assert_false(m.problems.is_empty(), "a refused map says why")
 
 
-func test_no_shipped_item_is_dev_the_street_is_the_one_dev_map_and_the_range_is_listed() -> void:
+func test_no_shipped_item_or_map_is_dev_and_the_range_is_listed() -> void:
 	var cat := MapCatalog.read_file()
 	for e in cat.listed(false):
 		assert_false(cat.is_dev(e.id), e.id)
@@ -22,7 +22,7 @@ func test_no_shipped_item_is_dev_the_street_is_the_one_dev_map_and_the_range_is_
 	for e in cat.listed(false):
 		ids.append(e.id)
 	assert_eq(ids, PackedStringArray(["depot", "woodland", "range"]))
-	assert_eq(cat.listed(true).size(), cat.listed(false).size() + 1, "Dev content adds The Street (owner, 2026-11-05)")
+	assert_eq(cat.listed(true).size(), cat.listed(false).size(), "no dev map (The Street, the last, removed 2026-11-09)")
 	var pool := Pool.read_file()
 	var every: Array[Pool.Item] = []
 	every.append_array(pool.replicas)

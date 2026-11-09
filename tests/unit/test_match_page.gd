@@ -147,7 +147,7 @@ func test_there_are_three_levels_and_a_new_player_starts_on_normal() -> void:
 func test_the_public_maps_are_listed_and_a_dev_one_is_tagged() -> void:
 	var page := _page(false)
 	assert_eq(page.map_ids(), PackedStringArray(["depot", "woodland", "range"]),
-			"listed with Dev content off: The Street is dev (owner, 2026-11-05)")
+			"every shipped map is public")
 	for id: String in page.map_ids():
 		assert_false(_labels(page.map_card(id)).has("DEV"), id)
 		assert_false(page.is_unloadable(id), id)
@@ -155,7 +155,6 @@ func test_the_public_maps_are_listed_and_a_dev_one_is_tagged() -> void:
 	var dev := _page(true)
 	DevContent.restore_map(was)
 	assert_true(_labels(dev.map_card("woodland")).has("DEV"), "a dev map is tagged")
-	assert_true(_labels(dev.map_card("street")).has("DEV"), "the shipped dev map too")
 	assert_false(_labels(dev.map_card("woodland")).has("LATER"))
 	assert_false(_labels(dev.map_card("depot")).has("DEV"))
 	for id: String in ["depot", "woodland"]:
@@ -174,7 +173,7 @@ func test_a_map_that_cant_load_is_greyed_with_later_and_listed_last() -> void:
 	page.picks.map_id = "ghost"
 	page._offered = PackedStringArray()
 	page._list_maps()
-	assert_eq(page.map_ids(), PackedStringArray(["depot", "woodland", "street", "range", "ghost"]))
+	assert_eq(page.map_ids(), PackedStringArray(["depot", "woodland", "range", "ghost"]))
 	var ghost := page.map_card("ghost")
 	assert_true(page.is_unloadable("ghost"))
 	assert_true(ghost.disabled)
@@ -189,7 +188,7 @@ func test_no_dev_maps_listed_with_dev_content_off() -> void:
 	var page := _page(false)
 	DevContent.restore_map(was)
 	assert_eq(page.map_ids(), PackedStringArray(["depot", "range"]),
-			"Woodland tagged dev here, The Street dev since 2026-11-05")
+			"Woodland tagged dev here")
 	assert_true(page.map_card("depot").is_picked())
 
 
@@ -214,6 +213,12 @@ func test_a_picked_map_that_is_no_longer_listed_falls_back_to_a_playable_one() -
 	gone.map_id = "neonHeights" # a map taken out of the game (2026-10-29)
 	add_child_autofree(MatchPage.new(gone, Settings.new()))
 	assert_eq(gone.map_id, "depot", "a map no longer in the game falls back to Depot")
+	var street := MatchPicks.new()
+	street.map_id = "street" # taken out too (owner, 2026-11-09), with Dev content on
+	var dev := Settings.new()
+	dev.dev.dev_content = true
+	add_child_autofree(MatchPage.new(street, dev))
+	assert_eq(street.map_id, "depot", "The Street falls back to Depot")
 
 
 # --- your team and the picks ---
@@ -476,7 +481,7 @@ func test_a_field_picture_is_cut_from_the_render_centre_to_the_cards_size() -> v
 ## compressed (lossy, as they were taken), smaller than the 700 x 400 pictures were; each has a small copy for the
 ## Match page's cards.
 func test_the_map_pictures_are_full_screen_and_ship_compressed() -> void:
-	for map_id: String in ["depot", "range", "street", "woodland"]:
+	for map_id: String in ["depot", "range", "woodland"]:
 		var path := "res://assets/maps/%s.jpg" % map_id
 		var picture := load(path) as Texture2D
 		assert_eq(Vector2i(picture.get_size()), Vector2i(1920, 1080), map_id)
