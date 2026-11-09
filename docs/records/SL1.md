@@ -22,8 +22,9 @@
   the shared include, applied to the albedo of every material in the look (vertex-coloured models, the site surface,
   doors, puddles). The palette hexes stay as painted, so the 20° team-hue tests are unchanged. The concept pulled
   colour 55 % back in screen space; 45 % turned Woodland's grass khaki, so 40 %.
-- **Woodland's grass `#5f8a3a`** (was `#8aa860`), in MapStyle and the palette's `meadow`: the old light green turned
-  pale khaki once muted under the warmer sun.
+- **Grass `#5f8a3a`** (was `#8aa860`) for sloping ground and the ground beyond the walls (MapStyle), a new palette
+  entry `grass`; `meadow` keeps its value for The Street's floors. The old light green turned pale khaki once muted
+  under the warmer sun.
 - **The day:** sun `1.0, 0.92, 0.8` at 2.0 (was `1.0, 0.95, 0.86` at 1.25), ambient 0.55 (was 0.9), exposure 0.9. A
   more orange sun (`0.88, 0.72`) turned the grass khaki. Night keeps its own values (`night_lighting.tres`). Depot's
   and the Range's bakes were rebaked for the new sun.

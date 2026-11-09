@@ -115,13 +115,14 @@ The look's palette is `LookConfig.palette` (`game/config/look_config.gd`, in `pl
 | bark, heartwood | `#7b6f62`, `#e4dccd` | Woodland's trunks and their cut ends (WA1) |
 | canopy, fern, olive | `#5c9a50`, `#79a650`, `#8c9a48` | Woodland's crowns and bushes; olive the logs' moss |
 | pine, spruce, forest | `#3d7a4a`, `#2f6e55`, `#2b5c48` | spruces, thicket cores and the far forest |
-| meadow, litter, earth | `#8aa860`, `#7c7a58`, `#8a8070` | Woodland's grass, leaf litter and bare earth |
+| meadow, litter, earth | `#8aa860`, `#7c7a58`, `#8a8070` | a light meadow, Woodland's leaf litter and bare earth |
+| grass | `#5f8a3a` | sloping ground's grass and the ground beyond a field's walls (SL1) |
 | rubber | `#3d3b45` | tyres and wheels |
 | pond, mud, mud_wet | `#4a6f6c`, `#554e44`, `#403b34` | puddles and mud (wet mud also the wet skin) |
 
 - **Paint is weathered.** The light draws every paint at `paint_saturation` (0.6) of its colour, toward its own
-  grey, so the hexes above are the paint as bought and the screen shows it weathered (SL1). Woodland's grass is a
-  darker natural green (`#5f8a3a`) so it stays green once muted.
+  grey, so the hexes above are the paint as bought and the screen shows it weathered (SL1). Sloping ground's grass is
+  `grass`, a darker natural green (`#5f8a3a`), so it stays green once muted.
 - **Spread the six evenly.** No site colour covers much more of a map than another; big repeated props (racking,
   walls) take a neutral (steel, plywood, cream) so they never make one colour dominate.
 - **Team colours** (Alpha blue, Beta orange) appear **only** on players and the flag, never on props. No palette colour
