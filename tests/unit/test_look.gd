@@ -164,6 +164,16 @@ func test_the_shared_materials_draw_in_the_shared_light() -> void:
 	assert_eq(m.shader, LookMaterials.VERTEX_SHADER)
 	assert_true(m.shader.code.contains("look_light.gdshaderinc"), "the vertex-colour shader includes the light")
 	assert_true(SiteSurface.SHADER.code.contains("look_light.gdshaderinc"), "the site surface includes the light")
+	# Sunlit Concrete's paint grade (SL1): the include defines it from the global, and every shader in the look draws
+	# its ALBEDO through it
+	var include := FileAccess.get_file_as_string("res://game/play/look/look_light.gdshaderinc")
+	assert_true(include.contains("vec3 look_paint(vec3"), "the include defines look_paint")
+	assert_true(include.contains("global uniform float look_paint_saturation"), "from the paint's global")
+	for path: String in ["res://game/play/look/look_vertex.gdshader", "res://game/play/look/look_clear.gdshader",
+			"res://game/play/site/site_surface.gdshader", "res://game/play/door_leaf.gdshader"]:
+		var code := (load(path) as Shader).code
+		assert_true(code.contains("look_light.gdshaderinc"), "%s includes the light" % path)
+		assert_true(code.contains("ALBEDO = look_paint("), "%s draws its paint through look_paint" % path)
 	assert_almost_eq(m.get_shader_parameter(&"roughness") as float, 0.4, 0.0001)
 	assert_almost_eq(m.get_shader_parameter(&"metallic") as float, 0.2, 0.0001)
 

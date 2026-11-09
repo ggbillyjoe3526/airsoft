@@ -1,9 +1,10 @@
-// The game's shared light (docs/ART.md › Light; LookConfig's Light group): Valorant's clean forms under BOTW's soft
-// light. A spatial shader opts in with `#include "res://game/play/look/look_light.gdshaderinc"` and gets this light():
-// soft cel bands with a gentle mid step, the sun's far side lit in the look's cool violet (never black), a warm rim on
-// an edge seen against the light, and a small soft highlight on smooth surfaces. Its values are global shader
-// uniforms (project.godot [shader_globals], set by LookConfig.push_globals), so every map's materials follow one
-// place. Ambient light, global illumination and reflections are the engine's and come on top.
+// The game's shared light (docs/ART.md › Light; LookConfig's Light group): Sunlit Concrete's real daylight. A spatial
+// shader opts in with `#include "res://game/play/look/look_light.gdshaderinc"` and gets this light(): a natural soft
+// falloff from the sun (a band wide enough to read as no band; a mid step the old look used, now 0), the sun's far
+// side adding only the shade (a dark warm grey, so it falls to the ambient and bounce light), a faint warm rim on an
+// edge seen against the light, and a small soft highlight on smooth surfaces; and look_paint() for its ALBEDO, the
+// paint at LookConfig.paint_saturation of its colour. Its values are global shader uniforms (project.godot
+// [shader_globals], set by LookConfig.push_globals), so every map's materials follow one place. Ambient light, global illumination and reflections are the engine's and come on top.
 
 global uniform vec4 look_shade;
 global uniform float look_band;
