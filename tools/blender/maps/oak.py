@@ -35,6 +35,8 @@ CROWN_R = Vector((10.0, 8.4, 10.0))   # half again as wide as the tree is tall, 
 CROWN_FLOOR = 3.35
 CLEAR = 3.1              # 2.6 m over the ground at the smallest oak the map stands (12 m of 14)
 BUDGET = 8000
+N_SURFACE = 47   # clumps over the dome's surface
+N_INNER = 9      # clumps filling its upper half from inside
 
 BARK = tk.srgb(P["bark"])
 BARK_DARK = tk.srgb(P["bark"], 0.62)
@@ -108,7 +110,7 @@ def main() -> None:
     # ones so the middle reads solid
     for e in tips:
         put(tree, e, rng.uniform(2.4, 3.1), rng)
-    n_surface = 54
+    n_surface = N_SURFACE
     golden = math.pi * (3.0 - math.sqrt(5.0))
     laid = 0
     i = 0
@@ -119,22 +121,29 @@ def main() -> None:
         a = golden * i
         d = Vector((math.cos(a) * rr, y, math.sin(a) * rr))
         p = CROWN + Vector((d.x * CROWN_R.x, d.y * CROWN_R.y, d.z * CROWN_R.z)) * rng.uniform(0.82, 0.95)
-        put(tree, p, rng.uniform(2.5, 3.2) * (1.1 if y > 0.6 else 1.0), rng)
+        put(tree, p, rng.uniform(2.5, 3.2), rng)
         laid += 1
     for c in (Vector((0.0, 9.6, 0.0)), Vector((2.6, 8.6, 1.2)), Vector((-2.4, 8.8, -1.6)), Vector((0.8, 8.4, -2.8)),
               Vector((-1.2, 8.3, 2.7))):
         put(tree, Vector((c.x * 1.5, CROWN.y + (c.y - 8.6) * 1.6 + 1.0, c.z * 1.5)), 3.8, rng)
-    # the dome's top closed: a ring of clumps just under its crest
+    # the dome's top closed: a small ring of clumps just under its crest, so it rounds over rather than squares off
     for k in range(5):
         a = math.tau * k / 5 + 0.3
-        put(tree, CROWN + Vector((math.cos(a) * 3.4, CROWN_R.y * 0.8, math.sin(a) * 3.4)), 3.0, rng)
+        put(tree, CROWN + Vector((math.cos(a) * 2.4, CROWN_R.y * 0.8, math.sin(a) * 2.4)), 2.6, rng)
+    # and its upper half filled from inside, so no sky shows through between the surface clumps
+    for k in range(N_INNER):
+        a = golden * k * 1.7 + 0.9
+        f = 0.0 if k == 0 else rng.uniform(0.35, 0.65)    # the first caps the crest
+        h = 0.92 if k == 0 else 0.3 + 0.6 * (k - 0.5) / (N_INNER - 1)
+        put(tree, CROWN + Vector((math.cos(a) * CROWN_R.x * f, CROWN_R.y * h, math.sin(a) * CROWN_R.z * f)),
+            rng.uniform(2.6, 3.1), rng)
     tree.export(BUDGET, FOOT_R, CLEAR, crown=True)
 
 
 def put(tree: tk.Tree, at: Vector, size: float, rng) -> None:
     """A rounded foliage clump `size` m across at `at`, its underside kept over CROWN_FLOOR."""
     # uneven across and flatter than tall, knobbly with a few bulges: leafy masses, not balls (owner, 2026-11-09)
-    r = Vector((size * rng.uniform(0.9, 1.15), size * rng.uniform(0.62, 0.75), size * rng.uniform(0.9, 1.15))) * 0.62
+    r = Vector((size * rng.uniform(0.9, 1.15), size * rng.uniform(0.7, 0.8), size * rng.uniform(0.9, 1.15))) * 0.62
     at = at.copy()
     at.y = max(at.y, CROWN_FLOOR + r.y * 0.6)
     top = at.y > CROWN.y + CROWN_R.y * 0.25
