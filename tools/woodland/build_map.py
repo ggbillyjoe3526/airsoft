@@ -37,7 +37,15 @@ KINDS = {"palisade": "fence", "logstack": "log", "log": "log", "logpile": "log",
 # The CC0 prop each piece's blocks are drawn as (WR3; PropDressConfig lays them in the box, which stays what BBs meet),
 # and the trees' and thickets'. The wind-thrown root plates, the posts, the walls and the palisade keep their boxes.
 DRESS = {"log": "log", "logpile": "logstack", "logstack": "logstack", "crates": "crate", "lowcrates": "crate",
-         "tyre": "tyre", "tyrestack": "tyre", "truck": "truck", "tree": "trunk", "thicket": "pine"}
+         "tyre": "tyre", "tyrestack": "tyre", "truck": "truck", "tree": "trunk", "thicket": "pine",
+         "palisade": "palisade"}
+# The structures drawn as one model of the game's own each (WG3, tools/blender/maps/woodland_*.py), named on every
+# block of theirs: the model fills the box round them all (PropDressConfig's SET lay), each part of it its block.
+TOWER, BRIDGE, SHED = "watch_tower", "footbridge", "sawmill_shed"
+TAGGED = {("post", "tower"): TOWER, ("parapet", "tower"): TOWER, ("post", "shed"): SHED}
+# The roofs' models by tag: the huts' two sizes (WG3; a roof the long side of HUT_LONG m or more is the long one).
+ROOF_DRESS = {"tower": TOWER, "shed": SHED}
+HUT_ROOF, HUT_ROOF_LONG, HUT_LONG = "hut_roof", "hut_roof_long", 6.0
 # Pieces this long or longer follow the ground in parts no longer than this (m): walls and palisades on slopes.
 FOLLOW = {"palisade", "fortwall", "hutwall", "lowwall"}
 PART = 4.0
@@ -183,7 +191,9 @@ def piece_blocks(p: dict) -> list[dict]:
             out.append(block(KINDS[kind], a1, lo, b1, a2, g + p["top"], b2))
             out.append(block(KINDS[kind], a1, g + LINTEL_FROM, b1, a2, g + wall_top, b2))
             continue
-        out.append(block(KINDS[kind], a1, bottom, b1, a2, g + p.get("bottom", 0.0) + p["top"], b2, piece_kind=kind))
+        extra = {"dress": TAGGED[(kind, p["tag"])]} if (kind, p["tag"]) in TAGGED else {}
+        out.append(block(KINDS[kind], a1, bottom, b1, a2, g + p.get("bottom", 0.0) + p["top"], b2, piece_kind=kind,
+                         **extra))
     return out
 
 
@@ -193,8 +203,9 @@ def roof_blocks() -> list[dict]:
         base = rf.get("abs_base")
         g = float(base) if base is not None else ground(rf["cx"], rf["cz"])
         y = g + rf["y"]
+        dress = ROOF_DRESS.get(rf["tag"], HUT_ROOF_LONG if max(rf["sx"], rf["sz"]) >= HUT_LONG else HUT_ROOF)
         out.append(block("plywood", rf["cx"] - rf["sx"] / 2, y, rf["cz"] - rf["sz"] / 2,
-                         rf["cx"] + rf["sx"] / 2, y + 0.15, rf["cz"] + rf["sz"] / 2))
+                         rf["cx"] + rf["sx"] / 2, y + 0.15, rf["cz"] + rf["sz"] / 2, dress=dress))
     return out
 
 
@@ -269,19 +280,20 @@ def deck_blocks() -> list[dict]:
             for zz in (z1, z2 - 0.3):  # the kerbs over the headwalls
                 out.append(block("wall", x1, y, zz, x2, y + 0.45, zz + 0.3))
         elif d["name"] == "Tower platform":
-            out.append(block("floor", x1, y - 0.2, z1, x2, y, z2, surface="wood"))
+            out.append(block("floor", x1, y - Wd.TOWER_DECK, z1, x2, y, z2, surface="wood", dress=TOWER))
             # Its stair: a ramp off the open east side, 1:2, down to the ground.
             run = 2.0 * (y - ground(x2 + 6.8, d["cz"])) + 0.2
             foot = ground(x2 + run, d["cz"])
             run = 2.0 * (y - foot) + 0.2
             rz1, rz2 = d["cz"] - TOWER_RAMP_WIDTH / 2, d["cz"] + TOWER_RAMP_WIDTH / 2
-            out.append(block("ramp", x2, foot, rz1, x2 + run, y, rz2, rise="-x", surface="wood"))
+            out.append(block("ramp", x2, foot, rz1, x2 + run, y, rz2, rise="-x", surface="wood", dress=TOWER))
             under = cells(x2, rz1, x2 + run, rz2)
             assert float((under - foot).max()) <= 0.6, "the ground pokes through the tower's stair"
         else:
-            out.append(block("floor", x1, y - 0.3, z1, x2, y, z2, surface="wood"))
+            assert d["name"] == "North bridge", f"{d['name']} has no model (WG3)"
+            out.append(block("floor", x1, y - 0.3, z1, x2, y, z2, surface="wood", dress=BRIDGE))
             for zz in (z1, z2 - 0.1):  # rails along both sides
-                out.append(block("fence", x1, y, zz, x2, y + 1.0, zz + 0.1))
+                out.append(block("fence", x1, y, zz, x2, y + 1.0, zz + 0.1, dress=BRIDGE))
     return out
 
 
@@ -330,14 +342,16 @@ def fence_blocks() -> list[dict]:
         while x < L.W + t - 1e-6:
             xe = min(x + FENCE_SEG, L.W + t)
             under = cells(max(x, -L.W), zz - 1 if zz > 0 else zz, min(xe, L.W), zz + 1 if zz < 0 else zz)
-            out.append(block("fence", x, float(under.min()) - SINK, za, xe, float(under.max()) + FENCE_TOP, zb))
+            out.append(block("fence", x, float(under.min()) - SINK, za, xe, float(under.max()) + FENCE_TOP, zb,
+                             dress="palisade"))
             x = xe
     for xx, xa, xb in ((-L.W, -L.W - t, -L.W), (L.W, L.W, L.W + t)):
         z = -L.H
         while z < L.H - 1e-6:
             ze = min(z + FENCE_SEG, L.H)
             under = cells(xx - 1 if xx > 0 else xx, z, xx + 1 if xx < 0 else xx, ze)
-            out.append(block("fence", xa, float(under.min()) - SINK, z, xb, float(under.max()) + FENCE_TOP, ze))
+            out.append(block("fence", xa, float(under.min()) - SINK, z, xb, float(under.max()) + FENCE_TOP, ze,
+                             dress="palisade"))
             z = ze
     return out
 
@@ -565,9 +579,9 @@ def settle(blocks: list[dict]) -> list[dict]:
 
 
 def dressed(blocks: list[dict]) -> list[dict]:
-    """Each block of a dressed piece, tree or thicket names its prop (`dress`, DRESS)."""
+    """Each block of a dressed piece, tree or thicket names its prop (`dress`, DRESS), unless it names one already."""
     for b in blocks:
-        if b.get("piece_kind", b["kind"]) in DRESS:
+        if "dress" not in b and b.get("piece_kind", b["kind"]) in DRESS:
             b["dress"] = DRESS[b.get("piece_kind", b["kind"])]
         b.pop("piece_kind", None)
     return blocks

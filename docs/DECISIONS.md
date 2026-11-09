@@ -509,6 +509,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Maps and modes
 
+- **Models keep the play boxes they dress (owner, 2026-11-09, WG3).** Woodland's structures are modelled inside the
+  blocks as they are: no pitched roofs in taller roof boxes, no open bridge rails, no low lattice on the tower's legs.
+  A shape the photos have that needs a bigger or opener box is a play change, and his call.
+- **The watch tower is solid but where you look out (owner, 2026-11-09, WG3).** Its walls close every corner and the
+  stair's head either side; the band between the walls and the roof and the stair are its only openings, and nothing
+  is seen through any structure's blocks from any side, underneath included (tested).
 - **What no player can see is not drawn (owner, 2026-10-16, MS1).** Beyond a map's walls only what shows over them from
   a lane, a spawn or a raised floor is built (tested). Look-only fixtures hung over the field stay out of the room a
   player takes up. Woodland's bushes are small and decorative (0.9 to 1.25 m): crouch cover, never full cover.

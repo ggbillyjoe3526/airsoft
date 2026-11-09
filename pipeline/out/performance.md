@@ -1,6 +1,19 @@
-Performance verdict (0765d76): PASS
-- Bench reproduced (figure_bench, 11 figures, 4 s, headless): close (eye in the middle) 235 surfaces by day vs 257 with --night (+22, i.e. 2 a bot, matching the rifle's lens and LED); at the spawn (--far) 184 vs 184 (the torches are on the bare far copies, 0 extra). Both claims hold.
-- Per frame: _fit_torches loops the figure's replicas (at most 2) and compares one Mesh reference. No allocation and no rebuild. A holster toggle costs one assignment of a cached Mesh. lens_position is one Transform3D times Vector3 (value types), no heap, once per lit bot per frame in TorchBeams. The fallback path is the old arithmetic.
-- Draws: the holstered pistol and every far version drop the torch (bare meshes), so the cost is only inside the far line and in hand. That is down from my earlier 3 and 3 per replica to 2 on a rifle (its Rubber shares the rifle's material) and 3 on a pistol. The 11-bot worst case at night is +22 close and 0 far. Reaching 15 bots, about +30 close.
-- Night load: set_body 392 vs 275 ms close and 335 vs 191 ms far, i.e. about 11 to 13 ms per figure, in line with the claimed 14. The cause is ReplicaParts.take instantiating the parts glb scene per figure per replica (load is cached; the instantiate and free is not), plus the extra bare and bare-far merges (cached by key, so only the first of a kind builds). It is a one-off at match build, not in play, so about 0.2 s more for a 15-bot night match; a cache of the instantiated parts scene would remove most of it if loading time matters.
-- Memory: up to three more cached meshes per lit kit (lit, bare, bare far); bounded by the kits in the match. Freed: take() frees its holder, with no new orphans in the test run.
+Task: WG3 · head 1606137 (+ uncommitted docs) · Verdict: Pass
+Run: headless script (no GPU), Woodland, map's dressing seed; PropLayout.layout once, PropDress.build x3 · budget: no baseline yet (pipeline/perf-budget.json absent), judged against the owner's targets, the earlier pass on this branch and the model budgets in tests/unit/test_wg3_woodland_models.gd:8
+Since the earlier pass: no shipped code changed (last game/ commit f2633c8); only watch_tower.glb (394,892 -> 397,328 B) and footbridge.glb (143,480 -> 146,812 B) changed. The new gap test is tests only.
+Metrics (measured):
+- Triangles: watch_tower 5,942 / 6,000 ok · footbridge 2,896 / 3,000 ok · sawmill_shed 4,688 / 5,000 ok · hut_roof 1,368 / 1,500 ok · hut_roof_long 1,476 / 1,500 ok · palisade 56 a stake + 20 a rail, about 970 a 4 m section / 1,000 ok. Every model 1 surface (1 material).
+- Placed: palisade 2,942, palisade_rail 216, tower/bridge/shed 1 each, roofs 2 + 2; 6,857 props in all.
+- PropLayout.layout 15.1 ms; PropDress.build 21.7-23.0 ms (127 MultiMesh views, 646,462 drawn triangles over all Woodland props). One-off at match build (play_session.gd:410, staged dress part 0), not per frame.
+- Orphan nodes 1 -> 1 over three build-and-free cycles (no leak).
+Regressions (> 10 % worse): none. Tower and bridge add 86 triangles each, +172 in a 646k-triangle prop set (+0.03 %), one instance each, no new draw call, material or shader.
+Blocking findings: none.
+- No new per-frame or per-tick code: STAKES and SET run only inside PropLayout.layout at build (judgment).
+- No new node or resource kinds: the new models go through the shared mesh cache (prop_dress_config.gd mesh_of) and the shared vertex-colour material, chunked MultiMesh as before (judgment).
+Advisory:
+- game/play/site/prop_layout.gd:111 a PackedFloat32Array per palisade block and prop_layout.gd:139 an array literal per block: build-time, small, fine (judgment).
+- game/config/prop_dress_config.gd:250 set_box scans every block; called once per SET model (prop_layout.gd:58-63, guarded by sets_laid), so 3 scans of Woodland's blocks at build (judgment).
+- The tower sits 58 triangles under its 6,000 budget and the bridge 104 under 3,000: any further detail needs triangles taken elsewhere first (measured).
+- Shadows: the palisade's 165k stake triangles in 20 chunks still cast on Medium and up (earlier pass); frame cost there needs the owner's hardware (judgment).
+Fixes: none needed.
+Unexplained: none. Frame times and draw calls not measured (no GPU); owner to check F3 on Woodland, Medium and Low, near the palisade and tower.

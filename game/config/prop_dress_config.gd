@@ -21,8 +21,12 @@ extends Resource
 ## middle (DM1: Depot's containers, a port cut between two units of one). BAY lines a wall's box with the model in
 ## cells on a grid of the world (`bay_pitch` m apart from `bay_anchor`), each stretched to its cell and its front (+z)
 ## to the field's middle, a feature bay (`bay_features`) in some cells with nothing standing in front of them (Dev 3:
-## Depot's hall walls, their columns under the roof's trusses).
-enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY }
+## Depot's hall walls, their columns under the roof's trusses). STAKES stands the model upright side by side along the
+## box's long side and lays its rails along the side towards the field's middle (`stake_pitch`, `stake_rails`: WG3,
+## Woodland's palisade). SET fits one model, unturned, to the box round every block that names it (`set_box`: WG3, a
+## structure built over its blocks, each part filling its own: Woodland's watch tower, its footbridge and the Sawmill's
+## shed); a ramp may be one of them.
+enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, STAKES, SET }
 
 ## Each prop's model (a .glb of one vertex-coloured mesh).
 @export var models: Dictionary[StringName, String] = {
@@ -85,6 +89,15 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY }
 	&"hall_exit": "res://assets/models/props/hall_exit.glb",
 	&"pillar": "res://assets/models/props/pillar.glb",
 	&"camo_net": "res://assets/models/props/camo_net.glb",
+	# Woodland's structures (Dev 3, WG3, tools/blender/maps/): the palisade's stake and rail, the watch tower, the
+	# North bridge, the Sawmill's shed and the huts' roofs.
+	&"palisade": "res://assets/models/props/palisade.glb",
+	&"palisade_rail": "res://assets/models/props/palisade_rail.glb",
+	&"watch_tower": "res://assets/models/props/watch_tower.glb",
+	&"footbridge": "res://assets/models/props/footbridge.glb",
+	&"sawmill_shed": "res://assets/models/props/sawmill_shed.glb",
+	&"hut_roof": "res://assets/models/props/hut_roof.glb",
+	&"hut_roof_long": "res://assets/models/props/hut_roof_long.glb",
 }
 ## Each dressed block kind's prop, and how it is laid. A kind not listed keeps its box.
 @export var kind_props: Dictionary[StringName, StringName] = {
@@ -138,6 +151,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY }
 @export var model_lays: Dictionary[StringName, Lay] = {
 	&"logstack": Lay.GRID, &"crate": Lay.GRID, &"tyre": Lay.GRID, &"pine": Lay.GRID,
 	&"bin_green": Lay.GRID, &"bin_steel": Lay.GRID, &"bin_teal": Lay.GRID, &"units": Lay.GRID,
+	&"palisade": Lay.STAKES, &"watch_tower": Lay.SET, &"footbridge": Lay.SET, &"sawmill_shed": Lay.SET,
 }
 ## GRID's cells (m): x along the box's long side, y up (0: one layer the box's height), z across. Cordwood a metre and
 ## a half long a stack, plywood crates 1.2 m long, a metre deep and 1.15 m high on their pallets (DM1: two high in
@@ -154,6 +168,19 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY }
 ## GRID models laid all one way round, never turned at random: a net wall's sections match only edge to edge as
 ## modelled (DH1).
 @export var grid_unturned: PackedStringArray = PackedStringArray(["camo_net"])
+## STAKES: each model's stake spacing (m, about: whole stakes stretched to fill the box), and its rails' model. The
+## stakes stand as thick as the box less its rails (at most `stake_thick` times their spacing, so neighbours meet and
+## nothing is seen between them), each `stake_drop` m under the box's top at most and turned a quarter at random (a
+## box too thin for a round stake gets flattened ones, turned a half); the rails lie along the box's face towards the
+## field's middle, as long as the box, one `stake_rail_heights.x` m over its foot and one `stake_rail_heights.y` m under
+## its top (the box reaches 0.3 m under the ground).
+@export var stake_pitch: Dictionary[StringName, float] = {&"palisade": 0.235}
+@export var stake_rails: Dictionary[StringName, StringName] = {&"palisade": &"palisade_rail"}
+@export var stake_thick: float = 1.06
+@export var stake_drop: float = 0.25
+## STAKES: how much each stake's share of the box's length varies either way (logs of mixed sizes).
+@export var stake_vary: float = 0.15
+@export var stake_rail_heights: Vector2 = Vector2(0.8, 0.7)
 ## A named prop whose box is still drawn behind it, cut down to a share (y) of its height and inset (x, m, at most a
 ## fifth of the box's width) on each side with no other such box against it, rather than not at all: a thicket's dark
 ## core between its spruces, unbroken across touching thickets, so nothing is seen through a thicket that stops BBs
@@ -222,9 +249,9 @@ var _meshes: Dictionary[String, Mesh] = {}
 
 
 ## Whether block `b` is drawn as props: the prop it names, or else its kind's, has a model that loads, the kind's is
-## tall enough, and the block is no ramp (else it keeps its box).
+## tall enough, and the block is no ramp, unless it is part of a structure laid by SET (else it keeps its box).
 func dresses(b: MapData.Block) -> bool:
-	if b.rise != MapData.Rise.NONE:
+	if b.rise != MapData.Rise.NONE and (b.dress == &"" or lay_of(b) != Lay.SET):
 		return false
 	if b.dress != &"":
 		return mesh_of(b.dress) != null
@@ -320,3 +347,16 @@ func tile_depths(b: MapData.Block) -> Vector2:
 	var along_x := minf(tile_skin, b.size.z * 0.5) if b.size.x >= tile_min_face else 0.0
 	var along_z := minf(tile_skin, b.size.x * 0.5) if b.size.z - 2.0 * along_x >= tile_min_face else 0.0
 	return Vector2(along_x, along_z)
+
+
+## The box round every block of `map` that names `model` (SET: one structure's blocks), or an empty one when none does.
+static func set_box(map: MapData, model: StringName) -> AABB:
+	var box := AABB()
+	var first := true
+	for b in map.blocks:
+		if b.dress != model:
+			continue
+		var each := AABB(b.center - b.size * 0.5, b.size)
+		box = each if first else box.merge(each)
+		first = false
+	return box

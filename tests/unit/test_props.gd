@@ -51,7 +51,8 @@ func _count(m: MapData, kind: StringName, tall_from: float = 0.0) -> int:
 	return n
 
 
-## Each prop that reaches past the box of the block it stands in, as "model index".
+## Each prop that reaches past the box of the block it stands in (a structure laid over several blocks, SET: the box of
+## them all), as "model index".
 func _outside(m: MapData, dress: PropDress) -> Array[String]:
 	var boxes: Array[AABB] = []
 	for b in m.blocks:
@@ -63,6 +64,8 @@ func _outside(m: MapData, dress: PropDress) -> Array[String]:
 		var mesh := dress.mesh_of(model)
 		var verts: PackedVector3Array = mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 		var middle := mesh.get_aabb().get_center()
+		var whole: bool = look.props.model_lays.get(model, -1) == PropDressConfig.Lay.SET
+		var set_box := PropDressConfig.set_box(m, model).grow(1e-3) if whole else AABB()
 		for i in placed[model].transforms.size():
 			var t := placed[model].transforms[i]
 			var home := -1
@@ -71,7 +74,11 @@ func _outside(m: MapData, dress: PropDress) -> Array[String]:
 					home = k
 					break
 			for v in verts:
-				if home < 0 or not boxes[home].has_point(t * v):
+				if whole:
+					if not set_box.has_point(t * v):
+						outside.append("%s %d" % [model, i])
+						break
+				elif home < 0 or not boxes[home].has_point(t * v):
 					outside.append("%s %d" % [model, i])
 					break
 	return outside
