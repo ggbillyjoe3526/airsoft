@@ -4,3 +4,4 @@
 - The roof has trusses, purlins, rooflights, a sprinkler main and cable trays, with high-bay lamps hanging on cables.
 - The concrete floor has a softer tone, speckles and a few hairline cracks.
 - Walls, pillars and nets block BBs and sight just as before.
+- Camouflage net walls are closed over their tops and at their ends, so you can no longer see through them from above or from the end.

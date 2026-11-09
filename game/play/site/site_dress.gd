@@ -103,7 +103,8 @@ static func _modelled(look: SiteLook, b: MapData.Block) -> bool:
 func _build(map: MapData, look: SiteLook, material: ShaderMaterial) -> void:
 	var st := SiteSurface.begin()
 	for b in map.blocks:
-		if b.rise != MapData.Rise.NONE or _modelled(look, b):
+		# A block drawn as props (DM1: Depot's crates, plywood walls and containers) has its details in its model.
+		if b.rise != MapData.Rise.NONE or SiteSurface.as_props(look, b):
 			continue
 		match look.finish_of(b):
 			&"container":
@@ -129,7 +130,7 @@ func _build(map: MapData, look: SiteLook, material: ShaderMaterial) -> void:
 	_details.material_override = material
 	add_child(_details)
 	_lay_bags(map, look)
-	_props = PropDress.build(map, look.props)
+	_props = PropDress.build(map, look.props, look.prop_paint)
 	if _props != null:
 		add_child(_props)
 	var font := GameTheme.font(STENCIL_WEIGHT)

@@ -154,7 +154,11 @@ func test_a_modelled_block_draws_no_details_and_a_plain_crate_keeps_its_battens(
 			LightingConfig.DAY), false, look)
 	var site := SiteDress.build(m, look, level.site_material())
 	add_child_autofree(site)
-	var verts: PackedVector3Array = site.details().mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+	# Depot's details may be none at all now its crates, walls and containers are models (DM1).
+	var mesh := site.details().mesh
+	var verts := PackedVector3Array()
+	if mesh != null and mesh.get_surface_count() > 0:
+		verts = mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 	var plain := 0
 	for b in m.blocks:
 		if b.kind != &"crate" and b.kind != &"plywood":
@@ -166,9 +170,14 @@ func test_a_modelled_block_draws_no_details_and_a_plain_crate_keeps_its_battens(
 				inside += 1
 		if b.dress != &"":
 			assert_eq(inside, 0, "%s at %s: no battens or cap on a block drawn as its own model" % [b.dress, b.center])
+		elif SiteSurface.as_props(look, b):
+			assert_eq(inside, 0, "%s at %s: no battens or cap on a block drawn as its kind's model (DM1)" % [b.kind,
+					b.center])
 		elif b.kind == &"crate" and inside > 0:
 			plain += 1
-	assert_gt(plain, 0, "a crate block with no prop of its own is still battened")
+	# Depot's crate blocks are all crates or desks now (DM1, RK1); one left a box would still be battened.
+	assert_eq(plain, m.blocks.filter(func(b: MapData.Block) -> bool: return b.kind == &"crate" \
+			and not SiteSurface.as_props(look, b)).size(), "a crate block drawn as no prop is still battened")
 
 
 func test_the_props_palette_is_the_look_s() -> void:

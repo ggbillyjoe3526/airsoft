@@ -1205,7 +1205,8 @@ Bugs the browser game had and fixed; a bug pass checks the rebuild doesn't bring
   crimson column every 8 m standing right under a roof truss. Two roller shutters and one fire exit, each with clear
   floor in front of it. Does anything float, flicker or poke through a wall's corner?
 - [ ] **Pillars and nets.** The steel pillars have a black-and-yellow band at about waist height. The camouflage net
-  walls stop sight and BBs as before, and read the same from both sides.
+  walls stop sight and BBs as before, and read the same from both sides. From a crate's top or past a net wall's end the net is
+  solid dark green: no hall or floor through it.
 - [ ] **Roof.** Look up: trusses, purlins, rooflights, the teal sprinkler main and cable trays, and the lamps hanging on
   cables with glowing lenses. Is it too busy, or too dark between the lamps?
 - [ ] **Floor.** The concrete has a soft cloudy tone, fine speckle and a few hairline cracks and stains. It is the one

@@ -14,15 +14,20 @@ extends Resource
 ## stretches one model to the whole box, its front to the field's middle; TILE lines the box's faces with rows of the
 ## model as tall as the box, each facing out (`tile_depths`), over a dark backing; GRID fills the box with the model
 ## in cells about `grid_cells` m across (x along the box's long side, y up, z across it), stacked, each stretched to
-## its cell, the model's z across the box (WR3); BAY lines a wall's box with the model in cells on a grid of the
-## world (`bay_pitch` m apart from `bay_anchor`), each stretched to its cell and its front (+z) to the field's middle,
-## a feature bay (`bay_features`) in some cells with nothing standing in front of them (Dev 3: Depot's hall walls,
-## their columns under the roof's trusses); TREE stands one tree in the box (Dev 3, WT1: Woodland's pines, oaks and
-## birches): the model's origin on the ground under the box's middle, its trunk's foot (`tree_feet` m round its
-## origin) stretched to the box's half-width and the tree's top to the box's top, turned a random quarter; its crown
-## (`tree_crowns`, a model of its own) scaled evenly by the tree's height over it, so it keeps its shape however the
-## box is proportioned, spreading past the box over head height, look only, as the cone crowns WoodsView drew before.
-enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY, TREE }
+## its cell, the model's z across the box (WR3). RUN lays a wall's modules end to end along the box's long side, each
+## about `run_lengths` m long (stretched so a whole number fill it), as tall and as thick as the box, each turned end
+## for end at random (DM1: Depot's plywood walls). UNIT fits one model to the box like FIT, long side along the box's,
+## its +x end (a container's doors) turned away from a block of its kind against either end, else away from the field's
+## middle (DM1: Depot's containers, a port cut between two units of one). BAY lines a wall's box with the model in
+## cells on a grid of the world (`bay_pitch` m apart from `bay_anchor`), each stretched to its cell and its front (+z)
+## to the field's middle, a feature bay (`bay_features`) in some cells with nothing standing in front of them (Dev 3:
+## Depot's hall walls, their columns under the roof's trusses). TREE stands one tree in the box (Dev 3, WT1: Woodland's
+## pines, oaks and birches): the model's origin on the ground under the box's middle, its trunk's foot (`tree_feet` m
+## round its origin) stretched to the box's half-width and the tree's top to the box's top, turned a random quarter;
+## its crown (`tree_crowns`, a model of its own) scaled evenly by the tree's height over it, so it keeps its shape
+## however the box is proportioned, spreading past the box over head height, look only, as the cone crowns WoodsView
+## drew before.
+enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, TREE }
 
 ## Each prop's model (a .glb of one vertex-coloured mesh).
 @export var models: Dictionary[StringName, String] = {
@@ -69,6 +74,16 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY, TREE }
 	&"table": "res://assets/models/props/table.glb",
 	&"units": "res://assets/models/props/units.glb",
 	&"fridge": "res://assets/models/props/fridge.glb",
+	# The game's own map models (DM1, tools/blender/maps): Depot's plywood walls and containers (the crate above too).
+	&"plywood": "res://assets/models/props/plywood.glb",
+	&"plywood_mid": "res://assets/models/props/plywood_mid.glb",
+	&"plywood_low": "res://assets/models/props/plywood_low.glb",
+	&"plywood_short": "res://assets/models/props/plywood_short.glb",
+	&"container": "res://assets/models/props/container.glb",
+	&"container_low": "res://assets/models/props/container_low.glb",
+	&"container_short": "res://assets/models/props/container_short.glb",
+	&"container_wall": "res://assets/models/props/container_wall.glb",
+	&"container_roof": "res://assets/models/props/container_roof.glb",
 	# Depot's hall shell (Dev 3, tools/blender/maps/): the walls' bays, its pillars and its camouflage nets.
 	&"hall_wall": "res://assets/models/props/hall_wall.glb",
 	&"hall_shutter": "res://assets/models/props/hall_shutter.glb",
@@ -91,13 +106,44 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY, TREE }
 }
 ## Each dressed block kind's prop, and how it is laid. A kind not listed keeps its box.
 @export var kind_props: Dictionary[StringName, StringName] = {
-	&"barrel": &"barrel", &"drum": &"drum", &"sofa": &"sofa", &"rack": &"shelf",
+	&"barrel": &"barrel", &"drum": &"drum", &"sofa": &"sofa", &"rack": &"shelf", &"crate": &"crate",
+	&"plywood": &"plywood", &"container": &"container",
 	&"wall": &"hall_wall", &"pillar": &"pillar", &"net": &"camo_net",
 }
 @export var kind_lays: Dictionary[StringName, Lay] = {
-	&"barrel": Lay.ROW, &"drum": Lay.CLUSTER, &"sofa": Lay.FIT, &"rack": Lay.TILE,
+	&"barrel": Lay.ROW, &"drum": Lay.CLUSTER, &"sofa": Lay.FIT, &"rack": Lay.TILE, &"crate": Lay.GRID,
+	&"plywood": Lay.RUN, &"container": Lay.UNIT,
 	&"wall": Lay.BAY, &"pillar": Lay.FIT, &"net": Lay.GRID,
 }
+## A model's versions for its kind's other shapes of block (DM1), each drawn when it loads: a flat one on a block
+## `flat_height` m high or lower (the Box's roof), a thin one on a block `thin_depth` m thick or thinner (the Box's
+## container walls), else the one of `heights` built nearest the block's height (by ratio): a plywood wall's sill
+## under a window and lintel over one, a container's under and over a port, so a cap or a rail is never squashed or
+## stretched far.
+@export var flat_models: Dictionary[StringName, StringName] = {&"container": &"container_roof"}
+@export var flat_height: float = 0.3
+@export var thin_models: Dictionary[StringName, StringName] = {&"container": &"container_wall"}
+@export var thin_depth: float = 1.0
+## A model's heights: each version and the height (m) it is built at (tools/blender/maps, HEIGHTS and MODELS).
+@export var heights: Dictionary[StringName, Dictionary] = {
+	&"plywood": {&"plywood": 2.6, &"plywood_mid": 1.7, &"plywood_low": 1.0, &"plywood_short": 0.5},
+	&"container": {&"container": 2.6, &"container_low": 1.0, &"container_short": 0.6},
+}
+## UNIT finds a block of its kind against an end this close (m) or closer, and turns a box along the blocks it touches
+## only when its long side is under `unit_square` times its short (a cut piece, not a whole unit).
+@export var unit_reach: float = 0.05
+@export var unit_square: float = 1.5
+## RUN's module length (m) a model: a plywood wall's batten pitch, half a 1.22 m sheet. A wall is that many whole
+## modules, stretched by at most `run_stretch` (a share) to fill it, or else with a cut, narrower one at its end.
+@export var run_lengths: Dictionary[StringName, float] = {
+	&"plywood": 0.61, &"plywood_mid": 0.61, &"plywood_low": 0.61, &"plywood_short": 0.61,
+}
+@export var run_stretch: float = 0.1
+## A cut module narrower than this share of one is never laid: the whole ones stretch over the sliver instead.
+@export var run_min_cut: float = 0.25
+## A dressed kind's block thicker than this (m) keeps its box: Depot's wardrobe, a plywood block a metre deep, is no
+## wall.
+@export var kind_max_depth: Dictionary[StringName, float] = {&"plywood": 0.5}
 ## Other models a lining model (TILE) takes turns with, place by place along a rack, never the same twice in a row,
 ## so a long rack wall never reads as one bay repeated (the owner, 2026-11-09: the racking loaded three ways; five drew
 ## three times the hall's draws on Low). Each is in `models`, the same size as the model it stands in for. Their chunks
@@ -113,10 +159,11 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY, TREE }
 	&"bin_green": Lay.GRID, &"bin_steel": Lay.GRID, &"bin_teal": Lay.GRID, &"units": Lay.GRID,
 }
 ## GRID's cells (m): x along the box's long side, y up (0: one layer the box's height), z across. Cordwood a metre and
-## a half long a stack, crates about a metre, tyres in stacks, a spruce every metre and a half; The Street's bins side
+## a half long a stack, plywood crates 1.2 m long, a metre deep and 1.15 m high on their pallets (DM1: two high in
+## Depot's 2.4 m crate walls, one in its waist cover), tyres in stacks, a spruce every metre and a half; The Street's bins side
 ## by side, about 0.7 m each, and its kitchen units about 0.6 m a cupboard.
 @export var grid_cells: Dictionary[StringName, Vector3] = {
-	&"logstack": Vector3(1.6, 0.9, 1.4), &"crate": Vector3(0.9, 0.9, 1.0), &"tyre": Vector3(0.9, 0.45, 0.9),
+	&"logstack": Vector3(1.6, 0.9, 1.4), &"crate": Vector3(1.2, 1.15, 1.0), &"tyre": Vector3(0.9, 0.45, 0.9),
 	&"pine": Vector3(1.5, 0.0, 1.5), &"spruce": Vector3(1.5, 0.0, 1.5),
 	&"bin_green": Vector3(0.7, 0.0, 0.7), &"bin_steel": Vector3(0.7, 0.0, 0.7), &"bin_teal": Vector3(0.7, 0.0, 0.7),
 	&"units": Vector3(0.6, 0.0, 0.6),
@@ -144,8 +191,12 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY, TREE }
 	&"oak": &"oak_crown", &"birch": &"birch_crown",
 }
 ## A dressed kind's block lower than this (m) keeps its box: a rack's shelf boards stay boards, its racking is
-## shelving; only a hall's 8 m walls are its bays (the Range's and The Street's lower walls keep their boxes).
-@export var kind_min_height: Dictionary[StringName, float] = {&"rack": 2.0, &"wall": 6.0}
+## shelving; Depot's desks (crate blocks 0.8 m high) stay desks, its crate stacks and the Range's are crates.
+## A plywood block under 0.3 m (a hut's floor edge) stays a board. Only a hall's 8 m walls are its bays (the Range's
+## and The Street's lower walls keep their boxes).
+@export var kind_min_height: Dictionary[StringName, float] = {
+	&"rack": 2.0, &"crate": 0.85, &"plywood": 0.3, &"wall": 6.0,
+}
 ## BAY's cells (m) by model: their edges at `bay_anchor` plus whole `bay_pitch`es along the world's x (anchor x) or z
 ## (anchor y), a wall's end cell shorter than half a pitch joined to the next. Depot's hall: the roof's trusses stand
 ## every RoofConfig.truss_step m along x from 0, so a long wall's columns stand under them; the end walls' bays run
@@ -218,8 +269,9 @@ func dresses(b: MapData.Block) -> bool:
 		# a tree model is laid only with its foot's reach (tree_feet)
 		var tree_ok: bool = model_lays.get(b.dress, Lay.FIT) != Lay.TREE or tree_feet.has(b.dress)
 		return tree_ok and mesh_of(b.dress) != null
-	var model: StringName = kind_props.get(b.kind, &"")
-	return model != &"" and b.size.y >= kind_min_height.get(b.kind, 0.0) and mesh_of(model) != null
+	var model := model_of(b)
+	return model != &"" and b.size.y >= kind_min_height.get(b.kind, 0.0) \
+			and minf(b.size.x, b.size.z) <= kind_max_depth.get(b.kind, INF) and mesh_of(model) != null
 
 
 ## Whether `model` is part of a tree (Lay.TREE's trunk, or its crown): stood by its origin on the ground, its crown
@@ -237,9 +289,32 @@ func variants_of(model: StringName) -> Array[StringName]:
 	return out
 
 
-## The prop block `b` is drawn as: the one it names (MapData.Block.dress), else its kind's; empty for none.
+## The prop block `b` is drawn as: the one it names (MapData.Block.dress), else its kind's (its flat, thin or low
+## version on a block of that shape, when that loads); empty for none.
 func model_of(b: MapData.Block) -> StringName:
-	return b.dress if b.dress != &"" else kind_props.get(b.kind, &"")
+	if b.dress != &"":
+		return b.dress
+	var model: StringName = kind_props.get(b.kind, &"")
+	var shape: StringName = &""
+	if b.size.y <= flat_height:
+		shape = flat_models.get(model, &"")
+	elif minf(b.size.x, b.size.z) <= thin_depth:
+		shape = thin_models.get(model, &"")
+	if shape == &"" and heights.has(model):
+		shape = _nearest_height(heights[model], b.size.y)
+	return shape if shape != &"" and mesh_of(shape) != null else model
+
+
+## Of `versions` (model: the height it is built at), the one nearest `height` by ratio that loads; none: &"".
+func _nearest_height(versions: Dictionary, height: float) -> StringName:
+	var best: StringName = &""
+	var best_gap := INF
+	for v: StringName in versions:
+		var gap := absf(log(maxf(height, 0.01) / float(versions[v])))
+		if gap < best_gap and mesh_of(v) != null:
+			best = v
+			best_gap = gap
+	return best
 
 
 ## How block `b`'s props are laid: its named prop's lay (FIT unless model_lays says), else its kind's.
