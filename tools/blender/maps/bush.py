@@ -30,7 +30,7 @@ RADIUS, HEIGHT = 1.0, 1.7
 CLUSTERS = 36
 SKIRT = 11
 STEMS = 4
-LEAVES = 6          # leaf points round a spray
+LEAVES = 540        # small leaves over the outline
 # the clumps: middle (x, y, z) and half size (m), in the 2 m wide, 1.7 m tall box
 CLUMPS = (
     ((0.0, 0.0, 1.0), (0.66, 0.62, 0.6)),
@@ -42,20 +42,22 @@ CLUMPS = (
 )
 
 
-def leaf_plate(b: hs.Builder, centre: Vector, normal: Vector, size: float, r, top_mat: str) -> None:
-    """A spray of leaves: a flat star of LEAVES points round `centre`, facing `normal`, cupped a little (its middle
-    raised, its tips drooping), lit on top and dark under."""
+def leaf(b: hs.Builder, centre: Vector, normal: Vector, size: float, r, mat: str) -> None:
+    """One small leaf: a pointed diamond at `centre` facing `normal`, turned its own way and tipped down a little."""
     side, up = wk.frame(normal)
-    spin = r.uniform(0.0, 2.0 * math.pi)
-    ring = []
-    for i in range(LEAVES * 2):
-        a = spin + math.pi * i / LEAVES
-        reach = size * (r.uniform(0.9, 1.1) if i % 2 == 0 else r.uniform(0.55, 0.7))
-        tip = centre + (side * math.cos(a) + up * math.sin(a)) * reach
-        ring.append(tip - normal * (0.12 * size if i % 2 == 0 else 0.0))
-    rim = wk.verts(b, ring)
-    wk.fan(b, rim, centre + normal * size * 0.22, top_mat, normal)
-    wk.fan(b, rim, centre - normal * size * 0.05, "LeafDark", -normal)
+    a = r.uniform(0.0, 2.0 * math.pi)
+    along = side * math.cos(a) + up * math.sin(a)
+    across = normal.cross(along).normalized()
+    pts = [centre - along * size * 0.5, centre + across * size * 0.22 + normal * size * 0.08,
+           centre + along * size * 0.5 - normal * size * 0.1, centre - across * size * 0.22 + normal * size * 0.08]
+    wk.face(b, wk.verts(b, pts), mat, normal)
+
+
+def surface(d: Vector) -> Vector:
+    """The bush's outline in direction `d` from its heart: a dome wider than tall, lumpy (clumps of shoots) and
+    ragged at the top."""
+    bump = 1.0 + 0.22 * wk.lump(d * 1.3, 0.45, 5.0) + 0.1 * wk.lump(d * 3.0, 0.45, 9.0)
+    return Vector((d.x * 0.92, d.y * 0.92, 0.62 + d.z * 0.95)) * bump
 
 
 def build() -> object:
@@ -63,31 +65,32 @@ def build() -> object:
     wk.paint_all()
     r = wk.rng(1100)
     b = hs.Builder("Bush", [])
-    # the dark mass inside, flat and dull: only glimpsed between the sprays
-    for k, (at, size) in enumerate(CLUMPS[:3]):
-        wk.blob(b, Vector(at), Vector(size) * 0.72, 2, r, lambda c, n: "NeedleDark", rough=0.6, seed=k * 3.1)
-    # sprays of leaves over a dome, narrower toward its ragged top, each facing out and up to the light
-    for placed in range(CLUSTERS):
-        # spread evenly over the dome (a golden-angle spiral), jittered, so no side is bare
-        zt = 1.0 - 1.45 * (placed + 0.5) / CLUSTERS
-        a = placed * 2.39996 + r.uniform(-0.3, 0.3)
+    # the leafy mass under the leaves, the outline's own shape a little inside it, dark and faceted: what shows
+    # between the leaves is the shade inside the bush, not a ball
+    import bmesh
+    tmp = bmesh.new()
+    bmesh.ops.create_icosphere(tmp, subdivisions=3, radius=1.0)
+    vmap = {v: b.bm.verts.new(surface(v.co.normalized()) * 0.9) for v in tmp.verts}
+    for f in tmp.faces:
+        vs = [vmap[v] for v in f.verts]
+        c = sum((v.co for v in vs), Vector()) / 3.0
+        wk.face(b, vs, "LeafDark" if c.z > 0.5 else "NeedleDark", c - Vector((0.0, 0.0, 0.62)))
+    tmp.free()
+    # small leaves all over the outline (a golden-angle spiral, jittered so it never reads as rows), each facing out,
+    # sunlit on top and darker down the sides and under
+    for k in range(LEAVES):
+        zt = 1.0 - 1.5 * (k + 0.5) / LEAVES
+        a = k * 2.39996 + r.uniform(-0.2, 0.2)
         ring = math.sqrt(max(0.0, 1.0 - zt * zt))
-        d = Vector((math.cos(a) * ring, math.sin(a) * ring, zt + r.uniform(-0.08, 0.08))).normalized()
-        taper = 1.0 - 0.3 * max(0.0, d.z)
-        centre = Vector((d.x * 0.8 * taper, d.y * 0.8 * taper, 0.8 + d.z * 0.78)) * r.uniform(0.86, 1.04)
-        centre.z = max(centre.z, 0.35)
-        normal = (d + Vector((0.0, 0.0, 0.7))).normalized()
-        v = normal.z + 0.35 * wk.lump(centre, 0.35, 3.0)
-        mat = "LeafSun" if v > 0.9 else ("LeafLight" if v > 0.6 else "Leaf")
-        leaf_plate(b, centre, normal, r.uniform(0.25, 0.33), r, mat)
-    # the skirt: sprays low round the foot, so the leaves come down to the ground as in the photos
-    for k in range(SKIRT):
-        a = 2.0 * math.pi * k / SKIRT + r.uniform(-0.25, 0.25)
-        reach = r.uniform(0.6, 0.78)
-        d = Vector((math.cos(a), math.sin(a), 0.0))
-        leaf_plate(b, Vector((d.x * reach, d.y * reach, r.uniform(0.15, 0.3))), (d + Vector((0, 0, 0.5))).normalized(),
-                   r.uniform(0.26, 0.32), r, "Leaf" if k % 2 else "LeafDark")
-    # the stems, fanning out of the ground into the leaves, seen only between the skirt's sprays
+        d = Vector((math.cos(a) * ring, math.sin(a) * ring, zt)).normalized()
+        at = surface(d) * r.uniform(0.95, 1.03)
+        if at.z < 0.04:
+            at.z = r.uniform(0.04, 0.2)
+        normal = (d + Vector((0.0, 0.0, 0.5))).normalized()
+        v = normal.z + 0.3 * wk.lump(at, 0.3, 3.0) + r.uniform(-0.15, 0.15)
+        mat = "LeafSun" if v > 0.85 else ("LeafLight" if v > 0.6 else ("Leaf" if v > 0.3 else "LeafDark"))
+        leaf(b, at, normal, r.uniform(0.13, 0.17), r, mat)
+    # the stems, fanning out of the ground into the leaves, seen only low down between them
     for k in range(STEMS):
         a = 2.0 * math.pi * k / STEMS + r.uniform(-0.2, 0.2)
         lean = r.uniform(0.25, 0.45)

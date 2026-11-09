@@ -25,7 +25,7 @@ from mathutils import Vector, noise  # noqa: E402
 COLOURS = {
     "Bark": 0x5E5548, "BarkDark": 0x463F37, "BarkFurrow": 0x4F483E, "BarkGrey": 0x7A735C, "BarkLight": 0x7A7062,
     "Cut": 0xDCC07A, "Heart": 0xD0B46C, "Ring": 0xB4A062, "Split": 0xD6BA72, "Weathered": 0x9C9484,
-    "Rot": 0x686152, "Moss": 0x71864A, "MossDeep": 0x5F7A3C, "Fungus": 0x8E866E, "FungusRim": 0xA89C80,
+    "Rot": 0x686152, "Moss": 0x71864A, "MossDeep": 0x506A36, "Fungus": 0x8E866E, "FungusRim": 0xA89C80,
     "Earth": 0x4C443A, "EarthDark": 0x36302A, "Root": 0x6A6254, "RootLight": 0x8E826C, "Stone": 0x8C8478,
     "Litter": 0x7C7A58, "Sawdust": 0xDCCBA0, "Soil": 0x8A8070, "SoilDark": 0x6E665A,
     "Fern": 0x6A9A48, "FernDark": 0x4A7438, "FernLight": 0x84B054, "FernStem": 0x5E7A3A,
@@ -180,12 +180,12 @@ def log(b: hs.Builder, path: list, radii: list, sides: int, r: random.Random, ba
             mid = (rings[k][i].co + rings[k][(i + 1) % sides].co + rings[k + 1][i].co) / 3.0
             centre = (Vector(path[k]) + Vector(path[k + 1])) * 0.5
             facing = (mid - centre).normalized()
-            # moss in a few broad soft patches along the top, one green, its edge following the noise; the bark in
-            # furrows, each broken now and then along its length so they stagger rather than run as pinstripes (no
-            # small patches of other shades: those read as a camouflage print)
+            # moss in a few broad soft patches along the top, one dark green, its edge following the noise; the bark
+            # in long furrows running the log's length, each broken only now and then (no small patches of other
+            # shades: those read as a camouflage print)
             if moss > 0.0 and facing.z > 0.5 and lump(mid, 0.9, seed + 3.0) + 0.5 * facing.z > 1.45 - 2.0 * moss:
                 return "MossDeep"
-            return bark[1] if i % 2 and furrows and (k + 5 * i) % 7 < 5 else bark[0]
+            return bark[1] if i % 2 and furrows and (k + 7 * i) % 19 < 16 else bark[0]
         return pick
 
     for k in range(n - 1):
@@ -316,13 +316,17 @@ def wedge_end(b: hs.Builder, outline: list, depth: float, out: Vector, mats: tup
 
 
 def split_end(b: hs.Builder, outline: list, depth: float, out: Vector, end_mat: str, bark_edge: int,
-              sides: bool) -> None:
+              sides: bool, band: bool = True) -> None:
     """A split piece's end standing `depth` proud of a stack's face (outline: points on the face plane): its sawn face
     in `end_mat` with a band of bark along edge `bark_edge` (a wedge's round side), and, with `sides`, its short sides
-    back to the face (else the dark core behind reads as the shadow between pieces)."""
+    back to the face (else the dark core behind reads as the shadow between pieces). Without `band`, the end face
+    only (a piece split from the heart, no bark showing)."""
     n = len(outline)
     pts = [Vector(p) + out * depth for p in outline]
     c = sum(pts, Vector()) / n
+    if not band:
+        face(b, verts(b, pts), end_mat, out)
+        return
     a, z = bark_edge, (bark_edge + 1) % n
     ia, iz = pts[a].lerp(c, 0.22), pts[z].lerp(c, 0.22)
     band = verts(b, [pts[a], pts[z], iz, ia])
@@ -438,7 +442,7 @@ def comb_frond(b: hs.Builder, base: Vector, heading: float, rise: float, length:
     """A fern frond drawn as a comb: its midrib arches out from `base` along `heading` (radians about up), rising at
     `rise` and bending over more and more towards its tip, `droop` (radians) in all, with `pairs` leaflets either
     side, each a narrow triangle
-    from the rib out and forward, widest a third of the way along and tapering to the tip, the notches between them
+    from the rib out and forward, small at the foot, longest past the middle and tapering to the tip, the notches between them
     reaching the rib, so the frond reads as rows of leaflets. Its top faces up; its under side is drawn too (the props'
     material culls back faces) for the first `under` share, the rising part you see from outside the clump. Its first
     `bare` steps are the stalk, a thin strip with no leaflets, so the clump springs from a small crown. mats = (top,
@@ -468,7 +472,8 @@ def comb_frond(b: hs.Builder, base: Vector, heading: float, rise: float, length:
         face(b, verts(b, q), mats[1], -u)
     for k in range(bare, pairs):
         t = (k - bare + 0.5) / (pairs - bare)
-        w = width * math.sin(math.pi * min(1.0, 0.3 + t * 0.74)) * r.uniform(0.9, 1.1)
+        # the leaflets small at the frond's foot, longest past its middle, small again at its tip
+        w = width * (0.2 + 0.8 * math.sin(math.pi * min(1.0, t * 0.95))) * r.uniform(0.9, 1.1)
         a, c = pts[k], pts[k + 1]
         ahead = (c - a).normalized()
         u = (ups[k] + ups[k + 1]).normalized()

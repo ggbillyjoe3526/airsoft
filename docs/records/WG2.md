@@ -1,6 +1,6 @@
 # WG2 · Woodland's ferns, bushes, logs, root plates, woodpiles and saw bench from the owner's photos (Dev)
 
-**Review:** pending (fix round 2)
+**Review:** pending (attempt 3)
 
 ## Attempts
 
@@ -8,7 +8,8 @@
 |---|---|---|---|---|---|
 | 2026-11-09 | 1 | build thread | see Verified; performance Pass, QA Fail | Retry 5/8 | the models against the photos, gaps in boxes that stop BBs, two untracked files |
 | 2026-11-09 | 1, fix round 1 | build thread | QA Pass | Retry 6/8 | the models against the photos; a root plate you could see through where it stops BBs |
-| 2026-11-09 | 2 | build thread | see Fix rounds | pending | – |
+| 2026-11-09 | 2 | build thread | focused tests | Retry 6/8 | the models against the photos; the saw bench's box open under its log |
+| 2026-11-09 | 3 | build thread | see Fix rounds | pending | – |
 
 ## Goal
 
@@ -20,9 +21,9 @@ lines stay where they were; the ferns and bushes, drawn by code as ellipsoids, a
 ## Approach
 
 - **Models** (`tools/blender/maps/`, vertex-coloured like the Kenney props, through `mapkit.py`; Woodland's shared
-  parts and colours in `woodkit.py`): `fern.py` (384 of 400 triangles), `bush.py` (1,468 of 1,500), `fallen_log.py`
-  (5, 6 and 8 m, 1,400 of 1,500), `root_plate.py` (3,877 of 4,000), `cordwood.py` (three 2 m sections, 1,048 to
-  1,146 of 1,200; the boards 1,206 of 1,500), `sawbench.py` (1,955 of 2,000) and `earth_bank.py` (320 of 340). Each script
+  parts and colours in `woodkit.py`): `fern.py` (384 of 400 triangles), `bush.py` (1,500 of 1,500), `fallen_log.py`
+  (5, 6 and 8 m, 1,400 of 1,500), `root_plate.py` (3,877 of 4,000), `cordwood.py` (three 2 m sections, 1,078 to
+  1,106 of 1,200; the boards 1,206 of 1,500), `sawbench.py` (1,943 of 2,000) and `earth_bank.py` (320 of 340). Each script
   ends with `woodkit.fit_box`, so a model's bounds are exactly its box.
 - **Grounded props** (`PropDressConfig.Lay.GROUND`, `PropLayout._ground`): Woodland's blocks reach from under the
   lowest ground to their top over the ground at their middle. A fallen log, root plate, saw bench or board stack
@@ -112,6 +113,19 @@ lines stay where they were; the ferns and bushes, drawn by code as ellipsoids, a
     bark on the pieces' round sides.
   - Found in the pictures: a flat olive sheet over the root plates was the woods' moss lid on the block's top; it is
     left off logs drawn as models (test_no_moss_lid_floats_over_a_modelled_log).
+
+- Critic, attempt 2 (Retry 6/8), and what changed (attempt 3):
+  - Fern: no bare stalk; six fronds of sixteen narrow leaflet pairs from the crown at the ground, small at the foot
+    and longest past the middle; inner fronds tall and arching, outer ones low and spreading.
+  - Bush: 540 small leaves (about a fifteenth of its width) over a lumpy dome, a dark faceted leafy mass under them.
+    Its width to height is the map's (each plant's radius and height), not the model's.
+  - Root plate: the plate about a metre thick at its middle. The crowns still fill the box to the ground: the box is
+    the windthrow's collision, and attempt 1's critic failed see-through gaps where it stops BBs (kept, see
+    Decisions); thin sparse sprays would bring them back.
+  - Cordwood: twelve rows (were nine) of smaller wedges, halves and quarters, half with a bark band; no grey pieces.
+  - Logs: furrows run the length, broken now and then; the moss a darker green.
+  - Saw bench: the machine upright (taller than long); three logs lie under the sawhorses' log, so the box's front
+    is solid below it; the logs' bark a lighter grey-brown so it reads.
 
 ## Outstanding
 

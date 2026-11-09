@@ -28,10 +28,8 @@ from mathutils import Vector  # noqa: E402
 
 BUDGET = 400
 RADIUS, HEIGHT = 1.0, 1.2
-FRONDS = 9
-PAIRS = 11
-BARE = 2            # steps of bare stalk at a frond's foot
-YOUNG = 2
+FRONDS = 6
+PAIRS = 16
 
 
 def build() -> object:
@@ -39,20 +37,18 @@ def build() -> object:
     wk.paint_all()
     r = wk.rng(1000)
     b = hs.Builder("Fern", [])
-    # the fronds, a shuttlecock out of a small crown: each a bare stalk rising steeply, then a strip of paired leaflets
-    # arching out and over towards the ground (photos, middle): high enough that someone crouched in a bed is hidden,
-    # as the game rules. Both sides drawn, in the same greens, so the clump has no dark cone at its foot.
+    # the fronds, a shuttlecock out of the crown at the ground (photos, middle): each a strip of sixteen pairs of narrow
+    # leaflets from its foot to its tip, rising steeply, then arching out and over towards the ground; high enough
+    # that someone crouched in a bed is hidden, as the game rules. Both sides drawn, in the same greens.
     for k in range(FRONDS):
+        # the inner fronds stand tall and arch over; the outer ones, older, spread low between them to the bed's edge
+        inner = k % 2 == 0
         heading = 2.0 * math.pi * k / FRONDS + r.uniform(-0.2, 0.2)
-        wk.comb_frond(b, Vector((math.cos(heading) * 0.05, math.sin(heading) * 0.05, 0.0)), heading,
-                      math.radians(r.uniform(60.0, 68.0)), r.uniform(1.3, 1.45), r.uniform(0.22, 0.26), PAIRS,
-                      math.radians(r.uniform(130.0, 150.0)), r, ("Fern", "Fern", "FernLight"), under=1.0, bare=BARE)
-    # young fronds standing up out of the middle, paler and narrow, their tips just curling over
-    for k in range(YOUNG):
-        heading = math.pi * k + 0.4 + r.uniform(-0.3, 0.3)
-        wk.comb_frond(b, Vector((math.cos(heading) * 0.03, math.sin(heading) * 0.03, 0.0)), heading,
-                      math.radians(r.uniform(84.0, 87.0)), r.uniform(1.0, 1.1), 0.11, 6, math.radians(60.0), r,
-                      ("FernLight", "Fern", "FernLight"), under=0.0)
+        rise, droop = (r.uniform(70.0, 76.0), r.uniform(175.0, 195.0)) if inner else (r.uniform(42.0, 50.0),
+                                                                                     r.uniform(95.0, 115.0))
+        wk.comb_frond(b, Vector((math.cos(heading) * 0.06, math.sin(heading) * 0.06, 0.0)), heading,
+                      math.radians(rise), r.uniform(1.35, 1.5), r.uniform(0.17, 0.2), PAIRS, math.radians(droop), r,
+                      ("Fern", "Fern", "FernLight"), under=1.0)
     ob = b.build()
     wk.finish(ob, 25.0)
     wk.fit_box(ob, (-RADIUS, -RADIUS, -0.02), (RADIUS, RADIUS, HEIGHT))

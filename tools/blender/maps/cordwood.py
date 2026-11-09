@@ -37,9 +37,10 @@ TOPS = 7                # points along the section where its ragged top is set
 SAG = 0.45              # how far under the cell's top the stack's top dips at most
 PROUD = (0.015, 0.1)    # how far a piece's end stands out of the core: the face's relief
 GAP = 0.1               # a piece's share shrunk from its neighbours: the dark gaps between them
-ROWS = 9
-ACROSS = 7              # pieces' bases along a row (each row is a strip of wedges, up and down in turn)
-SIDED = 0.1             # the share of pieces whose short sides are drawn (the rest show the core's dark behind)
+ROWS = 12
+ACROSS = 9              # pieces' bases along a row (each row is a strip of wedges, up and down in turn)
+BAND = 0.5              # the share of pieces showing a band of bark on their round side
+SIDED = 0.0             # the share of pieces whose short sides are drawn (the rest show the core's dark behind)
 LOOSE = 6               # split pieces lying across the top
 # the boards (m)
 BOARDS_LEN, BOARDS_DEPTH, BOARDS_TOP = 6.4, 1.0, 2.0
@@ -88,7 +89,7 @@ def cordwood(seed: int) -> object:
                 bulge = base + s * r.uniform(0.0, 0.05)
                 ridge = bulge + s * 0.035
                 zm = (z0 + z1) * 0.5 + r.uniform(-0.02, 0.02)
-                mat = ("Bark", "BarkDark", "Weathered", "Bark")[r.randrange(4)]
+                mat = ("Bark", "BarkDark", "BarkFurrow", "Bark")[r.randrange(4)]
                 wk.face(b, wk.verts(b, [(bulge, y0, z0 + 0.012), (bulge, y1, z0 + 0.012), (ridge, y1, zm),
                                         (ridge, y0, zm)]), mat, Vector((s, 0, -0.6)))
                 wk.face(b, wk.verts(b, [(ridge, y0, zm), (ridge, y1, zm), (bulge, y1, z1 - 0.012),
@@ -108,8 +109,9 @@ def cordwood(seed: int) -> object:
                 # the bark on the piece's longest edge: a wedge's round side
                 n = len(outline)
                 longest = max(range(n), key=lambda e: (Vector(outline[(e + 1) % n]) - Vector(outline[e])).length)
-                end_mat = r.choices(("Cut", "Heart", "Ring", "Weathered", "Split"), (3, 5, 2, 1, 1))[0]
-                wk.split_end(b, outline, r.uniform(*PROUD), out, end_mat, longest, r.random() < SIDED)
+                end_mat = r.choices(("Cut", "Heart", "Ring", "Split"), (3, 5, 2, 2))[0]
+                wk.split_end(b, outline, r.uniform(*PROUD), out, end_mat, longest, r.random() < SIDED,
+                             r.random() < BAND)
     # split pieces lying across the top here and there, on the ragged top
     for k in range(LOOSE):
         x = -half_x + SECTION * (k + r.uniform(0.2, 0.8)) / LOOSE

@@ -36,7 +36,7 @@ FRONT = -0.36       # the trestles' line across the box, in front of the stacked
 
 def machine(b: hs.Builder, r) -> None:
     """The saw bench at x -4 .. -2.6: frame, wheels, motor, cradle, blade guard, handle and a log in the cradle."""
-    x0, x1 = -3.8, -2.75
+    x0, x1 = -3.8, -3.1  # an upright machine, taller than it is long
     ys = (-0.34, 0.34)
     # four legs and the rails between them
     for x in (x0, x1):
@@ -71,31 +71,30 @@ def machine(b: hs.Builder, r) -> None:
                                     (xa, yc + 0.07, za)]), "Paint",
                     Vector(((xa + xb) * 0.5 - x0, 0, (za + zb) * 0.5 - axle_z)))
     # the motor in its box under the table, a stop button on its side
-    b.box((-3.55, -0.26, 0.3), (-3.0, 0.12, 0.72), "Paint")
-    mk.cylinder(b, (-3.3, -0.26, 0.6), (-3.3, -0.3, 0.6), 0.035, "Button", sides=6)
+    b.box((-3.62, -0.26, 0.3), (-3.25, 0.12, 0.72), "Paint")
+    mk.cylinder(b, (-3.45, -0.26, 0.6), (-3.45, -0.3, 0.6), 0.035, "Button", sides=6)
     # the table and the log cradle on it: a V of two plates
-    b.box((-3.85, -0.4, 0.92), (-2.7, 0.4, 0.95), "Steel")
+    b.box((-3.85, -0.4, 0.92), (-3.05, 0.4, 0.95), "Steel")
     for s in (-1.0, 1.0):
-        wk.face(b, wk.verts(b, [(-3.85, 0.1 + s * 0.02, 0.95), (-2.7, 0.1 + s * 0.02, 0.95),
-                                (-2.7, 0.1 + s * 0.2, 1.08), (-3.85, 0.1 + s * 0.2, 1.08)]), "Paint",
+        wk.face(b, wk.verts(b, [(-3.85, 0.1 + s * 0.02, 0.95), (-3.05, 0.1 + s * 0.02, 0.95),
+                                (-3.05, 0.1 + s * 0.2, 1.08), (-3.85, 0.1 + s * 0.2, 1.08)]), "Paint",
                 Vector((0, -s, 1)))
     # the blade guard: a black half-round hood standing over the blade beside the cradle
-    hood = [(-3.3 + 0.44 * math.cos(math.pi * k / 8), 0.95 + 0.36 * math.sin(math.pi * k / 8)) for k in range(9)]
+    hood = [(-3.45 + 0.36 * math.cos(math.pi * k / 8), 0.95 + 0.36 * math.sin(math.pi * k / 8)) for k in range(9)]
     b.prism([(x, z) for x, z in hood], "y", -0.38, -0.08, "Guard")
     # the handle: a tube up from the far legs, bent back to a grip
     for y in ys:
         mk.cylinder(b, (x1 + 0.02, y, 0.85), (x1 + 0.2, y, 1.12), 0.018, "Paint", sides=5, caps=False)
     mk.cylinder(b, (x1 + 0.2, -0.36, 1.12), (x1 + 0.2, 0.36, 1.12), 0.02, "Grip", sides=6)
     # the log waiting in the cradle
-    path = [(-3.95 + 1.3 * k / 3, 0.1, 1.08 + 0.115) for k in range(4)]
+    path = [(-3.95 + 1.0 * k / 3, 0.1, 1.08 + 0.115) for k in range(4)]
     wk.log(b, path, [0.12, 0.118, 0.115, 0.11], 8, r, rough=0.05, ends=("sawn", "sawn"), seed=21.0)
 
 
 def rounds(b: hs.Builder, r) -> None:
     """A heap of sawn rounds beside the machine, some lying, some on end, and sawdust under it all."""
     spots = [(-2.3, -0.35, 0, 0.2), (-2.25, 0.25, 0, 0.19), (-1.8, -0.05, 0, 0.21), (-1.35, 0.35, 0, 0.17),
-             (-1.4, -0.4, 1, 0.2), (-0.9, 0.05, 1, 0.18), (-2.0, 0.0, 2, 0.18), (-1.6, 0.25, 2, 0.16),
-             (-0.55, -0.35, 0, 0.16)]
+             (-1.4, -0.4, 1, 0.2), (-0.9, 0.05, 1, 0.18), (-2.0, 0.0, 2, 0.18)]
     for k, (x, y, level, rad) in enumerate(spots):
         ln = r.uniform(0.32, 0.4)
         if level == 2:  # on top of the heap, lying across
@@ -120,7 +119,7 @@ def rounds(b: hs.Builder, r) -> None:
 
 
 def trestles(b: hs.Builder, r) -> None:
-    """Two X-trestles of sawn timber holding a long log to be cut, split pieces and offcuts under them."""
+    """Two sawhorses of sawn timber holding a long log to be cut, logs waiting under it and along the back."""
     # two sawhorses at the front of the box, clear of the logs stacked behind them: splayed legs under a top beam,
     # the log lying on the beams, nothing passing through it
     for x in (0.9, 3.3):
@@ -138,13 +137,12 @@ def trestles(b: hs.Builder, r) -> None:
     # one on them, so the shed's low cover reads solid at its back
     for k, (y, z, rad) in enumerate(((0.52, 0.18, 0.18), (0.18, 0.17, 0.17), (0.35, 0.48, 0.16))):
         x0, x1 = -2.55 + 0.15 * k, 3.95 - 0.2 * k
-        path = [(x0 + (x1 - x0) * i / 3, y, z) for i in range(4)]
-        wk.log(b, path, [rad, rad * 0.97, rad * 0.94, rad * 0.9], 7, r, rough=0.05, furrows=1,
-               ends=("sawn", "sawn"), seed=60.0 + k)
-    # split pieces and offcuts lying under them
-    for k, (x, y, a) in enumerate(((1.6, -0.5, 0.3), (2.0, -0.25, 1.4), (2.6, -0.45, 2.0), (3.88, -0.3, 1.1))):
-        faces = b.prism([(-0.07, 0.0), (0.07, 0.0), (0.0, 0.11)], "x", -0.22, 0.22, "Split" if k % 2 else "Cut")
-        b.transform(faces, hs.Matrix.Translation((x, y, 0.0)) @ hs.Matrix.Rotation(a, 4, "Z"))
+        wk.log(b, [(x0, y, z), (x1, y, z)], [rad, rad * 0.9], 8, r, bark=("BarkGrey", "Bark"), rough=0.05,
+               furrows=1, ends=("sawn", "sawn"), seed=60.0 + k)
+    # logs waiting under the sawhorses' log, between their legs, so the box's front reads solid below it too
+    for k, (y, z, rad) in enumerate(((FRONT - 0.17, 0.16, 0.16), (FRONT + 0.15, 0.15, 0.15), (FRONT, 0.45, 0.14))):
+        wk.log(b, [(1.22 + 0.05 * k, y, z), (2.98 - 0.05 * k, y, z)], [rad, rad * 0.94], 8, r,
+               bark=("BarkGrey", "Bark"), rough=0.05, furrows=1, ends=("sawn", "sawn"), seed=70.0 + k)
 
 
 def build() -> object:
