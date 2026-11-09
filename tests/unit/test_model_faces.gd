@@ -1,7 +1,8 @@
 extends GutTest
 ## Dev 3 map models (FS1): every map model is solid from outside. The owner saw the sky through the water tower
 ## (2026-11-09): its drum and roof were built inside out, so the game culled them as holes. Rays from all round and
-## above (the ground hides a model's underside) must first meet a front face, a face turned toward them.
+## above (the ground hides a model's underside) must first meet a front face, a face turned toward them: by its winding,
+## as the game culls (Godot's front faces wind clockwise, so (c - a) x (b - a) is a face's outside).
 
 ## Rays a model: elevation steps (from level to steeply above) by azimuth steps, each at seeded points in its box.
 const ELEVATIONS := 5
@@ -34,7 +35,6 @@ func test_every_skyline_model_and_the_flagpole_are_solid_from_outside() -> void:
 static func back_share(mesh: Mesh) -> float:
 	var arrays := mesh.surface_get_arrays(0)
 	var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
 	var index: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
 	var box := mesh.get_aabb()
 	var reach := box.size.length() * 2.0
@@ -60,7 +60,8 @@ static func back_share(mesh: Mesh) -> float:
 					var d := from.distance_to(hit as Vector3)
 					if d < nearest:
 						nearest = d
-						facing = (normals[index[t]] + normals[index[t + 1]] + normals[index[t + 2]]).dot(dir)
+						var v0 := verts[index[t]]
+						facing = (verts[index[t + 2]] - v0).cross(verts[index[t + 1]] - v0).dot(dir)
 				if nearest < INF:
 					rays += 1
 					if facing > 0.0:

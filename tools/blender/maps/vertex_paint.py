@@ -10,6 +10,7 @@ in the colour's alpha, tells the game what to paint there:
 Colours are written linear, as glTF keeps vertex colours.
 """
 
+import math
 import os
 import sys
 
@@ -19,6 +20,10 @@ from mathutils import Vector
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "replicas"))
 import hardsurface as hs  # noqa: E402
 
+# The largest angle (degrees) between two rounded faces that is shaded smooth: a 16-sided ring's 22.5 degrees is,
+# a profile's corner (a roof's eave, a drum's rim) is not.
+SMOOTH_MOST = 35.0
+
 FIXED = 1.0
 BODY = 0.0
 LAMP = 0.5
@@ -27,13 +32,15 @@ LAMP = 0.5
 AXES = {"x": Vector((1.0, 0.0, 0.0)), "y": Vector((0.0, 1.0, 0.0)), "z": Vector((0.0, 0.0, 1.0))}
 
 
-def _turn(faces: list, wants: list) -> None:
+def _turn(faces: list, wants: list, rounded: int = 0) -> None:
     """Turns each face to face its wanted direction (None leaves it). Builder's recalc_face_normals guesses an open
-    surface's outside (a drum open at both ends, a cone) and can guess wrong, which the game draws as a hole."""
-    for f, want in zip(faces, wants):
+    surface's outside (a drum open at both ends, a cone) and can guess wrong, which the game draws as a hole. The first
+    `rounded` faces (a lathe's or a tube's sides, not its caps) are shaded smooth (bake keeps creases sharp)."""
+    for k, (f, want) in enumerate(zip(faces, wants)):
         f.normal_update()
         if want is not None and want.length > 1e-9 and f.normal.dot(want) < 0.0:
             f.normal_flip()
+        f.smooth = k < rounded
 
 
 def lathe(b: hs.Builder, profile: list, mat: str, segments: int, centre=(0.0, 0.0, 0.0), axis: str = "z",
@@ -57,7 +64,7 @@ def lathe(b: hs.Builder, profile: list, mat: str, segments: int, centre=(0.0, 0.
         caps.append(ax * (profile[0][0] - profile[1][0]))
     if cap and profile[-1][1] > 1e-6:
         caps.append(ax * (profile[-1][0] - profile[-2][0]))
-    _turn(faces, wants + caps[:len(rest)])
+    _turn(faces, wants + caps[:len(rest)], len(wants))
     return faces
 
 
@@ -71,11 +78,12 @@ def orient_loft(faces: list, rings: list, cap0: bool = False, cap1: bool = False
         mid = (mids[k] + mids[k + 1]) * 0.5
         for f in faces[len(wants):len(wants) + n]:
             wants.append(Vector(out) if out is not None else f.calc_center_median() - mid)
+    sides = len(wants) if out is None else 0  # a flat band stays flat
     if cap0:
         wants.append(mids[0] - mids[1])
     if cap1:
         wants.append(mids[-1] - mids[-2])
-    _turn(faces, wants)
+    _turn(faces, wants, sides)
 
 
 def linear(hex_colour: int) -> tuple:
@@ -91,7 +99,7 @@ def materials(palette: dict) -> None:
 
 def bake(ob: bpy.types.Object, palette: dict) -> None:
     """Paints every face corner of `ob` its material's palette colour, then leaves it one "vertex_colour" material.
-    Faces stay flat: the skyline and the flagpole are read at a distance, and flat faces keep the edges crisp."""
+    Lathes' and tubes' sides are smooth (SMOOTH_MOST), everything else flat, so curves read round and edges crisp."""
     me = ob.data
     names = [m.name for m in me.materials]
     attr = me.color_attributes.new("Col", "FLOAT_COLOR", "CORNER")
@@ -102,7 +110,9 @@ def bake(ob: bpy.types.Object, palette: dict) -> None:
         for li in p.loop_indices:
             attr.data[li].color = rgba
         p.material_index = 0
-        p.use_smooth = False
+    # rounded faces (lathes' and tubes' sides) smooth across their facets, sharp at the profile's corners and where
+    # they meet flat faces; every other face stays flat, so the edges keep crisp at a distance
+    me.set_sharp_from_angle(angle=math.radians(SMOOTH_MOST))
     me.materials.clear()
     vc = bpy.data.materials.get("vertex_colour") or bpy.data.materials.new("vertex_colour")
     me.materials.append(vc)

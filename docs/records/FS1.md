@@ -7,7 +7,8 @@
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-09 | 1 | Opus 5.5 (build thread) | 114/114 targeted | Revise 5/8 | proportions against the photos (water tower, silo, watch tower, flagpole truck), stretched shed doors and windows, no windscreen, no face test, changelog |
-| 2026-11-09 | 2 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-09 | 2 | Opus 5.5 (build thread) | 117/117 targeted | Revise 7/8 | a 12 mm gap under the flagpole's truck; curves flat-shaded (the water tower's bowl read as a cone) |
+| 2026-11-09 | 3 | Opus 5.5 (build thread) | pending | pending | – |
 
 ## Decisions
 
@@ -63,6 +64,9 @@
   height (rounded to 0.5 m: 9 m eaves to 6 m, the tallest 15 m to 10 m) in `data/maps/range.json`, so sight is
   worked out from the lower boxes; the sheds are built with their shutter, door and tall windows (103332) at real
   sizes.
+- **Curves shade smooth (critic, attempt 2):** lathes' and tubes' sides are smooth-shaded, split sharp past 35° (a
+  profile's corner, a 4- or 6-sided beam), everything else flat (`vertex_paint.SMOOTH_MOST`); no triangles added. The
+  face test reads each triangle's winding, as the game culls, not its stored normals.
 - **Flag pole model cached:** `FlagViewConfig.pole_mesh()` loads it once and warns once if it won't load (QA), as
   `SkylineConfig.model_of` does; a skyline model without vertex colours or an index counts as not loading.
 - **Pictures:** the Range's card (`assets/maps/range.jpg`) and the wiki's range picture re-rendered.
