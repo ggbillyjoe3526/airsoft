@@ -223,3 +223,16 @@ func test_a_net_wall_s_sections_all_face_one_way_so_their_edges_meet() -> void:
 		if not by_wall.has(wall.center):
 			by_wall[wall.center] = t.basis
 		assert_true(t.basis.is_equal_approx(by_wall[wall.center]), "the section at %s turns as its wall's others" % t.origin)
+
+
+func test_the_pillar_the_net_and_the_lamp_are_solid_from_outside() -> void:
+	# FS1's check (test_model_faces): rays from all round and above first meet a face turned toward them. The wall
+	# bays and the roof bay are seen from the hall only, and their test is that they fill their boxes.
+	var faces: GDScript = load("res://tests/unit/test_model_faces.gd")
+	for path: String in ["res://assets/models/props/pillar.glb", "res://assets/models/props/camo_net.glb",
+			"res://assets/models/props/roof_lamp.glb"]:
+		var mesh := PropDressConfig.load_mesh(path)
+		assert_not_null(mesh, "%s loads" % path)
+		if mesh != null:
+			var share: float = faces.call("back_share", mesh)
+			assert_lt(share, 0.02, "%s: %.1f%% of rays meet a face turned away" % [path.get_file(), share * 100.0])

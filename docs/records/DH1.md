@@ -1,6 +1,6 @@
 # DH1 · Depot's hall shell: walls, pillars, nets, roof, lamps and floor from the owner's photos (Dev)
 
-**Review:** critic Accept 8/8 · qa Pass · performance Pass
+**Review:** critic Accept 8/8 · qa Pass · performance Pass (follow-up: critic Accept 7/8 · qa Pass · performance Pass)
 
 ## Attempts
 
@@ -91,6 +91,16 @@ open.
   so neighbours met with different folds; `PropDressConfig.grid_unturned` now lays the net's sections all one way.
 - QA (Pass) and performance (Pass) advisories taken: the roof's bare ends, lamps inside trusses, the coping over the
   bays, the walls' chunking. Not taken: no shadow off the wall bays (Low has no sun shadows; High's look needs them).
+
+## Follow-up: solid from outside (after FS1, 2026-11-09)
+
+FS1 (#264) added `tests/unit/test_model_faces.gd` after the owner saw the sky through an inside-out water tower. Run on
+these models: the pillar and the lamp are solid all round; the wall bays (2 % from the hall's side: thin trim edge-on)
+and the roof bay (from below) are solid from where they are seen. The net was open over its top and at its ends
+(11 % of rays met a face turned away): from a crate's top, or past a net wall's end, you could see through it. The
+net now closes its dark mesh over the top and across each end (40 triangles, 1,492 of 1,500), and
+`test_the_pillar_the_net_and_the_lamp_are_solid_from_outside` holds the three to FS1's 2 %. FS1 changed no shared
+build code these models use (`hardsurface.py` is as it was), so the other models rebuild byte for byte the same.
 
 ## Outstanding
 
