@@ -59,7 +59,8 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 			PropDressConfig.Lay.TILE:
 				_tile(turns, cfg.variants_of(model), b, foot, cfg, map)
 			PropDressConfig.Lay.GRID:
-				_grid(_placed(out, model), boxes[model], foot, b.size, cfg.grid_cells.get(model, b.size), cfg, rng, model)
+				_grid(out, _variants(model, boxes, cfg), boxes, foot, b.size, cfg.grid_cells.get(model, b.size), cfg,
+						rng, model)
 			PropDressConfig.Lay.UNIT:
 				var tint := Color.WHITE
 				if paint.is_valid():
@@ -70,6 +71,8 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 						cfg, rng)
 			PropDressConfig.Lay.BAY:
 				features_laid = _bays(out, model, boxes, b, map, cfg, middle, features_laid)
+			PropDressConfig.Lay.GROUND:
+				_ground(out, model, boxes, b, map, cfg, rng)
 			PropDressConfig.Lay.TREE:
 				if cfg.tree_feet.has(model):
 					var crown: StringName = cfg.tree_crowns.get(model, &"")
@@ -189,9 +192,12 @@ static func _cluster(p: Placed, model: AABB, foot: Vector3, size: Vector3, cfg: 
 ## The box filled with the model in cells about `cell` m across (x along the box's long side, y up, 0 for one layer,
 ## z across), stacked from the foot, each stretched to its cell, the model's z across the box; a quarter turn either
 ## way at random where that keeps it so (a round model, a square one), else a half turn, so a stack never reads as
-## one model repeated; never turned for a model (`model_name`) in PropDressConfig.grid_unturned.
-static func _grid(p: Placed, model: AABB, foot: Vector3, size: Vector3, cell: Vector3, cfg: PropDressConfig,
-		rng: RandomNumberGenerator, model_name: StringName = &"") -> void:
+## one model repeated; never turned for a model (`model_name`) in PropDressConfig.grid_unturned. Each cell takes one of
+## `picks` at random (the model and its variants).
+static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName], boxes: Dictionary[StringName, AABB],
+		foot: Vector3, size: Vector3, cell: Vector3, cfg: PropDressConfig, rng: RandomNumberGenerator,
+		model_name: StringName = &"") -> void:
+	var model := boxes[picks[0]]
 	var along_x := size.x >= size.z
 	var long := size.x if along_x else size.z
 	var across := size.z if along_x else size.x
@@ -210,8 +216,24 @@ static func _grid(p: Placed, model: AABB, foot: Vector3, size: Vector3, cell: Ve
 				var turn := yaw + (_quarter_turn(rng) if square else PI * float(rng.randi_range(0, 1)))
 				if cfg.grid_unturned.has(model_name):
 					turn = yaw
-				p.add(fit(model, at + Vector3(0.0, j * step.y, 0.0), _turned(step, turn - yaw), turn),
-						_shade(cfg, rng))
+				var pick := picks[0] if picks.size() == 1 else picks[rng.randi_range(0, picks.size() - 1)]
+				# a stack of variant sections keeps one shade along it, so its joins don't show as steps; the shade is
+				# still drawn, so every model's random stream stays as it was
+				var shade := _shade(cfg, rng)
+				if picks.size() > 1:
+					shade = 1.0
+				_placed(out, pick).add(fit(boxes[pick], at + Vector3(0.0, j * step.y, 0.0), _turned(step, turn - yaw),
+						turn), shade)
+
+
+## `model` and its GRID variants (PropDressConfig.variants) that have bounds in `boxes`, `model` first.
+static func _variants(model: StringName, boxes: Dictionary[StringName, AABB],
+		cfg: PropDressConfig) -> Array[StringName]:
+	var out: Array[StringName] = []
+	for v in cfg.variants_of(model):
+		if v == model or boxes.has(v):
+			out.append(v)
+	return out
 
 
 ## A wall's modules end to end along the box's long side, `length` m each (PropDressConfig.run_stretch: stretched a
@@ -674,6 +696,57 @@ static func _tile_row(row: Row, at: Vector3, length: float, depth: float, height
 		# in line with its neighbours by its front face: rows of different depths on abutting blocks still meet
 		var bay := row.turns.next(row.names, foot + Vector3(sin(yaw), 0.0, cos(yaw)) * depth * 0.5, yaw, cell)
 		_placed(row.turns.out, bay).add(fit(row.turns.boxes[bay], foot, size, yaw), 1.0)
+
+
+## Block `b`'s prop `model` stood on the ground at its middle (GROUND, WG2): the model's y = 0 on the terrain there (the
+## box's bottom on a map with none), its top the box's top, its long side (x) along the box's, stretched to the box's
+## length and width, a half turn either way at random; its buried part (under y = 0) kept inside the box by raising
+## its ground line if it must. Under it, where the ground in the box falls further than PropDressConfig.bank_from below
+## that line, the earth bank fills the box from its bottom to just over the line, so the box is never empty air.
+static func _ground(out: Dictionary[StringName, Placed], model: StringName, boxes: Dictionary[StringName, AABB],
+		b: MapData.Block, map: MapData, cfg: PropDressConfig, rng: RandomNumberGenerator) -> void:
+	var box := boxes[model]
+	var bottom := b.center.y - b.size.y * 0.5
+	var top := b.center.y + b.size.y * 0.5
+	var line := clampf(ground_at(map, b.center.x, b.center.z, bottom), bottom, top - cfg.ground_least)
+	var tall := maxf(box.end.y, 1e-6)
+	var under := minf(box.position.y, 0.0) / tall  # the buried share of the model's height, negative
+	# the lowest the ground line may sit and keep the buried part in the box: line + under * (top - line) >= bottom
+	line = maxf(line, (bottom - under * top) / (1.0 - under))
+	var along_x := b.size.x >= b.size.z
+	var long := b.size.x if along_x else b.size.z
+	var across := b.size.z if along_x else b.size.x
+	var yaw := (0.0 if along_x else PI * 0.5) + PI * float(rng.randi_range(0, 1))
+	var scale := Vector3(long / maxf(box.size.x, 1e-6), (top - line) / tall, across / maxf(box.size.z, 1e-6))
+	var basis := Basis(Vector3.UP, yaw) * Basis.from_scale(scale)
+	var pivot := Vector3(box.position.x + box.size.x * 0.5, 0.0, box.position.z + box.size.z * 0.5)
+	_placed(out, model).add(Transform3D(basis, Vector3(b.center.x, line, b.center.z) - basis * pivot), _shade(cfg, rng))
+	if not boxes.has(cfg.ground_bank) or line - lowest_ground(map, b, bottom) <= cfg.bank_from:
+		return
+	var bank_top := minf(line + cfg.bank_tuck, top)
+	var size := Vector3(long * cfg.bank_length, bank_top - bottom, across * cfg.bank_share)
+	_placed(out, cfg.ground_bank).add(fit(boxes[cfg.ground_bank], Vector3(b.center.x, bottom, b.center.z),
+			size, 0.0 if along_x else PI * 0.5), 1.0)
+
+
+## The terrain's height at (x, z), or `fallback` off it or on a map with none.
+static func ground_at(map: MapData, x: float, z: float, fallback: float) -> float:
+	if map.terrain == null:
+		return fallback
+	var h := map.terrain.height_at(x, z)
+	return fallback if is_nan(h) else h
+
+
+## The lowest ground under block `b`'s footprint (its corners, the middles of its sides and its middle), no lower than
+## `bottom`.
+static func lowest_ground(map: MapData, b: MapData.Block, bottom: float) -> float:
+	var low := INF
+	for i in 3:
+		for j in 3:
+			var x := b.center.x + (i - 1) * b.size.x * 0.5
+			var z := b.center.z + (j - 1) * b.size.z * 0.5
+			low = minf(low, ground_at(map, x, z, INF))
+	return bottom if is_inf(low) else maxf(low, bottom)
 
 
 ## A round prop's turn: a random quarter, so the model's own bounds (and so the box) still hold it.

@@ -21,18 +21,23 @@ extends Resource
 ## middle (DM1: Depot's containers, a port cut between two units of one). BAY lines a wall's box with the model in
 ## cells on a grid of the world (`bay_pitch` m apart from `bay_anchor`), each stretched to its cell and its front (+z)
 ## to the field's middle, a feature bay (`bay_features`) in some cells with nothing standing in front of them (Dev 3:
-## Depot's hall walls, their columns under the roof's trusses). SIDE fits a tunnel wall's model to its box, long side
-## along the box's, its inner face (the model's -x) toward the wall across the tunnel (the nearest block named alike
-## across the box's short side, within `side_reach` m), at its own height. LINED sets the model on the box's foot at its
-## own height and width, stretched only along, and its cap (`lined_caps`) over the rest of the box, or its mouth model
-## (`lined_mouths`) at the end of a run (WG4: Woodland's hollow-log tunnels, the log's top shell under the roof and the
-## mound's earth over it; the shell's earth reaches past the box's sides onto the ground banked against the log).
+## Depot's hall walls, their columns under the roof's trusses). GROUND stands the model on the ground at the box's
+## middle (its own y = 0 the ground line), its long side along the box's and stretched to fill it, its top the box's
+## top, a half turn either way at random, and fills the box under it where the ground falls away with an earth bank
+## (`ground_bank`): Woodland's logs, root plates, sawbench and boards (WG2), which lie on slopes in boxes that reach
+## down to the lowest ground under them.
+## SIDE fits a tunnel wall's model to its box, long side along the box's, its inner face (the model's -x) toward the
+## wall across the tunnel (the nearest block named alike across the box's short side, within `side_reach` m), at its
+## own height. LINED sets the model on the box's foot at its own height and width, stretched only along, and its cap
+## (`lined_caps`) over the rest of the box, or its mouth model (`lined_mouths`) at the end of a run (WG4: Woodland's
+## hollow-log tunnels, the log's top shell under the roof and the mound's earth over it; the shell's earth reaches
+## past the box's sides onto the ground banked against the log).
 ## TREE stands one tree in the box (Dev 3, WT1: Woodland's pines, oaks and birches): the model's origin on the ground
 ## under the box's middle, its trunk's foot (`tree_feet` m round its origin) stretched to the box's half-width and the
 ## tree's top to the box's top, turned a random quarter; its crown (`tree_crowns`, a model of its own) scaled evenly by
 ## the tree's height over it, so it keeps its shape however the box is proportioned, spreading past the box over head
 ## height, look only, as the cone crowns WoodsView drew before.
-enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, SIDE, LINED, TREE }
+enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, TREE }
 
 
 ## Each prop's model (a .glb of one vertex-coloured mesh).
@@ -96,6 +101,18 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, SIDE, LINED, TREE }
 	&"hall_exit": "res://assets/models/props/hall_exit.glb",
 	&"pillar": "res://assets/models/props/pillar.glb",
 	&"camo_net": "res://assets/models/props/camo_net.glb",
+	# Woodland's undergrowth and logs (Dev 3 WG2, tools/blender/maps/): the fallen logs at three lengths, the
+	# wind-thrown root plates, cordwood and B's sawn boards and sawbench, and the earth bank under them on slopes.
+	&"fallen_log_5": "res://assets/models/props/fallen_log_5.glb",
+	&"fallen_log_6": "res://assets/models/props/fallen_log_6.glb",
+	&"fallen_log_8": "res://assets/models/props/fallen_log_8.glb",
+	&"root_plate": "res://assets/models/props/root_plate.glb",
+	&"cordwood": "res://assets/models/props/cordwood.glb",
+	&"cordwood_b": "res://assets/models/props/cordwood_b.glb",
+	&"cordwood_c": "res://assets/models/props/cordwood_c.glb",
+	&"boards": "res://assets/models/props/boards.glb",
+	&"sawbench": "res://assets/models/props/sawbench.glb",
+	&"earth_bank": "res://assets/models/props/earth_bank.glb",
 	# Woodland's trees (Dev 3, WT1, tools/blender/maps/): the pine's three ages, the oak and the birch, each block of
 	# kind tree naming one, its trunk and its crown apart (tree_crowns); and the thickets' spruce.
 	&"pine_young": "res://assets/models/props/pine_young.glb",
@@ -162,11 +179,13 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, SIDE, LINED, TREE }
 ## wall.
 @export var kind_max_depth: Dictionary[StringName, float] = {&"plywood": 0.5}
 ## Other models a lining model (TILE) takes turns with, place by place along a rack, never the same twice in a row,
-## so a long rack wall never reads as one bay repeated (the owner, 2026-11-09: the racking loaded three ways; five drew
-## three times the hall's draws on Low). Each is in `models`, the same size as the model it stands in for. Their chunks
-## are `many_chunk` across, so the bays together take about the draws one model did in `chunk` ones.
+## and a GRID model's cells pick among at random (WG2: Woodland's woodpiles, three sections each its own ragged top),
+## so a long rack wall or stack never reads as one bay repeated (the owner, 2026-11-09: the racking loaded three ways;
+## five drew three times the hall's draws on Low). Each is in `models`, the same size as the model it stands in for.
+## Their chunks are `many_chunk` across, so the bays together take about the draws one model did in `chunk` ones.
 @export var variants: Dictionary[StringName, PackedStringArray] = {
 	&"shelf": PackedStringArray(["shelf_b", "shelf_c"]),
+	&"cordwood": PackedStringArray(["cordwood_b", "cordwood_c"]),
 }
 ## How a prop a block names (MapData.Block.dress, WR3) is laid in it; one not listed is fitted to the box (FIT, long
 ## side along the box's).
@@ -174,6 +193,8 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, SIDE, LINED, TREE }
 	&"logstack": Lay.GRID, &"crate": Lay.GRID, &"tyre": Lay.GRID, &"pine": Lay.GRID, &"spruce": Lay.GRID,
 	&"pine_young": Lay.TREE, &"pine_grown": Lay.TREE, &"pine_old": Lay.TREE, &"oak": Lay.TREE, &"birch": Lay.TREE,
 	&"bin_green": Lay.GRID, &"bin_steel": Lay.GRID, &"bin_teal": Lay.GRID, &"units": Lay.GRID,
+	&"cordwood": Lay.GRID, &"fallen_log_5": Lay.GROUND, &"fallen_log_6": Lay.GROUND, &"fallen_log_8": Lay.GROUND,
+	&"root_plate": Lay.GROUND, &"sawbench": Lay.GROUND, &"boards": Lay.GROUND,
 	&"log_tunnel_side": Lay.SIDE, &"log_tunnel_roof": Lay.LINED,
 }
 ## SIDE looks this far (m) across a tunnel wall for the wall across from it.
@@ -194,10 +215,11 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, SIDE, LINED, TREE }
 ## the box sinks into (build_map's SINK) and the model is never sunk or lifted by the slope. Fitted to the whole box as
 ## FIT does where the skirt would reach under the box.
 @export var grounded: PackedStringArray = PackedStringArray(["tractor_tyre", "tractor_tyre_stack", "pickup"])
-## GRID's cells (m): x along the box's long side, y up (0: one layer the box's height), z across. Cordwood a metre and
-## a half long a stack, plywood crates 1.2 m long, a metre deep and 1.15 m high on their pallets (DM1: two high in
-## Depot's 2.4 m crate walls, one in its waist cover), tyres in stacks, a spruce every metre and a half; The Street's bins side
-## by side, about 0.7 m each, and its kitchen units about 0.6 m a cupboard.
+## GRID's cells (m): x along the box's long side, y up (0: one layer the box's height), z across. Cordwood in 2 m
+## sections as tall as the stack (layers would show their ragged tops as seams), the Kenney log stack's 1.6 m, plywood
+## crates 1.2 m long, a metre deep and 1.15 m high on their pallets (DM1: two high in Depot's 2.4 m crate walls, one in
+## its waist cover), tyres in stacks, a spruce every metre and a half; The Street's bins side by side, about 0.7 m
+## each, and its kitchen units about 0.6 m a cupboard.
 @export var grid_cells: Dictionary[StringName, Vector3] = {
 	&"logstack": Vector3(1.6, 0.9, 1.4), &"crate": Vector3(1.2, 1.15, 1.0), &"tyre": Vector3(0.9, 0.45, 0.9),
 	&"pine": Vector3(1.5, 0.0, 1.5), &"spruce": Vector3(1.5, 0.0, 1.5),
@@ -205,6 +227,8 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, SIDE, LINED, TREE }
 	&"units": Vector3(0.6, 0.0, 0.6),
 	# a camouflage net's scaffold sections, a pole every 2 m
 	&"camo_net": Vector3(2.0, 0.0, 0.3),
+	# cordwood in 2 m sections as tall as the stack, one section across however deep the stack (WG2)
+	&"cordwood": Vector3(2.0, 0.0, 2.0),
 }
 ## GRID models laid all one way round, never turned at random: a net wall's sections match only edge to edge as
 ## modelled (DH1).
@@ -281,6 +305,19 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, SIDE, LINED, TREE }
 ## heavy and spread over it (Woodland's oaks and birches, WT1), one MultiMesh would draw them all wherever you look.
 @export var spread_models: PackedStringArray = PackedStringArray(["hall_wall", "camo_net", "oak", "oak_crown", "birch",
 		"birch_crown"])
+## GROUND's earth bank: the model drawn under a grounded prop where the lowest ground under its box (sampled at its
+## corners, the middles of its sides and its middle) is more than `bank_from` m under the ground at its middle; it fills
+## the box from its bottom to `bank_tuck` m over that ground (a little under it: its top hides under the ground where
+## that is level and shows only where the ground falls away, never a slab round the prop), `bank_share` of the box
+## across and `bank_length` of it along. A grounded prop shows at least `ground_least` m over the ground, however the
+## box sits.
+@export var ground_bank: StringName = &"earth_bank"
+@export var bank_from: float = 0.08
+@export var bank_tuck: float = -0.03
+@export var bank_share: float = 0.7
+@export var bank_length: float = 0.96
+@export var ground_least: float = 0.2
+
 ## The props' material: roughness, and metalness.
 @export var roughness: float = 0.7
 @export var metallic: float = 0.0

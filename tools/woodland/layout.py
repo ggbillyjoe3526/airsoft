@@ -181,7 +181,7 @@ pieces: list[dict] = []
 TALL = {"palisade", "tree", "oak", "thicket", "windthrow", "logstack", "crates", "wall", "hutwall", "truck", "fortwall", "tyrestack",
         "headwall", "tunnel", "shed"}
 LOW = {"log", "lowcrates", "tyre", "lowwall", "logpile"}
-HEIGHTS = {"thicket": 5.0, "windthrow": 2.2, "logstack": 2.0, "crates": 1.8, "lowcrates": 1.0, "log": 0.6,
+HEIGHTS = {"thicket": 5.0, "windthrow": 2.2, "logstack": 1.8, "crates": 1.8, "lowcrates": 1.0, "log": 0.6,
            "logpile": 0.9, "tyre": 0.85, "tyrestack": 1.7, "truck": 1.9, "fortwall": 2.3, "lowwall": 1.1,
            "hutwall": 2.5, "headwall": 0.0, "tunnel": 0.0}
 
@@ -270,7 +270,7 @@ walls("palisade", [(88, -16), (72, -16), (72, 14), (88, 14)],
 rect("logstack", 75.5, -1.75, 1.2, 10.5, 0, top=2.8)  # the west gate screen, past its north post
 rect("logstack", 80.5, -13.5, 7.0, 1.2, 0, top=2.8)
 rect("logstack", 80.5, 11.5, 7.0, 1.2, 0, top=2.8)
-rect("logstack", 58.0, 1.0, 1.6, 6.0, 0, top=2.0)             # Back yard: breaks the line from Hut row to the gate
+rect("logstack", 58.0, 1.0, 1.6, 6.0, 0)             # Back yard: breaks the line from Hut row to the gate
 rect("crates", 84.5, 7.5, 1.6, 1.6)
 
 # ------------------------------------------------------------------ NORTH LANE: Pine slope > Ridge > North bridge > Tower > Fern hollow > A
@@ -310,7 +310,7 @@ rect("tyre", 47.5, -36.0, 1.7, 1.7)
 # ------------------------------------------------------------------ MID LANE: Cabin > Woodpile > Birch stand > Clearing > Ford > Hut row
 hut(-52.0, 9.0, 6.0, 4.5, 0, [(0, 1.5, 3.0, "door"), (1, 1.4, 3.0, "door"), (2, 2.0, 4.0, "window"),
                               (3, 1.4, 3.0, "window")], tag="cabin")
-rect("logstack", -34.5, 8.0, 1.8, 12.0, 0, top=2.6)          # the Woodpile: a 12 m cordwood wall across the lane
+rect("logstack", -34.5, 8.0, 1.8, 12.0, 0)          # the Woodpile: a 12 m cordwood wall across the lane
 rect("logpile", -40.0, 13.0, 4.0, 1.2, 0)
 rect("lowcrates", -26.0, 3.0, 2.0, 1.0, 20)
 # Clearing (centre, overtime flag): open moss floor, three islands of cover, two hero oaks
@@ -336,23 +336,23 @@ rect("tyrestack", -26.0, 41.0, 1.8, 1.8)
 rect("log", -12.0, 46.0, 6.0, 0.8, 5)
 rect("logpile", -4.0, 55.0, 5.0, 1.0, 0)
 rect("lowcrates", 1.0, 45.5, 2.0, 1.0, 0)
-rect("logstack", 25.0, 47.6, 6.0, 1.6, -20, top=2.0)          # Log stacks (on the verge: breaks the Truck bend to B line)
-rect("logstack", 29.7, 35.9, 5.0, 1.6, -25, top=2.0)
+rect("logstack", 25.0, 47.6, 6.0, 1.6, -20)          # Log stacks (on the verge: breaks the Truck bend to B line)
+rect("logstack", 29.7, 35.9, 5.0, 1.6, -25)
 rect("tyre", 19.0, 39.0, 1.7, 1.7)
-rect("logstack", 36.5, 42.3, 5.0, 1.6, -30, top=2.0)          # v3: along the verge, off the road
+rect("logstack", 36.5, 42.3, 5.0, 1.6, -30)          # v3: along the verge, off the road
 
 # ------------------------------------------------------------------ B SITE: the Sawmill (open shed, log stacks, sawdust yard)
 SHED = (56.0, 36.0, 10.0, 6.0)  # cx, cz, sx, sz: open sides, roof at 3.2 m, posts
-rect("logpile", 56.0, 36.0, 8.0, 1.4, 0, top=1.2)             # sawbench + logs inside the shed: low cover
-rect("logstack", 44.0, 44.5, 7.0, 1.6, 0, top=2.0)
-rect("logstack", 60.5, 45.0, 1.6, 6.0, 0, top=2.0)
+rect("logpile", 56.0, 36.0, 8.0, 1.4, 0, top=1.2, tag="sawbench")  # sawbench + logs inside the shed: low cover
+rect("logstack", 44.0, 44.5, 7.0, 1.6, 0)
+rect("logstack", 60.5, 45.0, 1.6, 6.0, 0)
 rect("crates", 42.5, 29.4, 2.0, 2.0, 15)                      # v3: off the road
-rect("logstack", 43.0, 39.0, 5.0, 1.6, -30, top=2.0)          # v3: B's road mouth, south verge: the Truck bend can't see through the Sawmill
+rect("logstack", 43.0, 39.0, 5.0, 1.6, -30)          # v3: B's road mouth, south verge: the Truck bend can't see through the Sawmill
 rect("tyre", 49.5, 44.8, 1.7, 1.7)
 rect("crates", 52.5, 40.95, 2.4, 2.6, 10)                     # yard crates: the road can't see deep into B
 rect("lowcrates", 64.0, 30.0, 2.0, 1.0, 90)
 rect("logstack", 53.0, 34.0, 6.4, 1.0, 0, top=2.0, tag="boards")  # v3: sawn boards stacked along the shed's north side: no road line through B
-rect("logstack", 51.6, 30.6, 4.4, 1.4, 63, top=2.0)          # v3: where the road ends: it can't look on into B's back yard
+rect("logstack", 51.6, 30.6, 4.4, 1.4, 63)          # v3: where the road ends: it can't look on into B's back yard
 
 # ------------------------------------------------------------------ links (beyond the stream, ridge and road)
 # 1 Birch gap: open slope Woodpile <-> Pine slope/Ridge foot (west half), a log mid-way

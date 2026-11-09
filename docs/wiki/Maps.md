@@ -92,10 +92,11 @@ defenders in the east camp.
   spruce thickets, and beyond the fence a far wood of spruce spires. A meadow floor, the violet pickup wreck and teal
   crates carry the colour, with nothing near a team's blue or orange. Every crown starts over head height.
 - **Long views, few walls:** the Ridge looks 86 m down onto the Fort; elsewhere a lane's longest line is under 80 m.
-  Cover is logs, log stacks, stacks of tractor tyres, wooden crates, the violet pickup wreck and the trunks of the trees
-  themselves; each stops a BB about where you see it, a round trunk by its bark. The thickets of spruce at the edges
-  and between the lanes can't be entered or seen through.
-- **Ferns** grow knee to hip high in eight beds where you'd want to hide, and **bushes** stand taller. Nobody sees you
+  Cover is fallen logs, wind-thrown trees torn out by their roots, woodpiles, stacks of tractor tyres, wooden crates,
+  the violet pickup wreck and the trunks of the trees themselves; each stops a BB about where you see it, a round trunk
+  by its bark. The woodpiles are 1.8 m tall, so they hide you standing; the camps' gate screens stand 2.8 m. The
+  thickets of spruce at the edges and between the lanes can't be entered or seen through.
+- **Ferns** grow knee to hip high in eight beds where you'd want to hide, and leafy **bushes** stand taller. Nobody sees you
   through more than about half a metre of leaves, so crouch in a fern bed to vanish; you can walk through ferns and
   bushes, but they slow you and a run through them rustles loudly ([Movement](Movement)), and a BB that pushes 0.6 m
   into leaves stops there. The minimap marks them. Grass never hides you.
@@ -106,7 +107,7 @@ defenders in the east camp.
 - **The huts:** the Cabin, the two huts of Hut row and the Box on A site have windows and two wooden [doors](#doors)
   each. The door facing the other team's end starts each round shut and the one facing your own end open, so a hut
   is walked into from its own side and opened, loudly, from the other. The Tower is a platform 3.4 m up a stair, the
-  Sawmill an open shed.
+  Sawmill an open shed with a saw bench, rounds and a stack of sawn boards.
 - **Night** is the Time of day setting's (day by default): a low moon, stars and haze, with fires and lanterns at the
   camps, the huts, the Clearing, the Fort, the Sawmill, the Truck bend and the North bridge: campfires in stone rings,
   and hurricane lanterns hung from a roof, a post or a hooked pole, which stand cold by day. Bots see you from about
