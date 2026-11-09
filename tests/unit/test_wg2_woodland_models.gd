@@ -2,10 +2,10 @@ extends GutTest
 ## WG2 (Dev 3, Woodland's models, tools/blender/maps/): every fallen log, wind-thrown tree, woodpile, board stack and
 ## the saw bench stands inside its block's box, a grounded one (PropDressConfig.Lay.GROUND) reaching its box's top;
 ## an earth bank only under a grounded prop, inside its box and under the ground at its middle; each woodpile one
-## section high, the three sections mixed, its stack 1.8 m over the ground (the gate screens 2.8 m); the tunnel's log
-## lining keeps its old dress; every model keeps to its triangle budget; off the map's data, a grounded prop on a map
-## without terrain or in a box lower than `ground_least` still stands in its box up to its top, any bank inside it; no
-## moss lid floats over a log drawn as a model of its own (WoodsConfig.moss_dresses).
+## section high, the three sections mixed in one shade, its stack 1.8 m over the ground (the gate screens 2.8 m); the
+## tunnel's log lining keeps its old dress; every model keeps to its triangle budget; off the map's data, a grounded
+## prop on a map without terrain or in a box lower than `ground_least` still stands in its box up to its top, any bank
+## inside it; no moss lid floats over a log drawn as a model of its own (WoodsConfig.moss_dresses).
 
 const BUDGETS := {
 	&"fallen_log_5": 1500, &"fallen_log_6": 1500, &"fallen_log_8": 1500, &"root_plate": 4000, &"cordwood": 1200,
@@ -126,6 +126,9 @@ func test_every_woodpile_is_one_section_high_inside_its_box_its_sections_mixed()
 			var drawn := _bounds(t, box)
 			assert_true(_box(b, SLACK).encloses(drawn), "the %s at %s stays inside its box" % [model, t.origin])
 			assert_almost_eq(drawn.size.y, b.size.y, SLACK, "the %s at %s is as tall as its stack" % [model, t.origin])
+		# one shade along a stack, so the joins between its sections don't show as steps of light and dark
+		for shade in placed[model].shades:
+			assert_eq(shade, 1.0, "the %s sections keep one shade" % model)
 
 
 func test_the_woodpiles_stand_1_8_m_the_gate_screens_2_8() -> void:

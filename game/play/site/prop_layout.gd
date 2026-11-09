@@ -159,12 +159,17 @@ static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName],
 				if cfg.grid_unturned.has(model_name):
 					turn = yaw
 				var pick := picks[0] if picks.size() == 1 else picks[rng.randi_range(0, picks.size() - 1)]
+				# a stack of variant sections keeps one shade along it, so its joins don't show as steps
+				var shade := _shade(cfg, rng)
+				if picks.size() > 1:
+					shade = 1.0
 				_placed(out, pick).add(fit(boxes[pick], at + Vector3(0.0, j * step.y, 0.0), _turned(step, turn - yaw),
-						turn), _shade(cfg, rng))
+						turn), shade)
 
 
 ## `model` and its GRID variants (PropDressConfig.variants) that have bounds in `boxes`, `model` first.
-static func _variants(model: StringName, boxes: Dictionary[StringName, AABB], cfg: PropDressConfig) -> Array[StringName]:
+static func _variants(model: StringName, boxes: Dictionary[StringName, AABB],
+		cfg: PropDressConfig) -> Array[StringName]:
 	var out: Array[StringName] = []
 	for v in cfg.variants_of(model):
 		if v == model or boxes.has(v):

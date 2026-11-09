@@ -32,7 +32,7 @@ RADIUS, HEIGHT = 1.0, 1.2
 SEGS = 8            # leaflet pairs along a frond
 RINGS = (
     # (fronds, rise °, droop °, length m, leaflet width m, both sides drawn)
-    (4, (70.0, 78.0), (140.0, 165.0), (1.3, 1.45), (0.26, 0.3), True),   # young fronds standing up and arching over
+    (4, (62.0, 70.0), (125.0, 150.0), (1.3, 1.45), (0.26, 0.3), True),   # young fronds standing up and arching over
     (5, (42.0, 52.0), (95.0, 115.0), (1.2, 1.35), (0.28, 0.32), True),  # the clump's flanks, at a crouch's height
     (7, (14.0, 20.0), (45.0, 60.0), (1.0, 1.15), (0.28, 0.32), False),  # old fronds spread low to the bed's edge
 )
@@ -53,7 +53,7 @@ def build() -> object:
             heading = 2.0 * math.pi * (k + 0.5 * (n % 2)) / count + n * 0.45 + r.uniform(-0.2, 0.2)
             wk.pinna_frond(b, Vector((math.cos(heading) * 0.05, math.sin(heading) * 0.05, 0.06)), heading,
                            math.radians(r.uniform(*rise)), r.uniform(*length), r.uniform(*width), SEGS,
-                           math.radians(r.uniform(*droop)), r, ("Fern", "Fern", "FernLight"), both)
+                           math.radians(r.uniform(*droop)), r, ("Fern", "FernLight", "FernLight"), both)
         n += 1
     ob = b.build()
     wk.finish(ob, 25.0)

@@ -99,30 +99,27 @@ def round_(b: hs.Builder, r, at: Vector, axis: Vector, length: float, rad: float
 
 
 def pile(b: hs.Builder, r) -> None:
-    """Rounds sawn off the log, heaped between the machine and the first sawhorse (photo 1): a bottom layer two
-    across the box, a layer in its hollows and a few on top, their sawn ends to the box's long sides, so the low cover
-    there reads as the solid heap it is; sawdust round the machine."""
+    """Rounds sawn off the log, heaped between the machine and the first sawhorse (photo 1): a loose mound, highest in
+    its middle, of rounds lying every way and a few stood on end, so the low cover there reads as the solid heap it
+    is; sawdust round the machine."""
+    x0, x1 = -2.6, 0.45
     k = 0
-    x = -2.55
-    while x < 0.4:
-        rad = r.uniform(0.17, 0.22)
-        for y in (-0.36, 0.36):
-            round_(b, r, Vector((x + r.uniform(-0.04, 0.04), y, rad)),
-                   Vector((r.uniform(-0.15, 0.15), 1.0, 0.0)), r.uniform(0.5, 0.62), rad, k)
+    for layer, (count, spread, z) in enumerate(((11, 1.0, 0.0), (6, 0.7, 0.33), (3, 0.4, 0.62))):
+        mid, half = (x0 + x1) * 0.5, (x1 - x0) * 0.5 * spread
+        for i in range(count):
+            rad = r.uniform(0.15, 0.22)
+            x = mid - half + 2.0 * half * (i + r.uniform(0.1, 0.9)) / count
+            y = r.uniform(-0.42, 0.42) * (1.0 - 0.4 * layer)
+            if layer == 0 and r.random() < 0.2:
+                # stood on end, as rounds are when they're waiting to be split
+                ln = r.uniform(0.4, 0.5)
+                round_(b, r, Vector((x, y, ln * 0.5)), Vector((r.uniform(-0.1, 0.1), r.uniform(-0.1, 0.1), 1.0)),
+                       ln, rad, k)
+            else:
+                a = r.uniform(0.0, math.pi)
+                axis = Vector((math.cos(a), math.sin(a), r.uniform(-0.25, 0.25)))
+                round_(b, r, Vector((x, y, z + rad * r.uniform(0.85, 1.0))), axis, r.uniform(0.4, 0.6), rad, k)
             k += 1
-        x += 2.0 * rad + r.uniform(0.02, 0.06)
-    x = -2.3
-    while x < 0.2:
-        rad = r.uniform(0.16, 0.2)
-        round_(b, r, Vector((x, r.uniform(-0.1, 0.1), 0.36 + rad)), Vector((r.uniform(-0.3, 0.3), 1.0, 0.0)),
-               r.uniform(0.55, 0.7), rad, k)
-        k += 1
-        x += 2.0 * rad + r.uniform(0.15, 0.3)
-    for x in (-1.9, -0.9):
-        rad = r.uniform(0.15, 0.18)
-        round_(b, r, Vector((x, r.uniform(-0.2, 0.2), 0.72 + rad)), Vector((r.uniform(-0.2, 0.2), 1.0, 0.1)), 0.55,
-               rad, k)
-        k += 1
     wk.blob(b, Vector((-3.0, 0.0, -0.02)), Vector((1.0, 0.6, 0.06)), 1, r, lambda c, n: "Sawdust", rough=0.3,
             seed=3.0, flat_base=-SINK)
 
@@ -148,12 +145,18 @@ def trestles(b: hs.Builder, r) -> None:
         x0, x1 = 0.68 + 0.05 * k, 3.95 - 0.2 * k
         wk.log(b, [(x0, y, z), (x1, y, z)], [rad, rad * 0.9], 7, r, bark=("BarkGrey", "Bark"), rough=0.05,
                furrows=1, ends=("sawn", "sawn"), seed=60.0 + k)
-    # rounds standing on end under the sawhorses' log, waiting to be split, so the box's front reads solid below it
-    for k, (x, y) in enumerate(((1.3, FRONT - 0.12), (1.72, FRONT + 0.14), (2.15, FRONT - 0.1), (2.55, FRONT + 0.12),
-                                (2.95, FRONT - 0.05))):
-        rad = r.uniform(0.17, 0.21)
-        round_(b, r, Vector((x, y, 0.27)), Vector((r.uniform(-0.05, 0.05), r.uniform(-0.05, 0.05), 1.0)),
-               r.uniform(0.45, 0.55), rad, 40 + k)
+    # rounds dropped under the sawhorses' log, some stood on end, some lying, so the box's front reads solid below it
+    for k, (x, y, up) in enumerate(((1.25, FRONT - 0.1, True), (1.68, FRONT + 0.16, False), (2.02, FRONT - 0.14, True),
+                                    (2.5, FRONT + 0.06, False), (2.9, FRONT - 0.08, True))):
+        rad = r.uniform(0.16, 0.21)
+        if up:
+            ln = r.uniform(0.42, 0.55)
+            round_(b, r, Vector((x, y, ln * 0.5)), Vector((r.uniform(-0.12, 0.12), r.uniform(-0.12, 0.12), 1.0)),
+                   ln, rad, 40 + k)
+        else:
+            a = r.uniform(0.3, 1.3) * (1 if k % 2 else -1)
+            round_(b, r, Vector((x, y, rad)), Vector((math.cos(a), math.sin(a), 0.0)), r.uniform(0.45, 0.6), rad,
+                   40 + k)
 
 
 def build() -> object:

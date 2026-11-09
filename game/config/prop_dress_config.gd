@@ -144,9 +144,9 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND }
 @export var kind_max_depth: Dictionary[StringName, float] = {&"plywood": 0.5}
 ## Other models a lining model (TILE) takes turns with, place by place along a rack, never the same twice in a row,
 ## and a GRID model's cells pick among at random (WG2: Woodland's woodpiles, three sections each its own ragged top),
-## so a long rack wall or stack never reads as one bay repeated (the owner, 2026-11-09: the racking loaded three ways; five drew
-## three times the hall's draws on Low). Each is in `models`, the same size as the model it stands in for. Their chunks
-## are `many_chunk` across, so the bays together take about the draws one model did in `chunk` ones.
+## so a long rack wall or stack never reads as one bay repeated (the owner, 2026-11-09: the racking loaded three ways;
+## five drew three times the hall's draws on Low). Each is in `models`, the same size as the model it stands in for.
+## Their chunks are `many_chunk` across, so the bays together take about the draws one model did in `chunk` ones.
 @export var variants: Dictionary[StringName, PackedStringArray] = {
 	&"shelf": PackedStringArray(["shelf_b", "shelf_c"]),
 	&"cordwood": PackedStringArray(["cordwood_b", "cordwood_c"]),
@@ -239,8 +239,9 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND }
 ## GROUND's earth bank: the model drawn under a grounded prop where the lowest ground under its box (sampled at its
 ## corners, the middles of its sides and its middle) is more than `bank_from` m under the ground at its middle; it fills
 ## the box from its bottom to `bank_tuck` m over that ground (a little under it: its top hides under the ground where
-## that is level and shows only where the ground falls away, never a slab round the prop), `bank_share` of the box across
-## and `bank_length` of it along. A grounded prop shows at least `ground_least` m over the ground, however the box sits.
+## that is level and shows only where the ground falls away, never a slab round the prop), `bank_share` of the box
+## across and `bank_length` of it along. A grounded prop shows at least `ground_least` m over the ground, however the
+## box sits.
 @export var ground_bank: StringName = &"earth_bank"
 @export var bank_from: float = 0.08
 @export var bank_tuck: float = -0.03

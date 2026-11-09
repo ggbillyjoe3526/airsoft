@@ -156,12 +156,14 @@ lines stay where they were; the ferns and bushes, drawn by code as ellipsoids, a
   - Saw bench: the machine half again as long, the shed's main mass; a heap of sawn rounds beside it (the long logs
     gone), rounds stood on end under the sawhorses' log.
 
-## Outstanding
+- The owner's polish ask on the critic's round 5 notes (2026-11-09, "make those polish changes now"), and what
+  changed: the root plate's crown clumps smaller, shaded by facing, a needle spray hanging over each, so none shows a
+  flat top; the saw bench's rounds a loose mound lying every way, some on end, and those under the sawhorses' log a
+  jumble; the woodpile's section joins narrower and barked, and a stack's sections one shade (`PropLayout._grid`: a
+  model with variants keeps shade 1.0); tufts of leaves standing out of the bush's outer clumps; the fern's young
+  fronds lower, their undersides lighter, so no dark spike at its heart.
 
-- The critic's polish notes on round 5 (not blocking): the root plate's crown fill clumps read flat-topped from
-  behind; the saw bench's rounds lie in two neat rows and the rounds under the log stand evenly spaced; the bush's
-  clumps read as faceted lumps from close up; the fern's young fronds make a dark spike at the centre; the woodpile's
-  section joins show as dark lines and one section reads paler.
+## Outstanding
 
 - How the ferns, the root plates and the lower woodpiles feel in play, and the frame rate in the fern beds on Low:
   `playtest/0.1-dev3-checklist.md` › Woodland's models (WG2).

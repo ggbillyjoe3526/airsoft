@@ -83,10 +83,10 @@ def cordwood(seed: int) -> object:
         for k in range(ROWS):
             z0, z1 = t * k / ROWS, t * (k + 1) / ROWS
             split = r.uniform(-0.15, 0.15)
-            base = x - s * 0.085  # the ends stand inside the section's length, so the sections still meet
+            base = x - s * 0.02  # the ends stand just inside the section's length, so the sections meet closely
             for y0, y1 in ((-core, split - 0.015), (split + 0.015, core)):
-                bulge = base + s * r.uniform(0.0, 0.05)
-                ridge = bulge + s * 0.035
+                bulge = base + s * r.uniform(0.0, 0.008)
+                ridge = bulge + s * 0.012
                 zm = (z0 + z1) * 0.5 + r.uniform(-0.02, 0.02)
                 mat = ("Bark", "BarkDark", "BarkFurrow", "Bark")[r.randrange(4)]
                 wk.face(b, wk.verts(b, [(bulge, y0, z0 + 0.012), (bulge, y1, z0 + 0.012), (ridge, y1, zm),
@@ -94,7 +94,7 @@ def cordwood(seed: int) -> object:
                 wk.face(b, wk.verts(b, [(ridge, y0, zm), (ridge, y1, zm), (bulge, y1, z1 - 0.012),
                                         (bulge, y0, z1 - 0.012)]), mat, Vector((s, 0, 0.6)))
             q = wk.verts(b, [(base, -core, z0), (base, core, z0), (base, core, z1), (base, -core, z1)])
-            wk.face(b, q, "Gap", Vector((s, 0, 0)))
+            wk.face(b, q, "BarkDark", Vector((s, 0, 0)))
     # the rows of pieces' ends on each face, in rows following the ragged top, each row's pieces their own sizes and
     # shapes: split wedges (most, as in the photos) turned every way, their round side bowed and barked, and rounds
     for side in (1.0, -1.0):

@@ -35,8 +35,24 @@ SPRAYS = [Vector(v).normalized() for v in (
     (1.0, 0.15, 0.35), (0.45, 0.9, 0.5), (-0.55, 0.8, 0.3), (-1.0, -0.1, 0.55), (-0.4, -0.95, 0.25),
     (0.55, -0.8, 0.6), (0.2, 0.25, 1.0), (0.8, -0.3, 0.05), (-0.75, 0.3, 0.0), (0.1, 0.85, -0.05),
     (-0.3, -0.5, 1.0))]
-ALONG = 5           # clumps along a spray
-CORE = 10           # dark clumps filling the heart, so nobody is seen through it
+ALONG = 4           # clumps along a spray
+TUFT = 7            # leaves standing out of each of a spray's two outer clumps
+CORE = 8            # dark clumps filling the heart, so nobody is seen through it
+
+
+def leaf(b: hs.Builder, root: Vector, out: Vector, length: float, r, mat: str) -> None:
+    """One leaf rooted at `root` (inside a clump) reaching `length` out along `out`, drooping at its tip, its face
+    turned up to the light: a pointed diamond."""
+    side = out.cross(Vector((0.0, 0.0, 1.0)))
+    side = side.normalized() if side.length > 1e-6 else Vector((1.0, 0.0, 0.0))
+    side = (side + out * r.uniform(-0.2, 0.2)).normalized()
+    tip = root + out * length - Vector((0.0, 0.0, length * 0.25))
+    mid = root.lerp(tip, 0.45)
+    w = length * 0.22
+    normal = side.cross(tip - root).normalized()
+    if normal.z < 0.0:
+        normal = -normal
+    wk.face(b, wk.verts(b, [root, mid + side * w, tip, mid - side * w]), mat, normal)
 
 
 def surface(d: Vector) -> Vector:
@@ -78,6 +94,16 @@ def build() -> object:
             at.z = max(at.z, 0.12)
             size = Vector((0.29, 0.29, 0.22)) * (1.15 - 0.45 * (t - 0.45)) * r.uniform(0.85, 1.15)
             wk.blob(b, at, size, 1, r, shade(max(0.0, 0.9 - t)), 0.5, j * 5.7 + i, flat_base=0.02)
+            if i < ALONG - 2:
+                continue
+            # a tuft of leaves standing out of the clump's sunny side, each rooted in it, so its outline is leaves
+            # rather than a faceted lump
+            for q in range(TUFT):
+                n = (dd + Vector((0.0, 0.0, 0.7)) + side * r.uniform(-1.0, 1.0) + up * r.uniform(-0.7, 0.7)).normalized()
+                root = at + Vector((n.x * size.x, n.y * size.y, n.z * size.z)) * 0.75
+                v = n.z + r.uniform(-0.25, 0.25)
+                leaf(b, root, n, r.uniform(0.2, 0.26), r,
+                     "LeafSun" if v > 0.8 else ("LeafLight" if v > 0.4 else "Leaf"))
     # the stems, fanning out of the ground into the sprays, seen low down between them
     for k in range(STEMS):
         a = 2.0 * math.pi * k / STEMS + r.uniform(-0.2, 0.2)

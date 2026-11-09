@@ -181,14 +181,20 @@ def build() -> object:
                 continue
             # the shade inside the crown: small dark clumps along the trunks
             c = Vector((x + r.uniform(-0.15, 0.15), r.uniform(-0.15, 0.15), z + r.uniform(-0.05, 0.05)))
-            wk.blob(b, c, Vector((r.uniform(0.36, 0.46), r.uniform(0.4, 0.5), 0.3)), 1, r,
-                    lambda c, n: "NeedleDark", rough=0.6, seed=20.0 + k, flat_base=-SINK)
+            wk.blob(b, c, Vector((r.uniform(0.38, 0.46), r.uniform(0.4, 0.48), 0.3)), 1, r,
+                    lambda c, n: "Needle" if n.z > 0.45 else "NeedleDark", rough=0.45, seed=20.0 + k,
+                    flat_base=-SINK)
             # a spruce's branches over it: flat needle sprays hanging out from the trunk either side, tier on tier
             for s in (1.0, -1.0):
                 heading = math.pi * 0.5 * s + r.uniform(-0.6, 0.6) + (0.4 if x > 0.0 else -0.4) * r.random()
                 wk.pinna_frond(b, c + Vector((0.0, s * 0.12, 0.12)), heading, math.radians(r.uniform(10.0, 35.0)),
                                r.uniform(1.0, 1.25), r.uniform(0.28, 0.34), 5, math.radians(r.uniform(60.0, 90.0)), r,
                                ("Needle", "NeedleDark", "Needle"))
+            # and one hanging over the clump's top, along the trunk, so no clump shows a flat top
+            wk.pinna_frond(b, c + Vector((0.0, 0.0, 0.2)), math.pi * (0.0 if r.random() < 0.5 else 1.0)
+                           + r.uniform(-0.5, 0.5), math.radians(r.uniform(20.0, 40.0)), r.uniform(0.8, 1.0),
+                           r.uniform(0.26, 0.32), 4, math.radians(r.uniform(70.0, 100.0)), r,
+                           ("Needle", "NeedleDark", "Needle"))
             k += 1
     # ferns growing on the plate's top (photo 2)
     for k in range(3):
