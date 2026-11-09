@@ -9,9 +9,9 @@ in `docs/PROCESS.md`.
 - **Building the game.** The game restarted on 2026-10-18 as an installable desktop game built with Godot and
   Blender. The browser game it replaces stopped at its 0.1 Beta 1; its old repository is no longer on GitHub, and its
   code was in `legacy/browser/` until 2026-11-05 (in git at the tag `0.1-dev.1`).
-- **Last tag:** `0.1-dev.1`, [0.1 Dev 1](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.1)
-  (2026-10-30). The owner creates tags.
-- **Building 0.1 Dev 2** (owner, 2026-10-30): basic smoke and flash bombs, thrown by bots too (done: SF1, SF2), a
+- **Last tag:** `0.1-dev.2`, [0.1 Dev 2](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.2)
+  (2026-11-09). The owner creates tags.
+- **0.1 Dev 2** (owner, 2026-10-30; tagged 2026-11-09): basic smoke and flash bombs, thrown by bots too (done: SF1, SF2), a
   full-screen map and a Go there ping (owner, 2026-10-31; done: FM1), then Depot and Woodland redesigned larger and
   dressed (step 28). Depot is the owner's concept 3, an indoor hall (2026-10-31): the map (done: DR1), doors (done:
   DO1), two flags in Attack / Defend (done: AB1) and its CC0 dress (done: DR2). Woodland is the owner's concept 3, an
@@ -24,6 +24,11 @@ in `docs/PROCESS.md`.
   single shot, its 2x Scope fitted, three springs, unlocked at level 5 (SN1), then a variable scope (SN2). Since DT1
   (2026-11-05) the Sniper Rifle and its parts are public and The Street is dev only. The rest of 0.1
   ([What 0.1 is](#what-01-is)) follows in later Dev builds.
+  After it, the owner's playtest fixes (BP2 to BP8) and the Blender models of replicas, attachments, figures, gear
+  and first-person arms.
+- **Building 0.1 Dev 3** (owner, 2026-11-07): Blender models for Depot and the practice range, and perhaps Woodland's.
+  A league and cup mode is noted for Dev 3 but waits for the owner's word (`docs/IDEAS.md`); the Modes Update is
+  deferred.
 - **The release path** (owner, 2026-10-12): 0.1 Dev builds, 0.1 Beta, then 0.1 (tagged `0.1.0`) opens Early
   Access to the public.
   Themed updates follow (Replica, Modes, Maps, Progression and any more), up to 1.0, the full launch. See
@@ -142,6 +147,7 @@ at his PC to connect.
 
 | Build | Date | What it brought | Tag |
 |---|---|---|---|
+| [0.1 Dev 2](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.2) | 2026-11-09 | Depot rebuilt as an indoor hall and Woodland as an open wood, with doors and two flags; The Street (dev only); smoke and flash bombs, thrown by bots too; the Sniper Rifle and Variable Scope; Blender models of every replica, attachment, magazine, barrel and bomb, first-person arms, and figures in gear with faces; the owner's recorded sounds; new menus and HUD; the full-screen map and Go there; teams of 5 to 8; four bug passes | `0.1-dev.2` |
 | [0.1 Dev 1](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.1) | 2026-10-30 | The first build: Depot, Woodland and the range; the AEG Rifle and GBB Pistol with attachments and the Armory; bots, squad orders and callouts; Elimination and Attack / Defend; settings, saves and accessibility; the Windows installer and the Linux build | `0.1-dev.1` |
 
 Only full releases are tagged (owner, 2026-10-01): playtests in between are plain commits. The browser game's builds

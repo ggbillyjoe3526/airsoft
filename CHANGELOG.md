@@ -9,6 +9,933 @@ Don't edit this file for a change: add a note to `changelog.d/` instead (its `RE
 
 The browser game's changelog is `legacy/browser/docs/CHANGELOG.md`.
 
+## 0.1 Dev 2 (2026-11-09)
+
+### Highlights
+- Depot is rebuilt as an indoor airsoft hall with doors and two flags, and Woodland as an open wood with tunnels to crouch through.
+- Smoke and flash bombs: throw them yourself, take any two into a match, and watch the bots use them too.
+- The Sniper Rifle: bolt action, single shot, the 2x Scope or the Variable Scope, and three springs, unlocked from level 5.
+- Every replica, attachment, magazine, barrel and bomb has a detailed model, and you see your own arms holding them.
+- Bots wear real gear, head gear and faces, hold the same replicas you do, and play more as a team.
+- Recorded sounds for the replicas, footsteps, kit, the whistle and the flag rope.
+- New menus and HUD: the Match, Loadout and Armory pages, a weapon rail, and a 3-2-1-GO countdown at the start of each round.
+- A full-screen map with Go there, minimap zoom, and teams of 5 to 8 a side (6 v 6 by default), plus four bug passes of fixes.
+
+### Clean bomb icons on the weapon rail
+- The smoke and flash icons on the weapon rail no longer sit on a grey box.
+
+### Your hands hold the grip and change the magazine
+- With a vertical or angled grip fitted to the AEG Rifle or the Sniper Rifle, your left hand holds the grip, at the hip and aimed.
+- On a reload your left hand takes the empty magazine out, carries it down out of view and brings a fresh one up in the hand to push it home, on every replica. The rifles tip up while they reload and the pistols tip up toward you, so you see your hand at work and not your forearm.
+- New Settings › Dev › Skin-only arms shows your first-person arms with bare hands instead of gloves, at once.
+
+### A tidier HUD, a countdown and a weapon rail
+- Every round now starts with 3, 2, 1, GO! under the banner; you can look round but not move or shoot until GO!.
+- The referee's whistle blows at GO!, and nothing sounds at all under the loading screen.
+- A weapon rail above the ammo panel shows your replicas and an icon per bomb with their keys; the one in hand is lit.
+- The bottom right panel is smaller: BB count, magazines and fire mode, with no replica name or bomb icons.
+- The level in the menus reads LVL, and a switch that is off is a plain grey outline with one knob.
+- HIT! is gone from the middle of the screen once the round result or the scoreboard shows, and it no longer shows over you while you watch a teammate.
+- The scoreboard now replaces the round banner while you hold Tab, so nothing draws over anything.
+- The pause menu's title, buttons and seed line are centred.
+
+### Something new in the Dev tab
+- There is a new hidden switch to find in Settings › Dev. Go looking.
+- It is off by default, and with it off nothing about the BBs changes.
+
+### Matches (before 0.1 Dev 2)
+- Pick your grenades on the Loadout screen: two slots, each Smoke or Flash, so you can carry two smokes or two flashes.
+  A new loadout carries one of each, and bots carry the grenades their kit lists.
+- Attack / Defend: raising the flag takes 7 s instead of 5, and the attackers must then hold it up for 3 s to win.
+  A defender on the rope pulls it back down; the FLAG gauge counts the hold down.
+- Attack / Defend is now the mode picked when you open the Match screen.
+- The camera holds still once a round has ended, instead of swaying with the player you watch.
+- New Gameplay setting, Simulate skipped rounds (off by default): on, a skip offers a SIMULATE button that decides
+  the round at once, with the fast-forward skip still there.
+- Bushes and ferns slow anyone pushing through them, and running or sprinting through them rustles loudly enough for
+  bots to hear from further away.
+- The smoke and flash bombs are louder, and the flash bomb's pop now echoes round the field as it fades.
+
+### Wood steps, metal bangs and night woods
+- Footsteps on wooden floors, when you walk, sprint or land a jump, are now recorded wood sounds: five different steps, so no two in a row sound the same.
+- Steps on wooden floors are as easy to hear as steps on concrete.
+- Running into a steel skip, a shipping container or the van now plays a recorded metal bang that rings for about a second.
+- Woodland at night has its own recorded night-time woods sound instead of a quiet street; the owl and creaking branches still call over it.
+
+### Replicas, scopes and bombs from the Dev 2 playtest
+- The AEG Rifle takes the Red Laser, on the left side rail of its handguard just behind your left hand.
+- Inspect turns the replica the other way, so its muzzle points to the left.
+- Throw smoke and Throw flash take the bomb in hand instead of throwing it. Click to throw, or hold and let go to throw.
+- At the hip, the 2x Scope and Variable Scope glass is plain glass you see through. The zoomed view only shows while aiming. On
+  the Low graphics preset the glass at the hip is a light tinted glass instead, to keep the frame rate up.
+- Your own BBs show only once they leave the muzzle, so none are seen behind a pistol aimed down its sights.
+- The Variable Scope is plainer: no rails or iron sights on top, and one smaller dial.
+
+### Watching Here and calmer running bots
+- The order wheel has a new Watching Here: the spot you look at is yours to cover, marked "WATCHING" over it and on the minimap.
+- With Watching Here, the nearest free teammate comes to watch the spot beside you and says so; the rest spread out to other angles.
+- Team Plan, another order, walking away from the spot, being hit or the next round ends Watching Here.
+- Bots sprinting with their replica away swing their arms less: elbows bent, hands low and close in, shoulders steadier.
+
+### Cut-off throws ease back down
+- In first person, if your grenade throw is cut off while you wind up (a hit, or the round ends), your arms now ease back down over about 0.15 seconds.
+- Before, they snapped back to the holding pose in a single frame.
+
+### Shadows on slopes, magazines on ledges, a smoother Sniper Rifle
+- On Low, the soft shadow under a player's feet now lies along a ramp's slope instead of sinking into it.
+- A player stepping off a ledge keeps their shadow, on the floor below, fading the higher they are.
+- An old magazine thrown off a ledge now lands on the floor below, not in mid-air at the thrower's height.
+- Looking through a zoomed scope, only the players in the scope's glass get the extra detail, so scoping in costs less.
+- The Sniper Rifle's bolt and its cocking sound now finish just as the rifle can fire again, no longer early.
+- Working the Sniper Rifle's bolt from the hip, the rifle tips toward you so your hand stays in view.
+- Bots firing over cover tip their replica up a little, so the barrel no longer pokes into the cover.
+- Calling a hit, the dark edge by a player's raised shoulder is smaller.
+- At night, bots' replicas show their weapon torch, its lens and light glowing, and their beam starts from its lens.
+- The holster now moves with the pistol in it, so crouching no longer shows a speck of the pistol through it.
+
+### A shorter loading stop on Woodland
+- Woodland's longest loading stop is gone: the field's ground and its solid parts now go up a little each frame
+  instead of all at once. Other stops of up to about a second remain while its woods, the map itself and the views
+  load.
+
+### Bots (before 0.1 Dev 2)
+- Your bot teammates now carry kits the same way the other team's bots do, so both sides field snipers, riflemen and
+  the rest in the same mix.
+- A teammate told to Follow me that has fallen more than 7.5 m behind runs a little faster than you to catch up, then
+  keeps your pace.
+- A bot waiting for a magazine from a teammate who is in a fight now waits behind cover instead of in the open.
+- A magazine tossed to a teammate who steps behind a wall while it flies is now lost at the wall, instead of flying
+  through it, and the catcher (you or a bot) can ask again at once. You can only toss when the magazine's arc has a
+  clear path: under a low lintel, or from a crouch behind cover taller than your hand, the toss waits.
+- A bot doesn't wait 15 s for a magazine from a teammate who is asking for one too. It looks elsewhere at once.
+- A magazine in flight now shows the thrower's replica paint, as it does in their hands.
+- Hard bots hold the edge of a tall bush as a corner, the way they hold a wall's edge.
+- A match replayed from its seed (`--seed`, shown in the pause menu) now plays out exactly the same every time,
+  however fast the level loaded, so bug reports can be replayed.
+
+### Menus, HUD, sound and reports
+- Settings has a **Gameplay** tab: Crouch, Aim down sights and Reload (hold or toggle, manual or auto) moved there from
+  Controls, and What got you moved there from HUD. Your saved choices carry over.
+- Skipping the rest of a round you're out of shows a bar of how far the round has played.
+- Replace on the Loadout strip can be undone for a few seconds.
+- The Armory works out what a win and each hit give from the levels table, so its note can't go stale.
+- PLAY no longer shows a white focus ring as the menus open; Enter still works at once, and a key or pad press shows it.
+- A screen reader names every card on the Match page and the Loadout (maps, modes, teams, rules, loadouts, replicas,
+  parts) and the menus' choices.
+- Ping markers over the field step apart when they meet each other or Hold here's sign, so each stays readable, at
+  the screen's top and bottom edges too.
+- The fields' ambience plays as a wide stereo pair again, as in the browser game, at the same level.
+- The loading screen draws its map's picture at 1920x1080, so it is sharp; the Match page and the menus' backdrop use
+  small copies, so the menus open faster and use less graphics memory. The range's picture shows its targets.
+- Airsoft.exe carries the game's icon.
+- Switching Bottomless magazines on (Dev tab) tops up the magazine in your hands, even an empty one.
+- Bug reports hide an address written right after a driver's name and every IPv6 address.
+- A clean quit after a start that couldn't write its run record no longer shows a crash on the next start, and old
+  marks are cleared from the save folder. A copy of the game still running is told from a crashed run by a heartbeat
+  it writes, so a crash, in the game or while its graphics start, is not missed when another copy of the game has
+  since taken its process id.
+- The wiki's squad order keys, the minimap's hearing distances, the late push and the restore points come from the
+  game itself; the AEG Rifle stays on target to about 39 m, not 38.
+
+### Graphics fixes: occlusion culling, lighter smoke, a dim Lounge
+- A new **Occlusion culling** setting under Graphics skips drawing what walls, containers and houses hide from you.
+  It is on from Medium and off on Low.
+- Smoke clouds on Low and Medium are made of fewer, bigger puffs, so standing in smoke costs less to draw.
+- Doors, flag poles and the far skyline now take the same soft, stylised light as the rest of the field. With baked
+  light on, Depot's doors, poles and props take its light too, so each face of a door is lit like the wall beside it.
+- Depot's Lounge is now a dim room with baked light on: its walls, floor, doors and furniture are darker, and no roof
+  lamps hang over it.
+- Corners where two walls meet, or a crate stands on the floor, are a little less dark in the baked light.
+- With baked light on, Depot's crate lids, container frames, sandbags and flag cloths are still lit like the open hall,
+  even in the Lounge.
+
+### Smoother loading and a way back out
+- Woodland's loading screen no longer stops for a few seconds near the end: the bots' vaults and cover are now worked out while it keeps moving.
+- Press Esc on the loading screen to go back to the Match page, while the match loads or while it waits for Continue. The loading line says "Leaving…" until it is out.
+
+### Hits on figures putting their replica away
+- When a figure puts its replica away or starts sprinting, the place a BB can hit it now follows its arms and body as they move, instead of jumping ahead of what you see.
+
+### Menus, HUD and controls fixes from the third bug pass
+- Customise's turning replica is framed whole at every screen size: at 1080p and 4K it came out zoomed in on the
+  receiver, and closer each time it was drawn. Moving the game to a screen of another size redraws it sharp.
+- The minimap stays on the field by its edges: at a spawn by the edge a third of it was empty, so now your arrow moves
+  off the middle instead.
+- The Armory's level track takes keyboard and controller focus: left and right pick a level.
+- The Performance sheet's Magazines row colours the magazine's size and how many apart, as the part cards do.
+- The replica panel's round count sits in a line as tall as its numbers, as in the HUD's design, so the panel is a
+  little shorter.
+- A paint's name too long for its tile ("Ranger green") is set smaller to fit, never cut.
+- The credits' title uses the same lettering as the other pages' titles.
+- Settings › Accessibility says "Your system doesn't say whether it wants reduced motion" when it can't tell, not "asks
+  for reduced motion: It doesn't say".
+- The map pictures on the Match page's cards are drawn smooth rather than grainy.
+- After an update that moved a default key (the bombs to 4 and 5, doors to G), an action whose new key you already use
+  for something else gets its old key back if that is free; if not, Settings says which actions have no key.
+- A key slot waiting for a key ("PRESS A KEY") stops waiting when you change Settings tab or the window loses focus.
+- Coming back from the practice Loadout with a held crouch, you come back standing at once; a toggled crouch is still
+  kept.
+- While you spectate, the WATCHING line steps aside while the round's table is up, so it no longer covers "CLICK FOR THE
+  NEXT ROUND".
+- Keys rebound to punctuation show the mark they print (`[`, `;`, `/`) instead of names like "BracketLeft", and number
+  pad keys read "Num 5".
+- The match's XP card says "Rounds won with you in them", since a round you took no part in isn't counted.
+- The crosshair and the teammates' markers no longer show through the pause menu.
+- The walk-off line under HIT! keeps clear of the LOST banner when your hit ends the round.
+
+### Screen reader
+- Your squad orders are read out ("Order · Follow Me"), and so is an order that has to wait for the next round.
+- Skipping a round is read out, and the last hit line no longer stays behind to be read again.
+- Settings' choices, switches and sliders, Customise's paint tiles and the Armory's level track have spoken names.
+
+### Bug reports
+- Report a Bug takes out an IPv6 address written in letters only (`dead::beef`) or in mixed case (`Fe80::1`), a
+  zero-padded IPv4 address and WSL's path to another account (`/mnt/c/Users/…`), and keeps C++ names (`Fade::1`),
+  versions (`v1.2.3.4`) and the graphics driver's version.
+- An account named with an ordinary word ("player", "test", "deck") is taken out of folder paths only, not from every
+  sentence of the report.
+- A sentence written after a user folder's path keeps its words.
+- An account name with a space or a tab ("Jo Bloggs") never leaves its first word behind when a long note is cut.
+- A clean quit that can't write its run record (a full disk, a locked file) leaves a mark beside it, so the next start
+  no longer takes it for a crash; a save folder that takes no file at all still can.
+
+### Dev tools
+- F4's BB trails are ribbons a few pixels wide at any distance, not 1 px lines.
+- Bot intentions (Dev tab) are hidden behind walls and while the order wheel, the field map or your sight is up, and
+  labels over bots standing close step up so they don't overlap.
+- F3's readout sits in the bottom left corner, clear of the minimap.
+- Retro pixels (Dev tab) has Pixel size and Shades sliders.
+
+### Cleaner bots and replicas up close
+- The hard plates on the bots' gloves stay whole when a finger bends round a grip, instead of breaking into shards up
+  close.
+- A bot that swings into view in a fast turn, or after the camera cuts (spectating, respawning), holds its replica
+  properly from the first frame.
+- The GBB Pistol's frame has a rounder nose under the barrel instead of a square-cut front.
+
+### Zoom keys of their own
+- The Variable Scope's zoom has its own two actions, Zoom in and Zoom out, in Settings › Controls. They are on the mouse wheel, as before: aimed through the scope the wheel zooms, otherwise it switches.
+- Put Next and Previous replica on keys and those keys now switch while you aim, instead of zooming; put the zooms on keys and the wheel always switches.
+- A zoom shares its key only with Next or Previous replica; any other key you give it swaps, as every key does.
+- A mouse wheel notch as a reload or a draw starts, aimed through the scope, now switches instead of doing nothing.
+
+### Play fixes from the third bug pass
+- Thrown bombs bounce off anyone in play standing in the way. They still hit nobody, and just after the throw they pass through the thrower's teammates, so one thrown past a teammate at your side never bounces back at you.
+- A ping through a window marks what lies beyond the glass, as through a bar railing.
+- Hold Here's key with the full-screen map open has your teammates hold the spot under the map's pointer until the order ends.
+- The Sniper Rifle's cocking sound stops when you switch away or are hit mid-cycle.
+- A BB's second strike in a tight inside corner you can see is no longer heard muffled.
+- The flash bomb's flare shows even if the game hitches at the bang.
+- The minimap shows a footstep or shot heard on another storey, fainter.
+- Dev settings › End the round now during Elimination's overtime puts only the overtime played on the round's table.
+
+### Bot fixes from the third bug pass
+- Indoors, a bot decides once per opponent each round whether to go full auto, however often it turns between two of them, and drops full auto when a burst it had to hold resumes on someone no longer in the open.
+- A bot no longer steps aside for an enemy on the other side of a thin wall.
+- A bot back from a search walks on along its lane from the stretch it stands by, instead of walking back to the point it left.
+- A bot pulls the trigger for a single shot or a burst only when the shot can go off that moment, so it never fires later than the check of its line of fire: not while its replica cycles, draws or reloads, nor while it vaults.
+- A real noise near a spot you pinged is news to the bots who took the ping: they react and call it.
+- A teammate's Go Round ask never marks a spot on a floor no route joins to yours.
+
+### Sharper bots through a scope, and lighter bot figures
+- Through a scope, bots are drawn in the detail of how near they look, not how far they stand: at 6x a bot 40 m off looks as it does 7 m away.
+- A bot's radio no longer vanishes when the bot is far off.
+- Bots' bodies are drawn in fewer pieces, with no visible change, and on Low a shadow copy nobody could see is no longer kept up.
+- On Depot, two doors that opened into the wall beside them now stop against it.
+
+### Lighter bot figures
+- Each bot's held replica draws in fewer pieces, and past the far detail line a simpler copy of it stands in with the same shape, colours and shine: about 32 to 28 draws a bot up close and 32 to 21 far off, looking the same.
+- Moving models (figures, replicas, bombs, BBs) no longer take part in Ultra's scene lighting as if they were level, and a few figure texture maps are smaller in memory where they hold little detail.
+
+### A little less work in big fights
+- BBs and bots check who stands near a line of fire with a quicker first test: the same answers, a little less work each step with many players on the field.
+
+### Bug fixes from the second bug pass
+- Holding the trigger after the pull that throws a bomb in hand no longer fires your replica when it comes back up; let go and pull again.
+- Your torch comes back on when you put a bomb in hand back with a replica key or a reload.
+- The Loadout page's carried cards show your own keys for Primary and Secondary when you rebind them.
+
+### Bots' hands on their replicas
+- Bots now hold their replicas the way your own first-person hands do: the right hand high on the grip, fingers wrapped round it, index finger on the trigger and thumb along the grip's left side.
+- Bots hold a pistol in one hand, as you do.
+- Aiming a rifle, a bot's other hand holds the handguard from underneath, fingers up its side. With a grip fitted, the hand holds the handguard just behind the grip.
+- The hand still lets go of the handguard to reload, switch replicas, throw a bomb or call a hit.
+
+### Your hand works the Sniper Rifle's bolt
+- After each Sniper Rifle shot your right hand takes the bolt's knob, draws it back and pushes it home, then returns to the grip.
+- The GBB Pistol's trigger finger now rests nearly straight on the trigger.
+- Your wrist stays nearly straight as the hand works the bolt, turning on the knob as it moves.
+
+### Your arms throw the bomb
+- Your left hand now comes up and pulls the pin out of a smoke or flash before you throw it, taking the pin and ring away with it.
+- Your right arm swings the bomb back, over the top and out ahead as you throw, then the hand opens and follows through out of view.
+- The throw takes the same time as before.
+
+### Your arms hold the smoke and flash bombs
+- Taking a smoke or flash in hand now shows your gloved right hand closed round it, the lever under the palm, instead of the bomb floating on its own.
+- Each bomb has its own grip, fitted to its model. Your hand comes up with it as your replica goes down, and goes back down with it if you put it back.
+- The bomb sits a little nearer and higher in the view than before, so it shows above the bottom edge.
+
+### First-person arms
+- You now see your own arms in dark olive gloves and sleeves holding the replica in your hands: both hands on the AEG Rifle, the right hand on the GBB Pistol and the Cyber Pistol.
+- The arms follow the replica as it sways, kicks, reloads and drops.
+- Pistols sit higher and nearer the middle of the screen at the hip, your hand and wrist in view, and come a little closer when you aim.
+
+### Sharper attachments
+- Every attachment has more detail: smoother curves, softer edges, and finer knurling, stippling and ribs.
+- The red dot, both scopes, both grips, the silencers, the laser and the weapon torch all got the new detail.
+- The weapon torch has a polished reflector, and the rifle silencer has a knurled coupling at the back.
+- The laser is one closed housing under the rail, with its emitter set flush in the front face, so no tube sticks out.
+- The 2x scope sits 20 mm lower on a slim mount, and the iron sights still come off under it.
+- The variable scope is 10% smaller. Aiming through it looks the same as before.
+- The vertical grip is a little shorter.
+- The angled grip has saw-tooth serrations along its sweep.
+
+### Replicas worn on the figure
+- A pistol that isn't in a player's or bot's hands now sits in the holster on their right hip.
+- A rifle that isn't in their hands rests on their backpack. Before, it only showed on their back while
+  holstered and vanished when they drew the pistol.
+
+### Models in the pictures
+- The smoke and flash bomb icons on the Loadout and the HUD now show the bombs' 3D models once they are added; until then they stay the flat drawn cans.
+- Every replica, attachment and power source picture in the menus comes from its model, so new models show up there by themselves.
+- The crash screen's blurred backdrop no longer shows the old rifle.
+
+### Bots in new gear
+- Human bots wear new gear, remodelled from reference photos.
+- A plate carrier in the team colour, with magazine pouches and padded straps.
+- A battle belt with a holster, grenade and dump pouches.
+- A radio on the left side, and a two-pocket assault pack on the back.
+
+### GBB Pistol slide and AEG Rifle sights
+- The GBB Pistol's slide always rests forward. It only runs back as you fire or when the magazine is empty, and only the slide moves: the barrel stays and shows in front of it.
+- The GBB Pistol's slide now has lines at the front and the back, a chamfered nose and rounded edges.
+- The AEG Rifle's iron sights are smaller and lower, with a small ring at the back that is quick to line up and leaves the target in view.
+- Fitting any optic now removes a replica's iron sights completely, so nothing gets in the optic's way.
+- The AEG Rifle's stock has flat sides; the half-round tubes along them are gone.
+- The AEG Rifle's charging handle sits a little lower, tucked under the rail, and still pulls straight back clear.
+
+### Hit call arm
+- A hit player's raised hand goes straight up, the elbow nearly straight and the wrist in line with the arm, as they
+  call the hit and walk off (it was bent out to the side, the wrist cocked back).
+
+### Sniper Rifle
+- The Sniper Rifle, its M130, M140 and M150 Springs and the Variable Scope are now open to everyone: the rifle and the
+  M130 at level 5, the M140 at 7, the Variable Scope at 8 and the M150 at 9, and bots on the other team can carry the Sniper Rifle.
+
+### The Street
+- The Street is now dev content: it shows on the Match page only with Settings › Dev › Dev content on, and a match there
+  gives no XP and stays out of your records.
+
+### Rifles held in the shoulder
+- Bots, and your own figure, now hold a rifle with its stock resting in the shoulder by the armpit, lower and closer to
+  the body, with the head bowed onto the stock to look down the sights, instead of up by the face. Pistols are held
+  out as before. The head's hit area bows with it.
+- Their hands now close round the grip: a pistol no longer sits on top of the fists, and the right hand holds a
+  rifle's pistol grip.
+
+### Bots have real faces behind their goggles
+- Through a bot's clear lenses you now see modelled eyes: eyeballs, eyelids, brows and the bridge of the nose, framed
+  by the balaclava's rolled eye opening, in place of a flat painted strip.
+- Bots wear one of four looks, each with its own skin tone and eye colour, so teammates under the same helmet look
+  different.
+
+### Inspect your replica
+- Press Y (rebindable in Settings › Controls) to turn your replica side on and look it over.
+- An AEG's charging handle draws back, its dust cover opens and the hop-up dial turns.
+- A GBB Pistol's slide stays home; a Cyber Pistol's battery slides out of the grip and back.
+- Small plastic clicks go with each part.
+- Firing, aiming, reloading, switching, holstering, sprinting or being hit stops it at once.
+
+### Bots hold the real replicas
+- Bots now hold proper versions of the AEG Rifle, the GBB Pistol, the Cyber Pistol and the Sniper Rifle, made from
+  the models in your hands, instead of plain blocky shapes.
+- The parts a bot has fitted show on its replica: optics (with the iron sights taken off), silencers, grips, torches,
+  the laser and the bigger magazines, and it reloads the magazine it has fitted.
+
+### Knee pad strap
+- The knee pads' top strap now wraps all the way round the back of the thigh instead of disappearing into the trousers.
+
+### One dry click and a street-day range
+- Every replica that fires empty now gives the GBB Pistol's recorded dry click, so an empty AEG Rifle no longer whirs its motor.
+- The practice range now sounds like a quiet street by day.
+
+### Barrels you can see
+- The Tight-Bore Barrel shows a polished steel inner barrel seated in its hop-up unit, with a rotary dial and red rubber bucking, on the Customise screen.
+- The Long Barrel shows a longer brass inner barrel through a 10 cm knurled, fluted extension.
+- Fitted, the tight bore sits inside the rifle and only its polished crown shows in the flash hider.
+- The long barrel's extension sits between the front sight and the flash hider or silencer, which moves out 10 cm as before.
+- Neither barrel plays differently.
+
+### Cyber Pistol resized
+- The Cyber Pistol is now the same size as the GBB Pistol: shorter, slimmer and lower, with a shorter grip, so it sits in your hand like the GBB.
+- Its trigger sits nearer the grip, so your finger reaches it about as easily as the GBB's, and its trigger guard is shorter.
+- Its iron sights show when you aim: the front sight and its glowing dot sit in the rear notch with light either side.
+- It keeps its own look: the white slab, glowing slashes, pink core, finned rear cap and fire-mode lights.
+
+### Knee and elbow pads
+- Players and bots wear new black knee and elbow pads: a hard shell with vents and rivets over a padded cushion, held on by two elastic straps with triangle buckles.
+- The pads stay rigid when a player crouches or kneels, as real hard-shell pads do.
+
+### Detailed magazines
+- The Hi-Cap and Low-Cap magazines for the AEG Rifle are new, detailed models, built from the rifle's standard magazine: the Hi-Cap is about a third longer, with a knurled winding wheel under its base plate.
+- The Low-Cap is shorter than the standard magazine.
+- The Extended magazine for the GBB Pistol is new and detailed: it sticks out 3.5 cm below the grip, with holes down its back and a base pad in the pistol's frame colour.
+
+### Grenade sounds
+- The smoke and flash bombs now sound like the owner's recordings: the ring pull rings out, a bomb lands with a whole
+  tin can clattering and rattling (not just its first knock), the pin is a clean click instead of hiss, a smoke bomb hisses as it goes off without the deep
+  made-up pop, and the flashbang is a clean balloon pop instead of a distorted burst.
+
+### Player figures
+- Players and bots wear new, detailed clothes made from real airsoft kit photos: an olive combat shirt with a mock-neck
+  collar, shoulder and elbow pockets and flat velcro cuffs, and camouflage trousers with cargo pockets, bloused over
+  the boots.
+- New gloves with a moulded knuckle shell, padded fingers and a strapped velcro cuff, and new laced coyote boots with
+  eyelets and speed hooks, a toe cap, a heel counter and a rubber sole.
+- The cloth has a fine ripstop weave, press studs on the pocket flaps, back pockets, belt loops, wear on the elbows,
+  knees and seat, and dust on the trouser hems and boots.
+- The team armbands round the upper arms show the team colour, with the plate carrier.
+
+### Bots throw bombs overhand
+- A bot throwing a smoke or flash bomb now shows it in its right hand.
+- It pulls the pin with its left hand, swings its arm back by its head, then brings the bomb over beside its head, elbow leading, and lets it go out ahead.
+- It follows through with the arm before its replica comes back up.
+- Before, a bot's arms hung at its sides and the bomb appeared in the air at its eyes.
+
+### Bots wear new head gear
+- Bots wear new head gear modelled on real kit: a high-cut helmet, a full-cut helmet, a coyote cap or an olive boonie.
+- Helmets and caps keep their team patch.
+- Masks, goggles and glasses sit with the gear, and their lenses are clear with a slight tint, so a bot's eyes show.
+
+### Smoke and flash bombs you can see
+- The smoke bomb is a grey canister with a green stripe, a black head with a notched lever down its side and a pull ring.
+- The flash bomb is a slim olive tube with a violet band round its top and a pull ring hanging from the rim.
+- You see the bombs in your hand, flying through the air and lying where they land. Bots' bombs look the same.
+- The stripe and the band match the bomb colours on the HUD.
+
+### Bug fixes (before 0.1 Dev 2)
+- Closing the Switch Replica list with the keyboard puts you back on Switch Replica, and Tab or the arrows can no
+  longer reach the buttons hidden behind the list.
+- Standing on a roof right beside a flag pole no longer raises or lowers its flag: you have to be at its foot.
+- The game is a little smaller: a few sounds it never played are gone.
+
+### Running figures
+- Players' and bots' figures run, walk, sprint, strafe, back-pedal and crouch-walk with new animations: feet plant on
+  the ground without sliding, roll heel to toe, and keep pace with the speed they move at instead of skating.
+- Running and walking figures lean a little into the step; crouch-walking figures take short, quick steps on the balls
+  of their feet with the knees over the toes.
+- A running figure's hips swing and turn into a sideways step while its replica stays on its aim.
+- The hit areas follow the new legs, so a BB that touches a running leg still counts.
+
+### GBB Pistol sights and port
+- Aiming the GBB Pistol now shows its front sight: the post with its white dot stands in the rear sight's notch, level with the rear sight's top, with a sliver of light either side.
+- The rear sight's notch is a little deeper and wider, and its white outline thinner, so the front post fits in it.
+- The barrel now fills the ejection port: no more dark gap between the slide and the barrel.
+
+### New attachment models
+- The red dot is now a compact closed sight on a low riser.
+- The 2x scope is a magnifier on a hinged mount.
+- The short vertical grip has a flared top and stippled sides.
+- The angled handstop sweeps forward and has serrations.
+- The rifles' silencer is a long black tube.
+- The GBB Pistol's silencer is short and stout, with a knurled collar.
+- The GBB Pistol's red laser is a closed unit under the rail.
+- The weapon torch is a compact pistol light with a polished reflector and an LED. It fits the GBB Pistol, the Cyber Pistol and the AEG's right-side rail.
+- Aiming the red dot holds the replica a little further from your eye, so the smaller window shows in full.
+
+### A more detailed Cyber Pistol
+- The Cyber Pistol is a new, more detailed model with the same shape and colours as before: a front block with teeth along its foot and glowing slashes, a muzzle block with the barrel standing out of it, a slide with a glowing pink core behind bars on its sides and top, a rear block with a hex plate and a finned cap, an angular trigger guard, a fire-mode slider with three lights, and a ribbed power cell showing through the grip.
+- Its stats, sights, sounds and torch are unchanged.
+
+### Round BBs
+- BBs in flight, white and glowing, are now drawn as proper round BBs instead of rough eight-sided balls.
+- Up close, a BB leaving your muzzle now looks round.
+- How BBs fly, their size, colours and trails are unchanged.
+- Tracers are still the Glowing BBs option, now the same round model in a glowing colour.
+
+### Sniper Rifle model
+- The Sniper Rifle has its own model, from the owner's photo: a bolt-action spring rifle in a grey chassis, with a long barrel, an M-LOK forend, a top rail, a short box magazine and a stock with a cheek piece.
+- After each shot you work its bolt: the handle lifts, the bolt slides back and home, and the handle turns down.
+- Its flip-up iron sights stand on the rail's ends and hide while a scope or red dot is fitted.
+
+### Power source pictures
+- The Standard Battery, the 11.1 V LiPo, the gas bottles and the springs have new, detailed models in the menus, made from real airsoft kit.
+- The gas bottle is a tall can with a ribbed screw cap; its cap and shoulder are the gas's colour (Green, Red or Black Gas).
+- The springs are painted rifle springs, tightly wound at one end, in each spring's colour.
+
+### AEG Rifle fixes
+- The AEG Rifle's trigger faces the right way and sits in the middle of its guard.
+- Its charging handle is bigger, sits higher behind the receiver and slides back over the stock when you inspect the rifle.
+- Its top rail runs level from the receiver onto the handguard, with no raised section and no gaps.
+- Its receiver, magazine well and grip are one moulded piece, the grip straight, then curving into the receiver, with a finger groove and stippled side panels.
+
+### A more detailed GBB Pistol
+- The GBB Pistol is a new, more detailed model, built from the owner's photos: a compact striker pistol with a squared slide, a railed dust cover, a raked grip with stippled panels and finger grooves, and a thumb rest.
+- Its sights sit a little lower on the slide, as in the photos; its stats are unchanged.
+- The laser, torch, silencer and extended magazine fit the new pistol.
+
+### A more detailed AEG Rifle
+- The AEG Rifle is a new, more detailed model, built from the owner's photos: a short carbine with a quad-rail handguard, an A-frame front sight, a flip-up rear sight, a raked grip, an adjustable stock and a curved magazine.
+- It is about 67 cm long with the stock in, shorter than before, with a shorter magazine (its stats are unchanged).
+- With an optic fitted, its iron sights come off, so they never block the view.
+- The Sniper Rifle is rebuilt from the new AEG Rifle and keeps its old length.
+- Long barrels, the silencer and the torch fit the new AEG Rifle.
+
+### More recorded sounds: whistle, steps and flag rope
+- The referee's whistle is now a real recording, with short and long blasts.
+- Footsteps on metal and grass are now recorded.
+- Running on gravel is now recorded too.
+- The flag rope going up and down is now recorded, with a pull for each step of the flag's climb.
+- The flashbang's bang is now recorded.
+- The Cyber Pistol's motor is now a recorded whir.
+
+### Woodland's woods by day
+- Woodland has its own woods background by day.
+- At night Woodland still uses a stand-in for now.
+
+### More recorded sounds: footsteps, kit and gear
+- Footsteps on concrete, gravel and leaves are now recorded. Wood, grass and soil use stand-ins for now.
+- Every ground's footsteps are balanced, so none is much quieter or louder than the rest.
+- Crouching, standing and leaning rustle your kit.
+- Holstering, raising your replica and vaulting now play recorded sounds.
+- The hit tick and the hit confirmation are now recorded.
+- The steel target ring and bumping into glass are now recorded.
+- The fire selector click, the radio click and the electric, spring and Cyber magazine sounds are now recorded.
+- The grenade pin, bounce and smoke hiss are now recorded.
+- Doors have more variety.
+
+### Map backgrounds
+- The Depot sounds like a big indoor hall now, not the outdoor yard.
+- The Street has its own background sound by day and by night.
+- Woodland's background sound is a stand-in for now.
+
+### A bit more motor on the Cyber Pistol
+- The Cyber Pistol's shot has a little more of its motor whirr, with a faint electric-motor whine under it.
+
+### Hits land where the figure is
+- A BB now counts where it meets the figure you see, in every pose: standing, crouched, crouch-walking, running, leaning, vaulting, and aiming up or down.
+- Before, up to a third of BBs that visibly struck a crouched, running or vaulting player flew on through them, and some just beside a figure counted.
+- Arms and replicas still don't count; only the body does.
+- F5 shows the hit areas, so you can see where a BB will count.
+
+### More motor whirr, and recorded sounds for more actions
+- The AEG Rifle's shot has more of its electric motor whirr, a little longer and louder.
+- The fire selector click and the radio click when bots answer orders now play recorded sounds.
+- The steel target ring, vaulting, raising and holstering your replica, and the flag rope now play recorded sounds.
+- BBs hitting concrete, soil and leaves now play recorded sounds.
+- Running into steel skips and glass now plays recorded bumps.
+- These recordings are stand-ins until dedicated ones are made.
+- The referee's whistle is a cleaner synthesised pea whistle for now.
+
+### Fixes from the playtest
+- HUD opacity now fades only the backgrounds of the ammo and bomb panel and the minimap; icons, numbers and words stay solid.
+- The HUD tab in Settings fits on one screen with no scrolling; HUD opacity and What got you sit in the left column.
+- In the Armory, clicking a level on the track rings its dot and edges its level card in white.
+- The side rail's teal bar lines up with the selected tab.
+- Each replica card on the Loadout has a SWITCH REPLICA button, which replaces the Swap row.
+- SWITCH REPLICA opens a list of every replica; picking the one in your other slot swaps the two.
+- Nothing plays while a match loads; the ambience starts when you press Continue.
+- The scoreboard and the round results table are more compact.
+- Holding Tab after a round shows the scoreboard in place of the results, not over them.
+- Over the match's final results, Tab does nothing, as they already show the match.
+- SWITCH REPLICA now works with the mouse; before, clicking it did nothing.
+- A double click on a replica card on the Loadout no longer opens Customise; only the CUSTOMISE button does.
+- Once you're out, clicks are ignored for 1.5 seconds before one can skip the round, so the shots you fired as you were hit no longer skip it.
+
+### Recorded sounds for the replicas
+- Replica shots, dry clicks and magazines now play recorded sounds: the AEG Rifle's motor whirr, the GBB Pistol's gas pop and slide, the Cyber Pistol's buzz.
+- The GBB Pistol's slide now audibly locks back on its last BB.
+- BBs hitting metal, wood and players have recorded sounds; BBs hitting glass, plastic and cardboard have new ones too.
+- Running into shelves, racks, crates and wooden props has recorded bumps.
+- The pouch slap when you are out of magazines, the hi-cap rattle, a magazine thrown and caught, and the weapon torch's click are recorded too.
+- Doors opening and shutting play recorded sounds.
+- The referee's whistle is a real pea whistle: its short blasts last a little longer and it is a little louder.
+- The practice range's countdown beep and your ping's pip are recorded; the pip is a little louder.
+
+### Bots
+- A BB that lands by a bot, or hits its teammate close to it, gives the shooter away: for a few seconds the bot can see
+  them out to 70 m, so a long shot from beyond its sight no longer goes unanswered.
+
+### Maps
+- The Street: wheelie bins put out halfway down the Path's long straight give attackers somewhere to stop on it.
+
+### Sniper Rifle
+- Sniper bots see further through a raised scope, aim steadier through it, and wait for their aim to settle before
+  their one shot.
+
+### Fixes
+- With Settings open from the pause menu, Tab no longer reaches Resume or Quit Match hidden under them.
+- The pause menu's Loadout key shows a key you just rebound in its Settings.
+- With QUIT GAME? asking, the Loadout page's number keys no longer switch your loadout behind it.
+- Going from Settings to the Armory by the side rail leaves the keyboard somewhere to start from.
+- The crosshair no longer flares wide as a scope comes up or goes down.
+- Need a Mag says "Nobody near has a spare mag that fits" when nobody can help, which is true whether teammates are out
+  of spares or carry mags for another replica.
+
+### Practice
+- A Practice challenge run with dev gear is no longer kept as a best.
+
+### HUD
+- The magazine boxes now sit at the left of the replica panel, in line with your replica's name.
+- HUD opacity (Settings › HUD) now fades the ammo and bomb panel and the minimap, words included, and nothing else. It goes down to 20 %.
+
+### Fixes
+- Aimed through a scope, the mouse turn now follows the scope's own zoom, so the view no longer swings too fast.
+- The replica panel in the bottom right no longer jumps when a note and the bomb row show together.
+- The HUD preview in Settings › HUD fits at 150 % and shows one of each bomb, not blank icons.
+- Choice tracks in Match › Custom rules and Time of day now stop at their buttons, not across the whole row.
+- The Armory's NEXT card points to the next level with something to show, not an empty one.
+- A notice waiting for your answer, such as the graphics question after a crash, keeps the keyboard: Enter can't start
+  a match past it.
+- Under Settings, a waiting notice steps aside so you can reach BACK, and comes back when you leave Settings.
+- Fire rates on the Loadout card and performance sheet show decimals where they have them; the Energy and Zoom bars
+  reach further, so stronger power sources and scopes read apart.
+- Turning Dev content on or off in Settings now updates the Loadout page straight away.
+- Indoors, a bot that chose full auto at someone in the open can choose it again when they step back into the open
+  after a moment out of sight, and never fires as it changes mode.
+- Bot teammates following you no longer put their replica away when you take a bomb in hand.
+
+### Sniper Rifle
+- After a Sniper Rifle shot, the pistol you switch to fires as soon as it is up; the bolt keeps cycling on the sling,
+  and switching back never skips it.
+- A click once the bolt handle is home fires as the cycle ends instead of being lost; a double click still fires once.
+- The rifle's rate reads 0.8 BBs/s (0.76 and 0.73 with the stronger springs), not 1.
+
+### A new look for the Armory
+- A level panel shows your LEVEL number and XP lines, with a note on how XP is earned.
+- A row of dots runs from KIT to the top level. Click a dot to jump to that level.
+- Four level cards start at your level. The next level has a teal edge, and locked levels are dimmed.
+- Hover an item on a card to see what it does.
+- Use the arrows to browse the level cards.
+
+### Settings in the new look
+- The page title is SETTINGS, in the pause menu's Settings too.
+- The Settings tabs are a row of rounded buttons, and the open tab is white.
+- Each row of choices is one dark bar, and the picked choice shows as a white pill.
+- The same choice bars now appear on Match's Custom rules, Customise's view buttons and Glowing BBs.
+
+### A cleaner HUD
+- Your smoke and flash bombs show as icons with how many are left; the one in your hand is larger, and a bomb you have none of dims.
+- The replica panel is a rounded panel with your replica's name beside its fire modes.
+- The score is one rounded bar, and each hit feed line is a rounded pill.
+
+### Turn the replica in Customise
+- The replica stands on a turntable. Drag with either mouse button to turn and tilt it, scroll to zoom, or pick 3/4, Left, Right or Top.
+- R puts the view back to 3/4.
+- Fitting a part, changing its paint or switching tabs never moves or resizes the replica, so you can see each change.
+- The replica's name is now the page's title, with the way back to LOADOUT beside it.
+
+### Variable Scope
+- A new Variable Scope: the 2x Scope, a little longer, with a zoom ring. It fits the AEG Rifle and the Sniper Rifle.
+- Aim through it and the mouse wheel zooms from 2× to 6×, one step a notch. Wheel up zooms in.
+- Only the view inside the scope's glass zooms. From the hip, the mouse wheel still switches replicas and bombs.
+- The zoom stays where you leave it for the rest of the match.
+- It is a little slower to raise than the 2x Scope.
+- It unlocks at level 8.
+
+### A new Loadout page
+- LOADOUT sits at the top, with your loadout's name and its replicas beside it. Your saved loadouts are listed underneath.
+- The Primary card is big, with the replica drawn large. CUSTOMISE is on the card.
+- The Secondary card sits beside a Grenades panel, which shows each grenade with its throw key.
+- The Swap row puts another replica in the slot you have picked.
+- The Performance sheet is on the right.
+- Every replica is drawn to true size against the others, whichever slot it sits in.
+
+### Sniper Rifle
+- A new spring-powered Sniper Rifle, like the AEG Rifle with a longer barrel.
+- Single shot: you cock it after every shot, and hear the handle drawn back and snapped home.
+- It comes with the 2x Scope fitted. Take it off or swap it in Customise.
+- It shoots further and flatter than the AEG Rifle, but from the hip its BBs spread wide until the sight is up.
+- Three springs unlock like the gases: M130 Spring (as it comes), M140 Spring and M150 Spring for more power, cocking a little slower.
+- The Sniper Rifle and the M130 Spring unlock at level 5, the M140 Spring at level 7 and the M150 Spring at level 9.
+- Bots can carry it in a Sniper kit and raise the scope to fight.
+
+### Unlock levels
+- The 2x Scope now unlocks at level 5 (was 7), and Red Gas at level 6 (was 5).
+- The level-up card no longer names gear that isn't in the game yet.
+
+### A new Match page
+- Fields are listed on the left. Each one has a small picture taken at eye height and a one-line description.
+- Woodland and The Street have new pictures.
+- The modes sit under the fields, each with a line on how it plays.
+- The rules are in the middle. Your team and the bots are on the right.
+- A card at the foot shows the field you picked, your other picks and a big PLAY button.
+
+### Depot starts on single shots
+- On Depot, the AEG Rifle and Cyber Pistol now start each round on single shots, so full auto is no longer the first setting indoors.
+- Switching to auto during a round still works as before.
+- Bots on Depot fire single shots too. Now and then a bot switches to full auto, but only at someone out in the open down a long sight line.
+- Other maps are unchanged.
+
+### New menu look
+- The menus sit on frosted-glass panels over a blurred view of the field you picked.
+- One teal accent now runs through the menus. Headings are in condensed capitals; numbers stay in the plain face.
+- Blue and yellow are gone from the menus. Team colours stay, and warnings such as a low magazine and the flags stay yellow.
+
+### Side rail and no title screen
+- A slim text rail runs down the left: AIRSOFT, MATCH, LOADOUT, ARMORY, SETTINGS, your level with a thin XP bar, and QUIT.
+- There is no title screen. The game opens straight on Match, with PLAY ready.
+
+### About in Settings
+- Settings › About shows the version, the renderer, Report a Bug, Licences and Quit to desktop.
+
+### Teal in the HUD
+- The HUD uses the teal accent for highlights, such as your own lines in the hit feed, where it used to be yellow.
+
+### Bigger teams
+- Every map now plays 6v6 by default: Depot, Woodland and The Street.
+- Under Custom rules the Team size row offers 5v5, 6v6, 7v7 and 8v8 on every map. Fewer players make a slower, more
+  careful match; more make a faster, busier one.
+- Every map's starts and dead zones have room for eight a side.
+
+### Railings follow-up
+- The Street's metal railings no longer muffle sound: footsteps, shots and BB hits behind them sound open.
+- A ping or a Hold order aimed through a railing lands on the ground beyond it.
+- Bots treat railings as see-through when holding angles, checking corners, picking crossfire and cover spots, and
+  deciding whether to flash a spot.
+
+### See-through railings
+- The Street's waist-high metal railings are real bars now, so you can see through them.
+- BBs fly through the gaps and only stop or ping off when they hit a bar or rail, so about three shots in four get through.
+- A railing is no longer cover: bots see you through railings and will shoot through them, but never pick one to hide behind.
+- You still can't walk through a railing, or throw a smoke or flash through one.
+- The tall wooden garden fences stay solid.
+
+### Performance and sound fixes
+- Later matches load a little faster: the night sky, dust, light pools, torch beams and Woodland grass and air are now set up once per run of the game.
+- The crosshair is redrawn only when it changes, not every frame, for slightly smoother play on slower computers.
+- A BB hitting a thin wall now sounds muffled when you are on the other side of it, instead of sounding as if it hit your side.
+
+### Menu and save fixes
+- The end-of-match XP card now says what set its difficulty multiplier: the bots, your teammates or Custom rules.
+- On the crash screen, Tab moves between the note, the buttons, the report and Copy instead of typing a tab into the note.
+- Settings and loadouts saved by a newer version of the game are never overwritten by an older one. The game says the file is kept.
+- Settings added by a newer version are kept when an older version saves them.
+- A "damaged" warning for settings, progress or records clears once that file saves again.
+- A loadout name you are typing when the game closes is kept.
+
+### Fixes
+- The mouse wheel from a holstered replica now draws a replica, not a bomb.
+- On the Range, a bomb taken with the mouse wheel stays in your hand and can be thrown.
+- Woodland's hut doors fold back against the posts when open, so they are no longer hidden inside them.
+- On Medium detail and up, Woodland's reflections no longer show the inside of the hill.
+- The door prompt shows the key you rebound in the pause menu.
+- Switching Aim or Crouch from Toggle to Hold and back no longer turns the toggle back on by itself.
+- The click that takes the mouse back into the game no longer fires a shot.
+- Bots no longer go looking for a bomb thrower who is already out.
+- A mouse wheel step onto a bomb during a vault is kept and taken in hand when the vault ends.
+- The full-screen map comes back if you are still holding M after the scoreboard closes.
+
+### Bots play as a team
+- Normal and Hard bots, friends and enemies, now play more as a team and fight smarter. Easy is unchanged.
+- A bot that spots you radios teammates within 35 m (45 m on Hard) a moment later, and they come ready for you. Hard sends it sooner.
+- A team two or more eliminations ahead in Elimination stops holding and comes hunting for the rest.
+- The last bot of a team left plays it carefully, walking and checking corners.
+- In a fight in the open, bots take a knee for each burst and sidestep between bursts. Their BBs are steadier, and there is less of them to hit.
+- Bot teammates told to Follow Me come out of cover to keep up with you once nobody is in sight, instead of being left behind.
+- Bots see you through glass for a flash bomb's aim and while sidestepping, as they already did for spotting you.
+- In test matches, Normal bots with these changes won about 57% of rounds against Normal bots without them.
+
+### Bot teammates ask for you
+- Your bot teammates now ask for you when they need you, with a callout you hear and a marker you can follow.
+- "Need help" puts a HELP marker where the bot is when it is fighting two or more enemies, or defending the flag pole as the other team starts raising it.
+- "Go round" puts a GO marker to one side of an enemy, on your side, when the bot has been trading looks with that one enemy for a while.
+- "Cover me" puts a COVER marker on the pole when your team starts raising the flag in Attack / Defend.
+- They only ask while you are in play and more than 15 m away, at most once every 30 seconds and three times a round.
+- Only your team asks, and asking never changes how the bots play.
+
+### A more detailed full-screen map
+- The hold-M map now fills the screen, with a key to its marks down the right.
+- The header says what your side must do this round: attack A or B, defend them, or knock out the other team.
+- Flags show as A and B badges. In Elimination, a faint ring marks where the overtime flag will rise.
+- Each team's start is boxed in its colour, the dead zones are hatched, and doors are marked.
+- Place names are sized by how big the area is and never overlap any more.
+- A compass and a 10 m scale bar sit in the corner.
+- The map and the minimap show the ground: grass, tracks and roads in their own shades, Woodland's hills shaded, hedges and thickets in green.
+
+### Hear gunfire across the field
+- Other players' shots stay at full loudness within about 10 m and carry up to 120 m; they used to fade by 30 m and stop at 60 m.
+- Electric rifle motors, gas pistol pops and spring twangs are much louder, motors the most.
+- A silenced replica still carries about half as far.
+- Sound no longer distorts when it gets loud.
+
+### Quieter ambience
+- The Ambience slider starts at 20 % (was 30 %); if you never changed it, it moves to 20 % for you.
+- Birds, insects and the yard's hum play at half their old level, whatever the slider says.
+
+### Continue after loading
+- The loading screen fills its bar, then says Ready and shows a CONTINUE button once the match has fully loaded. Click it, or press Enter or Space, to start.
+- The round clock starts when you continue. Coming back to the range from its Loadout goes straight in.
+
+### Click to skip a round
+- Out of a round, click (Fire) to skip it instead of holding Space.
+- The rest of the round is played out unseen, as fast as your computer allows: a "Skipping the round" screen shows the round's clock counting down, with no fast-forward and no sound.
+- The round's result shows, and the next round waits for your click. After the last round, the match's results follow.
+- The pause menu's Skip to next round does the same.
+
+### Bombs on 4 and 5
+- Smoke moves to 4 and flash to 5 (they were G and Y). Open or shut a door is now G (it was U).
+- The hop-up dial is on Page Down and Page Up only, since 4 and 5 went to the bombs.
+- A save from before keeps your own key changes. Actions still on their old default keys take the new ones.
+
+### Mouse wheel for replicas and bombs
+- The mouse wheel steps through your two replicas, then your smoke and flash bombs, and round again. It never lands on the holster.
+- On a bomb, your replica goes down and the bomb shows in your hand. The panel says SMOKE IN HAND or FLASH IN HAND, and the crosshair stays.
+- A click throws the bomb and your replica comes back. Rolling on, or pressing 1, 2, R or 3, puts it back at once.
+
+### Minimap zoom
+- Settings › HUD › Minimap has a Zoom slider from 50 % to 200 % (100 % by default). Higher shows less of the field, bigger.
+- The two samples beside the slider follow it.
+
+### Match screen spacing
+- On the Match screen, the Day / Night row has more room under Ricochets and Friendly fire.
+
+### Go there goes quiet, and bots see through glass
+- Your teammates give up a Go there spot after 30 seconds with no enemy in sight and nothing heard or fought within 30 m, then go back to the team plan.
+- When that happens, the order wheel says "All quiet: back to the team plan".
+- Sending the squad to the same spot again restarts the wait. Hold here never lapses.
+- Bots see you through the glass in The Street's House windows and bus shelter, just as you can, and no longer treat glass as cover.
+- A bot that can see you through glass but can't shoot through it goes round to get at you, instead of staring.
+- Flash bombs dazzle through glass too. BBs still stop on glass.
+
+### The Street is dressed
+- On The Street, parked cars, vans and box lorries are now proper models, painted in the street's own colours, never a team colour.
+- Bins, skips, street lamps and trees now fill The Street.
+- The House has settees, a dining table, kitchen units and a fridge.
+- Each new model fills the same space as the block it replaces, so what you see is what stops a BB.
+- Railings, fences, hedges, kiosks, the bus shelter and the roadworks are still plain coloured blocks.
+
+### The Street
+- A third map, The Street: a terraced street, 104 by 162 m, by day or night, 5v5 or 6v6, with 3-minute rounds.
+- Defenders start on the railway embankment to the north, attackers on the Bottom street to the south.
+- Three lanes: the left road behind the west terrace's back gardens, the Path between railed front gardens, and the back lane with the right road.
+- Most front gates on the Path are shut; three open pockets let you through.
+- The lanes link through the Lane, the Pend (a covered passage under a terrace), the arch and the open Field.
+- Flag A is in the House's living room, reached by its back door, front door, a hall and a kitchen.
+- You can see through every window of the House, but only the open half of the front window lets a BB through.
+- Flag B sits on car park B's island.
+- Railings and window sills are 1 m high, too high to vault.
+- Every street lamp lights a pool of light at night.
+
+### Woodland in the new look
+- Woodland now wears the new art direction: soft stylised light, a bright palette of greens, and clean ground
+  with no floor grid.
+- The truck is violet and the crates are teal, so the cover and the sites read at a glance.
+- The Range loses its floor grid too.
+- Leaf litter on the ground is darker, so logs and fences read clearly against it.
+
+### A new look, starting with Depot
+- Depot now wears the game's new art direction: clean painted surfaces, a soft stylised light with cool violet shade
+  and a warm rim on edges, and a vibrant palette of crimson, violet, yellow, teal, green and cream spread over the hall.
+- The ceiling is lit, its lamps glow, and the racking is steel grey so no one colour takes over.
+- The look is shared: Woodland's props already use its light, and Woodland's ground and trees move onto it next.
+- Settings › Graphics has a new Light effects section: Bounce light, Reflections, Glow and Volumetric haze.
+- Ultra now goes much further: bounce light from the whole field, screen-space reflections, volumetric haze and
+  contact-hardening soft shadows. Low draws none of these and keeps no sun shadows, so it stays fast.
+
+### Woodland's new look
+- Woodland's tree trunks, spruce thickets, fallen logs, log stacks, teal crates, tyre stacks and the violet truck now replace its grey boxes.
+- You can't walk into a spruce thicket or see through it.
+- Each prop stops BBs and bodies about where you see it: a round trunk by its bark (its roots fill its back corners), a spruce still at its block, a little wide of the boughs.
+- The Match page's Woodland card shows the new look.
+
+### Woodland's huts, flags and round times
+- Woodland's huts (the Cabin, the two huts in the Hut row and the Box) have eight noisy doors.
+- The door facing the other team's end starts each round shut.
+- Attack / Defend on Woodland has two flags: A at the Fort and B at the Sawmill.
+- Skirmish on Woodland now plays 3:00 rounds. Depot stays at 2:30.
+- Custom rules keep their own round time.
+- The wiki's Maps table shows each map's round length.
+
+### Crouch through Woodland's tunnels
+- Crouched players, bots and eliminated players walking off now fit through Woodland's three low tunnels: the Crawl box, the Badger run and the Culvert.
+- The stream bed under the North bridge is passable while crouched.
+- Inside a tunnel you stay crouched until you are out the other end.
+- Bots crouch before they go into a tunnel.
+- The Badger run's cutting now ramps down at both ends, with no pit and no wall.
+
+### Woodland rebuilt as an open wood
+- Woodland is rebuilt as a much bigger wood, 176 by 120 metres, with gentle slopes. You play it 5v5 or 6v6.
+- A dry stream runs down the middle, with a bridge in the north and a road over a culvert in the south to cross it.
+- Three lanes run end to end: the Ridge in the north, the Clearing in the middle and the road in the south.
+- Cover is sparse. You can walk into the huts.
+- Fern beds hide a crouched player and bushes hide a standing one.
+- Day is the default. Set Time of day to night for camp fires and lanterns.
+- Bots on Woodland see 60 metres.
+- Bots take cover behind pieces on sloping ground and walk diagonally up smooth banks.
+- The crawl tunnels are too low to get through until the next update.
+- Doors and a second flag come next. The wood is still greybox until it gets its real models.
+
+### Depot's props
+- Depot's drums, barrels, sofa and racking are real models now, all free CC0 models by Kenney, recoloured for the game.
+- Teal drums stand four to a pallet, raspberry steel barrels stand in pairs, and the Lounge's sofa faces the hall.
+- The tall racking is lined with stocked shelving: green frames, cartons and boxes over a dark back, so you never see through a rack a BB can't pass.
+- Every prop stands exactly where its old block did, so cover and bot routes are the same as before; a BB or a body grazing a round drum or barrel passes its curve instead of the old block's square corner.
+
+### Two flags on Depot in Attack / Defend
+- Depot's Attack / Defend has two flagpoles, A on A site and B on B site. The attackers win the round by raising their flag on either one.
+- Each pole works on its own: attackers raise, defenders pull down, and both teams at one pole hold it still. The clock goes into overtime while attackers work either rope.
+- A big A or B stands over each pole, and the minimap shows both. The flag marker and the gauge follow the pole in play: the one being fought over, until a flag going up at the other stands higher or the fight ends; else the flag going up; else the nearer pole. The warning names the flag going up ("Their flag is going up at B!").
+- Bots pick A or B each round and head for the pole in play. Bots already fighting at a pole's rope stay on it, and defenders split: start a flag at B while your team fights at A, and free defenders come to B while those at A stay.
+
+### Full-screen map and Go there
+- Hold M to open a full-screen map of the whole field, north up.
+- The map shows what the minimap shows: you, your team, the flag, your team's pings, and enemies only where your side heard them.
+- The named areas show on the map too.
+- While the map is open, the mouse moves a pointer. A click sends your squad there, and the ping key pings the spot under the pointer.
+- New squad order, Go there: press Mouse 4, pick it from the order wheel (six items now), or click a spot on the map.
+- Your bots walk side by side to the spot, then hold there, looking the way they went.
+- Go there given with your view stops at the first thing you look at. A wall stops it with its foot on your side.
+- The marker reads "Go · 30 m" while they're on the way.
+
+### Doors on Depot
+- Depot has 15 green hinged doors in its plywood rooms and huts. Some start each round open and some shut, the same every round.
+- Press U (Open / shut door, rebindable in Settings › Controls) by a door to open or shut it. A line under the crosshair says which.
+- A shut door stops BBs, bombs, sight and bodies. An open one folds flat against its wall.
+- Doors are loud: the creak and bang carry 20 metres, even through walls, and show on the other team's minimap.
+- A door takes a moment to swing and won't shut on someone standing in the doorway.
+- Bots open shut doors on their way, and so does anyone walking off after a hit.
+
+### Depot rebuilt as an indoor airsoft hall
+- Depot is a new map: a 108 by 72 metre hall under one roof, much bigger than the old yard. You play it 5v5 or 6v6.
+- Three lanes bend from end to end between plywood rooms and racking: the Shoot House and the Lounge in the north, the open Chrono hall in the middle, and the Huts and the Box yard in the south.
+- Cuts, galleries and two tight alleys link the lanes. So do two unlit tunnels, one in each half, which are dark but never pitch black.
+- The two halves aren't mirrored, but they're balanced: both teams reach the Chrono hall together, and each side reaches one side lane first.
+- A dark steel roof with red trusses and rows of lamps hangs overhead. A BB fired up stops at the ceiling.
+- Sight lines are longer, so bots on Depot see up to 55 metres.
+- Each spawn room opens through two crate chicanes, so nobody can see into a spawn from outside it.
+- Steel drums and plastic barrels are noisy: bump into one and bots hear it.
+- In overtime, bots that flank the flag now find a way round the huts and pillars instead of walking straight in.
+
+### Smoke and flash bombs
+- You carry one smoke bomb and one flash bomb each round. Press G to throw smoke and Y to throw a flash (both rebindable in Settings › Controls).
+- Your replica drops for a moment while you throw, then comes back up. The bomb leaves from your throwing hand, its pin and ring already pulled, and never from inside a wall you stand against. The canister bounces and rolls.
+- A smoke pops about a second after it leaves your hand and makes a big pale cloud for about 15 seconds. Bots can't see through it, but BBs still fly through.
+- Standing inside a smoke cloud turns your screen milky.
+- A flash goes bang about 1.5 seconds after the throw and blinds anyone facing it, up to 22 m, including your own team and you.
+- Blinded bots stop shooting and crouch for a few seconds. Your screen goes white and the sound dips, softer with Reduced motion.
+- The replica panel shows SMOKE 1 · FLASH 1, and the Loadout's Grenades slot shows what you carry.
+- On the practice range they come back after each throw.
+
+### Bots throw smoke and flash bombs
+- Bots now throw their smoke and flash bombs.
+- A bot pinned in cover by fire from range may smoke the line between it and you.
+- A bot pushing round a corner toward where it heard you may flash the corner first, turn its back until the bang, then come through.
+- Bots never flash where a teammate close by would be caught in it.
+- Harder bots throw more often, Hard most of all.
+- Bots hear an enemy's flash go bang and a smoke pop, and come to look.
+
+### Turn your back on a flash
+- Turn your back on a flash and it can't dazzle you; side on, it still does. This applies to you and to bots.
+
+### Tooltips wrap and stay on screen
+- Rest the pointer on a setting and its help now wraps onto a few lines, about a third of the screen wide, instead of running off the edge.
+- Every tooltip in the menus wraps this way and stays on screen at 1080p, 4K and in a small window.
+
+### Version name
+- The game now calls itself 0.1 Dev 2, the build being made after 0.1 Dev 1.
+
 ## 0.1 Dev 1 (2026-10-30)
 
 ### Compact, steady menus
