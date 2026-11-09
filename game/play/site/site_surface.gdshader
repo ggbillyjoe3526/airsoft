@@ -82,6 +82,9 @@ uniform bool low = false;
 // How much wear and grain the canvases show (SiteLook.grit): 1 the old worn site, 0 the look's clean painted surfaces
 // (joints, seams, panels and marks stay; stains, chips, rust, grime and photo grain go).
 uniform float grit = 1.0;
+// The slab photo's share on the clean look (SiteLook.slab_grain, Dev 3): the floor's concrete grain and hairline cracks,
+// whatever the grit.
+uniform float slab_grain = 0.0;
 // The look's soft vertical gradient: a side this much darker at the ground, full paint `gradient_height` m up.
 uniform float gradient = 0.0;
 uniform float gradient_height = 2.6;
@@ -182,9 +185,10 @@ void fragment() {
 		r -= 0.08 * stain;
 		if (mode == CONCRETE) {
 			vec2 uv = c / slab_set.x;
-			if (grit > 0.0) {
+			float grain = max(grit, slab_grain);
+			if (grain > 0.0) {
 				float t = dot(texture(slab_col, uv).rgb, vec3(0.299, 0.587, 0.114));
-				col *= mix(1.0, t / slab_set.w, slab_set.y * grit);
+				col *= mix(1.0, t / slab_set.w, slab_set.y * grain);
 				if (!low) {
 					n = photo_relief(slab_nrm, uv, n, along, top, slab_set.z);
 				}

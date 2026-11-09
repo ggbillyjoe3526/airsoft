@@ -37,7 +37,7 @@ func test_the_roof_hangs_its_lamps_and_casts_no_shadow() -> void:
 	var roof := RoofView.build(map, play.roof)
 	add_child_autofree(roof)
 	assert_eq(roof.lamp_count(), map.roof_lamps.size())
-	assert_eq(roof.materials().size(), 2)
+	assert_eq(roof.materials().size(), 4, "the ceiling, the bays, the lamps' glow and their bodies")
 	for child in roof.get_children():
 		assert_eq((child as GeometryInstance3D).cast_shadow, GeometryInstance3D.SHADOW_CASTING_SETTING_OFF,
 				"%s lets the overhead sun through" % child.name)
