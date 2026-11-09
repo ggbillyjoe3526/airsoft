@@ -1,12 +1,13 @@
 # RD2 · The 0.1 Dev 2 release checklist, ready before the tag
 
-**Review:** 1 attempt · critic PENDING · qa PENDING · performance PENDING
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-09 | 1 | Opus 5.5 (thread) | PENDING | PENDING | – |
+| 2026-11-09 | 1 | Opus 5.5 (thread) | ✓ | 7/8 Retry | Modes Update deferral had no ruling behind it; repeated changelog headings, a build-internal note, an untraceable bug pass count |
+| 2026-11-09 | 2 | Opus 5.5 (thread) | ✓ | 8/8 Accept | – |
 
 ## Decisions
 
@@ -19,6 +20,9 @@
 - **A Highlights block heads the section**: eight lines in player words, so the release page reads at a glance above
   134 notes. Two robot mentions came out of the section (robots are a Dev-only Easter egg and never named in public
   text, as in the wiki).
+- **The section read over:** repeated and "(before 0.1 Dev 2)" headings renamed so each says what it holds, the
+  build-internal "Version name" note dropped.
+- **The Dev 3 plan and the Modes Update deferral** (owner, 2026-11-07) are a ruling in `docs/DECISIONS.md`.
 - **No changelog note of its own:** this pull request is the one that empties `changelog.d/`.
 - **Archive check** (`wc -c docs/*.md`): the Dev 2 tasks' own check lists in `docs/PLAYTEST.md` (BP2 to BP5, 32 KB)
   moved word for word to `docs/archive/0.1-dev/PLAYTEST.md`; no live doc pointed at them. BP8's lists stay, since the

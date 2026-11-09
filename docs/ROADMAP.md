@@ -146,7 +146,7 @@ at his PC to connect.
 
 | Build | Date | What it brought | Tag |
 |---|---|---|---|
-| [0.1 Dev 2](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.2) | 2026-11-09 | Depot rebuilt as an indoor hall and Woodland as an open wood, with doors and two flags; The Street (dev only); smoke and flash bombs, thrown by bots too; the Sniper Rifle and Variable Scope; Blender models of every replica, attachment, magazine, barrel and bomb, first-person arms, and figures in gear with faces; the owner's recorded sounds; new menus and HUD; the full-screen map and Go there; teams of 5 to 8; seven bug passes | `0.1-dev.2` |
+| [0.1 Dev 2](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.2) | 2026-11-09 | Depot rebuilt as an indoor hall and Woodland as an open wood, with doors and two flags; The Street (dev only); smoke and flash bombs, thrown by bots too; the Sniper Rifle and Variable Scope; Blender models of every replica, attachment, magazine, barrel and bomb, first-person arms, and figures in gear with faces; the owner's recorded sounds; new menus and HUD; the full-screen map and Go there; teams of 5 to 8; rounds of bug fixes | `0.1-dev.2` |
 | [0.1 Dev 1](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.1) | 2026-10-30 | The first build: Depot, Woodland and the range; the AEG Rifle and GBB Pistol with attachments and the Armory; bots, squad orders and callouts; Elimination and Attack / Defend; settings, saves and accessibility; the Windows installer and the Linux build | `0.1-dev.1` |
 
 Only full releases are tagged (owner, 2026-10-01): playtests in between are plain commits. The browser game's builds
