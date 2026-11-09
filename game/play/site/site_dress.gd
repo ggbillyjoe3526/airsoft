@@ -24,15 +24,19 @@ var _details: MeshInstance3D = null
 var _bags: MultiMeshInstance3D = null
 var _props: PropDress = null
 var _stencils: Array[Label3D] = []
+## Whether the watch tower wears the camouflage net and flag (its greybox does; its model keeps its own roof).
+var _tower_netted: bool = true
 
 
 ## The dress of `map` in `look`, its details in `material` (MapLevel.site_material); null for a map naming no site
-## dress. Add it to the tree beside the level.
-static func build(map: MapData, look: SiteLook, material: ShaderMaterial) -> SiteDress:
+## dress. With `skyline` drawing the watch tower from its model (Dev 3 map models, after the owner's photos), the
+## tower keeps its own roof: no camouflage net or flag over it. Add it to the tree beside the level.
+static func build(map: MapData, look: SiteLook, material: ShaderMaterial, skyline: SkylineConfig = null) -> SiteDress:
 	if map.site == null or look == null or material == null:
 		return null
 	var dress := SiteDress.new()
 	dress.name = "SiteDress"
+	dress._tower_netted = skyline == null or skyline.model_of(&"watchTower") == null
 	dress._build(map, look, material)
 	return dress
 
@@ -107,7 +111,7 @@ func _build(map: MapData, look: SiteLook, material: ShaderMaterial) -> void:
 			&"skip":
 				_skip(st, look, b)
 	for p in map.skyline:
-		if p.kind == &"watchTower":
+		if p.kind == &"watchTower" and _tower_netted:
 			_tower(st, look, p)
 	for s in map.site.sails:
 		_sail(st, look, s)

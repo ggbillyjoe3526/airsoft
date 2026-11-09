@@ -53,16 +53,25 @@ func setup(cfg: FlagViewConfig, teams: TeamConfig, foot: Vector3, reach: float) 
 	_standing.name = "Standing"
 	add_child(_standing)
 	# The pole and its fittings in the shared light (BP7); the cloth has its own shader, the ring stays flat paint.
-	var alu := LookMaterials.paint(cfg.pole_colour, cfg.pole_roughness, cfg.pole_metallic)
-	var dark := LookMaterials.paint(cfg.fittings_colour, FITTINGS_ROUGHNESS)
-	_paints = [alu, dark]
-	_paint_colours = [cfg.pole_colour, cfg.fittings_colour]
 	var h := cfg.overtime_pole_height
 	var r := cfg.overtime_pole_radius
-	_add(_standing, FlagView.cylinder(r, r, h, POLE_SEGMENTS), alu, Vector3(0.0, h * 0.5, 0.0))
-	var base := cfg.overtime_base_radius
-	_add(_standing, FlagView.cylinder(base.y, base.x, cfg.overtime_base_height, BASE_SEGMENTS), dark,
-			Vector3(0.0, cfg.overtime_base_height * 0.5, 0.0))
+	var model := PropDressConfig.load_mesh(cfg.pole_model)
+	if model != null:
+		# the Attack / Defend pole's model, scaled down to this pole's height
+		var paint := LookMaterials.vertex_colour(cfg.pole_model_roughness, 0.0)
+		_paints = [paint]
+		_paint_colours = [Color.WHITE]
+		var pole := _add(_standing, model, paint, Vector3.ZERO)
+		pole.scale = Vector3.ONE * (h / cfg.pole_height)
+	else:
+		var alu := LookMaterials.paint(cfg.pole_colour, cfg.pole_roughness, cfg.pole_metallic)
+		var dark := LookMaterials.paint(cfg.fittings_colour, FITTINGS_ROUGHNESS)
+		_paints = [alu, dark]
+		_paint_colours = [cfg.pole_colour, cfg.fittings_colour]
+		_add(_standing, FlagView.cylinder(r, r, h, POLE_SEGMENTS), alu, Vector3(0.0, h * 0.5, 0.0))
+		var base := cfg.overtime_base_radius
+		_add(_standing, FlagView.cylinder(base.y, base.x, cfg.overtime_base_height, BASE_SEGMENTS), dark,
+				Vector3(0.0, cfg.overtime_base_height * 0.5, 0.0))
 	_cloth_mat = ShaderMaterial.new()
 	_cloth_mat.shader = FlagView.CLOTH_SHADER
 	_cloth_mat.set_shader_parameter(&"chequer", true)

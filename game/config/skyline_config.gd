@@ -15,6 +15,23 @@ extends Resource
 @export var sides: int = 12
 @export var roughness: float = 0.9
 
+@export_group("Models")
+## The kinds drawn from a model (Dev 3 map models, tools/blender/maps/skyline.py) in place of their greybox, each
+## stretched to fill its piece (SkylineModels): the model's path. A kind not listed, or one whose model won't load,
+## keeps its greybox. Sight (SkylineSight, `hides_of`) reads the greybox either way, so a model changes no row.
+@export var models: Dictionary[StringName, String] = {
+	&"shed": "res://assets/models/skyline/shed.glb",
+	&"crane": "res://assets/models/skyline/crane.glb",
+	&"mast": "res://assets/models/skyline/mast.glb",
+	&"fuselage": "res://assets/models/skyline/fuselage.glb",
+	&"silo": "res://assets/models/skyline/silo.glb",
+	&"watchTower": "res://assets/models/skyline/watch_tower.glb",
+	&"waterTower": "res://assets/models/skyline/water_tower.glb",
+}
+## The kinds whose model keeps its own depth, scaled as its length and height are (never past its piece's), so a
+## crane's piece, deeper than the crane, doesn't fatten its pillar.
+@export var keep_depth: Array[StringName] = [&"crane"]
+
 @export_group("Sight")
 ## A floor whose top stands this high (m) or higher is a raised floor: its corners, `floor_inset` m in, and its middle
 ## are stand points.
@@ -25,7 +42,7 @@ extends Resource
 ## The walls, the gabled roof (its ridge `roof_rise` of the short side over the eaves, `roof_overhang` m past them), a
 ## band `band_height` m tall `band_below` m under the eaves and doors `door_width` x `door_height` m every
 ## `door_every` m on the side facing the field.
-@export var shed_colour: Color = Color("d9dcd8")
+@export var shed_colour: Color = Color("52634a")
 @export var shed_roof: Color = Color("4a4f57")
 @export var shed_band: Color = Color("3f7a6a")
 @export var shed_doors: Color = Color("cdb338")
@@ -178,3 +195,19 @@ extends Resource
 @export var smoke_wind_share: float = 0.6
 @export var smoke_breeze: float = 0.5
 @export var smoke_refresh: float = 0.5
+
+var _meshes: Dictionary[StringName, Mesh] = {}
+var _tried: Dictionary[StringName, bool] = {}
+
+
+## The model `kind` is drawn from, or null (not listed, or it won't load: warned once).
+func model_of(kind: StringName) -> Mesh:
+	if not _tried.has(kind):
+		_tried[kind] = true
+		var path: String = models.get(kind, "")
+		var mesh := PropDressConfig.load_mesh(path)
+		if mesh != null:
+			_meshes[kind] = mesh
+		elif not path.is_empty():
+			push_warning("SkylineConfig: %s's model \"%s\" won't load; it keeps its greybox" % [kind, path])
+	return _meshes.get(kind, null) as Mesh

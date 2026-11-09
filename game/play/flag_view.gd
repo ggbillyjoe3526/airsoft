@@ -46,6 +46,36 @@ func setup(cfg: FlagViewConfig, teams: TeamConfig, foot: Vector3, reach: float, 
 	if not letter.is_empty():
 		_add_letter(letter)
 	# The pole and its fittings in the shared light (BP7); the cloth has its own shader, the ring stays flat paint.
+	var model := PropDressConfig.load_mesh(cfg.pole_model)
+	if model != null:
+		var paint := LookMaterials.vertex_colour(cfg.pole_model_roughness, 0.0)
+		_paints = [paint]
+		_paint_colours = [Color.WHITE]
+		_add(model, paint, Vector3.ZERO)
+	else:
+		_add_plain_pole(cfg)
+	_cloth_mat = ShaderMaterial.new()
+	_cloth_mat.shader = CLOTH_SHADER
+	_cloth_mat.set_shader_parameter(&"pale", cfg.cloth_pale)
+	_cloth_mat.set_shader_parameter(&"cloth_size", cfg.cloth_size)
+	_cloth_mat.set_shader_parameter(&"wave", cfg.cloth_wave)
+	_cloth_mat.set_shader_parameter(&"waves", cfg.cloth_waves)
+	_cloth_mat.set_shader_parameter(&"wave_speed", cfg.cloth_wave_speed)
+	_cloth = _add(cloth_mesh(cfg.cloth_size, cfg.cloth_droop), _cloth_mat, Vector3(cfg.pole_radius, cfg.cloth_low, 0.0))
+	_cloth.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	_ring_mat = flat(cfg.ring_idle)
+	var ring := _add(ring_mesh(reach - cfg.ring_width, reach), _ring_mat, Vector3(0.0, RING_LIFT, 0.0))
+	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var edge := MeshInstance3D.new()
+	edge.mesh = ring_edge_mesh(reach, cfg.ring_width, cfg.ring_edge_width)
+	edge.material_override = flat(cfg.ring_edge)
+	edge.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	edge.position.y = EDGE_LIFT
+	add_child(edge)
+
+
+## The pole drawn plain from FlagViewConfig's values: the model's fallback.
+func _add_plain_pole(cfg: FlagViewConfig) -> void:
 	var alu := LookMaterials.paint(cfg.pole_colour, cfg.pole_roughness, cfg.pole_metallic)
 	var dark := LookMaterials.paint(cfg.fittings_colour, FITTINGS_ROUGHNESS)
 	var rope_mat := LookMaterials.paint(cfg.rope_colour, ROPE_ROUGHNESS)
@@ -69,24 +99,6 @@ func setup(cfg: FlagViewConfig, teams: TeamConfig, foot: Vector3, reach: float, 
 	cleat.size = cfg.cleat_size
 	_add(cleat, dark, Vector3(0.0, cfg.cleat_height, cfg.rope_offset)).cast_shadow = \
 			GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_cloth_mat = ShaderMaterial.new()
-	_cloth_mat.shader = CLOTH_SHADER
-	_cloth_mat.set_shader_parameter(&"pale", cfg.cloth_pale)
-	_cloth_mat.set_shader_parameter(&"cloth_size", cfg.cloth_size)
-	_cloth_mat.set_shader_parameter(&"wave", cfg.cloth_wave)
-	_cloth_mat.set_shader_parameter(&"waves", cfg.cloth_waves)
-	_cloth_mat.set_shader_parameter(&"wave_speed", cfg.cloth_wave_speed)
-	_cloth = _add(cloth_mesh(cfg.cloth_size, cfg.cloth_droop), _cloth_mat, Vector3(cfg.pole_radius, cfg.cloth_low, 0.0))
-	_cloth.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-	_ring_mat = flat(cfg.ring_idle)
-	var ring := _add(ring_mesh(reach - cfg.ring_width, reach), _ring_mat, Vector3(0.0, RING_LIFT, 0.0))
-	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var edge := MeshInstance3D.new()
-	edge.mesh = ring_edge_mesh(reach, cfg.ring_width, cfg.ring_edge_width)
-	edge.material_override = flat(cfg.ring_edge)
-	edge.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	edge.position.y = EDGE_LIFT
-	add_child(edge)
 
 
 ## The flag at `flag`'s height for a round attacked by `attackers` (-1: none, the cloth hidden).

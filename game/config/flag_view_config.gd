@@ -11,6 +11,12 @@ extends Resource
 @export var pole_metallic: float = 0.7
 @export var pole_roughness: float = 0.32
 @export var finial_radius: float = 0.06
+## The pole as modelled (Dev 3 map models, tools/blender/maps/flagpole.py, after the owner's photos): one
+## vertex-coloured mesh of the sectional pole, its weighted base, halyard, truck and cleat, built to the sizes here, in
+## the shared light at `pole_model_roughness`. It stands in place of the plain pole and fittings drawn from these
+## values, which stay its fallback when it won't load. The overtime flag draws it scaled to its own height.
+@export var pole_model: String = "res://assets/models/props/flagpole.glb"
+@export var pole_model_roughness: float = 0.55
 ## The weighted base: radius at the bottom and top, and height (m).
 @export var base_radius: Vector2 = Vector2(0.28, 0.22)
 @export var base_height: float = 0.14
