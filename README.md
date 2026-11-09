@@ -21,8 +21,8 @@ being built.** The plan is `docs/ROADMAP.md`; what is happening now is `docs/HAN
 flags; smoke and flash bombs, thrown by bots too; the Sniper Rifle with the 2x and Variable Scopes; detailed models
 built in Blender for every replica, attachment, magazine, barrel and bomb, first-person arms, and bot figures in real
 gear, head gear and faces; the owner's recorded sounds; new menus and HUD with a weapon rail and a round countdown; a
-full-screen map with Go there; teams of 5 to 8 a side; and four bug passes. Its full notes are `CHANGELOG.md` ›
-0.1 Dev 2.
+full-screen map with Go there; teams of 5 to 8 a side; and seven bug passes (BP2 to BP8). Its full notes are
+`CHANGELOG.md` › 0.1 Dev 2.
 
 **New since 0.1 Dev 1:** everything above. 0.1 Dev 1 (2026-10-30) was the first build: Depot, Woodland and a practice
 range, the AEG Rifle and the GBB Pistol, Elimination and Attack / Defend against bots, the hit call and walk-off,

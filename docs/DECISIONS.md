@@ -105,6 +105,9 @@ binds; the rest goes in the task's record. When this file nears 50 KB, move supe
 
 ## Versions, releases and branches
 
+- **0.1 Dev 3 builds the map models; the Modes Update waits (owner, 2026-11-07).** "Depot and practice range models
+  are Dev 3. Potentially also Woodlands map models", and "modes update is deferred until later". The league and cup
+  idea (`docs/IDEAS.md`) is noted for Dev 3 but is not built until he says.
 - **Names read "0.1 Dev 5" and "0.1 Beta 1" with no "v"; tags are `0.1-dev.5`, `0.1-beta.1`, `0.1.0` (owner,
   2026-10-05).** A GitHub release is titled "Airsoft 0.1 Dev N". Policy: `docs/PROCESS.md`.
 - **The number is the product, the stage its state (owner, 2026-10-01).** Everything up to the first feature-complete

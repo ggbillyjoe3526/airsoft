@@ -19,7 +19,7 @@ The browser game's changelog is `legacy/browser/docs/CHANGELOG.md`.
 - Bots wear real gear, head gear and faces, hold the same replicas you do, and play more as a team.
 - Recorded sounds for the replicas, footsteps, kit, the whistle and the flag rope.
 - New menus and HUD: the Match, Loadout and Armory pages, a weapon rail, and a 3-2-1-GO countdown at the start of each round.
-- A full-screen map with Go there, minimap zoom, and teams of 5 to 8 a side (6 v 6 by default), plus four bug passes of fixes.
+- A full-screen map with Go there, minimap zoom, and teams of 5 to 8 a side (6 v 6 by default), plus rounds of bug fixes.
 
 ### Clean bomb icons on the weapon rail
 - The smoke and flash icons on the weapon rail no longer sit on a grey box.
@@ -43,7 +43,7 @@ The browser game's changelog is `legacy/browser/docs/CHANGELOG.md`.
 - There is a new hidden switch to find in Settings › Dev. Go looking.
 - It is off by default, and with it off nothing about the BBs changes.
 
-### Matches (before 0.1 Dev 2)
+### Matches: two bomb slots and more
 - Pick your grenades on the Loadout screen: two slots, each Smoke or Flash, so you can carry two smokes or two flashes.
   A new loadout carries one of each, and bots carry the grenades their kit lists.
 - Attack / Defend: raising the flag takes 7 s instead of 5, and the attackers must then hold it up for 3 s to win.
@@ -98,7 +98,7 @@ The browser game's changelog is `legacy/browser/docs/CHANGELOG.md`.
   instead of all at once. Other stops of up to about a second remain while its woods, the map itself and the views
   load.
 
-### Bots (before 0.1 Dev 2)
+### Bot teammates' kits and more
 - Your bot teammates now carry kits the same way the other team's bots do, so both sides field snipers, riflemen and
   the rest in the same mix.
 - A teammate told to Follow me that has fallen more than 7.5 m behind runs a little faster than you to catch up, then
@@ -319,11 +319,11 @@ The browser game's changelog is `legacy/browser/docs/CHANGELOG.md`.
 - A hit player's raised hand goes straight up, the elbow nearly straight and the wrist in line with the arm, as they
   call the hit and walk off (it was bent out to the side, the wrist cocked back).
 
-### Sniper Rifle
+### Sniper Rifle for everyone
 - The Sniper Rifle, its M130, M140 and M150 Springs and the Variable Scope are now open to everyone: the rifle and the
   M130 at level 5, the M140 at 7, the Variable Scope at 8 and the M150 at 9, and bots on the other team can carry the Sniper Rifle.
 
-### The Street
+### The Street becomes dev content
 - The Street is now dev content: it shows on the Match page only with Settings › Dev › Dev content on, and a match there
   gives no XP and stays out of your records.
 
@@ -414,7 +414,7 @@ The browser game's changelog is `legacy/browser/docs/CHANGELOG.md`.
 - You see the bombs in your hand, flying through the air and lying where they land. Bots' bombs look the same.
 - The stripe and the band match the bomb colours on the HUD.
 
-### Bug fixes (before 0.1 Dev 2)
+### More bug fixes
 - Closing the Switch Replica list with the keyboard puts you back on Switch Replica, and Tab or the arrows can no
   longer reach the buttons hidden behind the list.
 - Standing on a roof right beside a flag pole no longer raises or lowers its flag: you have to be at its foot.
@@ -560,11 +560,11 @@ The browser game's changelog is `legacy/browser/docs/CHANGELOG.md`.
 ### Maps
 - The Street: wheelie bins put out halfway down the Path's long straight give attackers somewhere to stop on it.
 
-### Sniper Rifle
+### Sniper bots
 - Sniper bots see further through a raised scope, aim steadier through it, and wait for their aim to settle before
   their one shot.
 
-### Fixes
+### Pause menu fixes
 - With Settings open from the pause menu, Tab no longer reaches Resume or Quit Match hidden under them.
 - The pause menu's Loadout key shows a key you just rebound in its Settings.
 - With QUIT GAME? asking, the Loadout page's number keys no longer switch your loadout behind it.
@@ -580,7 +580,7 @@ The browser game's changelog is `legacy/browser/docs/CHANGELOG.md`.
 - The magazine boxes now sit at the left of the replica panel, in line with your replica's name.
 - HUD opacity (Settings › HUD) now fades the ammo and bomb panel and the minimap, words included, and nothing else. It goes down to 20 %.
 
-### Fixes
+### Scope and HUD fixes
 - Aimed through a scope, the mouse turn now follows the scope's own zoom, so the view no longer swings too fast.
 - The replica panel in the bottom right no longer jumps when a note and the bomb row show together.
 - The HUD preview in Settings › HUD fits at 150 % and shows one of each bomb, not blank icons.
@@ -596,7 +596,7 @@ The browser game's changelog is `legacy/browser/docs/CHANGELOG.md`.
   after a moment out of sight, and never fires as it changes mode.
 - Bot teammates following you no longer put their replica away when you take a bomb in hand.
 
-### Sniper Rifle
+### The Sniper Rifle and your pistol
 - After a Sniper Rifle shot, the pistol you switch to fires as soon as it is up; the bolt keeps cycling on the sling,
   and switching back never skips it.
 - A click once the bolt handle is home fires as the cycle ends instead of being lost; a double click still fires once.
@@ -715,7 +715,7 @@ The browser game's changelog is `legacy/browser/docs/CHANGELOG.md`.
 - A "damaged" warning for settings, progress or records clears once that file saves again.
 - A loadout name you are typing when the game closes is kept.
 
-### Fixes
+### Mouse wheel and bomb fixes
 - The mouse wheel from a holstered replica now draws a replica, not a bomb.
 - On the Range, a bomb taken with the mouse wheel stays in your hand and can be thrown.
 - Woodland's hut doors fold back against the posts when open, so they are no longer hidden inside them.
@@ -932,9 +932,6 @@ The browser game's changelog is `legacy/browser/docs/CHANGELOG.md`.
 ### Tooltips wrap and stay on screen
 - Rest the pointer on a setting and its help now wraps onto a few lines, about a third of the screen wide, instead of running off the edge.
 - Every tooltip in the menus wraps this way and stays on screen at 1080p, 4K and in a small window.
-
-### Version name
-- The game now calls itself 0.1 Dev 2, the build being made after 0.1 Dev 1.
 
 ## 0.1 Dev 1 (2026-10-30)
 
