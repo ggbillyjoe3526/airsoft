@@ -159,7 +159,8 @@ static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName],
 				if cfg.grid_unturned.has(model_name):
 					turn = yaw
 				var pick := picks[0] if picks.size() == 1 else picks[rng.randi_range(0, picks.size() - 1)]
-				# a stack of variant sections keeps one shade along it, so its joins don't show as steps
+				# a stack of variant sections keeps one shade along it, so its joins don't show as steps; the shade is
+				# still drawn, so every model's random stream stays as it was
 				var shade := _shade(cfg, rng)
 				if picks.size() > 1:
 					shade = 1.0
