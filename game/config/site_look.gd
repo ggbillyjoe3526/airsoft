@@ -139,8 +139,8 @@ enum Canvas {
 @export var edge_width: float = 0.04
 @export var edge_light: float = 0.08
 ## The surfaces' wear (docs/ART.md › Surfaces): how much wear and grain the canvases show (0 clean painted, 1 the old
-## worn site: stains, chips, rust, grime and photo grain; Sunlit Concrete draws 0.6), and the soft vertical gradient on every side,
-## `gradient` darker at its foot, full paint `gradient_height` m up.
+## worn site: stains, chips, rust, grime and photo grain; Sunlit Concrete draws 0.6), and the soft vertical gradient
+## on every side, `gradient` darker at its foot, full paint `gradient_height` m up.
 @export_range(0.0, 1.0) var grit: float = 0.6
 @export var gradient: float = 0.3
 @export var gradient_height: float = 2.6

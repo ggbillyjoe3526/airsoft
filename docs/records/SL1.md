@@ -1,12 +1,13 @@
 # SL1 · Sunlit Concrete: the light, grade and paint
 
-**Review:** pending
+**Review:** 2 attempts · critic Accept 8/8 (Opus) · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-09 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-09 | 1 | Opus 5.5 (build thread) | ✓ | 5/8 Retry | no performance report on disk; look_paint untested; stale comments; no KNOWN_ISSUES rows |
+| 2026-11-09 | 2 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 ## Decisions
 
@@ -33,6 +34,9 @@
   their wear in SL2.
 
 ## Known issues left
+
+- The map pictures (loading screen, Match page) still show the Dev 2 look; they are re-rendered in SL3 once the roof
+  is repainted.
 
 - Depot's roof and trusses keep their baked violet and crimson, so they draw dark and dull until SL3 repaints them.
 - Model surfaces have no wear yet (SL2).
