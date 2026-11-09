@@ -104,7 +104,6 @@ def main() -> None:
     mk.clean(ob)
     n = round(4.0 / PITCH)
     tris = hs.tris(ob)
-    print("palisade: a stake %d triangles, %d a 4 m section with its rails" % (tris, n * tris + 2 * 4 * 12))
     mk.report(ob, "palisade", int(BUDGET_4M / n))
     mk.export_prop(ob, "palisade")
     hs.reset()
@@ -113,6 +112,8 @@ def main() -> None:
     mk.clean(ob)
     mk.report(ob, "palisade_rail", 20)
     mk.export_prop(ob, "palisade_rail")
+    # a section's two rails are one model each, stretched along its block
+    print("palisade: a stake %d triangles, %d a 4 m section with its two rails" % (tris, n * tris + 2 * hs.tris(ob)))
 
 
 if __name__ == "__main__":

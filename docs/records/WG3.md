@@ -39,7 +39,7 @@ body or sight.
 - **Models** (`tools/blender/maps/`, `woodkit.py` the shared timber): each script reads its blocks from the map file
   and builds every part to fill its block (posts, deck, walls, roof); the open timbers between blocks (knee braces,
   trusses, stair rails) stand over head height or where a body can't go. Triangles: palisade 56 a stake and 20 a rail
-  (about 970 a 4 m section of 1,000), tower 5,942 of 6,000, bridge 2,896 of 3,000, shed 4,688 of 5,000, roofs 1,368
+  (992 a 4 m section of 1,000), tower 5,942 of 6,000, bridge 2,896 of 3,000, shed 4,688 of 5,000, roofs 1,368
   and 1,476 of 1,500.
 - Shadows: the palisade casts them on Medium and up (Low has no sun shadows); its 2,942 stakes are 165k triangles in
   20 chunks of 40 m, its rails 216 more of 20 (performance review, measured headless).
