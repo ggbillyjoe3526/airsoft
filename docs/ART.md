@@ -281,12 +281,14 @@ Depot's temporary site dress (DD1, until the owner's models; Depot and the range
   MultiMesh within 60 m; the stencils as Label3D, charcoal, or light on a dark wall. `dress_sky` gives the day its
   cumulus and haze. Re-render the field pictures at eye height with `tools/eye_pictures.gd` (spots in `docs/records/UR2.md`).
 - **CC0 props** (DR2). `PropDress` (`game/play/site/prop_dress.gd`, built by SiteDress) draws the kinds
-  `PropDressConfig` (`game/config/prop_dress_config.gd`, SiteLook's `props`) dresses: drums four to a pallet, barrels
-  two a block, the sofa, and the tall racks lined with shelving, where `PropLayout` (`prop_layout.gd`, pure, seeded)
+  `PropDressConfig` (`game/config/prop_dress_config.gd`, SiteLook's `props`) dresses: drums nine stacks of two to a
+  pallet, barrels two a block, the sofa, the tall racks lined with pallet racking, and any block that names its own
+  prop (`dress`: Depot's desks and lockers, the Range's kit rack), where `PropLayout` (`prop_layout.gd`, pure, seeded)
   lays them, one MultiMesh a model in one vertex-coloured material. Every prop stays inside its block's box; the box
   draws nothing (or, behind shelving, a dark backing half a row in: `SiteSurface.core_of`) and leaves the baked
-  shadow caster. The models are Kenney's, recoloured off the teams' hues into `assets/models/props/` by
-  `tools/props/build_props.py` (vertex colours, no textures).
+  shadow caster. Depot's and the Range's models are our own, built in Blender by `tools/blender/maps/` (RK1); Woodland's
+  and The Street's are Kenney's, recoloured off the teams' hues by `tools/props/build_props.py`; all in
+  `assets/models/props/` (vertex colours, no textures).
 
 The figures (step 23, FI1-FI7; every bot on every preset, DECISIONS BD1):
 

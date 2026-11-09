@@ -7,8 +7,8 @@ extends Resource
 ## and a surface with a colour of its own (gravel) is drawn in it. Sloping ground (TerrainGrid) is drawn in its
 ## surfaces' `terrain_colours`.
 
-## What a BB or a footstep meets on each kind (RayHit.Surface). Moulded plastic (the toilets, the bins) and cardboard
-## (the wrapped stock, the fibre drums) tick as themselves (AU2); sand-filled bags and gabions soak BBs up like wood.
+## What a BB or a footstep meets on each kind (RayHit.Surface). Moulded plastic (the toilets, the bins, Depot's
+## barrels) and cardboard (the wrapped stock) tick as themselves (AU2); sand-filled bags and gabions soak BBs up like wood.
 ## Kinds not listed are concrete.
 @export var surfaces: Dictionary[StringName, int] = {
 	&"floor": RayHit.Surface.CONCRETE,
@@ -29,10 +29,11 @@ extends Resource
 	&"tree": RayHit.Surface.WOOD,
 	&"log": RayHit.Surface.WOOD,
 	&"fence": RayHit.Surface.WOOD,
-	# Depot's warehouse (DR1): fibre drums are cardboard, the sofa soaks BBs up like wood, steel barrels and pillars
-	# ring, and the netting's fine mesh stops a BB dead, nearest to wood.
-	&"drum": RayHit.Surface.CARDBOARD,
-	&"barrel": RayHit.Surface.METAL,
+	# Depot's warehouse (DR1; RK1 drew its drums as steel drums and its barrels as plastic ones): steel drums and
+	# pillars ring, plastic barrels tick, the sofa soaks BBs up like wood, and the netting's fine mesh stops a BB dead,
+	# nearest to wood.
+	&"drum": RayHit.Surface.METAL,
+	&"barrel": RayHit.Surface.PLASTIC,
 	&"pillar": RayHit.Surface.METAL,
 	&"net": RayHit.Surface.WOOD,
 	&"sofa": RayHit.Surface.WOOD,
@@ -81,8 +82,8 @@ extends Resource
 	&"tree": Color8(0x7b, 0x6f, 0x62),
 	&"log": Color8(0xa0, 0x94, 0x7c),
 	&"fence": Color8(0xa0, 0x94, 0x7c),
-	# Depot's warehouse (DR1), off both team hues: tan fibre drums, olive-grey steel barrels, raspberry steel pillars,
-	# teal netting, a plum sofa.
+	# Depot's warehouse (DR1), off both team hues: the greybox colours of its drum and barrel boxes (their props, RK1's
+	# models, paint their own), raspberry steel pillars, teal netting, a plum sofa.
 	&"drum": Color(0.72, 0.64, 0.36),
 	&"barrel": Color(0.30, 0.33, 0.28),
 	&"pillar": Color(0.62, 0.16, 0.40),

@@ -467,7 +467,8 @@
     "x": 2.2,
     "y": 0.8,
     "z": 1.0
-   }
+   },
+   "dress": "desk"
   },
   {
    "kind": "barrel",
@@ -1013,7 +1014,8 @@
     "x": 2.2,
     "y": 0.8,
     "z": 1.0
-   }
+   },
+   "dress": "desk"
   },
   {
    "kind": "plywood",
@@ -1026,7 +1028,9 @@
     "x": 1.0,
     "y": 2.2,
     "z": 2.0
-   }
+   },
+   "dress": "locker",
+   "surface": "metal"
   },
   {
    "kind": "barrel",
@@ -1624,7 +1628,8 @@
     "x": 2.2,
     "y": 0.8,
     "z": 1.0
-   }
+   },
+   "dress": "desk"
   },
   {
    "kind": "barrel",

@@ -23,12 +23,14 @@ static func boxes(b: MapData.Block, style: MapStyle, props: PropDressConfig, mid
 	var low := b.center - b.size * 0.5
 	var foot := 0.0
 	var cell := minf(b.size.x, b.size.z)
+	var fill := 1.0
 	match props.lay_of(b):
 		PropDressConfig.Lay.FIT:
 			_fitted(b, steps, middle, out)
 			return
 		PropDressConfig.Lay.CLUSTER:
 			cell = props.cluster_cell
+			fill = props.cluster_fill
 			if props.models.has(props.pallet) and props.pallet_height < b.size.y:
 				foot = props.pallet_height
 				out.append(AABB(low, Vector3(b.size.x, foot, b.size.z)))
@@ -36,16 +38,22 @@ static func boxes(b: MapData.Block, style: MapStyle, props: PropDressConfig, mid
 			pass # a tree is one round trunk filling its square box: a row of one
 		_:
 			return
-	# As PropLayout's CLUSTER and ROW lay them: a grid of cells, a prop as wide as its cell's shorter side in each.
+	# As PropLayout's CLUSTER and ROW lay them: a grid of cells, a prop as wide as its cell's shorter side in each (a
+	# cluster's `cluster_fill` of it).
 	var nx := maxi(1, roundi(b.size.x / cell))
 	var nz := maxi(1, roundi(b.size.z / cell))
 	var cx := b.size.x / nx
 	var cz := b.size.z / nz
-	var half := minf(cx, cz) * 0.5
+	var half := minf(cx, cz) * 0.5 * fill
 	var y0 := low.y + foot
 	var height := b.size.y - foot
 	if height <= 0.0:
 		return
+	# A cluster whose props stand apart (`cluster_fill` under 1): a core from its outer props' middles inward, so no
+	# BB or sight line threads the gaps between them (the block is solid to the nav grid and the bots' cover too).
+	if fill < 1.0 and nx > 1 and nz > 1:
+		out.append(AABB(Vector3(low.x + cx * 0.5, y0, low.z + cz * 0.5),
+				Vector3(b.size.x - cx, height, b.size.z - cz)))
 	for i in nx:
 		for j in nz:
 			var at := Vector2(low.x + (i + 0.5) * cx, low.z + (j + 0.5) * cz)
