@@ -234,12 +234,14 @@ var mag_rush: bool = false
 var mag_press_at: float = -INF
 
 ## Its smoke and flash bombs (SF2, BotBombs), from their own stream (Seeds.bomb_seed): the throw it is turning to
-## (NONE: none) and its view, until when it turns before giving up, when it may next roll for one, and after a flash,
-## until when it looks away (that way) before it pushes.
+## (NONE: none) and its view, where a flash it is turning to is meant to go bang (checked for teammates again as it
+## throws, FL1), until when it turns before giving up, when it may next roll for one, and after a flash, until when it
+## looks away (that way) before it pushes.
 var bomb_rng: RandomNumberGenerator = null
 var bomb_kind: Grenade.Kind = Grenade.Kind.NONE
 var bomb_yaw: float = 0.0
 var bomb_pitch: float = 0.0
+var bomb_bang: Vector3 = Vector3.ZERO
 var bomb_aim_until: float = -INF
 var bomb_roll_at: float = -INF
 var bomb_away_until: float = -INF

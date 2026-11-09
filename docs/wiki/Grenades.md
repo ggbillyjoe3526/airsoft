@@ -65,5 +65,6 @@ moment.
 
 - **A bot pinned in cover** by someone shooting at it from range may smoke the line between them.
 - **A bot pushing round a corner** to where it heard you may flash it first, then look away until the bang and come
-  through. It never flashes where a teammate close by would see it.
+  through. It never flashes where a teammate close by would see it, counting teammates heading that way, and it
+  checks again as it throws.
 - Bots hear a bang or a smoke's pop and come to look. Harder bots throw more often.

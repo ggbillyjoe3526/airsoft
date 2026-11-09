@@ -265,6 +265,33 @@ func test_no_flash_at_a_spot_in_sight_too_near_or_far_by_a_teammate_or_with_none
 		assert_eq(thrown, 0, "case %d" % case)
 
 
+func test_no_flash_where_a_teammate_walking_in_would_be_by_the_bang() -> void:
+	# FL1: a teammate 16.5 m behind the spot, out of reach where it stands, walking toward the bang at 5 m/s.
+	for walking: bool in [false, true]:
+		var m := _search_round_a_corner()
+		var s: GameState = m[1]
+		var mate := s.characters[1]
+		var hold := func() -> void:
+			_place(mate, Vector3(6.0, tuning.body.rest_gap, -26.5), 0.0)
+			mate.velocity = Vector3(0.0, 0.0, 5.0) if walking else Vector3.ZERO
+		var thrown := _run(m, 50, hold, GameEvent.Kind.GRENADE_THROW)
+		assert_eq(thrown, 0 if walking else 1, "walking in %s" % walking)
+
+
+func test_a_teammate_stepping_near_the_bang_while_it_turns_stops_the_throw() -> void:
+	var m := _search_round_a_corner()
+	var b: Bot = m[2]
+	var s: GameState = m[1]
+	var mate := s.characters[1]
+	assert_eq(_run(m, 1, func() -> void: pass, GameEvent.Kind.GRENADE_THROW), 0)
+	assert_eq(b.bomb_kind, Grenade.Kind.FLASH, "it turns to a flash")
+	var near := b.bomb_bang + Vector3(0.0, 0.0, -3.0)
+	var stand := func() -> void: _place(mate, Vector3(near.x, tuning.body.rest_gap, near.z), 0.0)
+	assert_eq(_run(m, 50, stand, GameEvent.Kind.GRENADE_PIN), 0, "no flash thrown at a teammate's feet")
+	assert_eq(b.bomb_kind, Grenade.Kind.NONE, "the throw is given up")
+	assert_eq(s.characters[0].grenades.flash, 1, "and the flash kept")
+
+
 func test_a_failed_roll_waits_its_gap_before_the_next() -> void:
 	var m := _search_round_a_corner()
 	var b: Bot = m[2]
