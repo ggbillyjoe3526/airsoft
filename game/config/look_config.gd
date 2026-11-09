@@ -75,6 +75,11 @@ const GLOBAL_SPEC := &"look_spec"
 ## captures from (about eye height).
 @export var probe_height: float = 8.0
 @export var probe_eye: float = 1.6
+## How far (m) a probe sees from where it captures, at least, past its own box: without it each face stops at the box's
+## side, which on sloping ground is a metre or two under the eye, so the hill is cut off there (sky drawn below the
+## ground) and on Woodland's north bridge the cut left bad values in the probe's blurred levels that drew everything
+## shiny near it black with a white glow (GL1).
+@export var probe_reach: float = 40.0
 ## Screen-space reflections (Screen): steps, fades and depth tolerance.
 @export var ssr_steps: int = 96
 @export var ssr_fade_in: float = 0.15

@@ -5,7 +5,8 @@ extends Node3D
 ## box-projected over its area from eye height and captured once at the start (UPDATE_ONCE), so a shiny surface
 ## reflects the hall it stands in, not the sky; on a roofed field they are interiors and reach the roof. On sloping
 ## ground (MapData.terrain) each box stands on the ground under it, from its lowest corner to `height` over its
-## highest, and captures from eye height over the ground at its middle, never from inside a hill (BP2). Nothing per
+## highest, and captures from eye height over the ground at its middle, never from inside a hill (BP2), seeing at
+## least `probe_reach` m, so no face stops short at its box's side in the hill under the eye (GL1). Nothing per
 ## frame. FieldLighting shows or hides them all with the Reflections row.
 
 ## The visual layer the probes sit on, which a scope's glass camera (OpticGlass) leaves out: while that second camera
@@ -76,6 +77,7 @@ func _add(box: Rect2, height: float, interior: bool, look: LookConfig, kind: Str
 	probe.position = Vector3(middle.x, centre_y, middle.y)
 	probe.size = Vector3(box.size.x + look.probe_margin * 2.0, tall, box.size.y + look.probe_margin * 2.0)
 	probe.origin_offset = Vector3(0.0, ground.z + look.probe_eye - centre_y, 0.0)
+	probe.max_distance = look.probe_reach
 	probe.box_projection = true
 	probe.interior = interior
 	probe.blend_distance = look.probe_margin
