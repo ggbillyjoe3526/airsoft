@@ -21,7 +21,8 @@
   colours, three new globals). `wear` defaults to 0, so the greybox, bushes, woods, skyline, flags, lamps and roof
   stay as they were.
 - **Per model:** `PropDressConfig.wear` 1 for the props; `model_wear` puts the racking at 0.35 (its model's floor is
-  under its bottom pallets, so its goods would grime like walls) and the trees' crowns at 0. The props' materials are
+  under its bottom pallets, so its goods would grime like walls), the trees' crowns and WG2's earth bank (the ground
+  under Woodland's logs) at 0. The props' materials are
   keyed by roughness and wear, so Depot gains one material (the racking) and Woodland one (the crowns).
 - **Tops and sides blend** (critic): the blotch and stain noise mix the top's and the side's projections between 0.5
   and 0.7 of the normal's height, so a tyre, drum or trunk shows no ring where its top meets its side.

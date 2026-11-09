@@ -152,7 +152,7 @@ metalness; the light does the rest.
 - **The models wear too (SL2).** Every map model drawn in vertex colours (Depot's walls, crates, containers and
   racking, Woodland's kit and trunks, the CC0 props) is worn in world space by `look_vertex.gdshader`: dark-earth grime
   climbs up to 0.9 m from its foot, ragged; thin streaks run down its sides; broad faint stains; pale dust settles on
-  its tops. A material's `wear` (`PropDressConfig.wear` 1, `model_wear`: the racking 0.35, tree crowns 0) times the
+  its tops. A material's `wear` (`PropDressConfig.wear` 1, `model_wear`: the racking 0.35, tree crowns and the earth bank 0) times the
   look's (`LookConfig.wear`, `grime`, `dust`). The greybox, bushes, woods, skyline and flags draw clean. Edge scuffs are
   the models' own paint (SL3).
 - **Marks that stay:** zone stencils in ink, joints, seams, screws, sheet panels, bay lines and hazard stripes in
