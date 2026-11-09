@@ -49,7 +49,7 @@ body or sight.
 - **Thin window headers** (asked through the coordinator, 2026-11-09): a Woodland window's sill or lintel under 0.3 m,
   which the plywood kit leaves a box (DM1: Depot's floor edges), names `plywood_header`, a fifth 0.2 m module of the
   plywood kit with no skirting, laid by RUN like the wall around it (`build_map.py` HEADER; today the Fort's north
-  firing window's lintel). 88 triangles a module.
+  firing window's lintel). 72 triangles a module.
 
 ## Defaults taken
 

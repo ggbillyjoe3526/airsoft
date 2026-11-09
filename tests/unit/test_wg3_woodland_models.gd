@@ -400,6 +400,9 @@ func test_a_window_s_thin_lintel_or_sill_is_a_plywood_header() -> void:
 			assert_eq(b.dress, &"plywood_header", "the plywood board at %s is a header" % b.center)
 			assert_true(cfg.dresses(b), "and drawn")
 	assert_gt(thin, 0, "the Fort's north window has a thin lintel")
+	var module := boxes[&"plywood_header"]
+	assert_almost_eq(module.position.y, 0.0, 1e-3, "the header's foot is at its block's foot")
+	assert_almost_eq(module.end.y, 0.2, 1e-3, "and it is built at the lintel's 0.2 m")
 	var placed := PropLayout.layout(map, cfg, boxes)
 	assert_true(placed.has(&"plywood_header"), "the game lays the header's modules")
 

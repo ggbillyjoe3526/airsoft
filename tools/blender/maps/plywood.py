@@ -146,10 +146,11 @@ def build(tall: float) -> list:
                                       (ri, SHEET + RAIL / 2)], BATTEN_C))
             for rx in (-0.15, 0.15):
                 parts.append(dot("screw", rx, SHEET, side, SCREW, SCREW, SCREW_C, ht - 0.0012))
-        # The skirting, its top edge bevelled off.
-        y0s, y1s = side * (inner - 0.002), side * (inner + SKIRT_PROUD)
-        parts.append(rod("skirt", [(y0s, 0.0), (y1s, 0.0), (y1s, skirt - 0.006), (y0s + side * 0.002, skirt)],
-                         SKIRT_C))
+        # The skirting, its top edge bevelled off (a header has none).
+        if skirt > 0.0:
+            y0s, y1s = side * (inner - 0.002), side * (inner + SKIRT_PROUD)
+            parts.append(rod("skirt", [(y0s, 0.0), (y1s, 0.0), (y1s, skirt - 0.006), (y0s + side * 0.002, skirt)],
+                             SKIRT_C))
         # Half battens at both ends, screws up each (the pair at a joint shows two rows).
         for x0, x1 in ((-hw, -hw + BATTEN / 2), (hw - BATTEN / 2, hw)):
             parts.append(batten("batten", x0, x1, skirt, top, side))
