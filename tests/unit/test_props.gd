@@ -285,7 +285,8 @@ func test_woodland_is_dressed_without_a_site_each_prop_inside_the_block_that_nam
 		if b.dress != &"":
 			assert_true(look.props.dresses(b), "%s's %s has its model" % [b.kind, b.dress])
 			named[b.dress] = named.get(b.dress, 0) + 1
-	for model: StringName in [&"trunk", &"pine", &"log", &"logstack", &"crate", &"tyre", &"truck"]:
+	for model: StringName in [&"trunk", &"pine", &"log", &"cordwood", &"fallen_log_5", &"fallen_log_6", &"fallen_log_8",
+			&"root_plate", &"sawbench", &"boards", &"crate", &"tyre", &"truck"]:
 		assert_gt(named.get(model, 0), 0, "a block names %s" % model)
 		assert_gt(dress.count(model), 0, "%s placed" % model)
 	assert_eq(dress.count(&"trunk"), named[&"trunk"], "one trunk a tree")

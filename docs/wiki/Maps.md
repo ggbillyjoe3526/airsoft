@@ -90,11 +90,13 @@ defenders in the east camp.
 - **The look:** the game's soft, stylised light over a bright green wood: lime-lit crowns, pine-green spruces, a
   meadow floor, and the violet truck carrying the colour, with nothing near a team's blue or orange.
 - **Long views, few walls:** the Ridge looks 86 m down onto the Fort; elsewhere a lane's longest line is under 80 m.
-  Cover is logs, log stacks, tyres, wooden crates, the violet truck and the trunks of the trees themselves, free CC0
-  models and the game's own; each stops a BB about where you see it, a round trunk by its bark (its roots fill its back corners). The
+  Cover is fallen logs, wind-thrown trees torn out by their roots, woodpiles, tyres, wooden crates, the violet truck
+  and the trunks of the trees themselves, free CC0 models and the game's own; each stops a BB about where you see it, a
+  round trunk by its bark (its roots fill its back corners). The woodpiles are 1.8 m tall, so they hide you standing;
+  the camps' gate screens stand 2.8 m. The
   thickets of spruce at the edges and between
   the lanes can't be entered or seen through.
-- **Ferns** grow knee to hip high in eight beds where you'd want to hide, and **bushes** stand taller. Nobody sees you
+- **Ferns** grow knee to hip high in eight beds where you'd want to hide, and leafy **bushes** stand taller. Nobody sees you
   through more than about half a metre of leaves, so crouch in a fern bed to vanish; you can walk through ferns and
   bushes, but they slow you and a run through them rustles loudly ([Movement](Movement)), and a BB that pushes 0.6 m
   into leaves stops there. The minimap marks them. Grass never hides you.
@@ -105,7 +107,7 @@ defenders in the east camp.
 - **The huts:** the Cabin, the two huts of Hut row and the Box on A site have windows and two wooden [doors](#doors)
   each. The door facing the other team's end starts each round shut and the one facing your own end open, so a hut
   is walked into from its own side and opened, loudly, from the other. The Tower is a platform 3.4 m up a stair, the
-  Sawmill an open shed.
+  Sawmill an open shed with a saw bench, rounds and a stack of sawn boards.
 - **Night** is the Time of day setting's (day by default): a low moon, stars and haze, with fires and lanterns at the
   camps, the huts, the Clearing, the Fort, the Sawmill, the Truck bend and the North bridge. Bots see you from about
   40 m in their light, 25 m under the moon and 10 m under the trees ([Bots](Bots#at-night)); by day they see 60 m.

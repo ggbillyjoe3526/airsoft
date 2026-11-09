@@ -596,20 +596,70 @@ static func _woodland() -> MapData:
 	return OldWoodland.load_map(PlayTuning.load_default().map_style, SimTuning.load_default().rounds.team_size)
 
 
-func test_woodland_s_bushes_are_one_draw_of_placeholder_ellipsoids_standing_on_their_feet() -> void:
+func test_woodland_s_bushes_are_ferns_and_shrubs_a_draw_a_square_filling_its_bush_on_its_foot() -> void:
 	var map := _woodland()
-	var view := BushView.build(map, PlayTuning.load_default().woods)
+	var cfg := PlayTuning.load_default().woods
+	var view := BushView.build(map, cfg)
 	add_child_autofree(view)
-	assert_eq(view.get_child_count(), 0, "one node")
-	assert_eq(view.multimesh.instance_count, 70, "one draw of every bush")
+	var parts := view.parts()
+	assert_eq(view.drawn(), map.foliage.size(), "every bush drawn once")
+	var ferns := 0
+	for i in map.foliage.size():
+		if map.foliage.heights[i] <= cfg.fern_tallest:
+			ferns += 1
+	var drawn_ferns := 0
+	var squares := {}
+	for part in parts:
+		var fern := part.name.begins_with("Ferns")
+		assert_eq(part.multimesh.mesh, PropDressConfig.load_mesh(cfg.fern_model if fern else cfg.bush_model),
+				"%s draw the %s model" % [part.name, "fern" if fern else "bush"])
+		drawn_ferns += part.multimesh.instance_count if fern else 0
+		var shadow := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if not fern or cfg.fern_shadow \
+				else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		assert_eq(part.cast_shadow, shadow, "%s's shadow as the config says" % part.name)
+		# a draw a kind a square of the field: all its plants in one square
+		var cell := Vector2i(-99999, -99999)
+		for k in part.multimesh.instance_count:
+			var at := part.multimesh.get_instance_transform(k) * Vector3.ZERO
+			var c := Vector2i(floori(at.x / cfg.bush_chunk), floori(at.z / cfg.bush_chunk))
+			if cell.x == -99999:
+				cell = c
+			assert_lte(absi(c.x - cell.x) + absi(c.y - cell.y), 2, "%s's plants stand in its square" % part.name)
+		squares[part.name] = true
+	assert_eq(drawn_ferns, ferns, "every fern in a fern draw")
+	assert_eq(squares.size(), parts.size(), "each draw its own kind and square")
+	var turns := BushView.turns_of(map)
+	for i in map.foliage.size():
+		var f := map.foliage
+		var model := PropDressConfig.load_mesh(cfg.fern_model if f.heights[i] <= cfg.fern_tallest else cfg.bush_model)
+		var box := model.get_aabb()
+		var xf := BushView.fitted(f, i, box, turns[i])
+		var drawn := xf * box
+		assert_almost_eq(drawn.end.y, f.feet[i].y + f.heights[i], EPS, "bush %d tops out at its height" % i)
+		assert_lt(drawn.position.y, f.feet[i].y + EPS, "bush %d reaches its foot" % i)
+		var middle := xf * Vector3(box.get_center().x, 0.0, box.get_center().z)
+		assert_almost_eq(middle, f.feet[i], Vector3.ONE * EPS, "bush %d stands on its foot" % i)
+		# turned, its square bounds reach the radius on the model's own axes: inside a circle of the bush's radius
+		# and a corner's reach at most
+		var reach := Vector2(drawn.size.x, drawn.size.z) * 0.5
+		assert_lte(maxf(reach.x, reach.y), f.radii[i] * sqrt(2.0) + EPS, "bush %d no wider than its radius" % i)
+	assert_null(BushView.build(MapData.load_map("depot", MapStyle.new(), 3), cfg), "nothing on a map without bushes")
+
+
+func test_without_the_models_the_bushes_fall_back_to_ellipsoids() -> void:
+	var map := _woodland()
+	var cfg := PlayTuning.load_default().woods.duplicate() as WoodsConfig
+	cfg.fern_model = "res://nowhere/fern.glb"
+	var view := BushView.build(map, cfg)
+	add_child_autofree(view)
+	assert_eq(view.parts().size(), 1, "one draw of ellipsoids")
+	assert_eq(view.drawn(), map.foliage.size())
 	for i in map.foliage.size():
 		var xf := BushView.placed(map.foliage, i)
 		var half := map.foliage.heights[i] * 0.5
 		assert_almost_eq(xf.origin, map.foliage.feet[i] + Vector3.UP * half, Vector3.ONE * EPS, "on its foot")
 		assert_almost_eq(xf.basis.get_scale(), Vector3(map.foliage.radii[i], half, map.foliage.radii[i]),
 				Vector3.ONE * EPS, "its own size")
-	assert_null(BushView.build(MapData.load_map("depot", MapStyle.new(), 3), PlayTuning.load_default().woods),
-			"nothing on a map without bushes")
 
 
 func test_the_field_picture_draws_woodlands_bushes() -> void:
@@ -620,7 +670,7 @@ func test_the_field_picture_draws_woodlands_bushes() -> void:
 	var bushes := port.find_children("*", "BushView", false, false)
 	assert_eq(bushes.size(), 1, "the eye-height render dresses Woodland as a match does, bushes and all")
 	if not bushes.is_empty():
-		assert_eq((bushes[0] as BushView).multimesh.instance_count, _woodland().foliage.size())
+		assert_eq((bushes[0] as BushView).drawn(), _woodland().foliage.size())
 
 
 func test_the_bushes_leaves_and_marks_are_off_every_team_s_hue() -> void:
@@ -642,6 +692,18 @@ func test_the_bushes_leaves_and_marks_are_off_every_team_s_hue() -> void:
 		if FieldChecks.hue_gap(c, teams) <= 20.0:
 			near.append("%s %s" % [greens[c], c.to_html(false)])
 	assert_eq(near, [] as Array[String], "nothing within 20 degrees of a team's hue")
+	# the models' own colours (WG2): their leaves likewise, their stems and twigs dull enough not to read as a team
+	var off: Array[String] = []
+	for path: String in [play.woods.fern_model, play.woods.bush_model]:
+		var mesh := PropDressConfig.load_mesh(path)
+		assert_not_null(mesh, "%s loads" % path)
+		if mesh == null:
+			continue
+		for linear in mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR] as PackedColorArray:
+			var c := linear.linear_to_srgb()
+			if FieldChecks.reads_as_team(c, teams):
+				off.append("%s %s" % [path.get_file(), c.to_html(false)])
+	assert_eq(off, [] as Array[String], "no fern or bush colour reads as a team")
 
 
 func test_a_bb_stopped_in_leaves_puffs_green_with_4_to_6_leaves_at_the_side_it_went_in() -> void:
