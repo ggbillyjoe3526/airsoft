@@ -118,7 +118,7 @@ static func ground_customs(look: SiteLook, top: float) -> Array[Color]:
 
 ## Whether block `b` is drawn as CC0 props (PropDress, DR2) instead of its faces.
 static func as_props(look: SiteLook, b: MapData.Block) -> bool:
-	return b.rise == MapData.Rise.NONE and look.props != null and look.props.dresses(b)
+	return look.props != null and look.props.dresses(b)
 
 
 ## Where block `b` (of `map`) has its faces drawn: where they are, but for a sandbag stack, whose own box is drawn

@@ -56,7 +56,8 @@ func _count(m: MapData, kind: StringName, tall_from: float = 0.0) -> int:
 	return n
 
 
-## Each prop that reaches past the box of the block it stands in, as "model index".
+## Each prop that reaches past the box of the block it stands in (a structure laid over several blocks, SET: the box of
+## them all), as "model index".
 func _outside(m: MapData, dress: PropDress) -> Array[String]:
 	var boxes: Array[AABB] = []
 	for b in m.blocks:
@@ -76,6 +77,8 @@ func _outside(m: MapData, dress: PropDress) -> Array[String]:
 		var mesh := dress.mesh_of(model)
 		var verts: PackedVector3Array = mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 		var middle := mesh.get_aabb().get_center()
+		var whole: bool = look.props.model_lays.get(model, -1) == PropDressConfig.Lay.SET
+		var set_box := PropDressConfig.set_box(m, model).grow(1e-3) if whole else AABB()
 		var tree: bool = look.props.is_tree_part(model)
 		for i in placed[model].transforms.size():
 			var t := placed[model].transforms[i]
@@ -86,6 +89,11 @@ func _outside(m: MapData, dress: PropDress) -> Array[String]:
 					break
 			for v in verts:
 				var at := t * v
+				if whole:
+					if not set_box.has_point(at):
+						outside.append("%s %d" % [model, i])
+						break
+					continue
 				if home >= 0 and boxes[home].has_point(at):
 					continue
 				# a tree's crown spreads past its box over head height, never over the box's top (WT1)

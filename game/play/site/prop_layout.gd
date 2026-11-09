@@ -38,8 +38,9 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 	var middle := field_middle(map)
 	var features_laid := 0
 	var turns := Turns.new(out, boxes, map.dressing_seed)
+	var sets_laid: Dictionary[StringName, bool] = {}
 	for b in map.blocks:
-		if not cfg.dresses(b) or b.rise != MapData.Rise.NONE:
+		if not cfg.dresses(b):
 			continue
 		var model := cfg.model_of(b)
 		if not boxes.has(model):
@@ -71,6 +72,14 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 						cfg, rng)
 			PropDressConfig.Lay.BAY:
 				features_laid = _bays(out, model, boxes, b, map, cfg, middle, features_laid)
+			PropDressConfig.Lay.STAKES:
+				_stakes(out, model, boxes, b, foot, cfg, middle, rng)
+			PropDressConfig.Lay.SET:
+				if not sets_laid.has(model):
+					sets_laid[model] = true
+					var box := PropDressConfig.set_box(map, model)
+					_placed(out, model).add(fit(boxes[model], box.get_center() - Vector3(0.0, box.size.y * 0.5, 0.0),
+							box.size, 0.0), 1.0)
 			PropDressConfig.Lay.GROUND:
 				_ground(out, model, boxes, b, map, cfg, rng)
 			PropDressConfig.Lay.TREE:
@@ -151,6 +160,61 @@ static func field_middle(map: MapData) -> Vector3:
 			sum += s.position
 			n += 1
 	return Vector3(sum.x, 0.0, sum.z) / maxf(n, 1.0)
+
+
+## A palisade (STAKES, WG3): stakes side by side along the box's long side, whole ones stretched to fill it at about
+## PropDressConfig.stake_pitch each, as thick as the box less the rails, each a little under the box's top and turned
+## a quarter at random; the rails along the face towards the field's middle, two high, the box's length each.
+static func _stakes(out: Dictionary[StringName, Placed], model: StringName, boxes: Dictionary[StringName, AABB],
+		b: MapData.Block, foot: Vector3, cfg: PropDressConfig, middle: Vector3, rng: RandomNumberGenerator) -> void:
+	var along_x := b.size.x >= b.size.z
+	var long := b.size.x if along_x else b.size.z
+	var depth := b.size.z if along_x else b.size.x
+	var front := signf((middle - b.center).z if along_x else (middle - b.center).x)
+	if front == 0.0:
+		front = 1.0
+	var rail: StringName = cfg.stake_rails.get(model, &"")
+	var rail_depth := 0.0
+	if rail != &"" and boxes.has(rail):
+		rail_depth = minf(boxes[rail].size.z, depth * 0.4)
+	var n := maxi(1, roundi(long / maxf(cfg.stake_pitch.get(model, long), 1e-6)))
+	var cell := long / n
+	# Each stake overlaps the next a little (stake_thick), the end ones kept inside the block. A block too thin for a
+	# round stake takes flattened ones, its long way along the block, so nothing is seen between them still.
+	# Each stake's share of the length varies by up to stake_vary either way, so the logs are of mixed sizes.
+	var cells := PackedFloat32Array()
+	cells.resize(n)
+	var sum := 0.0
+	for i in n:
+		cells[i] = 1.0 + rng.randf_range(-cfg.stake_vary, cfg.stake_vary)
+		sum += cells[i]
+	var turn := 0.0 if along_x else PI * 0.5
+	var room := depth - rail_depth
+	var p := _placed(out, model)
+	var start := -long * 0.5
+	for i in n:
+		var share := long * cells[i] / sum
+		var wide := minf(share * cfg.stake_thick, long)
+		var thick := minf(wide, room)
+		var flat := thick < wide - 1e-4
+		var step := clampf(start + share * 0.5, (wide - long) * 0.5, (long - wide) * 0.5)
+		start += share
+		var back := (depth * 0.5 - rail_depth - thick * 0.5) * front
+		var at := foot + (Vector3(step, 0.0, back) if along_x else Vector3(back, 0.0, step))
+		var tall := b.size.y - rng.randf_range(0.0, minf(cfg.stake_drop, b.size.y * 0.1))
+		var yaw := turn + rng.randi_range(0, 1) * PI if flat else rng.randi_range(0, 3) * PI * 0.5
+		p.add(fit(boxes[model], at, Vector3(wide, tall, thick) if flat else Vector3(thick, tall, thick), yaw),
+				_shade(cfg, rng))
+	if rail_depth <= 0.0:
+		return
+	var r := _placed(out, rail)
+	var face := (depth * 0.5 - rail_depth * 0.5) * front
+	var rail_h := boxes[rail].size.y
+	for lift: float in [cfg.stake_rail_heights.x, b.size.y - cfg.stake_rail_heights.y - rail_h]:
+		if lift < 0.0 or lift + rail_h > b.size.y:
+			continue
+		var at := foot + (Vector3(0.0, lift, face) if along_x else Vector3(face, lift, 0.0))
+		r.add(fit(boxes[rail], at, Vector3(long, rail_h, rail_depth), turn), _shade(cfg, rng))
 
 
 static func _placed(out: Dictionary[StringName, Placed], model: StringName) -> Placed:

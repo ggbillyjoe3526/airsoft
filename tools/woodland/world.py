@@ -133,6 +133,7 @@ tx, tz = L.TOWER
 ti, tj = to_cell(tx, tz)
 tower_g = float(h[ti, tj])
 TOWER_Y = tower_g + 3.4
+TOWER_DECK = 0.2  # the platform's thickness (m), as build_map.py draws it
 tower_m = deck("Tower platform", tx, tz, 4.0, 4.0, 0.0, TOWER_Y, crouch_under=False, rails=False)
 LADDER_FOOT = (tx + 2.9, tz)
 LADDER_TOP = (tx + 1.6, tz)
@@ -158,18 +159,28 @@ add_sight(thicket_mask, h - 1, h + 5.0)
 
 # structures: posts (shed, tower legs)
 sx, sz_, ssx, ssz = L.SHED
+# The shed's posts reach its roof, which stands 3.2 m over the ground at its middle (WG3: each once stopped 3.2 m over
+# its own ground, up to 0.26 m short of the roof where the yard falls away).
+shed_g = float(h[to_cell(sx, sz_)])
 for px in (sx - ssx / 2, sx, sx + ssx / 2):
     for pz in (sz_ - ssz / 2, sz_ + ssz / 2):
-        L.circ("post", px, pz, 0.15, top=3.2)
+        L.circ("post", px, pz, 0.15, top=3.2, tag="shed")
+        L.pieces[-1]["abs_base"] = shed_g
+# The tower's legs stand under its platform's corners, up to its underside (WG3: they once ran 0.2 m into it and
+# were cut to slivers there by `settle`).
 for px in (tx - 2, tx + 2):
     for pz in (tz - 2, tz + 2):
-        L.circ("post", px, pz, 0.15, top=3.4)
+        L.circ("post", px, pz, 0.15, top=3.4 - TOWER_DECK, tag="tower")
+        L.pieces[-1]["abs_base"] = tower_g
 # tower parapet (on the platform), roof
-for (a, b, sx2, sz2) in [(tx, tz - 2, 4.0, 0.2), (tx, tz + 2, 4.0, 0.2), (tx - 2, tz, 0.2, 4.0)]:
-    L.rect("parapet", a, b, sx2, sz2, 0, top=4.5 - 3.4, walk=False, bottom=3.4)
+# the west side between the other two, which run on over its ends to hold the corners whole, so no two overlap
+# and on the east side either side of the stair's head (WG3, the owner: the tower solid, no gaps but to look out of)
+for (a, b, sx2, sz2) in [(tx - 0.125, tz - 2, 4.25, 0.2), (tx - 0.125, tz + 2, 4.25, 0.2), (tx - 2, tz, 0.2, 4.0 - L.RES),
+                         (tx + 1.75, tz - 1.175, 0.2, 1.15), (tx + 1.75, tz + 1.175, 0.2, 1.15)]:
+    L.rect("parapet", a, b, sx2, sz2, 0, top=4.5 - 3.4, walk=False, bottom=3.4, tag="tower")
     L.pieces[-1]["abs_base"] = tower_g
 L.ROOFS.append({"cx": tx, "cz": tz, "sx": 4.8, "sz": 4.8, "rot": 0, "y": 5.6, "tag": "tower", "abs_base": tower_g})
-L.ROOFS.append({"cx": sx, "cz": sz_, "sx": ssx + 1, "sz": ssz + 1, "rot": 0, "y": 3.2, "tag": "shed"})
+L.ROOFS.append({"cx": sx, "cz": sz_, "sx": ssx + 1, "sz": ssz + 1, "rot": 0, "y": 3.2, "tag": "shed", "abs_base": shed_g})
 # doors: the start state (shut ones block sight; every door counts as open for run times, opening takes a moment)
 DOORS = []
 for (x, z, rot, w, tag) in L.DOORWAYS:

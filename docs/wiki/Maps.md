@@ -93,9 +93,10 @@ defenders in the east camp.
   the colour, with nothing near a team's blue or orange. Every crown starts over head height.
 - **Long views, few walls:** the Ridge looks 86 m down onto the Fort; elsewhere a lane's longest line is under 80 m.
   Cover is fallen logs, wind-thrown trees torn out by their roots, woodpiles, stacks of tractor tyres, wooden crates,
-  the violet pickup wreck and the trunks of the trees themselves; each stops a BB about where you see it, a round trunk
-  by its bark. The woodpiles are 1.8 m tall, so they hide you standing; the camps' gate screens stand 2.8 m. The
-  thickets of spruce at the edges and between the lanes can't be entered or seen through.
+  the violet pickup wreck and the trunks of the trees themselves, and the camps and the field's edge are walled by a
+  log palisade of sharpened stakes; each stops a BB about where you see it, a round trunk by its bark. The woodpiles
+  are 1.8 m tall, so they hide you standing; the camps' gate screens stand 2.8 m. The thickets of spruce at the edges
+  and between the lanes can't be entered or seen through.
 - **Ferns** grow knee to hip high in eight beds where you'd want to hide, and leafy **bushes** stand taller. Nobody sees you
   through more than about half a metre of leaves, so crouch in a fern bed to vanish; you can walk through ferns and
   bushes, but they slow you and a run through them rustles loudly ([Movement](Movement)), and a BB that pushes 0.6 m
@@ -106,8 +107,10 @@ defenders in the east camp.
   crouch through too. The stream bed under the North bridge is crouch height as well, a fourth low way along the bed.
 - **The huts:** the Cabin, the two huts of Hut row and the Box on A site have windows and two wooden [doors](#doors)
   each. The door facing the other team's end starts each round shut and the one facing your own end open, so a hut
-  is walked into from its own side and opened, loudly, from the other. The Tower is a platform 3.4 m up a stair, the
-  Sawmill an open shed with a saw bench, rounds and a stack of sawn boards.
+  is walked into from its own side and opened, loudly, from the other, under shake roofs. The Tower is a timber watch
+  tower, its deck 3.4 m up a stair, walled in all round but the stair's head by waist-high board walls under a roof;
+  the North bridge is a log bridge with closed slab sides; the Sawmill is an open timber shed under a corrugated roof,
+  with a saw bench, rounds and a stack of sawn boards.
 - **Night** is the Time of day setting's (day by default): a low moon, stars and haze, with fires and lanterns at the
   camps, the huts, the Clearing, the Fort, the Sawmill, the Truck bend and the North bridge: campfires in stone rings,
   and hurricane lanterns hung from a roof, a post or a hooked pole, which stand cold by day. Bots see you from about
