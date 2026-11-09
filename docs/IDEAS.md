@@ -9,6 +9,10 @@ parked here was placed in a version on the roadmap (`docs/ROADMAP.md`, Beta and 
 
 Work the owner wants one day but hasn't placed in a version.
 
+- **A league and a cup (owner, 2026-11-07; noted for 0.1 Dev 3, not to be built until he says).** You make a team
+  of six. A league of 10 teams plays 27 matches each (three times round), 3 points for a win and 1 each for a draw;
+  most points takes the title. Then a cup against 31 new teams: 8 groups of 4, the top two of each to a round of 16,
+  quarter-finals, semi-finals and a final. Working cup name "Field Masters Cup" (no real league names).
 - **Another UI redesign (owner, 2026-10-13).** "We're probably going to have to do another UI redesign at some point.
   Maybe in a future Dev release or after 1.0." Nothing is built for it until he places it.
 - **A Visual redesign (owner, 2026-10-16).** A fresh look for the game's visuals, to be done at some point. Timing not

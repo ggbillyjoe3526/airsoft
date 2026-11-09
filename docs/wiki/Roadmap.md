@@ -13,28 +13,31 @@ then **0.1**, which opens **Early Access**. Each build is posted on the
 
 ### Built
 
-Depot, Woodland at night with the weapon torch and glowing BBs, the AEG Rifle, the GBB Pistol, the Cyber Pistol and the Sniper Rifle,
-every part and power source, the Loadout, levels and the Armory, Easy, Normal and Hard bots with names, personalities,
-kits and callouts, Elimination with its overtime flag, Attack / Defend and Custom matches, the practice range in Depot's
-site, Practice on any field and the timed challenge, squad orders, pings and the magazine hand-off, the minimap, the
-hit feed, scoreboard and match summary, the sound pass, graphics presets, accessibility options, the save file screen,
-the crash screen and bug reports, and smoke and flash bombs, thrown by you and the bots.
+Depot as an indoor airsoft hall and Woodland as an open wood (by day, or at night with the weapon torch and glowing
+BBs), with doors and two flags; the AEG Rifle, the GBB Pistol, the Cyber Pistol and the Sniper Rifle with the 2x and
+Variable Scopes, every part and power source, the Loadout, levels and the Armory; Easy, Normal and Hard bots with
+names, personalities, kits and callouts, playing as a team; Elimination with its overtime flag, Attack / Defend and
+Custom matches with 5 to 8 a side; the practice range in Depot's site, Practice on any field and the timed challenge;
+squad orders, pings, Go there and the magazine hand-off; the minimap, the full-screen map, the hit feed, scoreboard
+and match summary; smoke and flash bombs, thrown by you and the bots; detailed models of every replica, attachment,
+magazine and bomb, your own arms holding them, and figures in real gear with faces; recorded sounds; graphics presets,
+accessibility options, the save file screen, the crash screen and bug reports.
 The rest of this wiki describes all of it.
 
 ### Next
 
-- **0.1 Dev 2:** Depot and Woodland redesigned and dressed with free models and textures.
+- **0.1 Dev 3:** finished models for Depot and the practice range, and perhaps Woodland.
 
 ### In development
 
 - **The Street**, a terraced street of three lanes, a house to take and a car park, by day or by night. It
   shows only with Dev content on for now.
 
-### Then: the art pass
+### Then: the rest of the art pass
 
-The greybox goes. Finished models for Depot and everything in it (the range too), human figures
-with first-person arms and hands, and every replica, part and accessory, all made for the game and checked in play
-under its own lighting.
+The replicas, attachments, figures and first-person arms have their finished models. The fields' greybox goes next:
+finished models for Depot and everything in it (the range too), then the other fields, all made for the game and
+checked in play under its own lighting.
 
 ## Early Access: the themed updates
 

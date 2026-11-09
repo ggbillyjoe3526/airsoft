@@ -14,24 +14,27 @@ every merge (`docs/wiki/README.md`).
 
 ## Status
 
-**[0.1 Dev 1](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.1) is out (2026-10-30); 0.1 Dev 2 is
+**[0.1 Dev 2](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.2) is out (2026-11-09); 0.1 Dev 3 is
 being built.** The plan is `docs/ROADMAP.md`; what is happening now is `docs/HANDOFF.md`.
 
-**What's in 0.1 Dev 1:** the first build. Two maps, Depot and Woodland, and a practice range; the AEG Rifle and the GBB
-Pistol, with attachments, power options and the Armory to earn them; Elimination and Attack / Defend against bots on
-three difficulty levels, with squad orders, callouts and the magazine hand-off; the hit call, the walk-off and the
-dead zone; settings, saves, accessibility options and a bug report button. Its full notes are `CHANGELOG.md` ›
-0.1 Dev 1.
+**What's in 0.1 Dev 2:** Depot rebuilt as an indoor airsoft hall and Woodland as an open wood, with doors and two
+flags; smoke and flash bombs, thrown by bots too; the Sniper Rifle with the 2x and Variable Scopes; detailed models
+built in Blender for every replica, attachment, magazine, barrel and bomb, first-person arms, and bot figures in real
+gear, head gear and faces; the owner's recorded sounds; new menus and HUD with a weapon rail and a round countdown; a
+full-screen map with Go there; teams of 5 to 8 a side; and rounds of bug fixes. Its full notes are `CHANGELOG.md` ›
+0.1 Dev 2.
 
-**Built for 0.1 Dev 2 so far:** smoke and flash bombs (bots throw them too), Depot and Woodland redesigned and dressed,
-The Street (dev content only), a public Sniper Rifle, models built in Blender for the replicas, attachments, figures
-and gear, first-person arms, and the owner's own recorded sounds.
+**New since 0.1 Dev 1:** everything above. 0.1 Dev 1 (2026-10-30) was the first build: Depot, Woodland and a practice
+range, the AEG Rifle and the GBB Pistol, Elimination and Attack / Defend against bots, the hit call and walk-off,
+settings, saves and accessibility.
+
+**Being built for 0.1 Dev 3:** Blender models for Depot and the practice range, and perhaps Woodland.
 
 ## Run it
 
 - **Players:** download the Windows installer or zip, or the Linux build, from the
-  [0.1 Dev 1 release page](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.1): the Windows
-  installer (`Airsoft-0.1-dev.1-Windows-Setup.exe`), the Windows zip or the Linux zip. The installer is not signed
+  [0.1 Dev 2 release page](https://github.com/ggbillyjoe3526/airsoft/releases/tag/0.1-dev.2): the Windows
+  installer (`Airsoft-0.1-dev.2-Windows-Setup.exe`), the Windows zip or the Linux zip. The installer is not signed
   yet, so Windows warns about it: choose *More info*, then *Run anyway*.
 - **From source:** install Godot **4.7.2** (standard, not .NET), choose *Import*, pick this folder's `project.godot`
   and press F5.

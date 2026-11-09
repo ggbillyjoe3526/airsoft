@@ -16,7 +16,7 @@ general/accessibility_support=0
 
 config/name="Airsoft"
 config/description="A first-person airsoft shooter: round-based team matches against bots on airsoft fields."
-config/version="0.1 Dev 2"
+config/version="0.1 Dev 3"
 run/main_scene="res://game/main.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="Airsoft"

@@ -1,11 +1,12 @@
 # Handoff
 
-What is happening now (as of 2026-11-06), for a session picking up the work. The plan is `docs/ROADMAP.md`, the
+What is happening now (as of 2026-11-09), for a session picking up the work. The plan is `docs/ROADMAP.md`, the
 rulings `docs/DECISIONS.md`, how work runs `docs/PROCESS.md`.
 
 ## Now
 
-- **0.1 Dev 1 is out (2026-10-30)** (tag `0.1-dev.1`). 0.1 Dev 2 is being built: `config/version` reads "0.1 Dev 2".
+- **0.1 Dev 2 is out (2026-11-09)** (tag `0.1-dev.2`). 0.1 Dev 3 is being built: `config/version` reads "0.1 Dev 3".
+  Its plan (owner, 2026-11-07): Blender models for Depot and the practice range, perhaps Woodland's.
   The browser game is frozen at `0.1-beta.1`, removed from the repository on 2026-11-05 (owner) and read from git at
   the tag `0.1-dev.1`.
 - **Fields.** Woodland and the Depot are redesigned (WR1, DR1). The Street is a new field, dev only since DT1.
@@ -18,8 +19,9 @@ rulings `docs/DECISIONS.md`, how work runs `docs/PROCESS.md`.
   bolt (GT2, GT3, BW1, BW2), and bots hold replicas as the arms do, a pistol in one hand (HG1, owner, 2026-11-06).
 - **Sound.** The owner's recordings are in (AU2 to AU8).
 - **UI.** The menus and HUD are redesigned (UR1 to UR7), with fixes after (UF1, UF2).
-- **Bug passes.** BP2 to BP4 are merged. BP5 is under way.
-- **Next.** The owner's playtest of the Dev 2 list, then the release checklist after he tags (`docs/PROCESS.md`).
+- **Bug passes.** BP2 to BP8 are merged; BP8 fixed the owner's thorough Dev 2 playtest.
+- **Next.** 0.1 Dev 3's map models. The open checks the owner hadn't played by the Dev 2 tag carry over to his Dev 3
+  list (`/mnt/project-files/playtest/0.1-dev3-checklist.md`).
 
 ## Where to look
 
