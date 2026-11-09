@@ -273,23 +273,23 @@ rendering_device/fallback_to_opengl3=true
 
 look_shade={
 "type": "color",
-"value": Color(0.3371637, 0.2917706, 0.5028865, 1)
+"value": Color(0.0221739, 0.0212190, 0.0193824, 1)
 }
 look_band={
 "type": "float",
-"value": 0.1
+"value": 0.42
 }
 look_band_soft={
 "type": "float",
-"value": 0.08
+"value": 0.55
 }
 look_mid_band={
 "type": "float",
-"value": 0.14
+"value": 0.0
 }
 look_rim={
 "type": "color",
-"value": Color(1, 0.9473066, 0.8307698, 0.22)
+"value": Color(1, 0.8879231, 0.6938718, 0.03)
 }
 look_rim_power={
 "type": "float",
@@ -297,5 +297,9 @@ look_rim_power={
 }
 look_spec={
 "type": "float",
-"value": 0.35
+"value": 0.3
+}
+look_paint_saturation={
+"type": "float",
+"value": 0.6
 }

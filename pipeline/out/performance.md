@@ -1,6 +1,19 @@
-Performance verdict (0765d76): PASS
-- Bench reproduced (figure_bench, 11 figures, 4 s, headless): close (eye in the middle) 235 surfaces by day vs 257 with --night (+22, i.e. 2 a bot, matching the rifle's lens and LED); at the spawn (--far) 184 vs 184 (the torches are on the bare far copies, 0 extra). Both claims hold.
-- Per frame: _fit_torches loops the figure's replicas (at most 2) and compares one Mesh reference. No allocation and no rebuild. A holster toggle costs one assignment of a cached Mesh. lens_position is one Transform3D times Vector3 (value types), no heap, once per lit bot per frame in TorchBeams. The fallback path is the old arithmetic.
-- Draws: the holstered pistol and every far version drop the torch (bare meshes), so the cost is only inside the far line and in hand. That is down from my earlier 3 and 3 per replica to 2 on a rifle (its Rubber shares the rifle's material) and 3 on a pistol. The 11-bot worst case at night is +22 close and 0 far. Reaching 15 bots, about +30 close.
-- Night load: set_body 392 vs 275 ms close and 335 vs 191 ms far, i.e. about 11 to 13 ms per figure, in line with the claimed 14. The cause is ReplicaParts.take instantiating the parts glb scene per figure per replica (load is cached; the instantiate and free is not), plus the extra bare and bare-far merges (cached by key, so only the first of a kind builds). It is a one-off at match build, not in play, so about 0.2 s more for a 15-bot night match; a cache of the instantiated parts scene would remove most of it if loading time matters.
-- Memory: up to three more cached meshes per lit kit (lit, bare, bare far); bounded by the kits in the match. Freed: take() frees its holder, with no new orphans in the test run.
+# Performance: SL1 · Sunlit Concrete: the light, grade and paint
+
+Head e8aada2 (4493a30 plus a palette-only commit) · Verdict: **Pass** (judgment; no GPU in the cloud, no frame times)
+
+- **GDScript:** nothing new per frame. One more key in `LookConfig.globals()`, pushed once a match. No new nodes,
+  timers, tweens or connections.
+- **look_paint():** one dot, one mix and a few multiplies on ALBEDO in look_vertex, look_clear, site_surface and
+  door_leaf. No texture reads, no branches: negligible.
+- **Site-surface grit 0.6 (was 0):** the grit branches are uniform-gated (no divergence) but now run on every
+  site-surface fragment: roughly 3 to 6 more fbm samples (single channel, small, mipmapped) on slab, wall and ground,
+  and the plywood's colour and normal samples on plywood. The heaviest fragments in a scene; only the owner's card can
+  say whether Low still holds 60 FPS.
+- **Memory:** the plywood photo pair (1k, VRAM-compressed with mips) now loads: about 2.7 MB of VRAM, shared by every
+  material (ResourceCache). The slab set was already loaded. No new files on disk; the rebaked depot.res and range.res
+  got smaller.
+- **Shader warm-up:** no new material or shader; the plywood textures bind at map load.
+
+Advisory: measure Low on Depot and the Range (F3) before and after. If over budget: gate the fine fbm samples by
+preset, or grit 0 on Low, or bake the wear into a mask texture. Recorded in docs/KNOWN_ISSUES.md and the record.

@@ -1,13 +1,24 @@
-Task: FL1 · QA commit 025070b · Verdict: Pass
+Task: SL1 · QA commit (see git log, "Agent: qa") · Verdict: Pass
 
-Blocking: none.
-Advisory:
-- game/ai/bot_bombs.gd (_mate_sees): lead uses current velocity only, so a teammate who turns or stops mid-way is over- or under-predicted; press-time re-check covers the turn. Already listed in the record (bounce off unforeseen geometry).
-- _mate_sees now raycasts up to twice per teammate per candidate spot; bounded by the roll gap, not per frame, so cost is fine.
+Reviewed against e8aada2.
 
-Tests added: none by QA. Worker's two in tests/unit/test_bot_bombs.gd cover both behaviours:
-- test_no_flash_where_a_teammate_walking_in_would_be_by_the_bang: walking vs standing mate at 16.5 m. Not re-run on main (tree shared, no checkout); by reading, the walking case throws on main because only the standing position was checked.
-- test_a_teammate_stepping_near_the_bang_while_it_turns_stops_the_throw: no press-time check on main, so the throw happens; here it is dropped and the flash kept.
+Blocking: none. Advisory: none.
 
-Runs on head: test_bot_bombs 17/17 (77 asserts, 77 s); test_sf2_qa 8/8 (47 s); test_bp2_qa 2/2. tools/check.sh not run (asked not to).
-Not tested: feel of bots refusing flashes in real play (owner's list).
+Checks
+- project.godot shader_globals vs LookConfig.globals(): all 8 keys incl. look_paint_saturation match; already pinned by test_look.gd test_the_lights_values_are_the_projects_global_uniforms (iterates globals(), so the new key is covered).
+- Team colours: flag_cloth.gdshader neither includes look_light nor calls look_paint; figures/flag use team_colour outside the look shaders.
+- Night: night_lighting.tres keeps sun 0.18, ambient 0.3, exposure 1.2; only the day defaults in lighting_config.gd changed.
+- 20 degree team-hue rule: test_no_palette_colour_reads_as_a_team iterates the whole palette, so `grass` is covered (and now explicitly).
+- Note: MapStyle keeps literal Color8(0x5f,0x8a,0x3a) for ground and GRASS terrain, not a palette lookup; the new test pins them equal so they cannot drift.
+
+Tests added (tests/unit/test_look.gd from line 307)
+- test_grass_is_its_own_palette_colour_and_not_a_team_hue · palette has grass, differs from meadow, off team hues · fails on e8aada2's parent (no grass key / meadow = grass).
+- test_the_map_style_ground_and_grass_terrain_are_the_palettes_grass · MapStyle ground and GRASS terrain equal palette grass · fails if either reverts to 8aa860.
+- test_the_night_preset_keeps_its_own_light · night_lighting.tres values and differs from day sun · fails if night inherited the day retune.
+- test_team_cloth_is_not_muted_by_the_paint_grade · flag cloth shader free of look_paint/look_light · fails if paint grade is routed into team cloth.
+
+Runs (one file at a time, raw output in pipeline/out/qa/)
+- test_look.gd 21/21 (244 asserts, 1.2 s); test_dh1_hall_shell.gd 9/9; test_dp2_qa.gd 9/9.
+- Not run (per brief): tools/check.sh, full suite, smoke test.
+
+Not testable headless: how the 0.6 paint saturation, sun 2.0 / ambient 0.55 / exposure 0.9 look on screen (owner to eyeball Depot, Range, Woodland, The Street, a night map; confirm meadow-floored Street reads right and team colours on figures/flags are unmuted).

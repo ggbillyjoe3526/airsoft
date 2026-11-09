@@ -147,9 +147,13 @@ extends Resource
 
 @export_group("Moss")
 ## Moss on the logs (MapData.moss and moss_share; Medium and up): on the chosen logs, a lid over the top and a band
-## down the north side (-z) `moss_band` of the log's height deep, `moss_proud` m proud.
+## down the north side (-z) `moss_band` of the log's height deep, `moss_proud` m proud. Only on logs drawn plain or
+## dressed as one of `moss_dresses`: a log drawn as a model of its own (WG2's fallen logs, root plates, woodpiles, saw
+## bench) wears that model's moss, and a lid over its box would float over it as a flat sheet; WG4's crouch tunnels'
+## hollow-log sections carry their own look, and a slab of moss on their boxes would show inside the tunnel.
 @export var moss_band: float = 0.4
 @export var moss_proud: float = 0.012
+@export var moss_dresses: Array[StringName] = [&"", &"log"]
 
 @export_group("Night air")
 ## Fireflies over the field by night (MapData.fireflies): points `firefly_size` m across hanging `firefly_height` m (a
@@ -180,10 +184,19 @@ extends Resource
 @export var mote_edge: float = 1.5
 
 @export_group("Bushes")
-## The map's bushes (MapData.foliage, WL5; BushView) as placeholder ellipsoids, every one in a single instanced draw on
-## every preset: a sphere of `bush_sides` sides and `bush_rings` rings stretched to each bush, in one of `bush_colours`,
-## each up to `bush_jitter` lighter or darker, as rough as `bush_roughness`; marked on the minimap in
-## MinimapConfig.bush_colour. The art pass gives them leaves (step 32).
+## The map's bushes (MapData.foliage, WL5; BushView), drawn on every preset as models (WG2): foliage up to
+## `fern_tallest` m tall as the fern clump, the rest as the bush, each kind an instanced draw for every `bush_chunk` m
+## square of the field (so a bed out of view is culled), the ferns casting no shadow (`fern_shadow`; knee to hip high,
+## their shadow adds little and costs a draw of every fern a cascade), every plant stretched to its foliage's radius
+## and height, turned at random and up to `bush_jitter` lighter or darker, as rough as
+## `bush_roughness`. Woodland's ferns stand 1.2 m (they hide a crouched player), its bushes 1.7 m (a standing one).
+@export var fern_model: String = "res://assets/models/props/fern.glb"
+@export var bush_model: String = "res://assets/models/props/bush.glb"
+@export var fern_tallest: float = 1.45
+@export_range(1.0, 400.0) var bush_chunk: float = 40.0
+@export var fern_shadow: bool = false
+## Without the models, placeholder ellipsoids: a sphere of `bush_sides` sides and `bush_rings` rings stretched to each
+## bush, in one of `bush_colours`; marked on the minimap in MinimapConfig.bush_colour either way.
 @export var bush_colours: PackedColorArray = PackedColorArray([
 	Color("79a650"), Color("58904e"), Color("8c9a48"), Color("5c9a50"),
 ])

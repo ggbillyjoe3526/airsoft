@@ -36,7 +36,7 @@ body or sight.
   block too thin for a round stake gets flattened ones), with two rails (`stake_rails`) on the face toward the field's
   middle; `SET` fits one model once to the box of every block that names it (`PropDressConfig.set_box`), so a
   structure of several blocks is drawn whole, its stair ramp among them (a SET is the only dress a ramp takes).
-- **Models** (`tools/blender/maps/`, `woodkit.py` the shared timber): each script reads its blocks from the map file
+- **Models** (`tools/blender/maps/`, `timberkit.py` the shared timber): each script reads its blocks from the map file
   and builds every part to fill its block (posts, deck, walls, roof); the open timbers between blocks (knee braces,
   trusses, stair rails) stand over head height or where a body can't go. Triangles: palisade 56 a stake and 20 a rail
   (992 a 4 m section of 1,000), tower 5,942 of 6,000, bridge 2,896 of 3,000, shed 4,688 of 5,000, roofs 1,368

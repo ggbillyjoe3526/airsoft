@@ -42,8 +42,8 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
 - **Doors:** some of the plywood rooms and huts have wooden [doors](#doors), some starting open and some shut.
 - **Attack / Defend** puts two flagpoles at the defenders' end, **A** on A site and **B** on B site; the attackers
   raise either ([Modes](Modes#attack--defend)).
-- **The look:** clean painted surfaces in soft, stylised light, with crimson, violet, yellow, teal, green and cream
-  spread over the hall so the team colours stay the loudest.
+- **The look:** a real warehouse in daylight: concrete and plywood with their grain, weathered paint in muted
+  crimson, violet, yellow, teal, green and cream, so the team colours stay the loudest.
 - **Props:** the hall's racking, drums, barrels, sofa, desks and lockers are the game's own models: navy and yellow
   pallet racking stocked three different ways (cartons, sacks, wrapped loads, drums, some slots empty) and mixed along
   every rack, violet steel drums stacked two
@@ -87,16 +87,17 @@ defenders in the east camp.
 
 - **The stream:** its bed is 1.7 m under its banks, which are too steep to climb. Cross on the North bridge or the road,
   or walk in and out at the Ford and the gentle slides. Down in the bed you're out of sight of the wood above.
-- **The look:** the game's soft, stylised light over a bright green wood: young, grown and old Scots pines with bare
-  tan trunks under their crowns, broad, lumpy oaks, white birches in the Birch stand and Fern hollow, dark
-  spruce thickets, and beyond the fence a far wood of spruce spires. A meadow floor, the violet pickup wreck and teal
-  crates carry the colour, with nothing near a team's blue or orange. Every crown starts over head height.
+- **The look:** warm afternoon sun over a natural green wood: young, grown and old Scots pines with bare tan trunks
+  under their crowns, broad, lumpy oaks, white birches in the Birch stand and Fern hollow, dark spruce thickets, and
+  beyond the fence a far wood of spruce spires. A grassy floor, the weathered violet pickup wreck and teal crates carry
+  the colour, with nothing near a team's blue or orange. Every crown starts over head height.
 - **Long views, few walls:** the Ridge looks 86 m down onto the Fort; elsewhere a lane's longest line is under 80 m.
-  Cover is logs, log stacks, stacks of tractor tyres, wooden crates, the violet pickup wreck and the trunks of the trees
-  themselves, free CC0 models and the game's own, and the camps and the field's edge are walled by a log palisade of
-  sharpened stakes; each stops a BB about where you see it, a round trunk by its bark. The thickets of spruce at the
-  edges and between the lanes can't be entered or seen through.
-- **Ferns** grow knee to hip high in eight beds where you'd want to hide, and **bushes** stand taller. Nobody sees you
+  Cover is fallen logs, wind-thrown trees torn out by their roots, woodpiles, stacks of tractor tyres, wooden crates,
+  the violet pickup wreck and the trunks of the trees themselves, and the camps and the field's edge are walled by a
+  log palisade of sharpened stakes; each stops a BB about where you see it, a round trunk by its bark. The woodpiles
+  are 1.8 m tall, so they hide you standing; the camps' gate screens stand 2.8 m. The thickets of spruce at the edges
+  and between the lanes can't be entered or seen through.
+- **Ferns** grow knee to hip high in eight beds where you'd want to hide, and leafy **bushes** stand taller. Nobody sees you
   through more than about half a metre of leaves, so crouch in a fern bed to vanish; you can walk through ferns and
   bushes, but they slow you and a run through them rustles loudly ([Movement](Movement)), and a BB that pushes 0.6 m
   into leaves stops there. The minimap marks them. Grass never hides you.
@@ -108,7 +109,8 @@ defenders in the east camp.
   each. The door facing the other team's end starts each round shut and the one facing your own end open, so a hut
   is walked into from its own side and opened, loudly, from the other, under shake roofs. The Tower is a timber watch
   tower, its deck 3.4 m up a stair, walled in all round but the stair's head by waist-high board walls under a roof;
-  the North bridge is a log bridge with closed slab sides; the Sawmill is an open timber shed under a corrugated roof.
+  the North bridge is a log bridge with closed slab sides; the Sawmill is an open timber shed under a corrugated roof,
+  with a saw bench, rounds and a stack of sawn boards.
 - **Night** is the Time of day setting's (day by default): a low moon, stars and haze, with fires and lanterns at the
   camps, the huts, the Clearing, the Fort, the Sawmill, the Truck bend and the North bridge: campfires in stone rings,
   and hurricane lanterns hung from a roof, a post or a hooked pole, which stand cold by day. Bots see you from about

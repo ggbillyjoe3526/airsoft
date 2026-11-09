@@ -1,15 +1,17 @@
 class_name LookConfig
 extends Resource
-## The game's look, shared by every map (docs/ART.md; the owner's art direction, 2026-10-29, game-wide 2026-10-31):
-## Valorant's clean forms under BOTW's soft light. Three parts, each its own group:
-## - **Light.** The shared light (game/play/look/look_light.gdshaderinc): soft cel bands, the shade a cool violet, a warm
-##   rim where an edge meets the sun, a small soft highlight. Pushed as global shader uniforms (`push_globals`), so
+## The game's look, shared by every map (docs/ART.md; the owner's art direction "Sunlit Concrete", 2026-11-09):
+## Counter-Strike-leaning naturalism, real materials in real light. Three parts, each its own group:
+## - **Light.** The shared light (game/play/look/look_light.gdshaderinc): a natural soft falloff (no cel bands), a
+##   dark neutral shade, a faint warm rim, a small soft highlight, and every surface's paint pulled back toward its grey
+##   (`paint_saturation`). Pushed as global shader uniforms (`push_globals`), so
 ##   every material that includes the light follows one place; project.godot's [shader_globals] hold the same values.
 ## - **Picture.** The environment's grade (tonemap, saturation, contrast) and glow, on every preset (FieldLighting).
 ## - **Graphics.** What the dearer Graphics rows draw when on (data/graphics.md: global illumination, reflections,
 ##   glow, volumetric fog, softest shadows): their strengths here, their switches in GraphicsApply.
-## The palette is the look's colours by name (sRGB): the six site colours spread evenly so none dominates, the
-## neutrals under them, and the ink. None is within 20° of a team's hue unless dull (tests/unit/test_look.gd).
+## The palette is the look's colours by name (sRGB), as painted: the light draws each at `paint_saturation` of its
+## colour, so the six site colours read as weathered paint. They spread evenly so none dominates, with the neutrals
+## under them, and the ink. None is within 20° of a team's hue unless dull (tests/unit/test_look.gd).
 
 ## The global shader uniforms the light reads, as project.godot declares them.
 const GLOBAL_SHADE := &"look_shade"
@@ -19,30 +21,35 @@ const GLOBAL_MID_BAND := &"look_mid_band"
 const GLOBAL_RIM := &"look_rim"
 const GLOBAL_RIM_POWER := &"look_rim_power"
 const GLOBAL_SPEC := &"look_spec"
+const GLOBAL_PAINT_SATURATION := &"look_paint_saturation"
 
 @export_group("Light")
-## What the sun adds where it doesn't reach (the far side of a band): a soft cool violet, never black or grey.
-@export var shade: Color = Color8(0x9d, 0x93, 0xbc)
-## Where the lit band starts (the light's angle as a cosine) and how soft its edge is.
-@export var band: float = 0.1
-@export var band_soft: float = 0.08
-## A second, gentler step half way up the lit side: this share of the light comes only past it.
-@export var mid_band: float = 0.14
+## What the sun adds where it doesn't reach: a dark warm grey, so the far side falls to the ambient and bounce light
+## as it does in daylight (Sunlit Concrete; it was the old look's violet).
+@export var shade: Color = Color8(0x29, 0x28, 0x26)
+## Where the sun's light is centred (its angle as a cosine) and how far it spreads either side: wide, so a surface
+## darkens smoothly as it turns from the sun, the way real light falls off, with no cel band.
+@export var band: float = 0.42
+@export var band_soft: float = 0.55
+## A second step half way up the lit side (the old look's cel step): this share of the light comes only past it.
+@export var mid_band: float = 0.0
 ## The rim: warm light on an edge seen against the sun, `rim_power` the falloff from the edge (higher is thinner), its
 ## colour's alpha its strength.
-@export var rim: Color = Color(Color8(0xff, 0xf9, 0xeb), 0.22)
+@export var rim: Color = Color(Color8(0xff, 0xf2, 0xd9), 0.03)
 @export var rim_power: float = 3.2
 ## A soft highlight's strength on a smooth surface (none on a rough one).
-@export var spec: float = 0.35
+@export var spec: float = 0.3
+## How much of its colour every surface's paint keeps (0 grey, 1 as painted): the palette as weathered material.
+@export_range(0.0, 1.0) var paint_saturation: float = 0.6
 
 @export_group("Picture")
-## AgX's contrast and the grade over it: a clean, vibrant picture that keeps the team colours the loudest.
+## AgX's contrast and the grade over it: a natural picture, a little contrasty, the team colours still the loudest.
 @export var agx_contrast: float = 1.35
-@export var saturation: float = 1.14
-@export var contrast: float = 1.03
+@export var saturation: float = 0.95
+@export var contrast: float = 1.12
 @export var brightness: float = 1.0
 ## Glow (Graphics › Glow): only what is brighter than `glow_threshold` (lamps, a lit sky) blooms, softly.
-@export var glow_intensity: float = 0.45
+@export var glow_intensity: float = 0.35
 @export var glow_strength: float = 1.0
 @export var glow_bloom: float = 0.02
 @export var glow_threshold: float = 0.95
@@ -121,6 +128,8 @@ const GLOBAL_SPEC := &"look_spec"
 	&"fern": Color8(0x79, 0xa6, 0x50), &"olive": Color8(0x8c, 0x9a, 0x48), &"pine": Color8(0x3d, 0x7a, 0x4a),
 	&"spruce": Color8(0x2f, 0x6e, 0x55), &"forest": Color8(0x2b, 0x5c, 0x48), &"meadow": Color8(0x8a, 0xa8, 0x60),
 	&"litter": Color8(0x7c, 0x7a, 0x58), &"earth": Color8(0x8a, 0x80, 0x70), &"rubber": Color8(0x3d, 0x3b, 0x45),
+	# Sunlit Concrete (SL1): sloping ground's grass, darker so it stays green once the paint is muted.
+	&"grass": Color8(0x5f, 0x8a, 0x3a),
 	&"pond": Color8(0x4a, 0x6f, 0x6c), &"mud": Color8(0x55, 0x4e, 0x44), &"mud_wet": Color8(0x40, 0x3b, 0x34),
 	# The Street's (ST1): raspberry brick (off Beta's high-contrast orange's hue), and the terraces' pastel renders (seafoam, lilac, butter, sage).
 	&"brick": Color8(0xa3, 0x4a, 0x6a), &"seafoam": Color8(0x7f, 0xb8, 0xad), &"lilac": Color8(0xb9, 0xa8, 0xd6),
@@ -145,6 +154,7 @@ func globals() -> Dictionary[StringName, Variant]:
 	return {
 		GLOBAL_SHADE: shade.srgb_to_linear(), GLOBAL_BAND: band, GLOBAL_BAND_SOFT: band_soft, GLOBAL_MID_BAND: mid_band,
 		GLOBAL_RIM: rim.srgb_to_linear(), GLOBAL_RIM_POWER: rim_power, GLOBAL_SPEC: spec,
+		GLOBAL_PAINT_SATURATION: paint_saturation,
 	}
 
 

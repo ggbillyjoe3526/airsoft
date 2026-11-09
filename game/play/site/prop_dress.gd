@@ -146,9 +146,9 @@ func light_of(model: StringName, i: int) -> Color:
 	return each[i] if i < each.size() else Color.WHITE
 
 
-## The models some block of `map` is dressed with, the pallet too when a cluster stands on one, a palisade's rail
-## with its stakes, a bay's features with its wall and a lined model's cap and mouth (PropDressConfig.lined_caps,
-## lined_mouths).
+## The models some block of `map` is dressed with, their variants (lining or grid), the pallet too when a cluster
+## stands on one, the earth bank when a prop stands on the ground (GROUND), a palisade's rail with its stakes, and a
+## lined model's cap and mouth (PropDressConfig.lined_caps, lined_mouths).
 static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName]:
 	var used: Array[StringName] = []
 	for b in map.blocks:
@@ -156,7 +156,7 @@ static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName
 			continue
 		var model := cfg.model_of(b)
 		var each: Array[StringName] = [model]
-		if cfg.lay_of(b) == PropDressConfig.Lay.TILE:
+		if cfg.lay_of(b) == PropDressConfig.Lay.TILE or cfg.lay_of(b) == PropDressConfig.Lay.GRID:
 			each = cfg.variants_of(model)
 		for m in each:
 			if not used.has(m):
@@ -164,6 +164,8 @@ static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName
 		if cfg.lay_of(b) == PropDressConfig.Lay.CLUSTER \
 				and not used.has(cfg.pallet):
 			used.append(cfg.pallet)
+		if cfg.lay_of(b) == PropDressConfig.Lay.GROUND and not used.has(cfg.ground_bank):
+			used.append(cfg.ground_bank)
 		var crown: StringName = cfg.tree_crowns.get(model, &"")
 		if cfg.lay_of(b) == PropDressConfig.Lay.TREE and crown != &"" and not used.has(crown):
 			used.append(crown)

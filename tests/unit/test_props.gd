@@ -313,9 +313,12 @@ func test_woodland_is_dressed_without_a_site_each_prop_inside_the_block_that_nam
 		if b.dress != &"":
 			assert_true(look.props.dresses(b), "%s's %s has its model" % [b.kind, b.dress])
 			named[b.dress] = named.get(b.dress, 0) + 1
-	# WG4: Woodland names its own tyres and pickup (the Kenney tyre and truck stay the kinds' fallback)
+	# WG2, WG4 and WT1: Woodland names its own trees, logs, tyres, pickup and tunnels (the Kenney log, tyre and truck
+	# stay the kinds' fallback)
 	var trees: Array[StringName] = [&"pine_young", &"pine_grown", &"pine_old", &"oak", &"birch"]
-	for model: StringName in trees + ([&"spruce", &"log", &"logstack", &"crate", &"tractor_tyre", &"pickup"] as Array[StringName]):
+	for model: StringName in trees + ([&"spruce", &"cordwood", &"fallen_log_5", &"fallen_log_6", &"fallen_log_8",
+			&"root_plate", &"sawbench", &"boards", &"crate", &"tractor_tyre", &"pickup", &"log_tunnel_side"]
+			as Array[StringName]):
 		assert_gt(named.get(model, 0), 0, "a block names %s" % model)
 		assert_gt(dress.count(model), 0, "%s placed" % model)
 	var trunks := 0

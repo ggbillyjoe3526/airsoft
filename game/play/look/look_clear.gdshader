@@ -12,7 +12,7 @@ void fragment() {
 	if (!OUTPUT_IS_SRGB) {
 		own = mix(pow((own + vec3(0.055)) * (1.0 / 1.055), vec3(2.4)), own * (1.0 / 12.92), lessThan(own, vec3(0.04045)));
 	}
-	ALBEDO = own;
+	ALBEDO = look_paint(own);
 	ALPHA = COLOR.a;
 	ROUGHNESS = roughness;
 }

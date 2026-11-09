@@ -4,9 +4,10 @@ Blender build scripts for the maps' own models (Dev 3), each writing one vertex-
 `assets/models/props/` the way the Kenney props are (one `Prop` material, palette colours linear; a lamp's lens keeps a
 material of its own). `mapkit.py` holds the shared palette, the vertex-colour bake, the export and the triangle report
 for the hall shell (DH1); `prop.py` does the same for the racking and small props (RK1), painting by palette name with
-a foot-to-top gradient (`render_prop.py` renders a built prop from labelled angles); `woodkit.py` holds the Woodland
-scripts' timber paints, logs, boards and beams, and their blocks read from `data/maps/woodland.json` (rerun a Woodland
-script after `tools/woodland/build_map.py`).
+a foot-to-top gradient (`render_prop.py` renders a built prop from labelled angles); `woodkit.py` holds Woodland's
+shared parts (bark, logs, split ends, leaf clumps, fronds) and its colours, each checked off the team hues as the tests
+measure them (WG2); `timberkit.py` holds the Woodland structures' timber paints, logs, boards and beams, and their
+blocks read from `data/maps/woodland.json` (rerun a structure's script after `tools/woodland/build_map.py`, WG3).
 
 | Script | Writes | Drawn as |
 |---|---|---|
@@ -24,6 +25,12 @@ script after `tools/woodland/build_map.py`).
 | `footbridge.py` | `footbridge.glb` | Woodland's North bridge (`Lay.SET`) |
 | `sawmill_shed.py` | `sawmill_shed.glb` | Woodland's Sawmill shed (`Lay.SET`) |
 | `hut_roof.py` | `hut_roof.glb`, `hut_roof_long.glb` | Woodland's hut roofs (fitted to the block) |
+| `fern.py`, `bush.py` | `fern.glb`, `bush.glb` | Woodland's ferns and bushes (`BushView`), stretched to each plant |
+| `fallen_log.py` | `fallen_log_5.glb`, `_6.glb`, `_8.glb` | Woodland's fallen logs, the nearest length (`PropDressConfig.Lay.GROUND`) |
+| `root_plate.py` | `root_plate.glb` | Woodland's wind-thrown trees (`Lay.GROUND`) |
+| `cordwood.py` | `cordwood.glb`, `_b`, `_c`, `boards.glb` | Woodland's woodpiles, a 2 m section a cell, the three mixed (`Lay.GRID`, `variants`); B site's boards (`Lay.GROUND`) |
+| `sawbench.py` | `sawbench.glb` | Woodland's B site saw bench (`Lay.GROUND`) |
+| `earth_bank.py` | `earth_bank.glb` | The earth under a grounded prop where the ground falls away |
 | `log_tunnel.py` | `log_tunnel_side.glb`, `log_tunnel_roof.glb`, `log_tunnel_mouth.glb`, `log_tunnel_cap.glb` | Woodland's crouch tunnels, a 1 m hollow-log section a block (`Lay.SIDE`, `Lay.LINED`; a run's end sections the mouth) |
 | `culvert.py` | `culvert_wall.glb`, `culvert_kerb.glb` | Woodland's culvert under the road |
 | `pickup.py` | `pickup.glb` | Woodland's pickup wreck (grounded) |
@@ -44,5 +51,6 @@ Run each with Blender 5.x or pip's `bpy` (`pip install bpy==5.2.3`): `python3 -I
 root>`, then `godot --headless --path . --import`. Pictures for review: `tools/prop_pictures.gd` (a model alone),
 `tools/hall_pictures.gd` (Depot) and `tools/woodland_pictures.gd` (Woodland), all under xvfb; `tools/eye_pictures.gd`
 for a field (`night` lights its fires and lanterns). Records: `docs/records/DH1.md`, `docs/records/RK1.md` (RK1's
-scripts run as `python3 tools/blender/maps/<script>.py`), `docs/records/WG3.md`, `docs/records/WG4.md`
-(`weathering.py`: WG4's noise and repaint helpers), `docs/records/WT1.md`. Dev only: tools/ never ships.
+scripts run as `python3 tools/blender/maps/<script>.py`), `docs/records/WG2.md`, `docs/records/WG3.md`,
+`docs/records/WG4.md` (`weathering.py`: WG4's noise and repaint helpers), `docs/records/WT1.md`. Dev only: tools/ never
+ships.

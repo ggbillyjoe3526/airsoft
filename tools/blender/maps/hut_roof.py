@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import mapkit as mk  # noqa: E402  first: it sets up bpy and the replica helpers
 import hardsurface as hs  # noqa: E402
-import woodkit as wk  # noqa: E402
+import timberkit as wk  # noqa: E402
 from mathutils import Vector  # noqa: E402
 
 BUDGET = 1500

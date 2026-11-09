@@ -12,7 +12,7 @@ each side. Bolts at the joints. Weathered silver-grey timber, a dark sheet roof.
 Every block is filled by its part: the legs, the platform, the walls, the roof (its pitch kept inside the roof's
 0.15 m: a hip so low it reads from the field as a flat cap) and the stair (its nosings on the ramp's slope). The
 open timbers (truss, roof posts, handrails) stand between the blocks, over head height or open, inside the box round
-them all (woodkit). Budget 6,000 triangles (/mnt/project-files/art/woodland-model-list.md).
+them all (timberkit). Budget 6,000 triangles (/mnt/project-files/art/woodland-model-list.md).
 
     python -I tools/blender/maps/watch_tower.py <repo root>
 """
@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import mapkit as mk  # noqa: E402  first: it sets up bpy and the replica helpers
 import hardsurface as hs  # noqa: E402
-import woodkit as wk  # noqa: E402
+import timberkit as wk  # noqa: E402
 
 NAME = "watch_tower"
 BUDGET = 6000

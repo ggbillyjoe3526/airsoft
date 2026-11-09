@@ -9,7 +9,7 @@ lapped over the middle, a fascia board round the edge. The roof keeps inside the
 as photo 2's lean-to nearly is). No brands.
 
 The posts and the roof fill their blocks; the plates, ties and braces stand under the roof between them, over head
-height (woodkit). Budget 5,000 triangles (/mnt/project-files/art/woodland-model-list.md). Plain vertex colours.
+height (timberkit). Budget 5,000 triangles (/mnt/project-files/art/woodland-model-list.md). Plain vertex colours.
 
     python -I tools/blender/maps/sawmill_shed.py <repo root>
 """
@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import mapkit as mk  # noqa: E402  first: it sets up bpy and the replica helpers
 import hardsurface as hs  # noqa: E402
-import woodkit as wk  # noqa: E402
+import timberkit as wk  # noqa: E402
 import watch_tower as wt  # noqa: E402  its bolts and post shoes
 
 NAME = "sawmill_shed"

@@ -53,8 +53,8 @@ every preset; turn it on if you want it.
 
 - **Low** is for speed: no sun shadows, ambient occlusion, baked light, wind dust or light effects, and a lower render
   scale. Every player gets a soft shadow under their feet instead, lying on a ramp's slope and on the floor below a
-  ledge they drop from. The game's look (its colours and soft, stylised
-  light) is the same on every preset.
+  ledge they drop from. The game's look (its natural colours and sunlight) is the
+  same on every preset.
 - **Ultra** is the top end, for the most powerful cards: bounce light from the whole field, reflections on screen,
   volumetric haze and the softest shadows, sharp at their foot and soft away from it.
 - **Baked light** gives Depot soft shade in its corners, warm light bounced off sunlit walls and its dim Lounge; its
