@@ -1212,6 +1212,20 @@ Bugs the browser game had and fixed; a bug pass checks the rebuild doesn't bring
   surface that isn't plain paint: keep it, tone it down, or make it clean?
 - [ ] **Frame rate.** Low and Ultra on Depot: any drop compared with Dev 2 while looking down the hall?
 
+## Woodland's small props (WG4)
+
+- [ ] **Crouch tunnels.** The Crawl box and the Badger run are hollow oak logs set in the mound, the log's cut end at
+  each mouth, grass growing down over the earth above. Crouch through both: nothing hangs into your head room, and the
+  walls never flicker where two sections meet.
+- [ ] **Culvert.** Concrete headwalls and kerbs where the road crosses the stream, moss and water stains low down.
+  Crouch through it.
+- [ ] **Tyres and the pickup.** Tractor tyres stand in stacks of two and four, the violet pickup wreck at the Truck
+  bend has flat tyres and rust. Walk round each on its slope: no gap under its low side, BBs stop where you see it.
+- [ ] **Fires and lanterns.** By day: cold campfires (stone ring, charred logs) and lanterns hanging from roofs, a
+  post's nail or a hook pole. At night: the coals and globes glow and the flames flicker. Is anything too bright?
+  Under Reduced motion the flames stay still.
+- [ ] **Frame rate.** Low and Ultra by the Truck bend at night.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

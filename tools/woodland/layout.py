@@ -452,7 +452,7 @@ LIGHTS = [
     (-5.0, 3.0, "lantern"),                                       # the overtime flag
     (58.0, -44.6, "lantern"), (66.0, -32.0, "lantern"),          # the Box, the Fort gate
     (56.0, 33.0, "lamp"),                                        # Sawmill work lamp
-    (-30.5, 41.0, "fire"),                                        # fire drum at the Truck bend
+    (-27.4, 37.8, "fire"),                                        # campfire at the Truck bend, off the road (WG4)
     (2.0, -39.0, "lantern"),                                     # North bridge, west end
 ]
 

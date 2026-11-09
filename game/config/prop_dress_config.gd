@@ -21,8 +21,12 @@ extends Resource
 ## middle (DM1: Depot's containers, a port cut between two units of one). BAY lines a wall's box with the model in
 ## cells on a grid of the world (`bay_pitch` m apart from `bay_anchor`), each stretched to its cell and its front (+z)
 ## to the field's middle, a feature bay (`bay_features`) in some cells with nothing standing in front of them (Dev 3:
-## Depot's hall walls, their columns under the roof's trusses).
-enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY }
+## Depot's hall walls, their columns under the roof's trusses). SIDE fits a tunnel wall's model to its box, long side
+## along the box's, its inner face (the model's -x) toward the wall across the tunnel (the nearest block named alike
+## across the box's short side, within `side_reach` m). LINED sets the model on the box's foot at the model's own
+## height, stretched only across and along, and its cap (`lined_caps`) over the rest of the box (WG4: Woodland's
+## hollow-log tunnels, the log's top shell under the roof and the mound's earth over it).
+enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, SIDE, LINED }
 
 ## Each prop's model (a .glb of one vertex-coloured mesh).
 @export var models: Dictionary[StringName, String] = {
@@ -85,6 +89,16 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY }
 	&"hall_exit": "res://assets/models/props/hall_exit.glb",
 	&"pillar": "res://assets/models/props/pillar.glb",
 	&"camo_net": "res://assets/models/props/camo_net.glb",
+	# Woodland's small props (WG4, tools/blender/maps/): its tractor tyres, the pickup wreck, the culvert under the
+	# road and the hollow-log tunnels.
+	&"tractor_tyre": "res://assets/models/props/tractor_tyre.glb",
+	&"tractor_tyre_stack": "res://assets/models/props/tractor_tyre_stack.glb",
+	&"pickup": "res://assets/models/props/pickup.glb",
+	&"culvert_wall": "res://assets/models/props/culvert_wall.glb",
+	&"culvert_kerb": "res://assets/models/props/culvert_kerb.glb",
+	&"log_tunnel_side": "res://assets/models/props/log_tunnel_side.glb",
+	&"log_tunnel_roof": "res://assets/models/props/log_tunnel_roof.glb",
+	&"log_tunnel_cap": "res://assets/models/props/log_tunnel_cap.glb",
 }
 ## Each dressed block kind's prop, and how it is laid. A kind not listed keeps its box.
 @export var kind_props: Dictionary[StringName, StringName] = {
@@ -138,7 +152,22 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY }
 @export var model_lays: Dictionary[StringName, Lay] = {
 	&"logstack": Lay.GRID, &"crate": Lay.GRID, &"tyre": Lay.GRID, &"pine": Lay.GRID,
 	&"bin_green": Lay.GRID, &"bin_steel": Lay.GRID, &"bin_teal": Lay.GRID, &"units": Lay.GRID,
+	&"log_tunnel_side": Lay.SIDE, &"log_tunnel_roof": Lay.LINED,
 }
+## SIDE looks this far (m) across a tunnel wall for the wall across from it.
+@export var side_reach: float = 3.0
+## LINED's caps: the model laid over the rest of a box above a lined model, stretched to it from `lined_cap_from` m
+## over the box's foot (down over the lined model's shoulders: WG4's mound earth over the log, from where the earth
+## heaped against it starts, log_tunnel.py WEDGE_FOOT); none where less than `lined_min_cap` m is left over the lined
+## model's top.
+@export var lined_caps: Dictionary[StringName, StringName] = {&"log_tunnel_roof": &"log_tunnel_cap"}
+@export var lined_cap_from: float = 0.5
+@export var lined_min_cap: float = 0.02
+## FIT models stood on the ground under the box's middle (WG4: the tyres and the pickup, on a slope too): the model's
+## own y = 0 meets the ground there and its top the box's, so what is under its y = 0 (a skirt) runs into the ground
+## the box sinks into (build_map's SINK) and the model is never sunk or lifted by the slope. Fitted to the whole box as
+## FIT does where the skirt would reach under the box.
+@export var grounded: PackedStringArray = PackedStringArray(["tractor_tyre", "tractor_tyre_stack", "pickup"])
 ## GRID's cells (m): x along the box's long side, y up (0: one layer the box's height), z across. Cordwood a metre and
 ## a half long a stack, plywood crates 1.2 m long, a metre deep and 1.15 m high on their pallets (DM1: two high in
 ## Depot's 2.4 m crate walls, one in its waist cover), tyres in stacks, a spruce every metre and a half; The Street's bins side
