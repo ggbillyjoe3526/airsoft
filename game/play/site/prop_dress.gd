@@ -14,7 +14,8 @@ extends Node3D
 ## A prop takes the baked light near this far (m) over its foot, from faces facing any way (BakedLightNear.at).
 const LIGHT_LIFT := 0.5
 
-var _materials: Dictionary[float, ShaderMaterial] = {} # by roughness: the shared one and each model_roughness
+## By roughness (x) and wear (y): the shared one and each model_roughness or model_wear.
+var _materials: Dictionary[Vector2, ShaderMaterial] = {}
 var _cfg: PropDressConfig = null
 var _views: Dictionary[StringName, Array] = {} # each model's MultiMeshInstance3Ds, a chunk each
 var _meshes: Dictionary[StringName, Mesh] = {}
@@ -44,7 +45,7 @@ static func build(map: MapData, cfg: PropDressConfig, paint: Callable = Callable
 	var dress := PropDress.new()
 	dress.name = "Props"
 	dress._cfg = cfg
-	dress._materials[cfg.roughness] = _new_material(cfg.roughness, cfg.metallic)
+	dress._materials[Vector2(cfg.roughness, cfg.wear)] = _new_material(cfg.roughness, cfg.metallic, cfg.wear)
 	dress._placed = placed
 	dress._meshes = meshes
 	for model: StringName in placed:
@@ -92,23 +93,24 @@ func placed() -> Dictionary[StringName, PropLayout.Placed]:
 ## The materials drawn, to warm their shaders before play.
 func materials() -> Array[Material]:
 	var out: Array[Material] = []
-	for rough: float in _materials:
-		out.append(_materials[rough])
+	for key: Vector2 in _materials:
+		out.append(_materials[key])
 	return out
 
 
-## Model `model`'s material: its own roughness's (PropDressConfig.model_roughness), else the shared one.
+## Model `model`'s material: its own roughness's and wear's (PropDressConfig.model_roughness, model_wear), else the
+## shared one.
 func _material_of(model: StringName) -> ShaderMaterial:
-	var rough: float = _cfg.model_roughness.get(model, _cfg.roughness)
-	if not _materials.has(rough):
-		_materials[rough] = _new_material(rough, _cfg.metallic)
-	return _materials[rough]
+	var key := Vector2(_cfg.model_roughness.get(model, _cfg.roughness), _cfg.model_wear.get(model, _cfg.wear))
+	if not _materials.has(key):
+		_materials[key] = _new_material(key.x, _cfg.metallic, key.y)
+	return _materials[key]
 
 
-## A prop material drawn `rough` and `metallic`, each instance painted by its custom data (DM1) and perforated where
-## its model's faces say so.
-static func _new_material(rough: float, metallic: float) -> ShaderMaterial:
-	var mat := LookMaterials.vertex_colour(rough, metallic)
+## A prop material drawn `rough` and `metallic` and worn `wear` (SL2), each instance painted by its custom data (DM1)
+## and perforated where its model's faces say so.
+static func _new_material(rough: float, metallic: float, wear: float) -> ShaderMaterial:
+	var mat := LookMaterials.vertex_colour(rough, metallic, Color.WHITE, false, wear)
 	mat.set_shader_parameter(&"paint_by_custom", true)
 	mat.set_shader_parameter(&"perforations", true)
 	return mat

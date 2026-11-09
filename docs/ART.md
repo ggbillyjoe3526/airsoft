@@ -24,8 +24,8 @@ sets the **colour, light and materials, not what may appear** (owner, 2026-10-31
 
 The Dev 2 look (Valorant's forms with Breath of the Wild's light, clean vibrant paint) is history: `docs/DECISIONS.md`.
 Built in steps: SL1 the light, grade and paint; SL2 material wear in the shared shaders; SL3 the models repainted
-(Depot's trusses and roof); SL4 players, replicas and UI. Until SL2 and SL3 land, some sections below still describe
-the clean Dev 2 surfaces.
+(Depot's trusses and roof); SL4 players, replicas and UI. Until SL3 lands, some sections below still describe the
+Dev 2 models' paint.
 
 ## The field kit
 
@@ -148,7 +148,13 @@ metalness; the light does the rest.
   highlight".
 - **Grit is real (SL1).** `SiteLook.grit` (0.6) scales the stains, chips, rust feet, grime bands and the plywood's
   photo grain on the map's own surfaces; the floor's slab set, Depot's floated concrete, draws at full grain
-  (`SiteLook.slab_grain` 1). The models get their wear in SL2.
+  (`SiteLook.slab_grain` 1).
+- **The models wear too (SL2).** Every map model drawn in vertex colours (Depot's walls, crates, containers and
+  racking, Woodland's kit and trunks, the CC0 props) is worn in world space by `look_vertex.gdshader`: dark-earth grime
+  climbs up to 0.9 m from its foot, ragged; thin streaks run down its sides; broad faint stains; pale dust settles on
+  its tops. A material's `wear` (`PropDressConfig.wear` 1, `model_wear`: the racking 0.35, tree crowns 0) times the
+  look's (`LookConfig.wear`, `grime`, `dust`). The greybox, bushes, woods, skyline and flags draw clean. Edge scuffs are
+  the models' own paint (SL3).
 - **Marks that stay:** zone stencils in ink, joints, seams, screws, sheet panels, bay lines and hazard stripes in
   yellow and ink, the white chevron on containers.
 

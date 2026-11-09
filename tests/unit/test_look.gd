@@ -179,6 +179,21 @@ func test_the_shared_materials_draw_in_the_shared_light() -> void:
 	assert_almost_eq(m.get_shader_parameter(&"metallic") as float, 0.2, 0.0001)
 
 
+## SL2: the models' wear is in the shared vertex-colour shader, off unless a material asks for it, and scaled by the
+## look's wear, its grime darker than its dust.
+func test_a_model_is_worn_only_when_its_material_asks() -> void:
+	assert_almost_eq(LookMaterials.vertex_colour(0.4, 0.0).get_shader_parameter(&"wear") as float, 0.0, 0.0001,
+			"clean by default: the greybox, bushes, woods and flags")
+	var worn := LookMaterials.vertex_colour(0.4, 0.0, Color.WHITE, false, 0.7)
+	assert_almost_eq(worn.get_shader_parameter(&"wear") as float, 0.7, 0.0001)
+	var code := LookMaterials.VERTEX_SHADER.code
+	for global: String in ["look_wear", "look_grime", "look_dust"]:
+		assert_true(code.contains("global uniform") and code.contains(global), "the shader reads %s" % global)
+	assert_true(code.contains("wear * look_wear"), "a material's wear scaled by the look's")
+	assert_gt(look.wear, 0.0, "the look wears its models")
+	assert_lt(look.grime.get_luminance(), look.dust.get_luminance(), "grime is darker than dust")
+
+
 func test_the_presets_scale_the_effects_and_low_draws_none() -> void:
 	var low := table.preset(&"low")
 	assert_eq(low.global_illumination, GraphicsQuality.GlobalIllumination.OFF)
