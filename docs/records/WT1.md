@@ -1,6 +1,6 @@
 # WT1 · Woodland's trees: pines, oaks, birches, thicket spruces and the far wood from the owner's photos (Dev)
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -11,7 +11,7 @@
 | 2026-11-09 | 3 | build thread | as attempt 1 | Retry 7/8 | fidelity: oak's dome widest too high with sky through it; grown pine's spire top; young pine's closed cone above 4 m; birch's twigs don't hang, marks don't read |
 | 2026-11-09 | 4 | build thread | see Verified | Retry 7/8 (no auto-accept: check 1) | fidelity (measured): oak's dome still shows sky in its upper half (2,692 px in the quarter view, 5,531 square on) and its shoulder is square (W/H at 0.85 of the height 0.98 against the photo's 0.82); pines and birch met |
 | 2026-11-09 | 5 (owner's extra oak pass, decision card) | build thread | as attempt 4 | Retry 7/8 (no auto-accept: check 1) | fidelity (measured): shoulder fixed (width at 0.85 of the height 0.77 against the photo's 0.82), but sky still shows through the upper dome (2,876 px square on, 1,625 in the quarter view: 7.9 % and 3.7 % of its crown against the photo's 1.0 %) |
-| 2026-11-09 | 5, the critic's must-fix | build thread | as attempt 4 | pending | – |
+| 2026-11-09 | 5, the critic's must-fix | build thread | as attempt 4 | Accept 8/8 | – (gate met: enclosed sky in the oak's upper dome 0.4 % square on and 0.0 % in the quarter view against the photo's 1.0 %; width at 0.85 of the height 0.81 and 0.83 against 0.82) |
 
 ## Goal
 
