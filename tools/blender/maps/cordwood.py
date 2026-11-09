@@ -36,12 +36,10 @@ SECTION, DEPTH, HEIGHT = 2.0, 1.0, 1.8
 TOPS = 7                # points along the section where its ragged top is set
 SAG = 0.45              # how far under the cell's top the stack's top dips at most
 PROUD = (0.015, 0.1)    # how far a piece's end stands out of the core: the face's relief
-GAP = 0.05              # a piece's share shrunk from its neighbours: the dark gaps between them
-ROWS = 11
-ACROSS = 9              # pieces' bases along a row (each row is a strip of wedges, up and down in turn)
-ROUND = 0.35             # the share of pieces that are rounds or half rounds
-BAND = 0.5              # the share of pieces showing a band of bark on their round side
-SIDED = 0.0             # the share of pieces whose short sides are drawn (the rest show the core's dark behind)
+ROWS = 10
+ACROSS = 10             # pieces along a row, on average
+ROUND = 0.3             # the share of pieces that are rounds or half rounds
+BAND = 0.75             # the share of pieces showing a band of bark on their round side
 LOOSE = 6               # split pieces lying across the top
 # the boards (m)
 BOARDS_LEN, BOARDS_DEPTH, BOARDS_TOP = 6.4, 1.0, 2.0
@@ -56,7 +54,7 @@ BEARER = 0.1
 def cordwood(seed: int) -> object:
     hs.reset()
     wk.paint_all()
-    mk.paints({"Gap": 0x47433C})  # dull: a warm brown here reads near Beta orange
+    mk.paints({"Gap": 0x2E2924})  # dark and dull: a warm brown here reads near Beta orange
     r = wk.rng(seed)
     b = hs.Builder("Cordwood", [])
     half_x, half_y = SECTION * 0.5, DEPTH * 0.5
@@ -97,26 +95,35 @@ def cordwood(seed: int) -> object:
                                         (bulge, y0, z1 - 0.012)]), mat, Vector((s, 0, 0.6)))
             q = wk.verts(b, [(base, -core, z0), (base, core, z0), (base, core, z1), (base, -core, z1)])
             wk.face(b, q, "Gap", Vector((s, 0, 0)))
-    # the rows of pieces' ends on each face, following the ragged top so they wave up and down along the stack
+    # the rows of pieces' ends on each face, in rows following the ragged top, each row's pieces their own sizes and
+    # shapes: split wedges (most, as in the photos) turned every way, their round side bowed and barked, and rounds
     for side in (1.0, -1.0):
         out = Vector((0.0, side, 0.0))
-        shares = [0.0] + [(k + r.uniform(-0.2, 0.2)) / ROWS for k in range(1, ROWS)] + [1.0]
         for k in range(ROWS):
-            for poly in row_pieces(r, half_x, lambda x, a=shares[k]: top_at(x) * a,
-                                   lambda x, a=shares[k + 1]: top_at(x) * a):
-                cx = sum(p[0] for p in poly) / len(poly)
-                cz = sum(p[1] for p in poly) / len(poly)
-                band = r.random() < BAND
-                if r.random() < ROUND:
-                    # a round or a half round: an unsplit billet's end, or one split once, its bark showing all round
-                    poly, cx, cz = round_end(r, poly)
-                    band = False
-                outline = [(cx + (x - cx) * (1.0 - GAP), side * core, cz + (z - cz) * (1.0 - GAP)) for x, z in poly]
-                # the bark on the piece's longest edge: a wedge's round side
-                n = len(outline)
-                longest = max(range(n), key=lambda e: (Vector(outline[(e + 1) % n]) - Vector(outline[e])).length)
+            x = -half_x + r.uniform(0.0, 0.08)
+            while x < half_x - 0.04:
+                w = SECTION / ACROSS * r.uniform(0.75, 1.3)
+                cx = min(x + w * 0.5, half_x - w * 0.4)
+                row = top_at(cx) / ROWS
+                cz = row * (k + 0.5) + r.uniform(-0.15, 0.15) * row
+                rad = min(w, row) * 0.5 * r.uniform(1.3, 1.5)
+                x += w
+                kind = "round" if r.random() < ROUND else ("wedge" if r.random() < BAND else "heart")
+                if kind == "round":
+                    m = 6 if r.random() < 0.6 else 5
+                    turn = r.uniform(0.0, math.pi)
+                    poly = [(cx + rad * math.cos(turn + 2 * math.pi * i / m), cz + rad * math.sin(turn + 2 * math.pi * i / m))
+                            for i in range(m)]
+                else:
+                    # a wedge, its point toward the log's heart, turned any way
+                    t = r.uniform(0.0, 2.0 * math.pi)
+                    d, q = (math.cos(t), math.sin(t)), (-math.sin(t), math.cos(t))
+                    poly = [(cx - d[0] * rad * 0.95, cz - d[1] * rad * 0.95),
+                            (cx + d[0] * rad * 0.6 + q[0] * rad, cz + d[1] * rad * 0.6 + q[1] * rad),
+                            (cx + d[0] * rad * 0.6 - q[0] * rad, cz + d[1] * rad * 0.6 - q[1] * rad)]
+                outline = [(px, side * core, pz) for px, pz in poly]
                 end_mat = r.choices(("Cut", "Heart", "Ring", "Split"), (3, 5, 2, 2))[0]
-                wk.split_end(b, outline, r.uniform(*PROUD), out, end_mat, longest, r.random() < SIDED, band)
+                piece_end(b, outline, r.uniform(*PROUD), out, end_mat, kind)
     # split pieces lying across the top here and there, on the ragged top
     for k in range(LOOSE):
         x = -half_x + SECTION * (k + r.uniform(0.2, 0.8)) / LOOSE
@@ -128,55 +135,31 @@ def cordwood(seed: int) -> object:
     return ob
 
 
-def row_pieces(r, half_x: float, z0, z1) -> list:
-    """A row of split pieces' ends (outlines of (x, z)) between the heights z0(x) and z1(x): wedges pointing up and
-    down in turn, their bases spaced unevenly, a few neighbours merged into a quarter or half round."""
-    n = ACROSS
-    bottom = [-half_x + 2.0 * half_x * (k + r.uniform(-0.2, 0.2)) / n for k in range(n + 1)]
-    bottom[0], bottom[-1] = -half_x, half_x
-    top = [-half_x] + [(bottom[i] + bottom[i + 1]) * 0.5 + r.uniform(-0.04, 0.04) for i in range(n)] + [half_x]
-    lo = [(x, z0(x)) for x in bottom]
-    hi = [(x, z1(x)) for x in top]
-    tris = [[lo[0], hi[1], hi[0]]]
-    for i in range(n):
-        tris.append([lo[i], lo[i + 1], hi[i + 1]])
-        tris.append([hi[i + 1], lo[i + 1], hi[i + 2]])
-    out = []
-    i = 0
-    while i < len(tris):
-        if i + 1 < len(tris) and r.random() < 0.3:
-            pts = []
-            for p in tris[i] + tris[i + 1]:
-                if all(abs(p[0] - q[0]) + abs(p[1] - q[1]) > 1e-6 for q in pts):
-                    pts.append(p)
-            out.append(sorted_outline(pts))
-            i += 2
-        else:
-            out.append(tris[i])
-            i += 1
-    return [p for p in out if len(p) >= 3]
-
-
-def round_end(r, poly: list) -> tuple:
-    """A round (a hexagon) or a half round (four steps of arc on a flat side, up or down) in the place of piece
-    `poly`, as big as its bounds; returns its outline and middle."""
-    xs, zs = [p[0] for p in poly], [p[1] for p in poly]
-    cx, cz = (min(xs) + max(xs)) * 0.5, (min(zs) + max(zs)) * 0.5
-    rad = 0.5 * min(max(xs) - min(xs), max(zs) - min(zs)) * r.uniform(1.0, 1.15)
-    if r.random() < 0.5:
-        return [(cx + rad * math.cos(math.pi * k / 3), cz + rad * math.sin(math.pi * k / 3)) for k in range(6)], cx, cz
-    flip = 1.0 if r.random() < 0.5 else -1.0
-    base = cz - flip * rad * 0.4
-    arc = [(cx + rad * math.cos(math.pi * k / 4), base + flip * rad * math.sin(math.pi * k / 4)) for k in range(5)]
-    pts = sorted_outline(arc)
-    return pts, cx, sum(p[1] for p in pts) / len(pts)
-
-
-def sorted_outline(pts: list) -> list:
-    """Points (x, z) wound round their middle."""
-    cx = sum(p[0] for p in pts) / len(pts)
-    cz = sum(p[1] for p in pts) / len(pts)
-    return sorted(pts, key=lambda p: math.atan2(p[1] - cz, p[0] - cx))
+def piece_end(b: hs.Builder, outline: list, depth: float, out: Vector, end_mat: str, kind: str) -> None:
+    """A piece's end standing `depth` proud of the stack's face (outline: points on the face plane). A "wedge" (a
+    split piece, as most in the photos) has its longest side bowed out into the log's round, a band of bark along it;
+    a "round" (a billet or half round) a ring of bark all round its sawn face; a "heart" (split from the log's middle)
+    no bark showing. The sawn face stands a few millimetres proud of the bark behind it."""
+    pts = [Vector(p) + out * depth for p in outline]
+    n = len(pts)
+    c = sum(pts, Vector()) / n
+    if kind == "heart":
+        wk.face(b, wk.verts(b, pts), end_mat, out)
+        return
+    if kind == "round":
+        wk.face(b, wk.verts(b, pts), "Bark", out)
+        wk.face(b, wk.verts(b, [p.lerp(c, 0.25) + out * 0.008 for p in pts]), end_mat, out)
+        return
+    e = max(range(n), key=lambda i: (pts[(i + 1) % n] - pts[i]).length)
+    a, z = pts[e], pts[(e + 1) % n]
+    mid = (a + z) * 0.5
+    bow = mid + (mid - c).normalized() * (z - a).length * 0.22
+    ring = pts[:e + 1] + [bow] + pts[e + 1:]
+    wk.face(b, wk.verts(b, ring), "Bark", out)
+    inner = list(ring)
+    for i in (e, e + 1, (e + 2) % len(ring)):
+        inner[i] = ring[i].lerp(c, 0.3)
+    wk.face(b, wk.verts(b, [p + out * 0.008 for p in inner]), end_mat, out)
 
 
 def boards() -> object:

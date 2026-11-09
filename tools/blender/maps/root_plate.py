@@ -47,7 +47,10 @@ def plate(b: hs.Builder, r) -> None:
     rims, inner = [], []
     for i in range(RIM):
         a = 2.0 * math.pi * i / RIM
-        notch = 0.84 if r.random() < 0.3 else r.uniform(0.93, 1.0)
+        # big lobes where clods hang on, bites where they broke away: a ragged disc, not a drum
+        notch = (1.0 + 0.1 * math.sin(3.0 * a + 0.7) + 0.06 * math.sin(5.0 * a + 2.1)) * (
+            0.82 if r.random() < 0.3 else r.uniform(0.94, 1.02))
+        notch = min(notch, 1.0)
         rims.append((math.cos(a) * PLATE.y * notch, max(-SINK, cz + math.sin(a) * PLATE.z * notch)))
         inner.append((math.cos(a) * PLATE.y * 0.5 * r.uniform(0.9, 1.1), cz + math.sin(a) * PLATE.z * 0.5 * r.uniform(0.9, 1.1)))
     faces = {}
@@ -56,7 +59,9 @@ def plate(b: hs.Builder, r) -> None:
         # the plate a metre thick out to its rim, its torn face's foot an earth lip standing out over the pit
         ring = wk.verts(b, [(PLATE_X + rim_x + wk.lump(Vector((y, z, side)), 0.4, 1.0) * 0.05
                              + (0.14 if side > 0 and z < cz - PLATE.z * 0.55 else 0.0), y, z) for y, z in rims])
-        mids = wk.verts(b, [(PLATE_X + in_x + wk.lump(Vector((y, z, side)), 0.3, 2.0) * 0.07, y, z) for y, z in inner])
+        # the torn face lumpy with clods and hollows, not a flat end
+        mids = wk.verts(b, [(PLATE_X + in_x + wk.lump(Vector((y, z, side)), 0.3, 2.0) * (0.16 if side > 0 else 0.07),
+                             y, z) for y, z in inner])
         for i in range(RIM):
             j = (i + 1) % RIM
             if side > 0:
@@ -71,18 +76,29 @@ def plate(b: hs.Builder, r) -> None:
     for i in range(RIM):
         j = (i + 1) % RIM
         my, mz = (rims[i][0] + rims[j][0]) * 0.5, (rims[i][1] + rims[j][1]) * 0.5 - cz
-        wk.face(b, [front[i], front[j], back[j], back[i]], "MossDeep" if mz > PLATE.z * 0.7 else "EarthDark",
-                Vector((0.0, my, mz)))
+        mat = "MossDeep" if mz > PLATE.z * 0.7 else ("Earth" if wk.lump(Vector((my, mz, 0.0)), 0.4, 4.0) > 0.0
+                                                      else "EarthDark")
+        wk.face(b, [front[i], front[j], back[j], back[i]], mat, Vector((0.0, my, mz)))
+    # clods of earth and moss hanging on the rim, breaking its outline
+    for k in range(9):
+        a = 2.0 * math.pi * (k + r.uniform(0.2, 0.8)) / 9
+        if math.sin(a) < -0.5:
+            continue
+        at = Vector((PLATE_X + r.uniform(-0.25, 0.3), math.cos(a) * PLATE.y * 0.86, cz + math.sin(a) * PLATE.z * 0.86))
+        s = r.uniform(0.16, 0.26)
+        wk.blob(b, at, Vector((s * 1.3, s, s * 0.9)), 1, r,
+                lambda c, n: "MossDeep" if n.z > 0.5 and c.z > cz + 0.5 else ("Earth" if n.x > 0 else "EarthDark"),
+                rough=0.35, seed=40.0 + k)
     # root stubs radiating out of the rim, snapped where the ground held them
     for k in range(13):
         a = 2.0 * math.pi * (k + r.uniform(0.1, 0.9)) / 13
         if math.sin(a) < -0.6:
             continue  # none down into the ground
-        ln = r.uniform(0.15, 0.32)
+        ln = r.uniform(0.2, 0.45)
         d = Vector((r.uniform(-0.3, 0.3), math.cos(a), math.sin(a))).normalized()
         base = Vector((PLATE_X + r.uniform(-0.1, 0.1), math.cos(a) * PLATE.y * 0.88, cz + math.sin(a) * PLATE.z * 0.88))
-        wk.branch(b, [tuple(base), tuple(base + d * ln * 0.6), tuple(base + d * ln)], 0.045, 0.015, 4,
-                  "RootLight" if k % 3 == 0 else "Root", "Root")
+        wk.branch(b, [tuple(base), tuple(base + d * ln * 0.6 + Vector((0.0, 0.0, r.uniform(-0.06, 0.06)))),
+                      tuple(base + d * ln)], 0.05, 0.015, 4, "Root", "Root")
 
 
 def build() -> object:
@@ -105,7 +121,7 @@ def build() -> object:
             y = max(-0.9, min(0.9, y0 + math.cos(wander) * reach * t))
             z = max(-0.05, min(2.0, z0 + math.sin(wander) * reach * t - (t ** 2) * 0.25))
             pts.append((face_x + math.sin(t * math.pi) * out, y, z))
-        wk.branch(b, pts, r.choice((0.03, 0.045)), 0.012, 5, "RootLight" if k % 4 == 0 else "Root", "Root")
+        wk.branch(b, pts, r.choice((0.03, 0.045)), 0.012, 5, "RootLight" if k % 7 == 0 else "Root", "Root")
     # the thick roots at the trunk's foot, flaring into the plate
     for k in range(4):
         a = math.pi * 0.25 + math.pi * 0.5 * k
@@ -163,11 +179,16 @@ def build() -> object:
         for z in (0.32, 0.9, 1.45, 1.85):
             if z > top - 0.3:
                 continue
-            # a spruce's branches hang in tiers of long ragged sprays, each drooping from the trunk
+            # the shade inside the crown: small dark clumps along the trunks
             c = Vector((x + r.uniform(-0.15, 0.15), r.uniform(-0.15, 0.15), z + r.uniform(-0.05, 0.05)))
-            wk.blob(b, c, Vector((r.uniform(0.5, 0.65), r.uniform(0.7, 0.9), 0.38)), 2, r,
-                    lambda c, n: "NeedleDark" if n.z < 0.2 or wk.lump(c, 0.35, 3.0) > 0.3 else "Needle",
-                    rough=0.7, seed=20.0 + k, flat_base=-SINK)
+            wk.blob(b, c, Vector((r.uniform(0.36, 0.46), r.uniform(0.4, 0.5), 0.3)), 1, r,
+                    lambda c, n: "NeedleDark", rough=0.6, seed=20.0 + k, flat_base=-SINK)
+            # a spruce's branches over it: flat needle sprays hanging out from the trunk either side, tier on tier
+            for s in (1.0, -1.0):
+                heading = math.pi * 0.5 * s + r.uniform(-0.6, 0.6) + (0.4 if x > 0.0 else -0.4) * r.random()
+                wk.pinna_frond(b, c + Vector((0.0, s * 0.12, 0.12)), heading, math.radians(r.uniform(10.0, 35.0)),
+                               r.uniform(1.0, 1.25), r.uniform(0.28, 0.34), 5, math.radians(r.uniform(60.0, 90.0)), r,
+                               ("Needle", "NeedleDark", "Needle"))
             k += 1
     # ferns growing on the plate's top (photo 2)
     for k in range(3):

@@ -5,8 +5,9 @@ From the owner's photos (references/maps/woodland/11-bush): a hazel-like woodlan
 fanning out into a dome of leaf clumps, its outline lumpy and uneven, darker inside and underneath, lighter where the
 sun catches its top; the young spruce and scrub in the other photos the same dense, rounded mass.
 
-Stylised to the art direction (solid leaf clumps, Valorant-led with BOTW light, not see-through leaf cards): a dark
-leafy mass covered in small jagged leaf clusters on a few bare stems, so a standing player hidden in one is hidden
+Stylised to the art direction (solid leaf clumps, Valorant-led with BOTW light, not see-through leaf cards): eleven
+sprays of small ragged leaf clumps fanning out of a dark heart on a few bare stems, their tips drooping, the outline
+broken between them, so a standing player hidden in one is hidden
 (BBs pass straight through, Foliage, and the model has no collider). Fills the foliage's ellipsoid's box: 2 m across,
 1.7 m tall, its ground line at y = 0; the game stretches it to each bush. Budget 1,500 triangles
 (/mnt/project-files/art/woodland-model-list.md). Plain vertex colours, no texture.
@@ -27,42 +28,30 @@ from mathutils import Vector  # noqa: E402
 
 BUDGET = 1500
 RADIUS, HEIGHT = 1.0, 1.7
-CLUSTERS = 36
-SKIRT = 11
-STEMS = 4
-SPRAYS = [Vector(v).normalized() for v in ((1.0, 0.2, 0.6), (-0.7, 0.8, 0.5), (-0.4, -0.9, 0.7), (0.5, -0.6, 0.2),
-                                          (0.1, 0.3, 1.0), (-1.0, -0.1, 0.1), (0.6, 0.9, 0.0))]
-LEAVES = 540        # small leaves over the outline
-# the clumps: middle (x, y, z) and half size (m), in the 2 m wide, 1.7 m tall box
-CLUMPS = (
-    ((0.0, 0.0, 1.0), (0.66, 0.62, 0.6)),
-    ((0.45, 0.25, 0.62), (0.52, 0.5, 0.5)),
-    ((-0.48, 0.2, 0.5), (0.5, 0.52, 0.5)),
-    ((0.15, -0.48, 0.58), (0.52, 0.48, 0.5)),
-    ((-0.25, -0.35, 1.12), (0.45, 0.45, 0.44)),
-    ((0.3, 0.45, 1.22), (0.4, 0.4, 0.38)),
-)
-
-
-def leaf(b: hs.Builder, centre: Vector, normal: Vector, size: float, r, mat: str) -> None:
-    """One small leaf: a pointed diamond at `centre` facing `normal`, turned its own way and tipped down a little."""
-    side, up = wk.frame(normal)
-    a = r.uniform(0.0, 2.0 * math.pi)
-    along = side * math.cos(a) + up * math.sin(a)
-    across = normal.cross(along).normalized()
-    pts = [centre - along * size * 0.5, centre + across * size * 0.22 + normal * size * 0.08,
-           centre + along * size * 0.5 - normal * size * 0.1, centre - across * size * 0.22 + normal * size * 0.08]
-    wk.face(b, wk.verts(b, pts), mat, normal)
+STEMS = 5
+# the sprays of shoots the bush is made of (photos: a hazel's leafy sprays fanning out of the stems, gaps between
+# them): direction from the heart, clumps along it
+SPRAYS = [Vector(v).normalized() for v in (
+    (1.0, 0.15, 0.35), (0.45, 0.9, 0.5), (-0.55, 0.8, 0.3), (-1.0, -0.1, 0.55), (-0.4, -0.95, 0.25),
+    (0.55, -0.8, 0.6), (0.2, 0.25, 1.0), (0.8, -0.3, 0.05), (-0.75, 0.3, 0.0), (0.1, 0.85, -0.05),
+    (-0.3, -0.5, 1.0))]
+ALONG = 5           # clumps along a spray
+CORE = 10           # dark clumps filling the heart, so nobody is seen through it
 
 
 def surface(d: Vector) -> Vector:
-    """The bush's outline in direction `d` from its heart: a dome wider than tall, lumpy (clumps of shoots) and
-    ragged at the top."""
-    bump = 1.0 + 0.22 * wk.lump(d * 1.3, 0.45, 5.0) + 0.1 * wk.lump(d * 3.0, 0.45, 9.0)
-    # sprays of shoots pushing out of the dome, breaking its outline
-    for s in SPRAYS:
-        bump += 0.22 * max(0.0, d.dot(s)) ** 12
-    return Vector((d.x * 0.92, d.y * 0.92, 0.62 + d.z * 0.95)) * bump
+    """The bush's outline in direction `d` from its heart: a dome a little wider than tall, its middle 0.62 up."""
+    bump = 1.0 + 0.12 * wk.lump(d * 1.3, 0.45, 5.0)
+    return Vector((d.x * 0.95, d.y * 0.95, 0.62 + d.z * 0.95)) * bump
+
+
+def shade(heart: float):
+    """A clump's face colours: sunlit on top, darker down its sides and under, darkest in the bush's heart (`heart`
+    0 at the outline, 1 in the middle)."""
+    def pick(c: Vector, n: Vector) -> str:
+        v = 0.5 * n.z + 0.2 - 0.7 * heart + 0.25 * wk.lump(c, 0.25, 3.0)
+        return "LeafSun" if v > 0.72 else ("LeafLight" if v > 0.3 else ("Leaf" if v > 0.0 else "LeafDark"))
+    return pick
 
 
 def build() -> object:
@@ -70,38 +59,32 @@ def build() -> object:
     wk.paint_all()
     r = wk.rng(1100)
     b = hs.Builder("Bush", [])
-    # the leafy mass under the leaves, the outline's own shape a little inside it, dark and faceted: what shows
-    # between the leaves is the shade inside the bush, not a ball
-    import bmesh
-    tmp = bmesh.new()
-    bmesh.ops.create_icosphere(tmp, subdivisions=3, radius=1.0)
-    vmap = {v: b.bm.verts.new(surface(v.co.normalized()) * 0.88) for v in tmp.verts}
-    for f in tmp.faces:
-        vs = [vmap[v] for v in f.verts]
-        c = sum((v.co for v in vs), Vector()) / 3.0
-        wk.face(b, vs, "LeafDark" if wk.lump(c, 0.2, 4.0) > 0.2 else "NeedleDark", c - Vector((0.0, 0.0, 0.62)))
-    tmp.free()
-    # small leaves all over the outline (a golden-angle spiral, jittered so it never reads as rows), each facing out,
-    # sunlit on top and darker down the sides and under
-    for k in range(LEAVES):
-        zt = 1.0 - 1.5 * (k + 0.5) / LEAVES
-        a = k * 2.39996 + r.uniform(-0.2, 0.2)
-        ring = math.sqrt(max(0.0, 1.0 - zt * zt))
-        d = Vector((math.cos(a) * ring, math.sin(a) * ring, zt)).normalized()
-        at = surface(d) * r.uniform(0.885, 0.915)
-        if at.z < 0.04:
-            at.z = r.uniform(0.04, 0.2)
-        normal = (d + Vector((0.0, 0.0, 0.5))).normalized()
-        v = normal.z + 0.3 * wk.lump(at, 0.3, 3.0) + r.uniform(-0.15, 0.15)
-        mat = "LeafSun" if v > 0.85 else ("LeafLight" if v > 0.6 else ("Leaf" if v > 0.3 else "LeafDark"))
-        leaf(b, at, normal, r.uniform(0.13, 0.17), r, mat)
-    # the stems, fanning out of the ground into the leaves, seen only low down between them
+    heart = Vector((0.0, 0.0, 0.62))
+    # the heart: big dark clumps, the shade inside the bush that shows between the sprays
+    for k in range(CORE):
+        a = 2.0 * math.pi * k / CORE + r.uniform(-0.2, 0.2)
+        d = Vector((math.cos(a), math.sin(a), r.uniform(-0.3, 0.5))).normalized()
+        at = heart + (surface(d) - heart) * 0.4
+        wk.blob(b, at, Vector((0.38, 0.38, 0.32)) * r.uniform(0.9, 1.1), 1, r, shade(0.9), 0.3, k * 3.1,
+                flat_base=0.02)
+    # the sprays: clumps from the heart out past the outline, smaller and lighter towards their tips, which droop
+    for j, d in enumerate(SPRAYS):
+        side, up = wk.frame(d)
+        for i in range(ALONG):
+            t = 0.45 + 0.62 * i / (ALONG - 1)
+            dd = (d + side * r.uniform(-0.15, 0.15) + up * r.uniform(-0.12, 0.12)
+                  - Vector((0.0, 0.0, 0.25 * max(0.0, t - 0.8)))).normalized()
+            at = heart + (surface(dd) - heart) * t
+            at.z = max(at.z, 0.12)
+            size = Vector((0.29, 0.29, 0.22)) * (1.15 - 0.45 * (t - 0.45)) * r.uniform(0.85, 1.15)
+            wk.blob(b, at, size, 1, r, shade(max(0.0, 0.9 - t)), 0.5, j * 5.7 + i, flat_base=0.02)
+    # the stems, fanning out of the ground into the sprays, seen low down between them
     for k in range(STEMS):
         a = 2.0 * math.pi * k / STEMS + r.uniform(-0.2, 0.2)
-        lean = r.uniform(0.25, 0.45)
+        lean = r.uniform(0.3, 0.5)
         base = Vector((math.cos(a) * 0.08, math.sin(a) * 0.08, -0.02))
-        top = base + Vector((math.cos(a) * lean, math.sin(a) * lean, 0.5))
-        wk.branch(b, [tuple(base), tuple(base.lerp(top, 0.5) + Vector((0, 0, 0.03))), tuple(top)], 0.035, 0.018, 5,
+        top = base + Vector((math.cos(a) * lean, math.sin(a) * lean, 0.55))
+        wk.branch(b, [tuple(base), tuple(base.lerp(top, 0.5) + Vector((0, 0, 0.03))), tuple(top)], 0.04, 0.02, 5,
                   "Twig", "Twig")
     ob = b.build()
     wk.finish(ob, 8.0)  # faceted, as the look's other leaves: no smooth, glossy ball

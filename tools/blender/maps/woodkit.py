@@ -26,7 +26,7 @@ COLOURS = {
     "Bark": 0x5E5548, "BarkDark": 0x463F37, "BarkFurrow": 0x4F483E, "BarkGrey": 0x7A735C, "BarkLight": 0x7A7062,
     "Cut": 0xCEB888, "Heart": 0xC2AC7A, "Ring": 0xA89660, "Split": 0xC6B07E, "Weathered": 0x9C9484,
     "Rot": 0x686152, "Moss": 0x71864A, "MossDeep": 0x506A36, "Fungus": 0x8E866E, "FungusRim": 0xA89C80,
-    "Earth": 0x4C443A, "EarthDark": 0x36302A, "Root": 0x6A6254, "RootLight": 0x8E826C, "Stone": 0x8C8478,
+    "Earth": 0x4C443A, "EarthDark": 0x36302A, "Root": 0x564C42, "RootLight": 0x766C5E, "Stone": 0x8C8478,
     "Litter": 0x7C7A58, "Sawdust": 0xDCCBA0, "Soil": 0x8A8070, "SoilDark": 0x6E665A,
     "Fern": 0x6A9A48, "FernDark": 0x4A7438, "FernLight": 0x84B054, "FernStem": 0x5E7A3A,
     "Leaf": 0x467E3A, "LeafDark": 0x2F5A2E, "LeafLight": 0x5E9442, "LeafSun": 0x7BA84E, "Twig": 0x5A554A,
@@ -154,7 +154,8 @@ def log(b: hs.Builder, path: list, radii: list, sides: int, r: random.Random, ba
         rough: float = 0.06, furrows: int = 0, ends=("cut", "cut"), moss: float = 0.0, seed: float = 0.0) -> dict:
     """A bark-covered log along `path` (points), `radii` at each point, `sides` round, its radius roughened by up to
     `rough` of itself (furrows: every other side pressed in when `furrows` > 0, so the bark reads as ridged). Each end
-    is "cut" (a sawn face: bark rim, pale wood, darker heart), "sawn" (the same, plainer), "broken" (splinters
+    is "cut" (a sawn face: bark rim, pale wood, darker heart), "sawn" (the same, plainer), "plain" (the sawn face
+    alone), "broken" (splinters
     standing out of a rotten hollow),
     "rot" (a soft hollow end) or "none" (open, buried or hidden). Faces facing up get moss where `moss` > 0 (a share
     of them, in noise patches). Returns the rings' verts and each ring's frame."""
@@ -216,6 +217,9 @@ def end(b: hs.Builder, ring: list, centre: Vector, out: Vector, radius: float, k
         rim = verts(b, [centre + (v.co - centre) * 0.84 + out * 0.003 for v in ring])
         ring_band_flat(b, ring, rim, "BarkDark", out)
         fan(b, rim, centre + out * 0.003, lambda i: "Cut" if i % 4 else "Heart", out)
+        return
+    if kind == "plain":  # cheapest: the sawn face alone, its bark the log's own sides (many small rounds)
+        fan(b, ring, centre + out * 0.004, lambda i: "Heart" if i % 3 == 0 else "Cut", out)
         return
     if kind == "rot":
         rim = verts(b, [centre + (v.co - centre) * 0.8 + out * 0.01 for v in ring])
@@ -315,34 +319,6 @@ def wedge_end(b: hs.Builder, outline: list, depth: float, out: Vector, mats: tup
         face(b, [back[i], back[j], front[j], front[i]], mats[1] if i in bark_edges else mats[2], mid - c)
 
 
-def split_end(b: hs.Builder, outline: list, depth: float, out: Vector, end_mat: str, bark_edge: int,
-              sides: bool, band: bool = True) -> None:
-    """A split piece's end standing `depth` proud of a stack's face (outline: points on the face plane): its sawn face
-    in `end_mat` with a band of bark along edge `bark_edge` (a wedge's round side), and, with `sides`, its short sides
-    back to the face (else the dark core behind reads as the shadow between pieces). Without `band`, the end face
-    only (a piece split from the heart, no bark showing)."""
-    n = len(outline)
-    pts = [Vector(p) + out * depth for p in outline]
-    c = sum(pts, Vector()) / n
-    if not band:
-        face(b, verts(b, pts), end_mat, out)
-        return
-    a, z = bark_edge, (bark_edge + 1) % n
-    ia, iz = pts[a].lerp(c, 0.22), pts[z].lerp(c, 0.22)
-    band = verts(b, [pts[a], pts[z], iz, ia])
-    face(b, band, "BarkDark", out)
-    inner = [iz if i == z else ia if i == a else pts[i] for i in range(n)]
-    # the end face starts at the edge after the bark so its vertex order stays round the piece
-    order = [(z + k) % n for k in range(n)]
-    face(b, verts(b, [inner[i] for i in order]), end_mat, out)
-    if sides:
-        back = [Vector(p) for p in outline]
-        for i in range(n):
-            j = (i + 1) % n
-            mid = (back[i] + back[j]) * 0.5
-            face(b, verts(b, [back[i], back[j], pts[j], pts[i]]), "Bark" if i == a else "Split", mid - c + out * 0.0)
-
-
 def ridge(b: hs.Builder, x: float, w: float, z: float, h: float, half_depth: float, mat: str) -> None:
     """A split piece lying across a stack's top: a low three-sided ridge `w` either side of `x`, `h` over `z`, running
     the stack's depth (its ends hidden in the pieces on the faces)."""
@@ -437,92 +413,44 @@ def frond(b: hs.Builder, base: Vector, heading: float, rise: float, length: floa
             if t < under:
                 face(b, verts(b, [q - u * lift for q in quad]), mats[1], -u)
 
-def comb_frond(b: hs.Builder, base: Vector, heading: float, rise: float, length: float, width: float, pairs: int,
-               droop: float, r: random.Random, mats: tuple, under: float = 0.3, bare: int = 0) -> None:
-    """A fern frond drawn as a comb: its midrib arches out from `base` along `heading` (radians about up), rising at
-    `rise` and bending over more and more towards its tip, `droop` (radians) in all, with `pairs` leaflets either
-    side, each a narrow triangle
-    from the rib out and forward, small at the foot, longest past the middle and tapering to the tip, the notches between them
-    reaching the rib, so the frond reads as rows of leaflets. Its top faces up; its under side is drawn too (the props'
-    material culls back faces) for the first `under` share, the rising part you see from outside the clump. Its first
-    `bare` steps are the stalk, a thin strip with no leaflets, so the clump springs from a small crown. mats = (top,
-    under, the lighter leaflets in turn)."""
-    pts, ups, sides = [], [], []
-    p = Vector(base)
-    angle = rise
-    h = Vector((math.cos(heading), math.sin(heading), 0.0))
-    step = length / pairs
-    for k in range(pairs + 1):
-        pts.append(p.copy())
-        d = h * math.cos(angle) + Vector((0, 0, math.sin(angle)))
-        side = h.cross(Vector((0, 0, 1))).normalized()
-        up = side.cross(d).normalized()
-        if up.z < 0.0:
-            up = -up
-        ups.append(up)
-        sides.append(side)
-        p = p + d * step
-        angle = rise - droop * ((k + 1) / pairs) ** 1.8
-    lift = 0.004
-    for k in range(bare):
-        a, c = pts[k], pts[k + 1]
-        u = (ups[k] + ups[k + 1]).normalized()
-        q = [a - sides[k] * 0.012, a + sides[k] * 0.012, c + sides[k] * 0.012, c - sides[k] * 0.012]
-        face(b, verts(b, q), mats[1], u)
-        face(b, verts(b, q), mats[1], -u)
-    for k in range(bare, pairs):
-        t = (k - bare + 0.5) / (pairs - bare)
-        # the leaflets small at the frond's foot, longest past its middle, small again at its tip
-        w = width * (0.2 + 0.8 * math.sin(math.pi * min(1.0, t * 0.95))) * r.uniform(0.9, 1.1)
-        a, c = pts[k], pts[k + 1]
-        ahead = (c - a).normalized()
-        u = (ups[k] + ups[k + 1]).normalized()
-        top_mat = mats[2] if k % 2 == 0 else mats[0]
-        for s in (1.0, -1.0):
-            # a leaflet joined to the rib along its whole step, its tip out to the side and a little forward
-            tip = (a + c) * 0.5 + sides[k] * s * w + ahead * w * 0.2
-            tri = [a, tip, c]
-            face(b, verts(b, [q + u * lift for q in tri]), top_mat, u)
-            if t < under:
-                face(b, verts(b, [q - u * lift for q in tri]), mats[1], -u)
-
-
-def blade_frond(b: hs.Builder, base: Vector, heading: float, rise: float, length: float, width: float, segs: int,
-                droop: float, r: random.Random, mats: tuple) -> None:
-    """A fern frond drawn as one solid blade (the photos' fronds from a few metres: a lance of leaflets, its edge
-    toothed): its rib arches out from `base` along `heading` (radians about up), rising at `rise` and bending over
-    towards its tip, `droop` (radians) in all; across it, `segs` steps of a blade narrow at the foot, widest past
-    its middle and coming to a point, every other step's edge pulled in so the edge reads as leaflets. Both sides
-    drawn (the props' material culls back faces). mats = (top, under, the lighter steps in turn)."""
+def pinna_frond(b: hs.Builder, base: Vector, heading: float, rise: float, length: float, width: float, segs: int,
+                droop: float, r: random.Random, mats: tuple, both: bool = True) -> None:
+    """A fern frond as the photos show it: a midrib arching out from `base` along `heading` (radians about up), rising
+    at `rise` and bending over towards its tip, `droop` (radians) in all, with a leaflet either side of each of its
+    `segs` steps. Each leaflet a pointed tongue joined to the rib along its step and swept forward past the next one's
+    foot, so the blade is solid but its edge is cut into leaflets; small at the foot, longest a third of the way out,
+    tapering to the tip. Its top drawn always; with `both`, its under side too (the props' material culls back faces),
+    for a frond you see from below or beside; a low spreading one is seen from above. mats = (top, under, every other
+    leaflet's top)."""
     h = Vector((math.cos(heading), math.sin(heading), 0.0))
     side = h.cross(Vector((0, 0, 1))).normalized()
     p = Vector(base)
     angle = rise
     step = length / segs
-    lefts, rights, ups = [], [], []
+    pts, ups, aheads = [], [], []
     for k in range(segs + 1):
-        t = k / segs
         d = h * math.cos(angle) + Vector((0, 0, math.sin(angle)))
         up = side.cross(d).normalized()
         if up.z < 0.0:
             up = -up
-        w = width * math.sin(math.pi * (0.1 + 0.9 * t)) ** 0.7 * (1.0 if k % 2 else 0.6) * r.uniform(0.92, 1.08)
-        if k == segs:
-            w = 0.0
-        # the blade folds up a little along its rib, as a frond's leaflets do
-        lefts.append(p - side * w + up * w * 0.18)
-        rights.append(p + side * w + up * w * 0.18)
+        pts.append(p.copy())
         ups.append(up)
+        aheads.append(d)
         p = p + d * step
-        angle = rise - droop * ((k + 1) / segs) ** 1.8
+        angle = rise - droop * ((k + 1) / segs) ** 1.6
     for k in range(segs):
+        t = (k + 0.5) / segs
+        w = width * (0.3 + 0.7 * math.sin(math.pi * min(1.0, 0.25 + t * 0.85))) * r.uniform(0.9, 1.1)
+        a, c = pts[k], pts[k + 1]
         u = (ups[k] + ups[k + 1]).normalized()
-        quad = [lefts[k], rights[k], rights[k + 1], lefts[k + 1]]
-        if k == segs - 1:
-            quad = [lefts[k], rights[k], rights[k + 1]]
-        # the two sides a few millimetres apart, so the weld in `finish` keeps both
-        face(b, verts(b, [q + u * 0.004 for q in quad]), mats[2] if k % 2 else mats[0], u)
-        face(b, verts(b, [q - u * 0.004 for q in quad]), mats[1], -u)
+        ahead = (aheads[k] + aheads[k + 1]).normalized()
+        for s in (1.0, -1.0):
+            # out to the side, swept forward and curled up a little, as a leaflet is
+            tip = a + side * s * w + ahead * (step * 0.5 + w * 0.55) + u * w * 0.2
+            top = mats[2] if (k + (s > 0)) % 2 else mats[0]
+            face(b, verts(b, [q + u * 0.004 for q in (a, c, tip)]), top, u)
+            if both:
+                face(b, verts(b, [q - u * 0.004 for q in (a, c, tip)]), mats[1], -u)
 
 
 def fit_box(ob: object, lo: tuple, hi: tuple) -> None:

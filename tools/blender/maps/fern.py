@@ -5,9 +5,10 @@ From the owner's photos (references/maps/woodland/10-fern-clump): a shuttlecock 
 arching over, each frond a midrib with leaflets either side, widest a third of the way out, its tip drooping; fresh
 green on top, darker underneath and in the clump's heart, the leaflets in turn a shade lighter.
 
-Stylised to the art direction (solid leaf shapes, not see-through cards): every frond is a comb of leaflet triangles,
-their rising part drawn on both sides (the props' material culls back faces), a low rosette of arching fronds with a few
-young ones standing up out of it, so you can't read through a bed to someone crouched in it (ferns hide a
+Stylised to the art direction (solid leaf shapes, not see-through cards): every frond is a midrib with eight pairs of
+pointed leaflets swept forward over each other, drawn on both sides where you see it from below (the props' material
+culls back faces); a few young fronds standing up and arching over, the flanks at a crouch's height and old fronds
+spread low to the edge, so the clump is wide at its foot and you can't read through a bed to someone crouched in it (ferns hide a
 crouched player; BBs pass straight through, Foliage, and the model has no
 collider). Fills the foliage's ellipsoid's box: 2 m across, 1.2 m tall, its ground line at y = 0; the game stretches
 it to each fern. Budget 400 triangles (/mnt/project-files/art/woodland-model-list.md). Plain vertex colours.
@@ -28,8 +29,13 @@ from mathutils import Vector  # noqa: E402
 
 BUDGET = 400
 RADIUS, HEIGHT = 1.0, 1.2
-FRONDS = 11
-SEGS = 9            # steps along a frond's blade
+SEGS = 8            # leaflet pairs along a frond
+RINGS = (
+    # (fronds, rise °, droop °, length m, leaflet width m, both sides drawn)
+    (4, (70.0, 78.0), (140.0, 165.0), (1.3, 1.45), (0.26, 0.3), True),   # young fronds standing up and arching over
+    (5, (42.0, 52.0), (95.0, 115.0), (1.2, 1.35), (0.28, 0.32), True),  # the clump's flanks, at a crouch's height
+    (7, (14.0, 20.0), (45.0, 60.0), (1.0, 1.15), (0.28, 0.32), False),  # old fronds spread low to the bed's edge
+)
 
 
 def build() -> object:
@@ -37,17 +43,18 @@ def build() -> object:
     wk.paint_all()
     r = wk.rng(1000)
     b = hs.Builder("Fern", [])
-    # eleven fronds out of the crown at the ground (photos: a clump of twenty or more), each a solid toothed blade:
-    # the inner ones standing tall and arching over, the outer ones older, spreading low between them to the bed's
-    # edge, overlapping so the clump is solid at a crouched body's height, as the game rules (a bed hides you)
-    for k in range(FRONDS):
-        ring = k % 3  # 0 inner, 1 middle, 2 outer
-        heading = 2.0 * math.pi * k / FRONDS * 3.0 + ring * 0.7 + r.uniform(-0.15, 0.15)
-        rise, droop = ((r.uniform(74.0, 82.0), r.uniform(170.0, 200.0)), (r.uniform(58.0, 66.0), r.uniform(130.0, 150.0)),
-                       (r.uniform(38.0, 46.0), r.uniform(90.0, 110.0)))[ring]
-        wk.blade_frond(b, Vector((math.cos(heading) * 0.05, math.sin(heading) * 0.05, 0.0)), heading,
-                       math.radians(rise), r.uniform(1.25, 1.45), r.uniform(0.17, 0.2), SEGS, math.radians(droop), r,
-                       ("Fern", "FernDark", "FernLight"))
+    # sixteen fronds out of a crown at the ground (photos: a shuttlecock of twenty or more), each a midrib with eight
+    # pairs of leaflets swept forward: a few young ones standing up and arching over, the flanks at a crouched body's
+    # height, the old ones spread low out to the bed's edge, so the clump is wide at its foot and solid at a crouch, as
+    # the game rules (a bed hides you); the low ones are seen from above, so drawn on top only
+    n = 0
+    for count, rise, droop, length, width, both in RINGS:
+        for k in range(count):
+            heading = 2.0 * math.pi * (k + 0.5 * (n % 2)) / count + n * 0.45 + r.uniform(-0.2, 0.2)
+            wk.pinna_frond(b, Vector((math.cos(heading) * 0.05, math.sin(heading) * 0.05, 0.06)), heading,
+                           math.radians(r.uniform(*rise)), r.uniform(*length), r.uniform(*width), SEGS,
+                           math.radians(r.uniform(*droop)), r, ("Fern", "Fern", "FernLight"), both)
+        n += 1
     ob = b.build()
     wk.finish(ob, 25.0)
     wk.fit_box(ob, (-RADIUS, -RADIUS, -0.02), (RADIUS, RADIUS, HEIGHT))

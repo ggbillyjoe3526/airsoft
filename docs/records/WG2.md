@@ -1,6 +1,6 @@
 # WG2 · Woodland's ferns, bushes, logs, root plates, woodpiles and saw bench from the owner's photos (Dev)
 
-**Review:** pending (attempt 4)
+**Review:** pending (round 5, the owner's pick after four attempts)
 
 ## Attempts
 
@@ -10,7 +10,8 @@
 | 2026-11-09 | 1, fix round 1 | build thread | QA Pass | Retry 6/8 | the models against the photos; a root plate you could see through where it stops BBs |
 | 2026-11-09 | 2 | build thread | focused tests | Retry 6/8 | the models against the photos; the saw bench's box open under its log |
 | 2026-11-09 | 3 | build thread | focused tests, check.sh | Retry 6/8 | fern sparse, bush leaves floating, round pieces, the saw bench open beside the machine |
-| 2026-11-09 | 4 | build thread | see Fix rounds | pending | – |
+| 2026-11-09 | 4 | build thread | focused tests | Retry 6/8 | fern blades not pinnate, bush a closed dome, root plate a drum, cordwood ends angular, saw bench logs too long; fern beds open at a crouch |
+| 2026-11-09 | 5 (the owner's pick: one more round) | build thread | see Fix rounds | pending | – |
 
 ## Goal
 
@@ -54,6 +55,8 @@ lines stay where they were; the ferns and bushes, drawn by code as ellipsoids, a
 - **The root plate's crowns** are plain dark green, still in needle, so the box reads as the tangle that stops a BB;
   green and brown blotches read as camouflage.
 - **The earth bank's budget**, 340 triangles, is this task's; the owner's list has no row for it.
+- **Cordwood photos:** most of the owner's woodpile photos show split wedges, so the woodpile keeps them, their round
+  side bowed and barked, with a third rounds.
 - **The boards** wear a corrugated sheet on top, as stacks in the photos are covered.
 - **The saw bench's log rests on two sawhorses** (an A-frame under a top beam), not the photos' X-trestles: an X's
   legs would pass through the log in the 1.4 m box.
@@ -129,7 +132,7 @@ lines stay where they were; the ferns and bushes, drawn by code as ellipsoids, a
     is solid below it; the logs' bark a lighter grey-brown so it reads.
 
 - Critic, attempt 3 (Retry 6/8), and what changed (attempt 4):
-  - Fern: eleven fronds, each a solid toothed blade (`woodkit.blade_frond`), both sides, overlapping so the clump is
+  - Fern: eleven fronds, each a solid toothed blade, both sides, overlapping so the clump is
     solid at a crouch: a bed hides what the rules say it hides.
   - Bush: the leaves seated on the leafy mass (at 0.885 to 0.915 of the outline, the mass at 0.88), seven sprays of
     shoots breaking the dome, the mass's shades mixed by noise.
@@ -138,6 +141,20 @@ lines stay where they were; the ferns and bushes, drawn by code as ellipsoids, a
   - Cordwood: a third of the pieces rounds or half rounds; the gaps halved; the wood a darker, duller tan (`Cut`,
     `Heart`, `Split`) with darker rings (`Ring`).
   - Root plate: a metre thick out to its rim, an earth lip at the torn face's foot.
+
+- Critic, attempt 4 (Retry 6/8, the last attempt): stopped and reported to the owner, who picked one more round
+  (2026-11-09). What changed (round 5):
+  - Fern: sixteen fronds, each a midrib with eight pairs of pointed leaflets swept forward over each other
+    (`woodkit.pinna_frond`); four young ones standing up, five flanks at a crouch's height, seven old ones spread low
+    to the bed's edge (drawn on top only, seen from above), so the clump is wide at its foot.
+  - Bush: eleven sprays of small ragged leaf clumps out of a dark heart, their tips drooping, gaps between them; no
+    loose leaves (they sank into the clumps or floated over them).
+  - Root plate: the rim in lobes and bites with clods of earth and moss on it, the torn face lumpy, the roots dark
+    (`Root`, `RootLight` darker); the crowns flat needle sprays hanging tier on tier over smaller dark clumps.
+  - Cordwood: ten rows of pieces packed by size, wedges turned every way with their round side bowed and barked, a
+    third rounds ringed in bark; the gap darker, so the pieces read.
+  - Saw bench: the machine half again as long, the shed's main mass; a heap of sawn rounds beside it (the long logs
+    gone), rounds stood on end under the sawhorses' log.
 
 ## Outstanding
 
