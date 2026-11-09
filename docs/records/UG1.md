@@ -1,12 +1,13 @@
 # UG1 · Lamp light: roof lamps and night pools as real shadowed lights
 
-**Review:** critic PENDING · qa Pass · performance Pass
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-09 | 1 | thread | see Checks | PENDING | – |
+| 2026-11-09 | 1 | thread | see Checks | Retry 6/8 | stale comments, eye_pictures without the lamps, a duplicate picture tool, play README and DECISIONS rows |
+| 2026-11-09 | 2 | thread | see Checks | Accept 8/8 | – |
 
 ## Goal
 

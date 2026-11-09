@@ -330,7 +330,8 @@ static func pool_shadows(values: GraphicsQuality) -> bool:
 
 
 ## Whether any light casts shadows with `values`: the sun, the torch's spot only with it (torch_mode), and an indoor
-## field's roof lamps and a night's light pools while they are real lights (Lamp light). Without, the figures' shadow twins are hidden.
+## field's roof lamps and a night's light pools while they are real lights (Lamp light). Without, the figures' shadow
+## twins are hidden.
 static func any_shadows(values: GraphicsQuality) -> bool:
 	return values.sun_shadows or values.lamp_lights != GraphicsQuality.LampLights.OFF
 

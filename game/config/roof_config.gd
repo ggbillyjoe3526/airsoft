@@ -57,7 +57,7 @@ extends Resource
 @export var lamp_near: float = 28.0
 @export var lamp_far: float = 70.0
 @export var lamp_fade: float = 10.0
-## The lamps' shadows: blur on the softer filters, and the lens's width (`lamp_lens_size`, m) on Softest, so a shadow is sharp at its foot
-## and soft away from it, as the sun's.
+## The lamps' shadows: blur on the softer filters, and the lens's width (`lamp_lens_size`, m) on Softest, so a shadow is
+## sharp at its foot and soft away from it, as the sun's.
 @export var lamp_shadow_blur: float = 1.0
 @export var lamp_lens_size: float = 0.35

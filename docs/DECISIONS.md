@@ -1062,10 +1062,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **Round 1 waits for every shader to be built before it goes live (owner, 2026-10-17, PF1).** A short wait on a still
   field beats a stutter in round 1; the time to round 1 may grow for it. A 60 s limit only guards against a build that
   never settles.
-- **What each quality preset drops (owner, 2026-10-04 to 2026-10-16).** Real light counts are fixed: Low none, Medium
-  2, High 4 (owner, 2026-10-04); Ultra's Lamp light Far gives a night's pools 8, with shadows (UG1, 2026-11-09). Torch shadows only on High and Ultra, and Medium's Player detail is Low (Art
-  direction). High and Ultra draw the city's flat finishes at 512², as Medium does (owner, 2026-10-05; M78): 1024²
-  gains nothing there for four times the memory.
+- **What each quality preset drops (owner, 2026-10-04 to 2026-10-16).** Real light counts are fixed: Low none, Medium 2,
+  High 4 (owner, 2026-10-04); Ultra's Lamp light Far gives a night's pools 8, with shadows (UG1, 2026-11-09). Torch
+  shadows only on High and Ultra, and Medium's Player detail is Low (Art direction). High and Ultra draw the city's flat
+  finishes at 512², as Medium does (owner, 2026-10-05; M78): 1024² gains nothing there for four times the memory.
 - **Menus stay smooth (owner, 2026-10-12; IM1).** "The UI should always feel smooth and responsive", with a loading
   screen allowed for the tutorial, range, maps and matches.
 - **The human figure is built in parts, one owner each (BL10 to BL13, 2026-11-05; owner: "split the models up into

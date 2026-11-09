@@ -1,8 +1,8 @@
 extends GutTest
 ## Graphics › Lamp light (RoofLamps, data/graphics.md): Depot's roof lamps as real shadow-casting spots, off on Low and
 ## Medium, near on High and far on Ultra; the overhead sun turned down while they shine and back up when they stop;
-## their shadows following the shadow rows (atlas, filter, contact hardening on Softest); the figures' shadow twins
-## kept while only the lamps cast; and an open-air field untouched. Headless: properties and counts, never pixels.
+## their shadows following the shadow rows (atlas, filter, contact hardening on Softest); the figures' shadow twins kept
+## while only the lamps cast; and an open-air field untouched. Headless: properties and counts, never pixels.
 
 var table: GraphicsTable = null
 var play: PlayTuning = PlayTuning.new()
