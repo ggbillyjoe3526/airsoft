@@ -1,16 +1,13 @@
-Task: none (BP5 part 3) · QA commit ba2cdb3 · Verdict: Pass
-
-Re-verified head ba2cdb3 (critic's changes) after the earlier Pass.
+Task: FL1 · QA commit 025070b · Verdict: Pass
 
 Blocking: none.
-Advisory: none new.
-- Reload past the far line: far_version no longer folds the magazine; the well node stays its own MeshInstance3D and only the replica gets visibility_range_end (figure_view.gd:196-198), so the well draws at every distance. Visibility ranges are per instance, not inherited. Covered by the rewritten far tests in test_bp5_models.gd (passing).
-- Stowed or holstered replica's far version: placement still reads HeldMerge.figure_mesh (unchanged); far version is a swap on the same node's sibling, no placement path touches it. Tests for hands and holster pass.
-- _far_paints growth: keyed by finish (roughness/metallic/specular, 3 decimals), so bounded by the number of distinct finishes in the shipped paints (a handful). HeldMerge.clear() leaves it (documented "kept for the process"); it holds no per-figure state. No unbounded growth.
-- Removed API: no remaining references to held_far_roughness or _place_arrays in game, tests, tools or docs.
-- _plain now rejects any texture slot or normal map, so the stippled grip stays as it is (tests pass).
+Advisory:
+- game/ai/bot_bombs.gd (_mate_sees): lead uses current velocity only, so a teammate who turns or stops mid-way is over- or under-predicted; press-time re-check covers the turn. Already listed in the record (bounce off unforeseen geometry).
+- _mate_sees now raycasts up to twice per teammate per candidate spot; bounded by the roll gap, not per frame, so cost is fine.
 
-Counts: 47 files, 523 tests, 522 pass, 0 fail, 1 pending (existing Cyber test), 242 s. Import clean. Smoke and tools/check.sh not run (as told).
-Not tested (needs a display): a bot's rifle/pistol far off with a reload; the owner's playtest checks cover it.
+Tests added: none by QA. Worker's two in tests/unit/test_bot_bombs.gd cover both behaviours:
+- test_no_flash_where_a_teammate_walking_in_would_be_by_the_bang: walking vs standing mate at 16.5 m. Not re-run on main (tree shared, no checkout); by reading, the walking case throws on main because only the standing position was checked.
+- test_a_teammate_stepping_near_the_bang_while_it_turns_stops_the_throw: no press-time check on main, so the throw happens; here it is dropped and the flash kept.
 
-Verdict: Pass
+Runs on head: test_bot_bombs 17/17 (77 asserts, 77 s); test_sf2_qa 8/8 (47 s); test_bp2_qa 2/2. tools/check.sh not run (asked not to).
+Not tested: feel of bots refusing flashes in real play (owner's list).
