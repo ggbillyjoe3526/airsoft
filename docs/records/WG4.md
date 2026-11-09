@@ -79,6 +79,9 @@ tunnels keep 1.4 m clear inside; the campfires and lanterns are look only (the m
   the log (`build_map.bank_tunnel`: `TUNNEL_BANK` over the ceiling for `TUNNEL_BANK_REACH` 0.5 m out, then falling
   1:1 to the ground on every side, past the mouths but never on the path), so no ridge, flap or gap shows beside a
   mouth; the earth's skirt (`SKIRT`, 0.25 m out) lies under it.
+- With the earth banked against them, the tunnels' logs are no longer low cover from outside (the mound is): Woodland's
+  low cover goes from 51 blocks to 36, the rest unchanged, so `test_woodland_layout`'s floor is 30 (was 40).
+- `play_tuning.tres` writes its `light_fixtures` out (test_saved_configs).
 - The Kenney `tyre.glb` and `truck.glb` stay as the `tyre` and `truck` kinds' fallback; Woodland names its own models.
 
 ## Verified
