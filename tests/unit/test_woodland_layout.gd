@@ -128,7 +128,8 @@ func test_bots_take_cover_at_its_pieces_sunk_into_the_slope() -> void:
 	var low := BotCover.low_blocks(map, nav, cfg, tuning)
 	var tall := BotCover.tall_blocks(map, nav, cfg, tuning)
 	gut.p("cover: %d low, %d tall" % [low.size(), tall.size()])
-	assert_gt(low.size(), 40, "logs, stacks and crates hide a crouched bot")
+	# (the crouch tunnels' logs are banked into their mounds, WG4: the mound is the cover there, not the log)
+	assert_gt(low.size(), 30, "logs, stacks and crates hide a crouched bot")
 	assert_gt(tall.size(), 400, "trunks, huts and thickets hide a standing one")
 	# The one look at each block's floor the bots are given (BotCover.find_cover) finds the very same blocks.
 	var both := BotCover.find_cover(map, nav, cfg, tuning)

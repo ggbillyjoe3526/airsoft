@@ -143,7 +143,8 @@ extends Resource
 ## Moss on the logs (MapData.moss and moss_share; Medium and up): on the chosen logs, a lid over the top and a band
 ## down the north side (-z) `moss_band` of the log's height deep, `moss_proud` m proud. Only on logs drawn plain or
 ## dressed as one of `moss_dresses`: a log drawn as a model of its own (WG2's fallen logs, root plates, woodpiles, saw
-## bench) wears that model's moss, and a lid over its box would float over it as a flat sheet.
+## bench) wears that model's moss, and a lid over its box would float over it as a flat sheet; WG4's crouch tunnels'
+## hollow-log sections carry their own look, and a slab of moss on their boxes would show inside the tunnel.
 @export var moss_band: float = 0.4
 @export var moss_proud: float = 0.012
 @export var moss_dresses: Array[StringName] = [&"", &"log"]

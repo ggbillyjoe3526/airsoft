@@ -152,9 +152,9 @@ func test_the_woodpiles_stand_1_8_m_the_gate_screens_2_8() -> void:
 func test_the_tunnel_keeps_its_log_lining() -> void:
 	var lining := 0
 	for b in woodland.blocks:
-		if b.dress == &"log":
+		if b.dress in [&"log_tunnel_side", &"log_tunnel_roof"]:
 			lining += 1
-	assert_gt(lining, 0, "the Badger run's log lining keeps the log model, not a fallen log")
+	assert_gt(lining, 0, "the Badger run keeps its hollow-log lining (WG4), not a fallen log")
 
 
 func test_every_model_keeps_to_its_budget() -> void:

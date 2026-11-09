@@ -26,7 +26,13 @@ extends Resource
 ## top, a half turn either way at random, and fills the box under it where the ground falls away with an earth bank
 ## (`ground_bank`): Woodland's logs, root plates, sawbench and boards (WG2), which lie on slopes in boxes that reach
 ## down to the lowest ground under them.
-enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND }
+## SIDE fits a tunnel wall's model to its box, long side along the box's, its inner face (the model's -x) toward the
+## wall across the tunnel (the nearest block named alike across the box's short side, within `side_reach` m), at its
+## own height. LINED sets the model on the box's foot at its own height and width, stretched only along, and its cap
+## (`lined_caps`) over the rest of the box, or its mouth model (`lined_mouths`) at the end of a run (WG4: Woodland's
+## hollow-log tunnels, the log's top shell under the roof and the mound's earth over it; the shell's earth reaches
+## past the box's sides onto the ground banked against the log).
+enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED }
 
 ## Each prop's model (a .glb of one vertex-coloured mesh).
 @export var models: Dictionary[StringName, String] = {
@@ -101,6 +107,17 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND }
 	&"boards": "res://assets/models/props/boards.glb",
 	&"sawbench": "res://assets/models/props/sawbench.glb",
 	&"earth_bank": "res://assets/models/props/earth_bank.glb",
+	# Woodland's small props (WG4, tools/blender/maps/): its tractor tyres, the pickup wreck, the culvert under the
+	# road and the hollow-log tunnels.
+	&"tractor_tyre": "res://assets/models/props/tractor_tyre.glb",
+	&"tractor_tyre_stack": "res://assets/models/props/tractor_tyre_stack.glb",
+	&"pickup": "res://assets/models/props/pickup.glb",
+	&"culvert_wall": "res://assets/models/props/culvert_wall.glb",
+	&"culvert_kerb": "res://assets/models/props/culvert_kerb.glb",
+	&"log_tunnel_side": "res://assets/models/props/log_tunnel_side.glb",
+	&"log_tunnel_roof": "res://assets/models/props/log_tunnel_roof.glb",
+	&"log_tunnel_cap": "res://assets/models/props/log_tunnel_cap.glb",
+	&"log_tunnel_mouth": "res://assets/models/props/log_tunnel_mouth.glb",
 }
 ## Each dressed block kind's prop, and how it is laid. A kind not listed keeps its box.
 @export var kind_props: Dictionary[StringName, StringName] = {
@@ -158,7 +175,26 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND }
 	&"bin_green": Lay.GRID, &"bin_steel": Lay.GRID, &"bin_teal": Lay.GRID, &"units": Lay.GRID,
 	&"cordwood": Lay.GRID, &"fallen_log_5": Lay.GROUND, &"fallen_log_6": Lay.GROUND, &"fallen_log_8": Lay.GROUND,
 	&"root_plate": Lay.GROUND, &"sawbench": Lay.GROUND, &"boards": Lay.GROUND,
+	&"log_tunnel_side": Lay.SIDE, &"log_tunnel_roof": Lay.LINED,
 }
+## SIDE looks this far (m) across a tunnel wall for the wall across from it.
+@export var side_reach: float = 3.0
+## LINED's caps: the model laid over the rest of a box above a lined model, stretched to it from `lined_cap_from` m
+## over the box's foot (down over the lined model's shoulders: WG4's mound earth over the log, from where the earth
+## heaped against it starts, log_tunnel.py WEDGE_FOOT); none where less than `lined_min_cap` m is left over the lined
+## model's top.
+@export var lined_caps: Dictionary[StringName, StringName] = {&"log_tunnel_roof": &"log_tunnel_cap"}
+## LINED's mouths: the model laid instead at the end of a run of sections (a block with a neighbour named alike on one
+## side only, joint_bend's), its -z end turned to the open side, at its own height with no cap (WG4: a tunnel's mouth,
+## the mound's earth running down onto the log's end).
+@export var lined_mouths: Dictionary[StringName, StringName] = {&"log_tunnel_roof": &"log_tunnel_mouth"}
+@export var lined_cap_from: float = 0.5
+@export var lined_min_cap: float = 0.02
+## FIT models stood on the ground under the box's middle (WG4: the tyres and the pickup, on a slope too): the model's
+## own y = 0 meets the ground there and its top the box's, so what is under its y = 0 (a skirt) runs into the ground
+## the box sinks into (build_map's SINK) and the model is never sunk or lifted by the slope. Fitted to the whole box as
+## FIT does where the skirt would reach under the box.
+@export var grounded: PackedStringArray = PackedStringArray(["tractor_tyre", "tractor_tyre_stack", "pickup"])
 ## GRID's cells (m): x along the box's long side, y up (0: one layer the box's height), z across. Cordwood in 2 m
 ## sections as tall as the stack (layers would show their ragged tops as seams), the Kenney log stack's 1.6 m, plywood
 ## crates 1.2 m long, a metre deep and 1.15 m high on their pallets (DM1: two high in Depot's 2.4 m crate walls, one in

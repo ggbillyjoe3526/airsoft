@@ -25,9 +25,15 @@ measure them (WG2).
 | `cordwood.py` | `cordwood.glb`, `_b`, `_c`, `boards.glb` | Woodland's woodpiles, a 2 m section a cell, the three mixed (`Lay.GRID`, `variants`); B site's boards (`Lay.GROUND`) |
 | `sawbench.py` | `sawbench.glb` | Woodland's B site saw bench (`Lay.GROUND`) |
 | `earth_bank.py` | `earth_bank.glb` | The earth under a grounded prop where the ground falls away |
+| `log_tunnel.py` | `log_tunnel_side.glb`, `log_tunnel_roof.glb`, `log_tunnel_mouth.glb`, `log_tunnel_cap.glb` | Woodland's crouch tunnels, a 1 m hollow-log section a block (`Lay.SIDE`, `Lay.LINED`; a run's end sections the mouth) |
+| `culvert.py` | `culvert_wall.glb`, `culvert_kerb.glb` | Woodland's culvert under the road |
+| `pickup.py` | `pickup.glb` | Woodland's pickup wreck (grounded) |
+| `tyre.py` | `tractor_tyre.glb`, `tractor_tyre_stack.glb` | Woodland's tyre stacks (grounded) |
+| `campfire.py`, `lantern.py` | `campfire.glb`, `lantern.glb`, `lantern_post.glb`, `lantern_chain.glb` | Woodland's fires and lanterns (`LightFixtures`, no collider) |
 
 Run each with Blender 5.x or pip's `bpy` (`pip install bpy==5.2.3`): `python3 -I tools/blender/maps/<script>.py <repo
 root>`, then `godot --headless --path . --import`. Pictures for review: `tools/prop_pictures.gd` (a model alone) and
-`tools/hall_pictures.gd` (Depot), both under xvfb; in place on a field, `tools/eye_pictures.gd`. Records:
-`docs/records/DH1.md`, `docs/records/RK1.md` (RK1's scripts run as `python3 tools/blender/maps/<script>.py`),
-`docs/records/WG2.md`. Dev only: tools/ never ships.
+`tools/hall_pictures.gd` (Depot), both under xvfb; `tools/eye_pictures.gd` for a field (`night` lights its fires and
+lanterns). Records: `docs/records/DH1.md`, `docs/records/RK1.md` (RK1's scripts run as `python3
+tools/blender/maps/<script>.py`), `docs/records/WG2.md`, `docs/records/WG4.md` (`weathering.py`: WG4's noise and
+repaint helpers). Dev only: tools/ never ships.
