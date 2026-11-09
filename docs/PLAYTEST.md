@@ -1199,6 +1199,19 @@ Bugs the browser game had and fixed; a bug pass checks the rebuild doesn't bring
 - [ ] **Nothing over anything.** Hold Tab at the start of a round: the scoreboard replaces the round banner and the
   countdown instead of drawing over them. Try 1280x720 and 2560x1440 too.
 
+## Depot's hall shell (DH1)
+
+- [ ] **Walls.** Walk Depot's outer walls: blockwork to about 2.3 m, cladding over it with a pale rooflight band, a
+  crimson column every 8 m standing right under a roof truss. Two roller shutters and one fire exit, each with clear
+  floor in front of it. Does anything float, flicker or poke through a wall's corner?
+- [ ] **Pillars and nets.** The steel pillars have a black-and-yellow band at about waist height. The camouflage net
+  walls stop sight and BBs as before, and read the same from both sides.
+- [ ] **Roof.** Look up: trusses, purlins, rooflights, the teal sprinkler main and cable trays, and the lamps hanging on
+  cables with glowing lenses. Is it too busy, or too dark between the lamps?
+- [ ] **Floor.** The concrete has a soft cloudy tone, fine speckle and a few hairline cracks and stains. It is the one
+  surface that isn't plain paint: keep it, tone it down, or make it clean?
+- [ ] **Frame rate.** Low and Ultra on Depot: any drop compared with Dev 2 while looking down the hall?
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

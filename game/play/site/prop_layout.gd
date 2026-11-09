@@ -32,6 +32,7 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 	var rng := RandomNumberGenerator.new()
 	rng.seed = map.dressing_seed
 	var middle := field_middle(map)
+	var features_laid := 0
 	for b in map.blocks:
 		if not cfg.dresses(b) or b.rise != MapData.Rise.NONE:
 			continue
@@ -53,7 +54,7 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 			PropDressConfig.Lay.TILE:
 				_tile(_placed(out, model), boxes[model], b, foot, cfg, map)
 			PropDressConfig.Lay.GRID:
-				_grid(_placed(out, model), boxes[model], foot, b.size, cfg.grid_cells.get(model, b.size), cfg, rng)
+				_grid(_placed(out, model), boxes[model], foot, b.size, cfg.grid_cells.get(model, b.size), cfg, rng, model)
 			PropDressConfig.Lay.UNIT:
 				var tint := Color.WHITE
 				if paint.is_valid():
@@ -62,6 +63,8 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 			PropDressConfig.Lay.RUN:
 				_run(_placed(out, model), boxes[model], foot, b.size, cfg.run_lengths.get(model, maxf(b.size.x, b.size.z)),
 						cfg, rng)
+			PropDressConfig.Lay.BAY:
+				features_laid = _bays(out, model, boxes, b, map, cfg, middle, features_laid)
 			_:
 				_placed(out, model).add(_fit_facing(boxes[model], b, foot, middle), 1.0)
 	return out
@@ -125,9 +128,10 @@ static func _cluster(p: Placed, model: AABB, foot: Vector3, size: Vector3, cfg: 
 
 ## The box filled with the model in cells about `cell` m across (x along the box's long side, y up, 0 for one layer,
 ## z across), stacked from the foot, each stretched to its cell, the model's z across the box; a quarter turn either
-## way at random where that keeps it so (a round model, a square one), so a stack never reads as one model repeated.
+## way at random where that keeps it so (a round model, a square one), else a half turn, so a stack never reads as
+## one model repeated; never turned for a model (`model_name`) in PropDressConfig.grid_unturned.
 static func _grid(p: Placed, model: AABB, foot: Vector3, size: Vector3, cell: Vector3, cfg: PropDressConfig,
-		rng: RandomNumberGenerator) -> void:
+		rng: RandomNumberGenerator, model_name: StringName = &"") -> void:
 	var along_x := size.x >= size.z
 	var long := size.x if along_x else size.z
 	var across := size.z if along_x else size.x
@@ -144,6 +148,8 @@ static func _grid(p: Placed, model: AABB, foot: Vector3, size: Vector3, cell: Ve
 			var at := foot + (Vector3(u, 0.0, v) if along_x else Vector3(v, 0.0, u))
 			for j in n.y:
 				var turn := yaw + (_quarter_turn(rng) if square else PI * float(rng.randi_range(0, 1)))
+				if cfg.grid_unturned.has(model_name):
+					turn = yaw
 				p.add(fit(model, at + Vector3(0.0, j * step.y, 0.0), _turned(step, turn - yaw), turn),
 						_shade(cfg, rng))
 
@@ -259,6 +265,79 @@ static func _first_joined(b: MapData.Block, map: MapData, cfg: PropDressConfig) 
 		if map.blocks.find(g) < map.blocks.find(first):
 			first = g
 	return first
+
+
+## Block `b` (a wall) lined with `model` in cells on the world's grid (bay_cells), each stretched to its cell and
+## facing the field's `middle`, a feature bay (PropDressConfig.bay_features, taken in turn from `laid`, the count laid
+## on the walls before this one) in some whole cells with their fronts clear (bay_open), never two side by side. Returns
+## the features laid so far.
+static func _bays(out: Dictionary[StringName, Placed], model: StringName, boxes: Dictionary[StringName, AABB],
+		b: MapData.Block, map: MapData, cfg: PropDressConfig, middle: Vector3, laid: int) -> int:
+	var along_x := b.size.x >= b.size.z
+	var across := b.size.z if along_x else b.size.x
+	var to := middle - b.center
+	var yaw: float
+	if along_x:
+		yaw = 0.0 if to.z >= 0.0 else PI
+	else:
+		yaw = PI * 0.5 if to.x >= 0.0 else -PI * 0.5
+	var features: PackedStringArray = cfg.bay_features.get(model, PackedStringArray())
+	var pitch: float = cfg.bay_pitch.get(model, maxf(b.size.x, b.size.z))
+	var on_wall := 0
+	var last := -2
+	var edges := bay_cells(b, pitch, cfg.bay_anchor.get(model, Vector2.ZERO))
+	for i in edges.size() - 1:
+		var length := edges[i + 1] - edges[i]
+		var mid := (edges[i] + edges[i + 1]) * 0.5
+		var at := Vector3(mid, b.center.y - b.size.y * 0.5, b.center.z) if along_x \
+				else Vector3(b.center.x, b.center.y - b.size.y * 0.5, mid)
+		var use := model
+		if not features.is_empty() and on_wall < cfg.bay_feature_most and i > last + 1 \
+				and absf(length - pitch) < 0.01 and bay_open(map, b, cfg, edges[i], edges[i + 1], yaw):
+			var feature := StringName(features[laid % features.size()])
+			if boxes.has(feature):
+				use = feature
+				laid += 1
+				on_wall += 1
+				last = i
+		_placed(out, use).add(fit(boxes[use], at, Vector3(length, b.size.y, across), yaw), 1.0)
+	return laid
+
+
+## Wall block `b`'s cell edges along its long side for bays `pitch` m apart on the world's grid: its two ends and
+## every grid line (anchor.x plus whole pitches along x for a wall long in x, anchor.y along z for one long in z)
+## at least half a pitch inside them.
+static func bay_cells(b: MapData.Block, pitch: float, anchor: Vector2) -> PackedFloat32Array:
+	var along_x := b.size.x >= b.size.z
+	var lo := (b.center.x - b.size.x * 0.5) if along_x else (b.center.z - b.size.z * 0.5)
+	var hi := (b.center.x + b.size.x * 0.5) if along_x else (b.center.z + b.size.z * 0.5)
+	var origin := anchor.x if along_x else anchor.y
+	var edges := PackedFloat32Array([lo])
+	var line := origin + ceilf((lo + pitch * 0.5 - origin) / pitch) * pitch
+	while line <= hi - pitch * 0.5 + 1e-4:
+		edges.append(line)
+		line += pitch
+	edges.append(hi)
+	return edges
+
+
+## Whether the face of wall `b` turned to `yaw` has no other block within PropDressConfig.bay_clear m of it between
+## `from` and `to` along it, below bay_clear_height (the floor aside): room for a door or a shutter.
+static func bay_open(map: MapData, b: MapData.Block, cfg: PropDressConfig, from: float, to: float, yaw: float) -> bool:
+	var front := Basis(Vector3.UP, yaw) * Vector3.BACK
+	var along_x := b.size.x >= b.size.z
+	var face := b.center + Vector3(front.x * b.size.x, 0.0, front.z * b.size.z) * 0.5
+	var lo := Vector3(from, 0.1, minf(face.z, face.z + front.z * cfg.bay_clear)) if along_x \
+			else Vector3(minf(face.x, face.x + front.x * cfg.bay_clear), 0.1, from)
+	var hi := Vector3(to, cfg.bay_clear_height, maxf(face.z, face.z + front.z * cfg.bay_clear)) if along_x \
+			else Vector3(maxf(face.x, face.x + front.x * cfg.bay_clear), cfg.bay_clear_height, to)
+	var strip := AABB(lo, hi - lo)
+	for other in map.blocks:
+		if other == b:
+			continue
+		if AABB(other.center - other.size * 0.5, other.size).intersects(strip):
+			return false
+	return true
 
 
 ## A cell's size in the model's own axes once it is turned `turn` more than its first lay: x and z swap a quarter turn

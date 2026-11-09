@@ -141,7 +141,8 @@ metalness; the light does the rest.
   (`SiteLook.gradient`), the way the approved picture grounds its walls and cover.
 - **The lit edge.** Every box a player sees has a lighter bevel (30 % lighter, 4 cm), the "CS edge highlight".
 - **Grit is zero.** `SiteLook.grit` scales every stain, chip, rust foot, grime band and photo grain from the old site
-  dress; the look draws it at 0, which also leaves the photo textures unloaded.
+  dress; the look draws it at 0, which also leaves the photo textures unloaded. One exception (Dev 3, DH1, from the
+  owner's floor photos): the floor's slab set, Depot's floated concrete (`SiteLook.slab_grain`; 0 makes it clean).
 - **Marks that stay:** zone stencils in ink, joints, seams, screws, sheet panels, bay lines and hazard stripes in
   yellow and ink, the white chevron on containers.
 

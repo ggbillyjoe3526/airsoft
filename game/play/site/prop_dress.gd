@@ -48,7 +48,7 @@ static func build(map: MapData, cfg: PropDressConfig, paint: Callable = Callable
 	dress._meshes = meshes
 	for model: StringName in placed:
 		var tiled := _tiled(cfg, model)
-		var many := placed[model].transforms.size() >= cfg.chunk_from
+		var many := placed[model].transforms.size() >= cfg.chunk_from or cfg.spread_models.has(model)
 		var chunk := cfg.chunk if tiled else cfg.many_chunk if many else INF
 		dress._add(model, meshes[model], placed[model], not tiled, chunk)
 	return dress
@@ -136,6 +136,10 @@ static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName
 		if cfg.lay_of(b) == PropDressConfig.Lay.CLUSTER \
 				and not used.has(cfg.pallet):
 			used.append(cfg.pallet)
+		if cfg.lay_of(b) == PropDressConfig.Lay.BAY:
+			for feature: String in cfg.bay_features.get(model, PackedStringArray()):
+				if not used.has(StringName(feature)):
+					used.append(StringName(feature))
 	return used
 
 

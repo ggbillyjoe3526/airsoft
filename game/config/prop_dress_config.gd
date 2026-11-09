@@ -16,8 +16,11 @@ extends Resource
 ## about `run_lengths` m long (stretched so a whole number fill it), as tall and as thick as the box, each turned end
 ## for end at random (DM1: Depot's plywood walls). UNIT fits one model to the box like FIT, long side along the box's,
 ## its +x end (a container's doors) turned away from a block of its kind against either end, else away from the field's
-## middle (DM1: Depot's containers, a port cut between two units of one).
-enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT }
+## middle (DM1: Depot's containers, a port cut between two units of one). BAY lines a wall's box with the model in
+## cells on a grid of the world (`bay_pitch` m apart from `bay_anchor`), each stretched to its cell and its front (+z)
+## to the field's middle, a feature bay (`bay_features`) in some cells with nothing standing in front of them (Dev 3:
+## Depot's hall walls, their columns under the roof's trusses).
+enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY }
 
 ## Each prop's model (a .glb of one vertex-coloured mesh).
 @export var models: Dictionary[StringName, String] = {
@@ -67,15 +70,23 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT }
 	&"container_short": "res://assets/models/props/container_short.glb",
 	&"container_wall": "res://assets/models/props/container_wall.glb",
 	&"container_roof": "res://assets/models/props/container_roof.glb",
+	# Depot's hall shell (Dev 3, tools/blender/maps/): the walls' bays, its pillars and its camouflage nets.
+	&"hall_wall": "res://assets/models/props/hall_wall.glb",
+	&"hall_shutter": "res://assets/models/props/hall_shutter.glb",
+	&"hall_exit": "res://assets/models/props/hall_exit.glb",
+	&"pillar": "res://assets/models/props/pillar.glb",
+	&"camo_net": "res://assets/models/props/camo_net.glb",
 }
 ## Each dressed block kind's prop, and how it is laid. A kind not listed keeps its box.
 @export var kind_props: Dictionary[StringName, StringName] = {
 	&"barrel": &"barrel", &"drum": &"drum", &"sofa": &"sofa", &"rack": &"shelf", &"crate": &"crate",
 	&"plywood": &"plywood", &"container": &"container",
+	&"wall": &"hall_wall", &"pillar": &"pillar", &"net": &"camo_net",
 }
 @export var kind_lays: Dictionary[StringName, Lay] = {
 	&"barrel": Lay.ROW, &"drum": Lay.CLUSTER, &"sofa": Lay.FIT, &"rack": Lay.TILE, &"crate": Lay.GRID,
 	&"plywood": Lay.RUN, &"container": Lay.UNIT,
+	&"wall": Lay.BAY, &"pillar": Lay.FIT, &"net": Lay.GRID,
 }
 ## A model's versions for its kind's other shapes of block (DM1), each drawn when it loads: a flat one on a block
 ## `flat_height` m high or lower (the Box's roof), a thin one on a block `thin_depth` m thick or thinner (the Box's
@@ -121,7 +132,12 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT }
 	&"pine": Vector3(1.5, 0.0, 1.5),
 	&"bin_green": Vector3(0.7, 0.0, 0.7), &"bin_steel": Vector3(0.7, 0.0, 0.7), &"bin_teal": Vector3(0.7, 0.0, 0.7),
 	&"units": Vector3(0.6, 0.0, 0.6),
+	# a camouflage net's scaffold sections, a pole every 2 m
+	&"camo_net": Vector3(2.0, 0.0, 0.3),
 }
+## GRID models laid all one way round, never turned at random: a net wall's sections match only edge to edge as
+## modelled (DH1).
+@export var grid_unturned: PackedStringArray = PackedStringArray(["camo_net"])
 ## A named prop whose box is still drawn behind it, cut down to a share (y) of its height and inset (x, m, at most a
 ## fifth of the box's width) on each side with no other such box against it, rather than not at all: a thicket's dark
 ## core between its spruces, unbroken across touching thickets, so nothing is seen through a thicket that stops BBs
@@ -129,8 +145,26 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT }
 @export var model_cores: Dictionary[StringName, Vector2] = {&"pine": Vector2(0.7, 0.6)}
 ## A dressed kind's block lower than this (m) keeps its box: a rack's shelf boards stay boards, its racking is
 ## shelving; Depot's desks (crate blocks 0.8 m high) stay desks, its crate stacks and the Range's are crates.
-## A plywood block under 0.3 m (a hut's floor edge) stays a board.
-@export var kind_min_height: Dictionary[StringName, float] = {&"rack": 2.0, &"crate": 0.85, &"plywood": 0.3}
+## A plywood block under 0.3 m (a hut's floor edge) stays a board. Only a hall's 8 m walls are its bays (the Range's
+## and The Street's lower walls keep their boxes).
+@export var kind_min_height: Dictionary[StringName, float] = {
+	&"rack": 2.0, &"crate": 0.85, &"plywood": 0.3, &"wall": 6.0,
+}
+## BAY's cells (m) by model: their edges at `bay_anchor` plus whole `bay_pitch`es along the world's x (anchor x) or z
+## (anchor y), a wall's end cell shorter than half a pitch joined to the next. Depot's hall: the roof's trusses stand
+## every RoofConfig.truss_step m along x from 0, so a long wall's columns stand under them; the end walls' bays run
+## from their corners.
+@export var bay_pitch: Dictionary[StringName, float] = {&"hall_wall": 8.0}
+@export var bay_anchor: Dictionary[StringName, Vector2] = {&"hall_wall": Vector2(0.0, 4.0)}
+## A bay model's feature bays, taken in turn, at most `bay_feature_most` a wall, never side by side, each in a whole
+## cell with no block standing within `bay_clear` m of its face below `bay_clear_height` m (a door behind a stack of
+## crates would make no sense).
+@export var bay_features: Dictionary[StringName, PackedStringArray] = {
+	&"hall_wall": PackedStringArray(["hall_shutter", "hall_exit"]),
+}
+@export var bay_feature_most: int = 2
+@export var bay_clear: float = 2.0
+@export var bay_clear_height: float = 3.0
 ## A cluster's cell (m, about) and the pallet's height under it (m; `pallet` is its model).
 @export var cluster_cell: float = 0.9
 @export var pallet_height: float = 0.15
@@ -156,6 +190,9 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT }
 ## (BP7): Woodland's props drew 167 of a High frame's 445 draws in 20 m chunks, 93 in 40 m ones.
 @export var chunk_from: int = 64
 @export var many_chunk: float = 40.0
+## Models chunked as `many_chunk` however few are laid: spread round a field's edge (Depot's hall walls, DH1), one
+## MultiMesh would draw them all wherever you look.
+@export var spread_models: PackedStringArray = PackedStringArray(["hall_wall", "camo_net"])
 ## The props' material: roughness, and metalness.
 @export var roughness: float = 0.7
 @export var metallic: float = 0.0

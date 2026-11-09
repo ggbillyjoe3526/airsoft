@@ -16,14 +16,17 @@ colours, with the finished models coming later ([Roadmap](Roadmap)).
 **An indoor airsoft hall**, 108 by 72 metres under one roof, in 6v6 (5v5 to 8v8 under Custom). Alpha starts at the east
 end and Beta in the west in Elimination, and the teams swap ends at half time.
 
-![Depot's Chrono hall under the violet ceiling and its lamps](images/depot-chrono-hall.jpg)
+![Depot's hall under its crimson roof trusses and hanging lamps](images/depot-chrono-hall.jpg)
 
 - **Three lanes** wind from end to end between plywood rooms and racking you can't enter: the **Shoot House** and
   the dim **Lounge** to the north, the open **Chrono hall** in the middle, the **Huts** and the **Box yard** to the
   south. No lane runs straight; each bends round the dead space.
 - **Links** join the lanes: open cuts and galleries, two tight alleys, and two **tunnels**, one in each half. The
   tunnels are unlit and bend twice: dark, but never pitch black.
-- **The roof:** a violet ceiling on crimson trusses, with rows of glowing lamps. A BB fired up stops at the ceiling.
+- **The building:** blockwork walls under cladding, with crimson steel columns, roller shutters and fire exits;
+  steel pillars with hazard bands; scaffold walls hung with camouflage netting; a polished concrete floor.
+- **The roof:** crimson trusses, purlins and rooflights, a sprinkler main and cable trays, with rows of high-bay lamps
+  hanging on cables. A BB fired up stops at the roof.
 - **It sounds like a big empty hall:** a quiet hum of the building, with the odd creak from the roof.
 - **No full auto indoors:** as at a real indoor site, every replica that can fire full auto starts each round on
   single shots here, bots' too. Press **B** to switch to auto during the round if you want it. Bots switch only now
