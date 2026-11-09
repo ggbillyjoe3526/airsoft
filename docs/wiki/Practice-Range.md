@@ -9,8 +9,9 @@ practise on a field: see [Practice on a field](#practice-on-a-field).
 
 ## The targets
 
-Three lanes of targets run out from the firing line. Beyond the walls stand Depot's buildings, its water tower,
-cranes, light masts, watch tower and smoking chimneys.
+Three lanes of targets run out from the firing line. Beyond the walls stand Depot's green steel sheds, a water
+tower, yellow jib cranes, feed silos, a steel watch tower, an old airliner fuselage on sleepers, phone masts carrying
+the yard's floodlights, and smoking chimneys.
 
 <!-- wiki:range-targets -->
 

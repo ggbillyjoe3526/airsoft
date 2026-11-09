@@ -290,6 +290,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   through, like the skyline. The day gets the dress's cumulus sky and a depth haze from 45 m; the night is unchanged.
   Low draws the same without the photo relief and fine marks. No paint within 20° of a team's hue unless dull
   (tested), so the concept's oxide red became crimson and its navy a greyed navy.
+- **Map models' open surfaces face out by rule, and a test sees each from outside (owner, 2026-11-09, FS1).** The
+  owner saw the sky through the Range's water tower: Blender's guess at an open drum's outside put its faces inside,
+  and the game culls those as holes. Every lathe, tube and band in `tools/blender/maps/` turns its faces out through
+  `vertex_paint.py` (`lathe`, `orient_loft`), and `tests/unit/test_model_faces.gd` fails a model when more than 2 % of
+  rays from all round and above first meet a face turned away. New map models follow both.
 - **Every figure keeps its team-colour plate carrier (owner, 2026-10-17, AX1).** The carrier reads like a site's team
   bib and is the strongest team cue at range. A civilian outfit is in `docs/IDEAS.md`.
 

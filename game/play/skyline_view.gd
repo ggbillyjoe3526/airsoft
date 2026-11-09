@@ -29,6 +29,7 @@ static func build(map: MapData, cfg: SkylineConfig, lighting: LightingConfig, ey
 	view.name = "Skyline"
 	view._cfg = cfg
 	var parts: Array[SkylineShapes.Part] = []
+	var placed: Array[SkylineModels.Placed] = []
 	var chimneys := PackedVector3Array()
 	var each: Array[Array] = []
 	for p in map.skyline:
@@ -40,9 +41,11 @@ static func build(map: MapData, cfg: SkylineConfig, lighting: LightingConfig, ey
 			view.left_out.append(p)
 			continue
 		view.kept.append(p)
-		var mine: Array[SkylineShapes.Part] = []
-		mine.assign(each[i])
-		parts.append_array(mine)
+		var models := SkylineModels.placed_of(p, cfg, middle)
+		for part: SkylineShapes.Part in each[i]:
+			if models.is_empty() or part.with_model:
+				parts.append(part)
+		placed.append_array(models)
 		if p.smoke and p.kind == &"chimney":
 			chimneys.append(SkylineShapes.smoke_from(p))
 	if view.kept.is_empty():
@@ -50,7 +53,7 @@ static func build(map: MapData, cfg: SkylineConfig, lighting: LightingConfig, ey
 		return null
 	view._mesh = MeshInstance3D.new()
 	view._mesh.name = "Pieces"
-	view._mesh.mesh = mesh_of(parts, cfg, lighting.sky_horizon, middle, lighting.night)
+	view._mesh.mesh = mesh_of(parts, cfg, lighting.sky_horizon, middle, lighting.night, placed)
 	view._mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# In the shared light (BP7), as the field's own blocks are: its sRGB vertex colours, already faded.
 	view._mesh.mesh.surface_set_material(0, LookMaterials.vertex_colour(cfg.roughness, 0.0, Color.WHITE, true))
@@ -111,25 +114,34 @@ static func middle_of(map: MapData) -> Vector2:
 	return map.middle()
 
 
-## `parts` as one flat-shaded mesh, each face turned outward from its part's middle, each vertex's colour faded toward
-## `horizon` by its distance from `middle`; with `lamps_apart`, the lamps as a second surface (none without lamps).
+## `parts` and the models `placed` as one mesh, each part's faces flat and turned outward from its middle, each
+## vertex's colour faded toward `horizon` by its distance from `middle`; with `lamps_apart`, the lamps (parts' and
+## models') as a second surface (none without lamps).
 static func mesh_of(parts: Array[SkylineShapes.Part], cfg: SkylineConfig, horizon: Color, middle: Vector2,
-		lamps_apart: bool = false) -> ArrayMesh:
+		lamps_apart: bool = false, placed: Array[SkylineModels.Placed] = []) -> ArrayMesh:
 	var mesh := ArrayMesh.new()
+	var far := horizon.srgb_to_linear()
 	var lamps: Array[SkylineShapes.Part] = []
 	var rest: Array[SkylineShapes.Part] = []
 	for part in parts:
 		(lamps if lamps_apart and part.lamp else rest).append(part)
-	_add_surface(mesh, rest, cfg, horizon.srgb_to_linear(), middle)
-	_add_surface(mesh, lamps, cfg, horizon.srgb_to_linear(), middle)
-	return mesh
-
-
-static func _add_surface(mesh: ArrayMesh, parts: Array[SkylineShapes.Part], cfg: SkylineConfig, far: Color,
-		middle: Vector2) -> void:
 	var pos := PackedVector3Array()
 	var nor := PackedVector3Array()
 	var col := PackedColorArray()
+	var lamp_pos := PackedVector3Array()
+	var lamp_nor := PackedVector3Array()
+	var lamp_col := PackedColorArray()
+	_add_parts(rest, cfg, far, middle, pos, nor, col)
+	_add_parts(lamps, cfg, far, middle, lamp_pos, lamp_nor, lamp_col)
+	for model: SkylineModels.Placed in placed:
+		SkylineModels.add(model, cfg, far, middle, lamps_apart, pos, nor, col, lamp_pos, lamp_nor, lamp_col)
+	_add_surface(mesh, pos, nor, col)
+	_add_surface(mesh, lamp_pos, lamp_nor, lamp_col)
+	return mesh
+
+
+static func _add_parts(parts: Array[SkylineShapes.Part], cfg: SkylineConfig, far: Color, middle: Vector2,
+		pos: PackedVector3Array, nor: PackedVector3Array, col: PackedColorArray) -> void:
 	for part in parts:
 		var centre := Vector3.ZERO
 		for q in part.a:
@@ -146,6 +158,10 @@ static func _add_surface(mesh: ArrayMesh, parts: Array[SkylineShapes.Part], cfg:
 		for ring: PackedVector3Array in ([part.a] if part.cap_a else []) + ([part.b] if part.cap_b else []):
 			for i in range(1, n - 1):
 				_tri(ring[0], ring[i], ring[i + 1], centre, own, far, middle, cfg, pos, nor, col)
+
+
+static func _add_surface(mesh: ArrayMesh, pos: PackedVector3Array, nor: PackedVector3Array,
+		col: PackedColorArray) -> void:
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = pos

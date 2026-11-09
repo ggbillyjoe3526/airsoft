@@ -14,7 +14,8 @@ const HILL_CORE := 0.35
 
 
 ## One part: the section `a` at its start and `b` at its end (the same number of points, joined side by side), its
-## faces `colour`; a cap closes a section unless it is on the ground or shrunk to a point. A lamp glows at night.
+## faces `colour`; a cap closes a section unless it is on the ground or shrunk to a point. A lamp glows at night. A part
+## `with_model` is drawn even where its piece's kind is drawn from a model (SkylineModels): the walkway over a silo row.
 class Part:
 	extends RefCounted
 	var a: PackedVector3Array = PackedVector3Array()
@@ -23,12 +24,13 @@ class Part:
 	var cap_a: bool = true
 	var cap_b: bool = true
 	var lamp: bool = false
+	var with_model: bool = false
 
 
 ## The parts of `p`, the field's middle at `middle` (x, z).
 static func parts_of(p: SkylinePiece, cfg: SkylineConfig, middle: Vector2) -> Array[Part]:
 	var out: Array[Part] = []
-	var toward := (middle - p.at).normalized() if p.at.distance_to(middle) > 0.0 else Vector2(0.0, 1.0)
+	var toward := toward_of(p, middle)
 	match p.kind:
 		&"shed":
 			_shed(out, p, cfg, toward)
@@ -55,6 +57,11 @@ static func parts_of(p: SkylinePiece, cfg: SkylineConfig, middle: Vector2) -> Ar
 		&"treeline":
 			_treeline(out, p, cfg)
 	return out
+
+
+## Which way `p` faces: toward the field's middle `middle` (x, z), a unit vector (+z when it stands on it).
+static func toward_of(p: SkylinePiece, middle: Vector2) -> Vector2:
+	return (middle - p.at).normalized() if p.at.distance_to(middle) > 0.0 else Vector2(0.0, 1.0)
 
 
 ## The solid boxes inside `p` that hide what stands beyond it (DP3's row): a shed's walls, a container stack, each
@@ -131,7 +138,7 @@ static func _shed(out: Array[Part], p: SkylinePiece, cfg: SkylineConfig, toward:
 	var gable := PackedVector2Array([Vector2(-half_short, 0.0), Vector2(half_short, 0.0), Vector2(0.0, rise)])
 	out.append(sweep(top - end, top + end, gable, gable, cfg.shed_roof))
 	# the band and the doors on the side facing the field
-	var face := _facing(toward)
+	var face := facing(toward)
 	var span := p.depth if face.x != 0.0 else p.width
 	var out_by := (p.width if face.x != 0.0 else p.depth) * 0.5
 	var along := Vector3(0.0, 0.0, 1.0) if face.x != 0.0 else Vector3(1.0, 0.0, 0.0)
@@ -207,17 +214,32 @@ static func _chimney(out: Array[Part], p: SkylinePiece, cfg: SkylineConfig) -> v
 				cfg.chimney_band_colour))
 
 
-static func _silo(out: Array[Part], p: SkylinePiece, cfg: SkylineConfig) -> void:
-	var along_x := p.width >= p.depth
-	var long := maxf(p.width, p.depth)
-	var r := minf(p.width, p.depth) * 0.5
-	var n := maxi(1, floori((long + cfg.silo_gap) / (2.0 * r + cfg.silo_gap)))
+## The middles (on the ground) of a silo row's drums, along its long side, each `silo_radius` across.
+static func silo_drums(p: SkylinePiece, cfg: SkylineConfig) -> PackedVector3Array:
+	var r := silo_radius(p)
+	var n := maxi(1, floori((maxf(p.width, p.depth) + cfg.silo_gap) / (2.0 * r + cfg.silo_gap)))
 	var step := 2.0 * r + cfg.silo_gap
-	var dir := Vector3(1.0, 0.0, 0.0) if along_x else Vector3(0.0, 0.0, 1.0)
+	var dir := Vector3(1.0, 0.0, 0.0) if p.width >= p.depth else Vector3(0.0, 0.0, 1.0)
+	var out := PackedVector3Array()
+	for i in n:
+		out.append(Vector3(p.at.x, 0.0, p.at.y) + dir * (i - (n - 1) * 0.5) * step)
+	return out
+
+
+## A silo drum's radius: half the row's short side.
+static func silo_radius(p: SkylinePiece) -> float:
+	return minf(p.width, p.depth) * 0.5
+
+
+static func _silo(out: Array[Part], p: SkylinePiece, cfg: SkylineConfig) -> void:
+	var r := silo_radius(p)
+	var drums := silo_drums(p, cfg)
+	var n := drums.size()
+	var step := 2.0 * r + cfg.silo_gap
+	var dir := Vector3(1.0, 0.0, 0.0) if p.width >= p.depth else Vector3(0.0, 0.0, 1.0)
 	var drum_top := p.height - r * cfg.silo_roof
 	var colour := p.colour_or(cfg.silo_colour)
-	for i in n:
-		var c := Vector3(p.at.x, 0.0, p.at.y) + dir * (i - (n - 1) * 0.5) * step
+	for c in drums:
 		out.append(drum(c, c + Vector3.UP * drum_top, r, r, cfg.sides, colour))
 		out.append(drum(c + Vector3.UP * drum_top, c + Vector3.UP * p.height, r, 0.0, cfg.sides, cfg.silo_roof_colour))
 		out.append(drum(c + Vector3.UP * cfg.silo_band_at, c + Vector3.UP * (cfg.silo_band_at + cfg.silo_band),
@@ -226,8 +248,10 @@ static func _silo(out: Array[Part], p: SkylinePiece, cfg: SkylineConfig) -> void
 		var half := (n - 1) * 0.5 * step
 		var w := cfg.silo_walkway * 0.5
 		var mid := Vector3(p.at.x, p.height, p.at.y)
-		out.append(sweep(mid - dir * half, mid + dir * half, _rect(w, cfg.proud * 2.0), _rect(w, cfg.proud * 2.0),
-				cfg.silo_walkway_colour))
+		var walkway := sweep(mid - dir * half, mid + dir * half, _rect(w, cfg.proud * 2.0), _rect(w, cfg.proud * 2.0),
+				cfg.silo_walkway_colour)
+		walkway.with_model = true
+		out.append(walkway)
 
 
 static func _power_line(out: Array[Part], p: SkylinePiece, cfg: SkylineConfig) -> void:
@@ -437,7 +461,7 @@ static func _slab(foot: Vector3, head: Vector3, along: Vector3, width: float, no
 
 
 ## Which of +x, -x, +z, -z is nearest `toward`.
-static func _facing(toward: Vector2) -> Vector2:
+static func facing(toward: Vector2) -> Vector2:
 	if absf(toward.x) >= absf(toward.y):
 		return Vector2(signf(toward.x), 0.0)
 	return Vector2(0.0, signf(toward.y))

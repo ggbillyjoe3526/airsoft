@@ -11,6 +11,12 @@ extends Resource
 @export var pole_metallic: float = 0.7
 @export var pole_roughness: float = 0.32
 @export var finial_radius: float = 0.06
+## The pole as modelled (Dev 3 map models, tools/blender/maps/flagpole.py, after the owner's photos): one
+## vertex-coloured mesh of the sectional pole, its weighted base, halyard, truck and cleat, built to the sizes here, in
+## the shared light at `pole_model_roughness`. It stands in place of the plain pole and fittings drawn from these
+## values, which stay its fallback when it won't load. The overtime flag draws it scaled to its own height.
+@export var pole_model: String = "res://assets/models/props/flagpole.glb"
+@export var pole_model_roughness: float = 0.55
 ## The weighted base: radius at the bottom and top, and height (m).
 @export var base_radius: Vector2 = Vector2(0.28, 0.22)
 @export var base_height: float = 0.14
@@ -70,3 +76,17 @@ extends Resource
 ## The rise out of the ground as it goes up (s; none under Reduced motion), from this share of its height.
 @export var overtime_rise: float = 0.8
 @export var overtime_rise_from: float = 0.02
+
+var _pole_mesh: Mesh = null
+var _pole_tried := false
+
+
+## The pole's model (`pole_model`), loaded once, or null: none set, or it won't load (warned once); the views then draw
+## the plain pole.
+func pole_mesh() -> Mesh:
+	if not _pole_tried:
+		_pole_tried = true
+		_pole_mesh = PropDressConfig.load_mesh(pole_model)
+		if _pole_mesh == null and not pole_model.is_empty():
+			push_warning("FlagViewConfig: the pole's model \"%s\" won't load; it is drawn plain" % pole_model)
+	return _pole_mesh
