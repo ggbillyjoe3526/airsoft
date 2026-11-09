@@ -1,7 +1,7 @@
 """The hinged door (DM1, 2026-11-09): assets/models/props/door_leaf*.glb and door_frame*.glb, every map's doors.
 
 A two-panel timber door after the owner's photos (art/references/maps/william-2026-11-09/wooden_door/, the third):
-stiles and rails standing proud of two raised and fielded panels on both faces, soft grain shaded across the fields,
+stiles and rails standing proud of two raised and fielded panels on both faces, soft upright grain bands on the fields,
 a lever handle on a round rose with a keyhole below on both faces at the free edge, hinge leaves and three knuckles
 on the hinged edge.
 DoorView draws two leaves a door, each scaled to its half of the opening, so each leaf's body is written in a 1 m cube
@@ -67,7 +67,10 @@ STILE_C = 0xc0a661
 PANEL_C = 0xd3b875
 FIELD_C = 0xdabf79
 EDGE_C = 0xa38e5b
-GRAIN = (1.0, 0.9, 0.97, 0.93, 1.0)  # the field's soft grain: each column of its grid's share of its colour
+GRAIN = 0.93  # a grain band's darkest share of the field's colour, at its middle line (kit.band)
+# The fields' grain bands (panel_field): the upper panel two, the lower one, each side mirrored.
+UPPER_BANDS = ((-0.42, 0.16, 0.06, 0.12, 0.1), (0.38, 0.13, -0.05, 0.22, 0.08))
+LOWER_BANDS = ((0.05, 0.18, 0.07, 0.15, 0.14),)
 SHADOW_C = 0x7c6c44  # the shadow line under a panel's moulding
 LIGHT_C = 0xe1c787  # the light catching the panel's foot
 METAL = 0x4a4650  # the handle's dark bronze
@@ -76,43 +79,37 @@ KEYHOLE = 0x1e1c22
 LINING_C = 0xc9ae66
 
 
-def panel_field(x0: float, x1: float, z0: float, z1: float, side: int, y_plane: float) -> list:
+def panel_field(x0: float, x1: float, z0: float, z1: float, side: int, y_plane: float, bands: tuple) -> list:
     """A raised and fielded panel on face `side`: a flat field in the middle, a bevelled margin round it down to the
-    panel's plane. The field is a row of four columns whose inner points carry GRAIN's shades, leaning
-    and swapping round from its foot to its head, so soft grain fades in and out across it with no line."""
+    panel's plane, and on the field soft grain bands (kit.band) as in his photo: mostly upright, unevenly spaced,
+    slightly curved, each starting and stopping inside the field. `bands` are (middle, width, bend, foot, head), the
+    middle a share of the field's half width from its middle, the width a share of its width, the foot and head shares
+    of its height."""
     b = BEVEL
     y_field = side * (y_plane + FIELD)
     y_low = side * y_plane
     bm = bmesh.new()
     outer = [(x0, z0), (x1, z0), (x1, z1), (x0, z1)]
+    inner = [(x0 + b, z0 + b), (x1 - b, z0 + b), (x1 - b, z1 - b), (x0 + b, z1 - b)]
     vo = [bm.verts.new((x, y_low, z)) for x, z in outer]
-    fx0, fx1, fz0, fz1 = x0 + b, x1 - b, z0 + b, z1 - b
-    cols = len(GRAIN)
-    grid, tones = [], []
-    for zt, lean, flip in ((0.0, 0.0, 0), (1.0, 0.014, 1)):
-        row = []
-        for c in range(cols):
-            t = c / (cols - 1)
-            inner = 0 < c < cols - 1
-            x = fx0 + t * (fx1 - fx0) + (lean * side if inner else 0.0)
-            row.append(bm.verts.new((x, y_field, fz0 + zt * (fz1 - fz0))))
-            # The inner columns' shades swap round up the panel (a band darkest low on one, high on the next).
-            k = GRAIN[cols - 1 - c] if (flip and inner) else GRAIN[c]
-            tones.append(k if inner else 1.0)
-        grid.append(row)
-    for c in range(cols - 1):
-        bm.faces.new([grid[0][c], grid[0][c + 1], grid[1][c + 1], grid[1][c]])
-    # The bevelled margin round it, its long edges through the field's grid points (no T-junctions).
-    for i, edge in enumerate((grid[0], [grid[0][-1], grid[1][-1]], list(reversed(grid[1])), [grid[1][0], grid[0][0]])):
-        bm.faces.new([vo[i], vo[(i + 1) % 4]] + list(reversed(edge)))
+    vi = [bm.verts.new((x, y_field, z)) for x, z in inner]
+    bm.faces.new(vi)
+    for i in range(4):
+        j = (i + 1) % 4
+        bm.faces.new([vo[i], vo[j], vi[j], vi[i]])
     ob = kit.mesh_object("panel", bm, FIELD_C)
     ob.data.update()
     for p in ob.data.polygons:
         if (p.normal.y > 0) != (side > 0):
             p.flip()
     ob.data.update()
-    kit.toned(ob, [1.0] * 4 + tones)
-    return [ob]
+    parts = [ob]
+    fx0, fx1, fz0, fz1 = x0 + b, x1 - b, z0 + b, z1 - b
+    half, wide, tall = (fx1 - fx0) / 2, fx1 - fx0, fz1 - fz0
+    for c, w, bend, foot, head in bands:
+        parts.append(kit.band("grain", c * half * side, w * wide, bend * wide * side, fz0 + foot * tall,
+                              fz1 - head * tall, y_field + side * 0.0005, 1, side, FIELD_C, (z0, z1), GRAIN))
+    return parts
 
 
 def prism_y(name: str, outline: list, y0: float, y1: float, colour: int) -> object:
@@ -164,8 +161,8 @@ def leaf(wide: float, tall: float) -> list:
             parts.append(kit.open_box("rail", (-hw + stile, lo, z0), (hw - stile, hi, z1), STILE_C,
                                       (back, "-x", "+x", "-z"), shade=0.97))
         # The two panels between them, raised and fielded with soft grain, a shadow line under each one's top rail.
-        for z0, z1 in ((bottom_rail, mid0), (mid1, tall - top_rail)):
-            parts += panel_field(-hw + stile, hw - stile, z0, z1, side, plane)
+        for z0, z1, bands in ((bottom_rail, mid0, LOWER_BANDS), (mid1, tall - top_rail, UPPER_BANDS)):
+            parts += panel_field(-hw + stile, hw - stile, z0, z1, side, plane, bands)
             parts.append(mark("shadow", -hw + stile, hw - stile, z1 - 0.012, z1 - 0.002, plane + 0.0004, side,
                               SHADOW_C))
             parts.append(mark("light", -hw + stile, hw - stile, z0 + 0.002, z0 + 0.008, plane + 0.0004, side,

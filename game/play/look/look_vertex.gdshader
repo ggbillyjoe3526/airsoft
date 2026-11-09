@@ -35,12 +35,14 @@ void fragment() {
 	if (srgb_colours && !OUTPUT_IS_SRGB) {
 		own = mix(pow((own + vec3(0.055)) * (1.0 / 1.055), vec3(2.4)), own * (1.0 / 12.92), lessThan(own, vec3(0.04045)));
 	}
+	// Metres a pixel across the strip, either way (fwidth outside the branch: every pixel of a quad takes the same).
+	float pixel = max(max(fwidth(perforation.x), fwidth(perforation.y)), 1e-5);
 	if (perforation.x > 1.0) {
 		vec2 off = vec2(perforation.x - 2.0, (fract(perforation.y / perforation_pitch) - 0.5) * perforation_pitch);
-		float pixel = max(fwidth(perforation.y), 1e-5);
 		float hole = 1.0 - smoothstep(perforation_radius - pixel, perforation_radius + pixel, length(off));
-		// Far off: the row's average, PI r / (2 pitch) of it dark, across the holes' width.
-		float row = step(abs(off.x), perforation_radius) * 1.5708 * perforation_radius / perforation_pitch;
+		// Far off: the row's average, PI r / (2 pitch) of it dark across the holes' width, spread over a pixel.
+		float row = (1.0 - smoothstep(perforation_radius - pixel, perforation_radius + pixel, abs(off.x)))
+				* 1.5708 * perforation_radius / perforation_pitch;
 		hole = mix(hole, row, smoothstep(0.5, 1.0, pixel / perforation_radius));
 		own *= mix(1.0, perforation_shade, hole);
 	}

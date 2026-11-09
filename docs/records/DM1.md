@@ -40,7 +40,8 @@ shipping_container, wooden_door). Every model is one vertex-coloured mesh (no te
   (`unit_square`). SiteDress no longer draws the old frames, battens and chevrons under blocks drawn as props.
 - **Door** (`door.py`, leaves 490 of 500, frames 132 to 168 of 175): a two-panel honey-oak leaf with raised fields,
   its rails and stiles at his photo's shares (top 0.071, mid 0.087 at 0.44, bottom 0.092 of the height; stiles 0.155
-  of the width) and the handle on the mid rail, soft grain shaded across the fields (no lines), shadow lines, lever, rose,
+  of the width) and the handle on the mid rail, soft upright grain bands on the fields (`map_kit.band`, shared with
+  the crate), shadow lines, lever, rose,
   keyhole, hinges; frames with linings standing 6 mm into the opening (no plane
   shared with the wall's cut end), moulded architraves on plinth blocks, a head where a wall stands over the opening.
   Three sizes each (Depot's 2.0 x 2.6, the huts' 1.6 x 2.5, The Street's 0.9 x 2.1); DoorView takes the nearest to a

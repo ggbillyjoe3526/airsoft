@@ -109,6 +109,42 @@ def perforated(ob: bpy.types.Object, across: int, along: int, middle: float) -> 
     return ob
 
 
+def band(name: str, c: float, w: float, bend: float, z0: float, z1: float, plane: float, axis: int, facing: int,
+         colour: int, foot: tuple, dark: float) -> bpy.types.Object:
+    """A soft grain band on a face: a lens from z0 to z1, `w` wide at its widest, its middle `c` across the face
+    bending `bend` over its length, its middle line `dark` of its colour fading to the colour's own at its
+    edges and tips, so it has no edge. On the plane `plane` of axis `axis` (0: a face across x, 1: across y), facing
+    `facing` along it."""
+    zs = (z0, z0 + (z1 - z0) * 0.3, z0 + (z1 - z0) * 0.68, z1)
+    offs = (0.0, bend, bend * 0.4, -bend * 0.3)
+    widths = (0.0, w, w * 0.8, 0.0)
+    pts, tones = [], []
+    for z, o, ww in zip(zs, offs, widths):
+        row = [(c + o, z)] if ww == 0.0 else [(c + o - ww / 2, z), (c + o, z), (c + o + ww / 2, z)]
+        pts.append(row)
+        tones += [1.0] if ww == 0.0 else [1.0, dark, 1.0]
+    bm = bmesh.new()
+
+    def at(a: float, z: float) -> tuple:
+        return (plane, a, z) if axis == 0 else (a, plane, z)
+    rows = [[bm.verts.new(at(a, z)) for a, z in row] for row in pts]
+    tip0, mid0, mid1, tip1 = rows
+    bm.faces.new([tip0[0], mid0[2], mid0[1]])
+    bm.faces.new([tip0[0], mid0[1], mid0[0]])
+    for k in range(2):
+        bm.faces.new([mid0[k], mid0[k + 1], mid1[k + 1], mid1[k]])
+    bm.faces.new([tip1[0], mid1[0], mid1[1]])
+    bm.faces.new([tip1[0], mid1[1], mid1[2]])
+    ob = mesh_object(name, bm, colour)
+    ob.data.update()
+    for p in ob.data.polygons:
+        if (p.normal[axis] > 0) != (facing > 0):
+            p.flip()
+    ob.data.update()
+    toned(ob, tones)
+    return foot_span(ob, *foot)
+
+
 def box(name: str, lo: tuple, hi: tuple, colour: int, shade: float = 1.0) -> bpy.types.Object:
     """An axis-aligned box from corner `lo` to corner `hi`."""
     bm = bmesh.new()

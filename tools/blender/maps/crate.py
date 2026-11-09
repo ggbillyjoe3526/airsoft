@@ -91,42 +91,6 @@ def shadow_sheet(name: str, along: str, at: float, a0: float, a1: float, z0: flo
     return kit.mesh_object(name, bm, SHADOW)
 
 
-def band(name: str, c: float, w: float, bend: float, z0: float, z1: float, plane: float, axis: int, facing: int,
-         colour: int, foot: tuple) -> object:
-    """A soft grain band on a face: a lens from z0 to z1, `w` wide at its widest, its middle `c` across the face
-    bending `bend` over its length, its middle line GRAIN of the plywood's colour fading to the plywood's own at its
-    edges and tips, so it has no edge. On the plane `plane` of axis `axis` (0: a face across x, 1: across y), facing
-    `facing` along it."""
-    zs = (z0, z0 + (z1 - z0) * 0.3, z0 + (z1 - z0) * 0.68, z1)
-    offs = (0.0, bend, bend * 0.4, -bend * 0.3)
-    widths = (0.0, w, w * 0.8, 0.0)
-    pts, tones = [], []
-    for z, o, ww in zip(zs, offs, widths):
-        row = [(c + o, z)] if ww == 0.0 else [(c + o - ww / 2, z), (c + o, z), (c + o + ww / 2, z)]
-        pts.append(row)
-        tones += [1.0] if ww == 0.0 else [1.0, GRAIN, 1.0]
-    bm = bmesh.new()
-
-    def at(a: float, z: float) -> tuple:
-        return (plane, a, z) if axis == 0 else (a, plane, z)
-    rows = [[bm.verts.new(at(a, z)) for a, z in row] for row in pts]
-    tip0, mid0, mid1, tip1 = rows
-    bm.faces.new([tip0[0], mid0[2], mid0[1]])
-    bm.faces.new([tip0[0], mid0[1], mid0[0]])
-    for k in range(2):
-        bm.faces.new([mid0[k], mid0[k + 1], mid1[k + 1], mid1[k]])
-    bm.faces.new([tip1[0], mid1[0], mid1[1]])
-    bm.faces.new([tip1[0], mid1[1], mid1[2]])
-    ob = kit.mesh_object(name, bm, colour)
-    ob.data.update()
-    for p in ob.data.polygons:
-        if (p.normal[axis] > 0) != (facing > 0):
-            p.flip()
-    ob.data.update()
-    kit.toned(ob, tones)
-    return kit.foot_span(ob, *foot)
-
-
 def strip(along: int, a0: float, a1: float, across: int, middle: float, plane: float, facing: int,
           shade: float, foot: tuple) -> object:
     """A flat steel strip over a profile's face, from a0 to a1 along axis `along`, PERF wide across `across` round
@@ -231,12 +195,12 @@ def build() -> list:
         for gx, w, bend, z0, z1 in ((-0.32, 0.13, 0.04, lo_z + 0.08, top - 0.12), (0.0, 0.1, -0.03, lo_z + 0.3,
                                                                                     top - 0.02),
                                     (0.3, 0.14, 0.05, lo_z + 0.02, top - 0.3)):
-            parts.append(band("grain", gx * -facing, w, bend * -facing, z0, z1, y, 1, facing, PLY, span))
+            parts.append(kit.band("grain", gx * -facing, w, bend * -facing, z0, z1, y, 1, facing, PLY, span, GRAIN))
     for sx in (-1, 1):
         x = sx * (ix + 0.001)
         for gy, w, bend, z0, z1 in ((-0.2, 0.13, 0.04, lo_z + 0.1, top - 0.06), (0.2, 0.11, -0.035, lo_z + 0.02,
                                                                                  top - 0.25)):
-            parts.append(band("grain", gy * sx, w, bend * sx, z0, z1, x, 0, sx, PLY_END, span))
+            parts.append(kit.band("grain", gy * sx, w, bend * sx, z0, z1, x, 0, sx, PLY_END, span, GRAIN))
     # The edge profiles' perforations, a dense row down the middle of each leg's outer face (his photos): flat strips
     # whose holes the game's shader punches (kit.perforated), so they cost two triangles a row.
     for sx in (-1, 1):
