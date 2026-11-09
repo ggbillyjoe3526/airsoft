@@ -1,12 +1,18 @@
 class_name RoofView
 extends Node3D
-## An indoor field's roof (DR1; MapData.roof_height): the ceiling over the whole field, the steel trusses under it
-## (one mesh in one material, one draw call) and its lamp panels (MapData.roof_lamps, one MultiMesh, one draw call),
-## none of it casting a shadow, so the preset's overhead sun keeps lighting the hall as the roof lamps would. Look only:
-## the BB ceiling is MapLevel's; nothing here is read by the simulation. Built once, nothing per frame.
+## An indoor field's roof (DR1; MapData.roof_height): the ceiling over the whole field, the roof's bays under it (Dev 3:
+## RoofConfig.bay_model, a truss, purlins, the sheet and services a bay, on the trusses' grid, a MultiMesh every
+## RoofConfig.bay_chunk truss lines; plain truss beams in one mesh without it) and its lamps (MapData.roof_lamps, one
+## MultiMesh: the high-bay model with its glowing lens, or a glowing panel without it), none of it casting a shadow, so
+## the preset's overhead sun keeps lighting the hall as the roof lamps would. Look only: the BB ceiling is MapLevel's;
+## nothing here is read by the simulation. Built once, nothing per frame.
+
+## How far (m) over the roof's underside the ceiling slab starts when the bays' sheet is drawn under it.
+const CEILING_LIFT := 0.01
 
 var _mesh: MeshInstance3D = null
 var _lamps: MultiMeshInstance3D = null
+var _bays: Array[MultiMeshInstance3D] = []
 var _materials: Array[Material] = []
 
 
@@ -18,16 +24,17 @@ static func build(map: MapData, cfg: RoofConfig) -> RoofView:
 	view.name = "Roof"
 	var area := map.footprint().grow(cfg.ceiling_overhang)
 	var y := map.roof_height
+	var bay := PropDressConfig.load_mesh(cfg.bay_model)
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	st.set_color(cfg.ceiling_colour.srgb_to_linear())
-	_box(st, Vector3(area.position.x, y, area.position.y), Vector3(area.end.x, y + 0.2, area.end.y))
-	st.set_color(cfg.truss_colour.srgb_to_linear())
-	var x := ceilf(area.position.x / cfg.truss_step) * cfg.truss_step
-	while x <= area.end.x:
-		_box(st, Vector3(x - cfg.truss_width * 0.5, y - cfg.truss_depth, area.position.y),
-				Vector3(x + cfg.truss_width * 0.5, y, area.end.y))
-		x += cfg.truss_step
+	var lift := CEILING_LIFT if bay != null else 0.0
+	_box(st, Vector3(area.position.x, y + lift, area.position.y), Vector3(area.end.x, y + 0.2, area.end.y))
+	if bay == null:
+		st.set_color(cfg.truss_colour.srgb_to_linear())
+		for x in truss_lines(area, cfg.truss_step):
+			_box(st, Vector3(x - cfg.truss_width * 0.5, y - cfg.truss_depth, area.position.y),
+					Vector3(x + cfg.truss_width * 0.5, y, area.end.y))
 	view._mesh = MeshInstance3D.new()
 	view._mesh.name = "Ceiling"
 	view._mesh.mesh = st.commit()
@@ -39,9 +46,10 @@ static func build(map: MapData, cfg: RoofConfig) -> RoofView:
 	view._mesh.material_override = mat
 	view._materials.append(mat)
 	view.add_child(view._mesh)
+	if bay != null:
+		view._add_bays(bay, area, y, cfg)
 	if not map.roof_lamps.is_empty():
-		view._lamps = _lamp_panels(map, cfg)
-		view._materials.append(view._lamps.material_override)
+		view._lamps = view._lamp_view(map, cfg, bay != null)
 		view.add_child(view._lamps)
 	return view
 
@@ -51,31 +59,132 @@ func materials() -> Array[Material]:
 	return _materials
 
 
-## How many lamp panels hang under it (for tests).
+## How many lamps hang under it (for tests).
 func lamp_count() -> int:
 	return _lamps.multimesh.instance_count if _lamps != null else 0
 
 
-static func _lamp_panels(map: MapData, cfg: RoofConfig) -> MultiMeshInstance3D:
-	var panel := BoxMesh.new()
-	panel.size = Vector3(cfg.lamp_size.x, 0.08, cfg.lamp_size.y)
+## The roof's bays' views (empty without the bay model), and how many bays they draw (for tests).
+func bay_views() -> Array[MultiMeshInstance3D]:
+	return _bays
+
+
+func bay_count() -> int:
+	var n := 0
+	for v in _bays:
+		n += v.multimesh.instance_count
+	return n
+
+
+## The x of every truss over `area` (x along the field, y its z): every `step` m from 0, inside it.
+static func truss_lines(area: Rect2, step: float) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	var x := ceilf(area.position.x / step) * step
+	while x <= area.end.x:
+		out.append(x)
+		x += step
+	return out
+
+
+## The bays: one a truss line and cell across the field (bay_placings), truss lines `bay_chunk` a MultiMesh.
+func _add_bays(bay: Mesh, area: Rect2, y: float, cfg: RoofConfig) -> void:
+	var lines := bay_lines(area, cfg).size()
+	var cells := bay_cells(area, cfg)
+	var at := bay_placings(bay.get_aabb(), area, y, cfg)
+	var mat := LookMaterials.vertex_colour(cfg.roughness, 0.0)
+	_materials.append(mat)
+	var chunk := maxi(1, cfg.bay_chunk)
+	for first in range(0, lines, chunk):
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = bay
+		var count := mini(chunk, lines - first) * cells
+		mm.instance_count = count
+		for i in count:
+			mm.set_instance_transform(i, at[first * cells + i])
+		var inst := MultiMeshInstance3D.new()
+		inst.name = "Bays_%d" % (first / chunk)
+		inst.multimesh = mm
+		inst.material_override = mat
+		inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		inst.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		add_child(inst)
+		_bays.append(inst)
+
+
+## The truss lines the bays stand on: every truss line over `area` and one more past each end where the end bays
+## wouldn't reach it (their trusses outside the hall's end walls), so the roof's sheet runs to its walls.
+static func bay_lines(area: Rect2, cfg: RoofConfig) -> PackedFloat32Array:
+	var half := cfg.truss_step * 0.5
+	return truss_lines(Rect2(area.position.x - half, area.position.y, area.size.x + 2.0 * half, area.size.y),
+			cfg.truss_step)
+
+
+## Where a lamp at `at` (x, z) hangs: off the nearest truss line by `lamp_clear` m when it would hang in the truss
+## (only with the bay model: the plain beams are shallower than a lamp's drop).
+static func lamp_spot(at: Vector2, cfg: RoofConfig) -> Vector2:
+	var line := roundf(at.x / cfg.truss_step) * cfg.truss_step
+	if absf(at.x - line) >= cfg.lamp_clear:
+		return at
+	return Vector2(line + (cfg.lamp_clear if at.x >= line else -cfg.lamp_clear), at.y)
+
+
+## How many bays run across `area` (its y the field's z): cells about RoofConfig.bay_span m, as many as fit.
+static func bay_cells(area: Rect2, cfg: RoofConfig) -> int:
+	return maxi(1, roundi(area.size.y / cfg.bay_span))
+
+
+## Each bay's transform over `area` for a bay model of bounds `box`: truss line by truss line, cell by cell across,
+## each stretched to its truss step and cell, its top at the roof's underside `y`.
+static func bay_placings(box: AABB, area: Rect2, y: float, cfg: RoofConfig) -> Array[Transform3D]:
+	var cells := bay_cells(area, cfg)
+	var cell := area.size.y / cells
+	var out: Array[Transform3D] = []
+	for x in bay_lines(area, cfg):
+		for c in cells:
+			var foot := Vector3(x, y - box.size.y, area.position.y + cell * (c + 0.5))
+			out.append(PropLayout.fit(box, foot, Vector3(cfg.truss_step, box.size.y, cell), 0.0))
+	return out
+
+
+## The lamps: the high-bay model, its body in the shared light and its lens glowing, its top at the roof's underside;
+## or a glowing panel `lamp_drop` under it without the model; with the roof's `bays`, each clear of the trusses
+## (lamp_spot).
+func _lamp_view(map: MapData, cfg: RoofConfig, bays: bool) -> MultiMeshInstance3D:
+	var glow := StandardMaterial3D.new()
+	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	glow.albedo_color = cfg.lamp_colour * cfg.lamp_energy
+	_materials.append(glow)
+	var lamp: Mesh = null
+	var own := PropDressConfig.load_mesh(cfg.lamp_model) as ArrayMesh
+	var drop := cfg.lamp_drop
+	if own != null:
+		var body := LookMaterials.vertex_colour(cfg.roughness, 0.0)
+		_materials.append(body)
+		lamp = own.duplicate() as ArrayMesh
+		for s in lamp.get_surface_count():
+			var m := lamp.surface_get_material(s)
+			lamp.surface_set_material(s, glow if m != null and m.resource_name == cfg.lamp_lens else body)
+		drop = lamp.get_aabb().end.y
+	else:
+		var panel := BoxMesh.new()
+		panel.size = Vector3(cfg.lamp_size.x, 0.08, cfg.lamp_size.y)
+		panel.material = glow
+		lamp = panel
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = panel
+	mm.mesh = lamp
 	mm.instance_count = map.roof_lamps.size()
-	var y := map.roof_height - cfg.lamp_drop
+	# the model hangs from its top (its own y 0 at the roof's underside); a panel's middle `lamp_drop` under it
+	var y := map.roof_height - drop
 	for i in map.roof_lamps.size():
-		var at := map.roof_lamps[i]
+		var at := lamp_spot(map.roof_lamps[i], cfg) if bays else map.roof_lamps[i]
 		mm.set_instance_transform(i, Transform3D(Basis.IDENTITY, Vector3(at.x, y, at.y)))
 	var inst := MultiMeshInstance3D.new()
 	inst.name = "Lamps"
 	inst.multimesh = mm
 	inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	inst.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
-	var glow := StandardMaterial3D.new()
-	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	glow.albedo_color = cfg.lamp_colour * cfg.lamp_energy
-	inst.material_override = glow
 	return inst
 
 

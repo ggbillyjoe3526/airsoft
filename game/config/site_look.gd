@@ -117,13 +117,17 @@ enum Canvas {
 ## The dock's hazard-striped lip (its accent and the stripes' black) on its sides, from and to this far (m) below its
 ## top.
 @export var hazard_lip: Vector2 = Vector2(0.04, 0.22)
-@export_file("*.jpg", "*.png") var slab_colour: String = "res://assets/textures/site/concrete_floor_02_diff_1k.jpg"
-@export_file("*.jpg", "*.png") var slab_normal: String = "res://assets/textures/site/concrete_floor_02_nor_gl_1k.jpg"
-@export var slab_scale: float = 3.0
+## The slab's set is Depot's floated concrete (Dev 3, tools/textures/concrete_floor.py: the owner's floor photos'
+## grain, flecks, hairline cracks and stains), one tile a joint's bay, drawn at `slab_grain` of its mix even on the
+## look's clean surfaces (0 leaves it to `grit`).
+@export_file("*.jpg", "*.png") var slab_colour: String = "res://assets/textures/site/hall_concrete_col_2k.jpg"
+@export_file("*.jpg", "*.png") var slab_normal: String = "res://assets/textures/site/hall_concrete_nor_gl_2k.jpg"
+@export_range(0.0, 1.0) var slab_grain: float = 0.75
+@export var slab_scale: float = 4.0
 @export var slab_mix: float = 0.9
 @export var slab_depth: float = 0.7
 ## The set's mean brightness (linear luma), so it darkens and lightens round the finish's paint.
-@export var slab_luma: float = 0.173
+@export var slab_luma: float = 0.217
 @export_file("*.jpg", "*.png") var ply_colour: String = "res://assets/textures/site/plywood_diff_1k.jpg"
 @export_file("*.jpg", "*.png") var ply_normal: String = "res://assets/textures/site/plywood_nor_gl_1k.jpg"
 @export var ply_scale: float = 1.22

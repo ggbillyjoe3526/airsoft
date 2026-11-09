@@ -254,7 +254,8 @@ func test_depot_is_drawn_clean_without_its_photos() -> void:
 	var play := PlayTuning.load_default()
 	assert_eq(play.site_look.grit, 0.0, "the look's clean surfaces")
 	var m := SiteSurface.material(play.site_look, _depot())
-	assert_null(m.get_shader_parameter(&"slab_col"), "no photo grain, so no photo loaded")
+	# no photo grain, so the plywood's photo isn't loaded; the floor's own slab set is (DH1, SiteLook.slab_grain)
+	assert_null(m.get_shader_parameter(&"ply_col"), "no photo grain, so no photo loaded")
 	assert_almost_eq(m.get_shader_parameter(&"grit") as float, 0.0, 0.0001)
 	assert_gt(m.get_shader_parameter(&"gradient") as float, 0.0, "the soft vertical gradient")
 

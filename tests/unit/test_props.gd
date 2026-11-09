@@ -122,7 +122,8 @@ func test_a_propped_box_draws_no_faces_and_leaves_the_baked_shadow_caster() -> v
 			var core := SiteSurface.core_of(look, b, m)
 			assert_eq(core * (b.center + b.size * 0.5), b.center, "a drum's or barrel's box folds to its middle")
 		drawn += GreyboxFaces.faces_of(b).size() if not SiteSurface.hidden(look, b) else 0
-	assert_eq(hidden, _count(m, &"drum") + _count(m, &"barrel") + _count(m, &"sofa"))
+	assert_eq(hidden, _count(m, &"drum") + _count(m, &"barrel") + _count(m, &"sofa") + _count(m, &"wall", 6.0)
+			+ _count(m, &"pillar") + _count(m, &"net"), "the props' boxes and the hall shell's (DH1)")
 	var caster := MapLevel._greybox_mesh(m, play.map_style, look)
 	var full := MapLevel._greybox_mesh(m, play.map_style)
 	assert_lt(caster.surface_get_array_len(0), full.surface_get_array_len(0), "the caster leaves them out")
@@ -381,7 +382,8 @@ func test_drums_barrels_and_the_sofa_cast_shadows_and_shelving_leaves_it_to_its_
 
 
 ## The shelving is drawn in chunks no wider than PropDressConfig.chunk, so the camera culls what it can't see and far
-## chunks take the simpler mesh the import generated (the Mesh detail step's threshold); the rest one view a model;
+## chunks take the simpler mesh the import generated (the Mesh detail step's threshold); the hall's walls and nets in
+## bigger chunks (DH1); the rest one view a model;
 ## every prop is drawn once.
 func test_shelving_is_drawn_in_chunks_that_cull_and_take_a_simpler_mesh_far_off() -> void:
 	var m := _map("depot")
@@ -390,6 +392,9 @@ func test_shelving_is_drawn_in_chunks_that_cull_and_take_a_simpler_mesh_far_off(
 	for model: StringName in placed:
 		var views := dress.views_of(model)
 		assert_eq(dress.count(model), placed[model].transforms.size(), "%s: each drawn once" % model)
+		if look.props.spread_models.has(model):
+			assert_gt(views.size(), 1, "%s: spread round the hall, chunked so it culls (DH1)" % model)
+			continue
 		if model != &"shelf":
 			assert_eq(views.size(), 1, "%s: one view" % model)
 			continue
