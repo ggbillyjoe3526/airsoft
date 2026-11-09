@@ -78,7 +78,7 @@ const GLOBAL_SPEC := &"look_spec"
 ## How far (m) each of a probe's six views reaches at least (GL1). Godot ends each view at its box's side, which for
 ## a probe on Woodland's slopes is a metre or two under the eye and a few metres off to each side, so the views stopped
 ## in the hillside and trees close round it; on the north bridge that left bad values in the probe's blurred levels,
-## which drew everything shiny near it black with a white glow. 12 m cleared it; 40 m did too but darkened the
+## which drew every surface near it rough enough to read them black with a white glow. 12 m cleared it; 40 m did too but darkened the
 ## Clearing (its views took in the dark wood far past its area), so the reach stays short.
 @export var probe_reach: float = 12.0
 ## Screen-space reflections (Screen): steps, fades and depth tolerance.

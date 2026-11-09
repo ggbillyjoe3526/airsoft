@@ -1,13 +1,13 @@
 # GL1 · Woodland's north bridge glowing (Dev 3 bug)
 
-**Review:** pending
+**Review:** 2 attempts · critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-09 | 1 | Opus 5.5 (build thread) | tools/check.sh green | Retry 7/8 | 40 m reach darkened the Clearing about 30 %; Depot and Range not pictured; record overstated the mechanism |
-| 2026-11-09 | 2 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-09 | 2 | Opus 5.5 (build thread) | tools/check.sh green | Accept 7/8 | – (should-fix taken: the test and the config comment no longer blame the view down alone; a KNOWN_ISSUES row) |
 
 ## What it was
 
@@ -46,4 +46,4 @@
 ## Known issues left
 
 - Seen only on the cloud's software Vulkan (lavapipe); whether a real card ever drew the black marks is unverified.
-  Play check on the Dev 3 checklist.
+  Play check on the Dev 3 checklist; a playtest row in `docs/KNOWN_ISSUES.md`.
