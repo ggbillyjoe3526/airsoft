@@ -42,6 +42,7 @@ static func build(map: MapData, cfg: PropDressConfig, paint: Callable = Callable
 	var dress := PropDress.new()
 	dress.name = "Props"
 	dress._material = LookMaterials.vertex_colour(cfg.roughness, cfg.metallic)
+	dress._material.set_shader_parameter(&"paint_by_custom", true)
 	dress._placed = placed
 	dress._meshes = meshes
 	for model: StringName in placed:
@@ -112,7 +113,7 @@ func relight(lights: BakedLightNear) -> void:
 			var pick: PackedInt32Array = picks[c]
 			for k in pick.size():
 				var shade := p.shades[pick[k]]
-				var l := each[pick[k]] * p.paints[pick[k]]
+				var l := each[pick[k]]
 				mm.set_instance_color(k, Color(shade * l.r, shade * l.g, shade * l.b))
 
 
@@ -162,13 +163,14 @@ func _add(model: StringName, mesh: Mesh, p: PropLayout.Placed, shadow: bool, chu
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
 		mm.use_colors = true
+		mm.use_custom_data = true
 		mm.mesh = mesh
 		mm.instance_count = picks.size()
 		for k in picks.size():
 			var shade := p.shades[picks[k]]
-			var paint := p.paints[picks[k]]
 			mm.set_instance_transform(k, p.transforms[picks[k]])
-			mm.set_instance_color(k, Color(shade * paint.r, shade * paint.g, shade * paint.b))
+			mm.set_instance_color(k, Color(shade, shade, shade))
+			mm.set_instance_custom_data(k, p.paints[picks[k]])
 		var view := MultiMeshInstance3D.new()
 		view.name = "%s_%d_%d" % [String(model).capitalize(), cell.x, cell.y]
 		view.multimesh = mm

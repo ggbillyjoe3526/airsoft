@@ -2,8 +2,9 @@
 
 A plywood shipping crate after the owner's photos (art/references/maps/william-2026-11-09/wooden_crate/): birch
 plywood sides and lid, the lid a sheet laid on top, galvanised steel edge profiles along all twelve edges with the
-clip loops of a nail-less crate along the top, a pine skid base of three runners under a deck, and the stencils a
-crate carries (two up arrows and a blank label; no brand). Stacked by PropLayout's GRID in cells of
+clip loops of a nail-less crate along the top and flat clips along the foot, a block pallet under it (three bottom
+boards, nine blocks, a deck; its fork openings dark), grain streaks down each face, and the stencils a crate carries
+(two up arrows and a blank label; no brand). The map's blocks set its footprint (GRID cells), not the photos'. Stacked by PropLayout's GRID in cells of
 PropDressConfig.grid_cells[&"crate"] (two high in a 2.4 m wall, one in waist cover), each turned end for end at random.
 
 Run with Blender 5.x, or Python with the `bpy` module (pip install bpy==5.2.3):
@@ -36,15 +37,18 @@ CLIP = (0.05, 0.03)  # a clip loop's width and height on the top profile
 CLIPS_LONG = (-0.36, 0.0, 0.36)
 CLIPS_SHORT = (0.0,)
 
-# Wood tones pale and greyed (saturation under 0.3 in linear light), so none reads as Beta's orange
-# (tests/unit/test_props.gd).
-PLY = 0xd6cbae  # birch plywood, the long sides
-PLY_END = 0xc6b99c  # the end panels, a sheet of a darker cut
-PLY_LID = 0xe0d8c4  # the lid, catching the light
-PINE = 0xb5aa92  # the skids
-PINE_END = 0xa09684  # the runners' cut ends
+# Wood tones kept out of Beta's orange (hue at least 20 degrees from it, or greyed: tests/unit/test_props.gd).
+PLY = 0xd0c690  # pine plywood, the long sides (his photos' warm tan, its hue past orange's band toward yellow)
+PLY_END = 0xc4ba86  # the end panels, a sheet of a darker cut
+PLY_LID = 0xd8ce9a  # the lid, catching the light
+PINE = 0xb6ae80  # the pallet's boards
+PINE_END = 0xa69e72  # its blocks, end grain
 STEEL = 0xb6babd  # galvanised profiles and clips
 INK = 0x3b3440  # stencil ink
+SHADOW = 0x2a2824  # the dark inside the pallet's fork openings
+GRAIN = 0xc8be8a  # grain streaks on the sides' plywood
+GRAIN_END = 0xbab27e  # and on the ends'
+CLIP_C = 0x8a8e90  # the foot's clips, flat
 LABEL = 0xefe8d6  # the shipping label
 
 
@@ -61,6 +65,29 @@ def flat(name: str, outline: list, y: float, colour: int, facing: int) -> object
     return ob
 
 
+def turned_flat(name: str, outline: list, x: float, colour: int, facing: int) -> object:
+    """A flat mark on the plane x, its outline (y, z) points, facing -X or +X."""
+    bm = bmesh.new()
+    bm.faces.new([bm.verts.new((x, y, z)) for y, z in outline])
+    ob = kit.mesh_object(name, bm, colour)
+    ob.data.update()
+    if (ob.data.polygons[0].normal.x > 0) != (facing > 0):
+        ob.data.flip_normals()
+    return ob
+
+
+def shadow_sheet(name: str, along: str, at: float, a0: float, a1: float, z0: float, z1: float) -> object:
+    """A dark sheet, both faces, in the pallet's fork openings: along x at y `at`, or along y at x `at`."""
+    bm = bmesh.new()
+    if along == "x":
+        pts = [(a0, at, z0), (a1, at, z0), (a1, at, z1), (a0, at, z1)]
+    else:
+        pts = [(at, a0, z0), (at, a1, z0), (at, a1, z1), (at, a0, z1)]
+    bm.faces.new([bm.verts.new(p) for p in pts])
+    bm.faces.new([bm.verts.new(p) for p in reversed(pts)])
+    return kit.mesh_object(name, bm, SHADOW)
+
+
 def arrow(cx: float, z0: float, w: float, h: float) -> list:
     """An up arrow's outline, its foot's middle at (cx, z0)."""
     stem, head = w * 0.32, h * 0.45
@@ -72,12 +99,18 @@ def build() -> list:
     kit.reset()
     parts = []
     hx, hy = LONG / 2, ACROSS / 2
-    # The base: three runners along the long side under a deck.
+    # The base, a block pallet: three bottom boards along the long side, nine blocks, a deck of boards across. The
+    # fork openings between the blocks are dark (a shadow sheet down the middle each way), so they read as openings.
+    bz = BASE - DECK
+    board = 0.02
     for y in (-hy + RUNNER / 2, 0.0, hy - RUNNER / 2):
-        parts.append(kit.box("runner", (-hx, y - RUNNER / 2, 0.0), (hx, y + RUNNER / 2, BASE - DECK), PINE))
-        parts.append(kit.box("block", (-hx, y - RUNNER / 2 - 0.004, 0.0), (-hx + 0.004, y + RUNNER / 2 + 0.004,
-                                                                           BASE - DECK), PINE_END))
-    parts.append(kit.box("deck", (-hx, -hy, BASE - DECK), (hx, hy, BASE), PINE, shade=1.04))
+        parts.append(kit.open_box("board", (-hx, y - RUNNER / 2, 0.0), (hx, y + RUNNER / 2, board), PINE, ("-z",)))
+        for x in (-hx + RUNNER / 2, 0.0, hx - RUNNER / 2):
+            parts.append(kit.open_box("block", (x - RUNNER / 2, y - RUNNER / 2, board), (x + RUNNER / 2, y + RUNNER / 2, bz),
+                                  PINE_END, ("-z", "+z")))
+    parts.append(shadow_sheet("opening", "x", 0.0, -hx + RUNNER, hx - RUNNER, board, bz))
+    parts.append(shadow_sheet("opening", "y", 0.0, -hy + RUNNER, hy - RUNNER, board, bz))
+    parts.append(kit.open_box("deck", (-hx, -hy, bz), (hx, hy, BASE), PINE, ("+z",), shade=1.04))
     # The plywood box, its faces inside the profiles' line, and the lid sheet over its top.
     ix, iy = hx - PROUD, hy - PROUD
     body = kit.box("body", (-ix, -iy, BASE), (ix, iy, HIGH - LID), PLY)
@@ -93,26 +126,49 @@ def build() -> list:
         for sy in (-1, 1):
             x0, x1 = sorted((sx * hx, sx * (hx - e)))
             y0, y1 = sorted((sy * hy, sy * (hy - e)))
-            parts.append(kit.box("post", (x0, y0, BASE), (x1, y1, HIGH), STEEL))
+            parts.append(kit.open_box("post", (x0, y0, BASE), (x1, y1, HIGH), STEEL,
+                                  ("-x" if sx > 0 else "+x", "-y" if sy > 0 else "+y", "-z")))
     for z0, z1 in ((BASE, BASE + e), (HIGH - e, HIGH)):
+        low = ("-z",) if z0 == BASE else ()
         for sy in (-1, 1):
             y0, y1 = sorted((sy * hy, sy * (hy - e)))
-            parts.append(kit.box("rail", (-hx + e, y0, z0), (hx - e, y1, z1), STEEL, shade=0.97))
+            parts.append(kit.open_box("rail", (-hx + e, y0, z0), (hx - e, y1, z1), STEEL, ("-y" if sy > 0 else "+y",) + low,
+                                  shade=0.97))
         for sx in (-1, 1):
             x0, x1 = sorted((sx * hx, sx * (hx - e)))
-            parts.append(kit.box("rail", (x0, -hy + e, z0), (x1, hy - e, z1), STEEL, shade=0.97))
+            parts.append(kit.open_box("rail", (x0, -hy + e, z0), (x1, hy - e, z1), STEEL, ("-x" if sx > 0 else "+x",) + low,
+                                  shade=0.97))
     # The clip loops on the top profiles, standing off them.
     cw, ch = CLIP
     for sy in (-1, 1):
         for x in CLIPS_LONG:
             y0, y1 = sorted((sy * hy, sy * (hy + PROUD)))
-            parts.append(kit.box("clip", (x - cw / 2, y0, HIGH - ch - 0.004), (x + cw / 2, y1, HIGH - 0.004), STEEL,
-                                 shade=0.9))
+            parts.append(kit.open_box("clip", (x - cw / 2, y0, HIGH - ch - 0.004), (x + cw / 2, y1, HIGH - 0.004), STEEL,
+                                  ("-y" if sy > 0 else "+y",), shade=0.9))
+            # Its partner on the foot's profile, flat.
+            parts.append(flat("clip", [(x - cw / 2, BASE + 0.003), (x + cw / 2, BASE + 0.003),
+                                       (x + cw / 2, BASE + ch), (x - cw / 2, BASE + ch)], sy * (hy + 0.0015), CLIP_C, sy))
     for sx in (-1, 1):
         for y in CLIPS_SHORT:
             x0, x1 = sorted((sx * hx, sx * (hx + PROUD)))
-            parts.append(kit.box("clip", (x0, y - cw / 2, HIGH - ch - 0.004), (x1, y + cw / 2, HIGH - 0.004), STEEL,
-                                 shade=0.9))
+            parts.append(kit.open_box("clip", (x0, y - cw / 2, HIGH - ch - 0.004), (x1, y + cw / 2, HIGH - 0.004), STEEL,
+                                  ("-x" if sx > 0 else "+x",), shade=0.9))
+            parts.append(turned_flat("clip", [(y - cw / 2, BASE + 0.003), (y + cw / 2, BASE + 0.003),
+                                              (y + cw / 2, BASE + ch), (y - cw / 2, BASE + ch)], sx * (hx + 0.0015),
+                                     CLIP_C, sx))
+    # Grain streaks down each face, a shade darker (his photos' strong figure), the long sides three, the ends two.
+    for facing in (-1, 1):
+        y = facing * (iy + 0.001)
+        for gx, w in ((-0.3, 0.05), (0.07, 0.035), (0.33, 0.06)):
+            g = gx * -facing
+            parts.append(flat("grain", [(g - w / 2, BASE + e), (g + w / 2 - 0.01, BASE + e), (g + w / 2, HIGH - e - LID),
+                                        (g - w / 2 + 0.012, HIGH - e - LID)], y, GRAIN, facing))
+    for sx in (-1, 1):
+        x = sx * (ix + 0.001)
+        for gy, w in ((-0.18, 0.05), (0.24, 0.04)):
+            g = gy * sx
+            parts.append(turned_flat("grain", [(g - w / 2, BASE + e), (g + w / 2, BASE + e), (g + w / 2 - 0.012,
+                                     HIGH - e - LID), (g - w / 2, HIGH - e - LID)], x, GRAIN_END, sx))
     # Stencils on both long sides: two up arrows high on the left, a blank label low on the right.
     for facing in (-1, 1):
         y = facing * (iy + 0.0015)

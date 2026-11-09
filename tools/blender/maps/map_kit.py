@@ -69,6 +69,13 @@ def mesh_object(name: str, bm: bmesh.types.BMesh, colour: int, shade: float = 1.
     return ob
 
 
+def bare(ob: bpy.types.Object) -> bpy.types.Object:
+    """Marks `ob` as never painted: its vertex alpha 0, so the game's paint (a container's, PropDress's custom data in
+    look_vertex.gdshader) leaves it its own colour, bare steel or rubber. Every other part's alpha is 1."""
+    ob["bare"] = True
+    return ob
+
+
 def box(name: str, lo: tuple, hi: tuple, colour: int, shade: float = 1.0) -> bpy.types.Object:
     """An axis-aligned box from corner `lo` to corner `hi`."""
     bm = bmesh.new()
@@ -91,6 +98,25 @@ def prism(name: str, outline: list, y0: float, y1: float, colour: int, shade: fl
         bm.faces.new([front[j], front[i], back[i], back[j]])
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     return mesh_object(name, bm, colour, shade)
+
+
+def hide(ob: bpy.types.Object, hidden: tuple) -> bpy.types.Object:
+    """Drops `ob`'s faces whose normals point along any of `hidden` ("+x", "-z"...): the faces nobody sees (against
+    another part, the floor or a wall), so the budget goes on what shows."""
+    if hidden:
+        bm = bmesh.new()
+        bm.from_mesh(ob.data)
+        drop = [f for f in bm.faces if any(
+            f.normal["xyz".index(h[1])] * (1 if h[0] == "+" else -1) > 0.9 for h in hidden)]
+        bmesh.ops.delete(bm, geom=drop, context="FACES")
+        bm.to_mesh(ob.data)
+        bm.free()
+    return ob
+
+
+def open_box(name: str, lo: tuple, hi: tuple, colour: int, hidden: tuple, shade: float = 1.0) -> bpy.types.Object:
+    """A box without its faces in `hidden` (hide)."""
+    return hide(box(name, lo, hi, colour, shade), hidden)
 
 
 def turned(ob: bpy.types.Object, degrees_z: float, pivot: tuple = (0.0, 0.0, 0.0)) -> bpy.types.Object:
@@ -143,6 +169,7 @@ def _gather(objects: list, unit: tuple = None, middle: tuple = None) -> tuple:
     for ob in objects:
         me = ob.data
         shade = float(ob.get("shade", 1.0))
+        alpha = 0.0 if ob.get("bare", False) else 1.0
         zs = [v.co.z for v in me.vertices]
         z0, z1 = min(zs), max(zs)
         span = max(z1 - z0, 1e-6)
@@ -160,7 +187,7 @@ def _gather(objects: list, unit: tuple = None, middle: tuple = None) -> tuple:
                 foot = 1.0 - FOOT_SHADE * (1.0 - (me.vertices[vi].co.z - z0) / span)
                 k = shade * foot
                 row = ((round(co.x, 5), round(co.z, 5), round(-co.y, 5)), (round(n.x, 4), round(n.z, 4),
-                       round(-n.y, 4)), (round(base[0] * k, 4), round(base[1] * k, 4), round(base[2] * k, 4), 1.0))
+                       round(-n.y, 4)), (round(base[0] * k, 4), round(base[1] * k, 4), round(base[2] * k, 4), alpha))
                 if row not in seen:
                     seen[row] = len(positions)
                     positions.append(row[0])
@@ -213,7 +240,7 @@ def export(path: str, name: str, objects: list, unit: tuple = None, middle: tupl
 
 # ----------------------------------------------------------------------------------------------------------- picture
 
-def render(path: str, objects: list, views: list, size: tuple = (900, 700)) -> list:
+def render(path: str, objects: list, views: list, size: tuple = (900, 700), paint: int = None) -> list:
     """Studio pictures of `objects` (Cycles on the CPU, a grey floor, a sun and a soft sky), one a view: each view
     (name, azimuth degrees from the front (-Y), elevation degrees, distance as a share of the model's size). Writes
     `<path>_<name>.png`; returns the files. For the owner's review sheets only: nothing here ships."""
@@ -225,9 +252,15 @@ def render(path: str, objects: list, views: list, size: tuple = (900, 700)) -> l
     scene.render.resolution_x, scene.render.resolution_y = size
     scene.render.film_transparent = False
     scene.view_settings.view_transform = "Standard"
-    # Paint the vertex colours in the picture: each part's material shows its colour.
+    # Paint the vertex colours in the picture: each part's material shows its colour, times `paint` (as the game
+    # paints a container) unless the part is bare.
+    tint = [srgb_to_linear(((paint >> sh) & 0xff) / 255.0) for sh in (16, 8, 0)] if paint is not None else None
     for ob in objects:
-        for m in ob.data.materials:
+        for i, m in enumerate(ob.data.materials):
+            if tint is not None and not ob.get("bare", False):
+                m = m.copy()
+                m.diffuse_color = [m.diffuse_color[c] * tint[c] for c in range(3)] + [1.0]
+                ob.data.materials[i] = m
             m.use_nodes = True
             bsdf = m.node_tree.nodes.get("Principled BSDF")
             bsdf.inputs["Base Color"].default_value = m.diffuse_color

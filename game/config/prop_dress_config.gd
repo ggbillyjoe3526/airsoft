@@ -59,9 +59,12 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT }
 	&"fridge": "res://assets/models/props/fridge.glb",
 	# The game's own map models (DM1, tools/blender/maps): Depot's plywood walls and containers (the crate above too).
 	&"plywood": "res://assets/models/props/plywood.glb",
+	&"plywood_mid": "res://assets/models/props/plywood_mid.glb",
 	&"plywood_low": "res://assets/models/props/plywood_low.glb",
+	&"plywood_short": "res://assets/models/props/plywood_short.glb",
 	&"container": "res://assets/models/props/container.glb",
 	&"container_low": "res://assets/models/props/container_low.glb",
+	&"container_short": "res://assets/models/props/container_short.glb",
 	&"container_wall": "res://assets/models/props/container_wall.glb",
 	&"container_roof": "res://assets/models/props/container_roof.glb",
 }
@@ -76,20 +79,28 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT }
 }
 ## A model's versions for its kind's other shapes of block (DM1), each drawn when it loads: a flat one on a block
 ## `flat_height` m high or lower (the Box's roof), a thin one on a block `thin_depth` m thick or thinner (the Box's
-## container walls), a low one on a block lower than `low_height` m (a plywood wall's sill under a window and its
-## lintel over one, a container's under and over a port, built a metre high so their caps keep their size).
+## container walls), else the one of `heights` built nearest the block's height (by ratio): a plywood wall's sill
+## under a window and lintel over one, a container's under and over a port, so a cap or a rail is never squashed or
+## stretched far.
 @export var flat_models: Dictionary[StringName, StringName] = {&"container": &"container_roof"}
 @export var flat_height: float = 0.3
 @export var thin_models: Dictionary[StringName, StringName] = {&"container": &"container_wall"}
 @export var thin_depth: float = 1.0
-@export var low_models: Dictionary[StringName, StringName] = {
-	&"plywood": &"plywood_low", &"container": &"container_low",
+## A model's heights: each version and the height (m) it is built at (tools/blender/maps, HEIGHTS and MODELS).
+@export var heights: Dictionary[StringName, Dictionary] = {
+	&"plywood": {&"plywood": 2.6, &"plywood_mid": 1.7, &"plywood_low": 1.0, &"plywood_short": 0.5},
+	&"container": {&"container": 2.6, &"container_low": 1.0, &"container_short": 0.6},
 }
-@export var low_height: float = 1.5
-## UNIT finds a block of its kind against an end this close (m) or closer.
+## UNIT finds a block of its kind against an end this close (m) or closer, and turns a box along the blocks it touches
+## only when its long side is under `unit_square` times its short (a cut piece, not a whole unit).
 @export var unit_reach: float = 0.05
-## RUN's module length (m, about) a model: a plywood wall's sheet, 1.22 m wide.
-@export var run_lengths: Dictionary[StringName, float] = {&"plywood": 1.22, &"plywood_low": 1.22}
+@export var unit_square: float = 1.5
+## RUN's module length (m) a model: a plywood wall's batten pitch, half a 1.22 m sheet. A wall is that many whole
+## modules, stretched by at most `run_stretch` (a share) to fill it, or else with a cut, narrower one at its end.
+@export var run_lengths: Dictionary[StringName, float] = {
+	&"plywood": 0.61, &"plywood_mid": 0.61, &"plywood_low": 0.61, &"plywood_short": 0.61,
+}
+@export var run_stretch: float = 0.1
 ## A dressed kind's block thicker than this (m) keeps its box: Depot's wardrobe, a plywood block a metre deep, is no
 ## wall.
 @export var kind_max_depth: Dictionary[StringName, float] = {&"plywood": 0.5}
@@ -100,7 +111,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT }
 	&"bin_green": Lay.GRID, &"bin_steel": Lay.GRID, &"bin_teal": Lay.GRID, &"units": Lay.GRID,
 }
 ## GRID's cells (m): x along the box's long side, y up (0: one layer the box's height), z across. Cordwood a metre and
-## a half long a stack, plywood crates 1.2 m long, a metre deep and 1.15 m high on their skids (DM1: two high in
+## a half long a stack, plywood crates 1.2 m long, a metre deep and 1.15 m high on their pallets (DM1: two high in
 ## Depot's 2.4 m crate walls, one in its waist cover), tyres in stacks, a spruce every metre and a half; The Street's bins side
 ## by side, about 0.7 m each, and its kitchen units about 0.6 m a cupboard.
 @export var grid_cells: Dictionary[StringName, Vector3] = {
@@ -116,7 +127,8 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT }
 @export var model_cores: Dictionary[StringName, Vector2] = {&"pine": Vector2(0.7, 0.6)}
 ## A dressed kind's block lower than this (m) keeps its box: a rack's shelf boards stay boards, its racking is
 ## shelving; Depot's desks (crate blocks 0.8 m high) stay desks, its crate stacks and the Range's are crates.
-@export var kind_min_height: Dictionary[StringName, float] = {&"rack": 2.0, &"crate": 0.85}
+## A plywood block under 0.3 m (a hut's floor edge) stays a board.
+@export var kind_min_height: Dictionary[StringName, float] = {&"rack": 2.0, &"crate": 0.85, &"plywood": 0.3}
 ## A cluster's cell (m, about) and the pallet's height under it (m; `pallet` is its model).
 @export var cluster_cell: float = 0.9
 @export var pallet_height: float = 0.15
@@ -173,9 +185,21 @@ func model_of(b: MapData.Block) -> StringName:
 		shape = flat_models.get(model, &"")
 	elif minf(b.size.x, b.size.z) <= thin_depth:
 		shape = thin_models.get(model, &"")
-	if shape == &"" and b.size.y < low_height:
-		shape = low_models.get(model, &"")
+	if shape == &"" and heights.has(model):
+		shape = _nearest_height(heights[model], b.size.y)
 	return shape if shape != &"" and mesh_of(shape) != null else model
+
+
+## Of `versions` (model: the height it is built at), the one nearest `height` by ratio that loads; none: &"".
+func _nearest_height(versions: Dictionary, height: float) -> StringName:
+	var best: StringName = &""
+	var best_gap := INF
+	for v: StringName in versions:
+		var gap := absf(log(maxf(height, 0.01) / float(versions[v])))
+		if gap < best_gap and mesh_of(v) != null:
+			best = v
+			best_gap = gap
+	return best
 
 
 ## How block `b`'s props are laid: its named prop's lay (FIT unless model_lays says), else its kind's.

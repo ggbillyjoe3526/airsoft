@@ -55,8 +55,10 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 			PropDressConfig.Lay.GRID:
 				_grid(_placed(out, model), boxes[model], foot, b.size, cfg.grid_cells.get(model, b.size), cfg, rng)
 			PropDressConfig.Lay.UNIT:
-				_placed(out, model).add(_unit(boxes[model], b, foot, map, middle, cfg), 1.0,
-						paint.call(_first_joined(b, map, cfg)) if paint.is_valid() else Color.WHITE)
+				var tint := Color.WHITE
+				if paint.is_valid():
+					tint = paint.call(_first_joined(b, map, cfg))
+				_placed(out, model).add(_unit(boxes[model], b, foot, map, middle, cfg), 1.0, tint)
 			PropDressConfig.Lay.RUN:
 				_run(_placed(out, model), boxes[model], foot, b.size, cfg.run_lengths.get(model, maxf(b.size.x, b.size.z)),
 						cfg, rng)
@@ -146,25 +148,40 @@ static func _grid(p: Placed, model: AABB, foot: Vector3, size: Vector3, cell: Ve
 						_shade(cfg, rng))
 
 
-## A wall's modules end to end along the box's long side, about `length` m each (stretched so a whole number fill
-## it), each as tall and as thick as the box, its x along the wall, turned end for end at random so a long wall never
-## reads as one module repeated.
+## A wall's modules end to end along the box's long side, `length` m each (PropDressConfig.run_stretch: stretched a
+## little, or a cut one at the high end), each as tall and as thick as the box, its x along the wall, turned end for
+## end at random so a long wall never reads as one module repeated.
 static func _run(p: Placed, model: AABB, foot: Vector3, size: Vector3, length: float, cfg: PropDressConfig,
 		rng: RandomNumberGenerator) -> void:
 	var along_x := size.x >= size.z
 	var long := size.x if along_x else size.z
 	var across := size.z if along_x else size.x
-	var n := maxi(1, roundi(long / maxf(length, 1e-6)))
-	var step := long / n
+	var pitch := maxf(length, 1e-6)
+	# Whole modules at the pitch, stretched to take up what is left when that is at most a tenth of them; otherwise
+	# a cut module (narrower, a sheet cut down) at the high end makes up the rest.
+	var n := floori(long / pitch + 1e-6)
+	var rest := long - n * pitch
+	var widths := PackedFloat32Array()
+	if n == 0:
+		widths.append(long)
+	elif rest <= cfg.run_stretch * n * pitch:
+		for i in n:
+			widths.append(long / n)
+	else:
+		for i in n:
+			widths.append(pitch)
+		widths.append(rest)
 	var yaw := 0.0 if along_x else PI * 0.5
-	for i in n:
-		var u := (i + 0.5) * step - long * 0.5
-		var at := foot + (Vector3(u, 0.0, 0.0) if along_x else Vector3(0.0, 0.0, u))
-		p.add(fit(model, at, Vector3(step, size.y, across), yaw + PI * float(rng.randi_range(0, 1))), _shade(cfg, rng))
+	var u := -long * 0.5
+	for w in widths:
+		var at := foot + (Vector3(u + w * 0.5, 0.0, 0.0) if along_x else Vector3(0.0, 0.0, u + w * 0.5))
+		p.add(fit(model, at, Vector3(w, size.y, across), yaw + PI * float(rng.randi_range(0, 1))), _shade(cfg, rng))
+		u += w
 
 
-## One model fitted to block `b`'s box, its x along the axis a block of its kind touches one of its ends on (a cut
-## length between two units lies along their row), else along the box's long side; its +x end turned away from a
+## One model fitted to block `b`'s box, its x along the box's long side, or, on a box near square (its long side under
+## PropDressConfig.unit_square times its short), along the axis a block of its kind touches one of its ends on (a cut
+## length between two units lies along their row: a row of units side by side never turns one across); its +x end turned away from a
 ## block of its kind against one of those ends (PropDressConfig.unit_reach), else away from the field's middle: a
 ## container's doors at the free end of each unit, never into the port cut between two.
 static func _unit(model: AABB, b: MapData.Block, foot: Vector3, map: MapData, middle: Vector3,
@@ -172,10 +189,11 @@ static func _unit(model: AABB, b: MapData.Block, foot: Vector3, map: MapData, mi
 	var ends := Vector2(_end_touches(b, 0, map, cfg), _end_touches(b, 2, map, cfg)) # x, z: -1 low end, +1 high end
 	var touched := Vector2(_touch_count(b, 0, map, cfg), _touch_count(b, 2, map, cfg))
 	var along_x := b.size.x >= b.size.z
-	if touched.x > 0.0 and touched.y == 0.0:
-		along_x = true
-	elif touched.y > 0.0 and touched.x == 0.0:
-		along_x = false
+	if maxf(b.size.x, b.size.z) < cfg.unit_square * minf(b.size.x, b.size.z):
+		if touched.x > 0.0 and touched.y == 0.0:
+			along_x = true
+		elif touched.y > 0.0 and touched.x == 0.0:
+			along_x = false
 	var axis := 0 if along_x else 2
 	var side := 2 if along_x else 0
 	var end := -(ends.x if along_x else ends.y) # the doors away from the touching blocks

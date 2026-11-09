@@ -11,15 +11,29 @@ extends Node3D
 ## The colour MapStyle gives a door's leaves, and their shader.
 const KIND := &"door"
 const LEAF_SHADER := preload("res://game/play/door_leaf.gdshader")
-## The leaf's model (DM1, tools/blender/maps/door.py): a two-panel timber leaf in its own colours, its body a 1 m cube
-## (x the width, the hinge at -x; y up; z the thickness) scaled to each leaf; a plain box painted the style's door
-## colour when it won't load. The frame's model: the opening's linings and architraves, built for an opening
-## FRAME_OPENING m wide and high in a wall FRAME_OPENING.z thick, its origin at the opening's foot, stretched to each.
-const LEAF_MODEL := "res://assets/models/props/door_leaf.glb"
-const FRAME_MODEL := "res://assets/models/props/door_frame.glb"
-const FRAME_OPENING := Vector3(2.0, 2.6, 0.3)
-## A door's wall is the block this far (m) past a jamb, at the door's middle height; its thickness the frame's depth.
+## The leaf's models (DM1, tools/blender/maps/door.py): two-panel timber leaves in their own colours, each built for
+## a leaf the size (m, wide and high) given here, its body a 1 m cube (x the width, the hinge at -x; y up; z the
+## thickness) scaled to each leaf. A map's doors take the one built nearest their first leaf's shape, so stiles and
+## handles stretch little (Depot's, the huts', The Street's); a plain box painted the style's door colour when it won't
+## load.
+const LEAF_MODELS: Dictionary[String, Vector2] = {
+	"res://assets/models/props/door_leaf.glb": Vector2(0.97, 2.6),
+	"res://assets/models/props/door_leaf_mid.glb": Vector2(0.78, 2.5),
+	"res://assets/models/props/door_leaf_narrow.glb": Vector2(0.43, 2.1),
+}
+## The frame's models: the opening's linings and architraves (and a head over it, where a wall is above), each built
+## for an opening the size given (m: wide, high, in a wall z thick), its origin at the opening's foot, stretched to
+## each door's opening and wall; the nearest to the map's first door.
+const FRAME_MODELS: Dictionary[String, Vector3] = {
+	"res://assets/models/props/door_frame.glb": Vector3(2.0, 2.6, 0.3),
+	"res://assets/models/props/door_frame_mid.glb": Vector3(1.6, 2.5, 0.3),
+	"res://assets/models/props/door_frame_narrow.glb": Vector3(0.9, 2.1, 0.3),
+}
+## A door's wall is the thinnest block across it this far (m) past a jamb, at the door's middle height; its thickness
+## the frame's depth (a wall's end meeting it at a corner is thicker that way, so it isn't taken).
 const WALL_PROBE := 0.05
+## A frame takes the baked light this far (m) over its foot.
+const FRAME_LIGHT_LIFT := 1.0
 ## The gap left between the two leaves and at each jamb (m), so the leaves read as two.
 const LEAF_GAP := 0.02
 ## A leaf folds back by up to half a turn, flat against its wall, and stops short where another block stands in its way
@@ -67,7 +81,10 @@ static func build(map: MapData, style: MapStyle, swing_time: float) -> DoorView:
 	var view := DoorView.new()
 	view.name = "Doors"
 	view._swing_time = maxf(swing_time, 0.001)
-	var leaf_mesh := PropDressConfig.load_mesh(LEAF_MODEL)
+	var first := map.doors[0]
+	var first_width := maxf(first.size.x, first.size.z)
+	var leaf_path := _nearest(LEAF_MODELS, Vector3(first_width * 0.5 - LEAF_GAP * 1.5, first.size.y, 0.0))
+	var leaf_mesh := PropDressConfig.load_mesh(leaf_path)
 	view._material = ShaderMaterial.new()
 	view._material.shader = LEAF_SHADER
 	view._material.set_shader_parameter(&"tint", style.colour_of(KIND, 0) if leaf_mesh == null else Color.WHITE)
@@ -117,8 +134,8 @@ func relight(lights: BakedLightNear) -> void:
 	if _frames != null:
 		var fm := _frames.multimesh
 		for i in _frame_at.size():
-			fm.set_instance_color(i, lights.at(_frame_at[i].origin + Vector3(0.0, 1.0, 0.0)) if lights != null
-					else Color.WHITE)
+			fm.set_instance_color(i, lights.at(_frame_at[i].origin + Vector3(0.0, FRAME_LIGHT_LIFT, 0.0))
+					if lights != null else Color.WHITE)
 
 
 ## Leaf `j`'s light on its face looking up its thin axis (`up`) or down it (a linear multiplier of its paint; white
@@ -156,7 +173,10 @@ func materials() -> Array[Material]:
 ## Each door's frame (DM1): the frame model stretched to the opening and its wall's thickness, in one MultiMesh;
 ## none when the model won't load.
 func _add_frames(map: MapData, style: MapStyle) -> void:
-	var mesh := PropDressConfig.load_mesh(FRAME_MODEL)
+	var first := map.doors[0]
+	var path := _nearest(FRAME_MODELS, Vector3(maxf(first.size.x, first.size.z), first.size.y, 0.0))
+	var opening: Vector3 = FRAME_MODELS[path]
+	var mesh := PropDressConfig.load_mesh(path)
 	if mesh == null:
 		return
 	var mm := MultiMesh.new()
@@ -169,15 +189,16 @@ func _add_frames(map: MapData, style: MapStyle) -> void:
 		var along_z := d.size.x < d.size.z
 		var width := d.size.z if along_z else d.size.x
 		var axis := Vector3(0.0, 0.0, 1.0) if along_z else Vector3(1.0, 0.0, 0.0)
-		var wall := FRAME_OPENING.z
+		var wall := INF
 		var probe := d.center + axis * (width * 0.5 + WALL_PROBE)
 		for b in map.blocks:
 			if AABB(b.center - b.size * 0.5, b.size).has_point(probe):
-				wall = b.size.x if along_z else b.size.z
-				break
+				wall = minf(wall, b.size.x if along_z else b.size.z)
+		if wall == INF:
+			wall = opening.z
 		var turn := Basis(Vector3.UP, PI * 0.5) if along_z else Basis.IDENTITY
-		var at := Transform3D(turn * Basis.from_scale(Vector3(width / FRAME_OPENING.x, d.size.y / FRAME_OPENING.y,
-				wall / FRAME_OPENING.z)), d.center - Vector3(0.0, d.size.y * 0.5, 0.0))
+		var at := Transform3D(turn * Basis.from_scale(Vector3(width / opening.x, d.size.y / opening.y,
+				wall / opening.z)), d.center - Vector3(0.0, d.size.y * 0.5, 0.0))
 		_frame_at.append(at)
 		mm.set_instance_transform(i, at)
 		mm.set_instance_color(i, Color.WHITE)
@@ -186,7 +207,23 @@ func _add_frames(map: MapData, style: MapStyle) -> void:
 	_frames.name = "Frames"
 	_frames.multimesh = mm
 	_frames.material_override = _frame_material
+	# The frame sits in its wall, which casts the shadow already.
+	_frames.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_frames)
+
+
+## Of `models` (path: the size each is built for, x wide and y high), the one nearest `size` in width and height by
+## ratio.
+static func _nearest(models: Dictionary, size: Vector3) -> String:
+	var best := ""
+	var best_gap := INF
+	for path: String in models:
+		var built: Vector3 = Vector3(models[path].x, models[path].y, 0.0)
+		var gap := absf(log(maxf(size.x, 0.01) / built.x)) + absf(log(maxf(size.y, 0.01) / built.y))
+		if gap < best_gap:
+			best = path
+			best_gap = gap
+	return best
 
 
 ## Door `d`'s two leaves: each from its jamb to the middle, turning out to the door's side.
