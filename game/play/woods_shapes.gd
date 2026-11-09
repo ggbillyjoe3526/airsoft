@@ -8,6 +8,9 @@ extends RefCounted
 
 const TREE := &"tree"
 const LOG := &"log"
+## Log blocks that get no moss: a crouch tunnel's sections (WG4), whose hollow-log models carry their own look; a slab
+## of moss on their boxes would show inside the tunnel.
+const UNMOSSED: Array[StringName] = [&"log_tunnel_side", &"log_tunnel_roof"]
 const HILL := &"hill"
 ## Each part draws its own numbers from the seed, so one part's count never moves another's.
 const SALT_CROWNS := 101
@@ -479,7 +482,7 @@ static func _fallen(map: MapData, cfg: WoodsConfig, standing: Array[MapData.Bloc
 static func _moss(map: MapData, cfg: WoodsConfig, standing: Array[MapData.Block], rng: RandomNumberGenerator,
 		pos: PackedVector3Array, nor: PackedVector3Array, col: PackedColorArray) -> void:
 	for b in standing:
-		if b.kind != LOG or rng.randf() >= map.moss_share:
+		if b.kind != LOG or rng.randf() >= map.moss_share or UNMOSSED.has(b.dress):
 			continue
 		var lo := b.center - b.size * 0.5
 		var hi := b.center + b.size * 0.5
