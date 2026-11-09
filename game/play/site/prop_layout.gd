@@ -75,8 +75,15 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 					var box := PropDressConfig.set_box(map, model)
 					_placed(out, model).add(fit(boxes[model], box.get_center() - Vector3(0.0, box.size.y * 0.5, 0.0),
 							box.size, 0.0), 1.0)
+			PropDressConfig.Lay.SIDE:
+				_placed(out, model).add(joint_bend(b, map, true) * _side(boxes[model], b, map, cfg, middle), 1.0)
+			PropDressConfig.Lay.LINED:
+				_lined(out, model, boxes, b, foot, cfg, joint_bend(b, map, false), map)
 			_:
-				_placed(out, model).add(_fit_facing(boxes[model], b, foot, middle), 1.0)
+				var t := _fit_facing(boxes[model], b, foot, middle)
+				if cfg.grounded.has(model):
+					t = grounded(t, boxes[model], b, map)
+				_placed(out, model).add(t, 1.0)
 	return out
 
 
@@ -427,6 +434,173 @@ static func _fit_facing(model: AABB, b: MapData.Block, foot: Vector3, middle: Ve
 		yaw = 0.0 if to.z >= 0.0 else PI
 	else:
 		yaw = PI * 0.5 if to.x >= 0.0 else -PI * 0.5
+	return fit(model, foot, size, yaw)
+
+
+## FIT's transform `t` of a model of bounds `model` in block `b`, stood on the ground under the box's middle instead
+## (PropDressConfig.grounded): the model's y = 0 on the ground, its top the box's; `t` itself where the ground isn't
+## known, lies outside the box's height, or the model's skirt (under its y = 0) would reach under the box's foot.
+static func grounded(t: Transform3D, model: AABB, b: MapData.Block, map: MapData) -> Transform3D:
+	if map.terrain == null or model.end.y <= 0.0:
+		return t
+	var foot := b.center.y - b.size.y * 0.5
+	var top := b.center.y + b.size.y * 0.5
+	var ground := map.terrain.height_at(b.center.x, b.center.z)
+	if is_nan(ground) or ground <= foot or ground >= top:
+		return t
+	var sy := (top - ground) / model.end.y
+	if ground + model.position.y * sy < foot - 1e-4:
+		return t
+	var out := t
+	out.basis.y = Vector3(0.0, sy, 0.0)
+	out.origin.y = ground
+	return out
+
+
+## SIDE: a tunnel wall's model on block `b`, its long side (the model's z) along the box's, its inner face (the
+## model's -x) toward the wall across the tunnel (with none found, toward the field's middle); stretched across and
+## along, but at its own height with its top at the box's top (the ceiling), so every section's profile is the same and
+## neighbours meet flush (its foot is under the floor, in the ground).
+static func _side(model: AABB, b: MapData.Block, map: MapData, cfg: PropDressConfig, middle: Vector3) -> Transform3D:
+	var along_x := b.size.x >= b.size.z
+	var inward := _toward_pair(b, map, cfg, along_x)
+	if inward == 0.0:
+		var to := middle - b.center
+		inward = 1.0 if (to.z if along_x else to.x) >= 0.0 else -1.0
+	# a quarter turn takes the model's -x to world +z; a half turn to world +x
+	var yaw: float
+	if along_x:
+		yaw = PI * 0.5 if inward > 0.0 else -PI * 0.5
+	else:
+		yaw = PI if inward > 0.0 else 0.0
+	var size := Vector3(minf(b.size.x, b.size.z), model.size.y, maxf(b.size.x, b.size.z))
+	return fit(model, Vector3(b.center.x, b.center.y + b.size.y * 0.5 - model.size.y, b.center.z), size, yaw)
+
+
+## The shear that bends a tunnel section's model (SIDE and LINED lays) to meet its neighbours halfway at each joint: a
+## tunnel's 1 m sections step with its floor (and its roofs' tops with the mound), so each one's level (its block's top
+## with `top`, else its bottom: a wall's top and a roof's foot are the ceiling, a roof's top its cap's) is tilted along
+## the tunnel from the middle of the step behind it to the middle of the step ahead (its own level at a mouth).
+## Neighbours are blocks named alike, end to end with it along x or z; none leaves it unbent.
+static func joint_bend(b: MapData.Block, map: MapData, top: bool) -> Transform3D:
+	var level := _ceiling(b, top)
+	for axis: int in [0, 2]:
+		var other := 2 - axis
+		var back := level
+		var ahead := level
+		var found := false
+		for c in map.blocks:
+			if c == b or c.dress != b.dress:
+				continue
+			var d := c.center - b.center
+			if absf(d[other]) > 1e-3 or absf(absf(d[axis]) - (b.size[axis] + c.size[axis]) * 0.5) > 1e-3:
+				continue
+			found = true
+			if d[axis] < 0.0:
+				back = (level + _ceiling(c, top)) * 0.5
+			else:
+				ahead = (level + _ceiling(c, top)) * 0.5
+		if found:
+			var k := (ahead - back) / b.size[axis]
+			var basis := Basis.IDENTITY
+			if axis == 0:
+				basis.x = Vector3(1.0, k, 0.0)
+			else:
+				basis.z = Vector3(0.0, k, 1.0)
+			return Transform3D(basis, Vector3(0.0, (back + ahead) * 0.5 - level - k * b.center[axis], 0.0))
+	return Transform3D.IDENTITY
+
+
+static func _ceiling(b: MapData.Block, top: bool) -> float:
+	return b.center.y + b.size.y * (0.5 if top else -0.5)
+
+
+## Which way across block `b` (+1 or -1 along world z for a box long in x, else along world x) the nearest block named
+## alike lies, a side wall's partner across the tunnel: within PropDressConfig.side_reach m and level with it along
+## the box (their middles under half its length apart); 0 for none.
+static func _toward_pair(b: MapData.Block, map: MapData, cfg: PropDressConfig, along_x: bool) -> float:
+	var half := maxf(b.size.x, b.size.z) * 0.5
+	var best := INF
+	var side := 0.0
+	for c in map.blocks:
+		if c == b or c.dress != b.dress:
+			continue
+		var d := c.center - b.center
+		var along := d.x if along_x else d.z
+		var across := d.z if along_x else d.x
+		if absf(along) < half and absf(across) > 1e-3 and absf(across) <= cfg.side_reach and absf(across) < best:
+			best = absf(across)
+			side = signf(across)
+	return side
+
+
+## LINED: the model on block `b`'s foot at its own height (or the box's, if lower) and width, its long side along the
+## box's, stretched along, bent by `bend` (joint_bend by the box's foot). At the end of a run of sections, the mouth
+## model (PropDressConfig.lined_mouths) instead, its -z end to the open side. Elsewhere, where more than lined_min_cap m
+## of the box is left over it, its cap (lined_caps) stretched over the rest of the box from lined_cap_from m over its
+## foot, bent by the boxes' tops, so a tunnel's caps run on as one slope.
+static func _lined(out: Dictionary[StringName, Placed], model: StringName, boxes: Dictionary[StringName, AABB],
+		b: MapData.Block, foot: Vector3, cfg: PropDressConfig, bend: Transform3D, map: MapData) -> void:
+	var mouth: StringName = cfg.lined_mouths.get(model, &"")
+	var open := _open_end(b, map)
+	if mouth != &"" and boxes.has(mouth) and open != Vector3.ZERO:
+		var m := boxes[mouth]
+		var along := b.size.z if absf(open.z) > 0.0 else b.size.x
+		# a quarter turn takes the model's -z to world -x, a half turn to +z
+		var yaw := 0.0
+		if open.z > 0.0:
+			yaw = PI
+		elif open.x < 0.0:
+			yaw = PI * 0.5
+		elif open.x > 0.0:
+			yaw = -PI * 0.5
+		_placed(out, mouth).add(bend * fit(m, foot, Vector3(m.size.x, minf(m.size.y, b.size.y), along), yaw), 1.0)
+		return
+	var own := boxes[model]
+	var height := minf(own.size.y, b.size.y)
+	_placed(out, model).add(bend * _fit_long(own, b, foot, height, false), 1.0)
+	var cap: StringName = cfg.lined_caps.get(model, &"")
+	if cap == &"" or not boxes.has(cap) or b.size.y - height <= cfg.lined_min_cap:
+		return
+	var from := minf(cfg.lined_cap_from, height)
+	_placed(out, cap).add(joint_bend(b, map, true) * _fit_long(boxes[cap], b, foot + Vector3(0.0, from, 0.0),
+			b.size.y - from), 1.0)
+
+
+## The open end of block `b` at the end of a run of blocks named alike (end to end with it along x or z, as joint_bend
+## finds them): the world direction (a unit along x or z) with no neighbour, ZERO for a block with a neighbour at both
+## ends or none.
+static func _open_end(b: MapData.Block, map: MapData) -> Vector3:
+	for axis: int in [0, 2]:
+		var other := 2 - axis
+		var back := false
+		var ahead := false
+		for c in map.blocks:
+			if c == b or c.dress != b.dress:
+				continue
+			var d := c.center - b.center
+			if absf(d[other]) > 1e-3 or absf(absf(d[axis]) - (b.size[axis] + c.size[axis]) * 0.5) > 1e-3:
+				continue
+			if d[axis] < 0.0:
+				back = true
+			else:
+				ahead = true
+		if back != ahead:
+			var dir := Vector3.ZERO
+			dir[axis] = -1.0 if ahead else 1.0
+			return dir
+	return Vector3.ZERO
+
+
+## One model stretched over block `b`'s footprint, `height` m high from `foot`, its long side along the box's (at the
+## model's own length with `stretch_long` off: a tunnel's shell, whose earth reaches past the box's sides).
+static func _fit_long(model: AABB, b: MapData.Block, foot: Vector3, height: float,
+		stretch_long: bool = true) -> Transform3D:
+	var long := maxf(b.size.x, b.size.z) if stretch_long else maxf(model.size.x, model.size.z)
+	var short := minf(b.size.x, b.size.z)
+	var model_long_x := model.size.x >= model.size.z
+	var size := Vector3(long, height, short) if model_long_x else Vector3(short, height, long)
+	var yaw := 0.0 if (b.size.x >= b.size.z) == model_long_x else PI * 0.5
 	return fit(model, foot, size, yaw)
 
 

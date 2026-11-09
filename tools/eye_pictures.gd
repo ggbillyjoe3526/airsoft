@@ -8,7 +8,8 @@ extends SceneTree
 ##       -- <map id> <folder> <name>:<x>,<z>,<yaw degrees>,<pitch degrees> ...
 ## Yaw 0 looks along -z (north), 90 along -x (west); pitch is up from level. An argument `preset=<low|medium|high|ultra>`
 ## draws that Graphics preset's values (GraphicsApply) instead of High; `fov=<degrees>` a narrower or wider view (the
-## range's card is 40). An argument `card` writes a map's pictures instead: the loading screen's, drawn at 1920 x 1080
+## range's card is 40); `night` the map's night preset, its lights' pools and fixtures lit (WG4). An argument `card`
+## writes a map's pictures instead: the loading screen's, drawn at 1920 x 1080
 ## (BP7 row 93: it draws it full screen), and beside it in `cards/` the Match page's and the menus' backdrop's copy at
 ## THUMB_SIZE (BP7: the page shows all four at once, so it holds the small ones), each at the map
 ## pictures' quality (UR2; the spots are in docs/ASSETS.md). The range stands its targets and markings (RangeView,
@@ -38,6 +39,7 @@ func _run() -> void:
 	var args := OS.get_cmdline_user_args()
 	var preset := &"high"
 	var card := false
+	var night := false
 	var fov := FOV
 	for a: String in args.duplicate():
 		if a.begins_with("preset="):
@@ -48,6 +50,9 @@ func _run() -> void:
 			args.erase(a)
 		elif a == "card":
 			card = true
+			args.erase(a)
+		elif a == "night":
+			night = true
 			args.erase(a)
 	if args.size() < 3:
 		push_error("eye_pictures: give a map id, a folder and at least one name:x,z,yaw,pitch")
@@ -68,7 +73,8 @@ func _run() -> void:
 	port.msaa_3d = MSAA
 	port.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	root.add_child(port)
-	var sun := LightingConfig.for_map(play.lighting, null, map, LightingConfig.DAY)
+	var sun := LightingConfig.for_map(play.lighting, play.night_lighting, map,
+			LightingConfig.NIGHT if night else LightingConfig.DAY)
 	var level := MapLevel.new()
 	port.add_child(level)
 	level.build(map, play.map_style, tuning.body, play.baked_light, sun, false, play.site_look)
@@ -87,6 +93,13 @@ func _run() -> void:
 		port.add_child(roof)
 	# An outdoor field's props, wood and bushes as a match draws them on High (WR3: Woodland's pictures).
 	add_woods(port, map, play)
+	# What its lights stand on or hang from (WG4), and with `night` their pools of light.
+	var fixtures := LightFixtures.build(map, play.light_fixtures, sun)
+	if fixtures != null:
+		port.add_child(fixtures)
+	var pools := LightPools.build(map, sun)
+	if pools != null:
+		port.add_child(pools)
 	var skyline := SkylineView.build(map, play.skyline, play.lighting, tuning.body.stand_eye_height)
 	if skyline != null:
 		port.add_child(skyline)

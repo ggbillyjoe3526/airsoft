@@ -37,8 +37,11 @@ KINDS = {"palisade": "fence", "logstack": "log", "log": "log", "logpile": "log",
 # The CC0 prop each piece's blocks are drawn as (WR3; PropDressConfig lays them in the box, which stays what BBs meet),
 # and the trees' and thickets'. The wind-thrown root plates, the posts, the walls and the palisade keep their boxes.
 DRESS = {"log": "log", "logpile": "logstack", "logstack": "logstack", "crates": "crate", "lowcrates": "crate",
-         "tyre": "tyre", "tyrestack": "tyre", "truck": "truck", "tree": "trunk", "thicket": "pine",
-         "palisade": "palisade"}
+         "tyre": "tractor_tyre", "tyrestack": "tractor_tyre_stack", "truck": "pickup", "tree": "trunk",
+         "thicket": "pine", "palisade": "palisade",
+         # WG4: the game's own models (tools/blender/maps) for the tunnels' and the culvert's blocks
+         "tunnel_side": "log_tunnel_side", "tunnel_roof": "log_tunnel_roof", "culvert_wall": "culvert_wall",
+         "culvert_kerb": "culvert_kerb"}
 # The structures drawn as one model of the game's own each (WG3, tools/blender/maps/woodland_*.py), named on every
 # block of theirs: the model fills the box round them all (PropDressConfig's SET lay), each part of it its block.
 TOWER, BRIDGE, SHED = "watch_tower", "footbridge", "sawmill_shed"
@@ -55,8 +58,13 @@ LINTEL_FROM = 2.1
 HEADER = "plywood_header"  # a window's sill or lintel under HEADER_UNDER m (PropDressConfig: the plywood kit's own)
 HEADER_UNDER = 0.3
 TUNNEL_WALL = (0.7, 1.25)  # a tunnel's side walls, from and to this far off its middle line (m)
-TUNNEL_ROOF_HALF = 1.75
+TUNNEL_ROOF_HALF = 1.25  # the log's outside: the roof is the log's arched top (WG4)
 TUNNEL_SEG = 1.0
+TUNNEL_EARTH_STEP = 0.3  # how much higher the mound's earth over a tunnel may stand than the next section's (m)
+TUNNEL_BANK = 0.5  # the earth banked against a tunnel log's sides, over its ceiling (log_tunnel.py WEDGE_FOOT)
+TUNNEL_BANK_REACH = 0.5  # how far out from the log the bank keeps its height (past log_tunnel.py SKIRT's 0.35 m)
+TUNNEL_BANK_SLOPE = 1.0  # its fall beyond that, m a m: a heap of earth
+TUNNEL_LOG_TOP = 0.9  # the hollow log's top over a tunnel's clear height (tools/blender/maps/log_tunnel.py SHELL)
 THICKET_TOP = 5.0
 THICKET_CELL = 1.0
 FENCE_SEG, FENCE_TOP = 8.0, 3.0
@@ -145,7 +153,8 @@ def cut_tunnels() -> list[dict]:
         # Down to the floor from the ground before the cuttings: the cells either end already in the cutting stay
         # where they are (cut twice, they were 1.5 m pits either side of the Badger run's floor, CT1).
         h[cut] = np.minimum(h, Wd.H0 - mound)[cut]
-        kind = "plywood" if t["material"] == "wood" else "log"
+        kind = "log"  # both covered tunnels are hollow logs (WG4, the owner's photos)
+        sections = []
         z = z0
         while z < z1 - 1e-6:
             ze = min(z + TUNNEL_SEG, z1)
@@ -153,15 +162,47 @@ def cut_tunnels() -> list[dict]:
             low = float(cells(ax - t["w"] / 2, z, ax + t["w"] / 2, ze).min())
             i1, j1 = to_cell(ax - TUNNEL_ROOF_HALF, z)
             i2, j2 = to_cell(ax + TUNNEL_ROOF_HALF, ze - 1e-6)
-            crown = float(top[i1:i2 + 1, j1:j2 + 1].max())
             under = floor + L.TUNNEL_CLEAR
-            crown = max(crown, under + 0.15)  # where the mound runs out, the box stands proud of the ground
-            out.append(block(kind, ax - TUNNEL_ROOF_HALF, under, z, ax + TUNNEL_ROOF_HALF, crown, ze))
+            sections.append({"z": z, "ze": ze, "low": low, "under": under,
+                             "crown": float(top[i1:i2 + 1, j1:j2 + 1].max())})
+            z = ze
+        # The mound's earth over the log (WG4): at least the log's arched top where the mound runs out; down to the log
+        # alone at each mouth, so a mouth is the log's round end standing out of the slope; and one even slope along
+        # the tunnel, each section at most TUNNEL_EARTH_STEP over its neighbour, so the earth reads as one heap.
+        n = len(sections)
+        for i, sc in enumerate(sections):
+            log_top = sc["under"] + TUNNEL_LOG_TOP
+            sc["crown"] = min(max(sc["crown"], log_top), log_top + TUNNEL_EARTH_STEP * min(i, n - 1 - i))
+        for order in (range(1, n), range(n - 2, -1, -1)):
+            for i in order:
+                near = sections[i - 1] if order.step > 0 else sections[i + 1]
+                sections[i]["crown"] = min(sections[i]["crown"], near["crown"] + TUNNEL_EARTH_STEP)
+        for sc in sections:
+            crown = max(sc["crown"], sc["under"] + TUNNEL_LOG_TOP)
+            out.append(block(kind, ax - TUNNEL_ROOF_HALF, sc["under"], sc["z"], ax + TUNNEL_ROOF_HALF, crown, sc["ze"],
+                             piece_kind="tunnel_roof"))
             for sg in (-1, 1):
                 xa, xb = sorted((ax + sg * TUNNEL_WALL[0], ax + sg * TUNNEL_WALL[1]))
-                out.append(block(kind, xa, low - SINK, z, xb, under, ze))
-            z = ze
+                out.append(block(kind, xa, sc["low"] - SINK, sc["z"], xb, sc["under"], sc["ze"],
+                                 piece_kind="tunnel_side"))
+        bank_tunnel(ax, z0, z1, sections)
     return out
+
+
+def bank_tunnel(ax: float, z0: float, z1: float, sections: list[dict]) -> None:
+    """Heaps the earth against a tunnel log's sides (WG4): up to TUNNEL_BANK over its ceiling for TUNNEL_BANK_REACH
+    out from the log (where the mound's earth on its shoulders starts, log_tunnel.py WEDGE_FOOT and SKIRT), then down
+    at TUNNEL_BANK_SLOPE to the ground on every side, past the mouths too (never on the path into one), so no flat of
+    the log's side and no ridge of earth stands out of a low mound."""
+    side = np.abs(L.GX - ax) - TUNNEL_WALL[1]
+    out_z = np.maximum(np.maximum(z0 - L.GZ, L.GZ - z1), 0.0)
+    near = (side >= -1e-6) & ((out_z <= 1e-6) | (side >= TUNNEL_BANK_REACH - 1e-6))
+    reach = np.hypot(np.maximum(side - TUNNEL_BANK_REACH, 0.0), out_z)
+    starts = np.array([sc["z"] for sc in sections])
+    under = np.array([sc["under"] for sc in sections])[np.clip(np.searchsorted(starts, L.GZ, "right") - 1, 0,
+                                                                 len(sections) - 1)]
+    heap = under + TUNNEL_BANK - TUNNEL_BANK_SLOPE * reach
+    h[near] = np.maximum(h, heap)[near]
 
 
 # ------------------------------------------------------------------ pieces
@@ -280,9 +321,9 @@ def deck_blocks() -> list[dict]:
             assert y - pipe_top >= 0.15, f"the road is {y - pipe_top:.2f} m over the culvert's pipe"
             out.append(block("floor", x1, pipe_top, z1, x2, y, z2, surface="gravel"))
             for (a1, a2) in ((x1, L.CULVERT[0] - 0.8), (L.CULVERT[0] + 0.8, x2)):
-                out.append(block("wall", a1, float(bed.min()) - SINK, z1, a2, pipe_top, z2))
+                out.append(block("wall", a1, float(bed.min()) - SINK, z1, a2, pipe_top, z2, piece_kind="culvert_wall"))
             for zz in (z1, z2 - 0.3):  # the kerbs over the headwalls
-                out.append(block("wall", x1, y, zz, x2, y + 0.45, zz + 0.3))
+                out.append(block("wall", x1, y, zz, x2, y + 0.45, zz + 0.3, piece_kind="culvert_kerb"))
         elif d["name"] == "Tower platform":
             out.append(block("floor", x1, y - Wd.TOWER_DECK, z1, x2, y, z2, surface="wood", dress=TOWER))
             # Its stair: a ramp off the open east side, 1:2, down to the ground.
@@ -487,7 +528,7 @@ def lights() -> list[dict]:
     out = []
     for (x, z, kind) in L.LIGHTS:
         fire = kind == "fire"
-        out.append({"position": {"x": r(x), "y": r(floor_at(x, z) + (1.0 if fire else 2.2)), "z": r(z)},
+        out.append({"position": {"x": r(x), "y": r(floor_at(x, z) + (0.7 if fire else 2.2)), "z": r(z)},
                     "radius": 7 if fire else 5.5, "colour": FIRE if fire else LANTERN,
                     "kind": "fire" if fire else "lantern"})
     return out
