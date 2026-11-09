@@ -9,7 +9,8 @@ whole number of them each stretched under 10 % to the wall's length, height and 
 battens meet as one.
 
 Four heights (PropDressConfig.heights picks the nearest for a block): the full 2.6 m, a 1.7 m and a 1 m one without
-the rail, and a 0.5 m one for sills and lintels, so a cap is never squashed far.
+the rail, and a 0.5 m one for sills and lintels, so a cap is never squashed far. A fifth, the 0.2 m header (WG3), is
+a lintel or sill too low for those, with no skirting: Woodland names it on its thin window blocks.
 
 Run with Blender 5.x, or Python with the `bpy` module (pip install bpy==5.2.3):
 
@@ -32,6 +33,8 @@ BUDGET = 245  # one 0.61 m module (a sheet's half: about 400 a metre of wall)
 WIDE = 0.61  # half a 1.22 m sheet, the batten pitch: a wall is a whole number of them, stretched under 10 %
 THICK = 0.30  # the wall's box
 HEIGHTS = {"plywood": 2.6, "plywood_mid": 1.7, "plywood_low": 1.0, "plywood_short": 0.5}  # PropDressConfig.heights
+HEADER = {"plywood_header": 0.2}  # named by a block (Woodland's thin lintels), not picked by height
+HEADER_UNDER = 0.3  # a module this low is a header: no skirting at its foot
 SHEET = 2.44  # the full sheet's height; the filler strip runs above it
 FACE = 0.012  # how far a batten stands off the sheet
 SKIRT = 0.12  # the skirting board's height
@@ -128,7 +131,7 @@ def build(tall: float) -> list:
     inner = ht - FACE
     full = tall > SHEET
     top = tall - CAP
-    skirt = min(SKIRT, tall * 0.2)
+    skirt = 0.0 if tall < HEADER_UNDER else min(SKIRT, tall * 0.2)
     sheet_top = SHEET - RAIL / 2 if full else top
     parts.append(kit.box("core", (-hw, -inner + 0.001, skirt), (hw, inner - 0.001, top), SHEET_A, shade=0.8))
     for side in (-1, 1):
@@ -143,10 +146,11 @@ def build(tall: float) -> list:
                                       (ri, SHEET + RAIL / 2)], BATTEN_C))
             for rx in (-0.15, 0.15):
                 parts.append(dot("screw", rx, SHEET, side, SCREW, SCREW, SCREW_C, ht - 0.0012))
-        # The skirting, its top edge bevelled off.
-        y0s, y1s = side * (inner - 0.002), side * (inner + SKIRT_PROUD)
-        parts.append(rod("skirt", [(y0s, 0.0), (y1s, 0.0), (y1s, skirt - 0.006), (y0s + side * 0.002, skirt)],
-                         SKIRT_C))
+        # The skirting, its top edge bevelled off (a header has none).
+        if skirt > 0.0:
+            y0s, y1s = side * (inner - 0.002), side * (inner + SKIRT_PROUD)
+            parts.append(rod("skirt", [(y0s, 0.0), (y1s, 0.0), (y1s, skirt - 0.006), (y0s + side * 0.002, skirt)],
+                             SKIRT_C))
         # Half battens at both ends, screws up each (the pair at a joint shows two rows).
         for x0, x1 in ((-hw, -hw + BATTEN / 2), (hw - BATTEN / 2, hw)):
             parts.append(batten("batten", x0, x1, skirt, top, side))
@@ -184,7 +188,7 @@ def make(name: str, tall: float) -> None:
 
 
 def main() -> None:
-    for name, tall in HEIGHTS.items():
+    for name, tall in {**HEIGHTS, **HEADER}.items():
         make(name, tall)
 
 

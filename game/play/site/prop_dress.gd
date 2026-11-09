@@ -147,8 +147,8 @@ func light_of(model: StringName, i: int) -> Color:
 
 
 ## The models some block of `map` is dressed with, their variants (lining or grid), the pallet too when a cluster
-## stands on one, the earth bank when a prop stands on the ground (GROUND), and a lined model's cap and mouth
-## (PropDressConfig.lined_caps, lined_mouths).
+## stands on one, the earth bank when a prop stands on the ground (GROUND), a palisade's rail with its stakes, and a
+## lined model's cap and mouth (PropDressConfig.lined_caps, lined_mouths).
 static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName]:
 	var used: Array[StringName] = []
 	for b in map.blocks:
@@ -177,6 +177,9 @@ static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName
 			for feature: String in cfg.bay_features.get(model, PackedStringArray()):
 				if not used.has(StringName(feature)):
 					used.append(StringName(feature))
+		var rail: StringName = cfg.stake_rails.get(model, &"")
+		if cfg.lay_of(b) == PropDressConfig.Lay.STAKES and rail != &"" and not used.has(rail):
+			used.append(rail)
 	return used
 
 

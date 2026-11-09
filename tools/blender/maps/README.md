@@ -6,7 +6,8 @@ material of its own). `mapkit.py` holds the shared palette, the vertex-colour ba
 for the hall shell (DH1); `prop.py` does the same for the racking and small props (RK1), painting by palette name with
 a foot-to-top gradient (`render_prop.py` renders a built prop from labelled angles); `woodkit.py` holds Woodland's
 shared parts (bark, logs, split ends, leaf clumps, fronds) and its colours, each checked off the team hues as the tests
-measure them (WG2).
+measure them (WG2); `timberkit.py` holds the Woodland structures' timber paints, logs, boards and beams, and their
+blocks read from `data/maps/woodland.json` (rerun a structure's script after `tools/woodland/build_map.py`, WG3).
 
 | Script | Writes | Drawn as |
 |---|---|---|
@@ -19,6 +20,11 @@ measure them (WG2).
 | `steel_drum.py`, `pallet.py` | `steel_drum.glb`, `pallet.glb` | Depot's drum blocks, nine stacks on a pallet (CLUSTER) |
 | `plastic_barrel.py` | `plastic_barrel.glb` | Depot's barrel blocks, two a block (ROW) |
 | `sofa.py`, `office_desk.py`, `steel_locker.py` | `sofa.glb`, `office_desk.glb`, `steel_locker.glb` | The Lounge's sofa, the Offices' desks and lockers (fitted) |
+| `palisade.py` | `palisade.glb`, `palisade_rail.glb` | Woodland's fences, stake by stake (`PropDressConfig.Lay.STAKES`) |
+| `watch_tower.py` | `watch_tower.glb` | Woodland's watch tower, one model over its blocks (`Lay.SET`) |
+| `footbridge.py` | `footbridge.glb` | Woodland's North bridge (`Lay.SET`) |
+| `sawmill_shed.py` | `sawmill_shed.glb` | Woodland's Sawmill shed (`Lay.SET`) |
+| `hut_roof.py` | `hut_roof.glb`, `hut_roof_long.glb` | Woodland's hut roofs (fitted to the block) |
 | `fern.py`, `bush.py` | `fern.glb`, `bush.glb` | Woodland's ferns and bushes (`BushView`), stretched to each plant |
 | `fallen_log.py` | `fallen_log_5.glb`, `_6.glb`, `_8.glb` | Woodland's fallen logs, the nearest length (`PropDressConfig.Lay.GROUND`) |
 | `root_plate.py` | `root_plate.glb` | Woodland's wind-thrown trees (`Lay.GROUND`) |
@@ -42,8 +48,9 @@ and crown are written apart (`export(..., crown=True)`): the game stretches the 
 crown evenly over it.
 
 Run each with Blender 5.x or pip's `bpy` (`pip install bpy==5.2.3`): `python3 -I tools/blender/maps/<script>.py <repo
-root>`, then `godot --headless --path . --import`. Pictures for review: `tools/prop_pictures.gd` (a model alone) and
-`tools/hall_pictures.gd` (Depot), both under xvfb; `tools/eye_pictures.gd` for a field (`night` lights its fires and
-lanterns). Records: `docs/records/DH1.md`, `docs/records/RK1.md` (RK1's scripts run as `python3
-tools/blender/maps/<script>.py`), `docs/records/WG2.md`, `docs/records/WG4.md` (`weathering.py`: WG4's noise and
-repaint helpers), `docs/records/WT1.md`. Dev only: tools/ never ships.
+root>`, then `godot --headless --path . --import`. Pictures for review: `tools/prop_pictures.gd` (a model alone),
+`tools/hall_pictures.gd` (Depot) and `tools/woodland_pictures.gd` (Woodland), all under xvfb; `tools/eye_pictures.gd`
+for a field (`night` lights its fires and lanterns). Records: `docs/records/DH1.md`, `docs/records/RK1.md` (RK1's
+scripts run as `python3 tools/blender/maps/<script>.py`), `docs/records/WG2.md`, `docs/records/WG3.md`,
+`docs/records/WG4.md` (`weathering.py`: WG4's noise and repaint helpers), `docs/records/WT1.md`. Dev only: tools/ never
+ships.
