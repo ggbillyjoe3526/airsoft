@@ -74,10 +74,12 @@ static func material(look: SiteLook, map: MapData) -> ShaderMaterial:
 	m.set_shader_parameter(&"grit", look.grit)
 	m.set_shader_parameter(&"gradient", look.gradient)
 	m.set_shader_parameter(&"gradient_height", look.gradient_height)
-	# clean surfaces draw no photo grain, so the photos aren't loaded at all
-	if look.grit > 0.0:
+	m.set_shader_parameter(&"slab_grain", look.slab_grain)
+	# clean surfaces draw no photo grain, so the photos aren't loaded at all (but the slab's own, Dev 3)
+	if look.grit > 0.0 or look.slab_grain > 0.0:
 		_photo(m, look.slab_colour, look.slab_normal, &"slab_col", &"slab_nrm", &"slab_set",
 				Vector4(look.slab_scale, look.slab_mix, look.slab_depth, look.slab_luma))
+	if look.grit > 0.0:
 		_photo(m, look.ply_colour, look.ply_normal, &"ply_col", &"ply_nrm", &"ply_set",
 				Vector4(look.ply_scale, look.ply_mix, look.ply_depth, look.ply_luma))
 	_wet(m, look, map)

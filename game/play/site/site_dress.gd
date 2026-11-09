@@ -107,7 +107,9 @@ func _build(map: MapData, look: SiteLook, material: ShaderMaterial) -> void:
 			&"plywood":
 				_cap(st, look, b, look.cap, &"timber")
 			&"wall_outer":
-				_cap(st, look, b, look.coping, &"coping")
+				# a wall drawn as its bays (DH1) has its own eaves; the coping would stand proud of them
+				if not SiteSurface.as_props(look, b):
+					_cap(st, look, b, look.coping, &"coping")
 			&"skip":
 				_skip(st, look, b)
 	for p in map.skyline:
