@@ -1,7 +1,7 @@
 name: Checks
 
 # Every pull request and every push to main: lint the scripts, check the changelog notes and the wiki, run the GUT unit
-# tests (in four parts side by side, CI1), import the project and run the headless smoke test, check the licence
+# tests (in seven parts side by side, CI1, CI2), import the project and run the headless smoke test, check the licence
 # notices are current, and play the match guards (whole bot matches over 16 seeds, Elimination and Attack / Defend each a
 # job of their own, the night guards six of their own, WL10, the callouts' guards one, CO1; pipeline/README.md › The
 # checks). Fails on any script error or failed test. The Review line is checked by review.yml.
@@ -39,7 +39,7 @@ jobs:
       - name: Smoke test (imports the project, then runs it headless)
         run: tools/smoke_test.sh
 
-      - name: Unit tests, part 1 (tests/unit/test_a* to test_dev*)
+      - name: Unit tests, part 1 (tests/unit/test_a* to test_bots.gd)
         if: success() || failure()
         run: tools/unit_tests.sh 1
 
@@ -49,6 +49,15 @@ jobs:
           godot --headless --path . -s res://tools/make_notices.gd
           if ! git diff --exit-code -- THIRD_PARTY_NOTICES.txt; then
             echo "::error::THIRD_PARTY_NOTICES.txt is out of date. Run: godot --headless --path . -s res://tools/make_notices.gd and commit the result."
+            exit 1
+          fi
+
+      - name: Every unit test part has a job (tools/unit_tests.sh --parts against the unit matrix below)
+        if: success() || failure()
+        run: |
+          parts=$(tools/unit_tests.sh --parts)
+          if [ "$parts" != 7 ]; then
+            echo "::error::tools/unit_tests.sh has $parts parts but CI runs 7: update the unit job's matrix and this check."
             exit 1
           fi
 
@@ -64,10 +73,15 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-  unit-2:
-    name: Unit tests part 2
+  # Parts 2 to 7 of the unit tests, a job each (tools/unit_tests.sh splits the files by name; part 1 runs above).
+  unit:
+    name: Unit tests part ${{ matrix.part }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [2, 3, 4, 5, 6, 7]
     steps:
       - uses: actions/checkout@v6
 
@@ -76,69 +90,17 @@ jobs:
           version: ${{ env.GODOT_VERSION }}
           status: ${{ env.GODOT_STATUS }}
 
-      - name: Unit tests, part 2 (tests/unit/test_df* to test_fr*)
-        run: tools/unit_tests.sh 2
+      - name: Unit tests, part ${{ matrix.part }} (tools/unit_tests.sh)
+        run: tools/unit_tests.sh ${{ matrix.part }}
 
       - name: Keep the logs
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: unit-2-logs
+          name: unit-${{ matrix.part }}-logs
           path: |
             import.log
-            unit-2.log
-          if-no-files-found: ignore
-          retention-days: 14
-
-  unit-3:
-    name: Unit tests part 3
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: ./.github/actions/setup-godot
-        with:
-          version: ${{ env.GODOT_VERSION }}
-          status: ${{ env.GODOT_STATUS }}
-
-      - name: Unit tests, part 3 (tests/unit/test_g* to test_re*)
-        run: tools/unit_tests.sh 3
-
-      - name: Keep the logs
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: unit-3-logs
-          path: |
-            import.log
-            unit-3.log
-          if-no-files-found: ignore
-          retention-days: 14
-
-  unit-4:
-    name: Unit tests part 4
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: ./.github/actions/setup-godot
-        with:
-          version: ${{ env.GODOT_VERSION }}
-          status: ${{ env.GODOT_STATUS }}
-
-      - name: Unit tests, part 4 (tests/unit/test_rg* to test_z*)
-        run: tools/unit_tests.sh 4
-
-      - name: Keep the logs
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: unit-4-logs
-          path: |
-            import.log
-            unit-4.log
+            unit-${{ matrix.part }}.log
           if-no-files-found: ignore
           retention-days: 14
 

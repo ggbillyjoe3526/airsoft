@@ -1,39 +1,47 @@
 #!/usr/bin/env bash
-# Unit tests (Gut, addons/gut): the test_*.gd under tests/unit, headless, in four parts of about the same time (CI1,
-# WL9, WR1): part 1 the files before test_df (test_a* to test_dev*, test_bots.gd's whole bot matches among them), part 2
-# from test_df to before test_g, part 3 from test_g to before test_rg (test_night*, test_play* and test_range* among
-# them), part 4 the rest.
-# Each part is a Godot run of its own with its own limit; CI runs them as four jobs side by side. Settings live in
+# Unit tests (Gut, addons/gut): the test_*.gd under tests/unit, headless, in parts of about the same time (CI1, WL9,
+# WR1, CI2). The parts split the files by name at BOUNDS below: part 1 is every file sorted before the first bound,
+# part n every file from bound n-1 to before bound n, the last part the rest.
+# Each part is a Godot run of its own with its own limit; CI runs them as jobs side by side. Settings live in
 # .gutconfig.json. Prints each failure as "FAIL: <file> <test>: <message>" and the totals, the whole output in
 # unit-<part>.log; fails if any test fails or any script error is printed.
-# Usage: tools/unit_tests.sh [1|2|3|4]  (all four parts in turn without one; GODOT=/path/to/godot to override)
+# Usage: tools/unit_tests.sh [<part>|--parts]  (every part in turn without one; --parts prints how many there are;
+# GODOT=/path/to/godot to override)
 set -uo pipefail
 GODOT="${GODOT:-godot}"
 cd "$(dirname "$0")/.."
 
+# Where each part after the first starts, by file name, byte by byte whatever the locale. Moving one keeps the parts
+# about even (CI2 measured them, docs/records/CI2.md); adding one adds a part, and CI's unit jobs list every part.
+BOUNDS=(test_bots_ test_df test_g test_mc test_rg test_torch_)
+parts=$(( ${#BOUNDS[@]} + 1 ))
+
+if [ "${1:-}" = "--parts" ]; then
+  echo "$parts"; exit 0
+fi
 if [ -z "${1:-}" ]; then
   failed=0
-  "$0" 1 || failed=1
-  "$0" 2 || failed=1
-  "$0" 3 || failed=1
-  "$0" 4 || failed=1
+  for p in $(seq 1 "$parts"); do
+    "$0" "$p" || failed=1
+  done
   exit $failed
 fi
 part="$1"
-if [ "$part" != 1 ] && [ "$part" != 2 ] && [ "$part" != 3 ] && [ "$part" != 4 ]; then
-  echo "FAIL: no unit test part '$part' (1, 2, 3 or 4)"; exit 1
+if ! [[ "$part" =~ ^[1-9][0-9]*$ ]] || [ "$part" -gt "$parts" ]; then
+  echo "FAIL: no unit test part '$part' (1 to $parts)"; exit 1
 fi
 LOG="unit-$part.log"
 
-# This part's files by name, byte by byte whatever the locale: part 1 sorts before test_df, part 2 from test_df to
-# before test_g, part 3 from test_g to before test_rg, part 4 from test_rg on.
+# This part's files: from the bound before it (none for part 1) to before its own (none for the last part).
+from="${BOUNDS[part - 2]:-}"
+[ "$part" -eq 1 ] && from=""
+to="${BOUNDS[part - 1]:-}"
 files=()
 while IFS= read -r f; do
   files+=("res://$f")
-done < <(find tests/unit -name 'test_*.gd' | LC_ALL=C sort | LC_ALL=C awk -v part="$part" '{
+done < <(find tests/unit -name 'test_*.gd' | LC_ALL=C sort | LC_ALL=C awk -v from="$from" -v to="$to" '{
   name = $0; sub(/.*\//, "", name)
-  at = name < "test_df" ? 1 : (name < "test_g" ? 2 : (name < "test_rg" ? 3 : 4))
-  if (at == part) print
+  if (name >= from && (to == "" || name < to)) print
 }')
 if [ "${#files[@]}" -eq 0 ]; then
   echo "FAIL: no test files in unit test part $part"; exit 1
@@ -43,8 +51,8 @@ list="$(IFS=,; echo "${files[*]}")"
 # Always import first, so a new class_name or asset is known to the tests whatever ran before.
 "$GODOT" --headless --path . --import > import.log 2>&1
 
-# A part takes about 11 to 13 minutes on a cloud session and on CI (WR1); the limit catches a hang or a part grown too
-# big to split again, inside the CI job's 20 minutes.
+# A part takes about 6 to 10 minutes on CI (CI2), and CI's runners vary by half again; the limit catches a hang or a
+# part grown too big to split again, inside the CI job's 20 minutes.
 timeout 1080 "$GODOT" --headless --path . -s res://addons/gut/gut_cmdln.gd -gdir= -gtest="$list" > "$LOG" 2>&1
 status=$?
 
