@@ -1,6 +1,6 @@
 # FS1 · The flagpole and the Range's skyline buildings (Dev 3 map models, group 5)
 
-**Review:** pending
+**Review:** 3 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | 2026-11-09 | 1 | Opus 5.5 (build thread) | 114/114 targeted | Revise 5/8 | proportions against the photos (water tower, silo, watch tower, flagpole truck), stretched shed doors and windows, no windscreen, no face test, changelog |
 | 2026-11-09 | 2 | Opus 5.5 (build thread) | 117/117 targeted | Revise 7/8 | a 12 mm gap under the flagpole's truck; curves flat-shaded (the water tower's bowl read as a cone) |
-| 2026-11-09 | 3 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-09 | 3 | Opus 5.5 (build thread) | tools/check.sh green (all four unit parts, smoke) | Accept 8/8 | – |
 
 ## Decisions
 

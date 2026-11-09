@@ -247,5 +247,5 @@ func _load(kind: StringName, path: String) -> Mesh:
 			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 			if colours.size() == verts.size():
 				return mesh
-	push_warning("SkylineConfig: %s's model \"%s\" won't load; it keeps its greybox" % [kind, path])
+	push_warning("SkylineConfig: %s's model \"%s\" won't load; it is left out" % [kind, path])
 	return null
