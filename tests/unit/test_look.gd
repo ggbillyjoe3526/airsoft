@@ -173,16 +173,19 @@ func test_depots_roof_is_galvanised_grey() -> void:
 		return
 	var area := 0.0
 	var grey := 0.0
-	for surface in mesh.get_surface_count():
+	for surface: int in mesh.get_surface_count():
 		var arrays := mesh.surface_get_arrays(surface)
 		var verts := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
 		var colours := arrays[Mesh.ARRAY_COLOR] as PackedColorArray
 		var index := arrays[Mesh.ARRAY_INDEX] as PackedInt32Array
-		for t in range(0, index.size(), 3):
+		assert_eq(colours.size(), verts.size(), "the bay is painted in vertex colours")
+		if colours.size() != verts.size():
+			return
+		for t: int in range(0, index.size(), 3):
 			var a := verts[index[t]]
 			var size := (verts[index[t + 1]] - a).cross(verts[index[t + 2]] - a).length() * 0.5
 			area += size
-			if colours.is_empty() or colours[index[t]].linear_to_srgb().s < 0.2:
+			if colours[index[t]].linear_to_srgb().s < 0.2:
 				grey += size
 	assert_gt(grey / area, 0.9, "%.0f%% of the roof bay is grey" % (100.0 * grey / area))
 
