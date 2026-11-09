@@ -3,7 +3,8 @@ extends Node3D
 ## A map's CC0 props (DR2, WR3): the drums, barrels, pallets and sofa that stand in the blocks of the kinds
 ## PropDressConfig dresses, and Woodland's trunks, logs, cordwood, spruces, tyres, crates and truck in the blocks that
 ## name them, where PropLayout lays them, one MultiMesh a model (a model laid often, or tiled, one a chunk,
-## PropDressConfig.many_chunk or chunk, so it culls and takes its level of detail by area) in one vertex-coloured material. A
+## PropDressConfig.many_chunk or chunk, so it culls and takes its level of detail by area) in one vertex-coloured material
+## (a model drawn rougher, PropDressConfig.model_roughness, in its own: Woodland's trees). A
 ## drum, barrel or sofa casts its own shadow (its box draws nothing, SiteSurface.core_of, and leaves MapLevel's shadow
 ## caster); shelving casts none, its rack's backing box still does. Depot's crate walls, plywood walls and containers
 ## are map models of the game's own (DM1, tools/blender/maps). Each prop is drawn in its own shade times its paint (a
@@ -13,7 +14,8 @@ extends Node3D
 ## A prop takes the baked light near this far (m) over its foot, from faces facing any way (BakedLightNear.at).
 const LIGHT_LIFT := 0.5
 
-var _material: ShaderMaterial = null
+var _materials: Dictionary[float, ShaderMaterial] = {} # by roughness: the shared one and each model_roughness
+var _cfg: PropDressConfig = null
 var _views: Dictionary[StringName, Array] = {} # each model's MultiMeshInstance3Ds, a chunk each
 var _meshes: Dictionary[StringName, Mesh] = {}
 var _placed: Dictionary[StringName, PropLayout.Placed] = {}
@@ -41,9 +43,8 @@ static func build(map: MapData, cfg: PropDressConfig, paint: Callable = Callable
 		return null
 	var dress := PropDress.new()
 	dress.name = "Props"
-	dress._material = LookMaterials.vertex_colour(cfg.roughness, cfg.metallic)
-	dress._material.set_shader_parameter(&"paint_by_custom", true)
-	dress._material.set_shader_parameter(&"perforations", true)
+	dress._cfg = cfg
+	dress._materials[cfg.roughness] = _new_material(cfg.roughness, cfg.metallic)
 	dress._placed = placed
 	dress._meshes = meshes
 	for model: StringName in placed:
@@ -90,7 +91,27 @@ func placed() -> Dictionary[StringName, PropLayout.Placed]:
 
 ## The materials drawn, to warm their shaders before play.
 func materials() -> Array[Material]:
-	return [_material]
+	var out: Array[Material] = []
+	for rough: float in _materials:
+		out.append(_materials[rough])
+	return out
+
+
+## Model `model`'s material: its own roughness's (PropDressConfig.model_roughness), else the shared one.
+func _material_of(model: StringName) -> ShaderMaterial:
+	var rough: float = _cfg.model_roughness.get(model, _cfg.roughness)
+	if not _materials.has(rough):
+		_materials[rough] = _new_material(rough, _cfg.metallic)
+	return _materials[rough]
+
+
+## A prop material drawn `rough` and `metallic`, each instance painted by its custom data (DM1) and perforated where
+## its model's faces say so.
+static func _new_material(rough: float, metallic: float) -> ShaderMaterial:
+	var mat := LookMaterials.vertex_colour(rough, metallic)
+	mat.set_shader_parameter(&"paint_by_custom", true)
+	mat.set_shader_parameter(&"perforations", true)
+	return mat
 
 
 ## Draws each prop in its shade and paint times the baked light near it (BakedLightNear.at, LIGHT_LIFT m over its foot), or in
@@ -142,6 +163,9 @@ static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName
 		if cfg.lay_of(b) == PropDressConfig.Lay.CLUSTER \
 				and not used.has(cfg.pallet):
 			used.append(cfg.pallet)
+		var crown: StringName = cfg.tree_crowns.get(model, &"")
+		if cfg.lay_of(b) == PropDressConfig.Lay.TREE and crown != &"" and not used.has(crown):
+			used.append(crown)
 		if cfg.lay_of(b) == PropDressConfig.Lay.LINED:
 			for extra: StringName in [cfg.lined_caps.get(model, &""), cfg.lined_mouths.get(model, &"")]:
 				if extra != &"" and not used.has(extra):
@@ -201,7 +225,7 @@ func _add(model: StringName, mesh: Mesh, p: PropLayout.Placed, shadow: bool, chu
 		var view := MultiMeshInstance3D.new()
 		view.name = "%s_%d_%d" % [String(model).capitalize(), cell.x, cell.y]
 		view.multimesh = mm
-		view.material_override = _material
+		view.material_override = _material_of(model)
 		if not shadow:
 			view.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(view)
