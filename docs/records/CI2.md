@@ -32,6 +32,15 @@ on a slow runner (part 1 took 702 s on #263 and 1,020 s on main), so every part 
 | 3 (`test_g`..`test_re`) | 952 s | `test_mc` | 4: 456 s, 5: 496 s |
 | 4 (`test_rg`..`test_z`) | 1,099 s | `test_torch_` | 6: 577 s, 7: 522 s |
 
+## Checks
+
+- `tools/check.sh`'s gates, the seven parts four at a time: gdlint, changelog notes and wiki clean; parts 1 to 7 pass,
+  5,429 tests, 5,428 passing and the one pending test as on main; smoke test passes.
+- QA Pass: every one of the 461 files in exactly one part, none empty; bad parts (0, 8, x, -1, 01, 2.5) refused; the
+  YAML's job and artifact names keep their shape. Its advisory taken: part 1 no longer reads `BOUNDS[-1]` (bash 4.3+).
+- Performance Pass: worst part 577 s, about 866 s at the runners' 1.5x; 22 jobs instead of 19, each paying a cached
+  Godot set-up and an import.
+
 ## Decisions
 
 - **Part 4 split too.** Not in the brief, but at 838 s on main it was nearer the limit than part 3.

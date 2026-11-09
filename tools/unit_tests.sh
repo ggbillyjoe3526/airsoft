@@ -33,8 +33,8 @@ fi
 LOG="unit-$part.log"
 
 # This part's files: from the bound before it (none for part 1) to before its own (none for the last part).
-from="${BOUNDS[part - 2]:-}"
-[ "$part" -eq 1 ] && from=""
+from=""
+[ "$part" -gt 1 ] && from="${BOUNDS[part - 2]}"
 to="${BOUNDS[part - 1]:-}"
 files=()
 while IFS= read -r f; do
