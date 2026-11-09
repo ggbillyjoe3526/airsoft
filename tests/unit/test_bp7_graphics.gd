@@ -247,10 +247,12 @@ func test_depot_s_props_and_poles_take_the_bake_near_them() -> void:
 	add_child_autofree(props)
 	props.relight(lights)
 	assert_lt(props.light_of(&"sofa", 0).g, 0.5, "the Lounge's sofa is dim")
-	var shelves := props.placed()[&"shelf"].transforms.size()
+	var shelves := 0
 	var sum := 0.0
-	for i in shelves:
-		sum += props.light_of(&"shelf", i).g
+	for bay in play.site_look.props.variants_of(&"shelf"):
+		for i in props.placed()[bay].transforms.size():
+			sum += props.light_of(bay, i).g
+			shelves += 1
 	assert_gt(sum / shelves, 0.6, "the hall's shelving is not")
 	props.relight(null)
 	assert_eq(props.light_of(&"sofa", 0), Color.WHITE, "Baked light off: its shade alone")

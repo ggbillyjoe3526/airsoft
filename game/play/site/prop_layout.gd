@@ -28,6 +28,7 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 	rng.seed = map.dressing_seed
 	var middle := field_middle(map)
 	var features_laid := 0
+	var turns := Turns.new(out, boxes, map.dressing_seed)
 	for b in map.blocks:
 		if not cfg.dresses(b) or b.rise != MapData.Rise.NONE:
 			continue
@@ -47,7 +48,7 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 				_cluster(_placed(out, model), boxes[model], foot + Vector3(0.0, lift, 0.0),
 						Vector3(b.size.x, b.size.y - lift, b.size.z), cfg, rng)
 			PropDressConfig.Lay.TILE:
-				_tile(_placed(out, model), boxes[model], b, foot, cfg, map)
+				_tile(turns, cfg.variants_of(model), b, foot, cfg, map)
 			PropDressConfig.Lay.GRID:
 				_grid(_placed(out, model), boxes[model], foot, b.size, cfg.grid_cells.get(model, b.size), cfg, rng, model)
 			PropDressConfig.Lay.BAY:
@@ -99,14 +100,15 @@ static func _row(p: Placed, model: AABB, foot: Vector3, size: Vector3, cfg: Prop
 		p.add(fit(model, at, Vector3(d, size.y, d), _quarter_turn(rng)), _shade(cfg, rng))
 
 
-## Round props upright in a grid of cells about `cluster_cell` across, filling the box.
+## Round props upright in a grid of cells about `cluster_cell` across, filling the box's height, each `cluster_fill` of
+## its cell wide (RK1: a drum stack keeps a real drum's shape, a hand's width between them).
 static func _cluster(p: Placed, model: AABB, foot: Vector3, size: Vector3, cfg: PropDressConfig,
 		rng: RandomNumberGenerator) -> void:
 	var nx := maxi(1, roundi(size.x / cfg.cluster_cell))
 	var nz := maxi(1, roundi(size.z / cfg.cluster_cell))
 	var cx := size.x / nx
 	var cz := size.z / nz
-	var d := minf(cx, cz)
+	var d := minf(cx, cz) * cfg.cluster_fill
 	for i in nx:
 		for j in nz:
 			var at := foot + Vector3((i + 0.5) * cx - size.x * 0.5, 0.0, (j + 0.5) * cz - size.z * 0.5)
@@ -263,8 +265,11 @@ static func lining(map: MapData, cfg: PropDressConfig, b: MapData.Block) -> Lini
 
 ## The box's lined faces (`lining`) filled with rows of the model as tall as the box, each row facing out and holding
 ## as many models as fit at their own width (each stretched a little to fill the row).
-static func _tile(p: Placed, model: AABB, b: MapData.Block, foot: Vector3, cfg: PropDressConfig, map: MapData) -> void:
+static func _tile(turns: Turns, names: Array[StringName], b: MapData.Block, foot: Vector3, cfg: PropDressConfig,
+		map: MapData) -> void:
 	var line := lining(map, cfg, b)
+	var model := turns.boxes[names[0]]
+	var row := Row.new(turns, names)
 	var k := b.size.y / maxf(model.size.y, 1e-6)
 	var wide := maxf(model.size.x, model.size.z) * k
 	var model_long_x := model.size.x >= model.size.z
@@ -274,10 +279,10 @@ static func _tile(p: Placed, model: AABB, b: MapData.Block, foot: Vector3, cfg: 
 	for side: float in [-1.0, 1.0]:
 		var d := line.low if side < 0.0 else line.high
 		if d.z > 0.0:
-			_tile_row(p, model, foot + Vector3(0.0, 0.0, side * (h.z - d.z * 0.5)), b.size.x, d.z, b.size.y,
+			_tile_row(row, foot + Vector3(0.0, 0.0, side * (h.z - d.z * 0.5)), b.size.x, d.z, b.size.y,
 					true, side, wide, model_long_x)
 		if d.x > 0.0:
-			_tile_row(p, model, foot + Vector3(side * (h.x - d.x * 0.5), 0.0, z_mid), z_length, d.x, b.size.y,
+			_tile_row(row, foot + Vector3(side * (h.x - d.x * 0.5), 0.0, z_mid), z_length, d.x, b.size.y,
 					false, side, wide, model_long_x)
 
 
@@ -301,7 +306,7 @@ static func face_hidden(map: MapData, b: MapData.Block, out: Vector3) -> bool:
 
 ## One row of TILE: `length` long along x (or z), `depth` deep, its middle's foot at `at`, facing `side` (+1 or -1)
 ## across it.
-static func _tile_row(p: Placed, model: AABB, at: Vector3, length: float, depth: float, height: float,
+static func _tile_row(row: Row, at: Vector3, length: float, depth: float, height: float,
 		along_x: bool, side: float, wide: float, model_long_x: bool) -> void:
 	var n := maxi(1, roundi(length / wide))
 	var cell := length / n
@@ -314,7 +319,10 @@ static func _tile_row(p: Placed, model: AABB, at: Vector3, length: float, depth:
 		yaw = PI * 0.5 if side > 0.0 else -PI * 0.5
 	for i in n:
 		var step := (i + 0.5) * cell - length * 0.5
-		p.add(fit(model, at + (Vector3(step, 0.0, 0.0) if along_x else Vector3(0.0, 0.0, step)), size, yaw), 1.0)
+		var foot := at + (Vector3(step, 0.0, 0.0) if along_x else Vector3(0.0, 0.0, step))
+		# in line with its neighbours by its front face: rows of different depths on abutting blocks still meet
+		var bay := row.turns.next(row.names, foot + Vector3(sin(yaw), 0.0, cos(yaw)) * depth * 0.5, yaw, cell)
+		_placed(row.turns.out, bay).add(fit(row.turns.boxes[bay], foot, size, yaw), 1.0)
 
 
 ## A round prop's turn: a random quarter, so the model's own bounds (and so the box) still hold it.
@@ -324,3 +332,50 @@ static func _quarter_turn(rng: RandomNumberGenerator) -> float:
 
 static func _shade(cfg: PropDressConfig, rng: RandomNumberGenerator) -> float:
 	return 1.0 + rng.randf_range(-cfg.shade_jitter, cfg.shade_jitter)
+
+
+## One TILE block's lining: the shared turns and the models it takes turns with.
+class Row:
+	var turns: Turns
+	var names: Array[StringName]
+
+	func _init(shared: Turns, models: Array[StringName]) -> void:
+		turns = shared
+		names = []
+		for n in models:
+			if shared.boxes.has(n):
+				names.append(n)
+
+
+## Where every TILE lining's bays went, so each place takes a random one of its models that neither neighbour in line
+## (facing the same way, a bay to either side, whichever block laid it) already is: a rack wall never shows one bay
+## twice side by side. Seeded by the map, so a layout is the same each time.
+class Turns:
+	var out: Dictionary[StringName, Placed]
+	var boxes: Dictionary[StringName, AABB]
+	var rng := RandomNumberGenerator.new()
+	var feet: PackedVector3Array = []
+	var yaws: PackedFloat32Array = []
+	var laid: Array[StringName] = []
+
+	func _init(placed: Dictionary[StringName, Placed], bounds: Dictionary[StringName, AABB], seed_from: int) -> void:
+		out = placed
+		boxes = bounds
+		rng.seed = hash([seed_from, "bays"])
+
+	## A bay for the place whose front face's middle is `face`, `width` wide, turned `yaw`.
+	func next(names: Array[StringName], face: Vector3, yaw: float, width: float) -> StringName:
+		var free := names.duplicate()
+		var along := Vector3(cos(yaw), 0.0, -sin(yaw))
+		for i in feet.size():
+			var gap := feet[i] - face
+			if absf(angle_difference(yaws[i], yaw)) < 0.01 and absf(gap.y) < 0.01 \
+					and absf(gap.dot(along)) < width * 1.6 and gap.length_squared() - gap.dot(along) ** 2 < 0.01:
+				free.erase(laid[i])
+		if free.is_empty():
+			free = names.duplicate()
+		var pick: StringName = free[rng.randi_range(0, free.size() - 1)]
+		feet.append(face)
+		yaws.append(yaw)
+		laid.append(pick)
+		return pick

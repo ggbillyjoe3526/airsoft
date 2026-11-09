@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""The fields' CC0 props (Depot's, DR2; Woodland's, WR3): Kenney models recoloured off the team hues into
+"""The fields' CC0 props (Woodland's, WR3; Depot's until RK1 built its own in Blender,
+tools/blender/maps/): Kenney models recoloured off the team hues into
 assets/models/props/.
 
 Reads each recipe's source model from a checkout of the Kenney library's GitHub mirror (CC0,
@@ -34,23 +35,7 @@ SHADE_KEEP = 0.6
 # pixel, a vehicle's body colour and its lamps), its pale glass and chrome ("light"), its tyres and underside ("dark")
 # and the rest ("trim": bumpers and sills). A textured model keeps its texture's light and shade within each part.
 RECIPES = {
-    # Steel drums in the look's crimson with steel hoops (the hall's barrel blocks: two upright a block). The colours
-    # are docs/ART.md's palette (LookConfig.palette).
-    "barrel": {"source": "survival/barrel.glb", "parts": "palette",
-               "colours": {"warm": (0.761, 0.22, 0.455), "cool": (0.549, 0.541, 0.588)}},
-    # Fibre drums in the look's teal with ink hoops (the hall's drum blocks: four on a pallet).
-    "drum": {"source": "survival/barrel.glb", "parts": "palette",
-             "colours": {"warm": (0.165, 0.612, 0.565), "cool": (0.227, 0.184, 0.353)}},
-    # A pallet in the look's grey (SiteLook's pallet mark too).
-    "pallet": {"source": "retro-urban/pallet.glb", "parts": "texture", "colours": {"all": (0.549, 0.541, 0.588)}},
-    # The lounge's sofa: the look's violet cushions on umber feet.
-    "sofa": {"source": "furniture/loungeSofa.glb", "parts": "materials",
-             "colours": {"carpet": (0.463, 0.345, 0.667), "wood": (0.38, 0.349, 0.31)}},
-    # Racking full of stock (the hall's tall rack blocks): the look's steel frames (a neutral, so the hall's many racks
-    # never make one colour dominate), tan cartons below and cream boxes above.
-    "shelf": {"source": "mini-market/shelf-boxes.glb", "parts": "nodes",
-              "colours": {"shelf-boxes": (0.424, 0.416, 0.478), "carton": (0.761, 0.714, 0.596),
-                          "box": (0.957, 0.925, 0.855)}},
+    # Depot's barrels, drums, pallet, sofa and racking are Blender models since RK1 (tools/blender/maps/).
     # Woodland (WR3). A tree's trunk: a log stood upright, grey-brown bark (dull, so off the orange team's hue) and pale
     # cut ends (hidden in the ground and the crown).
     "trunk": {"source": "nature/log.glb", "parts": "materials", "turn": "z_up",

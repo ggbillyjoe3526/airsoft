@@ -52,11 +52,9 @@ func test_the_lights_values_are_the_projects_global_uniforms() -> void:
 ## SiteLook colours that aren't paint: a container's base (each unit takes container_paint), a frame's white tint, and
 ## the marks drawn only with grit (none on a clean surface).
 const NOT_PAINT: Array[StringName] = [&"container", &"frame", &"tuft", &"chip", &"rust_foot", &"dirt_foot"]
-## Depot's and Woodland's props' recipe parts (tools/props/build_props.py), every part of each, by palette name.
+## Woodland's props' recipe parts (tools/props/build_props.py; Depot's are Blender models since RK1), every part of
+## each, by palette name.
 const PROP_PARTS := {
-	"barrel": {"warm": &"crimson", "cool": &"grey"}, "drum": {"warm": &"teal", "cool": &"ink"},
-	"pallet": {"all": &"grey"}, "sofa": {"carpet": &"violet", "wood": &"umber"},
-	"shelf": {"shelf-boxes": &"steel", "carton": &"crate", "box": &"cream"},
 	"trunk": {"woodBark": &"bark", "woodInner": &"heartwood"}, "log": {"woodBark": &"bark", "woodInner": &"heartwood"},
 	"logstack": {"woodBark": &"bark", "woodInner": &"heartwood", "woodDark": &"umber"},
 	"pine": {"woodBarkDark": &"umber", "leafsDark": &"pine"}, "tyre": {"all": &"rubber"}, "crate": {"all": &"teal"},

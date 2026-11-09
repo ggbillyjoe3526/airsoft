@@ -177,15 +177,23 @@ func test_the_steps_cut_the_square_s_empty_corners_and_stay_inside_it() -> void:
 			# Halfway out to a corner: inside a prop (a cluster's, a row's first) whatever the kind.
 			var held := b.center + Vector3(b.size.x * 0.25, 0.0, b.size.z * 0.25)
 			assert_true(_inside(steps, held), "%s: a %s's prop is solid" % [id, b.kind])
-			# Where a cluster's first four cells meet (PropLayout's cells): open between its drums.
+			# A cluster's props stand apart (RK1: cluster_fill), so its core is solid: no line along the gaps between
+			# them (PropLayout's grid lines, across the whole block) gets through at mid-height.
 			var props := play.site_look.props
 			if props.lay_of(b) == PropDressConfig.Lay.CLUSTER:
 				var nx := maxi(1, roundi(b.size.x / props.cluster_cell))
 				var nz := maxi(1, roundi(b.size.z / props.cluster_cell))
-				if nx >= 2 and nz >= 2:
-					var meet := b.center - b.size * 0.5 + Vector3(b.size.x / nx, b.size.y * 0.5, b.size.z / nz)
-					assert_false(_inside(steps, meet), "%s: between a %s cluster's props is open" % [id, b.kind])
-					clusters += 1
+				var lo := b.center - b.size * 0.5
+				var y := b.center.y + b.size.y * 0.1
+				for i in range(1, nx):
+					var x := lo.x + b.size.x * i / nx
+					assert_true(_crosses(steps, Vector3(x, y, lo.z - 0.1), Vector3(x, y, lo.z + b.size.z + 0.1)),
+							"%s: a line between a %s cluster's props is stopped" % [id, b.kind])
+				for j in range(1, nz):
+					var z := lo.z + b.size.z * j / nz
+					assert_true(_crosses(steps, Vector3(lo.x - 0.1, y, z), Vector3(lo.x + b.size.x + 0.1, y, z)),
+							"%s: a line between a %s cluster's props is stopped" % [id, b.kind])
+				clusters += 1
 		assert_gt(clusters if id == "depot" else 1, 0, "%s: its drum clusters were checked" % id)
 		assert_gt(counted, 0, "%s has round props" % id)
 
@@ -257,7 +265,8 @@ func test_a_bb_grazing_a_drum_s_corner_flies_on_and_one_at_its_middle_stops() ->
 	var row_z := drum.center.z + half.z * 0.5
 	var mid_from := Vector3(drum.center.x + half.x + 0.5, y, row_z)
 	assert_true(level.query().ray(mid_from, Vector3(drum.center.x, y, row_z), hit), "a BB at a drum's middle stops")
-	assert_almost_eq(hit.position.x, drum.center.x + half.x, 0.01, "on the drums' face")
+	# RK1: the stacks stand `cluster_fill` of their cells, a hand's width in from the box's face
+	assert_between(hit.position.x, drum.center.x + half.x - 0.1, drum.center.x + half.x - 0.01, "on the drums' face")
 
 
 func test_the_nav_grid_and_the_blocks_still_take_the_box() -> void:
@@ -273,3 +282,10 @@ func test_the_nav_grid_and_the_blocks_still_take_the_box() -> void:
 			continue
 		var corner := b.center + Vector3(b.size.x * 0.49, -b.size.y * 0.5, b.size.z * 0.49)
 		assert_false(nav.is_walkable_at(corner), "a drum block's corner is no walkable node")
+
+
+func _crosses(steps: Array[AABB], from: Vector3, to: Vector3) -> bool:
+	for s in steps:
+		if s.intersects_segment(from, to) != null:
+			return true
+	return false
