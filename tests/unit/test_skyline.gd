@@ -259,6 +259,58 @@ func test_woodland_s_treelines_and_hills_are_built_and_read_as_no_team_by_day_or
 		v.free()
 
 
+func test_woodland_s_treelines_are_the_band_model_in_budget_along_their_lines() -> void:
+	var cfg := play.skyline
+	var woodland := MapData.load_map("woodland", play.map_style, 1)
+	var middle := SkylineView.middle_of(woodland)
+	var bands := 0
+	var teams := AccessibilityTable.read_file().colours
+	for p in woodland.skyline:
+		if p.kind != &"treeline":
+			continue
+		var placed := SkylineModels.placed_of(p, cfg, middle)
+		assert_gt(placed.size(), 0, "a treeline at %s is drawn from the band" % [p.points[0]])
+		bands += 1
+		var tris := 0
+		var lo := INF
+		var hi := -INF
+		var far := 0.0
+		for one in placed:
+			tris += (one.mesh.surface_get_arrays(0)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
+			assert_false(FieldChecks.reads_as_team(one.body, teams), "a band's green reads as no team")
+			for v: Vector3 in one.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]:
+				var q := one.at * v
+				lo = minf(lo, q.y)
+				hi = maxf(hi, q.y)
+				far = maxf(far, _off_line(Vector2(q.x, q.z), p.points))
+		# Woodland's four bands, 2,000 triangles each at most (the model list)
+		assert_lt(tris, 2000, "a band's triangles: %d" % tris)
+		assert_almost_eq(hi, p.height, 0.01, "its spires reach the treeline's height")
+		assert_almost_eq(lo, -cfg.treeline_sink, 0.01, "its foot sunk as the cones' are")
+		assert_lt(far, p.depth * 0.5 + p.height * cfg.treeline_width + 0.5, "it stands along its line, about its depth")
+	assert_eq(bands, 4, "Woodland's four treelines")
+	var v := SkylineView.build(woodland, cfg, play.lighting, body.stand_eye_height)
+	var plain := cfg.duplicate() as SkylineConfig
+	plain.treeline_model = ""
+	var cones := SkylineView.build(woodland, plain, play.lighting, body.stand_eye_height)
+	add_child_autofree(v)
+	add_child_autofree(cones)
+	assert_eq(v.kept, cones.kept, "the same pieces seen either way")
+	assert_ne(v.triangle_count(), cones.triangle_count(), "the band, not the cones")
+	assert_lt(v.triangle_count(), TRIANGLES_MOST, "Woodland's skyline in budget")
+
+
+## How far `q` lies from the nearest run of `points` (m).
+func _off_line(q: Vector2, points: PackedVector2Array) -> float:
+	var best := INF
+	for i in points.size() - 1:
+		var a := points[i]
+		var b := points[i + 1]
+		var t := clampf((q - a).dot(b - a) / maxf((b - a).length_squared(), 1e-6), 0.0, 1.0)
+		best = minf(best, q.distance_to(a.lerp(b, t)))
+	return best
+
+
 func test_the_masts_lamps_glow_at_night_with_no_real_light() -> void:
 	var night := SkylineView.build(depot, play.skyline, play.night_lighting, body.stand_eye_height)
 	add_child_autofree(night)

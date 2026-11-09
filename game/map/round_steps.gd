@@ -9,7 +9,7 @@ extends RefCounted
 
 
 ## Block `b`'s stepped boxes into `out` (cleared first); none when its model is not round, it is laid other than FIT,
-## ROW or CLUSTER, or it is a ramp. `props` is how the props are laid (the site look's); `middle` is the field's
+## ROW, CLUSTER or TREE, or it is a ramp. `props` is how the props are laid (the site look's); `middle` is the field's
 ## middle (PropLayout.field_middle), which a fitted prop's front faces.
 static func boxes(b: MapData.Block, style: MapStyle, props: PropDressConfig, middle: Vector3,
 		out: Array[AABB]) -> void:
@@ -34,8 +34,8 @@ static func boxes(b: MapData.Block, style: MapStyle, props: PropDressConfig, mid
 			if props.models.has(props.pallet) and props.pallet_height < b.size.y:
 				foot = props.pallet_height
 				out.append(AABB(low, Vector3(b.size.x, foot, b.size.z)))
-		PropDressConfig.Lay.ROW:
-			pass
+		PropDressConfig.Lay.ROW, PropDressConfig.Lay.TREE:
+			pass # a tree is one round trunk filling its square box: a row of one
 		_:
 			return
 	# As PropLayout's CLUSTER and ROW lay them: a grid of cells, a prop as wide as its cell's shorter side in each (a

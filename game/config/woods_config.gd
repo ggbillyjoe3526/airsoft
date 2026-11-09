@@ -22,6 +22,9 @@ extends Resource
 @export var crown_sides: int = 8
 @export var crown_jitter: float = 0.1
 @export var crown_roughness: float = 0.95
+## Tree models that carry their own crown (Dev 3, WT1: PropDressConfig's TREE models): a tree block dressed as one
+## gets no cone.
+@export var own_crowns: PackedStringArray = PackedStringArray(["pine_young", "pine_grown", "pine_old", "oak", "birch"])
 
 @export_group("Forest")
 ## The wood beyond the fence (MapData.forest_trees): `forest_share` of them on each step (Low none), standing
@@ -43,6 +46,9 @@ extends Resource
 	Color("2b5c48"), Color("2f6e55"), Color("3d7a4a"), Color("2b5c48"),
 ])
 @export var forest_fade: float = 0.2
+## The far tree's model (Dev 3, WT1, tools/blender/maps/far_tree.py: unit-sized like the cone, radius 1 at its foot
+## and 1 tall, vertex colours its light); the cone without it.
+@export var forest_model: String = "res://assets/models/props/forest_tree.glb"
 
 @export_group("Grass tufts")
 ## Tufts on the ground's grass squares (Medium and up; MapData.grass_height): `tuft_density` a square metre on each
