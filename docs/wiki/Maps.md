@@ -44,12 +44,15 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
   raise either ([Modes](Modes#attack--defend)).
 - **The look:** clean painted surfaces in soft, stylised light, with crimson, violet, yellow, teal, green and cream
   spread over the hall so the team colours stay the loudest.
-- **Props:** the drums, barrels, the Lounge's sofa and the racking are free CC0 models: teal drums four to a pallet,
-  crimson steel barrels in pairs, a violet sofa, and steel shelving stocked with cartons on every rack. Each fills the
-  space its block did, so what you see is what stops a BB; a BB grazing past a round drum or barrel flies on by its
-  curve instead of stopping at a square corner. The plywood walls (birch sheets, battens and screws), the wooden
-  crates on their pallets and the corrugated shipping containers, each in its own paint, are the game's own models,
-  made after photos of the real things, and fill their blocks the same way.
+- **Props:** the hall's racking, drums, barrels, sofa, desks and lockers are the game's own models: navy and yellow
+  pallet racking stocked three different ways (cartons, sacks, wrapped loads, drums, some slots empty) and mixed along
+  every rack, violet steel drums stacked two
+  high, nine stacks to a pallet, teal plastic barrels in pairs, a worn four-seat sofa in the Lounge, office desks with
+  their drawers and modesty panels, and a bank of steel lockers in front of the Offices door. Each fills the space
+  its block did, so what you see is what stops a BB; a BB grazing past a round drum or barrel flies on by its curve
+  instead of stopping at a square corner. Steel drums ring when hit and plastic barrels tick. The plywood walls (birch sheets,
+  battens and screws), the wooden crates on their pallets and the corrugated shipping containers, each in its own
+  paint, are the game's own models too, made after photos of the real things, and fill their blocks the same way.
 
 ![The West tunnel, lit only from its ends](images/depot-tunnel.jpg)
 

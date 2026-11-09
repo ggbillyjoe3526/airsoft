@@ -22,6 +22,11 @@ OUT = os.path.join(HERE, "..", "..", "data", "maps", "depot.json")
 KINDS = {"wall": "plywood", "hut": "plywood", "wardrobe": "plywood", "window": "plywood", "dead": "rack",
          "crates": "crate", "lowcrate": "crate", "desk": "crate", "drums": "drum", "barrels": "barrel",
          "pillar": "pillar", "net": "net", "sofa": "sofa", "container": "container", "lid": "rack"}
+# Pieces drawn as a prop of their own (`dress`, PropDressConfig.models; RK1): the desks and the lockers keep their
+# kinds (a desk is wood to a BB, the lockers' block plywood), only their look changes.
+DRESS = {"desk": "desk", "wardrobe": "locker"}
+# Pieces whose model is another material than their kind: the steel lockers ring as metal (RK1).
+SURFACE = {"wardrobe": "metal"}
 # A window or a container's port: solid under the sill and over the lintel.
 SILL, LINTEL = 1.0, 2.0
 EYE_FACING_EAST = -math.pi / 2  # yaw -90 degrees looks along +x
@@ -32,9 +37,15 @@ def r(v: float) -> float:
     return round(v, 3)
 
 
-def block(kind: str, x1: float, y1: float, z1: float, x2: float, y2: float, z2: float) -> dict:
-    return {"kind": kind, "center": {"x": r((x1 + x2) / 2), "y": r((y1 + y2) / 2), "z": r((z1 + z2) / 2)},
-            "size": {"x": r(x2 - x1), "y": r(y2 - y1), "z": r(z2 - z1)}}
+def block(kind: str, x1: float, y1: float, z1: float, x2: float, y2: float, z2: float, dress: str = "",
+          surface: str = "") -> dict:
+    b = {"kind": kind, "center": {"x": r((x1 + x2) / 2), "y": r((y1 + y2) / 2), "z": r((z1 + z2) / 2)},
+         "size": {"x": r(x2 - x1), "y": r(y2 - y1), "z": r(z2 - z1)}}
+    if dress:
+        b["dress"] = dress
+    if surface:
+        b["surface"] = surface
+    return b
 
 
 def blocks() -> list[dict]:
@@ -57,6 +68,8 @@ def blocks() -> list[dict]:
             boxes.append([kind, x1, L.LID_H, z1, x2, L.LID_H + h, z2])
         elif p["tag"] == "boxroof":
             boxes.append([kind, x1, 2.6, z1, x2, 2.6 + h, z2])
+        elif k in DRESS:
+            boxes.append([kind, x1, 0, z1, x2, h, z2, DRESS[k], SURFACE.get(k, "")])
         else:
             boxes.append([kind, x1, 0, z1, x2, h, z2])
     unseat(boxes)

@@ -1,11 +1,13 @@
 class_name PropDressConfig
 extends Resource
-## A field's CC0 props (DR2, WR3): which blocks are drawn as models instead of their box (Depot's by kind, Woodland's
+## A field's props (DR2, WR3, RK1): which blocks are drawn as models instead of their box (Depot's by kind, Woodland's
 ## by the prop each block names, MapData.Block.dress), and how the models are laid in the box. Each prop fills its
 ## block's box (never past it), so cover and the nav grid stay the box's and collision the box's (a round prop's,
 ## its stepped boxes that hug it: MapStyle.round_steps, RoundSteps); the box's own faces are not
-## drawn (SiteSurface.core_of). The models are Kenney's (CC0), recoloured off the teams' hues by
-## tools/props/build_props.py into assets/models/props/ (docs/ASSETS.md).
+## drawn (SiteSurface.core_of). Most models are Kenney's (CC0), recoloured off the teams' hues by
+## tools/props/build_props.py into assets/models/props/; Depot's and the Range's racking, drums, pallet, barrel, sofa,
+## desk, lockers and kit rack are built in Blender by tools/blender/maps/ (RK1), the same one vertex-coloured mesh
+## each (docs/ASSETS.md).
 
 ## How a kind's props are laid: ROW stands round props upright side by side along the box's long side, as many as fit
 ## at its short side's width; CLUSTER stands them on a pallet in a grid of cells about `cluster_cell` m across; FIT
@@ -24,11 +26,18 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY }
 
 ## Each prop's model (a .glb of one vertex-coloured mesh).
 @export var models: Dictionary[StringName, String] = {
-	&"barrel": "res://assets/models/props/barrel.glb",
-	&"drum": "res://assets/models/props/drum.glb",
+	# Depot's and the Range's, built in Blender (RK1): plastic barrels, two steel drums stacked, the pallet under them,
+	# the Lounge's sofa, a bay of pallet racking, the Offices' desks and lockers, the Range's kit rack.
+	&"barrel": "res://assets/models/props/plastic_barrel.glb",
+	&"drum": "res://assets/models/props/steel_drum.glb",
 	&"pallet": "res://assets/models/props/pallet.glb",
 	&"sofa": "res://assets/models/props/sofa.glb",
-	&"shelf": "res://assets/models/props/shelf.glb",
+	&"shelf": "res://assets/models/props/pallet_racking.glb",
+	&"shelf_b": "res://assets/models/props/pallet_racking_b.glb",
+	&"shelf_c": "res://assets/models/props/pallet_racking_c.glb",
+	&"desk": "res://assets/models/props/office_desk.glb",
+	&"locker": "res://assets/models/props/steel_locker.glb",
+	&"kit_rack": "res://assets/models/props/kit_rack.glb",
 	&"trunk": "res://assets/models/props/trunk.glb",
 	&"log": "res://assets/models/props/log.glb",
 	&"logstack": "res://assets/models/props/logstack.glb",
@@ -117,6 +126,13 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY }
 ## A dressed kind's block thicker than this (m) keeps its box: Depot's wardrobe, a plywood block a metre deep, is no
 ## wall.
 @export var kind_max_depth: Dictionary[StringName, float] = {&"plywood": 0.5}
+## Other models a lining model (TILE) takes turns with, place by place along a rack, never the same twice in a row,
+## so a long rack wall never reads as one bay repeated (the owner, 2026-11-09: the racking loaded three ways; five drew
+## three times the hall's draws on Low). Each is in `models`, the same size as the model it stands in for. Their chunks
+## are `many_chunk` across, so the bays together take about the draws one model did in `chunk` ones.
+@export var variants: Dictionary[StringName, PackedStringArray] = {
+	&"shelf": PackedStringArray(["shelf_b", "shelf_c"]),
+}
 ## How a prop a block names (MapData.Block.dress, WR3) is laid in it; one not listed is fitted to the box (FIT, long
 ## side along the box's).
 @export var model_lays: Dictionary[StringName, Lay] = {
@@ -165,8 +181,12 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY }
 @export var bay_feature_most: int = 2
 @export var bay_clear: float = 2.0
 @export var bay_clear_height: float = 3.0
-## A cluster's cell (m, about) and the pallet's height under it (m; `pallet` is its model).
-@export var cluster_cell: float = 0.9
+## A cluster's cell (m, about) and the pallet's height under it (m; `pallet` is its model). A drum block's 1.8 m
+## pallet holds three by three stacks of two steel drums (RK1).
+@export var cluster_cell: float = 0.6
+## The share of its cell a cluster's prop is wide: a drum stack 0.53 m in its 0.6 m cell, a real drum's proportions at
+## the block's height (RK1; RoundSteps steps them the same).
+@export var cluster_fill: float = 0.887
 @export var pallet_height: float = 0.15
 @export var pallet: StringName = &"pallet"
 ## TILE lines a box's faces with rows of props, each row `tile_skin` m deep at most (half the box's depth across it
@@ -211,6 +231,15 @@ func dresses(b: MapData.Block) -> bool:
 	var model := model_of(b)
 	return model != &"" and b.size.y >= kind_min_height.get(b.kind, 0.0) \
 			and minf(b.size.x, b.size.z) <= kind_max_depth.get(b.kind, INF) and mesh_of(model) != null
+
+
+## `model` and the variants it takes turns with (`variants`), those with a model.
+func variants_of(model: StringName) -> Array[StringName]:
+	var out: Array[StringName] = [model]
+	for v: String in variants.get(model, PackedStringArray()):
+		if models.has(StringName(v)):
+			out.append(StringName(v))
+	return out
 
 
 ## The prop block `b` is drawn as: the one it names (MapData.Block.dress), else its kind's (its flat, thin or low

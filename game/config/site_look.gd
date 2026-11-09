@@ -38,8 +38,9 @@ enum Canvas {
 	&"timber": Color8(0xa0, 0x94, 0x7c), &"frame": Color(1.0, 1.0, 1.0), &"steel": Color8(0x6c, 0x6a, 0x7a),
 	&"hazard": Color8(0xe4, 0xca, 0x46), &"net": Color8(0x58, 0x90, 0x4e), &"flag": Color8(0xe4, 0xca, 0x46),
 	&"coping": Color8(0xd2, 0xce, 0xc8), &"sail": Color8(0xf4, 0xec, 0xda), &"default": Color8(0xb9, 0xb4, 0xae),
-	# Depot's hall (DR1) in the look's six site colours (LookConfig.palette), each off both team hues: teal drums,
-	# crimson barrels, yellow pillars, green netting, a violet sofa; the shelving's backing in the look's ink.
+	# Depot's hall (DR1) in the look's six site colours (LookConfig.palette), each off both team hues: its drum, barrel
+	# and sofa boxes (drawn as RK1's models, which paint their own), yellow pillars, green netting; the shelving's
+	# backing in the look's ink.
 	&"drum": Color8(0x2a, 0x9c, 0x90), &"barrel": Color8(0xc2, 0x38, 0x74), &"pillar": Color8(0xe4, 0xca, 0x46),
 	&"netting": Color8(0x58, 0x90, 0x4e), &"sofa": Color8(0x76, 0x58, 0xaa), &"backing": Color8(0x3a, 0x2f, 0x5a),
 }
