@@ -7,8 +7,9 @@
 // middle, y metres along it) has a row of round holes punched down it, a crate's edge profiles' dense holes for no
 // triangles; from far off, where a hole is under a pixel, they fade to the row's average shade so they never shimmer.
 // With `wear` (SL2, docs/ART.md › Surfaces), times the look's `look_wear`, the model is worn in world space: grime up
-// its foot (from its own origin, a model's floor), streaks down its sides, broad stains, and dust settled on its tops,
-// so no two props wear alike. Edge scuffs are the models' own paint (tools/blender). 0 (foliage, the greybox) is clean.
+// its foot (from its floor, `wear_floor` m up its own y: PropDress sets its box's bottom, where PropLayout stands it),
+// streaks down its sides, broad stains, and dust settled on its tops, so no two props wear alike. Edge scuffs are the
+// models' own paint (tools/blender). 0 (foliage, the greybox) is clean.
 shader_type spatial;
 render_mode blend_mix, cull_back;
 
@@ -25,6 +26,7 @@ uniform float perforation_pitch = 0.045;
 uniform float perforation_radius = 0.0045;
 uniform float perforation_shade : hint_range(0.0, 1.0) = 0.22;
 uniform float wear : hint_range(0.0, 1.0) = 0.0;
+instance uniform float wear_floor = 0.0;
 // How high (m) a foot's grime climbs, at most; how strong each wear is at full wear, of the paint it covers.
 uniform float grime_height = 0.9;
 uniform vec4 wear_strengths = vec4(0.6, 0.28, 0.15, 0.4); // foot grime, streaks, stains, dust
@@ -36,7 +38,7 @@ global uniform vec4 look_dust;
 varying vec3 paint;
 varying vec2 perforation;
 varying vec3 wear_at; // world position
-varying float wear_foot; // metres over the model's origin
+varying float wear_foot; // metres over the model's floor
 
 // A smooth value noise in 0..1, a cell a unit (Hoskins's sin-free hash, steady far from the origin).
 float wear_hash(vec2 p) {
@@ -57,7 +59,7 @@ void vertex() {
 	paint = paint_by_custom ? mix(vec3(1.0), INSTANCE_CUSTOM.rgb, COLOR.a) : vec3(1.0);
 	perforation = perforations ? UV : vec2(0.0);
 	wear_at = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	wear_foot = wear_at.y - MODEL_MATRIX[3].y;
+	wear_foot = wear_at.y - (MODEL_MATRIX * vec4(0.0, wear_floor, 0.0, 1.0)).y;
 }
 
 void fragment() {
@@ -79,18 +81,19 @@ void fragment() {
 	vec3 col = own * paint * tint.rgb;
 	float rough = roughness;
 	float worn = wear * look_wear;
-	// The face's own plane in the world (a side's across and up, a top's x and z), so the wear lies on it unstretched.
-	// A side's plane is across it and up, blended by which way it faces so a round model shows no seam; a top's is x, z.
-	vec3 n = (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz;
-	float facing_x = n.x * n.x / max(n.x * n.x + n.z * n.z, 1e-4);
-	float across = mix(wear_at.x, wear_at.z, facing_x);
-	vec2 p = abs(n.y) > 0.6 ? wear_at.xz : vec2(across, wear_at.y);
-	// Streaks fade out where they'd be finer than a few pixels (far off), so they never shimmer.
-	float fine = 1.0 - smoothstep(0.015, 0.05, fwidth(across));
+	// Uniform (a material's and the look's), so fwidth inside is safe and a clean model pays nothing.
 	if (worn > 0.0) {
+		// The face's own plane in the world, so the wear lies on it unstretched: a top's x and z; a side's across and
+		// up, blended by which way it faces so a round model shows no seam.
+		vec3 n = (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz;
+		float facing_x = n.x * n.x / max(n.x * n.x + n.z * n.z, 1e-4);
+		float across = mix(wear_at.x, wear_at.z, facing_x);
+		vec2 p = abs(n.y) > 0.6 ? wear_at.xz : vec2(across, wear_at.y);
+		// Streaks fade out where they'd be finer than a few pixels (far off), so they never shimmer.
+		float fine = 1.0 - smoothstep(0.015, 0.05, fwidth(across));
 		float blotch = wear_noise(p * 0.7);
 		float side = 1.0 - smoothstep(0.4, 0.7, abs(n.y));
-		// None under the origin: a model hung from its top (a net), or dropped through a floor, keeps its paint there.
+		// None under the floor: a model sunk into the ground keeps its paint there.
 		float foot = (1.0 - smoothstep(0.0, grime_height * (0.35 + 0.65 * blotch), wear_foot)) * side
 				* step(-0.05, wear_foot);
 		float streak = side * fine * smoothstep(0.6, 0.85, wear_noise(vec2(across * 14.0, wear_at.y * 0.5)))

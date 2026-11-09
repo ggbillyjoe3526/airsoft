@@ -310,6 +310,14 @@ func test_the_props_are_worn_as_their_config_says() -> void:
 	assert_almost_eq(_wear_of(woods, &"oak_crown"), 0.0, 0.0001, "an oak's crown is clean")
 	assert_almost_eq(_wear_of(woods, &"oak"), cfg.wear, 0.0001, "its trunk is worn")
 	assert_ne(woods.views_of(&"oak")[0].material_override, woods.views_of(&"oak_crown")[0].material_override)
+	# a foot's grime climbs from each model's floor, its box's bottom, wherever its origin is (QA: a trunk's and a
+	# tyre's origins are up to 0.36 m over their feet)
+	for dress: PropDress in [depot, woods]:
+		for model: StringName in dress.placed():
+			var floor_y := dress.mesh_of(model).get_aabb().position.y
+			for view in dress.views_of(model):
+				assert_almost_eq(view.get_instance_shader_parameter(&"wear_floor") as float, floor_y, 0.0001,
+						"%s's grime from its floor" % model)
 
 
 ## The wear of model `model`'s first view's material in `dress` (fails when it isn't drawn).

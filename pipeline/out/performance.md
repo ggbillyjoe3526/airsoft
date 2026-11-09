@@ -1,19 +1,16 @@
-# Performance: SL1 · Sunlit Concrete: the light, grade and paint
-
-Head e8aada2 (4493a30 plus a palette-only commit) · Verdict: **Pass** (judgment; no GPU in the cloud, no frame times)
-
-- **GDScript:** nothing new per frame. One more key in `LookConfig.globals()`, pushed once a match. No new nodes,
-  timers, tweens or connections.
-- **look_paint():** one dot, one mix and a few multiplies on ALBEDO in look_vertex, look_clear, site_surface and
-  door_leaf. No texture reads, no branches: negligible.
-- **Site-surface grit 0.6 (was 0):** the grit branches are uniform-gated (no divergence) but now run on every
-  site-surface fragment: roughly 3 to 6 more fbm samples (single channel, small, mipmapped) on slab, wall and ground,
-  and the plywood's colour and normal samples on plywood. The heaviest fragments in a scene; only the owner's card can
-  say whether Low still holds 60 FPS.
-- **Memory:** the plywood photo pair (1k, VRAM-compressed with mips) now loads: about 2.7 MB of VRAM, shared by every
-  material (ResourceCache). The slab set was already loaded. No new files on disk; the rebaked depot.res and range.res
-  got smaller.
-- **Shader warm-up:** no new material or shader; the plywood textures bind at map load.
-
-Advisory: measure Low on Depot and the Range (F3) before and after. If over budget: gate the fine fbm samples by
-preset, or grit 0 on Low, or bake the wear into a mask texture. Recorded in docs/KNOWN_ISSUES.md and the record.
+Task: SL2 · head b2a9901 · Verdict: Pass
+Run: none (cloud, no GPU; shader and diff read) · budget: no baseline yet, judged against targets and ALU/texture estimate vs site_surface.gdshader
+Metrics: not measured (judgment only)
+Regressions: none measured
+Blocking findings: none
+Advisory:
+- look_vertex.gdshader fragment (judgment): wear costs 4 noise calls (about 16 hash calls, each ~6 ALU, plus 4 mixes), ~6 smoothsteps, 1 fwidth, 1 INV_VIEW_MATRIX mat-vec: roughly 150-200 ALU per pixel, zero texture fetches. site_surface does about 6 texture fetches plus its own procedural work in 429 lines, so wear is comparable and ALU-only. Fine on Ultra/High; on Low (iGPU) walls and crates covering much of the screen make it the heaviest prop pass, so the owner should check Low in Depot on real hardware.
+- Uniform branch `worn > 0.0` is dynamic-uniform: wear-0 materials (tree crowns, greybox) skip the noise. But `fine` (fwidth) and the normal transform run before the branch for all pixels; move them inside the `if` (cheap fix, saves a derivative and a mat-vec on clean models).
+- Streak noise at across*14 near the horizon: gated by `fine`, but the 2 streak noise calls still run when fine = 0; could skip with `if (fine > 0.0)`. Minor.
+- Two new varyings (wear_at vec3, wear_foot float): 4 floats interpolated per pixel, plus MODEL_MATRIX mul in vertex for every prop vertex including MultiMesh instances. Negligible; but wear_foot is flat per instance origin so fine.
+Shader variants and prewarm (judgment, read): same shader file and no render-mode or define change, so `wear` is a plain uniform and adds no pipeline variant. The new materials are extra ShaderMaterial resources only (Depot +1 racking at wear 0.35, Woodland +1 crown at wear 0), all sharing one compiled shader.
+Prewarm: _material_of is called when the views are built (prop_dress.gd:230), before materials() (prop_dress.gd:94) is read for first_use (play_session.gd:885). materials() iterates every Vector2 key, so the new materials are warmed. Pass.
+Draw calls / state changes: each model is one MultiMesh view with material_override; the split adds at most one material switch per map (racking, crowns vs. the rest), so draw calls are unchanged; at most 1-2 extra state changes.
+Allocations: Vector2 key built per _material_of call, at build time only, not per frame. No per-frame code added. New global uniforms (look_wear, look_grime, look_dust) are set via LookConfig, not per frame.
+Leaks: materials are owned by the dress dict, freed with it (RefCounted); no nodes, timers, tweens or connections added. None found.
+Presets: wear scales via LookConfig.wear (one global), but there is no per-preset wear switch. Advisory: for Low, tie look_wear to 0 (the branch then skips all noise at no cost) if the owner measures a regression.

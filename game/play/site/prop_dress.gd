@@ -231,6 +231,8 @@ func _add(model: StringName, mesh: Mesh, p: PropLayout.Placed, shadow: bool, chu
 		view.name = "%s_%d_%d" % [String(model).capitalize(), cell.x, cell.y]
 		view.multimesh = mm
 		view.material_override = _material_of(model)
+		# its foot's grime climbs from the model's floor (its box's bottom), wherever its origin is (SL2)
+		view.set_instance_shader_parameter(&"wear_floor", mesh.get_aabb().position.y)
 		if not shadow:
 			view.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(view)
