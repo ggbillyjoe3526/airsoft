@@ -78,7 +78,7 @@ static func crowns(map: MapData, cfg: WoodsConfig) -> Placed:
 	var xforms: Array[Transform3D] = []
 	var colours := PackedColorArray()
 	for b in map.blocks:
-		if b.kind != TREE:
+		if b.kind != TREE or cfg.own_crowns.has(String(b.dress)):
 			continue
 		var foot := _ground_at(map, b.center.x, b.center.z, b.center.y - b.size.y * 0.5)
 		var top := b.center.y + b.size.y * 0.5
@@ -94,7 +94,7 @@ static func crowns(map: MapData, cfg: WoodsConfig) -> Placed:
 	return _instances(cone(cfg.crown_sides, true), xforms, colours, PackedColorArray())
 
 
-## The wood beyond the fence: `map.forest_trees` cones in a seeded order (a share of them is a fair sample), faded
+## The wood beyond the fence: `map.forest_trees` far trees (WoodsConfig.forest_model, else cones) in a seeded order (a share of them is a fair sample), faded
 ## toward `horizon` (sRGB) a share of the way the skyline is (`sky`).
 static func forest(map: MapData, cfg: WoodsConfig, sky: SkylineConfig, horizon: Color) -> Placed:
 	if map.forest_trees <= 0:
@@ -132,7 +132,8 @@ static func forest(map: MapData, cfg: WoodsConfig, sky: SkylineConfig, horizon: 
 		var fade := clampf((at.distance_to(middle) - sky.fade_from) / sky.fade_span, 0.0, 1.0) * sky.fade_most \
 				* cfg.forest_fade
 		colours.append(own.lerp(far, fade).linear_to_srgb())
-	return _instances(cone(cfg.forest_sides, false), xforms, colours, PackedColorArray())
+	var tree := PropDressConfig.load_mesh(cfg.forest_model)
+	return _instances(tree if tree != null else cone(cfg.forest_sides, false), xforms, colours, PackedColorArray())
 
 
 ## The ground the field stands on (x, z): its sloping ground's, or its blocks' footprint.

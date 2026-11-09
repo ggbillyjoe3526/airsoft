@@ -63,17 +63,24 @@ func _outside(m: MapData, dress: PropDress) -> Array[String]:
 		var mesh := dress.mesh_of(model)
 		var verts: PackedVector3Array = mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 		var middle := mesh.get_aabb().get_center()
+		var tree: bool = look.props.model_lays.get(model, PropDressConfig.Lay.FIT) == PropDressConfig.Lay.TREE
 		for i in placed[model].transforms.size():
 			var t := placed[model].transforms[i]
 			var home := -1
 			for k in boxes.size():
-				if boxes[k].has_point(t * middle):
+				if boxes[k].has_point(t.origin + Vector3(0.0, 0.01, 0.0) if tree else t * middle):
 					home = k
 					break
 			for v in verts:
-				if home < 0 or not boxes[home].has_point(t * v):
-					outside.append("%s %d" % [model, i])
-					break
+				var at := t * v
+				if home >= 0 and boxes[home].has_point(at):
+					continue
+				# a tree's crown spreads past its box over head height, never over the box's top (WT1)
+				if home >= 0 and tree and at.y >= t.origin.y + play.woods.crown_clear - 1e-3 \
+						and at.y <= boxes[home].end.y:
+					continue
+				outside.append("%s %d" % [model, i])
+				break
 	return outside
 
 
@@ -271,10 +278,19 @@ func test_woodland_is_dressed_without_a_site_each_prop_inside_the_block_that_nam
 		if b.dress != &"":
 			assert_true(look.props.dresses(b), "%s's %s has its model" % [b.kind, b.dress])
 			named[b.dress] = named.get(b.dress, 0) + 1
-	for model: StringName in [&"trunk", &"pine", &"log", &"logstack", &"crate", &"tyre", &"truck"]:
+	var trees: Array[StringName] = [&"pine_young", &"pine_grown", &"pine_old", &"oak", &"birch"]
+	for model: StringName in trees + ([&"spruce", &"log", &"logstack", &"crate", &"tyre", &"truck"] as Array[StringName]):
 		assert_gt(named.get(model, 0), 0, "a block names %s" % model)
 		assert_gt(dress.count(model), 0, "%s placed" % model)
-	assert_eq(dress.count(&"trunk"), named[&"trunk"], "one trunk a tree")
+	var trunks := 0
+	for b in m.blocks:
+		if b.kind == &"tree":
+			assert_true(trees.has(b.dress), "a tree at %s names a tree model, not %s" % [b.center, b.dress])
+			trunks += 1
+	for model in trees:
+		assert_eq(dress.count(model), named[model], "one %s a tree that names it" % model)
+	assert_eq(named.get(&"trunk", 0), 0, "no Woodland tree is the old trunk")
+	assert_gt(trunks, 400)
 	assert_eq(dress.count(&"truck"), 1)
 	assert_eq(_outside(m, dress), [] as Array[String], "no prop reaches past its block's box")
 
@@ -326,18 +342,18 @@ func test_a_dressed_block_draws_no_box_and_a_thicket_only_its_core() -> void:
 	var thicket: MapData.Block = null
 	var hidden := 0
 	for b in m.blocks:
-		if b.dress == &"pine" and thicket == null:
+		if b.dress == &"spruce" and thicket == null:
 			thicket = b
 		elif b.dress != &"":
 			hidden += 1
 	var verts := func(mesh: ArrayMesh) -> int: return (mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 			as PackedVector3Array).size()
 	assert_lt(verts.call(dressed), verts.call(plain), "the dressed blocks' boxes are left out")
-	assert_eq(look.props.core_of(thicket), look.props.model_cores[&"pine"])
-	var inset: Vector2 = look.props.model_cores[&"pine"]
+	assert_eq(look.props.core_of(thicket), look.props.model_cores[&"spruce"])
+	var inset: Vector2 = look.props.model_cores[&"spruce"]
 	var cored: Array[MapData.Block] = []
 	for b in m.blocks:
-		if b.dress == &"pine":
+		if b.dress == &"spruce":
 			cored.append(b)
 	var lone := MapLevel.core_box(thicket, inset, [] as Array[MapData.Block])
 	var lo := thicket.center - thicket.size * 0.5

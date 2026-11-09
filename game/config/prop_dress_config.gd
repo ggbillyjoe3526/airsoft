@@ -15,8 +15,11 @@ extends Resource
 ## its cell, the model's z across the box (WR3); BAY lines a wall's box with the model in cells on a grid of the
 ## world (`bay_pitch` m apart from `bay_anchor`), each stretched to its cell and its front (+z) to the field's middle,
 ## a feature bay (`bay_features`) in some cells with nothing standing in front of them (Dev 3: Depot's hall walls,
-## their columns under the roof's trusses).
-enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY }
+## their columns under the roof's trusses); TREE stands one tree in the box (Dev 3, WT1: Woodland's pines, oaks and
+## birches): the model's origin on the ground under the box's middle, its trunk's foot (`tree_feet` m round its
+## origin) stretched to the box's half-width and its top to the box's top, turned a random quarter; its crown
+## spreads past the box over head height, look only, as the cone crowns WoodsView drew before.
+enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY, TREE }
 
 ## Each prop's model (a .glb of one vertex-coloured mesh).
 @export var models: Dictionary[StringName, String] = {
@@ -62,6 +65,14 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY }
 	&"hall_exit": "res://assets/models/props/hall_exit.glb",
 	&"pillar": "res://assets/models/props/pillar.glb",
 	&"camo_net": "res://assets/models/props/camo_net.glb",
+	# Woodland's trees (Dev 3, WT1, tools/blender/maps/): the pine's three ages, the oak and the birch, each block of
+	# kind tree naming one; and the thickets' spruce.
+	&"pine_young": "res://assets/models/props/pine_young.glb",
+	&"pine_grown": "res://assets/models/props/pine_grown.glb",
+	&"pine_old": "res://assets/models/props/pine_old.glb",
+	&"oak": "res://assets/models/props/oak.glb",
+	&"birch": "res://assets/models/props/birch.glb",
+	&"spruce": "res://assets/models/props/spruce.glb",
 }
 ## Each dressed block kind's prop, and how it is laid. A kind not listed keeps its box.
 @export var kind_props: Dictionary[StringName, StringName] = {
@@ -75,7 +86,8 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY }
 ## How a prop a block names (MapData.Block.dress, WR3) is laid in it; one not listed is fitted to the box (FIT, long
 ## side along the box's).
 @export var model_lays: Dictionary[StringName, Lay] = {
-	&"logstack": Lay.GRID, &"crate": Lay.GRID, &"tyre": Lay.GRID, &"pine": Lay.GRID,
+	&"logstack": Lay.GRID, &"crate": Lay.GRID, &"tyre": Lay.GRID, &"pine": Lay.GRID, &"spruce": Lay.GRID,
+	&"pine_young": Lay.TREE, &"pine_grown": Lay.TREE, &"pine_old": Lay.TREE, &"oak": Lay.TREE, &"birch": Lay.TREE,
 	&"bin_green": Lay.GRID, &"bin_steel": Lay.GRID, &"bin_teal": Lay.GRID, &"units": Lay.GRID,
 }
 ## GRID's cells (m): x along the box's long side, y up (0: one layer the box's height), z across. Cordwood a metre and
@@ -83,7 +95,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY }
 ## by side, about 0.7 m each, and its kitchen units about 0.6 m a cupboard.
 @export var grid_cells: Dictionary[StringName, Vector3] = {
 	&"logstack": Vector3(1.6, 0.9, 1.4), &"crate": Vector3(0.9, 0.9, 1.0), &"tyre": Vector3(0.9, 0.45, 0.9),
-	&"pine": Vector3(1.5, 0.0, 1.5),
+	&"pine": Vector3(1.5, 0.0, 1.5), &"spruce": Vector3(1.5, 0.0, 1.5),
 	&"bin_green": Vector3(0.7, 0.0, 0.7), &"bin_steel": Vector3(0.7, 0.0, 0.7), &"bin_teal": Vector3(0.7, 0.0, 0.7),
 	&"units": Vector3(0.6, 0.0, 0.6),
 	# a camouflage net's scaffold sections, a pole every 2 m
@@ -96,7 +108,13 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY }
 ## fifth of the box's width) on each side with no other such box against it, rather than not at all: a thicket's dark
 ## core between its spruces, unbroken across touching thickets, so nothing is seen through a thicket that stops BBs
 ## and sight below the tops of its trees.
-@export var model_cores: Dictionary[StringName, Vector2] = {&"pine": Vector2(0.7, 0.6)}
+@export var model_cores: Dictionary[StringName, Vector2] = {&"pine": Vector2(0.7, 0.6), &"spruce": Vector2(0.7, 0.6)}
+## TREE's models: each one's trunk's widest reach (m) round its origin at the ground and under it (an oak's buttress
+## roots), which the box's half-width is; as each build script prints it (tools/blender/maps/pine.py, oak.py,
+## birch.py). A tree model not listed keeps its box.
+@export var tree_feet: Dictionary[StringName, float] = {
+	&"pine_young": 0.2, &"pine_grown": 0.33, &"pine_old": 0.42, &"oak": 0.85, &"birch": 0.17,
+}
 ## A dressed kind's block lower than this (m) keeps its box: a rack's shelf boards stay boards, its racking is
 ## shelving; only a hall's 8 m walls are its bays (the Range's and The Street's lower walls keep their boxes).
 @export var kind_min_height: Dictionary[StringName, float] = {&"rack": 2.0, &"wall": 6.0}
@@ -146,6 +164,11 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, BAY }
 ## The props' material: roughness, and metalness.
 @export var roughness: float = 0.7
 @export var metallic: float = 0.0
+## Models drawn rougher or smoother than `roughness` (each roughness its own material): Woodland's trees' foliage is
+## matt, so its soft crown normals never shine like plastic (WT1).
+@export var model_roughness: Dictionary[StringName, float] = {
+	&"pine_young": 0.95, &"pine_grown": 0.95, &"pine_old": 0.95, &"oak": 0.95, &"birch": 0.95, &"spruce": 0.95,
+}
 
 ## Each model path's mesh as loaded (null when it won't load), so a kind is dressed only by a model that loads.
 var _meshes: Dictionary[String, Mesh] = {}

@@ -52,6 +52,10 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 				_grid(_placed(out, model), boxes[model], foot, b.size, cfg.grid_cells.get(model, b.size), cfg, rng, model)
 			PropDressConfig.Lay.BAY:
 				features_laid = _bays(out, model, boxes, b, map, cfg, middle, features_laid)
+			PropDressConfig.Lay.TREE:
+				if cfg.tree_feet.has(model):
+					_placed(out, model).add(tree_fit(boxes[model], b, ground_under(map, b), cfg.tree_feet[model],
+							_quarter_turn(rng)), _shade(cfg, rng))
 			_:
 				_placed(out, model).add(_fit_facing(boxes[model], b, foot, middle), 1.0)
 	return out
@@ -65,6 +69,30 @@ static func fit(model: AABB, foot: Vector3, size: Vector3, yaw: float) -> Transf
 	var basis := Basis(Vector3.UP, yaw) * Basis.from_scale(scale)
 	var base := model.position + Vector3(model.size.x * 0.5, 0.0, model.size.z * 0.5)
 	return Transform3D(basis, foot - basis * base)
+
+
+## The transform that stands a tree of bounds `model` in block `b` (PropDressConfig.Lay.TREE): its origin on the
+## ground `ground` under the box's middle (raised as little as keeps its sunk foot inside the box), its trunk's foot (`foot` m round its origin) stretched to the box's
+## half-width (the box's shorter side, a tree's box being square) and its top to the box's top, turned `yaw` about up
+## (a quarter turn: the trunk's foot reaches its radius along its axes, so the box and its round steps still hold it).
+static func tree_fit(model: AABB, b: MapData.Block, ground: float, foot: float, yaw: float) -> Transform3D:
+	var top := b.center.y + b.size.y * 0.5
+	var across := minf(b.size.x, b.size.z) * 0.5 / maxf(foot, 1e-6)
+	var up := (top - ground) / maxf(model.end.y, 1e-6)
+	# the trunk's cut end, under the ground, stays inside the box: on a steep foot the tree stands a little higher
+	var stand := maxf(ground, b.center.y - b.size.y * 0.5 - model.position.y * up)
+	up = (top - stand) / maxf(model.end.y, 1e-6)
+	var basis := Basis(Vector3.UP, yaw) * Basis.from_scale(Vector3(across, up, across))
+	return Transform3D(basis, Vector3(b.center.x, stand, b.center.z))
+
+
+## The ground under block `b`'s middle: sloping ground's, kept inside the box, or its foot without it.
+static func ground_under(map: MapData, b: MapData.Block) -> float:
+	var foot := b.center.y - b.size.y * 0.5
+	if map.terrain == null:
+		return foot
+	var h := map.terrain.height_at(b.center.x, b.center.z)
+	return foot if is_nan(h) else clampf(h, foot, b.center.y + b.size.y * 0.5)
 
 
 ## The middle of the field on the ground: halfway between the teams' spawns.

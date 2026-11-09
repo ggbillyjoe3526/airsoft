@@ -67,7 +67,7 @@ const PROP_PARTS := {
 const WOODLAND_KINDS := {
 	&"tree": &"bark", &"log": &"timber", &"fence": &"timber", &"plywood": &"plywood", &"wall": &"concrete",
 	&"floor": &"floor", &"ramp": &"floor", &"crate": &"crate", &"tyre": &"rubber", &"truck": &"violet",
-	&"thicket": &"pine",
+	&"thicket": &"forest",
 }
 
 
