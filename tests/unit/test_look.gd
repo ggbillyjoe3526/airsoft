@@ -132,7 +132,8 @@ func test_woodland_is_drawn_in_the_shared_light() -> void:
 	var bushes := BushView.build(m, play.woods)
 	if bushes != null:
 		add_child_autofree(bushes)
-		assert_eq((bushes.material_override as ShaderMaterial).shader, LookMaterials.VERTEX_SHADER, "the bushes")
+		for mat in bushes.materials():
+			assert_eq((mat as ShaderMaterial).shader, LookMaterials.VERTEX_SHADER, "the bushes")
 
 
 func test_the_props_recipes_are_the_palettes() -> void:

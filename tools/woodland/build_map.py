@@ -35,13 +35,20 @@ KINDS = {"palisade": "fence", "logstack": "log", "log": "log", "logpile": "log",
          "fortwall": "plywood", "lowwall": "plywood", "hutwall": "plywood", "window": "plywood", "post": "log",
          "parapet": "plywood"}
 # The CC0 prop each piece's blocks are drawn as (WR3; PropDressConfig lays them in the box, which stays what BBs meet),
-# and the trees' and thickets'. The wind-thrown root plates, the posts, the walls and the palisade keep their boxes.
-DRESS = {"log": "log", "logpile": "logstack", "logstack": "logstack", "crates": "crate", "lowcrates": "crate",
+# and the trees' and thickets'. The posts, the walls and the palisade keep their boxes.
+DRESS = {"log": "fallen_log", "logpile": "cordwood", "logstack": "cordwood", "crates": "crate", "lowcrates": "crate",
          "tyre": "tractor_tyre", "tyrestack": "tractor_tyre_stack", "truck": "pickup", "tree": "trunk",
-         "thicket": "spruce",
+         "thicket": "spruce", "windthrow": "root_plate",
          # WG4: the game's own models (tools/blender/maps) for the tunnels' and the culvert's blocks
          "tunnel_side": "log_tunnel_side", "tunnel_roof": "log_tunnel_roof", "culvert_wall": "culvert_wall",
          "culvert_kerb": "culvert_kerb"}
+# A piece whose tag names a prop of its own is drawn as that, whatever its kind (WG2): the sawn boards and the
+# sawbench at B.
+TAG_DRESS = {"boards": "boards", "sawbench": "sawbench"}
+# The fallen logs are modelled at these lengths (m, WG2): each log block takes the nearest to its long side.
+LOG_LENGTHS = (5, 6, 8)
+# A log block that is no piece of the plan's keeps the CC0 log (WG4 names the tunnels' blocks; this is the fallback).
+UNNAMED_LOG = "log"
 # Each tree's model by its kind (layout.py's tree list) and, a pine's, its age by its height (m): young 6 to 10, grown
 # 12 to 17, old 19 to 25 (layout.tree_sized; Dev 3, WT1). Look only: the block is the same box whatever it names.
 TREE_MODELS = {"oak": "oak", "birch": "birch"}
@@ -229,7 +236,8 @@ def piece_blocks(p: dict) -> list[dict]:
             out.append(block(KINDS[kind], a1, lo, b1, a2, g + p["top"], b2))
             out.append(block(KINDS[kind], a1, g + LINTEL_FROM, b1, a2, g + wall_top, b2))
             continue
-        out.append(block(KINDS[kind], a1, bottom, b1, a2, g + p.get("bottom", 0.0) + p["top"], b2, piece_kind=kind))
+        out.append(block(KINDS[kind], a1, bottom, b1, a2, g + p.get("bottom", 0.0) + p["top"], b2,
+                         piece_kind=p["tag"] if p.get("tag") in TAG_DRESS else kind))
     return out
 
 
@@ -619,10 +627,18 @@ def settle(blocks: list[dict]) -> list[dict]:
 
 
 def dressed(blocks: list[dict]) -> list[dict]:
-    """Each block of a dressed piece, tree or thicket names its prop (`dress`, DRESS)."""
+    """Each block of a dressed piece, tree or thicket names its prop (`dress`, DRESS, or its tag's, TAG_DRESS); a fallen
+    log names the length nearest its long side (LOG_LENGTHS)."""
     for b in blocks:
-        if b.get("piece_kind", b["kind"]) in DRESS and "dress" not in b:
-            b["dress"] = DRESS[b.get("piece_kind", b["kind"])]
+        key = b.get("piece_kind", b["kind"])
+        name = TAG_DRESS.get(key, DRESS.get(key))
+        if "piece_kind" not in b and b["kind"] == "log":
+            name = UNNAMED_LOG
+        if name == "fallen_log":
+            long = max(b["size"]["x"], b["size"]["z"])
+            name = "fallen_log_%d" % min(LOG_LENGTHS, key=lambda n: abs(n - long))
+        if name is not None and "dress" not in b:
+            b["dress"] = name
         b.pop("piece_kind", None)
     return blocks
 
