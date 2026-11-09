@@ -8,10 +8,10 @@ const SHORT := "qa_short"
 const MISCOUNT := "qa_miscount"
 const SWITCHES := 12
 ## The meshes the base (origin/main 79969e6) drew, as SHA-256 of vertices, normals and colours (first 16 hex). Woodland
-## left it in WL1, its ground drawn at last; WA1 repainted the greybox kinds from the look's palette.
+## left it in WL1, its ground drawn at last; WA1 repainted the greybox kinds from the look's palette; SL1 the grass.
 const BASE_HASHES: Dictionary[String, String] = {
-	"depot": "cd4626461cff8e0c", # the hall (DR1), the palette's colours (WA1)
-	"range": "d8e76694957be155",
+	"depot": "3ad9ade3484adafc", # the hall (DR1), the palette's colours (WA1), SL1's darker grass outside
+	"range": "dae60d51779a9749", # SL1's darker grass outside
 }
 
 var play: PlayTuning = PlayTuning.load_default()

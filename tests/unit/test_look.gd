@@ -165,6 +165,16 @@ func test_the_shared_materials_draw_in_the_shared_light() -> void:
 	assert_eq(m.shader, LookMaterials.VERTEX_SHADER)
 	assert_true(m.shader.code.contains("look_light.gdshaderinc"), "the vertex-colour shader includes the light")
 	assert_true(SiteSurface.SHADER.code.contains("look_light.gdshaderinc"), "the site surface includes the light")
+	# Sunlit Concrete's paint grade (SL1): the include defines it from the global, and every shader in the look draws
+	# its ALBEDO through it
+	var include := FileAccess.get_file_as_string("res://game/play/look/look_light.gdshaderinc")
+	assert_true(include.contains("vec3 look_paint(vec3"), "the include defines look_paint")
+	assert_true(include.contains("global uniform float look_paint_saturation"), "from the paint's global")
+	for path: String in ["res://game/play/look/look_vertex.gdshader", "res://game/play/look/look_clear.gdshader",
+			"res://game/play/site/site_surface.gdshader", "res://game/play/door_leaf.gdshader"]:
+		var code := (load(path) as Shader).code
+		assert_true(code.contains("look_light.gdshaderinc"), "%s includes the light" % path)
+		assert_true(code.contains("ALBEDO = look_paint("), "%s draws its paint through look_paint" % path)
 	assert_almost_eq(m.get_shader_parameter(&"roughness") as float, 0.4, 0.0001)
 	assert_almost_eq(m.get_shader_parameter(&"metallic") as float, 0.2, 0.0001)
 
@@ -249,14 +259,22 @@ func test_depots_probes_cover_the_field_and_its_large_areas_as_interiors() -> vo
 		assert_almost_eq(p.size.y, depot.roof_height, 0.001, "reaches the roof: %s" % p.name)
 
 
-func test_depot_is_drawn_clean_without_its_photos() -> void:
+func test_depot_is_drawn_with_its_grain_and_wear() -> void:
 	var play := PlayTuning.load_default()
-	assert_eq(play.site_look.grit, 0.0, "the look's clean surfaces")
+	assert_gt(play.site_look.grit, 0.0, "Sunlit Concrete's real grain and light wear (SL1)")
 	var m := SiteSurface.material(play.site_look, _depot())
-	# no photo grain, so the plywood's photo isn't loaded; the floor's own slab set is (DH1, SiteLook.slab_grain)
+	assert_not_null(m.get_shader_parameter(&"ply_col"), "the plywood's photo grain is loaded")
+	assert_not_null(m.get_shader_parameter(&"slab_col"), "and the floor's slab set")
+	assert_almost_eq(m.get_shader_parameter(&"grit") as float, play.site_look.grit, 0.0001)
+	assert_gt(m.get_shader_parameter(&"gradient") as float, 0.0, "the soft vertical gradient")
+
+
+func test_a_clean_look_loads_no_plywood_photo() -> void:
+	var look := PlayTuning.load_default().site_look.duplicate(true) as SiteLook
+	look.grit = 0.0
+	var m := SiteSurface.material(look, _depot())
 	assert_null(m.get_shader_parameter(&"ply_col"), "no photo grain, so no photo loaded")
 	assert_almost_eq(m.get_shader_parameter(&"grit") as float, 0.0, 0.0001)
-	assert_gt(m.get_shader_parameter(&"gradient") as float, 0.0, "the soft vertical gradient")
 
 
 func test_the_roofs_faces_are_wound_to_face_out() -> void:
@@ -295,3 +313,34 @@ func _in_palette(what: String, colour: Color, off: Array[String]) -> void:
 func _depot() -> MapData:
 	var play := PlayTuning.load_default()
 	return MapData.load_map("depot", play.map_style, SimTuning.load_default().rounds.team_size)
+
+
+func test_grass_is_its_own_palette_colour_and_not_a_team_hue() -> void:
+	assert_true(look.palette.has(&"grass"), "the palette has grass")
+	assert_ne(look.colour(&"grass"), look.colour(&"meadow"), "meadow keeps The Street's floors")
+	var teams := AccessibilityTable.read_file().colours
+	teams.append_array(PlayTuning.load_default().teams.colours)
+	assert_false(FieldChecks.reads_as_team(look.colour(&"grass"), teams), "grass is off every team's hue")
+
+
+func test_the_map_style_ground_and_grass_terrain_are_the_palettes_grass() -> void:
+	var style := PlayTuning.load_default().map_style
+	var want := look.colour(&"grass")
+	assert_eq(style.ground_colour.to_html(false), want.to_html(false), "the ground beyond the walls")
+	assert_eq(style.terrain_colour(RayHit.Surface.GRASS).to_html(false), want.to_html(false), "sloping grass")
+
+
+func test_the_night_preset_keeps_its_own_light() -> void:
+	var play := PlayTuning.load_default()
+	var night := load("res://game/config/night_lighting.tres") as LightingConfig
+	assert_true(night.night)
+	assert_almost_eq(night.sun_energy, 0.18, 0.0001, "the moon")
+	assert_almost_eq(night.ambient_energy, 0.3, 0.0001)
+	assert_almost_eq(night.exposure, 1.2, 0.0001)
+	assert_ne(night.sun_energy, play.lighting.sun_energy, "the day's sun is not the night's")
+
+
+func test_team_cloth_is_not_muted_by_the_paint_grade() -> void:
+	var src := FileAccess.get_file_as_string("res://game/play/flag_cloth.gdshader")
+	assert_false(src.contains("look_paint"), "flag cloth keeps its team colour")
+	assert_false(src.contains("look_light"), "and does not take the shared light")

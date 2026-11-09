@@ -196,6 +196,14 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   Valorant's shapes and Breath of the Wild's soft light and rim light only; clean surfaces; a vibrant palette with no
   dominant colour; no grass. The target picture is project files `concepts/art-direction/06-valorant-botw-v3.jpg`.
   `docs/ART.md` is rewritten to it at the start of 0.1 Dev 2; 0.1 Dev 1's look is unchanged.
+- **Art direction from 0.1 Dev 3: "Sunlit Concrete", Counter-Strike-leaning naturalism (owner, 2026-11-09).** He
+  asked for "more realistic and gritty with less bold vibrant colours. Think Valorant or Counterstrike and less
+  marathon/breath of the wild", for the whole game ("Not just depot but the full game"), and picked direction B of
+  three Depot concepts (project files `art/concepts/depot-gritty-v1/`). Real light (no cel bands), a warm sun, a dark
+  neutral shade, paint at 60 % of its colour, real material grain and light wear; team colours stay the loudest.
+  It replaces the Dev 2 look; `docs/ART.md` is rewritten to it. Built in steps SL1 to SL4 (`docs/records/SL1.md`).
+- **Live ray tracing is not planned (owner, 2026-11-09).** Ultra gets baked path-traced light first ("Baked path
+  tracing first"), then he dropped live ray tracing ("Never mind the live raytracing").
 - **The art direction is game-wide and is about colour and look, not content (owner, 2026-10-31).** "Just because
   something isn't in the art direction doesn't mean it can't appear." Depot, Woodland and every later map use the same
   look, as shared code (`LookConfig`, the shared light): `docs/ART.md` › A map in the look.

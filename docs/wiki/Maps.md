@@ -42,8 +42,8 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
 - **Doors:** some of the plywood rooms and huts have wooden [doors](#doors), some starting open and some shut.
 - **Attack / Defend** puts two flagpoles at the defenders' end, **A** on A site and **B** on B site; the attackers
   raise either ([Modes](Modes#attack--defend)).
-- **The look:** clean painted surfaces in soft, stylised light, with crimson, violet, yellow, teal, green and cream
-  spread over the hall so the team colours stay the loudest.
+- **The look:** a real warehouse in daylight: concrete and plywood with their grain, weathered paint in muted
+  crimson, violet, yellow, teal, green and cream, so the team colours stay the loudest.
 - **Props:** the hall's racking, drums, barrels, sofa, desks and lockers are the game's own models: navy and yellow
   pallet racking stocked three different ways (cartons, sacks, wrapped loads, drums, some slots empty) and mixed along
   every rack, violet steel drums stacked two
@@ -87,10 +87,10 @@ defenders in the east camp.
 
 - **The stream:** its bed is 1.7 m under its banks, which are too steep to climb. Cross on the North bridge or the road,
   or walk in and out at the Ford and the gentle slides. Down in the bed you're out of sight of the wood above.
-- **The look:** the game's soft, stylised light over a bright green wood: young, grown and old Scots pines with bare
-  tan trunks under their crowns, broad, lumpy oaks, white birches in the Birch stand and Fern hollow, dark
-  spruce thickets, and beyond the fence a far wood of spruce spires. A meadow floor, the violet pickup wreck and teal
-  crates carry the colour, with nothing near a team's blue or orange. Every crown starts over head height.
+- **The look:** warm afternoon sun over a natural green wood: young, grown and old Scots pines with bare tan trunks
+  under their crowns, broad, lumpy oaks, white birches in the Birch stand and Fern hollow, dark spruce thickets, and
+  beyond the fence a far wood of spruce spires. A grassy floor, the weathered violet pickup wreck and teal crates carry
+  the colour, with nothing near a team's blue or orange. Every crown starts over head height.
 - **Long views, few walls:** the Ridge looks 86 m down onto the Fort; elsewhere a lane's longest line is under 80 m.
   Cover is fallen logs, wind-thrown trees torn out by their roots, woodpiles, stacks of tractor tyres, wooden crates,
   the violet pickup wreck and the trunks of the trees themselves; each stops a BB about where you see it, a round trunk
