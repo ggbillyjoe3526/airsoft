@@ -1,6 +1,6 @@
 # WT1 · Woodland's trees: pines, oaks, birches, thicket spruces and the far wood from the owner's photos (Dev)
 
-**Review:** pending
+**Review:** pending (stopped after attempt 4, check 1; the owner rules on the oak)
 
 ## Attempts
 
@@ -9,7 +9,7 @@
 | 2026-11-09 | 1 | build thread | QA Pass, performance Pass | Retry 6/8 | fidelity to the photos (oak too narrow and high, old pine an umbrella, young pine a lollipop, grown pine's bare twigs), crowns stretched by their trunk's box in game, changelog note and checklist link |
 | 2026-11-09 | 2 | build thread | as attempt 1 | Retry 7/8 | fidelity: oak's foot flare and low limbs, holes atop its dome; grown pine widest at its foot; young pine's tufts; birch's twigs and marks |
 | 2026-11-09 | 3 | build thread | as attempt 1 | Retry 7/8 | fidelity: oak's dome widest too high with sky through it; grown pine's spire top; young pine's closed cone above 4 m; birch's twigs don't hang, marks don't read |
-| 2026-11-09 | 4 | build thread | see Verified | pending | – |
+| 2026-11-09 | 4 | build thread | see Verified | Retry 7/8 (no auto-accept: check 1) | fidelity (measured): oak's dome still shows sky in its upper half (2,692 px in the quarter view, 5,531 square on) and its shoulder is square (W/H at 0.85 of the height 0.98 against the photo's 0.82); pines and birch met |
 
 ## Goal
 
