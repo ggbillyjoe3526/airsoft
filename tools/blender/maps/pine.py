@@ -102,22 +102,24 @@ def young() -> None:
     centre = Vector((0.0, height * 0.7, 0.0))
     # a slim, open cone (about 0.3 as wide as tall): whorls of short up-swept branches, each tipped with a long
     # upright tuft of needles, the gaps between whorls showing the stem
-    whorls = 8
+    whorls = 5
     for w in range(whorls):
         t = w / (whorls - 1)
-        y = CLEAR_YOUNG + 0.1 + (height * 0.86 - CLEAR_YOUNG - 0.1) * t + rng.uniform(-0.12, 0.12)
-        reach = 0.78 * (1.0 - t) ** 0.85 + 0.15
+        y = CLEAR_YOUNG + 0.25 + (height * 0.84 - CLEAR_YOUNG - 0.25) * t + rng.uniform(-0.1, 0.1)
+        reach = 0.78 * (1.0 - t) ** 0.85 + 0.18
         at = axis_at(path, y)
-        n = 4 if w < whorls - 2 else 3
+        low = w < 3
+        n = 4
         spin = rng.uniform(0.0, math.tau)
         for k in range(n):
             a = spin + math.tau * k / n + rng.uniform(-0.3, 0.3)
             out = Vector((math.cos(a), 0.0, math.sin(a)))
             ln = reach * rng.uniform(0.85, 1.1)
-            bp = branch(tree, at, out, ln, ln * 0.8, 0.03, 3, 1, BARK_YOUNG)
-            size = 0.42 + 0.25 * (1.0 - t)
-            tree.tuft(bp[-1] + UP * size * 0.5, size * 1.1, out, 1, NEEDLE_YOUNG, NEEDLE_UNDER, centre, flat=2.0,
-                      lean=0.6)
+            bp = branch(tree, at, out, ln, ln * (0.3 if w < 2 else 0.8), 0.03, 3, 1, BARK_YOUNG)
+            size = 0.4 + 0.2 * (1.0 - t)
+            # a narrow upright tuft of long needles at the branch's end (two on the lower whorls' longer branches)
+            tree.tuft(bp[-1] + UP * size * (0.15 if w < 2 else 0.4), size, out, 2 if low else 1, NEEDLE_YOUNG,
+                      NEEDLE_UNDER, centre, flat=2.1, lean=0.6, spread=0.55)
     # the leader: a tall tuft round the top bud and the ring of shoots under it
     top = path[-1]
     tree.tuft(top + UP * -0.45, 0.55, Vector((1.0, 0.0, 0.0)), 3, NEEDLE_YOUNG, NEEDLE_UNDER, centre, flat=2.1,
@@ -142,7 +144,7 @@ def grown() -> None:
         t = w / (whorls - 1)
         y = height * (0.3 + 0.6 * t + rng.uniform(-0.025, 0.025))  # whorls a little irregular, as grown
         # a ragged column, widest about half way up (the photos' grown pines), narrowing to its top
-        shape = math.sin(math.pi * min(1.0, (t + 0.15) / 1.1))
+        shape = math.sin(math.pi * min(1.0, (t + 0.15) / 1.4))  # broad to its top, as the photos'
         reach = 0.4 + 1.55 * shape
         at = axis_at(path, y)
         n = 4 if w < whorls - 2 else 3
@@ -160,11 +162,15 @@ def grown() -> None:
                 tree.tuft(tk.along(bp, 0.45) + UP * 0.15, size * 0.85, out, 1, NEEDLE_TOP, NEEDLE_UNDER, centre,
                           flat=0.8)
     # the crown's core round the stem, so it never reads as a stack of plates, and the top
-    for y in (0.56, 0.7, 0.82):
+    for y in (0.37, 0.56, 0.7, 0.82):
         tree.tuft(axis_at(path, height * y), 2.4 - 0.9 * y, Vector((1.0, 0.0, 0.0)), 2, NEEDLE_TOP, NEEDLE_UNDER,
                   centre, flat=0.9, spread=0.6)
-    tree.tuft(path[-1] + UP * -0.7, 1.0, Vector((0.0, 0.0, 1.0)), 3, NEEDLE_TOP, NEEDLE_UNDER, centre, flat=1.2,
-              spread=0.5)
+    # a ragged top whorl round the leader, not a ball
+    for k in range(4):
+        a = math.tau * k / 4 + rng.uniform(-0.4, 0.4)
+        out = Vector((math.cos(a), 0.0, math.sin(a)))
+        tree.tuft(path[-1] + UP * rng.uniform(-1.3, -0.6) + out * rng.uniform(0.45, 0.8), 0.95, out, 1, NEEDLE_TOP,
+                  NEEDLE_UNDER, centre, flat=0.9)
     tree.export(2000, foot_r, CLEAR_GROWN, crown=True)
 
 

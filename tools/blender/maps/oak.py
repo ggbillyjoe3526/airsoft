@@ -30,8 +30,8 @@ HEIGHT = 14.0
 FOOT_R = 0.85            # the buttresses' widest reach: the box's half-width
 BOLE_R = 0.55            # the bole's radius over the buttresses (they flare to 1.5 times it)
 SPLIT = 3.45             # where the bole splits into its limbs (m)
-CROWN = Vector((0.0, 8.6, 0.0))
-CROWN_R = Vector((9.6, 5.8, 9.6))   # half again as wide as the tree is tall, as in the photos
+CROWN = Vector((0.0, 6.6, 0.0))       # its widest ring at about 0.43 of the height, as in the photos
+CROWN_R = Vector((10.0, 8.4, 10.0))   # half again as wide as the tree is tall, as in the photos
 CROWN_FLOOR = 3.35
 CLEAR = 3.1              # 2.6 m over the ground at the smallest oak the map stands (12 m of 14)
 BUDGET = 8000
@@ -107,27 +107,27 @@ def main() -> None:
     # the crown: a clump at every branch's end, then the dome's surface filled out with clumps, then a few big inner
     # ones so the middle reads solid
     for e in tips:
-        put(tree, e, rng.uniform(2.0, 2.6), rng)
-    n_surface = 56
+        put(tree, e, rng.uniform(2.4, 3.1), rng)
+    n_surface = 54
     golden = math.pi * (3.0 - math.sqrt(5.0))
     laid = 0
     i = 0
     while laid < n_surface:
-        y = 1.0 - (i + 0.5) / (n_surface * 1.3) * 2.45     # the dome, down to its rim over head height
+        y = 1.0 - (i + 0.5) / (n_surface * 1.3) * 2.2      # the dome, its skirt flattened at CROWN_FLOOR
         i += 1
         rr = math.sqrt(max(0.0, 1.0 - y * y))
         a = golden * i
         d = Vector((math.cos(a) * rr, y, math.sin(a) * rr))
         p = CROWN + Vector((d.x * CROWN_R.x, d.y * CROWN_R.y, d.z * CROWN_R.z)) * rng.uniform(0.82, 0.95)
-        put(tree, p, rng.uniform(2.1, 2.7) * (1.1 if y > 0.6 else 1.0), rng)
+        put(tree, p, rng.uniform(2.5, 3.2) * (1.1 if y > 0.6 else 1.0), rng)
         laid += 1
     for c in (Vector((0.0, 9.6, 0.0)), Vector((2.6, 8.6, 1.2)), Vector((-2.4, 8.8, -1.6)), Vector((0.8, 8.4, -2.8)),
               Vector((-1.2, 8.3, 2.7))):
-        put(tree, Vector((c.x * 1.5, c.y * 1.2 - 2.0, c.z * 1.5)), 3.6, rng)
+        put(tree, Vector((c.x * 1.5, CROWN.y + (c.y - 8.6) * 1.6 + 1.0, c.z * 1.5)), 3.8, rng)
     # the dome's top closed: a ring of clumps just under its crest
     for k in range(5):
         a = math.tau * k / 5 + 0.3
-        put(tree, CROWN + Vector((math.cos(a) * 3.2, CROWN_R.y * 0.78, math.sin(a) * 3.2)), 2.6, rng)
+        put(tree, CROWN + Vector((math.cos(a) * 3.4, CROWN_R.y * 0.8, math.sin(a) * 3.4)), 3.0, rng)
     tree.export(BUDGET, FOOT_R, CLEAR, crown=True)
 
 
