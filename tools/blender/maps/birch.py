@@ -46,9 +46,9 @@ def bark_paint(rng):
         if t < 0.07:
             return tk.mix(FOOT, WHITE, max(0.0, (t - 0.04) / 0.03))
         for b in bands:
-            if abs(t - b) < 0.012 and rng.random() < 0.6:
+            if abs(t - b) < 0.05 and rng.random() < 0.55:
                 return DASH
-        return WHITE if rng.random() > 0.08 else tk.mix(WHITE, DASH, 0.5)
+        return WHITE if rng.random() > 0.16 else tk.mix(WHITE, DASH, 0.6)
     return paint
 
 
@@ -72,14 +72,16 @@ def main() -> None:
         out = Vector((math.cos(a), 0.0, math.sin(a)))
         at = tk.along(path, (y + tk.SINK) / (HEIGHT - 0.4 + tk.SINK))
         ln = (2.3 - 1.4 * t) * rng.uniform(0.85, 1.15)
-        end = at + out * ln + UP * ln * rng.uniform(0.7, 1.0)
-        bp = tk.curve(at, end, out * 0.25 - UP * 0.15, 2)
+        # up steeply, then arching over, the tip hanging (a birch's weeping twigs)
+        end = at + out * ln * 1.1 + UP * ln * rng.uniform(0.35, 0.55)
+        bp = tk.curve(at, end, UP * ln * 0.45 - out * ln * 0.15, 2)
         tree.limb(bp, [0.04, 0.03, 0.018], 3, lambda tt, aa: TWIG, cap=False)
         # small leafy tufts along it and at its arching tip
         size = 0.75 + 0.35 * (1.0 - t)
         tree.tuft(tk.along(bp, 0.62) + out * 0.1, size * 0.85, out, 2, LEAF_TOP, LEAF_UNDER, centre, flat=0.8,
                   lean=0.55)
-        tree.tuft(bp[-1] + out * 0.1, size, out, 3, LEAF_TOP, LEAF_UNDER, centre, flat=0.8, lean=0.55)
+        tree.tuft(bp[-1] + out * 0.1 - UP * size * 0.35, size, out, 3, LEAF_TOP, LEAF_UNDER, centre, flat=0.9,
+                  lean=0.55)
     # tufts hanging round the stem through the crown, and the top's
     for k in range(10):
         t = k / 9

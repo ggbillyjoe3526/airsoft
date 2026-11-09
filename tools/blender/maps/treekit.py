@@ -120,11 +120,13 @@ class Tree:
 
     # ------------------------------------------------------------------ wood
     def limb(self, path: list, radii: list, sides: int, bark, ridges: float = 0.0, lobes: int = 0,
-             lobe_depth: float = 0.0, lobe_until: float = 0.0, cap: bool = True, twist: float = 0.0, reach: float = 0.0) -> None:
+             lobe_depth: float = 0.0, lobe_until: float = 0.0, cap: bool = True, twist: float = 0.0, reach: float = 0.0,
+             lobe_from: float = 0.0) -> None:
         """A tapered round limb along `path` (points), its radius `radii` at each, `sides` sided: rings joined side by
         side, normals straight out of the bark. `bark(t, a)` paints a ring vertex from its share of the way up `t` and
         its angle `a`. `ridges` roughs each vertex's radius (bark plates), `lobes` buttresses swell the foot (an oak's
-        root flare) `lobe_depth` of the radius, fading out by `lobe_until` of the way. Its top end closes to a point
+        root flare) `lobe_depth` of the radius, in full to `lobe_from` of the way (the ground) and fading out by
+        `lobe_until`. Its top end closes to a point
         when `cap`. With `reach`, no point stands farther than that from the tree's upright line (x, z 0): a stem
         stays inside its box."""
         n = len(path)
@@ -144,9 +146,9 @@ class Tree:
                 if lobes and t < lobe_until:
                     # buttresses peaking on the ring's axes (a quarter turn keeps the foot's reach), smaller ones
                     # between them that never reach as far
-                    swell = (1.0 - t / lobe_until) ** 2
-                    main = max(0.0, math.cos(lobes * a)) ** 2
-                    minor = 0.45 * math.sin(lobes * 1.5 * a) ** 2 * (1.0 - main)
+                    swell = 1.0 if t <= lobe_from else (1.0 - (t - lobe_from) / (lobe_until - lobe_from)) ** 1.6
+                    main = max(0.0, math.cos(lobes * a)) ** 0.8
+                    minor = 0.55 * math.sin(lobes * 1.5 * a) ** 2 * (1.0 - main)
                     r *= 1.0 + lobe_depth * swell * max(main, minor)
                 if ridges and i > 0:  # the foot's ring stays true: it is the box's width (Lay.TREE)
                     r *= 1.0 + self.rng.uniform(-ridges, ridges)

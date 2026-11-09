@@ -7,7 +7,8 @@
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-09 | 1 | build thread | QA Pass, performance Pass | Retry 6/8 | fidelity to the photos (oak too narrow and high, old pine an umbrella, young pine a lollipop, grown pine's bare twigs), crowns stretched by their trunk's box in game, changelog note and checklist link |
-| 2026-11-09 | 2 | build thread | see Verified | pending | – |
+| 2026-11-09 | 2 | build thread | as attempt 1 | Retry 7/8 | fidelity: oak's foot flare and low limbs, holes atop its dome; grown pine widest at its foot; young pine's tufts; birch's twigs and marks |
+| 2026-11-09 | 3 | build thread | see Verified | pending | – |
 
 ## Goal
 
@@ -20,7 +21,7 @@ sight lines don't change; crowns are look only, over head height. 60 FPS on Low 
 ## Approach
 
 - **Models** (`tools/blender/maps/`, one vertex-coloured mesh each through `mapkit.py`'s export; shared `treekit.py`):
-  `pine.py` (young 960, grown 1,996, old 2,866), `oak.py` (7,940), `birch.py` (1,996), `spruce.py` (474),
+  `pine.py` (young 960, grown 1,936, old 2,866), `oak.py` (7,966), `birch.py` (1,996), `spruce.py` (474),
   `far_tree.py` (the far tree 12, the treeline band's 20 m section 192). Each tree is written as its trunk and its
   crown apart (`<model>.glb`, `<model>_crown.glb`). The oak's leaf clumps are knobbly and flatter, not round (owner,
   2026-11-09). Normals lean out from each crown's middle, the stylised

@@ -32,7 +32,7 @@ BOLE_R = 0.55            # the bole's radius over the buttresses (they flare to 
 SPLIT = 3.45             # where the bole splits into its limbs (m)
 CROWN = Vector((0.0, 8.6, 0.0))
 CROWN_R = Vector((9.6, 5.8, 9.6))   # half again as wide as the tree is tall, as in the photos
-CROWN_FLOOR = 3.7
+CROWN_FLOOR = 3.35
 CLEAR = 3.1              # 2.6 m over the ground at the smallest oak the map stands (12 m of 14)
 BUDGET = 8000
 
@@ -57,7 +57,13 @@ def main() -> None:
     rng = tree.rng
     bark = bark_paint(rng)
     # the bole: buttress roots at the foot, a slight twist, swelling where it splits
-    bole = tk.curve(Vector((0.0, -tk.SINK, 0.0)), Vector((0.25, SPLIT + 0.4, -0.1)), Vector((0.08, 0.0, 0.05)), 7)
+    # rings close together at the foot, where the buttresses flare (in full at the ground, gone by 1.4 m)
+    top = Vector((0.25, SPLIT + 0.4, -0.1))
+    bole = [Vector((0.0, -tk.SINK, 0.0)), Vector((0.0, 0.0, 0.0))]
+    for y in (0.3, 0.7, 1.3, 2.1, 3.0, SPLIT + 0.4):
+        f = y / (SPLIT + 0.4)
+        bole.append(Vector((top.x * f * f, y, top.z * f * f)))
+    length = sum((bole[i + 1] - bole[i]).length for i in range(len(bole) - 1))
     radii = []
     for p in bole:
         h = max(0.0, p.y)
@@ -67,24 +73,26 @@ def main() -> None:
         radii.append(r)
     first = len(tree.verts)
     tree.limb(bole, radii, 16, bark, ridges=0.03, lobes=4, lobe_depth=FOOT_R / BOLE_R - 1.0,
-              lobe_until=0.32, cap=False, twist=0.5, reach=FOOT_R)
+              lobe_until=(1.4 + tk.SINK) / length, lobe_from=tk.SINK / length + 1e-6, cap=False, twist=0.5,
+              reach=FOOT_R)
     tree.mark_stem(first)
     top = bole[-1]
     tips = []
-    limbs = 5
+    limbs = 7
     spin = rng.uniform(0.0, math.tau)
     for k in range(limbs):
-        a = spin + math.tau * k / limbs + rng.uniform(-0.35, 0.35)
+        a = spin + math.tau * k / limbs + rng.uniform(-0.3, 0.3)
         out = Vector((math.cos(a), 0.0, math.sin(a)))
-        start = top + out * 0.18 + UP * rng.uniform(-0.3, 0.1)
-        reach = rng.uniform(6.0, 7.2)
-        rise = rng.uniform(2.8, 3.8)
+        low = k in (1, 4)   # two long, near-level limbs under the crown, the photos' low spread
+        start = top + out * 0.18 + UP * (rng.uniform(-0.45, -0.3) if low else rng.uniform(-0.2, 0.1))
+        reach = rng.uniform(7.4, 8.2) if low else rng.uniform(6.0, 7.2)
+        rise = rng.uniform(1.0, 1.5) if low else rng.uniform(2.8, 3.8)
         end = start + out * reach + UP * rise
-        bend = out * 0.6 - UP * 0.7 + out.cross(UP) * rng.uniform(-0.6, 0.6)  # crooked: out first, then up
+        bend = out * 0.6 - UP * (0.3 if low else 0.7) + out.cross(UP) * rng.uniform(-0.6, 0.6)  # crooked: out, then up
         path = tk.curve(start, end, bend, 5)
-        tree.limb(path, [0.34 * (1.0 - 0.62 * i / 5) for i in range(6)], 9, bark, ridges=0.04, cap=False)
+        tree.limb(path, [0.45 * (1.0 - 0.7 * i / 5) for i in range(6)], 8, bark, ridges=0.04, cap=False)
         # forks off its outer half, out toward the crown's edge
-        forks = 3 if k % 2 == 0 else 2
+        forks = 2 if k % 2 == 0 else 1
         for f in range(forks):
             s = tk.along(path, 0.5 + 0.22 * f)
             side = out.cross(UP).normalized() * rng.choice((-1.0, 1.0))
@@ -100,12 +108,12 @@ def main() -> None:
     # ones so the middle reads solid
     for e in tips:
         put(tree, e, rng.uniform(2.0, 2.6), rng)
-    n_surface = 59
+    n_surface = 56
     golden = math.pi * (3.0 - math.sqrt(5.0))
     laid = 0
     i = 0
     while laid < n_surface:
-        y = 1.0 - (i + 0.5) / (n_surface * 1.3) * 2.25     # the dome, down to its rim over head height
+        y = 1.0 - (i + 0.5) / (n_surface * 1.3) * 2.45     # the dome, down to its rim over head height
         i += 1
         rr = math.sqrt(max(0.0, 1.0 - y * y))
         a = golden * i
@@ -114,8 +122,12 @@ def main() -> None:
         put(tree, p, rng.uniform(2.1, 2.7) * (1.1 if y > 0.6 else 1.0), rng)
         laid += 1
     for c in (Vector((0.0, 9.6, 0.0)), Vector((2.6, 8.6, 1.2)), Vector((-2.4, 8.8, -1.6)), Vector((0.8, 8.4, -2.8)),
-              Vector((-1.2, 8.3, 2.7)), Vector((3.0, 9.8, -1.8)), Vector((-3.1, 9.9, 1.0))):
+              Vector((-1.2, 8.3, 2.7))):
         put(tree, Vector((c.x * 1.5, c.y * 1.2 - 2.0, c.z * 1.5)), 3.6, rng)
+    # the dome's top closed: a ring of clumps just under its crest
+    for k in range(5):
+        a = math.tau * k / 5 + 0.3
+        put(tree, CROWN + Vector((math.cos(a) * 3.2, CROWN_R.y * 0.78, math.sin(a) * 3.2)), 2.6, rng)
     tree.export(BUDGET, FOOT_R, CLEAR, crown=True)
 
 
