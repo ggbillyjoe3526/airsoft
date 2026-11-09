@@ -1,6 +1,6 @@
 # SL3 · Sunlit Concrete: Depot's roof repainted, the map pictures again
 
-**Review:** 1 attempt · critic pending · qa pending · performance pending
+**Review:** 1 attempt · critic pending · qa Pass · performance Pass
 
 ## Attempts
 
@@ -22,7 +22,9 @@
   (`docs/KNOWN_ISSUES.md` › Art).
 - **The map pictures again:** the three map cards (`assets/maps/`, with `cards/`) from their `docs/ASSETS.md` spots,
   and the wiki's hall picture (`docs/wiki/images/depot-chrono-hall.jpg`) at eye height from the hall's south end, in
-  the new light, paint, wear and roof.
+  the new light, paint, wear and roof. The pictures grew (the Range's most, its wall and sky in the new grain), so
+  docs/ASSETS.md says about 0.95 MB for the three now (The Street's went with the map); its old 0.4 MB was already
+  short of what main held.
 
 ## Known issues left
 

@@ -23,7 +23,7 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
   south. No lane runs straight; each bends round the dead space.
 - **Links** join the lanes: open cuts and galleries, two tight alleys, and two **tunnels**, one in each half. The
   tunnels are unlit and bend twice: dark, but never pitch black.
-- **The building:** blockwork walls under cladding, with crimson steel columns, roller shutters and fire exits;
+- **The building:** blockwork walls under cladding, with galvanised steel columns, roller shutters and fire exits;
   steel pillars with hazard bands; scaffold walls hung with camouflage netting; a polished concrete floor.
 - **The roof:** galvanised steel trusses, purlins and rooflights under a pale grey liner, red sprinkler mains and cable
   trays, with rows of high-bay lamps hanging on cables. A BB fired up stops at the roof.
