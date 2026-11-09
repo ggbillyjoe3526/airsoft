@@ -75,7 +75,7 @@ func test_near_and_far_reach_and_fade_with_their_shadows() -> void:
 	assert_false(lamps.visible)
 
 
-func test_the_sun_dims_while_the_lamps_shine_and_comes_back() -> void:
+func test_the_sun_dims_or_is_shaded_while_the_lamps_shine_and_comes_back() -> void:
 	var lighting := FieldLighting.build(LightingConfig.new())
 	add_child_autofree(lighting)
 	var full := lighting.sun.light_energy

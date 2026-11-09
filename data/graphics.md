@@ -85,7 +85,8 @@ never stops the game from starting.
   follow the shadow rows: Shadow detail is their atlas, Softness their filter (Softest gives each the lens's size, so
   its shadows harden at their foot). At night it also gives a field's fires and lanterns (its light pools) shadows,
   and Far gives real lights to `LightingConfig.real_lights_far` of them. On Far a roof drawn with its bay model also
-  shades the sun but at its rooflights (UG2, `RoofView`'s sun shade, a shadow-only slab): the sun keeps
+  shades the sun but at its rooflights (UG2, `RoofView`'s sun shade, a shadow-only slab, so only with Sun shadows
+  on; it then lights every lamp and stretches the sun's shadows over the whole roof): the sun keeps
   `RoofConfig.shade_sun_share` and falls through them in bright strips on the floor and shafts in a thicker haze under
   the roof (`shade_haze`, with Volumetric fog), while the lamps shine `lamp_shaded_energy` to light the rest. Off (Low,
   Medium), and on a field with no roof lamps or light pools, it costs nothing.

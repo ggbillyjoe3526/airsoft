@@ -314,9 +314,15 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 	if woods != null:
 		woods.set_quality(values.mesh_detail, values.wind_dust / PERCENT)
 	if lamps != null:
-		lamps.set_mode(values.lamp_lights, values.shadow_softness == GraphicsQuality.ShadowSoftness.SOFTEST)
+		lamps.set_mode(values.lamp_lights, values.shadow_softness == GraphicsQuality.ShadowSoftness.SOFTEST,
+				values.sun_shadows)
 		if lighting != null:
 			lighting.set_key_share(lamps.key_share(values.lamp_lights))
+			if lamps.shaded():
+				# The shade is a shadow: it shades the whole roof only while the sun's shadows reach all of it, past
+				# their fade.
+				lighting.sun.directional_shadow_max_distance = maxf(values.shadow_range,
+						lamps.shade_reach() / lighting.sun.directional_shadow_fade_start)
 
 
 ## Whether the figures draw their contact shadows with `values`: where the sun casts none.

@@ -14,6 +14,8 @@ const CEILING_LIFT := 0.01
 ## The sun shade's slabs (m over the roof's underside): over the ceiling slab, so they never shade its own top.
 const SHADE_FROM := 0.2
 const SHADE_TO := 0.3
+## The narrowest shade span kept (m): a sliver at the roof's end is float rounding, not shade.
+const SPAN_MIN := 0.001
 
 var _mesh: MeshInstance3D = null
 var _lamps: MultiMeshInstance3D = null
@@ -70,7 +72,7 @@ static func build(map: MapData, cfg: RoofConfig) -> RoofView:
 			shaded = [view._shade, view._haze]
 			for node in shaded:
 				view.add_child(node)
-		view._lights = RoofLamps.build(spots, cfg, shaded)
+		view._lights = RoofLamps.build(spots, cfg, shaded, Vector3(area.size.x, y, area.size.y).length())
 		view.add_child(view._lights)
 	return view
 
@@ -159,9 +161,9 @@ static func shade_spans(area: Rect2, cfg: RoofConfig) -> PackedVector2Array:
 	var x := area.position.x
 	var gap := (floorf(x / step - 0.5) + 0.5) * step
 	while x < area.end.x:
-		var lo := gap - cfg.rooflight_half
-		if lo > x:
-			out.append(Vector2(x, minf(lo, area.end.x)))
+		var lo := minf(gap - cfg.rooflight_half, area.end.x)
+		if lo > x + SPAN_MIN:
+			out.append(Vector2(x, lo))
 		x = maxf(x, gap + cfg.rooflight_half)
 		gap += step
 	return out

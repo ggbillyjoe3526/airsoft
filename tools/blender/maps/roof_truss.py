@@ -43,7 +43,8 @@ WEB = 0.07
 POST = 0.06
 PANEL = 1.5             # the web's panel along the span
 RIB_PITCH = 0.2
-ROOFLIGHT = 0.8         # the rooflight strip's half width, about the bay's edges (a fifth of the roof, as in the photos)
+ROOFLIGHT = 0.8         # the rooflight strip's half width, about the bay's edges (a fifth of the roof, as in the photos);
+                        # RoofConfig.rooflight_half matches it (the sun shade's gaps, UG2)
 
 
 def chord_bottom() -> float:
