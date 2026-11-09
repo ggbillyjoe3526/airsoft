@@ -30,6 +30,8 @@ RADIUS, HEIGHT = 1.0, 1.7
 CLUSTERS = 36
 SKIRT = 11
 STEMS = 4
+SPRAYS = [Vector(v).normalized() for v in ((1.0, 0.2, 0.6), (-0.7, 0.8, 0.5), (-0.4, -0.9, 0.7), (0.5, -0.6, 0.2),
+                                          (0.1, 0.3, 1.0), (-1.0, -0.1, 0.1), (0.6, 0.9, 0.0))]
 LEAVES = 540        # small leaves over the outline
 # the clumps: middle (x, y, z) and half size (m), in the 2 m wide, 1.7 m tall box
 CLUMPS = (
@@ -57,6 +59,9 @@ def surface(d: Vector) -> Vector:
     """The bush's outline in direction `d` from its heart: a dome wider than tall, lumpy (clumps of shoots) and
     ragged at the top."""
     bump = 1.0 + 0.22 * wk.lump(d * 1.3, 0.45, 5.0) + 0.1 * wk.lump(d * 3.0, 0.45, 9.0)
+    # sprays of shoots pushing out of the dome, breaking its outline
+    for s in SPRAYS:
+        bump += 0.22 * max(0.0, d.dot(s)) ** 12
     return Vector((d.x * 0.92, d.y * 0.92, 0.62 + d.z * 0.95)) * bump
 
 
@@ -70,11 +75,11 @@ def build() -> object:
     import bmesh
     tmp = bmesh.new()
     bmesh.ops.create_icosphere(tmp, subdivisions=3, radius=1.0)
-    vmap = {v: b.bm.verts.new(surface(v.co.normalized()) * 0.9) for v in tmp.verts}
+    vmap = {v: b.bm.verts.new(surface(v.co.normalized()) * 0.88) for v in tmp.verts}
     for f in tmp.faces:
         vs = [vmap[v] for v in f.verts]
         c = sum((v.co for v in vs), Vector()) / 3.0
-        wk.face(b, vs, "LeafDark" if c.z > 0.5 else "NeedleDark", c - Vector((0.0, 0.0, 0.62)))
+        wk.face(b, vs, "LeafDark" if wk.lump(c, 0.2, 4.0) > 0.2 else "NeedleDark", c - Vector((0.0, 0.0, 0.62)))
     tmp.free()
     # small leaves all over the outline (a golden-angle spiral, jittered so it never reads as rows), each facing out,
     # sunlit on top and darker down the sides and under
@@ -83,7 +88,7 @@ def build() -> object:
         a = k * 2.39996 + r.uniform(-0.2, 0.2)
         ring = math.sqrt(max(0.0, 1.0 - zt * zt))
         d = Vector((math.cos(a) * ring, math.sin(a) * ring, zt)).normalized()
-        at = surface(d) * r.uniform(0.95, 1.03)
+        at = surface(d) * r.uniform(0.885, 0.915)
         if at.z < 0.04:
             at.z = r.uniform(0.04, 0.2)
         normal = (d + Vector((0.0, 0.0, 0.5))).normalized()

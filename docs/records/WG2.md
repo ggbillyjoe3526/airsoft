@@ -1,6 +1,6 @@
 # WG2 · Woodland's ferns, bushes, logs, root plates, woodpiles and saw bench from the owner's photos (Dev)
 
-**Review:** pending (attempt 3)
+**Review:** pending (attempt 4)
 
 ## Attempts
 
@@ -9,7 +9,8 @@
 | 2026-11-09 | 1 | build thread | see Verified; performance Pass, QA Fail | Retry 5/8 | the models against the photos, gaps in boxes that stop BBs, two untracked files |
 | 2026-11-09 | 1, fix round 1 | build thread | QA Pass | Retry 6/8 | the models against the photos; a root plate you could see through where it stops BBs |
 | 2026-11-09 | 2 | build thread | focused tests | Retry 6/8 | the models against the photos; the saw bench's box open under its log |
-| 2026-11-09 | 3 | build thread | see Fix rounds | pending | – |
+| 2026-11-09 | 3 | build thread | focused tests, check.sh | Retry 6/8 | fern sparse, bush leaves floating, round pieces, the saw bench open beside the machine |
+| 2026-11-09 | 4 | build thread | see Fix rounds | pending | – |
 
 ## Goal
 
@@ -21,9 +22,9 @@ lines stay where they were; the ferns and bushes, drawn by code as ellipsoids, a
 ## Approach
 
 - **Models** (`tools/blender/maps/`, vertex-coloured like the Kenney props, through `mapkit.py`; Woodland's shared
-  parts and colours in `woodkit.py`): `fern.py` (384 of 400 triangles), `bush.py` (1,500 of 1,500), `fallen_log.py`
-  (5, 6 and 8 m, 1,400 of 1,500), `root_plate.py` (3,877 of 4,000), `cordwood.py` (three 2 m sections, 1,078 to
-  1,106 of 1,200; the boards 1,206 of 1,500), `sawbench.py` (1,943 of 2,000) and `earth_bank.py` (320 of 340). Each script
+  parts and colours in `woodkit.py`): `fern.py` (374 of 400 triangles), `bush.py` (1,500 of 1,500), `fallen_log.py`
+  (5, 6 and 8 m, 1,400 of 1,500), `root_plate.py` (3,877 of 4,000), `cordwood.py` (three 2 m sections, 1,148 to
+  1,172 of 1,200; the boards 1,206 of 1,500), `sawbench.py` (1,980 of 2,000) and `earth_bank.py` (320 of 340). Each script
   ends with `woodkit.fit_box`, so a model's bounds are exactly its box.
 - **Grounded props** (`PropDressConfig.Lay.GROUND`, `PropLayout._ground`): Woodland's blocks reach from under the
   lowest ground to their top over the ground at their middle. A fallen log, root plate, saw bench or board stack
@@ -126,6 +127,17 @@ lines stay where they were; the ferns and bushes, drawn by code as ellipsoids, a
   - Logs: furrows run the length, broken now and then; the moss a darker green.
   - Saw bench: the machine upright (taller than long); three logs lie under the sawhorses' log, so the box's front
     is solid below it; the logs' bark a lighter grey-brown so it reads.
+
+- Critic, attempt 3 (Retry 6/8), and what changed (attempt 4):
+  - Fern: eleven fronds, each a solid toothed blade (`woodkit.blade_frond`), both sides, overlapping so the clump is
+    solid at a crouch: a bed hides what the rules say it hides.
+  - Bush: the leaves seated on the leafy mass (at 0.885 to 0.915 of the outline, the mass at 0.88), seven sprays of
+    shoots breaking the dome, the mass's shades mixed by noise.
+  - Saw bench: six logs piled three, two, one between the machine and the first sawhorse, so the box reads solid
+    there; the back logs start behind the sawhorses; ten-sided logs; the sawhorses weathered grey-brown.
+  - Cordwood: a third of the pieces rounds or half rounds; the gaps halved; the wood a darker, duller tan (`Cut`,
+    `Heart`, `Split`) with darker rings (`Ring`).
+  - Root plate: a metre thick out to its rim, an earth lip at the torn face's foot.
 
 ## Outstanding
 

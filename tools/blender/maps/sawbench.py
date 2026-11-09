@@ -3,13 +3,13 @@ shed (8 x 1.4 m, 1.2 m tall).
 
 From the owner's photos (references/maps/woodland/18-sawbench-with-logs): a firewood saw bench (a painted steel frame
 on two wheels, a tilting cradle for the log, a big black guard over the blade, a handle to wheel it about), a log
-waiting in its cradle and a heap of sawn rounds beside it, sawdust on the ground; and wooden X-trestles holding a long
-log up to be cut, offcuts and split pieces under them, a chopping block with an axe in it. No brands or labels: the
-machine is an original design, painted in the palette's yellow, off both teams' hues (the photos' orange and blue are
-Beta's and Alpha's).
+waiting in its cradle, sawdust on the ground; logs piled beside it; and a long log up on sawhorses to be cut, more
+logs under it and along the back. No brands or labels: the machine is an original design, painted in the palette's
+yellow, off both teams' hues (the photos' orange and blue are Beta's and Alpha's).
 
-Fills its block's box: the machine at one end, the rounds in the middle, the trestled log along the rest, the log's
-top and the guard's the box's 1.2 m; its ground line at y = 0 (PropDressConfig.Lay.GROUND). Budget 2,000 triangles
+Fills its block's box, which stops a BB end to end: the machine at one end, the pile beside it, the sawhorses' log
+with logs under it along the rest, the log's top and the guard's the box's 1.2 m; its ground line at y = 0
+(PropDressConfig.Lay.GROUND). Budget 2,000 triangles
 (/mnt/project-files/art/woodland-model-list.md). Plain vertex colours, no texture.
 
     python -I tools/blender/maps/sawbench.py <repo root>
@@ -91,29 +91,14 @@ def machine(b: hs.Builder, r) -> None:
     wk.log(b, path, [0.12, 0.118, 0.115, 0.11], 8, r, rough=0.05, ends=("sawn", "sawn"), seed=21.0)
 
 
-def rounds(b: hs.Builder, r) -> None:
-    """A heap of sawn rounds beside the machine, some lying, some on end, and sawdust under it all."""
-    spots = [(-2.3, -0.35, 0, 0.2), (-2.25, 0.25, 0, 0.19), (-1.8, -0.05, 0, 0.21), (-1.35, 0.35, 0, 0.17),
-             (-1.4, -0.4, 1, 0.2), (-0.9, 0.05, 1, 0.18), (-2.0, 0.0, 2, 0.18)]
-    for k, (x, y, level, rad) in enumerate(spots):
-        ln = r.uniform(0.32, 0.4)
-        if level == 2:  # on top of the heap, lying across
-            z = 0.55 + rad
-            path = [(x, y - ln * 0.5, z), (x, y + ln * 0.5, z)]
-        elif level == 1:  # on end
-            path = [(x, y, 0.0), (x, y, ln)]
-        else:  # lying on the ground
-            path = [(x - ln * 0.5, y, rad - 0.01), (x + ln * 0.5, y, rad - 0.01)]
-            if k % 2:
-                path = [(x, y - ln * 0.4, rad - 0.01), (x, y + ln * 0.4, rad - 0.01)]
-        ends = ("none", "sawn") if level == 1 else ("sawn", "sawn")
-        wk.log(b, path, [rad, rad * 0.97], 7, r, rough=0.04, ends=ends, seed=30.0 + k)
-    # the chopping block with an axe in it
-    wk.log(b, [(-0.2, 0.3, 0.0), (-0.2, 0.3, 0.5)], [0.24, 0.24], 9, r, rough=0.04, ends=("none", "sawn"), seed=40.0)
-    b.prism([(-0.27, 0.48), (-0.12, 0.48), (-0.1, 0.62), (-0.29, 0.6)], "y", 0.26, 0.29, "Steel")
-    mk.cylinder(b, (-0.2, 0.275, 0.58), (0.25, 0.275, 0.82), 0.022, "Handle", sides=5)
-    # sawdust and chips on the ground
-    for x, y, sx, sy in ((-3.2, 0.0, 0.9, 0.55), (-1.6, 0.0, 0.9, 0.6)):
+def pile(b: hs.Builder, r) -> None:
+    """Logs piled beside the machine, three, two and one, across the box from the machine to the first sawhorse:
+    the low cover there reads as solid as it is; sawdust round the machine."""
+    for k, (y, z) in enumerate(((-0.42, 0.2), (0.0, 0.2), (0.42, 0.2), (-0.21, 0.55), (0.21, 0.55), (0.0, 0.9))):
+        x0, x1 = -2.95 + r.uniform(0.0, 0.12), 0.55 - r.uniform(0.0, 0.12)
+        wk.log(b, [(x0, y, z), (x1, y, z)], [0.2, 0.19], 10, r, bark=("BarkGrey", "Bark"), rough=0.05, furrows=1,
+               ends=("sawn", "sawn"), seed=30.0 + k)
+    for x, y, sx, sy in ((-3.2, 0.0, 0.9, 0.55),):
         wk.blob(b, Vector((x, y, -0.02)), Vector((sx, sy, 0.06)), 1, r, lambda c, n: "Sawdust", rough=0.3,
                 seed=x, flat_base=-SINK)
 
@@ -136,7 +121,7 @@ def trestles(b: hs.Builder, r) -> None:
     # long logs waiting to be cut, stacked along the back from the rounds to the far trestle: two on the ground and
     # one on them, so the shed's low cover reads solid at its back
     for k, (y, z, rad) in enumerate(((0.52, 0.18, 0.18), (0.18, 0.17, 0.17), (0.35, 0.48, 0.16))):
-        x0, x1 = -2.55 + 0.15 * k, 3.95 - 0.2 * k
+        x0, x1 = 0.68 + 0.05 * k, 3.95 - 0.2 * k
         wk.log(b, [(x0, y, z), (x1, y, z)], [rad, rad * 0.9], 8, r, bark=("BarkGrey", "Bark"), rough=0.05,
                furrows=1, ends=("sawn", "sawn"), seed=60.0 + k)
     # logs waiting under the sawhorses' log, between their legs, so the box's front reads solid below it too
@@ -150,11 +135,11 @@ def build() -> object:
     wk.paint_all()
     mk.paints({"Paint": mk.PALETTE["yellow"], "Steel": mk.PALETTE["steel"], "Guard": mk.PALETTE["rubber"],
                "Tyre": 0x2E2C33, "Hub": mk.PALETTE["cream"], "Grip": 0x2E2C33, "Button": mk.PALETTE["crimson"],
-               "Timber": 0xB8AE8C, "Handle": 0xA89E7C})
+               "Timber": 0x8C8270, "Handle": 0xA89E7C})
     r = wk.rng(1800)
     b = hs.Builder("Sawbench", [])
     machine(b, r)
-    rounds(b, r)
+    pile(b, r)
     trestles(b, r)
     ob = b.build()
     wk.finish(ob, 40.0)

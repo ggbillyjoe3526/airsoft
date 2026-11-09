@@ -51,9 +51,11 @@ def plate(b: hs.Builder, r) -> None:
         rims.append((math.cos(a) * PLATE.y * notch, max(-SINK, cz + math.sin(a) * PLATE.z * notch)))
         inner.append((math.cos(a) * PLATE.y * 0.5 * r.uniform(0.9, 1.1), cz + math.sin(a) * PLATE.z * 0.5 * r.uniform(0.9, 1.1)))
     faces = {}
-    for side, rim_x, in_x, mid_x in ((1.0, 0.28, 0.44, 0.5), (-1.0, -0.28, -0.42, -0.48)):
+    for side, rim_x, in_x, mid_x in ((1.0, 0.42, 0.52, 0.56), (-1.0, -0.38, -0.46, -0.5)):
         out = Vector((side, 0.0, 0.0))
-        ring = wk.verts(b, [(PLATE_X + rim_x + wk.lump(Vector((y, z, side)), 0.4, 1.0) * 0.05, y, z) for y, z in rims])
+        # the plate a metre thick out to its rim, its torn face's foot an earth lip standing out over the pit
+        ring = wk.verts(b, [(PLATE_X + rim_x + wk.lump(Vector((y, z, side)), 0.4, 1.0) * 0.05
+                             + (0.14 if side > 0 and z < cz - PLATE.z * 0.55 else 0.0), y, z) for y, z in rims])
         mids = wk.verts(b, [(PLATE_X + in_x + wk.lump(Vector((y, z, side)), 0.3, 2.0) * 0.07, y, z) for y, z in inner])
         for i in range(RIM):
             j = (i + 1) % RIM
@@ -90,7 +92,7 @@ def build() -> object:
     b = hs.Builder("RootPlate", [])
     plate(b, r)
     # the torn-out face's roots: cords looping out of the earth and back in, wandering over the plate (photos 2, 4)
-    face_x = PLATE_X + 0.46
+    face_x = PLATE_X + 0.54
     for k in range(14):
         y0, z0 = r.uniform(-0.75, 0.75), r.uniform(0.15, 1.85)
         a = r.uniform(0.0, 2.0 * math.pi)

@@ -36,9 +36,10 @@ SECTION, DEPTH, HEIGHT = 2.0, 1.0, 1.8
 TOPS = 7                # points along the section where its ragged top is set
 SAG = 0.45              # how far under the cell's top the stack's top dips at most
 PROUD = (0.015, 0.1)    # how far a piece's end stands out of the core: the face's relief
-GAP = 0.1               # a piece's share shrunk from its neighbours: the dark gaps between them
-ROWS = 12
+GAP = 0.05              # a piece's share shrunk from its neighbours: the dark gaps between them
+ROWS = 11
 ACROSS = 9              # pieces' bases along a row (each row is a strip of wedges, up and down in turn)
+ROUND = 0.35             # the share of pieces that are rounds or half rounds
 BAND = 0.5              # the share of pieces showing a band of bark on their round side
 SIDED = 0.0             # the share of pieces whose short sides are drawn (the rest show the core's dark behind)
 LOOSE = 6               # split pieces lying across the top
@@ -105,13 +106,17 @@ def cordwood(seed: int) -> object:
                                    lambda x, a=shares[k + 1]: top_at(x) * a):
                 cx = sum(p[0] for p in poly) / len(poly)
                 cz = sum(p[1] for p in poly) / len(poly)
+                band = r.random() < BAND
+                if r.random() < ROUND:
+                    # a round or a half round: an unsplit billet's end, or one split once, its bark showing all round
+                    poly, cx, cz = round_end(r, poly)
+                    band = False
                 outline = [(cx + (x - cx) * (1.0 - GAP), side * core, cz + (z - cz) * (1.0 - GAP)) for x, z in poly]
                 # the bark on the piece's longest edge: a wedge's round side
                 n = len(outline)
                 longest = max(range(n), key=lambda e: (Vector(outline[(e + 1) % n]) - Vector(outline[e])).length)
                 end_mat = r.choices(("Cut", "Heart", "Ring", "Split"), (3, 5, 2, 2))[0]
-                wk.split_end(b, outline, r.uniform(*PROUD), out, end_mat, longest, r.random() < SIDED,
-                             r.random() < BAND)
+                wk.split_end(b, outline, r.uniform(*PROUD), out, end_mat, longest, r.random() < SIDED, band)
     # split pieces lying across the top here and there, on the ragged top
     for k in range(LOOSE):
         x = -half_x + SECTION * (k + r.uniform(0.2, 0.8)) / LOOSE
@@ -150,6 +155,21 @@ def row_pieces(r, half_x: float, z0, z1) -> list:
             out.append(tris[i])
             i += 1
     return [p for p in out if len(p) >= 3]
+
+
+def round_end(r, poly: list) -> tuple:
+    """A round (a hexagon) or a half round (four steps of arc on a flat side, up or down) in the place of piece
+    `poly`, as big as its bounds; returns its outline and middle."""
+    xs, zs = [p[0] for p in poly], [p[1] for p in poly]
+    cx, cz = (min(xs) + max(xs)) * 0.5, (min(zs) + max(zs)) * 0.5
+    rad = 0.5 * min(max(xs) - min(xs), max(zs) - min(zs)) * r.uniform(1.0, 1.15)
+    if r.random() < 0.5:
+        return [(cx + rad * math.cos(math.pi * k / 3), cz + rad * math.sin(math.pi * k / 3)) for k in range(6)], cx, cz
+    flip = 1.0 if r.random() < 0.5 else -1.0
+    base = cz - flip * rad * 0.4
+    arc = [(cx + rad * math.cos(math.pi * k / 4), base + flip * rad * math.sin(math.pi * k / 4)) for k in range(5)]
+    pts = sorted_outline(arc)
+    return pts, cx, sum(p[1] for p in pts) / len(pts)
 
 
 def sorted_outline(pts: list) -> list:

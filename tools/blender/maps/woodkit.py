@@ -24,7 +24,7 @@ from mathutils import Vector, noise  # noqa: E402
 # (a ring darker), a split face, weathered grey wood, moss, earth, roots and the greens.
 COLOURS = {
     "Bark": 0x5E5548, "BarkDark": 0x463F37, "BarkFurrow": 0x4F483E, "BarkGrey": 0x7A735C, "BarkLight": 0x7A7062,
-    "Cut": 0xDCC07A, "Heart": 0xD0B46C, "Ring": 0xB4A062, "Split": 0xD6BA72, "Weathered": 0x9C9484,
+    "Cut": 0xCEB888, "Heart": 0xC2AC7A, "Ring": 0xA89660, "Split": 0xC6B07E, "Weathered": 0x9C9484,
     "Rot": 0x686152, "Moss": 0x71864A, "MossDeep": 0x506A36, "Fungus": 0x8E866E, "FungusRim": 0xA89C80,
     "Earth": 0x4C443A, "EarthDark": 0x36302A, "Root": 0x6A6254, "RootLight": 0x8E826C, "Stone": 0x8C8478,
     "Litter": 0x7C7A58, "Sawdust": 0xDCCBA0, "Soil": 0x8A8070, "SoilDark": 0x6E665A,
@@ -485,6 +485,44 @@ def comb_frond(b: hs.Builder, base: Vector, heading: float, rise: float, length:
             face(b, verts(b, [q + u * lift for q in tri]), top_mat, u)
             if t < under:
                 face(b, verts(b, [q - u * lift for q in tri]), mats[1], -u)
+
+
+def blade_frond(b: hs.Builder, base: Vector, heading: float, rise: float, length: float, width: float, segs: int,
+                droop: float, r: random.Random, mats: tuple) -> None:
+    """A fern frond drawn as one solid blade (the photos' fronds from a few metres: a lance of leaflets, its edge
+    toothed): its rib arches out from `base` along `heading` (radians about up), rising at `rise` and bending over
+    towards its tip, `droop` (radians) in all; across it, `segs` steps of a blade narrow at the foot, widest past
+    its middle and coming to a point, every other step's edge pulled in so the edge reads as leaflets. Both sides
+    drawn (the props' material culls back faces). mats = (top, under, the lighter steps in turn)."""
+    h = Vector((math.cos(heading), math.sin(heading), 0.0))
+    side = h.cross(Vector((0, 0, 1))).normalized()
+    p = Vector(base)
+    angle = rise
+    step = length / segs
+    lefts, rights, ups = [], [], []
+    for k in range(segs + 1):
+        t = k / segs
+        d = h * math.cos(angle) + Vector((0, 0, math.sin(angle)))
+        up = side.cross(d).normalized()
+        if up.z < 0.0:
+            up = -up
+        w = width * math.sin(math.pi * (0.1 + 0.9 * t)) ** 0.7 * (1.0 if k % 2 else 0.6) * r.uniform(0.92, 1.08)
+        if k == segs:
+            w = 0.0
+        # the blade folds up a little along its rib, as a frond's leaflets do
+        lefts.append(p - side * w + up * w * 0.18)
+        rights.append(p + side * w + up * w * 0.18)
+        ups.append(up)
+        p = p + d * step
+        angle = rise - droop * ((k + 1) / segs) ** 1.8
+    for k in range(segs):
+        u = (ups[k] + ups[k + 1]).normalized()
+        quad = [lefts[k], rights[k], rights[k + 1], lefts[k + 1]]
+        if k == segs - 1:
+            quad = [lefts[k], rights[k], rights[k + 1]]
+        # the two sides a few millimetres apart, so the weld in `finish` keeps both
+        face(b, verts(b, [q + u * 0.004 for q in quad]), mats[2] if k % 2 else mats[0], u)
+        face(b, verts(b, [q - u * 0.004 for q in quad]), mats[1], -u)
 
 
 def fit_box(ob: object, lo: tuple, hi: tuple) -> None:
