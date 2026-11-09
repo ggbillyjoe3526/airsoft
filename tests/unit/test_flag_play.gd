@@ -3,6 +3,10 @@ extends GutTest
 ## the colour of the side working it, the HUD's ATK / DEF tags, overtime clock, flag gauge, "their flag is going up"
 ## warning, flag marker and round banners, and Elimination left as it was.
 
+## The flagpole model's triangle budget (docs/ASSETS.md; tools/blender/maps/flagpole.py).
+const MODEL_BUDGET := 2500
+
+
 var session: PlaySession = null
 
 
@@ -57,11 +61,47 @@ func test_the_ring_takes_the_colour_of_the_side_working_the_rope() -> void:
 
 
 func test_the_pole_hands_its_materials_to_the_prewarm() -> void:
-	# the pole's, fittings' and rope's paints too, since they draw in the shared light (BP7)
+	# the pole model's paint too, since it draws in the shared light (BP7)
 	var materials := _view().materials()
-	assert_eq(materials.size(), 5, "the cloth, the ring, the pole, its fittings and the rope")
+	assert_eq(materials.size(), 3, "the cloth, the ring and the pole's model")
 	for m in materials:
 		assert_not_null(m, "every one made")
+
+
+func test_the_pole_is_its_model_standing_on_the_floor_within_its_sizes() -> void:
+	# Dev 3 map models: the flagpole after the owner's photos, built to FlagViewConfig's sizes
+	var cfg := PlayTuning.new().flag
+	var mesh := PropDressConfig.load_mesh(cfg.pole_model)
+	assert_not_null(mesh, "the model loads")
+	var box := mesh.get_aabb()
+	assert_almost_eq(box.position.y, 0.0, 1e-3, "it stands on the floor")
+	assert_almost_eq(box.size.y, cfg.pole_height, 0.03, "as tall as the pole: no ball on top (the owner, 2026-11-09)")
+	assert_lt(maxf(absf(box.position.x), box.end.x), cfg.base_radius.x + 1e-3, "no wider than its base")
+	assert_lt(cfg.cloth_high + cfg.cloth_size.y, box.end.y, "the cloth's top stays under its top")
+	var tris := (mesh.surface_get_arrays(0)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
+	assert_lt(tris, MODEL_BUDGET + 1, "inside its budget: %d" % tris)
+
+
+func test_a_pole_whose_model_won_t_load_is_drawn_plain() -> void:
+	var play := PlayTuning.new()
+	var cfg := play.flag.duplicate() as FlagViewConfig
+	cfg.pole_model = ""
+	var view := FlagView.new()
+	view.setup(cfg, play.teams, Vector3.ZERO, SimTuning.new().flag.radius)
+	add_child_autofree(view)
+	assert_eq(view.materials().size(), 5, "the cloth, the ring, the pole, its fittings and the rope")
+
+
+func test_a_pole_whose_model_is_missing_is_drawn_plain_with_one_warning() -> void:
+	var play := PlayTuning.new()
+	var cfg := play.flag.duplicate() as FlagViewConfig
+	cfg.pole_model = "res://assets/models/props/no_such_pole.glb"
+	for i in 2:
+		var view := FlagView.new()
+		view.setup(cfg, play.teams, Vector3.ZERO, SimTuning.new().flag.radius)
+		add_child_autofree(view)
+		assert_eq(view.materials().size(), 5, "drawn plain")
+	assert_push_warning_count(1, "warned once, not every pole")
 
 
 func test_the_pole_is_only_drawn_so_bbs_pass_through_it() -> void:

@@ -401,7 +401,7 @@ func _dress_part(part: int) -> void:
 			_lighting = FieldLighting.build(_light, _play.look)
 			_lighting.add_probes(_map)
 			add_child(_lighting)
-			_site = SiteDress.build(_map, _play.site_look, _level.site_material())
+			_site = SiteDress.build(_map, _play.site_look, _level.site_material(), _play.skyline)
 			if _site != null:
 				add_child(_site)
 				if not _light.night:
