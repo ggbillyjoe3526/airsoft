@@ -172,8 +172,10 @@ def casting(x: float, y: float, z: float, sx: int, sy: int, sz: int) -> list:
             hole("hole", mx, my, z + sz * e, "+z" if sz > 0 else "-z", 0.11, 0.06)]
 
 
-def rod(name: str, x: float, y: float, z0: float, z1: float, r: float, colour: int, sides: int = 6) -> object:
-    """An upright bar (a locking bar), `sides`-sided, round the line (x, y)."""
+def rod(name: str, x: float, y: float, z0: float, z1: float, r: float, colour: int, sides: int = 6,
+        caps: bool = True) -> object:
+    """An upright bar (a locking bar), `sides`-sided, round the line (x, y); its ends open without `caps` (they run
+    into the keepers)."""
     bm = bmesh.new()
     lo = [bm.verts.new((x + r * math.cos(math.tau * i / sides), y + r * math.sin(math.tau * i / sides), z0))
           for i in range(sides)]
@@ -182,10 +184,16 @@ def rod(name: str, x: float, y: float, z0: float, z1: float, r: float, colour: i
     for i in range(sides):
         j = (i + 1) % sides
         bm.faces.new([lo[i], lo[j], hi[j], hi[i]])
-    bm.faces.new(list(reversed(lo)))
-    bm.faces.new(hi)
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    return kit.mesh_object(name, bm, colour)
+    if caps:
+        bm.faces.new(list(reversed(lo)))
+        bm.faces.new(hi)
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    ob = kit.mesh_object(name, bm, colour)
+    ob.data.update()
+    for f in ob.data.polygons:  # face out of the bar's line
+        if (f.center.x - x) * f.normal.x + (f.center.y - y) * f.normal.y < 0:
+            f.flip()
+    return ob
 
 
 def door_end(x: float, hy: float, z0: float, z1: float) -> list:
@@ -219,10 +227,13 @@ def door_end(x: float, hy: float, z0: float, z1: float) -> list:
         for k, frac in enumerate((0.3, 0.72)):
             ry = a0 + (a1 - a0) * frac
             rx = face + BAR + 0.006
-            parts.append(bare(rod("bar", rx, ry, z0 + 0.05, z1 - 0.05, BAR, STEEL, sides=8)))
+            parts.append(bare(rod("bar", rx, ry, z0 + 0.05, z1 - 0.05, BAR, STEEL, sides=12, caps=False)))
             for gz in (lz0 + 0.45, (lz0 + lz1) / 2 + 0.25, lz1 - 0.45):
-                parts.append(kit.open_box("guide", (face, ry - 0.035, gz - 0.03), (rx + BAR + 0.006, ry + 0.035, gz + 0.03),
-                                      FRAME, ("-x",)))
+                # A bracket each side of the bar (bare steel like it), the bar's face left showing between them.
+                for gy in (-1, 1):
+                    y0, y1 = sorted((ry + gy * (BAR + 0.002), ry + gy * (BAR + 0.02)))
+                    parts.append(bare(kit.open_box("guide", (face, y0, gz - 0.03), (rx + BAR * 0.6, y1, gz + 0.03),
+                                                   STEEL, ("-x", "+z", "-z"), shade=0.8)))
             for kz in (z0 + 0.02, z1 - 0.1):
                 parts.append(bare(kit.open_box("keeper", (x - 0.05, ry - 0.045, kz), (x - 0.002, ry + 0.045, kz + 0.08),
                                            STEEL, ("-x",), shade=0.85)))
@@ -230,8 +241,9 @@ def door_end(x: float, hy: float, z0: float, z1: float) -> list:
             hand = 1 if (side > 0) == (k == 0) else -1
             parts.append(bare(kit.open_box("handle", (rx - 0.012, min(ry, ry + hand * 0.42), hz - 0.016),
                                        (rx + BAR + 0.01, max(ry, ry + hand * 0.42), hz + 0.016), STEEL, ())))
-            parts.append(kit.open_box("retainer", (face, ry + hand * 0.36 - 0.03, hz - 0.06),
-                                  (rx + BAR + 0.012, ry + hand * 0.36 + 0.03, hz + 0.06), FRAME, ("-x",)))
+            parts.append(bare(kit.open_box("retainer", (face, ry + hand * 0.36 - 0.03, hz - 0.06),
+                                           (rx + BAR + 0.012, ry + hand * 0.36 + 0.03, hz + 0.06), STEEL, ("-x",),
+                                           shade=0.85)))
         # Hinges on the leaf's outer edge.
         for hz in (lz0 + 0.25, lz0 + 0.95, lz1 - 0.95, lz1 - 0.25):
             y0, y1 = sorted((side * (hy - POST - 0.02), side * (hy - POST + 0.02)))
@@ -297,17 +309,25 @@ def unit() -> list:
     return parts
 
 
-def low(h: float = 1.0) -> list:
-    """A cut length 2 m long, `h` high (a metre, or 0.6 m for a lintel): corrugated sides on the bottom rails, a
-    welded channel along its top."""
+def low(h: float = 1.0, floor: bool = True) -> list:
+    """A cut length 2 m long, `h` high: on the floor (the sill under a port) corrugated sides on the bottom rails with
+    a forklift pocket, a welded channel along its top; over a port (a lintel, `floor` false) the sides down to a
+    welded channel along its foot too, and no pockets."""
     kit.reset()
     hx, hy = 1.0, 1.2
     parts = []
+    foot = BOTTOM if floor else 0.08
     for side in (-1, 1):
-        y0, y1 = sorted((side * (hy - RAIL_IN), side * (hy - 0.06)))
-        parts.append(kit.box("bottom_rail", (-hx, y0, 0.0), (hx, y1, BOTTOM), FRAME))
-        parts.append(strip("side", -hx, hx, BOTTOM, h - 0.08, side * (hy - 0.004), side, True, PAINT))
-        parts += slot("pocket", 0.0, side * hy, BOTTOM * 0.5, side, 0.36, 0.09)
+        if floor:
+            y0, y1 = sorted((side * (hy - RAIL_IN), side * (hy - 0.06)))
+            parts.append(kit.box("bottom_rail", (-hx, y0, 0.0), (hx, y1, BOTTOM), FRAME))
+            parts += slot("pocket", 0.0, side * hy, BOTTOM * 0.5, side, 0.36, 0.09)
+        parts.append(strip("side", -hx, hx, foot, h - 0.08, side * (hy - 0.004), side, True, PAINT))
+    if not floor:
+        parts.append(kit.box("foot_channel", (-hx, -hy, 0.0), (hx, hy, foot), FRAME))
+        for side in (-1, 1):
+            y0, y1 = sorted((side * hy, side * (hy - 0.03)))
+            parts.append(kit.box("lip", (-hx, y0, foot), (hx, y1, foot + 0.02), FRAME, shade=0.9))
     parts.append(kit.box("channel", (-hx, -hy, h - 0.08), (hx, hy, h), FRAME))
     parts.append(kit.box("lip", (-hx, -hy - 0.0, h - 0.1), (hx, -hy + 0.03, h - 0.08), FRAME, shade=0.9))
     parts.append(kit.box("lip", (-hx, hy - 0.03, h - 0.1), (hx, hy, h - 0.08), FRAME, shade=0.9))
@@ -317,7 +337,7 @@ def low(h: float = 1.0) -> list:
         for sx in (-1, 1):
             x0, x1 = sorted((sx * hx, sx * (hx - 0.02)))
             y0, y1 = sorted((side * (hy - 0.006), side * (hy - 0.001)))
-            parts.append(kit.open_box("seam", (x0, y0, BOTTOM), (x1, y1, h - 0.08), FRAME, ("-y" if side > 0 else "+y",),
+            parts.append(kit.open_box("seam", (x0, y0, foot), (x1, y1, h - 0.08), FRAME, ("-y" if side > 0 else "+y",),
                                   shade=0.88))
     return parts
 
@@ -357,7 +377,7 @@ def lid() -> list:
     return parts
 
 
-MODELS = (("container", unit, 1800), ("container_low", low, 250), ("container_short", lambda: low(0.6), 250),
+MODELS = (("container", unit, 1800), ("container_low", low, 250), ("container_short", lambda: low(0.6, False), 250),
           ("container_wall", wall, 400), ("container_roof", lid, 500))
 SAMPLE_PAINT = 0x2e6b46  # the studio pictures' paint, a site green, to show what the game tints and what stays bare
 

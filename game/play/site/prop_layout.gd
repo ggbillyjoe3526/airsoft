@@ -157,14 +157,14 @@ static func _run(p: Placed, model: AABB, foot: Vector3, size: Vector3, length: f
 	var long := size.x if along_x else size.z
 	var across := size.z if along_x else size.x
 	var pitch := maxf(length, 1e-6)
-	# Whole modules at the pitch, stretched to take up what is left when that is at most a tenth of them; otherwise
-	# a cut module (narrower, a sheet cut down) at the high end makes up the rest.
+	# Whole modules at the pitch, stretched to take up what is left when that is at most a tenth of them (or a sliver
+	# under run_min_cut of a module, never laid alone); otherwise a cut module (a sheet cut down) at the high end.
 	var n := floori(long / pitch + 1e-6)
 	var rest := long - n * pitch
 	var widths := PackedFloat32Array()
 	if n == 0:
 		widths.append(long)
-	elif rest <= cfg.run_stretch * n * pitch:
+	elif rest <= cfg.run_stretch * n * pitch or rest < cfg.run_min_cut * pitch:
 		for i in n:
 			widths.append(long / n)
 	else:

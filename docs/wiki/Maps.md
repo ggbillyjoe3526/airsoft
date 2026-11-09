@@ -45,8 +45,8 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
   crimson steel barrels in pairs, a violet sofa, and steel shelving stocked with cartons on every rack. Each fills the
   space its block did, so what you see is what stops a BB; a BB grazing past a round drum or barrel flies on by its
   curve instead of stopping at a square corner. The plywood walls (birch sheets, battens and screws), the wooden
-  crates on their runners and the corrugated shipping containers, each in its own paint, are the game's own models,
-  made from photos of real airsoft sites, and fill their blocks the same way.
+  crates on their pallets and the corrugated shipping containers, each in its own paint, are the game's own models,
+  made after photos of the real things, and fill their blocks the same way.
 
 ![The West tunnel, lit only from its ends](images/depot-tunnel.jpg)
 

@@ -101,6 +101,8 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT }
 	&"plywood": 0.61, &"plywood_mid": 0.61, &"plywood_low": 0.61, &"plywood_short": 0.61,
 }
 @export var run_stretch: float = 0.1
+## A cut module narrower than this share of one is never laid: the whole ones stretch over the sliver instead.
+@export var run_min_cut: float = 0.25
 ## A dressed kind's block thicker than this (m) keeps its box: Depot's wardrobe, a plywood block a metre deep, is no
 ## wall.
 @export var kind_max_depth: Dictionary[StringName, float] = {&"plywood": 0.5}

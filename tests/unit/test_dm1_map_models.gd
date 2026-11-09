@@ -67,7 +67,7 @@ func test_a_plywood_wall_is_laid_at_the_batten_pitch_stretched_under_a_tenth_or_
 	# On all of Depot, no module but a cut one is more than a tenth off the pitch.
 	var depot := MapData.load_map("depot", play.map_style, 6)
 	var all := PropLayout.layout(depot, cfg, boxes)
-	for model: StringName in [&"plywood", &"plywood_low", &"plywood_short"]:
+	for model: StringName in [&"plywood", &"plywood_mid", &"plywood_low", &"plywood_short"]:
 		if not all.has(model):
 			continue
 		for t in (all[model] as PropLayout.Placed).transforms:

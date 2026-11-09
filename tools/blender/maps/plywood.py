@@ -44,7 +44,7 @@ SCREW = 0.012  # a screw head's size
 SCREW_STEP = 0.45  # screws up each batten
 NAIL = 0.008  # a nail head in the sheet
 NAIL_STEP = 0.24 # nails up the stud behind the sheet's middle
-PATCHES = ((-0.14, 0.62), (0.12, 1.43), (-0.1, 2.05), (0.15, 0.3), (-0.15, 1.12), (0.13, 1.8))  # (x, z), mirrored
+PATCHES = ((-0.14, 0.62), (0.12, 1.43), (-0.1, 2.05), (0.15, 0.3))  # (x, z), mirrored
 
 # Wood tones pale and greyed (saturation under 0.3 in linear light), so none reads as Beta's orange
 # (tests/unit/test_props.gd).
@@ -102,14 +102,14 @@ def rod(name: str, profile: list, colour: int, caps: bool = False) -> object:
 def dot(name: str, x: float, z: float, side: int, w: float, h: float, colour: int, y: float,
         sides: int = 4) -> object:
     """A flat mark (a screw or nail head, a patch) on the face at |y|, facing out on `side`: a square, or with
-    `sides` 6 an oval."""
+    `sides` other than 4 a football patch's lens."""
     bm = bmesh.new()
     yy = side * y
     if sides == 4:
         pts = [(x - w / 2, z - h / 2), (x + w / 2, z - h / 2), (x + w / 2, z + h / 2), (x - w / 2, z + h / 2)]
-    else:
-        pts = [(x + w / 2 * math.cos(math.tau * i / sides), z + h / 2 * math.sin(math.tau * i / sides))
-               for i in range(sides)]
+    else:  # a lens: pointed at both ends, its sides curved (a football patch)
+        pts = [(x - w / 2, z), (x - w / 4, z - h * 0.42), (x, z - h / 2), (x + w / 4, z - h * 0.42), (x + w / 2, z),
+               (x + w / 4, z + h * 0.42), (x, z + h / 2), (x - w / 4, z + h * 0.42)]
     bm.faces.new([bm.verts.new((px, yy, pz)) for px, pz in pts])
     ob = kit.mesh_object(name, bm, colour)
     ob.data.update()
@@ -162,7 +162,7 @@ def build(tall: float) -> list:
             z += NAIL_STEP if full else 0.12
         for kx, kz in PATCHES:
             if kz < sheet_top - 0.08 and kz > skirt + 0.05:
-                parts.append(dot("patch", kx * side, kz, side, 0.07, 0.03, PATCH_C, inner + 0.0008, sides=6))
+                parts.append(dot("patch", kx * side, kz, side, 0.07, 0.03, PATCH_C, inner + 0.0008, sides=8))
     # The cap along the top, its outer edges eased.
     e = 0.008
     parts.append(rod("cap", [(-ht, top), (ht, top), (ht, tall - e), (ht - e, tall), (-ht + e, tall), (-ht, tall - e)],

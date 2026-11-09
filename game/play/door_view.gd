@@ -32,6 +32,8 @@ const FRAME_MODELS: Dictionary[String, Vector3] = {
 ## A door's wall is the thinnest block across it this far (m) past a jamb, at the door's middle height; its thickness
 ## the frame's depth (a wall's end meeting it at a corner is thicker that way, so it isn't taken).
 const WALL_PROBE := 0.05
+## A frame is at least this deep (m), whatever thin block stands at its jamb.
+const MIN_WALL := 0.1
 ## A frame takes the baked light this far (m) over its foot.
 const FRAME_LIGHT_LIFT := 1.0
 ## The gap left between the two leaves and at each jamb (m), so the leaves read as two.
@@ -194,8 +196,7 @@ func _add_frames(map: MapData, style: MapStyle) -> void:
 		for b in map.blocks:
 			if AABB(b.center - b.size * 0.5, b.size).has_point(probe):
 				wall = minf(wall, b.size.x if along_z else b.size.z)
-		if wall == INF:
-			wall = opening.z
+		wall = opening.z if wall == INF else maxf(wall, MIN_WALL)
 		var turn := Basis(Vector3.UP, PI * 0.5) if along_z else Basis.IDENTITY
 		var at := Transform3D(turn * Basis.from_scale(Vector3(width / opening.x, d.size.y / opening.y,
 				wall / opening.z)), d.center - Vector3(0.0, d.size.y * 0.5, 0.0))

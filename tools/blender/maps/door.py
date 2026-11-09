@@ -1,19 +1,21 @@
-"""The hinged door (DM1, 2026-11-09): assets/models/props/door_leaf.glb and door_frame.glb, every map's doors.
+"""The hinged door (DM1, 2026-11-09): assets/models/props/door_leaf*.glb and door_frame*.glb, every map's doors.
 
 A two-panel timber door after the owner's photos (art/references/maps/william-2026-11-09/wooden_door/, the third):
-stiles and rails standing proud of two raised and fielded panels on both faces, a lever handle on a round rose with
-a keyhole below on both faces at the free edge, and three hinge knuckles on the hinged edge. DoorView draws two leaves
-a door, each scaled to its half of the opening (a Depot door is two leaves of about 0.97 x 2.6 m, 8 cm thick), so the
-leaf's body is written in a 1 m cube round its middle (its x the width, the hinge at -x and the handle at +x, its y
-the height, its z the thickness; the handles and knuckles stand out of it): DoorView scales it back.
+stiles and rails standing proud of two raised and fielded panels on both faces, grain down them, a lever handle on a
+round rose with a keyhole below on both faces at the free edge, hinge leaves and three knuckles on the hinged edge.
+DoorView draws two leaves a door, each scaled to its half of the opening, so each leaf's body is written in a 1 m cube
+round its middle (its x the width, the hinge at -x and the handle at +x, its y the height, its z the thickness; the
+handles and knuckles stand out of it): DoorView scales it back. Three leaves (LEAVES), one for each map's openings,
+so a leaf's stiles and handle are never stretched far.
 
-The frame is the opening's lining and architraves: a lining board on each jamb (the walls' cut ends) and an
-architrave round the opening on both faces of the wall, built for Depot's 2.0 x 2.6 m opening in a 0.3 m wall and
-written at that size, its origin at the opening's foot in the wall's middle: DoorView stretches it to each door's
-opening and the wall it is in (DoorView.FRAME_OPENING).
+The frame is the opening's lining and architraves: a lining board on each jamb standing just into the opening from the
+wall's cut end, a moulded architrave on a plinth block each side of the opening on both faces of the wall, and over a
+lower opening a head lining and architrave. Three (FRAMES), each written at its opening's size in a 0.3 m wall, its
+origin at the opening's foot in the wall's middle: DoorView stretches the nearest to each door's opening and wall
+(DoorView.FRAME_MODELS).
 
-Oak tones greyed below the teams' saturation line (tests/unit/test_props.gd's rule), darker than the plywood walls so a
-door reads as a door.
+Golden oak: his honey oak's hue lies in Beta's orange band (tests/unit/test_props.gd's rule), so the oak is moved past
+it, darker than the plywood walls so a door reads as a door.
 
 Run with Blender 5.x, or Python with the `bpy` module (pip install bpy==5.2.3):
 
@@ -43,31 +45,31 @@ LEAVES = {"door_leaf": (0.97, 2.6), "door_leaf_mid": (0.78, 2.5), "door_leaf_nar
 FRAMES = {"door_frame": (2.0, 2.6, False), "door_frame_mid": (1.6, 2.5, True), "door_frame_narrow": (0.9, 2.1, True)}
 THICK = 0.08
 TOP_RAIL, MID_RAIL, BOTTOM_RAIL = 0.13, 0.2, 0.24
-MID_AT = 1.02  # the mid rail's middle, a little under the handle
+MID_AT = 0.44  # the mid rail's middle, a share of the leaf's height up (his photo's two panels)
 PROUD = 0.01  # the frame over the panels' plane
 FIELD = 0.008  # the panel's raised field over the panel's plane
 BEVEL = 0.05  # the field's bevelled margin
-HANDLE_AT = 1.05
+HANDLE_LOW = 1.0  # the handle on the mid rail, but never under this (m)
 WALL = 0.3  # the frames' wall
 ARCH = 0.07  # an architrave's width
 ARCH_PROUD = 0.016
 LINING = 0.018  # the lining's thickness
 LINING_IN = 0.006  # how far the lining stands into the opening past the wall's cut end (no shared plane with it)
 
-# Yellow oak (his photos' honey oak with its hue moved past the orange band, test_props.gd's rule), darker than the
-# plywood walls so a door reads as a door.
-STILE_C = 0x96906a
-PANEL_C = 0xaea67c
-FIELD_C = 0xb6ae84
-EDGE_C = 0x8a8460
-GRAIN_C = 0x8c8862  # grain streaks on the stiles and rails, darker
-FIELD_GRAIN_C = 0xa8a076  # and on the panels, a shade under the field
-SHADOW_C = 0x6e6a50  # the shadow line under a panel's moulding
-LIGHT_C = 0xc8c094  # the light catching the panel's foot
+# Golden oak (his photo's honey oak with its hue moved just past Beta's orange band, test_props.gd's rule), more
+# saturated than the pale plywood walls so a door reads as a door.
+STILE_C = 0xb4aa6a
+PANEL_C = 0xc6ba78
+FIELD_C = 0xccc07c
+EDGE_C = 0xa29862
+GRAIN_C = 0xa29862  # grain streaks on the stiles and rails, darker
+FIELD_GRAIN_C = 0xaca268  # and on the panels, a shade under the field
+SHADOW_C = 0x7c7448  # the shadow line under a panel's moulding
+LIGHT_C = 0xdcd086  # the light catching the panel's foot
 METAL = 0x4a4650  # the handle's dark bronze
 HINGE_C = 0x5c5860
 KEYHOLE = 0x1e1c22
-LINING_C = 0x8a8460
+LINING_C = 0xa69c64
 
 
 def panel_field(x0: float, x1: float, z0: float, z1: float, side: int, y_plane: float) -> list:
@@ -127,7 +129,9 @@ def leaf(wide: float, tall: float) -> list:
     # The edges, a shade darker (the leaf's edge grain).
     parts.append(kit.open_box("edge", (-hw, -ht, 0.0), (-hw + 0.004, ht, tall), EDGE_C, ("+x", "-z")))
     parts.append(kit.open_box("edge", (hw - 0.004, -ht, 0.0), (hw, ht, tall), EDGE_C, ("-x", "-z")))
-    mid0, mid1 = MID_AT - MID_RAIL / 2, MID_AT + MID_RAIL / 2
+    mid = MID_AT * tall
+    handle = max(HANDLE_LOW, mid)
+    mid0, mid1 = mid - MID_RAIL / 2, mid + MID_RAIL / 2
     for side in (-1, 1):
         y0, y1 = side * plane, side * ht
         lo, hi = sorted((y0, y1))
@@ -160,16 +164,16 @@ def leaf(wide: float, tall: float) -> list:
         face = side * ht
         out = side
         lever = min(0.12, wide * 0.3)
-        parts.append(kit.hide(disc("rose", hx, HANDLE_AT, min(0.028, stile * 0.35), face, face + out * 0.01, METAL,
+        parts.append(kit.hide(disc("rose", hx, handle, min(0.028, stile * 0.35), face, face + out * 0.01, METAL,
                                    sides=14), (back,)))
-        parts.append(kit.hide(disc("neck", hx, HANDLE_AT, 0.011, face + out * 0.01, face + out * 0.055, METAL, sides=6),
+        parts.append(kit.hide(disc("neck", hx, handle, 0.011, face + out * 0.01, face + out * 0.055, METAL, sides=6),
                               (back,)))
         y_a, y_b = sorted((face + out * 0.045, face + out * 0.065))
-        parts.append(kit.box("lever", (hx - lever, y_a, HANDLE_AT - 0.011), (hx + 0.012, y_b, HANDLE_AT + 0.011),
+        parts.append(kit.box("lever", (hx - lever, y_a, handle - 0.011), (hx + 0.012, y_b, handle + 0.011),
                              METAL))
-        parts.append(kit.hide(disc("escutcheon", hx, HANDLE_AT - 0.1, min(0.02, stile * 0.25), face,
+        parts.append(kit.hide(disc("escutcheon", hx, handle - 0.1, min(0.02, stile * 0.25), face,
                                    face + out * 0.006, METAL, sides=12), (back,)))
-        parts.append(mark("keyhole", hx - 0.004, hx + 0.004, HANDLE_AT - 0.112, HANDLE_AT - 0.09, ht + 0.0065, side,
+        parts.append(mark("keyhole", hx - 0.004, hx + 0.004, handle - 0.112, handle - 0.09, ht + 0.0065, side,
                           KEYHOLE))
         # The hinges' leaves on the face at the hinged edge.
         for z in (0.25, tall / 2, tall - 0.25):
