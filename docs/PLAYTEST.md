@@ -1213,6 +1213,17 @@ Bugs the browser game had and fixed; a bug pass checks the rebuild doesn't bring
   surface that isn't plain paint: keep it, tone it down, or make it clean?
 - [ ] **Frame rate.** Low and Ultra on Depot: any drop compared with Dev 2 while looking down the hall?
 
+## Woodland's trees (WT1)
+
+- [ ] **Trees against your photos.** Young, grown and old pines (bare trunks under their crowns, the old ones' narrow,
+  lopsided clouds), the oaks' buttressed foot and broad dome, the white birches (no photo: made from general
+  knowledge), the dark spruce cones in the thickets with no bright green between them, and the stepped spruces past
+  the fence and along the treelines.
+- [ ] **Head room and BBs.** Walk under every kind of crown: nothing at head height. Shoot past trunks edge on: BBs stop
+  at the bark.
+- [ ] **Shade.** The oaks' wide crowns shade the Clearing and its grass reads dark under them: fine, or narrow them?
+- [ ] **Frame rate.** F3 on Low from the Ridge and the Clearing looking across the field: 60 FPS?
+
 ## Woodland's small props (WG4)
 
 - [ ] **Crouch tunnels.** The Crawl box and the Badger run are hollow oak logs set in the mound, the log's cut end at
