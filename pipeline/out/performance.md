@@ -1,13 +1,19 @@
-Task: SX1 · head 32f364e · Verdict: Pass
-Run: none (no match run: suite and benches busy on a 4-core machine, per brief) · budget: pipeline/perf-budget.json does not exist in this repo; no baseline yet, judged against targets and the diff (judgment only)
-Metrics: not measured. Nodes, orphans, static memory and script time cannot change for the remaining maps: the diff only removes content.
-Regressions (> 10 % worse): none expected (judgment)
+# Performance: SL1 · Sunlit Concrete: the light, grade and paint
 
-What changed at runtime (game/, 10 files in the stat): comments only, plus prop_dress_config.gd (-30/+2 lines): 23 model_paths entries, 4 model_lays and 4 grid_cells entries for Street-only kinds removed. No new code, no allocation, no signal, no node, material or shader added. Fewer dictionary entries means a slightly smaller config resource at load; no per-frame effect.
-Dangling references: git grep of the 23 removed model keys, street.json and Street paths in game/, data/, scenes, project.godot, export_presets.cfg and tools/*.sh finds none. The &"skip", &"lamp", &"fridge" hits (map_style.gd, noise_config.gd, site_look.gd, site_dress.gd) are box-kind keys used by Depot/Woodland dressing, not model paths: a missing model would only fall back to a box, and none is missing.
-Ambience "street" stays (data/maps/range.json:3, play_tuning.tres loops): audio kept on purpose, unchanged cost.
+Head e8aada2 (4493a30 plus a palette-only commit) · Verdict: **Pass** (judgment; no GPU in the cloud, no frame times)
 
-Install size: 46 .glb removed (23 props plus .import/.uid pairs counted by file; 50 binary/asset files in all) and 2.76 MB of asset/data bytes (glb, png, jpg, ogg, wav, json, bin) deleted from the tree. The install and export shrink by about that much; nothing grows. The pooled/prewarmed paths (BBs, puffs, shader prewarm) are untouched; removed props carried no prewarm entries.
-Blocking findings: none
-Advisory: none. A rendered/headless --perf run on this head vs 53234c6 would only confirm "no change" for Depot/Woodland; not required for a deletion-only diff.
-Fixes: none needed.
+- **GDScript:** nothing new per frame. One more key in `LookConfig.globals()`, pushed once a match. No new nodes,
+  timers, tweens or connections.
+- **look_paint():** one dot, one mix and a few multiplies on ALBEDO in look_vertex, look_clear, site_surface and
+  door_leaf. No texture reads, no branches: negligible.
+- **Site-surface grit 0.6 (was 0):** the grit branches are uniform-gated (no divergence) but now run on every
+  site-surface fragment: roughly 3 to 6 more fbm samples (single channel, small, mipmapped) on slab, wall and ground,
+  and the plywood's colour and normal samples on plywood. The heaviest fragments in a scene; only the owner's card can
+  say whether Low still holds 60 FPS.
+- **Memory:** the plywood photo pair (1k, VRAM-compressed with mips) now loads: about 2.7 MB of VRAM, shared by every
+  material (ResourceCache). The slab set was already loaded. No new files on disk; the rebaked depot.res and range.res
+  got smaller.
+- **Shader warm-up:** no new material or shader; the plywood textures bind at map load.
+
+Advisory: measure Low on Depot and the Range (F3) before and after. If over budget: gate the fine fbm samples by
+preset, or grit 0 on Low, or bake the wear into a mask texture. Recorded in docs/KNOWN_ISSUES.md and the record.

@@ -196,6 +196,14 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   Valorant's shapes and Breath of the Wild's soft light and rim light only; clean surfaces; a vibrant palette with no
   dominant colour; no grass. The target picture is project files `concepts/art-direction/06-valorant-botw-v3.jpg`.
   `docs/ART.md` is rewritten to it at the start of 0.1 Dev 2; 0.1 Dev 1's look is unchanged.
+- **Art direction from 0.1 Dev 3: "Sunlit Concrete", Counter-Strike-leaning naturalism (owner, 2026-11-09).** He
+  asked for "more realistic and gritty with less bold vibrant colours. Think Valorant or Counterstrike and less
+  marathon/breath of the wild", for the whole game ("Not just depot but the full game"), and picked direction B of
+  three Depot concepts (project files `art/concepts/depot-gritty-v1/`). Real light (no cel bands), a warm sun, a dark
+  neutral shade, paint at 60 % of its colour, real material grain and light wear; team colours stay the loudest.
+  It replaces the Dev 2 look; `docs/ART.md` is rewritten to it. Built in steps SL1 to SL4 (`docs/records/SL1.md`).
+- **Live ray tracing is not planned (owner, 2026-11-09).** Ultra gets baked path-traced light first ("Baked path
+  tracing first"), then he dropped live ray tracing ("Never mind the live raytracing").
 - **The art direction is game-wide and is about colour and look, not content (owner, 2026-10-31).** "Just because
   something isn't in the art direction doesn't mean it can't appear." Depot, Woodland and every later map use the same
   look, as shared code (`LookConfig`, the shared light): `docs/ART.md` › A map in the look.
@@ -295,6 +303,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   and the game culls those as holes. Every lathe, tube and band in `tools/blender/maps/` turns its faces out through
   `vertex_paint.py` (`lathe`, `orient_loft`), and `tests/unit/test_model_faces.gd` fails a model when more than 2 % of
   rays from all round and above first meet a face turned away. New map models follow both.
+- **Ultra pushes Godot's light as far as it goes, for the whole game (owner, 2026-11-09, UG1).** "Use all of Godot's
+  graphics abilities": baked path-traced-like light on Ultra only, every effect scaling down per preset, every map
+  (he said twice it is not one map). Baked path tracing comes before any live ray tracing (his card answer). Built as
+  shared code in five steps (`docs/ROADMAP.md`); step 1 is Graphics › Lamp light: roof lamps and a night's light
+  pools as real shadowed lights, near on High, far on Ultra, off on Low and Medium (`data/graphics.md`).
 - **Every figure keeps its team-colour plate carrier (owner, 2026-10-17, AX1).** The carrier reads like a site's team
   bib and is the strongest team cue at range. A civilian outfit is in `docs/IDEAS.md`.
 
@@ -1072,10 +1085,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **Round 1 waits for every shader to be built before it goes live (owner, 2026-10-17, PF1).** A short wait on a still
   field beats a stutter in round 1; the time to round 1 may grow for it. A 60 s limit only guards against a build that
   never settles.
-- **What each quality preset drops (owner, 2026-10-04 to 2026-10-16).** Real light counts are fixed: Low none, Medium
-  2, High 4 (owner, 2026-10-04). Torch shadows only on High and Ultra, and Medium's Player detail is Low (Art
-  direction). High and Ultra draw the city's flat finishes at 512², as Medium does (owner, 2026-10-05; M78): 1024²
-  gains nothing there for four times the memory.
+- **What each quality preset drops (owner, 2026-10-04 to 2026-10-16).** Real light counts are fixed: Low none, Medium 2,
+  High 4 (owner, 2026-10-04); Ultra's Lamp light Far gives a night's pools 8, with shadows (UG1, 2026-11-09). Torch
+  shadows only on High and Ultra, and Medium's Player detail is Low (Art direction). High and Ultra draw the city's flat
+  finishes at 512², as Medium does (owner, 2026-10-05; M78): 1024² gains nothing there for four times the memory.
 - **Menus stay smooth (owner, 2026-10-12; IM1).** "The UI should always feel smooth and responsive", with a loading
   screen allowed for the tutorial, range, maps and matches.
 - **The human figure is built in parts, one owner each (BL10 to BL13, 2026-11-05; owner: "split the models up into

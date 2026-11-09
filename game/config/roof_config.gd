@@ -34,3 +34,30 @@ extends Resource
 @export var lamp_size: Vector2 = Vector2(1.4, 0.5)
 @export var lamp_colour: Color = Color(1.0, 0.96, 0.86)
 @export var lamp_energy: float = 2.6
+
+@export_group("Lamp light")
+## The lamps as real lights (Settings › Graphics › Lamp light, RoofLamps): each a spot `lamp_light_drop` m under the
+## lamp's lowest point, shining straight down, `lamp_cone` degrees from its axis to the cone's edge (dimming from its
+## axis to the edge by the engine's curve `lamp_cone_falloff`: below 1 soft, so neighbouring pools blend), reaching
+## `lamp_range` m at `lamp_light_energy` with the engine's distance falloff `lamp_falloff` (1: inverse distance), in
+## `lamp_colour`. On the haze (Volumetric fog) it shines `lamp_fog` of itself.
+@export var lamp_light_drop: float = 0.05
+@export var lamp_cone: float = 36.0
+@export var lamp_cone_falloff: float = 0.6
+@export var lamp_range: float = 17.0
+@export var lamp_light_energy: float = 26.0
+@export var lamp_falloff: float = 1.0
+@export var lamp_fog: float = 0.6
+## While the lamps shine the preset's overhead sun, which stands in for them on Low and Medium, is turned down to this
+## share of itself, so the hall keeps about its brightness and reads as lit by its lamps.
+@export var lamp_sun_share: float = 0.55
+## How far (m) from the eye the lamps are lit (Near, Far), each fading out over its last `lamp_fade` m; past that a
+## lamp is not lit at all, as an unshadowed one would shine through the rooms' roofs. Far keeps Depot's 65 m hall
+## sight line lit.
+@export var lamp_near: float = 28.0
+@export var lamp_far: float = 70.0
+@export var lamp_fade: float = 10.0
+## The lamps' shadows: blur on the softer filters, and the lens's width (`lamp_lens_size`, m) on Softest, so a shadow is
+## sharp at its foot and soft away from it, as the sun's.
+@export var lamp_shadow_blur: float = 1.0
+@export var lamp_lens_size: float = 0.35

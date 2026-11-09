@@ -97,12 +97,15 @@ func _exit_tree() -> void:
 		GraphicsApply.server().applied.disconnect(_follow)
 
 
-## The graphics drawn changed: the picture's scale and edge smoothing follow, and its environment is copied again at the
-## next raise of a sight (once a change, never per frame).
+## The graphics drawn changed: the picture's scale, edge smoothing and shadow atlas follow, and its environment is
+## copied again at the next raise of a sight (once a change, never per frame).
 func _follow(values: GraphicsQuality) -> void:
 	if _port == null:
 		return
 	GraphicsApply.apply_picture(values, _port)
+	var atlas := GraphicsApply.glass_atlas(values)
+	if _port.positional_shadow_atlas_size != atlas:
+		_port.positional_shadow_atlas_size = atlas
 	_hip_camera = values.mesh_detail >= _cfg.hip_glass_camera_from
 	_env_ready = false
 

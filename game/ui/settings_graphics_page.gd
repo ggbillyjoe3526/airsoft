@@ -34,8 +34,8 @@ const METRES := "%d m"
 const LEFT_SECTIONS: Dictionary[String, Array] = {
 	"GRAPHICS_RESOLUTION": [GraphicsQuality.RENDER_SCALE, GraphicsQuality.UPSCALER],
 	"GRAPHICS_EDGES": [GraphicsQuality.EDGE_SMOOTHING, GraphicsQuality.TEMPORAL_SMOOTHING],
-	"GRAPHICS_EFFECTS": [GraphicsQuality.GLOBAL_ILLUMINATION, GraphicsQuality.REFLECTIONS, GraphicsQuality.GLOW,
-			GraphicsQuality.VOLUMETRIC_FOG],
+	"GRAPHICS_EFFECTS": [GraphicsQuality.GLOBAL_ILLUMINATION, GraphicsQuality.REFLECTIONS,
+			GraphicsQuality.LAMP_LIGHTS, GraphicsQuality.GLOW, GraphicsQuality.VOLUMETRIC_FOG],
 }
 const RIGHT_SECTIONS: Dictionary[String, Array] = {
 	"GRAPHICS_SHADOWS": [GraphicsQuality.SUN_SHADOWS, GraphicsQuality.SHADOW_DETAIL, GraphicsQuality.SHADOW_SOFTNESS,
@@ -55,6 +55,7 @@ const NOTES: Dictionary[StringName, String] = {
 	GraphicsQuality.UPSCALER: "GRAPHICS_UPSCALER_NOTE",
 	GraphicsQuality.TEMPORAL_SMOOTHING: "GRAPHICS_TEMPORAL_SMOOTHING_NOTE",
 	GraphicsQuality.GLOBAL_ILLUMINATION: "GRAPHICS_GLOBAL_ILLUMINATION_NOTE",
+	GraphicsQuality.LAMP_LIGHTS: "GRAPHICS_LAMP_LIGHTS_NOTE",
 	GraphicsQuality.OCCLUSION_CULLING: "GRAPHICS_OCCLUSION_CULLING_NOTE",
 }
 ## The two choices a row shown as a switch offers, off then on.

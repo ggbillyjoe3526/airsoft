@@ -494,12 +494,13 @@ func test_your_torch_is_a_real_spot_from_medium_with_shadows_from_high_and_a_haz
 		pools.append(GraphicsApply.pool_lights(q, night, true))
 	assert_eq(modes, [TorchBeams.Mode.HAZE, TorchBeams.Mode.SPOT, TorchBeams.Mode.SHADOWED,
 			TorchBeams.Mode.SHADOWED] as Array[TorchBeams.Mode])
-	assert_eq(pools, [0, 1, 3, 3] as Array[int], "the torch is one of the preset's real lights")
+	# Ultra's Lamp light Far gives the pools real_lights_far (8) in place of Mesh detail's 4 (UG1).
+	assert_eq(pools, [0, 1, 3, 7] as Array[int], "the torch is one of the preset's real lights")
 	assert_eq(GraphicsApply.pool_lights(table.preset(&"high"), night, false), 4, "none fitted: the pools have all")
 	var no_sun := table.preset(&"ultra")
 	no_sun.sun_shadows = false
 	assert_eq(GraphicsApply.torch_mode(no_sun, night, true), TorchBeams.Mode.SPOT, "Sun shadows off: no torch shadow")
-	assert_eq(GraphicsApply.pool_lights(no_sun, night, true), 3, "still one real light for it")
+	assert_eq(GraphicsApply.pool_lights(no_sun, night, true), 7, "still one real light for it (of Lamp light Far's 8)")
 
 
 func test_the_pools_give_your_torch_a_real_light_only_when_you_carry_one_and_for_the_whole_match() -> void:

@@ -422,7 +422,7 @@ void fragment() {
 		col *= mix(1.0 - gradient, 1.0, clamp(h / gradient_height, 0.0, 1.0));
 	}
 
-	ALBEDO = col * ((flags & FLAG_TINT) != 0 ? vec3(1.0) : tint_in);
+	ALBEDO = look_paint(col * ((flags & FLAG_TINT) != 0 ? vec3(1.0) : tint_in));
 	ROUGHNESS = r;
 	METALLIC = m;
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);

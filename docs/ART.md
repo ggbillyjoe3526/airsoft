@@ -6,26 +6,26 @@ shared light and palette (A map in the look, below), not by copying a map's sett
 
 ## The target
 
-**Stylised, Valorant-led, with BOTW's soft light** (owner, 2026-10-29; game-wide 2026-10-31). The approved picture is
-`concepts/art-direction/06-valorant-botw-v3.jpg` in the project's shared files, with its notes beside it. It sets the
-**colour and the look, not what may appear** (owner, 2026-10-31): its containers, bunting and sky are examples, and
-anything that suits a map can appear in it, drawn in this look.
+**Sunlit Concrete: Counter-Strike-leaning naturalism** (owner, 2026-11-09, game-wide). He asked for "more realistic and
+gritty with less bold vibrant colours. Think Valorant or Counterstrike and less marathon/breath of the wild" and
+picked direction B of three Depot concepts (project files `art/concepts/depot-gritty-v1/`, `notes.md` beside them). It
+sets the **colour, light and materials, not what may appear** (owner, 2026-10-31, still true).
 
-- **Forms:** Valorant's chunky, clean shapes with real proportions. Every shape reads at a glance; detail comes from
-  form, bevels and lit edges, never from texture noise.
-- **Light:** only BOTW's light, not its world: soft cel bands, the shade a cool violet rather than grey or black, and a
-  warm rim where an edge meets the light. No meadows, mountains or grass on Depot.
-- **Surfaces:** clean. Flat paint with a soft vertical gradient and a lighter bevel on edges; seams, panels, screws,
-  joints and stencils stay. No stains, chips, rust, grime or photo grain.
-- **Colour:** vibrant, never neutral or desaturated, but no one colour dominant: the six site colours spread evenly
-  over a map (Colour, below). The team colours stay the strongest blue and orange on screen.
-- **Not:** Fortnite-cartoony (no chibi proportions, no outlines), dirty, neutral, or green- or blue-heavy.
-- **Still true:** toy replicas and no gore (BBs leave dust, never marks or blood); a warm weekend site, not a base;
-  airsoft, not military.
+- **Light:** real daylight. A warm sun with real shadow shapes, surfaces darkening smoothly as they turn from it (no
+  cel bands), a dark neutral shade under the ambient and bounce light, and almost no rim.
+- **Colour:** natural and muted. Colour comes from real materials (plywood, concrete, painted steel, tarp, foliage)
+  and a few weathered paint accents. Every paint is drawn at 60 % of its colour (`LookConfig.paint_saturation`).
+- **Materials:** real grain and light wear. Plywood and concrete grain, scuffed wall feet, floor stains; no candy
+  gloss, and the lit bevel is only a hint.
+- **Readability beats realism.** The team colours stay the strongest blue and orange on screen, players stay lighter
+  or darker than what is behind them, and safety yellow still reads.
+- **Not:** grimdark, gory, military or dark. It is a sunny weekend at an airsoft site, just a real one.
+- **Still true:** toy replicas and no gore (BBs leave dust, never marks or blood); airsoft, not military.
 
-The owner's six reference pictures of 2026-10-18 (`docs/art/references/`) set the earlier semi-realistic target. They
-still show the kind of field kit an airsoft site has, but not its look: where they and this section differ, this
-section wins. His arm and hand study (`arm-hand-anatomy.jpg`) is still the target for arms and hands.
+The Dev 2 look (Valorant's forms with Breath of the Wild's light, clean vibrant paint) is history: `docs/DECISIONS.md`.
+Built in steps: SL1 the light, grade and paint; SL2 material wear in the shared shaders; SL3 the models repainted
+(Depot's trusses and roof); SL4 players, replicas and UI. Until SL2 and SL3 land, some sections below still describe
+the clean Dev 2 surfaces.
 
 ## The field kit
 
@@ -115,10 +115,14 @@ The look's palette is `LookConfig.palette` (`game/config/look_config.gd`, in `pl
 | bark, heartwood | `#7b6f62`, `#e4dccd` | Woodland's trunks and their cut ends (WA1) |
 | canopy, fern, olive | `#5c9a50`, `#79a650`, `#8c9a48` | Woodland's crowns and bushes; olive the logs' moss |
 | pine, spruce, forest | `#3d7a4a`, `#2f6e55`, `#2b5c48` | spruces, thicket cores and the far forest |
-| meadow, litter, earth | `#8aa860`, `#7c7a58`, `#8a8070` | Woodland's grass, leaf litter and bare earth |
+| meadow, litter, earth | `#8aa860`, `#7c7a58`, `#8a8070` | a light meadow, Woodland's leaf litter and bare earth |
+| grass | `#5f8a3a` | sloping ground's grass and the ground beyond a field's walls (SL1) |
 | rubber | `#3d3b45` | tyres and wheels |
 | pond, mud, mud_wet | `#4a6f6c`, `#554e44`, `#403b34` | puddles and mud (wet mud also the wet skin) |
 
+- **Paint is weathered.** The light draws every paint at `paint_saturation` (0.6) of its colour, toward its own
+  grey, so the hexes above are the paint as bought and the screen shows it weathered (SL1). Sloping ground's grass is
+  `grass`, a darker natural green (`#5f8a3a`), so it stays green once muted.
 - **Spread the six evenly.** No site colour covers much more of a map than another; big repeated props (racking,
   walls) take a neutral (steel, plywood, cream) so they never make one colour dominate.
 - **Team colours** (Alpha blue, Beta orange) appear **only** on players and the flag, never on props. No palette colour
@@ -126,37 +130,42 @@ The look's palette is `LookConfig.palette` (`game/config/look_config.gd`, in `pl
   (`tests/unit/test_look.gd`), Depot's paint (`test_site_dress.gd`) and the props (`test_props.gd`). Safety paint is
   yellow, never orange.
 - **Readability beats detail.** Silhouettes first, then value, then colour. A figure is always lighter or darker than
-  what is behind it. Shade is violet, never black. Night and golden hour tint the light, never a team colour.
+  what is behind it. Shade is dark but never black: the ambient and bounce light fill it. Night and golden hour tint
+  the light, never a team colour.
 
 ## Surfaces
 
-Every surface is clean paint in the shared light. A material gives a colour (or a vertex colour), a roughness and a
+Every surface is paint or material in the shared light, drawn weathered (The target). A material gives a colour (or a vertex colour), a roughness and a
 metalness; the light does the rest.
 
 - **Paint, polymer and fabric** are matte (roughness 0.8 to 1.0, metalness 0). **Painted steel** (containers,
   drums, pillars) is semi-gloss (roughness 0.4 to 0.5) with at most 0.2 metalness, so it keeps its colour under the
   cel light and gets the look's small soft highlight. A hall floor is a little smooth (0.6), so the probes give it a
   faint reflection of the room.
-- **The vertical gradient.** Every side is up to 22 % darker at its foot, full paint 2.6 m up
+- **The vertical gradient.** Every side is up to 30 % darker at its foot, full paint 2.6 m up
   (`SiteLook.gradient`), the way the approved picture grounds its walls and cover.
-- **The lit edge.** Every box a player sees has a lighter bevel (30 % lighter, 4 cm), the "CS edge highlight".
-- **Grit is zero.** `SiteLook.grit` scales every stain, chip, rust foot, grime band and photo grain from the old site
-  dress; the look draws it at 0, which also leaves the photo textures unloaded. One exception (Dev 3, DH1, from the
-  owner's floor photos): the floor's slab set, Depot's floated concrete (`SiteLook.slab_grain`; 0 makes it clean).
+- **The lit edge.** Every box a player sees has a faint lighter bevel (8 % lighter, 4 cm), a hint of the "CS edge
+  highlight".
+- **Grit is real (SL1).** `SiteLook.grit` (0.6) scales the stains, chips, rust feet, grime bands and the plywood's
+  photo grain on the map's own surfaces; the floor's slab set, Depot's floated concrete, draws at full grain
+  (`SiteLook.slab_grain` 1). The models get their wear in SL2.
 - **Marks that stay:** zone stencils in ink, joints, seams, screws, sheet panels, bay lines and hazard stripes in
   yellow and ink, the white chevron on containers.
 
 ## Light
 
 **The shared light** (`game/play/look/look_light.gdshaderinc`, values in `LookConfig`'s Light group) is one `light()`
-for every material in the look: soft cel bands (the lit band from a 0.1 cosine, 0.08 soft, with a gentle 14 % step
-half way up), the sun's far side lit in the look's violet `#9d93bc` instead of falling to black, a warm rim
-(`#fff9eb`, 22 %) on an edge seen against the light, and a small soft highlight on smooth paint. Its values are global
+for every material in the look: a natural falloff with no cel band (the light centred on a 0.42 cosine and spread
+0.55 either side, so a surface darkens smoothly as it turns from the sun), the sun's far side adding only a dark warm
+grey `#292826` so it falls to the ambient and bounce light, a faint warm rim (`#fff2d9`, 3 %) on an edge seen against
+the light, a small soft highlight on smooth paint, and every paint at `paint_saturation` (0.6) of its colour
+(`look_paint`). Its values are global
 shader uniforms (`project.godot` [shader_globals], pushed by `LookConfig.push_globals` at the start of a match), so
 tuning it once changes every map; the colours are sent linear, since a colour global reaches the shader unconverted. Ambient light, bounce light and reflections are the engine's and come on top.
 
-**The grade** (LookConfig's Picture group) is on every preset: AgX with its contrast at 1.35, then 1.14 saturation and
-1.03 contrast, so the palette stays vibrant without pushing the team colours off.
+**The grade** (LookConfig's Picture group) is on every preset: AgX with its contrast at 1.35, then 0.95 saturation and
+1.12 contrast, a natural, slightly contrasty picture with the team colours still the loudest. **The day** (LightingConfig)
+has a warm sun (`1.0, 0.92, 0.8`, energy 2.0), less flat fill (ambient 0.55) and exposure 0.9 (SL1).
 
 **The graphics scale the light, never the look** (owner, 2026-10-31). Low draws the same shared light, palette and
 grade with none of the dearer effects; each preset up adds real light on top (`data/graphics.md`):

@@ -30,8 +30,8 @@ never stops the game from starting.
   temporal smoothing, sun shadows, baked light and occlusion culling `off, on`; shadow detail `1024, 2048, 4096, 8192` (the sun's shadow map, in
   pixels); shadow softness `hard, soft, softer, softest`; ambient occlusion `off, half, full`; texture filtering
   `off, 2x, 4x, 8x, 16x`; mesh detail `low, medium, high, ultra`; global illumination `off, screen, scene`;
-  reflections `off, probes, screen`; glow and volumetric fog `off, on`. Render scale is 10–200 % at most, shadow range
-  10–500 m and wind dust 0–100 %.
+  reflections `off, probes, screen`; lamp light `off, near, far`; glow and volumetric fog `off, on`. Render scale is
+  10–200 % at most, shadow range 10–500 m and wind dust 0–100 %.
 
 ## Rows
 
@@ -53,6 +53,7 @@ never stops the game from starting.
 | wind_dust | GRAPHICS_WIND_DUST | 0–100 % | 0 | all | 0 % | 50 % | 100 % | 100 % |
 | global_illumination | GRAPHICS_GLOBAL_ILLUMINATION | off, screen, scene | 3 | forward_plus | off | off | screen | scene |
 | reflections | GRAPHICS_REFLECTIONS | off, probes, screen | 2 | all | off | probes | probes | screen |
+| lamp_lights | GRAPHICS_LAMP_LIGHTS | off, near, far | 3 | forward_plus | off | off | near | far |
 | glow | GRAPHICS_GLOW | off, on | 1 | all | off | on | on | on |
 | volumetric_fog | GRAPHICS_VOLUMETRIC_FOG | off, on | 3 | forward_plus | off | off | off | on |
 
@@ -76,6 +77,15 @@ never stops the game from starting.
 - **Reflections**: Probes are the map's reflection probes, one over the field and one in each large named area,
   captured once at the start (`AreaProbes`), so a smooth floor or paint reflects the hall it is in, not the sky.
   Screen (Ultra) adds screen-space reflections over them.
+- **Lamp light** makes an indoor field's roof lamps (Depot's hall) real lights, each casting its own shadow, with the
+  preset's overhead sun turned down to `RoofConfig.lamp_sun_share` of itself while they shine, so the hall reads as lit
+  by its lamps: pools under each lamp, shadows thrown out from under it, light on the haze. Near (High) lights the
+  lamps within `lamp_near` m of you, Far (Ultra) within `lamp_far` m, each fading out over its last
+  `lamp_fade` m, with no lamp lit past that (an unshadowed lamp would shine through the rooms' roofs). Their shadows
+  follow the shadow rows: Shadow detail is their atlas, Softness their filter (Softest gives each the lens's size, so
+  its shadows harden at their foot). At night it also gives a field's fires and lanterns (its light pools) shadows,
+  and Far gives real lights to `LightingConfig.real_lights_far` of them. Off (Low, Medium), and on a field with no
+  roof lamps or light pools, it costs nothing.
 - **Glow** blooms only what is brighter than white (lamp panels, a lit sky), softly. **Volumetric fog** is a faint
   haze lit by the sun and the bounce light (LookConfig's Volumetric fog group).
 - **Temporal smoothing** is off on every preset: it smears the thin, fast BB streaks. It and FSR 2 are there for

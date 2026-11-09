@@ -88,7 +88,10 @@ func test_changing_the_graphics_mid_match_changes_the_real_lights_and_frees_them
 		session._apply_graphics(quality)
 		# No weapon light in this kit: the pools keep every real light (WL7; test_torch.gd has one fitted).
 		assert_null(session._eyes.torch(), "no torch's spot: %s" % preset)
-		assert_eq(pools.real_lights().size(), session.lighting().real_lights_for(quality.mesh_detail), String(preset))
+		assert_eq(pools.real_lights().size(), GraphicsApply.pool_lights(quality, session.lighting(), false),
+				String(preset))
+		for light in pools.real_lights():
+			assert_eq(light.shadow_enabled, GraphicsApply.pool_shadows(quality), "Lamp light's shadows: %s" % preset)
 	for i in 30:
 		pools.update(Vector3(-50.0, 2.0, -10.0), 0.05)
 	session._apply_graphics(GraphicsTable.shared().preset(&"low"))

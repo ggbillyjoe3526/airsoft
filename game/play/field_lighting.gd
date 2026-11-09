@@ -63,6 +63,8 @@ var sun: DirectionalLight3D = null
 var environment: Environment = null
 var _ssao: bool = false
 var _look: LookConfig = null
+## The sun's strength as the preset sets it, which `set_key_share` scales.
+var _key_energy: float = 0.0
 ## The map's reflection probes (`add_probes`), shown while Reflections draw them.
 var _probes: Node3D = null
 
@@ -112,6 +114,7 @@ static func build(cfg: LightingConfig, look: LookConfig = null) -> FieldLighting
 	sun.directional_shadow_max_distance = cfg.shadow_distance
 	root.add_child(sun)
 	root.sun = sun
+	root._key_energy = cfg.sun_energy
 	return root
 
 
@@ -191,6 +194,14 @@ func set_effects(gi: GraphicsQuality.GlobalIllumination, reflections: GraphicsQu
 	var size := _look.sun_size if soft_sun else 0.0
 	if not is_equal_approx(sun.light_angular_distance, size):
 		sun.light_angular_distance = size
+
+
+## The sun at `share` of its preset's strength: below 1 while an indoor field's real roof lamps light the hall
+## (RoofLamps.key_share). Only set when it changes; never per frame.
+func set_key_share(share: float) -> void:
+	var energy := _key_energy * share
+	if not is_equal_approx(sun.light_energy, energy):
+		sun.light_energy = energy
 
 
 ## The look's grade and its effects' settings on `env`, every effect left off for `set_effects`.

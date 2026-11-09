@@ -3,15 +3,18 @@ extends Node3D
 ## An indoor field's roof (DR1; MapData.roof_height): the ceiling over the whole field, the roof's bays under it (Dev 3:
 ## RoofConfig.bay_model, a truss, purlins, the sheet and services a bay, on the trusses' grid, a MultiMesh every
 ## RoofConfig.bay_chunk truss lines; plain truss beams in one mesh without it) and its lamps (MapData.roof_lamps, one
-## MultiMesh: the high-bay model with its glowing lens, or a glowing panel without it), none of it casting a shadow, so
-## the preset's overhead sun keeps lighting the hall as the roof lamps would. Look only: the BB ceiling is MapLevel's;
-## nothing here is read by the simulation. Built once, nothing per frame.
+## MultiMesh: the high-bay model with its glowing lens, or a glowing panel without it), and a real light under each lamp
+## (RoofLamps) that Graphics › Lamp light switches on. The roof and lamps themselves cast no shadow, so the preset's
+## overhead sun lights the hall through them where the lamps aren't real lights (Low, Medium). Look only: the BB ceiling
+## is MapLevel's; nothing here is read by the simulation. Built once, nothing per frame.
 
 ## How far (m) over the roof's underside the ceiling slab starts when the bays' sheet is drawn under it.
 const CEILING_LIFT := 0.01
 
 var _mesh: MeshInstance3D = null
 var _lamps: MultiMeshInstance3D = null
+## The lamps as real lights (Graphics › Lamp light), or null on a roof with none.
+var _lights: RoofLamps = null
 var _bays: Array[MultiMeshInstance3D] = []
 var _materials: Array[Material] = []
 
@@ -49,14 +52,22 @@ static func build(map: MapData, cfg: RoofConfig) -> RoofView:
 	if bay != null:
 		view._add_bays(bay, area, y, cfg)
 	if not map.roof_lamps.is_empty():
-		view._lamps = view._lamp_view(map, cfg, bay != null)
+		var spots: Array[Vector3] = []
+		view._lamps = view._lamp_view(map, cfg, bay != null, spots)
 		view.add_child(view._lamps)
+		view._lights = RoofLamps.build(spots, cfg)
+		view.add_child(view._lights)
 	return view
 
 
 ## The materials to draw once before play, so the first look up doesn't hitch.
 func materials() -> Array[Material]:
 	return _materials
+
+
+## The lamps' real lights, or null on a roof with none.
+func lamp_lights() -> RoofLamps:
+	return _lights
 
 
 ## How many lamps hang under it (for tests).
@@ -149,8 +160,8 @@ static func bay_placings(box: AABB, area: Rect2, y: float, cfg: RoofConfig) -> A
 
 ## The lamps: the high-bay model, its body in the shared light and its lens glowing, its top at the roof's underside;
 ## or a glowing panel `lamp_drop` under it without the model; with the roof's `bays`, each clear of the trusses
-## (lamp_spot).
-func _lamp_view(map: MapData, cfg: RoofConfig, bays: bool) -> MultiMeshInstance3D:
+## (lamp_spot). Each lamp's lowest point (under its lens) is added to `spots`, for its real light.
+func _lamp_view(map: MapData, cfg: RoofConfig, bays: bool, spots: Array[Vector3]) -> MultiMeshInstance3D:
 	var glow := StandardMaterial3D.new()
 	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	glow.albedo_color = cfg.lamp_colour * cfg.lamp_energy
@@ -177,9 +188,11 @@ func _lamp_view(map: MapData, cfg: RoofConfig, bays: bool) -> MultiMeshInstance3
 	mm.instance_count = map.roof_lamps.size()
 	# the model hangs from its top (its own y 0 at the roof's underside); a panel's middle `lamp_drop` under it
 	var y := map.roof_height - drop
+	var under := y + lamp.get_aabb().position.y
 	for i in map.roof_lamps.size():
 		var at := lamp_spot(map.roof_lamps[i], cfg) if bays else map.roof_lamps[i]
 		mm.set_instance_transform(i, Transform3D(Basis.IDENTITY, Vector3(at.x, y, at.y)))
+		spots.append(Vector3(at.x, under, at.y))
 	var inst := MultiMeshInstance3D.new()
 	inst.name = "Lamps"
 	inst.multimesh = mm

@@ -19,8 +19,8 @@ const PRESETS: Array[StringName] = [DAY, NIGHT]
 ## how soft they are.
 @export var sun_elevation: float = 52.0
 @export var sun_heading: float = 35.0
-@export var sun_colour: Color = Color(1.0, 0.95, 0.86)
-@export var sun_energy: float = 1.25
+@export var sun_colour: Color = Color(1.0, 0.92, 0.8)
+@export var sun_energy: float = 2.0
 @export var shadow_distance: float = 70.0
 @export var shadow_blur: float = 1.5
 ## The sky: top, horizon, and the ground's colour below the horizon.
@@ -30,14 +30,14 @@ const PRESETS: Array[StringName] = [DAY, NIGHT]
 @export var ground_bottom: Color = Color(0.36, 0.34, 0.3)
 ## The fill on shaded sides: part sky, part a warm ground bounce, so they stay warm grey, never black or blue.
 @export var ambient_colour: Color = Color(0.86, 0.8, 0.7)
-@export var ambient_energy: float = 0.9
+@export var ambient_energy: float = 0.55
 @export var sky_contribution: float = 0.45
 ## Contact shade in corners (screen-space ambient occlusion).
 @export var ssao: bool = true
 @export var ssao_radius: float = 1.0
 @export var ssao_intensity: float = 1.4
 ## Exposure for the AgX tonemapper.
-@export var exposure: float = 1.0
+@export var exposure: float = 0.9
 ## A night preset: the one flag every night system reads (the ambience's night set, the figures' paint without its
 ## glow (TeamColours.resolve), the light pools, the skyline's lamps, a bake's sky share alone).
 @export var night: bool = false
@@ -83,12 +83,17 @@ const PRESETS: Array[StringName] = [DAY, NIGHT]
 @export var lantern_colour: Color = Color8(255, 232, 180)
 ## Real lights by Mesh detail (Low, Medium, High, Ultra): the nearest pools to the eye get one each, the rest are drawn.
 @export var real_lights: PackedInt32Array = PackedInt32Array([0, 2, 4, 4])
-## A real light reaches `real_reach` times its pool's radius at `real_energy`, casting no shadow; it moves to another
-## pool only when that one is `real_hysteresis` m nearer, fading out and in over `real_fade` s.
+## With Graphics › Lamp light on (Near, Far) the real lights cast shadows, as a roof's lamps do (every map's lamps
+## and fires alike); on Far the nearest `real_lights_far` pools get one, if that is more than Mesh detail's.
+@export var real_lights_far: int = 8
+## A real light reaches `real_reach` times its pool's radius at `real_energy` (its shadow, with Lamp light, blurred
+## `real_shadow_blur`); it moves to another pool only when that one is `real_hysteresis` m nearer, fading out and in
+## over `real_fade` s.
 @export var real_reach: float = 1.5
 @export var real_energy: float = 1.6
 @export var real_hysteresis: float = 3.0
 @export var real_fade: float = 0.3
+@export var real_shadow_blur: float = 1.5
 ## The drawn pool on the ground: a disc of `pool_rings` × `pool_segments` following the ground `pool_lift` m above it,
 ## `pool_strength` of its colour at the middle fading to nothing at its radius, added to what is under it.
 @export var pool_rings: int = 6

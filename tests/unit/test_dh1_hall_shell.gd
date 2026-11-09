@@ -177,9 +177,9 @@ func test_the_roof_draws_a_bay_a_truss_line_and_cell_all_up_under_the_roof() -> 
 		assert_lte(spot.distance_to(at), play.roof.lamp_clear + 1e-3, "and near where the map hangs it")
 
 
-func test_the_floor_draws_its_slab_set_on_the_clean_look_at_its_brightness() -> void:
-	var look := play.site_look
-	assert_eq(look.grit, 0.0, "the look is clean")
+func test_the_floor_draws_its_slab_set_even_on_a_clean_look_at_its_brightness() -> void:
+	var look := play.site_look.duplicate(true) as SiteLook
+	look.grit = 0.0
 	assert_gt(look.slab_grain, 0.0)
 	var m := SiteSurface.material(look, depot)
 	assert_not_null(m.get_shader_parameter(&"slab_col"), "the slab's photo is loaded")

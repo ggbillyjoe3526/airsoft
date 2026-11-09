@@ -53,8 +53,8 @@ every preset; turn it on if you want it.
 
 - **Low** is for speed: no sun shadows, ambient occlusion, baked light, wind dust or light effects, and a lower render
   scale. Every player gets a soft shadow under their feet instead, lying on a ramp's slope and on the floor below a
-  ledge they drop from. The game's look (its colours and soft, stylised
-  light) is the same on every preset.
+  ledge they drop from. The game's look (its natural colours and sunlight) is the
+  same on every preset.
 - **Ultra** is the top end, for the most powerful cards: bounce light from the whole field, reflections on screen,
   volumetric haze and the softest shadows, sharp at their foot and soft away from it.
 - **Baked light** gives Depot soft shade in its corners, warm light bounced off sunlit walls and its dim Lounge; its
@@ -67,7 +67,10 @@ every preset; turn it on if you want it.
   It saves the graphics card work and costs the processor a little, so it is off on Low and on from Medium.
 - **Light effects:** **Bounce light** is light bouncing off the field: Screen bounces what you see, Scene the whole
   field. **Reflections** on Probes show the room a shiny surface is in; Screen adds what is on screen. **Glow** makes
-  lamps bloom softly. **Volumetric haze** is a faint haze the light shines through.
+  lamps bloom softly. **Volumetric haze** is a faint haze the light shines through. **Lamp light** makes an indoor
+  hall's roof lamps real lights that cast shadows (and, at night, fires and lanterns cast shadows too): Near (High)
+  lights the lamps round you, Far (Ultra) the whole hall and up to eight fires. The lamps' shadows follow your shadow
+  settings.
 - While graphics are on **For your card**, slow frames in a match step the preset down one at the end of a round,
   never mid-round and never below Low, with a short note under the score. A preset you picked yourself never steps
   down.

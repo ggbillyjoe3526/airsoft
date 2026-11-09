@@ -4,10 +4,13 @@ extends Node3D
 ## night preset: each light lights the ground within its radius. Every pool is drawn as one disc following the ground
 ## under it, all of them one additive mesh (one draw call), and each light glows where it hangs (one billboard each,
 ## one draw call). The nearest pools to the eye, as many as the graphics give (LightingConfig.real_lights_for: Low 0,
-## Medium 2, High 4), get a real light each, casting no shadow, and their drawn disc fades out as the light fades in.
+## Medium 2, High 4; Ultra's Lamp light Far 8), get a real light each, casting a shadow only with Lamp light on (Near,
+## Far: `set_shadows`), and their drawn disc fades out as the light fades in.
 ## Fires flicker, on the drawn disc and the real light alike; still under Reduced motion. Look only: nothing the
 ## simulation reads. Built once; `update` each rendered frame allocates nothing.
 
+## Every render layer, as a light's shadow caster mask.
+const ALL_CASTERS := 0xFFFFFFFF
 ## The most lights a map may have drawn (the disc shader's array).
 const MAX_POOLS := 32
 ## The drawn discs: COLOR is the pool's light at that point (linear), UV.x its index, UV.y 1 for a fire.
@@ -35,6 +38,8 @@ var _pool_material: ShaderMaterial = null
 var _glows: MultiMeshInstance3D = null
 ## The real lights, the pool each serves (-1 none), the pool it is fading toward, and how far in it is (0 to 1).
 var _real: Array[OmniLight3D] = []
+## Whether the real lights cast shadows (`set_shadows`).
+var _shadows: bool = false
 var _serving: PackedInt32Array = PackedInt32Array()
 var _target: PackedInt32Array = PackedInt32Array()
 var _fade: PackedFloat32Array = PackedFloat32Array()
@@ -186,7 +191,10 @@ func set_real_count(count: int) -> void:
 	while _real.size() < count:
 		var light := OmniLight3D.new()
 		light.name = "PoolLight%d" % _real.size()
-		light.shadow_enabled = false
+		light.shadow_enabled = _shadows
+		light.shadow_blur = _cfg.real_shadow_blur
+		# Not shadowed by the lantern or campfire it sits in (LightFixtures.LAYER).
+		light.shadow_caster_mask = ALL_CASTERS & ~LightFixtures.LAYER
 		light.visible = false
 		add_child(light)
 		_serving[_real.size()] = -1
@@ -194,6 +202,15 @@ func set_real_count(count: int) -> void:
 		_fade[_real.size()] = 0.0
 		_real.append(light)
 	_pool_material.set_shader_parameter(&"drawn", _drawn)
+
+
+## Whether the real lights cast shadows (Graphics › Lamp light on): set on each only when it changes, never per frame.
+func set_shadows(on: bool) -> void:
+	if on == _shadows:
+		return
+	_shadows = on
+	for light in _real:
+		light.shadow_enabled = on
 
 
 ## Reduced motion stills the fires (their light holds steady).
