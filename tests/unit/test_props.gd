@@ -125,10 +125,18 @@ func test_a_propped_box_draws_no_faces_and_leaves_the_baked_shadow_caster() -> v
 			var core := SiteSurface.core_of(look, b, m)
 			assert_eq(core * (b.center + b.size * 0.5), b.center, "a drum's or barrel's box folds to its middle")
 		drawn += GreyboxFaces.faces_of(b).size() if not SiteSurface.hidden(look, b) else 0
+	var crates := m.blocks.filter(func(b: MapData.Block) -> bool: return b.kind == &"crate" and b.dress == &"" \
+			and b.size.y >= look.props.kind_min_height[&"crate"]).size()
+	assert_gt(crates, 0, "Depot's crate stacks are crates (DM1)")
+	assert_lt(crates, _count(m, &"crate"), "its desks are no crates")
+	var walls := m.blocks.filter(func(b: MapData.Block) -> bool: return b.kind == &"plywood" and b.dress == &"" \
+			and minf(b.size.x, b.size.z) <= look.props.kind_max_depth[&"plywood"]).size()
+	assert_gt(walls, 0, "its plywood walls are wall modules (DM1)")
 	var named := m.blocks.filter(func(b: MapData.Block) -> bool: return b.dress != &"").size()
-	assert_eq(hidden, _count(m, &"drum") + _count(m, &"barrel") + _count(m, &"sofa") + _count(m, &"wall", 6.0)
-			+ _count(m, &"pillar") + _count(m, &"net") + named,
-			"the props' boxes, the hall shell's (DH1) and the props a block names itself (RK1: the desks and lockers)")
+	assert_eq(hidden, _count(m, &"drum") + _count(m, &"barrel") + _count(m, &"sofa") + crates + walls
+			+ _count(m, &"container") + _count(m, &"wall", 6.0) + _count(m, &"pillar") + _count(m, &"net") + named,
+			"the props' boxes, every crate stack, plywood wall and container (DM1), the hall shell's (DH1) and the props"
+			+ " a block names itself (RK1: the desks and lockers)")
 	var caster := MapLevel._greybox_mesh(m, play.map_style, look)
 	var full := MapLevel._greybox_mesh(m, play.map_style)
 	assert_lt(caster.surface_get_array_len(0), full.surface_get_array_len(0), "the caster leaves them out")
