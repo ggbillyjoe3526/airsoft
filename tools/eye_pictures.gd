@@ -77,7 +77,7 @@ func _run() -> void:
 	var lighting := FieldLighting.build(sun, play.look)
 	lighting.add_probes(map)
 	port.add_child(lighting)
-	var site := SiteDress.build(map, play.site_look, level.site_material())
+	var site := SiteDress.build(map, play.site_look, level.site_material(), play.skyline)
 	if site != null:
 		port.add_child(site)
 		level.set_detail(GraphicsQuality.MeshDetail.HIGH)

@@ -144,7 +144,7 @@ func test_scenery_only_so_bbs_pass_through() -> void:
 	var view := _view()
 	assert_eq(view.find_children("*", "CollisionObject3D", true, false).size(), 0)
 	assert_eq(view.find_children("*", "CollisionShape3D", true, false).size(), 0)
-	assert_eq(view.materials().size(), 4, "the cloth, the ring, the pole and its base warm in the prewarm (BP7)")
+	assert_eq(view.materials().size(), 3, "the cloth, the ring and the pole's model warm in the prewarm (BP7)")
 
 
 func test_a_frame_with_it_down_allocates_nothing() -> void:

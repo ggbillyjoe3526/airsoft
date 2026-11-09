@@ -567,7 +567,7 @@
     "z": -38,
     "width": 26,
     "depth": 14,
-    "height": 9
+    "height": 6
    },
    {
     "kind": "shed",
@@ -575,7 +575,7 @@
     "z": 37,
     "width": 22,
     "depth": 12,
-    "height": 8,
+    "height": 5,
     "turned": true
    },
    {
@@ -674,7 +674,7 @@
     "z": -56,
     "width": 32,
     "depth": 16,
-    "height": 12,
+    "height": 8,
     "colour": 13226966
    },
    {
@@ -683,7 +683,7 @@
     "z": -52,
     "width": 22,
     "depth": 14,
-    "height": 8,
+    "height": 5,
     "colour": 14141864
    },
    {
@@ -725,7 +725,7 @@
     "z": 50,
     "width": 24,
     "depth": 6,
-    "height": 21
+    "height": 15
    },
    {
     "kind": "shed",
@@ -733,7 +733,7 @@
     "z": 62,
     "width": 20,
     "depth": 12,
-    "height": 9,
+    "height": 6,
     "colour": 12175311
    },
    {
@@ -742,7 +742,7 @@
     "z": 6,
     "width": 14,
     "depth": 34,
-    "height": 11,
+    "height": 7,
     "colour": 14275782
    },
    {
@@ -751,7 +751,7 @@
     "z": -112,
     "width": 54,
     "depth": 22,
-    "height": 15,
+    "height": 10,
     "colour": 13094096
    },
    {
@@ -760,7 +760,7 @@
     "z": 34,
     "width": 24,
     "depth": 46,
-    "height": 14,
+    "height": 9,
     "colour": 14012612
    },
    {
@@ -769,7 +769,7 @@
     "z": -40,
     "width": 26,
     "depth": 40,
-    "height": 12,
+    "height": 8,
     "colour": 13226966
    },
    {
@@ -778,7 +778,7 @@
     "z": 98,
     "width": 40,
     "depth": 22,
-    "height": 11
+    "height": 7
    },
    {
     "kind": "shed",
@@ -786,7 +786,7 @@
     "z": 124,
     "width": 46,
     "depth": 20,
-    "height": 13,
+    "height": 8.5,
     "colour": 14141864
    },
    {
@@ -795,7 +795,7 @@
     "z": -54,
     "width": 6,
     "depth": 22,
-    "height": 26
+    "height": 15
    },
    {
     "kind": "chimney",
