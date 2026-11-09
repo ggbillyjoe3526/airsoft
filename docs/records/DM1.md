@@ -1,6 +1,6 @@
 # DM1 · Depot's plywood walls, crates, containers and doors
 
-**Review:** pending
+**Review:** 4 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -9,7 +9,7 @@
 | 2026-11-09 | 1 | Opus 5.5 (map models thread, group 1) | – | 5/8 Revise (QA Pass, performance Pass) | modules stretched up to 55 %, doors distorted on other maps, budgets under 95 %, container doors and crate off his photos, low caps squashed, no tests |
 | 2026-11-09 | 2 | Opus 5.5 (map models thread, group 1) | – | 5/8 Revise (QA Pass, performance Pass) | door panels out of proportion (mid rail at a fixed height), olive door and khaki crate, lintel piece with pockets, bars broken by painted guides, grain like seams, no perforations, hexagon patches, wiki wording |
 | 2026-11-09 | 3 | Opus 5.5 (map models thread, group 1) | ✓ | 7/8 Revise | door rails and stiles off his photo's shares, khaki door and crate (hue held at 48° when the rule allows 36°), grain still full-height lines, three holes a profile not a dense row |
-| 2026-11-09 | 4 | Opus 5.5 (map models thread, group 1) | | | |
+| 2026-11-09 | 4 | Opus 5.5 (map models thread, group 1) | ✓ | 7/8, near-miss re-run 8/8 Accept (QA Pass, performance Pass) | re-run: the door fields' tone grid read as zigzags; redrawn as lens bands (`map_kit.band`); QA's advisories (pixel size from both axes, the far row spread over a pixel) applied |
 
 ## What changed
 
