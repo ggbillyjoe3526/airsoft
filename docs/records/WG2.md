@@ -1,6 +1,6 @@
 # WG2 · Woodland's ferns, bushes, logs, root plates, woodpiles and saw bench from the owner's photos (Dev)
 
-**Review:** pending (round 5, the owner's pick after four attempts)
+**Review:** critic Accept 8/8 (round 5) · qa Pass · performance Pass
 
 ## Attempts
 
@@ -11,7 +11,7 @@
 | 2026-11-09 | 2 | build thread | focused tests | Retry 6/8 | the models against the photos; the saw bench's box open under its log |
 | 2026-11-09 | 3 | build thread | focused tests, check.sh | Retry 6/8 | fern sparse, bush leaves floating, round pieces, the saw bench open beside the machine |
 | 2026-11-09 | 4 | build thread | focused tests | Retry 6/8 | fern blades not pinnate, bush a closed dome, root plate a drum, cordwood ends angular, saw bench logs too long; fern beds open at a crouch |
-| 2026-11-09 | 5 (the owner's pick: one more round) | build thread | see Fix rounds | pending | – |
+| 2026-11-09 | 5 (the owner's pick: one more round) | build thread | focused tests, check.sh | Accept 8/8 | – |
 
 ## Goal
 
@@ -157,6 +157,11 @@ lines stay where they were; the ferns and bushes, drawn by code as ellipsoids, a
     gone), rounds stood on end under the sawhorses' log.
 
 ## Outstanding
+
+- The critic's polish notes on round 5 (not blocking): the root plate's crown fill clumps read flat-topped from
+  behind; the saw bench's rounds lie in two neat rows and the rounds under the log stand evenly spaced; the bush's
+  clumps read as faceted lumps from close up; the fern's young fronds make a dark spike at the centre; the woodpile's
+  section joins show as dark lines and one section reads paler.
 
 - How the ferns, the root plates and the lower woodpiles feel in play, and the frame rate in the fern beds on Low:
   `playtest/0.1-dev3-checklist.md` › Woodland's models (WG2).
