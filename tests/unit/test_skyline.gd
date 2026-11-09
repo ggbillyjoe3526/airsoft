@@ -28,7 +28,12 @@ const TRIANGLES_MOST := 20000
 const MAST_MODEL_LAMPS := 4
 ## Each modelled kind's triangle budget (tools/blender/maps/skyline.py, docs/ASSETS.md).
 const MODEL_BUDGETS: Dictionary[StringName, int] = {&"shed": 500, &"crane": 800, &"mast": 500, &"fuselage": 700,
-		&"silo": 650, &"watchTower": 1000, &"waterTower": 900}
+		&"silo": 650, &"watchTower": 750, &"waterTower": 900}
+## The shed's other sizes' budgets, by file (SkylineConfig.variants).
+const VARIANT_BUDGETS: Dictionary[String, int] = {"shed_long.glb": 660, "shed_deep.glb": 600}
+## How unevenly a shed's model may stretch to its piece (its largest scale over its smallest): the critic's
+## "doors and windows keep their size".
+const SHED_STRETCH_MOST := 1.3
 
 var play: PlayTuning = PlayTuning.load_default()
 var body: BodyConfig = BodyConfig.new()
@@ -348,6 +353,32 @@ func test_every_skyline_model_is_inside_its_budget() -> void:
 		assert_not_null(mesh, "%s's model loads" % kind)
 		var tris := (mesh.surface_get_arrays(0)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
 		assert_between(tris, 1, MODEL_BUDGETS[kind], "%s: %d triangles" % [kind, tris])
+
+
+func test_every_shed_size_is_inside_its_budget_and_each_range_shed_stretches_evenly() -> void:
+	var cfg := play.skyline
+	for path: String in cfg.variants[&"shed"]:
+		var mesh := PropDressConfig.load_mesh(path)
+		assert_not_null(mesh, "%s loads" % path)
+		var tris := (mesh.surface_get_arrays(0)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
+		assert_between(tris, 1, VARIANT_BUDGETS[path.get_file()], "%s: %d triangles" % [path.get_file(), tris])
+	assert_eq(cfg.models_of(&"shed").size(), 3, "the shed in three sizes")
+	var m := _range()
+	var middle := SkylineView.middle_of(m)
+	var uneven: Array[String] = []
+	var used: Dictionary[Mesh, bool] = {}
+	for p in m.skyline:
+		if p.kind != &"shed":
+			continue
+		var one: SkylineModels.Placed = SkylineModels.placed_of(p, cfg, middle)[0]
+		used[one.mesh] = true
+		var b := one.at.basis
+		var scales := Vector3(b.x.length(), b.y.length(), b.z.length())
+		var stretch := maxf(scales.x, maxf(scales.y, scales.z)) / minf(scales.x, minf(scales.y, scales.z))
+		if stretch > SHED_STRETCH_MOST:
+			uneven.append("%s %sx%sx%s: %.2f" % [p.at, p.width, p.depth, p.height, stretch])
+	assert_eq(uneven, [] as Array[String], "no Range shed stretches its doors and windows out of shape")
+	assert_eq(used.size(), 3, "every size stands somewhere on the Range")
 
 
 func test_no_model_colour_reads_as_a_team_at_any_fade_step_by_day_or_night() -> void:

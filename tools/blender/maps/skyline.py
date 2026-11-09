@@ -27,10 +27,10 @@ from mathutils import Vector  # noqa: E402
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "assets", "models", "skyline")
 
-# Triangle budgets: the plan's skyline is 20k in all; these seven kinds stand 24 pieces and six silo drums on the
-# Range (17.3k at budget), the containers, chimneys, power lines and hills the rest.
-BUDGETS = {"shed": 500, "crane": 800, "mast": 500, "fuselage": 700, "silo": 650, "watch_tower": 1000,
-           "water_tower": 900}
+# Triangle budgets: the plan's skyline is 20k in all; these seven kinds (the shed in three sizes) stand 24 pieces and
+# six silo drums on the Range, the containers, chimneys, power lines and hills the rest.
+BUDGETS = {"shed": 500, "shed_long": 660, "shed_deep": 600, "crane": 800, "mast": 500, "fuselage": 700, "silo": 650,
+           "watch_tower": 750, "water_tower": 900}
 
 # Shared colours (sRGB). A BODY entry's value is its shade of the piece's colour.
 DARK_TRIM = 0x2E3234
@@ -106,18 +106,25 @@ class Model:
 
 # ------------------------------------------------------------------------------------------------------------- shed
 
-def shed() -> Model:
+# A shed's sizes (length, depth, eaves), m: the game stands each shed piece the one nearest its proportions
+# (SkylineConfig.variants), so its doors, windows and sheets keep their size instead of stretching (the Range's sheds
+# run from 20 x 12 x 5 to 54 x 22 x 10 since the owner had them lowered, 2026-11-09).
+SHEDS = {"shed": (26.0, 14.0, 6.0), "shed_long": (50.0, 22.0, 9.0), "shed_deep": (40.0, 26.0, 8.0)}
+
+
+def shed(name: str = "shed") -> Model:
     """A steel-clad portal-frame shed (photos: dark green box-profile cladding, darker trims, a shallow gabled roof
-    with rooflights, a concrete plinth, a roller shutter and a door in the gable end, windows down the side).
-    26 x 14 m, eaves 6 m, ridge 8.1 m (SkylineConfig.roof_rise; the owner had the sheds
-    lowered, 2026-11-09)."""
-    m = Model("shed", {
+    with rooflights, a concrete plinth, a roller shutter and a door in the gable end, tall windows down the side), at
+    one of SHEDS' sizes; its ridge SkylineConfig.roof_rise of its depth over the eaves. Sheets, doors and windows keep
+    their real sizes whatever the shed's."""
+    m = Model(name, {
         "clad": (1.0, vp.BODY), "clad_dark": (0.82, vp.BODY),
         "roof": (0x5E655F, vp.FIXED), "rooflight": (0xC5CCC4, vp.FIXED), "trim": (DARK_TRIM, vp.FIXED),
         "plinth": (CONCRETE, vp.FIXED), "shutter": (0x4A4F55, vp.FIXED), "shutter_dark": (0x3C4046, vp.FIXED),
         "door": (0xB4B8B4, vp.FIXED), "glass": (GLASS, vp.FIXED), "frame": (0x8E9396, vp.FIXED),
     })
-    L, D, H, R = 26.0, 14.0, 6.0, 2.1
+    L, D, H = SHEDS[name]
+    R = 0.15 * D
     hl, hd = L * 0.5 - 0.3, D * 0.5 - 0.3   # the walls stand inside the roof's overhang
     plinth = 0.45
 
@@ -147,13 +154,15 @@ def shed() -> Model:
         return H + R * (1.0 - abs(z) / (D * 0.5))
 
     # long sides (front +Z with windows and a door, back plain), gable ends (+X with the shutter and door)
-    strips(-hl, hl, hd, 18, eaves, 1)
-    strips(-hl, hl, -hd, 18, eaves, -1)
+    n = round(L / 1.45)
+    strips(-hl, hl, hd, n, eaves, 1)
+    strips(-hl, hl, -hd, n, eaves, -1)
     # the gables' sheets: split at the ridge so every face is flat
-    strips_x(-hd, 0.0, hl, 5, gable, 1)
-    strips_x(0.0, hd, hl, 5, gable, 1)
-    strips_x(-hd, 0.0, -hl, 5, gable, -1)
-    strips_x(0.0, hd, -hl, 5, gable, -1)
+    g = max(3, round(hd / 1.4))
+    strips_x(-hd, 0.0, hl, g, gable, 1)
+    strips_x(0.0, hd, hl, g, gable, 1)
+    strips_x(-hd, 0.0, -hl, g, gable, -1)
+    strips_x(0.0, hd, -hl, g, gable, -1)
     m.box((-hl - 0.05, 0.0, -hd - 0.05), (hl + 0.05, plinth, hd + 0.05), "plinth")
     # the roof: two slopes to the overhang, rooflight strips, the ridge cap
     ov = 0.3
@@ -171,8 +180,9 @@ def shed() -> Model:
             edge.reverse()
         m.face(edge, "trim")
         # rooflights: three pale panels a slope, a hair proud
-        for k in range(3):
-            x = -L * 0.5 + L * (k + 0.5) / 3.0
+        lights = max(3, round(L / 9.0))
+        for k in range(lights):
+            x = -L * 0.5 + L * (k + 0.5) / lights
             w = 1.1
             f0, f1 = 0.25, 0.75
             pts = []
@@ -198,28 +208,32 @@ def shed() -> Model:
                    0.08, 4, "trim")
     # the gable end facing out (+X): a roller shutter in its box and guides, a door and its frame
     gx = hl + 0.03
-    sw, sh = 4.6, 4.3
-    m.box((gx - 0.03, plinth, -sw * 0.5 - 1.0), (gx + 0.05, sh, sw * 0.5 - 1.0), "shutter")
+    sh = min(H - 1.7, 5.0)
+    sw = sh * 1.07
+    sz = -D * 0.07           # the shutter's middle along the gable
+    m.box((gx - 0.03, plinth, -sw * 0.5 + sz), (gx + 0.05, sh, sw * 0.5 + sz), "shutter")
     for k in range(6):  # slat bands
         y0 = plinth + (sh - plinth) * k / 6.0
-        m.face([(gx + 0.06, y0, sw * 0.5 - 1.0), (gx + 0.06, y0, -sw * 0.5 - 1.0),
-                (gx + 0.06, y0 + 0.35, -sw * 0.5 - 1.0), (gx + 0.06, y0 + 0.35, sw * 0.5 - 1.0)], "shutter_dark")
-    m.box((gx, sh, -sw * 0.5 - 1.25), (gx + 0.45, sh + 0.7, sw * 0.5 - 0.75), "trim")
-    for z in (-sw * 0.5 - 1.0, sw * 0.5 - 1.0):
+        m.face([(gx + 0.06, y0, sw * 0.5 + sz), (gx + 0.06, y0, -sw * 0.5 + sz),
+                (gx + 0.06, y0 + 0.35, -sw * 0.5 + sz), (gx + 0.06, y0 + 0.35, sw * 0.5 + sz)], "shutter_dark")
+    m.box((gx, sh, -sw * 0.5 + sz - 0.25), (gx + 0.45, sh + 0.7, sw * 0.5 + sz + 0.25), "trim")
+    for z in (-sw * 0.5 + sz, sw * 0.5 + sz):
         m.box((gx, plinth, z - 0.15), (gx + 0.12, sh, z + 0.15), "trim")
-    m.box((gx - 0.02, plinth, 3.2), (gx + 0.06, plinth + 2.2, 4.3), "door")
-    m.box((gx, plinth, 3.05), (gx + 0.1, plinth + 2.35, 3.2), "trim")
-    m.box((gx, plinth, 4.3), (gx + 0.1, plinth + 2.35, 4.45), "trim")
-    m.box((gx, plinth + 2.2, 3.05), (gx + 0.1, plinth + 2.35, 4.45), "trim")
-    # the long side facing out (+Z): a row of windows high up and a door
+    m.box((gx - 0.02, plinth, hd - 3.5), (gx + 0.06, plinth + 2.2, hd - 2.4), "door")
+    m.box((gx, plinth, hd - 3.65), (gx + 0.1, plinth + 2.35, hd - 3.5), "trim")
+    m.box((gx, plinth, hd - 2.4), (gx + 0.1, plinth + 2.35, hd - 2.25), "trim")
+    m.box((gx, plinth + 2.2, hd - 3.65), (gx + 0.1, plinth + 2.35, hd - 2.25), "trim")
+    # the long side facing out (+Z): a row of tall windows (photos 103332) and a door
     fz = hd + 0.03
-    for k in range(4):
-        x = -hl + 4.0 + k * 3.2
-        m.box((x - 0.55, 3.0, fz - 0.03), (x + 0.55, 4.3, fz + 0.04), "frame")
-        m.face([(x - 0.42, 3.13, fz + 0.05), (x + 0.42, 3.13, fz + 0.05), (x + 0.42, 4.17, fz + 0.05),
-                (x - 0.42, 4.17, fz + 0.05)], "glass", (0, 0, 1))
-    m.box((6.0, plinth, fz - 0.02), (7.1, plinth + 2.2, fz + 0.06), "door")
-    m.box((5.85, plinth + 2.2, fz), (7.25, plinth + 2.35, fz + 0.1), "trim")
+    dx = hl - 6.7
+    x = -hl + 4.0
+    while x + 0.5 < dx - 1.5:
+        m.box((x - 0.5, 2.4, fz - 0.03), (x + 0.5, 4.2, fz + 0.04), "frame")
+        m.face([(x - 0.42, 2.52, fz + 0.05), (x + 0.42, 2.52, fz + 0.05), (x + 0.42, 4.08, fz + 0.05),
+                (x - 0.42, 4.08, fz + 0.05)], "glass", (0, 0, 1))
+        x += 3.2 if L < 40.0 else 4.0
+    m.box((dx, plinth, fz - 0.02), (dx + 1.1, plinth + 2.2, fz + 0.06), "door")
+    m.box((dx - 0.15, plinth + 2.2, fz), (dx + 1.25, plinth + 2.35, fz + 0.1), "trim")
     return m
 
 
@@ -342,6 +356,8 @@ def mast() -> Model:
     for s in (-1.0, 1.0):
         x = s * 1.1
         m.face([(x, 11.8, 0.22), (x, 11.8, -0.2), (x, 13.6, -0.2), (x, 13.6, 0.22)], "antenna_shade", (s, 0, 0))
+        xi = x - s * 0.03  # its back, seen across the head from the other side
+        m.face([(xi, 11.8, 0.22), (xi, 11.8, -0.2), (xi, 13.6, -0.2), (xi, 13.6, 0.22)], "antenna_shade", (-s, 0, 0))
     # two microwave dishes on short arms below the head, facing out to the sides
     for s in (-1.0, 1.0):
         m.tube((0.0, 10.95, -0.05), (s * 0.55, 10.95, -0.05), 0.03, 0.03, 3, "frame")
@@ -417,14 +433,22 @@ def fuselage() -> Model:
             band(x - 0.17, x + 0.17, cy + 0.15, cy + 0.6, "glass", z + s * 0.01)
         band(nose0 - 2.1, nose0 - 1.1, cy - 0.9, cy + 1.0, "door", z + s * 0.01)
         band(tail0 + 3.6, tail0 + 4.4, cy - 0.7, cy + 0.9, "skin_grime", z + s * 0.005)
-    # the cockpit's windows on the nose's shoulder
-    for s in (-1.0, 1.0):
-        z0 = s * 1.62
-        for k in range(2):
-            xa = L * 0.5 - 2.25 + k * 0.62
-            pts = [(xa, cy + 0.55, z0 * (1.0 - 0.08 * k)), (xa + 0.55, cy + 0.42, z0 * (0.94 - 0.1 * k)),
-                   (xa + 0.5, cy + 0.98, z0 * (0.86 - 0.1 * k)), (xa, cy + 1.06, z0 * (0.92 - 0.08 * k))]
-            m.face(pts, "glass", (0, 0, s))
+    # the cockpit's windscreen (photos 103958, 104028): six panes across the top of the nose, laid on its skin
+    # between the nose's first two stations, framed by the skin left between them
+    ra, rb = rs[5], rs[6]
+    for i in range(2, 8):   # the facets from 36 to 144 degrees round, over the top
+        j = i + 1
+        u0, u1 = 0.18, 0.72
+        w0, w1 = 0.1, 0.9
+        corners = []
+        for u, w in ((u0, w0), (u0, w1), (u1, w1), (u1, w0)):
+            p_a = tuple(ra[i][k] + (ra[j][k] - ra[i][k]) * w for k in range(3))
+            p_b = tuple(rb[i][k] + (rb[j][k] - rb[i][k]) * w for k in range(3))
+            corners.append(tuple(p_a[k] + (p_b[k] - p_a[k]) * u for k in range(3)))
+        mid = [sum(c[k] for c in corners) / 4.0 for k in range(3)]
+        out = (0.25, mid[1] - (cy - 0.2), mid[2])
+        lift = Vector(out).normalized() * 0.03
+        m.face([(c[0] + lift.x, c[1] + lift.y, c[2] + lift.z) for c in corners], "glass", out)
     # the wing-root fairings under the middle
     for s in (-1.0, 1.0):
         m.tube((-2.5, cy - 1.5, s * 1.5), (3.0, cy - 1.5, s * 1.5), 0.6, 0.6, 5, "belly", caps=(True, True))
@@ -457,8 +481,8 @@ def fuselage() -> Model:
     for s in (-1.0, 1.0):
         m.face([(-L * 0.5 + 1.2, cy + 0.55, s * 0.6), (-L * 0.5 + 3.2, cy + 0.55, s * 0.9),
                 (-L * 0.5 + 2.6, cy + 0.6, s * 2.1), (-L * 0.5 + 1.5, cy + 0.6, s * 2.0)], "skin", (0, 1, 0))
-        m.face([(-L * 0.5 + 1.2, cy + 0.55, s * 0.6), (-L * 0.5 + 3.2, cy + 0.55, s * 0.9),
-                (-L * 0.5 + 2.6, cy + 0.6, s * 2.1), (-L * 0.5 + 1.5, cy + 0.6, s * 2.0)], "skin", (0, -1, 0))
+        m.face([(-L * 0.5 + 1.2, cy + 0.5, s * 0.6), (-L * 0.5 + 3.2, cy + 0.5, s * 0.9),
+                (-L * 0.5 + 2.6, cy + 0.55, s * 2.1), (-L * 0.5 + 1.5, cy + 0.55, s * 2.0)], "skin", (0, -1, 0))
     # sleeper cribs: two stacks of two layers, crossing
     for x in (-5.0, 5.0):
         for layer in range(2):
@@ -476,35 +500,35 @@ def fuselage() -> Model:
 
 def silo() -> Model:
     """One drum of a feed silo row (photos: a GRP drum on a conical hopper, the hopper on a galvanised leg frame
-    with cross braces and a base ring, a domed top with its hatch, the fill pipe climbing the side and curving over
-    into the top). 6 m across, 21 m tall; the game stands one a drum along the row."""
+    with cross braces and a base ring, a low rounded top with its hatch, the fill pipe climbing the side and curving
+    over into the top). 6 m across, 15 m tall: the drum and its top about 1.4 times its width, the hopper about half
+    the drum, as in the photos (103739, 103753); the game stands one a drum along the row."""
     m = Model("silo", {
         "drum": (1.0, vp.BODY), "drum_shade": (0.88, vp.BODY), "galv": (GALV, vp.FIXED),
         "galv_dark": (0x7E8488, vp.FIXED), "hatch": (0x6F7378, vp.FIXED), "label": (0xE9E7E0, vp.FIXED),
     })
-    H = 21.0
+    H = 15.0
     r = 2.9                   # the drum; the fill pipe stands just outside it on a diagonal, inside the 3 m
-    legs_top, cone_top, drum_top = 4.6, 8.0, 18.2
-    sides = 12
+    legs_top, cone_top, drum_top = 3.4, 6.8, 14.1
+    sides = 16
     m.lathe([(legs_top - 0.1, 0.5), (cone_top - 0.25, r - 0.05), (cone_top, r)], "drum_shade", sides)
     m.lathe([(cone_top, r), (cone_top + 0.25, r + 0.05), (cone_top + 0.5, r), (drum_top, r)], "drum", sides)
-    m.lathe([(drum_top, r), (drum_top + 0.2, r + 0.05), (drum_top + 0.5, r - 0.1), (H - 0.9, r * 0.55),
-             (H - 0.7, 0.45)], "drum_shade", sides)
-    m.lathe([(H - 0.7, 0.45), (H - 0.35, 0.45), (H - 0.3, 0.0)], "hatch", 8)
-    # a seam band and a pale maker's plate on the front (no logos)
-    m.lathe([(13.0, r), (13.08, r + 0.04), (13.25, r + 0.04), (13.33, r)], "drum_shade", sides)
-    m.face([(-0.6, 15.6, r + 0.03), (0.6, 15.6, r + 0.03), (0.6, 16.2, r + 0.03), (-0.6, 16.2, r + 0.03)], "label",
+    m.lathe([(drum_top, r), (drum_top + 0.3, r - 0.12), (drum_top + 0.6, r * 0.72), (H - 0.35, 0.45)],
+            "drum_shade", sides)
+    m.lathe([(H - 0.35, 0.45), (H - 0.05, 0.45), (H, 0.0)], "hatch", 8)
+    # a pale maker's plate on the front, high up (no logos)
+    m.face([(-0.6, 12.6, r + 0.03), (0.6, 12.6, r + 0.03), (0.6, 13.2, r + 0.03), (-0.6, 13.2, r + 0.03)], "label",
            (0, 0, 1))
     # the leg frame: four legs to a ring beam under the drum, braced, on a base ring
-    lr = r * 0.82
+    lr = r * 0.9
     corners = [(lr * math.cos(a), lr * math.sin(a)) for a in (math.pi * 0.25 + k * math.pi * 0.5 for k in range(4))]
     for x, z in corners:
         m.tube((x, 0.0, z), (x * 1.0, cone_top - 0.1, z * 1.0), 0.13, 0.13, 4, "galv")
     for (xa, za), (xb, zb) in zip(corners, corners[1:] + corners[:1]):
         m.tube((xa, 0.35, za), (xb, 0.35, zb), 0.11, 0.11, 4, "galv_dark")
-        m.tube((xa, 0.35, za), (xb, legs_top, zb), 0.06, 0.06, 4, "galv")
-        m.tube((xb, 0.35, zb), (xa, legs_top, za), 0.06, 0.06, 4, "galv")
-        m.tube((xa, legs_top, za), (xb, legs_top, zb), 0.09, 0.09, 4, "galv")
+        m.tube((xa, 0.35, za), (xb, cone_top - 0.2, zb), 0.06, 0.06, 4, "galv")
+        m.tube((xb, 0.35, zb), (xa, cone_top - 0.2, za), 0.06, 0.06, 4, "galv")
+        m.tube((xa, cone_top - 0.2, za), (xb, cone_top - 0.2, zb), 0.09, 0.09, 4, "galv")
     m.lathe([(cone_top - 0.3, r + 0.08), (cone_top - 0.05, r + 0.08)], "galv_dark", sides)
     # the outlet under the hopper
     m.lathe([(legs_top - 0.1, 0.5), (legs_top - 0.6, 0.25), (legs_top - 1.0, 0.25)], "galv_dark", 6)
@@ -516,12 +540,12 @@ def silo() -> Model:
     bend = [(1.0, H - 0.2), (0.85, H + 0.25), (0.55, H + 0.42), (0.3, H + 0.2)]
     prev = (px, H - 0.2, pz)
     for f, y in bend[1:]:
-        cur = (px * f, min(y, H - 0.05), pz * f)
+        cur = (px * f, min(y, H - 0.12), pz * f)
         m.tube(prev, cur, 0.11, 0.11, 6, "galv")
         prev = cur
     m.tube(prev, (px * 0.15, H - 0.75, pz * 0.15), 0.11, 0.11, 6, "galv")
     # pipe brackets
-    for y in (6.0, 12.0, 17.5):
+    for y in (4.5, 9.0, 13.0):
         m.tube((px * (r / pr), y, pz * (r / pr)), (px, y, pz), 0.05, 0.05, 4, "galv_dark")
     return m
 
@@ -529,26 +553,28 @@ def silo() -> Model:
 # ------------------------------------------------------------------------------------------------------ watch tower
 
 def watch_tower() -> Model:
-    """A steel watch tower (photos: a braced four-leg lattice frame, zig-zag stair flights up one side, an
-    overhanging deck with railings, a cabin with a band of windows and a shallow roof). 5.2 m square, 12.4 m tall;
-    the stairs on the +Z side."""
+    """A steel watch tower (photos 103631, 103648: a braced four-leg frame on concrete footings, a stair up one side,
+    a deck with an open cab on it: low corrugated panels round its edge, posts up to a pitched hip roof that overhangs
+    the deck all round). 5.2 m square (the roof), 12.4 m tall: the cab about two thirds of the legs' height, as in the
+    photos; the stair on the +Z side."""
     m = Model("watch_tower", {
         "steel": (1.0, vp.BODY), "steel_shade": (0.82, vp.BODY),
-        "cabin": (0xD9D8D2, vp.FIXED), "cabin_shade": (0xBEBDB6, vp.FIXED), "glass": (GLASS, vp.FIXED),
-        "roof": (0x545C45, vp.FIXED), "deck": (0x7D7F7C, vp.FIXED), "pad": (CONCRETE, vp.FIXED),
+        "panel": (0xC9CBC6, vp.FIXED), "panel_shade": (0xAEB1AC, vp.FIXED),
+        "roof": (0x7F8780, vp.FIXED), "roof_under": (0x5D6560, vp.FIXED), "deck": (0x7D7F7C, vp.FIXED),
+        "pad": (CONCRETE, vp.FIXED),
     })
     S, H = 5.2, 12.4
     f = 1.45                       # the leg frame's half width
-    deck_y = 8.4
-    roof_y = H - 0.35
-    cab = 1.75                     # the cabin's half width
+    d = 1.95                       # the deck's half width (the stair passes outside it)
+    deck_y = 7.55
+    eave_y = 10.75                 # the roof's eaves; its ridge point at H
     # footings and legs
     legs = [(sx * f, sz * f) for sx in (-1.0, 1.0) for sz in (-1.0, 1.0)]
     for x, z in legs:
-        m.box((x - 0.3, 0.0, z - 0.3), (x + 0.3, 0.35, z + 0.3), "pad")
-        m.tube((x, 0.35, z), (x, deck_y, z), 0.12, 0.12, 4, "steel")
+        m.box((x - 0.3, 0.0, z - 0.3), (x + 0.3, 0.45, z + 0.3), "pad")
+        m.tube((x, 0.45, z), (x, deck_y, z), 0.12, 0.12, 4, "steel")
     # the bays: a strut round each level and crossed braces on every side
-    levels = [0.6, 3.2, 5.8, deck_y - 0.2]
+    levels = [0.6, 2.9, 5.2, deck_y - 0.2]
     sides = [((-f, -f), (f, -f)), ((f, -f), (f, f)), ((f, f), (-f, f)), ((-f, f), (-f, -f))]
     for y in levels[1:]:
         for (xa, za), (xb, zb) in sides:
@@ -557,91 +583,105 @@ def watch_tower() -> Model:
         for (xa, za), (xb, zb) in sides:
             m.tube((xa, ya, za), (xb, yb, zb), 0.045, 0.045, 4, "steel")
             m.tube((xb, ya, zb), (xa, yb, za), 0.045, 0.045, 4, "steel")
-    # the deck: a slab over the frame to the full square, joists under it
-    m.box((-S * 0.5, deck_y, -S * 0.5), (S * 0.5, deck_y + 0.22, S * 0.5), "deck")
+    # the deck: a slab over the frame, joists under it
+    top = deck_y + 0.2
+    m.box((-d, deck_y, -d), (d, top, d), "deck")
     for x in (-f, f):
-        m.box((x - 0.1, deck_y - 0.35, -S * 0.5), (x + 0.1, deck_y, S * 0.5), "steel_shade")
-    # the railing round the deck: posts, a top and a mid rail
-    e = S * 0.5 - 0.05
+        m.box((x - 0.1, deck_y - 0.3, -d), (x + 0.1, deck_y, d), "steel_shade")
+    # the cab: low corrugated panels round the deck's edge (a gap on the stair side), posts to the eaves, a beam
+    # round their tops
+    wall = top + 1.15
+    door = (-1.7, -0.5)
+    m.box((-d, top, -d), (d, wall, -d + 0.06), "panel")
+    m.box((-d, top, -d), (-d + 0.06, wall, d), "panel")
+    m.box((d - 0.06, top, -d), (d, wall, d), "panel")
+    m.box((-d, top, d - 0.06), (door[0], wall, d), "panel")
+    m.box((door[1], top, d - 0.06), (d, wall, d), "panel")
+    for k in range(5):  # the corrugation's shadow lines on the outside faces
+        t = -d + 2.0 * d * (k + 0.5) / 5.0
+        z = -d - 0.01
+        m.face([(t - 0.08, top + 0.05, z), (t + 0.08, top + 0.05, z), (t + 0.08, wall - 0.05, z),
+                (t - 0.08, wall - 0.05, z)], "panel_shade", (0, 0, -1))
+        for sx in (-1.0, 1.0):
+            m.face([(sx * (d + 0.01), top + 0.05, t - 0.08), (sx * (d + 0.01), top + 0.05, t + 0.08),
+                    (sx * (d + 0.01), wall - 0.05, t + 0.08), (sx * (d + 0.01), wall - 0.05, t - 0.08)],
+                   "panel_shade", (sx, 0, 0))
+    e = d - 0.05
+    posts = [(-e, -e), (0.0, -e), (e, -e), (e, 0.0), (e, e), (-e, e), (-e, 0.0)]
+    for x, z in posts:
+        m.tube((x, top, z), (x, eave_y, z), 0.05, 0.05, 4, "steel")
     ring = [(-e, -e), (e, -e), (e, e), (-e, e)]
     for (xa, za), (xb, zb) in zip(ring, ring[1:] + ring[:1]):
-        for y in (deck_y + 1.1, deck_y + 0.6):
-            m.tube((xa, y, za), (xb, y, zb), 0.035, 0.035, 4, "steel")
-        for k in range(3):
-            t = k / 3.0
-            x, z = xa + (xb - xa) * t, za + (zb - za) * t
-            m.tube((x, deck_y + 0.22, z), (x, deck_y + 1.12, z), 0.03, 0.03, 4, "steel")
-    # the cabin: walls, a window band all round, a door on the stair side
-    m.box((-cab, deck_y + 0.22, -cab), (cab, deck_y + 1.15, cab), "cabin")
-    m.box((-cab, roof_y - 0.5, -cab), (cab, roof_y, cab), "cabin")
-    for k in range(4):
-        x = -cab + 2.0 * cab * k / 3.0
-        for z in (-cab, cab):
-            m.box((x - 0.07, deck_y + 1.15, z - 0.07), (x + 0.07, roof_y - 0.5, z + 0.07), "cabin_shade")
-        for xx in (-cab, cab):
-            m.box((xx - 0.07, deck_y + 1.15, x - 0.07), (xx + 0.07, roof_y - 0.5, x + 0.07), "cabin_shade")
-    m.box((-cab + 0.03, deck_y + 1.15, -cab + 0.03), (cab - 0.03, roof_y - 0.5, cab - 0.03), "glass")
-    m.box((0.4, deck_y + 0.22, cab - 0.02), (1.3, roof_y - 0.55, cab + 0.04), "cabin_shade")
-    # the roof: a shallow hip to the deck's square, its fascia
-    m.box((-S * 0.5, roof_y, -S * 0.5), (S * 0.5, roof_y + 0.12, S * 0.5), "roof")
+        m.tube((xa, eave_y - 0.06, za), (xb, eave_y - 0.06, zb), 0.06, 0.06, 4, "steel_shade")
+        m.tube((xa, wall + 0.05, za), (xb, wall + 0.05, zb), 0.035, 0.035, 4, "steel")
+    # the roof: a hip over the whole square, its fascia, and its underside (seen from the ground)
+    h = S * 0.5
     apex = (0.0, H, 0.0)
-    rr = [(-S * 0.5, roof_y + 0.12, -S * 0.5), (S * 0.5, roof_y + 0.12, -S * 0.5),
-          (S * 0.5, roof_y + 0.12, S * 0.5), (-S * 0.5, roof_y + 0.12, S * 0.5)]
+    rr = [(-h, eave_y, -h), (h, eave_y, -h), (h, eave_y, h), (-h, eave_y, h)]
     for a, c in zip(rr, rr[1:] + rr[:1]):
-        m.face([a, apex, c], "roof")
-    # the stairs: flights zig-zagging up the +Z side outside the frame, landings at each bay, a hand rail
-    sz0, sz1 = f + 0.15, S * 0.5 - 0.02
-    flights = [(0.3, -f, 2.15, f), (2.15, f, 4.3, -f), (4.3, -f, 6.35, f), (6.35, f, deck_y + 0.22, -f)]
+        mid = ((a[0] + c[0]) * 0.5, 0.0, (a[2] + c[2]) * 0.5)
+        m.face([a, c, apex], "roof", (mid[0], 1.0, mid[2]))
+        m.face([(a[0], a[1] - 0.08, a[2]), (c[0], c[1] - 0.08, c[2]), (0.0, H - 0.1, 0.0)], "roof_under", (0, -1, 0))
+        m.face([(a[0], a[1] - 0.12, a[2]), (c[0], c[1] - 0.12, c[2]), c, a], "roof", mid)
+    # the stair: two flights up the +Z side outside the deck, a landing between, a hand rail on the outside
+    sz0, sz1 = d + 0.04, S * 0.5 - 0.02
+    flights = [(0.45, -2.3, 3.6, 2.2), (3.6, 2.2, top, door[0] + 0.1)]
     for y0, xa, y1, xb in flights:
         m.face([(xa, y0, sz1), (xb, y1, sz1), (xb, y1, sz0), (xa, y0, sz0)], "deck", (0, 1, 0))
         m.face([(xa, y0 - 0.25, sz0), (xb, y1 - 0.25, sz0), (xb, y1 - 0.25, sz1), (xa, y0 - 0.25, sz1)],
                "steel_shade", (0, -1, 0))
-        m.face([(xa, y0 - 0.25, sz1), (xb, y1 - 0.25, sz1), (xb, y1, sz1), (xa, y0, sz1)], "steel_shade", (0, 0, 1))
+        for z, out in ((sz1, 1), (sz0, -1)):
+            m.face([(xa, y0 - 0.25, z), (xb, y1 - 0.25, z), (xb, y1, z), (xa, y0, z)], "steel_shade", (0, 0, out))
         m.tube((xa, y0 + 0.9, sz1), (xb, y1 + 0.9, sz1), 0.03, 0.03, 4, "steel")
-        m.tube((xb, y1, sz1), (xb, y1 + 0.9, sz1), 0.03, 0.03, 4, "steel")
-        m.box((xb - 0.5 if xb > 0 else xb, y1 - 0.12, sz0), (xb if xb > 0 else xb + 0.5, y1, sz1), "deck")
+        m.tube((xa, y0, sz1), (xa, y0 + 0.9, sz1), 0.03, 0.03, 4, "steel")
+    m.box((2.2, 3.48, sz0), (2.6, 3.6, sz1), "deck")
+    m.tube((2.4, 0.0, (sz0 + sz1) * 0.5), (2.4, 3.48, (sz0 + sz1) * 0.5), 0.05, 0.05, 4, "steel")
     return m
 
 
 # ------------------------------------------------------------------------------------------------------ water tower
 
 def water_tower() -> Model:
-    """A water tower (photos: a tank with a conical roof and a rounded bottom on four tall legs leaning in, struts
-    and crossed rods in each bay, a balcony with a railing round the tank's waist, a ladder up a leg and the tank, a
-    riser pipe in the middle, a finial). 7 m across, 22 m tall."""
+    """A water tower (photos: a drum tank with a low conical roof overhanging it and a deep rounded bowl under it, on
+    four tall legs leaning in, struts and crossed rods in each bay, a balcony with a railing round the bowl's rim, a
+    ladder up a leg and the tank, a riser pipe in the middle, a finial). 7 m across, 22 m tall; the legs stand about
+    1.7 times the tank and bowl, as in the photos (103841)."""
     m = Model("water_tower", {
         "tank": (1.0, vp.BODY), "tank_shade": (0.86, vp.BODY), "legs": (0xA5AAAE, vp.FIXED),
         "rods": (0x8E949A, vp.FIXED), "rail": (0x7C8288, vp.FIXED), "pad": (CONCRETE, vp.FIXED),
     })
-    H, R = 22.0, 2.8
+    H, R = 22.0, 2.6
     sides = 16
-    bal_y = 13.6               # the balcony's floor, the tank's widest point
-    tank_top = 18.8
-    # the tank: a rounded bottom, the drum, a conical roof and the finial
-    bottom = [(bal_y - 2.6, 0.0)]
+    bowl = 3.9                 # the bowl's depth, about three quarters of the tank's width
+    bal_y = 16.6               # the balcony's floor: the bowl's rim and the drum's foot
+    tank_top = bal_y + 3.5     # the drum, about two thirds of its width tall
+    eave = R + 0.4             # the roof's overhang
+    roof_top = H - 0.55
+    # the bowl: a deep rounded bottom (half an ellipse), the drum, the low overhanging roof and the finial
+    prof = [(bal_y - bowl, 0.0)]
     for k in range(1, 4):
         t = math.pi * 0.5 * k / 4
-        bottom.append((bal_y - 2.6 * math.cos(t), R * math.sin(t)))
-    m.lathe(bottom + [(bal_y, R)], "tank_shade", sides)
-    m.lathe([(bal_y, R), (tank_top, R), (tank_top + 0.15, R + 0.12)], "tank", sides)
-    m.lathe([(tank_top + 0.15, R + 0.12), (H - 0.7, 0.35), (H - 0.6, 0.2)], "tank_shade", sides)
-    m.lathe([(H - 0.6, 0.2), (H - 0.2, 0.12), (H, 0.0)], "rail", 6)
+        prof.append((bal_y - bowl * math.cos(t), R * math.sin(t)))
+    m.lathe(prof + [(bal_y, R)], "tank_shade", sides)
+    m.lathe([(bal_y, R), (tank_top, R)], "tank", sides)
+    m.lathe([(tank_top, R), (tank_top + 0.02, eave), (tank_top + 0.2, eave), (roof_top, 0.2)], "tank_shade", sides)
+    m.lathe([(roof_top, 0.2), (H - 0.2, 0.08), (H, 0.0)], "rail", 6)
     # the legs: four, leaning in from a wide stance to the balcony
-    foot, head = 3.6, R * 0.86
+    foot, head = 3.4, R * 0.92
     angles = [math.pi * 0.25 + k * math.pi * 0.5 for k in range(4)]
     feet = [(foot * math.cos(a), foot * math.sin(a)) for a in angles]
     heads = [(head * math.cos(a), head * math.sin(a)) for a in angles]
     for (fx, fz), (hx, hz) in zip(feet, heads):
         m.box((fx - 0.4, 0.0, fz - 0.4), (fx + 0.4, 0.4, fz + 0.4), "pad")
-        m.tube((fx, 0.4, fz), (hx, bal_y, hz), 0.22, 0.17, 6, "legs")
+        m.tube((fx, 0.4, fz), (hx, bal_y, hz), 0.2, 0.16, 6, "legs")
     # the bays: struts round each level and crossed rods
-    levels = [0.4, 4.6, 8.8, bal_y - 0.6]
+    levels = [0.4, 4.6, 8.8, 12.6]
 
     def at(i, y):
         t = (y - 0.4) / (bal_y - 0.4)
         return (feet[i][0] + (heads[i][0] - feet[i][0]) * t, y, feet[i][1] + (heads[i][1] - feet[i][1]) * t)
 
-    for y in levels[1:-1]:
+    for y in levels[1:]:
         for i in range(4):
             m.tube(at(i, y), at((i + 1) % 4, y), 0.09, 0.09, 4, "legs")
     for ya, yb in zip(levels, levels[1:]):
@@ -649,10 +689,10 @@ def water_tower() -> Model:
             j = (i + 1) % 4
             m.tube(at(i, ya), at(j, yb), 0.035, 0.035, 3, "rods")
             m.tube(at(j, ya), at(i, yb), 0.035, 0.035, 3, "rods")
-    # the riser pipe in the middle
-    m.tube((0.0, 0.0, 0.0), (0.0, bal_y - 2.5, 0.0), 0.35, 0.35, 8, "tank_shade")
-    # the balcony: a floor ring, a railing round it on posts
-    br = R + 0.65
+    # the riser pipe in the middle, into the bowl's bottom
+    m.tube((0.0, 0.0, 0.0), (0.0, bal_y - bowl + 0.3, 0.0), 0.32, 0.32, 8, "tank_shade")
+    # the balcony: a floor ring round the rim, a railing round it on posts
+    br = R + 0.6
     floor_in, floor_out = [], []
     rail_lo, rail_hi = [], []
     for i in range(sides):
@@ -668,25 +708,24 @@ def water_tower() -> Model:
             out=(0.0, -1.0, 0.0))
     m.rings([rail_lo, rail_hi], "rail")
     m.rings([rail_lo, rail_hi], "rail", inward=True)
-    for i in range(0, sides, 2):
+    for i in range(0, sides, 4):
         x, _, z = floor_out[i]
         m.tube((x, bal_y, z), (x, bal_y + 1.0, z), 0.03, 0.03, 3, "rail")
-    # the ladder: up the +Z leg's side to the balcony, then up the tank to the roof
-    lz0, lz1 = feet[1][1] + 0.0, R + 0.25
+    # the ladder: up the +Z side to the balcony, then up the drum to the roof's eave
     for dx in (-0.22, 0.22):
         m.tube((dx, 0.4, foot * 0.92), (dx, bal_y, br - 0.05), 0.03, 0.03, 3, "rail")
-        m.tube((dx, bal_y + 1.0, R + 0.12), (dx, tank_top + 0.3, R + 0.12), 0.03, 0.03, 3, "rail")
-    del lz0, lz1
-    for k in range(6):
-        y = 0.4 + (bal_y - 0.4) * (k + 0.5) / 6.0
+        m.tube((dx, bal_y + 1.0, R + 0.12), (dx, tank_top + 0.1, R + 0.12), 0.03, 0.03, 3, "rail")
+    for k in range(5):
+        y = 0.4 + (bal_y - 0.4) * (k + 0.5) / 5.0
         t = (y - 0.4) / (bal_y - 0.4)
         z = foot * 0.92 + (br - 0.05 - foot * 0.92) * t
         m.tube((-0.22, y, z), (0.22, y, z), 0.025, 0.025, 3, "rail")
     return m
 
 
-KINDS = {"shed": shed, "crane": crane, "mast": mast, "fuselage": fuselage, "silo": silo,
-         "watch_tower": watch_tower, "water_tower": water_tower}
+KINDS = {"shed": shed, "shed_long": lambda: shed("shed_long"), "shed_deep": lambda: shed("shed_deep"),
+         "crane": crane, "mast": mast, "fuselage": fuselage, "silo": silo, "watch_tower": watch_tower,
+         "water_tower": water_tower}
 
 
 def main() -> None:

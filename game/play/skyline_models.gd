@@ -66,7 +66,26 @@ static func placed_of(p: SkylinePiece, cfg: SkylineConfig, middle: Vector2) -> A
 			z_axis = Vector3(face.x, 0.0, face.y)
 			x_axis = Vector3.UP.cross(z_axis)
 	var size := Vector3(_extent(x_axis, p), height, _extent(z_axis, p))
-	return [_fit(mesh, foot, x_axis, z_axis, size, p.kind in cfg.keep_depth, body)]
+	return [_fit(best_of(cfg.models_of(p.kind), size), foot, x_axis, z_axis, size, p.kind in cfg.keep_depth, body)]
+
+
+## Of `meshes`, the one whose box stretches most evenly to `size` (the least stretch_of), so a shed's doors and windows
+## keep their size; the first when they tie.
+static func best_of(meshes: Array[Mesh], size: Vector3) -> Mesh:
+	var best: Mesh = meshes[0]
+	var least := INF
+	for mesh in meshes:
+		var spread := stretch_of(mesh, size)
+		if spread < least - 1e-6:
+			least = spread
+			best = mesh
+	return best
+
+
+## How unevenly `mesh`'s box stretches to `size`: the largest scale over the smallest (1 is even).
+static func stretch_of(mesh: Mesh, size: Vector3) -> float:
+	var scale := size / mesh.get_aabb().size.max(Vector3.ONE * 1e-3)
+	return maxf(scale.x, maxf(scale.y, scale.z)) / maxf(minf(scale.x, minf(scale.y, scale.z)), 1e-6)
 
 
 ## The colour `p`'s BODY faces take: the map file's, else its kind's.

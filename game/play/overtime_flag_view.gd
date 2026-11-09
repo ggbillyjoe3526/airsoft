@@ -55,7 +55,7 @@ func setup(cfg: FlagViewConfig, teams: TeamConfig, foot: Vector3, reach: float) 
 	# The pole and its fittings in the shared light (BP7); the cloth has its own shader, the ring stays flat paint.
 	var h := cfg.overtime_pole_height
 	var r := cfg.overtime_pole_radius
-	var model := PropDressConfig.load_mesh(cfg.pole_model)
+	var model := cfg.pole_mesh()
 	if model != null:
 		# the Attack / Defend pole's model, scaled down to this pole's height
 		var paint := LookMaterials.vertex_colour(cfg.pole_model_roughness, 0.0)

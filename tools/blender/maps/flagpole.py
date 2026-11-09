@@ -41,8 +41,9 @@ BASE_TOP = 0.14
 SOCKET_TOP = 0.27
 JOINTS = (1.25, 2.30)          # the twist-lock collars
 TOP = 3.30                     # the top of the aluminium section
-SHEAVE_Z = 3.34                # the truck's axle
-TRUCK_R = 0.068                # the truck's radius: the halyard's runs go into it
+SHEAVE_Z = 3.362               # the truck's axle
+TRUCK_R = 0.034                # the truck's radius, a little over the pole's (the photos' slim top)
+ROPE_IN = 0.13                 # how far under the axle the halyard's runs turn in to the truck
 RADII = (0.032, 0.029, 0.025)  # the three sections, bottom to top
 ROPE_LOW = 0.30                # FlagViewConfig.cloth_low
 ROPE_OFF = 0.058               # FlagViewConfig.rope_offset
@@ -72,6 +73,17 @@ def thumb(b: hs.Builder, x0: float, z: float) -> None:
     vp.lathe(b, [(-0.014, 0.0055), (0.0, 0.0055)], "collar", 8, (x0, 0.0, z), "x")
     b.prism([(-0.013, z - 0.0045), (0.013, z - 0.0045), (0.013, z + 0.0045), (-0.013, z + 0.0045)], "x",
             x0 - 0.024, x0 - 0.014, "knob")
+
+
+def rope(b: hs.Builder, p0: tuple, p1: tuple) -> None:
+    """A straight run of the halyard from `p0` to `p1` (Blender points), six-sided, its faces turned out."""
+    a, c = hs.Vector(p0), hs.Vector(p1)
+    axis = (c - a).normalized()
+    u = axis.cross(hs.Vector((1.0, 0.0, 0.0))).normalized()
+    v = axis.cross(u)
+    rings = [[tuple(o + (u * math.cos(2.0 * math.pi * i / 6) + v * math.sin(2.0 * math.pi * i / 6)) * ROPE_R)
+              for i in range(6)] for o in (a, c)]
+    vp.orient_loft(b.loft(rings, "rope", cap0=False, cap1=True), rings, False, True)
 
 
 def band(b: hs.Builder, z: float, r: float) -> None:
@@ -108,17 +120,19 @@ def build() -> hs.bpy.types.Object:
     # the top: a ferrule, the truck (a round pulley housing across the pole, its axle along X, the halyard running
     # into it either side), and a flat cap (no ball: the owner, 2026-11-09)
     lathe_z(b, [(TOP - 0.02, RADII[2]), (TOP - 0.015, 0.03), (TOP + 0.012, 0.03), (TOP + 0.016, 0.022)], "collar")
-    hub = TRUCK_R - 0.008
+    hub = TRUCK_R - 0.006
     vp.lathe(b, [(-0.016, 0.0), (-0.016, hub), (-0.012, TRUCK_R), (0.012, TRUCK_R), (0.016, hub), (0.016, 0.0)],
              "collar", 20, (0.0, 0.0, SHEAVE_Z), "x")
     for side in (-1.0, 1.0):  # the axle's nuts
         vp.lathe(b, [(0.0, 0.009), (0.007 * side, 0.009), (0.007 * side, 0.0)], "bolt", 6,
                  (0.016 * side, 0.0, SHEAVE_Z), "x")
     top = SHEAVE_Z + TRUCK_R
-    lathe_z(b, [(top - 0.01, 0.0), (top - 0.01, 0.016), (top + 0.008, 0.014), (top + 0.014, 0.0)], "knob", seg=16)
+    lathe_z(b, [(top - 0.01, 0.0), (top - 0.01, 0.012), (top + 0.004, 0.011), (top + 0.006, 0.0)], "collar", seg=16)
     # the halyard's two runs from the cloth's foot into the truck
     for side in (-1.0, 1.0):
-        vp.lathe(b, [(ROPE_LOW, ROPE_R), (SHEAVE_Z, ROPE_R)], "rope", 6, (0.0, -side * ROPE_OFF, 0.0), "z")
+        y = -side * ROPE_OFF
+        vp.lathe(b, [(ROPE_LOW, ROPE_R), (SHEAVE_Z - ROPE_IN, ROPE_R)], "rope", 6, (0.0, y, 0.0), "z")
+        rope(b, (0.0, y, SHEAVE_Z - ROPE_IN), (0.0, -side * (TRUCK_R - 0.004), SHEAVE_Z))
     # the horn cleat on the +Z (Godot) side, horns along the pole, the halyard's tail wrapped on it
     y0 = -(RADII[0] - 0.002)
     b.box((-0.012, y0 - 0.014, CLEAT_Z - 0.022), (0.012, y0, CLEAT_Z + 0.022), "base")

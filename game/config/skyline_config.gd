@@ -31,6 +31,12 @@ extends Resource
 ## The kinds whose model keeps its own depth, scaled as its length and height are (never past its piece's), so a
 ## crane's piece, deeper than the crane, doesn't fatten its pillar.
 @export var keep_depth: Array[StringName] = [&"crane"]
+## More models of a kind at other proportions (a shed's sizes): each piece stands whichever of its kind's models needs
+## the least uneven stretch to fill its box (SkylineModels), so doors and windows keep their size. One that won't load
+## is left out with a warning.
+@export var variants: Dictionary[StringName, PackedStringArray] = {
+	&"shed": PackedStringArray(["res://assets/models/skyline/shed_long.glb", "res://assets/models/skyline/shed_deep.glb"]),
+}
 
 @export_group("Sight")
 ## A floor whose top stands this high (m) or higher is a raised floor: its corners, `floor_inset` m in, and its middle
@@ -198,6 +204,7 @@ extends Resource
 
 var _meshes: Dictionary[StringName, Mesh] = {}
 var _tried: Dictionary[StringName, bool] = {}
+var _all: Dictionary[StringName, Array] = {}
 
 
 ## The model `kind` is drawn from, or null (not listed, or it won't load: warned once).
@@ -205,9 +212,40 @@ func model_of(kind: StringName) -> Mesh:
 	if not _tried.has(kind):
 		_tried[kind] = true
 		var path: String = models.get(kind, "")
-		var mesh := PropDressConfig.load_mesh(path)
+		var mesh := _load(kind, path)
 		if mesh != null:
 			_meshes[kind] = mesh
-		elif not path.is_empty():
-			push_warning("SkylineConfig: %s's model \"%s\" won't load; it keeps its greybox" % [kind, path])
 	return _meshes.get(kind, null) as Mesh
+
+
+## Every model `kind` may be drawn from: its own (model_of) first, then its `variants` that load; none without its own.
+func models_of(kind: StringName) -> Array[Mesh]:
+	if not _all.has(kind):
+		var out: Array[Mesh] = []
+		var own := model_of(kind)
+		if own != null:
+			out.append(own)
+			for path: String in variants.get(kind, PackedStringArray()):
+				var mesh := _load(kind, path)
+				if mesh != null:
+					out.append(mesh)
+		_all[kind] = out
+	var list: Array[Mesh] = []
+	list.assign(_all[kind])
+	return list
+
+
+## The mesh at `path` if it loads as a skyline model (one indexed surface with vertex colours), else null, warned.
+func _load(kind: StringName, path: String) -> Mesh:
+	if path.is_empty():
+		return null
+	var mesh := PropDressConfig.load_mesh(path)
+	if mesh != null and mesh.get_surface_count() > 0:
+		var arrays := mesh.surface_get_arrays(0)
+		if arrays[Mesh.ARRAY_COLOR] != null and arrays[Mesh.ARRAY_INDEX] != null:
+			var colours: PackedColorArray = arrays[Mesh.ARRAY_COLOR]
+			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			if colours.size() == verts.size():
+				return mesh
+	push_warning("SkylineConfig: %s's model \"%s\" won't load; it keeps its greybox" % [kind, path])
+	return null

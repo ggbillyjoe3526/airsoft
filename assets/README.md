@@ -6,6 +6,8 @@
 | `models/replicas/`, `models/replicaParts/` | The AEG, GBB Pistol and Cyber Pistol, and their fittable parts |
 | `models/powerSources/` | The batteries, gas bottle and springs shown in the loadout and the Armory |
 | `models/grenades/` | The smoke and flash bombs, shown in a match and as the Loadout's and the HUD's bomb icons |
+| `models/props/` | Map props: the Kenney CC0 set and the flagpole every map stands (`tools/blender/maps/flagpole.py`) |
+| `models/skyline/` | The Range's skyline buildings beyond the walls, drawn into the skyline's one mesh (`tools/blender/maps/skyline.py`; the shed in three sizes) |
 | `fonts/` | Inter (SIL OFL 1.1, `fonts/OFL.txt`), the HUD and menu font |
 | `ui/` | The crash screen's backdrop, `title-backdrop.jpg`: Depot's field picture blurred and darkened, no replica in it |
 | `maps/` | One picture of each match field for the Match page and the loading screen, each from a player's eye height by `tools/eye_pictures.gd`, 1920x1080 (our own renders; see `docs/ASSETS.md` for re-running them) |

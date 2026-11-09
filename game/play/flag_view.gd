@@ -46,7 +46,7 @@ func setup(cfg: FlagViewConfig, teams: TeamConfig, foot: Vector3, reach: float, 
 	if not letter.is_empty():
 		_add_letter(letter)
 	# The pole and its fittings in the shared light (BP7); the cloth has its own shader, the ring stays flat paint.
-	var model := PropDressConfig.load_mesh(cfg.pole_model)
+	var model := cfg.pole_mesh()
 	if model != null:
 		var paint := LookMaterials.vertex_colour(cfg.pole_model_roughness, 0.0)
 		_paints = [paint]

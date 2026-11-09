@@ -76,3 +76,17 @@ extends Resource
 ## The rise out of the ground as it goes up (s; none under Reduced motion), from this share of its height.
 @export var overtime_rise: float = 0.8
 @export var overtime_rise_from: float = 0.02
+
+var _pole_mesh: Mesh = null
+var _pole_tried := false
+
+
+## The pole's model (`pole_model`), loaded once, or null: none set, or it won't load (warned once); the views then draw
+## the plain pole.
+func pole_mesh() -> Mesh:
+	if not _pole_tried:
+		_pole_tried = true
+		_pole_mesh = PropDressConfig.load_mesh(pole_model)
+		if _pole_mesh == null and not pole_model.is_empty():
+			push_warning("FlagViewConfig: the pole's model \"%s\" won't load; it is drawn plain" % pole_model)
+	return _pole_mesh

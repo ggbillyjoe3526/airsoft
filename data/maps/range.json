@@ -725,7 +725,7 @@
     "z": 50,
     "width": 24,
     "depth": 6,
-    "height": 21
+    "height": 15
    },
    {
     "kind": "shed",
@@ -795,7 +795,7 @@
     "z": -54,
     "width": 6,
     "depth": 22,
-    "height": 26
+    "height": 15
    },
    {
     "kind": "chimney",

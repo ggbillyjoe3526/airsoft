@@ -75,7 +75,7 @@ func test_the_pole_is_its_model_standing_on_the_floor_within_its_sizes() -> void
 	assert_not_null(mesh, "the model loads")
 	var box := mesh.get_aabb()
 	assert_almost_eq(box.position.y, 0.0, 1e-3, "it stands on the floor")
-	assert_almost_eq(box.size.y, cfg.pole_height + cfg.finial_radius * 1.5, 0.1, "as tall as the pole and its ball")
+	assert_almost_eq(box.size.y, cfg.pole_height, 0.03, "as tall as the pole: no ball on top (the owner, 2026-11-09)")
 	assert_lt(maxf(absf(box.position.x), box.end.x), cfg.base_radius.x + 1e-3, "no wider than its base")
 	assert_lt(cfg.cloth_high + cfg.cloth_size.y, box.end.y, "the cloth's top stays under its top")
 	var tris := (mesh.surface_get_arrays(0)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
@@ -90,6 +90,18 @@ func test_a_pole_whose_model_won_t_load_is_drawn_plain() -> void:
 	view.setup(cfg, play.teams, Vector3.ZERO, SimTuning.new().flag.radius)
 	add_child_autofree(view)
 	assert_eq(view.materials().size(), 5, "the cloth, the ring, the pole, its fittings and the rope")
+
+
+func test_a_pole_whose_model_is_missing_is_drawn_plain_with_one_warning() -> void:
+	var play := PlayTuning.new()
+	var cfg := play.flag.duplicate() as FlagViewConfig
+	cfg.pole_model = "res://assets/models/props/no_such_pole.glb"
+	for i in 2:
+		var view := FlagView.new()
+		view.setup(cfg, play.teams, Vector3.ZERO, SimTuning.new().flag.radius)
+		add_child_autofree(view)
+		assert_eq(view.materials().size(), 5, "drawn plain")
+	assert_push_warning_count(1, "warned once, not every pole")
 
 
 func test_the_pole_is_only_drawn_so_bbs_pass_through_it() -> void:
