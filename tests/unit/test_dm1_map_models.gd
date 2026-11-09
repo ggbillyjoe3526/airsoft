@@ -4,7 +4,8 @@ extends GutTest
 ## container's doors face the free end of its row, a cut piece lies along the row it joins and a unit beside another
 ## keeps its length along its box; every block of a joined row takes the first's paint, carried in the instances'
 ## custom data so bare steel stays unpainted; a map's doors take the leaf and frame built nearest their size, the
-## frame as deep as the thinnest wall at the jamb and casting no shadow.
+## frame as deep as the thinnest wall at the jamb and casting no shadow; a crate's edge profiles carry rows of holes the
+## props' shader punches.
 
 var play: PlayTuning = PlayTuning.load_default()
 var cfg: PropDressConfig = null
@@ -136,6 +137,21 @@ func test_a_joined_row_takes_its_first_block_s_paint_in_custom_data_and_bare_ste
 	for c in cfg.mesh_of(&"container").surface_get_arrays(0)[Mesh.ARRAY_COLOR] as PackedColorArray:
 		alphas[snappedf(c.a, 0.01)] = true
 	assert_eq(alphas.keys().size(), 2, "a container has painted and bare parts")
+
+
+func test_a_crate_s_profiles_carry_rows_of_holes_the_props_shader_punches() -> void:
+	var arrays := cfg.mesh_of(&"crate").surface_get_arrays(0)
+	var uvs := arrays[Mesh.ARRAY_TEX_UV] as PackedVector2Array
+	assert_false(uvs.is_empty(), "the crate carries UVs")
+	var rows := 0
+	for uv in uvs:
+		if uv.x > 1.0:
+			rows += 1
+	assert_gt(rows, 0, "its perforated strips' UVs mark them (x over 1)")
+	var dress := PropDress.build(_map([_block(&"crate", Vector3(0.0, 0.6, 0.0), Vector3(1.2, 1.15, 1.0))]), cfg)
+	add_child_autofree(dress)
+	assert_true((dress.materials()[0] as ShaderMaterial).get_shader_parameter(&"perforations"),
+			"the props' shader punches them")
 
 
 func test_a_map_s_doors_take_the_leaf_and_frame_built_nearest_their_size() -> void:

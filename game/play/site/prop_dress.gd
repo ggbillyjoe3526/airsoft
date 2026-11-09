@@ -43,6 +43,7 @@ static func build(map: MapData, cfg: PropDressConfig, paint: Callable = Callable
 	dress.name = "Props"
 	dress._material = LookMaterials.vertex_colour(cfg.roughness, cfg.metallic)
 	dress._material.set_shader_parameter(&"paint_by_custom", true)
+	dress._material.set_shader_parameter(&"perforations", true)
 	dress._placed = placed
 	dress._meshes = meshes
 	for model: StringName in placed:

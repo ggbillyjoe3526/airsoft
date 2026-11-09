@@ -3,9 +3,11 @@
 A plywood shipping crate after the owner's photos (art/references/maps/william-2026-11-09/wooden_crate/): birch
 plywood sides and lid, the lid a sheet laid on top, galvanised steel edge profiles along all twelve edges with the
 clip loops of a nail-less crate along the top and flat clips along the foot, a block pallet under it (three bottom
-boards, nine blocks, a deck; its fork openings dark), grain streaks down each face, and the stencils a crate carries
-(two up arrows and a blank label; no brand). The map's blocks set its footprint (GRID cells), not the photos'. Stacked by PropLayout's GRID in cells of
-PropDressConfig.grid_cells[&"crate"] (two high in a 2.4 m wall, one in waist cover), each turned end for end at random.
+boards, eight blocks, a deck; its fork openings dark), soft grain bands fading in and out on each face, a dense row of
+holes down the profiles (punched by the game's shader, kit.perforated) and the stencils a crate carries (two up arrows
+and a blank label; no brand). The map's blocks set its footprint (GRID cells), not the photos'. Stacked by
+PropLayout's GRID in cells of PropDressConfig.grid_cells[&"crate"] (two high in a 2.4 m wall, one in waist cover),
+each turned end for end at random.
 
 Run with Blender 5.x, or Python with the `bpy` module (pip install bpy==5.2.3):
 
@@ -36,20 +38,20 @@ LID = 0.012  # the lid sheet's thickness over the sides' tops
 CLIP = (0.05, 0.03)  # a clip loop's width and height on the top profile
 CLIPS_LONG = (-0.36, 0.0, 0.36)
 CLIPS_SHORT = (0.0,)
+PERF = 0.014  # a perforated strip's width over a profile's face (its holes kit.PERF_RADIUS)
 
-# Wood tones kept out of Beta's orange (hue at least 20 degrees from it, or greyed: tests/unit/test_props.gd).
-PLY = 0xd2c88c  # pine plywood, the long sides (his photos' warm tan, its hue past orange's band toward yellow)
-PLY_END = 0xc6bc84  # the end panels, a sheet of a darker cut
-PLY_LID = 0xded49e  # the lid, catching the light
-PINE = 0xbab07c  # the pallet's boards
-PINE_END = 0xaaa274  # its blocks, end grain
+# Wood tones off Beta's orange (tests/unit/test_props.gd: none within 20 degrees of a team's hue unless greyed): his
+# photos' pale plywood (linear hue 33 to 37) moved just past that band, to 38, its lightness and saturation kept.
+PLY = 0xe0cea9  # birch plywood, the long sides (his third photo's front)
+PLY_END = 0xd5c298  # the end panels, a sheet of a darker cut
+PLY_LID = 0xe8dcc0  # the lid, catching the light
+PINE = 0xbaa677  # the pallet's boards, rougher and darker
+PINE_END = 0xa99a6a  # its blocks, end grain
 STEEL = 0xb6babd  # galvanised profiles and clips
 INK = 0x3b3440  # stencil ink
 SHADOW = 0x2a2824  # the dark inside the pallet's fork openings
-GRAIN = 0xb2a874  # grain streaks on the sides' plywood
-GRAIN_END = 0xaaa274  # and on the ends'
+GRAIN = 0.95  # a grain band's darkest share of the plywood's colour, at its middle (his photos' soft figure)
 CLIP_C = 0x8a8e90  # the foot's clips, flat
-HOLE = 0x3a3c40  # the profiles' perforations
 LABEL = 0xefe8d6  # the shipping label
 
 
@@ -89,13 +91,61 @@ def shadow_sheet(name: str, along: str, at: float, a0: float, a1: float, z0: flo
     return kit.mesh_object(name, bm, SHADOW)
 
 
-def streak(c: float, w: float, wave: float, z0: float, z1: float) -> list:
-    """A grain streak's outline (across, up): `w` wide, wavering `wave` off its line at a third and two thirds up."""
-    zs = (z0, z0 + (z1 - z0) / 3, z0 + 2 * (z1 - z0) / 3, z1)
-    offs = (0.0, wave, -wave * 0.5, wave * 0.3)
-    left = [(c + o - w / 2, z) for o, z in zip(offs, zs)]
-    right = [(c + o + w / 2, z) for o, z in zip(offs, zs)]
-    return right + list(reversed(left))
+def band(name: str, c: float, w: float, bend: float, z0: float, z1: float, plane: float, axis: int, facing: int,
+         colour: int, foot: tuple) -> object:
+    """A soft grain band on a face: a lens from z0 to z1, `w` wide at its widest, its middle `c` across the face
+    bending `bend` over its length, its middle line GRAIN of the plywood's colour fading to the plywood's own at its
+    edges and tips, so it has no edge. On the plane `plane` of axis `axis` (0: a face across x, 1: across y), facing
+    `facing` along it."""
+    zs = (z0, z0 + (z1 - z0) * 0.3, z0 + (z1 - z0) * 0.68, z1)
+    offs = (0.0, bend, bend * 0.4, -bend * 0.3)
+    widths = (0.0, w, w * 0.8, 0.0)
+    pts, tones = [], []
+    for z, o, ww in zip(zs, offs, widths):
+        row = [(c + o, z)] if ww == 0.0 else [(c + o - ww / 2, z), (c + o, z), (c + o + ww / 2, z)]
+        pts.append(row)
+        tones += [1.0] if ww == 0.0 else [1.0, GRAIN, 1.0]
+    bm = bmesh.new()
+
+    def at(a: float, z: float) -> tuple:
+        return (plane, a, z) if axis == 0 else (a, plane, z)
+    rows = [[bm.verts.new(at(a, z)) for a, z in row] for row in pts]
+    tip0, mid0, mid1, tip1 = rows
+    bm.faces.new([tip0[0], mid0[2], mid0[1]])
+    bm.faces.new([tip0[0], mid0[1], mid0[0]])
+    for k in range(2):
+        bm.faces.new([mid0[k], mid0[k + 1], mid1[k + 1], mid1[k]])
+    bm.faces.new([tip1[0], mid1[0], mid1[1]])
+    bm.faces.new([tip1[0], mid1[1], mid1[2]])
+    ob = kit.mesh_object(name, bm, colour)
+    ob.data.update()
+    for p in ob.data.polygons:
+        if (p.normal[axis] > 0) != (facing > 0):
+            p.flip()
+    ob.data.update()
+    kit.toned(ob, tones)
+    return kit.foot_span(ob, *foot)
+
+
+def strip(along: int, a0: float, a1: float, across: int, middle: float, plane: float, facing: int,
+          shade: float, foot: tuple) -> object:
+    """A flat steel strip over a profile's face, from a0 to a1 along axis `along`, PERF wide across `across` round
+    `middle`, on the plane `plane` of the third axis facing `facing`: the game punches its row of holes
+    (kit.perforated)."""
+    flat_axis = 3 - along - across
+    bm = bmesh.new()
+    corners = []
+    for a, b in ((a0, -1), (a1, -1), (a1, 1), (a0, 1)):
+        co = [0.0, 0.0, 0.0]
+        co[along], co[across], co[flat_axis] = a, middle + b * PERF / 2, plane
+        corners.append(bm.verts.new(co))
+    bm.faces.new(corners)
+    ob = kit.mesh_object("perforations", bm, STEEL, shade=shade)
+    ob.data.update()
+    if (ob.data.polygons[0].normal[flat_axis] > 0) != (facing > 0):
+        ob.data.flip_normals()
+    kit.foot_span(ob, *foot)
+    return kit.perforated(ob, across, along, middle)
 
 
 def arrow(cx: float, z0: float, w: float, h: float) -> list:
@@ -171,29 +221,35 @@ def build() -> list:
             parts.append(turned_flat("clip", [(y - cw / 2, BASE + 0.003), (y + cw / 2, BASE + 0.003),
                                               (y + cw / 2, BASE + ch), (y - cw / 2, BASE + ch)], sx * (hx + 0.0015),
                                      CLIP_C, sx))
-    # Grain streaks down each face, darker (his photos' strong figure): thin and wavering, three on each long side
-    # and two on each end, so they read as grain, not as the seams between boards.
+    # Soft grain bands on each face (his photos' broad figure, no lines): each starts and stops inside the face, five
+    # per cent darker at its middle and fading out to the plywood at its edges.
     top = HIGH - e - LID
+    lo_z = BASE + e
+    span = (BASE, HIGH - LID)
     for facing in (-1, 1):
         y = facing * (iy + 0.001)
-        for gx, w, wave in ((-0.31, 0.016, 0.03), (0.04, 0.012, -0.025), (0.3, 0.02, 0.035)):
-            parts.append(flat("grain", streak(gx * -facing, w, wave, BASE + e, top), y, GRAIN, facing))
+        for gx, w, bend, z0, z1 in ((-0.32, 0.13, 0.04, lo_z + 0.08, top - 0.12), (0.0, 0.1, -0.03, lo_z + 0.3,
+                                                                                    top - 0.02),
+                                    (0.3, 0.14, 0.05, lo_z + 0.02, top - 0.3)):
+            parts.append(band("grain", gx * -facing, w, bend * -facing, z0, z1, y, 1, facing, PLY, span))
     for sx in (-1, 1):
         x = sx * (ix + 0.001)
-        for gy, w, wave in ((-0.2, 0.016, 0.03), (0.22, 0.013, -0.03)):
-            parts.append(turned_flat("grain", streak(gy * sx, w, wave, BASE + e, top), x, GRAIN_END, sx))
-    # The edge profiles' perforations: a column of dark holes up each outer face of the corner profiles.
+        for gy, w, bend, z0, z1 in ((-0.2, 0.13, 0.04, lo_z + 0.1, top - 0.06), (0.2, 0.11, -0.035, lo_z + 0.02,
+                                                                                 top - 0.25)):
+            parts.append(band("grain", gy * sx, w, bend * sx, z0, z1, x, 0, sx, PLY_END, span))
+    # The edge profiles' perforations, a dense row down the middle of each leg's outer face (his photos): flat strips
+    # whose holes the game's shader punches (kit.perforated), so they cost two triangles a row.
     for sx in (-1, 1):
         for sy in (-1, 1):
-            for k in range(3):
-                z = BASE + 0.2 + k * (HIGH - BASE - 0.4) / 2
-                px = sx * (hx - e / 2)
-                parts.append(flat("hole", [(px - 0.005, z - 0.005), (px + 0.005, z - 0.005), (px + 0.005, z + 0.005),
-                                           (px - 0.005, z + 0.005)], sy * (hy + 0.0008), HOLE, sy))
-                py = sy * (hy - e / 2)
-                parts.append(turned_flat("hole", [(py - 0.005, z - 0.005), (py + 0.005, z - 0.005),
-                                                  (py + 0.005, z + 0.005), (py - 0.005, z + 0.005)], sx * (hx + 0.0008),
-                                         HOLE, sx))
+            z0, z1 = BASE + e, HIGH - e
+            parts.append(strip(2, z0, z1, 0, sx * (hx - e / 2), sy * (hy + 0.0008), sy, 1.0, (BASE, HIGH)))
+            parts.append(strip(2, z0, z1, 1, sy * (hy - e / 2), sx * (hx + 0.0008), sx, 1.0, (BASE, HIGH)))
+    for z0, z1 in ((HIGH - e, HIGH),):
+        zm = (z0 + z1) / 2
+        for sy in (-1, 1):
+            parts.append(strip(0, -hx + e, hx - e, 2, zm, sy * (hy + 0.0008), sy, 0.97, (z0, z1)))
+        for sx in (-1, 1):
+            parts.append(strip(1, -hy + e, hy - e, 2, zm, sx * (hx + 0.0008), sx, 0.97, (z0, z1)))
     # Stencils on both long sides: two up arrows high on the left, a blank label low on the right.
     for facing in (-1, 1):
         y = facing * (iy + 0.0015)

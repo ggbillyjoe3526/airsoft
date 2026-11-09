@@ -9,8 +9,13 @@ the model's bounds to the box (or to a cell of it). So every model here is:
 - painted with parts: each part a material whose colour (an sRGB hex, written linear as glTF keeps vertex colours) is
   copied onto its vertices, times the part's shade and a soft darkening towards its foot (`FOOT_SHADE`), so a stack
   reads as stacked;
-- written as one glb of positions, normals and colours, glTF's +Y up (Blender's +Z), +Z toward the viewer (Blender's
-  -Y), with no textures.
+- shaded within a part where it carries a `tone` (`toned`): a share of its colour on each vertex, so soft grain fades
+  in and out across a face with no edge to it;
+- perforated where a part is marked `perforated`: its vertices carry UVs (x 2 plus metres across the row's middle, y
+  metres along it) that look_vertex.gdshader punches a row of holes into, so a steel profile's dense holes cost no
+  triangles;
+- written as one glb of positions, normals and colours (and UVs when a part is perforated), glTF's +Y up (Blender's
+  +Z), +Z toward the viewer (Blender's -Y), with no textures.
 
 Every colour stays off the teams' hues (tests/unit/test_props.gd); metallic is the props' (none). Run the build scripts
 with Blender 5.x or pip's `bpy` (pip install bpy==5.2.3); see each script's docstring.
@@ -28,6 +33,10 @@ from mathutils import Vector
 # How much darker a part is at its lowest point than at its highest (a share of its colour): the soft shade at a
 # crate's foot, under a wall's skirting.
 FOOT_SHADE = 0.12
+# A perforated strip's holes (`perforated`): their pitch along it and radius, metres; look_vertex.gdshader's
+# perforation_pitch and perforation_radius keep the same.
+PERF_PITCH = 0.045
+PERF_RADIUS = 0.0045
 # Who made the files, written into each glb.
 COPYRIGHT = "airsoft project; made by tools/blender/maps"
 
@@ -73,6 +82,30 @@ def bare(ob: bpy.types.Object) -> bpy.types.Object:
     """Marks `ob` as never painted: its vertex alpha 0, so the game's paint (a container's, PropDress's custom data in
     look_vertex.gdshader) leaves it its own colour, bare steel or rubber. Every other part's alpha is 1."""
     ob["bare"] = True
+    return ob
+
+
+def toned(ob: bpy.types.Object, tones: list) -> bpy.types.Object:
+    """Gives each of `ob`'s vertices, in order, a share of its colour (`tones`): soft shading within the part."""
+    layer = ob.data.attributes.new("tone", "FLOAT", "POINT")
+    for i, t in enumerate(tones):
+        layer.data[i].value = t
+    return ob
+
+
+def foot_span(ob: bpy.types.Object, z0: float, z1: float) -> bpy.types.Object:
+    """Shades `ob`'s foot over z0 to z1 instead of its own height (FOOT_SHADE), so a mark laid on a part shades as the
+    part under it does and shows no edge."""
+    ob["foot"] = (z0, z1)
+    return ob
+
+
+def perforated(ob: bpy.types.Object, across: int, along: int, middle: float) -> bpy.types.Object:
+    """Marks `ob` (a flat strip) for a row of holes down its axis `along` (0 x, 1 y, 2 z), centred on `middle` along
+    its axis `across`: look_vertex.gdshader draws them from the UVs `_gather` writes."""
+    ob["perf"] = True
+    ob["perf_axes"] = [int(across), int(along)]
+    ob["perf_middle"] = float(middle)
     return ob
 
 
@@ -160,7 +193,7 @@ def _gather(objects: list, unit: tuple = None, middle: tuple = None) -> tuple:
     positions are divided by it round the bounds' middle, so the model fills a 1 m cube a game scales back to any
     size (a door's leaf, DoorView), and the normals follow (times the size, normalised). `middle` is the point that
     goes to the cube's middle (the bounds' middle without it); parts past `unit` (a handle) stand out of the cube."""
-    positions, normals, colours, indices = [], [], [], []
+    positions, normals, colours, uvs, indices = [], [], [], [], []
     mid = [0.0, 0.0, 0.0]
     if unit is not None:
         lo, hi = bounds(objects)
@@ -171,8 +204,10 @@ def _gather(objects: list, unit: tuple = None, middle: tuple = None) -> tuple:
         shade = float(ob.get("shade", 1.0))
         alpha = 0.0 if ob.get("bare", False) else 1.0
         zs = [v.co.z for v in me.vertices]
-        z0, z1 = min(zs), max(zs)
+        z0, z1 = ob["foot"] if "foot" in ob else (min(zs), max(zs))
         span = max(z1 - z0, 1e-6)
+        tone = me.attributes.get("tone")
+        perf = (int(ob["perf_axes"][0]), int(ob["perf_axes"][1]), ob["perf_middle"]) if "perf" in ob else None
         me.calc_loop_triangles()
         for tri in me.loop_triangles:
             mat = me.materials[me.polygons[tri.polygon_index].material_index]
@@ -185,28 +220,35 @@ def _gather(objects: list, unit: tuple = None, middle: tuple = None) -> tuple:
                 if unit is not None:
                     co = Vector([(co[i] - mid[i]) / unit[i] for i in range(3)])
                 foot = 1.0 - FOOT_SHADE * (1.0 - (me.vertices[vi].co.z - z0) / span)
-                k = shade * foot
+                k = shade * foot * (tone.data[vi].value if tone is not None else 1.0)
+                own = me.vertices[vi].co
+                uv = (round(2.0 + own[perf[0]] - perf[2], 5), round(own[perf[1]], 5)) if perf else (0.0, 0.0)
                 row = ((round(co.x, 5), round(co.z, 5), round(-co.y, 5)), (round(n.x, 4), round(n.z, 4),
-                       round(-n.y, 4)), (round(base[0] * k, 4), round(base[1] * k, 4), round(base[2] * k, 4), alpha))
+                       round(-n.y, 4)), (round(base[0] * k, 4), round(base[1] * k, 4), round(base[2] * k, 4), alpha),
+                       uv)
                 if row not in seen:
                     seen[row] = len(positions)
                     positions.append(row[0])
                     normals.append(row[1])
                     colours.append(row[2])
+                    uvs.append(row[3])
                 indices.append(seen[row])
-    return positions, normals, colours, indices
+    return positions, normals, colours, uvs, indices
 
 
 def export(path: str, name: str, objects: list, unit: tuple = None, middle: tuple = None) -> int:
     """Writes `objects` as one vertex-coloured mesh `name` to the glb at `path` (in a 1 m cube with `unit`, _gather);
-    returns its triangle count."""
-    positions, normals, colours, indices = _gather(objects, unit, middle)
+    returns its triangle count. The UVs (TEXCOORD_0) are written only when a part is perforated."""
+    positions, normals, colours, uvs, indices = _gather(objects, unit, middle)
+    with_uv = any("perf" in ob for ob in objects)
 
     def pack(fmt: str, rows: list) -> bytes:
         return b"".join(struct.pack("<" + fmt, *r) for r in rows)
 
     chunks = [pack("3f", positions), pack("3f", normals), pack("4f", colours),
               struct.pack("<%dI" % len(indices), *indices)]
+    if with_uv:
+        chunks.append(pack("2f", uvs))
     views, blob = [], b""
     for c in chunks:
         views.append({"buffer": 0, "byteOffset": len(blob), "byteLength": len(c)})
@@ -214,18 +256,21 @@ def export(path: str, name: str, objects: list, unit: tuple = None, middle: tupl
     lo = [min(p[i] for p in positions) for i in range(3)]
     hi = [max(p[i] for p in positions) for i in range(3)]
     count = len(positions)
+    attributes = {"POSITION": 0, "NORMAL": 1, "COLOR_0": 2}
+    if with_uv:
+        attributes["TEXCOORD_0"] = 4
     gltf = {
         "asset": {"version": "2.0", "generator": "airsoft tools/blender/maps", "copyright": COPYRIGHT},
         "scene": 0, "scenes": [{"nodes": [0]}], "nodes": [{"name": name, "mesh": 0}],
-        "meshes": [{"name": name, "primitives": [{"attributes": {"POSITION": 0, "NORMAL": 1, "COLOR_0": 2},
-                                                    "indices": 3, "material": 0}]}],
+        "meshes": [{"name": name, "primitives": [{"attributes": attributes, "indices": 3, "material": 0}]}],
         "materials": [{"name": "vertex_colour", "pbrMetallicRoughness": {"metallicFactor": 0.0,
                                                                          "roughnessFactor": 0.8}}],
         "accessors": [
             {"bufferView": 0, "componentType": 5126, "count": count, "type": "VEC3", "min": lo, "max": hi},
             {"bufferView": 1, "componentType": 5126, "count": count, "type": "VEC3"},
             {"bufferView": 2, "componentType": 5126, "count": count, "type": "VEC4"},
-            {"bufferView": 3, "componentType": 5125, "count": len(indices), "type": "SCALAR"}],
+            {"bufferView": 3, "componentType": 5125, "count": len(indices), "type": "SCALAR"}]
+        + ([{"bufferView": 4, "componentType": 5126, "count": count, "type": "VEC2"}] if with_uv else []),
         "bufferViews": views, "buffers": [{"byteLength": len(blob)}],
     }
     j = json.dumps(gltf, separators=(",", ":")).encode()
@@ -256,15 +301,55 @@ def render(path: str, objects: list, views: list, size: tuple = (900, 700), pain
     # paints a container) unless the part is bare.
     tint = [srgb_to_linear(((paint >> sh) & 0xff) / 255.0) for sh in (16, 8, 0)] if paint is not None else None
     for ob in objects:
+        toned_part = ob.data.attributes.get("tone") is not None
         for i, m in enumerate(ob.data.materials):
-            if tint is not None and not ob.get("bare", False):
+            if (tint is not None and not ob.get("bare", False)) or toned_part:
                 m = m.copy()
-                m.diffuse_color = [m.diffuse_color[c] * tint[c] for c in range(3)] + [1.0]
+                if tint is not None and not ob.get("bare", False):
+                    m.diffuse_color = [m.diffuse_color[c] * tint[c] for c in range(3)] + [1.0]
                 ob.data.materials[i] = m
             m.use_nodes = True
             bsdf = m.node_tree.nodes.get("Principled BSDF")
             bsdf.inputs["Base Color"].default_value = m.diffuse_color
             bsdf.inputs["Roughness"].default_value = 0.8
+            if toned_part:  # the tone times the colour, as _gather writes it
+                tone = m.node_tree.nodes.new("ShaderNodeAttribute")
+                tone.attribute_name = "tone"
+                mul = m.node_tree.nodes.new("ShaderNodeMix")
+                mul.data_type = "RGBA"
+                mul.blend_type = "MULTIPLY"
+                mul.inputs[0].default_value = 1.0
+                mul.inputs[6].default_value = m.diffuse_color
+                m.node_tree.links.new(tone.outputs["Color"], mul.inputs[7])
+                m.node_tree.links.new(mul.outputs[2], bsdf.inputs["Base Color"])
+    # The perforations the game's shader draws, as dark dots for the pictures only.
+    dots = []
+    for ob in objects:
+        if "perf" not in ob:
+            continue
+        across, along, middle = int(ob["perf_axes"][0]), int(ob["perf_axes"][1]), ob["perf_middle"]
+        cos = [v.co for v in ob.data.vertices]
+        flat_axis = 3 - across - along
+        level = cos[0][flat_axis] + math.copysign(0.0004, ob.data.polygons[0].normal[flat_axis])
+        a0, a1 = min(c[along] for c in cos), max(c[along] for c in cos)
+        at = math.ceil(a0 / PERF_PITCH) * PERF_PITCH
+        bm = bmesh.new()
+        while at < a1 - PERF_RADIUS:
+            ring = []
+            for k in range(8):
+                co = [0.0, 0.0, 0.0]
+                co[across] = middle + PERF_RADIUS * math.cos(math.tau * k / 8)
+                co[along] = at + PERF_RADIUS * math.sin(math.tau * k / 8)
+                co[flat_axis] = level
+                ring.append(bm.verts.new(co))
+            bm.faces.new(ring)
+            at += PERF_PITCH
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+        dot = mesh_object("_holes", bm, 0x2a2c30)
+        dot.data.materials[0].use_nodes = True
+        dot.data.materials[0].node_tree.nodes.get("Principled BSDF").inputs["Base Color"].default_value = (
+            0.02, 0.02, 0.025, 1.0)
+        dots.append(dot)
     world = bpy.data.worlds.new("w")
     world.use_nodes = True
     world.node_tree.nodes["Background"].inputs[0].default_value = (0.75, 0.76, 0.8, 1.0)
@@ -296,6 +381,8 @@ def render(path: str, objects: list, views: list, size: tuple = (900, 700), pain
         scene.render.filepath = "%s_%s.png" % (path, name)
         bpy.ops.render.render(write_still=True)
         out.append(scene.render.filepath)
+    for dot in dots:
+        bpy.data.objects.remove(dot)
     bpy.data.objects.remove(floor)
     bpy.data.objects.remove(sun)
     bpy.data.objects.remove(cam)

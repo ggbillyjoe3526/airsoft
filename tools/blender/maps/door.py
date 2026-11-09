@@ -1,8 +1,9 @@
 """The hinged door (DM1, 2026-11-09): assets/models/props/door_leaf*.glb and door_frame*.glb, every map's doors.
 
 A two-panel timber door after the owner's photos (art/references/maps/william-2026-11-09/wooden_door/, the third):
-stiles and rails standing proud of two raised and fielded panels on both faces, grain down them, a lever handle on a
-round rose with a keyhole below on both faces at the free edge, hinge leaves and three knuckles on the hinged edge.
+stiles and rails standing proud of two raised and fielded panels on both faces, soft grain shaded across the fields,
+a lever handle on a round rose with a keyhole below on both faces at the free edge, hinge leaves and three knuckles
+on the hinged edge.
 DoorView draws two leaves a door, each scaled to its half of the opening, so each leaf's body is written in a 1 m cube
 round its middle (its x the width, the hinge at -x and the handle at +x, its y the height, its z the thickness; the
 handles and knuckles stand out of it): DoorView scales it back. Three leaves (LEAVES), one for each map's openings,
@@ -14,8 +15,8 @@ lower opening a head lining and architrave. Three (FRAMES), each written at its 
 origin at the opening's foot in the wall's middle: DoorView stretches the nearest to each door's opening and wall
 (DoorView.FRAME_MODELS).
 
-Golden oak: his honey oak's hue lies in Beta's orange band (tests/unit/test_props.gd's rule), so the oak is moved past
-it, darker than the plywood walls so a door reads as a door.
+Honey oak: his photo's hue lies in Beta's orange band (tests/unit/test_props.gd's rule), so it is moved just past it,
+its lightness and saturation kept, warmer and darker than the plywood walls so a door reads as a door.
 
 Run with Blender 5.x, or Python with the `bpy` module (pip install bpy==5.2.3):
 
@@ -44,8 +45,11 @@ LEAVES = {"door_leaf": (0.97, 2.6), "door_leaf_mid": (0.78, 2.5), "door_leaf_nar
 # no head; the huts' and The Street's have wall above them. DoorView.FRAMES keeps these sizes.
 FRAMES = {"door_frame": (2.0, 2.6, False), "door_frame_mid": (1.6, 2.5, True), "door_frame_narrow": (0.9, 2.1, True)}
 THICK = 0.08
-TOP_RAIL, MID_RAIL, BOTTOM_RAIL = 0.13, 0.2, 0.24
-MID_AT = 0.44  # the mid rail's middle, a share of the leaf's height up (his photo's two panels)
+# His photo's two panels, as shares of the leaf: the top, mid and bottom rails' heights and the mid rail's middle of
+# its height, the stiles' of its width.
+TOP_RAIL, MID_RAIL, BOTTOM_RAIL = 0.071, 0.087, 0.092
+MID_AT = 0.44
+STILE = 0.155
 PROUD = 0.01  # the frame over the panels' plane
 FIELD = 0.008  # the panel's raised field over the panel's plane
 BEVEL = 0.05  # the field's bevelled margin
@@ -56,43 +60,58 @@ ARCH_PROUD = 0.016
 LINING = 0.018  # the lining's thickness
 LINING_IN = 0.006  # how far the lining stands into the opening past the wall's cut end (no shared plane with it)
 
-# Golden oak (his photo's honey oak with its hue moved just past Beta's orange band, test_props.gd's rule), more
-# saturated than the pale plywood walls so a door reads as a door.
-STILE_C = 0xb4aa6a
-PANEL_C = 0xc6ba78
-FIELD_C = 0xccc07c
-EDGE_C = 0xa29862
-GRAIN_C = 0xa29862  # grain streaks on the stiles and rails, darker
-FIELD_GRAIN_C = 0xaca268  # and on the panels, a shade under the field
-SHADOW_C = 0x7c7448  # the shadow line under a panel's moulding
-LIGHT_C = 0xdcd086  # the light catching the panel's foot
+# Honey oak: his third photo's (linear hue 18 to 21) moved just past Beta's orange band (test_props.gd: none within
+# 20 degrees of a team's hue unless greyed) to 38, its lightness and saturation kept; the stiles and rails darker than
+# the panels, as in his photo.
+STILE_C = 0xc0a661
+PANEL_C = 0xd3b875
+FIELD_C = 0xdabf79
+EDGE_C = 0xa38e5b
+GRAIN = (1.0, 0.9, 0.97, 0.93, 1.0)  # the field's soft grain: each column of its grid's share of its colour
+SHADOW_C = 0x7c6c44  # the shadow line under a panel's moulding
+LIGHT_C = 0xe1c787  # the light catching the panel's foot
 METAL = 0x4a4650  # the handle's dark bronze
 HINGE_C = 0x5c5860
 KEYHOLE = 0x1e1c22
-LINING_C = 0xa69c64
+LINING_C = 0xc9ae66
 
 
 def panel_field(x0: float, x1: float, z0: float, z1: float, side: int, y_plane: float) -> list:
     """A raised and fielded panel on face `side`: a flat field in the middle, a bevelled margin round it down to the
-    panel's plane."""
+    panel's plane. The field is a row of four columns whose inner points carry GRAIN's shades, leaning
+    and swapping round from its foot to its head, so soft grain fades in and out across it with no line."""
     b = BEVEL
     y_field = side * (y_plane + FIELD)
     y_low = side * y_plane
     bm = bmesh.new()
     outer = [(x0, z0), (x1, z0), (x1, z1), (x0, z1)]
-    inner = [(x0 + b, z0 + b), (x1 - b, z0 + b), (x1 - b, z1 - b), (x0 + b, z1 - b)]
     vo = [bm.verts.new((x, y_low, z)) for x, z in outer]
-    vi = [bm.verts.new((x, y_field, z)) for x, z in inner]
-    bm.faces.new(vi)
-    for i in range(4):
-        j = (i + 1) % 4
-        bm.faces.new([vo[i], vo[j], vi[j], vi[i]])
+    fx0, fx1, fz0, fz1 = x0 + b, x1 - b, z0 + b, z1 - b
+    cols = len(GRAIN)
+    grid, tones = [], []
+    for zt, lean, flip in ((0.0, 0.0, 0), (1.0, 0.014, 1)):
+        row = []
+        for c in range(cols):
+            t = c / (cols - 1)
+            inner = 0 < c < cols - 1
+            x = fx0 + t * (fx1 - fx0) + (lean * side if inner else 0.0)
+            row.append(bm.verts.new((x, y_field, fz0 + zt * (fz1 - fz0))))
+            # The inner columns' shades swap round up the panel (a band darkest low on one, high on the next).
+            k = GRAIN[cols - 1 - c] if (flip and inner) else GRAIN[c]
+            tones.append(k if inner else 1.0)
+        grid.append(row)
+    for c in range(cols - 1):
+        bm.faces.new([grid[0][c], grid[0][c + 1], grid[1][c + 1], grid[1][c]])
+    # The bevelled margin round it, its long edges through the field's grid points (no T-junctions).
+    for i, edge in enumerate((grid[0], [grid[0][-1], grid[1][-1]], list(reversed(grid[1])), [grid[1][0], grid[0][0]])):
+        bm.faces.new([vo[i], vo[(i + 1) % 4]] + list(reversed(edge)))
     ob = kit.mesh_object("panel", bm, FIELD_C)
     ob.data.update()
     for p in ob.data.polygons:
         if (p.normal.y > 0) != (side > 0):
             p.flip()
     ob.data.update()
+    kit.toned(ob, [1.0] * 4 + tones)
     return [ob]
 
 
@@ -123,7 +142,7 @@ def mark(name: str, x0: float, x1: float, z0: float, z1: float, y: float, side: 
 def leaf(wide: float, tall: float) -> list:
     kit.reset()
     hw, ht = wide / 2, THICK / 2
-    stile = min(0.12, wide * 0.2)
+    stile = STILE * wide
     plane = ht - PROUD  # the panels' plane, each face
     parts = [kit.open_box("core", (-hw, -plane, 0.0), (hw, plane, tall), PANEL_C, ("-z",))]
     # The edges, a shade darker (the leaf's edge grain).
@@ -131,34 +150,26 @@ def leaf(wide: float, tall: float) -> list:
     parts.append(kit.open_box("edge", (hw - 0.004, -ht, 0.0), (hw, ht, tall), EDGE_C, ("-x", "-z")))
     mid = MID_AT * tall
     handle = max(HANDLE_LOW, mid)
-    mid0, mid1 = mid - MID_RAIL / 2, mid + MID_RAIL / 2
+    top_rail, bottom_rail = TOP_RAIL * tall, BOTTOM_RAIL * tall
+    mid0, mid1 = mid - MID_RAIL * tall / 2, mid + MID_RAIL * tall / 2
     for side in (-1, 1):
         y0, y1 = side * plane, side * ht
         lo, hi = sorted((y0, y1))
         back = "-y" if side > 0 else "+y"
-        # Stiles the full height, rails between them, each with a grain streak.
+        # Stiles the full height, rails between them.
         for sx in (-1, 1):
             a0, a1 = sorted((sx * hw, sx * (hw - stile)))
             parts.append(kit.open_box("stile", (a0, lo, 0.0), (a1, hi, tall), STILE_C, (back, "-z")))
-            parts.append(mark("grain", sx * (hw - stile * 0.62), sx * (hw - stile * 0.62) + 0.008, 0.05, tall - 0.05,
-                              ht + 0.0006, side, GRAIN_C, lean=0.006))
-        for z0, z1 in ((0.0, BOTTOM_RAIL), (mid0, mid1), (tall - TOP_RAIL, tall)):
+        for z0, z1 in ((0.0, bottom_rail), (mid0, mid1), (tall - top_rail, tall)):
             parts.append(kit.open_box("rail", (-hw + stile, lo, z0), (hw - stile, hi, z1), STILE_C,
                                       (back, "-x", "+x", "-z"), shade=0.97))
-            parts.append(mark("grain", -hw + stile + 0.03, hw - stile - 0.03, (z0 + z1) / 2 - 0.003,
-                              (z0 + z1) / 2 + 0.003, ht + 0.0006, side, GRAIN_C))
-        # The two panels between them, raised and fielded, a shadow line under each one's top rail, grain on the field.
-        pw = (hw - stile) * 2
-        for z0, z1 in ((BOTTOM_RAIL, mid0), (mid1, tall - TOP_RAIL)):
+        # The two panels between them, raised and fielded with soft grain, a shadow line under each one's top rail.
+        for z0, z1 in ((bottom_rail, mid0), (mid1, tall - top_rail)):
             parts += panel_field(-hw + stile, hw - stile, z0, z1, side, plane)
             parts.append(mark("shadow", -hw + stile, hw - stile, z1 - 0.012, z1 - 0.002, plane + 0.0004, side,
                               SHADOW_C))
             parts.append(mark("light", -hw + stile, hw - stile, z0 + 0.002, z0 + 0.008, plane + 0.0004, side,
                               LIGHT_C))
-            for f in (-0.3, -0.12, 0.06, 0.28):
-                gx = f * pw
-                parts.append(mark("grain", gx, gx + 0.006, z0 + BEVEL + 0.02, z1 - BEVEL - 0.02,
-                                  plane + FIELD + 0.0005, side, FIELD_GRAIN_C, lean=0.01 * (1 if f > 0 else -1)))
         # The handle at the free edge: a rose, a neck and a lever pointing at the hinge side; a keyhole under it.
         hx = hw - min(0.065, stile * 0.55)
         face = side * ht
