@@ -92,10 +92,10 @@ extends Resource
 	# Its hinged doors (DO1): bottle-green painted leaves, so a door reads apart from the plywood round it.
 	&"door": Color(0.22, 0.40, 0.27),
 	# Woodland's concept 3 (WR1), off both team hues, from the palette: rubber tyres, a violet pickup, a thicket's core
-	# in its spruces' pine green.
+	# in the deep forest green, the shade between its spruces (WT1).
 	&"tyre": Color8(0x3d, 0x3b, 0x45),
 	&"truck": Color8(0x76, 0x58, 0xaa),
-	&"thicket": Color8(0x3d, 0x7a, 0x4a),
+	&"thicket": Color8(0x2b, 0x5c, 0x48),
 }
 ## Surfaces drawn in their own colour whatever their block's kind (RayHit.Surface to sRGB): a gravel bed on the slab.
 @export var surface_colours: Dictionary[int, Color] = {
@@ -126,7 +126,10 @@ extends Resource
 @export var occluder_height: float = 1.8
 @export var occluder_length: float = 1.2
 @export var occluder_inset: float = 0.03
-## Prop models that are round (BP7: Woodland's trunks, Depot's drums and barrels): BBs and bodies
+## A round prop's three stepped boxes (a drum's, a tree's trunk), in round_steps' frame.
+const ROUND_TRUNK: Array[Vector2] = [Vector2(-1.0, -0.55), Vector2(1.0, 0.55), Vector2(-0.55, -1.0),
+		Vector2(0.55, 1.0), Vector2(-0.883, -0.883), Vector2(0.883, 0.883)]
+## Prop models that are round (BP7: Woodland's trunks and trees, Depot's drums and barrels): BBs and bodies
 ## meet each prop as a few stepped boxes that hug it (RoundSteps), not as its block's square box; the nav grid, the
 ## bots' cover, the noisy props, the bake and the minimap still take the block's box. Where each prop stands comes
 ## from PropDressConfig (its lay, cluster cell and pallet), as PropLayout lays it. Each model's boxes in its own frame,
@@ -143,6 +146,11 @@ extends Resource
 			Vector2(-0.883, -0.883), Vector2(0.883, 0.883)]),
 	&"barrel": PackedVector2Array([Vector2(-1.0, -0.55), Vector2(1.0, 0.55), Vector2(-0.55, -1.0), Vector2(0.55, 1.0),
 			Vector2(-0.883, -0.883), Vector2(0.883, 0.883)]),
+	# Woodland's trees (WT1): a round trunk turned a quarter at a time, the drum's three boxes round it; the crown over head
+	# height is look only, as the old cone crowns were.
+	&"pine_young": PackedVector2Array(ROUND_TRUNK), &"pine_grown": PackedVector2Array(ROUND_TRUNK),
+	&"pine_old": PackedVector2Array(ROUND_TRUNK), &"oak": PackedVector2Array(ROUND_TRUNK),
+	&"birch": PackedVector2Array(ROUND_TRUNK),
 }
 ## The ground beyond the field's walls, out to `ground_extent` metres each way from the middle, just below the floor.
 @export var ground_colour: Color = Color8(0x8a, 0xa8, 0x60)

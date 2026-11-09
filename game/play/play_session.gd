@@ -430,7 +430,8 @@ func _dress_part(part: int) -> void:
 			if _fixtures != null:
 				add_child(_fixtures)
 		3:
-			_woods = WoodsView.build(_map, _play.woods, _play.skyline, _light, _play.map_style)
+			_woods = WoodsView.build(_map, _play.woods, _play.skyline, _light, _play.map_style,
+					_play.site_look.props)
 			if _woods != null:
 				add_child(_woods)
 		4:

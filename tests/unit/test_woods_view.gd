@@ -24,13 +24,18 @@ var teams: Array[Color] = []
 var woodland: MapData = null
 var night: LightingConfig = null
 var view: WoodsView = null
+## The wood with cone crowns on every tree (none carrying its own, WoodsConfig.own_crowns): the crowns a map's trunks
+## would get (none ships one since WT1), drawn here on Woodland's trees. Woodland's own trees are models (WT1).
+var cones: WoodsConfig = null
 
 
 func before_all() -> void:
 	teams = AccessibilityTable.read_file().colours
 	woodland = MapData.load_map("woodland", play.map_style, 1)
 	night = LightingConfig.for_map(play.lighting, play.night_lighting, woodland, LightingConfig.NIGHT)
-	view = WoodsView.build(woodland, play.woods, play.skyline, night, play.map_style)
+	cones = play.woods.duplicate() as WoodsConfig
+	cones.own_crowns = PackedStringArray()
+	view = WoodsView.build(woodland, cones, play.skyline, night, play.map_style)
 	add_child(view)
 
 
@@ -90,7 +95,7 @@ func test_every_tree_has_one_crown_over_everyone_s_head_and_over_its_trunk() -> 
 	for b in woodland.blocks:
 		if b.kind == WoodsShapes.TREE:
 			trees.append(b)
-	var placed := WoodsShapes.crowns(woodland, play.woods)
+	var placed := WoodsShapes.crowns(woodland, cones)
 	assert_eq(placed.size(), trees.size(), "a crown a tree")
 	assert_eq(view.crowns().multimesh.instance_count, trees.size(), "all drawn")
 	var low := INF
@@ -104,6 +109,34 @@ func test_every_tree_has_one_crown_over_everyone_s_head_and_over_its_trunk() -> 
 			bare += 1
 	assert_gt(low, tuning.body.height, "every crown starts over a standing player's head")
 	assert_eq(bare, 0, "every trunk's top is inside its crown")
+
+
+func test_woodland_s_trees_carry_their_own_crowns_and_the_forest_is_the_far_tree() -> void:
+	var own := 0
+	for b in woodland.blocks:
+		if b.kind == WoodsShapes.TREE:
+			assert_true(play.woods.own_crowns.has(String(b.dress)), "a tree at %s is a model with its crown" % b.center)
+			own += 1
+	assert_gt(own, 400, "Woodland's trees")
+	assert_eq(WoodsShapes.crowns(woodland, play.woods).size(), 0, "no cone over a tree model")
+	var forest := WoodsShapes.forest(woodland, play.woods, play.skyline, night.sky_horizon)
+	assert_eq(forest.mesh, PropDressConfig.load_mesh(play.woods.forest_model), "the wood past the fence is the far tree")
+	var day := WoodsView.build(woodland, play.woods, play.skyline, play.lighting, play.map_style)
+	assert_null(day.crowns(), "the game's wood draws no cones on Woodland")
+	day.free()
+	var props: PropDressConfig = play.site_look.props
+	assert_eq(WoodsShapes.crowns(woodland, play.woods, props).size(), 0, "none where the models load")
+	# a tree model that won't load (or has no foot to lay it by) keeps its box, and so its cone
+	var broken: PropDressConfig = props.duplicate(true)
+	broken.models[&"oak"] = "res://assets/models/props/no_such_oak.glb"
+	broken.tree_feet.erase(&"birch")
+	var kept := 0
+	for b in woodland.blocks:
+		if b.kind == WoodsShapes.TREE and (b.dress == &"oak" or b.dress == &"birch"):
+			assert_false(broken.dresses(b), "a %s with no model to lay keeps its box" % b.dress)
+			kept += 1
+	assert_gt(kept, 0)
+	assert_eq(WoodsShapes.crowns(woodland, play.woods, broken).size(), kept, "each keeps a cone crown")
 
 
 func test_crowns_draw_on_every_preset_and_low_draws_nothing_else() -> void:
@@ -195,7 +228,7 @@ func test_the_night_air_flies_only_at_night_by_the_wind_dust_share_and_stands_st
 
 func _colours_of(v: WoodsView, horizon: Color) -> Dictionary[Color, String]:
 	var out: Dictionary[Color, String] = {}
-	var parts: Array[WoodsShapes.Placed] = [WoodsShapes.crowns(woodland, play.woods), WoodsShapes.forest(woodland,
+	var parts: Array[WoodsShapes.Placed] = [WoodsShapes.crowns(woodland, cones), WoodsShapes.forest(woodland,
 			play.woods, play.skyline, horizon)]
 	parts.append_array(WoodsShapes.tufts(woodland, play.woods, play.map_style))
 	for part in parts:
@@ -224,7 +257,7 @@ func test_no_dressing_colour_reads_as_a_team_by_day_or_night() -> void:
 
 
 func _placed(horizon: Color) -> Array[WoodsShapes.Placed]:
-	var out: Array[WoodsShapes.Placed] = [WoodsShapes.crowns(woodland, play.woods), WoodsShapes.forest(woodland,
+	var out: Array[WoodsShapes.Placed] = [WoodsShapes.crowns(woodland, cones), WoodsShapes.forest(woodland,
 			play.woods, play.skyline, horizon), WoodsShapes.night_air(woodland, play.woods)]
 	out.append_array(WoodsShapes.tufts(woodland, play.woods, play.map_style))
 	return out

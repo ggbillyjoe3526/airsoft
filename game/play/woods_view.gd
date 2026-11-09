@@ -106,13 +106,14 @@ var _air_look: ShaderMaterial = null
 
 ## `map`'s wood drawn with `cfg`, under `lighting` (the playing preset: its horizon fades the forest, its night flag
 ## brings the fireflies and motes), the grass in `style`'s colour, the forest faded as `sky` fades the skyline; null
-## on a map with no trees and none of a wood's dressing. Every part starts as Low draws it (`set_quality`).
+## on a map with no trees and none of a wood's dressing; a tree dressed in its own crowned model that `props` draws
+## gets no cone. Every part starts as Low draws it (`set_quality`).
 static func build(map: MapData, cfg: WoodsConfig, sky: SkylineConfig, lighting: LightingConfig,
-		style: MapStyle) -> WoodsView:
+		style: MapStyle, props: PropDressConfig = null) -> WoodsView:
 	var view := WoodsView.new()
 	view.name = "Woods"
 	view._cfg = cfg
-	view._make_crowns(WoodsShapes.crowns(map, cfg))
+	view._make_crowns(WoodsShapes.crowns(map, cfg, props))
 	view._make_forest(WoodsShapes.forest(map, cfg, sky, lighting.sky_horizon))
 	view._make_tufts(WoodsShapes.tufts(map, cfg, style))
 	view._make_puddles(WoodsShapes.puddles(map, cfg))

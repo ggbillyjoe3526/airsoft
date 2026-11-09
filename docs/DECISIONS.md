@@ -698,6 +698,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **Woodland keeps its rare long gaps between trunks (owner, 2026-10-31, WR1 decision card).** Pinholes between trees
   run 100 to 160 m across the whole wood; each lane's own lines stay under 78 m and the Ridge overlook 86 m. Asked to
   keep them or thicken the wood, he kept them: Woodland's sightline exception is 170 m (`FieldStandard.EXCEPTIONS`).
+- **Trees keep to their collision boxes (owner, 2026-11-09, WT1 decision card).** A tree model's trunk fills its
+  block's box and its crown starts over `WoodsConfig.crown_clear` (2.6 m); a thicket's spruces stay inside its box.
+  Asked whether young pines and spruces should match his photos instead (branches to the ground, spruces spilling past
+  the thicket's edge), he kept the boxes: what you see is what stops BBs and sight.
 
 ## Replicas, Loadout and levels
 

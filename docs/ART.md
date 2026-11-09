@@ -287,8 +287,8 @@ Depot's temporary site dress (DD1, until the owner's models; Depot and the range
   lays them, one MultiMesh a model in one vertex-coloured material. Every prop stays inside its block's box; the box
   draws nothing (or, behind shelving, a dark backing half a row in: `SiteSurface.core_of`) and leaves the baked
   shadow caster. Depot's and the Range's models are our own, built in Blender by `tools/blender/maps/` (RK1); Woodland's
-  and The Street's are Kenney's, recoloured off the teams' hues by `tools/props/build_props.py`; all in
-  `assets/models/props/` (vertex colours, no textures).
+  smaller props are Kenney's (its trees are its own since WT1), recoloured off the teams' hues by
+  `tools/props/build_props.py`; all in `assets/models/props/` (vertex colours, no textures).
 
 The figures (step 23, FI1-FI7; every bot on every preset, DECISIONS BD1):
 
