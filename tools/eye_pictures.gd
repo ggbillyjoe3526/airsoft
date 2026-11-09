@@ -118,7 +118,9 @@ func _run() -> void:
 		add_range(port, play, tuning, map)
 	var values := GraphicsTable.shared().preset(preset)
 	GraphicsApply.apply(values, port)
-	GraphicsApply.apply_field(values, lighting, null, null, level)
+	# The roof's lamps as real lights where the preset lights them (Lamp light, UG1), the sun dimmed as a match does.
+	GraphicsApply.apply_field(values, lighting, null, null, level, null, null,
+			roof.lamp_lights() if roof != null else null)
 	if site != null:
 		level.set_detail(values.mesh_detail)
 	# The doors, poles and a site's props in the baked light near them, as a match draws them (BP7).

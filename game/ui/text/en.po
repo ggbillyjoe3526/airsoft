@@ -2496,6 +2496,12 @@ msgstr "GLOW"
 msgid "GRAPHICS_VOLUMETRIC_FOG"
 msgstr "VOLUMETRIC HAZE"
 
+msgid "GRAPHICS_LAMP_LIGHTS"
+msgstr "LAMP LIGHT"
+
+msgid "GRAPHICS_LAMP_LIGHTS_NOTE"
+msgstr "An indoor field's roof lamps as real lights with shadows. Near: the lamps round you. Far: out to the hall's far end."
+
 msgid "GRAPHICS_GLOBAL_ILLUMINATION_NOTE"
 msgstr "Light bouncing off the field. Screen: what you see. Scene: the whole field, sky light included."
 
@@ -2585,6 +2591,12 @@ msgstr "Screen"
 
 msgid "GRAPHICS_CHOICE_SCENE"
 msgstr "Scene"
+
+msgid "GRAPHICS_CHOICE_NEAR"
+msgstr "Near"
+
+msgid "GRAPHICS_CHOICE_FAR"
+msgstr "Far"
 
 msgid "GRAPHICS_CHOICE_PROBES"
 msgstr "Probes"

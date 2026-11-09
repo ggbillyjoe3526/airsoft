@@ -12,7 +12,7 @@ var table: GraphicsTable = null
 var _saved: Dictionary[StringName, Variant] = {}
 ## The root viewport's knobs, put back after each test.
 var _knobs: Array[StringName] = [&"scaling_3d_scale", &"scaling_3d_mode", &"msaa_3d", &"screen_space_aa", &"use_taa",
-		&"anisotropic_filtering_level", &"mesh_lod_threshold", &"use_occlusion_culling"]
+		&"anisotropic_filtering_level", &"mesh_lod_threshold", &"use_occlusion_culling", &"positional_shadow_atlas_size"]
 
 
 func before_each() -> void:
