@@ -391,6 +391,19 @@ func _surface(b: MapData.Block, box: AABB, p: Vector3) -> float:
 	return box.position.y + box.size.y * (f if rising else 1.0 - f)
 
 
+func test_a_window_s_thin_lintel_or_sill_is_a_plywood_header() -> void:
+	var cfg := look.props
+	var thin := 0
+	for b in map.blocks:
+		if b.kind == &"plywood" and b.size.y < 0.3 and minf(b.size.x, b.size.z) <= 0.5:
+			thin += 1
+			assert_eq(b.dress, &"plywood_header", "the plywood board at %s is a header" % b.center)
+			assert_true(cfg.dresses(b), "and drawn")
+	assert_gt(thin, 0, "the Fort's north window has a thin lintel")
+	var placed := PropLayout.layout(map, cfg, boxes)
+	assert_true(placed.has(&"plywood_header"), "the game lays the header's modules")
+
+
 func test_the_roofs_fill_their_blocks() -> void:
 	var placed := PropLayout.layout(map, look.props, boxes)
 	for model: StringName in [&"hut_roof", &"hut_roof_long"]:

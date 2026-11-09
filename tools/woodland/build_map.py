@@ -52,6 +52,8 @@ PART = 4.0
 SINK = 0.3  # every block reaches this far under the lowest ground beneath it
 WALL_TOP = {"fort": 2.3}  # a window's lintel tops out with its wall: the Fort's 2.3 m, the huts' 2.5 m
 LINTEL_FROM = 2.1
+HEADER = "plywood_header"  # a window's sill or lintel under HEADER_UNDER m (PropDressConfig: the plywood kit's own)
+HEADER_UNDER = 0.3
 TUNNEL_WALL = (0.7, 1.25)  # a tunnel's side walls, from and to this far off its middle line (m)
 TUNNEL_ROOF_HALF = 1.75
 TUNNEL_SEG = 1.0
@@ -188,8 +190,10 @@ def piece_blocks(p: dict) -> list[dict]:
         bottom = g + p.get("bottom", 0.0) if p.get("bottom", 0.0) > 0 else lo
         if kind == "window":
             wall_top = WALL_TOP.get(p["tag"], L.HEIGHTS["hutwall"])
-            out.append(block(KINDS[kind], a1, lo, b1, a2, g + p["top"], b2))
-            out.append(block(KINDS[kind], a1, g + LINTEL_FROM, b1, a2, g + wall_top, b2))
+            for y1, y2 in ((lo, g + p["top"]), (g + LINTEL_FROM, g + wall_top)):
+                # a sill or lintel too low for the plywood wall's modules is a plywood header (WG3)
+                thin = {"dress": HEADER} if y2 - y1 < HEADER_UNDER else {}
+                out.append(block(KINDS[kind], a1, y1, b1, a2, y2, b2, **thin))
             continue
         extra = {"dress": TAGGED[(kind, p["tag"])]} if (kind, p["tag"]) in TAGGED else {}
         out.append(block(KINDS[kind], a1, bottom, b1, a2, g + p.get("bottom", 0.0) + p["top"], b2, piece_kind=kind,

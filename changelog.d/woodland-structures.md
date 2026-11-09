@@ -4,4 +4,5 @@
 - The North bridge is a log bridge with split-log decking and closed slab sides under a pole handrail.
 - The Sawmill is an open post-and-beam shed with knee braces and a corrugated roof.
 - The huts have shake roofs, and the camps and the field's edge are walled by a palisade of sharpened stakes.
+- The Fort's firing window has a plywood lintel to match its walls, not a plain bar.
 - Everything else stops BBs and sight exactly as before.

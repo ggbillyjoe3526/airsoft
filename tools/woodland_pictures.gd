@@ -27,6 +27,7 @@ const SHOTS: Array = [
 	["bridge_far", Vector3(18.0, EYE, -34.0), Vector3(-1.0, 4.6, -41.5), false],
 	["bridge_low", Vector3(-1.0, 3.3, -36.0), Vector3(-1.0, 3.9, -41.5), true],
 	["bridge_under", Vector3(-0.2, 3.2, -39.6), Vector3(-1.6, 4.15, -41.5), true],
+	["fort_window", Vector3(53.8, EYE, -53.0), Vector3(53.8, 3.9, -46.0), false],
 	["shed_quarter", Vector3(43.0, EYE, 27.0), Vector3(56.0, 1.8, 36.0), false],
 	["shed_inside", Vector3(52.5, EYE, 35.0), Vector3(60.0, 2.9, 38.5), false],
 	["shed_far", Vector3(68.0, EYE, 27.0), Vector3(56.0, 1.8, 36.0), false],

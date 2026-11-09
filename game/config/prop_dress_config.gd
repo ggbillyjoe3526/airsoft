@@ -78,6 +78,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, STAKES, SET }
 	&"plywood_mid": "res://assets/models/props/plywood_mid.glb",
 	&"plywood_low": "res://assets/models/props/plywood_low.glb",
 	&"plywood_short": "res://assets/models/props/plywood_short.glb",
+	&"plywood_header": "res://assets/models/props/plywood_header.glb",
 	&"container": "res://assets/models/props/container.glb",
 	&"container_low": "res://assets/models/props/container_low.glb",
 	&"container_short": "res://assets/models/props/container_short.glb",
@@ -131,7 +132,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, STAKES, SET }
 ## RUN's module length (m) a model: a plywood wall's batten pitch, half a 1.22 m sheet. A wall is that many whole
 ## modules, stretched by at most `run_stretch` (a share) to fill it, or else with a cut, narrower one at its end.
 @export var run_lengths: Dictionary[StringName, float] = {
-	&"plywood": 0.61, &"plywood_mid": 0.61, &"plywood_low": 0.61, &"plywood_short": 0.61,
+	&"plywood": 0.61, &"plywood_mid": 0.61, &"plywood_low": 0.61, &"plywood_short": 0.61, &"plywood_header": 0.61,
 }
 @export var run_stretch: float = 0.1
 ## A cut module narrower than this share of one is never laid: the whole ones stretch over the sliver instead.
@@ -151,6 +152,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, STAKES, SET }
 @export var model_lays: Dictionary[StringName, Lay] = {
 	&"logstack": Lay.GRID, &"crate": Lay.GRID, &"tyre": Lay.GRID, &"pine": Lay.GRID,
 	&"bin_green": Lay.GRID, &"bin_steel": Lay.GRID, &"bin_teal": Lay.GRID, &"units": Lay.GRID,
+	&"plywood_header": Lay.RUN,
 	&"palisade": Lay.STAKES, &"watch_tower": Lay.SET, &"footbridge": Lay.SET, &"sawmill_shed": Lay.SET,
 }
 ## GRID's cells (m): x along the box's long side, y up (0: one layer the box's height), z across. Cordwood a metre and
