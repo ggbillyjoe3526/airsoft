@@ -145,6 +145,12 @@ extends Resource
 @export var treeline_width: float = 0.27
 @export var treeline_sides: int = 6
 @export var treeline_sink: float = 1.0
+## The band drawn from a model (Dev 3, WT1, tools/blender/maps/far_tree.py) in place of the cones: a section of two
+## rows of stepped spruces `treeline_section` m long (x) and deep (y), its top the tallest spire, laid end to end along
+## each run of the line (whole sections, each stretched to an even share), every other one mirrored, each in one of
+## `treeline_colours`. Empty, or a model that won't load, keeps the cones.
+@export var treeline_model: String = "res://assets/models/skyline/treeline.glb"
+@export var treeline_section: Vector2 = Vector2(20.0, 5.0)
 
 @export_group("Watch tower")
 ## A concrete column `watch_column` of the width wide up to a deck `watch_deck` m thick, a parapet `watch_parapet` m
@@ -233,6 +239,16 @@ func models_of(kind: StringName) -> Array[Mesh]:
 	var list: Array[Mesh] = []
 	list.assign(_all[kind])
 	return list
+
+
+## The treeline band's section (treeline_model), or null (none, or it won't load: warned once).
+func treeline_mesh() -> Mesh:
+	if not _tried.has(&"treeline"):
+		_tried[&"treeline"] = true
+		var mesh := _load(&"treeline", treeline_model)
+		if mesh != null:
+			_meshes[&"treeline"] = mesh
+	return _meshes.get(&"treeline", null) as Mesh
 
 
 ## The mesh at `path` if it loads as a skyline model (one indexed surface with vertex colours), else null, warned.

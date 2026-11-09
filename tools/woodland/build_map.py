@@ -38,7 +38,7 @@ KINDS = {"palisade": "fence", "logstack": "log", "log": "log", "logpile": "log",
 # and the trees' and thickets'. The posts, the walls and the palisade keep their boxes.
 DRESS = {"log": "fallen_log", "logpile": "cordwood", "logstack": "cordwood", "crates": "crate", "lowcrates": "crate",
          "tyre": "tractor_tyre", "tyrestack": "tractor_tyre_stack", "truck": "pickup", "tree": "trunk",
-         "thicket": "pine", "windthrow": "root_plate",
+         "thicket": "spruce", "windthrow": "root_plate",
          # WG4: the game's own models (tools/blender/maps) for the tunnels' and the culvert's blocks
          "tunnel_side": "log_tunnel_side", "tunnel_roof": "log_tunnel_roof", "culvert_wall": "culvert_wall",
          "culvert_kerb": "culvert_kerb"}
@@ -49,6 +49,10 @@ TAG_DRESS = {"boards": "boards", "sawbench": "sawbench"}
 LOG_LENGTHS = (5, 6, 8)
 # A log block that is no piece of the plan's keeps the CC0 log (WG4 names the tunnels' blocks; this is the fallback).
 UNNAMED_LOG = "log"
+# Each tree's model by its kind (layout.py's tree list) and, a pine's, its age by its height (m): young 6 to 10, grown
+# 12 to 17, old 19 to 25 (layout.tree_sized; Dev 3, WT1). Look only: the block is the same box whatever it names.
+TREE_MODELS = {"oak": "oak", "birch": "birch"}
+PINE_AGES = ((11.0, "pine_young"), (18.5, "pine_grown"), (math.inf, "pine_old"))
 # Pieces this long or longer follow the ground in parts no longer than this (m): walls and palisades on slopes.
 FOLLOW = {"palisade", "fortwall", "hutwall", "lowwall"}
 PART = 4.0
@@ -400,14 +404,22 @@ def overlaps(a: dict, x: float, z: float, rad: float) -> bool:
 def tree_blocks(others: list[dict]) -> tuple[list[dict], int]:
     out, dropped = [], 0
     solid = [b for b in others if b["kind"] not in ("fence", "thicket")]
-    for (x, z, rad, _kind, height) in Wd.TREES:
+    for (x, z, rad, kind, height) in Wd.TREES:
         if any(overlaps(b, x, z, rad + 0.3) for b in solid):
             dropped += 1
             continue
         under = cells(x - rad, z - rad, x + rad, z + rad)
-        out.append(block("tree", x - rad, float(under.min()) - SINK, z - rad, x + rad, float(under.max()) + height,
-                         z + rad))
+        b = block("tree", x - rad, float(under.min()) - SINK, z - rad, x + rad, float(under.max()) + height, z + rad)
+        b["dress"] = tree_model(kind, height)
+        out.append(b)
     return out, dropped
+
+
+def tree_model(kind: str, height: float) -> str:
+    """The model a tree of `kind` and `height` (m) is drawn as."""
+    if kind in TREE_MODELS:
+        return TREE_MODELS[kind]
+    return next(model for top, model in PINE_AGES if height < top)
 
 
 # ------------------------------------------------------------------ the terrain, its surfaces, the foliage
@@ -625,7 +637,7 @@ def dressed(blocks: list[dict]) -> list[dict]:
         if name == "fallen_log":
             long = max(b["size"]["x"], b["size"]["z"])
             name = "fallen_log_%d" % min(LOG_LENGTHS, key=lambda n: abs(n - long))
-        if name is not None:
+        if name is not None and "dress" not in b:
             b["dress"] = name
         b.pop("piece_kind", None)
     return blocks

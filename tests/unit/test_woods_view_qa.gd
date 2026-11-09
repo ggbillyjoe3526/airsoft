@@ -81,7 +81,9 @@ func test_the_sweep_would_see_a_collider_on_a_crown() -> void:
 	run.world.add_child(dressed)
 	await wait_physics_frames(3)
 	var before := _sweep(run)
-	var x := WoodsShapes.crowns(run.map, play.woods).xforms[0]
+	var cones := play.woods.duplicate() as WoodsConfig
+	cones.own_crowns = PackedStringArray() # Woodland's trees carry their own crowns (WT1): a cone's spot to test with
+	var x := WoodsShapes.crowns(run.map, cones).xforms[0]
 	var body := StaticBody3D.new()
 	var shape := CollisionShape3D.new()
 	var sphere := SphereShape3D.new()
@@ -212,7 +214,7 @@ func test_a_woodland_match_wires_the_wood_to_the_presets_and_frees_it_with_the_s
 		assert_eq(shape_bodies, 0, "no body under the wood")
 		for preset: StringName in [&"low", &"medium", &"high", &"ultra", &"low"]:
 			session._apply_graphics(table.preset(preset))
-			assert_true(woods.crowns().visible, "crowns on %s" % preset)
+			assert_null(woods.crowns(), "Woodland's trees carry their own crowns (%s)" % preset)
 			assert_eq(woods.puddles().visible, preset != &"low", "puddles on %s" % preset)
 			assert_eq(woods.forest().visible, preset != &"low", "forest on %s" % preset)
 		counts.append(woods.get_child_count())
