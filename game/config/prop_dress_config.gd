@@ -23,9 +23,10 @@ extends Resource
 ## to the field's middle, a feature bay (`bay_features`) in some cells with nothing standing in front of them (Dev 3:
 ## Depot's hall walls, their columns under the roof's trusses). SIDE fits a tunnel wall's model to its box, long side
 ## along the box's, its inner face (the model's -x) toward the wall across the tunnel (the nearest block named alike
-## across the box's short side, within `side_reach` m). LINED sets the model on the box's foot at the model's own
-## height, stretched only across and along, and its cap (`lined_caps`) over the rest of the box (WG4: Woodland's
-## hollow-log tunnels, the log's top shell under the roof and the mound's earth over it).
+## across the box's short side, within `side_reach` m), at its own height. LINED sets the model on the box's foot at its
+## own height and width, stretched only along, and its cap (`lined_caps`) over the rest of the box, or its mouth model
+## (`lined_mouths`) at the end of a run (WG4: Woodland's hollow-log tunnels, the log's top shell under the roof and the
+## mound's earth over it; the shell's earth reaches past the box's sides onto the ground banked against the log).
 enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, SIDE, LINED }
 
 ## Each prop's model (a .glb of one vertex-coloured mesh).
@@ -99,6 +100,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, SIDE, LINED }
 	&"log_tunnel_side": "res://assets/models/props/log_tunnel_side.glb",
 	&"log_tunnel_roof": "res://assets/models/props/log_tunnel_roof.glb",
 	&"log_tunnel_cap": "res://assets/models/props/log_tunnel_cap.glb",
+	&"log_tunnel_mouth": "res://assets/models/props/log_tunnel_mouth.glb",
 }
 ## Each dressed block kind's prop, and how it is laid. A kind not listed keeps its box.
 @export var kind_props: Dictionary[StringName, StringName] = {
@@ -161,6 +163,10 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, SIDE, LINED }
 ## heaped against it starts, log_tunnel.py WEDGE_FOOT); none where less than `lined_min_cap` m is left over the lined
 ## model's top.
 @export var lined_caps: Dictionary[StringName, StringName] = {&"log_tunnel_roof": &"log_tunnel_cap"}
+## LINED's mouths: the model laid instead at the end of a run of sections (a block with a neighbour named alike on one
+## side only, joint_bend's), its -z end turned to the open side, at its own height with no cap (WG4: a tunnel's mouth,
+## the mound's earth running down onto the log's end).
+@export var lined_mouths: Dictionary[StringName, StringName] = {&"log_tunnel_roof": &"log_tunnel_mouth"}
 @export var lined_cap_from: float = 0.5
 @export var lined_min_cap: float = 0.02
 ## FIT models stood on the ground under the box's middle (WG4: the tyres and the pickup, on a slope too): the model's

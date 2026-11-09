@@ -11,6 +11,8 @@ extends GutTest
 
 ## How far (m) a tunnel section may reach over or under its box (WG4: half a step of its floor or its mound).
 const JOINT_SLACK := 0.2
+## How far (m) a tunnel's earth reaches past its box's sides (WG4: log_tunnel.py SKIRT).
+const SKIRT_SLACK := 0.4
 
 var play: PlayTuning = PlayTuning.load_default()
 var tuning: SimTuning = SimTuning.new()
@@ -63,8 +65,10 @@ func _outside(m: MapData, dress: PropDress) -> Array[String]:
 			if look.props.lay_of(b) in [PropDressConfig.Lay.SIDE, PropDressConfig.Lay.LINED]:
 				# a tunnel section is bent to meet its neighbours halfway up a step of the floor or the mound
 				# (PropLayout.joint_bend, WG4), and a wall stands at its own height with its foot in the ground
-				box.position.y -= JOINT_SLACK
-				box.size.y += 2.0 * JOINT_SLACK
+				# and the log's earth reaches past the box's sides onto the ground banked against it
+				box = box.grow(SKIRT_SLACK)
+				box.position.y -= JOINT_SLACK - SKIRT_SLACK
+				box.size.y += 2.0 * (JOINT_SLACK - SKIRT_SLACK)
 			boxes.append(box)
 	var outside: Array[String] = []
 	var placed := dress.placed()

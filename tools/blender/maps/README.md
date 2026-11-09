@@ -17,7 +17,7 @@ a foot-to-top gradient (`render_prop.py` renders a built prop from labelled angl
 | `steel_drum.py`, `pallet.py` | `steel_drum.glb`, `pallet.glb` | Depot's drum blocks, nine stacks on a pallet (CLUSTER) |
 | `plastic_barrel.py` | `plastic_barrel.glb` | Depot's barrel blocks, two a block (ROW) |
 | `sofa.py`, `office_desk.py`, `steel_locker.py` | `sofa.glb`, `office_desk.glb`, `steel_locker.glb` | The Lounge's sofa, the Offices' desks and lockers (fitted) |
-| `log_tunnel.py` | `log_tunnel_side.glb`, `log_tunnel_roof.glb`, `log_tunnel_cap.glb` | Woodland's crouch tunnels, a 1 m hollow-log section a block (`Lay.SIDE`, `Lay.LINED`) |
+| `log_tunnel.py` | `log_tunnel_side.glb`, `log_tunnel_roof.glb`, `log_tunnel_mouth.glb`, `log_tunnel_cap.glb` | Woodland's crouch tunnels, a 1 m hollow-log section a block (`Lay.SIDE`, `Lay.LINED`; a run's end sections the mouth) |
 | `culvert.py` | `culvert_wall.glb`, `culvert_kerb.glb` | Woodland's culvert under the road |
 | `pickup.py` | `pickup.glb` | Woodland's pickup wreck (grounded) |
 | `tyre.py` | `tractor_tyre.glb`, `tractor_tyre_stack.glb` | Woodland's tyre stacks (grounded) |

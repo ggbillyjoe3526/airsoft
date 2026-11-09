@@ -53,6 +53,8 @@ TUNNEL_ROOF_HALF = 1.25  # the log's outside: the roof is the log's arched top (
 TUNNEL_SEG = 1.0
 TUNNEL_EARTH_STEP = 0.3  # how much higher the mound's earth over a tunnel may stand than the next section's (m)
 TUNNEL_BANK = 0.5  # the earth banked against a tunnel log's sides, over its ceiling (log_tunnel.py WEDGE_FOOT)
+TUNNEL_BANK_REACH = 0.5  # how far out from the log the bank keeps its height (past log_tunnel.py SKIRT's 0.35 m)
+TUNNEL_BANK_SLOPE = 1.0  # its fall beyond that, m a m: a heap of earth
 TUNNEL_LOG_TOP = 0.9  # the hollow log's top over a tunnel's clear height (tools/blender/maps/log_tunnel.py SHELL)
 THICKET_TOP = 5.0
 THICKET_CELL = 1.0
@@ -174,12 +176,24 @@ def cut_tunnels() -> list[dict]:
                 xa, xb = sorted((ax + sg * TUNNEL_WALL[0], ax + sg * TUNNEL_WALL[1]))
                 out.append(block(kind, xa, sc["low"] - SINK, sc["z"], xb, sc["under"], sc["ze"],
                                  piece_kind="tunnel_side"))
-            # the earth banked against the log's sides, up to where the mound's earth on its shoulders starts
-            # (log_tunnel.py WEDGE_FOOT), so no flat of the log's side stands out of a low mound
-            bank = (np.abs(np.abs(L.GX - ax) - (TUNNEL_WALL[1] + L.RES / 2)) <= L.RES / 2 + 1e-6) & \
-                (L.GZ >= sc["z"] - 1e-6) & (L.GZ < sc["ze"] - 1e-6)
-            h[bank] = np.maximum(h, sc["under"] + TUNNEL_BANK)[bank]
+        bank_tunnel(ax, z0, z1, sections)
     return out
+
+
+def bank_tunnel(ax: float, z0: float, z1: float, sections: list[dict]) -> None:
+    """Heaps the earth against a tunnel log's sides (WG4): up to TUNNEL_BANK over its ceiling for TUNNEL_BANK_REACH
+    out from the log (where the mound's earth on its shoulders starts, log_tunnel.py WEDGE_FOOT and SKIRT), then down
+    at TUNNEL_BANK_SLOPE to the ground on every side, past the mouths too (never on the path into one), so no flat of
+    the log's side and no ridge of earth stands out of a low mound."""
+    side = np.abs(L.GX - ax) - TUNNEL_WALL[1]
+    out_z = np.maximum(np.maximum(z0 - L.GZ, L.GZ - z1), 0.0)
+    near = (side >= -1e-6) & ((out_z <= 1e-6) | (side >= TUNNEL_BANK_REACH - 1e-6))
+    reach = np.hypot(np.maximum(side - TUNNEL_BANK_REACH, 0.0), out_z)
+    starts = np.array([sc["z"] for sc in sections])
+    under = np.array([sc["under"] for sc in sections])[np.clip(np.searchsorted(starts, L.GZ, "right") - 1, 0,
+                                                                 len(sections) - 1)]
+    heap = under + TUNNEL_BANK - TUNNEL_BANK_SLOPE * reach
+    h[near] = np.maximum(h, heap)[near]
 
 
 # ------------------------------------------------------------------ pieces

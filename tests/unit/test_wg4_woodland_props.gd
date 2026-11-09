@@ -8,7 +8,7 @@ extends GutTest
 
 const MODELS: Dictionary[StringName, int] = {
 	&"tractor_tyre": 750, &"tractor_tyre_stack": 1500, &"pickup": 10000, &"culvert_wall": 890, &"culvert_kerb": 360,
-	&"log_tunnel_side": 130, &"log_tunnel_roof": 260, &"log_tunnel_cap": 120,
+	&"log_tunnel_side": 130, &"log_tunnel_roof": 260, &"log_tunnel_cap": 120, &"log_tunnel_mouth": 1500,
 }
 const FIXTURES: Dictionary[String, int] = {
 	"res://assets/models/props/campfire.glb": 800, "res://assets/models/props/lantern.glb": 400,
@@ -105,6 +105,37 @@ func test_a_tunnel_s_sections_meet_halfway_where_its_floor_steps() -> void:
 	assert_eq(PropLayout.joint_bend(roof, m, false), Transform3D.IDENTITY, "a section alone stays unbent")
 
 
+func test_a_run_of_sections_ends_in_a_mouth_turned_to_its_open_side() -> void:
+	var m := MapData.new()
+	m.id = "wg4 test"
+	m.blocks.append(_block(&"log_tunnel_roof", Vector3(0.0, 1.85, 0.0), Vector3(2.5, 0.9, 1.0)))
+	m.blocks.append(_block(&"log_tunnel_roof", Vector3(0.0, 2.0, 1.0), Vector3(2.5, 1.2, 1.0)))
+	m.blocks.append(_block(&"log_tunnel_roof", Vector3(0.0, 1.85, 2.0), Vector3(2.5, 0.9, 1.0)))
+	var placed := PropLayout.layout(m, cfg, _boxes())
+	assert_eq(placed[&"log_tunnel_mouth"].transforms.size(), 2, "a mouth at each end")
+	assert_eq(placed[&"log_tunnel_roof"].transforms.size(), 1, "the middle one a section")
+	for t: Transform3D in placed[&"log_tunnel_mouth"].transforms:
+		var out := (t.basis * Vector3.FORWARD).normalized()
+		assert_gt(out.dot(Vector3(0.0, 0.0, signf(t.origin.z - 1.0))), 0.99, "the mouth at %s faces out" % t.origin)
+	# the model's front (-z) is its mouth: the earth runs down onto the log there and is full height at the back
+	var tops := {-1: 0.0, 1: 0.0}
+	var mesh := PropDressConfig.load_mesh(cfg.models[&"log_tunnel_mouth"])
+	for s in mesh.get_surface_count():
+		for v: Vector3 in mesh.surface_get_arrays(s)[Mesh.ARRAY_VERTEX] as PackedVector3Array:
+			if absf(v.z) > 0.45:
+				tops[int(signf(v.z))] = maxf(tops[int(signf(v.z))], v.y)
+	assert_lt(tops[-1] + 0.1, tops[1], "the hood is low at the mouth (-z), high where it meets the next section")
+
+
+func test_woodland_loads_its_tunnels_mouths_and_caps() -> void:
+	# a model is drawn only when the dress loads it: the mouths went unloaded once, so every end showed the roof
+	var used := PropDress._models_used(_woodland(), cfg)
+	for model: StringName in [&"log_tunnel_side", &"log_tunnel_roof", &"log_tunnel_mouth", &"log_tunnel_cap"]:
+		assert_true(used.has(model), "Woodland loads %s" % model)
+	var placed := PropLayout.layout(_woodland(), cfg, _boxes())
+	assert_eq(placed[&"log_tunnel_mouth"].transforms.size(), 4, "both log tunnels end in a mouth at each end")
+
+
 func test_a_tunnel_roof_is_a_shell_at_its_own_height_with_earth_over_the_rest() -> void:
 	var boxes := _boxes()
 	var shell := boxes[&"log_tunnel_roof"].size.y
@@ -146,7 +177,8 @@ func test_woodland_s_props_stay_inside_their_blocks_and_the_grounded_ones_stand_
 			for b in blocks:
 				# a tunnel section is bent to meet its neighbours halfway up the floor's step (joint_bend), and a wall
 				# stands at its own height with its top at the ceiling, its foot in the ground
-				var slack := Vector3(0.03, 0.2 if model.begins_with("log_tunnel") else 0.03, 0.03)
+				# (and the log's earth reaches past the box's sides onto the bank, log_tunnel.py SKIRT)
+				var slack := Vector3(0.4, 0.2, 0.4) if model.begins_with("log_tunnel") else Vector3.ONE * 0.03
 				var lo := b.center - b.size * 0.5 - slack
 				var hi := b.center + b.size * 0.5 + slack
 				if AABB(lo, hi - lo).encloses(box):

@@ -1,6 +1,6 @@
 # WG4 · Woodland's small props: tunnels, culvert, pickup, tyres, campfires and lanterns from the owner's photos (Dev)
 
-**Review:** critic 7/8 after five attempts (check 1's residue, the tunnel mouths' earth edges side on, in KNOWN_ISSUES; owner told) · qa Pass · performance Pass
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -9,7 +9,8 @@
 | 2026-11-09 | 1 | build thread | see Verified | Retry 6/8 | the tunnel mouth not one round log, the cap a block; the pickup's rust everywhere, its tyres not flat enough; the tyres' lugs; the campfire's flames white; the culvert inside too pale |
 | 2026-11-09 | 1, fix round 2 | build thread | see Verified | Retry 7/8 | the tunnel: a crease at the crown, strips at the joints inside, the mouth a ring in a box of earth, no bark rim |
 | 2026-11-09 | 1, fix round 3 | build thread | see Verified | Retry 7/8 | the tunnel's outside from the mound: the earth over the log stepped per section, a flat side of the log standing out |
-| 2026-11-09 | 1, fix round 4 (owner allowed a fifth try) | build thread | see Verified | Retry 7/8 | hard earth edges by the tunnel mouths, seen from the side and above: in `docs/KNOWN_ISSUES.md`; shipped as the owner's default (critic's recommendation) |
+| 2026-11-09 | 1, fix round 4 (owner allowed a fifth try) | build thread | see Verified | Retry 7/8 | hard earth edges by the tunnel mouths, seen from the side and above |
+| 2026-11-09 | 1, fix round 5 | build thread | see Verified | Accept 8/8 | |
 
 ## Goal
 
@@ -71,12 +72,20 @@ tunnels keep 1.4 m clear inside; the campfires and lanterns are look only (the m
   (`lined_cap_from`, `WEDGE_FOOT` 0.5 m over the ceiling) and is bent by the roofs' tops, so the caps run on as one
   ridge; the terrain is banked against the log's sides up to the same height (`TUNNEL_BANK`), so no flat of its side
   shows.
+- Critic round 5 (the fifth attempt): the hard edges were a middle section standing at each end. The mouth model
+  (`log_tunnel_mouth`: the shell under one hood of earth that runs from its neighbour's profile at the joint down onto
+  the log's cut end, `PropDressConfig.lined_mouths`) was never loaded, since `PropDress._models_used` listed a lined
+  model's cap but not its mouth; it does now, and a test checks both tunnels end in mouths. The earth is heaped against
+  the log (`build_map.bank_tunnel`: `TUNNEL_BANK` over the ceiling for `TUNNEL_BANK_REACH` 0.5 m out, then falling
+  1:1 to the ground on every side, past the mouths but never on the path), so no ridge, flap or gap shows beside a
+  mouth; the earth's skirt (`SKIRT`, 0.25 m out) lies under it.
 - The Kenney `tyre.glb` and `truck.glb` stay as the `tyre` and `truck` kinds' fallback; Woodland names its own models.
 
 ## Verified
 
-- `tests/unit/test_wg4_woodland_props.gd` (7 tests): budgets, the walls facing in, sections meeting at a step, the roof
-  shell and cap, every prop inside its block, the grounded ones on the ground, every fire on the ground and every
+- `tests/unit/test_wg4_woodland_props.gd` (9 tests): budgets, the walls facing in, sections meeting at a step, a run
+  ending in a mouth turned to its open side (the model's earth low at its front), Woodland loading its mouths and caps
+  (four mouths), the roof shell and cap, every prop inside its block, the grounded ones on the ground, every fire on the ground and every
   lantern on a chain or a hook, flames only at night and only on Woodland.
 - `tests/unit/test_props.gd`: Woodland names `tractor_tyre` and `pickup` (not the Kenney `tyre` and `truck`); a SIDE or
   LINED section may reach `JOINT_SLACK` (0.2 m) over or under its box where it is bent to meet its neighbours; the

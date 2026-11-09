@@ -470,15 +470,31 @@ static func _toward_pair(b: MapData.Block, map: MapData, cfg: PropDressConfig, a
 	return side
 
 
-## LINED: the model on block `b`'s foot at its own height (or the box's, if lower), its long side along the box's,
-## stretched across and along, bent by `bend` (joint_bend by the box's foot); where more than
-## PropDressConfig.lined_min_cap m of the box is left over it, its cap (lined_caps) stretched over the rest of the box
-## from lined_cap_from m over its foot, bent by the boxes' tops, so a tunnel's caps run on as one slope.
+## LINED: the model on block `b`'s foot at its own height (or the box's, if lower) and width, its long side along the
+## box's, stretched along, bent by `bend` (joint_bend by the box's foot). At the end of a run of sections, the mouth
+## model (PropDressConfig.lined_mouths) instead, its -z end to the open side. Elsewhere, where more than lined_min_cap m
+## of the box is left over it, its cap (lined_caps) stretched over the rest of the box from lined_cap_from m over its
+## foot, bent by the boxes' tops, so a tunnel's caps run on as one slope.
 static func _lined(out: Dictionary[StringName, Placed], model: StringName, boxes: Dictionary[StringName, AABB],
 		b: MapData.Block, foot: Vector3, cfg: PropDressConfig, bend: Transform3D, map: MapData) -> void:
+	var mouth: StringName = cfg.lined_mouths.get(model, &"")
+	var open := _open_end(b, map)
+	if mouth != &"" and boxes.has(mouth) and open != Vector3.ZERO:
+		var m := boxes[mouth]
+		var along := b.size.z if absf(open.z) > 0.0 else b.size.x
+		# a quarter turn takes the model's -z to world -x, a half turn to +z
+		var yaw := 0.0
+		if open.z > 0.0:
+			yaw = PI
+		elif open.x < 0.0:
+			yaw = PI * 0.5
+		elif open.x > 0.0:
+			yaw = -PI * 0.5
+		_placed(out, mouth).add(bend * fit(m, foot, Vector3(m.size.x, minf(m.size.y, b.size.y), along), yaw), 1.0)
+		return
 	var own := boxes[model]
 	var height := minf(own.size.y, b.size.y)
-	_placed(out, model).add(bend * _fit_long(own, b, foot, height), 1.0)
+	_placed(out, model).add(bend * _fit_long(own, b, foot, height, false), 1.0)
 	var cap: StringName = cfg.lined_caps.get(model, &"")
 	if cap == &"" or not boxes.has(cap) or b.size.y - height <= cfg.lined_min_cap:
 		return
@@ -487,9 +503,36 @@ static func _lined(out: Dictionary[StringName, Placed], model: StringName, boxes
 			b.size.y - from), 1.0)
 
 
-## One model stretched over block `b`'s footprint, `height` m high from `foot`, its long side along the box's.
-static func _fit_long(model: AABB, b: MapData.Block, foot: Vector3, height: float) -> Transform3D:
-	var long := maxf(b.size.x, b.size.z)
+## The open end of block `b` at the end of a run of blocks named alike (end to end with it along x or z, as joint_bend
+## finds them): the world direction (a unit along x or z) with no neighbour, ZERO for a block with a neighbour at both
+## ends or none.
+static func _open_end(b: MapData.Block, map: MapData) -> Vector3:
+	for axis: int in [0, 2]:
+		var other := 2 - axis
+		var back := false
+		var ahead := false
+		for c in map.blocks:
+			if c == b or c.dress != b.dress:
+				continue
+			var d := c.center - b.center
+			if absf(d[other]) > 1e-3 or absf(absf(d[axis]) - (b.size[axis] + c.size[axis]) * 0.5) > 1e-3:
+				continue
+			if d[axis] < 0.0:
+				back = true
+			else:
+				ahead = true
+		if back != ahead:
+			var dir := Vector3.ZERO
+			dir[axis] = -1.0 if ahead else 1.0
+			return dir
+	return Vector3.ZERO
+
+
+## One model stretched over block `b`'s footprint, `height` m high from `foot`, its long side along the box's (at the
+## model's own length with `stretch_long` off: a tunnel's shell, whose earth reaches past the box's sides).
+static func _fit_long(model: AABB, b: MapData.Block, foot: Vector3, height: float,
+		stretch_long: bool = true) -> Transform3D:
+	var long := maxf(b.size.x, b.size.z) if stretch_long else maxf(model.size.x, model.size.z)
 	var short := minf(b.size.x, b.size.z)
 	var model_long_x := model.size.x >= model.size.z
 	var size := Vector3(long, height, short) if model_long_x else Vector3(short, height, long)

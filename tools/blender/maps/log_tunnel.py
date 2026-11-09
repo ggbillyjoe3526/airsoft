@@ -60,6 +60,22 @@ _ROOF_OUT = [(1.15, CLEAR), (1.094, CLEAR + 0.278), (0.93, CLEAR + 0.529), (0.67
              (0.355, CLEAR + 0.856), (0.0, CLEAR + SHELL)]
 # the log's outer arc over the shell's foot, crown first (the earth wedges' inner edge)
 ROOF_ARC = [(u, v - CLEAR) for u, v in reversed(_ROOF_OUT[1:-1])]
+SKIRT = (1.45, 0.2)   # the earth's edge outside the box, under the ground banked against the log (build_map's
+                      # TUNNEL_BANK), so no hollow shows between the log's flank and the bank
+# an earth wedge on the log's right shoulder (u, v over the ceiling): from the log's foot out over the skirt, back to
+# the box's side and up the slope onto the log
+WEDGE = [(1.15, 0.0), SKIRT, (ROOF_HALF, WEDGE_FOOT)] + [(u, v) for u, v in ROOF_ARC if u >= WEDGE_TOP]
+# the mouth's hood: the log's outer line (the cut end's outer edge, foot to foot: earth to the end's rim, no bare bark) and, point for point, its neighbour's
+# earth over it at the joint (the skirt, the box's side, the cap's side and top, HOOD_TOP: halfway up the mound's first
+# step, build_map's TUNNEL_EARTH_STEP)
+HOOD_TOP = SHELL + 0.15
+_ARC_R = [(1.15, 0.0)] + list(reversed(ROOF_ARC)) + [(0.0, SHELL)]
+_CAP_TOP_HALF = ROOF_HALF * (1.0 - CAP_SLOPE)
+_HOOD_R = [SKIRT, (ROOF_HALF, WEDGE_FOOT),
+           (1.0, WEDGE_FOOT + (ROOF_HALF - 1.0) / (ROOF_HALF - _CAP_TOP_HALF) * (HOOD_TOP - WEDGE_FOOT)),
+           (_CAP_TOP_HALF, HOOD_TOP), (0.35, HOOD_TOP), (0.0, HOOD_TOP)]
+HOOD_IN = _ARC_R + [(-u, v) for u, v in reversed(_ARC_R[:-1])]
+HOOD_OUT = _HOOD_R + [(-u, v) for u, v in reversed(_HOOD_R[:-1])]
 ROOF_IN = [(-u, v) for u, v in _ROOF_IN] + [(u, v) for u, v in reversed(_ROOF_IN[:-1])]
 ROOF_OUT = [(-u, v) for u, v in _ROOF_OUT] + [(u, v) for u, v in reversed(_ROOF_OUT[:-1])]
 END_LINES = (0.0, 0.84, 0.91, 1.0)  # a cut end's lines across the shell: heartwood, sapwood rim, bark, bark's edge
@@ -90,10 +106,11 @@ def _bark_bump(p: Vector, period: float) -> float:
     return wt.noise(q, 0.5, 3) - 0.5
 
 
-def _shell(b: hs.Builder, inner: list, outer: list, place, mats: tuple, bump: float) -> None:
+def _shell(b: hs.Builder, inner: list, outer: list, place, mats: tuple, bump: float, bark: bool = True) -> None:
     """A length of the log's shell between two paired section lines, swept along the tunnel: its inner face, its outer
     face (bark, bumped out and in by `bump` m along the furrows) and both cut ends (lofted across through END_LINES).
-    `place(u, v, y)` maps tunnel space to the model's."""
+    `place(u, v, y)` maps tunnel space to the model's. With `bark` False the outer face is left off (the mouth's hood
+    covers it: earth just over bark reads dark in the game's light)."""
     bm = b.bm
     ys = _along()
     m_in, m_out, m_end = (b.mat(m) for m in mats)
@@ -107,7 +124,7 @@ def _shell(b: hs.Builder, inner: list, outer: list, place, mats: tuple, bump: fl
             pts.append(p)
         return pts
 
-    for line, other, out, m in ((inner, outer, False, m_in), (outer, inner, True, m_out)):
+    for line, other, out, m in ((inner, outer, False, m_in), (outer, inner, True, m_out))[:2 if bark else 1]:
         rows = [[bm.verts.new(p) for p in ring_points(line, y, out)] for y in ys]
         faces = []
         for a, c in zip(rows, rows[1:]):
@@ -173,13 +190,55 @@ def roof() -> None:
     # the mound's earth heaped against the log's shoulders, sloping from the box's side up onto the log (the ring
     # stands out of the slope at a mouth; the box's top corners over the slope are left open)
     for s in (-1.0, 1.0):
-        outline = [(s * 1.15, 0.0), (s * ROOF_HALF, 0.0), (s * ROOF_HALF, WEDGE_FOOT)] + \
-            [(s * u, v) for u, v in ROOF_ARC if u >= WEDGE_TOP]
+        outline = [(s * u, v) for u, v in WEDGE]
         if s < 0:
             outline.reverse()
         b.prism(outline, "y", -ALONG / 2, ALONG / 2, "earth")
     ob = b.build()
     _finish(ob, "log_tunnel_roof", 260)
+
+
+def mouth() -> None:
+    """A tunnel's end section: the log's shell as the roof's, with the mound's earth (the wedges, their skirt and the
+    cap) as one hood that runs from its neighbour's profile at the inner end (+z) down onto the log's bark at the mouth
+    (-z), so the log's round end stands out of the slope with no face of earth beside or over it."""
+    hs.reset()
+    mk.paints({"inside": WOOD, "bark": BARK, "end": SAP, "earth": EARTH})
+    b = hs.Builder("log_tunnel_mouth", ["inside", "bark", "end", "earth"])
+
+    def place(u: float, v: float, y: float) -> tuple:
+        return (u, -y, v - CLEAR)
+
+    _shell(b, ROOF_IN, ROOF_OUT, place, ("inside", "bark", "end"), 0.02, bark=False)
+    bm = b.bm
+    m_earth = b.mat("earth")
+    rows = []
+    for k in range(STEPS + 1):
+        t = k / STEPS
+        y = ALONG / 2 - ALONG * t  # the mouth at +y: glTF's -z, the model's front
+        rows.append([bm.verts.new((u + (ou - u) * t, y, v + (ov - v) * t))
+                     for (u, v), (ou, ov) in zip(HOOD_IN, HOOD_OUT)])
+    faces = []
+    for a, c in zip(rows, rows[1:]):
+        for j in range(len(HOOD_IN) - 1):
+            faces.append(bm.faces.new((a[j], a[j + 1], c[j + 1], c[j])))
+        # the skirts' undersides, from the log's foot out to the skirt's edge
+        for j, foot in ((0, HOOD_IN[0]), (len(HOOD_IN) - 1, HOOD_IN[-1])):
+            f0 = bm.verts.new((foot[0], a[j].co.y, foot[1]))
+            f1 = bm.verts.new((foot[0], c[j].co.y, foot[1]))
+            if (a[j].co - f0.co).length > 1e-4:
+                faces.append(bm.faces.new((f0, a[j], c[j], f1)))
+            else:
+                faces.append(bm.faces.new((f0, c[j], f1)))
+    for f in faces:
+        f.material_index = m_earth
+        f.normal_update()
+        # facing away from the log's middle
+        mid = f.calc_center_median()
+        if f.normal.dot(Vector((mid.x, 0.0, mid.z + 0.3))) < 0.0:
+            f.normal_flip()
+    ob = b.build()
+    _finish(ob, "log_tunnel_mouth", 300)
 
 
 def cap() -> None:
@@ -236,7 +295,7 @@ def _finish(ob, name: str, budget: int) -> None:
             if name == "log_tunnel_roof":
                 # the wedges' ends: earth against the log, the mound's grass over it toward the top
                 return wt.mix(col, wt.mix(meadow, turf, 0.4 * wt.fbm(p, 0.4, 67)), wt.smooth(0.0, 0.45, p.z / SHELL))
-            if name == "log_tunnel_cap":
+            if name in ("log_tunnel_cap", "log_tunnel_mouth"):
                 # the mound's grass all over, a little earth showing through low down, so it reads as the mound
                 grass = 1.0 - 0.3 * wt.smooth(0.3, 0.0, p.z) * wt.fbm(p, 0.3, 63)
                 col = wt.mix(col, wt.mix(meadow, turf, 0.4 * wt.fbm(p, 0.4, 65)), grass)
@@ -279,4 +338,5 @@ def _across(u: float, v: float, line_in: list, line_out: list) -> float:
 
 side()
 roof()
+mouth()
 cap()
