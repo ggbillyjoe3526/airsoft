@@ -94,10 +94,16 @@ func materials() -> Array[Material]:
 	return out
 
 
+## Whether block `b` is drawn as a prop it names itself (MapData.Block.dress: Depot's desks and lockers, RK1): its
+## box draws no faces, so it gets no details either (battens, cap, frame or coping).
+static func _modelled(look: SiteLook, b: MapData.Block) -> bool:
+	return b.dress != &"" and look.props != null and look.props.dresses(b)
+
+
 func _build(map: MapData, look: SiteLook, material: ShaderMaterial) -> void:
 	var st := SiteSurface.begin()
 	for b in map.blocks:
-		if b.rise != MapData.Rise.NONE:
+		if b.rise != MapData.Rise.NONE or _modelled(look, b):
 			continue
 		match look.finish_of(b):
 			&"container":

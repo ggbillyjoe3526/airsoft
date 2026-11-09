@@ -7,6 +7,9 @@ practise on a field: see [Practice on a field](#practice-on-a-field).
 
 ![The range in Depot's site: three lanes of targets, with Depot's water tower and buildings beyond the walls](images/range-in-depot.jpg)
 
+Beside the firing point stands the range's kit rack: a bay of warehouse racking with empty rifle and pistol stands,
+BB bottles and cans, and a stack of hard cases.
+
 ## The targets
 
 Three lanes of targets run out from the firing line. Beyond the walls stand Depot's green steel sheds, a water

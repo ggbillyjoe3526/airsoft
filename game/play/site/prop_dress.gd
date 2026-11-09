@@ -46,7 +46,8 @@ static func build(map: MapData, cfg: PropDressConfig) -> PropDress:
 	for model: StringName in placed:
 		var tiled := _tiled(cfg, model)
 		var many := placed[model].transforms.size() >= cfg.chunk_from or cfg.spread_models.has(model)
-		var chunk := cfg.chunk if tiled else cfg.many_chunk if many else INF
+		var chunk := cfg.many_chunk if tiled and _varied(cfg, model) else cfg.chunk if tiled \
+				else cfg.many_chunk if many else INF
 		dress._add(model, meshes[model], placed[model], not tiled, chunk)
 	return dress
 
@@ -128,8 +129,12 @@ static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName
 		if not cfg.dresses(b):
 			continue
 		var model := cfg.model_of(b)
-		if not used.has(model):
-			used.append(model)
+		var each: Array[StringName] = [model]
+		if cfg.lay_of(b) == PropDressConfig.Lay.TILE:
+			each = cfg.variants_of(model)
+		for m in each:
+			if not used.has(m):
+				used.append(m)
 		if cfg.lay_of(b) == PropDressConfig.Lay.CLUSTER \
 				and not used.has(cfg.pallet):
 			used.append(cfg.pallet)
@@ -140,8 +145,20 @@ static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName
 	return used
 
 
+## Whether `model` takes turns with other models (PropDressConfig.variants), as the base or one of them.
+static func _varied(cfg: PropDressConfig, model: StringName) -> bool:
+	for base: StringName in cfg.variants:
+		var each := cfg.variants_of(base)
+		if each.size() > 1 and each.has(model):
+			return true
+	return false
+
+
 ## Whether `model` lines boxes (TILE): their backing is still in the shadow caster, so the model casts none.
 static func _tiled(cfg: PropDressConfig, model: StringName) -> bool:
+	for base: StringName in cfg.variants:
+		if cfg.variants_of(base).has(model) and base != model:
+			return _tiled(cfg, base)
 	if cfg.model_lays.get(model, PropDressConfig.Lay.FIT) == PropDressConfig.Lay.TILE:
 		return true
 	for kind: StringName in cfg.kind_props:
