@@ -87,13 +87,15 @@ defenders in the east camp.
 
 - **The stream:** its bed is 1.7 m under its banks, which are too steep to climb. Cross on the North bridge or the road,
   or walk in and out at the Ford and the gentle slides. Down in the bed you're out of sight of the wood above.
-- **The look:** the game's soft, stylised light over a bright green wood: lime-lit crowns, pine-green spruces, a
-  meadow floor, and the violet pickup wreck carrying the colour, with nothing near a team's blue or orange.
+- **The look:** the game's soft, stylised light over a bright green wood: young, grown and old Scots pines with bare
+  tan trunks under their crowns, broad, lumpy oaks, white birches in the Birch stand and Fern hollow, dark
+  spruce thickets, and beyond the fence a far wood of spruce spires. A meadow floor, the violet pickup wreck and teal
+  crates carry the colour, with nothing near a team's blue or orange. Every crown starts over head height.
 - **Long views, few walls:** the Ridge looks 86 m down onto the Fort; elsewhere a lane's longest line is under 80 m.
   Cover is logs, log stacks, stacks of tractor tyres, wooden crates, the violet pickup wreck and the trunks of the trees
   themselves, free CC0 models and the game's own, and the camps and the field's edge are walled by a log palisade of
-  sharpened stakes; each stops a BB about where you see it, a round trunk by its bark (its roots fill its back
-  corners). The thickets of spruce at the edges and between the lanes can't be entered or seen through.
+  sharpened stakes; each stops a BB about where you see it, a round trunk by its bark. The thickets of spruce at the
+  edges and between the lanes can't be entered or seen through.
 - **Ferns** grow knee to hip high in eight beds where you'd want to hide, and **bushes** stand taller. Nobody sees you
   through more than about half a metre of leaves, so crouch in a fern bed to vanish; you can walk through ferns and
   bushes, but they slow you and a run through them rustles loudly ([Movement](Movement)), and a BB that pushes 0.6 m

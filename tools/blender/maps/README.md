@@ -29,10 +29,20 @@ script after `tools/woodland/build_map.py`).
 | `pickup.py` | `pickup.glb` | Woodland's pickup wreck (grounded) |
 | `tyre.py` | `tractor_tyre.glb`, `tractor_tyre_stack.glb` | Woodland's tyre stacks (grounded) |
 | `campfire.py`, `lantern.py` | `campfire.glb`, `lantern.glb`, `lantern_post.glb`, `lantern_chain.glb` | Woodland's fires and lanterns (`LightFixtures`, no collider) |
+| `pine.py` | `pine_young.glb`, `pine_grown.glb`, `pine_old.glb` (each with its `_crown`) | Woodland's pines, the age by the tree's height (`PropDressConfig.Lay.TREE`) |
+| `oak.py` | `oak.glb`, `oak_crown.glb` | Woodland's hand-placed oaks (TREE) |
+| `birch.py` | `birch.glb`, `birch_crown.glb` | Woodland's birches (TREE) |
+| `spruce.py` | `spruce.glb` | Woodland's thickets, a spruce a 1.5 m cell (GRID) |
+| `far_tree.py` | `forest_tree.glb`, `skyline/treeline.glb` | The wood past Woodland's fence (`WoodsConfig.forest_model`) and the skyline's treeline band (`SkylineConfig.treeline_model`) |
+
+The trees share `treekit.py`: stems, limbs, foliage clumps and spruce tiers with crown-lit normals, and the build gates
+(budget, no team hue, the trunk inside its foot radius, the crown only over the clearance outside it). A tree's trunk
+and crown are written apart (`export(..., crown=True)`): the game stretches the trunk to its box and scales the
+crown evenly over it.
 
 Run each with Blender 5.x or pip's `bpy` (`pip install bpy==5.2.3`): `python3 -I tools/blender/maps/<script>.py <repo
 root>`, then `godot --headless --path . --import`. Pictures for review: `tools/prop_pictures.gd` (a model alone),
 `tools/hall_pictures.gd` (Depot) and `tools/woodland_pictures.gd` (Woodland), all under xvfb; `tools/eye_pictures.gd`
 for a field (`night` lights its fires and lanterns). Records: `docs/records/DH1.md`, `docs/records/RK1.md` (RK1's
 scripts run as `python3 tools/blender/maps/<script>.py`), `docs/records/WG3.md`, `docs/records/WG4.md`
-(`weathering.py`: WG4's noise and repaint helpers). Dev only: tools/ never ships.
+(`weathering.py`: WG4's noise and repaint helpers), `docs/records/WT1.md`. Dev only: tools/ never ships.

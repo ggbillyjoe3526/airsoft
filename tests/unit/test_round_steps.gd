@@ -7,6 +7,9 @@ extends GutTest
 ## bots' cover still take the block's box.
 
 const ROUND_MAPS: Array[String] = ["woodland", "depot", "street"]
+## The round props checked: The Street's trunks, Woodland's trees (WT1), Depot's drums and barrels and their pallets.
+const ROUND_MODELS: Array[StringName] = [&"trunk", &"pine_young", &"pine_grown", &"pine_old", &"oak", &"birch", &"drum",
+		&"barrel", &"pallet"]
 ## A step may reach this far (m) past a prop's vertex and still hold it (the steps' figures are rounded outwards).
 const SLACK := 2e-3
 ## Each side of a step lies within this share of the step's width of a vertex of the props it holds (the hug; the
@@ -50,9 +53,11 @@ func _laid(m: MapData) -> Dictionary[int, PackedVector3Array]:
 		return out
 	add_child_autofree(dress)
 	var placed := dress.placed()
-	for model: StringName in [&"trunk", &"drum", &"barrel", &"pallet"]:
+	for model: StringName in ROUND_MODELS:
 		if not placed.has(model):
 			continue
+		# a tree's trunk only: its crown, over head height, is look only (WT1)
+		var tree: bool = play.site_look.props.model_lays.get(model, PropDressConfig.Lay.FIT) == PropDressConfig.Lay.TREE
 		var mesh := dress.mesh_of(model)
 		var verts := PackedVector3Array()
 		for s in mesh.get_surface_count():
@@ -62,13 +67,16 @@ func _laid(m: MapData) -> Dictionary[int, PackedVector3Array]:
 			var at := -1
 			for i in round_blocks:
 				var b := m.blocks[i]
-				if AABB(b.center - b.size * 0.5, b.size).grow(1e-3).has_point(t * middle):
+				if AABB(b.center - b.size * 0.5, b.size).grow(1e-3).has_point(
+						t.origin + Vector3(0.0, 0.01, 0.0) if tree else t * middle):
 					at = i
 					break
 			if not out.has(at):
 				out[at] = PackedVector3Array()
 			for v in verts:
-				out[at].append(t * v)
+				var w := t * v
+				if not tree or w.y < t.origin.y + play.woods.crown_clear:
+					out[at].append(w)
 	return out
 
 

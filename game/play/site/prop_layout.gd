@@ -7,6 +7,8 @@ extends RefCounted
 
 ## How far (m) past a face TILE looks for a block that hides it.
 const FACE_SLAB := 0.04
+## The trees' own seeded stream (their turns and shades, WT1), apart from the other props' so theirs stay as they were.
+const TREE_SALT := 0x7EE5
 
 
 ## One model's instances: a transform, a shade (1 is the model's own colours) and a paint (a linear multiplier, white
@@ -31,6 +33,8 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 	var out: Dictionary[StringName, Placed] = {}
 	var rng := RandomNumberGenerator.new()
 	rng.seed = map.dressing_seed
+	var trees := RandomNumberGenerator.new()
+	trees.seed = map.dressing_seed ^ TREE_SALT
 	var middle := field_middle(map)
 	var features_laid := 0
 	var turns := Turns.new(out, boxes, map.dressing_seed)
@@ -75,6 +79,17 @@ static func layout(map: MapData, cfg: PropDressConfig, boxes: Dictionary[StringN
 					var box := PropDressConfig.set_box(map, model)
 					_placed(out, model).add(fit(boxes[model], box.get_center() - Vector3(0.0, box.size.y * 0.5, 0.0),
 							box.size, 0.0), 1.0)
+			PropDressConfig.Lay.TREE:
+				if cfg.tree_feet.has(model):
+					var crown: StringName = cfg.tree_crowns.get(model, &"")
+					var has_crown := boxes.has(crown)
+					var top := maxf(boxes[model].end.y, boxes[crown].end.y if has_crown else 0.0)
+					var shade := _shade(cfg, trees)
+					var t := tree_fit(boxes[model], b, ground_under(map, b), cfg.tree_feet[model], _quarter_turn(trees),
+							top)
+					_placed(out, model).add(t, shade)
+					if has_crown:
+						_placed(out, crown).add(crown_fit(t), shade)
 			PropDressConfig.Lay.SIDE:
 				_placed(out, model).add(joint_bend(b, map, true) * _side(boxes[model], b, map, cfg, middle), 1.0)
 			PropDressConfig.Lay.LINED:
@@ -95,6 +110,42 @@ static func fit(model: AABB, foot: Vector3, size: Vector3, yaw: float) -> Transf
 	var basis := Basis(Vector3.UP, yaw) * Basis.from_scale(scale)
 	var base := model.position + Vector3(model.size.x * 0.5, 0.0, model.size.z * 0.5)
 	return Transform3D(basis, foot - basis * base)
+
+
+## The transform that stands a tree of bounds `model` in block `b` (PropDressConfig.Lay.TREE): its origin on the
+## ground `ground` under the box's middle (raised as little as keeps its sunk foot inside the box), its trunk's foot
+## (`foot` m round its origin) stretched to the box's half-width (the box's shorter side, a tree's box being square)
+## and the tree's top (`height` m in the model, its crown's included; the model's own top without it) to the box's
+## top, turned `yaw` about up
+## (a quarter turn: the trunk's foot reaches its radius along its axes, so the box and its round steps still hold it).
+static func tree_fit(model: AABB, b: MapData.Block, ground: float, foot: float, yaw: float, height: float = -1.0) \
+		-> Transform3D:
+	var tall := maxf(height if height > 0.0 else model.end.y, 1e-6)
+	var top := b.center.y + b.size.y * 0.5
+	var across := minf(b.size.x, b.size.z) * 0.5 / maxf(foot, 1e-6)
+	var up := (top - ground) / tall
+	# the trunk's cut end, under the ground, stays inside the box: on a steep foot the tree stands a little higher
+	var stand := maxf(ground, b.center.y - b.size.y * 0.5 - model.position.y * up)
+	up = (top - stand) / tall
+	var basis := Basis(Vector3.UP, yaw) * Basis.from_scale(Vector3(across, up, across))
+	return Transform3D(basis, Vector3(b.center.x, stand, b.center.z))
+
+
+## A tree's crown over its trunk stood by `trunk` (tree_fit): the same origin and turn, scaled evenly by the trunk's
+## height scale, so the crown keeps its modelled shape whatever its box's width.
+static func crown_fit(trunk: Transform3D) -> Transform3D:
+	var up := trunk.basis.y.length()
+	var turn := trunk.basis.orthonormalized()
+	return Transform3D(turn * Basis.from_scale(Vector3.ONE * up), trunk.origin)
+
+
+## The ground under block `b`'s middle: sloping ground's, kept inside the box, or its foot without it.
+static func ground_under(map: MapData, b: MapData.Block) -> float:
+	var foot := b.center.y - b.size.y * 0.5
+	if map.terrain == null:
+		return foot
+	var h := map.terrain.height_at(b.center.x, b.center.z)
+	return foot if is_nan(h) else clampf(h, foot, b.center.y + b.size.y * 0.5)
 
 
 ## The middle of the field on the ground: halfway between the teams' spawns.
