@@ -9,6 +9,8 @@ extends Node3D
 ## Fires flicker, on the drawn disc and the real light alike; still under Reduced motion. Look only: nothing the
 ## simulation reads. Built once; `update` each rendered frame allocates nothing.
 
+## Every render layer, as a light's shadow caster mask.
+const ALL_CASTERS := 0xFFFFFFFF
 ## The most lights a map may have drawn (the disc shader's array).
 const MAX_POOLS := 32
 ## The drawn discs: COLOR is the pool's light at that point (linear), UV.x its index, UV.y 1 for a fire.
@@ -191,6 +193,8 @@ func set_real_count(count: int) -> void:
 		light.name = "PoolLight%d" % _real.size()
 		light.shadow_enabled = _shadows
 		light.shadow_blur = _cfg.real_shadow_blur
+		# Not shadowed by the lantern or campfire it sits in (LightFixtures.LAYER).
+		light.shadow_caster_mask = ALL_CASTERS & ~LightFixtures.LAYER
 		light.visible = false
 		add_child(light)
 		_serving[_real.size()] = -1

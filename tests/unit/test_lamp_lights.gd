@@ -2,7 +2,8 @@ extends GutTest
 ## Graphics › Lamp light (RoofLamps, data/graphics.md): Depot's roof lamps as real shadow-casting spots, off on Low and
 ## Medium, near on High and far on Ultra; the overhead sun turned down while they shine and back up when they stop;
 ## their shadows following the shadow rows (atlas, filter, contact hardening on Softest); the figures' shadow twins kept
-## while only the lamps cast; and an open-air field untouched. Headless: properties and counts, never pixels.
+## while only the lamps cast; a night pool's light unshadowed by its own lantern or campfire; and an open-air field
+## untouched. Headless: properties and counts, never pixels.
 
 var table: GraphicsTable = null
 var play: PlayTuning = PlayTuning.new()
@@ -131,3 +132,24 @@ func test_a_repeat_changes_nothing() -> void:
 	spot.light_size = 9.0
 	lamps.set_mode(GraphicsQuality.LampLights.FAR, true)
 	assert_almost_eq(spot.light_size, 9.0, 0.001, "nothing set again when nothing changed")
+
+
+func test_a_pool_light_is_not_shadowed_by_the_lantern_or_campfire_it_sits_in() -> void:
+	var map := MapData.load_map("woodland", play.map_style, 6)
+	var night := LightingConfig.new()
+	night.night = true
+	var pools := LightPools.build(map, night)
+	var fixtures := LightFixtures.build(map, play.light_fixtures,
+			LightingConfig.for_map(play.lighting, play.night_lighting, map, LightingConfig.NIGHT))
+	assert_not_null(pools)
+	assert_not_null(fixtures)
+	add_child_autofree(pools)
+	add_child_autofree(fixtures)
+	pools.set_real_count(2)
+	pools.set_shadows(true)
+	for light in pools.real_lights():
+		assert_eq(light.shadow_caster_mask & LightFixtures.LAYER, 0, "the fixtures' layer is left out")
+		assert_ne(light.shadow_caster_mask & 1, 0, "the field, its props and the players still cast")
+	for view in fixtures.find_children("*", "MultiMeshInstance3D", false, false):
+		assert_ne((view as VisualInstance3D).layers & LightFixtures.LAYER, 0, "%s on the fixtures' layer" % view.name)
+		assert_ne((view as VisualInstance3D).layers & 1, 0, "and still drawn with the field")

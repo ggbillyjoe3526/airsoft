@@ -7,6 +7,9 @@ extends Node3D
 ## day the coals are dark, the globe is glass and there are no flames), as LightPools lights them. Look only: no
 ## collider, nothing the simulation reads. Built once; the flicker is the flame shader's, so nothing runs a frame.
 
+## The render layer the fixtures draw on as well as the first, so the light pools' real lights, which sit inside a
+## lantern's globe or among a campfire's logs, leave them out of their shadows (LightPools, Graphics › Lamp light).
+const LAYER := 1 << 17
 const PROP_SURFACE := &"Prop"
 const EMBER_SURFACE := &"Ember"
 const GLOW_SURFACE := &"Glow"
@@ -247,6 +250,7 @@ func _add(path: String, mesh: ArrayMesh, transforms: Array) -> void:
 	var view := MultiMeshInstance3D.new()
 	view.name = path.get_file().get_basename().capitalize()
 	view.multimesh = mm
+	view.layers = 1 | LAYER
 	add_child(view)
 	_views.append(view)
 
