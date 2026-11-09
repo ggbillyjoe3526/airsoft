@@ -35,6 +35,8 @@ const SOFTNESS: Array[int] = [RenderingServer.SHADOW_QUALITY_HARD, RenderingServ
 		RenderingServer.SHADOW_QUALITY_SOFT_LOW, RenderingServer.SHADOW_QUALITY_SOFT_HIGH]
 ## The project settings kept as they are when the presets change the shadow map or ambient occlusion's size.
 const SHADOW_16_BITS := "rendering/lights_and_shadows/directional_shadow/16_bits"
+## The project's shadow atlas for the lights other than the sun (spots and omnis).
+const LAMP_ATLAS_SIZE := "rendering/lights_and_shadows/positional_shadow/atlas_size"
 const SSAO_QUALITY := "rendering/environment/ssao/quality"
 const SSAO_ADAPTIVE := "rendering/environment/ssao/adaptive_target"
 const SSAO_BLUR := "rendering/environment/ssao/blur_passes"
@@ -104,6 +106,15 @@ class Server:
 			RenderingServer.environment_set_sdfgi_ray_count(look.sdfgi_rays)
 			RenderingServer.environment_set_sdfgi_frames_to_converge(look.sdfgi_converge)
 			RenderingServer.environment_set_sdfgi_frames_to_update_light(look.sdfgi_update)
+
+	## The lamps' (and the torch's) shadow filter, as last sent (RenderingServer.ShadowQuality, -1 never sent).
+	var lamp_soft: int = -1
+
+	func set_lamp_soft(quality: int) -> void:
+		if quality == lamp_soft:
+			return
+		lamp_soft = quality
+		RenderingServer.positional_soft_shadow_filter_set_quality(quality as RenderingServer.ShadowQuality)
 
 	## The volumetric fog's froxel grid (cells across, deep).
 	func set_fog_grid(grid: Vector2i) -> void:
@@ -221,6 +232,26 @@ static func apply(values: GraphicsQuality, viewport: Viewport, rs: Server = null
 		viewport.use_occlusion_culling = values.occlusion_culling
 	to.set_shadow_size(values.shadow_detail)
 	to.set_soft_shadows(SOFTNESS[values.shadow_softness])
+	var atlas := lamp_atlas(values)
+	if viewport.positional_shadow_atlas_size != atlas:
+		viewport.positional_shadow_atlas_size = atlas
+	to.set_lamp_soft(SOFTNESS[values.shadow_softness])
+
+
+## The root viewport's shadow atlas for the lamps and the torch's spot with `values`: the sun's Shadow detail while the
+## roof lamps are real lights (Lamp light), else the project's (LAMP_ATLAS_DEFAULT), which the torch was tuned on.
+static func lamp_atlas(values: GraphicsQuality) -> int:
+	if values.lamp_lights == GraphicsQuality.LampLights.OFF:
+		return ProjectSettings.get_setting(LAMP_ATLAS_SIZE) as int
+	return values.shadow_detail
+
+
+## The optic glass's shadow atlas with `values`: none, as it always was, unless the roof lamps are real lights, whose
+## shadows keep them from shining through the rooms' roofs in the glass too; then half the main view's.
+static func glass_atlas(values: GraphicsQuality) -> int:
+	if values.lamp_lights == GraphicsQuality.LampLights.OFF:
+		return 0
+	return values.shadow_detail / 2
 
 
 ## The render scale and edge smoothing alone, which the optic glass's own picture follows too.
@@ -240,9 +271,11 @@ static func apply_picture(values: GraphicsQuality, viewport: Viewport) -> void:
 ## size), its global illumination, reflections, glow and volumetric fog (FieldLighting.set_effects), the wind dust's share,
 ## the kicked dust (on with any wind dust), the level's baked light (a new mesh only when it changes) and a wood's
 ## dressing (WoodsView: its parts by Mesh detail, its fireflies and motes by the wind dust's share), from `values`
-## (already drawable). Any of `lighting`, `dust`, `level`, `kicked` and `woods` may be null.
+## (already drawable), and an indoor field's roof lamps as real lights (RoofLamps, Lamp light; their shadows
+## contact-hardening on Softest) with the sun turned down while they shine. Any of `lighting`, `dust`, `level`,
+## `kicked`, `woods` and `lamps` may be null.
 static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: WindDust, rs: Server = null,
-		level: MapLevel = null, kicked: KickedDust = null, woods: WoodsView = null) -> void:
+		level: MapLevel = null, kicked: KickedDust = null, woods: WoodsView = null, lamps: RoofLamps = null) -> void:
 	var to := rs if rs != null else server()
 	if lighting != null:
 		lighting.sun.shadow_enabled = values.sun_shadows
@@ -266,6 +299,10 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 		kicked.set_on(values.wind_dust > 0)
 	if woods != null:
 		woods.set_quality(values.mesh_detail, values.wind_dust / PERCENT)
+	if lamps != null:
+		lamps.set_mode(values.lamp_lights, values.shadow_softness == GraphicsQuality.ShadowSoftness.SOFTEST)
+		if lighting != null:
+			lighting.set_key_share(lamps.key_share(values.lamp_lights))
 
 
 ## Whether the figures draw their contact shadows with `values`: where the sun casts none.
@@ -273,10 +310,15 @@ static func contact_shadows(values: GraphicsQuality) -> bool:
 	return not values.sun_shadows
 
 
-## Whether any light casts shadows with `values`: the sun, and the torch's spot only with it (torch_mode); no other
-## light ever does. Without, the figures' shadow twins are hidden.
+## Whether a night's light pools' real lights cast shadows with `values`: with Lamp light on, as a roof's lamps do.
+static func pool_shadows(values: GraphicsQuality) -> bool:
+	return values.lamp_lights != GraphicsQuality.LampLights.OFF
+
+
+## Whether any light casts shadows with `values`: the sun, the torch's spot only with it (torch_mode), and an indoor
+## field's roof lamps and a night's light pools while they are real lights (Lamp light). Without, the figures' shadow twins are hidden.
 static func any_shadows(values: GraphicsQuality) -> bool:
-	return values.sun_shadows
+	return values.sun_shadows or values.lamp_lights != GraphicsQuality.LampLights.OFF
 
 
 ## How the view's weapon torch is drawn at night with `values` (WL7): a real spot while your kit carries a light this
@@ -291,10 +333,12 @@ static func torch_mode(values: GraphicsQuality, lighting: LightingConfig, fitted
 	return TorchBeams.Mode.SPOT
 
 
-## The real lights `lighting`'s light pools get with `values`: the preset's, less the one your torch's real spot takes
-## while your kit carries a light this match (`fitted`; taken for the whole match, lit or not, so the pools never
-## flicker as it switches).
+## The real lights `lighting`'s light pools get with `values`: the preset's (Mesh detail's, or Lamp light Far's if
+## more), less the one your torch's real spot takes while your kit carries a light this match (`fitted`; taken for the
+## whole match, lit or not, so the pools never flicker as it switches).
 static func pool_lights(values: GraphicsQuality, lighting: LightingConfig, fitted: bool) -> int:
 	var real := lighting.real_lights_for(values.mesh_detail)
+	if values.lamp_lights == GraphicsQuality.LampLights.FAR:
+		real = maxi(real, lighting.real_lights_far)
 	var torch := 1 if torch_mode(values, lighting, fitted) != TorchBeams.Mode.HAZE else 0
 	return maxi(0, real - torch)

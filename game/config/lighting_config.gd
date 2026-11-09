@@ -83,12 +83,17 @@ const PRESETS: Array[StringName] = [DAY, NIGHT]
 @export var lantern_colour: Color = Color8(255, 232, 180)
 ## Real lights by Mesh detail (Low, Medium, High, Ultra): the nearest pools to the eye get one each, the rest are drawn.
 @export var real_lights: PackedInt32Array = PackedInt32Array([0, 2, 4, 4])
-## A real light reaches `real_reach` times its pool's radius at `real_energy`, casting no shadow; it moves to another
+## With Graphics › Lamp light on (Near, Far) the real lights cast shadows, as a roof's lamps do (every map's lamps
+## and fires alike); on Far the nearest `real_lights_far` pools get one, if that is more than Mesh detail's.
+@export var real_lights_far: int = 8
+## A real light reaches `real_reach` times its pool's radius at `real_energy` (its shadow, with Lamp light, blurred
+## `real_shadow_blur`); it moves to another
 ## pool only when that one is `real_hysteresis` m nearer, fading out and in over `real_fade` s.
 @export var real_reach: float = 1.5
 @export var real_energy: float = 1.6
 @export var real_hysteresis: float = 3.0
 @export var real_fade: float = 0.3
+@export var real_shadow_blur: float = 1.5
 ## The drawn pool on the ground: a disc of `pool_rings` × `pool_segments` following the ground `pool_lift` m above it,
 ## `pool_strength` of its colour at the middle fading to nothing at its radius, added to what is under it.
 @export var pool_rings: int = 6

@@ -20,6 +20,9 @@ enum MeshDetail { LOW, MEDIUM, HIGH, ULTRA }
 enum GlobalIllumination { OFF, SCREEN, SCENE }
 ## Reflections: the sky's alone, the map's reflection probes, or the probes with screen-space reflections.
 enum Reflections { OFF, PROBES, SCREEN }
+## An indoor field's roof lamps as real lights (RoofLamps): none (the hall lit by the preset's overhead sun alone), the
+## lamps near you, or the lamps out to the hall's far end; every real lamp casts the sun's grade of shadow.
+enum LampLights { OFF, NEAR, FAR }
 
 ## The choice that is a preset with your own rows over it.
 const CUSTOM := &"custom"
@@ -40,12 +43,13 @@ const OCCLUSION_CULLING := &"occlusion_culling"
 const WIND_DUST := &"wind_dust"
 const GLOBAL_ILLUMINATION := &"global_illumination"
 const REFLECTIONS := &"reflections"
+const LAMP_LIGHTS := &"lamp_lights"
 const GLOW := &"glow"
 const VOLUMETRIC_FOG := &"volumetric_fog"
 ## Every row, in the Graphics tab's order (data/graphics.md's).
 const ROWS: Array[StringName] = [RENDER_SCALE, UPSCALER, EDGE_SMOOTHING, TEMPORAL_SMOOTHING, SUN_SHADOWS,
 		SHADOW_DETAIL, SHADOW_SOFTNESS, SHADOW_RANGE, AMBIENT_OCCLUSION, BAKED_LIGHT, TEXTURE_FILTERING, MESH_DETAIL,
-		OCCLUSION_CULLING, WIND_DUST, GLOBAL_ILLUMINATION, REFLECTIONS, GLOW, VOLUMETRIC_FOG]
+		OCCLUSION_CULLING, WIND_DUST, GLOBAL_ILLUMINATION, REFLECTIONS, LAMP_LIGHTS, GLOW, VOLUMETRIC_FOG]
 ## Every choice the game knows for each choice row, by level. The file offers these, or some of them. (Values are Arrays:
 ## Godot 4.7 keeps a const typed dictionary's array values as Arrays, so a PackedStringArray value type misreads them.)
 const CHOICES: Dictionary[StringName, Array] = {
@@ -62,6 +66,7 @@ const CHOICES: Dictionary[StringName, Array] = {
 	OCCLUSION_CULLING: ["off", "on"],
 	GLOBAL_ILLUMINATION: ["off", "screen", "scene"],
 	REFLECTIONS: ["off", "probes", "screen"],
+	LAMP_LIGHTS: ["off", "near", "far"],
 	GLOW: ["off", "on"],
 	VOLUMETRIC_FOG: ["off", "on"],
 }
@@ -96,6 +101,7 @@ var occlusion_culling: bool = false
 var wind_dust: int = 0
 var global_illumination: GlobalIllumination = GlobalIllumination.OFF
 var reflections: Reflections = Reflections.OFF
+var lamp_lights: LampLights = LampLights.OFF
 ## Bright lamps and sky bloom softly.
 var glow: bool = false
 ## A faint haze the light shines through (shafts and depth).
@@ -182,6 +188,8 @@ func level(row: StringName) -> int:
 			return global_illumination
 		REFLECTIONS:
 			return reflections
+		LAMP_LIGHTS:
+			return lamp_lights
 		GLOW:
 			return int(glow)
 		VOLUMETRIC_FOG:
@@ -225,6 +233,8 @@ func set_level(row: StringName, value: int) -> void:
 			global_illumination = value as GlobalIllumination
 		REFLECTIONS:
 			reflections = value as Reflections
+		LAMP_LIGHTS:
+			lamp_lights = value as LampLights
 		GLOW:
 			glow = value != 0
 		VOLUMETRIC_FOG:

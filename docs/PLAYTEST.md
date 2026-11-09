@@ -1015,6 +1015,12 @@ Settings › Graphics › Quality: Low, Medium, High, Ultra or Custom.
   Then turn round, face the sun, switch replicas, reload, aim the 2x scope, watch an eliminated figure fade and let
   overtime raise the flag. No hitch shows in the perf log.
 
+- [ ] **Lamp light (UG1, your graphics card).** On Depot, play High, then Ultra. Each roof lamp lights a pool on the
+  floor under it, and players, crates and racking throw shadows out from under the lamps. On Ultra the lamps reach the
+  hall's far end and light the haze. Walk into the Lounge and the Offices: no lamp light comes through their roofs.
+  Turn Lamp light Off (Custom): the hall should be about as bright as with it on. On Woodland at night (High, Ultra),
+  fires and lanterns cast shadows. Note the frame rate (F3) on Ultra looking down the hall at 6v6.
+
 ## Accessibility
 
 - [ ] **Team colours › High contrast.** Light blue and dark orange on the figures, flag, armband, scoreboard, feed and

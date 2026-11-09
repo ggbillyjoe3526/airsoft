@@ -1984,7 +1984,8 @@ func _apply_motion() -> void:
 
 ## The graphics drawn, onto the field: at the start and whenever they change (the settings can open from the pause menu).
 func _apply_graphics(values: GraphicsQuality) -> void:
-	GraphicsApply.apply_field(values, _lighting, _dust, null, _level, _kicked, _woods)
+	GraphicsApply.apply_field(values, _lighting, _dust, null, _level, _kicked, _woods,
+			_roof.lamp_lights() if _roof != null else null)
 	if _level != null:
 		_level.set_detail(values.mesh_detail)
 		if _level.baked_light_drawn() != _relit:
@@ -2001,6 +2002,7 @@ func _apply_graphics(values: GraphicsQuality) -> void:
 		_torches.set_own_haze(torch == TorchBeams.Mode.HAZE)
 	if _pools != null:
 		_pools.set_real_count(GraphicsApply.pool_lights(values, _light, _torches != null and _own_light))
+		_pools.set_shadows(GraphicsApply.pool_shadows(values))
 	if _grenades != null:
 		_grenades.set_puffs(_play.effects.smoke_puffs_at(values.mesh_detail))
 	_figure_detail = values.mesh_detail
