@@ -146,7 +146,8 @@ func light_of(model: StringName, i: int) -> Color:
 	return each[i] if i < each.size() else Color.WHITE
 
 
-## The models some block of `map` is dressed with, the pallet too when a cluster stands on one.
+## The models some block of `map` is dressed with, the pallet too when a cluster stands on one, and a lined model's
+## cap and mouth (PropDressConfig.lined_caps, lined_mouths).
 static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName]:
 	var used: Array[StringName] = []
 	for b in map.blocks:
@@ -165,6 +166,10 @@ static func _models_used(map: MapData, cfg: PropDressConfig) -> Array[StringName
 		var crown: StringName = cfg.tree_crowns.get(model, &"")
 		if cfg.lay_of(b) == PropDressConfig.Lay.TREE and crown != &"" and not used.has(crown):
 			used.append(crown)
+		if cfg.lay_of(b) == PropDressConfig.Lay.LINED:
+			for extra: StringName in [cfg.lined_caps.get(model, &""), cfg.lined_mouths.get(model, &"")]:
+				if extra != &"" and not used.has(extra):
+					used.append(extra)
 		if cfg.lay_of(b) == PropDressConfig.Lay.BAY:
 			for feature: String in cfg.bay_features.get(model, PackedStringArray()):
 				if not used.has(StringName(feature)):

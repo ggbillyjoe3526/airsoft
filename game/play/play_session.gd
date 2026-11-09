@@ -151,6 +151,8 @@ var _lighting: FieldLighting = null
 var _light: LightingConfig = null
 ## A night field's pools of light, or null by day or on a map without lights (LightPools).
 var _pools: LightPools = null
+## What the field's lights stand on or hang from (LightFixtures: Woodland's campfires and lanterns), day and night.
+var _fixtures: LightFixtures = null
 ## The weapon torches drawn at night (TorchBeams; null by day).
 var _torches: TorchBeams = null
 ## Dev › Lasers' beams (LZ1): made for every match, drawing only while lasers are fired.
@@ -424,6 +426,9 @@ func _dress_part(part: int) -> void:
 			_pools = LightPools.build(_map, _light)
 			if _pools != null:
 				add_child(_pools)
+			_fixtures = LightFixtures.build(_map, _play.light_fixtures, _light)
+			if _fixtures != null:
+				add_child(_fixtures)
 		3:
 			_woods = WoodsView.build(_map, _play.woods, _play.skyline, _light, _play.map_style,
 					_play.site_look.props)
@@ -895,6 +900,8 @@ func _build_views(ui: CanvasLayer) -> void:
 		first_use.append_array(_doors.materials())
 	if _pools != null:
 		first_use.append_array(_pools.materials())
+	if _fixtures != null:
+		first_use.append_array(_fixtures.materials())
 	first_use.append_array(_level.glass_materials())
 	if _woods != null:
 		first_use.append_array(_woods.materials())
@@ -1974,6 +1981,8 @@ func _apply_motion() -> void:
 		_skyline.set_motion(motion)
 	if _pools != null:
 		_pools.set_motion(motion)
+	if _fixtures != null:
+		_fixtures.set_motion(motion)
 	if _woods != null:
 		_woods.set_motion(motion)
 	if _overtime_flag != null:

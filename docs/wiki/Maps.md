@@ -89,26 +89,27 @@ defenders in the east camp.
   or walk in and out at the Ford and the gentle slides. Down in the bed you're out of sight of the wood above.
 - **The look:** the game's soft, stylised light over a bright green wood: young, grown and old Scots pines with bare
   tan trunks under their crowns, broad, lumpy oaks, white birches in the Birch stand and Fern hollow, dark
-  spruce thickets, and beyond the fence a far wood of spruce spires. A meadow floor, the violet truck and teal crates
-  carry the colour, with nothing near a team's blue or orange. Every crown starts over head height.
+  spruce thickets, and beyond the fence a far wood of spruce spires. A meadow floor, the violet pickup wreck and teal
+  crates carry the colour, with nothing near a team's blue or orange. Every crown starts over head height.
 - **Long views, few walls:** the Ridge looks 86 m down onto the Fort; elsewhere a lane's longest line is under 80 m.
-  Cover is logs, log stacks, tyres, wooden crates, the violet truck and the trunks of the trees themselves; each stops a BB
-  about where you see it, a round trunk by its bark. The thickets of spruce at the edges and between the lanes can't
-  be entered or seen through.
+  Cover is logs, log stacks, stacks of tractor tyres, wooden crates, the violet pickup wreck and the trunks of the trees
+  themselves; each stops a BB about where you see it, a round trunk by its bark. The thickets of spruce at the edges
+  and between the lanes can't be entered or seen through.
 - **Ferns** grow knee to hip high in eight beds where you'd want to hide, and **bushes** stand taller. Nobody sees you
   through more than about half a metre of leaves, so crouch in a fern bed to vanish; you can walk through ferns and
   bushes, but they slow you and a run through them rustles loudly ([Movement](Movement)), and a BB that pushes 0.6 m
   into leaves stops there. The minimap marks them. Grass never hides you.
-- **Three crouch tunnels,** 1.4 m high: the Crawl box, a plywood crawl through the Berm between the Ridge and the
-  Clearing; the Badger run, a log-lined run through the Knoll between the middle and the south; and the Culvert, the
-  stream bed under the road. Crouch to go through; inside you stay down until you're out, and bots crouch through
-  too. The stream bed under the North bridge is crouch height as well, a fourth low way along the bed.
+- **Three crouch tunnels,** 1.4 m high: the Crawl box, a hollow log through the Berm between the Ridge and the
+  Clearing; the Badger run, another hollow log through the Knoll between the middle and the south; and the Culvert,
+  the concrete-lined stream bed under the road. Crouch to go through; inside you stay down until you're out, and bots
+  crouch through too. The stream bed under the North bridge is crouch height as well, a fourth low way along the bed.
 - **The huts:** the Cabin, the two huts of Hut row and the Box on A site have windows and two wooden [doors](#doors)
   each. The door facing the other team's end starts each round shut and the one facing your own end open, so a hut
   is walked into from its own side and opened, loudly, from the other. The Tower is a platform 3.4 m up a stair, the
   Sawmill an open shed.
 - **Night** is the Time of day setting's (day by default): a low moon, stars and haze, with fires and lanterns at the
-  camps, the huts, the Clearing, the Fort, the Sawmill, the Truck bend and the North bridge. Bots see you from about
+  camps, the huts, the Clearing, the Fort, the Sawmill, the Truck bend and the North bridge: campfires in stone rings,
+  and hurricane lanterns hung from a roof, a post or a hooked pole, which stand cold by day. Bots see you from about
   40 m in their light, 25 m under the moon and 10 m under the trees ([Bots](Bots#at-night)); by day they see 60 m.
   At night, fit a [weapon torch](Parts-and-Power#lights) and load [glowing BBs](Loadout#customise).
 - Footsteps sound like grass, leaf litter, gravel or boards, and a BB that hits the ground puffs like earth. By day
