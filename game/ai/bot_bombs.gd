@@ -33,7 +33,9 @@ static func step(b: Bot, w: BotWorld, target: Character, cmd: PlayerCommand, dt:
 	if b.bomb_kind != Grenade.Kind.NONE:
 		_hold_still(cmd)
 		if _face(b, cmd, b.bomb_yaw, b.bomb_pitch, dt) <= deg_to_rad(cfg.bomb_aim_within_deg):
-			cmd.throw_grenade = b.bomb_kind
+			# Teammates move while it turns: a flash one would now be caught by is not thrown (FL1).
+			if b.bomb_kind != Grenade.Kind.FLASH or not _mate_sees(b, w, b.bomb_bang):
+				cmd.throw_grenade = b.bomb_kind
 			b.bomb_kind = Grenade.Kind.NONE
 		elif w.time > b.bomb_aim_until:
 			b.bomb_kind = Grenade.Kind.NONE
@@ -107,8 +109,11 @@ static func _try_flash(b: Bot, w: BotWorld) -> bool:
 ## from `eye` along a clear arc.
 static func _flash_at(b: Bot, w: BotWorld, eye: Vector3, at: Vector3, spot: Vector3) -> bool:
 	var bang := at + Vector3(0.0, w.cfg.flash_bang_height, 0.0)
-	return BotSenses.sight_clear(w.query, bang, spot) and not _mate_sees(b, w, bang) \
-			and _aim(b, w, eye, at, Grenade.Kind.FLASH)
+	if not BotSenses.sight_clear(w.query, bang, spot) or _mate_sees(b, w, bang) \
+			or not _aim(b, w, eye, at, Grenade.Kind.FLASH):
+		return false
+	b.bomb_bang = bang
+	return true
 
 
 ## Turns `b` to throw `kind` from `eye` to land at `at`: aimed short for the bounce and roll, along the low arc, or the
@@ -159,17 +164,30 @@ static func _clear_pitch(w: BotWorld, eyes: Vector3, yaw: float, aim: Vector3, h
 
 
 ## Whether a teammate of `b` in play would be caught by a bang at `bang`: within flash_mate_clear of it, or within
-## flash_mate_sight with a clear line from its eyes (it can't be told to look away).
+## flash_mate_sight with a clear line from its eyes (it can't be told to look away); where it stands now, or where its
+## pace takes it by the bang, a throw's windup and the flash's fuse from now (FL1: one walking in was caught).
 static func _mate_sees(b: Bot, w: BotWorld, bang: Vector3) -> bool:
 	var me := b.character
+	var g := w.tuning.grenades
+	var lead := g.windup + g.flash_fuse
 	for c in w.characters:
 		if c == me or c.team != me.team or not Elimination.is_in_play(c):
 			continue
-		var flat := _flat(c.position, bang)
-		if flat < w.cfg.flash_mate_clear or (flat < w.cfg.flash_mate_sight
-				and BotSenses.sight_clear(w.query, BotSenses.eye_of(c, w.tuning), bang)):
+		var eye := BotSenses.eye_of(c, w.tuning)
+		if _caught(w, eye, c.position, bang):
+			return true
+		var ahead := Vector3(c.velocity.x, 0.0, c.velocity.z) * lead
+		if ahead.length_squared() > EPSILON and _caught(w, eye + ahead, c.position + ahead, bang):
 			return true
 	return false
+
+
+## Whether a body standing at `feet` with eyes at `eye` is within flash_mate_clear of `bang`, or within
+## flash_mate_sight with a clear line to it.
+static func _caught(w: BotWorld, eye: Vector3, feet: Vector3, bang: Vector3) -> bool:
+	var flat := _flat(feet, bang)
+	return flat < w.cfg.flash_mate_clear or (flat < w.cfg.flash_mate_sight
+			and BotSenses.sight_clear(w.query, eye, bang))
 
 
 ## Turns the bot's view toward `yaw`, `pitch` at its turn rate into `cmd`; returns how far off it still is (rad).

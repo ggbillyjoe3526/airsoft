@@ -720,7 +720,7 @@ same and throw them (SF2).
   between you (more often on Hard). Does it read as a bot buying time, and is it annoying how often?
 - [ ] **Bots' flash (SF2).** Let a bot hear you round a corner, then wait: it may flash the corner, turn its back and
   come through after the bang. Look away when you hear the pin and the bounce: can you beat it? Note any bot that
-  flashes its own teammates or itself.
+  flashes its own teammates or itself (FL1: it now counts teammates heading toward the bang, and checks as it throws).
 - [ ] **Reduced motion** (Settings › Accessibility): your own flash is a softer wash, not full white.
 - [ ] **Practice range.** Throw both: they come back once the throw ends, so you can keep throwing.
 
