@@ -43,7 +43,8 @@ on its own, and the menus say so once. Mouse and keyboard; there is no controlle
    graphics, High for a separate card). Press **OK**, or **Graphics settings** to change it.
 2. The game opens straight on **Match**, over a blurred view of the field you picked. There is no title screen.
 3. The rail down the left holds **Match**, **Loadout**, **Armory** and **Settings**, with your level and **Quit** at its
-   foot. **Esc** in the menus asks **Quit game?**: **Quit** leaves, **Cancel** (or Esc again) stays.
+   foot. Every button dips in and flashes an outline when you press it. **Esc** in the menus asks **Quit game?**:
+   **Quit** leaves, **Cancel** (or Esc again) stays.
 
 ## Your first match
 

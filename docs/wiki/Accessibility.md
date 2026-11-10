@@ -31,7 +31,8 @@ and your teammates' steps show nothing. Markers fade after about a second and a 
 
 **On**, **Off** or **Follow system** (your computer's reduce-motion setting). It takes out the replica's sway and the
 drifting dust, halves the kick and the reload tilt, softens lean and vault tilt to a quarter, holds chimney smoke still
-and holds the flag warning steady instead of pulsing. Recoil climb stays the same, so aiming feels the same. A hit
+and holds the flag warning steady instead of pulsing. Menu buttons stop dipping when you press them and only flash
+their outline. Recoil climb stays the same, so aiming feels the same. A hit
 never moves the camera, with or without it.
 
 ## Screen reader messages
