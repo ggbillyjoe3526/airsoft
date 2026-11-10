@@ -247,6 +247,19 @@ static func cloth_mesh(size: Vector2, droop: float) -> ArrayMesh:
 	return st.commit()
 
 
+## How high over the foot the letter's middle stands (m): `letter_rise` over the pole's top, or on a low pole (drawn
+## scaled down, MT1) at its top, under the low ceiling it was lowered for.
+func letter_height() -> float:
+	if _standing.scale.y < 1.0:
+		return _cfg.pole_height * _standing.scale.y
+	return _cfg.pole_height + _cfg.letter_rise
+
+
+## The letter's glyph height (m): its font size at its pixel size.
+func letter_size() -> float:
+	return _letter.font_size * _letter.pixel_size if _letter != null else 0.0
+
+
 func _add_letter(letter: String) -> void:
 	_letter = Label3D.new()
 	_letter.name = "Letter"
@@ -258,6 +271,9 @@ func _add_letter(letter: String) -> void:
 	_letter.outline_modulate = _cfg.fittings_colour
 	# Billboarded as the "HIT!" sign is (FigureView.make_sign), so it shares the shader the prewarm compiles with it.
 	_letter.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	_letter.position.y = (_cfg.pole_height + _cfg.letter_rise) * _standing.scale.y
+	_letter.position.y = letter_height()
+	# A low pole (MT1: inside a train car) stands under a low ceiling: its letter shrinks with it and sits on its top.
+	if _standing.scale.y < 1.0:
+		_letter.pixel_size = _cfg.letter_pixel * _standing.scale.y
 	_letter.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_letter)
