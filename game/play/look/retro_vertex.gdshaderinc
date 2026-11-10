@@ -1,10 +1,12 @@
 // Dev › Retro filter's geometry (RF1, RetroFilter): while it is on, the field drawn as a 1990s console drew it. A
-// spatial shader opts in with `#include "res://game/play/look/retro_vertex.gdshaderinc"` and, in vertex() after any
-// change to VERTEX, `POSITION = retro_position(PROJECTION_MATRIX, VIEW_MATRIX, MODEL_MATRIX, VERTEX, true);`: each
-// corner moved in the world so the main camera sees it on a corner of the filter's pixels (whole pixels from the
-// screen's top left, as the console's), so the field's edges wobble against each other as the view moves. Every pass
-// moves it alike (the shadow and depth passes too), so a surface never shadows itself where its drawn shape left its
-// true one. `wobble` false keeps a big face true: one laid a few cm over another (a floor over the ground) would tilt
+// spatial shader opts in with `#include "res://game/play/look/retro_vertex.gdshaderinc"` and, at the end of vertex(),
+// `VERTEX = retro_vertex(MODEL_MATRIX, VERTEX, retro_snaps(IN_SHADOW_PASS, PROJECTION_MATRIX));`: each corner moved in
+// the world so the main camera sees it on a corner of the filter's pixels (whole pixels from the screen's top left, as
+// the console's), so the field's edges wobble against each other as the view moves. VERTEX, not POSITION, so the
+// engine's own shadow bias and projections stay as they are, and off it costs a branch. The colour, depth and sun
+// shadow passes move it alike, so a surface never shadows itself where its drawn shape left its true one; a lamp's
+// shadow keeps the true shape (the engine keeps a still lamp's shadow map, which can't follow the camera's snap).
+// A shader's own `false` keeps a big face true: one laid a few cm over another (a floor over the ground) would tilt
 // through it, as a corner tens of metres off moves more than that. A surface pattern laid in world space can swim as
 // the console's textures did: retro_affine_in() in vertex() keeps the point for fragment(), where retro_affine_out()
 // gives it interpolated straight across the screen instead of in perspective, at most w m from the true point (the
@@ -31,12 +33,18 @@ vec3 retro_world(vec3 world) {
 	return moved.xyz / moved.w;
 }
 
-vec4 retro_position(mat4 projection, mat4 view, mat4 model, vec3 vertex, bool wobble) {
-	vec3 world = (model * vec4(vertex, 1.0)).xyz;
-	if (wobble) {
-		world = retro_world(world);
+// Whether a pass moves its corners: every pass but a lamp's shadow (a perspective one; the sun's is orthographic).
+bool retro_snaps(bool shadow_pass, mat4 projection) {
+	return !shadow_pass || projection[3][3] > 0.5;
+}
+
+// `vertex` (model space) moved as retro_world moves its world point, while the filter is on and `wobble`.
+vec3 retro_vertex(mat4 model, vec3 vertex, bool wobble) {
+	if (!wobble || retro_snap.x <= 0.0) {
+		return vertex;
 	}
-	return projection * (view * vec4(world, 1.0));
+	vec3 world = (model * vec4(vertex, 1.0)).xyz;
+	return vertex + inverse(mat3(model)) * (retro_world(world) - world);
 }
 
 // `p` times the clip w, and w: perspective-correct interpolation of both, divided, is straight across the screen.

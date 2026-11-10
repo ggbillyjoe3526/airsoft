@@ -19,7 +19,7 @@ void vertex() {
 	// COLOR is the vertex colour times the instance colour (the light down the model's z)
 	lit = COLOR.rgb * mix(vec3(1.0), INSTANCE_CUSTOM.rgb, clamp(0.5 + 0.5 * NORMAL.z, 0.0, 1.0));
 	// Dev › Retro filter: corners on the retro screen's pixels while it is on (RF1).
-	POSITION = retro_position(PROJECTION_MATRIX, VIEW_MATRIX, MODEL_MATRIX, VERTEX, true);
+	VERTEX = retro_vertex(MODEL_MATRIX, VERTEX, retro_snaps(IN_SHADOW_PASS, PROJECTION_MATRIX));
 }
 
 void fragment() {

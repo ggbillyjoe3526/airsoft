@@ -10,7 +10,8 @@ Also rename it to Retro filter."
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-10 | 1 | build thread | ✓ (touched files; full run cut short for the fixes) | 5/8 Retry | the map's own day haze lost after on/off; specks from self-shadowing; lettering broken; snap grid centred, not top-left; names, KNOWN_ISSUES, ART.md |
-| 2026-11-10 | 2 | build thread | pending | pending | – |
+| 2026-11-10 | 2 | build thread | ✓ (touched files) | 8/8, Retry until QA and performance cover the new head | the lamps' shadow maps are kept while nothing moves, so a snap in their pass would go stale |
+| 2026-11-10 | 3 | build thread | pending | pending | – |
 
 ## Decisions
 
@@ -28,9 +29,10 @@ Defaults taken without waiting (owner's defaults rule); each is a constant in `R
 - **Wobbling corners**: the props, racks, crates, containers, roof, doors, trees, bushes and flag cloth move each
   corner in the world so the main camera sees it on a corner of the filter's pixels, counted from the screen's top
   left as the filter's are (`look/retro_vertex.gdshaderinc`; RetroFilter sets `retro_snap` and the camera's view
-  projection every frame while on). Every pass moves it alike, shadows included: snapping only the drawn pass
-  (attempt 1) left surfaces shadowing themselves in black specks and dashes. Off, it is one branch on a global per
-  vertex. Not the level's blocks and ground, the site surfaces (floors, walls) or puddles: they are big faces laid a few
+  projection every frame while on). It moves VERTEX, not POSITION, so the engine's shadow bias and projections are
+  untouched and off it is one branch per vertex. The colour, depth and sun shadow passes move it alike: snapping only
+  the drawn pass (attempt 1) left surfaces shadowing themselves in black specks and dashes. A lamp's shadow keeps the
+  true shape (attempt 3): Godot keeps a still lamp's shadow map, which could not follow the camera's snap. Not the level's blocks and ground, the site surfaces (floors, walls) or puddles: they are big faces laid a few
   cm over one another (the ground 2 cm under the floors), and a snapped corner tens of metres off tilts its face by more
   than that, so the ground showed through Depot's office floor as a flat tan (tried first, seen in the pictures).
 - **Swimming textures**: the site surfaces' world-space canvases are laid straight across the screen, not in
