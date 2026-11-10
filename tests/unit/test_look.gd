@@ -56,7 +56,7 @@ const NOT_PAINT: Array[StringName] = [&"container", &"frame", &"tuft", &"chip", 
 const WOODLAND_KINDS := {
 	&"tree": &"bark", &"log": &"timber", &"fence": &"timber", &"plywood": &"plywood", &"wall": &"concrete",
 	&"floor": &"floor", &"ramp": &"floor", &"crate": &"crate", &"tyre": &"rubber", &"truck": &"violet",
-	&"thicket": &"forest",
+	&"thicket": &"bough_shade",
 }
 
 

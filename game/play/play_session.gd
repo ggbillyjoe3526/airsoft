@@ -896,6 +896,8 @@ func _build_views(ui: CanvasLayer) -> void:
 		first_use.append_array(_overtime_flag.materials())
 	first_use.append_array(_hands.prewarm_glass())
 	first_use.append_array(_hands.arms_materials())
+	# the replica in your hands wears its paint lightly used (RW1): one shader for every replica and paint
+	first_use.append_array(ReplicaPaint.worn_materials())
 	first_use.append_array(HeldMerge.far_materials())
 	first_use.append_array(range_materials)
 	if _skyline != null:

@@ -1,0 +1,83 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_skyline.gd
+* test_depot_lists_its_landmarks_beyond_the_walls
+* test_every_landmark_is_seen_and_built
+* test_a_piece_no_one_sees_over_the_walls_is_left_out
+WARNING: MapData: skyline entry 3 (shed) needs x, z, width, depth and height; left out
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:242)
+         [1] _yard (res://tests/unit/test_skyline.gd:55)
+         [2] test_a_piece_no_one_sees_over_the_walls_is_left_out (res://tests/unit/test_skyline.gd:89)
+         [3] _run_test (res://addons/gut/gut.gd:622)
+         [4] _test_the_scripts (res://addons/gut/gut.gd:835)
+* test_a_piece_seen_only_past_a_nearer_one_is_left_out
+WARNING: MapData: skyline entry 3 (shed) needs x, z, width, depth and height; left out
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:242)
+         [1] _yard (res://tests/unit/test_skyline.gd:55)
+         [2] test_a_piece_seen_only_past_a_nearer_one_is_left_out (res://tests/unit/test_skyline.gd:105)
+         [3] _run_test (res://addons/gut/gut.gd:622)
+         [4] _test_the_scripts (res://addons/gut/gut.gd:835)
+WARNING: MapData: skyline entry 4 (shed) needs x, z, width, depth and height; left out
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] parse (res://game/map/map_data.gd:242)
+         [1] _yard (res://tests/unit/test_skyline.gd:55)
+         [2] test_a_piece_seen_only_past_a_nearer_one_is_left_out (res://tests/unit/test_skyline.gd:109)
+         [3] _run_test (res://addons/gut/gut.gd:622)
+         [4] _test_the_scripts (res://addons/gut/gut.gd:835)
+* test_only_solid_pieces_hide_and_a_hill_s_core_stays_inside_its_mound
+* test_one_mesh_no_collider_and_the_layout_unchanged
+* test_a_far_piece_fades_toward_the_horizon
+* test_no_skyline_colour_reads_as_a_team
+* test_it_fades_to_the_playing_horizon_and_no_fade_step_reads_as_a_team_by_day_or_night
+* test_a_treeline_is_cones_along_its_points_across_its_depth
+* test_woodland_s_treelines_and_hills_are_built_and_read_as_no_team_by_day_or_night
+* test_woodland_s_treelines_are_the_band_model_in_budget_along_their_lines
+* test_the_masts_lamps_glow_at_night_with_no_real_light
+* test_smoke_from_medium_and_frozen_under_reduced_motion
+* test_a_map_with_no_skyline_draws_as_before
+* test_each_modelled_kind_is_drawn_from_its_model_inside_its_piece
+* test_every_skyline_model_is_inside_its_budget
+* test_every_shed_size_is_inside_its_budget_and_each_range_shed_stretches_evenly
+* test_no_model_colour_reads_as_a_team_at_any_fade_step_by_day_or_night
+* test_a_kind_whose_model_won_t_load_keeps_its_greybox_and_sight_reads_the_greybox_either_way
+WARNING: SkylineConfig: shed's model "res://assets/models/skyline/missing.glb" won't load; it is left out
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] _load (res://game/config/skyline_config.gd:273)
+         [1] model_of (res://game/config/skyline_config.gd:228)
+         [2] placed_of (res://game/play/skyline_models.gd:31)
+         [3] test_a_kind_whose_model_won_t_load_keeps_its_greybox_and_sight_reads_the_greybox_either_way (res://tests/unit/test_skyline.gd:469)
+         [4] _run_test (res://addons/gut/gut.gd:622)
+         [5] _test_the_scripts (res://addons/gut/gut.gd:835)
+[ExpectedError]Expected push_warning error containing 'won't load'.  
+20/20 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                20
+Passing Tests        20
+Asserts             257
+Time              3.189s
+
+
+---- All tests passed! ----
+

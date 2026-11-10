@@ -30,7 +30,7 @@ never stops the game from starting.
   temporal smoothing, sun shadows, baked light and occlusion culling `off, on`; shadow detail `1024, 2048, 4096, 8192` (the sun's shadow map, in
   pixels); shadow softness `hard, soft, softer, softest`; ambient occlusion `off, half, full`; texture filtering
   `off, 2x, 4x, 8x, 16x`; mesh detail `low, medium, high, ultra`; global illumination `off, screen, scene`;
-  reflections `off, probes, screen`; lamp light `off, near, far`; glow and volumetric fog `off, on`. Render scale is
+  reflections `off, probes, screen`; lamp light `off, near, far`; glow, eye adaptation and volumetric fog `off, on`. Render scale is
   10–200 % at most, shadow range 10–500 m and wind dust 0–100 %.
 
 ## Rows
@@ -55,6 +55,7 @@ never stops the game from starting.
 | reflections | GRAPHICS_REFLECTIONS | off, probes, screen | 2 | all | off | probes | probes | screen |
 | lamp_lights | GRAPHICS_LAMP_LIGHTS | off, near, far | 3 | forward_plus | off | off | near | far |
 | glow | GRAPHICS_GLOW | off, on | 1 | all | off | on | on | on |
+| eye_adaptation | GRAPHICS_EYE_ADAPTATION | off, on | 1 | forward_plus, mobile | off | off | on | on |
 | volumetric_fog | GRAPHICS_VOLUMETRIC_FOG | off, on | 3 | forward_plus | off | off | off | on |
 
 - **Low** holds 60 FPS on a reasonably modern low-powered gaming PC: no sun shadows, ambient occlusion, baked light,
@@ -88,6 +89,12 @@ never stops the game from starting.
   their foot). At night it also gives a field's fires and lanterns (its light pools) shadows, and Far gives real
   lights to `LightingConfig.real_lights_far` of them. Off (Low, Medium) the overhead light stands in for the lamps,
   and on a field with no roof lamps or light pools it costs nothing; an open field keeps its sun on every preset.
+- **Eye adaptation** (UG3, High and Ultra) meters what the camera sees, as eyes do: in a view darker than the
+  preset's middle (`LightingConfig.eye_middle`, 0.25; Depot's lamp-lit hall and Woodland's open field meter above it)
+  the picture opens up slowly towards it, at most `eye_lift` (3) times, so a tunnel or the wood under its crowns reads;
+  any brighter view keeps the preset's own exposure (`eye_drop` 1), so the look stays the one tuned, and stepping out
+  of the dark dazzles a moment as the eyes close again (`LookConfig.eye_speed`). The night keeps its tuned dark
+  (`eye_lift` 1). A scope's glass never adapts on its own: the main view adapts it with the rest.
 - **Glow** blooms only what is brighter than white (lamp panels, a lit sky), softly. **Volumetric fog** is a faint
   haze lit by the sun and the bounce light (LookConfig's Volumetric fog group).
 - **Temporal smoothing** is off on every preset: it smears the thin, fast BB streaks. It and FSR 2 are there for

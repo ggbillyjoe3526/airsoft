@@ -268,13 +268,18 @@ static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName],
 	var n := Vector3i(maxi(1, roundi(long / maxf(cell.x, 1e-6))),
 			1 if cell.y <= 0.0 else maxi(1, roundi(size.y / cell.y)), maxi(1, roundi(across / maxf(cell.z, 1e-6))))
 	var step := Vector3(long / n.x, size.y / n.y, across / n.z)
+	# Drawn wider than its cell where grid_spread says (FT1), never past the box: the end ones flush with its ends and
+	# the rest evenly between, so neighbours overlap. At a spread of 1 each is its cell, as before.
+	var spread: Vector2 = cfg.grid_spread.get(model_name, Vector2.ONE)
+	var drawn := Vector3(minf(step.x * spread.x, long), step.y, minf(step.z * spread.y, across))
+	var pitch := Vector2((long - drawn.x) / maxi(n.x - 1, 1), (across - drawn.z) / maxi(n.z - 1, 1))
 	# The model's z across the box: unturned on a box long in x, a quarter turn (its z to world x) on one long in z.
 	var yaw := 0.0 if along_x else PI * 0.5
 	var square := absf(model.size.x - model.size.z) < 0.05 * maxf(model.size.x, model.size.z)
 	for i in n.x:
 		for k in n.z:
-			var u := (i + 0.5) * step.x - long * 0.5
-			var v := (k + 0.5) * step.z - across * 0.5
+			var u := (drawn.x - long) * 0.5 + i * pitch.x
+			var v := (drawn.z - across) * 0.5 + k * pitch.y
 			var at := foot + (Vector3(u, 0.0, v) if along_x else Vector3(v, 0.0, u))
 			for j in n.y:
 				var turn := yaw + (_quarter_turn(rng) if square else PI * float(rng.randi_range(0, 1)))
@@ -286,7 +291,7 @@ static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName],
 				var shade := _shade(cfg, rng)
 				if picks.size() > 1:
 					shade = 1.0
-				_placed(out, pick).add(fit(boxes[pick], at + Vector3(0.0, j * step.y, 0.0), _turned(step, turn - yaw),
+				_placed(out, pick).add(fit(boxes[pick], at + Vector3(0.0, j * step.y, 0.0), _turned(drawn, turn - yaw),
 						turn), shade)
 
 

@@ -19,6 +19,10 @@ class Placed:
 	var mesh: Mesh = null
 	var at: Transform3D = Transform3D.IDENTITY
 	var body: Color = Color.WHITE
+	## Its share of the skyline's fade toward the horizon (a treeline's SkylineConfig.treeline_fade).
+	var haze: float = 1.0
+	## How much of its colour it keeps against the look's pull toward grey (a treeline's SkylineConfig.treeline_keep).
+	var keep: float = 0.0
 
 
 ## The models `p` stands, the field's middle at `middle`; none when its kind has no model (it keeps its greybox).
@@ -111,7 +115,8 @@ static func body_of(p: SkylinePiece, cfg: SkylineConfig) -> Color:
 
 
 ## Adds `placed`'s triangles to the arrays: each corner moved into the world, its normal turned with it, its colour the
-## model's (BODY's the piece's times its shade) faded toward `far` (linear) by its distance from `middle`, written sRGB.
+## model's (BODY's the piece's times its shade) faded toward `far` (linear) by its distance from `middle`, written sRGB,
+## its alpha the share of that colour it keeps against the look's pull toward grey (`keep`).
 ## With `lamps_apart`, the lamps' glass goes to `lamp_pos`, `lamp_nor` and `lamp_col` instead.
 static func add(placed: Placed, cfg: SkylineConfig, far: Color, middle: Vector2, lamps_apart: bool,
 		pos: PackedVector3Array, nor: PackedVector3Array, col: PackedColorArray, lamp_pos: PackedVector3Array,
@@ -142,8 +147,10 @@ static func add(placed: Placed, cfg: SkylineConfig, far: Color, middle: Vector2,
 			var c := colours[v]
 			var own := Color(body.r * c.r, body.g * c.g, body.b * c.b) if c.a < BODY_BELOW else Color(c.r, c.g, c.b)
 			var d := Vector2(q.x, q.z).distance_to(middle)
-			var fade := clampf((d - cfg.fade_from) / cfg.fade_span, 0.0, 1.0) * cfg.fade_most
-			to_col.append(own.lerp(far, fade).linear_to_srgb())
+			var fade := clampf((d - cfg.fade_from) / cfg.fade_span, 0.0, 1.0) * cfg.fade_most * placed.haze
+			var out := own.lerp(far, fade).linear_to_srgb()
+			out.a = placed.keep
+			to_col.append(out)
 
 
 ## The model stood at `foot` (its base's middle) with its own x along `x_axis` and z along `z_axis`, its box stretched
@@ -168,7 +175,7 @@ static func _fit(mesh: Mesh, foot: Vector3, x_axis: Vector3, z_axis: Vector3, si
 ## A treeline's band (SkylineConfig.treeline_model): along each run of its points, whole sections end to end, each
 ## stretched to an even share of the run, as deep as the piece and as tall as it from `treeline_sink` m under the
 ## ground (as the cones are sunk, so none floats on lower ground), every other one mirrored, each a seeded one of
-## `treeline_colours` (the same every build). None without the model: the cones stand.
+## `treeline_colours` (the same every build), faded `treeline_fade` as far as the rest. None without the model: the cones stand.
 static func _band(p: SkylinePiece, cfg: SkylineConfig) -> Array[Placed]:
 	var out: Array[Placed] = []
 	var mesh := cfg.treeline_mesh()
@@ -194,6 +201,8 @@ static func _band(p: SkylinePiece, cfg: SkylineConfig) -> Array[Placed]:
 			one.at = Transform3D(Basis(along * long * flip, Vector3.UP * up, across * depth / cfg.treeline_section.y),
 					Vector3(at.x, -cfg.treeline_sink, at.y))
 			one.body = p.colour_or(cfg.treeline_colours[rng.randi() % cfg.treeline_colours.size()])
+			one.haze = cfg.treeline_fade
+			one.keep = cfg.treeline_keep
 			out.append(one)
 			flip = -flip
 	return out

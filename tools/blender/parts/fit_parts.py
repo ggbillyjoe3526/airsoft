@@ -11,7 +11,7 @@ Run with Blender 5.x, or Python with the `bpy` module (pip install bpy==5.2.3), 
 
     python -I tools/blender/parts/fit_parts.py <repo root>
 
-It rewrites assets/models/replicaParts/aeg.glb. Re-run tools/blender/replicas/sniper.py after it (the rifle's parts
+It rewrites assets/models/replicaParts/aeg.glb. Re-run tools/blender/replicas/sniper.py and smg.py after it (the rifle's parts
 are built from this file).
 """
 

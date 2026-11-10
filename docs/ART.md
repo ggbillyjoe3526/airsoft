@@ -114,7 +114,8 @@ The look's palette is `LookConfig.palette` (`game/config/look_config.gd`, in `pl
 | umber, moss | `#61594f`, `#b3b891` | the gaps between slats, the sofa's feet; grass on open ground |
 | bark, heartwood | `#7b6f62`, `#e4dccd` | Woodland's trunks and their cut ends (WA1) |
 | canopy, fern, olive | `#5c9a50`, `#79a650`, `#8c9a48` | Woodland's crowns and bushes; olive the logs' moss |
-| pine, spruce, forest | `#3d7a4a`, `#2f6e55`, `#2b5c48` | spruces, thicket cores and the far forest |
+| pine, spruce, forest | `#3d7a4a`, `#2f6e55`, `#2b5c48` | spruces and the far forest |
+| bough_shade | `#183328` | a thicket's core, in the shade under its spruces' boughs (FT1) |
 | meadow, litter, earth | `#8aa860`, `#7c7a58`, `#8a8070` | a light meadow, Woodland's leaf litter and bare earth |
 | grass | `#5f8a3a` | sloping ground's grass and the ground beyond a field's walls (SL1) |
 | rubber | `#3d3b45` | tyres and wheels |
@@ -155,6 +156,13 @@ metalness; the light does the rest.
   its tops. A material's `wear` (`PropDressConfig.wear` 1, `model_wear`: the racking 0.35, tree crowns and the earth bank 0) times the
   look's (`LookConfig.wear`, `grime`, `dust`). The greybox, bushes, woods, skyline and flags draw clean. Edge scuffs are
   the models' own paint (SL3).
+- **Replicas are lightly used (RW1).** The AEG Rifle and the GBB Pistol in your hands, in the menus' pictures and the
+  Customise turntable carry a baked mask (`tools/blender/replicas/wear.py`): faint scratches (most along the length,
+  some in small parallel clusters, the magazine and slide handled most), rubbed outer edges and a few rubbed patches,
+  and dirt in the recesses. `replica_wear.gdshader` scuffs whichever paint is on towards a worn mid grey in
+  square-root light (black greys up, white dirties down, a bold colour dulls), polishes the rubs and mattes the
+  scratches and dirt; a metal part wears to bare metal. Times `LookConfig.wear`. Bots' copies, the Cyber Pistol and the
+  Sniper Rifle draw clean.
 - **Marks that stay:** zone stencils in ink, joints, seams, screws, sheet panels, bay lines and hazard stripes in
   yellow and ink, the white chevron on containers.
 

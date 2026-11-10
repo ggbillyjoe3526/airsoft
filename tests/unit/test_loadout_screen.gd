@@ -439,7 +439,8 @@ func test_the_painted_model_wears_the_five_colours_and_hides_the_figure() -> voi
 		var m := node as MeshInstance3D
 		for i in m.mesh.get_surface_count():
 			var own := m.mesh.surface_get_material(i)
-			var over := m.get_surface_override_material(i) as StandardMaterial3D
+			var painted := m.get_surface_override_material(i)
+			var over := ReplicaPaint.plain_of(painted) as StandardMaterial3D if painted != null else null  # worn (RW1)
 			if over != null and own != null:
 				seen[own.resource_name] = over.albedo_color
 	var colours := ReplicaSchemes.colours(&"signal", false)

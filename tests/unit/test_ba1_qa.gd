@@ -5,7 +5,7 @@ extends GutTest
 const AEG_PARTS := "res://assets/models/replicaParts/aeg.glb"
 const SNIPER_PARTS := "res://assets/models/replicaParts/sniper.glb"
 const RIFLE := "res://assets/models/replicas/aeg.glb"
-const FILE_BUDGET := 3 * 1024 * 1024  # the parts-file cap (3 MiB since BL8b, #216; docs/CC0_ASSETS.md)
+const FILE_BUDGET := 4 * 1024 * 1024  # the parts-file cap (4 MiB since RW2, 3 MiB since BL8b; docs/CC0_ASSETS.md)
 const BARRELS: Array[StringName] = [&"tightBore", &"long"]
 const INNER_MATERIALS: Array[String] = ["Steel", "Brass", "Etch", "Chamber", "Bucking", "Bore"]
 

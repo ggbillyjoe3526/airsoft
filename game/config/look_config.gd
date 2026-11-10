@@ -118,6 +118,12 @@ const GLOBAL_DUST := &"look_dust"
 @export var fog_volume_size: int = 128
 @export var fog_volume_depth: int = 128
 
+@export_group("Eye adaptation")
+## How fast the eyes adapt (Graphics › Eye adaptation, UG3): the share of the way to the new brightness covered in a
+## second. The engine steps by speed x the frame's time, so it overshoots only on a frame longer than 1 / speed
+## (1.25 s at 0.8): never in play, only in the cloud's seconds-long software frames.
+@export var eye_speed: float = 0.8
+
 @export_group("Shadows")
 ## The sun's apparent size (degrees) on Softest shadows: contact-hardening shadows, sharp at a foot, soft far from it.
 @export var sun_size: float = 0.6
@@ -139,6 +145,8 @@ const GLOBAL_DUST := &"look_dust"
 	&"bark": Color8(0x7b, 0x6f, 0x62), &"heartwood": Color8(0xe4, 0xdc, 0xcd), &"canopy": Color8(0x5c, 0x9a, 0x50),
 	&"fern": Color8(0x79, 0xa6, 0x50), &"olive": Color8(0x8c, 0x9a, 0x48), &"pine": Color8(0x3d, 0x7a, 0x4a),
 	&"spruce": Color8(0x2f, 0x6e, 0x55), &"forest": Color8(0x2b, 0x5c, 0x48), &"meadow": Color8(0x8a, 0xa8, 0x60),
+	# the shade under a thicket's spruces (spruce.py's UNDER, forest at 0.55; FT1): its core
+	&"bough_shade": Color8(0x18, 0x33, 0x28),
 	&"litter": Color8(0x7c, 0x7a, 0x58), &"earth": Color8(0x8a, 0x80, 0x70), &"rubber": Color8(0x3d, 0x3b, 0x45),
 	# Sunlit Concrete (SL1): sloping ground's grass, darker so it stays green once the paint is muted.
 	&"grass": Color8(0x5f, 0x8a, 0x3a),

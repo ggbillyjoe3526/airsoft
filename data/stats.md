@@ -84,8 +84,7 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
   30 % tighter than the AEG and from a standing hip as well. The quickest draw and reload of the rifles. Against that,
   0.75 J with 0.20 g BBs (284 fps) stays within 15 cm of the aim line to 27 m as it comes (35 m at its best hop-up; the
   AEG 39 m) and takes 0.59 s to fly 30 m (the AEG 0.52 s); a third wider spread aimed; 45 BBs a magazine, empty in
-  2.5 s with the trigger held; and no grip, barrel or magazine parts. Semi and full auto, no burst. Drawn as the AEG
-  Rifle until its own model (the owner's reference pictures).
+  2.5 s with the trigger held; and no grip, barrel or magazine parts. Semi and full auto, no burst.
 
 ## Power sources
 

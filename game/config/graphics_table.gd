@@ -58,6 +58,8 @@ const BUILT_IN: Dictionary[StringName, Array] = {
 	GraphicsQuality.LAMP_LIGHTS: ["GRAPHICS_LAMP_LIGHTS", "off, near, far", "3", "forward_plus", "off", "off", "near",
 			"far"],
 	GraphicsQuality.GLOW: ["GRAPHICS_GLOW", "off, on", "1", "all", "off", "on", "on", "on"],
+	GraphicsQuality.EYE_ADAPTATION: ["GRAPHICS_EYE_ADAPTATION", "off, on", "1", "forward_plus, mobile", "off", "off", "on",
+			"on"],
 	GraphicsQuality.VOLUMETRIC_FOG: ["GRAPHICS_VOLUMETRIC_FOG", "off, on", "3", "forward_plus", "off", "off", "off",
 			"on"],
 }

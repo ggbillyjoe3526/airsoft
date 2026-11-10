@@ -99,10 +99,10 @@ extends Resource
 	&"lift_lit": Color(1.0, 0.96, 0.78),
 	&"lift_strip": Color(0.97, 0.96, 0.92),
 	# Woodland's concept 3 (WR1), off both team hues, from the palette: rubber tyres, a violet pickup, a thicket's core
-	# in the deep forest green, the shade between its spruces (WT1).
+	# in the shade under its spruces' boughs (bough_shade, spruce.py's UNDER; FT1: forest green read as a lit box).
 	&"tyre": Color8(0x3d, 0x3b, 0x45),
 	&"truck": Color8(0x76, 0x58, 0xaa),
-	&"thicket": Color8(0x2b, 0x5c, 0x48),
+	&"thicket": Color8(0x18, 0x33, 0x28),
 }
 ## Surfaces drawn in their own colour whatever their block's kind (RayHit.Surface to sRGB): a gravel bed on the slab.
 @export var surface_colours: Dictionary[int, Color] = {

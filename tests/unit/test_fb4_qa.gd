@@ -232,8 +232,14 @@ func test_every_surface_of_every_replica_with_every_part_is_pressed() -> void:
 				for i in m.mesh.get_surface_count():
 					var worn := m.get_active_material(i)
 					assert_not_null(worn, "%s %s surface %d has a material" % [held.id, node.name, i])
+					if ReplicaPaint.is_worn(worn):
+						# A painted part, lightly used (RW1): its own copy, pressed by its uniform.
+						seen += 1
+						assert_almost_eq(float((worn as ShaderMaterial).get_shader_parameter(&"z_clip_scale")),
+								cfg.depth_scale, 1e-6, "%s %s surface %d pressed" % [held.id, node.name, i])
+						continue
 					if worn is ShaderMaterial:
-						# Only the optic's glass disc draws with a shader: it presses its own depth.
+						# Otherwise only the optic's glass disc draws with a shader: it presses its own depth.
 						assert_eq(node.name, &"Glass")
 						assert_almost_eq(float((worn as ShaderMaterial).get_shader_parameter(&"z_clip_scale")),
 								cfg.depth_scale, 1e-6)
@@ -254,12 +260,16 @@ func test_realistic_colours_keep_the_pressed_copy_in_the_realistic_paint() -> vo
 	for node: Node in held.root.find_children("*", "MeshInstance3D", true, false):
 		var m := node as MeshInstance3D
 		for i in m.mesh.get_surface_count():
-			var shared := hands.painted(m, i) as StandardMaterial3D
+			var painted := hands.painted(m, i)
+			# the hands wear the paint lightly used (RW1), worn from the shared plain paint
+			var shared := ReplicaPaint.plain_of(painted) as StandardMaterial3D if painted != null else null
 			if shared == null:
 				continue
-			var worn := m.get_active_material(i) as StandardMaterial3D
-			assert_ne(worn, shared, "a copy, not the shared paint")
-			assert_eq(worn.albedo_color, shared.albedo_color, "in the paint's colour")
+			var worn := m.get_active_material(i)
+			assert_ne(worn, painted, "a copy, not the shared paint")
+			var colour: Variant = (worn as ShaderMaterial).get_shader_parameter(&"albedo") if worn is ShaderMaterial \
+					else (worn as BaseMaterial3D).albedo_color
+			assert_eq(colour, shared.albedo_color, "in the paint's colour")
 			assert_true(String(shared.resource_name).contains("/realistic"), "the realistic set: %s" % shared.resource_name)
 			assert_false(shared.use_z_clip_scale, "the shared paint stays unpressed")
 			checked += 1
@@ -316,7 +326,7 @@ func test_two_views_press_apart_and_neither_changes_a_third_user_of_the_paint() 
 	assert_ne(m1.get_active_material(0), m2.get_active_material(0), "each view its own copies")
 	var figure_side := (load("res://assets/models/replicas/aeg.glb") as PackedScene).instantiate() as Node3D
 	add_child_autofree(figure_side)
-	ReplicaPaint.apply(figure_side, &"cobalt", false)
+	ReplicaPaint.apply(figure_side, &"cobalt", false, false)  # as FigureView paints a figure's (plain, RW1)
 	for node: Node in figure_side.find_children("*", "MeshInstance3D", true, false):
 		var m := node as MeshInstance3D
 		for i in m.mesh.get_surface_count():

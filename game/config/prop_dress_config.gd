@@ -220,6 +220,10 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"range_wall": Vector3(2.4, 0.0, 0.4), &"range_backstop": Vector3(2.4, 0.0, 0.4),
 	&"sandbags": Vector3(1.2, 0.0, 0.6),
 }
+## GRID models drawn wider than their cell (x along the box's long side, y across it, a factor), so neighbours'
+## boughs interleave into one mass: a thicket's spruces (FT1, the owner: its core box showed as a plain block between
+## narrow spires). Never past the box: the end ones stand flush with its ends and the rest evenly between.
+@export var grid_spread: Dictionary[StringName, Vector2] = {&"spruce": Vector2(1.8, 1.5)}
 ## GRID models laid all one way round, never turned at random: a net wall's sections match only edge to edge as
 ## modelled (DH1).
 @export var grid_unturned: PackedStringArray = PackedStringArray(["camo_net"])
@@ -236,11 +240,12 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 ## STAKES: how much each stake's share of the box's length varies either way (logs of mixed sizes).
 @export var stake_vary: float = 0.15
 @export var stake_rail_heights: Vector2 = Vector2(0.8, 0.7)
-## A named prop whose box is still drawn behind it, cut down to a share (y) of its height and inset (x, m, at most a
-## fifth of the box's width) on each side with no other such box against it, rather than not at all: a thicket's dark
-## core between its spruces, unbroken across touching thickets, so nothing is seen through a thicket that stops BBs
-## and sight below the tops of its trees.
-@export var model_cores: Dictionary[StringName, Vector2] = {&"spruce": Vector2(0.7, 0.6)}
+## A named prop whose box is still drawn behind it, cut down to a share (y) of its height and inset (x, m, at most
+## MapLevel.CORE_SHARE of the box's width) on each side with no other such box against it, rather than not at all: a thicket's dark
+## core between its spruces' feet, unbroken across touching thickets, so nothing is seen through a thicket that stops
+## BBs under its boughs. A spruce core reaches 0.2 of the thicket's height, under the spruces' widest boughs (FT1: at
+## 0.6 it stood past their narrowing tops and read as a plain block).
+@export var model_cores: Dictionary[StringName, Vector2] = {&"spruce": Vector2(0.7, 0.2)}
 ## TREE's models: each one's trunk's widest reach (m) round its origin at the ground and under it (an oak's buttress
 ## roots), which the box's half-width is; as each build script prints it (tools/blender/maps/pine.py, oak.py,
 ## birch.py). A tree model not listed keeps its box.
@@ -339,6 +344,8 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 @export var model_wear: Dictionary[StringName, float] = {
 	&"shelf": 0.35, &"shelf_b": 0.35, &"shelf_c": 0.35, &"earth_bank": 0.0,
 	&"pine_young_crown": 0.0, &"pine_grown_crown": 0.0, &"pine_old_crown": 0.0, &"oak_crown": 0.0, &"birch_crown": 0.0,
+	# a thicket's spruce is all boughs (FT1: worn, the dust on its upturned tiers drew its sunlit tops pale beige)
+	&"spruce": 0.0,
 }
 
 ## Each model path's mesh as loaded (null when it won't load), so a kind is dressed only by a model that loads.

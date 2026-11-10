@@ -211,6 +211,10 @@ never players.
   their team's colours.
 - [ ] **Replica detail on High.** Fine speckle, rounded lit edges, rail slots and sights. In Loadout try every optic,
   grip and magazine: nothing floats or clips the hands.
+- [ ] **Lightly used replicas (RW1).** Inspect (Y) the AEG Rifle and the GBB Pistol in Woodland by day and in Depot,
+  in a dark paint and a light one: faint scratches (most along the length, more on the magazine and the pistol's
+  slide), slightly rubbed edges and a little dirt in the recesses, never stripes, blotches or shimmer as you turn them.
+  The Cyber Pistol and the Sniper Rifle stay clean; at a distance, bots' replicas look as before.
 - [ ] **Gas puffs and impacts.** The pistol puffs a little gas each shot; the rifle none. No flash, no casings.
   Impacts make pale dust on concrete, tan crumbs on wood, a grey puff on steel: never sparks.
 - [ ] **Name tags.** A teammate's tag sits just above the head at 1 to 2 m and at 30 m. Try a field of view of 80.
@@ -1051,6 +1055,12 @@ Settings › Graphics › Quality: Low, Medium, High, Ultra or Custom.
   warmer, three flicker now and then and two are dead with dark lenses and a darker patch under them, the same every
   match. On High and Ultra the light under them follows. Does the flicker read as an old lamp, not a distraction in a
   fight? Note F3 near a flickering lamp on Ultra.
+- [ ] **Eye adaptation (UG3, your graphics card).** On High or Ultra, walk into Depot's West tunnel from the hall: over
+  a second or two the tunnel opens up until you can make out a bot crouched in it; walk back out and the hall dazzles a
+  moment, then settles to its usual look. On Woodland by day, step in under the trees: the shade lifts the same way,
+  and the open field looks as before. Turn Eye adaptation off (Custom) on Woodland's open field and back on: the sky's
+  glow should look the same both ways (the cloud's renderer loses it with the setting on). By night nothing changes.
+  Is it too strong, too weak, too slow? Look through a scope in the tunnel: its picture adapts with the rest.
 
 ## Accessibility
 
@@ -1277,8 +1287,7 @@ Bugs the browser game had and fixed; a bug pass checks the rebuild doesn't bring
 
 ## The Compact SMG (CS1)
 
-Dev content: tick Settings › Dev › Dev content (or Disable levelling), then pick it as your primary. It looks like the
-AEG Rifle until its own model.
+Dev content: tick Settings › Dev › Dev content (or Disable levelling), then pick it as your primary.
 
 - [ ] **The trigger.** A full magazine on full auto runs dry in about 2.5 s, clearly quicker than the AEG's; the
   reload and the draw are quicker too. Semi and full auto only, no burst; on Depot it starts on semi (B for full auto).
@@ -1316,6 +1325,15 @@ AEG Rifle until its own model.
   into one colour), and a soft haze from about 12 m. Your replica, arms and the players stay steady (their shapes
   don't wobble). Lines 120 is chunkier, 480 finer; Shades 4 bands hard. Off: the haze and wobble go at once and the
   map's own look is back.
+
+## Woodland's treelines and thickets (FT1)
+
+- [ ] **Treelines.** Stand at each fence and look out, then look across the map at the far side: the band of spruces
+  past the fence is green on Low and High, never white or grey, and matches the far wood behind it.
+- [ ] **Thickets.** Walk round the spruce thickets (the Sawmill's stair of them, the bank by the culvert, the edges):
+  they read as packed spruces, with no flat green wall between them. On Low a little dark shade shows at their feet.
+- [ ] **BBs.** Shoot into a thicket at chest height and at its edges: BBs stop in it as before, never fly through.
+- [ ] **Frame rate.** F3 on Low looking across a thicket: 60 FPS as before.
 
 ## Reporting what you find
 

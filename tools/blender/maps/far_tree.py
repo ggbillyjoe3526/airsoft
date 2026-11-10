@@ -60,6 +60,8 @@ BAND_BUDGET = 200              # a section's: 2,000 a band (the model list), the
 BAND_SPACING = 2.4
 BAND_LOW = 0.7
 BAND_WIDTH = 0.27              # a tree's radius, of its height (SkylineConfig.treeline_width)
+BAND_SHADE = 0.95              # a tier's skirt, of its tip's light (FT1: High's screen-space light darkens the far
+#                                side already; at 0.58 the faces seen from the fence read black)
 # Each tree's tiers as the far tree's (skirt height and radius of the tree's, the tip's height), stretched a little
 # each tree so no two spires match.
 BAND_TIERS = ((0.0, 1.0, 0.5), (0.3, 0.74, 0.78), (0.56, 0.46, 1.0))
@@ -92,7 +94,7 @@ def treeline() -> None:
                 for c in range(4):
                     a = turn + math.pi * 0.5 * c
                     p = Vector((x + math.cos(a) * rad, foot, z + math.sin(a) * rad))
-                    dark = lit * 0.58
+                    dark = lit * BAND_SHADE
                     ids.append(tree.vert(p, (dark, dark, dark), Vector((math.cos(a), 0.55, math.sin(a)))))
                 inside = Vector((x, foot + (tip - foot) * 0.3, z))
                 for c in range(4):
