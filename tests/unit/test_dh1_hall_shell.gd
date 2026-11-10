@@ -169,9 +169,9 @@ func test_the_roof_draws_a_bay_a_truss_line_and_cell_all_up_under_the_roof() -> 
 	var lamps := roof.get_node("Lamps") as MultiMeshInstance3D
 	var glows := 0
 	for s in lamps.multimesh.mesh.get_surface_count():
-		var m := lamps.multimesh.mesh.surface_get_material(s) as StandardMaterial3D
-		if m != null and m.shading_mode == BaseMaterial3D.SHADING_MODE_UNSHADED:
-			glows += 1
+		var m := lamps.multimesh.mesh.surface_get_material(s)
+		if m is ShaderMaterial and (m as ShaderMaterial).shader == CodeShaders.of(RoofView.LENS_SHADER):
+			glows += 1  # the lens: an unshaded shader since DW1 (a worn lamp's tint per lamp)
 	assert_eq(glows, 1, "the lens glows, the body is painted")
 	var low_lamp := depot.roof_height - lamps.multimesh.mesh.get_aabb().size.y
 	assert_gt(low_lamp, HALL_WALL - 0.5, "the lamps hang well over a head and a thrown grenade's arc")

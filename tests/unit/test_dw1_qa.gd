@@ -68,6 +68,7 @@ func test_flicker_level_is_valid_for_odd_times_and_lamps() -> void:
 
 
 func test_freeing_the_roof_leaves_no_orphans() -> void:
+	await wait_physics_frames(2)  # the earlier tests' freed nodes go first, so they are not counted as this one's
 	var before := Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)
 	var roof := RoofView.build(_depot(), cfg)
 	add_child(roof)
