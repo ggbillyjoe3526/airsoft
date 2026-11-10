@@ -2,7 +2,7 @@ extends GutTest
 ## The full-screen map's detail (FM2): the field fills the screen beside a key, under a header saying what your side
 ## must do; the flags' letters (Attack / Defend) or the overtime spot (Elimination), each end's start in its team's
 ## colour (swapped at half time) and the dead zones, the doors, and the named areas' words laid out with none over
-## another, on Depot, Woodland and The Street. The shared field drawing tints ground by what it is, greens hedges and
+## another, on Depot and Woodland. The shared field drawing tints ground by what it is, greens hedges and
 ## thickets, and shades sloping ground's relief. A frame allocates nothing.
 
 const TOLERANCE := 1.5 / 255.0
@@ -19,7 +19,7 @@ var maps: Dictionary[String, MapData] = {}
 
 
 func before_all() -> void:
-	for id: String in ["depot", "woodland", "street"]:
+	for id: String in ["depot", "woodland"]:
 		maps[id] = MapData.load_map(id, MapStyle.new(), 2)
 
 
@@ -194,7 +194,7 @@ func test_lay_out_moves_a_word_off_another_and_leaves_out_one_with_no_room() -> 
 
 
 func test_the_biggest_areas_win_room_first() -> void:
-	var words := FieldMapMarks.areas_of(maps["street"].areas)
+	var words := FieldMapMarks.areas_of(maps["depot"].areas)
 	for i in range(1, words.size()):
 		assert_true(words[i - 1].total >= words[i].total)
 
@@ -270,8 +270,8 @@ func test_the_pointer_keeps_to_a_panel_that_isnt_square() -> void:
 	assert_true(p.framed())
 
 
-func test_a_frame_of_the_open_map_allocates_nothing_on_the_street() -> void:
-	var fm := _field_map(maps["street"])
+func test_a_frame_of_the_open_map_allocates_nothing_on_woodland() -> void:
+	var fm := _field_map(maps["woodland"])
 	_attack_defend(0)
 	for i in 5:
 		_show(fm)

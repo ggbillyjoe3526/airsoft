@@ -41,7 +41,7 @@ class Block:
 	## a thicket's spruce; PropDressConfig.model_lays), empty for its box. Look only: the box is still what BBs meet
 	## (a round prop's, MapStyle.round_steps, as its stepped boxes).
 	var dress: StringName = &""
-	## Its own colour (sRGB; `colour` in the file, 0xRRGGBB, ST1: The Street's palette paint, each house its own), or
+	## Its own colour (sRGB; `colour` in the file, 0xRRGGBB, ST1: a map's palette paint, each building its own), or
 	## clear (alpha 0) to take its kind's (MapStyle.block_colour).
 	var colour: Color = Color(0, 0, 0, 0)
 

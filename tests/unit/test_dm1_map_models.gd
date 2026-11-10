@@ -160,9 +160,9 @@ func test_a_map_s_doors_take_the_leaf_and_frame_built_nearest_their_size() -> vo
 	assert_eq(DoorView._nearest(DoorView.LEAF_MODELS, Vector3(0.77, 2.5, 0.0)),
 			"res://assets/models/props/door_leaf_mid.glb", "the huts'")
 	assert_eq(DoorView._nearest(DoorView.LEAF_MODELS, Vector3(0.42, 2.1, 0.0)),
-			"res://assets/models/props/door_leaf_narrow.glb", "The Street's")
+			"res://assets/models/props/door_leaf_narrow.glb", "a narrow house door")
 	assert_eq(DoorView._nearest(DoorView.FRAME_MODELS, Vector3(0.9, 2.1, 0.0)),
-			"res://assets/models/props/door_frame_narrow.glb", "The Street's frame")
+			"res://assets/models/props/door_frame_narrow.glb", "its frame")
 	for path: String in DoorView.LEAF_MODELS:
 		assert_not_null(PropDressConfig.load_mesh(path), "%s loads" % path)
 	for path: String in DoorView.FRAME_MODELS:

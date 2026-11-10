@@ -5,7 +5,7 @@ extends GutTest
 const ROOM := Vector2i(1920, 1080)
 
 
-## `dev_content` lists the dev maps too: The Street, the longest name and blurb, is dev (owner, 2026-11-05).
+## `dev_content` lists the dev maps too (none ship now; The Street, the last, was removed 2026-11-09).
 func _screen(picks: MatchPicks = null, size: Vector2i = ROOM, dev_content: bool = false) -> MenuScreen:
 	var view := SubViewport.new()
 	view.size = size
@@ -164,7 +164,7 @@ func test_custom_rules_rows_fit_their_panel_at_1080() -> void:
 
 func test_longest_summary_and_blurbs_fit_their_lines() -> void:
 	var picks := MatchPicks.new()
-	picks.map_id = "street"
+	picks.map_id = "woodland"
 	picks.mode = MatchOptions.MODE_ATTACK_DEFEND
 	picks.rules = MatchOptions.RULES_CUSTOM
 	picks.bots = "hard"
@@ -187,7 +187,7 @@ func test_longest_summary_and_blurbs_fit_their_lines() -> void:
 
 func test_a_plain_attack_defend_summary_fits_its_line() -> void:
 	var picks := MatchPicks.new()
-	picks.map_id = "street"
+	picks.map_id = "woodland"
 	picks.mode = MatchOptions.MODE_ATTACK_DEFEND
 	var screen := _screen(picks, ROOM, true)
 	await wait_process_frames(3)

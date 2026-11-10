@@ -50,7 +50,7 @@ func test_the_backdrop_copes_with_a_missing_or_wrong_kind_of_picture() -> void:
 
 
 func test_the_backdrop_blurs_every_listed_fields_picture() -> void:
-	for id: String in ["depot", "woodland", "street", "range"]:
+	for id: String in ["depot", "woodland", "range"]:
 		var tex := MenuBackdrop.blurred(MenuBackdrop.PICTURE_DIR + id + ".jpg")
 		assert_not_null(tex, id)
 		if tex != null:

@@ -1,5 +1,5 @@
 extends GutTest
-## BQ1 · Bots see through glass (The Street's House windows and bus shelter) as players do, while it still stops their
+## BQ1 · Bots see through glass (window panes, MapStyle.clear_kinds) as players do, while it still stops their
 ## BBs: WorldQuery.sight_ray passes clear blocks (MapStyle.clear_kinds) that `ray` meets, on BoxWorld and on a built
 ## MapLevel's Jolt colliders. Sight, a held view and cover read it; a bot seeing someone it can't shoot goes round.
 

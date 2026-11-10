@@ -43,7 +43,8 @@ func test_no_shipped_map_has_a_one_way_step() -> void:
 		var nav := NavGrid.build(m, tuning.nav, tuning.body)
 		assert_eq(one_way_steps(nav), PackedStringArray(), "%s has no one-way step" % e.id)
 		checked += 1
-	assert_gt(checked, 3, "every shipped map, the range too")
+	assert_eq(checked, catalog.entries.size(), "every shipped map, the range too")
+	assert_gt(checked, 2, "Depot, Woodland and the range at least")
 
 
 func test_the_check_finds_a_one_way_step() -> void:

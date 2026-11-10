@@ -28,11 +28,6 @@ The rest of this wiki describes all of it.
 
 - **0.1 Dev 3:** finished models for Depot and the practice range, and perhaps Woodland.
 
-### In development
-
-- **The Street**, a terraced street of three lanes, a house to take and a car park, by day or by night. It
-  shows only with Dev content on for now.
-
 ### Then: the rest of the art pass
 
 The replicas, attachments, figures and first-person arms have their finished models. The fields' greybox goes next:

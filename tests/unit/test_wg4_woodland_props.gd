@@ -234,9 +234,9 @@ func test_fixtures_glow_and_flame_only_at_night_and_only_on_their_maps() -> void
 	add_child_autofree(by_night)
 	assert_eq(_flames(by_day), 0, "no flames by day")
 	assert_gt(_flames(by_night), 0, "flames by night")
-	var street := MapData.load_map("street", play.map_style, SimTuning.load_default().rounds.team_size)
-	if street != null:
-		assert_null(LightFixtures.build(street, play.light_fixtures, night), "The Street's lanterns are its own lamps")
+	var depot := MapData.load_map("depot", play.map_style, SimTuning.load_default().rounds.team_size)
+	assert_not_null(depot, "Depot loads")
+	assert_null(LightFixtures.build(depot, play.light_fixtures, night), "no fixtures on a map not listed (Depot)")
 
 
 func _flames(fixtures: LightFixtures) -> int:

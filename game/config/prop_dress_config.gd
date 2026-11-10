@@ -64,30 +64,6 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"tyre": "res://assets/models/props/tyre.glb",
 	&"crate": "res://assets/models/props/crate.glb",
 	&"truck": "res://assets/models/props/truck.glb",
-	# The Street's (ST2).
-	&"car_crimson": "res://assets/models/props/car_crimson.glb",
-	&"car_teal": "res://assets/models/props/car_teal.glb",
-	&"car_cream": "res://assets/models/props/car_cream.glb",
-	&"car_lilac": "res://assets/models/props/car_lilac.glb",
-	&"car_yellow": "res://assets/models/props/car_yellow.glb",
-	&"car_green": "res://assets/models/props/car_green.glb",
-	&"car_grey": "res://assets/models/props/car_grey.glb",
-	&"van_cream": "res://assets/models/props/van_cream.glb",
-	&"van_plaster": "res://assets/models/props/van_plaster.glb",
-	&"van_teal": "res://assets/models/props/van_teal.glb",
-	&"van_grey": "res://assets/models/props/van_grey.glb",
-	&"lorry_crimson": "res://assets/models/props/lorry_crimson.glb",
-	&"lorry_teal": "res://assets/models/props/lorry_teal.glb",
-	&"lorry_cream": "res://assets/models/props/lorry_cream.glb",
-	&"bin_green": "res://assets/models/props/bin_green.glb",
-	&"bin_steel": "res://assets/models/props/bin_steel.glb",
-	&"bin_teal": "res://assets/models/props/bin_teal.glb",
-	&"skip": "res://assets/models/props/skip.glb",
-	&"lamp": "res://assets/models/props/lamp.glb",
-	&"settee": "res://assets/models/props/settee.glb",
-	&"table": "res://assets/models/props/table.glb",
-	&"units": "res://assets/models/props/units.glb",
-	&"fridge": "res://assets/models/props/fridge.glb",
 	# The game's own map models (DM1, tools/blender/maps): Depot's plywood walls and containers (the crate above too).
 	&"plywood": "res://assets/models/props/plywood.glb",
 	&"plywood_mid": "res://assets/models/props/plywood_mid.glb",
@@ -205,7 +181,6 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 @export var model_lays: Dictionary[StringName, Lay] = {
 	&"logstack": Lay.GRID, &"crate": Lay.GRID, &"tyre": Lay.GRID, &"pine": Lay.GRID, &"spruce": Lay.GRID,
 	&"pine_young": Lay.TREE, &"pine_grown": Lay.TREE, &"pine_old": Lay.TREE, &"oak": Lay.TREE, &"birch": Lay.TREE,
-	&"bin_green": Lay.GRID, &"bin_steel": Lay.GRID, &"bin_teal": Lay.GRID, &"units": Lay.GRID,
 	&"plywood_header": Lay.RUN,
 	&"palisade": Lay.STAKES, &"watch_tower": Lay.SET, &"footbridge": Lay.SET, &"sawmill_shed": Lay.SET,
 	&"cordwood": Lay.GRID, &"fallen_log_5": Lay.GROUND, &"fallen_log_6": Lay.GROUND, &"fallen_log_8": Lay.GROUND,
@@ -233,13 +208,10 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 ## GRID's cells (m): x along the box's long side, y up (0: one layer the box's height), z across. Cordwood in 2 m
 ## sections as tall as the stack (layers would show their ragged tops as seams), the Kenney log stack's 1.6 m, plywood
 ## crates 1.2 m long, a metre deep and 1.15 m high on their pallets (DM1: two high in Depot's 2.4 m crate walls, one in
-## its waist cover), tyres in stacks, a spruce every metre and a half; The Street's bins side by side, about 0.7 m
-## each, and its kitchen units about 0.6 m a cupboard.
+## its waist cover), tyres in stacks, a spruce every metre and a half.
 @export var grid_cells: Dictionary[StringName, Vector3] = {
 	&"logstack": Vector3(1.6, 0.9, 1.4), &"crate": Vector3(1.2, 1.15, 1.0), &"tyre": Vector3(0.9, 0.45, 0.9),
 	&"pine": Vector3(1.5, 0.0, 1.5), &"spruce": Vector3(1.5, 0.0, 1.5),
-	&"bin_green": Vector3(0.7, 0.0, 0.7), &"bin_steel": Vector3(0.7, 0.0, 0.7), &"bin_teal": Vector3(0.7, 0.0, 0.7),
-	&"units": Vector3(0.6, 0.0, 0.6),
 	# a camouflage net's scaffold sections, a pole every 2 m
 	&"camo_net": Vector3(2.0, 0.0, 0.3),
 	# cordwood in 2 m sections as tall as the stack, one section across however deep the stack (WG2)
@@ -281,7 +253,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 ## A dressed kind's block lower than this (m) keeps its box: a rack's shelf boards stay boards, its racking is
 ## shelving; Depot's desks (crate blocks 0.8 m high) stay desks, its crate stacks and the Range's are crates.
 ## A plywood block under 0.3 m (a hut's floor edge) stays a board. Only a hall's 8 m walls are its bays (the Range's
-## and The Street's lower walls keep their boxes).
+## lower walls keep their boxes).
 @export var kind_min_height: Dictionary[StringName, float] = {
 	&"rack": 2.0, &"crate": 0.85, &"plywood": 0.3, &"wall": 6.0,
 }

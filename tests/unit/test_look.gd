@@ -332,7 +332,7 @@ func _depot() -> MapData:
 
 func test_grass_is_its_own_palette_colour_and_not_a_team_hue() -> void:
 	assert_true(look.palette.has(&"grass"), "the palette has grass")
-	assert_ne(look.colour(&"grass"), look.colour(&"meadow"), "meadow keeps The Street's floors")
+	assert_ne(look.colour(&"grass"), look.colour(&"meadow"), "meadow keeps its own colour")
 	var teams := AccessibilityTable.read_file().colours
 	teams.append_array(PlayTuning.load_default().teams.colours)
 	assert_false(FieldChecks.reads_as_team(look.colour(&"grass"), teams), "grass is off every team's hue")

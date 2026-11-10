@@ -65,7 +65,7 @@ func test_depot_is_the_one_shipped_field_with_no_full_auto_to_start() -> void:
 	var cat := MapCatalog.read_file()
 	assert_eq(cat.problems, [] as Array[String])
 	assert_eq(cat.find("depot").start_mode, SEMI)
-	for id: String in ["woodland", "street", "range"]:
+	for id: String in ["woodland", "range"]:
 		assert_eq(cat.find(id).start_mode, AUTO, "%s starts replicas as they come" % id)
 
 

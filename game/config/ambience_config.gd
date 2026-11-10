@@ -7,7 +7,8 @@ extends Resource
 ## call louder than a bird and no bed louder than the yard's (DECISIONS 2026-10-05).
 
 ## The ambiences a map may name; a map naming none, or one not listed, plays DEFAULT_ID.
-## indoor and street are the owner's recordings (AU5): Depot's big room, The Street by day and night.
+## indoor and street are the owner's recordings (AU5): Depot's big room, and a street by day and night
+## (the Range's sound, owner 2026-11-05).
 const IDS: Array[StringName] = [&"yard", &"woods", &"indoor", &"street"]
 const DEFAULT_ID := &"yard"
 

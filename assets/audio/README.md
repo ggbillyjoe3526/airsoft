@@ -16,8 +16,9 @@ rustle (`foley_*`), the holster, the draw, the vault, the hit tick and hit marke
 selector, the radio, the electric, spring and cyber magazines, the grenades' pin, bounce and smoke hiss, and two more
 doors each way. Every ground's steps are then balanced to the recorded concrete, within
 1 dB overall and 2 dB in the 0.7 to 4 kHz band (`balance_steps`; the rule is in `docs/DECISIONS.md` › Audio). With
-`--loops` the script also makes the beds `loops/indoor.wav` (the Depot), `street_day.wav` and `street_night.wav` (The
-Street; the night one was Woodland's night too until AU9): a stretch of each recording, its spikes ridden
+`--loops` the script also makes the beds `loops/indoor.wav` (the Depot), `street_day.wav` and `street_night.wav` (the
+street ambience, the Range's since 2026-11-05 and The Street's until that map went, 2026-11-09; the night one was
+Woodland's night too until AU9): a stretch of each recording, its spikes ridden
 down, cross-faded into a seamless loop and stored at its peak, with `peaks.json` holding the factor that brings it to
 an RMS of 1, so a bed's gain in `play_tuning.tres` is its loudness.
 
@@ -41,7 +42,7 @@ after it (BP8: slap echoes and a diffuse tail, `echoed` in tools/cut_recordings.
 **The batch of 2026-11-08** (AU9): 5 more give the steps on wood (`step_wood_run`, `_sprint`, `_land`: his walk and
 run on a wooden floor cut where each step starts, his jumps as takes, then balanced like every ground), the steel skip
 run into (`prop_steel`: about 0.9 s of each of his two metal bangs) and `loops/woods_night.wav`, Woodland's night bed (his
-woods at night, which also leaves The Street's night bed to The Street).
+woods at night, which leaves the street's night bed to the street ambience).
 
 **Every replica fired empty** plays one cue, `dryFire`: the gas pistol's recorded dry click as it is, for today's
 replicas and any added later (owner, 2026-11-05: final, not a stand-in).

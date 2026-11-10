@@ -32,7 +32,7 @@ import bpy  # noqa: E402
 import bmesh  # noqa: E402
 from mathutils import Vector  # noqa: E402
 
-# The look's palette (LookConfig.palette, sRGB): mapkit's, with Woodland's own (WA1) and The Street's sage as the game
+# The look's palette (LookConfig.palette, sRGB): mapkit's, with Woodland's own (WA1) and the town sage as the game
 # has them.
 PALETTE = {**mk.PALETTE, "bark": 0x7B6F62, "heartwood": 0xE4DCCD, "fern": 0x79A650, "meadow": 0x8AA860,
            "sage": 0xA9C48E}
