@@ -61,7 +61,8 @@ intentions, Time of day or Disable levelling changed, or on dev content, stays o
   is doing, including bringing or waiting for a magazine; hidden while the order wheel, the field map or your sight
   is up).
 - **Dev content** shows what is still being built (below), and **Time of day** plays any map by day or at night.
-- **Disable levelling** unlocks everything and gives no XP; **Reset level** goes back to level 0.
+- **Disable levelling** unlocks everything and gives no XP (your level stays on the rail, greyed); **Reset level**
+  goes back to level 0.
 - **Skin-only arms** shows your first-person arms with bare hands instead of gloves, at once.
 - **Retro pixels**, **Pretend slow frames** (to try the graphics step-down), **Log a test error** and **Crash the game
   now** (to try the crash screen). **End the round now** is in the pause menu.
