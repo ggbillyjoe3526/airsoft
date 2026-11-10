@@ -43,6 +43,9 @@ look realistic and slightly used." Shapes, triangles and gameplay are unchanged.
 - **2K masks** (the texture budget's cap), BPTC with mipmaps.
 - **Parts, figure parts and the sniper are not rebuilt**: their models carry no wear; clean rebuilds differ from HEAD
   only by build noise.
+- **arms.glb is not rebuilt**: a rebuild against the worn pistol (more vertices from the UV seams, same shape) moves
+  the pistol hold's finger curls by under 1° (quaternion components ≤ 0.009; every other hold identical), so the
+  approved holds stay as they are; the next arms rebuild (the SMG's) takes that change.
 - **The SMG gets its wear in its own pull request**: its model is not on `main` yet; whichever merges second adds
   `wear.apply(...)` to `smg.py`.
 
