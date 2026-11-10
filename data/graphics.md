@@ -67,10 +67,13 @@ never stops the game from starting.
   Depot's Lounge) draw their whole light at their share, and the doors, flag poles and props take the baked light
   of the faces near them (each face of a door its own side's). A face's part hidden inside a block that abuts it
   takes the light of its nearest part in the open, lifting the joint a little.
-- **Ultra** is the top end: the whole scene's bounce light (SDFGI with screen-space bounce at full size and its
-  finest probes), screen-space reflections over the probes, volumetric fog the sun and the bounce light up, the
-  sharpest and farthest shadows with contact hardening (Softest: the sun given a size, so a shadow is sharp at its
-  foot and soft away from it), full ambient occlusion and the finest mesh detail.
+- **Ultra** is the top end: the whole scene's bounce light (SDFGI in 10 cm cells near the eye, six cascades out to
+  410 m, 128 rays a probe, with screen-space bounce at the engine's Ultra quality and full size), screen-space
+  reflections over the probes at full size, volumetric fog the sun and the bounce light up, the sharpest and farthest
+  shadows with contact hardening (Softest: the sun given a size, so a shadow is sharp at its foot and soft away from
+  it), full-size ambient occlusion at the engine's Ultra quality and the finest mesh detail (UG4: the finer light,
+  `LookConfig`'s Global illumination group and `fine_adaptive`; High keeps the project's medium quality at half
+  size).
 - **Global illumination** is light bounced off the field. Screen (High) bounces what is on screen (SSIL), cheaply;
   Scene (Ultra) adds SDFGI, the whole field's bounce and sky light, with occlusion, so a coloured wall tints the floor
   by it and a corner or a room under a roof fills with soft light. Settings and strengths: `LookConfig`'s Global

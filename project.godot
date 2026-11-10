@@ -267,6 +267,7 @@ common/physics_interpolation=true
 
 [rendering]
 
+environment/screen_space_reflection/half_size=false
 rendering_device/fallback_to_opengl3=true
 
 [shader_globals]

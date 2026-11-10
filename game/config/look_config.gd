@@ -72,16 +72,21 @@ const GLOBAL_DUST := &"look_dust"
 @export var ssil_intensity: float = 1.1
 @export var ssil_sharpness: float = 0.98
 ## SDFGI (Scene): the whole field's bounce and sky light, occlusion on. Cascades, the smallest cell (m), its strength,
-## how much of a bounce feeds the next, and its probes' rays and frames to settle.
-@export var sdfgi_cascades: int = 5
-@export var sdfgi_min_cell: float = 0.2
+## how much of a bounce feeds the next, and its probes' rays and frames to settle. UG4: cells of 10 cm near the eye
+## (each cascade 128 cells a side, twice the last), so a thin wall or a trunk stops the light it should; six cascades
+## still reach 410 m, as five of 20 cm did.
+@export var sdfgi_cascades: int = 6
+@export var sdfgi_min_cell: float = 0.1
 @export var sdfgi_energy: float = 1.0
 @export var sdfgi_bounce: float = 0.5
-@export var sdfgi_rays: RenderingServer.EnvironmentSDFGIRayCount = RenderingServer.ENV_SDFGI_RAY_COUNT_96
+@export var sdfgi_rays: RenderingServer.EnvironmentSDFGIRayCount = RenderingServer.ENV_SDFGI_RAY_COUNT_128
 @export var sdfgi_converge: RenderingServer.EnvironmentSDFGIFramesToConverge = \
 		RenderingServer.ENV_SDFGI_CONVERGE_IN_30_FRAMES
 @export var sdfgi_update: RenderingServer.EnvironmentSDFGIFramesToUpdateLight = \
 		RenderingServer.ENV_SDFGI_UPDATE_LIGHT_IN_4_FRAMES
+## Ultra's screen-space shading (UG4): full ambient occlusion and Scene's screen bounce at the engine's Ultra quality,
+## whose sampling adapts to each pixel; this is how far it goes, 0 to 1 (the most samples).
+@export var fine_adaptive: float = 1.0
 
 @export_group("Reflections")
 ## Reflection probes (Probes and up): one per named area of a map of at least `probe_area` m², up to `probe_most`,

@@ -55,8 +55,9 @@ every preset; turn it on if you want it.
   scale. Every player gets a soft shadow under their feet instead, lying on a ramp's slope and on the floor below a
   ledge they drop from. The game's look (its natural colours and sunlight) is the
   same on every preset.
-- **Ultra** is the top end, for the most powerful cards: bounce light from the whole field, reflections on screen,
-  volumetric haze and the softest shadows, sharp at their foot and soft away from it.
+- **Ultra** is the top end, for the most powerful cards: bounce light from the whole field, worked out finely near
+  you so thin walls and tree trunks keep their shade, sharp reflections on screen, the finest ambient occlusion in
+  corners and under things, volumetric haze and the softest shadows, sharp at their foot and soft away from it.
 - **Baked light** gives Depot soft shade in its corners, warm light bounced off sunlit walls and its dim Lounge; its
   doors, flag poles and props take the same light.
 - **Mesh detail** sets how near a player must be to be drawn in full detail. Through a scope that is how near they

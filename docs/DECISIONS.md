@@ -325,6 +325,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   view keeps the preset's exposure, so every look the owner approved stays as it is and only tunnels and deep shade
   lift. The night keeps its tuned dark. One middle for every map (0.25): Depot's hall and Woodland's open field both
   meter above it.
+- **Ultra's light is the engine's finest, High's stays as it was (2026-11-10, UG4; default, owner's step 4).** Ultra
+  draws ambient occlusion and the screen bounce at Godot's Ultra quality at full size, SDFGI in 10 cm cells with the
+  most rays and screen-space reflections at full size; Low, Medium and High draw exactly as before, so only the
+  preset aimed at the owner's card pays.
 - **Every figure keeps its team-colour plate carrier (owner, 2026-10-17, AX1).** The carrier reads like a site's team
   bib and is the strongest team cue at range. A civilian outfit is in `docs/IDEAS.md`.
 
