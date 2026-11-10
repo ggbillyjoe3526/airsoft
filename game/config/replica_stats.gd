@@ -6,7 +6,7 @@ extends RefCounted
 
 const PATH := "res://data/stats.md"
 const FILE_NAME := "stats.md"
-const REPLICA_DIR := "res://game/config/replicas/"
+const REPLICA_DIR := ReplicaConfig.REPLICA_DIR
 ## The loadout bots and tests carry and a new player starts with: primary, then secondary.
 const DEFAULT_LOADOUT: Array[StringName] = [&"aeg", &"pistol"]
 const REPLICAS_TABLE := "Replicas"
@@ -40,7 +40,9 @@ const COLUMNS: Array[Dictionary] = [
 	{"header": "Draw (s)", "field": &"draw_time", "kind": Kind.NUMBER, "min": 0.05, "max": 5.0},
 	{"header": "Spread (°)", "field": &"spread_deg", "kind": Kind.NUMBER, "min": 0.0, "max": 10.0},
 	{"header": "Recoil (°)", "field": &"recoil_deg", "kind": Kind.NUMBER, "min": 0.0, "max": 5.0},
-	{"header": "Hip spread (×)", "field": &"hip_spread", "kind": Kind.NUMBER, "min": 1.0, "max": 20.0, "optional": true},
+	{"header": "Hip spread (×)", "field": &"hip_spread", "kind": Kind.NUMBER, "min": 0.5, "max": 20.0, "optional": true},
+	{"header": "Pace (×)", "field": &"pace", "kind": Kind.NUMBER, "min": 0.8, "max": 1.2, "optional": true},
+	{"header": "Moving spread (×)", "field": &"move_spread", "kind": Kind.NUMBER, "min": 0.2, "max": 2.0, "optional": true},
 ]
 
 ## What a power source changes, as shares (0.15 is +15 %): energy (gas, spring), rate of fire (battery) and kick.

@@ -1114,7 +1114,7 @@ msgid "LOADOUT_SECONDARY"
 msgstr "SECONDARY"
 
 msgid "LOADOUT_SWITCH_REPLICA"
-msgstr "Switch Replica"
+msgstr "Swap"
 
 msgid "LOADOUT_SWITCH_TITLE"
 msgstr "Switch %s replica"
@@ -1919,6 +1919,9 @@ msgstr "A pistol with its battery built in: nothing to pick for power."
 
 msgid "ARMORY_BLURB_REPLICA_SNIPER"
 msgstr "A spring rifle, cocked after every shot: long and flat, wild from the hip."
+
+msgid "ARMORY_BLURB_REPLICA_SMG"
+msgstr "A compact electric SMG: the fastest trigger and quick on your feet, short on reach."
 
 msgid "XP_LINE_MATCH_PLAYED"
 msgstr "Match played"
@@ -3707,6 +3710,9 @@ msgstr "Hedge, thicket"
 
 msgid "MENU_LEVEL_SHORT"
 msgstr "LVL %d"
+
+msgid "MENU_LEVEL_OFF_TIP"
+msgstr "Levelling is off (Settings › Dev › Disable levelling): every replica and part is yours to carry and matches give no XP. Your level stays as it is."
 
 msgid "SETTINGS_ABOUT"
 msgstr "About"

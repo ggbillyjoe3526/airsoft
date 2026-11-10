@@ -75,8 +75,7 @@ func test_views_follow_movers_and_swingers_turned_any_way_through_their_waits() 
 						.length())
 				worst = maxf(worst, absf(d.carrier.global_position.y - want.y))
 			elif f == 1.0:
-				var front := d.faces[0].global_position + d.root.global_basis.z * cfg.plate_thickness * 0.5
-				worst = maxf(worst, front.distance_to(t.position))
+				worst = maxf(worst, d.faces[0].global_position.distance_to(t.position))
 	assert_lt(worst, 1e-3, "every drawn mover and swinger is where the simulation has it, at any facing")
 
 

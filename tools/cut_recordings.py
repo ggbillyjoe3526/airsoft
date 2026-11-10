@@ -482,6 +482,14 @@ def build(folder):
     cover_on = pick(folder, [("remote_cover_clipping.wav", [1, 3, 5, 7])], 0.25, 0.3)
     put("magOut_electric", variants(cover_off, 5, 0.85), -30.8)
     put("magIn_electric", variants(cover_on, 5, 0.85), -27.0)
+    # Compact SMG (CS1, a stand-in until the owner records one): the AEG's motor whir a fifth higher and shorter, a
+    # smaller gearbox spinning faster, so its 18 shots a second run into one quick buzz; the same crack a little higher
+    # and 1 dB under the AEG's; its smaller magazines' clicks a little higher than the rifle's.
+    smg_record = "a small fast motor in short bursts (a mini handheld fan or a cordless drill on its top speed)"
+    put("power_smg", [onset_slice(m, 0.11, 30) for m in variants(motor, 5, 1.22)], -26.3, smg_record)
+    put("shot_smg", variants(cracks, 5, 0.98), -19.5, smg_record)
+    put("magOut_smg", variants(cover_off, 5, 0.95), -30.8, "a smaller plastic clip than the rifle's")
+    put("magIn_smg", variants(cover_on, 5, 0.95), -27.0, "a smaller plastic clip than the rifle's")
 
     # Sniper Rifle (spring): his recorded shots (third batch, 2026-11-04), each from where it bursts out, its spring's
     # quieter run-up before that as the power part (it plays with the shot, so the shot answers the trigger at once);

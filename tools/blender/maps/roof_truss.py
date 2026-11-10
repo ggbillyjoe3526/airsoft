@@ -6,8 +6,8 @@ From the owner's photos (references/maps/william-2026-11-09/roof_truss_bay and h
 - **roof_truss**: a lattice truss across the hall (square hollow chords, a Warren web of diagonals with a post at every
   other node, gusset plates at the nodes), lipped C purlins across the trusses on cleats, sag rods between them, the
   profiled roof sheet over them with a translucent rooflight strip halfway between trusses (refs 1, 5), a
-  longitudinal tie at the bottom chord and a sprinkler main with drop heads (ref 2). The trusses are the look's
-  crimson and the sheet its violet ceiling (RoofConfig's colours), the forms the photos'.
+  longitudinal tie at the bottom chord and a sprinkler main with drop heads (ref 2). The trusses are galvanised grey
+  and the sheet a pale grey liner (Sunlit Concrete, SL3; RoofConfig's colours), the forms the photos'.
 - **roof_lamp**: a round "UFO" high-bay (refs 1 to 3): an eye bolt on its cable, the driver can, the finned heat sink
   ring and the LED lens under it; the lens is its own material (`Lens`), which the game draws glowing.
 
@@ -241,10 +241,13 @@ def lamp() -> object:
     return b.build()
 
 
+# Sunlit Concrete (SL3, the owner's art direction 2026-11-09): galvanised grey steel under a pale grey insulated liner,
+# the rooflight's sheet cream and the sprinkler main its real red (the look's crimson, muted by the light's paint); the
+# Dev 2 look's crimson trusses and violet ceiling are history.
 COLOURS = {
-    "Truss": mk.PALETTE["crimson"], "Gusset": (mk.PALETTE["crimson"], 0.92), "Purlin": mk.PALETTE["grey"],
-    "Tie": mk.PALETTE["steel"], "Sheet": mk.PALETTE["ceiling"], "Rooflight": mk.PALETTE["lilac"],
-    "Pipe": mk.PALETTE["teal"], "Head": mk.PALETTE["yellow"],
+    "Truss": mk.PALETTE["grey"], "Gusset": (mk.PALETTE["grey"], 0.92), "Purlin": mk.PALETTE["concrete"],
+    "Tie": mk.PALETTE["steel"], "Sheet": (mk.PALETTE["concrete"], 0.92), "Rooflight": mk.PALETTE["cream"],
+    "Pipe": mk.PALETTE["crimson"], "Head": mk.PALETTE["yellow"],
     "Cable": mk.PALETTE["rubber"], "CableGrey": mk.PALETTE["grey"], "Tray": mk.PALETTE["grey"], "LampBody": mk.PALETTE["ink"], "Lens": mk.PALETTE["cream"],
 }
 

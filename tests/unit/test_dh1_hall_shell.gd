@@ -87,12 +87,17 @@ func test_every_hall_wall_is_drawn_as_bays_with_its_columns_under_the_trusses() 
 
 
 func test_the_ranges_lower_walls_keep_their_boxes() -> void:
+	# A lower wall is never a hall wall: it keeps its box, or draws the model its block names (the Range's fence bays
+	# and backstop, RM1).
 	for id: String in ["range"]:
 		var m := MapData.load_map(id, play.map_style, 1)
 		assert_true(m.ok(), "%s loads" % id)
 		for b in m.blocks:
 			if b.kind == &"wall" and b.size.y < HALL_WALL:
-				assert_false(cfg.dresses(b), "%s's wall at %s keeps its box" % [id, b.center])
+				if b.dress != &"":
+					assert_ne(cfg.model_of(b), &"hall_wall", "%s's wall at %s draws its own model" % [id, b.center])
+				else:
+					assert_false(cfg.dresses(b), "%s's wall at %s keeps its box" % [id, b.center])
 
 
 func test_the_feature_bays_are_few_apart_open_and_each_kind_is_there() -> void:

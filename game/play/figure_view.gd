@@ -129,7 +129,7 @@ func setup(c: Character, team_colour: Color, hits: HitConfig, font: Font,
 		_replicas.append(held)
 		_lit_meshes.append(held.mesh if held != null and _bare_meshes.size() > i and _bare_meshes[i] != null else null)
 		_classes.append(c.armament.replicas[i].site_class)
-		_ids.append(c.armament.replicas[i].id)
+		_ids.append(c.armament.replicas[i].model_id())
 		if held != null:
 			add_child(held)
 		if _magazines[i] != null:
@@ -251,7 +251,9 @@ static func with_lights(parts: Array[Dictionary], lights: Array[Torch.Light], co
 func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictionary,
 		magazines: Array[MeshInstance3D], muzzles: PackedVector3Array, supports: PackedVector3Array,
 		cfg: FigureConfig, fars: Array[MeshInstance3D], wells: Array[MeshInstance3D]) -> MeshInstance3D:
-	var scene := load(MODEL_DIR + r.id + ".glb") as PackedScene
+	# Drawn as its model's replica (a stand-in model's, CS1).
+	var look := r.model_id()
+	var scene := load(MODEL_DIR + look + ".glb") as PackedScene
 	fars.append(null)
 	wells.append(null)
 	_bare_meshes.append(null)
@@ -279,11 +281,11 @@ func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictiona
 		held.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		for piece: Node in held.find_children("*", "GeometryInstance3D", true, false):
 			(piece as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		var fit := ReplicaParts.fit_figure(held, r.id, parts, barrel_end, muzzle)
+		var fit := ReplicaParts.fit_figure(held, look, parts, barrel_end, muzzle)
 		muzzle = fit.muzzle
 		support = support_mark(support, fit.grip, cfg)
 		ReplicaPaint.apply(held, paint, realistic)
-		var key := _merge_key(r.id, paint, realistic, parts)
+		var key := _merge_key(look, paint, realistic, parts)
 		# A night torch (row 69): its plain pieces share the replica's own paint of the same name (its rubber), and a
 		# copy without it is kept for the holster and the far version (a few pixels wide there).
 		var bare: ArrayMesh = null

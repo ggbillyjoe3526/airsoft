@@ -66,15 +66,21 @@ func test_the_rail_has_the_four_tabs_all_built() -> void:
 	assert_eq(later, 0, "no LATER tag: every tab is built")
 
 
-func test_the_level_chip_reads_the_level_and_hides_with_levelling_off() -> void:
+func test_the_level_chip_reads_the_level_and_greys_with_levelling_off() -> void:
 	var bar := NavRail.new()
 	add_child_autofree(bar)
 	bar.set_level(3)
 	var chip := bar.find_child("Level", true, false) as Control
 	assert_eq(bar.level_text(), "LVL 3")
-	bar.set_level(-1)
-	assert_false(chip.visible, "no chip while levelling is off")
-	assert_eq(bar.level_text(), "")
+	assert_false(bar.level_greyed())
+	bar.set_level(3, 0.5, true)
+	assert_true(chip.visible, "the chip shows while levelling is off (owner, 2026-11-10)")
+	assert_eq(bar.level_text(), "LVL 3")
+	assert_true(bar.level_greyed())
+	assert_eq(chip.tooltip_text, tr("MENU_LEVEL_OFF_TIP"))
+	bar.set_level(4)
+	assert_false(bar.level_greyed(), "back on: white again, no tooltip")
+	assert_eq(chip.tooltip_text, "")
 
 
 func test_the_current_tab_is_lit() -> void:

@@ -160,6 +160,36 @@ func test_a_palette_name_it_lacks_warns_and_shows_magenta() -> void:
 	assert_eq(look.colour(&"no such colour"), Color.MAGENTA)
 
 
+## SL3: Depot's roof is galvanised steel under a pale grey liner, not the Dev 2 look's crimson and violet: its config's
+## colours are greys, and almost all of the bay model's surface is painted grey (the red sprinkler mains and the
+## yellow heads are the only paint accents).
+func test_depots_roof_is_galvanised_grey() -> void:
+	var roof := PlayTuning.load_default().roof
+	assert_lt(roof.truss_colour.s, 0.15, "the trusses' fallback colour is a grey")
+	assert_lt(roof.ceiling_colour.s, 0.15, "the ceiling's is a grey")
+	var mesh := PropDressConfig.load_mesh(roof.bay_model)
+	assert_not_null(mesh, "the roof bay model loads")
+	if mesh == null:
+		return
+	var area := 0.0
+	var grey := 0.0
+	for surface: int in mesh.get_surface_count():
+		var arrays := mesh.surface_get_arrays(surface)
+		var verts := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+		var colours := arrays[Mesh.ARRAY_COLOR] as PackedColorArray
+		var index := arrays[Mesh.ARRAY_INDEX] as PackedInt32Array
+		assert_eq(colours.size(), verts.size(), "the bay is painted in vertex colours")
+		if colours.size() != verts.size():
+			return
+		for t: int in range(0, index.size(), 3):
+			var a := verts[index[t]]
+			var size := (verts[index[t + 1]] - a).cross(verts[index[t + 2]] - a).length() * 0.5
+			area += size
+			if colours[index[t]].linear_to_srgb().s < 0.2:
+				grey += size
+	assert_gt(grey / area, 0.9, "%.0f%% of the roof bay is grey" % (100.0 * grey / area))
+
+
 func test_the_shared_materials_draw_in_the_shared_light() -> void:
 	var m := LookMaterials.vertex_colour(0.4, 0.2)
 	assert_eq(m.shader, LookMaterials.VERTEX_SHADER)

@@ -812,6 +812,15 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   wheel** turns the zoom (up in, down out) instead of switching, and the zoom stays where it is left for the match;
   slower to raise than the 2x Scope (1.9 against 1.6); fits any top rail (the AEG Rifle and the Sniper Rifle); unlocks
   at **level 8**. The rifle still comes with the 2x Scope.
+- **The Compact SMG (owner, 2026-11-10, CS1).** "A compact electric smg" in Dev 3 that "should feel and play unique";
+  its specs and data first, and **no model until his reference pictures** (until then it is drawn, held and pictured
+  as the AEG Rifle: ReplicaConfig.model). Defaults taken (the owner may change any): a rifle-class electric replica,
+  **18 BBs/s**, **45 × 5** BBs, 0.75 J with 0.20 g, 1.4 s reload, 0.32 s draw, 0.6° spread, 0.14° kick, semi and full
+  auto; two behaviours of its own, both new stats.md columns: **Pace 1.08** (run and sprint, not holstered) and
+  **Moving spread 0.5** (half of what moving adds), with a **hip spread** of 0.75 (the column now takes under 1). Its
+  parts: the optics, the laser, the silencer and the torch, not the grips, barrels or AEG magazines. **Level 7** with
+  the M140 Spring, not a new level 11, which would stand empty with Dev content off. A Breacher bot kit (red dot,
+  rushers and flankers). Its own sound profile `smg`, a stand-in from the owner's AEG motor until he records one.
 
 ## Menus, HUD, settings and accessibility
 

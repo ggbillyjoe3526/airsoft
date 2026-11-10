@@ -334,7 +334,7 @@ func _ready() -> void:
 		_build_step()
 	_running = _map.ok()
 	if _running:
-		_audio.start_ambience()
+		_start_sound()
 
 
 ## Runs the next build step and reports it.
@@ -1429,7 +1429,7 @@ func _process(delta: float) -> void:
 		_held_for = 0.0
 		# the loading screen goes now unless it waits for Continue: the ambience starts with the match, never under it
 		if not _holding:
-			_audio.start_ambience()
+			_start_sound()
 		started.emit()
 
 
@@ -1483,8 +1483,17 @@ func go() -> void:
 	if not _holding or _leaving:
 		return
 	_holding = false
-	_audio.start_ambience()
+	_start_sound()
 	_capture()
+
+
+## The match is first heard: the ambience starts and, while the first round's start countdown holds, its beep for the
+## digit showing (its ROUND_COUNT fell under the loading screen, where nothing sounds). Called once a match.
+func _start_sound() -> void:
+	_audio.start_ambience()
+	var rs := state.round_state
+	if rs.held() and not rs.practice:
+		_audio.count_beep()
 
 
 ## The prewarm left the tree: done, unless the match itself is leaving.

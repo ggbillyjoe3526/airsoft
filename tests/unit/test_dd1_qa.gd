@@ -213,15 +213,9 @@ func test_the_baked_site_mesh_keeps_the_tiles_and_draws_sandbags_inside_their_ba
 			outside += 1
 	assert_gt(moved, 0, "the sandbag tiles are drawn smaller")
 	assert_eq(outside, 0, "only a stack's (or a propped block's) own tiles move, and inside their block")
-	# a tile on the stack's top comes down to bag_core under it, its sides in by bag_core
+	# RM1: the range's stacks are drawn as the sandbag model, so their tiles fold away inside them like any propped box
 	for i in stack_ids.slice(0, 2):
-		var b := m.blocks[i]
-		var top := b.center.y + b.size.y * 0.5
-		var lowest_top := INF
-		for v in tiles.positions.size():
-			if tiles.blocks[v] == i and is_equal_approx(tiles.positions[v].y, top):
-				lowest_top = minf(lowest_top, pos[v].y)
-		assert_almost_eq(lowest_top, top - look.bag_core, 1e-4, "the stack's own top is drawn bag_core inside")
+		assert_true(SiteSurface.as_props(look, m.blocks[i]), "the stack is drawn as the sandbag model")
 
 
 func test_switching_the_baked_light_rebuilds_the_mesh_alone_and_keeps_the_material() -> void:
@@ -294,8 +288,12 @@ func test_a_match_on_low_reaches_the_dress_and_its_bags_too() -> void:
 	var mat := session._level.site_material()
 	assert_true(mat.get_shader_parameter(&"low"))
 	assert_same(session._site.details().material_override, mat, "the details share the level's material")
-	assert_not_null(session._site.bags(), "Low keeps the sandbags")
-	assert_gt(session._site.bags().multimesh.instance_count, 0)
+	# RM1: the range's sandbags are the sandbag model (props), no longer instanced bags
+	assert_null(session._site.bags(), "no instanced bags: the stacks are modelled")
+	var sandbags := session._site.props().views_of(&"sandbags")
+	assert_gt(sandbags.size(), 0, "Low keeps the sandbags")
+	for v in sandbags:
+		assert_true(v.visible and v.multimesh.instance_count > 0)
 	session._apply_graphics(table.preset(&"medium"))
 	assert_false(mat.get_shader_parameter(&"low"))
 	session._apply_graphics(table.preset(&"low"))
