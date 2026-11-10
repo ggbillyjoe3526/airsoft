@@ -106,7 +106,7 @@ in their team's colours. **Realistic colours** shows every bold scheme as its pl
 the next match.
 
 The AEG Rifle and the GBB Pistol look lightly used in your hands: faint scratches, rubbed edges and a little dirt in
-the recesses, in whatever colours they wear.
+the recesses, in whatever colours they wear. Their swappable magazines (Hi-Cap, Low-Cap and Extended) look used the same way.
 
 ## On other players
 

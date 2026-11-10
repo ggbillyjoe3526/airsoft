@@ -26,6 +26,11 @@ tools/blender/parts/fit_parts.py):
 
 It replaces the magazine parts in assets/models/replicaParts/aeg.glb and pistol.glb and leaves every other part as it
 is. Running it again builds the same magazines.
+
+They are lightly used like their replica's own magazine (RW2, owner 2026-11-10: "make sure that magazine models also
+have the cosmetic changes"): tools/blender/replicas/wear.py bakes one mask for a file's magazines (WEAR_SIZE, their
+scratches times MAGAZINE_SCRATCH as the replicas' magazines have them) on copies of their painted materials, so the
+file's other parts stay as they are; Godot's import writes it beside the file as `<replica>_wear.png`.
 """
 
 import math
@@ -41,6 +46,7 @@ from mathutils import Matrix, Vector  # noqa: E402
 import aeg  # noqa: E402
 import gbb  # noqa: E402
 import hardsurface as hs  # noqa: E402
+import wear  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
 PARTS = os.path.join(ROOT, "assets/models/replicaParts/%s.glb")
@@ -56,6 +62,11 @@ LOWCAP_BOTTOM = -0.1310
 HICAP_FINE = 2
 LOWCAP_FINE = 3
 EXTENDED_FINE = 9
+# The magazines' wear (RW2): one mask a file, at about the replicas' own texel size (a 2K mask over a whole replica),
+# each file's own seed, and the scratches times the replicas' magazines' factor (aeg.py, gbb.py: "Magazine" 2.5).
+WEAR_SIZE = 1024
+WEAR_SEED = {"aeg": 4, "pistol": 5}
+MAGAZINE_SCRATCH = 2.5
 # The AEG base plate's frame (aeg.mag_plate: its top at z 0, +y toward the muzzle): its foot, and the grip grooves cut
 # across its foot (their places along it, half width, width, depth), inside the standard plate's outline.
 PLATE_FOOT = -0.0075
@@ -313,6 +324,7 @@ def replace(part_file: str, materials: dict, well: tuple, build: list) -> None:
     for ob in list(bpy.data.objects):
         if ob.name.startswith("magazine_"):
             bpy.data.objects.remove(ob, do_unlink=True)
+    plain_materials()
     for name, (colour, rough, metal) in materials.items():
         hs.material(name, colour, rough, metal)
     at = Vector(well)
@@ -326,8 +338,28 @@ def replace(part_file: str, materials: dict, well: tuple, build: list) -> None:
             ob.data.transform(Matrix.Translation(-at))
             ob.location = at
             print("  %-26s %6d triangles" % (ob.name, hs.tris(ob)))
+    worn = [ob.name for ob in bpy.data.objects if ob.type == "MESH" and ob.name.startswith("magazine_")
+            and not ob.name.endswith("_Figure")]
+    wear.apply(seed=WEAR_SEED[part_file], heavier={name: MAGAZINE_SCRATCH for name in worn}, size=WEAR_SIZE,
+               only=("magazine_",))
     hs.export(path, False)
+    wear.unsuffix(path)
     print("wrote", path)
+
+
+def plain_materials() -> None:
+    """The last build's worn magazine materials (wear.resuffix names them apart from the plain ones they share a name
+    with in the file) and its mask let go once the magazines are out."""
+    wear.resuffix()
+    for me in list(bpy.data.meshes):
+        if me.users == 0:
+            bpy.data.meshes.remove(me)
+    for m in list(bpy.data.materials):
+        if m.name.endswith(wear.SUFFIX):
+            bpy.data.materials.remove(m)
+    for image in list(bpy.data.images):
+        if image.users == 0:
+            bpy.data.images.remove(image)
 
 
 def main() -> None:

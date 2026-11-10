@@ -13,6 +13,8 @@ parts file (the replicas' scripts, tools/blender/parts/fit_parts.py and attachme
     python -I tools/blender/parts/figure_parts.py <repo root>
 
 It rewrites assets/models/replicaParts/<id>.glb for every replica id in FILES. Running it again makes the same copies.
+A worn part's copy (RW2: the alternative magazines, tools/blender/parts/magazines.py) is put on the plain paint with no
+UV layers (wear.plain_copy), and the worn materials keep their names through the rewrite (wear.resuffix, unsuffix).
 """
 
 import os
@@ -24,13 +26,14 @@ import bpy  # noqa: E402
 
 import figure_copy  # noqa: E402
 import hardsurface as hs  # noqa: E402
+import wear  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
 FILES = ["aeg", "pistol", "cyber", "sniper", "smg"]
 SUFFIX = "_Figure"
 # A part's copy: this share of its triangles, kept between FIGURE_MIN and FIGURE_MAX (a part's small round shapes, a
 # laser's knurled body, thin out below it), and always under the part's own count. FIGURE_MAX 600 (from 900): the
-# AEG's parts file also holds MAG1's magazines and BA1's barrels (3 MiB, docs/CC0_ASSETS.md › Size limits).
+# AEG's parts file also holds MAG1's magazines and BA1's barrels (4 MiB, docs/CC0_ASSETS.md › Size limits).
 FIGURE_SHARE = 0.15
 FIGURE_MIN = 120
 # Parts whose own script builds their figures' copy, kept as it is: a barrel's (tools/blender/parts/barrels.py, BA1),
@@ -73,6 +76,7 @@ def copy_of(part: bpy.types.Object, magazine: int) -> bpy.types.Object:
         meshes.append(me)
     have = sum(sum(len(p.vertices) - 2 for p in me.polygons) for me in meshes)
     ob = figure_copy._object(part.name + SUFFIX, meshes, figure_copy._materials(meshes))
+    wear.plain_copy(ob)
     figure_copy.cut_down(ob, budget(part.name, have, magazine))
     return ob
 
@@ -84,6 +88,7 @@ def write(part_file: str) -> None:
     magazine = magazine_tris(part_file)
     hs.reset()
     bpy.ops.import_scene.gltf(filepath=path)
+    wear.resuffix()
     parts = [o for o in bpy.data.objects if o.type == "MESH" and o.parent is None and not o.name.endswith(SUFFIX)]
     for part in parts:
         old = bpy.data.objects.get(part.name + SUFFIX)
@@ -105,6 +110,7 @@ def write(part_file: str) -> None:
         if m.users == 0:
             bpy.data.meshes.remove(m)
     hs.export(path, False)
+    wear.unsuffix(path)
 
 
 def main() -> None:
