@@ -155,6 +155,8 @@ func rescue_if_out_of_world(kill_y: float) -> bool:
 	prev_crouch_amount = crouch_amount
 	prev_lean = lean
 	vault.cancel()
+	stairs = 0.0
+	prev_stairs = 0.0
 	velocity = Vector3.ZERO
 	grounded = false
 	airborne = false
