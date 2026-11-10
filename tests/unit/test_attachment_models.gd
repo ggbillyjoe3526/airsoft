@@ -6,9 +6,10 @@ extends GutTest
 const DIR := "res://assets/models/replicaParts/"
 const FILES: Array[String] = ["aeg", "pistol", "cyber", "sniper", "smg"]
 const PART_TRIS := 10000
-## A parts file's cap: 3 MiB since BL8b, as the attachments (2.0 MB of the AEG's), the separate magazines (MAG1) and
-## the barrels (BA1) all land in the same file, about 2.55 MB together; the install's 500 MB budget is not at stake.
-const FILE_BYTES := 3 * 1024 * 1024
+## A parts file's cap: 4 MiB since RW2 (3 MiB since BL8b), as the attachments (2.0 MB of the AEG's), the separate
+## magazines (MAG1) with their wear mask and its UV layer (RW2) and the barrels (BA1) all land in the same file, about
+## 3.9 MB together; the install's 500 MB budget is not at stake (the game ships the imported meshes, not the glb).
+const FILE_BYTES := 4 * 1024 * 1024
 const SIGHT_REDDOT_AEG := Vector3(0.0, 0.104, -0.025)
 ## The glass disc's lift off the window (OpticGlass.DISC_LIFT), and the slack allowed on a surface test.
 const LIFT := 0.0005

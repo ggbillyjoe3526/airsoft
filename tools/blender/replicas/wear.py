@@ -30,9 +30,21 @@ Called by a replica's script last, after `figure_copy.make` and `hardsurface.fol
     wear.apply(heavier={"Magazine": 2.5})
 
 It needs Cycles (Blender's own, or the `bpy` module's). A seed keeps it the same on every run.
+
+A parts file (RW2: the alternative magazines in replicaParts/<replica>.glb, tools/blender/parts/magazines.py) wears only
+the parts named by `only`, at a smaller `size`: the other parts there share the painted materials but carry no UV
+layer at all (a layer on all of them would not fit the parts file's cap), so the worn parts get their own copies of
+the painted materials (`<name>.worn`, the mask on them) and `unsuffix` names the copies back in the written glb, so
+ReplicaPaint still knows them by their part's name.
+
+    wear.apply(seed=4, heavier={"magazine_hiCap": 2.5}, size=1024, only=("magazine_",))
+    hs.export(path, False)
+    wear.unsuffix(path)
 """
 
+import json
 import math
+import struct
 
 import bpy
 import numpy as np
@@ -71,16 +83,21 @@ LIP_RUB_CUT = 0.75
 NARROW_GRIME = 0.5
 ## The face attribute that numbers each loose part, for the bake (removed after).
 PART_ATTR = "wear_part"
+## A worn part's own copy of a painted material in a parts file (`only`), named back by `unsuffix`.
+SUFFIX = ".worn"
 
 
-def apply(seed: int = 1, heavier: dict = None, size: int = SIZE) -> None:
+def apply(seed: int = 1, heavier: dict = None, size: int = SIZE, only: tuple = None) -> None:
     """Bakes the scene's wear mask (the image `wear`, packed: the export embeds it and Godot's import writes it beside
     the glb as `<model>_wear.png`) and hangs it on the painted materials. `heavier` maps a mesh's name to how many
-    times the scratches it gets (the magazine is handled most)."""
-    targets = _targets()
+    times the scratches it gets (the magazine is handled most). `only` (name prefixes) wears just those meshes, on their
+    own copies of the painted materials (a parts file; `unsuffix` after the export)."""
+    targets = _targets(only)
     if not targets:
         raise RuntimeError("wear: no mesh carries a painted material")
     heavier = heavier or {}
+    if only:
+        _own_materials(targets)
     _unwrap(targets)
     lo, hi = _bounds(targets)
     for i, ob in enumerate(targets):
@@ -116,14 +133,94 @@ def apply(seed: int = 1, heavier: dict = None, size: int = SIZE) -> None:
 
 # ----------------------------------------------------------------------------------------------------------- unwrap
 
-def _targets() -> list:
+def _targets(only: tuple = None) -> list:
     out = []
     for ob in bpy.data.objects:
         if ob.type != "MESH" or ob.name.startswith("Figure") or not ob.visible_get():
             continue
-        if any(m is not None and m.name in PAINTED for m in ob.data.materials):
+        if only and (not ob.name.startswith(tuple(only)) or ob.name.endswith("_Figure")):
+            continue
+        if any(_painted(m) for m in ob.data.materials):
             out.append(ob)
     return sorted(out, key=lambda o: o.name)
+
+
+def _painted(m) -> bool:
+    return m is not None and m.name.removesuffix(SUFFIX) in PAINTED
+
+
+def _own_materials(targets: list) -> None:
+    """The targets' painted materials swapped for copies of their own (`<name>.worn`), one per material, so the mask
+    hangs on them and not on the other parts sharing the originals."""
+    copies = {}
+    for ob in targets:
+        for i, m in enumerate(ob.data.materials):
+            if m is None or m.name not in PAINTED:
+                continue
+            if m.name not in copies:
+                copies[m.name] = bpy.data.materials.get(m.name + SUFFIX) or m.copy()
+                copies[m.name].name = m.name + SUFFIX
+            ob.data.materials[i] = copies[m.name]
+
+
+def resuffix() -> None:
+    """After importing a glb `unsuffix` wrote (a script rewriting a parts file): the worn copies (the painted materials
+    carrying the mask) named `<name>.worn` again and the plain ones `<name>`, whichever the import numbered `.001`."""
+    found = []
+    for m in list(bpy.data.materials):
+        base = m.name.removesuffix(SUFFIX)
+        head, _, tail = base.rpartition(".")
+        if head and tail.isdigit():
+            base = head
+        if base in PAINTED:
+            found.append((m, base, _carries_mask(m)))
+    for m, _, _ in found:
+        m.name = "wear_renaming_" + m.name
+    for m, base, worn in found:
+        m.name = base + (SUFFIX if worn else "")
+
+
+def _carries_mask(m) -> bool:
+    return m.node_tree is not None and any(n.type == "TEX_IMAGE" and n.image is not None for n in m.node_tree.nodes)
+
+
+def plain_copy(ob) -> None:
+    """`ob`, a figure's copy of a worn part, put on the plain painted materials (made from the worn ones, the mask taken
+    off, where the file has none) with no UV layers: the figures draw plain (RW1), and the copy stays small."""
+    me = ob.data
+    for i, m in enumerate(me.materials):
+        if m is None or not m.name.endswith(SUFFIX):
+            continue
+        base = m.name.removesuffix(SUFFIX)
+        plain = bpy.data.materials.get(base)
+        if plain is None:
+            plain = m.copy()
+            plain.name = base
+            nt = plain.node_tree
+            for n in list(nt.nodes):
+                if n.type in ("TEX_IMAGE", "UVMAP", "SEPARATE_COLOR", "SEPRGB") or (
+                        n.type == "GROUP" and n.node_tree is not None and n.node_tree.name == GROUP):
+                    nt.nodes.remove(n)
+        me.materials[i] = plain
+    while len(me.uv_layers):
+        me.uv_layers.remove(me.uv_layers[0])
+
+
+def unsuffix(path: str) -> None:
+    """Names the worn copies (`<name>.worn`) back to their painted material's name in the glb at `path`; only its JSON
+    chunk changes."""
+    with open(path, "rb") as f:
+        data = f.read()
+    length = struct.unpack("<I", data[12:16])[0]
+    doc = json.loads(data[20:20 + length])
+    for m in doc.get("materials", []):
+        m["name"] = m["name"].removesuffix(SUFFIX)
+    text = json.dumps(doc, separators=(",", ":")).encode()
+    text += b" " * (-len(text) % 4)
+    rest = data[20 + length:]
+    out = struct.pack("<4sII", b"glTF", 2, 12 + 8 + len(text) + len(rest)) + struct.pack("<I4s", len(text), b"JSON")
+    with open(path, "wb") as f:
+        f.write(out + text + rest)
 
 
 def _unwrap(targets: list) -> None:
@@ -177,7 +274,7 @@ def _bake(targets: list, size: int, key: str, shader, samples: int) -> np.ndarra
         old = out.inputs["Surface"].links[0].from_socket if out.inputs["Surface"].links else None
         made = list(nt.nodes)
         emit = nt.nodes.new("ShaderNodeEmission")
-        if mat.name in PAINTED:
+        if _painted(mat):
             nt.links.new(shader(nt), emit.inputs["Color"])
         else:
             emit.inputs["Color"].default_value = (0.0, 0.0, 0.0, 1.0)
@@ -431,7 +528,7 @@ def _painted_area(ob) -> float:
     total = 0.0
     for p in ob.data.polygons:
         m = ob.data.materials[p.material_index] if p.material_index < len(ob.data.materials) else None
-        if m is not None and m.name in PAINTED:
+        if _painted(m):
             vs = [mw @ ob.data.vertices[v].co for v in p.vertices]
             for k in range(1, len(vs) - 1):
                 total += (vs[k] - vs[0]).cross(vs[k + 1] - vs[0]).length * 0.5
@@ -539,7 +636,7 @@ def _hang(targets: list, image) -> None:
     """The mask as each painted material's glTF occlusion texture, read on the `Wear` layer."""
     group = _group()
     for mat in _materials(targets):
-        if mat.name not in PAINTED:
+        if not _painted(mat):
             continue
         nt = mat.node_tree
         uv = nt.nodes.new("ShaderNodeUVMap")
