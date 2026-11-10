@@ -201,3 +201,128 @@ func test_the_map_builders_leave_the_shipped_maps_unchanged() -> void:
 		assert_eq(OS.execute("python3", [root + "tools/%s/build_map.py" % f]), 0, f)
 	for f in maps:
 		assert_eq(FileAccess.get_file_as_string("res://data/maps/%s.json" % f), before[f], "%s reproducible" % f)
+
+
+# ---- rework: pieces, fades, lug pitch, degenerate tracks, art reuse ----
+
+func _alpha_at(img: Image, row: int) -> float:
+	return img.get_pixel(img.get_width() / 2, row).a
+
+
+func test_one_piece_is_only_two_are_first_and_last_three_have_a_middle() -> void:
+	assert_eq(WearMarks._piece(0, 1), WearMarkArt.Piece.ONLY)
+	assert_eq(WearMarks._piece(0, 2), WearMarkArt.Piece.FIRST)
+	assert_eq(WearMarks._piece(1, 2), WearMarkArt.Piece.LAST)
+	assert_eq(WearMarks._piece(1, 3), WearMarkArt.Piece.MIDDLE)
+	assert_eq(WearMarks._piece(2, 3), WearMarkArt.Piece.LAST)
+
+
+func test_a_fade_of_zero_leaves_a_piece_untouched() -> void:
+	var cfg := MarksConfig.new()
+	cfg.track_fade = 0.0
+	var tile := Image.create_empty(4, 16, false, Image.FORMAT_RGBA8)
+	tile.fill(Color(1, 1, 1, 0.8))
+	for piece: WearMarkArt.Piece in [WearMarkArt.Piece.FIRST, WearMarkArt.Piece.LAST, WearMarkArt.Piece.ONLY]:
+		var out := WearMarkArt.faded(cfg, tile, piece)
+		for row in 16:
+			assert_almost_eq(_alpha_at(out, row), _alpha_at(tile, row), 0.01, "piece %d row %d" % [piece, row])
+
+
+func test_a_fade_longer_than_the_piece_is_clamped_and_still_fades_the_ends() -> void:
+	var cfg := MarksConfig.new()
+	cfg.track_fade = 50.0
+	var tile := Image.create_empty(4, 32, false, Image.FORMAT_RGBA8)
+	tile.fill(Color.WHITE)
+	var first := WearMarkArt.faded(cfg, tile, WearMarkArt.Piece.FIRST)
+	assert_lt(_alpha_at(first, 31), _alpha_at(first, 0), "a first piece fades in from the bottom")
+	var last := WearMarkArt.faded(cfg, tile, WearMarkArt.Piece.LAST)
+	assert_lt(_alpha_at(last, 0), _alpha_at(last, 31), "a last piece fades out at the top")
+	var only := WearMarkArt.faded(cfg, tile, WearMarkArt.Piece.ONLY)
+	assert_lt(_alpha_at(only, 0), _alpha_at(only, 16))
+	assert_lt(_alpha_at(only, 31), _alpha_at(only, 16))
+	assert_eq(WearMarkArt.faded(cfg, tile, WearMarkArt.Piece.MIDDLE).get_data(), tile.get_data())
+
+
+func test_faded_never_changes_the_source_tile_and_a_zero_track_piece_does_not_crash() -> void:
+	var cfg := MarksConfig.new()
+	cfg.track_piece = 0.0
+	var tile := Image.create_empty(4, 16, false, Image.FORMAT_RGBA8)
+	tile.fill(Color.WHITE)
+	var before := tile.get_data()
+	var out := WearMarkArt.faded(cfg, tile, WearMarkArt.Piece.ONLY)
+	assert_eq(tile.get_data(), before)
+	assert_eq(out.get_width(), 4)
+
+
+func test_a_zero_or_tiny_lug_pitch_still_paints_a_finite_tread() -> void:
+	var noise := FastNoiseLite.new()
+	for pitch: float in [0.0, -1.0, 0.0001, 100.0]:
+		var cfg := MarksConfig.new()
+		cfg.lug_pitch = pitch
+		cfg.tread_pixels = Vector2i(8, 64)
+		var img := WearMarkArt.tread_image(cfg, noise, true)
+		assert_eq(img.get_size(), Vector2i(8, 64), "pitch %s" % pitch)
+		var seen := 0.0
+		for y in 64:
+			seen = maxf(seen, _alpha_at(img, y))
+		assert_gt(seen, 0.0, "pitch %s paints something" % pitch)
+
+
+func test_a_tread_picture_tiles_top_to_bottom() -> void:
+	var cfg := MarksConfig.new()
+	var noise := FastNoiseLite.new()
+	noise.seed = WearMarkArt.SEED
+	noise.frequency = 1.0
+	var img := WearMarkArt.tread_image(cfg, noise, false)
+	var h := img.get_height()
+	assert_almost_eq(_alpha_at(img, 0), _alpha_at(img, h - 1), 0.1, "smear rows at the seam are alike")
+
+
+func test_tracks_of_tiny_length_with_a_big_bend_have_no_nan_and_a_positive_size() -> void:
+	for length: float in [0.01, 0.0001]:
+		for mud: bool in [false, true]:
+			var map := MapData.parse('{"size":[40,40],"dressing":{"wearMarks":[{"kind":"tyres","x":3,"z":3,"length":%s,"bend":180,"mud":%s}]}}'
+					% [length, str(mud).to_lower()], play.map_style, 6)
+			if map.marks.is_empty():
+				continue
+			var marks := WearMarks.build(map, play.marks, play.look)
+			add_child_autofree(marks)
+			assert_gt(marks.decals().size(), 0)
+			for d in marks.decals():
+				assert_true(is_finite(d.position.x) and is_finite(d.position.z) and is_finite(d.rotation.y))
+				assert_gt(d.size.z, 0.0)
+				assert_true(d.size.is_finite())
+
+
+func test_every_bent_track_wheel_pieces_meet_end_to_end() -> void:
+	var map := MapData.parse('{"size":[80,80],"dressing":{"wearMarks":[{"kind":"tyres","x":0,"z":0,"length":14,"bend":120}]}}',
+			play.map_style, 6)
+	if map.marks.is_empty():
+		pending("a bare map does not parse in this build")
+		return
+	var marks := WearMarks.build(map, play.marks, play.look)
+	add_child_autofree(marks)
+	var all := marks.decals()
+	var per := all.size() / 2
+	for w in 2:
+		for i in per - 1:
+			var a := all[w * per + i]
+			var b := all[w * per + i + 1]
+			var end_a := Vector2(a.position.x, a.position.z) + Vector2(sin(-a.rotation.y), -cos(-a.rotation.y)) * a.size.z * 0.5
+			var start_b := Vector2(b.position.x, b.position.z) - Vector2(sin(-b.rotation.y), -cos(-b.rotation.y)) * b.size.z * 0.5
+			assert_lt(end_a.distance_to(start_b), 0.01, "wheel %d piece %d meets the next" % [w, i])
+
+
+func test_the_art_repaints_after_a_config_change() -> void:
+	var a := MarksConfig.new()
+	a.tread_pixels = Vector2i(8, 32)
+	WearMarkArt.ensure(a)
+	assert_eq(WearMarkArt.tread(true, WearMarkArt.Piece.MIDDLE).get_height(), 32)
+	var b := MarksConfig.new()
+	b.tread_pixels = Vector2i(8, 64)
+	b.smear_pixels = Vector2i(8, 16)
+	WearMarkArt.ensure(b)
+	assert_eq(WearMarkArt.tread(true, WearMarkArt.Piece.FIRST).get_height(), 64)
+	assert_eq(WearMarkArt.tread(false, WearMarkArt.Piece.ONLY).get_height(), 16)
+	WearMarkArt.ensure(play.marks)
+	assert_eq(WearMarkArt.tread(true, WearMarkArt.Piece.LAST).get_height(), play.marks.tread_pixels.y)

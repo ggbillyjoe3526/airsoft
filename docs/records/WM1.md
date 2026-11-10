@@ -46,14 +46,18 @@ names them, scaling per preset.
 
 ## Checks
 
-- gdlint clean; `test_wear_marks` (9) and QA's `test_wm1_qa` (19: malformed marks, old and corrupt saves,
-  Compatibility, teardown, bounded long marks, reproducible map builders) pass, with `test_graphics_table`, `test_graphics_apply`, `test_gr1_qa`,
-  `test_map_data`, the settings, look, site dress and woods tests.
-- Pictures (High, marks off and on): `/mnt/project-files/art/graphics/ug5/`.
+- gdlint clean; `test_wear_marks` (12) and QA's `test_wm1_qa` (28: malformed marks, old and corrupt saves,
+  Compatibility, teardown, bounded long marks, reproducible map builders, and attempt 2's pieces, faded ends, lug pitch
+  limits and bends) pass, with `test_graphics_table`, `test_graphics_apply`, `test_gr1_qa`, `test_saved_configs`, the
+  settings, look, site dress and woods tests; CI runs the full gate.
+- QA and performance re-checked attempt 2: both Pass (the pictures paint in about 39 ms once per run; about 0.8 MB of
+  textures; 54 decals on Depot, 29 on Woodland).
+- Pictures (High, marks off and on): `/mnt/project-files/art/graphics/ug5/` (3- and 4- are attempt 2's; the boot
+  prints in them were taken out after, at the owner's word).
 
 ## Known issues left
 
 - A mark's box reaches 25 cm above the floor, so a figure standing on one takes it on its soles.
-- Painting the pictures takes about 47 ms once per run (measured headless; the muddy tread's real-scale lugs need a
+- Painting the pictures takes about 39 ms once per run (measured headless; the muddy tread's real-scale lugs need a
   longer picture), a few staged build slices on the loading screen of the first match; later matches reuse them.
   Left as it is.
