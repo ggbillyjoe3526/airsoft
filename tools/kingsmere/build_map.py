@@ -19,6 +19,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import layout as L  # noqa: E402
+import station_dress  # noqa: E402
 
 OUT = os.path.join(HERE, "..", "..", "data", "maps", "kingsmere.json")
 LIFT = -L.T          # the track bed is the game's floor at 0
@@ -503,6 +504,7 @@ def build() -> dict:
                              + LIFT), "plain": True, "lamps": lamps()},
         "areas": areas(),
         "lifts": lifts(),
+        "dressing": {"station": station_dress.dress(L, floor_at, ceil_at, LIFT)},
     }
     del sx
     return m

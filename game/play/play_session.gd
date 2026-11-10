@@ -410,7 +410,8 @@ func _dress_part(part: int) -> void:
 				add_child(_site)
 				if not _light.night:
 					SiteDress.dress_sky(_lighting, _play.site_look)
-			else:
+			elif _level.station_material() == null:
+				# a station dress (MT3) draws every block itself, so no model stands in a block's box
 				_props = PropDress.build(_map, _play.site_look.props, _play.site_look.prop_paint)
 				if _props != null:
 					add_child(_props)
@@ -460,7 +461,7 @@ func _build_ground() -> bool:
 		# plays.
 		var baked_sun := LightingConfig.for_map(_play.lighting, null, _map, LightingConfig.DAY)
 		_level.begin(_map, _play.map_style, _tuning.body, _play.baked_light, baked_sun, _light.night, _play.site_look,
-				_tuning.lifts)
+				_tuning.lifts, _play.station_look)
 	return _level.build_some(Time.get_ticks_usec() + BUILD_SLICE_USEC if staged else 0)
 
 
