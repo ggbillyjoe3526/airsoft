@@ -1,11 +1,12 @@
 # MT3 · Kingsmere dressed in CC0 materials (ambientCG)
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
+| 2026-11-10 | 1 | thread | ✓ | Accept 8/8 | – (first look held until QA and performance re-signed the final head) |
 
 ## Goal
 
@@ -29,8 +30,9 @@ grime; underground lamp-lit), 60 fps on a low-spec machine, textures at 2K or le
 - **Which finish:** `tools/kingsmere/station_dress.py` (called by build_map.py) writes `dressing.station`: every room's
   air with its style (hall, passage, escalator, plant, service, platform, track, tunnel, train). Each face takes the
   finish its room's style gives a floor, wall or ceiling facing it (StationLook); a cover block its kind's (a cabinet's
-  steel, a crate's planks, a hoarding's boards, a skip's rust); a block inside a train its car's paint; the lift shafts
-  plain paint in their own colour.
+  steel, a crate's planks, a hoarding's boards, a skip's rust); a block inside a train its car's paint. A wall spanning
+  storeys (MT2's lift shafts) is cut at each room's floor and ceiling, so each storey's stretch wears that room's
+  walls; inside the wells the shafts are plain paint in their own colour.
 - **Details, scenery only:** each platform's edge has a pale coping and a yellow tactile strip, laid 1 cm over the
   floor; both lines' track has concrete sleepers and rails, 14 cm at the rail's top (below a 15 cm step), no collider.
 - **Nothing moves:** the map's blocks, spawns, lanes, flags and areas are byte for byte MT1's (the build only adds
@@ -44,14 +46,18 @@ grime; underground lamp-lit), 60 fps on a low-spec machine, textures at 2K or le
   holes); only the running tunnels are lined in dark concrete.
 - Tunnels lined in sooty concrete, not cast-iron segments (the iron set read as rust walls).
 - Low draws the sets without their relief (one texture read a pixel).
+- The lift shafts tiled like the room they stand in (a first try in dark paint read as a black box in the hall).
 
 ## Checks
 
-- `tools/check.sh`: pending.
-- `tests/unit/test_station_dress.gd` (11 tests): the map's dress, every finish's set in both arrays, the rooms' finishes
-  at known spots, the escalators' tread and the cover kinds', the colliders identical with and without the dress, the
-  strips on the platforms and the rails on the track bed under a step, Low, the tints off the team hues, bad input.
+- `tools/check.sh`: green on a1a6a5a (5,752 tests, 2 pending for want of a display).
+- `tests/unit/test_station_dress.gd` (19 tests, 7 of them QA's): the map's dress, every finish's set in both arrays,
+  the rooms' finishes at known spots, the lift shafts' storeys, the escalators' tread and the cover kinds', the
+  colliders identical with and without the dress, the strips on the platforms and the rails on the track bed under a
+  step, Low, the tints off the team hues, bad input, the greybox when the arrays are missing.
 
 ## Known issues left
 
 - Medium still draws underground in flat shade (KNOWN_ISSUES, Graphics).
+- Not measured: frame time on a low-spec PC (one draw, 15,160 triangles against the greybox's 9,910, two array reads a
+  pixel on High, one on Low); a play check in playtest/0.1-dev3-checklist.md.
