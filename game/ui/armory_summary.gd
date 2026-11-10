@@ -3,7 +3,8 @@ extends PanelContainer
 ## The Armory's level panel (UI concept B v2 `armory.png`): LEVEL n large with the XP into the next level and what is
 ## unlocked beside it, how XP is earned at the right (the difficulty's note its tooltip), and the level track under them
 ## (ArmoryDots). With levelling off it says everything is unlocked, and at the cap that XP stops counting. Built from
-## ArmoryFacts once; the page is built again when the level changes.
+## ArmoryFacts once; the page is built again when the level changes. With more than ten levels the track shows ten at a
+## time, with ‹ › arrows at its ends to turn to the levels before and after (owner, 2026-11-10; LV15).
 
 const PAD := Vector2i(30, 24)
 const ROW_GAP := 18
@@ -15,10 +16,14 @@ const FACT_SIZE := 15
 const LINE_GAP := 4
 const EARN_SIZE := 15
 const JOIN := " · "
+## The gap between the track and the arrows at its ends.
+const TRACK_ARROW_GAP := 12
 
 var _facts: ArmoryFacts = null
 var _dots: ArmoryDots = null
 var _earn: Label = null
+var _page_back: Button = null
+var _page_on: Button = null
 
 
 func _init(facts: ArmoryFacts) -> void:
@@ -48,12 +53,47 @@ func _init(facts: ArmoryFacts) -> void:
 	var reached := _facts.table.cap() if _facts.levelling_off else s.level
 	_dots = ArmoryDots.new(_facts.rows.size(), reached,
 			0.0 if _facts.levelling_off or s.at_cap() else float(s.into) / float(s.next))
-	column.add_child(_dots)
+	_dots.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var track := HBoxContainer.new()
+	track.name = "Track"
+	track.add_theme_constant_override("separation", TRACK_ARROW_GAP)
+	column.add_child(track)
+	_page_back = _page_arrow("‹", "ARMORY_PAGE_BACK", -1)
+	track.add_child(_page_back)
+	track.add_child(_dots)
+	_page_on = _page_arrow("›", "ARMORY_PAGE_ON", 1)
+	track.add_child(_page_on)
+	_dots.page_changed.connect(_refresh_page_arrows.unbind(1))
+	_refresh_page_arrows()
 
 
 ## The level track: its dots and how far into the next level.
 func bar() -> ArmoryDots:
 	return _dots
+
+
+## The arrows that turn the track's pages: the levels before, and after. Hidden with one page.
+func page_back_arrow() -> Button:
+	return _page_back
+
+
+func page_on_arrow() -> Button:
+	return _page_on
+
+
+func _page_arrow(glyph: String, tip_key: String, step: int) -> Button:
+	var b := MenuParts.arrow_button(glyph, tr(tip_key), "PageBack" if step < 0 else "PageOn")
+	b.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	b.pressed.connect(func() -> void: _dots.show_page(_dots.page() + step))
+	return b
+
+
+func _refresh_page_arrows() -> void:
+	var paged := _dots.page_count() > 1
+	_page_back.visible = paged
+	_page_on.visible = paged
+	_page_back.disabled = _dots.page() <= 0
+	_page_on.disabled = _dots.page() >= _dots.page_count() - 1
 
 
 ## How XP is earned, the line at the right; the difficulty's note is its tooltip.
