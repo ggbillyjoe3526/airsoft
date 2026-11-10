@@ -129,7 +129,7 @@ extends Resource
 ## A round prop's three stepped boxes (a drum's, a tree's trunk), in round_steps' frame.
 const ROUND_TRUNK: Array[Vector2] = [Vector2(-1.0, -0.55), Vector2(1.0, 0.55), Vector2(-0.55, -1.0),
 		Vector2(0.55, 1.0), Vector2(-0.883, -0.883), Vector2(0.883, 0.883)]
-## Prop models that are round (BP7: Woodland's trunks and trees, Depot's drums and barrels): BBs and bodies
+## Prop models that are round (BP7: Woodland's trees, Depot's drums and barrels): BBs and bodies
 ## meet each prop as a few stepped boxes that hug it (RoundSteps), not as its block's square box; the nav grid, the
 ## bots' cover, the noisy props, the bake and the minimap still take the block's box. Where each prop stands comes
 ## from PropDressConfig (its lay, cluster cell and pallet), as PropLayout lays it. Each model's boxes in its own frame,
@@ -139,9 +139,6 @@ const ROUND_TRUNK: Array[Vector2] = [Vector2(-1.0, -0.55), Vector2(1.0, 0.55), V
 ## model laid in cells (CLUSTER, ROW) is turned a random quarter, so its boxes must hold it turned. A model not
 ## listed meets its box.
 @export var round_steps: Dictionary[StringName, PackedVector2Array] = {
-	# The trunk's roots fill its back corners; its front ones are open.
-	&"trunk": PackedVector2Array([Vector2(-1.0, -0.95), Vector2(1.0, 0.1), Vector2(-0.7, -1.0), Vector2(0.55, 1.0),
-			Vector2(-0.879, -0.971), Vector2(0.747, 0.559)]),
 	&"drum": PackedVector2Array([Vector2(-1.0, -0.55), Vector2(1.0, 0.55), Vector2(-0.55, -1.0), Vector2(0.55, 1.0),
 			Vector2(-0.883, -0.883), Vector2(0.883, 0.883)]),
 	&"barrel": PackedVector2Array([Vector2(-1.0, -0.55), Vector2(1.0, 0.55), Vector2(-0.55, -1.0), Vector2(0.55, 1.0),

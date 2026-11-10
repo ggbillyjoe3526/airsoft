@@ -7,8 +7,8 @@ extends GutTest
 ## bots' cover still take the block's box.
 
 const ROUND_MAPS: Array[String] = ["woodland", "depot"]
-## The round props checked: Woodland's trunks and trees (WT1), Depot's drums and barrels and their pallets.
-const ROUND_MODELS: Array[StringName] = [&"trunk", &"pine_young", &"pine_grown", &"pine_old", &"oak", &"birch", &"drum",
+## The round props checked: Woodland's trees (WT1), Depot's drums and barrels and their pallets.
+const ROUND_MODELS: Array[StringName] = [&"pine_young", &"pine_grown", &"pine_old", &"oak", &"birch", &"drum",
 		&"barrel", &"pallet"]
 ## A step may reach this far (m) past a prop's vertex and still hold it (the steps' figures are rounded outwards).
 const SLACK := 2e-3
@@ -180,8 +180,7 @@ func test_the_steps_cut_the_square_s_empty_corners_and_stay_inside_it() -> void:
 			# Each corner of the block's footprint, at half height, a hand's breadth in: open.
 			for corner: Vector2 in [Vector2(1, 1), Vector2(1, -1), Vector2(-1, 1), Vector2(-1, -1)]:
 				var p := b.center + Vector3(corner.x * b.size.x * 0.49, 0.0, corner.y * b.size.z * 0.49)
-				if b.kind != &"tree":
-					assert_false(_inside(steps, p), "%s: a %s's corner is open" % [id, b.kind])
+				assert_false(_inside(steps, p), "%s: a %s's corner is open" % [id, b.kind])
 			# Halfway out to a corner: inside a prop (a cluster's, a row's first) whatever the kind.
 			var held := b.center + Vector3(b.size.x * 0.25, 0.0, b.size.z * 0.25)
 			assert_true(_inside(steps, held), "%s: a %s's prop is solid" % [id, b.kind])
@@ -204,25 +203,6 @@ func test_the_steps_cut_the_square_s_empty_corners_and_stay_inside_it() -> void:
 				clusters += 1
 		assert_gt(clusters if id == "depot" else 1, 0, "%s: its drum clusters were checked" % id)
 		assert_gt(counted, 0, "%s has round props" % id)
-
-
-func test_a_trunk_s_front_corners_are_open_and_its_rooted_back_ones_solid() -> void:
-	var m := _map("woodland")
-	var middle := PropLayout.field_middle(m)
-	var trees := 0
-	for b in m.blocks:
-		if b.kind != &"tree" or b.size.x < 1.0:
-			continue
-		trees += 1
-		var steps := _steps(m, b)
-		var front := 1.0 if middle.z >= b.center.z else -1.0
-		var open := b.center + Vector3(b.size.x * 0.45, 0.0, front * b.size.z * 0.45)
-		var rooted := b.center + Vector3(b.size.x * 0.4, 0.0, -front * b.size.z * 0.4)
-		assert_false(_inside(steps, open), "a trunk's front corner (away from its roots) is open")
-		assert_true(_inside(steps, rooted), "a trunk's back corner (its roots) is solid")
-		if trees >= 20:
-			break
-	assert_gt(trees, 0)
 
 
 func test_a_quarter_turned_kind_s_steps_hold_it_turned() -> void:

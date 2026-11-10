@@ -1,6 +1,6 @@
 """Vertex-coloured map models (Dev 3): a model built with hardsurface.Builder, one material a colour, baked to one
-colour on every face corner and exported as one mesh in one material, "vertex_colour", like the Kenney props
-(tools/props/build_props.py), so the game draws it in one batch and ships no texture.
+colour on every face corner and exported as one mesh in one material, "vertex_colour", so the game draws it in one batch and
+ships no texture.
 
 A colour is (sRGB hex, mask), or for BODY (shade, mask): the share of the piece's colour drawn there. The mask, kept
 in the colour's alpha, tells the game what to paint there:

@@ -349,8 +349,7 @@ func test_woodland_is_dressed_without_a_site_each_prop_inside_the_block_that_nam
 		if b.dress != &"":
 			assert_true(look.props.dresses(b), "%s's %s has its model" % [b.kind, b.dress])
 			named[b.dress] = named.get(b.dress, 0) + 1
-	# WG2, WG4 and WT1: Woodland names its own trees, logs, tyres, pickup and tunnels (the Kenney log, tyre and truck
-	# stay the kinds' fallback)
+	# WG2, WG4 and WT1: Woodland names its own trees, logs, tyres, pickup and tunnels (the Kenney models are gone)
 	var trees: Array[StringName] = [&"pine_young", &"pine_grown", &"pine_old", &"oak", &"birch"]
 	for model: StringName in trees + ([&"spruce", &"cordwood", &"fallen_log_5", &"fallen_log_6", &"fallen_log_8",
 			&"root_plate", &"sawbench", &"boards", &"crate", &"tractor_tyre", &"pickup", &"log_tunnel_side"]
@@ -372,7 +371,6 @@ func test_woodland_is_dressed_without_a_site_each_prop_inside_the_block_that_nam
 			var sc := t.basis.get_scale()
 			worst = maxf(worst, absf(sc.x / sc.y - 1.0) + absf(sc.z / sc.y - 1.0))
 		assert_lt(worst, 0.02, "%s's crowns keep their modelled proportions" % model)
-	assert_eq(named.get(&"trunk", 0), 0, "no Woodland tree is the old trunk")
 	assert_gt(trunks, 400)
 	assert_eq(dress.count(&"pickup"), 1)
 	assert_eq(_outside(m, dress), [] as Array[String], "no prop reaches past its block's box")

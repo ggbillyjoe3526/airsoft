@@ -4,10 +4,9 @@ extends Resource
 ## by the prop each block names, MapData.Block.dress), and how the models are laid in the box. Each prop fills its
 ## block's box (never past it), so cover and the nav grid stay the box's and collision the box's (a round prop's,
 ## its stepped boxes that hug it: MapStyle.round_steps, RoundSteps); the box's own faces are not
-## drawn (SiteSurface.core_of). Most models are Kenney's (CC0), recoloured off the teams' hues by
-## tools/props/build_props.py into assets/models/props/; Depot's and the Range's racking, drums, pallet, barrel, sofa,
-## desk, lockers and kit rack are built in Blender by tools/blender/maps/ (RK1), the same one vertex-coloured mesh
-## each (docs/ASSETS.md).
+## drawn (SiteSurface.core_of). Every model is the game's own, built in Blender by tools/blender/maps/ into
+## assets/models/props/, one vertex-coloured mesh each (docs/ASSETS.md; the last Kenney ones, unused once Woodland had
+## its own models, went in Dev 3).
 
 ## How a kind's props are laid: ROW stands round props upright side by side along the box's long side, as many as fit
 ## at its short side's width; CLUSTER stands them on a pallet in a grid of cells about `cluster_cell` m across; FIT
@@ -57,14 +56,9 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"desk": "res://assets/models/props/office_desk.glb",
 	&"locker": "res://assets/models/props/steel_locker.glb",
 	&"kit_rack": "res://assets/models/props/kit_rack.glb",
-	&"trunk": "res://assets/models/props/trunk.glb",
-	&"log": "res://assets/models/props/log.glb",
-	&"logstack": "res://assets/models/props/logstack.glb",
-	&"pine": "res://assets/models/props/pine.glb",
-	&"tyre": "res://assets/models/props/tyre.glb",
+	# The game's own map models (DM1, tools/blender/maps): Depot's and Woodland's crates, Depot's plywood walls and
+	# containers.
 	&"crate": "res://assets/models/props/crate.glb",
-	&"truck": "res://assets/models/props/truck.glb",
-	# The game's own map models (DM1, tools/blender/maps): Depot's plywood walls and containers (the crate above too).
 	&"plywood": "res://assets/models/props/plywood.glb",
 	&"plywood_mid": "res://assets/models/props/plywood_mid.glb",
 	&"plywood_low": "res://assets/models/props/plywood_low.glb",
@@ -186,7 +180,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 ## How a prop a block names (MapData.Block.dress, WR3) is laid in it; one not listed is fitted to the box (FIT, long
 ## side along the box's).
 @export var model_lays: Dictionary[StringName, Lay] = {
-	&"logstack": Lay.GRID, &"crate": Lay.GRID, &"tyre": Lay.GRID, &"pine": Lay.GRID, &"spruce": Lay.GRID,
+	&"crate": Lay.GRID, &"spruce": Lay.GRID,
 	&"pine_young": Lay.TREE, &"pine_grown": Lay.TREE, &"pine_old": Lay.TREE, &"oak": Lay.TREE, &"birch": Lay.TREE,
 	&"plywood_header": Lay.RUN,
 	&"palisade": Lay.STAKES, &"watch_tower": Lay.SET, &"footbridge": Lay.SET, &"sawmill_shed": Lay.SET,
@@ -214,12 +208,11 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 ## FIT does where the skirt would reach under the box.
 @export var grounded: PackedStringArray = PackedStringArray(["tractor_tyre", "tractor_tyre_stack", "pickup"])
 ## GRID's cells (m): x along the box's long side, y up (0: one layer the box's height), z across. Cordwood in 2 m
-## sections as tall as the stack (layers would show their ragged tops as seams), the Kenney log stack's 1.6 m, plywood
-## crates 1.2 m long, a metre deep and 1.15 m high on their pallets (DM1: two high in Depot's 2.4 m crate walls, one in
-## its waist cover), tyres in stacks, a spruce every metre and a half.
+## sections as tall as the stack (layers would show their ragged tops as seams), plywood crates 1.2 m long, a metre
+## deep and 1.15 m high on their pallets (DM1: two high in Depot's 2.4 m crate walls, one in its waist cover), a spruce
+## every metre and a half.
 @export var grid_cells: Dictionary[StringName, Vector3] = {
-	&"logstack": Vector3(1.6, 0.9, 1.4), &"crate": Vector3(1.2, 1.15, 1.0), &"tyre": Vector3(0.9, 0.45, 0.9),
-	&"pine": Vector3(1.5, 0.0, 1.5), &"spruce": Vector3(1.5, 0.0, 1.5),
+	&"crate": Vector3(1.2, 1.15, 1.0), &"spruce": Vector3(1.5, 0.0, 1.5),
 	# a camouflage net's scaffold sections, a pole every 2 m
 	&"camo_net": Vector3(2.0, 0.0, 0.3),
 	# cordwood in 2 m sections as tall as the stack, one section across however deep the stack (WG2)
@@ -247,7 +240,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 ## fifth of the box's width) on each side with no other such box against it, rather than not at all: a thicket's dark
 ## core between its spruces, unbroken across touching thickets, so nothing is seen through a thicket that stops BBs
 ## and sight below the tops of its trees.
-@export var model_cores: Dictionary[StringName, Vector2] = {&"pine": Vector2(0.7, 0.6), &"spruce": Vector2(0.7, 0.6)}
+@export var model_cores: Dictionary[StringName, Vector2] = {&"spruce": Vector2(0.7, 0.6)}
 ## TREE's models: each one's trunk's widest reach (m) round its origin at the ground and under it (an oak's buttress
 ## roots), which the box's half-width is; as each build script prints it (tools/blender/maps/pine.py, oak.py,
 ## birch.py). A tree model not listed keeps its box.

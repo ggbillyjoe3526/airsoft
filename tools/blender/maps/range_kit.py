@@ -4,7 +4,7 @@ the sandbags, the site toilet, the water tote, the generator and the distance bo
 Every model is built from code with tools/blender/replicas/hardsurface.py's Builder, in metres, Blender space (+Z up,
 the model's front towards -Y, which is Godot's +Z once exported). Each part is painted a colour by name (PAINT, sRGB),
 then baked to colours on its corners, so the game draws a whole model in one vertex-coloured material and ships no
-texture, like the fields' other props (tools/props/build_props.py). Colours are written linear, as glTF keeps them,
+texture, like the fields' other props (prop.py). Colours are written linear, as glTF keeps them,
 and every colour stays off the teams' hues (tests/unit/test_props.gd; `check_colours` here fails the build first).
 
 Run the build scripts with Blender 5.x or pip's `bpy` (pip install bpy==5.2.3); see each script's docstring. Dev

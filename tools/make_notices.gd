@@ -14,7 +14,7 @@ const RULE := "=================================================================
 const SHIPPED: Array = [
 	["Inter (the HUD and menu font)", "res://assets/fonts/OFL.txt"],
 	["Barlow Condensed (the menus' headings)", "res://assets/fonts/BarlowCondensed-OFL.txt"],
-	["Poly Haven textures (Depot's concrete and plywood; CC0, credited by choice)", "res://assets/textures/site/LICENSE.txt"],
+	["Poly Haven textures (Depot's plywood; CC0, credited by choice)", "res://assets/textures/site/LICENSE.txt"],
 ]
 
 

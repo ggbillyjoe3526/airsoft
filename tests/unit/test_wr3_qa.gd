@@ -48,7 +48,7 @@ func test_a_dress_naming_no_model_keeps_the_box_and_lays_nothing() -> void:
 
 
 func test_a_grid_stays_inside_a_box_long_in_x_or_in_z_and_counts_the_same() -> void:
-	for model: String in ["logstack", "crate", "tyre", "pine"]:
+	for model: String in ["crate", "spruce"]:
 		var counts: Array[int] = []
 		for long_x: bool in [true, false]:
 			var s := Vector3(7.3, 2.0, 2.1) if long_x else Vector3(2.1, 2.0, 7.3)
@@ -79,7 +79,7 @@ func test_the_layout_is_seeded_not_random() -> void:
 
 func test_a_sliver_of_a_thicket_has_a_finite_core() -> void:
 	for s: Vector3 in [Vector3(1.0, 4.0, 30.0), Vector3(0.2, 3.0, 0.2), Vector3(1.4, 3.0, 1.4)]:
-		var m := _map_of([_blk("thicket", "pine", Vector3(0, 2, 0), s)])
+		var m := _map_of([_blk("thicket", "spruce", Vector3(0, 2, 0), s)])
 		var mesh := MapLevel._greybox_mesh(m, play.map_style, null, play.site_look.props)
 		for v in mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array:
 			assert_true(v.is_finite(), "%s: finite vertex" % s)

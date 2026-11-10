@@ -1,8 +1,7 @@
 # Map models
 
 Blender build scripts for the maps' own models (Dev 3), each writing one vertex-coloured prop to
-`assets/models/props/` the way the Kenney props are (one `Prop` material, palette colours linear; a lamp's lens keeps a
-material of its own). `mapkit.py` holds the shared palette, the vertex-colour bake, the export and the triangle report
+`assets/models/props/` (one `Prop` material, palette colours linear; a lamp's lens keeps a material of its own). `mapkit.py` holds the shared palette, the vertex-colour bake, the export and the triangle report
 for the hall shell (DH1); `prop.py` does the same for the racking and small props (RK1), painting by palette name with
 a foot-to-top gradient (`render_prop.py` renders a built prop from labelled angles); `woodkit.py` holds Woodland's
 shared parts (bark, logs, split ends, leaf clumps, fronds) and its colours, each checked off the team hues as the tests
