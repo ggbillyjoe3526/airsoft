@@ -91,18 +91,20 @@ func _ready() -> void:
 
 
 ## How strongly (0 to 1) a flickering lamp `lamp` shines at `time` s, as `cfg` sets it: in full, but each
-## `lamp_flicker_every` s (each lamp's own phase) a burst of up to `lamp_flicker_burst` s, some cycles none, stepping
-## between full and `lamp_flicker_low` every `lamp_flicker_step` s. Pure and the same every run.
+## `lamp_flicker_every` s (each lamp's own phase), all but `lamp_flicker_quiet` of the cycles, a burst of
+## `lamp_flicker_shortest` to 1 of `lamp_flicker_burst` s, stepping each `lamp_flicker_step` s between full and
+## `lamp_flicker_low` (off at `lamp_flicker_off` odds). Pure and the same every run.
 static func flicker_level(time: float, lamp: int, cfg: RoofConfig) -> float:
 	var phase := _unit(lamp, 7919) * cfg.lamp_flicker_every
 	var cycle := floori((time + phase) / cfg.lamp_flicker_every)
 	var into := time + phase - cycle * cfg.lamp_flicker_every
-	if _unit(cycle, lamp) < 0.3:
+	if _unit(cycle, lamp) < cfg.lamp_flicker_quiet:
 		return 1.0
-	if into > cfg.lamp_flicker_burst * (0.4 + 0.6 * _unit(cycle, lamp + 101)):
+	var shortest := cfg.lamp_flicker_shortest
+	if into > cfg.lamp_flicker_burst * (shortest + (1.0 - shortest) * _unit(cycle, lamp + 101)):
 		return 1.0
 	var step := floori(into / cfg.lamp_flicker_step)
-	return cfg.lamp_flicker_low if _unit(step + cycle * 977, lamp + 31) < 0.55 else 1.0
+	return cfg.lamp_flicker_low if _unit(step + cycle * 977, lamp + 31) < cfg.lamp_flicker_off else 1.0
 
 
 ## A number in [0, 1) from two whole numbers, the same every run (a small integer hash).

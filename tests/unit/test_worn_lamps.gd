@@ -32,6 +32,20 @@ func test_depot_names_its_worn_lamps_and_only_depot() -> void:
 			assert_eq(other.roof_lamp_states.count(MapData.LAMP_WORKING), other.roof_lamp_states.size(), id)
 
 
+func test_a_dead_lamp_hangs_among_four_working_neighbours() -> void:
+	var spacing := 7.0
+	for i in depot.roof_lamps.size():
+		if depot.roof_lamp_states[i] != MapData.LAMP_DEAD:
+			continue
+		var neighbours := 0
+		for j in depot.roof_lamps.size():
+			if j != i and depot.roof_lamps[i].distance_to(depot.roof_lamps[j]) <= spacing + 0.01:
+				neighbours += 1
+				assert_eq(depot.roof_lamp_states[j], MapData.LAMP_WORKING,
+						"lamp %d next to dead lamp %d works, so the patch under it is filled" % [j, i])
+		assert_eq(neighbours, 4, "dead lamp %d is not in an edge row" % i)
+
+
 func test_an_unknown_state_is_a_working_lamp_with_a_warning() -> void:
 	var text := FileAccess.get_file_as_string(MapData.DIR + "depot.json")
 	var json: Dictionary = JSON.parse_string(text)

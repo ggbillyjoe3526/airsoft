@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-10 | 1 | thread | see Checks | pending | – |
+| 2026-11-10 | 1 | thread | see Checks | Retry 6/8 | dim lenses read as working ones; dead lamps in edge rows beside dim ones; flicker barely shows on the floor |
+| 2026-11-10 | 2 | thread | see Checks | pending | – |
 
 ## Goal
 
@@ -19,23 +20,25 @@ indoors) the hall is lit by its lamps alone, so worn lamps vary its light.
 - **The map names them** (`roof.lamps[].state`: "dim", "flicker" or "dead"; none is working): `MapData` reads
   `roof_lamp_states` (an unknown state is a working lamp, with a warning). Depot's builder
   (`tools/depot/build_map.py` › `wear_lamps`) picks 12 dim, 3 flickering and 2 dead with a fixed seed, the
-  flickering and dead ones at least 15 m apart, so no corner goes dark or busy. No other map names any.
+  flickering and dead ones at least 15 m apart; a dead lamp only where all four neighbours hang (never an edge row)
+  and all four work, so its patch is filled and no corner goes dark (critic, attempt 1). No other map names any.
 - **The lenses** (`RoofView`): the glow is a small unshaded shader reading each lamp's tint from the MultiMesh's
-  custom data (`lens_tint`): working and flickering in full, dim at `RoofConfig.lamp_dim_glow` (0.25: a lens glows so
-  brightly that half still reads full) in the warmer `lamp_dim_colour`, dead at `lamp_dead_glow` (0). On every preset.
+  custom data (`lens_tint`): working and flickering in full, dim at `RoofConfig.lamp_dim_glow` (0.12: a lens glows so
+  brightly that half still reads full white; critic, attempt 1) in the amber `lamp_dim_colour`, dead at `lamp_dead_glow` (0). On every preset.
 - **The lights** (`RoofLamps`, High and Ultra): a dead lamp has none, a dim one shines at the same share and colour,
   a flickering one is out of the baked bounce light (BAKE_DYNAMIC) as its strength steps.
-- **The flicker** (`RoofView.flicker_level`, pure): mostly full; every `lamp_flicker_every` (3.5 s) on average, in
-  each lamp's own phase, some cycles a burst of up to `lamp_flicker_burst` (0.8 s) stepping between full and
-  `lamp_flicker_low` (0.1) every `lamp_flicker_step` (0.06 s). `_process` runs only on a roof with flickering lamps
+- **The flicker** (`RoofView.flicker_level`, pure): mostly full; every `lamp_flicker_every` (3.5 s), in each lamp's
+  own phase, all but `lamp_flicker_quiet` (30 %) of the cycles a burst of up to `lamp_flicker_burst` (1 s) stepping
+  every `lamp_flicker_step` (0.09 s) to nearly off (`lamp_flicker_low` 0.05) at `lamp_flicker_off` (60 %) odds, long
+  and dark enough to show on the floor under it (critic, attempt 1). `_process` runs only on a roof with flickering lamps
   and sets a lens and light only when its step changes.
 
 ## Defaults taken
 
 - Counts 12 / 3 / 2 of 93 lamps: enough to notice, few enough that the hall still reads evenly lit; a dead lamp's
   patch is filled by its wide-coned neighbours (UG2).
-- Dim lamps warmer (an older lamp), at half strength.
-- The flicker is a stutter, not a strobe: off at most 0.8 s in a burst, then full for seconds. A play check asks
+- Dim lamps amber (an older lamp), their light at 45 %.
+- The flicker is a stutter, not a strobe: off at most 1 s in a burst, then full for seconds. A play check asks
   whether it distracts.
 
 ## Checks

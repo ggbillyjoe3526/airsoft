@@ -615,7 +615,7 @@ func _read_roof(raw: Variant) -> void:
 		var state: Variant = at.get("state", "")
 		var kind: int = LAMP_STATES.find(str(state)) if state is String else -1
 		if kind < 0:
-			warnings.append("a roof lamp's state %s is not dim, flicker or dead; working" % state)
+			warnings.append("a roof lamp's state %s is not dim, flicker or dead; working" % str(state))
 			kind = LAMP_WORKING
 		roof_lamp_states.append(kind)
 
