@@ -15,7 +15,7 @@ var _cast: RayCast3D = null
 var _sight_cast: RayCast3D = null
 ## The static body of each RayHit.Surface, by its value.
 var _surface_bodies: Array[RID] = []
-## The clear blocks' bodies (The Street's glass, MapStyle.clear_kinds) and each one's RayHit.Surface: solid to BBs and
+## The clear blocks' bodies (window glass, MapStyle.clear_kinds) and each one's RayHit.Surface: solid to BBs and
 ## movers, not to sight.
 var _clear_bodies: Array[RID] = []
 var _clear_surfaces: PackedInt32Array = PackedInt32Array()

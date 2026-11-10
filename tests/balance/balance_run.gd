@@ -9,7 +9,7 @@ extends SceneTree
 
 ## Every field (the range is not a match map). Each plays at the team size the game gives it (MatchRunner.sized_for:
 ## its standard, 6v6) or the one asked for, and at the time of day the runner gives it (by day on all three).
-const MAPS: Array[String] = ["depot", "woodland", "street"]
+const MAPS: Array[String] = ["depot", "woodland"]
 ## Match time a match may take (s), as the guards allow.
 const MAX_MATCH_SECONDS := 30.0 * 60.0
 

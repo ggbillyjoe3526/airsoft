@@ -93,7 +93,7 @@ func test_only_tall_solid_plain_boxes_occlude() -> void:
 
 
 func test_each_map_s_occluder_is_its_tall_solid_blocks_inset() -> void:
-	for id: String in ["depot", "woodland", "street"]:
+	for id: String in ["depot", "woodland"]:
 		var map := MapData.load_map(id, play.map_style, 5)
 		var expected := 0
 		for b in map.blocks:

@@ -14,7 +14,7 @@ const LEAF_SHADER := preload("res://game/play/door_leaf.gdshader")
 ## The leaf's models (DM1, tools/blender/maps/door.py): two-panel timber leaves in their own colours, each built for
 ## a leaf the size (m, wide and high) given here, its body a 1 m cube (x the width, the hinge at -x; y up; z the
 ## thickness) scaled to each leaf. A map's doors take the one built nearest their first leaf's shape, so stiles and
-## handles stretch little (Depot's, the huts', The Street's); a plain box painted the style's door colour when it won't
+## handles stretch little (Depot's, the huts', a narrow house door's); a plain box painted the style's door colour when it won't
 ## load.
 const LEAF_MODELS: Dictionary[String, Vector2] = {
 	"res://assets/models/props/door_leaf.glb": Vector2(0.97, 2.6),

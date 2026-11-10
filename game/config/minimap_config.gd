@@ -81,7 +81,7 @@ extends Resource
 @export var drop_colour: Color = Color(Color("16191e"), 0.95)
 @export var drop_edge: float = 0.3
 ## What the ground is (FM2): a floor or a square of sloping ground takes this share of its surface's tint (a floor with
-## its own colour, The Street's, takes that colour instead), so grass, tracks, decks and roads read apart; concrete and
+## its own colour takes that colour instead), so grass, tracks, decks and roads read apart; concrete and
 ## metal keep the plain ground.
 @export var ground_tint_share: float = 0.26
 @export var grass_tint: Color = Color("7a9866")
@@ -98,7 +98,7 @@ extends Resource
 @export var relief_cell: float = 1.0
 @export var relief_shade: float = 0.22
 @export var relief_height: float = 0.16
-## Greenery that blocks (FM2: Woodland's thickets, The Street's hedges and scrub): drawn in these darker greens, low and
+## Greenery that blocks (FM2: Woodland's thickets; hedges and scrub): drawn in these darker greens, low and
 ## tall, instead of the grey of cover and the white of walls, so a wall of leaves reads apart from a wall.
 @export var green_kinds: Array[StringName] = [&"thicket", &"hedge", &"scrub"]
 @export var green_low_colour: Color = Color(Color("4d7a45"), 0.95)

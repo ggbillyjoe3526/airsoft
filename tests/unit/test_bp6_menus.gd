@@ -71,7 +71,7 @@ func test_the_credits_title_is_a_page_title() -> void:
 
 ## The UI audit: the map pictures carry mipmaps, so the Match page's cards (a fifth of their size) draw them smooth.
 func test_the_map_pictures_have_mipmaps() -> void:
-	for map_id: String in ["depot", "range", "street", "woodland"]:
+	for map_id: String in ["depot", "range", "woodland"]:
 		var picture := load("res://assets/maps/%s.jpg" % map_id) as Texture2D
 		assert_true(picture.get_image().has_mipmaps(), map_id)
 	assert_eq(MenuBackdrop.blurred("res://assets/maps/depot.jpg").get_image().has_mipmaps(), false, "the blur needs none")

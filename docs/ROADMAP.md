@@ -22,7 +22,8 @@ in `docs/PROCESS.md`.
   asking you over with a ping (done: BQ2) and a pass over the bots' play (done: BQ3), and a more detailed full-screen
   map (done: FM2). The owner pulled the spring sniper rifle into 0.1 (2026-11-02): like the AEG with a longer barrel,
   single shot, its 2x Scope fitted, three springs, unlocked at level 5 (SN1), then a variable scope (SN2). Since DT1
-  (2026-11-05) the Sniper Rifle and its parts are public and The Street is dev only. The rest of 0.1 ([What 0.1
+  (2026-11-05) the Sniper Rifle and its parts are public and The Street is dev only; the owner removed it from the
+  game on 2026-11-09 (SX1). The rest of 0.1 ([What 0.1
   is](#what-01-is)) follows in later Dev builds. After it, the owner's playtest fixes (BP2 to BP8) and the Blender
   models of replicas, attachments, figures, gear and first-person arms.
 - **Building 0.1 Dev 3** (owner, 2026-11-07): Blender models for Depot and the practice range, and perhaps Woodland's.

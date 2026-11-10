@@ -25,7 +25,7 @@ var woodland: MapData = null
 var night: LightingConfig = null
 var view: WoodsView = null
 ## The wood with cone crowns on every tree (none carrying its own, WoodsConfig.own_crowns): the crowns a map's trunks
-## still get (The Street's), drawn here on Woodland's trees. Woodland's own trees are models (WT1).
+## would get (none ships one since WT1), drawn here on Woodland's trees. Woodland's own trees are models (WT1).
 var cones: WoodsConfig = null
 
 

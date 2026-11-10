@@ -1,13 +1,13 @@
 extends GutTest
-## BP7: a round prop's block (a tree's trunk on Woodland and The Street, Depot's drums and barrels) stands as stepped
+## BP7: a round prop's block (a tree's trunk on Woodland, Depot's drums and barrels) stands as stepped
 ## boxes for BBs and bodies (RoundSteps, MapStyle.round_steps): every drawn prop lies inside its block's steps, the
 ## steps cut the square's empty corners, a BB grazing a drum's or a trunk's open corner flies on while one at its
 ## middle stops, a prop turned a random quarter has steps that hold it turned, every step's side hugs a prop (so steps
 ## laid wider than the props fail), a level built without a site look steps as the game's, and the nav grid and the
 ## bots' cover still take the block's box.
 
-const ROUND_MAPS: Array[String] = ["woodland", "depot", "street"]
-## The round props checked: The Street's trunks, Woodland's trees (WT1), Depot's drums and barrels and their pallets.
+const ROUND_MAPS: Array[String] = ["woodland", "depot"]
+## The round props checked: Woodland's trunks and trees (WT1), Depot's drums and barrels and their pallets.
 const ROUND_MODELS: Array[StringName] = [&"trunk", &"pine_young", &"pine_grown", &"pine_old", &"oak", &"birch", &"drum",
 		&"barrel", &"pallet"]
 ## A step may reach this far (m) past a prop's vertex and still hold it (the steps' figures are rounded outwards).

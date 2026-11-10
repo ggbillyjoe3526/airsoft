@@ -22,6 +22,9 @@ const GLOBAL_RIM := &"look_rim"
 const GLOBAL_RIM_POWER := &"look_rim_power"
 const GLOBAL_SPEC := &"look_spec"
 const GLOBAL_PAINT_SATURATION := &"look_paint_saturation"
+const GLOBAL_WEAR := &"look_wear"
+const GLOBAL_GRIME := &"look_grime"
+const GLOBAL_DUST := &"look_dust"
 
 @export_group("Light")
 ## What the sun adds where it doesn't reach: a dark warm grey, so the far side falls to the ambient and bounce light
@@ -41,6 +44,15 @@ const GLOBAL_PAINT_SATURATION := &"look_paint_saturation"
 @export var spec: float = 0.3
 ## How much of its colour every surface's paint keeps (0 grey, 1 as painted): the palette as weathered material.
 @export_range(0.0, 1.0) var paint_saturation: float = 0.6
+
+@export_group("Wear")
+## The models' wear (look_vertex.gdshader's `wear`, SL2): grime up a model's foot, streaks down its sides, broad
+## stains and dust on its tops, in world space so no two props wear alike. This scales every material's own share (a
+## prop's PropDressConfig.wear, a tree's crown none); 0 draws every model clean.
+@export_range(0.0, 1.0) var wear: float = 1.0
+## The grime's colour (dark earth) and the dust's (pale and dry), mixed over a worn surface's paint.
+@export var grime: Color = Color8(0x4a, 0x41, 0x36)
+@export var dust: Color = Color8(0xb3, 0xa9, 0x94)
 
 @export_group("Picture")
 ## AgX's contrast and the grade over it: a natural picture, a little contrasty, the team colours still the loudest.
@@ -112,7 +124,7 @@ const GLOBAL_PAINT_SATURATION := &"look_paint_saturation"
 
 @export_group("Palette")
 ## The look's colours by name (sRGB), for every map's dress: a map's paint (SiteLook, RoofConfig, the props' recipes)
-## takes each colour from here, and tests/unit/test_look.gd holds Depot's, Woodland's and The Street's to it.
+## takes each colour from here, and tests/unit/test_look.gd holds Depot's and Woodland's to it.
 @export var palette: Dictionary[StringName, Color] = {
 	&"crimson": Color8(0xc2, 0x38, 0x74), &"violet": Color8(0x76, 0x58, 0xaa), &"yellow": Color8(0xe4, 0xca, 0x46),
 	&"teal": Color8(0x2a, 0x9c, 0x90), &"green": Color8(0x58, 0x90, 0x4e), &"cream": Color8(0xf4, 0xec, 0xda),
@@ -131,7 +143,8 @@ const GLOBAL_PAINT_SATURATION := &"look_paint_saturation"
 	# Sunlit Concrete (SL1): sloping ground's grass, darker so it stays green once the paint is muted.
 	&"grass": Color8(0x5f, 0x8a, 0x3a),
 	&"pond": Color8(0x4a, 0x6f, 0x6c), &"mud": Color8(0x55, 0x4e, 0x44), &"mud_wet": Color8(0x40, 0x3b, 0x34),
-	# The Street's (ST1): raspberry brick (off Beta's high-contrast orange's hue), and the terraces' pastel renders (seafoam, lilac, butter, sage).
+	# Town colours (ST1): raspberry brick (off Beta's high-contrast orange's hue), and pastel renders (seafoam, lilac,
+	# butter, sage).
 	&"brick": Color8(0xa3, 0x4a, 0x6a), &"seafoam": Color8(0x7f, 0xb8, 0xad), &"lilac": Color8(0xb9, 0xa8, 0xd6),
 	&"butter": Color8(0xe6, 0xd4, 0x78), &"sage": Color8(0xa9, 0xc4, 0x8e),
 }
@@ -154,7 +167,8 @@ func globals() -> Dictionary[StringName, Variant]:
 	return {
 		GLOBAL_SHADE: shade.srgb_to_linear(), GLOBAL_BAND: band, GLOBAL_BAND_SOFT: band_soft, GLOBAL_MID_BAND: mid_band,
 		GLOBAL_RIM: rim.srgb_to_linear(), GLOBAL_RIM_POWER: rim_power, GLOBAL_SPEC: spec,
-		GLOBAL_PAINT_SATURATION: paint_saturation,
+		GLOBAL_PAINT_SATURATION: paint_saturation, GLOBAL_WEAR: wear, GLOBAL_GRIME: grime.srgb_to_linear(),
+		GLOBAL_DUST: dust.srgb_to_linear(),
 	}
 
 

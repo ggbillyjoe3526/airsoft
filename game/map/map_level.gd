@@ -626,7 +626,7 @@ func _level_ray(ray_name: String) -> RayCast3D:
 	return ray
 
 
-## The see-through blocks (MapStyle.clear_kinds: The Street's glass, ST1) as one mesh, each in its colour at its kind's
+## The see-through blocks (MapStyle.clear_kinds: window glass, ST1) as one mesh, each in its colour at its kind's
 ## opacity; null on a map with none. They stay out of the greybox (a bake still draws them solid: no baked map has
 ## glass).
 static func _glass_mesh(m: MapData, style: MapStyle) -> ArrayMesh:

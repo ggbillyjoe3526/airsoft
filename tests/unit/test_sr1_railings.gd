@@ -1,8 +1,8 @@
 extends GutTest
-## SR1 · The Street's metal railings are bars you can see and shoot through: a BB meets only the bars and rails its
+## SR1 · Metal railings are bars you can see and shoot through: a BB meets only the bars and rails its
 ## path crosses (Railings, WorldQuery.bb_ray, BBStep) and flies on through the gaps; sight and a bot's shot pass the
 ## railing's box (sight_ray, ray_past_railings), so it is no cover; movers and the level ray still meet the box. On
-## BoxWorld, on a built MapLevel's Jolt colliders, and on The Street, whose bars are drawn from the same numbers.
+## BoxWorld and on a built MapLevel's Jolt colliders, whose bars are drawn from the same numbers.
 
 const DT := 1.0 / 60.0
 const KILL_Y := -10.0
@@ -276,28 +276,3 @@ func test_a_bot_sees_and_shoots_through_a_railing_and_it_is_no_cover() -> void:
 	assert_false(BotCover.hides_from(Vector3(2.0, 0.0, 0.0), threat, w), "behind the railing you are still seen")
 	assert_true(BotCover.hides_from(Vector3(-2.0, 0.0, 0.0), Vector3(-10.0, threat.y, 0.0), w),
 			"behind the same box solid you are hidden")
-
-
-func test_every_railing_on_the_street_is_bars_and_its_garden_fences_stay_solid() -> void:
-	var map := MapData.load_map("street", play.map_style, 5)
-	var level := MapLevel.new()
-	add_child_autofree(level)
-	level.build(map, play.map_style, tuning.body)
-	var q := level.query()
-	var railings := 0
-	var fence: MapData.Block = null
-	for b in map.blocks:
-		if b.kind == &"railing":
-			railings += 1
-		elif b.kind == &"fence" and b.size.y > tuning.body.height and fence == null:
-			fence = b
-	assert_gt(railings, 0)
-	assert_eq(q.railings.size(), railings, "every railing a run of bars")
-	assert_not_null(level.get_node_or_null(^"Railings"), "drawn as bars")
-	assert_not_null(fence, "a 6 ft garden fence")
-	if fence != null:
-		var thin := Vector3(1.0, 0.0, 0.0) if fence.size.x < fence.size.z else Vector3(0.0, 0.0, 1.0)
-		var at := fence.center
-		var hit := RayHit.new()
-		assert_true(q.sight_ray(at - thin, at + thin, hit), "the wooden fence still hides (owner, 2026-11-01)")
-		assert_true(q.bb_ray(at - thin, at + thin, hit), "and stops BBs")

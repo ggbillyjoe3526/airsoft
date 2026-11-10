@@ -39,10 +39,11 @@ PICTURES = ARGS[1] if len(ARGS) > 1 else ""
 LEAF_BUDGET = 500
 FRAME_BUDGET = 175  # with a head; Depot's, without one, is 132
 # Leaves by the maps' openings, each a 2-leaf door's half (DoorView picks the nearest in shape and scales it the rest):
-# Depot's 2.0 x 2.6 m, Woodland's huts' about 1.6 x 2.5, The Street's 0.9 x 2.1.
+# Depot's 2.0 x 2.6 m, Woodland's huts' about 1.6 x 2.5, a narrow house door 0.9 x 2.1 (The Street's, kept when it
+# went, 2026-11-09).
 LEAVES = {"door_leaf": (0.97, 2.6), "door_leaf_mid": (0.78, 2.5), "door_leaf_narrow": (0.43, 2.1)}
 # Frames by the same openings (width, height, a head over the opening): Depot's openings run up to the walls' cap, so
-# no head; the huts' and The Street's have wall above them. DoorView.FRAMES keeps these sizes.
+# no head; the huts' and a house door have wall above them. DoorView.FRAMES keeps these sizes.
 FRAMES = {"door_frame": (2.0, 2.6, False), "door_frame_mid": (1.6, 2.5, True), "door_frame_narrow": (0.9, 2.1, True)}
 THICK = 0.08
 # His photo's two panels, as shares of the leaf: the top, mid and bottom rails' heights and the mid rail's middle of

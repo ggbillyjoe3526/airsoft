@@ -160,6 +160,36 @@ func test_a_palette_name_it_lacks_warns_and_shows_magenta() -> void:
 	assert_eq(look.colour(&"no such colour"), Color.MAGENTA)
 
 
+## SL3: Depot's roof is galvanised steel under a pale grey liner, not the Dev 2 look's crimson and violet: its config's
+## colours are greys, and almost all of the bay model's surface is painted grey (the red sprinkler mains and the
+## yellow heads are the only paint accents).
+func test_depots_roof_is_galvanised_grey() -> void:
+	var roof := PlayTuning.load_default().roof
+	assert_lt(roof.truss_colour.s, 0.15, "the trusses' fallback colour is a grey")
+	assert_lt(roof.ceiling_colour.s, 0.15, "the ceiling's is a grey")
+	var mesh := PropDressConfig.load_mesh(roof.bay_model)
+	assert_not_null(mesh, "the roof bay model loads")
+	if mesh == null:
+		return
+	var area := 0.0
+	var grey := 0.0
+	for surface: int in mesh.get_surface_count():
+		var arrays := mesh.surface_get_arrays(surface)
+		var verts := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+		var colours := arrays[Mesh.ARRAY_COLOR] as PackedColorArray
+		var index := arrays[Mesh.ARRAY_INDEX] as PackedInt32Array
+		assert_eq(colours.size(), verts.size(), "the bay is painted in vertex colours")
+		if colours.size() != verts.size():
+			return
+		for t: int in range(0, index.size(), 3):
+			var a := verts[index[t]]
+			var size := (verts[index[t + 1]] - a).cross(verts[index[t + 2]] - a).length() * 0.5
+			area += size
+			if colours[index[t]].linear_to_srgb().s < 0.2:
+				grey += size
+	assert_gt(grey / area, 0.9, "%.0f%% of the roof bay is grey" % (100.0 * grey / area))
+
+
 func test_the_shared_materials_draw_in_the_shared_light() -> void:
 	var m := LookMaterials.vertex_colour(0.4, 0.2)
 	assert_eq(m.shader, LookMaterials.VERTEX_SHADER)
@@ -177,6 +207,21 @@ func test_the_shared_materials_draw_in_the_shared_light() -> void:
 		assert_true(code.contains("ALBEDO = look_paint("), "%s draws its paint through look_paint" % path)
 	assert_almost_eq(m.get_shader_parameter(&"roughness") as float, 0.4, 0.0001)
 	assert_almost_eq(m.get_shader_parameter(&"metallic") as float, 0.2, 0.0001)
+
+
+## SL2: the models' wear is in the shared vertex-colour shader, off unless a material asks for it, and scaled by the
+## look's wear, its grime darker than its dust.
+func test_a_model_is_worn_only_when_its_material_asks() -> void:
+	assert_almost_eq(LookMaterials.vertex_colour(0.4, 0.0).get_shader_parameter(&"wear") as float, 0.0, 0.0001,
+			"clean by default: the greybox, bushes, woods and flags")
+	var worn := LookMaterials.vertex_colour(0.4, 0.0, Color.WHITE, false, 0.7)
+	assert_almost_eq(worn.get_shader_parameter(&"wear") as float, 0.7, 0.0001)
+	var code := LookMaterials.VERTEX_SHADER.code
+	for global: String in ["look_wear", "look_grime", "look_dust"]:
+		assert_true(code.contains("global uniform") and code.contains(global), "the shader reads %s" % global)
+	assert_true(code.contains("wear * look_wear"), "a material's wear scaled by the look's")
+	assert_gt(look.wear, 0.0, "the look wears its models")
+	assert_lt(look.grime.get_luminance(), look.dust.get_luminance(), "grime is darker than dust")
 
 
 func test_the_presets_scale_the_effects_and_low_draws_none() -> void:
@@ -317,7 +362,7 @@ func _depot() -> MapData:
 
 func test_grass_is_its_own_palette_colour_and_not_a_team_hue() -> void:
 	assert_true(look.palette.has(&"grass"), "the palette has grass")
-	assert_ne(look.colour(&"grass"), look.colour(&"meadow"), "meadow keeps The Street's floors")
+	assert_ne(look.colour(&"grass"), look.colour(&"meadow"), "meadow keeps its own colour")
 	var teams := AccessibilityTable.read_file().colours
 	teams.append_array(PlayTuning.load_default().teams.colours)
 	assert_false(FieldChecks.reads_as_team(look.colour(&"grass"), teams), "grass is off every team's hue")

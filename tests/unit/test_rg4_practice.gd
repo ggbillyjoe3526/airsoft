@@ -60,7 +60,7 @@ func test_the_range_is_listed_beside_the_fields_and_hosts_only_practice() -> voi
 	var ids := PackedStringArray()
 	for e in catalog.listed(false):
 		ids.append(e.id)
-	assert_eq(ids, PackedStringArray(["depot", "woodland", "range"]), "every public map; The Street is dev (2026-11-05)")
+	assert_eq(ids, PackedStringArray(["depot", "woodland", "range"]), "every map")
 	var range_entry := catalog.find("range")
 	assert_eq(MatchOptions.modes_offered(range_entry), PackedStringArray(["practice"]))
 	assert_eq(MatchOptions.only_tag_key("elimination", range_entry), MatchOptions.FIELDS_ONLY_KEY)

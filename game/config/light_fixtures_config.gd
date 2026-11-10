@@ -3,7 +3,7 @@ extends Resource
 ## What a field's lights stand on or hang from (WG4: Woodland's campfires and hurricane lanterns, from the owner's
 ## photos; tools/blender/maps/campfire.py and lantern.py), drawn by LightFixtures. Look only: no collider.
 
-## The maps whose lights get fixtures (The Street's lanterns are its own lamps).
+## The maps whose lights get fixtures (on the others a light has none).
 @export var map_ids: PackedStringArray = PackedStringArray(["woodland"])
 ## Each light kind's model: a campfire stood on the ground under a fire, a lantern at a lantern's light.
 @export var kind_models: Dictionary[StringName, String] = {

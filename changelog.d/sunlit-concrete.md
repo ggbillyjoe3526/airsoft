@@ -6,4 +6,3 @@
 - Concrete and plywood show their grain and light wear.
 - Woodland's grass is a darker, natural green.
 - Team blue and orange stay the strongest colours.
-- Depot's roof keeps its old colours for now.

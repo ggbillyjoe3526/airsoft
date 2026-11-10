@@ -36,6 +36,9 @@ DEV_PAGES = {"Roadmap", "Development"}
 EXTRA_DEV_TERMS = ["dev content"]
 # Named nowhere, not even as dev content: robots are a hidden Dev-only Easter egg (DECISIONS, owner 2026-10-24).
 HIDDEN_RE = re.compile(r"robot", re.I)
+# Named nowhere either: The Street was only ever dev content and the owner removed it from the game (2026-11-09), so
+# its old changelog notes stay out of the Patch Notes and no page names it.
+GONE_RE = re.compile(r"\bThe Street\b")
 # Key-binding actions that belong to a pool item: listed only while the item is public.
 ACTION_ITEMS = {"torch": "Weapon Torch"}
 MARKER_RE = re.compile(r"^<!-- wiki:([a-z-]+)(?: ([A-Za-z0-9_.-]+))? -->$")
@@ -727,9 +730,9 @@ def render_notes(text: str, terms: list) -> str:
     public, dev = [], []
     merged: dict = {}
     for title, bullets in note_blocks(text):
-        if title.lower() == "internal" or HIDDEN_RE.search(title):
+        if title.lower() == "internal" or HIDDEN_RE.search(title) or GONE_RE.search(title):
             continue
-        bullets = [b for b in bullets if not HIDDEN_RE.search(b)]
+        bullets = [b for b in bullets if not HIDDEN_RE.search(b) and not GONE_RE.search(b)]
         whole_dev = mentions(title, terms)
         clean = re.sub(r"\s*\(dev content\)\s*$", "", title, flags=re.I)
         pub = [] if whole_dev else [b for b in bullets if not mentions(b, terms)]
@@ -889,6 +892,8 @@ def check_built(built: Path) -> int:
     for name, text in pages.items():
         if HIDDEN_RE.search(text):
             error(name, "names the hidden Easter egg (robots). It stays out of the wiki (docs/DECISIONS.md).")
+        if GONE_RE.search(text):
+            error(name, "names The Street, removed from the game (owner, 2026-11-09). It stays out of the wiki.")
         if name in DEV_PAGES:
             continue
         rest = norm(without_dev_sections(text))

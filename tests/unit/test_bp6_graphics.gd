@@ -213,7 +213,7 @@ func test_the_merged_paint_is_the_parts_paint() -> void:
 func test_an_open_leaf_stops_short_of_a_wall_across_its_fold_and_every_other_folds_flat() -> void:
 	var play := PlayTuning.load_default()
 	var sim := SimTuning.load_default()
-	for id: String in ["depot", "woodland", "street"]:
+	for id: String in ["depot", "woodland"]:
 		var map := MapData.load_map(id, play.map_style, sim.rounds.team_size)
 		var view := DoorView.build(map, play.map_style, sim.doors.swing_time)
 		if view == null:

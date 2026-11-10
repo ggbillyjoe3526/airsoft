@@ -16,17 +16,17 @@ colours, with the finished models coming later ([Roadmap](Roadmap)).
 **An indoor airsoft hall**, 108 by 72 metres under one roof, in 6v6 (5v5 to 8v8 under Custom). Alpha starts at the east
 end and Beta in the west in Elimination, and the teams swap ends at half time.
 
-![Depot's hall under its crimson roof trusses and hanging lamps](images/depot-chrono-hall.jpg)
+![Depot's hall under its grey roof trusses and hanging lamps](images/depot-chrono-hall.jpg)
 
 - **Three lanes** wind from end to end between plywood rooms and racking you can't enter: the **Shoot House** and
   the dim **Lounge** to the north, the open **Chrono hall** in the middle, the **Huts** and the **Box yard** to the
   south. No lane runs straight; each bends round the dead space.
 - **Links** join the lanes: open cuts and galleries, two tight alleys, and two **tunnels**, one in each half. The
   tunnels are unlit and bend twice: dark, but never pitch black.
-- **The building:** blockwork walls under cladding, with crimson steel columns, roller shutters and fire exits;
+- **The building:** blockwork walls under cladding, with galvanised steel columns, roller shutters and fire exits;
   steel pillars with hazard bands; scaffold walls hung with camouflage netting; a polished concrete floor.
-- **The roof:** crimson trusses, purlins and rooflights, a sprinkler main and cable trays, with rows of high-bay lamps
-  hanging on cables. A BB fired up stops at the roof.
+- **The roof:** galvanised steel trusses, purlins and rooflights under a pale grey liner, red sprinkler mains and cable
+  trays, with rows of high-bay lamps hanging on cables. A BB fired up stops at the roof.
 - **It sounds like a big empty hall:** a quiet hum of the building, with the odd creak from the roof.
 - **No full auto indoors:** as at a real indoor site, every replica that can fire full auto starts each round on
   single shots here, bots' too. Press **B** to switch to auto during the round if you want it. Bots switch only now
@@ -43,7 +43,8 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
 - **Attack / Defend** puts two flagpoles at the defenders' end, **A** on A site and **B** on B site; the attackers
   raise either ([Modes](Modes#attack--defend)).
 - **The look:** a real warehouse in daylight: concrete and plywood with their grain, weathered paint in muted
-  crimson, violet, yellow, teal, green and cream, so the team colours stay the loudest.
+  crimson, violet, yellow, teal, green and cream, so the team colours stay the loudest. Walls, crates and containers
+  are worn: grime at their feet, streaks down their sides, dust on top.
 - **Props:** the hall's racking, drums, barrels, sofa, desks and lockers are the game's own models: navy and yellow
   pallet racking stocked three different ways (cartons, sacks, wrapped loads, drums, some slots empty) and mixed along
   every rack, violet steel drums stacked two

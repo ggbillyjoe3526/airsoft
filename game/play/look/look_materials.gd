@@ -9,15 +9,16 @@ const CLEAR_SHADER := preload("res://game/play/look/look_clear.gdshader")
 
 ## A material drawing a model's vertex colours in the shared light, `roughness` and `metallic` over all of it. With
 ## `srgb`, the colours are sRGB (a mesh built in code with SurfaceTool or a MultiMesh's instance colours), not linear
-## (a glTF's).
+## (a glTF's). `wear` is how worn it is drawn (SL2: grime, streaks, stains, dust; 0 clean), times LookConfig.wear.
 static func vertex_colour(roughness: float, metallic: float, tint: Color = Color.WHITE,
-		srgb: bool = false) -> ShaderMaterial:
+		srgb: bool = false, wear: float = 0.0) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = VERTEX_SHADER
 	m.set_shader_parameter(&"roughness", roughness)
 	m.set_shader_parameter(&"metallic", metallic)
 	m.set_shader_parameter(&"tint", tint)
 	m.set_shader_parameter(&"srgb_colours", srgb)
+	m.set_shader_parameter(&"wear", wear)
 	return m
 
 

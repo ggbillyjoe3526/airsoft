@@ -23,9 +23,9 @@ sets the **colour, light and materials, not what may appear** (owner, 2026-10-31
 - **Still true:** toy replicas and no gore (BBs leave dust, never marks or blood); airsoft, not military.
 
 The Dev 2 look (Valorant's forms with Breath of the Wild's light, clean vibrant paint) is history: `docs/DECISIONS.md`.
-Built in steps: SL1 the light, grade and paint; SL2 material wear in the shared shaders; SL3 the models repainted
-(Depot's trusses and roof); SL4 players, replicas and UI. Until SL2 and SL3 land, some sections below still describe
-the clean Dev 2 surfaces.
+Built in steps: SL1 the light, grade and paint; SL2 material wear in the shared shaders; SL3 Depot's roof and hall
+frames repainted (galvanised grey steel, a pale grey liner, red sprinkler mains) and the map pictures rendered again;
+SL4 players, replicas and UI.
 
 ## The field kit
 
@@ -93,7 +93,7 @@ The look's palette is `LookConfig.palette` (`game/config/look_config.gd`, in `pl
 
 | Name | Hex | Use |
 |---|---|---|
-| crimson | `#c23874` | site colour: containers, barrels, trusses |
+| crimson | `#c23874` | site colour: containers, barrels, exit doors, sprinkler mains |
 | violet | `#7658aa` | site colour: containers, wall bands, the sofa |
 | yellow | `#e4ca46` | site colour, and all safety paint (lines, hazard stripes, pillars, cones) |
 | teal | `#2a9c90` | site colour: containers, drums, inner wall bands |
@@ -109,8 +109,8 @@ The look's palette is `LookConfig.palette` (`game/config/look_config.gd`, in `pl
 | slab | `#7c7670` | Depot's hall floor, darker than `floor` so the cover stands off it |
 | sand, pebble, stone | `#b9ae98`, `#a09a92`, `#8c8478` | open ground, gravel, gabion stone |
 | plaster | `#ece2cf` | outer walls |
-| grey | `#8c8a96` | ramps, pallets, IBC frames, the barrels' lids |
-| ceiling | `#524a72` | a roof's underside |
+| grey | `#8c8a96` | ramps, pallets, IBC frames, the barrels' lids, Depot's trusses and hall frames (galvanised) |
+| ceiling | `#524a72` | the Dev 2 roof's underside (Depot's liner is concrete since SL3) |
 | umber, moss | `#61594f`, `#b3b891` | the gaps between slats, the sofa's feet; grass on open ground |
 | bark, heartwood | `#7b6f62`, `#e4dccd` | Woodland's trunks and their cut ends (WA1) |
 | canopy, fern, olive | `#5c9a50`, `#79a650`, `#8c9a48` | Woodland's crowns and bushes; olive the logs' moss |
@@ -148,7 +148,13 @@ metalness; the light does the rest.
   highlight".
 - **Grit is real (SL1).** `SiteLook.grit` (0.6) scales the stains, chips, rust feet, grime bands and the plywood's
   photo grain on the map's own surfaces; the floor's slab set, Depot's floated concrete, draws at full grain
-  (`SiteLook.slab_grain` 1). The models get their wear in SL2.
+  (`SiteLook.slab_grain` 1).
+- **The models wear too (SL2).** Every map model drawn in vertex colours (Depot's walls, crates, containers and
+  racking, Woodland's kit and trunks, the CC0 props) is worn in world space by `look_vertex.gdshader`: dark-earth grime
+  climbs up to 0.9 m from its foot, ragged; thin streaks run down its sides; broad faint stains; pale dust settles on
+  its tops. A material's `wear` (`PropDressConfig.wear` 1, `model_wear`: the racking 0.35, tree crowns and the earth bank 0) times the
+  look's (`LookConfig.wear`, `grime`, `dust`). The greybox, bushes, woods, skyline and flags draw clean. Edge scuffs are
+  the models' own paint (SL3).
 - **Marks that stay:** zone stencils in ink, joints, seams, screws, sheet panels, bay lines and hazard stripes in
   yellow and ink, the white chevron on containers.
 
@@ -296,8 +302,8 @@ Depot's temporary site dress (DD1, until the owner's models; Depot and the range
   lays them, one MultiMesh a model in one vertex-coloured material. Every prop stays inside its block's box; the box
   draws nothing (or, behind shelving, a dark backing half a row in: `SiteSurface.core_of`) and leaves the baked
   shadow caster. Depot's and the Range's models are our own, built in Blender by `tools/blender/maps/` (RK1); Woodland's
-  and The Street's are Kenney's, recoloured off the teams' hues by `tools/props/build_props.py`; all in
-  `assets/models/props/` (vertex colours, no textures).
+  smaller props are Kenney's (its trees are its own since WT1), recoloured off the teams' hues by
+  `tools/props/build_props.py`; all in `assets/models/props/` (vertex colours, no textures).
 
 The figures (step 23, FI1-FI7; every bot on every preset, DECISIONS BD1):
 

@@ -6,8 +6,7 @@ extends GutTest
 ## layout is seeded; a missing model leaves its kind a box; the props are in the prewarm. WR3: Woodland's blocks
 ## name their props (trees, spruces, logs, cordwood, crates, tyres, a truck) with no site dress, each inside its
 ## block; a grid lays a cell's prop a cell; a dressed block draws no box, a thicket only its dark core; a ramp keeps
-## its box. ST2: The Street's blocks name theirs (cars, vans, lorries, bins, a skip, lamps, trunks, the House's
-## settees, tables, units and fridge), each inside its block, bins two a block.
+## its box.
 
 ## How far (m) a tunnel section may reach over or under its box (WG4: half a step of its floor or its mound).
 const JOINT_SLACK := 0.2
@@ -297,8 +296,44 @@ func test_the_props_are_in_the_site_dress_and_its_prewarm() -> void:
 	assert_not_null(site.props())
 	for mat in site.props().materials():
 		assert_true(site.materials().has(mat), "warmed before play")
+	var shared := site.props().materials()[0]
 	for view in site.props().all_views():
-		assert_eq(view.material_override, site.props().materials()[0], "one material for every prop")
+		assert_true(site.props().materials().has(view.material_override), "a material it warms")
+	for model: StringName in [&"hall_wall", &"crate", &"container", &"drum"]:
+		for view in site.props().views_of(model):
+			assert_eq(view.material_override, shared, "%s shares the props' one material" % model)
+
+
+## SL2: the props are worn at PropDressConfig.wear in the one material, the racking's goods lightly, and the trees'
+## crowns not at all (leaves gather no grime), each its own material.
+func test_the_props_are_worn_as_their_config_says() -> void:
+	var cfg := look.props
+	assert_gt(cfg.wear, 0.0, "the props are worn")
+	var depot := _dress(_map("depot"))
+	assert_almost_eq(_wear_of(depot, &"hall_wall"), cfg.wear, 0.0001, "the hall's walls at the props' wear")
+	assert_almost_eq(_wear_of(depot, &"shelf"), cfg.model_wear[&"shelf"], 0.0001, "the racking lightly")
+	assert_lt(cfg.model_wear[&"shelf"], cfg.wear)
+	var woods := _dress(_map("woodland"))
+	assert_almost_eq(_wear_of(woods, &"oak_crown"), 0.0, 0.0001, "an oak's crown is clean")
+	assert_almost_eq(_wear_of(woods, &"oak"), cfg.wear, 0.0001, "its trunk is worn")
+	assert_ne(woods.views_of(&"oak")[0].material_override, woods.views_of(&"oak_crown")[0].material_override)
+	# a foot's grime climbs from each model's floor, its box's bottom, wherever its origin is (QA: a trunk's and a
+	# tyre's origins are up to 0.36 m over their feet)
+	for dress: PropDress in [depot, woods]:
+		for model: StringName in dress.placed():
+			var floor_y := dress.mesh_of(model).get_aabb().position.y
+			for view in dress.views_of(model):
+				assert_almost_eq(view.get_instance_shader_parameter(&"wear_floor") as float, floor_y, 0.0001,
+						"%s's grime from its floor" % model)
+
+
+## The wear of model `model`'s first view's material in `dress` (fails when it isn't drawn).
+func _wear_of(dress: PropDress, model: StringName) -> float:
+	var views := dress.views_of(model)
+	assert_false(views.is_empty(), "%s is drawn" % model)
+	if views.is_empty():
+		return -1.0
+	return (views[0].material_override as ShaderMaterial).get_shader_parameter(&"wear") as float
 
 
 func test_woodland_is_dressed_without_a_site_each_prop_inside_the_block_that_names_it() -> void:
@@ -339,27 +374,6 @@ func test_woodland_is_dressed_without_a_site_each_prop_inside_the_block_that_nam
 	assert_eq(named.get(&"trunk", 0), 0, "no Woodland tree is the old trunk")
 	assert_gt(trunks, 400)
 	assert_eq(dress.count(&"pickup"), 1)
-	assert_eq(_outside(m, dress), [] as Array[String], "no prop reaches past its block's box")
-
-
-func test_the_street_is_dressed_each_prop_inside_the_block_that_names_it() -> void:
-	var m := _map("street")
-	var dress := _dress(m)
-	assert_not_null(dress, "The Street has CC0 props")
-	if dress == null:
-		return
-	var named: Dictionary[StringName, int] = {}
-	for b in m.blocks:
-		if b.dress != &"":
-			assert_true(look.props.dresses(b), "%s's %s has its model" % [b.kind, b.dress])
-			named[b.dress] = named.get(b.dress, 0) + 1
-	for model: StringName in [&"car_crimson", &"car_lilac", &"van_cream", &"lorry_teal", &"bin_green", &"skip", &"lamp",
-			&"trunk", &"settee", &"table", &"units", &"fridge"]:
-		assert_gt(named.get(model, 0), 0, "a block names %s" % model)
-		assert_gt(dress.count(model), 0, "%s placed" % model)
-	assert_eq(dress.count(&"car_crimson"), named[&"car_crimson"], "one car a car's block")
-	assert_eq(dress.count(&"lamp"), named[&"lamp"], "one lamp a lamp post")
-	assert_eq(dress.count(&"bin_green"), 2 * named[&"bin_green"], "two bins a bin block")
 	assert_eq(_outside(m, dress), [] as Array[String], "no prop reaches past its block's box")
 
 

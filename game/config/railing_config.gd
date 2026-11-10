@@ -1,6 +1,6 @@
 class_name RailingConfig
 extends Resource
-## What a bar railing is made of (SR1; The Street's waist-high metal railings, MapStyle.railing_kinds): upright bars
+## What a bar railing is made of (SR1; waist-high metal railings, MapStyle.railing_kinds): upright bars
 ## between a rail along the top and one near the foot, all in the railing block's box. Bars and rails stop a BB
 ## (Railings.first_bar); the gaps between them let it fly on, and let anyone see through. The same numbers draw the
 ## bars (MapLevel), so what you see is what stops a BB. Read by game/sim/railings.gd.
