@@ -25,7 +25,7 @@ func _level(m: MapData, station: StationLook) -> MapLevel:
 	var level := MapLevel.new()
 	add_child_autofree(level)
 	level.build(m, play.map_style, tuning.body, play.baked_light, LightingConfig.for_map(play.lighting, null, m,
-			LightingConfig.DAY), false, play.site_look, station)
+			LightingConfig.DAY), false, play.site_look, tuning.lifts, station)
 	return level
 
 
@@ -246,7 +246,7 @@ func test_a_look_whose_arrays_are_missing_draws_the_greybox() -> void:
 	var level := MapLevel.new()
 	add_child_autofree(level)
 	level.build(_map("kingsmere"), play.map_style, tuning.body, play.baked_light, LightingConfig.for_map(play.lighting,
-			null, _map("kingsmere"), LightingConfig.DAY), false, play.site_look, bad)
+			null, _map("kingsmere"), LightingConfig.DAY), false, play.site_look, tuning.lifts, bad)
 	assert_null(level.station_material(), "no material")
 	assert_null(level.get_node_or_null("Station"), "no station mesh")
 	assert_not_null(level.get_node_or_null("Greybox"), "the greybox instead")
@@ -269,7 +269,7 @@ func test_freeing_a_station_level_leaves_no_orphans() -> void:
 	var level := MapLevel.new()
 	add_child(level)
 	level.build(_map("kingsmere"), play.map_style, tuning.body, play.baked_light, LightingConfig.for_map(play.lighting,
-			null, _map("kingsmere"), LightingConfig.DAY), false, play.site_look, look)
+			null, _map("kingsmere"), LightingConfig.DAY), false, play.site_look, tuning.lifts, look)
 	remove_child(level)
 	level.free()
 	await wait_physics_frames(2)

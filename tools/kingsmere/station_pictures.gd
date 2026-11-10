@@ -23,6 +23,7 @@ const SHOTS: Array[Array] = [
 	["south-track", Vector3(-28.0, 1.7, 10.0), Vector3(-6.0, 0.4, 10.75)],
 	["north-train-inside", Vector3(-42.0, 2.6, -10.75), Vector3(-30.0, 2.0, -10.75)],
 	["lower-hall", Vector3(11.0, 2.6, 2.0), Vector3(21.0, 1.6, -2.0)],
+	["lifts-ticket-hall", Vector3(-43.5, 20.6, -6.0), Vector3(-43.5, 19.9, -0.9)],
 ]
 
 
