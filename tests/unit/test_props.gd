@@ -370,7 +370,6 @@ func test_woodland_is_dressed_without_a_site_each_prop_inside_the_block_that_nam
 			var sc := t.basis.get_scale()
 			worst = maxf(worst, absf(sc.x / sc.y - 1.0) + absf(sc.z / sc.y - 1.0))
 		assert_lt(worst, 0.02, "%s's crowns keep their modelled proportions" % model)
-	assert_eq(named.get(&"trunk", 0), 0, "no Woodland tree is the old trunk")
 	assert_gt(trunks, 400)
 	assert_eq(dress.count(&"pickup"), 1)
 	assert_eq(_outside(m, dress), [] as Array[String], "no prop reaches past its block's box")

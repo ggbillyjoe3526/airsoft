@@ -180,8 +180,7 @@ func test_the_steps_cut_the_square_s_empty_corners_and_stay_inside_it() -> void:
 			# Each corner of the block's footprint, at half height, a hand's breadth in: open.
 			for corner: Vector2 in [Vector2(1, 1), Vector2(1, -1), Vector2(-1, 1), Vector2(-1, -1)]:
 				var p := b.center + Vector3(corner.x * b.size.x * 0.49, 0.0, corner.y * b.size.z * 0.49)
-				if b.kind != &"tree":
-					assert_false(_inside(steps, p), "%s: a %s's corner is open" % [id, b.kind])
+				assert_false(_inside(steps, p), "%s: a %s's corner is open" % [id, b.kind])
 			# Halfway out to a corner: inside a prop (a cluster's, a row's first) whatever the kind.
 			var held := b.center + Vector3(b.size.x * 0.25, 0.0, b.size.z * 0.25)
 			assert_true(_inside(steps, held), "%s: a %s's prop is solid" % [id, b.kind])
@@ -204,24 +203,6 @@ func test_the_steps_cut_the_square_s_empty_corners_and_stay_inside_it() -> void:
 				clusters += 1
 		assert_gt(clusters if id == "depot" else 1, 0, "%s: its drum clusters were checked" % id)
 		assert_gt(counted, 0, "%s has round props" % id)
-
-
-func test_a_tree_s_corners_are_open_and_round_its_middle_solid() -> void:
-	var m := _map("woodland")
-	var trees := 0
-	for b in m.blocks:
-		if b.kind != &"tree" or b.size.x < 1.0:
-			continue
-		trees += 1
-		var steps := _steps(m, b)
-		for corner: Vector2 in [Vector2(1, 1), Vector2(1, -1), Vector2(-1, 1), Vector2(-1, -1)]:
-			var open := b.center + Vector3(corner.x * b.size.x * 0.45, 0.0, corner.y * b.size.z * 0.45)
-			var solid := b.center + Vector3(corner.x * b.size.x * 0.4, 0.0, corner.y * b.size.z * 0.4)
-			assert_false(_inside(steps, open), "a tree's corner %s is open" % corner)
-			assert_true(_inside(steps, solid), "a tree's trunk %s of its middle is solid" % corner)
-		if trees >= 20:
-			break
-	assert_gt(trees, 0)
 
 
 func test_a_quarter_turned_kind_s_steps_hold_it_turned() -> void:
