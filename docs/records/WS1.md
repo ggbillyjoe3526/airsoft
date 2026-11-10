@@ -1,6 +1,6 @@
 # WS1 · Woodland's stream, varied trees and deeper log stacks
 
-**Review:** 8 attempts · critic Accept ?/8 · qa Pass · performance Pass
+**Review:** 8 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 The owner (2026-11-10): "Would it be possible to add a river stream through the Woodland map where the dried river
 bed is? It could push players to cross the bridge as going through in foot would create noise (from splashes) and slow
@@ -28,11 +28,11 @@ them."
   made level its whole length (`tools/woodland/layout.py` `BED_Y`, the old floor's lowest), 0.08 m over the Ford's
   gravel bar. The old bed rose about 4 m to a hump under the North bridge (the Ridge's shoulder); it is cut down, the
   ground beside it falling into the stream in a walkable valley (0.6 at most), the bridge 4.5 m lower with its model
-  rebuilt (`footbridge.py`); route times across the lanes (analyze.py) are unchanged. The simulation reads it
-  through `WorldQuery.water` (`Water`, `game/sim/water.gd`): `Character.in_water` at `MovementConfig.wade_depth`
-  (0.15 m) slows a character to `wade_speed_scale` 0.6, Footsteps send every wading stride as a run on the new WATER
-  surface (`NoiseConfig.ground` 1.5; a walk or a crouch at `wade_quiet_carry` 0.9), and a BB stops where its path goes under
-  the surface with a WATER impact. The nav grid prices points in it (`NavConfig.wade_cost` 8, `splash_cost` 1.5).
+  rebuilt (`footbridge.py`); route times across the lanes (analyze.py) are unchanged. The simulation reads it through
+  `WorldQuery.water` (`Water`, `game/sim/water.gd`): `Character.in_water` at `MovementConfig.wade_depth` (0.15 m) slows
+  a character to `wade_speed_scale` 0.6, Footsteps send every wading stride as a run on the new WATER surface
+  (`NoiseConfig.ground` 1.5; a walk or a crouch at `wade_quiet_carry` 0.9), and a BB stops where its path goes under the
+  surface with a WATER impact. The nav grid prices points in it (`NavConfig.wade_cost` 8, `splash_cost` 1.5).
   `WaterView` draws it (`look_water.gdshader`). Sounds: `tools/water_sounds.py`.
 - **Trees:** the far forest grows in clumps and glades with varied girth (`WoodsConfig.forest_clump`,
   `forest_clumping`, `forest_slim`, a wider `forest_height`); the treeline band mixes four sections (`far_tree.py`
@@ -40,18 +40,18 @@ them."
   height and shifted up to 0.9 m across (`SkylineConfig.treeline_variants`, `treeline_rise`, `treeline_shift`); the
   thickets' spruces are scattered inside their boxes at full height (`PropDressConfig.grid_scatter`). The
   wood's own trees (Poisson-disc already) are unchanged, so cover and sight lines are too.
-- **Log stacks:** every piece in `cordwood*.glb` is a solid end standing 0.3 to 5 cm proud (most 1.5 cm, near flush
-  as in the owner's photo), its face tilted up to 0.08 m a metre, its sides shown only where it stands 3.5 cm or more
-  out (`cordwood.py` `piece_end`). The pieces are stacked as by hand (`lay_face`): each in turn set where it rests
-  lowest on the ground or the pieces under it, a split piece tried point up, point down and now and then on its side,
-  so the wedges lock together, 5 mm apart; then smaller split pieces (0.28 to 0.7 of a row) are pushed into the holes left.
-  Each is whole and unstretched under the stack's ragged top, and no outline crosses another (asserted at build).
-  About 85 % are pie slices of their log (75 to 100 degrees, up to 14 degrees off square) with a rim of warm bark a
-  tenth of their radius inside the arc; 3 % small 16-sided rounds ringed in bark; a few four-sided pieces from the
-  heart. Most show no crack; some one to three thin drying cracks, each its own length and way. Each end is its own
-  warm colour from pale straw to tan, over a near-black core whose top follows each face's highest pieces, so the
-  ragged top is the logs' own, and runs whole across the joins between sections. The sides facing down below 1.6 m, never seen from eye height, are left out. 2,872 to
-  3,039 triangles of a new 3,200 budget per section.
+- **Log stacks:** every piece in `cordwood*.glb` is a solid end standing 0.3 to 5 cm proud (most 1.5 cm, near flush as
+  in the owner's photo), its face tilted up to 0.08 m a metre, its sides shown only where it stands 3.5 cm or more out
+  (`cordwood.py` `piece_end`). The pieces are stacked as by hand (`lay_face`): each in turn set where it rests lowest on
+  the ground or the pieces under it, a split piece tried point up, point down and now and then on its side, so the
+  wedges lock together, 5 mm apart; then smaller split pieces (0.28 to 0.7 of a row) are pushed into the holes left.
+  Each is whole and unstretched under the stack's ragged top, and no outline crosses another (asserted at build). About
+  85 % are pie slices of their log (75 to 100 degrees, up to 14 degrees off square) with a rim of warm bark a tenth of
+  their radius inside the arc; 3 % small 16-sided rounds ringed in bark; a few four-sided pieces from the heart. Most
+  show no crack; some one to three thin drying cracks, each its own length and way. Each end is its own warm colour from
+  pale straw to tan, over a near-black core whose top follows each face's highest pieces, so the ragged top is the logs'
+  own, and runs whole across the joins between sections. The sides facing down below 1.6 m, never seen from eye height,
+  are left out. 2,872 to 3,039 triangles of a new 3,200 budget per section.
 
 ## Decisions
 
