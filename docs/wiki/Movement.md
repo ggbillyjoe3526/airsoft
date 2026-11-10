@@ -28,6 +28,9 @@ Pushing through **bushes and ferns** slows you to three quarters of your speed, 
 sprinting through them rustles the leaves loudly enough to be heard further than on open ground. Walk or crouch through
 quietly ([Maps](Maps#woodland)). Bots are slowed and heard the same way.
 
+Wading through Woodland's **stream** slows you to 60% of your pace, and every stride splashes, at any pace: walking or
+crouching only softens it a little ([Maps](Maps#woodland)). Bots are slowed and heard the same way.
+
 ## Lean
 
 Hold **Q** or **E** to lean left or right round a corner. You slow to a walk while leaning. A lean that a wall cuts

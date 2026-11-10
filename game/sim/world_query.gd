@@ -18,6 +18,10 @@ var block_surfaces: PackedInt32Array = PackedInt32Array()
 ## a bot can't see far through. Empty unless whoever builds the level hands it the map's (MapLevel from MapData.foliage;
 ## tests through BoxWorld.add_bush).
 var foliage: Foliage = Foliage.new()
+## The level's shallow streams (WS1): no surface a ray meets or a mover is stopped by, only water a body wades and
+## splashes in and a BB lands in. Empty unless whoever builds the level hands it the map's (MapLevel from MapData.water;
+## tests through BoxWorld.add_stream).
+var water: Water = Water.new()
 ## The level's bar railings (SR1): solid boxes to `ray` and movers, but sight and BBs pass between their bars. Empty
 ## unless whoever builds the level adds the map's (MapLevel from its railing blocks; tests through BoxWorld.add_railing).
 var railings: Railings = Railings.new()

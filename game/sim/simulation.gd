@@ -184,6 +184,8 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		# In a bush (BP8): slower, and louder underfoot.
 		c.in_bush = query.foliage != null and query.foliage.holds(c.position + Vector3(0.0,
 				tuning.movement.bush_probe_height, 0.0))
+		# In a stream (WS1): slower, and splashing.
+		c.in_water = query.water != null and query.water.depth_at(c.position) >= tuning.movement.wade_depth
 		# A vault under way finishes even if its vaulter is hit meanwhile: nobody is left hanging over the obstacle.
 		if c.vault.active:
 			Vault.step(c, cmd, tuning, dt, mover)

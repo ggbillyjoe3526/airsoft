@@ -172,6 +172,8 @@ var _doors: DoorView = null
 var _lifts: LiftView = null
 ## A wood's crowns and dressing, or null on a map with neither (WoodsView, WL4).
 var _woods: WoodsView = null
+## The map's streams (WS1), or null on a map with none.
+var _water: WaterView = null
 ## The map's bushes, or null on a map with none (BushView, WL5).
 var _bushes: BushView = null
 ## The site dress's details, or null on a greybox map (SiteDress, DD1).
@@ -443,6 +445,9 @@ func _dress_part(part: int) -> void:
 			_bushes = BushView.build(_map, _play.woods)
 			if _bushes != null:
 				add_child(_bushes)
+			_water = WaterView.build(_map, _play.woods)
+			if _water != null:
+				add_child(_water)
 		5:
 			# What the tall solid blocks hide is left out of the frame with Occlusion culling on (GraphicsApply.apply).
 			_occluders = MapOccluders.build(_map, _play.map_style)
@@ -917,6 +922,8 @@ func _build_views(ui: CanvasLayer) -> void:
 		first_use.append_array(_woods.materials())
 	if _bushes != null:
 		first_use.append_array(_bushes.materials())
+	if _water != null:
+		first_use.append_array(_water.materials())
 	if _site != null:
 		first_use.append_array(_site.materials())
 	if _props != null:
@@ -2022,6 +2029,8 @@ func _apply_motion() -> void:
 		_fixtures.set_motion(motion)
 	if _woods != null:
 		_woods.set_motion(motion)
+	if _water != null:
+		_water.set_motion(motion)
 	if _overtime_flag != null:
 		_overtime_flag.rises = not settings.reduces_motion_now()
 	if _grenades != null:

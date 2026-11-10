@@ -22,7 +22,7 @@ const SURFACES: Dictionary[String, RayHit.Surface] = {
 	"concrete": RayHit.Surface.CONCRETE, "metal": RayHit.Surface.METAL, "wood": RayHit.Surface.WOOD,
 	"earth": RayHit.Surface.EARTH, "gravel": RayHit.Surface.GRAVEL, "grass": RayHit.Surface.GRASS,
 	"leaves": RayHit.Surface.LEAVES, "glass": RayHit.Surface.GLASS, "plastic": RayHit.Surface.PLASTIC,
-	"cardboard": RayHit.Surface.CARDBOARD,
+	"cardboard": RayHit.Surface.CARDBOARD, "water": RayHit.Surface.WATER,
 }
 
 
@@ -95,6 +95,9 @@ var terrain: TerrainGrid = null
 ## Its bushes (`foliage` in the file: upright ellipsoids of leaves on the ground, WL5): no collider and no nav cell, only
 ## leaves that hide and stop BBs (Foliage). Empty on a map with none.
 var foliage: Foliage = Foliage.new()
+## Its shallow streams (`water` in the file, WS1): no collider and no ray surface, only water to wade, splash in and
+## price a bot's route through (Water). Empty on a map with none.
+var water: Water = Water.new()
 ## The map's two ends (spawns and dead zones), end 0 first.
 var ends: Array[MapEnd] = []
 var kill_y: float = -10.0
@@ -244,6 +247,7 @@ static func parse(text: String, style: MapStyle, team_size: int) -> MapData:
 	m.bot_sight = maxf(0.0, _number(d.get("botSight"), 0.0))
 	m.pole_height = maxf(0.0, _number(d.get("poleHeight"), 0.0))
 	m._read_foliage(d.get("foliage"))
+	m._read_water(d.get("water"))
 	m.skyline = SkylinePiece.read(d.get("dressing"), m.warnings)
 	m._read_kicked_dust(d.get("dressing"))
 	m.site = SiteDressing.read(d.get("dressing"), m.warnings)
@@ -752,6 +756,33 @@ func _read_foliage(raw: Variant) -> void:
 			warnings.append("bush %s is not {x, y, z, radius over 0, height over 0}; left out" % JSON.stringify(item))
 			continue
 		foliage.add(_vec(d), radius, height)
+
+
+## `water`: each stream {points [{x, y (the water's surface there), z}, two or more], width over 0 (across, m)}; one
+## that isn't is left out.
+func _read_water(raw: Variant) -> void:
+	if raw == null:
+		return
+	if not raw is Array:
+		warnings.append("water is not a list of streams; none")
+		return
+	for item: Variant in raw:
+		var d: Dictionary = item if item is Dictionary else {}
+		var points := PackedVector3Array()
+		var listed: Variant = d.get("points")
+		if listed is Array:
+			for p: Variant in listed:
+				var pd: Dictionary = p if p is Dictionary else {}
+				var x := _number(pd.get("x"), NAN)
+				var y := _number(pd.get("y"), NAN)
+				var z := _number(pd.get("z"), NAN)
+				if is_nan(x + y + z):
+					points.clear()
+					break
+				points.append(Vector3(x, y, z))
+		if not water.add(points, _number(d.get("width"), 0.0) * 0.5):
+			warnings.append("stream %s is not {points [{x, y, z}, two or more], width over 0}; left out"
+					% JSON.stringify(item).left(80))
 
 
 static func _number(raw: Variant, otherwise: float) -> float:

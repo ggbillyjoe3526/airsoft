@@ -1341,6 +1341,23 @@ Dev content: tick Settings › Dev › Dev content (or Disable levelling), then 
 - [ ] **BBs.** Shoot into a thicket at chest height and at its edges: BBs stop in it as before, never fly through.
 - [ ] **Frame rate.** F3 on Low looking across a thicket: 60 FPS as before.
 
+## Woodland's stream, trees and log stacks (WS1)
+
+- [ ] **Wading.** Run down into the stream from a slide and along the bed: you slow to about 60% of your pace and
+  every stride splashes. Walk and crouch in it: still a splash, a little softer. Run over the Ford: it splashes but
+  you keep full pace. Out of the water you're at full pace at once.
+- [ ] **Heard.** Wade with bots hunting you: they hear you run through the water from about 16 m, against 11 m on
+  the bank.
+- [ ] **The bridge.** Watch bots cross the north lane: they take the North bridge, not the water beneath it; at the Ford
+  they splash straight over.
+- [ ] **BBs.** Shoot into the water: each BB splashes at the surface and stays there, no bounce.
+- [ ] **The look.** On Low and High: the water is a dark, muted blue and see-through, deeper-looking in the middle,
+  with ripples drifting downstream and no hard line where it meets the banks. Reduced motion holds the ripples still.
+- [ ] **Trees.** At each fence: the band of far spruces rises and falls in clumps with gaps, never an even row; the
+  thicket spruces stand at uneven spacing and heights.
+- [ ] **Log stacks.** Walk past the Woodpile and the Log stacks: the log ends stand out of the stack in depth.
+- [ ] **Frame rate.** F3 on Low looking along the stream from the North bridge: 60 FPS.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

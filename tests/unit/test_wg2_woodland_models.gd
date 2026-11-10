@@ -8,8 +8,8 @@ extends GutTest
 ## inside it; no moss lid floats over a log drawn as a model of its own (WoodsConfig.moss_dresses).
 
 const BUDGETS := {
-	&"fallen_log_5": 1500, &"fallen_log_6": 1500, &"fallen_log_8": 1500, &"root_plate": 4000, &"cordwood": 1200,
-	&"cordwood_b": 1200, &"cordwood_c": 1200, &"boards": 1500, &"sawbench": 2000, &"earth_bank": 340,
+	&"fallen_log_5": 1500, &"fallen_log_6": 1500, &"fallen_log_8": 1500, &"root_plate": 4000, &"cordwood": 2900,
+	&"cordwood_b": 2900, &"cordwood_c": 2900, &"boards": 1500, &"sawbench": 2000, &"earth_bank": 340,
 }
 const FOLIAGE_BUDGETS := {"fern_model": 400, "bush_model": 1500}
 const GROUNDED: Array[StringName] = [

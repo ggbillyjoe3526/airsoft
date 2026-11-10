@@ -175,16 +175,17 @@ static func _fit(mesh: Mesh, foot: Vector3, x_axis: Vector3, z_axis: Vector3, si
 ## A treeline's band (SkylineConfig.treeline_model): along each run of its points, whole sections end to end, each
 ## stretched to an even share of the run, as deep as the piece and as tall as it from `treeline_sink` m under the
 ## ground (as the cones are sunk, so none floats on lower ground), every other one mirrored, each a seeded one of
-## `treeline_colours` (the same every build), faded `treeline_fade` as far as the rest. None without the model: the cones stand.
+## `treeline_colours` (the same every build), faded `treeline_fade` as far as the rest. Each section a seeded one of
+## the model and its variants, a seeded share of the height tall (`treeline_rise`) and a seeded way off its line
+## (`treeline_shift`), so the band's top and front wander as a wood's do (WS1). None without the model: the cones stand.
 static func _band(p: SkylinePiece, cfg: SkylineConfig) -> Array[Placed]:
 	var out: Array[Placed] = []
-	var mesh := cfg.treeline_mesh()
-	if mesh == null:
+	var meshes := cfg.treeline_meshes()
+	if meshes.is_empty():
 		return out
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(p.points)
 	var depth := p.depth if p.depth > 0.0 else cfg.treeline_section.y
-	var up := (p.height + cfg.treeline_sink) / maxf(mesh.get_aabb().end.y, 1e-3)
 	var flip := 1.0
 	for i in p.points.size() - 1:
 		var a := p.points[i]
@@ -195,11 +196,15 @@ static func _band(p: SkylinePiece, cfg: SkylineConfig) -> Array[Placed]:
 		var across := along.cross(Vector3.UP)
 		var long := run.length() / n / cfg.treeline_section.x
 		for k in n:
+			var mesh := meshes[rng.randi() % meshes.size()]
+			var rise := rng.randf_range(cfg.treeline_rise.x, cfg.treeline_rise.y)
+			var up := (p.height * rise + cfg.treeline_sink) / maxf(mesh.get_aabb().end.y, 1e-3)
 			var at := a.lerp(b, (k + 0.5) / n)
+			var off := across * rng.randf_range(-cfg.treeline_shift, cfg.treeline_shift)
 			var one := Placed.new()
 			one.mesh = mesh
 			one.at = Transform3D(Basis(along * long * flip, Vector3.UP * up, across * depth / cfg.treeline_section.y),
-					Vector3(at.x, -cfg.treeline_sink, at.y))
+					Vector3(at.x + off.x, -cfg.treeline_sink, at.y + off.z))
 			one.body = p.colour_or(cfg.treeline_colours[rng.randi() % cfg.treeline_colours.size()])
 			one.haze = cfg.treeline_fade
 			one.keep = cfg.treeline_keep

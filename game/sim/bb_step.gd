@@ -39,7 +39,8 @@ static var _crossing: Foliage.Crossing = Foliage.Crossing.new()
 ## stopped on a body that isn't knocked out (already hit, a teammate with friendly fire off, anyone in a `cease_fire`)
 ## or on the level is a BB_IMPACT, and a bounce off the level is one too; one stopped in a bush's leaves (`query`'s
 ## foliage) is a BB_IMPACT with value IN_LEAVES (direction its unit path, reach the leaves it crossed), and one coming
-## out of a bush's edge a BB_LEAVES; one that falls below `kill_y` or outlives its lifetime is BB_LOST. On the practice range a BB also stops on the first of `targets` it reaches, nearer than any
+## out of a bush's edge a BB_LEAVES; one landing on a stream's bed (`query`'s water, WS1) a BB_IMPACT on WATER at the
+## water's surface over it, never bouncing; one that falls below `kill_y` or outlives its lifetime is BB_LOST. On the practice range a BB also stops on the first of `targets` it reaches, nearer than any
 ## body or the level, unless in a cease-fire: a TARGET_HIT (a figure goes down, RangeTargets.hit_target), or a
 ## BB_IMPACT on metal at a plate's post or a swinger's frame (a miss). `rng` (the match's stream) scatters bounces and
 ## times a pop-up's spell down.
@@ -51,6 +52,8 @@ static func step(pool: BBPool, characters: Array[Character], query: WorldQuery, 
 	var prepared := false
 	var foliage := query.foliage
 	var leafy := foliage != null and not foliage.is_empty()
+	var water := query.water
+	var wet := water != null and not water.is_empty()
 	for bb: BB in pool.bbs:
 		if not bb.active:
 			continue
@@ -108,9 +111,14 @@ static func step(pool: BBPool, characters: Array[Character], query: WorldQuery, 
 				impact.position = bb.position
 				impact.value2 = _ray_hit.surface
 				impact.direction = bb.velocity # how hard it landed, before any bounce turns it (PropNoise.ring)
+				# Landed on a stream's bed (WS1): it went in at the water's surface, a splash there, and stays down.
+				var under := water.depth_at(bb.position) if wet else 0.0
+				if under > 0.0:
+					impact.value2 = RayHit.Surface.WATER
+					impact.position.y += under
 				# A bounce flies on from the surface next tick: the rest of this tick's travel is dropped, so a ricochet
 				# arrives at most a tick late, which nobody can see at these speeds.
-				if not Ricochet.bounce(bb, _ray_hit, tuning.ricochet, rng):
+				if under > 0.0 or not Ricochet.bounce(bb, _ray_hit, tuning.ricochet, rng):
 					bb.active = false
 				continue
 			if in_leaves > 0.0:

@@ -18,6 +18,11 @@ extends Resource
 ## (Foliage.holds), so brushing a bush's rim or stepping by a low one doesn't count.
 @export var bush_speed_scale: float = 0.75
 @export var bush_probe_height: float = 0.5
+## Wading a stream (WS1, owner: the water slows you, so the bridge is the better crossing): every pace is this share of
+## itself while the feet are `wade_depth` m or more under its surface (Water.depth_at), players and bots alike. Shallower
+## water (Woodland's Ford, ankle deep over its gravel bar) only splashes (Footsteps).
+@export var wade_speed_scale: float = 0.6
+@export var wade_depth: float = 0.15
 ## A Follow me follower further than SquadConfig.catch_up_boost_from behind its leader sprints this much faster than
 ## the sprint (PlayerCommand.catch_up), so it can close on a leader sprinting at its own top speed (the owner's card
 ## B6, 2026-11-07); nearer, it matches the leader's pace.

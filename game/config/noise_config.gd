@@ -72,12 +72,17 @@ const SOUND_NAMES: PackedStringArray = ["steel", "clank", "rattle", "glass", "pl
 	RayHit.Surface.METAL: 1.35,
 	RayHit.Surface.GRAVEL: 1.35,
 	RayHit.Surface.GLASS: 1.35,
+	# A splash wading a stream (WS1, owner: the bridge is the quiet crossing).
+	RayHit.Surface.WATER: 1.5,
 }
 
 
 ## Run, sprint and landing steps pushing through a bush (Character.in_bush, BP8) carry this many times as far, and
 ## sound as leaves: bots hear them further, you hear them louder and further.
 @export var bush_carry: float = 1.75
+## A walk's or a crouch's stride wading a stream (WS1) splashes as a run step carrying this many times as far: never
+## silent, a little quieter than a run's splash (the water's `ground` carry).
+@export var wade_quiet_carry: float = 0.9
 
 
 ## How far a step on `surface` carries (×).

@@ -450,6 +450,7 @@ def path(points: list) -> list[dict]:
 def ground_paint() -> dict:
     patches = [
         {"surface": "earth", "path": path(L.STREAM), "width": r(2 * L.BED_W)},
+        {"surface": "gravel", "path": path(ford_bar()), "width": r(2 * L.BED_W + 1.0)},  # WS1: the Ford's gravel bar
         {"surface": "earth", "path": path(L.HOLLOW), "width": 3.6},
         {"surface": "gravel", "path": path(L.ROAD), "width": 5.0},
         {"surface": "earth", "box": [-88, -72, -14, 20]},
@@ -465,6 +466,49 @@ def ground_paint() -> dict:
         if t["material"] != "concrete":
             patches.append({"surface": "earth", "path": path([t["a"], t["b"]]), "width": r(t["w"])})
     return {"base": "grass", "underTrees": "leaves", "patches": patches}
+
+
+# The stream in the old dry bed (WS1, the owner 2026-11-10: wading it is slow and loud, so the bridge is the better
+# crossing): the water's surface WATER_DEPTH over the bed's floor along the bed's line, a point every WATER_STEP m,
+# smoothed over WATER_SMOOTH points; WATER_HALF either side of the line (the bed's floor, its banks and a slide's gentle
+# bank: the ground rising out of it above the level is dry, so the banks set where it ends).
+WATER_DEPTH, WATER_STEP, WATER_SMOOTH = 0.3, 1.5, 5
+WATER_HALF = L.BED_W + L.BANK + 4.0
+# The Ford stays the mid lane's crossing: a gravel bar where the water runs ankle deep (FORD_DEPTH, under
+# MovementConfig.wade_depth: it splashes but doesn't slow), FORD_FLAT m either side of the slide along the bed, then
+# deepening to WATER_DEPTH over FORD_RAMP m. So the overtime flag's race stays even (the east team crosses here).
+FORD_DEPTH, FORD_FLAT, FORD_RAMP = 0.08, 3.5, 4.0
+
+
+def ford_bar() -> list[tuple[float, float]]:
+    """The Ford's gravel bar: the stretch of the bed's line FORD_FLAT m either side of the Ford."""
+    (ax, az), (bx, bz) = L.STREAM[7], L.STREAM[8]  # the leg the Ford lies on
+    ln = math.hypot(bx - ax, bz - az)
+    t = ((L.FORD[0] - ax) * (bx - ax) + (L.FORD[1] - az) * (bz - az)) / ln
+    return [(ax + (bx - ax) * (t + d) / ln, az + (bz - az) * (t + d) / ln) for d in (-FORD_FLAT - 1.0, FORD_FLAT + 1.0)]
+
+
+def water() -> list[dict]:
+    pts = []
+    for (ax, az), (bx, bz) in zip(L.STREAM, L.STREAM[1:]):
+        n = max(1, round(math.hypot(bx - ax, bz - az) / WATER_STEP))
+        pts += [(ax + (bx - ax) * k / n, az + (bz - az) * k / n) for k in range(n)]
+    pts.append(L.STREAM[-1])
+    arc = np.concatenate([[0.0], np.cumsum([math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(pts, pts[1:])])])
+    ford = arc[int(np.argmin([math.hypot(x - L.FORD[0], z - L.FORD[1]) for x, z in pts]))]
+    near = np.clip(1.0 - (np.abs(arc - ford) - FORD_FLAT) / FORD_RAMP, 0.0, 1.0)
+    depth = WATER_DEPTH - (WATER_DEPTH - FORD_DEPTH) * near
+    beds = []
+    for i, (x, z) in enumerate(pts):
+        a, b = pts[max(i - 1, 0)], pts[min(i + 1, len(pts) - 1)]
+        ln = math.hypot(b[0] - a[0], b[1] - a[1])
+        nx, nz = (b[1] - a[1]) / ln, -(b[0] - a[0]) / ln
+        beds.append(min(ground(x + nx * o, z + nz * o) for o in np.linspace(-L.BED_W * 0.6, L.BED_W * 0.6, 5)))
+    k = WATER_SMOOTH // 2
+    bed = np.array(beds)
+    smooth = np.convolve(np.pad(bed, k, mode="edge"), np.ones(WATER_SMOOTH) / WATER_SMOOTH, mode="valid")
+    level = np.minimum(smooth, bed + 0.1) + depth
+    return [{"points": [{"x": r(x), "y": r(y), "z": r(z)} for (x, z), y in zip(pts, level)], "width": r(2 * WATER_HALF)}]
 
 
 def foliage() -> list[dict]:
@@ -558,9 +602,8 @@ def dressing() -> dict:
         "seed": 3107,
         "woods": {"leaves": 0.22, "fallen": 0.15},
         "moss": {"colour": 0x8C9A48, "share": 0.4},
-        "puddles": [{"x": 8.0, "z": 30.0, "width": 2.4, "depth": 1.6, "mud": True},
-                    {"x": -4.5, "z": -25.0, "width": 2.2, "depth": 1.5, "mud": True},
-                    {"x": -52.0, "z": 30.5, "width": 3.0, "depth": 1.8},
+        # (WS1: the two mud patches that lay in the dry bed are under the stream now)
+        "puddles": [{"x": -52.0, "z": 30.5, "width": 3.0, "depth": 1.8},
                     {"x": 30.0, "z": -14.0, "width": 2.4, "depth": 1.6, "mud": True}],
         "skyline": [{"kind": "treeline", "height": 16, "depth": 5, "points": path(ln)} for ln in lines] + [
             {"kind": "hill", "x": 150, "z": -10, "width": 90, "depth": 110, "height": 30, "colour": 0x4F6B45},
@@ -681,6 +724,7 @@ def main() -> None:
         "terrain": terrain(),
         "ground": ground_paint(),
         "foliage": foliage(),
+        "water": water(),
         "lights": lights(),
         "ambience": "woods",
         "dressing": dressing(),

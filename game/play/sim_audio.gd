@@ -56,11 +56,12 @@ const LASER_CUE := &"shot_laser"
 const INSPECT_MAG_IN := &"magIn"
 const INSPECT_MAG_OUT := &"magOut"
 ## Cue names by RayHit.Surface (none sounds as concrete; a BB on gravel, grass or leaves as earth, a step on each as
-## its own; a step on glass as on metal, on plastic or cardboard as on wood) and by GameEvent.Footstep.
+## its own; a step on glass as on metal, on plastic or cardboard as on wood; a step or a BB in a stream as a splash,
+## WS1) and by GameEvent.Footstep.
 const SURFACE_NAMES: PackedStringArray = ["concrete", "concrete", "metal", "wood", "earth", "gravel", "grass", "leaves",
-		"metal", "wood", "wood"]
+		"metal", "wood", "wood", "water"]
 const IMPACT_NAMES: PackedStringArray = ["concrete", "concrete", "metal", "wood", "earth", "earth", "earth", "earth",
-		"glass", "plastic", "cardboard"]
+		"glass", "plastic", "cardboard", "water"]
 const STEP_NAMES: PackedStringArray = ["run", "sprint", "land"]
 ## Cues other than a shot's capped at their own level up close, not the field's (BP8: a smoke going off, raised with
 ## the bang, which plays as a shot).

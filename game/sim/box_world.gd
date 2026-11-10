@@ -115,6 +115,12 @@ func add_bush(foot: Vector3, radius: float, height: float) -> void:
 	foliage.add(foot, radius, height)
 
 
+## Adds a stream along `points` (x, the water's level, z), `width` m across (WorldQuery.water, WS1): no surface a ray
+## or a mover meets.
+func add_stream(points: PackedVector3Array, width: float) -> void:
+	water.add(points, width * 0.5)
+
+
 ## A floor whose top is at y = 0, `width` by `depth`, centred on the origin.
 func add_floor(width: float, depth: float, thickness: float = 0.5) -> void:
 	add_box(Vector3(0.0, -thickness * 0.5, 0.0), Vector3(width, thickness, depth), RayHit.Surface.EARTH)

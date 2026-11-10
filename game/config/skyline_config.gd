@@ -162,6 +162,16 @@ extends Resource
 ## `treeline_colours`. Empty, or a model that won't load, keeps the cones.
 @export var treeline_model: String = "res://assets/models/skyline/treeline.glb"
 @export var treeline_section: Vector2 = Vector2(20.0, 5.0)
+## So the band never reads as one section repeated (WS1, the owner: the far trees stood too neatly): each section is a
+## seeded one of the model and these variants (their own trees, heights and gaps; a variant that won't load is left
+## out), as tall as a seeded `treeline_rise` share of the piece's height (x to y), and standing a seeded up to
+## `treeline_shift` m off its line either way, across it.
+@export var treeline_variants: PackedStringArray = PackedStringArray([
+	"res://assets/models/skyline/treeline_b.glb", "res://assets/models/skyline/treeline_c.glb",
+	"res://assets/models/skyline/treeline_d.glb",
+])
+@export var treeline_rise: Vector2 = Vector2(0.82, 1.0)
+@export var treeline_shift: float = 0.9
 
 @export_group("Watch tower")
 ## A concrete column `watch_column` of the width wide up to a deck `watch_deck` m thick, a parapet `watch_parapet` m
@@ -260,6 +270,25 @@ func treeline_mesh() -> Mesh:
 		if mesh != null:
 			_meshes[&"treeline"] = mesh
 	return _meshes.get(&"treeline", null) as Mesh
+
+
+## The band's sections: treeline_mesh first, then each of treeline_variants that loads (empty without the model).
+func treeline_meshes() -> Array[Mesh]:
+	var out: Array[Mesh] = []
+	var main := treeline_mesh()
+	if main == null:
+		return out
+	out.append(main)
+	for i in treeline_variants.size():
+		var kind := StringName("treeline_%d" % i)
+		if not _tried.has(kind):
+			_tried[kind] = true
+			var mesh := _load(kind, treeline_variants[i])
+			if mesh != null:
+				_meshes[kind] = mesh
+		if _meshes.has(kind):
+			out.append(_meshes[kind])
+	return out
 
 
 ## The mesh at `path` if it loads as a skyline model (one indexed surface with vertex colours), else null, warned.

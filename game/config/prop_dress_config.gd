@@ -224,6 +224,11 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 ## boughs interleave into one mass: a thicket's spruces (FT1, the owner: its core box showed as a plain block between
 ## narrow spires). Never past the box: the end ones stand flush with its ends and the rest evenly between.
 @export var grid_spread: Dictionary[StringName, Vector2] = {&"spruce": Vector2(1.8, 1.5)}
+## GRID models scattered off their even places, so a stand of them grows as a wood does, not in rows (WS1, the owner:
+## the thickets' spruces stood too neatly): each moves up to x of the pitch between them either way along and across
+## the box (never past it), and stands a seeded y to 1 of the box's height (never over it: trees keep to their boxes).
+## Seeded by the block's place, so a stand is the same every build and nothing else's random draws move.
+@export var grid_scatter: Dictionary[StringName, Vector2] = {&"spruce": Vector2(0.38, 0.62)}
 ## GRID models laid all one way round, never turned at random: a net wall's sections match only edge to edge as
 ## modelled (DH1).
 @export var grid_unturned: PackedStringArray = PackedStringArray(["camo_net"])

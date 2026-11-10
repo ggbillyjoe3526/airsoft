@@ -285,9 +285,12 @@ func test_woodland_s_treelines_are_the_band_model_in_budget_along_their_lines() 
 				far = maxf(far, _off_line(Vector2(q.x, q.z), p.points))
 		# Woodland's four bands, 2,000 triangles each at most (the model list)
 		assert_lt(tris, 2000, "a band's triangles: %d" % tris)
-		assert_almost_eq(hi, p.height, 0.01, "its spires reach the treeline's height")
+		# WS1: each section's spires rise to between treeline_rise's share of the height and all of it
+		assert_lt(hi, p.height + 0.01, "its spires never pass the treeline's height")
+		assert_gt(hi, p.height * cfg.treeline_rise.x - 0.01, "its spires reach about the treeline's height")
 		assert_almost_eq(lo, -cfg.treeline_sink, 0.01, "its foot sunk as the cones' are")
-		assert_lt(far, p.depth * 0.5 + p.height * cfg.treeline_width + 0.5, "it stands along its line, about its depth")
+		assert_lt(far, p.depth * 0.5 + p.height * cfg.treeline_width + cfg.treeline_shift + 0.5,
+				"it stands along its line, about its depth")
 	assert_eq(bands, 4, "Woodland's four treelines")
 	var v := SkylineView.build(woodland, cfg, play.lighting, body.stand_eye_height)
 	var plain := cfg.duplicate() as SkylineConfig

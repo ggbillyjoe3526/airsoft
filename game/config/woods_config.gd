@@ -32,13 +32,18 @@ extends Resource
 ## more from the next, on a skyline hill where they stand on one: cones `forest_height` m tall (a range),
 ## `forest_width` of that wide (radius), `forest_sides` sides, sunk `forest_sink` m, in one of `forest_colours`,
 ## faded toward the horizon `forest_fade` as far as the skyline fades (SkylineConfig), casting no shadow.
-## `forest_tries` candidate spots a tree at most.
+## `forest_tries` candidate spots a tree at most. So the wood never stands evenly spread (WS1, the owner: the far trees
+## stood too neatly): each is `forest_slim` (a range) of the width, and it grows in clumps and thins in glades about
+## `forest_clump` m across, a spot in the thinnest glade taken `1 - forest_clumping` as often as in a clump.
 @export var forest_share: PackedFloat32Array = PackedFloat32Array([0.0, 0.45, 0.7, 1.0])
 @export var forest_fence: float = 12.0
 @export var forest_reach: float = 118.0
 @export var forest_apart: float = 2.2
-@export var forest_height: Vector2 = Vector2(9.0, 17.0)
+@export var forest_height: Vector2 = Vector2(7.5, 18.5)
 @export var forest_width: float = 0.27
+@export var forest_slim: Vector2 = Vector2(0.78, 1.22)
+@export var forest_clump: float = 22.0
+@export_range(0.0, 1.0) var forest_clumping: float = 0.7
 @export var forest_sides: int = 6
 @export var forest_sink: float = 0.4
 @export var forest_tries: int = 30
@@ -97,6 +102,30 @@ extends Resource
 @export var mud_alpha: float = 0.85
 @export var mud_wet: Color = Color("403b34")
 @export var mud_wet_alpha: float = 0.5
+
+@export_group("Stream")
+## A map's shallow streams (MapData.water, WS1; WaterView), on every preset (the water is play: it slows and gives you
+## away): each a ribbon over its line as wide as the stream, at the water's level, its banks rising through it. See-through:
+## `stream_shallow` (alpha its opacity) where the eye looks through little water, toward `stream_deep` through
+## `stream_deep_at` m of it, fading in where the bed comes within `stream_edge` m of its surface; glossy
+## (`stream_roughness`, mirroring `stream_specular` of the sky, with `stream_sheen` toward a glancing look); ripples
+## `stream_ripple` a metre tilting it up to `stream_tilt`, flowing downstream at `stream_flow` m/s in phases of
+## `stream_cycle` s; cut `stream_across` times across. Colours sRGB, a little blue (William, 2026-11-10): the look's paint
+## and the bed showing through grey them to about a fifth saturated on screen, far from Alpha's bright blue.
+@export var stream_shallow: Color = Color(0.14, 0.3, 0.46, 0.65)
+@export var stream_deep: Color = Color(0.03, 0.09, 0.2, 0.95)
+@export var stream_deep_at: float = 0.8
+@export var stream_edge: float = 0.07
+@export var stream_roughness: float = 0.14
+## How much of the sky it mirrors (Godot's 0.5 is a glassy pane under the open sky; a wooded stream mirrors little).
+@export var stream_specular: float = 0.12
+## The sheen of the wood and sky toward a glancing look (alpha its most), so the ripples show on every preset.
+@export var stream_sheen: Color = Color(0.3, 0.44, 0.6, 0.4)
+@export var stream_ripple: float = 0.9
+@export var stream_tilt: float = 0.12
+@export var stream_flow: float = 0.4
+@export var stream_cycle: float = 3.0
+@export var stream_across: int = 4
 
 @export_group("Leaf drifts")
 ## Leaf litter (MapData.leaf_drifts; Medium and up): the ground cut into squares `leaf_cell` m across; a square within
