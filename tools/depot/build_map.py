@@ -156,7 +156,7 @@ def roof() -> dict:
     return {"height": L.ROOF, "lamps": lamps}
 
 
-# Worn lamps (LV1, owner 2026-11-10: "some lamps aren't as bright or they flicker or one that doesn't work"): how many
+# Worn lamps (DW1, owner 2026-11-10: "some lamps aren't as bright or they flicker or one that doesn't work"): how many
 # of each, the seed that picks them (the same lamps every build) and how far apart (m) the flickering and dead ones
 # hang at least, so no corner goes dark or busy.
 WORN = {"dim": 12, "flicker": 3, "dead": 2}

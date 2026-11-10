@@ -1,52 +1,42 @@
-# LV1 · Depot's worn lamps: some dim, a few flickering, a couple dead
+# LV1 · Levels, XP and unlocks
 
-**Review:** pending
+**Review:** critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-10 | 1 | thread | see Checks | pending | – |
+| 2026-10-19 | 1 | Opus (build thread) | pass (941) | – | QA Fail: a Reset level didn't reach the open rules; a huge saved XP wrapped negative (both fixed) |
+| 2026-10-19 | 2 | Opus (build thread) | pass (941) | Accept 7/8 | – |
 
-## Goal
+## Decisions
 
-The owner (2026-11-10 04:10): "Can you add some variations to the lighting? I mean maybe some lamps aren't as bright
-or they flicker or one that doesn't work", and (04:10) "This is just specific to depot map". After UG2 (no sun
-indoors) the hall is lit by its lamps alone, so worn lamps vary its light.
-
-## Approach
-
-- **The map names them** (`roof.lamps[].state`: "dim", "flicker" or "dead"; none is working): `MapData` reads
-  `roof_lamp_states` (an unknown state is a working lamp, with a warning). Depot's builder
-  (`tools/depot/build_map.py` › `wear_lamps`) picks 12 dim, 3 flickering and 2 dead with a fixed seed, the
-  flickering and dead ones at least 15 m apart, so no corner goes dark or busy. No other map names any.
-- **The lenses** (`RoofView`): the glow is a small unshaded shader reading each lamp's tint from the MultiMesh's
-  custom data (`lens_tint`): working and flickering in full, dim at `RoofConfig.lamp_dim_glow` (0.25: a lens glows so
-  brightly that half still reads full) in the warmer `lamp_dim_colour`, dead at `lamp_dead_glow` (0). On every preset.
-- **The lights** (`RoofLamps`, High and Ultra): a dead lamp has none, a dim one shines at the same share and colour,
-  a flickering one is out of the baked bounce light (BAKE_DYNAMIC) as its strength steps.
-- **The flicker** (`RoofView.flicker_level`, pure): mostly full; every `lamp_flicker_every` (3.5 s) on average, in
-  each lamp's own phase, some cycles a burst of up to `lamp_flicker_burst` (0.8 s) stepping between full and
-  `lamp_flicker_low` (0.1) every `lamp_flicker_step` (0.06 s). `_process` runs only on a roof with flickering lamps
-  and sets a lens and light only when its step changes.
-
-## Defaults taken
-
-- Counts 12 / 3 / 2 of 93 lamps: enough to notice, few enough that the hall still reads evenly lit; a dead lamp's
-  patch is filled by its wide-coned neighbours (UG2).
-- Dim lamps warmer (an older lamp), at half strength.
-- The flicker is a stutter, not a strobe: off at most 0.8 s in a burst, then full for seconds. A play check asks
-  whether it distracts.
-
-## Checks
-
-- gdlint clean; `test_worn_lamps` 7/7 (Depot's states and only Depot's, an unknown state, a dead lamp with no light
-  and a dark lens, a dim one's light and lens, a flickering one dynamic and following its steps, the flicker mostly
-  on and the same every run, no processing without worn lamps); `test_lamp_lights` (one light a lamp but the dead),
-  `test_lamp_lights_qa`, `test_ug2_qa`, `test_depot_hall` pass.
-- Pictures: `/mnt/project-files/art/graphics/lv1/`.
-
-## Known issues left
-
-- Frame cost: three flickering lights change strength a few times a second (their shadows are redrawn anyway); no
-  GPU in the cloud. The owner's check is in the playtest list.
+- **Ported from the browser game** (`progress/levels.ts`, `xp.ts`, `progress.ts`, `stats/records.ts`) into plain
+  classes in `game/progress/`, with its rules unchanged (DECISIONS › Replicas, Loadout and levels): levels.md read
+  against the pool, a row it can't read left out with its line; a shorter match gives less; a round won counts only if
+  you took part; the lower team difficulty multiplies; XP stops at the cap; unlocks are only ever added.
+- **Three stores, each its own file** through `SaveFile` (crash-safe, checksummed): `user://progress.save` (XP and
+  unlocks), `user://records.save` (wins and losses per difficulty and mode, best accuracy over matches of at least 20
+  BBs, win streaks) beside the existing settings and loadouts. One from a newer build is read for nothing and never
+  written over; a damaged one is set aside as the settings' are.
+- **Only the game's own matches count** (`PlaySession.counts`, set by `main.gd` off the smoke test), so tests, the
+  smoke test and the match guards never touch a player's progress. Your teammates are bots at the opponents'
+  difficulty for now, so the lower multiplier is that one.
+- **Disable levelling** is a cheat (`DevCheats.levelling_off`): a match with it on gives no XP and is no record, and a
+  kit picked with it on keeps the session's matches off the record after it is turned off. Reset level sits beside
+  Reset the save in the Dev tab.
+- **Locks live in `LoadoutRules`** (`follow_progress`, reading the Progress live so a Reset level shows at once; QA
+  attempt 1): a locked item is still listed (greyed with MenuTag "LEVEL n"),
+  `equip`, `set_part` and `set_power` refuse it, and `carried` plays a saved locked item as it comes, as it does dev
+  gear with Dev content off. Rules with no progress set (the bots, tests) unlock everything. The default replicas and
+  power sources are the starting kit, so a new player's loadout is never locked.
+- **The Weapon Torch** sits in levels.md's level 0 but pool.md's Lights table wasn't read (lights wait for night
+  fields): `Pool.waiting` now reads it so levels.md names it cleanly; nothing offers it.
+- **levels.md's guide** now names the Godot reader and test; pool.md's and stats.md's still name the browser files
+  (can wait: their readers' tasks own them).
+- **An open Loadout page is built again** when Disable levelling or what is unlocked changed under the settings
+  (`LoadoutPage.locks_changed`, checked when the settings close; QA attempt 1). A saved XP over 10⁹ or not a whole
+  number is refused (QA: 1e30 wrapped negative).
+- The top bar's chip shows your level (hidden with levelling off); the Armory tab stays LATER until AR1.
+- **Critic, check 7 (can wait, AR1):** nothing shows `Progress.load_message` or `Records.load_message` yet; AR1 shows
+  them on the Armory (its acceptance 4).

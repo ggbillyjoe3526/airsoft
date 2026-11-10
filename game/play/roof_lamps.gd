@@ -8,7 +8,7 @@ extends Node3D
 ## out (`key_share`, RoofConfig.lamp_sun_share) and set_ambient_share turns the sky's light under the roof down
 ## (`ambient_share`), so their shadows stay deep; the ceiling joins the scene's bounce light (Ultra's SDFGI), so the
 ## sky no longer lights the hall through it. Near (High) shadows the lamps within `lamp_near` m, Far (Ultra) all.
-## A worn lamp (LV1, MapData.roof_lamp_states) shines at `lamp_dim_share` in `lamp_dim_colour` (dim), not at all (dead:
+## A worn lamp (DW1, MapData.roof_lamp_states) shines at `lamp_dim_share` in `lamp_dim_colour` (dim), not at all (dead:
 ## no light) or as RoofView's flicker steps it (`set_flicker`; out of the baked bounce light, as it changes).
 ## Built once with the roof; `set_mode` only sets what changes. Look only.
 

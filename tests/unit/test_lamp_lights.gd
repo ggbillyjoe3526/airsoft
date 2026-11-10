@@ -49,7 +49,7 @@ func test_every_lamp_gets_a_downward_shadowed_spot_under_its_lens() -> void:
 	var lamps := roof.lamp_lights()
 	assert_not_null(lamps)
 	var dead := depot.roof_lamp_states.count(MapData.LAMP_DEAD)
-	assert_eq(lamps.light_count(), roof.lamp_count() - dead, "one light a lamp, none for a dead one (LV1)")
+	assert_eq(lamps.light_count(), roof.lamp_count() - dead, "one light a lamp, none for a dead one (DW1)")
 	assert_false(lamps.visible, "off until the graphics say")
 	for spot in lamps.lights():
 		assert_true(spot.shadow_enabled, "%s casts a shadow, so it never shines through a room's roof" % spot.name)

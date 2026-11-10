@@ -1027,7 +1027,7 @@ Settings › Graphics › Quality: Low, Medium, High, Ultra or Custom.
   bot crouched in it? On High, walk toward a roofed room from past 28 m: does light from a far lamp show through its
   roof and then pop dark? Switch Medium to Ultra mid-session: any hitch or flash? At Medium the hall is lit evenly
   again by the overhead light. Note the frame rate (F3) at 4K Ultra looking down the hall at 6v6.
-- [ ] **Worn lamps (LV1, your graphics card).** On Depot, look up along the hall: a dozen lamps glow dimmer and
+- [ ] **Worn lamps (DW1, your graphics card).** On Depot, look up along the hall: a dozen lamps glow dimmer and
   warmer, three flicker now and then and two are dead with dark lenses and a darker patch under them, the same every
   match. On High and Ultra the light under them follows. Does the flicker read as an old lamp, not a distraction in a
   fight? Note F3 near a flickering lamp on Ultra.

@@ -1,5 +1,5 @@
 extends GutTest
-## LV1: Depot's worn roof lamps (owner, 2026-11-10: "some lamps aren't as bright or they flicker or one that doesn't
+## DW1: Depot's worn roof lamps (owner, 2026-11-10: "some lamps aren't as bright or they flicker or one that doesn't
 ## work", Depot only): the map names them, a dim one glows and lights less in a warmer colour, a dead one neither glows
 ## nor lights, a flickering one stutters now and then, the same every run; a map naming none is untouched.
 

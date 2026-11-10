@@ -317,7 +317,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   (they have no real lamps); open fields keep their sun. This replaces UG2's first build, which let the sun in at the
   rooflights. Shadows stay dark but readable: "the player should still be able to recognise objects and players"
   (2026-11-10), so the lamps are wide (70°) and overlap into one even light.
-- **Depot's lamps are worn (owner, 2026-11-10, LV1).** "Some lamps aren't as bright or they flicker or one that
+- **Depot's lamps are worn (owner, 2026-11-10, DW1).** "Some lamps aren't as bright or they flicker or one that
   doesn't work", for Depot only: the map file names each worn lamp (`roof.lamps[].state`), picked once by its builder,
   the same every match; other maps name none.
 - **Every figure keeps its team-colour plate carrier (owner, 2026-10-17, AX1).** The carrier reads like a site's team

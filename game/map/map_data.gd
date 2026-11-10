@@ -78,7 +78,7 @@ class Door:
 
 ## The kinds a light may name (a light naming none is a lamp in its own colour).
 const LIGHT_KINDS: Array[StringName] = [&"fire", &"lantern"]
-## A roof lamp's states (`roof.lamps[].state`, LV1): a working lamp names none (""), a worn one is dim, flickers or is
+## A roof lamp's states (`roof.lamps[].state`, DW1): a working lamp names none (""), a worn one is dim, flickers or is
 ## dead; MapData.roof_lamp_states holds each one's index here.
 const LAMP_STATES: Array[String] = ["", "dim", "flicker", "dead"]
 const LAMP_WORKING := 0
@@ -170,7 +170,7 @@ var bot_sight: float = 0.0
 ## the sky, and its lamp panels (x, z), drawn by RoofView. A BB stops on it (MapLevel's ceiling).
 var roof_height: float = 0.0
 var roof_lamps: PackedVector2Array = PackedVector2Array()
-## Each roof lamp's state (`state` in the file: LV1, Depot's worn lamps), in roof_lamps' order: LAMP_WORKING unless
+## Each roof lamp's state (`state` in the file: DW1, Depot's worn lamps), in roof_lamps' order: LAMP_WORKING unless
 ## the file names it dim, flickering or dead. Look only.
 var roof_lamp_states: PackedByteArray = PackedByteArray()
 ## The hinged doors (DO1), in file order: the simulation, the level and the view number them alike.

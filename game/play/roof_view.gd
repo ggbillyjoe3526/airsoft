@@ -6,7 +6,7 @@ extends Node3D
 ## MultiMesh: the high-bay model with its glowing lens, or a glowing panel without it), and a real light under each lamp
 ## (RoofLamps) that Graphics › Lamp light switches on, lighting the hall alone (no sun gets indoors). The roof and lamps
 ## themselves cast no shadow, so the preset's overhead light stands in for the lamps through them where they aren't
-## real lights (Low, Medium). A map may wear some lamps out (LV1, MapData.roof_lamp_states): dim, dead or flickering,
+## real lights (Low, Medium). A map may wear some lamps out (DW1, MapData.roof_lamp_states): dim, dead or flickering,
 ## each lens glowing as its lamp shines (the MultiMesh's custom data). Look only: the BB ceiling is MapLevel's; nothing
 ## here is read by the simulation. Built once; per frame only a flickering lamp's step, set when it changes.
 
