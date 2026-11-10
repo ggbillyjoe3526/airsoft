@@ -1,13 +1,18 @@
-Task: RF1 · QA commit f83100f · Verdict: Pass
+Task: SL4 · QA commit none (no new tests; test_lo3_qa and others already updated in the diff) · Verdict: Pass
 
-Blocking: none. Advisory: none.
-Re-run at head 37039b7. test_rf1_qa.gd 19/19 pass (~12 s), test_dev_play.gd 10/10 pass (~64 s). Whole suite left to check.sh. Raw output pipeline/out/qa/.
+Head 3e9bf5e, `git diff origin/main...HEAD` re-checked.
 
-Added (tests/unit/test_rf1_qa.gd, end of file):
-- haze changed after build (site-dressed sky haze) is restored exactly after on, on again, off; off twice harmless. Fails if retro_haze held the preset or re-held the retro haze on a second on.
-- haze off without on leaves the night fog untouched (no restore of an unset hold).
-- _process with no camera is safe.
-- a filter outside the tree does not process (the globals are touched only while it is up).
-Earlier 15 tests (clamps, resize, no lighting, night fog back, one-frame off/on, freed lighting/session, toggling, saves) updated by the worker for held haze and still pass.
+Blocking: none.
+Advisory: targeted GUT runs print one pair of "get_base_script / resource_path on null" SCRIPT ERRORs per script. The count equals the script count, so it comes from GUT with `-gdir=`, not from the game.
 
-Not tested: the camera globals' values (reading globals can stall the renderer); how the look appears, other resolutions and window modes, shader compilation (need a display).
+Checked:
+- HudStyle.navy_box is now dark_box. No `navy_box` reference is left in game/, tests/ or tools/. The callers in match_summary, xp_card and weapon_rail use dark_box. panel_box too.
+- GameTheme.DEEP and PLATE exist. MinimapConfig ink and map_backdrop read GameTheme.BG; both are consts, so the config's load order is fine.
+- test_lo3_qa, test_loadout_screen and test_replica_paint compare against ReplicaPaint.drawn(...), matching the new paint code.
+
+Runs (targeted only, whole suite left to the other process):
+- 13 scripts (hud*, minimap, pause, report, nav_rail, crash_screen, lo3_qa, loadout_screen, replica_paint, game_theme): 199 tests, 199 pass.
+- 38 scripts (armory, chevron, graphics, sound_cues, order_wheel, team_markers, settings, flag, hud_table, menu, loadout): 608 tests, 608 pass.
+- No parse errors.
+
+Not tested: how the new palette looks on screen, which needs a display (owner's list).
