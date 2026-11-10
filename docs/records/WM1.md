@@ -1,13 +1,13 @@
 # WM1 · Wear marks: oil stains and tyre tracks on the floors
 
-**Review:** pending
+**Review:** critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-10 | 1 | thread | CI green on 4421a30 | Retry 6/8 | – |
-| 2026-11-10 | 2 | thread | see Checks | pending | critic: Depot's marks too faint, tracks' tread toy-sized and cut off mid-road, prints dots, unnamed constants, bends' gaps |
+| 2026-11-10 | 2 | thread | CI green on 46fb838 | Accept 7/8 | critic: Depot's marks too faint, tracks' tread toy-sized and cut off mid-road, prints dots, unnamed constants, bends' gaps |
 
 ## Goal
 
@@ -57,7 +57,7 @@ names them, scaling per preset.
 
 ## Known issues left
 
-- A mark's box reaches 25 cm above the floor, so a figure standing on one takes it on its soles.
+- A mark's box reaches 25 cm above the floor, so a figure standing on one takes it on its soles (KNOWN_ISSUES row).
 - Painting the pictures takes about 39 ms once per run (measured headless; the muddy tread's real-scale lugs need a
   longer picture), a few staged build slices on the loading screen of the first match; later matches reuse them.
   Left as it is.

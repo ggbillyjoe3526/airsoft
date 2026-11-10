@@ -41,6 +41,10 @@ const TREAD_PATCHY := 0.55
 const SMEAR_STREAKS := 14.0
 const SMEAR_STREAKY := 0.35
 const SMEAR_FLOOR := 0.45
+## How much of a muddy tread's patchiness a smear takes (rubber on a hard floor wears more evenly).
+const SMEAR_PATCHY := 0.5
+## The shortest lug pitch or piece (m) the pictures are worked out over, whatever the config says, so a 0 can't divide.
+const SHORTEST := 0.01
 ## A muddy tread: its lugs' slant (of the width), their fill (of a lug's pitch) and how much each one's fill varies at
 ## random, how much mud lies between them, and the rows of mud flecks it throws off its edges.
 const LUG_SLANT := 0.35
@@ -135,7 +139,7 @@ static func stain_image(cfg: MarksConfig, noise: FastNoiseLite) -> Array[Image]:
 static func tread_image(cfg: MarksConfig, noise: FastNoiseLite, mud: bool) -> Image:
 	var size := cfg.tread_pixels if mud else cfg.smear_pixels
 	var img := Image.create_empty(size.x, size.y, false, Image.FORMAT_RGBA8)
-	var lugs := maxi(1, roundi(cfg.track_piece / maxf(cfg.lug_pitch, 0.01)))
+	var lugs := maxi(1, roundi(cfg.track_piece / maxf(cfg.lug_pitch, SHORTEST)))
 	var fills := PackedFloat32Array()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = SEED
@@ -161,7 +165,7 @@ static func tread_image(cfg: MarksConfig, noise: FastNoiseLite, mud: bool) -> Im
 			else:
 				var streak := 0.5 + 0.5 * noise.get_noise_3d(u * SMEAR_STREAKS + SPOT_OFFSET, ring.x, ring.y)
 				var side := 1.0 - smoothstep(1.0 - TREAD_SOFT, 1.0, across)
-				a = side * maxf(SMEAR_FLOOR, 1.0 - SMEAR_STREAKY * streak - TREAD_PATCHY * 0.5 * patch)
+				a = side * maxf(SMEAR_FLOOR, 1.0 - SMEAR_STREAKY * streak - TREAD_PATCHY * SMEAR_PATCHY * patch)
 			img.set_pixel(px, py, Color(1.0, 1.0, 1.0, a))
 	return img
 
@@ -173,7 +177,7 @@ static func faded(cfg: MarksConfig, tile: Image, piece: Piece) -> Image:
 	var img := tile.duplicate() as Image
 	if piece == Piece.MIDDLE:
 		return img
-	var share := clampf(cfg.track_fade / maxf(cfg.track_piece, 0.01), 0.0, 1.0)
+	var share := clampf(cfg.track_fade / maxf(cfg.track_piece, SHORTEST), 0.0, 1.0)
 	var w := img.get_width()
 	var h := img.get_height()
 	# the alpha bytes straight (RGBA8, four a pixel), not a pixel at a time: this runs once a piece kind at load
