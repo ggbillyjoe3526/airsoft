@@ -157,10 +157,10 @@ func test_an_old_save_file_holding_rigged_figures_loads_clean_from_disk() -> voi
 func test_a_dev_block_with_a_wrong_type_for_the_old_key_still_loads() -> void:
 	var dev := DevSettings.new()
 	dev.from_dict({"rigged_figures": "yes", "retro_pixels": true})
-	assert_true(dev.retro_pixels)
+	assert_true(dev.retro_filter)
 	dev.from_dict({"rigged_figures": [1, 2], "ghost": true})
 	assert_true(dev.ghost)
-	assert_false(dev.retro_pixels, "the rest read as saved, a missing key false")
+	assert_false(dev.retro_filter, "the rest read as saved, a missing key false")
 
 
 func test_every_export_preset_leaves_the_dev_tools_and_tests_out() -> void:

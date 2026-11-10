@@ -58,7 +58,7 @@ func test_turning_every_switch_off_clears_every_cheat_in_the_match() -> void:
 	s.dev.bots_hold_fire = true
 	s.dev.spectate_bots = true
 	s.dev.bot_intent = true
-	s.dev.retro_pixels = true
+	s.dev.retro_filter = true
 	await _play()
 	assert_true(session.state.cheats.any())
 	s.dev.from_dict({})
@@ -71,7 +71,7 @@ func test_turning_every_switch_off_clears_every_cheat_in_the_match() -> void:
 	assert_ne(session.spectated(), null)
 	assert_eq(session.spectated(), session.player, "back in your own eyes")
 	assert_eq(session.find_children("*", "BotIntentView", true, false).size(), 0)
-	assert_eq(session.find_children("*", "RetroPixels", true, false).size(), 0)
+	assert_eq(session.find_children("*", "RetroFilter", true, false).size(), 0)
 	assert_true(session.state.off_record, "and the match stays off the record")
 
 
@@ -263,13 +263,13 @@ func test_toggling_the_dev_views_leaves_no_nodes_or_connections() -> void:
 	var wired := s.changed.get_connections().size()
 	for i in 6:
 		s.dev.bot_intent = true
-		s.dev.retro_pixels = true
+		s.dev.retro_filter = true
 		s.mark_changed()
 		s.mark_changed()
 		assert_eq(session.find_children("*", "BotIntentView", true, false).size(), 1, "never doubled")
-		assert_eq(session.find_children("*", "RetroPixels", true, false).size(), 1, "never doubled")
+		assert_eq(session.find_children("*", "RetroFilter", true, false).size(), 1, "never doubled")
 		s.dev.bot_intent = false
-		s.dev.retro_pixels = false
+		s.dev.retro_filter = false
 		s.mark_changed()
 		await wait_process_frames(2)
 	assert_eq(int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)), nodes, "back to the same node count")
@@ -278,7 +278,7 @@ func test_toggling_the_dev_views_leaves_no_nodes_or_connections() -> void:
 
 func test_a_session_with_every_dev_view_on_frees_clean() -> void:
 	s.dev.bot_intent = true
-	s.dev.retro_pixels = true
+	s.dev.retro_filter = true
 	s.dev.spectate_bots = true
 	var before := int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
 	await _play()

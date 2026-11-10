@@ -62,7 +62,7 @@ func test_every_switch_that_changes_play_keeps_a_match_off_the_record_and_the_lo
 		set_it.call(d)
 		assert_true(d.cheats().any(), "a cheat: %s" % str(d.to_dict()))
 	var look: Array[Callable] = [
-		func(d: DevSettings) -> void: d.retro_pixels = true,
+		func(d: DevSettings) -> void: d.retro_filter = true,
 		func(d: DevSettings) -> void: d.robots = true,
 		func(d: DevSettings) -> void: d.pretend_slow_frames = true,
 		func(d: DevSettings) -> void: d.dev_content = true,
@@ -120,7 +120,7 @@ func test_the_reset_covers_every_switch_an_unticked_save_held() -> void:
 	all.bots_run_low = true
 	all.spectate_bots = true
 	all.bot_intent = true
-	all.retro_pixels = true
+	all.retro_filter = true
 	all.robots = true
 	all.pretend_slow_frames = true
 	all.time_of_day = LightingConfig.DAY
@@ -185,7 +185,7 @@ func test_every_dev_switch_is_a_focusable_row_that_keyboard_accept_flips() -> vo
 	screen.open()
 	screen._tabs.current_tab = screen._dev_page.get_parent().get_index()
 	await wait_process_frames(2)
-	var ok := screen._dev_checks[&"retro_pixels"]
+	var ok := screen._dev_checks[&"retro_filter"]
 	for field: StringName in SettingsScreen.DEV_SWITCHES:
 		assert_ne(screen._dev_checks[field].focus_mode, Control.FOCUS_NONE, "%s takes focus" % field)
 	ok.grab_focus()
@@ -198,7 +198,7 @@ func test_every_dev_switch_is_a_focusable_row_that_keyboard_accept_flips() -> vo
 	release.pressed = false
 	get_viewport().push_input(release)
 	await wait_process_frames(2)
-	assert_true(s.dev.retro_pixels, "Enter on the focused switch turned it on")
+	assert_true(s.dev.retro_filter, "Enter on the focused switch turned it on")
 	assert_true(s.dirty or FileAccess.file_exists(path), "and it was saved")
 
 
