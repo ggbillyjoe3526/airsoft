@@ -62,7 +62,7 @@ extends Resource
 @export var storey_pick: float = 0.5
 @export var storey_cut: float = 1.8
 ## The drawing's colours: ground, raised floor, ramp, low cover and tall walls; the shade laid over everything below
-## the storey drawn (so the street through a stairwell reads as below you); you, and a teammate who is out. The navy
+## the storey drawn (so the street through a stairwell reads as below you); you, and a teammate who is out. The dark
 ## panel under the drawing is the HUD's.
 @export var ground_colour: Color = Color(Color("485058"), 0.92)
 @export var raised_colour: Color = Color(Color("60686e"), 0.95)
@@ -128,7 +128,7 @@ extends Resource
 @export var ping_ring_radius: float = 5.5
 @export var ping_ring_width: float = 2.4
 @export var ping_diamond: float = 7.0
-## The area label's backing, as a share of the HUD's navy (the panel and caption are solid); all follow the panels'
+## The area label's backing, as a share of the HUD's dark fill (the panel and caption are solid); all follow the panels'
 ## opacity.
 @export var label_backing: float = 0.82
 

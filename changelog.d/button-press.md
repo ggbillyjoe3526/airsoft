@@ -1,6 +1,6 @@
 ### Buttons answer your click
-- Every button in the menus and the pause menu dips in slightly and flashes a teal outline when you click it or press Enter on it.
-- With Reduced motion on, only the teal outline flashes.
+- Every button in the menus and the pause menu dips in slightly and flashes a pale outline when you click it or press Enter on it.
+- With Reduced motion on, only the outline flashes.
 
 ### Loadout swap
 - On the Loadout page, the PRIMARY and SECONDARY boxes' SWITCH REPLICA button now says SWAP.
