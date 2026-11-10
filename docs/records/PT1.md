@@ -27,10 +27,10 @@ only.
   be coarser than SDFGI's 10 cm cells. Only full lightmaps (Cycles onto a second UV set of every model) would beat it.
 - The work is kept as a patch, `art/graphics/pt1/pt1-lamp-bake-wip.patch` in the project files, with its test picture.
 
-## Defaults taken
+## Rulings and defaults
 
-- **Stopped there (decision card to the owner, 2026-11-10, recommended):** Ultra's scene bounce stays the lamps'
-  bounce; full lightmaps are offered for a later update (`docs/IDEAS.md`). If he picks another option, this changes.
+- **Stopped there (owner, 2026-11-10, on the decision card: "Stop here, keep live bounce"):** Ultra's scene bounce
+  stays the lamps' bounce, and the Ultra push ends after step 4. Full lightmaps stay in `docs/IDEAS.md`, not planned.
 - Kept from it, a fix the bake would have brought: while a roof's lamps shine as real lights (High, Ultra), the baked
   light is drawn without the sun's bounce (`MapLevel.set_baked_light(on, lamps)`), as no sun gets under the roof
   (UG2). The floor near Depot's open sides no longer reads warmer than its lamps make it (the KNOWN_ISSUES row).

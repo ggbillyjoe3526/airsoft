@@ -27,7 +27,7 @@ Work the owner wants one day but hasn't placed in a version.
   Woodland) with vehicles to drive round it. A driving player can't shoot but can still ping and give orders; a bot
   can drive but gives no orders (it follows the player's); players and bots in passenger seats can fight. Nothing is
   built until he places it.
-- **Full baked lightmaps on Ultra (offered 2026-11-10, PT1; the owner's call).** Every surface and model's light
+- **Full baked lightmaps on Ultra (offered 2026-11-10, PT1; the owner chose to stop at the live bounce instead).** Every surface and model's light
   path-traced ahead (Blender's Cycles onto a second UV set of the assembled map), the only bake that would beat Ultra's
   live scene bounce: new UVs on every model, hours of baking a map, perhaps 100 MB or more of install. The lamp bake
   of the walls and floors alone (patch in the project files, `art/graphics/pt1/`) was near invisible in Depot.
