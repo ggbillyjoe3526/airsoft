@@ -57,14 +57,14 @@ func _dev_tab(screen: SettingsScreen) -> int:
 func test_the_dev_settings_are_saved_and_read_back() -> void:
 	s.dev.game_speed = 0.5
 	s.dev.ghost = true
-	s.dev.retro_pixels = true
+	s.dev.retro_filter = true
 	s.dev.dev_content = true
 	assert_true(s.save(path))
 	var again := Settings.new(PlayTuning.new())
 	again.load_file(path)
 	assert_eq(again.dev.game_speed, 0.5)
 	assert_true(again.dev.ghost)
-	assert_true(again.dev.retro_pixels)
+	assert_true(again.dev.retro_filter)
 	assert_true(again.dev.dev_content)
 	assert_false(again.dev.bottomless)
 
@@ -126,7 +126,7 @@ func test_an_old_save_with_the_box_unticked_has_its_switches_reset_once() -> voi
 
 func test_spectate_and_bot_intentions_keep_a_match_off_the_record_but_retro_does_not() -> void:
 	var d := DevSettings.new()
-	d.retro_pixels = true
+	d.retro_filter = true
 	d.dev_content = true
 	assert_false(d.cheats().any(), "a look and a list: no cheat")
 	d.spectate_bots = true
@@ -301,26 +301,40 @@ func test_a_bad_catalogue_row_is_left_out_and_reported() -> void:
 	assert_eq(MapCatalog.read_file("res://nowhere.md").fields(false).size(), 1, "no file: Depot alone")
 
 
-## BP6: Retro pixels' size and shades are saved, read back and held to their ends, with sliders on the Dev tab.
-func test_retro_pixels_size_and_shades() -> void:
-	s.dev.retro_pixel_size = 8
-	s.dev.retro_shades = 3
+## BP6, RF1: Retro filter's lines and shades are saved, read back and held to their ends, with sliders on the Dev tab;
+## the old filter's keys are not read (another look), its switch is.
+func test_retro_filter_lines_and_shades() -> void:
+	s.dev.retro_lines = 168
+	s.dev.retro_levels = 12
 	assert_true(s.save(path))
 	var again := Settings.new(PlayTuning.new())
 	again.load_file(path)
-	assert_eq(again.dev.retro_pixel_size, 8)
-	assert_eq(again.dev.retro_shades, 3)
+	assert_eq(again.dev.retro_lines, 168)
+	assert_eq(again.dev.retro_levels, 12)
 	var d := DevSettings.new()
-	d.from_dict({"retro_pixel_size": 99, "retro_shades": "x"})
-	assert_eq(d.retro_pixel_size, RetroPixels.PIXEL_SIZE, "out of range: the default")
-	assert_eq(d.retro_shades, RetroPixels.SHADES)
-	var r := RetroPixels.new()
+	d.from_dict({"retro_lines": 999, "retro_levels": "x"})
+	assert_eq(d.retro_lines, RetroFilter.LINES, "out of range: the default")
+	assert_eq(d.retro_levels, RetroFilter.LEVELS)
+	d.from_dict({"retro_pixels": true, "retro_pixel_size": 4, "retro_shades": 6})
+	assert_true(d.retro_filter, "an old save's switch is read")
+	assert_eq(d.retro_levels, RetroFilter.LEVELS, "its Doom-like 6 shades are not")
+	var r := RetroFilter.new()
 	r.set_look(1, 40)
 	add_child_autofree(r)
 	var mat := (r.get_child(0) as ColorRect).material as ShaderMaterial
-	assert_eq(float(mat.get_shader_parameter(&"pixel_size")), float(RetroPixels.PIXEL_SIZE_MIN), "held to the ends")
-	assert_eq(float(mat.get_shader_parameter(&"shades")), float(RetroPixels.SHADES_MAX))
+	var height := r.get_viewport().get_visible_rect().size.y
+	assert_eq(float(mat.get_shader_parameter(&"pixel_size")), float(RetroFilter.pixel_size(height, RetroFilter.LINES_MIN)),
+			"held to the ends")
+	assert_eq(float(mat.get_shader_parameter(&"levels")), float(RetroFilter.LEVELS_MAX))
 	var screen := _screen()
-	assert_eq(screen._retro_size.value, 8.0)
-	screen._retro_shades.value = 5.0
-	assert_eq(s.dev.retro_shades, 5)
+	assert_eq(screen._retro_lines.value, 168.0)
+	screen._retro_levels.value = 5.0
+	assert_eq(s.dev.retro_levels, 5)
+
+
+## RF1: a retro pixel is square and whole, about the view's height over the lines, never under one screen pixel.
+func test_retro_pixel_size() -> void:
+	assert_eq(RetroFilter.pixel_size(1080.0, 240), 5, "4.5 rounds to 5")
+	assert_eq(RetroFilter.pixel_size(2160.0, 240), 9)
+	assert_eq(RetroFilter.pixel_size(720.0, 240), 3)
+	assert_eq(RetroFilter.pixel_size(100.0, 480), 1, "never under one")

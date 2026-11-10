@@ -791,9 +791,10 @@ func _site_customs(blocks: PackedInt32Array, n: int, arrays: Array) -> void:
 
 
 ## The greybox's one material: its vertex colours (sRGB) in the shared light (docs/ART.md › A map in the look), clean,
-## with no grid or texture.
+## with no grid or texture. Its corners stay true under Dev › Retro filter (RF1): its big faces would tilt through the
+## floors and cladding laid on them.
 static func _greybox_material(style: MapStyle) -> ShaderMaterial:
-	return LookMaterials.vertex_colour(style.roughness, 0.0, Color.WHITE, true)
+	return LookMaterials.vertex_colour(style.roughness, 0.0, Color.WHITE, true, 0.0, false)
 
 
 ## A convex face given anticlockwise as seen from outside, its normal worked out from its winding.

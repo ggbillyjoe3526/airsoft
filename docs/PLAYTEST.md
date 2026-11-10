@@ -983,8 +983,8 @@ file, Dev).
   colours go back to Neutral when you set it back; a match played with AgX still counts.
 - [ ] **Dev playtesting aids** (M90). **+500 XP**, **Level up** and **Reset level** change your level at once and
   survive a reload. **Time of day** plays the map under the other light; **Bots hold fire**.
-- [ ] **Settings › Dev › Retro look** (M96, back on the Dev tab since ST1). Off by default; On gives chunky pixels and
-  a small dithered palette at once, with Pixel size and Colours; the HUD and menus stay sharp.
+- [ ] **Settings › Dev › Retro filter** (RF1; Retro pixels before). Off by default; On draws the 3D view as a 1990s
+  console did at once, with Lines and Shades; the HUD and menus stay sharp (below, The Retro filter).
 
 ## Sound
 
@@ -1307,6 +1307,15 @@ AEG Rifle until its own model.
 
 - [ ] **Mode order.** Under MODE the cards read Attack / Defend at the top, then Elimination, then Practice. Attack /
   Defend is still picked at start; pick the Range, then Depot again: your mode comes back.
+
+## The Retro filter (RF1)
+
+- [ ] **A 1990s console, not Doom.** Settings › Dev › Retro filter on, play Depot and Woodland: square low-resolution
+  pixels (240 lines), smooth 15-bit colour with a fine stipple in dark gradients (no hard bands), the field's corners
+  wobbling a little as you turn and walk, its textures swimming slightly on walls and floors (never smearing a floor
+  into one colour), and a soft haze from about 12 m. Your replica, arms and the players stay steady (their shapes
+  don't wobble). Lines 120 is chunkier, 480 finer; Shades 4 bands hard. Off: the haze and wobble go at once and the
+  map's own look is back.
 
 ## Reporting what you find
 
