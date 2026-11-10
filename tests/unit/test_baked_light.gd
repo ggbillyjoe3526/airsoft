@@ -329,3 +329,24 @@ func test_a_tiny_tile_size_is_turned_away_before_tiling() -> void:
 	assert_lt(Time.get_ticks_msec() - started, 200, "no millions of vertices made")
 	assert_false(level.baked_light_drawn())
 	assert_push_warning("rebake with tools/bake_light.gd")
+
+
+func test_doors_and_props_follow_the_light_when_only_the_lamps_toggle() -> void:
+	var session := PlaySession.new()
+	session.map_id = "depot"
+	session.practice = true
+	session.autopilot = true
+	add_child_autofree(session)
+	await wait_physics_frames(2)
+	var base := GraphicsTable.shared().preset(&"high").copy()
+	base.baked_light = true
+	base.lamp_lights = GraphicsQuality.LampLights.OFF
+	session._apply_graphics(base)
+	var lit := base.copy()
+	lit.lamp_lights = GraphicsQuality.LampLights.NEAR
+	session._apply_graphics(lit)
+	assert_true(session._level.baked_light_drawn())
+	assert_not_null(session._doors, "Depot has doors")
+	var held: PackedColorArray = session._doors._lights_down.duplicate()
+	session._relight()
+	assert_eq(session._doors._lights_down, held, "the doors hold the light now drawn, not the one before the lamps lit")

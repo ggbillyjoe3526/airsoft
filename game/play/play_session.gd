@@ -180,8 +180,9 @@ var _bushes: BushView = null
 var _site: SiteDress = null
 ## A field with no site dress drawn with CC0 props all the same (Woodland's, WR3; a site's are its SiteDress's).
 var _props: PropDress = null
-## Whether the doors, poles and props were last lit by the baked light (`_relight`, BP7).
-var _relit: bool = false
+## Which of the level's lights the doors, poles and props were last lit by (`_relight`, BP7;
+## MapLevel.baked_light_builds: 0 the shared light alone, as they are built).
+var _relit: int = 0
 ## Scratch for the vault prompt's look ahead each tick.
 var _vault_probe: VaultState = VaultState.new()
 var _figures: Array[FigureView] = []
@@ -2045,7 +2046,7 @@ func _apply_graphics(values: GraphicsQuality) -> void:
 		_lifts.set_probes(values.reflections != GraphicsQuality.Reflections.OFF)
 	if _level != null:
 		_level.set_detail(values.mesh_detail)
-		if _level.baked_light_drawn() != _relit:
+		if _level.baked_light_builds() != _relit:
 			_relight()
 	var contact := GraphicsApply.contact_shadows(values)
 	for f in _figures:
@@ -2067,9 +2068,10 @@ func _apply_graphics(values: GraphicsQuality) -> void:
 
 
 ## The doors, poles and props in the baked light near them while it is drawn, in the shared light alone while it
-## isn't (BakedLightNear, BP7): as Baked light switches (they are built in the shared light alone).
+## isn't (BakedLightNear, BP7): as the light drawn changes, Baked light switched or the roof's lamps (PT1; they are
+## built in the shared light alone).
 func _relight() -> void:
-	_relit = _level.baked_light_drawn()
+	_relit = _level.baked_light_builds()
 	var lights := _level.baked_lights()
 	if _doors != null:
 		_doors.relight(lights)

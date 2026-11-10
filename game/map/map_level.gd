@@ -80,6 +80,8 @@ var _bake: BakedLight = null
 var _bake_looked: bool = false
 ## Whether the roof's lamps shine as real lights (`set_baked_light`): the bake is drawn without the sun's bounce.
 var _lamps_shine: bool = false
+## How many times `set_baked_light` has rebuilt the mesh (`baked_light_builds`).
+var _light_builds: int = 0
 ## The baked vertices drawn, each one's normal and its light (a linear multiplier), kept while the bake is drawn for
 ## `baked_lights`, made from them when first asked.
 var _lit_at: PackedVector3Array = PackedVector3Array()
@@ -347,6 +349,7 @@ func set_baked_light(on: bool, lamps: bool = false) -> void:
 		return
 	_baked = draw
 	_lamps_shine = shine
+	_light_builds += 1
 	var old := _mesh
 	remove_child(old)
 	old.queue_free()
@@ -357,6 +360,12 @@ func set_baked_light(on: bool, lamps: bool = false) -> void:
 ## Whether the baked light is drawn.
 func baked_light_drawn() -> bool:
 	return _baked
+
+
+## How many times the light drawn has changed (`set_baked_light` rebuilt the mesh): what stands beside the baked faces
+## takes their light again (`baked_lights`) each time it does, whether the bake was switched or only the lamps.
+func baked_light_builds() -> int:
+	return _light_builds
 
 
 ## The baked light near what stands beside the baked faces (BakedLightNear), made the first time it is asked for after

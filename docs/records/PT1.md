@@ -37,5 +37,10 @@ only.
 
 ## Checks
 
-- gdlint clean; `test_baked_light` (14, two new: the sun's bounce goes under shining lamps and comes back with them
+- QA attempt 1 failed it: the doors, poles and props kept the sun's bounce when only Lamp light changed, since
+  PlaySession relit them only when Baked light switched. Now MapLevel counts its light's rebuilds
+  (`baked_light_builds`) and PlaySession relights on each one; QA's test
+  (`test_doors_and_props_follow_the_light_when_only_the_lamps_toggle`) passes.
+
+- gdlint clean; `test_baked_light` (15, three new: the sun's bounce goes under shining lamps and comes back with them
   off, and a field with no roof lamps keeps it) and `test_graphics_apply` (15) pass; CI runs the full gate.
