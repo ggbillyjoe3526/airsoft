@@ -65,6 +65,8 @@ var _ssao: bool = false
 var _look: LookConfig = null
 ## The sun's strength as the preset sets it, which `set_key_share` scales.
 var _key_energy: float = 0.0
+## The preset's ambient light's strength, before set_ambient_share.
+var _ambient_energy: float = 0.0
 ## The map's reflection probes (`add_probes`), shown while Reflections draw them.
 var _probes: Node3D = null
 
@@ -115,6 +117,7 @@ static func build(cfg: LightingConfig, look: LookConfig = null) -> FieldLighting
 	root.add_child(sun)
 	root.sun = sun
 	root._key_energy = cfg.sun_energy
+	root._ambient_energy = cfg.ambient_energy
 	return root
 
 
@@ -196,12 +199,23 @@ func set_effects(gi: GraphicsQuality.GlobalIllumination, reflections: GraphicsQu
 		sun.light_angular_distance = size
 
 
-## The sun at `share` of its preset's strength: below 1 while an indoor field's real roof lamps light the hall
-## (RoofLamps.key_share). Only set when it changes; never per frame.
+## The sun at `share` of its preset's strength: none while an indoor field's real roof lamps light the hall
+## (RoofLamps.key_share), when it is hidden too, so its shadow passes go. Only set when it changes; never per frame.
 func set_key_share(share: float) -> void:
 	var energy := _key_energy * share
 	if not is_equal_approx(sun.light_energy, energy):
 		sun.light_energy = energy
+	var lit := share > 0.0
+	if sun.visible != lit:
+		sun.visible = lit
+
+
+## The sky's ambient light at `share` of the preset's: below 1 under an indoor field's roof while its real lamps light
+## the hall (RoofLamps.ambient_share), so their shadows stay deep. Only set when it changes; never per frame.
+func set_ambient_share(share: float) -> void:
+	var energy := _ambient_energy * share
+	if not is_equal_approx(environment.ambient_light_energy, energy):
+		environment.ambient_light_energy = energy
 
 
 ## The look's grade and its effects' settings on `env`, every effect left off for `set_effects`.

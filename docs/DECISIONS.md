@@ -311,6 +311,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **Roof lamps light wide and soft, but their shadows stay dark (owner, 2026-11-10, UG2).** No visible cone on the
   floor or in the haze ("more wider and diffused"), and never so much overlap that shadows fill in ("the shadows
   should still be dark"). Re-tune any lamp change against both (`RoofConfig` › Lamp light).
+- **No sun indoors (owner, 2026-11-10, UG2).** "There is no place for sun to get inside": on a roofed field (Depot)
+  High and Ultra light the hall with its lamps alone, every lamp over the whole roof, with less sky light under the
+  roof so their shadows are deep; no sun strips or shafts. Low and Medium keep the overhead light as the lamps' stand-in
+  (they have no real lamps); open fields keep their sun. This replaces UG2's first build, which let the sun in at the
+  rooflights.
 - **Every figure keeps its team-colour plate carrier (owner, 2026-10-17, AX1).** The carrier reads like a site's team
   bib and is the strongest team cue at range. A civilian outfit is in `docs/IDEAS.md`.
 

@@ -1,6 +1,7 @@
 extends GutTest
 ## Graphics › Lamp light (RoofLamps, data/graphics.md): Depot's roof lamps as real shadow-casting spots, off on Low and
-## Medium, near on High and far on Ultra; the overhead sun turned down while they shine and back up when they stop;
+## Medium; on High and Ultra every lamp lights the whole hall, shadowed near on High and all the way on Ultra, with no
+## sun and less sky light under the roof while they shine, both back when they stop;
 ## their shadows following the shadow rows (atlas, filter, contact hardening on Softest); the figures' shadow twins kept
 ## while only the lamps cast; a night pool's light unshadowed by its own lantern or campfire; and an open-air field
 ## untouched. Headless: properties and counts, never pixels.
@@ -58,47 +59,54 @@ func test_every_lamp_gets_a_downward_shadowed_spot_under_its_lens() -> void:
 		assert_eq(spot.light_bake_mode, Light3D.BAKE_STATIC, "baked into the bounce light, never updated per frame")
 
 
-func test_near_and_far_reach_and_fade_with_their_shadows() -> void:
+func test_near_and_far_light_the_whole_hall_and_shadow_near_or_all_of_it() -> void:
 	var cfg := play.roof
 	var lamps := _roof().lamp_lights()
 	lamps.set_mode(GraphicsQuality.LampLights.NEAR, false)
 	assert_true(lamps.visible)
 	var spot := lamps.lights()[0]
-	assert_almost_eq(spot.distance_fade_begin + spot.distance_fade_length, cfg.lamp_near, 0.001)
-	assert_almost_eq(spot.distance_fade_shadow, cfg.lamp_near, 0.001, "lit only as far as shadowed")
+	assert_gt(lamps.reach(), 130.0, "past Depot's roof diagonal, so every lamp lights the hall without a sun")
+	assert_almost_eq(spot.distance_fade_begin + spot.distance_fade_length, lamps.reach(), 0.001)
+	assert_almost_eq(spot.distance_fade_shadow, cfg.lamp_near, 0.001, "High shadows only the near lamps")
 	assert_almost_eq(spot.light_size, 0.0, 0.001, "hard-edged off Softest")
 	lamps.set_mode(GraphicsQuality.LampLights.FAR, true)
-	assert_almost_eq(spot.distance_fade_begin + spot.distance_fade_length, cfg.lamp_far, 0.001)
-	assert_gt(cfg.lamp_far, 65.0, "Depot's 65 m hall sight line stays lit")
+	assert_almost_eq(spot.distance_fade_begin + spot.distance_fade_length, lamps.reach(), 0.001)
+	assert_almost_eq(spot.distance_fade_shadow, lamps.reach(), 0.001, "Ultra shadows every lamp it lights")
 	assert_almost_eq(spot.light_size, cfg.lamp_lens_size, 0.001, "contact hardening on Softest")
 	lamps.set_mode(GraphicsQuality.LampLights.OFF, true)
 	assert_false(lamps.visible)
 
 
-func test_the_sun_dims_or_is_shaded_while_the_lamps_shine_and_comes_back() -> void:
+func test_the_sun_goes_out_indoors_while_the_lamps_shine_and_comes_back() -> void:
 	var lighting := FieldLighting.build(LightingConfig.new())
 	add_child_autofree(lighting)
 	var full := lighting.sun.light_energy
+	var sky := lighting.environment.ambient_light_energy
 	var lamps := _roof().lamp_lights()
 	var rs := GraphicsApply.Server.new()
-	GraphicsApply.apply_field(table.preset(&"ultra"), lighting, null, rs, null, null, null, lamps)
-	assert_true(lamps.visible)
-	assert_almost_eq(lighting.sun.light_energy, full * play.roof.shade_sun_share, 0.001,
-			"on Far the roof shades the sun but at its rooflights instead (test_sun_shade)")
-	GraphicsApply.apply_field(table.preset(&"high"), lighting, null, rs, null, null, null, lamps)
-	assert_eq(lamps.mode(), GraphicsQuality.LampLights.NEAR)
-	assert_almost_eq(lighting.sun.light_energy, full * play.roof.lamp_sun_share, 0.001)
+	for preset: StringName in [&"ultra", &"high"]:
+		GraphicsApply.apply_field(table.preset(preset), lighting, null, rs, null, null, null, lamps)
+		assert_true(lamps.visible, preset)
+		assert_almost_eq(lighting.sun.light_energy, 0.0, 0.001, "%s: no sun gets under the roof" % preset)
+		assert_false(lighting.sun.visible, "%s: and its shadow passes go" % preset)
+		assert_almost_eq(lighting.environment.ambient_light_energy, sky * play.roof.lamp_ambient_share, 0.001,
+				"%s: less sky light, so the lamps' shadows stay deep" % preset)
 	GraphicsApply.apply_field(table.preset(&"medium"), lighting, null, rs, null, null, null, lamps)
 	assert_false(lamps.visible)
-	assert_almost_eq(lighting.sun.light_energy, full, 0.001, "the overhead sun lights the hall alone again")
+	assert_true(lighting.sun.visible)
+	assert_almost_eq(lighting.sun.light_energy, full, 0.001, "the overhead light stands in for the lamps again")
+	assert_almost_eq(lighting.environment.ambient_light_energy, sky, 0.001)
 
 
 func test_an_open_field_keeps_its_sun() -> void:
 	var lighting := FieldLighting.build(LightingConfig.new())
 	add_child_autofree(lighting)
 	var full := lighting.sun.light_energy
+	var sky := lighting.environment.ambient_light_energy
 	GraphicsApply.apply_field(table.preset(&"ultra"), lighting, null, GraphicsApply.Server.new())
 	assert_almost_eq(lighting.sun.light_energy, full, 0.001)
+	assert_true(lighting.sun.visible)
+	assert_almost_eq(lighting.environment.ambient_light_energy, sky, 0.001)
 
 
 func test_their_shadows_follow_the_shadow_rows() -> void:

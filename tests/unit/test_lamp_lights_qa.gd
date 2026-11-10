@@ -93,7 +93,7 @@ func test_switching_between_near_and_far_and_off_leaves_one_consistent_state() -
 		if step[0] == GraphicsQuality.LampLights.OFF:
 			assert_false(lamps.visible)
 			continue
-		var reach := cfg.lamp_near if step[0] == GraphicsQuality.LampLights.NEAR else cfg.lamp_far
+		var reach := cfg.lamp_near if step[0] == GraphicsQuality.LampLights.NEAR else lamps.reach()
 		assert_true(lamps.visible)
 		assert_almost_eq(spot.distance_fade_shadow, reach, 0.001)
 		assert_almost_eq(spot.light_size, cfg.lamp_lens_size if step[1] else 0.0, 0.001)

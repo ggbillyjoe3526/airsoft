@@ -77,19 +77,16 @@ never stops the game from starting.
 - **Reflections**: Probes are the map's reflection probes, one over the field and one in each large named area,
   captured once at the start (`AreaProbes`), so a smooth floor or paint reflects the hall it is in, not the sky.
   Screen (Ultra) adds screen-space reflections over them.
-- **Lamp light** makes an indoor field's roof lamps (Depot's hall) real lights, each casting its own shadow, with the
-  preset's overhead sun turned down to `RoofConfig.lamp_sun_share` of itself while they shine, so the hall reads as lit
-  by its lamps: pools under each lamp, shadows thrown out from under it, light on the haze. Near (High) lights the
-  lamps within `lamp_near` m of you, Far (Ultra) within `lamp_far` m, each fading out over its last
-  `lamp_fade` m, with no lamp lit past that (an unshadowed lamp would shine through the rooms' roofs). Their shadows
-  follow the shadow rows: Shadow detail is their atlas, Softness their filter (Softest gives each the lens's size, so
-  its shadows harden at their foot). At night it also gives a field's fires and lanterns (its light pools) shadows,
-  and Far gives real lights to `LightingConfig.real_lights_far` of them. On Far a roof drawn with its bay model also
-  shades the sun but at its rooflights (UG2, `RoofView`'s sun shade, a shadow-only slab, so only with Sun shadows
-  on; it then lights every lamp and stretches the sun's shadows over the whole roof): the sun keeps
-  `RoofConfig.shade_sun_share` and falls through them in bright strips on the floor and shafts in a thicker haze under
-  the roof (`shade_haze`, with Volumetric fog), while the lamps shine `lamp_shaded_energy` to light the rest. Off (Low,
-  Medium), and on a field with no roof lamps or light pools, it costs nothing.
+- **Lamp light** makes an indoor field's roof lamps (Depot's hall) real lights, each casting its own shadow, and the
+  hall is lit by them alone (owner, 2026-11-10: no sun gets indoors): while they shine the preset's overhead sun goes
+  out (`RoofConfig.lamp_sun_share`, none, and hidden, so its shadow passes go too) and the sky's ambient light keeps
+  `lamp_ambient_share` of itself, so their shadows stay deep. Pools under each lamp, shadows thrown out from under it,
+  light on the haze. Both Near (High) and Far (Ultra) light every lamp over the whole roof (`RoofLamps.reach`);
+  Near shadows only the lamps within `lamp_near` m of you, Far all of them. Their shadows follow the shadow rows:
+  Shadow detail is their atlas, Softness their filter (Softest gives each the lens's size, so its shadows harden at
+  their foot). At night it also gives a field's fires and lanterns (its light pools) shadows, and Far gives real
+  lights to `LightingConfig.real_lights_far` of them. Off (Low, Medium) the overhead light stands in for the lamps,
+  and on a field with no roof lamps or light pools it costs nothing; an open field keeps its sun on every preset.
 - **Glow** blooms only what is brighter than white (lamp panels, a lit sky), softly. **Volumetric fog** is a faint
   haze lit by the sun and the bounce light (LookConfig's Volumetric fog group).
 - **Temporal smoothing** is off on every preset: it smears the thin, fast BB streaks. It and FSR 2 are there for

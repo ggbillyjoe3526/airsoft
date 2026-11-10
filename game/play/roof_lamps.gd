@@ -1,33 +1,29 @@
 class_name RoofLamps
 extends Node3D
 ## An indoor field's roof lamps as real lights (Settings › Graphics › Lamp light, data/graphics.md): a SpotLight3D under
-## each lamp RoofView hangs, shining straight down and casting a shadow, lit out to the row's reach from the eye by the
-## engine's own distance fade (nothing here runs per frame). Off, the node is hidden and the preset's overhead sun
-## lights the hall alone, as on Low and Medium; on Near, FieldLighting.set_key_share turns that sun down to
-## RoofConfig.lamp_sun_share (`key_share`). On Far, with the roof's sun shade, the roof shades the sun but at its
-## rooflights instead, the sun keeps RoofConfig.shade_sun_share and the lamps shine lamp_shaded_energy. Built once
-## with the roof; `set_mode` only sets what changes. Look only.
+## each lamp RoofView hangs, shining straight down and casting a shadow, every one lit across the whole hall (the
+## roof's reach from any point under it), by the engine's own distance fade (nothing here runs per frame). Off, the
+## node is hidden and the preset's overhead light stands in for the lamps alone, as on Low and Medium. While they shine
+## the hall is lit by its lamps only (owner, 2026-11-10: no sun gets indoors): FieldLighting.set_key_share puts the sun
+## out (`key_share`, RoofConfig.lamp_sun_share) and set_ambient_share turns the sky's light under the roof down
+## (`ambient_share`), so their shadows stay deep. Near (High) shadows the lamps within `lamp_near` m, Far (Ultra) all.
+## Built once with the roof; `set_mode` only sets what changes. Look only.
 
 var _cfg: RoofConfig = null
 var _lights: Array[SpotLight3D] = []
-## RoofView's sun shade and hall haze, shown on Far; empty on a roof without them.
-var _shaded_nodes: Array[Node3D] = []
 var _mode: GraphicsQuality.LampLights = GraphicsQuality.LampLights.OFF
 var _soft: bool = false
-## Whether the sun casts shadows, as last set (the sun shade is a shadow and nothing else).
-var _sun_shadows: bool = false
-## How far (m) the roof reaches from any point under it (its area's diagonal and height): on Far, shaded, every lamp
-## is lit and the sun's shadows reach that far, so no part of the hall is left shaded and unlit or unshaded.
+## How far (m) the roof reaches from any point under it (its area's diagonal and height): every lamp is lit that far
+## from the eye, so no part of the hall goes unlit without the sun.
 var _cover: float = 0.0
 
 
-## A light under each of `spots` (each lamp's lowest point), as `cfg` sets them, all off; `shaded` (may be empty) are
-## the roof's sun shade and its haze, shown on Far, and `cover` how far the roof reaches from any point under it.
-static func build(spots: Array[Vector3], cfg: RoofConfig, shaded: Array[Node3D] = [], cover: float = 0.0) -> RoofLamps:
+## A light under each of `spots` (each lamp's lowest point), as `cfg` sets them, all off; `cover` is how far the roof
+## reaches from any point under it.
+static func build(spots: Array[Vector3], cfg: RoofConfig, cover: float = 0.0) -> RoofLamps:
 	var lamps := RoofLamps.new()
 	lamps.name = "LampLights"
 	lamps._cfg = cfg
-	lamps._shaded_nodes = shaded
 	lamps._cover = cover
 	lamps.visible = false
 	var down := Basis(Vector3.RIGHT, -PI * 0.5)
@@ -68,56 +64,38 @@ func mode() -> GraphicsQuality.LampLights:
 	return _mode
 
 
-## The share of its strength the overhead sun keeps with `wanted`: all of it with the lamps off, shade_sun_share
-## shaded (Far with the roof's sun shade), else lamp_sun_share.
+## The share of its strength the sun keeps with `wanted`: all of it with the lamps off (it stands in for them), else
+## RoofConfig.lamp_sun_share (none: no sun gets under the roof).
 func key_share(wanted: GraphicsQuality.LampLights) -> float:
-	if wanted == GraphicsQuality.LampLights.OFF or _lights.is_empty():
-		return 1.0
-	return _cfg.shade_sun_share if _shaded(wanted) else _cfg.lamp_sun_share
+	return 1.0 if wanted == GraphicsQuality.LampLights.OFF or _lights.is_empty() else _cfg.lamp_sun_share
 
 
-## Whether the roof shades the sun with `wanted`: on Far, with a sun shade, while the sun casts shadows (with Sun
-## shadows off a shadow-only shade blocks nothing).
-func _shaded(wanted: GraphicsQuality.LampLights) -> bool:
-	return not _shaded_nodes.is_empty() and wanted == GraphicsQuality.LampLights.FAR and _sun_shadows
+## The share of the sky's ambient light kept under the roof with `wanted`: all of it with the lamps off, else
+## RoofConfig.lamp_ambient_share, so the lamps' shadows stay deep.
+func ambient_share(wanted: GraphicsQuality.LampLights) -> float:
+	return 1.0 if wanted == GraphicsQuality.LampLights.OFF or _lights.is_empty() else _cfg.lamp_ambient_share
 
 
-## Whether the roof shades the sun now (the mode in force).
-func shaded() -> bool:
-	return _shaded(_mode)
+## How far (m) from the eye every lamp is lit: the whole roof (`_cover`), Far's `lamp_far` at least.
+func reach() -> float:
+	return maxf(_cfg.lamp_far, _cover + _cfg.lamp_fade)
 
 
-## How far (m) the sun's shadows must reach while the roof shades it: the whole roof from any point under it.
-func shade_reach() -> float:
-	return _cover
-
-
-## Lights the lamps out to `wanted`'s reach (off: hidden), their shadows contact-hardening when `soft` (Softest), and
-## on Far while the sun casts shadows (`sun_shadows`) shows the sun shade and lights every lamp under the roof
-## (`_shaded`; GraphicsApply.apply_field stretches the sun's shadows to `shade_reach`). Only what changes is set;
-## never per frame.
-func set_mode(wanted: GraphicsQuality.LampLights, soft: bool, sun_shadows: bool = false) -> void:
-	var was_shaded := _shaded(_mode)
-	_sun_shadows = sun_shadows
+## Lights every lamp (off: hidden), shadowed out to `wanted`'s reach (Near: `lamp_near`; Far: all), their shadows
+## contact-hardening when `soft` (Softest). Only what changes is set; never per frame.
+func set_mode(wanted: GraphicsQuality.LampLights, soft: bool) -> void:
 	var on := wanted != GraphicsQuality.LampLights.OFF
 	if visible != on:
 		visible = on
-	var shade_on := _shaded(wanted)
-	for node in _shaded_nodes:
-		if node.visible != shade_on:
-			node.visible = shade_on
-	if not on or (wanted == _mode and soft == _soft and shade_on == was_shaded):
+	if not on or (wanted == _mode and soft == _soft):
 		_mode = wanted
 		return
 	_mode = wanted
 	_soft = soft
-	var reach := _cfg.lamp_near if wanted == GraphicsQuality.LampLights.NEAR else _cfg.lamp_far
-	if shade_on:
-		reach = maxf(reach, _cover + _cfg.lamp_fade)
+	var lit := reach()
+	var shadowed := _cfg.lamp_near if wanted == GraphicsQuality.LampLights.NEAR else lit
 	var size := _cfg.lamp_lens_size if soft else 0.0
-	var energy := _cfg.lamp_shaded_energy if shade_on else _cfg.lamp_light_energy
 	for spot in _lights:
-		spot.light_energy = energy
-		spot.distance_fade_begin = maxf(0.0, reach - _cfg.lamp_fade)
-		spot.distance_fade_shadow = reach
+		spot.distance_fade_begin = maxf(0.0, lit - _cfg.lamp_fade)
+		spot.distance_fade_shadow = shadowed
 		spot.light_size = size

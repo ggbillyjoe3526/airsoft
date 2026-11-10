@@ -233,14 +233,7 @@ func test_pause_menu_graphics_reach_the_dust_the_sun_and_ssao_of_the_live_match(
 	assert_true(play._lighting.sun.shadow_enabled)
 	assert_true(play._lighting.environment.ssao_enabled)
 	assert_true(play._dust.emitting)
-	var sun := play._lighting.sun
-	var lamps := play._roof.lamp_lights() if play._roof != null else null
-	if lamps != null and lamps.shaded():
-		# Depot's roof shades the sun on Ultra (UG2): its shadows stretch over the whole roof, past the row's 100 m.
-		assert_almost_eq(sun.directional_shadow_max_distance, lamps.shade_reach() / sun.directional_shadow_fade_start,
-				0.001)
-	else:
-		assert_almost_eq(sun.directional_shadow_max_distance, 100.0, 0.001)
+	assert_almost_eq(play._lighting.sun.directional_shadow_max_distance, 100.0, 0.001)
 	get_tree().paused = false
 
 

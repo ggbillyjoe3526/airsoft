@@ -4,28 +4,19 @@ extends Node3D
 ## RoofConfig.bay_model, a truss, purlins, the sheet and services a bay, on the trusses' grid, a MultiMesh every
 ## RoofConfig.bay_chunk truss lines; plain truss beams in one mesh without it) and its lamps (MapData.roof_lamps, one
 ## MultiMesh: the high-bay model with its glowing lens, or a glowing panel without it), and a real light under each lamp
-## (RoofLamps) that Graphics › Lamp light switches on. The roof and lamps themselves cast no shadow, so the preset's
-## overhead sun lights the hall through them where the lamps aren't real lights (Low, Medium); on Far a shadow-only
-## sun shade over the bays (`sun_shade`) lets it in at the rooflights alone. Look only: the BB ceiling is MapLevel's;
-## nothing here is read by the simulation. Built once, nothing per frame.
+## (RoofLamps) that Graphics › Lamp light switches on, lighting the hall alone (no sun gets indoors). The roof and lamps
+## themselves cast no shadow, so the preset's overhead light stands in for the lamps through them where they aren't
+## real lights (Low, Medium). Look only: the BB ceiling
+## is MapLevel's; nothing here is read by the simulation. Built once, nothing per frame.
 
 ## How far (m) over the roof's underside the ceiling slab starts when the bays' sheet is drawn under it.
 const CEILING_LIFT := 0.01
-## The sun shade's slabs (m over the roof's underside): over the ceiling slab, so they never shade its own top.
-const SHADE_FROM := 0.2
-const SHADE_TO := 0.3
-## The narrowest shade span kept (m): a sliver at the roof's end is float rounding, not shade.
-const SPAN_MIN := 0.001
 
 var _mesh: MeshInstance3D = null
 var _lamps: MultiMeshInstance3D = null
 ## The lamps as real lights (Graphics › Lamp light), or null on a roof with none.
 var _lights: RoofLamps = null
 var _bays: Array[MultiMeshInstance3D] = []
-## The roof's shadow over the hall but at its rooflights (Lamp light Far), or null without the bays or lamps.
-var _shade: MeshInstance3D = null
-## The hall's thicker haze while the roof shades the sun (Lamp light Far), so the rooflights' sun shows in shafts.
-var _haze: FogVolume = null
 var _materials: Array[Material] = []
 
 
@@ -65,14 +56,7 @@ static func build(map: MapData, cfg: RoofConfig) -> RoofView:
 		var spots: Array[Vector3] = []
 		view._lamps = view._lamp_view(map, cfg, bay != null, spots)
 		view.add_child(view._lamps)
-		var shaded: Array[Node3D] = []
-		if bay != null:
-			view._shade = _sun_shade(area, y, cfg)
-			view._haze = _hall_haze(area, y, cfg)
-			shaded = [view._shade, view._haze]
-			for node in shaded:
-				view.add_child(node)
-		view._lights = RoofLamps.build(spots, cfg, shaded, Vector3(area.size.x, y, area.size.y).length())
+		view._lights = RoofLamps.build(spots, cfg, Vector3(area.size.x, y, area.size.y).length())
 		view.add_child(view._lights)
 	return view
 
@@ -85,11 +69,6 @@ func materials() -> Array[Material]:
 ## The lamps' real lights, or null on a roof with none.
 func lamp_lights() -> RoofLamps:
 	return _lights
-
-
-## The sun shade (Lamp light Far shows it), or null on a roof without bays or lamps (for tests).
-func sun_shade() -> MeshInstance3D:
-	return _shade
 
 
 ## How many lamps hang under it (for tests).
@@ -151,54 +130,6 @@ static func bay_lines(area: Rect2, cfg: RoofConfig) -> PackedFloat32Array:
 	var half := cfg.truss_step * 0.5
 	return truss_lines(Rect2(area.position.x - half, area.position.y, area.size.x + 2.0 * half, area.size.y),
 			cfg.truss_step)
-
-
-## The x spans over `area` the sun shade covers: all of it but a rooflight `rooflight_half` m either side of each line
-## halfway between two trusses (the bays' edges, where the bay model's rooflight strips lie), in order.
-static func shade_spans(area: Rect2, cfg: RoofConfig) -> PackedVector2Array:
-	var out := PackedVector2Array()
-	var step := cfg.truss_step
-	var x := area.position.x
-	var gap := (floorf(x / step - 0.5) + 0.5) * step
-	while x < area.end.x:
-		var lo := minf(gap - cfg.rooflight_half, area.end.x)
-		if lo > x + SPAN_MIN:
-			out.append(Vector2(x, lo))
-		x = maxf(x, gap + cfg.rooflight_half)
-		gap += step
-	return out
-
-
-## The sun shade over `area`, the roof's underside at `y`: a slab a shade span (shade_spans), casting the shadow alone,
-## hidden until Lamp light Far shows it (RoofLamps.set_mode); out of the bounce light, as the roof is.
-static func _sun_shade(area: Rect2, y: float, cfg: RoofConfig) -> MeshInstance3D:
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for span in shade_spans(area, cfg):
-		_box(st, Vector3(span.x, y + SHADE_FROM, area.position.y), Vector3(span.y, y + SHADE_TO, area.end.y))
-	var shade := MeshInstance3D.new()
-	shade.name = "SunShade"
-	shade.mesh = st.commit()
-	shade.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
-	shade.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
-	shade.visible = false
-	return shade
-
-
-## The hall's haze under the roof over `area`, the roof's underside at `y`: `shade_haze` more density on the volumetric
-## fog (Graphics › Volumetric fog; nothing without it), hidden until the sun shade shows.
-static func _hall_haze(area: Rect2, y: float, cfg: RoofConfig) -> FogVolume:
-	var haze := FogVolume.new()
-	haze.name = "HallHaze"
-	haze.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
-	haze.size = Vector3(area.size.x, y, area.size.y)
-	haze.position = Vector3(area.get_center().x, y * 0.5, area.get_center().y)
-	var mat := FogMaterial.new()
-	mat.density = cfg.shade_haze
-	mat.albedo = cfg.lamp_colour
-	haze.material = mat
-	haze.visible = false
-	return haze
 
 
 ## Where a lamp at `at` (x, z) hangs: off the nearest truss line by `lamp_clear` m when it would hang in the truss
