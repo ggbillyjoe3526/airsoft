@@ -72,6 +72,10 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 ## (m), a little past the furthest a bot hears one (DoorConfig.heard, 20 m).
 @export var door_gain: float = 0.8
 @export var door_reach: float = 26.0
+## A lift (LIFT, MT2): its chime, doors, motor and buzzer from the car or its doorway, yours too, muffled by the walls,
+## heard out to the event's reach (LiftConfig.heard); a button's beep from the button, quieter.
+@export var lift_gain: float = 0.7
+@export var lift_button_gain: float = 0.4
 ## Smoke and flash bombs (SF1): a bomb's bouncing can where it bounces (at the gain times its speed into the surface
 ## over bounce_full_speed, at most the gain), a bounce within bounce_hold (s) of the one that started it left silent,
 ## as the can's own knocks and rattle play on; a smoke going off (its spray), both heard out to prop_reach; a flash's

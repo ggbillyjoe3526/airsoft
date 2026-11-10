@@ -20,6 +20,8 @@ const DEFAULT_PATH := "res://game/config/play_tuning.tres"
 @export var skyline: SkylineConfig = SkylineConfig.new()
 ## An indoor field's roof (DR1: Depot's hall).
 @export var roof: RoofConfig = RoofConfig.new()
+## A station's lifts (MT2: Kingsmere's).
+@export var lifts: LiftViewConfig = LiftViewConfig.new()
 @export var woods: WoodsConfig = WoodsConfig.new()
 ## The floors' worn marks (WM1, WearMarks).
 @export var marks: MarksConfig = MarksConfig.new()

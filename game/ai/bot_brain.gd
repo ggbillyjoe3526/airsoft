@@ -106,6 +106,12 @@ static func think(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> void:
 		# A tunnel on its way (a floor only a crouched body fits over, CT1): it crouches through, as the player would.
 		if w.nav != null and w.nav.low_ahead(me.position, b.move_dir, cfg.low_crouch_ahead):
 			cmd.crouch = true
+	# A lift on its route (MT2): the button it presses this tick, as the player's Use would.
+	if b.lift_press != Lifts.NONE:
+		cmd.use_door = true
+		cmd.lift_to_use = b.lift_press.x
+		cmd.lift_stop = b.lift_press.y
+		b.lift_press = Lifts.NONE
 	# A personality that aims from cover raises its sight standing still to fight, to look over its cover or to hold;
 	# never to draw a holstered replica (BotHolster decides that). Every other bot fires from the hip.
 	if b.style.aims_from_cover and not moving and cmd.forward == 0.0 and cmd.right == 0.0 \

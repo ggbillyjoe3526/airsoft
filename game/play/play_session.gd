@@ -168,8 +168,11 @@ var _occluders: MapOccluders = null
 var _roof: RoofView = null
 ## The field's hinged doors, or null on a field without (DoorView, DO1).
 var _doors: DoorView = null
+## The field's lifts, or null on a field without (LiftView, MT2).
+var _lifts: LiftView = null
 ## A wood's crowns and dressing, or null on a map with neither (WoodsView, WL4).
 var _woods: WoodsView = null
+## The field's wear marks, or null on a map naming none (WearMarks, WM1).
 var _marks: WearMarks = null
 ## The map's bushes, or null on a map with none (BushView, WL5).
 var _bushes: BushView = null
@@ -424,6 +427,9 @@ func _dress_part(part: int) -> void:
 			_doors = DoorView.build(_map, _play.map_style, _tuning.doors.swing_time)
 			if _doors != null:
 				add_child(_doors)
+			_lifts = LiftView.build(_map, _play.map_style, _tuning.lifts, _play.lifts)
+			if _lifts != null:
+				add_child(_lifts)
 			_pools = LightPools.build(_map, _light)
 			if _pools != null:
 				add_child(_pools)
@@ -458,7 +464,8 @@ func _build_ground() -> bool:
 		# The bake is of the day's sun as this map sets it (an indoor field's overhead lamps, DR1), whichever preset
 		# plays.
 		var baked_sun := LightingConfig.for_map(_play.lighting, null, _map, LightingConfig.DAY)
-		_level.begin(_map, _play.map_style, _tuning.body, _play.baked_light, baked_sun, _light.night, _play.site_look)
+		_level.begin(_map, _play.map_style, _tuning.body, _play.baked_light, baked_sun, _light.night, _play.site_look,
+				_tuning.lifts)
 	return _level.build_some(Time.get_ticks_usec() + BUILD_SLICE_USEC if staged else 0)
 
 
@@ -904,6 +911,8 @@ func _build_views(ui: CanvasLayer) -> void:
 		first_use.append_array(_roof.materials())
 	if _doors != null:
 		first_use.append_array(_doors.materials())
+	if _lifts != null:
+		first_use.append_array(_lifts.materials())
 	if _pools != null:
 		first_use.append_array(_pools.materials())
 	if _fixtures != null:
@@ -1210,7 +1219,14 @@ func _after_tick() -> void:
 			_audio.on_calls(_bots.callouts.said, state, player.team, settings.hud.callouts)
 		_hud.on_calls(_bots.callouts.said, state)
 	_hud.set_vault_ready(_vault_ready())
-	_hud.set_door_prompt(_door_prompt())
+	var lift := _lift_button()
+	if lift != Lifts.NONE:
+		var spec := _level.query().lifts[lift.x]
+		var aboard := spec.holds(player.position, state.lifts.y[lift.x], _tuning.lifts)
+		_hud.set_door_prompt(Hud.DoorPrompt.LIFT_TO if aboard else Hud.DoorPrompt.LIFT_CALL,
+				spec.stop_names[lift.y] if aboard else "")
+	else:
+		_hud.set_door_prompt(_door_prompt())
 	_tally.on_tick(state)
 	_stats.after_tick(state, TICK)
 	_recent.record(state.tick, state.events, PLAYER_ID)
@@ -1406,6 +1422,8 @@ func _process(delta: float) -> void:
 	_hud.place_sound_cues(watched, yaw, fraction)
 	if _doors != null:
 		_doors.refresh(state.doors)
+	if _lifts != null:
+		_lifts.refresh(state.lifts, fraction)
 	if not _flags.is_empty():
 		var rs := state.round_state
 		for i in mini(_flags.size(), rs.flags.size()):
@@ -1917,6 +1935,15 @@ func _vault_ready() -> bool:
 	return way != Vector2.ZERO and Vault.find_along(player, way, _tuning, _level.query(), _vault_probe)
 
 
+## The lift button a Use press would press now (MT2, Lifts.pick; the prompt under the crosshair): Lifts.NONE out of play,
+## vaulting, on a map without lifts or with none in reach.
+func _lift_button() -> Vector2i:
+	if not Elimination.is_in_play(player) or player.vault.active or _sim.lifts.count() == 0:
+		return Lifts.NONE
+	return Lifts.pick(_level.query(), _tuning.lifts, state.lifts, player.position,
+			Lean.eye(player, _tuning.body, _tuning.hits), player.yaw, player.pitch)
+
+
 ## What a Use press would do now (the prompt under the crosshair, DO1): the door in your reach nearest your view's line
 ## opens or shuts; none, one swinging, or an open one with someone in its doorway shows nothing.
 func _door_prompt() -> Hud.DoorPrompt:
@@ -2011,6 +2038,9 @@ func _apply_motion() -> void:
 func _apply_graphics(values: GraphicsQuality) -> void:
 	GraphicsApply.apply_field(values, _lighting, _dust, null, _level, _kicked, _woods,
 			_roof.lamp_lights() if _roof != null else null, _marks)
+	if _lifts != null:
+		_lifts.set_lamps(values.lamp_lights != GraphicsQuality.LampLights.OFF)
+		_lifts.set_probes(values.reflections != GraphicsQuality.Reflections.OFF)
 	if _level != null:
 		_level.set_detail(values.mesh_detail)
 		if _level.baked_light_drawn() != _relit:

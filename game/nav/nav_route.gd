@@ -5,8 +5,8 @@ class_name NavRoute
 ## run drawn in cells ends), where a leg's end lies, and only when the next corner is out of sight its turns, then every
 ## second node. Each try walks a line in GDScript, so fewer tries keep the smoothing cheap.
 ##
-## A vault link in the path (a search point past the grid's nodes, NavVaults) ends the pulling at its takeoff node: the
-## route goes to the takeoff, then straight to the landing, a leg of its own, and pulls on from there.
+## A vault or lift link in the path (a search point past the grid's nodes, NavVaults, NavLifts) ends the pulling at its
+## takeoff node: the route goes to the takeoff, then straight to the landing, a leg of its own, and pulls on from there.
 
 
 ## Writes the route along node path `ids` (start node first, goal node last) into `out`, from `start` (where the walker
@@ -48,13 +48,15 @@ static func pull(g: NavGrid, ids: PackedInt64Array, start: Vector3, goal: Vector
 		out[n - 1] = Vector3(goal.x, g.floor_y[goal_node], goal.z)
 
 
-## The index of the node in `ids` from `k` on that a vault link's search point follows (its takeoff), or the last index.
+## The index of the node in `ids` from `k` on that a vault or lift link's search point follows (its takeoff: every
+## link's id is past the grid's nodes), or the last index.
 static func _segment_end(g: NavGrid, ids: PackedInt64Array, k: int) -> int:
 	var last := ids.size() - 1
-	if g.vault_base < 0:
+	if g.vault_base < 0 and g.lift_base < 0:
 		return last
+	var nodes := g.node_count()
 	for t in range(k, last):
-		if ids[t + 1] >= g.vault_base:
+		if ids[t + 1] >= nodes:
 			return t
 	return last
 

@@ -5,6 +5,8 @@
 The rooms become the station's shell: a floor slab under each (a ramp room's floor as wedges a SEG m long), a
 ceiling over it, and a wall along every edge that opens into no other room, lintels and risers where two rooms of
 different heights meet. Every shell box is then cut back out of every room's air, and no box is left inside another.
+The lift shafts (layout.SHAFT, MT2) are cut out of the shell whole and walled, a door at each stop; their cars are
+the map's `lifts`, which the game moves.
 The JSON is the map file the game reads (game/map/map_data.gd).
 """
 from __future__ import annotations
@@ -29,6 +31,7 @@ SLACK = 0.02         # boxes overlapping less than this on an axis don't clash
 GROW = 0.01          # each floor and ramp grown this much a side
 EYE_FACING_EAST = -math.pi / 2
 EYE_FACING_WEST = math.pi / 2
+SHAFT_COLOUR = 0x9c978d   # the shafts' walls, as MT1's shut shaft
 
 
 def r(v: float) -> float:
@@ -355,6 +358,49 @@ def ramp_barrier(bl: dict) -> list[tuple[list[float], str]]:
     return out
 
 
+def shaft_hole() -> list[float]:
+    """The lift shafts' whole volume, walls and all: nothing of the shell stands in it."""
+    s = L.SHAFT
+    return [s["x0"], s["x1"], L.P - s["pit"] - FT, s["top"], s["z0"], s["z1"]]
+
+
+def shaft_boxes() -> list[tuple[list[float], str]]:
+    """The shafts' walls (north, south, west, east and a partition between each two wells), each car's door cut out of
+    the north wall at every stop, and the pit's floor under the lowest stop (a wall's kind: the bots' grid walks no
+    floor in a shaft, MT2)."""
+    s, t = L.SHAFT, L.SHAFT_T
+    y0, y1 = L.P - s["pit"] - FT, s["top"]
+    walls = [[s["x0"], s["x1"], y0, y1, s["z0"], s["z0"] + t], [s["x0"], s["x1"], y0, y1, s["z1"] - t, s["z1"]],
+             [s["x0"], s["x0"] + t, y0, y1, s["z0"] + t, s["z1"] - t],
+             [s["x1"] - t, s["x1"], y0, y1, s["z0"] + t, s["z1"] - t]]
+    for a, b in zip(L.LIFTS, L.LIFTS[1:]):
+        walls.append([a["x1"], b["x0"], y0 + FT, y1, s["z0"] + t, s["z1"] - t])  # on the pit's floor
+    doors = []
+    for lf in L.LIFTS:
+        mid = (lf["x0"] + lf["x1"]) / 2
+        for y in L.LIFT_STOPS:
+            doors.append([mid - L.LIFT_DOOR_W / 2, mid + L.LIFT_DOOR_W / 2, y, y + L.LIFT_DOOR_H, s["z0"], s["z0"] + t])
+    out = [(p, "wall") for p in cut(walls, doors)]
+    out.append(([s["x0"] + t, s["x1"] - t, y0, y0 + FT, s["z0"] + t, s["z1"] - t], "wall"))
+    return out
+
+
+def lifts() -> list[dict]:
+    """The cars (MT2): each one's well inside the shaft's walls, its door on the north face, its stops' floor heights
+    and names, the stop it waits at as each round starts."""
+    s, t = L.SHAFT, L.SHAFT_T
+    out = []
+    for lf in L.LIFTS:
+        mid = (lf["x0"] + lf["x1"]) / 2
+        out.append({"name": lf["name"],
+                    "well": {"x0": lf["x0"], "x1": lf["x1"], "z0": r(s["z0"] + t), "z1": r(s["z1"] - t)},
+                    "door": {"face": "n", "from": r(mid - L.LIFT_DOOR_W / 2), "to": r(mid + L.LIFT_DOOR_W / 2),
+                             "height": L.LIFT_DOOR_H},
+                    "stops": [r(y + LIFT) for y in L.LIFT_STOPS], "stopNames": L.LIFT_STOP_NAMES,
+                    "start": L.LIFT_STOPS.index(lf["start"])})
+    return out
+
+
 # ---------------- Writing ----------------
 
 def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0) -> dict:
@@ -417,9 +463,16 @@ def build() -> dict:
         blocks.append(as_block(bl["kind"], bx, colour=bl["colour"]))
         solid.append(bx)
     air = [(i, a) for i, rm in enumerate(L.rooms) for a in air_boxes(rm)]
+    shaft = shaft_hole()
+    for bx in solid:
+        if overlap(bx, shaft, SLACK):
+            print("warning: a ramp or cover", bx, "stands in the lift shafts")
+    for bx, kind in shaft_boxes():
+        blocks.append(as_block(kind, bx, colour=SHAFT_COLOUR))
+        solid.append(bx)
     kinds = 0
     for bx, owner, kind in shell_boxes:
-        holes = [a for i, a in air if i != owner]
+        holes = [a for i, a in air if i != owner] + [shaft]
         parts = cut([bx], holes)
         parts = cut(parts, [s for s in solid if overlap(s, bx)])
         for p in parts:
@@ -449,6 +502,7 @@ def build() -> dict:
         "roof": {"height": r(max(ceil_at(rm, max(rm["ya"], rm["yb"])) for rm in L.rooms if rm["ceil"]) + FT + ROOF_OVER
                              + LIFT), "plain": True, "lamps": lamps()},
         "areas": areas(),
+        "lifts": lifts(),
     }
     del sx
     return m

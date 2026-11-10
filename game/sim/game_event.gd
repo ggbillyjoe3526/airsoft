@@ -50,6 +50,7 @@ enum Kind {
 	LASER, ## actor's laser from slot (Dev › Lasers, LZ1) ended at position, reach m along direction (unit) from the eyes it left: its beam, drawn; what it stopped on is that tick's BB_IMPACT, CHARACTER_HIT or TARGET_HIT.
 	ROUND_COUNT, ## the round's start countdown reached value whole seconds left (3, 2, 1): everyone is held until GO.
 	ROUND_GO, ## the start countdown is over (or there is none): the round's clock and everyone's hands are free.
+	LIFT, ## lift target's (WorldQuery's order) cue value (Lifts.Cue) at stop value2, at position (a button, its doorway or its car), from actor's press (its last caller; -1 none); heard out to reach through walls (Lifts, MT2).
 }
 
 ## RATTLE: a rattling magazine (ReplicaConfig.rattles) while walking or moving crouched, otherwise silent.

@@ -21,6 +21,7 @@ two interfaces the simulation asks the level through (docs/ARCHITECTURE.md › C
 | `baked_light.gd` | `BakedLight`: one map's bake (`assets/maps/bakes/`, written by `tools/bake_light.gd`): per tiled vertex the sky it sees and the sun's bounce, kept apart, and the hash of the blocks and settings it was baked from (`hash_of`) |
 | `jolt_query.gd` | `JoltQuery` (WorldQuery): BB rays and what is underfoot through one `RayCast3D` cast on demand (no allocation a ray); its `foliage` is the map's bushes, which MapLevel hands it and Jolt never sees; the sight ray and the ray past the railings are blind to the railings' bodies (SR1), whose bars `railings` tests |
 | `jolt_mover.gd` | `JoltMover` (CharacterMover): the same cylinder BoxWorld moves, swept with `body_test_motion`: vertical, then level with slides, then a step up; the ground probe sweeps a thin disc down |
+| (lifts) | `MapLevel` adds each lift's car (its floor and roof, one static body moved each tick with `body_set_state`, so it carries and stops at once) and its doorways (a shape a stop, solid unless the car stands open there); `WorldQuery.add_lift`, `set_lift_car` and `set_lift_door` (BoxWorld and JoltQuery) keep them as the rules have them (MT2) |
 
 Tuning: `MapStyle` (`game/config/map_style.gd`: each kind's surface and colour, a block's own colour first, the kinds drawn see-through (`clear_kinds`), sloping ground's colours, its squares
 and the canopy rule). Tests: `tests/unit/test_map_level.gd`

@@ -65,6 +65,10 @@ const STEP_NAMES: PackedStringArray = ["run", "sprint", "land"]
 ## Cues other than a shot's capped at their own level up close, not the field's (BP8: a smoke going off, raised with
 ## the bang, which plays as a shot).
 const OWN_CAP_CUES: Array[StringName] = [&"smoke_pop"]
+## A lift's cue by its LIFT event's value (Lifts.Cue: a button, the doors opening, shutting, the car setting off,
+## arriving, too full), from tools/lift_sounds.py (MT2).
+const LIFT_CUES: Array[StringName] = [&"lift_button", &"lift_doors", &"lift_doors", &"lift_motor", &"lift_chime",
+		&"lift_buzz"]
 ## What a play is, for its pitch and level spread, its priority in the field's pool and how many of its cue may sound.
 enum Kind { SHOT, MECHANISM, STEP, VAULT, ROPE, IMPACT, HIT, STEEL, INTERFACE, RADIO, FOLEY, CALL, PROP, RADIO_CALL }
 ## How far past the ears' distance a call's voice still carries, so the far edge of its ring is never cut off.
@@ -195,6 +199,8 @@ func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, quer
 			"foley_lean", "whistle_short", "whistle_long", "torchClick", "ping_pip", "magToss", "magCatch", "grenade_pin",
 			"grenade_bounce", "smoke_pop", "flash_bang", "door_open", "door_shut", BOLT_CUE, DRY_CUE, LASER_CUE]:
 		_load(cue)
+	for cue: StringName in LIFT_CUES:
+		_load(String(cue))
 	_set_muffle(cfg.muffled_cutoff_hz)
 	for i in cfg.field_voices:
 		var v := AudioStreamPlayer3D.new()
@@ -367,6 +373,12 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 			GameEvent.Kind.DOOR:
 				_play(&"door_shut" if e.value == 1 else &"door_open", e.position, false, _cfg.door_gain, Kind.PROP,
 						BUS_EFFECTS, 1.0, _cfg.door_reach, null, true)
+			# A lift's cue (MT2): from its button, doorway or car, yours too, muffled by the walls between.
+			GameEvent.Kind.LIFT:
+				var button := e.value == Lifts.Cue.BUTTON
+				_play(LIFT_CUES[clampi(e.value, 0, LIFT_CUES.size() - 1)], e.position, false,
+						_cfg.lift_button_gain if button else _cfg.lift_gain, Kind.PROP, BUS_EFFECTS, 1.0, e.reach, null,
+						true)
 			GameEvent.Kind.FLAG_ROPE:
 				_play(&"rope_up" if e.value == 1 else &"rope_down", e.position, false, _cfg.rope_gain, Kind.ROPE,
 						BUS_EFFECTS)
