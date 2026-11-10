@@ -26,7 +26,7 @@ that only clips an elbow or a muzzle flies on. F5 shows everyone's hit areas if 
 Every round starts the same way: everyone is held still while **3, 2, 1, GO!** shows under the round's banner, a beep
 sounds on each of 3, 2 and 1, and the referee's whistle blows at **GO!**, when the clock starts. You can still look
 round while you wait. Nothing sounds under the loading screen, so the first thing you hear in a match is the field and
-the first round's 3.
+the countdown's first beep.
 
 When a BB hits you:
 
