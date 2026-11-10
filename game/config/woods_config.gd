@@ -153,7 +153,7 @@ extends Resource
 ## hollow-log sections carry their own look, and a slab of moss on their boxes would show inside the tunnel.
 @export var moss_band: float = 0.4
 @export var moss_proud: float = 0.012
-@export var moss_dresses: Array[StringName] = [&"", &"log"]
+@export var moss_dresses: Array[StringName] = [&""]
 
 @export_group("Night air")
 ## Fireflies over the field by night (MapData.fireflies): points `firefly_size` m across hanging `firefly_height` m (a

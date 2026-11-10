@@ -37,8 +37,8 @@ class Block:
 	## Which piece of its kind it is (0 first, in file order): blocks that build one thing, such as a container's walls
 	## under its roof, share their piece (MapStyle draws a piece in one colour).
 	var piece: int = 0
-	## The CC0 prop it is drawn as (`dress` in the file, WR3: a tree's trunk, a log, cordwood, crates, tyres, the truck,
-	## a thicket's spruce; PropDressConfig.model_lays), empty for its box. Look only: the box is still what BBs meet
+	## The prop model it is drawn as (`dress` in the file, WR3: a tree, a fallen log, cordwood, crates, tyres, the
+	## pickup, a thicket's spruce; PropDressConfig.model_lays), empty for its box. Look only: the box is still what BBs meet
 	## (a round prop's, MapStyle.round_steps, as its stepped boxes).
 	var dress: StringName = &""
 	## Its own colour (sRGB; `colour` in the file, 0xRRGGBB, ST1: a map's palette paint, each building its own), or

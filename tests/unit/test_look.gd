@@ -52,15 +52,6 @@ func test_the_lights_values_are_the_projects_global_uniforms() -> void:
 ## SiteLook colours that aren't paint: a container's base (each unit takes container_paint), a frame's white tint, and
 ## the marks drawn only with grit (none on a clean surface).
 const NOT_PAINT: Array[StringName] = [&"container", &"frame", &"tuft", &"chip", &"rust_foot", &"dirt_foot"]
-## Woodland's props' recipe parts (tools/props/build_props.py; Depot's are Blender models since RK1), every part of
-## each, by palette name.
-const PROP_PARTS := {
-	"trunk": {"woodBark": &"bark", "woodInner": &"heartwood"}, "log": {"woodBark": &"bark", "woodInner": &"heartwood"},
-	"logstack": {"woodBark": &"bark", "woodInner": &"heartwood", "woodDark": &"umber"},
-	"pine": {"woodBarkDark": &"umber", "leafsDark": &"pine"}, "tyre": {"all": &"rubber"},
-	"truck": {"body": &"violet", "wheel-front-right": &"rubber", "wheel-front-left": &"rubber",
-			"wheel-back-right": &"rubber", "wheel-back-left": &"rubber"},
-}
 ## The greybox kinds and ground surfaces Woodland is drawn in (MapStyle), each by its palette name.
 const WOODLAND_KINDS := {
 	&"tree": &"bark", &"log": &"timber", &"fence": &"timber", &"plywood": &"plywood", &"wall": &"concrete",
@@ -134,25 +125,6 @@ func test_woodland_is_drawn_in_the_shared_light() -> void:
 		add_child_autofree(bushes)
 		for mat in bushes.materials():
 			assert_eq((mat as ShaderMaterial).shader, LookMaterials.VERTEX_SHADER, "the bushes")
-
-
-func test_the_props_recipes_are_the_palettes() -> void:
-	var text := FileAccess.get_file_as_string("res://tools/props/build_props.py")
-	assert_false(text.is_empty(), "reads the recipes")
-	for model: String in PROP_PARTS:
-		var start := text.find('\n    "%s": {' % model)
-		assert_gt(start, -1, "a %s recipe" % model)
-		var recipe := text.substr(start, text.find("\n    \"", start + 1) - start)
-		for part: String in PROP_PARTS[model]:
-			var re := RegEx.create_from_string('"%s": \\(([\\d.]+), ([\\d.]+), ([\\d.]+)\\)' % part)
-			var m := re.search(recipe)
-			assert_not_null(m, "%s's %s colour" % [model, part])
-			if m == null:
-				continue
-			var got := Color(m.get_string(1).to_float(), m.get_string(2).to_float(), m.get_string(3).to_float())
-			var want := look.colour(PROP_PARTS[model][part] as StringName)
-			for c in 3:
-				assert_almost_eq(got[c], want[c], 0.002, "%s's %s is %s" % [model, part, PROP_PARTS[model][part]])
 
 
 func test_a_palette_name_it_lacks_warns_and_shows_magenta() -> void:

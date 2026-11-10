@@ -224,8 +224,8 @@ Every map takes the look this way (Depot did, AD1; Woodland, WA1):
 1. **Draw every surface in the shared light.** A shader includes `look_light.gdshaderinc`; a vertex-coloured model
    uses `LookMaterials.vertex_colour`. A `StandardMaterial3D` doesn't get the look's shade or rim.
 2. **Paint from the palette.** Every colour a map paints is a palette entry: a new colour goes into the palette
-   first, then into the map's paint. Spread the six site colours evenly and put big repeated props on a neutral. CC0
-   models are recoloured into it (`tools/props/build_props.py` writes vertex colours). `tests/unit/test_look.gd` holds
+   first, then into the map's paint. Spread the six site colours evenly and put big repeated props on a neutral. A
+   model is painted from it by name (`tools/blender/maps/prop.py` writes vertex colours). `tests/unit/test_look.gd` holds
    Depot's and Woodland's paint and props to the palette; a new map adds its own to that test.
 3. **Keep surfaces clean.** No noise, stains or photo grain; the gradient and lit edges carry the shape.
 4. **Light it with a preset.** The map's `lighting` overrides tune the sun, fill and exposure; a roofed map's sun hangs
@@ -301,9 +301,8 @@ Depot's temporary site dress (DD1, until the owner's models; Depot and the range
   prop (`dress`: Depot's desks and lockers, the Range's kit rack), where `PropLayout` (`prop_layout.gd`, pure, seeded)
   lays them, one MultiMesh a model in one vertex-coloured material. Every prop stays inside its block's box; the box
   draws nothing (or, behind shelving, a dark backing half a row in: `SiteSurface.core_of`) and leaves the baked
-  shadow caster. Depot's and the Range's models are our own, built in Blender by `tools/blender/maps/` (RK1); Woodland's
-  smaller props are Kenney's (its trees are its own since WT1), recoloured off the teams' hues by
-  `tools/props/build_props.py`; all in `assets/models/props/` (vertex colours, no textures).
+  shadow caster. Every map's models are our own, built in Blender by `tools/blender/maps/` (RK1, WT1, WG2 to WG4; the
+  last Kenney props went in Dev 3), all in `assets/models/props/` (vertex colours, no textures).
 
 The figures (step 23, FI1-FI7; every bot on every preset, DECISIONS BD1):
 

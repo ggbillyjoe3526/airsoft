@@ -1,6 +1,5 @@
 """Shared helpers for the map props built in Blender (Dev 3, RK1): one vertex-coloured mesh a model, exported as a
-.glb into assets/models/props/ the way tools/props/build_props.py writes the Kenney ones, so PropDress draws it in the
-props' one material (PropDressConfig).
+.glb into assets/models/props/, so PropDress draws it in the props' one material (PropDressConfig).
 
 A prop is built from code with hardsurface.py's Builder, each face painted a palette colour by name (LookConfig.palette,
 sRGB here, written linear): "crate", or "crate*0.9" for a shade of it. On export every face's paint becomes the colour

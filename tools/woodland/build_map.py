@@ -34,10 +34,10 @@ KINDS = {"palisade": "fence", "logstack": "log", "log": "log", "logpile": "log",
          "crates": "crate", "lowcrates": "crate", "tyre": "tyre", "tyrestack": "tyre", "truck": "truck",
          "fortwall": "plywood", "lowwall": "plywood", "hutwall": "plywood", "window": "plywood", "post": "log",
          "parapet": "plywood"}
-# The CC0 prop each piece's blocks are drawn as (WR3; PropDressConfig lays them in the box, which stays what BBs meet),
+# The prop model each piece's blocks are drawn as (WR3; PropDressConfig lays them in the box, which stays what BBs meet),
 # and the trees', the thickets' and the palisade's (WG3). The posts and the walls keep their boxes.
 DRESS = {"log": "fallen_log", "logpile": "cordwood", "logstack": "cordwood", "crates": "crate", "lowcrates": "crate",
-         "tyre": "tractor_tyre", "tyrestack": "tractor_tyre_stack", "truck": "pickup", "tree": "trunk",
+         "tyre": "tractor_tyre", "tyrestack": "tractor_tyre_stack", "truck": "pickup",
          "thicket": "spruce", "windthrow": "root_plate", "palisade": "palisade",
          # WG4: the game's own models (tools/blender/maps) for the tunnels' and the culvert's blocks
          "tunnel_side": "log_tunnel_side", "tunnel_roof": "log_tunnel_roof", "culvert_wall": "culvert_wall",
@@ -47,8 +47,6 @@ DRESS = {"log": "fallen_log", "logpile": "cordwood", "logstack": "cordwood", "cr
 TAG_DRESS = {"boards": "boards", "sawbench": "sawbench"}
 # The fallen logs are modelled at these lengths (m, WG2): each log block takes the nearest to its long side.
 LOG_LENGTHS = (5, 6, 8)
-# A log block that is no piece of the plan's keeps the CC0 log (WG4 names the tunnels' blocks; this is the fallback).
-UNNAMED_LOG = "log"
 # The structures drawn as one model of the game's own each (WG3, tools/blender/maps/woodland_*.py), named on every
 # block of theirs: the model fills the box round them all (PropDressConfig's SET lay), each part of it its block.
 TOWER, BRIDGE, SHED = "watch_tower", "footbridge", "sawmill_shed"
@@ -648,8 +646,6 @@ def dressed(blocks: list[dict]) -> list[dict]:
     for b in blocks:
         key = b.get("piece_kind", b["kind"])
         name = TAG_DRESS.get(key, DRESS.get(key))
-        if "piece_kind" not in b and b["kind"] == "log":
-            name = UNNAMED_LOG
         if name == "fallen_log":
             long = max(b["size"]["x"], b["size"]["z"])
             name = "fallen_log_%d" % min(LOG_LENGTHS, key=lambda n: abs(n - long))

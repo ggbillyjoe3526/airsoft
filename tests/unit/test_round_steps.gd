@@ -7,8 +7,8 @@ extends GutTest
 ## bots' cover still take the block's box.
 
 const ROUND_MAPS: Array[String] = ["woodland", "depot"]
-## The round props checked: Woodland's trunks and trees (WT1), Depot's drums and barrels and their pallets.
-const ROUND_MODELS: Array[StringName] = [&"trunk", &"pine_young", &"pine_grown", &"pine_old", &"oak", &"birch", &"drum",
+## The round props checked: Woodland's trees (WT1), Depot's drums and barrels and their pallets.
+const ROUND_MODELS: Array[StringName] = [&"pine_young", &"pine_grown", &"pine_old", &"oak", &"birch", &"drum",
 		&"barrel", &"pallet"]
 ## A step may reach this far (m) past a prop's vertex and still hold it (the steps' figures are rounded outwards).
 const SLACK := 2e-3
@@ -206,20 +206,19 @@ func test_the_steps_cut_the_square_s_empty_corners_and_stay_inside_it() -> void:
 		assert_gt(counted, 0, "%s has round props" % id)
 
 
-func test_a_trunk_s_front_corners_are_open_and_its_rooted_back_ones_solid() -> void:
+func test_a_tree_s_corners_are_open_and_round_its_middle_solid() -> void:
 	var m := _map("woodland")
-	var middle := PropLayout.field_middle(m)
 	var trees := 0
 	for b in m.blocks:
 		if b.kind != &"tree" or b.size.x < 1.0:
 			continue
 		trees += 1
 		var steps := _steps(m, b)
-		var front := 1.0 if middle.z >= b.center.z else -1.0
-		var open := b.center + Vector3(b.size.x * 0.45, 0.0, front * b.size.z * 0.45)
-		var rooted := b.center + Vector3(b.size.x * 0.4, 0.0, -front * b.size.z * 0.4)
-		assert_false(_inside(steps, open), "a trunk's front corner (away from its roots) is open")
-		assert_true(_inside(steps, rooted), "a trunk's back corner (its roots) is solid")
+		for corner: Vector2 in [Vector2(1, 1), Vector2(1, -1), Vector2(-1, 1), Vector2(-1, -1)]:
+			var open := b.center + Vector3(corner.x * b.size.x * 0.45, 0.0, corner.y * b.size.z * 0.45)
+			var solid := b.center + Vector3(corner.x * b.size.x * 0.4, 0.0, corner.y * b.size.z * 0.4)
+			assert_false(_inside(steps, open), "a tree's corner %s is open" % corner)
+			assert_true(_inside(steps, solid), "a tree's trunk %s of its middle is solid" % corner)
 		if trees >= 20:
 			break
 	assert_gt(trees, 0)

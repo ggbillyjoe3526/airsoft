@@ -1,12 +1,10 @@
-Poly Haven textures (Depot's temporary site dress)
+Poly Haven textures (Depot's plywood)
 
-concrete_floor_02_diff_1k.jpg, concrete_floor_02_nor_gl_1k.jpg
-  "Concrete Floor 02" by Poly Haven, https://polyhaven.com/a/concrete_floor_02
 plywood_diff_1k.jpg, plywood_nor_gl_1k.jpg
   "Plywood" by Poly Haven, https://polyhaven.com/a/plywood
 
 Fetched from the GitHub mirror https://github.com/hakyong-tae/game-asset-library-3d (packs/ph),
-as the build machine could not reach polyhaven.com; the mirror lists them as Poly Haven's 1K sets.
+as the build machine could not reach polyhaven.com; the mirror lists it as Poly Haven's 1K set.
 
 Licence: CC0 1.0 Universal (public domain dedication),
 https://creativecommons.org/publicdomain/zero/1.0/
