@@ -68,6 +68,9 @@ var _site: SiteLook = null
 ## behind them, or not at all.
 var _props: PropDressConfig = null
 var _site_material: ShaderMaterial = null
+## The station dress's look and its material (MT3); null for a map without one.
+var _station: StationLook = null
+var _station_material: ShaderMaterial = null
 ## Sloping ground's tiles, under one node; empty on a map without it.
 var _tiles: Array[MeshInstance3D] = []
 ## Whether the mesh drawn is the baked one; the map's bake, loaded when first drawn (`_bake_looked`).
@@ -110,17 +113,20 @@ var _railing_bodies: Dictionary[int, StaticBody3D] = {}
 ## `set_baked_light`) drawn with `light` and checked against the sun in `lighting` (null: the built-in ones), the
 ## preset bakes are made under (the day's), not the one playing; `night` draws it with its sky share alone; `site` dresses
 ## a map that names a site dress (null: greybox); its lifts' cars are sized by `lifts` (null: the built-in LiftConfig,
-## MT2). Call once, inside the tree; or, to spread it over frames (a loading screen), `begin` with the same arguments
-## and then `build_some` each frame until it says it is done: the same level.
+## MT2); `station` dresses a map that names a station dress (null: greybox, MT3). Call once, inside the tree; or, to
+## spread it over frames (a loading screen), `begin` with the same arguments and then `build_some` each frame until it
+## says it is done: the same level.
 func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = null,
-		lighting: LightingConfig = null, night: bool = false, site: SiteLook = null, lifts: LiftConfig = null) -> void:
-	begin(m, style, body, light, lighting, night, site, lifts)
+		lighting: LightingConfig = null, night: bool = false, site: SiteLook = null, lifts: LiftConfig = null,
+		station: StationLook = null) -> void:
+	begin(m, style, body, light, lighting, night, site, lifts, station)
 	build_some(0)
 
 
 ## Starts `build` (its arguments), building nothing yet: `build_some` does it.
 func begin(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = null,
-		lighting: LightingConfig = null, night: bool = false, site: SiteLook = null, lifts: LiftConfig = null) -> void:
+		lighting: LightingConfig = null, night: bool = false, site: SiteLook = null, lifts: LiftConfig = null,
+		station: StationLook = null) -> void:
 	assert(is_inside_tree(), "MapLevel.build needs the level in the tree (its physics space)")
 	map = m
 	_style = style
@@ -135,6 +141,9 @@ func begin(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 	if m.site != null and site != null:
 		_site = site
 		_site_material = SiteSurface.material(site, m)
+	if m.station != null and station != null:
+		_station_material = StationSurface.material(station)
+		_station = station if _station_material != null else null
 	_piece = Piece.MESH
 
 
@@ -361,16 +370,24 @@ func glass_materials() -> Array[Material]:
 	return out
 
 
+## The station dress's material (MT3); null for a map without one.
+func station_material() -> ShaderMaterial:
+	return _station_material
+
+
 ## The site dress's material, which SiteDress draws its details in too; null for a greybox map.
 func site_material() -> ShaderMaterial:
 	return _site_material
 
 
 ## Draws the site dress as Mesh detail step `detail` (GraphicsQuality.MeshDetail) asks: on Low without the photo
-## textures' relief and the finer marks (SiteSurface). Nothing on a greybox map.
+## textures' relief and the finer marks (SiteSurface), a station's without its sets' relief (StationSurface). Nothing on
+## a greybox map.
 func set_detail(detail: GraphicsQuality.MeshDetail) -> void:
 	if _site_material != null:
 		_site_material.set_shader_parameter(&"low", detail == GraphicsQuality.MeshDetail.LOW)
+	if _station_material != null:
+		_station_material.set_shader_parameter(&"low", detail == GraphicsQuality.MeshDetail.LOW)
 
 
 ## Sloping ground's tiles (WL4), row by row; empty on a map without sloping ground.
@@ -548,6 +565,13 @@ func _kinematic(space: RID, shape: RID) -> RID:
 ## draws either in the site's material; its shadow caster stays the greybox's.
 func _make_mesh() -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
+	# A station draws its own photo sets, unbaked (MT3: lit by its lamps; Kingsmere names no bake).
+	if _station != null:
+		mi.name = "Station"
+		mi.material_override = _station_material
+		mi.mesh = StationSurface.mesh(map, _style, _station)
+		_baked = false
+		return mi
 	mi.name = "Greybox" if _site == null else "Site"
 	mi.material_override = _material if _site == null else _site_material
 	var baked := _baked_mesh() if _baked else null

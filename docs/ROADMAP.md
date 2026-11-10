@@ -35,7 +35,7 @@ in `docs/PROCESS.md`.
   and wear decals (WM1), then baked path-traced light. The owner added a replica (2026-11-10): the Compact SMG, its numbers
   and play first (CS1, Dev content), then its own model from his photos (CS2). And a
   new map (2026-11-10): Kingsmere, a closed metro station on three levels, from his concept v2: its greybox as Dev
-  content (MT1, done), then its working lifts (MT2, done), then its models and lamps.
+  content (MT1, done), then its working lifts (MT2, done), its CC0 materials (MT3, done), then its models and lamps.
 - **The release path** (owner, 2026-10-12): 0.1 Dev builds, 0.1 Beta, then 0.1 (tagged `0.1.0`) opens Early
   Access to the public.
   Themed updates follow (Replica, Modes, Maps, Progression and any more), up to 1.0, the full launch. See

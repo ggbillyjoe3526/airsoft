@@ -35,6 +35,8 @@ const DEFAULT_PATH := "res://game/config/play_tuning.tres"
 @export var figures: FigureConfig = FigureConfig.new()
 ## How a map naming a site dress is drawn (DD1: Depot's temporary dress).
 @export var site_look: SiteLook = SiteLook.new()
+## How a map naming a station dress is drawn (MT3: Kingsmere's CC0 photo sets).
+@export var station_look: StationLook = StationLook.new()
 ## The game's look on every map: the shared light, the picture's grade and the graphics effects (docs/ART.md).
 @export var look: LookConfig = LookConfig.new()
 ## Seconds the match's summary stays up before the next match starts (a click starts it sooner); the wait starts once
