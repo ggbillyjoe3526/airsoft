@@ -25,6 +25,9 @@ const PANEL_GAP := 26
 const PANEL_PAD := Vector2i(22, 22)
 ## A key cap's corner radius and least width (px).
 const KEY_CORNER := 4
+## The Armory's browse arrows (‹ ›): glyph size and padding.
+const ARROW_SIZE := 22
+const ARROW_PAD := Vector2i(14, 4)
 const KEY_MIN_WIDTH := 26.0
 
 
@@ -187,3 +190,19 @@ static func glass(content: Control, pad: Vector2i = PANEL_PAD) -> PanelContainer
 	panel.add_theme_stylebox_override("panel", GameTheme.panel_box(pad.x, pad.y))
 	panel.add_child(content)
 	return panel
+
+
+## A small ‹ or › arrow button (the Armory's), named `node_name`, with `tip` as its tooltip; disabled, it fades right
+## back, not just its glyph.
+static func arrow_button(glyph: String, tip: String, node_name: String) -> Button:
+	var b := Button.new()
+	b.name = node_name
+	b.text = glyph
+	b.tooltip_text = tip
+	b.add_theme_font_size_override("font_size", ARROW_SIZE)
+	GameTheme.dress(b, GameTheme.box(GameTheme.CARD, GameTheme.LINE, ARROW_PAD.x, ARROW_PAD.y),
+			GameTheme.box(GameTheme.CARD_HI, GameTheme.LINE, ARROW_PAD.x, ARROW_PAD.y),
+			GameTheme.box(GameTheme.CARD_HI, GameTheme.ACCENT, ARROW_PAD.x, ARROW_PAD.y))
+	b.add_theme_stylebox_override("disabled", GameTheme.box(Color(0.0, 0.0, 0.0, 0.0), GameTheme.LINE, ARROW_PAD.x,
+			ARROW_PAD.y))
+	return b

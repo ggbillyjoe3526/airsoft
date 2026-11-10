@@ -318,6 +318,9 @@ unlocks is in `data/levels.md`; the Armory shows it in the game.
 - [ ] **The Armory.** Your level "of 15", the XP bar and how XP is earned (a match 100, a win 100 more, each round won
   20, each hit 10, times the difficulty), what the next level unlocks, and every level with its items (reached ones
   Unlocked, the next Next). Easy to read?
+- [ ] **Ten levels at a time.** The level track shows the starting kit and levels 1 to 10; the › at its right end
+  turns to 11 to 15 and the ‹ at its left back. It opens on the ten with your next level. Left and right on the
+  focused track turn the page past 10 and 11.
 - [ ] **XP on the summary.** Win a standard first-to-5 match on Normal: "XP earned +N XP", what gave it, then "Level
   N: X / Y XP" over a bar. A loss gives less.
 - [ ] **A level up.** Your first finished standard match takes you to level 1: the summary says "Level 1!" and

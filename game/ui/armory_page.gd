@@ -7,8 +7,6 @@ extends Control
 ## Dev buttons).
 
 const NOTICE_SIZE := 15
-const ARROW_SIZE := 22
-const ARROW_PAD := Vector2i(14, 4)
 const ARROW_GAP := 10
 
 var progress: Progress = null
@@ -110,17 +108,7 @@ func _title_row() -> Control:
 
 
 func _arrow(glyph: String, tip_key: String, step: int) -> Button:
-	var b := Button.new()
-	b.name = "Back" if step < 0 else "On"
-	b.text = glyph
-	b.tooltip_text = tr(tip_key)
-	b.add_theme_font_size_override("font_size", ARROW_SIZE)
-	GameTheme.dress(b, GameTheme.box(GameTheme.CARD, GameTheme.LINE, ARROW_PAD.x, ARROW_PAD.y),
-			GameTheme.box(GameTheme.CARD_HI, GameTheme.LINE, ARROW_PAD.x, ARROW_PAD.y),
-			GameTheme.box(GameTheme.CARD_HI, GameTheme.ACCENT, ARROW_PAD.x, ARROW_PAD.y))
-	# at an end the arrow fades right back, not just its glyph
-	b.add_theme_stylebox_override("disabled", GameTheme.box(Color(0.0, 0.0, 0.0, 0.0), GameTheme.LINE, ARROW_PAD.x,
-			ARROW_PAD.y))
+	var b := MenuParts.arrow_button(glyph, tr(tip_key), "Back" if step < 0 else "On")
 	b.pressed.connect(func() -> void: _track.browse(step))
 	return b
 

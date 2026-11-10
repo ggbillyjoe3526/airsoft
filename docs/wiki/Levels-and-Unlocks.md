@@ -45,7 +45,8 @@ default. Custom matches never count, and the summary says "Not counted this matc
 The **ARMORY** tab on the side rail shows your level in large type, with the XP you have towards the next level, the
 XP you have earned in all and how many items are unlocked. How XP is earned and the bot level multipliers sit at the
 right (hover for the details). Under them a track has a dot for the starting kit and each level, filled up to your
-level and on into the next by the XP you have earned.
+level and on into the next by the XP you have earned. It shows ten levels at a time: the arrows at its ends turn to
+the levels before and after, and it opens on the ten with your next level.
 
 Below the track are four level cards, starting at your level. Each card shows its items with their pictures (hover an
 item to see what it does), marked **UNLOCKED**, **NEXT** (edged in the accent colour: the next level with something new) or with

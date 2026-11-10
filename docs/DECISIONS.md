@@ -789,7 +789,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **The cap is 15, with a replica every five levels (owner, 2026-11-10; LV15).** The Sniper Rifle at 5, the Compact
   SMG at 10 and the Cyber Pistol at 15; every level gives something public. Levels 1 to 10 keep their XP, so no save
   changes level; 11 to 15 take 1,400 to 1,800 (about 58 Normal matches to the cap). The cap goes to 20 or more with the
-  Progression Update, its new levels filled with skins.
+  Progression Update, its new levels filled with skins. The Armory's level track shows ten levels at a time, with
+  arrows at its ends to turn to the next ten (owner, 2026-11-10).
 - **XP numbers live in `levels.md` for the owner to tune (2026-10-13).** Every match gives XP except the range, the
   tutorial and any match using dev content or a cheat. About 250 XP a Normal match, level 10 after about 26
   (level 15 after about 58 since LV15).
