@@ -1,13 +1,13 @@
 # MT2 · Kingsmere's working lifts
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-10 | 1 | thread | ✓ | Retry 7/8 | the golden angle and the beep's reach were unnamed numbers; the performance report was missing |
-| 2026-11-10 | 2 | thread | ✓ | – | – |
+| 2026-11-10 | 2 | thread | ✓ | Accept 8/8 | – |
 
 ## Goal
 
@@ -53,9 +53,9 @@ the ticket hall (18.9).
 ## Checks and balance
 
 - `tools/check.sh`: gdlint, changelog notes, wiki, unit tests (all seven parts), smoke and licence notices pass.
-- Balance (8 seeds, Normal, `pipeline/runs/MT2/attempt-1/balance-report.md` in the shared files): Attack / Defend
-  attackers 46.9 % ±6.2 (MT1: 67.7 %), in band; Elimination's west end 57.1 % ±6.2, within noise; no round ran out
-  the clock.
+- Balance (8 seeds, Normal, `pipeline/runs/MT2/attempt-1/balance-report.md` in the shared files, the reviews'
+  reports beside it and in `attempt-2/`): Attack / Defend attackers 46.9 % ±6.2 (MT1: 67.7 %), in band;
+  Elimination's west end 57.1 % ±6.2, within noise; no round ran out the clock.
 
 ## Known issues left
 

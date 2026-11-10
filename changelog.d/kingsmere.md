@@ -5,4 +5,4 @@
 - Close quarters above, with one long 58 m line along the south platform.
 - In Attack / Defend, flag A is inside the south train and flag B is on the stair's half landing. The flag poles are shorter to fit inside the train.
 - Strip lamps light every level on High and Ultra. Medium draws the station in flat shade.
-- It is a greybox: plain shapes with no station models yet. The lift shafts are shut and bots don't use lifts yet.
+- It is a greybox: plain shapes with no station models yet.
