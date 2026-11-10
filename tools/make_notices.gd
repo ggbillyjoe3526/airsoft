@@ -15,6 +15,7 @@ const SHIPPED: Array = [
 	["Inter (the HUD and menu font)", "res://assets/fonts/OFL.txt"],
 	["Barlow Condensed (the menus' headings)", "res://assets/fonts/BarlowCondensed-OFL.txt"],
 	["Poly Haven textures (Depot's plywood; CC0, credited by choice)", "res://assets/textures/site/LICENSE.txt"],
+	["ambientCG materials (Kingsmere's station; CC0, credited by choice)", "res://assets/textures/station/LICENSE.txt"],
 ]
 
 

@@ -14,6 +14,7 @@
 [ext_resource type="Script" path="res://game/config/skyline_config.gd" id="14_sk3ln"]
 [ext_resource type="Script" path="res://game/config/woods_config.gd" id="16_wd4cf"]
 [ext_resource type="Script" path="res://game/config/site_look.gd" id="17_st5lk"]
+[ext_resource type="Script" uid="uid://b1pmo28hh45he" path="res://game/config/station_look.gd" id="31_stnlk"]
 [ext_resource type="Script" uid="uid://cvb8w0oxso48k" path="res://game/config/prop_dress_config.gd" id="29_pdc01"]
 [ext_resource type="Script" path="res://game/config/roof_config.gd" id="18_rf6cf"]
 [ext_resource type="Script" path="res://game/config/play_tuning.gd" id="6_q2qxh"]
@@ -301,6 +302,9 @@ script = ExtResource("16_wd4cf")
 [sub_resource type="Resource" id="Resource_pdc01"]
 script = ExtResource("29_pdc01")
 
+[sub_resource type="Resource" id="Resource_stnlk"]
+script = ExtResource("31_stnlk")
+
 [sub_resource type="Resource" id="Resource_st5lk"]
 script = ExtResource("17_st5lk")
 props = SubResource("Resource_pdc01")
@@ -338,6 +342,7 @@ range_view = SubResource("Resource_3isbp")
 minimap = SubResource("Resource_mm1cf")
 figures = SubResource("Resource_fi1fc")
 site_look = SubResource("Resource_st5lk")
+station_look = SubResource("Resource_stnlk")
 roof = SubResource("Resource_rf6cf")
 look = SubResource("Resource_lk7ad")
 light_fixtures = SubResource("Resource_lf4wg")
