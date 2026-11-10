@@ -6,7 +6,8 @@ extends Node
 ## dot on it (optic_glass.gdshader). Round the glass the optic's own model shows and the view is the main camera's, with
 ## nothing dark round it. The second camera draws only while a sight is raised, into a small square picture, or while a
 ## scope is held at the hip (BP8, the owner): then its disc is clear glass you see through, the second camera drawing
-## the field behind it at the main view's own scale, lined up with the view round it, lightly tinted with a reflection
+## what lies straight ahead of the optic, looking down its own axis (SG1, the owner: not the patch of the view behind
+## the glass, which at the hip looks off at a slant), at the main view's own scale, lightly tinted with a reflection
 ## and no reticle (its own material, optic_glass_hip.gdshader), drawn without the dearer effects (no ambient occlusion,
 ## bounce light, reflections, glow or volumetric fog); below `hip_glass_camera_from`'s Mesh detail (Low) the hip glass
 ## is a still tint and no camera draws. Neither shader copies the screen. A red dot's glass at the hip is its model's
@@ -27,6 +28,9 @@ const AIM_DISTANCE := 100.0
 const RIM_POINTS := 8
 ## The disc sits this far nearer the eye than the glass, so the two never fight over depth (m).
 const DISC_LIFT := 0.0005
+## Past this share of straight up or down the optic points too near the eye's up to keep the hip glass's picture
+## upright by it, and the optic's own up is taken.
+const UPRIGHT_LIMIT := 0.999
 
 
 ## One optic's glass, on one replica in the hands.
@@ -80,6 +84,8 @@ func setup(cfg: ViewModelConfig, view: ViewConfig, eyes: Camera3D) -> void:
 	_camera.near = view.near
 	_camera.far = view.far
 	_camera.keep_aspect = Camera3D.KEEP_HEIGHT
+	# Placed by hand every rendered frame (off the eye at the hip), never eased between ticks by the engine.
+	_camera.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	_port.add_child(_camera)
 	_camera.current = true
 
@@ -189,14 +195,18 @@ func update(w: Sight, raise: float) -> void:
 	if hip:
 		reach = _rim_reach(w, centre_px)
 	var span := minf(2.0 * reach * _cfg.glass_margin / screen.y, _cfg.glass_share)
+	if _camera.projection != Camera3D.PROJECTION_PERSPECTIVE:
+		_camera.projection = Camera3D.PROJECTION_PERSPECTIVE
+	# The glass sees as far, and as near, as the eye.
+	if _camera.near != _eyes.near or _camera.far != _eyes.far:
+		_camera.near = _eyes.near
+		_camera.far = _eyes.far
 	if hip:
-		_frame_patch(centre_px / screen, span, screen.x / screen.y)
+		_face_optic(w, span, screen.x / screen.y)
 	else:
 		var tan_glass := span * tan(deg_to_rad(_eyes.fov) * 0.5)
 		if w.magnify > 0.0:
 			tan_glass = span * tan(deg_to_rad(_view.vertical_fov()) * 0.5) / w.magnify
-		if _camera.projection != Camera3D.PROJECTION_PERSPECTIVE:
-			_camera.projection = Camera3D.PROJECTION_PERSPECTIVE
 		_camera.fov = rad_to_deg(2.0 * atan(tan_glass))
 		_camera.transform = Transform3D(Basis.looking_at(centre - eye, _eyes.global_basis.y), eye)
 	m.set_shader_parameter(&"span", span)
@@ -220,17 +230,23 @@ func _rim_reach(w: Sight, centre_px: Vector2) -> float:
 	return reach
 
 
-## The glass's camera at the eye, facing as the eye does, its frustum cropped to the square `span` screen heights across
-## centred on `centre_uv` (the screen's width over its height `aspect`): the picture is exactly the patch of the main
-## view behind the glass, wherever the glass is on screen.
-func _frame_patch(centre_uv: Vector2, span: float, aspect: float) -> void:
-	var near := _eyes.near
-	var half_h := near * tan(deg_to_rad(_eyes.fov) * 0.5)
+## The glass's camera on `w`'s optic's own axis, where it passes nearest the eye (at most hip_glass_eye_reach from it),
+## looking straight down it, upright as the eye sees, at the main view's own scale for a picture `span` screen heights
+## across (the screen's width over its height `aspect`): the glass shows what lies directly in front of the optic.
+func _face_optic(w: Sight, span: float, aspect: float) -> void:
+	var eye := _eyes.global_position
+	var ahead := -w.model.global_basis.z.normalized()
+	var on_axis := w.disc.global_position
+	var nearest := on_axis + ahead * (eye - on_axis).dot(ahead)
+	var from := eye + (nearest - eye).limit_length(_cfg.hip_glass_eye_reach)
+	var up := _eyes.global_basis.y
+	if absf(ahead.dot(up)) > UPRIGHT_LIMIT:
+		up = w.model.global_basis.y.normalized()
+	var half_h := tan(deg_to_rad(_eyes.fov) * 0.5)
 	if _eyes.keep_aspect == Camera3D.KEEP_WIDTH:
 		half_h /= aspect
-	_camera.transform = _eyes.global_transform
-	_camera.set_frustum(span * 2.0 * half_h,
-			Vector2((2.0 * centre_uv.x - 1.0) * half_h * aspect, (1.0 - 2.0 * centre_uv.y) * half_h), near, _eyes.far)
+	_camera.fov = rad_to_deg(2.0 * atan(span * half_h))
+	_camera.transform = Transform3D(Basis.looking_at(ahead, up), from)
 
 
 ## Whether `w`'s glass shows as plain glass now, its sight raised `raise` (0..1): a scope's (one that magnifies) at the

@@ -1163,7 +1163,7 @@ Bugs the browser game had and fixed; a bug pass checks the rebuild doesn't bring
 - [ ] **Bombs.** Press 4: the smoke comes into your hand and stays there. Click: it is thrown. Take another, hold the
   button: your arm stays back, pin out, until you let go. Same with 5. Bots still throw theirs on their own.
 - [ ] **Scope glass.** At the hip, the 2x Scope's and the Variable Scope's glass is clear, lightly tinted glass showing
-  what is behind it, lined up with the view round it, while turning and walking; aim (right mouse) and the zoomed view
+  what lies straight ahead of the scope, down its own axis (SG1), while turning and walking; aim (right mouse) and the zoomed view
   and reticle show. On Low graphics the hip glass is a still tinted glass instead: check Low's frame rate with a scope.
 - [ ] **BBs from the muzzle.** Aim down the GBB Pistol and the Cyber Pistol and fire while turning and strafing: no BB
   shows between your eye and the pistol; each first shows at the muzzle.

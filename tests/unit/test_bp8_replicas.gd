@@ -260,9 +260,9 @@ func test_at_the_hip_a_scopes_glass_is_plain_glass_and_aimed_it_is_the_sight() -
 	assert_eq(glass._port.render_target_update_mode, SubViewport.UPDATE_ALWAYS, "the field behind it drawn")
 	var span: float = held.window.hip_material.get_shader_parameter(&"span")
 	var eyes := glass._eyes
-	assert_eq(glass._camera.projection, Camera3D.PROJECTION_FRUSTUM, "a crop of the main view")
-	assert_almost_eq(glass._camera.size, span * 2.0 * eyes.near * tan(deg_to_rad(eyes.fov) * 0.5), 1e-6,
-			"at the main view's own scale: what lies behind the glass, lined up, unmagnified")
+	assert_eq(glass._camera.projection, Camera3D.PROJECTION_PERSPECTIVE, "down the scope's own axis (SG1)")
+	assert_almost_eq(tan(deg_to_rad(glass._camera.fov) * 0.5), span * tan(deg_to_rad(eyes.fov) * 0.5), 1e-5,
+			"at the main view's own scale: unmagnified")
 	assert_null(glass.drawing_camera(), "no zoomed detail for figures at the hip")
 	held.root.position = Vector3(0.0, 0.0, ViewModelConfig.new().aim_forward[&"aeg"]) - held.rear_sight
 	glass.update(held.window, 1.0)
@@ -332,32 +332,43 @@ func test_the_glass_camera_leaves_the_reflection_probes_to_the_view() -> void:
 	assert_eq(glass._camera.cull_mask & OpticGlass.HANDS_LAYER, 0, "and the hands, as before")
 
 
-func test_off_centre_the_hip_glass_shows_exactly_the_patch_of_the_view_behind_it() -> void:
-	# The critic (BP8): a world point lands on the same screen pixel through the main view and through the glass's
-	# picture as its shader maps it, wherever the glass is on screen.
+func test_at_the_hip_the_glass_shows_what_lies_straight_ahead_of_the_scope() -> void:
+	# SG1 (the owner): at the hip the glass showed the patch of the view behind it, which looks off at a slant; it shows
+	# what is directly in front of the optic, down its own axis, wherever the replica is held and however it is turned.
 	var hands := _hip_scope()
 	var held: ReplicaView.Held = hands._held[0]
 	var glass := hands._glass
 	var eyes := glass._eyes
-	for at: Vector3 in [Vector3(0.13, -0.16, -0.32), Vector3(0.3, -0.05, -0.3), Vector3(-0.25, 0.12, -0.35)]:
-		held.root.position = at
-		glass.update(held.window, 0.0)
-		assert_eq(glass._camera.global_basis, eyes.global_basis, "facing as the eye does")
-		var m := held.window.hip_material
-		var screen := eyes.get_viewport().get_visible_rect().size
-		var centre_uv: Vector2 = m.get_shader_parameter(&"centre_uv")
-		var span: float = m.get_shader_parameter(&"span")
-		var aspect: float = m.get_shader_parameter(&"aspect")
-		var centre_px := centre_uv * screen
-		assert_gt(centre_px.distance_to(screen * 0.5), 20.0, "%s: off the screen's centre" % at)
-		for nudge: Vector2 in [Vector2.ZERO, Vector2(6.0, -4.0), Vector2(-5.0, 7.0)]:
-			var q := centre_px + nudge
-			var point := eyes.project_position(q, 8.0)
-			assert_almost_eq(eyes.unproject_position(point), q, Vector2.ONE * 0.01)
-			var picture := glass._camera.unproject_position(point) / Vector2(glass._port.size)
-			var shown := (centre_uv + (picture - Vector2(0.5, 0.5)) * span / Vector2(aspect, 1.0)) * screen
-			assert_almost_eq(shown, q, Vector2.ONE * 0.5, "%s %s: the same pixel through the glass" % [at, nudge])
-			assert_true(picture.x > 0.0 and picture.x < 1.0 and picture.y > 0.0 and picture.y < 1.0, "on the picture")
+	var cfg := ViewModelConfig.new()
+	# The rifles' hold at the hip, the default hold, and one nudged in toward the eye's line.
+	for at: Vector3 in [cfg.hip[&"aeg"], cfg.hip_default, Vector3(0.05, -0.12, -0.3)]:
+		for turn: Vector3 in [Vector3.ZERO, Vector3(0.1, -0.2, 0.05), Vector3(-0.15, 0.25, -0.1)]:
+			held.root.position = at
+			held.root.rotation = turn
+			glass.update(held.window, 0.0)
+			assert_true(held.window.disc.visible, "%s %s: the glass shows" % [at, turn])
+			var ahead := -held.window.model.global_basis.z.normalized()
+			var cam := glass._camera
+			assert_almost_eq(-cam.global_basis.z.normalized().dot(ahead), 1.0, 1e-5, "%s %s: down its axis" % [at, turn])
+			var from_eye := cam.global_position.distance_to(eyes.global_position)
+			assert_lte(from_eye, cfg.hip_glass_eye_reach + 1e-5, "%s %s: no further from the eye than allowed" % [at, turn])
+			# A point on the optic's axis, near or far, lands on the middle of the glass's picture: straight ahead.
+			for far: float in [3.0, 30.0]:
+				var point := held.window.disc.global_position + ahead * far
+				var picture := cam.unproject_position(point) / Vector2(glass._port.size)
+				assert_almost_eq(picture, Vector2(0.5, 0.5), Vector2.ONE * 0.01, "%s %s %s m: on the glass's middle" % [
+						at, turn, far])
+			assert_almost_eq(cam.global_basis.x.dot(eyes.global_basis.y), 0.0, 1e-4, "%s %s: upright" % [at, turn])
+	# Held far out, the axis passes further from the eye than the body reaches: the camera stops at the reach, toward
+	# it, still looking down the axis, so it never looks out past a wall the eye stands against.
+	held.root.rotation = Vector3.ZERO
+	held.root.position = Vector3(0.45, 0.2, -0.3)
+	glass.update(held.window, 0.0)
+	var cam_far := glass._camera
+	assert_almost_eq(cam_far.global_position.distance_to(eyes.global_position), cfg.hip_glass_eye_reach, 1e-4,
+			"held far out: at the reach")
+	assert_almost_eq(-cam_far.global_basis.z.normalized().dot(-held.window.model.global_basis.z.normalized()), 1.0,
+			1e-5, "and down the axis still")
 	glass.update(null, 0.0)
 
 
