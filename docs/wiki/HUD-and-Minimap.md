@@ -25,7 +25,7 @@ Turning the hop-up dial shows its setting here for a moment.
 Bottom right, just above the ammo panel, a picture of each thing you carry with the key that takes it in hand at the
 right of its row: your two replicas (1 and 2), then your smoke (4) and flash (5) bombs, one icon for each bomb you
 carry (two icons side by side for two), with no numbers. A bomb you never carried has no row. The one in your hand is
-bright with a teal edge; the rest are dim, and a bomb you have thrown stays as one dim icon. Nothing is lit while your
+bright with a pale accent edge; the rest are dim, and a bomb you have thrown stays as one dim icon. Nothing is lit while your
 replica is holstered. The notes above the ammo panel (RELOADING, a bomb in hand, the hop-up readout) show above the
 rail, so it never moves. The pictures come from the models
 themselves, so a new paint or replica shows as it is.
@@ -38,7 +38,7 @@ goes as the reload starts.
 
 The hit feed (top right, or bottom left if you like) shows each hit: who fired, the BB trail, who was hit and their red
 **HIT** call with a raised hand, in team colours, each on a rounded pill. Your own lines say "You" and are framed in
-teal, and your own hit stays framed until the next round.
+the accent colour, and your own hit stays framed until the next round.
 
 Teammates wear a chevron in your team's colour over their heads, seen through walls: solid when you can see them,
 hollow when cover hides them, grey with a raised hand once they're hit. Markers never show over enemies and never

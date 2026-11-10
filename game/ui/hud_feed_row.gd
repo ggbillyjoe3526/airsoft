@@ -1,8 +1,8 @@
 class_name HudFeedRow
 extends Control
 ## One hit-feed line (concept `hud-feed.png`, rounded as UI concept B v2 `hud.png`): who fired, the BB's trail, who was
-## hit, and their HIT call, on a rounded navy pill with the shooter's team bar inside its left end. Names in their
-## team's colour, "You" in white; a teammate's name carries the teammate chevron; your own lines are framed in teal. A
+## hit, and their HIT call, on a rounded dark pill with the shooter's team bar inside its left end. Names in their
+## team's colour, "You" in white; a teammate's name carries the teammate chevron; your own lines are framed in accent. A
 ## teammate's callout (CO2, concept `step27/callouts.png`) is a row of its own kind: the team bar, the speaker's chevron
 ## and name, a radio glyph and the words. One node: everything is drawn, laid out once each time the line changes.
 

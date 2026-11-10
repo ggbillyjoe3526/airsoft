@@ -184,7 +184,8 @@ func _shot_of(key: StringName) -> Shot:
 
 
 func _make(key: StringName) -> Shot:
-	var scene := load("%s%s.glb" % [MODEL_DIR, key]) as PackedScene
+	# A replica with a stand-in model (CS1) is pictured by it.
+	var scene := load("%s%s.glb" % [MODEL_DIR, ReplicaConfig.model_of(key)]) as PackedScene
 	if scene == null:
 		return null
 	var model := scene.instantiate() as Node3D

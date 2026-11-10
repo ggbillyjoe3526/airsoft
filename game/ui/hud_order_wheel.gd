@@ -25,7 +25,7 @@ const NOTICE_RULE := 3.0
 const BAND := 9.0
 ## What lies behind the wheel: a dark that fades out to the radius `SCRIM_RADII` ends at, its darkest share and the
 ## texture (px) it is baked into.
-const SCRIM := Color("080d18")
+const SCRIM := GameTheme.BG
 const SCRIM_RADII := Vector3(360.0, 470.0, 540.0)
 const SCRIM_ALPHAS := Vector2(0.3, 0.1)
 const SCRIM_BAKE := 128

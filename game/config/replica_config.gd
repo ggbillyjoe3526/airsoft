@@ -6,6 +6,9 @@ extends Resource
 
 enum FireMode { SEMI, BURST, AUTO }
 
+## Where the built-in replicas are (ReplicaStats.REPLICA_DIR).
+const REPLICA_DIR := "res://game/config/replicas/"
+
 ## stats.md's Key, and the generic, non-brand name the HUD shows.
 @export var id: StringName = &""
 @export var display_name: String = ""
@@ -42,6 +45,15 @@ enum FireMode { SEMI, BURST, AUTO }
 ## Each shot is followed by a bolt worked by hand (the Sniper Rifle): its cycle is heard and drawn after every shot, and
 ## its fire rate is how fast the bolt is worked.
 @export var bolt_action: bool = false
+## The pace it is carried at, as a share of the run and the sprint (Movement.target_speed; a compact replica is lighter
+## on your feet, the Compact SMG, CS1). Holstered, the holster's pace stands instead.
+@export var pace: float = 1.0
+## The share of the spread that moving, jumping and sprinting add that it takes (Accuracy; 1: all of it). A compact
+## replica swings less on the move (the Compact SMG, CS1).
+@export var move_spread: float = 1.0
+## The replica whose model, parts, first-person hold and view it is drawn with, until it has a model of its own
+## (the Compact SMG wears the AEG Rifle's until the owner's reference pictures, CS1); "" for its own (`id`).
+@export var model: StringName = &""
 
 ## What its parts make of it, as carried (LoadoutRules.carried; as it comes, these change nothing). The view's zoom when
 ## aimed (0: the iron sights', ViewConfig.aim_zoom), and the share of the usual time to raise the sight.
@@ -64,3 +76,15 @@ enum FireMode { SEMI, BURST, AUTO }
 ## The sound profile its shots, dry clicks and magazines play: its own, else its power's.
 func sound_profile() -> StringName:
 	return sound if sound != &"" else power
+
+
+## The Key of the replica it is drawn as: its stand-in `model`, else its own `id`.
+func model_id() -> StringName:
+	return model if model != &"" else id
+
+
+## The Key of the replica the built-in replica `key` is drawn as (model_id); `key` itself with no built-in config.
+static func model_of(key: StringName) -> StringName:
+	var path := "%s%s.tres" % [REPLICA_DIR, key]
+	var r := load(path) as ReplicaConfig if ResourceLoader.exists(path) else null
+	return r.model_id() if r != null else key

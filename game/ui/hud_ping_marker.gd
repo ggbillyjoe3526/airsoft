@@ -3,7 +3,7 @@ extends Control
 ## One ping's marker on the HUD (PN2; concept `step27/ping.png`; the browser game's ui/pingMarkers.ts, PG1): over the
 ## field a ring in your team's colour for a spot, or a diamond in the other team's for a contact, with "PING · 9 M" or
 ## "CONTACT · 13 M" under it. Off the screen's side or behind you it is pinned inside the edge instead, as the flag
-## marker is: a navy plate with a chevron pointing the way, the ring or diamond and the words. It pops in over
+## marker is: a dark plate with a chevron pointing the way, the ring or diamond and the words. It pops in over
 ## HudConfig.ping_pop (at once under Reduced motion), stays whole, and fades over the last HudConfig.ping_fade of its
 ## life. Made once (HudPingMarkers keeps one per teammate) and refilled: its words change only with the distance or
 ## the kind, and a frame that moves it allocates nothing. Over the field the marker draws its glyph (one triangle
@@ -29,7 +29,7 @@ const CHEVRON := Vector2(10.0, 16.0)
 ## The glyphs' strokes (px): the ring's band in its colour, the dark ink round it and round the diamond.
 const RING_WIDTH := 3.5
 const INK_WIDTH := 2.0
-const INK := Color(Color("080d18"), 0.85)
+const INK := Color(GameTheme.BG, 0.85)
 const ARC_POINTS := 32
 ## The antialiasing fringe round a Mark's edges (px), fading to nothing.
 const FEATHER := 1.0

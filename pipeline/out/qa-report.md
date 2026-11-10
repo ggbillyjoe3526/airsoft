@@ -1,8 +1,18 @@
-# QA report SL3
-Verdict: Pass (one doc bug to fix, no code bugs).
-- glbs (roof_truss, hall_wall, hall_shutter, hall_exit): nodes, scenes, mesh/primitive names, accessor counts and POSITION min/max identical to origin/main; materials identical (one "Prop"); only vertex colours differ. Lamp Lens is in roof_lamp.glb, untouched.
-- Targeted tests (test_look, test_props, test_dh1_hall_shell, test_lamp_lights_qa): 56/56 pass. New test fails against the old roof_truss.glb (checked), passes on the new one.
-- Palette: 0x8c8a96 = grey, 0xd2cec8 = concrete, both palette entries; neither is a team hue. test_look's _in_palette passes.
-- Card pictures: 1920x1080 and 480x270 as before, .import files unchanged.
-- Bug 1: docs/wiki/Maps.md:26 still says "crimson steel columns" for the hall; SL3 repainted the frames grey. Fix: "galvanised steel columns".
-- Note: docs/ASSETS.md has an uncommitted edit ("about 1 MB the four, SL3"); commit it or drop it. pipeline/out/performance.md is also modified (not mine).
+Task: SL4 · QA commit none (no new tests; test_lo3_qa and others already updated in the diff) · Verdict: Pass
+
+Head 3e9bf5e, `git diff origin/main...HEAD` re-checked.
+
+Blocking: none.
+Advisory: targeted GUT runs print one pair of "get_base_script / resource_path on null" SCRIPT ERRORs per script. The count equals the script count, so it comes from GUT with `-gdir=`, not from the game.
+
+Checked:
+- HudStyle.navy_box is now dark_box. No `navy_box` reference is left in game/, tests/ or tools/. The callers in match_summary, xp_card and weapon_rail use dark_box. panel_box too.
+- GameTheme.DEEP and PLATE exist. MinimapConfig ink and map_backdrop read GameTheme.BG; both are consts, so the config's load order is fine.
+- test_lo3_qa, test_loadout_screen and test_replica_paint compare against ReplicaPaint.drawn(...), matching the new paint code.
+
+Runs (targeted only, whole suite left to the other process):
+- 13 scripts (hud*, minimap, pause, report, nav_rail, crash_screen, lo3_qa, loadout_screen, replica_paint, game_theme): 199 tests, 199 pass.
+- 38 scripts (armory, chevron, graphics, sound_cues, order_wheel, team_markers, settings, flag, hud_table, menu, loadout): 608 tests, 608 pass.
+- No parse errors.
+
+Not tested: how the new palette looks on screen, which needs a display (owner's list).

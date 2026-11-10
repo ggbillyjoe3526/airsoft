@@ -62,7 +62,7 @@ extends Resource
 @export var storey_pick: float = 0.5
 @export var storey_cut: float = 1.8
 ## The drawing's colours: ground, raised floor, ramp, low cover and tall walls; the shade laid over everything below
-## the storey drawn (so the street through a stairwell reads as below you); you, and a teammate who is out. The navy
+## the storey drawn (so the street through a stairwell reads as below you); you, and a teammate who is out. The dark
 ## panel under the drawing is the HUD's.
 @export var ground_colour: Color = Color(Color("485058"), 0.92)
 @export var raised_colour: Color = Color(Color("60686e"), 0.95)
@@ -108,7 +108,7 @@ extends Resource
 ## What the panel draws over the field, in px at 1080p. The outline (ink) under a marker keeps it plain on any ground.
 ## A teammate's dot: its radius and outline width, and how far inside the edge a teammate pinned there sits; the pole
 ## and the hold diamond pin the same way, mark_pad inside.
-@export var ink: Color = Color(Color("080d18"), 0.9)
+@export var ink: Color = Color(GameTheme.BG, 0.9)
 @export var dot_radius: float = 5.5
 @export var dot_outline: float = 1.8
 @export var dot_pad: float = 8.0
@@ -128,7 +128,7 @@ extends Resource
 @export var ping_ring_radius: float = 5.5
 @export var ping_ring_width: float = 2.4
 @export var ping_diamond: float = 7.0
-## The area label's backing, as a share of the HUD's navy (the panel and caption are solid); all follow the panels'
+## The area label's backing, as a share of the HUD's dark fill (the panel and caption are solid); all follow the panels'
 ## opacity.
 @export var label_backing: float = 0.82
 
@@ -142,7 +142,7 @@ extends Resource
 @export var map_key_width: float = 210.0
 @export var map_key_gap: float = 24.0
 @export var map_fit: float = 0.96
-@export var map_backdrop: Color = Color(Color("080d18"), 0.94)
+@export var map_backdrop: Color = Color(GameTheme.BG, 0.94)
 @export var map_title_size: int = 30
 @export var map_subtitle_size: int = 15
 ## The goal line's type (px), the title's line as a share of its type size, and the most of the screen's width the key

@@ -1,5 +1,5 @@
 class_name HudStyle
-## The HUD's look in the menus' language (the approved concept's `hud` section): the sizes, the dark navy backings and
+## The HUD's look in the menus' language (the approved concept's `hud` section): the sizes, the dark charcoal backings and
 ## the few plain helpers the HUD's parts share. Colours are GameTheme's palette and TeamConfig's team colours, never
 ## copied; the pure helpers (pip fill, clock and banner words) are unit-tested.
 
@@ -40,7 +40,7 @@ const COUNT_SIZE := 40
 ## The start countdown's padding (left, top, right, bottom): a square-ish plate round a single digit.
 const COUNT_PAD := Vector4(48.0, 6.0, 48.0, 10.0)
 const SPARE_SIZE := 16
-## A navy box's alpha before the panel opacity (a meta on the box), the panel opacity a part draws at (a meta on the
+## A dark box's alpha before the panel opacity (a meta on the box), the panel opacity a part draws at (a meta on the
 ## part), and the slots restyle() looks in.
 const BOX_ALPHA := &"hud_alpha"
 const OPACITY := &"hud_opacity"
@@ -123,14 +123,14 @@ static func opacity_of(part: CanvasItem) -> float:
 	return part.get_meta(OPACITY, 1.0) as float
 
 
-## A navy panel at `alpha` with an `edge` and the given margins, at 100% until restyle() brings it to a panel opacity.
-static func navy_box(alpha: float, edge: Color, margin_x: int, margin_y: int) -> StyleBoxFlat:
+## A dark panel at `alpha` with an `edge` and the given margins, at 100% until restyle() brings it to a panel opacity.
+static func dark_box(alpha: float, edge: Color, margin_x: int, margin_y: int) -> StyleBoxFlat:
 	var box := GameTheme.box(backing(alpha), edge, margin_x, margin_y)
 	box.set_meta(BOX_ALPHA, alpha)
 	return box
 
 
-## Brings `root` and every part under it to the panel `opacity`: each navy_box, and each part that draws its own
+## Brings `root` and every part under it to the panel `opacity`: each dark_box, and each part that draws its own
 ## backing (backing_on, opacity_of). Only backgrounds fade; icons, numbers and words keep their own alpha. Whoever owns
 ## the parts calls it again for parts added later.
 static func restyle(root: Control, opacity: float) -> void:
@@ -298,7 +298,7 @@ static func caps(key: String) -> String:
 
 ## A flat panel in the page colour at `alpha` with the given margins.
 static func panel_box(alpha: float, margin_x: int, margin_y: int) -> StyleBoxFlat:
-	return navy_box(alpha, Color(0.0, 0.0, 0.0, 0.0), margin_x, margin_y)
+	return dark_box(alpha, Color(0.0, 0.0, 0.0, 0.0), margin_x, margin_y)
 
 
 ## Inter at `weight` whose line is `font_size` tall, as the concept's line-height 1 sets it: the font's own leading

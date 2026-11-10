@@ -58,8 +58,8 @@ const BUTTON_PAD := 20
 const BUTTON_GAP := 12
 const FINE_SIZE := 15
 const REPORT_SIZE := 14
-const REPORT_INK := Color("c8d0dc")
-const REPORT_FILL := Color("0a111f")
+const REPORT_INK := ReportPanel.REPORT_INK
+const REPORT_FILL := ReportPanel.REPORT_FILL
 const REPORT_PAD := Vector2i(14, 12)
 const REPORT_HEIGHT := 640.0
 ## The gaps down the left column (px): under the tape, the kicker, the heading, the blurb, the facts, the note's label,

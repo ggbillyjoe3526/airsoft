@@ -200,7 +200,8 @@ static func fit_figure(held: Node3D, key: StringName, parts: Dictionary, barrel_
 ## figure copies, or (`figure`) just the figure copies, placed in the replica's space. Slot -> node.
 static func take(key: StringName, parts: Dictionary, figure: bool) -> Dictionary[StringName, Node3D]:
 	var taken: Dictionary[StringName, Node3D] = {}
-	var path := "%s%s.glb" % [PART_DIR, key]
+	# A replica with a stand-in model (CS1) wears that model's parts.
+	var path := "%s%s.glb" % [PART_DIR, ReplicaConfig.model_of(key)]
 	if parts.is_empty() or not ResourceLoader.exists(path):
 		return taken
 	var scene := load(path) as PackedScene
@@ -250,7 +251,7 @@ static func _carry_markers(part: Node3D, copy: Node3D) -> void:
 ## What part `part` for `slot` of replica `key` puts inside the replica, placed in the replica's space, owned by nothing;
 ## null if it puts nothing there. The part's own picture draws it beside the part.
 static func inside(key: StringName, slot: StringName, part: StringName) -> Node3D:
-	var path := "%s%s.glb" % [INSIDE_DIR, key]
+	var path := "%s%s.glb" % [INSIDE_DIR, ReplicaConfig.model_of(key)]
 	if not ResourceLoader.exists(path):
 		return null
 	var scene := load(path) as PackedScene

@@ -173,7 +173,7 @@ func text() -> String:
 	return "%s %s" % [_title.text, _distance.text]
 
 
-## The pinned plate: a chevron, "FLAG" and the distance, on a navy strip with a yellow rule on top.
+## The pinned plate: a chevron, "FLAG" and the distance, on a dark strip with a yellow rule on top.
 func _build_edge() -> void:
 	_edge = PanelContainer.new()
 	_edge.mouse_filter = Control.MOUSE_FILTER_IGNORE

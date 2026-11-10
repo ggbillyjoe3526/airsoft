@@ -26,7 +26,8 @@ The rest of this wiki describes all of it.
 
 ### Next
 
-- **0.1 Dev 3:** finished models for Depot and the practice range, and perhaps Woodland.
+- **0.1 Dev 3:** finished models for Depot and the practice range, and perhaps Woodland, and a new replica: a compact
+  electric SMG, quick on your feet and fast on the trigger, short on reach (in development).
 
 ### Then: the rest of the art pass
 

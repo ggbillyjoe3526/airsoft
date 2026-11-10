@@ -36,7 +36,7 @@ const CHIP_SIZE := 12
 const CHIP_GLYPH := 13.0
 const CHIP_PAD := Vector2(5.0, 2.0)
 const CHIP_EDGE := 1.5
-const CHIP_TEXT := Color("c9d0db")
+const CHIP_TEXT := Color("cfcac2")
 ## How much lighter than its team colour a team's name is.
 const NAME_LIGHTEN := 0.3
 

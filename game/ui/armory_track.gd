@@ -1,7 +1,7 @@
 class_name ArmoryTrack
 extends HBoxContainer
 ## The Armory's level cards (UI concept B v2 `armory.png`): CARDS levels side by side from the one `first()` names, each
-## a glass card with LEVEL n (or KIT) and its state (UNLOCKED in teal; NEXT, edged in teal; else the XP that reaches it),
+## a glass card with LEVEL n (or KIT) and its state (UNLOCKED in accent; NEXT, edged in accent; else the XP that reaches it),
 ## then a tile an item: its picture, name and kind, its words in the tooltip; a locked level's tiles dimmed. Every card
 ## is built; `browse` and `show_from` choose which show. It opens on the player's level. The level picked on the track
 ## (`set_picked`) has its card edged in white (owner, 2026-11-03), wherever the arrows move the cards.
@@ -29,7 +29,7 @@ const LOCKED_ALPHA := 0.45
 const NEXT_EDGE := 2
 ## The picked level's card: its edge (white, px) and fill.
 const PICKED_EDGE := 2
-const PICKED_FILL := Color(0.11, 0.125, 0.17, 0.86)
+const PICKED_FILL := Color(GameTheme.PLATE, 0.86)
 
 var _facts: ArmoryFacts = null
 var _pictures: ItemPictures = null

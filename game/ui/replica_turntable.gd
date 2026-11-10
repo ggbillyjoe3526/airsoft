@@ -276,7 +276,8 @@ func _set_angles(angles: Vector2) -> void:
 func _load(key: StringName) -> void:
 	let_go()
 	_key = key
-	var path := "%s%s.glb" % [ReplicaPictures.MODEL_DIR, key]
+	# A replica with a stand-in model (CS1) turns as that model.
+	var path := "%s%s.glb" % [ReplicaPictures.MODEL_DIR, ReplicaConfig.model_of(key)]
 	var scene := load(path) as PackedScene if ResourceLoader.exists(path) else null
 	if scene == null:
 		return

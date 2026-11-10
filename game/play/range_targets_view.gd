@@ -1,12 +1,13 @@
 class_name RangeTargetsView
 extends Node3D
-## The practice range's targets in greybox (the browser game's RANGE_VISUALS, M21 and M93), drawn from GameState.targets
-## between the last two ticks: white steel plates on their posts, swinging back and settling when hit; plywood figures
-## the size of a player's hit volume, falling back on their hinge when hit and standing up at the end of their time
-## down; a mover's rails and trolley, a pop-up's motor box, a swinger's frame and arm. The timed challenge's lit targets
-## glow orange and its START plate stands only while the challenge waits for it. Scenery only: BBs meet the targets in
-## the simulation (RangeTargets), never these nodes. Built once a session; a frame only moves nodes and swaps a lit
-## target's paint when it changes, allocating nothing.
+## The practice range's targets (the browser game's RANGE_VISUALS, M21 and M93; their Blender models RM1, RangeModels),
+## drawn from GameState.targets between the last two ticks: white steel plates hung on a pin from a timber post in an
+## H-stand, swinging back and settling when hit; flat plywood cut-outs in a peg figure's outline, the size of a player's
+## hit volume, on a hinge plate, falling back on their hinge when hit and standing up at the end of their time down;
+## a mover's rails, end stops and trolley, a pop-up's motor box, a swinger's frame and arm. The timed challenge's lit
+## targets glow orange and its START plate stands only while the challenge waits for it. Scenery only: BBs meet the
+## targets in the simulation (RangeTargets), never these nodes. Built once a session; a frame only moves nodes and swaps
+## a lit target's paint when it changes, allocating nothing.
 
 
 ## One target's nodes.
@@ -29,11 +30,14 @@ class Drawn:
 var _cfg: RangeViewConfig = null
 var _range: RangeConfig = null
 var _drawn: Array[Drawn] = []
-var _steel: StandardMaterial3D = null
-var _post: StandardMaterial3D = null
-var _plywood: StandardMaterial3D = null
+var _steel_parts: RangeModels = null
+var _figure_parts: RangeModels = null
+## The models' vertex colours, the challenge's lit paint and the START plate's.
+var _paint: ShaderMaterial = null
 var _lit: StandardMaterial3D = null
 var _start: StandardMaterial3D = null
+## The plate's radius as modelled (the models' Face; a target's own radius scales it).
+var _model_radius: float = 0.0
 
 
 ## Builds `targets` as laid out (`tuning`: their sizes and a figure's hit volume), the START plate's word in `font`.
@@ -41,11 +45,12 @@ func setup(targets: Array[RangeTarget], cfg: RangeViewConfig, tuning: SimTuning,
 	name = "RangeTargets"
 	_cfg = cfg
 	_range = tuning.targets
-	_steel = _paint(cfg.steel_colour, cfg.steel_roughness, cfg.steel_metallic)
-	_post = _paint(cfg.post_colour, cfg.post_roughness)
-	_plywood = _paint(cfg.figure_colour, cfg.figure_roughness)
-	_start = _paint(cfg.start_paint, cfg.start_roughness)
-	_lit = _paint(cfg.lit_colour, cfg.lit_roughness)
+	_steel_parts = RangeModels.read(cfg.steel_model)
+	_figure_parts = RangeModels.read(cfg.figure_model)
+	_model_radius = _steel_parts.bounds(&"Face").size.x * 0.5
+	_paint = LookMaterials.vertex_colour(cfg.model_roughness, 0.0)
+	_start = _flat(cfg.start_paint, cfg.start_roughness)
+	_lit = _flat(cfg.lit_colour, cfg.lit_roughness)
 	_lit.emission_enabled = true
 	_lit.emission = cfg.lit_colour
 	_lit.emission_energy_multiplier = cfg.lit_glow
@@ -69,7 +74,7 @@ func setup(targets: Array[RangeTarget], cfg: RangeViewConfig, tuning: SimTuning,
 
 ## The materials drawn first (ShaderPrewarm), so a target's first light never hitches.
 func materials() -> Array[Material]:
-	return [_steel, _post, _plywood, _lit, _start]
+	return [_paint, _lit, _start]
 
 
 ## The tick's events: a still plate that's hit starts its swing.
@@ -135,125 +140,98 @@ func _swing(d: Drawn, delta: float) -> float:
 	return _cfg.swing_angle * size * sin(_cfg.swing_rate * d.hit_age)
 
 
-## A still plate (the START plate too): its post behind it, the hanger over it, and the plate hanging from the hanger,
-## which it swings back on when hit.
+## A still plate (the START plate too): its post in its H-stand behind it, the bracket on the post's top with the pin
+## the plate hangs from by its hooked neck, swinging back on it when hit.
 func _build_plate(t: RangeTarget, d: Drawn, font: Font) -> void:
-	var cfg := _cfg
 	var centre := t.home.y - t.floor_y
 	var post_top := t.posts[0].y - t.floor_y
-	var w := _range.post_width
-	_box(d.root, Vector3(w, post_top, w), Vector3(0.0, post_top * 0.5, -_range.post_behind), _post)
-	_box(d.root, Vector3(w, w, _range.post_behind + w), Vector3(0.0, post_top - w * 0.5, -_range.post_behind * 0.5),
-			_post)
-	var drop := post_top - centre
+	var post := Vector3(0.0, 0.0, -_range.post_behind)
+	_steel_parts.add(d.root, &"Base", post, _paint)
+	_steel_parts.add(d.root, &"Post", post, _paint, Vector3(1.0, post_top, 1.0))
+	_steel_parts.add(d.root, &"Bracket", post + Vector3(0.0, post_top, 0.0), _paint)
 	d.pivot = Node3D.new()
 	d.pivot.position = Vector3(0.0, post_top, 0.0)
 	d.root.add_child(d.pivot)
-	_box(d.pivot, Vector3(cfg.arm, drop - t.radius, cfg.arm),
-			Vector3(0.0, -(drop - t.radius) * 0.5, -cfg.plate_thickness - cfg.arm * 0.5), _post)
-	var plate := _disc(d.pivot, t.radius, Vector3(0.0, -drop, 0.0), _start if t.start else _steel)
-	d.paint = plate.material_override
+	_steel_parts.add(d.pivot, &"Hanger", Vector3.ZERO, _paint)
+	var plate := _face(d.pivot, t.radius, Vector3(0.0, centre - post_top, 0.0))
 	if t.start:
-		var word := RangeView.painted_words(tr("RANGE_START_PLATE"), cfg.start_text_share * t.radius * 2.0,
-				cfg.start_ink, font, cfg.text_font_size)
-		word.position = Vector3(0.0, -drop, cfg.start_text_lift)
+		plate.material_override = _start
+		d.paint = _start
+		var word := RangeView.painted_words(tr("RANGE_START_PLATE"), _cfg.start_text_share * t.radius * 2.0,
+				_cfg.start_ink, font, _cfg.text_font_size)
+		word.position = Vector3(0.0, centre - post_top, _cfg.start_text_lift)
 		d.pivot.add_child(word)
 	else:
+		d.paint = _paint
 		d.faces.append(plate)
 
 
-## A swinger: its frame's two legs and the bar across their tops, and the plate on its arm from a pivot under the bar.
+## A swinger: its frame's two legs on their splayed feet and the bar across their tops, the bearing at the bar's
+## middle, and the plate on its arm swinging from the pin there.
 func _build_swinger(t: RangeTarget, d: Drawn) -> void:
 	var w := _range.swinger_frame_width
 	var top := t.posts[0].y - t.floor_y
 	for p in t.posts:
-		_box(d.root, Vector3(w, top, w), Vector3(p.x, top * 0.5, p.z), _post)
+		_steel_parts.add(d.root, &"SwingLeg", Vector3(p.x, 0.0, p.z), _paint, Vector3(1.0, top, 1.0))
+		_steel_parts.add(d.root, &"SwingFoot", Vector3(p.x, 0.0, p.z), _paint)
 	var span := absf(t.posts[1].x - t.posts[0].x) + w
-	_box(d.root, Vector3(span, w, w), Vector3(0.0, top - w * 0.5, t.posts[0].z), _post)
+	_steel_parts.add(d.root, &"SwingBar", Vector3(-span * 0.5, top - w * 0.5, t.posts[0].z), _paint,
+			Vector3(span, 1.0, 1.0))
 	var arm := _range.swinger_arm
+	var pivot_at := Vector3(0.0, t.home.y - t.floor_y + arm, 0.0)
+	_steel_parts.add(d.root, &"SwingPivot", pivot_at, _paint)
 	d.pivot = Node3D.new()
-	d.pivot.position = Vector3(0.0, t.home.y - t.floor_y + arm, 0.0)
+	d.pivot.position = pivot_at
 	d.root.add_child(d.pivot)
-	_box(d.pivot, Vector3(_cfg.arm, arm, _cfg.arm), Vector3(0.0, -arm * 0.5, -_cfg.plate_thickness - _cfg.arm * 0.5),
-			_post)
-	var plate := _disc(d.pivot, t.radius, Vector3(0.0, -arm, 0.0), _steel)
-	d.paint = _steel
-	d.faces.append(plate)
+	_steel_parts.add(d.pivot, &"SwingArm", Vector3.ZERO, _paint, Vector3(1.0, arm, 1.0))
+	d.paint = _paint
+	d.faces.append(_face(d.pivot, t.radius, Vector3(0.0, -arm, 0.0)))
 
 
-## A plywood figure on its hinge: the board from the hit volume's feet to its body's top and the head's disc, crouched
-## or not; a mover's rails, end stops and trolley under it, a pop-up's motor box beside it.
+## A flat cut-out figure on its hinge plate, crouched (the cone peg's outline) or not, the size of its hit volume; a
+## mover's rails, end stops and trolley under it, a pop-up's motor box beside it. It falls back about its hinge, just
+## behind the board.
 func _build_figure(t: RangeTarget, d: Drawn, tuning: SimTuning) -> void:
 	var cfg := _cfg
-	var hits := tuning.hits
-	var drop := hits.crouch_drop if t.crouched else 0.0
 	var feet := t.home.y - t.floor_y
 	d.carrier.position.y = feet
 	if t.motion == RangeTarget.Motion.MOVER:
-		_build_rails(t, d, feet)
+		_build_rails(t, d)
 	elif t.motion == RangeTarget.Motion.POPUP:
 		var b := cfg.popup_box
-		_box(d.root, b, Vector3(cfg.figure_width * 0.5 + cfg.popup_gap + b.x * 0.5, b.y * 0.5, -b.z * 0.5), _post)
+		_figure_parts.add(d.root, &"MotorBox",
+				Vector3(tuning.hits.body_radius + cfg.popup_gap + b.x * 0.5, b.y * 0.5, -b.z * 0.5), _paint)
+	_figure_parts.add(d.carrier, &"PegBase", Vector3.ZERO, _paint)
 	d.pivot = Node3D.new()
+	d.pivot.position = Vector3(0.0, tuning.body.rest_gap, -cfg.hinge_behind)
 	d.carrier.add_child(d.pivot)
-	var bottom := tuning.body.rest_gap
-	var top := bottom + hits.body_top - drop
-	var thick := cfg.figure_thickness
-	d.faces.append(_box(d.pivot, Vector3(cfg.figure_width, top - bottom, thick),
-			Vector3(0.0, bottom + (top - bottom) * 0.5, -thick * 0.5), _plywood))
-	d.faces.append(_disc(d.pivot, hits.head_radius, Vector3(0.0, bottom + hits.head_height - drop, 0.0), _plywood,
-			thick))
-	d.paint = _plywood
+	d.faces.append(_figure_parts.add(d.pivot, &"PegCrouched" if t.crouched else &"Peg", Vector3.ZERO, _paint))
+	d.paint = _paint
 
 
-## A mover's two rails along its track with a stop at each end, and its trolley riding them (on the carrier, under the
-## figure's feet `feet` high).
-func _build_rails(t: RangeTarget, d: Drawn, feet: float) -> void:
+## A mover's two rails along its track with a stop at each end, and its trolley riding them (on the carrier, under
+## the figure's feet).
+func _build_rails(t: RangeTarget, d: Drawn) -> void:
 	var cfg := _cfg
-	var half := t.track + cfg.trolley_size.x * 0.5
+	var half := t.track + _figure_parts.bounds(&"Trolley").size.x * 0.5
 	for side: float in [-1.0, 1.0]:
-		_box(d.root, Vector3(half * 2.0, cfg.rail, cfg.rail), Vector3(0.0, cfg.rail * 0.5, side * cfg.rail_gauge * 0.5),
-				_post)
-		_box(d.root, Vector3(cfg.stop_size.x, cfg.stop_size.y, cfg.rail_gauge + cfg.rail),
-				Vector3(side * (half + cfg.stop_size.x * 0.5), cfg.stop_size.y * 0.5, 0.0), _post)
-	var high := feet - cfg.rail
-	_box(d.carrier, Vector3(cfg.trolley_size.x, high, cfg.trolley_size.y), Vector3(0.0, -high * 0.5, 0.0), _post)
+		_figure_parts.add(d.root, &"Rail", Vector3(0.0, 0.0, side * cfg.rail_gauge * 0.5), _paint,
+				Vector3(half * 2.0, 1.0, 1.0))
+		var stop := _figure_parts.add(d.root, &"RailStop", Vector3(side * (half + cfg.stop_size.x * 0.5), 0.0, 0.0),
+				_paint)
+		# Its buffer faces the trolley: modelled for the far (+x) end, turned round for the near one.
+		stop.rotation.y = 0.0 if side > 0.0 else PI
+	_figure_parts.add(d.carrier, &"Trolley", Vector3.ZERO, _paint)
 
 
-## A box of `size` centred at `at` under `parent`.
-static func _box(parent: Node3D, size: Vector3, at: Vector3, mat: Material) -> MeshInstance3D:
-	var mesh := BoxMesh.new()
-	mesh.size = size
-	var m := MeshInstance3D.new()
-	m.mesh = mesh
-	m.material_override = mat
-	m.position = at
-	parent.add_child(m)
-	return m
+## A plate's face of `radius` hanging under `parent`, its front face's middle at `at` (where the simulation tests it).
+func _face(parent: Node3D, radius: float, at: Vector3) -> MeshInstance3D:
+	var k := radius / _model_radius if _model_radius > 0.0 else 1.0
+	return _steel_parts.add(parent, &"Face", at, _paint, Vector3(k, k, 1.0))
 
 
-## A disc of `radius` facing +z, its front face through `at` (a plate's, as the simulation tests it), `thick` deep
-## (the plate's thickness when not given).
-func _disc(parent: Node3D, radius: float, at: Vector3, mat: Material, thick: float = -1.0) -> MeshInstance3D:
-	var depth := thick if thick > 0.0 else _cfg.plate_thickness
-	var mesh := CylinderMesh.new()
-	mesh.top_radius = radius
-	mesh.bottom_radius = radius
-	mesh.height = depth
-	mesh.radial_segments = _cfg.plate_segments
-	mesh.rings = 1
-	var m := MeshInstance3D.new()
-	m.mesh = mesh
-	m.material_override = mat
-	m.rotation.x = PI * 0.5
-	m.position = at + Vector3(0.0, 0.0, -depth * 0.5)
-	parent.add_child(m)
-	return m
-
-
-static func _paint(colour: Color, roughness: float, metallic: float = 0.0) -> StandardMaterial3D:
+static func _flat(colour: Color, roughness: float) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.albedo_color = colour
 	m.roughness = roughness
-	m.metallic = metallic
 	return m

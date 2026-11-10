@@ -53,25 +53,39 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
 
 ## Replicas
 
-| Key | Name | Class | Energy (J) | BB (g) | Fire rate (BBs/s) | Magazine (BBs) | Magazines | Reload (s) | Draw (s) | Spread (°) | Recoil (°) | Hip spread (×) |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| aeg | AEG Rifle | rifle | 0.97 | 0.25 | 13 | 60 | 4 | 1.8 | 0.45 | 0.45 | 0.18 | 1 |
-| pistol | GBB Pistol | pistol | 0.52 | 0.2 | 7 | 18 | 4 | 1.2 | 0.3 | 0.8 | 0.5 | 1 |
-| cyber | Cyber Pistol | pistol | 1.0 | 0.25 | 14 | 50 | 3 | 1.1 | 0.28 | 0.3 | 0.06 | 1 |
-| sniper | Sniper Rifle | sniper | 1.9 | 0.3 | 0.8 | 25 | 4 | 2.2 | 0.65 | 0.1 | 0.4 | 6 |
+| Key | Name | Class | Energy (J) | BB (g) | Fire rate (BBs/s) | Magazine (BBs) | Magazines | Reload (s) | Draw (s) | Spread (°) | Recoil (°) | Hip spread (×) | Pace (×) | Moving spread (×) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| aeg | AEG Rifle | rifle | 0.97 | 0.25 | 13 | 60 | 4 | 1.8 | 0.45 | 0.45 | 0.18 | 1 | 1 | 1 |
+| pistol | GBB Pistol | pistol | 0.52 | 0.2 | 7 | 18 | 4 | 1.2 | 0.3 | 0.8 | 0.5 | 1 | 1 | 1 |
+| cyber | Cyber Pistol | pistol | 1.0 | 0.25 | 14 | 50 | 3 | 1.1 | 0.28 | 0.3 | 0.06 | 1 | 1 | 1 |
+| sniper | Sniper Rifle | sniper | 1.9 | 0.3 | 0.8 | 25 | 4 | 2.2 | 0.65 | 0.1 | 0.4 | 6 | 1 | 1 |
+| smg | Compact SMG | rifle | 0.75 | 0.2 | 18 | 45 | 5 | 1.4 | 0.32 | 0.6 | 0.14 | 0.75 | 1.08 | 0.5 |
 
 - **Fire rate.** BBs a second with the trigger held (auto, and within a burst), or the fastest you can click (semi).
 - **Magazines.** Carried per round, the loaded one included.
 - **Spread.** The random scatter of the shots from the hip (degrees), before stance, movement and the hip spread.
 - **Recoil.** The upward kick of each shot (degrees). Light: these are toys, not firearms.
 - **Hip spread.** How many times wider the spread is with the sight down than with it raised (1: no difference beyond
-  the usual, Accuracy's). A long rifle pointed from the hip is a guess.
+  the usual, Accuracy's). A long rifle pointed from the hip is a guess; under 1, a compact replica is that much tighter
+  from the hip.
+- **Pace.** How fast you run and sprint carrying it, as a share of the usual (1.08 is 8 % faster). Holstered, the
+  holster's pace stands instead.
+- **Moving spread.** The share of the extra spread that walking, running, jumping and sprinting add that it takes (0.5
+  is half; standing still is as steady as ever).
 - **Sniper Rifle** (SN1, owner 2026-11-02: like the AEG with a longer barrel, spring driven, single shot, the 2x Scope
   fitted as it comes). The long-range pick: 1.90 J with 0.30 g BBs (the heaviest the Loadout loads; 440 fps on a
   0.20 g chrono) stays within 15 cm of the aim line to about 48 m (the AEG 39 m) and gets to 50 m in 0.81 s (the AEG
   1.18 s), and its 0.10° of spread is the tightest there is. Against that, one shot every 1.25 s (the
   spring cocked by the charging handle after each one), 25 BBs a magazine, a slow reload and draw, and from the hip six
   times the spread. Its class's site limit is the bolt-action one (below).
+- **Compact SMG** (CS1, owner 2026-11-10: "a compact electric smg" that plays unlike the others). The close-quarters
+  pick, built for shooting on the move: 18 BBs a second, the fastest there is, and 8 % quicker on your feet than with a
+  rifle; moving adds only half the usual spread and from the hip it is 0.75 times as wide, so on the run it groups about
+  30 % tighter than the AEG and from a standing hip as well. The quickest draw and reload of the rifles. Against that,
+  0.75 J with 0.20 g BBs (284 fps) stays within 15 cm of the aim line to 27 m as it comes (35 m at its best hop-up; the
+  AEG 39 m) and takes 0.59 s to fly 30 m (the AEG 0.52 s); a third wider spread aimed; 45 BBs a magazine, empty in
+  2.5 s with the trigger held; and no grip, barrel or magazine parts. Semi and full auto, no burst. Drawn as the AEG
+  Rifle until its own model (the owner's reference pictures).
 
 ## Power sources
 

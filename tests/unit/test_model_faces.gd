@@ -31,6 +31,27 @@ func test_every_skyline_model_and_the_flagpole_are_solid_from_outside() -> void:
 				% [path.get_file(), share * 100.0])
 
 
+
+## RM1: the practice range's props and every part of its targets and boards (the targets' files hold a mesh a part).
+func test_the_ranges_models_are_solid_from_outside() -> void:
+	var files: Array[String] = ["props/range_wall", "props/range_backstop", "props/sandbags", "props/site_toilet",
+		"props/water_tote", "props/generator", "range/steel_target", "range/figure_target", "range/distance_board"]
+	for file in files:
+		var packed := load("res://assets/models/%s.glb" % file) as PackedScene
+		assert_not_null(packed, "%s loads" % file)
+		if packed == null:
+			continue
+		var scene := packed.instantiate()
+		var stack: Array[Node] = [scene]
+		while not stack.is_empty():
+			var n: Node = stack.pop_back()
+			stack.append_array(n.get_children())
+			if n is MeshInstance3D:
+				var share := back_share((n as MeshInstance3D).mesh)
+				assert_lt(share, BACK_MOST, "%s %s: %.1f%% of rays from outside meet a face turned away"
+						% [file, n.name, share * 100.0])
+		scene.free()
+
 ## The share of rays from outside `mesh` (all round, level to steeply above) whose first face is turned away.
 static func back_share(mesh: Mesh) -> float:
 	var arrays := mesh.surface_get_arrays(0)

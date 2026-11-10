@@ -25,7 +25,7 @@ sets the **colour, light and materials, not what may appear** (owner, 2026-10-31
 The Dev 2 look (Valorant's forms with Breath of the Wild's light, clean vibrant paint) is history: `docs/DECISIONS.md`.
 Built in steps: SL1 the light, grade and paint; SL2 material wear in the shared shaders; SL3 Depot's roof and hall
 frames repainted (galvanised grey steel, a pale grey liner, red sprinkler mains) and the map pictures rendered again;
-SL4 players, replicas and UI.
+SL4 the menus, HUD and replica paint toned to match (the figures' kit already was).
 
 ## The field kit
 
@@ -263,15 +263,27 @@ arms, figures and replicas use (steps 23 and 28).
   fit a correctly built hand, so knuckles, tendons and finger joints still read through them.
 - **Replicas.** Two-tone toy polymer: the AEG in tan with black furniture and yellow accents on the controls (magazine
   release, selector), the pistol in black with green fibre-optic sights. Shapes are the owner's own designs; the
-  pictures set the finish and how much of the screen the replica takes.
+  pictures set the finish and how much of the screen the replica takes. In Sunlit Concrete (SL4) a paint is matte
+  polymer with a soft sheen (roughness 0.64, the metal parts 0.48) and is drawn at the look's paint saturation
+  (`ReplicaPaint.drawn`, as `look_paint()` draws the maps), so a bold scheme still reads two-tone but sits in the muted
+  world; the Loadout's swatches show the paint as drawn. The Cyber Pistol keeps its own lit lines.
 
 ## Figures
 
 - **Clothing.** The figures take the references' silhouettes and gear (vests, pouches, caps, eye protection) in
   lighter, mixed clothing a weekend player would wear, never all-dark kit and masks. Every figure keeps its
-  team-colour plate carrier, the strongest team cue at range (AX1; owner, 2026-10-18).
+  team-colour plate carrier, the strongest team cue at range (AX1; owner, 2026-10-18). Their kit is already
+  Sunlit Concrete's realistic multicam, khaki and olive (about a quarter saturation, SL4), so SL4 left it as it is.
 - **Detail.** This is a desktop game, so figures, arms and replicas are modelled at high quality, with LODs carrying
   less at range (owner, 2026-10-18). The budgets are in `docs/CC0_ASSETS.md` › Size limits.
+
+## Menus and HUD
+
+- **Sunlit Concrete (SL4):** `GameTheme`'s palette is charcoal panels (`BG` `#131311`), off-white words (`TEXT`
+  `#f2eee6`) and one bone accent (`ACCENT` `#d8ccb2`, charcoal ink on it) for the main button and the selection, so the
+  team colours are the only strong colours on screen. Signal yellow (`WARN`), better and worse (`GOOD`, `BAD`) are a
+  little quieter. Every dark ink derives from the palette: `BG` (markers' ink, the map's backdrop), `DEEP` `#0c0c0b`
+  (the rail, the shades over a match or page) and `PLATE` `#1f1e1b` (notices, report boxes, the Armory's picked card).
 
 ## Where it lives in the code
 

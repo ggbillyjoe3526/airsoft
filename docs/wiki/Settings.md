@@ -2,7 +2,7 @@
 
 Open **Settings** from the rail on the left of the menus or from the pause menu. Every change applies at once, even in
 the middle of a match, and is saved straight away. If the settings file is ever damaged, the game starts on the defaults
-and says so. **Back**, a small button at the bottom left, closes Settings. An On/Off setting is a switch: teal with the
+and says so. **Back**, a small button at the bottom left, closes Settings. An On/Off setting is a switch: pale with the
 knob at the right when on. The tabs are a row of buttons under the SETTINGS title, the one open in white, and a row of
 choices is one bar with the picked choice in white. Nothing on the screen moves or changes size when you press a switch
 or pick a choice. Rest the pointer on a row to see what it does: the help wraps onto more lines and always stays on

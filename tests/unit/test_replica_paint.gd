@@ -95,26 +95,26 @@ func test_a_replica_in_hand_wears_its_paints_five_colours() -> void:
 	for i in ReplicaSchemes.PARTS.size():
 		var m := _override(model, ReplicaSchemes.PARTS[i])
 		assert_not_null(m, "%s is painted" % ReplicaSchemes.PARTS[i])
-		assert_eq(_colour(m), want[i], "%s wears Cobalt's" % ReplicaSchemes.PARTS[i])
+		assert_eq(_colour(m), ReplicaPaint.drawn(want[i]), "%s wears Cobalt's" % ReplicaSchemes.PARTS[i])
 
 
 func test_a_slot_without_a_paint_wears_its_classes_default() -> void:
 	var view := _hands([_aeg(), _pistol()] as Array[ReplicaConfig], [] as Array[StringName], false)
-	assert_eq(_colour(_override(view._held[0].root, &"Furniture")), ReplicaSchemes.colours(&"cobalt", false)[1])
-	assert_eq(_colour(_override(view._held[1].root, &"Furniture")), ReplicaSchemes.colours(&"ghost", false)[1])
+	assert_eq(_colour(_override(view._held[0].root, &"Furniture")), ReplicaPaint.drawn(ReplicaSchemes.colours(&"cobalt", false)[1]))
+	assert_eq(_colour(_override(view._held[1].root, &"Furniture")), ReplicaPaint.drawn(ReplicaSchemes.colours(&"ghost", false)[1]))
 
 
 func test_realistic_colours_show_the_plain_family() -> void:
 	var view := _hands([_aeg()] as Array[ReplicaConfig], [&"cobalt"] as Array[StringName], true)
 	var black := ReplicaSchemes.colours(&"black", false)
 	for i in ReplicaSchemes.PARTS.size():
-		assert_eq(_colour(_override(view._held[0].root, ReplicaSchemes.PARTS[i])), black[i])
+		assert_eq(_colour(_override(view._held[0].root, ReplicaSchemes.PARTS[i])), ReplicaPaint.drawn(black[i]))
 	assert_ne(black, ReplicaSchemes.colours(&"cobalt", false), "and Black is not Cobalt")
 
 
 func test_a_plain_colour_is_the_same_realistic_or_not() -> void:
 	var view := _hands([_aeg()] as Array[ReplicaConfig], [&"ranger"] as Array[StringName], true)
-	assert_eq(_colour(_override(view._held[0].root, &"Body")), ReplicaSchemes.colours(&"ranger", false)[0])
+	assert_eq(_colour(_override(view._held[0].root, &"Body")), ReplicaPaint.drawn(ReplicaSchemes.colours(&"ranger", false)[0]))
 
 
 func test_the_cyber_pistol_keeps_its_own_colours() -> void:
@@ -127,7 +127,7 @@ func test_the_cyber_pistol_keeps_its_own_colours() -> void:
 	# Realistic colours: a dark grey slab and plain grey lines, nothing glowing; its metal keeps the model's own.
 	var own := _hands([_cyber()] as Array[ReplicaConfig], [ReplicaSchemes.OWN] as Array[StringName], true)
 	var slab := _override(own._held[0].root, &"CyberSlab") as StandardMaterial3D
-	assert_eq(_colour(slab), Color.hex(0x4a4f57ff))
+	assert_eq(_colour(slab), ReplicaPaint.drawn(Color.hex(0x4a4f57ff)))
 	var line := _override(own._held[0].root, &"CyberLine") as StandardMaterial3D
 	assert_false(line.emission_enabled, "the lines don't glow")
 	assert_null(_override(own._held[0].root, &"CyberMetal"))
@@ -158,16 +158,16 @@ func test_bots_wear_their_teams_paints() -> void:
 	var loadout: Array[ReplicaConfig] = [_aeg(), _pistol()]
 	var alpha := _figure(0, loadout, false)
 	var beta := _figure(1, loadout, false)
-	assert_eq(_colour(_override(alpha._replicas[0], &"Furniture")), ReplicaSchemes.colours(&"cobalt", false)[1])
-	assert_eq(_colour(_override(alpha._replicas[1], &"Detail")), ReplicaSchemes.colours(&"onyx", false)[2])
-	assert_eq(_colour(_override(beta._replicas[0], &"Furniture")), ReplicaSchemes.colours(&"signal", false)[1])
-	assert_eq(_colour(_override(beta._replicas[1], &"Furniture")), ReplicaSchemes.colours(&"coral", false)[1])
+	assert_eq(_colour(_override(alpha._replicas[0], &"Furniture")), ReplicaPaint.drawn(ReplicaSchemes.colours(&"cobalt", false)[1]))
+	assert_eq(_colour(_override(alpha._replicas[1], &"Detail")), ReplicaPaint.drawn(ReplicaSchemes.colours(&"onyx", false)[2]))
+	assert_eq(_colour(_override(beta._replicas[0], &"Furniture")), ReplicaPaint.drawn(ReplicaSchemes.colours(&"signal", false)[1]))
+	assert_eq(_colour(_override(beta._replicas[1], &"Furniture")), ReplicaPaint.drawn(ReplicaSchemes.colours(&"coral", false)[1]))
 
 
 func test_bots_show_the_plain_colour_under_realistic() -> void:
 	var loadout: Array[ReplicaConfig] = [_aeg()]
 	var beta := _figure(1, loadout, true)
-	assert_eq(_colour(_override(beta._replicas[0], &"Furniture")), ReplicaSchemes.colours(&"tan", false)[1])
+	assert_eq(_colour(_override(beta._replicas[0], &"Furniture")), ReplicaPaint.drawn(ReplicaSchemes.colours(&"tan", false)[1]))
 
 
 func test_a_figure_shows_the_replica_it_has_out() -> void:
@@ -232,3 +232,18 @@ func test_nothing_is_left_after_free() -> void:
 	ReplicaPaint.clear()
 	assert_eq(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT), before)
 	assert_true(ReplicaPaint._sets.is_empty())
+
+
+func test_a_paint_is_drawn_at_the_looks_saturation_and_matte() -> void:
+	var look := LookConfig.new()
+	assert_almost_eq(ReplicaPaint.paint_saturation(), look.paint_saturation, 0.00001, "the maps' paint saturation")
+	var bold := Color("2f6fd6")
+	var muted := ReplicaPaint.drawn(bold)
+	assert_lt(muted.s, bold.s * 0.9, "a bold colour is quieter")
+	assert_gt(muted.s, 0.2, "and still a colour")
+	assert_lt(absf(muted.get_luminance() - bold.get_luminance()), 0.05, "at about its own brightness")
+	var grey := Color("808080")
+	assert_true(ReplicaPaint.drawn(grey).is_equal_approx(grey), "a grey is left grey")
+	var body := ReplicaPaint.materials(&"cobalt", false)[0]
+	assert_gte(body.roughness, 0.6, "matte polymer")
+	assert_lt(body.roughness, 0.8, "with a soft sheen left")

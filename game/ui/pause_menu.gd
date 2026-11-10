@@ -18,7 +18,7 @@ signal challenge_toggled(on: bool)
 signal loadout_requested
 
 ## The shade over the match, the panel's width and margins, and the sizes of its words (px at 1080p; concept `pause.png`).
-const BACKDROP := Color(0.031, 0.051, 0.094, 0.72)
+const BACKDROP := Color(GameTheme.DEEP, 0.72)
 ## The panel is as wide as its words and buttons need; these are its least width (px).
 const PANEL_WIDTH := 0.0
 const PANEL_SIDE := 48
