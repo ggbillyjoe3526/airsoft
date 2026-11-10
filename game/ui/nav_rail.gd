@@ -64,6 +64,7 @@ var _current: Tab = Tab.MATCH
 var _level_box: VBoxContainer = null
 var _level: Label = null
 var _level_fill: ColorRect = null
+var _levelling_off: bool = false
 
 
 func _init() -> void:
@@ -136,6 +137,7 @@ func quit_button() -> Button:
 ## levelling) it still shows the level kept for when it comes back, greyed, and its tooltip says why (owner,
 ## 2026-11-10: the chip was hidden then, and read as missing).
 func set_level(level: int, into: float = 0.0, levelling_off: bool = false) -> void:
+	_levelling_off = levelling_off
 	_level.text = tr("MENU_LEVEL_SHORT") % maxi(0, level)
 	_level_fill.custom_minimum_size.x = LEVEL_BAR.x * clampf(into, 0.0, 1.0)
 	_level.add_theme_color_override("font_color", GameTheme.DIM if levelling_off else GameTheme.TEXT)
@@ -149,7 +151,7 @@ func level_text() -> String:
 
 ## Whether the level shows greyed, levelling being off.
 func level_greyed() -> bool:
-	return _level_box.tooltip_text != ""
+	return _levelling_off
 
 
 ## The tab's button.

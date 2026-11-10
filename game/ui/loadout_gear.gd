@@ -2,10 +2,10 @@ class_name LoadoutGear
 extends Control
 ## The Loadout tab's gear page body (UI concept B v2, `loadout.png`, owner 2026-11-02): LOADOUT and its line (the loadout
 ## carried and what is in it), then the glass panels: the PRIMARY card (its replica large, its name and what it carries,
-## SWAP at its top right (SWITCH REPLICA until the owner, 2026-11-10), CUSTOMISE on the picked card), the SECONDARY card the same beside the GRENADES carried
-## every round (SF1; its two slots, each a smoke or a flash, BP8), and the Performance sheet at the right. SWITCH REPLICA picks that card's slot and opens the
-## pop-up of every replica to carry in it (LoadoutSwitch; owner, 2026-11-03: it replaced the SWAP row); the one carried
-## in the other slot swaps the two.
+## SWAP at its top right, CUSTOMISE on the picked card), the SECONDARY card the same beside the GRENADES carried every
+## round (SF1; its two slots, each a smoke or a flash, BP8), and the Performance sheet at the right. SWAP (named SWITCH
+## REPLICA until the owner, 2026-11-10) picks that card's slot and opens the pop-up of every replica to carry in it
+## (LoadoutSwitch; owner, 2026-11-03: it replaced the old swap row); the one carried in the other slot swaps the two.
 ## Every replica on the page is drawn at one scale (owner, 2026-10-19 and 2026-11-02: replicas to scale), the cards'
 ## sized so the longest fits a card's picture box: a rifle in either slot is the same size, a pistol beside it true to
 ## size. The page owner reads `slot_picked`, `replica_picked`, `customise_requested` and `bomb_picked` and calls
