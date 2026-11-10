@@ -1,0 +1,24 @@
+test_figure_hit_area
+Tests                 6
+Passing Tests         6
+test_hit_registration
+Tests                 3
+Passing Tests         3
+test_hit_registration_qa
+Tests                 5
+Passing Tests         5
+test_figure_body
+Tests                17
+Passing Tests        17
+test_figure_models
+Tests                10
+Passing Tests        10
+test_bp7_figures
+Tests                13
+Passing Tests        13
+test_figure_copies
+Tests                 8
+Passing Tests         8
+test_figure_view
+Tests                 9
+Passing Tests         9
