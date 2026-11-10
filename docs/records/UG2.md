@@ -23,8 +23,8 @@ in the volumetric haze, while the roof lamps (UG1) light the rest of the hall.
   the sheet itself; out of the bounce light, as the roof is. Built only with the bay model and lamps.
 - **A thicker haze under the roof** (`RoofView._hall_haze`): a box FogVolume over the hall adding `shade_haze` (0.012)
   to the volumetric fog's density, so the shafts read; the map's own fog (0.006) is too thin indoors.
-- **On Lamp light Far only** (Ultra): `RoofLamps.set_mode` shows both, the lamps shine `lamp_shaded_energy` (34)
-  instead of 26, and `key_share` keeps the sun at `shade_sun_share` (1.0) instead of dimming it, only while the
+- **On Lamp light Far only** (Ultra): `RoofLamps.set_mode` shows both, the lamps shine `lamp_shaded_energy` (15)
+  instead of 11.5, and `key_share` keeps the sun at `shade_sun_share` (1.0) instead of dimming it, only while the
   sun casts shadows: a shadow-only shade blocks nothing, so Custom with Sun shadows off falls back to Near's sun and
   lamps (QA).
 - **The whole roof, from anywhere under it** (critic, attempt 1): shaded, every lamp is lit out to the roof's reach
@@ -32,10 +32,19 @@ in the volumetric haze, while the roof lamps (UG1) light the rest of the hall.
   distance so they reach it before their fade, so no part of the hall is shaded and unlit, or unshaded.
   Near and Off hide them, as before. Shared code: any roofed map with the bay model gets it.
 
+## Owner's change (2026-11-10)
+
+- **Wider, softer lamps** (William: "the lamp lights are too focused … I can see the cone … more wider and diffused",
+  and "the shadows should still be dark, not filled in"): cone 36° to 50°, its edge falloff 0.6 to 0.35 (no rim on the
+  floor), the haze glow 0.6 to 0.3 (no cone in the haze), energy 26 to 11.5 (High) and 34 to 15 (Ultra, shaded), so
+  the hall keeps its brightness (Ultra 103/94, 79/77, 88/87, 120/118; High 105/97, 74/72) and the overlap stays low
+  enough that crate and figure shadows stay dark; wider cones (65°, 72°) at the same brightness filled the shadows in
+  and washed out the rooflight strips. Picture: `art/graphics/ug2/6-depot-wider-softer-lamps.jpg`.
+
 ## Defaults taken
 
 - Far only, not High: Near lights only the lamps within 28 m, so with the sun shaded the hall past that would go dark.
-- Lamp energy 34 and haze 0.012 from trial renders at Ultra: against UG1's Ultra (sun at 55 %, lamps 26, no shade),
+- (Before the owner's change above) lamp energy 34 and haze 0.012 from trial renders at Ultra: against UG1's Ultra (sun at 55 %, lamps 26, no shade),
   the same four cameras measure 94/95, 77/74, 87/80 and 118/104 in mean brightness (about 7 % brighter overall, the
   corner view most, with every lamp lit and the haze); walls right under a lamp brighter. Haze 0.02 washed out the
   hall's far end, against the 65 m sight line's readability.

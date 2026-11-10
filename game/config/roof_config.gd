@@ -43,12 +43,12 @@ extends Resource
 ## `lamp_range` m at `lamp_light_energy` with the engine's distance falloff `lamp_falloff` (1: inverse distance), in
 ## `lamp_colour`. On the haze (Volumetric fog) it shines `lamp_fog` of itself.
 @export var lamp_light_drop: float = 0.05
-@export var lamp_cone: float = 36.0
-@export var lamp_cone_falloff: float = 0.6
+@export var lamp_cone: float = 50.0
+@export var lamp_cone_falloff: float = 0.35
 @export var lamp_range: float = 17.0
-@export var lamp_light_energy: float = 26.0
+@export var lamp_light_energy: float = 11.5
 @export var lamp_falloff: float = 1.0
-@export var lamp_fog: float = 0.6
+@export var lamp_fog: float = 0.3
 ## While the lamps shine the preset's overhead sun, which stands in for them on Low and Medium, is turned down to this
 ## share of itself, so the hall keeps about its brightness and reads as lit by its lamps.
 @export var lamp_sun_share: float = 0.55
@@ -70,4 +70,4 @@ extends Resource
 @export var rooflight_half: float = 0.8
 @export var shade_haze: float = 0.012
 @export var shade_sun_share: float = 1.0
-@export var lamp_shaded_energy: float = 34.0
+@export var lamp_shaded_energy: float = 15.0
