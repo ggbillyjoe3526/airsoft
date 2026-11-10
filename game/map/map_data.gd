@@ -622,7 +622,10 @@ func _read_roof(raw: Variant) -> void:
 		warnings.append("roof is not {\"height\": metres over 0, \"lamps\": [...]}; no roof")
 		return
 	roof_height = height
-	roof_plain = d.get("plain", false) == true
+	var plain: Variant = d.get("plain", false)
+	if not plain is bool:
+		warnings.append("roof.plain is not true or false; not plain")
+	roof_plain = plain is bool and plain
 	var lamps: Variant = d.get("lamps", [])
 	for raw_lamp: Variant in (lamps as Array if lamps is Array else []):
 		var at: Dictionary = raw_lamp if raw_lamp is Dictionary else {}

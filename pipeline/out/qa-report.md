@@ -1,4 +1,4 @@
-Task: MT1 · QA commit (see git log) · Verdict: Fail
+Task: MT1 · QA commit 2745f044 · Verdict: Fail
 
 Blocking
 - game/map/map_data.gd:625 `roof_plain = d.get("plain", false) == true` raises a SCRIPT ERROR ("Invalid operands String and bool in ==") when a map file has a non-bool `plain` (e.g. "plain": "yes"). Trigger: any map JSON with a string/number `plain`. The documented contract is warn and fall back, and the smoke test fails on any script error. Fix: `var plain: Variant = d.get("plain", false); roof_plain = plain is bool and plain` (add a warning if it is not a bool).
