@@ -16,7 +16,7 @@ names them, scaling per preset.
 
 ## Approach
 
-- **Data:** a map's `dressing.marks` (`WearMark`): oil, tyres or boots, at x, z (y, or the ground's height), a heading,
+- **Data:** a map's `dressing.wearMarks` (`WearMark`): oil, tyres or boots, at x, z (y, or the ground's height), a heading,
   a length and a bend, muddy or not. Written by the map builders (`tools/depot/build_map.py`,
   `tools/woodland/build_map.py`), each placed on open floor (checked against the blocks).
 - **Drawing:** `WearMarks` (built with the bushes in the dressing's staged parts): a Godot `Decal` per stain, per

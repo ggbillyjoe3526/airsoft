@@ -100,7 +100,7 @@ never stops the game from starting.
   of the dark dazzles a moment as the eyes close again (`LookConfig.eye_speed`). The night keeps its tuned dark
   (`eye_lift` 1). A scope's glass never adapts on its own: the main view adapts it with the rest.
 - **Wear marks** (WM1, Medium and up; Forward+ and Mobile, as Compatibility draws no decals) are a map's marks on its
-  floor (`dressing.marks`): oil stains, darker and shiny in the middle, tyre tracks and boot trails, dusty or muddy,
+  floor (`dressing.wearMarks`): oil stains, darker and shiny in the middle, tyre tracks and boot trails, dusty or muddy,
   each a decal faded out past 40 m (`MarksConfig`). They add to the floor's own grime and dust (SL1, SL2) rather than
   repeat it: Depot's vans and forklift in the Loading bay, the Garage and the hall, Woodland's pickup up its road
   and boots out of its mud.

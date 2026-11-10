@@ -15,7 +15,7 @@ func _good() -> Dictionary:
 
 func test_a_dressing_that_is_not_a_dictionary_names_no_marks() -> void:
 	var warnings: Array[String] = []
-	for bad: Variant in [[], "marks", 5, 1.5, true, null]:
+	for bad: Variant in [[], "wearMarks", 5, 1.5, true, null]:
 		assert_eq(WearMark.read(bad, warnings).size(), 0)
 	assert_eq(warnings.size(), 0, "not a dressing at all is silent, as for every other dressing")
 
@@ -23,7 +23,7 @@ func test_a_dressing_that_is_not_a_dictionary_names_no_marks() -> void:
 func test_marks_that_are_not_a_list_warn_once_and_name_none() -> void:
 	for bad: Variant in [{"a": 1}, "oil", 3, true, null]:
 		var warnings: Array[String] = []
-		assert_eq(WearMark.read({"marks": bad}, warnings).size(), 0)
+		assert_eq(WearMark.read({"wearMarks": bad}, warnings).size(), 0)
 		assert_eq(warnings.size(), 1, "marks = %s" % [bad])
 
 
@@ -41,14 +41,14 @@ func test_wrong_types_in_a_mark_leave_it_out_and_keep_the_rest() -> void:
 		{"kind": "oil", "x": 0, "z": 0, "length": 1, "mud": "yes"},
 		_good(),
 	]
-	var marks := WearMark.read({"marks": list}, warnings)
+	var marks := WearMark.read({"wearMarks": list}, warnings)
 	assert_eq(marks.size(), 1)
 	assert_eq(warnings.size(), list.size() - 1)
 
 
 func test_the_limits_themselves_are_allowed() -> void:
 	var warnings: Array[String] = []
-	var marks := WearMark.read({"marks": [
+	var marks := WearMark.read({"wearMarks": [
 		{"kind": "tyres", "x": 0, "z": 0, "length": WearMark.MOST_LENGTH, "bend": WearMark.MOST_BEND},
 		{"kind": "boots", "x": 0, "z": 0, "length": 0.01, "bend": -WearMark.MOST_BEND, "y": 3, "mud": true},
 	]}, warnings)
@@ -58,7 +58,7 @@ func test_the_limits_themselves_are_allowed() -> void:
 
 
 func test_a_longest_bent_mark_builds_a_bounded_number_of_decals() -> void:
-	var map := MapData.parse('{"size":[40,40],"dressing":{"marks":[{"kind":"tyres","x":0,"z":0,"length":30,"bend":180},'
+	var map := MapData.parse('{"size":[40,40],"dressing":{"wearMarks":[{"kind":"tyres","x":0,"z":0,"length":30,"bend":180},'
 			+ '{"kind":"boots","x":0,"z":0,"length":30,"bend":-180}]}}', play.map_style, 6)
 	if map.marks.is_empty():
 		pending("a bare map does not parse in this build")

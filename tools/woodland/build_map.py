@@ -572,7 +572,7 @@ def dressing() -> dict:
         "kickedDust": {"tint": 0x8D8467, "scale": 0.9},
         "grass": {"height": 0.34},
         "forest": {"trees": 1800},  # about what fits between the fence and the ground's edge (WoodsConfig.forest_reach)
-        "marks": marks(),
+        "wearMarks": marks(),
     }
 
 

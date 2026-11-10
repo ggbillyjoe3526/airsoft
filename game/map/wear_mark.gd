@@ -1,6 +1,6 @@
 class_name WearMark
 extends RefCounted
-## A worn mark on a field's floor (WM1; `dressing.marks` in the map file): an oil stain, a pair of tyre tracks or a
+## A worn mark on a field's floor (WM1; `dressing.wearMarks` in the map file): an oil stain, a pair of tyre tracks or a
 ## trail of boot prints, drawn by WearMarks as decals over the floor's own procedural wear (SL1, SL2), which they add to
 ## rather than repeat: the floor's wear is broad grime and dust, these are the marks of something that was there.
 ## Scenery only: nothing reads them but WearMarks.
@@ -30,9 +30,9 @@ var mud: bool = false
 ## The marks in a map file's `dressing` (none for a file without them), each warned of and left out when it isn't one.
 static func read(dressing: Variant, warnings: Array[String]) -> Array[WearMark]:
 	var out: Array[WearMark] = []
-	var raw: Variant = (dressing as Dictionary).get("marks", []) if dressing is Dictionary else []
+	var raw: Variant = (dressing as Dictionary).get("wearMarks", []) if dressing is Dictionary else []
 	if not raw is Array:
-		warnings.append("dressing.marks is not a list; no marks")
+		warnings.append("dressing.wearMarks is not a list; no marks")
 		return out
 	for i in (raw as Array).size():
 		var item: Variant = (raw as Array)[i]
@@ -47,7 +47,7 @@ static func read(dressing: Variant, warnings: Array[String]) -> Array[WearMark]:
 		var mud: Variant = d.get("mud", false)
 		if not KINDS.has(m.kind) or is_nan(m.at.x) or is_nan(m.at.y) or not (m.length > 0.0) \
 				or m.length > MOST_LENGTH or absf(m.bend) > MOST_BEND or not mud is bool:
-			warnings.append(("dressing.marks %d needs a kind (oil, tyres, boots), x, z and a length over 0 up to %d m"
+			warnings.append(("dressing.wearMarks %d needs a kind (oil, tyres, boots), x, z and a length over 0 up to %d m"
 					+ " (yaw, bend up to %d degrees, y, mud true or false); left out") % [i, MOST_LENGTH, MOST_BEND])
 			continue
 		m.mud = mud

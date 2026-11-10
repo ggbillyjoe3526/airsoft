@@ -265,7 +265,7 @@ def build() -> dict:
         "bakedLight": {"file": "depot", "dim": dims()},
         # The yard's dust: motes in the lamps' light and the grey puff feet kick up off the slab.
         "dressing": {"seed": 4127, "motes": {"tint": 14210767}, "kickedDust": {"tint": 12171184, "scale": 1},
-                     "site": site(), "marks": marks()},
+                     "site": site(), "wearMarks": marks()},
         "areas": areas(),
     }
 

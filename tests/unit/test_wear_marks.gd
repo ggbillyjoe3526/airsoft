@@ -1,6 +1,6 @@
 extends GutTest
 ## WM1: the floors' worn marks (WearMark, WearMarks, WearMarkArt, Graphics › Wear marks): oil stains, tyre tracks and
-## boot trails read from a map's `dressing.marks`, each a decal on open floor, shown from Medium up and never on
+## boot trails read from a map's `dressing.wearMarks`, each a decal on open floor, shown from Medium up and never on
 ## Compatibility. Headless: what is built and set, never pixels.
 
 var play: PlayTuning = PlayTuning.load_default()
@@ -20,7 +20,7 @@ func _marks(map: MapData) -> WearMarks:
 
 func test_a_mark_is_read_and_a_bad_one_left_out_with_a_warning() -> void:
 	var warnings: Array[String] = []
-	var marks := WearMark.read({"marks": [
+	var marks := WearMark.read({"wearMarks": [
 		{"kind": "tyres", "x": 1.0, "z": 2.0, "yaw": 90, "length": 6, "bend": 20, "mud": true},
 		{"kind": "paint", "x": 0, "z": 0, "length": 1},
 		{"kind": "oil", "x": 0, "z": 0, "length": 0},
@@ -63,7 +63,7 @@ func test_depot_and_woodland_have_marks_and_lay_them_without_warnings() -> void:
 		var map := MapData.load_map(id, play.map_style, 6)
 		assert_gt(map.marks.size(), 0, id)
 		for w in map.warnings:
-			assert_false(w.contains("marks"), "%s: %s" % [id, w])
+			assert_false(w.contains("wearMarks"), "%s: %s" % [id, w])
 		var kinds := {}
 		for m in map.marks:
 			kinds[m.kind] = true

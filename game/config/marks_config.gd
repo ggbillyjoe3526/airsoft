@@ -1,6 +1,6 @@
 class_name MarksConfig
 extends Resource
-## How the floors' worn marks look (WM1, WearMarks; a map places them in `dressing.marks`, WearMark): oil stains, tyre
+## How the floors' worn marks look (WM1, WearMarks; a map places them in `dressing.wearMarks`, WearMark): oil stains, tyre
 ## tracks and boot prints, each a decal (Graphics › Wear marks, Medium and up). Their colours are the look's palette's.
 
 @export_group("Colours")

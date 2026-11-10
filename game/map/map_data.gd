@@ -139,7 +139,7 @@ var site: SiteDressing = null
 ## fireflies over the field at night (`fireflies.count`) and the tint of the motes in the air (`motes.tint`, sRGB;
 ## has_motes false without one); the grass tufts' height (`grass.height`, m) and the trees in the wood beyond the fence
 ## (`forest.trees`). Each 0 or empty on a map naming none; a malformed one is left out with a warning.
-## Worn marks on its floor (WM1, `dressing.marks`: WearMark), drawn as decals by WearMarks; none on a map naming none.
+## Worn marks on its floor (WM1, `dressing.wearMarks`: WearMark), drawn as decals by WearMarks; none on a map naming none.
 var marks: Array[WearMark] = []
 var dressing_seed: int = 0
 var leaf_drifts: float = 0.0

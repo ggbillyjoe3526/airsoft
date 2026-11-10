@@ -1,6 +1,6 @@
 class_name WearMarks
 extends Node3D
-## A field's worn marks on its floor (WM1; the map's `dressing.marks`, WearMark): each oil stain one decal, each pair
+## A field's worn marks on its floor (WM1; the map's `dressing.wearMarks`, WearMark): each oil stain one decal, each pair
 ## of tyre tracks a decal a wheel for every straight piece it is laid in, each boot trail a decal a print, left and
 ## right in turn. They add to the floor's own wear (SL1, SL2), never repeat it. Shown with Graphics › Wear marks
 ## (`set_on`; Medium and up, Forward+ and Mobile, as Compatibility draws no decals). Scenery: no collider, no nav cell.
