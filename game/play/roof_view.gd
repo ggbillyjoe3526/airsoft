@@ -224,13 +224,13 @@ static func bay_placings(box: AABB, area: Rect2, y: float, cfg: RoofConfig) -> A
 
 
 ## How a lamp in `state` (MapData.LAMP_*) tints its lens's glow: a working or flickering one in full, a dim one at
-## `lamp_dim_share` in `lamp_dim_colour` (against the working colour), a dead one at `lamp_dead_glow`.
+## `lamp_dim_glow` in `lamp_dim_colour` (against the working colour), a dead one at `lamp_dead_glow`.
 static func lens_tint(state: int, cfg: RoofConfig) -> Color:
 	match state:
 		MapData.LAMP_DIM:
 			var c := cfg.lamp_dim_colour
 			var w := cfg.lamp_colour
-			return Color(c.r / w.r, c.g / w.g, c.b / w.b) * cfg.lamp_dim_share
+			return Color(c.r / w.r, c.g / w.g, c.b / w.b) * cfg.lamp_dim_glow
 		MapData.LAMP_DEAD:
 			return Color(cfg.lamp_dead_glow, cfg.lamp_dead_glow, cfg.lamp_dead_glow)
 	return Color.WHITE

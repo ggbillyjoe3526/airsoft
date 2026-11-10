@@ -26,7 +26,8 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
 - **The building:** blockwork walls under cladding, with galvanised steel columns, roller shutters and fire exits;
   steel pillars with hazard bands; scaffold walls hung with camouflage netting; a polished concrete floor.
 - **The roof:** galvanised steel trusses, purlins and rooflights under a pale grey liner, red sprinkler mains and cable
-  trays, with rows of high-bay lamps hanging on cables. A BB fired up stops at the roof.
+  trays, with rows of high-bay lamps hanging on cables. A BB fired up stops at the roof. The lamps are not all new:
+  some burn dimmer and warmer, a few flicker now and then, and a couple are dead, the same ones every match.
 - **It sounds like a big empty hall:** a quiet hum of the building, with the odd creak from the roof.
 - **No full auto indoors:** as at a real indoor site, every replica that can fire full auto starts each round on
   single shots here, bots' too. Press **B** to switch to auto during the round if you want it. Bots switch only now

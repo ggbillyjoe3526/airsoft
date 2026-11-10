@@ -36,10 +36,12 @@ extends Resource
 @export var lamp_colour: Color = Color(1.0, 0.96, 0.86)
 @export var lamp_energy: float = 2.6
 ## Worn lamps (LV1, a map's `roof.lamps[].state`: Depot's): a dim one glows and lights at `lamp_dim_share` of a
-## working one's strength in the older, warmer `lamp_dim_colour`; a dead one neither glows nor lights; a flickering one
+## working one's strength in the older, warmer `lamp_dim_colour`, its lens at `lamp_dim_glow` of a working one's (lower,
+## as a lens's glow is so bright that half still reads full); a dead one neither glows nor lights; a flickering one
 ## mostly shines in full but now and then stutters, every `lamp_flicker_every` s on average for up to
 ## `lamp_flicker_burst` s, stepping between full and `lamp_flicker_low` every `lamp_flicker_step` s.
 @export var lamp_dim_share: float = 0.5
+@export var lamp_dim_glow: float = 0.25
 @export var lamp_dim_colour: Color = Color(1.0, 0.86, 0.66)
 @export var lamp_dead_glow: float = 0.0
 @export var lamp_flicker_low: float = 0.1
