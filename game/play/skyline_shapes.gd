@@ -25,6 +25,8 @@ class Part:
 	var cap_b: bool = true
 	var lamp: bool = false
 	var with_model: bool = false
+	## Its share of the skyline's fade toward the horizon (a treeline's SkylineConfig.treeline_fade).
+	var haze: float = 1.0
 
 
 ## The parts of `p`, the field's middle at `middle` (x, z).
@@ -314,8 +316,10 @@ static func _treeline(out: Array[Part], p: SkylinePiece, cfg: SkylineConfig) -> 
 				var h := p.height * rng.randf_range(cfg.treeline_low, 1.0)
 				var colour := cfg.treeline_colours[rng.randi() % cfg.treeline_colours.size()]
 				var foot := Vector3(at.x, -cfg.treeline_sink, at.y)
-				out.append(drum(foot, Vector3(at.x, h, at.y), h * cfg.treeline_width, 0.0, cfg.treeline_sides,
-						p.colour_or(colour)))
+				var tree := drum(foot, Vector3(at.x, h, at.y), h * cfg.treeline_width, 0.0, cfg.treeline_sides,
+						p.colour_or(colour))
+				tree.haze = cfg.treeline_fade
+				out.append(tree)
 
 
 static func _hill(out: Array[Part], p: SkylinePiece, cfg: SkylineConfig) -> void:

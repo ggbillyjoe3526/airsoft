@@ -92,10 +92,10 @@ extends Resource
 	# Its hinged doors (DO1): bottle-green painted leaves, so a door reads apart from the plywood round it.
 	&"door": Color(0.22, 0.40, 0.27),
 	# Woodland's concept 3 (WR1), off both team hues, from the palette: rubber tyres, a violet pickup, a thicket's core
-	# in the deep forest green, the shade between its spruces (WT1).
+	# in the shade under its spruces' boughs (spruce.py's UNDER, FT1: the forest green read as a lit box between them).
 	&"tyre": Color8(0x3d, 0x3b, 0x45),
 	&"truck": Color8(0x76, 0x58, 0xaa),
-	&"thicket": Color8(0x2b, 0x5c, 0x48),
+	&"thicket": Color8(0x18, 0x33, 0x28),
 }
 ## Surfaces drawn in their own colour whatever their block's kind (RayHit.Surface to sRGB): a gravel bed on the slab.
 @export var surface_colours: Dictionary[int, Color] = {

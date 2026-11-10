@@ -19,6 +19,8 @@ render_mode blend_mix, cull_back;
 uniform vec4 tint : source_color = vec4(1.0);
 uniform float roughness : hint_range(0.0, 1.0) = 0.8;
 uniform float metallic : hint_range(0.0, 1.0) = 0.0;
+// The engine's sheen of the sky at a glancing angle (Godot's default 0.5); the skyline draws none (FT1).
+uniform float specular : hint_range(0.0, 1.0) = 0.5;
 uniform bool srgb_colours = false;
 uniform bool paint_by_custom = false;
 uniform bool perforations = false;
@@ -116,4 +118,5 @@ void fragment() {
 	ALBEDO = look_paint(col);
 	ROUGHNESS = rough;
 	METALLIC = metallic;
+	SPECULAR = specular;
 }

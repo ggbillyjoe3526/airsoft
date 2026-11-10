@@ -11,9 +11,15 @@ extends Resource
 @export var fade_from: float = 25.0
 @export var fade_span: float = 140.0
 @export var fade_most: float = 0.7
+## A treeline's share of that fade (FT1): it stands just past the fence, so a player near it sees it close up; faded as
+## far as a horizon piece, then lit by the sun, it read white. As the far wood behind it is (WoodsConfig.forest_fade).
+@export var treeline_fade: float = 0.2
 ## Sides of a round part (drums, chimneys, the fuselage, a hill's rings).
 @export var sides: int = 12
 @export var roughness: float = 0.9
+## How much of the sky its faces mirror at a glancing angle (look_vertex.gdshader's `specular`; FT1): none, so a
+## dark treeline seen up its sides from the field's edge stays green rather than mirroring the bright sky white.
+@export var specular: float = 0.0
 
 @export_group("Models")
 ## The kinds drawn from a model (Dev 3 map models, tools/blender/maps/skyline.py) in place of their greybox, each
@@ -135,9 +141,10 @@ extends Resource
 ## A band of dark conifers along a line (WL4; the browser game's DRESSING.treeline): cones `treeline_spacing` m apart
 ## in rows across its depth, jittered by `treeline_jitter` of the spacing, `treeline_low` to 1 of its height tall,
 ## `treeline_width` of their height wide (radius) with `treeline_sides` sides, sunk `treeline_sink` m into the ground,
-## each in one of these greens (far from both teams' hues).
+## each in one of these greens (far from both teams' hues): the far wood's (WoodsConfig.forest_colours), so the band
+## and the wood behind it match (FT1: the darker greens, shaded again by the model's own shade, read grey in the sun).
 @export var treeline_colours: PackedColorArray = PackedColorArray([
-	Color("1c3024"), Color("22382a"), Color("18291f"), Color("2a3a2c"),
+	Color("2b5c48"), Color("2f6e55"), Color("3d7a4a"), Color("2b5c48"),
 ])
 @export var treeline_spacing: float = 2.4
 @export var treeline_jitter: float = 0.35
