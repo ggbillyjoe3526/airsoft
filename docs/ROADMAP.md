@@ -33,7 +33,7 @@ in `docs/PROCESS.md`.
   preset, baked path tracing before live ray tracing), in five steps: real lamp lights with shadows (done: UG1), a
   hall lit by its lamps alone with no sun indoors (UG2), eye adaptation, finer bounce light, reflections, ambient occlusion
   and wear decals, then baked path-traced light. The owner added a replica (2026-11-10): the Compact SMG, its numbers
-  and play first (CS1, Dev content, drawn as the AEG for now), its model once his reference pictures come. And a
+  and play first (CS1, Dev content), then its own model from his photos (CS2). And a
   new map (2026-11-10): Kingsmere, a closed metro station on three levels, from his concept v2: its greybox as Dev
   content (MT1), then its working lifts (MT2), then its models and lamps.
 - **The release path** (owner, 2026-10-12): 0.1 Dev builds, 0.1 Beta, then 0.1 (tagged `0.1.0`) opens Early

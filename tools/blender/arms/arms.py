@@ -261,6 +261,15 @@ SNIPER_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.100, -0.035), index=(0.030, -0.030
 SNIPER_GUARD = dict(GUARD, y=0.260, axis=(0.0, 0.030), radius=0.025, tips_below=0.052,
                     tip_at=(0.0255, 0.000, 0.040), thumb_x=-0.028, thumb_z=0.040, thumb_f=0.050, forward=0.034,
                     search=((40, 80), (20, 50), (-40, 0)), tip_drop={"Pinky": 0.015})
+# The Compact SMG (CS1): its grip raked 30 degrees as the AEG's and its front where the AEG's is at the hand's height
+# (smg.py), but 12 mm deeper, so the web and the little finger's knuckle sit that much further back and the thumb
+# reaches round onto the grip's left side a little further back; its roll, thumb and trigger finger searched.
+SMG_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.113, -0.056), pinky=(0.024, -0.074, -0.078),
+                 thumb_at=(-0.022, -0.058, -0.026), rolls=None, thumb_turn=None, index_turn=None)
+# Its left hand under the slim handguard behind its side rails, as the AEG's (the handguard's centre line higher, its
+# top under the cocking tube at 0.096, so the fingertips stay under the tube and the right rail starts 2 cm ahead).
+SMG_GUARD = dict(GUARD, y=0.158, axis=(0.0, 0.072), radius=0.022, tips_below=0.090,
+                 tip_at=(0.0275, 0.005, 0.068), thumb_x=-0.028, thumb_z=0.080, search=((40, 80), (20, 50), (-40, 0)))
 # A foregrip fitted under the handguard (BP8, the owner's playtest note 6: "If a weapon has a grip attachment the
 # players left hand should hold it"): the left hand wraps the grip as the right hand wraps a pistol's, mirrored: its
 # palm on the grip's left side, the thumb's root (`web`) behind its back face, the index finger's knuckle high under
@@ -311,6 +320,8 @@ HOLDS = {
                   CYBER_RIGHT, DOWN),
     "sniper": Hold("sniper.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.090, 0.008), 54.0, 0.050, 0.021),
                    SNIPER_RIGHT, SNIPER_GUARD),
+    "smg": Hold("smg.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.0847, -0.026), 30.0, 0.050, 0.0145),
+                SMG_RIGHT, SMG_GUARD),
     "smoke": Hold("../grenades/smoke.glb", HELD_AT, Grip((0.0, -0.0275, 0.03), 0.0, 0.055, 0.0275), SMOKE_RIGHT,
                   DOWN, HELD_TIP),
     "flash": Hold("../grenades/flash.glb", HELD_AT, Grip((0.0, -0.020, 0.03), 0.0, 0.040, 0.020), FLASH_RIGHT,

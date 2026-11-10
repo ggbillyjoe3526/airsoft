@@ -26,7 +26,7 @@ import figure_copy  # noqa: E402
 import hardsurface as hs  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
-FILES = ["aeg", "pistol", "cyber", "sniper"]
+FILES = ["aeg", "pistol", "cyber", "sniper", "smg"]
 SUFFIX = "_Figure"
 # A part's copy: this share of its triangles, kept between FIGURE_MIN and FIGURE_MAX (a part's small round shapes, a
 # laser's knurled body, thin out below it), and always under the part's own count. FIGURE_MAX 600 (from 900): the

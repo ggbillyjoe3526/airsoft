@@ -8,7 +8,7 @@ const DT := 1.0 / 60.0
 const GRIPS: Array[StringName] = [&"vertical", &"angled"]
 ## The replicas that take a grip (data/pool.md: under-rail), and every replica you reload.
 const GRIPPED: Array[StringName] = [&"aeg", &"sniper"]
-const HELD: Array[StringName] = [&"aeg", &"pistol", &"cyber", &"sniper"]
+const HELD: Array[StringName] = [&"aeg", &"pistol", &"cyber", &"sniper", &"smg"]
 ## How far (m) the magazine may sit from its place in the left hand while the hand carries it, and may jump as the
 ## hand takes it or lets it go.
 const CARRY_SLACK := 0.004

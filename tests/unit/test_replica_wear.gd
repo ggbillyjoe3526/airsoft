@@ -3,7 +3,7 @@ extends GutTest
 ## (tools/blender/replicas/wear.py) as their painted materials' ao_texture, and ReplicaPaint draws those surfaces in the
 ## worn paint (game/play/replica_wear.gdshader); the figures' copies, the Cyber Pistol and the Sniper Rifle stay plain.
 
-const WORN := ["aeg", "pistol"]
+const WORN := ["aeg", "pistol", "smg"]
 const CLEAN := ["cyber", "sniper"]
 const MODEL := "res://assets/models/replicas/%s.glb"
 const MASK := "res://assets/models/replicas/%s_wear.png"

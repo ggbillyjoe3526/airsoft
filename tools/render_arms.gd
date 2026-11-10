@@ -24,7 +24,7 @@ const MAP := "depot"
 const SPOT := Vector4(0.0, 0.0, 0.0, 0.0)
 const GRIPPED: Array[StringName] = [&"aeg", &"sniper"]
 const GRIPS: Array[StringName] = [&"", &"vertical", &"angled"]
-const HELD: Array[StringName] = [&"aeg", &"pistol", &"cyber", &"sniper"]
+const HELD: Array[StringName] = [&"aeg", &"pistol", &"cyber", &"sniper", &"smg"]
 ## Reload frames a second.
 const RELOAD_RATE := 30.0
 ## The outside camera: OUTSIDE_FAR m from what it looks at, that way from it (along the eye camera's axes: to the
