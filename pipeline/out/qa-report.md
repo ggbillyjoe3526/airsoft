@@ -1,41 +1,22 @@
-# QA report: SL2 world-space wear (HEAD b2a9901)
+Task: SG1 · QA commit (see git log, Agent: qa) · Verdict: Pass
 
-Verdict: PASS with one visual bug to fix before Beta (not a crash, no test fails).
+Blocking: none. Advisory: none reproducible.
+- game/play/optic_glass.gd `_face_optic`: a zero-scale model gives a zero `ahead` (normalized) and a looking_at error; not reachable today (no replica model is scaled to 0), noted only.
+- update() allocates only value types (Vector3/Basis/Transform3D); no new arrays, nodes or tweens per call (read, not measured).
 
-Ran: test_look, test_props, test_dr2_qa, test_rk1_props, test_wg4_woodland_props, test_dm1_map_models,
-test_wr3_qa: 77 passing, 0 failing, no SCRIPT ERROR. Headless cannot compile the shader, so the .gdshader was read by hand.
+Tests added (tests/unit/test_sg1_hip_glass_qa.gd, 9 tests, 422 asserts, all pass):
+- :32 straight up/down and within 0.02-0.06 rad of it: camera finite, orthonormal, looks down the axis (colinear case) · old code faced the eye, so the axis check fails on it.
+- :48 scaled model (0.25, 3.0): unit camera down the axis · same.
+- :60 reach clamp across far-out poses and turns: never beyond hip_glass_eye_reach of the eye · guards the clamp; the old camera sat at the eye, so this would pass there (a guard, not a regression pin).
+- :76 aimed -> hip -> aimed restores fov, near, transform, projection, environment · old hip path used frustum, so a stale projection would show.
+- :95 near/far follow the eye's own at hip and aimed, changed twice · old hip path kept setup values.
+- :114 camera physics_interpolation_mode is OFF · fails without the added line.
+- :118 red dot: no hip glass, no second camera at the hip.
+- :127 Low: still tint, camera not placed, not drawing.
+- :140 200 seeded random poses (any rotation): camera and span always finite.
+Not verified by stubbing production (QA may not edit it); "fails without" is by reading the old hunks.
 
-## Bug 1 (visual, medium): grime lands mid-model on models whose origin is not at their foot
-game/play/look/look_vertex.gdshader:59-60 (wear_foot) and :88-90 (step(-0.05, wear_foot)); worn by the default
-PropDressConfig.wear 1.0 (game/config/prop_dress_config.gd:294).
-PropLayout.fit() puts the model's AABB bottom on the floor, not its origin. Measured AABB min y (m):
-trunk -0.355 (h 0.71), tyre -0.175 (h 0.35), tractor_tyre -0.25 (h 1.1), tractor_tyre_stack -0.25, spruce -0.2.
-The trunk and both tyre models are centred on their origin. Scenario: a tyre or trunk standing on the ground has its
-floor at wear_foot = -0.175 or -0.355, so step() zeroes the foot grime there. The grime then starts at the model's
-middle and fades upward. Result: clean at the foot, dirty halfway up. The same applies to anything stacked or hung.
-Fix: set model_wear to 0 for trunk, tyre, tractor_tyre, tractor_tyre_stack (a one-line data change). The better fix is
-to give the material a per-model floor offset, or to measure foot from the mesh's own AABB min y instead of the origin.
-Add a test that every model with wear above 0 has AABB.position.y >= -0.05.
+Runs: new file 9/9 (0.7 s); test_bp8_replicas.gd + test_bp8_replicas_qa.gd 44/44, 372 asserts (1.5 s). Raw output in pipeline/out/qa/sg1-*.txt. I did not run tools/check.sh (running in the background by the caller); the smoke test is part of it.
 
-## Checked and fine
-- Normal space: INV_VIEW_MATRIX * NORMAL in fragment() is world space. MultiMesh MODEL_MATRIX includes the instance
-  transform, so wear_at and wear_foot are per instance. Non-uniform scale is handled by the engine's normal.
-- Division: facing_x uses max(...,1e-4); smoothstep upper edges are all above their lower edges
-  (grime_height*(0.35+0.65*blotch) is at least 0.315).
-- fwidth(across) and fwidth(perforation) are outside every branch.
-- Material keys: Vector2(rough, wear) is built from the same float32 values each time, so there are no duplicate
-  materials. The shared material is inserted first, so materials()[0] (test_dm1) is still the shared one.
-- Every caller of materials() (site_dress.gd:93, play_session.gd:913) takes the whole array, so prewarm covers all
-  of them. All other vertex_colour() callers use the default wear 0 (clean), and the new argument is last, so none break.
-- project.godot: look_wear, look_grime and look_dust are declared. The colours are the sRGB-to-linear of the
-  LookConfig defaults, and globals() pushes the same values.
-- Night and other maps: wear is world space and independent of lighting. look_paint() desaturates the grime and dust
-  colours by paint_saturation (0.6) too, which is not a bug but is worth knowing when tuning.
-
-## Notes (minor, not blocking)
-- Stacked cells (_grid, e.g. stacked containers or crates) each have their own origin, so grime repeats at every
-  level's foot. Fine for crates; check containers in play.
-- Vertex stage computes wear_at for every material, including wear 0. This is cheap, but the varyings are
-  also interpolated for the foliage.
-- To verify in play (cannot be run headless): a tyre, trunk, container stack and racking on Depot and Woodland, and
-  that the streaks do not shimmer at range.
+Could not test: how the glass looks on a real window, the angle against the owner's complaint, and alt-tab/window modes (need a display); the owner should check a 2x and a variable at the hip and while turning/looking up.
+Note: my first launch ran the whole suite by mistake (missing -gdir=); it may still be running as a background godot process and can be ignored or stopped.
