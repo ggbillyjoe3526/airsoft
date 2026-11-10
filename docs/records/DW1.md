@@ -46,7 +46,7 @@ indoors) the hall is lit by its lamps alone, so worn lamps vary its light.
 - gdlint clean; `test_worn_lamps` 8/8 (Depot's states and only Depot's, a dead lamp among four working neighbours, an unknown state, a dead lamp with no light
   and a dark lens, a dim one's light and lens, a flickering one dynamic and following its steps, the flicker mostly
   on and the same every run, no processing without worn lamps); `test_lamp_lights` (one light a lamp but the dead),
-  `test_lamp_lights_qa`, `test_ug2_qa`, `test_depot_hall` pass.
+  `test_lamp_lights_qa`, `test_ug2_qa`, `test_depot_hall`, QA's `test_dw1_qa` (7) and `test_dw1_qa2` (5, the flicker's levels and odds and each lens tint) pass.
 - Pictures: `/mnt/project-files/art/graphics/lv1/`.
 
 ## Known issues left
