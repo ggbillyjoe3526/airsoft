@@ -3,7 +3,7 @@ extends GutTest
 ## content): a replica that plays by stats.md's `smg` row, the fastest trigger there is with a small magazine, semi and
 ## full auto, driven by the batteries, under the rifle site limit; 8 % quicker on your feet carried (ReplicaConfig.pace),
 ## half the spread moving adds (move_spread) and tighter from the hip (hip_spread 0.75); short on reach with its light
-## BBs. It takes the optics, laser, silencer and torch, not the grips, barrels or AEG magazines; unlocks at level 7;
+## BBs. It takes the optics, laser, silencer and torch, not the grips, barrels or AEG magazines; unlocks at level 10;
 ## the Breacher bot kit carries it; it is heard through its own stand-in sounds and drawn as the AEG Rifle until its
 ## own model (the owner's reference pictures).
 
@@ -188,12 +188,12 @@ func test_its_parts_are_the_optics_laser_silencer_and_torch() -> void:
 	assert_almost_eq(carried.replicas[0].move_spread, 0.5, 1e-6)
 
 
-func test_it_unlocks_at_level_7_with_its_parts_already_there() -> void:
+func test_it_unlocks_at_level_10_with_its_parts_already_there() -> void:
 	var table := LevelTable.read_file(rules.pool)
 	assert_eq(table.problems, [] as Array[String])
-	assert_eq(table.unlock_level(SMG), 7)
+	assert_eq(table.unlock_level(SMG), 10, "a replica every five levels (LV15)")
 	for part: String in [RED_DOT, RED_LASER, SILENCER, BATTERY]:
-		assert_lt(table.unlock_level(part), 7, "%s before it" % part)
+		assert_lt(table.unlock_level(part), 10, "%s before it" % part)
 
 
 func test_the_breacher_kit_carries_it_with_a_red_dot_with_dev_content_only() -> void:

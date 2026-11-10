@@ -71,7 +71,8 @@ func test_a_click_on_a_dot_shows_that_level_first() -> void:
 	click.position = dots.dot_position(1)
 	dots._gui_input(click)
 	assert_eq(_shown(page), [1, 2, 3, 4] as Array[int])
-	click.position = dots.dot_position(10)
+	dots.show_page(1) # levels 11 to 15 are on the track's second page (LV15)
+	click.position = dots.dot_position(14)
 	dots._gui_input(click)
 	assert_eq(page.track().first(), page.track().last_first(), "a level near the end keeps four cards")
 

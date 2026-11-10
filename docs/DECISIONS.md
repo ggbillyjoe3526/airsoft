@@ -99,7 +99,7 @@ binds; the rest goes in the task's record. When this file nears 50 KB, move supe
   from a credits screen.
 - **0.1 is the browser game's 0.1 as the owner's rulings define it (owner, 2026-10-18).** Depot (Elimination, Attack /
   Defend, custom matches), Easy to Hard and Pro, Woodland (night play, the weapon torch, glowing BBs, 5v5 / 6v6), the
-  AEG Rifle, GBB Pistol and Cyber Pistol (level 10), loadout and attachments, levels and the Armory, squad orders,
+  AEG Rifle, GBB Pistol and Cyber Pistol (the level cap), loadout and attachments, levels and the Armory, squad orders,
   settings, comfort and accessibility. Extraction waits for the Modes Update, as ruled 2026-10-05; Neon Heights is cut
   (2026-10-29). Dev 1 is the core slice: Depot, the AEG and GBB Pistol, bots, Elimination.
 
@@ -736,10 +736,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **The next replica is a spring sniper rifle, and the owner is asked how to build it and its specs before work starts
   (owner, 2026-10-06).** The SMG and shotgun come after it.
 - **The Cyber Pistol is the owner's own design and the level cap's reward (owner, 2026-10-04; level 10 since
-  2026-10-13).** It stays inside the pistol class's 1.0 J chrono limit: rifle power with pistol handling, the tightest
-  spread and almost no kick. Hard and Pro opponents now and then carry it. It borrows its colours from his photo (mint,
-  hot pink, black), never its logo or lettering. Redesigned from his three pictures (owner, 2026-10-12; RM5): small
-  iron sights, and only the dark grey slide kicks back.
+  2026-10-13, level 15 since 2026-11-10, LV15).** It stays inside the pistol class's 1.0 J chrono limit: rifle power
+  with pistol handling, the tightest spread and almost no kick. Hard and Pro opponents now and then carry it. It
+  borrows its colours from his photo (mint, hot pink, black), never its logo or lettering. Redesigned from his three
+  pictures (owner, 2026-10-12; RM5): small iron sights, and only the dark grey slide kicks back.
 - **The AEG Rifle and the GBB Pistol are redesigned from the owner's reference photos, with no text or logo copied
   (owner, 2026-10-12; RM6, RM7).** Small, minimal iron sights; the old length, grip, magazine, rails and mounts stay.
   The Gas Pistol became the GBB Pistol, a blowback replica with the same numbers.
@@ -786,8 +786,14 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **Levels (owner, 2026-10-13).** Everyone starts at level 0 with the GBB Pistol, the AEG Rifle and their power
   sources; the cap is 10, with the Cyber Pistol at the top. `levels.md` lists what each level unlocks. The cap goes up by
   adding rows. Unlocks are never taken away: an item moved up stays with whoever has it.
+- **The cap is 15, with a replica every five levels (owner, 2026-11-10; LV15).** The Sniper Rifle at 5, the Compact
+  SMG at 10 and the Cyber Pistol at 15; every level gives something public. Levels 1 to 10 keep their XP, so no save
+  changes level; 11 to 15 take 1,400 to 1,800 (about 58 Normal matches to the cap). The cap goes to 20 or more with the
+  Progression Update, its new levels filled with skins. The Armory's level track shows ten levels at a time, with
+  arrows at its ends to turn to the next ten (owner, 2026-11-10).
 - **XP numbers live in `levels.md` for the owner to tune (2026-10-13).** Every match gives XP except the range, the
-  tutorial and any match using dev content or a cheat. About 250 XP a Normal match, level 10 after about 25.
+  tutorial and any match using dev content or a cheat. About 250 XP a Normal match, level 10 after about 26
+  (level 15 after about 58 since LV15).
 - **Disable levelling is a Dev switch (owner, 2026-10-13).** It unlocks everything for the Loadout without touching your
   level and counts as a cheat: no XP, and the match stays out of the records.
 - **In Practice you change gear from play, and it is your one loadout (2026-10-13, M95).** The Loadout key (L) opens it
@@ -827,9 +833,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   **18 BBs/s**, **45 × 5** BBs, 0.75 J with 0.20 g, 1.4 s reload, 0.32 s draw, 0.6° spread, 0.14° kick, semi and full
   auto; two behaviours of its own, both new stats.md columns: **Pace 1.08** (run and sprint, not holstered) and
   **Moving spread 0.5** (half of what moving adds), with a **hip spread** of 0.75 (the column now takes under 1). Its
-  parts: the optics, the laser, the silencer and the torch, not the grips, barrels or AEG magazines. **Level 7** with
-  the M140 Spring, not a new level 11, which would stand empty with Dev content off. A Breacher bot kit (red dot,
-  rushers and flankers). Its own sound profile `smg`, a stand-in from the owner's AEG motor until he records one.
+  parts: the optics, the laser, the silencer and the torch, not the grips, barrels or AEG magazines. **Level 10**, with
+  the Variable Scope so the level isn't empty with Dev content off (LV15, owner 2026-11-10; level 7 at first). A
+  Breacher bot kit (red dot, rushers and flankers). Its own sound profile `smg`, a stand-in from the owner's AEG motor
+  until he records one.
 
 ## Menus, HUD, settings and accessibility
 

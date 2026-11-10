@@ -7,10 +7,17 @@ extends Control
 ## label in accent under an accent bar (owner, 2026-11-03), until another dot is clicked. It takes keyboard and controller
 ## focus too (BP6): left and right (ui_left, ui_right) pick the dot beside the picked one (the next level's first), and
 ## the theme's focus ring shows round the track while it has focus.
+## It shows ten levels at a time (owner, 2026-11-10; LV15): the starting kit and levels 1 to 10, then 11 to 20 and so
+## on, each page's line starting from the page before's last level. `show_page` turns the page (the summary's arrows);
+## the keys turn it on past either end of a page, and the track opens on the page with the next level.
 
 ## A dot was clicked: its level (0 for the starting kit).
 signal level_picked(number: int)
+## The page shown changed (the summary's arrows follow).
+signal page_changed(page: int)
 
+## Levels on a page: the first page has the starting kit too.
+const PER_PAGE := 10
 const HEIGHT := 64.0
 const DOT := 9.0
 const NEXT_DOT := 13.0
@@ -37,6 +44,8 @@ var _words: PackedStringArray = []
 ## The dot clicked last (-1: none yet).
 var _picked: int = -1
 var _focus_ring: StyleBoxFlat = GameTheme.focus_box()
+## The page shown (0: the starting kit and levels 1 to PER_PAGE).
+var _page: int = 0
 
 
 ## `count` dots (the starting kit and each level), the player at `level`, `fraction` of the way to the next.
@@ -55,6 +64,7 @@ func _init(count: int = 1, level: int = 0, fraction_in: float = 0.0) -> void:
 	_font = GameTheme.heading_font(700, GameTheme.SPACING_TAB, LABEL_SIZE)
 	for i in _count:
 		_words.append(tr("ARMORY_DOT_KIT") if i == 0 else str(i))
+	_page = page_of(mini(_level + 1, _count - 1))
 
 
 ## The share of the next level's XP earned (0 to 1).
@@ -67,13 +77,50 @@ func set_fraction(f: float) -> void:
 	queue_redraw()
 
 
-## Dot `i`'s centre.
+## How many pages of levels there are (1 up to PER_PAGE levels).
+func page_count() -> int:
+	return maxi(1, ceili(float(_count - 1) / float(PER_PAGE)))
+
+
+## The page shown.
+func page() -> int:
+	return _page
+
+
+## The page dot `i` is on: the starting kit and levels 1 to PER_PAGE on the first.
+func page_of(i: int) -> int:
+	return 0 if i <= 0 else floori(float(i - 1) / float(PER_PAGE))
+
+
+## The first dot on the page shown (the starting kit on the first page).
+func first_shown() -> int:
+	return 0 if _page == 0 else _page * PER_PAGE + 1
+
+
+## The last dot on the page shown.
+func last_shown() -> int:
+	return mini(_count - 1, (_page + 1) * PER_PAGE)
+
+
+## Shows page `p` (kept inside the pages there are).
+func show_page(p: int) -> void:
+	var to := clampi(p, 0, page_count() - 1)
+	if to == _page:
+		return
+	_page = to
+	queue_redraw()
+	page_changed.emit(_page)
+
+
+## Dot `i`'s centre on the page shown (`i` may be the page before's last level, where the page's line starts). A page
+## spaces its dots as a full page would, so a part page (the cap's) keeps the same steps and leaves room for more.
 func dot_position(i: int) -> Vector2:
 	var y := NEXT_DOT + RING
 	if _count == 1:
 		return Vector2(size.x * 0.5, y)
-	var step := (size.x - END_ROOM * 2.0) / float(_count - 1)
-	return Vector2(END_ROOM + step * i, y)
+	var slots := mini(PER_PAGE, _count - 1)
+	var step := (size.x - END_ROOM * 2.0) / float(slots)
+	return Vector2(END_ROOM + step * (i - _page * PER_PAGE), y)
 
 
 ## The dot clicked last (-1: none yet).
@@ -81,16 +128,18 @@ func picked() -> int:
 	return _picked
 
 
-## Marks dot `i` picked (-1: none).
+## Marks dot `i` picked (-1: none), turning to its page.
 func set_picked(i: int) -> void:
 	_picked = clampi(i, -1, _count - 1)
+	if _picked >= 0:
+		show_page(page_of(_picked))
 	queue_redraw()
 
 
-## The dot nearest `x`.
+## The dot on the page shown nearest `x`.
 func dot_at(x: float) -> int:
-	var best := 0
-	for i in _count:
+	var best := first_shown()
+	for i in range(first_shown(), last_shown() + 1):
 		if absf(dot_position(i).x - x) < absf(dot_position(best).x - x):
 			best = i
 	return best
@@ -111,7 +160,11 @@ func _gui_input(event: InputEvent) -> void:
 		step = 1
 	if step == 0:
 		return
-	var from := _picked if _picked >= 0 else mini(_level + 1, _count - 1) - step
+	var from := _picked if _picked >= 0 and page_of(_picked) == _page else -1
+	if from < 0:
+		# nothing picked on this page: the key starts from its next level, or from the end it comes in at
+		var next := mini(_level + 1, _count - 1)
+		from = next - step if page_of(next) == _page else (last_shown() + 1 if step < 0 else first_shown() - 1)
 	var to := from + step
 	# past either end the key goes on to the focus beside the track
 	if to < 0 or to >= _count:
@@ -124,14 +177,17 @@ func _gui_input(event: InputEvent) -> void:
 func _draw() -> void:
 	if has_focus():
 		draw_style_box(_focus_ring, Rect2(Vector2.ZERO, size))
-	var first := dot_position(0)
-	var last := dot_position(_count - 1)
+	# a later page's line starts where the page before ended, at its last level (no dot there)
+	var start := _page * PER_PAGE
+	var first := dot_position(start)
+	var last := dot_position(last_shown())
 	draw_line(first, last, RING_COLOUR, LINE)
-	var reach := dot_position(mini(_level, _count - 1))
-	if _level + 1 < _count:
-		reach = reach.lerp(dot_position(_level + 1), _fraction)
-	draw_line(first, reach, GameTheme.ACCENT, LINE)
-	for i in _count:
+	if _level >= start:
+		var reach := dot_position(mini(_level, last_shown()))
+		if _level < last_shown():
+			reach = reach.lerp(dot_position(_level + 1), _fraction)
+		draw_line(first, reach, GameTheme.ACCENT, LINE)
+	for i in range(first_shown(), last_shown() + 1):
 		var c := dot_position(i)
 		if i <= _level:
 			draw_circle(c, DOT, GameTheme.ACCENT)

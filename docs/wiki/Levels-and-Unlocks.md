@@ -1,8 +1,8 @@
 # Levels and Unlocks
 
 Everyone starts with a full kit that can win any match. Playing earns **XP**, XP raises your **level**, and each
-level unlocks more replicas, power sources and parts to play with. Unlocks are kept for good, and nothing is for sale:
-there are no microtransactions, loot boxes or paid advantages.
+level unlocks more replicas, power sources and parts to play with, with a new replica every five levels. Unlocks are
+kept for good, and nothing is for sale: there are no microtransactions, loot boxes or paid advantages.
 
 ## What each level unlocks
 
@@ -24,8 +24,8 @@ A finished match pays:
   card calls them "Rounds won with you in them", so it can count fewer than the match's score.
 - **A shorter Custom match pays less:** Match played, Match won and each Round won are scaled by its rounds to win
   divided by 5 (never more than in full).
-- A first-to-5 match on Normal gives about 250 XP, so the first level comes after your first match and the top level
-  after about 25 matches on Normal (fewer on Hard).
+- A first-to-5 match on Normal gives about 250 XP, so the first level comes after your first match, level 10 after
+  about 26 matches on Normal and the top level, 15, after about 58 (about 39 on Hard).
 - The [Practice Range](Practice-Range) gives no XP, and nor does a match played with a Dev setting that changes how it
   plays.
 
@@ -45,7 +45,8 @@ default. Custom matches never count, and the summary says "Not counted this matc
 The **ARMORY** tab on the side rail shows your level in large type, with the XP you have towards the next level, the
 XP you have earned in all and how many items are unlocked. How XP is earned and the bot level multipliers sit at the
 right (hover for the details). Under them a track has a dot for the starting kit and each level, filled up to your
-level and on into the next by the XP you have earned.
+level and on into the next by the XP you have earned. It shows ten levels at a time: the arrows at its ends turn to
+the levels before and after, and it opens on the ten with your next level.
 
 Below the track are four level cards, starting at your level. Each card shows its items with their pictures (hover an
 item to see what it does), marked **UNLOCKED**, **NEXT** (edged in the accent colour: the next level with something new) or with

@@ -47,15 +47,15 @@ func _sniper_config() -> ReplicaConfig:
 
 # --- the owner's unlock levels ---
 
-func test_the_levels_are_as_the_owner_set_them_and_the_cap_stays_10() -> void:
-	assert_eq(table.cap(), 10, "level cap stays 10")
+func test_the_levels_are_as_the_owner_set_them_and_the_cap_is_15() -> void:
+	assert_eq(table.cap(), 15, "the cap went to 15 (LV15)")
 	assert_eq(table.unlock_level(SNIPER), 5)
 	assert_eq(table.unlock_level(M130), 5)
 	assert_eq(table.unlock_level(SCOPE), 5)
-	assert_eq(table.unlock_level(RED_GAS), 6, "Red Gas moved from 5 to 6")
-	assert_eq(table.unlock_level(M140), 7)
-	assert_eq(table.unlock_level(M150), 9)
-	assert_eq(table.unlock_level(BLACK_GAS), 9, "Black Gas stays with the M150")
+	assert_eq(table.unlock_level(RED_GAS), 8, "Red Gas before the M140 (LV15)")
+	assert_eq(table.unlock_level(M140), 9)
+	assert_eq(table.unlock_level(M150), 14)
+	assert_eq(table.unlock_level(BLACK_GAS), 13, "Black Gas just before the M150 (LV15)")
 
 
 func test_the_springs_unlock_one_by_one_and_a_locked_one_cannot_be_picked() -> void:
@@ -66,11 +66,11 @@ func test_the_springs_unlock_one_by_one_and_a_locked_one_cannot_be_picked() -> v
 	assert_true(rules.equip(l, Loadout.Slot.PRIMARY, SNIPER))
 	assert_true(rules.set_power(l, SNIPER, M130))
 	assert_false(rules.set_power(l, SNIPER, M140), "locked at level 5")
-	p.add_xp(table.levels[7].total - p.xp)
-	assert_true(rules.set_power(l, SNIPER, M140), "unlocked at level 7")
-	assert_false(rules.set_power(l, SNIPER, M150), "locked at level 7")
 	p.add_xp(table.levels[9].total - p.xp)
-	assert_true(rules.set_power(l, SNIPER, M150), "unlocked at level 9")
+	assert_true(rules.set_power(l, SNIPER, M140), "unlocked at level 9")
+	assert_false(rules.set_power(l, SNIPER, M150), "locked at level 9")
+	p.add_xp(table.levels[14].total - p.xp)
+	assert_true(rules.set_power(l, SNIPER, M150), "unlocked at level 14")
 
 
 # --- a save from before the move ---
@@ -89,8 +89,9 @@ func test_a_save_from_before_gets_the_new_level_5_gear_and_keeps_what_it_had() -
 	assert_eq(Array(added).size(), 3, "exactly the three new level 5 items")
 	for id: String in [SNIPER, M130, SCOPE]:
 		assert_true(p.has(id), id)
-	assert_true(p.has(RED_GAS))
-	assert_false(p.has(M140), "level 7 is still ahead")
+	for id: String in ids:
+		assert_true(p.has(id), "kept: %s" % id)
+	assert_false(p.has(M140), "level 9 is still ahead")
 
 
 func test_an_old_player_at_level_5_keeps_red_gas_after_it_moved_to_6() -> void:
@@ -108,7 +109,7 @@ func test_the_shipped_rifle_springs_and_variable_scope_are_public_and_listed_wit
 	var shipped := Pool.read_file()
 	var levels := LevelTable.read_file(shipped)
 	var listed := PackedStringArray()
-	for r in ArmoryFacts.new(levels, shipped, levels.levels[10].total, false, false).rows:
+	for r in ArmoryFacts.new(levels, shipped, levels.levels[levels.cap()].total, false, false).rows:
 		for it in r.items:
 			listed.append(it.id)
 	for id: String in DEV_IDS + [VARIABLE_SCOPE]:
@@ -117,8 +118,8 @@ func test_the_shipped_rifle_springs_and_variable_scope_are_public_and_listed_wit
 
 
 func test_the_armory_names_no_sniper_gear_without_dev_content_and_with_it_names_all() -> void:
-	var plain := ArmoryFacts.new(table, pool, table.levels[10].total, false, false)
-	var dev := ArmoryFacts.new(table, pool, table.levels[10].total, false, true)
+	var plain := ArmoryFacts.new(table, pool, table.levels[table.cap()].total, false, false)
+	var dev := ArmoryFacts.new(table, pool, table.levels[table.cap()].total, false, true)
 	var plain_ids := PackedStringArray()
 	var dev_ids := PackedStringArray()
 	for r in plain.rows:
@@ -135,27 +136,28 @@ func test_the_armory_names_no_sniper_gear_without_dev_content_and_with_it_names_
 	assert_true(plain_ids.has(SCOPE), "the public 2x Scope is still listed")
 
 
-func test_the_next_unlock_skips_level_7_without_dev_content() -> void:
-	# Level 7 gives only the dev M140 Spring: a public player's next unlock from level 6 is the level 8 battery.
-	var facts := ArmoryFacts.new(table, pool, table.levels[6].total, false, false)
+func test_the_next_unlock_skips_levels_9_and_10_without_dev_content() -> void:
+	# Level 9 gives only the M140 Spring and level 10 only the Variable Scope, both dev here: a public player's next
+	# unlock from level 8 is the level 11 battery (LV15).
+	var facts := ArmoryFacts.new(table, pool, table.levels[8].total, false, false)
 	var next := facts.next_row()
 	assert_not_null(next)
-	assert_eq(next.number, 8)
+	assert_eq(next.number, 11)
 	for it in next.items:
 		assert_false(it.is_dev())
 
 
 func test_a_level_up_with_only_dev_gear_names_none_of_it_without_dev_content() -> void:
 	var p := Progress.new(table)
-	p.from_dict({"xp": table.levels[6].total})
+	p.from_dict({"xp": table.levels[8].total})
 	p.grant_reached()
 	var o := MatchXp.Outcome.new()
 	o.won = true
 	o.rounds_won = 5
 	var s := PlayerTally.Settled.new()
 	s.earned = MatchXp.earned(table, o)
-	s.level_up = p.add_xp(table.levels[7].total - p.xp)
-	assert_eq(s.level_up.to, 7)
+	s.level_up = p.add_xp(table.levels[9].total - p.xp)
+	assert_eq(s.level_up.to, 9)
 	var card := XpCard.new(s, p, pool, false)
 	add_child_autofree(card)
 	await wait_process_frames(2)

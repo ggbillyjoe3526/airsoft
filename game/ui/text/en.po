@@ -1863,6 +1863,12 @@ msgstr "Back a level"
 msgid "ARMORY_BROWSE_ON"
 msgstr "On a level"
 
+msgid "ARMORY_PAGE_BACK"
+msgstr "Levels before"
+
+msgid "ARMORY_PAGE_ON"
+msgstr "Levels after"
+
 msgid "ARMORY_START"
 msgstr "STARTING KIT"
 
