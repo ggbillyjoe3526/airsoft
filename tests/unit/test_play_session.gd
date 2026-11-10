@@ -130,12 +130,14 @@ func test_the_late_materials_are_drawn_once_at_the_start_and_then_freed() -> voi
 	assert_gt(arms, 0, "your arms (BL4)")
 	var far := HeldMerge.far_materials().size()
 	assert_gt(far, 0, "the bots' far replicas' paints (BP5)")
+	var worn := ReplicaPaint.worn_materials().size()
+	assert_gt(worn, 0, "your replica's worn paints (RW1)")
 	assert_eq(prewarm.get_child_count(), 11 + skyline + site + overtime + mags + bombs + roof + doors + arms + far
-			+ 2 * figures,
+			+ worn + 2 * figures,
 			"a BB, its trail (FB4), a glowing BB and its streak (WL8), a puff, a gas puff, kicked dust, the contact shadow, a wind speck,"
 			+ " the sign, the skyline's, the site dress's (DD1), the overtime flag's (OV3), the tossed magazines' (MH3),"
 			+ " the bombs' (SF1), the roof's (DR1), the doors' (DO1), your arms' (BL4), the far replicas' paints (BP5),"
-			+ " Dev › Lasers' beam (LZ1, whatever the switch) and each figure material solid and fading")
+			+ " your replica's worn paints (RW1), Dev › Lasers' beam (LZ1, whatever the switch) and each figure material solid and fading")
 	await wait_process_frames(ShaderPrewarm.FRAMES + 1)
 	assert_false(is_instance_valid(prewarm), "gone once its frames are drawn")
 

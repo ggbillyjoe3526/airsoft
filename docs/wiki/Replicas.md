@@ -105,6 +105,9 @@ Each replica can wear one of eight bold colour schemes or four plain ones, picke
 in their team's colours. **Realistic colours** shows every bold scheme as its plain colour, yours and the bots', from
 the next match.
 
+The AEG Rifle and the GBB Pistol look lightly used in your hands: faint scratches, rubbed edges and a little dirt in
+the recesses, in whatever colours they wear.
+
 ## On other players
 
 Bots hold the same replicas you hold, with the parts they have fitted: their optic (the iron sights taken off under

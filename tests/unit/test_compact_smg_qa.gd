@@ -1,6 +1,6 @@
 extends GutTest
 ## QA for the Compact SMG (CS1): the edges of its new stats columns, its fire modes on a semi-only field, what a
-## loadout carries of its stand-in model, and its figure drawn in hand and holstered.
+## loadout carries of its model, and its figure drawn in hand and holstered.
 
 const SMG := "000026"
 const RED_DOT := "000007"
@@ -48,7 +48,7 @@ func test_a_table_without_the_new_columns_keeps_the_smgs_built_in_pace_and_sprea
 	var missing := s.problems.filter(func(p: String) -> bool: return p.contains("Pace") or p.contains("Moving spread"))
 	assert_eq(missing, [] as Array, "optional columns are not reported missing")
 	var r := s.overlay(_smg_base())
-	assert_eq([r.pace, r.move_spread, r.hip_spread, r.model], [1.08, 0.5, 0.75, &"aeg"])
+	assert_eq([r.pace, r.move_spread, r.hip_spread, r.model], [1.08, 0.5, 0.75, &""])
 
 
 func test_on_a_semi_only_field_it_starts_on_semi_never_burst_or_auto() -> void:
@@ -58,13 +58,13 @@ func test_on_a_semi_only_field_it_starts_on_semi_never_burst_or_auto() -> void:
 	assert_eq(Armament.start_mode(r, ReplicaConfig.FireMode.AUTO), ReplicaConfig.FireMode.AUTO)
 
 
-func test_a_carried_smg_keeps_its_stand_in_model_and_parts_leave_pace_alone() -> void:
+func test_a_carried_smg_keeps_its_own_model_and_parts_leave_pace_alone() -> void:
 	var l := rules.default_loadout("L")
 	assert_true(rules.equip(l, Loadout.Slot.PRIMARY, SMG))
 	assert_true(rules.set_part(l, SMG, &"optic", RED_DOT))
 	var carried := rules.carried(l)
 	assert_eq(carried.replicas[0].id, &"smg")
-	assert_eq(carried.replicas[0].model_id(), &"aeg", "drawn as the AEG, even carried with a fitted part")
+	assert_eq(carried.replicas[0].model_id(), &"smg", "drawn as itself, carried with a fitted part")
 	assert_eq(carried.replicas[1].model_id(), &"pistol")
 
 

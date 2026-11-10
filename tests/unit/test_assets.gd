@@ -9,7 +9,7 @@ const MODEL_DIRS: Array[String] = [
 	"res://assets/models/powerSources",
 ]
 const FIGURE_CLIPS := 32
-const MAPS: Array[String] = ["depot", "woodland", "range"]
+const MAPS: Array[String] = ["depot", "woodland", "range", "kingsmere"]
 
 
 func _files(dir: String, ext: String) -> Array[String]:
@@ -31,7 +31,7 @@ func test_every_model_loads() -> void:
 				assert_not_null(node, path)
 				node.free()
 			count += 1
-	assert_eq(count, 14, "two figures, four replicas, four part sets, four power sources (the Sniper Rifle's and the spring, SN1)")
+	assert_eq(count, 16, "two figures, five replicas, five part sets, four power sources (the Compact SMG's model and parts, CS2)")
 
 
 func test_figures_have_their_clips_and_sidecars() -> void:

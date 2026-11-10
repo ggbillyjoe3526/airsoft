@@ -879,7 +879,7 @@ func _build_views(ui: CanvasLayer) -> void:
 		for i in poles.size():
 			var view := FlagView.new()
 			view.setup(_play.flag, _colours.figures, poles[i], _tuning.flag.radius,
-					Flag.LETTERS[i] if poles.size() > 1 else "")
+					Flag.LETTERS[i] if poles.size() > 1 else "", _map.pole_height)
 			add_child(view)
 			_flags.append(view)
 			first_use.append_array(view.materials())
@@ -890,6 +890,8 @@ func _build_views(ui: CanvasLayer) -> void:
 		first_use.append_array(_overtime_flag.materials())
 	first_use.append_array(_hands.prewarm_glass())
 	first_use.append_array(_hands.arms_materials())
+	# the replica in your hands wears its paint lightly used (RW1): one shader for every replica and paint
+	first_use.append_array(ReplicaPaint.worn_materials())
 	first_use.append_array(HeldMerge.far_materials())
 	first_use.append_array(range_materials)
 	if _skyline != null:

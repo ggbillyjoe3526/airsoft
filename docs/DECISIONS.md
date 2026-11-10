@@ -320,6 +320,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **Depot's lamps are worn (owner, 2026-11-10, DW1).** "Some lamps aren't as bright or they flicker or one that
   doesn't work", for Depot only: the map file names each worn lamp (`roof.lamps[].state`), picked once by its builder,
   the same every match; other maps name none.
+- **Eye adaptation lifts the dark and keeps the tuned look (2026-11-10, UG3; default, owner's step 3).** A Graphics
+  row, on for High and Ultra: a view darker than its map's middle opens up slowly, at most three times; any brighter
+  view keeps the preset's exposure, so every look the owner approved stays as it is and only tunnels and deep shade
+  lift. The night keeps its tuned dark. One middle for every map (0.25): Depot's hall and Woodland's open field both
+  meter above it.
 - **Every figure keeps its team-colour plate carrier (owner, 2026-10-17, AX1).** The carrier reads like a site's team
   bib and is the strongest team cue at range. A civilian outfit is in `docs/IDEAS.md`.
 
@@ -689,6 +694,17 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   The layout lives in `tools/woodland/layout.py` and `world.py`, and `build_map.py` writes `data/maps/woodland.json`:
   change the scripts, never the JSON. The game's blocks are axis-aligned, so pieces are squared and the stream runs
   straight north to south under both crossings. The old wood is a test fixture (`tests/support/maps/old_woodland.json`).
+- **Kingsmere, a closed metro station, is a Dev-only field (owner, 2026-11-10: "Add this to the game as a dev only
+  map", MT1).** The owner's pick for Dev 3's new map (a deep-level station like London's, inspired by Battlefield's
+  Operation Metro; its own layout, no real names or branding), built from his concept v2
+  (`/mnt/project-files/concepts/metro/v2/`, `tools/kingsmere/`): asymmetric, the Street team starting in the ticket
+  hall at street level and the Tunnel team in a cross-passage between the running tunnels, swapping at half time; one
+  spiral stair (street to concourse) and one ordinary stair (concourse to platforms) beside the escalators; tunnels
+  0.5 m over the trains' roofs; close quarters above and the long lines only on the platforms ("mostly CQB until the
+  platform level where longer sightlines open up"), so its 58 m platform line is its sightline exception. Its working
+  lifts (owner) are a step of their own (MT2); until then their shafts stand shut. Nobody climbs out of a track pit over
+  a platform's edge (a vault never lands on a platform), so every stretch of track has steps up at its ends. Its
+  Attack / Defend poles stand 2.1 m (`poleHeight`, FlagView), since flag A is inside a car 2.4 m high.
 - **The Street is removed from the game (owner, 2026-11-09: "completely remove the street map from the game", SX1).**
   It was dev only (DT1). Its map file, pictures, layout scripts (`tools/street/`), guards and CI job, its tests and
   the 23 Kenney props only it used (cars, vans, lorries, bins, skip, lamp, the House's furniture) went; nothing the rest
@@ -831,7 +847,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   slower to raise than the 2x Scope (1.9 against 1.6); fits any top rail (the AEG Rifle and the Sniper Rifle); unlocks
   at **level 8**. The rifle still comes with the 2x Scope.
 - **The Compact SMG (owner, 2026-11-10, CS1).** "A compact electric smg" in Dev 3 that "should feel and play unique";
-  its specs and data first, and **no model until his reference pictures** (until then it is drawn, held and pictured
+  its specs and data first, and **no model until his reference pictures** (until then it was drawn, held and pictured
   as the AEG Rifle: ReplicaConfig.model). Defaults taken (the owner may change any): a rifle-class electric replica,
   **18 BBs/s**, **45 × 5** BBs, 0.75 J with 0.20 g, 1.4 s reload, 0.32 s draw, 0.6° spread, 0.14° kick, semi and full
   auto; two behaviours of its own, both new stats.md columns: **Pace 1.08** (run and sprint, not holstered) and
@@ -843,6 +859,15 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Menus, HUD, settings and accessibility
 
+- **The Compact SMG's model (owner, 2026-11-10, CS2).** His photos came at 07:04 ("Create an initial model based on
+  this MP5 smg", with small rails for attachments and his magazine photos). Defaults he may change: the stock collapsed
+  as in his side photos, a short top rail and a short rail each side of the handguard (no under rail: it takes no
+  grips), the curved steel magazine (the polymer one with a window could be a second magazine later), the drum's
+  aperture opened to a ghost ring so the post shows aimed, and no markings. His rulings on version 2 (09:23): the
+  grip, trigger guard and housing one piece; lower rails; rounder stock edges; the barrel joined to the muzzle; the
+  rear sight seated, not floating; the cocking handle a bolt, not a disc. On version 3 (10:14): no gap between the
+  handguard and the front block, the barrel attached from the body to the muzzle, and the grip, guard and housing
+  reading as one piece.
 - **Settings after the Dev 6 playtest (owner, 2026-10-16; ST1).** Groups: Display, Graphics, Gameplay, Audio,
   Controls, Accessibility, Save file, Dev (Looks went with its only row, Robots, now a Dev Easter egg: 2026-10-24, RB1).
   Defaults: sound cues red, scoreboard 100 %, aim

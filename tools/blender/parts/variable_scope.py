@@ -23,4 +23,4 @@ PART = "optic_scopeVar"
 if __name__ == "__main__":
     attachments.FILES = {"aeg": [PART]}
     attachments.write("aeg")
-    print("wrote aeg (now run tools/blender/replicas/sniper.py)")
+    print("wrote aeg (now run tools/blender/replicas/sniper.py and smg.py)")

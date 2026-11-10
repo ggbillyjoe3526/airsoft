@@ -84,6 +84,8 @@ func setup(cfg: ViewModelConfig, view: ViewConfig, eyes: Camera3D) -> void:
 	_camera.near = view.near
 	_camera.far = view.far
 	_camera.keep_aspect = Camera3D.KEEP_HEIGHT
+	# Its own exposure fixed: the main view, adapting (Eye adaptation), tonemaps the glass's picture with the rest.
+	_camera.attributes = CameraAttributesPractical.new()
 	# Placed by hand every rendered frame (off the eye at the hip), never eased between ticks by the engine.
 	_camera.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	_port.add_child(_camera)

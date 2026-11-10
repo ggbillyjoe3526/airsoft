@@ -23,4 +23,3 @@ recoil_deg = 0.14
 hip_spread = 0.75
 pace = 1.08
 move_spread = 0.5
-model = &"aeg"

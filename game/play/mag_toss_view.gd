@@ -121,7 +121,7 @@ func _wear(i: int, t: MagShare.Toss) -> void:
 	for s in copy.get_surface_override_material_count():
 		copy.set_surface_override_material(s, null)
 	if key >= 0 and key < _paints.size() and _paints[key] != &"":
-		ReplicaPaint.apply(copy, _paints[key], _realistic)
+		ReplicaPaint.apply(copy, _paints[key], _realistic, false)  # a figure's copy: plain (RW1)
 	_middles[i] = mesh.get_aabb().get_center()
 
 

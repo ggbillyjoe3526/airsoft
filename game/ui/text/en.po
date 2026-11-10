@@ -2502,6 +2502,12 @@ msgstr "REFLECTIONS"
 msgid "GRAPHICS_GLOW"
 msgstr "GLOW"
 
+msgid "GRAPHICS_EYE_ADAPTATION"
+msgstr "EYE ADAPTATION"
+
+msgid "GRAPHICS_EYE_ADAPTATION_NOTE"
+msgstr "The picture brightens slowly in the dark and settles in bright light, as your eyes do, within limits."
+
 msgid "GRAPHICS_VOLUMETRIC_FOG"
 msgstr "VOLUMETRIC HAZE"
 

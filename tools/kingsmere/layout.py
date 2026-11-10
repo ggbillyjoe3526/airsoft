@@ -1,0 +1,241 @@
+"""Kingsmere's layout as data: a closed deep-level metro station (the owner's concept v2, 2026-11-10;
+/mnt/project-files/concepts/metro/v2/). Dev content until the owner makes it public.
+
+Asymmetric. The Street team (end 0) starts in the ticket hall at street level; the Tunnel team (end 1) starts in a
+cross-passage between the two running tunnels east of the platforms. Teams swap ends at half time.
+
+Metres, x west to east, z north (-) to south (+), y up. The levels are written as the concept has them, from the
+street down (G 0, concourse -10, platforms -18, track bed -18.9); build_map.py lifts them all by LIFT so the track
+bed is the game's floor at 0.
+
+ROOMS are walkable volumes: a box of air from its floor up `h` m (a ramp room's floor runs from `ya` at x0 to `yb` at
+x1). Rooms that touch along an edge, with their air overlapping at least OPEN m, open into each other there; every
+other edge of a room gets a wall, and every room a floor and a ceiling. A sealed edge (a train's side, the spiral
+stair's well) is walled from the inside but for its `gaps`. BLOCKS are the cover, `h` m over the floor they stand on.
+The links between levels: two upper escalators (0 to -10), two lower ones (-10 to -18), one spiral stair (0 to -10)
+and one ordinary stair (-10 to -18, a half landing on the way). The two lift shafts stand where the lifts will run.
+
+Edit this file, then run `python3 tools/kingsmere/build_map.py` to write data/maps/kingsmere.json.
+"""
+from __future__ import annotations
+
+G, C, P, T = 0.0, -10.0, -18.0, -18.9
+LANDING = -14.0
+TRAIN_IN = 2.4    # a car's height inside
+TUNNEL_H = 3.2    # platform tunnels and running tunnels: 0.5 m over a car's roof
+rooms: list[dict] = []
+blocks: list[dict] = []
+
+
+def room(name: str, area: str, x0: float, x1: float, z0: float, z1: float, y: float, yb: float | None = None,
+         h: float = 3.0, seal: dict | None = None, ceil: bool = True, floor: bool = True, flat: bool = False) -> None:
+    """A room; a ramp room's ceiling follows its floor down in steps, or with `flat` stays level, `h` over its higher
+    end (a short flight of steps under a tunnel's roof)."""
+    rooms.append(dict(name=name, area=area, x0=x0, x1=x1, z0=z0, z1=z1, ya=y, yb=y if yb is None else yb, h=h,
+                      seal=seal or {}, ceil=ceil, floor=floor, flat=flat))
+
+
+def block(kind: str, y: float, x0: float, x1: float, z0: float, z1: float, h: float, colour: int = 0) -> None:
+    blocks.append(dict(kind=kind, y=y, x0=x0, x1=x1, z0=z0, z1=z1, h=h, colour=colour))
+
+
+# ---------------- Street level, 0 m: the ticket hall (Street team's start) ----------------
+room("hall", "Ticket hall", -62, -38, -10, 10, G, h=6.0)
+block("wall", G, -62, -56, -10, -6.5, 3.0)                # closed ticket office
+block("container", G, -48, -45, 7.4, 10, 2.5, 0x8a8478)   # shuttered kiosk
+for z0, z1 in [(-9.5, -8), (-7, -6), (-5, -4), (-3, -2), (2, 3), (4, 5), (6, 7), (8, 9.5)]:
+    block("cabinet", G, -51, -50.4, z0, z1, 1.0)           # ticket gates
+block("cabinet", G, -55.0, -54.4, 2.5, 8.0, 2.0)           # ticket machines
+block("pillar", G, -50.2, -49.2, -0.5, 0.5, 6.0)           # hall column in the gate line
+block("wall", G, -46.3, -40.8, -1.2, 1.2, 6.0, 0x9c978d)  # the lift shafts (the lifts come in a later step)
+
+# The spiral stair's well: 5 x 5 m in the hall's north-east corner, down to the lower booking hall. Its flights are
+# built by build_map.py (SPIRAL); its rail round the hole in the hall floor here.
+SPIRAL = dict(x0=-43.0, x1=-38.0, z0=-10.0, z1=-5.0, flight=1.3, y0=C, y1=G, sides=10, top=6.0)
+room("spiral", "Spiral stair", -43, -38, -10, -5, C, h=G - C + 0.01, ceil=False,
+     seal={"n": [], "e": [], "w": [], "s": [(-39.4, -38.0)]})
+block("railing", G, -43.0, -38.0, -5.0, -4.88, 1.1)
+block("railing", G, -43.12, -43.0, -8.6, -4.88, 1.1)
+
+# Upper escalators: 10 m down at 1:2, a balustrade between the two.
+room("esc_up", "Escalators", -38, -18, -3.5, 3.5, G, C, h=3.2)
+block("barrier", None, -38, -18, -0.2, 0.2, 1.0)           # on the ramp: build_map.py follows its slope
+
+# ---------------- Concourse, -10 m: close quarters ----------------
+room("bk_w", "Booking hall", -52, -43, -9.5, -1.2, C, h=4.0)
+room("bk_s", "Booking hall", -43, -36, -5, -1.2, C, h=4.0)
+room("bk_e", "Booking hall", -38, -36, -9.5, -5, C, h=4.0)
+block("furniture", C, -50, -44, -9.5, -8.6, 1.1)           # old ticket counter, waist high
+block("crate", C, -48.5, -47, -5.5, -4, 1.4)
+block("cabinet", C, -36.9, -36.0, -4.2, -1.2, 2.0)         # lockers: screen the spiral foot from the passage
+room("wpass", "West passage", -36, -18, -9.5, -7, C, h=3.0)
+block("crate", C, -31, -29, -9.5, -8.1, 1.8)               # cable drums staggered: no line down the passage
+block("crate", C, -25, -23, -8.4, -7.0, 1.8)
+room("upper", "Concourse", -18, -6, -9.5, 9.5, C, h=4.0)
+block("barrier", C, -14.0, -13.4, -5.6, -3.6, 1.1)
+block("barrier", C, -14.0, -13.4, 3.6, 5.6, 1.1)
+block("cabinet", C, -9.0, -7.6, -8.4, -7.0, 2.2)           # help points / map boards
+block("cabinet", C, -9.0, -7.6, 7.0, 8.4, 2.2)
+block("furniture", C, -17.4, -16.8, 5.5, 8.5, 0.8)         # bench
+block("wall", C, -12.6, -11.4, -9.5, -6.9, 4.0)            # piers: break the passage-to-passage line
+block("wall", C, -12.6, -11.4, 6.9, 9.5, 4.0)
+block("container", C, -12.4, -10.4, -2.6, 2.6, 2.8, 0x8a8478)  # shut newsagent's kiosk between the escalator banks:
+#                                                                no line from the lower hall up both flights
+# Lower escalators: 8 m down to the lower hall between the platform tunnels.
+room("esc_low", "Low escalators", -6, 10, -3, 3, C, P, h=2.8)
+block("barrier", None, -6, 10, -0.2, 0.2, 1.0)
+room("npass", "North passage", -6, 20, -9.5, -6.5, C, h=3.0)
+room("spass", "South passage", -6, 20, 6.5, 9.5, C, h=3.0)
+for zs in (-1, 1):
+    a, b = sorted((zs * 9.5, zs * 7.7))
+    c, d = sorted((zs * 8.3, zs * 6.5))
+    block("cabinet", C, 1, 2.2, a, b, 2.0)                 # lockers, a chicane down each passage
+    block("cabinet", C, 7, 8.2, c, d, 2.0)
+    block("cabinet", C, 13, 14.2, a, b, 2.0)
+    block("crate", C, 16.5, 18, c, d, 1.2)
+    block("cabinet", C, -4, -2.8, c, d, 2.0)               # at the passage mouth
+room("plant", "Plant room", 4, 18, -4, 4, C, h=3.5)
+room("pdoor_n", "Plant room", 9.5, 11.5, -6.5, -4, C, h=2.2)
+room("pdoor_s", "Plant room", 9.5, 11.5, 4, 6.5, C, h=2.2)
+block("generator", C, 6, 8.5, -2.5, 0.5, 2.2)             # fan housings
+block("generator", C, 13, 15.5, -0.5, 2.5, 2.2)
+block("cabinet", C, 17.2, 18, -4, -2, 2.0)
+room("east", "Stair top", 20, 27, -9.5, 9.5, C, h=4.0)
+block("crate", C, 22, 23.4, -4.8, -3.4, 1.4)
+block("crate", C, 22, 23.4, 3.4, 4.8, 1.4)
+block("barrier", C, 24.6, 25.2, -9.5, -7.5, 1.1)
+block("barrier", C, 24.6, 25.2, 7.5, 9.5, 1.1)
+# The stair: one ordinary staircase, -10 to -18, two flights and a half landing.
+room("stair1", "Stair", 27, 35, -1.6, 1.6, C, LANDING, h=3.0)
+room("landing", "Stair landing", 35, 37.5, -1.6, 1.6, LANDING, h=3.0)
+room("stair2", "Stair", 37.5, 45.5, -1.6, 1.6, LANDING, P, h=3.0)
+
+# ---------------- Platforms, -18 m, and the track bed, -18.9 m ----------------
+room("plat_n", "North platform", -52, 47, -9, -5.5, P, h=TUNNEL_H)
+room("plat_n_end", "North platform", 47, 50, -7.5, -5.5, P, h=TUNNEL_H)
+room("endramp_n", "North platform", 47, 50, -9, -7.5, P, T, h=TUNNEL_H, flat=True)
+room("ramp_foot", "North tunnel", 50, 52, -9, -7.5, T, h=TUNNEL_H + 0.9)
+room("plat_s", "South platform", -52, 50, 5.5, 9, P, h=TUNNEL_H)
+# The track pits, 0.9 m under the platforms: nobody climbs out over a platform's edge (VaultConfig: never onto a
+# platform), so each stretch of track has steps up at its ends: a ramp along the platform's edge to a landing.
+TRACK_H = TUNNEL_H + 0.9
+
+
+def track(name: str, area: str, x0: float, x1: float, z_edge: float, z_wall: float, steps: list[str]) -> None:
+    """A stretch of track from x0 to x1 between the platform's edge (z_edge) and the tunnel wall (z_wall), with steps
+    up to the platform at its "w" and/or "e" end: a 2 m landing at platform height, a 2 m ramp down."""
+    w = 1.2 * (1 if z_wall > z_edge else -1)
+    za, zb = sorted((z_edge, z_edge + w))
+    zc, zd = sorted((z_edge + w, z_wall))
+    a, b = x0, x1
+    if "w" in steps:
+        room(name + "_wl", area, x0, x0 + 2, za, zb, P, h=TUNNEL_H)
+        room(name + "_wr", area, x0 + 2, x0 + 4, za, zb, P, T, h=TUNNEL_H, flat=True)
+        room(name + "_wb", area, x0, x0 + 4, zc, zd, T, h=TRACK_H)
+        a = x0 + 4
+    if "e" in steps:
+        room(name + "_er", area, x1 - 4, x1 - 2, za, zb, T, P, h=TUNNEL_H, flat=True)
+        room(name + "_el", area, x1 - 2, x1, za, zb, P, h=TUNNEL_H)
+        room(name + "_eb", area, x1 - 4, x1, zc, zd, T, h=TRACK_H)
+        b = x1 - 4
+    lo, hi = sorted((z_edge, z_wall))
+    room(name, area, a, b, lo, hi, T, h=TRACK_H)
+
+
+track("track_n_w", "North track", -52, -44, -9, -12.5, ["w"])
+track("track_n_e", "North track", 16, 50, -9, -12.5, ["w"])
+track("trench", "South track", -52, 30, 9, 12.5, ["w", "e"])
+# North train: four cars standing at the north platform, five doors open; the middle pair not coupled through.
+NDOORS = [-38.3, -19.7, -11.8, -1.2, 10.3]
+room("train_n", "North train", -44, 16, -12.5, -9, P, h=TRAIN_IN,
+     seal={"n": [], "e": [], "w": [], "s": [(x - 0.7, x + 0.7) for x in NDOORS]})
+TRAIN = 0x8c8e8a
+for x in (-29, 1):
+    block("container", P, x - 0.15, x + 0.15, -12.5, -11.3, TRAIN_IN, TRAIN)   # car ends, a gangway between
+    block("container", P, x - 0.15, x + 0.15, -10.2, -9.0, TRAIN_IN, TRAIN)
+block("container", P, -14.15, -13.85, -12.5, -9.0, TRAIN_IN, TRAIN)             # not coupled through
+# South train: two cars standing half in the south running tunnel; its east cab door is the way through.
+SDOORS = [35.7, 47.2]
+room("train_s", "South train", 30, 60, 9, 12.5, P, h=TRAIN_IN,
+     seal={"n": [(x - 0.7, x + 0.7) for x in SDOORS], "s": [], "w": [], "e": [(10.15, 11.35)]})
+block("container", P, 44.85, 45.15, 9.0, 10.15, TRAIN_IN, TRAIN)
+block("container", P, 44.85, 45.15, 11.35, 12.5, TRAIN_IN, TRAIN)
+block("cabinet", P, 39, 40.5, 10.15, 11.35, 1.7)           # tool carts in the aisle
+block("cabinet", P, 52, 53.5, 10.15, 11.35, 1.7)
+# Between the platform tunnels.
+room("lowc", "Lower hall", 10, 22, -4, 4, P, h=3.5)
+for x in (11.5, 18.5):
+    room("lcdoor", "Lower hall", x, x + 2.5, -5.5, -4, P, h=2.4)
+    room("lcdoor", "Lower hall", x, x + 2.5, 4, 5.5, P, h=2.4)
+block("furniture", P, 15, 17, -0.4, 0.4, 0.8)
+block("cabinet", P, 21.2, 22, -1, 1, 2.0)
+room("midp", "Mid passage", -22, -19, -5.5, 5.5, P, h=3.0)
+room("ecross", "East passage", 45.5, 48.5, -5.5, 5.5, P, h=3.0)
+room("liftp", "Lift landing", -50, -38, -5.0, -1.2, P, h=3.0)
+room("liftp_door", "Lift landing", -46, -42, -5.5, -5.0, P, h=2.6)
+room("liftp_w", "Lift landing", -50, -46.5, -1.2, 5.5, P, h=3.0)
+# Platform cover: break the 100 m platforms into lanes; the long lines live on this level only.
+for zs in (-1, 1):
+    edge = sorted((zs * 9, zs * 7.1))
+    back = sorted((zs * 7.7, zs * 5.5))
+    wall = sorted((zs * 6.1, zs * 5.5))
+    block("hoarding", P, -4, -1, *edge, 2.4)               # works chicane at the platform middle
+    block("shed", P, 4, 6, *back, 2.6)                      # booth
+    block("crate", P, 28, 29.4, *sorted((zs * 9, zs * 7.8)), 1.4)
+    block("crate", P, -30, -28.6, *back, 1.4)
+    block("hoarding", P, -34, -32, *edge, 2.4)
+    block("shed", P, -27, -25.4, *back, 2.6)
+    block("hoarding", P, 30, 32, *sorted((zs * 9, zs * 6.6)), 2.4)
+    block("shed", P, 34, 35.6, *sorted((zs * 6.5, zs * 5.5)), 2.6)
+    for x in (-40, -10, 24):
+        block("furniture", P, x - 1, x + 1, *wall, 0.8)    # benches
+block("barrier", P, 38, 40, -7.4, -5.5, 1.3)                # stacked tunnel lining segments
+block("cabinet", P, 48.6, 49.4, -7.5, -6.6, 2.2)            # signal cabinet at the tunnel mouth
+block("skip", T, -18, -16, 9.0, 11.2, 2.7)                  # spoil skips on wagons, staggered wall to edge
+block("skip", T, -2, 0, 10.3, 12.5, 2.7)
+block("skip", T, 6, 8, 9.0, 11.2, 2.7)
+block("cabinet", T, -46.5, -45, -12.3, -11.0, 1.2)          # platelayers trolley
+block("container", T, 36, 40, -11.2, -9.0, 2.6, 0x7d7a72)    # an engineering wagon left on the north track
+block("barrier", T, -52, -51.5, -12.5, -10.2, 1.2)         # buffer stops: the west end is a dead end
+block("barrier", T, -52, -51.5, 10.2, 12.5, 1.2)
+
+# ---------------- Running tunnels east, -18.9 m (Tunnel team's start) ----------------
+room("run_n", "North tunnel", 50, 82, -12.6, -9, T, h=TUNNEL_H + 0.9)
+# Detrainment steps down from the south train's cab door to the track, a way round them each side.
+room("cab_steps", "South tunnel", 60, 62, 10.15, 11.35, P, T, h=TUNNEL_H, flat=True)
+room("cab_n", "South tunnel", 60, 62, 9, 10.15, T, h=TUNNEL_H + 0.9)
+room("cab_s", "South tunnel", 60, 62, 11.35, 12.6, T, h=TUNNEL_H + 0.9)
+room("run_s", "South tunnel", 62, 82, 9, 12.6, T, h=TUNNEL_H + 0.9)
+room("xpass", "Cross passage", 74, 77, -9, 9, T, h=2.6)
+block("cabinet", T, 60.5, 62, -12.4, -11.4, 1.2)    # platelayers' trolley
+block("crate", T, 69.5, 70.9, -10.4, -9.0, 1.4)   # cable drum
+block("container", T, 55, 59, -12.4, -10.6, 2.2, 0x7d7a72)   # ballast wagons, staggered
+block("container", T, 64.5, 68.5, -11.0, -9.2, 2.2, 0x7d7a72)
+block("cabinet", T, 66, 68, 9.3, 10.6, 1.2)
+
+# ---------------- Ends, flags, lanes ----------------
+SPAWNS_W = [(x, z) for x in (-60.6, -58.6) for z in (-4.5, -1.5, 1.5, 4.5)]
+SPAWNS_E = [(75.5, z) for z in (-7.5, -5.4, -3.2, -1.1, 1.1, 3.2, 5.4, 7.5)]
+DEAD_W = [(x, z) for x in (-61.2, -60.4) for z in (6.4, 7.2, 8.0, 8.8)]          # the hall's south-west corner
+DEAD_E = [(x, z) for x in (80.4, 81.2) for z in (-12.0, -11.2, -10.4, -9.6)]    # the north tunnel's blocked end
+FLAGS = [(33.5, 10.75, P), (36.2, 0.0, LANDING)]    # A in the south train's first car, B on the stair's half landing
+POLE_HEIGHT = 2.1                                     # the poles drawn this tall: a car is 2.4 m inside
+OT_FLAG = (12.0, 2.4, P)                              # the lower hall's west end
+# Bots' lanes, Street end to Tunnel end: (x, z, y) points on the floor. Each ends at the flags, not in the tunnel: a
+# defender (Attack / Defend, the Tunnel team) holds its lane's last point or the one before (RoundPlanner), so the last
+# two are its posts: n the stair below B and B's landing, m the south platform's east end and train A's doors, s train
+# A's east car and flag A. The Tunnel team walks out of the tunnel to its lanes' ends.
+LANES = {
+    "n": [(-56, -3, G), (-46, -4, G), (-43.6, -9.3, G), (-42.3, -5.7, -1.0), (-38.7, -9.3, -3.0),  # spiral top half
+          (-40.5, -5.7, -5.0), (-42.3, -7.5, -6.5), (-42.3, -9.3, -7.0), (-38.7, -9.3, -9.0), (-38.7, -5.7, C),
+          (-38.5, -3.5, C), (-37.0, -8.2, C), (-27, -7.7, C), (-15, -8.0, C), (-5, -8.0, C), (4, -7.2, C),
+          (11, -7.8, C), (19, -7.5, C), (23.5, -6.5, C), (26, -0.0, C), (31, 0, -12.0), (36.2, 1.0, LANDING),
+          (41.5, 0, -16.0)],
+    "m": [(-56, 0, G), (-44, 2.5, G), (-37, 2, G - 0.5), (-28, 2, -5.5), (-19, 2, C), (-10, 0, C),
+          (-5, 1.5, C), (2, 1.5, -14.0), (9, 1.5, -17.5), (13, 2, P), (19.7, 4.7, P), (26, 7.2, P), (36, 7.5, P),
+          (46.5, 7.0, P)],
+    "s": [(-56, 3, G), (-44, 4, G), (-37, -2, G - 0.5), (-28, -2, -5.5), (-19, -2, C), (-10, 6, C), (-5, 8, C),
+          (4, 7.2, C), (11, 7.8, C), (19, 7.5, C), (23.5, 6.5, C), (26, 0.5, C), (31, -0.5, -12.0),
+          (36.2, -1.0, LANDING), (41.5, 0, -16.0), (47, 0, P), (47, 4.5, P), (40, 7.3, P), (35.7, 7.3, P),
+          (35.7, 10.75, P), (46, 10.75, P)],
+}

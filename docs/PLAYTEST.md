@@ -211,6 +211,10 @@ never players.
   their team's colours.
 - [ ] **Replica detail on High.** Fine speckle, rounded lit edges, rail slots and sights. In Loadout try every optic,
   grip and magazine: nothing floats or clips the hands.
+- [ ] **Lightly used replicas (RW1).** Inspect (Y) the AEG Rifle and the GBB Pistol in Woodland by day and in Depot,
+  in a dark paint and a light one: faint scratches (most along the length, more on the magazine and the pistol's
+  slide), slightly rubbed edges and a little dirt in the recesses, never stripes, blotches or shimmer as you turn them.
+  The Cyber Pistol and the Sniper Rifle stay clean; at a distance, bots' replicas look as before.
 - [ ] **Gas puffs and impacts.** The pistol puffs a little gas each shot; the rifle none. No flash, no casings.
   Impacts make pale dust on concrete, tan crumbs on wood, a grey puff on steel: never sparks.
 - [ ] **Name tags.** A teammate's tag sits just above the head at 1 to 2 m and at 30 m. Try a field of view of 80.
@@ -559,6 +563,26 @@ Once the rest of step 26 lands:
   glow. Does the green read as a BB and never as a team's colour?
 - [ ] **Frame time in a night firefight (WL8).** With `--perf`, a 5v5 on Woodland on Low and on High, every BB
   glowing: the overlay's frame time and draws (two more draws while any glowing BB flies). Does it hold the budget?
+
+### Kingsmere (Dev content, MT1)
+
+A closed metro station on three levels: the Street team starts in the ticket hall at street level, the Tunnel team in
+a cross-passage between the running tunnels, and they swap at half time. Turn on Settings › Dev › Dev content.
+
+- [ ] **Listed only as Dev content (MT1).** With Dev content off, the Match page shows no Kingsmere; on, it does, with
+  its picture, 5 to 8 a side and 6 standard.
+- [ ] **Every way down (MT1).** From the ticket hall: the escalators to the concourse and on down to the lower hall;
+  the spiral stair in the hall's corner to the booking hall; the ordinary stair from the stair top down past flag B's
+  half landing to the platforms. Nothing snags you on a step, a balustrade or a landing.
+- [ ] **The tracks and trains (MT1).** Drop off a platform's edge into the track: there are steps back up at each
+  stretch's end (you can't climb the edge). Walk through the north train's open doors, and the south train from its
+  platform doors to its east cab door and down the steps into the south tunnel.
+- [ ] **Close quarters above, long lines below (MT1).** Above the platforms no line runs much past 28 m; the
+  platforms open to about 58 m. Does each level play as meant, and do the bots hold and push through all three?
+- [ ] **The flags (MT1).** Attack / Defend: flag A stands inside the south train's first car, B on the stair's half
+  landing, both on short poles that fit under the roof; Elimination's overtime flag rises in the lower hall.
+- [ ] **The lift shafts stand shut (MT1).** The two lifts come in their own step (MT2); until then their shafts are
+  solid in the ticket hall.
 
 ## Bots
 
@@ -1031,6 +1055,12 @@ Settings › Graphics › Quality: Low, Medium, High, Ultra or Custom.
   warmer, three flicker now and then and two are dead with dark lenses and a darker patch under them, the same every
   match. On High and Ultra the light under them follows. Does the flicker read as an old lamp, not a distraction in a
   fight? Note F3 near a flickering lamp on Ultra.
+- [ ] **Eye adaptation (UG3, your graphics card).** On High or Ultra, walk into Depot's West tunnel from the hall: over
+  a second or two the tunnel opens up until you can make out a bot crouched in it; walk back out and the hall dazzles a
+  moment, then settles to its usual look. On Woodland by day, step in under the trees: the shade lifts the same way,
+  and the open field looks as before. Turn Eye adaptation off (Custom) on Woodland's open field and back on: the sky's
+  glow should look the same both ways (the cloud's renderer loses it with the setting on). By night nothing changes.
+  Is it too strong, too weak, too slow? Look through a scope in the tunnel: its picture adapts with the rest.
 
 ## Accessibility
 
@@ -1257,8 +1287,7 @@ Bugs the browser game had and fixed; a bug pass checks the rebuild doesn't bring
 
 ## The Compact SMG (CS1)
 
-Dev content: tick Settings › Dev › Dev content (or Disable levelling), then pick it as your primary. It looks like the
-AEG Rifle until its own model.
+Dev content: tick Settings › Dev › Dev content (or Disable levelling), then pick it as your primary.
 
 - [ ] **The trigger.** A full magazine on full auto runs dry in about 2.5 s, clearly quicker than the AEG's; the
   reload and the draw are quicker too. Semi and full auto only, no burst; on Depot it starts on semi (B for full auto).

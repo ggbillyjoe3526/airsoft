@@ -1,11 +1,12 @@
-Task: FT1 · head d946192 · Verdict: Pass
-Run: no measured run (re-check of the diff 766afe7..d946192; cloud container has no GPU, no frame times or draw calls) · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and the diff
-Metrics: not measured. Unchanged by the diff (judgment): treeline.glb is rebuilt with the same 192 triangles; no node, material, mesh or surface is added; the skyline keeps its one look material and its glow surface; the vertex colour array already was a PackedColorArray, so its size is the same.
+Task: SL4 · head 3e9bf5e · Verdict: Pass
+Run: no --perf run made (see Unexplained) · budget: no baseline yet, judged against targets and origin/main's diff
+Metrics: not measured. A headless --perf pair (head plus an origin/main worktree, each needing a full project import) would compete with the two `godot --import` processes already running in this box (load ~1, 5 % RAM each) and would skew script-time comparison. The diff adds no node, process or tick code, so node, orphan and memory counts cannot change from it.
 Regressions (> 10 % worse): none measured
 Blocking findings: none
-- Shader (look_vertex.gdshader:22-26, 122-124): one uniform bool and one branch mixing ALBEDO by COLOR.a. It is a uniform branch, coherent across the draw, and only the skyline sets it true (skyline_view.gd:61). Cost is a mix per fragment on the skyline, negligible (judgment). No new material, so no new prewarm entry; the shader variant is the existing one.
-- Allocations: the `out` alpha write in skyline_models.gd:151-153 and skyline_view.gd:266-268 is in the build path, run once per map build, not per frame or per tick (judgment). `keep` is a plain float on Placed and Part.
-- Wear (prop_dress_config.gd:347): spruce wear 0 skips the props' wear branch for that model, a small saving at most. It adds one dictionary entry, read at build time.
-- Preset bypass: none. The palette entry (look_config.gd:143) and the treeline colour and keep values are data only.
-Advisory: none
-Unexplained: none
+Advisory (judgment):
+- game/play/replica_paint.gd: new drawn() / paint_saturation() (a ProjectSettings read, a Color lerp) run only when a paint's material is built, and at game/ui/customise_view.gd:675 once per swatch when the screen builds. Materials stay cached and shared (ReplicaPaint.clear() at play_session.gd:1615 is unchanged). No per-frame or per-tick path calls them.
+- Roughness 0.5 to 0.64 and 0.4 to 0.48 are constants; no new material, particle or shader, so no prewarm entry is needed.
+- game/ui/game_theme.gd: Color constants only (DEEP, PLATE added); the navy_box to dark_box rename is a rename. No new allocation, node or connection; no preset bypass.
+- Tests only otherwise.
+Fixes: none needed
+Unexplained: none; the measured run is skipped for the contention above, not for a failure. Run `godot --headless --path . -- --smoke --perf` (and F3 in game) on the owner's PC if wanted.

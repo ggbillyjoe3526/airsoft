@@ -20,6 +20,7 @@ ambient_energy = 0.3
 sky_contribution = 0.0
 ssao = true
 exposure = 1.2
+eye_lift = 1.0
 night = true
 fog = true
 fog_colour = Color(0.165, 0.2, 0.26, 1)

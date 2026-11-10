@@ -284,7 +284,8 @@ func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictiona
 		var fit := ReplicaParts.fit_figure(held, look, parts, barrel_end, muzzle)
 		muzzle = fit.muzzle
 		support = support_mark(support, fit.grip, cfg)
-		ReplicaPaint.apply(held, paint, realistic)
+		# Plain: a figure's copy has no wear mask of its own and is seen from far off (RW1).
+		ReplicaPaint.apply(held, paint, realistic, false)
 		var key := _merge_key(look, paint, realistic, parts)
 		# A night torch (row 69): its plain pieces share the replica's own paint of the same name (its rubber), and a
 		# copy without it is kept for the holster and the far version (a few pixels wide there).
@@ -322,7 +323,7 @@ func _held_replica(r: ReplicaConfig, team: int, realistic: bool, parts: Dictiona
 			copy.mesh = fit.magazine.mesh
 			copy.visible = false
 			copy.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			ReplicaPaint.apply(copy, paint, realistic)
+			ReplicaPaint.apply(copy, paint, realistic, false)
 	magazines.append(copy)
 	muzzles.append(muzzle)
 	supports.append(support)

@@ -4,8 +4,8 @@ extends GutTest
 ## full auto, driven by the batteries, under the rifle site limit; 8 % quicker on your feet carried (ReplicaConfig.pace),
 ## half the spread moving adds (move_spread) and tighter from the hip (hip_spread 0.75); short on reach with its light
 ## BBs. It takes the optics, laser, silencer and torch, not the grips, barrels or AEG magazines; unlocks at level 10;
-## the Breacher bot kit carries it; it is heard through its own stand-in sounds and drawn as the AEG Rifle until its
-## own model (the owner's reference pictures).
+## the Breacher bot kit carries it; it is heard through its own stand-in sounds and drawn by its own model (the owner's
+## reference pictures, 2026-11-10: tools/blender/replicas/smg.py), held in your arms' own SMG hold.
 
 const DT := 1.0 / 60.0
 const EYE := Vector3(0.0, 1.6, 0.0)
@@ -219,23 +219,42 @@ func test_its_sounds_are_there() -> void:
 	assert_true(SoundConfig.new().power_gains.has(&"smg"), "its motor lifted as the AEG's")
 
 
-func test_until_its_own_model_it_is_drawn_held_and_pictured_as_the_aeg() -> void:
+func test_it_is_drawn_held_and_fitted_by_its_own_model() -> void:
 	var r := _smg()
-	assert_eq(r.model_id(), &"aeg", "the AEG Rifle's model until the owner's reference pictures")
-	assert_eq(_aeg().model_id(), &"aeg", "a replica with no stand-in is drawn as itself")
-	assert_eq(ReplicaConfig.model_of(&"smg"), &"aeg")
+	assert_eq(r.model, &"", "no stand-in any more")
+	assert_eq(r.model_id(), &"smg", "drawn as itself")
+	assert_eq(ReplicaConfig.model_of(&"smg"), &"smg")
 	assert_eq(ReplicaConfig.model_of(&"sniper"), &"sniper")
 	assert_eq(ReplicaConfig.model_of(&"nothing"), &"nothing", "no built-in config: the key itself")
-	assert_false(ResourceLoader.exists("res://assets/models/replicas/smg.glb"), "no model of its own yet (owner)")
+	assert_true(ResourceLoader.exists("res://assets/models/replicas/smg.glb"), "its own model")
 	var c := Character.new(1, 0, Vector3.ZERO, 0.0, [r] as Array[ReplicaConfig])
 	var view := ReplicaView.new()
 	add_child_autofree(view)
 	view.setup(ViewModelConfig.new(), c.armament.replicas, BoxWorld.new())
 	var held: ReplicaView.Held = view._held[0]
-	assert_eq(held.id, &"aeg", "held and posed as the AEG")
-	assert_not_null(held.muzzle, "its model loaded")
+	assert_eq(held.id, &"smg", "held and posed as itself")
+	assert_not_null(held.muzzle, "its model loaded, with its muzzle")
 	assert_not_null(held.anim)
-	var taken := ReplicaParts.take(&"smg", {&"optic": &"redDot"}, false)
-	assert_true(taken.has(&"optic"), "its red dot from the AEG's parts")
+	for clip: StringName in [&"Fire", &"Reload", &"Selector", &"Inspect"]:
+		assert_true(held.anim.has_animation(clip), "its %s clip" % clip)
+	var taken := ReplicaParts.take(&"smg", {&"optic": &"redDot", &"laser": &"redLaser", &"light": &"weaponTorch",
+			&"muzzle": &"silencer"}, false)
+	for slot: StringName in [&"optic", &"laser", &"light", &"muzzle"]:
+		assert_true(taken.has(slot), "its %s from its own parts file" % slot)
 	for n: Node3D in taken.values():
 		n.free()
+
+
+func test_its_model_keeps_the_replica_contract() -> void:
+	var model := (load("res://assets/models/replicas/smg.glb") as PackedScene).instantiate() as Node3D
+	for node: String in ["Body", "Magazine", "FlashHider", "Figure", "Figure_Magazine", "Figure_FlashHider",
+			"Figure_Sights", "Muzzle", "BarrelEnd", "FrontSight", "RearSight", "MagWell", "OpticMount", "TorchMount"]:
+		assert_not_null(model.find_child(node, true, false), node)
+	var muzzle := model.find_child("Muzzle", true, false) as Node3D
+	var end := model.find_child("BarrelEnd", true, false) as Node3D
+	assert_lt(end.position.z, 0.0, "the barrel's end ahead of the origin (-z forward)")
+	assert_lt(muzzle.position.z, end.position.z, "the muzzle ahead of the barrel's end")
+	var rear := model.find_child("RearSight", true, false) as Node3D
+	var front := model.find_child("FrontSight", true, false) as Node3D
+	assert_almost_eq(rear.position.y, front.position.y, 1e-4, "the iron sights' line parallel to the bore")
+	model.free()

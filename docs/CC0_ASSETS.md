@@ -133,6 +133,13 @@ A replica's file is its model in the hands, on the menus' pictures and on the fi
 - **Iron sights (owner, 2026-11-05, every replica).** Every piece of the iron sights (base, leaf, ears, post) hangs
   from a bone whose name ends in `Sight` (`frontSight`, `rearSight`). With any optic fitted the game hides them whole
   (`IronSights`): never folded, so nothing stands in the optic's way.
+- **Wear (RW1, owner 2026-11-10: "realistic and slightly used").** A replica that wears is baked a mask by
+  `tools/blender/replicas/wear.py` (`wear.apply`, its script's last call before the export): a second UV layer `Wear`
+  on the hands' meshes (the figures' copies get one too, all at the origin), and one 2K image `wear` (R ambient
+  occlusion, G rubbed edges and patches, B scratches) hung on the five painted materials as their glTF occlusion
+  texture. Godot's import extracts it as `<id>_wear.png` (keep its import at VRAM compressed, high quality, mipmaps),
+  makes the `Wear` layer those surfaces' UV, and ReplicaPaint draws them in `game/play/replica_wear.gdshader`. The
+  AEG Rifle and the GBB Pistol wear; the Cyber Pistol and the Sniper Rifle stay clean (owner, 2026-11-10).
 - **Parts.** `replicaParts/<id>.glb`: one top-level object per part named `<kind>_<id>` (`optic_redDot`,
   `magazine_hiCap`, `muzzle_silencer` …), in the replica's space where it fits, with its figures' copy `<name>_Figure`
   (cut down from it by `tools/blender/parts/figure_parts.py`, run last). Two child empties are read (RM8): an optic's
