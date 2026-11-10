@@ -172,6 +172,8 @@ var _doors: DoorView = null
 var _lifts: LiftView = null
 ## A wood's crowns and dressing, or null on a map with neither (WoodsView, WL4).
 var _woods: WoodsView = null
+## The field's wear marks, or null on a map naming none (WearMarks, WM1).
+var _marks: WearMarks = null
 ## The map's bushes, or null on a map with none (BushView, WL5).
 var _bushes: BushView = null
 ## The site dress's details, or null on a greybox map (SiteDress, DD1).
@@ -444,6 +446,9 @@ func _dress_part(part: int) -> void:
 			_bushes = BushView.build(_map, _play.woods)
 			if _bushes != null:
 				add_child(_bushes)
+			_marks = WearMarks.build(_map, _play.marks, _play.look)
+			if _marks != null:
+				add_child(_marks)
 		5:
 			# What the tall solid blocks hide is left out of the frame with Occlusion culling on (GraphicsApply.apply).
 			_occluders = MapOccluders.build(_map, _play.map_style)
@@ -2034,7 +2039,7 @@ func _apply_motion() -> void:
 ## The graphics drawn, onto the field: at the start and whenever they change (the settings can open from the pause menu).
 func _apply_graphics(values: GraphicsQuality) -> void:
 	GraphicsApply.apply_field(values, _lighting, _dust, null, _level, _kicked, _woods,
-			_roof.lamp_lights() if _roof != null else null)
+			_roof.lamp_lights() if _roof != null else null, _marks)
 	if _lifts != null:
 		_lifts.set_lamps(values.lamp_lights != GraphicsQuality.LampLights.OFF)
 		_lifts.set_probes(values.reflections != GraphicsQuality.Reflections.OFF)

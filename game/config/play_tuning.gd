@@ -23,6 +23,8 @@ const DEFAULT_PATH := "res://game/config/play_tuning.tres"
 ## A station's lifts (MT2: Subway's).
 @export var lifts: LiftViewConfig = LiftViewConfig.new()
 @export var woods: WoodsConfig = WoodsConfig.new()
+## The floors' worn marks (WM1, WearMarks).
+@export var marks: MarksConfig = MarksConfig.new()
 ## What a field's lights stand on or hang from (WG4: Woodland's campfires and lanterns).
 @export var light_fixtures: LightFixturesConfig = LightFixturesConfig.new()
 @export var teams: TeamConfig = TeamConfig.new()
