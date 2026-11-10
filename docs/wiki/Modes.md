@@ -1,7 +1,8 @@
 # Modes
 
-Pick the mode on the **Match** screen, with the map, your team, the [bots](Bots) and the rules. Attack / Defend is
-picked to start with (on a map without a flagpole, Elimination). Every mode is played
+Pick the mode on the **Match** screen, with the map, your team, the [bots](Bots) and the rules. The modes are listed
+Attack / Defend first, then Elimination, then Practice. Attack / Defend is picked to start with (on a map without a
+flagpole, Elimination). Every mode is played
 in rounds against the clock, and the first team to the rounds to win takes the match. Teams swap ends at half time,
 one round before the win, so the deciding round is always played in the second half.
 

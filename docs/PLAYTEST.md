@@ -1240,6 +1240,11 @@ Bugs the browser game had and fixed; a bug pass checks the rebuild doesn't bring
   Under Reduced motion the flames stay still.
 - [ ] **Frame rate.** Low and Ultra by the Truck bend at night.
 
+## The Match page's mode order (MOD1)
+
+- [ ] **Mode order.** Under MODE the cards read Attack / Defend at the top, then Elimination, then Practice. Attack /
+  Defend is still picked at start; pick the Range, then Depot again: your mode comes back.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

@@ -1,5 +1,5 @@
 extends GutTest
-## MO1: the Match page lists Attack / Defend, Elimination, Practice (top to bottom); a field without a pole falls back
+## MOD1: the Match page lists Attack / Defend, Elimination, Practice (top to bottom); a field without a pole falls back
 ## to Elimination, the Range to Practice.
 
 
