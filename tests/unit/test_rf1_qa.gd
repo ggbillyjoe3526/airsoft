@@ -211,3 +211,46 @@ func test_corrupt_values_fall_back_to_defaults() -> void:
 func test_lines_step_lands_on_the_slider_ends() -> void:
 	assert_eq((RetroFilter.LINES_MAX - RetroFilter.LINES_MIN) % RetroFilter.LINES_STEP, 0)
 	assert_eq((RetroFilter.LINES - RetroFilter.LINES_MIN) % RetroFilter.LINES_STEP, 0, "default on a step")
+
+
+func test_haze_changed_after_build_is_what_comes_back() -> void:
+	var light := FieldLighting.build(LightingConfig.new())
+	add_child_autofree(light)
+	var env := light.environment
+	# a site-dressed map sets its sky haze after the build
+	env.fog_enabled = true
+	env.fog_mode = Environment.FOG_MODE_EXPONENTIAL
+	env.fog_light_color = Color(0.3, 0.5, 0.7)
+	env.fog_density = 0.013
+	env.fog_sky_affect = 0.4
+	light.retro_haze(true, 12.0, 70.0, 0.85, 0.55)
+	light.retro_haze(true, 12.0, 70.0, 0.85, 0.55)
+	light.retro_haze(false)
+	assert_true(env.fog_enabled)
+	assert_eq(env.fog_mode, Environment.FOG_MODE_EXPONENTIAL)
+	assert_almost_eq(env.fog_density, 0.013, 0.0001)
+	assert_almost_eq(env.fog_sky_affect, 0.4, 0.0001)
+	assert_eq(env.fog_light_color, Color(0.3, 0.5, 0.7), "a second on did not hold the retro haze as the map's own")
+	light.retro_haze(false)
+	assert_almost_eq(env.fog_density, 0.013, 0.0001, "off twice is harmless")
+
+
+func test_haze_off_without_on_changes_nothing() -> void:
+	var light := FieldLighting.build(_night())
+	add_child_autofree(light)
+	light.retro_haze(false)
+	assert_eq(light.environment.fog_depth_end, 33.0)
+
+
+func test_process_without_a_camera_is_safe() -> void:
+	var f := RetroFilter.new()
+	add_child_autofree(f)
+	await wait_process_frames(2)
+	f._process(0.016)
+	assert_true(true, "no script error")
+
+
+func test_a_filter_outside_the_tree_does_not_process() -> void:
+	var f := RetroFilter.new()
+	assert_false(f.is_processing() and f.is_inside_tree())
+	f.free()
