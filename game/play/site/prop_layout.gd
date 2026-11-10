@@ -257,8 +257,8 @@ static func _cluster(p: Placed, model: AABB, foot: Vector3, size: Vector3, cfg: 
 ## z across), stacked from the foot, each stretched to its cell, the model's z across the box; a quarter turn either
 ## way at random where that keeps it so (a round model, a square one), else a half turn, so a stack never reads as
 ## one model repeated; never turned for a model (`model_name`) in PropDressConfig.grid_unturned. Each cell takes one of
-## `picks` at random (the model and its variants). A model in PropDressConfig.grid_scatter stands off its even place and
-## lower, inside the box (WS1).
+## `picks` at random (the model and its variants). A model in PropDressConfig.grid_scatter stands off its even place,
+## inside the box (WS1).
 static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName], boxes: Dictionary[StringName, AABB],
 		foot: Vector3, size: Vector3, cell: Vector3, cfg: PropDressConfig, rng: RandomNumberGenerator,
 		model_name: StringName = &"") -> void:
@@ -277,9 +277,9 @@ static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName],
 	# The model's z across the box: unturned on a box long in x, a quarter turn (its z to world x) on one long in z.
 	var yaw := 0.0 if along_x else PI * 0.5
 	var square := absf(model.size.x - model.size.z) < 0.05 * maxf(model.size.x, model.size.z)
-	# Scattered (WS1): off its even place and lower, from a stream of the box's own.
-	var scatter: Vector2 = cfg.grid_scatter.get(model_name, Vector2(0.0, 1.0))
-	var scattered := scatter.x > 0.0 or scatter.y < 1.0
+	# Scattered (WS1): off its even place, from a stream of the box's own.
+	var scatter: float = cfg.grid_scatter.get(model_name, 0.0)
+	var scattered := scatter > 0.0
 	var own := RandomNumberGenerator.new() if scattered else null
 	if scattered:
 		own.seed = hash(Vector3i(roundi(foot.x * 100.0), roundi(foot.y * 100.0), roundi(foot.z * 100.0)))
@@ -288,11 +288,9 @@ static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName],
 		for k in n.z:
 			var u := (drawn.x - long) * 0.5 + i * pitch.x
 			var v := (drawn.z - across) * 0.5 + k * pitch.y
-			var tall := 1.0
 			if scattered:
-				u = clampf(u + own.randf_range(-scatter.x, scatter.x) * step.x, -room.x, room.x)
-				v = clampf(v + own.randf_range(-scatter.x, scatter.x) * step.z, -room.y, room.y)
-				tall = own.randf_range(minf(scatter.y, 1.0), 1.0)
+				u = clampf(u + own.randf_range(-scatter, scatter) * step.x, -room.x, room.x)
+				v = clampf(v + own.randf_range(-scatter, scatter) * step.z, -room.y, room.y)
 			var at := foot + (Vector3(u, 0.0, v) if along_x else Vector3(v, 0.0, u))
 			for j in n.y:
 				var turn := yaw + (_quarter_turn(rng) if square else PI * float(rng.randi_range(0, 1)))
@@ -304,9 +302,8 @@ static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName],
 				var shade := _shade(cfg, rng)
 				if picks.size() > 1:
 					shade = 1.0
-				var stood := _turned(drawn, turn - yaw)
-				stood.y *= tall
-				_placed(out, pick).add(fit(boxes[pick], at + Vector3(0.0, j * step.y, 0.0), stood, turn), shade)
+				_placed(out, pick).add(fit(boxes[pick], at + Vector3(0.0, j * step.y, 0.0), _turned(drawn, turn - yaw),
+						turn), shade)
 
 
 ## `model` and its GRID variants (PropDressConfig.variants) that have bounds in `boxes`, `model` first.

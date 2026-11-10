@@ -129,6 +129,30 @@ func test_a_bb_landing_in_the_stream_splashes_at_its_surface_and_stays_down() ->
 	assert_false(bb.active, "no bounce off the bed")
 
 
+func test_a_grazing_bb_splashes_where_it_goes_into_the_water_not_over_the_bed_beyond() -> void:
+	var w := BoxWorld.new(tuning.body)
+	w.add_box(Vector3(0.0, -0.25, 0.0), Vector3(80.0, 0.5, 80.0), RayHit.Surface.EARTH)
+	w.add_stream(PackedVector3Array([Vector3(0.0, 0.3, -40.0), Vector3(0.0, 0.3, 40.0)]), 20.0)
+	var pool := BBPool.new(4)
+	# 5 degrees down from 0.5 m over the bed at x = 9: through the surface (0.3 m) at about x = 6.7, the bed at 3.3.
+	var dir := Vector3(-cos(deg_to_rad(5.0)), -sin(deg_to_rad(5.0)), 0.0)
+	pool.spawn(0, Vector3(9.0, 0.5, 0.0), dir, 40.0, 0.0, 0.25e-3, 0.0)
+	var events := SimEvents.new()
+	var ends: Array[MapEnd] = []
+	var people: Array[Character] = []
+	var splash := Vector3.INF
+	for i in 30:
+		BBStep.step(pool, people, w, tuning, -10.0, false, ends, events, DT)
+		for j in events.count:
+			if events.items[j].kind == GameEvent.Kind.BB_IMPACT and splash == Vector3.INF:
+				assert_eq(events.items[j].value2, RayHit.Surface.WATER)
+				splash = events.items[j].position
+		events.clear()
+	assert_ne(splash, Vector3.INF, "it splashed")
+	assert_almost_eq(splash.y, 0.3, 0.01, "at the surface")
+	assert_gt(splash.x, 5.5, "where it went in (%.2f), not over the bed where it would land" % splash.x)
+
+
 func test_the_nav_and_movement_agree_on_how_deep_wading_starts() -> void:
 	assert_eq(tuning.nav.wade_from, tuning.movement.wade_depth)
 	assert_gt(tuning.nav.wade_cost, tuning.nav.splash_cost)

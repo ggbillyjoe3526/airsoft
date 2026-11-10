@@ -12,7 +12,8 @@ them."
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-10 | 1 | Opus 5.5 (build thread) | pass | – | – |
+| 2026-11-10 | 1 | Opus 5.5 (build thread) | pass | Retry 6/8 | Log ends too proud and faceted next to the photo; thicket spruces lower than their boxes; a grazing BB splashed over its landing point, not where it went in |
+| 2026-11-10 | 2 | Opus 5.5 (build thread) | pass | – | – |
 
 ## What changed
 
@@ -31,11 +32,12 @@ them."
   `forest_clumping`, `forest_slim`, a wider `forest_height`); the treeline band mixes four sections (`far_tree.py`
   BANDS, trees scattered over three lanes in groves and a glade), each lowered to between 0.82 and 1 of the line's
   height and shifted up to 0.9 m across (`SkylineConfig.treeline_variants`, `treeline_rise`, `treeline_shift`); the
-  thickets' spruces are scattered and of varied height inside their boxes (`PropDressConfig.grid_scatter`). The
+  thickets' spruces are scattered inside their boxes at full height (`PropDressConfig.grid_scatter`). The
   wood's own trees (Poisson-disc already) are unchanged, so cover and sight lines are too.
-- **Log stacks:** every piece in `cordwood*.glb` is a solid end standing 3 to 20 cm proud (most 9 cm), its face tilted
-  up to 0.12 rad, its sides barked or split back into the stack (`cordwood.py` `piece_end`), 2,697 to 2,761 triangles
-  of a new 2,900 budget per section.
+- **Log stacks:** every piece in `cordwood*.glb` is a solid end standing 1 to 10 cm proud (most about 3 cm, close to
+  flush as in the owner's photo), its face tilted up to 0.08 m a metre, its sides barked or split back into the stack
+  (`cordwood.py` `piece_end`), the rounds 7 or 8 sided; the sides facing down below 1.6 m, never seen from eye height,
+  are left out for them. 2,692 to 2,839 triangles of a new 2,900 budget per section.
 
 ## Decisions
 
@@ -53,12 +55,15 @@ them."
 - **Splashes carry 1.5 times earth's** (bots hear a running wade at 16.5 m against 11 m).
 - **Bots price wading at 8 times a dry point:** 4 left the free route under the North bridge; at 8 bots take the bridge
   or the road when it is near their way and wade only when a crossing is far.
-- **A BB in the water stops at its surface,** with a splash puff and a plop; it never bounces off the bed.
+- **A BB in the water stops where its path goes under the surface** (BBStep's `sink`), with a splash puff and a plop
+  there; it never bounces off the bed.
 - **The two mud puddles in the bed are gone,** under the water now. A gravel patch marks the Ford.
 - **The splash sounds are computer-made placeholders** (`tools/water_sounds.py`), listed for the owner to record
   (`audio/record-next.md`). No running-water ambience: Woodland's background stays as the owner approved it.
 - **The cordwood section's budget is 2,900 triangles** (was about 1,200): the extruded ends need the sides, and the
   stacks are few (three sections, mixed along each pile).
+- **Thicket spruces scatter but keep their box's height:** trees keep to their boxes (DECISIONS, WT1), so a spruce never
+  stands lower than the block that stops BBs and sight.
 
 ## Known issues left
 

@@ -1350,11 +1350,11 @@ Dev content: tick Settings › Dev › Dev content (or Disable levelling), then 
   the bank.
 - [ ] **The bridge.** Watch bots cross the north lane: they take the North bridge, not the water beneath it; at the Ford
   they splash straight over.
-- [ ] **BBs.** Shoot into the water: each BB splashes at the surface and stays there, no bounce.
-- [ ] **The look.** On Low and High: the water is a dark, muted blue and see-through, deeper-looking in the middle,
+- [ ] **BBs.** Shoot low across the water: each BB splashes where it goes in and stays there, no bounce.
+- [ ] **The look.** On Low and High: the water is a slightly bright blue and see-through, deeper-looking in the middle,
   with ripples drifting downstream and no hard line where it meets the banks. Reduced motion holds the ripples still.
 - [ ] **Trees.** At each fence: the band of far spruces rises and falls in clumps with gaps, never an even row; the
-  thicket spruces stand at uneven spacing and heights.
+  thicket spruces stand at uneven spacing, never in rows.
 - [ ] **Log stacks.** Walk past the Woodpile and the Log stacks: the log ends stand out of the stack in depth.
 - [ ] **Frame rate.** F3 on Low looking along the stream from the North bridge: 60 FPS.
 

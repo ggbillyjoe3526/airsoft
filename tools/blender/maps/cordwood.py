@@ -36,9 +36,11 @@ BOARD_BUDGET = 1500
 SECTION, DEPTH, HEIGHT = 2.0, 1.0, 1.8
 TOPS = 7                # points along the section where its ragged top is set
 SAG = 0.45              # how far under the cell's top the stack's top dips at most
-PROUD = (0.03, 0.2)     # how far a piece's end stands out of the core: the face's relief (WS1: real depth, was 0.1)
-PROUD_MODE = 0.09       # most stand out about this far; a few far out or nearly flush, as a stack built by hand
-TILT = 0.12             # an end face sawn off square: up to this much further out per metre across or up it
+PROUD = (0.01, 0.1)     # how far a piece's end stands out of the core: the face's relief (WS1: solid ends, mostly flush)
+PROUD_MODE = 0.03       # most stand out about this far, a few nearly flush or 8 to 10 cm out, as a stack built by hand
+TILT = 0.08             # an end face sawn off square: up to this much further out per metre across or up it
+SIDES = (7, 8)          # a round's sides, so it reads round
+UNDER_SEEN = 1.6        # a piece's end's sides facing down are left out below this (m): the eye looks down on them
 ROWS = 10
 ACROSS = 10             # pieces along a row, on average
 ROUND = 0.3             # the share of pieces that are rounds or half rounds
@@ -113,7 +115,7 @@ def cordwood(seed: int) -> object:
                 x += w
                 kind = "round" if r.random() < ROUND else ("wedge" if r.random() < BAND else "heart")
                 if kind == "round":
-                    m = 6 if r.random() < 0.15 else 5  # WS1: mostly five-sided, its sides cost triangles
+                    m = r.choice(SIDES)
                     turn = r.uniform(0.0, math.pi)
                     poly = [(cx + rad * math.cos(turn + 2 * math.pi * i / m), cz + rad * math.sin(turn + 2 * math.pi * i / m))
                             for i in range(m)]
@@ -124,7 +126,8 @@ def cordwood(seed: int) -> object:
                     poly = [(cx - d[0] * rad * 0.95, cz - d[1] * rad * 0.95),
                             (cx + d[0] * rad * 0.6 + q[0] * rad, cz + d[1] * rad * 0.6 + q[1] * rad),
                             (cx + d[0] * rad * 0.6 - q[0] * rad, cz + d[1] * rad * 0.6 - q[1] * rad)]
-                outline = [(px, side * core, pz) for px, pz in poly]
+                # the bottom row rests on the ground, never under it (or out over the grass)
+                outline = [(px, side * core, max(pz, 0.01)) for px, pz in poly]
                 end_mat = r.choices(("Cut", "Heart", "Ring", "Split"), (3, 5, 2, 2))[0]
                 piece_end(b, outline, r.triangular(PROUD[0], PROUD[1], PROUD_MODE), out, end_mat, kind,
                           (r.uniform(-TILT, TILT), r.uniform(-TILT, TILT)))
@@ -173,6 +176,8 @@ def piece_end(b: hs.Builder, outline: list, depth: float, out: Vector, end_mat: 
         else:
             mat = "Split" if kind == "wedge" else "Heart"
         side_out = ((base[i] + base[j]) * 0.5 - c0).normalized()
+        if side_out.z < -0.5 and c0.z < UNDER_SEEN:
+            continue  # a side facing down under eye height is never seen: its triangles go to rounder rounds
         wk.face(b, [back_ids[i], back_ids[j], front_ids[j], front_ids[i]], mat, side_out)
     if kind == "heart":
         wk.face(b, front_ids, end_mat, out)
