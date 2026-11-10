@@ -120,7 +120,8 @@ const GLOBAL_DUST := &"look_dust"
 
 @export_group("Eye adaptation")
 ## How fast the eyes adapt (Graphics › Eye adaptation, UG3): the share of the way to the new brightness covered in a
-## second. Under 1, so even a frame a second long never overshoots it (the engine steps by speed x the frame's time).
+## second. The engine steps by speed x the frame's time, so it overshoots only on a frame longer than 1 / speed
+## (1.25 s at 0.8): never in play, only in the cloud's seconds-long software frames.
 @export var eye_speed: float = 0.8
 
 @export_group("Shadows")

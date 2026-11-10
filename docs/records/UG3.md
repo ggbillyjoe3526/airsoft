@@ -1,12 +1,12 @@
 # UG3 · Eye adaptation: the dark opens up, the tuned look holds
 
-**Review:** pending
+**Review:** critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-10 | 1 | thread | see Checks | pending | – |
+| 2026-11-10 | 1 | thread | see Checks | Accept 7/8 | – (the QA test's uid, record wording and the speed comment fixed in the same push) |
 
 ## Goal
 
@@ -65,8 +65,11 @@ middle of 0.7 brightened Depot's hall (120 to 165) and was dropped.
 
 ## Known issues left
 
-- In the cloud's software renderer the glow vanished with Eye adaptation on (Woodland's sky bloom: 136 to 88 mean
-  brightness at a held exposure; with glow off both ways 94 and 88), though Godot's glow pass divides by the same
-  meter as the picture. The owner's card decides (`docs/PLAYTEST.md` › Eye adaptation, `docs/KNOWN_ISSUES.md`).
-- The cloud's frames are seconds long, so pictures there need the speed turned down (`EYE_SPEED` in the local tool);
-  at 0.8 they overshoot and flash.
+- In the cloud's software renderer the glow vanished with Eye adaptation on. Woodland's open field (logstacks) with
+  glow on: 136 mean brightness with the setting off, 88 with it on and the meter held at the preset's exposure; with
+  glow off: 94 with the setting off, 88 with it on. So the glow's share went, though Godot's glow pass divides by the
+  same meter as the picture. The comparison pictures are glow off both ways. The owner's card decides (`docs/PLAYTEST.md` › Eye adaptation, `docs/KNOWN_ISSUES.md`).
+- The cloud's frames are seconds long, longer than 1 / speed, so pictures there need the speed turned down
+  (`EYE_SPEED` in the local tool); at 0.8 they overshoot and flash. In play a frame is far shorter.
+- From the bright hall the West tunnel's mouth stays black: the meter averages the whole view, so a dark hole in a
+  bright one is not lifted until you are in it (PLAYTEST asks whether a bot in it shows).

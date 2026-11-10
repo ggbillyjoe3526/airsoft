@@ -43,7 +43,7 @@ func test_the_eyes_lift_the_dark_and_hold_the_tuned_exposure_above_the_middle() 
 	assert_almost_eq(eyes.auto_exposure_max_sensitivity, 0.5 * FieldLighting.ISO_PER_BRIGHTNESS, 1e-3,
 			"never darker than tuned")
 	assert_almost_eq(eyes.auto_exposure_speed, look.eye_speed, 1e-5)
-	assert_lt(look.eye_speed, 1.0, "a frame a second long never overshoots")
+	assert_lt(look.eye_speed, 1.0, "any frame under a second steps short of the new brightness")
 
 
 func test_a_lift_or_drop_under_one_still_holds_the_exposure() -> void:
