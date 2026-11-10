@@ -1,13 +1,13 @@
 # DW1 · Depot's worn lamps: some dim, a few flickering, a couple dead
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-10 | 1 | thread | see Checks | Retry 6/8 | dim lenses read as working ones; dead lamps in edge rows beside dim ones; flicker barely shows on the floor |
-| 2026-11-10 | 2 | thread | see Checks | pending | – |
+| 2026-11-10 | 2 | thread | see Checks | Accept 8/8 | – |
 
 ## Goal
 
@@ -50,6 +50,8 @@ indoors) the hall is lit by its lamps alone, so worn lamps vary its light.
 - Pictures: `/mnt/project-files/art/graphics/lv1/`.
 
 ## Known issues left
+
+- The flicker runs on wall-clock time, so it keeps stepping behind the pause menu (critic, attempt 2: left, a play check asks). At its off step a flickering lens glows about as much as a dim one.
 
 - The lens shader's MultiMesh-with-custom-data variant is prewarmed on a plain quad (`shader_prewarm.gd`), as the
   roof's other MultiMesh materials are; Godot's ubershader covers the first real draw (performance review: check for
