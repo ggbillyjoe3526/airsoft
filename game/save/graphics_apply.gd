@@ -317,6 +317,7 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 		lamps.set_mode(values.lamp_lights, values.shadow_softness == GraphicsQuality.ShadowSoftness.SOFTEST)
 		if lighting != null:
 			lighting.set_key_share(lamps.key_share(values.lamp_lights))
+			lighting.set_ambient_share(lamps.ambient_share(values.lamp_lights))
 
 
 ## Whether the figures draw their contact shadows with `values`: where the sun casts none.

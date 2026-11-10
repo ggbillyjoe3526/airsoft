@@ -1016,6 +1016,14 @@ Settings › Graphics › Quality: Low, Medium, High, Ultra or Custom.
   hall's far end and light the haze. Walk into the Lounge and the Offices: no lamp light comes through their roofs.
   Turn Lamp light Off (Custom): the hall should be about as bright as with it on. On Woodland at night (High, Ultra),
   fires and lanterns cast shadows. Note the frame rate (F3) on Ultra looking down the hall at 6v6.
+- [ ] **Lamps alone indoors (UG2, your graphics card).** On Depot at High and Ultra, no sunlight gets into the hall:
+  no bright strips or shafts, every lamp lit to the far end, and the light wide, soft and even, with no visible cone
+  on the floor or in the haze (look at the walls too: do bright arcs show where the lamps meet them?). Shadows under
+  racking, crates and players are dark, but you can still make out what and who is in them; do crates in the open
+  look grounded? Far figures down the 65 m hall should still read clearly. In the West tunnel at 6v6, can you see a
+  bot crouched in it? On High, walk toward a roofed room from past 28 m: does light from a far lamp show through its
+  roof and then pop dark? Switch Medium to Ultra mid-session: any hitch or flash? At Medium the hall is lit evenly
+  again by the overhead light. Note the frame rate (F3) at 4K Ultra looking down the hall at 6v6.
 
 ## Accessibility
 

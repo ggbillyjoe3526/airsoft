@@ -1,22 +1,36 @@
 class_name RoofLamps
 extends Node3D
 ## An indoor field's roof lamps as real lights (Settings › Graphics › Lamp light, data/graphics.md): a SpotLight3D under
-## each lamp RoofView hangs, shining straight down and casting a shadow, lit out to the row's reach from the eye by the
-## engine's own distance fade (nothing here runs per frame). Off, the node is hidden and the preset's overhead sun
-## lights the hall alone, as on Low and Medium; while it shines, FieldLighting.set_key_share turns that sun down to
-## RoofConfig.lamp_sun_share (`key_share`). Built once with the roof; `set_mode` only sets what changes. Look only.
+## each lamp RoofView hangs, shining straight down and casting a shadow, every one lit across the whole hall (the
+## roof's reach from any point under it), by the engine's own distance fade (nothing here runs per frame). Off, the
+## node is hidden and the preset's overhead light stands in for the lamps alone, as on Low and Medium. While they shine
+## the hall is lit by its lamps only (owner, 2026-11-10: no sun gets indoors): FieldLighting.set_key_share puts the sun
+## out (`key_share`, RoofConfig.lamp_sun_share) and set_ambient_share turns the sky's light under the roof down
+## (`ambient_share`), so their shadows stay deep; the ceiling joins the scene's bounce light (Ultra's SDFGI), so the
+## sky no longer lights the hall through it. Near (High) shadows the lamps within `lamp_near` m, Far (Ultra) all.
+## Built once with the roof; `set_mode` only sets what changes. Look only.
 
 var _cfg: RoofConfig = null
 var _lights: Array[SpotLight3D] = []
 var _mode: GraphicsQuality.LampLights = GraphicsQuality.LampLights.OFF
 var _soft: bool = false
+## How far (m) the roof reaches from any point under it (its area's diagonal and height): every lamp is lit that far
+## from the eye, so no part of the hall goes unlit without the sun.
+var _cover: float = 0.0
+## The roof's ceiling: in the bounce light while the lamps shine, out of it (the sky's light falling through) while the
+## overhead light stands in for them.
+var _ceiling: GeometryInstance3D = null
 
 
-## A light under each of `spots` (each lamp's lowest point), as `cfg` sets them, all off.
-static func build(spots: Array[Vector3], cfg: RoofConfig) -> RoofLamps:
+## A light under each of `spots` (each lamp's lowest point), as `cfg` sets them, all off; `cover` is how far the roof
+## reaches from any point under it; `ceiling` the roof's ceiling, put in the bounce light while they shine.
+static func build(spots: Array[Vector3], cfg: RoofConfig, cover: float = 0.0,
+		ceiling: GeometryInstance3D = null) -> RoofLamps:
 	var lamps := RoofLamps.new()
 	lamps.name = "LampLights"
 	lamps._cfg = cfg
+	lamps._cover = cover
+	lamps._ceiling = ceiling
 	lamps.visible = false
 	var down := Basis(Vector3.RIGHT, -PI * 0.5)
 	for i in spots.size():
@@ -56,25 +70,41 @@ func mode() -> GraphicsQuality.LampLights:
 	return _mode
 
 
-## The share of its strength the overhead sun keeps with `wanted`: all of it with the lamps off.
+## The share of its strength the sun keeps with `wanted`: all of it with the lamps off (it stands in for them), else
+## RoofConfig.lamp_sun_share (none: no sun gets under the roof).
 func key_share(wanted: GraphicsQuality.LampLights) -> float:
 	return 1.0 if wanted == GraphicsQuality.LampLights.OFF or _lights.is_empty() else _cfg.lamp_sun_share
 
 
-## Lights the lamps out to `wanted`'s reach (off: hidden), their shadows contact-hardening when `soft` (Softest). Only
-## what changes is set; never per frame.
+## The share of the sky's ambient light kept under the roof with `wanted`: all of it with the lamps off, else
+## RoofConfig.lamp_ambient_share, so the lamps' shadows stay deep.
+func ambient_share(wanted: GraphicsQuality.LampLights) -> float:
+	return 1.0 if wanted == GraphicsQuality.LampLights.OFF or _lights.is_empty() else _cfg.lamp_ambient_share
+
+
+## How far (m) from the eye every lamp is lit: the whole roof (`_cover`), Far's `lamp_far` at least.
+func reach() -> float:
+	return maxf(_cfg.lamp_far, _cover + _cfg.lamp_fade)
+
+
+## Lights every lamp (off: hidden), shadowed out to `wanted`'s reach (Near: `lamp_near`; Far: all), their shadows
+## contact-hardening when `soft` (Softest). Only what changes is set; never per frame.
 func set_mode(wanted: GraphicsQuality.LampLights, soft: bool) -> void:
 	var on := wanted != GraphicsQuality.LampLights.OFF
 	if visible != on:
 		visible = on
+	var gi := GeometryInstance3D.GI_MODE_STATIC if on else GeometryInstance3D.GI_MODE_DISABLED
+	if _ceiling != null and _ceiling.gi_mode != gi:
+		_ceiling.gi_mode = gi
 	if not on or (wanted == _mode and soft == _soft):
 		_mode = wanted
 		return
 	_mode = wanted
 	_soft = soft
-	var reach := _cfg.lamp_near if wanted == GraphicsQuality.LampLights.NEAR else _cfg.lamp_far
+	var lit := reach()
+	var shadowed := _cfg.lamp_near if wanted == GraphicsQuality.LampLights.NEAR else lit
 	var size := _cfg.lamp_lens_size if soft else 0.0
 	for spot in _lights:
-		spot.distance_fade_begin = maxf(0.0, reach - _cfg.lamp_fade)
-		spot.distance_fade_shadow = reach
+		spot.distance_fade_begin = maxf(0.0, lit - _cfg.lamp_fade)
+		spot.distance_fade_shadow = shadowed
 		spot.light_size = size

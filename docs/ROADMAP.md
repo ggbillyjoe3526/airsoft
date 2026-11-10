@@ -31,7 +31,7 @@ in `docs/PROCESS.md`.
   deferred until later (owner, 2026-11-07: `docs/DECISIONS.md` › Versions, releases and branches). The owner pulled in
   the top graphics for the whole game (2026-11-09: Ultra as close to path-traced light as Godot gets, scaling per
   preset, baked path tracing before live ray tracing), in five steps: real lamp lights with shadows (done: UG1), a
-  roof that lets the sun in only at its skylights, eye adaptation, finer bounce light, reflections, ambient occlusion
+  hall lit by its lamps alone with no sun indoors (UG2), eye adaptation, finer bounce light, reflections, ambient occlusion
   and wear decals, then baked path-traced light. The owner added a replica (2026-11-10): the Compact SMG, its numbers
   and play first (CS1, Dev content, drawn as the AEG for now), its model once his reference pictures come.
 - **The release path** (owner, 2026-10-12): 0.1 Dev builds, 0.1 Beta, then 0.1 (tagged `0.1.0`) opens Early

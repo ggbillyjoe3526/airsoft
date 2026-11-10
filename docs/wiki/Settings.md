@@ -69,8 +69,8 @@ every preset; turn it on if you want it.
   field. **Reflections** on Probes show the room a shiny surface is in; Screen adds what is on screen. **Glow** makes
   lamps bloom softly. **Volumetric haze** is a faint haze the light shines through. **Lamp light** makes an indoor
   hall's roof lamps real lights that cast shadows (and, at night, fires and lanterns cast shadows too): Near (High)
-  lights the lamps round you, Far (Ultra) the whole hall and up to eight fires. The lamps' shadows follow your shadow
-  settings.
+  and Far (Ultra) light the whole hall with its lamps alone, as no sunlight gets indoors; Near shadows the lamps round
+  you, Far every lamp and up to eight fires. The lamps' shadows follow your shadow settings.
 - While graphics are on **For your card**, slow frames in a match step the preset down one at the end of a round,
   never mid-round and never below Low, with a short note under the score. A preset you picked yourself never steps
   down.
