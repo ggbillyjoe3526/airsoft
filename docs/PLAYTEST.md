@@ -255,10 +255,10 @@ parts. To try every part before you have levelled, turn on Settings › Dev › 
 
 ## Cyber Pistol
 
-The level 10 reward. To try it now, turn on Settings › Dev › Disable levelling, or press Settings › Dev › Level up
-until 10.
+The level cap's reward (level 15 since LV15). To try it now, turn on Settings › Dev › Disable levelling, or press
+Settings › Dev › Level up until 15.
 
-- [ ] **Equip it.** Below level 10 it is greyed with a lock and "Level 10"; once unlocked it goes in either slot.
+- [ ] **Equip it.** Below level 15 it is greyed with a lock and "Level 15"; once unlocked it goes in either slot.
 - [ ] **Its look.** A white slab with glowing cyan lines and a magenta core, the same on either team; with Realistic
   colours plain grey and unlit. Does it read as rare and special?
 - [ ] **Customise.** Power source reads Built-in battery, the magazine "Its own, 50 BBs"; optic, grip, laser, barrel
@@ -267,7 +267,7 @@ until 10.
   It stays on target to about 33 m.
 - [ ] **Its sound.** A quiet electronic chirp and a soft pop, no motor whine; an empty trigger blips; a reload ends in
   a two-note chime. Futuristic but still a toy?
-- [ ] **The Armory and the summary.** Level 10's row holds it; reaching it the summary says "Level 10!" and "Unlocked:
+- [ ] **The Armory and the summary.** Level 15's row holds it; reaching it the summary says "Level 15!" and "Unlocked:
   Cyber Pistol".
 - [ ] **Bots with it.** With it unlocked (or Disable levelling on), about 1 Hard match in 20 has an opponent with it.
   Never on Easy or Normal, never a teammate.
@@ -286,8 +286,8 @@ Public since 2026-11-05 (SN1): turn on Settings › Dev settings › Disable lev
   AEG's grips, the Silencer and the torch fit; no barrels, no AEG magazines. Power lists the M130, M140 and M150
   Springs (pictures: a coil with a violet, crimson or black band).
 - [ ] **Springs.** The M140 and M150 shoot harder (Energy up 10 % and 20 %) and cock a little slower. Can you feel it?
-- [ ] **Levels.** In the Armory level 5 holds the Sniper Rifle, the M130 Spring, the 2x Scope and the Tight-Bore Barrel;
-  level 6 has Red Gas; the M140 is at 7 and the M150 at 9. They show with Dev content off too (public since 2026-11-05).
+- [ ] **Levels.** In the Armory level 5 holds the Sniper Rifle, the M130 Spring and the 2x Scope; the M140 is at 9 and
+  the M150 at 14 (LV15). They show with Dev content off too (public since 2026-11-05).
 - [ ] **Bots with it.** About 1 opponent in 12 on Hard (fewer on Normal and Easy) carries it: they raise the scope to
   fight and hold their fire from the hip unless you are within 8 m. Do they feel dangerous at range and beatable up
   close? Is it fair on Depot and Woodland, at 5v5 and 8v8?
@@ -309,13 +309,13 @@ Public since 2026-11-05 (SN2): turn on Settings › Dev settings › Disable lev
 
 ## Levels and the Armory
 
-Finished matches give XP, each level up to 10 unlocks parts for good, and nothing is ever sold. What each level
+Finished matches give XP, each level up to 15 unlocks parts for good, and nothing is ever sold. What each level
 unlocks is in `data/levels.md`; the Armory shows it in the game.
 
 - [ ] **Level 0 to start.** On a fresh save (Settings › Save file › Delete) the side rail reads "LV 0"
   with an empty bar.
 - [ ] **The level badge.** "LV N" with a thin XP bar near the foot of the side rail on every menu page (UR1).
-- [ ] **The Armory.** Your level "of 10", the XP bar and how XP is earned (a match 100, a win 100 more, each round won
+- [ ] **The Armory.** Your level "of 15", the XP bar and how XP is earned (a match 100, a win 100 more, each round won
   20, each hit 10, times the difficulty), what the next level unlocks, and every level with its items (reached ones
   Unlocked, the next Next). Easy to read?
 - [ ] **XP on the summary.** Win a standard first-to-5 match on Normal: "XP earned +N XP", what gave it, then "Level
@@ -327,8 +327,8 @@ unlocks is in `data/levels.md`; the Armory shows it in the game.
 - [ ] **Settings › Dev › Disable levelling.** The badge goes, the Armory says levelling is off, and the Loadout and
   Customise offer everything unlocked. A match gives no XP and stays out of your records.
 - [ ] **Dev XP buttons.** **+500 XP** adds 500 (a level it reaches unlocks its items); **Level up** adds exactly what
-  the next level takes (at 10: "At the top level"); **Reset level** asks first, then returns you to level 0.
-- [ ] **At the cap.** At level 10 the Armory and the summary say "Top level reached. XP counts again when the level
+  the next level takes (at 15: "At the top level"); **Reset level** asks first, then returns you to level 0.
+- [ ] **At the cap.** At level 15 the Armory and the summary say "Top level reached. XP counts again when the level
   cap goes up." and the bar is full.
 - [ ] **Edit `data/levels.md`.** Swap the Red Dot (level 1) and the Silencer (level 4) and start the game again: at
   level 1 the Armory lists the Silencer.
@@ -669,7 +669,7 @@ pays XP ×1.5.
 - [ ] **A save from before** keeps its records: the old Normal's wins and losses show under Easy, the old Hard's under
   Normal, the old Pro's under Hard (the old Easy's add to Easy's), with no warning.
 - [ ] **XP:** Easy ×0.5, Normal ×1, Hard ×1.5 on the Opponents line and the XP card. Normal now pays ×1 against the
-  old Hard's bots: does the pace still feel fair (about 25 matches to level 10 on Normal)?
+  old Hard's bots: does the pace still feel fair (about 26 matches to level 10 and 58 to level 15 on Normal)?
 
 ## Callouts (CO2)
 

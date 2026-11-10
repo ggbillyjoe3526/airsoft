@@ -168,12 +168,12 @@ foundations. The owner has since pulled more into 0.1: see the browser game's De
 
 The whole of 0.1 is the browser game's 0.1 as those rulings define it (owner, 2026-10-18): Depot (Elimination,
 Attack / Defend, custom matches), Easy, Normal and Hard (Hard the old Pro, TL1), Woodland (night play, the weapon
-torch, glowing BBs, 5v5 / 6v6), the AEG Rifle, GBB Pistol and Cyber Pistol (level 10), loadout and attachments, levels
-and the Armory, squad orders, settings, comfort and accessibility. 0.1 Dev 1 builds the core slice (Depot, the AEG and GBB Pistol, bots,
+torch, glowing BBs, 5v5 / 6v6), the AEG Rifle, GBB Pistol and Cyber Pistol (the level cap), loadout and attachments,
+levels and the Armory, squad orders, settings, comfort and accessibility. 0.1 Dev 1 builds the core slice (Depot, the AEG and GBB Pistol, bots,
 Elimination); the rest follows in later Dev builds.
 
-- **Replicas:** the AEG Rifle and the GBB Pistol (the starting kit), and the Cyber Pistol at level 10. More
-  platforms come with the Replica Update.
+- **Replicas:** the AEG Rifle and the GBB Pistol (the starting kit), and the Cyber Pistol at the cap (level 15 since
+  LV15). More platforms come with the Replica Update.
 - **Loadout** (owner, 2026-10-03): a primary and a secondary replica, BB weight, hop-up and a first set of attachments
   (optics, grips, magazines), picked before a match. Gear and more parts come with later versions.
 - **Match info and options** (owner, 2026-10-03): a hit feed, teammate markers, an end-of-match summary, crosshair
@@ -356,7 +356,8 @@ Deferred until later (owner, 2026-11-07): not started in the 0.1 Dev builds.
   45 s", "3 hits with the pistol", "win on Hard") and a badge list kept in the save, like Counter-Strike: Condition
   Zero's Tour of Duty. A daily challenge could come from a date seed (offline, no online board).
 - **A higher level cap** (owner, 2026-10-13). New levels in `data/levels.md` as content arrives, with the new replicas,
-  attachments and skins as their rewards.
+  attachments and skins as their rewards. The cap went to 15 in 0.1 Dev 3 (LV15, a replica every five levels); 20 or
+  more comes with the Progression Update, its new levels filled with skins.
 - **Replica skins and kit looks** (from 0.1 Dev 6). Skins: colour, furniture, tape and markings, filling the Loadout's
   Skins row. Kit looks: camouflage, plate carrier, pouches, helmet, goggles, face protection, gloves, boots, backpacks,
   patches and armbands. Gear that only changes looks lives here, not as its own system (triage).

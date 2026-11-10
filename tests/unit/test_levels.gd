@@ -42,16 +42,17 @@ func after_each() -> void:
 
 func test_the_shipped_levels_read_clean_and_unlock_every_item_once() -> void:
 	assert_eq(table.problems, [] as Array[String])
-	assert_eq(table.cap(), 10)
+	assert_eq(table.cap(), 15, "a replica every five levels, the Cyber Pistol at the cap (LV15)")
 	assert_eq(table.levels[0].total, 0)
 	assert_eq(table.levels[1].total, 100)
-	assert_eq(table.levels[10].total, 6500)
+	assert_eq(table.levels[10].total, 6500, "levels 1 to 10 take what they took when 10 was the cap (LV15)")
+	assert_eq(table.levels[15].total, 14500)
 	assert_eq(table.unlock_level(AEG), 0)
 	assert_eq(table.unlock_level(RED_DOT), 1)
 	assert_eq(table.unlock_level(SCOPE), 5, "with the Sniper Rifle it comes on (SN1)")
 	assert_eq(table.unlock_level("000021"), 5)
-	assert_eq(table.unlock_level(CYBER), 10)
-	assert_eq(table.unlock_level("000026"), 7, "the Compact SMG with the M140 Spring (CS1)")
+	assert_eq(table.unlock_level(CYBER), 15)
+	assert_eq(table.unlock_level("000026"), 10, "the Compact SMG, a replica every five levels (LV15)")
 	var count := 0
 	for l in table.levels:
 		count += l.unlocks.size()
@@ -118,7 +119,7 @@ func test_standing_counts_xp_into_the_level_and_stops_at_the_cap() -> void:
 	var s := table.standing(920)
 	assert_eq([s.level, s.into, s.next], [3, 120, 500])
 	var top := table.standing(99999)
-	assert_eq(top.level, 10)
+	assert_eq(top.level, 15)
 	assert_true(top.at_cap())
 
 
@@ -157,7 +158,7 @@ func test_xp_unlocks_what_its_levels_give_and_stops_at_the_cap() -> void:
 	assert_true(up.unlocked.has(RED_DOT))
 	assert_true(p.has(RED_DOT))
 	p.add_xp(100000)
-	assert_eq(p.xp, 6500, "XP stops at the cap's total")
+	assert_eq(p.xp, table.levels[table.cap()].total, "XP stops at the cap's total")
 	assert_true(p.has(CYBER))
 	p.reset()
 	assert_eq(p.xp, 0)

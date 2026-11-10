@@ -56,7 +56,7 @@ the start.
 
 ## Cyber Pistol
 
-A futuristic electric pistol, unlocked at level 10, the top of the [levels](Levels-and-Unlocks). It fires **single
+A futuristic electric pistol, unlocked at level 15, the top of the [levels](Levels-and-Unlocks). It fires **single
 shots, bursts or full auto**, faster than the rifle from big magazines, with almost no kick (the table above has
 its numbers). Its battery is built in, so
 no power source fits it, and only the Weapon Torch fits it.
