@@ -15,6 +15,9 @@ const VERSION := 1
 const KNOWN_KEYS: Array[String] = ["xp", "unlocked", "last_map", "last_team"]
 ## The most XP a save may hold: far beyond any cap, a guard against a garbled number.
 const MAX_XP := 1000000000
+## Maps renamed since a save could name them, old id to new, so a remembered pick follows its map (owner, 2026-11-10:
+## Kingsmere became Subway).
+const RENAMED_MAPS: Dictionary[String, String] = {"kingsmere": "subway"}
 
 
 ## What one change of XP reached: the level before and after, and what it unlocked (pool IDs, lowest level first).
@@ -199,7 +202,7 @@ func from_dict(data: Dictionary) -> Array[String]:
 			else:
 				problems.append("an unlocked item \"%s\" isn't a pool ID: left out" % str(id))
 	var saved_map: Variant = data.get("last_map", "")
-	last_map = saved_map if saved_map is String else ""
+	last_map = str(RENAMED_MAPS.get(saved_map, saved_map)) if saved_map is String else ""
 	var saved_team: Variant = data.get("last_team", -1)
 	last_team = int(saved_team) if (saved_team is int or saved_team is float) and float(saved_team) in [0.0, 1.0] else -1
 	dirty = false

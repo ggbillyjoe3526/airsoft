@@ -2,7 +2,7 @@ class_name LiftConfig
 extends Resource
 ## Lifts (MT2): how a car's doors, ride and buttons behave, how big a car is and how far it is heard. The simulation
 ## keeps them (Lifts); the map says where each car runs and where it stops (MapData.lifts). The concept's defaults
-## (Kingsmere v2, 2026-11-10): 4 players a car, doors 1.5 s, 4 s a floor. Part of SimTuning (sim_tuning.tres).
+## (Subway v2, 2026-11-10): 4 players a car, doors 1.5 s, 4 s a floor. Part of SimTuning (sim_tuning.tres).
 
 ## A car's doors (and the landing's with them) take this long to open or to shut (s). They stop BBs and bodies from
 ## the moment they start to shut until they stand fully open.

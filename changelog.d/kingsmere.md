@@ -1,5 +1,5 @@
-### Kingsmere in development
-- A new map is in development: Kingsmere, an abandoned metro station on three levels, in Settings › Dev › Dev content.
+### Subway in development
+- A new map is in development: Subway, an abandoned metro station on three levels, in Settings › Dev › Dev content.
 - The Street team starts in the ticket hall and comes down the escalators or spiral stair to the booking hall and concourse.
 - A stair and ramps lead down to two platforms beside abandoned trains, where the Tunnel team comes out from the running tunnels.
 - Close quarters above, with one long 58 m line along the south platform.

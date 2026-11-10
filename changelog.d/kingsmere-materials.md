@@ -1,5 +1,5 @@
-### Kingsmere dressed in materials
-- Kingsmere's station is no longer grey boxes: white tiled walls, terrazzo and quarry-tile floors, light concrete ceilings.
+### Subway dressed in materials
+- Subway's station is no longer grey boxes: white tiled walls, terrazzo and quarry-tile floors, light concrete ceilings.
 - Platforms have concrete, a pale coping stone and a yellow tactile strip at each edge.
 - Both tracks have ballast, concrete sleepers and rails. They are scenery: you walk straight over them.
 - Escalators have ribbed tread. Running tunnels are sooty concrete. Train floors are rubber, and the walls are painted steel.
@@ -8,4 +8,4 @@
 - Cover, collision and sight lines are the same as before.
 - Low graphics draws the materials without their surface relief.
 - The materials are CC0 from ambientCG, credited in the game's notices.
-- Kingsmere no longer borrows Depot's container and crate models.
+- Subway no longer borrows Depot's container and crate models.

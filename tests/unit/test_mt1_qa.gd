@@ -1,5 +1,5 @@
 extends GutTest
-## MT1 QA: Kingsmere loads clean and stays Dev-only; per-lamp heights, plain roofs and their light reach, floor_under on
+## MT1 QA: Subway loads clean and stays Dev-only; per-lamp heights, plain roofs and their light reach, floor_under on
 ## ramps and terrain, a scaled flag pole, and the area probes of a storeyed map against Depot's.
 
 var play: PlayTuning = PlayTuning.load_default()
@@ -15,8 +15,8 @@ func _roofed(lamp: String, extra: String = "") -> MapData:
 			% [extra, lamp])
 
 
-func test_kingsmere_loads_without_problems_or_warnings() -> void:
-	var m := MapData.load_map("kingsmere", MapStyle.new(), 6)
+func test_subway_loads_without_problems_or_warnings() -> void:
+	var m := MapData.load_map("subway", MapStyle.new(), 6)
 	assert_eq(m.problems, [] as Array[String])
 	assert_eq(m.warnings, [] as Array[String])
 	assert_true(m.roof_plain, "a plain roof")
@@ -25,17 +25,17 @@ func test_kingsmere_loads_without_problems_or_warnings() -> void:
 	assert_gt(m.storeys.size(), 1)
 
 
-func test_kingsmere_is_dev_only() -> void:
+func test_subway_is_dev_only() -> void:
 	var cat := MapCatalog.shared()
-	assert_true(cat.is_dev("kingsmere"))
+	assert_true(cat.is_dev("subway"))
 	var public_ids: Array[String] = []
 	for e in cat.fields(false):
 		public_ids.append(e.id)
-	assert_false("kingsmere" in public_ids)
+	assert_false("subway" in public_ids)
 	var dev_ids: Array[String] = []
 	for e in cat.fields(true):
 		dev_ids.append(e.id)
-	assert_true("kingsmere" in dev_ids)
+	assert_true("subway" in dev_ids)
 
 
 func test_lamp_y_is_read_per_lamp() -> void:
@@ -81,7 +81,7 @@ func test_plain_reaches_is_empty_on_a_non_plain_roof() -> void:
 
 
 func test_plain_reaches_stops_just_under_the_floor_below_the_lamp() -> void:
-	var m := MapData.load_map("kingsmere", MapStyle.new(), 6)
+	var m := MapData.load_map("subway", MapStyle.new(), 6)
 	var spots: Array[Vector3] = []
 	for i in m.roof_lamps.size():
 		spots.append(Vector3(m.roof_lamps[i].x, m.roof_lamp_heights[i] - cfg.plain_lamp_drop, m.roof_lamps[i].y))
@@ -126,7 +126,7 @@ func test_non_plain_roof_lights_keep_the_hall_energy_and_range() -> void:
 
 
 func test_floor_under_picks_the_highest_surface_not_above_top() -> void:
-	var m := MapData.load_map("kingsmere", MapStyle.new(), 6)
+	var m := MapData.load_map("subway", MapStyle.new(), 6)
 	for x_z: Vector2 in [Vector2(-40, 0), Vector2(0, 0), Vector2(30, 3)]:
 		var all := m.floor_top(x_z.x, x_z.y)
 		assert_eq(m.floor_under(x_z.x, x_z.y, INF), all, "INF top is floor_top")
@@ -136,7 +136,7 @@ func test_floor_under_picks_the_highest_surface_not_above_top() -> void:
 
 
 func test_floor_under_on_a_ramp_uses_the_ramp_height_at_the_point() -> void:
-	var m := MapData.load_map("kingsmere", MapStyle.new(), 6)
+	var m := MapData.load_map("subway", MapStyle.new(), 6)
 	var found := false
 	for b in m.blocks:
 		if b.kind == &"ramp" and b.rise != MapData.Rise.NONE:
@@ -147,7 +147,7 @@ func test_floor_under_on_a_ramp_uses_the_ramp_height_at_the_point() -> void:
 			found = true
 			break
 	if not found:
-		pending("no ramp in Kingsmere")
+		pending("no ramp in Subway")
 
 
 func test_floor_under_respects_terrain() -> void:
@@ -205,7 +205,7 @@ func test_depot_probe_count_is_whole_field_plus_its_areas() -> void:
 
 
 func test_storeyed_map_has_no_field_probe_and_each_area_probe_spans_its_band() -> void:
-	var m := MapData.load_map("kingsmere", MapStyle.new(), 6)
+	var m := MapData.load_map("subway", MapStyle.new(), 6)
 	var probes := AreaProbes.build(m, play.look)
 	var areas := AreaProbes.probed_areas(m, play.look)
 	assert_gt(areas.size(), 0)
@@ -222,14 +222,14 @@ func test_storeyed_map_has_no_field_probe_and_each_area_probe_spans_its_band() -
 
 
 func test_probed_areas_match_boxes_in_order() -> void:
-	var m := MapData.load_map("kingsmere", MapStyle.new(), 6)
+	var m := MapData.load_map("subway", MapStyle.new(), 6)
 	var boxes := AreaProbes.boxes(m, play.look)
 	var areas := AreaProbes.probed_areas(m, play.look)
 	assert_eq(boxes.size(), areas.size())
 
 
 func test_storeyed_map_with_no_large_area_builds_an_empty_probe_set() -> void:
-	var m := MapData.load_map("kingsmere", MapStyle.new(), 6)
+	var m := MapData.load_map("subway", MapStyle.new(), 6)
 	m.areas.clear()
 	var probes := AreaProbes.build(m, play.look)
 	assert_eq(probes.get_child_count(), 0)

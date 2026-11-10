@@ -662,7 +662,7 @@ func test_without_the_models_the_bushes_fall_back_to_ellipsoids() -> void:
 				Vector3.ONE * EPS, "its own size")
 
 
-func test_the_field_picture_draws_woodlands_bushes() -> void:
+func test_the_field_picture_draws_woodland_bushes() -> void:
 	var pictures: GDScript = load("res://tools/eye_pictures.gd")
 	var port := Node3D.new()
 	add_child_autofree(port)

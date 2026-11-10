@@ -1,5 +1,5 @@
 extends GutTest
-## Bots and lifts (MT2): Kingsmere's lift links (a ride from each stop's landing to each other's, priced as the ride's
+## Bots and lifts (MT2): Subway's lift links (a ride from each stop's landing to each other's, priced as the ride's
 ## time on foot), a bot's route from the platforms to the ticket hall riding one while a walk-off's never does, a route
 ## planned inside a car starting at its landing, and a bot walking its lift leg through the simulation: calling the car,
 ## boarding, pressing its stop, riding and walking out (game/nav/nav_lifts.gd, nav_grid.gd, game/ai/bot_lifts.gd,
@@ -15,7 +15,7 @@ var nav: NavGrid = null
 
 
 func before_all() -> void:
-	map = MapData.load_map("kingsmere", MapStyle.new(), 6)
+	map = MapData.load_map("subway", MapStyle.new(), 6)
 	level = MapLevel.new()
 	add_child(level)
 	level.build(map, MapStyle.new(), tuning.body, null, null, false, null, tuning.lifts)
@@ -39,7 +39,7 @@ func _lift_legs(route: PackedVector3Array, start: Vector3) -> Array[int]:
 	return out
 
 
-func test_kingsmere_has_a_link_each_way_between_every_two_stops_of_each_lift() -> void:
+func test_subway_has_a_link_each_way_between_every_two_stops_of_each_lift() -> void:
 	assert_eq(nav.lift_to.size(), 12, "2 lifts, 3 stops: 6 rides each")
 	assert_eq(NavLifts.link(nav, level.query(), tuning.lifts, 4.2, 4.0), 12, "a second call adds none")
 	for l in nav.lift_to.size():

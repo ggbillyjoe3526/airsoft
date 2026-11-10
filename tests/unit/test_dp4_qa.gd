@@ -228,7 +228,7 @@ func test_a_teammates_knock_gives_no_patch_and_no_cue_but_an_enemys_does() -> vo
 # --- The maps ---
 
 
-func test_woodlands_fence_is_its_only_noisy_prop_and_the_ranges_five_are_listed() -> void:
+func test_woodland_fence_is_its_only_noisy_prop_and_the_ranges_five_are_listed() -> void:
 	var counts: Dictionary[String, int] = {}
 	for id: String in ["woodland", "range"]:
 		var style := MapStyle.new()

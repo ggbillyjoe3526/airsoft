@@ -48,7 +48,7 @@ func test_a_wheel_notch_with_a_bomb_in_hand_still_steps_the_bombs() -> void:
 	input.active = false
 
 
-func test_woodlands_reflection_probes_capture_over_the_ground_not_inside_a_hill() -> void:
+func test_woodland_reflection_probes_capture_over_the_ground_not_inside_a_hill() -> void:
 	var play := PlayTuning.load_default()
 	var woodland := MapData.load_map("woodland", play.map_style, SimTuning.load_default().rounds.team_size)
 	assert_not_null(woodland.terrain, "Woodland's ground rises and falls")

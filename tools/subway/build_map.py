@@ -1,6 +1,6 @@
-"""Writes data/maps/kingsmere.json from tools/kingsmere/layout.py (the layout as data). Run from anywhere:
+"""Writes data/maps/subway.json from tools/subway/layout.py (the layout as data). Run from anywhere:
 
-    python3 tools/kingsmere/build_map.py
+    python3 tools/subway/build_map.py
 
 The rooms become the station's shell: a floor slab under each (a ramp room's floor as wedges a SEG m long), a
 ceiling over it, and a wall along every edge that opens into no other room, lintels and risers where two rooms of
@@ -21,7 +21,7 @@ sys.path.insert(0, HERE)
 import layout as L  # noqa: E402
 import station_dress  # noqa: E402
 
-OUT = os.path.join(HERE, "..", "..", "data", "maps", "kingsmere.json")
+OUT = os.path.join(HERE, "..", "..", "data", "maps", "subway.json")
 LIFT = -L.T          # the track bed is the game's floor at 0
 FT = 0.3             # slab and wall thickness
 SEAL_T = 0.15        # a sealed edge's wall (a train's side, the spiral's well), inside its room
@@ -483,7 +483,7 @@ def build() -> dict:
     # The cover must stand clear of every room's walls: none inside another's air but its own room's.
     sx = L.SPIRAL
     m = {
-        "name": "Kingsmere",
+        "name": "Subway",
         "blocks": blocks,
         "killY": -5,
         "storeys": [0, r(L.C + LIFT), r(L.G + LIFT)],

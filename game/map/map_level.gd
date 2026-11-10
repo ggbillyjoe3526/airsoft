@@ -565,7 +565,7 @@ func _kinematic(space: RID, shape: RID) -> RID:
 ## draws either in the site's material; its shadow caster stays the greybox's.
 func _make_mesh() -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
-	# A station draws its own photo sets, unbaked (MT3: lit by its lamps; Kingsmere names no bake).
+	# A station draws its own photo sets, unbaked (MT3: lit by its lamps; Subway names no bake).
 	if _station != null:
 		mi.name = "Station"
 		mi.material_override = _station_material

@@ -2,7 +2,7 @@ extends GutTest
 ## Lifts (MT2; the concept's defaults of 2026-11-10: 4 a car, doors 1.5 s, 4 s a floor): a call brings the car, its
 ## doors shut, it rides and opens; its riders rise and fall with it; a doorway is solid but where the car stands open;
 ## the doors never shut on a body, with anyone hit aboard or too many aboard; the panel and the call button the view
-## picks; a new round puts every car back; Kingsmere's file lists its two and Jolt moves their cars
+## picks; a new round puts every car back; Subway's file lists its two and Jolt moves their cars
 ## (game/sim/lifts.gd, lift_state.gd, lift_spec.gd, game/map/map_data.gd, map_level.gd, jolt_query.gd).
 
 const DT := 1.0 / 60.0
@@ -323,8 +323,8 @@ func test_a_stop_called_on_the_way_is_stopped_at() -> void:
 	assert_eq(state.lifts.stop[0], 2, "then on up")
 
 
-func test_kingsmere_lists_two_lifts_of_three_stops() -> void:
-	var m := MapData.load_map("kingsmere", MapStyle.new(), 6)
+func test_subway_lists_two_lifts_of_three_stops() -> void:
+	var m := MapData.load_map("subway", MapStyle.new(), 6)
 	assert_not_null(m)
 	assert_eq(m.lifts.size(), 2)
 	for spec in m.lifts:
@@ -343,8 +343,8 @@ func test_a_malformed_lift_is_left_out_with_a_warning() -> void:
 	assert_eq(m.warnings.size(), 2)
 
 
-func test_jolt_moves_kingsmere_s_car_and_switches_its_doorways_at_once() -> void:
-	var map := MapData.load_map("kingsmere", MapStyle.new(), 6)
+func test_jolt_moves_subway_s_car_and_switches_its_doorways_at_once() -> void:
+	var map := MapData.load_map("subway", MapStyle.new(), 6)
 	var level := MapLevel.new()
 	add_child_autofree(level)
 	level.build(map, MapStyle.new(), tuning.body, null, null, false, null, cfg)
@@ -368,8 +368,8 @@ func test_jolt_moves_kingsmere_s_car_and_switches_its_doorways_at_once() -> void
 	assert_false(q.ray(door - across + Vector3(0, -0.5, 0), door + across * 0.6, hit), "open, a clear doorway")
 
 
-func test_a_ride_on_kingsmere_takes_a_body_from_the_platforms_to_the_hall() -> void:
-	var map := MapData.load_map("kingsmere", MapStyle.new(), 6)
+func test_a_ride_on_subway_takes_a_body_from_the_platforms_to_the_hall() -> void:
+	var map := MapData.load_map("subway", MapStyle.new(), 6)
 	var level := MapLevel.new()
 	add_child_autofree(level)
 	level.build(map, MapStyle.new(), tuning.body, null, null, false, null, cfg)

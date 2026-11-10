@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d4nhidne57rjp"
-path="res://.godot/imported/kingsmere.jpg-19353a6e8bb328f3248411c4ef612ea4.ctex"
+uid="uid://ddpoxr65s8d67"
+path="res://.godot/imported/subway.jpg-702df50357d7be2d4744d6aabc1da45c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/maps/kingsmere.jpg"
-dest_files=["res://.godot/imported/kingsmere.jpg-19353a6e8bb328f3248411c4ef612ea4.ctex"]
+source_file="res://assets/maps/cards/subway.jpg"
+dest_files=["res://.godot/imported/subway.jpg-702df50357d7be2d4744d6aabc1da45c.ctex"]
 
 [params]
 

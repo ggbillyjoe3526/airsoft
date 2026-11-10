@@ -1,6 +1,6 @@
 class_name StationLook
 extends Resource
-## How a map naming a station dress is drawn (MT3, Kingsmere: `dressing.station`, StationDressing): its blocks in CC0
+## How a map naming a station dress is drawn (MT3, Subway: `dressing.station`, StationDressing): its blocks in CC0
 ## photo materials (ambientCG, docs/ASSETS.md) instead of greybox paint, one material and one draw for the whole level
 ## (StationSurface). Each face takes a finish: a block a kind's own (a cabinet's painted steel, a crate's planks), else
 ## the finish its room's style gives a floor, a wall or a ceiling facing that room; a block inside a room that owns

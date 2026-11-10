@@ -4,7 +4,7 @@ extends GutTest
 ## exports carry the figure sidecars.
 
 const LOOP_DIR := "res://assets/audio/loops"
-const MAPS: Array[String] = ["depot", "woodland", "range", "kingsmere"]
+const MAPS: Array[String] = ["depot", "woodland", "range", "subway"]
 ## Share of a loop's samples allowed at full scale: a few stray peaks, never a squared-off wave.
 const MAX_CLIPPED_SHARE := 0.001
 const FIGURE_BONES := 65

@@ -3,7 +3,7 @@ Stairs_Up and Stairs_Down made by gait.py's engine (plain numpy, no Blender) on 
 donor glb that splice.mjs puts into human.glb and robot.glb. The rig itself is never touched.
   python3 tools/blender/bot-figure/gait/stairs.py <figure.glb> <donor.glb> [<sidecar.json>]
 Each is Run_F's run on a slope: the same pace and walk cycle (so the game swaps between them in step), each planted
-foot set down on the slope (RISE metres up a metre ahead, as Kingsmere's stairs and escalators climb), the swinging
+foot set down on the slope (RISE metres up a metre ahead, as Subway's stairs and escalators climb), the swinging
 foot lifted clear of the step ahead. Going up the body leans into the climb and the knees come high; going down it
 sits back a little on shorter, softer strikes. The game blends them in by the slope a figure runs on
 (Character.stairs, FigureGraph's stairs blend); the upper body is Run_F's, under the aim clips anyway.

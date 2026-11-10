@@ -1,4 +1,4 @@
-"""Kingsmere's station dress (MT3): `dressing.station` in data/maps/kingsmere.json, which build_map.py writes. The game
+"""Subway's station dress (MT3): `dressing.station` in data/maps/subway.json, which build_map.py writes. The game
 draws each block face in the CC0 photo set its room's style gives it (game/config/station_look.gd), lays the
 platforms' edge strips and the track's rails and sleepers (game/play/station/station_surface.gd). Look only: nothing
 here adds, moves or cuts a block.

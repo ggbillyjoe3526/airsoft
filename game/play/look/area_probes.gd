@@ -7,7 +7,7 @@ extends Node3D
 ## ground (MapData.terrain) each box stands on the ground under it, from its lowest corner to `height` over its
 ## highest, and captures from eye height over the ground at its middle, never from inside a hill (BP2); each of its views
 ## reaches at least `probe_reach` m, so none stops in the hill or the trees close round it (GL1). Nothing per
-## frame. FieldLighting shows or hides them all with the Reflections row. A map built in storeys (MT1: Kingsmere) has no
+## frame. FieldLighting shows or hides them all with the Reflections row. A map built in storeys (MT1: Subway) has no
 ## one floor for a probe over the whole field, so it has none: each area holding its own band of feet heights is an
 ## interior from its band's floor to its top, captured from eye height over that floor, never from inside a slab.
 

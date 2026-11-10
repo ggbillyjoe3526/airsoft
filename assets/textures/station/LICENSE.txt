@@ -1,4 +1,4 @@
-ambientCG materials (Kingsmere's station dress, MT3)
+ambientCG materials (Subway's station dress, MT3)
 
 station_col.jpg, station_srf.png (one 512 px layer each, in this order):
    0. "Tiles136B" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Tiles136B
