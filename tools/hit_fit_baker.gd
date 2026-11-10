@@ -37,6 +37,7 @@ func bake(models: FigureModels, hits: HitConfig, moves: MovementConfig, parent: 
 	fit.jump_from = cfg.jump_from
 	fit.jump_to = cfg.jump_to
 	fit.vault_top = cfg.vault_top
+	fit.climb_top = cfg.climb_top
 	fit.aim_pitch = cfg.aim_pitch
 	fit.aim_reach = cfg.aim_reach
 	fit.crouch_top_max = cfg.crouch_top_max
@@ -72,6 +73,29 @@ func bake(models: FigureModels, hits: HitConfig, moves: MovementConfig, parent: 
 		_upper(vault_upper)
 	fit.vault_lower = vault_lower
 	fit.vault_upper = vault_upper
+	var climb_lower := PackedFloat32Array()
+	var climb_upper := PackedVector3Array()
+	for i in fit.climb_samples:
+		var c := _character()
+		c.grounded = false
+		_vault_at(c, float(i) / float(fit.climb_samples - 1), fit.climb_top)
+		c.vault.climb = true
+		_pose(c)
+		_lower(climb_lower)
+		_upper(climb_upper)
+	fit.climb_lower = climb_lower
+	fit.climb_upper = climb_upper
+	# The stairs (CL1): each stairs clip alone (the Blend3 at -1, then 1) at each phase, running ahead on it.
+	var stairs := PackedFloat32Array()
+	for way: float in [-1.0, 1.0]:
+		for phase in fit.phases:
+			var c := _character()
+			c.velocity = Vector3(0.0, 0.0, -moves.run_speed)
+			c.stairs = way
+			c.walk_cycle = TAU * float(phase) / float(fit.phases)
+			_pose(c)
+			_lower(stairs)
+	fit.stairs = stairs
 	var pistol := _pistol_slot(_character())
 	for hold in 2:
 		var aims := PackedVector3Array()
@@ -194,6 +218,7 @@ func _pose(c: Character) -> void:
 	c.prev_lean = c.lean
 	c.prev_crouch_amount = c.crouch_amount
 	c.prev_walk_cycle = c.walk_cycle
+	c.prev_stairs = c.stairs
 	var pose := FigurePose.new(_models.config)
 	pose.read(c, 1.0, _hits)
 	pose.snap()

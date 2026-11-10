@@ -60,6 +60,9 @@ msgstr "Ricochet: play on"
 msgid "HUD_VAULT"
 msgstr "%s to vault"
 
+msgid "HUD_CLIMB"
+msgstr "%s to climb"
+
 msgid "HUD_DOOR_OPEN"
 msgstr "%s to open the door"
 

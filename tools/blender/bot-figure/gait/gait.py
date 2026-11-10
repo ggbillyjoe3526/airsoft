@@ -315,9 +315,10 @@ def periodic_smooth(values, width):
     return out
 
 
-def make(rig, name, g, old):
-    """The clip's tracks {(bone, path): (times, values)} and its report."""
-    clip = Clip(rig, name, g)
+def make(rig, name, g, old, kind=Clip):
+    """The clip's tracks {(bone, path): (times, values)} and its report; `kind` the clip's class (stairs.py's
+    SlopeClip for a gait on a slope)."""
+    clip = kind(rig, name, g)
     n = clip.frames * KEYS
     times = np.arange(n + 1) / (FPS * KEYS)
     # the hips sunk where a foot would be out of reach, smoothed (sampled finely, then kept above the need)

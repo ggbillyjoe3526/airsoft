@@ -2,7 +2,9 @@ class_name VaultConfig
 extends Resource
 ## Vaulting (the browser game's config/vault.ts, M102): Jump pressed at a low obstacle takes you over it in one short,
 ## committed move (game/sim/vault.gd). Heights are from the floor you take off from (owner, 2026-10-12: obstacles 0.6 to
-## 0.95 m; crouch cover stays peek-only). Metres, seconds, radians. Read through SimTuning.vault.
+## 0.95 m; crouch cover stays peek-only). The same press at a ledge of those heights whose top runs on, a platform's edge
+## seen from the track, climbs up onto it instead (owner, 2026-11-10, CL1). Metres, seconds, radians. Read through
+## SimTuning.vault.
 
 ## The obstacle's top over the floor you take off from: the lowest and the highest you vault.
 @export var min_height: float = 0.6
@@ -12,8 +14,18 @@ extends Resource
 @export var max_landing_height: float = 0.95
 ## The floor you land on at most this far over the one you take off from (the far side of a slope).
 @export var max_climb: float = 0.3
-## The deepest obstacle vaulted, along the way you go (a wall, a barrier, a crate; never a platform).
+## The deepest obstacle vaulted, along the way you go (a wall, a barrier, a crate; deeper is a platform, climbed).
 @export var max_depth: float = 1.0
+## A climb (CL1): the top runs on, flat and open, at least this far past the edge along the way you go (a platform, a
+## dock; never a crate or a bench, so the ledges climbed are floors, not props).
+@export var climb_depth: float = 1.5
+## The climb's rise onto the top (hands on the edge, a knee up) takes at least this long.
+@export var climb_rise_time: float = 0.34
+## Speed onto the top after the rise: the speed you came in at, held between these (m/s).
+@export var climb_min_speed: float = 3.0
+@export var climb_max_speed: float = 4.0
+## How far the body tucks on the way up (0..1, as `tuck`).
+@export var climb_tuck: float = 0.5
 ## How far in front of the body's surface a Jump press finds an obstacle: reach plus reach_per_speed × speed (m/s).
 @export var reach: float = 0.55
 @export var reach_per_speed: float = 0.12

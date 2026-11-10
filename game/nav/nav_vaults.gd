@@ -6,6 +6,11 @@ class_name NavVaults
 ## `price` metres (a vault is slower than its length on foot, the replica is carried, and it is loud), so a route takes
 ## one only where it saves more than that walking round.
 ##
+## A climb (CL1: a ledge whose top runs on, a platform's edge from the track) is a link up from the node below to the
+## node on the top, found where the next cell has no floor a step from this one; each climb also gives a drop link back
+## down, walked off the edge (a bot steps off a platform where a player would hop down), so a pit with no steps is
+## no trap for either.
+##
 ## In the search each link is a point of its own between the two nodes (AStar3D prices a step by its length times the
 ## weight of the point stepped onto), one way, weighted so the two halves cost the link's price.
 
@@ -21,11 +26,14 @@ const CLOCK_EVERY := 256
 
 
 ## A search for a grid's vault links under way (`find`, `finish`): the next node to look at, where each node's links
-## start in `to`, the landing nodes found so far, and the grid's point weight.
+## start in `to`, the landing nodes found so far, the drops back down each climb gives (from the top's node to the one
+## below, in the order found) and the grid's point weight.
 class Finder:
 	var next: int = 0
 	var start: PackedInt32Array = PackedInt32Array()
 	var to: PackedInt32Array = PackedInt32Array()
+	var drop_from: PackedInt32Array = PackedInt32Array()
+	var drop_to: PackedInt32Array = PackedInt32Array()
 	var plan: VaultState = VaultState.new()
 	var weight: float = 0.0
 
@@ -77,12 +85,14 @@ static func _find_from(f: Finder, g: NavGrid, k: int, query: WorldQuery, vault: 
 		var nj := cj + DJ[d]
 		if ni < 0 or nj < 0 or ni >= g.cols or nj >= g.rows:
 			continue
+		# Beside a blocked node of the same floor (a vault, or a climb at a ledge's foot), or with no floor a step
+		# away (only a climb: the next cell's floor is the ledge's top).
 		var n := g.step_node(k, nj * g.cols + ni)
-		if n < 0 or g.walkable[n] == 1:
+		if n >= 0 and g.walkable[n] == 1:
 			continue
 		var feet := g.node_position(k) + Vector3(0.0, body.rest_gap, 0.0)
 		var way := Vector2(DI[d], DJ[d])
-		if not Vault.plan(feet, way, 0.0, vault, body, query, f.plan):
+		if not Vault.plan(feet, way, 0.0, vault, body, query, f.plan) or (n < 0 and not f.plan.climb):
 			continue
 		for cells: int in LAND_CELLS:
 			var s := f.plan.far + cells * g.cell
@@ -90,6 +100,9 @@ static func _find_from(f: Finder, g: NavGrid, k: int, query: WorldQuery, vault: 
 			if m < 0 or g.walkable[m] == 0 or g.low[m] != 0:
 				continue
 			f.to.append(m)
+			if f.plan.climb:
+				f.drop_from.append(m)
+				f.drop_to.append(k)
 			break
 
 
@@ -101,6 +114,10 @@ static func finish(f: Finder, g: NavGrid, price: float) -> int:
 	var nodes := g.node_count()
 	var start := f.start
 	var to := f.to
+	if not f.drop_from.is_empty():
+		_merge_drops(f, nodes)
+		start = f.start
+		to = f.to
 	g.vault_start = start
 	g.vault_to = to
 	g.vault_base = nodes
@@ -111,6 +128,43 @@ static func finish(f: Finder, g: NavGrid, price: float) -> int:
 	for r: int in g.vault_region:
 		g.vault_region[r] = _root(g.vault_region, r)
 	return to.size()
+
+
+## Puts the drops `f` found among its links, by their start node (each node's own links first, then its drops in the
+## order found), and forgets them: the grid's links are then one list by start node, as `is_vault_leg` reads them.
+static func _merge_drops(f: Finder, nodes: int) -> void:
+	# The drops by start node: where each node's begin in `drops` (counted, summed, then filled in the order found).
+	var at := PackedInt32Array()
+	at.resize(nodes + 1)
+	at.fill(0)
+	for i in f.drop_from.size():
+		at[f.drop_from[i] + 1] += 1
+	for k in nodes:
+		at[k + 1] += at[k]
+	var fill := at.duplicate()
+	var drops := PackedInt32Array()
+	drops.resize(f.drop_from.size())
+	for i in f.drop_from.size():
+		drops[fill[f.drop_from[i]]] = f.drop_to[i]
+		fill[f.drop_from[i]] += 1
+	var start := PackedInt32Array()
+	start.resize(nodes + 1)
+	var to := PackedInt32Array()
+	to.resize(f.to.size() + drops.size())
+	var n := 0
+	for k in nodes:
+		start[k] = n
+		for l in range(f.start[k], f.start[k + 1]):
+			to[n] = f.to[l]
+			n += 1
+		for l in range(at[k], at[k + 1]):
+			to[n] = drops[l]
+			n += 1
+	start[nodes] = n
+	f.start = start
+	f.to = to
+	f.drop_from.clear()
+	f.drop_to.clear()
 
 
 ## The region `r` is joined to, lowest first, in `joins` (a union-find over the few regions vault links touch).

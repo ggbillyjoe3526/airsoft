@@ -574,8 +574,8 @@ a cross-passage between the running tunnels, and they swap at half time. Turn on
 - [ ] **Every way down (MT1).** From the ticket hall: the escalators to the concourse and on down to the lower hall;
   the spiral stair in the hall's corner to the booking hall; the ordinary stair from the stair top down past flag B's
   half landing to the platforms. Nothing snags you on a step, a balustrade or a landing.
-- [ ] **The tracks and trains (MT1).** Drop off a platform's edge into the track: there are steps back up at each
-  stretch's end (you can't climb the edge). Walk through the north train's open doors, and the south train from its
+- [ ] **The tracks and trains (MT1, CL1).** Drop off a platform's edge into the track: no steps lead back up; you
+  climb out over the edge (Jump). Walk through the north train's open doors, and the south train from its
   platform doors to its east cab door and down the steps into the south tunnel.
 - [ ] **Close quarters above, long lines below (MT1).** Above the platforms no line runs much past 28 m; the
   platforms open to about 58 m. Does each level play as meant, and do the bots hold and push through all three?
@@ -1334,6 +1334,22 @@ Dev content: tick Settings › Dev › Dev content (or Disable levelling), then 
   they read as packed spruces, with no flat green wall between them. On Low a little dark shade shows at their feet.
 - [ ] **BBs.** Shoot into a thicket at chest height and at its edges: BBs stop in it as before, never fly through.
 - [ ] **Frame rate.** F3 on Low looking across a thicket: 60 FPS as before.
+
+## Climbing onto a platform and running on stairs (CL1)
+
+Kingsmere is Dev content: tick Settings › Dev › Dev content.
+
+- [ ] **Climb out of the track.** On Kingsmere, drop into a track and run at the platform's edge: "Space to climb"
+  shows; press Jump and you heave up, the view dips and your replica comes low, and you stand on the platform in
+  about half a second, ready to shoot a moment after. From a standstill at the edge it works too. Crouched, or with
+  the edge more than 70° off your view, it doesn't.
+- [ ] **Only ledges.** A crate, a bench or a barrier is still vaulted ("Space to vault"), never climbed; nothing on
+  Depot, Woodland or the Range is climbable.
+- [ ] **Bots climb.** Watch bots crossing the tracks: they drop in and climb out by the same move, never stuck in a
+  pit. Their climb reads as a hand on the edge, a knee up and a step on.
+- [ ] **Stairs.** Watch a bot run up the ordinary stair: it leans into the climb with high knees; running down it sits
+  back a little on softer steps. Its run on the flat is as before, and nothing pops as it reaches the stair's top or
+  foot. A BB at its legs on the stair hits where you see them.
 
 ## Reporting what you find
 

@@ -115,6 +115,7 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		c.prev_crouch_amount = c.crouch_amount
 		c.prev_lean = c.lean
 		c.prev_walk_cycle = c.walk_cycle
+		c.prev_stairs = c.stairs
 		c.prev_yaw = c.yaw
 		c.prev_pitch = c.pitch
 		_squad_order(c, commands, live, state.events)
@@ -180,6 +181,7 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 				noise.knock(c, tuning.body, dt, state)
 		c.rescue_if_out_of_world(kill_y)
 		Hitbox.step_walk_cycle(c, tuning.hits) # the legs' swing, for their hit volumes and the drawn figure
+		Hitbox.step_stairs(c, tuning.hits, dt)
 		Lean.step(c, cmd, tuning, query, dt)
 		Accuracy.step(c, tuning.movement, tuning.accuracy, dt)
 		if not in_play:

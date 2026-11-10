@@ -3,7 +3,8 @@ class_name Vault
 ## or crate whose top is VaultConfig min_height to max_height over your floor, no deeper than max_depth, with room to land
 ## past it) takes the body over it in one short, committed move instead of a jump. The body rises onto the top and
 ## crosses it on a path the CharacterMover follows, so it never passes through anything, then falls off the far side
-## and lands as from a jump. Meanwhile the replica is carried (no firing, aiming or reloading starts; fire is held
+## and lands as from a jump. A ledge of the same heights whose flat top runs on at least climb_depth (a platform's edge
+## from the track, CL1) is climbed instead: the body rises onto it the same way and steps on until it stands on the top. Meanwhile the replica is carried (no firing, aiming or reloading starts; fire is held
 ## fire_lockout after it), the body tucks (a crouch: eyes, hit volume and figure follow it) and the view turns freely.
 ## Presses made during it are kept for after it (BP5). The obstacle is found with level rays only (WorldQuery), so the
 ## rule is the same for the player and the bots. Allocation-free.
@@ -45,10 +46,10 @@ static func way(cmd: PlayerCommand, tuning: SimTuning) -> Vector2:
 	return Vector2((-s * f + co * r) / mag, (-co * f - s * r) / mag)
 
 
-## Looks for an obstacle to vault from feet at `feet` along the unit way `way` at `speed` (m/s, towards it) and writes
-## the vault into `out` (not started: `active` is left as it is). False if there is none: nothing low enough within
-## reach, a top that isn't flat, deeper than a vault, no floor to land on within the heights allowed, or no room for the
-## body over the top or past it.
+## Looks for an obstacle to vault, or a ledge to climb, from feet at `feet` along the unit way `way` at `speed` (m/s,
+## towards it) and writes the move into `out` (not started: `active` is left as it is). False if there is none: nothing
+## low enough within reach, a top that isn't flat, deeper than a vault but not climb_depth of open floor, no floor to
+## land on within the heights allowed, or no room for the body over the top or past it (on it, for a climb).
 static func plan(feet: Vector3, way: Vector2, speed: float, cfg: VaultConfig, body: BodyConfig, query: WorldQuery,
 		out: VaultState) -> bool:
 	var dx := way.x
@@ -87,23 +88,35 @@ static func plan(feet: Vector3, way: Vector2, speed: float, cfg: VaultConfig, bo
 		if scan_y - d > top + cfg.top_tolerance:
 			return false
 		s += cfg.depth_step
-	if edge < 0.0:
-		return false
-	# The far side exactly: a ray back from past it, under the top.
-	var back := _cast(query, Vector3(feet.x + dx * edge, top - cfg.top_tolerance * 0.5, feet.z + dz * edge),
-			Vector3(-dx, 0.0, -dz), cfg.depth_step + 1e-3)
-	var far_side := edge - back if back >= 0.0 else edge - cfg.depth_step * 0.5
-	# Room for the body past the far side, and a floor there no higher than max_climb over this one, with the top no
-	# more than max_landing_height over it.
-	var land := far_side + r + cfg.landing_room
-	if land + r > open:
-		return false
-	var l := _down(query, feet, way, land, scan_y, scan_y - (top - cfg.max_landing_height))
-	if l < 0.0 or scan_y - l > floor_y + cfg.max_climb:
-		return false
-	# Room for the body on its way: rising here, then over the top until clear of the far side.
+	var climb := edge < 0.0
+	var far := 0.0
+	if climb:
+		# No far side within a vault's depth: a ledge, climbed if its top runs on flat and open to climb_depth (past
+		# the scan line's end is a wall over it). The body ends on the top, its back landing_room past the edge.
+		while s <= face + cfg.climb_depth:
+			if s >= open:
+				return false
+			var d := _down(query, feet, way, s, scan_y, scan_y - (top - cfg.top_tolerance))
+			if d < 0.0 or scan_y - d > top + cfg.top_tolerance:
+				return false
+			s += cfg.depth_step
+		far = face + r + cfg.landing_room
+	else:
+		# The far side exactly: a ray back from past it, under the top.
+		var back := _cast(query, Vector3(feet.x + dx * edge, top - cfg.top_tolerance * 0.5, feet.z + dz * edge),
+				Vector3(-dx, 0.0, -dz), cfg.depth_step + 1e-3)
+		var far_side := edge - back if back >= 0.0 else edge - cfg.depth_step * 0.5
+		# Room for the body past the far side, and a floor there no higher than max_climb over this one, with the top
+		# no more than max_landing_height over it.
+		var land := far_side + r + cfg.landing_room
+		if land + r > open:
+			return false
+		var l := _down(query, feet, way, land, scan_y, scan_y - (top - cfg.max_landing_height))
+		if l < 0.0 or scan_y - l > floor_y + cfg.max_climb:
+			return false
+		far = far_side + r + cfg.skin
+	# Room for the body on its way: rising here, then over the top until clear of the far side (or on it, climbing).
 	var over_y := top + cfg.clearance
-	var far := far_side + r + cfg.skin
 	if _cast(query, Vector3(feet.x, feet.y + body.height - cfg.head_ray, feet.z), Vector3.UP,
 			over_y - feet.y + cfg.head_ray) >= 0.0:
 		return false
@@ -130,14 +143,19 @@ static func plan(feet: Vector3, way: Vector2, speed: float, cfg: VaultConfig, bo
 		return false
 
 	out.time = 0.0
+	out.climb = climb
 	out.start = feet
 	out.dir = way
 	out.front = maxf(0.0, face - r - cfg.skin)
 	out.far = far
 	out.top_y = top
 	out.over_y = over_y
-	out.speed = clampf(speed, cfg.min_speed, cfg.max_speed)
-	out.rise_end = maxf(cfg.rise_time, out.front / out.speed)
+	if climb:
+		out.speed = clampf(speed, cfg.climb_min_speed, cfg.climb_max_speed)
+		out.rise_end = maxf(cfg.climb_rise_time, out.front / out.speed)
+	else:
+		out.speed = clampf(speed, cfg.min_speed, cfg.max_speed)
+		out.rise_end = maxf(cfg.rise_time, out.front / out.speed)
 	out.end = out.rise_end + (out.far - out.front) / out.speed
 	return true
 
@@ -229,7 +247,8 @@ static func with_held_presses(v: VaultState, cmd: PlayerCommand, out: PlayerComm
 ## One tick of a vault under way, in place of the movement step: the view turns with `cmd`; the body follows the vault's
 ## path through `mover` (rising onto the top, eased, then across it at the vault's speed with a slight arc). Clear of
 ## the far side it hands over to the movement step, falling at the vault's speed with a push down; held back by
-## something the plan didn't see (lifted higher than the path is not held back), it gives up and falls where it is.
+## something the plan didn't see (lifted higher than the path is not held back), it gives up and falls where it is. A
+## climb steps on over the top with no arc and hands over standing on it, at its speed with no push down.
 static func step(c: Character, cmd: PlayerCommand, tuning: SimTuning, dt: float, mover: CharacterMover) -> void:
 	var v := c.vault
 	var cfg := tuning.vault
@@ -240,6 +259,7 @@ static func step(c: Character, cmd: PlayerCommand, tuning: SimTuning, dt: float,
 	var along := 0.0
 	var y := 0.0
 	var rise := 1.0
+	var tuck := cfg.climb_tuck if v.climb else cfg.tuck
 	if t < v.rise_end:
 		var x := t / v.rise_end
 		rise = 1.0 - (1.0 - x) * (1.0 - x)
@@ -247,15 +267,19 @@ static func step(c: Character, cmd: PlayerCommand, tuning: SimTuning, dt: float,
 		y = v.start.y + (v.over_y - v.start.y) * rise
 	else:
 		var span := v.end - v.rise_end
+		var across := (t - v.rise_end) / span if span > 0.0 else 1.0
 		along = v.front + v.speed * (t - v.rise_end)
-		y = v.over_y + cfg.arc * sin(PI * ((t - v.rise_end) / span if span > 0.0 else 1.0))
+		y = v.over_y if v.climb else v.over_y + cfg.arc * sin(PI * across)
+		# A climb stands up again across the top: standing by the time it is on it.
+		if v.climb:
+			tuck *= 1.0 - across
 	var desired := Vector3(v.start.x + v.dir.x * along - c.position.x, y - c.position.y,
 			v.start.z + v.dir.y * along - c.position.z)
 	var corrected := mover.move(c, desired)
 	c.position += corrected
 	c.velocity = corrected / dt
 
-	c.crouch_amount = cfg.tuck * rise
+	c.crouch_amount = tuck * rise
 	c.grounded = false
 	c.sprinting = false
 	c.walking = false
@@ -274,7 +298,7 @@ static func step(c: Character, cmd: PlayerCommand, tuning: SimTuning, dt: float,
 		c.velocity.y = minf(0.0, c.velocity.y)
 	elif v.time >= v.end:
 		v.active = false
-		c.velocity = Vector3(v.dir.x * v.speed, -cfg.drop_speed, v.dir.y * v.speed)
+		c.velocity = Vector3(v.dir.x * v.speed, 0.0 if v.climb else -cfg.drop_speed, v.dir.y * v.speed)
 
 
 ## Distance along the unit `dir` from `from` to the first level surface within `max_dist`, or -1.
