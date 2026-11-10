@@ -43,8 +43,9 @@ const TERRAIN_ROWS := 32
 ## An indoor field's ceiling collider's thickness (m), over the roof's height (DR1).
 const CEILING_THICKNESS := 0.2
 ## A dressed block's core (core_box) is inset at most this share of the box's width a side, and a side counts as
-## touched by another cored box within this many metres of it (WR3).
-const CORE_SHARE := 0.2
+## touched by another cored box within this many metres of it (WR3). FT1: 0.3, so a metre-deep thicket's core sits
+## inside its spruces' boughs.
+const CORE_SHARE := 0.3
 const CORE_TOUCH := 0.05
 ## The see-through blocks' roughness (_glass_mesh): glass, near mirror-smooth.
 const GLASS_ROUGHNESS := 0.1

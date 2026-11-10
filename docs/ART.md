@@ -114,7 +114,8 @@ The look's palette is `LookConfig.palette` (`game/config/look_config.gd`, in `pl
 | umber, moss | `#61594f`, `#b3b891` | the gaps between slats, the sofa's feet; grass on open ground |
 | bark, heartwood | `#7b6f62`, `#e4dccd` | Woodland's trunks and their cut ends (WA1) |
 | canopy, fern, olive | `#5c9a50`, `#79a650`, `#8c9a48` | Woodland's crowns and bushes; olive the logs' moss |
-| pine, spruce, forest | `#3d7a4a`, `#2f6e55`, `#2b5c48` | spruces, thicket cores and the far forest |
+| pine, spruce, forest | `#3d7a4a`, `#2f6e55`, `#2b5c48` | spruces and the far forest |
+| bough_shade | `#183328` | a thicket's core, in the shade under its spruces' boughs (FT1) |
 | meadow, litter, earth | `#8aa860`, `#7c7a58`, `#8a8070` | a light meadow, Woodland's leaf litter and bare earth |
 | grass | `#5f8a3a` | sloping ground's grass and the ground beyond a field's walls (SL1) |
 | rubber | `#3d3b45` | tyres and wheels |

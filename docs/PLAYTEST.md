@@ -1326,6 +1326,15 @@ Dev content: tick Settings › Dev › Dev content (or Disable levelling), then 
   don't wobble). Lines 120 is chunkier, 480 finer; Shades 4 bands hard. Off: the haze and wobble go at once and the
   map's own look is back.
 
+## Woodland's treelines and thickets (FT1)
+
+- [ ] **Treelines.** Stand at each fence and look out, then look across the map at the far side: the band of spruces
+  past the fence is green on Low and High, never white or grey, and matches the far wood behind it.
+- [ ] **Thickets.** Walk round the spruce thickets (the Sawmill's stair of them, the bank by the culvert, the edges):
+  they read as packed spruces, with no flat green wall between them. On Low a little dark shade shows at their feet.
+- [ ] **BBs.** Shoot into a thicket at chest height and at its edges: BBs stop in it as before, never fly through.
+- [ ] **Frame rate.** F3 on Low looking across a thicket: 60 FPS as before.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
