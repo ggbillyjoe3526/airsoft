@@ -79,7 +79,7 @@ static func step(pool: BBPool, characters: Array[Character], query: WorldQuery, 
 			var sink := INF
 			if wet and dir.y < 0.0:
 				var end := bb.prev_position + dir * minf(wall, length)
-				var level := water.level_at(end.x, end.z)
+				var level := water.level_at(end.x, end.z) if end.y < water.top() - Water.MIN_DEPTH else NAN
 				if not is_nan(level) and level - end.y > Water.MIN_DEPTH:
 					sink = _went_in(water, bb.prev_position, dir, clampf((level - bb.prev_position.y) / dir.y, 0.0,
 							minf(wall, length)), minf(wall, length))

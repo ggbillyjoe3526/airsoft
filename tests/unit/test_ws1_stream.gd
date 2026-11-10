@@ -26,6 +26,7 @@ func test_water_has_a_level_over_its_line_out_to_its_half_width() -> void:
 	var w := Water.new()
 	assert_true(w.is_empty())
 	assert_eq(w.depth_at(Vector3.ZERO), 0.0, "no stream, no water")
+	assert_eq(w.top(), -INF, "no stream, nothing under water")
 	assert_true(w.add(PackedVector3Array([Vector3(0.0, 1.0, 0.0), Vector3(10.0, 0.0, 0.0)]), 2.0))
 	assert_false(w.add(PackedVector3Array([Vector3.ZERO]), 2.0), "one point is no line")
 	assert_false(w.add(PackedVector3Array([Vector3.ZERO, Vector3.ONE]), 0.0), "nor is no width")
@@ -36,6 +37,8 @@ func test_water_has_a_level_over_its_line_out_to_its_half_width() -> void:
 	assert_almost_eq(w.depth_at(Vector3(5.0, 0.2, 0.0)), 0.3, 1e-5)
 	assert_eq(w.depth_at(Vector3(5.0, 0.6, 0.0)), 0.0, "a point over the surface is dry")
 	assert_eq(w.depth_at(Vector3(5.0, 0.5 - Water.MIN_DEPTH * 0.5, 0.0)), 0.0, "a damp rim is dry")
+	assert_eq(w.top(), 1.0, "its highest level, a quick miss for anything over it")
+	assert_almost_eq(w.depth_at(Vector3(1.0, 0.5, 0.0)), 0.4, 1e-5, "under the top, the level where it stands")
 
 
 func test_a_map_file_reads_its_streams_and_leaves_out_a_bad_one() -> void:

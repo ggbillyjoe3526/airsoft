@@ -4,7 +4,7 @@ extends RefCounted
 ## point the water's surface there (x, level, z), and a half width either side of the line. Over the line, out to
 ## the half width, ground lower than the level is under water; the banks rise out of it of themselves. No collider and
 ## no ray surface: people wade through it (Movement: slower), every stride splashes (Footsteps: heard further, walking
-## and crouched too), a BB landing in it lands on the bed and shows and sounds as water (BBStep), and the bots' route
+## and crouched too), a BB going into it stops where it goes in and shows and sounds as water (BBStep), and the bots' route
 ## search prices a step in it (NavGridBuilder: they take a dry crossing where one is near). The simulation gets it
 ## through WorldQuery.water (Contracts 4); MapData reads it from the map's `water` list; WaterView draws it. Queries
 ## allocate nothing.
@@ -18,6 +18,8 @@ var _start: PackedInt32Array = PackedInt32Array([0])
 ## Each stream's half width (m) and its plan bounds grown by it, for a quick miss.
 var _halves: PackedFloat32Array = PackedFloat32Array()
 var _bounds: Array[Rect2] = []
+## The highest level of any stream (m): nothing above it is under water, a quick miss for a point over it.
+var _top: float = -INF
 
 
 ## Adds a stream along `points` (x, level, z: at least two), `half_width` m either side of its line; false, and none
@@ -29,6 +31,7 @@ func add(points: PackedVector3Array, half_width: float) -> bool:
 	for p: Vector3 in points:
 		_points.append(p)
 		r = r.expand(Vector2(p.x, p.z))
+		_top = maxf(_top, p.y)
 	_start.append(_points.size())
 	_halves.append(half_width)
 	_bounds.append(r.grow(half_width))
@@ -51,6 +54,11 @@ func points_of(s: int) -> PackedVector3Array:
 
 func half_width_of(s: int) -> float:
 	return _halves[s]
+
+
+## The highest level of any stream (m; -INF with none): a point higher up is out of the water wherever it stands.
+func top() -> float:
+	return _top
 
 
 ## The water's surface over (x, z), or NAN where no stream reaches: the level at the nearest point of the nearest
@@ -82,7 +90,7 @@ func level_at(x: float, z: float) -> float:
 ## How deep (m) a point stands under the water: the level over it less its height, 0 out of the water or less than
 ## MIN_DEPTH under it.
 func depth_at(p: Vector3) -> float:
-	if _halves.is_empty():
+	if p.y > _top - MIN_DEPTH:
 		return 0.0
 	var level := level_at(p.x, p.z)
 	if is_nan(level):
