@@ -1,13 +1,19 @@
-Task: SL4 · Sunlit Concrete: menus, HUD and replicas
+Task: RW1 · Replica wear (AEG Rifle, GBB Pistol): realistic, slightly used
 Attempt: 3 of 4
-Head: 3e9bf5e (gdlint, changelog, wiki, unit parts 3-6 passed; parts 1, 2, 7 and smoke still running)
+Head: cbf89f6 (wear and paint suites 44/44; gdlint, notes, wiki, unit parts 1-2 passed on attempt 2's tree, no .gd changed since)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept, provided unit parts 1, 2, 7 and the smoke test pass on 3e9bf5e (any failure makes it Retry, measured)
-Evidence: attempt 2's must-fixes are met. QA (pipeline/out/qa-report.md) and performance (pipeline/out/performance.md)
-both Pass and name 3e9bf5e. docs/KNOWN_ISSUES.md:16 now says "the replicas included (SL4 made their paint matte and
-muted)". dafc0bf renames navy_box to dark_box at every caller and warms the last cool greys. ReplicaPaint.drawn() and
-paint_saturation() (game/play/replica_paint.gd:+104,+113) run only when a cached material is built, never per frame.
-Nits (non-blocking): the Rec.709 luma weights at replica_paint.gd:+107 could be one named const. Commit the two
-reports with the records. Leave the untracked tools/_ui_pictures.gd(.uid) out of the commit, or delete it.
-Owner should test: the list in docs/records/SL4.md and the Dev 3 checklist (the menus, HUD, minimap and replica paints
-under Sunlit Concrete on a real display; check that bold schemes still read as two tones).
+Score: 8/8 → Accept (conditional on the full tools/check.sh on this head passing)
+1. Attempt 2's must-fixes met: the pistol's rail slot is a faint broken grey with no light lip (LIP_RUB_CUT,
+   NARROW_GRIME, rub² bare metal); serrations crisp with no tan fill; no stripe at the whole-pistol distance; grime
+   neutral; the AEG's patches broken up (one faint handling haze left on the black upper receiver). Shapes and
+   triangles unchanged; no clipping. In game: faint scuffing, within "keep it subtle".
+2. No contract touched. 3. No runtime code changed; QA and performance Pass stand. 4. test_replica_wear fails
+   without the feature; the bake has no unit test (acceptable for a Blender tool). 5. Shader uniforms typed and
+   documented; bake thresholds are build-tool constants. 6. Grey, toy-first wear, no brand marks; fits Sunlit
+   Concrete. 7. arms.glb not rebuilt on purpose, recorded. 8. Scope AEG and pistol only; record updated; changelog due.
+Advisory: a four-stroke parallel scratch cluster on the slide reads a little like a drawn hatch (vary length and
+angle in a cluster); the AEG magazine's ticks are evenly sized; the next arms rebuild (the SMG's) takes the under-1°
+curl change.
+Owner should test: the pistol's rail slot in Ghost and grey under sun; the black AEG's receiver for any smudge; the
+slide's scratch clusters on inspect; repaint worn → plain → worn on the turntable; Low preset; first person in Depot
+and outdoors (visible at all, still subtle).

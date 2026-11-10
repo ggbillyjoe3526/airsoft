@@ -1,6 +1,6 @@
 # RW1 · Lightly used AEG Rifle and GBB Pistol
 
-**Review:** 1 attempt · critic PENDING · qa Pass · performance Pass
+**Review:** 3 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | 2026-11-10 | 1 | Opus 5.5 (replica wear thread) | – | 7/8 Retry (QA Pass, performance Pass) | thin strips on the pistol (the extractor in its slot, the frame's rail slot) wore or grimed whole and read as a recoloured part or a stain, not as wear |
 | 2026-11-10 | 2 | Opus 5.5 (replica wear thread) | – | 7/8 Retry | the pistol's rail slot and serration grooves (welded into the big Frame and Slide parts, so out of the per-part fade) still filled with tan grime and a light rubbed lip, reading as paint at the whole-pistol distance; round rubbed patches on the black AEG read as smudges |
-| 2026-11-10 | 3 | Opus 5.5 (replica wear thread) | PENDING | PENDING | – |
+| 2026-11-10 | 3 | Opus 5.5 (replica wear thread) | ✓ | 8/8 Accept (QA Pass, performance Pass) | – |
 
 ## What changed
 
