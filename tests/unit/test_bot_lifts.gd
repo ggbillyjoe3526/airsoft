@@ -125,3 +125,33 @@ func test_a_bot_calls_boards_rides_and_walks_out_at_the_hall() -> void:
 	assert_eq(departs, 2, "down for it, up with it")
 	assert_true(BotRoutes.arrived(bot), "at its goal in the hall")
 	assert_almost_eq(me.position.y, spec.stops[2] + tuning.body.rest_gap, 0.1, "on the hall's floor")
+
+
+func test_one_too_many_aboard_the_highest_id_steps_back_out() -> void:
+	var q := level.query()
+	var state := GameState.new(5, tuning)
+	var loadout := ReplicaStats.default_loadout()
+	var spec := q.lifts[0]
+	var n := tuning.lifts.capacity + 1
+	for i in n:
+		var at := spec.car_point(spec.stops[2]) + Vector3(0.1 * i - 0.2, tuning.body.rest_gap, 0.0)
+		state.characters.append(Character.new(i, i % 2, at, 0.0, loadout))
+	var bots := BotController.new(state, -1, map, nav, q, tuning, config)
+	var sim := Simulation.new(tuning, q, level.mover(tuning.body), map.ends, map.kill_y)
+	sim.start_match(state)
+	for c in state.characters:
+		c.position = spec.car_point(spec.stops[2]) + Vector3(0.1 * c.id - 0.2, tuning.body.rest_gap, 0.0)
+	bots.world.lifts = state.lifts
+	var link := -1
+	for l in nav.lift_to.size():
+		if nav.lift_of[l] == 0 and nav.lift_stop_from[l] == 2 and nav.lift_stop_to[l] == 0:
+			link = l
+	assert_gt(link, -1, "a ride from the hall down")
+	assert_true(state.lifts.open_at(0, 2), "the west car stands open at the hall")
+	var out := Vector3(spec.out.x, 0.0, spec.out.y)
+	var last: Bot = bots.world.bots[n - 1]
+	assert_true(BotLifts.ride(last, bots.world, link, DT))
+	assert_gt(last.move_dir.dot(out), 0.5, "the highest id walks back out to the landing")
+	var first: Bot = bots.world.bots[0]
+	BotLifts.ride(first, bots.world, link, DT)
+	assert_lt(first.move_dir.dot(out), 0.5, "the rest stay aboard")

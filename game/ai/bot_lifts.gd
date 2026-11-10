@@ -3,10 +3,10 @@ class_name BotLifts
 ## the landing it waits for the car, calling it (the call button, once: Lifts keeps the call) or opening its shutting
 ## doors again; with the car open there and room aboard it walks in, to its own spot in the car; aboard, it presses
 ## its stop's button (once) and stands while the car rides; open at its stop, it walks out to the landing, where the
-## leg ends. Waiting on the landing longer than BotConfig.lift_patience it gives up: a fresh route on foot (no links
-## for vault_retry_delay). Aboard a car on a leg on foot (a route planned again inside it), it waits for the doors
-## before walking out. Writes b.move_dir (zero: stand) and b.lift_press; never stuck while it waits. Allocates
-## nothing.
+## leg ends. One too many aboard (the buzzer), the highest ids step back out and wait. Waiting on the landing longer
+## than BotConfig.lift_patience it gives up: a fresh route on foot (no links for vault_retry_delay). Aboard a car on a
+## leg on foot (a route planned again inside it), it waits for the doors before walking out. Writes b.move_dir (zero:
+## stand) and b.lift_press; never stuck while it waits. Allocates nothing.
 
 ## Bots aboard stand this far (m) from the car's middle, each at its own angle by id, so they don't crowd one spot.
 const SPREAD := 0.45
@@ -32,6 +32,9 @@ static func ride(b: Bot, w: BotWorld, link: int, dt: float) -> bool:
 		b.lift_wait = 0.0
 		if lifts.open_at(i, to):
 			_walk_to(b, spec.landing_point(to, cfg))
+			return true
+		if lifts.open_at(i, from) and _over(w, i, spec, me):
+			_walk_to(b, spec.landing_point(from, cfg))
 			return true
 		if not lifts.called(i, to) and not (lifts.stop[i] == to and lifts.phase[i] != LiftState.Phase.MOVING):
 			b.lift_press = Vector2i(i, to)
@@ -78,6 +81,19 @@ static func _room_aboard(w: BotWorld, i: int, spec: LiftSpec) -> bool:
 		if spec.holds(c.position, w.lifts.y[i], w.tuning.lifts):
 			n += 1
 	return n < w.tuning.lifts.capacity
+
+
+## Whether `me` is one too many aboard lift `i`'s car (over LiftConfig.capacity, so it buzzes and won't go): the
+## highest ids aboard step out, as many as are over, so the rest can ride.
+static func _over(w: BotWorld, i: int, spec: LiftSpec, me: Character) -> bool:
+	var n := 0
+	var above := 0
+	for c in w.characters:
+		if spec.holds(c.position, w.lifts.y[i], w.tuning.lifts):
+			n += 1
+			if c.id > me.id:
+				above += 1
+	return above < n - w.tuning.lifts.capacity
 
 
 ## `b`'s own spot in the car with its floor at `y`: SPREAD from the middle at an angle of its id's.

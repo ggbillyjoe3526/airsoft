@@ -288,7 +288,7 @@ func _place(i: int, y: float, stop: int, doors: float, calls: int) -> void:
 	if y != _drawn_y[i] or doors != _drawn_doors[i] or stop != _drawn_stop[i]:
 		_place_leaves(i, y, stop, doors)
 	if calls != _drawn_calls[i] or y != _drawn_y[i]:
-		_place_buttons(i, y, calls)
+		_place_buttons(i, y, calls, calls != _drawn_calls[i])
 	_drawn_y[i] = y
 	_drawn_doors[i] = doors
 	_drawn_stop[i] = stop
@@ -327,23 +327,25 @@ func _leaf(spec: LiftSpec, s: float, open: float, w: float, off: float, y: float
 	return Transform3D(Basis.from_scale(size), at)
 
 
-## Lift `i`'s buttons: each stop's call button on its landing, then its panel's in the car at `y`, lit while called.
-func _place_buttons(i: int, y: float, calls: int) -> void:
+## Lift `i`'s buttons: its panel's in the car at `y`, and with `recolour` (the calls changed) each stop's call button on
+## its landing and both lit while called.
+func _place_buttons(i: int, y: float, calls: int, recolour: bool) -> void:
 	var spec := _specs[i]
 	var mm := _buttons.multimesh
 	var j := _first_button[i]
+	var n := spec.stop_count()
 	var out := Vector3(spec.out.x, 0.0, spec.out.y)
 	var depth := _cfg.button_size.z * 0.5
-	for k in spec.stop_count():
-		var lit := (calls >> k) & 1 != 0
-		mm.set_instance_transform(j, Transform3D(_facing(spec), spec.call_button(k, _lift_cfg) + out * depth))
-		var colour := _lit if lit else _unlit
-		_button_colours[j] = colour
-		_button_colours[j + spec.stop_count()] = colour
-		mm.set_instance_color(j, colour)
-		mm.set_instance_transform(j + spec.stop_count(), Transform3D(_facing(spec),
+	for k in n:
+		if recolour:
+			var colour := _lit if (calls >> k) & 1 != 0 else _unlit
+			_button_colours[j] = colour
+			_button_colours[j + n] = colour
+			mm.set_instance_transform(j, Transform3D(_facing(spec), spec.call_button(k, _lift_cfg) + out * depth))
+			mm.set_instance_color(j, colour)
+			mm.set_instance_color(j + n, colour)
+		mm.set_instance_transform(j + n, Transform3D(_facing(spec),
 				spec.panel_button(k, y, _lift_cfg) - out * (_cfg.wall_thickness + depth)))
-		mm.set_instance_color(j + spec.stop_count(), colour)
 		j += 1
 
 
