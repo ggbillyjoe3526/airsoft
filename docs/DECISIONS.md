@@ -708,7 +708,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   change the scripts, never the JSON. The game's blocks are axis-aligned, so pieces are squared and the stream runs
   straight north to south under both crossings. The old wood is a test fixture (`tests/support/maps/old_woodland.json`).
 - **Subway, a closed metro station, is a Dev-only field (owner, 2026-11-10: "Add this to the game as a dev only
-  map", MT1).** The owner's pick for Dev 3's new map (a deep-level station like London's, inspired by Battlefield's
+  map", MT1).** Built as Kingsmere, renamed Subway the same day (owner: "Rename ... Kingsmere to Subway"), its id and
+  files with it (`subway`); a save remembering `kingsmere` as the last map picks Subway (`Progress.RENAMED_MAPS`). The
+  owner's pick for Dev 3's new map (a deep-level station like London's, inspired by Battlefield's
   Operation Metro; its own layout, no real names or branding), built from his concept v2
   (`/mnt/project-files/concepts/metro/v2/`, `tools/subway/`): asymmetric, the Street team starting in the ticket
   hall at street level and the Tunnel team in a cross-passage between the running tunnels, swapping at half time; one

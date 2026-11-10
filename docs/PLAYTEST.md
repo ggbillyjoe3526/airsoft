@@ -571,6 +571,8 @@ a cross-passage between the running tunnels, and they swap at half time. Turn on
 
 - [ ] **Listed only as Dev content (MT1).** With Dev content off, the Match page shows no Subway; on, it does, with
   its picture, 5 to 8 a side and 6 standard.
+- [ ] **Named Subway (owner, 2026-11-10).** The Match page's card and the loading screen say Subway (SUBWAY),
+  never Kingsmere. If the last match you played before the rename was on Kingsmere, the Match page opens on Subway.
 - [ ] **Every way down (MT1).** From the ticket hall: the escalators to the concourse and on down to the lower hall;
   the spiral stair in the hall's corner to the booking hall; the ordinary stair from the stair top down past flag B's
   half landing to the platforms. Nothing snags you on a step, a balustrade or a landing.

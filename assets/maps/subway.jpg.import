@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d4nhidne57rjp"
-path="res://.godot/imported/subway.jpg-19353a6e8bb328f3248411c4ef612ea4.ctex"
+path="res://.godot/imported/subway.jpg-43dc7a22e1482de5838abc502dcf409d.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/maps/subway.jpg"
-dest_files=["res://.godot/imported/subway.jpg-19353a6e8bb328f3248411c4ef612ea4.ctex"]
+dest_files=["res://.godot/imported/subway.jpg-43dc7a22e1482de5838abc502dcf409d.ctex"]
 
 [params]
 
