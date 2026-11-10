@@ -29,6 +29,10 @@ const LINE := Color(0.95, 0.93, 0.89, 0.12)
 const TEXT := Color("f2eee6")
 const MUTED := Color(0.95, 0.93, 0.9, 0.62)
 const DIM := Color(0.95, 0.93, 0.9, 0.36)
+## The deepest charcoal: the rail and the shades laid over the match or a page.
+const DEEP := Color("0c0c0b")
+## A raised dark plate drawn whole (a notice, a report box, the Armory's picked card): a step lighter than BG.
+const PLATE := Color("1f1e1b")
 const ACCENT := Color("d8ccb2")
 const ACCENT_INK := Color("1b1a17")
 ## Signal yellow, for warnings and the flags only (a low magazine, THEIR FLAG IS GOING UP!, a flag's marker), never as a

@@ -21,7 +21,7 @@ const LABEL_GAP := 10.0
 ## The room kept at each end, so the end dots and their labels sit inside.
 const END_ROOM := 16.0
 const RING_COLOUR := Color(1.0, 1.0, 1.0, 0.35)
-const FACE := Color(0.075, 0.073, 0.068, 1.0)
+const FACE := GameTheme.BG
 ## The picked dot: the ring round it (its gap outside the dot and its width), and the bar under its label (width, height,
 ## gap under the label).
 const PICKED_GAP := 4.0

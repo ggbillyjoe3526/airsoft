@@ -45,7 +45,7 @@ const BACK_KEY_PAD := Vector2i(6, 1)
 const BACK_GAP := 6
 const BACK_AFTER := 18
 ## The rail's own fill: a darker glass than the panels, so it reads as the frame.
-const FILL := Color(0.045, 0.044, 0.041, 0.8)
+const FILL := Color(GameTheme.DEEP, 0.8)
 const TAB_KEYS: Dictionary[Tab, String] = {
 	Tab.MATCH: "MENU_TAB_MATCH",
 	Tab.LOADOUT: "MENU_TAB_LOADOUT",

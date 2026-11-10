@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-10 | 1 | Opus 5.5 (build thread) | – | – | – |
+| 2026-11-10 | 1 | Opus 5.5 (build thread) | ✗ (test_lo3_qa) | 5/8 Retry | navy left in MinimapConfig, charcoal copied as literals, FEATURES and KNOWN_ISSUES stale |
+| 2026-11-10 | 2 | Opus 5.5 (build thread) | – | – | – |
 
 ## Decisions
 
@@ -15,9 +16,10 @@
   cards and hairlines in the same white), and the accent from teal `#25d0b8` to bone `#d8ccb2` with charcoal ink. Bone,
   not plain white, so the selection still reads apart from the words. `WARN`, `GOOD` and `BAD` a little quieter. The
   layout (UR1) is unchanged.
-- **Every navy ink in `game/ui/` goes charcoal** (rail, pause shade, report box, crash report, markers' ink, order
-  wheel scrim, armory dots and picked card, graphics notice, the replica picture's glow), at about the same brightness.
-  The HUD preview's teal containers stay: they picture a map's containers.
+- **Every navy ink goes charcoal, derived from the palette** (critic): `BG` for the markers' and map's ink, the order
+  wheel's scrim and the Armory's dots; a new `DEEP` `#0c0c0b` for the rail and the shades over a match or page; a new
+  `PLATE` `#1f1e1b` for the notices, the report boxes (the crash screen's is the report panel's) and the Armory's picked
+  card. The HUD preview's teal containers stay: they picture a map's containers.
 - **Replicas: matte, at the look's paint saturation.** `ReplicaPaint` draws a paint at
   `look_paint_saturation` (read from project.godot's shader globals, the same value `LookConfig` pushes and the maps'
   `look_paint()` uses, in linear light) with roughness 0.64 (was 0.5) and the metal parts 0.48 (was 0.4). The bold

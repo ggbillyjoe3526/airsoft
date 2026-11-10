@@ -108,7 +108,7 @@ extends Resource
 ## What the panel draws over the field, in px at 1080p. The outline (ink) under a marker keeps it plain on any ground.
 ## A teammate's dot: its radius and outline width, and how far inside the edge a teammate pinned there sits; the pole
 ## and the hold diamond pin the same way, mark_pad inside.
-@export var ink: Color = Color(Color("080d18"), 0.9)
+@export var ink: Color = Color(GameTheme.BG, 0.9)
 @export var dot_radius: float = 5.5
 @export var dot_outline: float = 1.8
 @export var dot_pad: float = 8.0
@@ -142,7 +142,7 @@ extends Resource
 @export var map_key_width: float = 210.0
 @export var map_key_gap: float = 24.0
 @export var map_fit: float = 0.96
-@export var map_backdrop: Color = Color(Color("080d18"), 0.94)
+@export var map_backdrop: Color = Color(GameTheme.BG, 0.94)
 @export var map_title_size: int = 30
 @export var map_subtitle_size: int = 15
 ## The goal line's type (px), the title's line as a share of its type size, and the most of the screen's width the key

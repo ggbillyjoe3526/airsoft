@@ -282,7 +282,8 @@ arms, figures and replicas use (steps 23 and 28).
 - **Sunlit Concrete (SL4):** `GameTheme`'s palette is charcoal panels (`BG` `#131311`), off-white words (`TEXT`
   `#f2eee6`) and one bone accent (`ACCENT` `#d8ccb2`, charcoal ink on it) for the main button and the selection, so the
   team colours are the only strong colours on screen. Signal yellow (`WARN`), better and worse (`GOOD`, `BAD`) are a
-  little quieter; every dark plate that was navy (rail, pause shade, markers, report box) is the same charcoal.
+  little quieter. Every dark ink derives from the palette: `BG` (markers' ink, the map's backdrop), `DEEP` `#0c0c0b`
+  (the rail, the shades over a match or page) and `PLATE` `#1f1e1b` (notices, report boxes, the Armory's picked card).
 
 ## Where it lives in the code
 

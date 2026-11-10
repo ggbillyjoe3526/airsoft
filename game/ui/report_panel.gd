@@ -11,9 +11,9 @@ extends Control
 signal closed
 
 ## The shade over what is under the panel, and the report box's own colours (concept `report-bug.png`).
-const SHADE := Color(0.055, 0.054, 0.05, 0.8)
-const REPORT_FILL := Color("121210")
-const REPORT_INK := Color("c8d0dc")
+const SHADE := Color(GameTheme.DEEP, 0.8)
+const REPORT_FILL := GameTheme.PLATE
+const REPORT_INK := Color(GameTheme.TEXT, 0.82)
 ## The toast's edge and fill: the good colour at these opacities.
 const TOAST_EDGE_ALPHA := 0.5
 const TOAST_FILL_ALPHA := 0.08

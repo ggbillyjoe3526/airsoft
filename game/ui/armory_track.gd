@@ -29,7 +29,7 @@ const LOCKED_ALPHA := 0.45
 const NEXT_EDGE := 2
 ## The picked level's card: its edge (white, px) and fill.
 const PICKED_EDGE := 2
-const PICKED_FILL := Color(0.13, 0.127, 0.12, 0.86)
+const PICKED_FILL := Color(GameTheme.PLATE, 0.86)
 
 var _facts: ArmoryFacts = null
 var _pictures: ItemPictures = null

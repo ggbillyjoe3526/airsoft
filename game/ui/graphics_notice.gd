@@ -15,7 +15,7 @@ const PAD := Vector2i(24, 20)
 const LEFT_EDGE := 6
 ## The warning's orange (the concept's #ff8a2a).
 const WARN := Color("ff8a2a")
-const FILL := Color(0.094, 0.092, 0.086, 0.96)
+const FILL := Color(GameTheme.PLATE, 0.96)
 ## Type sizes and the gaps between the parts (px).
 const KICKER_SIZE := 13
 const KICKER_SPACING := 0.14

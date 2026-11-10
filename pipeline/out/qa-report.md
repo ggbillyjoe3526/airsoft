@@ -1,8 +1,21 @@
-# QA report SL3
-Verdict: Pass (one doc bug to fix, no code bugs).
-- glbs (roof_truss, hall_wall, hall_shutter, hall_exit): nodes, scenes, mesh/primitive names, accessor counts and POSITION min/max identical to origin/main; materials identical (one "Prop"); only vertex colours differ. Lamp Lens is in roof_lamp.glb, untouched.
-- Targeted tests (test_look, test_props, test_dh1_hall_shell, test_lamp_lights_qa): 56/56 pass. New test fails against the old roof_truss.glb (checked), passes on the new one.
-- Palette: 0x8c8a96 = grey, 0xd2cec8 = concrete, both palette entries; neither is a team hue. test_look's _in_palette passes.
-- Card pictures: 1920x1080 and 480x270 as before, .import files unchanged.
-- Bug 1: docs/wiki/Maps.md:26 still says "crimson steel columns" for the hall; SL3 repainted the frames grey. Fix: "galvanised steel columns".
-- Note: docs/ASSETS.md has an uncommitted edit ("about 1 MB the four, SL3"); commit it or drop it. pipeline/out/performance.md is also modified (not mine).
+# QA report: SL4 menus, HUD and replicas (HEAD 64813e3)
+
+Verdict: FAIL on 64813e3 (one test file not updated); fixed in the next commit.
+
+Blocking
+1. tests/unit/test_lo3_qa.gd still compared the painted material to the raw scheme colour (4 of 7 failing). Fix: the
+   expected values go through ReplicaPaint.drawn(), as in test_replica_paint and test_loadout_screen. Fixed: 7/7 pass.
+
+Checked and fine
+- test_replica_paint 14/14 (with the new saturation and matte test); test_ur7_qa, test_ac1_qa, test_colour_vision,
+  test_accessibility_table pass.
+- ProjectSettings read: project.godot carries look_paint_saturation as {type, value} 0.6; exports bake project settings;
+  fallback 1.0; the new test pins it to LookConfig.paint_saturation.
+- Cache keyed by paint; drawn() once per set; the value is constant at runtime (push_globals writes RenderingServer only).
+- Cyber Pistol: own colours skip the five parts; only its realistic grey goes through drawn().
+- Swatches drawn as painted; no leftover old hexes in game/ or tests/.
+
+Non-blocking
+- replica_pictures.gd _restyle paints power-source labels with PowerModels' colours, not schemes (traced: unaffected).
+- ACCENT d8ccb2 vs TEXT f2eee6 is about 1.3:1, so accent words beside white words are a soft distinction: owner check.
+- Focus rings on accent-filled controls stay as invisible as with teal (no regression); hovered accent is near TEXT.

@@ -7,7 +7,7 @@ extends RefCounted
 ## The concept's 20 x 15 viewbox: the chevron's four corners.
 const BOX := Vector2(20.0, 15.0)
 const SHAPE: PackedVector2Array = [Vector2(1.0, 1.5), Vector2(10.0, 13.5), Vector2(19.0, 1.5), Vector2(10.0, 5.5)]
-const EDGE := Color(0.055, 0.054, 0.05, 0.85)
+const EDGE := Color(GameTheme.BG, 0.85)
 const EDGE_WIDTH := 1.2
 const HOLLOW_WIDTH := 2.2
 const HOLLOW_FILL := 0.25
