@@ -32,6 +32,8 @@ extends Resource
 ## lamp's half width, the truss's half width and a hand between).
 @export var lamp_clear: float = 0.4
 @export var lamp_drop: float = 0.6
+## A plain roof's lamps (MT1, MapData.roof_plain: a station's strip lights): panels this far under their ceiling.
+@export var plain_lamp_drop: float = 0.08
 @export var lamp_size: Vector2 = Vector2(1.4, 0.5)
 @export var lamp_colour: Color = Color(1.0, 0.96, 0.86)
 @export var lamp_energy: float = 2.6
@@ -66,6 +68,11 @@ extends Resource
 @export var lamp_light_energy: float = 6.0
 @export var lamp_falloff: float = 0.6
 @export var lamp_fog: float = 0.3
+## A plain roof's lamps (MT1, a station's low ceilings, one level over another): each reaching only
+## `plain_lamp_reach` m past the storey under it (MapData.storeys), so no light falls through a floor onto the level
+## under that, at `plain_lamp_energy`.
+@export var plain_lamp_reach: float = 2.5
+@export var plain_lamp_energy: float = 2.4
 ## While the lamps shine the hall is lit by them alone (owner, 2026-11-10: no sun gets indoors): the preset's
 ## overhead light, which stands in for them on Low and Medium, keeps `lamp_sun_share` of itself (none), and the sky's
 ## ambient light under the roof `lamp_ambient_share`, so their shadows stay deep.

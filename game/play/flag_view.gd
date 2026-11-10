@@ -30,6 +30,8 @@ var _height: float = -1.0
 var _attackers: int = -1
 var _status: int = -1
 var _letter: Label3D = null
+## The pole, its fittings, rope and cloth, scaled down together under a low ceiling (`height`); the ring stays as it is.
+var _standing: Node3D = null
 ## The pole's, fittings' and rope's paints, their colours, and the light they are drawn in (white: no bake).
 var _paints: Array[ShaderMaterial] = []
 var _paint_colours: PackedColorArray = PackedColorArray()
@@ -37,12 +39,19 @@ var _light: Color = Color.WHITE
 
 
 ## Builds the pole at `foot` with the rope's reach `reach` (m), the team colours from `teams`; with a `letter` (a map
-## with two poles, AB1) that letter stands over its top.
-func setup(cfg: FlagViewConfig, teams: TeamConfig, foot: Vector3, reach: float, letter: String = "") -> void:
+## with two poles, AB1) that letter stands over its top. A `height` (m) under FlagViewConfig.pole_height draws the pole
+## and its flag scaled down to it (MapData.pole_height: a field whose rooms are too low for the full pole, MT1).
+func setup(cfg: FlagViewConfig, teams: TeamConfig, foot: Vector3, reach: float, letter: String = "",
+		height: float = 0.0) -> void:
 	_cfg = cfg
 	_teams = teams
 	name = "Flagpole" + letter
 	position = foot
+	_standing = Node3D.new()
+	_standing.name = "Standing"
+	add_child(_standing)
+	if height > 0.0 and height < cfg.pole_height:
+		_standing.scale = Vector3.ONE * (height / cfg.pole_height)
 	if not letter.is_empty():
 		_add_letter(letter)
 	# The pole and its fittings in the shared light (BP7); the cloth has its own shader, the ring stays flat paint.
@@ -51,7 +60,7 @@ func setup(cfg: FlagViewConfig, teams: TeamConfig, foot: Vector3, reach: float, 
 		var paint := LookMaterials.vertex_colour(cfg.pole_model_roughness, 0.0)
 		_paints = [paint]
 		_paint_colours = [Color.WHITE]
-		_add(model, paint, Vector3.ZERO)
+		_add(model, paint, Vector3.ZERO, _standing)
 	else:
 		_add_plain_pole(cfg)
 	_cloth_mat = ShaderMaterial.new()
@@ -61,7 +70,8 @@ func setup(cfg: FlagViewConfig, teams: TeamConfig, foot: Vector3, reach: float, 
 	_cloth_mat.set_shader_parameter(&"wave", cfg.cloth_wave)
 	_cloth_mat.set_shader_parameter(&"waves", cfg.cloth_waves)
 	_cloth_mat.set_shader_parameter(&"wave_speed", cfg.cloth_wave_speed)
-	_cloth = _add(cloth_mesh(cfg.cloth_size, cfg.cloth_droop), _cloth_mat, Vector3(cfg.pole_radius, cfg.cloth_low, 0.0))
+	_cloth = _add(cloth_mesh(cfg.cloth_size, cfg.cloth_droop), _cloth_mat, Vector3(cfg.pole_radius, cfg.cloth_low, 0.0),
+			_standing)
 	_cloth.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	_ring_mat = flat(cfg.ring_idle)
 	var ring := _add(ring_mesh(reach - cfg.ring_width, reach), _ring_mat, Vector3(0.0, RING_LIFT, 0.0))
@@ -82,22 +92,22 @@ func _add_plain_pole(cfg: FlagViewConfig) -> void:
 	_paints = [alu, dark, rope_mat]
 	_paint_colours = [cfg.pole_colour, cfg.fittings_colour, cfg.rope_colour]
 	var h := cfg.pole_height
-	_add(cylinder(cfg.pole_radius, cfg.pole_radius, h, POLE_SEGMENTS), alu, Vector3(0.0, h * 0.5, 0.0))
+	_add(cylinder(cfg.pole_radius, cfg.pole_radius, h, POLE_SEGMENTS), alu, Vector3(0.0, h * 0.5, 0.0), _standing)
 	_add(cylinder(cfg.base_radius.y, cfg.base_radius.x, cfg.base_height, BASE_SEGMENTS), dark,
-			Vector3(0.0, cfg.base_height * 0.5, 0.0))
+			Vector3(0.0, cfg.base_height * 0.5, 0.0), _standing)
 	var ball := SphereMesh.new()
 	ball.radius = cfg.finial_radius
 	ball.height = cfg.finial_radius * 2.0
-	_add(ball, alu, Vector3(0.0, h + cfg.finial_radius * 0.5, 0.0))
+	_add(ball, alu, Vector3(0.0, h + cfg.finial_radius * 0.5, 0.0), _standing)
 	var rope_h := h - cfg.cloth_low
 	for side: float in [-1.0, 1.0]:
 		# The ropes and the cleat are too thin to shade anything: no shadow pass for them.
 		var rope := _add(cylinder(cfg.rope_radius, cfg.rope_radius, rope_h, ROPE_SEGMENTS), rope_mat,
-				Vector3(0.0, cfg.cloth_low + rope_h * 0.5, side * cfg.rope_offset))
+				Vector3(0.0, cfg.cloth_low + rope_h * 0.5, side * cfg.rope_offset), _standing)
 		rope.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var cleat := BoxMesh.new()
 	cleat.size = cfg.cleat_size
-	_add(cleat, dark, Vector3(0.0, cfg.cleat_height, cfg.rope_offset)).cast_shadow = \
+	_add(cleat, dark, Vector3(0.0, cfg.cleat_height, cfg.rope_offset), _standing).cast_shadow = \
 			GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
@@ -160,12 +170,12 @@ func ring_colour() -> Color:
 	return _ring_mat.albedo_color
 
 
-func _add(mesh: Mesh, material: Material, at: Vector3) -> MeshInstance3D:
+func _add(mesh: Mesh, material: Material, at: Vector3, parent: Node3D = null) -> MeshInstance3D:
 	var m := MeshInstance3D.new()
 	m.mesh = mesh
 	m.material_override = material
 	m.position = at
-	add_child(m)
+	(parent if parent != null else self).add_child(m)
 	return m
 
 
@@ -248,6 +258,6 @@ func _add_letter(letter: String) -> void:
 	_letter.outline_modulate = _cfg.fittings_colour
 	# Billboarded as the "HIT!" sign is (FigureView.make_sign), so it shares the shader the prewarm compiles with it.
 	_letter.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	_letter.position.y = _cfg.pole_height + _cfg.letter_rise
+	_letter.position.y = (_cfg.pole_height + _cfg.letter_rise) * _standing.scale.y
 	_letter.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_letter)

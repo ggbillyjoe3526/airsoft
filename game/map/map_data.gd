@@ -166,6 +166,9 @@ var lights: Array[Light] = []
 ## How far its bots make someone out (m, `botSight` in the file: BotConfig.for_map), for a hall with longer views than
 ## the default; 0 on a map naming none, where BotConfig.view_distance holds.
 var bot_sight: float = 0.0
+## How tall its Attack / Defend poles stand (m, `poleHeight` in the file, MT1: Kingsmere's low tunnels and train), the
+## pole and its flag drawn scaled down to it (FlagView); 0 on a map naming none, where FlagViewConfig.pole_height holds.
+var pole_height: float = 0.0
 ## An indoor field's roof (`roof` in the file, DR1): its underside's height (m) over the floor, 0 on a field open to
 ## the sky, and its lamp panels (x, z), drawn by RoofView. A BB stops on it (MapLevel's ceiling).
 var roof_height: float = 0.0
@@ -173,6 +176,12 @@ var roof_lamps: PackedVector2Array = PackedVector2Array()
 ## Each roof lamp's state (`state` in the file: DW1, Depot's worn lamps), in roof_lamps' order: LAMP_WORKING unless
 ## the file names it dim, flickering or dead. Look only.
 var roof_lamp_states: PackedByteArray = PackedByteArray()
+## Each roof lamp's height (m), in roof_lamps' order: the underside of the ceiling it hangs from (`y` in the file, MT1:
+## a station's lamps on each level's own ceiling), roof_height for a lamp naming none.
+var roof_lamp_heights: PackedFloat32Array = PackedFloat32Array()
+## A plain roof (`roof.plain` in the file, MT1): its ceiling alone, no bays or trusses under it, and its lamps flat
+## panels (a station's strip lights) rather than the hall's high-bay model.
+var roof_plain: bool = false
 ## The hinged doors (DO1), in file order: the simulation, the level and the view number them alike.
 var doors: Array[Door] = []
 ## The floor heights (m) of a map built in storeys, lowest first (such as 0, 3 and 6); empty on a map of one.
@@ -230,6 +239,7 @@ static func parse(text: String, style: MapStyle, team_size: int) -> MapData:
 	m._read_roof(d.get("roof"))
 	m._read_doors(d.get("doors"))
 	m.bot_sight = maxf(0.0, _number(d.get("botSight"), 0.0))
+	m.pole_height = maxf(0.0, _number(d.get("poleHeight"), 0.0))
 	m._read_foliage(d.get("foliage"))
 	m.skyline = SkylinePiece.read(d.get("dressing"), m.warnings)
 	m._read_kicked_dust(d.get("dressing"))
@@ -293,10 +303,16 @@ func footprint() -> Rect2:
 
 ## The top of the highest floor or ramp or the terrain under (x, z), or -INF off them all (for tools and tests).
 func floor_top(x: float, z: float) -> float:
+	return floor_under(x, z, INF)
+
+
+## The top of the highest floor or ramp or the terrain under (x, z) no higher than `top` (a level's floor under a
+## point on a map built in storeys), or -INF if none.
+func floor_under(x: float, z: float, top: float) -> float:
 	var best := -INF
 	if terrain != null:
 		var ground := terrain.height_at(x, z)
-		if not is_nan(ground):
+		if not is_nan(ground) and ground <= top:
 			best = ground
 	for b in blocks:
 		if b.kind != &"floor" and b.kind != &"ramp":
@@ -305,7 +321,9 @@ func floor_top(x: float, z: float) -> float:
 		var hi := b.center + b.size * 0.5
 		if x < lo.x or x > hi.x or z < lo.z or z > hi.z:
 			continue
-		best = maxf(best, ramp_top(b, x, z) if b.rise != Rise.NONE else hi.y)
+		var y := ramp_top(b, x, z) if b.rise != Rise.NONE else hi.y
+		if y <= top:
+			best = maxf(best, y)
 	return best
 
 
@@ -591,9 +609,10 @@ static func _override(d: Dictionary) -> LightingConfig.Override:
 	return o
 
 
-## `roof`: {height over 0, lamps: [{x, z, state (optional: "dim", "flicker" or "dead")}, ...]}; anything else is no
-## roof, with a warning. A lamp without both numbers is left out, and an unknown state is a working lamp, each with a
-## warning.
+## `roof`: {height over 0, plain (optional), lamps: [{x, z, y (optional: the ceiling it hangs from, over 0 and at most
+## the roof's height), state (optional: "dim", "flicker" or "dead")}, ...]}; anything else is no roof, with a warning. A
+## lamp without both x and z is left out, a y out of range hangs from the roof, and an unknown state is a working lamp,
+## each with a warning.
 func _read_roof(raw: Variant) -> void:
 	if raw == null:
 		return
@@ -603,6 +622,7 @@ func _read_roof(raw: Variant) -> void:
 		warnings.append("roof is not {\"height\": metres over 0, \"lamps\": [...]}; no roof")
 		return
 	roof_height = height
+	roof_plain = d.get("plain", false) == true
 	var lamps: Variant = d.get("lamps", [])
 	for raw_lamp: Variant in (lamps as Array if lamps is Array else []):
 		var at: Dictionary = raw_lamp if raw_lamp is Dictionary else {}
@@ -612,6 +632,11 @@ func _read_roof(raw: Variant) -> void:
 			warnings.append("a roof lamp is not {x, z}; left out")
 			continue
 		roof_lamps.append(Vector2(x, z))
+		var y := _number(at.get("y"), height)
+		if y <= 0.0 or y > height:
+			warnings.append("a roof lamp's y %s is not over 0 and at most the roof's height; hung from the roof" % str(y))
+			y = height
+		roof_lamp_heights.append(y)
 		var state: Variant = at.get("state", "")
 		var kind: int = LAMP_STATES.find(str(state)) if state is String else -1
 		if kind < 0:
