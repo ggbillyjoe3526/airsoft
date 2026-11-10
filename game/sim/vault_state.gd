@@ -5,12 +5,15 @@ extends RefCounted
 
 ## Vaulting now: the body follows the path below, not its command.
 var active: bool = false
+## The move is a climb up onto a ledge whose top runs on (CL1): it ends standing on the top, not falling past it.
+var climb: bool = false
 ## Seconds since the vault began.
 var time: float = 0.0
 ## Where it began (the feet), and the way it goes (a unit vector on the ground plane, x and z).
 var start: Vector3 = Vector3.ZERO
 var dir: Vector2 = Vector2(0.0, -1.0)
-## Along the way from the start (m): where the body meets the obstacle's face, and where it is clear of the far side.
+## Along the way from the start (m): where the body meets the obstacle's face, and where it is clear of the far side
+## (a climb's: where it stands on the top, the whole body past the edge).
 var front: float = 0.0
 var far: float = 0.0
 ## The obstacle's top (world height), and the feet's height crossing it (the top plus the clearance).

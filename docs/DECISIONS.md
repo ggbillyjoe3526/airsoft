@@ -401,6 +401,15 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   over your floor, at most 1 m deep, heading within 70° of where you look; crouch cover never qualifies. Anywhere else
   Jump is a jump. A vault takes about 0.4 s, carries the replica and holds fire 0.3 s after; crouched, you can't vault.
   Slide into cover is no for now (`docs/IDEAS.md`).
+- **A platform's edge is climbed: Jump at a ledge 0.6 to 0.95 m high whose flat top runs on (owner, 2026-11-10: "the
+  player needs to be able to climb from the tracks up to the platform", CL1).** The vault's heights and heading; a top
+  open and flat for at least 1.5 m (`VaultConfig.climb_depth`, so platforms and docks, never crates or props) is
+  climbed instead of vaulted: about 0.55 s, the body ends standing on the top, the view heaves and the replica is
+  carried low; the prompt reads "Space to climb". Bots climb the same ledges by one-way nav links and drop back down by
+  their reverse. It overrides MT1's "nobody climbs out of a track pit", and Kingsmere's trackside steps went with it
+  (owner: no stairs only there because there was no other way between levels); real stations' stairs, escalators, the
+  north tunnel's end ramp and the cab steps stay. Running up or down a 1:2 slope blends in the Stairs_Up and
+  Stairs_Down clips (owner: "animations for running up and down stairs"), the hit volume with them.
 - **A vault keeps what you press during it; a trigger held through it is the same pull (BP5, 2026-10-16).**
 - **Vaults are loud (owner, 2026-10-13).** Bots hear a vault from 18 m (a sprint 16, a landing 12, a run 11).
 - **Running into a noisy prop gives you away, and a BB ringing off steel draws a look (2026-10-15, NP1; Claude's
@@ -706,8 +715,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   spiral stair (street to concourse) and one ordinary stair (concourse to platforms) beside the escalators; tunnels
   0.5 m over the trains' roofs; close quarters above and the long lines only on the platforms ("mostly CQB until the
   platform level where longer sightlines open up"), so its 58 m platform line is its sightline exception. Its working
-  lifts (owner) are a step of their own (MT2); until then their shafts stand shut. Nobody climbs out of a track pit over
-  a platform's edge (a vault never lands on a platform), so every stretch of track has steps up at its ends. Its
+  lifts (owner) are a step of their own (MT2); until then their shafts stand shut. Its track pits have no steps: you
+  climb out over a platform's edge (CL1, below). Its
   Attack / Defend poles stand 2.1 m (`poleHeight`, FlagView), since flag A is inside a car 2.4 m high.
 - **The Street is removed from the game (owner, 2026-11-09: "completely remove the street map from the game", SX1).**
   It was dev only (DT1). Its map file, pictures, layout scripts (`tools/street/`), guards and CI job, its tests and

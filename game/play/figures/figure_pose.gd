@@ -21,6 +21,10 @@ var jump: float = 0.0
 var jump_time: float = 0.0
 var vault: float = 0.0
 var vault_share: float = 0.0
+## The vault layer plays the Climb clip (CL1), not the Vault: the move under way's, or the last one's while it eases out.
+var climb: bool = false
+## On stairs (CL1): the stairs clips' share in the legs (-1 down .. 1 up; Hitbox.stairs_blend), between the ticks.
+var stairs: float = 0.0
 var call: float = 0.0
 var call_time: float = 0.0
 var walk_off: float = 0.0
@@ -127,7 +131,12 @@ func read(c: Character, fraction: float, hits: HitConfig) -> void:
 	jump = 1.0 if alive and not c.grounded and not vaulting else 0.0
 	jump_time = minf(_config.jump_to, _config.jump_from + maxf(c.air_time, 0.0))
 	vault = 1.0 if vaulting else 0.0
-	vault_share = vault_progress(c.vault, _config.vault_top) if vaulting else 0.0
+	# Its share held once over, so the clip eases out from where it ended.
+	if vaulting:
+		climb = c.vault.climb
+		vault_share = vault_progress(c.vault, _config.climb_top if climb else _config.vault_top)
+	stairs = Hitbox.stairs_blend(c, lerpf(c.prev_stairs, c.stairs, fraction)) \
+			if alive and c.grounded and not vaulting else 0.0
 	call = 1.0 if c.status == Character.Status.CALLING else 0.0
 	call_time = c.status_time if call > 0.0 else 0.0
 	var off := c.status == Character.Status.WALKING_OFF or c.status == Character.Status.LEAVING
@@ -328,6 +337,7 @@ static func settle_share(delta: float, settle: float) -> float:
 
 
 ## Where in the Vault clip (0..1) vault `v` is: its first `top` over the rise onto the top, the rest across it to the
-## hand-over to the fall, so the hop keeps to the body's path whatever the obstacle (the browser's vaultClipShare).
+## hand-over to the fall, so the hop keeps to the body's path whatever the obstacle (the browser's vaultClipShare). A
+## climb's the same way through the Climb clip (with FigureConfig.climb_top).
 static func vault_progress(v: VaultState, top: float) -> float:
 	return v.clip_share(top)

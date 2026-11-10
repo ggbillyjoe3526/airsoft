@@ -18,6 +18,9 @@ extends Node3D
 const GATE_UNSET := -1
 const GATE_SHUT := 0
 const GATE_OPEN := 1
+## The vault layer's two clips as asked of its Transition (CL1).
+const VAULT_OVER := 0
+const VAULT_CLIMB := 1
 
 ## The parts it draws (the shadow twin last) and each one's level (0, 1, 2; -1 for the twin).
 var meshes: Array[MeshInstance3D] = []
@@ -51,8 +54,9 @@ var _shoulder: float = 0.0
 ## How far the left hand is on a rifle's handguard, and the right hand holds the replica as the arms do, eased (HG1).
 var _support: float = 0.0
 var _grasp: float = 0.0
-## The Vault and HitCall clips' lengths (s) and the WalkOff clip's own pace (m/s).
+## The Vault, Climb and HitCall clips' lengths (s) and the WalkOff clip's own pace (m/s).
 var _vault_seconds: float = 0.0
+var _climb_seconds: float = 0.0
 var _call_seconds: float = 0.0
 var _walk_off_pace: float = 0.0
 ## Turns a way in the figure's frame (x right, -z ahead) into the skeleton's (the file's, facing +Z).
@@ -70,6 +74,10 @@ var _reload_way: int = GATE_UNSET
 var _hold_gate: int = GATE_UNSET
 var _holster_gate: int = GATE_UNSET
 var _upper_gate: int = GATE_UNSET
+## The stairs clips' gates as last asked (CL1), and the vault layer's clip (GATE_UNSET, VAULT_OVER or VAULT_CLIMB).
+var _stairs_down_gate: int = GATE_UNSET
+var _stairs_up_gate: int = GATE_UNSET
+var _vault_way: int = GATE_UNSET
 
 
 ## Builds kind `kind` of `models` for figure `figure_id` of `team`, painted `colour` with `glow`, its levels changing at
@@ -162,6 +170,7 @@ func setup(models: FigureModels, kind: int, figure_id: int, team: int, colour: C
 	_rifle_reload_seconds = _seconds(side, _config.rifle_reload_clip)
 	_pistol_reload_seconds = _seconds(side, _config.pistol_reload_clip)
 	_vault_seconds = _seconds(side, _config.vault_clip)
+	_climb_seconds = _seconds(side, _config.climb_clip)
 	_call_seconds = _seconds(side, _config.call_clip)
 	var walk_off := side.clip(_config.walk_off_clip)
 	_walk_off_pace = walk_off.speed if walk_off != null else 0.0
@@ -176,6 +185,9 @@ func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = fals
 		return
 	_animate_upper(pose, fired)
 	tree.set(FigureGraph.P_GAIT, pose.gait_position())
+	_stairs_down_gate = _gate(FigureGraph.P_STAIRS_DOWN_GATE, _stairs_down_gate, pose.stairs < -HitPose.GATE)
+	_stairs_up_gate = _gate(FigureGraph.P_STAIRS_UP_GATE, _stairs_up_gate, pose.stairs > HitPose.GATE)
+	tree.set(FigureGraph.P_STAIRS, pose.stairs if absf(pose.stairs) > HitPose.GATE else 0.0)
 	tree.set(FigureGraph.P_CROUCH_SPACE, pose.speed)
 	tree.set(FigureGraph.P_CROUCH, pose.crouch)
 	if pose.stepping():
@@ -186,7 +198,12 @@ func animate(pose: FigurePose, hits: HitConfig, delta: float, fired: bool = fals
 	tree.set(FigureGraph.P_JUMP, pose.jump_weight)
 	tree.set(FigureGraph.P_JUMP_SEEK, pose.jump_time)
 	tree.set(FigureGraph.P_VAULT, pose.vault_weight)
-	tree.set(FigureGraph.P_VAULT_SEEK, pose.vault_share * _vault_seconds)
+	# The vault layer's clip, asked of the tree only when it changes (a Transition plays no input until asked once).
+	var way := VAULT_CLIMB if pose.climb else VAULT_OVER
+	if way != _vault_way:
+		_vault_way = way
+		tree.set(FigureGraph.P_VAULT_WAY, FigureGraph.VAULT_CLIMB if pose.climb else FigureGraph.VAULT_OVER)
+	tree.set(FigureGraph.P_VAULT_SEEK, pose.vault_share * (_climb_seconds if pose.climb else _vault_seconds))
 	tree.set(FigureGraph.P_CALL, pose.call_weight)
 	tree.set(FigureGraph.P_CALL_SEEK, minf(pose.call_time, _call_seconds))
 	tree.set(FigureGraph.P_WALK_OFF, pose.walk_off_weight)

@@ -16,8 +16,8 @@ so W A S D stays W A S D on any keyboard layout.
   parts move: the AEG's
   charging handle and dust cover, the Cyber Pistol's battery (a gas pistol's slide stays home). Firing,
   aiming, reloading, switching, holstering, sprinting or being hit stops it at once.
-- **Jump** vaults when you are at a low wall: "Space to vault" shows under the crosshair (it names your own Jump
-  key).
+- **Jump** vaults when you are at a low wall, or climbs onto a ledge such as a platform's edge: "Space to vault" or
+  "Space to climb" shows under the crosshair (it names your own Jump key).
 - **Loadout (practice)** opens the Loadout from the [Practice Range](Practice-Range); in a match it does nothing.
 - **Hop-up less** and **Hop-up more** turn the hop-up dial on the replica in your hands ([How to Play](How-to-Play#hop-up)).
 - **Squad: ping a spot** (the middle mouse button) marks where you look for your bot teammates

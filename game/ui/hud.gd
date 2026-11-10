@@ -96,6 +96,8 @@ var _vault_prompt: Label = null
 ## "G to open the door" or "to shut", while a door is in your reach (DO1).
 var _door_prompt: Label = null
 var _vault_left: float = 0.0
+## Whether the prompt says climb (CL1) rather than vault.
+var _vault_climb: bool = false
 var _door_want: DoorPrompt = DoorPrompt.NONE
 ## The stop a LIFT_TO prompt names.
 var _door_stop: String = ""
@@ -746,12 +748,14 @@ func leaves_notice_shown() -> bool:
 	return _leaves_notice.visible
 
 
-## Whether a Jump press would vault this tick: the prompt shows, and stays up vault_prompt_hold after.
-func set_vault_ready(ready: bool) -> void:
+## Whether a Jump press would vault this tick, or climb (`climb`, CL1): the prompt shows, and stays up
+## vault_prompt_hold after.
+func set_vault_ready(ready: bool, climb: bool = false) -> void:
 	if ready:
-		if _vault_left <= 0.0:
+		if _vault_left <= 0.0 or climb != _vault_climb:
 			# the key is whatever Jump is bound to now
-			_vault_prompt.text = tr("HUD_VAULT") % KeyNames.of_action(&"jump")
+			_vault_prompt.text = tr("HUD_CLIMB" if climb else "HUD_VAULT") % KeyNames.of_action(&"jump")
+			_vault_climb = climb
 		_vault_left = _cfg.vault_prompt_hold
 
 

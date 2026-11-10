@@ -106,11 +106,85 @@ func test_takes_obstacles_from_0_6_to_0_95_m_and_nothing_lower_or_higher() -> vo
 	assert_false(plan([floor_box(), wall(1.0, 0.1)]), "a 1 m railing")
 
 
-func test_takes_walls_barriers_and_crates_up_to_a_metre_deep_never_a_platform() -> void:
+func test_takes_walls_barriers_and_crates_up_to_a_metre_deep_and_climbs_a_platform() -> void:
+	var v := VaultState.new()
 	for d: float in [0.1, 0.3, 0.6, 1.0]:
-		assert_true(plan([floor_box(), wall(0.85, d)]), "%s m deep" % d)
-	for d: float in [1.2, 3.0]:
-		assert_false(plan([floor_box(), wall(0.85, d)]), "%s m deep" % d)
+		assert_true(plan([floor_box(), wall(0.85, d)], 0.0, feet, v), "%s m deep" % d)
+		assert_false(v.climb, "%s m deep: vaulted" % d)
+	for d: float in [1.2, 1.4]:
+		assert_false(plan([floor_box(), wall(0.85, d)]), "%s m deep: too deep to vault, too shallow to climb" % d)
+	for d: float in [1.6, 3.0, 8.0]:
+		assert_true(plan([floor_box(), wall(0.85, d)], 0.0, feet, v), "%s m deep" % d)
+		assert_true(v.climb, "%s m deep: a platform, climbed" % d)
+
+
+## A platform `height` tall, its edge `face` m ahead, running 6 m on.
+func platform(height: float, face: float = -0.7) -> Array:
+	return wall(height, 6.0, face)
+
+
+func test_climbs_a_platform_from_0_6_to_0_95_m_and_nothing_lower_or_higher() -> void:
+	var v := VaultState.new()
+	for h: float in [0.6, 0.75, 0.9, 0.95]:
+		assert_true(plan([floor_box(), platform(h)], 0.0, feet, v), "%s m" % h)
+		assert_true(v.climb, "%s m" % h)
+		assert_almost_eq(v.top_y, h, 1e-4)
+	for h: float in [0.3, 0.55, 1.0, 1.2]:
+		assert_false(plan([floor_box(), platform(h)]), "%s m" % h)
+
+
+func test_a_climb_ends_standing_on_the_top_past_the_edge() -> void:
+	var v := VaultState.new()
+	assert_true(plan([floor_box(), platform(0.9)], 0.0, feet, v))
+	assert_almost_eq(v.over_y, 0.9 + cfg.clearance, 1e-4)
+	assert_lt(v.front, 0.7 - r)
+	assert_almost_eq(v.far, 0.7 + r + cfg.landing_room, 1e-3, "the whole body on the top, landing_room past the edge")
+	assert_eq(v.speed, cfg.climb_min_speed)
+	assert_gte(v.rise_end, cfg.climb_rise_time)
+	assert_lt(v.end, 0.65, "a quick pull up, not a cutscene")
+	assert_gt(v.end, 0.45, "slower than a vault's hop")
+
+
+func test_climbs_only_a_flat_open_ledge() -> void:
+	var bench := [Vector3(0.0, 1.1, -1.9), Vector3(6.0, 0.4, 0.6)]
+	assert_false(plan([floor_box(), platform(0.9), bench]), "something standing on the top within climb_depth")
+	var hoarding := [Vector3(0.0, 2.1, -1.6), Vector3(6.0, 2.4, 0.2)]
+	assert_false(plan([floor_box(), platform(0.9), hoarding]), "a wall on the top just past the edge")
+	var low_roof := [Vector3(0.0, 2.3, -3.0), Vector3(6.0, 0.2, 6.0)]
+	assert_false(plan([floor_box(), platform(0.9), low_roof]), "no room to stand on the top")
+	var tunnel := [Vector3(0.0, 4.2, -3.0), Vector3(6.0, 0.2, 12.0)]
+	assert_true(plan([floor_box(), platform(0.9), tunnel]), "a tunnel's roof 3.2 m over the platform")
+	var far_wall := [Vector3(0.0, 2.0, -3.0), Vector3(6.0, 4.0, 0.3)]
+	assert_true(plan([floor_box(), platform(0.9), far_wall]), "a wall 2.2 m past the edge is room enough")
+
+
+func test_a_climb_rises_steps_on_and_hands_over_standing_on_the_top() -> void:
+	var c := standing()
+	var cmd := PlayerCommand.new()
+	cmd.jump = true
+	assert_true(Vault.try_start(c, cmd, tuning, level([floor_box(), platform(0.9)]), SimEvents.new()))
+	var v := c.vault
+	assert_true(v.climb)
+	var free := FreeMover.new()
+	var ticks := 0
+	var top_tuck := 0.0
+	while v.active and ticks < 90:
+		Vault.step(c, PlayerCommand.new(), tuning, DT, free)
+		ticks += 1
+		top_tuck = maxf(top_tuck, c.crouch_amount)
+		if -c.position.z > v.front + 0.02:
+			assert_gte(c.position.y, v.over_y - 1e-5, "never lower than the top once over the edge")
+		if v.time > v.rise_end:
+			assert_almost_eq(c.position.y, v.over_y, 1e-5, "no hop on the top")
+	assert_eq(ticks, ceili(v.end / DT - 1e-6))
+	assert_almost_eq(-c.position.z, v.far, 1e-4)
+	assert_almost_eq(top_tuck, cfg.climb_tuck, 0.01, "tucked most at the top of the rise")
+	assert_almost_eq(c.crouch_amount, 0.0, 1e-4, "standing again on the top")
+	assert_almost_eq(c.velocity.z, -v.speed, 1e-4)
+	assert_eq(c.velocity.y, 0.0, "no push down: it stands on the top")
+	# A vault after it is a vault again.
+	assert_true(plan([floor_box(), wall(0.85)], 0.0, feet, v))
+	assert_false(v.climb)
 
 
 func test_reaches_further_the_faster_you_come_in_and_not_at_all_from_afar() -> void:

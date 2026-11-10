@@ -55,6 +55,10 @@ var jump_cooldown: float = 0.0
 var jump_wanted: float = 0.0
 ## Slope climbed on the last tick on the ground (rise per metre), for ramp pace.
 var ground_rise: float = 0.0
+## On stairs (CL1, Hitbox.step_stairs): the legs' stairs clips' share, eased (-1 all the way down .. 1 all the way up),
+## this tick and last.
+var stairs: float = 0.0
+var prev_stairs: float = 0.0
 var sprinting: bool = false
 ## Walking slowly and quietly (walk held or aiming, not crouched).
 var walking: bool = false
@@ -151,6 +155,8 @@ func rescue_if_out_of_world(kill_y: float) -> bool:
 	prev_crouch_amount = crouch_amount
 	prev_lean = lean
 	vault.cancel()
+	stairs = 0.0
+	prev_stairs = 0.0
 	velocity = Vector3.ZERO
 	grounded = false
 	airborne = false
@@ -178,6 +184,8 @@ func respawn() -> void:
 	jump_cooldown = 0.0
 	jump_wanted = 0.0
 	ground_rise = 0.0
+	stairs = 0.0
+	prev_stairs = 0.0
 	sprinting = false
 	walking = false
 	step_distance = 0.0

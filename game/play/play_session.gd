@@ -1213,7 +1213,8 @@ func _after_tick() -> void:
 		if heard:
 			_audio.on_calls(_bots.callouts.said, state, player.team, settings.hud.callouts)
 		_hud.on_calls(_bots.callouts.said, state)
-	_hud.set_vault_ready(_vault_ready())
+	var vault_ready := _vault_ready()
+	_hud.set_vault_ready(vault_ready, vault_ready and _vault_probe.climb)
 	var lift := _lift_button()
 	if lift != Lifts.NONE:
 		var spec := _level.query().lifts[lift.x]
