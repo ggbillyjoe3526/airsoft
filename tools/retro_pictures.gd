@@ -2,13 +2,14 @@ extends SceneTree
 ## Pictures of Dev › Retro filter (RF1) in a real match, for review: a whole PlaySession with a bot playing you (the
 ## smoke test's autopilot), stepped one tick and one rendered frame at a time; at each of the named match times the
 ## same frame is saved with the filter off (`<map>_<n>_off.png`) and on (`<map>_<n>_on.png`), so a pair differs only
-## in the filter. Needs a display, so under xvfb (Forward+ on lavapipe in the cloud):
+## in the filter. Needs a display, so under xvfb (Forward+ on lavapipe where the cloud has Vulkan; without it Godot falls
+## back to the compatibility renderer, OpenGL on llvmpipe, as it did for RF1's pictures):
 ##   xvfb-run -a -s "-screen 0 1920x1080x24" godot --path . -s res://tools/retro_pictures.gd \
 ##       -- <folder> [map] [seconds,seconds,...]
 ## Dev only: tools/ never ships.
 
 const SIZE := Vector2i(1600, 900)
-const SECONDS := [4.0, 9.0, 16.0, 26.0]
+const SECONDS: Array[float] = [4.0, 9.0, 16.0, 26.0]
 ## Rendered frames for the filter to settle after it is switched (its node is added a frame late).
 const SETTLE := 3
 
@@ -44,7 +45,7 @@ func _run() -> void:
 	session.set_process(false)
 	var shot := 0
 	var last := roundi(times.max() / PlaySession.TICK)
-	for i in last + 1:
+	for i: int in last + 1:
 		session._physics_process(PlaySession.TICK)
 		# The view as the bot playing you aims (the autopilot leaves the input's view where it was).
 		var me := session.state.characters[PlaySession.PLAYER_ID]
@@ -56,12 +57,12 @@ func _run() -> void:
 			continue
 		_save(folder, "%s_%d_off" % [map_id, shot])
 		_switch(session, true)
-		for f in SETTLE:
+		for f: int in SETTLE:
 			session._process(0.0)
 			await RenderingServer.frame_post_draw
 		_save(folder, "%s_%d_on" % [map_id, shot])
 		_switch(session, false)
-		for f in SETTLE:
+		for f: int in SETTLE:
 			session._process(0.0)
 			await RenderingServer.frame_post_draw
 		shot += 1
@@ -69,10 +70,9 @@ func _run() -> void:
 	quit()
 
 
-## The Dev filter on or off, under its old name or its new.
+## The Dev filter on or off.
 func _switch(session: PlaySession, on: bool) -> void:
-	var dev := session.settings.dev
-	dev.set(&"retro_filter" if &"retro_filter" in dev else &"retro_pixels", on)
+	session.settings.dev.retro_filter = on
 	session.settings.changed.emit()
 
 

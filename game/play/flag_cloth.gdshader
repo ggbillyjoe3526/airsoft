@@ -25,7 +25,7 @@ void vertex() {
 	float u = UV.x;
 	VERTEX.z += sin(u * waves - TIME * wave_speed + UV.y * 1.4) * wave * u;
 	// Dev › Retro filter: corners on the retro screen's pixels while it is on (RF1).
-	POSITION = retro_position(PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0), IN_SHADOW_PASS);
+	POSITION = retro_position(PROJECTION_MATRIX, VIEW_MATRIX, MODEL_MATRIX, VERTEX, true);
 }
 
 void fragment() {

@@ -319,3 +319,11 @@ retro_snap={
 "type": "vec4",
 "value": Vector4(0, 0, 0, 0)
 }
+retro_view_projection={
+"type": "mat4",
+"value": Projection(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+}
+retro_view_projection_inverse={
+"type": "mat4",
+"value": Projection(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+}

@@ -9,7 +9,8 @@ Also rename it to Retro filter."
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-10 | 1 | build thread | pending | pending | – |
+| 2026-11-10 | 1 | build thread | ✓ (touched files; full run cut short for the fixes) | 5/8 Retry | the map's own day haze lost after on/off; specks from self-shadowing; lettering broken; snap grid centred, not top-left; names, KNOWN_ISSUES, ART.md |
+| 2026-11-10 | 2 | build thread | pending | pending | – |
 
 ## Decisions
 
@@ -24,21 +25,25 @@ Defaults taken without waiting (owner's defaults rule); each is a constant in `R
 - **15-bit colour with the console's own 4x4 dither** (-4 to +3 eighths of a step) on the pixel grid, rounded to the
   nearest shade: 32 shades a channel by default, so gradients get a fine stipple instead of Doom's hard 6-shade
   bands. Shades runs 4 to 32.
-- **Wobbling corners**: the props, racks, crates, containers, roof, doors, trees, bushes and flag cloth snap each
-  corner to the retro screen's pixels through one global (`retro_snap`, `look/retro_vertex.gdshaderinc`); shadows are
-  cast from the true shape. Off, it is one branch on a global per vertex. Not the level's blocks and ground, the site
-  surfaces (floors, walls) or puddles: they are big faces laid a few cm over one another (the ground 2 cm under the
-  floors), and a snapped corner tens of metres off tilts its face by more than that, so the ground showed through
-  Depot's office floor as a flat tan (tried first, seen in the pictures).
+- **Wobbling corners**: the props, racks, crates, containers, roof, doors, trees, bushes and flag cloth move each
+  corner in the world so the main camera sees it on a corner of the filter's pixels, counted from the screen's top
+  left as the filter's are (`look/retro_vertex.gdshaderinc`; RetroFilter sets `retro_snap` and the camera's view
+  projection every frame while on). Every pass moves it alike, shadows included: snapping only the drawn pass
+  (attempt 1) left surfaces shadowing themselves in black specks and dashes. Off, it is one branch on a global per
+  vertex. Not the level's blocks and ground, the site surfaces (floors, walls) or puddles: they are big faces laid a few
+  cm over one another (the ground 2 cm under the floors), and a snapped corner tens of metres off tilts its face by more
+  than that, so the ground showed through Depot's office floor as a flat tan (tried first, seen in the pictures).
 - **Swimming textures**: the site surfaces' world-space canvases are laid straight across the screen, not in
-  perspective, but at most 0.4 m from the true point. Unbounded (tried first), a floor, one big face, smeared into long
+  perspective, but at most 0.2 m from the true point (0.4 m still read A SITE as A BITE, critic). Unbounded (tried first), a floor, one big face, smeared into long
   streaks and the A SITE lettering broke up; the console's games cut big faces small, so their swim stayed local too.
-- **Haze from 12 m to 70 m**, at most 85 %, in the map's haze colour (its night haze, else its horizon) at 55 %:
-  depth cueing, through the map's own environment (FieldLighting.retro_haze), so it covers everything drawn. Off, the
-  map's own haze is back.
+- **Haze from 12 m to 70 m**, at most 85 %, in the map's own haze colour (the night's, or the site sky's by day; else
+  its horizon) at 55 %: depth cueing, through the map's environment (FieldLighting.retro_haze), so it covers everything
+  drawn. Off, the haze as it was is put back exactly (attempt 1 rebuilt it from the preset and lost the site sky's).
+- **Small lettering breaks up at 240 lines** (A SITE reads A 8I7 at 1600x900): its strokes are about one retro pixel,
+  as the old filter's were; the swim's reach was cut to 0.2 m to keep it from adding to that. Lines 360 or more read it.
+  The black dots on Depot's cladding in the pictures are its screw heads, a whole retro pixel each.
 
 ## Known issues
 
-- The replicas, arms, figures, BBs and puffs keep steady corners: they are glTF or code-made StandardMaterial3D
-  materials, not the look's shaders. Snapping them would need their materials converted; not done (a Dev look).
-- The haze dims the far end of Depot's 65 m hall line while it is on (a look only; Dev).
+Both are rows in docs/KNOWN_ISSUES.md: the replicas, arms, players, BBs, puffs and the level's big faces keep steady
+corners; the haze dims Depot's 65 m hall line while it is on.

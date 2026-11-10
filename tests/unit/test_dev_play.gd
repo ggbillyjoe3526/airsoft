@@ -143,7 +143,9 @@ func test_retro_filter_is_built_while_on_and_freed_once_off() -> void:
 	# Out of the tree at once, its look off before it is freed.
 	assert_eq(session.find_children("*", "RetroFilter", true, false).size(), 0)
 	assert_eq(filter.snap(), Vector4.ZERO, "the corners true again once off")
-	assert_eq(env.fog_enabled, session._light.fog, "the map's own haze back")
+	assert_true(env.fog_enabled, "Depot by day: the site sky's haze back (SiteDress.dress_sky)")
+	assert_eq(env.fog_depth_begin, session._play.site_look.haze_from)
+	assert_almost_eq(env.fog_density, session._play.site_look.haze_density, 0.0001)
 	await wait_process_frames(1)
 	assert_false(is_instance_valid(filter), "freed")
 

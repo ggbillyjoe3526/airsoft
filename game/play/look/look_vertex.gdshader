@@ -65,7 +65,7 @@ void vertex() {
 	wear_at = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	wear_foot = wear_at.y - (MODEL_MATRIX * vec4(0.0, wear_floor, 0.0, 1.0)).y;
 	// Dev › Retro filter: corners on the retro screen's pixels while it is on (RF1).
-	POSITION = retro_position(PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0), IN_SHADOW_PASS || !retro_wobble);
+	POSITION = retro_position(PROJECTION_MATRIX, VIEW_MATRIX, MODEL_MATRIX, VERTEX, retro_wobble);
 }
 
 void fragment() {

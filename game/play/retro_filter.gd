@@ -5,7 +5,8 @@ extends CanvasLayer
 ## that console's height), each in 15-bit colour (`levels` shades of red, green and blue, 32 by default) with that
 ## console's own 4x4 dither on the pixel grid; the field's geometry snapped to those pixels so its corners wobble as
 ## you move, and its surfaces' patterns laid on screen-straight, not in perspective, so they swim (the look's shaders,
-## look/retro_vertex.gdshaderinc, through the `retro_snap` global); and a short depth haze (FieldLighting.retro_haze).
+## look/retro_vertex.gdshaderinc, through the `retro_snap` global and the main camera's view projection, set every
+## frame while it is on); and a short depth haze (FieldLighting.retro_haze).
 ## Drawn over the 3D view and under the HUD. Changes only what you see. Built only while it is on.
 
 ## Lines of retro pixels top to bottom, and shades a channel: the defaults, and the Dev tab's sliders' ends and step.
@@ -20,9 +21,9 @@ const LEVELS_MAX := 32
 ## and at most how far (m) a point's pattern swims from where it belongs (the console's games cut big faces small, so
 ## their swim stayed local; unbounded, a field's floor, one face, smears into long streaks).
 const AFFINE := 1.0
-const AFFINE_REACH := 0.4
-## The haze: from and to (m from the eye), at most this much of the view, the map's haze colour (its night haze, else
-## its sky's horizon) times `HAZE_LIGHT`.
+const AFFINE_REACH := 0.2
+## The haze: from and to (m from the eye), at most this much of the view, the map's own haze colour (else its sky's
+## horizon) times `HAZE_LIGHT`.
 const HAZE_FROM := 12.0
 const HAZE_TO := 70.0
 const HAZE_MOST := 0.85
@@ -31,6 +32,9 @@ const SHADER := preload("res://game/play/retro_filter.gdshader")
 ## The global the look's shaders read (project.godot [shader_globals]): x, y the retro screen in pixels (0: off),
 ## z the AFFINE share, w AFFINE_REACH.
 const SNAP_GLOBAL := &"retro_snap"
+## The main camera's view projection and its inverse (mat4 globals), which the corners are snapped through.
+const VIEW_PROJECTION_GLOBAL := &"retro_view_projection"
+const VIEW_PROJECTION_INVERSE_GLOBAL := &"retro_view_projection_inverse"
 
 var _mat: ShaderMaterial = null
 var _lines: int = LINES
@@ -80,6 +84,16 @@ func _ready() -> void:
 	set_look(_lines, _levels)
 	if _lighting != null:
 		_lighting.retro_haze(true, HAZE_FROM, HAZE_TO, HAZE_MOST, HAZE_LIGHT)
+
+
+## The main camera as it draws this frame (after the session's _process placed it: the filter is its child).
+func _process(_delta: float) -> void:
+	var camera := get_viewport().get_camera_3d()
+	if camera == null:
+		return
+	var view_projection := camera.get_camera_projection() * Projection(camera.get_camera_transform().affine_inverse())
+	RenderingServer.global_shader_parameter_set(VIEW_PROJECTION_GLOBAL, view_projection)
+	RenderingServer.global_shader_parameter_set(VIEW_PROJECTION_INVERSE_GLOBAL, view_projection.inverse())
 
 
 func _exit_tree() -> void:

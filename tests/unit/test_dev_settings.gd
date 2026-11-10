@@ -325,8 +325,8 @@ func test_retro_filter_lines_and_shades() -> void:
 			"held to the ends")
 	assert_eq(float(mat.get_shader_parameter(&"levels")), float(RetroFilter.LEVELS_MAX))
 	var screen := _screen()
-	assert_eq(screen._retro_size.value, 168.0)
-	screen._retro_shades.value = 5.0
+	assert_eq(screen._retro_lines.value, 168.0)
+	screen._retro_levels.value = 5.0
 	assert_eq(s.dev.retro_levels, 5)
 
 

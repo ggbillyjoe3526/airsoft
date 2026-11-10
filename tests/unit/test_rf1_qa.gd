@@ -168,7 +168,11 @@ func test_toggling_the_session_filter_repeatedly_leaves_one_or_none() -> void:
 		s.mark_changed()
 		assert_eq(session.find_children("*", "RetroFilter", true, false).size(), 0)
 	await wait_process_frames(2)
-	assert_eq(session._lighting.environment.fog_enabled, session._light.fog)
+	# Depot by day: the site sky's haze (SiteDress.dress_sky), exactly as before the filter (critic, RF1 attempt 1).
+	var env := session._lighting.environment
+	assert_true(env.fog_enabled, "the site sky's haze back")
+	assert_eq(env.fog_depth_begin, session._play.site_look.haze_from)
+	assert_eq(env.fog_light_color, session._play.site_look.haze_colour)
 
 
 func test_old_save_with_retro_pixels_switch_turns_the_filter_on_with_new_defaults() -> void:

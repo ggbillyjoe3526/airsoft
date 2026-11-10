@@ -69,8 +69,18 @@ var _key_energy: float = 0.0
 var _ambient_energy: float = 0.0
 ## The map's reflection probes (`add_probes`), shown while Reflections draw them.
 var _probes: Node3D = null
-## The preset the field was built from, whose haze Dev › Retro filter's comes off back to (retro_haze).
-var _cfg: LightingConfig = null
+## The sky's horizon (the preset's), the haze colour of Dev › Retro filter on a map with no haze of its own.
+var _horizon: Color = Color.WHITE
+## The haze as it was when Dev › Retro filter's went on (retro_haze), put back exactly when it goes off: the preset's,
+## or the site sky's (SiteDress.dress_sky), or none.
+var _held: bool = false
+var _held_on: bool = false
+var _held_mode: Environment.FogMode = Environment.FOG_MODE_EXPONENTIAL
+var _held_colour: Color = Color.WHITE
+var _held_density: float = 0.0
+var _held_from: float = 0.0
+var _held_to: float = 0.0
+var _held_sky: float = 0.0
 
 
 ## A node holding the environment and the sun, graded and its effects set up by `look` (the built-in look when null).
@@ -94,7 +104,14 @@ static func build(cfg: LightingConfig, look: LookConfig = null) -> FieldLighting
 	env.ssao_enabled = cfg.ssao
 	env.ssao_radius = cfg.ssao_radius
 	env.ssao_intensity = cfg.ssao_intensity
-	_own_haze(env, cfg)
+	if cfg.fog:
+		env.fog_enabled = true
+		env.fog_mode = Environment.FOG_MODE_DEPTH
+		env.fog_light_color = cfg.fog_colour
+		env.fog_density = 1.0
+		env.fog_depth_begin = cfg.fog_from
+		env.fog_depth_end = cfg.fog_to
+		env.fog_sky_affect = cfg.fog_sky
 	_grade(env, root._look)
 	root.environment = env
 	var world := WorldEnvironment.new()
@@ -113,40 +130,45 @@ static func build(cfg: LightingConfig, look: LookConfig = null) -> FieldLighting
 	root.sun = sun
 	root._key_energy = cfg.sun_energy
 	root._ambient_energy = cfg.ambient_energy
-	root._cfg = cfg
+	root._horizon = cfg.sky_horizon
 	return root
 
 
 ## Dev › Retro filter's haze (RF1, RetroFilter) on: a depth haze from `from` to `to` m from the eye covering at most
-## `most` of the view, in the preset's haze colour (its night haze, else its sky's horizon) times `light`, over the
-## sky as much as the preset's haze is (none by day). Off: the preset's own haze again (none by day).
+## `most` of the view, in the map's own haze colour (the night's, or the site sky's by day; the preset's horizon where
+## there is none) times `light`, over the sky as much as the map's haze is. Off: the map's haze exactly as it was.
 func retro_haze(on: bool, from: float = 0.0, to: float = 0.0, most: float = 0.0, light: float = 0.0) -> void:
-	if environment == null or _cfg == null:
+	if environment == null:
 		return
+	var env := environment
 	if not on:
-		_own_haze(environment, _cfg)
+		if _held:
+			env.fog_enabled = _held_on
+			env.fog_mode = _held_mode
+			env.fog_light_color = _held_colour
+			env.fog_density = _held_density
+			env.fog_depth_begin = _held_from
+			env.fog_depth_end = _held_to
+			env.fog_sky_affect = _held_sky
+			_held = false
 		return
-	var colour := _cfg.fog_colour if _cfg.fog else _cfg.sky_horizon
-	environment.fog_enabled = true
-	environment.fog_mode = Environment.FOG_MODE_DEPTH
-	environment.fog_light_color = Color(colour.r * light, colour.g * light, colour.b * light)
-	environment.fog_density = most
-	environment.fog_depth_begin = from
-	environment.fog_depth_end = to
-	environment.fog_sky_affect = _cfg.fog_sky
-
-
-## `cfg`'s haze on `env`: a depth haze from fog_from to fog_to m, or none.
-static func _own_haze(env: Environment, cfg: LightingConfig) -> void:
-	env.fog_enabled = cfg.fog
-	if not cfg.fog:
-		return
+	if not _held:
+		_held = true
+		_held_on = env.fog_enabled
+		_held_mode = env.fog_mode
+		_held_colour = env.fog_light_color
+		_held_density = env.fog_density
+		_held_from = env.fog_depth_begin
+		_held_to = env.fog_depth_end
+		_held_sky = env.fog_sky_affect
+	var colour := _held_colour if _held_on else _horizon
+	env.fog_enabled = true
 	env.fog_mode = Environment.FOG_MODE_DEPTH
-	env.fog_light_color = cfg.fog_colour
-	env.fog_density = 1.0
-	env.fog_depth_begin = cfg.fog_from
-	env.fog_depth_end = cfg.fog_to
-	env.fog_sky_affect = cfg.fog_sky
+	env.fog_light_color = Color(colour.r * light, colour.g * light, colour.b * light)
+	env.fog_density = most
+	env.fog_depth_begin = from
+	env.fog_depth_end = to
+	env.fog_sky_affect = _held_sky if _held_on else 0.0
 
 
 ## The day's procedural sky in `cfg`'s colours.

@@ -104,8 +104,8 @@ var _dev_checks: Dictionary[StringName, CheckButton] = {}
 ## Dev › Time of day: the map's own, then each preset (DEV_TIMES).
 var _time_of_day: MenuChoice = null
 var _speed: HSlider = null
-var _retro_size: HSlider = null
-var _retro_shades: HSlider = null
+var _retro_lines: HSlider = null
+var _retro_levels: HSlider = null
 var _end_round: Button = null
 var _confirm_level: ConfirmationDialog = null
 var _confirm_crash: ConfirmationDialog = null
@@ -592,17 +592,17 @@ func _build_dev_checks(page: VBoxContainer) -> Array[Button]:
 
 ## Retro filter's lines and shades, under its switch (BP6, RF1).
 func _build_retro_sliders(page: Control) -> void:
-	_retro_size = add_slider_row(page, "DEV_RETRO_LINES", RetroFilter.LINES_MIN, RetroFilter.LINES_MAX,
+	_retro_lines = add_slider_row(page, "DEV_RETRO_LINES", RetroFilter.LINES_MIN, RetroFilter.LINES_MAX,
 			RetroFilter.LINES_STEP, "%d")
-	_retro_size.value_changed.connect(func(v: float) -> void:
+	_retro_lines.value_changed.connect(func(v: float) -> void:
 		settings.dev.retro_lines = roundi(v)
 		_changed(true))
-	explain(_retro_size.get_parent() as Control, tr("DEV_RETRO_LINES_HELP"))
-	_retro_shades = add_slider_row(page, "DEV_RETRO_SHADES", RetroFilter.LEVELS_MIN, RetroFilter.LEVELS_MAX, 1.0, "%d")
-	_retro_shades.value_changed.connect(func(v: float) -> void:
+	explain(_retro_lines.get_parent() as Control, tr("DEV_RETRO_LINES_HELP"))
+	_retro_levels = add_slider_row(page, "DEV_RETRO_SHADES", RetroFilter.LEVELS_MIN, RetroFilter.LEVELS_MAX, 1.0, "%d")
+	_retro_levels.value_changed.connect(func(v: float) -> void:
 		settings.dev.retro_levels = roundi(v)
 		_changed(true))
-	explain(_retro_shades.get_parent() as Control, tr("DEV_RETRO_SHADES_HELP"))
+	explain(_retro_levels.get_parent() as Control, tr("DEV_RETRO_SHADES_HELP"))
 
 
 func _on_dev_switch(on: bool, field: StringName) -> void:
@@ -675,8 +675,8 @@ func _refresh() -> void:
 	_hud_page.refresh()
 	_access_page.refresh()
 	set_slider(_speed, settings.dev.game_speed * 100.0)
-	set_slider(_retro_size, settings.dev.retro_lines)
-	set_slider(_retro_shades, settings.dev.retro_levels)
+	set_slider(_retro_lines, settings.dev.retro_lines)
+	set_slider(_retro_levels, settings.dev.retro_levels)
 	for field: StringName in DEV_SWITCHES:
 		set_check(_dev_checks[field], settings.dev.get(field) as bool)
 	_time_of_day.put(maxi(0, DEV_TIMES.find(settings.dev.time_of_day)))

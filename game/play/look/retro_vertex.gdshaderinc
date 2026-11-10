@@ -1,23 +1,42 @@
 // Dev › Retro filter's geometry (RF1, RetroFilter): while it is on, the field drawn as a 1990s console drew it. A
-// spatial shader opts in with `#include "res://game/play/look/retro_vertex.gdshaderinc"` and, in vertex(),
-// `POSITION = retro_position(PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0), IN_SHADOW_PASS);` after any
-// change to VERTEX: each corner snapped to the retro screen's pixels (whole pixels, as the console's), so the field's
-// edges wobble against each other as the view moves (not a big face laid a few cm over another: a corner tens of
-// metres off moves more than that, and the face under shows through). Shadows are cast from the true shape. A surface pattern laid in
-// world space can swim as the console's textures did: retro_affine_in() in vertex() keeps the point for fragment(),
-// where retro_affine_out() gives it interpolated straight across the screen instead of in perspective, at most w m from
-// the true point (the console's games cut big faces small, so their swim stayed local; a field's floor is one face, so
-// an unbounded swim smears it into long streaks). Off (x 0), both are the true values, for a branch on a global.
+// spatial shader opts in with `#include "res://game/play/look/retro_vertex.gdshaderinc"` and, in vertex() after any
+// change to VERTEX, `POSITION = retro_position(PROJECTION_MATRIX, VIEW_MATRIX, MODEL_MATRIX, VERTEX, true);`: each
+// corner moved in the world so the main camera sees it on a corner of the filter's pixels (whole pixels from the
+// screen's top left, as the console's), so the field's edges wobble against each other as the view moves. Every pass
+// moves it alike (the shadow and depth passes too), so a surface never shadows itself where its drawn shape left its
+// true one. `wobble` false keeps a big face true: one laid a few cm over another (a floor over the ground) would tilt
+// through it, as a corner tens of metres off moves more than that. A surface pattern laid in world space can swim as
+// the console's textures did: retro_affine_in() in vertex() keeps the point for fragment(), where retro_affine_out()
+// gives it interpolated straight across the screen instead of in perspective, at most w m from the true point (the
+// console's games cut big faces small, so their swim stayed local; an unbounded swim smears a floor into long streaks
+// and breaks up lettering). Off (x 0), both are the true values, for a branch on a global.
 
 global uniform vec4 retro_snap; // x, y: the retro screen in pixels (0: off); z: how far patterns swim (0 to 1); w: m
+global uniform mat4 retro_view_projection; // the main camera's, as RetroFilter last set it
+global uniform mat4 retro_view_projection_inverse;
 
-vec4 retro_position(vec4 clip, bool shadow) {
-	if (retro_snap.x <= 0.0 || shadow || clip.w <= 0.0) {
-		return clip;
+// `world` moved so the main camera sees it on the nearest corner of the retro screen's pixels.
+vec3 retro_world(vec3 world) {
+	if (retro_snap.x <= 0.0) {
+		return world;
 	}
-	vec2 half_screen = retro_snap.xy * 0.5;
-	clip.xy = round(clip.xy / clip.w * half_screen) / half_screen * clip.w;
-	return clip;
+	vec4 clip = retro_view_projection * vec4(world, 1.0);
+	if (clip.w <= 0.0) {
+		return world;
+	}
+	vec2 ndc = clip.xy / clip.w;
+	vec2 px = round(vec2(ndc.x * 0.5 + 0.5, 0.5 - ndc.y * 0.5) * retro_snap.xy);
+	ndc = vec2(px.x / retro_snap.x * 2.0 - 1.0, 1.0 - px.y / retro_snap.y * 2.0);
+	vec4 moved = retro_view_projection_inverse * vec4(ndc * clip.w, clip.z, clip.w);
+	return moved.xyz / moved.w;
+}
+
+vec4 retro_position(mat4 projection, mat4 view, mat4 model, vec3 vertex, bool wobble) {
+	vec3 world = (model * vec4(vertex, 1.0)).xyz;
+	if (wobble) {
+		world = retro_world(world);
+	}
+	return projection * (view * vec4(world, 1.0));
 }
 
 // `p` times the clip w, and w: perspective-correct interpolation of both, divided, is straight across the screen.
