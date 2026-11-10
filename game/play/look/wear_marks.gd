@@ -5,6 +5,9 @@ extends Node3D
 ## right in turn. They add to the floor's own wear (SL1, SL2), never repeat it. Shown with Graphics › Wear marks
 ## (`set_on`; Medium and up, Forward+ and Mobile, as Compatibility draws no decals). Scenery: no collider, no nav cell.
 
+## The shortest piece or stride (m) a mark is laid in, whatever the config says, so a 0 can't divide.
+const SHORTEST := 0.05
+
 var _decals: Array[Decal] = []
 
 
@@ -56,7 +59,7 @@ func _stain(map: MapData, cfg: MarksConfig, look: LookConfig, m: WearMark, rng: 
 
 
 func _tracks(map: MapData, cfg: MarksConfig, look: LookConfig, m: WearMark) -> void:
-	var pieces := maxi(1, ceili(m.length / cfg.track_piece))
+	var pieces := maxi(1, ceili(m.length / maxf(cfg.track_piece, SHORTEST)))
 	var points := m.path(pieces)
 	var paint := _paint(look, cfg.mud_colour if m.mud else cfg.rubber_colour, cfg.rubber_opacity)
 	for i in pieces:
@@ -73,7 +76,7 @@ func _tracks(map: MapData, cfg: MarksConfig, look: LookConfig, m: WearMark) -> v
 
 
 func _trail(map: MapData, cfg: MarksConfig, look: LookConfig, m: WearMark, rng: RandomNumberGenerator) -> void:
-	var steps := maxi(1, floori(m.length / cfg.stride))
+	var steps := maxi(1, floori(m.length / maxf(cfg.stride, SHORTEST)))
 	var points := m.path(steps)
 	var paint := _paint(look, cfg.mud_colour if m.mud else cfg.dust_colour, cfg.boot_opacity)
 	for i in points.size():

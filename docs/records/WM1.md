@@ -47,3 +47,5 @@ names them, scaling per preset.
 ## Known issues left
 
 - A mark's box reaches 25 cm above the floor, so a figure standing on one takes it on its soles.
+- Painting the pictures takes about 28 ms once per run (performance, measured headless), a little over one staged
+  build slice on the loading screen of the first match; later matches reuse them. Left as it is.
