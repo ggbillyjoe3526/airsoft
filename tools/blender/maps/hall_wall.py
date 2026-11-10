@@ -4,8 +4,8 @@ assets/models/props/hall_wall.glb (the plain bay), hall_shutter.glb (a roller sh
 From the owner's photos (references/maps/william-2026-11-09/hall_wall_bay) and the roof photos beside them: a painted
 blockwork dado on a concrete kerb, a steel flashing on its top, then the profiled steel liner of the cladding (ribs
 upright, a lap halfway up) with a band of translucent rooflight sheets under the eaves, and the hall's portal frame
-(the crimson of the roof trusses) at each bay's ends: an I-section column on a base plate, a knee bracket and the
-eaves beam the trusses land on. A conduit runs along at 3 m on saddle clips.
+(the roof trusses' galvanised grey, SL3) at each bay's ends: an I-section column on a base plate, a knee bracket and
+the eaves beam the trusses land on. A conduit runs along at 3 m on saddle clips.
 - **hall_shutter**: a roller shutter 4.5 m wide in steel guides under its coil box, curved slats, a bottom rail with a
   rubber seal, hazard-striped guard posts at the guides' feet (ref 1) and a push-button box on the right.
 - **hall_exit**: a pair of crimson fire doors (refs 5, 7) in a steel frame under a concrete lintel: push bars, vertical
@@ -485,7 +485,7 @@ def pictogram(b: hs.Builder, cx: float, cz: float, y: float) -> None:
 COLOURS = {
     "Kerb": mk.PALETTE["slab"], "Block": mk.PALETTE["plaster"], "Joint": (mk.PALETTE["plaster"], 0.84),
     "Flash": mk.PALETTE["grey"], "Clad": mk.PALETTE["concrete"], "Rooflight": mk.PALETTE["cream"],
-    "Frame": mk.PALETTE["crimson"], "Steel": mk.PALETTE["steel"], "Back": mk.PALETTE["concrete"],
+    "Frame": mk.PALETTE["grey"], "Steel": mk.PALETTE["steel"], "Back": mk.PALETTE["concrete"],
     "Slat": mk.PALETTE["grey"], "Rail": mk.PALETTE["steel"], "Rubber": mk.PALETTE["rubber"],
     "Guide": (mk.PALETTE["steel"], 0.9), "Guard": mk.PALETTE["yellow"], "Hazard": mk.PALETTE["rubber"],
     "Hood": (mk.PALETTE["steel"], 0.85), "Control": mk.PALETTE["concrete"], "Go": mk.PALETTE["green"],

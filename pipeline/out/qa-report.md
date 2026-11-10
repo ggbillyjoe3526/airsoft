@@ -1,19 +1,8 @@
-Task: UB1 · QA commit PENDING · Verdict: Pass
-
-Blocking: none. Advisory: ButtonPress.play (game/ui/button_press.gd:78-97) sets b.scale = ONE at each press; any page that scales a button itself would be reset (none found in game/ui grep). Reduced motion switched on mid-dip leaves the current dip to finish normally (harmless).
-
-Tests added (tests/unit/test_button_press.gd, 8 new, all fail if ButtonPress.install is removed because no ring is made / no hook exists):
-- freed_mid_press_leaves_nothing_behind: ring freed with button.
-- pressed_twice_quickly: one ring, ends at scale 1, outline hidden (a second ring or stuck tween would fail).
-- taken_out_of_the_tree_mid_press: removed and re-added, ends scale 1, no stuck outline.
-- hidden_mid_press: returns at full size.
-- ring_never_takes_the_mouse: MOUSE_FILTER_IGNORE, FOCUS_NONE, a viewport click on the outline beside the button does not press it.
-- toggle_and_check_buttons: toggle state flips correctly through viewport clicks, CheckButton plays.
-- container re-sorting mid-press: ends scale 1.
-- menu_card: MenuCard pressed, its child count unchanged.
-- paused tree: button with PROCESS_MODE_ALWAYS still dips and finishes while paused (pause menu).
-All clicks go through push_input.
-
-Counts: test_button_press 16/16 (4.8 s); test_title_and_menus 15, test_locked_items 5, test_loadout_screen 27, all pass. Raw output: pipeline/out/qa/. Full suite/check.sh not run (running elsewhere); smoke test not run for the same reason.
-
-Not tested (needs a display): how the dip and outline look/feel, visible NavRail level at real window sizes and modes, focus-loss behaviour (untouched by this change).
+# QA report SL3
+Verdict: Pass (one doc bug to fix, no code bugs).
+- glbs (roof_truss, hall_wall, hall_shutter, hall_exit): nodes, scenes, mesh/primitive names, accessor counts and POSITION min/max identical to origin/main; materials identical (one "Prop"); only vertex colours differ. Lamp Lens is in roof_lamp.glb, untouched.
+- Targeted tests (test_look, test_props, test_dh1_hall_shell, test_lamp_lights_qa): 56/56 pass. New test fails against the old roof_truss.glb (checked), passes on the new one.
+- Palette: 0x8c8a96 = grey, 0xd2cec8 = concrete, both palette entries; neither is a team hue. test_look's _in_palette passes.
+- Card pictures: 1920x1080 and 480x270 as before, .import files unchanged.
+- Bug 1: docs/wiki/Maps.md:26 still says "crimson steel columns" for the hall; SL3 repainted the frames grey. Fix: "galvanised steel columns".
+- Note: docs/ASSETS.md has an uncommitted edit ("about 1 MB the four, SL3"); commit it or drop it. pipeline/out/performance.md is also modified (not mine).
