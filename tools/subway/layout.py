@@ -1,4 +1,4 @@
-"""Kingsmere's layout as data: a closed deep-level metro station (the owner's concept v2, 2026-11-10;
+"""Subway's layout as data: a closed deep-level metro station (the owner's concept v2, 2026-11-10;
 /mnt/project-files/concepts/metro/v2/). Dev content until the owner makes it public.
 
 Asymmetric. The Street team (end 0) starts in the ticket hall at street level; the Tunnel team (end 1) starts in a
@@ -16,7 +16,7 @@ The links between levels: two upper escalators (0 to -10), two lower ones (-10 t
 and one ordinary stair (-10 to -18, a half landing on the way), and two lifts (LIFTS: 0, -10 and -18) in a pair of
 shafts by the ticket hall's gate line.
 
-Edit this file, then run `python3 tools/kingsmere/build_map.py` to write data/maps/kingsmere.json.
+Edit this file, then run `python3 tools/subway/build_map.py` to write data/maps/subway.json.
 """
 from __future__ import annotations
 
@@ -116,35 +116,20 @@ room("plat_n_end", "North platform", 47, 50, -7.5, -5.5, P, h=TUNNEL_H)
 room("endramp_n", "North platform", 47, 50, -9, -7.5, P, T, h=TUNNEL_H, flat=True)
 room("ramp_foot", "North tunnel", 50, 52, -9, -7.5, T, h=TUNNEL_H + 0.9)
 room("plat_s", "South platform", -52, 50, 5.5, 9, P, h=TUNNEL_H)
-# The track pits, 0.9 m under the platforms: nobody climbs out over a platform's edge (VaultConfig: never onto a
-# platform), so each stretch of track has steps up at its ends: a ramp along the platform's edge to a landing.
+# The track pits, 0.9 m under the platforms: no steps up (owner, 2026-11-10, CL1: "remove the trackside stairs"), a
+# body climbs out over a platform's edge (VaultConfig climb_depth) and drops back down; bots take the same links.
 TRACK_H = TUNNEL_H + 0.9
 
 
-def track(name: str, area: str, x0: float, x1: float, z_edge: float, z_wall: float, steps: list[str]) -> None:
-    """A stretch of track from x0 to x1 between the platform's edge (z_edge) and the tunnel wall (z_wall), with steps
-    up to the platform at its "w" and/or "e" end: a 2 m landing at platform height, a 2 m ramp down."""
-    w = 1.2 * (1 if z_wall > z_edge else -1)
-    za, zb = sorted((z_edge, z_edge + w))
-    zc, zd = sorted((z_edge + w, z_wall))
-    a, b = x0, x1
-    if "w" in steps:
-        room(name + "_wl", area, x0, x0 + 2, za, zb, P, h=TUNNEL_H)
-        room(name + "_wr", area, x0 + 2, x0 + 4, za, zb, P, T, h=TUNNEL_H, flat=True)
-        room(name + "_wb", area, x0, x0 + 4, zc, zd, T, h=TRACK_H)
-        a = x0 + 4
-    if "e" in steps:
-        room(name + "_er", area, x1 - 4, x1 - 2, za, zb, T, P, h=TUNNEL_H, flat=True)
-        room(name + "_el", area, x1 - 2, x1, za, zb, P, h=TUNNEL_H)
-        room(name + "_eb", area, x1 - 4, x1, zc, zd, T, h=TRACK_H)
-        b = x1 - 4
+def track(name: str, area: str, x0: float, x1: float, z_edge: float, z_wall: float) -> None:
+    """A stretch of track from x0 to x1 between the platform's edge (z_edge) and the tunnel wall (z_wall)."""
     lo, hi = sorted((z_edge, z_wall))
-    room(name, area, a, b, lo, hi, T, h=TRACK_H)
+    room(name, area, x0, x1, lo, hi, T, h=TRACK_H)
 
 
-track("track_n_w", "North track", -52, -44, -9, -12.5, ["w"])
-track("track_n_e", "North track", 16, 50, -9, -12.5, ["w"])
-track("trench", "South track", -52, 30, 9, 12.5, ["w", "e"])
+track("track_n_w", "North track", -52, -44, -9, -12.5)
+track("track_n_e", "North track", 16, 50, -9, -12.5)
+track("trench", "South track", -52, 30, 9, 12.5)
 # North train: four cars standing at the north platform, five doors open; the middle pair not coupled through.
 NDOORS = [-38.3, -19.7, -11.8, -1.2, 10.3]
 room("train_n", "North train", -44, 16, -12.5, -9, P, h=TRAIN_IN,

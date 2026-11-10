@@ -14,6 +14,7 @@
 [ext_resource type="Script" path="res://game/config/skyline_config.gd" id="14_sk3ln"]
 [ext_resource type="Script" path="res://game/config/woods_config.gd" id="16_wd4cf"]
 [ext_resource type="Script" path="res://game/config/site_look.gd" id="17_st5lk"]
+[ext_resource type="Script" uid="uid://b1pmo28hh45he" path="res://game/config/station_look.gd" id="31_stnlk"]
 [ext_resource type="Script" uid="uid://cvb8w0oxso48k" path="res://game/config/prop_dress_config.gd" id="29_pdc01"]
 [ext_resource type="Script" path="res://game/config/roof_config.gd" id="18_rf6cf"]
 [ext_resource type="Script" path="res://game/config/play_tuning.gd" id="6_q2qxh"]
@@ -31,6 +32,7 @@
 [ext_resource type="Script" uid="uid://cj6ju4x7le6w4" path="res://game/config/inspect_pose.gd" id="50_in1ip"]
 [ext_resource type="Script" uid="uid://wko4nifmpxxm" path="res://game/config/light_fixtures_config.gd" id="51_lf4wg"]
 [ext_resource type="Script" uid="uid://dlruigog1xspi" path="res://game/config/lift_view_config.gd" id="52_mt2lv"]
+[ext_resource type="Script" uid="uid://dremqyubntd3e" path="res://game/config/marks_config.gd" id="53_wm1mk"]
 
 [sub_resource type="Resource" id="Resource_01h5l"]
 script = ExtResource("1_ermsw")
@@ -301,6 +303,9 @@ script = ExtResource("16_wd4cf")
 [sub_resource type="Resource" id="Resource_pdc01"]
 script = ExtResource("29_pdc01")
 
+[sub_resource type="Resource" id="Resource_stnlk"]
+script = ExtResource("31_stnlk")
+
 [sub_resource type="Resource" id="Resource_st5lk"]
 script = ExtResource("17_st5lk")
 props = SubResource("Resource_pdc01")
@@ -316,6 +321,9 @@ script = ExtResource("51_lf4wg")
 
 [sub_resource type="Resource" id="Resource_mt2lv"]
 script = ExtResource("52_mt2lv")
+
+[sub_resource type="Resource" id="Resource_wm1mk"]
+script = ExtResource("53_wm1mk")
 
 [resource]
 script = ExtResource("6_q2qxh")
@@ -338,7 +346,9 @@ range_view = SubResource("Resource_3isbp")
 minimap = SubResource("Resource_mm1cf")
 figures = SubResource("Resource_fi1fc")
 site_look = SubResource("Resource_st5lk")
+station_look = SubResource("Resource_stnlk")
 roof = SubResource("Resource_rf6cf")
 look = SubResource("Resource_lk7ad")
 light_fixtures = SubResource("Resource_lf4wg")
 lifts = SubResource("Resource_mt2lv")
+marks = SubResource("Resource_wm1mk")

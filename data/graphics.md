@@ -30,7 +30,7 @@ never stops the game from starting.
   temporal smoothing, sun shadows, baked light and occlusion culling `off, on`; shadow detail `1024, 2048, 4096, 8192` (the sun's shadow map, in
   pixels); shadow softness `hard, soft, softer, softest`; ambient occlusion `off, half, full`; texture filtering
   `off, 2x, 4x, 8x, 16x`; mesh detail `low, medium, high, ultra`; global illumination `off, screen, scene`;
-  reflections `off, probes, screen`; lamp light `off, near, far`; glow, eye adaptation and volumetric fog `off, on`. Render scale is
+  reflections `off, probes, screen`; lamp light `off, near, far`; glow, eye adaptation, volumetric fog and wear marks `off, on`. Render scale is
   10–200 % at most, shadow range 10–500 m and wind dust 0–100 %.
 
 ## Rows
@@ -51,6 +51,7 @@ never stops the game from starting.
 | mesh_detail | GRAPHICS_MESH_DETAIL | low, medium, high, ultra | 1 | all | low | medium | high | ultra |
 | occlusion_culling | GRAPHICS_OCCLUSION_CULLING | off, on | 0 | all | off | on | on | on |
 | wind_dust | GRAPHICS_WIND_DUST | 0–100 % | 0 | all | 0 % | 50 % | 100 % | 100 % |
+| wear_marks | GRAPHICS_WEAR_MARKS | off, on | 1 | forward_plus, mobile | off | on | on | on |
 | global_illumination | GRAPHICS_GLOBAL_ILLUMINATION | off, screen, scene | 3 | forward_plus | off | off | screen | scene |
 | reflections | GRAPHICS_REFLECTIONS | off, probes, screen | 2 | all | off | probes | probes | screen |
 | lamp_lights | GRAPHICS_LAMP_LIGHTS | off, near, far | 3 | forward_plus | off | off | near | far |
@@ -98,6 +99,11 @@ never stops the game from starting.
   any brighter view keeps the preset's own exposure (`eye_drop` 1), so the look stays the one tuned, and stepping out
   of the dark dazzles a moment as the eyes close again (`LookConfig.eye_speed`). The night keeps its tuned dark
   (`eye_lift` 1). A scope's glass never adapts on its own: the main view adapts it with the rest.
+- **Wear marks** (WM1, Medium and up; Forward+ and Mobile, as Compatibility draws no decals) are a map's marks on its
+  floor (`dressing.wearMarks`): oil stains, darker and shiny in the middle, and tyre tracks, a rubber smear on a hard
+  floor or a muddy tread outdoors, faded in and out at their ends; each a decal faded out past 40 m (`MarksConfig`).
+  They add to the floor's own grime and dust (SL1, SL2) rather than repeat it: Depot's vans and forklift in the
+  Loading bay, the Garage and the hall, and Woodland's pickup up its road. No boot prints (owner, 2026-11-10).
 - **Glow** blooms only what is brighter than white (lamp panels, a lit sky), softly. **Volumetric fog** is a faint
   haze lit by the sun and the bounce light (LookConfig's Volumetric fog group).
 - **Temporal smoothing** is off on every preset: it smears the thin, fast BB streaks. It and FSR 2 are there for

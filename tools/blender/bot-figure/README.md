@@ -184,6 +184,15 @@ current figure (`pump.py <figure.glb> donor.glb`), splice Holster_Sprint into hu
 fit (the sprint row) and check with `tests/unit/test_holster_sprint_arms.gd`; film it with `tools/gait_pictures.gd`
 (`sprint_away`, `run_away`). The shoulder weights (33fa48b) are untouched.
 
+The climb and the stairs runs (CL1) are made the same way. `gait/climb.py` makes Climb from the Vault clip's upper
+body: the hips' path, lean and feet as keyed curves (`HIPS`, `LEAN`, `FEET`) over a 0.9 m ledge (`H`, the top at
+`TOP` of the clip, `FigureConfig.climb_top`), the left hand planted on the edge (`HAND`), the trailing knee turned out
+past the face (`KNEE_OUT`), two-bone IK legs. `gait/stairs.py` makes Stairs_Up and Stairs_Down from Run_F's row in
+`GAITS` on a 1:2 slope (`RISE`, `SlopeClip`), at Run_F's pace and cycle so the game swaps between them in step. Run
+each on the current figure (`climb.py|stairs.py <figure.glb> donor.glb <sidecar.json>`), splice Climb or
+Stairs_Up,Stairs_Down into human.glb and robot.glb, re-bake the hit fit, and film them with
+`tools/climb_pictures.gd`.
+
 ## How the hands hold the replicas (bot13)
 
 - The right fist sits low and turned 40 degrees on the AEG grip (`RIFLE_SEAT`), so the web is on the backstrap, the

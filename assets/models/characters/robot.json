@@ -262,6 +262,30 @@
    "loop": true,
    "upperBodyOnly": true,
    "speed": null
+  },
+  {
+   "name": "Climb",
+   "seconds": 0.6,
+   "frames": 18,
+   "loop": false,
+   "upperBodyOnly": false,
+   "speed": null
+  },
+  {
+   "name": "Stairs_Up",
+   "seconds": 0.7,
+   "frames": 21,
+   "loop": true,
+   "upperBodyOnly": false,
+   "speed": 4.2
+  },
+  {
+   "name": "Stairs_Down",
+   "seconds": 0.7,
+   "frames": 21,
+   "loop": true,
+   "upperBodyOnly": false,
+   "speed": 4.2
   }
  ],
  "fitToNote": "Clips with fitTo are time-scaled to that replica stat (e.g. AEG drawTime 0.45 s, pistol 0.3 s; reloads 1.8 s and 1.2 s).",

@@ -1,16 +1,17 @@
 class_name FirstPersonView
 extends Node3D
-## The player's eyes (the browser game's render/camera.ts): a Camera3D at the character's eye, drawn between the last two
-## ticks, turned by the mouse every rendered frame (PlayerInput's view) and lifted by the replica's recoil. A lean moves
-## the eyes as the simulation does (Lean.offset, the one lean geometry) and rolls the view a little
+## The player's eyes (the browser game's render/camera.ts): a Camera3D at the character's eye, drawn between the last
+## two ticks, turned by the mouse every rendered frame (PlayerInput's view) and lifted by the replica's recoil. A lean
+## moves the eyes as the simulation does (Lean.offset, the one lean geometry) and rolls the view a little
 ## (ViewConfig.lean_camera_roll); a lean a wall cuts short eases out instead of snapping, never drawn into the wall. A
-## vault dips and tips the view. Reduced motion (set_motion) draws less of the lean's roll and the vault's dip and tip,
-## never less recoil: the climb shows where the next BB goes. Once hit, the view follows the character's own heading as
-## it walks off. Zooms a little as the sight comes up (as its optic does; a scope zooms only inside its glass). The
-## easing runs on rendered frames; the rules stay on the tick. At night the weapon torch of whoever the view is through
-## is a real spot from the rail while lit (WL7, `set_torch`): with a light in your kit, on Medium and up, one of the
-## preset's real lights, casting shadows on High and Ultra with Sun shadows on; else TorchBeams draws it as a haze.
-## Once a round is over the view holds still where it was (`holds_still`, BP8), unless it is your own in play.
+## vault (or a climb, CL1) dips and tips the view. Reduced motion (set_motion) draws less of the lean's roll and the
+## vault's dip and tip, never less recoil: the climb shows where the next BB goes. Once hit, the view follows the
+## character's own heading as it walks off. Zooms a little as the sight comes up (as its optic does; a scope zooms only
+## inside its glass). The easing runs on rendered frames; the rules stay on the tick. At night the weapon torch of
+## whoever the view is through is a real spot from the rail while lit (WL7, `set_torch`): with a light in your kit, on
+## Medium and up, one of the preset's real lights, casting shadows on High and Ultra with Sun shadows on; else
+## TorchBeams draws it as a haze. Once a round is over the view holds still where it was (`holds_still`, BP8), unless it
+## is your own in play.
 
 ## Recoil on screen follows the simulation's at this rate (1/s of simulation time), so a 60 Hz kick reads smoothly at
 ## any frame rate and game speed.
@@ -39,6 +40,8 @@ var _recoil: float = 0.0
 ## The lean drawn (eased out of a cut) and the vault's dip and tip now (0..1).
 var _lean: float = 0.0
 var _vault: float = 0.0
+## The dip and tip are a climb's (CL1): the move under way's, or the last one's while it settles.
+var _climbing: bool = false
 ## How much of the lean's roll and the vault's dip and tip to draw (Reduced motion).
 var _motion: MotionScale = MotionScale.new()
 ## The torch's real spot on the rail (null: none, on Low or by day) and the light it was last set for.
@@ -109,12 +112,22 @@ func update(c: Character, input: PlayerInput, fraction: float, delta: float, aim
 	var height := Character.eye_height(crouch, _body)
 	_lean = _ease_lean(lean, height, crouch, yaw, delta, own and Elimination.is_in_play(c))
 	var v := c.vault
-	var swing := sin(PI * clampf(v.time / v.end, 0.0, 1.0)) if v.active and v.end > 0.0 else 0.0
+	var swing := 0.0
+	if v.active and v.end > 0.0:
+		var x := clampf(v.time / v.end, 0.0, 1.0)
+		# A climb's peak early (climb_peak of the way: the heave), a vault's at its middle (over the top).
+		if v.climb:
+			x = 0.5 * x / _view.climb_peak if x < _view.climb_peak else 0.5 + 0.5 * (x - _view.climb_peak) / (
+					1.0 - _view.climb_peak)
+		swing = sin(PI * x)
+		_climbing = v.climb
 	_vault = lerpf(_vault, swing, 1.0 - exp(-_view.vault_follow * delta))
 	var vault := _vault * _motion.vault_tip
-	position = feet + Vector3(0.0, height - _view.vault_dip * vault, 0.0) + Lean.offset(height, _lean, crouch, yaw, _hits)
+	var dip := _view.climb_dip if _climbing else _view.vault_dip
+	var tip := _view.climb_tip if _climbing else _view.vault_tip
+	position = feet + Vector3(0.0, height - dip * vault, 0.0) + Lean.offset(height, _lean, crouch, yaw, _hits)
 	# Leaning right tips the view's top to the right: a roll about the line of sight (local -Z), negative about +Z.
-	rotation = Vector3(pitch + _recoil - _view.vault_tip * vault, yaw, -_lean * _view.lean_camera_roll * _motion.lean_roll)
+	rotation = Vector3(pitch + _recoil - tip * vault, yaw, -_lean * _view.lean_camera_roll * _motion.lean_roll)
 	if _torch != null:
 		_show_torch(c)
 	var r := c.armament.replica()

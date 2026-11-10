@@ -12,9 +12,10 @@ extends Resource
 ## (LEG_BONES; quaternions x, y, z, w), the bones' offsets on their parents being `leg_offsets`. Samples: standing still
 ## and crouched still, then each clip of the gait blend space (`gait_points`, triangulated as `gait_triangles`) and of
 ## the crouch blend space (`crouch_points`) at each of `phases` steps of the walk cycle; in the air, jump_samples from
-## jump_from to jump_to s into the Jump clip; vaulting, vault_samples over the Vault clip's share. An upper body sample
+## jump_from to jump_to s into the Jump clip; vaulting, vault_samples over the Vault clip's share; climbing (CL1),
+## climb_samples over the Climb clip's; on stairs (CL1), Stairs_Down then Stairs_Up at each of `phases`. An upper body sample
 ## (UPPER points) is in the Hips bone's frame: the aim clips down, level and up for the rifle and the pistol,
-## holstered standing and holstered sprinting, and each vault sample.
+## holstered standing and holstered sprinting, and each vault and climb sample.
 
 ## A lower body sample's floats: the hips' place (3) and turn (4), then each leg bone's turn (4).
 const HIPS_AT := 0
@@ -82,6 +83,13 @@ const AIMS := 3
 @export var vault_top: float = 0.4
 @export var vault_lower: PackedFloat32Array = PackedFloat32Array()
 @export var vault_upper: PackedVector3Array = PackedVector3Array()
+@export var climb_samples: int = 12
+## The share of the Climb clip that covers the rise onto the top (FigureConfig.climb_top).
+@export var climb_top: float = 0.55
+@export var climb_lower: PackedFloat32Array = PackedFloat32Array()
+@export var climb_upper: PackedVector3Array = PackedVector3Array()
+## Stairs_Down's then Stairs_Up's clip at each phase (as the gait's points: STAIRS_DOWN, STAIRS_UP).
+@export var stairs: PackedFloat32Array = PackedFloat32Array()
 ## AIMS samples each (UPPER points each), then one each.
 @export var aim_rifle: PackedVector3Array = PackedVector3Array()
 @export var aim_pistol: PackedVector3Array = PackedVector3Array()
@@ -107,6 +115,8 @@ func is_complete() -> bool:
 			and jump_samples > 1 and jump.size() == SAMPLE * jump_samples \
 			and vault_samples > 1 and vault_lower.size() == SAMPLE * vault_samples \
 			and vault_upper.size() == UPPER * vault_samples \
+			and climb_samples > 1 and climb_lower.size() == SAMPLE * climb_samples \
+			and climb_upper.size() == UPPER * climb_samples and stairs.size() == SAMPLE * phases * 2 \
 			and aim_rifle.size() == UPPER * AIMS and aim_pistol.size() == UPPER * AIMS \
 			and holster.size() == UPPER and sprint.size() == UPPER
 
@@ -151,9 +161,13 @@ class Table:
 
 ## The lower body tables `table` makes, each from its sample field (FIELDS): asked for by these names only, so
 ## `prepare` makes every one a pose can ask for.
-enum Lower { STAND_STILL, CROUCH_STILL, GAIT, CROUCH, JUMP, VAULT }
+enum Lower { STAND_STILL, CROUCH_STILL, GAIT, CROUCH, JUMP, VAULT, CLIMB, STAIRS }
 ## Each Lower table's sample field, in Lower's order.
-const FIELDS: Array[StringName] = [&"stand_still", &"crouch_still", &"gait", &"crouch", &"jump", &"vault_lower"]
+const FIELDS: Array[StringName] = [&"stand_still", &"crouch_still", &"gait", &"crouch", &"jump", &"vault_lower",
+		&"climb_lower", &"stairs"]
+## The stairs table's two points (clip_at): down, then up.
+const STAIRS_DOWN := 0
+const STAIRS_UP := 1
 
 ## The rests (HitFit.rests) as turns, and the tables ready to blend: built once, on first use (or `prepare`).
 var _rests: Array[Quaternion] = []

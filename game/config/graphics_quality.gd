@@ -47,10 +47,11 @@ const LAMP_LIGHTS := &"lamp_lights"
 const GLOW := &"glow"
 const EYE_ADAPTATION := &"eye_adaptation"
 const VOLUMETRIC_FOG := &"volumetric_fog"
+const WEAR_MARKS := &"wear_marks"
 ## Every row, in the Graphics tab's order (data/graphics.md's).
 const ROWS: Array[StringName] = [RENDER_SCALE, UPSCALER, EDGE_SMOOTHING, TEMPORAL_SMOOTHING, SUN_SHADOWS,
 		SHADOW_DETAIL, SHADOW_SOFTNESS, SHADOW_RANGE, AMBIENT_OCCLUSION, BAKED_LIGHT, TEXTURE_FILTERING, MESH_DETAIL,
-		OCCLUSION_CULLING, WIND_DUST, GLOBAL_ILLUMINATION, REFLECTIONS, LAMP_LIGHTS, GLOW, EYE_ADAPTATION, VOLUMETRIC_FOG]
+		OCCLUSION_CULLING, WIND_DUST, WEAR_MARKS, GLOBAL_ILLUMINATION, REFLECTIONS, LAMP_LIGHTS, GLOW, EYE_ADAPTATION, VOLUMETRIC_FOG]
 ## Every choice the game knows for each choice row, by level. The file offers these, or some of them. (Values are Arrays:
 ## Godot 4.7 keeps a const typed dictionary's array values as Arrays, so a PackedStringArray value type misreads them.)
 const CHOICES: Dictionary[StringName, Array] = {
@@ -71,6 +72,7 @@ const CHOICES: Dictionary[StringName, Array] = {
 	GLOW: ["off", "on"],
 	EYE_ADAPTATION: ["off", "on"],
 	VOLUMETRIC_FOG: ["off", "on"],
+	WEAR_MARKS: ["off", "on"],
 }
 ## The widest range the file may give a range row (a typo guard): the render scale within what the viewport takes, in
 ## percent; the shadow range in metres; the dust as a share of EffectsConfig.dust_count, in percent.
@@ -110,6 +112,8 @@ var glow: bool = false
 var eye_adaptation: bool = false
 ## A faint haze the light shines through (shafts and depth).
 var volumetric_fog: bool = false
+## Oil stains and tyre tracks on the floors (WearMarks, WM1).
+var wear_marks: bool = false
 
 
 ## True for a row that is a range of numbers, false for one with named choices.
@@ -200,6 +204,8 @@ func level(row: StringName) -> int:
 			return int(eye_adaptation)
 		VOLUMETRIC_FOG:
 			return int(volumetric_fog)
+		WEAR_MARKS:
+			return int(wear_marks)
 	return GraphicsTable.NO_LEVEL
 
 
@@ -247,6 +253,8 @@ func set_level(row: StringName, value: int) -> void:
 			eye_adaptation = value != 0
 		VOLUMETRIC_FOG:
 			volumetric_fog = value != 0
+		WEAR_MARKS:
+			wear_marks = value != 0
 
 
 func equals(other: GraphicsQuality) -> bool:

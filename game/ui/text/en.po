@@ -60,6 +60,9 @@ msgstr "Ricochet: play on"
 msgid "HUD_VAULT"
 msgstr "%s to vault"
 
+msgid "HUD_CLIMB"
+msgstr "%s to climb"
+
 msgid "HUD_DOOR_OPEN"
 msgstr "%s to open the door"
 
@@ -2513,6 +2516,12 @@ msgstr "EYE ADAPTATION"
 
 msgid "GRAPHICS_EYE_ADAPTATION_NOTE"
 msgstr "The picture brightens slowly in the dark and settles in bright light, as your eyes do, within limits."
+
+msgid "GRAPHICS_WEAR_MARKS"
+msgstr "WEAR MARKS"
+
+msgid "GRAPHICS_WEAR_MARKS_NOTE"
+msgstr "Oil stains and tyre tracks on the floors."
 
 msgid "GRAPHICS_VOLUMETRIC_FOG"
 msgstr "VOLUMETRIC HAZE"

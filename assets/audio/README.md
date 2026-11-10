@@ -87,7 +87,7 @@ seeds the browser game used, so they sound as they did.
   (above), and the flash's bang too since AU6 (all re-cut in AU7), so this renderer only drafts.
 - `cues/door_open_<n>.wav` and `door_shut_<n>.wav` (1 to 5): recorded since AU2, 4 and 5 since AU5; the synthesised draft (DO1)
   renders with `tools/render_doors.gd` to a folder named after `--`.
-- `cues/lift_chime_1.wav`, `lift_doors_1` and `_2`, `lift_motor_1`, `lift_button_1`, `lift_buzz_1` (MT2): Kingsmere's
+- `cues/lift_chime_1.wav`, `lift_doors_1` and `_2`, `lift_motor_1`, `lift_button_1`, `lift_buzz_1` (MT2): Subway's
   lifts (the car's arrival, its doors sliding, setting off, a button's beep, the too-full buzzer), synthesised
   placeholders from `tools/lift_sounds.py` at a 0.7 peak; their levels are SoundConfig's `lift_gain` and
   `lift_button_gain`. To re-render: `python3 tools/lift_sounds.py`, then `godot --headless --path . --import`.

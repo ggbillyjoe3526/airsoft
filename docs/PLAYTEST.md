@@ -564,18 +564,20 @@ Once the rest of step 26 lands:
 - [ ] **Frame time in a night firefight (WL8).** With `--perf`, a 5v5 on Woodland on Low and on High, every BB
   glowing: the overlay's frame time and draws (two more draws while any glowing BB flies). Does it hold the budget?
 
-### Kingsmere (Dev content, MT1)
+### Subway (Dev content, MT1)
 
 A closed metro station on three levels: the Street team starts in the ticket hall at street level, the Tunnel team in
 a cross-passage between the running tunnels, and they swap at half time. Turn on Settings › Dev › Dev content.
 
-- [ ] **Listed only as Dev content (MT1).** With Dev content off, the Match page shows no Kingsmere; on, it does, with
+- [ ] **Listed only as Dev content (MT1).** With Dev content off, the Match page shows no Subway; on, it does, with
   its picture, 5 to 8 a side and 6 standard.
+- [ ] **Named Subway (owner, 2026-11-10).** The Match page's card and the loading screen say Subway (SUBWAY),
+  never Kingsmere. If the last match you played before the rename was on Kingsmere, the Match page opens on Subway.
 - [ ] **Every way down (MT1).** From the ticket hall: the escalators to the concourse and on down to the lower hall;
   the spiral stair in the hall's corner to the booking hall; the ordinary stair from the stair top down past flag B's
   half landing to the platforms. Nothing snags you on a step, a balustrade or a landing.
-- [ ] **The tracks and trains (MT1).** Drop off a platform's edge into the track: there are steps back up at each
-  stretch's end (you can't climb the edge). Walk through the north train's open doors, and the south train from its
+- [ ] **The tracks and trains (MT1, CL1).** Drop off a platform's edge into the track: no steps lead back up; you
+  climb out over the edge (Jump). Walk through the north train's open doors, and the south train from its
   platform doors to its east cab door and down the steps into the south tunnel.
 - [ ] **Close quarters above, long lines below (MT1).** Above the platforms no line runs much past 28 m; the
   platforms open to about 58 m. Does each level play as meant, and do the bots hold and push through all three?
@@ -1067,6 +1069,10 @@ Settings › Graphics › Quality: Low, Medium, High, Ultra or Custom.
   stacks' corners and the cabin's walls on Woodland: the shade in corners and under things should be finer and softer,
   with no flicker or crawling dots when you turn; light should not leak through the tunnel walls. Smooth paint and
   floors should reflect the lamps sharply, not as a blur.
+- [ ] **Wear marks (WM1, your graphics card).** On Medium or up, walk Depot's loading bay, garage and the hall's
+  forklift lanes and Woodland's road by the pickup: oil stains and tyre tracks should sit flat on the
+  floor, never float, stretch up walls or crates, or shimmer as you move; they fade out past about 40 m. Switch
+  Graphics › Wear marks off and on: they go and come back at once.
 
 ## Accessibility
 
@@ -1357,6 +1363,22 @@ Dev content: tick Settings › Dev › Dev content (or Disable levelling), then 
   thicket spruces stand at uneven spacing, never in rows.
 - [ ] **Log stacks.** Walk past the Woodpile and the Log stacks: the log ends stand out of the stack in depth.
 - [ ] **Frame rate.** F3 on Low looking along the stream from the North bridge: 60 FPS.
+
+## Climbing onto a platform and running on stairs (CL1)
+
+Subway is Dev content: tick Settings › Dev › Dev content.
+
+- [ ] **Climb out of the track.** On Subway, drop into a track and run at the platform's edge: "Space to climb"
+  shows; press Jump and you heave up, the view dips and your replica comes low, and you stand on the platform in
+  about half a second, ready to shoot a moment after. From a standstill at the edge it works too. Crouched, or with
+  the edge more than 70° off your view, it doesn't.
+- [ ] **Only ledges.** A crate, a bench or a barrier is still vaulted ("Space to vault"), never climbed; nothing on
+  Depot, Woodland or the Range is climbable.
+- [ ] **Bots climb.** Watch bots crossing the tracks: they drop in and climb out by the same move, never stuck in a
+  pit. Their climb reads as a hand on the edge, a knee up and a step on.
+- [ ] **Stairs.** Watch a bot run up the ordinary stair: it leans into the climb with high knees; running down it sits
+  back a little on softer steps. Its run on the flat is as before, and nothing pops as it reaches the stair's top or
+  foot. A BB at its legs on the stair hits where you see them.
 
 ## Reporting what you find
 
