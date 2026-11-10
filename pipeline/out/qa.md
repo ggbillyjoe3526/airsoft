@@ -1,22 +1,8 @@
-Task: RW1 · QA commit 65cff16 · Verdict: Pass
-
-Blocking: none; no bugs found in the change.
-Advisory (no KNOWN_ISSUES row): replica_paint.gd's worn cache is keyed by the plain material's and the mask's
-instance ids; both clear paths (materials() at MAX_SETS, clear()) also clear `_worn`, so a reused id can't return a
-stale material. If anyone later clears `_sets` alone, the risk comes back.
-
-Checked by test or by reading:
-- Customise turntable repaint: paint swap, realistic toggle and back reuse the same worn material; worn=false
-  repaints plain.
-- OWN paint (Cyber) builds no worn material on any model; sniper and cyber carry no mask and stay plain.
-- clear() mid-match: a live replica keeps its worn material; a later apply builds a new one.
-- Depth press: the pressed copy stays worn (albedo, mask, z_clip_scale), the shared one unpressed, one copy each.
-- Figures and mag toss plain (worn=false); menu pictures and turntable worn, figure meshes on the mask's clean corner.
-- Ten repeat applies build no extra worn materials; all twelve paints in both modes stay within MAX_WORN.
-
-Tests added (tests/unit/test_replica_wear.gd, 7 of its 15): repaint swap and back to plain, no duplicate worn
-materials (both checked against a stubbed cache: they fail), own paint unworn, clean models plain under any paint,
-cache clear keeps a live worn paint, cache bounded, pressed copy keeps colour and mask. 15/15, 396 asserts.
-
-Could not test (needs a display or a person): how the wear looks in play, the first-use compile hitch, look_wear 0,
-the turntable and menu pictures in a viewport.
+QA verdict (0765d76, diff from 1a5e2d3): PASS
+Tests: --import clean. bp7_figures, figure_view, figure_view_cone_qa, hit_call_arm, figure_hit_area, arms_view, play_session: 54/54 pass, 0 failing.
+- merged_without / cache keys: the lit mesh is keyed "key", the holstered copy "key/bare" (plus the materials-named suffix), and the far copy "key/bare/far" when a torch is fitted, otherwise "(made)/far". All distinct, so a lit and an unlit variant can't collide in HeldMerge._made. held is left unchanged: the torch's visibility is restored after the gather and the far version is built with held.mesh swapped to the bare mesh and swapped back. If the lit merge fails (made == ""), the bare mesh is dropped, so no half-lit state.
+- _fit_torches: runs after animate's `_body == null` and not-visible early returns, so there is no null-body crash. It only touches replicas that have a bare mesh. It compares a Mesh reference and assigns only when it differs, so it does one cached swap per holster toggle with no rebuild. The swap looks right for a fading figure (the far child has its own mesh).
+- Torch Rubber: share_own_paint sets per-instance override materials on the part's figure copy, so the shared mesh resource isn't mutated. It runs after the paint is applied and before the merge. The test shows the rifle gaining 2 surfaces (lens and LED) and the pistol 3, as the changelog and KNOWN_ISSUES row say.
+- Beams: has_lens requires a lens (not INF) and a replica. Otherwise TorchBeams falls back to the old muzzle-minus-dir origin, then to the eye drop. lens_of uses the AABB's -Z face (min z), which is the forward face by the replica's axes.
+- Minor: KNOWN_ISSUES quotes "day 133, night 143" for the spawn, a different measure (Forward+ draws under Xvfb) from the bench's headless surface counts (184 vs 184). The two rows read as consistent only if the reader knows that; maybe say so.
+Not verified: the look of the lens on a real display (owner's check).

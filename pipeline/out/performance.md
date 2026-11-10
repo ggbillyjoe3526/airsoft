@@ -1,21 +1,12 @@
-Task: RW1 · head 532010e · Verdict: Pass
-Run: no --perf run (static review while tools/check.sh ran) · budget: no baseline yet, judged against targets and origin/main
-Metrics: not measured (no GPU). No new nodes. Triangles unchanged (replica 40k budget holds; AEG vertices 40,051 ->
-~45,000 from UV seams; figure copy 3,000). Install about +5 MB glb and +3.4 MB png of 500 MB. Two 2048 BPTC masks,
-about 10.6 MB VRAM.
-Regressions (> 10 % worse): none measured.
-Blocking findings: none.
-- replica_wear.gdshader: one texture sample per fragment, a few mix and sqrt, no loops, discard or depth write (judgment).
-- ReplicaPaint.apply / _worn_of run on setup and repaint, not per frame; one shared ShaderMaterial per (paint, mask);
-  cache bounded (MAX_WORN 160) and cleared with clear(); views keep their own references, nothing leaks (judgment).
-- ReplicaView._pressed_copy is cached per source material: one duplicate per view, no per-frame work (judgment).
-- Bots' figure copies and mag tosses stay plain StandardMaterial3D: figure draw cost unchanged.
-- play_session.gd prewarms worn_materials(); every replica and paint shares the one shader.
-Advisory:
-- A paint chosen later in a match builds a new ShaderMaterial on the compiled shader; check for no hitch on first swap
-  to the AEG Rifle or GBB Pistol on the owner's hardware (judgment).
-- replica_view.gd _pressed / _pressed_from never cleared (pre-existing), bounded by distinct materials.
-- On Low the mask is still sampled with look_wear 0.
-- Masks embedded in the glbs duplicate the PNGs (install size only).
-Fixes: none required.
-Unexplained: none. A --perf pair on the owner's machine would confirm node, orphan and static memory counts.
+Task: SL4 · head 3e9bf5e · Verdict: Pass
+Run: no --perf run made (see Unexplained) · budget: no baseline yet, judged against targets and origin/main's diff
+Metrics: not measured. A headless --perf pair (head plus an origin/main worktree, each needing a full project import) would compete with the two `godot --import` processes already running in this box (load ~1, 5 % RAM each) and would skew script-time comparison. The diff adds no node, process or tick code, so node, orphan and memory counts cannot change from it.
+Regressions (> 10 % worse): none measured
+Blocking findings: none
+Advisory (judgment):
+- game/play/replica_paint.gd: new drawn() / paint_saturation() (a ProjectSettings read, a Color lerp) run only when a paint's material is built, and at game/ui/customise_view.gd:675 once per swatch when the screen builds. Materials stay cached and shared (ReplicaPaint.clear() at play_session.gd:1615 is unchanged). No per-frame or per-tick path calls them.
+- Roughness 0.5 to 0.64 and 0.4 to 0.48 are constants; no new material, particle or shader, so no prewarm entry is needed.
+- game/ui/game_theme.gd: Color constants only (DEEP, PLATE added); the navy_box to dark_box rename is a rename. No new allocation, node or connection; no preset bypass.
+- Tests only otherwise.
+Fixes: none needed
+Unexplained: none; the measured run is skipped for the contention above, not for a failure. Run `godot --headless --path . -- --smoke --perf` (and F3 in game) on the owner's PC if wanted.
