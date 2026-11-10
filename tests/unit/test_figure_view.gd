@@ -69,7 +69,7 @@ func test_the_settings_no_longer_carry_rigged_figures_and_an_old_save_still_load
 	old["rigged_figures"] = true
 	old["retro_pixels"] = true
 	dev.from_dict(old)
-	assert_true(dev.retro_pixels, "the rest of an old save reads as saved")
+	assert_true(dev.retro_filter, "the rest of an old save reads as saved")
 	assert_false(SettingsScreen.DEV_SWITCHES.has(&"rigged_figures"), "no Dev row")
 	assert_eq(tr("DEV_RIGGED_FIGURES"), "DEV_RIGGED_FIGURES", "its words gone")
 

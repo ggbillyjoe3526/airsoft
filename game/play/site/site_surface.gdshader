@@ -7,6 +7,7 @@ render_mode blend_mix, cull_back;
 
 // the game's shared light (docs/ART.md › Light)
 #include "res://game/play/look/look_light.gdshaderinc"
+#include "res://game/play/look/retro_vertex.gdshaderinc"
 
 const int CONCRETE = 0;
 const int BLOCK = 1;
@@ -89,22 +90,27 @@ uniform float slab_grain = 0.0;
 uniform float gradient = 0.0;
 uniform float gradient_height = 2.6;
 
-varying vec3 wpos;
+varying vec3 wpos_v; // world position (fragment(): `wpos`)
 varying vec3 wnrm;
 varying flat vec3 box_c;
 varying flat vec3 box_h;
 varying flat int fin;
 varying flat int flags;
 varying vec3 tint_in;
+// The world point for the Retro filter's swimming patterns (retro_affine_in).
+varying vec4 wpos_affine;
 
 void vertex() {
-	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	wpos_v = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	wnrm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	box_c = CUSTOM0.xyz;
 	box_h = CUSTOM1.xyz;
 	fin = clamp(int(CUSTOM0.w + 0.5), 0, FINISHES - 1);
 	flags = int(CUSTOM1.w + 0.5);
 	tint_in = COLOR.rgb;
+	// Dev › Retro filter's swimming canvases (RF1). Their corners never wobble: a floor or a wall is one big face, which
+	// would tilt through the blocks and ground a few cm under it.
+	wpos_affine = retro_affine_in(wpos_v, PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
 }
 
 // Noise from the tiling textures: `fbm` one feature a unit, `cells` stones a unit (x: centre to edge, 0 to 1; y: the
@@ -138,8 +144,8 @@ vec2 face_coords(vec3 p, vec3 n, out vec3 along, out bool top) {
 	return vec2(-p.x * sign(n.z), p.y);
 }
 
-// A unit's paint on a long or stacked container: SiteLook.container_colour picks the same.
-vec3 container_colour() {
+// A unit's paint on a long or stacked container at world point `wpos`: SiteLook.container_colour picks the same.
+vec3 container_colour(vec3 wpos) {
 	bool along_x = box_h.x >= box_h.z;
 	float len_ = (along_x ? box_h.x : box_h.z) * 2.0;
 	int units = len_ > container_split ? max(1, int(round(len_ / container_unit))) : 1;
@@ -159,13 +165,15 @@ vec3 photo_relief(sampler2D nrm, vec2 uv, vec3 n, vec3 along, bool top, float de
 }
 
 void fragment() {
+	// Dev › Retro filter: the canvases laid straight across the screen while it is on (RF1).
+	vec3 wpos = retro_affine_out(wpos_v, wpos_affine);
 	vec3 along;
 	bool top;
 	vec2 c = face_coords(wpos, wnrm, along, top);
 	int mode = modes[fin];
 	vec3 paint = (flags & FLAG_TINT) != 0 ? tint_in : paints[fin];
 	if ((flags & FLAG_PALETTE) != 0) {
-		paint = container_colour();
+		paint = container_colour(wpos);
 	}
 	vec3 accent = accents[fin];
 	vec2 band = bands[fin];

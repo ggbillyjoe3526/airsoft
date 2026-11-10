@@ -296,7 +296,8 @@ arms, figures and replicas use (steps 23 and 28).
 
 The look (AD1): `LookConfig` (`game/config/look_config.gd`, PlayTuning's `look`) holds the light's values, the grade,
 the effects' strengths and the palette; `game/play/look/` holds the shared light (`look_light.gdshaderinc`), the
-vertex-colour shader and `LookMaterials`, and `AreaProbes`; `FieldLighting.set_effects` and `GraphicsApply.apply_field`
+vertex-colour shader and `LookMaterials`, `AreaProbes`, and Dev › Retro filter's corner snap and texture swim
+(`retro_vertex.gdshaderinc`, RF1); `FieldLighting.set_effects` and `GraphicsApply.apply_field`
 switch the effects by the Graphics rows. The site surface, the roof, the CC0 props and the sandbags are drawn in it.
 
 Depot's temporary site dress (DD1, until the owner's models; Depot and the range, by day):

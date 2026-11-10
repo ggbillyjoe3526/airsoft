@@ -41,7 +41,7 @@ const PERCENT_STEP := 1.0
 ## Dev › Time of day's choices in order: the map's own (&""), then LightingConfig's presets.
 const DEV_TIMES: Array[StringName] = [&"", LightingConfig.DAY, LightingConfig.NIGHT]
 const DEV_SWITCHES: Array[StringName] = [&"dev_content", &"disable_levelling", &"bottomless", &"ghost",
-		&"bots_hold_fire", &"bots_run_low", &"spectate_bots", &"bot_intent", &"retro_pixels", &"robots", &"lasers",
+		&"bots_hold_fire", &"bots_run_low", &"spectate_bots", &"bot_intent", &"retro_filter", &"robots", &"lasers",
 		&"pretend_slow_frames", &"skin_arms"]
 ## Dev › Actions' error and crash, in the log (English: the log is read by the developer).
 const DEV_TEST_ERROR := "Dev: a test error (Settings › Dev › Log a test error)"
@@ -104,8 +104,8 @@ var _dev_checks: Dictionary[StringName, CheckButton] = {}
 ## Dev › Time of day: the map's own, then each preset (DEV_TIMES).
 var _time_of_day: MenuChoice = null
 var _speed: HSlider = null
-var _retro_size: HSlider = null
-var _retro_shades: HSlider = null
+var _retro_lines: HSlider = null
+var _retro_levels: HSlider = null
 var _end_round: Button = null
 var _confirm_level: ConfirmationDialog = null
 var _confirm_crash: ConfirmationDialog = null
@@ -515,7 +515,7 @@ func _build_dev() -> void:
 		check.toggled.connect(_on_dev_switch.bind(field))
 		_dev_checks[field] = check
 		explain(check.get_parent() as Control, tr(key + "_HELP"))
-		if field == &"retro_pixels":
+		if field == &"retro_filter":
 			_build_retro_sliders(page)
 	_build_time_of_day(page)
 	add_section(page, tr("DEV_ACTIONS"))
@@ -590,19 +590,19 @@ func _build_dev_checks(page: VBoxContainer) -> Array[Button]:
 	return [error, crash]
 
 
-## Retro pixels' block size and shades, under its switch (BP6).
+## Retro filter's lines and shades, under its switch (BP6, RF1).
 func _build_retro_sliders(page: Control) -> void:
-	_retro_size = add_slider_row(page, "DEV_RETRO_SIZE", RetroPixels.PIXEL_SIZE_MIN, RetroPixels.PIXEL_SIZE_MAX, 1.0,
-			"%d px")
-	_retro_size.value_changed.connect(func(v: float) -> void:
-		settings.dev.retro_pixel_size = roundi(v)
+	_retro_lines = add_slider_row(page, "DEV_RETRO_LINES", RetroFilter.LINES_MIN, RetroFilter.LINES_MAX,
+			RetroFilter.LINES_STEP, "%d")
+	_retro_lines.value_changed.connect(func(v: float) -> void:
+		settings.dev.retro_lines = roundi(v)
 		_changed(true))
-	explain(_retro_size.get_parent() as Control, tr("DEV_RETRO_SIZE_HELP"))
-	_retro_shades = add_slider_row(page, "DEV_RETRO_SHADES", RetroPixels.SHADES_MIN, RetroPixels.SHADES_MAX, 1.0, "%d")
-	_retro_shades.value_changed.connect(func(v: float) -> void:
-		settings.dev.retro_shades = roundi(v)
+	explain(_retro_lines.get_parent() as Control, tr("DEV_RETRO_LINES_HELP"))
+	_retro_levels = add_slider_row(page, "DEV_RETRO_SHADES", RetroFilter.LEVELS_MIN, RetroFilter.LEVELS_MAX, 1.0, "%d")
+	_retro_levels.value_changed.connect(func(v: float) -> void:
+		settings.dev.retro_levels = roundi(v)
 		_changed(true))
-	explain(_retro_shades.get_parent() as Control, tr("DEV_RETRO_SHADES_HELP"))
+	explain(_retro_levels.get_parent() as Control, tr("DEV_RETRO_SHADES_HELP"))
 
 
 func _on_dev_switch(on: bool, field: StringName) -> void:
@@ -675,8 +675,8 @@ func _refresh() -> void:
 	_hud_page.refresh()
 	_access_page.refresh()
 	set_slider(_speed, settings.dev.game_speed * 100.0)
-	set_slider(_retro_size, settings.dev.retro_pixel_size)
-	set_slider(_retro_shades, settings.dev.retro_shades)
+	set_slider(_retro_lines, settings.dev.retro_lines)
+	set_slider(_retro_levels, settings.dev.retro_levels)
 	for field: StringName in DEV_SWITCHES:
 		set_check(_dev_checks[field], settings.dev.get(field) as bool)
 	_time_of_day.put(maxi(0, DEV_TIMES.find(settings.dev.time_of_day)))

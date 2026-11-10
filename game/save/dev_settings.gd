@@ -4,11 +4,11 @@ extends RefCounted
 ## the tab is always there and every switch starts off (owner, 2026-10-29; before, a Dev settings box). Game speed,
 ## bottomless magazines, ghost, bots hold fire, bots run low on BBs, spectate any bot, bot intentions and Disable
 ## levelling keep a match out of the records and give it no XP (DevCheats); Dev content lists maps tagged dev and keeps
-## a match on one out too; Retro pixels changes only the look, and Robots (the hidden Easter egg, owner 2026-10-24) only
+## a match on one out too; Retro filter changes only the look, and Robots (the hidden Easter egg, owner 2026-10-24) only
 ## who is drawn as a robot from the next match (FigureMix; everyone is human while it is off). Disable levelling unlocks
 ## every item to carry; your own level and unlocks stay as they are and come back when it is off. Pretend slow frames
 ## counts every frame of a live round slow for the automatic graphics step-down (FrameWatch), to check it on a fast
-## machine; it changes nothing else. Retro pixels' block size and shades are its sliders' (BP6). Time of day plays every
+## machine; it changes nothing else. Retro filter's lines and shades are its sliders' (BP6, RF1). Time of day plays every
 ## map from the next match by Day or Night whatever it offers (the browser's M90; LightingConfig.PRESETS), or as the map
 ## and the Match page pick (""); forcing one keeps the match out of the records, as the browser's cheat did
 ## (DevCheats.watching: it changes only what you see). Lasers (LZ1, an Easter egg) makes every replica on the field fire
@@ -27,10 +27,11 @@ var bots_hold_fire: bool = false
 var bots_run_low: bool = false
 var spectate_bots: bool = false
 var bot_intent: bool = false
-var retro_pixels: bool = false
-## Retro pixels' block size (screen pixels) and shades a channel (RetroPixels' ends).
-var retro_pixel_size: int = RetroPixels.PIXEL_SIZE
-var retro_shades: int = RetroPixels.SHADES
+var retro_filter: bool = false
+## Retro filter's lines top to bottom and shades a channel (RetroFilter's ends). New keys in RF1: the old filter's
+## block size and shades (`retro_pixel_size`, `retro_shades`) meant another look, so they are not read.
+var retro_lines: int = RetroFilter.LINES
+var retro_levels: int = RetroFilter.LEVELS
 var robots: bool = false
 var lasers: bool = false
 var pretend_slow_frames: bool = false
@@ -58,7 +59,7 @@ func to_dict() -> Dictionary:
 		"dev_content": dev_content, "disable_levelling": disable_levelling, "game_speed": game_speed,
 		"bottomless": bottomless, "ghost": ghost,
 		"bots_hold_fire": bots_hold_fire, "bots_run_low": bots_run_low, "spectate_bots": spectate_bots, "bot_intent": bot_intent,
-		"retro_pixels": retro_pixels, "retro_pixel_size": retro_pixel_size, "retro_shades": retro_shades, "robots": robots, "pretend_slow_frames": pretend_slow_frames,
+		"retro_filter": retro_filter, "retro_lines": retro_lines, "retro_levels": retro_levels, "robots": robots, "pretend_slow_frames": pretend_slow_frames,
 		"lasers": lasers,
 		"skin_arms": skin_arms, "time_of_day": String(time_of_day),
 	}
@@ -78,10 +79,10 @@ func from_dict(data: Dictionary) -> void:
 	bots_run_low = _flag(data, "bots_run_low")
 	spectate_bots = _flag(data, "spectate_bots")
 	bot_intent = _flag(data, "bot_intent")
-	retro_pixels = _flag(data, "retro_pixels")
-	retro_pixel_size = _whole(data, "retro_pixel_size", RetroPixels.PIXEL_SIZE, RetroPixels.PIXEL_SIZE_MIN,
-			RetroPixels.PIXEL_SIZE_MAX)
-	retro_shades = _whole(data, "retro_shades", RetroPixels.SHADES, RetroPixels.SHADES_MIN, RetroPixels.SHADES_MAX)
+	# Saved before RF1 as Retro pixels.
+	retro_filter = _flag(data, "retro_filter") or _flag(data, "retro_pixels")
+	retro_lines = _whole(data, "retro_lines", RetroFilter.LINES, RetroFilter.LINES_MIN, RetroFilter.LINES_MAX)
+	retro_levels = _whole(data, "retro_levels", RetroFilter.LEVELS, RetroFilter.LEVELS_MIN, RetroFilter.LEVELS_MAX)
 	robots = _flag(data, "robots")
 	lasers = _flag(data, "lasers")
 	pretend_slow_frames = _flag(data, "pretend_slow_frames")

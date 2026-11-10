@@ -6,7 +6,7 @@ extends Node3D
 ## teammates against bots on Beta, as many a side as the map plays (data/maps.md: 6v6 on every field, 5v5 to 8v8 in
 ## Custom), Elimination rounds to five wins. Esc pauses; losing focus pauses too. Emits
 ## `left` when the player leaves (to the menus' Match page). The Dev settings apply here and follow every change
-## (game speed, bottomless magazines, ghost, bots hold fire, spectate any bot, bot intentions, Retro pixels, End the
+## (game speed, bottomless magazines, ghost, bots hold fire, spectate any bot, bot intentions, Retro filter, End the
 ## round now): the cheats through the simulation (DevCheats), the views built only while on. The graphics drawn follow
 ## too (GraphicsApply's `applied`: the sun's shadows, ambient occlusion and the wind dust), without rebuilding the field.
 ## Day or night (WL3): the map's first lighting preset unless the Match screen's pick (`lighting_pick`) or Dev › Time
@@ -244,7 +244,7 @@ var _watch_id: int = -1
 var _watch_fire_was: bool = false
 var _watch_input: PlayerCommand = PlayerCommand.new()
 var _intents: BotIntentView = null
-var _retro: RetroPixels = null
+var _retro: RetroFilter = null
 var _rematch_left: float = -1.0
 ## Skipping the round you are out of: the rest is played out at once under the cover with the HUD hidden and no sound;
 ## whether the trigger was up once you could skip (a press made before does not count); the cover and its line.
@@ -2140,12 +2140,15 @@ func _apply_dev() -> void:
 		_hands.skin_arms = dev.skin_arms
 	if _grenades != null:
 		_grenades.set_arms_skin(dev.skin_arms)
-	if dev.retro_pixels and _retro == null:
-		_retro = RetroPixels.new()
+	if dev.retro_filter and _retro == null:
+		_retro = RetroFilter.new()
+		_retro.setup(_lighting)
 		add_child(_retro)
 	if _retro != null:
-		_retro.set_look(dev.retro_pixel_size, dev.retro_shades)
-	if not dev.retro_pixels and _retro != null:
+		_retro.set_look(dev.retro_lines, dev.retro_levels)
+	if not dev.retro_filter and _retro != null:
+		# Out of the tree now, so its look comes off before another could go on.
+		remove_child(_retro)
 		_retro.queue_free()
 		_retro = null
 

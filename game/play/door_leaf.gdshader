@@ -7,6 +7,7 @@ shader_type spatial;
 render_mode blend_mix, cull_back;
 
 #include "res://game/play/look/look_light.gdshaderinc"
+#include "res://game/play/look/retro_vertex.gdshaderinc"
 
 uniform vec4 tint : source_color = vec4(1.0);
 uniform float roughness : hint_range(0.0, 1.0) = 0.85;
@@ -17,6 +18,8 @@ varying vec3 lit;
 void vertex() {
 	// COLOR is the vertex colour times the instance colour (the light down the model's z)
 	lit = COLOR.rgb * mix(vec3(1.0), INSTANCE_CUSTOM.rgb, clamp(0.5 + 0.5 * NORMAL.z, 0.0, 1.0));
+	// Dev › Retro filter: corners on the retro screen's pixels while it is on (RF1).
+	VERTEX = retro_vertex(MODEL_MATRIX, VERTEX, retro_snaps(IN_SHADOW_PASS, PROJECTION_MATRIX));
 }
 
 void fragment() {
