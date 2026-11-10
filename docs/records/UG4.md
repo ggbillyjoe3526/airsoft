@@ -1,12 +1,12 @@
 # UG4 · Ultra's finer light: ambient occlusion, bounce and reflections at the engine's best
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-10 | 1 | thread | see Checks | pending | – |
+| 2026-11-10 | 1 | thread | see Checks | Accept 8/8 | – (a first critic run refused: the full gate had run before the rebase; CI then ran it on the head) |
 
 ## Goal
 
