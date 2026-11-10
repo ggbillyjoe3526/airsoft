@@ -26,6 +26,7 @@ const DEFAULT_PATH := "res://game/config/sim_tuning.tres"
 @export var mag_share: MagShareConfig = MagShareConfig.new()
 @export var grenades: GrenadeConfig = GrenadeConfig.new()
 @export var doors: DoorConfig = DoorConfig.new()
+@export var lifts: LiftConfig = LiftConfig.new()
 @export var lasers: LaserConfig = LaserConfig.new()
 
 

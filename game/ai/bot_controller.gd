@@ -48,8 +48,8 @@ var _ran_low: bool = false
 ## team at its level in `team_levels` (team: a MatchOptions.BOT_LEVELS id; a team not in it plays Easy, the baseline),
 ## each with its name and personality in `identities` (by character id, BotRoster.draw; a bot not in it has neither).
 ## Their first plan comes with the match's first ROUND_START (observe). `options` (null: the defaults) says whether
-## they talk and may bring the map's cover already found; the vault links are found here unless the grid has them
-## (NavVaults.link does nothing on a grid already linked).
+## they talk and may bring the map's cover already found; the vault and lift links are found here unless the grid has
+## them (NavVaults.link and NavLifts.link do nothing on a grid already linked).
 func _init(state: GameState, player_id: int, map: MapData, nav: NavGrid, query: WorldQuery, tuning: SimTuning,
 		config: BotConfig, team_levels: Dictionary[int, StringName] = {},
 		identities: Dictionary[int, BotRoster.Identity] = {}, options: Options = null) -> void:
@@ -63,6 +63,7 @@ func _init(state: GameState, player_id: int, map: MapData, nav: NavGrid, query: 
 	w.nav = nav
 	w.query = query
 	NavVaults.link(nav, query, tuning.vault, tuning.body, config.vault_price)
+	NavLifts.link(nav, query, tuning.lifts, tuning.movement.run_speed, config.lift_wait)
 	w.characters = state.characters
 	w.lanes = map.lanes
 	var cover := options.cover
@@ -75,6 +76,7 @@ func _init(state: GameState, player_id: int, map: MapData, nav: NavGrid, query: 
 	w.mag_share = MagShare.new(tuning, query)
 	w.grenades = state.grenades
 	w.doors = state.doors
+	w.lifts = state.lifts
 	for c in state.characters:
 		if c.id != player_id:
 			var skill := config.skill_for(team_levels[c.team]) if team_levels.has(c.team) else config.skill

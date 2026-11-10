@@ -87,6 +87,10 @@ seeds the browser game used, so they sound as they did.
   (above), and the flash's bang too since AU6 (all re-cut in AU7), so this renderer only drafts.
 - `cues/door_open_<n>.wav` and `door_shut_<n>.wav` (1 to 5): recorded since AU2, 4 and 5 since AU5; the synthesised draft (DO1)
   renders with `tools/render_doors.gd` to a folder named after `--`.
+- `cues/lift_chime_1.wav`, `lift_doors_1` and `_2`, `lift_motor_1`, `lift_button_1`, `lift_buzz_1` (MT2): Kingsmere's
+  lifts (the car's arrival, its doors sliding, setting off, a button's beep, the too-full buzzer), synthesised
+  placeholders from `tools/lift_sounds.py` at a 0.7 peak; their levels are SoundConfig's `lift_gain` and
+  `lift_button_gain`. To re-render: `python3 tools/lift_sounds.py`, then `godot --headless --path . --import`.
 - `cues/boltCycle_<n>.wav` (1 to 3): recorded since AU2 (the pistol's slide), his rifle bolt since AU6; the
   synthesised draft (SN1) renders with `tools/render_bolt.gd` to a folder named after `--`.
 - Not baked in: the room reverb and distance muffling, which were applied live; in Godot they belong to the audio buses

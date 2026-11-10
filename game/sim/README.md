@@ -49,6 +49,7 @@ and, on the range, `test_range_map.gd`).
 | `range_challenge.gd` | The range's timed challenge: ready on the START plate, a counted-down start, lit targets picked from the match's stream for a timed run, cues as `CHALLENGE` events, and the run's best (none with a Dev cheat on since START) |
 | `flag.gd`, `flag_state.gd` | Attack / Defend's flag: attackers at the pole raise it, defenders pull it down, both hold it still |
 | `overtime_flag.gd` | `OvertimeFlag`: Elimination's overtime flag (OV1): up at the map's spot when the clock runs out with both teams in play (an OVERTIME event), the first team with a player in play within reach of its foot wins the round (`RoundEnd.OVERTIME_FLAG`), both teams there hold each other off, untouched for `OvertimeConfig.time` a draw played again |
+| `lift_spec.gd`, `lift_state.gd`, `lifts.gd` | Lifts (MT2). `LiftSpec`: one lift from the map (its well, the door on one face, its stops' floors and names, the stop it waits at) and where its doorways, landings, call buttons and panel stand. `LiftState`: each car's height, stop, phase (open, shutting, moving, opening), doors and calls in `GameState.lifts`. `Lifts`: calls and the panel's buttons (Use: by view, or a bot's pick), doors that won't shut on a body in the doorway, over `LiftConfig.capacity` (the buzzer) or with anyone hit aboard, the car riding to the nearest called stop ahead (stopping on the way) and carrying its riders before they move; cues as `LIFT` events |
 
 ## Not yet
 

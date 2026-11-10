@@ -96,6 +96,7 @@ at its level, never how well (`BotPersonality`).
 | `bot_angles.gd` | Held angles: the corners and doorways in view where someone would step out, from the level's walls alone |
 | `bot_cover.gd` | Crouch cover and lean spots at tall corners that hide a bot from a threat |
 | `bot_movement.gd`, `bot_routes.gd` | Lanes, holds, hunting, searching, strafing, keeping apart; planning nav routes within the tick's search budget and following them |
+| `bot_lifts.gd` | `BotLifts`: a route's lift leg walked as a player would (MT2): on the landing it calls the car (once) or opens its shutting doors, boards with room aboard, to its own spot, presses its stop and stands, then walks out; past `BotConfig.lift_patience` on the landing it walks instead; on a leg on foot from inside a car it waits for the doors |
 | `round_planner.gd` | Each round's team plans and lanes (a flanker's own, an anchor's short one, attackers to the middle, defenders their first points), and hunt spots from the team's memory |
 | `bot_flag.gd` | Attack / Defend: each bot's side, which attacker raises the flag and which defenders pull it down, when a bot wants the pole; when it goes for Elimination's overtime flag, and where flag mode heads |
 | `squad_orders.gd`, `squad_order_book.gd` | Squad orders: carrying each out (Follow me's spots and pace, Hold here's spot and each holder's place, Regroup); the orders in force, handed out and ended |

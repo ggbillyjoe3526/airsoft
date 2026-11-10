@@ -27,6 +27,10 @@ var railings: Railings = Railings.new()
 var door_centers: PackedVector3Array = PackedVector3Array()
 var door_halves: PackedVector3Array = PackedVector3Array()
 var door_starts_shut: PackedByteArray = PackedByteArray()
+## The level's lifts (MT2), in the map's order: each car's well, door and stops (LiftSpec). Filled once by whoever
+## builds the level (MapLevel from MapData.lifts; tests through add_lift). Where each car is now is the game's
+## (LiftState); the simulation tells the level with set_lift_car and set_lift_door.
+var lifts: Array[LiftSpec] = []
 ## bb_ray's bar, reused.
 var _bar_hit: RayHit = RayHit.new()
 
@@ -98,4 +102,25 @@ func door_count() -> int:
 
 ## Makes door `i`'s leaf solid (shut) or nothing at all (open) to rays and movers, from this call on.
 func set_door_shut(_i: int, _shut: bool) -> void:
+	pass
+
+
+## Lists lift `spec` (MT2) with LiftConfig `cfg`'s car. Implementations add its car's floor and roof, steel, and a
+## steel leaf in each stop's doorway, solid until told (set_lift_car, set_lift_door).
+func add_lift(spec: LiftSpec, _cfg: LiftConfig) -> void:
+	lifts.append(spec)
+
+
+## How many lifts the level has.
+func lift_count() -> int:
+	return lifts.size()
+
+
+## Moves lift `i`'s car (its floor and roof) so its floor's top is at `y`, for rays and movers from this call on.
+func set_lift_car(_i: int, _y: float) -> void:
+	pass
+
+
+## Makes lift `i`'s doorway at stop `k` solid (shut) or nothing at all (open) to rays and movers, from this call on.
+func set_lift_door(_i: int, _k: int, _shut: bool) -> void:
 	pass

@@ -69,10 +69,12 @@ func on_tick(state: GameState, listener: Character) -> void:
 				var shooter := state.character(e.actor)
 				if shooter != null:
 					_hear(shooter, e.position, _cfg.shot_reach * heard_scale(shooter, e.slot), Sound.SHOT, listener)
-			GameEvent.Kind.FOOTSTEP, GameEvent.Kind.VAULT, GameEvent.Kind.PROP_KNOCK, GameEvent.Kind.DOOR:
+			GameEvent.Kind.FOOTSTEP, GameEvent.Kind.VAULT, GameEvent.Kind.PROP_KNOCK, GameEvent.Kind.DOOR, \
+					GameEvent.Kind.LIFT:
 				var walker := state.character(e.actor)
 				if walker != null:
 					var reach := e.reach if e.kind == GameEvent.Kind.PROP_KNOCK or e.kind == GameEvent.Kind.DOOR \
+							or e.kind == GameEvent.Kind.LIFT \
 							else _cfg.step_reach * e.carry
 					_hear(walker, walker.position, reach, Sound.STEP, listener)
 			GameEvent.Kind.CHARACTER_HIT:

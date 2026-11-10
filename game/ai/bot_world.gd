@@ -42,6 +42,8 @@ var mag_share: MagShare = null
 var grenades: Array[Grenade] = []
 ## The level's doors as the round has left them (GameState.doors, DO1).
 var doors: DoorState = null
+## The level's lifts as the round has left them (GameState.lifts, MT2).
+var lifts: LiftState = null
 ## The field's start mode (RoundState.start_mode, NA1): below AUTO, the bots keep to it and go full auto only for an
 ## open shot (BotFireMode).
 var start_mode: ReplicaConfig.FireMode = ReplicaConfig.FireMode.AUTO

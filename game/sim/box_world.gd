@@ -26,6 +26,11 @@ var box_clear: PackedByteArray = PackedByteArray()
 var box_railing: PackedByteArray = PackedByteArray()
 ## Each door's box (WorldQuery.add_door), by door.
 var _door_box: PackedInt32Array = PackedInt32Array()
+## Each lift's car floor box (its roof the next), and its first doorway's box (the rest follow, a stop each), by lift.
+var _lift_box: PackedInt32Array = PackedInt32Array()
+var _lift_door_box: PackedInt32Array = PackedInt32Array()
+## Each lift's car's floor and roof thickness and height inside (m), by lift, to move its boxes.
+var _lift_slabs: PackedVector3Array = PackedVector3Array()
 var body: BodyConfig = null
 
 
@@ -75,6 +80,33 @@ func add_door(center: Vector3, size: Vector3, shut: bool) -> void:
 
 func set_door_shut(i: int, shut: bool) -> void:
 	box_off[_door_box[i]] = 0 if shut else 1
+
+
+## Adds a lift's car (a steel floor and roof at its first stop) and a steel box in each stop's doorway, all solid
+## (WorldQuery.add_lift).
+func add_lift(spec: LiftSpec, cfg: LiftConfig) -> void:
+	super(spec, cfg)
+	var y := spec.stops[0]
+	_lift_box.append(box_min.size())
+	_lift_slabs.append(Vector3(cfg.floor_thickness, cfg.roof_thickness, cfg.car_height))
+	add_box(spec.floor_center(y, cfg), spec.slab_size(cfg.floor_thickness), RayHit.Surface.METAL)
+	add_box(spec.roof_center(y, cfg), spec.slab_size(cfg.roof_thickness), RayHit.Surface.METAL)
+	_lift_door_box.append(box_min.size())
+	for k in spec.stop_count():
+		add_box(spec.door_center(k), spec.door_size(), RayHit.Surface.METAL)
+
+
+func set_lift_car(i: int, y: float) -> void:
+	var b := _lift_box[i]
+	var s := _lift_slabs[i]
+	box_min[b].y = y - s.x
+	box_max[b].y = y
+	box_min[b + 1].y = y + s.z
+	box_max[b + 1].y = y + s.z + s.y
+
+
+func set_lift_door(i: int, k: int, shut: bool) -> void:
+	box_off[_lift_door_box[i] + k] = 0 if shut else 1
 
 
 ## Adds a bush standing on `foot`, `radius` across and `height` tall (WorldQuery.foliage): nothing a ray or a mover

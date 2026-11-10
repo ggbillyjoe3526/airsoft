@@ -13,7 +13,8 @@ x1). Rooms that touch along an edge, with their air overlapping at least OPEN m,
 other edge of a room gets a wall, and every room a floor and a ceiling. A sealed edge (a train's side, the spiral
 stair's well) is walled from the inside but for its `gaps`. BLOCKS are the cover, `h` m over the floor they stand on.
 The links between levels: two upper escalators (0 to -10), two lower ones (-10 to -18), one spiral stair (0 to -10)
-and one ordinary stair (-10 to -18, a half landing on the way). The two lift shafts stand where the lifts will run.
+and one ordinary stair (-10 to -18, a half landing on the way), and two lifts (LIFTS: 0, -10 and -18) in a pair of
+shafts by the ticket hall's gate line.
 
 Edit this file, then run `python3 tools/kingsmere/build_map.py` to write data/maps/kingsmere.json.
 """
@@ -47,7 +48,6 @@ for z0, z1 in [(-9.5, -8), (-7, -6), (-5, -4), (-3, -2), (2, 3), (4, 5), (6, 7),
     block("cabinet", G, -51, -50.4, z0, z1, 1.0)           # ticket gates
 block("cabinet", G, -55.0, -54.4, 2.5, 8.0, 2.0)           # ticket machines
 block("pillar", G, -50.2, -49.2, -0.5, 0.5, 6.0)           # hall column in the gate line
-block("wall", G, -46.3, -40.8, -1.2, 1.2, 6.0, 0x9c978d)  # the lift shafts (the lifts come in a later step)
 
 # The spiral stair's well: 5 x 5 m in the hall's north-east corner, down to the lower booking hall. Its flights are
 # built by build_map.py (SPIRAL); its rail round the hole in the hall floor here.
@@ -197,6 +197,20 @@ block("crate", T, 69.5, 70.9, -10.4, -9.0, 1.4)   # cable drum
 block("container", T, 55, 59, -12.4, -10.6, 2.2, 0x7d7a72)   # ballast wagons, staggered
 block("container", T, 64.5, 68.5, -11.0, -9.2, 2.2, 0x7d7a72)
 block("cabinet", T, 66, 68, 9.3, 10.6, 1.2)
+
+# ---------------- The lifts (MT2) ----------------
+# Two shafts side by side, x -46.3 to -40.8 and z -1.2 to 1.2, their walls SHAFT_T thick and a partition between,
+# from a pit under the platforms up to the ticket hall's ceiling; build_map.py cuts them out of the shell and walls
+# them, a door in the north wall at each stop. Each car runs in its well (inside the walls), its doors facing north
+# (-z) onto the hall, the booking hall (west car) or its south end (east car) and the lift landing. The concept's
+# defaults (2026-11-10): one car waits at the hall, the other at the platforms.
+SHAFT = dict(x0=-46.3, x1=-40.8, z0=-1.2, z1=1.2, pit=0.5, top=G + 6.0)
+SHAFT_T = 0.3
+LIFT_DOOR_W = 1.1    # each car's door, centred on its well
+LIFT_DOOR_H = 2.1
+LIFTS = [dict(name="west", x0=-46.0, x1=-43.7, start=G), dict(name="east", x0=-43.4, x1=-41.1, start=P)]
+LIFT_STOPS = [P, C, G]
+LIFT_STOP_NAMES = ["Platforms", "Concourse", "Ticket hall"]
 
 # ---------------- Ends, flags, lanes ----------------
 SPAWNS_W = [(x, z) for x in (-60.6, -58.6) for z in (-4.5, -1.5, 1.5, 4.5)]

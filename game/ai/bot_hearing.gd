@@ -47,7 +47,8 @@ static func observe(state: GameState, w: BotWorld) -> void:
 				if thrower != null and Elimination.is_in_play(thrower):
 					var reach := w.cfg.bang_hearing if e.kind == GameEvent.Kind.FLASH_BANG else w.cfg.pop_hearing
 					_hear(w, thrower, e.position, e.position, reach, null, e.position)
-			GameEvent.Kind.DOOR:
+			GameEvent.Kind.DOOR, GameEvent.Kind.LIFT:
+				# A door, or a lift's chime, doors or motor (MT2): news of whoever worked it, at the door.
 				var user := _character(w, e.actor)
 				if user != null and Elimination.is_in_play(user):
 					_hear(w, user, e.position, e.position, e.reach, null, e.position, false, false, false)
