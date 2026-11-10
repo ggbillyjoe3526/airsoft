@@ -62,17 +62,29 @@ func _tracks(map: MapData, cfg: MarksConfig, look: LookConfig, m: WearMark) -> v
 	var pieces := maxi(1, ceili(m.length / maxf(cfg.track_piece, SHORTEST)))
 	var points := m.path(pieces)
 	var paint := _paint(look, cfg.mud_colour if m.mud else cfg.rubber_colour, cfg.rubber_opacity)
-	for i in pieces:
-		var from := points[i]
-		var to := points[i + 1]
-		var along := to - from
-		var heading := atan2(along.x, -along.y)
-		var across := Vector2(cos(heading), sin(heading)) * cfg.track_gauge * 0.5
-		for wheel: float in [-1.0, 1.0]:
+	for wheel: float in [-1.0, 1.0]:
+		# each wheel's own path, the middle's set off square to it at every point, so on a bend the outer wheel's
+		# pieces are longer and the inner's shorter and they still meet end to end
+		var track := PackedVector2Array()
+		for i in points.size():
+			var ahead := points[mini(i + 1, pieces)] - points[maxi(i - 1, 0)]
+			var heading := atan2(ahead.x, -ahead.y)
+			track.append(points[i] + Vector2(cos(heading), sin(heading)) * cfg.track_gauge * 0.5 * wheel)
+		for i in pieces:
+			var along := track[i + 1] - track[i]
 			var d := _decal(cfg, Vector3(cfg.tread_width, cfg.box_height, along.length()))
-			d.texture_albedo = WearMarkArt.tread()
+			d.texture_albedo = WearMarkArt.tread(m.mud, _piece(i, pieces))
 			d.modulate = paint
-			_place(d, map, m, (from + to) * 0.5 + across * wheel, heading)
+			_place(d, map, m, (track[i] + track[i + 1]) * 0.5, atan2(along.x, -along.y))
+
+
+## Which piece of a pair's `pieces` the `i`th is: its first fades in, its last fades out.
+static func _piece(i: int, pieces: int) -> WearMarkArt.Piece:
+	if pieces == 1:
+		return WearMarkArt.Piece.ONLY
+	if i == 0:
+		return WearMarkArt.Piece.FIRST
+	return WearMarkArt.Piece.LAST if i == pieces - 1 else WearMarkArt.Piece.MIDDLE
 
 
 func _trail(map: MapData, cfg: MarksConfig, look: LookConfig, m: WearMark, rng: RandomNumberGenerator) -> void:
@@ -87,7 +99,7 @@ func _trail(map: MapData, cfg: MarksConfig, look: LookConfig, m: WearMark, rng: 
 		var d := _decal(cfg, Vector3(cfg.print_width, cfg.box_height, cfg.print_length))
 		d.texture_albedo = WearMarkArt.boot(left)
 		# a trail fades as the boots wipe clean
-		d.modulate = Color(paint, paint.a * (1.0 - 0.5 * float(i) / points.size()))
+		d.modulate = Color(paint, paint.a * (1.0 - cfg.trail_fade * float(i) / points.size()))
 		_place(d, map, m, points[i] + side, heading + rng.randf_range(-cfg.print_wobble, cfg.print_wobble))
 
 

@@ -22,6 +22,10 @@ extends Resource
 @export var track_gauge: float = 1.3
 @export var tread_width: float = 0.24
 @export var track_piece: float = 2.0
+## A muddy tread's lug pitch (m, from one lug to the next along it: a pickup's or a van's tyre), and how far (m) a pair
+## of tracks fades in at its start and out at its end.
+@export var lug_pitch: float = 0.065
+@export var track_fade: float = 1.5
 ## A boot print's length and width (m), and a trail's stride (m, from one print to the next, left and right in turn)
 ## and the gap between its feet (m).
 @export var print_length: float = 0.3
@@ -30,6 +34,8 @@ extends Resource
 @export var feet_gap: float = 0.2
 ## How far (rad) a print turns off the trail's heading at random, either way, and a stain's stretch at random.
 @export var print_wobble: float = 0.12
+## How much of a trail's colour its last print has lost, as the boots wipe clean along it (0-1).
+@export var trail_fade: float = 0.5
 @export var stain_stretch: float = 0.3
 
 @export_group("Decals")
@@ -40,7 +46,9 @@ extends Resource
 ## A mark fades out from `fade_from` m away over `fade_over` m (drawn by nobody beyond).
 @export var fade_from: float = 40.0
 @export var fade_over: float = 10.0
-## The marks' pictures: a stain's and a print's size (px a side), a tread's tile (px across and along).
+## The marks' pictures: a stain's and a print's size (px a side), a muddy tread's piece (px across and along: enough
+## along for its lugs at their pitch over `track_piece`) and a hard floor's smoother smear's.
 @export var stain_pixels: int = 128
 @export var print_pixels: Vector2i = Vector2i(48, 128)
-@export var tread_pixels: Vector2i = Vector2i(32, 128)
+@export var tread_pixels: Vector2i = Vector2i(32, 512)
+@export var smear_pixels: Vector2i = Vector2i(32, 128)

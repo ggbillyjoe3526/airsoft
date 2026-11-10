@@ -143,7 +143,7 @@ func test_the_pictures_are_painted_once_and_the_tread_tiles() -> void:
 	assert_same(WearMarkArt.stain(), stain, "painted once")
 	assert_not_null(WearMarkArt.stain_orm())
 	assert_ne(WearMarkArt.boot(true), WearMarkArt.boot(false), "a left print and a right")
-	var tread := WearMarkArt.tread().get_image()
+	var tread := WearMarkArt.tread(true, WearMarkArt.Piece.MIDDLE).get_image()
 	var h := tread.get_height()
 	var seam := 0.0
 	var inside := 0.0
@@ -151,3 +151,70 @@ func test_the_pictures_are_painted_once_and_the_tread_tiles() -> void:
 		seam += absf(tread.get_pixel(x, 0).a - tread.get_pixel(x, h - 1).a)
 		inside += absf(tread.get_pixel(x, floori(h * 0.5)).a - tread.get_pixel(x, floori(h * 0.5) - 1).a)
 	assert_lte(seam, inside * 1.5 + 0.5, "its top and bottom rows meet like any two rows, so pieces laid end to end join")
+
+
+func _pair(length: float, bend: float) -> WearMarks:
+	var map := MapData.new()
+	var m := WearMark.new()
+	m.kind = WearMark.TYRES
+	m.length = length
+	m.bend = bend
+	m.y = 0.0
+	map.marks = [m]
+	return _marks(map)
+
+
+func test_a_bending_pairs_pieces_meet_wheel_by_wheel() -> void:
+	var decals := _pair(12.0, 90.0).decals()
+	var pieces := decals.size() / 2
+	for wheel in 2:
+		for i in pieces - 1:
+			var a := decals[wheel * pieces + i]
+			var b := decals[wheel * pieces + i + 1]
+			# a piece's far end (its local -z, half its length on) and the next one's near end
+			var a_end := a.position + a.basis * Vector3(0.0, 0.0, -a.size.z * 0.5)
+			var b_start := b.position + b.basis * Vector3(0.0, 0.0, b.size.z * 0.5)
+			assert_almost_eq(a_end.distance_to(b_start), 0.0, 0.001, "wheel %d, piece %d meets the next" % [wheel, i])
+
+
+func test_a_pair_fades_in_at_its_start_and_out_at_its_end() -> void:
+	var decals := _pair(9.0, 0.0).decals()
+	var pieces := decals.size() / 2
+	assert_gt(pieces, 2)
+	for wheel in 2:
+		var first := decals[wheel * pieces]
+		assert_same(first.texture_albedo, WearMarkArt.tread(false, WearMarkArt.Piece.FIRST))
+		assert_same(decals[wheel * pieces + 1].texture_albedo, WearMarkArt.tread(false, WearMarkArt.Piece.MIDDLE))
+		assert_same(decals[wheel * pieces + pieces - 1].texture_albedo, WearMarkArt.tread(false, WearMarkArt.Piece.LAST))
+	var only := _pair(1.0, 0.0).decals()
+	assert_eq(only.size(), 2)
+	assert_same(only[0].texture_albedo, WearMarkArt.tread(false, WearMarkArt.Piece.ONLY))
+	var first_img := WearMarkArt.tread(false, WearMarkArt.Piece.FIRST).get_image()
+	var h := first_img.get_height()
+	var mid := first_img.get_width() / 2
+	# the picture's bottom row is where the wheel rolled from
+	assert_lt(first_img.get_pixel(mid, h - 1).a, 0.05, "faded in from nothing at its start")
+	assert_gt(first_img.get_pixel(mid, 0).a, 0.3, "full by its end")
+
+
+func test_a_muddy_tread_has_lugs_at_a_real_tyres_pitch() -> void:
+	WearMarkArt.ensure(play.marks)
+	var img := WearMarkArt.tread(true, WearMarkArt.Piece.MIDDLE).get_image()
+	var x := img.get_width() / 2
+	var edges := 0
+	var was := img.get_pixel(x, 0).a > 0.5
+	for y in img.get_height():
+		var on := img.get_pixel(x, y).a > 0.5
+		if on != was:
+			edges += 1
+		was = on
+	var lugs := edges / 2.0
+	var pitch := play.marks.track_piece / lugs
+	assert_between(pitch, 0.04, 0.1, "a lug every %.3f m along the middle of the tread" % pitch)
+
+
+func test_a_boot_print_has_a_sole_outline_narrow_at_the_arch() -> void:
+	assert_eq(WearMarkArt.sole_half(0.0), 0.0, "nothing before the toe")
+	assert_eq(WearMarkArt.sole_half(1.0), 0.0, "nothing past the heel")
+	assert_lt(WearMarkArt.sole_half(WearMarkArt.ARCH_AT), WearMarkArt.sole_half(0.3), "the arch narrower than the ball")
+	assert_lt(WearMarkArt.sole_half(WearMarkArt.ARCH_AT), WearMarkArt.sole_half(0.8), "and than the heel")

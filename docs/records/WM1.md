@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-10 | 1 | thread | see Checks | pending | – |
+| 2026-11-10 | 1 | thread | CI green on 4421a30 | Retry 6/8 | – |
+| 2026-11-10 | 2 | thread | see Checks | pending | critic: Depot's marks too faint, tracks' tread toy-sized and cut off mid-road, prints dots, unnamed constants, bends' gaps |
 
 ## Goal
 
@@ -24,12 +25,16 @@ names them, scaling per preset.
   half from the floor faded out, distance-faded from 40 m. Colours from the look's palette (a new `oil`, `rubber`,
   `umber` for dust, `mud_wet`), strengths and shapes in `MarksConfig` (PlayTuning.marks).
 - **Pictures:** `WearMarkArt` paints them once at load from noise, with mipmaps (without, a print a few metres off
-  faded to nothing): a ragged stain with splashes, darker and shinier (its ORM's roughness) in the middle; one wheel's
-  slanted-lug tread whose top and bottom meet, so pieces join; a left boot's print and its mirror.
+  faded to nothing): a ragged stain with splashes, darker and shinier (its ORM's roughness) in the middle; on a hard
+  floor a smooth streaked rubber smear, outdoors a muddy tread with lugs at a real tyre's pitch (`lug_pitch`, 6.5 cm),
+  each a little different; a pair's first and last pieces fade in and out over `track_fade` (1.5 m); a boot's sole
+  outline (narrow at the arch, the heel set off by its breast) with a firm rim and rows of lugs, and its mirror.
+- **Bends:** each wheel is laid along its own path, set off square to the middle's at every point, so on a bend the
+  pieces still meet end to end.
 - **Graphics row** Wear marks, off on Low, on from Medium (Forward+ and Mobile: Compatibility draws no decals), under
   Light and detail, set by `GraphicsApply.apply_field`.
 - **Placed:** Depot 16 (8 oil, 4 tracks: Loading bay, Garage, the hall's forklift lanes; 4 dusty trails), 87 decals;
-  Woodland 7 (the pickup's muddy tracks up the road, an oil drip by it, 5 muddy trails out of the mud puddles).
+  Woodland 7 (the pickup's muddy tracks from the culvert's wet banks along the road to the verge where it stands, an oil drip by it, 5 muddy trails out of the mud puddles).
 
 ## Defaults taken
 
@@ -48,5 +53,6 @@ names them, scaling per preset.
 ## Known issues left
 
 - A mark's box reaches 25 cm above the floor, so a figure standing on one takes it on its soles.
-- Painting the pictures takes about 28 ms once per run (performance, measured headless), a little over one staged
-  build slice on the loading screen of the first match; later matches reuse them. Left as it is.
+- Painting the pictures takes about 47 ms once per run (measured headless; the muddy tread's real-scale lugs need a
+  longer picture), a few staged build slices on the loading screen of the first match; later matches reuse them.
+  Left as it is.
