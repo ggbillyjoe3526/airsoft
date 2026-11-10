@@ -25,7 +25,7 @@ sets the **colour, light and materials, not what may appear** (owner, 2026-10-31
 The Dev 2 look (Valorant's forms with Breath of the Wild's light, clean vibrant paint) is history: `docs/DECISIONS.md`.
 Built in steps: SL1 the light, grade and paint; SL2 material wear in the shared shaders; SL3 Depot's roof and hall
 frames repainted (galvanised grey steel, a pale grey liner, red sprinkler mains) and the map pictures rendered again;
-SL4 players, replicas and UI.
+SL4 the menus, HUD and replica paint toned to match (the figures' kit already was).
 
 ## The field kit
 
