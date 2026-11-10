@@ -1,6 +1,6 @@
 # UG2 · No sun indoors: Depot's hall lit by its lamps alone on High and Ultra
 
-**Review:** pending (attempt 3, after the owner's rework)
+**Review:** 3 attempts · critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | 2026-11-09 | 1 | thread | see Checks | Retry 7/8 | the shade and lamps didn't cover the hall past 70 m from the eye; Sun shadows off still shaded |
 | 2026-11-09 | 2 | thread | see Checks | Accept 8/8 | – (then reworked at the owner's word, below) |
-| 2026-11-10 | 3 | thread | see Checks | pending | – |
+| 2026-11-10 | 3 | thread | see Checks | Accept 7/8 | – (record and wrapping fixes in the same push) |
 
 ## Goal
 
@@ -24,7 +24,7 @@ with its lamps alone, with deep shadows, keeping the wide, soft lamp look of his
 - **No sun under the roof** (`RoofLamps.key_share`, `RoofConfig.lamp_sun_share` 0): while the lamps shine,
   `FieldLighting.set_key_share` puts the sun out and hides it, so its shadow passes go too. Low and Medium keep the
   overhead light as the lamps' stand-in (no real lamps there); an open field keeps its sun on every preset.
-- **Less sky light** (`RoofLamps.ambient_share`, `lamp_ambient_share` 0.3, `FieldLighting.set_ambient_share`): the
+- **Less sky light** (`RoofLamps.ambient_share`, `lamp_ambient_share` 0.6, `FieldLighting.set_ambient_share`): the
   environment's ambient light (High's) drops, so shadows stay deep. On Ultra the bounce light (SDFGI) traces the sky
   instead of using the ambient, so `RoofLamps` puts the roof's ceiling into it while the lamps shine
   (GI_MODE_STATIC; out of it as before for the stand-in): the sky no longer lights the hall through the roof and the

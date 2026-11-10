@@ -6,8 +6,8 @@ extends Node3D
 ## MultiMesh: the high-bay model with its glowing lens, or a glowing panel without it), and a real light under each lamp
 ## (RoofLamps) that Graphics › Lamp light switches on, lighting the hall alone (no sun gets indoors). The roof and lamps
 ## themselves cast no shadow, so the preset's overhead light stands in for the lamps through them where they aren't
-## real lights (Low, Medium). Look only: the BB ceiling
-## is MapLevel's; nothing here is read by the simulation. Built once, nothing per frame.
+## real lights (Low, Medium). Look only: the BB ceiling is MapLevel's; nothing here is read by the simulation. Built
+## once, nothing per frame.
 
 ## How far (m) over the roof's underside the ceiling slab starts when the bays' sheet is drawn under it.
 const CEILING_LIFT := 0.01
