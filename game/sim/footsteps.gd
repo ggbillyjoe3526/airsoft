@@ -25,8 +25,8 @@ static func step(c: Character, cfg: FootstepConfig, events: SimEvents, query: Wo
 			c.step_distance = 0.0
 			return
 	var hushed := c.walking or c.crouch_amount > cfg.silent_crouch
-	var wet := c.in_water or (query.water != null and query.water.depth_at(c.position) > 0.0)
-	var quiet := hushed and not wet
+	# Only a hushed step asks whether it is in water (a run splashes or not in _send either way).
+	var quiet := hushed and not (c.in_water or (query.water != null and query.water.depth_at(c.position) > 0.0))
 	if quiet and not c.armament.rattles():
 		return
 	var dx := c.position.x - c.prev_position.x

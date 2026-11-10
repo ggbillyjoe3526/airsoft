@@ -14,7 +14,8 @@ them."
 |---|---|---|---|---|---|
 | 2026-11-10 | 1 | Opus 5.5 (build thread) | pass | Retry 6/8 | Log ends too proud and faceted next to the photo; thicket spruces lower than their boxes; a grazing BB splashed over its landing point, not where it went in |
 | 2026-11-10 | 2 | Opus 5.5 (build thread) | pass | Retry 7/8 | Log ends still unlike the photo: thick bark rims, straight-sided splits, too many faceted rounds, wide gaps, one colour |
-| 2026-11-10 | 3 | Opus 5.5 (build thread) | pass | – | – |
+| 2026-11-10 | 3 | Opus 5.5 (build thread) | pass | Retry 7/8 | Log ends: gaps too wide and dark, too few true wedges, faceted curves, too cool a colour, bark band unseen |
+| 2026-11-10 | 4 | Opus 5.5 (build thread) | pass | – | – |
 
 ## What changed
 
@@ -36,12 +37,13 @@ them."
   thickets' spruces are scattered inside their boxes at full height (`PropDressConfig.grid_scatter`). The
   wood's own trees (Poisson-disc already) are unchanged, so cover and sight lines are too.
 - **Log stacks:** every piece in `cordwood*.glb` is a solid end standing 0.3 to 5 cm proud (most 1.5 cm, near flush
-  as in the owner's photo), its face tilted up to 0.08 m a metre, its sides shown only where it stands 2 cm or more out
-  (`cordwood.py` `piece_end`). Most are split pieces cut as pie slices of their log, a bark arc of 4 segments with a
-  thin band of bark inside it; one in eight a 10- or 12-sided round with a thin bark ring (about 4 % across); a few
-  from the heart with no bark; packed tight, each end its own colour from pale to tan to weathered grey. The sides
-  facing down below 1.6 m, never seen from eye height, are left out. 2,792 to 2,862 triangles of a new 2,900 budget
-  per section.
+  as in the owner's photo), its face tilted up to 0.08 m a metre, its sides shown only where it stands 3.5 cm or more
+  out (`cordwood.py` `piece_end`). Most are split pieces cut as pie slices of their log (75 to 100 degrees of it), a
+  bark arc of 6 segments with a thin band of dark bark inside it; one in eight a 14- or 16-sided round with a thin bark
+  ring and a darker growth ring; a few from the heart with no bark; about a third with a drying crack. They are packed
+  tight (1.6 to 1.8 of their cell) on a dull brown core, each end its own warm colour from pale straw to tan to
+  weathered grey. The sides facing down below 1.6 m, never seen from eye height, are left out. 2,840 to 3,101
+  triangles of a new 3,200 budget per section.
 
 ## Decisions
 
@@ -64,7 +66,7 @@ them."
 - **The two mud puddles in the bed are gone,** under the water now. A gravel patch marks the Ford.
 - **The splash sounds are computer-made placeholders** (`tools/water_sounds.py`), listed for the owner to record
   (`audio/record-next.md`). No running-water ambience: Woodland's background stays as the owner approved it.
-- **The cordwood section's budget is 2,900 triangles** (was about 1,200): the extruded ends need the sides, and the
+- **The cordwood section's budget is 3,200 triangles** (was about 1,200): the extruded ends need the sides, and the
   stacks are few (three sections, mixed along each pile).
 - **Thicket spruces scatter but keep their box's height:** trees keep to their boxes (DECISIONS, WT1), so a spruce never
   stands lower than the block that stops BBs and sight.
