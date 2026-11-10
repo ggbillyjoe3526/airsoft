@@ -195,6 +195,31 @@ static func step_walk_cycle(c: Character, hits: HitConfig) -> void:
 	c.walk_cycle += moved / cycle_length(speed, c.crouch_amount, hits, step) * TAU
 
 
+## Eases c.stairs (CL1) towards the slope it ran on this tick: on the ground before and after, the rise over the ground
+## covered (c.prev_position) as a share of stairs_slope, -1 .. 1, none under stairs_from either way (a kerb's step, a
+## gentle hill); none off the ground, vaulting or too slow to step. Once a tick, after the movement step.
+static func step_stairs(c: Character, hits: HitConfig, dt: float) -> void:
+	var target := 0.0
+	var moved := Vector2(c.position.x - c.prev_position.x, c.position.z - c.prev_position.z).length()
+	if c.grounded and not c.vault.active and moved > hits.walking_speed * dt and moved < hits.max_stride:
+		var rise := (c.position.y - c.prev_position.y) / moved
+		if absf(rise) >= hits.stairs_from:
+			target = clampf(rise / hits.stairs_slope, -1.0, 1.0)
+	c.stairs = move_toward(c.stairs, target, dt / hits.stairs_ease) if hits.stairs_ease > 0.0 else target
+
+
+## The stairs clips' share in `c`'s legs (CL1): its stairs as far as it steps ahead (none stepping back or aside; -1
+## down .. 1 up), at `stairs` (c.stairs, or the drawn figure's between the ticks).
+static func stairs_blend(c: Character, stairs: float) -> float:
+	var sin_yaw := sin(c.yaw)
+	var cos_yaw := cos(c.yaw)
+	var moving := Vector2(c.velocity.x, c.velocity.z).length()
+	if moving <= 0.0:
+		return 0.0
+	var ahead := (-c.velocity.x * sin_yaw - c.velocity.z * cos_yaw) / moving
+	return stairs * clampf(ahead, 0.0, 1.0)
+
+
 ## The ground (m) one walk cycle (two steps) covers at `speed` (m/s), crouched `crouch` (0..1), stepping `step` (the
 ## character's frame: x to its right, y ahead; any length): HitConfig's standing lengths, in line between their speeds
 ## and shortened stepping back or aside (back_cycle_share, side_cycle_share by the step's share each way), and its

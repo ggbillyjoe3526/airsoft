@@ -17,7 +17,10 @@ func test_both_kinds_load_with_their_sidecars() -> void:
 	for kind: int in [FigureMix.HUMAN, FigureMix.ROBOT]:
 		assert_true(models.has_kind(kind))
 		var side := models.sidecar(kind)
-		assert_eq(side.clips.size(), 32, "every clip")
+		assert_eq(side.clips.size(), 35, "every clip: the Climb and the two stairs clips (CL1) too")
+		for clip_name: StringName in [&"Climb", &"Stairs_Up", &"Stairs_Down"]:
+			assert_not_null(side.clip(clip_name), "%s: %s" % [kind, clip_name])
+			assert_true(models.library(kind).has_animation(clip_name), "%s: %s in the file" % [kind, clip_name])
 		assert_true(side.parts.has("Body_LOD2"))
 		assert_true(side.replica_on_grip.has(&"rifle") and side.replica_on_grip.has(&"pistol"))
 		var reload: FigureSidecar.Magazine = side.magazine_in_hand.get(&"Rifle_Reload")

@@ -1,9 +1,9 @@
 class_name HitPose
 ## The fitted hit volume's pose (HV1): the human figure's joints in its own frame (feet on the origin, facing -Z), posed
-## from HitFit's samples as its animation graph blends them (the gait and crouch blend spaces, the crouch, the jump and
-## the vault, each turn blended as AnimationMixer does, the legs posed down from the hips, the upper body for the aim
-## and hold, turned back to standing still's heading) and then bent as FigureBend draws it. Hitbox.build_volume hangs
-## the capsules on them. Allocates nothing.
+## from HitFit's samples as its animation graph blends them (the gait and crouch blend spaces, the stairs, the crouch,
+## the jump and the vault or the climb, each turn blended as AnimationMixer does, the legs posed down from the hips, the
+## upper body for the aim and hold, turned back to standing still's heading) and then bent as FigureBend draws it.
+## Hitbox.build_volume hangs the capsules on them. Allocates nothing.
 
 ## A blend this little is none, and this near full is full: the drawn figure's gate too (FigureConfig.gate_below).
 const GATE := 0.001
@@ -39,14 +39,18 @@ static func pose(c: Character, hits: HitConfig, fit: HitFit) -> void:
 	# The aim clips' blend (-1 down .. 1 up, FigurePose.aim_blend).
 	var blend := clampf(c.pitch / fit.aim_pitch, -1.0, 1.0) if fit.aim_pitch > 0.0 else 0.0
 	if vaulting:
-		var vault := fit.table(HitFit.Lower.VAULT)
-		var share := c.vault.clip_share(fit.vault_top) * float(fit.vault_samples - 1)
-		var k := mini(int(share), fit.vault_samples - 2)
+		# Over the obstacle the Vault clip, up onto a ledge the Climb clip (CL1).
+		var climb := c.vault.climb
+		var vault := fit.table(HitFit.Lower.CLIMB if climb else HitFit.Lower.VAULT)
+		var samples := fit.climb_samples if climb else fit.vault_samples
+		var share := c.vault.clip_share(fit.climb_top if climb else fit.vault_top) * float(samples - 1)
+		var k := mini(int(share), samples - 2)
 		var t := share - float(k)
+		var tops := fit.climb_upper if climb else fit.vault_upper
 		_add_lower(vault, k, 1.0 - t)
 		_add_lower(vault, k + 1, t)
-		_add_upper(fit.vault_upper, HitFit.UPPER * k, 1.0 - t)
-		_add_upper(fit.vault_upper, HitFit.UPPER * (k + 1), t)
+		_add_upper(tops, HitFit.UPPER * k, 1.0 - t)
+		_add_upper(tops, HitFit.UPPER * (k + 1), t)
 	else:
 		if alive and not c.grounded:
 			var jump := fit.table(HitFit.Lower.JUMP)
@@ -68,7 +72,15 @@ static func pose(c: Character, hits: HitConfig, fit: HitFit) -> void:
 			var stepping := moving > hits.walking_speed
 			if crouch < 1.0:
 				if stepping:
-					_add_gait(fit, Vector2(right, ahead), c.walk_cycle, 1.0 - crouch)
+					# On stairs (CL1) the gait through the stairs Blend3: down or up for its share, the gait the rest.
+					var stairs := Hitbox.stairs_blend(c, c.stairs)
+					if absf(stairs) <= GATE:
+						stairs = 0.0
+					_add_gait(fit, Vector2(right, ahead), c.walk_cycle, (1.0 - crouch) * (1.0 - absf(stairs)))
+					if stairs != 0.0:
+						var point := HitFit.STAIRS_UP if stairs > 0.0 else HitFit.STAIRS_DOWN
+						_add_stepped(fit, fit.table(HitFit.Lower.STAIRS), point, c.walk_cycle,
+								(1.0 - crouch) * absf(stairs))
 				else:
 					_add_lower(fit.table(HitFit.Lower.STAND_STILL), 0, 1.0 - crouch)
 			if crouch > 0.0:
