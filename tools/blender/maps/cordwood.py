@@ -36,16 +36,25 @@ BOARD_BUDGET = 1500
 SECTION, DEPTH, HEIGHT = 2.0, 1.0, 1.8
 TOPS = 7                # points along the section where its ragged top is set
 SAG = 0.45              # how far under the cell's top the stack's top dips at most
-PROUD = (0.01, 0.1)     # how far a piece's end stands out of the core: the face's relief (WS1: solid ends, mostly flush)
-PROUD_MODE = 0.03       # most stand out about this far, a few nearly flush or 8 to 10 cm out, as a stack built by hand
+PROUD = (0.003, 0.05)   # how far a piece's end stands out of the core: the face's relief (WS1: solid ends, near flush)
+PROUD_MODE = 0.015      # most stand out about this far, a few flush or 5 cm out, as a stack built by hand
 TILT = 0.08             # an end face sawn off square: up to this much further out per metre across or up it
-SIDES = (7, 8)          # a round's sides, so it reads round
+SIDES = (10, 12)        # a round's sides, so it reads round
+ARC = 4                 # the bark arc's segments on a split piece (a pie slice of its log)
+ARC_SPAN = (65.0, 100.0)  # a split piece's angle at the log's heart (degrees)
+RIM = 0.07              # a ring of bark on a sawn end: this share of the way in from its edge (about 4 % across)
+PACK = (1.45, 1.65)     # a piece's size for its cell (its radius over half the cell): packed tight, few gaps
+SHOWS = 0.02            # an end standing out less than this (m) shows no side
 UNDER_SEEN = 1.6        # a piece's end's sides facing down are left out below this (m): the eye looks down on them
 ROWS = 10
 ACROSS = 10             # pieces along a row, on average
-ROUND = 0.3             # the share of pieces that are rounds or half rounds
+ROUND = 0.12            # the share of pieces that are rounds (most are split, as in the photos)
 BAND = 0.75             # the share of pieces showing a band of bark on their round side
 LOOSE = 6               # split pieces lying across the top
+# the sawn ends' colours, each piece its own, from fresh pale to warm tan to weathered grey (as in the photo)
+END_PAINTS = {"CutPale": 0xD4C49C, "CutGrey": 0xA69F8E, "CutTan": 0xBAAA80}
+END_MATS = ("Cut", "Heart", "Ring", "Split", "CutPale", "CutGrey", "CutTan")
+END_WEIGHTS = (3, 4, 2, 2, 2, 2, 3)
 # the boards (m)
 BOARDS_LEN, BOARDS_DEPTH, BOARDS_TOP = 6.4, 1.0, 2.0
 BOARD_T, STICKER_T = 0.07, 0.03
@@ -60,6 +69,9 @@ def cordwood(seed: int) -> object:
     hs.reset()
     wk.paint_all()
     mk.paints({"Gap": 0x2E2924})  # dark and dull: a warm brown here reads near Beta orange
+    for name, colour in END_PAINTS.items():
+        assert wk.off_team(colour), "%s #%06x reads as a team" % (name, colour)
+    mk.paints(END_PAINTS)
     r = wk.rng(seed)
     b = hs.Builder("Cordwood", [])
     half_x, half_y = SECTION * 0.5, DEPTH * 0.5
@@ -111,7 +123,7 @@ def cordwood(seed: int) -> object:
                 cx = min(x + w * 0.5, half_x - w * 0.4)
                 row = top_at(cx) / ROWS
                 cz = row * (k + 0.5) + r.uniform(-0.15, 0.15) * row
-                rad = min(w, row) * 0.5 * r.uniform(1.3, 1.5)
+                rad = min(w, row) * 0.5 * r.uniform(*PACK)
                 x += w
                 kind = "round" if r.random() < ROUND else ("wedge" if r.random() < BAND else "heart")
                 if kind == "round":
@@ -119,16 +131,23 @@ def cordwood(seed: int) -> object:
                     turn = r.uniform(0.0, math.pi)
                     poly = [(cx + rad * math.cos(turn + 2 * math.pi * i / m), cz + rad * math.sin(turn + 2 * math.pi * i / m))
                             for i in range(m)]
-                else:
-                    # a wedge, its point toward the log's heart, turned any way
+                elif kind == "wedge":
+                    # a pie slice of its log: its point at the log's heart, two split sides, its bark round an arc
                     t = r.uniform(0.0, 2.0 * math.pi)
-                    d, q = (math.cos(t), math.sin(t)), (-math.sin(t), math.cos(t))
-                    poly = [(cx - d[0] * rad * 0.95, cz - d[1] * rad * 0.95),
-                            (cx + d[0] * rad * 0.6 + q[0] * rad, cz + d[1] * rad * 0.6 + q[1] * rad),
-                            (cx + d[0] * rad * 0.6 - q[0] * rad, cz + d[1] * rad * 0.6 - q[1] * rad)]
+                    span = math.radians(r.uniform(*ARC_SPAN))
+                    big = rad * 1.45
+                    hx, hz = cx - math.cos(t) * big * 0.6, cz - math.sin(t) * big * 0.6
+                    poly = [(hx, hz)] + [(hx + big * math.cos(t - span / 2 + span * i / ARC),
+                                          hz + big * math.sin(t - span / 2 + span * i / ARC)) for i in range(ARC + 1)]
+                else:
+                    # from the log's middle: four split sides, no bark
+                    t = r.uniform(0.0, 2.0 * math.pi)
+                    poly = [(cx + rad * r.uniform(0.75, 1.0) * math.cos(t + math.pi * 0.5 * i + r.uniform(-0.25, 0.25)),
+                             cz + rad * r.uniform(0.75, 1.0) * math.sin(t + math.pi * 0.5 * i + r.uniform(-0.25, 0.25)))
+                            for i in range(4)]
                 # the bottom row rests on the ground, never under it (or out over the grass)
                 outline = [(px, side * core, max(pz, 0.01)) for px, pz in poly]
-                end_mat = r.choices(("Cut", "Heart", "Ring", "Split"), (3, 5, 2, 2))[0]
+                end_mat = r.choices(END_MATS, END_WEIGHTS)[0]
                 piece_end(b, outline, r.triangular(PROUD[0], PROUD[1], PROUD_MODE), out, end_mat, kind,
                           (r.uniform(-TILT, TILT), r.uniform(-TILT, TILT)))
     # split pieces lying across the top here and there, on the ragged top
@@ -144,53 +163,44 @@ def cordwood(seed: int) -> object:
 
 def piece_end(b: hs.Builder, outline: list, depth: float, out: Vector, end_mat: str, kind: str, tilt: tuple) -> None:
     """A piece's end standing `depth` proud of the stack's dark core (outline: points on the core's face), as a solid
-    log end (WS1, the owner: the stacks read flat): its sides run back to the core, so it throws its shadow and shows
-    its thickness from an angle, and its end face is sawn a little off square (`tilt`: how much further out it stands
-    per metre across and up the face). A "wedge" (a split piece, as most in the photos) has its longest side bowed out
-    into the log's round, barked, its split sides pale; a "round" (a billet or half round) bark all round, a ring of it
-    on its sawn face; a "heart" (split from the log's middle) no bark at all."""
+    log end (WS1, the owner: the stacks read flat): its sides run back to the core where it stands out enough to show
+    them (SHOWS), and its end face is sawn a little off square (`tilt`: how much further out it stands per metre across
+    and up the face). A "wedge" (a split piece, a pie slice of its log, as most in the photos: its outline the heart's
+    point, then its bark arc) has its arc barked and a thin band of bark (RIM) inside it on its face, its split sides
+    pale; a "round" a thin ring of bark round its sawn face; a "heart" (split from the log's middle) no bark at all."""
     n = len(outline)
     c0 = sum((Vector(p) for p in outline), Vector()) / n
     base = [Vector(p) for p in outline]
-    bark = None
-    if kind == "wedge":
-        e = max(range(n), key=lambda i: (base[(i + 1) % n] - base[i]).length)
-        a, z = base[e], base[(e + 1) % n]
-        mid = (a + z) * 0.5
-        base = base[:e + 1] + [mid + (mid - c0).normalized() * (z - a).length * 0.22] + base[e + 1:]
-        bark = (e, e + 1)  # the two side faces either side of the bow are the log's round
-    m = len(base)
+    bark = range(1, n - 1) if kind == "wedge" else range(0)  # the arc's edges
 
     def proud(p: Vector) -> Vector:
         d = depth + tilt[0] * (p.x - c0.x) + tilt[1] * (p.z - c0.z)
-        return p + out * max(0.012, d)
+        return p + out * max(0.003, d)
 
     front = [proud(p) for p in base]
-    back_ids = wk.verts(b, base)
     front_ids = wk.verts(b, front)
-    c = sum(front, Vector()) / m
-    for i in range(m):
-        j = (i + 1) % m
-        if kind == "round" or (bark is not None and i in bark):
-            mat = "Bark"
-        else:
-            mat = "Split" if kind == "wedge" else "Heart"
-        side_out = ((base[i] + base[j]) * 0.5 - c0).normalized()
-        if side_out.z < -0.5 and c0.z < UNDER_SEEN:
-            continue  # a side facing down under eye height is never seen: its triangles go to rounder rounds
-        wk.face(b, [back_ids[i], back_ids[j], front_ids[j], front_ids[i]], mat, side_out)
+    c = sum(front, Vector()) / n
+    if depth >= SHOWS:
+        back_ids = wk.verts(b, base)
+        for i in range(n):
+            j = (i + 1) % n
+            side_out = ((base[i] + base[j]) * 0.5 - c0).normalized()
+            if side_out.z < -0.5 and c0.z < UNDER_SEEN:
+                continue  # a side facing down under eye height is never seen
+            if kind == "round" or i in bark:
+                mat = "Bark"
+            else:
+                mat = "Split" if kind == "wedge" else "Heart"
+            wk.face(b, [back_ids[i], back_ids[j], front_ids[j], front_ids[i]], mat, side_out)
     if kind == "heart":
         wk.face(b, front_ids, end_mat, out)
         return
-    if kind == "round":
-        wk.face(b, front_ids, "Bark", out)
-        wk.face(b, wk.verts(b, [p.lerp(c, 0.25) + out * 0.008 for p in front]), end_mat, out)
-        return
     wk.face(b, front_ids, "Bark", out)
-    inner = list(front)
-    for i in (bark[0], bark[1], (bark[1] + 1) % m):
-        inner[i] = front[i].lerp(c, 0.3)
-    wk.face(b, wk.verts(b, [p + out * 0.008 for p in inner]), end_mat, out)
+    if kind == "round":
+        inner = [p.lerp(c, RIM) for p in front]
+    else:
+        inner = [p if i in (0,) else p.lerp(c, RIM * 1.6) for i, p in enumerate(front)]
+    wk.face(b, wk.verts(b, [p + out * 0.004 for p in inner]), end_mat, out)
 
 
 def boards() -> object:

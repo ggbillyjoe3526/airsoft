@@ -13,7 +13,8 @@ them."
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-10 | 1 | Opus 5.5 (build thread) | pass | Retry 6/8 | Log ends too proud and faceted next to the photo; thicket spruces lower than their boxes; a grazing BB splashed over its landing point, not where it went in |
-| 2026-11-10 | 2 | Opus 5.5 (build thread) | pass | – | – |
+| 2026-11-10 | 2 | Opus 5.5 (build thread) | pass | Retry 7/8 | Log ends still unlike the photo: thick bark rims, straight-sided splits, too many faceted rounds, wide gaps, one colour |
+| 2026-11-10 | 3 | Opus 5.5 (build thread) | pass | – | – |
 
 ## What changed
 
@@ -25,8 +26,8 @@ them."
   rebuilt (`footbridge.py`); route times across the lanes (analyze.py) are unchanged. The simulation reads it
   through `WorldQuery.water` (`Water`, `game/sim/water.gd`): `Character.in_water` at `MovementConfig.wade_depth`
   (0.15 m) slows a character to `wade_speed_scale` 0.6, Footsteps send every wading stride as a run on the new WATER
-  surface (`NoiseConfig.ground` 1.5; a walk or a crouch at `wade_quiet_carry` 0.9), and a BB landing in it stops at its
-  surface with a WATER impact. The nav grid prices points in it (`NavConfig.wade_cost` 8, `splash_cost` 1.5).
+  surface (`NoiseConfig.ground` 1.5; a walk or a crouch at `wade_quiet_carry` 0.9), and a BB stops where its path goes under
+  the surface with a WATER impact. The nav grid prices points in it (`NavConfig.wade_cost` 8, `splash_cost` 1.5).
   `WaterView` draws it (`look_water.gdshader`). Sounds: `tools/water_sounds.py`.
 - **Trees:** the far forest grows in clumps and glades with varied girth (`WoodsConfig.forest_clump`,
   `forest_clumping`, `forest_slim`, a wider `forest_height`); the treeline band mixes four sections (`far_tree.py`
@@ -34,10 +35,13 @@ them."
   height and shifted up to 0.9 m across (`SkylineConfig.treeline_variants`, `treeline_rise`, `treeline_shift`); the
   thickets' spruces are scattered inside their boxes at full height (`PropDressConfig.grid_scatter`). The
   wood's own trees (Poisson-disc already) are unchanged, so cover and sight lines are too.
-- **Log stacks:** every piece in `cordwood*.glb` is a solid end standing 1 to 10 cm proud (most about 3 cm, close to
-  flush as in the owner's photo), its face tilted up to 0.08 m a metre, its sides barked or split back into the stack
-  (`cordwood.py` `piece_end`), the rounds 7 or 8 sided; the sides facing down below 1.6 m, never seen from eye height,
-  are left out for them. 2,692 to 2,839 triangles of a new 2,900 budget per section.
+- **Log stacks:** every piece in `cordwood*.glb` is a solid end standing 0.3 to 5 cm proud (most 1.5 cm, near flush
+  as in the owner's photo), its face tilted up to 0.08 m a metre, its sides shown only where it stands 2 cm or more out
+  (`cordwood.py` `piece_end`). Most are split pieces cut as pie slices of their log, a bark arc of 4 segments with a
+  thin band of bark inside it; one in eight a 10- or 12-sided round with a thin bark ring (about 4 % across); a few
+  from the heart with no bark; packed tight, each end its own colour from pale to tan to weathered grey. The sides
+  facing down below 1.6 m, never seen from eye height, are left out. 2,792 to 2,862 triangles of a new 2,900 budget
+  per section.
 
 ## Decisions
 
@@ -50,8 +54,8 @@ them."
   crossing, not so slow that a player caught in it is helpless.
 - **The Ford is ankle deep (0.08 m, under the 0.15 m wade depth): it splashes but never slows.** The overtime flag in
   the Clearing is west of the stream, so the east team crosses there; a slowing Ford would make the race unfair.
-- **Every wading stride splashes, at any pace** (`wade_quiet_carry` 0.9 for a walk or a crouch): water can't be crossed
-  quietly, which is what pushes players to the bridge.
+- **Every stride in water splashes, at any pace, the Ford's shallows too** (`wade_quiet_carry` 0.9 for a walk or a
+  crouch): water can't be crossed quietly, which is what pushes players to the bridge.
 - **Splashes carry 1.5 times earth's** (bots hear a running wade at 16.5 m against 11 m).
 - **Bots price wading at 8 times a dry point:** 4 left the free route under the North bridge; at 8 bots take the bridge
   or the road when it is near their way and wade only when a crossing is far.

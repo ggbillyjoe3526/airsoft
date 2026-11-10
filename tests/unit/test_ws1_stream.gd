@@ -109,6 +109,10 @@ func test_ankle_deep_water_splashes_without_slowing() -> void:
 	assert_false(s.characters[0].in_water, "not deep enough to wade")
 	assert_almost_eq(pace, tuning.movement.run_speed, 0.1, "full pace over the ford")
 	assert_eq(steps[-1].value2, RayHit.Surface.WATER, "but every step splashes")
+	var walked: Array[GameEvent] = []
+	_run_north(sim, s, Vector3(0.0, 0.0, 10.0), 2.0, true, walked)
+	assert_gt(walked.size(), 0, "a walk over it splashes too")
+	assert_eq(walked[-1].value2, RayHit.Surface.WATER)
 
 
 func test_a_bb_landing_in_the_stream_splashes_at_its_surface_and_stays_down() -> void:
