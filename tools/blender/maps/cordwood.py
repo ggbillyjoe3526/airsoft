@@ -45,7 +45,7 @@ ARC_SPAN = (75.0, 100.0)  # a split piece's angle at the log's heart (degrees): 
 RIM = 0.07              # a ring of bark on a sawn end: this share of the way in from its edge (about 4 % across)
 ARC_BAND = 0.16         # a split piece's band of bark inside its arc: this share of the way to its middle (7 % deep)
 CHECK = 0.35            # the share of split pieces with a drying crack from the heart toward the bark
-PACK = (1.6, 1.8)       # a piece's size for its cell (its radius over half the cell): packed tight, few gaps
+PACK = (1.75, 1.95)     # a piece's size for its cell (its radius over half the cell): packed tight, few gaps
 SHOWS = 0.035           # an end standing out less than this (m) shows no side
 UNDER_SEEN = 1.6        # a piece's end's sides facing down are left out below this (m): the eye looks down on them
 ROWS = 10
@@ -72,7 +72,8 @@ BEARER = 0.1
 def cordwood(seed: int) -> object:
     hs.reset()
     wk.paint_all()
-    mk.paints({"Gap": 0x4A4238})  # a dull mid brown (any warmer reads near Beta orange): the shade between the pieces
+    mk.paints({"Gap": 0x5C5545})  # a dull mid brown (any warmer reads near Beta orange): the shade between the pieces
+    assert wk.off_team(0x5C5545), "Gap reads as a team"
     for name, colour in END_PAINTS.items():
         assert wk.off_team(colour), "%s #%06x reads as a team" % (name, colour)
     mk.paints(END_PAINTS)

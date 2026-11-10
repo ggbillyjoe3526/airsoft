@@ -41,7 +41,7 @@ them."
   out (`cordwood.py` `piece_end`). Most are split pieces cut as pie slices of their log (75 to 100 degrees of it), a
   bark arc of 6 segments with a thin band of dark bark inside it; one in eight a 14- or 16-sided round with a thin bark
   ring and a darker growth ring; a few from the heart with no bark; about a third with a drying crack. They are packed
-  tight (1.6 to 1.8 of their cell) on a dull brown core, each end its own warm colour from pale straw to tan to
+  tight (1.75 to 1.95 of their cell) on a mid brown core, each end its own warm colour from pale straw to tan to
   weathered grey. The sides facing down below 1.6 m, never seen from eye height, are left out. 2,840 to 3,101
   triangles of a new 3,200 budget per section.
 
