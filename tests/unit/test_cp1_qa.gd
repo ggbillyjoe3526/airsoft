@@ -20,7 +20,7 @@ func before_each() -> void:
 func _unlocked() -> Progress:
 	var progress := Progress.new(LevelTable.read_file(rules.pool))
 	rules.follow_progress(progress, false)
-	progress.add_xp(progress.table.levels[10].total)
+	progress.add_xp(progress.table.levels[progress.table.cap()].total)
 	return progress
 
 
@@ -73,8 +73,8 @@ func test_a_cyber_pistol_saved_below_level_ten_keeps_the_choice_and_plays_the_de
 	var kit := rules.carried(l)
 	assert_eq(kit.replicas.size(), 2)
 	assert_eq(kit.replicas[1].id, &"pistol", "plays the default while locked")
-	progress.add_xp(progress.table.levels[10].total)
-	assert_eq(rules.carried(l).replicas[1].id, &"cyber", "and the choice comes back at level 10")
+	progress.add_xp(progress.table.levels[progress.table.cap()].total)
+	assert_eq(rules.carried(l).replicas[1].id, &"cyber", "and the choice comes back at the cap")
 
 
 func test_the_cyber_pistol_as_primary_below_level_ten_does_not_double_the_pistol() -> void:

@@ -101,24 +101,24 @@ func test_a_bomb_in_hand_is_no_holster_to_follow() -> void:
 	assert_true(BotHolster.put_away(giver), "holstered before the bomb: away")
 
 
-func test_with_dev_content_off_the_empty_level_7_is_never_marked_next() -> void:
+func test_with_dev_content_off_the_empty_level_9_is_never_marked_next() -> void:
 	var pool := Pool.read_file()
-	# The M140 went public with the rifle (owner, 2026-11-05); tagged dev again here, level 7 holds only dev content.
+	# The M140 went public with the rifle (owner, 2026-11-05); tagged dev again here, level 9 holds only dev content (LV15).
 	pool.item(M140).access = &"dev"
 	var table := LevelTable.read_file(pool)
-	var at_6 := 0
+	var at_8 := 0
 	for l in table.levels:
-		if l.number == 6:
-			at_6 = l.total
-	var facts := ArmoryFacts.new(table, pool, at_6, false, false)
-	assert_eq(facts.level, 6)
-	var seven: ArmoryFacts.Row = null
+		if l.number == 8:
+			at_8 = l.total
+	var facts := ArmoryFacts.new(table, pool, at_8, false, false)
+	assert_eq(facts.level, 8)
+	var nine: ArmoryFacts.Row = null
 	for r in facts.rows:
-		if r.number == 7:
-			seven = r
-	assert_true(seven.items.is_empty(), "level 7 holds only the M140 Spring, dev here")
-	assert_eq(seven.state, ArmoryFacts.State.LOCKED, "not the next card")
-	assert_eq(facts.next_row().number, 8, "the next card is the one the header names")
+		if r.number == 9:
+			nine = r
+	assert_true(nine.items.is_empty(), "level 9 holds only the M140 Spring, dev here")
+	assert_eq(nine.state, ArmoryFacts.State.LOCKED, "not the next card")
+	assert_eq(facts.next_row().number, 10, "the next card is the one the header names")
 
 
 func test_a_spring_rifle_s_rate_reads_as_it_is() -> void:

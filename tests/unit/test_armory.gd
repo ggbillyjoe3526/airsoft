@@ -88,7 +88,7 @@ func test_level_3_lists_ten_of_twenty_with_the_silencer_next() -> void:
 	assert_eq(states.slice(0, 5), [ArmoryFacts.State.UNLOCKED, ArmoryFacts.State.UNLOCKED,
 			ArmoryFacts.State.UNLOCKED, ArmoryFacts.State.UNLOCKED, ArmoryFacts.State.NEXT] as Array[ArmoryFacts.State])
 	assert_eq(states[5], ArmoryFacts.State.LOCKED)
-	assert_eq(states.size(), 11)
+	assert_eq(states.size(), 16, "the starting kit and 15 levels (LV15)")
 	var words := _words(page.summary())
 	for w: String in ["LEVEL 3", "120 / 500 XP · 380 XP to level 4", "920 XP earned in all · 10 / 25 unlocked",
 			"Every match 100 XP · a win +100 · round won 20 · hit 10 · Easy ×0.5 · Normal ×1 · Hard ×1.5"]:
@@ -137,16 +137,16 @@ func test_level_1_and_a_new_player_list_the_start_and_the_first_unlock() -> void
 
 
 func test_at_the_cap_it_says_xp_stops_counting_and_nothing_is_next() -> void:
-	var page := _page(6500)
+	var page := _page(14500)
 	var facts := page.facts()
-	assert_eq(facts.level, 10)
+	assert_eq(facts.level, 15)
 	assert_null(facts.next_row())
 	assert_eq(facts.unlocked_count, 25)
 	var words := _words(page.summary())
 	assert_true(words.has("Top level reached · XP counts again when the level cap goes up."))
 	assert_eq(page.summary().bar().fraction(), 0.0, "nothing past the cap to fill")
 	assert_eq(page.track().first(), page.track().last_first(), "the last levels show")
-	assert_eq(page.track().row(10).find_children("Item_*", "PanelContainer", true, false).size(), 1)
+	assert_eq(page.track().row(15).find_children("Item_*", "PanelContainer", true, false).size(), 1)
 
 
 func test_with_levelling_off_everything_is_unlocked() -> void:
@@ -182,7 +182,7 @@ func test_dev_items_are_listed_only_with_dev_content_and_waiting_ones_never() ->
 # --- pictures ---
 
 func test_every_item_has_its_own_model_picture_and_a_blurb() -> void:
-	var page := _page(6500)
+	var page := _page(14500)
 	await wait_process_frames(2)
 	var shown := 0
 	for r in page.facts().rows:
@@ -370,14 +370,14 @@ func test_a_level_up_over_two_levels_names_everything_it_unlocked() -> void:
 	await wait_process_frames(2)
 	var words := _words(card)
 	assert_true(words.has("LEVEL 5!"))
-	assert_true(words.has("Unlocked: Silencer, Tight-Bore Barrel, Sniper Rifle, M130 Spring, 2x Scope"),
+	assert_true(words.has("Unlocked: Silencer, Sniper Rifle, M130 Spring, 2x Scope"),
 			"the Sniper Rifle and its spring, public since 2026-11-05, are named without Dev content")
 	assert_eq(card.find_child("LevelUp", true, false).find_children("*", "TextureRect", true, false).size(), 3,
 			"at most UP_PICTURES_MAX pictures")
 	var dev_card := XpCard.new(s, p, pool, true)
 	add_child_autofree(dev_card)
 	await wait_process_frames(2)
-	assert_true(_words(dev_card).has("Unlocked: Silencer, Tight-Bore Barrel, Sniper Rifle, M130 Spring, 2x Scope"),
+	assert_true(_words(dev_card).has("Unlocked: Silencer, Sniper Rifle, M130 Spring, 2x Scope"),
 			"and with Dev content on")
 
 
@@ -391,11 +391,11 @@ func test_a_match_that_gave_none_says_why() -> void:
 
 
 func test_at_the_cap_the_card_says_xp_stops_counting() -> void:
-	var p := _progress(6500)
+	var p := _progress(14500)
 	var card := _card(_settled(0, true, 5, 4, &"normal", p), p)
 	var words := _words(card)
 	assert_true(words.has("Top level reached"))
-	assert_false(words.has("LEVEL 10!"))
+	assert_false(words.has("LEVEL 15!"))
 
 
 func test_an_uneven_share_says_just_the_count() -> void:

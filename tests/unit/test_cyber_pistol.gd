@@ -57,14 +57,14 @@ func test_its_battery_is_built_in_so_no_power_source_fits_or_changes_it() -> voi
 	assert_almost_eq(kit.replicas[1].muzzle_energy, 1.0, 1e-6, "at the pistol limit")
 
 
-func test_it_unlocks_at_level_ten() -> void:
+func test_it_unlocks_at_the_cap_level_15() -> void:
 	var progress := Progress.new(LevelTable.read_file(rules.pool))
 	rules.follow_progress(progress, false)
-	assert_eq(rules.unlock_level(CYBER), 10)
+	assert_eq(rules.unlock_level(CYBER), 15, "a replica every five levels, the Cyber Pistol last (LV15)")
 	var l := rules.default_loadout("L")
 	assert_false(rules.equip(l, Loadout.Slot.SECONDARY, CYBER), "locked at level 0")
-	progress.add_xp(progress.table.levels[10].total)
-	assert_eq(progress.level(), 10)
+	progress.add_xp(progress.table.levels[progress.table.cap()].total)
+	assert_eq(progress.level(), 15)
 	assert_true(rules.equip(l, Loadout.Slot.SECONDARY, CYBER), "unlocked at the cap")
 	assert_eq(rules.carried(l).replicas[1].id, &"cyber")
 

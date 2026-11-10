@@ -269,9 +269,9 @@ func test_a_turn_made_mid_vault_is_kept_and_a_bomb_in_hand_drops_it() -> void:
 	assert_eq(copy.zoom_steps, 0)
 
 
-func test_it_unlocks_at_level_8() -> void:
+func test_it_unlocks_at_level_10() -> void:
 	var table := LevelTable.read_file(rules.pool)
-	assert_eq(table.unlock_level(VARIABLE), 8)
+	assert_eq(table.unlock_level(VARIABLE), 10, "with the Compact SMG (LV15)")
 
 
 func test_both_rifles_parts_files_carry_it_longer_than_the_2x_scope() -> void:
