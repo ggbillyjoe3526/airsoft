@@ -110,11 +110,11 @@ func test_a_built_skyline_view_sets_the_specular_from_the_config() -> void:
 # --- GRID spread -----------------------------------------------------------------------------------------------
 
 func _grid(size: Vector3, cell: Vector3, spread: Vector2, model: AABB = AABB(Vector3(-0.5, 0, -0.5), Vector3.ONE),
-		seed_: int = 1) -> Array[Transform3D]:
+		rng_seed: int = 1) -> Array[Transform3D]:
 	var cfg: PropDressConfig = look.props.duplicate()
 	cfg.grid_spread = {&"m": spread}
 	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_
+	rng.seed = rng_seed
 	var out: Dictionary[StringName, PropLayout.Placed] = {}
 	var boxes: Dictionary[StringName, AABB] = {&"m": model}
 	var picks: Array[StringName] = [&"m"]

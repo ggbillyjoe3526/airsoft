@@ -33,7 +33,7 @@ Also there appear to be some blocks on the map? It looks like there are no model
   its box: the end ones flush with its ends, the rest evenly between. Every prop still stays inside its block
   (`test_props`), so what is seen still matches what stops BBs.
 - **The core is a fifth of the thicket's height** (was 0.6), inset up to 0.3 of its width (`MapLevel.CORE_SHARE`, was
-  0.2), in the shade under the spruces' boughs (`#183327`, spruce.py's UNDER; was the forest green). Touching thickets'
+  0.2), in the shade under the spruces' boughs (`#183328`, spruce.py's UNDER; was the forest green). Touching thickets'
   cores still meet (WR3).
 - The treeline model's section is 24.5 x 10 m against `treeline_section`'s 20 x 5, so sections overlap a little and
   stand twice as deep as their piece; left as it is (scenery past the fence, nothing changes for play).
