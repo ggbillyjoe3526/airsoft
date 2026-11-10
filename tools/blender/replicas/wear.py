@@ -16,7 +16,8 @@ copies (`Figure*`) keep none and draw plain. The channels:
 
 No part wears whole (critic, RW1 attempt 1: a thin strip all edge, or a small part all in a recess, read as a
 recoloured part or a stain): a loose part rubbed past a quarter of its surface, or a small one grimed past a fifth,
-has its wear faded (PART_RUB_SHARE, PART_GRIME_SHARE).
+has its wear faded (PART_RUB_SHARE, PART_GRIME_SHARE); a lip round a recess rubs a quarter as much as an outer edge,
+and a narrow slot or groove keeps only a broken fringe of grime (LIP_RUB_CUT, NARROW_GRIME).
 
 The figures' copies get both layers too, all at the origin (outside every island: the mask is clean there), so the
 exporter writes each material once. Shapes, triangles and empties don't change. The scratches are placed in the model's
@@ -64,6 +65,10 @@ PART_RUB_SHARE = 0.25
 ## in its slot), which a recess would otherwise darken whole. A big part keeps its grime, which lies in its recesses.
 PART_GRIME_SHARE = 0.2
 SMALL_PART = 0.01
+## How much less a lip round a recess rubs than an outer edge, and the most of its grime a narrow place keeps (in
+## patches).
+LIP_RUB_CUT = 0.75
+NARROW_GRIME = 0.5
 ## The face attribute that numbers each loose part, for the bake (removed after).
 PART_ATTR = "wear_part"
 
@@ -391,8 +396,15 @@ def _compose(targets, pos, nrm, geo, ids, lo, hi, seed, heavier, size) -> np.nda
         near = np.flatnonzero(np.abs(P - c).max(axis=1) < r)
         d = np.linalg.norm(P[near] - c, axis=1) / r
         patches[near] = np.maximum(patches[near], rng.uniform(0.12, 0.28) * _smoothstep(1.0, 0.2, d))
-    patches *= 0.6 + 0.4 * _fbm(P * 400.0, seed + 3)
+    # Broken up finely, so a patch reads as a rubbed area, not a round smudge (critic, RW1 attempt 2).
+    patches *= _smoothstep(0.3, 0.7, _fbm(P * 700.0, seed + 3))
     edge = np.maximum(edge, patches)
+    # Feature limits (critic, RW1 attempt 2: a slot or a serration groove welded into a big part filled solid and read
+    # as a stripe): a lip round a recess (the far reach occluded) rubs at most a quarter as much as an outer edge, and
+    # a narrow place (the near reach occluded: a slot, a groove) keeps only a broken fringe of its grime.
+    edge *= 1.0 - LIP_RUB_CUT * (1.0 - _smoothstep(0.55, 0.85, G[:, 2]))
+    narrow = _smoothstep(0.15, 0.45, 1.0 - G[:, 1])
+    grime *= 1.0 - narrow * (1.0 - NARROW_GRIME * _smoothstep(0.55, 0.8, _fbm(P * 500.0, seed + 5)))
     part = np.rint(ids.reshape(-1, 4)[idx, 1]).astype(int)
     edge *= _part_fade(part, edge, PART_RUB_SHARE)
     grime *= _part_fade(part, grime, PART_GRIME_SHARE, SMALL_PART)

@@ -7,7 +7,8 @@
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-10 | 1 | Opus 5.5 (replica wear thread) | – | 7/8 Retry (QA Pass, performance Pass) | thin strips on the pistol (the extractor in its slot, the frame's rail slot) wore or grimed whole and read as a recoloured part or a stain, not as wear |
-| 2026-11-10 | 2 | Opus 5.5 (replica wear thread) | PENDING | PENDING | – |
+| 2026-11-10 | 2 | Opus 5.5 (replica wear thread) | – | 7/8 Retry | the pistol's rail slot and serration grooves (welded into the big Frame and Slide parts, so out of the per-part fade) still filled with tan grime and a light rubbed lip, reading as paint at the whole-pistol distance; round rubbed patches on the black AEG read as smudges |
+| 2026-11-10 | 3 | Opus 5.5 (replica wear thread) | PENDING | PENDING | – |
 
 ## What changed
 
@@ -21,6 +22,8 @@ look realistic and slightly used." Shapes, triangles and gameplay are unchanged.
   soft handling patches, B scratches drawn as tapered 3D polylines from the baked position and normal maps (so they
   never break at a UV seam), some in small clusters. No part wears whole: a loose part rubbed past a quarter of its
   surface, or a small one (under 1 % of the mask) grimed past a fifth, has that wear faded as (share / covered)².
+  A lip round a recess (far reach occluded) rubs a quarter as much as an outer edge, a narrow slot or groove (near
+  reach occluded) keeps only a broken fringe of its grime, and the soft rubbed patches are broken up finely.
   Seeded; hung on the glTF occlusion slot so Godot imports it as the surface's own texture (`aeg_wear.png`,
   `pistol_wear.png`). Figure copies get the mask's clean corner.
 - **Worn paint** (`game/play/replica_wear.gdshader`, `ReplicaPaint`): the paint scuffs towards a worn mid grey in
@@ -37,9 +40,10 @@ look realistic and slightly used." Shapes, triangles and gameplay are unchanged.
 - **Bots' copies stay plain** (default): at 3,000 triangles and figure distance the wear would not read; they keep the
   plain StandardMaterial3D.
 - **Magazines scratch 2.5 times as much, the pistol's slide 1.6 times** (default): the parts handled most.
-- **Grime greys more than it browns, and lightly** (attempt 2: shade 0.12, tint 0.92/0.88/0.82): a groove welded into
-  a big part (the pistol frame's rail slot) can't be faded per part, and a brown floor read as a painted stripe on white
-  and grey paint; a light grey shade reads as dirt in the slot.
+- **Grime is a light, near-neutral grey** (shade 0.12, tint 0.96/0.95/0.94; attempt 1 was 0.2 and a brown
+  0.85/0.78/0.70): brown on white and grey paint read as a painted stripe.
+- **A metal part shows bare metal only where rubbed hard** (rub squared in the shader), so a faint rub on a lip never
+  lightens it into a bar.
 - **2K masks** (the texture budget's cap), BPTC with mipmaps.
 - **Parts, figure parts and the sniper are not rebuilt**: their models carry no wear; clean rebuilds differ from HEAD
   only by build noise.

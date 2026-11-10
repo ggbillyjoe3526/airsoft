@@ -22,9 +22,9 @@ uniform float edge_scuff : hint_range(0.0, 1.0) = 0.3;
 uniform float scratch_scuff : hint_range(0.0, 1.0) = 0.6;
 // The worn grey a scuff goes towards, in square-root light (0.6: about sRGB 0.6).
 uniform float scuff : hint_range(0.0, 1.0) = 0.6;
-// How much the dirt in a recess darkens and browns the paint, at a full mask.
+// How much the dirt in a recess darkens the paint (near grey, so light paint doesn't brown), at a full mask.
 uniform float grime_shade : hint_range(0.0, 1.0) = 0.12;
-uniform vec3 grime_tint : source_color = vec3(0.92, 0.88, 0.82);
+uniform vec3 grime_tint : source_color = vec3(0.96, 0.95, 0.94);
 // Roughness changes at a full mask: a rubbed edge polishes, a scratch and dirt go matte.
 uniform float edge_polish : hint_range(0.0, 1.0) = 0.18;
 uniform float scratch_matte : hint_range(0.0, 1.0) = 0.10;
@@ -51,12 +51,13 @@ void fragment() {
 	float rub = mask.g * look_wear;
 	float scratch = mask.b * look_wear;
 	vec3 paint = albedo.rgb;
-	vec3 worn = mix(scuffed(paint, edge_scuff * rub), mix(paint, bare_colour, rub), bare_metal);
+	// A metal part shows bare metal only where it is rubbed hard (rub squared), so a faint rub never lightens a lip.
+	vec3 worn = mix(scuffed(paint, edge_scuff * rub), mix(paint, bare_colour, rub * rub), bare_metal);
 	vec3 cut = mix(scuffed(paint, scratch_scuff), bare_colour, bare_metal);
 	worn = mix(worn, cut, scratch);
 	worn = mix(worn, worn * grime_tint * (1.0 - grime_shade), grime);
 	ALBEDO = worn;
-	float bare = bare_metal * max(rub, scratch);
+	float bare = bare_metal * max(rub * rub, scratch);
 	METALLIC = mix(metallic, bare_metallic, bare);
 	ROUGHNESS = clamp(roughness - edge_polish * rub + scratch_matte * scratch + grime_matte * grime, 0.05, 1.0);
 }
