@@ -38,9 +38,9 @@ Mean picture brightness (0-255), Eye adaptation off / on:
 
 | View | Off | On |
 |---|---|---|
-| Depot hall | 119.8 | see below |
-| Depot, the West tunnel from the hall | 82.5 | see below |
-| Depot, inside the West tunnel looking out | 13.6 | see below |
+| Depot hall | 119.8 | 119.8 |
+| Depot, the West tunnel from the hall | 82.5 | 102.4 |
+| Depot, inside the West tunnel looking out | 13.6 | 26.9 |
 | Woodland open field (logstacks) | 87.5 | 87.5 |
 | Woodland under the crowns (clearing) | 11.6 | 31.1 |
 | Woodland by the cabin, in shade | 11.7 | 37.6 |
@@ -58,7 +58,8 @@ middle of 0.7 brightened Depot's hall (120 to 165) and was dropped.
 
 ## Checks
 
-- gdlint clean; `test_eye_adaptation` (7) passes, with `test_graphics_table`, `test_gr1_qa`, `test_graphics_apply`,
+- gdlint clean; `test_eye_adaptation` (7) and QA's `test_ug3_qa` (9: old saves, Compatibility greyed, renderer switch,
+  no orphans, extreme settings, the text keys) pass, with `test_graphics_table`, `test_gr1_qa`, `test_graphics_apply`,
   `test_lamp_lights`, `test_map_data`.
 - Pictures: `/mnt/project-files/art/graphics/ug3/`.
 
