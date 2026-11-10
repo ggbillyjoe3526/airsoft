@@ -7,6 +7,8 @@ extends RefCounted
 
 ## The zones are looked up in columns this many metres wide (x).
 const COLUMN := 8.0
+## A room's edge closer than this (m) to a face's top or bottom doesn't cut it.
+const LEVEL_GAP := 0.05
 
 
 ## A room's air (or a slice of a ramp room's): any point inside it faces that room. `owns` marks a room whose blocks
@@ -83,6 +85,24 @@ func zone_at(p: Vector3) -> Zone:
 		if zones[i].box.has_point(p):
 			return zones[i]
 	return null
+
+
+## The heights (y) where a zone touching `box` starts or ends strictly inside `box`'s height, low to high, each once:
+## where a face spanning several rooms (a lift shaft's wall, every storey high) changes room.
+func levels_across(box: AABB) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	var lo := box.position.y
+	var hi := box.end.y
+	for c in range(floori(box.position.x / COLUMN), floori(box.end.x / COLUMN) + 1):
+		for i: int in _columns.get(c, PackedInt32Array()):
+			var zb := zones[i].box
+			if not zb.intersects(box):
+				continue
+			for y: float in [zb.position.y, zb.end.y]:
+				if y > lo + LEVEL_GAP and y < hi - LEVEL_GAP and not out.has(y):
+					out.append(y)
+	out.sort()
+	return out
 
 
 ## The style of the room point `p` lies in, &"" in none.

@@ -47,11 +47,12 @@ static func mesh(m: MapData, style: MapStyle, look: StationLook) -> ArrayMesh:
 			continue
 		var own := dress.owner_of(b)
 		var bottom := b.center.y - b.size.y * 0.5
-		for f in GreyboxFaces.faces_of(b):
-			var zone := zone_faced(dress, look, f)
-			var finish := look.finish_of(b, GreyboxFaces.face_normal(f), zone.style if zone != null else &"", own)
-			var floor_y := zone.box.position.y if zone != null else bottom
-			add_face(st, look, f, finish, look.tint_of(finish, b), floor_y)
+		for whole in GreyboxFaces.faces_of(b):
+			for f in bands(dress, look, whole):
+				var zone := zone_faced(dress, look, f)
+				var finish := look.finish_of(b, GreyboxFaces.face_normal(f), zone.style if zone != null else &"", own)
+				var floor_y := zone.box.position.y if zone != null else bottom
+				add_face(st, look, f, finish, look.tint_of(finish, b), floor_y)
 	var top := GreyboxFaces.ground_top(m)
 	add_face(st, look, GreyboxFaces.ground_face(style, top), look.outside, look.tint_of(look.outside, null), NO_FLOOR)
 	for s in dress.strips:
@@ -93,12 +94,46 @@ static func plane_uv(p: Vector3, n: Vector3) -> Vector2:
 	return Vector2(p.x if n.z > 0.0 else -p.x, -p.y)
 
 
+## Face `f` cut where the rooms it faces change, one band a room: a wall's upright rectangle spanning storeys (a lift
+## shaft's) is cut at each room's floor and ceiling it passes; any other face is itself.
+static func bands(dress: StationDressing, look: StationLook, f: PackedVector3Array) -> Array[PackedVector3Array]:
+	var n := GreyboxFaces.face_normal(f)
+	var box := AABB(f[0], Vector3.ZERO)
+	for p in f:
+		box = box.expand(p)
+	if f.size() != 4 or absf(n.y) > 0.01 or not _upright(f):
+		return [f]
+	var cuts := dress.levels_across(AABB(box.position + n * look.probe, box.size))
+	if cuts.is_empty():
+		return [f]
+	var out: Array[PackedVector3Array] = []
+	var lo := box.position.y
+	cuts.append(box.end.y)
+	for y in cuts:
+		var band := PackedVector3Array()
+		for p in f:
+			band.append(Vector3(p.x, lo if p.y < box.get_center().y else y, p.z))
+		out.append(band)
+		lo = y
+	return out
+
+
+## Whether quad `f`'s corners stand at two heights only, the bottom pair and the top pair (an upright rectangle).
+static func _upright(f: PackedVector3Array) -> bool:
+	var lo := minf(minf(f[0].y, f[1].y), minf(f[2].y, f[3].y))
+	var hi := maxf(maxf(f[0].y, f[1].y), maxf(f[2].y, f[3].y))
+	for p in f:
+		if absf(p.y - lo) > 0.001 and absf(p.y - hi) > 0.001:
+			return false
+	return hi - lo > 0.001
+
+
 ## The zone face `f` looks into (its middle `probe` m out along its normal), or null when it faces no room.
 static func zone_faced(dress: StationDressing, look: StationLook, f: PackedVector3Array) -> StationDressing.Zone:
 	return dress.zone_at(_middle(f) + GreyboxFaces.face_normal(f) * look.probe)
 
 
-## The finish block `b`'s face `f` is drawn in on map `m` (its station dress).
+## The finish block `b`'s face `f` (or one of its `bands`) is drawn in on map `m` (its station dress).
 static func finish_of_face(m: MapData, look: StationLook, b: MapData.Block, f: PackedVector3Array) -> StringName:
 	var zone := zone_faced(m.station, look, f)
 	return look.finish_of(b, GreyboxFaces.face_normal(f), zone.style if zone != null else &"", m.station.owner_of(b))

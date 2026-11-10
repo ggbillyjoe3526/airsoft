@@ -49,7 +49,15 @@ func _finish_at(m: MapData, p: Vector3, n: Vector3) -> StringName:
 	assert_false(hit.is_empty(), "a face at %s facing %s" % [p, n])
 	if hit.is_empty():
 		return &""
-	return StationSurface.finish_of_face(m, look, hit[0], hit[1])
+	for band in StationSurface.bands(m.station, look, hit[1]):
+		var lo := INF
+		var hi := -INF
+		for q in band:
+			lo = minf(lo, q.y)
+			hi = maxf(hi, q.y)
+		if p.y >= lo - 0.01 and p.y <= hi + 0.01:
+			return StationSurface.finish_of_face(m, look, hit[0], band)
+	return &""
 
 
 func test_kingsmere_names_its_station_and_the_other_maps_none() -> void:
@@ -95,6 +103,15 @@ func test_each_face_takes_its_room_s_finish() -> void:
 	assert_eq(_finish_at(m, Vector3(40.0, 2.0, 9.0), Vector3.FORWARD), &"car", "the south train's side, outside")
 	assert_eq(_finish_at(m, Vector3(40.0, 0.9, 10.75), Vector3.UP), &"rubber", "the south train's floor")
 	assert_eq(_finish_at(m, Vector3(10.0, 8.9, 3.0), Vector3.UP), &"platform", "the plant room's floor")
+
+
+func test_a_lift_shaft_wears_each_storey_s_walls_and_paint_inside() -> void:
+	var m := _map("kingsmere")
+	assert_eq(_finish_at(m, Vector3(-43.55, 20.0, -1.2), Vector3.FORWARD), &"wall_tile",
+			"the shaft's front in the ticket hall")
+	assert_eq(_finish_at(m, Vector3(-43.55, 10.0, -1.2), Vector3.FORWARD), &"wall_tile",
+			"the shaft's front on the concourse")
+	assert_eq(_finish_at(m, Vector3(-43.55, 3.0, -0.9), Vector3.BACK), &"painted", "the shaft's wall inside its well")
 
 
 func test_the_escalators_are_tread_and_the_cover_its_kind_s() -> void:

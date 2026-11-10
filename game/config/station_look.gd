@@ -69,7 +69,8 @@ extends Resource
 }
 ## The cover kinds a room that owns its blocks draws in its own finishes (a train's car ends), not their kind's.
 @export var owned_kinds: Array[StringName] = [&"container"]
-## A shell block with its own colour (the lift shafts) is plain paint in it.
+## A shell block with its own colour (the lift shafts) is plain paint in it where it faces no room (inside the wells);
+## facing a room it wears that room's walls like any other shell.
 @export var painted_shell: StringName = &"painted"
 ## A face that looks into no room (the station's outside, seen nowhere) and the ground beyond the walls.
 @export var outside: StringName = &"soot"
@@ -104,10 +105,8 @@ func finish_of(b: MapData.Block, normal: Vector3, style: StringName, own: String
 	var room := own if own != &"" else style
 	if kind_finishes.has(b.kind) and (own == &"" or not owned_kinds.has(b.kind)):
 		return kind_finishes[b.kind]
-	if own == &"" and b.colour.a > 0.0:
-		return painted_shell
 	if room == &"" or not style_walls.has(room):
-		return outside
+		return painted_shell if own == &"" and b.colour.a > 0.0 else outside
 	var up := normal.y
 	if up > 0.5 and (b.kind == &"floor" or b.kind == &"ramp" or own != &""):
 		return style_floors[room]
