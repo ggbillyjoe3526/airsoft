@@ -3,7 +3,7 @@
 William: "Can you redesign the dev retro pixel filter? I want it to look less like Doom and more like PS1 graphics.
 Also rename it to Retro filter."
 
-**Review:** pending
+**Review:** critic 8/8 (attempt 2; Accept once QA and performance covered the head) · qa Pass · performance Pass
 
 ## Attempts
 
@@ -11,7 +11,7 @@ Also rename it to Retro filter."
 |---|---|---|---|---|---|
 | 2026-11-10 | 1 | build thread | ✓ (touched files; full run cut short for the fixes) | 5/8 Retry | the map's own day haze lost after on/off; specks from self-shadowing; lettering broken; snap grid centred, not top-left; names, KNOWN_ISSUES, ART.md |
 | 2026-11-10 | 2 | build thread | ✓ (touched files) | 8/8, Retry until QA and performance cover the new head | the lamps' shadow maps are kept while nothing moves, so a snap in their pass would go stale |
-| 2026-11-10 | 3 | build thread | pending | pending | – |
+| 2026-11-10 | 3 | build thread | ✓ | 8/8 Accept (critic's attempt 2 terms: QA and performance Pass on 37039b7) | – |
 
 ## Decisions
 

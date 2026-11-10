@@ -1,21 +1,13 @@
-Task: RF1 · QA commit df10fe4 · Verdict: Pass
+Task: RF1 · QA commit f83100f · Verdict: Pass
 
-Blocking: none. Advisory: none reproducible.
+Blocking: none. Advisory: none.
+Re-run at head 37039b7. test_rf1_qa.gd 19/19 pass (~12 s), test_dev_play.gd 10/10 pass (~64 s). Whole suite left to check.sh. Raw output pipeline/out/qa/.
 
-Tests added (tests/unit/test_rf1_qa.gd, 15 tests, 15 pass, ~10 s; raw output pipeline/out/qa/rf1_qa.txt):
-- set_look holds lines/levels to the slider ends, before and after entering the tree, huge and negative input. Fails if the clamps are removed (levels would exceed 32 / go negative).
-- pixel_size never below 1, zero/negative lines safe, 0 height safe. Fails without the maxi guards.
-- resize: snap follows a changed window size and the connection is made/removed. Fails if size_changed is not connected.
-- no lighting (setup(null)): builds and frees quietly, snap zeroed on exit.
-- leaving the tree zeroes snap and disconnects size_changed.
-- haze off restores a night map's own fog (begin/end/density/colour); a fog-less day map returns to no fog. Fails if retro_haze(false) did not call _own_haze.
-- off and on in one frame: one filter, new haze stands, old one's exit does not leave snap zero or the haze off.
-- lighting freed before the filter: no script error. Session freed with the filter up: no error.
-- session toggled on/off/on four times in a row: never more than one RetroFilter, none when off, map haze back.
-- save compatibility: old retro_pixels switch turns the filter on with new default lines/levels (old size/shades ignored); round trip; corrupt/out-of-range/missing values fall back to defaults.
-- LINES default and ends sit on the Lines slider step.
+Added (tests/unit/test_rf1_qa.gd, end of file):
+- haze changed after build (site-dressed sky haze) is restored exactly after on, on again, off; off twice harmless. Fails if retro_haze held the preset or re-held the retro haze on a second on.
+- haze off without on leaves the night fog untouched (no restore of an unset hold).
+- _process with no camera is safe.
+- a filter outside the tree does not process (the globals are touched only while it is up).
+Earlier 15 tests (clamps, resize, no lighting, night fog back, one-frame off/on, freed lighting/session, toggling, saves) updated by the worker for held haze and still pass.
 
-Checks of "fails without the feature": the old keys/class do not exist in base 16a9b26, so these cannot compile or pass there; I did not mutate production code (not allowed).
-
-Could not test (owner/display): how the PS1 look, wobble and swim actually look; Retro filter at 1080p/4K and in borderless/fullscreen; the global itself (not read back, it can stall the renderer: only RetroFilter.snap() is checked); a headless run has no real renderer so the shaders are not compiled by these tests.
-Suite: not run whole (check.sh running elsewhere); this file only.
+Not tested: the camera globals' values (reading globals can stall the renderer); how the look appears, other resolutions and window modes, shader compilation (need a display).
