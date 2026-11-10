@@ -195,3 +195,82 @@ func test_a_malformed_station_dress_is_warned_about_and_left_out() -> void:
 	assert_eq(warnings.size(), 5, "each bad one warned about, and the bad dress")
 	assert_eq(d.style_at(Vector3(0.5, 0.5, 0.5)), &"hall", "a point in a zone")
 	assert_eq(d.style_at(Vector3(5.0, 0.5, 0.5)), &"", "a point in none")
+
+
+func test_zone_lookup_holds_at_column_and_box_edges() -> void:
+	var w: Array[String] = []
+	var d := StationDressing.read({"station": {"zones": [
+		{"style": "hall", "box": [-9.0, 17.0, 0, 3, 0, 3]},
+		{"style": "plant", "box": [20.0, 24.0, 0, 3, 0, 3]},
+	]}}, w)
+	for x: float in [-9.0, -8.0, -0.001, 0.0, 7.999, 8.0, 16.0, 17.0]:
+		assert_eq(d.style_at(Vector3(x, 1.0, 1.0)), &"hall", "x=%s lies in the hall across the column edges" % x)
+	assert_eq(d.style_at(Vector3(17.5, 1.0, 1.0)), &"", "just past the hall: none")
+	assert_eq(d.style_at(Vector3(-9.5, 1.0, 1.0)), &"", "just before it: none")
+	assert_eq(d.style_at(Vector3(24.0, 1.0, 1.0)), &"plant", "a far zone")
+	assert_eq(d.style_at(Vector3(1e6, 1.0, 1.0)), &"", "far away: none")
+	assert_eq(w, [], "no warnings")
+
+
+func test_a_station_with_no_zones_leaves_every_face_outside() -> void:
+	var w: Array[String] = []
+	var d := StationDressing.read({"station": {}}, w)
+	assert_not_null(d, "an empty station is still a dress")
+	assert_eq(d.zones.size(), 0)
+	assert_null(d.zone_at(Vector3.ZERO), "no zone")
+	assert_eq(d.owner_of(MapData.Block.new()), &"", "no owner")
+
+
+func test_a_face_in_no_room_takes_the_outside_set_and_every_finish_has_a_layer() -> void:
+	var b := MapData.Block.new()
+	b.kind = &"wall"
+	assert_eq(look.finish_of(b, Vector3.UP, &"", &""), look.outside, "no room: outside")
+	assert_eq(look.finish_of(b, Vector3.UP, &"nonsense", &""), look.outside, "an unknown style: outside")
+	assert_eq(look.layer_of(&"never_heard_of"), look.layer_of(look.outside), "an unknown finish: the outside's layer")
+	var m := _map("kingsmere")
+	var blocks_outside := 0
+	for blk in m.blocks:
+		if look.kind_finishes.has(blk.kind) and m.station.owner_of(blk) == &"":
+			continue
+		for f in GreyboxFaces.faces_of(blk):
+			var layer := look.layer_of(StationSurface.finish_of_face(m, look, blk, f))
+			assert_between(layer, 0, look.sets.size() - 1, "a valid layer")
+		if m.station.zone_at(blk.center) == null and blk.kind == &"floor":
+			blocks_outside += 1
+	gut.p("floor blocks whose centre lies in no zone: %d" % blocks_outside)
+
+
+func test_a_look_whose_arrays_are_missing_draws_the_greybox() -> void:
+	var bad: StationLook = look.duplicate()
+	bad.colour_array = "res://assets/textures/station/does_not_exist.res"
+	var level := MapLevel.new()
+	add_child_autofree(level)
+	level.build(_map("kingsmere"), play.map_style, tuning.body, play.baked_light, LightingConfig.for_map(play.lighting,
+			null, _map("kingsmere"), LightingConfig.DAY), false, play.site_look, bad)
+	assert_null(level.station_material(), "no material")
+	assert_null(level.get_node_or_null("Station"), "no station mesh")
+	assert_not_null(level.get_node_or_null("Greybox"), "the greybox instead")
+	assert_push_error("texture arrays")
+
+
+func test_set_detail_before_a_build_and_on_a_greybox_map_is_harmless() -> void:
+	var level := MapLevel.new()
+	add_child_autofree(level)
+	level.set_detail(GraphicsQuality.MeshDetail.LOW)
+	assert_null(level.station_material(), "nothing before a build")
+	var plain := _level(_map("depot"), look)
+	plain.set_detail(GraphicsQuality.MeshDetail.LOW)
+	assert_null(plain.station_material(), "a map without a dress ignores the station look")
+	assert_null(plain.get_node_or_null("Station"), "and draws no station")
+
+
+func test_freeing_a_station_level_leaves_no_orphans() -> void:
+	var before := Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)
+	var level := MapLevel.new()
+	add_child(level)
+	level.build(_map("kingsmere"), play.map_style, tuning.body, play.baked_light, LightingConfig.for_map(play.lighting,
+			null, _map("kingsmere"), LightingConfig.DAY), false, play.site_look, look)
+	remove_child(level)
+	level.free()
+	await wait_physics_frames(2)
+	assert_eq(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT), before, "no node left behind")
