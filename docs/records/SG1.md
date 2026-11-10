@@ -1,11 +1,12 @@
 # SG1 · The scope's glass at the hip looks straight ahead (Dev 3 bug)
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
+| 2026-11-10 | 1 | Opus 5.5 (build thread) | tools/check.sh green | Accept 8/8 | – |
 
 ## What it was
 
@@ -23,13 +24,22 @@
 
 - **The camera stays within `hip_glass_eye_reach` (0.25 m) of the eye.** The axis passes about 0.17 to 0.2 m from the
   eye at the hip; the clamp keeps the camera inside the body's 0.32 m radius less the near plane, so a replica pressed
-  over a wall never shows what is behind it. Held further out (only in tests), the view shifts a few centimetres off
-  the axis, still looking down it.
+  over a wall never shows what is behind it. Leaning keeps the eye at least `lean_wall_clearance` (0.2 m) from a wall
+  beside it, and the camera sits about 0.14 m to the side and looks forward, its near plane a few millimetres across,
+  so a lean into a wall can't put it through one either (the critic's advisory; a play check on the checklist). Held
+  further out (only in tests), the view shifts a few centimetres off the axis, still looking down it.
 - **Upright by the eye's up, the optic's own up when it points within 2.6 degrees of straight up or down**, so the
   picture never rolls against the screen and never builds a degenerate basis.
 - **The glass's camera is never eased between ticks** (`physics_interpolation_mode` off): it is placed by hand every
   rendered frame, now off the eye; the match tree already set this, a test tree did not.
 - **The glass's camera follows the eye's near and far** each update (once a change), as BP8's crop did.
+
+## Review
+
+- QA Pass (tests/unit/test_sg1_hip_glass_qa.gd: the vertical axis, a scaled model, the reach, aimed to the hip and
+  back, near and far, interpolation off, the red dot, Low, 200 random poses). Performance Pass by reading (no GPU: the
+  hip camera now looks out rather than at the floor, so it may draw more far geometry; the open BP8 row covers it).
+  Critic Accept 8/8.
 
 ## Known issues left
 
