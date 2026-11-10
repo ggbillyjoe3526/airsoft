@@ -1,18 +1,12 @@
-Task: SL4 · QA commit none (no new tests; test_lo3_qa and others already updated in the diff) · Verdict: Pass
+Task: UG3 · QA commit (see git log) · Verdict: Pass  (head under test 9b71816)
 
-Head 3e9bf5e, `git diff origin/main...HEAD` re-checked.
+Blocking: none. Advisory: none found.
+- Old saves / Custom rows: a save without the row takes the base preset's column; a bad value is dropped alone; override round trip works.
+- Compatibility drawable() greys the row to off, Mobile and Forward+ keep it; renderer switch clears and restores the eyes.
+- Freed field: no orphan growth over 5 build/toggle/free cycles; the eyes resource is reused, not rebuilt.
+- Map without a lighting override uses the day preset's eye_lift; zero/huge lift and drop stay finite and min <= max.
+- en.po label and note resolve. Glass camera gets its own plain attributes (optic_glass.gd:88); not render-checkable headless.
 
-Blocking: none.
-Advisory: targeted GUT runs print one pair of "get_base_script / resource_path on null" SCRIPT ERRORs per script. The count equals the script count, so it comes from GUT with `-gdir=`, not from the game.
-
-Checked:
-- HudStyle.navy_box is now dark_box. No `navy_box` reference is left in game/, tests/ or tools/. The callers in match_summary, xp_card and weapon_rail use dark_box. panel_box too.
-- GameTheme.DEEP and PLATE exist. MinimapConfig ink and map_backdrop read GameTheme.BG; both are consts, so the config's load order is fine.
-- test_lo3_qa, test_loadout_screen and test_replica_paint compare against ReplicaPaint.drawn(...), matching the new paint code.
-
-Runs (targeted only, whole suite left to the other process):
-- 13 scripts (hud*, minimap, pause, report, nav_rail, crash_screen, lo3_qa, loadout_screen, replica_paint, game_theme): 199 tests, 199 pass.
-- 38 scripts (armory, chevron, graphics, sound_cues, order_wheel, team_markers, settings, flag, hud_table, menu, loadout): 608 tests, 608 pass.
-- No parse errors.
-
-Not tested: how the new palette looks on screen, which needs a display (owner's list).
+Tests added: tests/unit/test_ug3_qa.gd (9, all pass, 0.56 s). Each fails without the feature (EYE_ADAPTATION row, eye_adaptation field, set_eye_adaptation and the en.po keys do not exist; they error or assert false).
+Targeted run (ug3_qa, eye_adaptation, graphics_table, graphics_apply, settings_screen, bp6/bp7_graphics, graphics_pick): 123 pass, 0 fail, 121 s.
+Not tested (needs display): the Settings page layout at small window sizes with the extra Effects row, actual exposure look, scope glass pixels. tools/check.sh and smoke not run (as asked).

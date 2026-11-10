@@ -45,11 +45,12 @@ const GLOBAL_ILLUMINATION := &"global_illumination"
 const REFLECTIONS := &"reflections"
 const LAMP_LIGHTS := &"lamp_lights"
 const GLOW := &"glow"
+const EYE_ADAPTATION := &"eye_adaptation"
 const VOLUMETRIC_FOG := &"volumetric_fog"
 ## Every row, in the Graphics tab's order (data/graphics.md's).
 const ROWS: Array[StringName] = [RENDER_SCALE, UPSCALER, EDGE_SMOOTHING, TEMPORAL_SMOOTHING, SUN_SHADOWS,
 		SHADOW_DETAIL, SHADOW_SOFTNESS, SHADOW_RANGE, AMBIENT_OCCLUSION, BAKED_LIGHT, TEXTURE_FILTERING, MESH_DETAIL,
-		OCCLUSION_CULLING, WIND_DUST, GLOBAL_ILLUMINATION, REFLECTIONS, LAMP_LIGHTS, GLOW, VOLUMETRIC_FOG]
+		OCCLUSION_CULLING, WIND_DUST, GLOBAL_ILLUMINATION, REFLECTIONS, LAMP_LIGHTS, GLOW, EYE_ADAPTATION, VOLUMETRIC_FOG]
 ## Every choice the game knows for each choice row, by level. The file offers these, or some of them. (Values are Arrays:
 ## Godot 4.7 keeps a const typed dictionary's array values as Arrays, so a PackedStringArray value type misreads them.)
 const CHOICES: Dictionary[StringName, Array] = {
@@ -68,6 +69,7 @@ const CHOICES: Dictionary[StringName, Array] = {
 	REFLECTIONS: ["off", "probes", "screen"],
 	LAMP_LIGHTS: ["off", "near", "far"],
 	GLOW: ["off", "on"],
+	EYE_ADAPTATION: ["off", "on"],
 	VOLUMETRIC_FOG: ["off", "on"],
 }
 ## The widest range the file may give a range row (a typo guard): the render scale within what the viewport takes, in
@@ -104,6 +106,8 @@ var reflections: Reflections = Reflections.OFF
 var lamp_lights: LampLights = LampLights.OFF
 ## Bright lamps and sky bloom softly.
 var glow: bool = false
+## The picture brightens in the dark and steadies in bright light, as eyes do (FieldLighting.set_eye_adaptation).
+var eye_adaptation: bool = false
 ## A faint haze the light shines through (shafts and depth).
 var volumetric_fog: bool = false
 
@@ -192,6 +196,8 @@ func level(row: StringName) -> int:
 			return lamp_lights
 		GLOW:
 			return int(glow)
+		EYE_ADAPTATION:
+			return int(eye_adaptation)
 		VOLUMETRIC_FOG:
 			return int(volumetric_fog)
 	return GraphicsTable.NO_LEVEL
@@ -237,6 +243,8 @@ func set_level(row: StringName, value: int) -> void:
 			lamp_lights = value as LampLights
 		GLOW:
 			glow = value != 0
+		EYE_ADAPTATION:
+			eye_adaptation = value != 0
 		VOLUMETRIC_FOG:
 			volumetric_fog = value != 0
 

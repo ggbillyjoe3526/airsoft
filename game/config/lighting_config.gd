@@ -42,6 +42,18 @@ const PRESETS: Array[StringName] = [DAY, NIGHT]
 ## glow (TeamColours.resolve), the light pools, the skyline's lamps, a bake's sky share alone).
 @export var night: bool = false
 
+@export_group("Eye adaptation")
+## Graphics › Eye adaptation (UG3): the eyes open up slowly in the dark and close again in the light, so a tunnel or
+## the wood under its crowns reads, and stepping out dazzles a moment. `eye_middle` is the view's average brightness
+## (linear, as the engine meters it: the brightest channel's mean before exposure) at and above which this preset's
+## own exposure holds, so every ordinary view keeps the look tuned; a darker view is lifted towards it, at most
+## `eye_lift` times. `eye_drop` (1: never) would darken a view brighter than `eye_drop` x the middle. Depot's hall
+## under its lamps and Woodland's open field by day both meter above 0.25. At night `eye_lift` is 1: the night keeps
+## its tuned dark.
+@export var eye_middle: float = 0.25
+@export var eye_lift: float = 3.0
+@export var eye_drop: float = 1.0
+
 @export_group("Haze")
 ## Haze from `fog_from` to `fog_to` m from the eye, in `fog_colour`, over `fog_sky` of the sky. Off by day.
 @export var fog: bool = false

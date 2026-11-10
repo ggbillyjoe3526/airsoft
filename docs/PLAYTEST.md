@@ -1055,6 +1055,12 @@ Settings › Graphics › Quality: Low, Medium, High, Ultra or Custom.
   warmer, three flicker now and then and two are dead with dark lenses and a darker patch under them, the same every
   match. On High and Ultra the light under them follows. Does the flicker read as an old lamp, not a distraction in a
   fight? Note F3 near a flickering lamp on Ultra.
+- [ ] **Eye adaptation (UG3, your graphics card).** On High or Ultra, walk into Depot's West tunnel from the hall: over
+  a second or two the tunnel opens up until you can make out a bot crouched in it; walk back out and the hall dazzles a
+  moment, then settles to its usual look. On Woodland by day, step in under the trees: the shade lifts the same way,
+  and the open field looks as before. Turn Eye adaptation off (Custom) on Woodland's open field and back on: the sky's
+  glow should look the same both ways (the cloud's renderer loses it with the setting on). By night nothing changes.
+  Is it too strong, too weak, too slow? Look through a scope in the tunnel: its picture adapts with the rest.
 
 ## Accessibility
 

@@ -320,6 +320,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **Depot's lamps are worn (owner, 2026-11-10, DW1).** "Some lamps aren't as bright or they flicker or one that
   doesn't work", for Depot only: the map file names each worn lamp (`roof.lamps[].state`), picked once by its builder,
   the same every match; other maps name none.
+- **Eye adaptation lifts the dark and keeps the tuned look (2026-11-10, UG3; default, owner's step 3).** A Graphics
+  row, on for High and Ultra: a view darker than its map's middle opens up slowly, at most three times; any brighter
+  view keeps the preset's exposure, so every look the owner approved stays as it is and only tunnels and deep shade
+  lift. The night keeps its tuned dark. One middle for every map (0.25): Depot's hall and Woodland's open field both
+  meter above it.
 - **Every figure keeps its team-colour plate carrier (owner, 2026-10-17, AX1).** The carrier reads like a site's team
   bib and is the strongest team cue at range. A civilian outfit is in `docs/IDEAS.md`.
 

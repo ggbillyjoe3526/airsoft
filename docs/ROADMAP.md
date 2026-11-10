@@ -31,7 +31,7 @@ in `docs/PROCESS.md`.
   deferred until later (owner, 2026-11-07: `docs/DECISIONS.md` › Versions, releases and branches). The owner pulled in
   the top graphics for the whole game (2026-11-09: Ultra as close to path-traced light as Godot gets, scaling per
   preset, baked path tracing before live ray tracing), in five steps: real lamp lights with shadows (done: UG1), a
-  hall lit by its lamps alone with no sun indoors (UG2), eye adaptation, finer bounce light, reflections, ambient occlusion
+  hall lit by its lamps alone with no sun indoors (UG2), eye adaptation (UG3), finer bounce light, reflections, ambient occlusion
   and wear decals, then baked path-traced light. The owner added a replica (2026-11-10): the Compact SMG, its numbers
   and play first (CS1, Dev content), then its own model from his photos (CS2). And a
   new map (2026-11-10): Kingsmere, a closed metro station on three levels, from his concept v2: its greybox as Dev
