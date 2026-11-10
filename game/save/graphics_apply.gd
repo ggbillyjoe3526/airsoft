@@ -56,10 +56,15 @@ const SSIL_BLUR := "rendering/environment/ssil/blur_passes"
 const SSIL_FADE_FROM := "rendering/environment/ssil/fadeout_from"
 const SSIL_FADE_TO := "rendering/environment/ssil/fadeout_to"
 ## Each GlobalIllumination as the screen-space bounce's quality and whether it is drawn at half size: Screen (High)
-## medium at half size, Scene (Ultra) high at full size with SDFGI at full resolution.
+## medium at half size, Scene (Ultra) ultra (adaptive, LookConfig.fine_adaptive) at full size with SDFGI at full
+## resolution.
 const SSIL_QUALITY: Array[int] = [RenderingServer.ENV_SSIL_QUALITY_LOW, RenderingServer.ENV_SSIL_QUALITY_MEDIUM,
-		RenderingServer.ENV_SSIL_QUALITY_HIGH]
+		RenderingServer.ENV_SSIL_QUALITY_ULTRA]
 const SSIL_HALF: Array[bool] = [true, true, false]
+## Each AmbientOcclusion's quality: Half (High) the project's medium at half size, Full (Ultra) ultra (adaptive,
+## LookConfig.fine_adaptive) at full size. Off sends nothing.
+const SSAO_QUALITY_OF: Array[int] = [RenderingServer.ENV_SSAO_QUALITY_MEDIUM, RenderingServer.ENV_SSAO_QUALITY_MEDIUM,
+		RenderingServer.ENV_SSAO_QUALITY_ULTRA]
 
 
 ## The process's graphics: the RenderingServer's few global settings, which it can't be asked for, each sent only when
@@ -75,11 +80,13 @@ class Server:
 	const SOFT_SHADOWS := "rendering/lights_and_shadows/directional_shadow/soft_shadow_filter_quality"
 	const SSAO_HALF := "rendering/environment/ssao/half_size"
 
-	## The sun's shadow map (px a side), its filter (RenderingServer.ShadowQuality) and ambient occlusion at half size,
-	## as last sent: at first the project's, which the RenderingServer starts with, so High sends nothing new.
+	## The sun's shadow map (px a side), its filter (RenderingServer.ShadowQuality) and ambient occlusion at half size
+	## and its quality (RenderingServer.EnvironmentSSAOQuality), as last sent: at first the project's, which the
+	## RenderingServer starts with, so High sends nothing new.
 	var shadow_size: int = ProjectSettings.get_setting(SHADOW_SIZE) as int
 	var soft_shadows: int = ProjectSettings.get_setting(SOFT_SHADOWS) as int
 	var ssao_half: bool = ProjectSettings.get_setting(SSAO_HALF) as bool
+	var ssao_quality: int = ProjectSettings.get_setting(SSAO_QUALITY) as int
 	## The global illumination's and the volumetric fog's quality as last sent (GlobalIllumination, -1 never sent; the
 	## fog's froxel grid, zero never sent).
 	var gi_quality: int = -1
@@ -105,11 +112,11 @@ class Server:
 		if gi == gi_quality:
 			return
 		gi_quality = gi
+		var scene := gi == GraphicsQuality.GlobalIllumination.SCENE
 		RenderingServer.environment_set_ssil_quality(SSIL_QUALITY[gi] as RenderingServer.EnvironmentSSILQuality,
-				SSIL_HALF[gi], ProjectSettings.get_setting(SSIL_ADAPTIVE) as float,
+				SSIL_HALF[gi], look.fine_adaptive if scene else ProjectSettings.get_setting(SSIL_ADAPTIVE) as float,
 				ProjectSettings.get_setting(SSIL_BLUR) as int, ProjectSettings.get_setting(SSIL_FADE_FROM) as float,
 				ProjectSettings.get_setting(SSIL_FADE_TO) as float)
-		var scene := gi == GraphicsQuality.GlobalIllumination.SCENE
 		RenderingServer.gi_set_use_half_resolution(not scene)
 		if scene:
 			RenderingServer.environment_set_sdfgi_ray_count(look.sdfgi_rays)
@@ -132,14 +139,18 @@ class Server:
 		fog_grid = grid
 		RenderingServer.environment_set_volumetric_fog_volume_size(grid.x, grid.y)
 
-	func set_ssao_half(half: bool) -> void:
-		if half == ssao_half:
+	## Ambient occlusion for `ao` (on): half size or full, and its quality (SSAO_QUALITY_OF, Full's adaptive from `look`).
+	func set_ao(ao: GraphicsQuality.AmbientOcclusion, look: LookConfig) -> void:
+		var half := ao != GraphicsQuality.AmbientOcclusion.FULL
+		var quality := SSAO_QUALITY_OF[ao]
+		if half == ssao_half and quality == ssao_quality:
 			return
 		ssao_half = half
-		RenderingServer.environment_set_ssao_quality(
-				ProjectSettings.get_setting(SSAO_QUALITY) as RenderingServer.EnvironmentSSAOQuality, half,
-				ProjectSettings.get_setting(SSAO_ADAPTIVE) as float, ProjectSettings.get_setting(SSAO_BLUR) as int,
-				ProjectSettings.get_setting(SSAO_FADE_FROM) as float, ProjectSettings.get_setting(SSAO_FADE_TO) as float)
+		ssao_quality = quality
+		RenderingServer.environment_set_ssao_quality(quality as RenderingServer.EnvironmentSSAOQuality, half,
+				ProjectSettings.get_setting(SSAO_ADAPTIVE) as float if half else look.fine_adaptive,
+				ProjectSettings.get_setting(SSAO_BLUR) as int, ProjectSettings.get_setting(SSAO_FADE_FROM) as float,
+				ProjectSettings.get_setting(SSAO_FADE_TO) as float)
 
 
 static var _server: Server = null
@@ -296,9 +307,9 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 		lighting.sun.directional_shadow_max_distance = values.shadow_range
 		var ao := values.ambient_occlusion != GraphicsQuality.AmbientOcclusion.OFF
 		lighting.environment.ssao_enabled = ao and lighting.ssao_allowed()
-		if ao:
-			to.set_ssao_half(values.ambient_occlusion == GraphicsQuality.AmbientOcclusion.HALF)
 		var look := lighting.look()
+		if ao:
+			to.set_ao(values.ambient_occlusion, look)
 		if values.global_illumination != GraphicsQuality.GlobalIllumination.OFF:
 			to.set_gi_quality(values.global_illumination, look)
 		if values.volumetric_fog:
