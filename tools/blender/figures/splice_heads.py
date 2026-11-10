@@ -1,7 +1,8 @@
 """Swaps the figure's four heads into human.glb at the glTF level (BL11, 2026-11-05).
 
 Only the Head_* nodes' meshes, the Headwear and TeamHeadwear materials and their three atlas images change: each new
-mesh is skinned whole to the Head joint, and every node, the skeleton, the inverse bind matrices, the clips and the
+mesh is skinned to the Head joint, but for its neck inside the shirt's collar, which takes the weights of the collar
+round it (CN1), so the neck bends with the collar instead of swinging out through it; every node, the skeleton, the inverse bind matrices, the clips and the
 other meshes and materials stay exactly as they were. What nothing uses any more (the old head meshes and their
 accessors) is dropped and the binary chunk repacked, so the splice can run again on any later human.glb (another
 thread's body or kit) and give the same heads. Joints are found by name.
@@ -31,6 +32,20 @@ COMPONENTS = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4, "MAT4": 16}
 DTYPES = {FLOAT: np.float32, USHORT: np.uint16, UINT: np.uint32, UBYTE: np.uint8}
 # The rest pose must put the Head joint exactly where its inverse bind matrix says.
 BIND_TOLERANCE = 1e-4
+# The neck in the collar (CN1), Blender space (+Z up, the figure facing -Y): the body's mesh whose collar lends its
+# weights; the neck's axis (head_shapes.NECK) and the radius (m) inside which a head vertex is neck and what lies on it
+# (the knit, the boonie's scarf over the collar), easing out over the next 10 mm, behind and ahead (the chin, the ear
+# cups and the brims stay whole on the Head joint); the heights (m) over which the neck eases from the collar's weights
+# to the Head joint's, behind and ahead (the throat under the chin, lower); the body vertices that are collar: above
+# this height and inside this radius of the axis.
+BODY = "Body"
+NECK_AXIS_Y = 0.016
+NECK_RADIUS_BEHIND = 0.108
+NECK_RADIUS_AHEAD = 0.088
+NECK_RADIUS_EASE = 0.010
+NECK_EASE_BEHIND = (1.525, 1.565)
+NECK_EASE_AHEAD = (1.455, 1.48)
+COLLAR_FROM = (1.43, 0.11)
 
 
 # ------------------------------------------------------------------------------------------------- glb reading
@@ -173,6 +188,8 @@ def splice(human_path: str, heads_path: str, images: dict, out_path: str) -> Non
     err = float(np.abs(rest @ ibm[head_joint] - np.eye(4)).max())
     assert err < BIND_TOLERANCE, "the Head joint's rest pose is %.5f off its bind; the heads would move" % err
 
+    collar = _collar(human)
+
     # Materials: Headwear and TeamHeadwear on the new atlas; Lens clear.
     tex = {k: _image(j, w, "%s_%s" % (IMAGE_STEM, k), open(p, "rb").read()) for k, p in images.items()}
     team_colour = [0.047, 0.258, 1.0, 1.0]
@@ -215,10 +232,7 @@ def splice(human_path: str, heads_path: str, images: dict, out_path: str) -> Non
             nrm /= np.linalg.norm(nrm, axis=1, keepdims=True) + 1e-12
             uv = heads.accessor(p["attributes"]["TEXCOORD_0"])
             idx = heads.accessor(p["indices"]).ravel()
-            joints = np.zeros((len(pos), 4), np.uint8)
-            joints[:, 0] = head_joint
-            weights = np.zeros((len(pos), 4), np.float32)
-            weights[:, 0] = 1.0
+            joints, weights = _neck_weights(pos, head_joint, collar)
             prims.append({
                 "attributes": {
                     "POSITION": w.accessor(pos, "VEC3", FLOAT, 34962, bounds=True),
@@ -240,6 +254,65 @@ def splice(human_path: str, heads_path: str, images: dict, out_path: str) -> Non
     j["accessors"] = w.accessors
     _collect(j)
     _write(j, w.bin, out_path)
+
+
+# ------------------------------------------------------------------------------------------------- the neck
+
+def _smoothstep(a: float, b: float, x: np.ndarray) -> np.ndarray:
+    t = np.clip((x - a) / (b - a), 0.0, 1.0)
+    return t * t * (3.0 - 2.0 * t)
+
+
+def _collar(human: Glb) -> tuple:
+    """The body's collar vertices: their positions (Blender space), joints and weights."""
+    j = human.json
+    node = next(n for n in j["nodes"] if n.get("name") == BODY and "mesh" in n)
+    pos, joints, weights = [], [], []
+    for p in j["meshes"][node["mesh"]]["primitives"]:
+        a = p["attributes"]
+        pos.append(human.accessor(a["POSITION"]).astype(np.float64))
+        joints.append(human.accessor(a["JOINTS_0"]).astype(np.int64))
+        weights.append(human.accessor(a["WEIGHTS_0"]).astype(np.float64))
+    pos, joints, weights = np.concatenate(pos), np.concatenate(joints), np.concatenate(weights)
+    b = _blender(pos)
+    keep = (b[:, 2] > COLLAR_FROM[0]) & (np.hypot(b[:, 0], b[:, 1] - NECK_AXIS_Y) < COLLAR_FROM[1])
+    return b[keep], joints[keep], weights[keep]
+
+
+def _blender(pos: np.ndarray) -> np.ndarray:
+    """glTF's +Y up, -Z ahead to Blender's +Z up, -Y ahead."""
+    return np.c_[pos[:, 0], -pos[:, 2], pos[:, 1]]
+
+
+def _neck_weights(pos: np.ndarray, head_joint: int, collar: tuple) -> tuple:
+    """Each head vertex's four joints and weights: the Head joint's, but where it is neck inside the collar, eased
+    toward the weights of the collar vertex nearest it, so the two bend together."""
+    b = _blender(pos)
+    dy = b[:, 1] - NECK_AXIS_Y
+    r = np.hypot(b[:, 0], dy)
+    ahead = ((1.0 - dy / np.maximum(r, 1e-9)) * 0.5) ** 3  # 1 straight ahead, 0 behind, 1/8 at the sides
+    lo = NECK_EASE_BEHIND[0] + (NECK_EASE_AHEAD[0] - NECK_EASE_BEHIND[0]) * ahead
+    hi = NECK_EASE_BEHIND[1] + (NECK_EASE_AHEAD[1] - NECK_EASE_BEHIND[1]) * ahead
+    inside = NECK_RADIUS_BEHIND + (NECK_RADIUS_AHEAD - NECK_RADIUS_BEHIND) * ahead
+    share = (1.0 - _smoothstep(0.0, 1.0, (b[:, 2] - lo) / (hi - lo))) * (
+        1.0 - _smoothstep(0.0, 1.0, (r - inside) / NECK_RADIUS_EASE))
+    joints = np.zeros((len(pos), 4), np.uint8)
+    weights = np.zeros((len(pos), 4), np.float32)
+    joints[:, 0] = head_joint
+    weights[:, 0] = 1.0
+    cpos, cjoints, cweights = collar
+    for i in np.nonzero(share > 1e-3)[0]:
+        near = int(np.argmin(((cpos - b[i]) ** 2).sum(1)))
+        mix = {head_joint: 1.0 - share[i]}
+        for jt, wt in zip(cjoints[near], cweights[near]):
+            if wt > 0.0:
+                mix[int(jt)] = mix.get(int(jt), 0.0) + share[i] * wt
+        top = sorted(mix.items(), key=lambda kv: -kv[1])[:4]
+        total = sum(wt for _, wt in top)
+        for k, (jt, wt) in enumerate(top):
+            joints[i, k] = jt
+            weights[i, k] = wt / total
+    return joints, weights
 
 
 # ------------------------------------------------------------------------------------------------- clean-up

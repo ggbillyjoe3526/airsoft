@@ -351,16 +351,17 @@ def boundary_loops(bm: bmesh.types.BMesh) -> list:
     return loops
 
 
-def grow_collar(bm: bmesh.types.BMesh, rings: list, centre_y: float) -> None:
-    """Raise a collar from the neckline (the highest open loop): each ring (z, rx, ry) an ellipse round the neck the
-    loop's vertices are carried to by their angle, the first ring halfway from the neckline."""
+def grow_collar(bm: bmesh.types.BMesh, rings: list, ring_point, centre_y: float) -> None:
+    """Raise a collar from the neckline (the highest open loop) through `rings`: ring_point(ring, angle) places a point
+    of a ring by its angle round the neck's axis (x 0, y centre_y; collar.py), and each of the loop's vertices is
+    carried there by its own angle, the first ring halfway from the neckline."""
     loop = max(boundary_loops(bm), key=lambda lp: sum(v.co.z for v in lp) / len(lp))
     prev = loop
-    for k, (z, rx, ry) in enumerate(rings):
+    for k, ring in enumerate(rings):
         cur = []
         for v in loop:
             ang = math.atan2(v.co.x, -(v.co.y - centre_y))
-            p = Vector((rx * math.sin(ang), centre_y - ry * math.cos(ang), z))
+            p = Vector(ring_point(ring, ang))
             if k == 0:
                 p = (p + v.co) * 0.5
             cur.append(bm.verts.new(p))

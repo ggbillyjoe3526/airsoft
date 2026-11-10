@@ -10,7 +10,7 @@ The human figure's four heads, built from the owner's photos (`ref_images.zip` â
 | `head_shapes.py` | The head and the helmet shells as formulas: the head's radius by azimuth and height, the shells' superellipsoid and rim curves. |
 | `head_textures.py` | The 2048 px atlas (colour, normal, ORM) painted with numpy: the knit, loop, mesh, shells, brims and straps. |
 | `headkit.py` | Shared helpers: mesh building (`Part`), draping on the head (`Drape`), the atlas (`Atlas`, `Tile`). |
-| `splice_heads.py` | Replaces the `Head_*` meshes, the `Headwear`, `TeamHeadwear` and `Lens` materials and the atlas inside `human.glb`, skinned whole to the `Head` bone; leaves every other node alone. |
+| `splice_heads.py` | Replaces the `Head_*` meshes, the `Headwear`, `TeamHeadwear` and `Lens` materials and the atlas inside `human.glb`, skinned to the `Head` bone but for the neck inside the collar, which takes the collar's weights (CN1); leaves every other node alone. |
 
 Rebuild (pip `bpy`, see `tools/blender/bot-figure/README.md` â€º `headless.py`):
 
@@ -35,6 +35,14 @@ count changed.
   stands out of the knit's surface but the lids (1.5 mm at most), so gear fitted to the head clears it.
 - **Space:** Blender metres, +Z up, the figure facing -Y, +X its left, at the rest pose. Everything sits on the whole
   LOD0 head, so the gear lands in the same place at every level.
+
+## The shirt's collar and the neck (CN1)
+
+`collar.py` holds the shirt's mock-neck collar as numbers (its rings round the heads' neck axis, higher at the back):
+`body.py` grows it from the shirt's neckline and `headwear.py` lays the boonie's scarf over it. `splice_heads.py`
+gives each head's neck inside the collar the weights of the collar vertex nearest it, so the neck bends with the
+collar instead of swinging out behind it: after the body is rebuilt, run `headwear.py` **last**, after `pads.py`,
+`gear.py` and `body_weights.py`.
 
 ## Knee and elbow pads (BL13)
 

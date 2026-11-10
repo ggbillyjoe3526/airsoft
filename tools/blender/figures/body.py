@@ -28,6 +28,7 @@ from mathutils import Vector
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import anatomy  # noqa: E402
 import boots as B  # noqa: E402
+import collar as C  # noqa: E402
 import details as D  # noqa: E402
 import garment as G  # noqa: E402
 
@@ -47,10 +48,6 @@ GLOVE_TRIS = 6000
 TROUSER_FOLDS_FROM = 0.60   # the trousers are subdivided below this height (m) for their folds
 KNEE_SMOOTH = (0.36, 0.66)   # the heights (m) whose weights smooth_knees blurs
 SLEEVE_FROM = 0.19     # |x| (m) past which the shirt is sleeve: finer mesh and folds in the geometry
-# The mock-neck collar's rings (z, half width, half depth), from the neckline up to its rolled top and back down
-# inside to the neck.
-COLLAR = [(1.468, 0.078, 0.073), (1.492, 0.071, 0.067), (1.509, 0.068, 0.064), (1.516, 0.064, 0.060),
-          (1.505, 0.059, 0.055), (1.470, 0.060, 0.056)]
 SHIRT_BONES = {"Hips", "Spine", "Spine1", "Chest", "Neck"}
 ARM_BONES = ("Shoulder", "UpperArm", "Forearm")
 LEG_BONES = ("Thigh", "Shin", "Foot", "Toe")
@@ -108,7 +105,7 @@ def shirt(verts, faces, r, dom) -> tuple:
     G.offset(bm, ease)
     sleeve_folds(bm, r)
     surf = G.Surface(bm)
-    G.grow_collar(bm, COLLAR, 0.004)
+    G.grow_collar(bm, C.RINGS, C.ring_point, C.AXIS_Y)
     G.hem(bm, depth=0.012)
     return bm, surf
 

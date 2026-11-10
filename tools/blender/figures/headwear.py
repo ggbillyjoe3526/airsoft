@@ -42,6 +42,7 @@ sys.path.insert(0, HERE)
 import bpy  # noqa: E402  (first of Blender's modules: it brings bmesh and mathutils)
 from mathutils import Vector  # noqa: E402
 
+import collar  # noqa: E402
 import face  # noqa: E402
 import head_shapes as hs  # noqa: E402
 import head_textures  # noqa: E402
@@ -707,6 +708,25 @@ def mask(k: Kit, drape: Drape, eyewear: dict) -> Part:
 
 
 SCARF_CENTRE = Vector((0.0, 0.004, 1.535))
+# The scarf lies this far (m) over the shirt's collar (collar.py), easing back onto the neck over this height (m) above
+# the collar's top (CN1: the bigger collar of 2026-11-10 would otherwise take the scarf's tail inside it).
+SCARF_OVER_COLLAR = 0.007
+SCARF_OVER_EASE = 0.015
+
+
+def over_collar(q: Vector, folds: float) -> Vector:
+    """Point q of the scarf carried out from the neck's axis, if need be, to lie over the shirt's collar."""
+    off = Vector((q.x, q.y - collar.AXIS_Y, 0.0))
+    r = off.length
+    if r < 1e-6:
+        return q
+    ang = math.atan2(q.x, -(q.y - collar.AXIS_Y))
+    rim = collar.top(ang)
+    need = (collar.outer_radius(ang, min(q.z, rim)) + SCARF_OVER_COLLAR + folds) * (
+        1.0 - smoothstep(rim, rim + SCARF_OVER_EASE, q.z))
+    if r >= need:
+        return q
+    return q + off * (need / r - 1.0)
 
 
 def scarf(k: Kit, drape: Drape) -> Part:
@@ -725,7 +745,8 @@ def scarf(k: Kit, drape: Drape) -> Part:
         folds = 0.0028 * math.sin(b * 9.5 + 0.8 * math.sin(az * 3.0)) + 0.002 * math.sin(az * 7.0 + b * 3.0)
         drop = 0.006 * gauss(az, 0.5) * math.sin(math.pi * b)  # the front sags into a soft V under the chin
         q = drape.around(SCARF_CENTRE, az, el * DEG, 0.009 + folds + drop + 0.004 * (1 - b))
-        return q if q is not None else SCARF_CENTRE + direction(az, el * DEG) * 0.1
+        q = q if q is not None else SCARF_CENTRE + direction(az, el * DEG) * 0.1
+        return over_collar(q, folds)
 
     rows = [[pt(i, j) for i in range(nu)] for j in range(nv + 1)]
     p.grid(rows, GEAR, lambda i, j: tile.uv(i / nu, j / nv), wrap=True)
