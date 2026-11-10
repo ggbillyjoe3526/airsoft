@@ -1,21 +1,18 @@
-# QA report: SL4 menus, HUD and replicas (HEAD 64813e3)
+Task: SL4 · QA commit none (no new tests; test_lo3_qa and others already updated in the diff) · Verdict: Pass
 
-Verdict: FAIL on 64813e3 (one test file not updated); fixed in the next commit.
+Head 3e9bf5e, `git diff origin/main...HEAD` re-checked.
 
-Blocking
-1. tests/unit/test_lo3_qa.gd still compared the painted material to the raw scheme colour (4 of 7 failing). Fix: the
-   expected values go through ReplicaPaint.drawn(), as in test_replica_paint and test_loadout_screen. Fixed: 7/7 pass.
+Blocking: none.
+Advisory: targeted GUT runs print one pair of "get_base_script / resource_path on null" SCRIPT ERRORs per script. The count equals the script count, so it comes from GUT with `-gdir=`, not from the game.
 
-Checked and fine
-- test_replica_paint 14/14 (with the new saturation and matte test); test_ur7_qa, test_ac1_qa, test_colour_vision,
-  test_accessibility_table pass.
-- ProjectSettings read: project.godot carries look_paint_saturation as {type, value} 0.6; exports bake project settings;
-  fallback 1.0; the new test pins it to LookConfig.paint_saturation.
-- Cache keyed by paint; drawn() once per set; the value is constant at runtime (push_globals writes RenderingServer only).
-- Cyber Pistol: own colours skip the five parts; only its realistic grey goes through drawn().
-- Swatches drawn as painted; no leftover old hexes in game/ or tests/.
+Checked:
+- HudStyle.navy_box is now dark_box. No `navy_box` reference is left in game/, tests/ or tools/. The callers in match_summary, xp_card and weapon_rail use dark_box. panel_box too.
+- GameTheme.DEEP and PLATE exist. MinimapConfig ink and map_backdrop read GameTheme.BG; both are consts, so the config's load order is fine.
+- test_lo3_qa, test_loadout_screen and test_replica_paint compare against ReplicaPaint.drawn(...), matching the new paint code.
 
-Non-blocking
-- replica_pictures.gd _restyle paints power-source labels with PowerModels' colours, not schemes (traced: unaffected).
-- ACCENT d8ccb2 vs TEXT f2eee6 is about 1.3:1, so accent words beside white words are a soft distinction: owner check.
-- Focus rings on accent-filled controls stay as invisible as with teal (no regression); hovered accent is near TEXT.
+Runs (targeted only, whole suite left to the other process):
+- 13 scripts (hud*, minimap, pause, report, nav_rail, crash_screen, lo3_qa, loadout_screen, replica_paint, game_theme): 199 tests, 199 pass.
+- 38 scripts (armory, chevron, graphics, sound_cues, order_wheel, team_markers, settings, flag, hud_table, menu, loadout): 608 tests, 608 pass.
+- No parse errors.
+
+Not tested: how the new palette looks on screen, which needs a display (owner's list).

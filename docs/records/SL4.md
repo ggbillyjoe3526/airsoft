@@ -1,6 +1,6 @@
 # SL4 · Sunlit Concrete: menus, HUD and replicas
 
-**Review:** pending
+**Review:** 3 attempts · critic Accept 8/8 (Opus) · qa Pass · performance Pass
 
 ## Attempts
 
@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | 2026-11-10 | 1 | Opus 5.5 (build thread) | ✗ (test_lo3_qa) | 5/8 Retry | navy left in MinimapConfig, charcoal copied as literals, FEATURES and KNOWN_ISSUES stale |
 | 2026-11-10 | 2 | Opus 5.5 (build thread) | – | 8/8 Retry | procedural: QA and performance re-run on the final head |
-| 2026-11-10 | 3 | Opus 5.5 (build thread) | – | – | – |
+| 2026-11-10 | 3 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 ## Decisions
 

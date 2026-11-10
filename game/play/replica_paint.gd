@@ -15,6 +15,8 @@ const METALLIC := 0.4
 ## The look's paint saturation (LookConfig.paint_saturation, kept in project.godot's shader globals): a paint is drawn
 ## at this share of its colour, as the maps' paint is (SL4).
 const PAINT_SATURATION_SETTING := "shader_globals/look_paint_saturation"
+## A linear colour's brightness (Rec. 709), as look_paint() weighs it.
+const LUMA := Vector3(0.2126, 0.7152, 0.0722)
 ## The most paints kept; the cache is cleared past it (there are twelve paints, each plain or realistic).
 const MAX_SETS := 32
 
@@ -105,7 +107,7 @@ static func _realistic_own(material_name: StringName) -> StandardMaterial3D:
 ## like look_paint() (look_light.gdshaderinc), so a bold scheme sits in the muted world and keeps its two tones.
 static func drawn(colour: Color) -> Color:
 	var linear := colour.srgb_to_linear()
-	var grey := linear.r * 0.2126 + linear.g * 0.7152 + linear.b * 0.0722
+	var grey := Vector3(linear.r, linear.g, linear.b).dot(LUMA)
 	var paint := Color(grey, grey, grey, linear.a).lerp(linear, paint_saturation())
 	return paint.linear_to_srgb()
 
