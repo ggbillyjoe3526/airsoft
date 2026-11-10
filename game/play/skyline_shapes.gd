@@ -27,6 +27,8 @@ class Part:
 	var with_model: bool = false
 	## Its share of the skyline's fade toward the horizon (a treeline's SkylineConfig.treeline_fade).
 	var haze: float = 1.0
+	## How much of its colour it keeps against the look's pull toward grey (a treeline's SkylineConfig.treeline_keep).
+	var keep: float = 0.0
 
 
 ## The parts of `p`, the field's middle at `middle` (x, z).
@@ -319,6 +321,7 @@ static func _treeline(out: Array[Part], p: SkylinePiece, cfg: SkylineConfig) -> 
 				var tree := drum(foot, Vector3(at.x, h, at.y), h * cfg.treeline_width, 0.0, cfg.treeline_sides,
 						p.colour_or(colour))
 				tree.haze = cfg.treeline_fade
+				tree.keep = cfg.treeline_keep
 				out.append(tree)
 
 

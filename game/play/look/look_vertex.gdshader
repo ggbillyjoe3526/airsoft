@@ -22,6 +22,9 @@ uniform float metallic : hint_range(0.0, 1.0) = 0.0;
 // The engine's sheen of the sky at a glancing angle (Godot's default 0.5); the skyline draws none (FT1).
 uniform float specular : hint_range(0.0, 1.0) = 0.5;
 uniform bool srgb_colours = false;
+// With `keep_by_alpha` (the skyline's, FT1), a vertex's alpha is how much of its colour it keeps against the look's
+// pull toward grey (look_paint): a treeline's greens, which pulled read olive-grey under the warm sun.
+uniform bool keep_by_alpha = false;
 uniform bool paint_by_custom = false;
 uniform bool perforations = false;
 // kit.PERF_PITCH and kit.PERF_RADIUS (tools/blender/maps/map_kit.py) keep the same.
@@ -116,6 +119,9 @@ void fragment() {
 		rough = mix(rough, 1.0, max(foot, dust) * worn);
 	}
 	ALBEDO = look_paint(col);
+	if (keep_by_alpha) {
+		ALBEDO = mix(ALBEDO, col, COLOR.a);
+	}
 	ROUGHNESS = rough;
 	METALLIC = metallic;
 	SPECULAR = specular;

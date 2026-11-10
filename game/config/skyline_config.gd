@@ -152,6 +152,10 @@ extends Resource
 @export var treeline_width: float = 0.27
 @export var treeline_sides: int = 6
 @export var treeline_sink: float = 1.0
+## How much of its own colour a treeline keeps against the look's pull toward grey (LookConfig.paint_saturation; FT1):
+## all of it. Pulled to the look's share, its greens lit by the warm sun read olive-grey from the fence. Every other
+## piece takes the look's pull.
+@export_range(0.0, 1.0) var treeline_keep: float = 1.0
 ## The band drawn from a model (Dev 3, WT1, tools/blender/maps/far_tree.py) in place of the cones: a section of two
 ## rows of stepped spruces `treeline_section` m long (x) and deep (y), its top the tallest spire, laid end to end along
 ## each run of the line (whole sections, each stretched to an even share), every other one mirrored, each in one of

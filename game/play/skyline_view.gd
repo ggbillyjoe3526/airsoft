@@ -58,6 +58,8 @@ static func build(map: MapData, cfg: SkylineConfig, lighting: LightingConfig, ey
 	# In the shared light (BP7), as the field's own blocks are: its sRGB vertex colours, already faded.
 	var look := LookMaterials.vertex_colour(cfg.roughness, 0.0, Color.WHITE, true)
 	look.set_shader_parameter(&"specular", cfg.specular)
+	# Each vertex's alpha is the share of its colour it keeps against the look's pull toward grey (a treeline's, FT1).
+	look.set_shader_parameter(&"keep_by_alpha", true)
 	view._mesh.mesh.surface_set_material(0, look)
 	if view._mesh.mesh.get_surface_count() > 1:
 		var glow := StandardMaterial3D.new()
@@ -155,11 +157,11 @@ static func _add_parts(parts: Array[SkylineShapes.Part], cfg: SkylineConfig, far
 		var n := part.a.size()
 		for i in n:
 			var j := (i + 1) % n
-			_tri(part.a[i], part.a[j], part.b[j], centre, own, far, middle, cfg, part.haze, pos, nor, col)
-			_tri(part.a[i], part.b[j], part.b[i], centre, own, far, middle, cfg, part.haze, pos, nor, col)
+			_tri(part.a[i], part.a[j], part.b[j], centre, own, far, middle, cfg, part.haze, part.keep, pos, nor, col)
+			_tri(part.a[i], part.b[j], part.b[i], centre, own, far, middle, cfg, part.haze, part.keep, pos, nor, col)
 		for ring: PackedVector3Array in ([part.a] if part.cap_a else []) + ([part.b] if part.cap_b else []):
 			for i in range(1, n - 1):
-				_tri(ring[0], ring[i], ring[i + 1], centre, own, far, middle, cfg, part.haze, pos, nor, col)
+				_tri(ring[0], ring[i], ring[i + 1], centre, own, far, middle, cfg, part.haze, part.keep, pos, nor, col)
 
 
 static func _add_surface(mesh: ArrayMesh, pos: PackedVector3Array, nor: PackedVector3Array,
@@ -244,7 +246,8 @@ func update(wind: Vector3, delta: float) -> void:
 
 
 static func _tri(p0: Vector3, p1: Vector3, p2: Vector3, centre: Vector3, own: Color, far: Color, middle: Vector2,
-		cfg: SkylineConfig, haze: float, pos: PackedVector3Array, nor: PackedVector3Array, col: PackedColorArray) -> void:
+		cfg: SkylineConfig, haze: float, keep: float, pos: PackedVector3Array, nor: PackedVector3Array,
+		col: PackedColorArray) -> void:
 	var n := (p1 - p0).cross(p2 - p0)
 	if n.length_squared() < 1e-10:
 		return
@@ -260,7 +263,9 @@ static func _tri(p0: Vector3, p1: Vector3, p2: Vector3, centre: Vector3, own: Co
 		nor.append(n)
 		var d := Vector2(q.x, q.z).distance_to(middle)
 		var fade := clampf((d - cfg.fade_from) / cfg.fade_span, 0.0, 1.0) * cfg.fade_most * haze
-		col.append(own.lerp(far, fade).linear_to_srgb())
+		var out := own.lerp(far, fade).linear_to_srgb()
+		out.a = keep
+		col.append(out)
 
 
 func _make_smoke(from: PackedVector3Array, lighting: LightingConfig) -> void:

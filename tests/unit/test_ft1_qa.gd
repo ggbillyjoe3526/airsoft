@@ -260,3 +260,60 @@ func test_a_thicket_s_spruce_wears_no_dust_and_other_props_keep_their_wear() -> 
 	for key: StringName in fresh.model_wear:
 		if key != &"spruce":
 			assert_eq(look.props.model_wear[key], fresh.model_wear[key], "%s keeps its wear" % key)
+
+
+# --- Treeline keep (attempt 2) ---------------------------------------------------------------------------------
+
+func test_treeline_cones_and_the_model_band_carry_the_keep_and_a_hill_none() -> void:
+	var cfg := play.skyline
+	assert_eq(cfg.treeline_keep, 1.0, "a treeline keeps all its colour")
+	for p in SkylineShapes.parts_of(_tree_piece(0.0), cfg, Vector2.ZERO):
+		assert_almost_eq(p.keep, cfg.treeline_keep, 1e-6, "a cone keeps treeline_keep")
+	var warnings: Array[String] = []
+	var hill := SkylinePiece.read({"skyline": [{"kind": "hill", "x": 0, "z": 300, "width": 20, "depth": 20,
+			"height": 10}]}, warnings)
+	for p in SkylineShapes.parts_of(hill[0], cfg, Vector2.ZERO):
+		assert_almost_eq(p.keep, 0.0, 1e-6, "a hill takes the look's pull")
+	if cfg.treeline_mesh() == null:
+		return
+	for one in SkylineModels.placed_of(_tree_piece(0.0), cfg, Vector2.ZERO):
+		assert_almost_eq(one.keep, cfg.treeline_keep, 1e-6, "the band keeps treeline_keep")
+
+
+func test_a_vertex_s_alpha_is_its_part_s_keep() -> void:
+	var cfg := play.skyline
+	var kept := SkylineShapes.box(Vector3(99, 0, -1), Vector3(101, 2, 1), Color(0.1, 0.4, 0.2))
+	kept.keep = 0.75
+	var pulled := SkylineShapes.box(Vector3(99, 0, 9), Vector3(101, 2, 11), Color(0.1, 0.4, 0.2))
+	for parts: Array[SkylineShapes.Part] in [[kept] as Array[SkylineShapes.Part],
+			[pulled] as Array[SkylineShapes.Part]]:
+		var cols: PackedColorArray = SkylineView.mesh_of(parts, cfg, Color.WHITE, Vector2.ZERO).surface_get_arrays(0)[
+				Mesh.ARRAY_COLOR]
+		for c in cols:
+			assert_almost_eq(c.a, parts[0].keep, 0.005, "stored in 8 bits")
+
+
+func test_the_band_s_vertices_carry_the_keep_in_their_alpha() -> void:
+	var cfg := play.skyline
+	if cfg.treeline_mesh() == null:
+		pending("the treeline model does not load here")
+		return
+	var placed := SkylineModels.placed_of(_tree_piece(0.0), cfg, Vector2.ZERO)
+	var parts: Array[SkylineShapes.Part] = []
+	var cols: PackedColorArray = SkylineView.mesh_of(parts, cfg, Color.WHITE, Vector2.ZERO, false,
+			placed).surface_get_arrays(0)[Mesh.ARRAY_COLOR]
+	assert_gt(cols.size(), 0)
+	for c in cols:
+		assert_almost_eq(c.a, cfg.treeline_keep, 1e-6)
+
+
+func test_a_built_skyline_view_keeps_by_alpha_and_other_look_materials_do_not() -> void:
+	var m := MapData.load_map("woodland", play.map_style, 1)
+	var v := SkylineView.build(m, play.skyline, play.lighting, BodyConfig.new().stand_eye_height)
+	if v == null:
+		pending("woodland shows no skyline")
+		return
+	autofree(v)
+	var mat := v._mesh.mesh.surface_get_material(0) as ShaderMaterial
+	assert_eq(mat.get_shader_parameter(&"keep_by_alpha"), true)
+	assert_eq(LookMaterials.vertex_colour(0.8, 0.0).get_shader_parameter(&"keep_by_alpha"), null, "the shader's off")
