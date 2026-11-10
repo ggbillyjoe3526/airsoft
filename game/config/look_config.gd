@@ -118,6 +118,11 @@ const GLOBAL_DUST := &"look_dust"
 @export var fog_volume_size: int = 128
 @export var fog_volume_depth: int = 128
 
+@export_group("Eye adaptation")
+## How fast the eyes adapt (Graphics › Eye adaptation, UG3): the share of the way to the new brightness covered in a
+## second. Under 1, so even a frame a second long never overshoots it (the engine steps by speed x the frame's time).
+@export var eye_speed: float = 0.8
+
 @export_group("Shadows")
 ## The sun's apparent size (degrees) on Softest shadows: contact-hardening shadows, sharp at a foot, soft far from it.
 @export var sun_size: float = 0.6

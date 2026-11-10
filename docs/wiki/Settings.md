@@ -67,7 +67,7 @@ every preset; turn it on if you want it.
   It saves the graphics card work and costs the processor a little, so it is off on Low and on from Medium.
 - **Light effects:** **Bounce light** is light bouncing off the field: Screen bounces what you see, Scene the whole
   field. **Reflections** on Probes show the room a shiny surface is in; Screen adds what is on screen. **Glow** makes
-  lamps bloom softly. **Volumetric haze** is a faint haze the light shines through. **Lamp light** makes an indoor
+  lamps bloom softly. **Eye adaptation** (High and Ultra) lets your eyes open up slowly in a dark tunnel or under the trees, so you can see what is there, and close again as you step back into the light; ordinary views look the same either way, and nights stay dark. **Volumetric haze** is a faint haze the light shines through. **Lamp light** makes an indoor
   hall's roof lamps real lights that cast shadows (and, at night, fires and lanterns cast shadows too): Near (High)
   and Far (Ultra) light the whole hall with its lamps alone, as no sunlight gets indoors; Near shadows the lamps round
   you, Far every lamp and up to eight fires. The lamps' shadows follow your shadow settings.

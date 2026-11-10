@@ -282,7 +282,7 @@ static func apply_picture(values: GraphicsQuality, viewport: Viewport) -> void:
 
 
 ## The match's sun (shadows on, their range, contact-hardening on Softest), its ambient occlusion (on, and half or full
-## size), its global illumination, reflections, glow and volumetric fog (FieldLighting.set_effects), the wind dust's share,
+## size), its global illumination, reflections, glow and volumetric fog (FieldLighting.set_effects), eye adaptation, the wind dust's share,
 ## the kicked dust (on with any wind dust), the level's baked light (a new mesh only when it changes) and a wood's
 ## dressing (WoodsView: its parts by Mesh detail, its fireflies and motes by the wind dust's share), from `values`
 ## (already drawable), and an indoor field's roof lamps as real lights (RoofLamps, Lamp light; their shadows
@@ -305,6 +305,7 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 			to.set_fog_grid(Vector2i(look.fog_volume_size, look.fog_volume_depth))
 		lighting.set_effects(values.global_illumination, values.reflections, values.glow, values.volumetric_fog,
 				values.sun_shadows and values.shadow_softness == GraphicsQuality.ShadowSoftness.SOFTEST)
+		lighting.set_eye_adaptation(values.eye_adaptation)
 	if dust != null:
 		dust.set_share(values.wind_dust / PERCENT)
 	if level != null:

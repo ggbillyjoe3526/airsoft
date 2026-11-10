@@ -58,6 +58,9 @@ void sky() {
 """
 ## The night sky's star grid: cells round each face of the cube of directions.
 const STAR_GRID := 160.0
+## CameraAttributesPractical's auto exposure limits are sensitivities (ISO): it meters brightness b as b x 800 at its
+## default sensitivity of 100 (12.5 / 100 / 100 per ISO), so a brightness limit is set as this many times it.
+const ISO_PER_BRIGHTNESS := 800.0
 
 var sun: DirectionalLight3D = null
 var environment: Environment = null
@@ -81,6 +84,9 @@ var _held_density: float = 0.0
 var _held_from: float = 0.0
 var _held_to: float = 0.0
 var _held_sky: float = 0.0
+## The field's world environment, and the eyes it adapts with while Eye adaptation is on (`set_eye_adaptation`).
+var _world: WorldEnvironment = null
+var _eyes: CameraAttributesPractical = null
 
 
 ## A node holding the environment and the sun, graded and its effects set up by `look` (the built-in look when null).
@@ -118,6 +124,8 @@ static func build(cfg: LightingConfig, look: LookConfig = null) -> FieldLighting
 	world.name = "Environment"
 	world.environment = env
 	root.add_child(world)
+	root._world = world
+	root._eyes = eye_attributes(cfg, root._look)
 	var sun := DirectionalLight3D.new()
 	sun.name = "Sun"
 	sun.rotation_degrees = Vector3(-cfg.sun_elevation, cfg.sun_heading, 0.0)
@@ -247,6 +255,32 @@ func set_effects(gi: GraphicsQuality.GlobalIllumination, reflections: GraphicsQu
 	var size := _look.sun_size if soft_sun else 0.0
 	if not is_equal_approx(sun.light_angular_distance, size):
 		sun.light_angular_distance = size
+
+
+## The eyes adapting (Graphics › Eye adaptation, UG3): the field's world meters what its camera sees and brightens a
+## dark view or settles a bright one within the preset's limits; off, the preset's own exposure alone. Every camera in
+## the field's world adapts but a scope's glass (OpticGlass: the main view tonemaps its picture). Only set when it
+## changes; never per frame.
+func set_eye_adaptation(on: bool) -> void:
+	var eyes := _eyes if on else null
+	if _world.camera_attributes != eyes:
+		_world.camera_attributes = eyes
+
+
+func eye_adaptation() -> bool:
+	return _world.camera_attributes != null
+
+
+## The eyes `cfg` and `look` adapt with: metered at `cfg.eye_middle`, the preset's exposure kept; lifted at most
+## `eye_lift` times in the dark, darkened at most `eye_drop` times in bright light, at `look.eye_speed`.
+static func eye_attributes(cfg: LightingConfig, look: LookConfig) -> CameraAttributesPractical:
+	var eyes := CameraAttributesPractical.new()
+	eyes.auto_exposure_enabled = true
+	eyes.auto_exposure_scale = cfg.eye_middle
+	eyes.auto_exposure_min_sensitivity = cfg.eye_middle / maxf(cfg.eye_lift, 1.0) * ISO_PER_BRIGHTNESS
+	eyes.auto_exposure_max_sensitivity = cfg.eye_middle * maxf(cfg.eye_drop, 1.0) * ISO_PER_BRIGHTNESS
+	eyes.auto_exposure_speed = look.eye_speed
+	return eyes
 
 
 ## The sun at `share` of its preset's strength: none while an indoor field's real roof lamps light the hall
