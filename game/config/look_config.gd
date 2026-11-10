@@ -156,6 +156,8 @@ const GLOBAL_DUST := &"look_dust"
 	# Sunlit Concrete (SL1): sloping ground's grass, darker so it stays green once the paint is muted.
 	&"grass": Color8(0x5f, 0x8a, 0x3a),
 	&"pond": Color8(0x4a, 0x6f, 0x6c), &"mud": Color8(0x55, 0x4e, 0x44), &"mud_wet": Color8(0x40, 0x3b, 0x34),
+	# The floors' worn marks (WM1): old engine oil, nearly black with a brown cast.
+	&"oil": Color8(0x26, 0x22, 0x1e),
 	# Town colours (ST1): raspberry brick (off Beta's high-contrast orange's hue), and pastel renders (seafoam, lilac,
 	# butter, sage).
 	&"brick": Color8(0xa3, 0x4a, 0x6a), &"seafoam": Color8(0x7f, 0xb8, 0xad), &"lilac": Color8(0xb9, 0xa8, 0xd6),

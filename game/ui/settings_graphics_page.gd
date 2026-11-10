@@ -43,7 +43,7 @@ const RIGHT_SECTIONS: Dictionary[String, Array] = {
 			GraphicsQuality.SHADOW_RANGE],
 	"GRAPHICS_LIGHT_AND_DETAIL": [GraphicsQuality.AMBIENT_OCCLUSION, GraphicsQuality.BAKED_LIGHT,
 			GraphicsQuality.TEXTURE_FILTERING, GraphicsQuality.MESH_DETAIL, GraphicsQuality.OCCLUSION_CULLING,
-			GraphicsQuality.WIND_DUST],
+			GraphicsQuality.WIND_DUST, GraphicsQuality.WEAR_MARKS],
 }
 ## A range row's figure, and the note beside a row (none for the others).
 const RANGE_FORMATS: Dictionary[StringName, String] = {
@@ -58,6 +58,7 @@ const NOTES: Dictionary[StringName, String] = {
 	GraphicsQuality.GLOBAL_ILLUMINATION: "GRAPHICS_GLOBAL_ILLUMINATION_NOTE",
 	GraphicsQuality.LAMP_LIGHTS: "GRAPHICS_LAMP_LIGHTS_NOTE",
 	GraphicsQuality.EYE_ADAPTATION: "GRAPHICS_EYE_ADAPTATION_NOTE",
+	GraphicsQuality.WEAR_MARKS: "GRAPHICS_WEAR_MARKS_NOTE",
 	GraphicsQuality.OCCLUSION_CULLING: "GRAPHICS_OCCLUSION_CULLING_NOTE",
 }
 ## The two choices a row shown as a switch offers, off then on.

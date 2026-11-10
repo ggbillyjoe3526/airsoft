@@ -208,6 +208,19 @@ def site() -> dict:
     return {"stencils": stencils, "lines": lines}
 
 
+def marks() -> list[dict]:
+    """The floor's worn marks (WM1, WearMarks): oil where vans and the forklift stand, their tyre tracks through the
+    Garage, the Loading bay and the hall, and dusty boot trails, each on open floor (y 0, the slab's top)."""
+    oil = [(34, 3, 1.2), (41, 5, 0.8), (49.5, 4.5, 1.2), (50, -2, 0.7), (1, -9, 0.9), (-3, 4, 0.6), (8, 2, 1.1),
+           (-6, 20, 1.0)]
+    tyres = [(53.4, 4.5, -90, 6), (13, -7, -90, 20), (30, 2, 90, 6.5), (5, 7, 0, 12)]
+    boots = [(53, 1.5, 180, 6), (5, -3, 100, 4), (4, 30, 0, 6), (-45, -27, 90, 6)]
+    out = [{"kind": "oil", "x": x, "y": 0, "z": z, "length": size} for x, z, size in oil]
+    out += [{"kind": "tyres", "x": x, "y": 0, "z": z, "yaw": yaw, "length": n} for x, z, yaw, n in tyres]
+    out += [{"kind": "boots", "x": x, "y": 0, "z": z, "yaw": yaw, "length": n} for x, z, yaw, n in boots]
+    return out
+
+
 # A door's leaves (DO1): this thick (m), hung on one face of the wall (the +x or +z one, `side` 1) across its gap, as
 # tall as the wall. Two leaves, each hinged at its jamb in the leaf's middle plane, so an open leaf folds back flat
 # against the wall's face; each wall piece beside a gap is at least a leaf wide.
@@ -252,7 +265,7 @@ def build() -> dict:
         "bakedLight": {"file": "depot", "dim": dims()},
         # The yard's dust: motes in the lamps' light and the grey puff feet kick up off the slab.
         "dressing": {"seed": 4127, "motes": {"tint": 14210767}, "kickedDust": {"tint": 12171184, "scale": 1},
-                     "site": site()},
+                     "site": site(), "marks": marks()},
         "areas": areas(),
     }
 

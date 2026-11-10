@@ -572,7 +572,18 @@ def dressing() -> dict:
         "kickedDust": {"tint": 0x8D8467, "scale": 0.9},
         "grass": {"height": 0.34},
         "forest": {"trees": 1800},  # about what fits between the fence and the ground's edge (WoodsConfig.forest_reach)
+        "marks": marks(),
     }
+
+
+def marks() -> list[dict]:
+    """The ground's worn marks (WM1, WearMarks), on the ground's height: the pickup's muddy tracks up the road to where
+    it stands, an oil drip by its bonnet, and muddy boot trails out of the mud puddles."""
+    out = [{"kind": "tyres", "x": -18.0, "z": 49.3, "yaw": -80, "length": 13, "bend": 5, "mud": True},
+           {"kind": "oil", "x": -31.0, "z": 46.7, "length": 0.8}]
+    for x, z, yaw in [(9.6, 30.0, 90), (8.0, 31.2, 180), (-4.5, -23.8, 180), (-4.5, -26.2, 0), (31.6, -14.0, 90)]:
+        out.append({"kind": "boots", "x": x, "z": z, "yaw": yaw, "length": 5, "mud": True})
+    return out
 
 
 SEAM = 0.025  # FieldStandard.SEAM_SLACK: blocks may overlap this much

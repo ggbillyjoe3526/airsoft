@@ -139,6 +139,8 @@ var site: SiteDressing = null
 ## fireflies over the field at night (`fireflies.count`) and the tint of the motes in the air (`motes.tint`, sRGB;
 ## has_motes false without one); the grass tufts' height (`grass.height`, m) and the trees in the wood beyond the fence
 ## (`forest.trees`). Each 0 or empty on a map naming none; a malformed one is left out with a warning.
+## Worn marks on its floor (WM1, `dressing.marks`: WearMark), drawn as decals by WearMarks; none on a map naming none.
+var marks: Array[WearMark] = []
 var dressing_seed: int = 0
 var leaf_drifts: float = 0.0
 var fallen: float = 0.0
@@ -244,6 +246,7 @@ static func parse(text: String, style: MapStyle, team_size: int) -> MapData:
 	m.skyline = SkylinePiece.read(d.get("dressing"), m.warnings)
 	m._read_kicked_dust(d.get("dressing"))
 	m.site = SiteDressing.read(d.get("dressing"), m.warnings)
+	m.marks = WearMark.read(d.get("dressing"), m.warnings)
 	m._read_woods(d.get("dressing"), style)
 	m._read_poles(d.get("flags"), d.get("flag"))
 	m.has_overtime_flag = _spot(d.get("overtimeFlag"), "overtimeFlag", m.warnings)

@@ -64,6 +64,8 @@ every preset; turn it on if you want it.
   look, so a far player seen at 6x keeps the detail of one six times nearer; only the players in the scope's glass do,
   the rest of the view keeps its own. It also sets how many puffs make up a smoke cloud: fewer, bigger ones on Low and
   Medium, so standing in smoke costs less.
+- **Wear marks** (Medium and up) adds oil stains, tyre tracks and boot prints to the floors: where vans and the
+  forklift stood and drove in Depot, the pickup's muddy tracks on Woodland's road and boot prints out of the mud.
 - **Occlusion culling** skips drawing what walls, containers and houses hide from you, such as a player behind a wall.
   It saves the graphics card work and costs the processor a little, so it is off on Low and on from Medium.
 - **Light effects:** **Bounce light** is light bouncing off the field: Screen bounces what you see, Scene the whole

@@ -4124,7 +4124,129 @@
      "d": 0.12
     }
    ]
-  }
+  },
+  "marks": [
+   {
+    "kind": "oil",
+    "x": 34,
+    "y": 0,
+    "z": 3,
+    "length": 1.2
+   },
+   {
+    "kind": "oil",
+    "x": 41,
+    "y": 0,
+    "z": 5,
+    "length": 0.8
+   },
+   {
+    "kind": "oil",
+    "x": 49.5,
+    "y": 0,
+    "z": 4.5,
+    "length": 1.2
+   },
+   {
+    "kind": "oil",
+    "x": 50,
+    "y": 0,
+    "z": -2,
+    "length": 0.7
+   },
+   {
+    "kind": "oil",
+    "x": 1,
+    "y": 0,
+    "z": -9,
+    "length": 0.9
+   },
+   {
+    "kind": "oil",
+    "x": -3,
+    "y": 0,
+    "z": 4,
+    "length": 0.6
+   },
+   {
+    "kind": "oil",
+    "x": 8,
+    "y": 0,
+    "z": 2,
+    "length": 1.1
+   },
+   {
+    "kind": "oil",
+    "x": -6,
+    "y": 0,
+    "z": 20,
+    "length": 1.0
+   },
+   {
+    "kind": "tyres",
+    "x": 53.4,
+    "y": 0,
+    "z": 4.5,
+    "yaw": -90,
+    "length": 6
+   },
+   {
+    "kind": "tyres",
+    "x": 13,
+    "y": 0,
+    "z": -7,
+    "yaw": -90,
+    "length": 20
+   },
+   {
+    "kind": "tyres",
+    "x": 30,
+    "y": 0,
+    "z": 2,
+    "yaw": 90,
+    "length": 6.5
+   },
+   {
+    "kind": "tyres",
+    "x": 5,
+    "y": 0,
+    "z": 7,
+    "yaw": 0,
+    "length": 12
+   },
+   {
+    "kind": "boots",
+    "x": 53,
+    "y": 0,
+    "z": 1.5,
+    "yaw": 180,
+    "length": 6
+   },
+   {
+    "kind": "boots",
+    "x": 5,
+    "y": 0,
+    "z": -3,
+    "yaw": 100,
+    "length": 4
+   },
+   {
+    "kind": "boots",
+    "x": 4,
+    "y": 0,
+    "z": 30,
+    "yaw": 0,
+    "length": 6
+   },
+   {
+    "kind": "boots",
+    "x": -45,
+    "y": 0,
+    "z": -27,
+    "yaw": 90,
+    "length": 6
+   }
+  ]
  },
  "areas": [
   {
