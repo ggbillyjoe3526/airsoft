@@ -1,12 +1,12 @@
-Task: SL4 · head 3e9bf5e · Verdict: Pass
-Run: no --perf run made (see Unexplained) · budget: no baseline yet, judged against targets and origin/main's diff
-Metrics: not measured. A headless --perf pair (head plus an origin/main worktree, each needing a full project import) would compete with the two `godot --import` processes already running in this box (load ~1, 5 % RAM each) and would skew script-time comparison. The diff adds no node, process or tick code, so node, orphan and memory counts cannot change from it.
-Regressions (> 10 % worse): none measured
+Task: CN1 · head adb2321 · Verdict: Pass
+Run: figure_bench headless, 11 figures, 1800 frames (no GPU; draw calls and frame times not measurable here) · budget: pipeline/perf-budget.json does not exist; no baseline yet, judged against the stated tri budgets, the owner's targets and the diff
+Metrics: LOD0 tris 58,868 / 60k (ok) · LOD1 19,424 / 20k (ok) · LOD2 5,639 / 6k (ok) · glb 9,703,220 B vs 9,708,632 on main (-0.06 %) · textures body col/nrm/orm: nrm and orm slightly smaller, col re-encoded · mesh surfaces drawn per frame 236 (max), merged body meshes 6 · animation per figure mean 132.8 us, skeleton 43.9 us, both x11 1.94 ms mean / 3.8 ms p99 (script time, this machine, reported only; main not rerun, as no runtime code or mesh topology changed)
+Regressions (> 10 % worse): none (LOD2 +0.3 % tris, within budget)
 Blocking findings: none
-Advisory (judgment):
-- game/play/replica_paint.gd: new drawn() / paint_saturation() (a ProjectSettings read, a Color lerp) run only when a paint's material is built, and at game/ui/customise_view.gd:675 once per swatch when the screen builds. Materials stay cached and shared (ReplicaPaint.clear() at play_session.gd:1615 is unchanged). No per-frame or per-tick path calls them.
-- Roughness 0.5 to 0.64 and 0.4 to 0.48 are constants; no new material, particle or shader, so no prewarm entry is needed.
-- game/ui/game_theme.gd: Color constants only (DEEP, PLATE added); the navy_box to dark_box rename is a rename. No new allocation, node or connection; no preset bypass.
-- Tests only otherwise.
+ - No game/ code changed: no per-frame or per-tick allocations, node, resource or prewarm concerns (judgment).
+ - Skinning: head meshes keep the same primitive count, material and skeleton; JOINTS_0/WEIGHTS_0 are already 4-wide vertex attributes, so up to 4 joints per neck vertex costs the same GPU skinning (judgment). Weights are renormalised to sum 1 in splice_heads.py.
+ - Draw calls: no new surfaces, materials or meshes, so no change expected (judgment; needs a rendered run to confirm).
+ - Install size: glb and textures shrank by about 7 KB in total (measured, git diff stat).
+Advisory: none
 Fixes: none needed
-Unexplained: none; the measured run is skipped for the contention above, not for a failure. Run `godot --headless --path . -- --smoke --perf` (and F3 in game) on the owner's PC if wanted.
+Unexplained: none
