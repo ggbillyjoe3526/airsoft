@@ -39,6 +39,7 @@ from mathutils import Matrix, Vector  # noqa: E402
 
 import figure_copy  # noqa: E402
 import hardsurface as hs  # noqa: E402
+import wear  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
 OUT = os.environ.get("BL_OUT") or os.path.join(ROOT, "assets/models/replicas/smg.glb")
@@ -915,6 +916,8 @@ def build() -> None:
             print("  %-16s %6d triangles" % (ob.name, n))
     print("  in the hands: %d triangles; figure: %d" % (total, sum(hs.tris(o) for o in [fig] + list(fig.children))))
     hs.fold_material("Rubber", "BB")  # BP6: within the 6 materials, looking the same
+    # RW1: light use-wear in the hands, its own seed; the magazine handled most, as the AEG Rifle's.
+    wear.apply(seed=3, heavier={"Magazine": 2.5})
     hs.export(OUT, True)
     print("wrote", OUT)
     build_parts()

@@ -1,14 +1,14 @@
 class_name ReplicaPaint
 extends RefCounted
-## Paints a replica's model in a ReplicaSchemes paint (presentation only, nothing in the simulation reads it): the
-## five materials the replica models name Body, Furniture, Detail, Accent and Metal are overridden on each mesh
-## surface that carries one, the rest (rubber, the BB, the orange tip) keep the model's own. The materials are built
-## once per paint and shared by every replica wearing it; a paint with no colours (the Cyber Pistol's) leaves the
-## model's own, except under Realistic colours, which turns its glowing lines plain grey (ReplicaSchemes.OWN_REALISTIC).
-## The glb files are never edited. A model that carries a wear mask (RW1: the hands' meshes of the AEG Rifle and the
-## GBB Pistol, its `<model>_wear.png` as their materials' ao_texture; tools/blender/replicas/wear.py) wears the
-## paint lightly used instead (replica_wear.gdshader: faint scratches, rubbed edges, grime in the recesses), unless the
-## caller asks for it plain (the figures' copies, which carry no mask of their own and are seen from far off).
+## Paints a replica's model in a ReplicaSchemes paint (presentation only, nothing in the simulation reads it): the five
+## materials the replica models name Body, Furniture, Detail, Accent and Metal are overridden on each mesh surface that
+## carries one, the rest (rubber, the BB, the orange tip) keep the model's own. The materials are built once per paint
+## and shared by every replica wearing it; a paint with no colours (the Cyber Pistol's) leaves the model's own, except
+## under Realistic colours, which turns its glowing lines plain grey (ReplicaSchemes.OWN_REALISTIC). The glb files are
+## never edited. A model that carries a wear mask (RW1: the hands' meshes of the AEG Rifle, the GBB Pistol and the
+## Compact SMG, its `<model>_wear.png` as their materials' ao_texture; tools/blender/replicas/wear.py) wears the paint
+## lightly used instead (replica_wear.gdshader: faint scratches, rubbed edges, grime in the recesses), unless the caller
+## asks for it plain (the figures' copies, which carry no mask of their own and are seen from far off).
 
 ## How a painted part is drawn: matte polymer with a soft sheen, the metal parts a little shiny (Sunlit Concrete, SL4).
 const ROUGHNESS := 0.64

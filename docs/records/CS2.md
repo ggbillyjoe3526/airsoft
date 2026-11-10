@@ -44,6 +44,9 @@
   and body. It's one solid piece"): the grip starts inside the housing (its top had stopped at the housing's foot,
   a hairline gap at its front), the housing exactly the receiver's width, and the housing, grip and guard welded
   into the receiver as one mesh (smg.py `weld`, which keeps their Furniture paint).
+- **Wear (the owner, 10:19, after RW1):** lightly used as the AEG Rifle, `wear.apply(seed=3, heavier={"Magazine": 2.5})`
+  after the figure copy, so the magazine wears most and the bots' copy stays plain; the receiver's ribs and the rail
+  slots keep only a broken fringe of grime (`art/smg/smg-wear-closeups.jpg`).
 - **Clips.** Fire is one trigger pull at 18 a second; Selector safe, semi at half, auto at the end (no burst);
   Reload keeps the AEG Rifle's timeline (the game plays it as a share of the reload, and the arms' magazine change and
   `reload_carry` are keyed to those shares), but it comes up 6 cm through a reload, not the AEG's 10, so your left
