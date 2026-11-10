@@ -1,6 +1,6 @@
 # UC1 · Remove the unused models and files
 
-**Review:** 2 attempts · critic pending · qa Pass · performance Pass
+**Review:** 2 attempts · critic Accept 7/8 · qa Pass · performance Pass
 
 The owner, 2026-11-10: "Remove anything not needed." Every file in `assets/` was checked against what loads it (the
 props' and the skyline's model tables, the map files' `dress` names, the configs' paths, the sounds' name patterns,
@@ -11,7 +11,7 @@ the textures each `.glb` embeds, the notices); everything else was in use.
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-10 | 1 | Opus 5.5 (build thread) | ✓ (parts 2 and 3 re-run alone after a clash with QA's run) | 7/8 Retry | no changelog note |
-| 2026-11-10 | 2 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-10 | 2 | Opus 5.5 (build thread) | ✓ | 7/8 Accept | – (its two doc nits fixed after: the maps README's Kenney line, the note's size figure) |
 
 ## Decisions
 
