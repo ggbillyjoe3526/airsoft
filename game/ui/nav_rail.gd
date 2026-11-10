@@ -4,9 +4,9 @@ extends PanelContainer
 ## centred: the AIRSOFT wordmark, the tabs MATCH, LOADOUT, ARMORY and SETTINGS, then at the foot the player's level with
 ## a thin bar of the XP into it (`set_level`; greyed while levelling is off, owner 2026-11-10: it is never hidden) and
 ## QUIT. The current tab is lit with a
-## card and a teal rule on its left edge. A tab press is sent as `tab_pressed`; the page decides what to show and calls
+## card and an accent rule on its left edge. A tab press is sent as `tab_pressed`; the page decides what to show and calls
 ## `set_current`. QUIT is sent as `quit_pressed` (the game asks QUIT GAME?). From practice (`set_practice`) the rail
-## shows only the LOADOUT tab and, under the wordmark, the teal BACK TO PRACTICE button with the Loadout's key; it is
+## shows only the LOADOUT tab and, under the wordmark, the accent BACK TO PRACTICE button with the Loadout's key; it is
 ## sent as `practice_pressed`, and QUIT is hidden (the range has its own way out). The four tabs are one width.
 
 signal tab_pressed(tab: Tab)
@@ -45,7 +45,7 @@ const BACK_KEY_PAD := Vector2i(6, 1)
 const BACK_GAP := 6
 const BACK_AFTER := 18
 ## The rail's own fill: a darker glass than the panels, so it reads as the frame.
-const FILL := Color(0.03, 0.04, 0.06, 0.78)
+const FILL := Color(0.045, 0.044, 0.041, 0.8)
 const TAB_KEYS: Dictionary[Tab, String] = {
 	Tab.MATCH: "MENU_TAB_MATCH",
 	Tab.LOADOUT: "MENU_TAB_LOADOUT",
@@ -224,7 +224,7 @@ func _flat_button(words: String, size: int, colour: Color) -> Button:
 	return b
 
 
-## BACK TO PRACTICE: a teal button with its words over the Loadout's key cap, both centred.
+## BACK TO PRACTICE: an accent button with its words over the Loadout's key cap, both centred.
 func _build_back() -> Button:
 	var b := Button.new()
 	b.name = "BackToPractice"

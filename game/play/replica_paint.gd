@@ -7,11 +7,14 @@ extends RefCounted
 ## model's own, except under Realistic colours, which turns its glowing lines plain grey (ReplicaSchemes.OWN_REALISTIC).
 ## The glb files are never edited.
 
-## How a painted part is drawn: plastic, with the metal parts a little shiny.
-const ROUGHNESS := 0.5
+## How a painted part is drawn: matte polymer with a soft sheen, the metal parts a little shiny (Sunlit Concrete, SL4).
+const ROUGHNESS := 0.64
 const METAL_PART := &"Metal"
-const METAL_ROUGHNESS := 0.4
+const METAL_ROUGHNESS := 0.48
 const METALLIC := 0.4
+## The look's paint saturation (LookConfig.paint_saturation, kept in project.godot's shader globals): a paint is drawn
+## at this share of its colour, as the maps' paint is (SL4).
+const PAINT_SATURATION_SETTING := "shader_globals/look_paint_saturation"
 ## The most paints kept; the cache is cleared past it (there are twelve paints, each plain or realistic).
 const MAX_SETS := 32
 
@@ -48,7 +51,7 @@ static func materials(paint: StringName, realistic: bool) -> Array[StandardMater
 		for i in colours.size():
 			var m := StandardMaterial3D.new()
 			m.resource_name = "%s_%s" % [key, ReplicaSchemes.PARTS[i]]
-			m.albedo_color = colours[i]
+			m.albedo_color = drawn(colours[i])
 			var is_metal := ReplicaSchemes.PARTS[i] == METAL_PART
 			m.roughness = METAL_ROUGHNESS if is_metal else ROUGHNESS
 			m.metallic = METALLIC if is_metal else 0.0
@@ -92,10 +95,29 @@ static func _realistic_own(material_name: StringName) -> StandardMaterial3D:
 	if not _own_realistic.has(material_name):
 		var m := StandardMaterial3D.new()
 		m.resource_name = "own/realistic_%s" % material_name
-		m.albedo_color = Color.hex((ReplicaSchemes.OWN_REALISTIC[material_name] << 8) | 0xff)
+		m.albedo_color = drawn(Color.hex((ReplicaSchemes.OWN_REALISTIC[material_name] << 8) | 0xff))
 		m.roughness = ROUGHNESS
 		_own_realistic[material_name] = m
 	return _own_realistic[material_name]
+
+
+## `colour` (sRGB) as a replica draws it: pulled toward its own grey to the look's paint saturation, in linear light
+## like look_paint() (look_light.gdshaderinc), so a bold scheme sits in the muted world and keeps its two tones.
+static func drawn(colour: Color) -> Color:
+	var linear := colour.srgb_to_linear()
+	var grey := linear.r * 0.2126 + linear.g * 0.7152 + linear.b * 0.0722
+	var paint := Color(grey, grey, grey, linear.a).lerp(linear, paint_saturation())
+	return paint.linear_to_srgb()
+
+
+## The look's paint saturation (1 when the setting is missing: the paint as it is).
+static func paint_saturation() -> float:
+	var entry: Variant = ProjectSettings.get_setting(PAINT_SATURATION_SETTING, null)
+	if entry is Dictionary:
+		return float((entry as Dictionary).get("value", 1.0))
+	if entry is float:
+		return entry
+	return 1.0
 
 
 ## Lets go of the shared materials (a match ends); replicas still wearing them keep theirs until freed.

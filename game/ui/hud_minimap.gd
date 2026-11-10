@@ -13,7 +13,7 @@ extends Control
 ## settings' thumbnails use it too, and so does the full-screen map (HudFieldMap, FM1), whole and north up, through
 ## `fill` and `add_pings` with its own View.
 
-## The panel's and the caption's navy, before the panels' opacity.
+## The panel's and the caption's dark fill, before the panels' opacity.
 const BACKING := 1.0
 const CAPTION_SIZE := 15
 const CAPTION_PAD := 10
@@ -244,7 +244,7 @@ func _draw() -> void:
 	draw_rect(Rect2(s - r, r, r, s - r * 2.0), line)
 
 
-## The caption under the panel: the map, a muted dot and the round, on a navy strip.
+## The caption under the panel: the map, a muted dot and the round, on a dark strip.
 func _build_caption(map_name: String) -> void:
 	var strip := PanelContainer.new()
 	strip.mouse_filter = Control.MOUSE_FILTER_IGNORE

@@ -82,8 +82,8 @@ class Painter:
 	extends RefCounted
 
 	## The edges' ink and the ring's two strokes (a dark one under a light one) and their widths (px).
-	const INK := Color(0.031, 0.051, 0.094, 0.85)
-	const RING_SHADE := Color(0.031, 0.051, 0.094, 0.4)
+	const INK := Color(0.075, 0.075, 0.067, 0.85)
+	const RING_SHADE := Color(0.075, 0.075, 0.067, 0.4)
 	const RING_LINE := Color(1.0, 1.0, 1.0, 0.45)
 	const RING_SHADE_WIDTH := 3.5
 	const RING_LINE_WIDTH := 1.5
