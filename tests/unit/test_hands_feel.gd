@@ -115,7 +115,18 @@ func test_every_surface_in_the_hands_presses_its_depth_and_shared_paints_stay_un
 			if m.material_override != null:
 				continue
 			for i in m.mesh.get_surface_count():
-				var worn := m.get_active_material(i) as BaseMaterial3D
+				var active := m.get_active_material(i)
+				if ReplicaPaint.is_worn(active):
+					# The worn paint (RW1) presses through its own uniform; the shared one keeps the default.
+					seen += 1
+					assert_almost_eq(_z_clip(active as ShaderMaterial),
+							cfg.depth_scale, 1e-6, "%s surface %d pressed (worn)" % [node.name, i])
+					var shared := hands.painted(m, i) as ShaderMaterial
+					assert_ne(shared, active, "a copy is pressed, not the shared worn paint")
+					assert_almost_eq(_z_clip(shared), 1.0, 1e-6,
+							"the shared worn paint itself is untouched (menus)")
+					continue
+				var worn := active as BaseMaterial3D
 				if worn == null:
 					continue
 				seen += 1
@@ -129,6 +140,12 @@ func test_every_surface_in_the_hands_presses_its_depth_and_shared_paints_stay_un
 	assert_gt(seen, 10, "control: the replicas' surfaces were seen")
 
 
+## The worn paint's depth press (RW1): its uniform, or the shader's default 1 where it was never set.
+func _z_clip(m: ShaderMaterial) -> float:
+	var z: Variant = m.get_shader_parameter(&"z_clip_scale")
+	return 1.0 if z == null else float(z)
+
+
 func test_a_depth_scale_of_one_draws_it_as_before() -> void:
 	cfg.depth_scale = 1.0
 	var c := _character()
@@ -136,7 +153,11 @@ func test_a_depth_scale_of_one_draws_it_as_before() -> void:
 	for node: Node in hands._held[0].root.find_children("*", "MeshInstance3D", true, false):
 		var m := node as MeshInstance3D
 		for i in m.mesh.get_surface_count():
-			var worn := m.get_active_material(i) as BaseMaterial3D
+			var active := m.get_active_material(i)
+			if ReplicaPaint.is_worn(active):
+				assert_almost_eq(_z_clip(active as ShaderMaterial), 1.0, 1e-6)
+				continue
+			var worn := active as BaseMaterial3D
 			if worn != null:
 				assert_false(worn.use_z_clip_scale)
 
