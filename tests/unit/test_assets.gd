@@ -9,7 +9,7 @@ const MODEL_DIRS: Array[String] = [
 	"res://assets/models/powerSources",
 ]
 const FIGURE_CLIPS := 32
-const MAPS: Array[String] = ["depot", "woodland", "range"]
+const MAPS: Array[String] = ["depot", "woodland", "range", "kingsmere"]
 
 
 func _files(dir: String, ext: String) -> Array[String]:

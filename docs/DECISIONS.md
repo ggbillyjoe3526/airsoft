@@ -689,6 +689,17 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   The layout lives in `tools/woodland/layout.py` and `world.py`, and `build_map.py` writes `data/maps/woodland.json`:
   change the scripts, never the JSON. The game's blocks are axis-aligned, so pieces are squared and the stream runs
   straight north to south under both crossings. The old wood is a test fixture (`tests/support/maps/old_woodland.json`).
+- **Kingsmere, a closed metro station, is a Dev-only field (owner, 2026-11-10: "Add this to the game as a dev only
+  map", MT1).** The owner's pick for Dev 3's new map (a deep-level station like London's, inspired by Battlefield's
+  Operation Metro; its own layout, no real names or branding), built from his concept v2
+  (`/mnt/project-files/concepts/metro/v2/`, `tools/kingsmere/`): asymmetric, the Street team starting in the ticket
+  hall at street level and the Tunnel team in a cross-passage between the running tunnels, swapping at half time; one
+  spiral stair (street to concourse) and one ordinary stair (concourse to platforms) beside the escalators; tunnels
+  0.5 m over the trains' roofs; close quarters above and the long lines only on the platforms ("mostly CQB until the
+  platform level where longer sightlines open up"), so its 58 m platform line is its sightline exception. Its working
+  lifts (owner) are a step of their own (MT2); until then their shafts stand shut. Nobody climbs out of a track pit over
+  a platform's edge (a vault never lands on a platform), so every stretch of track has steps up at its ends. Its
+  Attack / Defend poles stand 2.1 m (`poleHeight`, FlagView), since flag A is inside a car 2.4 m high.
 - **The Street is removed from the game (owner, 2026-11-09: "completely remove the street map from the game", SX1).**
   It was dev only (DT1). Its map file, pictures, layout scripts (`tools/street/`), guards and CI job, its tests and
   the 23 Kenney props only it used (cars, vans, lorries, bins, skip, lamp, the House's furniture) went; nothing the rest

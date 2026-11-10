@@ -45,13 +45,14 @@ static func build(map: MapData, cfg: RoofConfig) -> RoofView:
 	view.name = "Roof"
 	var area := map.footprint().grow(cfg.ceiling_overhang)
 	var y := map.roof_height
-	var bay := PropDressConfig.load_mesh(cfg.bay_model)
+	# A plain roof (MT1, a station) is its ceiling alone: no bays, no trusses.
+	var bay: Mesh = null if map.roof_plain else PropDressConfig.load_mesh(cfg.bay_model)
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	st.set_color(cfg.ceiling_colour.srgb_to_linear())
 	var lift := CEILING_LIFT if bay != null else 0.0
 	_box(st, Vector3(area.position.x, y + lift, area.position.y), Vector3(area.end.x, y + 0.2, area.end.y))
-	if bay == null:
+	if bay == null and not map.roof_plain:
 		st.set_color(cfg.truss_colour.srgb_to_linear())
 		for x in truss_lines(area, cfg.truss_step):
 			_box(st, Vector3(x - cfg.truss_width * 0.5, y - cfg.truss_depth, area.position.y),
@@ -75,7 +76,7 @@ static func build(map: MapData, cfg: RoofConfig) -> RoofView:
 		view._lamps = view._lamp_view(map, cfg, bay != null, spots)
 		view.add_child(view._lamps)
 		view._lights = RoofLamps.build(spots, cfg, Vector3(area.size.x, y, area.size.y).length(), view._mesh,
-				map.roof_lamp_states)
+				map.roof_lamp_states, plain_reaches(map, spots, cfg))
 		view.add_child(view._lights)
 		view._cfg = cfg
 		for i in mini(map.roof_lamp_states.size(), map.roof_lamps.size()):
@@ -247,8 +248,8 @@ func _lamp_view(map: MapData, cfg: RoofConfig, bays: bool, spots: Array[Vector3]
 	glow.set_shader_parameter(&"glow", cfg.lamp_colour * cfg.lamp_energy)
 	_materials.append(glow)
 	var lamp: Mesh = null
-	var own := PropDressConfig.load_mesh(cfg.lamp_model) as ArrayMesh
-	var drop := cfg.lamp_drop
+	var own: ArrayMesh = null if map.roof_plain else PropDressConfig.load_mesh(cfg.lamp_model) as ArrayMesh
+	var drop := cfg.plain_lamp_drop if map.roof_plain else cfg.lamp_drop
 	if own != null:
 		var body := LookMaterials.vertex_colour(cfg.roughness, 0.0)
 		_materials.append(body)
@@ -267,11 +268,13 @@ func _lamp_view(map: MapData, cfg: RoofConfig, bays: bool, spots: Array[Vector3]
 	mm.use_custom_data = true
 	mm.mesh = lamp
 	mm.instance_count = map.roof_lamps.size()
-	# the model hangs from its top (its own y 0 at the roof's underside); a panel's middle `lamp_drop` under it
-	var y := map.roof_height - drop
-	var under := y + lamp.get_aabb().position.y
+	# the model hangs from its top (its own y 0 at the ceiling's underside); a panel's middle `lamp_drop` under it, each
+	# lamp from its own ceiling (MapData.roof_lamp_heights: the roof's, or a station level's)
 	for i in map.roof_lamps.size():
 		var at := lamp_spot(map.roof_lamps[i], cfg) if bays else map.roof_lamps[i]
+		var top := map.roof_lamp_heights[i] if i < map.roof_lamp_heights.size() else map.roof_height
+		var y := top - drop
+		var under := y + lamp.get_aabb().position.y
 		mm.set_instance_transform(i, Transform3D(Basis.IDENTITY, Vector3(at.x, y, at.y)))
 		mm.set_instance_custom_data(i, lens_tint(map.roof_lamp_states[i] if i < map.roof_lamp_states.size()
 				else MapData.LAMP_WORKING, cfg))
@@ -282,6 +285,19 @@ func _lamp_view(map: MapData, cfg: RoofConfig, bays: bool, spots: Array[Vector3]
 	inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	inst.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 	return inst
+
+
+## Each lamp's light's range (m) under a plain roof (MT1): from its lowest point (`spots`) down to the floor under it
+## (MapData.floor_under; the ground without) and `plain_lamp_reach` past it, so it never lights the level under that.
+## None (the roof's own range) under a roof that is not plain.
+static func plain_reaches(map: MapData, spots: Array[Vector3], cfg: RoofConfig) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	if not map.roof_plain:
+		return out
+	for at in spots:
+		var under := map.floor_under(at.x, at.z, at.y)
+		out.append(at.y - (under if is_finite(under) else 0.0) + cfg.plain_lamp_reach)
+	return out
 
 
 ## A box from `lo` to `hi`, each face with its outward normal, wound to face out (Godot's front faces are clockwise).

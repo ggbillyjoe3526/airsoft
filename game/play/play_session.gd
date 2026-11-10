@@ -879,7 +879,7 @@ func _build_views(ui: CanvasLayer) -> void:
 		for i in poles.size():
 			var view := FlagView.new()
 			view.setup(_play.flag, _colours.figures, poles[i], _tuning.flag.radius,
-					Flag.LETTERS[i] if poles.size() > 1 else "")
+					Flag.LETTERS[i] if poles.size() > 1 else "", _map.pole_height)
 			add_child(view)
 			_flags.append(view)
 			first_use.append_array(view.materials())

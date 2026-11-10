@@ -24,14 +24,20 @@ var _cover: float = 0.0
 var _ceiling: GeometryInstance3D = null
 ## Each lamp's light's index in `_lights`, -1 for a dead lamp's (none).
 var _by_lamp: PackedInt32Array = PackedInt32Array()
+## A working lamp's light strength: RoofConfig.lamp_light_energy, or plain_lamp_energy under a plain roof.
+var _energy: float = 0.0
 
 
 ## A light under each of `spots` (each lamp's lowest point), as `cfg` sets them, all off; `cover` is how far the roof
 ## reaches from any point under it; `ceiling` the roof's ceiling, put in the bounce light while they shine; `states`
-## each lamp's MapData.LAMP_* (none: all working).
+## each lamp's MapData.LAMP_* (none: all working); `reaches` each light's range (m) under a plain roof
+## (MapData.roof_plain: short, softer lights; none: the roof's own `lamp_range` and `lamp_light_energy`).
 static func build(spots: Array[Vector3], cfg: RoofConfig, cover: float = 0.0,
-		ceiling: GeometryInstance3D = null, states: PackedByteArray = PackedByteArray()) -> RoofLamps:
+		ceiling: GeometryInstance3D = null, states: PackedByteArray = PackedByteArray(),
+		reaches: PackedFloat32Array = PackedFloat32Array()) -> RoofLamps:
+	var plain := not reaches.is_empty()
 	var lamps := RoofLamps.new()
+	lamps._energy = cfg.plain_lamp_energy if plain else cfg.lamp_light_energy
 	lamps.name = "LampLights"
 	lamps._cfg = cfg
 	lamps._cover = cover
@@ -49,9 +55,9 @@ static func build(spots: Array[Vector3], cfg: RoofConfig, cover: float = 0.0,
 		spot.transform = Transform3D(down, spots[i] + Vector3.DOWN * cfg.lamp_light_drop)
 		var dim := state == MapData.LAMP_DIM
 		spot.light_color = cfg.lamp_dim_colour if dim else cfg.lamp_colour
-		spot.light_energy = cfg.lamp_light_energy * (cfg.lamp_dim_share if dim else 1.0)
+		spot.light_energy = lamps._energy * (cfg.lamp_dim_share if dim else 1.0)
 		spot.light_volumetric_fog_energy = cfg.lamp_fog
-		spot.spot_range = cfg.lamp_range
+		spot.spot_range = reaches[i] if i < reaches.size() else cfg.lamp_range
 		spot.spot_attenuation = cfg.lamp_falloff
 		spot.spot_angle = cfg.lamp_cone
 		spot.spot_angle_attenuation = cfg.lamp_cone_falloff
@@ -87,7 +93,7 @@ func light_of(lamp: int) -> SpotLight3D:
 func set_flicker(lamp: int, level: float) -> void:
 	var spot := light_of(lamp)
 	if spot != null:
-		spot.light_energy = _cfg.lamp_light_energy * level
+		spot.light_energy = _energy * level
 
 
 ## The mode in force.

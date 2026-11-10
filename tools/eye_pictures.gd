@@ -6,7 +6,8 @@ extends SceneTree
 ## the game does, where `--rendering-driver opengl3` draws the compatibility renderer's harsher light:
 ##   xvfb-run -a -s "-screen 0 1920x1080x24" godot --path . -s res://tools/eye_pictures.gd \
 ##       -- <map id> <folder> <name>:<x>,<z>,<yaw degrees>,<pitch degrees> ...
-## Yaw 0 looks along -z (north), 90 along -x (west); pitch is up from level. An argument `preset=<low|medium|high|ultra>`
+## Yaw 0 looks along -z (north), 90 along -x (west); pitch is up from level; a fifth number is the floor's height the
+## eye stands on (a map built in storeys), else the ground's. An argument `preset=<low|medium|high|ultra>`
 ## draws that Graphics preset's values (GraphicsApply) instead of High; `fov=<degrees>` a narrower or wider view (the
 ## range's card is 40); `night` the map's night preset, its lights' pools and fixtures lit (WG4). An argument `card`
 ## writes a map's pictures instead: the loading screen's, drawn at 1920 x 1080
@@ -111,7 +112,8 @@ func _run() -> void:
 	var poles: Array[FlagView] = []
 	for i in map.poles.size():
 		var pole := FlagView.new()
-		pole.setup(play.flag, teams, map.poles[i], tuning.flag.radius, Flag.LETTERS[i] if map.poles.size() > 1 else "")
+		pole.setup(play.flag, teams, map.poles[i], tuning.flag.radius, Flag.LETTERS[i] if map.poles.size() > 1 else "",
+				map.pole_height)
 		port.add_child(pole)
 		poles.append(pole)
 	if not map.targets.is_empty():
@@ -139,11 +141,13 @@ func _run() -> void:
 	for spec in args.slice(2):
 		var parts := spec.split(":")
 		var at := parts[1].split_floats(",") if parts.size() == 2 else PackedFloat64Array()
-		if at.size() != 4:
-			push_error("eye_pictures: %s is not name:x,z,yaw,pitch" % spec)
+		if at.size() != 4 and at.size() != 5:
+			push_error("eye_pictures: %s is not name:x,z,yaw,pitch[,floor]" % spec)
 			failed += 1
 			continue
 		var ground := map.terrain.height_at(at[0], at[1]) if map.terrain != null else 0.0
+		if at.size() == 5:
+			ground = at[4]
 		camera.global_position = Vector3(at[0], ground + tuning.body.stand_eye_height, at[1])
 		camera.global_rotation = Vector3(deg_to_rad(at[3]), deg_to_rad(at[2]), 0.0)
 		var settle := GI_SETTLE_FRAMES if values.global_illumination == GraphicsQuality.GlobalIllumination.SCENE \
