@@ -75,7 +75,7 @@ func test_the_model_band_carries_the_treeline_fade() -> void:
 		assert_almost_eq(one.haze, cfg.treeline_fade, 1e-6)
 
 
-func test_the_treeline_greens_are_the_far_woods() -> void:
+func test_the_treeline_greens_are_lit_greens_not_near_black() -> void:
 	var cfg := play.skyline
 	for c in cfg.treeline_colours:
 		assert_true(c.g > c.r and c.g > c.b, "a green: %s" % c)
@@ -252,3 +252,11 @@ func test_two_touching_thickets_cores_still_meet() -> void:
 	var cored: Array[MapData.Block] = [a, b]
 	var ta := MapLevel.core_box(a, Vector2(0.7, 0.2), cored)
 	assert_almost_eq((ta * Vector3(2, 0, 0)).x, 2.0, 1e-4, "a's core runs to the shared face")
+
+
+func test_a_thicket_s_spruce_wears_no_dust_and_other_props_keep_their_wear() -> void:
+	assert_eq(look.props.model_wear.get(&"spruce", -1.0), 0.0, "no dust on the spruce's upturned tiers")
+	var fresh := PropDressConfig.new()
+	for key: StringName in fresh.model_wear:
+		if key != &"spruce":
+			assert_eq(look.props.model_wear[key], fresh.model_wear[key], "%s keeps its wear" % key)
