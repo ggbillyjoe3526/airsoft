@@ -79,7 +79,7 @@ func test_the_loadout_tab_is_on_and_opens_the_gear_page() -> void:
 	var words := _words(page)
 	for expected: String in ["LOADOUT", "PERFORMANCE", "PRIMARY", "SECONDARY", "GRENADES"]:
 		assert_true(words.has(expected), expected)
-	assert_eq(page.gear().switch_button(Loadout.Slot.PRIMARY).text, "SWITCH REPLICA", "UF1: no SWAP row")
+	assert_eq(page.gear().switch_button(Loadout.Slot.PRIMARY).text, "SWAP", "the owner, 2026-11-10: SWITCH REPLICA reads SWAP")
 	assert_eq(page.gear().customise_button().text, "CUSTOMISE")
 
 

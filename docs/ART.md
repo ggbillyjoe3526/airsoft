@@ -23,9 +23,9 @@ sets the **colour, light and materials, not what may appear** (owner, 2026-10-31
 - **Still true:** toy replicas and no gore (BBs leave dust, never marks or blood); airsoft, not military.
 
 The Dev 2 look (Valorant's forms with Breath of the Wild's light, clean vibrant paint) is history: `docs/DECISIONS.md`.
-Built in steps: SL1 the light, grade and paint; SL2 material wear in the shared shaders; SL3 the models repainted
-(Depot's trusses and roof); SL4 players, replicas and UI. Until SL3 lands, some sections below still describe the
-Dev 2 models' paint.
+Built in steps: SL1 the light, grade and paint; SL2 material wear in the shared shaders; SL3 Depot's roof and hall
+frames repainted (galvanised grey steel, a pale grey liner, red sprinkler mains) and the map pictures rendered again;
+SL4 players, replicas and UI.
 
 ## The field kit
 
@@ -93,7 +93,7 @@ The look's palette is `LookConfig.palette` (`game/config/look_config.gd`, in `pl
 
 | Name | Hex | Use |
 |---|---|---|
-| crimson | `#c23874` | site colour: containers, barrels, trusses |
+| crimson | `#c23874` | site colour: containers, barrels, exit doors, sprinkler mains |
 | violet | `#7658aa` | site colour: containers, wall bands, the sofa |
 | yellow | `#e4ca46` | site colour, and all safety paint (lines, hazard stripes, pillars, cones) |
 | teal | `#2a9c90` | site colour: containers, drums, inner wall bands |
@@ -109,8 +109,8 @@ The look's palette is `LookConfig.palette` (`game/config/look_config.gd`, in `pl
 | slab | `#7c7670` | Depot's hall floor, darker than `floor` so the cover stands off it |
 | sand, pebble, stone | `#b9ae98`, `#a09a92`, `#8c8478` | open ground, gravel, gabion stone |
 | plaster | `#ece2cf` | outer walls |
-| grey | `#8c8a96` | ramps, pallets, IBC frames, the barrels' lids |
-| ceiling | `#524a72` | a roof's underside |
+| grey | `#8c8a96` | ramps, pallets, IBC frames, the barrels' lids, Depot's trusses and hall frames (galvanised) |
+| ceiling | `#524a72` | the Dev 2 roof's underside (Depot's liner is concrete since SL3) |
 | umber, moss | `#61594f`, `#b3b891` | the gaps between slats, the sofa's feet; grass on open ground |
 | bark, heartwood | `#7b6f62`, `#e4dccd` | Woodland's trunks and their cut ends (WA1) |
 | canopy, fern, olive | `#5c9a50`, `#79a650`, `#8c9a48` | Woodland's crowns and bushes; olive the logs' moss |

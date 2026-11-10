@@ -383,8 +383,11 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 			GameEvent.Kind.CHALLENGE when own and e.value == RangeChallenge.Cue.TIME:
 				_blasts.round_over(now)
 			GameEvent.Kind.CHALLENGE when own:
-				var pitch := _cfg.go_pitch if e.value == RangeChallenge.Cue.GO else 1.0
-				_play(&"count_beep", Vector3.ZERO, true, _cfg.beep_gain, Kind.INTERFACE, BUS_INTERFACE, pitch)
+				count_beep(_cfg.go_pitch if e.value == RangeChallenge.Cue.GO else 1.0)
+			# The round's start countdown (3, 2, 1): the shot timer's beep in your ear on each, the same beep every second;
+			# GO is the whistle below. Practice has no countdown.
+			GameEvent.Kind.ROUND_COUNT when not state.round_state.practice:
+				count_beep()
 			# The round's whistle blows at GO, as the start countdown ends (BP8), never under the loading screen. Practice
 			# has no rounds to start: no whistle on the range. A new round's whistle cuts the last short.
 			GameEvent.Kind.ROUND_GO when not state.round_state.practice:
@@ -810,6 +813,12 @@ func start_ambience() -> void:
 	for i in _beds.size():
 		if not _beds[i].playing:
 			_beds[i].play(_bed_from[i])
+
+
+## One countdown beep at `pitch`, in your ear on the Interface bus (the owner's recorded beep, AU2): the round's start
+## countdown and the range challenge's shot timer.
+func count_beep(pitch: float = 1.0) -> void:
+	_play(&"count_beep", Vector3.ZERO, true, _cfg.beep_gain, Kind.INTERFACE, BUS_INTERFACE, pitch)
 
 
 ## Whether the beds have started (start_ambience).

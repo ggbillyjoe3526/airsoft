@@ -6,7 +6,8 @@ extends GutTest
 ## layout is seeded; a missing model leaves its kind a box; the props are in the prewarm. WR3: Woodland's blocks
 ## name their props (trees, spruces, logs, cordwood, crates, tyres, a truck) with no site dress, each inside its
 ## block; a grid lays a cell's prop a cell; a dressed block draws no box, a thicket only its dark core; a ramp keeps
-## its box.
+## its box. RM1: the range's walls, sandbags, site toilet, water tote and generator are its own Blender models, each
+## inside its block, its sandbags no longer the site's round bags.
 
 ## How far (m) a tunnel section may reach over or under its box (WG4: half a step of its floor or its mound).
 const JOINT_SLACK := 0.2
@@ -373,6 +374,33 @@ func test_woodland_is_dressed_without_a_site_each_prop_inside_the_block_that_nam
 	assert_gt(trunks, 400)
 	assert_eq(dress.count(&"pickup"), 1)
 	assert_eq(_outside(m, dress), [] as Array[String], "no prop reaches past its block's box")
+
+
+func test_the_range_is_dressed_in_its_own_models_each_inside_the_block_that_names_it() -> void:
+	var m := _map("range")
+	var dress := _dress(m)
+	assert_not_null(dress, "the range has props")
+	if dress == null:
+		return
+	var named: Dictionary[StringName, int] = {}
+	var walls := 0.0
+	for b in m.blocks:
+		if b.dress != &"":
+			assert_true(look.props.dresses(b), "%s's %s has its model" % [b.kind, b.dress])
+			named[b.dress] = named.get(b.dress, 0) + 1
+		if b.kind == &"wall":
+			assert_ne(b.dress, &"", "every range wall is the fence model")
+			walls += maxf(b.size.x, b.size.z)
+	for model: StringName in [&"range_wall", &"range_backstop", &"sandbags", &"site_toilet", &"water_tote",
+			&"generator"]:
+		assert_gt(dress.count(model), 0, "%s placed" % model)
+	assert_eq(dress.count(&"site_toilet"), 1)
+	assert_eq(dress.count(&"water_tote"), 1)
+	assert_eq(dress.count(&"generator"), 1)
+	assert_between(dress.count(&"range_wall") + dress.count(&"range_backstop"), roundi(walls / 2.4) - 4,
+			roundi(walls / 2.4) + 4, "a bay about every 2.4 m of wall")
+	assert_eq(_outside(m, dress), [] as Array[String], "no prop reaches past its block's box")
+	assert_eq(SiteDress.bag_layout(m, look, PackedFloat32Array()).size(), 0, "no round site bags under the model")
 
 
 func test_a_grid_lays_a_block_s_props_in_cells_and_a_round_count_a_side() -> void:

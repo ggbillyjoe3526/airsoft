@@ -17,6 +17,7 @@
   },
   {
    "kind": "wall",
+   "dress": "range_wall",
    "center": {
     "x": -11.2,
     "y": 1.5,
@@ -30,6 +31,7 @@
   },
   {
    "kind": "wall",
+   "dress": "range_wall",
    "center": {
     "x": 11.2,
     "y": 1.5,
@@ -43,6 +45,7 @@
   },
   {
    "kind": "wall",
+   "dress": "range_wall",
    "center": {
     "x": 0,
     "y": 1.5,
@@ -56,6 +59,7 @@
   },
   {
    "kind": "wall",
+   "dress": "range_backstop",
    "center": {
     "x": 0,
     "y": 2.5,
@@ -69,6 +73,7 @@
   },
   {
    "kind": "toilet",
+   "dress": "site_toilet",
    "center": {
     "x": -10.4,
     "y": 1.2,
@@ -96,6 +101,7 @@
   },
   {
    "kind": "ibc",
+   "dress": "water_tote",
    "center": {
     "x": 10.4,
     "y": 0.6,
@@ -109,6 +115,7 @@
   },
   {
    "kind": "generator",
+   "dress": "generator",
    "center": {
     "x": 10.4,
     "y": 0.6,
@@ -135,6 +142,7 @@
   },
   {
    "kind": "sandbags",
+   "dress": "sandbags",
    "center": {
     "x": 0,
     "y": 0.45,
@@ -148,6 +156,7 @@
   },
   {
    "kind": "sandbags",
+   "dress": "sandbags",
    "center": {
     "x": 4.6,
     "y": 0.45,

@@ -30,6 +30,13 @@ func _first(targets: Array[RangeTarget], motion: RangeTarget.Motion, kind: Range
 	return null
 
 
+func _small(targets: Array[RangeTarget]) -> RangeTarget:
+	for t in targets:
+		if t.kind == RangeTarget.Kind.STEEL and t.radius < tuning.targets.plate_radius and not t.start:
+			return t
+	return null
+
+
 func _start(targets: Array[RangeTarget]) -> RangeTarget:
 	for t in targets:
 		if t.start:
@@ -52,23 +59,39 @@ func test_every_target_is_built_at_its_home_facing_its_way() -> void:
 func test_a_plate_hangs_with_its_face_where_the_simulation_rings_it() -> void:
 	var targets := RangeTargets.create(specs, tuning)
 	var v := _view(targets)
-	var plate := _first(targets, RangeTarget.Motion.STILL, RangeTarget.Kind.STEEL)
-	var d := v._drawn[plate.id]
-	var disc := d.faces[0]
-	var front := disc.global_position + d.root.global_basis.z * cfg.plate_thickness * 0.5
-	assert_almost_eq(front, plate.position, Vector3.ONE * 1e-4)
-	assert_almost_eq((disc.mesh as CylinderMesh).top_radius, plate.radius, 1e-6)
+	for plate: RangeTarget in [_first(targets, RangeTarget.Motion.STILL, RangeTarget.Kind.STEEL), _small(targets)]:
+		var d := v._drawn[plate.id]
+		var disc := d.faces[0]
+		assert_almost_eq(disc.global_position, plate.position, Vector3.ONE * 1e-4, "its face's middle")
+		var drawn := disc.global_transform * disc.mesh.get_aabb()
+		assert_almost_eq(drawn.size.x * 0.5, plate.radius, 1e-3, "the plate's radius")
+		assert_almost_eq(drawn.size.y * 0.5, plate.radius, 1e-3)
+		assert_almost_eq(drawn.end.z, plate.position.z, 1e-4, "its front through the simulation's plate")
 
 
 func test_a_figure_is_the_size_of_its_hit_volume() -> void:
 	var targets := RangeTargets.create(specs, tuning)
 	var v := _view(targets)
-	var standing := _first(targets, RangeTarget.Motion.STILL, RangeTarget.Kind.FIGURE)
-	var head := v._drawn[standing.id].faces[1]
-	assert_almost_eq(head.global_position.y, standing.volume.head.a.y, 1e-4, "the head's disc on the head")
-	var board := v._drawn[standing.id].faces[0]
-	var top := board.global_position.y + (board.mesh as BoxMesh).size.y * 0.5
-	assert_almost_eq(top, standing.floor_y + tuning.body.rest_gap + tuning.hits.body_top, 1e-4)
+	var hits := tuning.hits
+	for crouched: bool in [false, true]:
+		var figure: RangeTarget = null
+		for t in targets:
+			if t.kind == RangeTarget.Kind.FIGURE and t.motion == RangeTarget.Motion.STILL and t.crouched == crouched:
+				figure = t
+				break
+		var peg := v._drawn[figure.id].faces[0]
+		var drawn := peg.global_transform * peg.mesh.get_aabb()
+		var feet := figure.floor_y + tuning.body.rest_gap
+		var drop := hits.crouch_drop if crouched else 0.0
+		assert_almost_eq(drawn.end.y, figure.volume.head.a.y + hits.head_radius, 2e-3, "the head's top on the head's")
+		assert_almost_eq(drawn.end.y, feet + hits.head_height - drop + hits.head_radius, 2e-3)
+		assert_between(drawn.position.y, figure.floor_y, feet, "on its hinge plate (the hinge's knuckle a little lower)")
+		var middle := drawn.get_center()
+		assert_almost_eq(Vector2(middle.x, middle.z), Vector2(figure.home.x, figure.home.z), Vector2.ONE * 0.04,
+				"round the hit volume's middle (a flat board, its hinge leaf just behind)")
+		assert_lt(peg.mesh.get_aabb().size.z, 0.08, "flat: a plywood cut-out, not a turned peg")
+		assert_between(drawn.size.x, hits.body_radius * 2.0 - 0.01, hits.body_radius * 2.0 + 0.05,
+				"as wide as the body's (a crouched peg's foot a little wider: a crouch's knees)")
 
 
 func test_a_figure_falls_back_lies_and_rises() -> void:
@@ -91,10 +114,12 @@ func test_a_hit_figure_tips_back_away_from_the_line() -> void:
 	RangeTargets.knock_down(figure, tuning.targets.figure_down_time)
 	figure.down -= cfg.fall_time
 	v.update(targets, 0.0, DT)
-	var head := v._drawn[figure.id].faces[1]
-	var back := (head.global_position - v._drawn[figure.id].root.global_position).dot(
-			v._drawn[figure.id].root.global_basis.z)
+	var peg := v._drawn[figure.id].faces[0]
+	var aabb := peg.mesh.get_aabb()
+	var crown := peg.global_transform * Vector3(aabb.get_center().x, aabb.end.y, aabb.get_center().z)
+	var back := (crown - v._drawn[figure.id].root.global_position).dot(v._drawn[figure.id].root.global_basis.z)
 	assert_lt(back, -1.0, "the head lies well behind the hinge")
+	assert_gt(crown.y, figure.floor_y, "and above the ground")
 
 
 func test_a_hit_plate_swings_back_and_settles() -> void:
@@ -126,8 +151,7 @@ func test_a_mover_rides_its_track_and_a_swinger_swings_with_its_clock() -> void:
 	assert_almost_eq(trolley.global_position.x, mover.position.x, 1e-4)
 	assert_almost_eq(trolley.global_position.z, mover.position.z, 1e-4)
 	var plate := v._drawn[swinger.id].faces[0]
-	var front := plate.global_position + v._drawn[swinger.id].root.global_basis.z * cfg.plate_thickness * 0.5
-	assert_almost_eq(front, swinger.position, Vector3.ONE * 1e-4, "the plate where the simulation swings it")
+	assert_almost_eq(plate.global_position, swinger.position, Vector3.ONE * 1e-4, "the plate where the simulation swings it")
 
 
 func test_lit_targets_glow_and_go_back_to_their_paint() -> void:

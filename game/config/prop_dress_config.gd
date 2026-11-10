@@ -120,6 +120,13 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"log_tunnel_roof": "res://assets/models/props/log_tunnel_roof.glb",
 	&"log_tunnel_cap": "res://assets/models/props/log_tunnel_cap.glb",
 	&"log_tunnel_mouth": "res://assets/models/props/log_tunnel_mouth.glb",
+	# The practice range's (RM1), modelled in Blender by tools/blender/maps/.
+	&"range_wall": "res://assets/models/props/range_wall.glb",
+	&"range_backstop": "res://assets/models/props/range_backstop.glb",
+	&"sandbags": "res://assets/models/props/sandbags.glb",
+	&"site_toilet": "res://assets/models/props/site_toilet.glb",
+	&"water_tote": "res://assets/models/props/water_tote.glb",
+	&"generator": "res://assets/models/props/generator.glb",
 }
 ## Each dressed block kind's prop, and how it is laid. A kind not listed keeps its box.
 @export var kind_props: Dictionary[StringName, StringName] = {
@@ -180,6 +187,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"cordwood": Lay.GRID, &"fallen_log_5": Lay.GROUND, &"fallen_log_6": Lay.GROUND, &"fallen_log_8": Lay.GROUND,
 	&"root_plate": Lay.GROUND, &"sawbench": Lay.GROUND, &"boards": Lay.GROUND,
 	&"log_tunnel_side": Lay.SIDE, &"log_tunnel_roof": Lay.LINED,
+	&"range_wall": Lay.GRID, &"range_backstop": Lay.GRID, &"sandbags": Lay.GRID,
 }
 ## SIDE looks this far (m) across a tunnel wall for the wall across from it.
 @export var side_reach: float = 3.0
@@ -209,6 +217,8 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"camo_net": Vector3(2.0, 0.0, 0.3),
 	# cordwood in 2 m sections as tall as the stack, one section across however deep the stack (WG2)
 	&"cordwood": Vector3(2.0, 0.0, 2.0),
+	&"range_wall": Vector3(2.4, 0.0, 0.4), &"range_backstop": Vector3(2.4, 0.0, 0.4),
+	&"sandbags": Vector3(1.2, 0.0, 0.6),
 }
 ## GRID models laid all one way round, never turned at random: a net wall's sections match only edge to edge as
 ## modelled (DH1).

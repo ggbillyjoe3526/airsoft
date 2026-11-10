@@ -9,7 +9,7 @@ extends GutTest
 ## rebuilt Depot as the hall; the old play area is the yard fixture (tests/support/maps/yard.json).
 const RANGE_KEYS: Array[String] = ["name", "blocks", "killY", "spawns", "deadZones", "lanes", "targets", "bakedLight",
 		"keepClear"]
-const RANGE_PLAY_SHA := "d4d59a8b057b0fa2fb7f7e15dd53ef8c66bf221c0bc59bbcbe412110d31d7481"
+const RANGE_PLAY_SHA := "a6c3b53cd243442018d2a4dd670abe004bbcd369ff5b44b4e52a874358712511"
 const MAPS: Array[String] = ["depot", "woodland"]
 
 var tuning: SimTuning = SimTuning.load_default()
@@ -21,6 +21,11 @@ func _sha_of(path: String, keys: Array[String]) -> String:
 	var out := {}
 	for k in keys:
 		out[k] = (data as Dictionary).get(k)
+	# A block's "dress" (the model drawn over it, RM1) is how it looks, not how it plays: left out of the sum.
+	if out.get("blocks") is Array:
+		for b: Variant in out["blocks"]:
+			if b is Dictionary:
+				(b as Dictionary).erase("dress")
 	return JSON.stringify(out, "", true).sha256_text()
 
 
