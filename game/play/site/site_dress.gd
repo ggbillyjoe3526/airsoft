@@ -264,14 +264,15 @@ func _sail(st: SurfaceTool, look: SiteLook, s: SiteDressing.Sail) -> void:
 				Vector3(look.sail_post, s.post, look.sail_post), &"steel", 0)
 
 
-## Every sandbag of `map`'s stacks, a unit sphere's transform each (its shade into `shades`): laid in courses, alternate
-## courses half a bag along, each bag bulging `bag_bulge` out of its slot. The same bags every time (the map's seed).
+## Every sandbag of `map`'s stacks not drawn as a modelled prop (the range's, RM1), a unit sphere's transform each (its
+## shade into `shades`): laid in courses, alternate courses half a bag along, each bag bulging `bag_bulge` out of its
+## slot. The same bags every time (the map's seed).
 static func bag_layout(map: MapData, look: SiteLook, shades: PackedFloat32Array) -> Array[Transform3D]:
 	var placed: Array[Transform3D] = []
 	var rng := RandomNumberGenerator.new()
 	rng.seed = map.dressing_seed
 	for b in map.blocks:
-		if look.finish_of(b) == &"sandbags" and b.rise == MapData.Rise.NONE:
+		if look.finish_of(b) == &"sandbags" and b.rise == MapData.Rise.NONE and not SiteSurface.as_props(look, b):
 			_stack(look, b, rng, placed, shades)
 	return placed
 

@@ -1,8 +1,9 @@
 class_name RangeView
 extends Node3D
 ## The practice range's markings (the browser game's RANGE_VISUALS, M21): a painted line across the floor at each
-## marked distance (RangeConfig.distances, 10 to 60 m) and a board on both walls saying how far, turned a little from
-## the wall towards the firing line so it reads from there (the map keeps their room clear, range.json's keepClear).
+## marked distance (RangeConfig.distances, 10 to 60 m) and a board on two posts by both walls saying how far (its
+## Blender model, RM1), turned a little from the wall towards the firing line so it reads from there (the map keeps
+## their room clear, range.json's keepClear).
 ## Scenery only, built once: no collider, nothing moves.
 
 
@@ -10,12 +11,12 @@ extends Node3D
 func setup(cfg: RangeViewConfig, range_cfg: RangeConfig, font: Font) -> void:
 	name = "RangeMarks"
 	var line_mat := _paint(cfg.line_colour, cfg.mark_roughness)
-	var board_mat := _paint(cfg.sign_colour, cfg.mark_roughness)
+	var board_mat := LookMaterials.vertex_colour(cfg.mark_roughness, 0.0)
+	var boards := RangeModels.read(cfg.board_model)
 	var line := QuadMesh.new()
 	line.size = Vector2(range_cfg.half_width * 2.0, cfg.line_depth)
 	line.orientation = PlaneMesh.FACE_Y
-	var board := BoxMesh.new()
-	board.size = Vector3(cfg.sign_size.x, cfg.sign_size.y, cfg.sign_thickness)
+	var post_scale := Vector3(1.0, cfg.sign_lift + cfg.sign_size.y * 0.5, 1.0)
 	# The board's middle stands off the wall by the gap plus its half-width turned towards the line.
 	var across := range_cfg.half_width - cfg.sign_wall_gap - cfg.sign_size.x * 0.5 * sin(cfg.sign_turn)
 	for distance: float in range_cfg.distances:
@@ -32,11 +33,9 @@ func setup(cfg: RangeViewConfig, range_cfg: RangeConfig, font: Font) -> void:
 			# Facing into the range (+x from the left wall), turned towards the line (+z).
 			sign_at.rotation.y = -side * (PI * 0.5 - cfg.sign_turn)
 			add_child(sign_at)
-			var plank := MeshInstance3D.new()
-			plank.mesh = board
-			plank.material_override = board_mat
-			plank.position.z = -cfg.sign_thickness * 0.5
-			sign_at.add_child(plank)
+			boards.add(sign_at, &"Board", Vector3.ZERO, board_mat)
+			for post_x: float in [-cfg.sign_post_x, cfg.sign_post_x]:
+				boards.add(sign_at, &"Post", Vector3(post_x, -cfg.sign_lift, 0.0), board_mat, post_scale)
 			var label := painted_words(words, cfg.sign_text_share * cfg.sign_size.y, cfg.sign_ink, font,
 					cfg.text_font_size)
 			label.position.z = cfg.sign_text_lift

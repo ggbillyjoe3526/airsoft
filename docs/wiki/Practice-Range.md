@@ -12,9 +12,13 @@ BB bottles and cans, and a stack of hard cases.
 
 ## The targets
 
-Three lanes of targets run out from the firing line. Beyond the walls stand Depot's green steel sheds, a water
-tower, yellow jib cranes, feed silos, a steel watch tower, an old airliner fuselage on sleepers, phone masts carrying
-the yard's floodlights, and smoking chimneys.
+Three lanes of targets run out from the firing line. The steel plates are white and round, hung from a timber post
+in a steel stand; the figures are flat plywood cut-outs shaped like big pegs, standing or crouched, on hinges that let them fall back when hit.
+The movers ride rails and the pop-ups stand up from a motor box. Timber fences on a block wall close the lot, with a
+5 m backstop over a line of sandbags at the far end, a sign at every 10 m, and a site toilet, a water tote and a
+generator behind the firing point. Beyond the walls stand Depot's green steel sheds, a water tower, yellow jib
+cranes, feed silos, a steel watch tower, an old airliner fuselage on sleepers, phone masts carrying the yard's
+floodlights, and smoking chimneys.
 
 <!-- wiki:range-targets -->
 
