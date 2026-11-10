@@ -184,6 +184,8 @@ var roof_lamp_heights: PackedFloat32Array = PackedFloat32Array()
 var roof_plain: bool = false
 ## The hinged doors (DO1), in file order: the simulation, the level and the view number them alike.
 var doors: Array[Door] = []
+## The lifts (MT2), in file order: the simulation, the level and the view number them alike.
+var lifts: Array[LiftSpec] = []
 ## The floor heights (m) of a map built in storeys, lowest first (such as 0, 3 and 6); empty on a map of one.
 var storeys: PackedFloat64Array = PackedFloat64Array()
 ## Why the file was refused; empty when it loaded.
@@ -238,6 +240,7 @@ static func parse(text: String, style: MapStyle, team_size: int) -> MapData:
 	m._read_lights(d.get("lights"))
 	m._read_roof(d.get("roof"))
 	m._read_doors(d.get("doors"))
+	m._read_lifts(d.get("lifts"))
 	m.bot_sight = maxf(0.0, _number(d.get("botSight"), 0.0))
 	m.pole_height = maxf(0.0, _number(d.get("poleHeight"), 0.0))
 	m._read_foliage(d.get("foliage"))
@@ -664,6 +667,54 @@ func _read_doors(raw: Variant) -> void:
 			warnings.append("door %s is not {center, size over 0, shut}; left out" % JSON.stringify(item))
 			continue
 		doors.append(door)
+
+
+## `lifts` (MT2): each {name, well {x0, x1, z0, z1}, door {face (LiftSpec.FACES), from, to (within the well's side),
+## height, depth (optional, 0.3)}, stops (two or more floor heights, rising), stopNames (optional, one a stop), start
+## (optional, a stop's index, 0)}; one that isn't is left out.
+func _read_lifts(raw: Variant) -> void:
+	if raw == null:
+		return
+	for item: Variant in (raw as Array if raw is Array else []):
+		var spec := _lift(item)
+		if spec == null:
+			warnings.append("lift %s is not {well, door {face, from, to, height}, rising stops, start}; left out"
+					% JSON.stringify(item))
+			continue
+		lifts.append(spec)
+
+
+## One lift from the file, or null when it isn't one.
+static func _lift(item: Variant) -> LiftSpec:
+	var d: Dictionary = item if item is Dictionary else {}
+	var w: Dictionary = d.get("well") if d.get("well") is Dictionary else {}
+	var door: Dictionary = d.get("door") if d.get("door") is Dictionary else {}
+	var stops: Array = d.get("stops") if d.get("stops") is Array else []
+	var spec := LiftSpec.new()
+	spec.name = str(d.get("name", ""))
+	var x0 := _number(w.get("x0"), NAN)
+	var z0 := _number(w.get("z0"), NAN)
+	spec.well = Rect2(x0, z0, _number(w.get("x1"), NAN) - x0, _number(w.get("z1"), NAN) - z0)
+	var face := LiftSpec.FACES.find(str(door.get("face", "")))
+	spec.out = [Vector2(0.0, -1.0), Vector2(0.0, 1.0), Vector2(-1.0, 0.0), Vector2(1.0, 0.0)][maxi(face, 0)]
+	spec.door_from = _number(door.get("from"), NAN)
+	spec.door_to = _number(door.get("to"), NAN)
+	spec.door_height = _number(door.get("height"), NAN)
+	spec.door_depth = _number(door.get("depth"), 0.3)
+	for s: Variant in stops:
+		spec.stops.append(_number(s, NAN))
+	var names: Array = d.get("stopNames") if d.get("stopNames") is Array else []
+	for k in spec.stops.size():
+		spec.stop_names.append(str(names[k]) if k < names.size() else "")
+	spec.start = int(_number(d.get("start"), 0.0))
+	var side_lo := spec.well.position.x if spec.along_x() else spec.well.position.y
+	var side_hi := spec.well.end.x if spec.along_x() else spec.well.end.y
+	var ok := face >= 0 and spec.well.size.x > 0.0 and spec.well.size.y > 0.0 and spec.door_from < spec.door_to \
+			and spec.door_from >= side_lo and spec.door_to <= side_hi and spec.door_height > 0.0 \
+			and spec.door_depth > 0.0 and spec.stops.size() >= 2 and spec.start >= 0 and spec.start < spec.stops.size()
+	for k in spec.stops.size():
+		ok = ok and not is_nan(spec.stops[k]) and (k == 0 or spec.stops[k] > spec.stops[k - 1])
+	return spec if ok else null
 
 
 ## `lights`: each {position, radius over 0, colour, kind (optional: LIGHT_KINDS)}; one that isn't is left out.

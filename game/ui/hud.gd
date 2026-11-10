@@ -69,8 +69,9 @@ const STEP_BACKING := 0.88
 ## The least HUD size drawn, so a broken value never divides by nothing (the settings keep it within 0.8–1.5).
 const HUD_SIZE_FLOOR := 0.1
 
-## What Use would do to the door in your reach (DO1), for the prompt under the crosshair.
-enum DoorPrompt { NONE, OPEN, SHUT }
+## What Use would do to the door in your reach (DO1), or the lift button in it (MT2: call the car, or a stop of its
+## panel's), for the prompt under the crosshair.
+enum DoorPrompt { NONE, OPEN, SHUT, LIFT_CALL, LIFT_TO }
 
 var _cfg: HudConfig = null
 var _teams: TeamConfig = null
@@ -96,6 +97,8 @@ var _vault_prompt: Label = null
 var _door_prompt: Label = null
 var _vault_left: float = 0.0
 var _door_want: DoorPrompt = DoorPrompt.NONE
+## The stop a LIFT_TO prompt names.
+var _door_stop: String = ""
 var _leaves_notice: Label = null
 ## The reload prompt under them (RL2), and whether reloads are manual: the player's command says so each tick (the play
 ## scene copies PlayerCommand.manual_reload here), so the prompt follows the rule the simulation used.
@@ -752,16 +755,27 @@ func set_vault_ready(ready: bool) -> void:
 		_vault_left = _cfg.vault_prompt_hold
 
 
-## The door in your reach this tick (DO1): DoorPrompt.NONE hides the prompt; OPEN and SHUT say what Use would do, with
-## Use's key as it is bound when the prompt changes (called each tick: the text is built only then, as the vault
-## prompt's). Shown only while you are in play.
-func set_door_prompt(what: DoorPrompt) -> void:
-	if what == _door_want:
+## The door or lift button in your reach this tick (DO1, MT2): DoorPrompt.NONE hides the prompt; OPEN and SHUT say what
+## Use would do to the door, LIFT_CALL calls the lift and LIFT_TO names the car panel's stop `stop`, with Use's key as
+## it is bound when the prompt changes (called each tick: the text is built only then, as the vault prompt's). Shown
+## only while you are in play.
+func set_door_prompt(what: DoorPrompt, stop: String = "") -> void:
+	if what == _door_want and stop == _door_stop:
 		return
 	_door_want = what
-	if what != DoorPrompt.NONE:
-		var key := KeyNames.of_action(&"use_door")
-		_door_prompt.text = tr("HUD_DOOR_OPEN" if what == DoorPrompt.OPEN else "HUD_DOOR_SHUT") % key
+	_door_stop = stop
+	if what == DoorPrompt.NONE:
+		return
+	var key := KeyNames.of_action(&"use_door")
+	match what:
+		DoorPrompt.OPEN:
+			_door_prompt.text = tr("HUD_DOOR_OPEN") % key
+		DoorPrompt.SHUT:
+			_door_prompt.text = tr("HUD_DOOR_SHUT") % key
+		DoorPrompt.LIFT_CALL:
+			_door_prompt.text = tr("HUD_LIFT_CALL") % key
+		DoorPrompt.LIFT_TO:
+			_door_prompt.text = tr("HUD_LIFT_TO") % [key, stop]
 
 
 ## The door prompt built again with Use's key as it is bound now: after the pause menu's settings may have rebound
@@ -769,7 +783,7 @@ func set_door_prompt(what: DoorPrompt) -> void:
 func refresh_door_prompt() -> void:
 	var what := _door_want
 	_door_want = DoorPrompt.NONE
-	set_door_prompt(what)
+	set_door_prompt(what, _door_stop)
 
 
 ## Whether the door prompt shows.

@@ -1,0 +1,12 @@
+### Kingsmere's working lifts
+- Press G at a lift door in Kingsmere to call the car.
+- Inside, look at a floor's button and press G to ride there. The HUD names the floor.
+- One car waits in the ticket hall, the other at the platforms.
+- A car takes 4 people. Its doors open in 1.5 s, and it rides 4 s a floor.
+- The car stops on the way at floors someone called, and holds its doors open for 2 s at each stop.
+- Doors won't shut on someone in the doorway or while a hit player is aboard.
+- A fifth rider sounds the buzzer.
+- Bots ride the lifts when that is quicker than the stairs, and step back out of an over-full car.
+- Walk-offs always take the stairs.
+- Lit buttons glow warm white.
+- The chime, doors, motor, button beep and buzzer are placeholder sounds until a real lift is recorded.

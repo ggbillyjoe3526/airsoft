@@ -217,7 +217,7 @@ func _init(parent: Node, map_id: String, sim_tuning: SimTuning = null, bot_confi
 	parent.add_child(world)
 	level = MapLevel.new()
 	world.add_child(level)
-	level.build(map, style, tuning.body)
+	level.build(map, style, tuning.body, null, null, false, null, tuning.lifts)
 	nav = NavGrid.build(map, tuning.nav, tuning.body)
 	night = map.ok() and not map.lighting_presets.has(LightingConfig.DAY)
 	for b in map.blocks:

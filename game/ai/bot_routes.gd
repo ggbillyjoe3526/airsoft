@@ -56,6 +56,7 @@ static func plan(w: BotWorld, characters: Array[Character], cursor: int) -> int:
 			b.route_from = from
 			b.route_leg = 0
 			b.stuck_for = 0.0
+			b.lift_wait = 0.0
 		else:
 			b.route.clear()
 			b.route_state = Bot.RouteState.FAILED
@@ -101,7 +102,7 @@ static func point_ahead(b: Bot, distance: float) -> Vector3:
 ## off_leg_replan_moved; one walking slower than stuck_speed for stuck_time does too. A leg over a low obstacle (a vault
 ## link, NavVaults) sets b.vault_leg while the obstacle is still ahead: it is walked straight, its end counts as reached
 ## once past it wherever the vault set the body down, and held up on it the bot's routes go round for
-## vault_retry_delay.
+## vault_retry_delay. A lift leg (NavLifts, MT2) is BotLifts' to walk.
 static func follow(b: Bot, w: BotWorld, dt: float, while_planning: bool = false) -> bool:
 	var cfg := w.cfg
 	var planning := while_planning and b.route_state == Bot.RouteState.WANTED
@@ -114,6 +115,9 @@ static func follow(b: Bot, w: BotWorld, dt: float, while_planning: bool = false)
 				and not (_leg_share(b.route_from, reached, p, cfg.waypoint_reach) >= 1.0
 				and w.nav.is_vault_leg(b.route_from, reached)):
 			break
+		# A lift leg's far landing lies over or under its near one: reached only on its own floor.
+		if absf(reached.y - p.y) > w.tuning.lifts.reach_up and w.nav.lift_leg(b.route_from, reached) >= 0:
+			break
 		b.route_from = reached
 		b.route_leg += 1
 	if b.route_leg >= b.route.size():
@@ -122,6 +126,12 @@ static func follow(b: Bot, w: BotWorld, dt: float, while_planning: bool = false)
 			b.stuck_for = 0.0
 		return false
 	var wp := b.route[b.route_leg]
+	# A lift on its way (MT2): called, boarded, ridden and walked out of (BotLifts); aboard on foot, the doors first.
+	var lift := w.nav.lift_leg(b.route_from, wp)
+	if lift >= 0:
+		return BotLifts.ride(b, w, lift, dt)
+	if BotLifts.hold_aboard(b, w):
+		return true
 	var vault := w.nav.is_vault_leg(b.route_from, wp)
 	b.vault_leg = vault and _leg_share(b.route_from, wp, p, 0.0) < 0.5
 	if not planning and not vault and _off_leg(b.route_from, wp, p) > cfg.route_off_leg \

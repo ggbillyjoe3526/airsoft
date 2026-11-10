@@ -107,14 +107,15 @@ static func finish(f: Finder, g: NavGrid, price: float) -> int:
 	for k in nodes:
 		for l in range(start[k], start[k + 1]):
 			_add_point(g, k, to[l], nodes + l, f.weight, price)
-			_join(g.vault_region, g.region[k], g.region[to[l]])
+			join(g.vault_region, g.region[k], g.region[to[l]])
 	for r: int in g.vault_region:
-		g.vault_region[r] = _root(g.vault_region, r)
+		g.vault_region[r] = root(g.vault_region, r)
 	return to.size()
 
 
-## The region `r` is joined to, lowest first, in `joins` (a union-find over the few regions vault links touch).
-static func _root(joins: Dictionary[int, int], r: int) -> int:
+## The region `r` is joined to, lowest first, in `joins` (a union-find over the few regions vault and lift links
+## touch).
+static func root(joins: Dictionary[int, int], r: int) -> int:
 	var at := r
 	while joins.get(at, at) != at:
 		at = joins[at]
@@ -122,9 +123,9 @@ static func _root(joins: Dictionary[int, int], r: int) -> int:
 
 
 ## Joins regions `a` and `b`, the lower one the root.
-static func _join(joins: Dictionary[int, int], a: int, b: int) -> void:
-	var ra := _root(joins, a)
-	var rb := _root(joins, b)
+static func join(joins: Dictionary[int, int], a: int, b: int) -> void:
+	var ra := root(joins, a)
+	var rb := root(joins, b)
 	if ra == rb:
 		return
 	joins[ra] = mini(ra, rb)

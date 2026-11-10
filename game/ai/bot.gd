@@ -99,6 +99,10 @@ var off_leg_at: Vector3 = Vector3.INF
 var vault_leg: bool = false
 ## No vault in its routes before this time (s): it got held up on a vault leg (BotConfig.vault_retry_delay).
 var vaults_off_until: float = -INF
+## The lift button it presses this tick riding its route's lift leg (BotLifts, MT2; Lifts.NONE: none), and how long it
+## has waited on the landing for the car (s).
+var lift_press: Vector2i = Lifts.NONE
+var lift_wait: float = 0.0
 ## The way it walks this tick (a unit vector on the ground; zero to coast).
 var move_dir: Vector3 = Vector3.ZERO
 
@@ -313,6 +317,8 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	off_leg_at = Vector3.INF
 	vault_leg = false
 	vaults_off_until = -INF
+	lift_press = Lifts.NONE
+	lift_wait = 0.0
 	move_dir = Vector3.ZERO
 	lane = lane_id
 	# From end 0 the lane's points go first to last, from end 1 last to first.
