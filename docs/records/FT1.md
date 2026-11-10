@@ -1,6 +1,6 @@
 # FT1 · Woodland's treelines green and its thickets without plain blocks
 
-**Review:** pending
+**Review:** 4 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 The owner (2026-11-10): "On the woodland map the models in the distance have white trees. They should have colour.
 Also there appear to be some blocks on the map? It looks like there are no models."
@@ -12,7 +12,7 @@ Also there appear to be some blocks on the map? It looks like there are no model
 | 2026-11-10 | 1 | Opus 5.5 (build thread) | pass | Retry 7/8 | The field spruces' tops still drew white; the treeline read olive-grey at the fence |
 | 2026-11-10 | 2 | Opus 5.5 (build thread) | pass | Retry 7/8 | The treeline still read olive-grey from the fence (saturation about 0.2), with near-black facets |
 | 2026-11-10 | 3 | Opus 5.5 (build thread) | pass | Retry 7/8 | Band saturation 0.28 against 0.30; 5 % near-black facets on High |
-| 2026-11-10 | 4 | Opus 5.5 (build thread) | pass | pending | – |
+| 2026-11-10 | 4 | Opus 5.5 (build thread) | pass | Accept 8/8 | – |
 
 ## What was wrong
 

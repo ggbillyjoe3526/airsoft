@@ -1,34 +1,32 @@
 Task: FT1 · Woodland's treelines green and its thickets without plain blocks (owner report 2026-11-10, no task block)
-Attempt: 3 of 4
-Head: d946192 (checks passed on it: gdlint on touched files, GUT 16 files all pass, 1 pending; full check.sh left to CI)
-Checks: 1 ✗ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 7/8 → Retry (near miss, measured)
-Failed checks, with evidence (file:line, one or two lines each, each marked measured or judgment):
-1. [measured] The cause is now found and fixed at its step (look_vertex.gdshader:+122 keep_by_alpha, skyline_view.gd:+266
-   alpha = keep; recorded FT1.md:+22), and the band reads green on both presets: a real step. But the attempt-2 target
-   (saturation >= 0.3, hue 100-160, no near-black facets in panel 1) is not met. My measures on the after panels, sky
-   excluded: panel 1 top (y 76-175) High hue 118 sat 0.28, Low hue 133 sat 0.26; panel 2 between trunks
-   (x 1310-1370) High sat 0.27, Low 0.26. The record's own numbers agree (0.29 / 0.26). Near-black: High panel 1 still
-   has 5% of band pixels under value 0.12 (Low 1%); the dark facets at the top centre (x ~1130-1200) and left
-   (x ~900-1000) are plainly visible. BAND_SHADE 0.75 (far_tree.py:+63) halved them on paper but not on High.
+Attempt: 4 of 4
+Head: 5e7e3c8 (checks passed on it: gdlint clean, GUT 8 files 114 tests, 113 pass, 1 pending; full check.sh left to CI)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
+Score: 8/8 → Accept
+Evidence (my own measures on the after panels of the sheets, 800x450 halves, sky with hue 180-252 and sat >0.3 left out):
+1. Panel 1 (sheet x 800-1600, y 76-171 = full-res 0-1600 x 0-190): High hue 114, sat 0.39, 0.49 % under value 0.12;
+   Low hue 122, sat 0.35, 0 %. Panel 2 (sheet x 1300-1368, y 702-767 = full-res 1000-1135 x 280-410): High hue 125,
+   sat 0.33; Low hue 127, sat 0.31. Both attempt-3 targets met; the record's numbers agree. The cause is isolated
+   (SSIL, FT1.md:+27) and fixed at the model's own shade (far_tree.py:+63 BAND_SHADE 0.95, used at :97), not by
+   exempting one material from a global effect. White tops and thicket blocks stay fixed (panels 3, 4 both presets).
+2. No contract touched in this commit: colours in skyline_config.gd:+147 and a rebuilt glb (192 triangles as before).
+3. No runtime code in this commit; performance's d946192 pass covers the rest (build-time alpha write only).
+4. test_ft1_qa's greens test (g > 0.3, not near-black) still fails on the old #1c3024 greens; the new ones pass it.
+5-7. Data only (PackedColorArray export, a build-script constant); comments state why.
+8. Scope held to the owner's report.
 Advisory (no check failed):
-- The kept band is lighter and mintier than everything else under the 0.6 pull (High panel 1, upper right): check it
-  still sits in the same world as the field's spruces in front of it rather than looking pasted on.
-- No changelog.d note or docs/wiki row in the diff yet; add them at the records step.
-- Performance passed on 766afe7; its re-check of d946192 must be on file before merge (one uniform-bool branch in
-  fragment(), build-time alpha write: I expect no cost).
-Must-fix for the next attempt:
-- The far side is dark only on High (5% vs 1% on Low), so the cause is a High-only term on the band's shade side
-  (shadow, SSAO/SSIL or the look_shade band), not the vertex shade: find it by the same isolation renders and exempt
-  or soften it for the skyline (or lift BAND_SHADE further only if the isolation points there). Target: <1% of
-  panel 1 band pixels under value 0.12 on High.
-- Find the last ~0.03-0.05 of saturation (treeline_fade toward the grey horizon colour, the sky ambient, or the
-  skirt's grey multiply) and get the band to mean saturation >= 0.30, hue 100-160, in panels 1 and 2 on both presets.
-  Render the same panels and report the measures with the crop boxes used.
+- The far band is now more saturated and lighter than the field's spruces in front of it (High panels 3 and 4,
+  upper right): aerial perspective runs backwards. If the owner calls it too bright, pull treeline_fade or the greens'
+  value down a step; the 0.30 floor leaves little room for saturation.
+- Up close at the east fence the band's facets are large and flat (panel 1): it is far scenery, acceptable, but the
+  owner sees it every round from that spawn side.
+- Low panel 3 still shows a dark slab at a thicket's foot (core box, sheet x ~1180-1290, y ~1460-1490).
+- No changelog.d note or docs/wiki change in the diff: the records step must add the note before merge.
+Must-fix for the next attempt: none.
 Owner should test in the game (at most 6, one line each):
-- Woodland on High, at the east fence, look up: green treeline with no black facets?
+- Woodland on High at the east fence, look up: green treeline, no black facets?
 - Same on Low, then across the woods to the west: green, not grey or olive?
-- Does the far treeline look like the same forest as the spruces in front of it, or too pale/minty?
-- Spruce thickets at the Sawmill and culvert in full sun: any pale tip or flat box left, or the dark slab on Low?
-- Shoot into a thicket at chest height and its edges: BBs stop as before.
+- Does the far treeline sit in the same forest as the spruces in front, or read too bright and minty?
+- Spruce thickets at the Sawmill and culvert in full sun: any pale tip, flat box, or dark slab at the foot on Low?
+- Shoot into a thicket at chest height and at its edges: BBs stop as before.
 - F3 on Low close to a thicket: FPS against main.
