@@ -1,6 +1,7 @@
 extends GutTest
-## The Cyber Pistol in play (CP1): it plays by stats.md's `cyber` row with its built-in battery, unlocks at level 10,
-## is drawn from `cyber.glb` with its sights marked and its selector showing the fire mode, and sounds as its own.
+## The Cyber Pistol in play (CP1): it plays by stats.md's `cyber` row with its built-in battery, unlocks at the cap
+## (level 15 since LV15), is drawn from `cyber.glb` with its sights marked and its selector showing the fire mode, and
+## sounds as its own.
 
 const DT := 1.0 / 60.0
 const AEG := "000002"
