@@ -1,6 +1,6 @@
 # WS1 · Woodland's stream, varied trees and deeper log stacks
 
-**Review:** 7 attempts · critic Accept ?/8 · qa Pass · performance Pass
+**Review:** 8 attempts · critic Accept ?/8 · qa Pass · performance Pass
 
 The owner (2026-11-10): "Would it be possible to add a river stream through the Woodland map where the dried river
 bed is? It could push players to cross the bridge as going through in foot would create noise (from splashes) and slow
@@ -18,7 +18,8 @@ them."
 | 2026-11-10 | 4 | Opus 5.5 (build thread) | pass | Retry 7/8 | Log ends overlapping rather than packed, too many rounds and four-sided pieces, faceted growth ring, too pale |
 | 2026-11-10 | 5 | Opus 5.5 (build thread) | pass | Retry 7/8 | Core a lit brown, not deep shade; pieces stretched to the ragged top; too many rounds |
 | 2026-11-10 | 6 | Opus 5.5 (build thread) | pass | Retry 7/8 | Holes between the pieces, core showing above the top pieces, no bark rim on the slices, one stamped crack each, grey ends |
-| 2026-11-10 | 7 | Opus 5.5 (build thread) | pass | – | – |
+| 2026-11-10 | 7 | Opus 5.5 (build thread) | pass | Retry 7/8 | A dark slot at every join between sections (the core's top fell to the ground at each end) |
+| 2026-11-10 | 8 | Opus 5.5 (build thread) | pass | – | – |
 
 ## What changed
 
@@ -43,14 +44,14 @@ them."
   as in the owner's photo), its face tilted up to 0.08 m a metre, its sides shown only where it stands 3.5 cm or more
   out (`cordwood.py` `piece_end`). The pieces are stacked as by hand (`lay_face`): each in turn set where it rests
   lowest on the ground or the pieces under it, a split piece tried point up, point down and now and then on its side,
-  so the wedges lock together, 5 mm apart; then smaller pieces (0.28 to 0.7 of a row) are pushed into the holes left.
+  so the wedges lock together, 5 mm apart; then smaller split pieces (0.28 to 0.7 of a row) are pushed into the holes left.
   Each is whole and unstretched under the stack's ragged top, and no outline crosses another (asserted at build).
   About 85 % are pie slices of their log (75 to 100 degrees, up to 14 degrees off square) with a rim of warm bark a
   tenth of their radius inside the arc; 3 % small 16-sided rounds ringed in bark; a few four-sided pieces from the
   heart. Most show no crack; some one to three thin drying cracks, each its own length and way. Each end is its own
   warm colour from pale straw to tan, over a near-black core whose top follows each face's highest pieces, so the
-  ragged top is the logs' own. The sides facing down below 1.6 m, never seen from eye height, are left out. 2,905 to
-  3,058 triangles of a new 3,200 budget per section.
+  ragged top is the logs' own, and runs whole across the joins between sections. The sides facing down below 1.6 m, never seen from eye height, are left out. 2,872 to
+  3,039 triangles of a new 3,200 budget per section.
 
 ## Decisions
 
