@@ -1,5 +1,5 @@
 extends GutTest
-## MT3: Kingsmere's station dress in CC0 photo sets. The map file names its rooms' styles, strips and tracks; every
+## MT3: Subway's station dress in CC0 photo sets. The map file names its rooms' styles, strips and tracks; every
 ## finish names a set baked into both texture arrays; each face takes the finish of the room it faces (the hall's
 ## terrazzo, tiles and plaster, the platforms' concrete, the tunnels' lining, the escalators' tread, the trains' paint)
 ## or its cover kind's; the level draws one mesh in one material, its colliders exactly the greybox's and no prop models
@@ -60,9 +60,9 @@ func _finish_at(m: MapData, p: Vector3, n: Vector3) -> StringName:
 	return &""
 
 
-func test_kingsmere_names_its_station_and_the_other_maps_none() -> void:
-	var m := _map("kingsmere")
-	assert_not_null(m.station, "Kingsmere is station-dressed")
+func test_subway_names_its_station_and_the_other_maps_none() -> void:
+	var m := _map("subway")
+	assert_not_null(m.station, "Subway is station-dressed")
 	assert_gt(m.station.zones.size(), 60, "its rooms' air")
 	assert_eq(m.station.strips.size(), 4, "two strips on each platform's edge")
 	assert_eq(m.station.tracks.size(), 4, "both lines, either side of the trains")
@@ -88,12 +88,12 @@ func test_every_finish_names_a_set_in_both_texture_arrays() -> void:
 
 
 func test_every_style_the_map_names_is_one_the_look_knows() -> void:
-	for z in _map("kingsmere").station.zones:
+	for z in _map("subway").station.zones:
 		assert_true(look.style_walls.has(z.style), "style %s is known" % z.style)
 
 
 func test_each_face_takes_its_room_s_finish() -> void:
-	var m := _map("kingsmere")
+	var m := _map("subway")
 	assert_eq(_finish_at(m, Vector3(-45.0, 18.9, 5.0), Vector3.UP), &"terrazzo", "the ticket hall's floor")
 	assert_eq(_finish_at(m, Vector3(-62.0, 20.0, 0.0), Vector3.RIGHT), &"wall_tile", "the ticket hall's west wall")
 	assert_eq(_finish_at(m, Vector3(-50.0, 24.9, 0.0), Vector3.DOWN), &"plaster", "the ticket hall's ceiling")
@@ -106,7 +106,7 @@ func test_each_face_takes_its_room_s_finish() -> void:
 
 
 func test_a_lift_shaft_wears_each_storey_s_walls_and_paint_inside() -> void:
-	var m := _map("kingsmere")
+	var m := _map("subway")
 	assert_eq(_finish_at(m, Vector3(-43.55, 20.0, -1.2), Vector3.FORWARD), &"wall_tile",
 			"the shaft's front in the ticket hall")
 	assert_eq(_finish_at(m, Vector3(-43.55, 10.0, -1.2), Vector3.FORWARD), &"wall_tile",
@@ -115,7 +115,7 @@ func test_a_lift_shaft_wears_each_storey_s_walls_and_paint_inside() -> void:
 
 
 func test_the_escalators_are_tread_and_the_cover_its_kind_s() -> void:
-	var m := _map("kingsmere")
+	var m := _map("subway")
 	var treads := 0
 	for b in m.blocks:
 		if b.kind == &"ramp" and b.center.x > -37.0 and b.center.x < -19.0 and absf(b.center.z) > 0.5:
@@ -130,7 +130,7 @@ func test_the_escalators_are_tread_and_the_cover_its_kind_s() -> void:
 
 
 func test_almost_every_floor_faces_the_room_it_carries() -> void:
-	var m := _map("kingsmere")
+	var m := _map("subway")
 	var facing := 0
 	var floors := 0
 	for b in m.blocks:
@@ -147,9 +147,9 @@ func test_almost_every_floor_faces_the_room_it_carries() -> void:
 
 
 func test_the_level_draws_one_station_mesh_with_the_greybox_s_colliders() -> void:
-	var m := _map("kingsmere")
+	var m := _map("subway")
 	var dressed := _level(m, look)
-	var plain := _level(_map("kingsmere"), null)
+	var plain := _level(_map("subway"), null)
 	var mesh := dressed.get_node("Station") as MeshInstance3D
 	assert_not_null(mesh, "the station's mesh")
 	assert_eq(mesh.material_override, dressed.station_material(), "in the station's material")
@@ -172,7 +172,7 @@ func _shapes(level: MapLevel) -> Array[String]:
 
 
 func test_strips_lie_on_the_platforms_and_the_rails_low_on_the_track_bed() -> void:
-	var m := _map("kingsmere")
+	var m := _map("subway")
 	for s in m.station.strips:
 		var mid := Vector3(s.area.get_center().x, s.y + look.strip_lift, s.area.get_center().y)
 		assert_eq(m.station.style_at(mid + Vector3.UP * 0.05), &"platform", "a %s strip on a platform" % s.finish)
@@ -187,7 +187,7 @@ func test_strips_lie_on_the_platforms_and_the_rails_low_on_the_track_bed() -> vo
 
 
 func test_low_drops_the_relief() -> void:
-	var level := _level(_map("kingsmere"), look)
+	var level := _level(_map("subway"), look)
 	level.set_detail(GraphicsQuality.MeshDetail.LOW)
 	assert_true(level.station_material().get_shader_parameter(&"low"), "Low: no relief")
 	level.set_detail(GraphicsQuality.MeshDetail.HIGH)
@@ -244,7 +244,7 @@ func test_a_face_in_no_room_takes_the_outside_set_and_every_finish_has_a_layer()
 	assert_eq(look.finish_of(b, Vector3.UP, &"", &""), look.outside, "no room: outside")
 	assert_eq(look.finish_of(b, Vector3.UP, &"nonsense", &""), look.outside, "an unknown style: outside")
 	assert_eq(look.layer_of(&"never_heard_of"), look.layer_of(look.outside), "an unknown finish: the outside's layer")
-	var m := _map("kingsmere")
+	var m := _map("subway")
 	var blocks_outside := 0
 	for blk in m.blocks:
 		if look.kind_finishes.has(blk.kind) and m.station.owner_of(blk) == &"":
@@ -262,8 +262,8 @@ func test_a_look_whose_arrays_are_missing_draws_the_greybox() -> void:
 	bad.colour_array = "res://assets/textures/station/does_not_exist.res"
 	var level := MapLevel.new()
 	add_child_autofree(level)
-	level.build(_map("kingsmere"), play.map_style, tuning.body, play.baked_light, LightingConfig.for_map(play.lighting,
-			null, _map("kingsmere"), LightingConfig.DAY), false, play.site_look, tuning.lifts, bad)
+	level.build(_map("subway"), play.map_style, tuning.body, play.baked_light, LightingConfig.for_map(play.lighting,
+			null, _map("subway"), LightingConfig.DAY), false, play.site_look, tuning.lifts, bad)
 	assert_null(level.station_material(), "no material")
 	assert_null(level.get_node_or_null("Station"), "no station mesh")
 	assert_not_null(level.get_node_or_null("Greybox"), "the greybox instead")
@@ -285,8 +285,8 @@ func test_freeing_a_station_level_leaves_no_orphans() -> void:
 	var before := Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)
 	var level := MapLevel.new()
 	add_child(level)
-	level.build(_map("kingsmere"), play.map_style, tuning.body, play.baked_light, LightingConfig.for_map(play.lighting,
-			null, _map("kingsmere"), LightingConfig.DAY), false, play.site_look, tuning.lifts, look)
+	level.build(_map("subway"), play.map_style, tuning.body, play.baked_light, LightingConfig.for_map(play.lighting,
+			null, _map("subway"), LightingConfig.DAY), false, play.site_look, tuning.lifts, look)
 	remove_child(level)
 	level.free()
 	await wait_physics_frames(2)
@@ -294,7 +294,7 @@ func test_freeing_a_station_level_leaves_no_orphans() -> void:
 
 
 func test_bands_tile_each_face_exactly_with_its_normal_and_no_sliver() -> void:
-	var m := _map("kingsmere")
+	var m := _map("subway")
 	var cut := 0
 	for b in m.blocks:
 		for f in GreyboxFaces.faces_of(b):
@@ -322,4 +322,4 @@ func test_bands_tile_each_face_exactly_with_its_normal_and_no_sliver() -> void:
 				assert_lt(GreyboxFaces.face_normal(band).distance_to(n), 0.001, "a band keeps its face's winding")
 				at = bhi
 			assert_almost_eq(at, hi, 0.001, "the bands reach the face's top")
-	assert_gt(cut, 0, "Kingsmere's lift shafts are cut")
+	assert_gt(cut, 0, "Subway's lift shafts are cut")

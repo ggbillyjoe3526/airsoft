@@ -1,6 +1,6 @@
 class_name StationSurface
 extends RefCounted
-## A station dress's surfaces (MT3, Kingsmere): the level's very block faces (GreyboxFaces, in its order) drawn in the
+## A station dress's surfaces (MT3, Subway): the level's very block faces (GreyboxFaces, in its order) drawn in the
 ## CC0 photo sets StationLook gives each face, with the platforms' edge strips and the track's rails and sleepers, as
 ## one mesh in one material (station_surface.gdshader). MapLevel draws it in place of the greybox's mesh; the colliders,
 ## the nav, the shadow's shape and the sight lines are the blocks', unchanged: a strip lies `strip_lift` over its floor

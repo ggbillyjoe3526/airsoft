@@ -5,5 +5,5 @@
 - Bots climb up onto platforms and drop back down the same way.
 - Bots lean in with high knees going up stairs and sit back on softer steps going down.
 
-### In development: Kingsmere
-- Kingsmere's steps at the ends of the track pits are gone; you climb out over the platform edge instead.
+### In development: Subway
+- Subway's steps at the ends of the track pits are gone; you climb out over the platform edge instead.

@@ -26,7 +26,7 @@ func test_the_map_style_has_no_grid_left() -> void:
 	assert_false("grid_shade" in play.map_style, "no grid shade")
 
 
-func test_woodlands_sloping_ground_and_blocks_draw_in_the_shared_light() -> void:
+func test_woodland_sloping_ground_and_blocks_draw_in_the_shared_light() -> void:
 	var m := MapData.load_map("woodland", play.map_style, 5)
 	var level := MapLevel.new()
 	add_child_autofree(level)

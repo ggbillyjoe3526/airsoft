@@ -26,7 +26,7 @@ func test_every_maps_reflection_probes_see_at_least_the_reach_every_way() -> voi
 					"%s %s: the view down too, past the hill under the eye" % [id, p.name])
 
 
-func test_the_reach_reaches_past_woodlands_slopes_but_stays_near() -> void:
+func test_the_reach_reaches_past_woodland_slopes_but_stays_near() -> void:
 	# The view down on the north bridge's probe ended 2.24 m under the eye; 12 m cleared the glow, 40 m darkened the
 	# Clearing (GL1's pictures).
 	var play := PlayTuning.load_default()

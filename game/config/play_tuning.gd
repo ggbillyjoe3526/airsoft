@@ -20,7 +20,7 @@ const DEFAULT_PATH := "res://game/config/play_tuning.tres"
 @export var skyline: SkylineConfig = SkylineConfig.new()
 ## An indoor field's roof (DR1: Depot's hall).
 @export var roof: RoofConfig = RoofConfig.new()
-## A station's lifts (MT2: Kingsmere's).
+## A station's lifts (MT2: Subway's).
 @export var lifts: LiftViewConfig = LiftViewConfig.new()
 @export var woods: WoodsConfig = WoodsConfig.new()
 ## What a field's lights stand on or hang from (WG4: Woodland's campfires and lanterns).
@@ -33,7 +33,7 @@ const DEFAULT_PATH := "res://game/config/play_tuning.tres"
 @export var figures: FigureConfig = FigureConfig.new()
 ## How a map naming a site dress is drawn (DD1: Depot's temporary dress).
 @export var site_look: SiteLook = SiteLook.new()
-## How a map naming a station dress is drawn (MT3: Kingsmere's CC0 photo sets).
+## How a map naming a station dress is drawn (MT3: Subway's CC0 photo sets).
 @export var station_look: StationLook = StationLook.new()
 ## The game's look on every map: the shared light, the picture's grade and the graphics effects (docs/ART.md).
 @export var look: LookConfig = LookConfig.new()

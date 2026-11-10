@@ -1,6 +1,6 @@
 class_name StationDressing
 extends RefCounted
-## A map's station dress (MT3, Kingsmere; `dressing.station` in its file, written by tools/kingsmere/build_map.py): the
+## A map's station dress (MT3, Subway; `dressing.station` in its file, written by tools/subway/build_map.py): the
 ## rooms' air as boxes, each with its style (StationLook's floors, walls and ceilings), the platforms' edge strips and
 ## the track's centre lines. Plain data, look only: no collider, no nav cell. A map without `dressing.station` has none
 ## (null); a malformed zone, strip or track is left out with a warning.

@@ -564,12 +564,12 @@ Once the rest of step 26 lands:
 - [ ] **Frame time in a night firefight (WL8).** With `--perf`, a 5v5 on Woodland on Low and on High, every BB
   glowing: the overlay's frame time and draws (two more draws while any glowing BB flies). Does it hold the budget?
 
-### Kingsmere (Dev content, MT1)
+### Subway (Dev content, MT1)
 
 A closed metro station on three levels: the Street team starts in the ticket hall at street level, the Tunnel team in
 a cross-passage between the running tunnels, and they swap at half time. Turn on Settings › Dev › Dev content.
 
-- [ ] **Listed only as Dev content (MT1).** With Dev content off, the Match page shows no Kingsmere; on, it does, with
+- [ ] **Listed only as Dev content (MT1).** With Dev content off, the Match page shows no Subway; on, it does, with
   its picture, 5 to 8 a side and 6 standard.
 - [ ] **Every way down (MT1).** From the ticket hall: the escalators to the concourse and on down to the lower hall;
   the spiral stair in the hall's corner to the booking hall; the ordinary stair from the stair top down past flag B's
@@ -1343,9 +1343,9 @@ Dev content: tick Settings › Dev › Dev content (or Disable levelling), then 
 
 ## Climbing onto a platform and running on stairs (CL1)
 
-Kingsmere is Dev content: tick Settings › Dev › Dev content.
+Subway is Dev content: tick Settings › Dev › Dev content.
 
-- [ ] **Climb out of the track.** On Kingsmere, drop into a track and run at the platform's edge: "Space to climb"
+- [ ] **Climb out of the track.** On Subway, drop into a track and run at the platform's edge: "Space to climb"
   shows; press Jump and you heave up, the view dips and your replica comes low, and you stand on the platform in
   about half a second, ready to shoot a moment after. From a standstill at the edge it works too. Crouched, or with
   the edge more than 70° off your view, it doesn't.

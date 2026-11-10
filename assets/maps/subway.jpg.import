@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d4nhidne57rjp"
-path="res://.godot/imported/kingsmere.jpg-19353a6e8bb328f3248411c4ef612ea4.ctex"
+path="res://.godot/imported/subway.jpg-19353a6e8bb328f3248411c4ef612ea4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/maps/kingsmere.jpg"
-dest_files=["res://.godot/imported/kingsmere.jpg-19353a6e8bb328f3248411c4ef612ea4.ctex"]
+source_file="res://assets/maps/subway.jpg"
+dest_files=["res://.godot/imported/subway.jpg-19353a6e8bb328f3248411c4ef612ea4.ctex"]
 
 [params]
 

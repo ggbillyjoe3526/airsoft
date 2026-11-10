@@ -2,7 +2,7 @@ class_name DevContent
 extends RefCounted
 ## The shipped tables with one map or item tagged dev, for the tests of what dev content does (listed only with Dev
 ## content, off the records) on a known one: Woodland and its Weapon Torch (public since 2026-10-29), whatever the
-## shipped tables tag dev (Kingsmere, MT1). Each `use_` puts its table in the shared one's place and returns what was there; `restore_`
+## shipped tables tag dev (Subway, MT1). Each `use_` puts its table in the shared one's place and returns what was there; `restore_`
 ## puts that back. Test-only (tests/ never ships).
 
 

@@ -3,14 +3,14 @@ extends SceneTree
 ## through the game's animation graph) running at a 0.9 m platform and climbing it, and running up and down a 1:2 stair,
 ## each before (Run_F alone, as before CL1) and after (the Stairs_Up and Stairs_Down clips blended in by the slope); then
 ## your own first-person view through the same climb (FirstPersonView's heave and ReplicaView's arms). The climb is the
-## simulation's own (Vault.try_start and Vault.step on a BoxWorld platform as tall as Kingsmere's); the stairs body
+## simulation's own (Vault.try_start and Vault.step on a BoxWorld platform as tall as Subway's); the stairs body
 ## follows the slope as a ramp's does. Needs a display and OpenGL, so under xvfb:
 ##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . --rendering-driver opengl3 -s res://tools/climb_pictures.gd \
 ##       -- <folder> [shot ...]
 ## Shots: climb (side), climb_quarter, stairs_up, stairs_up_before, stairs_down, stairs_down_before, fp_climb; all by
-## default. Each writes <folder>/<shot>_<nnn>.png, one a frame at FPS. The shot `kingsmere` instead plays Kingsmere
+## default. Each writes <folder>/<shot>_<nnn>.png, one a frame at FPS. The shot `subway` instead plays Subway
 ## (a whole PlaySession, frozen, nobody drawn) and looks down at each end of a track pit where steps stood before CL1
-## (`kingsmere_<site>.png`; run it on the map before and after to compare). Dev only: tools/ never ships.
+## (`subway_<site>.png`; run it on the map before and after to compare). Dev only: tools/ never ships.
 
 const SIZE := Vector2i(1600, 900)
 const TICK := 1.0 / 60.0
@@ -18,14 +18,14 @@ const FPS := 15
 const FOV := 40.0
 const DISTANCE := 5.6
 const LOOK_HEIGHT := 1.0
-## The platform: as tall as Kingsmere's over its track bed, its edge EDGE m ahead (-Z) of the start.
+## The platform: as tall as Subway's over its track bed, its edge EDGE m ahead (-Z) of the start.
 const PLATFORM := 0.9
 const EDGE := -3.0
 ## The stair: 1:2 (MovementConfig.stairs_slope's 0.5), RISE m a step, from FOOT m ahead (-Z) of the start, STEPS steps.
 const RISE := 0.125
 const FOOT := -2.0
 const STEPS := 16
-## Kingsmere's track-pit ends where steps up to the platform stood before CL1: name, camera, the point it looks at.
+## Subway's track-pit ends where steps up to the platform stood before CL1: name, camera, the point it looks at.
 const SITES := [
 	["north_west", Vector3(-44.0, 3.0, -6.0), Vector3(-50.0, 0.0, -10.4)],
 	["north_middle", Vector3(25.0, 3.0, -6.0), Vector3(19.0, 0.0, -10.4)],
@@ -55,9 +55,9 @@ func _run() -> void:
 	DirAccess.make_dir_recursive_absolute(folder)
 	var shots: PackedStringArray = []
 	for a in args.slice(1):
-		if a == "kingsmere":
+		if a == "subway":
 			root.size = SIZE
-			await _kingsmere(folder)
+			await _subway(folder)
 			quit(0)
 			return
 		if SHOTS.has(a):
@@ -198,11 +198,11 @@ func _fp_climb(field: Node3D, folder: String, shot: String) -> int:
 	return frames
 
 
-## Each SITES end of Kingsmere's track pits, the map as a match draws it, the play frozen and nobody drawn.
-func _kingsmere(folder: String) -> void:
+## Each SITES end of Subway's track pits, the map as a match draws it, the play frozen and nobody drawn.
+func _subway(folder: String) -> void:
 	var session := PlaySession.new()
 	session.settings = Settings.new(PlayTuning.new())
-	session.map_id = "kingsmere"
+	session.map_id = "subway"
 	session.match_seed = 3
 	session.autopilot = true
 	root.add_child(session)
@@ -220,8 +220,8 @@ func _kingsmere(folder: String) -> void:
 		camera.look_at_from_position(site[1], site[2])
 		await RenderingServer.frame_post_draw
 		await RenderingServer.frame_post_draw
-		root.get_texture().get_image().save_png("%s/kingsmere_%s.png" % [folder, site[0]])
-	print("climb_pictures: kingsmere, %d sites" % SITES.size())
+		root.get_texture().get_image().save_png("%s/subway_%s.png" % [folder, site[0]])
+	print("climb_pictures: subway, %d sites" % SITES.size())
 	session.queue_free()
 	await process_frame
 

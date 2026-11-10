@@ -1,7 +1,7 @@
 extends GutTest
-## Bots climb (CL1, owner 2026-11-10: out of Kingsmere's track pits, whose steps went): the nav grid links the foot of a
+## Bots climb (CL1, owner 2026-11-10: out of Subway's track pits, whose steps went): the nav grid links the foot of a
 ## ledge a body can climb to its top, one way up, with a drop link back down, and nothing on a ledge too high or a
-## top too shallow; bots climb out of a pit and drop into it on their way. On Kingsmere every track pit is joined to
+## top too shallow; bots climb out of a pit and drop into it on their way. On Subway every track pit is joined to
 ## its platform by climbs and drops only, and the other maps have no climb at all.
 
 const DT := 1.0 / 60.0
@@ -170,20 +170,20 @@ func test_bots_climb_out_of_the_pit_and_drop_into_it_on_their_way() -> void:
 	assert_eq(fell, 0)
 
 
-func test_kingsmere_pits_join_their_platforms_by_climbs_and_drops_and_no_other_map_climbs() -> void:
-	for id: String in ["depot", "range", "woodland", "kingsmere"]:
+func test_subway_pits_join_their_platforms_by_climbs_and_drops_and_no_other_map_climbs() -> void:
+	for id: String in ["depot", "range", "woodland", "subway"]:
 		var map := MapData.load_map(id, MapStyle.new(), tuning.rounds.team_size)
 		var level := MapLevel.new()
 		add_child(level)
 		level.build(map, MapStyle.new(), tuning.body)
 		var nav := _linked(map, level.query())
 		var n := _links(nav)
-		if id != "kingsmere":
+		if id != "subway":
 			assert_eq(n.x, 0, "%s: no ledge to climb" % id)
 			assert_eq(n.y, 0, "%s: so no drop" % id)
 			level.free()
 			continue
-		assert_gt(n.x, 100, "kingsmere: climbs all along the pits")
+		assert_gt(n.x, 100, "subway: climbs all along the pits")
 		assert_eq(n.y, n.x)
 		var route := PackedVector3Array()
 		# The south track's trench, the north track's west pit and its east stretch, each to and from its platform.

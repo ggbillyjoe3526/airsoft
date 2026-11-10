@@ -71,7 +71,7 @@ extends Resource
 @export var crouch_cycle_speeds: PackedFloat32Array = PackedFloat32Array([0.0, 2.1])
 @export var crouch_cycle_metres: PackedFloat32Array = PackedFloat32Array([0.8, 1.05])
 ## Stairs (CL1): on a slope rising or falling at least stairs_from (m a metre along) the legs take the stairs clips
-## (Stairs_Up, Stairs_Down), all of them on a slope of stairs_slope (Kingsmere's stairs and escalators), eased in and
+## (Stairs_Up, Stairs_Down), all of them on a slope of stairs_slope (Subway's stairs and escalators), eased in and
 ## out over stairs_ease (s); only stepping ahead, never back or aside.
 @export var stairs_from: float = 0.15
 @export var stairs_slope: float = 0.5

@@ -15,7 +15,7 @@ var level: MapLevel = null
 
 func before_all() -> void:
 	loadout = ReplicaStats.default_loadout()
-	map = MapData.load_map("kingsmere", MapStyle.new(), 6)
+	map = MapData.load_map("subway", MapStyle.new(), 6)
 	level = MapLevel.new()
 	add_child(level)
 	level.build(map, MapStyle.new(), tuning.body, null, null, false, null, cfg)

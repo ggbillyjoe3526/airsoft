@@ -1,10 +1,10 @@
 extends SceneTree
-## Pictures of Kingsmere's station dress for review (MT3): a whole PlaySession on Kingsmere, the play frozen, the HUD,
+## Pictures of Subway's station dress for review (MT3): a whole PlaySession on Subway, the play frozen, the HUD,
 ## arms and players hidden, the camera at eye height at fixed spots (SHOTS), one picture each (`<n>-<name>.png`).
 ## At the graphics preset named (High unless one is given). For a before picture, run it in a checkout from before
 ## MT3. Needs a display (the cloud's lavapipe Vulkan draws Forward+):
 ##   xvfb-run -a -s "-screen 0 1600x900x24" godot --path . --rendering-driver vulkan -s \
-##       res://tools/kingsmere/station_pictures.gd -- <folder> [low|medium|high|ultra]
+##       res://tools/subway/station_pictures.gd -- <folder> [low|medium|high|ultra]
 ## Dev only: tools/ never ships.
 
 const SIZE := Vector2i(1600, 900)
@@ -40,12 +40,12 @@ func _run() -> void:
 	var session := PlaySession.new()
 	session.settings = Settings.new(PlayTuning.new())
 	session.settings.graphics_forced = preset
-	session.map_id = "kingsmere"
+	session.map_id = "subway"
 	session.match_seed = 3
 	session.autopilot = true
 	root.add_child(session)
 	if session.state == null:
-		push_error("station_pictures: kingsmere refused")
+		push_error("station_pictures: subway refused")
 		quit(1)
 		return
 	await process_frame

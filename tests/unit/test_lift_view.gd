@@ -1,5 +1,5 @@
 extends GutTest
-## The lifts' view (MT2, game/play/lift_view.gd): built for Kingsmere's two lifts (none for a map without), each car
+## The lifts' view (MT2, game/play/lift_view.gd): built for Subway's two lifts (none for a map without), each car
 ## drawn where it waits and between ticks where it rides, a landing's leaves apart only at the car's stop while it
 ## stands open there, the car's leaves inside its front when open, the buttons lit while called, the lamps and probes
 ## switched.
@@ -11,7 +11,7 @@ var view: LiftView = null
 
 
 func before_all() -> void:
-	map = MapData.load_map("kingsmere", MapStyle.new(), 6)
+	map = MapData.load_map("subway", MapStyle.new(), 6)
 
 
 func before_each() -> void:

@@ -169,7 +169,7 @@ var lights: Array[Light] = []
 ## How far its bots make someone out (m, `botSight` in the file: BotConfig.for_map), for a hall with longer views than
 ## the default; 0 on a map naming none, where BotConfig.view_distance holds.
 var bot_sight: float = 0.0
-## How tall its Attack / Defend poles stand (m, `poleHeight` in the file, MT1: Kingsmere's low tunnels and train), the
+## How tall its Attack / Defend poles stand (m, `poleHeight` in the file, MT1: Subway's low tunnels and train), the
 ## pole and its flag drawn scaled down to it (FlagView); 0 on a map naming none, where FlagViewConfig.pole_height holds.
 var pole_height: float = 0.0
 ## An indoor field's roof (`roof` in the file, DR1): its underside's height (m) over the floor, 0 on a field open to

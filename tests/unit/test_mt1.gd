@@ -1,5 +1,5 @@
 extends GutTest
-## MT1: Kingsmere's low poles keep their letters under the ceiling over them (critic, attempt 1).
+## MT1: Subway's low poles keep their letters under the ceiling over them (critic, attempt 1).
 
 
 ## The underside of the lowest block over (x, z) above `over` (m), INF with none.
@@ -13,8 +13,8 @@ func _ceiling(map: MapData, x: float, z: float, over: float) -> float:
 	return low
 
 
-func test_every_kingsmere_letter_stands_under_the_ceiling_over_its_pole() -> void:
-	var map := MapData.load_map("kingsmere", MapStyle.new(), 6)
+func test_every_subway_letter_stands_under_the_ceiling_over_its_pole() -> void:
+	var map := MapData.load_map("subway", MapStyle.new(), 6)
 	assert_eq(map.poles.size(), 2, "A and B")
 	var cfg := FlagViewConfig.new()
 	for i in map.poles.size():

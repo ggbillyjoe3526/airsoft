@@ -173,8 +173,8 @@ func test_a_map_that_cant_load_is_greyed_with_later_and_listed_last() -> void:
 	page.picks.map_id = "ghost"
 	page._offered = PackedStringArray()
 	page._list_maps()
-	assert_eq(page.map_ids(), PackedStringArray(["depot", "woodland", "kingsmere", "range", "ghost"]),
-			"Kingsmere with Dev content on (MT1)")
+	assert_eq(page.map_ids(), PackedStringArray(["depot", "woodland", "subway", "range", "ghost"]),
+			"Subway with Dev content on (MT1)")
 	var ghost := page.map_card("ghost")
 	assert_true(page.is_unloadable("ghost"))
 	assert_true(ghost.disabled)

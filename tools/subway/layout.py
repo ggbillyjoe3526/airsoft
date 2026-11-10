@@ -1,4 +1,4 @@
-"""Kingsmere's layout as data: a closed deep-level metro station (the owner's concept v2, 2026-11-10;
+"""Subway's layout as data: a closed deep-level metro station (the owner's concept v2, 2026-11-10;
 /mnt/project-files/concepts/metro/v2/). Dev content until the owner makes it public.
 
 Asymmetric. The Street team (end 0) starts in the ticket hall at street level; the Tunnel team (end 1) starts in a
@@ -16,7 +16,7 @@ The links between levels: two upper escalators (0 to -10), two lower ones (-10 t
 and one ordinary stair (-10 to -18, a half landing on the way), and two lifts (LIFTS: 0, -10 and -18) in a pair of
 shafts by the ticket hall's gate line.
 
-Edit this file, then run `python3 tools/kingsmere/build_map.py` to write data/maps/kingsmere.json.
+Edit this file, then run `python3 tools/subway/build_map.py` to write data/maps/subway.json.
 """
 from __future__ import annotations
 
