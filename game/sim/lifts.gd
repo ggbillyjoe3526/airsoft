@@ -18,8 +18,6 @@ enum Cue { BUTTON, OPENING, SHUTTING, DEPART, ARRIVE, BUZZ }
 const NONE := Vector2i(-1, -1)
 ## A car this close (m) to a stop's height stands at it.
 const AT_STOP := 1e-4
-## How far a button's beep carries (m): the caller's hand, not the car.
-const BUTTON_HEARD := 6.0
 
 var _cfg: LiftConfig = null
 var _body: BodyConfig = null
@@ -229,7 +227,7 @@ func _press_button(i: int, k: int, c: Character, state: GameState) -> void:
 	lifts.caller[i] = c.id
 	var inside := spec.holds(c.position, lifts.y[i], _cfg)
 	_event(state, Cue.BUTTON, i, k, spec.panel_button(k, lifts.y[i], _cfg) if inside else spec.call_button(k, _cfg),
-			c.id, BUTTON_HEARD)
+			c.id, _cfg.button_heard)
 	var here := lifts.stop[i] == k and lifts.phase[i] != LiftState.Phase.MOVING
 	if not here:
 		lifts.calls[i] |= 1 << k

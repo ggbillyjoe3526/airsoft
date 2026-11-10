@@ -6,7 +6,8 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-10 | 1 | thread | ✓ | – | – |
+| 2026-11-10 | 1 | thread | ✓ | Retry 7/8 | the golden angle and the beep's reach were unnamed numbers; the performance report was missing |
+| 2026-11-10 | 2 | thread | ✓ | – | – |
 
 ## Goal
 
@@ -62,4 +63,5 @@ the ticket hall (18.9).
 - A car is a greybox box; its model comes with the station's models.
 - Can wait (QA): someone standing on a car's roof isn't carried (Kingsmere's shafts can't be reached above a car); Use
   presses a lift button before a hinged door, so a door within reach of a call button would need its own key (no map
-  has one).
+  has one). A doorway is solid from the moment its doors start to shut until they are fully open again, so a BB
+  through a half-open gap stops on it for up to 1.5 s (critic).

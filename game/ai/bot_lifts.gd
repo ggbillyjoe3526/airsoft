@@ -12,6 +12,8 @@ class_name BotLifts
 const SPREAD := 0.45
 ## Close enough (m, level) to a spot to stand still on it.
 const ON_SPOT := 0.2
+## The turn (radians) from one id's spot to the next: the golden angle, so any few ids stand well apart.
+const SPOT_TURN := 2.399963
 
 
 ## Walks `b`'s lift leg (link `link` of the grid's): writes b.move_dir and b.lift_press. True while on its route;
@@ -98,7 +100,7 @@ static func _over(w: BotWorld, i: int, spec: LiftSpec, me: Character) -> bool:
 
 ## `b`'s own spot in the car with its floor at `y`: SPREAD from the middle at an angle of its id's.
 static func _spot(b: Bot, spec: LiftSpec, y: float) -> Vector3:
-	var angle := b.character.id * 2.399963
+	var angle := b.character.id * SPOT_TURN
 	return spec.car_point(y) + Vector3(cos(angle), 0.0, sin(angle)) * SPREAD
 
 

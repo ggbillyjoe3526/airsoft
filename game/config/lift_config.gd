@@ -36,3 +36,5 @@ extends Resource
 @export var landing_out: float = 0.8
 ## How far a car's chime, doors and motor are heard (m), walls or none.
 @export var heard: float = 24.0
+## How far a button's beep carries (m): the caller's hand, not the car.
+@export var button_heard: float = 6.0
