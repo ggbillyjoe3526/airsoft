@@ -70,7 +70,7 @@ func _painted(mesh_node: MeshInstance3D, i: int) -> Material:
 
 
 func _colour(m: Material) -> Color:
-	return (m as StandardMaterial3D).albedo_color
+	return (ReplicaPaint.plain_of(m) as StandardMaterial3D).albedo_color
 
 
 func _hands(loadout: Array[ReplicaConfig], paints: Array[StringName], realistic: bool) -> ReplicaView:
@@ -203,7 +203,10 @@ func test_replicas_in_one_paint_share_their_materials() -> void:
 	for part: StringName in ReplicaSchemes.PARTS:
 		var m := _override(a._replicas[0], part)
 		assert_same(_override(b._replicas[0], part), m, "%s shared by two figures" % part)
-		assert_same(_override(hands._held[0].root, part), m, "%s shared with the hands (same paint)" % part)
+		# the hands wear it lightly used (RW1), worn from the same plain paint
+		var held := _override(hands._held[0].root, part)
+		assert_true(ReplicaPaint.is_worn(held), "%s worn in the hands" % part)
+		assert_same(ReplicaPaint.plain_of(held), m, "%s shared with the hands (same paint)" % part)
 	assert_eq(ReplicaPaint._sets.size(), 1, "built once for the one paint")
 	var other := _hands(loadout, [&"signal"] as Array[StringName], false)
 	assert_not_same(_override(other._held[0].root, &"Body"), _override(a._replicas[0], &"Body"))

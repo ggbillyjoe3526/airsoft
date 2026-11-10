@@ -211,6 +211,10 @@ never players.
   their team's colours.
 - [ ] **Replica detail on High.** Fine speckle, rounded lit edges, rail slots and sights. In Loadout try every optic,
   grip and magazine: nothing floats or clips the hands.
+- [ ] **Lightly used replicas (RW1).** Inspect (Y) the AEG Rifle and the GBB Pistol in Woodland by day and in Depot,
+  in a dark paint and a light one: faint scratches (most along the length, more on the magazine and the pistol's
+  slide), slightly rubbed edges and a little dirt in the recesses, never stripes, blotches or shimmer as you turn them.
+  The Cyber Pistol and the Sniper Rifle stay clean; at a distance, bots' replicas look as before.
 - [ ] **Gas puffs and impacts.** The pistol puffs a little gas each shot; the rifle none. No flash, no casings.
   Impacts make pale dust on concrete, tan crumbs on wood, a grey puff on steel: never sparks.
 - [ ] **Name tags.** A teammate's tag sits just above the head at 1 to 2 m and at 30 m. Try a field of view of 80.

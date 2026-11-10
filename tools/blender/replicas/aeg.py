@@ -28,6 +28,7 @@ from mathutils import Matrix, Vector  # noqa: E402
 
 import figure_copy  # noqa: E402
 import hardsurface as hs  # noqa: E402
+import wear  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
 OUT = os.environ.get("BL_OUT") or os.path.join(ROOT, "assets/models/replicas/aeg.glb")
@@ -200,6 +201,9 @@ MATERIALS = {
     "Accent": (0xf2f0ea, 0.5, 0.0), "Metal": (0x484d56, 0.4, 0.4), "Rubber": (0x1c1d20, 0.8, 0.0),
     "BB": (0xf4f1e8, 0.3, 0.0),
 }
+
+## RW1: the magazine is handled most (in and out of pouches, dropped), so it gets more scratches (wear.apply).
+HEAVIER_WEAR = {"Magazine": 2.5}
 
 
 # ------------------------------------------------------------------------------------------------------ picatinny
@@ -1100,6 +1104,7 @@ def build() -> None:
             print("  %-16s %6d triangles" % (ob.name, n))
     print("  in the hands: %d triangles; figure: %d" % (total, sum(hs.tris(o) for o in [fig] + list(fig.children))))
     hs.fold_material("Rubber", "BB")  # BP6: within the 6 materials, looking the same
+    wear.apply(heavier=HEAVIER_WEAR)  # RW1: light use-wear in the hands
     hs.export(OUT, True)
     print("wrote", OUT)
 

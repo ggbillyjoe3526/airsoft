@@ -8,3 +8,8 @@ Pistol's `RearSight` and `FrontSight` empties were added to its file for CP1 (20
 (CS1) is drawn, held and pictured as the AEG until its own `smg.glb`. Objects, materials, space and budget:
 [docs/CC0_ASSETS.md](../../../docs/CC0_ASSETS.md) › Replica models. Record every model in
 [docs/ASSETS.md](../../../docs/ASSETS.md).
+
+`aeg_wear.png` and `pistol_wear.png` are those replicas' wear masks (RW1, 2026-11-10: faint scratches, rubbed edges,
+dirt in the recesses), baked by `tools/blender/replicas/wear.py` into their glb, extracted here by Godot's import and
+read by `game/play/replica_paint.gd` (docs/CC0_ASSETS.md › Replica models › Wear). The Cyber Pistol and the Sniper
+Rifle have none.

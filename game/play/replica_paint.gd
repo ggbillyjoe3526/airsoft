@@ -5,7 +5,10 @@ extends RefCounted
 ## surface that carries one, the rest (rubber, the BB, the orange tip) keep the model's own. The materials are built
 ## once per paint and shared by every replica wearing it; a paint with no colours (the Cyber Pistol's) leaves the
 ## model's own, except under Realistic colours, which turns its glowing lines plain grey (ReplicaSchemes.OWN_REALISTIC).
-## The glb files are never edited.
+## The glb files are never edited. A model that carries a wear mask (RW1: the hands' meshes of the AEG Rifle and the
+## GBB Pistol, its `<model>_wear.png` as their materials' ao_texture; tools/blender/replicas/wear.py) wears the
+## paint lightly used instead (replica_wear.gdshader: faint scratches, rubbed edges, grime in the recesses), unless the
+## caller asks for it plain (the figures' copies, which carry no mask of their own and are seen from far off).
 
 ## How a painted part is drawn: matte polymer with a soft sheen, the metal parts a little shiny (Sunlit Concrete, SL4).
 const ROUGHNESS := 0.64
@@ -19,11 +22,18 @@ const PAINT_SATURATION_SETTING := "shader_globals/look_paint_saturation"
 const LUMA := Vector3(0.2126, 0.7152, 0.0722)
 ## The most paints kept; the cache is cleared past it (there are twelve paints, each plain or realistic).
 const MAX_SETS := 32
+## The worn paint (RW1), and the most worn materials kept (a paint's part on one model's mask); cleared past it.
+const WEAR_SHADER := preload("res://game/play/replica_wear.gdshader")
+const MAX_WORN := 160
+## The meta a worn paint keeps its plain one in (plain_of).
+const PLAIN_META := &"plain"
 
 ## The materials per paint (PARTS' order), keyed "<paint>" or "<paint>/realistic".
 static var _sets: Dictionary[String, Array] = {}
 ## The own colours' realistic materials, by the model's material name; built once.
 static var _own_realistic: Dictionary[StringName, StandardMaterial3D] = {}
+## The worn materials (RW1), keyed by the plain one and the mask: "<plain's id>/<mask's id>".
+static var _worn: Dictionary[String, ShaderMaterial] = {}
 
 
 ## The paint a bot on `team` carries on `replica`: its team's for the replica's class, or its own colours.
@@ -49,6 +59,7 @@ static func materials(paint: StringName, realistic: bool) -> Array[StandardMater
 			return []
 		if _sets.size() >= MAX_SETS:
 			_sets.clear()
+			_worn.clear()
 		var built: Array = []
 		for i in colours.size():
 			var m := StandardMaterial3D.new()
@@ -64,8 +75,9 @@ static func materials(paint: StringName, realistic: bool) -> Array[StandardMater
 	return out
 
 
-## Puts `paint` on every surface of `model` and below it whose material is one of the five parts.
-static func apply(model: Node, paint: StringName, realistic: bool) -> void:
+## Puts `paint` on every surface of `model` and below it whose material is one of the five parts: worn where the model
+## carries a wear mask (RW1), unless `worn` is false.
+static func apply(model: Node, paint: StringName, realistic: bool, worn: bool = true) -> void:
 	var painted := materials(paint, realistic)
 	var own_colours := paint == ReplicaSchemes.OWN
 	if painted.is_empty() and not own_colours:
@@ -89,7 +101,53 @@ static func apply(model: Node, paint: StringName, realistic: bool) -> void:
 				continue
 			var part := ReplicaSchemes.PARTS.find(material_name)
 			if part >= 0 and part < painted.size():
-				mesh_node.set_surface_override_material(i, painted[part])
+				var mask := wear_mask(mesh_node.mesh, i) if worn else null
+				mesh_node.set_surface_override_material(i, painted[part] if mask == null else _worn_of(painted[part], mask))
+
+
+## The wear mask surface `i` of `mesh` carries (RW1): its own material's ao_texture (the glTF occlusion texture, read
+## on the surface's UV); null for a clean one.
+static func wear_mask(mesh: Mesh, i: int) -> Texture2D:
+	if mesh == null:
+		return null
+	var own := mesh.surface_get_material(i) as BaseMaterial3D
+	return own.ao_texture if own != null else null
+
+
+## `plain` (one of materials()'s) worn by `mask`, built once and shared by every surface wearing both.
+static func _worn_of(plain: StandardMaterial3D, mask: Texture2D) -> ShaderMaterial:
+	var key := "%d/%d" % [plain.get_instance_id(), mask.get_instance_id()]
+	if not _worn.has(key):
+		if _worn.size() >= MAX_WORN:
+			_worn.clear()
+		var m := ShaderMaterial.new()
+		m.resource_name = plain.resource_name + "/worn"
+		m.shader = WEAR_SHADER
+		m.set_shader_parameter(&"albedo", plain.albedo_color)
+		m.set_shader_parameter(&"roughness", plain.roughness)
+		m.set_shader_parameter(&"metallic", plain.metallic)
+		m.set_shader_parameter(&"bare_metal", 1.0 if plain.metallic > 0.0 else 0.0)
+		m.set_shader_parameter(&"wear_mask", mask)
+		m.set_meta(PLAIN_META, plain)
+		_worn[key] = m
+	return _worn[key]
+
+
+## The plain paint `material` was worn from (RW1), or `material` itself where it isn't worn.
+static func plain_of(material: Material) -> Material:
+	return material.get_meta(PLAIN_META) as Material if is_worn(material) and material.has_meta(PLAIN_META) else material
+
+
+## Whether `material` is a worn paint (RW1), or a copy of one.
+static func is_worn(material: Material) -> bool:
+	return material is ShaderMaterial and (material as ShaderMaterial).shader == WEAR_SHADER
+
+
+## The worn materials built so far (RW1), for ShaderPrewarm.
+static func worn_materials() -> Array[Material]:
+	var out: Array[Material] = []
+	out.assign(_worn.values())
+	return out
 
 
 ## The plain material, with no glow, that the own colours' `material_name` turns into under Realistic colours.
@@ -126,3 +184,4 @@ static func paint_saturation() -> float:
 static func clear() -> void:
 	_sets.clear()
 	_own_realistic.clear()
+	_worn.clear()

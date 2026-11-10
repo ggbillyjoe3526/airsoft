@@ -21,6 +21,11 @@ func _pistol() -> ReplicaConfig:
 	return r
 
 
+## A paint's colour, worn in the hands (RW1) or plain.
+func _colour(m: Material) -> Color:
+	return (ReplicaPaint.plain_of(m) as StandardMaterial3D).albedo_color
+
+
 func _body(model: Node) -> Material:
 	var nodes := model.find_children("*", "MeshInstance3D", true, false)
 	nodes.push_front(model)
@@ -59,25 +64,25 @@ func test_a_session_paints_each_slot_from_the_kit_and_the_bots_by_team_and_class
 	var s := _session(false, [&"teal", &"hazard"] as Array[StringName])
 	await wait_physics_frames(3)
 	var hands: ReplicaView = s._hands
-	assert_eq((_body(hands._held[0].root) as StandardMaterial3D).albedo_color, ReplicaPaint.drawn(ReplicaSchemes.colours(&"teal", false)[1]))
-	assert_eq((_body(hands._held[1].root) as StandardMaterial3D).albedo_color, ReplicaPaint.drawn(ReplicaSchemes.colours(&"hazard", false)[1]))
+	assert_eq(_colour(_body(hands._held[0].root)), ReplicaPaint.drawn(ReplicaSchemes.colours(&"teal", false)[1]))
+	assert_eq(_colour(_body(hands._held[1].root)), ReplicaPaint.drawn(ReplicaSchemes.colours(&"hazard", false)[1]))
 	for f in s._figures:
 		var team := s.state.characters[f.character_id].team
 		var rifle := ReplicaSchemes.bot_paint(team, &"rifle")
 		var pistol := ReplicaSchemes.bot_paint(team, &"pistol")
-		assert_eq((_body(f._replicas[0]) as StandardMaterial3D).albedo_color, ReplicaPaint.drawn(ReplicaSchemes.colours(rifle, false)[1]))
-		assert_eq((_body(f._replicas[1]) as StandardMaterial3D).albedo_color, ReplicaPaint.drawn(ReplicaSchemes.colours(pistol, false)[1]))
+		assert_eq(_colour(_body(f._replicas[0])), ReplicaPaint.drawn(ReplicaSchemes.colours(rifle, false)[1]))
+		assert_eq(_colour(_body(f._replicas[1])), ReplicaPaint.drawn(ReplicaSchemes.colours(pistol, false)[1]))
 
 
 func test_realistic_in_a_session_turns_the_player_and_every_bot_plain() -> void:
 	var s := _session(true, [&"teal", &"hazard"] as Array[StringName])
 	await wait_physics_frames(3)
-	assert_eq((_body(s._hands._held[0].root) as StandardMaterial3D).albedo_color,
+	assert_eq(_colour(_body(s._hands._held[0].root)),
 			ReplicaPaint.drawn(ReplicaSchemes.colours(&"ranger", false)[1]))
 	for f in s._figures:
 		var team := s.state.characters[f.character_id].team
 		var plain: StringName = ReplicaSchemes.SCHEMES[ReplicaSchemes.bot_paint(team, &"rifle")]["family"]
-		assert_eq((_body(f._replicas[0]) as StandardMaterial3D).albedo_color, ReplicaPaint.drawn(ReplicaSchemes.colours(plain, false)[1]))
+		assert_eq(_colour(_body(f._replicas[0])), ReplicaPaint.drawn(ReplicaSchemes.colours(plain, false)[1]))
 
 
 func test_a_second_session_rebuilds_the_cache_after_the_first_cleared_it() -> void:
@@ -91,7 +96,7 @@ func test_a_second_session_rebuilds_the_cache_after_the_first_cleared_it() -> vo
 	await wait_physics_frames(2)
 	var second := _body(b._hands._held[0].root)
 	assert_not_null(second)
-	assert_eq((second as StandardMaterial3D).albedo_color, ReplicaPaint.drawn(ReplicaSchemes.colours(&"cobalt", false)[1]))
+	assert_eq(_colour(second), ReplicaPaint.drawn(ReplicaSchemes.colours(&"cobalt", false)[1]))
 	assert_not_same(first, second)
 
 
@@ -104,10 +109,10 @@ func test_clearing_the_cache_leaves_a_live_view_painted_and_later_views_equal() 
 	var v2 := ReplicaView.new()
 	add_child_autofree(v2)
 	v2.setup(ViewModelConfig.new(), loadout, BoxWorld.new(), [&"coral"] as Array[StringName], false)
-	var a := _body(v1._held[0].root) as StandardMaterial3D
-	var b := _body(v2._held[0].root) as StandardMaterial3D
-	assert_eq(a.albedo_color, b.albedo_color)
-	assert_eq(a.albedo_color, ReplicaPaint.drawn(ReplicaSchemes.colours(&"coral", false)[1]))
+	var a := _colour(_body(v1._held[0].root))
+	var b := _colour(_body(v2._held[0].root))
+	assert_eq(a, b)
+	assert_eq(a, ReplicaPaint.drawn(ReplicaSchemes.colours(&"coral", false)[1]))
 
 
 func test_a_figure_puts_its_replica_away_while_fading_and_shows_it_again_after_a_reset() -> void:
