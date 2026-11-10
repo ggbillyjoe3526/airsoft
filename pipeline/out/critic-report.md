@@ -1,25 +1,29 @@
-Task: MT1 · Kingsmere, the metro station, as a Dev-only greybox map (no task block; judged against the owner's v2 brief)
-Attempt: 2 of 4
-Head: 13efbccb (check.sh passed on 82002d94; since then QA's tests, 77779ede, the reports and this fix, whose tests
-test_mt1, test_mt1_qa, test_two_flags and test_flag pass 53/53 and gdlint is clean, per the coordinator)
+Task: FL1 · Bots' flashes no longer blind their own teammates
+Attempt: 1 of 4
+Head: 283c5bf (checks passed on it; the only commit after QA's 025070b and performance's d53525f is the changelog note)
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
 Score: 8/8 → Accept
-Failed checks, with evidence: none.
-1. Fixed: game/play/flag_view.gd:250-261 letter_height() puts a low pole's letter middle at its top (3.4 x 0.618 =
-   2.10 m) and :275-276 shrinks pixel_size by the same scale (glyph 0.36 m), so A's top is 2.28 m over the foot
-   (3.18 m) under the car's ceiling at 2.4 m (3.3 m); with the 18 px outline about 2.35 m, still under it. Full-height
-   poles unchanged (letter_height = pole_height + letter_rise).
-4. tests/unit/test_mt1.gd:14-27 fails on attempt 1's code (A's top 0.9 + 2.41 + 0.29 = 3.60 > 3.3);
-   :30-37 pins Depot/Woodland's letter. It ignores the outline (about 5 cm of margin left).
-3/5/7: the new code runs once in setup; typed; values from FlagViewConfig. 8: tests/README.md:10 and
-   tests/support/dev_content.gd:4-5 no longer say every shipped map is public; game/play/README.md updated.
-Advisory (non-blocking): on a low pole the letter now sits on the finial and overlaps a fully raised cloth's top
-corner; area_probes.gd `probe_eye * 2.0` is still a bare factor.
-Must-fix for the next attempt: none.
-Owner should test in the game (at most 6, one line each):
-- Attack / Defend: is the small "A" in the south car readable from the platform doors, and not hidden by the cloth?
-- Fall into the south track pit: does walking up to 40 m to the end steps feel like a fair trap or a chore?
-- Do the Tunnel team's pushes through the south car and up the stair feel fair (attackers won 67.7 % in 8 seeds)?
-- Does the 58 m platform line take over the lower level, or just open it up as the brief wanted?
-- Medium preset: is the flat, unlit-looking shading underground playable (the KNOWN_ISSUES row)?
-- High and Ultra on your hardware: frame time with 106 shadowed strip lamps.
+Evidence:
+1. No task block; judged against the brief. Planning: game/ai/bot_bombs.gd:+169-183 `_mate_sees` checks each mate now
+   and led by `windup + flash_fuse` (0.3 + 1.5 s); +110-116 `_flash_at` stores the bang on `Bot.bomb_bang` (bot.gd:+244).
+   Throw time: bot_bombs.gd:+36-38 re-checks a FLASH at the press, drops it, flash kept. Probe: 0 teammates dazzled.
+2. Contracts 1-9 untouched: pure static code in game/ai, acts through PlayerCommand, no new random draw.
+3. Runs only after a passed roll (bomb_roll_gap) and once per press; Vector3 values only, no Array/Dictionary/Callable
+   or strings; the led ray is skipped for a still mate (+180). QA and performance both Pass.
+4. tests/unit/test_bot_bombs.gd:+268 (walking mate at 16.5 m: 1.8 s x 5 m/s brings it to 7.5 m, inside flash_mate_clear
+   8; standing it is outside flash_mate_sight 16, so a throw) and +281 (mate placed 3 m from the planned bang after the
+   decision; main has no press check, so it throws). Both fail on main by reading.
+5. Rules in BotBombs; typed; lead comes from GrenadeConfig, radii from bot config; EPSILON is the file's own constant.
+6. Bots refusing a flash that would catch a mate is honest, readable bot play; no tone or asset change.
+7. `_caught` factored out cleanly; one field added. Nit: `bomb_bang` isn't cleared in Bot's reset (bot.gd:303-306),
+   same as bomb_yaw/pitch; it's only read while bomb_kind is FLASH, which `_flash_at` sets with it. Not a defect.
+8. Scope is the fix only; changelog note, wiki Grenades.md, PLAYTEST line and record updated.
+Advisory (no fix needed now):
+- The lead samples one endpoint (now + 1.8 s), not the closest approach: a mate crossing past the bang inside 8 m with
+  the line to it blocked at both ends would slip through. Rare; it's also caught at the press.
+- Flashes thrown fell 9 → 4 and enemies dazzled 7 → 3 on the same seeds, so bot flashes are now noticeably rarer.
+  Small sample; worth the owner's eye rather than a change now.
+Owner should test in the game:
+- Play a few Attack / Defend rounds on Depot with bots on your team: no teammate (or you) gets flashed by a bot.
+- Do enemy bots still flash corners often enough to matter, or do they now almost never do it?
+- When a bot turns to throw and then holds the flash, does that pause look odd (stood still, turned, nothing thrown)?

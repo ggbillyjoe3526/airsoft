@@ -1,21 +1,18 @@
-Task: MT1 · QA commit 77779ede · Verdict: Pass
+Task: SL4 · QA commit none (no new tests; test_lo3_qa and others already updated in the diff) · Verdict: Pass
 
-Blocking
-- none (the earlier non-bool roof.plain script error is fixed in 77779ede: warns, stays false; test passes).
+Head 3e9bf5e, `git diff origin/main...HEAD` re-checked.
 
-Advisory: none.
+Blocking: none.
+Advisory: targeted GUT runs print one pair of "get_base_script / resource_path on null" SCRIPT ERRORs per script. The count equals the script count, so it comes from GUT with `-gdir=`, not from the game.
 
-Tests added (tests/unit/test_mt1_qa.gd, 23 tests, all pass)
-- test_kingsmere_loads_without_problems_or_warnings / _is_dev_only: loads clean, plain, pole_height, a height per lamp; hidden from fields(false). Without the map row/file they fail (no file = problems).
-- test_lamp_y_*: per-lamp y read; above roof, zero, negative warn and hang from roof; dropped lamp keeps heights in step. Fail on main (roof_lamp_heights absent).
-- test_plain_flag_defaults_false_and_non_bool_is_false: pins the earlier blocking bug (passes since 77779ede).
-- test_pole_height_negative_or_missing_is_zero.
-- test_plain_reaches_*: empty on Depot, reach = drop to floor_under + plain_lamp_reach on Kingsmere, ground fallback with no floor. Fail on main (no plain_reaches).
-- test_plain_roof_lights_use_plain_energy_and_per_light_range / test_non_plain_roof_lights_keep_the_hall_energy_and_range: plain energy, lower lamp reaches less, flicker uses stored energy; Depot unchanged (range = lamp_range).
-- test_floor_under_*: INF top == floor_top, lower top finds lower or none, ramp point, terrain ground above top excluded.
-- test_flag_*: height under pole scales Standing and lowers the letter; 0, negative, == and > pole height stay full size.
-- test_depot_probe_count_is_whole_field_plus_its_areas, test_storeyed_map_*: Depot keeps its Field probe + area probes (capped by probe_most); Kingsmere has no Field probe, each probe is an interior starting at its band's floor, an empty areas list gives zero probes; probed_areas matches boxes.
-Each fails on main because the new API (floor_under, plain_reaches, probed_areas, roof_lamp_heights, Standing) does not exist there.
+Checked:
+- HudStyle.navy_box is now dark_box. No `navy_box` reference is left in game/, tests/ or tools/. The callers in match_summary, xp_card and weapon_rail use dark_box. panel_box too.
+- GameTheme.DEEP and PLATE exist. MinimapConfig ink and map_backdrop read GameTheme.BG; both are consts, so the config's load order is fine.
+- test_lo3_qa, test_loadout_screen and test_replica_paint compare against ReplicaPaint.drawn(...), matching the new paint code.
 
-Run: 23 tests, 23 pass, 1.7 s; gdlint clean. tools/check.sh: gdlint, changelog notes, wiki, unit part 1 passed; my 10-minute window ended before the remaining stages and the smoke test, so those are not confirmed by me. Raw output: pipeline/out/qa/mt1-run.txt, mt1-check.txt.
-Not tested (needs display): how the plain roof's lights, low flags and Kingsmere's probes look; reflections on the storeys.
+Runs (targeted only, whole suite left to the other process):
+- 13 scripts (hud*, minimap, pause, report, nav_rail, crash_screen, lo3_qa, loadout_screen, replica_paint, game_theme): 199 tests, 199 pass.
+- 38 scripts (armory, chevron, graphics, sound_cues, order_wheel, team_markers, settings, flag, hud_table, menu, loadout): 608 tests, 608 pass.
+- No parse errors.
+
+Not tested: how the new palette looks on screen, which needs a display (owner's list).
