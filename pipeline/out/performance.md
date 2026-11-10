@@ -1,17 +1,11 @@
-Task: FT1 · head c84e494 · Verdict: Pass
-Run: no measured run (the game has no `--perf` match flag here; the cloud container has no GPU, so no draw calls or frame times) · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and the diff
-Metrics: not measured. Instance counts are unchanged (judgment, from the diff: grid_spread changes positions and sizes only, `n` is untouched).
+Task: FT1 · head d946192 · Verdict: Pass
+Run: no measured run (re-check of the diff 766afe7..d946192; cloud container has no GPU, no frame times or draw calls) · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and the diff
+Metrics: not measured. Unchanged by the diff (judgment): treeline.glb is rebuilt with the same 192 triangles; no node, material, mesh or surface is added; the skyline keeps its one look material and its glow surface; the vertex colour array already was a PackedColorArray, so its size is the same.
 Regressions (> 10 % worse): none measured
 Blocking findings: none
- - No per-frame or per-tick code changed (judgment). Every edit runs at map or skyline build time: PropLayout._grid (prop_layout.gd), SkylineView/SkylineModels/SkylineShapes (one extra float `haze` per placed part, one multiply per vertex while building), MapLevel.CORE_SHARE constant.
- - Skyline specular (look_vertex.gdshader): one uniform and `SPECULAR = specular;` in fragment(). The shader already ran the PBR path, so this is a constant write, no extra texture or branch. Zero cost (judgment). Material is set once at build (skyline_view.gd), shared, no new per-instance material.
- - No new materials, particles or meshes, so no new prewarm entry is needed. No presets bypassed (specular and treeline_fade live in SkylineConfig, not a quality setting).
-Concern: spruce overdraw in thickets (judgment)
- - Wider spruces (grid_spread 1.8 x 1.5, clamped to the box) overlap neighbours more, so more fragments are shaded then depth-rejected. Forward+ has no depth prepass by default, so overlap in screen space costs fragment work only on the Low target's pixel-bound cases.
- - Mitigations in the diff: vertex count is the same (~2,600 x 474 tris), the draws are the same, and the core boxes are lower (0.2 of height instead of 0.6) and inset further, so fewer greybox faces are drawn behind the spruces. Net overdraw is bounded by spruce size, which the box clamp caps; I expect a small fragment cost increase, not a frame-time risk. The shader is a simple vertex-colour one, so fragment cost per layer is low.
- - Thickets are mostly seen at range, where the spruce covers few pixels. Close up the overlap is highest; that is where a modest GPU would show it.
-Advisory
- - Frame time on Low is unverified: on the owner's hardware, look into a thicket close up on Low (F3 overlay, draw calls and FPS) against origin/main once. If it is flat, nothing to do.
- - No perf-budget.json lines yet; the owner records a baseline.
-Fixes: none needed.
+- Shader (look_vertex.gdshader:22-26, 122-124): one uniform bool and one branch mixing ALBEDO by COLOR.a. It is a uniform branch, coherent across the draw, and only the skyline sets it true (skyline_view.gd:61). Cost is a mix per fragment on the skyline, negligible (judgment). No new material, so no new prewarm entry; the shader variant is the existing one.
+- Allocations: the `out` alpha write in skyline_models.gd:151-153 and skyline_view.gd:266-268 is in the build path, run once per map build, not per frame or per tick (judgment). `keep` is a plain float on Placed and Part.
+- Wear (prop_dress_config.gd:347): spruce wear 0 skips the props' wear branch for that model, a small saving at most. It adds one dictionary entry, read at build time.
+- Preset bypass: none. The palette entry (look_config.gd:143) and the treeline colour and keep values are data only.
+Advisory: none
 Unexplained: none

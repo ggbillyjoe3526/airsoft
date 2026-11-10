@@ -141,10 +141,10 @@ extends Resource
 ## A band of dark conifers along a line (WL4; the browser game's DRESSING.treeline): cones `treeline_spacing` m apart
 ## in rows across its depth, jittered by `treeline_jitter` of the spacing, `treeline_low` to 1 of its height tall,
 ## `treeline_width` of their height wide (radius) with `treeline_sides` sides, sunk `treeline_sink` m into the ground,
-## each in one of these greens (far from both teams' hues): the far wood's (WoodsConfig.forest_colours) a step
-## lighter, as the model's own shade darkens them again (FT1: the old near-black greens read grey in the sun).
+## each in one of these greens (far from both teams' hues), drawn as they are (`treeline_keep`): spruce greens, the
+## hue of the field's spruces in the sun (FT1: the old near-black greens, pulled toward grey, read olive-grey).
 @export var treeline_colours: PackedColorArray = PackedColorArray([
-	Color("356b52"), Color("3a7d60"), Color("4a8a56"), Color("356b52"),
+	Color("2e7a50"), Color("347f4a"), Color("3f8a4c"), Color("2e7a50"),
 ])
 @export var treeline_spacing: float = 2.4
 @export var treeline_jitter: float = 0.35
