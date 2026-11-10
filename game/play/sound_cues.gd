@@ -69,10 +69,12 @@ func on_tick(state: GameState, listener: Character) -> void:
 				if shooter != null and e.actor != listener_id:
 					var reach := _sound.max_distance * MinimapHearing.heard_scale(shooter, e.slot)
 					_hear(e.actor, Kind.SHOT, e.position, reach, listener)
-			GameEvent.Kind.FOOTSTEP, GameEvent.Kind.VAULT, GameEvent.Kind.PROP_KNOCK, GameEvent.Kind.DOOR:
+			GameEvent.Kind.FOOTSTEP, GameEvent.Kind.VAULT, GameEvent.Kind.PROP_KNOCK, GameEvent.Kind.DOOR, \
+					GameEvent.Kind.LIFT:
 				var walker := state.character(e.actor)
 				if walker != null and walker.team != side and Elimination.is_in_play(walker):
 					var reach := e.reach if e.kind == GameEvent.Kind.PROP_KNOCK or e.kind == GameEvent.Kind.DOOR \
+							or e.kind == GameEvent.Kind.LIFT \
 							else _sound.step_reach * e.carry
 					_hear(walker.id, Kind.STEP, walker.position, reach, listener)
 			GameEvent.Kind.CHARACTER_HIT:

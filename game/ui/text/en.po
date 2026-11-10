@@ -66,6 +66,12 @@ msgstr "%s to open the door"
 msgid "HUD_DOOR_SHUT"
 msgstr "%s to shut the door"
 
+msgid "HUD_LIFT_CALL"
+msgstr "%s to call the lift"
+
+msgid "HUD_LIFT_TO"
+msgstr "%s: %s"
+
 msgid "HUD_RELOAD"
 msgstr "RELOAD"
 

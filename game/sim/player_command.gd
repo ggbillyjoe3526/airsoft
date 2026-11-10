@@ -71,10 +71,14 @@ var throw_grenade: Grenade.Kind = Grenade.Kind.NONE
 ## Take a bomb of this kind in hand (one-shot; MC1, the mouse wheel's step past the replicas): the replica goes down and
 ## the next trigger pull throws it (Grenades.ready_command). NONE takes none.
 var ready_grenade: Grenade.Kind = Grenade.Kind.NONE
-## Open or shut a door (one-shot; Doors, DO1): the one in reach nearest the view's line, or `door_to_use` when the
-## controller picked one (a bot, the door its walk goes into; -1: none picked).
+## Use (one-shot): a lift's button in reach first (Lifts, MT2: `lift_to_use`'s `lift_stop` when the controller picked
+## one, a bot riding its route; -1: none picked, the one the view picks), else open or shut a door (Doors, DO1): the
+## one in reach nearest the view's line, or `door_to_use` when the controller picked one (a bot, the door its walk goes
+## into; -1: none picked).
 var use_door: bool = false
 var door_to_use: int = -1
+var lift_to_use: int = -1
+var lift_stop: int = -1
 
 
 ## Back to no input, looking along (yaw, pitch).
@@ -112,6 +116,8 @@ func reset(view_yaw: float = 0.0, view_pitch: float = 0.0) -> void:
 	ready_grenade = Grenade.Kind.NONE
 	use_door = false
 	door_to_use = -1
+	lift_to_use = -1
+	lift_stop = -1
 
 
 func copy_from(other: PlayerCommand) -> void:
@@ -148,3 +154,5 @@ func copy_from(other: PlayerCommand) -> void:
 	ready_grenade = other.ready_grenade
 	use_door = other.use_door
 	door_to_use = other.door_to_use
+	lift_to_use = other.lift_to_use
+	lift_stop = other.lift_stop

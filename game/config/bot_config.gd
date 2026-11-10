@@ -193,6 +193,12 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var vault_price: float = 3.0
 ## A bot held up on a vault leg (stuck_time) plans its routes without vaults for this long (s).
 @export var vault_retry_delay: float = 6.0
+## A lift link (NavLifts, MT2) costs the ride's time (doors, a floor_time a stop) plus this wait for the car (s) at a
+## running bot's pace (MovementConfig.run_speed): a route rides only where the stairs are longer still.
+@export var lift_wait: float = 4.0
+## A bot waiting this long (s) for a car on its landing gives up and goes on foot (no lifts or vaults in its routes
+## for vault_retry_delay).
+@export var lift_patience: float = 20.0
 ## A bot this far off the leg it walks (m) checks the way on for a drop before walking it.
 @export var route_off_leg: float = 0.2
 ## It asks again for a drop off its leg only once it has moved this far (m) from where it last asked: a fresh route

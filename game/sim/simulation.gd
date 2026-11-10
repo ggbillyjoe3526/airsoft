@@ -21,6 +21,9 @@ extends RefCounted
 ## go bang after the magazines land; a new round clears them (Grenades, SF1). A Use press is taken after the bomb's,
 ## before the character moves (a door it opens is open for its step), a walk-off opens a shut door it walks into, the
 ## swings run on after the bombs, and each match and round starts with the doors as the map sets them (Doors, DO1).
+## The lifts' cars move first, before anyone (Lifts, MT2): each character then rises or falls with the car it rides
+## before it moves, and a Use press takes a lift's button in reach before a door; each match and round starts with the
+## cars at their start stops.
 
 var tuning: SimTuning = null
 var query: WorldQuery = null
@@ -40,6 +43,8 @@ var mag_share: MagShare = null
 var grenades: Grenades = null
 ## The hinged doors' rules (DO1), made with the simulation.
 var doors: Doors = null
+## The lifts' rules (MT2), made with the simulation.
+var lifts: Lifts = null
 ## Followed by characters with no command this tick.
 var _idle: PlayerCommand = PlayerCommand.new()
 ## A character's command while the round's start countdown holds everyone: the view only.
@@ -70,6 +75,7 @@ func _init(sim_tuning: SimTuning, world: WorldQuery, character_mover: CharacterM
 	mag_share = MagShare.new(sim_tuning, world)
 	grenades = Grenades.new(sim_tuning, world)
 	doors = Doors.new(sim_tuning, world)
+	lifts = Lifts.new(sim_tuning, world)
 	# The fitted hit volume's tables, made before the match (BP6): a pose first met mid-match makes none.
 	if sim_tuning.hits.fit != null:
 		sim_tuning.hits.fit.prepare()
@@ -85,6 +91,7 @@ func start_match(state: GameState) -> void:
 		t.active = false
 	Grenades.clear(state.grenades)
 	doors.reset(state.doors)
+	lifts.reset(state.lifts)
 	for c in state.characters:
 		c.grenades.carry_picked(tuning.grenades)
 	Round.start_match(state.round_state, state.characters, ends, state.bbs, tuning, state.events)
@@ -108,6 +115,11 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 	# A state the match never started for (a test's, a tool's) meets the doors as the map sets them.
 	if has_doors and state.doors.count() != doors.count():
 		doors.reset(state.doors)
+	var has_lifts := lifts.count() > 0
+	if has_lifts:
+		if state.lifts.count() != lifts.count():
+			lifts.reset(state.lifts)
+		lifts.step(state, dt)
 	if noisy:
 		noise.prepare(state)
 	for c in state.characters:
@@ -117,6 +129,8 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		c.prev_walk_cycle = c.walk_cycle
 		c.prev_yaw = c.yaw
 		c.prev_pitch = c.pitch
+		if has_lifts:
+			lifts.carry(c, state.lifts)
 		_squad_order(c, commands, live, state.events)
 		_mag_hand_off(c, commands, sharing, state)
 		var in_play := Elimination.is_in_play(c)
@@ -158,7 +172,7 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 			cmd = Grenades.ready_command(c, cmd, _readied)
 			grenades.press(c, cmd, live, state.grenades, state.events)
 			cmd = Grenades.trigger_command(c, cmd, trigger, _throwing)
-			if cmd.use_door and has_doors:
+			if cmd.use_door and not (has_lifts and lifts.press(c, cmd, state)) and has_doors:
 				doors.press(c, cmd.door_to_use, state)
 		elif has_doors and not c.vault.active:
 			doors.walk_through(c, cmd, state)
@@ -227,6 +241,7 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		if state.events.first(GameEvent.Kind.ROUND_START) != null:
 			Grenades.clear(state.grenades)
 			doors.reset(state.doors)
+			lifts.reset(state.lifts)
 	state.tick += 1
 	state.time += dt
 

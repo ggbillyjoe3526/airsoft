@@ -114,6 +114,10 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
   and replaced by the owner's recordings (the pin, bounce and pop in AU5, the bang in AU6); the renderer only drafts
   now. No outside source; same licence as the code. To re-render: `godot --headless --path . -s
   res://tools/render_grenades.gd`, then `godot --headless --path . --import`.
+- **The lifts' sounds (MT2):** `assets/audio/cues/lift_chime_1.wav`, `lift_doors_1` and `_2`, `lift_motor_1`,
+  `lift_button_1` and `lift_buzz_1`, synthesised by our own `tools/lift_sounds.py` (numpy, seeded) as toy-like
+  placeholders until the owner records a lift. No outside source; same licence as the code. To re-render: `python3
+  tools/lift_sounds.py`, then `godot --headless --path . --import`.
 - **Synthesised drafts kept for reference:** `tools/render_whistle.gd` (the whistle and the ping's pip, SP3, PN2),
   `tools/render_doors.gd` (DO1) and `tools/render_bolt.gd` (SN1) render the drafts the recordings replaced, only to a
   folder named after `--`.

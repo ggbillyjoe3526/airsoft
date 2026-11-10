@@ -30,6 +30,12 @@ var _under: RayHit = RayHit.new()
 ## Each door's leaf (DO1), by door: the one shape of a wooden static body of its own, disabled while the door is open.
 var _door_shapes: Array[CollisionShape3D] = []
 var _door_bodies: Array[RID] = []
+## Each lift's car (MT2): a steel static body holding its floor and roof, moved whole (its origin the middle of its
+## floor's top); each lift's doorways, a shape a stop on a steel body of its own, disabled while open. The cars' and
+## the doorways' bodies are steel to rays.
+var _lift_cars: Array[StaticBody3D] = []
+var _lift_doors: Array[Array] = []
+var _lift_rids: Array[RID] = []
 
 
 func _init(cast: RayCast3D, surface_bodies: Array[RID], body: BodyConfig) -> void:
@@ -104,6 +110,30 @@ func set_door_shut(i: int, shut: bool) -> void:
 	_door_shapes[i].disabled = not shut
 
 
+## Lift `i`'s car body and its doorways' shapes (one a stop) and their body, as the level built them (MapLevel), after
+## add_lift.
+func set_lift_bodies(i: int, car: StaticBody3D, doors: Array[CollisionShape3D], doors_body: RID) -> void:
+	if _lift_cars.size() <= i:
+		_lift_cars.resize(i + 1)
+		_lift_doors.resize(i + 1)
+	_lift_cars[i] = car
+	_lift_doors[i] = doors
+	_lift_rids.append(car.get_rid())
+	_lift_rids.append(doors_body)
+
+
+## The car's body is placed on the physics server at once, for the next ray and the next mover's sweep (a node's own
+## transform reaches the server only when the tree flushes its changes); its node follows.
+func set_lift_car(i: int, y: float) -> void:
+	var car := _lift_cars[i]
+	car.position = Vector3(car.position.x, y, car.position.z)
+	PhysicsServer3D.body_set_state(car.get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, car.transform)
+
+
+func set_lift_door(i: int, k: int, shut: bool) -> void:
+	(_lift_doors[i][k] as CollisionShape3D).disabled = not shut
+
+
 func surface_under(feet: Vector3) -> RayHit.Surface:
 	var top := feet + Vector3(0.0, _body.max_step, 0.0)
 	if not ray(top, feet - Vector3(0.0, UNDERFOOT_REACH, 0.0), _under):
@@ -125,4 +155,8 @@ func _surface_of(rid: RID) -> RayHit.Surface:
 	for b in _door_bodies:
 		if b == rid:
 			return RayHit.Surface.WOOD
+	# A lift's car and doors are steel.
+	for b in _lift_rids:
+		if b == rid:
+			return RayHit.Surface.METAL
 	return RayHit.Surface.NONE

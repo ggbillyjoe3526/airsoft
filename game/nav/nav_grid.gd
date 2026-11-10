@@ -59,9 +59,22 @@ var vault_base: int = -1
 ## different regions have no route on foot, so a search between them is refused before it starts (a whole-grid search
 ## that fails took 182 to 202 ms on Woodland).
 var region: PackedInt32Array = PackedInt32Array()
-## Regions joined by vault links (NavVaults.link): a region's own entry is the lowest region it reaches by foot and
-## vaults, either way; a region no link touches has none.
+## Regions joined by vault and lift links (NavVaults.link, NavLifts.link): a region's own entry is the lowest region it
+## reaches by foot, vaults and lifts, either way; a region no link touches has none.
 var vault_region: Dictionary[int, int] = {}
+## Lift links (NavLifts, MT2): link l rides lift lift_of[l] from stop lift_stop_from[l] (its landing's node lift_from[l])
+## to stop lift_stop_to[l] (node lift_to[l]), as search point lift_base + l. lift_base -1: not linked yet.
+var lift_from: PackedInt32Array = PackedInt32Array()
+var lift_to: PackedInt32Array = PackedInt32Array()
+var lift_of: PackedInt32Array = PackedInt32Array()
+var lift_stop_from: PackedInt32Array = PackedInt32Array()
+var lift_stop_to: PackedInt32Array = PackedInt32Array()
+var lift_base: int = -1
+## Each lift's well (on the ground) and each of its stops' floor height and landing node, by lift: a route from inside a
+## car starts at the landing of the stop nearest its floor (find_route).
+var lift_wells: Array[Rect2] = []
+var lift_stop_y: Array[PackedFloat32Array] = []
+var lift_landing: Array[PackedInt32Array] = []
 ## Most floors any one cell has: 1 on a map with no floor over another.
 var layers: int = 0
 ## From NavConfig and BodyConfig when built. The largest floor height difference between neighbouring nodes a body
@@ -232,10 +245,13 @@ func drop_on_line(a: Vector3, b: Vector3, wall_above: float = INF) -> bool:
 ## nearest walkable node within `snap`, on the floor at its height), smoothed into straight legs probed by leg_probe,
 ## written into `out` as waypoints on their floors: the start excluded, ending exactly on the goal where it is walkable
 ## and in a straight line on foot from the leg before, else on the node nearest it. With `vaults` (a bot's route) it may
-## go over a low obstacle by a vault link, a leg of its own from the node before it to the node past it (is_vault_leg);
-## without (a walk-off), only on foot. False, with `out` emptied, when there is no route.
+## go over a low obstacle by a vault link, a leg of its own from the node before it to the node past it (is_vault_leg),
+## or ride a lift, a leg from one landing's node to another's (lift_leg); without (a walk-off), only on foot. From inside
+## a lift's car (no floor of the grid's) it starts at the landing of the stop nearest its floor, the first waypoint
+## that landing's node. False, with `out` emptied, when there is no route.
 func find_route(start: Vector3, goal: Vector3, out: PackedVector3Array, vaults: bool = false) -> bool:
-	var a := nearest_walkable(start, snap)
+	var landing := car_landing(start)
+	var a := landing if landing >= 0 else nearest_walkable(start, snap)
 	var b := nearest_walkable(goal, snap)
 	if a < 0 or b < 0:
 		out.clear()
@@ -243,19 +259,40 @@ func find_route(start: Vector3, goal: Vector3, out: PackedVector3Array, vaults: 
 	if not linked(a, b, vaults):
 		out.clear()
 		return false
-	var off := not vaults and not vault_to.is_empty()
+	var off := not vaults and (not vault_to.is_empty() or not lift_to.is_empty())
 	if off:
-		_set_vaults(false)
+		_set_links(false)
 	if a != b:
 		searches += 1
 	var ids := PackedInt64Array([a]) if a == b else astar.get_id_path(a, b)
 	if off:
-		_set_vaults(true)
+		_set_links(true)
 	if ids.is_empty():
 		out.clear()
 		return false
-	NavRoute.pull(self, ids, start, goal, out)
+	if landing < 0:
+		NavRoute.pull(self, ids, start, goal, out)
+		return true
+	var first := node_position(landing)
+	NavRoute.pull(self, ids, first, goal, out)
+	if out.is_empty() or out[0] != first:
+		out.insert(0, first)
 	return true
+
+
+## The landing node of the stop nearest `p`'s height when `p` stands in a lift's well (between its lowest stop and its
+## highest one's ceiling), else -1.
+func car_landing(p: Vector3) -> int:
+	for i in lift_wells.size():
+		var ys := lift_stop_y[i]
+		if not lift_wells[i].has_point(Vector2(p.x, p.z)) or p.y < ys[0] - max_step or p.y > ys[ys.size() - 1] + headroom:
+			continue
+		var best := 0
+		for k in ys.size():
+			if absf(ys[k] - p.y) < absf(ys[best] - p.y):
+				best = k
+		return lift_landing[i][best]
+	return -1
 
 
 ## False if nodes `a` and `b` lie in regions no route joins (on foot, or with `vaults` by vault links too). True
@@ -282,10 +319,24 @@ func is_vault_leg(a: Vector3, b: Vector3) -> bool:
 	return false
 
 
-## Turns every vault link in the search on or off.
-func _set_vaults(on: bool) -> void:
+## The lift link the leg from `a` to `b` (waypoints on node centres) rides (NavLifts), or -1: a leg on foot.
+func lift_leg(a: Vector3, b: Vector3) -> int:
+	if lift_to.is_empty():
+		return -1
+	var from := node_at(a)
+	var land := node_at(b)
+	for l in lift_to.size():
+		if lift_from[l] == from and lift_to[l] == land:
+			return l
+	return -1
+
+
+## Turns every vault and lift link in the search on or off.
+func _set_links(on: bool) -> void:
 	for l in vault_to.size():
 		astar.set_point_disabled(vault_base + l, not on)
+	for l in lift_to.size():
+		astar.set_point_disabled(lift_base + l, not on)
 
 
 ## A walkable floor point within `radius` (m) of `p`, drawn from `rng` (bots' hunting); `p` itself if hunt_tries draws

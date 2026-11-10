@@ -99,6 +99,8 @@ var _faces_due: TerrainGrid.Faces = null
 var _faces: Array[PackedVector3Array] = []
 var _next: int = 0
 var _body: BodyConfig = null
+## The lifts' cars' sizes (MT2).
+var _lifts: LiftConfig = null
 var _clear_bodies: Dictionary[int, StaticBody3D] = {}
 var _railing_bodies: Dictionary[int, StaticBody3D] = {}
 
@@ -106,21 +108,23 @@ var _railing_bodies: Dictionary[int, StaticBody3D] = {}
 ## Builds `m`'s greybox and colliders with `style`, for characters shaped as `body`, its baked light (off until
 ## `set_baked_light`) drawn with `light` and checked against the sun in `lighting` (null: the built-in ones), the
 ## preset bakes are made under (the day's), not the one playing; `night` draws it with its sky share alone; `site` dresses
-## a map that names a site dress (null: greybox). Call once, inside the tree; or, to spread it over frames (a loading
-## screen), `begin` with the same arguments and then `build_some` each frame until it says it is done: the same level.
+## a map that names a site dress (null: greybox); its lifts' cars are sized by `lifts` (null: the built-in LiftConfig,
+## MT2). Call once, inside the tree; or, to spread it over frames (a loading screen), `begin` with the same arguments
+## and then `build_some` each frame until it says it is done: the same level.
 func build(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = null,
-		lighting: LightingConfig = null, night: bool = false, site: SiteLook = null) -> void:
-	begin(m, style, body, light, lighting, night, site)
+		lighting: LightingConfig = null, night: bool = false, site: SiteLook = null, lifts: LiftConfig = null) -> void:
+	begin(m, style, body, light, lighting, night, site, lifts)
 	build_some(0)
 
 
 ## Starts `build` (its arguments), building nothing yet: `build_some` does it.
 func begin(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = null,
-		lighting: LightingConfig = null, night: bool = false, site: SiteLook = null) -> void:
+		lighting: LightingConfig = null, night: bool = false, site: SiteLook = null, lifts: LiftConfig = null) -> void:
 	assert(is_inside_tree(), "MapLevel.build needs the level in the tree (its physics space)")
 	map = m
 	_style = style
 	_body = body
+	_lifts = lifts if lifts != null else LiftConfig.new()
 	_light = light if light != null else BakeConfig.new()
 	_lighting = lighting if lighting != null else LightingConfig.new()
 	_night = night
@@ -314,6 +318,7 @@ func _add_rest() -> void:
 		if b.rise == MapData.Rise.NONE:
 			_query.add_block(b.kind, b.center, b.size, b.surface)
 	_add_doors(m)
+	_add_lifts(m)
 	_make_mover_bodies(_body)
 
 
@@ -435,6 +440,46 @@ func _add_doors(m: MapData) -> void:
 		add_child(sb)
 		_query.add_door(d.center, d.size, d.shut)
 		_query.set_door_shape(i, shape, sb.get_rid())
+
+
+## The lifts (MT2): each car a steel static body of its own holding its floor and roof, moved whole as the car rides
+## (JoltQuery.set_lift_car), and each lift's doorways a steel body of its own, a shape a stop, each switched on while
+## that doorway is shut (JoltQuery.set_lift_door). Each enters the tree with its shapes, as the other bodies. Drawn by
+## LiftView, never by the greybox or the bake.
+func _add_lifts(m: MapData) -> void:
+	for i in m.lifts.size():
+		var spec := m.lifts[i]
+		var y := spec.stops[0]
+		var car := StaticBody3D.new()
+		car.name = "LiftCar%d" % i
+		car.collision_layer = WORLD_LAYER
+		car.collision_mask = 0
+		car.add_child(_box_shape(spec.floor_center(y, _lifts) - spec.car_point(y), spec.slab_size(_lifts.floor_thickness)))
+		car.add_child(_box_shape(spec.roof_center(y, _lifts) - spec.car_point(y), spec.slab_size(_lifts.roof_thickness)))
+		car.position = spec.car_point(y)
+		add_child(car)
+		var doors := StaticBody3D.new()
+		doors.name = "LiftDoors%d" % i
+		doors.collision_layer = WORLD_LAYER
+		doors.collision_mask = 0
+		var shapes: Array[CollisionShape3D] = []
+		for k in spec.stop_count():
+			var shape := _box_shape(spec.door_center(k), spec.door_size())
+			doors.add_child(shape)
+			shapes.append(shape)
+		add_child(doors)
+		_query.add_lift(spec, _lifts)
+		_query.set_lift_bodies(i, car, shapes, doors.get_rid())
+
+
+## A box shape of `size` at `at` in its body.
+static func _box_shape(at: Vector3, size: Vector3) -> CollisionShape3D:
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = size
+	shape.shape = box
+	shape.position = at
+	return shape
 
 
 ## The next of sloping ground's tiles (`_plan`), under the Ground node, in the greybox's material, casting shadows:

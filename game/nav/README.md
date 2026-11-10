@@ -9,6 +9,7 @@ docs/ARCHITECTURE.md › Contracts 1).
 | `nav_grid.gd` | `NavGrid`: a 0.2 m grid holding a node per floor of each cell in flat packed arrays, its queries (`node_at`, `floor_at`, `is_walkable_at`, `nearest_walkable`, `clear_line`, `drop_on_line`, `random_walkable_near`) and `find_route` |
 | `nav_grid_builder.gd` | `NavGridBuilder`: each cell's floors (the terrain's ground at its centre, then each floor or ramp top), blocks and drops stamped with the clearance, the outer edge; each node's eight steps, the open-ground distances a line skips over, and the route search's points and links |
 | `nav_route.gd` | `NavRoute`: string-pulls the search's node path into straight legs probed a body's radius from corners (the browser's pullRoute) |
+| `nav_lifts.gd` | `NavLifts`: a lift link each way between every two stops' landings of each lift (MT2), priced as the ride's time (doors, floors, a wait) at a run, joined into the vault regions; a walk-off never takes one, and a route asked for inside a car starts at its landing (`NavGrid.car_landing`, `lift_leg`) |
 
 - **Sloping ground** (WL1, the browser's M33c). A cell's ground is `TerrainGrid.height_at` its centre, with nothing
   under it; the grid's bounds take in the terrain's. A 1:2 slope rises 0.14 m over a diagonal step of a 0.2 m cell,
