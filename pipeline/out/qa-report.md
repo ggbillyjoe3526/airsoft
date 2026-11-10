@@ -5,10 +5,10 @@ Blocking
 
 Advisory: none.
 
-Tests added (tests/unit/test_mt1_qa.gd, 23 tests, all but one pass)
+Tests added (tests/unit/test_mt1_qa.gd, 23 tests, all pass)
 - test_kingsmere_loads_without_problems_or_warnings / _is_dev_only: loads clean, plain, pole_height, a height per lamp; hidden from fields(false). Without the map row/file they fail (no file = problems).
 - test_lamp_y_*: per-lamp y read; above roof, zero, negative warn and hang from roof; dropped lamp keeps heights in step. Fail on main (roof_lamp_heights absent).
-- test_plain_flag_defaults_false_and_non_bool_is_false: pins the blocking bug above (fails now).
+- test_plain_flag_defaults_false_and_non_bool_is_false: pins the earlier blocking bug (passes since 77779ede).
 - test_pole_height_negative_or_missing_is_zero.
 - test_plain_reaches_*: empty on Depot, reach = drop to floor_under + plain_lamp_reach on Kingsmere, ground fallback with no floor. Fail on main (no plain_reaches).
 - test_plain_roof_lights_use_plain_energy_and_per_light_range / test_non_plain_roof_lights_keep_the_hall_energy_and_range: plain energy, lower lamp reaches less, flicker uses stored energy; Depot unchanged (range = lamp_range).
