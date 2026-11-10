@@ -78,6 +78,13 @@ class Door:
 
 ## The kinds a light may name (a light naming none is a lamp in its own colour).
 const LIGHT_KINDS: Array[StringName] = [&"fire", &"lantern"]
+## A roof lamp's states (`roof.lamps[].state`, DW1): a working lamp names none (""), a worn one is dim, flickers or is
+## dead; MapData.roof_lamp_states holds each one's index here.
+const LAMP_STATES: Array[String] = ["", "dim", "flicker", "dead"]
+const LAMP_WORKING := 0
+const LAMP_DIM := 1
+const LAMP_FLICKER := 2
+const LAMP_DEAD := 3
 
 var id: String = ""
 var display_name: String = ""
@@ -163,6 +170,9 @@ var bot_sight: float = 0.0
 ## the sky, and its lamp panels (x, z), drawn by RoofView. A BB stops on it (MapLevel's ceiling).
 var roof_height: float = 0.0
 var roof_lamps: PackedVector2Array = PackedVector2Array()
+## Each roof lamp's state (`state` in the file: DW1, Depot's worn lamps), in roof_lamps' order: LAMP_WORKING unless
+## the file names it dim, flickering or dead. Look only.
+var roof_lamp_states: PackedByteArray = PackedByteArray()
 ## The hinged doors (DO1), in file order: the simulation, the level and the view number them alike.
 var doors: Array[Door] = []
 ## The floor heights (m) of a map built in storeys, lowest first (such as 0, 3 and 6); empty on a map of one.
@@ -581,8 +591,9 @@ static func _override(d: Dictionary) -> LightingConfig.Override:
 	return o
 
 
-## `roof`: {height over 0, lamps: [{x, z}, ...]}; anything else is no roof, with a warning. A lamp without both numbers
-## is left out, with a warning.
+## `roof`: {height over 0, lamps: [{x, z, state (optional: "dim", "flicker" or "dead")}, ...]}; anything else is no
+## roof, with a warning. A lamp without both numbers is left out, and an unknown state is a working lamp, each with a
+## warning.
 func _read_roof(raw: Variant) -> void:
 	if raw == null:
 		return
@@ -601,6 +612,12 @@ func _read_roof(raw: Variant) -> void:
 			warnings.append("a roof lamp is not {x, z}; left out")
 			continue
 		roof_lamps.append(Vector2(x, z))
+		var state: Variant = at.get("state", "")
+		var kind: int = LAMP_STATES.find(str(state)) if state is String else -1
+		if kind < 0:
+			warnings.append("a roof lamp's state %s is not dim, flicker or dead; working" % str(state))
+			kind = LAMP_WORKING
+		roof_lamp_states.append(kind)
 
 
 ## `doors`: each {center, size over 0 every way, side (optional: 1 or -1, 1), shut (optional, false)}; one that isn't

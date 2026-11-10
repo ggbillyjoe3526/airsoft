@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import math
+import random
 import os
 import sys
 
@@ -151,7 +152,49 @@ def roof() -> dict:
                 lamps.append({"x": r(x), "z": r(zz)})
                 zz += step
             x += step
+    wear_lamps(lamps)
     return {"height": L.ROOF, "lamps": lamps}
+
+
+# Worn lamps (DW1, owner 2026-11-10: "some lamps aren't as bright or they flicker or one that doesn't work"): how many
+# of each, the seed that picks them (the same lamps every build), how far apart (m) the flickering and dead ones hang
+# at least, and how far (m) round a dead lamp its neighbours are (LAMP_STEP, the lamps' spacing): a dead lamp hangs
+# only where all four neighbours do (never in an edge row) and none of them is dim or dead, so its patch is filled by
+# working lamps and no corner goes dark.
+WORN = {"dim": 12, "flicker": 3, "dead": 2}
+WORN_SEED = 1110
+WORN_APART = 15.0
+LAMP_STEP = 7.0
+
+
+def _near(a: dict, b: dict, reach: float) -> bool:
+    return math.dist((a["x"], a["z"]), (b["x"], b["z"])) <= reach
+
+
+def wear_lamps(lamps: list[dict]) -> None:
+    """Names some lamps dim, flickering or dead (`state`), picked by WORN_SEED; the rest are working."""
+    rng = random.Random(WORN_SEED)
+    order = list(range(len(lamps)))
+    rng.shuffle(order)
+    picked: list[int] = []
+    dead: list[int] = []
+    for state in ("dead", "flicker"):
+        left = WORN[state]
+        for i in order:
+            if left == 0:
+                break
+            if i in picked or any(_near(lamps[i], lamps[j], WORN_APART - 0.01) for j in picked):
+                continue
+            if state == "dead" and sum(1 for o in lamps if o is not lamps[i] and _near(lamps[i], o, LAMP_STEP + 0.01)) < 4:
+                continue
+            lamps[i]["state"] = state
+            picked.append(i)
+            if state == "dead":
+                dead.append(i)
+            left -= 1
+    dim = [i for i in order if i not in picked and not any(_near(lamps[i], lamps[d], LAMP_STEP + 0.01) for d in dead)]
+    for i in dim[: WORN["dim"]]:
+        lamps[i]["state"] = "dim"
 
 
 def site() -> dict:

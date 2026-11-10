@@ -48,7 +48,8 @@ func test_every_lamp_gets_a_downward_shadowed_spot_under_its_lens() -> void:
 	var roof := _roof()
 	var lamps := roof.lamp_lights()
 	assert_not_null(lamps)
-	assert_eq(lamps.light_count(), roof.lamp_count(), "one light a lamp")
+	var dead := depot.roof_lamp_states.count(MapData.LAMP_DEAD)
+	assert_eq(lamps.light_count(), roof.lamp_count() - dead, "one light a lamp, none for a dead one (DW1)")
 	assert_false(lamps.visible, "off until the graphics say")
 	for spot in lamps.lights():
 		assert_true(spot.shadow_enabled, "%s casts a shadow, so it never shines through a room's roof" % spot.name)
@@ -56,7 +57,10 @@ func test_every_lamp_gets_a_downward_shadowed_spot_under_its_lens() -> void:
 		assert_lt(spot.global_position.y, depot.roof_height, "under the roof")
 		assert_gt(spot.global_position.y, depot.roof_height - 2.0, "at the lamp, not down in the hall")
 		assert_almost_eq((spot.global_basis * Vector3.FORWARD).y, -1.0, 0.001, "shining straight down")
-		assert_eq(spot.light_bake_mode, Light3D.BAKE_STATIC, "baked into the bounce light, never updated per frame")
+	for i in roof.lamp_count():
+		var spot := lamps.light_of(i)
+		if spot != null and depot.roof_lamp_states[i] != MapData.LAMP_FLICKER:
+			assert_eq(spot.light_bake_mode, Light3D.BAKE_STATIC, "baked into the bounce light, never updated per frame")
 
 
 func test_near_and_far_light_the_whole_hall_and_shadow_near_or_all_of_it() -> void:
