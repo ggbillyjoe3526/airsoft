@@ -374,7 +374,7 @@ def shaft_boxes() -> list[tuple[list[float], str]]:
              [s["x0"], s["x0"] + t, y0, y1, s["z0"] + t, s["z1"] - t],
              [s["x1"] - t, s["x1"], y0, y1, s["z0"] + t, s["z1"] - t]]
     for a, b in zip(L.LIFTS, L.LIFTS[1:]):
-        walls.append([a["x1"], b["x0"], y0, y1, s["z0"] + t, s["z1"] - t])
+        walls.append([a["x1"], b["x0"], y0 + FT, y1, s["z0"] + t, s["z1"] - t])  # on the pit's floor
     doors = []
     for lf in L.LIFTS:
         mid = (lf["x0"] + lf["x1"]) / 2

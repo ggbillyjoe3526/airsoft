@@ -91,12 +91,12 @@ extends Resource
 	&"sofa": Color(0.42, 0.31, 0.48),
 	# Its hinged doors (DO1): bottle-green painted leaves, so a door reads apart from the plywood round it.
 	&"door": Color(0.22, 0.40, 0.27),
-	# Kingsmere's lifts (MT2, LiftView): a brushed-steel car, darker steel doors so a doorway reads shut, dark buttons
-	# lit amber while called, the car's ceiling strip.
+	# Kingsmere's lifts (MT2, LiftView): a painted steel car, darker steel doors so a doorway reads shut, dark buttons
+	# lit warm white while called (amber read as Beta's orange), the car's ceiling strip.
 	&"lift_car": Color(0.66, 0.67, 0.66),
 	&"lift_door": Color(0.43, 0.46, 0.48),
 	&"lift_button": Color(0.16, 0.16, 0.17),
-	&"lift_lit": Color(1.0, 0.68, 0.18),
+	&"lift_lit": Color(1.0, 0.96, 0.78),
 	&"lift_strip": Color(0.97, 0.96, 0.92),
 	# Woodland's concept 3 (WR1), off both team hues, from the palette: rubber tyres, a violet pickup, a thicket's core
 	# in the deep forest green, the shade between its spruces (WT1).

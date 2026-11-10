@@ -4,7 +4,7 @@ extends Node3D
 ## beside the door, a ceiling strip, its lamp and an interior reflection probe, as the shafts lie outside the areas'
 ## probes), drawn between ticks where the car rides; two steel leaves sliding apart in each landing's doorway (into the
 ## wall) and two in the car's front; a call button beside each landing door and the car's panel, a button and its
-## stop's name a stop, lit amber while that stop is called. The leaves are one MultiMesh and the buttons another (one
+## stop's name a stop, lit white while that stop is called. The leaves are one MultiMesh and the buttons another (one
 ## draw call each), each car one mesh of its own. Reads GameState.lifts each frame and moves only what changed;
 ## nothing here is read by the simulation (the colliders are MapLevel's). Built once; a frame allocates nothing.
 
