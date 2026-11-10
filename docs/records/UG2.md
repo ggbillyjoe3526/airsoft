@@ -1,73 +1,68 @@
-# UG2 · Rooflight sun: the roof shades the sun but at its rooflights, with shafts in the haze
+# UG2 · No sun indoors: Depot's hall lit by its lamps alone on High and Ultra
 
-**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
+**Review:** pending (attempt 3, after the owner's rework)
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-09 | 1 | thread | see Checks | Retry 7/8 | the shade and lamps didn't cover the hall past 70 m from the eye; Sun shadows off still shaded |
-| 2026-11-09 | 2 | thread | see Checks | Accept 8/8 | – |
+| 2026-11-09 | 2 | thread | see Checks | Accept 8/8 | – (then reworked at the owner's word, below) |
+| 2026-11-10 | 3 | thread | see Checks | pending | – |
 
 ## Goal
 
-Step 2 of the owner's Ultra push for the whole game (2026-11-09, `docs/records/UG1.md` › Goal): an indoor field's
-roof keeps the sun out except at its rooflights, so on Ultra the sun falls through them in strips and shows as shafts
-in the volumetric haze, while the roof lamps (UG1) light the rest of the hall.
+Step 2 of the owner's Ultra push for the whole game (2026-11-09, `docs/records/UG1.md` › Goal). Attempts 1 and 2 let
+the sun into Depot's hall at its rooflights, in strips and shafts. The owner then ruled (2026-11-10): "Why are there
+sun strips if there are no windows?", "Have the light sources cast realistic deep shadows", "Remove the sun light.
+There is no place for sun to get inside. This is just for depot as it is indoors only", and later "I like the look of
+the latest screenshots. Just not the long strips of sun light". So on a roofed field, High and Ultra light the hall
+with its lamps alone, with deep shadows, keeping the wide, soft lamp look of his 2026-11-10 picture.
 
 ## Approach
 
-- **A sun shade** (`RoofView._sun_shade`): one shadow-only mesh over the roof, slabs `shade_spans` wide, leaving a gap
-  `RoofConfig.rooflight_half` (0.8 m) either side of each line halfway between two trusses, where the bay model's
-  rooflight strips lie (`tools/blender/maps/roof_truss.py` › ROOFLIGHT). Over the ceiling slab, so it never shades
-  the sheet itself; out of the bounce light, as the roof is. Built only with the bay model and lamps.
-- **A thicker haze under the roof** (`RoofView._hall_haze`): a box FogVolume over the hall adding `shade_haze` (0.012)
-  to the volumetric fog's density, so the shafts read; the map's own fog (0.006) is too thin indoors.
-- **On Lamp light Far only** (Ultra): `RoofLamps.set_mode` shows both, the lamps shine `lamp_shaded_energy` (15)
-  instead of 11.5, and `key_share` keeps the sun at `shade_sun_share` (1.0) instead of dimming it, only while the
-  sun casts shadows: a shadow-only shade blocks nothing, so Custom with Sun shadows off falls back to Near's sun and
-  lamps (QA).
-- **The whole roof, from anywhere under it** (critic, attempt 1): shaded, every lamp is lit out to the roof's reach
-  (its diagonal and height, about 133 m on Depot, past Far's usual 70 m) and `apply_field` stretches the sun's shadow
-  distance so they reach it before their fade, so no part of the hall is shaded and unlit, or unshaded.
-  Near and Off hide them, as before. Shared code: any roofed map with the bay model gets it.
+- **No sun under the roof** (`RoofLamps.key_share`, `RoofConfig.lamp_sun_share` 0): while the lamps shine,
+  `FieldLighting.set_key_share` puts the sun out and hides it, so its shadow passes go too. Low and Medium keep the
+  overhead light as the lamps' stand-in (no real lamps there); an open field keeps its sun on every preset.
+- **Less sky light** (`RoofLamps.ambient_share`, `lamp_ambient_share` 0.3, `FieldLighting.set_ambient_share`): the
+  environment's ambient light (High's) drops, so shadows stay deep. On Ultra the bounce light (SDFGI) traces the sky
+  instead of using the ambient, so `RoofLamps` puts the roof's ceiling into it while the lamps shine
+  (GI_MODE_STATIC; out of it as before for the stand-in): the sky no longer lights the hall through the roof and the
+  lamps' light bounces off the ceiling.
+- **Every lamp lit over the whole hall** (`RoofLamps.reach`: the roof's diagonal and height, about 134 m on Depot,
+  at least `lamp_far`): with no sun, a lamp past the old 28 m / 70 m reach would leave the hall dark. Near (High)
+  shadows the lamps within `lamp_near` (28 m), Far (Ultra) every lamp.
+- **Removed** the first build's sun shade, hall haze, rooflight spans and sun-shadow stretch, and their tests
+  (`test_sun_shade`, `test_sun_shade_qa`); `roof_truss.py`, `test_gr2_qa` and `test_depot_hall` are back to main's.
 
-## Owner's change (2026-11-10)
+## Owner's changes (2026-11-10)
 
-- **Wider, softer lamps** (William: "the lamp lights are too focused … I can see the cone … more wider and diffused",
-  and "the shadows should still be dark, not filled in"): cone 36° to 50°, its edge falloff 0.6 to 0.35 (no rim on the
-  floor), the haze glow 0.6 to 0.3 (no cone in the haze), energy 26 to 11.5 (High) and 34 to 15 (Ultra, shaded), so
-  the hall keeps its brightness (Ultra 103/94, 79/77, 88/87, 120/118; High 105/97, 74/72) and the overlap stays low
-  enough that crate and figure shadows stay dark; wider cones (65°, 72°) at the same brightness filled the shadows in
-  and washed out the rooflight strips. Picture: `art/graphics/ug2/6-depot-wider-softer-lamps.jpg`.
+- **Wider, softer lamps** ("the lamp lights are too focused … I can see the cone … more wider and diffused", and
+  "the shadows should still be dark, not filled in"): cone 36° to 50°, its edge falloff 0.6 to 0.35 (no rim on the
+  floor); wider cones (65°, 72°) filled the shadows in. Picture: `art/graphics/ug2/6-depot-wider-softer-lamps.jpg`.
+- **No sun indoors** (above). With the sun gone the lamps carry the whole hall: energy 11.5 to 28 and their glow on
+  the haze 0.3 to 0.12 (the same glow as before in absolute terms, so no cone shows in the haze).
 
 ## Defaults taken
 
-- Far only, not High: Near lights only the lamps within 28 m, so with the sun shaded the hall past that would go dark.
-- (Before the owner's change above) lamp energy 34 and haze 0.012 from trial renders at Ultra: against UG1's Ultra (sun at 55 %, lamps 26, no shade),
-  the same four cameras measure 94/95, 77/74, 87/80 and 118/104 in mean brightness (about 7 % brighter overall, the
-  corner view most, with every lamp lit and the haze); walls right under a lamp brighter. Haze 0.02 washed out the
-  hall's far end, against the 65 m sight line's readability.
-- The rooflight panels themselves are drawn as before (opaque, lilac); a glowing rooflight is left for step 4.
-- The sky's ambient light still reaches under the roof (the shade is out of the bounce light, as UG1 left the roof),
-  so the shaded floor reads slightly blue; step 4's bounce-light work revisits it (`docs/KNOWN_ISSUES.md`).
-- `RoofConfig.rooflight_half` copies `roof_truss.py`'s ROOFLIGHT (each says so); the gaps assume the bay is one truss
-  step wide, as RoofView lays it.
+- Energy 28 from trial renders at Ultra (11.5, 17, 20, 26, 32): the floor and crates near the eye match the owner's
+  liked picture; the upper hall and roof read darker than in it, because the sun lit them there. 32 blew out crate
+  tops under the lamps. Step 3 (eye adaptation) lifts a dim hall's exposure the way eyes do.
+- Ambient share 0.3 on High: at 0.5 the sky's blue ambient filled the shadows.
+- Depot's bake (Baked light, `tools/bake_light.gd`) is left as it is: Medium still has the sun it was baked for.
+  On High and Ultra it still carries the sun's one bounce (`docs/KNOWN_ISSUES.md`); step 5 replaces it.
+- On High the lamps past 28 m are lit without shadows, so a far one can light a little through a room's roof; shadowing
+  all 93 on High would cost Ultra's frame time (`docs/KNOWN_ISSUES.md`).
+- The rooflight panels in the roof model stay as drawn (DH1's model, pale panels, not glowing).
 
 ## Checks
 
-- gdlint clean; `test_sun_shade` 6/6 (spans, gaps on the rooflights, Far shows and Near hides, none with Sun shadows
-  off, the lamps and sun shadows over the whole roof, no shade without the bay model) and QA's `test_sun_shade_qa` 6/6;
-  `test_lamp_lights`, `test_lamp_lights_qa`, `test_depot_hall`, `test_graphics_apply`, `test_night_light_qa` and
-  `test_torch` pass; CI runs the whole suite (see the pull request).
-- Before/after renders (Ultra, same cameras, Sunlit Concrete light; the fourth from one corner of the hall to the far
-  one, even to the far end): `/mnt/project-files/art/graphics/ug2/`.
+- gdlint clean; `test_lamp_lights` (the sun goes out and comes back, the sky's light, the ceiling in the bounce light,
+  every lamp lit over the hall), `test_lamp_lights_qa`, `test_depot_hall`, `test_graphics_apply`, `test_gr2_qa`,
+  `test_night_light_qa`, `test_torch`, `test_look` and `test_baked_light` pass; CI runs the whole suite.
+- Renders (Ultra and High, no sun, the hall and the West tunnel with the yard outside): `/mnt/project-files/art/graphics/ug2/`.
 
 ## Known issues left
 
-- Frame cost on Ultra is unmeasured (no GPU in the cloud): the shade (one more caster for the sun's four splits), the
-  haze volume, all 93 lamps lit and the sun's shadows stretched to about 166 m (coarser near splits). The owner's
-  check is in the playtest list. Performance's ranking if it is too dear: cap the lamps' shadows (not their light) by
-  distance, then shorten the sun's stretch, then a cheaper lamp filter than Softest's. The stretch takes the sun's
-  shadows past the Shadow range row's own 120 m, on Far with the shade only (an exception, `data/graphics.md`).
-  The blue shade and missing purlin shadows: `docs/KNOWN_ISSUES.md`.
+- Frame cost on Ultra is unmeasured (no GPU in the cloud): all 93 lamps lit and shadowed, but the sun's shadow passes
+  gone. The owner's check is in the playtest list.

@@ -98,6 +98,18 @@ func test_the_sun_goes_out_indoors_while_the_lamps_shine_and_comes_back() -> voi
 	assert_almost_eq(lighting.environment.ambient_light_energy, sky, 0.001)
 
 
+func test_the_ceiling_keeps_the_sky_out_of_the_bounce_light_while_the_lamps_shine() -> void:
+	var roof := _roof()
+	var ceiling := roof.get_node("Ceiling") as GeometryInstance3D
+	assert_eq(ceiling.gi_mode, GeometryInstance3D.GI_MODE_DISABLED, "the sky lights the hall for the stand-in")
+	roof.lamp_lights().set_mode(GraphicsQuality.LampLights.FAR, false)
+	assert_eq(ceiling.gi_mode, GeometryInstance3D.GI_MODE_STATIC, "the roof blocks the sky in Ultra's bounce light")
+	roof.lamp_lights().set_mode(GraphicsQuality.LampLights.NEAR, false)
+	assert_eq(ceiling.gi_mode, GeometryInstance3D.GI_MODE_STATIC)
+	roof.lamp_lights().set_mode(GraphicsQuality.LampLights.OFF, false)
+	assert_eq(ceiling.gi_mode, GeometryInstance3D.GI_MODE_DISABLED)
+
+
 func test_an_open_field_keeps_its_sun() -> void:
 	var lighting := FieldLighting.build(LightingConfig.new())
 	add_child_autofree(lighting)

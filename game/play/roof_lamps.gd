@@ -6,7 +6,8 @@ extends Node3D
 ## node is hidden and the preset's overhead light stands in for the lamps alone, as on Low and Medium. While they shine
 ## the hall is lit by its lamps only (owner, 2026-11-10: no sun gets indoors): FieldLighting.set_key_share puts the sun
 ## out (`key_share`, RoofConfig.lamp_sun_share) and set_ambient_share turns the sky's light under the roof down
-## (`ambient_share`), so their shadows stay deep. Near (High) shadows the lamps within `lamp_near` m, Far (Ultra) all.
+## (`ambient_share`), so their shadows stay deep; the ceiling joins the scene's bounce light (Ultra's SDFGI), so the
+## sky no longer lights the hall through it. Near (High) shadows the lamps within `lamp_near` m, Far (Ultra) all.
 ## Built once with the roof; `set_mode` only sets what changes. Look only.
 
 var _cfg: RoofConfig = null
@@ -16,15 +17,20 @@ var _soft: bool = false
 ## How far (m) the roof reaches from any point under it (its area's diagonal and height): every lamp is lit that far
 ## from the eye, so no part of the hall goes unlit without the sun.
 var _cover: float = 0.0
+## The roof's ceiling: in the bounce light while the lamps shine, out of it (the sky's light falling through) while the
+## overhead light stands in for them.
+var _ceiling: GeometryInstance3D = null
 
 
 ## A light under each of `spots` (each lamp's lowest point), as `cfg` sets them, all off; `cover` is how far the roof
-## reaches from any point under it.
-static func build(spots: Array[Vector3], cfg: RoofConfig, cover: float = 0.0) -> RoofLamps:
+## reaches from any point under it; `ceiling` the roof's ceiling, put in the bounce light while they shine.
+static func build(spots: Array[Vector3], cfg: RoofConfig, cover: float = 0.0,
+		ceiling: GeometryInstance3D = null) -> RoofLamps:
 	var lamps := RoofLamps.new()
 	lamps.name = "LampLights"
 	lamps._cfg = cfg
 	lamps._cover = cover
+	lamps._ceiling = ceiling
 	lamps.visible = false
 	var down := Basis(Vector3.RIGHT, -PI * 0.5)
 	for i in spots.size():
@@ -87,6 +93,9 @@ func set_mode(wanted: GraphicsQuality.LampLights, soft: bool) -> void:
 	var on := wanted != GraphicsQuality.LampLights.OFF
 	if visible != on:
 		visible = on
+	var gi := GeometryInstance3D.GI_MODE_STATIC if on else GeometryInstance3D.GI_MODE_DISABLED
+	if _ceiling != null and _ceiling.gi_mode != gi:
+		_ceiling.gi_mode = gi
 	if not on or (wanted == _mode and soft == _soft):
 		_mode = wanted
 		return

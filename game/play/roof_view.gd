@@ -43,7 +43,8 @@ static func build(map: MapData, cfg: RoofConfig) -> RoofView:
 	view._mesh.name = "Ceiling"
 	view._mesh.mesh = st.commit()
 	view._mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	# Out of the bounce light too, so the sky's light still reaches the hall as the roof lamps' would.
+	# Out of the bounce light too, so the sky's light still reaches the hall as the roof lamps' would; RoofLamps puts it
+	# in while the real lamps shine (no sky indoors).
 	view._mesh.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 	# In the shared light (docs/ART.md › Light): its underside takes the look's shade and the bounce off the floor.
 	var mat := LookMaterials.vertex_colour(cfg.roughness, 0.0)
@@ -56,7 +57,7 @@ static func build(map: MapData, cfg: RoofConfig) -> RoofView:
 		var spots: Array[Vector3] = []
 		view._lamps = view._lamp_view(map, cfg, bay != null, spots)
 		view.add_child(view._lamps)
-		view._lights = RoofLamps.build(spots, cfg, Vector3(area.size.x, y, area.size.y).length())
+		view._lights = RoofLamps.build(spots, cfg, Vector3(area.size.x, y, area.size.y).length(), view._mesh)
 		view.add_child(view._lights)
 	return view
 

@@ -80,7 +80,8 @@ never stops the game from starting.
 - **Lamp light** makes an indoor field's roof lamps (Depot's hall) real lights, each casting its own shadow, and the
   hall is lit by them alone (owner, 2026-11-10: no sun gets indoors): while they shine the preset's overhead sun goes
   out (`RoofConfig.lamp_sun_share`, none, and hidden, so its shadow passes go too) and the sky's ambient light keeps
-  `lamp_ambient_share` of itself, so their shadows stay deep. Pools under each lamp, shadows thrown out from under it,
+  `lamp_ambient_share` of itself, and the roof's ceiling joins the bounce light (Ultra's Scene GI traces the sky
+  instead), so their shadows stay deep. Pools under each lamp, shadows thrown out from under it,
   light on the haze. Both Near (High) and Far (Ultra) light every lamp over the whole roof (`RoofLamps.reach`);
   Near shadows only the lamps within `lamp_near` m of you, Far all of them. Their shadows follow the shadow rows:
   Shadow detail is their atlas, Softness their filter (Softest gives each the lens's size, so its shadows harden at
