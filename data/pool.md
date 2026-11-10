@@ -101,10 +101,10 @@ config; owner, 2026-10-04).
 To add a higher spec battery for every electric replica, take the next free ID and add a row to Power sources:
 
 ```
-| 000026 | High Output Battery | battery | electric | dev |
+| 000027 | High Output Battery | battery | electric | dev |
 ```
 
-Then add a row to stats.md's Power sources table saying what it does (`| 000026 | High Output Battery | 0 | 25 | 0 |`
+Then add a row to stats.md's Power sources table saying what it does (`| 000027 | High Output Battery | 0 | 25 | 0 |`
 gives 25 % more rate of fire), and its Name to a level's Unlocks in levels.md (say level 11, raising the cap). Its
 Access says `dev`, so it shows only with Dev content on while you try it out. Change it to `public` and it is
 everyone's at its level; once unlocked it shows in the Power row of every replica tagged `electric`.
@@ -149,6 +149,7 @@ The cases an Extraction run places (M44, dev content for now). Each run's seed p
 | 000002 | AEG Rifle | aeg | rifle, electric, aeg-mag, top-rail, under-rail, side-rail, barrel-mount, muzzle-thread | | public |
 | 000019 | Cyber Pistol | cyber | pistol, built-in-power | | public |
 | 000021 | Sniper Rifle | sniper | rifle, spring, top-rail, under-rail, muzzle-thread | 2x Scope | public |
+| 000026 | Compact SMG | smg | rifle, electric, top-rail, side-rail, muzzle-thread | | dev |
 
 ### Power sources
 

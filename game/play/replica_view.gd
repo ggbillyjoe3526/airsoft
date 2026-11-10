@@ -32,6 +32,7 @@ const SLIDE_LOCK_POWER := &"gas"
 ## One replica's drawn model and the points on it the view needs.
 class Held:
 	extends RefCounted
+	## The Key of the replica it is drawn as (ReplicaConfig.model_id): its model, hold and pose.
 	var id: StringName = &""
 	var root: Node3D = null
 	var anim: AnimationPlayer = null
@@ -481,7 +482,8 @@ func _seek(held: Held, clip: StringName, share: float) -> void:
 
 func _load(r: ReplicaConfig, paint: StringName, realistic: bool, parts: Dictionary) -> Held:
 	var held := Held.new()
-	held.id = r.id
+	# Drawn, held and posed as its model's replica (a stand-in model's, CS1).
+	held.id = r.model_id()
 	# A bolt-action replica's cycle stretched to its ready time with its parts (the loadout's stats carry them; row 19).
 	if r.bolt_action and r.fire_rate > 0.0:
 		held.fire_speed = _cfg.bolt_cycle_end * r.fire_rate
@@ -489,13 +491,13 @@ func _load(r: ReplicaConfig, paint: StringName, realistic: bool, parts: Dictiona
 	held.root.name = "Held_%s" % r.id
 	held.root.visible = false
 	add_child(held.root)
-	var scene := load(MODEL_DIR + r.id + ".glb") as PackedScene
+	var scene := load(MODEL_DIR + held.id + ".glb") as PackedScene
 	if scene == null:
 		push_warning("ReplicaView: no model for replica %s" % r.id)
 		return held
 	var model := scene.instantiate() as Node3D
 	held.root.add_child(model)
-	held.fit = ReplicaParts.fit(model, r.id, parts)
+	held.fit = ReplicaParts.fit(model, held.id, parts)
 	held.grip = StringName(parts.get(ReplicaParts.GRIP_SLOT, &""))
 	ReplicaPaint.apply(model, paint, realistic)
 	held.anim = model.find_child("AnimationPlayer", true, false) as AnimationPlayer

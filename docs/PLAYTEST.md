@@ -1240,6 +1240,23 @@ Bugs the browser game had and fixed; a bug pass checks the rebuild doesn't bring
   Under Reduced motion the flames stay still.
 - [ ] **Frame rate.** Low and Ultra by the Truck bend at night.
 
+## The Compact SMG (CS1)
+
+Dev content: tick Settings › Dev › Dev content (or Disable levelling), then pick it as your primary. It looks like the
+AEG Rifle until its own model.
+
+- [ ] **The trigger.** A full magazine on full auto runs dry in about 2.5 s, clearly quicker than the AEG's; the
+  reload and the draw are quicker too. Semi and full auto only, no burst; on Depot it starts on semi (B for full auto).
+- [ ] **On your feet.** Running and sprinting with it feel a little quicker than with the AEG, still slower than with
+  your replica holstered.
+- [ ] **On the move.** Strafe and shoot at a target 10 m away: the BBs land much closer together than the AEG's on the
+  move. From the hip standing still they group about as the AEG's; with the sight up, a little wider.
+- [ ] **Reach.** At 35 m and beyond the BBs drop and spread more than the AEG's; the Loadout's on-target figure reads
+  about 27 m as it comes.
+- [ ] **Bots.** With Dev content on, some bots carry it (the Breacher kit, with a red dot). Do they feel dangerous up
+  close and weak at range?
+- [ ] **Sound.** Its buzz sounds smaller and quicker than the AEG's (a stand-in until you record one).
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

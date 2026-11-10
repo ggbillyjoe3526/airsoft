@@ -19,8 +19,9 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 ## A shot's power part (the motor's whir, the gas's pop and hiss, the spring's twang) plays at its power source's gain
 ## in power_gains, or power_gain for one not listed. The rendered motor sits about 11 dB under its shot, the gas's 4 dB
 ## and the spring's 7 dB, so each is lifted to be heard over a firefight at full Power volume (owner, 2026-11-01: AU1).
+## The Compact SMG's own profile (CS1) is its smaller motor, lifted as the AEG's.
 @export var power_gain: float = 2.5
-@export var power_gains: Dictionary[StringName, float] = {&"electric": 4.0, &"gas": 2.2, &"spring": 2.5}
+@export var power_gains: Dictionary[StringName, float] = {&"electric": 4.0, &"gas": 2.2, &"spring": 2.5, &"smg": 4.0}
 ## Dev › Lasers' shot (LZ1, LASER_CUE in SimAudio) plays alone, in place of the shot and its power part, at this gain:
 ## the owner's pick (B, the pew) of three mixes of free laser effects he sent, five variants (tools/laser_sound.py).
 @export var laser_gain: float = 1.0

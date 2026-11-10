@@ -2,7 +2,8 @@ class_name Accuracy
 ## Accuracy by stance and movement (the browser game's sim/accuracy.ts): how much a character's state scales its
 ## replica's spread. Holding still, crouching above all, is steady, and steadier the longer you hold; moving, jumping,
 ## firing on the run in a sprint and the moments after one are not; the sight raised to the eye tightens it (M84), and
-## the more for a replica with a hip spread (ReplicaConfig.hip_spread, SN1).
+## the more for a replica with a hip spread (ReplicaConfig.hip_spread, SN1). A compact replica swings less on the move
+## (ReplicaConfig.move_spread, CS1).
 ## Bots and the player follow the same rule.
 
 ## Summed tick lengths drift below round numbers (9 × 1/60 < 0.15): keeps the delay a whole number of ticks.
@@ -23,12 +24,16 @@ static func target_spread_scale(c: Character, cfg: MovementConfig, a: AccuracyCo
 		move = 1.0 + (a.walk - 1.0) * (speed - a.still_below) / (cfg.walk_speed - a.still_below)
 	else:
 		move = a.walk + (a.run - a.walk) * minf(1.0, (speed - cfg.walk_speed) / (cfg.run_speed - cfg.walk_speed))
+	# A compact replica takes only its move_spread share of what moving adds (CS1); holding still is as steady.
+	var r := c.armament.replica() if c.armament != null else null
+	if move > 1.0 and r != null:
+		move = 1.0 + (move - 1.0) * r.move_spread
 	# Crouching steadies a still shooter fully, a moving one less (audit SIM-10).
 	var moving := clampf((speed - a.still_below) / (cfg.crouch_speed - a.still_below), 0.0, 1.0)
 	var crouched := a.crouched + (a.crouched_moving - a.crouched) * moving
 	var aimed := 1.0 + (a.aimed - 1.0) * c.aim_raise
-	# A replica with a hip spread (the Sniper Rifle) is that much wider with the sight down, less as it comes up.
-	var r := c.armament.replica() if c.armament != null else null
+	# A replica with a hip spread (the Sniper Rifle) is that much wider with the sight down, less as it comes up; one
+	# under 1 (the Compact SMG, CS1) that much tighter.
 	var hip := 1.0 + ((r.hip_spread if r != null else 1.0) - 1.0) * (1.0 - c.aim_raise)
 	return move * (1.0 + (crouched - 1.0) * c.crouch_amount) * aimed * hip
 
