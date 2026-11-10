@@ -421,7 +421,8 @@ func test_each_paint_is_built_once_and_a_replica_has_one_picture() -> void:
 	page.pictures().texture(&"aeg", &"cobalt", false)
 	assert_same(ReplicaPaint.materials(&"cobalt", false)[0], first, "the same paint asked again builds nothing")
 	assert_eq(page.pictures().count(), 4, "the rifle, the pistol, the Cyber Pistol and the Sniper Rifle")
-	assert_eq(ReplicaPaint.materials(&"cobalt", true)[1].albedo_color, ReplicaSchemes.colours(&"cobalt", true)[1],
+	assert_eq(ReplicaPaint.materials(&"cobalt", true)[1].albedo_color,
+			ReplicaPaint.drawn(ReplicaSchemes.colours(&"cobalt", true)[1]),
 			"Realistic colours: the plain family")
 	assert_eq(ReplicaPaint.materials(ReplicaSchemes.OWN, false).size(), 0, "the Cyber Pistol keeps the model's own")
 
@@ -443,7 +444,7 @@ func test_the_painted_model_wears_the_five_colours_and_hides_the_figure() -> voi
 				seen[own.resource_name] = over.albedo_color
 	var colours := ReplicaSchemes.colours(&"signal", false)
 	for i in ReplicaSchemes.PARTS.size():
-		assert_eq(seen.get(String(ReplicaSchemes.PARTS[i])), colours[i], String(ReplicaSchemes.PARTS[i]))
+		assert_eq(seen.get(String(ReplicaSchemes.PARTS[i])), ReplicaPaint.drawn(colours[i]), String(ReplicaSchemes.PARTS[i]))
 
 
 func test_every_replica_picture_sits_inside_its_card_clear_of_its_lines_at_any_size() -> void:

@@ -1,10 +1,10 @@
 class_name ArmoryDots
 extends Control
 ## The Armory's level track (UI concept B v2 `armory.png`): a dot for the starting kit and each level along one line, the
-## line teal up to the player's level and on into the next by the share of its XP earned; the reached dots filled teal,
+## line accent up to the player's level and on into the next by the share of its XP earned; the reached dots filled accent,
 ## the next one large and white, the rest rings. KIT and the level numbers sit under them. A click on a dot sends
 ## `level_picked`, so the cards under it can show that level, and marks that dot picked: a white ring round it and its
-## label in teal under a teal bar (owner, 2026-11-03), until another dot is clicked. It takes keyboard and controller
+## label in accent under an accent bar (owner, 2026-11-03), until another dot is clicked. It takes keyboard and controller
 ## focus too (BP6): left and right (ui_left, ui_right) pick the dot beside the picked one (the next level's first), and
 ## the theme's focus ring shows round the track while it has focus.
 
@@ -21,7 +21,7 @@ const LABEL_GAP := 10.0
 ## The room kept at each end, so the end dots and their labels sit inside.
 const END_ROOM := 16.0
 const RING_COLOUR := Color(1.0, 1.0, 1.0, 0.35)
-const FACE := Color(0.06, 0.07, 0.1, 1.0)
+const FACE := GameTheme.BG
 ## The picked dot: the ring round it (its gap outside the dot and its width), and the bar under its label (width, height,
 ## gap under the label).
 const PICKED_GAP := 4.0

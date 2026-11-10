@@ -672,7 +672,7 @@ func _tile(paint: StringName) -> MenuCard:
 	swatch.custom_minimum_size = Vector2(0.0, SWATCH_HEIGHT)
 	for i in 2:
 		var c := ColorRect.new()
-		c.color = colours[i]
+		c.color = ReplicaPaint.drawn(colours[i])
 		c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		swatch.add_child(c)

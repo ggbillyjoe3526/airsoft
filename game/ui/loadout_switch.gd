@@ -13,7 +13,7 @@ signal picked(id: String)
 ## It closed, by a pick or with nothing changed (the page puts the keyboard back on SWITCH REPLICA).
 signal closed
 
-## The shade (the page colour, this opaque), the panel's width, its padding and the teal rule on top (px at 1080p).
+## The shade (the page colour, this opaque), the panel's width, its padding and the accent rule on top (px at 1080p).
 const SHADE_ALPHA := 0.72
 const WIDTH := 1120.0
 const PAD := Vector2i(36, 30)

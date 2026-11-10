@@ -48,7 +48,7 @@ right (hover for the details). Under them a track has a dot for the starting kit
 level and on into the next by the XP you have earned.
 
 Below the track are four level cards, starting at your level. Each card shows its items with their pictures (hover an
-item to see what it does), marked **UNLOCKED**, **NEXT** (edged in teal: the next level with something new) or with
+item to see what it does), marked **UNLOCKED**, **NEXT** (edged in the accent colour: the next level with something new) or with
 the XP that reaches it. Browse the levels with the arrows at the top right, or click a dot on the track: the dot you
 clicked is ringed and its level's card is edged in white. With the keyboard or a controller, move the focus to the
 track and press left or right to pick the level beside it.

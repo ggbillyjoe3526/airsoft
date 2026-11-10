@@ -7,8 +7,8 @@ const HEADING_GAP := 16
 const UNUSED_ALPHA := 0.4
 const UNUSED_TAG_SIZE := 12
 const UNUSED_TAG_GAP := 14
-## The glow behind a replica's picture (the concept's radial gradient from #27406b to the card colour).
-const GLOW := Color("27406b")
+## The glow behind a replica's picture: a radial gradient from warm grey to the card colour (SL4).
+const GLOW := Color("3b3934")
 const GLOW_CENTRE := Vector2(0.5, 0.6)
 const GLOW_REACH := 0.7
 const GLOW_SIZE := 64

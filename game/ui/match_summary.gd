@@ -195,9 +195,9 @@ func foot_text() -> String:
 	return _foot.text
 
 
-## A summary panel's box: navy with a thin edge, as the XP card's.
+## A summary panel's box: dark with a thin edge, as the XP card's.
 static func panel_box() -> StyleBoxFlat:
-	return HudStyle.navy_box(BACKING, GameTheme.LINE, PAD.x, PAD.y)
+	return HudStyle.dark_box(BACKING, GameTheme.LINE, PAD.x, PAD.y)
 
 
 ## A column inside `parent`.

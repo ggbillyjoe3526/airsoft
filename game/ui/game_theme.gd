@@ -2,9 +2,10 @@ class_name GameTheme
 ## The game's one look for menus and the HUD (docs/ART.md): Inter in four weights for every number and body line, with
 ## the "marks" faces as the fallback for the arrows and ticks the main faces lack, and Barlow Condensed for the menus'
 ## headings, tabs, rail and main buttons in words (assets/fonts/; never a number: the owner finds Barlow's figures hard
-## to read, 2026-10-07). The palette is UI concept B's (owner, 2026-11-02; docs/records/UR1.md): frosted glass panels
-## over the blurred field (MenuBackdrop), white words and one teal accent for the main button and the selection, never
-## a team (the team colours are the HUD's own).
+## to read, 2026-10-07). The layout is UI concept B's (owner, 2026-11-02; docs/records/UR1.md): glass panels over the
+## blurred field (MenuBackdrop). The colours are Sunlit Concrete's (owner, 2026-11-09; docs/records/SL4.md): charcoal
+## panels, off-white words and one bone accent for the main button and the selection, so the team colours are the only
+## strong colours on screen (the HUD's own).
 
 const FONT_DIR := "res://assets/fonts/"
 ## Sizes (px at 1080p; the window scales canvas items).
@@ -18,26 +19,30 @@ const TAB_SIZE := 20
 const HEADING_SIZE := 18
 const MAIN_BUTTON_SIZE := 32
 
-## The palette (concept B, b2.html): the night ink under everything, the glass panel, a card and a lit card on it,
-## the hairline, and white words at three strengths; the teal accent and the ink on it.
-const BG := Color("0b0e15")
-const PANEL := Color(0.063, 0.071, 0.102, 0.74)
-const CARD := Color(1.0, 1.0, 1.0, 0.06)
-const CARD_HI := Color(1.0, 1.0, 1.0, 0.12)
-const LINE := Color(1.0, 1.0, 1.0, 0.12)
-const TEXT := Color("ffffff")
-const MUTED := Color(1.0, 1.0, 1.0, 0.62)
-const DIM := Color(1.0, 1.0, 1.0, 0.36)
-const ACCENT := Color("25d0b8")
-const ACCENT_INK := Color("05201c")
+## The palette (Sunlit Concrete, SL4): the charcoal under everything, the panel, a card and a lit card on it, the
+## hairline, and off-white words at three strengths; the bone accent and the charcoal ink on it.
+const BG := Color("131311")
+const PANEL := Color(0.078, 0.076, 0.071, 0.82)
+const CARD := Color(0.95, 0.93, 0.89, 0.06)
+const CARD_HI := Color(0.95, 0.93, 0.89, 0.12)
+const LINE := Color(0.95, 0.93, 0.89, 0.12)
+const TEXT := Color("f2eee6")
+const MUTED := Color(0.95, 0.93, 0.9, 0.62)
+const DIM := Color(0.95, 0.93, 0.9, 0.36)
+## The deepest charcoal: the rail and the shades laid over the match or a page.
+const DEEP := Color("0c0c0b")
+## A raised dark plate drawn whole (a notice, a report box, the Armory's picked card): a step lighter than BG.
+const PLATE := Color("1f1e1b")
+const ACCENT := Color("d8ccb2")
+const ACCENT_INK := Color("1b1a17")
 ## Signal yellow, for warnings and the flags only (a low magazine, THEIR FLAG IS GOING UP!, a flag's marker), never as a
-## theme colour (UR1).
-const WARN := Color("ffd23f")
+## theme colour (UR1); a little quieter in Sunlit Concrete.
+const WARN := Color("ecc246")
 ## Words on WARN (a flag's letter).
 const WARN_INK := Color("1a1608")
 ## Better and worse (the Loadout's Performance sheet).
-const GOOD := Color("5fd08a")
-const BAD := Color("ff7a6b")
+const GOOD := Color("78c08c")
+const BAD := Color("e88271")
 
 ## Letter spacing in em (the concept's `letter-spacing`).
 const SPACING_HEADING := 0.08
@@ -61,7 +66,7 @@ const MAIN_MARGIN_Y := 18
 const SLIDER_HEIGHT := 6
 const SLIDER_GRABBER := 18
 const SCROLL_WIDTH := 10
-## The main button's variation of Button (PLAY, CUSTOMISE: a rounded teal plate).
+## The main button's variation of Button (PLAY, CUSTOMISE: a rounded accent plate).
 const MAIN_BUTTON := &"MainButton"
 ## The quiet text button's variation (a plain link: Licences, Quit).
 const LINK_BUTTON := &"QuietLink"
@@ -272,7 +277,7 @@ static func _add_buttons(t: Theme) -> void:
 		t.set_color("font_hover_pressed_color", type, TEXT)
 		t.set_color("font_disabled_color", type, DIM)
 		t.set_font("font", type, spaced_font(700, SPACING_TAB, BODY_SIZE))
-	# The main button: a rounded teal plate, lighter under the pointer; the focus a white ring round it.
+	# The main button: a rounded accent plate, lighter under the pointer; the focus a white ring round it.
 	t.set_type_variation(MAIN_BUTTON, "Button")
 	for state: String in ["normal", "hover", "pressed", "hover_pressed", "disabled", "focus"]:
 		var fill := ACCENT
@@ -335,7 +340,7 @@ static func focus_box() -> StyleBoxFlat:
 
 
 ## The focus outline drawn just outside a control (a white pill's tab or choice), so it lies on the dark round it and
-## not on the white, where teal would hardly show.
+## not on the white, where accent would hardly show.
 static func focus_ring_out() -> StyleBoxFlat:
 	var s := focus_box()
 	s.set_expand_margin_all(FOCUS_BORDER + 1)
