@@ -1,12 +1,12 @@
 // A scope's glass in your hands at the hip (OpticGlass, BP8, the owner): clear glass you see through. The glass's camera
-// draws the field behind the disc at the main view's own scale (no magnification, your replica left out), so the lens
-// shows what really lies behind it, lined up with the view round it; lightly tinted, with a soft reflection across it
-// and the sheen at its edge, so it reads as glass. No reticle, and no screen copy (as optic_glass.gdshader). On Low
-// (`see_through` off) no camera draws: the glass is a still tint, `still_colour`, under the same reflection.
+// looks straight down the scope's own axis at the main view's own scale (no magnification, your replica left out), so
+// the lens shows what lies directly in front of the scope (SG1, the owner); lightly tinted, with a soft reflection
+// across it and the sheen at its edge, so it reads as glass. No reticle, and no screen copy (as optic_glass.gdshader).
+// On Low (`see_through` off) no camera draws: the glass is a still tint, `still_colour`, under the same reflection.
 shader_type spatial;
 render_mode unshaded, cull_back, depth_draw_never, shadows_disabled, fog_disabled;
 
-// The view behind the glass: a square picture centred on the glass, `span` screen heights across.
+// The view through the glass: a square picture centred on the glass, `span` screen heights across.
 uniform sampler2D glass : filter_linear, repeat_disable;
 uniform vec2 centre_uv = vec2(0.5);
 uniform float span = 0.25;

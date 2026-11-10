@@ -33,7 +33,7 @@ extends Resource
 @export var glass_margin: float = 1.15
 @export var glass_share: float = 0.25
 ## At the hip a scope's glass (one that magnifies) reads as clear glass you see through (BP8, the owner): the field
-## behind it, unmagnified, tinted `hip_glass_tint` with a soft reflection `hip_glass_shine` strong;
+## straight ahead of the scope, unmagnified, tinted `hip_glass_tint` with a soft reflection `hip_glass_shine` strong;
 ## its magnified picture and reticle show only with the sight raised.
 @export var hip_glass_tint: Color = Color(0.8, 0.87, 0.92)
 @export var hip_glass_shine: float = 0.22
@@ -43,6 +43,10 @@ extends Resource
 ## sky-grey, so the glass reads as clear glass catching the sky rather than a dark lens cap.
 @export var hip_glass_camera_from: GraphicsQuality.MeshDetail = GraphicsQuality.MeshDetail.MEDIUM
 @export var hip_glass_still: Color = Color(0.68, 0.74, 0.8)
+## The hip glass looks straight down the scope's own axis (SG1, the owner), from where the axis passes nearest the eye,
+## but at most this far from the eye (m): inside the body's radius (BodyConfig.radius, 0.32 m) less the near plane,
+## so the glass never looks out past a wall the eye stands against. At the hip the axis passes about 0.2 m away.
+@export var hip_glass_eye_reach: float = 0.25
 ## How far the replica lags behind a turn (m per rad of turn), at most sway_max, springing back at return_rate (1/s).
 @export var sway_per_radian: float = 0.05
 @export var sway_max: float = 0.035

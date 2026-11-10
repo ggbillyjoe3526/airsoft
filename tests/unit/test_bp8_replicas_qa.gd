@@ -313,7 +313,7 @@ func test_aimed_after_the_hip_the_camera_is_perspective_again_with_the_views_own
 	var held: ReplicaView.Held = hands._held[0]
 	var glass := hands._glass
 	glass.update(held.window, 0.0)
-	assert_eq(glass._camera.projection, Camera3D.PROJECTION_FRUSTUM)
+	assert_eq(glass._camera.projection, Camera3D.PROJECTION_PERSPECTIVE, "the hip glass looks down the axis (SG1)")
 	held.root.position = Vector3(0.0, 0.0, ViewModelConfig.new().aim_forward[&"aeg"]) - held.rear_sight
 	glass.update(held.window, 1.0)
 	assert_eq(glass._camera.projection, Camera3D.PROJECTION_PERSPECTIVE)
@@ -366,7 +366,7 @@ func test_a_disc_behind_the_eye_or_off_screen_leaves_finite_values_and_no_drawin
 	glass.update(null, 0.0)
 
 
-func test_a_wide_eye_that_keeps_its_width_still_maps_each_pixel_through_the_glass() -> void:
+func test_a_wide_eye_that_keeps_its_width_still_shows_the_glass_at_the_views_own_scale() -> void:
 	var host := SubViewport.new()
 	host.size = Vector2i(1280, 540)
 	add_child_autofree(host)
@@ -374,20 +374,19 @@ func test_a_wide_eye_that_keeps_its_width_still_maps_each_pixel_through_the_glas
 	var held: ReplicaView.Held = hands._held[0]
 	var glass := hands._glass
 	var eyes := glass._eyes
-	eyes.keep_aspect = Camera3D.KEEP_WIDTH
-	for at: Vector3 in [HIP_AT, Vector3(-0.25, 0.1, -0.35)]:
-		held.root.position = at
-		glass.update(held.window, 0.0)
-		var m := held.window.hip_material
-		var screen := host.get_visible_rect().size
-		assert_almost_eq(float(m.get_shader_parameter(&"aspect")), screen.x / screen.y, 1e-4, "aspect of this window")
-		var centre_uv: Vector2 = m.get_shader_parameter(&"centre_uv")
-		var span: float = m.get_shader_parameter(&"span")
-		var q := centre_uv * screen + Vector2(5.0, -3.0)
-		var point := eyes.project_position(q, 8.0)
-		var picture := glass._camera.unproject_position(point) / Vector2(glass._port.size)
-		var shown := (centre_uv + (picture - Vector2(0.5, 0.5)) * span / Vector2(screen.x / screen.y, 1.0)) * screen
-		assert_almost_eq(shown, q, Vector2.ONE * 0.5, "%s: KEEP_WIDTH eye" % at)
+	for keep: Camera3D.KeepAspect in [Camera3D.KEEP_HEIGHT, Camera3D.KEEP_WIDTH]:
+		eyes.keep_aspect = keep
+		for at: Vector3 in [HIP_AT, Vector3(-0.25, 0.1, -0.35)]:
+			held.root.position = at
+			glass.update(held.window, 0.0)
+			var m := held.window.hip_material
+			var screen := host.get_visible_rect().size
+			assert_almost_eq(float(m.get_shader_parameter(&"aspect")), screen.x / screen.y, 1e-4, "aspect of this window")
+			var span: float = m.get_shader_parameter(&"span")
+			# The eye's own vertical reach (its projection's), so a thing shows on the glass as big as round it.
+			var eye_tan := 1.0 / eyes.get_camera_projection().y.y
+			var glass_tan := 1.0 / glass._camera.get_camera_projection().y.y
+			assert_almost_eq(glass_tan, span * eye_tan, 1e-4, "%s %s: the main view's own scale" % [keep, at])
 	glass.update(null, 0.0)
 
 
