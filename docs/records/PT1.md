@@ -1,11 +1,13 @@
 # PT1 · Baked path-traced lamp light (Ultra step 5): no sun's bounce under a lit roof
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
+| 2026-11-10 | 1 | thread | CI green on eae492a | – | QA: doors and props kept the sun's bounce when only Lamp light switched |
+| 2026-11-10 | 2 | thread | CI green on 7cd5ba7 | Accept 8/8 | – |
 
 ## Goal
 
