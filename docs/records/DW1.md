@@ -48,5 +48,9 @@ indoors) the hall is lit by its lamps alone, so worn lamps vary its light.
 
 ## Known issues left
 
-- Frame cost: three flickering lights change strength a few times a second (their shadows are redrawn anyway); no
-  GPU in the cloud. The owner's check is in the playtest list.
+- The lens shader's MultiMesh-with-custom-data variant is prewarmed on a plain quad (`shader_prewarm.gd`), as the
+  roof's other MultiMesh materials are; Godot's ubershader covers the first real draw (performance review: check for
+  a first-flicker hitch).
+- Frame cost: three flickering lights change strength a few times a second (their shadows are redrawn anyway), out of
+  Ultra's baked bounce light so SDFGI updates them while they change; no GPU in the cloud. If Ultra spikes during a
+  burst, keep them baked and only fade their strength (performance). The owner's check is in the playtest list.

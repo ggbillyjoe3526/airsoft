@@ -78,7 +78,7 @@ static func build(map: MapData, cfg: RoofConfig) -> RoofView:
 				map.roof_lamp_states)
 		view.add_child(view._lights)
 		view._cfg = cfg
-		for i in map.roof_lamp_states.size():
+		for i in mini(map.roof_lamp_states.size(), map.roof_lamps.size()):
 			if map.roof_lamp_states[i] == MapData.LAMP_FLICKER:
 				view._flickers.append(i)
 				view._levels.append(1.0)
