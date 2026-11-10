@@ -3,7 +3,8 @@ extends MeshInstance3D
 ## A map's shallow streams (MapData.water, WS1) drawn on every preset: each a flat ribbon along its line at the water's
 ## level, as wide as the stream (Water's half width either side), cut WoodsConfig.stream_across times across; the banks
 ## rise through it, so the water shows only over the bed (look_water.gdshader fades its edge by the depth behind it).
-## Each vertex carries its downstream way (the level falling along the line) in its colour for the ripples' flow. One
+## Each vertex carries its downstream way (where the level falls along the line; on level water, as Woodland's is, the
+## line's own way) in its colour for the ripples' flow. One
 ## draw, no shadow. Look only: the simulation reads the same streams through WorldQuery.water, never this node.
 
 const WATER_SHADER := preload("res://game/play/look/look_water.gdshader")
@@ -88,7 +89,7 @@ static func _ribbon(points: PackedVector3Array, half: float, across: int, verts:
 		if i > 0 and i < n - 1 and back.dot(ahead) > MITRE_LIMIT:
 			reach = half / maxf(along.dot(ahead), 1e-3)
 		var side := Vector2(-along.y, along.x) * reach
-		# Downstream: the way along the line the level falls (up the line where it rises), packed into 0..1.
+		# Downstream: the way along the line the level falls (the line's own way where it is level), packed into 0..1.
 		var down := along if b.y <= a.y else -along
 		var way := Color(down.x * 0.5 + 0.5, down.y * 0.5 + 0.5, 0.5, 1.0)
 		for k in across + 1:

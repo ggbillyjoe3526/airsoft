@@ -17,8 +17,11 @@ them."
 ## What changed
 
 - **The stream:** `data/maps/woodland.json` gains `water`, one line of 91 points 1.5 m apart down the bed
-  (`tools/woodland/build_map.py`, `water()`), 13.4 m wide so it reaches under the banks; its level is the bed's lowest
-  ground across its middle, smoothed, 0.3 m over it, and 0.08 m over the Ford's gravel bar. The simulation reads it
+  (`tools/woodland/build_map.py`, `water()`), 13.4 m wide so it reaches under the banks, lying flat 0.3 m over a bed
+  made level its whole length (`tools/woodland/layout.py` `BED_Y`, the old floor's lowest), 0.08 m over the Ford's
+  gravel bar. The old bed rose about 4 m to a hump under the North bridge (the Ridge's shoulder); it is cut down, the
+  ground beside it falling into the stream in a walkable valley (0.6 at most), the bridge 4.5 m lower with its model
+  rebuilt (`footbridge.py`); route times across the lanes (analyze.py) are unchanged. The simulation reads it
   through `WorldQuery.water` (`Water`, `game/sim/water.gd`): `Character.in_water` at `MovementConfig.wade_depth`
   (0.15 m) slows a character to `wade_speed_scale` 0.6, Footsteps send every wading stride as a run on the new WATER
   surface (`NoiseConfig.ground` 1.5; a walk or a crouch at `wade_quiet_carry` 0.9), and a BB landing in it stops at its
@@ -36,6 +39,11 @@ them."
 
 ## Decisions
 
+- **The water lies flat and the bed is level** (the owner, 2026-11-10: "the river should be flat and not on a
+  decline/incline. Adjust the map for this"; under the bridge it looked uphill). With no fall, its ripples flow north to
+  south, the line's own way.
+- **The water is a slightly bright, muted blue** (the owner asked for "a little blue", then "slightly brighter"):
+  about a quarter saturated on screen, far from Alpha's blue.
 - **The stream is 0.3 m deep and wading is 60% pace** (Claude's defaults): slow enough that the bridge is the better
   crossing, not so slow that a player caught in it is helpless.
 - **The Ford is ankle deep (0.08 m, under the 0.15 m wade depth): it splashes but never slows.** The overtime flag in

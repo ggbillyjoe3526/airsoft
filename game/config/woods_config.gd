@@ -110,17 +110,17 @@ extends Resource
 ## `stream_deep_at` m of it, fading in where the bed comes within `stream_edge` m of its surface; glossy
 ## (`stream_roughness`, mirroring `stream_specular` of the sky, with `stream_sheen` toward a glancing look); ripples
 ## `stream_ripple` a metre tilting it up to `stream_tilt`, flowing downstream at `stream_flow` m/s in phases of
-## `stream_cycle` s; cut `stream_across` times across. Colours sRGB, a little blue (William, 2026-11-10): the look's paint
-## and the bed showing through grey them to about a fifth saturated on screen, far from Alpha's bright blue.
-@export var stream_shallow: Color = Color(0.14, 0.3, 0.46, 0.65)
-@export var stream_deep: Color = Color(0.03, 0.09, 0.2, 0.95)
+## `stream_cycle` s; cut `stream_across` times across. Colours sRGB, a slightly bright blue (William, 2026-11-10): the look's
+## paint and the bed showing through grey them to about a quarter saturated on screen, far from Alpha's bright blue.
+@export var stream_shallow: Color = Color(0.2, 0.42, 0.62, 0.62)
+@export var stream_deep: Color = Color(0.06, 0.17, 0.33, 0.92)
 @export var stream_deep_at: float = 0.8
 @export var stream_edge: float = 0.07
 @export var stream_roughness: float = 0.14
 ## How much of the sky it mirrors (Godot's 0.5 is a glassy pane under the open sky; a wooded stream mirrors little).
 @export var stream_specular: float = 0.12
 ## The sheen of the wood and sky toward a glancing look (alpha its most), so the ripples show on every preset.
-@export var stream_sheen: Color = Color(0.3, 0.44, 0.6, 0.4)
+@export var stream_sheen: Color = Color(0.42, 0.58, 0.74, 0.4)
 @export var stream_ripple: float = 0.9
 @export var stream_tilt: float = 0.12
 @export var stream_flow: float = 0.4

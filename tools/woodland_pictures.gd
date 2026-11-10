@@ -40,6 +40,8 @@ const SHOTS: Array = [
 	# WS1: the stream, the woodpiles' log ends, the far treelines and a thicket's spruces
 	["stream_bridge", Vector3(-7.0, EYE, -31.0), Vector3(-0.5, 1.6, -42.0), false],
 	["stream_bed", Vector3(-1.0, 3.0, -35.5), Vector3(-4.0, 0.2, -24.0), true],
+	["stream_under_bridge", Vector3(-4.5, 0.2, -27.0), Vector3(-1.0, -1.4, -46.0), true],
+	["stream_ridge", Vector3(-18.0, EYE, -42.0), Vector3(2.0, -0.5, -41.5), false],
 	["stream_ford", Vector3(1.0, EYE, 7.0), Vector3(10.0, -1.6, 0.0), false],
 	["stream_down", Vector3(13.5, EYE, 14.0), Vector3(8.5, -1.6, 30.0), false],
 	["stream_culvert", Vector3(9.5, EYE, 37.0), Vector3(8.0, -1.4, 47.0), false],

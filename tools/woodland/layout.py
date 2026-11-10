@@ -166,6 +166,16 @@ _raw = _bp[:, 1]
 _sm = np.convolve(np.pad(_raw, 6, mode="edge"), np.ones(13) / 13, mode="valid")
 _bed = np.minimum(_sm, _raw)
 _bed = np.convolve(np.pad(_bed, 5, mode="edge"), np.ones(11) / 11, mode="valid") - 0.08  # smooth floor, never above the banks
+# WS1 (the owner, 2026-11-10: the stream ran uphill under the North bridge): the bed is level its whole length, at the
+# lowest of that floor, so the water on it lies flat; where the ground stands higher (the Ridge's shoulder at the North
+# bridge, once 4 m over the rest) the banks below cut it down into a valley, never steeper than 0.6. The water stands
+# WATER_DEPTH over the bed, but over the Ford's gravel bar only FORD_DEPTH (under MovementConfig.wade_depth: it
+# splashes but doesn't slow), FORD_FLAT m either side of the slide's middle, the bar sloping to the bed over FORD_RAMP.
+WATER_DEPTH, FORD_DEPTH, FORD_FLAT, FORD_RAMP = 0.3, 0.08, 3.5, 4.0
+BED_Y = float(_bed.min())
+FORD_ARC = float(seg_dist(np.array([FORD[0]]), np.array([FORD[1]]), STREAM)[1][0])
+_bed = BED_Y + (WATER_DEPTH - FORD_DEPTH) * np.clip(1 - (np.abs(_bp[:, 0] - FORD_ARC) - FORD_FLAT) / FORD_RAMP, 0, 1)
+WATER_Y = BED_Y + WATER_DEPTH
 bed_h = np.interp(sarc, _bp[:, 0], _bed)
 _wall = STREAM_D * np.clip((sd - BED_W) / bank, 0, 1)
 _beyond = np.maximum(sd - BED_W - bank, 0) * np.minimum(0.6, STREAM_D / bank)  # game build: never steeper than 0.6 (bots climb 0.75)

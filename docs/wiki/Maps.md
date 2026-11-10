@@ -88,9 +88,9 @@ road, round the Truck bend, over the Culvert to the Log stacks and the Sawmill. 
 defenders in the east camp.
 
 - **The stream:** its bed is 1.7 m under its banks, which are too steep to climb. Cross on the North bridge or the road,
-  or walk in and out at the Ford and the gentle slides. Down in the bed you're out of sight of the wood above. Water
-  about shin deep runs along the bed: wading slows you to 60% of your pace and every stride splashes, loud enough to be
-  heard about half as far again as a run on earth, even at a walk or a crouch. The Ford is a gravel bar only ankle
+  or walk in and out at the Ford and the gentle slides. Down in the bed you're out of sight of the wood above. A level
+  stream of shin-deep water runs along it: wading slows you to 60% of your pace and every stride splashes, loud enough
+  to be heard about half as far again as a run on earth, even at a walk or a crouch. The Ford is a gravel bar only ankle
   deep, so you splash over it at full pace. Bots splash and slow the same way, and they take the bridge or the road
   where it isn't far out of their way. A BB that lands in the water splashes and sinks.
 - **The look:** warm afternoon sun over a natural green wood: young, grown and old Scots pines with bare tan trunks

@@ -141,6 +141,10 @@ func test_woodland_has_its_stream_down_the_bed_with_both_crossings_dry_and_the_f
 	assert_eq(map.water.size(), 1, "one stream")
 	assert_true(map.warnings.is_empty(), str(map.warnings))
 	var t := map.terrain
+	# The water lies flat its whole length (the owner, 2026-11-10: it ran uphill under the North bridge).
+	var points := map.water.points_of(0)
+	for p: Vector3 in points:
+		assert_almost_eq(p.y, points[0].y, 1e-3, "level at %s" % p)
 	# Down the bed between the crossings, off the Ford, it is deep enough to wade.
 	for at: Vector2 in [Vector2(-1.0, -37.0), Vector2(-5.0, -25.0), Vector2(12.6, 12.0), Vector2(8.6, 30.0)]:
 		var depth := map.water.depth_at(Vector3(at.x, t.height_at(at.x, at.y), at.y))
@@ -162,9 +166,10 @@ func test_woodland_has_its_stream_down_the_bed_with_both_crossings_dry_and_the_f
 func test_bots_cross_by_the_north_bridge_rather_than_wade_beside_it() -> void:
 	var map := MapData.load_map("woodland", style, 6)
 	var nav := NavGrid.build(map, tuning.nav, tuning.body)
-	# Either side of the bed, north of the bridge, across from the slide where the bed can be walked into.
-	var a := Vector3(-8.0, 0.0, -50.0)
-	var b := Vector3(8.0, 0.0, -50.0)
+	# From the west bank by the slide south of the bridge to the east bank north of it: with wading free, a bot walks
+	# down the slide and up the bed under the bridge.
+	var a := Vector3(-10.0, 0.0, -32.0)
+	var b := Vector3(9.0, 0.0, -44.0)
 	a.y = nav.floor_at(Vector3(a.x, 50.0, a.z))
 	b.y = nav.floor_at(Vector3(b.x, 50.0, b.z))
 	var route := PackedVector3Array()
@@ -172,7 +177,7 @@ func test_bots_cross_by_the_north_bridge_rather_than_wade_beside_it() -> void:
 	var wet := _wading_metres(map, nav, a, route)
 	gut.p("route over %d waypoints, %.1f m wading" % [route.size(), wet])
 	assert_lt(wet, 0.5, "over the bridge, not through the water")
-	# With wading free, the same route goes straight through the water.
+	# With wading free, the same route goes up the bed through the water.
 	var free := tuning.nav.duplicate() as NavConfig
 	free.wade_cost = 1.0
 	free.splash_cost = 1.0
