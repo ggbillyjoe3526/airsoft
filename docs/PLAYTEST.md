@@ -1257,6 +1257,17 @@ AEG Rifle until its own model.
   close and weak at range?
 - [ ] **Sound.** Its buzz sounds smaller and quicker than the AEG's (a stand-in until you record one).
 
+## Button clicks, SWAP and the rail's level (UB1)
+
+- [ ] **Every button answers a click.** Rail tabs, map and mode cards, SWAP, CUSTOMISE, PLAY, Settings' switches and
+  choices, the pause menu: each dips in a little and flashes a teal outline that fades in about a third of a second.
+  Nothing beside it moves, and no button stays shrunk after the page changes. Enter on a focused button does the same.
+- [ ] **Reduced motion.** Settings › Accessibility › Reduced motion On: only the outline flashes, the button stays
+  still.
+- [ ] **SWAP.** The Loadout page's PRIMARY and SECONDARY boxes' button reads SWAP and still opens the replica list.
+- [ ] **Your level.** The rail's foot shows LVL n. Settings › Dev › Disable levelling on: it stays, greyed, and its
+  tooltip says levelling is off.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

@@ -1114,7 +1114,7 @@ msgid "LOADOUT_SECONDARY"
 msgstr "SECONDARY"
 
 msgid "LOADOUT_SWITCH_REPLICA"
-msgstr "Switch Replica"
+msgstr "Swap"
 
 msgid "LOADOUT_SWITCH_TITLE"
 msgstr "Switch %s replica"
@@ -3710,6 +3710,9 @@ msgstr "Hedge, thicket"
 
 msgid "MENU_LEVEL_SHORT"
 msgstr "LVL %d"
+
+msgid "MENU_LEVEL_OFF_TIP"
+msgstr "Levelling is off (Settings › Dev › Disable levelling): every replica and part is yours to carry and matches give no XP. Your level stays as it is."
 
 msgid "SETTINGS_ABOUT"
 msgstr "About"
