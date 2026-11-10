@@ -7,21 +7,21 @@ extends Resource
 
 ## The ceiling: its sheeting's paint (in the shared light, so its underside takes the look's shade and the bounce),
 ## its roughness, and how far past the field's walls it reaches (m), so no gap shows at the eaves.
-@export var ceiling_colour: Color = Color8(0x52, 0x4a, 0x72)
+@export var ceiling_colour: Color = Color8(0xd2, 0xce, 0xc8)
 @export var roughness: float = 0.9
 @export var ceiling_overhang: float = 1.0
 ## The trusses: across the hall along z, one every `truss_step` m along x (Depot's hall walls' columns stand under
 ## them, PropDressConfig.bay_anchor), drawn as the roof's bay model (Dev 3: truss, purlins, sheet and services,
 ## tools/blender/maps/roof_truss.py), each bay `truss_step` m along x and about `bay_span` m across, `bay_chunk` truss
 ## lines a MultiMesh so far ones cull and take a simpler mesh; without the model, plain beams `truss_depth` deep and
-## `truss_width` wide, in the look's crimson.
+## `truss_width` wide, in the look's galvanised grey (Sunlit Concrete, SL3; the ceiling its pale concrete grey).
 @export_file("*.glb") var bay_model: String = "res://assets/models/props/roof_truss.glb"
 @export var bay_span: float = 18.0
 @export var bay_chunk: int = 2
 @export var truss_step: float = 8.0
 @export var truss_depth: float = 0.5
 @export var truss_width: float = 0.25
-@export var truss_colour: Color = Color8(0xc2, 0x38, 0x74)
+@export var truss_colour: Color = Color8(0x8c, 0x8a, 0x96)
 ## The lamps: the high-bay model (Dev 3, its top at the ceiling, hanging on its cable; its `lamp_lens` material's
 ## faces glow `lamp_colour` at `lamp_energy` with no real light, the rest painted in its vertex colours); without the
 ## model, panels hanging `lamp_drop` m under the ceiling, `lamp_size` m (x across, z deep) and 0.08 m thick, glowing.

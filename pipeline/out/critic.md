@@ -1,23 +1,30 @@
-Task: SL2 · Sunlit Concrete: wear on the models
+Task: SL3 · Sunlit Concrete: Depot's roof repainted, the map pictures again
 Attempt: 1 of 4
-Head: 15df046 (targeted GUT test_look + test_props 41 passing, 0 failing; gdlint clean; shader compiled and drew on lavapipe at HEAD, no SHADER ERROR)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✗ | 8 ✓
-Score: 7/8 → Accept
-Evidence for the passes:
-1. All four wears in look_vertex.gdshader:97-104 (foot, streak, stain, dust), scaled by `wear * look_wear` (:83); per-model wear prop_dress_config.gd:297-300, prop_dress.gd:104-107; floor from the box's bottom prop_dress.gd:232. Render: foot grime measured on Depot (plywood foot -25 luminance, crate base -18), streaks plain on the plywood.
-2. No contract in ARCHITECTURE › Contracts touched; vertex_colour's new arg is last with default 0, every other caller clean.
-3. Build-time only (Vector2 key, materials, instance param at _add); no per-frame code; shader is ALU-only behind a uniform branch.
-4. test_props.gd: _wear_of on hall_wall/shelf/oak_crown and the wear_floor loop fail without the change; test_look.gd checks the material's wear param.
-Failed checks, with evidence:
-7. [judgment] game/play/look/look_vertex.gdshader:91 switches the blotch/stain projection hard at |n.y| = 0.6 (`abs(n.y) > 0.6 ? xz : (across, y)`), so on curved models (tyres, drums, trunks, sofa) the stains (0.15 of the paint) and the foot's ragged edge jump along a ring, while the comment at :86-87 says a round model shows no seam. Also game/config/prop_dress_config.gd:299 is one 168-character line where the file wraps its other dictionaries at 120.
-Must-fix for the next attempt (non-blocking; fold into SL3 or a Beta pass):
-- look_vertex.gdshader:91: blend the two projections instead of switching (sample blotch and stain on both, mix by smoothstep(0.5, 0.7, abs(n.y))), or correct the comment to say tops and sides meet at a seam.
-- prop_dress_config.gd:299: wrap the model_wear dictionary at 120 like model_roughness above it.
-Notes: the before/after picture (21:25) predates both commits; Depot's walls, containers and crates stand on their origin (AABB min y 0), so it holds for Depot, but no picture shows Woodland (where QA's floor fix matters), dust on a top, or a stain.
+Head: d53058b65ee94415e612be81e82aa46ce303972a (checks passed on it; targeted test_look + test_dh1_hall_shell 32/32 pass)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
+Score: 8/8 → Accept
+Evidence:
+1. roof_truss.py:248-250 (Truss/Gusset grey, Purlin/Sheet concrete, Rooflight cream, Pipe crimson); hall_wall.py:488 Frame grey;
+   roof_config.gd:10,24 greys; four glbs differ only in vertex colours (QA); depot/woodland/range cards and the wiki hall
+   picture re-rendered and seen: the roof reads as a real galvanised warehouse roof, no crimson or violet left anywhere
+   in the hall; grep finds no "crimson truss/violet ceiling" text left in docs/wiki/ART.
+2. No contract touched; RoofConfig keeps its fields, only two defaults change (roof_view.gd:33,37 unchanged).
+3. No runtime code path changes; RoofView builds once.
+4. test_look.gd:166-187: ≥90 % of the bay's area under s 0.2; crimson trusses (s 0.71) and violet sheet fail it (QA checked
+   against the old glb; I agree by reading the area split: trusses + sheet are most of the bay).
+5. Config data only, palette entries (test_look _in_palette). Nit: test_look.gd:176,180 loop vars untyped
+   (`for surface: int in`, `for t: int in`) – file already mixes styles, gdlint passes; not blocking.
+6. Fits the owner's gritty CS-leaning ruling (DECISIONS:199); red sprinkler mains a believable small accent, team hues untouched.
+7. Geometry, node and material names identical; no .tscn/.tres edits.
+8. Edge-scuff deferral is acceptable: they were an SL2-record carry-over, not an owner criterion (ART.md's SL3 was
+   "the models repainted"); doing them means rebuilding every map model with weathering.py, which is its own task, and
+   SL2's world-space grime already carries the grit. Recorded (SL3.md Decisions, KNOWN_ISSUES Art row, can wait).
+Notes (not must-fix):
+- KNOWN_ISSUES.md:16 "left for a polish pass (SL3)" reads as if SL3 does it; say "(moved out of SL3)".
+- The liner renders warm tan/beige under the hall light, not the "pale grey" the changelog, wiki and ART say; owner judges.
+- test_look.gd:182 counts a mesh with no vertex colours as grey, so a colourless re-export would pass vacuously.
 Owner should test in the game:
-- Depot mid-range: the crimson container and crate walls barely change (container base -3 luminance in the render); is that gritty enough, or raise grime/streak strength?
-- Depot plywood close up: the streaks are full-height soft bands with no ledge they run from; do they read as dirt or as stray shadows?
-- Woodland: tyres, trunks and drums: grime starts at the ground (QA fix), no ring where top meets side.
-- Tops of crates and containers seen from a tower: dust reads as dust, not as a lighter paint.
-- Long Depot sightlines: no streak shimmer at range.
-- Low preset on Depot: frame time still 60 FPS with the wear noise (KNOWN_ISSUES › Graphics).
+- Depot from the east end and looking straight up: does the liner read pale grey or beige to you, and is it too bright?
+- The red sprinkler mains: readable accent, or distracting along the roof?
+- Hall wall columns and eaves beams in grey: do the walls still read as structure, not blend into the cladding?
+- Loading screen and Match page: the three new map pictures (the Range's teal dado and violet backstop band are SL1 paint).
