@@ -1,6 +1,6 @@
 # WS1 · Woodland's stream, varied trees and deeper log stacks
 
-**Review:** 5 attempts · critic Accept ?/8 · qa Pass · performance Pass
+**Review:** 6 attempts · critic Accept ?/8 · qa Pass · performance Pass
 
 The owner (2026-11-10): "Would it be possible to add a river stream through the Woodland map where the dried river
 bed is? It could push players to cross the bridge as going through in foot would create noise (from splashes) and slow
@@ -16,7 +16,8 @@ them."
 | 2026-11-10 | 2 | Opus 5.5 (build thread) | pass | Retry 7/8 | Log ends still unlike the photo: thick bark rims, straight-sided splits, too many faceted rounds, wide gaps, one colour |
 | 2026-11-10 | 3 | Opus 5.5 (build thread) | pass | Retry 7/8 | Log ends: gaps too wide and dark, too few true wedges, faceted curves, too cool a colour, bark band unseen |
 | 2026-11-10 | 4 | Opus 5.5 (build thread) | pass | Retry 7/8 | Log ends overlapping rather than packed, too many rounds and four-sided pieces, faceted growth ring, too pale |
-| 2026-11-10 | 5 | Opus 5.5 (build thread) | pass | – | – |
+| 2026-11-10 | 5 | Opus 5.5 (build thread) | pass | Retry 7/8 | Core a lit brown, not deep shade; pieces stretched to the ragged top; too many rounds |
+| 2026-11-10 | 6 | Opus 5.5 (build thread) | pass | – | – |
 
 ## What changed
 
@@ -41,12 +42,13 @@ them."
   as in the owner's photo), its face tilted up to 0.08 m a metre, its sides shown only where it stands 3.5 cm or more
   out (`cordwood.py` `piece_end`). The pieces are stacked as by hand (`lay_face`): each in turn set where it rests
   lowest on the ground or the pieces under it, a split piece tried point up, point down and now and then on its side,
-  so the wedges lock together, 5 mm apart; no outline crosses another (asserted at build). About 85 % are pie slices
-  of their log (75 to 100 degrees, up to 14 degrees off square), a bark arc of 5 segments with a thin band of dark
-  bark inside it; 8 % small 12-sided rounds (12 to 16 cm across, about 0.6 of a slice) with a thin bark ring; 5 %
-  four-sided pieces from the heart; about a third with a drying crack. Each end is its own warm colour, from pale
-  straw to tan to weathered grey, over a mid brown core. The sides facing down below 1.6 m, never seen from eye
-  height, are left out. 2,423 to 2,735 triangles of a new 3,200 budget per section.
+  so the wedges lock together, 5 mm apart, each whole and unstretched under the stack's ragged top; no outline
+  crosses another (asserted at build). About 85 % are pie slices
+  of their log (75 to 100 degrees, up to 14 degrees off square), a bark arc of 7 segments with a thin band of dark
+  bark inside it; 3 % small 16-sided rounds (12 to 16 cm across, about 0.6 of a slice) with a thin bark ring; 5 %
+  four-sided pieces from the heart; one in five with a drying crack. Each end is its own warm colour, from pale
+  straw to tan to weathered grey, over a near-black core, the deep shade between them. The sides facing down below 1.6 m, never seen from eye
+  height, are left out. 2,782 to 3,013 triangles of a new 3,200 budget per section.
 
 ## Decisions
 

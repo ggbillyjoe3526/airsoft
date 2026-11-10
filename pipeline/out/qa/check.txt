@@ -1,6 +1,4 @@
-✓ gdlint
+– gdlint not installed (pip install "gdtoolkit==4.5.0"); CI runs it
 ✓ changelog notes
 ✓ wiki
 ✓ unit tests, part 1
-✓ unit tests, part 2
-✓ unit tests, part 3

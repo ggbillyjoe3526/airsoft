@@ -39,19 +39,19 @@ SAG = 0.45              # how far under the cell's top the stack's top dips at m
 PROUD = (0.003, 0.05)   # how far a piece's end stands out of the core: the face's relief (WS1: solid ends, near flush)
 PROUD_MODE = 0.015      # most stand out about this far, a few flush or 5 cm out, as a stack built by hand
 TILT = 0.08             # an end face sawn off square: up to this much further out per metre across or up it
-ARC = 5                 # the bark arc's segments on a split piece (a pie slice of its log)
+ARC = 7                 # the bark arc's segments on a split piece (a pie slice of its log)
 ARC_SPAN = (75.0, 100.0)  # a split piece's angle at the log's heart (degrees): 1.2 to 1.5 times as wide as deep
 RIM = 0.07              # a ring of bark on a sawn end: this share of the way in from its edge (about 4 % across)
 ARC_BAND = 0.08         # a split piece's band of bark inside its arc: this share of the way to its middle (thin)
-CHECK = 0.35            # the share of split pieces with a drying crack from the heart toward the bark
+CHECK = 0.2             # the share of split pieces with a drying crack from the heart toward the bark
 GAP = 0.005             # m between neighbouring ends along a row: a hairline, as the photo's stack packed tight
 EDGE = 0.03             # the share of its row's height kept clear above and below each piece
 SHOWS = 0.035           # an end standing out less than this (m) shows no side
 UNDER_SEEN = 1.6        # a piece's end's sides facing down are left out below this (m): the eye looks down on them
 ROWS = 8
-ROUND = 0.08            # the share of pieces that are small rounds (most are split, as in the photo)
+ROUND = 0.03            # the share of pieces that are small rounds (a few, as in the photo)
 ROUND_RAD = (0.06, 0.08)  # a round's radius (m): about 0.6 of a split piece across
-ROUND_SIDES = 12        # a small round's sides
+ROUND_SIDES = 16        # a small round's sides
 HEART = 0.05            # the share of four-sided pieces split from a log's heart, no bark
 ASIDE = 0.12            # the share of wedges that may lie on their side
 LEAN = 14.0             # degrees a split piece may lie off square, as stacked by hand
@@ -77,8 +77,8 @@ BEARER = 0.1
 def cordwood(seed: int) -> object:
     hs.reset()
     wk.paint_all()
-    mk.paints({"Gap": 0x5C5545})  # a dull mid brown (any warmer reads near Beta orange): the shade between the pieces
-    assert wk.off_team(0x5C5545), "Gap reads as a team"
+    mk.paints({"Gap": 0x2A2621})  # near black, dull: the deep shade between the pieces, as in the photo
+    assert wk.off_team(0x2A2621), "Gap reads as a team"
     for name, colour in END_PAINTS.items():
         assert wk.off_team(colour), "%s #%06x reads as a team" % (name, colour)
     mk.paints(END_PAINTS)
@@ -122,11 +122,11 @@ def cordwood(seed: int) -> object:
                                         (bulge, y0, z1 - 0.012)]), mat, Vector((s, 0, 0.6)))
             q = wk.verts(b, [(base, -core, z0), (base, core, z0), (base, core, z1), (base, -core, z1)])
             wk.face(b, q, "BarkDark", Vector((s, 0, 0)))
-    # each face's pieces (lay_face), stretched to the ragged top above them
+    # each face's pieces (lay_face), rigid, under the ragged top
     for side in (1.0, -1.0):
         out = Vector((0.0, side, 0.0))
-        for kind, poly in lay_face(r, half_x, HEIGHT - 0.05):
-            outline = [(px, side * core, max(0.01, pz * top_at(px) / (HEIGHT - 0.05))) for px, pz in poly]
+        for kind, poly in lay_face(r, half_x, top_at):
+            outline = [(px, side * core, pz) for px, pz in poly]
             end_mat = r.choices(END_MATS, END_WEIGHTS)[0]
             piece_end(b, outline, r.triangular(PROUD[0], PROUD[1], PROUD_MODE), out, end_mat, kind,
                       (r.uniform(-TILT, TILT), r.uniform(-TILT, TILT)), r.random() < CHECK)
@@ -141,12 +141,13 @@ def cordwood(seed: int) -> object:
     return ob
 
 
-def lay_face(r: object, half_x: float, top: float) -> list:
-    """A face's pieces' ends (kind, outline as (x, z) points) from x = -half_x to half_x and z = 0 to `top`, stacked as
+def lay_face(r: object, half_x: float, top_at: object) -> list:
+    """A face's pieces' ends (kind, outline as (x, z) points) from x = -half_x to half_x, from the ground up to the
+    stack's ragged top (`top_at(x)`, each piece wholly under it, never stretched to it), stacked as
     by hand: each piece in turn set where its middle rests lowest (a split piece tried point up, point down and, now
     and then, on its side, so the wedges lock together), on the ground or on the pieces under it, GAP above them;
-    until FULL pieces in a row no longer fit under the top. No outline crosses another (asserted)."""
-    h = top / ROWS
+    until FULL pieces in a row fit nowhere under the top. No outline crosses another (asserted)."""
+    h = (HEIGHT - 0.05) / ROWS
     pieces = []
     misses = 0
     while misses < FULL:
@@ -158,9 +159,11 @@ def lay_face(r: object, half_x: float, top: float) -> list:
             for i in range(steps + 1):
                 x = -half_x + GAP + i * LAY_STEP
                 z = rest(pieces, poly, x, wide)
+                if any(pz + z > top_at(px + x) - h * EDGE for px, pz in poly):
+                    continue
                 if best is None or z + mid < best[0] - 1e-6:
                     best = (z + mid, kind, [(px + x, pz + z) for px, pz in poly])
-        if max(pz for _, pz in best[2]) > top - h * EDGE:
+        if best is None:
             misses += 1
             continue
         misses = 0
