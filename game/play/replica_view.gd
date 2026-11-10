@@ -546,16 +546,21 @@ func _press_depth(model: Node) -> void:
 		if mesh_node.mesh == null or mesh_node.material_override != null:
 			continue
 		for i in mesh_node.mesh.get_surface_count():
-			var worn := mesh_node.get_active_material(i) as BaseMaterial3D
-			if worn != null:
+			var worn := mesh_node.get_active_material(i)
+			if worn is BaseMaterial3D or ReplicaPaint.is_worn(worn):
 				mesh_node.set_surface_override_material(i, _pressed_copy(worn))
 
 
-func _pressed_copy(worn: BaseMaterial3D) -> Material:
+## `worn` with its depth pressed: a BaseMaterial3D's z-clip scale, or the worn paint's (ReplicaPaint, RW1) uniform.
+func _pressed_copy(worn: Material) -> Material:
 	if not _pressed.has(worn):
-		var copy := worn.duplicate() as BaseMaterial3D
-		copy.use_z_clip_scale = true
-		copy.z_clip_scale = _cfg.depth_scale
+		var copy := worn.duplicate() as Material
+		var plain := copy as BaseMaterial3D
+		if plain != null:
+			plain.use_z_clip_scale = true
+			plain.z_clip_scale = _cfg.depth_scale
+		else:
+			(copy as ShaderMaterial).set_shader_parameter(&"z_clip_scale", _cfg.depth_scale)
 		_pressed[worn] = copy
 		_pressed_from[copy] = worn
 	return _pressed[worn]

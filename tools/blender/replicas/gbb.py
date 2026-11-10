@@ -30,6 +30,7 @@ from mathutils import Matrix, Vector  # noqa: E402
 
 import figure_copy  # noqa: E402
 import hardsurface as hs  # noqa: E402
+import wear  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
 OUT = os.environ.get("BL_OUT") or os.path.join(ROOT, "assets/models/replicas/pistol.glb")
@@ -40,6 +41,8 @@ FPS = 60
 # The figures' copy (figure_copy.py): triangles per piece, 3,000 in all, the replica budget on a figure
 # (docs/CC0_ASSETS.md › Size limits), used in full (TP1, 2026-11-05).
 FIGURE_TRIS = {"Figure": 2760, "Magazine": 240}
+## RW1: the magazine and the slide are handled most (pouches, holster, racking), so they get more scratches.
+HEAVIER_WEAR = {"Magazine": 2.5, "Slide": 1.6}
 
 # The owner's main photo (a side view, muzzle left) to model space: PX_PER_M pixels a metre, the photo's (ORIGIN_PX)
 # pixel at the model's origin (the old model's grip on the photo's, best overlap).
@@ -1123,6 +1126,7 @@ def build() -> None:
                 total += n
             print("  %-16s %6d triangles" % (ob.name, n))
     print("  in the hands: %d triangles; figure: %d" % (total, sum(hs.tris(o) for o in [fig] + list(fig.children))))
+    wear.apply(seed=2, heavier=HEAVIER_WEAR)  # RW1: light use-wear in the hands
     hs.export(OUT, True)
     print("wrote", OUT)
     build_parts()

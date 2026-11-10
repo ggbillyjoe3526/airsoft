@@ -155,6 +155,13 @@ metalness; the light does the rest.
   its tops. A material's `wear` (`PropDressConfig.wear` 1, `model_wear`: the racking 0.35, tree crowns and the earth bank 0) times the
   look's (`LookConfig.wear`, `grime`, `dust`). The greybox, bushes, woods, skyline and flags draw clean. Edge scuffs are
   the models' own paint (SL3).
+- **Replicas are lightly used (RW1).** The AEG Rifle and the GBB Pistol in your hands, in the menus' pictures and the
+  Customise turntable carry a baked mask (`tools/blender/replicas/wear.py`): faint scratches (most along the length,
+  some in small parallel clusters, the magazine and slide handled most), rubbed outer edges and a few rubbed patches,
+  and dirt in the recesses. `replica_wear.gdshader` scuffs whichever paint is on towards a worn mid grey in
+  square-root light (black greys up, white dirties down, a bold colour dulls), polishes the rubs and mattes the
+  scratches and dirt; a metal part wears to bare metal. Times `LookConfig.wear`. Bots' copies, the Cyber Pistol and the
+  Sniper Rifle draw clean.
 - **Marks that stay:** zone stencils in ink, joints, seams, screws, sheet panels, bay lines and hazard stripes in
   yellow and ink, the white chevron on containers.
 
