@@ -40,15 +40,21 @@ with its lamps alone, with deep shadows, keeping the wide, soft lamp look of his
 - **Wider, softer lamps** ("the lamp lights are too focused … I can see the cone … more wider and diffused", and
   "the shadows should still be dark, not filled in"): cone 36° to 50°, its edge falloff 0.6 to 0.35 (no rim on the
   floor); wider cones (65°, 72°) filled the shadows in. Picture: `art/graphics/ug2/6-depot-wider-softer-lamps.jpg`.
-- **No sun indoors** (above). With the sun gone the lamps carry the whole hall: energy 11.5 to 28 and their glow on
-  the haze 0.3 to 0.12 (the same glow as before in absolute terms, so no cone shows in the haze).
+- **No sun indoors** (above).
+- **Wider and softer again, shadows readable** ("Again, the lamp light is too focused. It should be wider, softer and
+  diffused. Also all the shadows are extremely dark. Keep them dark but the player should still be able to recognise
+  objects and players"): cone 50° to 70°, edge falloff 0.35 to 0.15, reach 17 to 24 m and distance falloff 1 to 0.6,
+  so neighbouring lamps overlap into one even light with soft-edged shadows; energy 6 (the overlap does the rest), the
+  sky's light on High kept at 0.6. Pictures: `art/graphics/ug2/9-*.jpg`.
 
 ## Defaults taken
 
-- Energy 28 from trial renders at Ultra (11.5, 17, 20, 26, 32): the floor and crates near the eye match the owner's
-  liked picture; the upper hall and roof read darker than in it, because the sun lit them there. 32 blew out crate
-  tops under the lamps. Step 3 (eye adaptation) lifts a dim hall's exposure the way eyes do.
-- Ambient share 0.3 on High: at 0.5 the sky's blue ambient filled the shadows.
+- Energy 6 from trial renders at Ultra (6, 7, 9.5, 11, 16 with the wide cone): the floor near the eye about as bright
+  as the owner's liked picture, crate tops not blown out. A narrow cone at 26 to 32 lit pools with near-black between
+  them, which the owner rejected.
+- A tunnel under racking (no lamp over it) is the darkest place on Ultra, where Scene GI replaces the sky's ambient
+  light: with the wide lamps the light reaching in from the hall makes its shelves readable (narrow lamps left it
+  near-black; a stronger GI, energy 1.8, bounce 0.8, barely lifted it). Step 3 (eye adaptation) lifts it further.
 - Depot's bake (Baked light, `tools/bake_light.gd`) is left as it is: Medium still has the sun it was baked for.
   On High and Ultra it still carries the sun's one bounce (`docs/KNOWN_ISSUES.md`); step 5 replaces it.
 - On High the lamps past 28 m are lit without shadows, so a far one can light a little through a room's roof; shadowing
