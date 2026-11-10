@@ -1,5 +1,5 @@
 extends GutTest
-## The assets salvaged from the browser game load in Godot: every model, the figures with their 32 clips and sidecars,
+## The assets salvaged from the browser game load in Godot: every model, the figures with their 35 clips and sidecars,
 ## every sound and loop, the fonts and the map layouts.
 
 const MODEL_DIRS: Array[String] = [
@@ -8,8 +8,8 @@ const MODEL_DIRS: Array[String] = [
 	"res://assets/models/replicaParts",
 	"res://assets/models/powerSources",
 ]
-const FIGURE_CLIPS := 32
-const MAPS: Array[String] = ["depot", "woodland", "range", "kingsmere"]
+const FIGURE_CLIPS := 35
+const MAPS: Array[String] = ["depot", "woodland", "range", "subway"]
 
 
 func _files(dir: String, ext: String) -> Array[String]:

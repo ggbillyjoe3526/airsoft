@@ -174,6 +174,8 @@ var _lifts: LiftView = null
 var _woods: WoodsView = null
 ## The map's streams (WS1), or null on a map with none.
 var _water: WaterView = null
+## The field's wear marks, or null on a map naming none (WearMarks, WM1).
+var _marks: WearMarks = null
 ## The map's bushes, or null on a map with none (BushView, WL5).
 var _bushes: BushView = null
 ## The site dress's details, or null on a greybox map (SiteDress, DD1).
@@ -412,7 +414,8 @@ func _dress_part(part: int) -> void:
 				add_child(_site)
 				if not _light.night:
 					SiteDress.dress_sky(_lighting, _play.site_look)
-			else:
+			elif _level.station_material() == null:
+				# a station dress (MT3) draws every block itself, so no model stands in a block's box
 				_props = PropDress.build(_map, _play.site_look.props, _play.site_look.prop_paint)
 				if _props != null:
 					add_child(_props)
@@ -448,6 +451,9 @@ func _dress_part(part: int) -> void:
 			_water = WaterView.build(_map, _play.woods)
 			if _water != null:
 				add_child(_water)
+			_marks = WearMarks.build(_map, _play.marks, _play.look)
+			if _marks != null:
+				add_child(_marks)
 		5:
 			# What the tall solid blocks hide is left out of the frame with Occlusion culling on (GraphicsApply.apply).
 			_occluders = MapOccluders.build(_map, _play.map_style)
@@ -465,7 +471,7 @@ func _build_ground() -> bool:
 		# plays.
 		var baked_sun := LightingConfig.for_map(_play.lighting, null, _map, LightingConfig.DAY)
 		_level.begin(_map, _play.map_style, _tuning.body, _play.baked_light, baked_sun, _light.night, _play.site_look,
-				_tuning.lifts)
+				_tuning.lifts, _play.station_look)
 	return _level.build_some(Time.get_ticks_usec() + BUILD_SLICE_USEC if staged else 0)
 
 
@@ -1220,7 +1226,8 @@ func _after_tick() -> void:
 		if heard:
 			_audio.on_calls(_bots.callouts.said, state, player.team, settings.hud.callouts)
 		_hud.on_calls(_bots.callouts.said, state)
-	_hud.set_vault_ready(_vault_ready())
+	var vault_ready := _vault_ready()
+	_hud.set_vault_ready(vault_ready, vault_ready and _vault_probe.climb)
 	var lift := _lift_button()
 	if lift != Lifts.NONE:
 		var spec := _level.query().lifts[lift.x]
@@ -2041,7 +2048,7 @@ func _apply_motion() -> void:
 ## The graphics drawn, onto the field: at the start and whenever they change (the settings can open from the pause menu).
 func _apply_graphics(values: GraphicsQuality) -> void:
 	GraphicsApply.apply_field(values, _lighting, _dust, null, _level, _kicked, _woods,
-			_roof.lamp_lights() if _roof != null else null)
+			_roof.lamp_lights() if _roof != null else null, _marks)
 	if _lifts != null:
 		_lifts.set_lamps(values.lamp_lights != GraphicsQuality.LampLights.OFF)
 		_lifts.set_probes(values.reflections != GraphicsQuality.Reflections.OFF)

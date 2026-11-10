@@ -136,12 +136,17 @@ var kicked_dust_scale: float = 1.0
 ## Its site dress (DD1, `dressing.site`: SiteDressing), drawn by SiteLook and SiteDress instead of the greybox
 ## colours; null on a map drawn as greybox.
 var site: SiteDressing = null
+## Its station dress (MT3, `dressing.station`: StationDressing), drawn by StationLook and StationSurface instead of the
+## greybox; null on a map without one.
+var station: StationDressing = null
 ## A wood's dressing (WL4; `dressing` in the file, the browser's MapDressing; WoodsView draws it, nothing else reads
 ## it): its seed; the share of squares by a foot with a leaf drift and of slots along a foot with a fallen branch,
 ## twigs or a log (`woods`); the moss on the logs' tops, its colour and the share of logs (`moss`); the puddles; the
 ## fireflies over the field at night (`fireflies.count`) and the tint of the motes in the air (`motes.tint`, sRGB;
 ## has_motes false without one); the grass tufts' height (`grass.height`, m) and the trees in the wood beyond the fence
 ## (`forest.trees`). Each 0 or empty on a map naming none; a malformed one is left out with a warning.
+## Worn marks on its floor (WM1, `dressing.wearMarks`: WearMark), drawn as decals by WearMarks; none on a map naming none.
+var marks: Array[WearMark] = []
 var dressing_seed: int = 0
 var leaf_drifts: float = 0.0
 var fallen: float = 0.0
@@ -169,7 +174,7 @@ var lights: Array[Light] = []
 ## How far its bots make someone out (m, `botSight` in the file: BotConfig.for_map), for a hall with longer views than
 ## the default; 0 on a map naming none, where BotConfig.view_distance holds.
 var bot_sight: float = 0.0
-## How tall its Attack / Defend poles stand (m, `poleHeight` in the file, MT1: Kingsmere's low tunnels and train), the
+## How tall its Attack / Defend poles stand (m, `poleHeight` in the file, MT1: Subway's low tunnels and train), the
 ## pole and its flag drawn scaled down to it (FlagView); 0 on a map naming none, where FlagViewConfig.pole_height holds.
 var pole_height: float = 0.0
 ## An indoor field's roof (`roof` in the file, DR1): its underside's height (m) over the floor, 0 on a field open to
@@ -251,6 +256,8 @@ static func parse(text: String, style: MapStyle, team_size: int) -> MapData:
 	m.skyline = SkylinePiece.read(d.get("dressing"), m.warnings)
 	m._read_kicked_dust(d.get("dressing"))
 	m.site = SiteDressing.read(d.get("dressing"), m.warnings)
+	m.marks = WearMark.read(d.get("dressing"), m.warnings)
+	m.station = StationDressing.read(d.get("dressing"), m.warnings)
 	m._read_woods(d.get("dressing"), style)
 	m._read_poles(d.get("flags"), d.get("flag"))
 	m.has_overtime_flag = _spot(d.get("overtimeFlag"), "overtimeFlag", m.warnings)

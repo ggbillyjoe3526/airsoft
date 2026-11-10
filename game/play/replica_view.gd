@@ -266,7 +266,9 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 	_fire_hold = maxf(0.0, _fire_hold - delta)
 	var firing := _fire_hold > 0.0
 	var carry_rate := _cfg.sprint_fire_raise if firing else _cfg.carry_time
-	_carry = move_toward(_carry, 1.0 if c.sprinting and not firing else 0.0, delta / carry_rate)
+	# Up onto a ledge (CL1) it is carried low too: a hand is on the edge.
+	var climbing := c.vault.active and c.vault.climb
+	_carry = move_toward(_carry, 1.0 if (c.sprinting or climbing) and not firing else 0.0, delta / carry_rate)
 	pos.y -= _cfg.sprint_drop * _carry
 	rot.y += _cfg.sprint_tilt * 0.5 * _carry
 	rot.x -= _cfg.sprint_tilt * 0.3 * _carry

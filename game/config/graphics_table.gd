@@ -51,6 +51,7 @@ const BUILT_IN: Dictionary[StringName, Array] = {
 			"high", "ultra"],
 	GraphicsQuality.OCCLUSION_CULLING: ["GRAPHICS_OCCLUSION_CULLING", "off, on", "0", "all", "off", "on", "on", "on"],
 	GraphicsQuality.WIND_DUST: ["GRAPHICS_WIND_DUST", "0–100 %", "0", "all", "0 %", "50 %", "100 %", "100 %"],
+	GraphicsQuality.WEAR_MARKS: ["GRAPHICS_WEAR_MARKS", "off, on", "1", "forward_plus, mobile", "off", "on", "on", "on"],
 	GraphicsQuality.GLOBAL_ILLUMINATION: ["GRAPHICS_GLOBAL_ILLUMINATION", "off, screen, scene", "3", "forward_plus",
 			"off", "off", "screen", "scene"],
 	GraphicsQuality.REFLECTIONS: ["GRAPHICS_REFLECTIONS", "off, probes, screen", "2", "all", "off", "probes", "probes",

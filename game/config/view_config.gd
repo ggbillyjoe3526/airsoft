@@ -24,6 +24,11 @@ extends Resource
 @export var vault_dip: float = 0.12
 @export var vault_tip: float = 0.14
 @export var vault_follow: float = 18.0
+## Up onto a ledge (CL1) the view dips (m) and tips forward (rad) the same way, most early on (climb_peak of the way
+## through the climb, as the hands go onto the edge and the body heaves up), and comes back level as you stand on it.
+@export var climb_dip: float = 0.10
+@export var climb_tip: float = 0.24
+@export var climb_peak: float = 0.3
 
 
 ## The vertical field of view (degrees) the horizontal 16:9 one gives, zoomed by `zoom`.

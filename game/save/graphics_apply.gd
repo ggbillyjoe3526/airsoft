@@ -297,10 +297,11 @@ static func apply_picture(values: GraphicsQuality, viewport: Viewport) -> void:
 ## the kicked dust (on with any wind dust), the level's baked light (a new mesh only when it changes) and a wood's
 ## dressing (WoodsView: its parts by Mesh detail, its fireflies and motes by the wind dust's share), from `values`
 ## (already drawable), and an indoor field's roof lamps as real lights (RoofLamps, Lamp light; their shadows
-## contact-hardening on Softest) with the sun turned down while they shine. Any of `lighting`, `dust`, `level`,
-## `kicked`, `woods` and `lamps` may be null.
+## contact-hardening on Softest) with the sun turned down while they shine, and the floors' worn marks (WearMarks,
+## Wear marks). Any of `lighting`, `dust`, `level`, `kicked`, `woods`, `lamps` and `marks` may be null.
 static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: WindDust, rs: Server = null,
-		level: MapLevel = null, kicked: KickedDust = null, woods: WoodsView = null, lamps: RoofLamps = null) -> void:
+		level: MapLevel = null, kicked: KickedDust = null, woods: WoodsView = null, lamps: RoofLamps = null,
+		marks: WearMarks = null) -> void:
 	var to := rs if rs != null else server()
 	if lighting != null:
 		lighting.sun.shadow_enabled = values.sun_shadows
@@ -330,6 +331,8 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 		if lighting != null:
 			lighting.set_key_share(lamps.key_share(values.lamp_lights))
 			lighting.set_ambient_share(lamps.ambient_share(values.lamp_lights))
+	if marks != null:
+		marks.set_on(values.wear_marks)
 
 
 ## Whether the figures draw their contact shadows with `values`: where the sun casts none.

@@ -46,6 +46,16 @@ port walls on [Depot](Maps#depot) can't be vaulted.
 
 Bots vault the same low walls the same way, when it saves them a long walk round.
 
+## Climb
+
+Press **Jump** at a ledge of the same height whose flat top runs on, such as a station platform's edge, to climb up
+onto it: "Space to climb" shows under the crosshair. You put a hand on the
+edge, pull up and stand on the top in about half a second, your replica held low until you are up. Crates and other
+props are never climbed, only vaulted. Bots climb up and drop back down the same way.
+
+Bots running up stairs lean into the climb with their knees high, and going down they sit back a little on softer
+steps.
+
 ## Holster
 
 Press **3** to holster your replica: it drops out of view, the panel says **HOLSTERED** and the crosshair goes.

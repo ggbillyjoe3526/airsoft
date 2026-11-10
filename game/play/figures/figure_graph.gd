@@ -2,16 +2,18 @@ class_name FigureGraph
 extends RefCounted
 ## The legs' animation graph (step 23, FI2), built once a kind by FigureModels and shared by every figure of it (each
 ## AnimationTree keeps its own parameters): a gait BlendSpace2D (Idle, then each gait clip at its way times its pace)
-## and a crouch BlendSpace1D (CrouchIdle, CrouchWalk at its pace), each under a TimeSeek, blended by crouch; then the
-## jump, the vault and the hit call, each its clip under a TimeSeek, and the walk-off under a TimeScale, each a Blend2
-## over what is below it. Each stepping clip's timeline is stretched to one walk cycle (TAU), its start offset set so
-## the sample where its leg (FigureConfig.swing_hip to swing_ankle) swings furthest forward lands where Hitbox's left
-## leg does (FORWARD_PHASE): seeking the walk cycle keeps the drawn legs in step with the hit volume's.
-## Over the legs (FI3) the upper body (every bone but FigureConfig.lower_bones) takes a filtered Blend2: the rifle's or the
-## pistol's aim (a BlendSpace1D down, level and up by pitch, the two blended by the hold), the holster's hanging arms
-## over it, the reload as a OneShot through a TimeSeek (FI4: the rifle's or the pistol's clip at the reload's share),
-## the Switch as a OneShot through a TimeScale (forwards to a pistol, backwards to a rifle), and on top of all the
-## trigger press as an additive OneShot. The upper body's branch sits beside the legs' TimeSeeks, never under them.
+## and a crouch BlendSpace1D (CrouchIdle, CrouchWalk at its pace), each under a TimeSeek, blended by crouch; on stairs
+## (CL1) the gait goes through a Blend3 from Stairs_Down to Stairs_Up, each behind a gate; then the jump, the vault (or
+## the climb, CL1: a Transition picks the clip) and the hit call, each its clip under a TimeSeek, and the walk-off under
+## a TimeScale, each a Blend2 over what is below it. Each stepping clip's timeline is stretched to one walk cycle (TAU),
+## its start offset set so the sample where its leg (FigureConfig.swing_hip to swing_ankle) swings furthest forward
+## lands where Hitbox's left leg does (FORWARD_PHASE): seeking the walk cycle keeps the drawn legs in step with the hit
+## volume's. Over the legs (FI3) the upper body (every bone but FigureConfig.lower_bones) takes a filtered Blend2: the
+## rifle's or the pistol's aim (a BlendSpace1D down, level and up by pitch, the two blended by the hold), the holster's
+## hanging arms over it, the reload as a OneShot through a TimeSeek (FI4: the rifle's or the pistol's clip at the
+## reload's share), the Switch as a OneShot through a TimeScale (forwards to a pistol, backwards to a rifle), and on top
+## of all the trigger press as an additive OneShot. The upper body's branch sits beside the legs' TimeSeeks, never under
+## them.
 
 ## The walk cycle's phase where Hitbox.leg_swing's sine peaks: the left leg furthest forward.
 const FORWARD_PHASE := PI * 0.5
@@ -25,9 +27,21 @@ const CROUCH := &"crouch"
 const JUMP_CLIP := &"jump_clip"
 const JUMP_SEEK := &"jump_seek"
 const JUMP := &"jump"
+const STAIRS_UP := &"stairs_up"
+const STAIRS_DOWN := &"stairs_down"
+const STAIRS_UP_GATE := &"stairs_up_gate"
+const STAIRS_DOWN_GATE := &"stairs_down_gate"
+const STAIRS_UP_REST := &"stairs_up_rest"
+const STAIRS_DOWN_REST := &"stairs_down_rest"
+const STAIRS := &"stairs"
 const VAULT_CLIP := &"vault_clip"
+const CLIMB_CLIP := &"climb_clip"
+const VAULT_WAY := &"vault_way"
 const VAULT_SEEK := &"vault_seek"
 const VAULT := &"vault"
+## The vault way's two inputs: the Vault clip or the Climb clip.
+const VAULT_OVER := "over"
+const VAULT_CLIMB := "climb"
 const CALL_CLIP := &"call_clip"
 const CALL_SEEK := &"call_seek"
 const CALL := &"call"
@@ -78,6 +92,10 @@ const P_CROUCH_SEEK := &"parameters/crouch_seek/seek_request"
 const P_CROUCH := &"parameters/crouch/blend_amount"
 const P_JUMP_SEEK := &"parameters/jump_seek/seek_request"
 const P_JUMP := &"parameters/jump/blend_amount"
+const P_STAIRS := &"parameters/stairs/blend_amount"
+const P_STAIRS_UP_GATE := &"parameters/stairs_up_gate/transition_request"
+const P_STAIRS_DOWN_GATE := &"parameters/stairs_down_gate/transition_request"
+const P_VAULT_WAY := &"parameters/vault_way/transition_request"
 const P_VAULT_SEEK := &"parameters/vault_seek/seek_request"
 const P_VAULT := &"parameters/vault/blend_amount"
 const P_CALL_SEEK := &"parameters/call_seek/seek_request"
@@ -137,15 +155,28 @@ static func build(side: FigureSidecar, library: AnimationLibrary, skeleton: Skel
 		crouch.add_blend_point(_stepping(library, cfg.crouch_walk_clip, skeleton, prefix, cfg), crouch.max_space, -1,
 				cfg.crouch_walk_clip)
 	graph.add_node(GAIT, gait)
+	_stairs(graph, library, skeleton, prefix, cfg)
 	graph.add_node(GAIT_SEEK, AnimationNodeTimeSeek.new())
-	graph.connect_node(GAIT_SEEK, 0, GAIT)
+	graph.connect_node(GAIT_SEEK, 0, STAIRS)
 	graph.add_node(CROUCH_SPACE, crouch)
 	graph.add_node(CROUCH_SEEK, AnimationNodeTimeSeek.new())
 	graph.connect_node(CROUCH_SEEK, 0, CROUCH_SPACE)
 	_layer(graph, CROUCH, GAIT_SEEK, CROUCH_SEEK)
 	_seeked(graph, JUMP_CLIP, JUMP_SEEK, _clip(library, cfg.jump_clip))
 	_layer(graph, JUMP, CROUCH, JUMP_SEEK)
-	_seeked(graph, VAULT_CLIP, VAULT_SEEK, _clip(library, cfg.vault_clip))
+	# The vault or the climb (CL1): a Transition picks the clip, so only the one picked plays.
+	var vault_way := AnimationNodeTransition.new()
+	vault_way.xfade_time = 0.0
+	vault_way.input_count = 2
+	vault_way.set_input_name(0, VAULT_OVER)
+	vault_way.set_input_name(1, VAULT_CLIMB)
+	graph.add_node(VAULT_CLIP, _clip(library, cfg.vault_clip))
+	graph.add_node(CLIMB_CLIP, _clip(library, cfg.climb_clip))
+	graph.add_node(VAULT_WAY, vault_way)
+	graph.connect_node(VAULT_WAY, 0, VAULT_CLIP)
+	graph.connect_node(VAULT_WAY, 1, CLIMB_CLIP)
+	graph.add_node(VAULT_SEEK, AnimationNodeTimeSeek.new())
+	graph.connect_node(VAULT_SEEK, 0, VAULT_WAY)
 	_layer(graph, VAULT, JUMP, VAULT_SEEK)
 	_seeked(graph, CALL_CLIP, CALL_SEEK, _clip(library, cfg.call_clip))
 	_layer(graph, CALL, VAULT, CALL_SEEK)
@@ -156,6 +187,26 @@ static func build(side: FigureSidecar, library: AnimationLibrary, skeleton: Skel
 	_upper_body(graph, library, skeleton, prefix, cfg, sprint_offset(gait, cfg))
 	graph.connect_node(&"output", 0, FIRE)
 	return graph
+
+
+## The stairs (CL1): a Blend3 (-1 Stairs_Down, 0 the gait, 1 Stairs_Up; each stairs clip stepping as the gait's
+## clips do, in step with Run_F), each stairs clip behind a gate whose rest is the one-frame gate clip, so off stairs
+## neither plays. A clip the library lacks leaves its gate on the rest (no stairs that way).
+static func _stairs(graph: AnimationNodeBlendTree, library: AnimationLibrary, skeleton: Skeleton3D, prefix: String,
+		cfg: FigureConfig) -> void:
+	graph.add_node(STAIRS, AnimationNodeBlend3.new())
+	for row: Array in [[STAIRS_DOWN, STAIRS_DOWN_GATE, STAIRS_DOWN_REST, cfg.stairs_down_clip, 0],
+			[STAIRS_UP, STAIRS_UP_GATE, STAIRS_UP_REST, cfg.stairs_up_clip, 2]]:
+		var clip_name: StringName = row[3]
+		var clip: AnimationNode = _clip(library, cfg.gate_clip)
+		if library.has_animation(clip_name):
+			clip = _stepping(library, clip_name, skeleton, prefix, cfg)
+		else:
+			push_warning("FigureGraph: no clip %s" % clip_name)
+		graph.add_node(row[0], clip)
+		_gate(graph, row[1], row[0], row[2], _clip(library, cfg.gate_clip))
+		graph.connect_node(STAIRS, row[4], row[1])
+	graph.connect_node(STAIRS, 1, GAIT)
 
 
 ## The Sprint clip's start offset in the gait (its forward swing at FORWARD_PHASE), for Holster_Sprint's arms.

@@ -216,6 +216,39 @@ https://creativecommons.org/publicdomain/zero/1.0/
 No credit is required; we give it anyway. Thank you, Poly Haven.
 
 ================================================================================
+ambientCG materials (Subway's station; CC0, credited by choice)
+================================================================================
+
+ambientCG materials (Subway's station dress, MT3)
+
+station_col.jpg, station_srf.png (one 512 px layer each, in this order):
+   0. "Tiles136B" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Tiles136B
+   1. "Terrazzo002" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Terrazzo002
+   2. "Concrete029" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Concrete029
+   3. "Concrete035" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Concrete035
+   4. "Gravel035" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Gravel035
+   5. "CorrugatedSteel009" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=CorrugatedSteel009
+   6. "PaintedMetal012" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=PaintedMetal012
+   7. "Rust004" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Rust004
+   8. "CorrugatedSteel005" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=CorrugatedSteel005
+   9. "Planks023A" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Planks023A
+  10. "PaintedPlaster011" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=PaintedPlaster011
+  11. "Rubber004" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Rubber004
+  12. "TactilePaving003" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=TactilePaving003
+  13. "Planks008" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Planks008
+  14. "Tiles017" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Tiles017
+  15. "Concrete034" by ambientCG (Lennart Demes), https://ambientcg.com/view?id=Concrete034
+
+Fetched from the CC0 mirror https://github.com/Papyszoo/CC0-Public-Domain-Textures
+(packs/ambientcg-textures, commit fcc4ff97a5a843dc2e242ec9e195389bc46ed7d2) as 512 px KTX2 files, as the build
+machine could not reach ambientcg.com; tools/textures/station_textures.gd bakes them into the two texture arrays
+(each set's colour; its OpenGL normal and roughness packed into one).
+
+Licence: CC0 1.0 Universal (public domain dedication),
+https://creativecommons.org/publicdomain/zero/1.0/
+No credit is required; we give it anyway. Thank you, ambientCG.
+
+================================================================================
 Godot Engine 4.7.2-stable (official)
 ================================================================================
 

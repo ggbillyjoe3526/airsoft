@@ -78,7 +78,7 @@ func test_depots_paint_is_the_palettes() -> void:
 	assert_eq(off, [] as Array[String], "every colour Depot paints is a palette colour")
 
 
-func test_woodlands_paint_is_the_palettes() -> void:
+func test_woodland_paint_is_the_palettes() -> void:
 	var play := PlayTuning.load_default()
 	var style := play.map_style
 	var woods := play.woods

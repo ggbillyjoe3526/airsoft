@@ -329,6 +329,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   draws ambient occlusion and the screen bounce at Godot's Ultra quality at full size, SDFGI in 10 cm cells with the
   most rays and screen-space reflections at full size; Low, Medium and High draw exactly as before, so only the
   preset aimed at the owner's card pays.
+- **Wear marks are their own graphics row, off on Low (2026-11-10, WM1; default, owner's step 4).** Oil stains,
+  and tyre tracks are decals named per map (`dressing.wearMarks`) that add to the floor's procedural wear (SL1, SL2)
+  rather than repeat it. Graphics › Wear marks is on from Medium (decals are clustered and faded at 40 m), off on Low
+  (the modest-PC preset) and unavailable on Compatibility, which draws no decals.
+- **No boot prints on the floors (owner, 2026-11-10, WM1).** The wear marks are oil stains and tyre tracks only; a
+  map naming a boot trail has it left out with a warning.
 - **Every figure keeps its team-colour plate carrier (owner, 2026-10-17, AX1).** The carrier reads like a site's team
   bib and is the strongest team cue at range. A civilian outfit is in `docs/IDEAS.md`.
 
@@ -401,6 +407,15 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   over your floor, at most 1 m deep, heading within 70° of where you look; crouch cover never qualifies. Anywhere else
   Jump is a jump. A vault takes about 0.4 s, carries the replica and holds fire 0.3 s after; crouched, you can't vault.
   Slide into cover is no for now (`docs/IDEAS.md`).
+- **A platform's edge is climbed: Jump at a ledge 0.6 to 0.95 m high whose flat top runs on (owner, 2026-11-10: "the
+  player needs to be able to climb from the tracks up to the platform", CL1).** The vault's heights and heading; a top
+  open and flat for at least 1.5 m (`VaultConfig.climb_depth`, so platforms and docks, never crates or props) is
+  climbed instead of vaulted: about 0.55 s, the body ends standing on the top, the view heaves and the replica is
+  carried low; the prompt reads "Space to climb". Bots climb the same ledges by one-way nav links and drop back down by
+  their reverse. It overrides MT1's "nobody climbs out of a track pit", and Subway's trackside steps went with it
+  (owner: no stairs only there because there was no other way between levels); real stations' stairs, escalators, the
+  north tunnel's end ramp and the cab steps stay. Running up or down a 1:2 slope blends in the Stairs_Up and
+  Stairs_Down clips (owner: "animations for running up and down stairs"), the hit volume with them.
 - **A vault keeps what you press during it; a trigger held through it is the same pull (BP5, 2026-10-16).**
 - **Vaults are loud (owner, 2026-10-13).** Bots hear a vault from 18 m (a sprint 16, a landing 12, a run 11).
 - **Running into a noisy prop gives you away, and a BB ringing off steel draws a look (2026-10-15, NP1; Claude's
@@ -706,16 +721,18 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   The layout lives in `tools/woodland/layout.py` and `world.py`, and `build_map.py` writes `data/maps/woodland.json`:
   change the scripts, never the JSON. The game's blocks are axis-aligned, so pieces are squared and the stream runs
   straight north to south under both crossings. The old wood is a test fixture (`tests/support/maps/old_woodland.json`).
-- **Kingsmere, a closed metro station, is a Dev-only field (owner, 2026-11-10: "Add this to the game as a dev only
-  map", MT1).** The owner's pick for Dev 3's new map (a deep-level station like London's, inspired by Battlefield's
+- **Subway, a closed metro station, is a Dev-only field (owner, 2026-11-10: "Add this to the game as a dev only
+  map", MT1).** Built as Kingsmere, renamed Subway the same day (owner: "Rename ... Kingsmere to Subway"), its id and
+  files with it (`subway`); a save remembering `kingsmere` as the last map picks Subway (`Progress.RENAMED_MAPS`). The
+  owner's pick for Dev 3's new map (a deep-level station like London's, inspired by Battlefield's
   Operation Metro; its own layout, no real names or branding), built from his concept v2
-  (`/mnt/project-files/concepts/metro/v2/`, `tools/kingsmere/`): asymmetric, the Street team starting in the ticket
+  (`/mnt/project-files/concepts/metro/v2/`, `tools/subway/`): asymmetric, the Street team starting in the ticket
   hall at street level and the Tunnel team in a cross-passage between the running tunnels, swapping at half time; one
   spiral stair (street to concourse) and one ordinary stair (concourse to platforms) beside the escalators; tunnels
   0.5 m over the trains' roofs; close quarters above and the long lines only on the platforms ("mostly CQB until the
   platform level where longer sightlines open up"), so its 58 m platform line is its sightline exception. Its working
-  lifts (owner) are a step of their own (MT2); until then their shafts stand shut. Nobody climbs out of a track pit over
-  a platform's edge (a vault never lands on a platform), so every stretch of track has steps up at its ends. Its
+  lifts (owner) are a step of their own (MT2); until then their shafts stand shut. Its track pits have no steps: you
+  climb out over a platform's edge (CL1, below). Its
   Attack / Defend poles stand 2.1 m (`poleHeight`, FlagView), since flag A is inside a car 2.4 m high.
 - **The Street is removed from the game (owner, 2026-11-09: "completely remove the street map from the game", SX1).**
   It was dev only (DT1). Its map file, pictures, layout scripts (`tools/street/`), guards and CI job, its tests and

@@ -1,5 +1,5 @@
 extends SceneTree
-## Pictures of Kingsmere's lifts for review (MT2): a whole PlaySession on Kingsmere, the play frozen, the cars posed
+## Pictures of Subway's lifts for review (MT2): a whole PlaySession on Subway, the play frozen, the cars posed
 ## and the camera put at fixed spots: the two lift doors from the ticket hall (the west car open there, the east's
 ## doorway shut), the west car's doors half open, inside the west car looking at its panel (the platforms called), the
 ## concourse's two doors, and the platforms' lift landing with the east car open. Needs a display, so under xvfb:
@@ -26,12 +26,12 @@ func _run() -> void:
 	var session := PlaySession.new()
 	session.settings = Settings.new(PlayTuning.new())
 	session.settings.graphics_forced = GraphicsPick.forced(args)
-	session.map_id = "kingsmere"
+	session.map_id = "subway"
 	session.match_seed = 3
 	session.autopilot = true
 	root.add_child(session)
 	if session.state == null:
-		push_error("lift_pictures: kingsmere refused")
+		push_error("lift_pictures: subway refused")
 		quit(1)
 		return
 	await process_frame
