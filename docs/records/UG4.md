@@ -35,13 +35,14 @@ tunnel from the hall 103.7 / 102.4, Woodland open field 88.1 / 88.0, under the c
 ## Defaults taken
 
 - Ultra only: the owner's card (RTX 5090 at 4K) is what Ultra targets; High keeps exactly its frame.
-- Adaptive 1 (the most samples) and 128 rays: if Ultra drops under the owner's refresh rate, the rays (96) and the
-  reflections' size give back first (`docs/KNOWN_ISSUES.md`).
+- Adaptive 1 (the most samples) and 128 rays: if Ultra drops under the owner's refresh rate, `fine_adaptive` (0.5)
+  gives back first, then the rays (96) and the reflections' size (`docs/KNOWN_ISSUES.md`; performance's advice).
 - No VoxelGI: it needs a bake per map and SDFGI covers every map live; baked path-traced light is step 5.
 
 ## Checks
 
-- gdlint clean; `test_fine_light` (6) passes with `test_graphics_apply`, `test_look`, `test_eye_adaptation`,
+- gdlint clean; `test_fine_light` (6) and QA's `test_ug4_qa` (7: Ultra to High and back, AO off and on, custom mixes,
+  the renderers, no callers of the old `set_ssao_half`, no orphans) pass, with `test_graphics_apply`, `test_look`, `test_eye_adaptation`,
   `test_ug3_qa`, `test_graphics_table`.
 
 ## Known issues left

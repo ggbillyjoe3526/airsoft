@@ -1063,7 +1063,7 @@ Settings › Graphics › Quality: Low, Medium, High, Ultra or Custom.
   Is it too strong, too weak, too slow? Look through a scope in the tunnel: its picture adapts with the rest.
 - [ ] **Ultra's finer light (UG4, your graphics card).** On Ultra, note F3's frame time in Depot's hall and on
   Woodland's open field, then switch Ambient occlusion to Half and Global illumination to Screen (Custom) and note it
-  again: Ultra should still hold your refresh rate at 4K. Back on Ultra, look at the hall's racking feet, the crate
+  again: Ultra should still hold your refresh rate at 4K, its 1% lows too, with no hitch as you switch to Ultra. Back on Ultra, look at the hall's racking feet, the crate
   stacks' corners and the cabin's walls on Woodland: the shade in corners and under things should be finer and softer,
   with no flicker or crawling dots when you turn; light should not leak through the tunnel walls. Smooth paint and
   floors should reflect the lamps sharply, not as a blur.
