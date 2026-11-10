@@ -40,7 +40,8 @@ names them, scaling per preset.
 
 ## Checks
 
-- gdlint clean; `test_wear_marks` (9) passes with `test_graphics_table`, `test_graphics_apply`, `test_gr1_qa`,
+- gdlint clean; `test_wear_marks` (9) and QA's `test_wm1_qa` (19: malformed marks, old and corrupt saves,
+  Compatibility, teardown, bounded long marks, reproducible map builders) pass, with `test_graphics_table`, `test_graphics_apply`, `test_gr1_qa`,
   `test_map_data`, the settings, look, site dress and woods tests.
 - Pictures (High, marks off and on): `/mnt/project-files/art/graphics/ug5/`.
 
