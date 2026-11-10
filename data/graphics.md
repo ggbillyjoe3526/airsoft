@@ -67,7 +67,8 @@ never stops the game from starting.
   other cost). A map with no bake draws the same either way. A map's dim rooms (`bakedLight.dim` in its file:
   Depot's Lounge) draw their whole light at their share, and the doors, flag poles and props take the baked light
   of the faces near them (each face of a door its own side's). A face's part hidden inside a block that abuts it
-  takes the light of its nearest part in the open, lifting the joint a little.
+  takes the light of its nearest part in the open, lifting the joint a little. While a roof's lamps shine (Lamp
+  light) the bake is drawn without the sun's bounce, as no sun gets under the roof.
 - **Ultra** is the top end: the whole scene's bounce light (SDFGI in 10 cm cells near the eye, six cascades out to
   410 m, 128 rays a probe, with screen-space bounce at the engine's Ultra quality and full size), screen-space
   reflections over the probes at full size, volumetric fog the sun and the bounce light up, the sharpest and farthest
