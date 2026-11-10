@@ -14,6 +14,7 @@ shader_type spatial;
 render_mode blend_mix, cull_back;
 
 #include "res://game/play/look/look_light.gdshaderinc"
+#include "res://game/play/look/retro_vertex.gdshaderinc"
 
 uniform vec4 tint : source_color = vec4(1.0);
 uniform float roughness : hint_range(0.0, 1.0) = 0.8;
@@ -26,6 +27,9 @@ uniform float perforation_pitch = 0.045;
 uniform float perforation_radius = 0.0045;
 uniform float perforation_shade : hint_range(0.0, 1.0) = 0.22;
 uniform float wear : hint_range(0.0, 1.0) = 0.0;
+// Whether Dev › Retro filter wobbles its corners (RF1): not the level's blocks and ground, whose big faces would tilt
+// through the floors and cladding laid a few cm over them (LookMaterials.vertex_colour's `wobble`).
+uniform bool retro_wobble = true;
 instance uniform float wear_floor = 0.0;
 // How high (m) a foot's grime climbs, at most; how strong each wear is at full wear, of the paint it covers.
 uniform float grime_height = 0.9;
@@ -60,6 +64,8 @@ void vertex() {
 	perforation = perforations ? UV : vec2(0.0);
 	wear_at = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	wear_foot = wear_at.y - (MODEL_MATRIX * vec4(0.0, wear_floor, 0.0, 1.0)).y;
+	// Dev › Retro filter: corners on the retro screen's pixels while it is on (RF1).
+	POSITION = retro_position(PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0), IN_SHADOW_PASS || !retro_wobble);
 }
 
 void fragment() {

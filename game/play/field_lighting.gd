@@ -69,6 +69,8 @@ var _key_energy: float = 0.0
 var _ambient_energy: float = 0.0
 ## The map's reflection probes (`add_probes`), shown while Reflections draw them.
 var _probes: Node3D = null
+## The preset the field was built from, whose haze Dev › Retro filter's comes off back to (retro_haze).
+var _cfg: LightingConfig = null
 
 
 ## A node holding the environment and the sun, graded and its effects set up by `look` (the built-in look when null).
@@ -92,14 +94,7 @@ static func build(cfg: LightingConfig, look: LookConfig = null) -> FieldLighting
 	env.ssao_enabled = cfg.ssao
 	env.ssao_radius = cfg.ssao_radius
 	env.ssao_intensity = cfg.ssao_intensity
-	if cfg.fog:
-		env.fog_enabled = true
-		env.fog_mode = Environment.FOG_MODE_DEPTH
-		env.fog_light_color = cfg.fog_colour
-		env.fog_density = 1.0
-		env.fog_depth_begin = cfg.fog_from
-		env.fog_depth_end = cfg.fog_to
-		env.fog_sky_affect = cfg.fog_sky
+	_own_haze(env, cfg)
 	_grade(env, root._look)
 	root.environment = env
 	var world := WorldEnvironment.new()
@@ -118,7 +113,40 @@ static func build(cfg: LightingConfig, look: LookConfig = null) -> FieldLighting
 	root.sun = sun
 	root._key_energy = cfg.sun_energy
 	root._ambient_energy = cfg.ambient_energy
+	root._cfg = cfg
 	return root
+
+
+## Dev › Retro filter's haze (RF1, RetroFilter) on: a depth haze from `from` to `to` m from the eye covering at most
+## `most` of the view, in the preset's haze colour (its night haze, else its sky's horizon) times `light`, over the
+## sky as much as the preset's haze is (none by day). Off: the preset's own haze again (none by day).
+func retro_haze(on: bool, from: float = 0.0, to: float = 0.0, most: float = 0.0, light: float = 0.0) -> void:
+	if environment == null or _cfg == null:
+		return
+	if not on:
+		_own_haze(environment, _cfg)
+		return
+	var colour := _cfg.fog_colour if _cfg.fog else _cfg.sky_horizon
+	environment.fog_enabled = true
+	environment.fog_mode = Environment.FOG_MODE_DEPTH
+	environment.fog_light_color = Color(colour.r * light, colour.g * light, colour.b * light)
+	environment.fog_density = most
+	environment.fog_depth_begin = from
+	environment.fog_depth_end = to
+	environment.fog_sky_affect = _cfg.fog_sky
+
+
+## `cfg`'s haze on `env`: a depth haze from fog_from to fog_to m, or none.
+static func _own_haze(env: Environment, cfg: LightingConfig) -> void:
+	env.fog_enabled = cfg.fog
+	if not cfg.fog:
+		return
+	env.fog_mode = Environment.FOG_MODE_DEPTH
+	env.fog_light_color = cfg.fog_colour
+	env.fog_density = 1.0
+	env.fog_depth_begin = cfg.fog_from
+	env.fog_depth_end = cfg.fog_to
+	env.fog_sky_affect = cfg.fog_sky
 
 
 ## The day's procedural sky in `cfg`'s colours.

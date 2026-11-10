@@ -10,8 +10,9 @@ const CLEAR_SHADER := preload("res://game/play/look/look_clear.gdshader")
 ## A material drawing a model's vertex colours in the shared light, `roughness` and `metallic` over all of it. With
 ## `srgb`, the colours are sRGB (a mesh built in code with SurfaceTool or a MultiMesh's instance colours), not linear
 ## (a glTF's). `wear` is how worn it is drawn (SL2: grime, streaks, stains, dust; 0 clean), times LookConfig.wear.
+## Without `wobble`, Dev › Retro filter leaves its corners true (RF1: the level's blocks and ground).
 static func vertex_colour(roughness: float, metallic: float, tint: Color = Color.WHITE,
-		srgb: bool = false, wear: float = 0.0) -> ShaderMaterial:
+		srgb: bool = false, wear: float = 0.0, wobble: bool = true) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = VERTEX_SHADER
 	m.set_shader_parameter(&"roughness", roughness)
@@ -19,6 +20,7 @@ static func vertex_colour(roughness: float, metallic: float, tint: Color = Color
 	m.set_shader_parameter(&"tint", tint)
 	m.set_shader_parameter(&"srgb_colours", srgb)
 	m.set_shader_parameter(&"wear", wear)
+	m.set_shader_parameter(&"retro_wobble", wobble)
 	return m
 
 

@@ -64,7 +64,9 @@ intentions, Time of day or Disable levelling changed, or on dev content, stays o
 - **Disable levelling** unlocks everything and gives no XP (your level stays on the rail, greyed); **Reset level**
   goes back to level 0.
 - **Skin-only arms** shows your first-person arms with bare hands instead of gloves, at once.
-- **Retro pixels**, **Pretend slow frames** (to try the graphics step-down), **Log a test error** and **Crash the game
+- **Retro filter** draws the 3D view as a 1990s console did: 240 lines of square pixels, 15-bit dithered colour,
+  corners that wobble as you move, textures that swim and a short haze (Lines and Shades sliders under it).
+- **Pretend slow frames** (to try the graphics step-down), **Log a test error** and **Crash the game
   now** (to try the crash screen). **End the round now** is in the pause menu.
 
 ### Dev content

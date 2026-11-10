@@ -1,6 +1,6 @@
 extends GutTest
 ## The Dev settings in a match on Depot (game/play/play_session.gd): game speed slows the fixed tick, bots hold fire,
-## Spectate any bot follows a bot while you stand still, the bot intention labels and Retro pixels are built only while
+## Spectate any bot follows a bot while you stand still, the bot intention labels and Retro filter are built only while
 ## on and freed once off, End the round now from the pause menu, the record mark, and a dev map counted as dev content.
 
 var session: PlaySession = null
@@ -29,7 +29,7 @@ func test_nothing_on_plays_on_the_record() -> void:
 	assert_false(session.state.off_record)
 	assert_false(session.state.dev_content)
 	assert_eq(session.find_children("*", "BotIntentView", true, false).size(), 0)
-	assert_eq(session.find_children("*", "RetroPixels", true, false).size(), 0)
+	assert_eq(session.find_children("*", "RetroFilter", true, false).size(), 0)
 
 
 func test_game_speed_runs_fewer_fixed_ticks() -> void:
@@ -117,24 +117,35 @@ func test_bot_intentions_are_built_while_on_and_freed_once_off() -> void:
 	assert_eq(session.find_children("*", "BotIntentView", true, false).size(), 0)
 
 
-func test_retro_pixels_are_built_while_on_and_freed_once_off() -> void:
-	s.dev.retro_pixels = true
+func test_retro_filter_is_built_while_on_and_freed_once_off() -> void:
+	s.dev.retro_filter = true
 	await _play()
-	var retro: Array[Node] = session.find_children("*", "RetroPixels", true, false)
+	var retro: Array[Node] = session.find_children("*", "RetroFilter", true, false)
 	assert_eq(retro.size(), 1)
 	assert_false(session.state.off_record, "a look only")
+	var filter := retro[0] as RetroFilter
+	assert_gt(filter.snap().x, 0.0, "RF1: the field's corners snap while it is on")
+	assert_eq(filter.snap().z, RetroFilter.AFFINE)
+	var env := session._lighting.environment
+	assert_true(env.fog_enabled, "RF1: its haze on")
+	assert_eq(env.fog_depth_end, RetroFilter.HAZE_TO)
 	# BP6: the Dev tab's sliders reach the shader while it is up
-	s.dev.retro_pixel_size = 9
-	s.dev.retro_shades = 3
+	s.dev.retro_lines = 120
+	s.dev.retro_levels = 3
 	s.mark_changed()
 	await wait_process_frames(1)
-	var mat := ((retro[0] as RetroPixels).get_child(0) as ColorRect).material as ShaderMaterial
-	assert_eq(float(mat.get_shader_parameter(&"pixel_size")), 9.0)
-	assert_eq(float(mat.get_shader_parameter(&"shades")), 3.0)
-	s.dev.retro_pixels = false
+	var mat := (filter.get_child(0) as ColorRect).material as ShaderMaterial
+	var height := session.get_viewport().get_visible_rect().size.y
+	assert_eq(float(mat.get_shader_parameter(&"pixel_size")), float(RetroFilter.pixel_size(height, 120)))
+	assert_eq(float(mat.get_shader_parameter(&"levels")), float(RetroFilter.LEVELS_MIN), "held to its end")
+	s.dev.retro_filter = false
 	s.mark_changed()
+	# Out of the tree at once, its look off before it is freed.
+	assert_eq(session.find_children("*", "RetroFilter", true, false).size(), 0)
+	assert_eq(filter.snap(), Vector4.ZERO, "the corners true again once off")
+	assert_eq(env.fog_enabled, session._light.fog, "the map's own haze back")
 	await wait_process_frames(1)
-	assert_eq(session.find_children("*", "RetroPixels", true, false).size(), 0)
+	assert_false(is_instance_valid(filter), "freed")
 
 
 func test_end_the_round_from_the_pause_menu() -> void:

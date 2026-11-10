@@ -6,6 +6,8 @@
 shader_type spatial;
 render_mode cull_disabled;
 
+#include "res://game/play/look/retro_vertex.gdshaderinc"
+
 uniform vec3 team_colour : source_color = vec3(0.23, 0.53, 0.96);
 uniform vec3 pale : source_color = vec3(0.95, 0.94, 0.89);
 // Width and height of the cloth (m), so the roundel stays round.
@@ -22,6 +24,8 @@ uniform vec3 dark : source_color = vec3(0.15, 0.16, 0.17);
 void vertex() {
 	float u = UV.x;
 	VERTEX.z += sin(u * waves - TIME * wave_speed + UV.y * 1.4) * wave * u;
+	// Dev › Retro filter: corners on the retro screen's pixels while it is on (RF1).
+	POSITION = retro_position(PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0), IN_SHADOW_PASS);
 }
 
 void fragment() {

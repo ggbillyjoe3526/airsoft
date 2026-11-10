@@ -714,23 +714,23 @@ msgstr "BOT INTENTIONS"
 msgid "DEV_BOT_INTENT_HELP"
 msgstr "A small label over each bot in play says what it is doing: advancing, fighting, in cover, searching, bringing a mag."
 
-msgid "DEV_RETRO_PIXELS"
-msgstr "RETRO PIXELS"
+msgid "DEV_RETRO_FILTER"
+msgstr "RETRO FILTER"
 
-msgid "DEV_RETRO_PIXELS_HELP"
-msgstr "The 3D view in chunky pixels and a small dithered palette. Changes only what you see."
+msgid "DEV_RETRO_FILTER_HELP"
+msgstr "The 3D view as a 1990s console drew it: low resolution, wobbling corners, swimming textures, dithered colour and haze. Changes only what you see."
 
-msgid "DEV_RETRO_SIZE"
-msgstr "PIXEL SIZE"
+msgid "DEV_RETRO_LINES"
+msgstr "LINES"
 
-msgid "DEV_RETRO_SIZE_HELP"
-msgstr "How big Retro pixels' blocks are, in screen pixels."
+msgid "DEV_RETRO_LINES_HELP"
+msgstr "How many rows of pixels Retro filter draws top to bottom. 240 is the old consoles'; fewer looks chunkier."
 
 msgid "DEV_RETRO_SHADES"
 msgstr "SHADES"
 
 msgid "DEV_RETRO_SHADES_HELP"
-msgstr "How many shades of red, green and blue Retro pixels keeps. Fewer looks older."
+msgstr "How many shades of red, green and blue Retro filter keeps. 32 is the old consoles'; fewer looks older."
 
 msgid "DEV_ROBOTS"
 msgstr "ROBOTS"
