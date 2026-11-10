@@ -32,7 +32,9 @@ in `docs/PROCESS.md`.
   the top graphics for the whole game (2026-11-09: Ultra as close to path-traced light as Godot gets, scaling per
   preset, baked path tracing before live ray tracing), in five steps: real lamp lights with shadows (done: UG1), a
   hall lit by its lamps alone with no sun indoors (UG2), eye adaptation (UG3), finer bounce light, reflections, ambient occlusion (UG4)
-  and wear decals (WM1), then baked path-traced light. The owner added a replica (2026-11-10): the Compact SMG, its numbers
+  and wear decals (WM1), then baked path-traced light (PT1: a lamp bake of the walls and floors proved near invisible
+  beside Ultra's scene bounce, as Depot's hall is mostly models; the owner stopped it there, 2026-11-10, keeping the
+  live bounce; the sun's bounce goes from under a lit roof). The Ultra push is done. The owner added a replica (2026-11-10): the Compact SMG, its numbers
   and play first (CS1, Dev content), then its own model from his photos (CS2). And a
   new map (2026-11-10): Subway, a closed metro station on three levels, from his concept v2: its greybox as Dev
   content (MT1, done), then its working lifts (MT2, done), its CC0 materials (MT3, done), then its models and lamps.

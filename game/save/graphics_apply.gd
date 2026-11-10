@@ -294,8 +294,9 @@ static func apply_picture(values: GraphicsQuality, viewport: Viewport) -> void:
 
 ## The match's sun (shadows on, their range, contact-hardening on Softest), its ambient occlusion (on, and half or full
 ## size), its global illumination, reflections, glow and volumetric fog (FieldLighting.set_effects), eye adaptation, the wind dust's share,
-## the kicked dust (on with any wind dust), the level's baked light (a new mesh only when it changes) and a wood's
-## dressing (WoodsView: its parts by Mesh detail, its fireflies and motes by the wind dust's share), from `values`
+## the kicked dust (on with any wind dust), the level's baked light (a new mesh only when it changes; no sun's bounce
+## while the roof lamps shine) and a wood's dressing (WoodsView: its parts by Mesh detail, its fireflies and motes by
+## the wind dust's share), from `values`
 ## (already drawable), and an indoor field's roof lamps as real lights (RoofLamps, Lamp light; their shadows
 ## contact-hardening on Softest) with the sun turned down while they shine, and the floors' worn marks (WearMarks,
 ## Wear marks). Any of `lighting`, `dust`, `level`, `kicked`, `woods`, `lamps` and `marks` may be null.
@@ -321,7 +322,7 @@ static func apply_field(values: GraphicsQuality, lighting: FieldLighting, dust: 
 	if dust != null:
 		dust.set_share(values.wind_dust / PERCENT)
 	if level != null:
-		level.set_baked_light(values.baked_light)
+		level.set_baked_light(values.baked_light, lamps != null and values.lamp_lights != GraphicsQuality.LampLights.OFF)
 	if kicked != null:
 		kicked.set_on(values.wind_dust > 0)
 	if woods != null:

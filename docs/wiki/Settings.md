@@ -58,8 +58,8 @@ every preset; turn it on if you want it.
 - **Ultra** is the top end, for the most powerful cards: bounce light from the whole field, worked out finely near
   you so thin walls and tree trunks keep their shade, sharp reflections on screen, the finest ambient occlusion in
   corners and under things, volumetric haze and the softest shadows, sharp at their foot and soft away from it.
-- **Baked light** gives Depot soft shade in its corners, warm light bounced off sunlit walls and its dim Lounge; its
-  doors, flag poles and props take the same light.
+- **Baked light** gives Depot soft shade in its corners, warm light bounced off sunlit walls (only while the roof
+  lamps are off: no sun gets in under them) and its dim Lounge; its doors, flag poles and props take the same light.
 - **Mesh detail** sets how near a player must be to be drawn in full detail. Through a scope that is how near they
   look, so a far player seen at 6x keeps the detail of one six times nearer; only the players in the scope's glass do,
   the rest of the view keeps its own. It also sets how many puffs make up a smoke cloud: fewer, bigger ones on Low and

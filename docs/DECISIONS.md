@@ -204,6 +204,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   It replaces the Dev 2 look; `docs/ART.md` is rewritten to it. Built in steps SL1 to SL4 (`docs/records/SL1.md`).
 - **Live ray tracing is not planned (owner, 2026-11-09).** Ultra gets baked path-traced light first ("Baked path
   tracing first"), then he dropped live ray tracing ("Never mind the live raytracing").
+- **Ultra keeps its live bounce light; no baked path-traced light (owner, 2026-11-10, PT1).** A path-traced lamp
+  bake of the walls and floors was near invisible beside Ultra's scene bounce (Depot's hall is mostly models); offered
+  that, full lightmaps or stopping, he chose "Stop here, keep live bounce". The Ultra push ends after step 4.
 - **The art direction is game-wide and is about colour and look, not content (owner, 2026-10-31).** "Just because
   something isn't in the art direction doesn't mean it can't appear." Depot, Woodland and every later map use the same
   look, as shared code (`LookConfig`, the shared light): `docs/ART.md` › A map in the look.

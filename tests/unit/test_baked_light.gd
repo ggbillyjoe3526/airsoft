@@ -188,6 +188,40 @@ func test_depot_draws_its_bake_as_vertex_colour_in_one_draw_call() -> void:
 	assert_eq(_greybox(level).mesh.surface_get_array_len(0), DEPOT_UNTILED_VERTICES, "off again: untiled")
 
 
+func test_depot_under_its_shining_lamps_draws_no_sun_bounce_and_switches_back() -> void:
+	var level := _level("depot")
+	level.set_baked_light(true)
+	var sunny: PackedColorArray = _greybox(level).mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR]
+	var mesh := _greybox(level).mesh
+	level.set_baked_light(true, true)
+	assert_true(level.baked_light_drawn())
+	assert_ne(_greybox(level).mesh, mesh, "rebuilt without the sun's bounce")
+	var lamplit: PackedColorArray = _greybox(level).mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR]
+	assert_eq(lamplit.size(), sunny.size())
+	var warmer := 0
+	var brighter := 0
+	for i in sunny.size():
+		if lamplit[i].get_luminance() > sunny[i].get_luminance() + 1e-4:
+			brighter += 1
+		if sunny[i].get_luminance() > lamplit[i].get_luminance() + 1e-3:
+			warmer += 1
+	assert_eq(brighter, 0, "nothing lighter without the sun's bounce")
+	assert_gt(warmer, sunny.size() / 10, "the sun's bounce is gone under the lit roof (PT1)")
+	mesh = _greybox(level).mesh
+	level.set_baked_light(true, true)
+	assert_eq(_greybox(level).mesh, mesh, "the same again: not rebuilt")
+	level.set_baked_light(true, false)
+	assert_eq(_greybox(level).mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR], sunny, "the lamps off: the sun's bounce back")
+
+
+func test_a_field_with_no_roof_lamps_keeps_the_suns_bounce_whatever_the_lamp_setting() -> void:
+	var level := _level("range")
+	level.set_baked_light(true)
+	var mesh := _greybox(level).mesh
+	level.set_baked_light(true, true)
+	assert_eq(_greybox(level).mesh, mesh, "nothing to shine: not rebuilt")
+
+
 func test_depot_at_night_keeps_its_bake_with_no_warning_drawn_by_its_sky_share_alone() -> void:
 	var day := _level("depot")
 	var m := MapData.load_map("depot", play.map_style, 1)
@@ -295,3 +329,24 @@ func test_a_tiny_tile_size_is_turned_away_before_tiling() -> void:
 	assert_lt(Time.get_ticks_msec() - started, 200, "no millions of vertices made")
 	assert_false(level.baked_light_drawn())
 	assert_push_warning("rebake with tools/bake_light.gd")
+
+
+func test_doors_and_props_follow_the_light_when_only_the_lamps_toggle() -> void:
+	var session := PlaySession.new()
+	session.map_id = "depot"
+	session.practice = true
+	session.autopilot = true
+	add_child_autofree(session)
+	await wait_physics_frames(2)
+	var base := GraphicsTable.shared().preset(&"high").copy()
+	base.baked_light = true
+	base.lamp_lights = GraphicsQuality.LampLights.OFF
+	session._apply_graphics(base)
+	var lit := base.copy()
+	lit.lamp_lights = GraphicsQuality.LampLights.NEAR
+	session._apply_graphics(lit)
+	assert_true(session._level.baked_light_drawn())
+	assert_not_null(session._doors, "Depot has doors")
+	var held: PackedColorArray = session._doors._lights_down.duplicate()
+	session._relight()
+	assert_eq(session._doors._lights_down, held, "the doors hold the light now drawn, not the one before the lamps lit")

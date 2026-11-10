@@ -17,7 +17,8 @@ extends Node3D
 ## was baked under, whatever preset plays; at night it draws its sky share alone (no sun to bounce; WL3). A dim room
 ## (MapData.baked_dim_boxes) draws its whole light at its share: the bake dims its sky and bounce, the draw the rest.
 ## What stands beside the baked faces with no bake of its own (doors, poles, props) takes the light near it from
-## `baked_lights` (BakedLightNear, BP7).
+## `baked_lights` (BakedLightNear, BP7). While an indoor field's roof lamps shine as real lights (Lamp light), no sun
+## gets under the roof, so the bake is drawn without the sun's bounce (PT1).
 ##
 ## Site dress (DD1): a map naming one (`dressing.site`) built with a SiteLook draws the very same faces, baked or not,
 ## in the site's one material (SiteSurface) instead of the greybox's: each vertex tells the shader its box and finish,
@@ -77,6 +78,10 @@ var _tiles: Array[MeshInstance3D] = []
 var _baked: bool = false
 var _bake: BakedLight = null
 var _bake_looked: bool = false
+## Whether the roof's lamps shine as real lights (`set_baked_light`): the bake is drawn without the sun's bounce.
+var _lamps_shine: bool = false
+## How many times `set_baked_light` has rebuilt the mesh (`baked_light_builds`).
+var _light_builds: int = 0
 ## The baked vertices drawn, each one's normal and its light (a linear multiplier), kept while the bake is drawn for
 ## `baked_lights`, made from them when first asked.
 var _lit_at: PackedVector3Array = PackedVector3Array()
@@ -334,14 +339,19 @@ func _add_rest() -> void:
 	_make_mover_bodies(_body)
 
 
-## Draws the map's baked light, or not (Settings › Graphics › Baked light), rebuilding the greybox mesh alone and only
-## when what is drawn changes. A map with no bake, or a bake that doesn't fit its mesh, draws as without it.
-func set_baked_light(on: bool) -> void:
+## Draws the map's baked light, or not (Settings › Graphics › Baked light), without the sun's bounce while the roof's
+## lamps shine as real lights (`lamps`, Lamp light: no sun gets under the roof); rebuilding the greybox mesh alone and
+## only when what is drawn changes. A map with no bake, or a bake that doesn't fit its mesh, draws as without it.
+func set_baked_light(on: bool, lamps: bool = false) -> void:
 	assert(map != null, "MapLevel.set_baked_light needs `build` first")
 	var draw := on and _bake_or_null() != null
-	if draw == _baked:
+	var shine := lamps and not map.roof_lamps.is_empty()
+	if draw == _baked and (not draw or shine == _lamps_shine):
+		_lamps_shine = shine
 		return
 	_baked = draw
+	_lamps_shine = shine
+	_light_builds += 1
 	var old := _mesh
 	remove_child(old)
 	old.queue_free()
@@ -352,6 +362,12 @@ func set_baked_light(on: bool) -> void:
 ## Whether the baked light is drawn.
 func baked_light_drawn() -> bool:
 	return _baked
+
+
+## How many times the light drawn has changed (`set_baked_light` rebuilt the mesh): what stands beside the baked faces
+## takes their light again (`baked_lights`) each time it does, whether the bake was switched or only the lamps.
+func baked_light_builds() -> int:
+	return _light_builds
 
 
 ## The baked light near what stands beside the baked faces (BakedLightNear), made the first time it is asked for after
@@ -770,7 +786,7 @@ static func _site_mesh(m: MapData, style: MapStyle, site: SiteLook) -> ArrayMesh
 
 ## The same faces cut into tiles, each vertex's colour lit by the bake (`_bake_or_null` has checked it fits), and the
 ## ground unlit. On a site-dressed map the colour is the light alone (linear, for the site's material) and each vertex
-## carries its block's box and finish.
+## carries its block's box and finish. At night, or under a roof whose lamps shine (`_lamps_shine`), no sun's bounce.
 func _baked_mesh() -> ArrayMesh:
 	var t := GreyboxFaces.tile(map, _light.cell, _light.ground_y)
 	var n := t.positions.size()
@@ -781,7 +797,7 @@ func _baked_mesh() -> ArrayMesh:
 	for b in map.blocks:
 		block_linear.append(_style.block_colour(b).srgb_to_linear() if _site == null else Color.WHITE)
 	var dark := _light.sky_share / BakedLight.FULL
-	var warm := 0.0 if _night else _light.bounce_gain / BakedLight.FULL
+	var warm := 0.0 if _night or _lamps_shine else _light.bounce_gain / BakedLight.FULL
 	var sky := _bake.sky
 	var bounce := _bake.bounce
 	var lights := PackedColorArray()
