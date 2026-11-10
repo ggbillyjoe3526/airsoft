@@ -140,3 +140,68 @@ func test_show_page_keeps_inside_the_pages_there_are() -> void:
 	assert_eq(dots.page(), 1, "kept inside the pages there are")
 	dots.show_page(-3)
 	assert_eq(dots.page(), 0)
+
+
+func test_page_counts_at_the_ten_level_edges() -> void:
+	var expected := {1: 1, 2: 1, 11: 1, 12: 2, 21: 2, 22: 3}
+	for count: int in expected:
+		var dots := ArmoryDots.new(count, 0, 0.0)
+		assert_eq(dots.page_count(), expected[count], "%d dots" % count)
+		dots.free()
+
+
+func test_every_page_dot_lies_inside_the_track_and_dot_at_never_leaves_the_page() -> void:
+	for count: int in [1, 2, 11, 12, 21, 22]:
+		var dots := ArmoryDots.new(count, count - 1, 0.0)
+		dots.size = Vector2(800.0, ArmoryDots.HEIGHT)
+		add_child_autofree(dots)
+		for p in dots.page_count():
+			dots.show_page(p)
+			for x: float in [-500.0, 0.0, 400.0, 800.0, 5000.0]:
+				var at := dots.dot_at(x)
+				assert_between(at, dots.first_shown(), dots.last_shown(), "%d dots, page %d, x %f" % [count, p, x])
+			assert_lte(dots.dot_position(dots.last_shown()).x, 800.0 - ArmoryDots.END_ROOM + 0.01)
+			assert_gte(dots.dot_position(dots.first_shown()).x, ArmoryDots.END_ROOM - 0.01)
+
+
+func test_a_level_beyond_the_count_opens_on_the_last_page_and_draws() -> void:
+	var dots := ArmoryDots.new(16, 99, 0.0)
+	dots.size = Vector2(800.0, ArmoryDots.HEIGHT)
+	add_child_autofree(dots)
+	await wait_process_frames(2)
+	assert_eq(dots.page(), 1)
+
+
+func test_with_levelling_off_the_track_opens_on_the_cap_page_and_the_arrows_work() -> void:
+	var facts := ArmoryFacts.new(table, pool, 0, true, false)
+	var summary := ArmorySummary.new(facts)
+	add_child_autofree(summary)
+	await wait_process_frames(2)
+	var dots := summary.bar()
+	assert_eq(dots.page(), dots.page_count() - 1)
+	assert_true(summary.page_on_arrow().disabled, "on the last page there is nothing further on")
+	assert_true(summary.page_back_arrow().disabled == (dots.page() == 0))
+	summary.page_back_arrow().pressed.emit()
+	assert_eq(dots.page(), maxi(dots.page_count() - 2, 0))
+
+
+func test_freeing_the_summary_leaves_no_orphan_nodes() -> void:
+	var before := Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)
+	for i in 3:
+		var page := _page(0)
+		await wait_process_frames(1)
+		page.summary().page_on_arrow().pressed.emit()
+		page.queue_free()
+		await wait_process_frames(2)
+	assert_lte(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT), before)
+
+
+func test_page_changed_fires_once_per_turn_and_not_when_nothing_moves() -> void:
+	var dots := ArmoryDots.new(16, 0, 0.0)
+	add_child_autofree(dots)
+	watch_signals(dots)
+	dots.show_page(0)
+	assert_signal_not_emitted(dots, "page_changed")
+	dots.show_page(1)
+	dots.show_page(1)
+	assert_signal_emit_count(dots, "page_changed", 1)
