@@ -10,10 +10,11 @@ const MODE_PRACTICE := "practice"
 ## The mode picked first, and taken first wherever the picked one can't be played there (BP8, owner: Attack / Defend);
 ## a map without a pole falls back to the first of MODES it hosts.
 const DEFAULT_MODE := MODE_ATTACK_DEFEND
-## Every mode, in the order the cards show them.
-const MODES: PackedStringArray = ["elimination", "attack_defend", "practice"]
+## Every mode, in the order the cards show them, top to bottom (owner, 2026-11-10: Attack / Defend first, then
+## Elimination, then Practice).
+const MODES: PackedStringArray = ["attack_defend", "elimination", "practice"]
 ## The modes that are built; the others show greyed with a LATER tag.
-const BUILT_MODES: PackedStringArray = ["elimination", "attack_defend", "practice"]
+const BUILT_MODES: PackedStringArray = ["attack_defend", "elimination", "practice"]
 ## The tag a mode card carries on a map that doesn't host it (a translation key): Elimination and Attack / Defend say
 ## FIELDS ONLY on the range. Every map hosts Practice.
 const FIELDS_ONLY_KEY := "MENU_FIELDS_ONLY"
@@ -32,7 +33,7 @@ const MODE_BLURB: Dictionary[String, String] = {
 ## Arrays: Godot 4.7.2 keeps a const Dictionary[K, PackedStringArray]'s values as Arrays and can crash reading one by a
 ## variable key (GraphicsTable's pattern).
 const KIND_MODES: Dictionary[StringName, Array] = {
-	&"field": ["elimination", "attack_defend", "practice"],
+	&"field": ["attack_defend", "elimination", "practice"],
 	&"range": ["practice"],
 }
 ## The rule sets (concepts `rules-skirmish.png`, `rules-custom.png`): Skirmish plays the round tuning as it is, Custom

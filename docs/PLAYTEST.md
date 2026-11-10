@@ -1268,6 +1268,11 @@ AEG Rifle until its own model.
 - [ ] **Your level.** The rail's foot shows LVL n. Settings › Dev › Disable levelling on: it stays, greyed, and its
   tooltip says levelling is off.
 
+## The Match page's mode order (MOD1)
+
+- [ ] **Mode order.** Under MODE the cards read Attack / Defend at the top, then Elimination, then Practice. Attack /
+  Defend is still picked at start; pick the Range, then Depot again: your mode comes back.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
