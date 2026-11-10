@@ -286,7 +286,7 @@ class View:
 	## The overtime flag's chequered cloth (px from its foot, as the pole's flag), its checks across and down.
 	const CHEQUER := Rect2(0.0, -15.0, 12.0, 8.0)
 	const CHEQUER_CHECKS := Vector2i(3, 2)
-	const POLE_COLOUR := Color("e6ebf2")
+	const POLE_COLOUR := GameTheme.TEXT
 	const YOU_COLOUR := Color("ffffff")
 	## Stroke widths (px) the concept gives: the outlines under the arrows, the pole, the hold and a dot's ring.
 	const OUTLINE := 1.8

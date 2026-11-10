@@ -3,7 +3,7 @@ extends Control
 ## The menus' backdrop (UI concept B, owner 2026-11-02): the picked field's picture (its small copy,
 ## assets/maps/cards/<id>.jpg), softly blurred, under a charcoal shade that is darker at the left (behind the rail and
 ## the page's first column) than at the right. The blur is made once per field on the CPU (shrunk, then grown again
-## with a smooth filter), so drawing it costs one textured rect a frame. A field with no picture leaves the plain night
+## with a smooth filter), so drawing it costs one textured rect a frame. A field with no picture leaves the plain charcoal
 ## colour.
 
 const PICTURE_DIR := "res://assets/maps/cards/"

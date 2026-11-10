@@ -15,7 +15,7 @@ const CLOTH: PackedVector2Array = [
 ]
 const ROUNDEL := Vector2(12.2, 8.2)
 const ROUNDEL_RADIUS := 2.1
-const MAST_COLOUR := Color("e6ebf2")
+const MAST_COLOUR := GameTheme.TEXT
 const ROUNDEL_COLOUR := Color("f3efe2")
 ## The chequered cloth's box in the viewbox, its checks across and down, its edge (px at 24) and its colours (the
 ## overtime flag's off-white (238, 234, 224) and dark, as FlagViewConfig draws its cloth).

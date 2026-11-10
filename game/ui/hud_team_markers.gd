@@ -9,7 +9,7 @@ extends Control
 const SIZE := Vector2(38.0, 29.0)
 const HAND := 22.0
 const HAND_GAP := 2.0
-const OUT_GREY := Color("c9d0db")
+const OUT_GREY := Color("cfcac2")
 ## Where the sight checks aim: the eye, and this share of the way up from the feet to it (the chest).
 const CHEST_SHARE := 0.65
 

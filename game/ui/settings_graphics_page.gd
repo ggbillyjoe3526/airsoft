@@ -646,7 +646,7 @@ class CostSquares:
 	extends Control
 	const SIDE := 9.0
 	const GAP := 3.0
-	const FILLED := Color("8a94a6")
+	const FILLED := Color("96918a")
 
 	var _cost: int = 0
 	var _word: String = ""

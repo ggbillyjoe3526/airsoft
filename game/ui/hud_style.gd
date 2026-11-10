@@ -124,13 +124,13 @@ static func opacity_of(part: CanvasItem) -> float:
 
 
 ## A dark panel at `alpha` with an `edge` and the given margins, at 100% until restyle() brings it to a panel opacity.
-static func navy_box(alpha: float, edge: Color, margin_x: int, margin_y: int) -> StyleBoxFlat:
+static func dark_box(alpha: float, edge: Color, margin_x: int, margin_y: int) -> StyleBoxFlat:
 	var box := GameTheme.box(backing(alpha), edge, margin_x, margin_y)
 	box.set_meta(BOX_ALPHA, alpha)
 	return box
 
 
-## Brings `root` and every part under it to the panel `opacity`: each navy_box, and each part that draws its own
+## Brings `root` and every part under it to the panel `opacity`: each dark_box, and each part that draws its own
 ## backing (backing_on, opacity_of). Only backgrounds fade; icons, numbers and words keep their own alpha. Whoever owns
 ## the parts calls it again for parts added later.
 static func restyle(root: Control, opacity: float) -> void:
@@ -298,7 +298,7 @@ static func caps(key: String) -> String:
 
 ## A flat panel in the page colour at `alpha` with the given margins.
 static func panel_box(alpha: float, margin_x: int, margin_y: int) -> StyleBoxFlat:
-	return navy_box(alpha, Color(0.0, 0.0, 0.0, 0.0), margin_x, margin_y)
+	return dark_box(alpha, Color(0.0, 0.0, 0.0, 0.0), margin_x, margin_y)
 
 
 ## Inter at `weight` whose line is `font_size` tall, as the concept's line-height 1 sets it: the font's own leading

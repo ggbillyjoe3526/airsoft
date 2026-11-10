@@ -51,8 +51,8 @@ func setup(replicas: Array[ReplicaConfig], paints: Array[StringName], realistic:
 	_pictures.name = "Pictures"
 	_pictures.replica_side = PICTURE_SIDE
 	add_child(_pictures)
-	_lit_box = HudStyle.navy_box(HudStyle.BACKING_PANEL, GameTheme.ACCENT, PLATE_PAD.x, PLATE_PAD.y)
-	_dim_box = HudStyle.navy_box(HudStyle.BACKING_PANEL, Color(0.0, 0.0, 0.0, 0.0), PLATE_PAD.x, PLATE_PAD.y)
+	_lit_box = HudStyle.dark_box(HudStyle.BACKING_PANEL, GameTheme.ACCENT, PLATE_PAD.x, PLATE_PAD.y)
+	_dim_box = HudStyle.dark_box(HudStyle.BACKING_PANEL, Color(0.0, 0.0, 0.0, 0.0), PLATE_PAD.x, PLATE_PAD.y)
 	_slots = mini(replicas.size(), SLOT_ACTIONS.size())
 	_shown_left.resize(BOMB_ACTIONS.size())
 	_shown_left.fill(-1)
