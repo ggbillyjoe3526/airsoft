@@ -1,6 +1,6 @@
 # CS2 · The Compact SMG's model
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -9,7 +9,7 @@
 | 2026-11-10 | 1 | Opus 5.5 (build thread) | one test failed (the reload showed the left forearm), fixed | Retry 6/8 | the stock read as a flat plate, the receiver and handguard as boxes, aimed the irons hid the post; docs |
 | 2026-11-10 | 2 | Opus 5.5 (build thread) | targeted tests pass | Retry 7/8 | the near-eye shapes shaded as flat facets, the pad a block; QA and performance reports; no reload picture |
 | 2026-11-10 | 3 | Opus 5.5 (build thread) | gates 1-4 pass, stopped for the owner's changes | Accept 8/8 | – (the owner's version-3 changes followed) |
-| 2026-11-10 | 4 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-10 | 4 | Opus 5.5 (build thread) | targeted tests pass (218 + QA's 4); full gates in CI | Accept 8/8 | – (the owner's version-4 and version-5 changes, the wear; performance: the wear mask VRAM-compressed as the AEG's) |
 
 ## Decisions
 
