@@ -288,3 +288,13 @@ func test_a_button_on_a_paused_tree_still_plays_and_finishes() -> void:
 	await wait_seconds(0.5)
 	assert_almost_eq(b.scale.x, 1.0, 0.0001)
 	assert_false(ring.visible)
+
+
+func test_the_game_leaving_the_tree_takes_its_hook_with_it() -> void:
+	ButtonPress.install(get_tree())
+	ButtonPress.uninstall(get_tree())
+	assert_false(get_tree().node_added.is_connected(ButtonPress._on_node_added), "no hook left behind")
+	var b := _button()
+	await wait_process_frames(1)
+	assert_eq(_hooks(b), 0, "a button added after has no hook")
+	ButtonPress.install(get_tree())

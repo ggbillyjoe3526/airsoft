@@ -4,10 +4,10 @@ extends Control
 ## ... even a simple highlight outline"): it dips in a little about its middle and springs back, and an outline in the
 ## accent lights just round it and fades. With Reduced motion (Settings › Accessibility) only the outline shows.
 ##
-## `ButtonPress.install(tree)` (once, at boot) hooks every BaseButton in the tree and every one added later, as
-## TooltipWrap watches for tooltips. A button gets its ring, an internal child drawn over it (so `get_children()` and the
-## pages' own children never see it), the first time it is pressed; the ring plays the press on its button. A key or a
-## pad presses a focused button as a click does (ui_accept sends button_down).
+## `ButtonPress.install(tree)` (once, at boot; `uninstall` as the game leaves the tree) hooks every BaseButton in the
+## tree and every one added later, as TooltipWrap watches for tooltips. A button gets its ring, an internal child drawn
+## over it (so `get_children()` and the pages' own children never see it), the first time it is pressed; the ring plays
+## the press on its button. A key or a pad presses a focused button as a click does (ui_accept sends button_down).
 
 ## A press dips the button to PRESS_SCALE of its size, but never more than MAX_DIP px at a side, so a big card dips by
 ## as much as a small button and its words don't swim.
@@ -32,6 +32,13 @@ static func install(tree: SceneTree) -> void:
 		tree.node_added.connect(_on_node_added)
 	for found: Node in tree.root.find_children("*", "BaseButton", true, false):
 		_on_node_added(found)
+
+
+## Stops hooking buttons added from now on (the game leaving the tree: a test's game must not leave the hook behind).
+## Buttons already hooked keep their hook until they are freed.
+static func uninstall(tree: SceneTree) -> void:
+	if tree.node_added.is_connected(_on_node_added):
+		tree.node_added.disconnect(_on_node_added)
 
 
 static func _on_node_added(node: Node) -> void:

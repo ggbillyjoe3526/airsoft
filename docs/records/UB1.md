@@ -38,6 +38,10 @@ outline"; and the player's level didn't show at the foot of the nav rail.
 - **Levelling off greys the level rather than hiding it.** The level is kept and comes back, so showing it is honest;
   greyed says it isn't counting.
 
+- **The game takes its hook with it.** CI's first run failed part 7: a test that boots the game left `ButtonPress`
+  hooked for the rest of the run, so a later layout test saw buttons dip and counted them as moved. `main.gd` now
+  calls `ButtonPress.uninstall` as it leaves the tree, like the F3 overlay's own `node_added` hook.
+
 ## Known issues left
 
 - None.

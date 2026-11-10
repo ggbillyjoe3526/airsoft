@@ -162,6 +162,7 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
+	ButtonPress.uninstall(get_tree())
 	# a clean quit: the graphics started (the trip's own restart is not one)
 	graphics.settle()
 	if run != null:
