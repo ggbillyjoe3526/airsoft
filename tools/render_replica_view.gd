@@ -64,6 +64,8 @@ func _run() -> void:
 	var ground := map.terrain.height_at(SPOT.x, SPOT.y) if map.terrain != null else 0.0
 	var eye := Vector3(SPOT.x, ground + tuning.body.stand_eye_height, SPOT.y)
 	var rules := LoadoutRules.standard()
+	# Dev replicas and parts too (the Sniper Rifle, the Compact SMG): this is a review tool.
+	rules.dev_content = true
 	var failed := 0
 	for shot: String in args.slice(1):
 		var f := shot.split(":")

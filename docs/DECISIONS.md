@@ -842,7 +842,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   slower to raise than the 2x Scope (1.9 against 1.6); fits any top rail (the AEG Rifle and the Sniper Rifle); unlocks
   at **level 8**. The rifle still comes with the 2x Scope.
 - **The Compact SMG (owner, 2026-11-10, CS1).** "A compact electric smg" in Dev 3 that "should feel and play unique";
-  its specs and data first, and **no model until his reference pictures** (until then it is drawn, held and pictured
+  its specs and data first, and **no model until his reference pictures** (until then it was drawn, held and pictured
   as the AEG Rifle: ReplicaConfig.model). Defaults taken (the owner may change any): a rifle-class electric replica,
   **18 BBs/s**, **45 × 5** BBs, 0.75 J with 0.20 g, 1.4 s reload, 0.32 s draw, 0.6° spread, 0.14° kick, semi and full
   auto; two behaviours of its own, both new stats.md columns: **Pace 1.08** (run and sprint, not holstered) and
@@ -854,6 +854,15 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Menus, HUD, settings and accessibility
 
+- **The Compact SMG's model (owner, 2026-11-10, CS2).** His photos came at 07:04 ("Create an initial model based on
+  this MP5 smg", with small rails for attachments and his magazine photos). Defaults he may change: the stock collapsed
+  as in his side photos, a short top rail and a short rail each side of the handguard (no under rail: it takes no
+  grips), the curved steel magazine (the polymer one with a window could be a second magazine later), the drum's
+  aperture opened to a ghost ring so the post shows aimed, and no markings. His rulings on version 2 (09:23): the
+  grip, trigger guard and housing one piece; lower rails; rounder stock edges; the barrel joined to the muzzle; the
+  rear sight seated, not floating; the cocking handle a bolt, not a disc. On version 3 (10:14): no gap between the
+  handguard and the front block, the barrel attached from the body to the muzzle, and the grip, guard and housing
+  reading as one piece.
 - **Settings after the Dev 6 playtest (owner, 2026-10-16; ST1).** Groups: Display, Graphics, Gameplay, Audio,
   Controls, Accessibility, Save file, Dev (Looks went with its only row, Robots, now a Dev Easter egg: 2026-10-24, RB1).
   Defaults: sound cues red, scoreboard 100 %, aim

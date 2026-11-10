@@ -261,6 +261,15 @@ shift = PackedVector3Array(0, 0, 0, -0.15, 0.03, -0.2, -0.16, 0.035, -0.2, -0.14
 sound_at = PackedFloat32Array(0.1, 0.28, 0.77, 0.83)
 sound_cue = Array[StringName]([&"selector", &"dryFire", &"dryFire", &"selector"])
 
+[sub_resource type="Resource" id="Resource_in1sm"]
+script = ExtResource("50_in1ip")
+duration = 3.0
+at = PackedFloat32Array(0, 0.17, 0.5, 0.82, 1)
+turn = PackedVector3Array(0, 0, 0, 0.08, 1.15, -0.12, 0.12, 1.2, -0.18, 0.06, 1.1, -0.1, 0, 0, 0)
+shift = PackedVector3Array(0, 0, 0, -0.2, 0.07, -0.18, -0.21, 0.08, -0.18, -0.19, 0.07, -0.17, 0, 0, 0)
+sound_at = PackedFloat32Array(0.18, 0.23, 0.69, 0.73)
+sound_cue = Array[StringName]([&"selector", &"torchClick", &"dryFire", &"selector"])
+
 [sub_resource type="Resource" id="Resource_k2yse"]
 script = ExtResource("10_bqp2c")
 selector_at = PackedFloat32Array(0.5, 0.75, 1)
@@ -268,6 +277,7 @@ inspect_poses = Dictionary[StringName, ExtResource("50_in1ip")]({
 &"aeg": SubResource("Resource_in1ae"),
 &"cyber": SubResource("Resource_in1cy"),
 &"pistol": SubResource("Resource_in1pi"),
+&"smg": SubResource("Resource_in1sm"),
 &"sniper": SubResource("Resource_in1sn")
 })
 inspect_pose_default = SubResource("Resource_in1df")

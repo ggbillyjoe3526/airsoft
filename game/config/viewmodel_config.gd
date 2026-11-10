@@ -11,12 +11,13 @@ extends Resource
 	&"pistol": Vector3(0.05, -0.07, -0.34),
 	&"cyber": Vector3(0.05, -0.07, -0.34),
 	&"sniper": Vector3(0.12, -0.19, -0.26),
+	&"smg": Vector3(0.12, -0.19, -0.26),
 }
 @export var hip_default: Vector3 = Vector3(0.13, -0.16, -0.32)
 ## Aimed, the sight line (rear to front sight) runs through the eye; the replica sits this far forward of it (the
 ## pistols near enough that the forearm drops out of view under the hand).
 @export var aim_forward: Dictionary[StringName, float] = {&"aeg": -0.2, &"pistol": -0.25, &"cyber": -0.25,
-		&"sniper": -0.2}
+		&"sniper": -0.2, &"smg": -0.15}
 @export var aim_forward_default: float = -0.25
 ## Looking through an optic, by its part Key (ReplicaView, OpticGlass): its glass's centre (z in the part's own space,
 ## -z forward, on the sight line) and radius (m), measured from the part models; how far behind the glass the eye sits
@@ -92,21 +93,26 @@ extends Resource
 ## the screen's lower right, and come up and out, so your hand is seen taking the magazine off; they and the pistols
 ## roll less, so your forearms run down out of view, not across it; the pistols tip their muzzles well up and come up
 ## a little, so their grips' base sits over a third of the way up the screen (your left hand seen taking the magazine
-## out and seating the fresh one) while your right forearm stays below it.
+## out and seating the fresh one) while your right forearm stays below it. The SMG comes up less than the AEG (CS2):
+## its deeper grip holds your hands lower, and at the AEG's lift your left forearm shows past the wrist.
 @export var reload_cant_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.6, 0.0, -0.25),
-		&"sniper": Vector3(0.5, 0.1, -0.25), &"pistol": Vector3(0.9, 0.2, -0.3), &"cyber": Vector3(0.9, 0.2, -0.3)}
+		&"sniper": Vector3(0.5, 0.1, -0.25), &"pistol": Vector3(0.9, 0.2, -0.3), &"cyber": Vector3(0.9, 0.2, -0.3),
+		&"smg": Vector3(0.6, 0.0, -0.25)}
 @export var reload_move_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.1, 0.04, 0.06),
-		&"sniper": Vector3(0.06, 0.1, -0.05), &"pistol": Vector3(0.1, 0.06, 0.0), &"cyber": Vector3(0.1, 0.06, 0.0)}
+		&"sniper": Vector3(0.06, 0.1, -0.05), &"pistol": Vector3(0.1, 0.06, 0.0), &"cyber": Vector3(0.1, 0.06, 0.0),
+		&"smg": Vector3(0.06, 0.04, 0.06)}
 ## A replica listed here comes into its cant over this share of the reload, holds it and goes back over the same share
 ## at the end (a rifle's magazine is out of the well in the first quarter: the cant is there by then, BP8); others ease
 ## in and out as one bell, sin(PI * share).
-@export var reload_rise: Dictionary[StringName, float] = {&"aeg": 0.15, &"sniper": 0.15, &"pistol": 0.2, &"cyber": 0.2}
+@export var reload_rise: Dictionary[StringName, float] = {&"aeg": 0.15, &"sniper": 0.15, &"pistol": 0.2, &"cyber": 0.2,
+		&"smg": 0.15}
 ## Your left hand carries the magazine from this share of a replica's reload to this one (x, y; BP8): it takes the old
 ## one as the replica's clip starts it down, takes it down out of view, brings the fresh one up in hand and lets go as
 ## it slides home, the magazine going where the hand goes (MagazineCarry). The arms' build keys the hand's catch and
 ## let-go at these shares (tools/blender/arms/magazine.py), so each is a whole frame of the clip (60 a second).
 @export var reload_carry: Dictionary[StringName, Vector2] = {&"aeg": Vector2(0.1111, 0.6759),
-		&"sniper": Vector2(0.1111, 0.6759), &"pistol": Vector2(0.1389, 0.5694), &"cyber": Vector2(0.1515, 0.5909)}
+		&"sniper": Vector2(0.1111, 0.6759), &"pistol": Vector2(0.1389, 0.5694), &"cyber": Vector2(0.1515, 0.5909),
+		&"smg": Vector2(0.1111, 0.6759)}
 ## Working a bolt at the hip (BP7, row 17): while the arms' bolt clip runs, the replica is canted toward the eye
 ## so the right hand stays on screen (rad at the clip's middle: muzzle up, roll, turn; m: lift, inward), eased in and out
 ## over the clip as a bell and drawn less as the sight comes up (none aimed); Reduced motion draws its reload_cant share.
@@ -223,6 +229,9 @@ extends Resource
 	# owner): the bolt lifted, drawn back, held and closed.
 	&"sniper": InspectPose.make(3.0, PackedFloat32Array([0.0, 0.17, 0.5, 0.82, 1.0]), LONG_TURN, LONG_SHIFT,
 			PackedFloat32Array([0.1, 0.28, 0.77, 0.83]), [&"selector", &"dryFire", &"dryFire", &"selector"]),
+	# Side on as the AEG: the cocking handle pulled back, flicked up into its notch, held, then slapped down and home.
+	&"smg": InspectPose.make(3.0, PackedFloat32Array([0.0, 0.17, 0.5, 0.82, 1.0]), RIFLE_TURN, RIFLE_SHIFT,
+			PackedFloat32Array([0.18, 0.23, 0.69, 0.73]), [&"selector", &"torchClick", &"dryFire", &"selector"]),
 }
 @export var inspect_pose_default: InspectPose = InspectPose.make(2.0, PackedFloat32Array([0.0, 0.17, 0.5, 0.82, 1.0]),
 		RIFLE_TURN, RIFLE_SHIFT, PackedFloat32Array(), [])

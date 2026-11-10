@@ -1281,8 +1281,7 @@ Bugs the browser game had and fixed; a bug pass checks the rebuild doesn't bring
 
 ## The Compact SMG (CS1)
 
-Dev content: tick Settings › Dev › Dev content (or Disable levelling), then pick it as your primary. It looks like the
-AEG Rifle until its own model.
+Dev content: tick Settings › Dev › Dev content (or Disable levelling), then pick it as your primary.
 
 - [ ] **The trigger.** A full magazine on full auto runs dry in about 2.5 s, clearly quicker than the AEG's; the
   reload and the draw are quicker too. Semi and full auto only, no burst; on Depot it starts on semi (B for full auto).
