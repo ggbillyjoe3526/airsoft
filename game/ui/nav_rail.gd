@@ -2,7 +2,8 @@ class_name NavRail
 extends PanelContainer
 ## The rail down the left of every menu page (UI concept B, owner 2026-11-02; docs/records/UR1.md): words only, each
 ## centred: the AIRSOFT wordmark, the tabs MATCH, LOADOUT, ARMORY and SETTINGS, then at the foot the player's level with
-## a thin bar of the XP into it (`set_level`; hidden while levelling is off) and QUIT. The current tab is lit with a
+## a thin bar of the XP into it (`set_level`; greyed while levelling is off, owner 2026-11-10: it is never hidden) and
+## QUIT. The current tab is lit with a
 ## card and a teal rule on its left edge. A tab press is sent as `tab_pressed`; the page decides what to show and calls
 ## `set_current`. QUIT is sent as `quit_pressed` (the game asks QUIT GAME?). From practice (`set_practice`) the rail
 ## shows only the LOADOUT tab and, under the wordmark, the teal BACK TO PRACTICE button with the Loadout's key; it is
@@ -131,15 +132,24 @@ func quit_button() -> Button:
 	return _quit
 
 
-## Shows the player's level and how far into it they are (0 to 1); a level below 0 (levelling off) hides it.
-func set_level(level: int, into: float = 0.0) -> void:
-	_level_box.visible = level >= 0
+## Shows the player's level and how far into it they are (0 to 1). With `levelling_off` (Settings › Dev › Disable
+## levelling) it still shows the level kept for when it comes back, greyed, and its tooltip says why (owner,
+## 2026-11-10: the chip was hidden then, and read as missing).
+func set_level(level: int, into: float = 0.0, levelling_off: bool = false) -> void:
 	_level.text = tr("MENU_LEVEL_SHORT") % maxi(0, level)
 	_level_fill.custom_minimum_size.x = LEVEL_BAR.x * clampf(into, 0.0, 1.0)
+	_level.add_theme_color_override("font_color", GameTheme.DIM if levelling_off else GameTheme.TEXT)
+	_level_fill.color = GameTheme.DIM if levelling_off else GameTheme.ACCENT
+	_level_box.tooltip_text = tr("MENU_LEVEL_OFF_TIP") if levelling_off else ""
 
 
 func level_text() -> String:
-	return _level.text if _level_box.visible else ""
+	return _level.text
+
+
+## Whether the level shows greyed, levelling being off.
+func level_greyed() -> bool:
+	return _level_box.tooltip_text != ""
 
 
 ## The tab's button.
@@ -258,6 +268,8 @@ func _fit_back(b: Button, pad: Control) -> void:
 func _build_level() -> VBoxContainer:
 	var box := VBoxContainer.new()
 	box.name = "Level"
+	# the pointer stops on it for the tooltip while levelling is off
+	box.mouse_filter = Control.MOUSE_FILTER_PASS
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", LEVEL_GAP)
 	_level = MenuParts.text("", LEVEL_SIZE, 700, GameTheme.TEXT)

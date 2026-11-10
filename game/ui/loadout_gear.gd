@@ -2,7 +2,7 @@ class_name LoadoutGear
 extends Control
 ## The Loadout tab's gear page body (UI concept B v2, `loadout.png`, owner 2026-11-02): LOADOUT and its line (the loadout
 ## carried and what is in it), then the glass panels: the PRIMARY card (its replica large, its name and what it carries,
-## SWITCH REPLICA at its top right, CUSTOMISE on the picked card), the SECONDARY card the same beside the GRENADES carried
+## SWAP at its top right (SWITCH REPLICA until the owner, 2026-11-10), CUSTOMISE on the picked card), the SECONDARY card the same beside the GRENADES carried
 ## every round (SF1; its two slots, each a smoke or a flash, BP8), and the Performance sheet at the right. SWITCH REPLICA picks that card's slot and opens the
 ## pop-up of every replica to carry in it (LoadoutSwitch; owner, 2026-11-03: it replaced the SWAP row); the one carried
 ## in the other slot swaps the two.
@@ -57,7 +57,7 @@ const GRENADE_TILE_HEIGHT := 160.0
 const GRENADE_TILE_PAD := Vector2i(16, 14)
 const GRENADE_SIZE := 17
 const HEADING_GAP := 14
-## SWITCH REPLICA on a carried card: its words' size and padding.
+## SWAP on a carried card: its words' size and padding.
 const SWITCH_SIZE := 14
 const SWITCH_PAD := Vector2i(12, 5)
 ## The range's note under the Performance sheet (concept `loadout-practice.png`): the gap above, the padding (left past
