@@ -1,11 +1,11 @@
 """Light use-wear on a replica's model in the hands (RW1, 2026-11-10): faint scratches, rubbed edges and grime in the
 recesses, so a replica looks real and slightly used (owner, 2026-11-10: "faint scratches/marks but keep it subtle").
 
-The wear is a mask, not paint: the replica is painted at run time in any of its schemes (game/play/replica_paint.gd),
-so the mask says where and how much, and the game's worn paint (game/play/replica_wear.gdshader) lightens, greys and
+The wear is a mask, not paint: the replica is painted at run time in any of its schemes (game/play/replica_paint.gd), so
+the mask says where and how much, and the game's worn paint (game/play/replica_wear.gdshader) lightens, greys and
 polishes whatever colour is there. One texture per replica, `<model>_wear.png` beside its glb, on a second UV layer
-`Wear` (glTF TEXCOORD_1, Godot's UV2) that only the hands' meshes get; the figures' copies (`Figure*`) keep none and
-draw plain. The channels:
+`Wear` (glTF TEXCOORD_1, which Godot's import makes these surfaces' UV) that only the hands' meshes get; the figures'
+copies (`Figure*`) keep none and draw plain. The channels:
 
 - R occlusion: 1 in the open, lower where dirt settles in the recesses (ambient occlusion over about a centimetre,
   broken up by noise); kept 1 off the model, so the imported material's own AO (glTF reads R) darkens nothing;
@@ -14,10 +14,15 @@ draw plain. The channels:
 - B scratches: thin straight or slightly bent lines a few millimetres long, most along the replica's length (in and
   out of bags and holsters), some in small parallel clusters, more on the parts named in `heavier` (the magazine).
 
+No part wears whole (critic, RW1 attempt 1: a thin strip all edge, or a small part all in a recess, read as a
+recoloured part or a stain): a loose part rubbed past a quarter of its surface, or a small one grimed past a fifth,
+has its wear faded (PART_RUB_SHARE, PART_GRIME_SHARE).
+
 The figures' copies get both layers too, all at the origin (outside every island: the mask is clean there), so the
-exporter writes each material once. Shapes, triangles and empties don't change. The scratches are placed in the model's 3D space from baked position and
-normal maps, so they never break at a UV seam. The mask rides on the five painted materials as their glTF occlusion
-texture (the same image on all), which Godot imports as the material's `ao_texture`: ReplicaPaint finds it there.
+exporter writes each material once. Shapes, triangles and empties don't change. The scratches are placed in the model's
+3D space from baked position and normal maps, so they never break at a UV seam. The mask rides on the five painted
+materials as their glTF occlusion texture (the same image on all), which Godot imports as the material's `ao_texture`:
+ReplicaPaint finds it there.
 
 Called by a replica's script last, after `figure_copy.make` and `hardsurface.fold_material`, just before the export:
 
@@ -52,6 +57,15 @@ NEAR_AO = 0.003
 FAR_AO = 0.012
 ## Soft rubbed patches per square metre.
 PATCH_DENSITY = 110.0
+## The most of one loose part a rub (past a quarter) may cover: a strip thinner than the edge reach is all edge, and
+## would wear whole (a recoloured part, not a worn one); past this share the part's rub fades as (share / x)^2.
+PART_RUB_SHARE = 0.25
+## The same for grime (past a quarter) on a small part (under SMALL_PART of the painted texels: a pin, the extractor
+## in its slot), which a recess would otherwise darken whole. A big part keeps its grime, which lies in its recesses.
+PART_GRIME_SHARE = 0.2
+SMALL_PART = 0.01
+## The face attribute that numbers each loose part, for the bake (removed after).
+PART_ATTR = "wear_part"
 
 
 def apply(seed: int = 1, heavier: dict = None, size: int = SIZE) -> None:
@@ -66,6 +80,7 @@ def apply(seed: int = 1, heavier: dict = None, size: int = SIZE) -> None:
     lo, hi = _bounds(targets)
     for i, ob in enumerate(targets):
         ob.pass_index = i + 1
+    _number_parts(targets)
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
     scene.cycles.device = "CPU"
@@ -77,6 +92,8 @@ def apply(seed: int = 1, heavier: dict = None, size: int = SIZE) -> None:
     nrm = _bake(targets, size, "nrm", _normal, 1)
     geo = _bake(targets, size, "geo", _edges, SAMPLES)
     ids = _bake(targets, size, "ids", _ids, 1)
+    for ob in targets:
+        ob.data.attributes.remove(ob.data.attributes[PART_ATTR])
     mask = _compose(targets, pos, nrm, geo, ids, lo, hi, seed, heavier, size)
     image = bpy.data.images.new("wear", size, size, alpha=False)
     image.colorspace_settings.name = "Non-Color"
@@ -252,15 +269,65 @@ def _edges(nt):
     return comb.outputs[0]
 
 
+def _number_parts(targets: list) -> None:
+    """Numbers every loose part (faces joined by shared vertices) of the targets from 1, in the face attribute
+    PART_ATTR, so the bake can tell a thin strip from the body it is joined into."""
+    first = 1
+    for ob in targets:
+        me = ob.data
+        parent = list(range(len(me.vertices)))
+
+        def find(v: int) -> int:
+            while parent[v] != v:
+                parent[v] = parent[parent[v]]
+                v = parent[v]
+            return v
+
+        for poly in me.polygons:
+            vs = poly.vertices
+            r0 = find(vs[0])
+            for v in vs[1:]:
+                r = find(v)
+                if r != r0:
+                    parent[r] = r0
+        roots = {}
+        numbers = []
+        for poly in me.polygons:
+            root = find(poly.vertices[0])
+            if root not in roots:
+                roots[root] = first + len(roots)
+            numbers.append(float(roots[root]))
+        attr = me.attributes.new(PART_ATTR, "FLOAT", "FACE")
+        attr.data.foreach_set("value", numbers)
+        first += len(roots)
+
+
 def _ids(nt):
+    """R: the object's pass index / 255; G: its loose part's number (PART_ATTR)."""
     info = nt.nodes.new("ShaderNodeObjectInfo")
     div = nt.nodes.new("ShaderNodeMath")
     div.operation = "DIVIDE"
     div.inputs[1].default_value = 255.0
     nt.links.new(info.outputs["Object Index"], div.inputs[0])
+    part = nt.nodes.new("ShaderNodeAttribute")
+    part.attribute_type = "GEOMETRY"
+    part.attribute_name = PART_ATTR
     comb = nt.nodes.new("ShaderNodeCombineColor")
     nt.links.new(div.outputs[0], comb.inputs[0])
+    nt.links.new(part.outputs["Fac"], comb.inputs[1])
     return comb.outputs[0]
+
+
+def _part_fade(part: np.ndarray, worn: np.ndarray, share: float, small: float = 1.0) -> np.ndarray:
+    """Per texel, how much of its part's wear to keep: 1, or (share / covered)^2 where more than `share` of the
+    part's texels are worn past a quarter (only on parts under `small` of all the texels)."""
+    count = np.bincount(part)
+    hit = np.bincount(part, weights=(worn > 0.25).astype(np.float64), minlength=len(count))
+    covered = hit / np.maximum(count, 1)
+    keep = np.minimum(1.0, share / np.maximum(covered, 1e-6)) ** 2
+    keep[count >= small * len(part)] = 1.0
+    print("  wear: %d of %d parts faded past %.2f" % (int((keep[1:] < 1.0).sum()), len(count) - 1, share))
+    return keep[part]
 
 
 # ---------------------------------------------------------------------------------------------------------- compose
@@ -326,6 +393,9 @@ def _compose(targets, pos, nrm, geo, ids, lo, hi, seed, heavier, size) -> np.nda
         patches[near] = np.maximum(patches[near], rng.uniform(0.12, 0.28) * _smoothstep(1.0, 0.2, d))
     patches *= 0.6 + 0.4 * _fbm(P * 400.0, seed + 3)
     edge = np.maximum(edge, patches)
+    part = np.rint(ids.reshape(-1, 4)[idx, 1]).astype(int)
+    edge *= _part_fade(part, edge, PART_RUB_SHARE)
+    grime *= _part_fade(part, grime, PART_GRIME_SHARE, SMALL_PART)
     # B: scratches.
     # Scratches and patches start where a hand or a bag reaches: not deep inside (the barrel in its handguard).
     reach = _smoothstep(0.55, 0.85, G[:, 2])
