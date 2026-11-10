@@ -8,6 +8,8 @@ extends Node3D
 ## out (`key_share`, RoofConfig.lamp_sun_share) and set_ambient_share turns the sky's light under the roof down
 ## (`ambient_share`), so their shadows stay deep; the ceiling joins the scene's bounce light (Ultra's SDFGI), so the
 ## sky no longer lights the hall through it. Near (High) shadows the lamps within `lamp_near` m, Far (Ultra) all.
+## A worn lamp (LV1, MapData.roof_lamp_states) shines at `lamp_dim_share` in `lamp_dim_colour` (dim), not at all (dead:
+## no light) or as RoofView's flicker steps it (`set_flicker`; out of the baked bounce light, as it changes).
 ## Built once with the roof; `set_mode` only sets what changes. Look only.
 
 var _cfg: RoofConfig = null
@@ -20,12 +22,15 @@ var _cover: float = 0.0
 ## The roof's ceiling: in the bounce light while the lamps shine, out of it (the sky's light falling through) while the
 ## overhead light stands in for them.
 var _ceiling: GeometryInstance3D = null
+## Each lamp's light's index in `_lights`, -1 for a dead lamp's (none).
+var _by_lamp: PackedInt32Array = PackedInt32Array()
 
 
 ## A light under each of `spots` (each lamp's lowest point), as `cfg` sets them, all off; `cover` is how far the roof
-## reaches from any point under it; `ceiling` the roof's ceiling, put in the bounce light while they shine.
+## reaches from any point under it; `ceiling` the roof's ceiling, put in the bounce light while they shine; `states`
+## each lamp's MapData.LAMP_* (none: all working).
 static func build(spots: Array[Vector3], cfg: RoofConfig, cover: float = 0.0,
-		ceiling: GeometryInstance3D = null) -> RoofLamps:
+		ceiling: GeometryInstance3D = null, states: PackedByteArray = PackedByteArray()) -> RoofLamps:
 	var lamps := RoofLamps.new()
 	lamps.name = "LampLights"
 	lamps._cfg = cfg
@@ -34,18 +39,25 @@ static func build(spots: Array[Vector3], cfg: RoofConfig, cover: float = 0.0,
 	lamps.visible = false
 	var down := Basis(Vector3.RIGHT, -PI * 0.5)
 	for i in spots.size():
+		var state: int = states[i] if i < states.size() else MapData.LAMP_WORKING
+		if state == MapData.LAMP_DEAD:
+			lamps._by_lamp.append(-1)
+			continue
+		lamps._by_lamp.append(lamps._lights.size())
 		var spot := SpotLight3D.new()
 		spot.name = "Lamp_%d" % i
 		spot.transform = Transform3D(down, spots[i] + Vector3.DOWN * cfg.lamp_light_drop)
-		spot.light_color = cfg.lamp_colour
-		spot.light_energy = cfg.lamp_light_energy
+		var dim := state == MapData.LAMP_DIM
+		spot.light_color = cfg.lamp_dim_colour if dim else cfg.lamp_colour
+		spot.light_energy = cfg.lamp_light_energy * (cfg.lamp_dim_share if dim else 1.0)
 		spot.light_volumetric_fog_energy = cfg.lamp_fog
 		spot.spot_range = cfg.lamp_range
 		spot.spot_attenuation = cfg.lamp_falloff
 		spot.spot_angle = cfg.lamp_cone
 		spot.spot_angle_attenuation = cfg.lamp_cone_falloff
-		# Baked into the scene's bounce light (SDFGI) as it is built, never updated per frame: the lamps don't move.
-		spot.light_bake_mode = Light3D.BAKE_STATIC
+		# Baked into the scene's bounce light (SDFGI) as it is built, never updated per frame: the lamps don't move; a
+		# flickering one is dynamic, as its strength steps.
+		spot.light_bake_mode = Light3D.BAKE_DYNAMIC if state == MapData.LAMP_FLICKER else Light3D.BAKE_STATIC
 		spot.shadow_enabled = true
 		spot.shadow_blur = cfg.lamp_shadow_blur
 		spot.distance_fade_enabled = true
@@ -63,6 +75,19 @@ func light_count() -> int:
 ## The lights (for tests).
 func lights() -> Array[SpotLight3D]:
 	return _lights
+
+
+## Lamp `lamp`'s light, or null for a dead lamp's (none).
+func light_of(lamp: int) -> SpotLight3D:
+	var at := _by_lamp[lamp] if lamp >= 0 and lamp < _by_lamp.size() else -1
+	return _lights[at] if at >= 0 else null
+
+
+## A flickering lamp's light at `level` (0 to 1) of its strength, as RoofView steps it (only when it changes).
+func set_flicker(lamp: int, level: float) -> void:
+	var spot := light_of(lamp)
+	if spot != null:
+		spot.light_energy = _cfg.lamp_light_energy * level
 
 
 ## The mode in force.

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import math
+import random
 import os
 import sys
 
@@ -151,7 +152,38 @@ def roof() -> dict:
                 lamps.append({"x": r(x), "z": r(zz)})
                 zz += step
             x += step
+    wear_lamps(lamps)
     return {"height": L.ROOF, "lamps": lamps}
+
+
+# Worn lamps (LV1, owner 2026-11-10: "some lamps aren't as bright or they flicker or one that doesn't work"): how many
+# of each, the seed that picks them (the same lamps every build) and how far apart (m) the flickering and dead ones
+# hang at least, so no corner goes dark or busy.
+WORN = {"dim": 12, "flicker": 3, "dead": 2}
+WORN_SEED = 1110
+WORN_APART = 15.0
+
+
+def wear_lamps(lamps: list[dict]) -> None:
+    """Names some lamps dim, flickering or dead (`state`), picked by WORN_SEED; the rest are working."""
+    rng = random.Random(WORN_SEED)
+    order = list(range(len(lamps)))
+    rng.shuffle(order)
+    picked: list[int] = []
+    for state in ("dead", "flicker"):
+        left = WORN[state]
+        for i in order:
+            if left == 0:
+                break
+            if i in picked or any(math.dist((lamps[i]["x"], lamps[i]["z"]), (lamps[j]["x"], lamps[j]["z"])) < WORN_APART
+                                  for j in picked):
+                continue
+            lamps[i]["state"] = state
+            picked.append(i)
+            left -= 1
+    dim = [i for i in order if i not in picked][: WORN["dim"]]
+    for i in dim:
+        lamps[i]["state"] = "dim"
 
 
 def site() -> dict:

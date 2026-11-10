@@ -6,11 +6,24 @@ extends Node3D
 ## MultiMesh: the high-bay model with its glowing lens, or a glowing panel without it), and a real light under each lamp
 ## (RoofLamps) that Graphics › Lamp light switches on, lighting the hall alone (no sun gets indoors). The roof and lamps
 ## themselves cast no shadow, so the preset's overhead light stands in for the lamps through them where they aren't
-## real lights (Low, Medium). Look only: the BB ceiling is MapLevel's; nothing here is read by the simulation. Built
-## once, nothing per frame.
+## real lights (Low, Medium). A map may wear some lamps out (LV1, MapData.roof_lamp_states): dim, dead or flickering,
+## each lens glowing as its lamp shines (the MultiMesh's custom data). Look only: the BB ceiling is MapLevel's; nothing
+## here is read by the simulation. Built once; per frame only a flickering lamp's step, set when it changes.
 
 ## How far (m) over the roof's underside the ceiling slab starts when the bays' sheet is drawn under it.
 const CEILING_LIFT := 0.01
+## The lamps' lenses: unshaded, `glow` (sRGB, may pass 1) times each lamp's own share and tint (INSTANCE_CUSTOM).
+const LENS_SHADER := """shader_type spatial;
+render_mode unshaded, cull_back;
+uniform vec4 glow : source_color = vec4(1.0);
+varying vec3 own;
+void vertex() {
+	own = INSTANCE_CUSTOM.rgb;
+}
+void fragment() {
+	ALBEDO = glow.rgb * own;
+}
+"""
 
 var _mesh: MeshInstance3D = null
 var _lamps: MultiMeshInstance3D = null
@@ -18,6 +31,10 @@ var _lamps: MultiMeshInstance3D = null
 var _lights: RoofLamps = null
 var _bays: Array[MultiMeshInstance3D] = []
 var _materials: Array[Material] = []
+var _cfg: RoofConfig = null
+## The flickering lamps (their indices) and each one's level as last set.
+var _flickers: PackedInt32Array = PackedInt32Array()
+var _levels: PackedFloat32Array = PackedFloat32Array()
 
 
 ## The roof of `map` as `cfg` draws it, or null on a field open to the sky.
@@ -57,9 +74,55 @@ static func build(map: MapData, cfg: RoofConfig) -> RoofView:
 		var spots: Array[Vector3] = []
 		view._lamps = view._lamp_view(map, cfg, bay != null, spots)
 		view.add_child(view._lamps)
-		view._lights = RoofLamps.build(spots, cfg, Vector3(area.size.x, y, area.size.y).length(), view._mesh)
+		view._lights = RoofLamps.build(spots, cfg, Vector3(area.size.x, y, area.size.y).length(), view._mesh,
+				map.roof_lamp_states)
 		view.add_child(view._lights)
+		view._cfg = cfg
+		for i in map.roof_lamp_states.size():
+			if map.roof_lamp_states[i] == MapData.LAMP_FLICKER:
+				view._flickers.append(i)
+				view._levels.append(1.0)
 	return view
+
+
+func _ready() -> void:
+	# Only a roof with flickering lamps runs per frame (Godot turns _process on when the node enters the tree).
+	set_process(not _flickers.is_empty())
+
+
+## How strongly (0 to 1) a flickering lamp `lamp` shines at `time` s, as `cfg` sets it: in full, but each
+## `lamp_flicker_every` s (each lamp's own phase) a burst of up to `lamp_flicker_burst` s, some cycles none, stepping
+## between full and `lamp_flicker_low` every `lamp_flicker_step` s. Pure and the same every run.
+static func flicker_level(time: float, lamp: int, cfg: RoofConfig) -> float:
+	var phase := _unit(lamp, 7919) * cfg.lamp_flicker_every
+	var cycle := floori((time + phase) / cfg.lamp_flicker_every)
+	var into := time + phase - cycle * cfg.lamp_flicker_every
+	if _unit(cycle, lamp) < 0.3:
+		return 1.0
+	if into > cfg.lamp_flicker_burst * (0.4 + 0.6 * _unit(cycle, lamp + 101)):
+		return 1.0
+	var step := floori(into / cfg.lamp_flicker_step)
+	return cfg.lamp_flicker_low if _unit(step + cycle * 977, lamp + 31) < 0.55 else 1.0
+
+
+## A number in [0, 1) from two whole numbers, the same every run (a small integer hash).
+static func _unit(a: int, b: int) -> float:
+	var h := (a * 73856093) ^ (b * 19349663) ^ 0x5bd1e995
+	h = (h ^ (h >> 13)) * 1274126177
+	h = h ^ (h >> 16)
+	return float(h & 0xffffff) / float(0x1000000)
+
+
+func _process(_delta: float) -> void:
+	var now := Time.get_ticks_msec() * 0.001
+	for k in _flickers.size():
+		var level := flicker_level(now, _flickers[k], _cfg)
+		if level == _levels[k]:
+			continue
+		_levels[k] = level
+		_lamps.multimesh.set_instance_custom_data(_flickers[k], Color(level, level, level))
+		if _lights != null:
+			_lights.set_flicker(_flickers[k], level)
 
 
 ## The materials to draw once before play, so the first look up doesn't hitch.
@@ -160,13 +223,26 @@ static func bay_placings(box: AABB, area: Rect2, y: float, cfg: RoofConfig) -> A
 	return out
 
 
+## How a lamp in `state` (MapData.LAMP_*) tints its lens's glow: a working or flickering one in full, a dim one at
+## `lamp_dim_share` in `lamp_dim_colour` (against the working colour), a dead one at `lamp_dead_glow`.
+static func lens_tint(state: int, cfg: RoofConfig) -> Color:
+	match state:
+		MapData.LAMP_DIM:
+			var c := cfg.lamp_dim_colour
+			var w := cfg.lamp_colour
+			return Color(c.r / w.r, c.g / w.g, c.b / w.b) * cfg.lamp_dim_share
+		MapData.LAMP_DEAD:
+			return Color(cfg.lamp_dead_glow, cfg.lamp_dead_glow, cfg.lamp_dead_glow)
+	return Color.WHITE
+
+
 ## The lamps: the high-bay model, its body in the shared light and its lens glowing, its top at the roof's underside;
 ## or a glowing panel `lamp_drop` under it without the model; with the roof's `bays`, each clear of the trusses
 ## (lamp_spot). Each lamp's lowest point (under its lens) is added to `spots`, for its real light.
 func _lamp_view(map: MapData, cfg: RoofConfig, bays: bool, spots: Array[Vector3]) -> MultiMeshInstance3D:
-	var glow := StandardMaterial3D.new()
-	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	glow.albedo_color = cfg.lamp_colour * cfg.lamp_energy
+	var glow := ShaderMaterial.new()
+	glow.shader = CodeShaders.of(LENS_SHADER)
+	glow.set_shader_parameter(&"glow", cfg.lamp_colour * cfg.lamp_energy)
 	_materials.append(glow)
 	var lamp: Mesh = null
 	var own := PropDressConfig.load_mesh(cfg.lamp_model) as ArrayMesh
@@ -186,6 +262,7 @@ func _lamp_view(map: MapData, cfg: RoofConfig, bays: bool, spots: Array[Vector3]
 		lamp = panel
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.use_custom_data = true
 	mm.mesh = lamp
 	mm.instance_count = map.roof_lamps.size()
 	# the model hangs from its top (its own y 0 at the roof's underside); a panel's middle `lamp_drop` under it
@@ -194,6 +271,8 @@ func _lamp_view(map: MapData, cfg: RoofConfig, bays: bool, spots: Array[Vector3]
 	for i in map.roof_lamps.size():
 		var at := lamp_spot(map.roof_lamps[i], cfg) if bays else map.roof_lamps[i]
 		mm.set_instance_transform(i, Transform3D(Basis.IDENTITY, Vector3(at.x, y, at.y)))
+		mm.set_instance_custom_data(i, lens_tint(map.roof_lamp_states[i] if i < map.roof_lamp_states.size()
+				else MapData.LAMP_WORKING, cfg))
 		spots.append(Vector3(at.x, under, at.y))
 	var inst := MultiMeshInstance3D.new()
 	inst.name = "Lamps"

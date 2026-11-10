@@ -35,6 +35,17 @@ extends Resource
 @export var lamp_size: Vector2 = Vector2(1.4, 0.5)
 @export var lamp_colour: Color = Color(1.0, 0.96, 0.86)
 @export var lamp_energy: float = 2.6
+## Worn lamps (LV1, a map's `roof.lamps[].state`: Depot's): a dim one glows and lights at `lamp_dim_share` of a
+## working one's strength in the older, warmer `lamp_dim_colour`; a dead one neither glows nor lights; a flickering one
+## mostly shines in full but now and then stutters, every `lamp_flicker_every` s on average for up to
+## `lamp_flicker_burst` s, stepping between full and `lamp_flicker_low` every `lamp_flicker_step` s.
+@export var lamp_dim_share: float = 0.5
+@export var lamp_dim_colour: Color = Color(1.0, 0.86, 0.66)
+@export var lamp_dead_glow: float = 0.0
+@export var lamp_flicker_low: float = 0.1
+@export var lamp_flicker_step: float = 0.06
+@export var lamp_flicker_every: float = 3.5
+@export var lamp_flicker_burst: float = 0.8
 
 @export_group("Lamp light")
 ## The lamps as real lights (Settings › Graphics › Lamp light, RoofLamps): each a spot `lamp_light_drop` m under the
