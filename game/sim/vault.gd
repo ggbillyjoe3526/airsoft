@@ -1,13 +1,14 @@
 class_name Vault
 ## Vaulting (the browser game's sim/vault.ts, M102; owner, 2026-10-12): Jump pressed at a low obstacle (a wall, barrier
-## or crate whose top is VaultConfig min_height to max_height over your floor, no deeper than max_depth, with room to land
-## past it) takes the body over it in one short, committed move instead of a jump. The body rises onto the top and
-## crosses it on a path the CharacterMover follows, so it never passes through anything, then falls off the far side
-## and lands as from a jump. A ledge of the same heights whose flat top runs on at least climb_depth (a platform's edge
-## from the track, CL1) is climbed instead: the body rises onto it the same way and steps on until it stands on the top. Meanwhile the replica is carried (no firing, aiming or reloading starts; fire is held
-## fire_lockout after it), the body tucks (a crouch: eyes, hit volume and figure follow it) and the view turns freely.
-## Presses made during it are kept for after it (BP5). The obstacle is found with level rays only (WorldQuery), so the
-## rule is the same for the player and the bots. Allocation-free.
+## or crate whose top is VaultConfig min_height to max_height over your floor, no deeper than max_depth, with room to
+## land past it) takes the body over it in one short, committed move instead of a jump. The body rises onto the top and
+## crosses it on a path the CharacterMover follows, so it never passes through anything, then falls off the far side and
+## lands as from a jump. A ledge of the same heights whose flat top runs on at least climb_depth (a platform's edge from
+## the track, CL1) is climbed instead: the body rises onto it the same way and steps on until it stands on the top.
+## Meanwhile the replica is carried (no firing, aiming or reloading starts; fire is held fire_lockout after it), the
+## body tucks (a crouch: eyes, hit volume and figure follow it) and the view turns freely. Presses made during it are
+## kept for after it (BP5). The obstacle is found with level rays only (WorldQuery), so the rule is the same for the
+## player and the bots. Allocation-free.
 
 ## Scratch for the level rays (used only within one call).
 static var _hit: RayHit = RayHit.new()

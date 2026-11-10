@@ -3,16 +3,17 @@ extends RefCounted
 ## The legs' animation graph (step 23, FI2), built once a kind by FigureModels and shared by every figure of it (each
 ## AnimationTree keeps its own parameters): a gait BlendSpace2D (Idle, then each gait clip at its way times its pace)
 ## and a crouch BlendSpace1D (CrouchIdle, CrouchWalk at its pace), each under a TimeSeek, blended by crouch; on stairs
-## (CL1) the gait goes through a Blend3 from Stairs_Down to Stairs_Up, each behind a gate; then the jump, the vault (or the
-## climb, CL1: a Transition picks the clip) and the hit call, each its clip under a TimeSeek, and the walk-off under a
-## TimeScale, each a Blend2 over what is below it. Each stepping clip's timeline is stretched to one walk cycle (TAU), its start offset set so
-## the sample where its leg (FigureConfig.swing_hip to swing_ankle) swings furthest forward lands where Hitbox's left
-## leg does (FORWARD_PHASE): seeking the walk cycle keeps the drawn legs in step with the hit volume's.
-## Over the legs (FI3) the upper body (every bone but FigureConfig.lower_bones) takes a filtered Blend2: the rifle's or the
-## pistol's aim (a BlendSpace1D down, level and up by pitch, the two blended by the hold), the holster's hanging arms
-## over it, the reload as a OneShot through a TimeSeek (FI4: the rifle's or the pistol's clip at the reload's share),
-## the Switch as a OneShot through a TimeScale (forwards to a pistol, backwards to a rifle), and on top of all the
-## trigger press as an additive OneShot. The upper body's branch sits beside the legs' TimeSeeks, never under them.
+## (CL1) the gait goes through a Blend3 from Stairs_Down to Stairs_Up, each behind a gate; then the jump, the vault (or
+## the climb, CL1: a Transition picks the clip) and the hit call, each its clip under a TimeSeek, and the walk-off under
+## a TimeScale, each a Blend2 over what is below it. Each stepping clip's timeline is stretched to one walk cycle (TAU),
+## its start offset set so the sample where its leg (FigureConfig.swing_hip to swing_ankle) swings furthest forward
+## lands where Hitbox's left leg does (FORWARD_PHASE): seeking the walk cycle keeps the drawn legs in step with the hit
+## volume's. Over the legs (FI3) the upper body (every bone but FigureConfig.lower_bones) takes a filtered Blend2: the
+## rifle's or the pistol's aim (a BlendSpace1D down, level and up by pitch, the two blended by the hold), the holster's
+## hanging arms over it, the reload as a OneShot through a TimeSeek (FI4: the rifle's or the pistol's clip at the
+## reload's share), the Switch as a OneShot through a TimeScale (forwards to a pistol, backwards to a rifle), and on top
+## of all the trigger press as an additive OneShot. The upper body's branch sits beside the legs' TimeSeeks, never under
+## them.
 
 ## The walk cycle's phase where Hitbox.leg_swing's sine peaks: the left leg furthest forward.
 const FORWARD_PHASE := PI * 0.5

@@ -1,16 +1,17 @@
 class_name FirstPersonView
 extends Node3D
-## The player's eyes (the browser game's render/camera.ts): a Camera3D at the character's eye, drawn between the last two
-## ticks, turned by the mouse every rendered frame (PlayerInput's view) and lifted by the replica's recoil. A lean moves
-## the eyes as the simulation does (Lean.offset, the one lean geometry) and rolls the view a little
+## The player's eyes (the browser game's render/camera.ts): a Camera3D at the character's eye, drawn between the last
+## two ticks, turned by the mouse every rendered frame (PlayerInput's view) and lifted by the replica's recoil. A lean
+## moves the eyes as the simulation does (Lean.offset, the one lean geometry) and rolls the view a little
 ## (ViewConfig.lean_camera_roll); a lean a wall cuts short eases out instead of snapping, never drawn into the wall. A
-## vault (or a climb, CL1) dips and tips the view. Reduced motion (set_motion) draws less of the lean's roll and the vault's dip and tip,
-## never less recoil: the climb shows where the next BB goes. Once hit, the view follows the character's own heading as
-## it walks off. Zooms a little as the sight comes up (as its optic does; a scope zooms only inside its glass). The
-## easing runs on rendered frames; the rules stay on the tick. At night the weapon torch of whoever the view is through
-## is a real spot from the rail while lit (WL7, `set_torch`): with a light in your kit, on Medium and up, one of the
-## preset's real lights, casting shadows on High and Ultra with Sun shadows on; else TorchBeams draws it as a haze.
-## Once a round is over the view holds still where it was (`holds_still`, BP8), unless it is your own in play.
+## vault (or a climb, CL1) dips and tips the view. Reduced motion (set_motion) draws less of the lean's roll and the
+## vault's dip and tip, never less recoil: the climb shows where the next BB goes. Once hit, the view follows the
+## character's own heading as it walks off. Zooms a little as the sight comes up (as its optic does; a scope zooms only
+## inside its glass). The easing runs on rendered frames; the rules stay on the tick. At night the weapon torch of
+## whoever the view is through is a real spot from the rail while lit (WL7, `set_torch`): with a light in your kit, on
+## Medium and up, one of the preset's real lights, casting shadows on High and Ultra with Sun shadows on; else
+## TorchBeams draws it as a haze. Once a round is over the view holds still where it was (`holds_still`, BP8), unless it
+## is your own in play.
 
 ## Recoil on screen follows the simulation's at this rate (1/s of simulation time), so a 60 Hz kick reads smoothly at
 ## any frame rate and game speed.

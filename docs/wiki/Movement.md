@@ -50,7 +50,8 @@ onto it: "Space to climb" shows under the crosshair. You put a hand on the
 edge, pull up and stand on the top in about half a second, your replica held low until you are up. Crates and other
 props are never climbed, only vaulted. Bots climb up and drop back down the same way.
 
-Running up or down stairs, players and bots lean into the climb going up and sit back a little going down.
+Bots running up stairs lean into the climb with their knees high, and going down they sit back a little on softer
+steps.
 
 ## Holster
 

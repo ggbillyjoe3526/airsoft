@@ -1,9 +1,9 @@
 class_name HitPose
 ## The fitted hit volume's pose (HV1): the human figure's joints in its own frame (feet on the origin, facing -Z), posed
 ## from HitFit's samples as its animation graph blends them (the gait and crouch blend spaces, the stairs, the crouch,
-## the jump and the vault or the climb, each turn blended as AnimationMixer does, the legs posed down from the hips, the upper body for the aim
-## and hold, turned back to standing still's heading) and then bent as FigureBend draws it. Hitbox.build_volume hangs
-## the capsules on them. Allocates nothing.
+## the jump and the vault or the climb, each turn blended as AnimationMixer does, the legs posed down from the hips, the
+## upper body for the aim and hold, turned back to standing still's heading) and then bent as FigureBend draws it.
+## Hitbox.build_volume hangs the capsules on them. Allocates nothing.
 
 ## A blend this little is none, and this near full is full: the drawn figure's gate too (FigureConfig.gate_below).
 const GATE := 0.001
