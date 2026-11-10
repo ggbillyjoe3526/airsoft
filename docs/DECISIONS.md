@@ -782,7 +782,7 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   changes level; 11 to 15 take 1,400 to 1,800 (about 58 Normal matches to the cap). The cap goes to 20 or more with the
   Progression Update, its new levels filled with skins.
 - **XP numbers live in `levels.md` for the owner to tune (2026-10-13).** Every match gives XP except the range, the
-  tutorial and any match using dev content or a cheat. About 250 XP a Normal match, level 10 after about 25
+  tutorial and any match using dev content or a cheat. About 250 XP a Normal match, level 10 after about 26
   (level 15 after about 58 since LV15).
 - **Disable levelling is a Dev switch (owner, 2026-10-13).** It unlocks everything for the Loadout without touching your
   level and counts as a cheat: no XP, and the match stays out of the records.
