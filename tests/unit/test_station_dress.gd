@@ -291,3 +291,35 @@ func test_freeing_a_station_level_leaves_no_orphans() -> void:
 	level.free()
 	await wait_physics_frames(2)
 	assert_eq(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT), before, "no node left behind")
+
+
+func test_bands_tile_each_face_exactly_with_its_normal_and_no_sliver() -> void:
+	var m := _map("kingsmere")
+	var cut := 0
+	for b in m.blocks:
+		for f in GreyboxFaces.faces_of(b):
+			var bands := StationSurface.bands(m.station, look, f)
+			assert_gt(bands.size(), 0, "a face always yields a band")
+			if bands.size() == 1:
+				assert_eq(bands[0], f, "an uncut face stays itself")
+				continue
+			cut += 1
+			var n := GreyboxFaces.face_normal(f)
+			var lo := INF
+			var hi := -INF
+			for p in f:
+				lo = minf(lo, p.y)
+				hi = maxf(hi, p.y)
+			var at := lo
+			var sorted := bands.duplicate()
+			sorted.sort_custom(func(a: PackedVector3Array, c: PackedVector3Array) -> bool:
+					return minf(a[0].y, a[2].y) < minf(c[0].y, c[2].y))
+			for band: PackedVector3Array in sorted:
+				var blo := minf(minf(band[0].y, band[1].y), minf(band[2].y, band[3].y))
+				var bhi := maxf(maxf(band[0].y, band[1].y), maxf(band[2].y, band[3].y))
+				assert_almost_eq(blo, at, 0.001, "bands abut with no gap or overlap")
+				assert_gt(bhi - blo, StationDressing.LEVEL_GAP * 0.99, "no sliver band")
+				assert_lt(GreyboxFaces.face_normal(band).distance_to(n), 0.001, "a band keeps its face's winding")
+				at = bhi
+			assert_almost_eq(at, hi, 0.001, "the bands reach the face's top")
+	assert_gt(cut, 0, "Kingsmere's lift shafts are cut")
