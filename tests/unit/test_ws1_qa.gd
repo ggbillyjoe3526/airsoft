@@ -42,7 +42,7 @@ func test_depth_is_never_negative_or_nan_far_off_or_far_below() -> void:
 
 
 func test_maps_without_water_have_none_and_their_routes_are_priced_as_before() -> void:
-	for id: String in ["depot", "kingsmere", "range"]:
+	for id: String in ["depot", "subway", "range"]:
 		var m := MapData.load_map(id, style, 6)
 		assert_true(m.water.is_empty(), "%s has no stream" % id)
 		var nav := NavGrid.build(m, tuning.nav, tuning.body)
