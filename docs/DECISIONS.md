@@ -330,9 +330,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   most rays and screen-space reflections at full size; Low, Medium and High draw exactly as before, so only the
   preset aimed at the owner's card pays.
 - **Wear marks are their own graphics row, off on Low (2026-11-10, WM1; default, owner's step 4).** Oil stains,
-  tyre tracks and boot prints are decals named per map (`dressing.wearMarks`) that add to the floor's procedural wear
-  (SL1, SL2) rather than repeat it. Graphics › Wear marks is on from Medium (decals are clustered and faded at 40 m),
-  off on Low (the modest-PC preset) and unavailable on Compatibility, which draws no decals.
+  and tyre tracks are decals named per map (`dressing.wearMarks`) that add to the floor's procedural wear (SL1, SL2)
+  rather than repeat it. Graphics › Wear marks is on from Medium (decals are clustered and faded at 40 m), off on Low
+  (the modest-PC preset) and unavailable on Compatibility, which draws no decals.
+- **No boot prints on the floors (owner, 2026-11-10, WM1).** The wear marks are oil stains and tyre tracks only; a
+  map naming a boot trail has it left out with a warning.
 - **Every figure keeps its team-colour plate carrier (owner, 2026-10-17, AX1).** The carrier reads like a site's team
   bib and is the strongest team cue at range. A civilian outfit is in `docs/IDEAS.md`.
 

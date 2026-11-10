@@ -578,13 +578,10 @@ def dressing() -> dict:
 
 def marks() -> list[dict]:
     """The ground's worn marks (WM1, WearMarks), on the ground's height: the pickup's muddy tracks from the culvert's
-    wet banks, where it picked the mud up, along the road and over to the verge where it stands; an oil drip by its
-    bonnet; and muddy boot trails out of the mud puddles."""
-    out = [{"kind": "tyres", "x": -3.0, "z": 50.8, "yaw": -82, "length": 28, "bend": 8, "mud": True},
-           {"kind": "oil", "x": -31.0, "z": 46.7, "length": 0.8}]
-    for x, z, yaw in [(9.6, 30.0, 90), (8.0, 31.2, 180), (-4.5, -23.8, 180), (-4.5, -26.2, 0), (31.6, -14.0, 90)]:
-        out.append({"kind": "boots", "x": x, "z": z, "yaw": yaw, "length": 5, "mud": True})
-    return out
+    wet banks, where it picked the mud up, along the road and over to the verge where it stands, and an oil drip by its
+    bonnet. No boot prints (owner, 2026-11-10)."""
+    return [{"kind": "tyres", "x": -3.0, "z": 50.8, "yaw": -82, "length": 28, "bend": 8, "mud": True},
+            {"kind": "oil", "x": -31.0, "z": 46.7, "length": 0.8}]
 
 
 SEAM = 0.025  # FieldStandard.SEAM_SLACK: blocks may overlap this much

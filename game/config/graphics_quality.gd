@@ -112,7 +112,7 @@ var glow: bool = false
 var eye_adaptation: bool = false
 ## A faint haze the light shines through (shafts and depth).
 var volumetric_fog: bool = false
-## Oil stains, tyre tracks and boot prints on the floors (WearMarks, WM1).
+## Oil stains and tyre tracks on the floors (WearMarks, WM1).
 var wear_marks: bool = false
 
 

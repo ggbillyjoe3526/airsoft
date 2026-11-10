@@ -2518,7 +2518,7 @@ msgid "GRAPHICS_WEAR_MARKS"
 msgstr "WEAR MARKS"
 
 msgid "GRAPHICS_WEAR_MARKS_NOTE"
-msgstr "Oil stains, tyre tracks and boot prints on the floors."
+msgstr "Oil stains and tyre tracks on the floors."
 
 msgid "GRAPHICS_VOLUMETRIC_FOG"
 msgstr "VOLUMETRIC HAZE"

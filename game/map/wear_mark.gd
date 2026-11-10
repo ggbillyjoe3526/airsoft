@@ -1,14 +1,13 @@
 class_name WearMark
 extends RefCounted
-## A worn mark on a field's floor (WM1; `dressing.wearMarks` in the map file): an oil stain, a pair of tyre tracks or a
-## trail of boot prints, drawn by WearMarks as decals over the floor's own procedural wear (SL1, SL2), which they add to
+## A worn mark on a field's floor (WM1; `dressing.wearMarks` in the map file): an oil stain or a pair of tyre tracks,
+## drawn by WearMarks as decals over the floor's own procedural wear (SL1, SL2), which they add to
 ## rather than repeat: the floor's wear is broad grime and dust, these are the marks of something that was there.
 ## Scenery only: nothing reads them but WearMarks.
 
 const OIL := &"oil"
 const TYRES := &"tyres"
-const BOOTS := &"boots"
-const KINDS: Array[StringName] = [OIL, TYRES, BOOTS]
+const KINDS: Array[StringName] = [OIL, TYRES]
 ## The longest a mark may be (m) and the most it may bend (degrees), so a typo can't spread one over a map.
 const MOST_LENGTH := 30.0
 const MOST_BEND := 180.0
@@ -17,13 +16,13 @@ var kind: StringName = OIL
 ## Where it starts (a stain's centre) on the floor, x and z; and the floor's height there, NAN to take the ground's.
 var at: Vector2 = Vector2.ZERO
 var y: float = NAN
-## Its heading (degrees, 0 towards -z, turning towards +x): the way the tracks or the trail run.
+## Its heading (degrees, 0 towards -z, turning towards +x): the way the tracks run.
 var yaw: float = 0.0
-## A stain's size across (m), or the tracks' or the trail's length (m).
+## A stain's size across (m), or the tracks' length (m).
 var length: float = 1.0
-## How far (degrees) the tracks or the trail turn by their end, evenly along them (a stain ignores it).
+## How far (degrees) the tracks turn by their end, evenly along them (a stain ignores it).
 var bend: float = 0.0
-## Muddy prints (boots) or tracks: the mud colour instead of the dust or the rubber.
+## Muddy tracks: the mud colour and a lugged tread instead of a hard floor's rubber smear.
 var mud: bool = false
 
 
@@ -47,7 +46,7 @@ static func read(dressing: Variant, warnings: Array[String]) -> Array[WearMark]:
 		var mud: Variant = d.get("mud", false)
 		if not KINDS.has(m.kind) or is_nan(m.at.x) or is_nan(m.at.y) or not (m.length > 0.0) \
 				or m.length > MOST_LENGTH or absf(m.bend) > MOST_BEND or not mud is bool:
-			warnings.append(("dressing.wearMarks %d needs a kind (oil, tyres, boots), x, z and a length over 0 up to %d m"
+			warnings.append(("dressing.wearMarks %d needs a kind (oil, tyres), x, z and a length over 0 up to %d m"
 					+ " (yaw, bend up to %d degrees, y, mud true or false); left out") % [i, MOST_LENGTH, MOST_BEND])
 			continue
 		m.mud = mud
@@ -55,7 +54,7 @@ static func read(dressing: Variant, warnings: Array[String]) -> Array[WearMark]:
 	return out
 
 
-## The points (x, z) along the tracks or the trail, `steps` + 1 of them from its start to its end, turning `bend`
+## The points (x, z) along the tracks, `steps` + 1 of them from its start to its end, turning `bend`
 ## evenly; a stain's one point is its centre.
 func path(steps: int) -> PackedVector2Array:
 	var points := PackedVector2Array([at])

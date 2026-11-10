@@ -210,14 +210,12 @@ def site() -> dict:
 
 def marks() -> list[dict]:
     """The floor's worn marks (WM1, WearMarks): oil where vans and the forklift stand, their tyre tracks through the
-    Garage, the Loading bay and the hall, and dusty boot trails, each on open floor (y 0, the slab's top)."""
+    Garage, the Loading bay and the hall, each on open floor (y 0, the slab's top). No boot prints (owner, 2026-11-10)."""
     oil = [(34, 3, 1.2), (41, 5, 0.8), (49.5, 4.5, 1.2), (50, -2, 0.7), (1, -9, 0.9), (-3, 4, 0.6), (8, 2, 1.1),
            (-6, 20, 1.0)]
     tyres = [(53.4, 4.5, -90, 6), (13, -7, -90, 20), (30, 2, 90, 6.5), (5, 7, 0, 12)]
-    boots = [(53, 1.5, 180, 6), (5, -3, 100, 4), (4, 30, 0, 6), (-45, -27, 90, 6)]
     out = [{"kind": "oil", "x": x, "y": 0, "z": z, "length": size} for x, z, size in oil]
     out += [{"kind": "tyres", "x": x, "y": 0, "z": z, "yaw": yaw, "length": n} for x, z, yaw, n in tyres]
-    out += [{"kind": "boots", "x": x, "y": 0, "z": z, "yaw": yaw, "length": n} for x, z, yaw, n in boots]
     return out
 
 

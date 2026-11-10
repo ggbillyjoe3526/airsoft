@@ -1,6 +1,6 @@
 extends GutTest
-## WM1: the floors' worn marks (WearMark, WearMarks, WearMarkArt, Graphics › Wear marks): oil stains, tyre tracks and
-## boot trails read from a map's `dressing.wearMarks`, each a decal on open floor, shown from Medium up and never on
+## WM1: the floors' worn marks (WearMark, WearMarks, WearMarkArt, Graphics › Wear marks): oil stains and tyre tracks
+## read from a map's `dressing.wearMarks`, each a decal on open floor, shown from Medium up and never on
 ## Compatibility. Headless: what is built and set, never pixels.
 
 var play: PlayTuning = PlayTuning.load_default()
@@ -24,11 +24,12 @@ func test_a_mark_is_read_and_a_bad_one_left_out_with_a_warning() -> void:
 		{"kind": "tyres", "x": 1.0, "z": 2.0, "yaw": 90, "length": 6, "bend": 20, "mud": true},
 		{"kind": "paint", "x": 0, "z": 0, "length": 1},
 		{"kind": "oil", "x": 0, "z": 0, "length": 0},
-		{"kind": "boots", "x": 0, "z": 0, "length": WearMark.MOST_LENGTH + 1.0},
-		{"kind": "boots", "z": 0, "length": 2},
+		{"kind": "tyres", "x": 0, "z": 0, "length": WearMark.MOST_LENGTH + 1.0},
+		{"kind": "tyres", "z": 0, "length": 2},
+		{"kind": "boots", "x": 0, "z": 0, "length": 2},
 	]}, warnings)
 	assert_eq(marks.size(), 1)
-	assert_eq(warnings.size(), 4, "each bad one warned of")
+	assert_eq(warnings.size(), 5, "each bad one warned of, boot prints too (no longer a kind, owner 2026-11-10)")
 	var m := marks[0]
 	assert_eq(m.kind, WearMark.TYRES)
 	assert_eq(m.at, Vector2(1.0, 2.0))
@@ -67,7 +68,7 @@ func test_depot_and_woodland_have_marks_and_lay_them_without_warnings() -> void:
 		var kinds := {}
 		for m in map.marks:
 			kinds[m.kind] = true
-		assert_true(kinds.has(WearMark.TYRES) and kinds.has(WearMark.BOOTS) and kinds.has(WearMark.OIL), id)
+		assert_true(kinds.has(WearMark.TYRES) and kinds.has(WearMark.OIL), id)
 
 
 func test_each_mark_lays_its_decals() -> void:
@@ -81,8 +82,6 @@ func test_each_mark_lays_its_decals() -> void:
 				want += 1
 			WearMark.TYRES:
 				want += 2 * maxi(1, ceili(m.length / play.marks.track_piece))
-			WearMark.BOOTS:
-				want += maxi(1, floori(m.length / play.marks.stride)) + 1
 	assert_eq(marks.decals().size(), want)
 	assert_eq(marks.get_child_count(), want, "every decal a child, freed with it")
 	for d in marks.decals():
@@ -142,7 +141,6 @@ func test_the_pictures_are_painted_once_and_the_tread_tiles() -> void:
 	WearMarkArt.ensure(play.marks)
 	assert_same(WearMarkArt.stain(), stain, "painted once")
 	assert_not_null(WearMarkArt.stain_orm())
-	assert_ne(WearMarkArt.boot(true), WearMarkArt.boot(false), "a left print and a right")
 	var tread := WearMarkArt.tread(true, WearMarkArt.Piece.MIDDLE).get_image()
 	var h := tread.get_height()
 	var seam := 0.0
@@ -212,9 +210,3 @@ func test_a_muddy_tread_has_lugs_at_a_real_tyres_pitch() -> void:
 	var pitch := play.marks.track_piece / lugs
 	assert_between(pitch, 0.04, 0.1, "a lug every %.3f m along the middle of the tread" % pitch)
 
-
-func test_a_boot_print_has_a_sole_outline_narrow_at_the_arch() -> void:
-	assert_eq(WearMarkArt.sole_half(0.0), 0.0, "nothing before the toe")
-	assert_eq(WearMarkArt.sole_half(1.0), 0.0, "nothing past the heel")
-	assert_lt(WearMarkArt.sole_half(WearMarkArt.ARCH_AT), WearMarkArt.sole_half(0.3), "the arch narrower than the ball")
-	assert_lt(WearMarkArt.sole_half(WearMarkArt.ARCH_AT), WearMarkArt.sole_half(0.8), "and than the heel")

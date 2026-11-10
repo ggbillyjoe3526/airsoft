@@ -1,18 +1,16 @@
 class_name MarksConfig
 extends Resource
 ## How the floors' worn marks look (WM1, WearMarks; a map places them in `dressing.wearMarks`, WearMark): oil stains, tyre
-## tracks and boot prints, each a decal (Graphics › Wear marks, Medium and up). Their colours are the look's palette's.
+## tracks, each a decal (Graphics › Wear marks, Medium and up). Their colours are the look's palette's.
 
 @export_group("Colours")
-## Each kind's palette colour (LookConfig.palette), and muddy prints' and tracks'.
+## Each kind's palette colour (LookConfig.palette), and muddy tracks'.
 @export var oil_colour: StringName = &"oil"
-@export var rubber_colour: StringName = &"rubber"
-@export var dust_colour: StringName = &"umber"
+@export var rubber_colour: StringName = &"tyre_mark"
 @export var mud_colour: StringName = &"mud_wet"
-## How much of the floor each covers at its darkest (0-1): an old stain, rubber worn in, a dusty print.
+## How much of the floor each covers at its darkest (0-1): an old stain, rubber worn in.
 @export var oil_opacity: float = 0.85
 @export var rubber_opacity: float = 0.8
-@export var boot_opacity: float = 0.95
 ## How shiny an oil stain is (its roughness, 0 a mirror, 1 matt) at its wettest middle.
 @export var oil_roughness: float = 0.2
 
@@ -26,16 +24,7 @@ extends Resource
 ## of tracks fades in at its start and out at its end.
 @export var lug_pitch: float = 0.065
 @export var track_fade: float = 1.5
-## A boot print's length and width (m), and a trail's stride (m, from one print to the next, left and right in turn)
-## and the gap between its feet (m).
-@export var print_length: float = 0.3
-@export var print_width: float = 0.11
-@export var stride: float = 0.7
-@export var feet_gap: float = 0.2
-## How far (rad) a print turns off the trail's heading at random, either way, and a stain's stretch at random.
-@export var print_wobble: float = 0.12
-## How much of a trail's colour its last print has lost, as the boots wipe clean along it (0-1).
-@export var trail_fade: float = 0.5
+## A stain's stretch at random (a share of its size, longer one way and narrower the other).
 @export var stain_stretch: float = 0.3
 
 @export_group("Decals")
@@ -46,9 +35,8 @@ extends Resource
 ## A mark fades out from `fade_from` m away over `fade_over` m (drawn by nobody beyond).
 @export var fade_from: float = 40.0
 @export var fade_over: float = 10.0
-## The marks' pictures: a stain's and a print's size (px a side), a muddy tread's piece (px across and along: enough
+## The marks' pictures: a stain's size (px a side), a muddy tread's piece (px across and along: enough
 ## along for its lugs at their pitch over `track_piece`) and a hard floor's smoother smear's.
 @export var stain_pixels: int = 128
-@export var print_pixels: Vector2i = Vector2i(48, 128)
 @export var tread_pixels: Vector2i = Vector2i(32, 512)
 @export var smear_pixels: Vector2i = Vector2i(32, 128)

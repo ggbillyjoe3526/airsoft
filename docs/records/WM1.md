@@ -1,4 +1,4 @@
-# WM1 · Wear marks: oil stains, tyre tracks and boot prints on the floors
+# WM1 · Wear marks: oil stains and tyre tracks on the floors
 
 **Review:** pending
 
@@ -17,30 +17,31 @@ names them, scaling per preset.
 
 ## Approach
 
-- **Data:** a map's `dressing.wearMarks` (`WearMark`): oil, tyres or boots, at x, z (y, or the ground's height), a heading,
+- **Data:** a map's `dressing.wearMarks` (`WearMark`): oil or tyres, at x, z (y, or the ground's height), a heading,
   a length and a bend, muddy or not. Written by the map builders (`tools/depot/build_map.py`,
   `tools/woodland/build_map.py`), each placed on open floor (checked against the blocks).
 - **Drawing:** `WearMarks` (built with the bushes in the dressing's staged parts): a Godot `Decal` per stain, per
-  wheel per straight piece of a pair of tracks (2 m), per boot print, its box half a metre tall, faces leaning past
-  half from the floor faded out, distance-faded from 40 m. Colours from the look's palette (a new `oil`, `rubber`,
-  `umber` for dust, `mud_wet`), strengths and shapes in `MarksConfig` (PlayTuning.marks).
-- **Pictures:** `WearMarkArt` paints them once at load from noise, with mipmaps (without, a print a few metres off
+  wheel per straight piece of a pair of tracks (2 m), its box half a metre tall, faces leaning past
+  half from the floor faded out, distance-faded from 40 m. Colours from the look's palette (new `oil`, and `tyre_mark`
+  dark enough to read on Depot's bright slab; `mud_wet`), strengths and shapes in `MarksConfig` (PlayTuning.marks).
+- **Pictures:** `WearMarkArt` paints them once at load from noise, with mipmaps (without, a mark a few metres off
   faded to nothing): a ragged stain with splashes, darker and shinier (its ORM's roughness) in the middle; on a hard
   floor a smooth streaked rubber smear, outdoors a muddy tread with lugs at a real tyre's pitch (`lug_pitch`, 6.5 cm),
-  each a little different; a pair's first and last pieces fade in and out over `track_fade` (1.5 m); a boot's sole
-  outline (narrow at the arch, the heel set off by its breast) with a firm rim and rows of lugs, and its mirror.
+  each a little different; a pair's first and last pieces fade in and out over `track_fade` (1.5 m).
 - **Bends:** each wheel is laid along its own path, set off square to the middle's at every point, so on a bend the
   pieces still meet end to end.
 - **Graphics row** Wear marks, off on Low, on from Medium (Forward+ and Mobile: Compatibility draws no decals), under
   Light and detail, set by `GraphicsApply.apply_field`.
-- **Placed:** Depot 16 (8 oil, 4 tracks: Loading bay, Garage, the hall's forklift lanes; 4 dusty trails), 87 decals;
-  Woodland 7 (the pickup's muddy tracks from the culvert's wet banks along the road to the verge where it stands, an oil drip by it, 5 muddy trails out of the mud puddles).
+- **Placed:** Depot 12 (8 oil, 4 tracks: Loading bay, Garage, the hall's forklift lanes), 54 decals;
+  Woodland 2 (the pickup's muddy tracks from the culvert's wet banks along the road to the verge where it stands, an
+  oil drip by it), 29 decals.
 
 ## Defaults taken
 
+- **No boot prints (owner, 2026-11-10):** attempt 2's prints were taken out at his word; the marks are oil and
+  tyres only.
 - Medium and up: decals are cheap (clustered, faded at 40 m), Low is the modest-PC preset.
 - Its own row, not tied to an existing one, so a player can turn the marks off alone.
-- Dusty prints are faint on Depot's bright slab, as dust prints are; the owner can ask for them bolder (`boot_opacity`).
 - Range and Kingsmere name no marks yet (Kingsmere's models come later).
 
 ## Checks

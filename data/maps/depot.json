@@ -4213,38 +4213,6 @@
     "z": 7,
     "yaw": 0,
     "length": 12
-   },
-   {
-    "kind": "boots",
-    "x": 53,
-    "y": 0,
-    "z": 1.5,
-    "yaw": 180,
-    "length": 6
-   },
-   {
-    "kind": "boots",
-    "x": 5,
-    "y": 0,
-    "z": -3,
-    "yaw": 100,
-    "length": 4
-   },
-   {
-    "kind": "boots",
-    "x": 4,
-    "y": 0,
-    "z": 30,
-    "yaw": 0,
-    "length": 6
-   },
-   {
-    "kind": "boots",
-    "x": -45,
-    "y": 0,
-    "z": -27,
-    "yaw": 90,
-    "length": 6
    }
   ]
  },

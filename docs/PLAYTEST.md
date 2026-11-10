@@ -1068,9 +1068,9 @@ Settings › Graphics › Quality: Low, Medium, High, Ultra or Custom.
   with no flicker or crawling dots when you turn; light should not leak through the tunnel walls. Smooth paint and
   floors should reflect the lamps sharply, not as a blur.
 - [ ] **Wear marks (WM1, your graphics card).** On Medium or up, walk Depot's loading bay, garage and the hall's
-  forklift lanes and Woodland's road by the pickup: oil stains, tyre tracks and boot prints should sit flat on the
+  forklift lanes and Woodland's road by the pickup: oil stains and tyre tracks should sit flat on the
   floor, never float, stretch up walls or crates, or shimmer as you move; they fade out past about 40 m. Switch
-  Graphics › Wear marks off and on: they go and come back at once. Dusty prints on Depot's slab are meant to be faint.
+  Graphics › Wear marks off and on: they go and come back at once.
 
 ## Accessibility
 

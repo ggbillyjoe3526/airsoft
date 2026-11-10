@@ -1,11 +1,11 @@
 class_name WearMarks
 extends Node3D
 ## A field's worn marks on its floor (WM1; the map's `dressing.wearMarks`, WearMark): each oil stain one decal, each pair
-## of tyre tracks a decal a wheel for every straight piece it is laid in, each boot trail a decal a print, left and
-## right in turn. They add to the floor's own wear (SL1, SL2), never repeat it. Shown with Graphics › Wear marks
-## (`set_on`; Medium and up, Forward+ and Mobile, as Compatibility draws no decals). Scenery: no collider, no nav cell.
+## of tyre tracks a decal a wheel for every straight piece it is laid in. They add to the floor's own wear (SL1, SL2),
+## never repeat it. Shown with Graphics › Wear marks (`set_on`; Medium and up, Forward+ and Mobile, as Compatibility
+## draws no decals). Scenery: no collider, no nav cell.
 
-## The shortest piece or stride (m) a mark is laid in, whatever the config says, so a 0 can't divide.
+## The shortest piece (m) a mark is laid in, whatever the config says, so a 0 can't divide.
 const SHORTEST := 0.05
 
 var _decals: Array[Decal] = []
@@ -27,8 +27,6 @@ static func build(map: MapData, cfg: MarksConfig, look: LookConfig) -> WearMarks
 				marks._stain(map, cfg, look, m, rng)
 			WearMark.TYRES:
 				marks._tracks(map, cfg, look, m)
-			WearMark.BOOTS:
-				marks._trail(map, cfg, look, m, rng)
 	return marks
 
 
@@ -85,22 +83,6 @@ static func _piece(i: int, pieces: int) -> WearMarkArt.Piece:
 	if i == 0:
 		return WearMarkArt.Piece.FIRST
 	return WearMarkArt.Piece.LAST if i == pieces - 1 else WearMarkArt.Piece.MIDDLE
-
-
-func _trail(map: MapData, cfg: MarksConfig, look: LookConfig, m: WearMark, rng: RandomNumberGenerator) -> void:
-	var steps := maxi(1, floori(m.length / maxf(cfg.stride, SHORTEST)))
-	var points := m.path(steps)
-	var paint := _paint(look, cfg.mud_colour if m.mud else cfg.dust_colour, cfg.boot_opacity)
-	for i in points.size():
-		var ahead := points[mini(i + 1, points.size() - 1)] - points[maxi(i - 1, 0)]
-		var heading := atan2(ahead.x, -ahead.y) if ahead.length() > 0.0 else deg_to_rad(m.yaw)
-		var left := i % 2 == 0
-		var side := Vector2(cos(heading), sin(heading)) * cfg.feet_gap * 0.5 * (-1.0 if left else 1.0)
-		var d := _decal(cfg, Vector3(cfg.print_width, cfg.box_height, cfg.print_length))
-		d.texture_albedo = WearMarkArt.boot(left)
-		# a trail fades as the boots wipe clean
-		d.modulate = Color(paint, paint.a * (1.0 - cfg.trail_fade * float(i) / points.size()))
-		_place(d, map, m, points[i] + side, heading + rng.randf_range(-cfg.print_wobble, cfg.print_wobble))
 
 
 func _decal(cfg: MarksConfig, size: Vector3) -> Decal:

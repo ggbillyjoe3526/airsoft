@@ -50,7 +50,7 @@ func test_the_limits_themselves_are_allowed() -> void:
 	var warnings: Array[String] = []
 	var marks := WearMark.read({"wearMarks": [
 		{"kind": "tyres", "x": 0, "z": 0, "length": WearMark.MOST_LENGTH, "bend": WearMark.MOST_BEND},
-		{"kind": "boots", "x": 0, "z": 0, "length": 0.01, "bend": -WearMark.MOST_BEND, "y": 3, "mud": true},
+		{"kind": "tyres", "x": 0, "z": 0, "length": 0.01, "bend": -WearMark.MOST_BEND, "y": 3, "mud": true},
 	]}, warnings)
 	assert_eq(marks.size(), 2)
 	assert_eq(warnings.size(), 0)
@@ -59,7 +59,7 @@ func test_the_limits_themselves_are_allowed() -> void:
 
 func test_a_longest_bent_mark_builds_a_bounded_number_of_decals() -> void:
 	var map := MapData.parse('{"size":[40,40],"dressing":{"wearMarks":[{"kind":"tyres","x":0,"z":0,"length":30,"bend":180},'
-			+ '{"kind":"boots","x":0,"z":0,"length":30,"bend":-180}]}}', play.map_style, 6)
+			+ '{"kind":"tyres","x":0,"z":0,"length":30,"bend":-180,"mud":true}]}}', play.map_style, 6)
 	if map.marks.is_empty():
 		pending("a bare map does not parse in this build")
 		return
