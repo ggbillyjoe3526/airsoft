@@ -17,6 +17,8 @@ const IN_LEAVES := 1
 const MIN_SEGMENT := 1e-9
 ## A laser out of a bush's leaves looks for the next bush from this far past the edge (m), not the edge itself.
 const LEAF_STEP := 1e-3
+## How finely a BB going into a stream through its edge finds where (halvings of its path's last stretch, WS1).
+const SIDE_STEPS := 8
 
 ## This tick's hit volume of each character, by index in the roster: characters don't move while BBs fly, so each is
 ## built at most once a tick, and only once a BB's path comes near it (Hitbox.may_touch; _built: 1 once built this
@@ -39,7 +41,8 @@ static var _crossing: Foliage.Crossing = Foliage.Crossing.new()
 ## stopped on a body that isn't knocked out (already hit, a teammate with friendly fire off, anyone in a `cease_fire`)
 ## or on the level is a BB_IMPACT, and a bounce off the level is one too; one stopped in a bush's leaves (`query`'s
 ## foliage) is a BB_IMPACT with value IN_LEAVES (direction its unit path, reach the leaves it crossed), and one coming
-## out of a bush's edge a BB_LEAVES; one that falls below `kill_y` or outlives its lifetime is BB_LOST. On the practice range a BB also stops on the first of `targets` it reaches, nearer than any
+## out of a bush's edge a BB_LEAVES; one whose path goes under a stream's surface (`query`'s water, WS1) a BB_IMPACT on
+## WATER where it went in, never bouncing; one that falls below `kill_y` or outlives its lifetime is BB_LOST. On the practice range a BB also stops on the first of `targets` it reaches, nearer than any
 ## body or the level, unless in a cease-fire: a TARGET_HIT (a figure goes down, RangeTargets.hit_target), or a
 ## BB_IMPACT on metal at a plate's post or a swinger's frame (a miss). `rng` (the match's stream) scatters bounces and
 ## times a pop-up's spell down.
@@ -51,6 +54,8 @@ static func step(pool: BBPool, characters: Array[Character], query: WorldQuery, 
 	var prepared := false
 	var foliage := query.foliage
 	var leafy := foliage != null and not foliage.is_empty()
+	var water := query.water
+	var wet := water != null and not water.is_empty()
 	for bb: BB in pool.bbs:
 		if not bb.active:
 			continue
@@ -69,7 +74,16 @@ static func step(pool: BBPool, characters: Array[Character], query: WorldQuery, 
 			var wall := INF
 			if query.bb_ray(bb.prev_position, bb.position, _ray_hit):
 				wall = _ray_hit.fraction * length
-			var reach := minf(wall, length)
+			# Under a stream's surface (WS1): the path goes in at the water where it falls through the level, `sink` m
+			# along it, and stops there, nearer than the bed or the bank beyond.
+			var sink := INF
+			if wet and dir.y < 0.0:
+				var end := bb.prev_position + dir * minf(wall, length)
+				var level := water.level_at(end.x, end.z) if end.y < water.top() - Water.MIN_DEPTH else NAN
+				if not is_nan(level) and level - end.y > Water.MIN_DEPTH:
+					sink = _went_in(water, bb.prev_position, dir, clampf((level - bb.prev_position.y) / dir.y, 0.0,
+							minf(wall, length)), minf(wall, length))
+			var reach := minf(minf(wall, length), sink)
 			# Leaves before the surface: where the BB stops in them, or comes out of them, ends its path here; a path
 			# that ends still among them (`in_leaves` m crossed) flies on through them next tick.
 			var leaf_end := -1.0
@@ -95,6 +109,9 @@ static func step(pool: BBPool, characters: Array[Character], query: WorldQuery, 
 				continue
 			if leaf_end >= 0.0:
 				_leave_leaves(bb, dir, leaf_end, leaf_stop, cfg, events, rng)
+				continue
+			if not is_inf(sink):
+				_sink(bb, dir, sink, events)
 				continue
 			if not is_inf(wall):
 				bb.position = bb.prev_position + dir * wall
@@ -122,6 +139,37 @@ static func step(pool: BBPool, characters: Array[Character], query: WorldQuery, 
 			var lost := events.add(GameEvent.Kind.BB_LOST)
 			lost.actor = bb.owner_id
 			lost.position = bb.position
+
+
+## Where a path from `from` along `dir` went into `water` (m along it): at `level` m, where it fell through the
+## surface, or, where that lies off the water (a stream's edge with no bank to wall it), the first of it over the water
+## before `far`, found to within 1/2^SIDE_STEPS of the way.
+static func _went_in(water: Water, from: Vector3, dir: Vector3, level: float, far: float) -> float:
+	var at := from + dir * level
+	if not is_nan(water.level_at(at.x, at.z)):
+		return level
+	var lo := level
+	var hi := far
+	for i in SIDE_STEPS:
+		var mid := (lo + hi) * 0.5
+		at = from + dir * mid
+		if is_nan(water.level_at(at.x, at.z)):
+			lo = mid
+		else:
+			hi = mid
+	return hi
+
+
+## The BB stops `at` m along `dir` where its path went under a stream's surface (WS1): a splash there (a BB_IMPACT on
+## WATER), and it sinks, never bouncing.
+static func _sink(bb: BB, dir: Vector3, at: float, events: SimEvents) -> void:
+	bb.position = bb.prev_position + dir * at
+	var impact := events.add(GameEvent.Kind.BB_IMPACT)
+	impact.actor = bb.owner_id
+	impact.position = bb.position
+	impact.value2 = RayHit.Surface.WATER
+	impact.direction = bb.velocity
+	bb.active = false
 
 
 ## The BB stops on the body _first_body reached (_reached, _reached_at along `dir`), whatever happens to its owner: a

@@ -81,17 +81,21 @@ it; a line under the crosshair tells you which.
 
 ## Woodland
 
-**A big open wood, 176 by 120 m, by day or by night**, in 6v6 (5v5 to 8v8 under Custom). A dry stream runs down the
+**A big open wood, 176 by 120 m, by day or by night**, in 6v6 (5v5 to 8v8 under Custom). A shallow stream runs down the
 middle, and three lanes cross it: the **north** over the Ridge, the North bridge and the Tower to the Fort; the
 **middle** past the Cabin and the Woodpile to the Clearing, over the Ford to Hut row; the **south** along the gravel
 road, round the Truck bend, over the Culvert to the Log stacks and the Sawmill. Attackers start in the west camp and
 defenders in the east camp.
 
 - **The stream:** its bed is 1.7 m under its banks, which are too steep to climb. Cross on the North bridge or the road,
-  or walk in and out at the Ford and the gentle slides. Down in the bed you're out of sight of the wood above.
+  or walk in and out at the Ford and the gentle slides. Down in the bed you're out of sight of the wood above. A level
+  stream of shin-deep water runs along it: wading slows you to 60% of your pace and every stride splashes, loud enough
+  to be heard about half as far again as a run on earth, even at a walk or a crouch. The Ford is a gravel bar only ankle
+  deep, so you splash over it at full pace. Bots splash and slow the same way, and they take the bridge or the road
+  where it isn't far out of their way. A BB that lands in the water splashes and sinks.
 - **The look:** warm afternoon sun over a natural green wood: young, grown and old Scots pines with bare tan trunks
   under their crowns, broad, lumpy oaks, white birches in the Birch stand and Fern hollow, dark spruce thickets, and
-  beyond the fence a far wood of spruce spires. A grassy floor, the weathered violet pickup wreck and teal crates carry
+  beyond the fence a far wood of spruce spires in uneven clumps and gaps. A grassy floor, the weathered violet pickup wreck and teal crates carry
   the colour, with nothing near a team's blue or orange. Every crown starts over head height.
 - **Long views, few walls:** the Ridge looks 86 m down onto the Fort; elsewhere a lane's longest line is under 80 m.
   Cover is fallen logs, wind-thrown trees torn out by their roots, woodpiles, stacks of tractor tyres, wooden crates,

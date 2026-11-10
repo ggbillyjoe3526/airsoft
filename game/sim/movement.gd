@@ -16,7 +16,8 @@ static func approach(current: float, target: float, max_delta: float) -> float:
 
 ## The pace (m/s) the character is aiming for in its stance: walking, sprinting or the run (both faster holstered, else
 ## at the replica in hand's pace, CS1), blended towards the crouch pace as it crouches. A lean slows it smoothly to walking pace, reached at lean_quiet_from of a full lean. Walk held
-## while aiming down sights creeps below the aiming pace (M84). In a bush every pace is bush_speed_scale of itself (BP8).
+## while aiming down sights creeps below the aiming pace (M84). In a bush every pace is bush_speed_scale of itself (BP8),
+## wading a stream wade_speed_scale (WS1), both in a bush in the water.
 static func target_speed(c: Character, cfg: MovementConfig, walk_held: bool) -> float:
 	var holstered := c.armament.holstered
 	# The replica in hand's pace (a compact one is lighter on your feet, CS1); holstered, the holster's.
@@ -31,6 +32,8 @@ static func target_speed(c: Character, cfg: MovementConfig, walk_held: bool) -> 
 	var speed := base + (cfg.crouch_speed - base) * c.crouch_amount
 	if c.in_bush:
 		speed *= cfg.bush_speed_scale
+	if c.in_water:
+		speed *= cfg.wade_speed_scale
 	return speed * cfg.aim_walk_scale if c.aiming and walk_held else speed
 
 

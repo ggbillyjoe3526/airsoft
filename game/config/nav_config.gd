@@ -23,6 +23,14 @@ extends Resource
 ## point's weight is 1 / this). 1 finds the shortest routes; 1.5 finds smoothed routes 3 % longer on average (13 % at
 ## worst) about six times faster (Depot, cross-map, measured 2026-10-18: 4.2 ms a search down to 0.7 ms).
 @export var search_greed: float = 1.5
+## A step onto a floor MovementConfig.wade_depth or more under a stream's surface (Water, WS1) costs this many times a
+## dry one, so a route takes a bridge or the road over the culvert where one is near and wades only where a dry crossing
+## is far out of its way (owner: the bridge is the better crossing; wading is slow and every stride splashes); one in
+## shallower water (a ford: it splashes, it doesn't slow) `splash_cost` times.
+## `wade_from` is MovementConfig.wade_depth (a test holds them equal).
+@export var wade_cost: float = 8.0
+@export var splash_cost: float = 1.5
+@export var wade_from: float = 0.15
 ## Points random_walkable_near tries before it gives up and returns the point it was asked about.
 @export var hunt_tries: int = 8
 ## Route searches a tick, the bots' and the walk-offs' together (the browser's NAV.searchBudget, 8,000 node expansions,

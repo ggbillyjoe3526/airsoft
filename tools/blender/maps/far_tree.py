@@ -57,7 +57,6 @@ def main() -> None:
 
 BAND = (20.0, 5.0, 16.0)       # length, depth, height (m) of one section
 BAND_BUDGET = 200              # a section's: 2,000 a band (the model list), the game tiles sections along it
-BAND_SPACING = 2.4
 BAND_LOW = 0.7
 BAND_WIDTH = 0.27              # a tree's radius, of its height (SkylineConfig.treeline_width)
 BAND_SHADE = 0.95              # a tier's skirt, of its tip's light (FT1: High's screen-space light darkens the far
@@ -67,38 +66,59 @@ BAND_SHADE = 0.95              # a tier's skirt, of its tip's light (FT1: High's
 BAND_TIERS = ((0.0, 1.0, 0.5), (0.3, 0.74, 0.78), (0.56, 0.46, 1.0))
 
 
-def treeline() -> None:
-    """A section of the band: two staggered rows of spruces, each three stacked, turned four-sided tiers (the far
-    tree's saw-tooth outline), every vertex the piece's colour times its shade (BODY), each tree its own shade so the
-    band reads as trees, not a wall."""
-    tree = tk.Tree("treeline", 1616)
+# The band's sections (WS1, the owner: the far trees stood too neatly): the game lays a seeded one of these at each
+# place along a treeline (SkylineConfig.treeline_variants), so the band never repeats one section. Each its own
+# trees: BAND_TREES of them scattered along it (none nearer BAND_APART m) over three lanes across its depth, the end ones
+# reaching a little past its ends so neighbours overlap; their heights rising and falling in groves along it
+# (BAND_GROVE m, a seeded phase) with one low glade, each BAND_SLIM (a range) of the width.
+BANDS = (("treeline", 1616), ("treeline_b", 1617), ("treeline_c", 1618), ("treeline_d", 1619))
+BAND_TREES = 16                # 192 triangles, 96 % of a section's 200
+BAND_APART = 0.75
+BAND_REACH = 0.6               # how far (m) past a section's ends its end trees may stand
+BAND_GROVE = 9.0
+BAND_SLIM = (0.8, 1.25)
+BAND_GLADE = (0.45, 0.7)       # the glade's trees: this share of the band's height (a range)
+
+
+def treeline(name: str, seed: int) -> None:
+    """A section of the band: BAND_TREES spruces scattered along it and across it, each three stacked, turned four-sided
+    tiers (the far tree's saw-tooth outline), every vertex the piece's colour times its shade (BODY), each tree its own
+    shade so the band reads as trees, not a wall."""
+    tree = tk.Tree(name, seed)
     tree.alpha = 0.0
     rng = tree.rng
     length, depth, height = BAND
-    n = round(length / BAND_SPACING)
-    for row in (0, 1):
-        z = depth * (0.25 if row == 0 else -0.25)
-        for k in range(n):
-            x = -length * 0.5 + (k + 0.25 + 0.5 * row) * length / n + rng.uniform(-0.3, 0.3)
-            h = height * rng.uniform(BAND_LOW, 1.0)
-            r = h * BAND_WIDTH
-            lit = rng.uniform(0.78, 1.0)
-            for t, (foot, tr, tip) in enumerate(BAND_TIERS):
-                foot *= h * rng.uniform(0.95, 1.05)
-                tip *= h if t == len(BAND_TIERS) - 1 else h * rng.uniform(0.95, 1.05)
-                rad = r * tr * rng.uniform(0.9, 1.1)
-                top = Vector((x, tip, z))
-                top_id = tree.vert(top, (lit, lit, lit), Vector((0.0, 1.0, 0.0)))
-                turn = rng.uniform(0.0, math.pi * 0.5)
-                ids = []
-                for c in range(4):
-                    a = turn + math.pi * 0.5 * c
-                    p = Vector((x + math.cos(a) * rad, foot, z + math.sin(a) * rad))
-                    dark = lit * BAND_SHADE
-                    ids.append(tree.vert(p, (dark, dark, dark), Vector((math.cos(a), 0.55, math.sin(a)))))
-                inside = Vector((x, foot + (tip - foot) * 0.3, z))
-                for c in range(4):
-                    tree.face_out(inside, ids[c], ids[(c + 1) % 4], top_id)
+    xs: list = []
+    while len(xs) < BAND_TREES:
+        x = rng.uniform(-length * 0.5 - BAND_REACH, length * 0.5 + BAND_REACH)
+        if all(abs(x - o) >= BAND_APART for o in xs):
+            xs.append(x)
+    phase = rng.uniform(0.0, 2.0 * math.pi)
+    glade = rng.uniform(-length * 0.35, length * 0.35)
+    for x in sorted(xs):
+        z = depth * rng.uniform(-0.38, 0.38)
+        grove = 0.5 + 0.5 * math.sin(x / BAND_GROVE * 2.0 * math.pi + phase)
+        h = height * min(1.0, rng.uniform(BAND_LOW - 0.15, 0.85) + 0.25 * grove)
+        if abs(x - glade) < 1.6:
+            h = height * rng.uniform(*BAND_GLADE)
+        r = h * BAND_WIDTH * rng.uniform(*BAND_SLIM)
+        lit = rng.uniform(0.78, 1.0)
+        for t, (foot, tr, tip) in enumerate(BAND_TIERS):
+            foot *= h * rng.uniform(0.95, 1.05)
+            tip *= h if t == len(BAND_TIERS) - 1 else h * rng.uniform(0.95, 1.05)
+            rad = r * tr * rng.uniform(0.9, 1.1)
+            top = Vector((x, tip, z))
+            top_id = tree.vert(top, (lit, lit, lit), Vector((0.0, 1.0, 0.0)))
+            turn = rng.uniform(0.0, math.pi * 0.5)
+            ids = []
+            for c in range(4):
+                a = turn + math.pi * 0.5 * c
+                p = Vector((x + math.cos(a) * rad, foot, z + math.sin(a) * rad))
+                dark = lit * BAND_SHADE
+                ids.append(tree.vert(p, (dark, dark, dark), Vector((math.cos(a), 0.55, math.sin(a)))))
+            inside = Vector((x, foot + (tip - foot) * 0.3, z))
+            for c in range(4):
+                tree.face_out(inside, ids[c], ids[(c + 1) % 4], top_id)
     # the section's own top at exactly its height (the tallest spire), so the game's stretch keeps the map's height
     top = max(v.y for v in tree.verts)
     for v in tree.verts:
@@ -109,4 +129,5 @@ def treeline() -> None:
 
 if __name__ == "__main__":
     main()
-    treeline()
+    for band_name, band_seed in BANDS:
+        treeline(band_name, band_seed)

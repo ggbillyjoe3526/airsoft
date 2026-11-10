@@ -257,7 +257,8 @@ static func _cluster(p: Placed, model: AABB, foot: Vector3, size: Vector3, cfg: 
 ## z across), stacked from the foot, each stretched to its cell, the model's z across the box; a quarter turn either
 ## way at random where that keeps it so (a round model, a square one), else a half turn, so a stack never reads as
 ## one model repeated; never turned for a model (`model_name`) in PropDressConfig.grid_unturned. Each cell takes one of
-## `picks` at random (the model and its variants).
+## `picks` at random (the model and its variants). A model in PropDressConfig.grid_scatter stands off its even place,
+## inside the box (WS1).
 static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName], boxes: Dictionary[StringName, AABB],
 		foot: Vector3, size: Vector3, cell: Vector3, cfg: PropDressConfig, rng: RandomNumberGenerator,
 		model_name: StringName = &"") -> void:
@@ -276,10 +277,20 @@ static func _grid(out: Dictionary[StringName, Placed], picks: Array[StringName],
 	# The model's z across the box: unturned on a box long in x, a quarter turn (its z to world x) on one long in z.
 	var yaw := 0.0 if along_x else PI * 0.5
 	var square := absf(model.size.x - model.size.z) < 0.05 * maxf(model.size.x, model.size.z)
+	# Scattered (WS1): off its even place, from a stream of the box's own.
+	var scatter: float = cfg.grid_scatter.get(model_name, 0.0)
+	var scattered := scatter > 0.0
+	var own := RandomNumberGenerator.new() if scattered else null
+	if scattered:
+		own.seed = hash(Vector3i(roundi(foot.x * 100.0), roundi(foot.y * 100.0), roundi(foot.z * 100.0)))
+	var room := Vector2(maxf(long - drawn.x, 0.0) * 0.5, maxf(across - drawn.z, 0.0) * 0.5)
 	for i in n.x:
 		for k in n.z:
 			var u := (drawn.x - long) * 0.5 + i * pitch.x
 			var v := (drawn.z - across) * 0.5 + k * pitch.y
+			if scattered:
+				u = clampf(u + own.randf_range(-scatter, scatter) * step.x, -room.x, room.x)
+				v = clampf(v + own.randf_range(-scatter, scatter) * step.z, -room.y, room.y)
 			var at := foot + (Vector3(u, 0.0, v) if along_x else Vector3(v, 0.0, u))
 			for j in n.y:
 				var turn := yaw + (_quarter_turn(rng) if square else PI * float(rng.randi_range(0, 1)))

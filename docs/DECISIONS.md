@@ -668,6 +668,14 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   MapData reads a map's `foliage`, MapLevel hands it to JoltQuery; BBs, bot sight and bot fire count its leaves, the
   view only draws them (BushView, one draw) and the minimap marks them. FO1's numbers are data (`BallisticsConfig`
   leaves, `BotConfig.foliage_*`, Easy's `fires_into_leaves`); a world without bushes flies BBs as before.
+- **Streams live in the simulation through `WorldQuery.water`, never in Jolt (2026-11-10, WS1; Claude's defaults for
+  William's ask).** MapData reads a map's `water` (lines of points at the water's level, a width; Woodland's lies flat
+  over a level bed, the owner's word), MapLevel hands it to the query. A character with at least
+  `MovementConfig.wade_depth` of water at its feet wades: slowed by `wade_speed_scale`, every stride splashing as a
+  run (a walk or crouch at `NoiseConfig.wade_quiet_carry`), the WATER surface carrying `NoiseConfig.ground`'s 1.5;
+  shallower water only splashes. A BB landing in water stops at its surface. The nav grid prices wading points by
+  `NavConfig.wade_cost` (its `wade_from` held equal to the wade depth by a test), so bots take a bridge near their
+  way. The view only draws it (WaterView).
 - **Practice has moving targets and a timed challenge, on the range or any map (2026-10-13, M93, M94; Claude's
   defaults).** The timed challenge is off by default, switched in Practice's pause menu: a START plate, a 3 s
   countdown, then 60 s of lit targets. On a map there are no bots: targets stand where the other team's bots would

@@ -450,6 +450,7 @@ def path(points: list) -> list[dict]:
 def ground_paint() -> dict:
     patches = [
         {"surface": "earth", "path": path(L.STREAM), "width": r(2 * L.BED_W)},
+        {"surface": "gravel", "path": path(ford_bar()), "width": r(2 * L.BED_W + 1.0)},  # WS1: the Ford's gravel bar
         {"surface": "earth", "path": path(L.HOLLOW), "width": 3.6},
         {"surface": "gravel", "path": path(L.ROAD), "width": 5.0},
         {"surface": "earth", "box": [-88, -72, -14, 20]},
@@ -465,6 +466,32 @@ def ground_paint() -> dict:
         if t["material"] != "concrete":
             patches.append({"surface": "earth", "path": path([t["a"], t["b"]]), "width": r(t["w"])})
     return {"base": "grass", "underTrees": "leaves", "patches": patches}
+
+
+# The stream in the old dry bed (WS1, the owner 2026-11-10: wading it is slow and loud, so the bridge is the better
+# crossing): the water lies flat at L.WATER_Y over the level bed (L.BED_Y, layout.py), its line a point every WATER_STEP
+# m, WATER_HALF either side of it (the bed's floor, its banks and a slide's gentle bank: the ground rising out of it is
+# dry, so the banks set where it ends). Flat, it runs north to south, the line's own way (WaterView's flow).
+WATER_STEP = 1.5
+WATER_HALF = L.BED_W + L.BANK + 4.0
+
+
+def ford_bar() -> list[tuple[float, float]]:
+    """The Ford's gravel bar (L.FORD_FLAT m either side of the Ford, along the bed's line), for its gravel paint."""
+    (ax, az), (bx, bz) = L.STREAM[7], L.STREAM[8]  # the leg the Ford lies on
+    ln = math.hypot(bx - ax, bz - az)
+    t = ((L.FORD[0] - ax) * (bx - ax) + (L.FORD[1] - az) * (bz - az)) / ln
+    return [(ax + (bx - ax) * (t + d) / ln, az + (bz - az) * (t + d) / ln)
+            for d in (-L.FORD_FLAT - 1.0, L.FORD_FLAT + 1.0)]
+
+
+def water() -> list[dict]:
+    pts = []
+    for (ax, az), (bx, bz) in zip(L.STREAM, L.STREAM[1:]):
+        n = max(1, round(math.hypot(bx - ax, bz - az) / WATER_STEP))
+        pts += [(ax + (bx - ax) * k / n, az + (bz - az) * k / n) for k in range(n)]
+    pts.append(L.STREAM[-1])
+    return [{"points": [{"x": r(x), "y": r(L.WATER_Y), "z": r(z)} for x, z in pts], "width": r(2 * WATER_HALF)}]
 
 
 def foliage() -> list[dict]:
@@ -558,9 +585,8 @@ def dressing() -> dict:
         "seed": 3107,
         "woods": {"leaves": 0.22, "fallen": 0.15},
         "moss": {"colour": 0x8C9A48, "share": 0.4},
-        "puddles": [{"x": 8.0, "z": 30.0, "width": 2.4, "depth": 1.6, "mud": True},
-                    {"x": -4.5, "z": -25.0, "width": 2.2, "depth": 1.5, "mud": True},
-                    {"x": -52.0, "z": 30.5, "width": 3.0, "depth": 1.8},
+        # (WS1: the two mud patches that lay in the dry bed are under the stream now)
+        "puddles": [{"x": -52.0, "z": 30.5, "width": 3.0, "depth": 1.8},
                     {"x": 30.0, "z": -14.0, "width": 2.4, "depth": 1.6, "mud": True}],
         "skyline": [{"kind": "treeline", "height": 16, "depth": 5, "points": path(ln)} for ln in lines] + [
             {"kind": "hill", "x": 150, "z": -10, "width": 90, "depth": 110, "height": 30, "colour": 0x4F6B45},
@@ -690,6 +716,7 @@ def main() -> None:
         "terrain": terrain(),
         "ground": ground_paint(),
         "foliage": foliage(),
+        "water": water(),
         "lights": lights(),
         "ambience": "woods",
         "dressing": dressing(),

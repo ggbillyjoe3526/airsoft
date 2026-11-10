@@ -113,9 +113,16 @@ static func forest(map: MapData, cfg: WoodsConfig, sky: SkylineConfig, horizon: 
 	var colours := PackedColorArray()
 	var far := horizon.srgb_to_linear()
 	var tries := map.forest_trees * cfg.forest_tries
+	# The clumps and glades: three crossing waves of about forest_clump m, at seeded phases.
+	var phase := Vector3(rng.randf() * TAU, rng.randf() * TAU, rng.randf() * TAU)
+	var k := TAU / maxf(cfg.forest_clump, 1.0)
 	while xforms.size() < map.forest_trees and tries > 0:
 		tries -= 1
 		var at := middle + Vector2.from_angle(rng.randf() * TAU) * cfg.forest_reach * sqrt(rng.randf())
+		var thick := (sin(at.x * k + phase.x) + sin((at.x * 0.6 + at.y * 0.8) * k * 1.3 + phase.y)
+				+ sin((at.y - at.x * 0.5) * k * 0.7 + phase.z)) / 6.0 + 0.5
+		if rng.randf() > 1.0 - cfg.forest_clumping * (1.0 - thick):
+			continue
 		if outside_by(field, at) < cfg.forest_fence or _crowded(near, at, cfg.forest_apart):
 			continue
 		var cell := Vector2i((at / cfg.forest_apart).floor())
@@ -126,7 +133,7 @@ static func forest(map: MapData, cfg: WoodsConfig, sky: SkylineConfig, horizon: 
 		for hill in hills:
 			y = maxf(y, hill_top(hill, at, sky.hill_rings))
 		var h := rng.randf_range(cfg.forest_height.x, cfg.forest_height.y)
-		var r := h * cfg.forest_width
+		var r := h * cfg.forest_width * rng.randf_range(cfg.forest_slim.x, cfg.forest_slim.y)
 		var basis := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(r, h, r))
 		xforms.append(Transform3D(basis, Vector3(at.x, y - cfg.forest_sink, at.y)))
 		var own := cfg.forest_colours[rng.randi() % cfg.forest_colours.size()].srgb_to_linear()

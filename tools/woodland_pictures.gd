@@ -37,6 +37,24 @@ const SHOTS: Array = [
 	["palisade_boundary", Vector3(-80.0, EYE, 4.0), Vector3(-88.0, 1.8, -2.0), false],
 	["palisade_camp", Vector3(-62.0, EYE, 6.0), Vector3(-72.0, 1.5, -2.0), false],
 	["palisade_close", Vector3(-69.5, EYE, -6.0), Vector3(-72.0, 1.6, -9.0), false],
+	# WS1: the stream, the woodpiles' log ends, the far treelines and a thicket's spruces
+	["stream_bridge", Vector3(-7.0, EYE, -31.0), Vector3(-0.5, 1.6, -42.0), false],
+	["stream_bed", Vector3(-1.0, 3.0, -35.5), Vector3(-4.0, 0.2, -24.0), true],
+	["stream_under_bridge", Vector3(-4.5, 0.2, -27.0), Vector3(-1.0, -1.4, -46.0), true],
+	["stream_ridge", Vector3(-18.0, EYE, -42.0), Vector3(2.0, -0.5, -41.5), false],
+	["bridge_side", Vector3(-3.0, -0.4, -33.0), Vector3(-1.0, -0.9, -41.5), true],
+	["bridge_west_end", Vector3(-9.0, EYE, -43.0), Vector3(-1.0, -0.6, -41.5), false],
+	["bridge_under", Vector3(-0.5, -1.2, -37.0), Vector3(-1.0, -1.4, -41.5), true],
+	["stream_ford", Vector3(1.0, EYE, 7.0), Vector3(10.0, -1.6, 0.0), false],
+	["stream_down", Vector3(13.5, EYE, 14.0), Vector3(8.5, -1.6, 30.0), false],
+	["stream_culvert", Vector3(9.5, EYE, 37.0), Vector3(8.0, -1.4, 47.0), false],
+	["woodpile_quarter", Vector3(-30.0, EYE, 3.0), Vector3(-34.5, 1.0, 8.0), false],
+	["woodpile_close", Vector3(-32.6, 1.3, 7.2), Vector3(-34.0, 0.9, 9.0), false],
+	["logstacks_b", Vector3(31.5, EYE, 31.0), Vector3(29.7, 1.0, 35.9), false],
+	["treeline_west", Vector3(-78.0, EYE, 30.0), Vector3(-100.0, 7.0, 26.0), false],
+	["treeline_north", Vector3(-20.0, EYE, -50.0), Vector3(-20.0, 9.0, -75.0), false],
+	["treeline_east", Vector3(84.0, EYE, -40.0), Vector3(100.0, 8.0, -20.0), false],
+	["thicket_spruces", Vector3(50.0, EYE, 7.0), Vector3(50.0, 3.0, 20.0), false],
 ]
 
 

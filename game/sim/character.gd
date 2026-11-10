@@ -65,6 +65,9 @@ var walking: bool = false
 ## Pushing through a bush this tick (Simulation, from Foliage.holds; BP8): slower (MovementConfig.bush_speed_scale)
 ## and its steps louder (NoiseConfig.bush_carry).
 var in_bush: bool = false
+## Wading in a stream this tick (Simulation, from Water.depth_at at its feet; WS1): slower
+## (MovementConfig.wade_speed_scale), and every stride splashes (Footsteps, NoiseConfig.wade_quiet_carry).
+var in_water: bool = false
 ## This tick's move as Movement wanted it and as the level let it happen (CharacterMover), for a run into a noisy prop
 ## (PropNoise); a vault leaves them as they were.
 var wanted_move: Vector3 = Vector3.ZERO

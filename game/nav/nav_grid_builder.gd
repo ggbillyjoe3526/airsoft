@@ -31,7 +31,7 @@ static func fill(g: NavGrid, map: MapData, cfg: NavConfig, body: BodyConfig) -> 
 	_stamp_low(g, map, r, body)
 	_stamp_drops(g, r, body.height * 0.5)
 	_stamp_outer_edge(g, r)
-	_link(g, 1.0 / maxf(cfg.search_greed, 1.0))
+	_link(g, 1.0 / maxf(cfg.search_greed, 1.0), map.water, cfg)
 	_open(g)
 	return true
 
@@ -310,8 +310,10 @@ static func _stamp_outer_edge(g: NavGrid, r: float) -> void:
 
 ## Each walkable node's eight steps (the node each neighbouring cell steps onto, walkable or not, or -1), which of them
 ## land on a walkable node (`step_mask`), the route search's points and links, each point weighted `weight` (below 1 the
-## search's estimate counts for more than the steps it has taken: NavConfig), and each node's region (NavGrid.region).
-static func _link(g: NavGrid, weight: float) -> void:
+## search's estimate counts for more than the steps it has taken: NavConfig), on a floor under `water`'s surface that
+## times `cfg`'s wade_cost where it is wade_from deep or more, else its splash_cost (WS1), and each node's region
+## (NavGrid.region).
+static func _link(g: NavGrid, weight: float, water: Water = null, cfg: NavConfig = null) -> void:
 	var count := g.floor_y.size()
 	var cols := g.cols
 	var rows := g.rows
@@ -357,9 +359,15 @@ static func _link(g: NavGrid, weight: float) -> void:
 	g.step_mask = masks
 	var astar := AStar3D.new()
 	astar.reserve_space(count)
+	var wet := water != null and not water.is_empty() and cfg != null
 	for k in count:
 		if walkable[k] == 1:
-			astar.add_point(k, g.node_position(k), weight)
+			var at := g.node_position(k)
+			var depth := water.depth_at(at) if wet else 0.0
+			var price := 1.0
+			if depth > 0.0:
+				price = cfg.wade_cost if depth >= cfg.wade_from else cfg.splash_cost
+			astar.add_point(k, at, weight * price)
 	# Union-find over the links, taken either way: a node's parent is never above it, so one pass in order flattens it.
 	var parent := PackedInt32Array()
 	parent.resize(count)

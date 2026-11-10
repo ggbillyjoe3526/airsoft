@@ -322,6 +322,8 @@ func _add_rest() -> void:
 	_railing_bodies.clear()
 	# Bushes are no collider: only leaves the simulation counts along a line (WL5).
 	_query.foliage = m.foliage
+	# Nor is water: only a level over the ground that the simulation wades, splashes and prices routes in (WS1).
+	_query.water = m.water
 	# What each box is, for the rules that ask (the noisy props, NP1); a ramp's wedge never makes a noise. A round
 	# prop's block counts as its box.
 	for b in m.blocks:

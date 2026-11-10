@@ -53,7 +53,7 @@ func after_each() -> void:
 func test_woodland_reads_its_dressing_with_no_warning() -> void:
 	assert_eq(woodland.warnings, [] as Array[String])
 	assert_eq([woodland.forest_trees, woodland.fireflies, woodland.grass_height], [1800, 220, 0.34])
-	assert_gt(woodland.puddles.size(), 3, "puddles")
+	assert_gt(woodland.puddles.size(), 1, "puddles (the bed's two under the stream since WS1)")
 	assert_true(woodland.puddles.any(func(p: MapData.Puddle) -> bool: return p.mud), "mud among them")
 	assert_true(woodland.has_motes and woodland.moss_share > 0.0 and woodland.leaf_drifts > 0.0
 			and woodland.fallen > 0.0, "motes, moss, leaves and fallen wood")
@@ -161,7 +161,9 @@ func test_crowns_draw_on_every_preset_and_low_draws_nothing_else() -> void:
 		tufts.append(n)
 	assert_gt(forest[0], 0, "Medium draws some of the forest")
 	assert_true(forest[0] < forest[1] and forest[1] < forest[2], "more forest each step up: %s" % [forest])
-	assert_eq(forest[2], woodland.forest_trees, "Ultra draws it all")
+	assert_eq(forest[2], view.forest().multimesh.instance_count, "Ultra draws it all")
+	# WS1: the clumps and glades leave out the spots too crowded in a clump, never much of the wood
+	assert_gt(view.forest().multimesh.instance_count, int(woodland.forest_trees * 0.9), "the wood about its count")
 	assert_true(tufts[0] > 0 and tufts[0] < tufts[1] and tufts[1] < tufts[2], "more tufts each step up: %s" % [tufts])
 
 
