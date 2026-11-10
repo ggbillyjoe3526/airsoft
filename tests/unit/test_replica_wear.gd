@@ -143,3 +143,98 @@ func test_the_worn_paint_follows_the_hands_depth_press() -> void:
 		names.append(StringName(u["name"]))
 	assert_has(names, &"z_clip_scale", "ReplicaView can press its depth")
 	assert_true(ReplicaPaint.is_worn((worn[0] as ShaderMaterial).duplicate() as Material), "a copy is still worn")
+
+
+func _first_override(model: Node) -> Material:
+	var s := _painted(model, false)[0] as Array
+	return (s[0] as MeshInstance3D).get_surface_override_material(s[1])
+
+
+func test_repainting_a_model_swaps_the_worn_paint_and_back_to_plain_with_worn_false() -> void:
+	var model := _model("aeg")
+	ReplicaPaint.apply(model, &"cobalt", false)
+	var cobalt := _first_override(model)
+	ReplicaPaint.apply(model, &"ghost", true)
+	var ghost := _first_override(model)
+	assert_true(ReplicaPaint.is_worn(ghost), "the repaint is worn too")
+	assert_ne(ghost, cobalt, "a new paint is a new worn material")
+	assert_ne(ReplicaPaint.plain_of(ghost), ReplicaPaint.plain_of(cobalt), "over its own plain paint")
+	ReplicaPaint.apply(model, &"cobalt", false)
+	assert_same(_first_override(model), cobalt, "back to the first paint reuses its worn material")
+	ReplicaPaint.apply(model, &"cobalt", false, false)
+	assert_false(ReplicaPaint.is_worn(_first_override(model)), "worn=false repaints it plain")
+
+
+func test_repeated_applies_build_no_duplicate_worn_materials() -> void:
+	var model := _model("pistol")
+	ReplicaPaint.apply(model, &"cobalt", false)
+	var built := ReplicaPaint.worn_materials().size()
+	for i in 5:
+		ReplicaPaint.apply(model, &"cobalt", false)
+		ReplicaPaint.apply(_model("pistol"), &"cobalt", false)
+	assert_eq(ReplicaPaint.worn_materials().size(), built, "no new worn material per apply")
+
+
+func test_the_own_paint_leaves_every_model_unworn() -> void:
+	for id: String in WORN + CLEAN:
+		var model := _model(id)
+		ReplicaPaint.apply(model, ReplicaSchemes.OWN, true)
+		ReplicaPaint.apply(model, ReplicaSchemes.OWN, false)
+		for node: Node in model.find_children("*", "MeshInstance3D", true, false):
+			var mi := node as MeshInstance3D
+			for i in mi.mesh.get_surface_count():
+				assert_false(ReplicaPaint.is_worn(mi.get_active_material(i)), "%s %s own paint is not worn" % [id, mi.name])
+	assert_eq(ReplicaPaint.worn_materials().size(), 0, "nothing worn was built")
+
+
+func test_clean_models_stay_plain_under_any_paint() -> void:
+	for id: String in CLEAN:
+		var model := _model(id)
+		ReplicaPaint.apply(model, &"cobalt", false)
+		for node: Node in model.find_children("*", "MeshInstance3D", true, false):
+			var mi := node as MeshInstance3D
+			for i in mi.mesh.get_surface_count():
+				assert_false(ReplicaPaint.is_worn(mi.get_active_material(i)), "%s %s plain" % [id, mi.name])
+
+
+func test_clearing_the_cache_keeps_a_live_replicas_worn_paint() -> void:
+	var model := _model("aeg")
+	ReplicaPaint.apply(model, &"cobalt", false)
+	var held := _first_override(model)
+	var albedo: Color = (held as ShaderMaterial).get_shader_parameter(&"albedo")
+	ReplicaPaint.clear()
+	assert_eq(ReplicaPaint.worn_materials().size(), 0, "the cache let go")
+	assert_true(is_instance_valid(held), "the live material survives")
+	assert_eq((held as ShaderMaterial).get_shader_parameter(&"albedo"), albedo, "unchanged")
+	assert_not_null((held as ShaderMaterial).get_shader_parameter(&"wear_mask"), "mask kept")
+	assert_not_null(ReplicaPaint.plain_of(held), "its plain paint is kept by the meta")
+	var again := _model("aeg")
+	ReplicaPaint.apply(again, &"cobalt", false)
+	assert_true(ReplicaPaint.is_worn(_first_override(again)), "a new apply after clear is worn")
+
+
+func test_the_worn_cache_stays_bounded() -> void:
+	var model := _model("aeg")
+	for p: StringName in ReplicaSchemes.SCHEMES.keys():
+		for r: bool in [false, true]:
+			ReplicaPaint.apply(model, p, r)
+	assert_lte(ReplicaPaint.worn_materials().size(), ReplicaPaint.MAX_WORN)
+
+
+func test_the_pressed_copy_keeps_the_worn_colour_and_mask() -> void:
+	var cfg := ViewModelConfig.new()
+	cfg.depth_scale = 0.5
+	var view := ReplicaView.new()
+	view._cfg = cfg
+	add_child_autofree(view)
+	var model := _model("aeg")
+	ReplicaPaint.apply(model, &"cobalt", false)
+	var src := _first_override(model) as ShaderMaterial
+	var copy := view._pressed_copy(src) as ShaderMaterial
+	assert_ne(copy, src, "a copy")
+	assert_true(ReplicaPaint.is_worn(copy))
+	assert_eq(copy.get_shader_parameter(&"z_clip_scale"), 0.5)
+	assert_eq(copy.get_shader_parameter(&"albedo"), src.get_shader_parameter(&"albedo"))
+	assert_eq(copy.get_shader_parameter(&"wear_mask"), src.get_shader_parameter(&"wear_mask"))
+	assert_ne(src.get_shader_parameter(&"z_clip_scale"), 0.5, "the shared one is not pressed")
+	assert_same(view._pressed_copy(src), copy, "one copy per material")
