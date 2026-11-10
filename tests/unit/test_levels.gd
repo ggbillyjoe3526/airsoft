@@ -51,6 +51,7 @@ func test_the_shipped_levels_read_clean_and_unlock_every_item_once() -> void:
 	assert_eq(table.unlock_level(SCOPE), 5, "with the Sniper Rifle it comes on (SN1)")
 	assert_eq(table.unlock_level("000021"), 5)
 	assert_eq(table.unlock_level(CYBER), 10)
+	assert_eq(table.unlock_level("000026"), 7, "the Compact SMG with the M140 Spring (CS1)")
 	var count := 0
 	for l in table.levels:
 		count += l.unlocks.size()

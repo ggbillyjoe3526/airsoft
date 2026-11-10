@@ -24,7 +24,7 @@ func before_each() -> void:
 func test_the_shipped_pool_reads_without_a_problem() -> void:
 	var pool := Pool.read_file()
 	assert_eq(pool.problems, [] as Array[String])
-	assert_eq(pool.replicas.map(func(i: Pool.Item) -> String: return i.id), [PISTOL, AEG, CYBER, "000021"])
+	assert_eq(pool.replicas.map(func(i: Pool.Item) -> String: return i.id), [PISTOL, AEG, CYBER, "000021", "000026"])
 	assert_eq(pool.powers.size(), 8, "two batteries, three gases, three springs (SN1)")
 	assert_eq(pool.item(AEG).key, &"aeg")
 	assert_true(pool.item(AEG).tags.has("electric"))

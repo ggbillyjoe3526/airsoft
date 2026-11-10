@@ -57,7 +57,7 @@ func setup(count: int, characters: Array[Character], models: FigureModels, share
 		var replicas := c.armament.replicas
 		for slot in replicas.size():
 			var r := replicas[slot]
-			var mesh: Mesh = models.magazine_mesh(r.id) if models != null else null
+			var mesh: Mesh = models.magazine_mesh(r.model_id()) if models != null else null
 			if mesh == null:
 				mesh = _pistol if r.site_class == &"pistol" else _rifle
 			if c.id >= 0 and c.id * _stride + slot < _meshes.size():

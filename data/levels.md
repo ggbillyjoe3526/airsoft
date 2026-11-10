@@ -37,7 +37,7 @@ typo never stops the game from starting.
 | 4 | 500 | Silencer |
 | 5 | 600 | Tight-Bore Barrel, Sniper Rifle, M130 Spring, 2x Scope |
 | 6 | 700 | Angled Grip, Low-Cap Magazine, Red Gas |
-| 7 | 800 | M140 Spring |
+| 7 | 800 | M140 Spring, Compact SMG |
 | 8 | 900 | 11.1 V LiPo Battery, Variable Scope |
 | 9 | 1000 | Long Barrel, Black Gas, M150 Spring |
 | 10 | 1200 | Cyber Pistol |
@@ -47,7 +47,8 @@ typo never stops the game from starting.
   power (the LiPo battery, Black Gas) and the Cyber Pistol. The Sniper Rifle is the first new replica (level 5, with
   the M130 Spring it comes with, owner 2026-11-02), its stronger springs follow as the stronger gases do (M140 at 7, M150
   at 9 with Black Gas), and the 2x Scope it comes with moved from level 7 to 5 to unlock with it, Red Gas from 5 to 6 to spread level 5 out
-  (owner, 2026-11-02).
+  (owner, 2026-11-02). The Compact SMG (CS1, 2026-11-10) fills out level 7 beside the M140 Spring, its red dot,
+  laser and silencer all unlocked by then; not a new level 11, which would stand empty with Dev content off.
 - **The pace** (2026-10-13). A first-to-5 match on Normal gives about 250 XP, so level 1 comes after the first match
   and level 10 after about 25 matches on Normal (about 17 on Hard).
 - **At the cap,** XP stops counting until the cap goes up: the Armory and the match summary say so.

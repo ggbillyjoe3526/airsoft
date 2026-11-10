@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="ReplicaConfig" format=3]
+
+[ext_resource type="Script" path="res://game/config/replica_config.gd" id="1_smg01"]
+
+[resource]
+script = ExtResource("1_smg01")
+id = &"smg"
+display_name = "Compact SMG"
+sound = &"smg"
+fire_modes = Array[int]([0, 2])
+default_fire_mode = 2
+fire_rate = 18.0
+mag_size = 45
+mags = 5
+reload_time = 1.4
+draw_time = 0.32
+muzzle_energy = 0.75
+bb_weight = 0.2
+hop_up_max = 0.2
+hop_up_dial = 0.65
+spread_deg = 0.6
+recoil_deg = 0.14
+hip_spread = 0.75
+pace = 1.08
+move_spread = 0.5
+model = &"aeg"
