@@ -69,7 +69,7 @@ func test_it_plays_by_its_stats_row_single_shot() -> void:
 	assert_almost_eq(r.fire_rate, 0.8, 1e-6)
 	assert_eq([r.mag_size, r.mags], [25, 4])
 	assert_almost_eq(r.spread_deg, 0.1, 1e-6)
-	assert_almost_eq(r.hip_spread, 6.0, 1e-6)
+	assert_almost_eq(r.hip_spread, 10.0, 1e-6, "ten times from the hip (PP1; six before)")
 	var aeg := rules.config(rules.pool.item(AEG))
 	assert_almost_eq(aeg.hip_spread, 1.0, 1e-6, "the rest as before")
 	assert_lt(r.spread_deg, aeg.spread_deg, "tighter than the AEG raised")
@@ -154,7 +154,7 @@ func test_one_shot_then_the_spring_is_cocked_before_the_next() -> void:
 	assert_eq(c.armament.mag(), 23)
 
 
-func test_from_the_hip_it_is_six_times_as_wide_and_raised_as_any_replica() -> void:
+func test_from_the_hip_it_is_its_hip_spread_times_as_wide_and_raised_as_any_replica() -> void:
 	var cfg := MovementConfig.new()
 	var acc := AccuracyConfig.new()
 	var sniper := Character.new(1, 0, Vector3.ZERO, 0.0, [_sniper()] as Array[ReplicaConfig])
@@ -162,7 +162,8 @@ func test_from_the_hip_it_is_six_times_as_wide_and_raised_as_any_replica() -> vo
 	for c: Character in [sniper, aeg]:
 		c.grounded = true
 	var hip := Accuracy.target_spread_scale(sniper, cfg, acc)
-	assert_almost_eq(hip / Accuracy.target_spread_scale(aeg, cfg, acc), 6.0, 1e-4)
+	var wide := _sniper().hip_spread
+	assert_almost_eq(hip / Accuracy.target_spread_scale(aeg, cfg, acc), wide, 1e-4)
 	sniper.aim_raise = 1.0
 	aeg.aim_raise = 1.0
 	assert_almost_eq(Accuracy.target_spread_scale(sniper, cfg, acc), Accuracy.target_spread_scale(aeg, cfg, acc), 1e-6,
@@ -170,7 +171,7 @@ func test_from_the_hip_it_is_six_times_as_wide_and_raised_as_any_replica() -> vo
 	sniper.aim_raise = 0.5
 	aeg.aim_raise = 0.5
 	assert_almost_eq(Accuracy.target_spread_scale(sniper, cfg, acc) / Accuracy.target_spread_scale(aeg, cfg, acc),
-			3.5, 1e-4, "half up, half way")
+			1.0 + (wide - 1.0) * 0.5, 1e-4, "half up, half way")
 
 
 func test_in_hand_it_is_a_bolt_action_with_a_long_barrel_and_a_bolt_cycle_fire_clip() -> void:

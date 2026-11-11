@@ -1,15 +1,17 @@
 # PP1 · Preliminary Dev 3 pass: balance, bugs, QA and performance
 
-**Review:** part 1 (#305) 2 attempts · critic Accept 8/8 · qa Pass · performance Pass; part 2 1 attempt · critic
-Accept 7/8 · qa Pass · performance Pass
+**Review:** part 1 (#305) 2 attempts · critic Accept 8/8 · qa Pass · performance Pass; part 2 (#306) 1 attempt ·
+critic Accept 7/8 · qa Pass · performance Pass; part 3 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Part | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|---|
-| 2026-11-11 | 1 | 1 | Opus 5.5 (build thread) | targeted ✓, CI unit part 1 ✗ | 6/8 Retry | test_armory_cards read the list's dim; the next level's tiles dimmed; a stale row |
-| 2026-11-11 | 1 | 2 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
-| 2026-11-11 | 2 | 1 | Opus 5.5 (worker) | targeted ✓ | 7/8 Accept | (non-blocking) the mid-ride stop limit had no row: added |
+| 2026-11-11 | 1 | 1 | build thread | targeted ✓, CI unit part 1 ✗ | 6/8 Retry | test_armory_cards read the list's dim; the next level's tiles dimmed; a stale row |
+| 2026-11-11 | 1 | 2 | build thread | ✓ | 8/8 Accept | – |
+| 2026-11-11 | 2 | 1 | worker | targeted ✓, CI unit part 3 ✗ then ✓ | 7/8 Accept | (non-blocking) the mid-ride stop limit had no row: added; the field areas check missed the Lift name: fixed |
+| 2026-11-11 | 3 | 1 | build thread | targeted ✓ (QA ✗: 5 stale tests) | 7/8 Retry | QA Fail; the Grenades wiki page and the record's "no new system" |
+| 2026-11-11 | 3 | 2 | build thread | targeted ✓ | 8/8 Accept | – |
 
 The owner's preliminary run of the Dev 3 final passes (2026-11-10, "search thoroughly for any bugs, issues (quality,
 balance, performance)", "check against all known issues"); the full passes run again after Subway's models and the
@@ -65,12 +67,47 @@ Hard 16, both modes) ran alongside. The fixes ship in parts.
   vault ×8).
 - MT2's three unlisted limits, and the mid-ride stop-on-the-way limit, are KNOWN_ISSUES rows.
 
+## Part 3: balance
+
+The balance review read every replica, part, optic, magazine and bot skill against data/stats.md, data/pool.md and
+the bot tuning. Changes (data and tuning rows, and one new bot reaction, the flash dodge):
+
+- **Parts are trade-offs, never straight upgrades.** The 11.1 V LiPo gave 15 % fire rate free: now 10 % recoil too.
+  The Tight-Bore Barrel gave tighter groups and 3 % energy free: now −5 % energy (a little less reach). The Red Dot
+  gave only its slight zoom: its raise time is 0.85 of the iron sights', the quick sight.
+- **Sniper Rifle hip spread 6 → 10.** A snap shot from the hip at 15 m still hit nine times in ten; at 10 it is a
+  coin toss, so the rifle is aimed.
+- **Compact SMG hop-up cap.** `hop_up_max` 0.2 → 0.15 and `hop_up_dial` 0.65 → 0.85 keep its factory setting
+  about where it was (lift 0.1275, was 0.13, the nearest dial notch; 27.46 m within 15 cm and 0.592 s to 30 m)
+  and cut its best reach from 35 m to 31 m, so it can't be dialled into the AEG's 39 m band.
+- **Bots turn from flashes.** Only a bot's own flash was turned from, so every flash the player threw blinded a bot
+  facing it. `BotSkill.flash_dodge_chance` (Easy 0, Normal 0.3, Hard 0.6) is rolled once a bomb when someone else's
+  flash in the air or landed is in its view and sight within `BotConfig.flash_dodge_reach` (16 m, flat); a win turns
+  the bot away until `flash_wait_after` past the bang, as the thrower does (`BotBombs._judge_flash`). With two in
+  view it judges the one that bangs sooner (QA).
+
+Tests: test_bot_bombs (turns away on a win and is not dazzled; dazzled on a lost roll or out of sight; Easy never,
+Hard more often than Normal; the sooner of two), test_sniper_rifle (reads `hip_spread`); QA's test_pp1_balance_qa
+(the rows read, the parts' sums, the SMG's reach, its own, a teammate's, a far and a behind flash, two flashes);
+stale rows in test_attachments, test_customise_parts and test_sn1_qa updated.
+
 ## Decisions
 
 - **Not fixed, logged instead** (`docs/KNOWN_ISSUES.md`): the locker's silent run-in (a per-block noise is a bigger
   change than one block warrants), the button dip's lost edge click (the owner's "dips about its middle" look kept),
   the lamps' per-frame shadow redraw (needs a frame time from the owner's card first), SDFGI after a lamp switch, the
   Retro filter in the glass, and the stale map pictures (render again before the Dev 3 tag).
+- **Flash dodge as a skill row** (default): Easy keeps 0 so the player's flash stays a sure thing against beginners'
+  bots; Normal 0.3 and Hard 0.6 follow the smoke and flash chances' climb. Easy to retune in bot_tuning.tres.
+- **A saved SMG hop-up** keeps its dial position, so under the new cap it lifts a little less than the player set
+  (0.65 of 0.15 is 0.0975): the SMG is Dev content new in Dev 3, so few saves have one; not migrated.
+- **The turn-away direction** is fixed when the bot first sees the flash (a flash seen in flight that lands past it
+  can still catch it): kept simple, a playtest call.
+- **A flash close behind a bot** (within `close_awareness`, 2.5 m, which `in_view` counts as seen) can be turned
+  from too: a bang anywhere but straight behind still dazzles in part (`Grenades.dazzle_strength`), so turning away
+  is right, at the cost of up to 1.8 s holding still (critic advisory, kept).
+- **Balance changes stay small** (default): one step per row, as the full balance pass after the owner's playtest
+  tunes them further.
 
 - **`climb_kinds` is floor alone:** every shipped platform and dock top is kind floor. **Riders' corners 0.6 m in:**
   the body's radius (0.32 m) and the 0.2 m a bot stops short, with a margin.
@@ -79,3 +116,5 @@ Hard 16, both modes) ran alongside. The fixes ship in parts.
 
 - The rows above, each added to `docs/KNOWN_ISSUES.md`; and a bot replanning mid-ride whose car stops on the way walks
   out on the wrong floor's leg once (can wait).
+- Part 3's owner questions (the Red Laser's cost, the GBB Pistol beside two rifles, the Hi-Cap rattle at a sprint,
+  the Cyber Pistol beside the SMG): `docs/KNOWN_ISSUES.md`, playtest.

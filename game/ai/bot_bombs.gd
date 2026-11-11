@@ -40,8 +40,10 @@ static func step(b: Bot, w: BotWorld, target: Character, cmd: PlayerCommand, dt:
 		elif w.time > b.bomb_aim_until:
 			b.bomb_kind = Grenade.Kind.NONE
 		return
+	if w.time >= b.bomb_away_until and w.time >= b.flash_judged_until:
+		_judge_flash(b, w)
 	if w.time < b.bomb_away_until:
-		# Even with someone in sight: facing its own bang would blind it.
+		# Even with someone in sight: facing its own bang (or one it saw coming) would blind it.
 		_hold_still(cmd)
 		_face(b, cmd, b.bomb_away_yaw, 0.0, dt)
 		return
@@ -49,6 +51,33 @@ static func step(b: Bot, w: BotWorld, target: Character, cmd: PlayerCommand, dt:
 		return
 	if not _try_smoke(b, w, target):
 		_try_flash(b, w)
+
+
+## Someone else's flash in the air or down within flash_dodge_reach, in its view and sight: one roll of the skill's
+## flash_dodge_chance, and on a win the bot looks away from it until just past its bang (PP1).
+static func _judge_flash(b: Bot, w: BotWorld) -> void:
+	var chance := b.skill.flash_dodge_chance
+	if chance <= 0.0:
+		return
+	var me := b.character
+	var eye := BotSenses.eye_of(me, w.tuning)
+	var fuse := w.tuning.grenades.flash_fuse
+	# The one in view that bangs soonest: turning from a later one would face the sooner one's bang.
+	var soonest: Grenade = null
+	var bang_in := INF
+	for g in w.grenades:
+		if not g.active or g.kind != Grenade.Kind.FLASH or g.owner == me.id or fuse - g.age >= bang_in \
+				or _flat(eye, g.position) > w.cfg.flash_dodge_reach or not BotSenses.in_view(me, g.position, w.cfg) \
+				or not BotSenses.sight_clear(w.query, eye, g.position):
+			continue
+		soonest = g
+		bang_in = maxf(fuse - g.age, 0.0)
+	if soonest == null:
+		return
+	b.flash_judged_until = w.time + bang_in
+	if b.bomb_rng.randf() < chance:
+		b.bomb_away_until = w.time + bang_in + w.cfg.flash_wait_after
+		b.bomb_away_yaw = atan2(soonest.position.x - eye.x, soonest.position.z - eye.z)
 
 
 ## Pinned in cover by `target` at range, with no cloud between yet: a roll, and the smoke along the line to them.

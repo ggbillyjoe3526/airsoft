@@ -210,7 +210,7 @@ func test_lasers_and_barrels_tighten_the_spread_and_barrels_and_silencers_change
 	var tight := _carried(AEG, {&"barrel": TIGHT_BORE})
 	assert_almost_eq(tight.spread_deg, base.spread_deg * 0.85, 1e-9)
 	var limit := rules.stats.energy_limit(base.site_class)
-	assert_almost_eq(tight.muzzle_energy, minf(limit, base.muzzle_energy * 1.03), 1e-9)
+	assert_almost_eq(tight.muzzle_energy, minf(limit, base.muzzle_energy * 0.95), 1e-9)
 	var long := _carried(AEG, {&"barrel": LONG})
 	assert_almost_eq(long.draw_time, base.draw_time * 1.15, 1e-6, "a long barrel is front-heavy")
 	var silenced := _carried(AEG, {&"muzzle": SILENCER, &"barrel": LONG})

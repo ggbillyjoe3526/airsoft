@@ -58,7 +58,7 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
 | aeg | AEG Rifle | rifle | 0.97 | 0.25 | 13 | 60 | 4 | 1.8 | 0.45 | 0.45 | 0.18 | 1 | 1 | 1 |
 | pistol | GBB Pistol | pistol | 0.52 | 0.2 | 7 | 18 | 4 | 1.2 | 0.3 | 0.8 | 0.5 | 1 | 1 | 1 |
 | cyber | Cyber Pistol | pistol | 1.0 | 0.25 | 14 | 50 | 3 | 1.1 | 0.28 | 0.3 | 0.06 | 1 | 1 | 1 |
-| sniper | Sniper Rifle | sniper | 1.9 | 0.3 | 0.8 | 25 | 4 | 2.2 | 0.65 | 0.1 | 0.4 | 6 | 1 | 1 |
+| sniper | Sniper Rifle | sniper | 1.9 | 0.3 | 0.8 | 25 | 4 | 2.2 | 0.65 | 0.1 | 0.4 | 10 | 1 | 1 |
 | smg | Compact SMG | rifle | 0.75 | 0.2 | 18 | 45 | 5 | 1.4 | 0.32 | 0.6 | 0.14 | 0.75 | 1.08 | 0.5 |
 
 - **Fire rate.** BBs a second with the trigger held (auto, and within a burst), or the fastest you can click (semi).
@@ -76,13 +76,15 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
   fitted as it comes). The long-range pick: 1.90 J with 0.30 g BBs (the heaviest the Loadout loads; 440 fps on a
   0.20 g chrono) stays within 15 cm of the aim line to about 48 m (the AEG 39 m) and gets to 50 m in 0.81 s (the AEG
   1.18 s), and its 0.10° of spread is the tightest there is. Against that, one shot every 1.25 s (the
-  spring cocked by the charging handle after each one), 25 BBs a magazine, a slow reload and draw, and from the hip six
-  times the spread. Its class's site limit is the bolt-action one (below).
+  spring cocked by the charging handle after each one), 25 BBs a magazine, a slow reload and draw, and from the hip ten
+  times the spread (six until PP1: a snap shot from the hip at 15 m still hit nine times in ten). Its class's site
+  limit is the bolt-action one (below).
 - **Compact SMG** (CS1, owner 2026-11-10: "a compact electric smg" that plays unlike the others). The close-quarters
   pick, built for shooting on the move: 18 BBs a second, the fastest there is, and 8 % quicker on your feet than with a
   rifle; moving adds only half the usual spread and from the hip it is 0.75 times as wide, so on the run it groups about
-  30 % tighter than the AEG and from a standing hip as well. The quickest draw and reload of the rifles. Against that,
-  0.75 J with 0.20 g BBs (284 fps) stays within 15 cm of the aim line to 27 m as it comes (35 m at its best hop-up; the
+  30 % tighter than the AEG, and as tight as it from a standing hip. The quickest draw and reload of the rifles.
+  Against that,
+  0.75 J with 0.20 g BBs (284 fps) stays within 15 cm of the aim line to 27 m as it comes (31 m at its best hop-up; the
   AEG 39 m) and takes 0.59 s to fly 30 m (the AEG 0.52 s); a third wider spread aimed; 45 BBs a magazine, empty in
   2.5 s with the trigger held; and no grip, barrel or magazine parts. Semi and full auto, no burst.
 
@@ -91,7 +93,7 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
 | ID | Name | Energy % | Fire rate % | Recoil % |
 |---|---|---|---|---|
 | 000003 | Standard Battery | 0 | 0 | 0 |
-| 000015 | 11.1 V LiPo Battery | 0 | 15 | 0 |
+| 000015 | 11.1 V LiPo Battery | 0 | 15 | 10 |
 | 000004 | Green Gas | 0 | 0 | 0 |
 | 000008 | Red Gas | 10 | 0 | 10 |
 | 000009 | Black Gas | 20 | 0 | 20 |
@@ -103,12 +105,13 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
 
 | Key | Name | Zoom (×) | Raise time (×) | In the glass | Zoom to (×) |
 |---|---|---|---|---|---|
-| redDot | Red Dot | 1.25 | 1 | no | 1.25 |
+| redDot | Red Dot | 1.25 | 0.85 | no | 1.25 |
 | scope2x | 2x Scope | 2 | 1.6 | yes | 2 |
 | scopeVar | Variable Scope | 2 | 1.9 | yes | 6 |
 
 - **Zoom.** How much aiming through it narrows the view (1 is none).
-- **Raise time.** The time to bring it to your eye.
+- **Raise time.** The time to bring it to your eye (× the iron sights'). The Red Dot is the quick sight, 0.85 (PP1:
+  at 1 its slight zoom was all it gave).
 - **In the glass.** yes: only the view inside its glass is zoomed (a scope); the view round it stays as the iron sights'
   (owner, 2026-10-19: no dark surround). no: the whole view zooms.
 - **Zoom to.** A variable optic's top zoom (SN2): aimed through it, the mouse wheel turns it from its Zoom up to this
@@ -157,13 +160,14 @@ barrel.
 
 | Key | Name | Energy % | Spread (×) | Handling (×) |
 |---|---|---|---|---|
-| tightBore | Tight-Bore Barrel | 3 | 0.85 | 1 |
+| tightBore | Tight-Bore Barrel | -5 | 0.85 | 1 |
 | long | Long Barrel | 10 | 0.9 | 1.15 |
 
 - **Handling.** The time to bring the replica up after a switch and to raise a fitted optic (a long barrel is
   front-heavy).
-- **Which barrel.** The tight bore is the accuracy pick (tighter groups at no handling cost), the long barrel the reach
-  pick (the most energy, a little tighter, front-heavy).
+- **Which barrel.** The tight bore is the accuracy pick (tighter groups at no handling cost, a little less energy, so
+  a little less reach: PP1, as parts are trade-offs, never straight upgrades), the long barrel the reach pick (the most
+  energy, a little tighter, front-heavy).
 
 ## Muzzle parts
 
