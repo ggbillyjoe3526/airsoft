@@ -63,6 +63,10 @@ extends Resource
 ## it may (BotConfig.bomb_roll_gap; SF2).
 @export var smoke_chance: float = 0.3
 @export var flash_chance: float = 0.3
+## The chance (0 to 1) it turns away from someone else's flash bomb it sees in the air or landing within
+## BotConfig.flash_dodge_reach, rolled once a bomb (PP1: only a bot's own flash was turned from, so every flash the
+## player threw blinded a bot facing it; turning away is the counter, GrenadeConfig.behind_share 0).
+@export var flash_dodge_chance: float = 0.0
 ## Team radio (BQ3): seeing someone afresh, it tells its teammates within share_radius (m) of them where they are after
 ## share_delay (s), as a teammate's call: each goes after it or watches it as its own play takes a noise there. Zero
 ## share_radius tells nobody.

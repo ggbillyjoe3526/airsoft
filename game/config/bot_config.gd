@@ -425,6 +425,9 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var flash_route_points: int = 3
 @export var flash_bang_height: float = 0.3
 @export var flash_wait_after: float = 0.3
+## Someone else's flash (PP1): a bot that sees one within this far (m, flat) of its eyes rolls its skill's
+## flash_dodge_chance, once a bomb, and on a win looks away like the thrower until flash_wait_after s past the bang.
+@export var flash_dodge_reach: float = 16.0
 ## Hearing them (BotHearing): an enemy's flash bang out to bang_hearing m, a smoke's pop out to pop_hearing m, heard as
 ## news of someone where it went off.
 @export var bang_hearing: float = 40.0

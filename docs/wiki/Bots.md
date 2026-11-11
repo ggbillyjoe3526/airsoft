@@ -130,7 +130,8 @@ each team the bot nearest the flag calls it, naming where it stands.
 
 Every bot carries a smoke and a flash bomb a round, as you do, and throws them: a smoke when pinned in cover by
 someone at range, a flash round a corner before it pushes, then it looks away until the bang. Harder bots throw more
-often. [Grenades](Grenades) has the rules.
+often. A Normal or Hard bot that sees someone else's flash coming may turn away from it too (Hard more often than
+Normal; an Easy bot never does), so a flash is surest thrown where it lands out of sight. [Grenades](Grenades) has the rules.
 
 ## Magazines
 

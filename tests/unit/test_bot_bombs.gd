@@ -454,3 +454,71 @@ func test_bots_throw_both_bombs_in_whole_matches_on_depot() -> void:
 	assert_gt(flashes, 0, "bots flash")
 	assert_gt(enemies_dazzled, own_dazzled, "a flash blinds the enemy more than its own team")
 	assert_lt(self_dazzled, flashes / 4 + 1, "a thrower looks away from its own bang")
+
+
+# --- Someone else's flash (PP1) ---
+
+
+## An enemy's flash bomb lying `away` m in front of the bot (which faces -Z), its fuse just lit.
+func _flash_in_front(m: Array, away: float) -> void:
+	var s: GameState = m[1]
+	for bomb in s.grenades:
+		if bomb.active:
+			continue
+		bomb.active = true
+		bomb.kind = Grenade.Kind.FLASH
+		bomb.owner = 2
+		bomb.position = Vector3(0.0, 0.1, -away)
+		bomb.prev_position = bomb.position
+		bomb.velocity = Vector3.ZERO
+		bomb.age = 0.0
+		bomb.resting = true
+		bomb.popped = false
+		return
+
+
+func test_a_bot_that_wins_its_roll_turns_from_an_enemy_flash_and_is_not_dazzled() -> void:
+	var m := _match(_world(), Vector3(0.0, 0.0, -30.0))
+	var b: Bot = m[2]
+	var s: GameState = m[1]
+	b.skill.flash_dodge_chance = 1.0
+	_flash_in_front(m, 5.0)
+	var bang := _run(m, roundi((g.flash_fuse + 0.4) / DT), func() -> void: pass, GameEvent.Kind.FLASH_BANG)
+	assert_eq(bang, 1)
+	assert_gt(absf(s.characters[0].yaw), PI * 0.75, "it looked away")
+	assert_eq(s.characters[0].dazzle_left, 0.0, "and wasn't dazzled")
+
+
+func test_a_bot_that_loses_its_roll_or_can_t_see_the_flash_is_dazzled() -> void:
+	for blocked: bool in [false, true]:
+		var m := _match(_world(-2.5 if blocked else INF), Vector3(0.0, 0.0, -30.0))
+		var b: Bot = m[2]
+		var s: GameState = m[1]
+		b.skill.flash_dodge_chance = 0.0 if not blocked else 1.0
+		_flash_in_front(m, 5.0)
+		_run(m, roundi((g.flash_fuse + 0.4) / DT), func() -> void: pass)
+		assert_lt(absf(s.characters[0].yaw), 0.1, "it kept facing ahead (blocked %s)" % blocked)
+		if not blocked:
+			assert_gt(s.characters[0].dazzle_left, 0.0, "facing the bang, dazzled")
+
+
+func test_the_levels_turn_from_flashes_more_often_easy_never() -> void:
+	assert_eq(bots.skill_for(&"easy").flash_dodge_chance, 0.0)
+	assert_gt(bots.skill_for(&"normal").flash_dodge_chance, 0.0)
+	assert_gt(bots.skill_for(&"hard").flash_dodge_chance, bots.skill_for(&"normal").flash_dodge_chance)
+
+
+func test_with_two_flashes_in_view_it_judges_the_one_that_bangs_sooner() -> void:
+	var m := _match(_world(), Vector3(0.0, 0.0, -30.0))
+	var b: Bot = m[2]
+	var s: GameState = m[1]
+	b.skill.flash_dodge_chance = 1.0
+	_flash_in_front(m, 5.0)
+	_flash_in_front(m, 6.0)
+	var older: Grenade = null
+	for bomb in s.grenades:
+		if bomb.active and bomb.position.z < -5.5:
+			older = bomb
+	older.age = 1.0
+	_run(m, 1, func() -> void: pass)
+	assert_almost_eq(b.flash_judged_until, g.flash_fuse - 1.0, 0.05, "the later flash in the pool, judged first")

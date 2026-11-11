@@ -30,7 +30,7 @@ the springs a painted rifle spring in each spring's colour.
 
 An optic on the top rail. With one fitted the iron sights come off completely, so nothing stands in its way, and
 aiming looks through it. The red dot is a compact sight on a low riser: a lit dot on clear glass, with the view open
-round it. The 2x scope is a magnifier on a low hinged mount; it magnifies only inside its glass: the view round it
+round it, and the quickest sight to raise. The 2x scope is a magnifier on a low hinged mount; it magnifies only inside its glass: the view round it
 stays as it is, with nothing dark round the edge. At the hip a scope's glass is clear glass showing what the scope points at (on Low graphics, tinted glass); the
 magnified view and its reticle show only while you aim. The Variable Scope is a plain compact prism scope, one small
 dial on top, with a zoom: aimed
@@ -76,7 +76,7 @@ magazine holds and **Carried** adds magazines to the replica's own (you always c
 
 <!-- wiki:parts barrels -->
 
-The tight bore is the accuracy pick: tighter groups at no handling cost. The long barrel is the reach pick: the most
+The tight bore is the accuracy pick: tighter groups at no handling cost, for a little less energy and reach. The long barrel is the reach pick: the most
 energy and a little tighter, but front-heavy. Both count toward the site limit. Each goes inside the rifle: the tight
 bore's polished crown just shows in the flash hider, and the long barrel adds a 10 cm barrel extension that carries
 the flash hider or silencer out to its end.

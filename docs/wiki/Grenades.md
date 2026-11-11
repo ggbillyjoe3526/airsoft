@@ -67,4 +67,6 @@ moment.
 - **A bot pushing round a corner** to where it heard you may flash it first, then look away until the bang and come
   through. It never flashes where a teammate close by would see it, counting teammates heading that way, and it
   checks again as it throws.
+- **A Normal or Hard bot that sees your flash coming** may turn away from it until the bang, and isn't blinded
+  (Hard more often; an Easy bot never does). A flash that lands out of its sight is surest.
 - Bots hear a bang or a smoke's pop and come to look. Harder bots throw more often.

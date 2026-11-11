@@ -250,6 +250,8 @@ var bomb_aim_until: float = -INF
 var bomb_roll_at: float = -INF
 var bomb_away_until: float = -INF
 var bomb_away_yaw: float = 0.0
+## Someone else's flash it has rolled to turn from (PP1): until it bangs, no other is rolled for.
+var flash_judged_until: float = -INF
 
 
 ## A character id's bit in auto_won and auto_rolled (0 for an id past the mask's 63 bits: decided afresh each burst).
@@ -308,6 +310,7 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	bomb_aim_until = -INF
 	bomb_roll_at = -INF
 	bomb_away_until = -INF
+	flash_judged_until = -INF
 	route.clear()
 	route_leg = 0
 	route_state = RouteState.NONE

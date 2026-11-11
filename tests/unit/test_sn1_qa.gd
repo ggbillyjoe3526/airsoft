@@ -241,11 +241,12 @@ func test_the_hip_spread_is_the_aeg_s_unchanged_and_six_times_on_the_rifle_only_
 	var aeg := Character.new(2, 0, Vector3.ZERO, 0.0, ReplicaStats.default_loadout())
 	var hip_s := Accuracy.target_spread_scale(sniper, cfg, acc)
 	var hip_a := Accuracy.target_spread_scale(aeg, cfg, acc)
-	assert_almost_eq(hip_s / hip_a, 6.0, 1e-4, "six times the AEG's, sight down")
+	var hip := _sniper_config().hip_spread
+	assert_almost_eq(hip_s / hip_a, hip, 1e-4, "hip_spread times the AEG's, sight down")
 	sniper.aim_raise = 0.5
 	aeg.aim_raise = 0.5
 	var half := Accuracy.target_spread_scale(sniper, cfg, acc) / Accuracy.target_spread_scale(aeg, cfg, acc)
-	assert_almost_eq(half, 3.5, 1e-4, "half way up: 1 + 5 * 0.5")
+	assert_almost_eq(half, 1.0 + (hip - 1.0) * 0.5, 1e-4, "half way up: 1 + (hip_spread - 1) * 0.5")
 	sniper.aim_raise = 1.0
 	aeg.aim_raise = 1.0
 	assert_almost_eq(Accuracy.target_spread_scale(sniper, cfg, acc), Accuracy.target_spread_scale(aeg, cfg, acc), 1e-6,
