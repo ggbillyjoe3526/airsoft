@@ -104,7 +104,8 @@ static func _find_from(f: Finder, g: NavGrid, k: int, query: WorldQuery, vault: 
 
 
 ## The links `f` found (its `find` done) added to `g`'s search, each costing its length plus `price` metres at its
-## take-off node's weight (a wade's dearer, WS1), and the regions they join. Once per grid: on a grid already linked it does nothing. Returns how many links `g` has.
+## take-off node's weight (a wade's dearer, WS1), and the regions they join. Once per grid: on a grid already linked
+## it does nothing. Returns how many links `g` has.
 static func finish(f: Finder, g: NavGrid, price: float) -> int:
 	if g.vault_base >= 0:
 		return g.vault_to.size()

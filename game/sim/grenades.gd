@@ -18,8 +18,7 @@ extends RefCounted
 ## surface is NONE; it hits nobody and never rests on one), slides and rolls, and settles; in a lift's car it rides
 ## with the car (MT2). A flash goes bang at its fuse (FLASH_BANG) and dazzles everyone in play with a clear line from
 ## the eyes to it, by distance and by how directly they look (DAZZLED; Character.dazzle_left), the thrower and its team
-## too. A smoke pops at its fuse
-## (SMOKE_POP) and smokes where it lies: an upright ellipsoid cloud that grows, holds and thins (`cloud_scale`,
+## too. A smoke pops at its fuse (SMOKE_POP) and smokes where it lies: an upright ellipsoid cloud that grows, holds and thins (`cloud_scale`,
 ## `cloud_density`), which BBs fly through and eyes don't (`smoke_depth`, BotSenses). Everyone carries the bombs it picked
 ## (Hand.picks: GrenadeConfig.slots of them, each a smoke or a flash) each round; on the range they come back after every
 ## throw.
