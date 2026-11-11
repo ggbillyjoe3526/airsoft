@@ -67,7 +67,8 @@ const STEP_NAMES: PackedStringArray = ["run", "sprint", "land"]
 ## the bang, which plays as a shot).
 const OWN_CAP_CUES: Array[StringName] = [&"smoke_pop"]
 ## A lift's cue by its LIFT event's value (Lifts.Cue: a button, the doors opening, shutting, the car setting off,
-## arriving, too full), from tools/lift_sounds.py (MT2).
+## arriving, too full): the doors and the car setting off the owner's lift (AU10, tools/cut_recordings.py), the rest
+## from tools/lift_sounds.py (MT2).
 const LIFT_CUES: Array[StringName] = [&"lift_button", &"lift_doors", &"lift_doors", &"lift_motor", &"lift_chime",
 		&"lift_buzz"]
 ## What a play is, for its pitch and level spread, its priority in the field's pool and how many of its cue may sound.

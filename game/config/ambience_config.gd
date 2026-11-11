@@ -8,8 +8,8 @@ extends Resource
 
 ## The ambiences a map may name; a map naming none, or one not listed, plays DEFAULT_ID.
 ## indoor and street are the owner's recordings (AU5): Depot's big room, and a street by day and night
-## (the Range's sound, owner 2026-11-05).
-const IDS: Array[StringName] = [&"yard", &"woods", &"indoor", &"street"]
+## (the Range's sound, owner 2026-11-05); tunnel his tunnel (2026-11-11), Subway's.
+const IDS: Array[StringName] = [&"yard", &"woods", &"indoor", &"street", &"tunnel"]
 const DEFAULT_ID := &"yard"
 
 ## Each ambience's set by day and by night, keyed by its id in IDS.

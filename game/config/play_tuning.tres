@@ -77,6 +77,12 @@ loop = &"indoor"
 gain = 0.03
 width = 0.7
 
+[sub_resource type="Resource" id="Resource_au10tb"]
+script = ExtResource("2_5olvw")
+loop = &"tunnel"
+gain = 0.03
+width = 0.7
+
 [sub_resource type="Resource" id="Resource_au5sd"]
 script = ExtResource("2_5olvw")
 loop = &"street_day"
@@ -186,6 +192,11 @@ script = ExtResource("1_jm3g4")
 beds = Array[ExtResource("2_5olvw")]([SubResource("Resource_au5in")])
 calls = Array[ExtResource("3_lbigc")]([SubResource("Resource_kxkck")])
 
+[sub_resource type="Resource" id="Resource_au10tu"]
+script = ExtResource("1_jm3g4")
+beds = Array[ExtResource("2_5olvw")]([SubResource("Resource_au10tb")])
+calls = Array[ExtResource("3_lbigc")]([SubResource("Resource_kxkck")])
+
 [sub_resource type="Resource" id="Resource_au5ss"]
 script = ExtResource("1_jm3g4")
 beds = Array[ExtResource("2_5olvw")]([SubResource("Resource_au5sd")])
@@ -201,12 +212,14 @@ script = ExtResource("4_q5v06")
 day = Dictionary[StringName, ExtResource("1_jm3g4")]({
 &"indoor": SubResource("Resource_au5ii"),
 &"street": SubResource("Resource_au5ss"),
+&"tunnel": SubResource("Resource_au10tu"),
 &"woods": SubResource("Resource_a0he4"),
 &"yard": SubResource("Resource_yt6mn")
 })
 night = Dictionary[StringName, ExtResource("1_jm3g4")]({
 &"indoor": SubResource("Resource_au5ii"),
 &"street": SubResource("Resource_au5tn"),
+&"tunnel": SubResource("Resource_au10tu"),
 &"woods": SubResource("Resource_gs03g"),
 &"yard": SubResource("Resource_4hk2b")
 })

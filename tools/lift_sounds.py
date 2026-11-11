@@ -1,7 +1,8 @@
-"""Synthesises the lifts' sounds (MT2) into assets/audio/cues/: the arrival chime (lift_chime), the doors sliding
-and meeting (lift_doors, two takes), the car setting off (lift_motor: a clunk and a rising whirr), a button's beep
-(lift_button) and the too-full buzzer (lift_buzz). Placeholders, toy-like rather than real machinery, until the owner
-records a lift; each written at the peak level SoundConfig's gains expect (PEAK). Seeded: the same bytes each run.
+"""Synthesises the lifts' sounds (MT2) into assets/audio/cues/ that the owner's lift recording (2026-11-11) doesn't
+cover: the arrival chime (lift_chime), a button's beep (lift_button) and the too-full buzzer (lift_buzz). Placeholders,
+toy-like, each written at the peak level SoundConfig's gains expect (PEAK). The same bytes each run. The doors
+(lift_doors) and the car setting off (lift_motor) are his, cut by tools/cut_recordings.py; the synthesised doors and
+motor that stood in before are in git history.
 
     python3 tools/lift_sounds.py            # then: godot --headless --path . --import
 """
@@ -16,7 +17,6 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "assets", "audio", "cues")
 RATE = 44100
 PEAK = 0.7          # each cue's peak (1 = full scale): the doors' recordings sit about here
-SEED = 2026_11_10
 
 
 def t_of(seconds: float) -> np.ndarray:
@@ -57,32 +57,6 @@ def chime() -> np.ndarray:
     return a + b
 
 
-def doors(rng: np.random.Generator, length: float) -> np.ndarray:
-    """A geared hum and rumbling slide over `length` s, eased in and out, then the leaves meeting with a soft thud."""
-    t = t_of(length + 0.35)
-    slide = np.clip(t / length, 0.0, 1.0)
-    shape = np.sin(np.pi * slide) ** 0.6 * (t < length)
-    hum = 0.35 * np.sin(2 * np.pi * (180 + 40 * slide) * t) + 0.15 * np.sin(2 * np.pi * 360 * t)
-    rumble = lowpass(rng.standard_normal(len(t)), 600.0) * 2.5
-    body = (hum + rumble) * shape
-    thud_t = t - length
-    thud = np.where(thud_t >= 0, np.sin(2 * np.pi * 90 * thud_t) * env(np.maximum(thud_t, 0), 0.003, 0.06), 0.0)
-    knock = np.where(thud_t >= 0, lowpass(rng.standard_normal(len(t)), 2500.0) * env(np.maximum(thud_t, 0), 0.001,
-                                                                                         0.02) * 3.0, 0.0)
-    return body + 1.4 * thud + knock
-
-
-def motor(rng: np.random.Generator) -> np.ndarray:
-    """A brake let go (a clunk), then the motor winding up into a whirr that fades as the car goes."""
-    t = t_of(1.8)
-    clunk = (np.sin(2 * np.pi * 70 * t) + lowpass(rng.standard_normal(len(t)), 1800.0) * 2.0) * env(t, 0.002, 0.07)
-    up = np.clip(t / 0.9, 0.0, 1.0)
-    phase = np.cumsum(2 * np.pi * (60 + 140 * up) / RATE)
-    whirr = (0.5 * np.sin(phase) + 0.25 * np.sin(2 * phase) + 0.12 * np.sin(3 * phase))
-    fade = np.minimum(1.0, t / 0.25) * np.clip((1.8 - t) / 0.9, 0.0, 1.0)
-    return 1.2 * clunk + whirr * fade * 0.8
-
-
 def button() -> np.ndarray:
     """A short square-ish beep."""
     t = t_of(0.12)
@@ -109,11 +83,7 @@ def write(name: str, x: np.ndarray) -> None:
 
 
 def main() -> None:
-    rng = np.random.default_rng(SEED)
     write("lift_chime_1", chime())
-    write("lift_doors_1", doors(rng, 1.4))
-    write("lift_doors_2", doors(rng, 1.45))
-    write("lift_motor_1", motor(rng))
     write("lift_button_1", button())
     write("lift_buzz_1", buzz())
 

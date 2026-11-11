@@ -402,6 +402,21 @@ def ev_hum(seconds, variant=0):
 # The Sniper Rifle's Fire clip has the bolt home and turned down at BOLT_CYCLE_END s (sniper.py; ViewModelConfig
 # bolt_cycle_end); it is ready to fire again BOLT_READY s after a shot (stats.md: 0.8 a second).
 BOLT_CYCLE_END = 0.88
+# The Compact SMG's motor (2026-11-11, owner): his toothbrush's whir this many dB under the AEG's motor.
+SMG_BRUSH_DB = 4.0
+# How long (s) each splash of his stream recordings (2026-11-11) rings: a wading step, a running one, a jump in.
+WATER_RUN_S = 0.45
+WATER_SPRINT_S = 0.32
+WATER_LAND_S = 0.9
+# His lift (2026-11-11): how long (s) of a door's slide plays, from where it comes within LIFT_DOORS_WITHIN_DB of its
+# loudest; where (s) in up_down each ride's motor starts, and how long (s) of each ride plays as the car sets off (its
+# stop comes about 3.4 s after the start).
+LIFT_DOORS_S = 1.7
+LIFT_DOORS_WITHIN_DB = 12.0
+LIFT_RIDE_STARTS = [0.56, 8.72]
+LIFT_RIDE_S = 3.2
+# Subway's background (2026-11-11): his tunnel's phone rumble sits under this (Hz).
+TUNNEL_RUMBLE_HZ = 60.0
 BOLT_READY = 1.25
 
 
@@ -482,20 +497,25 @@ def build(folder):
     cover_on = pick(folder, [("remote_cover_clipping.wav", [1, 3, 5, 7])], 0.25, 0.3)
     put("magOut_electric", variants(cover_off, 5, 0.85), -30.8)
     put("magIn_electric", variants(cover_on, 5, 0.85), -27.0)
-    # Compact SMG (CS1, a stand-in until the owner records one): the AEG's motor whir a fifth higher and shorter, a
-    # smaller gearbox spinning faster, so its 18 shots a second run into one quick buzz; the same crack a little higher
-    # and 1 dB under the AEG's; its smaller magazines' clicks a little higher than the rifle's.
-    smg_record = "a small fast motor in short bursts (a mini handheld fan or a cordless drill on its top speed)"
-    put("power_smg", [onset_slice(m, 0.11, 30) for m in variants(motor, 5, 1.22)], -26.3, smg_record)
-    put("shot_smg", variants(cracks, 5, 0.98), -19.5, smg_record)
-    put("magOut_smg", variants(cover_off, 5, 0.95), -30.8, "a smaller plastic clip than the rifle's")
-    put("magIn_smg", variants(cover_on, 5, 0.95), -27.0, "a smaller plastic clip than the rifle's")
+    # Compact SMG (CS1; his pick, 2026-11-11, so no longer a placeholder): the AEG's motor whir a fifth higher and
+    # shorter, a smaller gearbox spinning faster, so its 18 shots a second run into one quick buzz, with his
+    # toothbrush's whir SMG_BRUSH_DB under it (owner, 2026-11-11: "add a bit of a whir of the electric motor"); the same
+    # crack a little higher and 1 dB under the AEG's; its smaller magazines' clicks a little higher than the rifle's.
+    # (He kept these over his own SMG recording of 2026-11-11, smg_firing and smg_magazine, which the game doesn't use.)
+    brush = pick(folder, [("electric_toothbrush.wav", None)], 0.9, 0.05)
+    put("power_smg", [under(onset_slice(m, 0.11, 30), onset_slice(b, 0.11, 30), SMG_BRUSH_DB)
+                      for m, b in zip(variants(motor, 5, 1.22), variants(brush, 5, 1.1))], -26.3)
+    put("shot_smg", variants(cracks, 5, 0.98), -19.5)
+    put("magOut_smg", variants(cover_off, 5, 0.95), -30.8)
+    put("magIn_smg", variants(cover_on, 5, 0.95), -27.0)
 
     # Sniper Rifle (spring): his recorded shots (third batch, 2026-11-04), each from where it bursts out, its spring's
     # quieter run-up before that as the power part (it plays with the shot, so the shot answers the trigger at once);
     # its magazine lower; his bolt pulled back and pushed home as its cocking, each knock
     # moved to where the Fire clip has the handle. (The AU4 mix of the pistol's shot, a knock, a thud and a crack that
     # stood in until now is in git history, 7f1586e.)
+    # (2026-11-11: his second recording, sniper_rifle_shot, was tried with more crack and then under this one; the owner
+    # kept this one as it was, so the second is kept in the raw folder, unused.)
     fire = Source.get(folder, "sniper_fire.wav").a
     # (A burst too near the file's end to cut, as the rise in its last tail is, has no run-up either.)
     bursts = [t for t in onsets(fire, 6.0, 0.5) if (t + 0.45) * RATE <= len(fire)]
@@ -560,10 +580,12 @@ def build(folder):
     # The owner's steps (second and third batches, 2026-11-04). His steps on a solid floor ("not concrete but close")
     # are concrete's run, sprint and landing. Gravel, grass, leaves and metal are his own: walked as the run, run (or
     # the walk's later takes) as the sprint, and jumped onto (grass); the landings he hasn't recorded are the steps
-    # lower. Earth stands in from gravel, softened. His metal and running gravel never fall quiet between steps, so
-    # they are cut where each step starts. Wood is his own since his batch of 2026-11-08: walking, running and
-    # jumping on a wooden floor, the walk and the run cut where each step starts (the walk's creaks between steps, the
-    # run's steps 0.25 s apart), the jumps as takes.
+    # lower. His running gravel never falls quiet between steps, so it is cut where each step starts. Soil (earth),
+    # metal and water are his batch of 2026-11-11: walking, running and jumping on each, the runs (and the water's walk,
+    # its wading never quiet) cut where each step starts, the walks and jumps as takes; his metal walk replaces his
+    # first (walking_metal, whose rumble needed a 250 Hz high-pass), so metal is one set. Wood is his own since his
+    # batch of 2026-11-08: walking, running and jumping on a wooden floor, the walk and the run cut where each step
+    # starts (the walk's creaks between steps, the run's steps 0.25 s apart), the jumps as takes.
     def steps(name, longest, which=None):
         cuts = pick(folder, [(name, which)], longest + 0.2, 0.3)
         return [shape(tight(t, longest).copy(), 0.3) for t in cuts if len(t) > int(0.06 * RATE)]
@@ -581,9 +603,10 @@ def build(folder):
     gravel_run = run_together("running_gravel.wav", 0.25, 10.0, 0.2)
     leaves = steps("leaves_walking.wav", 0.25)
     grass = steps("walking_grass.wav", 0.25)
-    # (His metal steps ring over a steady low rumble: below 250 Hz is taken out before the steps are found. They come
-    # every 0.6 s.)
-    metal = run_together("walking_metal.wav", 0.25, 6.0, 0.45, 250.0)
+    metal = steps("metal_walking.wav", 0.25)
+    metal_run = run_together("metal_running.wav", 0.25, 10.0, 0.2)
+    soil = steps("soil_walking.wav", 0.25)
+    soil_run = run_together("soil_running.wav", 0.25, 10.0, 0.2)
     put("step_concrete_run", variants(steady(floor_walk, 5), 5), -22.4)
     put("step_concrete_sprint", variants(steady(floor_run, 5), 5), -21.0)
     put("step_concrete_land", variants(steady(jumps, 5), 5), -17.9)
@@ -600,11 +623,18 @@ def build(folder):
     put("step_grass_sprint", variants(steady(grass, 5, 5), 5), -20.8)
     put("step_grass_land", variants(steady(steps("jumping_grass.wav", 0.35), 5), 5), -18.0)
     put("step_metal_run", variants(steady(metal, 5), 5), -21.6)
-    put("step_metal_sprint", variants(steady(metal, 5, 5), 5), -20.7)
-    put("step_metal_land", variants(steady(metal, 5, 10), 5, 0.95), -18.2, "landing a jump on metal")
-    for gait, target in (("run", -22.4), ("sprint", -20.2), ("land", -18.3)):
-        put("step_earth_%s" % gait, [low_pass(t, 2500.0) for t in variants(steady(gravel, 5, 5), 5, 0.9)], target,
-            "footsteps on soil")
+    put("step_metal_sprint", variants(steady(metal_run, 5), 5), -20.7)
+    put("step_metal_land", variants(steady(steps("metal_jumping.wav", 0.35), 5), 5), -18.2)
+    put("step_earth_run", variants(steady(soil, 5), 5), -22.4)
+    put("step_earth_sprint", variants(steady(soil_run, 5), 5), -20.2)
+    put("step_earth_land", variants(steady(steps("soil_jumping.wav", 0.35), 5), 5), -18.3)
+    # Woodland's stream (WS1): his wellies wading (a step every 0.6 s, never quiet between), running (0.26 s apart) and
+    # jumping in, each splash ringing longer than a dry step (WATER_*), at the computer-made splashes' levels. Not
+    # balanced with the dry grounds: water is meant to be heard further (NoiseConfig.ground).
+    put("step_water_run", variants(steady(run_together("water_walking.wav", WATER_RUN_S, 10.0, 0.5), 5), 5), -20.4)
+    put("step_water_sprint", variants(steady(run_together("water_running.wav", WATER_SPRINT_S, 6.0, 0.2), 5), 5),
+        -18.6)
+    put("step_water_land", variants(pick(folder, [("water_jumping.wav", None)], WATER_LAND_S, 0.5), 5), -16.3)
 
     # Kit: his clothes rustling, the longest stretch as a crouch, a shorter as standing and the shortest as a lean, with
     # his keys jangling 10 dB under; the holster, the replica raised (the draw) and the vault his own.
@@ -674,6 +704,22 @@ def build(folder):
     put("door_shut", variants(pick(folder, [("door_close.wav", None)], 1.0, 0.2), 3)
         + pick(folder, [("door_open_and_close.wav", [1, 7])], 1.0, 0.2), -11.3)
 
+    # Subway's lifts (MT2): his lift (2026-11-11, elevator/): its doors sliding (door_opening, three takes) for both the
+    # doors opening and shutting, each from where its slide comes within LIFT_DOORS_WITHIN_DB of its loudest, so the
+    # loud part of the slide lands inside the game's 1.5 s door (LiftConfig.door_time), LIFT_DOORS_S of it; and the car
+    # setting off: each of his two rides (up_down) from its motor's start (LIFT_RIDE_STARTS, after the first ride's
+    # chime), LIFT_RIDE_S of it, faded out before the car's stop. The chime, the button and the buzzer stay
+    # tools/lift_sounds.py's (his chime sits only ~10 dB over the car's hum).
+    door = Source.get(folder, "elevator/door_opening.wav")
+    slides = []
+    for start, end in door.takes:
+        take = door.a[int(start * RATE):int(end * RATE)]
+        at = int((start + lead_in(take, LIFT_DOORS_WITHIN_DB)) * RATE)
+        slides.append(shape(door.a[at:at + int(LIFT_DOORS_S * RATE)].copy(), 0.25))
+    put("lift_doors", variants(slides, 3), -17.5)
+    ride = Source.get(folder, "elevator/up_down.wav").a
+    put("lift_motor", from_onsets(ride, LIFT_RIDE_STARTS, LIFT_RIDE_S, 0.25), -16.1)
+
     # The referee's pea whistle; a digital thermometer's beep (6.3 kHz) an octave down as the shot timer's, and lower
     # and shorter as your ping's pip (about 1.7 kHz, under the timer).
     # Each blast exactly SoundConfig's whistle_short or whistle_long, which time the blasts after it.
@@ -719,7 +765,8 @@ def loops(folder):
     peak (in loops/peaks.json) that brings it to an RMS of 1, as the browser game's beds were: an indoor room for
     Depot, his two outdoor recordings run together for a street by day ("for choice/variety"; the Range's since
     2026-11-05, The Street's until the map went, 2026-11-09), and his street at night for it at night; his woods for
-    Woodland by day, and his woods at night (batch of 2026-11-08) for Woodland's night."""
+    Woodland by day, his woods at night (batch of 2026-11-08) for Woodland's night, and his tunnel (2026-11-11) for
+    Subway."""
     def take(name, start, seconds):
         a = high_pass(read(os.path.join(folder, name)), 40.0)
         return a[int(start * RATE):int((start + seconds) * RATE)]
@@ -731,6 +778,9 @@ def loops(folder):
         "woods_day": bed([high_pass(high_pass(take("woodlands.wav", 1.0, 58.0), 150.0), 150.0)]),
         # His woods at night: no wind rumble to take out, so only the beds' 40 Hz high-pass.
         "woods_night": bed([take("night_forest.wav", 3.0, 62.0)]),
+        # His tunnel (2026-11-11) for Subway: its phone rumble under TUNNEL_RUMBLE_HZ taken out.
+        "tunnel": bed([high_pass(high_pass(take("tunnel_ambience.wav", 1.0, 48.0), TUNNEL_RUMBLE_HZ),
+                                 TUNNEL_RUMBLE_HZ)]),
     }
 
 

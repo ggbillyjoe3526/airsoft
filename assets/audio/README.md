@@ -44,6 +44,15 @@ run on a wooden floor cut where each step starts, his jumps as takes, then balan
 run into (`prop_steel`: about 0.9 s of each of his two metal bangs) and `loops/woods_night.wav`, Woodland's night bed (his
 woods at night, which leaves the street's night bed to the street ambience).
 
+**The batch of 2026-11-11** (AU10): 17 more give the steps on soil (`step_earth_*`, in place of gravel softened), metal
+(`step_metal_*`, a new walk, run and jumps in place of his first walk) and water (`step_water_*`, in place of the
+synthesised splashes: his wading cut where each step starts, his jumps in as takes, at the splashes' levels), the lifts'
+doors (`lift_doors`: 1.7 s of each slide, its loud part inside the 1.5 s door) and the car setting off (`lift_motor`:
+each of his two rides from its motor's start, 3.2 s, faded before its stop), and `loops/tunnel.wav`, Subway's background
+(his tunnel, its rumble under 60 Hz taken out). The Sniper Rifle keeps his first shot (his pick over his new one, which
+is kept unused), and the Compact SMG keeps its stand-ins (his pick over his own SMG recording), its motor now with his
+toothbrush's whir 4 dB under it (`power_smg`).
+
 **Every replica fired empty** plays one cue, `dryFire`: the gas pistol's recorded dry click as it is, for today's
 replicas and any added later (owner, 2026-11-05: final, not a stand-in).
 
@@ -52,9 +61,8 @@ mixes `tools/laser_sound.py` makes from four free laser sound effects he sent (`
 project files; source and licence in `docs/ASSETS.md`): `--samples` writes the three, `--pick B` its five variants
 (each from its own takes of the pew and zap, a little quicker or slower; the first B as he heard it).
 
-**Placeholders** (AU3, 2026-11-03; AU5; AU6): until the owner records them, 9 cues are his recordings reused,
-re-pitched, filtered or sliced (BBs on concrete, soil and leaves, the steps on soil, and the jumps onto gravel, leaves
-and metal). The script labels each
+**Placeholders** (AU3, 2026-11-03; AU5; AU6; AU10): until the owner records them, 5 cues are his recordings reused,
+re-pitched, filtered or sliced (BBs on concrete, soil and leaves, and the jumps onto gravel and leaves). The script labels each
 one with what to record; `python3 tools/cut_recordings.py <raw folder> --placeholders` prints them, and those still
 synthesised, as tables. The owner's plain status of every sound is in the shared project files, `audio/sound-status.md`
 (keep it current with every audio change).
@@ -87,10 +95,12 @@ seeds the browser game used, so they sound as they did.
   (above), and the flash's bang too since AU6 (all re-cut in AU7), so this renderer only drafts.
 - `cues/door_open_<n>.wav` and `door_shut_<n>.wav` (1 to 5): recorded since AU2, 4 and 5 since AU5; the synthesised draft (DO1)
   renders with `tools/render_doors.gd` to a folder named after `--`.
-- `cues/lift_chime_1.wav`, `lift_doors_1` and `_2`, `lift_motor_1`, `lift_button_1`, `lift_buzz_1` (MT2): Subway's
-  lifts (the car's arrival, its doors sliding, setting off, a button's beep, the too-full buzzer), synthesised
-  placeholders from `tools/lift_sounds.py` at a 0.7 peak; their levels are SoundConfig's `lift_gain` and
-  `lift_button_gain`. To re-render: `python3 tools/lift_sounds.py`, then `godot --headless --path . --import`.
+- `cues/lift_chime_1.wav`, `lift_doors_1` to `_3`, `lift_motor_1` and `_2`, `lift_button_1`, `lift_buzz_1` (MT2):
+  Subway's lifts (the car's arrival, its doors sliding, setting off, a button's beep, the too-full buzzer); the doors
+  and the car setting off are the owner's lift since AU10 (`tools/cut_recordings.py`, levelled to the placeholders'
+  loudness), the chime, the button and the buzzer still synthesised placeholders from `tools/lift_sounds.py` at a 0.7
+  peak; their levels are SoundConfig's `lift_gain` and `lift_button_gain`. To re-render the placeholders: `python3
+  tools/lift_sounds.py`, then `godot --headless --path . --import`.
 - `cues/boltCycle_<n>.wav` (1 to 3): recorded since AU2 (the pistol's slide), his rifle bolt since AU6; the
   synthesised draft (SN1) renders with `tools/render_bolt.gd` to a folder named after `--`.
 - Not baked in: the room reverb and distance muffling, which were applied live; in Godot they belong to the audio buses

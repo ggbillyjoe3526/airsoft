@@ -94,7 +94,7 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
   Sniper Rifle and the Cyber Pistol from the pistol's), one dry click for every replica (the pistol's, owner
   2026-11-05), the pistol's slide locking back, BBs on metal, wood, glass, plastic, cardboard and players, the gear,
   the props, the doors, the whistle, the shot timer and the ping. Since AU3 they also stand in, labelled placeholders,
-  for cues until he records them (25 at AU3, 13 at AU8, 9 since AU9; the script's `--placeholders` lists them), and the
+  for cues until he records them (25 at AU3, 13 at AU8, 9 at AU9, 5 since AU10; the script's `--placeholders` lists them), and the
   whistle is a pea whistle the script synthesises (his takes set aside).
   His second batch (AU5, 2026-11-04, 30 recordings: footsteps on a solid floor, concrete, gravel and leaves,
   clothes and keys, a holster, a strap swung up, a vault, a BB on goggles, a tap, a steel target, glass, a switch, a
@@ -106,6 +106,13 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
   motor, and his woods Woodland's day bed.
   His batch of 2026-11-08 (AU9, 5 recordings: walking, running and jumping on a wooden floor, a metal bin banged,
   woods at night) gives the steps on wood, the steel skip run into and Woodland's night bed.
+  His batch of 2026-11-11 (AU10, 17 recordings: walking, running and jumping on soil, metal and in a stream, a spring
+  rifle's shot, a small motor and a stapler tray with their room tone, a lift's doors and two rides, a tunnel) gives
+  the steps on soil (in place of gravel softened), metal (one new set; his first metal walk set aside) and water, the
+  landings on soil and metal, the lifts' doors and the car setting off, the Compact SMG's motor with his toothbrush's
+  whir under it, and Subway's background (`tunnel`). His
+  rifle shot, SMG motor and tray are kept in the raw folder, unused (owner, 2026-11-11: he kept the Sniper Rifle's
+  first shot and the SMG's stand-ins).
   Owner-made for the game; same licence as the code. To re-cut: `python3 tools/cut_recordings.py <raw folder>`,
   then `godot --headless --path . --import`.
 - **Sounds:** the rest of the sounds and 4 ambience loops are still rendered from the browser game's synthesis
@@ -116,15 +123,14 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
   and replaced by the owner's recordings (the pin, bounce and pop in AU5, the bang in AU6); the renderer only drafts
   now. No outside source; same licence as the code. To re-render: `godot --headless --path . -s
   res://tools/render_grenades.gd`, then `godot --headless --path . --import`.
-- **The lifts' sounds (MT2):** `assets/audio/cues/lift_chime_1.wav`, `lift_doors_1` and `_2`, `lift_motor_1`,
-  `lift_button_1` and `lift_buzz_1`, synthesised by our own `tools/lift_sounds.py` (numpy, seeded) as toy-like
-  placeholders until the owner records a lift. No outside source; same licence as the code. To re-render: `python3
+- **The lifts' sounds (MT2):** `assets/audio/cues/lift_chime_1.wav`, `lift_button_1` and `lift_buzz_1`, synthesised
+  by our own `tools/lift_sounds.py` (numpy) as toy-like placeholders (the doors and the car setting off are the
+  owner's lift since AU10, above). No outside source; same licence as the code. To re-render: `python3
   tools/lift_sounds.py`, then `godot --headless --path . --import`.
-- **The stream's sounds (WS1):** `assets/audio/cues/step_water_run_1.wav` to `_5`, `step_water_sprint_1` to `_5`,
-  `step_water_land_1` to `_5` (a foot wading through Woodland's stream) and `impact_water_1` to `_5` (a BB plopping
-  into it), synthesised by our own `tools/water_sounds.py` (numpy, seeded) as placeholders until the owner records
-  wading. No outside source; same licence as the code. To re-render: `python3 tools/water_sounds.py`, then `godot
-  --headless --path . --import`.
+- **The stream's BB plop (WS1):** `assets/audio/cues/impact_water_1.wav` to `_5` (a BB plopping into Woodland's stream),
+  synthesised by our own `tools/water_sounds.py` (numpy, seeded) as a placeholder until the owner records a pebble
+  dropped in water (the wading steps are his since AU10, above). No outside source; same licence as the code. To
+  re-render: `python3 tools/water_sounds.py`, then `godot --headless --path . --import`.
 - **Synthesised drafts kept for reference:** `tools/render_whistle.gd` (the whistle and the ping's pip, SP3, PN2),
   `tools/render_doors.gd` (DO1) and `tools/render_bolt.gd` (SN1) render the drafts the recordings replaced, only to a
   folder named after `--`.
