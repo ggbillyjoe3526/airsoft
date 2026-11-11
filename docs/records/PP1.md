@@ -120,6 +120,12 @@ Defend Easy 61.5 % and Hard 40.3 % to the attackers). Subway and Woodland's figu
 `docs/KNOWN_ISSUES.md` rows (Subway's at 32 seeds; Woodland's Hard timeouts were outside before part 3 too, 11.8 %
 against 15.6 %, within noise). Nothing outside its band by two standard errors.
 
+## Map pictures
+
+The owner asked (2026-11-11) for the map pictures rendered again before the Dev 3 tag: all four (`assets/maps/*.jpg`
+and `cards/`) from their spots in `docs/ASSETS.md`, on Forward+ with lavapipe. Woodland's far treeline is now green
+(FT1) and Depot shows its worn lamps (DW1); the KNOWN_ISSUES row is deleted.
+
 ## Known issues left
 
 - The rows above, each added to `docs/KNOWN_ISSUES.md`; and a bot replanning mid-ride whose car stops on the way walks
