@@ -1,7 +1,7 @@
 extends GutTest
-## The owner's recordings (AU2, AU5, AU6, AU9, AU10, and the placeholders cut from them, AU3): every cue they replaced still has
-## its variants, the three surfaces they added (glass, plastic, cardboard) sound as themselves and otherwise behave as the
-## metal and wood they were before, and a gas pistol's last shot locks its slide back.
+## The owner's recordings (AU2, AU5, AU6, AU9, AU10, and the placeholders cut from them, AU3): every cue they replaced
+## still has its variants, the three surfaces they added (glass, plastic, cardboard) sound as themselves and otherwise
+## behave as the metal and wood they were before, and a gas pistol's last shot locks its slide back.
 
 const VARIANTS := 5
 ## Cues cut from the recordings with 5 variants and with 3 (tools/cut_recordings.py).
