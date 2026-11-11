@@ -2,8 +2,8 @@
 
 Only the Head_* nodes' meshes, the Headwear and TeamHeadwear materials and their three atlas images change: each new
 mesh is skinned to the Head joint, but for its neck inside the shirt's collar, which takes the weights of the collar
-round it (CN1), so the neck bends with the collar instead of swinging out through it; every node, the skeleton, the inverse bind matrices, the clips and the
-other meshes and materials stay exactly as they were. What nothing uses any more (the old head meshes and their
+round it (CN1), so the neck bends with the collar instead of swinging out through it; every node, the skeleton, the
+inverse bind matrices, the clips and the other meshes and materials stay exactly as they were. What nothing uses any more (the old head meshes and their
 accessors) is dropped and the binary chunk repacked, so the splice can run again on any later human.glb (another
 thread's body or kit) and give the same heads. Joints are found by name.
 
@@ -267,6 +267,7 @@ def _collar(human: Glb) -> tuple:
     """The body's collar vertices: their positions (Blender space), joints and weights."""
     j = human.json
     node = next(n for n in j["nodes"] if n.get("name") == BODY and "mesh" in n)
+    assert node.get("skin") == 0, "%s is not on the figure's skin; its joints would not be the heads'" % BODY
     pos, joints, weights = [], [], []
     for p in j["meshes"][node["mesh"]]["primitives"]:
         a = p["attributes"]

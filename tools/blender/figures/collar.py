@@ -13,15 +13,29 @@ import math
 AXIS_Y = 0.016
 RINGS = [(1.468, 0.078, 0.085, 0.080), (1.492, 0.071, 0.079, 0.076), (1.509, 0.068, 0.076, 0.073),
          (1.516, 0.064, 0.072, 0.069), (1.505, 0.059, 0.067, 0.064), (1.470, 0.060, 0.068, 0.064)]
-BACK_RISE = 0.010   # the collar stands this much higher at the back (m), as a shirt's does
+# The collar stands this much higher at the back (m), as a shirt's does, rising broadly from the front.
+BACK_RISE = 0.005
+# The first ring stands only halfway out from the neckline (garment.grow_collar): the foot's outside lies about this
+# much (m) inside the ring.
+FOOT_INSET = 0.015
+# Its weights, by height alone (body.collar_weights): the chest's share at the foot (WEIGHTS_FOOT) fading to none at the
+# top (WEIGHTS_TOP), the head's growing from none to HEAD_TOP there, the neck's the rest; within WEIGHTS_REACH (m) of
+# the axis, eased in over WEIGHTS_EASE (m) above the neckline. The heads' necks copy them (splice_heads.py).
+WEIGHTS_FOOT = 1.46
+WEIGHTS_TOP = 1.526
+CHEST_FOOT = 0.3
+HEAD_TOP = 0.3
+WEIGHTS_REACH = 0.1
+WEIGHTS_EASE = 0.012
 
 
 def rise(ahead: float, z: float) -> float:
     """How much higher than its ring's height a ring at height z stands where cos(angle from straight ahead) is
-    `ahead`: in proportion to its height over the first ring (the foot stays on the neckline), none at the front."""
+    `ahead`: in proportion to its height over the first ring (the foot stays on the neckline), none at the front, half
+    at the sides (a broad rise, no peak at the back)."""
     foot = RINGS[0][0]
     top = max(r[0] for r in RINGS)
-    return BACK_RISE * ((1.0 - ahead) * 0.5) ** 2 * (z - foot) / (top - foot)
+    return BACK_RISE * (1.0 - ahead) * 0.5 * (z - foot) / (top - foot)
 
 
 def ring_point(ring: tuple, ang: float) -> tuple:
@@ -39,6 +53,7 @@ def outer_radius(ang: float, z: float) -> float:
     if z > outer[-1][2]:
         return 0.0
     rs = [(p[2], math.hypot(p[0], p[1] - AXIS_Y)) for p in outer]
+    rs[0] = (rs[0][0], rs[0][1] - FOOT_INSET)
     if z <= rs[0][0]:
         return rs[0][1]
     for (z0, r0), (z1, r1) in zip(rs, rs[1:]):
@@ -50,3 +65,16 @@ def outer_radius(ang: float, z: float) -> float:
 def top(ang: float) -> float:
     """The height of the collar's rolled top at angle `ang`."""
     return ring_point(RINGS[3], ang)[2]
+
+
+def smoothstep(a: float, b: float, x: float) -> float:
+    t = min(1.0, max(0.0, (x - a) / (b - a)))
+    return t * t * (3.0 - 2.0 * t)
+
+
+def weights(z: float) -> dict:
+    """The collar's weights at height z, by bone."""
+    h = min(1.0, max(0.0, (z - WEIGHTS_FOOT) / (WEIGHTS_TOP - WEIGHTS_FOOT)))
+    chest = CHEST_FOOT * (1.0 - h)
+    head = HEAD_TOP * h
+    return {"Chest": chest, "Head": head, "Neck": 1.0 - chest - head}

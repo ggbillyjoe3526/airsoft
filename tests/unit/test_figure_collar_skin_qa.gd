@@ -8,7 +8,7 @@ const CROWN_BOTTOM := 1.60
 func _head_meshes(node: Node, out: Array[MeshInstance3D]) -> void:
 	if node is MeshInstance3D and node.name.begins_with("Head_"):
 		out.append(node as MeshInstance3D)
-	for c in node.get_children():
+	for c: Node in node.get_children():
 		_head_meshes(c, out)
 
 func test_head_neck_vertices_blend_joints_and_crown_is_head_only() -> void:

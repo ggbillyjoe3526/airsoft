@@ -9,7 +9,8 @@ it should look like a natural clothing collar. Every human figure (player and bo
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-10 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-10 | 1 | Opus 5.5 (build thread) | ✗ (test_bp6_models: 29 plates) | 7/8 Retry | the collar's back tented with the cheek on the stock; the scarf's hem flared off the collar |
+| 2026-11-11 | 2 | Opus 5.5 (build thread) | pending | pending | – |
 
 ## Decisions
 
@@ -19,13 +20,20 @@ it should look like a natural clothing collar. Every human figure (player and bo
   or pitched against the neck (aiming, the cheek on the stock) the neck's foot swung out behind the collar.
 - **The collar** (`tools/blender/figures/collar.py`, shared by `body.py` and `headwear.py`) is two half ellipses round
   the neck's own axis: the front exactly as BL10 cut it (the zip pull stays), the back 7 mm clear of the neck inside
-  (as the sides), and 10 mm higher at the back, as a shirt's collar stands. Same vertex count: the body's 33,458
+  (as the sides), and 5 mm higher at the back, as a shirt's collar stands, rising broadly from the front (attempt 1's
+  10 mm rise, steepest at the back, read as a peak). Same vertex count: the body's 33,458
   triangles are unchanged.
+- **The collar's weights by height alone** (`body.collar_weights`, `collar.weights`): chest 0.3 at the foot to none at
+  the top, head none to 0.3, the neck the rest, the same all round, eased in over 12 mm above the neckline. The
+  nearest-face transfer had given its rings shoulder shares at the sides and half the head at the top over none a ring
+  lower, so a turned head tented the collar's back (critic, attempt 1). The zip's pull takes the same weights.
 - **The neck bends with the collar** (`splice_heads.py`): each head vertex within 108 mm of the neck's axis behind
   (88 mm ahead, so the chin, ear cups and brims stay whole on `Head`) takes the weights of the nearest collar vertex,
   easing to `Head` alone between 1.525 and 1.565 m behind (1.455 to 1.48 m ahead, under the chin).
 - **The boonie's scarf** lies 7 mm over the collar (it used to lie over the old, smaller collar; the new one took its
-  tail inside), easing back onto the neck 15 mm above the collar's top.
+  tail inside), easing back onto the neck 15 mm above the collar's top; below the collar's first ring it lies on the
+  collar's foot (`collar.FOOT_INSET`, that ring standing only halfway out), so its hem rests on the shirt instead of
+  flaring 1.3 cm off it (critic, attempt 1).
 - **Rebuild order** (README): `body.py` and its splice, `pads.py`, `gear.py`, `body_weights.py`, then `headwear.py` last
   (its neck reads the body's collar weights). The carrier's and pack's shoulder straps refit up to 8 mm round the
   collar's new back; nothing else in the file moved.

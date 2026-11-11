@@ -39,6 +39,7 @@ OUT_MAPS = os.environ.get("BODY_MAPS", os.path.join(os.path.dirname(os.path.absp
 # Heights (m, rest pose, the figure standing on z = 0 facing -Y).
 SHIRT_TUCK = 0.95      # the shirt's tail, tucked under the trousers' waist
 SHIRT_NECK = 1.445     # the shirt body's neckline; the collar stands above it
+NECKLINE_TILT = 0.25   # the neckline rises this much (m) a metre back
 WAIST_TOP = 1.02       # the trousers' waistband top
 HEM = 0.170            # the trousers' hem, bloused over the boots' shafts (about 9 % of the height shows, as photos)
 SLEEVE_END = 0.046     # the sleeve's end up the forearm from the wrist joint (m)
@@ -74,7 +75,7 @@ def shirt(verts, faces, r, dom) -> tuple:
                 or (b.startswith("Thigh") and p[2] > SHIRT_TUCK - 0.03))
     bm = subset(verts, faces, dom, keep)
     G.cut(bm, Vector((0, 0, SHIRT_TUCK)), Vector((0, 0, -1)), near=(Vector((0, 0, SHIRT_TUCK)), 0.30))
-    G.cut(bm, Vector((0, 0, SHIRT_NECK)), Vector((0, -0.25, 1)).normalized())
+    G.cut(bm, Vector((0, 0, SHIRT_NECK)), Vector((0, -NECKLINE_TILT, 1)).normalized())
     for s in ("L", "R"):
         w, a = arm_axis(r, s)
         G.cut(bm, w - a * SLEEVE_END, a, near=(w, 0.2))
@@ -381,12 +382,33 @@ def skin(ob: bpy.types.Object, rig: bpy.types.Object, src: bpy.types.Object) -> 
     if ob.name in ("trousers", "pocket"):
         hem_to_shins(ob)
         smooth_knees(ob)
+    collar_weights(ob)
     with bpy.context.temp_override(object=ob, active_object=ob, selected_editable_objects=[ob]):
         bpy.ops.object.vertex_group_limit_total(group_select_mode="ALL", limit=4)
         bpy.ops.object.vertex_group_normalize_all(group_select_mode="ALL", lock_active=False)
     ob.parent = rig
     a = ob.modifiers.new("Armature", "ARMATURE")
     a.object = rig
+
+
+def collar_weights(ob: bpy.types.Object) -> None:
+    """The collar (and the zip's pull on it) on weights set by height alone, the same all round (CN1): the nearest-face
+    weights gave its rings shoulder shares at the sides and half the head at the top over none a ring lower, so a
+    turned head tented the collar's back. Eased in over C.WEIGHTS_EASE above the neckline."""
+    groups = {g.name: g for g in ob.vertex_groups}
+    mw = ob.matrix_world
+    for v in ob.data.vertices:
+        p = mw @ v.co
+        if math.hypot(p.x, p.y - C.AXIS_Y) > C.WEIGHTS_REACH:
+            continue
+        t = C.smoothstep(0.0, C.WEIGHTS_EASE, p.z - (SHIRT_NECK + NECKLINE_TILT * p.y))
+        if t <= 0.0:
+            continue
+        mix = {ob.vertex_groups[g.group].name: g.weight * (1.0 - t) for g in v.groups}
+        for name, w in C.weights(p.z).items():
+            mix[name] = mix.get(name, 0.0) + w * t
+        for name, w in mix.items():
+            groups[name].add([v.index], w, "REPLACE")
 
 
 def hem_to_shins(ob: bpy.types.Object) -> None:
