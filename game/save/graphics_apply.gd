@@ -255,11 +255,7 @@ static func apply(values: GraphicsQuality, viewport: Viewport, rs: Server = null
 	var atlas := lamp_atlas(values)
 	if viewport.positional_shadow_atlas_size != atlas:
 		viewport.positional_shadow_atlas_size = atlas
-	var slots := LAMP_SLOTS if values.lamp_lights != GraphicsQuality.LampLights.OFF else PROJECT_SLOTS
-	for q in slots.size():
-		var subdiv := slots[q] as Viewport.PositionalShadowAtlasQuadrantSubdiv
-		if viewport.get_positional_shadow_atlas_quadrant_subdiv(q) != subdiv:
-			viewport.set_positional_shadow_atlas_quadrant_subdiv(q, subdiv)
+	apply_slots(values, viewport)
 	to.set_lamp_soft(SOFTNESS[values.shadow_softness])
 
 
@@ -277,6 +273,17 @@ static func glass_atlas(values: GraphicsQuality) -> int:
 	if values.lamp_lights == GraphicsQuality.LampLights.OFF:
 		return 0
 	return values.shadow_detail / GLASS_ATLAS_SHARE
+
+
+## The shadow atlas's slots in `viewport` with `values`: LAMP_SLOTS while the roof lamps are real lights, so each lit
+## lamp gets a slot, else the project's. The optic glass's picture takes them too (PP1: with the viewport's default 88
+## slots, Depot's 91 and Subway's 103 lit lamps ran out in the glass and the last lit through the rooms' roofs).
+static func apply_slots(values: GraphicsQuality, viewport: Viewport) -> void:
+	var slots := LAMP_SLOTS if values.lamp_lights != GraphicsQuality.LampLights.OFF else PROJECT_SLOTS
+	for q in slots.size():
+		var subdiv := slots[q] as Viewport.PositionalShadowAtlasQuadrantSubdiv
+		if viewport.get_positional_shadow_atlas_quadrant_subdiv(q) != subdiv:
+			viewport.set_positional_shadow_atlas_quadrant_subdiv(q, subdiv)
 
 
 ## The render scale and edge smoothing alone, which the optic glass's own picture follows too.

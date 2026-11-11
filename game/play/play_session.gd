@@ -1874,6 +1874,7 @@ func _resume() -> void:
 	# Loadout's)
 	_hud.reload_prompt().refresh_key()
 	_hud.refresh_door_prompt()
+	_hud.refresh_rail_keys()
 	if practice:
 		_hud.range_readout().refresh_key()
 

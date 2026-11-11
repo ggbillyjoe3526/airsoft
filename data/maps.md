@@ -29,6 +29,6 @@ warning; a map with no row is not listed.
 | Id | Name | Kind | Tag | Min | Standard | Max | Round | Start mode | Blurb |
 |---|---|---|---|---|---|---|---|---|---|
 | depot | Depot | field | public | 5 | 6 | 8 |  | semi | An indoor airsoft hall: three lanes, two dark tunnels. |
-| woodland | Woodland | field | public | 5 | 6 | 8 | 180 |  | A big open wood over a dry stream, by day or night. |
+| woodland | Woodland | field | public | 5 | 6 | 8 | 180 |  | A big open wood round a shallow stream, by day or night. |
 | subway | Subway | field | dev | 5 | 6 | 8 |  | semi | A closed metro station on three levels, from the ticket hall down to the trains. |
 | range | Range | range | public | 1 | 1 | 1 |  |  | Targets 10 to 60 m. No bots, no score. |

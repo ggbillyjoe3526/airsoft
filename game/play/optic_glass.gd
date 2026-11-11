@@ -114,6 +114,7 @@ func _follow(values: GraphicsQuality) -> void:
 	var atlas := GraphicsApply.glass_atlas(values)
 	if _port.positional_shadow_atlas_size != atlas:
 		_port.positional_shadow_atlas_size = atlas
+	GraphicsApply.apply_slots(values, _port)
 	_hip_camera = values.mesh_detail >= _cfg.hip_glass_camera_from
 	_env_ready = false
 

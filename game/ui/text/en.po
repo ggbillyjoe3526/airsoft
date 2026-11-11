@@ -1482,6 +1482,12 @@ msgstr "Zoom aimed"
 msgid "PERF_AIM"
 msgstr "Aim in"
 
+msgid "PERF_PACE"
+msgstr "Pace"
+
+msgid "PERF_MOVE_SPREAD"
+msgstr "Spread moving"
+
 msgid "PERF_MOVING"
 msgstr "Moving"
 

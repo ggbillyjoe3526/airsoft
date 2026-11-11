@@ -86,6 +86,8 @@ func play(still: bool = false) -> void:
 	var b := get_parent() as Control
 	if _tween != null:
 		_tween.kill()
+		# a dip cut short (a still press after it: Reduced motion turned on between two quick presses) leaves no shrink
+		b.scale = Vector2.ONE
 	_box.set_corner_radius_all(_radius(b) + RING_GAP + RING_WIDTH)
 	visible = true
 	modulate.a = 1.0

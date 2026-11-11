@@ -29,7 +29,7 @@ sprinting through them rustles the leaves loudly enough to be heard further than
 quietly ([Maps](Maps#woodland)). Bots are slowed and heard the same way.
 
 Wading through Woodland's **stream** slows you to 60% of your pace, and every stride splashes, at any pace: walking or
-crouching only softens it a little ([Maps](Maps#woodland)). Bots are slowed and heard the same way.
+crouching softens it, but it still carries nearly as far as a run on dry ground ([Maps](Maps#woodland)). Bots are slowed and heard the same way.
 
 ## Lean
 

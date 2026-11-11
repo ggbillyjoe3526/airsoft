@@ -234,6 +234,11 @@ def gen_replicas(_arg: str) -> str:
     def speed(s: dict) -> str:
         return f"{math.sqrt(2 * num(s['Energy (J)']) / (num(s['BB (g)']) / 1000)):.0f} m/s"
 
+    def hip_spread(s: dict) -> str:
+        """Spread × Hip spread (the Sniper Rifle wider from the hip, the Compact SMG tighter), as Accuracy has it."""
+        value = num(s["Spread (°)"]) * num(s.get("Hip spread (×)", "1") or "1")
+        return f"{value:.2f}".rstrip("0").rstrip(".")
+
     rows = [
         ("Class", lambda i, s: s["Class"]),
         ("Unlocks", lambda i, s: level_label(levels.get(i["Name"]))),
@@ -245,7 +250,7 @@ def gen_replicas(_arg: str) -> str:
         ("Magazines carried", lambda i, s: s["Magazines"]),
         ("Reload", lambda i, s: f"{s['Reload (s)']} s"),
         ("Draw", lambda i, s: f"{s['Draw (s)']} s"),
-        ("Spread from the hip", lambda i, s: f"{s['Spread (°)']}°"),
+        ("Spread from the hip", lambda i, s: f"{hip_spread(s)}°"),
         ("Recoil per shot", lambda i, s: f"{s['Recoil (°)']}°"),
         ("Site limit", lambda i, s: f"{limits.get(s['Class'], '–')} J"),
     ]

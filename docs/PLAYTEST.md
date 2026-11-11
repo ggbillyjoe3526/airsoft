@@ -1380,6 +1380,17 @@ Subway is Dev content: tick Settings › Dev › Dev content.
   back a little on softer steps. Its run on the flat is as before, and nothing pops as it reaches the stair's top or
   foot. A BB at its legs on the stair hits where you see them.
 
+## The preliminary Dev 3 pass (PP1)
+
+- [ ] **Door frames.** On Depot and Woodland, look at a door from both sides: its frame sits in the wall, the trim
+  standing just proud of each face, the leaf hung on one face; nothing sticks out a hand's width from the wall.
+- [ ] **The Armory with an old save.** With a save from 0.1 Dev 2 that had the Cyber Pistol, LiPo or Long Barrel,
+  the Armory shows them unlocked (not dimmed) on their new levels, and its count of unlocked items matches the
+  Loadout.
+- [ ] **The Loadout's sheet.** Spread reads from the hip: the Sniper Rifle shows 0.60°, not 0.10°. With Dev content
+  on, the Compact SMG shows Pace and Spread moving rows; no other replica does.
+- [ ] **Rebinding in a match.** Rebind slot 1 from Esc › Settings and resume: the weapon rail names the new key.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
