@@ -112,6 +112,14 @@ stale rows in test_attachments, test_customise_parts and test_sn1_qa updated.
 - **`climb_kinds` is floor alone:** every shipped platform and dock top is kind floor. **Riders' corners 0.6 m in:**
   the body's radius (0.32 m) and the 0.2 m a bot stops short, with a margin.
 
+## Balance runs
+
+Every map, both modes: Normal 32 seeds, Easy and Hard 16 (reports in project files `playtest/pp1-balance/`). Depot
+(before part 3) is in band throughout, four figures near an edge (Elimination Normal 47.9 / 52.1 % by team, Attack /
+Defend Easy 61.5 % and Hard 40.3 % to the attackers). Subway and Woodland's figures outside within noise are the two
+`docs/KNOWN_ISSUES.md` rows (Subway's at 32 seeds; Woodland's Hard timeouts were outside before part 3 too, 11.8 %
+against 15.6 %, within noise). Nothing outside its band by two standard errors.
+
 ## Known issues left
 
 - The rows above, each added to `docs/KNOWN_ISSUES.md`; and a bot replanning mid-ride whose car stops on the way walks
