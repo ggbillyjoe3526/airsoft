@@ -320,7 +320,8 @@ static func night(map: MapData) -> Result:
 			" or ".join(names), lights])
 
 
-## Every walkable nav cell in a named area (MapAreas), and every name holding one.
+## Every walkable nav cell in a named area (MapAreas), and every name holding one. A lift car's floor is no nav cell
+## (it moves), so a name covering a car at one of its stops counts as stood in (PP1).
 static func areas(map: MapData, nav: NavGrid) -> Result:
 	if map.areas.is_empty():
 		return Result.new(FieldStandard.AREAS, Status.FAIL, "It names no areas: a callout says no place.")
@@ -337,6 +338,12 @@ static func areas(map: MapData, nav: NavGrid) -> Result:
 			unnamed.append(at(p))
 		else:
 			used[area] = true
+	for lift in map.lifts:
+		var mid := lift.well.get_center()
+		for y in lift.stops:
+			var car := MapAreas.area_at(map.areas, Vector3(mid.x, y, mid.y))
+			if not car.is_empty():
+				used[car] = true
 	if not unnamed.is_empty():
 		return Result.new(FieldStandard.AREAS, Status.FAIL, "%d of %d walkable spots in no named area: %s." % [
 				unnamed.size(), walkable, _list(unnamed)])

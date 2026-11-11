@@ -337,3 +337,27 @@ func test_a_bot_held_up_on_a_vault_leg_routes_round_for_a_while_and_a_new_round_
 	assert_almost_eq(bot.vaults_off_until, 10.0 + config.vault_retry_delay, 1e-6)
 	bot.reset(0, 3, 0.0, config)
 	assert_eq(bot.vaults_off_until, -INF, "a new round forgives it")
+
+
+## PP1: each link's search point is priced at its own take-off node's weight (a wade's x8, WS1), never at the first
+## node's: with the field's first node made dear, the wall's links keep their own nodes' weights.
+func test_each_vault_link_is_priced_at_its_take_off_node_s_weight() -> void:
+	var f := _field(0.85)
+	var nav := NavGrid.build(f[0], tuning.nav, tuning.body)
+	var first := -1
+	for k in nav.node_count():
+		if nav.walkable[k] == 1:
+			first = k
+			break
+	assert_gt(first, -1)
+	nav.astar.set_point_weight_scale(first, nav.astar.get_point_weight_scale(first) * 8.0)
+	NavVaults.link(nav, f[1], tuning.vault, tuning.body, config.vault_price)
+	assert_gt(nav.vault_to.size(), 0)
+	var wrong := 0
+	for k in nav.node_count():
+		for l in range(nav.vault_start[k], nav.vault_start[k + 1]):
+			var half := maxf(nav.node_position(k).distance_to(nav.node_position(nav.vault_to[l])), nav.cell) * 0.5
+			var want := nav.astar.get_point_weight_scale(k) * (half + config.vault_price) / half
+			if absf(nav.astar.get_point_weight_scale(nav.vault_base + l) - want) > 1e-4 * want:
+				wrong += 1
+	assert_eq(wrong, 0, "every link at its take-off node's weight")

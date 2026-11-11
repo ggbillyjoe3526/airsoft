@@ -109,7 +109,7 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 	var live := state.round_state.is_live()
 	# The hand-off is for rounds only: never on the range, where the spares stay full.
 	var sharing := live and not state.round_state.practice
-	Elimination.plan_walk_off_routes(state.characters, nav)
+	Elimination.plan_walk_off_routes(state.characters, nav, state.lifts)
 	var noisy := noise.count() > 0
 	var has_doors := doors.count() > 0
 	# A state the match never started for (a test's, a tool's) meets the doors as the map sets them.
@@ -143,10 +143,12 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 			Elimination.step(c, tuning.hits, dt)
 			continue
 		var cmd: PlayerCommand = null
+		# Hit in a lift's car with its doors shut (or not yet open): the walk-off waits for them.
+		var shut_in := not in_play and has_lifts and lifts.shut_in(c, state.lifts)
 		if in_play:
 			cmd = commands[c.id] if c.id >= 0 and c.id < commands.size() else null
 		else:
-			cmd = Elimination.fill_eliminated_command(c, tuning, _eliminated, nav)
+			cmd = Elimination.fill_eliminated_command(c, tuning, _eliminated, nav, shut_in)
 		if cmd == null:
 			cmd = _idle
 			cmd.reset(c.yaw, c.pitch)
@@ -201,7 +203,7 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		Lean.step(c, cmd, tuning, query, dt)
 		Accuracy.step(c, tuning.movement, tuning.accuracy, dt)
 		if not in_play:
-			Elimination.step(c, tuning.hits, dt)
+			Elimination.step(c, tuning.hits, dt, shut_in)
 			UpperBlend.step(c, tuning.hits, dt)
 			continue
 		Footsteps.step(c, tuning.footsteps, state.events, query, tuning.noise)

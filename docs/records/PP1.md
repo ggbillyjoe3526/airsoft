@@ -1,6 +1,15 @@
 # PP1 · Preliminary Dev 3 pass: balance, bugs, QA and performance
 
-**Review (part 1):** pending
+**Review:** part 1 (#305) 2 attempts · critic Accept 8/8 · qa Pass · performance Pass; part 2 1 attempt · critic
+Accept 7/8 · qa Pass · performance Pass
+
+## Attempts
+
+| Date | Part | Attempt | Worker model | checks | Critic | Retry reason |
+|---|---|---|---|---|---|---|
+| 2026-11-11 | 1 | 1 | Opus 5.5 (build thread) | targeted ✓, CI unit part 1 ✗ | 6/8 Retry | test_armory_cards read the list's dim; the next level's tiles dimmed; a stale row |
+| 2026-11-11 | 1 | 2 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
+| 2026-11-11 | 2 | 1 | Opus 5.5 (worker) | targeted ✓ | 7/8 Accept | (non-blocking) the mid-ride stop limit had no row: added |
 
 The owner's preliminary run of the Dev 3 final passes (2026-11-10, "search thoroughly for any bugs, issues (quality,
 balance, performance)", "check against all known issues"); the full passes run again after Subway's models and the
@@ -33,6 +42,29 @@ Hard 16, both modes) ran alongside. The fixes ship in parts.
   get one at 5 and 15), Woodland's "dry stream" (data/maps.md), the bot kits' personality lean and column sums
   (data/bot-kits.md), and three stale KNOWN_ISSUES rows (Subway on Medium, Depot's baked details, "row 104").
 
+## Part 2: climbing and Subway's lifts
+
+- **Props climbed (High).** CL1's climb checked only that a 0.6 to 0.95 m top ran on 1.5 m, so Depot's desks and sofa,
+  Subway's benches and the Range's long crate could be climbed from an end, against the wiki and CL1's "never crates or
+  props". `VaultConfig.climb_kinds` (`[floor]`) lists what a climb may end on; a top no listed block owns (the ground)
+  still counts. Bots' climb links go through `Vault.plan`, so they follow. A sweep of every non-floor block on all four
+  maps at 16 headings guards it; Subway's track pits still climb at 0.9 m.
+- **A full lift held open (High).** A bot waiting at a car standing open but full pressed its button every tick (304
+  presses in 3.5 s, a beep and a ping each), so the car never left. It presses only when the car isn't open there and,
+  while it shuts, only with room aboard.
+- **Riders in the doorway (Medium).** Riders' spots on a small circle sat as close as 0.16 m, so keeping apart pushed one
+  into the doorway and held the doors. Riders stand in the corners by rank, 0.6 m in, and don't keep apart aboard.
+- **Routes from a moving car (Medium).** A route planned mid-ride started at the nearest stop's landing, not the stop
+  the car heads for; a hit player's walk-off began with the doors shut. Routes start at the car's destination and a
+  walk-off waits for the doors.
+- **Bombs in a car (High)** stayed in the shaft as the car left; they ride with it now.
+- **A "Lift" area** over each well, so a contact in a car has a place name (it had none at two stops). The field check
+  `areas` counts a name over a car at one of its stops as stood in, since a car's floor is no nav cell (CI unit part 3
+  caught it).
+- **Vault links' price** is each take-off node's own weight, not the first node's (a wet first node would price every
+  vault ×8).
+- MT2's three unlisted limits, and the mid-ride stop-on-the-way limit, are KNOWN_ISSUES rows.
+
 ## Decisions
 
 - **Not fixed, logged instead** (`docs/KNOWN_ISSUES.md`): the locker's silent run-in (a per-block noise is a bigger
@@ -40,6 +72,10 @@ Hard 16, both modes) ran alongside. The fixes ship in parts.
   the lamps' per-frame shadow redraw (needs a frame time from the owner's card first), SDFGI after a lamp switch, the
   Retro filter in the glass, and the stale map pictures (render again before the Dev 3 tag).
 
+- **`climb_kinds` is floor alone:** every shipped platform and dock top is kind floor. **Riders' corners 0.6 m in:**
+  the body's radius (0.32 m) and the 0.2 m a bot stops short, with a margin.
+
 ## Known issues left
 
-- The rows above, each added to `docs/KNOWN_ISSUES.md`.
+- The rows above, each added to `docs/KNOWN_ISSUES.md`; and a bot replanning mid-ride whose car stops on the way walks
+  out on the wrong floor's leg once (can wait).
