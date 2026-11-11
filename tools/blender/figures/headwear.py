@@ -711,7 +711,10 @@ SCARF_CENTRE = Vector((0.0, 0.004, 1.535))
 # The scarf lies this far (m) over the shirt's collar (collar.py), easing back onto the neck over this height (m) above
 # the collar's top (CN1: the bigger collar of 2026-11-10 would otherwise take the scarf's tail inside it).
 SCARF_OVER_COLLAR = 0.007
-SCARF_OVER_EASE = 0.015
+SCARF_OVER_EASE = 0.03
+# Its hem rests on the collar's widest ring (collar.RINGS[1]), the lowest row aimed at the neck this far (m) from the
+# scarf's centre at that ring's height, so the scarf never steps in under a bulge (CN1, the critic's attempt 2).
+SCARF_HEM_REACH = 0.065
 
 
 def over_collar(q: Vector, folds: float) -> Vector:
@@ -735,12 +738,13 @@ def scarf(k: Kit, drape: Drape) -> Part:
     tile = k.tile("shemagh")
     nu, nv = k.n(34, 10), k.n(10, 3)
     top = [(0, 33.0), (20, 25.0), (60, 26.0), (100, 22.0), (140, 12.0), (180, 8.0)]
-    bottom = -58.0
 
     def pt(i: int, j: int) -> Vector:
         az = -math.pi + TAU * i / nu
         a = abs(az / DEG)
         b = j / nv
+        hem = collar.ring_point(collar.RINGS[1], az)[2]
+        bottom = math.degrees(math.atan2(hem - SCARF_CENTRE.z, SCARF_HEM_REACH))
         el = bottom + (keyed(top, a) - bottom) * b
         folds = 0.0028 * math.sin(b * 9.5 + 0.8 * math.sin(az * 3.0)) + 0.002 * math.sin(az * 7.0 + b * 3.0)
         drop = 0.006 * gauss(az, 0.5) * math.sin(math.pi * b)  # the front sags into a soft V under the chin
@@ -749,6 +753,16 @@ def scarf(k: Kit, drape: Drape) -> Part:
         return over_collar(q, folds)
 
     rows = [[pt(i, j) for i in range(nu)] for j in range(nv + 1)]
+    # Below the collar's top the cloth only widens going down (it hangs over the collar, never tucks in under itself).
+    for i in range(nu):
+        for j in range(nv - 1, -1, -1):
+            q, above = rows[j][i], rows[j + 1][i]
+            if q.z >= collar.top(math.atan2(q.x, -(q.y - collar.AXIS_Y))):
+                continue
+            off = Vector((q.x, q.y - collar.AXIS_Y, 0.0))
+            r_above = Vector((above.x, above.y - collar.AXIS_Y, 0.0)).length
+            if 1e-6 < off.length < r_above:
+                rows[j][i] = q + off * (r_above / off.length - 1.0)
     p.grid(rows, GEAR, lambda i, j: tile.uv(i / nu, j / nv), wrap=True)
     # The rolled hem round the bottom and the upper edge's turn-in.
     for row, r in ((rows[0], 0.0075), (rows[-1], 0.0035)):

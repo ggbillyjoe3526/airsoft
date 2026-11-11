@@ -10,7 +10,8 @@ it should look like a natural clothing collar. Every human figure (player and bo
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-10 | 1 | Opus 5.5 (build thread) | ✗ (test_bp6_models: 29 plates) | 7/8 Retry | the collar's back tented with the cheek on the stock; the scarf's hem flared off the collar |
-| 2026-11-11 | 2 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-11 | 2 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | the scarf stepped in at its hem under a bulge over the collar |
+| 2026-11-11 | 3 | Opus 5.5 (build thread) | pending | pending | – |
 
 ## Decisions
 
@@ -30,10 +31,10 @@ it should look like a natural clothing collar. Every human figure (player and bo
 - **The neck bends with the collar** (`splice_heads.py`): each head vertex within 108 mm of the neck's axis behind
   (88 mm ahead, so the chin, ear cups and brims stay whole on `Head`) takes the weights of the nearest collar vertex,
   easing to `Head` alone between 1.525 and 1.565 m behind (1.455 to 1.48 m ahead, under the chin).
-- **The boonie's scarf** lies 7 mm over the collar (it used to lie over the old, smaller collar; the new one took its
-  tail inside), easing back onto the neck 15 mm above the collar's top; below the collar's first ring it lies on the
-  collar's foot (`collar.FOOT_INSET`, that ring standing only halfway out), so its hem rests on the shirt instead of
-  flaring 1.3 cm off it (critic, attempt 1).
+- **The boonie's scarf** sits over the collar like a gaiter (it used to hang over the old, smaller collar; the new one
+  took its tail inside): 7 mm out from the collar, easing back onto the neck over 30 mm above the collar's top, its
+  hem resting on the collar's widest ring (`SCARF_HEM_REACH`), and below the collar's top it only widens going down,
+  so it never tucks in under itself (attempts 1 and 2 flared, then stepped in at the hem).
 - **Rebuild order** (README): `body.py` and its splice, `pads.py`, `gear.py`, `body_weights.py`, then `headwear.py` last
   (its neck reads the body's collar weights). The carrier's and pack's shoulder straps refit up to 8 mm round the
   collar's new back; nothing else in the file moved.
