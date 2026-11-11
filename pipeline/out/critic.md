@@ -1,31 +1,31 @@
 Task: CN1 · The shirt collar at the back of the neck (owner bug report, 2026-11-10)
-Attempt: 2 of 4
-Head: ed8ea10 (work at e1133ce; check.sh parts 1-3 passed on it, parts 4-7 and smoke still re-running per the brief)
+Attempt: 3 of 4
+Head: 87208e6 (full check.sh not yet passed on it: parts 1-3 on e1133ce, parts 4-7 and smoke re-running; the
+  targeted figure tests 37/37 pass on 87208e6. A Retry does not depend on them; re-confirm before any merge)
 Checks: 1 ✗ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
 Score: 7/8 → Retry (near miss, judgment)
 Failed checks, with evidence:
-1. [judgment] Models rule (b), construction, from the v2 renders (no reference photo named, so (a) not measurable).
-   Fixed: the standing back view of Cap, High-cut and Full-cut is a continuous rounded collar, no V (1-back, rows 1-3);
-   cheek on the stock, the collar's back is now a rounded lobe, not the faceted tent (2-aiming, rows 1-2).
-   Still broken, and worse than origin/main:
-   - 1-back-standing, "Boonie + scarf", AFTER: the scarf pinches in under the chin line, balloons out over the collar,
-     and its rolled hem sits as a separate pale band under the bulge with a dark gap between them; it reads as a sack
-     with a loose ring, not cloth. BEFORE (main) the scarf hung flat and whole.
-   - 2-aiming, "Boonie + scarf: aiming", AFTER: the same detached hem lip with a dark line under the bulge.
-   Cause (headwear.py:717-729, 754-759): over_collar pushes the body rows out to outer_radius+7 mm, but the bottom row
-   now goes to the foot radius (collar.py:+56 FOOT_INSET) well inside the rows above, so the panel steps in at the hem;
-   the hem tube is swept along rows[0] with outward normals from SCARF_CENTRE, exposing it under the overhang.
-Must-fix for the next attempt:
-- Scarf: make the pushed radius monotonic down the scarf (no step-in at the hem): take the max of the needed radius over
-  the rows below the collar's top, or blend the hem row's push to its row above, so panel and hem tube meet with no
-  overhang, gap or waist pinch; keep its hem on the carrier/shirt. Re-render boonie standing back, aiming, crouched.
-- Confirm tools/check.sh parts 4-7, smoke and notices pass on the final head (the brief left them running).
-Advisory (non-blocking):
-- Cheek on stock, the collar's back still stands to the ear cups' lower edge (2-aiming rows 1-2); rounded and
-  acceptable, but a 0.2 Head share at the top would sit it lower. Owner's eye decides.
-- No test pins the collar's inner wall clear of head_shapes.NECK at rest (the original bug).
+1. [judgment] Models rule (b) construction and (d) bar, from the v3 renders (no reference photo named; (a) not measurable).
+   Fixed: the attempt-2 pinch and step-in are gone; Cap, High-cut, Full-cut unchanged and still clean (1-back rows 1-3,
+   2-aiming rows 1-3); the boonie scarf reads well enough in the aiming and crouched views (2-aiming rows 4-6).
+   Still broken: 1-back-standing, "Boonie + scarf", AFTER. The scarf is now a flared ruff, a lampshade: narrow at the
+   balaclava, then it widens sharply and stands out over the collar as a horizontal skirt. Its hem is a wavy, scalloped
+   pale band with a hard dark shadow line under it, standing off the shirt; on the left it overhangs past the collar's
+   edge. A shemagh round a neck drapes and sags under its weight (folds pooling at the back, a hanging tail or a soft
+   roll lying on the collar), never a stiff cone. Cause, tools/blender/figures/headwear.py:756-765: the "only widens
+   going down" pass turns every column into a monotonic cone, and SCARF_HEM_REACH = 0.065 (:717) aims the lowest row
+   out at the collar's widest ring; the 7.5 mm rolled hem (:768) then sits on that flare's rim as a separate band.
+   Not finished work next to a AAA figure; a reader sees the flare from any back angle in a round.
+Must-fix for the next attempt (the last: check 1 failing blocks auto-accept, so the owner decides after it):
+   - Let the scarf's lower rows lie on the collar's surface (radius = collar's radius at that height + cloth gap),
+     not on a cone aimed at the widest ring; keep a monotonic radius only within that surface, never beyond it.
+   - Or end the hem above the collar's widest ring and let a short tail hang at the back over the collar, so the
+     edge tucks onto cloth instead of standing off it.
+   - Shrink the rolled hem (7.5 mm) where it sits on the collar and smooth its scallop (the az*7 fold term at the
+     bottom row) so the edge reads as one soft roll; no dark gap under it in the 1-back render.
+   - Render the standing back view at both the v3 angle and 30° to each side before handing back.
 Owner should test in the game:
-- Boonie bot from behind, standing, aiming and crouched: scarf lies whole on the collar, no bulge, loose hem or gap.
-- Behind a bot aiming with its cheek on the stock (each head): collar back round, no spike; check its height reads ok.
-- Standing back view, all four heads: no dark V, collar continuous round the neck.
-- Bot looking down from the front: the chin doesn't sink into the collar more than before.
+   - A boonie bot standing with his back to you at 3-5 m: does the scarf read as cloth or as a frill/ruff?
+   - The same bot crouched and aiming: does the scarf stay on the collar with no gap or poke-through?
+   - Cap, High-cut and Full-cut bots from behind and aiming with cheek on stock: the collar's back looks like a shirt.
+   - Your own figure in any third-person or death view: collar and neck bend together, no gap at the nape.
