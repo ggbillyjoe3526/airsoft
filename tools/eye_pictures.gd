@@ -78,7 +78,9 @@ func _run() -> void:
 			LightingConfig.NIGHT if night else LightingConfig.DAY)
 	var level := MapLevel.new()
 	port.add_child(level)
-	level.build(map, play.map_style, tuning.body, play.baked_light, sun, false, play.site_look)
+	# The lifts and station dress as play_session passes them (PP1: without them Subway drew its greybox).
+	level.build(map, play.map_style, tuning.body, play.baked_light, sun, false, play.site_look, tuning.lifts,
+			play.station_look)
 	level.set_baked_light(true)
 	play.look.push_globals()
 	var lighting := FieldLighting.build(sun, play.look)
@@ -108,6 +110,10 @@ func _run() -> void:
 	var doors := DoorView.build(map, play.map_style, tuning.doors.swing_time)
 	if doors != null:
 		port.add_child(doors)
+	# Its lifts' cars at their start stops, doors open (MT2), as a match begins.
+	var lifts := LiftView.build(map, play.map_style, tuning.lifts, play.lifts)
+	if lifts != null:
+		port.add_child(lifts)
 	var teams := TeamColours.resolve(TeamColours.Set.STANDARD, false, null, play.teams).figures
 	var poles: Array[FlagView] = []
 	for i in map.poles.size():

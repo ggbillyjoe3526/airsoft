@@ -124,7 +124,10 @@ against 15.6 %, within noise). Nothing outside its band by two standard errors.
 
 The owner asked (2026-11-11) for the map pictures rendered again before the Dev 3 tag: all four (`assets/maps/*.jpg`
 and `cards/`) from their spots in `docs/ASSETS.md`, on Forward+ with lavapipe. Woodland's far treeline is now green
-(FT1) and Depot shows its worn lamps (DW1); the KNOWN_ISSUES row is deleted.
+(FT1) and Depot shows its worn lamps (DW1); the KNOWN_ISSUES row is deleted. `tools/eye_pictures.gd` built Subway
+without its station dress (MT3's tiles, terrazzo and platform edge) or its lift cars, since it never passed the
+level `tuning.lifts` and `play.station_look` nor built a `LiftView` as `play_session.gd` does (critic, attempt 1):
+both are passed now, and Subway's picture shows the station as you play it.
 
 ## Known issues left
 
