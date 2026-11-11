@@ -1380,6 +1380,17 @@ Subway is Dev content: tick Settings › Dev › Dev content.
   back a little on softer steps. Its run on the flat is as before, and nothing pops as it reaches the stair's top or
   foot. A BB at its legs on the stair hits where you see them.
 
+## The shirt collar at the back of the neck (CN1)
+
+- [ ] **No dark V.** Stand behind a bot (each head: cap, high cut, full cut, boonie) and look at the back of its neck
+  above the carrier: the olive shirt collar goes all the way round, a little higher at the back, with no dark notch
+  of the balaclava cutting down through it.
+- [ ] **Aiming.** Watch bots aim up, down and with the cheek on the stock from behind and the side: the neck stays
+  tucked in the collar, never sliding out behind it. The boonie's sand scarf sits on the collar like a gaiter and
+  doesn't tear or stretch.
+- [ ] **The front.** From the front the collar, its zip pull and the chin look as before; the chin doesn't sink into
+  the collar more than it used to when a bot looks down.
+
 ## The preliminary Dev 3 pass (PP1)
 
 - [ ] **Door frames.** On Depot and Woodland, look at a door from both sides: its frame sits in the wall, the trim

@@ -42,6 +42,7 @@ sys.path.insert(0, HERE)
 import bpy  # noqa: E402  (first of Blender's modules: it brings bmesh and mathutils)
 from mathutils import Vector  # noqa: E402
 
+import collar  # noqa: E402
 import face  # noqa: E402
 import head_shapes as hs  # noqa: E402
 import head_textures  # noqa: E402
@@ -707,6 +708,33 @@ def mask(k: Kit, drape: Drape, eyewear: dict) -> Part:
 
 
 SCARF_CENTRE = Vector((0.0, 0.004, 1.535))
+# The scarf lies this far (m) over the shirt's collar (collar.py), easing back onto the neck over this height (m) above
+# the collar's top (CN1: the bigger collar of 2026-11-10 would otherwise take the scarf's tail inside it).
+SCARF_OVER_COLLAR = 0.006
+SCARF_OVER_EASE = 0.03
+# Its hem lies on the collar this far (m) below the collar's third ring (collar.RINGS[2]), above its widest, so the
+# lower rows follow the collar's own surface down to it; the lowest row is aimed at the neck SCARF_HEM_REACH (m) from
+# the scarf's centre at that height. The folds fade out toward the hem and the hem's roll is thin, so it lies flat on
+# the collar (CN1, the critic's attempts 2 and 3).
+SCARF_HEM_DROP = 0.005
+SCARF_HEM_REACH = 0.065
+SCARF_HEM_ROLL = 0.0045
+SCARF_FOLDS_FROM = 0.35
+
+
+def over_collar(q: Vector, folds: float) -> Vector:
+    """Point q of the scarf carried out from the neck's axis, if need be, to lie over the shirt's collar."""
+    off = Vector((q.x, q.y - collar.AXIS_Y, 0.0))
+    r = off.length
+    if r < 1e-6:
+        return q
+    ang = math.atan2(q.x, -(q.y - collar.AXIS_Y))
+    rim = collar.top(ang)
+    need = (collar.outer_radius(ang, min(q.z, rim)) + SCARF_OVER_COLLAR + folds) * (
+        1.0 - smoothstep(rim, rim + SCARF_OVER_EASE, q.z))
+    if r >= need:
+        return q
+    return q + off * (need / r - 1.0)
 
 
 def scarf(k: Kit, drape: Drape) -> Part:
@@ -715,26 +743,29 @@ def scarf(k: Kit, drape: Drape) -> Part:
     tile = k.tile("shemagh")
     nu, nv = k.n(34, 10), k.n(10, 3)
     top = [(0, 33.0), (20, 25.0), (60, 26.0), (100, 22.0), (140, 12.0), (180, 8.0)]
-    bottom = -58.0
 
     def pt(i: int, j: int) -> Vector:
         az = -math.pi + TAU * i / nu
         a = abs(az / DEG)
         b = j / nv
+        hem = collar.ring_point(collar.RINGS[2], az)[2] - SCARF_HEM_DROP
+        bottom = math.degrees(math.atan2(hem - SCARF_CENTRE.z, SCARF_HEM_REACH))
         el = bottom + (keyed(top, a) - bottom) * b
         folds = 0.0028 * math.sin(b * 9.5 + 0.8 * math.sin(az * 3.0)) + 0.002 * math.sin(az * 7.0 + b * 3.0)
+        folds *= smoothstep(0.0, SCARF_FOLDS_FROM, b)
         drop = 0.006 * gauss(az, 0.5) * math.sin(math.pi * b)  # the front sags into a soft V under the chin
         q = drape.around(SCARF_CENTRE, az, el * DEG, 0.009 + folds + drop + 0.004 * (1 - b))
-        return q if q is not None else SCARF_CENTRE + direction(az, el * DEG) * 0.1
+        q = q if q is not None else SCARF_CENTRE + direction(az, el * DEG) * 0.1
+        return over_collar(q, folds)
 
     rows = [[pt(i, j) for i in range(nu)] for j in range(nv + 1)]
     p.grid(rows, GEAR, lambda i, j: tile.uv(i / nu, j / nv), wrap=True)
     # The rolled hem round the bottom and the upper edge's turn-in.
-    for row, r in ((rows[0], 0.0075), (rows[-1], 0.0035)):
+    for row, r in ((rows[0], SCARF_HEM_ROLL), (rows[-1], 0.0035)):
         outs = [(q - SCARF_CENTRE).normalized() for q in row]
         seg = k.n(6, 4)
         prof = [(math.cos(TAU * i / seg) * r, math.sin(TAU * i / seg) * r) for i in range(seg)]
-        p.sweep(row, outs, prof, GEAR, uv=lambda i, j: tile.uv(j / nu, 0.0 if r > 0.005 else 1.0),
+        p.sweep(row, outs, prof, GEAR, uv=lambda i, j, lo=row is rows[0]: tile.uv(j / nu, 0.0 if lo else 1.0),
                 closed_path=True, caps=False)
     return p
 

@@ -36,6 +36,7 @@ BODY = "Body"
 HAND = ("Hand_", "Thumb", "Index", "Middle", "Ring", "Pinky")
 PLATE_MOST = 300
 DOME_MOST = 70
+TIE = 1e-3
 WELD = 1e-6
 # The cloth taken whole by a plate within PIN (m), fading back to its own weights by PIN_FADE.
 PIN = 0.0025
@@ -176,8 +177,9 @@ def plates(body: Mesh, names: list, dense: np.ndarray) -> int:
     """Each glove plate on one set of weights, and the glove's cloth just under it on the same."""
     piece = shells(body.points, body.tris)
     in_hand = np.array([n.startswith(HAND) for n in names])
-    # Led by a hand bone: its best hand weight above every other bone's, so a tie goes to the arm.
-    led = dense[:, in_hand].max(axis=1) > dense[:, ~in_hand].max(axis=1)
+    # Led by a hand bone: its best hand weight above every other bone's, so a tie goes to the arm (TIE: within it the
+    # weights are a tie, as the wrist strap's tab's are, whatever float noise a rebuild leaves; CN1).
+    led = dense[:, in_hand].max(axis=1) > dense[:, ~in_hand].max(axis=1) + TIE
     on_plate = np.zeros(len(body.points), bool)
     found = []
     for c in np.unique(piece):

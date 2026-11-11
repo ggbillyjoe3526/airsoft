@@ -13,6 +13,8 @@ const FIGURE_MOST := 8
 ## (tools/blender/figures/body_weights.py finds them the same way).
 const HAND := ["Hand_", "Thumb", "Index", "Middle", "Ring", "Pinky"]
 const PLATE_MOST := 300
+## Weights within this of each other are a tie, which goes to the arm (body_weights.py TIE: the wrist strap's tab).
+const TIE := 1.0e-3
 ## The plates the glove carries: a back plate and its border, four knuckle domes and eight finger guards a hand.
 const PLATES := 28
 const WELD := 1.0e6
@@ -149,7 +151,7 @@ static func _all_in_hand(skin: Skin, bones: PackedInt32Array, weights: PackedFlo
 				hand = maxf(hand, weights[v * per + k])
 			else:
 				other = maxf(other, weights[v * per + k])
-		if hand <= other:
+		if hand <= other + TIE:
 			return false
 	return true
 

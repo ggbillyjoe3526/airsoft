@@ -1,12 +1,23 @@
-Task: UG3 · QA commit (see git log) · Verdict: Pass  (head under test 9b71816)
+Task: CN1 · QA commit (see git log, "Agent: qa", attempt 2, HEAD e1133ce) · Verdict: Pass
 
-Blocking: none. Advisory: none found.
-- Old saves / Custom rows: a save without the row takes the base preset's column; a bad value is dropped alone; override round trip works.
-- Compatibility drawable() greys the row to off, Mobile and Forward+ keep it; renderer switch clears and restores the eyes.
-- Freed field: no orphan growth over 5 build/toggle/free cycles; the eyes resource is reused, not rebuilt.
-- Map without a lighting override uses the day preset's eye_lift; zero/huge lift and drop stay finite and min <= max.
-- en.po label and note resolve. Glass camera gets its own plain attributes (optic_glass.gd:88); not render-checkable headless.
+Blocking: none.
+Advisory: none found. The collar now weighted by height alone (body.py collar_weights, uniform all round) and the zip pull
+on the same height weights cause no regression in the tests below. The glove plate TIE change (b8a38ad, weights within
+1e-3 go to the arm) keeps the plate count at 28 in test_bp6_models (3/3, 1804 asserts). game/ still never assumes a head
+is skinned to one joint (figure_body.gd folds parts by Skin resource; body_merge.gd copies skin_data per vertex).
 
-Tests added: tests/unit/test_ug3_qa.gd (9, all pass, 0.56 s). Each fails without the feature (EYE_ADAPTATION row, eye_adaptation field, set_eye_adaptation and the en.po keys do not exist; they error or assert false).
-Targeted run (ug3_qa, eye_adaptation, graphics_table, graphics_apply, settings_screen, bp6/bp7_graphics, graphics_pick): 123 pass, 0 fail, 121 s.
-Not tested (needs display): the Settings page layout at small window sizes with the extra Effects row, actual exposure look, scope glass pixels. tools/check.sh and smoke not run (as asked).
+Tests (attempt 1, unchanged and still valid):
+- tests/unit/test_figure_collar_skin_qa.gd:13 · loads human.glb through the game's loader; for every Head_* mesh
+  (four heads, LOD0/1/2) asserts neck vertices below 1.50 m carry non-Head weight and vertices above 1.60 m are
+  Head-only. Checked in attempt 1: against origin/main's human.glb it fails for every Head_* mesh (no blended neck
+  vertices); passes on the head's glb. Passes again on HEAD (50 asserts), so the new height-only weights still blend
+  the neck and leave the skull rigid.
+
+Run on HEAD, single files, raw output in pipeline/out/qa/a2_<file>.txt:
+test_figure_collar_skin_qa 1/1, test_bp6_models 3/3, test_figure_body 17/17, test_figure_hit_area 6/6 (54 s),
+test_hit_registration 3/3, test_hit_registration_qa 5/5, test_figure_hands 24/24, test_bp7_figures 13/13.
+No script errors in any file. Full tools/check.sh and the smoke test not run by me (another process runs them).
+
+Not tested (needs a display / a person): the visual result (no dark V at the neck, collar and scarf overlap, the
+gentler back rise with BACK_RISE 5 mm, neck bend while crouching, leaning, flinching, zip pull following the collar):
+docs/PLAYTEST.md > CN1.
