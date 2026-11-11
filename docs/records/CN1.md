@@ -1,6 +1,6 @@
 # CN1 · The shirt collar at the back of the neck
 
-**Review:** pending
+**Review:** 4 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 Owner's report (2026-11-10, screenshot): from behind, the figures' neck showed a dark V above the carrier, "glitched";
 it should look like a natural clothing collar. Every human figure (player and bots) wears the same `Body` and heads.
@@ -12,7 +12,7 @@ it should look like a natural clothing collar. Every human figure (player and bo
 | 2026-11-10 | 1 | Opus 5.5 (build thread) | ✗ (test_bp6_models: 29 plates) | 7/8 Retry | the collar's back tented with the cheek on the stock; the scarf's hem flared off the collar |
 | 2026-11-11 | 2 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | the scarf stepped in at its hem under a bulge over the collar |
 | 2026-11-11 | 3 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | the scarf's widen-only pass made it a stiff flared ruff with a scalloped hem |
-| 2026-11-11 | 4 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-11 | 4 | Opus 5.5 (build thread) | ✓ | 8/8 Accept | – |
 
 ## Decisions
 
@@ -46,4 +46,5 @@ it should look like a natural clothing collar. Every human figure (player and bo
 
 ## Known issues left
 
-- None.
+- None. The critic's later-polish notes (the scarf's hem a pale rolled band; the scarf a tight gaiter more than a loose
+  shemagh) are for the owner's eye in play.
