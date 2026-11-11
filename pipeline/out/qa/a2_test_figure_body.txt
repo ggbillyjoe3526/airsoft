@@ -1,0 +1,58 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_figure_body.gd
+* test_the_human_draws_one_head_and_one_level_at_each_distance
+* test_every_figure_is_within_the_budgets_at_every_distance
+* test_the_lines_follow_mesh_detail
+* test_each_line_has_its_margin_and_the_radio_is_drawn_past_the_far_line
+* test_every_head_index_has_its_head_and_the_others_are_freed
+* test_the_levels_cast_no_shadow_and_one_twin_casts_it
+* test_a_teams_team_surfaces_share_one_material_and_the_rest_stay_as_modelled
+* test_the_high_contrast_glow_lights_the_team_paint
+* test_bones_are_looked_up_by_name_on_both_files
+* test_its_legs_play_the_kinds_graph_facing_the_figure_forward
+* test_the_fade_sets_transparency_on_every_mesh
+* test_any_id_wears_one_of_the_heads
+* test_a_mesh_the_sidecar_does_not_list_is_not_drawn
+ERROR: Parameter "material" is null.
+   at: material_get_instance_shader_parameters (servers/rendering/dummy/storage/material_storage.cpp:264)
+   GDScript backtrace (most recent call first):
+       [0] free_all (res://addons/gut/autofree.gd:70)
+       [1] _run_test (res://addons/gut/gut.gd:642)
+       [2] _test_the_scripts (res://addons/gut/gut.gd:835)
+ERROR: Parameter "material" is null.
+   at: material_get_instance_shader_parameters (servers/rendering/dummy/storage/material_storage.cpp:264)
+   GDScript backtrace (most recent call first):
+       [0] free_all (res://addons/gut/autofree.gd:70)
+       [1] _run_test (res://addons/gut/gut.gd:642)
+       [2] _test_the_scripts (res://addons/gut/gut.gd:835)
+* test_no_glow_leaves_the_paint_unlit
+* test_figures_sharing_a_head_wear_different_face_looks_and_every_look_is_used
+* test_face_looks_spread_for_any_count_of_heads
+* test_the_face_look_offsets_the_face_uvs_shared_by_every_figure_wearing_it
+17/17 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                17
+Passing Tests        17
+Asserts             610
+Time              0.765s
+
+
+---- All tests passed! ----
+

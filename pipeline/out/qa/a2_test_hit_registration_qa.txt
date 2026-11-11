@@ -1,0 +1,34 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_hit_registration_qa.gd
+* test_leaning_aiming_up_and_running_figures_are_struck_and_the_air_beside_them_passes
+* test_a_jumping_figure_is_struck_at_the_chest
+* test_a_bb_fast_enough_to_cross_a_body_in_a_tick_still_strikes_it
+* test_a_far_character_is_not_touched_and_a_near_one_is
+* test_a_standing_figure_under_the_volume_top_is_never_skipped_by_the_quick_test
+5/5 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               1
+Tests                 5
+Passing Tests         5
+Asserts              79
+Time              5.21s
+
+
+---- All tests passed! ----
+
