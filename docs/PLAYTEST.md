@@ -1386,8 +1386,8 @@ Subway is Dev content: tick Settings › Dev › Dev content.
   above the carrier: the olive shirt collar goes all the way round, a little higher at the back, with no dark notch
   of the balaclava cutting down through it.
 - [ ] **Aiming.** Watch bots aim up, down and with the cheek on the stock from behind and the side: the neck stays
-  tucked in the collar, never sliding out behind it. The boonie's sand scarf sits on the collar like a gaiter and doesn't tear or
-  stretch.
+  tucked in the collar, never sliding out behind it. The boonie's sand scarf sits on the collar like a gaiter and
+  doesn't tear or stretch.
 - [ ] **The front.** From the front the collar, its zip pull and the chin look as before; the chin doesn't sink into
   the collar more than it used to when a bot looks down.
 
