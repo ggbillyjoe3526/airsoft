@@ -221,9 +221,13 @@ static func glance(b: Bot, w: BotWorld) -> void:
 
 ## Steers `b` off anyone in play close by (bodies pass through each other in the physics), harder the closer: an enemy
 ## only with nothing solid between (BP6), so none is nudged through a thin wall. Walking, the push bends the walk;
-## standing with nothing else to do, it walks out of the way, never off a floor. Returns whether it walks now.
+## standing with nothing else to do, it walks out of the way, never off a floor. Returns whether it walks now. Not
+## aboard a lift's car: each rider stands on its own spot there (BotLifts), and one pushed into the doorway would hold
+## the doors open.
 static func keep_apart(b: Bot, w: BotWorld, moving: bool, cmd: PlayerCommand) -> bool:
 	var me := b.character
+	if w.query != null and w.lifts != null and Lifts.riding(w.query, w.tuning.lifts, w.lifts, me.position) >= 0:
+		return moving
 	var reach := w.cfg.separation_distance
 	var lift := Vector3(0.0, w.cfg.separation_line_height, 0.0)
 	var push := Vector2.ZERO

@@ -15,9 +15,10 @@ extends RefCounted
 ## GrenadeConfig.hold_at keeps the bomb there, the arm cocked, until the trigger is let go (BP8, the owner: click to
 ## throw, or hold and throw on the release).
 ## In the air a bomb falls and bounces off the level and off the bodies of those in play (GRENADE_BOUNCE; a body's
-## surface is NONE; it hits nobody and never rests on one), slides and rolls, and settles. A flash goes bang
-## at its fuse (FLASH_BANG) and dazzles everyone in play with a clear line from the eyes to it, by distance and by how
-## directly they look (DAZZLED; Character.dazzle_left), the thrower and its team too. A smoke pops at its fuse
+## surface is NONE; it hits nobody and never rests on one), slides and rolls, and settles; in a lift's car it rides
+## with the car (MT2). A flash goes bang at its fuse (FLASH_BANG) and dazzles everyone in play with a clear line from
+## the eyes to it, by distance and by how directly they look (DAZZLED; Character.dazzle_left), the thrower and its team
+## too. A smoke pops at its fuse
 ## (SMOKE_POP) and smokes where it lies: an upright ellipsoid cloud that grows, holds and thins (`cloud_scale`,
 ## `cloud_density`), which BBs fly through and eyes don't (`smoke_depth`, BotSenses). Everyone carries the bombs it picked
 ## (Hand.picks: GrenadeConfig.slots of them, each a smoke or a flash) each round; on the range they come back after every
@@ -324,6 +325,7 @@ func step(state: GameState, dt: float, kill_y: float) -> void:
 			continue
 		g.prev_position = g.position
 		g.age += dt
+		_ride_car(g, state.lifts)
 		if not g.resting:
 			_fly(g, i, state.characters, state.events, dt)
 		if g.position.y < kill_y or (not g.popped and g.age > cfg.max_flight):
@@ -343,6 +345,16 @@ func step(state: GameState, dt: float, kill_y: float) -> void:
 		elif g.kind == Grenade.Kind.FLASH and g.age >= cfg.flash_fuse:
 			g.active = false
 			_bang(g, state)
+
+
+## `g` in a lift's car (MT2; its middle in it as the car stood before this tick's rise) rises or falls with it, as its
+## riders do (Lifts.carry): one lying on the car's floor stays on it.
+func _ride_car(g: Grenade, lifts: LiftState) -> void:
+	for i in mini(lifts.count(), _query.lift_count()):
+		var rise := lifts.rise[i]
+		if rise != 0.0 and _query.lifts[i].holds(g.position, lifts.y[i] - rise, _tuning.lifts):
+			g.position.y += rise
+			return
 
 
 ## Every bomb gone at once (a new round).

@@ -197,3 +197,62 @@ func test_subway_pits_join_their_platforms_by_climbs_and_drops_and_no_other_map_
 		assert_false(nav.find_route(Vector3(-10.0, 0.0, 11.0), Vector3(-10.0, 0.9, 7.0), route))
 		assert_false(nav.find_route(Vector3(-48.0, 0.0, -11.0), Vector3(-48.0, 0.9, -7.0), route))
 		level.free()
+
+
+## How many climbs `vault` plans onto the top of a block of `query`'s not of a climb kind, from a standstill beside each
+## at 16 headings, aimed at its middle; the first few named into `names`.
+func _prop_climbs(query: WorldQuery, vault: VaultConfig, names: Array[String]) -> int:
+	var n := 0
+	var plan := VaultState.new()
+	var r := tuning.body.radius
+	for i in query.block_kinds.size():
+		var kind := query.block_kinds[i]
+		if tuning.vault.climb_kinds.has(kind):
+			continue
+		var c := query.block_centers[i]
+		var h := query.block_halves[i]
+		var top := c.y + h.y
+		for d in 16:
+			var a := TAU * d / 16.0
+			var way := Vector2(cos(a), sin(a))
+			# From its middle out to its side along -way, then a body's radius and a little more.
+			var out := minf(h.x / maxf(absf(way.x), 1e-6), h.z / maxf(absf(way.y), 1e-6)) + r + 0.2
+			var feet := Vector3(c.x - way.x * out, c.y - h.y + tuning.body.rest_gap, c.z - way.y * out)
+			if not Vault.plan(feet, way, 0.0, vault, tuning.body, query, plan) or not plan.climb:
+				continue
+			var s := plan.front + r + vault.skin + vault.depth_step * 0.5
+			var on := Vector2(feet.x + way.x * s, feet.z + way.y * s)
+			if absf(plan.top_y - top) <= vault.top_tolerance and absf(on.x - c.x) <= h.x and absf(on.y - c.z) <= h.z:
+				n += 1
+				if names.size() < 5:
+					names.append("%s at %s" % [kind, c])
+	return n
+
+
+## PP1: a climb ends on a floor (VaultConfig.climb_kinds), never on a prop's top however long it is (Depot's desks and
+## sofa, Subway's benches, the Range's long crate and sandbags), on every shipped map; Subway's platform edges are still
+## climbed from the track.
+func test_no_map_s_prop_is_climbed_and_subway_s_platform_edge_is() -> void:
+	for id: String in ["depot", "range", "woodland", "subway"]:
+		var map := MapData.load_map(id, MapStyle.new(), tuning.rounds.team_size)
+		var level := MapLevel.new()
+		add_child(level)
+		level.build(map, MapStyle.new(), tuning.body)
+		var q := level.query()
+		var names: Array[String] = []
+		assert_eq(_prop_climbs(q, tuning.vault, names), 0, "%s: no prop climbed: %s" % [id, names])
+		if id == "depot":
+			# The sweep sees them: with every kind a floor, Depot's long props are climbed.
+			var any := tuning.vault.duplicate() as VaultConfig
+			any.climb_kinds = q.block_kinds.duplicate()
+			assert_gt(_prop_climbs(q, any, names), 0, "depot: the desks climbed with no kind refused")
+		if id == "subway":
+			var plan := VaultState.new()
+			# From the south track up onto the south platform's edge (z 9), and the north track onto the north's (z -9).
+			for pair: Array in [[Vector3(-10.0, 0.0, 9.6), Vector2(0.0, -1.0)],
+					[Vector3(-48.0, 0.0, -9.6), Vector2(0.0, 1.0)]]:
+				var feet: Vector3 = pair[0] + Vector3(0.0, tuning.body.rest_gap, 0.0)
+				assert_true(Vault.plan(feet, pair[1], 0.0, tuning.vault, tuning.body, q, plan), "%s" % pair[0])
+				assert_true(plan.climb, "%s: a climb" % pair[0])
+				assert_almost_eq(plan.top_y, 0.9, 0.05, "onto the platform")
+		level.free()

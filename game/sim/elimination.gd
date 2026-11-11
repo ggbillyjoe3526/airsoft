@@ -47,15 +47,16 @@ static func eliminate(victim: Character, shooter_id: int, characters: Array[Char
 ## its hit for HitConfig.call_time first, which covers the wait many times over. Returns whether a route was planned.
 ## With the map's nav grid the route goes round cover in straight legs to the spot (NavGrid.find_route, planned from
 ## where the victim stands); without one, or with no route there (the spot off the grid or out of reach), it is one
-## straight leg to the spot. A victim hit mid-vault is planned once it lands, from the far side (browser BP5). A plan
-## allocates (the search's path, the route's waypoints), once an elimination.
-static func plan_walk_off_routes(characters: Array[Character], nav: NavGrid = null) -> bool:
+## straight leg to the spot. A victim hit mid-vault is planned once it lands, from the far side (browser BP5); one in a
+## lift's car once its doors stand open (`lifts`), from that stop's landing (NavGrid.car_landing). A plan allocates
+## (the search's path, the route's waypoints), once an elimination.
+static func plan_walk_off_routes(characters: Array[Character], nav: NavGrid = null, lifts: LiftState = null) -> bool:
 	for c in characters:
-		if not c.walk_off_route_pending or c.vault.active:
+		if not c.walk_off_route_pending or c.vault.active or _in_shut_car(c, nav, lifts):
 			continue
 		c.walk_off_route_pending = false
 		c.walk_off_leg = 0
-		if nav == null or not nav.find_route(c.position, c.dead_zone_target, c.walk_off_route):
+		if nav == null or not nav.find_route(c.position, c.dead_zone_target, c.walk_off_route, false, lifts):
 			c.walk_off_route.resize(1)
 			c.walk_off_route.set(0, c.dead_zone_target)
 		return true
@@ -63,20 +64,30 @@ static func plan_walk_off_routes(characters: Array[Character], nav: NavGrid = nu
 
 
 ## Whether `c`'s walk-off route is planned this tick with a search on `nav` (plan_walk_off_routes: one waiting, not
-## mid-vault, and a grid to search), so the bots' route budget leaves it the tick's first search (BotRoutes.plan).
-static func walk_off_due(c: Character, nav: NavGrid) -> bool:
-	return c.walk_off_route_pending and not c.vault.active and nav != null
+## mid-vault, not in a lift's shut car, and a grid to search), so the bots' route budget leaves it the tick's first
+## search (BotRoutes.plan).
+static func walk_off_due(c: Character, nav: NavGrid, lifts: LiftState = null) -> bool:
+	return c.walk_off_route_pending and not c.vault.active and nav != null and not _in_shut_car(c, nav, lifts)
+
+
+## Whether `c` stands in a lift's well on `nav` whose car's doors aren't open (`lifts`; null: none).
+static func _in_shut_car(c: Character, nav: NavGrid, lifts: LiftState) -> bool:
+	if nav == null or lifts == null:
+		return false
+	var i := nav.car_of(c.position)
+	return i >= 0 and i < lifts.count() and lifts.phase[i] != LiftState.Phase.OPEN
 
 
 ## Fills `out` with what an eliminated character does instead of its controller's command: stand still with the hand up
 ## while calling, walk the route to the dead zone, then stand there. Never fires, aims, reloads or switches, whatever a
 ## reused command held before (browser audit SIM-11). The walk is `forward` = HitConfig.walk_off_speed with no walk
 ## or sprint held, so movement drives it at that share of MovementConfig.run_speed, as in the browser game; crouched
-## where a tunnel lies within HitConfig.walk_off_crouch_ahead on `nav` (NavGrid.low, CT1).
+## where a tunnel lies within HitConfig.walk_off_crouch_ahead on `nav` (NavGrid.low, CT1). `shut_in` (in a lift's car
+## with its doors not open, Lifts.shut_in): it stands until they are.
 static func fill_eliminated_command(c: Character, tuning: SimTuning, out: PlayerCommand,
-		nav: NavGrid = null) -> PlayerCommand:
+		nav: NavGrid = null, shut_in: bool = false) -> PlayerCommand:
 	out.reset(c.yaw, 0.0)
-	if c.status != Character.Status.WALKING_OFF:
+	if c.status != Character.Status.WALKING_OFF or shut_in:
 		return out
 	var hits := tuning.hits
 	var route := c.walk_off_route
@@ -99,8 +110,9 @@ static func fill_eliminated_command(c: Character, tuning: SimTuning, out: Player
 
 ## Advances an eliminated character's hit call, walk-off or leaving by one tick (`dt` s); a no-op in play. Calling ends
 ## after call_time; a walk-off arrives on the spot (out), or leaves the field when it has gone slower than stuck_speed
-## for stuck_time or lasted walk_off_time; leaving fades for vanish_time, then it stands on its spot, out.
-static func step(c: Character, hits: HitConfig, dt: float) -> void:
+## for stuck_time or lasted walk_off_time; leaving fades for vanish_time, then it stands on its spot, out. Standing in
+## a lift's shut car (`shut_in`, fill_eliminated_command) is no stuck walk-off.
+static func step(c: Character, hits: HitConfig, dt: float, shut_in: bool = false) -> void:
 	if is_in_play(c):
 		return
 	c.status_time += dt
@@ -113,7 +125,7 @@ static func step(c: Character, hits: HitConfig, dt: float) -> void:
 			var last: Vector3 = route[route.size() - 1] if route.size() > 0 else c.dead_zone_target
 			var arrived := c.walk_off_leg >= route.size() - 1 and _flat_distance(last, c.position) <= hits.dead_zone_arrive
 			var flat_speed := Vector2(c.velocity.x, c.velocity.z).length()
-			c.walk_off_stuck = c.walk_off_stuck + dt if flat_speed < hits.stuck_speed else 0.0
+			c.walk_off_stuck = c.walk_off_stuck + dt if flat_speed < hits.stuck_speed and not shut_in else 0.0
 			if arrived:
 				# Onto the spot itself (at most dead_zone_arrive away), so teammates on neighbouring spots never overlap.
 				# Only x and z move and prev_position stays, so the drawn figure slides that last bit.

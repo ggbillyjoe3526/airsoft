@@ -26,8 +26,8 @@ const CLOCK_EVERY := 256
 
 
 ## A search for a grid's vault links under way (`find`, `finish`): the next node to look at, where each node's links
-## start in `to`, the landing nodes found so far, the drops back down each climb gives (from the top's node to the one
-## below, in the order found) and the grid's point weight.
+## start in `to`, the landing nodes found so far and the drops back down each climb gives (from the top's node to the
+## one below, in the order found).
 class Finder:
 	var next: int = 0
 	var start: PackedInt32Array = PackedInt32Array()
@@ -35,7 +35,6 @@ class Finder:
 	var drop_from: PackedInt32Array = PackedInt32Array()
 	var drop_to: PackedInt32Array = PackedInt32Array()
 	var plan: VaultState = VaultState.new()
-	var weight: float = 0.0
 
 
 ## Finds `g`'s vault links through `query` (a body standing on each node, from a standstill) and adds them to its
@@ -75,8 +74,6 @@ static func _find_from(f: Finder, g: NavGrid, k: int, query: WorldQuery, vault: 
 	# A vault starts and lands standing: never from or onto a floor only a crouched body fits over (CT1).
 	if g.walkable[k] == 0 or g.low[k] != 0:
 		return
-	if f.weight == 0.0:
-		f.weight = g.astar.get_point_weight_scale(k)
 	var c := g.node_cell[k]
 	var ci := c % g.cols
 	var cj := c / g.cols
@@ -106,8 +103,8 @@ static func _find_from(f: Finder, g: NavGrid, k: int, query: WorldQuery, vault: 
 			break
 
 
-## The links `f` found (its `find` done) added to `g`'s search, each costing its length plus `price` metres, and the
-## regions they join. Once per grid: on a grid already linked it does nothing. Returns how many links `g` has.
+## The links `f` found (its `find` done) added to `g`'s search, each costing its length plus `price` metres at its
+## take-off node's weight (a wade's dearer, WS1), and the regions they join. Once per grid: on a grid already linked it does nothing. Returns how many links `g` has.
 static func finish(f: Finder, g: NavGrid, price: float) -> int:
 	if g.vault_base >= 0:
 		return g.vault_to.size()
@@ -123,7 +120,7 @@ static func finish(f: Finder, g: NavGrid, price: float) -> int:
 	g.vault_base = nodes
 	for k in nodes:
 		for l in range(start[k], start[k + 1]):
-			_add_point(g, k, to[l], nodes + l, f.weight, price)
+			_add_point(g, k, to[l], nodes + l, g.astar.get_point_weight_scale(k), price)
 			join(g.vault_region, g.region[k], g.region[to[l]])
 	for r: int in g.vault_region:
 		g.vault_region[r] = root(g.vault_region, r)
@@ -187,7 +184,7 @@ static func join(joins: Dictionary[int, int], a: int, b: int) -> void:
 
 
 ## The link from node `k` to node `m` as search point `id`, between them, so the step on and the step off together cost
-## (length + price) at the grid's `weight`.
+## (length + price) at `weight` (its take-off node's).
 static func _add_point(g: NavGrid, k: int, m: int, id: int, weight: float, price: float) -> void:
 	var a := g.node_position(k)
 	var b := g.node_position(m)

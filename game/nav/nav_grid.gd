@@ -247,10 +247,12 @@ func drop_on_line(a: Vector3, b: Vector3, wall_above: float = INF) -> bool:
 ## and in a straight line on foot from the leg before, else on the node nearest it. With `vaults` (a bot's route) it may
 ## go over a low obstacle by a vault link, a leg of its own from the node before it to the node past it (is_vault_leg),
 ## or ride a lift, a leg from one landing's node to another's (lift_leg); without (a walk-off), only on foot. From inside
-## a lift's car (no floor of the grid's) it starts at the landing of the stop nearest its floor, the first waypoint
-## that landing's node. False, with `out` emptied, when there is no route.
-func find_route(start: Vector3, goal: Vector3, out: PackedVector3Array, vaults: bool = false) -> bool:
-	var landing := car_landing(start)
+## a lift's car (no floor of the grid's) it starts at the landing of the stop the car is at, or heading for while it
+## moves (`lifts`, the round's cars; without, the stop nearest `start`'s height), the first waypoint that landing's
+## node. False, with `out` emptied, when there is no route.
+func find_route(start: Vector3, goal: Vector3, out: PackedVector3Array, vaults: bool = false,
+		lifts: LiftState = null) -> bool:
+	var landing := car_landing(start, lifts)
 	var a := landing if landing >= 0 else nearest_walkable(start, snap)
 	var b := nearest_walkable(goal, snap)
 	if a < 0 or b < 0:
@@ -280,18 +282,32 @@ func find_route(start: Vector3, goal: Vector3, out: PackedVector3Array, vaults: 
 	return true
 
 
-## The landing node of the stop nearest `p`'s height when `p` stands in a lift's well (between its lowest stop and its
-## highest one's ceiling), else -1.
-func car_landing(p: Vector3) -> int:
-	for i in lift_wells.size():
+## The landing node of a stop when `p` stands in a lift's well (between its lowest stop and its highest one's ceiling),
+## else -1: the stop its car is making for while it moves (`lifts`, the round's cars, in the level's order), else the
+## stop nearest `p`'s height.
+func car_landing(p: Vector3, lifts: LiftState = null) -> int:
+	var i := car_of(p)
+	if i >= 0:
 		var ys := lift_stop_y[i]
-		if not lift_wells[i].has_point(Vector2(p.x, p.z)) or p.y < ys[0] - max_step or p.y > ys[ys.size() - 1] + headroom:
-			continue
+		if lifts != null and i < lifts.count() and lifts.phase[i] == LiftState.Phase.MOVING \
+				and lifts.to[i] >= 0 and lifts.to[i] < ys.size():
+			return lift_landing[i][lifts.to[i]]
 		var best := 0
 		for k in ys.size():
 			if absf(ys[k] - p.y) < absf(ys[best] - p.y):
 				best = k
 		return lift_landing[i][best]
+	return -1
+
+
+## The lift whose well `p` stands in (between its lowest stop and its highest one's ceiling), in the level's order, or
+## -1.
+func car_of(p: Vector3) -> int:
+	for i in lift_wells.size():
+		var ys := lift_stop_y[i]
+		if lift_wells[i].has_point(Vector2(p.x, p.z)) and p.y >= ys[0] - max_step \
+				and p.y <= ys[ys.size() - 1] + headroom:
+			return i
 	return -1
 
 

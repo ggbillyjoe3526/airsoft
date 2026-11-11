@@ -266,6 +266,56 @@ func test_it_never_shuts_with_anyone_hit_aboard() -> void:
 	assert_false(cues.has(Lifts.Cue.SHUTTING), "it waits for them to walk off")
 
 
+## PP1: someone hit while the car rides stands in it, calling the hit, until its doors open (no walking into its walls,
+## no leaving the field for being stuck), then walks off.
+func test_a_body_hit_mid_ride_walks_off_only_once_the_doors_open() -> void:
+	var w := _world(0)
+	var m := _match(w)
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	var me := state.characters[0]
+	_place(me, Vector3(0.0, LOW, 0.2), 0.0)
+	_run(sim, state, 1, true, Vector2i(0, 1))
+	_run(sim, state, _ticks(cfg.door_time))
+	assert_eq(state.lifts.phase[0], LiftState.Phase.MOVING, "on its way up")
+	Elimination.eliminate(me, 1, state.characters, sim.ends)
+	var at := Vector2(me.position.x, me.position.z)
+	var drift := 0.0
+	var ticks := 0
+	while not state.lifts.open_at(0, 1) and ticks < _ticks(cfg.floor_time + cfg.door_time):
+		_run(sim, state, 1)
+		drift = maxf(drift, (Vector2(me.position.x, me.position.z) - at).length())
+		ticks += 1
+	assert_true(state.lifts.open_at(0, 1), "the car opened upstairs")
+	assert_eq(me.status, Character.Status.WALKING_OFF, "walking off, not left the field")
+	assert_lt(drift, 0.05, "stood still while the doors were shut")
+	_run(sim, state, 60)
+	assert_gt((Vector2(me.position.x, me.position.z) - at).length(), 0.5, "walks off once they are open")
+
+
+## PP1: a bomb lying on the car's floor rides up with it and still lies on it at the top.
+func test_a_bomb_on_the_car_s_floor_rides_with_it() -> void:
+	var w := _world(0)
+	var m := _match(w)
+	var sim: Simulation = m[0]
+	var state: GameState = m[1]
+	var me := state.characters[0]
+	_place(me, Vector3(0.3, LOW, 0.3), 0.0)
+	var r := tuning.grenades.radius
+	var g := state.grenades[0]
+	g.launch(Grenade.Kind.SMOKE, 0, Vector3(-0.5, LOW + r, 0.5), Vector3.ZERO)
+	g.resting = true
+	_run(sim, state, 1, true, Vector2i(0, 1))
+	var off := 0.0
+	for t in _ticks(cfg.door_time + cfg.floor_time + cfg.door_time):
+		_run(sim, state, 1)
+		off = maxf(off, absf(g.position.y - state.lifts.y[0] - r))
+	assert_true(state.lifts.open_at(0, 1))
+	assert_true(g.active)
+	assert_lt(off, 0.02, "on the car's floor all the way up")
+	assert_almost_eq(g.position.y, HIGH + r, 0.02)
+
+
 func test_the_view_picks_the_panel_button_inside_and_the_call_button_outside() -> void:
 	var w := _world(0)
 	var state: GameState = _match(w)[1]
@@ -332,6 +382,18 @@ func test_subway_lists_two_lifts_of_three_stops() -> void:
 		assert_eq(spec.stop_names[2], "Ticket hall")
 	assert_eq(m.lifts[0].start, 2, "one car waits at the hall")
 	assert_eq(m.lifts[1].start, 0, "the other at the platforms")
+
+
+## PP1: a body in either of Subway's cars is in the "Lift" area at every stop (no area, or the ticket hall's, before),
+## and one on a landing outside its door in the landing's.
+func test_subway_s_cars_are_the_lift_area_at_every_stop() -> void:
+	var m := MapData.load_map("subway", MapStyle.new(), 6)
+	for spec in m.lifts:
+		for k in spec.stop_count():
+			var inside := spec.car_point(spec.stops[k]) + Vector3(0.0, GAP, 0.0)
+			assert_eq(MapAreas.area_at(m.areas, inside), "Lift", "%s at %s" % [spec.name, spec.stop_names[k]])
+			var out := spec.landing_point(k, cfg) + Vector3(0.0, GAP, 0.0)
+			assert_ne(MapAreas.area_at(m.areas, out), "Lift", "%s's landing at %s" % [spec.name, spec.stop_names[k]])
 
 
 func test_a_malformed_lift_is_left_out_with_a_warning() -> void:
