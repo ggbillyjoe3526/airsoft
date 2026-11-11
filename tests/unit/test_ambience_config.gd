@@ -27,10 +27,10 @@ func _sets() -> Dictionary[String, AmbienceSet]:
 
 func test_every_ambience_has_a_day_and_a_night_set_with_beds() -> void:
 	assert_not_null(amb, "play_tuning.tres holds the ambiences")
-	assert_eq(AmbienceConfig.IDS, [&"yard", &"woods", &"indoor", &"street"] as Array[StringName])
+	assert_eq(AmbienceConfig.IDS, [&"yard", &"woods", &"indoor", &"street", &"tunnel"] as Array[StringName])
 	for id in AmbienceConfig.IDS:
 		assert_true(amb.day.has(id) and amb.night.has(id), "%s by day and by night" % id)
-	assert_eq(_sets().size(), 8)
+	assert_eq(_sets().size(), 10)
 	for at: String in _sets():
 		assert_gt(_sets()[at].beds.size(), 0, "%s has a bed" % at)
 		assert_gt(_sets()[at].calls.size(), 0, "%s has a call" % at)
@@ -107,6 +107,10 @@ func test_the_owners_recorded_beds() -> void:
 	assert_eq(_cues(amb.day[&"street"]), ["ambience_bird", "ambience_crow", "ambience_dog"])
 	assert_eq(_loops(amb.night[&"street"]), ["street_night"])
 	assert_eq(_cues(amb.night[&"street"]), ["ambience_dog"])
+	# 2026-11-11: his tunnel, Subway's, day and night, with the creak it had while it borrowed Depot's set.
+	for at: Dictionary in [amb.day, amb.night]:
+		assert_eq(_loops(at[&"tunnel"]), ["tunnel"])
+		assert_eq(_cues(at[&"tunnel"]), ["ambience_creak"])
 
 
 func test_a_set_is_picked_by_id_and_time_of_day_an_unknown_one_plays_the_yard() -> void:
@@ -121,7 +125,8 @@ func test_a_set_is_picked_by_id_and_time_of_day_an_unknown_one_plays_the_yard() 
 
 ## The range plays the street ambience (owner, 2026-11-05: it kept The Street's sound when the map went, 2026-11-09).
 func test_each_map_reads_its_ambience() -> void:
-	var want: Dictionary[String, StringName] = {"depot": &"indoor", "woodland": &"woods", "range": &"street"}
+	var want: Dictionary[String, StringName] = {"depot": &"indoor", "woodland": &"woods", "range": &"street",
+			"subway": &"tunnel"}
 	for id: String in want:
 		var map := MapData.load_map(id, MapStyle.new(), 1)
 		assert_eq(map.ambience, want[id], id)

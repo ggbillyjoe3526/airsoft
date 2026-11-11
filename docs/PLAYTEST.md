@@ -1402,6 +1402,19 @@ Subway is Dev content: tick Settings › Dev › Dev content.
   on, the Compact SMG shows Pace and Spread moving rows; no other replica does.
 - [ ] **Rebinding in a match.** Rebind slot 1 from Esc › Settings and resume: the weapon rail names the new key.
 
+## Your recordings of 11 Nov (AU10)
+
+- [ ] **Soil.** On Woodland's dirt, walk, run, sprint and jump: your soil steps and landings, no step louder than on
+  concrete or gravel.
+- [ ] **Metal.** On Depot's and Subway's steel floors and steps, the same: your new metal walk, run and jump.
+- [ ] **The stream.** Wade Woodland's stream at a walk and a run, and jump into it: your wellies, not the computer's
+  splashes. A bot still hears you wading from about 16 m.
+- [ ] **Subway's lifts** (Dev content): the doors sliding and the car setting off are your lift; the chime, button and
+  buzzer are still computer-made. The ride's sound fades just before the car stops.
+- [ ] **Subway's background** (Dev content): your tunnel, looping with no jump. Too loud or too boomy?
+- [ ] **Compact SMG** (Dev content): full auto buzzes with a little of your toothbrush's whir under the motor.
+- [ ] **Sniper Rifle:** unchanged (your pick).
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:

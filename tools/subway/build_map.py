@@ -496,7 +496,7 @@ def build() -> dict:
         "overtimeFlag": {"x": L.OT_FLAG[0], "y": r(L.OT_FLAG[2] + LIFT), "z": L.OT_FLAG[1]},
         "botSight": 50,
         "poleHeight": L.POLE_HEIGHT,
-        "ambience": "indoor",
+        "ambience": "tunnel",  # his tunnel recording (2026-11-11)
         # Depot's overhead light: the lamps' stand-in on Low and Medium (RoofConfig).
         "lighting": {"presets": ["day"], "overrides": {"day": {"key": {"elevation": 76, "heading": 25, "intensity": 1.1},
                                                              "hemi": {"intensity": 0.55}, "exposureScale": 0.85}}},

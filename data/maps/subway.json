@@ -11083,7 +11083,7 @@
  },
  "botSight": 50,
  "poleHeight": 2.1,
- "ambience": "indoor",
+ "ambience": "tunnel",
  "lighting": {
   "presets": [
    "day"
