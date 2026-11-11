@@ -482,7 +482,7 @@ func test_a_field_picture_is_cut_from_the_render_centre_to_the_cards_size() -> v
 ## compressed (lossy, as they were taken), smaller than the 700 x 400 pictures were; each has a small copy for the
 ## Match page's cards.
 func test_the_map_pictures_are_full_screen_and_ship_compressed() -> void:
-	for map_id: String in ["depot", "range", "woodland"]:
+	for map_id: String in ["depot", "range", "subway", "woodland"]:
 		var path := "res://assets/maps/%s.jpg" % map_id
 		var picture := load(path) as Texture2D
 		assert_eq(Vector2i(picture.get_size()), Vector2i(1920, 1080), map_id)
