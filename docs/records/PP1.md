@@ -58,7 +58,9 @@ Hard 16, both modes) ran alongside. The fixes ship in parts.
   the car heads for; a hit player's walk-off began with the doors shut. Routes start at the car's destination and a
   walk-off waits for the doors.
 - **Bombs in a car (High)** stayed in the shaft as the car left; they ride with it now.
-- **A "Lift" area** over each well, so a contact in a car has a place name (it had none at two stops).
+- **A "Lift" area** over each well, so a contact in a car has a place name (it had none at two stops). The field check
+  `areas` counts a name over a car at one of its stops as stood in, since a car's floor is no nav cell (CI unit part 3
+  caught it).
 - **Vault links' price** is each take-off node's own weight, not the first node's (a wet first node would price every
   vault ×8).
 - MT2's three unlisted limits, and the mid-ride stop-on-the-way limit, are KNOWN_ISSUES rows.
