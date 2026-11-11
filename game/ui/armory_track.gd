@@ -135,7 +135,8 @@ func _card(r: ArmoryFacts.Row) -> Control:
 	var small := r.items.size() > ONE_COLUMN_MAX
 	for it in r.items:
 		var tile := _tile(it, small)
-		if not _facts.is_unlocked(r, it):
+		# a locked level's tiles dim, but not one you already own (PP1); the next level's stay lit under its edge
+		if r.state == ArmoryFacts.State.LOCKED and not _facts.is_unlocked(r, it):
 			tile.modulate.a = LOCKED_ALPHA
 		tiles.add_child(tile)
 	return panel

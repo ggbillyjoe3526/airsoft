@@ -226,5 +226,10 @@ func test_an_item_you_own_reads_unlocked_on_a_level_you_have_not_reached() -> vo
 	add_child_autofree(page)
 	await wait_process_frames(1)
 	var tile := page.find_child("Item_" + CYBER, true, false) as Control
+	if tile == null:
+		page.track().show_from(owned.rows.size() - 1)
+		await wait_process_frames(1)
+		tile = page.find_child("Item_" + CYBER, true, false) as Control
+	assert_not_null(tile, "the pistol's tile is on the track")
 	if tile != null:
 		assert_eq(tile.modulate.a, 1.0, "its tile isn't dimmed")

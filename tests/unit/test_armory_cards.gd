@@ -42,8 +42,12 @@ func test_four_cards_show_from_your_level_and_the_next_is_edged() -> void:
 	assert_eq(_shown(page), [3, 4, 5, 6] as Array[int])
 	var next := page.track().row(4).get_theme_stylebox("panel") as StyleBoxFlat
 	assert_eq(next.border_color, GameTheme.ACCENT, "the next level is edged in teal")
-	assert_lt((page.track().row(5).find_child("Items", true, false) as Control).modulate.a, 1.0, "a locked level dims")
-	assert_eq((page.track().row(3).find_child("Items", true, false) as Control).modulate.a, 1.0)
+	# each tile dims, not the list, so a tile you own on a locked level can stay lit (PP1)
+	for tile: Control in (page.track().row(5).find_child("Items", true, false) as Control).get_children():
+		assert_lt(tile.modulate.a, 1.0, "a locked level dims")
+	for n: int in [3, 4]:
+		for tile: Control in (page.track().row(n).find_child("Items", true, false) as Control).get_children():
+			assert_eq(tile.modulate.a, 1.0, "level %d (reached, or the next) stays lit" % n)
 
 
 func test_the_arrows_browse_and_stop_at_the_ends() -> void:
