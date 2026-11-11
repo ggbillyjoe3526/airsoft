@@ -1386,10 +1386,21 @@ Subway is Dev content: tick Settings › Dev › Dev content.
   above the carrier: the olive shirt collar goes all the way round, a little higher at the back, with no dark notch
   of the balaclava cutting down through it.
 - [ ] **Aiming.** Watch bots aim up, down and with the cheek on the stock from behind and the side: the neck stays
-  tucked in the collar, never sliding out behind it. The boonie's sand scarf lies over the collar and doesn't tear or
+  tucked in the collar, never sliding out behind it. The boonie's sand scarf sits on the collar like a gaiter and doesn't tear or
   stretch.
 - [ ] **The front.** From the front the collar, its zip pull and the chin look as before; the chin doesn't sink into
   the collar more than it used to when a bot looks down.
+
+## The preliminary Dev 3 pass (PP1)
+
+- [ ] **Door frames.** On Depot and Woodland, look at a door from both sides: its frame sits in the wall, the trim
+  standing just proud of each face, the leaf hung on one face; nothing sticks out a hand's width from the wall.
+- [ ] **The Armory with an old save.** With a save from 0.1 Dev 2 that had the Cyber Pistol, LiPo or Long Barrel,
+  the Armory shows them unlocked (not dimmed) on their new levels, and its count of unlocked items matches the
+  Loadout.
+- [ ] **The Loadout's sheet.** Spread reads from the hip: the Sniper Rifle shows 0.60°, not 0.10°. With Dev content
+  on, the Compact SMG shows Pace and Spread moving rows; no other replica does.
+- [ ] **Rebinding in a match.** Rebind slot 1 from Esc › Settings and resume: the weapon rail names the new key.
 
 ## Reporting what you find
 

@@ -412,9 +412,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   Slide into cover is no for now (`docs/IDEAS.md`).
 - **A platform's edge is climbed: Jump at a ledge 0.6 to 0.95 m high whose flat top runs on (owner, 2026-11-10: "the
   player needs to be able to climb from the tracks up to the platform", CL1).** The vault's heights and heading; a top
-  open and flat for at least 1.5 m (`VaultConfig.climb_depth`, so platforms and docks, never crates or props) is
-  climbed instead of vaulted: about 0.55 s, the body ends standing on the top, the view heaves and the replica is
-  carried low; the prompt reads "Space to climb". Bots climb the same ledges by one-way nav links and drop back down by
+  open and flat for at least 1.5 m (`VaultConfig.climb_depth`) and a floor's (`climb_kinds`, PP1: platforms and docks,
+  never a desk, bench or crate however long) is climbed instead of vaulted: about 0.55 s, the body ends standing on the
+  top, the view heaves and the replica is carried low; the prompt reads "Space to climb". Bots climb the same ledges by one-way nav links and drop back down by
   their reverse. It overrides MT1's "nobody climbs out of a track pit", and Subway's trackside steps went with it
   (owner: no stairs only there because there was no other way between levels); real stations' stairs, escalators, the
   north tunnel's end ramp and the cab steps stay. Running up or down a 1:2 slope blends in the Stairs_Up and

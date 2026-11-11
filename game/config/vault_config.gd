@@ -17,8 +17,12 @@ extends Resource
 ## The deepest obstacle vaulted, along the way you go (a wall, a barrier, a crate; deeper is a platform, climbed).
 @export var max_depth: float = 1.0
 ## A climb (CL1): the top runs on, flat and open, at least this far past the edge along the way you go (a platform, a
-## dock; never a crate or a bench, so the ledges climbed are floors, not props).
+## dock), and is a floor's (climb_kinds).
 @export var climb_depth: float = 1.5
+## The block kinds (WorldQuery.block_kinds) a climb may end on: floors and platforms, never a prop's top however long
+## (a desk, a bench, a sofa, a crate, sandbags). A top no listed block owns (the ground, a test's bare box) counts as a
+## floor.
+@export var climb_kinds: Array[StringName] = [&"floor"]
 ## The climb's rise onto the top (hands on the edge, a knee up) takes at least this long.
 @export var climb_rise_time: float = 0.34
 ## Speed onto the top after the rise: the speed you came in at, held between these (m/s).

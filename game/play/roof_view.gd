@@ -32,9 +32,10 @@ var _lights: RoofLamps = null
 var _bays: Array[MultiMeshInstance3D] = []
 var _materials: Array[Material] = []
 var _cfg: RoofConfig = null
-## The flickering lamps (their indices) and each one's level as last set.
+## The flickering lamps (their indices) and each one's level as last set (64-bit, as GDScript's floats are: a 32-bit copy of
+## a low step such as 0.05 never compares equal, so the lamp was written every frame of its burst; PP1).
 var _flickers: PackedInt32Array = PackedInt32Array()
-var _levels: PackedFloat32Array = PackedFloat32Array()
+var _levels: PackedFloat64Array = PackedFloat64Array()
 
 
 ## The roof of `map` as `cfg` draws it, or null on a field open to the sky.

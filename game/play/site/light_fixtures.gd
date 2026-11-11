@@ -78,12 +78,12 @@ static func build(map: MapData, cfg: LightFixturesConfig, light: LightingConfig)
 	var coals: Material = LookMaterials.vertex_colour(cfg.roughness, cfg.metallic, cfg.cold_tint)
 	if night:
 		var g := ShaderMaterial.new()
-		g.shader = _shader(GLOW_SHADER)
+		g.shader = CodeShaders.of(GLOW_SHADER)
 		g.set_shader_parameter(&"energy", cfg.glow_energy)
 		glow = g
 		coals = g
 		fixtures._flame = ShaderMaterial.new()
-		fixtures._flame.shader = _shader(FLAME_SHADER)
+		fixtures._flame.shader = CodeShaders.of(FLAME_SHADER)
 		fixtures._flame.set_shader_parameter(&"energy", cfg.flame_energy)
 		fixtures._flame.set_shader_parameter(&"rate", cfg.flicker_rate)
 		fixtures._flame.set_shader_parameter(&"sway", cfg.flame_sway)
@@ -209,12 +209,6 @@ static func _put(out: Dictionary[String, Array], model: String, t: Transform3D) 
 	if not out.has(model):
 		out[model] = []
 	out[model].append(t)
-
-
-static func _shader(code: String) -> Shader:
-	var s := Shader.new()
-	s.code = code
-	return s
 
 
 ## `src`'s surfaces drawn with these materials, by each surface's material name: the props' for its own, `glow` for

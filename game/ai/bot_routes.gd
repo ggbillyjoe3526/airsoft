@@ -29,7 +29,7 @@ static func want(b: Bot, goal: Vector3, cfg: BotConfig) -> void:
 static func plan(w: BotWorld, characters: Array[Character], cursor: int) -> int:
 	var budget := w.tuning.nav.search_budget
 	for c in characters:
-		if Elimination.walk_off_due(c, w.nav):
+		if Elimination.walk_off_due(c, w.nav, w.lifts):
 			budget -= 1
 			break
 	for b in w.bots:
@@ -51,7 +51,7 @@ static func plan(w: BotWorld, characters: Array[Character], cursor: int) -> int:
 		budget -= 1
 		b.route_asked_at = -INF
 		var from := b.character.position
-		if w.nav.find_route(from, b.route_goal, b.route, w.time >= b.vaults_off_until):
+		if w.nav.find_route(from, b.route_goal, b.route, w.time >= b.vaults_off_until, w.lifts):
 			b.route_state = Bot.RouteState.OK
 			b.route_from = from
 			b.route_leg = 0

@@ -34,7 +34,7 @@ func _init(settings_in: Settings = null, progress_in: Progress = null, records_i
 	var dev := settings.dev
 	_signature = _now()
 	_facts = ArmoryFacts.new(progress.table, pool if pool != null else Pool.shared(), progress.xp,
-			dev.disable_levelling, dev.dev_content)
+			dev.disable_levelling, dev.dev_content, progress.unlocked)
 	# Small pictures: each item shows at about 200 px at most.
 	_pictures = ReplicaPictures.new()
 	_pictures.name = "Pictures"

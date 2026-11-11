@@ -3,6 +3,8 @@ extends GutTest
 ## first page, 11 to 15 on the second, with ‹ › arrows at the track's ends to turn the pages; the track opens on the page
 ## with your next level, a click or a key on the second page picks its levels, and the keys turn the page at its ends.
 
+const CYBER := "000019"
+
 var pool: Pool
 var table: LevelTable
 
@@ -205,3 +207,29 @@ func test_page_changed_fires_once_per_turn_and_not_when_nothing_moves() -> void:
 	dots.show_page(1)
 	dots.show_page(1)
 	assert_signal_emit_count(dots, "page_changed", 1)
+
+
+func test_an_item_you_own_reads_unlocked_on_a_level_you_have_not_reached() -> void:
+	# PP1: a 0.1 Dev 2 save at the old cap (level 10) kept the Cyber Pistol, now at level 15. The Armory read unlocks
+	# from the level alone, so it showed the pistol locked while the Loadout let you carry it.
+	var p := Progress.new(table)
+	p.from_dict({"xp": table.levels[10].total, "unlocked": [CYBER]})
+	p.grant_reached()
+	assert_true(p.has(CYBER))
+	var plain := ArmoryFacts.new(table, pool, p.xp, false, false)
+	var owned := ArmoryFacts.new(table, pool, p.xp, false, false, p.unlocked)
+	assert_eq(owned.unlocked_count, plain.unlocked_count + 1, "the pistol counts as unlocked")
+	var fifteen: ArmoryFacts.Row = owned.rows[owned.rows.size() - 1]
+	assert_eq(fifteen.state, ArmoryFacts.State.LOCKED, "the level itself is still ahead")
+	assert_true(owned.is_unlocked(fifteen, pool.item(CYBER)))
+	var page := ArmoryPage.new(Settings.new(), p, Records.new(), pool)
+	add_child_autofree(page)
+	await wait_process_frames(1)
+	var tile := page.find_child("Item_" + CYBER, true, false) as Control
+	if tile == null:
+		page.track().show_from(owned.rows.size() - 1)
+		await wait_process_frames(1)
+		tile = page.find_child("Item_" + CYBER, true, false) as Control
+	assert_not_null(tile, "the pistol's tile is on the track")
+	if tile != null:
+		assert_eq(tile.modulate.a, 1.0, "its tile isn't dimmed")

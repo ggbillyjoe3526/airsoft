@@ -29,6 +29,9 @@ const BOMB_ACTIONS: Array[StringName] = [&"throw_smoke", &"throw_flash"]
 var _pictures: ReplicaPictures = null
 var _plates: Array[PanelContainer] = []
 var _icons: Array[Control] = []
+## Each row's key label and the input it names, so a rebind mid-match relabels them (refresh_keys).
+var _keys: Array[Label] = []
+var _actions: Array[StringName] = []
 ## Each bomb kind's icons (Grenade.Kind order from SMOKE), BOMB_ICONS_MAX of them, the first n shown for n carried.
 var _glyphs: Array = []
 var _lit_box: StyleBoxFlat = null
@@ -104,8 +107,16 @@ func _row(action: StringName, icon: Control) -> void:
 	key.text = key_text(action)
 	key.custom_minimum_size.x = KEY_WIDTH
 	key.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_keys.append(key)
+	_actions.append(action)
 	_plates.append(plate)
 	_icons.append(icon)
+
+
+## Every row's key label read again: after the pause menu's settings may have rebound one (PP1).
+func refresh_keys() -> void:
+	for i in _keys.size():
+		_keys[i].text = key_text(_actions[i])
 
 
 ## The key that fires input `action`, as its label ("1"; a rebind shows); a dash with none bound.

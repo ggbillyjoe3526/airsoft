@@ -180,6 +180,12 @@ static func riding(query: WorldQuery, cfg: LiftConfig, lifts: LiftState, feet: V
 	return -1
 
 
+## Whether `c` stands in a car whose doors aren't open (shutting, riding or opening): nobody walks out of it yet.
+func shut_in(c: Character, lifts: LiftState) -> bool:
+	var i := riding(_query, _cfg, lifts, c.position)
+	return i >= 0 and lifts.phase[i] != LiftState.Phase.OPEN
+
+
 ## How many stand in lift `i`'s car (in play or not).
 func aboard(i: int, lifts: LiftState, characters: Array[Character]) -> int:
 	var spec := _query.lifts[i]

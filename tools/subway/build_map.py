@@ -575,7 +575,11 @@ def lane_point(x: float, z: float, near: float) -> dict:
 
 
 def areas() -> list[dict]:
-    out = []
+    # Each lift's car (MT2) first, over its well's whole height: a body in it is "Lift" at every stop, never the room
+    # round the shaft (MapAreas.area_at takes the first area that holds a point).
+    s, t = L.SHAFT, L.SHAFT_T
+    out = [{"name": "Lift", "box": [lf["x0"], lf["x1"], r(s["z0"] + t), r(s["z1"] - t)],
+            "floor": [r(min(L.LIFT_STOPS) + LIFT - 0.5), r(s["top"] + LIFT)]} for lf in L.LIFTS]
     seen = set()
     for rm in sorted(L.rooms, key=lambda q: 0 if q["name"] == "spiral" or is_ramp(q) else 1):
         lo = min(rm["ya"], rm["yb"]) + LIFT

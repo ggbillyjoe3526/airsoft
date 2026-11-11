@@ -32,6 +32,9 @@ const FRAME_MODELS: Dictionary[String, Vector3] = {
 ## A door's wall is the thinnest block across it this far (m) past a jamb, at the door's middle height; its thickness
 ## the frame's depth (a wall's end meeting it at a corner is thicker that way, so it isn't taken).
 const WALL_PROBE := 0.05
+## A leaf hangs on its wall's face, not in its middle (tools/depot/build_map.py): a block counts as the door's wall when
+## its face is within this far (m) of the leaf's middle across the wall. The frame then sits in that wall's middle.
+const WALL_REACH := 0.1
 ## A frame is at least this deep (m), whatever thin block stands at its jamb.
 const MIN_WALL := 0.1
 ## A frame takes the baked light this far (m) over its foot.
@@ -167,6 +170,12 @@ func leaf_at(j: int) -> Transform3D:
 	return _leaves[j]
 
 
+## Door `i`'s frame transform as placed (the frame model scaled to its opening and wall), or the identity with none.
+## The MultiMesh's own copy reads back as the identity under the headless renderer, so tests read this.
+func frame_at(i: int) -> Transform3D:
+	return _frame_at[i] if i < _frame_at.size() else Transform3D.IDENTITY
+
+
 ## The materials drawn, to warm their shaders before play.
 func materials() -> Array[Material]:
 	return [_material] if _frame_material == null else [_material, _frame_material]
@@ -191,15 +200,22 @@ func _add_frames(map: MapData, style: MapStyle) -> void:
 		var along_z := d.size.x < d.size.z
 		var width := d.size.z if along_z else d.size.x
 		var axis := Vector3(0.0, 0.0, 1.0) if along_z else Vector3(1.0, 0.0, 0.0)
+		var across := Vector3(1.0, 0.0, 0.0) if along_z else Vector3(0.0, 0.0, 1.0)
 		var wall := INF
-		var probe := d.center + axis * (width * 0.5 + WALL_PROBE)
-		for b in map.blocks:
-			if AABB(b.center - b.size * 0.5, b.size).has_point(probe):
-				wall = minf(wall, b.size.x if along_z else b.size.z)
+		var middle := d.center.dot(across)
+		for side: float in [-1.0, 1.0]:
+			var probe := d.center + axis * side * (width * 0.5 + WALL_PROBE)
+			for b in map.blocks:
+				var thick := b.size.dot(across)
+				var reach := b.size + across * WALL_REACH * 2.0
+				if thick < wall and AABB(b.center - reach * 0.5, reach).has_point(probe):
+					wall = thick
+					middle = b.center.dot(across)
 		wall = opening.z if wall == INF else maxf(wall, MIN_WALL)
+		var foot := d.center - Vector3(0.0, d.size.y * 0.5, 0.0) + across * (middle - d.center.dot(across))
 		var turn := Basis(Vector3.UP, PI * 0.5) if along_z else Basis.IDENTITY
 		var at := Transform3D(turn * Basis.from_scale(Vector3(width / opening.x, d.size.y / opening.y,
-				wall / opening.z)), d.center - Vector3(0.0, d.size.y * 0.5, 0.0))
+				wall / opening.z)), foot)
 		_frame_at.append(at)
 		mm.set_instance_transform(i, at)
 		mm.set_instance_color(i, Color.WHITE)

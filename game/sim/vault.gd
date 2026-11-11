@@ -4,11 +4,12 @@ class_name Vault
 ## land past it) takes the body over it in one short, committed move instead of a jump. The body rises onto the top and
 ## crosses it on a path the CharacterMover follows, so it never passes through anything, then falls off the far side and
 ## lands as from a jump. A ledge of the same heights whose flat top runs on at least climb_depth (a platform's edge from
-## the track, CL1) is climbed instead: the body rises onto it the same way and steps on until it stands on the top.
-## Meanwhile the replica is carried (no firing, aiming or reloading starts; fire is held fire_lockout after it), the
-## body tucks (a crouch: eyes, hit volume and figure follow it) and the view turns freely. Presses made during it are
-## kept for after it (BP5). The obstacle is found with level rays only (WorldQuery), so the rule is the same for the
-## player and the bots. Allocation-free.
+## the track, CL1), a floor's (climb_kinds) and never a prop's, is climbed instead: the body rises onto it the same way
+## and steps on until it stands on the top. Meanwhile the replica is carried (no firing, aiming or reloading starts;
+## fire is held fire_lockout after it), the body tucks (a crouch: eyes, hit volume and figure follow it) and the view
+## turns freely. Presses made during it are kept for after it (BP5). The obstacle is found with level rays only, a
+## climb's top's kind from the level's block list (WorldQuery), so the rule is the same for the player and the bots.
+## Allocation-free.
 
 ## Scratch for the level rays (used only within one call).
 static var _hit: RayHit = RayHit.new()
@@ -92,6 +93,10 @@ static func plan(feet: Vector3, way: Vector2, speed: float, cfg: VaultConfig, bo
 	var climb := edge < 0.0
 	var far := 0.0
 	if climb:
+		# Only onto a floor (VaultConfig.climb_kinds), never a long prop's top: the top just inside the face.
+		var on := face + cfg.depth_step * 0.5
+		if not _climbable(query, cfg, Vector3(feet.x + dx * on, top, feet.z + dz * on)):
+			return false
 		# No far side within a vault's depth: a ledge, climbed if its top runs on flat and open to climb_depth (past
 		# the scan line's end is a wall over it). The body ends on the top, its back landing_room past the edge.
 		while s <= face + cfg.climb_depth:
@@ -300,6 +305,22 @@ static func step(c: Character, cmd: PlayerCommand, tuning: SimTuning, dt: float,
 	elif v.time >= v.end:
 		v.active = false
 		c.velocity = Vector3(v.dir.x * v.speed, 0.0 if v.climb else -cfg.drop_speed, v.dir.y * v.speed)
+
+
+## Whether a climb may end on the top at `at` (on it, just past its face): a top of a listed block of a climb kind
+## (VaultConfig.climb_kinds), or of none listed. A top within top_tolerance of `at`'s height counts, over its box's
+## plan. Allocation-free.
+static func _climbable(query: WorldQuery, cfg: VaultConfig, at: Vector3) -> bool:
+	var listed := false
+	for i in query.block_kinds.size():
+		var c := query.block_centers[i]
+		var h := query.block_halves[i]
+		if absf(c.y + h.y - at.y) > cfg.top_tolerance or absf(at.x - c.x) > h.x or absf(at.z - c.z) > h.z:
+			continue
+		if cfg.climb_kinds.has(query.block_kinds[i]):
+			return true
+		listed = true
+	return not listed
 
 
 ## Distance along the unit `dir` from `from` to the first level surface within `max_dist`, or -1.

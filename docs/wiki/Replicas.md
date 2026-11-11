@@ -24,7 +24,8 @@ each replica as it comes, before [parts and power sources](Parts-and-Power).
   shots).
 - **Magazines carried** includes the loaded one. Nothing refills during a round.
 - **Draw** is the time to bring the replica up after a switch.
-- **Spread** is how far shots scatter from the hip, before stance and movement. Aiming halves it.
+- **Spread** is how far shots scatter from the hip, before stance and movement. Aiming takes it to half the
+  replica's base spread, so the Sniper Rifle, wide from the hip, tightens the most.
 - **Recoil** is each shot's upward kick, light, because these are toys.
 
 ## AEG Rifle

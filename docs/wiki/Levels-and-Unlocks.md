@@ -1,7 +1,7 @@
 # Levels and Unlocks
 
 Everyone starts with a full kit that can win any match. Playing earns **XP**, XP raises your **level**, and each
-level unlocks more replicas, power sources and parts to play with, with a new replica every five levels. Unlocks are
+level unlocks more replicas, power sources and parts to play with, with new replicas along the way. Unlocks are
 kept for good, and nothing is for sale: there are no microtransactions, loot boxes or paid advantages.
 
 ## What each level unlocks
