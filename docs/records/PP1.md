@@ -1,7 +1,8 @@
 # PP1 · Preliminary Dev 3 pass: balance, bugs, QA and performance
 
 **Review:** part 1 (#305) 2 attempts · critic Accept 8/8 · qa Pass · performance Pass; part 2 (#306) 1 attempt ·
-critic Accept 7/8 · qa Pass · performance Pass; part 3 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
+critic Accept 7/8 · qa Pass · performance Pass; part 3 2 attempts · critic Accept 8/8 · qa Pass · performance Pass; map pictures 2 attempts · critic
+Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
