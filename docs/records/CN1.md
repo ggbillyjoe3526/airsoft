@@ -29,6 +29,9 @@ it should look like a natural clothing collar. Every human figure (player and bo
 - **Rebuild order** (README): `body.py` and its splice, `pads.py`, `gear.py`, `body_weights.py`, then `headwear.py` last
   (its neck reads the body's collar weights). The carrier's and pack's shoulder straps refit up to 8 mm round the
   collar's new back; nothing else in the file moved.
+- **The glove plates' tie** (`body_weights.py`, `test_bp6_models.gd`): the right wrist strap's tab has points where
+  the hand's and the forearm's weights tie, which go to the arm; the rebuild left float noise there, so the tab read
+  as a 29th plate and went rigid on the hand. Weights within `TIE` (1e-3) are now a tie in the tool and the test alike.
 
 ## Known issues left
 
