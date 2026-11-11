@@ -408,9 +408,11 @@ SMG_BRUSH_DB = 4.0
 WATER_RUN_S = 0.45
 WATER_SPRINT_S = 0.32
 WATER_LAND_S = 0.9
-# His lift (2026-11-11): how long (s) a door's slide rings, where (s) in up_down each ride's motor starts, and how
-# long (s) of each ride plays as the car sets off (its stop comes about 3.4 s after the start).
-LIFT_DOORS_S = 3.0
+# His lift (2026-11-11): how long (s) of a door's slide plays, from where it comes within LIFT_DOORS_WITHIN_DB of its
+# loudest; where (s) in up_down each ride's motor starts, and how long (s) of each ride plays as the car sets off (its
+# stop comes about 3.4 s after the start).
+LIFT_DOORS_S = 1.7
+LIFT_DOORS_WITHIN_DB = 12.0
 LIFT_RIDE_STARTS = [0.56, 8.72]
 LIFT_RIDE_S = 3.2
 # Subway's background (2026-11-11): his tunnel's phone rumble sits under this (Hz).
@@ -495,11 +497,11 @@ def build(folder):
     cover_on = pick(folder, [("remote_cover_clipping.wav", [1, 3, 5, 7])], 0.25, 0.3)
     put("magOut_electric", variants(cover_off, 5, 0.85), -30.8)
     put("magIn_electric", variants(cover_on, 5, 0.85), -27.0)
-    # Compact SMG (CS1; his pick, 2026-11-11, so no longer a placeholder): the AEG's motor whir a fifth higher and shorter, a
-    # smaller gearbox spinning faster, so its 18 shots a second run into one quick buzz, with his toothbrush's whir
-    # SMG_BRUSH_DB under it (owner, 2026-11-11: "add a bit of a whir of the electric motor"); the same crack a little
-    # higher and 1 dB under the AEG's; its smaller magazines' clicks a little higher than the rifle's. (He kept these
-    # over his own SMG recording of 2026-11-11, smg_firing and smg_magazine, which the game doesn't use.)
+    # Compact SMG (CS1; his pick, 2026-11-11, so no longer a placeholder): the AEG's motor whir a fifth higher and
+    # shorter, a smaller gearbox spinning faster, so its 18 shots a second run into one quick buzz, with his
+    # toothbrush's whir SMG_BRUSH_DB under it (owner, 2026-11-11: "add a bit of a whir of the electric motor"); the same
+    # crack a little higher and 1 dB under the AEG's; its smaller magazines' clicks a little higher than the rifle's.
+    # (He kept these over his own SMG recording of 2026-11-11, smg_firing and smg_magazine, which the game doesn't use.)
     brush = pick(folder, [("electric_toothbrush.wav", None)], 0.9, 0.05)
     put("power_smg", [under(onset_slice(m, 0.11, 30), onset_slice(b, 0.11, 30), SMG_BRUSH_DB)
                       for m, b in zip(variants(motor, 5, 1.22), variants(brush, 5, 1.1))], -26.3)
@@ -579,11 +581,11 @@ def build(folder):
     # are concrete's run, sprint and landing. Gravel, grass, leaves and metal are his own: walked as the run, run (or
     # the walk's later takes) as the sprint, and jumped onto (grass); the landings he hasn't recorded are the steps
     # lower. His running gravel never falls quiet between steps, so it is cut where each step starts. Soil (earth),
-    # metal and water are his batch of 2026-11-11: walking, running and jumping on each, the runs (and the water's
-    # walk, its wading never quiet) cut where each step starts, the walks and jumps as takes; his metal walk replaces
-    # his first (walking_metal, whose rumble needed a 250 Hz high-pass), so metal is one set. Wood is his own since his batch of 2026-11-08: walking, running and
-    # jumping on a wooden floor, the walk and the run cut where each step starts (the walk's creaks between steps, the
-    # run's steps 0.25 s apart), the jumps as takes.
+    # metal and water are his batch of 2026-11-11: walking, running and jumping on each, the runs (and the water's walk,
+    # its wading never quiet) cut where each step starts, the walks and jumps as takes; his metal walk replaces his
+    # first (walking_metal, whose rumble needed a 250 Hz high-pass), so metal is one set. Wood is his own since his
+    # batch of 2026-11-08: walking, running and jumping on a wooden floor, the walk and the run cut where each step
+    # starts (the walk's creaks between steps, the run's steps 0.25 s apart), the jumps as takes.
     def steps(name, longest, which=None):
         cuts = pick(folder, [(name, which)], longest + 0.2, 0.3)
         return [shape(tight(t, longest).copy(), 0.3) for t in cuts if len(t) > int(0.06 * RATE)]
@@ -702,11 +704,19 @@ def build(folder):
     put("door_shut", variants(pick(folder, [("door_close.wav", None)], 1.0, 0.2), 3)
         + pick(folder, [("door_open_and_close.wav", [1, 7])], 1.0, 0.2), -11.3)
 
-    # Subway's lifts (MT2): his lift (2026-11-11, elevator/): its doors sliding (door_opening, three takes) for both
-    # the doors opening and shutting, and the car setting off: each of his two rides (up_down) from its motor's start
-    # (LIFT_RIDE_STARTS, after the first ride's chime), LIFT_RIDE_S of it, faded out before the car's stop. The chime,
-    # the button and the buzzer stay tools/lift_sounds.py's (his chime sits only ~10 dB over the car's hum).
-    put("lift_doors", variants(pick(folder, [("elevator/door_opening.wav", None)], LIFT_DOORS_S, 0.25), 3), -17.5)
+    # Subway's lifts (MT2): his lift (2026-11-11, elevator/): its doors sliding (door_opening, three takes) for both the
+    # doors opening and shutting, each from where its slide comes within LIFT_DOORS_WITHIN_DB of its loudest, so the
+    # loud part of the slide lands inside the game's 1.5 s door (LiftConfig.door_time), LIFT_DOORS_S of it; and the car
+    # setting off: each of his two rides (up_down) from its motor's start (LIFT_RIDE_STARTS, after the first ride's
+    # chime), LIFT_RIDE_S of it, faded out before the car's stop. The chime, the button and the buzzer stay
+    # tools/lift_sounds.py's (his chime sits only ~10 dB over the car's hum).
+    door = Source.get(folder, "elevator/door_opening.wav")
+    slides = []
+    for start, end in door.takes:
+        take = door.a[int(start * RATE):int(end * RATE)]
+        at = int((start + lead_in(take, LIFT_DOORS_WITHIN_DB)) * RATE)
+        slides.append(shape(door.a[at:at + int(LIFT_DOORS_S * RATE)].copy(), 0.25))
+    put("lift_doors", variants(slides, 3), -17.5)
     ride = Source.get(folder, "elevator/up_down.wav").a
     put("lift_motor", from_onsets(ride, LIFT_RIDE_STARTS, LIFT_RIDE_S, 0.25), -16.1)
 

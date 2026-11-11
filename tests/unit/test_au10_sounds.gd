@@ -1,6 +1,7 @@
 extends GutTest
 ## AU10: the lift's cues all resolve with the variants the game draws from, the tunnel loop is stored as a loop with a
-## peak, and the footstep surfaces the owner's recordings replaced keep their full set (noise levels are data, not cue length).
+## peak, and the footstep surfaces the owner's recordings replaced keep their full set (noise levels are data, not cue
+## length).
 
 
 func test_every_lift_cue_the_sim_audio_plays_exists() -> void:
@@ -8,12 +9,13 @@ func test_every_lift_cue_the_sim_audio_plays_exists() -> void:
 		assert_true(ResourceLoader.exists("%s%s_1.wav" % [SoundConfig.CUE_DIR, cue]), String(cue))
 
 
+## A door's slide is cut to sit inside the 1.5 s door (critic, AU10: the whole 3 s take put its loud part after it).
 func test_the_lift_rides_are_longer_than_a_door_but_each_cue_is_one_floor_long() -> void:
 	var doors := load("%slift_doors_1.wav" % SoundConfig.CUE_DIR) as AudioStream
 	var motor := load("%slift_motor_1.wav" % SoundConfig.CUE_DIR) as AudioStream
 	assert_not_null(doors)
 	assert_not_null(motor)
-	assert_almost_eq(doors.get_length(), 3.0, 0.1)
+	assert_almost_eq(doors.get_length(), 1.7, 0.1)
 	assert_almost_eq(motor.get_length(), 3.2, 0.1)
 
 

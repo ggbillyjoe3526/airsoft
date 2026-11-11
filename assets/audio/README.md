@@ -47,10 +47,11 @@ woods at night, which leaves the street's night bed to the street ambience).
 **The batch of 2026-11-11** (AU10): 17 more give the steps on soil (`step_earth_*`, in place of gravel softened), metal
 (`step_metal_*`, a new walk, run and jumps in place of his first walk) and water (`step_water_*`, in place of the
 synthesised splashes: his wading cut where each step starts, his jumps in as takes, at the splashes' levels), the lifts'
-doors (`lift_doors`) and the car setting off (`lift_motor`: each of his two rides from its motor's start, 3.2 s, faded
-before its stop), and `loops/tunnel.wav`, Subway's background (his tunnel, its rumble under 60 Hz taken out). The Sniper
-Rifle keeps his first shot (his pick over his new one, which is kept unused), and the Compact SMG keeps its stand-ins
-(his pick over his own SMG recording), its motor now with his toothbrush's whir 4 dB under it (`power_smg`).
+doors (`lift_doors`: 1.7 s of each slide, its loud part inside the 1.5 s door) and the car setting off (`lift_motor`:
+each of his two rides from its motor's start, 3.2 s, faded before its stop), and `loops/tunnel.wav`, Subway's background
+(his tunnel, its rumble under 60 Hz taken out). The Sniper Rifle keeps his first shot (his pick over his new one, which
+is kept unused), and the Compact SMG keeps its stand-ins (his pick over his own SMG recording), its motor now with his
+toothbrush's whir 4 dB under it (`power_smg`).
 
 **Every replica fired empty** plays one cue, `dryFire`: the gas pistol's recorded dry click as it is, for today's
 replicas and any added later (owner, 2026-11-05: final, not a stand-in).

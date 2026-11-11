@@ -127,10 +127,10 @@ The font ships inside the game's export. Its licence ships in `THIRD_PARTY_NOTIC
   by our own `tools/lift_sounds.py` (numpy) as toy-like placeholders (the doors and the car setting off are the
   owner's lift since AU10, above). No outside source; same licence as the code. To re-render: `python3
   tools/lift_sounds.py`, then `godot --headless --path . --import`.
-- **The stream's BB plop (WS1):** `assets/audio/cues/impact_water_1.wav` to `_5` (a BB plopping into Woodland's
-  stream), synthesised by our own `tools/water_sounds.py` (numpy, seeded) as a placeholder until the owner records a
-  pebble dropped in water (the wading steps are his since AU10, above). No outside source; same licence as the code. To re-render: `python3 tools/water_sounds.py`, then `godot
-  --headless --path . --import`.
+- **The stream's BB plop (WS1):** `assets/audio/cues/impact_water_1.wav` to `_5` (a BB plopping into Woodland's stream),
+  synthesised by our own `tools/water_sounds.py` (numpy, seeded) as a placeholder until the owner records a pebble
+  dropped in water (the wading steps are his since AU10, above). No outside source; same licence as the code. To
+  re-render: `python3 tools/water_sounds.py`, then `godot --headless --path . --import`.
 - **Synthesised drafts kept for reference:** `tools/render_whistle.gd` (the whistle and the ping's pip, SP3, PN2),
   `tools/render_doors.gd` (DO1) and `tools/render_bolt.gd` (SN1) render the drafts the recordings replaced, only to a
   folder named after `--`.
