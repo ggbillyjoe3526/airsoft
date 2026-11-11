@@ -27,16 +27,16 @@ The kits are the bots' own: what you have unlocked never changes them.
   pool.md says it comes with, else iron sights: the Sniper Rifle comes with its 2x Scope).
 - **Suits** lists the bot personalities that lean towards the kit (rusher, anchor, flanker, careful: the
   Personalities table in bots.md), separated by commas, or nothing. A bot whose personality is listed picks the kit 3
-  times as often as the other kits with Suits (the browser game's lean; bots have no personalities in this game yet, so
-  for now the column is read and checked against bots.md, and every kit keeps its weight). Kits with nothing in
+  times as often as the other kits with Suits (the browser game's lean, `BotConfig.kit_suit_lean`; each bot's personality comes
+  from its identity in bots.md). Kits with nothing in
   Suits, such as the Factory, keep their chance, and a weight of 0 stays 0: the difficulty decides how often a bot
   carries gear, its personality which. The column may be left out.
 - **Grenades** lists the bombs the kit carries, one a grenade slot (two slots, as on your Loadout), separated by commas:
   Smoke or Flash, the same twice if you like ("Flash, Flash"). Empty, or not two: the default pick, one smoke and one
   flash. The column may be left out.
 - **Easy**, **Normal** and **Hard** are each difficulty's weight for the kit: how likely a bot on that
-  difficulty is to carry it, against the other kits in the same column. Each column here adds up to 100, so the weights
-  read as a chance in 100, but they don't have to: a kit weighted 2 is picked twice as often as one weighted 1. 0 (or
+  difficulty is to carry it, against the other kits in the same column. The columns here add up to about 100, so the weights
+  read roughly as a chance in 100, but they don't have to: a kit weighted 2 is picked twice as often as one weighted 1. 0 (or
   empty) means never. A column with no weight above 0 means that difficulty's bots all carry the replicas as they come.
 - **Dev gear.** A kit holding a pool.md asset whose Access is `dev` is picked only with Dev content on, and such a
   match stays out of the records.

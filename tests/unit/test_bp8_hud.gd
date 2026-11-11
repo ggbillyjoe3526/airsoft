@@ -202,3 +202,27 @@ func test_the_round_is_under_way_in_the_countdown_but_not_live() -> void:
 	assert_true(rs.is_live())
 	rs.phase = RoundState.Phase.OVER
 	assert_false(rs.under_way())
+
+
+func test_the_rail_s_key_labels_follow_a_rebind_mid_match() -> void:
+	# PP1 (KNOWN_ISSUES row: the rail's key labels were read once, when the rail was built).
+	var c := Character.new(0, 0, Vector3.ZERO, 0.0, ReplicaStats.default_loadout())
+	var r := WeaponRail.new()
+	add_child_autofree(r)
+	var paints: Array[StringName] = [&"cobalt", &"cobalt"]
+	r.setup(c.armament.replicas, paints)
+	var action: StringName = WeaponRail.SLOT_ACTIONS[0]
+	var before: String = r._keys[0].text
+	var kept := InputMap.action_get_events(action)
+	InputMap.action_erase_events(action)
+	var ev := InputEventKey.new()
+	ev.physical_keycode = KEY_F9
+	InputMap.action_add_event(action, ev)
+	r.refresh_keys()
+	var shown: String = r._keys[0].text
+	var wanted := WeaponRail.key_text(action)
+	InputMap.action_erase_events(action)
+	for e in kept:
+		InputMap.action_add_event(action, e)
+	assert_ne(shown, before, "the label changed with the rebind")
+	assert_eq(shown, wanted, "the first row names the new key")

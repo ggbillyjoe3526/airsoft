@@ -298,3 +298,16 @@ func test_the_game_leaving_the_tree_takes_its_hook_with_it() -> void:
 	await wait_process_frames(1)
 	assert_eq(_hooks(b), 0, "a button added after has no hook")
 	ButtonPress.install(get_tree())
+
+
+func test_a_still_press_cutting_a_dip_short_leaves_the_button_full_size() -> void:
+	# PP1: Reduced motion turned on between two quick presses: the second (still) press killed the dip mid-way and left
+	# the button shrunk until a later press.
+	var b := _button()
+	await wait_process_frames(1)
+	await _click(b)
+	await wait_seconds(ButtonPress.DIP_IN * 0.6)
+	ButtonPress.ring_of(b).play(true)
+	assert_almost_eq(b.scale.x, 1.0, 0.0001, "the still press puts the button back at once")
+	await wait_seconds(ButtonPress.RING_FADE + 0.1)
+	assert_almost_eq(b.scale.x, 1.0, 0.0001)

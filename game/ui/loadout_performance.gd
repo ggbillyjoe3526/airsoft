@@ -17,6 +17,9 @@ const TIME_DISTANCE := 20.0
 const RATTLES_BAR := 0.3
 ## Rows that show only on the Customise tabs they belong to (the sheet's `extra`), and the one only a rattling magazine adds.
 const TAB_ROWS: Array[StringName] = [&"zoom", &"aim"]
+## Rows shown only for a replica whose value isn't 1, as carried or as it comes (the Compact SMG's pace and spread on
+## the move, CS1; PP1): ×1 on every other replica, so they'd only crowd the sheet.
+const OFF_ONE_ROWS: Array[StringName] = [&"pace", &"move_spread"]
 const MOVING_ROW := &"moving"
 ## The step a fire rate under WHOLE_RATE (BBs/s) is shown to, and the rate from which it shows whole (rate_text).
 const RATE_STEP := 0.01
@@ -50,6 +53,10 @@ const SPECS: Array[Dictionary] = [
 			"better": Better.LOWER},
 	{"field": &"draw", "name": "PERF_DRAW", "unit": "PERF_UNIT_S", "decimals": 2, "full": 0.9, "invert": true,
 			"better": Better.LOWER},
+	{"field": &"pace", "name": "PERF_PACE", "unit": "PERF_UNIT_X", "decimals": 2, "full": 1.2, "invert": false,
+			"better": Better.HIGHER},
+	{"field": &"move_spread", "name": "PERF_MOVE_SPREAD", "unit": "PERF_UNIT_X", "decimals": 2, "full": 1.0,
+			"invert": true, "better": Better.LOWER},
 	{"field": &"moving", "name": "PERF_MOVING", "unit": "", "decimals": 0, "full": 1.0, "invert": false,
 			"better": Better.NONE},
 ]
@@ -75,6 +82,9 @@ class Figures:
 	## The view's zoom when aimed (the optic's, or the iron sights'), and the seconds to bring the sight up.
 	var zoom: float = 1.0
 	var aim: float = 0.0
+	## The pace it's carried at and the share of moving's spread it takes (×, ReplicaConfig.pace and move_spread).
+	var pace: float = 1.0
+	var move_spread: float = 1.0
 	## A rattling magazine: bots close by hear it as you move.
 	var rattles: bool = false
 	var magazines: float:
@@ -94,7 +104,8 @@ class Row:
 	var bar: float = 0.0
 	## 1 better, -1 worse, 0 the same (or a row that isn't better or worse).
 	var verdict: int = 0
-	## The row belongs to some Customise tabs only (`TAB_ROWS`); `present` is false for the Moving row without a rattle.
+	## The row belongs to some Customise tabs only (`TAB_ROWS`); `present` is false for the Moving row without a rattle
+	## and for an OFF_ONE_ROWS row at ×1.
 	var tab_only: bool = false
 	var present: bool = true
 	## The Magazines row's two numbers, each with its own verdict, as the part tabs' cards colour them (BP6): the
@@ -145,7 +156,8 @@ static func measure(replica: ReplicaConfig, grams: float, dial: float, tuning: S
 	f.on_target = reach.on_target_to
 	f.on_target_full = reach.on_target_to >= range_limit
 	f.time = Ballistics.flight_time(replica, dial, TIME_DISTANCE, tuning, dt, grams)
-	f.spread = replica.spread_deg
+	# from the hip, as the wiki gives it: a hip spread (the Sniper Rifle wider, the Compact SMG tighter) counts (PP1)
+	f.spread = replica.spread_deg * replica.hip_spread
 	f.recoil = replica.recoil_deg
 	f.mag_size = replica.mag_size
 	f.mags = replica.mags
@@ -153,6 +165,8 @@ static func measure(replica: ReplicaConfig, grams: float, dial: float, tuning: S
 	f.draw = replica.draw_time
 	f.zoom = maxf(replica.aim_zoom, replica.aim_zoom_to) if replica.aim_zoom > 0.0 else iron_zoom
 	f.aim = tuning.movement.aim_raise_time * replica.raise_scale
+	f.pace = replica.pace
+	f.move_spread = replica.move_spread
 	f.rattles = replica.rattles
 	return f
 
@@ -175,6 +189,8 @@ static func compare(carried: Figures, comes: Figures, capped: bool, limit: float
 		r.name_key = spec["name"]
 		r.unit_key = spec["unit"]
 		r.tab_only = TAB_ROWS.has(field)
+		if OFF_ONE_ROWS.has(field):
+			r.present = not is_equal_approx(value, 1.0) or not is_equal_approx(before, 1.0)
 		r.text = _shown(field, carried, value, decimals)
 		r.as_comes_text = _shown(field, comes, before, decimals)
 		var share := clampf(value / float(spec["full"]), 0.0, 1.0)

@@ -2,7 +2,8 @@ class_name ArmoryFacts
 extends RefCounted
 ## What the Armory shows, worked out from the levels, the pool and the player's XP (no nodes): every level's items and
 ## whether each level is unlocked, the next one or locked, how many items are unlocked, and the words for an item. With
-## levelling off every level is unlocked. Items still being built (Access `dev`)
+## levelling off every level is unlocked. An item the player already owns counts as unlocked wherever its level now
+## sits (PP1: LV15 moved items up a level, and unlocks are never taken away). Items still being built (Access `dev`)
 ## are listed only with Dev content on; any waiting for their feature (Pool.waiting) never are.
 
 enum State { UNLOCKED, NEXT, LOCKED }
@@ -26,13 +27,17 @@ var rows: Array[Row] = []
 ## Items listed, and how many of them are unlocked.
 var item_count: int = 0
 var unlocked_count: int = 0
+## Items the save holds (Progress.unlocked): unlocked even on a level not reached.
+var owned: PackedStringArray = PackedStringArray()
 
 
-func _init(table_in: LevelTable, pool_in: Pool, xp_in: int, off: bool, dev_content: bool) -> void:
+func _init(table_in: LevelTable, pool_in: Pool, xp_in: int, off: bool, dev_content: bool,
+		owned_in: PackedStringArray = PackedStringArray()) -> void:
 	table = table_in
 	pool = pool_in
 	xp = xp_in
 	levelling_off = off
+	owned = owned_in
 	level = table.level_of(xp)
 	for l in table.levels:
 		var row := Row.new()
@@ -49,9 +54,15 @@ func _init(table_in: LevelTable, pool_in: Pool, xp_in: int, off: bool, dev_conte
 			# its empty card was marked next while the header named level 8).
 			row.state = State.NEXT
 		item_count += row.items.size()
-		if row.state == State.UNLOCKED:
-			unlocked_count += row.items.size()
+		for it in row.items:
+			if is_unlocked(row, it):
+				unlocked_count += 1
 		rows.append(row)
+
+
+## Whether `item` on `row` is the player's: its level reached (or levelling off), or already owned.
+func is_unlocked(row: Row, item: Pool.Item) -> bool:
+	return row.state == State.UNLOCKED or owned.has(item.id)
 
 
 func standing() -> LevelTable.Standing:

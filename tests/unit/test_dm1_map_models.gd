@@ -184,5 +184,24 @@ func test_a_frame_is_as_deep_as_the_thinnest_wall_at_its_jamb_and_casts_no_shado
 	add_child_autofree(view)
 	var frames := view.get_node("Frames") as MultiMeshInstance3D
 	assert_eq(frames.cast_shadow, GeometryInstance3D.SHADOW_CASTING_SETTING_OFF)
-	var t := frames.multimesh.get_instance_transform(0)
+	var t := view.frame_at(0)
 	assert_almost_eq(t.basis.z.length(), 0.3 / 0.3, 1e-4, "the frame as deep as the 0.3 m wall, not the 2 m block")
+
+
+func test_a_frame_sits_in_its_walls_middle_when_the_leaf_hangs_on_a_face() -> void:
+	# PP1: a leaf hangs on its wall's face (build_map.py: T/2 + door T/2 off the middle), as every Depot and Woodland
+	# door does; the frame was placed at the leaf, 0.19 m (0.3 m walls) or 0.3 m (0.5 m walls) proud of the wall.
+	var m := _map([
+		_block(&"plywood", Vector3(-4.0, 1.3, 0.0), Vector3(6.0, 2.6, 0.5)),
+		_block(&"plywood", Vector3(4.0, 1.3, 0.0), Vector3(6.0, 2.6, 0.5)),
+	])
+	var d := MapData.Door.new()
+	d.center = Vector3(0.0, 1.3, -0.29)
+	d.size = Vector3(2.0, 2.6, 0.08)
+	m.doors.append(d)
+	var view := DoorView.build(m, play.map_style, 0.4)
+	add_child_autofree(view)
+	var t := view.frame_at(0)
+	assert_almost_eq(t.origin.z, 0.0, 1e-4, "the frame in the wall's middle, not at the leaf")
+	assert_almost_eq(t.origin.x, 0.0, 1e-4, "still centred on the opening")
+	assert_almost_eq(t.basis.z.length(), 0.5 / 0.3, 1e-4, "as deep as the 0.5 m wall it found")

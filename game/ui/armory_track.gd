@@ -99,7 +99,6 @@ func browse(step: int) -> void:
 
 func _card(r: ArmoryFacts.Row) -> Control:
 	var next := r.state == ArmoryFacts.State.NEXT
-	var locked := r.state == ArmoryFacts.State.LOCKED
 	var panel := PanelContainer.new()
 	panel.name = "Level%d" % r.number
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -132,12 +131,13 @@ func _card(r: ArmoryFacts.Row) -> Control:
 		tiles = list
 	tiles.name = "Items"
 	tiles.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	if locked:
-		tiles.modulate.a = LOCKED_ALPHA
 	column.add_child(tiles)
 	var small := r.items.size() > ONE_COLUMN_MAX
 	for it in r.items:
-		tiles.add_child(_tile(it, small))
+		var tile := _tile(it, small)
+		if not _facts.is_unlocked(r, it):
+			tile.modulate.a = LOCKED_ALPHA
+		tiles.add_child(tile)
 	return panel
 
 
