@@ -1,12 +1,11 @@
-Task: CN1 · head adb2321 · Verdict: Pass
-Run: figure_bench headless, 11 figures, 1800 frames (no GPU; draw calls and frame times not measurable here) · budget: pipeline/perf-budget.json does not exist; no baseline yet, judged against the stated tri budgets, the owner's targets and the diff
-Metrics: LOD0 tris 58,868 / 60k (ok) · LOD1 19,424 / 20k (ok) · LOD2 5,639 / 6k (ok) · glb 9,703,220 B vs 9,708,632 on main (-0.06 %) · textures body col/nrm/orm: nrm and orm slightly smaller, col re-encoded · mesh surfaces drawn per frame 236 (max), merged body meshes 6 · animation per figure mean 132.8 us, skeleton 43.9 us, both x11 1.94 ms mean / 3.8 ms p99 (script time, this machine, reported only; main not rerun, as no runtime code or mesh topology changed)
-Regressions (> 10 % worse): none (LOD2 +0.3 % tris, within budget)
+Task: CN1 · head e1133ce · Verdict: Pass (attempt 2)
+Run: no match run needed (no game/ code changed since adb2321; only tools/blender/figures, tests, rebuilt human.glb and body textures) · budget: no baseline yet, judged against targets and base 4ea951a
+Metrics (measured on the committed files):
+- human.glb 9,707,612 B / base 9,708,632 (-0.0 %), attempt 1 9,703,220 (+0.05 %). ok
+- human_body_col.webp 565,022 / base 567,998 (-0.5 %); orm 90,776 / 91,778 (-1.1 %); nrm 856,624 / 852,226 (+0.5 %). ok
+- glb structure: 26 meshes, 68 primitives (surfaces), 8 materials, 10 images, identical to base. No new meshes, surfaces or materials.
+- Triangles per LOD for the largest-head human (budgets 60k / 20k / 6k): tests/unit/test_figure_body.gd HUMAN_HIGH = [58868, 58868, 19424, 5639] is unchanged by this diff, so the pinned counts still hold. QA's run at this head reports test_figure_body 17/17 (pipeline/out/qa-report.md). My own re-run timed out at 300 s because tools/check.sh was loading the machine, so the per-LOD counts are QA's measurement plus the test file untouched, not mine. All inside the budgets (judgment on that last point).
+Regressions (> 10 % worse): none
 Blocking findings: none
- - No game/ code changed: no per-frame or per-tick allocations, node, resource or prewarm concerns (judgment).
- - Skinning: head meshes keep the same primitive count, material and skeleton; JOINTS_0/WEIGHTS_0 are already 4-wide vertex attributes, so up to 4 joints per neck vertex costs the same GPU skinning (judgment). Weights are renormalised to sum 1 in splice_heads.py.
- - Draw calls: no new surfaces, materials or meshes, so no change expected (judgment; needs a rendered run to confirm).
- - Install size: glb and textures shrank by about 7 KB in total (measured, git diff stat).
-Advisory: none
-Fixes: none needed
+Advisory: none new. The only runtime-visible change is skin weights and vertex positions (collar, back rise, scarf radius), so no new draw calls, shaders, prewarm entries or per-frame work.
 Unexplained: none
