@@ -11,7 +11,8 @@ it should look like a natural clothing collar. Every human figure (player and bo
 |---|---|---|---|---|---|
 | 2026-11-10 | 1 | Opus 5.5 (build thread) | ✗ (test_bp6_models: 29 plates) | 7/8 Retry | the collar's back tented with the cheek on the stock; the scarf's hem flared off the collar |
 | 2026-11-11 | 2 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | the scarf stepped in at its hem under a bulge over the collar |
-| 2026-11-11 | 3 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-11 | 3 | Opus 5.5 (build thread) | ✓ | 7/8 Retry | the scarf's widen-only pass made it a stiff flared ruff with a scalloped hem |
+| 2026-11-11 | 4 | Opus 5.5 (build thread) | pending | pending | – |
 
 ## Decisions
 
@@ -31,10 +32,11 @@ it should look like a natural clothing collar. Every human figure (player and bo
 - **The neck bends with the collar** (`splice_heads.py`): each head vertex within 108 mm of the neck's axis behind
   (88 mm ahead, so the chin, ear cups and brims stay whole on `Head`) takes the weights of the nearest collar vertex,
   easing to `Head` alone between 1.525 and 1.565 m behind (1.455 to 1.48 m ahead, under the chin).
-- **The boonie's scarf** sits over the collar like a gaiter (it used to hang over the old, smaller collar; the new one
-  took its tail inside): 7 mm out from the collar, easing back onto the neck over 30 mm above the collar's top, its
-  hem resting on the collar's widest ring (`SCARF_HEM_REACH`), and below the collar's top it only widens going down,
-  so it never tucks in under itself (attempts 1 and 2 flared, then stepped in at the hem).
+- **The boonie's scarf** sits on the collar like a gaiter (it used to hang over the old, smaller collar; the new one
+  took its tail inside): its lower rows follow the collar's own surface 6 mm out, easing back onto the neck over 30 mm
+  above the collar's top, down to a hem just above the collar's widest ring (`SCARF_HEM_DROP`), so nothing below it
+  can step in; the folds fade out toward the hem and its roll is 4.5 mm (was 7.5), so it lies flat (attempts 1 to 3
+  flared, stepped in, then stood out as a ruff).
 - **Rebuild order** (README): `body.py` and its splice, `pads.py`, `gear.py`, `body_weights.py`, then `headwear.py` last
   (its neck reads the body's collar weights). The carrier's and pack's shoulder straps refit up to 8 mm round the
   collar's new back; nothing else in the file moved.
