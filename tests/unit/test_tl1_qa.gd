@@ -19,9 +19,10 @@ func after_each() -> void:
 
 
 ## Fields added after the levels moved, each held by its own task's tests: the bombs' chances (SF2, test_bot_bombs)
-## and the team radio, pressing, the careful last bot and a knee to fire (BQ3, test_bq3_team_play).
+## and the team radio, pressing, the careful last bot and a knee to fire (BQ3, test_bq3_team_play), and turning from a
+## flash (PP1, test_bot_bombs).
 const LATER_FIELDS: Array[String] = ["smoke_chance", "flash_chance", "share_radius", "share_delay", "presses_advantage",
-		"careful_when_last", "kneels_to_fire"]
+		"careful_when_last", "kneels_to_fire", "flash_dodge_chance"]
 
 
 func _described(s: BotSkill) -> String:
