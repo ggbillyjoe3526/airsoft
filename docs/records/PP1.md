@@ -127,7 +127,9 @@ and `cards/`) from their spots in `docs/ASSETS.md`, on Forward+ with lavapipe. W
 (FT1) and Depot shows its worn lamps (DW1); the KNOWN_ISSUES row is deleted. `tools/eye_pictures.gd` built Subway
 without its station dress (MT3's tiles, terrazzo and platform edge) or its lift cars, since it never passed the
 level `tuning.lifts` and `play.station_look` nor built a `LiftView` as `play_session.gd` does (critic, attempt 1):
-both are passed now, and Subway's picture shows the station as you play it.
+both are passed now, and Subway's picture shows the station as you play it. Subway's two pictures were also imported
+uncompressed without mipmaps (MT1; the full one about 8 MB of texture memory where the others' are lossy): they now
+import as the other maps' do, and `test_match_page` checks all four (QA).
 
 ## Known issues left
 
