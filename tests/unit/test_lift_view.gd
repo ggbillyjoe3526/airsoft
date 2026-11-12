@@ -151,3 +151,34 @@ func test_a_lift_unlike_the_model_keeps_plain_boxes() -> void:
 	assert_ne(body.mesh.get_aabb(), car.get_aabb(), "a box body")
 	assert_null(odd.get_node_or_null(^"Landings"), "no doorways")
 	odd.free()
+
+
+func test_lit_arrows_share_the_landings_transforms() -> void:
+	var landings := view.get_node(^"Landings") as MultiMeshInstance3D
+	var lights := view.get_node_or_null(^"LandingLights") as MultiMeshInstance3D
+	assert_not_null(lights, "the lit arrows are drawn")
+	if lights == null:
+		return
+	assert_eq(lights.multimesh.instance_count, landings.multimesh.instance_count, "one set a landing")
+	for j in landings.multimesh.instance_count:
+		assert_eq(lights.multimesh.get_instance_transform(j), landings.multimesh.get_instance_transform(j),
+				"arrows %d sit on their landing" % j)
+
+
+func test_a_missing_lit_model_still_builds_without_arrows() -> void:
+	var cfg: LiftViewConfig = play.lifts.duplicate()
+	cfg.landing_lit_model = ""
+	var bare := LiftView.build(map, MapStyle.new(), tuning.lifts, cfg)
+	add_child(bare)
+	assert_not_null(bare.get_node_or_null(^"Landings"), "the landings are still drawn")
+	assert_null(bare.get_node_or_null(^"LandingLights"), "no arrows")
+	bare.free()
+
+
+func test_the_lit_arrows_are_freed_with_the_view() -> void:
+	var lights := view.get_node(^"LandingLights") as MultiMeshInstance3D
+	var ref: WeakRef = weakref(lights)
+	view.free()
+	view = LiftView.build(map, MapStyle.new(), tuning.lifts, play.lifts)
+	add_child(view)
+	assert_null(ref.get_ref(), "freed with its view")
