@@ -205,3 +205,102 @@ func _wall_sign(mesh: Mesh) -> float:
 				var n := (verts[index[t + 1]] - verts[index[t]]).cross(verts[index[t + 2]] - verts[index[t]])
 				total += n.dot(Vector3(mid.x, 0.0, mid.z))
 	return 1.0 if total >= 0.0 else -1.0
+
+
+func _gas() -> Mesh:
+	return PropDressConfig.load_mesh("res://assets/models/powerSources/gasBottle.glb")
+
+
+## Every decal face over the whole label (15 to 200 mm up), not only the middle: outside the wall, wound like it.
+func test_gas_bottle_print_faces_outward_over_the_whole_label_height() -> void:
+	var mesh := _gas()
+	var wall := _wall_sign(mesh)
+	var bad := 0
+	var checked := 0
+	for i in mesh.get_surface_count():
+		var material_name := mesh.surface_get_material(i).resource_name
+		if material_name == "Can":
+			continue
+		var arrays := mesh.surface_get_arrays(i)
+		var verts := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+		var index := arrays[Mesh.ARRAY_INDEX] as PackedInt32Array
+		for t in range(0, index.size(), 3):
+			var a := verts[index[t]]
+			var b := verts[index[t + 1]]
+			var c := verts[index[t + 2]]
+			var mid := (a + b + c) / 3.0
+			if mid.y < 0.015 or mid.y > 0.2:
+				continue
+			var normal := (b - a).cross(c - a)
+			if normal.length() < 1e-10:
+				continue
+			checked += 1
+			var out := Vector3(mid.x, 0.0, mid.z).normalized()
+			var radial := normal.normalized().dot(out) * wall
+			var under := minf(Vector2(a.x, a.z).length(), minf(Vector2(b.x, b.z).length(), Vector2(c.x, c.z).length()))
+			if under < 0.033 - 0.00001:
+				bad += 1
+			elif radial < -0.5:
+				bad += 1
+	assert_gt(checked, 500, "print faces were found")
+	assert_eq(bad, 0, "faces wound inward or under the wall")
+
+
+func test_no_print_face_is_a_zero_area_sliver_on_the_label_or_print_layers() -> void:
+	var mesh := _gas()
+	var slivers := 0
+	for i in mesh.get_surface_count():
+		if mesh.surface_get_material(i).resource_name != "Print":
+			continue
+		var arrays := mesh.surface_get_arrays(i)
+		var verts := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+		var index := arrays[Mesh.ARRAY_INDEX] as PackedInt32Array
+		for t in range(0, index.size(), 3):
+			var n := (verts[index[t + 1]] - verts[index[t]]).cross(verts[index[t + 2]] - verts[index[t]])
+			if n.length() < 1e-10:
+				slivers += 1
+	assert_eq(slivers, 0, "zero-area print faces")
+
+
+## Two near-radial print faces over one spot must sit apart (>= 0.03 mm) or they z-fight.
+func test_gas_bottle_overlapping_print_layers_are_lifted_apart() -> void:
+	var mesh := _gas()
+	var cells := {}
+	for i in mesh.get_surface_count():
+		if mesh.surface_get_material(i).resource_name != "Print":
+			continue
+		var arrays := mesh.surface_get_arrays(i)
+		var verts := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+		var index := arrays[Mesh.ARRAY_INDEX] as PackedInt32Array
+		for t in range(0, index.size(), 3):
+			var a := verts[index[t]]
+			var b := verts[index[t + 1]]
+			var c := verts[index[t + 2]]
+			var mid := (a + b + c) / 3.0
+			var key := Vector3i(roundi(atan2(mid.z, mid.x) * 33.0 / 0.0004), roundi(mid.y / 0.0004), i)
+			var r := Vector2(mid.x, mid.z).length()
+			if not cells.has(key):
+				cells[key] = []
+			(cells[key] as Array).append(r)
+	var close := 0
+	for key: Vector3i in cells:
+		var radii := cells[key] as Array
+		for x in radii.size():
+			for y in range(x + 1, radii.size()):
+				var d := absf(float(radii[x]) - float(radii[y]))
+				if d > 0.000005 and d < 0.00003:
+					close += 1
+	assert_eq(close, 0, "print faces over one spot closer than 0.03 mm")
+
+
+func test_smoke_lever_with_its_ribs_stays_inside_the_body_and_hand_box() -> void:
+	var mesh := PropDressConfig.load_mesh("res://assets/models/grenades/smoke.glb")
+	for i in mesh.get_surface_count():
+		if mesh.surface_get_material(i).resource_name != "Lever":
+			continue
+		var verts := mesh.surface_get_arrays(i)[Mesh.ARRAY_VERTEX] as PackedVector3Array
+		for v in verts:
+			assert_lte(v.x, 0.0345, "lever sticks out past the ribs' reach")
+			assert_gte(v.x, -0.0276, "lever pokes through the body's far side")
+			assert_lte(absf(v.z), 0.0135, "lever wider than its flanges")
+			assert_lte(v.y, 0.0725, "lever above the pin head")

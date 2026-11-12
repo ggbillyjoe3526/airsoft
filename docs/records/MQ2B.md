@@ -1,6 +1,6 @@
 # MQ2B · Bombs and power sources made of what the real ones are
 
-**Review:** 4 attempts · critic PENDING · qa PENDING · performance PENDING
+**Review:** 4 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -9,7 +9,7 @@
 | 2026-11-12 | 1 | Fable 5.2 (model quality thread) | ✓ (after a prewarm count fix) | Retry 7/8 | the first-person pictures hardly differed, the print read as a ruler, the lever's ribs as slots and its bend as a mirror, the gas bottle's shoulder was short and its label nearly empty |
 | 2026-11-12 | 2 | Fable 5.2 (model quality thread) | QA's nine files 75 of 75 (the full gate was stopped when the verdict came) | Retry 7/8 | the smoke lever's beads read as slits and its arm as three boxes, the gas bottle's emblem was stair-stepped and its mark a letter H, the gas bottle's proportions were off the photo, the flash's word was hidden at rest |
 | 2026-11-12 | 3 | Fable 5.2 (model quality thread) | QA's nine files 77 of 77, QA Pass, performance Pass (the full gate was stopped when the verdict came) | Retry 7/8 | the gas bottle's outline matched the photo but the print inside it was never fitted (the emblem a third too low, the chevron's point a fifth too high, the paragraph two lines), the smoke lever's three beads still read as square cushions, the flash's word read as the letters C O F T C |
-| 2026-11-12 | 4 | Fable 5.2 (model quality thread) | PENDING | PENDING | – |
+| 2026-11-12 | 4 | Fable 5.2 (model quality thread) | ✓ | Accept 8/8 | – |
 
 ## What changed
 
@@ -96,7 +96,9 @@ hand and the menus' pictures draw them on those surfaces in their own colours:
   `GrenadeView` uses it for the bomb in your hand (its depth pressed by the shader's own uniform, as the replica's
   is); `ReplicaPictures` for the bombs' and power sources' pictures, the `Label` and `Kind` materials still painted
   in the item's colour. A bomb thrown, lying or in a figure's hand stays plain, as the figures' replicas do.
-- **Tests** (`tests/unit/test_accessory_surfaces.gd`): `card` after the others; the table above; each file names
+- **Tests** (`tests/unit/test_accessory_surfaces.gd`; QA's in `test_mq2b_qa.gd`: every piece of the gas bottle's
+  print outside the can and facing outward over the whole label, no print face without area, overlapping print
+  layers 0.03 mm apart or more, the smoke's lever with its ribs inside the box the hand and body leave it): `card` after the others; the table above; each file names
   only its own materials, kinds the game knows and no other custom property; the bomb in hand on its surfaces in
   its own colours, depth pressed; thrown and lying plain; the surfaced materials reach the prewarm once each; the
   menu pictures on their surfaces with the label's colour; `own_surface` leaves glass alone and keeps what it
@@ -152,4 +154,9 @@ hand and the menus' pictures draw them on those surfaces in their own colours:
 
 ## Known issues left
 
+- 120 triangles of no area in the gas bottle's cap and 2 at the ends of the smoke lever's ribs (QA's count,
+  attempt 4; the cap's are as old as BL7): harmless, to drop at the next rebuild of either.
+- The smoke's word is 14 mm tall at the sleeve's edge and reads as a cluster of blocks from a distance; the
+  photo's line fills the face. One of its glyphs (a block under a bar) is the nearest to a letter (the critic's
+  advisory): a later art pass.
 - The spring's wire is four-sided (its budget is full at 40 turns); it reads round at the menu's size.
