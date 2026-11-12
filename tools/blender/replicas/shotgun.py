@@ -138,8 +138,9 @@ RAIL_TOP = Z(5.0)
 RAIL_BASE = RAIL_TOP - RAIL_H
 SIDE_RAIL_PX = (775.0, 897.0)
 SIDE_RAIL_PY = 68.5
-# The sight line along the rail (no sights: the owner): this far over its teeth.
-SIGHT_Z = RAIL_TOP + 0.0050
+# The sight line along the rail (no sights: the owner): this far over its teeth, so the stock's comb under your eye
+# (STOCK_TOP_PY) is cut by the view's near plane below the screen's foot when aimed, not across it.
+SIGHT_Z = RAIL_TOP + 0.0095
 # The grip's adapter behind the receiver (one moulding with the grip and the trigger guard): its half width, its top
 # and the round tower at its back the receiver extension screws into.
 ADAPTER_HW = 0.0196
