@@ -406,3 +406,11 @@ func test_the_grip_cards_show_the_moving_spread_only_where_it_changes() -> void:
 	assert_true(by[VERTICAL].worse.has(tr("PART_WORSE_AIM")))
 	assert_false(by[ANGLED].figures_plain.contains("moving"), "the Angled Grip leaves it")
 	assert_false(by[""].figures_plain.contains("moving"))
+
+
+func test_the_cyber_pistols_moving_double_cannot_be_bought_off_with_a_grip_or_laser() -> void:
+	var l := rules.default_loadout("T")
+	assert_true(rules.equip(l, Loadout.Slot.PRIMARY, CYBER))
+	assert_false(rules.set_part(l, CYBER, &"grip", VERTICAL), "no under-rail")
+	assert_false(rules.set_part(l, CYBER, &"laser", LASER), "no laser rail")
+	assert_almost_eq(rules.carried(l).replicas[0].move_spread, 2.0, 1e-6, "its own double stays")
