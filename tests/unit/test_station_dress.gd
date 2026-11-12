@@ -206,6 +206,19 @@ func test_named_only_dresses_no_kind_and_leaves_the_config_as_it_was() -> void:
 	assert_true(named.dresses(b), "unless it names the crate")
 
 
+func test_a_named_model_that_does_not_load_keeps_its_box_and_other_maps_stay_kind_dressed() -> void:
+	var m := _map("subway")
+	var props := play.site_look.props.named_only()
+	var plain := StationSurface.mesh(m, play.map_style, look, props)
+	for b in m.blocks:
+		if b.kind == &"crate":
+			b.dress = &"no_such_model_qa"
+			break
+	assert_eq(_vertices(StationSurface.mesh(m, play.map_style, look, props)), _vertices(plain), "the box is still drawn")
+	assert_null(PropDress.build(m, props), "and no prop stands in it")
+	assert_not_null(PropDress.build(_map("depot"), play.site_look.props), "a field map keeps its kind dress")
+
+
 func _vertices(mesh: ArrayMesh) -> int:
 	return (mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
 
