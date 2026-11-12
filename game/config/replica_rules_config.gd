@@ -26,6 +26,11 @@ extends Resource
 @export var holster_draw_scale: float = 1.8
 ## One notch of the dial turned in play (share of hop_up_max); never zero, the dial snaps to it.
 @export_range(0.01, 0.5, 0.01) var hop_up_dial_step: float = 0.05
+## What a hop-up dial saved in a version 1 loadouts file is multiplied by, by pool.md ID, so that it lifts as it did
+## when it was saved: a replica's old hop_up_max over its new one, for each replica whose hop-up range has changed
+## since (PH2: the GBB Pistol's 0.3 to 0.19, the Compact SMG's 0.15 to 0.135). Read once, when such a file loads
+## (SavedLoadouts); a later change of range adds a version and a table of its own.
+@export var hop_up_rescale_v1: Dictionary[String, float] = {"000001": 0.3 / 0.19, "000026": 0.15 / 0.135}
 ## A variable optic's zoom step (×) per notch of the mouse wheel while aimed through it (SN2, owner default: 1×).
 @export_range(0.25, 2.0, 0.25) var zoom_step: float = 1.0
 ## The BB weights a player can load (g) and the Loadout's step (the browser game's BB_WEIGHT, 0.20 to 0.30 g; to 0.40 g

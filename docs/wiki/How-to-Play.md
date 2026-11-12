@@ -67,7 +67,7 @@ already have their flag part way up get a boost. The result says **Simulated**.
 Nothing in Airsoft is hitscan. Every BB leaves the muzzle at a real speed, slows in the air, falls, and is lifted by
 its backspin (the **hop-up**), so you can watch it fly and lead a moving target.
 
-- The AEG Rifle stays on target to about **39 m**, the GBB Pistol to about **30 m**. Past that, aim a little higher.
+- The AEG Rifle stays on target to about **39 m**, the GBB Pistol to about **29 m**. Past that, aim a little higher.
 - A white BB in flight is drawn a little larger than life with a faint short trail, so you can follow it against a
   pale wall or the sky.
 - BBs puff on what they hit, in its colour: metal, wood, concrete or earth.

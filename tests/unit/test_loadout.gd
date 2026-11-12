@@ -97,7 +97,7 @@ func test_a_new_player_carries_the_browser_games_defaults() -> void:
 	assert_eq(aeg.power_id, STANDARD)
 	var pistol := rules.tune_of(l, PISTOL)
 	assert_almost_eq(pistol.bb_weight, 0.2, 1e-9)
-	assert_almost_eq(pistol.hop_up, 0.5, 1e-9)
+	assert_almost_eq(pistol.hop_up, 0.75, 1e-9)
 	assert_eq(pistol.paint, &"ghost")
 	assert_eq(pistol.power_id, GREEN)
 

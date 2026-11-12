@@ -14,7 +14,7 @@ extends Resource
 ## BB diameter (m): the standard 5.95 mm airsoft BB.
 @export var bb_diameter: float = 5.95e-3
 ## Backspin (rad/s) per unit of hop-up lift (a replica's hop_up_max × its dial). Tuned so the factory dials keep the
-## rifle on target to ~38 m and the pistol to ~26 m.
+## rifle on target to ~39 m and the pistol to ~29 m (0.70 J, PH2).
 @export var spin_per_hop: float = 5000.0
 ## Magnus lift coefficient's fit to the spin ratio S = ω·r / v: CL = S / (lift_base + lift_slope · S).
 @export var lift_base: float = 0.981

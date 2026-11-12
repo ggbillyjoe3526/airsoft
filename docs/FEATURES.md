@@ -9,7 +9,7 @@ or drop (`docs/ROADMAP.md` › What 0.1 is).
 
 ## Simulation rules
 
-- BB flight: BBs fly with drag, gravity and hop-up lift; the AEG Rifle stays on target to about 38 m, the GBB Pistol to about 30 m at 20 °C and about 27 m on Woodland at night (FP1)
+- BB flight: BBs fly with drag, gravity and hop-up lift; the AEG Rifle stays on target to about 38 m, the GBB Pistol to about 29 m at 20 °C and about 26 m on Woodland at night (FP1)
 - Hit calling: one hit eliminates; you raise an arm, call "HIT!" and walk off to the dead zone round cover, where you watch through a teammate's eyes; bots call their hits honestly (FP1, BE1)
 - Loadouts: up to five named loadouts, one carried into each match; each replica has its own BB weight (0.20 to 0.40 g), hop-up dial, colour and power source, with batteries setting the AEG Rifle's rate of fire and gas the GBB Pistol's power, capped at the field's chrono limit; bots keep their replicas as they come (LO1)
 - Inspect replica: Y (rebindable in Settings › Controls) turns your replica side on, its muzzle to the left, and looks it over while its parts move: an AEG's charging handle draws back, its dust cover opens and the hop-up dial turns; a GBB Pistol turns over with its slide home; a Cyber Pistol's battery slides out of the grip and back; about 3 s for rifles, 2 s for pistols; any shot, aim, reload, switch, holster, sprint or hit stops it at once (IN1)

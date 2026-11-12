@@ -42,7 +42,7 @@ func test_the_built_ins_are_the_aeg_rifle_and_gbb_pistol() -> void:
 	assert_eq([aeg.display_name, aeg.power, aeg.default_fire_mode, aeg.hop_up_max, aeg.hop_up_dial],
 			["AEG Rifle", &"electric", ReplicaConfig.FireMode.AUTO, 0.3, 0.65])
 	assert_eq([pistol.display_name, pistol.power, pistol.default_fire_mode, pistol.hop_up_max, pistol.hop_up_dial],
-			["GBB Pistol", &"gas", ReplicaConfig.FireMode.SEMI, 0.3, 0.5])
+			["GBB Pistol", &"gas", ReplicaConfig.FireMode.SEMI, 0.19, 0.75])
 	assert_eq(numbers(aeg), [0.97, 0.25, 13.0, 60, 4, 1.8, 0.45, 0.45, 0.18])
 	assert_eq(numbers(pistol), [0.7, 0.2, 7.0, 18, 4, 1.0, 0.22, 0.65, 0.5])
 

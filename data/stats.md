@@ -101,15 +101,16 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
   30 % tighter than the AEG, and as tight as it from a standing hip. The quickest draw and reload of the rifles.
   Against that,
   0.85 J with 0.20 g BBs (302 fps; 0.75 J until PH2, owner 2026-11-12) stays within 15 cm of the aim line to 30 m as it
-  comes (31 m at its best hop-up, as before PH2: its hop-up tops out sooner, so the extra energy is a quicker BB, not
-  more reach; the AEG 39 m) and takes 0.56 s to fly 30 m (the AEG 0.52 s); a third wider spread aimed; 45 BBs a
+  comes (31 m at its best hop-up, as before PH2: its hop-up tops out at 0.135, 0.15 before, so the extra energy is a
+  quicker BB, not more reach; the AEG 39 m) and takes 0.56 s to fly 30 m (the AEG 0.52 s); a third wider spread aimed; 45 BBs a
   magazine, empty in 2.5 s with the trigger held; and no grip, barrel or magazine parts. Semi and full auto, no burst.
-- **GBB Pistol** (PH2, owner 2026-11-12: 0.70 J, a real green-gas pistol's, up from 0.52 J). 274 fps with 0.20 g BBs,
-  on the aim line to 30 m as it comes (27 m before) and 35 m at its best hop-up; Red Gas 0.77 J and 32 m, Black Gas
-  0.84 J and 33 m, about the Cyber Pistol's 33 m. Its hop-up comes at 50 % (55 % before): at 55 % a stronger gas is one
-  notch from over-hopping. What holds it to a sidearm is not reach now but its spread (0.65°, twice the Cyber
-  Pistol's), single shots, the hard kick and 18 BBs. On a cold field its gas gives a little back (27 m on Woodland at
-  night, PH1).
+- **GBB Pistol** (PH2, owner 2026-11-12: 0.70 J, a real green-gas pistol's, up from 0.52 J). 274 fps with 0.20 g BBs
+  (237 before; 20 m in 0.34 s against 0.39 s), on the aim line to 29 m as it comes (27 m before); Red Gas 0.77 J and
+  31 m, Black Gas 0.84 J and 32 m, each under the Cyber Pistol's 33 m. Its hop-up tops out at 0.19 (0.3 before) and
+  comes at 75 %: the extra energy is a quicker BB and a little reach as it comes, while the furthest it can be tuned
+  to, with any gas and any BB weight, stays about 37 m as before, under the Cyber Pistol's 38 m (untrimmed it reached
+  42 m on Black Gas with 0.32 g BBs, the AEG Rifle's ground). On a cold field its gas gives a little back (26 m on
+  Woodland at night, PH1). A loadout saved before PH2 keeps the lift its dial had (SavedLoadouts, version 2).
 
 ## Power sources
 

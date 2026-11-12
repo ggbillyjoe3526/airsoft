@@ -7,7 +7,7 @@
 - The GBB Pistol holds its aim line about 3 m less far on Woodland at night than at 20 °C.
 - The pause menu shows the field's air under the match line, such as "Air 16 °C · breeze 1.2 m/s" or "Air 20 °C · still air".
 - A map card's tooltip says whether the field is open to the breeze.
-- BB weights on the Loadout go up to 0.40 g, from 0.30 g. Heavier than 0.30 g only pays on the Sniper Rifle.
+- BB weights on the Loadout go up to 0.40 g, from 0.30 g. Heavier than 0.30 g pays on the Sniper Rifle and the AEG Rifle; the pistols lose reach with it.
 - The site energy limit is read with the BBs you load, so a heavier BB can no longer push a replica past its limit.
 
 ### Hits on running targets
