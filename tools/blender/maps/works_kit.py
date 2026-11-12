@@ -50,8 +50,8 @@ PAINT = {
     "rust_dark": 0x4c423c,
     # the works track: creosoted sleepers, the rails' rusty webs and their worn heads
     "sleeper": 0x5c5248,
-    "rail": 0x5a5048,
-    "rail_head": 0x8e8a84,
+    "rail": 0x7c7c7a,
+    "rail_head": 0xa6a6a4,
     # wheels and their axle boxes
     "wheel": 0x4a4644,
     # loads: spoil (clay and broken concrete), ballast stones, tarpaulin, concrete sleepers
@@ -183,24 +183,19 @@ class Kit(rk.Kit):
 
     def works_track(self, x0: float, x1: float, gauge: float = 0.9, sleeper_len: float = 1.5, pitch: float = 0.62,
                     stops: bool = False) -> float:
-        """A length of the contractor's works track from x0 to x1: timber sleepers on the ground (z 0), two flat-bottom
-        rails `gauge` apart (between their middles), a timber stop block bolted over each rail end. Returns the
-        rails' top (the wheels' tread line)."""
-        sh, sw = 0.06, 0.14  # thin timber sleepers: the contractor's track, light beside the running rails
-        n = max(2, int(round((x1 - x0) / pitch)))
-        span = (x1 - x0 - sw) / n
-        for i in range(n + 1):
-            x = x0 + sw * 0.5 + i * span
-            jitter = 0.04 * math.sin(i * 2.3 + x0)
-            self.blk((x - sw * 0.5, -sleeper_len * 0.5 + jitter, 0.0), (x + sw * 0.5, sleeper_len * 0.5 + jitter, sh),
-                     "sleeper")
-        top = sh + 0.062
+        """A length of the contractor's works track from x0 to x1: two flat-bottomed grey steel rails `gauge` apart
+        (between their middles) lying on the ground (z 0), a timber stop block bolted over each rail end when `stops`.
+        No sleepers, like the station's own track (owner, 2026-11-12: no planks, rails easy to see against the dark);
+        `sleeper_len` and `pitch` are kept for the callers. Returns the rails' top (the wheels' tread line)."""
+        sh = 0.0
+        top = 0.1
         for s in (-1.0, 1.0):
             y = s * gauge * 0.5
-            self.prism([(y - 0.04, sh), (y + 0.04, sh), (y + 0.008, sh + 0.016), (y + 0.008, top - 0.02),
-                        (y + 0.022, top - 0.014), (y - 0.022, top - 0.014), (y - 0.008, top - 0.02),
-                        (y - 0.008, sh + 0.016)], "x", x0, x1, "rail")  # the flat-bottomed rail: foot, web, head
-            self.blk((x0, y - 0.022, top - 0.014), (x1, y + 0.022, top), "rail_head")
+            self.prism([(y - 0.045, sh), (y + 0.045, sh), (y + 0.045, sh + 0.008), (y + 0.01, sh + 0.02),
+                        (y + 0.01, top - 0.026), (y + 0.026, top - 0.018), (y - 0.026, top - 0.018),
+                        (y - 0.01, top - 0.026), (y - 0.01, sh + 0.02), (y - 0.045, sh + 0.008)], "x", x0, x1,
+                       "rail")  # the flat-bottomed rail: foot, web, head
+            self.blk((x0, y - 0.026, top - 0.018), (x1, y + 0.026, top), "rail_head")
             if stops:
                 for x, d in ((x0, 1.0), (x1, -1.0)):
                     xa, xb = (x, x + d * 0.16) if d > 0 else (x + d * 0.16, x)
@@ -345,6 +340,11 @@ def underframe(k: Kit, hl: float, hw: float, axle_x: float, wheel_r: float, rail
             k.blk((xb - 0.025, s * 0.45 - 0.04, zc - 0.09), (xb + 0.025, s * 0.45 + 0.04, zc + 0.09), paint)
         k.blk((xb - 0.015, -0.45, zc - 0.015), (xb + 0.015, 0.45, zc + 0.015), paint)  # the brake beam
     return z1
+
+
+def rail_steel(p: Vector, c: tuple) -> tuple:
+    """A works rail's grey steel, a little dust on it, kept light so the rails read against the dark track bed."""
+    return wt.mix(c, lin(DUST), 0.2 * wt.fbm(p, 0.3, 71))
 
 
 def bake(ob: bpy.types.Object, weather=None, jitter: dict = None, seed: int = 1) -> None:

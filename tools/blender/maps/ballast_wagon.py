@@ -106,7 +106,9 @@ def weather(p: Vector, n: Vector, c: tuple, paint: str) -> tuple:
     if paint in ("ballast", "ballast_dark"):
         col = wt.mix(c, wk.lin("ballast_dark"), 0.5 * wt.fbm(p, 0.06, 31))
         return wt.scale(col, 0.75 + 0.5 * wt.fbm(p * 7.0, 0.05, 33))  # a speckle: stone by stone, light and dark
-    if paint in ("rail", "wheel", "rust"):
+    if paint in ("rail", "rail_head"):
+        return wk.rail_steel(p, c)
+    if paint in ("wheel", "rust"):
         return wk.grime(p, n, wk.rusty(p, n, c, seed=7, amount=0.4, streaks=False), seed=2)
     return wk.grime(p, n, c, seed=4)
 

@@ -249,8 +249,10 @@ func test_strips_lie_on_the_platforms_and_the_rails_low_on_the_track_bed() -> vo
 		var mid := (t.from + t.to) * 0.5
 		var style := m.station.style_at(Vector3(mid.x, t.y + 0.05, mid.y))
 		assert_true(style == &"track" or style == &"tunnel", "a track in a track or a tunnel (%s)" % style)
-	var top := look.sleeper_size.y + look.rail_size.y
+	var top := (look.sleeper_size.y if look.sleepers else 0.0) + look.rail_size.y
 	assert_lt(top, tuning.body.max_step, "a rail stands lower than a step")
+	assert_false(look.sleepers, "the owner's track: rails on the ballast, no sleepers")
+	assert_gte(look.rail_size.y, 0.1, "rails high enough to see against the dark")
 
 
 func test_low_drops_the_relief() -> void:

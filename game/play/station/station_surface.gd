@@ -151,7 +151,7 @@ static func _middle(f: PackedVector3Array) -> Vector3:
 	return sum / float(f.size())
 
 
-## A stretch of track: sleepers every `sleeper_pitch` m on the ballast and two rails along them, end to end.
+## A stretch of track: two rails end to end on the ballast (on sleepers every `sleeper_pitch` m if the look has them).
 static func _add_track(st: SurfaceTool, look: StationLook, t: StationDressing.Track) -> void:
 	var along := t.to - t.from
 	var length := along.length()
@@ -159,17 +159,20 @@ static func _add_track(st: SurfaceTool, look: StationLook, t: StationDressing.Tr
 		return
 	var x := Vector3(along.x, 0.0, along.y) / length
 	var frame := Transform3D(Basis(x, Vector3.UP, x.cross(Vector3.UP)), Vector3(t.from.x, t.y, t.from.y))
-	var sl := look.sleeper_size
-	var count := maxi(1, floori(length / look.sleeper_pitch))
-	var start := (length - float(count - 1) * look.sleeper_pitch) * 0.5
-	for i in count:
-		var at := start + float(i) * look.sleeper_pitch
-		_add_box(st, look, frame, Vector3(at - sl.z * 0.5, 0.0, -sl.x * 0.5), Vector3(at + sl.z * 0.5, sl.y, sl.x * 0.5),
-				&"sleeper")
+	var base := 0.0
+	if look.sleepers:
+		var sl := look.sleeper_size
+		base = sl.y
+		var count := maxi(1, floori(length / look.sleeper_pitch))
+		var start := (length - float(count - 1) * look.sleeper_pitch) * 0.5
+		for i in count:
+			var at := start + float(i) * look.sleeper_pitch
+			_add_box(st, look, frame, Vector3(at - sl.z * 0.5, 0.0, -sl.x * 0.5),
+					Vector3(at + sl.z * 0.5, sl.y, sl.x * 0.5), &"sleeper")
 	var r := look.rail_size
 	for side: float in [-0.5, 0.5]:
 		var z := side * look.gauge
-		_add_box(st, look, frame, Vector3(0.0, sl.y, z - r.x * 0.5), Vector3(length, sl.y + r.y, z + r.x * 0.5), &"rail")
+		_add_box(st, look, frame, Vector3(0.0, base, z - r.x * 0.5), Vector3(length, base + r.y, z + r.x * 0.5), &"rail")
 
 
 static func _add_box(st: SurfaceTool, look: StationLook, frame: Transform3D, lo: Vector3, hi: Vector3,

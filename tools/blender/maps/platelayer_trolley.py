@@ -124,7 +124,9 @@ def weather(p: Vector, n: Vector, c: tuple, paint: str) -> tuple:
         if p.z > HIGH - 0.06:  # the rail worn bare where it's pushed
             col = wt.mix(col, wk.lin("steel_bare"), 0.45 * wt.fbm(p, 0.06, 15))
         return wk.grime(p, n, col, seed=6)
-    if paint in ("rail", "wheel", "rust", "skip_grey"):
+    if paint in ("rail", "rail_head"):
+        return wk.rail_steel(p, c)
+    if paint in ("wheel", "rust", "skip_grey"):
         return wk.grime(p, n, wk.rusty(p, n, c, seed=7, amount=0.4, streaks=False), seed=2)
     return wk.grime(p, n, c, seed=4)
 

@@ -144,7 +144,9 @@ def weather(p: Vector, n: Vector, c: tuple, paint: str) -> tuple:
     if paint == "tarp":
         col = wt.mix(c, wk.lin(wk.GRIME), 0.3 * wt.fbm(p, 0.3, 53))  # stains in the folds
         return wt.mix(col, wk.lin(wk.DUST), max(0.0, n.z) * 0.25 * wt.fbm(p, 0.5, 55))
-    if paint in ("rail", "wheel", "rust"):
+    if paint in ("rail", "rail_head"):
+        return wk.rail_steel(p, c)
+    if paint in ("wheel", "rust"):
         return wk.grime(p, n, wk.rusty(p, n, c, seed=7, amount=0.4, streaks=False), seed=2)
     return wk.grime(p, n, c, seed=4)
 

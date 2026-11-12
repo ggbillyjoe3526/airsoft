@@ -174,7 +174,9 @@ def weather(p: Vector, n: Vector, c: tuple, paint: str) -> tuple:
     if paint == "spoil":
         col = wt.mix(c, wk.lin("spoil_dark"), 0.7 * wt.fbm(p, 0.15, 21))
         return wt.mix(col, wk.lin("concrete_dark"), 0.35 * wt.smooth(0.6, 0.8, wt.fbm(p, 0.08, 23)))
-    if paint in ("rail", "wheel", "rust"):
+    if paint in ("rail", "rail_head"):
+        return wk.rail_steel(p, c)
+    if paint in ("wheel", "rust"):
         return wk.grime(p, n, wk.rusty(p, n, c, seed=7, amount=0.4, streaks=False), seed=2)
     return wk.grime(p, n, c, seed=4)
 

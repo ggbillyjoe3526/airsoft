@@ -42,6 +42,10 @@ the switch cabinet. Each is built from the owner's photos in `art/references/map
   - The trolley is works yellow. The photos show red, but every red tried read as a team's hue.
   - The engineering wagon is a loaded flat wagon, the model list's gap default.
   - The cabinets are shut and the booth blinds are down, because the station is abandoned.
+- **The train track** (owner, 2026-11-12: "remove the wooden planks; make the train rails slightly thicker/higher and
+  slightly grey so they are easy to see against the dark"): the station's track has no sleepers now
+  (`StationLook.sleepers`, off), its rails are 0.09 x 0.12 m (were 0.07 x 0.08) in light grey painted steel. The works
+  track under the wagons and trolleys lost its timber sleepers too, its rails grey to match.
 - **Facing** (shared with SM3's benches): a block may name `facing` (`+x`, `-x`, `+z` or `-z`), the world direction its
   model's front points. FIT then turns the model that way, its width across the front, instead of toward the field's
   middle (`MapData.Block.facing`, `PropLayout._fit_facing`, `tests/unit/test_sm4_facing.gd`). The booths face the
