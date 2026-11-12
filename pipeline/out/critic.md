@@ -1,40 +1,38 @@
-Task: MQ1 · Replicas made of steel, aluminium, polymer and wood
-Attempt: 1 of 4
-Head: 4ae2546 (checks passed on it; matches `git rev-parse HEAD`)
-Checks: 1 ✗ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✗ | 8 ✓
-Score: 6/8 → Retry (judgment; not a near miss, blocking check 1 fails)
+Task: MQ1 · Replicas made of steel, aluminium and polymer
+Attempt: 2 of 4
+Head: f0298f3 (checks passed on it; it is `git rev-parse HEAD`. The performance report was written on 6029fe9, and only test_mq1_qa.gd and the two reports changed after it.)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
+Score: 8/8 → Accept
 
-Failed checks, with evidence (each one judgment):
+Failed checks, with evidence: none.
 
-1. [judgment] The models rule applies because all five .glb files changed. Parts (a) and (c) pass. Parts (b) and (d) fail on the renders.
-   - (a) I measured before and after on the same angle: overall length, handguard, magazine drop, stock and slide. All are within 1 % (AEG 904/906 px, handguard 218/220 px). No owner reference photo was in the brief, so proportions are only checked against the approved shapes.
-   - (d) bar, AEG/SMG/Sniper/Cyber: in 01, 03, 04 and 05 the BEFORE and AFTER pictures are almost the same. The Cobalt AEG handguard and the sniper rail are tagged aluminium, but they read as the same flat blue plastic. There is no sharp highlight on the rail edges or the barrel and no anodised sheen. The Tan AEG handguard and stock read as cream plastic. The SMG's "steel receiver" is the old flat black. This is not AAA work and does not meet "more realistic detail and surfaces". Cause: metallic 0.7–0.75 with roughness 0.44–0.52 and relief 0.07–0.16 is too soft to show (game/config/replica_surfaces.gd:42-50). The paint is the metal's albedo, so a coated part shines like coloured chrome or not at all, never like a clear coat over metal (game/play/replica_surface.gdshaderinc:+442-445).
-   - (b) GBB slide (02): stretch 10 on the side projection smears the brushed grain over the serrations. The close-up shows streaked, stretched texels and scratch lines that cut through the serration faces (replica_surface.gdshaderinc:+413-414, replica_surfaces.gd:44).
-   - (d) GBB realism: a real coated slide is matte nitride or cerakote, not brushed stainless. The Ghost (white) slide turns silver, so the paint's colour is lost on the part players see most. In Tan, slide and frame read as one material.
-   - (d) Sniper: in Tan the barrel is tan-painted metal. The owner said "barrel is metal", which should read as dark steel in any paint. The wood option (not shipped) is evenly spaced straight stripes, like a decal: no cathedral figure, no pores, no varying ring width. The cheek insert keeps the paint's colour on the wood.
+Basis for each check:
+1. I judged the models from renders 01 to 06. The record names no reference photos, so proportions are checked BEFORE against AFTER. The silhouettes are identical: AEG length 738/740 px, handguard, magazine drop, stock and slide all within 1 %, and the poses are unchanged.
+   - Attempt-1 must-fixes, all met:
+     - Black metal is the darkest part, with a satin highlight. This is visible on the GBB Black slide, the SMG magazine and the sniper barrel.
+     - The Ghost slide is off-white satin, not silver, and no grain smears over the serrations (replica_surfaces.gd:+44 sets stretch 1 on steel).
+     - The sniper barrel and its thread cap are dark steel in Tan (sniper.py:+552, +565).
+     - The polymer tones are the owner's (polymer gain 0.72 with bold_keeps 1, replica_surfaces.gd:+40-41).
+   - The owner called these renders "Excellent" (15:34).
+2. No contract changed. CC0_ASSETS › Surfaces is updated to the 16 slots.
+3. No per-frame allocation. dress() sets four prebuilt tables once per material (replica_surfaces.gd:+107-110). The shader adds ALU work and no texture fetches (replica_surface.gdshaderinc:+116-123).
+4. test_metal_keeps_a_light_paints_colour_and_only_bare_metal_is_brushed (test_replica_surfaces.gd:+109) fails without the attempt-2 change: there was no `light_keeps`, `floor` or `kind_shine`, and steel had stretch 10.
+5. Shader constants are named (LIGHT_PAINT, LUMA, CHROMA_FLOOR, gdshaderinc:+63-66). The presentation is only shaders and materials, and every variable is statically typed.
+6. Coated satin steel, matte polymer and no markings fit "toys, not firearms". Bots keep flat paints.
+7. The renames are complete (`_surfaced`, `MAX_SURFACED`, `surface_materials`), OWN_GLOW is gone, z_clip_scale now sits before the tables, and the Lossless import has a written reason.
+8. The scope is MQ1: wood is used by no replica, as the owner ruled. DECISIONS, the wiki and the record are updated. The changelog note is still due at pipeline step 6, after the critic.
 
-7. [judgment] Names that no longer read:
-   - `_worn`, `worn_materials()` and `apply(..., worn)` now mean "surfaced", worn or not (game/play/replica_paint.gd:+186, +198, +298).
-   - `OWN_GLOW := 1.0` multiplies by one and does nothing (replica_paint.gd:+177).
-   - `z_clip_scale` is declared in the middle of the kind tables (replica_surface.gdshaderinc:+349).
-   - The grain texture is imported Lossless, not VRAM compressed (replica_grain.png.import:18). That needs a written reason.
+Advisories (not blocking):
+- game/play/replica_wear.gdshader is dead code now. Add it to KNOWN_ISSUES or to the owner's sweep list so it isn't lost.
+- AEG rail tops (render 01, the Cobalt pair) catch the overhead box as a white and black checker. It is physically plausible, but at hip it could read as aliasing.
+- Renders 03 and 06 of the Compact SMG show only the hands' copy. A bot's copy is still flat by design.
 
-Other items:
-- The committed pipeline/out/performance.md at head is SM5B's. MQ1's report exists only as an uncommitted edit, so commit it with the records.
-- qa-report.md still says "QA commit PENDING".
-- The wiki line "The AEG Rifle and the GBB Pistol look lightly used" (docs/wiki/Replicas.md, the hunk at +114) contradicts CC0_ASSETS.md, which now says the Compact SMG wears too.
+Must-fix for the next attempt: none.
 
-Must-fix for the next attempt:
-- Make the metal read as metal. Draw coated steel and aluminium as a clear coat over metal: dielectric paint colour plus a tight metal specular lobe, a lower roughness (about 0.25–0.35), and a strong highlight on edges and rails. Hit a visible difference in every BEFORE/AFTER pair.
-- Give the Glock-style slide a matte coated finish in the paint's colour instead of brushed silver. Keep brushing for bare parts only, and kill the stretch smear on faces across the bore.
-- Keep steel barrels dark steel in any paint.
-- Give the wood real figure: irregular ring spacing, pores, a cathedral pattern on the flats. Leave the cheek insert unpainted or make it wood.
-- Re-render the same six sheets and judge each pair side by side. Then rename `_worn` and its family and fix the import and the stale wiki line.
-
-Owner should test in the game:
-1. AEG (Cobalt, Tan) at inspect in the Depot and Subway: do the receiver and handguard read as metal and the grip as plastic?
-2. GBB Ghost and Tan: is a silver or brushed slide what you want, or a coated slide in the paint's colour?
-3. Close to a wall and aiming down sights: any grain shimmer or crawling on the slide and handguard?
-4. Sniper in Tan: is a tan barrel acceptable? Is wood or polymer the stock you want?
-5. Customise pictures and turntable: do the metal reflections look like a studio or like grey plastic?
-6. First equip of each replica: any hitch (shader prewarm)?
+Owner should test in the game (Forward+, on a GPU):
+1. GBB Pistol in its default paint, hip and inspect in the Depot: does the slide stay in the paint's colour, or go grey as it did in the Compatibility render 06?
+2. AEG Rifle at hip in Cobalt: do the rail teeth shimmer or crawl as you move?
+3. Black replicas under the Subway's dim light: is black metal still darker than black polymer but never pure black?
+4. Customise pictures and turntable: do the soft studio panels give believable streaks on rails and barrels?
+5. Cyber Pistol: does the white coated shell's fine grain look like a finish or like noise up close?
+6. First equip of each replica on the Low preset: any hitch, and is the frame time fine with the grain fetches?

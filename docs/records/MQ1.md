@@ -1,13 +1,13 @@
 # MQ1 · Replicas made of steel, aluminium and polymer
 
-**Review:** 2 attempts · critic Accept N/8 · qa Pass · performance Pass
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | Fable 5.2 (model quality thread) | ✓ | 6/8 Retry (QA Pass, performance Pass) | Judgment, checks 1 and 7: the before and after pictures were too alike (metal too soft to read as metal), the pistol's brushed slide smeared over its serrations and turned silver in Ghost, the sniper's barrel took the paint, the wood option read as a decal; `_worn` names, a dead constant, the grain's import had no written reason |
-| 2026-11-12 | 2 | Fable 5.2 (model quality thread) | ✓ | N/8 Accept (QA Pass, performance Pass) | – |
+| 2026-11-12 | 2 | Fable 5.2 (model quality thread) | ✓ | 8/8 Accept (QA Pass, performance Pass) | – |
 
 ## What changed
 
@@ -100,6 +100,8 @@ says how it behaves in the light. Shapes, triangles, sizes, grip points and game
 
 ## Known issues left
 
+- The critic's advisories (the unused wear shader, the AEG's rail teeth catching a lamp as a checker) and the
+  performance advisory below are one row in docs/KNOWN_ISSUES.md (Art, playtest).
 - The surface shader reads the grain seven times a fragment on the replica in your hands (performance, advisory):
   not measurable without a GPU here; a play check is on the Dev 3 checklist. No quality preset turns it down yet.
 
