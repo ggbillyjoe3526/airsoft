@@ -39,6 +39,11 @@ GAP_LINE = 0.1
 WORDS = "MIND THE GAP"
 WORDS_HEIGHT = 0.24
 WORDS_EVERY = 12.0
+# The stairs' and escalators' heads and feet (SD2): a tactile strip across the floor just off each end, this deep and
+# this far from the end (m).
+HEADS = ["esc_up", "esc_low", "stair1", "stair2"]
+HEAD_DEPTH = 0.4
+HEAD_GAP = 0.2
 # The tracks' centre lines (z) and the areas whose rooms on the track bed carry them.
 LINES = [(-10.75, ("North track", "North tunnel")), (10.75, ("South track", "South tunnel"))]
 
@@ -92,6 +97,18 @@ def strips(L, lift: float) -> list[dict]:
         for finish, a, b in (("coping", 0.0, COPING), ("gap_line", COPING, COPING + GAP_LINE)):
             z0, z1 = sorted((edge + inward * a, edge + inward * b))
             out.append({"finish": finish, "x0": rm["x0"], "x1": rm["x1"], "z0": r(z0), "z1": r(z1), "y": y})
+    return out
+
+
+def heads(L, lift: float) -> list[dict]:
+    """A tactile strip on the floor off each end of each flight in HEADS, across its width."""
+    out = []
+    by_name = {rm["name"]: rm for rm in L.rooms}
+    for name in HEADS:
+        rm = by_name[name]
+        for x, y, way in ((rm["x0"], rm["ya"], -1), (rm["x1"], rm["yb"], 1)):
+            a, b = sorted((x + way * HEAD_GAP, x + way * (HEAD_GAP + HEAD_DEPTH)))
+            out.append({"finish": "tactile", "x0": r(a), "x1": r(b), "z0": rm["z0"], "z1": rm["z1"], "y": r(y + lift)})
     return out
 
 
@@ -168,5 +185,5 @@ def vaults(L, lift: float, thick: float) -> list[dict]:
 
 
 def dress(L, floor_at, ceil_at, lift: float, thick: float) -> dict:
-    return {"zones": zones(L, floor_at, ceil_at, lift, thick), "strips": strips(L, lift), "words": words(L, lift),
-            "tracks": tracks(L, lift), "vaults": vaults(L, lift, thick), "trims": trims(L, lift)}
+    return {"zones": zones(L, floor_at, ceil_at, lift, thick), "strips": strips(L, lift) + heads(L, lift),
+            "words": words(L, lift), "tracks": tracks(L, lift), "vaults": vaults(L, lift, thick), "trims": trims(L, lift)}

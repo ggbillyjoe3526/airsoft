@@ -64,7 +64,7 @@ func test_subway_names_its_station_and_the_other_maps_none() -> void:
 	var m := _map("subway")
 	assert_not_null(m.station, "Subway is station-dressed")
 	assert_gt(m.station.zones.size(), 60, "its rooms' air")
-	assert_eq(m.station.strips.size(), 4, "two strips on each platform's edge")
+	assert_eq(m.station.strips.size(), 12, "two strips on each platform's edge, one off each end of four flights (SD2)")
 	assert_eq(m.station.tracks.size(), 4, "both lines, either side of the trains")
 	assert_eq(m.warnings.filter(func(w: String) -> bool: return w.contains("station")), [], "no warnings")
 	for id: String in ["depot", "woodland", "range"]:
@@ -94,7 +94,7 @@ func test_every_style_the_map_names_is_one_the_look_knows() -> void:
 
 func test_each_face_takes_its_room_s_finish() -> void:
 	var m := _map("subway")
-	assert_eq(_finish_at(m, Vector3(-45.0, 18.9, 5.0), Vector3.UP), &"terrazzo", "the ticket hall's floor")
+	assert_eq(_finish_at(m, Vector3(-45.0, 18.9, 5.0), Vector3.UP), &"hall_floor", "the ticket hall's floor, plain")
 	assert_eq(_finish_at(m, Vector3(-62.0, 20.0, 0.0), Vector3.RIGHT), &"wall_tile", "the ticket hall's west wall")
 	assert_eq(_finish_at(m, Vector3(-50.0, 24.9, 0.0), Vector3.DOWN), &"plaster", "the ticket hall's ceiling")
 	assert_eq(_finish_at(m, Vector3(0.0, 0.9, -7.0), Vector3.UP), &"platform_floor", "the north platform")
@@ -247,7 +247,10 @@ func test_strips_lie_on_the_platforms_and_the_rails_low_on_the_track_bed() -> vo
 	var m := _map("subway")
 	for s in m.station.strips:
 		var mid := Vector3(s.area.get_center().x, s.y + look.strip_lift, s.area.get_center().y)
-		assert_eq(m.station.style_at(mid + Vector3.UP * 0.05), &"platform", "a %s strip on a platform" % s.finish)
+		var style := m.station.style_at(mid + Vector3.UP * 0.05)
+		# a platform's edge strips, or a flight's head and foot (SD2: in the room it opens onto)
+		assert_true(style == &"platform" or (s.finish == &"tactile" and style in [&"hall", &"passage"]),
+				"a %s strip on a platform or off a flight's end (%s)" % [s.finish, style])
 		assert_almost_eq(m.floor_under(mid.x, mid.z, s.y + 0.5), s.y, 0.01, "on its floor")
 	for t in m.station.tracks:
 		assert_almost_eq(t.y, 0.0, 0.001, "on the track bed")
