@@ -38,6 +38,7 @@ LOW_W = 0.06         # and where its lip starts
 LIP_Y = -0.128       # where the lip flares out
 FOOT = -0.14         # the body's foot, where the diffuser and the cage hang from it
 FOOT_W = 0.074       # half the lip's width
+LIP_OVER = 0.03      # how far the lip runs on past each end of the body
 LENS_HALF = 0.735    # half the diffuser's length
 LENS_W = 0.062       # half the diffuser's width at the body
 LENS_D = 0.08        # its depth under the body's foot
@@ -53,15 +54,17 @@ WIRE_RISE = 0.0045   # its crest over that
 
 def strip_lamp() -> sk.Mesh:
     m = sk.Mesh("strip_lamp")
-    # The body: a profile in (y, z), counter-clockwise seen from +x, open at its top (edge 3, under the ceiling);
-    # upright sides, a lip flaring out at its foot.
-    body = [(FOOT, FOOT_W), (FOOT, -FOOT_W), (LIP_Y, -LOW_W), (TOP, -SIDE_W), (TOP, SIDE_W), (LIP_Y, LOW_W)]
-    m.prism_x(body, -HALF, HALF, "black", open_edges=(3,))
+    # The body: a profile in (y, z), counter-clockwise seen from +x, open at its top (under the ceiling) and its foot;
+    # upright sides, on a lip flaring out at its foot that runs on past each end, as the photo's.
+    body = [(LIP_Y, -LOW_W), (TOP, -SIDE_W), (TOP, SIDE_W), (LIP_Y, LOW_W)]
+    m.prism_x(body, -HALF + LIP_OVER, HALF - LIP_OVER, "black", open_edges=(1, 3))
+    lip = [(FOOT, FOOT_W), (FOOT, -FOOT_W), (LIP_Y, -LOW_W), (LIP_Y, LOW_W)]
+    m.prism_x(lip, -HALF, HALF, "black", open_edges=(2,))
     # The diffuser filling the cage: pale glass down its sides and ends, the tube's glow along its floor.
     low = FOOT - LENS_D
     glass = [(FOOT, LENS_W), (low + 0.012, LENS_W - 0.003), (low, GLOW_W), (low, -GLOW_W),
              (low + 0.012, -LENS_W + 0.003), (FOOT, -LENS_W)]
-    m.prism_x(glass, -LENS_HALF, LENS_HALF, "glass", open_edges=(2, 5), smooth=True)
+    m.prism_x(glass, -LENS_HALF, LENS_HALF, "clear", open_edges=(2, 5), smooth=True)
     m.face_toward([(-LENS_HALF, low, GLOW_W), (LENS_HALF, low, GLOW_W), (LENS_HALF, low, -GLOW_W),
                    (-LENS_HALF, low, -GLOW_W)], (0.0, -1.0, 0.0), "lens", "Lens")
     # The cage: ten hoops down from the lip, under and up (their legs straps seen side on, the crossing a round bar),
@@ -101,10 +104,11 @@ S = 0.0675           # half the straight sides' length
 ARC = 9              # segments in each half circle (odd: its top and bottom on an edge's middle, not a point)
 FLANGE = 0.026       # the cast body's depth off the wall
 RIM = 0.008          # how far the body's front edge stands in from its back, round the glass
-DOME = ((0.052, 0.085),)   # the dome's front ring: radius, depth
-BARS = (-0.065, -0.014, 0.014, 0.065)      # the bars across, by height
+DOME = ((0.058, 0.084),)   # the dome's front ring: radius, depth
+BULGE = 0.002        # how far the glass's sides swell out between the body and the front
+BARS = (-S, -0.014, 0.014, S)      # the bars across, by height: the outer two over the glass's edges
 BAR_FRONT = 0.092    # how far out a bar crosses the front
-BAR_TURN = 0.062     # where a bar turns across the front (its half width there)
+BAR_TURN = 0.066     # where a bar turns across the front (its half width there)
 LUG = 0.009          # a screw lug's half width
 LUG_H = 0.014        # how far it stands past the rim
 
@@ -133,7 +137,15 @@ def tunnel_lamp() -> sk.Mesh:
         for i in range(n):
             j = (i + 1) % n
             glass = i in (ARC, n - 1) and b is rings[-1]
-            m.face([a[i], a[j], b[j], b[i]], "lens" if glass else "black", "Lens" if glass else "Prop", smooth=True)
+            if not glass:
+                m.face([a[i], a[j], b[j], b[i]], "black", smooth=True)
+                continue
+            # the glass down a straight side: two faces over a mid ring bulged out, a barrel, not a fold
+            out = -1.0 if i == ARC else 1.0
+            mi, mj = [((p[0] + q[0]) * 0.5 + out * BULGE, (p[1] + q[1]) * 0.5, (p[2] + q[2]) * 0.5 + BULGE * 0.3)
+                      for p, q in ((a[i], b[i]), (a[j], b[j]))]
+            m.face([a[i], a[j], mj, mi], "lens", "Lens", smooth=True)
+            m.face([mi, mj, b[j], b[i]], "lens", "Lens", smooth=True)
     # The front: rungs between the outline's left and right points, the middle (between the straight sides) glass.
     f = rings[-1]
     for k in range(ARC // 2 + 1):
@@ -159,12 +171,10 @@ def tunnel_lamp() -> sk.Mesh:
             (0.0, -top + 0.008, FLANGE * 0.6)]
     outs = [(0.0, 1.0, 0.2), (0.0, 0.6, 1.0), (0.0, -0.6, 1.0), (0.0, -1.0, 0.2)]
     m.wire(path, outs, 0.0032, 0.004, "black")
-    # A screw lug top and bottom: a round-ended ear off the body's rim, under the bar's end.
+    # A screw lug top and bottom: an ear off the body's rim, under the bar's end.
     for sgn in (1.0, -1.0):
         y0, y1 = sgn * (top - 0.004), sgn * (top + LUG_H)
-        mid = sgn * (top + LUG_H * 0.55)
-        m.face_toward([(-LUG, y0, 0.006), (LUG, y0, 0.006), (LUG, mid, 0.006), (0.0, y1, 0.006), (-LUG, mid, 0.006)],
-                      (0.0, 0.0, 1.0), "black")
+        m.face_toward([(-LUG, y0, 0.006), (LUG, y0, 0.006), (0.0, y1, 0.006)], (0.0, 0.0, 1.0), "black")
     return m
 
 

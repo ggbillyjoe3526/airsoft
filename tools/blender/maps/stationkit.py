@@ -31,7 +31,7 @@ PAINTS = dict(PALETTE)
 PAINTS.update({
     "black": 0x26262A, "charcoal": 0x3A3A3E, "zinc": 0x9A9AA0, "alu": 0xB4B4B8, "dark_alu": 0x6E6E74,
     "sign_black": 0x1E1E20, "red": 0x981C50, "dark_red": 0x601232, "brass": 0xA89A6A, "glass": 0x8C9294,
-    "bag": 0xB8BAB4, "bag_rim": 0xCFD0CA, "clock_rim": 0x2B4A3A, "lens": 0xFFFFFF, "white": 0xFFFFFF, "dust": 0x8A847A,
+    "clear": 0xC9D1D3, "bag": 0xB8BAB4, "bag_rim": 0xCFD0CA, "clock_rim": 0x2B4A3A, "lens": 0xFFFFFF, "white": 0xFFFFFF, "dust": 0x8A847A,
 })
 
 
