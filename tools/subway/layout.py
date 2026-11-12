@@ -24,7 +24,7 @@ G, C, P, T = 0.0, -10.0, -18.0, -18.9
 LANDING = -14.0
 TRAIN_IN = 2.4    # a car's height inside
 TUNNEL_H = 3.2    # platform tunnels and running tunnels: 0.5 m over a car's roof
-RUN_SPRING = 3.0  # where a running tunnel's arch springs over the track bed (RUN_VAULTS)
+RUN_SPRING = 2.7  # where a running tunnel's arch springs over the track bed (RUN_VAULTS)
 rooms: list[dict] = []
 blocks: list[dict] = []
 
@@ -201,8 +201,9 @@ block("barrier", T, -52, -51.5, 10.2, 12.5, 1.2)
 
 # ---------------- Running tunnels east, -18.9 m (Tunnel team's start) ----------------
 # Each running tunnel is arched to follow a car's rounded roof (owner, 2026-11-12: "curved/arched to closely match the
-# shape of the trains"): straight sides to RUN_SPRING over the track bed, just over a car's cant (1.95 m over its
-# floor), then an arch to the old roof, 0.5 m over a car's crown. Its west end opens onto its platform tunnel.
+# shape of the trains"): straight sides to RUN_SPRING over the track bed, 1.8 m over a car's floor where its sides
+# lean in, then an arch to the old roof, 0.5 m over a car's crown and about 0.15 m clear of its shoulders (SM1's car:
+# 1.55 m from its middle at 1.95 m over its floor, 1.3 m at 2.4 m). Its west end opens onto its platform tunnel.
 RUN_VAULTS = [dict(name="north_run", x0=50, x1=82, z0=-12.6, z1=-9, y=T + RUN_SPRING, low=P + TRAIN_IN,
                    rise=TUNNEL_H + 0.9 - RUN_SPRING, style="tunnel", finish="lining", mouth="west"),
               dict(name="south_run", x0=50, x1=82, z0=9, z1=12.6, y=T + RUN_SPRING, low=P + TRAIN_IN,
