@@ -1,0 +1,5 @@
+res://tests/unit/test_lift_view.gd
+Tests                11
+Passing Tests        11
+Asserts              46
+---- All tests passed! ----

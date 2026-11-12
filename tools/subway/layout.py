@@ -29,11 +29,14 @@ blocks: list[dict] = []
 
 
 def room(name: str, area: str, x0: float, x1: float, z0: float, z1: float, y: float, yb: float | None = None,
-         h: float = 3.0, seal: dict | None = None, ceil: bool = True, floor: bool = True, flat: bool = False) -> None:
+         h: float = 3.0, seal: dict | None = None, ceil: bool = True, floor: bool = True, flat: bool = False,
+         dress: str = "", vault: bool = False) -> None:
     """A room; a ramp room's ceiling follows its floor down in steps, or with `flat` stays level, `h` over its higher
-    end (a short flight of steps under a tunnel's roof)."""
+    end (a short flight of steps under a tunnel's roof). A ramp room's `dress` names the model laid over its ramps
+    (PropDressConfig, SET; SM2: an escalator bank or a stair), build_map.py writing it on each. A `vault` room has no
+    ceiling of its own: its walls stop `h` over its floor, where its platform tunnel's vault (VAULTS) springs."""
     rooms.append(dict(name=name, area=area, x0=x0, x1=x1, z0=z0, z1=z1, ya=y, yb=y if yb is None else yb, h=h,
-                      seal=seal or {}, ceil=ceil, floor=floor, flat=flat))
+                      seal=seal or {}, ceil=ceil, floor=floor, flat=flat, dress=dress, vault=vault))
 
 
 def block(kind: str, y: float, x0: float, x1: float, z0: float, z1: float, h: float, colour: int = 0,
@@ -56,15 +59,21 @@ block("pillar", G, -50.2, -49.2, -0.5, 0.5, 6.0)           # hall column in the 
 
 # The spiral stair's well: 5 x 5 m in the hall's north-east corner, down to the lower booking hall. Its flights are
 # built by build_map.py (SPIRAL); its rail round the hole in the hall floor here.
-SPIRAL = dict(x0=-43.0, x1=-38.0, z0=-10.0, z1=-5.0, flight=1.3, y0=C, y1=G, sides=10, top=6.0)
+SPIRAL = dict(x0=-43.0, x1=-38.0, z0=-10.0, z1=-5.0, flight=1.3, y0=C, y1=G, sides=10, top=6.0,
+              dress="spiral_stair")  # the model over its flights and landings, not the core (SM2)
 room("spiral", "Spiral stair", -43, -38, -10, -5, C, h=G - C + 0.01, ceil=False,
      seal={"n": [], "e": [], "w": [], "s": [(-39.4, -38.0)]})
 block("railing", G, -43.0, -38.0, -5.0, -4.88, 1.1)
 block("railing", G, -43.12, -43.0, -8.6, -4.88, 1.1)
 
-# Upper escalators: 10 m down at 1:2, a balustrade between the two.
-room("esc_up", "Escalators", -38, -18, -3.5, 3.5, G, C, h=3.2)
-block("barrier", None, -38, -18, -0.2, 0.2, 1.0)           # on the ramp: build_map.py follows its slope
+# Upper escalators: 10 m down at 1:2. Two escalators, each 1.2 m between its balustrades (two abreast, the owner
+# 2026-11-12), a wide deck between them with its uplighters and a deck from each to the wall. The decks are blocks on
+# the ramp: build_map.py follows its slope.
+ESC_LANE = 1.2
+ESC_MID = 0.6     # the middle deck's half width: as wide as an escalator, as in the photos
+room("esc_up", "Escalators", -38, -18, -3.5, 3.5, G, C, h=3.2, dress="escalator_upper")
+for z0, z1 in ((-3.5, -ESC_MID - ESC_LANE), (-ESC_MID, ESC_MID), (ESC_MID + ESC_LANE, 3.5)):
+    block("barrier", None, -38, -18, z0, z1, 1.0, dress="escalator_upper")
 
 # ---------------- Concourse, -10 m: close quarters ----------------
 room("bk_w", "Booking hall", -52, -43, -9.5, -1.2, C, h=4.0)
@@ -87,8 +96,9 @@ block("wall", C, -12.6, -11.4, 6.9, 9.5, 4.0)
 block("container", C, -12.4, -10.4, -2.6, 2.6, 2.8, 0x8a8478)  # shut newsagent's kiosk between the escalator banks:
 #                                                                no line from the lower hall up both flights
 # Lower escalators: 8 m down to the lower hall between the platform tunnels.
-room("esc_low", "Low escalators", -6, 10, -3, 3, C, P, h=2.8)
-block("barrier", None, -6, 10, -0.2, 0.2, 1.0)
+room("esc_low", "Low escalators", -6, 10, -3, 3, C, P, h=2.8, dress="escalator_lower")
+for z0, z1 in ((-3.0, -ESC_MID - ESC_LANE), (-ESC_MID, ESC_MID), (ESC_MID + ESC_LANE, 3.0)):
+    block("barrier", None, -6, 10, z0, z1, 1.0, dress="escalator_lower")
 room("npass", "North passage", -6, 20, -9.5, -6.5, C, h=3.0)
 room("spass", "South passage", -6, 20, 6.5, 9.5, C, h=3.0)
 for zs in (-1, 1):
@@ -111,16 +121,23 @@ block("crate", C, 22, 23.4, 3.4, 4.8, 1.4)
 block("barrier", C, 24.6, 25.2, -9.5, -7.5, 1.1)
 block("barrier", C, 24.6, 25.2, 7.5, 9.5, 1.1)
 # The stair: one ordinary staircase, -10 to -18, two flights and a half landing.
-room("stair1", "Stair", 27, 35, -1.6, 1.6, C, LANDING, h=3.0)
+room("stair1", "Stair", 27, 35, -1.6, 1.6, C, LANDING, h=3.0, dress="platform_stair")
 room("landing", "Stair landing", 35, 37.5, -1.6, 1.6, LANDING, h=3.0)
-room("stair2", "Stair", 37.5, 45.5, -1.6, 1.6, LANDING, P, h=3.0)
+room("stair2", "Stair", 37.5, 45.5, -1.6, 1.6, LANDING, P, h=3.0, dress="platform_stair")
 
 # ---------------- Platforms, -18 m, and the track bed, -18.9 m ----------------
-room("plat_n", "North platform", -52, 47, -9, -5.5, P, h=TUNNEL_H)
-room("plat_n_end", "North platform", 47, 50, -7.5, -5.5, P, h=TUNNEL_H)
-room("endramp_n", "North platform", 47, 50, -9, -7.5, P, T, h=TUNNEL_H, flat=True)
+# Each platform shares one deep-level tunnel with its track, London style (owner, 2026-11-12: "curved ceilings for the
+# platforms"): the platform's back wall and the trackside wall rise to TUNNEL_H over the platform, and a barrel vault
+# VAULT_RISE m high spans the two (VAULTS; build_map.py builds it, StationSurface draws it curved). Each vault's `y`
+# is where it springs, its `low` a standing car's ceiling: the air over a car's roof is the vault's too.
+VAULT_RISE = 2.5
+VAULTS = [dict(name="north", x0=-52, x1=50, z0=-12.5, z1=-5.5, y=P + TUNNEL_H, low=P + TRAIN_IN),
+          dict(name="south", x0=-52, x1=50, z0=5.5, z1=12.5, y=P + TUNNEL_H, low=P + TRAIN_IN)]
+room("plat_n", "North platform", -52, 47, -9, -5.5, P, h=TUNNEL_H, vault=True)
+room("plat_n_end", "North platform", 47, 50, -7.5, -5.5, P, h=TUNNEL_H, vault=True)
+room("endramp_n", "North platform", 47, 50, -9, -7.5, P, T, h=TUNNEL_H, flat=True, vault=True)
 room("ramp_foot", "North tunnel", 50, 52, -9, -7.5, T, h=TUNNEL_H + 0.9)
-room("plat_s", "South platform", -52, 50, 5.5, 9, P, h=TUNNEL_H)
+room("plat_s", "South platform", -52, 50, 5.5, 9, P, h=TUNNEL_H, vault=True)
 # The track pits, 0.9 m under the platforms: no steps up (owner, 2026-11-10, CL1: "remove the trackside stairs"), a
 # body climbs out over a platform's edge (VaultConfig climb_depth) and drops back down; bots take the same links.
 TRACK_H = TUNNEL_H + 0.9
@@ -130,7 +147,7 @@ TRACK_Z = 10.75      # each track's middle line (z, the south one; the north one
 def track(name: str, area: str, x0: float, x1: float, z_edge: float, z_wall: float) -> None:
     """A stretch of track from x0 to x1 between the platform's edge (z_edge) and the tunnel wall (z_wall)."""
     lo, hi = sorted((z_edge, z_wall))
-    room(name, area, x0, x1, lo, hi, T, h=TRACK_H)
+    room(name, area, x0, x1, lo, hi, T, h=TRACK_H, vault=True)
 
 
 track("track_n_w", "North track", -52, -44, -9, -12.5)
@@ -248,10 +265,10 @@ LANES = {
           (-38.5, -3.5, C), (-37.0, -8.2, C), (-27, -7.7, C), (-15, -8.0, C), (-5, -8.0, C), (4, -7.2, C),
           (11, -7.8, C), (19, -7.5, C), (23.5, -6.5, C), (26, -0.0, C), (31, 0, -12.0), (36.2, 1.0, LANDING),
           (41.5, 0, -16.0)],
-    "m": [(-56, 0, G), (-44, 2.5, G), (-37, 2, G - 0.5), (-28, 2, -5.5), (-19, 2, C), (-10, 0, C),
-          (-5, 1.5, C), (2, 1.5, -14.0), (9, 1.5, -17.5), (13, 2, P), (19.7, 4.7, P), (26, 7.2, P), (36, 7.5, P),
+    "m": [(-56, 0, G), (-44, 2.5, G), (-37, 1.2, G - 0.5), (-28, 1.2, -5.5), (-19, 1.2, C), (-10, 0, C),
+          (-5, 1.2, C), (2, 1.2, -14.0), (9, 1.2, -17.5), (13, 2, P), (19.7, 4.7, P), (26, 7.2, P), (36, 7.5, P),
           (46.5, 7.0, P)],
-    "s": [(-56, 3, G), (-44, 4, G), (-37, -2, G - 0.5), (-28, -2, -5.5), (-19, -2, C), (-10, 6, C), (-5, 8, C),
+    "s": [(-56, 3, G), (-44, 4, G), (-37, -1.2, G - 0.5), (-28, -1.2, -5.5), (-19, -1.2, C), (-10, 6, C), (-5, 8, C),
           (4, 7.2, C), (11, 7.8, C), (19, 7.5, C), (23.5, 6.5, C), (26, 0.5, C), (31, -0.5, -12.0),
           (36.2, -1.0, LANDING), (41.5, 0, -16.0), (47, 0, P), (47, 4.5, P), (40, 7.3, P), (35.7, 7.3, P),
           (35.7, 10.75, P), (46, 10.75, P)],

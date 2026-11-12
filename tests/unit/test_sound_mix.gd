@@ -40,8 +40,12 @@ func test_the_field_bus_carries_the_world_and_the_interface_goes_round_it() -> v
 	assert_eq(AudioServer.get_bus_send(_bus(SoundMix.BUS_EFFECTS_FULL)), SimAudio.BUS_EFFECTS)
 	assert_eq(AudioServer.get_bus_send(_bus(SoundMix.BUS_POWER_HALF)), SimAudio.BUS_POWER)
 	assert_eq(AudioServer.get_bus_send(_bus(SoundMix.BUS_POWER_FULL)), SimAudio.BUS_POWER)
+	assert_eq(AudioServer.get_bus_send(_bus(SimAudio.BUS_SHOTS)), SimAudio.BUS_EFFECTS)
+	for bus: StringName in [SimAudio.BUS_POWER, SimAudio.BUS_MUFFLED, SoundMix.BUS_SHOTS_HALF, SoundMix.BUS_SHOTS_FULL]:
+		assert_eq(AudioServer.get_bus_send(_bus(bus)), SimAudio.BUS_SHOTS, "%s feeds Shots" % bus)
+		assert_lt(_bus(SimAudio.BUS_SHOTS), _bus(bus), "%s feeds an earlier bus" % bus)
 	for bus: StringName in [SoundMix.BUS_FIELD, SoundMix.BUS_EFFECTS_HALF, SoundMix.BUS_EFFECTS_FULL,
-			SoundMix.BUS_POWER_HALF, SoundMix.BUS_POWER_FULL]:
+			SoundMix.BUS_POWER_HALF, SoundMix.BUS_POWER_FULL, SoundMix.BUS_SHOTS_HALF, SoundMix.BUS_SHOTS_FULL]:
 		var i := _bus(bus)
 		assert_true(AudioServer.get_bus_effect(i, 0) is AudioEffectLowPassFilter, "%s has its low-pass" % bus)
 		# A bus can only feed one before it.

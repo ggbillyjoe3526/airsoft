@@ -190,8 +190,11 @@ var roof_lamp_states: PackedByteArray = PackedByteArray()
 ## Each roof lamp's height (m), in roof_lamps' order: the underside of the ceiling it hangs from (`y` in the file, MT1:
 ## a station's lamps on each level's own ceiling), roof_height for a lamp naming none.
 var roof_lamp_heights: PackedFloat32Array = PackedFloat32Array()
-## A plain roof (`roof.plain` in the file, MT1): its ceiling alone, no bays or trusses under it, and its lamps flat
-## panels (a station's strip lights) rather than the hall's high-bay model.
+## Each roof lamp's turn about up (radians), in roof_lamps' order (`turn` in the file, degrees, SM5: a station's strip
+## lamp runs along its room, turned a quarter in a room running along z); 0 for a lamp naming none.
+var roof_lamp_turns: PackedFloat32Array = PackedFloat32Array()
+## A plain roof (`roof.plain` in the file, MT1): its ceiling alone, no bays or trusses under it, and its lamps a
+## station's strip lights (RoofConfig.plain_lamp_model, SM5) rather than the hall's high-bay model.
 var roof_plain: bool = false
 ## The hinged doors (DO1), in file order: the simulation, the level and the view number them alike.
 var doors: Array[Door] = []
@@ -663,6 +666,7 @@ func _read_roof(raw: Variant) -> void:
 			warnings.append("a roof lamp's y %s is not over 0 and at most the roof's height; hung from the roof" % str(y))
 			y = height
 		roof_lamp_heights.append(y)
+		roof_lamp_turns.append(deg_to_rad(_number(at.get("turn"), 0.0)))
 		var state: Variant = at.get("state", "")
 		var kind: int = LAMP_STATES.find(str(state)) if state is String else -1
 		if kind < 0:

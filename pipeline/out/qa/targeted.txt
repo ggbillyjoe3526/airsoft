@@ -1,0 +1,44 @@
+== test_station_fixtures
+Tests                 8
+Passing Tests         8
+Asserts             439
+== test_station_dress
+Tests                19
+Passing Tests        19
+Asserts           19694
+== test_mt1
+Tests                 2
+Passing Tests         2
+Asserts               7
+== test_mt1_qa
+Tests                23
+Passing Tests        23
+Asserts             403
+== test_lamp_lights
+Tests                10
+Passing Tests        10
+Asserts             601
+== test_lamp_lights_qa
+Tests                 5
+Passing Tests         5
+Asserts              38
+== test_worn_lamps
+Tests                 8
+Passing Tests         8
+Asserts           12036
+== test_look
+Tests                22
+Passing Tests        22
+Asserts             210
+== test_depot_hall
+Tests                10
+Passing Tests        10
+Asserts              60
+== test_depot_hall_qa
+Tests                 8
+Passing Tests         8
+Asserts             240
+== test_site_dress
+Tests                14
+Passing Tests        14
+Asserts             152

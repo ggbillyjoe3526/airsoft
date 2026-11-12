@@ -1,8 +1,9 @@
 class_name StationSurface
 extends RefCounted
 ## A station dress's surfaces (MT3, Subway): the level's very block faces (GreyboxFaces, in its order) drawn in the
-## CC0 photo sets StationLook gives each face, with the platforms' edge strips and the track's rails and sleepers, as
-## one mesh in one material (station_surface.gdshader). MapLevel draws it in place of the greybox's mesh; the colliders,
+## CC0 photo sets StationLook gives each face, with the platforms' edge strips and painted words, the track's rails and
+## sleepers and the platform tunnels' curved vaults (TB1: drawn in place of their colliders' boxes), as one mesh in one
+## material (station_surface.gdshader). MapLevel draws it in place of the greybox's mesh; the colliders,
 ## the nav, the shadow's shape and the sight lines are the blocks', unchanged: a strip lies `strip_lift` over its floor
 ## and the track's rails and sleepers are scenery (no collider). Static functions only; build time, never per frame.
 
@@ -36,9 +37,9 @@ static func material(look: StationLook) -> ShaderMaterial:
 
 
 ## `m`'s blocks (as the greybox draws them: no see-through block, no bar railing's box), the ground beyond the walls,
-## its station's strips and its track, each face in its finish. A block `props` draws as its model (SD1: one naming a
-## model, PropDressConfig.named_only) is left out, its model standing in its box; a lined (TILE) or cored one keeps
-## its box.
+## its station's strips, words, track and vaults, each face in its finish. A block `props` draws as its model (SD1:
+## one naming a model, PropDressConfig.named_only) is left out, its model standing in its box; a lined (TILE) or cored
+## one keeps its box. A block in a vault's colliders (StationDressing.in_vault) is left out, the vault drawn instead.
 static func mesh(m: MapData, style: MapStyle, look: StationLook, props: PropDressConfig = null) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -49,6 +50,8 @@ static func mesh(m: MapData, style: MapStyle, look: StationLook, props: PropDres
 			continue
 		if props != null and props.dresses(b) and props.lay_of(b) != PropDressConfig.Lay.TILE \
 				and props.core_of(b) == Vector2.ZERO:
+			continue
+		if not dress.vaults.is_empty() and dress.in_vault(AABB(b.center - b.size * 0.5, b.size)):
 			continue
 		var own := dress.owner_of(b)
 		var bottom := b.center.y - b.size.y * 0.5
@@ -66,8 +69,16 @@ static func mesh(m: MapData, style: MapStyle, look: StationLook, props: PropDres
 		var quad := PackedVector3Array([Vector3(a.position.x, y, a.position.y), Vector3(a.position.x, y, a.end.y),
 				Vector3(a.end.x, y, a.end.y), Vector3(a.end.x, y, a.position.y)])
 		add_face(st, look, quad, s.finish, look.tint_of(s.finish, null), NO_FLOOR)
+	for w in dress.words:
+		PlatformWords.add(st, look, w)
+	for t in dress.trims:
+		var tint := look.tint_of(t.finish, null)
+		for f in GreyboxFaces.box_faces(t.box.position, t.box.end):
+			add_face(st, look, f, t.finish, tint, NO_FLOOR)
 	for t in dress.tracks:
 		_add_track(st, look, t)
+	for v in dress.vaults:
+		add_vault(st, look, v)
 	st.generate_tangents()
 	return st.commit()
 
@@ -86,6 +97,93 @@ static func add_face(st: SurfaceTool, look: StationLook, f: PackedVector3Array, 
 		for p: Vector3 in [f[0], f[i + 1], f[i]]:
 			st.set_uv(plane_uv(p, n) / size)
 			st.add_vertex(p)
+
+
+## Appends vault `v`: its arc in `vault_steps` strips along its length, each vertex's normal pointing at the arc's
+## middle (smooth), the texture running along x and round the arc; and its two ends, each the shape between the arc
+## and its springing, `vault_proud` m in front of the shell's end behind it.
+static func add_vault(st: SurfaceTool, look: StationLook, v: StationDressing.TunnelVault) -> void:
+	var steps := maxi(look.vault_steps, 2)
+	var half := v.half_angle()
+	var c := v.circle()
+	var x0 := v.area.position.x
+	var x1 := v.area.end.x
+	var finish := look.vault_finish
+	var tint := look.tint_of(finish, null)
+	var pbr := look.pbr_of(finish)
+	var size := look.scale_of(finish)
+	st.set_color(tint.srgb_to_linear())
+	st.set_custom(0, Color(float(look.layer_of(finish)), pbr.y, pbr.x, NO_FLOOR))
+	for k in steps:
+		var a := -half + 2.0 * half * float(k) / float(steps)
+		var b := -half + 2.0 * half * float(k + 1) / float(steps)
+		var pa := v.point(a)
+		var pb := v.point(b)
+		var na := Vector3(0.0, -cos(a), -sin(a))
+		var nb := Vector3(0.0, -cos(b), -sin(b))
+		var sa := c.z * a
+		var sb := c.z * b
+		# The quad faces up (GreyboxFaces.face_normal), so its triangles are add_face's order reversed: drawn facing
+		# down into the tunnel.
+		var quad: Array[Vector3] = [Vector3(x0, pa.y, pa.x), Vector3(x0, pb.y, pb.x), Vector3(x1, pb.y, pb.x),
+				Vector3(x1, pa.y, pa.x)]
+		var normals: Array[Vector3] = [na, nb, nb, na]
+		var uvs: Array[Vector2] = [Vector2(x0, sa), Vector2(x0, sb), Vector2(x1, sb), Vector2(x1, sa)]
+		for i: int in [0, 1, 2, 0, 2, 3]:
+			st.set_normal(normals[i])
+			st.set_uv(uvs[i] / size)
+			st.add_vertex(quad[i])
+	_add_ribs(st, look, v)
+	for end: float in [x0 + look.vault_proud, x1 - look.vault_proud]:
+		var cap := PackedVector3Array()
+		for k in steps + 1:
+			var p := v.point(-half + 2.0 * half * float(k) / float(steps))
+			cap.append(Vector3(end, p.y, p.x))
+		# Facing into the tunnel: +x at its west end, -x at its east.
+		if (GreyboxFaces.face_normal(cap).x > 0.0) != (end < v.area.get_center().x):
+			cap.reverse()
+		add_face(st, look, cap, finish, tint, NO_FLOOR)
+
+
+## Vault `v`'s ribs: a band `vault_rib_width` m wide round the arc every `vault_rib_every` m along it, standing
+## `vault_rib_depth` m under it (the tunnel's lining rings), its underside and both sides drawn.
+static func _add_ribs(st: SurfaceTool, look: StationLook, v: StationDressing.TunnelVault) -> void:
+	if look.vault_rib_every <= 0.0 or look.vault_rib_width <= 0.0 or look.vault_rib_depth <= 0.0:
+		return
+	var steps := maxi(look.vault_steps, 2)
+	var half := v.half_angle()
+	var c := v.circle()
+	var inner := c.z - look.vault_rib_depth
+	var finish := look.vault_rib_finish
+	var tint := look.tint_of(finish, null)
+	var length := v.area.size.x
+	var count := floori((length - look.vault_rib_width) / look.vault_rib_every)
+	var first := v.area.position.x + (length - float(count) * look.vault_rib_every) * 0.5
+	for n in count + 1:
+		var xa := first + float(n) * look.vault_rib_every - look.vault_rib_width * 0.5
+		var xb := xa + look.vault_rib_width
+		for k in steps:
+			var a := -half + 2.0 * half * float(k) / float(steps)
+			var b := -half + 2.0 * half * float(k + 1) / float(steps)
+			var ia := Vector2(c.x + inner * sin(a), c.y + inner * cos(a))
+			var ib := Vector2(c.x + inner * sin(b), c.y + inner * cos(b))
+			var oa := v.point(a)
+			var ob := v.point(b)
+			# its underside, facing the tunnel's middle (each face anticlockwise seen from the side it faces)
+			_add_facing(st, look, [Vector3(xa, ia.y, ia.x), Vector3(xa, ib.y, ib.x), Vector3(xb, ib.y, ib.x),
+					Vector3(xb, ia.y, ia.x)], Vector3(0.0, -cos((a + b) * 0.5), -sin((a + b) * 0.5)), finish, tint)
+			for side: float in [xa, xb]:
+				_add_facing(st, look, [Vector3(side, oa.y, oa.x), Vector3(side, ob.y, ob.x), Vector3(side, ib.y, ib.x),
+						Vector3(side, ia.y, ia.x)], Vector3(signf(side - (xa + xb) * 0.5), 0.0, 0.0), finish, tint)
+
+
+## Appends quad `q` in `finish` facing `toward` (its corners' order turned round when they face away).
+static func _add_facing(st: SurfaceTool, look: StationLook, q: Array[Vector3], toward: Vector3, finish: StringName,
+		tint: Color) -> void:
+	var f := PackedVector3Array(q)
+	if GreyboxFaces.face_normal(f).dot(toward) < 0.0:
+		f.reverse()
+	add_face(st, look, f, finish, tint, NO_FLOOR)
 
 
 ## Point `p`'s place (m) on the plane of a face facing `n`: a floor or ceiling's x and z, a wall's along and up (up the

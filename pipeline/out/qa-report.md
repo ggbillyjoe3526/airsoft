@@ -1,23 +1,18 @@
-Task: CN1 · QA commit (see git log, "Agent: qa", attempt 2, HEAD e1133ce) · Verdict: Pass
+Task: EC1 · QA commit pending · Verdict: Pass
 
 Blocking: none.
-Advisory: none found. The collar now weighted by height alone (body.py collar_weights, uniform all round) and the zip pull
-on the same height weights cause no regression in the tests below. The glove plate TIE change (b8a38ad, weights within
-1e-3 go to the arm) keeps the plate count at 28 in test_bp6_models (3/3, 1804 asserts). game/ still never assumes a head
-is skinned to one joint (figure_body.gd folds parts by Skin resource; body_merge.gd copies skin_data per vertex).
+Advisory:
+- game/play/sim_audio.gd:521 (_exit_tree set_echo(null)) resets the global Shots bus when ANY SimAudio leaves the tree. If a new Subway SimAudio were set up before the old one is freed (overlap), the old one's exit would silence the new echo. Not reproducible via the current scene change/restart order (old exits first); no test pins it.
+- The echo is global AudioServer state; tests that call setup with a Subway map must reset it (the EC1 test does in after_each).
 
-Tests (attempt 1, unchanged and still valid):
-- tests/unit/test_figure_collar_skin_qa.gd:13 · loads human.glb through the game's loader; for every Head_* mesh
-  (four heads, LOD0/1/2) asserts neck vertices below 1.50 m carry non-Head weight and vertices above 1.60 m are
-  Head-only. Checked in attempt 1: against origin/main's human.glb it fails for every Head_* mesh (no blended neck
-  vertices); passes on the head's glb. Passes again on HEAD (50 asserts), so the new height-only weights still blend
-  the neck and leave the skull rigid.
+Checked (all hold): Shots is bus 3 under Effects; Power, Muffled, ShotsHalf, ShotsFull send to Shots; every bus sends to a lower index; reverb is Shots' effect 0, off by default, bus 0 dB. Only &"subway" has an echo; range, depot, woodland, kingsmere (old id), unknown and no map set the bus dry. Occlusion levels for Shots equal Effects' at 0.3/0.5/0.8/1.0; Effects/Footsteps/Power mapping unchanged; silenced shot open stays on Muffled, occluded goes to ShotsHalf/Full. Leaving the tree restores 0 dB / reverb off; repeated set_echo keeps one effect. Settings volume buses (Master/Effects/Power/Ambience/Interface) untouched.
 
-Run on HEAD, single files, raw output in pipeline/out/qa/a2_<file>.txt:
-test_figure_collar_skin_qa 1/1, test_bp6_models 3/3, test_figure_body 17/17, test_figure_hit_area 6/6 (54 s),
-test_hit_registration 3/3, test_hit_registration_qa 5/5, test_figure_hands 24/24, test_bp7_figures 13/13.
-No script errors in any file. Full tools/check.sh and the smoke test not run by me (another process runs them).
+Tests added (tests/unit/test_ec1_shot_echo.gd, after the existing six):
+- :105 every bus sends to a lower index; Shots children wired right. Fails if a send is reordered/wrong (checked by reading old layout: Power/Muffled sent to Effects).
+- :117 other maps incl. kingsmere/unknown dry after a Subway echo. Fails if setup skipped set_echo(null).
+- :125 silenced shot open/occluded bus. Fails with the old EffectsHalf mapping.
+- :130 set_echo twice / null twice leaves one effect. Guards effect duplication.
+Existing six EC1 tests reviewed, they exercise the criteria.
 
-Not tested (needs a display / a person): the visual result (no dark V at the neck, collar and scarf overlap, the
-gentler back rise with BACK_RISE 5 mm, neck bend while crouching, leaning, flinching, zip pull following the collar):
-docs/PLAYTEST.md > CN1.
+Suite (individual files, no check.sh per instructions): test_ec1_shot_echo 10/10, sound_mix 8, sound_occlusion 13, au1_qa 27, sp2_qa 9, parts_in_play 15, subway_rename 3: all pass. gdlint clean. Raw: pipeline/out/qa/ec1_test.txt.
+Not tested: how the reverb sounds, real audio output, smoke match (check.sh running elsewhere); owner to listen on Subway vs Woodland.

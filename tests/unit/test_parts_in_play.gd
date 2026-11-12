@@ -246,7 +246,7 @@ func test_a_silenced_shot_plays_duller_and_quieter() -> void:
 	add_child_autofree(audio)
 	audio.setup(cfg, [kit.replicas[0].power] as Array[StringName], BodyConfig.new(), null, null)
 	var bus := AudioServer.get_bus_index(SimAudio.BUS_MUFFLED)
-	assert_eq(AudioServer.get_bus_send(bus), SimAudio.BUS_EFFECTS)
+	assert_eq(AudioServer.get_bus_send(bus), SimAudio.BUS_SHOTS)
 	assert_almost_eq((AudioServer.get_bus_effect(bus, 0) as AudioEffectLowPassFilter).cutoff_hz, cfg.muffled_cutoff_hz,
 			EPS)
 	var e := state.events.add(GameEvent.Kind.SHOT)
@@ -269,7 +269,7 @@ func test_a_silenced_shot_plays_duller_and_quieter() -> void:
 	audio.on_tick(state, 0, null)
 	var plain := _own_voice(audio, before + 1)
 	assert_not_null(plain)
-	assert_eq(plain.bus, SimAudio.BUS_EFFECTS)
+	assert_eq(plain.bus, SimAudio.BUS_SHOTS)
 
 
 ## Your own voice that took play number `serial` (VoicePool.serial_of), or null.

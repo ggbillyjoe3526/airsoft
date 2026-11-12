@@ -99,13 +99,15 @@ func _volume_of(cue: StringName) -> float:
 
 
 ## Steps and vaults go on `feet` (Footsteps in the open), the power part on `power`, the rest on `effects`.
-func _expect_all_on(effects: StringName, power: StringName, feet: StringName = &"") -> void:
+func _expect_all_on(effects: StringName, power: StringName, shots: StringName, feet: StringName = &"") -> void:
 	var buses := _buses()
 	assert_eq(buses.size(), 6, "shot, power part, draw, step, vault, the hit's tick: %s" % buses)
 	for cue: String in buses:
 		var want := effects
 		if cue.begins_with("power_"):
 			want = power
+		elif cue.begins_with("shot_"):
+			want = shots
 		elif cue.begins_with("step_") or cue == "vault":
 			want = feet if feet != &"" else effects
 		assert_eq(buses[cue], want, cue)
@@ -115,21 +117,21 @@ func _expect_all_on(effects: StringName, power: StringName, feet: StringName = &
 func test_in_the_open_others_sounds_play_plain() -> void:
 	_sound()
 	_enemy_sounds(you)
-	_expect_all_on(SimAudio.BUS_EFFECTS, SimAudio.BUS_POWER, SimAudio.BUS_FOOTSTEPS)
+	_expect_all_on(SimAudio.BUS_EFFECTS, SimAudio.BUS_POWER, SimAudio.BUS_SHOTS, SimAudio.BUS_FOOTSTEPS)
 
 
 func test_behind_low_cover_others_sounds_play_half_muffled() -> void:
 	_barrier()
 	_sound()
 	_enemy_sounds(you)
-	_expect_all_on(SoundMix.BUS_EFFECTS_HALF, SoundMix.BUS_POWER_HALF)
+	_expect_all_on(SoundMix.BUS_EFFECTS_HALF, SoundMix.BUS_POWER_HALF, SoundMix.BUS_SHOTS_HALF)
 
 
 func test_behind_a_wall_others_sounds_play_fully_muffled() -> void:
 	_wall()
 	_sound()
 	_enemy_sounds(you)
-	_expect_all_on(SoundMix.BUS_EFFECTS_FULL, SoundMix.BUS_POWER_FULL)
+	_expect_all_on(SoundMix.BUS_EFFECTS_FULL, SoundMix.BUS_POWER_FULL, SoundMix.BUS_SHOTS_FULL)
 
 
 ## Each share is heard at the browser's level (1 open .. occlusion_muffled_gain), the bus's and the voice's together;
@@ -162,7 +164,7 @@ func test_a_silenced_shot_takes_the_more_muffled_corner_and_both_levels() -> voi
 	_wall(7.0)
 	_quiet_ticks(cfg.occlusion_refresh_ticks)
 	_enemy_sounds(you)
-	assert_eq(_buses()["shot_electric"], SoundMix.BUS_EFFECTS_FULL)
+	assert_eq(_buses()["shot_electric"], SoundMix.BUS_SHOTS_FULL)
 	assert_almost_eq(_volume_of(&"shot_electric"), linear_to_db(cfg.shot_gain * cfg.muffled_gain), 1e-3,
 			"the full bus gives the wall's level")
 
@@ -255,7 +257,7 @@ func test_the_listener_changes_to_the_teammate_you_watch_once_out() -> void:
 	you.status = Character.Status.OUT
 	_enemy_sounds(mate)
 	assert_eq(_buses()["vault"], SimAudio.BUS_FOOTSTEPS, "from the teammate's eyes, the next tick")
-	assert_eq(_buses()["shot_electric"], SimAudio.BUS_EFFECTS)
+	assert_eq(_buses()["shot_electric"], SimAudio.BUS_SHOTS)
 	state.events.clear()
 	var own := state.events.add(GameEvent.Kind.VAULT)
 	own.actor = you.id
@@ -287,7 +289,7 @@ func test_your_own_sounds_and_the_listeners_are_never_muffled() -> void:
 	for v in audio._own:
 		if v.playing:
 			buses.append(StringName(v.bus))
-	assert_eq(buses, [SimAudio.BUS_EFFECTS, SimAudio.BUS_POWER, SimAudio.BUS_INTERFACE] as Array[StringName])
+	assert_eq(buses, [SimAudio.BUS_SHOTS, SimAudio.BUS_POWER, SimAudio.BUS_INTERFACE] as Array[StringName])
 
 
 ## Casting and reusing shares, impacts and listener changes over many ticks makes nothing once the records exist.
