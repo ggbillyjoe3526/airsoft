@@ -115,3 +115,39 @@ func test_the_shots_occlusion_buses_match_the_effects_ones() -> void:
 		assert_almost_eq(AudioServer.get_bus_volume_db(a), AudioServer.get_bus_volume_db(b), EPS)
 		assert_almost_eq((AudioServer.get_bus_effect(a, 0) as AudioEffectFilter).cutoff_hz,
 				(AudioServer.get_bus_effect(b, 0) as AudioEffectFilter).cutoff_hz, EPS)
+
+
+func test_every_bus_sends_to_a_lower_bus_and_the_shots_chain_reaches_master() -> void:
+	for i in AudioServer.bus_count:
+		var send := AudioServer.get_bus_send(i)
+		if i == 0:
+			continue
+		assert_lt(AudioServer.get_bus_index(send), i, "%s sends to a lower bus" % AudioServer.get_bus_name(i))
+	for bus: StringName in [SimAudio.BUS_POWER, SimAudio.BUS_MUFFLED, SoundMix.BUS_SHOTS_HALF, SoundMix.BUS_SHOTS_FULL]:
+		assert_eq(AudioServer.get_bus_send(AudioServer.get_bus_index(bus)), SimAudio.BUS_SHOTS, "%s is under Shots" % bus)
+	assert_eq(AudioServer.get_bus_send(_shots()), SimAudio.BUS_EFFECTS)
+
+
+func test_the_other_maps_play_their_shots_dry() -> void:
+	for id: String in ["range", "depot", "woodland", "kingsmere", "unknown"]:
+		SimAudio.set_echo(cfg.shot_echoes[&"subway"])
+		_audio_on(id)
+		assert_false(_echo_on(), "%s has no echo" % id)
+		assert_almost_eq(AudioServer.get_bus_volume_db(_shots()), 0.0, EPS, id)
+
+
+func test_a_silenced_shot_keeps_its_own_low_pass_in_the_open() -> void:
+	assert_eq(SoundOcclusion.bus_for(SimAudio.BUS_MUFFLED, 0.0, cfg), SimAudio.BUS_MUFFLED)
+	assert_true(SoundOcclusion.bus_for(SimAudio.BUS_MUFFLED, 0.5, cfg) in [SimAudio.BUS_MUFFLED, SoundMix.BUS_SHOTS_HALF])
+	assert_eq(SoundOcclusion.bus_for(SimAudio.BUS_EFFECTS, 1.0, cfg), SoundMix.BUS_EFFECTS_FULL, "Effects unchanged")
+
+
+func test_setting_the_echo_twice_and_leaving_twice_stays_clean() -> void:
+	var echo: ShotEcho = cfg.shot_echoes[&"subway"]
+	SimAudio.set_echo(echo)
+	SimAudio.set_echo(echo)
+	assert_true(_echo_on())
+	SimAudio.set_echo(null)
+	SimAudio.set_echo(null)
+	assert_false(_echo_on())
+	assert_eq(AudioServer.get_bus_effect_count(_shots()), 1, "no effect added or lost")
