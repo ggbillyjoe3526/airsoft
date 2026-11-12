@@ -1,26 +1,34 @@
-Task: CN1 · The shirt collar at the back of the neck (owner bug report, 2026-11-10)
-Attempt: 4 of 4
-Head: b31bf5a (full check.sh not yet passed on it: parts 1-3 on e1133ce, the five figure/model tests on 87208e6 with
-  the same counts, parts 4-7 and smoke re-running. This Accept holds only once they and CI pass on b31bf5a)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept (conditional on the pending check.sh parts 4-7, smoke and CI on b31bf5a)
-Failed checks, with evidence: none.
-1. Models rule, judged from v4/1-boonie-before-after.jpg and v4/2-boonie-angles.jpg (no reference photo named, so (a)
-   can't be measured). All four attempt-3 must-fixes met: the widen-only cone pass is removed (headwear.py was
-   :756-765); the lower rows go through over_collar (:725-738) onto collar.outer_radius + SCARF_OVER_COLLAR 6 mm (:713);
-   the hem sits SCARF_HEM_DROP 5 mm under RINGS[2] (:751), 12 mm above RINGS[1], so nothing below it can flare or step
-   in; folds fade out over the lowest 35 % (:755, so the az*7 scallop is zero at the hem); roll 4.5 mm (:722, :764);
-   standing back plus 30° each side rendered. In the renders the scarf reads as a gaiter wrapped on the collar:
-   standing, aiming, crouched and behind-right show no ruff, no overhang past the collar's edge, no poke-through.
-   The 1.4 m view reads clean. Cap, High-cut and Full-cut are unchanged since attempt 2 (v3 sheets, judged clean then).
-   Not blocking, worth a later polish pass: the standing-back AFTER hem is still a pale rolled band with a thin
-   shadow line under it; at play distance (1.4 m view) it reads as a hem, not a gap. The scarf is now short at the
-   back and looks more like a tight gaiter than a loosely knotted shemagh. If the owner wants it looser, add a short
-   hanging tail at the back (an IDEAS row, not a CN1 retry).
-Must-fix before merge: confirm check.sh parts 4-7, smoke and CI green on b31bf5a; then fill in attempt 4's row in
-   docs/records/CN1.md (still "pending").
-Owner should test in the game:
-   - A boonie bot standing with his back to you at 3-5 m: does the scarf read as cloth on the collar, not a frill?
-   - The same bot crouched and aiming: does the scarf's hem stay on the collar with no dark gap or poke-through?
-   - Cap, High-cut and Full-cut bots from behind and aiming with cheek on stock: the collar's back looks like a shirt.
-   - Your own figure in any third-person or death view: collar and neck bend together, no gap at the nape.
+Task: TB1 · Subway's platforms like the Tube
+Attempt: 1 of 4
+Head: c992ec3 (checks passed on 5ece2f4; later commits are QA tests, reports and the record, no game code)
+Checks: 1 ✗ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✗
+Score: 6/8 → Retry (near miss, judgment: fixing check 1 alone gives Accept)
+Failed checks, with evidence (file:line, one or two lines each, each marked measured or judgment):
+1. [judgment] Construction: /mnt/project-files/concepts/metro/pt1/v2/2-north-platform.jpg (AFTER, about px 1140-1230 x 245-270)
+   shows a black wedge above the standing car's west end, where the tiled parapet (the 0.15 m wall at z -9.075, cut to
+   the car roof by vault_air, tools/subway/build_map.py +370) meets the vault. Either a hole into the void or an unlit
+   or wrong-finish face over the opened car-roof air (vault_boxes side walls, build_map.py +405-410). It is visible in
+   the owner's own first-person shot from the platform end.
+1. [judgment, pixel means measured] The owner asked for the trackside wall to be "white and almost match the rest of the
+   station". In 1-south-platform-across.jpg AFTER, the platform back wall averages RGB 110,108,104, the trackside wall
+   88,83,77 and the vault 76,70,62 (warm taupe, R-B +14; BEFORE's cream trackside was 79,67,51). The vault and the far
+   wall still read brown-grey, not white. The record notes the warm cast as a known issue instead of fixing it
+   (station_look.gd +50 vault_tile tint alone doesn't fix it).
+8. [judgment] The record (docs/records/TB1.md, Decisions › Posters) says the owner's "larger posters" belong to SM5's
+   thread, but SM5 and posters appear nowhere in docs/, game/ or git history: the ask isn't tracked. No KNOWN_ISSUES row
+   for the vault's warm cast. The new game/play/station/platform_words.gd has no folder README row (game/play/README.md).
+Advisory: MIND THE GAP orientation reads correctly from each platform (platform_words.gd +62-76, run = -up). The
+   words are 0.24 m tall on a 0.45 m coping with a 0.1 m yellow line; the Tube's line is much bolder, so check it reads.
+   The springing has a hard 19° crease where the vertical wall meets the arc (visible in render 4).
+Must-fix for the next attempt: find and close the black wedge over the north car's west end (and check every car end
+   on both tunnels from the platform and the track). Make the vault and the trackside wall read white under the
+   station's light (tint, probe or lamp fill), close to the back wall's value; re-render the four shots and compare.
+   Track the posters ask in docs/TASKS.md (or build them) and correct the record. Add the KNOWN_ISSUES row and the
+   README row.
+Owner should test in the game (at most 6, one line each):
+- Stand at the north platform's west end and look east: no black gap above the car next to the platform.
+- Are the vault and the wall across the track as white as the platform's back wall, on High and on Medium?
+- Shoot up into the vault from the platform and the track: BBs stop on the curve, never short in the air or inside it.
+- Throw a smoke over a standing car: it lands on the roof or falls back, never sticks; BBs over a car roof feel fair.
+- Read MIND THE GAP from both platforms, standing and crouched: legible, and the right way up.
+- F3 on Low, looking along a platform: 60 FPS.
