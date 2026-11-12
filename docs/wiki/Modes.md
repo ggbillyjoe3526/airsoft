@@ -1,8 +1,8 @@
 # Modes
 
 Pick the mode on the **Match** screen, with the map, your team, the [bots](Bots) and the rules. The modes are listed
-Attack / Defend first, then Elimination, then Practice. Attack / Defend is picked to start with (on a map without a
-flagpole, Elimination). Every mode is played
+Attack / Defend first, then Elimination, then Plant The Bomb, then Practice. Attack / Defend is picked to start with
+(on a map without a flagpole, Elimination). Every mode is played
 in rounds against the clock, and the first team to the rounds to win takes the match. Teams swap ends at half time,
 one round before the win, so the deciding round is always played in the second half.
 
@@ -48,6 +48,38 @@ going up; else the nearer pole. The marker reads "FLAG B · 24 m", and the warni
 is going up at B!").
 
 A map needs a flagpole for Attack / Defend; the Match screen says when one hasn't got it.
+
+## Plant The Bomb
+
+One team carries a bomb to the other team's end and plants it at **Site A** or **Site B**; the other team keeps it
+out, or defuses it before it goes off. The bomb is a field prop, a timer box with a lamp and a buzzer: when it goes
+off it pops a cloud of dust and sounds its buzzer, and nobody is hit by it. The team you pick attacks first, and the
+sides swap at half time. Every field has both sites.
+
+- **The bomb starts on the ground** just ahead of the attackers' start each round. Stand over it and **hold <!-- wiki:key use_door -->**
+  to pick it up. Your teammates leave it to you for the first <!-- wiki:config bot_config.plant_player_first -->
+  seconds, then one of them takes it and plants it without you
+  ([Bots](Bots#bots-in-plant-the-bomb)). A carrier who is hit drops it where they stood, for any attacker to pick up.
+- **Planting:** stand inside a site's ring with the bomb and hold <!-- wiki:key use_door --> for
+  **<!-- wiki:config plant_config.plant_time --> seconds**. You kneel, your replica is down and you can't shoot while
+  you do; let go or step out and you start again. A code beeps as it is keyed in, and anyone within about <!-- wiki:config sound_config.plant_work_reach -->
+  m hears it.
+- **Armed**, the bomb goes off after **<!-- wiki:config plant_config.fuse_time --> seconds**, beeping faster as its
+  time runs down. The round's clock stops mattering: only the fuse counts now.
+- **Defusing:** a defender within reach of the armed bomb holds <!-- wiki:key use_door --> for
+  **<!-- wiki:config plant_config.defuse_time --> seconds**. Past half way the work is kept: let go after that and
+  the next try starts from half.
+
+**Attackers win** when the bomb goes off, or by taking out every defender at any time. **Defenders win** by defusing
+the bomb, by taking out every attacker before it is armed, or by keeping it from being armed until the clock runs
+out. Once the bomb is armed, taking out the attackers is not enough: it still has to be defused. An attacker keying
+the code as the clock runs out gets up to <!-- wiki:config plant_config.max_overtime --> seconds more to finish.
+
+On the field each site has a ring on the floor and a big **A** or **B** over it. The ring takes the attackers' colour
+while the bomb is keyed in and once it is armed, and the defenders' while it is being defused. The bomb's lamp winks
+amber while it waits on the ground, flashes red with each beep once armed, and ends green when it is made safe.
+
+A map needs bomb sites for Plant The Bomb; the Match screen says when one hasn't got them.
 
 ## Skirmish and Custom
 

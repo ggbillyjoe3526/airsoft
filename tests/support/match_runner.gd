@@ -59,6 +59,13 @@ class RoundTally:
 	var top_flag: float = 0.0
 	## Elimination: the overtime flag went up this round (OV1).
 	var overtime: bool = false
+	## Plant The Bomb (PB1): when the bomb was first picked up and when it was armed (s into the round, -1 if never),
+	## at which site (-1), how often it was dropped, and the furthest a defuse got (0 to 1).
+	var picked_at: float = -1.0
+	var planted_at: float = -1.0
+	var site: int = -1
+	var drops: int = 0
+	var top_defuse: float = 0.0
 
 
 ## One match: its rounds and everything that must never happen, counted.
@@ -142,6 +149,20 @@ class MatchTally:
 				return true
 		return false
 
+	## Plant The Bomb: rounds the bomb was armed in, those it was defused in and those it went off in.
+	func plants() -> int:
+		var n := 0
+		for r in rounds:
+			if r.planted_at >= 0.0:
+				n += 1
+		return n
+
+	func defuses() -> int:
+		return _ended(GameEvent.RoundEnd.DEFUSED)
+
+	func went_off() -> int:
+		return _ended(GameEvent.RoundEnd.WENT_OFF)
+
 	func _ended(reason: GameEvent.RoundEnd) -> int:
 		var n := 0
 		for r in rounds:
@@ -163,7 +184,8 @@ var personalities: bool = true
 ## A bot (character id on team 0) that gives its teammates Follow me through its command at each round start, as the
 ## player would, while the match tallies how well they keep up (MatchTally.follow_*); -1, nobody: no order is given.
 var follow_leader: int = -1
-## The match's mode: Attack / Defend needs a map with a pole (MapData.has_pole); team 0 attacks first, as in the browser
+## The match's mode: Attack / Defend needs a map with a pole (MapData.has_pole) and Plant The Bomb one with sites
+## (MapData.has_bomb_sites); team 0 attacks first, as in the browser
 ## game's guards.
 var mode: RoundState.Mode = RoundState.Mode.ELIMINATION
 ## Called after every tick's step with the state and the bots (a test's own watch, such as what each bot sees through
@@ -325,6 +347,11 @@ func play(seed_value: int, max_seconds: float) -> MatchTally:
 		state.round_state.mode = mode
 		state.round_state.poles = map.poles
 		state.round_state.first_attackers = 0
+	elif mode == RoundState.Mode.PLANT_THE_BOMB:
+		state.round_state.mode = mode
+		state.round_state.plant.set_sites(map.bomb_sites, map.bomb_site_radii, tuning.plant.site_radius)
+		state.round_state.plant.start = map.bomb_start_ahead(tuning.plant.start_ahead)
+		state.round_state.first_attackers = 0
 	else:
 		state.round_state.has_overtime_spot = map.has_overtime_flag and overtime_flag
 		state.round_state.overtime_spot = map.overtime_flag
@@ -406,6 +433,16 @@ func play(seed_value: int, max_seconds: float) -> MatchTally:
 					t.rings += 1
 				GameEvent.Kind.OVERTIME:
 					round_now.overtime = true
+				GameEvent.Kind.BOMB:
+					match e.value:
+						Plant.Cue.PICKED_UP:
+							if round_now.picked_at < 0.0:
+								round_now.picked_at = state.time - round_start
+						Plant.Cue.DROPPED:
+							round_now.drops += 1
+						Plant.Cue.PLANTED:
+							round_now.planted_at = state.time - round_start
+							round_now.site = int(e.value2)
 				GameEvent.Kind.ROUND_OVER:
 					# In Attack / Defend only the attackers must leave: defenders hold by their pole.
 					for c in state.characters:
@@ -529,6 +566,7 @@ static func held_up_sample(ring: PackedVector3Array, errands: PackedInt32Array, 
 func _watch(state: GameState, t: MatchTally, r: RoundTally) -> void:
 	var live := state.round_state.is_live()
 	r.top_flag = maxf(r.top_flag, state.round_state.flag.progress)
+	r.top_defuse = maxf(r.top_defuse, state.round_state.plant.defusing)
 	for c in state.characters:
 		if c.position.y < map.kill_y + 1.0:
 			t.rescued += 1

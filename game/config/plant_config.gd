@@ -17,7 +17,7 @@ extends Resource
 ## Seconds the carrier holds Use, standing in a site, to arm the bomb. Letting go, being hit or leaving starts again.
 @export var plant_time: float = 3.5
 ## Seconds from the bomb armed to it going off (the attackers win).
-@export var fuse_time: float = 40.0
+@export var fuse_time: float = 30.0
 ## A defender in play holding Use within this distance of the armed bomb (m, flat) disarms it ...
 @export var defuse_reach: float = 1.6
 ## ... in this many seconds.

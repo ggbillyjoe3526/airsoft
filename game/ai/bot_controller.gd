@@ -95,6 +95,7 @@ func _init(state: GameState, player_id: int, map: MapData, nav: NavGrid, query: 
 	pings = Pings.new(state.characters, tuning.pings)
 	if options.talk:
 		callouts = Callouts.new(CalloutsFile.shared(), config.callouts, map.areas, state.match_seed)
+		callouts.bomb_heard = config.plant_heard
 		callouts.pings = pings
 		callouts.orders = orders
 		# The bots on your team ask for you (BQ2); with no player (the autopilot), nobody asks.

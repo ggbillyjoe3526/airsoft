@@ -9,6 +9,8 @@ and the armbands. A match is played in rounds against the clock:
 
 - **Elimination:** take out the whole other team to win the round.
 - **Attack / Defend:** the attackers raise their flag on the defenders' pole, or the defenders hold out.
+- **Plant The Bomb:** the attackers plant a prop bomb at Site A or B and keep it there until it goes off, or the
+  defenders defuse it.
 
 The first team to <!-- wiki:config round_config.wins_needed --> round wins takes the match, and the teams swap ends at half time so neither keeps the better end.
 [Modes](Modes) has the full rules, including Custom matches where you set them yourself.
