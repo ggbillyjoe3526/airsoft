@@ -32,6 +32,7 @@ from mathutils import Matrix, Vector  # noqa: E402
 
 import figure_copy  # noqa: E402
 import hardsurface as hs  # noqa: E402
+import surface  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
 OUT = os.environ.get("BL_OUT") or os.path.join(ROOT, "assets/models/replicas/cyber.glb")
@@ -960,6 +961,13 @@ def clips(arm: bpy.types.Object) -> None:
 
 # ------------------------------------------------------------------------------------------------------------ main
 
+# What each material's faces are made of (surface.py, MQ1; owner, 2026-11-12: "for the cyber pistol just add more
+# realistic materials and textures"): white-coated metal slabs (the coat keeps them white in any light) on a polymer frame, steel for the dark metal, the
+# glowing lines and core clear polymer.
+SURFACES = {"CyberSlab": "coated", "CyberFrame": "polymer", "CyberMetal": "steel", "CyberBar": "steel",
+            "CyberLine": "polymer", "CyberCore": "polymer"}
+
+
 def build() -> None:
     hs.reset(FPS)
     materials()
@@ -974,7 +982,9 @@ def build() -> None:
     for name, loc in EMPTIES.items():
         hs.empty(name, fit(loc), arm)
     clips(arm)
+    surface.resolve(SURFACES)
     fig = figure_copy.make(FIGURE_TRIS)
+    surface.strip()
     total = 0
     for ob in bpy.data.objects:
         if ob.type == "MESH":

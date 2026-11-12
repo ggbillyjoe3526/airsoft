@@ -39,6 +39,7 @@ from mathutils import Matrix, Vector  # noqa: E402
 
 import figure_copy  # noqa: E402
 import hardsurface as hs  # noqa: E402
+import surface  # noqa: E402
 import wear  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
@@ -208,6 +209,14 @@ MATERIALS = {
     "Accent": (0xf2f0ea, 0.5, 0.0), "Metal": (0x484d56, 0.4, 0.4), "Rubber": (0x1c1d20, 0.8, 0.0),
     "BB": (0xf4f1e8, 0.3, 0.0),
 }
+
+
+# What each material's faces are made of unless a part says otherwise (surface.py, MQ1; owner, 2026-11-12: "Rifles
+# should be mostly metal"), as the submachine gun it follows: a stamped steel receiver, cocking tube, magazine well,
+# magazine, sights and controls, with a polymer handguard, grip housing and butt.
+SURFACES = {"Body": "steel", "Furniture": "polymer", "Detail": "steel", "Accent": "polymer", "Metal": "steel"}
+# The parts that differ, by their object's name: the polymer selector lever, the bright bolt in the port.
+PART_SURFACES = {"Selector": ("polymer", ("Detail",)), "PortBolt": "bare"}
 
 
 # ------------------------------------------------------------------------------------------------------ helpers
@@ -887,6 +896,7 @@ def body() -> object:
     parts.append(stock())
     for ob in parts:
         print("  part %-14s %6d" % (ob.name, hs.tris(ob)))
+    surface.tag_named(parts, PART_SURFACES)
     return hs.join("Body", parts)
 
 
@@ -902,11 +912,14 @@ def build() -> None:
     for ob, bone in ((trigger(), "trigger"), (selector(), "selector"), (mag_release(), "magRelease"),
                      (charging_handle(), "chargingHandle"), (magazine(), "magazine"), (front_sight(), "frontSight"),
                      (rear_sight(), "rearSight")):
+        surface.tag_named([ob], PART_SURFACES)
         hs.parent_to_bone(ob, arm, bone)
     for name, loc in EMPTIES.items():
         hs.empty(name, loc, arm)
     clips(arm)
+    surface.resolve(SURFACES)
     fig = figure_copy.make(FIGURE_TRIS)
+    surface.strip()
     total = 0
     for ob in bpy.data.objects:
         if ob.type == "MESH":

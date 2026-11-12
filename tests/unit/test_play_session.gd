@@ -130,7 +130,7 @@ func test_the_late_materials_are_drawn_once_at_the_start_and_then_freed() -> voi
 	assert_gt(arms, 0, "your arms (BL4)")
 	var far := HeldMerge.far_materials().size()
 	assert_gt(far, 0, "the bots' far replicas' paints (BP5)")
-	var worn := ReplicaPaint.worn_materials().size()
+	var worn := ReplicaPaint.surface_materials().size()
 	assert_gt(worn, 0, "your replica's worn paints (RW1)")
 	assert_eq(prewarm.get_child_count(), 11 + skyline + site + overtime + mags + bombs + roof + doors + arms + far
 			+ worn + 2 * figures,
