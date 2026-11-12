@@ -24,6 +24,8 @@ const DEFAULT_PATH := "res://game/config/play_tuning.tres"
 @export var lifts: LiftViewConfig = LiftViewConfig.new()
 ## A station's ticket gates' paddle doors (SM3: Subway's).
 @export var gate_paddles: GatePaddlesConfig = GatePaddlesConfig.new()
+## A station's small fittings along its rooms' walls, floors and ceilings (SD2: Subway's).
+@export var station_detail: StationDetailConfig = StationDetailConfig.new()
 @export var woods: WoodsConfig = WoodsConfig.new()
 ## The floors' worn marks (WM1, WearMarks).
 @export var marks: MarksConfig = MarksConfig.new()
