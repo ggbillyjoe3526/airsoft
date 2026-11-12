@@ -103,3 +103,33 @@ func test_a_lift_with_unreadable_models_still_builds_with_boxes() -> void:
 	assert_gt((view.get_node(^"Buttons") as MultiMeshInstance3D).multimesh.instance_count, 0)
 	assert_gt((view.get_node(^"Leaves") as MultiMeshInstance3D).multimesh.instance_count, 0)
 	view.free()
+
+
+func _leaf_halves_meet(cfg: LiftViewConfig) -> void:
+	# The headless dummy renderer keeps no multimesh transforms, so the leaf maths is asked directly.
+	for out: Vector2 in [Vector2(0, -1), Vector2(0, 1), Vector2(-1, 0), Vector2(1, 0)]:
+		var map := MapData.load_map("subway", MapStyle.new(), 6)
+		for spec in map.lifts:
+			spec.out = out
+		var view := LiftView.build(map, MapStyle.new(), SimTuning.new().lifts, cfg)
+		add_child(view)
+		for spec in map.lifts:
+			var w := spec.door_to - spec.door_from
+			for open: float in [0.0, 1.0]:
+				for off: float in [spec.door_depth * 0.5, -0.1]:
+					var a: Transform3D = view._leaf(spec, -1.0, open, w, off, 0.0, 0.1)
+					var b: Transform3D = view._leaf(spec, 1.0, open, w, off, 0.0, 0.1)
+					var ab := (b.origin - a.origin).normalized()
+					assert_gt(a.basis.x.normalized().dot(ab), 0.9, "near leaf +x faces far leaf, out %s" % out)
+					assert_gt(b.basis.x.normalized().dot(-ab), 0.9, "far leaf +x faces near leaf, out %s" % out)
+		view.free()
+
+
+func test_each_leaf_pair_turns_its_plus_x_edges_toward_each_other_for_every_facing() -> void:
+	_leaf_halves_meet(LiftViewConfig.new())
+
+
+func test_box_leaves_without_a_model_also_meet_in_the_middle() -> void:
+	var cfg := LiftViewConfig.new()
+	cfg.leaf_model = ""
+	_leaf_halves_meet(cfg)
