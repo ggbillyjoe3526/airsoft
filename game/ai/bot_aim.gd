@@ -18,6 +18,10 @@ static func look_pitch(from: Vector3, to: Vector3) -> float:
 static func hold_yaw(b: Bot, w: BotWorld) -> float:
 	if b.mode == Bot.Mode.FLAG and b.flag_guard and w.overtime_flag.up:
 		return look_yaw(b.flag_goal, w.overtime_flag.foot)
+	# Plant The Bomb: a defender back at the armed bomb watches it from its cover (whoever guards it is near it).
+	if w.plant != null and w.plant.planted() and b.mode == Bot.Mode.FLAG and b.flag_guard \
+			and b.character.team != w.attackers:
+		return look_yaw(b.flag_goal, w.plant.position)
 	return w.enemy_yaw(b.character.team)
 
 

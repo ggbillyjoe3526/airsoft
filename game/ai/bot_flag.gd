@@ -8,9 +8,9 @@ class_name BotFlag
 enum Role { NONE, ATTACK, DEFEND }
 
 
-## Whether `b`'s team attacks or defends the pole this round (NONE in Elimination).
+## Whether `b`'s team attacks or defends the pole (or Plant The Bomb's sites) this round (NONE in Elimination).
 static func role(b: Bot, w: BotWorld) -> Role:
-	if w.mode != RoundState.Mode.ATTACK_DEFEND or w.attackers < 0:
+	if not RoundState.has_sides(w.mode) or w.attackers < 0:
 		return Role.NONE
 	return Role.ATTACK if b.character.team == w.attackers else Role.DEFEND
 
@@ -58,6 +58,8 @@ static func holds_post(b: Bot, w: BotWorld) -> bool:
 ## overtime (OV2), every bot once its reaction to the flag going up is over (Bot.overtime_at), while the round is live:
 ## the flag comes before chasing noises, as the pole does.
 static func wants_flag(b: Bot, w: BotWorld) -> bool:
+	if w.plant != null:
+		return BotPlant.wants_site(b, w)
 	match role(b, w):
 		Role.ATTACK:
 			return b.lane_done
@@ -69,6 +71,9 @@ static func wants_flag(b: Bot, w: BotWorld) -> bool:
 ## Where `b`'s flag mode heads: Elimination's overtime flag while it is up (its foot), else its Attack / Defend pole
 ## (pole_of).
 static func spot(b: Bot, w: BotWorld) -> Vector3:
+	# Plant The Bomb: the one fetching the bomb makes for where it lies.
+	if w.plant != null and b.fetcher:
+		return w.plant.position
 	return w.overtime_flag.foot if w.overtime_flag.up else w.flags[pole_of(b, w)].position
 
 

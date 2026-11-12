@@ -10,6 +10,8 @@ class_name BotMovement
 ## The two steps of an R2 sequence: a bot's glances spread evenly over its view, with no dice.
 const GLANCE_ACROSS := 0.7548776662466927
 const GLANCE_OUT := 0.5698402909980532
+## Flag mode picks its spot again once what it makes for (Plant The Bomb's bomb) has moved this far (m).
+const SPOT_MOVED := 0.5
 
 ## keep_apart's ray (used only within one call).
 static var _apart_hit: RayHit = RayHit.new()
@@ -60,6 +62,8 @@ static func enter_flag(b: Bot, w: BotWorld) -> void:
 static func _guards_flag(b: Bot, w: BotWorld) -> bool:
 	if w.overtime_flag.up:
 		return BotPersonality.overtime_watching(b, w)
+	if w.plant != null:
+		return BotPlant.guards(b, w)
 	return BotFlag.role(b, w) == BotFlag.Role.ATTACK and not b.raiser
 
 
@@ -72,6 +76,8 @@ static func _pick_flag_spot(b: Bot, w: BotWorld) -> void:
 	var cfg := w.cfg
 	b.flag_pole = BotFlag.pole_of(b, w)
 	var pole := BotFlag.spot(b, w)
+	b.flag_spot = pole
+	b.flag_fetching = b.fetcher
 	b.flag_guard = _guards_flag(b, w)
 	b.team_wait = 0.0
 	b.flanking = false
@@ -82,9 +88,40 @@ static func _pick_flag_spot(b: Bot, w: BotWorld) -> void:
 			b.overtime_flank = false
 			_overtime_flank_point(b, w, pole)
 		return
+	if not b.flag_guard and b.fetcher:
+		# Plant The Bomb: straight to the bomb where it lies.
+		b.flag_goal = pole
+		return
+	var threat := Vector3.ZERO
+	if not b.flag_guard and w.plant != null and b.raiser:
+		# The carrier arms the bomb behind crouch cover inside the site where there is some, hidden from the defenders'
+		# side: whoever comes to disarm it kneels where the attackers' guards can see.
+		threat = _guard_threat(b, w, pole)
+		var inside := w.plant.radii[b.flag_pole] - cfg.plant_spot_inset if b.flag_pole < w.plant.radii.size() else 0.0
+		var held := BotRoutes.teammate_spots(b, w)
+		if inside > 0.0 and BotCover.find(pole, threat, w, b.rng, b.hold_spot, inside, 0, false, BotRoutes.taken(), held,
+				true):
+			b.flag_goal = b.hold_spot.position
+		else:
+			b.flag_goal = _jitter(b, w, pole, minf(cfg.flag_stand, maxf(inside, 0.0)))
+		return
 	if not b.flag_guard:
 		b.flag_goal = _jitter(b, w, pole, cfg.flag_stand)
 		return
+	threat = _guard_threat(b, w, pole)
+	var taken := BotRoutes.teammate_spots(b, w)
+	if BotCover.find(pole, threat, w, b.rng, b.hold_spot, cfg.flag_guard_radius, 0, true, BotRoutes.taken(), taken,
+			true):
+		b.flag_goal = b.hold_spot.position
+	else:
+		b.flag_goal = _jitter(b, w, pole, cfg.flag_guard_radius)
+	b.hold_crouch = _crouched_view_clear(b, w, b.flag_goal)
+
+
+## Where a guard at `pole` hides from: where an enemy was last known, else a point flag_guard_threat_distance from the
+## pole towards the enemy's side, at standing eye height on the pole's floor.
+static func _guard_threat(b: Bot, w: BotWorld, pole: Vector3) -> Vector3:
+	var cfg := w.cfg
 	var threat := Vector3.ZERO
 	if b.has_last_known:
 		threat = Vector3(b.last_known.x, 0.0, b.last_known.z)
@@ -93,13 +130,7 @@ static func _pick_flag_spot(b: Bot, w: BotWorld) -> void:
 		threat = Vector3(pole.x - sin(yaw) * cfg.flag_guard_threat_distance, 0.0,
 				pole.z - cos(yaw) * cfg.flag_guard_threat_distance)
 	threat.y = pole.y + w.tuning.body.stand_eye_height
-	var taken := BotRoutes.teammate_spots(b, w)
-	if BotCover.find(pole, threat, w, b.rng, b.hold_spot, cfg.flag_guard_radius, 0, true, BotRoutes.taken(), taken,
-			true):
-		b.flag_goal = b.hold_spot.position
-	else:
-		b.flag_goal = _jitter(b, w, pole, cfg.flag_guard_radius)
-	b.hold_crouch = _crouched_view_clear(b, w, b.flag_goal)
+	return threat
 
 
 ## Overtime (OV2): the way to the flag at `flag` goes round by a point overtime_flank_offset to one side of the straight
@@ -140,7 +171,10 @@ static func _flag(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> bool:
 	var cfg := w.cfg
 	# The raiser changed (hit, or the player took the rope), or an overtime watch is over: raise, or guard, instead. The
 	# pole it makes for changed (a flag went up at the other while it isn't on a worked rope, AB1): to that one.
-	if b.flag_guard != _guards_flag(b, w) or b.flag_pole != BotFlag.pole_of(b, w):
+	# Plant The Bomb: the bomb to fetch or go back to is somewhere else now (dropped again, armed off the site's middle),
+	# or it stopped or started fetching it.
+	if b.flag_guard != _guards_flag(b, w) or b.flag_pole != BotFlag.pole_of(b, w) or b.flag_fetching != b.fetcher \
+			or (w.plant != null and BotFlag.spot(b, w).distance_squared_to(b.flag_spot) > SPOT_MOVED * SPOT_MOVED):
 		_pick_flag_spot(b, w)
 	if b.flanking:
 		BotRoutes.want(b, b.flank_goal, cfg)
@@ -153,6 +187,9 @@ static func _flag(b: Bot, w: BotWorld, cmd: PlayerCommand, dt: float) -> bool:
 		BotRoutes.drop(b)
 	var p := b.character.position
 	var arrive := cfg.cover_arrive if b.flag_guard else cfg.flag_arrive
+	# Fetching a bomb the player still has first pick of: it waits beside it, clear of their reach.
+	if b.fetcher and not BotPlant.may_take(w):
+		arrive = cfg.plant_wait_distance
 	if Vector2(b.flag_goal.x - p.x, b.flag_goal.z - p.z).length() <= arrive:
 		BotRoutes.drop(b)
 		b.holding = b.flag_guard

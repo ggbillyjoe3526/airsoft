@@ -205,7 +205,15 @@ var retake: bool = false
 ## The pole it was picked to pull down (BotFlag.pick_retakers; -1 none), on a map with two its own (AB1).
 var retake_pole: int = -1
 var raiser: bool = false
+## Plant The Bomb (BotPlant): picked to fetch the bomb from the ground (an attacker), or to disarm it (a defender);
+## `raiser` is the carrier, who arms it.
+var fetcher: bool = false
+var defuser: bool = false
 var flag_goal: Vector3 = Vector3.ZERO
+## Where the pole, site or bomb stood when its flag spot was picked: when that moves (the bomb armed off the site's
+## middle, or dropped elsewhere) it picks again.
+var flag_spot: Vector3 = Vector3.ZERO
+var flag_fetching: bool = false
 var flag_guard: bool = false
 ## The pole (BotWorld.flag_index) its flag spot was picked by: when the pole in play changes it picks again (AB1).
 var flag_pole: int = -1
@@ -367,6 +375,8 @@ func reset(lane_id: int, points: int, start_hold: float, cfg: BotConfig) -> void
 	retake_pole = -1
 	flag_pole = -1
 	raiser = false
+	fetcher = false
+	defuser = false
 	flag_guard = false
 	overtime_at = INF
 	overtime_flank = false

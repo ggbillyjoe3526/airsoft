@@ -39,7 +39,7 @@ func plan(w: BotWorld) -> void:
 	_measure_ends(w.characters)
 	var cfg := w.cfg
 	var lane_count := w.lanes.size()
-	var flag := w.mode == RoundState.Mode.ATTACK_DEFEND and w.attackers >= 0
+	var flag := RoundState.has_sides(w.mode) and w.attackers >= 0
 	attack_flag = _rng.randi_range(0, w.flags.size() - 1) if flag and w.flags.size() > 1 else 0
 	for team in 2:
 		_members.clear()
@@ -114,6 +114,16 @@ func in_enemy_half(b: Bot) -> bool:
 	var home := spawn_centre[me.team]
 	var enemy := spawn_centre[1 - me.team]
 	return _progress(me) > Vector2(enemy.x - home.x, enemy.z - home.z).length() * 0.5
+
+
+## True if `at` is past halfway from `team`'s spawns to the enemy's.
+func in_enemy_half_at(at: Vector3, team: int) -> bool:
+	if team < 0 or team >= spawn_centre.size():
+		return false
+	var home := spawn_centre[team]
+	var enemy := spawn_centre[1 - team]
+	return Vector2(at.x - home.x, at.z - home.z).dot(attack_dir[team]) \
+			> Vector2(enemy.x - home.x, enemy.z - home.z).length() * 0.5
 
 
 ## A walkable spot worth checking for `b`'s team into b.hunt_goal: of a few random walkable spots, the one in the sector

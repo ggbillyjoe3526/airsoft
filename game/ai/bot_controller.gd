@@ -131,6 +131,8 @@ func think(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 	if w.mode == RoundState.Mode.ATTACK_DEFEND:
 		BotFlag.pick_retakers(w)
 		BotFlag.pick_raiser(w)
+	elif w.mode == RoundState.Mode.PLANT_THE_BOMB:
+		BotPlant.plan(w)
 	var hold_fire := state.cheats.bots_hold_fire
 	# Who the weapon torches light, for this interval's looks (a night field only, WL7).
 	BotTorch.refresh(w)
@@ -138,6 +140,8 @@ func think(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		var cmd := commands[b.character.id]
 		BotBrain.think(b, w, cmd, dt)
 		BotTorch.step(b, w, cmd)
+		if w.plant != null:
+			BotPlant.act(b, w, cmd)
 		BotMagShare.ask_when_low(b, w, cmd, sharing)
 		# Holding fire holds their bombs too (SF2).
 		if hold_fire:
@@ -189,6 +193,8 @@ func card_note_of(character_id: int) -> String:
 ## it all (Callouts).
 func observe(state: GameState) -> void:
 	BotHearing.observe(state, world)
+	if state.round_state.mode == RoundState.Mode.PLANT_THE_BOMB:
+		BotPlant.observe(world, state.events, state.time)
 	var events := state.events
 	for i in events.count:
 		var e := events.items[i]
@@ -306,9 +312,13 @@ func _sync_round(state: GameState) -> void:
 	var rs := state.round_state
 	world.mode = rs.mode
 	world.attackers = rs.attackers
-	world.flags = rs.flags
-	world.flag_index = BotFlag.in_play(world)
-	world.flag = rs.flags[world.flag_index]
+	if rs.mode == RoundState.Mode.PLANT_THE_BOMB:
+		BotPlant.sync(world, rs)
+	else:
+		world.plant = null
+		world.flags = rs.flags
+		world.flag_index = BotFlag.in_play(world)
+		world.flag = rs.flags[world.flag_index]
 	world.overtime_flag = rs.overtime_flag
 	world.start_mode = rs.start_mode
 	world.air = state.air

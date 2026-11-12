@@ -88,6 +88,8 @@ const LAMP_WORKING := 0
 const LAMP_DIM := 1
 const LAMP_FLICKER := 2
 const LAMP_DEAD := 3
+## bomb_start_ahead looks for the floor up to this far (m) above the spawns' own: a step up, never the storey above.
+const BOMB_START_RISE := 1.0
 
 var id: String = ""
 var display_name: String = ""
@@ -109,6 +111,16 @@ var kill_y: float = -10.0
 var poles: PackedVector3Array = PackedVector3Array()
 var pole: Vector3 = Vector3.ZERO
 var has_pole: bool = false
+## Plant The Bomb's sites by end 1, site A first (`bombSites` in the file, PB1: a list of spots on their floors, each
+## with its `radius` in metres or none for PlantConfig.site_radius); a map naming none takes its flagpoles' spots, so
+## every map with a pole hosts the mode. has_bomb_sites false on a map with neither.
+var bomb_sites: PackedVector3Array = PackedVector3Array()
+var bomb_site_radii: PackedFloat32Array = PackedFloat32Array()
+var has_bomb_sites: bool = false
+## Where the bomb lies as each round starts (`bombStart` in the file); has_bomb_start false on a map naming none, where
+## `bomb_start_ahead` finds a spot ahead of end 0's spawns.
+var bomb_start: Vector3 = Vector3.ZERO
+var has_bomb_start: bool = false
 ## Elimination's overtime flag, its foot near the middle (`overtimeFlag` in the file, OT1); has_overtime_flag false on a
 ## map without one (a clock run out level is then a draw at once).
 var overtime_flag: Vector3 = Vector3.ZERO
@@ -266,6 +278,9 @@ static func parse(text: String, style: MapStyle, team_size: int) -> MapData:
 	m.station = StationDressing.read(d.get("dressing"), m.warnings)
 	m._read_woods(d.get("dressing"), style)
 	m._read_poles(d.get("flags"), d.get("flag"))
+	m._read_bomb_sites(d.get("bombSites"))
+	m.has_bomb_start = _spot(d.get("bombStart"), "bombStart", m.warnings)
+	m.bomb_start = _vec(d.get("bombStart")) if m.has_bomb_start else Vector3.ZERO
 	m.has_overtime_flag = _spot(d.get("overtimeFlag"), "overtimeFlag", m.warnings)
 	m.overtime_flag = _vec(d.get("overtimeFlag")) if m.has_overtime_flag else Vector3.ZERO
 	for w in m.warnings:
@@ -937,6 +952,50 @@ func _read_poles(list: Variant, single: Variant) -> void:
 				poles.append(_vec(raw))
 	has_pole = not poles.is_empty()
 	pole = poles[0] if has_pole else Vector3.ZERO
+
+
+## Plant The Bomb's sites: each spot of `list` (the file's `bombSites`) with its radius, up to Plant.MOST; a bad spot
+## is left out with a warning (_spot), a radius that is no positive number is none (0: the tuning's). Without a list,
+## the flagpoles' spots.
+func _read_bomb_sites(list: Variant) -> void:
+	bomb_sites.clear()
+	bomb_site_radii.clear()
+	if list == null:
+		for p in poles:
+			bomb_sites.append(p)
+			bomb_site_radii.append(0.0)
+	elif not list is Array or (list as Array).is_empty():
+		warnings.append("bombSites %s is not a list of spots: none read" % JSON.stringify(list))
+	else:
+		for raw: Variant in list:
+			if bomb_sites.size() >= Plant.MOST:
+				warnings.append("bombSites: more than %d, the rest left out" % Plant.MOST)
+				break
+			if not _spot(raw, "bombSites", warnings):
+				continue
+			bomb_sites.append(_vec(raw))
+			var radius: Variant = (raw as Dictionary).get("radius")
+			if radius != null and not ((radius is float or radius is int) and float(radius) > 0.0):
+				warnings.append("bombSites: radius %s is not a positive number: the usual radius kept" % [
+					JSON.stringify(radius)])
+				radius = null
+			bomb_site_radii.append(float(radius) if radius != null else 0.0)
+	has_bomb_sites = not bomb_sites.is_empty()
+
+
+## Where the bomb lies as a round starts: the file's `bombStart`, or `ahead` m in front of the middle of end 0's spawn
+## line, on the floor there (the attackers always start from end 0).
+func bomb_start_ahead(ahead: float) -> Vector3:
+	if has_bomb_start or ends.is_empty() or ends[0] == null or ends[0].spawns.is_empty():
+		return bomb_start
+	var spawns := ends[0].spawns
+	var mid := spawns[spawns.size() / 2]
+	if spawns.size() % 2 == 0:
+		mid = SpawnPoint.new((mid.position + spawns[spawns.size() / 2 - 1].position) * 0.5, mid.yaw)
+	var at := mid.position + Vector3(-sin(mid.yaw), 0.0, -cos(mid.yaw)) * ahead
+	var floor_y := floor_under(at.x, at.z, mid.position.y + BOMB_START_RISE)
+	at.y = floor_y if floor_y > -INF else mid.position.y
+	return at
 
 
 static func _vec(raw: Variant) -> Vector3:
