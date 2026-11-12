@@ -126,20 +126,24 @@ func _glbs(dir: String) -> Array[String]:
 	return out
 
 
-func _slots_in(node: Node, bad: Array[String], path: String) -> void:
+## The vertex colours read under `node`; a colour off the slots is named in `bad`.
+func _slots_in(node: Node, bad: Array[String], path: String) -> int:
+	var read := 0
 	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
 		var mesh := (node as MeshInstance3D).mesh
 		for s in mesh.get_surface_count():
 			var colours: Variant = mesh.surface_get_arrays(s)[Mesh.ARRAY_COLOR]
 			if colours is PackedColorArray:
+				read += (colours as PackedColorArray).size()
 				for c in (colours as PackedColorArray):
 					var slot := c.a * float(ReplicaSurfaces.SLOTS)
 					if absf(slot - roundf(slot)) > 0.2 or int(roundf(slot)) > ReplicaSurfaces.SLOTS \
 							or (int(roundf(slot)) >= ReplicaSurfaces.KINDS.size() and int(roundf(slot)) != ReplicaSurfaces.SLOTS):
 						bad.append("%s %s %f" % [path, node.name, c.a])
-						return
+						return read
 	for child in node.get_children():
-		_slots_in(child, bad, path)
+		read += _slots_in(child, bad, path)
+	return read
 
 
 func test_every_replica_and_part_file_names_kinds_in_sixteenths_or_none() -> void:
@@ -149,8 +153,10 @@ func test_every_replica_and_part_file_names_kinds_in_sixteenths_or_none() -> voi
 	for p in files:
 		var scene := load(p) as PackedScene
 		var root := scene.instantiate()
-		_slots_in(root, bad, p)
+		var read := _slots_in(root, bad, p)
 		root.free()
+		if p.begins_with("res://assets/models/replicas/"):
+			assert_gt(read, 0, "%s: the scan read its vertex colours" % p)
 	assert_eq(bad, [] as Array[String], "files still cut for another slot count")
 
 
