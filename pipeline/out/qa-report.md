@@ -1,15 +1,21 @@
-Task: UL2 · QA commit (see git log, "UL2 QA") · Verdict: Pass
+Task: PB1 · QA commit (see git log, Agent: qa) · Verdict: Fail
 
-Blocking: none.
-Advisory:
-- game/play/field_lighting.gd:305 doc comment line is 159 chars (gdlint passes; tidy when next touched).
-- A flicker lamp (BAKE_DYNAMIC) contributes no baked SDFGI bounce, so flicker lamps on Subway add less ceiling light than the working ones; by design (roof_lamps.gd comment), only visible on Ultra.
-Interplay checked by reading: set_underground is the only writer of sdfgi_energy/bounce after build (_grade runs once in build, field_lighting.gd:346; set_gi_quality in graphics_apply.gd:111 only sets RenderingServer ray/frame counts; set_effects only toggles sdfgi_enabled). So GraphicsApply re-apply and preset change keep the underground values. OpticGlass duplicates the env after set_underground (play_session order), so aimed/hip envs carry them. Lift car lamps and Subway lamps go through RoofLamps.build (roof_view.gd:79); Depot is not plain, keeps 1.0 (pinned).
+Blocking
+- game/sim/plant.gd:154-155 (checkpoint test `ps.defusing >= cfg.defuse_checkpoint`): defusing is summed tick by tick in
+  floats, so a hold of exactly half of defuse_time (120 ticks of 1/60 at 4 s) ends a hair under 0.5 and the checkpoint is
+  lost (defusing falls to 0). plant plant/arm code uses SLACK for this; the checkpoint compare does not. Fix: compare
+  against checkpoint - SLACK. Test: test_a_defuse_let_go_at_exactly_the_checkpoint_keeps_it (left failing).
+Advisory: none found.
 
-Tests (tests/unit/test_ul2_underground_bounce.gd):
-- :13,:22 underground/above-ground/restore bounce values; fail if set_underground did not set sdfgi_* (old code leaves 1.0/0.5).
-- :34,:42 plain lamps get plain_lamp_indirect, hall lamps stay 1.0; fail without the roof_lamps.gd line (default 1.0).
-- :49 Subway plain, Depot not.
-- added: dim/flicker/dead plain lamps keep indirect energy after set_flicker and flicker stays dynamic (fails if the indirect line were only on working lamps).
-Result: 6 pass, 0.5 s. Raw output pipeline/out/qa/ul2.txt. Full suite not run (running elsewhere).
-Not testable headless: the actual Ultra render (needs a display/GPU); owner to look at Subway on Ultra, incl. flicker lamps and the lift.
+Tests added (tests/unit/test_pb1_qa.gd, 11 tests, 10 pass, 1 fails on the bug above)
+- checkpoint at exactly 0.5 (fails: the bug); defuse and fuse ending in one tick (decided once, one point);
+  two attackers pressing Use in one tick (one carrier); an attacker in reach cannot disarm; a round ended on an armed
+  bomb with a defuse under way leaves a clean bomb next round and swaps sides at half time; round ended mid-plant
+  leaves planting/planter/carrier/using reset; one-site map arms; zero/negative site radius falls back to the config;
+  no-site map never arms or crashes; letting go at the buzzer mid-plant (overtime) gives the round to the defenders;
+  Elimination ignores Use and the bomb.
+- Each asserts behaviour that would fail if the feature were stubbed (e.g. nothing arms, no overtime, no reset).
+
+Not tested: bot latches across rounds (plant_go, plant_fell_far) and may_defuse with the player out (covered in part by
+test_bots_plant), SimAudio loop cuts, Use-key rebinding prompt, window modes, real focus loss: need a display/scene runs.
+Full suite not run (check.sh busy); guards not run as instructed.
