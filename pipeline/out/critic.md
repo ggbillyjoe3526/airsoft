@@ -1,31 +1,30 @@
 Task: SM5 · Subway's lamps and extras
-Attempt: 8 (past 4; review-cap ruling: keep fixing until the critic passes), William's ask for more and larger posters
-Head: 1cfb98f (= HEAD; QA ran test_sm5_qa 13/13 on 94294ee, 1cfb98f adds only reports and those tests; full
-   tools/check.sh still running when judged: gdlint, changelog and wiki passed, the GUT run not finished)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✗ | 7 ✓ | 8 ✓
-Score: 7/8 → Retry (near miss, judgment)
-Failed checks, with evidence:
-6. [judgment] tools/blender/maps/station_signs.py:+273 `line(d, h * 0.64, "THE NIGHTJAR", ...)` with "Live jazz every
-   Friday" (+274): Nightjar is a real, well-known London live-jazz bar, so poster_j advertises a real venue under its
-   own name and offer. That breaks the brief's rule (every name invented) and CLAUDE.md §4 (no real brand names).
-   The other names look invented: Halden Tea, Fizzbee, Copperhill (Pier, Cycle Hire, Library, Depot Yard, Airsoft Club).
-Passed, from images and diff (sm5-6, sm5-4 shots 1, 2, 13, 14):
-1. Thirteen 2:3 posters (336 x 504 cells) and three 2:1 wide ones (672 x 336), station_cells.py:+9-21. Checked the cell
-   rects: none overlap, and all sit inside 2048 x 2048. Every line of text sits inside its poster and reads in sm5-6
-   (line() shrinks text to fit, +70-77). The wide posters in fixtures.py:+89-94 sit at y 2.3 between the name boards,
-   no overlap (22/44 vs 26-40; -44/-26/-8/14 vs -36.5..24.5). No two neighbours share a design (QA test). The edge
-   warnings are at 0.7 m, fixtures.py:+50, behind PT1's line.
-6. Otherwise fits: the palette has no blue or orange (TEAL 2A9C90, VIOLET, CRIMSON, BUTTER). The topics are airsoft
-   culture (goggles on, chrono night, new players, Skirmish Sundays) and gentle local adverts, with no weapons.
-3/5. No runtime script changed except a config list and a picture tool; performance Pass (4.5 MB sheet, about 12 more draws).
-Advisory (non-blocking): poster_e's nose wedge reads as a yellow trapezoid under the goggles rather than a cut-out; the
-   wide posters print at 224 px/m against the small ones' 336, fine at track distance; poster_j's birds read as gulls.
-Must-fix for the next attempt: rename "The Nightjar" on poster_j (station_signs.py:+273, the record's Decisions line,
-   the module docstring is fine) to an invented club name that no real jazz venue uses, e.g. "The Lamplight Room";
-   rebuild signs.png. Then merge once tools/check.sh ends green on that head.
+Attempt: 9 (past 4; review-cap ruling: keep fixing until the critic passes), William's ask for more and larger posters
+Head: 931e139 (= HEAD). Full tools/check.sh started on 94294ee and NOT finished when judged: gdlint, changelog and wiki
+   passed, the GUT run is still going. 94294ee..931e139 adds only the sheet's pixels, station_signs.py, docs, QA's
+   test_sm5_qa.gd (QA ran it 13/13) and reports; no runtime script changed.
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
+Score: 8/8 → Accept (merge only once tools/check.sh ends green; the verdict lapses if it fails)
+Failed checks, with evidence: none.
+Checked this attempt (git diff 1cfb98f 931e139, sm5-6-posters.jpg):
+6. station_signs.py:+266 "THE LAMPLIGHT ROOM": no well-known real club, bar or brand uses it (I know of none; any
+   same-named small venue is obscure, and generic "Lamplighter" pubs are a different name). No "Nightjar" is left in
+   code, data or docs outside the history rows. The other names are invented or generic: Halden Tea (Halden is a
+   Norwegian town, not a tea brand), Fizzbee (a software tool's name, not a drink), Copperhill (a small US town's name,
+   used here as a fictional town, with Lido, Pier, Cycle Hire, Library, Airsoft Club, Depot Yard), Read Late, Chrono
+   Night and Saturday Market (generic phrases). None is a well-known real brand.
+1. poster_j in sm5-6: the lamp shade, bulb and three-step glow read clearly as a hanging lamp, with the crescent moon
+   and the stars top right. The title fits in one line at 64 px (+266) and all four lines stay inside the poster.
+   poster_e (+182): the rounded notch now reads as a nose cut-out under the goggles, not a trapezoid.
+1. records/SM5.md:+19-20: attempt 8's row is filled in and attempt 9's added; the club's name is updated at +48.
+Advisory (non-blocking, carried over): the wide posters print at 224 px/m against the small ones' 336; poster_wide_c's
+   birds still read as gulls, which suits a pier.
+Must-fix for the next attempt: none. Merge once tools/check.sh ends green with test_sm5_qa.gd included (re-run it on
+   931e139 if the 94294ee run doesn't cover it).
 Owner should test in the game:
 - Stand on each platform and look across the track: do the 3 x 1.5 m posters read, and are they big enough?
 - Walk the passages: do 13 designs feel varied, with no twin posters side by side?
 - Read a small poster at 2 to 3 m: is the small text crisp, not smeared by mipmaps?
+- Does the Lamplight Room poster read as a lamp and a jazz night at a glance?
 - Check the edge warning at 0.7 m sits behind the yellow line, clear of "Mind the gap".
 - From the track bed, do the trackside posters sit at a believable height under the vault?

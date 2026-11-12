@@ -1,6 +1,6 @@
 # SM5 · Subway's lamps and extras
 
-**Review:** pending (re-review after William's ask for more posters)
+**Review:** passed (critic 8/8 at attempt 9, QA Pass, performance Pass)
 
 Models 31 to 33 of `art/subway-model-list.md` (William's go, 2026-11-12: "Begin work on subway models now"), from his
 photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33-extras/<kind>/`.
@@ -17,7 +17,7 @@ photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33
 | 2026-11-12 | 6 | build thread | ✓ | 7/8 Retry | wedge holes under the tunnel lamp's raised spine, top and bottom |
 | 2026-11-12 | 7 | build thread | ✓ | 8/8 Accept | |
 | 2026-11-12 | 8 | build thread | ✓ | 7/8 Retry | (William's ask: more posters, large trackside ones) the jazz club's name was a real London bar's |
-| 2026-11-12 | 9 | build thread | | | |
+| 2026-11-12 | 9 | build thread | ✓ | 8/8 Accept | |
 
 ## What it adds
 
