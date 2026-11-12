@@ -20,6 +20,8 @@ void fragment() {
 var _views: Array[MultiMeshInstance3D] = []
 var _materials: Array[Material] = []
 var _placed: Dictionary[StringName, Array] = {}
+## The lit models' lights (StationFixturesConfig.lit_models).
+var _lamps: Array[OmniLight3D] = []
 
 
 ## The fixtures of `map`'s station drawn under `cfg`, or null on a map with none.
@@ -47,6 +49,9 @@ static func build(map: MapData, cfg: StationFixturesConfig) -> StationFixtures:
 			push_warning("StationFixtures: \"%s\" won't load; its fixtures are left out" % cfg.path_of(model))
 			continue
 		view._add(model, _surfaces(src, prop, glow, printed), placed[model])
+		if cfg.lit_models.has(String(model)):
+			for t: Transform3D in placed[model]:
+				view._add_lamp(t * Vector3(0.0, 0.0, cfg.lamp_out), cfg)
 	return view
 
 
@@ -95,6 +100,23 @@ func _add(model: StringName, mesh: ArrayMesh, transforms: Array) -> void:
 	inst.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 	add_child(inst)
 	_views.append(inst)
+
+
+func _add_lamp(at: Vector3, cfg: StationFixturesConfig) -> void:
+	var lamp := OmniLight3D.new()
+	lamp.name = "Lamp%d" % _lamps.size()
+	lamp.position = at
+	lamp.omni_range = cfg.lamp_range
+	lamp.light_energy = cfg.lamp_energy
+	lamp.light_color = cfg.lens_colour
+	lamp.shadow_enabled = false
+	lamp.light_bake_mode = Light3D.BAKE_STATIC
+	add_child(lamp)
+	_lamps.append(lamp)
+
+
+func lamps() -> Array[OmniLight3D]:
+	return _lamps
 
 
 ## Each model's instances, by name: what the views draw.

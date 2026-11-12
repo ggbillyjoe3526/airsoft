@@ -1442,7 +1442,10 @@ Subway is Dev content: tick Settings › Dev › Dev content.
 
 - [ ] **The arch.** Walk both running tunnels east of the platforms: straight sides up to about head height over a car,
   then a smooth round arch over the track, with a ring every 6 m; where each meets its platform tunnel the arch opens
-  onto the platform's vault with no gap or seam. Over a standing car the arch follows its roof closely without touching it.
+  onto the platform's vault with no gap or seam. The wall lamps light the curve above them on every preset (Low too).
+- [ ] **The standing car.** The south train's east car stands under the arch: its roof steps down at both edges to
+  clear the curve, nothing of it pokes through the lining, and inside it the roof is closed (crouch and look up at the
+  sides: no gap). The cab steps down to the track and the ways round them each side still work.
 - [ ] **BBs and bombs.** Shoot up into the arch from the track and from a car's roof: each BB stops on the curve where
   you see it. A smoke or flash thrown over a car in the tunnel lands on its roof or comes back down.
 - [ ] **As before below.** The wagons, the cross passage, the detrainment steps at the south cab and the climb out of

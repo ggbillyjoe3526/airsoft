@@ -1,6 +1,6 @@
 # TB2 · Subway's running tunnels arched like the trains
 
-**Review:** 1 attempt · critic pending · qa pending · performance pending
+**Review:** 2 attempts · critic pending · qa pending · performance pending
 
 Owner's ask (2026-11-12): "Subway tunnel should be curved/arched to closely math the shape of the trains." A second
 pull request after TB1 (#318), which vaulted the platform tunnels.
@@ -9,7 +9,8 @@ pull request after TB1 (#318), which vaulted the platform tunnels.
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-12 | 1 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-12 | 1 | Opus 5.5 (build thread) | ✓ | 6/8 Retry | the box car standing in the south running tunnel poked through the arch (its roof cut away, its sides through the lining); the arch unseen in the dark tunnel; an always-true test assert, a stale rib comment |
+| 2026-11-12 | 2 | Opus 5.5 (build thread) | pending | pending | – |
 
 ## Decisions
 
@@ -28,7 +29,22 @@ pull request after TB1 (#318), which vaulted the platform tunnels.
   only the room ceilings over 2.7 m became arch. The detrainment steps at the south cab (`cab_steps`) sit under the
   arch like the rest (when SM1 lands, its own steps replace them).
 - **Tunnel lamps** hang at 2.45 m (`fixtures.LAMP_Y`), under the springing, so their fittings never cut the arch.
+- **A standing car fits under the arch** (attempt 2). The south train stands half in its running tunnel (x 50 to 60),
+  and the greybox car is a 3.5 m box in a 3.6 m tunnel: no arch clears its corners. Where a car stands under a
+  running arch its shell is shaped to it (`build_map.under_arch`, `car_shoulders`): across the car in 0.1 m steps,
+  each no higher than `CAR_CLEAR` 12 cm inside the arc (measured from its middle), its roof stepping down over the
+  shoulders as SM1's rounded car does, and its air a roof's thickness under that. The arch's colliders now run
+  unbroken over the car, and the vault tests no longer let a train off.
+- **The cab steps under the arch** open onto the ways round them up to the arch (two rooms under one vault open to
+  it, `shell`), as they did under the flat roof before.
+- **Tunnel lamps light the arch** (attempt 2): the roof's strip lamps hang under the crown and shine straight down,
+  and on Low and Medium the overhead light stands in for them from above, so nothing lit the arch's down-facing
+  lining and the tunnels drew black above the wall. Each wall-mounted tunnel lamp (SM5's) now carries a short
+  shadowless light at its glass (`StationFixturesConfig.lit_models`, 6.5 m at 1.5, the glass's warm white), on every
+  preset: a dozen lights, in the running tunnels only.
 
 ## Known issues
 
-- The running tunnels stay as dark as before (lining, lamps every few metres): the arch reads mostly by its rings.
+- The car's stepped shoulders show on the greybox box car until SM1's train models draw over its shell.
+- The cloud renders draw in the Compatibility renderer, where the roof's lamps aren't real lights: on High and Ultra
+  (Forward+) the tunnels are lit by both, a little brighter than the pictures.

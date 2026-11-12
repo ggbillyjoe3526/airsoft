@@ -571,7 +571,7 @@ func test_a_malformed_finish_or_mouth_leaves_the_vault_out_and_a_good_one_is_rea
 		var kept := d != null and d.vaults.size() == 1
 		assert_eq(kept, case[1], "vault with %s" % [case[0]])
 		if not kept:
-			assert_eq(warnings.size(), 1 if d == null or true else 0, "a bad one warns: %s" % [case[0]])
+			assert_eq(warnings.size(), 1, "a bad one warns once: %s" % [case[0]])
 	var good := StationDressing.read({"station": {"vaults": [base.merged({"finish": "lining", "mouth": "west"})]}}, [] as Array[String])
 	assert_eq(good.vaults[0].finish, &"lining")
 	assert_true(good.vaults[0].open_west)

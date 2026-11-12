@@ -38,8 +38,8 @@ func test_no_gap_behind_the_arc_along_the_whole_tunnel() -> void:
 			for k in range(1, 20):
 				var a := v.half_angle() * (-1.0 + 2.0 * float(k) / 20.0)
 				var p := Vector3(x, c.y + (c.z + 0.02) * cos(a), c.x + (c.z + 0.02) * sin(a))
-				# a car standing in a running tunnel: its own shell holds its corners, under the arch (TB2)
-				if not _held(m, p) and m.station.style_at(p) != &"train":
+				# a car standing in a running tunnel is shaped under the arch (TB2): the arch holds every point
+				if not _held(m, p):
 					fail_test("gap behind the arc at %s" % p)
 					return
 			x += 3.7
@@ -78,7 +78,13 @@ func test_no_collider_stands_more_than_8_cm_proud_of_a_running_arch_at_any_x() -
 			if b.kind == &"ramp" or not lid.encloses(box) or box.size.x < 0.5 or box.end.x < v.area.position.x or box.position.x > v.area.end.x:
 				continue
 			var near := Vector2(clampf(c.x, box.position.z, box.end.z), clampf(c.y, box.position.y, box.end.y))
-			assert_gt(near.distance_to(Vector2(c.x, c.y)), c.z - 0.09, "arch collider within 8 cm of the arc: %s" % box)
+			if near.distance_to(Vector2(c.x, c.y)) > c.z - 0.09:
+				continue  # an arch collider: within 8 cm of the arc
+			# else a car's roof under the arch (TB2): every corner at least 11 cm inside the arc, never touching it
+			var far := 0.0
+			for corner: Vector2 in [Vector2(box.position.z, box.end.y), Vector2(box.end.z, box.end.y)]:
+				far = maxf(far, corner.distance_to(Vector2(c.x, c.y)))
+			assert_lt(far, c.z - 0.11, "a block in the arch is an arch collider or a car's roof clear of it: %s" % box)
 
 
 func test_the_running_arch_air_is_open_along_its_whole_length() -> void:
@@ -90,7 +96,7 @@ func test_the_running_arch_air_is_open_along_its_whole_length() -> void:
 			for k in range(-8, 9):
 				var a := v.half_angle() * float(k) / 9.0
 				var p := Vector3(x, c.y + (c.z - 0.1) * cos(a), c.x + (c.z - 0.1) * sin(a))
-				assert_false(_held(m, p) and m.station.style_at(p) != &"train", "air 10 cm under the arc at %s" % p)
+				assert_false(_held(m, p), "air 10 cm under the arc at %s" % p)
 			x += 1.9
 
 
@@ -106,7 +112,7 @@ func test_the_junction_at_x_50_has_no_hole_and_no_block_in_the_air() -> void:
 		for k in range(1, 12):
 			var a := v.half_angle() * (-1.0 + 2.0 * float(k) / 12.0)
 			var p := Vector3(50.03, c.y + (c.z + 0.02) * cos(a), c.x + (c.z + 0.02) * sin(a))
-			assert_true(_held(m, p) or m.station.style_at(p) == &"train", "no BB slips past the arc at the seam %s" % p)
+			assert_true(_held(m, p), "no BB slips past the arc at the seam %s" % p)
 
 
 func test_running_arch_has_no_end_cap_at_its_open_west_and_one_at_the_east() -> void:
@@ -126,3 +132,25 @@ func test_xpass_mouth_into_each_running_tunnel_stays_walkable() -> void:
 			var zz := z * sz
 			assert_false(_held(m, Vector3(75.5, -18.9 + 1.0, zz)), "a body walks through z %.1f" % zz)
 			assert_false(_held(m, Vector3(75.5, -18.9 + 2.3, zz)), "head clear at z %.1f" % zz)
+
+
+func test_a_car_under_a_running_arch_keeps_its_roof_under_the_arch() -> void:
+	var m := _map()
+	var checked := 0
+	for v in _running(m):
+		var c := v.circle()
+		for x: float in [51.0, 55.0, 59.0]:
+			var z := v.area.position.y + 0.25
+			while z < v.area.end.y - 0.25:
+				# inside a standing car (its floor 0.9 m over the track bed), up to the arch: its roof closes it first
+				if m.station.style_at(Vector3(x, 1.5, z)) == &"train":
+					checked += 1
+					var arc := c.y + sqrt(c.z * c.z - (z - c.x) * (z - c.x))
+					var roofed := false
+					var y := 1.8
+					while y < arc - 0.05 and not roofed:
+						roofed = _held(m, Vector3(x, y, z))
+						y += 0.05
+					assert_true(roofed, "the car's roof under the arch at x %.1f z %.2f" % [x, z])
+				z += 0.1
+	assert_gt(checked, 30, "the south car stands in its running tunnel")
