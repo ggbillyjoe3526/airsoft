@@ -13,7 +13,8 @@ the switch cabinet. Each is built from the owner's photos in `art/references/map
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | build thread | Pass | Retry 6/8 | Loads, tarp, trolley wheels, buffer stop, drum and hoarding short of the photos; black plant-room props unlogged |
 | 2026-11-12 | 2 | build thread | Pass | Retry 7/8 | Hoarding panels too narrow, cable turns too few, loads studded, trolley rims polygonal, tarp shoulders faceted, roof duct flush |
-| 2026-11-12 | 3 | build thread | – | – | – |
+| 2026-11-12 | 3 | build thread | Pass | Retry 7/8 | Vehicles on their own track beside the running rails, ballast load flat, no pictures after the track change |
+| 2026-11-12 | 4 | build thread | – | – | – |
 
 ## What changed
 
@@ -23,10 +24,10 @@ the switch cabinet. Each is built from the owner's photos in `art/references/map
 
   | Model | Budget | Triangles | Notes |
   |---|---|---|---|
-  | Skip wagon | 2,500 | 2,486 | A tipping skip of broken spoil on its cradle |
-  | Engineering wagon | 3,000 | 2,972 | Concrete sleepers under a strapped tarp on a flat wagon |
-  | Ballast wagon | 2,500 | 2,492 | Plank sides and a heap of dark stone |
-  | Platelayer trolley | 1,200 | 1,188 | Three sizes, the size picked by the box; spoked wheels |
+  | Skip wagon | 2,500 | 2,466 | A tipping skip of broken spoil on its cradle |
+  | Engineering wagon | 3,000 | 2,840 | Concrete sleepers under a strapped tarp on a flat wagon |
+  | Ballast wagon | 2,500 | 2,484 | Plank sides and a heap of dark stone |
+  | Platelayer trolley | 1,200 | 1,100 | Three sizes, the size picked by the box; spoked wheels |
   | Buffer stop | 1,500 | 1,378 | Yellow and black, on two pedestals, round buffers |
   | Cable drum | 1,000 | 956 | Two sizes, twenty turns of cable |
   | Tunnel segments | 1,500 | 1,424 | Two stacks of lining segments on bearers |
@@ -37,15 +38,18 @@ the switch cabinet. Each is built from the owner's photos in `art/references/map
   | Switch cabinet | 800 | 750 | Two bays, shut |
 
 - **Defaults taken** (the owner's DEFAULTS RULE):
-  - The vehicles' boxes stand about 0.65 m off the station's rails, so each wagon and trolley sits on its own short
-    900 mm works track inside its box. Moving the boxes onto the rails would be a play change.
+  - The works vehicles stand on the station's running rails: their blocks (and the buffer stops') are centred on
+    the tracks (`layout.TRACK_Z`), the skip and engineering wagons 2 m wide, the trolleys 1.7 m, so each leaves at least
+    0.75 m to pass either side. Their models carry the rails only as hidden pieces inside the station's
+    (`works_kit.running_rails`). Put to the owner as a question; this is the recommended answer, built while he decides.
+    The first default, each vehicle on its own short works track inside its old box, read as a third track in game.
   - The trolley is works yellow. The photos show red, but every red tried read as a team's hue.
   - The engineering wagon is a loaded flat wagon, the model list's gap default.
   - The cabinets are shut and the booth blinds are down, because the station is abandoned.
 - **The train track** (owner, 2026-11-12: "remove the wooden planks; make the train rails slightly thicker/higher and
   slightly grey so they are easy to see against the dark"): the station's track has no sleepers now
   (`StationLook.sleepers`, off), its rails are 0.09 x 0.12 m (were 0.07 x 0.08) in light grey painted steel. The works
-  track under the wagons and trolleys lost its timber sleepers too, its rails grey to match.
+  vehicles now stand on these rails.
 - **Facing** (shared with SM3's benches): a block may name `facing` (`+x`, `-x`, `+z` or `-z`), the world direction its
   model's front points. FIT then turns the model that way, its width across the front, instead of toward the field's
   middle (`MapData.Block.facing`, `PropLayout._fit_facing`, `tests/unit/test_sm4_facing.gd`). The booths face the

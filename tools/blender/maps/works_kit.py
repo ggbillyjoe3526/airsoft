@@ -11,9 +11,8 @@ there (`bake`: rust, dust, soot and grime from seeded noise, weathering.py), so 
 props' one vertex-coloured material and ships no texture. Every colour a corner ends with is checked off the teams'
 hues (tests/unit/test_props.gd's rule) before the model is written.
 
-The works vehicles stand on short lengths of the contractor's 900 mm works track (rails on timber sleepers, a stop
-block at each end), laid over the station's own track: their boxes stand off the main rails, so this is how a works
-train is left in a tunnel under refurbishment.
+The works vehicles stand on the station's running rails (1.5 m gauge, their blocks centred on the track): each model
+carries the rails under it only as hidden pieces inside the rails StationSurface draws (`Kit.running_rails`).
 
 Run each script with Blender 5.x or pip's `bpy` (pip install bpy==5.2.3): python3 -I tools/blender/maps/<model>.py
 [--render <sheet.jpg>]. Dev tool: tools/ never ships.
@@ -48,10 +47,8 @@ PAINT = {
     "galv_dark": 0x86888a,
     "rust": 0x625650,
     "rust_dark": 0x4c423c,
-    # the works track: creosoted sleepers, the rails' rusty webs and their worn heads
-    "sleeper": 0x5c5248,
+    # the running rails' hidden pieces (grey steel, as StationLook's rails)
     "rail": 0x7c7c7a,
-    "rail_head": 0xa6a6a4,
     # wheels and their axle boxes
     "wheel": 0x4a4644,
     # loads: spoil (clay and broken concrete), ballast stones, tarpaulin, concrete sleepers
@@ -98,6 +95,12 @@ PAINT = {
 GRIME = 0x4a4642
 DUST = 0x9a948a
 SOOT = 0x2e2c2c
+
+# The station's running rails (StationLook.gauge and rail_size): a works vehicle's block is centred on its track, so
+# its wheels stand on them. The wheels' flanges run just inside the rails' heads.
+RAIL_Y = 0.75        # each rail's middle from the track's middle
+RAIL_TOP = 0.12      # the rails' top over the track bed
+WHEEL_IN = RAIL_Y - 0.045
 
 
 def check_colours(names: list, shade: float = 0.2) -> None:
@@ -181,28 +184,15 @@ class Kit(rk.Kit):
                     (x + w * 0.3, z + h * 0.5), (x - w * 0.3, z + h * 0.5), (x - w * 0.5, z + h * 0.2)], "y",
                    y - d * 0.5, y + d * 0.5, mat)
 
-    def works_track(self, x0: float, x1: float, gauge: float = 0.9, sleeper_len: float = 1.5, pitch: float = 0.62,
-                    stops: bool = False) -> float:
-        """A length of the contractor's works track from x0 to x1: two flat-bottomed grey steel rails `gauge` apart
-        (between their middles) lying on the ground (z 0), a timber stop block bolted over each rail end when `stops`.
-        No sleepers, like the station's own track (owner, 2026-11-12: no planks, rails easy to see against the dark);
-        `sleeper_len` and `pitch` are kept for the callers. Returns the rails' top (the wheels' tread line)."""
-        sh = 0.0
-        top = 0.1
+    def running_rails(self, x0: float, x1: float) -> float:
+        """The station's running rails under a works vehicle from x0 to x1, a hair inside the rails StationSurface
+        draws (StationLook: 1.5 m gauge, heads 0.09 x 0.12 m on the track bed), so the vehicle's wheels stand on the
+        real rails and these never show: they only carry the model down to its box's floor. Returns the rails' top
+        (the wheels' tread line)."""
         for s in (-1.0, 1.0):
-            y = s * gauge * 0.5
-            self.prism([(y - 0.045, sh), (y + 0.045, sh), (y + 0.045, sh + 0.008), (y + 0.01, sh + 0.02),
-                        (y + 0.01, top - 0.026), (y + 0.026, top - 0.018), (y - 0.026, top - 0.018),
-                        (y - 0.01, top - 0.026), (y - 0.01, sh + 0.02), (y - 0.045, sh + 0.008)], "x", x0, x1,
-                       "rail")  # the flat-bottomed rail: foot, web, head
-            self.blk((x0, y - 0.026, top - 0.018), (x1, y + 0.026, top), "rail_head")
-            if stops:
-                for x, d in ((x0, 1.0), (x1, -1.0)):
-                    xa, xb = (x, x + d * 0.16) if d > 0 else (x + d * 0.16, x)
-                    self.blk((xa, y - 0.09, top - 0.01), (xb, y + 0.09, top + 0.12), "timber")
-                    self.bolts([((xa + xb) * 0.5, y - 0.05, top + 0.12), ((xa + xb) * 0.5, y + 0.05, top + 0.12)],
-                               0.012, 0.012, "z", "rust")
-        return top
+            y = s * RAIL_Y
+            self.blk((x0, y - 0.043, 0.0), (x1, y + 0.043, RAIL_TOP - 0.002), "rail")
+        return RAIL_TOP
 
     def mound(self, x0: float, x1: float, y0: float, y1: float, z0: float, peak: float, mat: str, nx: int, ny: int,
               rough: float, seed: int, shape=None) -> None:
@@ -294,13 +284,13 @@ class Kit(rk.Kit):
 def underframe(k: Kit, hl: float, hw: float, axle_x: float, wheel_r: float, rail_top: float, paint: str,
                buffer_y: float = 0.5, seg: int = 8) -> float:
     """A short works wagon's underframe, `hl` m from its middle to its buffer faces and `hw` to its solebars' outside
-    faces: two wheelsets `axle_x` m either side of the middle on the works track's rails, each axle box held in a
+    faces: two wheelsets `axle_x` m either side of the middle on the running rails, each axle box held in a
     pair of W-irons under a leaf spring, channel solebars and headstocks, a buffer either side of a coupling hook at
     each end and a brake lever down one side. Returns the solebars' top (the floor's underside)."""
     zc = rail_top + wheel_r
     z0, z1 = zc + 0.1, zc + 0.36           # the solebars
     for x in (-axle_x, axle_x):
-        k.wheelset(x, 0.45 - 0.035, zc, wheel_r, 0.07, seg=seg)
+        k.wheelset(x, WHEEL_IN, zc, wheel_r, 0.07, seg=seg)
         for s in (-1.0, 1.0):
             y = s * (hw - 0.05)
             k.axle_box(x, y, zc, 0.16, 0.17, 0.08, paint)
@@ -340,11 +330,6 @@ def underframe(k: Kit, hl: float, hw: float, axle_x: float, wheel_r: float, rail
             k.blk((xb - 0.025, s * 0.45 - 0.04, zc - 0.09), (xb + 0.025, s * 0.45 + 0.04, zc + 0.09), paint)
         k.blk((xb - 0.015, -0.45, zc - 0.015), (xb + 0.015, 0.45, zc + 0.015), paint)  # the brake beam
     return z1
-
-
-def rail_steel(p: Vector, c: tuple) -> tuple:
-    """A works rail's grey steel, a little dust on it, kept light so the rails read against the dark track bed."""
-    return wt.mix(c, lin(DUST), 0.2 * wt.fbm(p, 0.3, 71))
 
 
 def bake(ob: bpy.types.Object, weather=None, jitter: dict = None, seed: int = 1) -> None:

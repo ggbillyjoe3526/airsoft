@@ -5,11 +5,11 @@ fills it): a steel deck with timber cross-bearers on a channel underframe with w
 down both sides, loaded with two stacks of concrete sleepers on timber dunnage and, over them, a load of kit under a
 lashed tarpaulin, its straps ratcheted to the solebars. No lettering, no livery.
 
-Its block (4 x 2.2 m and 2.6 m high, data/maps/subway.json) stands off the main rails, so the wagon stands on a length
-of works track (works_kit.py).
+Its block (4 x 2 m and 2.6 m high, data/maps/subway.json) is centred on the north track, so the wagon's wheels stand
+on the station's running rails (works_kit.running_rails).
 
 Writes assets/models/props/engineering_wagon.glb, one vertex-coloured mesh filling x -2..2 (along the track),
-y -1.1..1.1, z 0..2.6 exactly (Godot: x along, y up, z across).
+y -1..1, z 0..2.6 exactly (Godot: x along, y up, z across).
 
 Usage: python3 -I tools/blender/maps/engineering_wagon.py [--render <sheet.jpg>]
 """
@@ -26,15 +26,15 @@ from mathutils import Vector  # noqa: E402
 
 NAME = "engineering_wagon"
 BUDGET = 3000
-HL, HD, HIGH = 2.0, 1.1, 2.6
+HL, HD, HIGH = 2.0, 1.0, 2.6
 
 DECK_X = 1.86          # the deck's half length
-DECK_Y = 1.04          # the deck's half width (the stanchions stand outside it, to the box's side)
-SLEEPER = (0.26, 2.0, 0.2)   # a concrete sleeper: wide (x), long (across), tall
+DECK_Y = 0.94          # the deck's half width (the stanchions stand outside it, to the box's side)
+SLEEPER = (0.26, 1.86, 0.2)   # a concrete sleeper: wide (x), long (across), tall
 STACK_X = (-1.78, 0.12)      # each stack's -x end
 PER_LAYER = 6
 LAYERS = 3
-TARP_X, TARP_Y = 1.74, 0.98  # the tarpaulin's half length and half width over the stacks
+TARP_X, TARP_Y = 1.74, 0.88  # the tarpaulin's half length and half width over the stacks
 STRAPS = (-1.25, -0.42, 0.42, 1.25)  # the straps' x over the tarp
 
 
@@ -64,9 +64,9 @@ def tarp_lines(n: int, half: float, shoulder: float, n_sh: int = 4) -> list:
 
 def build() -> object:
     k = wk.Kit(NAME)
-    rail_top = k.works_track(-HL, HL, sleeper_len=1.6, pitch=0.62)
+    rail_top = k.running_rails(-HL, HL)
     k.mark("track")
-    top = wk.underframe(k, HL, 0.82, 1.15, 0.3, rail_top, "frame_black", buffer_y=0.55)
+    top = wk.underframe(k, HL, 0.9, 1.15, 0.3, rail_top, "frame_black", buffer_y=0.55)
     for s in (-1.0, 1.0):  # the solebars' outer faces in works yellow
         y0, y1 = sorted((s * 0.82, s * 0.835))
         k.blk((-HL + 0.12, y0, top - 0.26), (HL - 0.12, y1, top), "works_yellow")
@@ -144,8 +144,6 @@ def weather(p: Vector, n: Vector, c: tuple, paint: str) -> tuple:
     if paint == "tarp":
         col = wt.mix(c, wk.lin(wk.GRIME), 0.3 * wt.fbm(p, 0.3, 53))  # stains in the folds
         return wt.mix(col, wk.lin(wk.DUST), max(0.0, n.z) * 0.25 * wt.fbm(p, 0.5, 55))
-    if paint in ("rail", "rail_head"):
-        return wk.rail_steel(p, c)
     if paint in ("wheel", "rust"):
         return wk.grime(p, n, wk.rusty(p, n, c, seed=7, amount=0.4, streaks=False), seed=2)
     return wk.grime(p, n, c, seed=4)
@@ -156,7 +154,7 @@ def main() -> None:
     wk.check_colours(list(wk.PAINT))
     ob = build()
     wk.finish(ob, (-HL, -HD, 0.0), (HL, HD, HIGH))
-    wk.bake(ob, weather, jitter={"sleeper": 0.08, "timber": 0.07, "concrete": 0.05})
+    wk.bake(ob, weather, jitter={"timber": 0.07, "concrete": 0.05})
     wk.write(ob, NAME, BUDGET)
     if "--render" in sys.argv:
         wk.render(wk.quarter_views(2 * HL, 2 * HD, HIGH), sys.argv[sys.argv.index("--render") + 1],

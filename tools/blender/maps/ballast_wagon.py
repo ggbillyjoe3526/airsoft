@@ -4,8 +4,8 @@ an outside steel stanchion at each plank joint and diagonal strapping, a drop do
 hinges, corner plates, on a short channel underframe with W-irons and leaf springs, buffers, coupling and a brake
 lever (works_kit.underframe); full of grey ballast heaped over the sides. Grey paint, rust at the joints; no lettering.
 
-Its two blocks (the north running tunnel, 4 x 1.8 m and 2.2 m high, data/maps/subway.json) stand off the main rails,
-so the wagon stands on a length of works track (works_kit.py).
+Its two blocks (the north running tunnel, 4 x 1.8 m and 2.2 m high, data/maps/subway.json) are centred on the track,
+so the wagon's wheels stand on the station's running rails (works_kit.running_rails).
 
 Writes assets/models/props/ballast_wagon.glb, one vertex-coloured mesh filling x -2..2 (along the track), y -0.9..0.9,
 z 0..2.2 exactly (Godot: x along, y up, z across).
@@ -34,9 +34,9 @@ PLANKS = 3
 
 def build() -> object:
     k = wk.Kit(NAME)
-    rail_top = k.works_track(-HL, HL, sleeper_len=1.5, pitch=0.62)
+    rail_top = k.running_rails(-HL, HL)
     k.mark("track")
-    deck = wk.underframe(k, HL, 0.74, 1.1, 0.3, rail_top, "frame_black")
+    deck = wk.underframe(k, HL, 0.86, 1.1, 0.3, rail_top, "frame_black")
     k.mark("underframe")
     floor = deck + 0.08
     k.blk((-BODY_X, -SIDE_Y, deck), (BODY_X, SIDE_Y, floor), "skip_grey")  # the floor's planks, edge on
@@ -79,10 +79,10 @@ def build() -> object:
     k.mark("ironwork")
     # The ballast, heaped over the sides to the box's top.
     k.rubble(-BODY_X + 0.05, BODY_X - 0.05, -SIDE_Y + 0.05, SIDE_Y - 0.05, SIDE_TOP - 0.08, HIGH,
-             ["ballast_dark", "ballast_dark", "ballast"], 24, 12, 0.05, 8, shape=heap)
+             ["ballast_dark", "ballast_dark", "ballast"], 24, 12, 0.1, 8, shape=heap)
     import random
     rng = random.Random(8)
-    for i in range(8):  # a few bigger stones lying loose on top
+    for i in range(24):  # bigger stones lying loose on top, every way up
         x, y = rng.uniform(-BODY_X + 0.3, BODY_X - 0.3), rng.uniform(-SIDE_Y + 0.3, SIDE_Y - 0.3)
         z = SIDE_TOP - 0.08 + (HIGH - SIDE_TOP + 0.08) * heap(x / BODY_X, y / SIDE_Y)
         r = rng.uniform(0.05, 0.09)
@@ -106,8 +106,6 @@ def weather(p: Vector, n: Vector, c: tuple, paint: str) -> tuple:
     if paint in ("ballast", "ballast_dark"):
         col = wt.mix(c, wk.lin("ballast_dark"), 0.5 * wt.fbm(p, 0.06, 31))
         return wt.scale(col, 0.75 + 0.5 * wt.fbm(p * 7.0, 0.05, 33))  # a speckle: stone by stone, light and dark
-    if paint in ("rail", "rail_head"):
-        return wk.rail_steel(p, c)
     if paint in ("wheel", "rust"):
         return wk.grime(p, n, wk.rusty(p, n, c, seed=7, amount=0.4, streaks=False), seed=2)
     return wk.grime(p, n, c, seed=4)
@@ -118,7 +116,7 @@ def main() -> None:
     wk.check_colours(list(wk.PAINT))
     ob = build()
     wk.finish(ob, (-HL, -HD, 0.0), (HL, HD, HIGH))
-    wk.bake(ob, weather, jitter={"sleeper": 0.08, "timber": 0.06, "ballast_dark": 0.1, "skip_grey": 0.03})
+    wk.bake(ob, weather, jitter={"timber": 0.06, "ballast_dark": 0.1, "skip_grey": 0.03})
     wk.write(ob, NAME, BUDGET)
     if "--render" in sys.argv:
         wk.render(wk.quarter_views(2 * HL, 2 * HD, HIGH), sys.argv[sys.argv.index("--render") + 1],

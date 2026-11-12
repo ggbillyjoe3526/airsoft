@@ -5,8 +5,8 @@ it (photos 3 and 4), a low push rail along the other end, and the tools lying on
 bar. Works yellow, worn and rusty (the photos' red is the Beta team's hue once weathered); no lettering.
 
 Its three blocks (data/maps/subway.json) are three sizes, so three models, each built at its block's size:
-`platelayer_trolley` 1.5 x 1.3 m, `platelayer_trolley_short` 1.5 x 1.0 m and `platelayer_trolley_long` 2 x 1.3 m, all
-1.2 m high. The trolleys stand off the main rails, so each stands on a length of works track (works_kit.py).
+`platelayer_trolley` 1.5 x 1.7 m, `platelayer_trolley_short` 1.3 x 1.7 m and `platelayer_trolley_long` 2 x 1.7 m, all
+1.2 m high, each centred on its track, its wheels on the station's running rails (works_kit.running_rails).
 
 Writes assets/models/props/platelayer_trolley*.glb, each one vertex-coloured mesh filling x -L/2..L/2 (along the
 track), y -W/2..W/2, z 0..1.2 exactly (Godot: x along, y up, z across).
@@ -26,8 +26,8 @@ from mathutils import Vector  # noqa: E402
 
 BUDGET = 1200
 HIGH = 1.2
-SIZES = {"platelayer_trolley": (1.5, 1.3), "platelayer_trolley_short": (1.5, 1.0),
-         "platelayer_trolley_long": (2.0, 1.3)}
+SIZES = {"platelayer_trolley": (1.5, 1.7), "platelayer_trolley_short": (1.3, 1.7),
+         "platelayer_trolley_long": (2.0, 1.7)}
 WHEEL_R = 0.26
 SPOKES = 5
 
@@ -58,16 +58,16 @@ def spoked_wheel(k: wk.Kit, x: float, y: float, z: float, outward: float) -> Non
 def build(name: str, length: float, width: float) -> object:
     hl, hw = length * 0.5, width * 0.5
     k = wk.Kit(name)
-    rail_top = k.works_track(-hl, hl, sleeper_len=min(1.3, width - 0.1), pitch=0.8)
+    rail_top = k.running_rails(-hl, hl)
     k.mark("track")
     zc = rail_top + WHEEL_R
     ax = hl - 0.34
-    gy = 0.45 + 0.0275           # the wheels' middles: their flanges' faces on the 900 mm gauge
+    gy = wk.WHEEL_IN + 0.0275    # the wheels' middles: their flanges' faces just inside the running rails
     for x in (-ax, ax):
         for sy in (-1.0, 1.0):
             spoked_wheel(k, x, sy * gy, zc, sy)
         k.bar((x, -gy, zc), (x, gy, zc), 0.03, "wheel", seg=6, cap=False)  # the axle
-    fy = 0.36                    # the side frames inside the wheels, the axles' bearings in them
+    fy = 0.62                    # the side frames inside the wheels, the axles' bearings in them
     f0, f1 = zc - 0.05, zc + 0.07
     for sy in (-1.0, 1.0):
         y0, y1 = sorted((sy * fy, sy * (fy - 0.05)))
@@ -124,8 +124,6 @@ def weather(p: Vector, n: Vector, c: tuple, paint: str) -> tuple:
         if p.z > HIGH - 0.06:  # the rail worn bare where it's pushed
             col = wt.mix(col, wk.lin("steel_bare"), 0.45 * wt.fbm(p, 0.06, 15))
         return wk.grime(p, n, col, seed=6)
-    if paint in ("rail", "rail_head"):
-        return wk.rail_steel(p, c)
     if paint in ("wheel", "rust", "skip_grey"):
         return wk.grime(p, n, wk.rusty(p, n, c, seed=7, amount=0.4, streaks=False), seed=2)
     return wk.grime(p, n, c, seed=4)
@@ -137,7 +135,7 @@ def main() -> None:
         wk.reset()
         ob = build(name, length, width)
         wk.finish(ob, (-length * 0.5, -width * 0.5, 0.0), (length * 0.5, width * 0.5, HIGH))
-        wk.bake(ob, weather, jitter={"sleeper": 0.08, "timber": 0.08})
+        wk.bake(ob, weather, jitter={"timber": 0.08})
         wk.write(ob, name, BUDGET)
         if "--render" in sys.argv:
             out = sys.argv[sys.argv.index("--render") + 1].replace(".jpg", "_%s.jpg" % name)

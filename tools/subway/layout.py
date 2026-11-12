@@ -124,6 +124,7 @@ room("plat_s", "South platform", -52, 50, 5.5, 9, P, h=TUNNEL_H)
 # The track pits, 0.9 m under the platforms: no steps up (owner, 2026-11-10, CL1: "remove the trackside stairs"), a
 # body climbs out over a platform's edge (VaultConfig climb_depth) and drops back down; bots take the same links.
 TRACK_H = TUNNEL_H + 0.9
+TRACK_Z = 10.75      # each track's middle line (z, the south one; the north one at -TRACK_Z): station_dress.LINES
 
 
 def track(name: str, area: str, x0: float, x1: float, z_edge: float, z_wall: float) -> None:
@@ -182,13 +183,17 @@ for zs in (-1, 1):
         block("furniture", P, x - 1, x + 1, *wall, 0.8)    # benches
 block("barrier", P, 38, 40, -7.4, -5.5, 1.3, dress="tunnel_segments")  # stacked tunnel lining segments
 block("cabinet", P, 48.6, 49.4, -7.5, -6.6, 2.2, dress="signal_cabinet")  # signal cabinet at the tunnel mouth
-block("skip", T, -18, -16, 9.0, 11.2, 2.7, dress="skip_wagon")  # spoil skips on wagons, staggered wall to edge
-block("skip", T, -2, 0, 10.3, 12.5, 2.7, dress="skip_wagon")
-block("skip", T, 6, 8, 9.0, 11.2, 2.7, dress="skip_wagon")
-block("cabinet", T, -46.5, -45, -12.3, -11.0, 1.2, dress="platelayer_trolley")  # platelayers trolley
-block("container", T, 36, 40, -11.2, -9.0, 2.6, 0x7d7a72, dress="engineering_wagon")  # left on the north track
-block("barrier", T, -52, -51.5, -12.5, -10.2, 1.2, dress="buffer_stop", facing="+x")  # the west end is a dead end
-block("barrier", T, -52, -51.5, 10.2, 12.5, 1.2, dress="buffer_stop", facing="+x")
+# The works vehicles and the buffer stops stand centred on their track (TRACK_Z), their wheels on the running rails
+# (owner, 2026-11-12), leaving a way past each side.
+block("skip", T, -18, -16, TRACK_Z - 1.0, TRACK_Z + 1.0, 2.7, dress="skip_wagon")  # spoil skips on wagons
+block("skip", T, -2, 0, TRACK_Z - 1.0, TRACK_Z + 1.0, 2.7, dress="skip_wagon")
+block("skip", T, 6, 8, TRACK_Z - 1.0, TRACK_Z + 1.0, 2.7, dress="skip_wagon")
+block("cabinet", T, -46.5, -45, -TRACK_Z - 0.85, -TRACK_Z + 0.85, 1.2, dress="platelayer_trolley")  # trolley
+block("container", T, 36, 40, -TRACK_Z - 1.0, -TRACK_Z + 1.0, 2.6, 0x7d7a72,
+      dress="engineering_wagon")  # left on the north track
+block("barrier", T, -52, -51.5, -TRACK_Z - 1.15, -TRACK_Z + 1.15, 1.2, dress="buffer_stop",
+      facing="+x")  # the west end is a dead end
+block("barrier", T, -52, -51.5, TRACK_Z - 1.15, TRACK_Z + 1.15, 1.2, dress="buffer_stop", facing="+x")
 
 # ---------------- Running tunnels east, -18.9 m (Tunnel team's start) ----------------
 room("run_n", "North tunnel", 50, 82, -12.6, -9, T, h=TUNNEL_H + 0.9)
@@ -198,11 +203,11 @@ room("cab_n", "South tunnel", 60, 62, 9, 10.15, T, h=TUNNEL_H + 0.9)
 room("cab_s", "South tunnel", 60, 62, 11.35, 12.6, T, h=TUNNEL_H + 0.9)
 room("run_s", "South tunnel", 62, 82, 9, 12.6, T, h=TUNNEL_H + 0.9)
 room("xpass", "Cross passage", 74, 77, -9, 9, T, h=2.6)
-block("cabinet", T, 60.5, 62, -12.4, -11.4, 1.2, dress="platelayer_trolley_short")    # platelayers' trolley
-block("crate", T, 69.5, 70.9, -10.4, -9.0, 1.4, dress="cable_drum_small")   # cable drum
-block("container", T, 55, 59, -12.4, -10.6, 2.2, 0x7d7a72, dress="ballast_wagon")   # ballast wagons, staggered
-block("container", T, 64.5, 68.5, -11.0, -9.2, 2.2, 0x7d7a72, dress="ballast_wagon")
-block("cabinet", T, 66, 68, 9.3, 10.6, 1.2, dress="platelayer_trolley_long")
+block("cabinet", T, 60.5, 61.8, -TRACK_Z - 0.85, -TRACK_Z + 0.85, 1.2, dress="platelayer_trolley_short")  # trolley
+block("crate", T, 69.5, 70.9, -TRACK_Z - 0.7, -TRACK_Z + 0.7, 1.4, dress="cable_drum_small")  # between the rails
+block("container", T, 55, 59, -TRACK_Z - 0.9, -TRACK_Z + 0.9, 2.2, 0x7d7a72, dress="ballast_wagon")  # ballast wagons
+block("container", T, 64.5, 68.5, -TRACK_Z - 0.9, -TRACK_Z + 0.9, 2.2, 0x7d7a72, dress="ballast_wagon")
+block("cabinet", T, 66, 68, TRACK_Z - 0.85, TRACK_Z + 0.85, 1.2, dress="platelayer_trolley_long")
 
 # ---------------- The lifts (MT2) ----------------
 # Two shafts side by side, x -46.3 to -40.8 and z -1.2 to 1.2, their walls SHAFT_T thick and a partition between,

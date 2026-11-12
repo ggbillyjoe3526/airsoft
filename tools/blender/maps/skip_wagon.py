@@ -5,11 +5,11 @@ cradle at each end of a low channel-steel frame on four small flanged wheels; a 
 end, dumb buffer blocks on the headstocks; full of spoil heaped over the rim (clay with broken concrete in it). Dark
 grey with rust coming through; no lettering.
 
-Its block (three on the south track, 2 x 2.2 m and 2.7 m high, data/maps/subway.json) is deeper across the track than
-along it, so the tub's rim is as wide as the box and the frame and wheels sit inside it, on a length of works track
-(works_kit.py).
+Its blocks (three on the south track, 2 x 2 m and 2.7 m high, data/maps/subway.json) are centred on the track, so
+its wheels stand on the station's running rails (works_kit.running_rails); the tub's rim is as wide as the box, the
+frame outside the wheels.
 
-Writes assets/models/props/skip_wagon.glb, one vertex-coloured mesh filling x -1..1 (along the track), y -1.1..1.1,
+Writes assets/models/props/skip_wagon.glb, one vertex-coloured mesh filling x -1..1 (along the track), y -1..1,
 z 0..2.7 exactly (Godot: x along, y up, z across).
 
 Usage: python3 -I tools/blender/maps/skip_wagon.py [--render <sheet.jpg>]
@@ -27,12 +27,12 @@ from mathutils import Vector  # noqa: E402
 
 NAME = "skip_wagon"
 BUDGET = 2500
-LUMPS = 10           # the big lumps lying in the spoil
-HL, HD, HIGH = 1.0, 1.1, 2.7   # the box: half its length, half its depth, its height
+LUMPS = 20           # the big lumps lying in the spoil
+HL, HD, HIGH = 1.0, 1.0, 2.7   # the box: half its length, half its depth, its height
 
 WHEEL_R = 0.3
 AXLE_X = 0.5
-FRAME_Y = 0.52                 # the frame's half width (outside its channels)
+FRAME_Y = 0.88                 # the frame's half width (outside its channels), outside the wheels
 PIVOT_Z = 1.62                 # the trunnions
 RIM_Z = 2.26                   # the tub's rim
 RIM_R = 0.032                  # the rolled rim's radius
@@ -67,11 +67,11 @@ def tub_at(z: float) -> tuple:
 
 def build() -> object:
     k = wk.Kit(NAME)
-    rail_top = k.works_track(-HL, HL, sleeper_len=1.4, pitch=0.62)
+    rail_top = k.running_rails(-HL, HL)
     k.mark("track")
     zc = rail_top + WHEEL_R
     for x in (-AXLE_X, AXLE_X):
-        k.wheelset(x, 0.45 - 0.035, zc, WHEEL_R, 0.07, seg=SEG)
+        k.wheelset(x, wk.WHEEL_IN, zc, WHEEL_R, 0.07, seg=SEG)
         for s in (-1.0, 1.0):
             k.axle_box(x, s * (FRAME_Y - 0.03), zc, 0.15, 0.15, 0.06, "frame_black")
     k.mark("wheels")
@@ -88,7 +88,7 @@ def build() -> object:
     for x in (-0.92, 0.92):
         sx = 1.0 if x > 0 else -1.0
         k.blk((x - 0.05, -FRAME_Y - 0.05, f0 - 0.02), (x + 0.05, FRAME_Y + 0.05, f1 + 0.02), "frame_black")
-        for y in (-0.36, 0.36):  # dumb buffers: timber blocks bolted to the headstock
+        for y in (-0.6, 0.6):  # dumb buffers: timber blocks bolted to the headstock
             xa, xb = sorted((x + sx * 0.05, sx * HL))
             k.blk((xa, y - 0.08, f0 + 0.01), (xb, y + 0.08, f1 + 0.01), "timber")
         xa, xb = sorted((x + sx * 0.05, sx * 0.99))
@@ -174,8 +174,6 @@ def weather(p: Vector, n: Vector, c: tuple, paint: str) -> tuple:
     if paint == "spoil":
         col = wt.mix(c, wk.lin("spoil_dark"), 0.7 * wt.fbm(p, 0.15, 21))
         return wt.mix(col, wk.lin("concrete_dark"), 0.35 * wt.smooth(0.6, 0.8, wt.fbm(p, 0.08, 23)))
-    if paint in ("rail", "rail_head"):
-        return wk.rail_steel(p, c)
     if paint in ("wheel", "rust"):
         return wk.grime(p, n, wk.rusty(p, n, c, seed=7, amount=0.4, streaks=False), seed=2)
     return wk.grime(p, n, c, seed=4)
@@ -186,7 +184,7 @@ def main() -> None:
     wk.check_colours(list(wk.PAINT))
     ob = build()
     wk.finish(ob, (-HL, -HD, 0.0), (HL, HD, HIGH))
-    wk.bake(ob, weather, jitter={"sleeper": 0.08, "timber": 0.06, "concrete_dark": 0.08, "spoil_dark": 0.08})
+    wk.bake(ob, weather, jitter={"timber": 0.06, "concrete_dark": 0.08, "spoil_dark": 0.08})
     wk.write(ob, NAME, BUDGET)
     if "--render" in sys.argv:
         wk.render(wk.quarter_views(2 * HL, 2 * HD, HIGH), sys.argv[sys.argv.index("--render") + 1],
