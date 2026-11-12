@@ -85,22 +85,23 @@ S_PIN_HOLE = (17.4, 133.2)
 S_RING = (25.5, -17.3, 136.5, 10.5, 0.85, math.radians(25.0))  # centre x y z, radius, wire, turn about z
 S_WIRE = 0.75
 S_RING_STEPS = 36
-# Print with no letters (MQ2B): a word is a row of glyphs, each a few bars on the lathe's own facets that read as a
-# bold stencilled character from arm's length and spell nothing. A glyph is rectangles (from, to across; from, to
-# along) in its own cell: across in whole segments, along as a share of its height.
+# Print with no letters (MQ2B): a word is a row of glyphs, each a few blocks on the lathe's own facets that read as
+# bold stencilled print from arm's length and spell nothing. No glyph has a spine with arms or a closed ring (the
+# shapes Latin letters and digits are made of): each is blocks set apart or corner to corner. A glyph is rectangles
+# (from, to across; from, to along) in its own cell: across in whole segments, along as a share of its height.
 GLYPHS_ROUND = (     # two segments wide, for a word running round the can
-    ((0, 2, 0.0, 0.22), (0, 2, 0.78, 1.0), (0, 1, 0.22, 0.78)),
-    ((0, 1, 0.0, 1.0), (1, 2, 0.39, 0.61)),
-    ((0, 2, 0.0, 0.22), (0, 1, 0.22, 1.0)),
-    ((0, 1, 0.0, 0.78), (0, 2, 0.78, 1.0), (1, 2, 0.36, 0.56)),
-    ((0, 2, 0.0, 1.0),),
+    ((0, 1, 0.0, 0.3), (1, 2, 0.35, 0.65), (0, 1, 0.7, 1.0)),     # three blocks in a zigzag
+    ((0, 2, 0.0, 0.56), (0, 2, 0.76, 1.0)),                       # a block under a bar
+    ((0, 1, 0.52, 1.0), (1, 2, 0.0, 0.48)),                       # two blocks corner to corner
+    ((0, 2, 0.0, 0.2), (0, 2, 0.4, 0.6), (0, 2, 0.8, 1.0)),       # three bars
+    ((0, 2, 0.0, 0.42), (1, 2, 0.62, 1.0)),                       # a block under a small one
 )
 GLYPHS_UP = (        # seven segments tall, for a word running up the tube
-    ((0, 7, 0.0, 0.25), (0, 2, 0.25, 1.0), (5, 7, 0.25, 1.0)),
-    ((0, 7, 0.0, 0.22), (0, 7, 0.78, 1.0), (0, 2, 0.22, 0.78), (5, 7, 0.22, 0.78)),
-    ((0, 7, 0.0, 0.25), (0, 2, 0.25, 1.0), (3, 5, 0.25, 0.75)),
-    ((0, 2, 0.0, 1.0), (2, 7, 0.36, 0.64)),
-    ((0, 7, 0.0, 0.28), (0, 2, 0.28, 1.0)),
+    ((0, 3, 0.52, 1.0), (4, 7, 0.0, 0.48)),                              # two blocks corner to corner
+    ((0, 7, 0.0, 0.52), (0, 7, 0.74, 1.0)),                              # a block under a bar
+    ((0, 2, 0.0, 0.34), (2, 5, 0.33, 0.67), (5, 7, 0.66, 1.0)),          # three blocks stepping up
+    ((0, 3, 0.0, 0.68), (4, 7, 0.32, 1.0)),                              # two blocks, one set higher
+    ((0, 7, 0.0, 0.2), (0, 4, 0.4, 0.6), (3, 7, 0.8, 1.0)),              # three bars set apart
 )
 
 
@@ -134,14 +135,16 @@ S_PRINT = word_round(52.0, 66.0, 27, (0, 1, 2), "Kind") + word_round(34.0, 48.0,
      (92.5, 94.0, 27, 6, "Band"), (24.0, 25.2, 27, 7, "Band"),
      (64.0, 72.0, 3, 3, "Band"), (58.0, 59.2, 3, 5, "Band"), (55.0, 56.2, 3, 4, "Band"), (52.0, 53.2, 3, 5, "Band")]
 PRINT_LIFT = 0.08
-# The lever's pressed beads (MQ2B): one between each pair of its edge nicks, stiffening the sheet as a real spoon's
-# do: (from, to mm up), one smooth swell S_RIB_HALF mm either side of the middle (six tenths of the arm's width) and
-# S_RIB_PROUD mm out of the arm's outside face, running out to nothing at its ends and sides.
-S_RIBS = ((64.5, 76.4), (80.0, 94.4), (98.0, 112.4))
-S_RIB_HALF = 5.1
-S_RIB_PROUD = 1.3
-S_RIB_ALONG = ((0.0, 0.0), (0.1, 0.5), (0.24, 1.0), (0.76, 1.0), (0.9, 0.5), (1.0, 0.0))     # (share along, height)
-S_RIB_ACROSS = ((-1.0, 0.0), (-0.62, 0.5), (0.0, 1.0), (0.62, 0.5), (1.0, 0.0))              # (share across, height)
+# The lever's pressed beads (MQ2B): two long ribs side by side down the arm's outside face, stiffening the sheet as
+# a real spoon's do: from, to (mm up), each S_RIB_HALF mm either side of its own middle (S_RIB_AT mm off the arm's)
+# and S_RIB_PROUD mm out of the face, domed along its whole length and running out to nothing at its ends and sides.
+S_RIB_SPAN = (66.5, 113.5)
+S_RIB_AT = (-3.3, 3.3)
+S_RIB_HALF = 2.3
+S_RIB_PROUD = 1.0
+S_RIB_ALONG = ((0.0, 0.0), (0.03, 0.3), (0.08, 0.5), (0.2, 0.77), (0.5, 1.0), (0.8, 0.77), (0.92, 0.5), (0.97, 0.3),
+               (1.0, 0.0))                                                                    # (share along, height)
+S_RIB_ACROSS = ((-1.0, 0.0), (-0.55, 0.62), (0.0, 1.0), (0.55, 0.62), (1.0, 0.0))            # (share across, height)
 S_RIB_SUNK = 0.03  # the bead's rim sits this far inside the arm's face
 
 # ------------------------------------------------------------------------------------------------------------ flash
@@ -437,15 +440,16 @@ def build_smoke() -> bpy.types.Object:
           "Lever")
     parts.append(hs.finish(b.build(), bevel=0.0004, segments=2))
 
-    # The arm's pressed beads, swelling out of its outside face between the notches.
+    # The arm's pressed beads: two long ribs swelling out of its outside face.
     b = hs.Builder("SmokeRibs", [])
-    for z0, z1 in S_RIBS:
+    z0, z1 = S_RIB_SPAN
+    for at in S_RIB_AT:
         rows = []
         for along, high in S_RIB_ALONG:
             z = z0 + (z1 - z0) * along
             # The rim (no height) sits a hair inside the arm's face.
             x = arm_x(z)
-            rows.append([b.bm.verts.new(v(x + (S_RIB_PROUD * high * wide or -S_RIB_SUNK), S_RIB_HALF * across, z))
+            rows.append([b.bm.verts.new(v(x + (S_RIB_PROUD * high * wide or -S_RIB_SUNK), at + S_RIB_HALF * across, z))
                          for across, wide in S_RIB_ACROSS])
         b._faces([b.bm.faces.new((rows[i][k], rows[i][k + 1], rows[i + 1][k + 1], rows[i + 1][k]))
                   for i in range(len(rows) - 1) for k in range(len(S_RIB_ACROSS) - 1)], "Lever")

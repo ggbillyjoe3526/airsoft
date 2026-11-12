@@ -1568,7 +1568,7 @@ A match on Depot with a smoke and a flash bomb; then Customise › Power and the
 
 - [ ] **The smoke bomb in your hand.** Its sleeve has a soft gloss like printed film; under your thumb you can see a
   green stencilled word and a pale one (bold glyphs that spell nothing); the cap is matte plastic; the lever is
-  matte black, its arm one sheet with small nicks in its two edges and three pressed beads swelling out of it,
+  matte black, its arm one sheet with small nicks in its two edges and two long pressed ribs side by side down it,
   and no white shine on its top bend.
 - [ ] **The flash bomb in your hand.** A dead matte card tube: a pale band under the violet one, a violet block and
   the top two glyphs of a pale word beside the ring, over your thumb, a column of small square tiles next to it; on the cap six small vents
@@ -1579,9 +1579,10 @@ A match on Depot with a smoke and a flash bomb; then Customise › Power and the
   crossing it, and nothing flickers as you turn.
 - [ ] **Thrown.** A bomb in the air, lying on the ground or in a bot's hand looks as it did.
 - [ ] **Menu pictures.** The gas bottle is a glossy can, its cap a little narrower and its shoulder rounder than
-  before, its label full under the chevron (a truly round emblem, a pale ring round a disc of the gas's colour;
-  three slanted bars; a coloured bar,
-  bulleted lines, fine print and a pale panel at the foot); the LiPo has white lines and a red block on its side; the Standard Battery's stickers are matte
+  before, its label laid out as a real can's (a broad chevron of the gas's colour; inside it a truly round
+  emblem, a pale ring round a disc of the gas's colour; four pale slanted bars over the chevron's point; a
+  coloured bar, five bulleted lines, two blocks of fine print, a pale panel and a last coloured bar at the
+  foot); the LiPo has white lines and a red block on its side; the Standard Battery's stickers are matte
   paper on glossy red film, with a yellow one by its leads; each spring is painted wire in its own colour. Nothing
   has gone black or blown out.
 

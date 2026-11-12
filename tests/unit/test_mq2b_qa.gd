@@ -157,3 +157,51 @@ func test_paint_keys_pressed_copies_by_material_instance_not_name() -> void:
 	assert_ne(out[0], out[1])
 	assert_same(out[0], out[2], "one model material shares one pressed copy")
 	assert_eq((out[0] as BaseMaterial3D).albedo_color, Color.RED)
+
+
+func test_gas_bottle_decals_sit_on_or_outside_the_can_and_face_outward() -> void:
+	var mesh := PropDressConfig.load_mesh("res://assets/models/powerSources/gasBottle.glb")
+	var aabb := mesh.get_aabb()
+	assert_almost_eq(aabb.size.y, 0.3, 0.001, "the can is 300 mm tall")
+	assert_lt(aabb.size.x, 0.1, "bounds are sane")
+	var checked := 0
+	for i in mesh.get_surface_count():
+		var material_name := mesh.surface_get_material(i).resource_name
+		if material_name == "Can":
+			continue
+		var wall := _wall_sign(mesh)
+		var arrays := mesh.surface_get_arrays(i)
+		var verts := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+		var index := arrays[Mesh.ARRAY_INDEX] as PackedInt32Array
+		for t in range(0, index.size(), 3):
+			var a := verts[index[t]]
+			var b := verts[index[t + 1]]
+			var c := verts[index[t + 2]]
+			var mid := (a + b + c) / 3.0
+			if mid.y < 0.06 or mid.y > 0.15:
+				continue
+			checked += 1
+			for v: Vector3 in [a, b, c]:
+				assert_gte(Vector2(v.x, v.z).length(), 0.033 - 0.00001, "%s vertex under the can" % material_name)
+			var normal := (b - a).cross(c - a)
+			var out := Vector3(mid.x, 0.0, mid.z)
+			assert_gt(normal.dot(out) * wall, 0.0, "%s face wound inward at %s" % [material_name, mid])
+	assert_gt(checked, 20, "decal faces were found")
+
+
+## +1 when the can's own wall faces have (b - a) x (c - a) pointing away from the axis, -1 when towards it (Godot
+## winds front faces clockwise), so the decals are compared with the wall's own winding.
+func _wall_sign(mesh: Mesh) -> float:
+	var total := 0.0
+	for i in mesh.get_surface_count():
+		if mesh.surface_get_material(i).resource_name != "Can":
+			continue
+		var arrays := mesh.surface_get_arrays(i)
+		var verts := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+		var index := arrays[Mesh.ARRAY_INDEX] as PackedInt32Array
+		for t in range(0, index.size(), 3):
+			var mid := (verts[index[t]] + verts[index[t + 1]] + verts[index[t + 2]]) / 3.0
+			if mid.y > 0.06 and mid.y < 0.15:
+				var n := (verts[index[t + 1]] - verts[index[t]]).cross(verts[index[t + 2]] - verts[index[t]])
+				total += n.dot(Vector3(mid.x, 0.0, mid.z))
+	return 1.0 if total >= 0.0 else -1.0

@@ -63,35 +63,41 @@ TOP_ROUND = 2.6
 TOP_ROUND_RINGS = 4
 TOP_DISH = 0.4  # the top is very slightly dished, as moulded caps are
 
-# The print (millimetres up the can). The shoulder print is solid down to a level edge 30 % of the can down from the
-# top (as the main photo's solid colour); under it two Label stripes, level round the back, dip into a chevron on the
+# The print (millimetres up the can), laid out as the main photo's label, each row at the photo's share of the
+# can's height (docs/records/MQ2B.md has the rows measured on both). The shoulder print is solid down to a level
+# edge 33 % of the can down from the top; under it one Label band, level round the back, dips into a chevron on the
 # front whose point is CHEVRON_DROP lower, CHEVRON_HALF_WIDTH (radians) either side of +X, the can black inside it.
 PRINT_EDGE = HEIGHT - CAP_HEIGHT - SHOULDER_HEIGHT - 20.0
-CHEVRON_DROP = 34.0
-CHEVRON_HALF_WIDTH = math.radians(60.0)
-STRIPES = ((4.0, 3.5), (10.0, 1.5))  # (gap under the level edge, width) of each chevron stripe
-FOOT_PRINT_LOW = CORNER_RADIUS + 0.5  # the pale band at the foot starts on the rolled corner, as the photo's
-FOOT_PRINT_HIGH = FOOT_PRINT_LOW + 9.5
+CHEVRON_DROP = 56.5
+CHEVRON_HALF_WIDTH = math.radians(90.0)
+STRIPES = ((1.7, 15.0),)  # (gap under the level edge, width) of each chevron stripe
+FOOT_PRINT_HIGH = 13.5  # the pale band at the foot runs from the standing ring up the rolled corner to here
 
-# The print on the front under the chevron (MQ2B), no letters, filling the label as the photos' does: a round
-# emblem (a pale ring round a disc of the gas's colour), a heavy mark of three slanted bars, a bar of the gas's
-# colour, a list of three points each with its bullet, a paragraph of fine lines and, low on the can, a pale caution
-# panel with a block of the gas's colour and two dark lines.
-# The emblem: its centre (mm up), the ring's outer and inner radius, the disc's radius, the points round a half.
-EMBLEM = (129.0, 17.0, 14.4, 11.4, 16)
+# The print on the front (MQ2B), no letters: inside the chevron a round emblem (a pale ring round a disc of the
+# gas's colour) whose ring just covers the chevron's inner edge; over the chevron's point a heavy mark of slanted
+# bars; under it a bar of the gas's colour in two parts, a list of five points each with its bullet, a paragraph
+# of fine lines in two blocks, a pale caution panel with a block of the gas's colour and its lines, and a last bar.
+# The emblem: its centre (mm up), the ring's outer and inner radius, the disc's radius, the points round a half of
+# the ring and of the disc.
+EMBLEM = (172.2, 20.4, 18.0, 14.2, 20, 16)
 # The mark's bars: from, to (mm up); each bar's width, lean and the gap between two (mm round the can).
-MARK = (92.0, 106.0, 4.6, 3.2, 2.4)
-MARK_BARS = 3
+MARK = (136.2, 147.6, 4.6, 2.8, 2.6)
+MARK_BARS = 4
 # The level print: each (from, to mm up; first side, sides wide of BODY_SIDES round from the front; material; extra
 # lift mm), PRINT_LIFT mm proud of the can.
+BULLET_LINES = ((107.4, 7), (103.05, 10), (98.7, 6), (94.35, 7), (90.0, 3))  # (from mm up, sides wide)
+BULLET_HEIGHT = 2.4
+FINE_LINES = ((81.6, 11), (78.4, 11), (75.2, 11), (72.0, 7), (65.7, 11), (62.5, 11), (59.3, 11), (56.1, 11), (52.9, 5))
+FINE_HEIGHT = 1.3
 BLOCKS = (
-    (84.0, 88.0, -4, 8, LABEL_MAT, 0.0),
-    (76.0, 78.2, -5, 1, PRINT_MAT, 0.0), (76.0, 78.2, -3, 7, PRINT_MAT, 0.0),
-    (70.5, 72.7, -5, 1, PRINT_MAT, 0.0), (70.5, 72.7, -3, 6, PRINT_MAT, 0.0),
-    (65.0, 67.2, -5, 1, PRINT_MAT, 0.0), (65.0, 67.2, -3, 8, PRINT_MAT, 0.0),
-    (57.0, 58.5, -5, 10, PRINT_MAT, 0.0), (53.5, 55.0, -5, 10, PRINT_MAT, 0.0), (50.0, 51.5, -5, 6, PRINT_MAT, 0.0),
-    (28.0, 43.0, -5, 10, PRINT_MAT, 0.0), (30.5, 40.5, -4, 2, LABEL_MAT, 0.04),
-    (37.0, 39.0, -1, 5, CAN_MAT, 0.04), (32.5, 34.5, -1, 4, CAN_MAT, 0.04),
+    (121.5, 125.1, -5, 6, LABEL_MAT, 0.0), (121.5, 125.1, 2, 3, LABEL_MAT, 0.0),
+    *((z - 0.4, z + BULLET_HEIGHT + 0.4, -5, 1, LABEL_MAT, 0.0) for z, _wide in BULLET_LINES),
+    *((z, z + BULLET_HEIGHT, -3, wide, PRINT_MAT, 0.0) for z, wide in BULLET_LINES),
+    *((z, z + FINE_HEIGHT, -6, wide, PRINT_MAT, 0.0) for z, wide in FINE_LINES),
+    (24.9, 45.3, -6, 13, PRINT_MAT, 0.0), (26.3, 43.9, -1, 7, LABEL_MAT, 0.04),
+    (38.2, 41.4, 0, 5, PRINT_MAT, 0.08), (33.8, 35.2, 0, 5, PRINT_MAT, 0.08), (30.2, 31.6, 0, 4, PRINT_MAT, 0.08),
+    (36.5, 42.5, -5, 1, CAN_MAT, 0.04), (27.5, 33.5, -3, 1, CAN_MAT, 0.04),
+    (19.2, 21.6, -4, 9, LABEL_MAT, 0.0),
 )
 PRINT_LIFT = 0.08
 
@@ -165,17 +171,17 @@ def can(bm: bmesh.types.BMesh) -> float:
         mats.append(CAN_MAT)
     rings.append(ring(bm, FOOT_RADIUS, 0.0, n))
     mats.append(CAN_MAT)
-    # The rolled corner: a quarter round from the foot up to the wall.
+    # The rolled corner: a quarter round from the foot (the standing ring above is its first ring) up to the wall,
+    # printed pale from its first ring.
     cx, cz = RADIUS - CORNER_RADIUS, CORNER_RADIUS
-    for k in range(CORNER_RINGS + 1):
+    for k in range(1, CORNER_RINGS + 1):
         a = -math.pi * 0.5 + (math.pi * 0.5) * k / CORNER_RINGS
         rings.append(ring(bm, cx + math.cos(a) * CORNER_RADIUS, cz + math.sin(a) * CORNER_RADIUS, n))
-        mats.append(CAN_MAT)
+        mats.append(PRINT_MAT)
     # The straight wall, cut where the print changes.
     wall_top = HEIGHT - CAP_HEIGHT - SHOULDER_HEIGHT
-    for z, mat in ((FOOT_PRINT_LOW, PRINT_MAT), (FOOT_PRINT_HIGH, CAN_MAT)):
-        rings.append(ring(bm, RADIUS, z, n))
-        mats.append(mat)
+    rings.append(ring(bm, RADIUS, FOOT_PRINT_HIGH, n))
+    mats.append(CAN_MAT)
     # The chevron stripes, lowest first, then the solid print's level edge.
     for gap, width in reversed(STRIPES):
         for drop, mat in ((gap + width, LABEL_MAT), (gap, CAN_MAT)):
@@ -255,11 +261,11 @@ def round_outline(centre: float, radius: float, points: int) -> tuple:
 
 def emblem(bm: bmesh.types.BMesh) -> None:
     """The label's round emblem: a pale ring round a disc of the gas's colour."""
-    centre, outer, inner, disc, points = EMBLEM
+    centre, outer, inner, disc, points, disc_points = EMBLEM
     ring_out = round_outline(centre, outer, points)
     decal(bm, ring_out[0], ring_out[1], ring_out[2], ring_out[3], PRINT_MAT, ring_out[4],
           hole=round_outline(centre, inner, points))
-    middle = round_outline(centre, disc, points)
+    middle = round_outline(centre, disc, disc_points)
     decal(bm, middle[0], middle[1], middle[2], middle[3], LABEL_MAT, middle[4])
 
 
@@ -277,6 +283,18 @@ def mark(bm: bmesh.types.BMesh) -> None:
             return z0 + (z1 - z0) * min(max((s - s0) / lean, 0.0), 1.0)
 
         decal(bm, s0, s0 + width + lean, lower, upper, PRINT_MAT, breaks=(s0 + lean, s0 + width))
+
+
+def face_print_outward(bm: bmesh.types.BMesh) -> None:
+    """Turns every piece of print to face away from the can. Each is an island of its own, and Blender's own pass
+    guesses which way a lone flat island faces, so a guess the wrong way would hide it."""
+    proud = (RADIUS + PRINT_LIFT * 0.5) * MM
+    for face in bm.faces:
+        if min(math.hypot(v.co.x, v.co.y) for v in face.verts) < proud:
+            continue
+        centre = face.calc_center_median()
+        if face.normal.x * centre.x + face.normal.y * centre.y < 0.0:
+            face.normal_flip()
 
 
 def cap(bm: bmesh.types.BMesh, bottom: float) -> None:
@@ -347,6 +365,7 @@ def build() -> bpy.types.Object:
     emblem(bm)
     mark(bm)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    face_print_outward(bm)
     me = bpy.data.meshes.new("GasBottle")
     bm.to_mesh(me)
     bm.free()
