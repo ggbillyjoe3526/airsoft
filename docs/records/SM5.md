@@ -1,6 +1,6 @@
 # SM5 · Subway's lamps and extras
 
-**Review:** passed (critic 8/8 at attempt 7, QA Pass, performance Pass)
+**Review:** pending (re-review after William's ask for more posters)
 
 Models 31 to 33 of `art/subway-model-list.md` (William's go, 2026-11-12: "Begin work on subway models now"), from his
 photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33-extras/<kind>/`.
@@ -16,6 +16,7 @@ photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33
 | 2026-11-12 | 5 | build thread | ✓ | 7/8 Retry | (past four attempts: the review-cap ruling) tunnel lamp's lugs pointed, its glass still one hard corner |
 | 2026-11-12 | 6 | build thread | ✓ | 7/8 Retry | wedge holes under the tunnel lamp's raised spine, top and bottom |
 | 2026-11-12 | 7 | build thread | ✓ | 8/8 Accept | |
+| 2026-11-12 | 8 | build thread | | | (William's ask: more posters, large trackside ones) |
 
 ## What it adds
 
@@ -30,8 +31,9 @@ photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33
   fourth photo, 12 on
   the running tunnels' walls, its glass glowing (no real light).
 - **Extras**, look only (`StationFixtures`, spots in `tools/subway/fixtures.py`, `dressing.station.fixtures`): 13
-  name boards, 8 way-out signs, 27 posters (four designs), 4 clocks, 10 CCTV cameras, 7 fire extinguishers, 6 litter
-  bins and 12 edge warnings; printed faces from one 2048 x 1024 sign sheet (`assets/textures/station/signs.png`, BC7).
+  name boards, 8 way-out signs, 21 posters (13 designs) and 7 large trackside ones (3 designs), 4 clocks, 11 CCTV
+  cameras, 8 fire extinguishers, 7 litter bins and 12 edge warnings; printed faces from one 2048 x 2048 sign sheet
+  (`assets/textures/station/signs.png`, BC7).
 
 ## Decisions
 
@@ -40,6 +42,17 @@ photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33
   grey-green with cream letters, the signs black with yellow (his photos' style, the station's one safety colour).
 - **The posters are the game's own:** "Call your hits", a Sunday skirmish at the Woodland site, lost property
   (goggles, gloves, one left boot) and Copperhill Lido; muted palette colours, kept off both team hues.
+- **More posters (William, 2026-11-12: "Create more posters. They can be related or have generic advertising"):**
+  nine more designs, 13 in all: Goggles on, a chrono night and a club's call for new players beside the first four,
+  and adverts for invented things (Halden Tea, Fizzbee lemonade, the Nightjar jazz club, the library's late opening, a
+  Saturday market, a tram museum). The wall spots take them in turn, so no two neighbours match.
+- **Large trackside posters** (William's "larger posters on the walls", through the platforms thread PT1): 3 x 1.5 m
+  in the same slim frame (`poster_wide_a..c`: Skirmish Sundays, cycle hire, Copperhill Pier), middle 2.3 m over the
+  track bed, on the walls across the track in the seven spots the small ones held, between the name boards. Each is
+  its own model (one MultiMesh a model); the sheet grew to 2048 x 2048 for them (posters drawn at 384 x 576 and
+  fitted to 336 x 504 cells).
+- **The edge warnings sit 0.7 m in from the edge**, behind PT1's yellow line (0.45 to 0.55 m) and clear of its
+  "Mind the gap" words on the coping.
 - **The edge warning reads "Stay behind the yellow line"**, his third photo's words, not a real network's phrase.
 - **Ceiling lamp: the caged batten** (photo 1) of his five, the one that reads as a station's; dark body, opal
   diffuser, wire guard. **Tunnel lamp: black**, not his photos' brass, which sits close to the Beta team's orange.

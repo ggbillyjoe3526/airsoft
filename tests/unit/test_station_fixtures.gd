@@ -9,13 +9,17 @@ extends GutTest
 const BUDGETS: Dictionary[StringName, int] = {
 	&"strip_lamp": 200, &"tunnel_lamp": 150, &"cctv_camera": 320, &"way_sign": 90, &"fire_extinguisher": 480,
 	&"litter_bin": 320, &"edge_sign": 12, &"platform_clock": 300, &"poster_a": 40, &"poster_b": 40, &"poster_c": 40,
-	&"poster_d": 40, &"name_board": 40,
+	&"poster_d": 40, &"poster_e": 40, &"poster_f": 40, &"poster_g": 40, &"poster_h": 40, &"poster_i": 40, &"poster_j": 40,
+	&"poster_k": 40, &"poster_l": 40, &"poster_m": 40, &"poster_wide_a": 40, &"poster_wide_b": 40, &"poster_wide_c": 40,
+	&"name_board": 40,
 }
 const LENSED: Array[StringName] = [&"strip_lamp", &"tunnel_lamp"]
 const PRINTED: Array[StringName] = [&"way_sign", &"edge_sign", &"platform_clock", &"poster_a", &"poster_b",
-		&"poster_c", &"poster_d", &"name_board"]
+		&"poster_c", &"poster_d", &"poster_e", &"poster_f", &"poster_g", &"poster_h", &"poster_i", &"poster_j", &"poster_k",
+		&"poster_l", &"poster_m", &"poster_wide_a", &"poster_wide_b", &"poster_wide_c", &"name_board"]
 const WALL: Array[StringName] = [&"tunnel_lamp", &"cctv_camera", &"fire_extinguisher", &"platform_clock", &"poster_a",
-		&"poster_b", &"poster_c", &"poster_d", &"name_board"]
+		&"poster_b", &"poster_c", &"poster_d", &"poster_e", &"poster_f", &"poster_g", &"poster_h", &"poster_i", &"poster_j",
+		&"poster_k", &"poster_l", &"poster_m", &"poster_wide_a", &"poster_wide_b", &"poster_wide_c", &"name_board"]
 const FLOOR: Array[StringName] = [&"litter_bin", &"edge_sign"]
 ## How far (m) a model may sink into the wall or ceiling it is fixed to.
 const TOUCH := 0.012

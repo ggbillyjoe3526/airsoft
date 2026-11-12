@@ -41,6 +41,8 @@ const FIXTURE_SHOTS: Array[Array] = [
 	["ticket-hall-clock", Vector3(-55.0, 20.8, 6.0), Vector3(-51.0, 22.0, 9.5)],
 	["strip-lamp-from-below", Vector3(-17.5, 1.7, -6.8), Vector3(-14.875, 3.85, -7.25)],
 	["tunnel-lamp-close", Vector3(60.4, 2.1, -10.4), Vector3(62.0, 2.55, -12.3)],
+	["trackside-posters-north", Vector3(35.0, 2.4, -8.3), Vector3(31.5, 2.3, -12.5)],
+	["trackside-posters-south", Vector3(-40.0, 2.4, 8.6), Vector3(-34.5, 2.3, 12.5)],
 ]
 
 

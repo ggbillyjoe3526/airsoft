@@ -9,7 +9,8 @@ extends Resource
 @export_dir var folder: String = "res://assets/models/props"
 @export var models: PackedStringArray = PackedStringArray([
 	"tunnel_lamp", "cctv_camera", "way_sign", "fire_extinguisher", "litter_bin", "edge_sign", "platform_clock",
-	"poster_a", "poster_b", "poster_c", "poster_d", "name_board",
+	"poster_a", "poster_b", "poster_c", "poster_d", "poster_e", "poster_f", "poster_g", "poster_h", "poster_i",
+	"poster_j", "poster_k", "poster_l", "poster_m", "poster_wide_a", "poster_wide_b", "poster_wide_c", "name_board",
 ])
 ## Every printed face's picture (tools/blender/maps/station_signs.py: an invented station name, the way-out signs,
 ## the posters, the clock face, the edge warning).

@@ -11,7 +11,8 @@ is z 0 on the wall, facing +z; a hanging one's top is y 0 at the ceiling; a stan
 | `litter_bin.glb` | litter_bin: a steel-topped bin, black corner posts, open sides showing its bag, a round slot in the top | 500 |
 | `edge_sign.glb` | mind_the_gap 3: "STAY BEHIND THE YELLOW LINE" on a black plate on the platform's coping | 12 |
 | `platform_clock.glb` | platform_clock: a round double-sided clock on a wall bracket, Roman numerals, a dark green case | 400 |
-| `poster_a..d.glb` | poster_frames: a 1 x 1.5 m poster in a slim aluminium frame, four invented posters | 30 |
+| `poster_a..m.glb` | poster_frames: a 1 x 1.5 m poster in a slim aluminium frame, thirteen invented posters | 30 |
+| `poster_wide_a..c.glb` | the same frame 3 x 1.5 m, the trackside walls' posters | 30 |
 | `name_board.glb` | station_name_platform: the station's name on a long band on the platform wall | 80 |
 
 Every word and name is invented (station_signs.py); no real network, brand or logo.
@@ -26,6 +27,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import stationkit as sk  # noqa: E402
+from station_cells import POSTERS, WIDE_POSTERS  # noqa: E402
 
 BUDGETS = {
     "cctv_camera": 320, "way_sign": 90, "fire_extinguisher": 480, "litter_bin": 320, "edge_sign": 12,
@@ -252,10 +254,10 @@ def platform_clock() -> sk.Mesh:
     return m
 
 
-def poster(cell: str) -> sk.Mesh:
-    """A 1 x 1.5 m poster in a 25 mm aluminium frame standing 20 mm off the wall, its middle at the origin."""
+def poster(cell: str, w: float = 0.5) -> sk.Mesh:
+    """A 1 x 1.5 m poster (2w wide) in a 25 mm aluminium frame standing 20 mm off the wall, its middle at the origin."""
     m = sk.Mesh(cell)
-    w, h, d, f = 0.5, 0.75, 0.02, 0.025
+    h, d, f = 0.75, 0.02, 0.025
     m.sign(cell, [(-w, -h, d - 0.004), (w, -h, d - 0.004), (w, h, d - 0.004), (-w, h, d - 0.004)])
     for a, b in (((-w - f, -h - f), (w + f, -h)), ((-w - f, h), (w + f, h + f)), ((-w - f, -h), (-w, h)),
                  ((w, -h), (w + f, h))):
@@ -283,8 +285,10 @@ def main() -> None:
     sk.export(litter_bin(), "litter_bin", BUDGETS["litter_bin"])
     sk.export(edge_sign(), "edge_sign", BUDGETS["edge_sign"])
     sk.export(platform_clock(), "platform_clock", BUDGETS["platform_clock"])
-    for cell in ("poster_a", "poster_b", "poster_c", "poster_d"):
+    for cell in POSTERS:
         sk.export(poster(cell), cell, BUDGETS["poster"])
+    for cell in WIDE_POSTERS:
+        sk.export(poster(cell, 1.5), cell, BUDGETS["poster"])
     sk.export(name_board(), "name_board", BUDGETS["name_board"])
 
 

@@ -28,18 +28,31 @@ MODELS = {
     "poster_b": ((-0.525, 0.525, -0.775, 0.775, 0.0, 0.020), "wall"),
     "poster_c": ((-0.525, 0.525, -0.775, 0.775, 0.0, 0.020), "wall"),
     "poster_d": ((-0.525, 0.525, -0.775, 0.775, 0.0, 0.020), "wall"),
+    "poster_e": ((-0.525, 0.525, -0.775, 0.775, 0.0, 0.020), "wall"),
+    "poster_f": ((-0.525, 0.525, -0.775, 0.775, 0.0, 0.020), "wall"),
+    "poster_g": ((-0.525, 0.525, -0.775, 0.775, 0.0, 0.020), "wall"),
+    "poster_h": ((-0.525, 0.525, -0.775, 0.775, 0.0, 0.020), "wall"),
+    "poster_i": ((-0.525, 0.525, -0.775, 0.775, 0.0, 0.020), "wall"),
+    "poster_j": ((-0.525, 0.525, -0.775, 0.775, 0.0, 0.020), "wall"),
+    "poster_k": ((-0.525, 0.525, -0.775, 0.775, 0.0, 0.020), "wall"),
+    "poster_l": ((-0.525, 0.525, -0.775, 0.775, 0.0, 0.020), "wall"),
+    "poster_m": ((-0.525, 0.525, -0.775, 0.775, 0.0, 0.020), "wall"),
+    "poster_wide_a": ((-1.525, 1.525, -0.775, 0.775, 0.0, 0.020), "wall"),
+    "poster_wide_b": ((-1.525, 1.525, -0.775, 0.775, 0.0, 0.020), "wall"),
+    "poster_wide_c": ((-1.525, 1.525, -0.775, 0.775, 0.0, 0.020), "wall"),
     "name_board": ((-1.460, 1.460, -0.245, 0.245, 0.0, 0.046), "wall"),
 }
-POSTERS = ["poster_a", "poster_b", "poster_c", "poster_d"]
+POSTERS = ["poster_%s" % k for k in "abcdefghijklm"]  # the spots below take them in turn
 # How each wall faces into its room: the turn (degrees) of a model on it.
 WALL_YAW = {"n": 0.0, "s": 180.0, "w": 90.0, "e": -90.0}
 LOOK = 0.04        # how far behind and in front of a wall face its spot is tested
 EDGE_STEP = 12.0   # m between the warnings along a platform's edge
-EDGE_IN = 0.15     # the warning's middle in from the platform's edge (on the 0.3 m coping)
-STRIP_LIFT = 0.01  # the coping is drawn this far over the floor (StationLook.strip_lift): the warning lies on it
+EDGE_IN = 0.7      # the warning's middle in from the platform's edge: behind the yellow line (0.45 to 0.55 m in)
+STRIP_LIFT = 0.01  # the warning lies this far over the platform's floor
 
 # Heights over the floor (m) of the wall models' spots.
 POSTER_Y = 1.6
+WIDE_Y = 2.3       # a trackside poster's middle over the track bed, under the vault's spring
 NAME_Y = 2.25
 CLOCK_Y = 2.9      # its bracket's top: the clock hangs under it
 CCTV_Y = 2.75
@@ -53,40 +66,40 @@ WALL = [
     # The ticket hall.
     ("cctv_camera", "hall", "n", -47.0, 4.8), ("cctv_camera", "hall", "s", -54.0, 4.8),
     ("platform_clock", "hall", "s", -51.0, 3.6),
-    ("poster_b", "hall", "s", -58.0, POSTER_Y), ("poster_d", "hall", "s", -42.0, POSTER_Y),
+    ("poster_a", "hall", "s", -58.0, POSTER_Y), ("poster_b", "hall", "s", -42.0, POSTER_Y),
     ("fire_extinguisher", "hall", "w", 5.5, EXTINGUISHER_Y),
     # The booking hall, the west passage and the concourse.
     ("poster_c", "bk_w", "w", -5.0, POSTER_Y),
-    ("poster_a", "wpass", "n", -33.0, POSTER_Y), ("poster_c", "wpass", "n", -27.0, POSTER_Y),
-    ("poster_b", "wpass", "n", -21.0, POSTER_Y), ("fire_extinguisher", "wpass", "s", -34.0, EXTINGUISHER_Y),
-    ("poster_d", "upper", "n", -16.0, POSTER_Y), ("poster_a", "upper", "s", -16.0, POSTER_Y),
+    ("poster_d", "wpass", "n", -33.0, POSTER_Y), ("poster_e", "wpass", "n", -27.0, POSTER_Y),
+    ("poster_f", "wpass", "n", -21.0, POSTER_Y), ("fire_extinguisher", "wpass", "s", -34.0, EXTINGUISHER_Y),
+    ("poster_g", "upper", "n", -16.0, POSTER_Y), ("poster_h", "upper", "s", -16.0, POSTER_Y),
     ("platform_clock", "upper", "w", 6.5, 3.4), ("cctv_camera", "upper", "e", -5.0, 3.4),
     ("fire_extinguisher", "upper", "w", -6.0, EXTINGUISHER_Y),
     # The north and south passages, the plant room, the stair top.
-    ("poster_b", "npass", "n", -3.5, POSTER_Y), ("poster_c", "npass", "n", 4.5, POSTER_Y),
-    ("poster_a", "npass", "n", 10.5, POSTER_Y), ("cctv_camera", "npass", "n", 19.0, 2.4),
-    ("poster_d", "spass", "s", -3.5, POSTER_Y), ("poster_a", "spass", "s", 4.5, POSTER_Y),
-    ("poster_b", "spass", "s", 10.5, POSTER_Y), ("fire_extinguisher", "spass", "n", 4.0, EXTINGUISHER_Y),
+    ("poster_i", "npass", "n", -3.5, POSTER_Y), ("poster_j", "npass", "n", 4.5, POSTER_Y),
+    ("poster_k", "npass", "n", 10.5, POSTER_Y), ("cctv_camera", "npass", "n", 19.0, 2.4),
+    ("poster_l", "spass", "s", -3.5, POSTER_Y), ("poster_m", "spass", "s", 4.5, POSTER_Y),
+    ("poster_a", "spass", "s", 10.5, POSTER_Y), ("fire_extinguisher", "spass", "n", 4.0, EXTINGUISHER_Y),
     ("fire_extinguisher", "plant", "n", 6.0, EXTINGUISHER_Y), ("fire_extinguisher", "lowc", "e", -2.5,
                                                                    EXTINGUISHER_Y),
-    ("cctv_camera", "east", "e", -6.0, 3.4), ("poster_c", "east", "e", 5.0, POSTER_Y),
+    ("cctv_camera", "east", "e", -6.0, 3.4), ("poster_b", "east", "e", 5.0, POSTER_Y),
     ("cctv_camera", "lowc", "e", 2.5, 3.0), ("cctv_camera", "liftp", "s", -40.0, 2.5),
     # The platforms: the station's name across the track and along the back wall, posters, a clock, cameras.
     ("name_board", "track_n_w", "n", -48.0, NAME_Y + 0.9), ("name_board", "track_n_e", "n", 22.0, NAME_Y + 0.9),
-    ("name_board", "track_n_e", "n", 44.0, NAME_Y + 0.9), ("poster_a", "track_n_e", "n", 27.5, POSTER_Y + 0.9),
-    ("poster_d", "track_n_e", "n", 33.0, POSTER_Y + 0.9), ("poster_b", "track_n_e", "n", 38.5, POSTER_Y + 0.9),
+    ("name_board", "track_n_e", "n", 44.0, NAME_Y + 0.9), ("poster_wide_a", "track_n_e", "n", 27.5, WIDE_Y),
+    ("poster_wide_b", "track_n_e", "n", 33.0, WIDE_Y), ("poster_wide_c", "track_n_e", "n", 38.5, WIDE_Y),
     ("name_board", "trench", "s", -44.0, NAME_Y + 0.9), ("name_board", "trench", "s", -26.0, NAME_Y + 0.9),
     ("name_board", "trench", "s", -8.0, NAME_Y + 0.9), ("name_board", "trench", "s", 14.0, NAME_Y + 0.9),
-    ("poster_c", "trench", "s", -35.0, POSTER_Y + 0.9), ("poster_a", "trench", "s", -17.0, POSTER_Y + 0.9),
-    ("poster_d", "trench", "s", 4.0, POSTER_Y + 0.9), ("poster_b", "trench", "s", 23.0, POSTER_Y + 0.9),
+    ("poster_wide_a", "trench", "s", -35.0, WIDE_Y), ("poster_wide_b", "trench", "s", -17.0, WIDE_Y),
+    ("poster_wide_c", "trench", "s", 4.0, WIDE_Y), ("poster_wide_a", "trench", "s", 23.0, WIDE_Y),
     ("name_board", "plat_n", "s", -34.0, NAME_Y), ("name_board", "plat_n", "s", 1.0, NAME_Y),
     ("name_board", "plat_n", "s", 29.0, NAME_Y),
     ("name_board", "plat_s", "n", -34.0, NAME_Y), ("name_board", "plat_s", "n", 1.0, NAME_Y),
     ("name_board", "plat_s", "n", 29.0, NAME_Y),
-    ("poster_b", "plat_n", "s", -16.0, POSTER_Y), ("poster_c", "plat_n", "s", 9.0, POSTER_Y),
-    ("poster_a", "plat_n", "s", 42.5, POSTER_Y),
-    ("poster_d", "plat_s", "n", -16.0, POSTER_Y), ("poster_a", "plat_s", "n", 9.0, POSTER_Y),
-    ("poster_c", "plat_s", "n", 40.0, POSTER_Y),
+    ("poster_c", "plat_n", "s", -16.0, POSTER_Y), ("poster_d", "plat_n", "s", 9.0, POSTER_Y),
+    ("poster_e", "plat_n", "s", 42.5, POSTER_Y),
+    ("poster_f", "plat_s", "n", -16.0, POSTER_Y), ("poster_g", "plat_s", "n", 9.0, POSTER_Y),
+    ("poster_h", "plat_s", "n", 40.0, POSTER_Y),
     ("platform_clock", "plat_n", "s", -13.0, CLOCK_Y), ("platform_clock", "plat_s", "n", 16.0, CLOCK_Y),
     ("cctv_camera", "plat_n", "s", -49.0, CCTV_Y), ("cctv_camera", "plat_n", "s", 44.0, CCTV_Y),
     ("cctv_camera", "plat_s", "n", -44.0, CCTV_Y), ("cctv_camera", "plat_s", "n", 44.0, CCTV_Y),
