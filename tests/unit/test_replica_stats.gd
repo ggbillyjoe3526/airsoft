@@ -44,7 +44,7 @@ func test_the_built_ins_are_the_aeg_rifle_and_gbb_pistol() -> void:
 	assert_eq([pistol.display_name, pistol.power, pistol.default_fire_mode, pistol.hop_up_max, pistol.hop_up_dial],
 			["GBB Pistol", &"gas", ReplicaConfig.FireMode.SEMI, 0.3, 0.55])
 	assert_eq(numbers(aeg), [0.97, 0.25, 13.0, 60, 4, 1.8, 0.45, 0.45, 0.18])
-	assert_eq(numbers(pistol), [0.52, 0.2, 7.0, 18, 4, 1.2, 0.3, 0.8, 0.5])
+	assert_eq(numbers(pistol), [0.52, 0.2, 7.0, 18, 4, 1.0, 0.22, 0.65, 0.5])
 
 
 func test_the_default_loadout_is_the_aeg_then_the_pistol_through_stats_md() -> void:

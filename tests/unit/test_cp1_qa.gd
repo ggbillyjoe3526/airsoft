@@ -150,14 +150,16 @@ func test_the_cyber_pistol_fires_a_burst_per_pull_and_full_auto_at_its_rate() ->
 	var cmd := PlayerCommand.new()
 	c.armament.modes[0] = ReplicaConfig.FireMode.BURST
 	assert_eq(_run(c, 60, true, tuning, pool, rng, cmd), tuning.replica_rules.burst_shots, "held: one burst")
-	assert_eq(c.armament.mag(), 50 - tuning.replica_rules.burst_shots)
+	var size := _cyber().mag_size
+	assert_eq(size, 30, "RP1: 30 BBs a magazine (50 before)")
+	assert_eq(c.armament.mag(), size - tuning.replica_rules.burst_shots)
 	c.armament.modes[0] = ReplicaConfig.FireMode.AUTO
 	var shots := _run(c, 60, true, tuning, pool, rng, cmd)
 	assert_between(shots, 13, 15, "14 a second held for a second")
-	assert_eq(c.armament.ammo[0].spare_bbs(), 100, "two spare magazines of 50 untouched")
+	assert_eq(c.armament.ammo[0].spare_bbs(), 2 * size, "two spare magazines untouched")
 
 
-func test_the_cyber_pistol_reloads_a_fresh_magazine_of_fifty_and_clicks_once_when_dry() -> void:
+func test_the_cyber_pistol_reloads_a_fresh_magazine_and_clicks_once_when_dry() -> void:
 	var tuning := SimTuning.new()
 	var c := Character.new(1, 0, Vector3.ZERO, 0.0, [_cyber()] as Array[ReplicaConfig])
 	c.armament.draw_left = 0.0
@@ -166,9 +168,10 @@ func test_the_cyber_pistol_reloads_a_fresh_magazine_of_fifty_and_clicks_once_whe
 	var rng := Seeds.stream(3)
 	var cmd := PlayerCommand.new()
 	var shots := _run(c, 60 * 8, true, tuning, pool, rng, cmd)
-	assert_gt(shots, 50, "it ran dry and reloaded from a spare")
-	assert_lte(c.armament.mag(), 50)
-	assert_lt(c.armament.ammo[0].spare_bbs(), 100, "a spare magazine was used")
+	var size := _cyber().mag_size
+	assert_gt(shots, size, "it ran dry and reloaded from a spare")
+	assert_lte(c.armament.mag(), size)
+	assert_lt(c.armament.ammo[0].spare_bbs(), 2 * size, "a spare magazine was used")
 
 
 # ---- sound -------------------------------------------------------------------------------------------------------
@@ -286,7 +289,10 @@ func test_a_cyber_menu_picture_goes_realistic_and_back() -> void:
 		var m := node as MeshInstance3D
 		for i in m.mesh.get_surface_count():
 			if m.mesh.surface_get_material(i).resource_name == "CyberLine":
-				assert_null(m.get_surface_override_material(i), "bold again: its own glowing line")
+				# its own glowing line again, on its surface (MQ1)
+				var line := ReplicaPaint.plain_of(m.get_surface_override_material(i)) as StandardMaterial3D
+				assert_eq(line, m.mesh.surface_get_material(i), "bold again: its own line")
+				assert_true(line.emission_enabled, "glowing")
 
 
 func test_a_cyber_figure_draws_the_pistol_and_goes_plain_under_realistic_colours() -> void:

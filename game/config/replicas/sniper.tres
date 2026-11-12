@@ -20,5 +20,6 @@ hop_up_max = 0.3
 hop_up_dial = 0.6
 spread_deg = 0.1
 recoil_deg = 0.4
-hip_spread = 6.0
+hip_spread = 10.0
 bolt_action = true
+pace = 0.95

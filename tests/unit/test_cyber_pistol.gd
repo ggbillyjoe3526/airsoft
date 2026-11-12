@@ -35,7 +35,7 @@ func test_it_plays_by_its_stats_row() -> void:
 			ReplicaConfig.FireMode.AUTO] as Array[ReplicaConfig.FireMode])
 	assert_eq(r.default_fire_mode, ReplicaConfig.FireMode.SEMI, "comes on semi")
 	assert_almost_eq(r.fire_rate, 14.0, 1e-6)
-	assert_eq(r.mag_size, 50)
+	assert_eq(r.mag_size, 30, "RP1: 30 BBs a magazine (50 before)")
 	assert_eq(r.mags, 3)
 	assert_almost_eq(r.reload_time, 1.1, 1e-6)
 	assert_almost_eq(r.draw_time, 0.28, 1e-6)

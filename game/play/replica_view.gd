@@ -549,7 +549,7 @@ func _press_depth(model: Node) -> void:
 			continue
 		for i in mesh_node.mesh.get_surface_count():
 			var worn := mesh_node.get_active_material(i)
-			if worn is BaseMaterial3D or ReplicaPaint.is_worn(worn):
+			if worn is BaseMaterial3D or ReplicaPaint.is_surface(worn):
 				mesh_node.set_surface_override_material(i, _pressed_copy(worn))
 
 

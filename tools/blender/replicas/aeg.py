@@ -28,6 +28,7 @@ from mathutils import Matrix, Vector  # noqa: E402
 
 import figure_copy  # noqa: E402
 import hardsurface as hs  # noqa: E402
+import surface  # noqa: E402
 import wear  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
@@ -202,6 +203,18 @@ MATERIALS = {
     "BB": (0xf4f1e8, 0.3, 0.0),
 }
 
+# What each material's faces are made of unless a part says otherwise (surface.py, MQ1; owner, 2026-11-12: "Rifles
+# should be mostly metal"), as the carbine it follows: forged aluminium receivers, a steel barrel, sights, pins and
+# controls, a polymer stock.
+SURFACES = {"Body": "aluminium", "Furniture": "polymer", "Detail": "steel", "Accent": "polymer", "Metal": "steel"}
+# The parts that differ, by their object's name: the polymer pistol grip, the aluminium receiver extension, quad rail
+# handguard, magazine and charging handle, the stamped steel dust cover, the bright mock bolt behind it.
+PART_SURFACES = {
+    "Grip": "polymer", "GripPanels": "polymer", "Tube": "aluminium", "Handguard": "aluminium",
+    "GuardRails": "aluminium", "Magazine": ("aluminium", ("Detail",)), "ChargingHandle": "aluminium",
+    "DustCover": "steel", "PortFloor": "bare",
+}
+
 ## RW1: the magazine is handled most (in and out of pouches, dropped), so it gets more scratches (wear.apply).
 HEAVIER_WEAR = {"Magazine": 2.5}
 
@@ -362,7 +375,8 @@ def lower() -> list:
     ob = b.build()
     # The pistol grip moulded in one piece with the lower (owner, 2026-11-05), the joins filleted by finish().
     g, panels = grip()
-    hs.cut(ob, [g], "UNION")
+    surface.tag(g, PART_SURFACES["Grip"])
+    hs.cut(ob, [g], "UNION", keep_materials=True)
     cutters = []
     # The lower's top edges chamfered in to the upper's sides, so the two read as one body.
     for sx in (-1, 1):
@@ -1080,12 +1094,15 @@ def build() -> None:
     body_parts += handguard()
     for ob in body_parts:
         print("  part %-14s %6d" % (ob.name, hs.tris(ob)))
+    surface.tag_named(body_parts, PART_SURFACES)
     body = hs.join("Body", body_parts)
     body.parent = arm
     fh = flash_hider()
     fh.parent = arm
     fh.location = (0.0, 0.0, 0.0)
-    for bone, ob in moving_parts().items():
+    moving = moving_parts()
+    surface.tag_named(list(moving.values()), PART_SURFACES)
+    for bone, ob in moving.items():
         hs.parent_to_bone(ob, arm, bone)
     for name, loc in EMPTIES.items():
         hs.empty(name, loc, arm)
@@ -1094,7 +1111,9 @@ def build() -> None:
     me.transform(Matrix.Translation(-Vector(BARREL_END)))
     fh.location = BARREL_END
     clips(arm)
+    surface.resolve(SURFACES)
     fig = figure_copy.make(FIGURE_TRIS)
+    surface.strip()
     total = 0
     for ob in bpy.data.objects:
         if ob.type == "MESH":

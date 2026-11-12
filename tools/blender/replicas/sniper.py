@@ -39,6 +39,7 @@ from mathutils import Matrix, Vector  # noqa: E402
 
 import figure_copy  # noqa: E402
 import hardsurface as hs  # noqa: E402
+import surface  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
 OUT = os.environ.get("BL_OUT") or os.path.join(ROOT, "assets/models/replicas/sniper.glb")
@@ -271,6 +272,17 @@ MATERIALS = {
     "Body": (0x24282f, 0.5, 0.0), "Furniture": (0x8e8f8a, 0.62, 0.0), "Detail": (0x30343b, 0.55, 0.0),
     "Accent": (0xf2f0ea, 0.5, 0.0), "Metal": (0x484d56, 0.4, 0.4), "Rubber": (0x1c1d20, 0.8, 0.0),
     "BB": (0xf4f1e8, 0.3, 0.0),
+}
+
+
+# What each material's faces are made of unless a part says otherwise (surface.py, MQ1; owner, 2026-11-12: "sniper
+# rifle barrel is metal", and the stock stays polymer, not wood): a steel barrel, receiver, bolt, bottom metal and
+# magazine in a polymer chassis, as the photo's rifle.
+SURFACES = {"Body": "steel", "Furniture": "polymer", "Detail": "steel", "Accent": "polymer", "Metal": "steel"}
+# The parts that differ, by their object's name: the aluminium rails, the polymer cheek piece and inserts, the
+# polished bolt body.
+PART_SURFACES = {
+    "Rails": "aluminium", "Cheek": "polymer", "Inserts": "polymer", "Bolt": ("bare", ("Metal",)),
 }
 
 
@@ -536,7 +548,8 @@ def receiver() -> object:
     for px in (925.0, 800.0, 650.0, 500.0, 350.0, 200.0, 40.0):
         prof.append((Y(px), at(BARREL_R, px)))
     prof.append((Y(40.0), 0.0))
-    b.lathe(prof, "Body", 32, centre=(0.0, 0.0, BORE_Z))
+    # The barrel in the Metal paint (dark steel in every paint; owner, 2026-11-12: "sniper rifle barrel is metal").
+    b.lathe(prof, "Metal", 32, centre=(0.0, 0.0, BORE_Z))
     ob = b.build()
     cutters = [scallop_cutter("Body")]
     c = hs.Builder("c_port", ["Detail"])
@@ -549,7 +562,7 @@ def receiver() -> object:
 
 def flash_hider() -> object:
     """The thread cap on the barrel's end: rounded at its face, a bore through it."""
-    b = hs.Builder("FlashHider", ["Body", "Detail"])
+    b = hs.Builder("FlashHider", ["Metal", "Detail"])
     y0, y1 = Y(BARREL_END_PX) - 0.0015, Y(MUZZLE_PX)
     # Its grip: fine grooves round it between the barrel and the rounded face.
     grooves = []
@@ -559,7 +572,7 @@ def flash_hider() -> object:
         y += 0.0013
     b.lathe([(y0, 0.0), (y0, CAP_R - 0.0004), (y0 + 0.0006, CAP_R)] + grooves + [(y1 - 0.0030, CAP_R),
              (y1 - 0.0012, CAP_R - 0.0008),
-             (y1 - 0.0002, CAP_R - 0.0026), (y1, CAP_R - 0.0042), (y1, 0.0048), (y1 - 0.0006, 0.0045)], "Body", 32,
+             (y1 - 0.0002, CAP_R - 0.0026), (y1, CAP_R - 0.0042), (y1, 0.0048), (y1 - 0.0006, 0.0045)], "Metal", 32,
             centre=(0.0, 0.0, BORE_Z), cap=False)
     b.lathe([(y1 - 0.0006, 0.0045), (y1 - 0.0080, 0.0045), (y1 - 0.0080, 0.0)], "Detail", 32,
             centre=(0.0, 0.0, BORE_Z), cap=False)
@@ -600,6 +613,7 @@ def body() -> object:
              bottom_metal(), bolt_release()]
     for ob in parts:
         print("  part %-12s %6d" % (ob.name, hs.tris(ob)))
+    surface.tag_named(parts, PART_SURFACES)
     return hs.join("Body", parts)
 
 
@@ -841,13 +855,16 @@ def build() -> None:
     for ob, bone in ((bolt(), "bolt"), (trigger(), "trigger"), (magazine(), "magazine"),
                      (mag_release(), "magRelease"), (safety(), "selector"), (sight(True), "frontSight"),
                      (sight(False), "rearSight")):
+        surface.tag_named([ob], PART_SURFACES)
         hs.parent_to_bone(ob, arm, bone)
     pad = butt_pad()
     hs.join("Body", [bod, pad])
     for name, loc in EMPTIES.items():
         hs.empty(name, loc, arm)
     clips(arm)
+    surface.resolve(SURFACES)
     fig = figure_copy.make(FIGURE_TRIS)
+    surface.strip()
     total = 0
     for ob in bpy.data.objects:
         if ob.type == "MESH":

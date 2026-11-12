@@ -138,8 +138,24 @@ A replica's file is its model in the hands, on the menus' pictures and on the fi
   on the hands' meshes (the figures' copies get one too, all at the origin), and one 2K image `wear` (R ambient
   occlusion, G rubbed edges and patches, B scratches) hung on the five painted materials as their glTF occlusion
   texture. Godot's import extracts it as `<id>_wear.png` (keep its import at VRAM compressed, high quality, mipmaps),
-  makes the `Wear` layer those surfaces' UV, and ReplicaPaint draws them in `game/play/replica_wear.gdshader`. The
-  AEG Rifle and the GBB Pistol wear; the Cyber Pistol and the Sniper Rifle stay clean (owner, 2026-11-10).
+  makes the `Wear` layer those surfaces' UV, and ReplicaPaint draws them worn in `game/play/replica_surface.gdshader`.
+  The AEG Rifle, the GBB Pistol and the Compact SMG wear; the Cyber Pistol and the Sniper Rifle stay clean (owner,
+  2026-11-10).
+- **Surfaces (MQ1, owner 2026-11-12: "made out of metal (steel/aluminium), polymer, wood").** A material's name says
+  which paint colour a face takes, not what it is made of, so every face of the hands' meshes also says its surface
+  kind: `polymer`, `steel`, `aluminium`, `wood`, `rubber`, `bare` (bright unpainted steel) or `coated` (metal under
+  a thick baked coat that keeps its colour in any light: the Cyber Pistol's white shell), in that order
+  (`game/config/replica_surfaces.gd` KINDS and `tools/blender/replicas/surface.py` KINDS, never reordered). It rides
+  in the vertex colours (glTF COLOR_0): white, the kind in the alpha as `index / 16`; alpha 1 is "none", which a face
+  of a material the game doesn't paint keeps (rubber, a lens) and a file with no colours reads everywhere (then a
+  `Metal` face draws as steel, the rest as polymer). A build script names the kinds through alias materials
+  (`Body@polymer`), `surface.tag` or its `SURFACES` table, and `surface.resolve` writes them before the figures' copy
+  is made; the figures' copies carry none. ReplicaPaint draws each paint on its surface: metal reflects under the
+  paint (a dark paint as blued or anodised metal, a light one as a baked coat that keeps its colour: `light_keeps`,
+  `floor`, `gain` and `specular` per kind), polymer is matte with a moulded grain, wood shows its figure in a walnut
+  stain the paint tints. Only `bare` metal is brushed along the bore. The grain is one
+  shared tiling texture, `assets/textures/replica/replica_grain.png` (`tools/textures/replica_grain.py`), read on the
+  model's own space, so no model needs texture coordinates for it.
 - **Parts.** `replicaParts/<id>.glb`: one top-level object per part named `<kind>_<id>` (`optic_redDot`,
   `magazine_hiCap`, `muzzle_silencer` …), in the replica's space where it fits, with its figures' copy `<name>_Figure`
   (cut down from it by `tools/blender/parts/figure_parts.py`, run last). Two child empties are read (RM8): an optic's
@@ -150,7 +166,8 @@ A replica's file is its model in the hands, on the menus' pictures and on the fi
   counts toward the part's triangle budget.
 - **Materials,** by name: `CyberSlab`, `CyberFrame`, `CyberLine`, `CyberCore`, `CyberMetal`, or a replica material's own
   name (`polymer`, `furniture`, `detail`, `metal`, `rubber`, `stipple`, `accent`). Plain colours: the game draws in its
-  own materials, so Realistic colours, the glow and the High finish apply. No textures needed.
+  own materials, so Realistic colours, the glow and the High finish apply, each on the face's surface (Surfaces,
+  above). No textures needed.
 - **Budget.** As Size limits, below: the hands model is the detailed one, the figure version its LOD. Textures are
   allowed (2K); plain colours still work.
 - **Muzzle.** Leave it plain: the orange-tip setting adds the tip.

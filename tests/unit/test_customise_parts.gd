@@ -120,8 +120,8 @@ func test_each_tab_offers_the_slot_as_it_comes_then_each_part_that_fits() -> voi
 	assert_true(page.card_text(0).begins_with("Zoom 1.2×"))
 	assert_true(page.card_text(0).contains("Nothing on the rail."))
 	assert_true(page.card_text(1).begins_with("Zoom 1.25× · aim in 0.13 s"))
-	assert_true(page.card_text(2).begins_with("Zoom 2× · aim in 0.24 s"))
-	assert_true(page.card_text(3).begins_with("Zoom 6× · aim in 0.28 s"), "the Variable Scope names its top zoom")
+	assert_true(page.card_text(2).begins_with("Zoom 2× · aim in 0.22 s"), "RP1: the quick scope (0.24 s before)")
+	assert_true(page.card_text(3).begins_with("Zoom 6× · aim in 0.3 s"), "the Variable Scope names its top zoom")
 	assert_true(page.card(0).is_picked(), "nothing fitted: as it comes is picked")
 	assert_null(page.card_picture(0).texture, "the slot as it comes has words, not a picture")
 	assert_not_null(page.card_picture(1).texture)
@@ -129,9 +129,9 @@ func test_each_tab_offers_the_slot_as_it_comes_then_each_part_that_fits() -> voi
 	var mags := view.part_page(MAGAZINE)
 	assert_eq(mags.card_count(), 3)
 	assert_true(mags.card_text(0).begins_with("60 × 4 · reload 1.8 s"))
-	assert_true(mags.card_text(1).begins_with("120 × 2 · reload 1.8 s"))
-	assert_true(mags.card_text(1).contains("Rattles: bots close by hear you walk."))
-	assert_true(mags.card_text(2).begins_with("30 × 6 · reload 1.35 s"))
+	assert_true(mags.card_text(1).begins_with("120 × 2 · reload 2.25 s"), "RP1: the hi-cap changes slower")
+	assert_true(mags.card_text(1).contains("Rattles: bots close by hear you walk, and it is slower to change."))
+	assert_true(mags.card_text(2).begins_with("30 × 6 · reload 1.26 s"))
 	assert_false(mags.card_text(2).contains("Rattles"))
 
 
@@ -155,14 +155,14 @@ func test_the_numbers_are_better_and_worse_in_colour_with_the_words_under_them()
 	var optic := page.customise().part_page(OPTIC)
 	assert_true(optic.card_text(2).contains("Zoom 2×"))
 	assert_true(optic.card(2).is_picked())
-	assert_eq(optic.words_text(), "Better: more zoom. Worse: slower aim in.")
+	assert_eq(optic.words_text(), "Better: more zoom. Worse: slower aim in, slower draw.")
 	var markup := page.customise().part_page(OPTIC).find_children("*", "RichTextLabel", true, false)
 	var scope_text := markup[2] as RichTextLabel
 	assert_true(scope_text.text.contains("[color=#%s]2[/color]" % GameTheme.GOOD.to_html(false)), "zoom in the good colour")
-	assert_true(scope_text.text.contains("[color=#%s]0.24[/color]" % GameTheme.BAD.to_html(false)), "aim in in the bad one")
+	assert_true(scope_text.text.contains("[color=#%s]0.22[/color]" % GameTheme.BAD.to_html(false)), "aim in in the bad one")
 	_pick(page, MAGAZINE, 1)
 	assert_eq(page.customise().part_page(MAGAZINE).words_text(),
-			"Better: more BBs a magazine. Worse: fewer magazines, rattles while you move.")
+			"Better: more BBs a magazine. Worse: fewer magazines, slower reload, rattles while you move.")
 	_pick(page, MAGAZINE, 0)
 	assert_eq(page.customise().part_page(MAGAZINE).words_text(), "", "nothing to say about the slot as it comes")
 
@@ -173,15 +173,21 @@ func test_a_part_adds_the_figures_it_changes_to_its_card() -> void:
 	var barrels := view.part_page(BARREL)
 	assert_true(barrels.card_text(0).begins_with("0.97 J · spread 0.45 °"), "the energy keeps its decimals")
 	assert_false(barrels.card_text(0).contains("aim in"))
-	assert_true(barrels.card_text(1).begins_with("0.92 J · spread 0.38 °"), "a tight bore handles as it comes")
+	assert_true(barrels.card_text(1).begins_with("0.92 J · spread 0.36 °"), "a tight bore handles as it comes")
 	assert_false(barrels.card_text(1).contains("aim in"))
 	assert_true(barrels.card_text(2).contains("aim in 0.17 s"), "a long barrel is front-heavy")
 	view.show_tab(MUZZLE)
 	var muzzles := view.part_page(MUZZLE)
 	assert_true(muzzles.card_text(1).begins_with("0.92 J · heard from 50 % · aim in 0.17 s"))
 	view.show_tab(GRIP)
-	assert_true(view.part_page(GRIP).card_text(1).begins_with("Aim in 0.19 s · shake 60 %"))
-	assert_true(view.part_page(GRIP).card_text(2).begins_with("Aim in 0.12 s · shake 130 %"))
+	# RP1: the Vertical Grip steadies the move too, so its card adds that figure; the Angled Grip's doesn't.
+	assert_true(view.part_page(GRIP).card_text(1).begins_with("Aim in 0.17 s · shake 60 % · moving\u00a080\u00a0%"))
+	assert_true(view.part_page(GRIP).card_text(2).begins_with("Aim in 0.13 s · shake 140 %"))
+	assert_false(view.part_page(GRIP).card_text(2).contains("moving"))
+	view.show_tab(LASER_TAB)
+	assert_true(view.part_page(LASER_TAB).card_text(0).begins_with("From the hip 0.45 °"))
+	assert_true(view.part_page(LASER_TAB).card_text(1).begins_with("From the hip 0.34 ° · aim in 0.16 s"),
+			"the laser tightens the hip and is a touch slower up")
 
 
 func test_the_tab_list_says_what_is_fitted() -> void:
@@ -263,7 +269,11 @@ func test_the_pistol_picks_its_laser_and_each_replica_keeps_its_own_parts() -> v
 	_pick(page, LASER_TAB, 1)
 	assert_eq(_tune(PISTOL).parts[&"laser"], LASER)
 	assert_false(_tune(AEG).parts.has(&"laser"))
-	assert_almost_eq(saved.rules.carried(saved.carried()).replicas[1].spread_deg, 0.8 * 0.8, 1e-6)
+	# RP1: the laser tightens the pistol's hip spread (on top of its own), not the spread itself.
+	var lit := saved.rules.carried(saved.carried()).replicas[1]
+	var plain := saved.rules.config(saved.rules.pool.item(PISTOL))
+	assert_almost_eq(lit.spread_deg, plain.spread_deg, 1e-6)
+	assert_almost_eq(lit.hip_spread, plain.hip_spread * 0.75, 1e-6)
 
 
 # --- the Performance sheet ---
@@ -282,7 +292,7 @@ func test_zoom_aimed_and_aim_in_show_on_the_optic_tab() -> void:
 	assert_eq(sheet.value_label(&"aim").get_theme_color("font_color"), GameTheme.GOOD, "the red dot raises quickest (PP1)")
 	_pick(page, OPTIC, 2)
 	assert_eq(sheet.value_label(&"zoom").text, "2.00")
-	assert_eq(sheet.value_label(&"aim").text, "0.24")
+	assert_eq(sheet.value_label(&"aim").text, "0.22")
 	assert_eq(sheet.value_label(&"aim").get_theme_color("font_color"), GameTheme.BAD)
 	_pick(page, OPTIC, 0)
 	assert_eq(sheet.value_label(&"zoom").text, "1.20", "iron sights: the view's own zoom")
