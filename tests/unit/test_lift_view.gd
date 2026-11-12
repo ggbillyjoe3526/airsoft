@@ -163,6 +163,18 @@ func test_lit_arrows_share_the_landings_transforms() -> void:
 	for j in landings.multimesh.instance_count:
 		assert_eq(lights.multimesh.get_instance_transform(j), landings.multimesh.get_instance_transform(j),
 				"arrows %d sit on their landing" % j)
+	var lit := MapStyle.new().colour_of(LiftView.LIT_KIND, 0)
+	var g: float = play.lifts.landing_lit_gain
+	assert_true(lights.multimesh.use_colors, "instance colours on")
+	if DisplayServer.get_name() == "headless":
+		pass_test("the dummy renderer keeps no instance data to read back; colours need a display")
+		return
+	for j in lights.multimesh.instance_count:
+		var c := lights.multimesh.get_instance_color(j)
+		assert_almost_eq(c.r, lit.r * g, 0.01, "glow red %d" % j)
+		assert_almost_eq(c.g, lit.g * g, 0.01, "glow green %d" % j)
+		assert_almost_eq(c.b, lit.b * g, 0.01, "glow blue %d" % j)
+		assert_eq(c.a, 1.0, "opaque %d" % j)
 
 
 func test_a_missing_lit_model_still_builds_without_arrows() -> void:
