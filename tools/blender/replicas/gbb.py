@@ -445,6 +445,12 @@ def _at(table: list, py: float) -> float:
     return table[0][1] if py < table[0][0] else table[-1][1]
 
 
+def at(table: list, py: float) -> float:
+    """A traced strap's place (photo px) at photo height py: FRONT_STRAP's or BACK_STRAP's (the Cyber Pistol's grip
+    reads them too, cyber.py)."""
+    return _at(table, py)
+
+
 def grip_section(py: float) -> tuple:
     """The grip's section at photo height py: its centre and half depth along y, its height, half width and the
     superellipse exponent (flat-sided like the frame up top, rounder down the grip)."""
