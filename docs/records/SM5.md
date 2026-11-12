@@ -14,7 +14,8 @@ photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33
 | 2026-11-12 | 3 | build thread | ✓ | 7/8 Retry | strip lamp's body deeper than the photo's (attempt 2's figures were off); tunnel lamp's outline faceted at six segments |
 | 2026-11-12 | 4 | build thread | ✓ | 7/8 Retry | tunnel lamp's glass folded on one crease, its edges past the outer bars; strip lamp's lip flush with the body's ends |
 | 2026-11-12 | 5 | build thread | ✓ | 7/8 Retry | (past four attempts: the review-cap ruling) tunnel lamp's lugs pointed, its glass still one hard corner |
-| 2026-11-12 | 6 | build thread | | | |
+| 2026-11-12 | 6 | build thread | ✓ | 7/8 Retry | wedge holes under the tunnel lamp's raised spine, top and bottom |
+| 2026-11-12 | 7 | build thread | | | |
 
 ## What it adds
 
@@ -25,7 +26,7 @@ photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33
   every station ceiling in place of MT1's glowing panels (`RoofConfig.plain_lamp_model`); a room running along z turns
   its lamps a quarter (`roof.lamps[].turn`, MapData.roof_lamp_turns), so each runs along its room. The real lights
   (RoofLamps) are unchanged.
-- **Tunnel bulkhead lamp** (`tunnel_lamp.glb`, 148 of 150): his caged bulkhead, a stadium outline, black like his
+- **Tunnel bulkhead lamp** (`tunnel_lamp.glb`, 150 of 150): his caged bulkhead, a stadium outline, black like his
   fourth photo, 12 on
   the running tunnels' walls, its glass glowing (no real light).
 - **Extras**, look only (`StationFixtures`, spots in `tools/subway/fixtures.py`, `dressing.station.fixtures`): 13

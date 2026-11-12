@@ -21,7 +21,7 @@ PANEL = (640, 520)
 VIEWS = {
     "front": (0.0, 6.0, "front"), "quarter": (-38.0, 16.0, "front quarter"), "side": (-90.0, 4.0, "side"),
     "below": (-20.0, -55.0, "from below"), "rear": (150.0, 14.0, "rear quarter"), "top": (-30.0, 55.0, "from above"),
-    "back": (180.0, 6.0, "back"), "level": (0.0, 0.0, "front, level"),
+    "back": (180.0, 6.0, "back"), "level": (0.0, 0.0, "front, level"), "low": (-38.0, -30.0, "front quarter from below"),
 }
 
 

@@ -154,6 +154,9 @@ def tunnel_lamp() -> sk.Mesh:
     top_spine, low_spine = (0.0, S, SPINE), (0.0, -S, SPINE)
     m.face([f[n - 1], f[0], top_spine, low_spine], "lens", "Lens", smooth=True)
     m.face([low_spine, top_spine, f[ARC], f[ARC + 1]], "lens", "Lens", smooth=True)
+    # the body's lip over the raised glass's top and bottom edges, closing the wedge under the spine
+    m.face_toward([f[ARC], top_spine, f[0]], (0.0, 1.0, 0.0), "black")
+    m.face_toward([f[ARC + 1], low_spine, f[n - 1]], (0.0, -1.0, 0.0), "black")
     # The cage: each bar out of the body's rim (its end inside it), up the dome's side, over the glass's spine and back
     # down, bending with the glass's arc: a flat strap all round (round ones cost twice), the vertical one a round bar.
     for y in BARS:
