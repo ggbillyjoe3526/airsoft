@@ -20,6 +20,7 @@ leaves out ships as null and the exported game crashes. `tests/unit/test_saved_c
 | `hit_config.gd` | Hit calling, friendly fire and whether ricochets count, the walk-off, the built-in hit volume (head, chest, hips, legs), the lean's pivot and tilt, and the fitted volume: its `fit`, the quick test's `volume_reach` and `volume_top`, and the capsules' `fit_*` shapes |
 | `hit_fit.tres` | The human figure's baked joints (HitFit, HV1), written by `tools/hit_fit_bake.gd`; re-bake after changing the figure's rig or clips (`test_hit_fit.gd` fails while it is stale) |
 | `wind_config.gd` | The match's breeze: its speed range, gusts and veer |
+| `weather_config.gd` | A field's weather (PH1): how much colder a night in the open is, and the share of a gas replica's energy a °C from the rated 20 °C (each field's Wind and Air are `data/maps.md`'s) |
 | `ricochet_config.gd` | BBs bouncing off hard surfaces: restitution by material, slide, scatter, the most bounces |
 | `round_config.gd` | Rounds: clock, score, half time, reset |
 | `range_config.gd` | The practice range's targets: plate and post sizes, a figure's time down and rise, pop-ups', movers' and swingers' timing, the range's marked distances and size (the targets' layout is `data/maps/range.json`); practice on a field (`field_`, WL9): where targets stand and of what kind, the START plate's search, the challenge's sight reach |

@@ -2,7 +2,8 @@ class_name AirModel
 extends RefCounted
 ## Everything a BB's flight step needs to know about the air (the browser game's sim/air.ts), worked out once per
 ## BallisticsConfig: the drag factor ½·ρ·Cd·A (kg/m) tabulated by airspeed, so a step costs a table read instead of a
-## Reynolds number and three powers, and the constants for Magnus lift and spin decay. Get one with AirModel.of(cfg).
+## Reynolds number and three powers, and the constants for Magnus lift and spin decay. Get one with AirModel.of(cfg), or
+## AirModel.at(cfg, temperature) for a field's own air (PH1).
 
 ## Specific gas constant of dry air, J/(kg·K).
 const R_AIR := 287.05
@@ -44,8 +45,18 @@ static func of(cfg: BallisticsConfig) -> AirModel:
 			if not is_instance_id_valid(id):
 				_models.erase(id)
 		model = AirModel.new()
-		model._build(cfg)
+		model._build(cfg, cfg.air_temperature)
 		_models[key] = model
+	return model
+
+
+## The AirModel of `cfg` in air at `temperature` (°C) instead of its own (a field's weather, PH1): `of(cfg)` itself at
+## cfg's temperature, else a new model, so once a match (Simulation.set_weather), never per tick.
+static func at(cfg: BallisticsConfig, temperature: float) -> AirModel:
+	if is_equal_approx(temperature, cfg.air_temperature):
+		return of(cfg)
+	var model := AirModel.new()
+	model._build(cfg, temperature)
 	return model
 
 
@@ -86,9 +97,9 @@ func lift_coefficient(s: float) -> float:
 	return s / (lift_base + lift_slope * s)
 
 
-func _build(cfg: BallisticsConfig) -> void:
-	var rho := air_density(cfg.air_temperature, cfg.air_pressure)
-	var mu := air_viscosity(cfg.air_temperature)
+func _build(cfg: BallisticsConfig, temperature: float) -> void:
+	var rho := air_density(temperature, cfg.air_pressure)
+	var mu := air_viscosity(temperature)
 	radius = cfg.bb_diameter / 2.0
 	var area := PI * radius * radius
 	drag.resize(TABLE_TOP * TABLE_RES + 2)

@@ -311,6 +311,7 @@ func _sync_round(state: GameState) -> void:
 	world.flag = rs.flags[world.flag_index]
 	world.overtime_flag = rs.overtime_flag
 	world.start_mode = rs.start_mode
+	world.air = state.air
 
 
 ## The field's walkable extent (its sloping ground, floors and ramps) and a height over all of it, for drawing hunt

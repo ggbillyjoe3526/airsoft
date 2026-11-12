@@ -320,7 +320,7 @@ static func flight_time(b: Bot, w: BotWorld, dist: float) -> float:
 		return 0.0
 	var grams := a.bb_weights[a.active]
 	var t := Ballistics.flight_time_estimate(dist, Ballistics.muzzle_velocity(r, w.tuning.replica_rules, grams),
-			Ballistics.bb_mass(r, grams), w.tuning.ballistics)
+			Ballistics.bb_mass(r, grams), w.tuning.ballistics, w.air)
 	return t if t < INF else 0.0
 
 

@@ -30,7 +30,9 @@ replica handles.
 
 **Energy (J)** is the muzzle energy with the replica's factory BB weight (**BB (g)**), the way a site's chrono rates
 it. With the BB weight it sets the speed the BB leaves the barrel at (E = ½·m·v²). Other BB weights shift the energy a
-little (a heavier BB takes more of the push); every BB weight is free and picked on the Loadout's slider. What happens
+little (a heavier BB takes more of the push), never past the site limit, which is read with the BBs loaded (PH1); every
+BB weight (0.20 to 0.40 g) is free and picked on the Loadout's slider. A gas replica's energy is rated at 20 °C and
+follows the field's air (`data/maps.md` Air, `game/config/weather_config.gd`). What happens
 to the BB after it leaves the barrel (drag, hop-up lift, spin) is in `game/config/ballistics_config.gd`.
 
 ### Power sources
@@ -86,9 +88,10 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
   precision, one shot at a time, slow on its feet and a guess from the hip. The Compact SMG is the one for shooting on
   the move.
 - **Sniper Rifle** (SN1, owner 2026-11-02: like the AEG with a longer barrel, spring driven, single shot, the 2x Scope
-  fitted as it comes). The long-range pick: 1.90 J with 0.30 g BBs (the heaviest the Loadout loads; 440 fps on a
-  0.20 g chrono) stays within 15 cm of the aim line to about 48 m (the AEG 39 m) and gets to 50 m in 0.81 s (the AEG
-  1.18 s), and its 0.10° of spread is the tightest there is. Against that, one shot every 1.25 s (the
+  fitted as it comes). The long-range pick: 1.90 J with 0.30 g BBs (the Loadout loads up to 0.40 g, PH1, which it
+  alone makes full use of; 440 fps on a 0.20 g chrono) stays within 15 cm of the aim line to about 48 m (the AEG
+  39 m) and gets to 50 m in 0.81 s (the AEG 1.18 s), and its 0.10° of spread is the tightest there is. Against that,
+  one shot every 1.25 s (the
   spring cocked by the charging handle after each one), 25 BBs a magazine, a slow reload and draw, and from the hip ten
   times the spread (six until PP1: a snap shot from the hip at 15 m still hit nine times in ten). Its class's site
   limit is the bolt-action one (below).

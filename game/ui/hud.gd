@@ -79,6 +79,8 @@ var _view: ViewConfig = null
 var _player: Character = null
 var _rounds: RoundConfig = null
 var _sim: SimTuning = null
+## The field's own air (GameState.air, PH1), for the hop-up readout's flight; null: the air replicas are rated in.
+var _air: AirModel = null
 
 var _replica: ReplicaPanel = null
 var _rail: WeaponRail = null
@@ -1391,12 +1393,17 @@ func _draw() -> void:
 				_marker_left / _cfg.marker_time)
 
 
+## The air the match is played in (GameState.air): the hop-up readout flies its BB through it.
+func set_field_air(air: AirModel) -> void:
+	_air = air
+
+
 ## The hop-up readout for the replica in hand with its dial at `dial`: the setting and how far a level shot stays flat.
 ## Flies one BB (Ballistics.hop_up_reach), so only on a turn, never per frame.
 func _show_hop_up(dial: float) -> void:
 	var a := _player.armament
 	var reach := Ballistics.hop_up_reach(a.replica(), dial, _sim, 1.0 / Engine.physics_ticks_per_second, _cfg.hop_band,
-			_cfg.hop_range, a.bb_weights[a.active])
+			_cfg.hop_range, a.bb_weights[a.active], _air)
 	var metres := roundi(reach.on_target_to)
 	var flat := tr("HUD_METRES_PLUS") % metres if reach.on_target_to >= _cfg.hop_range else tr("HUD_METRES") % metres
 	# Over-hopped, the BB leaves the band climbing, not dropping: say so, or a stronger dial would read as a worse one.
