@@ -13,15 +13,17 @@ static func look_pitch(from: Vector3, to: Vector3) -> float:
 	return atan2(to.y - from.y, Vector2(to.x - from.x, to.z - from.z).length())
 
 
-## The way `b` faces holding still: a bot watching the overtime flag from cover (OV2) at the flag from its spot, every
-## other the enemy's side.
+## The way `b` faces holding still: a bot watching the overtime flag from cover (OV2) at the flag from its spot, one by
+## an armed bomb (PB1) at the bomb or the way back to it, every other the enemy's side.
 static func hold_yaw(b: Bot, w: BotWorld) -> float:
 	if b.mode == Bot.Mode.FLAG and b.flag_guard and w.overtime_flag.up:
 		return look_yaw(b.flag_goal, w.overtime_flag.foot)
-	# Plant The Bomb: a defender back at the armed bomb watches it from its cover (whoever guards it is near it).
-	if w.plant != null and w.plant.planted() and b.mode == Bot.Mode.FLAG and b.flag_guard \
-			and b.character.team != w.attackers:
-		return look_yaw(b.flag_goal, w.plant.position)
+	# Plant The Bomb: a defender back at the armed bomb watches it from its cover (whoever guards it is near it), and
+	# its guards watch the ways back to it, split between them (BotPlant.watch_point).
+	if w.plant != null and w.plant.planted() and b.mode == Bot.Mode.FLAG and b.flag_guard:
+		if b.character.team != w.attackers:
+			return look_yaw(b.flag_goal, w.plant.position)
+		return look_yaw(b.flag_goal, BotPlant.watch_point(b, w))
 	return w.enemy_yaw(b.character.team)
 
 

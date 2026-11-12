@@ -25,6 +25,7 @@ leaves out ships as null and the exported game crashes. `tests/unit/test_saved_c
 | `round_config.gd` | Rounds: clock, score, half time, reset |
 | `range_config.gd` | The practice range's targets: plate and post sizes, a figure's time down and rise, pop-ups', movers' and swingers' timing, the range's marked distances and size (the targets' layout is `data/maps/range.json`); practice on a field (`field_`, WL9): where targets stand and of what kind, the START plate's search, the challenge's sight reach |
 | `flag_config.gd` | Attack / Defend's flag: reach, raise and lower times, overtime, rope steps |
+| `plant_config.gd`, `plant_view_config.gd` | Plant The Bomb (PB1). `PlantConfig`: where the bomb starts, reaches, a site's radius, plant, fuse and defuse times, the defuse's checkpoint, overtime while it is being armed, the beep's gaps. `PlantViewConfig`: the stand-in prop's size and colours, its lamp, the site rings and letters |
 | `overtime_config.gd` | Elimination's overtime flag (OV1): its time, the reach from its foot and the reach in height |
 | `footstep_config.gd` | Strides and landings |
 | `grenade_config.gd` | Smoke and flash bombs (SF1): what everyone carries, the pool, the throw's windup, speed and loft, a bomb's bounce and roll, a smoke's fuse, time, growth, fade and cloud, a flash's fuse, reach and dazzle |

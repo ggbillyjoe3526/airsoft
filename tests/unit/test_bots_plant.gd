@@ -338,3 +338,99 @@ func test_attackers_go_in_once_their_lane_is_swept_or_the_clock_runs_short() -> 
 	w.round_clock = w.cfg.plant_rush_clock - 1.0
 	assert_true(BotPlant.wants_site(b, w), "short of time, everyone goes")
 	assert_false(BotPlant.wants_site(_bot(3), w), "a defender holds its post while nothing is armed")
+
+
+func test_the_carrier_goes_in_last_once_its_escort_is_by_the_site_or_it_has_waited() -> void:
+	_world()
+	rs.plant.status = PlantState.Status.CARRIED
+	rs.plant.carrier = 1
+	w.round_clock = w.cfg.plant_rush_clock + 30.0
+	w.time = 20.0
+	var carrier := _bot(1)
+	carrier.lane_done = true
+	BotPlant.plan(w)
+	assert_true(carrier.raiser)
+	assert_false(BotPlant.wants_site(carrier, w), "its lane swept, but nobody of its team is by the site yet")
+	cs[0].position = SITE_A + Vector3(-w.cfg.plant_escort_radius + 1.0, 0.0, 0.0)
+	BotPlant.plan(w)
+	assert_false(BotPlant.wants_site(carrier, w), "one of the two it waits for")
+	cs[2].position = SITE_A + Vector3(0.0, 0.0, w.cfg.plant_escort_radius - 1.0)
+	BotPlant.plan(w)
+	assert_true(BotPlant.wants_site(carrier, w), "both in: it goes")
+	cs[0].position = START
+	cs[2].position = START
+	BotPlant.plan(w)
+	assert_true(BotPlant.wants_site(carrier, w), "kept once given")
+	# Another carrier starts over, and goes after plant_carrier_wait s whoever is there.
+	rs.plant.carrier = 2
+	var next := _bot(2)
+	next.lane_done = true
+	BotPlant.plan(w)
+	assert_false(BotPlant.wants_site(next, w))
+	w.time += w.cfg.plant_carrier_wait - 0.5
+	BotPlant.plan(w)
+	assert_false(BotPlant.wants_site(next, w))
+	w.time += 1.0
+	BotPlant.plan(w)
+	assert_true(BotPlant.wants_site(next, w), "waited long enough")
+
+
+func test_the_last_attacker_carries_straight_in() -> void:
+	_world()
+	rs.plant.status = PlantState.Status.CARRIED
+	rs.plant.carrier = 1
+	w.round_clock = w.cfg.plant_rush_clock + 30.0
+	cs[0].status = Character.Status.OUT
+	cs[2].status = Character.Status.OUT
+	_bot(1).lane_done = true
+	BotPlant.plan(w)
+	assert_true(BotPlant.wants_site(_bot(1), w), "nobody left to wait for")
+
+
+func test_a_bomb_taken_up_in_the_defenders_half_is_carried_straight_on() -> void:
+	_world()
+	var events := SimEvents.new()
+	var e := events.add(GameEvent.Kind.BOMB)
+	e.value = Plant.Cue.DROPPED
+	e.position = SITE_A + Vector3(-6.0, 0.0, 0.0)
+	BotPlant.observe(w, events, 30.0)
+	events.clear()
+	e = events.add(GameEvent.Kind.BOMB)
+	e.value = Plant.Cue.PICKED_UP
+	e.actor = 2
+	e.position = SITE_A + Vector3(-6.0, 0.0, 0.0)
+	BotPlant.observe(w, events, 34.0)
+	assert_true(_bot(2).lane_done, "its lane is behind it")
+	assert_false(_bot(1).lane_done)
+	# From the start line, its carrier still sweeps its lane.
+	_world()
+	events.clear()
+	e = events.add(GameEvent.Kind.BOMB)
+	e.value = Plant.Cue.PICKED_UP
+	e.actor = 1
+	e.position = START
+	BotPlant.observe(w, events, 1.0)
+	assert_false(_bot(1).lane_done)
+
+
+func test_an_attacker_who_hears_the_kit_leaves_its_cover_for_the_bomb() -> void:
+	_world()
+	_arm(0)
+	var near := _bot(0)
+	var far := _bot(2)
+	cs[0].position = rs.plant.position + Vector3(-w.cfg.plant_heard + 2.0, 0.0, 0.0)
+	cs[2].position = rs.plant.position + Vector3(-w.cfg.plant_heard - 2.0, 0.0, 0.0)
+	assert_true(BotPlant.guards(near, w), "armed and quiet: it guards from cover")
+	rs.plant.defuser = 4
+	assert_false(BotPlant.guards(near, w), "the kit is at work within earshot")
+	assert_true(BotPlant.guards(far, w), "out of earshot")
+
+
+func test_the_armed_bombs_guards_split_between_the_other_site_and_the_defenders_start() -> void:
+	_world()
+	_arm(0)
+	assert_eq(BotPlant.watch_point(_bot(0), w), SITE_B, "the first attacker in play watches the other site")
+	assert_eq(BotPlant.watch_point(_bot(1), w), w.planner.spawn_centre[1], "the next the defenders' start")
+	assert_eq(BotPlant.watch_point(_bot(2), w), SITE_B)
+	cs[0].status = Character.Status.OUT
+	assert_eq(BotPlant.watch_point(_bot(1), w), SITE_B, "the turns are among those still in play")

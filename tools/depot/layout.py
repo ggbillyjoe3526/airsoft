@@ -297,6 +297,9 @@ box("barrels", 8.5, 29.5, 1.3, 0.65)
 
 
 FLAGS = [FLAG_A, FLAG_B]
+# Plant The Bomb (PB1): the sites, A first, each (x, z, radius m; 0 the game's usual, PlantConfig.site_radius). Each
+# is its flag's site, its middle a metre towards the hall from the pole.
+BOMB_SITES = [(44.0, -26.0, 0), (45.0, 27.0, 0)]
 
 # ================================================================ the bots' lanes (end 0's side to end 1's)
 LANES = {

@@ -584,6 +584,7 @@ def build() -> dict:
                       [spot(x, z, L.T, EYE_FACING_WEST) for x, z in L.DEAD_E]],
         "lanes": [[lane_point(*p) for p in L.LANES[k]] for k in ("n", "m", "s")],
         "flags": [{"x": x, "y": r(y + LIFT), "z": z} for x, z, y in L.FLAGS],
+        "bombSites": [{"x": x, "y": r(y + LIFT), "z": z, "radius": radius} for x, z, y, radius in L.BOMB_SITES],
         "overtimeFlag": {"x": L.OT_FLAG[0], "y": r(L.OT_FLAG[2] + LIFT), "z": L.OT_FLAG[1]},
         "botSight": 50,
         "poleHeight": L.POLE_HEIGHT,

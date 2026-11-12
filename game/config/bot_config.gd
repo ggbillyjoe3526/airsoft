@@ -377,6 +377,11 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 ## With this much of the round left or less (s) and the bomb not armed, the attackers stop sweeping their lanes and
 ## make for the site.
 @export var plant_rush_clock: float = 40.0
+## The carrier goes in last: its lane swept, it holds there until plant_escorts of its team in play (or all that are
+## left) are within plant_escort_radius (m) of the site's middle, or it has held plant_carrier_wait s.
+@export var plant_escorts: int = 2
+@export var plant_escort_radius: float = 14.0
+@export var plant_carrier_wait: float = 10.0
 ## The carrier arms the bomb once it stands within flag_arrive plus this (m) of its spot in the site.
 @export var plant_settle_slack: float = 0.4
 ## The carrier looks for crouch cover to arm the bomb behind within the site's radius less this (m), so the spot is

@@ -80,18 +80,27 @@ static func site_in_play(w: BotWorld) -> int:
 
 
 ## What the tick's events mean to the plan: the bomb on the ground since the round's GO or since it was dropped; a bomb
-## dropped nearer the other site than the one planned moves the plan there (its carrier fell on the way in).
+## dropped in the defenders' half moves the plan to the site nearest it (its carrier fell on the way in), and the bot
+## that takes it up there goes on to the site rather than back to its lane.
 static func observe(w: BotWorld, events: SimEvents, time: float) -> void:
 	for i in events.count:
 		var e := events.items[i]
 		if e.kind == GameEvent.Kind.ROUND_START or e.kind == GameEvent.Kind.ROUND_GO:
 			w.plant_down_at = time
+			w.plant_fell_far = false
 		elif e.kind == GameEvent.Kind.BOMB and e.value == Plant.Cue.DROPPED:
 			w.plant_down_at = time
-			if w.plant != null and w.planner != null and w.planner.in_enemy_half_at(e.position, w.attackers):
+			w.plant_fell_far = w.plant != null and w.planner != null \
+					and w.planner.in_enemy_half_at(e.position, w.attackers)
+			if w.plant_fell_far:
 				var near := Plant.nearest_site(w.plant, e.position)
 				if near >= 0:
 					w.planner.attack_flag = near
+		elif e.kind == GameEvent.Kind.BOMB and e.value == Plant.Cue.PICKED_UP and w.plant_fell_far:
+			# Taken up where its carrier fell on the way in: its new carrier's lane is behind it.
+			for b in w.bots:
+				if b.character.id == e.actor:
+					b.lane_done = true
 
 
 ## Each tick, before the bots think: who fetches the bomb, who arms it, who goes back to it and who disarms it.
@@ -100,9 +109,13 @@ static func plan(w: BotWorld) -> void:
 		return
 	_pick_fetcher(w)
 	var ps := w.plant
+	var carrier: Bot = null
 	for b in w.bots:
 		b.raiser = ps.status == PlantState.Status.CARRIED and ps.carrier == b.character.id \
 				and b.order == SquadOrder.Kind.NONE
+		if b.raiser:
+			carrier = b
+	_hold_carrier(w, carrier)
 	if ps.planted():
 		# Armed: every free defender goes back to it.
 		for b in w.bots:
@@ -113,26 +126,76 @@ static func plan(w: BotWorld) -> void:
 	_pick_defuser(w)
 
 
-## Whether `b` should be at its site (or at the bomb) now. An attacker: fetching the bomb, once its lane is swept, with
-## the bomb armed, or with plant_rush_clock or less of the round left and nothing armed yet. A defender: picked to go
-## back to a site where the bomb is being armed or stands armed.
+## The carrier goes in last (w.plant_go): its lane swept, it holds there until plant_escorts of its team in play, or
+## all that are left, are within plant_escort_radius of the site's middle, or plant_carrier_wait s have passed. Kept
+## once given, while the same bot carries it.
+static func _hold_carrier(w: BotWorld, carrier: Bot) -> void:
+	if carrier == null or carrier.character.id != w.plant_go_for:
+		w.plant_go = false
+		w.plant_hold_since = -1.0
+		w.plant_go_for = carrier.character.id if carrier != null else -1
+	if carrier == null or w.plant_go or not carrier.lane_done:
+		return
+	if w.plant_hold_since < 0.0:
+		w.plant_hold_since = w.time
+	if w.time - w.plant_hold_since >= w.cfg.plant_carrier_wait:
+		w.plant_go = true
+		return
+	var site := w.plant.sites[w.plant_site]
+	var others := 0
+	var by := 0
+	for c in w.characters:
+		if c.team != w.attackers or c == carrier.character or not Elimination.is_in_play(c):
+			continue
+		others += 1
+		if _flat(c.position, site) <= w.cfg.plant_escort_radius:
+			by += 1
+	w.plant_go = by >= mini(w.cfg.plant_escorts, others)
+
+
+## Whether `b` should be at its site (or at the bomb) now. An attacker: fetching the bomb, with the bomb armed, with
+## plant_rush_clock or less of the round left and nothing armed yet, or once its lane is swept (the carrier: once its
+## escort is in, _hold_carrier). A defender: picked to go back to a site where the bomb is being armed or stands armed.
 static func wants_site(b: Bot, w: BotWorld) -> bool:
 	match BotFlag.role(b, w):
 		BotFlag.Role.ATTACK:
-			return b.fetcher or b.lane_done or w.plant.planted() or (w.live and w.round_clock <= w.cfg.plant_rush_clock)
+			if b.fetcher or w.plant.planted() or (w.live and w.round_clock <= w.cfg.plant_rush_clock):
+				return true
+			return b.lane_done and (w.plant_go or not b.raiser)
 		BotFlag.Role.DEFEND:
 			return b.retake and b.retake_pole >= 0 and w.flags[b.retake_pole].progress > 0.0
 	return false
 
 
 ## Whether `b` takes cover by its site rather than going onto it: an attacker who is neither fetching the bomb nor
-## carrying it in, and a defender back at an armed bomb who is not the one disarming it.
+## carrying it in, and a defender back at an armed bomb who is not the one disarming it. An attacker who hears the kit
+## at work on the armed bomb (within plant_heard of it) leaves its cover and goes to the bomb itself.
 static func guards(b: Bot, w: BotWorld) -> bool:
 	if b.fetcher:
 		return false
 	if BotFlag.role(b, w) == BotFlag.Role.ATTACK:
+		if w.plant.planted() and w.plant.defuser >= 0 \
+				and _flat(b.character.position, w.plant.position) <= w.cfg.plant_heard:
+			return false
 		return not b.raiser
 	return w.plant.planted() and not b.defuser
+
+
+## Where an attacker guarding the armed bomb watches for the defenders coming back, and hides from: the guards split,
+## by turns (a bot's place among the attackers in play), between the two ways back to it, from the other site and from
+## the defenders' start, so an armed bomb is covered both ways. With one site, their start.
+static func watch_point(b: Bot, w: BotWorld) -> Vector3:
+	var ps := w.plant
+	var home := w.planner.spawn_centre[1 - w.attackers]
+	if ps.sites.size() < 2 or ps.site < 0:
+		return home
+	var turn := 0
+	for o in w.bots:
+		if o == b:
+			break
+		if o.character.team == b.character.team and Elimination.is_in_play(o.character):
+			turn += 1
+	return ps.sites[(ps.site + 1) % ps.sites.size()] if turn % 2 == 0 else home
 
 
 ## Whether the bots may take the bomb from the ground now. With no player on the attackers' team in play, at once.

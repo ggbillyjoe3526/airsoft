@@ -119,12 +119,18 @@ static func _pick_flag_spot(b: Bot, w: BotWorld) -> void:
 
 
 ## Where a guard at `pole` hides from: where an enemy was last known, else a point flag_guard_threat_distance from the
-## pole towards the enemy's side, at standing eye height on the pole's floor.
+## pole towards the enemy's side (an armed bomb's guard: towards the way back to it that it watches), at standing eye
+## height on the pole's floor.
 static func _guard_threat(b: Bot, w: BotWorld, pole: Vector3) -> Vector3:
 	var cfg := w.cfg
 	var threat := Vector3.ZERO
 	if b.has_last_known:
 		threat = Vector3(b.last_known.x, 0.0, b.last_known.z)
+	elif w.plant != null and w.plant.planted() and b.character.team == w.attackers:
+		# Plant The Bomb: the armed bomb's guards split between the ways the defenders come back (BotPlant.watch_point).
+		var watch := BotPlant.watch_point(b, w)
+		var away := Vector2(watch.x - pole.x, watch.z - pole.z).normalized() * cfg.flag_guard_threat_distance
+		threat = Vector3(pole.x + away.x, 0.0, pole.z + away.y)
 	else:
 		var yaw := w.enemy_yaw(b.character.team)
 		threat = Vector3(pole.x - sin(yaw) * cfg.flag_guard_threat_distance, 0.0,
@@ -362,6 +368,10 @@ static func _advance(b: Bot, w: BotWorld, dt: float, at_post: bool = false) -> b
 		if not _next_goal(b, w):
 			if BotFlag.holds_post(b, w):
 				_hold_post(b, w, dt, reached, at_post)
+			elif w.plant != null and b.raiser:
+				# Plant The Bomb: the carrier, its lane swept, waits here for its escort to go in first (BotPlant).
+				b.holding = true
+				b.team_wait += dt
 			return false
 		if reached and not b.hunting:
 			if _pick_hold_cover(b, w):
