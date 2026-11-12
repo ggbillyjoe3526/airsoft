@@ -18,7 +18,8 @@ extends Resource
 ## A post's floor plate (m): its side and thickness, drawn in the post's paint, kept inside the run's box.
 @export var plate_side: float = 0.09
 @export var plate_thickness: float = 0.008
-## The paint's roughness and metalness, and how worn it is drawn (LookMaterials.vertex_colour).
+## The paint's roughness and metalness, and how worn it is drawn (LookMaterials.vertex_colour): lightly, as the
+## dust on the capping's top drew it beige (SM2).
 @export var roughness: float = 0.55
 @export var metallic: float = 0.0
-@export var wear: float = 0.5
+@export var wear: float = 0.15

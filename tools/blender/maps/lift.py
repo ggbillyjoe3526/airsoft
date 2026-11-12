@@ -283,13 +283,15 @@ def car() -> list:
 
 def leaf() -> list:
     """One leaf, built at a landing leaf's size (LiftView scales the 1 m cube back to each): brushed steel both faces,
-    a narrow wired-glass vision panel set in a frame high on each, a black rubber edge down both sides and a kick
+    half of a wired-glass vision panel at its meeting edge (+x; LiftView turns the other leaf round so the halves
+    meet as one panel), framed high on each face, a black rubber edge down both sides and a kick
     plate at the foot."""
     mk.reset()
     w, h, t = DOOR_W / 2 - 0.01, DOOR_H, 0.04
     face, glass, frame, edge = tk.Mesh(), tk.Mesh(), tk.Mesh(), tk.Mesh()
     hw, ht = w / 2, t / 2
     gx, gy0, gy1 = 0.06, 1.1, 1.75
+    cx = hw - gx - 0.03 - 0.012   # the panel's middle: its frame 12 mm in from the meeting edge (+x)
     for side in (-1.0, 1.0):
         z = side * ht
 
@@ -301,14 +303,15 @@ def leaf() -> list:
         for y0, y1, paint in rows:
             t0, t1 = 0.84 + 0.16 * y0 / h, 0.84 + 0.16 * y1 / h
             if y0 == gy0 - 0.03:
-                for a, b in ((-hw, -gx - 0.03), (gx + 0.03, hw)):
+                for a, b in ((-hw, cx - gx - 0.03), (cx + gx + 0.03, hw)):
                     q([(a, y0, z), (b, y0, z), (b, y1, z), (a, y1, z)], face, [t0, t0, t1, t1])
             else:
                 q([(-hw, y0, z), (hw, y0, z), (hw, y1, z), (-hw, y1, z)], frame if paint else face,
                   None if paint else [t0, t0, t1, t1])
         # The glass's frame: a bevelled steel surround standing in from the face.
-        outer = [(-gx - 0.03, gy0 - 0.03), (gx + 0.03, gy0 - 0.03), (gx + 0.03, gy1 + 0.03), (-gx - 0.03, gy1 + 0.03)]
-        inner = [(-gx, gy0), (gx, gy0), (gx, gy1), (-gx, gy1)]
+        outer = [(cx - gx - 0.03, gy0 - 0.03), (cx + gx + 0.03, gy0 - 0.03), (cx + gx + 0.03, gy1 + 0.03),
+                 (cx - gx - 0.03, gy1 + 0.03)]
+        inner = [(cx - gx, gy0), (cx + gx, gy0), (cx + gx, gy1), (cx - gx, gy1)]
         zi = side * (ht - 0.006)
         for i in range(4):
             j = (i + 1) % 4
@@ -400,14 +403,18 @@ def landing() -> list:
         # Wound to face the landing (-z): counter-clockwise seen from -z.
         nz = (pts[1][0] - pts[0][0]) * (pts[2][1] - pts[0][1]) - (pts[1][1] - pts[0][1]) * (pts[2][0] - pts[0][0])
         mitre.poly(pts if nz < 0 else list(reversed(pts)))
-    # The display over the door: a steel box with a dark window and the up and down arrows' lenses.
-    dy0, dy1 = DOOR_H + a_w + 0.05, DOOR_H + a_w + 0.2
-    bevelled(arch, -0.32, dy0, 0.32, dy1, -0.035, 0.01)
-    disp.box((-0.26, dy0 + 0.025, -0.0365), (0.16, dy1 - 0.025, -0.035), skip=("+z",))
-    for up, cy in ((1.0, dy0 + 0.105), (-1.0, dy0 + 0.045)):
-        lens.poly([(0.2, cy - 0.015 * up, -0.0365), (0.28, cy - 0.015 * up, -0.0365), (0.24, cy + 0.02 * up, -0.0365)]
-                  if up > 0 else [(0.28, cy - 0.015 * up, -0.0365), (0.2, cy - 0.015 * up, -0.0365),
-                                  (0.24, cy + 0.02 * up, -0.0365)])
+    # The display over the door: a steel box the architrave's width, a dark window and the up and down arrows' lenses,
+    # big enough to read across the hall (photo 115640).
+    dy0, dy1 = DOOR_H + a_w + 0.04, DOOR_H + a_w + 0.3
+    dx = hw + a_w
+    bevelled(arch, -dx, dy0, dx, dy1, -0.035, 0.012)
+    disp.box((-dx + 0.05, dy0 + 0.035, -0.0365), (dx - 0.24, dy1 - 0.035, -0.035), skip=("+z",))
+    for up, cy in ((1.0, dy0 + 0.19), (-1.0, dy0 + 0.075)):
+        ax0, ax1, am = dx - 0.2, dx - 0.06, dx - 0.13
+        # Wound to face the landing (-z): clockwise seen from +z.
+        lens.poly([(ax1, cy - 0.035 * up, -0.0365), (ax0, cy - 0.035 * up, -0.0365), (am, cy + 0.04 * up, -0.0365)]
+                  if up > 0 else [(ax0, cy - 0.035 * up, -0.0365), (ax1, cy - 0.035 * up, -0.0365),
+                                  (am, cy + 0.04 * up, -0.0365)])
     # The call station: a brushed plate round the call button (LiftView draws it), a bezel and a key switch.
     cx, cy = hw + CALL_BESIDE, CALL_HEIGHT
     bevelled(plate, cx - 0.055, cy - 0.17, cx + 0.055, cy + 0.09, -0.005, 0.004)
@@ -420,14 +427,14 @@ def landing() -> list:
     # The display's dot matrix: rows of dots (the props' perforations) across its window, and the screws holding
     # the box and the call plate.
     dots = []
-    for r in range(5):
-        yy = dy0 + 0.045 + r * 0.015
+    for r in range(8):
+        yy = dy0 + 0.06 + r * 0.02
         row = tk.Mesh()
-        row.poly([(-0.25, yy + 0.006, -0.0366), (0.15, yy + 0.006, -0.0366), (0.15, yy - 0.006, -0.0366),
-                  (-0.25, yy - 0.006, -0.0366)])
+        row.poly([(-dx + 0.06, yy + 0.007, -0.0366), (dx - 0.25, yy + 0.007, -0.0366), (dx - 0.25, yy - 0.007, -0.0366),
+                  (-dx + 0.06, yy - 0.007, -0.0366)])
         dots.append(mk.perforated(row.build("landing_dots_%d" % r, DOT, toned=False), 2, 0, yy))
     screws = tk.Mesh()
-    for sx, sy in ((-0.3, dy0 + 0.02), (0.3, dy0 + 0.02), (-0.3, dy1 - 0.02), (0.3, dy1 - 0.02),
+    for sx, sy in ((-dx + 0.025, dy0 + 0.02), (dx - 0.025, dy0 + 0.02), (-dx + 0.025, dy1 - 0.02), (dx - 0.025, dy1 - 0.02),
                    (cx - 0.04, cy + 0.07), (cx + 0.04, cy + 0.07), (cx - 0.04, cy - 0.15), (cx + 0.04, cy - 0.15)):
         z0 = -0.035 if sy > DOOR_H else -0.005
         tk.knob(screws, (sx, sy, z0), 0.006, 0.005, 0.002, -1.0, 12)

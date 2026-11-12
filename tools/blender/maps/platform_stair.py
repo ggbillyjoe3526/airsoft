@@ -36,7 +36,7 @@ BRACKET_STEP = 1.5
 TREAD = 0x55514C
 RISER = 0x67625B
 NOSE = 0xA4A29C
-SKIRTING = 0x5B6663   # a grey-green glazed tile, off the teams' hues
+SKIRTING = 0x8A918E   # a pale grey-green glazed tile, off the teams' hues (darker read as a gap under the wall)
 RAIL = 0xB4B2AC
 SEED = 17
 

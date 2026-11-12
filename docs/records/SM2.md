@@ -1,6 +1,6 @@
 # SM2 · Subway's escalators, lifts, stairs and railing
 
-**Review:** 2 attempts · critic pending · qa pending · performance pending
+**Review:** 3 attempts · critic pending · qa pending · performance pending
 
 The owner (2026-11-12): "Begin work on subway models now." SM2 is models #14 to #18 of
 `art/subway-model-list.md`: the escalator banks, the lift car and doors, the spiral stair, the stair handrails and
@@ -12,7 +12,8 @@ step nosings, and the balustrade railing, after the owner's photos in `art/refer
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | Opus 5.5 (build thread) | pass | Retry 7/8 | the escalator's proportions, finishes and the lift's tiled jambs against the photos |
-| 2026-11-12 | 2 | Opus 5.5 (build thread) | – | – | – |
+| 2026-11-12 | 2 | Opus 5.5 (build thread) | pass | Retry 7/8 | the decks and capping still read beige, the lift indicator small, the leaves' panels apart, a dark stair skirting |
+| 2026-11-12 | 3 | Opus 5.5 (build thread) | – | – | – |
 
 ## What changed
 
@@ -24,7 +25,7 @@ step nosings, and the balustrade railing, after the owner's photos in `art/refer
   combs, newel-ended stainless balustrades, black handrails looping into their inlets, skirting brushes, stop buttons,
   and bronze uplighters on the middle deck.
 - **Lifts** (`lift.py`): `LiftView` draws the car model (5,622 of 6,000) turned to its door, plus a landing doorway at
-  each stop (728 of 1,200). The leaves (48) and push buttons (128 of 160) are scaled to each use. A lift unlike the
+  each stop (734 of 1,200). The leaves (48) and push buttons (128 of 160) are scaled to each use. A lift unlike the
   model keeps the plain boxes: a different well, door or wall, or a door facing s or w (`LiftViewConfig.model_*`). The
   buttons are now real lift size (`button_size` 52 mm, was 90 mm). The car's inside is from general knowledge, as
   the list asks.
@@ -68,9 +69,17 @@ step nosings, and the balustrade railing, after the owner's photos in `art/refer
   smooth-shaded and the decks have seams every 1 m; the lift landing's linings run through the whole wall, 3 mm in
   from its opening, so no tile shows from inside the car, and the display's arrows are lit; the stair treads are
   ribbed and the skirting lighter.
+- **Critic attempt 2 fixes**: the beige on the decks, steps and the railing's capping was the shader's settled dust,
+  so Subway's escalators and stairs (`model_wear` 0.08 and 0.12) and the railing (`RailingLook.wear` 0.15) are drawn
+  swept; the escalator's whole rim (decks and newel ends) is a cooler, darker brushed steel with joints 10 mm wide;
+  the landing display is the architrave's width (1.28 by 0.26 m) with big lit arrows; each leaf carries half a vision
+  panel at its meeting edge and `LiftView` turns the other leaf round, so the two halves meet as one panel; the stair
+  skirting is a pale grey-green tile (dark, it read as a gap under the wall). The fourth handrail loop is whole: it is
+  seen edge-on from the top of the bank (picture esc-loop).
 - **Kept against the critic**: the railing's bar pitch is the sim's (gameplay, budget-bound); the posts stay a bar wide
-  along the run (wider would add steel no BB meets); the bars end on the foot rail as the sim's do; each lift leaf
-  keeps its own vision panel (a MultiMesh can't mirror one leaf); the stair handrail is already 44 mm.
+  along the run: `RailingConfig` draws the bars from the numbers that stop BBs ("what you see is what stops a BB"),
+  and a post 2.5 bars wide would show 2 cm of steel each side a BB flies through; the bars end on the foot rail as
+  the sim's do; the stair handrail is already 44 mm.
 
 ## Known issues left
 

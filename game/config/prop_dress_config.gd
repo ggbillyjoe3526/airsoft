@@ -365,7 +365,7 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	# a thicket's spruce is all boughs (FT1: worn, the dust on its upturned tiers drew its sunlit tops pale beige)
 	&"spruce": 0.0,
 	# Subway's escalators and stairs, swept daily: full dust drew their steps and decks beige (SM2)
-	&"escalator_upper": 0.25, &"escalator_lower": 0.25, &"spiral_stair": 0.35, &"platform_stair": 0.35,
+	&"escalator_upper": 0.08, &"escalator_lower": 0.08, &"spiral_stair": 0.12, &"platform_stair": 0.12,
 }
 
 ## Each model path's mesh as loaded (null when it won't load), so a kind is dressed only by a model that loads.

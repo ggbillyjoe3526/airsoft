@@ -40,6 +40,7 @@ LOOP = 0.22        # the handrail's loop round each newel (m, to its middle line
 INLET = 2.55       # how far round each loop (radians) the handrail runs before it goes into the newel
 SKIRT = 0.24       # the skirt panel's height over the slope
 BRUSH = (0.255, 0.285, 0.022)   # the brush deflector: from, to over the slope; how far it stands out
+DECK = 0x7E8285     # the rim (the decks and the newels' rounded ends): brushed steel, cooler and darker than the sides
 SEAM = 1.25        # the panels' seams along each balustrade (m)
 NOSING = 0.045     # the yellow edges' width on each step
 LAMP_STEP = 3.6    # the uplighters' spacing along the middle deck (m)
@@ -275,15 +276,15 @@ def balustrade(bank: Bank, z_lo: float, z_hi: float, faces: tuple, rails: list, 
             cap = [(xc + 0.018 * math.cos(math.tau * k / 10), yc + 0.018 * math.sin(math.tau * k / 10),
                     zp + side * 0.022) for k in range(10)]
             parts["stop_button"].poly(cap if side > 0 else list(reversed(cap)))
-    # The rim round the outline: the deck under and between the handrails, the newels' rounded ends and their fronts
-    # (the run along the floor is never seen).
+    # The rim round the outline, all deck steel: the deck under and between the handrails, the newels' rounded ends
+    # and their fronts (the run along the floor is never seen).
     n = len(out)
     for k in range(n):
         p, q = out[k], out[(k + 1) % n]
         if k == n - 1:
             continue  # along the floor
         quad = [(p[0], p[1], z_lo), (q[0], q[1], z_lo), (q[0], q[1], z_hi), (p[0], p[1], z_hi)]
-        (deck if k == NEWEL_STEPS + 1 else body).poly(quad, [tone(c) for c in quad])
+        deck.poly(quad, [tone(c) for c in quad])
         if k == NEWEL_STEPS + 1:
             # The deck's sheets: a dark joint across it every panel's length, a hair over it.
             length = math.hypot(q[0] - p[0], q[1] - p[1])
@@ -292,7 +293,7 @@ def balustrade(bank: Bank, z_lo: float, z_hi: float, faces: tuple, rails: list, 
             t = SEAM
             while t < length - 0.3:
                 a = (p[0] + d[0] * t + lift[0], p[1] + d[1] * t + lift[1])
-                b = (a[0] + d[0] * 0.006, a[1] + d[1] * 0.006)
+                b = (a[0] + d[0] * 0.01, a[1] + d[1] * 0.01)
                 seams.poly([(a[0], a[1], z_lo), (b[0], b[1], z_lo), (b[0], b[1], z_hi), (a[0], a[1], z_hi)])
                 t += SEAM
     # The handrails, and the inlet where each goes into the newel.
@@ -346,7 +347,7 @@ def build(room: str, name: str) -> None:
     lamps(bank, parts["bronze"], parts["glass"], parts["inside"])
     objects += [parts["body"].build("balustrade", tk.STAINLESS, smooth=40.0), parts["skirt"].build("skirt", tk.STAINLESS_DARK),
                 parts["brush"].build("brush", tk.GAP), parts["seams"].build("seams", tk.GAP),
-                parts["deck"].build("deck", tk.STAINLESS_DARK),
+                parts["deck"].build("deck", DECK),
                 parts["rail"].build("handrail", tk.RUBBER, smooth=50.0, toned=False, outward=True),
                 parts["inlet"].build("inlet", tk.RUBBER, toned=False),
                 parts["bronze"].build("uplighter", tk.BRONZE, smooth=50.0, toned=False),

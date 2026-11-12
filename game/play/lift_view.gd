@@ -420,8 +420,13 @@ func _leaf(spec: LiftSpec, s: float, open: float, w: float, off: float, y: float
 	var h := spec.door_height
 	var at := spec.on_face(along, off, y + h * 0.5)
 	var leaf := w * 0.5 - _cfg.leaf_gap
-	# Built wide along x and thin along z (the model's, or a box): turned to lie along the door's face.
-	return Transform3D(_turn(spec.out) * Basis.from_scale(Vector3(leaf, h, t)), at)
+	# Built wide along x and thin along z (the model's, or a box): turned to lie along the door's face, its +x edge (the
+	# model's half of the vision panel) toward the door's middle, so the two halves meet as one panel.
+	var turn := _turn(spec.out)
+	var axis := Vector3.RIGHT if spec.along_x() else Vector3.BACK
+	if turn.x.dot(axis) * s > 0.0:
+		turn = turn * Basis(Vector3.UP, PI)
+	return Transform3D(turn * Basis.from_scale(Vector3(leaf, h, t)), at)
 
 
 ## Lift `i`'s buttons: its panel's in the car at `y`, and with `recolour` (the calls changed) each stop's call button on
