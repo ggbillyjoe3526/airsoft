@@ -242,3 +242,19 @@ func test_a_malformed_or_unknown_fixture_is_warned_about_and_left_out() -> void:
 	assert_eq(d.fixtures[0].position, Vector3(1, 2, 3))
 	var placed := StationFixtures.placings(d, cfg)
 	assert_eq(placed.keys(), [&"poster_a"], "an unknown model is left out")
+
+
+func test_no_fixture_is_drawn_through_a_trim_or_the_vault_s_lid() -> void:
+	# TB1 x SM5: the frieze, cables and linings lie on the same walls as the clocks, cameras and name boards.
+	var m := _map("subway")
+	var bad: Array[String] = []
+	for f in m.station.fixtures:
+		var t := Transform3D(Basis(Vector3.UP, f.yaw), f.position)
+		var box := _shrunk(t * _mesh(f.model).get_aabb(), TOUCH)
+		for tr in m.station.trims:
+			if tr.box.intersects(box):
+				bad.append("%s at %s through a %s trim" % [f.model, f.position, tr.finish])
+		for v in m.station.vaults:
+			if v.lid().intersects(box):
+				bad.append("%s at %s in a vault's lid" % [f.model, f.position])
+	assert_eq(bad, [] as Array[String], "fixtures clear every trim and vault")
