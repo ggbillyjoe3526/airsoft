@@ -79,14 +79,15 @@ def build() -> object:
     k.mark("ironwork")
     # The ballast, heaped over the sides to the box's top.
     k.mound(-BODY_X + 0.05, BODY_X - 0.05, -SIDE_Y + 0.05, SIDE_Y - 0.05, SIDE_TOP - 0.08, HIGH, "ballast", 14, 7,
-            0.05, 8, shape=lambda u, v: 1.0 - max(abs(u) ** 5.0 * 0.9, abs(v) ** 1.8))
+            0.08, 8, shape=lambda u, v: 1.0 - max(abs(u) ** 5.0 * 0.9, abs(v) ** 1.8))
     import random
     rng = random.Random(8)
-    for i in range(14):
+    for i in range(44):
         x, y = rng.uniform(-BODY_X + 0.2, BODY_X - 0.2), rng.uniform(-SIDE_Y + 0.2, SIDE_Y - 0.2)
         h = 1.0 - max(abs(x / BODY_X) ** 5.0 * 0.9, abs(y / SIDE_Y) ** 1.8)
         z = SIDE_TOP - 0.08 + (HIGH - SIDE_TOP + 0.08) * h
-        k.stone((x, y, min(z, HIGH - 0.03)), rng.uniform(0.04, 0.06), "ballast_dark", 100 + i, squash=0.8)
+        k.stone((x, y, min(z, HIGH - 0.03)), rng.uniform(0.04, 0.07), ("ballast_dark", "ballast")[i % 2], 100 + i,
+                squash=0.8)
     k.mark("ballast")
     return k.build()
 
@@ -98,7 +99,8 @@ def weather(p: Vector, n: Vector, c: tuple, paint: str) -> tuple:
             col = wt.mix(col, wk.lin("ballast"), 0.35 * wt.fbm(p, 0.1, 6))  # stone dust on the top rail
         return wk.grime(p, n, col, seed=2)
     if paint in ("ballast", "ballast_dark"):
-        return wt.mix(c, wk.lin("ballast_dark"), 0.5 * wt.fbm(p, 0.06, 31))
+        col = wt.mix(c, wk.lin("ballast_dark"), 0.5 * wt.fbm(p, 0.06, 31))
+        return wt.scale(col, 0.75 + 0.5 * wt.fbm(p * 7.0, 0.05, 33))  # a speckle: stone by stone, light and dark
     if paint in ("rail", "wheel", "rust"):
         return wk.grime(p, n, wk.rusty(p, n, c, seed=7, amount=0.4, streaks=False), seed=2)
     return wk.grime(p, n, c, seed=4)

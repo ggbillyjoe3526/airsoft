@@ -1,6 +1,6 @@
 """Subway's cable drums (SM4, model 11): a big wooden reel of black cable standing on its rims, from the owner's photos
-(art/references/maps/subway/11-cable-drum): two flanges of sawn boards with a steel band round each rim, square steel
-washers on the through-bolts and a steel plate round the spindle hole, the cable wound turn on turn between them with
+(art/references/maps/subway/11-cable-drum): two flanges of sawn boards with a steel band round each rim and a steel
+plate round the spindle hole, the cable wound turn on turn between them, each turn a round-shouldered ridge, with
 its loose end trailing to the floor (photo 3), timber chocks under the rims. Weathered grey timber, black cable.
 
 Its blocks (data/maps/subway.json) are two sizes, so two models, each built at its block's size: `cable_drum` 2 m
@@ -25,7 +25,9 @@ from mathutils import Vector  # noqa: E402
 
 BUDGET = 1000
 SIZES = {"cable_drum": (2.0, 1.4, 1.8), "cable_drum_small": (1.4, 1.4, 1.4)}
-SEG = 16
+SEG = 22             # round the flanges
+COIL_SEG = 14        # round the cable's coil
+PITCH = 0.22         # a turn of the cable across the drum
 
 
 def build(name: str, length: float, width: float, high: float) -> object:
@@ -49,23 +51,18 @@ def build(name: str, length: float, width: float, high: float) -> object:
             pts = [(x - 0.006, face, zc - h), (x + 0.006, face, zc - h), (x + 0.006, face, zc + h),
                    (x - 0.006, face, zc + h)]
             k.quad(pts if s < 0 else list(reversed(pts)), "drum_wood_dark")
-        # the spindle plate and hole, the through-bolts' square washers in a ring
+        # the spindle plate and its hole
         k.cyl((0.0, y0, zc), 0.16, s * 0.012, "rust", seg=8, axis="y")
         k.cyl((0.0, y0 + s * 0.012, zc), 0.07, -s * 0.004, "cable", seg=8, axis="y")
-        for i in range(8):
-            a = 2 * math.pi * (i + 0.5) / 8
-            px, pz = r * 0.55 * math.cos(a), zc + r * 0.55 * math.sin(a)
-            pts = [(px - 0.035, face, pz - 0.035), (px + 0.035, face, pz - 0.035), (px + 0.035, face, pz + 0.035),
-                   (px - 0.035, face, pz + 0.035)]
-            k.quad(pts if s < 0 else list(reversed(pts)), "steel_bare")
     # The cable: turn on turn, a ripple round each turn, between the flanges.
-    turns = int((width - 2 * t) / 0.16)
     inner = hw - t
-    prof = []
-    for i in range(turns * 2 + 1):
-        y = -inner + (2 * inner) * i / (turns * 2)
-        prof.append((y, coil_r - (0.0 if i % 2 else 0.032)))
-    k.lathe(prof, "cable", segments=SEG, centre=(0.0, 0.0, zc), axis="y", cap=False)
+    turns = max(2, int(round(2 * inner / PITCH)))
+    pitch = 2 * inner / turns
+    prof = [(-inner, coil_r - 0.04)]
+    for i in range(turns):  # each turn a round-shouldered ridge, the groove between two turns narrow
+        y = -inner + i * pitch
+        prof += [(y + pitch * 0.3, coil_r), (y + pitch * 0.7, coil_r), (y + pitch, coil_r - 0.04)]
+    k.lathe(prof, "cable", segments=COIL_SEG, centre=(0.0, 0.0, zc), axis="y", cap=False)
     # its loose end: off the coil's front, down to the floor and along it
     end = [(coil_r * 0.95 * math.cos(math.radians(a)), inner * 0.6, zc + coil_r * 0.95 * math.sin(math.radians(a)))
            for a in (-20.0, -50.0, -80.0)]

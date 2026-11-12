@@ -28,6 +28,7 @@ HIGH = 2.4
 SIZES = {"works_hoarding": (3.0, 1.9), "works_hoarding_short": (2.0, 1.9), "works_hoarding_deep": (2.0, 2.4)}
 T = 0.02             # a panel's thickness
 STRIP = 0.09         # a cover strip's width
+PANEL = 0.62         # a panel's width (the photos' hoardings: narrow sheets, a cover strip on each joint)
 CAP = 0.07           # the capping rail's height
 POST = 0.1           # a corner post's side
 
@@ -46,11 +47,11 @@ def wall(k: wk.Kit, a0: float, a1: float, along: str, at: float, out: float, gat
     box(a0, a1, 0.0, T, 0.0, HIGH - CAP, "hoard_paint", step=0.4)
     box(a0, a1, -0.004, T, 0.0, 0.14, "plinth")                     # the kick strip
     box(a0, a1, -0.01, T + 0.05, HIGH - CAP, HIGH, "hoard_strip")    # the capping rail
-    n = max(1, round((a1 - a0) / 1.22))
+    n = max(1, round((a1 - a0) / PANEL))
     for i in range(1, n):  # cover strips over the joints
         a = a0 + (a1 - a0) * i / n
         box(a - STRIP * 0.5, a + STRIP * 0.5, -0.012, 0.0, 0.14, HIGH - CAP, "hoard_strip")
-    for i in range(n + 1):  # studs behind, and a raking brace from every other one to the ground inside
+    for i in sorted(set(range(0, n + 1, 2)) | {n}):  # studs behind, every other joint and each end
         a = min(max(a0 + (a1 - a0) * i / n, a0 + 0.05), a1 - 0.05)
         box(a - 0.035, a + 0.035, T, T + 0.07, 0.0, HIGH - CAP, "stud")
     if gate:

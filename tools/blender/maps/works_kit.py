@@ -55,10 +55,10 @@ PAINT = {
     # wheels and their axle boxes
     "wheel": 0x4a4644,
     # loads: spoil (clay and broken concrete), ballast stones, tarpaulin, concrete sleepers
-    "spoil": 0x7a6e60,
-    "spoil_dark": 0x5e554a,
-    "ballast": 0x8a857e,
-    "ballast_dark": 0x6c6862,
+    "spoil": 0x5c544c,
+    "spoil_dark": 0x3e3a36,
+    "ballast": 0x67645f,
+    "ballast_dark": 0x45433f,
     "tarp": 0x56604e,
     "strap": 0x8a8270,
     "concrete": 0xb4b0a8,
@@ -84,7 +84,7 @@ PAINT = {
     "plinth": 0x3a3a3a,
     # hoarding: painted panels, their cover strips and the timber studs behind
     "hoard_paint": 0xd0ccc0,
-    "hoard_strip": 0xbcb8ac,
+    "hoard_strip": 0xaaa69a,
     "stud": 0x9c907c,
     # the fan housings: grey panels in a galvanised frame, dark grilles, the flexible duct
     "fan_panel": 0xb0b2ae,
@@ -182,11 +182,11 @@ class Kit(rk.Kit):
                    y - d * 0.5, y + d * 0.5, mat)
 
     def works_track(self, x0: float, x1: float, gauge: float = 0.9, sleeper_len: float = 1.5, pitch: float = 0.62,
-                    stops: bool = True) -> float:
+                    stops: bool = False) -> float:
         """A length of the contractor's works track from x0 to x1: timber sleepers on the ground (z 0), two flat-bottom
         rails `gauge` apart (between their middles), a timber stop block bolted over each rail end. Returns the
         rails' top (the wheels' tread line)."""
-        sh, sw = 0.11, 0.2
+        sh, sw = 0.08, 0.16  # thin timber sleepers: the contractor's track, light beside the running rails
         n = max(2, int(round((x1 - x0) / pitch)))
         span = (x1 - x0 - sw) / n
         for i in range(n + 1):
@@ -194,7 +194,7 @@ class Kit(rk.Kit):
             jitter = 0.04 * math.sin(i * 2.3 + x0)
             self.panel((x - sw * 0.5, -sleeper_len * 0.5 + jitter, 0.0), (x + sw * 0.5, sleeper_len * 0.5 + jitter, sh),
                        "sleeper", step=0.75, skip=("-z",))
-        top = sh + 0.075
+        top = sh + 0.062
         for s in (-1.0, 1.0):
             y = s * gauge * 0.5
             self.prism([(y - 0.04, sh), (y + 0.04, sh), (y + 0.04, sh + 0.01), (y + 0.008, sh + 0.018),

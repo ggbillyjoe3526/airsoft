@@ -29,32 +29,29 @@ HW, HD, HIGH = 1.15, 0.25, 1.2
 
 BUFFER_Z = 0.86          # the buffers' height over the track bed (a car's buffers over its rails)
 BUFFER_X = 0.88          # their middles from the stop's middle
+PEDESTAL_X = 0.78        # the pedestals' middles, over the running rails (gauge 1.5 m)
 BEAM = (0.0, 0.22, BUFFER_Z - 0.26, BUFFER_Z + 0.22)   # the beam's front and back (y), bottom and top (z)
 
 
 def build() -> object:
     k = wk.Kit(NAME)
-    # The base: a frame of two rolled-steel channels along the track bed and cross pieces, bolted down.
-    for x in (-HW + 0.1, -0.35, 0.35, HW - 0.1):
-        k.blk((x - 0.06, -0.1, 0.0), (x + 0.06, HD, 0.1), "works_yellow")
-    k.blk((-HW + 0.04, -0.1, 0.0), (HW - 0.04, -0.02, 0.12), "works_yellow")
-    k.blk((-HW + 0.04, HD - 0.08, 0.0), (HW - 0.04, HD, 0.12), "works_yellow")
-    k.bolts([(x, y, 0.1) for x in (-HW + 0.1, -0.35, 0.35, HW - 0.1) for y in (-0.05, HD - 0.05)], 0.02, 0.025, "z",
-            "rust", seg=8)
-    k.mark("base")
-    # The cheeks: a triangular plate at each end, its top edge sloping from the beam back to the wall, with a
-    # stiffening flange round its edge.
+    # The pedestals (photo 1): a closed trapezoid box under each buffer, standing on its rail on a base plate bolted
+    # through to the rail, its back wider than its top; an end plate at each side closing the beam.
     for sx in (-1.0, 1.0):
-        x0, x1 = sorted((sx * (HW - 0.02), sx * (HW - 0.06)))
-        k.prism([(BEAM[0], 0.1), (HD, 0.1), (HD, BEAM[3] + 0.08), (BEAM[1], BEAM[3]), (BEAM[0], BEAM[3])], "x", x0,
-                x1, "works_yellow")
-        xf0, xf1 = sorted((sx * HW, sx * (HW - 0.12)))
-        k.blk((xf0, HD - 0.03, 0.1), (xf1, HD, BEAM[3] + 0.08), "works_yellow")  # the flange against the wall
-        k.bolts([(sx * (HW - 0.06), HD - 0.03, z) for z in (0.3, 0.6, 0.9)], 0.018, 0.02, "-y", "rust", seg=6)
-        # the second, inner cheek under each buffer
-        xi0, xi1 = sorted((sx * (BUFFER_X - 0.14), sx * (BUFFER_X - 0.18)))
-        k.prism([(BEAM[0], 0.1), (HD - 0.03, 0.1), (HD - 0.03, BEAM[2]), (BEAM[1], BEAM[2])], "x", xi0, xi1,
-                "works_yellow")
+        x = sx * PEDESTAL_X
+        k.blk((x - 0.2, -0.16, 0.0), (x + 0.2, HD, 0.04), "works_yellow")  # the base plate
+        k.bolts([(x + dx, y, 0.04) for dx in (-0.15, 0.15) for y in (-0.11, 0.05, 0.2)], 0.022, 0.022, "z", "rust",
+                seg=6)
+        k.prism([(-0.13, 0.04), (HD - 0.02, 0.04), (0.2, BEAM[2]), (0.02, BEAM[2])], "x", x - 0.13, x + 0.13,
+                "works_yellow")  # the pedestal's sloping front, its back up to the beam
+        for dx in (-0.13, 0.13):  # its side plates' edges standing proud, a flange down each slope
+            k.prism([(-0.15, 0.04), (-0.12, 0.04), (0.035, BEAM[2]), (0.005, BEAM[2])], "x", x + dx - 0.012,
+                    x + dx + 0.012, "works_yellow")
+        k.bolts([(x + dx, y, 0.32) for dx in (-0.143, 0.143) for y in (-0.04, 0.12)], 0.016, 0.012,
+                "x" if sx * dx > 0 else "-x", "rust", seg=4)
+        xe0, xe1 = sorted((sx * HW, sx * (HW - 0.05)))  # the end plate, a short cheek to the beam's end
+        k.prism([(BEAM[0], BEAM[2] - 0.22), (BEAM[1] + 0.02, BEAM[2] - 0.22), (BEAM[1] + 0.02, BEAM[3] + 0.04),
+                 (BEAM[0], BEAM[3] + 0.04)], "x", xe0, xe1, "works_yellow")
     k.mark("cheeks")
     # The beam: a box section across the cheeks, its face plate, lifting eyes on top; the hazard chevrons painted on
     # its face between the buffers.
@@ -80,18 +77,13 @@ def build() -> object:
         x = sx * BUFFER_X
         y0 = BEAM[0] - 0.015
         k.blk((x - 0.13, y0 - 0.03, BUFFER_Z - 0.13), (x + 0.13, y0, BUFFER_Z + 0.13), "works_yellow")
-        k.lathe([(0.0, 0.1), (0.09, 0.085)], "works_yellow", segments=20, centre=(x, y0 - 0.03, BUFFER_Z), axis="y",
-                cap=False)
-        k.lathe([(0.0, 0.1), (-0.09, 0.085)], "works_yellow", segments=20, centre=(x, y0 - 0.03, BUFFER_Z),
-                axis="y", cap=False)
-        k.cyl((x, y0 - 0.12, BUFFER_Z), 0.05, -0.05, "steel_bare", seg=14, axis="y")
-        k.cyl((x, -HD + 0.07, BUFFER_Z), 0.17, -0.03, "works_yellow", seg=24, axis="y")
+        k.lathe([(0.0, 0.115), (-0.02, 0.115), (-0.025, 0.1), (-0.12, 0.1), (-0.125, 0.09)], "works_yellow",
+                segments=20, centre=(x, y0 - 0.03, BUFFER_Z), axis="y", cap=False)  # the round body
+        k.cyl((x, -HD + 0.07, BUFFER_Z), 0.15, -0.03, "works_yellow", seg=20, axis="y")
         k.bolts([(x + dx, y0 - 0.03, BUFFER_Z + dz) for dx in (-0.1, 0.1) for dz in (-0.1, 0.1)], 0.016, 0.018, "-y",
                 "rust", seg=6)
         k.blk((x - 0.17, -HD, BUFFER_Z - 0.17), (x + 0.17, -HD + 0.04, BUFFER_Z + 0.17), "hazard_black")
-    # Braces from the beam's back down to the base, and a lamp on the beam's middle (its lens dark: unlit).
-    for x in (-0.45, 0.45):
-        k.sqbar((x, BEAM[1] - 0.04, BEAM[2]), (x, HD - 0.06, 0.12), 0.07, "works_yellow")
+    # A lamp on the beam's middle (its lens dark: unlit).
     k.blk((-0.09, 0.03, BEAM[3] + 0.02), (0.09, 0.19, BEAM[3] + 0.06), "works_yellow")
     k.cyl((0.0, 0.11, BEAM[3] + 0.06), 0.075, HIGH - BEAM[3] - 0.06, "hazard_black", seg=10)
     lamp = HIGH - BEAM[3] - 0.06

@@ -11,7 +11,8 @@ the switch cabinet. Each is built from the owner's photos in `art/references/map
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-12 | 1 | Opus 5.5 (build thread) | – | – | – |
+| 2026-11-12 | 1 | build thread | Pass | Retry 6/8 | Loads, tarp, trolley wheels, buffer stop, drum and hoarding short of the photos; black plant-room props unlogged |
+| 2026-11-12 | 2 | build thread | – | – | – |
 
 ## What changed
 
@@ -21,17 +22,17 @@ the switch cabinet. Each is built from the owner's photos in `art/references/map
 
   | Model | Budget | Triangles | Notes |
   |---|---|---|---|
-  | Skip wagon | 2,500 | 2,428 | A tipping skip of spoil on its cradle |
-  | Engineering wagon | 3,000 | 2,940 | Concrete sleepers under a tarp on a flat wagon |
-  | Ballast wagon | 2,500 | 2,352 | Plank sides and a ballast heap |
-  | Platelayer trolley | 1,200 | 1,126-1,160 | Three sizes, the size picked by the box |
-  | Buffer stop | 1,500 | 1,402 | Yellow and black |
-  | Cable drum | 1,000 | 888 | Two sizes |
+  | Skip wagon | 2,500 | 2,484 | A tipping skip of spoil on its cradle, stones in the heap |
+  | Engineering wagon | 3,000 | 2,812 | Concrete sleepers under a strapped tarp on a flat wagon |
+  | Ballast wagon | 2,500 | 2,464 | Plank sides and a speckled ballast heap |
+  | Platelayer trolley | 1,200 | 1,170-1,188 | Three sizes, the size picked by the box; spoked wheels |
+  | Buffer stop | 1,500 | 1,378 | Yellow and black, on two pedestals, round buffers |
+  | Cable drum | 1,000 | 972 | Two sizes, the cable in ridged turns |
   | Tunnel segments | 1,500 | 1,424 | Two stacks of lining segments on bearers |
   | Signal cabinet | 800 | 780 | Shut |
   | Staff booth | 3,000 | 1,748-2,732 | Three sizes, blinds down; the small one has less wall to dress |
-  | Works hoarding | 1,500 | 1,176-1,380 | Three sizes, a closed compound with a padlocked gate |
-  | Fan housing | 3,000 | 2,694 | Four fans in its end, a duct on its roof |
+  | Works hoarding | 1,500 | 1,320-1,500 | Three sizes, a closed compound with a padlocked gate |
+  | Fan housing | 3,000 | 2,666 | Four fans in its end, a duct on its roof |
   | Switch cabinet | 800 | 750 | Two bays, shut |
 
 - **Defaults taken** (the owner's DEFAULTS RULE):
@@ -50,3 +51,10 @@ the switch cabinet. Each is built from the owner's photos in `art/references/map
 - Coplanar faces render black in Cycles, so the hoarding's walls stop at its corner posts instead of running under
   them.
 - Browns and rust stay under 0.3 saturation, because warmer ones read as a team's hue in linear space.
+- The blocks' boxes are kept as they are, so some models are squatter or longer than their photos (the drums, the
+  buffer stop, the wagons). Resizing a box is a play change, offered to the owner.
+- `works_kit.finish` turns every face outward (rays cast from outside the box), because hand-built pieces had 2-4% of
+  faces backwards and the face test caught them.
+- Details that reached past a box were moved inside it, since clamping them flat made degenerate triangles.
+- The plant-room props draw black in the cloud's renders, whatever model stands there (a booth did too), so it is the
+  room's light, not the models. Logged in `docs/KNOWN_ISSUES.md` and on the Dev 3 checklist.

@@ -35,15 +35,24 @@ STACK_X = (-1.78, 0.12)      # each stack's -x end
 PER_LAYER = 6
 LAYERS = 3
 TARP_X, TARP_Y = 1.74, 0.98  # the tarpaulin's half length and half width over the stacks
+STRAPS = (-1.25, -0.42, 0.42, 1.25)  # the straps' x over the tarp
 
 
 def tarp_h(x: float, y: float, z0: float) -> float:
-    """The tarpaulin's height over (x, y): draped over a boxy load, lower at its ends, a sag between two crates."""
-    u, v = x / TARP_X, y / TARP_Y
-    body = 1.0 - max(abs(u) ** 6.0, abs(v) ** 4.0)
-    sag = 0.12 * math.exp(-((u - 0.1) / 0.18) ** 2) * (1.0 - abs(v) ** 2)  # a dip between the two crates under it
-    lump = 0.05 * wt.fbm(Vector((x, y, 0.0)), 0.6, 41)
-    return z0 + (HIGH - z0) * max(0.0, body - sag) * (0.94 + lump)
+    """The tarpaulin's height over (x, y): pulled tight over a boxy load of crates, its top flat, its shoulders
+    rounded, pressed in a little under each strap."""
+    u, v = abs(x) / TARP_X, abs(y) / TARP_Y
+    fu = min(1.0, (1.0 - u) / 0.1)  # the shoulders: the last tenth of the length, the last fifth of the width
+    fv = min(1.0, (1.0 - v) / 0.2)
+    shoulder = math.sqrt(max(0.0, min(fu, fv) * (2.0 - min(fu, fv))))  # a quarter round
+    pinch = sum(0.025 * math.exp(-((x - sx) / 0.08) ** 2) for sx in STRAPS) * (1.0 - v ** 4)
+    return z0 + (HIGH - z0) * shoulder - pinch
+
+
+def tarp_at(i: int, n: int, half: float) -> float:
+    """The grid's i-th of n lines across `half` either side of the middle, closer together toward the edges, where
+    the shoulders turn."""
+    return half * math.sin(math.pi * 0.5 * (2.0 * i / n - 1.0))
 
 
 def build() -> object:
@@ -90,9 +99,9 @@ def build() -> object:
     nx, ny = 18, 10
     grid = []
     for j in range(ny + 1):
-        y = -TARP_Y + 2 * TARP_Y * j / ny
-        grid.append([bm.verts.new(Vector((-TARP_X + 2 * TARP_X * i / nx, y,
-                                          tarp_h(-TARP_X + 2 * TARP_X * i / nx, y, z0)))) for i in range(nx + 1)])
+        y = tarp_at(j, ny, TARP_Y)
+        grid.append([bm.verts.new(Vector((tarp_at(i, nx, TARP_X), y, tarp_h(tarp_at(i, nx, TARP_X), y, z0))))
+                     for i in range(nx + 1)])
     faces = [bm.faces.new((grid[j][i], grid[j][i + 1], grid[j + 1][i + 1], grid[j + 1][i])) for j in range(ny)
              for i in range(nx)]
     # the tarp's skirt hanging down over the top layer's sides and ends
@@ -108,10 +117,10 @@ def build() -> object:
     bmesh.ops.recalc_face_normals(bm, faces=faces)
     k._faces(faces, "tarp")
     k.mark("tarp")
-    for x in (-1.25, -0.42, 0.42, 1.25):  # straps over the tarp to the solebars
+    for x in STRAPS:  # straps over the tarp to the solebars
         pts = []
         for j in range(ny + 1):
-            y = -TARP_Y + 2 * TARP_Y * j / ny
+            y = tarp_at(j, ny, TARP_Y)
             pts.append((x, y * 1.01, tarp_h(x, y, z0) + 0.012))
         pts = [(x, -HD + 0.01, top - 0.05), (x, -TARP_Y * 1.02, z0 - 0.16)] + pts + \
             [(x, TARP_Y * 1.02, z0 - 0.16), (x, HD - 0.01, top - 0.05)]
