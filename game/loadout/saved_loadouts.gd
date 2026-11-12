@@ -2,7 +2,8 @@ class_name SavedLoadouts
 extends RefCounted
 ## The player's saved loadouts (the browser game's pool/savedLoadouts.ts): up to five, named, one of them current. The
 ## current one is the loadout carried and every edit goes to it, so there is no Save button (docs/DECISIONS.md ›
-## Loadout). Saved through SaveFile at user://loadouts.save (kind "loadouts", version 1), apart from the settings.
+## Loadout). Saved through SaveFile at user://loadouts.save (kind "loadouts", version 2), apart from the settings.
+## A version 1 file (before PH2) has its hop-up dials turned to this build's ranges as it loads (_hop_ups_from_v1).
 ## A missing file is one default loadout. A damaged file, or one of a newer version, falls back to that with
 ## `load_message` (a newer one is never written over: the default lasts for the session); a saved value that won't do
 ## keeps its default and warns. Fields this build doesn't know are kept. A
@@ -14,7 +15,7 @@ signal changed
 
 const PATH := "user://loadouts.save"
 const KIND := "loadouts"
-const VERSION := 1
+const VERSION := 2
 const MAX_SLOTS := 5
 ## The longest name a loadout may have (characters).
 const NAME_MAX := 20
@@ -188,8 +189,37 @@ func load_file(path: String = PATH) -> void:
 		push_warning("loadouts: %s is version %d; using the default loadout" % [path, int(r.version)])
 		_newer_on_disk = int(r.version) > VERSION
 		return
-	for p in from_dict(r.data):
+	var data: Dictionary = r.data
+	if int(r.version) < 2:
+		data = _hop_ups_from_v1(data)
+	for p in from_dict(data):
 		push_warning("loadouts: " + p)
+	# An older file is saved as this version at the next save, so its dials are never turned twice.
+	dirty = int(r.version) < VERSION
+
+
+## A version 1 file's `data` with its hop-up dials turned to this build's ranges (PH2). A dial is a share of its
+## replica's hop_up_max, so where that range has changed since (ReplicaRulesConfig.hop_up_rescale_v1) a saved dial is
+## scaled to lift as it did when it was saved, on a notch and no further than the dial goes. Anything that isn't a
+## saved dial is left for from_dict to judge.
+func _hop_ups_from_v1(data: Dictionary) -> Dictionary:
+	var out := data.duplicate(true)
+	var scales := rules.rules.hop_up_rescale_v1
+	var saved: Variant = out.get("slots")
+	if not saved is Array:
+		return out
+	for entry: Variant in saved:
+		var tunes: Variant = (entry as Dictionary).get("tunes") if entry is Dictionary else null
+		if not tunes is Dictionary:
+			continue
+		for id: Variant in tunes:
+			var tune: Variant = tunes[id]
+			if not tune is Dictionary or not scales.has(str(id)):
+				continue
+			var dial: Variant = (tune as Dictionary).get("hop_up")
+			if (dial is float or dial is int) and not is_nan(float(dial)):
+				(tune as Dictionary)["hop_up"] = rules.snap_hop_up(float(dial) * scales[str(id)])
+	return out
 
 
 ## Writes `path`; false if it could not be written (or holds a newer build's loadouts).
