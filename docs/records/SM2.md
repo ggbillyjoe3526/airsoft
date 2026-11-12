@@ -15,8 +15,11 @@ step nosings, and the balustrade railing, after the owner's photos in `art/refer
 
 ## What changed
 
-- **Escalators** (`escalator.py`, 7,390 and 6,718 triangles of 8,000): each bank is one model laid over its ramp and
-  its middle barrier (`PropDressConfig` SET). It has ribbed steps with yellow sides and nosings, landing plates and
+- **Escalators** (`escalator.py`, 7,190 and 6,566 triangles of 8,000): each bank is one model laid over its ramp and
+  its three decks (`PropDressConfig` SET). Each bank's two escalators are 1.2 m wide between their balustrades, two
+  abreast (the owner, 2026-11-12: "Escalators need to be narrower. Only wide enough for 2 people."; they were 3.2 m):
+  `layout.py` gives each bank a 2 m middle deck and a deck from each escalator to the wall, solid 1 m blocks on the
+  slope like the old middle balustrade. The shafts, their walls and ceilings are unchanged. It has ribbed steps with yellow sides and nosings, landing plates and
   combs, newel-ended stainless balustrades, black handrails looping into their inlets, skirting brushes, stop buttons,
   and bronze uplighters on the middle deck.
 - **Lifts** (`lift.py`): `LiftView` draws the car model (5,622 of 6,000) turned to its door, plus a landing doorway at
@@ -41,9 +44,14 @@ step nosings, and the balustrade railing, after the owner's photos in `art/refer
   (`map_kit.ribbed`, 8.5 mm pitch, fading to the average far off), for step cleats and nosings that triangles can't
   carry.
 - **Map**: `layout.room(..., dress=)` and `SPIRAL["dress"]`. `build_map.py` writes them on the rooms' ramps, the
-  escalators' barriers and the spiral's landings in `data/maps/subway.json`. Only `dress` keys change; no box moves.
+  escalators' decks and the spiral's landings in `data/maps/subway.json`. Apart from the escalators' decks, no box
+  moves.
 
 ## Decisions
+
+- **The escalators narrowed with decks, not narrower shafts**: the shafts keep their walls, ceilings and the openings
+  into the halls, and the wide middle deck carries the uplighters as in the photos. The decks stop BBs and bodies,
+  as the middle balustrade did; a player can't climb onto them (1 m, over the 0.95 m ledge).
 
 - **No middle handrail on the platform stair** (the photos have one): it would stand in the walkway and stop nothing,
   so the stair keeps its full width.

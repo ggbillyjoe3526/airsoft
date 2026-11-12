@@ -6,11 +6,11 @@ the top and the bottom, and the old bronze uplighters standing on the middle dec
 the concept's lamps).
 
 Each bank is one model laid over its blocks (PropDressConfig Lay.SET, unturned): the ramp room's floor wedges
-(`esc_up` and `esc_low` in tools/subway/layout.py) and the balustrade down its middle (its `barrier` blocks), so it
+(`esc_up` and `esc_low` in tools/subway/layout.py) and its three decks (its `barrier` blocks: one from each wall and a
+wide one between the escalators, each escalator 1.2 m wide between them, two abreast: the owner, 2026-11-12), so it
 fills their box exactly and the ramp stays the collider: the steps' treads sit level, each one's middle on the ramp's
-slope (half a riser above it at the nosing, half under it at the back), so feet never sink more than 10 cm. The side
-balustrades stand against the walls, inside the ramp's edge. The map's balustrade is a metre tall over the slope; the
-handrails' tops are its top. The uplighters stand on the middle deck over it (thin bronze stems: sight and BBs pass
+slope (half a riser above it at the nosing, half under it at the back), so feet never sink more than 10 cm. The decks
+are a metre tall over the slope; the handrails' tops are their top, along each deck's edge over an escalator. The uplighters stand on the middle deck over it (thin bronze stems: sight and BBs pass
 them, as the ceiling's lamps), never over the bank's box.
 
 Writes assets/models/props/escalator_upper.glb (20 m, 10 m down) and escalator_lower.glb (16 m, 8 m down).
@@ -34,7 +34,6 @@ GOING = 0.4        # a step's depth along the slope's plan (m); its rise is the 
 COMB = 0.2         # the landing plate's length at each end before the first step (m)
 COMB_PITCH = 0.04  # the comb's teeth across the lane
 PLATE_T = 0.008    # the landing plate's thickness over the floor
-SIDE_T = 0.09      # a side balustrade's thickness, against the wall
 HR = 1.0           # the handrail's top over the slope: the balustrade block's height
 RAIL_W, RAIL_H = 0.085, 0.045   # the rubber handrail's section
 LOOP = 0.22        # the handrail's loop round each newel (m, to its middle line)
@@ -54,25 +53,29 @@ class Bank:
 
     def __init__(self, room: str) -> None:
         rm = next(r for r in L.rooms if r["name"] == room)
-        bar = next(b for b in L.blocks if b["y"] is None and rm["x0"] <= b["x0"] and b["x1"] <= rm["x1"]
-                   and rm["z0"] <= b["z0"] and b["z1"] <= rm["z1"])
+        bars = sorted((b for b in L.blocks if b["y"] is None and rm["x0"] <= b["x0"] and b["x1"] <= rm["x1"]
+                       and rm["z0"] <= b["z0"] and b["z1"] <= rm["z1"]), key=lambda b: b["z0"])
+        assert len(bars) == 3, "a deck against each wall and one between the escalators"
         self.x0, self.x1 = rm["x0"], rm["x1"]
         self.ya, self.yb = rm["ya"], rm["yb"]
         self.z0, self.z1 = rm["z0"], rm["z1"]
-        self.m0, self.m1 = bar["z0"], bar["z1"]
-        assert abs(bar["h"] - HR) < 1e-6, "the balustrade block is the handrail's height"
+        assert abs(bars[0]["z0"] - self.z0) < 1e-6 and abs(bars[2]["z1"] - self.z1) < 1e-6, "the side decks reach the walls"
+        self.s0, self.s1 = bars[0]["z1"], bars[2]["z0"]      # the side decks' faces to the escalators
+        self.m0, self.m1 = bars[1]["z0"], bars[1]["z1"]
+        assert all(abs(b["h"] - HR) < 1e-6 for b in bars), "the balustrade blocks are the handrail's height"
         self.slope = (self.yb - self.ya) / (self.x1 - self.x0)
         n = math.hypot(1.0, self.slope)
         self.d = (1.0 / n, self.slope / n)        # down the bank, in (x, y)
         self.u = (-self.slope / n, 1.0 / n)       # square to it, up
-        self.lanes = [(self.z0 + SIDE_T - GROW, self.m0), (self.m1, self.z1 - SIDE_T + GROW)]
+        self.lanes = [(self.s0, self.m0), (self.m1, self.s1)]
 
     def floor(self, x: float) -> float:
         x = min(max(x, self.x0), self.x1)
         return self.ya + self.slope * (x - self.x0)
 
     def box(self) -> tuple:
-        return ((self.x0 - GROW, self.yb, self.z0 - GROW), (self.x1 + GROW, self.ya + HR, self.z1 + GROW))
+        # The ramps' grown ends in x; across, the side decks' walls (the lanes' grown ramps stay inside them).
+        return ((self.x0 - GROW, self.yb, self.z0), (self.x1 + GROW, self.ya + HR, self.z1))
 
 
 def grime(bank: Bank, p: tuple) -> float:
@@ -324,11 +327,10 @@ def build(room: str, name: str) -> None:
     objects = steps(bank, rng)
     parts = {k: tk.Mesh() for k in ("body", "skirt", "brush", "seams", "deck", "rail", "inlet", "bronze", "glass",
                                     "inside", "stop_plate", "stop_button")}
-    za0 = bank.lanes[0][0]
-    zb1 = bank.lanes[1][1]
-    rail_side = SIDE_T / 2 - GROW / 2
-    balustrade(bank, bank.z0 - GROW, za0, (1,), [bank.z0 - GROW + rail_side + 0.003], rng, parts)
-    balustrade(bank, zb1, bank.z1 + GROW, (-1,), [bank.z1 + GROW - rail_side - 0.003], rng, parts)
+    # The side decks from the walls (their wall faces unseen) and the wide middle deck, a handrail on each edge over an
+    # escalator.
+    balustrade(bank, bank.z0, bank.s0, (1,), [bank.s0 - RAIL_W / 2], rng, parts)
+    balustrade(bank, bank.s1, bank.z1, (-1,), [bank.s1 + RAIL_W / 2], rng, parts)
     balustrade(bank, bank.m0, bank.m1, (-1, 1), [bank.m0 + RAIL_W / 2, bank.m1 - RAIL_W / 2], rng, parts)
     lamps(bank, parts["bronze"], parts["glass"], parts["inside"])
     objects += [parts["body"].build("balustrade", tk.STAINLESS), parts["skirt"].build("skirt", tk.STAINLESS_DARK),

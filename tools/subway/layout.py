@@ -63,9 +63,14 @@ room("spiral", "Spiral stair", -43, -38, -10, -5, C, h=G - C + 0.01, ceil=False,
 block("railing", G, -43.0, -38.0, -5.0, -4.88, 1.1)
 block("railing", G, -43.12, -43.0, -8.6, -4.88, 1.1)
 
-# Upper escalators: 10 m down at 1:2, a balustrade between the two.
+# Upper escalators: 10 m down at 1:2. Two escalators, each 1.2 m between its balustrades (two abreast, the owner
+# 2026-11-12), a wide deck between them with its uplighters and a deck from each to the wall. The decks are blocks on
+# the ramp: build_map.py follows its slope.
+ESC_LANE = 1.2
+ESC_MID = 1.0     # the middle deck's half width
 room("esc_up", "Escalators", -38, -18, -3.5, 3.5, G, C, h=3.2, dress="escalator_upper")
-block("barrier", None, -38, -18, -0.2, 0.2, 1.0, dress="escalator_upper")           # on the ramp: build_map.py follows its slope
+for z0, z1 in ((-3.5, -ESC_MID - ESC_LANE), (-ESC_MID, ESC_MID), (ESC_MID + ESC_LANE, 3.5)):
+    block("barrier", None, -38, -18, z0, z1, 1.0, dress="escalator_upper")
 
 # ---------------- Concourse, -10 m: close quarters ----------------
 room("bk_w", "Booking hall", -52, -43, -9.5, -1.2, C, h=4.0)
@@ -89,7 +94,8 @@ block("container", C, -12.4, -10.4, -2.6, 2.6, 2.8, 0x8a8478)  # shut newsagent'
 #                                                                no line from the lower hall up both flights
 # Lower escalators: 8 m down to the lower hall between the platform tunnels.
 room("esc_low", "Low escalators", -6, 10, -3, 3, C, P, h=2.8, dress="escalator_lower")
-block("barrier", None, -6, 10, -0.2, 0.2, 1.0, dress="escalator_lower")
+for z0, z1 in ((-3.0, -ESC_MID - ESC_LANE), (-ESC_MID, ESC_MID), (ESC_MID + ESC_LANE, 3.0)):
+    block("barrier", None, -6, 10, z0, z1, 1.0, dress="escalator_lower")
 room("npass", "North passage", -6, 20, -9.5, -6.5, C, h=3.0)
 room("spass", "South passage", -6, 20, 6.5, 9.5, C, h=3.0)
 for zs in (-1, 1):
