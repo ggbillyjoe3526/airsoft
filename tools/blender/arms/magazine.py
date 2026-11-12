@@ -145,6 +145,13 @@ OPEN_FIRST = 0.5
 # swing it in). A key whose left hand still passes into the replica eases it out as the solver's relax does: each
 # joint that touches opens EASE_TURN (degrees), a palm that does draws EASE_BACK (m) along CLEAR, an arm that does
 # swings its elbow EASE_SWING (degrees), at most EASE_STEPS times.
+# Coming off its hold and going back onto it, the arm shows no more than the hold itself does plus KEEP_SLACK (m), or
+# KEEP_CUFF (m, the hand and cuff: just inside the test's ARM_CUFF): where the hold's own elbow would swing a straight
+# forearm up into view as the hand drops (HA1), the elbow goes KEEP_STEP of the way to `elbow_for`'s at a time until
+# it doesn't.
+KEEP_SLACK = 0.01
+KEEP_CUFF = 0.065
+KEEP_STEP = 0.125
 EASE_TURN = 1.5
 EASE_BACK = 0.0008
 EASE_SWING = 2.0
@@ -353,6 +360,8 @@ class MagChange:
         self.view = View(rid, hold_to_eye.translation)
         # The frame being keyed (its view) and the last key's elbow (`pose` keeps it near).
         self.now, self.elbow = 0, None
+        # The most of the arm that may show while its elbow keeps to the hold's (KEEP_*; None: no limit yet).
+        self.most = None
         self.arm, self.action = reload_action(objects)
         if self.action is None:
             return
@@ -531,16 +540,29 @@ class MagChange:
         found = self.elbow_for(hand_m, self.now, self.elbow)
         pole = found[1]
         if kept is not None:
-            pole = kept.lerp(pole, smooth(free))
-        pose.place_arm(rig, SIDE, hand_m, pole, quiet=True)
+            share = smooth(free)
+            pole = kept.lerp(found[1], share)
+            pose.place_arm(rig, SIDE, hand_m, pole, quiet=True)
+            while self.most is not None and share < 1.0 and self.arm_shown() > self.most:
+                share = min(1.0, share + KEEP_STEP)
+                pole = kept.lerp(found[1], share)
+                pose.place_arm(rig, SIDE, hand_m, pole, quiet=True)
+        else:
+            pose.place_arm(rig, SIDE, hand_m, pole, quiet=True)
         self.elbow = rig.pose["Forearm_" + SIDE].translation.copy()
         if os.environ.get("BL_DEBUG"):
-            print("   frame %d: arm on %.1f%% of the screen at best, wrist %.0f deg, elbow %s" % (
-                self.now, found[3] * 100.0, found[4], tuple(round(v, 3) for v in self.elbow)))
+            print("   frame %d: arm on %.1f%% of the screen at best, wrist %.0f deg, elbow %s, shows %.3f m" % (
+                self.now, found[3] * 100.0, found[4], tuple(round(v, 3) for v in self.elbow), self.arm_shown()))
         for b in self.fingers:
             rig.local[b] = turns[b]
         rig.refresh("Hand_" + SIDE)
         return pole
+
+    def arm_shown(self) -> float:
+        """How far from the wrist (m) the left arm as posed shows at frame `self.now` (View.shown)."""
+        at = self.rig.pose
+        return self.view.shown(self.view.at(self.now / max(self.length, 1)), at["UpperArm_" + SIDE].translation,
+                               at["Forearm_" + SIDE].translation, at["Hand_" + SIDE].translation)
 
     def ease(self, pole: Vector) -> tuple:
         """The left arm as posed, eased out of the replica where it passes in (EASE_*); the clipping left (face
@@ -658,8 +680,9 @@ class MagChange:
         open_turns = self.opened(held_turns)
         open_turns.update({b: held_turns[b] for b in self.fingers if b.startswith("Thumb")})
         # A finger hooked round a corner (a pinky curled under the handguard) would open into it: it stays closed.
-        self.now, self.elbow = 0, None
+        self.now, self.elbow, self.most = 0, None, None
         self.pose(held_hand, open_turns, held_pole, 0.0)
+        self.most = max(KEEP_CUFF, self.arm_shown() + KEEP_SLACK)
         self.rig.write()
         for b in pose.clipping(self.moving, self.frame)[1]:
             finger = b.split("_")[0][:-1]

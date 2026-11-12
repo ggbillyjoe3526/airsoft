@@ -39,12 +39,14 @@ SLEEVE_END = -0.040
 # about 60): the shares it is widened across and thickened through, whole from WRIST_SPAN's second mark to its third
 # (m along the forearm from the wrist joint) and eased out to nothing at the first, up the forearm, and the last, in
 # the heel of the hand. The sleeve's cuff sits closer to it (SLEEVE_OFF), so hand, wrist and sleeve run on evenly.
-WRIST_FULL = (0.20, 0.13)
+# His fourth look, of a fifth wider and an eighth thicker with the cuff 10.5 mm off: "Wrists are slightly too thick
+# holding rifles": half of that taken back, the cuff 9.2 mm off.
+WRIST_FULL = (0.10, 0.065)
 WRIST_SPAN = (-0.150, -0.060, -0.004, 0.026)
 # How much of the upper arm the model keeps above the elbow (m): the view never shows the shoulder, and a moved
 # shoulder tore the sleeve's top.
 UPPER_KEEP = 0.13
-SLEEVE_OFF = (0.0055, 0.0105)
+SLEEVE_OFF = (0.0055, 0.0092)
 SLEEVE_BAND = 0.030
 SLEEVE_HEM = 0.0022
 SLEEVE_NORMAL_SMOOTH = 4

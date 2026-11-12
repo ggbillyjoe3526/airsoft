@@ -468,7 +468,7 @@ def roll_about(v: Vector, axis: Vector, deg: float) -> Vector:
 def tuned(spec: dict) -> dict:
     """`spec` with any value overridden from the environment (BL_<KEY>=value; BL_THUMB=across,twist,bend,tip1,tip2;
     BL_SEARCH=yaw0,yaw1,pitch0,pitch1,roll0,roll1; BL_G_<KEY> for a rifle's support hand's spec alone, BL_S_<KEY>
-    for a pistol's),
+    for a pistol's, BL_F_<KEY> for a foregrip's),
     for tuning a hold by eye."""
     out = dict(spec)
     for k, v in spec.items():
@@ -478,6 +478,9 @@ def tuned(spec: dict) -> dict:
         elif spec.get("kind") == "support":
             # A pistol's support hand shares its keys' names with the right hand's: BL_S_<KEY> alone tunes it.
             env = os.environ.get("BL_S_" + k.upper())
+        elif spec.get("kind") == "grip":
+            # A foregrip's too: BL_F_<KEY>.
+            env = os.environ.get("BL_F_" + k.upper())
         if env is not None and isinstance(v, float):
             out[k] = float(env)
         elif env is not None and isinstance(v, tuple) and all(isinstance(c, float) for c in v):
@@ -1346,6 +1349,14 @@ def build() -> None:
             pose.key_pose(rig, "%s_%s_Hold" % (rid, name))
             clips.add("%s_%s_Hold" % (rid, name))
             holds[name] = kept(rig)
+            if os.environ.get("BL_PREVIEW"):
+                # The pictures show this grip alone of the parts the file brought in.
+                others = [o for o in parts if o is not grip[0] and not o.hide_render]
+                for o in others:
+                    o.hide_render = True
+                pictures("%s_%s" % (rid, name), hold, rid, rig, objects)
+                for o in others:
+                    o.hide_render = False
             if grip_hits:
                 failed.append("%s with %s (%d face pairs)" % (rid, name, grip_hits))
             if bolt_keys is not None:

@@ -378,12 +378,13 @@ static func _merge_key(id: StringName, paint: StringName, realistic: bool, parts
 	return key
 
 
-## How far forward the support hand may hold a handguard whose mount is at `mount` (the model's space; Vector3.INF:
-## none): there, or with `grip` (a grip part's copy, in the same space) fitted, FigureConfig.support_behind_grip behind
-## its back end.
+## How far forward the support hand may hold a handguard whose grip mount is at `mount` (the model's space;
+## Vector3.INF: none) with `grip` (a grip part's copy, in the same space) fitted: FigureConfig.support_behind_grip
+## behind its back end. Vector3.INF with no grip or no mount: no limit, the hand holds where the arms' does (HA1: the
+## arms' hold is built against the replica and may sit ahead of the mount).
 static func support_mark(mount: Vector3, grip: MeshInstance3D, cfg: FigureConfig) -> Vector3:
 	if not mount.is_finite() or grip == null or grip.mesh == null:
-		return mount
+		return Vector3.INF
 	var back := (grip.transform * grip.get_aabb()).end.z
 	return Vector3(mount.x, mount.y, back + cfg.support_behind_grip)
 

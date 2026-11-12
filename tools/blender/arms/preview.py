@@ -29,6 +29,10 @@ HIDE = tuple(v for v in os.environ.get("BL_PREVIEW_HIDE", "").split(",") if v)
 SHOW = tuple(v for v in os.environ.get("BL_PREVIEW_SHOW", "").split(",") if v)
 
 
+# BL_PREVIEW_HAND=L or R: the outside views look at that hand alone (a rifle's support hand is far from the other).
+LOOK_AT = os.environ.get("BL_PREVIEW_HAND", "")
+
+
 def _camera(at: Vector, toward: Vector, fov_across: float) -> bpy.types.Object:
     data = bpy.data.cameras.new("Preview")
     data.sensor_fit = "HORIZONTAL"
@@ -116,6 +120,8 @@ def hold(folder: str, name: str, to_eye: Matrix, rig, objects: list, aim_forward
     right, left = ((rig.pose["Hand_" + s].translation + rig.pose["Middle1_" + s].translation) * 0.5 for s in "RL")
     # Round both hands when they hold together, else the right one.
     look = (right + left) * 0.5 if (right - left).length < 0.3 else right.copy()
+    if LOOK_AT in ("L", "R"):
+        look = left if LOOK_AT == "L" else right
     for view, off in OUTSIDE.items():
         if view in views:
             shot(os.path.join(folder, "%s_%s.jpg" % (name, view)), look + off * NEAR, look, OUTSIDE_FOV)

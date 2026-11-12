@@ -126,8 +126,8 @@ func setup(skeleton: Skeleton3D, models: FigureModels, kind: int, config: Figure
 ## Takes `replicas` (by slot, null for a slot with no model; `classes` their site classes) and their magazines' copies
 ## (`magazines`, by slot, null for none) onto the figure, hidden until `show_hands` and `show_reload` say otherwise;
 ## each one's places worked out once here. `ids` (by slot) name the replicas, for the first-person arms' holds the
-## hands take (HG1); `supports` (by slot, in each replica's frame; Vector3.INF or none: no handguard to hold) mark the
-## handguard's front limit for the left hand (FigureView.support_mark): behind a fitted grip it moves back to it.
+## hands take (HG1); `supports` (by slot, in each replica's frame; Vector3.INF or none: no limit, the arms' own hold)
+## mark how far forward the left hand may hold (FigureView.support_mark): behind a fitted grip it moves back to it.
 func hold(replicas: Array[MeshInstance3D], classes: Array[StringName],
 		magazines: Array[MeshInstance3D] = [], supports: PackedVector3Array = PackedVector3Array(),
 		ids: Array[StringName] = []) -> void:

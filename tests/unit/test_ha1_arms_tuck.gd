@@ -14,6 +14,8 @@ const UPPER := "UpperArm_L"
 const FORE := "Forearm_L"
 const HAND := "Hand_L"
 const TIP := "Index3_L"
+## How far (m) the elbow at least moves in toward the replica as the sight comes up.
+const ELBOW_IN := 0.02
 
 var cfg: ViewModelConfig = null
 
@@ -79,7 +81,9 @@ func test_aimed_the_elbow_is_in_under_the_replica_and_the_hand_has_slid_back_as_
 		var shift: Vector3 = cfg.aim_tuck[id]
 		assert_almost_eq(upper_in.origin, upper.origin + to_bones * shift, Vector3.ONE * EPS, "%s: the shoulder" % id)
 		var moved := to_bones.inverse() * (fore_in.origin - fore.origin)
-		assert_gt(moved.x, 0.03, "%s: the elbow in toward the replica" % id)
+		# Less than it was: the straight arm already holds its elbow in close to the replica at the hip (the owner's
+		# third look: "The arm and wrist should be straight", "angle the left arm/hand ... close to the replica").
+		assert_gt(moved.x, ELBOW_IN, "%s: the elbow in toward the replica" % id)
 		assert_lt(moved.y, -0.02, "%s: and down" % id)
 		assert_almost_eq(upper_in.origin.distance_to(fore_in.origin), upper.origin.distance_to(fore.origin), EPS,
 				"%s: the upper arm as long as it was" % id)
