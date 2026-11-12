@@ -21,7 +21,7 @@ extends Resource
 ## aimed along its top rail, near enough that its stock is behind the eye and you look over the receiver's back end:
 ## SH2).
 @export var aim_forward: Dictionary[StringName, float] = {&"aeg": -0.2, &"pistol": -0.25, &"cyber": -0.25,
-		&"sniper": -0.2, &"smg": -0.15, &"shotgun": -0.11}
+		&"sniper": -0.2, &"smg": -0.15, &"shotgun": -0.09}
 @export var aim_forward_default: float = -0.25
 ## Looking through an optic, by its part Key (ReplicaView, OpticGlass): its glass's centre (z in the part's own space,
 ## -z forward, on the sight line) and radius (m), measured from the part models; how far behind the glass the eye sits
@@ -106,7 +106,7 @@ extends Resource
 		&"smg": Vector3(0.6, 0.0, -0.25), &"shotgun": Vector3(0.6, 0.0, -0.25)}
 @export var reload_move_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.1, 0.04, 0.06),
 		&"sniper": Vector3(0.06, 0.1, -0.05), &"pistol": Vector3(0.1, 0.06, 0.0), &"cyber": Vector3(0.1, 0.06, 0.0),
-		&"smg": Vector3(0.06, 0.04, 0.06), &"shotgun": Vector3(0.06, 0.04, 0.0)}
+		&"smg": Vector3(0.06, 0.04, 0.06), &"shotgun": Vector3(0.04, 0.04, 0.0)}
 ## A replica listed here comes into its cant over this share of the reload, holds it and goes back over the same share
 ## at the end (a rifle's magazine is out of the well in the first quarter: the cant is there by then, BP8); others ease
 ## in and out as one bell, sin(PI * share).

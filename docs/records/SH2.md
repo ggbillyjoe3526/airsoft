@@ -21,7 +21,7 @@
   receiver extension; polymer pump, grip, stock and shell; a 2K wear mask as the AEG Rifle's (RW1), imported VRAM
   compressed as the other replicas' (the performance review's note; a test pins it for every replica now).
 - **No iron sights.** With no optic the eye sits on a line 9.5 mm over the top rail (5 mm at first: the stock's comb
-  was then cut open by the near plane) and 11 cm behind the rail's back end (the rifles' 20 cm put the stock across
+  was then cut open by the near plane) and 9 cm behind the rail's back end (the rifles' 20 cm put the stock across
   the foot of the view: attempt 1). `test_iron_sights` lets a model in `NO_SIGHTS` carry no sight bones.
 - **The stock's slots go through into its hollow** (attempt 2): three rows of five each side, 5.8 mm of wall, the
   upper two rows opening onto the receiver extension's underside and the lowest onto a chamber whose back wall leans
@@ -34,7 +34,7 @@
 - **The pump.** `cycle.work_pump` keys `shotgun_Fire`: the left hand rides the pump 62 mm back and home with the
   replica's own Fire clip (`ArmsView.follow`). The arms build fails if that wrist bends past 30 degrees held or over
   the stroke (`cycle.PUMP_WRIST`), as it does for a hand passing into the replica.
-- **The reload** moves the replica less than the AEG's (`reload_move_by` (0.06, 0.04, 0)): at the AEG's move the left
+- **The reload** moves the replica less than the AEG's (`reload_move_by` (0.04, 0.04, 0)): at the AEG's move the left
   forearm showed past the wrist on the way to the shell and back (`test_bp8_arms`).
 - **The replica rocks a quarter as much while pumped** (`work_cant` 0.25): the hand is on the pump, and the bolt
   action's full cant would swing the pump out of it.
