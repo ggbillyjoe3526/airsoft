@@ -924,6 +924,17 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   own model (his photos came the same day: no sights from the photos, the other replicas' quality, the steel,
   aluminium and polymer surfaces of MQ1) it is drawn, held and pictured as the Sniper Rifle, whose bolt is worked
   where the pump will be, and its side rail (the Red Laser) comes with that model.
+- **The GBB Pistol shoots 0.70 J and the Compact SMG 0.85 J (owner, 2026-11-12, PH2).** "Increase gbb pistol to 0.7J
+  and SMG to 0.85J", after PH1's audit found the pistol's 0.52 J below a real green-gas pistol's. This replaces CS1's
+  0.75 J and the pistol's 0.52 J. **Each keeps its job through its hop-up, not its energy** (the default taken to his
+  "would that still be balanced?"): the extra energy is a quicker BB and a little reach as it comes, and the furthest
+  either can be tuned to stays where it was. The pistol's hop-up tops out at 0.19 (0.3) and comes at 75 %: 29 m as it
+  comes and 31 and 32 m on Red and Black Gas (the Cyber Pistol 33 m as it comes), and at most 37 m tuned, with any gas
+  and BB weight (the Cyber Pistol 38 m tuned; untrimmed the pistol reached 42 m on Black Gas with 0.32 g BBs, beside
+  the AEG Rifle's 44 m). The SMG's tops out at 0.135
+  (0.15) and comes at 95 %: 30 m as it comes and 31 m at best, beside the AEG Rifle's 39 m. **A change to a replica's
+  hop-up range converts saved dials** (`ReplicaRulesConfig.hop_up_rescale_v1`, loadouts.save version 2), so a saved
+  setup lifts as it did (`docs/records/PH2.md`).
 - **Every replica and part has a job of its own (owner, 2026-11-12, RP1).** "Make sure each weapon has its own
   strengths and weaknesses. Each weapon should feel unique and attachments should offer incentives to use while also
   feeling unique from each other. Feel free to make any changes to the specs." Defaults taken (the owner may change

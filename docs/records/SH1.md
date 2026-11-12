@@ -31,10 +31,10 @@
 
   | | Pump Shotgun | M140 | M150 | for scale |
   |---|---|---|---|---|
-  | Energy (J, 0.20 g) | 0.65 | 0.72 | 0.78 | SMG 0.75, AEG 1.0 |
+  | Energy (J, 0.20 g) | 0.65 | 0.72 | 0.78 | SMG 0.85, GBB Pistol 0.70 (PH2) |
   | Muzzle (fps) | 265 | 277 | 290 | |
   | Pulls a second | 1.7 | 1.61 | 1.53 | Sniper 1.0 |
-  | Reach (m), as it comes / best hop | 24 / 28 | 25 / 30 | 27 / 32 | Pistol 27, SMG 27.5, AEG 39 |
+  | Reach (m), as it comes / best hop | 24 / 28 | 25 / 30 | 27 / 32 | Pistol 29, SMG 30 (PH2), AEG 39 |
   | Kick (°) | 0.45 | 0.54 | 0.68 | |
 
   A 30 BB shell is ten pulls; five shells carried (50 pulls); reload 1.2 s; raised in 0.5 s; hip spread 0.7 of the
@@ -58,6 +58,10 @@
   Support 1.34, Sniper 0.68; its median hit there is at 27 m, the rifles' at 40). So it sits with the close kits
   indoors and is the weakest thing to carry in the open, which is the trade it was given; about twenty bot-rounds a
   row for the spring and optic rows, so those are a direction, not a figure.
+- **The benches ran before PH2** (#327, merged the same evening) raised the GBB Pistol to 0.70 J and the Compact SMG to
+  0.85 J: their BBs fly quicker now and their spread is as it was, so the one-shot rows above hold, and the Breacher
+  and the pistol kits will stand a little better beside the Clearer than the bot matches show. The Dev 3 balance pass
+  runs them again.
 - **The bot kit** is the Clearer: a Red Dot, a GBB Pistol, two flashes, rushers and flankers, weights 3, 6 and 8
   (Easy, Normal, Hard) beside the Breacher's.
 - **Its model is the Sniper Rifle's** until SH2 builds its own from the owner's five photos (saved in the project
