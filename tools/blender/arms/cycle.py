@@ -19,6 +19,12 @@ BOLT = "bolt"
 # The knob: the bolt mesh's vertices this far out from the bolt's axis, at most (m from the furthest).
 KNOB_DEPTH = 0.008
 SIDE = "R"
+# A pump-action replica's part (SH2: the Pump Shotgun's fore-end, the bone it slides on) and the hand that holds it:
+# the hold's own left hand, which goes back and forward with it. The arms are checked against the replica every
+# PUMP_CHECK frames of the stroke.
+PUMP = "pump"
+PUMP_SIDE = "L"
+PUMP_CHECK = 4
 # How the hand takes the knob: hooked in the curl of the index finger (bent HOOK_INDEX, degrees base to tip, then
 # settled onto it), the knob's centre at the centre of the circle through the finger's three sections, its axis across
 # the finger's bend; the other fingers curled out past the knob's end in a loose fist (HOOK). The hand's turn about the
@@ -68,6 +74,11 @@ ELBOW_OUT = Vector((0.03, 0.0, 0.0))
 STEP = 2
 
 
+def has_pump(objects: list) -> bool:
+    """Whether the replica has a pump the left hand works (a pump-action replica, SH2)."""
+    return any(o.type == "ARMATURE" and PUMP in o.pose.bones for o in objects)
+
+
 def has_bolt(objects: list) -> bool:
     """Whether the replica has a bolt the hand works (a bolt-action replica)."""
     return any(o.type == "ARMATURE" and BOLT in o.pose.bones for o in objects)
@@ -83,11 +94,12 @@ def fire_action(objects: list) -> tuple:
     raise SystemExit("no %s clip on %s" % (CLIP, arm.name))
 
 
-def bolt_at(arm, action, frame: float) -> Matrix:
-    """The bolt bone's matrix (eye space: the replica already stands at its hold) at `frame` of its Fire clip."""
+def bolt_at(arm, action, frame: float, bone: str = BOLT) -> Matrix:
+    """The bolt bone's matrix (eye space: the replica already stands at its hold) at `frame` of its Fire clip; or
+    another bone's (`bone`: a pump's)."""
     arm.animation_data.action = action
     bpy.context.scene.frame_set(int(frame), subframe=frame - int(frame))
-    m = arm.matrix_world @ arm.pose.bones[BOLT].matrix
+    m = arm.matrix_world @ arm.pose.bones[bone].matrix
     return m.copy()
 
 
@@ -484,3 +496,51 @@ def work_bolt(rig: Rig, hand: pose.Hand, objects: list, solid: list, arms: list,
           "on the knob" % (work.first, work.last, work.end, work.length, hits, work.optic_hits, len(work.optics),
                            bend[0], bend[1]))
     return hits, keys
+
+
+def work_pump(rig: Rig, objects: list, solid: list, arms: list, clip: str) -> int:
+    """Keys `clip` from the hold now posed, for a pump-action replica (SH2): the left hand, closed on the pump as the
+    hold leaves it, goes back and forward with the pump over the replica's Fire clip (the hand's turn and its fingers
+    as held, the elbow bending in the hold's own plane), and the right hand stays on the grip. The game plays it in
+    step with the replica's Fire clip (ArmsView.follow), so the hand drives the pump on screen. How many of the keys
+    checked have the arms passing into the replica."""
+    side, bone = PUMP_SIDE, "Hand_" + PUMP_SIDE
+    arm, action = fire_action(objects)
+    length = int(round(action.frame_range[1]))
+    rest = bolt_at(arm, action, 0.0, PUMP)
+    held = snapshot(rig)
+    held_hand = rig.pose[bone].copy()
+    held_pole = rig.pose["Forearm_" + side].translation - rig.pose["UpperArm_" + side].translation
+    held_elbow = rig.pose["Forearm_" + side].translation.copy()
+    frame = [o for o in solid if not o.name.startswith("Trigger")]
+    # The hold itself comes out of more passes than the arm's reach alone (settled, pressed, tightened): the stroke's
+    # keys are the hold's own bases with only the arm's three bones re-posed, so the hand never jumps as it starts.
+    pose.place_arm(rig, side, held_hand, held_pole, quiet=True)
+    rig.refresh(bone)
+    drift = (rig.pose["Forearm_" + side].translation - held_elbow).length
+    keys, hits, furthest, bend = [(0, held)], 0, 0.0, 0.0
+    for f in range(1, length + 1):
+        move = bolt_at(arm, action, f, PUMP).translation - rest.translation
+        if move.length < 1e-6:
+            keys.append((f, held))
+            continue
+        pose.place_arm(rig, side, Matrix.Translation(move) @ held_hand, held_pole, quiet=True)
+        rig.refresh(bone)
+        rig.write()
+        furthest = max(furthest, move.length)
+        bend = max(bend, pose.wrist_bend(rig, side))
+        if f % PUMP_CHECK == 0:
+            n, tally = pose.clipping(arms, frame)
+            if n:
+                hits += 1
+                print("   frame %d: %d face pairs pass into the replica %s" % (
+                    f, n, sorted(tally.items(), key=lambda x: -x[1])[:4]))
+        keys.append((f, snapshot(rig)))
+    arm.animation_data.action = None
+    for pb in arm.pose.bones:
+        pb.matrix_basis = Matrix.Identity(4)
+    key_frames(rig, clip, keys)
+    print("  pump: the left hand carried %.0f mm back and home over %d frames; %d keys pass into the replica; the "
+          "wrist bends %.0f deg at most; the elbow sits %.1f mm from the hold's as the stroke starts" % (
+              furthest * 1000.0, length, hits, bend, drift * 1000.0))
+    return hits

@@ -54,6 +54,7 @@ GRASP = {
               "one_hand": True},
     "sniper": {"kind": "side", "up": 0.5, "turn": (0, 0), "fingers": SIDE_FINGERS, "thumb": (-0.01, -0.045, 0.0)},
     "smg": {"kind": "side", "up": 0.45, "turn": (0, 60), "fingers": SIDE_FINGERS, "thumb": (-0.01, -0.045, 0.0)},
+    "shotgun": {"kind": "side", "up": 0.5, "turn": (0, 30), "fingers": SIDE_FINGERS, "thumb": (-0.01, -0.045, 0.0)},
 }
 TURN_STEP = 15
 # A side grasp's palm centre sits on the magazine's points within BAND (m) of its height; the well's mouth is the

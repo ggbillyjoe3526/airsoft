@@ -4,7 +4,7 @@ extends GutTest
 ## worn paint (game/play/replica_surface.gdshader with its `wear` on, MQ1); the figures' copies stay plain and the
 ## Cyber Pistol and the Sniper Rifle clean.
 
-const WORN := ["aeg", "pistol", "smg"]
+const WORN := ["aeg", "pistol", "smg", "shotgun"]
 const CLEAN := ["cyber", "sniper"]
 const MODEL := "res://assets/models/replicas/%s.glb"
 const MASK := "res://assets/models/replicas/%s_wear.png"

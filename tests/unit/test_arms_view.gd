@@ -7,7 +7,7 @@ extends GutTest
 
 const DT := 1.0 / 60.0
 const EPS := 1e-4
-const HELD := [&"aeg", &"pistol", &"cyber", &"sniper", &"smg"]
+const HELD := [&"aeg", &"pistol", &"cyber", &"sniper", &"smg", &"shotgun"]
 
 var cfg: ViewModelConfig = null
 

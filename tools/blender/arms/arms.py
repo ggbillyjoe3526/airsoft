@@ -270,6 +270,17 @@ SMG_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.113, -0.056), pinky=(0.024, -0.074, -
 # top under the cocking tube at 0.096, so the fingertips stay under the tube and the right rail starts 2 cm ahead).
 SMG_GUARD = dict(GUARD, y=0.158, axis=(0.0, 0.072), radius=0.022, tips_below=0.090,
                  tip_at=(0.0275, 0.005, 0.068), thumb_x=-0.028, thumb_z=0.080, search=((40, 80), (20, 50), (-40, 0)))
+# The Pump Shotgun (SH2): its pistol grip is the AEG Rifle's own, in the AEG's place (shotgun.py builds it from
+# aeg.grip()), so the right hand holds it as the AEG's; its trigger sits in its own guard, so the trigger finger is
+# searched. The left hand holds the pump (a ribbed tube of 20 mm radius under the barrel, its centre line 30 mm over
+# the origin, from 0.279 to 0.449 ahead of it) near its back, further forward than a handguard hold reaches from the
+# AEG's stance, so the left shoulder comes forward (a shotgun's bladed stance); the fingers up its right side, their
+# tips under the barrel (its underside at 0.057), the thumb along its left side. cycle.work_pump slides the hand back
+# 62 mm and home with the pump after each shot.
+SHOTGUN_RIGHT = dict(AEG_RIGHT, index_turn=None)
+SHOTGUN_PUMP = dict(GUARD, y=0.325, axis=(0.0, 0.030), radius=0.0203, tips_below=0.054,
+                    tip_at=(0.0228, 0.005, 0.038), thumb_x=-0.024, thumb_z=0.038, thumb_f=0.050,
+                    shoulder=(-0.06, 0.10, -0.06), search=((40, 80), (20, 50), (-40, 0)))
 # A foregrip fitted under the handguard (BP8, the owner's playtest note 6: "If a weapon has a grip attachment the
 # players left hand should hold it"): the left hand wraps the grip as the right hand wraps a pistol's, mirrored: its
 # palm on the grip's left side, the thumb's root (`web`) behind its back face, the index finger's knuckle high under
@@ -322,6 +333,8 @@ HOLDS = {
                    SNIPER_RIGHT, SNIPER_GUARD),
     "smg": Hold("smg.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.0847, -0.026), 30.0, 0.050, 0.0145),
                 SMG_RIGHT, SMG_GUARD),
+    "shotgun": Hold("shotgun.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.073, -0.026), 31.0, 0.046, 0.0155),
+                    SHOTGUN_RIGHT, SHOTGUN_PUMP),
     "smoke": Hold("../grenades/smoke.glb", HELD_AT, Grip((0.0, -0.0275, 0.03), 0.0, 0.055, 0.0275), SMOKE_RIGHT,
                   DOWN, HELD_TIP),
     "flash": Hold("../grenades/flash.glb", HELD_AT, Grip((0.0, -0.020, 0.03), 0.0, 0.040, 0.020), FLASH_RIGHT,
@@ -970,6 +983,13 @@ def build() -> None:
                 bpy.data.objects.remove(o, do_unlink=True)
             if bolt_hits:
                 failed.append("%s working the bolt (%d keys)" % (rid, bolt_hits))
+            clips.add("%s_%s" % (rid, cycle.CLIP))
+        if cycle.has_pump(objects):
+            # A pump-action replica (SH2): the left hand goes back and home with the pump after each shot.
+            pump_hits = cycle.work_pump(rig, objects, solid, [left, right], "%s_%s" % (rid, cycle.CLIP))
+            reset_left(rig, holds[""])
+            if pump_hits:
+                failed.append("%s working the pump (%d keys)" % (rid, pump_hits))
             clips.add("%s_%s" % (rid, cycle.CLIP))
         # Each foregrip it takes (BP8): the left hand round it, the right hand as approved; a bolt-action replica's
         # bolt worked from that hold too (the same right hand's keys, the left arm on the grip throughout).

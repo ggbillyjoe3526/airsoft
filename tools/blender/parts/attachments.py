@@ -30,7 +30,8 @@ Run with Blender 5.x, or Python with the `bpy` module (pip install bpy==5.2.3), 
     python -I tools/blender/parts/attachments.py <repo root>
 
 It replaces those parts in assets/models/replicaParts/aeg.glb, pistol.glb and cyber.glb (barrels and magazines are
-left as they are). Then run tools/blender/replicas/sniper.py and smg.py, which build the Sniper Rifle's and the Compact SMG's parts from the AEG's.
+left as they are). Then run tools/blender/replicas/sniper.py, smg.py and shotgun.py, which build the Sniper Rifle's,
+the Compact SMG's and the Pump Shotgun's parts from the AEG's.
 Running it again rebuilds the same parts.
 """
 
@@ -1284,7 +1285,7 @@ def write(part_file: str) -> None:
 def main() -> None:
     for f in FILES:
         write(f)
-    print("wrote", ", ".join(FILES), "(now run tools/blender/replicas/sniper.py and smg.py)")
+    print("wrote", ", ".join(FILES), "(now run tools/blender/replicas/sniper.py, smg.py and shotgun.py)")
 
 
 if __name__ == "__main__":
