@@ -46,5 +46,6 @@ pull request after TB1 (#318), which vaulted the platform tunnels.
 ## Known issues
 
 - The car's stepped shoulders show on the greybox box car until SM1's train models draw over its shell.
-- The cloud renders draw in the Compatibility renderer, where the roof's lamps aren't real lights: on High and Ultra
-  (Forward+) the tunnels are lit by both, a little brighter than the pictures.
+- The tunnel lamps' lights are on every preset, Low and Medium too (where the roof's lamps are no real lights), so
+  the arch reads there: a dozen shadowless lights, judged by the performance review, not measured on a modest PC.
+- Pictures (concepts/metro/tb2/v3/) are Forward+ on High and Low; Ultra not rendered.
