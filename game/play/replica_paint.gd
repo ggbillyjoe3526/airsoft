@@ -111,7 +111,9 @@ static func apply(model: Node, paint: StringName, realistic: bool, worn: bool = 
 				if worn and shown != null and plain_colour(shown):
 					mesh_node.set_surface_override_material(i,
 							_surface_of(shown, null, ReplicaSurfaces.part_index(material_name)))
-				elif ReplicaSchemes.OWN_REALISTIC.has(material_name):
+				elif ReplicaSchemes.OWN_REALISTIC.has(material_name) \
+						or is_surface(mesh_node.get_surface_override_material(i)):
+					# plain again: the realistic grey, or the model's own (a surface a worn apply left is taken off)
 					mesh_node.set_surface_override_material(i, grey)
 				continue
 			var part := ReplicaSchemes.PARTS.find(material_name)

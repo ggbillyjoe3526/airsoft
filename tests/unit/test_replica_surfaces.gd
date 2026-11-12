@@ -263,3 +263,13 @@ func test_the_menus_pictures_have_a_studio_to_reflect() -> void:
 	assert_eq(env.reflected_light_source, Environment.REFLECTION_SOURCE_SKY)
 	assert_eq(env.sky, StudioSky.sky(), "one shared studio")
 	assert_ne(env.background_mode, Environment.BG_SKY, "never drawn behind the replica")
+
+
+func test_a_plain_apply_takes_the_own_colours_surfaces_off_again() -> void:
+	var model := _model("cyber")
+	ReplicaPaint.apply(model, ReplicaSchemes.OWN, false)
+	ReplicaPaint.apply(model, ReplicaSchemes.OWN, false, false)
+	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		for i in mi.mesh.get_surface_count():
+			assert_null(mi.get_surface_override_material(i), "%s surface %d wears the model's own again" % [mi.name, i])
