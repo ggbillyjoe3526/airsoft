@@ -1100,6 +1100,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   (its power part and a silenced one's too, yours and the bots', open or through cover) plays through the Shots bus;
   a map listed in `SoundConfig.shot_echoes` (Subway alone) raises it 2 dB and turns on its reverb (a bright tile slap,
   about a second of tail, kept light); every other map plays shots dry at their old level. The recordings are untouched.
+  Heard, "a bit too much. Decrease reverb a little", then of room 0.62 and wet 0.2 "still too much reverb. Decrease a
+  little more" (owner, 2026-11-12, EC2): room 0.5, wet 0.14, a tail of about half a second; the 2 dB stays.
 
 ## Save and settings storage
 

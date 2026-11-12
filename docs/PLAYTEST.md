@@ -1418,7 +1418,7 @@ Subway is Dev content: tick Settings › Dev › Dev content.
 ## Subway's echo on the shots (EC1)
 
 - [ ] **Subway** (Dev content): fire every replica, then fit a silencer and fire again. Each shot is a little louder
-  than in Woodland and rings off the tiles for about a second; a silenced one is still muffled, with the room round it.
+  than in Woodland and rings off the tiles lightly, fading in under a second; a silenced one is still muffled, with the room round it.
 - [ ] **Bots' shots** on Subway echo too, behind a wall as well; steps, impacts and grenades don't (shots only).
 - [ ] **Every other map** (Depot, Woodland, the Range): shots sound exactly as before, also after a Subway match.
 
