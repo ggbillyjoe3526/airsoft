@@ -120,6 +120,7 @@ never stops the game from starting.
   (`GraphicsApply.TORCH_SHADOWS_FROM`); on Low, with none, a haze. Everyone else's torch is a
   drawn beam on every preset: a cone, a lens glare and a lit spot.
 - **Sun shadows** off draws a soft dark disc under every other player instead (a contact shadow, free).
+  An underground field (Subway, UL1) never takes the sun's shadow, so it draws the disc on every preset.
 - **Mesh detail** also sets a smoke cloud's puffs (`game/config/effects_config.gd`, `smoke_puffs`): fewer and larger
   on Low and Medium, so from inside a cloud fewer see-through layers are drawn over the screen.
 - **Occlusion culling** leaves out what the map's tall solid blocks hide from the eye (plywood, containers, walls,
