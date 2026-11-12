@@ -108,8 +108,8 @@ defenders in the east camp.
 - **Few walls:** cover is fallen logs, wind-thrown trees torn out by their roots, woodpiles, stacks of tractor tyres,
   wooden crates, the violet pickup wreck and the trunks of the trees themselves, and the camps and the field's edge are
   walled by a log palisade of sharpened stakes; each stops a BB about where you see it, a round trunk by its bark. The
-  woodpiles are 1.8 m tall, so they hide you standing; the camps' gate screens stand 2.8 m and the stack across the
-  Long road 3 m. The thickets of spruce at
+  woodpiles are 1.8 m tall, so they hide you standing; the camps' gate screens and the stack across the Long road
+  stand 2.8 m. The thickets of spruce at
   the edges and between the lanes can't be entered or seen through.
 - **Ferns** grow knee to hip high in eight beds where you'd want to hide, and leafy **bushes** stand taller. Nobody sees you
   through more than about half a metre of leaves, so crouch in a fern bed to vanish; you can walk through ferns and

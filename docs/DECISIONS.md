@@ -819,13 +819,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   the Culvert, a fallen tree in the Clearing where the west's sweep ends, two spruce thickets on the Ford's east bank
   with hazels on the crest at the head of its ramp, and a log stack beside flag B, whose forward defender waits behind
   the crates north of the road mouth (in the mouth he was shot from 25 m before a fight reached the flag). A piece in
-  a dip hides nobody on a rise behind it (the road's stack is 3 m tall: at 1.8 m the hump looked over it, 52 m onto
-  flag B's post), and a screen with one gap is a trap for whoever must come through: bushes are walked through on a
-  broad front. A pole walled on two sides hides whoever raises it as well as whoever holds it: a pen of two stacks
-  round flag B, with the defenders' posts inside it, gave the attackers 78 % of 120 rounds, and came out. The lanes'
-  ranges now differ (Elimination's median knock-out: the road 10 m, the Clearing 17 m, the north 25 m; each was 37 to
-  39 m). The Ridge's 86 m overlook of the WR1 decision is gone; the 170 m exception stays for the pinholes between
-  trunks.
+  a dip hides nobody on a rise behind it (the road's stack is a gate screen's 2.8 m, 14 m past the Culvert: at 1.8 m
+  the hump looked over it, 52 m onto flag B's post), and a screen with one gap is a trap for whoever must come
+  through: bushes are walked through on a broad front. A pole walled on two sides hides whoever raises it as well as
+  whoever holds it: a pen of two stacks round flag B, with the defenders' posts inside it, gave the attackers 78 % of
+  120 rounds, and came out. The lanes' ranges now differ (Elimination's median knock-out: the road 10 m, the Clearing
+  17 m, the north 25 m; each was 37 to 39 m). The Ridge's 86 m overlook of the WR1 decision is gone; the 170 m
+  exception stays for the pinholes between trunks.
 - **Subway's flag B stands on the north platform (2026-11-12, MB1).** It stood on the stair landing 11 m from flag A,
   and the north platform saw 1 % of the fights; now each platform holds a flag. The north lane runs that platform from
   the lifts, the south lane takes the escalators and the concourse to the middle stair, where two defenders hold. No

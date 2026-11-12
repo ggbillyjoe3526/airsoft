@@ -91,8 +91,9 @@ rounds, Attack / Defend's the attackers'.
   east bank, joined, with a hazel below and three on the crest at the head of the bank's ramp, 5 m wide; the Hut row
   crates deeper and double height, and a stack across the Back yard's mouth.
 - **South:** three fallen trees across the Long road, staggered, the first on the hump's top (`tag="roadblock"`:
-  `check.py` lets a piece meant to block the road stand on it); a cordwood stack 3 m tall across the road east of
-  the Culvert and one behind the west camp's road gate; at the Sawmill a stack between flag B and the road.
+  `check.py` lets a piece meant to block the road stand on it); a cordwood stack across the road 14 m past the
+  Culvert, a gate screen's 2.8 m, and one behind the west camp's road gate; at the Sawmill a stack between flag B and
+  the road.
 - **Lanes:** re-laid through the new pieces; the middle lane ends in the Back yard (it ended in the east camp). Each
   has one point either side of the field's middle, the middle lane's western one behind the Clearing's tree. The
   south lane's last two, flag B's defenders, are behind the crates north of the road mouth and behind the flag's
@@ -101,9 +102,10 @@ rounds, Attack / Defend's the attackers'.
   gave the west 30 %. A fourth road tree and an open Ford each put the long lines back (26 m, 43 % over 30 m). A 2 m
   door between the Ford's thickets was a queue. A pen of two stacks round flag B gave the attackers 78 %. The road's
   stack at 1.8 m left one 52 m duel from the hump onto flag B's post, 88 of Attack / Defend's 142 knock-outs from over
-  38 m; at 3 m, 3 of 107 recorded pairs still see each other. Flag B's forward defender in the road mouth took 80 of
-  the 175 knock-outs the attackers scored there, from 25 m (attackers 64 %); behind the crates, 55 %. The first eight
-  baseline matches read 43 % and 70 % and sixteen read 46 % and 61 %: the before is measured as long as the after.
+  38 m; at 2.8 m and 3.5 m further east, where that line is lower, 3 of 107 recorded pairs still see each other. Flag
+  B's forward defender in the road mouth took 80 of the 175 knock-outs the attackers scored there, from 25 m
+  (attackers 64 %); behind the crates, 55 %. The first eight baseline matches read 43 % and 70 % and sixteen read 46 %
+  and 61 %: the before is measured as long as the after.
 - **After:** Elimination's median knock-out at 17 m (38), 20 % from over 30 m (71), a round's first at 16 m (40); by
   lane the north 25 m, the middle 17 m, the road 10 m (38, 37 and 39). Attack / Defend: 17 m (33) and 17 % over 30 m
   (58); round flag A the attackers score 109 to 121 at 8 m (146 to 55 at 38 m), round flag B 150 to 88 at 9 m (169 to
