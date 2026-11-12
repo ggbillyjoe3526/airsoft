@@ -354,6 +354,10 @@ func test_trims_lie_flat_on_the_tunnel_walls_out_of_the_way() -> void:
 		if t.finish == &"frieze":
 			assert_lt(t.box.end.y, v.y, "the frieze stays under the springing")
 			assert_gt(t.box.position.y, 3.6, "and over the car roofs and the openings")
+		elif t.finish == &"steel":
+			# a drop rod holding a hung board (SM5's departures) from the vault
+			assert_true(v.lid().has_point(t.box.end - Vector3(0.0, 0.01, 0.0) - Vector3(0.0, 0.0, t.box.size.z * 0.5)),
+					"a rod reaches up into the vault")
 		else:
 			assert_lt(t.box.end.y, 0.9, "%s stays under the platform's height" % t.finish)
 	assert_gt(look.vault_rib_every, 0.0, "the vault has ribs")

@@ -156,7 +156,7 @@ func test_each_fixture_stands_in_its_room_on_its_wall_ceiling_or_floor_and_in_no
 			if not _in_block(m, f.position - front * 0.03):
 				bad.append("%s: no wall behind it" % tag)
 		elif HUNG.has(f.model):
-			if not _in_block(m, f.position + Vector3.UP * 0.03):
+			if not _in_block(m, f.position + Vector3.UP * 0.03) and not _on_rods(m, f.position):
 				bad.append("%s: no ceiling over it" % tag)
 			var floor_y := m.floor_under(f.position.x, f.position.z, box.position.y)
 			if box.position.y - floor_y < 2.3:
@@ -228,6 +228,27 @@ func test_subway_s_ceiling_lamps_are_the_strip_model_turned_along_their_rooms() 
 		assert_almost_eq(t.basis.x.angle_to(Vector3.RIGHT), m.roof_lamp_turns[i], 0.001, "lamp %d turned" % i)
 
 
+## Whether drop rods (look-only trims, TB1) rise from a hung model's top at `p` up into a vault's arc.
+func _on_rods(m: MapData, p: Vector3) -> bool:
+	var rods := 0
+	for t in m.station.trims:
+		var c := t.box.get_center()
+		if absf(t.box.position.y - p.y) < 0.01 and Vector2(c.x - p.x, c.z - p.z).length() < 1.0:
+			for v in m.station.vaults:
+				if v.lid().has_point(Vector3(c.x, t.box.end.y - 0.01, c.z)) and t.box.end.y > v.y + 0.5:
+					rods += 1
+	return rods >= 2
+
+
+## The trains' stripe, a worn burnt orange, and the station's name signs in it (owner, 2026-11-12): let off the
+## team-hue rule at his word, as in test_trains.gd; within 0.03 of its hue and no more saturated (its blends with the
+## signs' cream words are paler, never stronger; Beta's orange is).
+func _stripe(c: Color) -> bool:
+	var stripe := Color("#c0652f")
+	var dh := absf(c.h - stripe.h)
+	return minf(dh, 1.0 - dh) <= 0.03 and c.s <= stripe.s + 0.02
+
+
 func test_no_colour_reads_as_a_team() -> void:
 	var teams: Array[Color] = AccessibilityTable.read_file().colours
 	teams.append_array(play.teams.colours)
@@ -254,10 +275,12 @@ func test_no_colour_reads_as_a_team() -> void:
 	for y in range(0, sheet.get_height(), 8):
 		for x in range(0, sheet.get_width(), 8):
 			tried += 1
-			if FieldChecks.reads_as_team(sheet.get_pixel(x, y), teams):
+			var c := sheet.get_pixel(x, y)
+			if FieldChecks.reads_as_team(c, teams) and not _stripe(c):
 				hits += 1
 	assert_eq(near, [] as Array[String], "no model paint within 20 degrees of a team's hue unless dull")
 	assert_lt(float(hits) / tried, 0.01, "the sign sheet keeps off the teams' hues (%d of %d)" % [hits, tried])
+	assert_false(_stripe(Color("#fa8c29")), "Beta's orange is never let off")
 
 
 func test_a_malformed_or_unknown_fixture_is_warned_about_and_left_out() -> void:

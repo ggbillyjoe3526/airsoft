@@ -62,6 +62,14 @@ more detail and make more realistic. It looks too empty and blocky."
   and a dark face on each platform edge over the track (`dressing.station.trims`, drawn by StationSurface in each
   trim's finish). The frieze stays over the car roofs and the openings; cables and edge stay under the platform. The
   benches, signs, posters, booths and trains come from the model threads (SM1 to SM5).
+- **Morrin Street** (owner, 2026-11-12: "the station name is Morrin Street. The map itself is still called Subway"; the
+  lamps thread had finished, so its sign sheet passed to this task): the name boards, the line's strip map and the
+  information panel say Morrin Street (`station_signs.py` STATION); the adverts keep their town, Copperhill, which
+  also names the line. The name boards and the panel's head are the trains' stripe orange #c0652f ("orange same as
+  the orange strip on the side of the trains"), let off the team-hue rule as the stripe is (SM1); the sheet's test
+  lets off only that hue no more saturated, never Beta's orange.
+- **Departure boards on drop rods**: SM5B hung them from a ceiling the vault took away; under a vault a hung model
+  now hangs `fixtures.VAULT_DROP` under the springing on two steel rods up into the arc (`build_map.drop_rods`).
 
 ## Known issues
 

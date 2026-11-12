@@ -28,6 +28,7 @@ const SHOTS: Array[Array] = [
 	# TB1: across the south platform's tunnel to the trackside wall, and down it to the tunnel mouth at its east end.
 	["south-platform-across", Vector3(-47.0, 2.5, 5.9), Vector3(-38.0, 3.9, 12.5)],
 	["north-platform-east-end", Vector3(24.0, 2.5, -6.2), Vector3(50.0, 3.4, -9.5)],
+	["departures-on-rods", Vector3(-17.0, 2.4, -6.2), Vector3(-10.75, 4.2, -7.25)],
 ]
 
 ## SM5's: the strip lamps, the tunnel lamps, the signs, posters, clocks, bins, extinguishers, cameras, edge warnings.

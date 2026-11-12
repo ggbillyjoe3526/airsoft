@@ -1432,6 +1432,8 @@ Subway is Dev content: tick Settings › Dev › Dev content.
 - [ ] **Detail.** Concrete ribs cross each vault every few metres (dark rings against the vault), a dark tiled band runs under the curve on both walls,
   three cables run along the wall across the track and each platform edge has a dark face over the track. None of it
   flickers or blocks a BB or a step.
+- [ ] **Morrin Street.** Every name board on the platforms says Morrin Street on the trains' stripe orange, as do the
+  line map's ringed stop and the information panel; the departure boards hang on two rods from the curved ceiling.
 - [ ] **Frame rate.** F3 on Low looking along a platform: 60 FPS.
 
 ## Subway's echo on the shots (EC1)

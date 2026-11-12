@@ -597,6 +597,7 @@ def build() -> dict:
         "dressing": {"station": station_dress.dress(L, floor_at, ceil_at, LIFT, FT)},
     }
     m["dressing"]["station"]["fixtures"] = fixtures.place(L, floor_at, ceil_at, air_boxes, LIFT, [shaft_hole()])
+    m["dressing"]["station"]["trims"] += drop_rods(m["dressing"]["station"]["fixtures"])
     del sx
     return m
 
@@ -605,6 +606,30 @@ LAMP_STEP = 8.0      # m between a room's ceiling lamps along it
 LAMP_ROOM_MIN = 3.0  # a smaller room (a doorway, a short flight) is lit by its neighbours' lamps
 LAMP_ROWS_OVER = 8.0  # a room wider than this gets two rows of lamps
 ROOF_OVER = 0.4      # the roof's height (m) over the highest ceiling's top: an unseen lid; its lamps hang lower
+ROD = 0.025            # a drop rod's half thickness (m)
+ROD_IN = 0.15          # each rod in from its hung model's end
+ROD_INTO = 0.05        # and run this far up into the arc, hidden behind it
+
+
+def drop_rods(placed: list[dict]) -> list[dict]:
+    """Two look-only rods (trims) holding each model hung under a vault (fixtures.VAULT_DROP), from its top up into
+    the arc over each rod (TB1 x SM5: the platforms' departure boards)."""
+    out = []
+    for f in placed:
+        b, how = fixtures.MODELS[f["model"]]
+        y = f["y"] - LIFT
+        v = next((v for v in L.VAULTS if v["x0"] <= f["x"] <= v["x1"] and v["z0"] <= f["z"] <= v["z1"]
+                  and v["y"] - fixtures.VAULT_DROP - EPS <= y < v["y"]), None)
+        if how != "hung" or v is None:
+            continue
+        c, s = math.cos(math.radians(f["yaw"])), math.sin(math.radians(f["yaw"]))
+        for px in (b[0] + ROD_IN, b[1] - ROD_IN):
+            x, z = f["x"] + px * c, f["z"] - px * s
+            top = vault_y(v, z) + ROD_INTO + LIFT
+            out.append({"finish": "steel", "box": [r(x - ROD), r(x + ROD), r(f["y"]), r(top), r(z - ROD), r(z + ROD)]})
+    return out
+
+
 LAMP_HALF_DEPTH = 0.3  # a lamp panel's half depth (RoofConfig.lamp_size.y) and a little: hung clear of a vault
 
 
