@@ -55,16 +55,19 @@ and 44 m (0.35 g), the Sniper Rifle 48 m as it comes.
 
 ## Bot bench
 
-`tools/balance.sh depot`, 8 seeds, Normal, both modes (16 matches, 126 rounds), where the SMG's Breacher kit and the
-sidearm matter most. Reports: `/mnt/project-files/pipeline/runs/PH2/attempt-1/balance-depot-before.md` (main) and
-`balance-depot-after.md` (attempt 1's energies). A check that nothing broke, not a tuning tool: 8 seeds leave ±6
-points on a share.
+`tools/balance.sh depot`, 8 seeds, Normal, both modes (16 matches, 126 rounds), on main and on attempt 1's energies.
+Reports: `/mnt/project-files/pipeline/runs/PH2/attempt-1/balance-depot-before.md` and `balance-depot-after.md`.
 
-BENCH_TABLE
+Every figure is the same to the last digit on both (Alpha 53.1 % of decided Elimination rounds, attackers 43.5 % of
+Attack / Defend rounds, first hit at a median 14.5 s and 12.8 m, no round on the clock; 0 of 16 figures outside its
+band). The bench's bots carry the factory loadout and fight with the AEG Rifle; the pistol is their fallback and decided
+nothing (not one figure moved), and the Compact SMG's Breacher kit is Dev content, which the bench does not field. So it shows that nothing
+else moved, and says nothing about the two replicas themselves; their balance here rests on the measured reach
+above and the invariants in `tests/unit/test_rp1_balance.gd` and `test_ph2_qa.gd`.
 
 ## Known issues left
 
-- `docs/KNOWN_ISSUES.md` › Balance: PH2's numbers are from the data and a bot bench, not from play; whether the pistol
-  still feels like a sidearm and the SMG still short is the owner's playtest.
+- `docs/KNOWN_ISSUES.md` › Balance: PH2's numbers are from the data, not from play (the bot bench does not field
+  either replica); whether the pistol still feels like a sidearm and the SMG still short is the owner's playtest.
 - `tests/unit/replica_fixtures.gd` keeps a standalone 0.52 J pistol for the flight tests that need fixed numbers
   (QA's note): no game code reads it.
