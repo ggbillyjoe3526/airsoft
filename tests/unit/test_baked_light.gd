@@ -5,8 +5,8 @@ extends GutTest
 
 const BakeTool := preload("res://tools/bake_light.gd")
 const DIR := "user://test_baked_light"
-## Depot's untiled greybox (Low): the faces before DP2.
-const DEPOT_UNTILED_VERTICES := 7926
+## Depot's untiled greybox (Low): the faces before DP2 (MB1 added two crate stacks: 72 more).
+const DEPOT_UNTILED_VERTICES := 7998
 ## Open floor in Depot's Chrono hall, clear of the hut and of any lid.
 const OPEN_FLOOR := Vector3(8.0, 0.0, 0.0)
 ## A small yard: a 30 m slab, a wall 4 m tall across it and a 1 m cube; two ends of one spawn each.

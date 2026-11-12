@@ -444,11 +444,14 @@ THICKETS = [  # polygons (x, z)
     [(34, -57), (40, -57), (39, -52), (35, -52)],
     [(-66, 36), (-60, 38), (-62, 46), (-70, 44)],
     [(28, 56), (36, 54), (34, 49), (29, 50)],
-    # MB1: the Ford thickets, two stands of young spruce staggered on the east bank. The Hut rise looked over anything
-    # lower across the whole Clearing, 50 m to the Woodpile; now nobody sees through the Ford, and whoever wades it comes
-    # up the bank's north half and turns between the two stands (2 m) or round the far one's north end.
+    # MB1: the Ford thickets, two stands of young spruce joined corner to corner on the east bank. The Hut rise looked
+    # over anything lower across the whole Clearing, 50 m to the Woodpile. The stands shut that view but for the head
+    # of the bank's gentle ramp north of them, 5 m wide, where hazels stand on the crest (BUSHES, "Hut hazel"): that is
+    # the way up from the Ford, walked on a broad front, and from its head the way on is the 4.6 m between the north
+    # stand and hut 1, or through the hut. (A 2 m door left between the stands was a trap: a squad sent through it
+    # queued there and was shot. Nothing is walked north of hut 1: the rise's north-east face is too steep.)
     [(15.0, 2.0), (17.2, 2.0), (17.4, 8.6), (15.2, 8.6)],
-    [(19.4, -3.2), (21.4, -3.2), (21.4, 2.8), (19.4, 2.8)],
+    [(17.4, -3.2), (19.4, -3.2), (19.4, 2.8), (17.4, 2.8)],
     [(-90, 30), (-80, 32), (-82, 40), (-90, 40)],
 ]
 WINDTHROW = [
@@ -501,6 +504,9 @@ BUSHES = [
     (-18.6, 7.4, 1.3, "Birch hazel"),         # and south of it
     (-18.9, 9.8, 1.2, "Birch hazel"),
     (16.5, -6.0, 1.3, "Ford hazel"),          # the Clearing's east edge, north of the Ford thickets (THICKETS)
+    (22.2, -4.9, 1.2, "Hut hazel"),           # the Hut rise's crest at the head of the Ford's ramp: on the rise, so they
+    (22.0, -7.2, 1.2, "Hut hazel"),           # hide who stands behind them from the Clearing below
+    (21.4, -9.4, 1.2, "Hut hazel"),
     (1.6, 39.4, 1.1, "Verge hazel"),          # between the thicket and the fallen tree on the Long road's north verge
 ]
 for (x, z, r, _) in BUSHES:
@@ -561,11 +567,12 @@ LANE_PATHS = {
     # point past the middle (RoundPlanner): with one point at the middle the west end stopped on it and the east end
     # walked on to the next, 15 m into the west's ground.
     "n": [(-76, -10), (-65, -24.5), (-50, -34), (-36, -42), (-22.5, -40.5), (-18.4, -41.4), (-15.2, -43.8),
-          (-7.0, -41.3), (3.3, -41.3), (12, -40.3), (19, -40), (32, -38), (48, -38), (56, -38)],
-    # MB1: the middle lane goes round the Woodpile's north end and the Birch stand's stack, between the Ford thickets,
-    # and ends in the Back yard, where Attack / Defend's middle defenders hold between the two sites (it ended in their camp).
+          (-8.2, -41.7), (1.8, -41.3), (12, -40.3), (19, -40), (32, -38), (48, -38), (56, -38)],
+    # MB1: the middle lane goes round the Woodpile's north end and the Birch stand's stack, up the Ford's ramp north
+    # of its thickets and between them and hut 1, and ends in the Back yard, where Attack / Defend's middle
+    # defenders hold between the two sites (it ended in their camp).
     "m": [(-74, 4), (-52, 4), (-38, 0.5), (-26, -2.5), (-19, -2.0), (-6, 2), (3, 1.5),
-          (9.5, 0.5), (16.2, 0.0), (18.3, 3.6), (19.0, 9.6), (24, 8.0), (31.2, 2.2), (36.5, 2.4), (40.5, 4.2),
+          (9.5, 0.5), (15.5, -3.6), (20.6, -5.0), (22.4, 0.4), (22.6, 3.4), (31.2, 2.2), (36.5, 2.4), (40.5, 4.2),
           (43.2, 1.0), (58, 4.5)],
     # MB1: the south lane leaves the road for its north verge at the fallen tree and comes back onto it past the stack.
     "s": [(-77, 21), (-66, 27), (-48, 33), (-34, 42), (-18, 49), (-11.5, 49.8), (-8.8, 47.2), (-6.2, 45.3),

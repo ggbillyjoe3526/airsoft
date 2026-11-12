@@ -312,14 +312,18 @@ FLAGS = [FLAG_A, FLAG_B]
 # (RoundPlanner), and those were the foot of the A stairs and the B ramp, outside the sites and open to them: now one
 # holds the pole from behind its flag stack and one the low crate by the stairs (ramp) mouth, across the pole from it.
 # The middle lane's two posts are behind the Garage dog-leg's two stacks (they stood in the open beside them).
+# Each lane has one point about 4.5 m short of the field's middle and one as far past it, none between: a squad
+# sweeps to the first point past the middle, and the old points sent the west 6 m deeper than the east down the Chrono
+# hall and 4 m deeper down the Box yard (the east 7 m deeper through the Lounge), so the west won 44 % of Elimination's
+# rounds. Dead even they gave it 55 %; the middle lane's two are 0.8 m east of even (the west 5.3 m past, the east 3.7).
 LANES = {
     "n": [(-51.2, -14.5), (-48.5, -16), (-46.5, -21.5), (-42.6, -26.4), (-36, -26), (-28, -24.5),
-          (-19, -21), (-11.5, -22.6), (-6, -22), (3, -21.2), (10, -24), (18, -24), (27, -24), (30, -23.5),
+          (-19, -21), (-11.5, -22.6), (-2.7, -21.7), (6.3, -21.4), (10, -24), (18, -24), (27, -24), (30, -23.5),
           (36, -25), (41.5, -24.8), (42.9, -27.2), (47.7, -19.6)],
-    "m": [(-40, -1), (-30, -8.5), (-23, -12.5), (-16, -12.5), (-9, -7.5), (-1, -7), (8, -5),
+    "m": [(-40, -1), (-30, -8.5), (-23, -12.5), (-16, -12.5), (-9, -7.5), (-3.1, -7.1), (5.8, -5.5), (8, -5),
           (15, 0), (19, 5.5), (25.5, 4.6), (29.5, 2.2), (34, 2.2), (33.8, 6.3), (40.3, 2.3)],
     "s": [(-51.2, 6.5), (-48.5, 10), (-48.5, 15), (-45, 19), (-37, 22), (-30, 19.5), (-21, 19.5),
-          (-14, 24.5), (-9.5, 24.6), (-8, 19.5), (-4, 18.2), (5, 18.8), (12, 18.6), (20, 18.6), (27.5, 18.4),
+          (-14, 24.5), (-9.5, 24.6), (-8, 19.5), (-6.2, 18.9), (2.9, 18.7), (12, 18.6), (20, 18.6), (27.5, 18.4),
           (31, 20.5), (33, 18.8), (39, 20.5), (42.8, 23.0), (43.9, 27.7), (47.6, 19.6)],
 }
 

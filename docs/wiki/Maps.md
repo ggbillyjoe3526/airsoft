@@ -42,7 +42,9 @@ end and Beta in the west in Elimination, and the teams swap ends at half time.
   bots hear, and a BB rings off the steel ([Movement](Movement#paces)).
 - **Doors:** some of the plywood rooms and huts have wooden [doors](#doors), some starting open and some shut.
 - **Attack / Defend** puts two flagpoles at the defenders' end, **A** on A site and **B** on B site; the attackers
-  raise either ([Modes](Modes#attack--defend)).
+  raise either ([Modes](Modes#attack--defend)). Each pole stands between two crate stacks: one hides it from the
+  site's doors, the other from the stairs (A) or the ramp (B). Defenders hold the pole from behind them, and whoever
+  raises the flag has cover on two sides, so the fight is on the site.
 - **The look:** a real warehouse in daylight: concrete and plywood with their grain, weathered paint in muted
   crimson, violet, yellow, teal, green and cream, so the team colours stay the loudest. Walls, crates and containers
   are worn: grime at their feet, streaks down their sides, dust on top.
@@ -98,12 +100,16 @@ defenders in the east camp.
   under their crowns, broad, lumpy oaks, white birches in the Birch stand and Fern hollow, dark spruce thickets, and
   beyond the fence a far wood of spruce spires in uneven clumps and gaps. A grassy floor, the weathered violet pickup wreck and teal crates carry
   the colour, with nothing near a team's blue or orange. Every crown starts over head height.
-- **Long views, few walls:** the Ridge looks 86 m down onto the Fort; elsewhere a lane's longest line is under 80 m.
-  Cover is fallen logs, wind-thrown trees torn out by their roots, woodpiles, stacks of tractor tyres, wooden crates,
-  the violet pickup wreck and the trunks of the trees themselves, and the camps and the field's edge are walled by a
-  log palisade of sharpened stakes; each stops a BB about where you see it, a round trunk by its bark. The woodpiles
-  are 1.8 m tall, so they hide you standing; the camps' gate screens stand 2.8 m. The thickets of spruce at the edges
-  and between the lanes can't be entered or seen through.
+- **Three lanes, three ranges:** no lane is shot from end to end. A hazel hedge on the Ridge's brow, fallen trees
+  and a log stack at the North bridge's two heads, three fallen trees lying across the Long road and two spruce
+  thickets on the Ford's east bank break the long lines. The road is close work from tree to tree, the north a
+  mid-range fight over the bridge, and the Clearing stays the long lane, crossed by the Ford and its ramp, 5 m wide,
+  up to Hut row.
+- **Few walls:** cover is fallen logs, wind-thrown trees torn out by their roots, woodpiles, stacks of tractor tyres,
+  wooden crates, the violet pickup wreck and the trunks of the trees themselves, and the camps and the field's edge are
+  walled by a log palisade of sharpened stakes; each stops a BB about where you see it, a round trunk by its bark. The
+  woodpiles are 1.8 m tall, so they hide you standing; the camps' gate screens stand 2.8 m. The thickets of spruce at
+  the edges and between the lanes can't be entered or seen through.
 - **Ferns** grow knee to hip high in eight beds where you'd want to hide, and leafy **bushes** stand taller. Nobody sees you
   through more than about half a metre of leaves, so crouch in a fern bed to vanish; you can walk through ferns and
   bushes, but they slow you and a run through them rustles loudly ([Movement](Movement)), and a BB that pushes 0.6 m
@@ -126,7 +132,8 @@ defenders in the east camp.
 - Footsteps sound like grass, leaf litter, gravel or boards, and a BB that hits the ground puffs like earth. By day
   and by night the wood sounds like a real one; owls and creaking branches call from it.
 - **Attack / Defend** puts flag **A** in the Fort and flag **B** at the Sawmill ([Modes](Modes#attack--defend)); in
-  Elimination's overtime the flag stands in the Clearing.
+  Elimination's overtime the flag stands in the Clearing. The Fort is walled on its west side as well, with a firing
+  window and a doorway, so flag A is fought for inside the walls; at the Sawmill a log stack stands beside flag B.
 
 ### Areas
 

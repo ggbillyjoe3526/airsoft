@@ -795,6 +795,37 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   block's box and its crown starts over `WoodsConfig.crown_clear` (2.6 m); a thicket's spruces stay inside its box.
   Asked whether young pines and spruces should match his photos instead (branches to the ground, spruces spilling past
   the thicket's edge), he kept the boxes: what you see is what stops BBs and sight.
+- **A field's layout is judged on its play record (owner, 2026-11-12, MB1).** He asked for every field to be analysed
+  like a Counter-Strike or Valorant map (sight lines, chokes, heat maps, cover, every piece placed on purpose) and
+  changed, with one rule: no new model or sound; a field may be resized or cut if balance wants it ("Balance and
+  gameplay is most important"). `tools/map_heat.gd` (where bots stood, every knock-out, every round's end),
+  `tools/map_survey.gd` (every stand point's exposure, longest line and walk from each end) and `tools/maps/plan.py`
+  (pictures and a report by area) are the measure; a layout change quotes them before and after in its record. No
+  field was resized: the first knock-out comes 15 to 24 s into a round on all three.
+- **A lane is laid for the planner (2026-11-12, MB1).** Its last two points are Attack / Defend's defender posts and
+  stand on the site behind cover, never at a spawn's mouth or a stair's foot. Either side of the field's middle it
+  has one point, about equally deep, and none between: a squad sweeps to the first point past the middle
+  (`RoundPlanner._points_to_middle`), and the end sent deeper loses (Depot's west won 44 % of Elimination's rounds
+  walking 6 m deeper down the Chrono hall, 55 % dead even, 50 % with the middle lane's pair 0.8 m east of even). No
+  lane takes a way a bot is slow on (Subway's spiral stair, about 40 s against a lift's 10), and none goes through a
+  gap a squad can't pass abreast.
+- **Each of Depot's flags stands between two crate stacks (2026-11-12, MB1).** One hides the pole from the site's
+  doors, the other from the A stairs or the B ramp; the two corner stacks behind the poles are gone. The defenders'
+  posts are behind them and the Garage's behind its dog-leg stacks, so Attack / Defend is fought on the sites (the
+  knock-outs there went from 71 to 188 against the attackers to 111 to 190, at 10 m, not 16).
+- **Woodland's lanes are broken by pieces on the high ground and by leaves (2026-11-12, MB1).** A hazel hedge on the
+  Ridge's brow, a fallen tree and a log stack at the North bridge's heads, a west wall with a window and a doorway on
+  the Fort, three fallen trees across the Long road (the first on the hump's top), two spruce thickets on the Ford's
+  east bank with hazels on the crest at the head of its ramp, and a log stack beside flag B. A piece in a dip hides
+  nobody on a rise behind it, and a screen with one gap is a trap for whoever must come through: bushes are walked
+  through on a broad front. A pole walled on two sides hides whoever raises it as well as whoever holds it: a pen of
+  two stacks round flag B, with the defenders' posts inside it, gave the attackers 78 % of 120 rounds, and came out.
+  The lanes' ranges now differ on purpose: the road close, the north middling, the Clearing long. The Ridge's 86 m
+  overlook of the WR1 decision is gone; the 170 m exception stays for the pinholes between trunks.
+- **Subway's flag B stands on the north platform (2026-11-12, MB1).** It stood on the stair landing 11 m from flag A,
+  and the north platform saw 2 % of the fights; now each platform holds a flag. The north lane runs that platform
+  from the lifts, the south lane takes the escalators and the concourse to the middle stair, where two defenders
+  hold. No block moved.
 
 ## Replicas, Loadout and levels
 
