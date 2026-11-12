@@ -12,7 +12,8 @@ larger posters on the walls."
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-12 | 1 | Opus 5.5 (build thread) | ✓ | – | – |
+| 2026-11-12 | 1 | Opus 5.5 (build thread) | ✓ | 6/8 Retry | a black wedge over the north car's west end; the vault and far wall still brown-grey; posters, known issue and README rows untracked |
+| 2026-11-12 | 2 | Opus 5.5 (build thread) | ✓ | – | – |
 
 ## Decisions
 
@@ -37,9 +38,17 @@ larger posters on the walls."
   (style `track`) wears the same tiles. The first pictures read "back" as "black" and gave it the tunnels' lining:
   the owner turned that down, and a dark wall also darkened its area's reflection probe, blacking out the vault's track
   half.
-- **Posters** on the trackside walls are the lamps and extras thread's (SM5): three 3 x 1.5 m on the north wall, four
-  on the south, centred 2.3 m up.
+- **Posters** on the trackside walls ("larger posters", owner) are built by the lamps and extras task (SM5, its own
+  pull request from branch claude/project-thread-bihuvo, in progress as this merges): three 3 x 1.5 m on the north
+  wall, four on the south, centred 2.3 m up, its "Stay behind the yellow line" decals moved behind this yellow line.
+- **A cool white fill** (attempt 2): the vault and the trackside wall still read brown-grey under the day preset's
+  warm fill (critic: vault 76, 70, 62). Subway's lighting now names its fill colours (`build_map.HEMI_SKY`,
+  `HEMI_GROUND`: a cool white, as fluorescent tubes on white tiles), and the whole station reads grey-white: vault
+  70, 70, 69, trackside 88, 89, 89, back wall 110, 114, 116 in the south-platform shot.
+- **The air over a car is the track's** (attempt 2): a zone over each vault's cars gives the trackside wall over a car
+  and its roof the track's tiles (they faced no room and drew as the dark outside, a black wedge over the north car's
+  west end).
 
 ## Known issues
 
-- The station's light is mostly area probe ambient; a down-facing surface still reads a little warmer than the walls.
+- The vault reads a darker grey than the walls (it faces down): `docs/KNOWN_ISSUES.md` › Graphics.

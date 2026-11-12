@@ -33,6 +33,8 @@ GROW = 0.01          # each floor and ramp grown this much a side
 EYE_FACING_EAST = -math.pi / 2
 EYE_FACING_WEST = math.pi / 2
 SHAFT_COLOUR = 0x9c978d   # the shafts' walls, as MT1's shut shaft
+HEMI_SKY = 0xdfe6ec       # the fill's colours (sRGB, LightingConfig.override_fill_*): a cool white, no warm bounce
+HEMI_GROUND = 0xc9cdd0
 
 
 def r(v: float) -> float:
@@ -581,9 +583,12 @@ def build() -> dict:
         "botSight": 50,
         "poleHeight": L.POLE_HEIGHT,
         "ambience": "tunnel",  # his tunnel recording (2026-11-11)
-        # Depot's overhead light: the lamps' stand-in on Low and Medium (RoofConfig).
+        # Depot's overhead light: the lamps' stand-in on Low and Medium (RoofConfig); the fill a cool white, as a
+        # station's fluorescent tubes light white tiles (owner, 2026-11-12: "a more white/grey look", TB1).
         "lighting": {"presets": ["day"], "overrides": {"day": {"key": {"elevation": 76, "heading": 25, "intensity": 1.1},
-                                                             "hemi": {"intensity": 0.55}, "exposureScale": 0.85}}},
+                                                             "hemi": {"intensity": 0.55, "sky": HEMI_SKY,
+                                                                      "ground": HEMI_GROUND},
+                                                             "exposureScale": 0.85}}},
         "roof": {"height": r(max(ceil_at(rm, max(rm["ya"], rm["yb"])) for rm in L.rooms if rm["ceil"]) + FT + ROOF_OVER
                              + LIFT), "plain": True, "lamps": lamps()},
         "areas": areas(),

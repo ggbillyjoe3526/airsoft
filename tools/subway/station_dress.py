@@ -3,7 +3,7 @@ draws each block face in the CC0 photo set its room's style gives it (game/confi
 platforms' edge strips and the track's rails and sleepers (game/play/station/station_surface.gd). Look only: nothing
 here adds, moves or cuts a block.
 
-- zones: every room's air as boxes with its style; a ramp room's in slices SLICE m long, each from its floor's lowest
+- zones: every room's air as boxes with its style, then each vault's air over its cars (TB1); a ramp room's in slices SLICE m long, each from its floor's lowest
   there, so a face looking into the slope finds it. Rooms that own their blocks (the trains) come first.
 - strips: each platform's edge as London's (owner, 2026-11-12: the yellow line only at the platforms' edges): a pale
   coping stone, MIND THE GAP painted on it every few metres, and the yellow line behind it.
@@ -52,7 +52,7 @@ def style_of(rm: dict) -> str:
     return style
 
 
-def zones(L, floor_at, ceil_at, lift: float) -> list[dict]:
+def zones(L, floor_at, ceil_at, lift: float, thick: float) -> list[dict]:
     out = []
     for rm in L.rooms:
         style = style_of(rm)
@@ -70,6 +70,11 @@ def zones(L, floor_at, ceil_at, lift: float) -> list[dict]:
                 z["owns"] = True
             out.append(z)
     out.sort(key=lambda z: 0 if z.get("owns") else 1)
+    # Each platform tunnel's vault, after the rooms (a room under it wins up to its springing): the air over a car's
+    # roof and under the arc is the track's, so the trackside wall over a car and the roof wear its tiles (TB1).
+    for v in L.VAULTS:
+        out.append({"style": "track", "box": [v["x0"], v["x1"], r(v["low"] + thick + lift),
+                                              r(v["y"] + L.VAULT_RISE + lift), v["z0"], v["z1"]]})
     return out
 
 
@@ -124,5 +129,5 @@ def vaults(L, lift: float, thick: float) -> list[dict]:
 
 
 def dress(L, floor_at, ceil_at, lift: float, thick: float) -> dict:
-    return {"zones": zones(L, floor_at, ceil_at, lift), "strips": strips(L, lift), "words": words(L, lift),
+    return {"zones": zones(L, floor_at, ceil_at, lift, thick), "strips": strips(L, lift), "words": words(L, lift),
             "tracks": tracks(L, lift), "vaults": vaults(L, lift, thick)}
