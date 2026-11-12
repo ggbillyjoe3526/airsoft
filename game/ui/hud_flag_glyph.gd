@@ -2,7 +2,8 @@ class_name HudFlagGlyph
 extends Control
 ## A small flag on its mast, the HUD's sign for Attack / Defend's flag (the approved concept's icon): a pale mast, the
 ## cloth in `colour` with a pale roundel. `chequered`, the sign for Elimination's overtime flag (concept
-## `overtime-flag.png`): a square cloth of off-white and dark checks with a thin off-white edge. Drawn from shapes built
+## `overtime-flag.png`): a square cloth of off-white and dark checks with a thin off-white edge. `bomb`, Plant The
+## Bomb's sign (PB1): a small carry case with a handle and a light (BombShape), in `colour`. Drawn from shapes built
 ## once for its size, never per frame.
 
 ## The icon's drawing box: the concept's 24 x 24 viewbox.
@@ -38,6 +39,14 @@ var chequered: bool = false:
 			chequered = value
 			queue_redraw()
 
+## Drawn as Plant The Bomb's carry case instead of a flag.
+var bomb: bool = false:
+	set(value):
+		if value != bomb:
+			bomb = value
+			queue_redraw()
+
+var _case := BombShape.new()
 var _cloth := PackedVector2Array()
 var _checks: Array[Rect2] = []
 var _check_box := Rect2()
@@ -59,6 +68,7 @@ func _init(side: float, tint: Color) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED:
 		var k := minf(size.x, size.y) / BOX
+		_case.fit(Rect2(Vector2.ZERO, size))
 		for i in CLOTH.size():
 			_cloth[i] = CLOTH[i] * k
 		_mast = Rect2(MAST.position * k, MAST.size * k)
@@ -77,6 +87,9 @@ func _notification(what: int) -> void:
 
 
 func _draw() -> void:
+	if bomb:
+		_case.paint(self, colour, GameTheme.BAD, GameTheme.BG)
+		return
 	draw_rect(_mast, MAST_COLOUR)
 	if chequered:
 		draw_rect(_check_box, CHECK_PALE)

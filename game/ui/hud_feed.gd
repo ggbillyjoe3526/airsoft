@@ -110,7 +110,7 @@ func _fill(feed: HitFeed, characters: Array[Character], you: Character) -> void:
 		var shooter := characters[line.shooter]
 		if line.call:
 			_side(_shooter, shooter, you)
-			row.show_call(_shooter, line.words, _teams.colours[shooter.team], mate_colour)
+			row.show_call(_shooter, line.words, _teams.colours[shooter.team], mate_colour, line.note)
 			continue
 		var victim := characters[line.victim]
 		_side(_shooter, shooter, you)

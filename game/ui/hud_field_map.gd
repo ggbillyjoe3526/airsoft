@@ -12,7 +12,7 @@ extends Control
 ## are laid out once per size, storey and round.
 
 ## What the header says your side must do.
-enum Goal { PRACTICE, ELIMINATION, OVERTIME, ATTACK, DEFEND }
+enum Goal { PRACTICE, ELIMINATION, OVERTIME, ATTACK, DEFEND, PLANT, DEFUSE }
 
 var _cfg: MinimapConfig = null
 var _minimap: HudMinimap = null
@@ -29,6 +29,7 @@ var _layer: int = -1
 var _ping_life: float = 0.0
 var _ping_fade: float = 0.0
 var _flag_count: int = 0
+var _site_count: int = 0
 var _end_colours := PackedColorArray([Color.WHITE, Color.WHITE])
 var _end_words := PackedStringArray(["", ""])
 ## The field's box on this control (px), ringed in _draw.
@@ -46,6 +47,7 @@ func setup(cfg: MinimapConfig, minimap: HudMinimap, map: MapData, map_name: Stri
 	_minimap = minimap
 	_map_name = map_name
 	_flag_count = map.poles.size()
+	_site_count = map.bomb_sites.size()
 	name = "HudFieldMap"
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -56,6 +58,7 @@ func setup(cfg: MinimapConfig, minimap: HudMinimap, map: MapData, map_name: Stri
 	var field := minimap.field()
 	_view = HudMinimap.View.new()
 	_view.setup(cfg, minimap.textures(), field.scale, field.origin, capacity, minimap.ground(), field.ground_rect)
+	_view.sites_drawn = false # the overlay's rings and letters stand for the sites
 	add_child(_view)
 	_overlay = FieldMapOverlay.new()
 	_overlay.setup(cfg, FieldMapMarks.of(map, cfg.map_start_pad))
@@ -116,7 +119,11 @@ func update(state: GameState, watched: Character, yaw: float, fraction: float, h
 		_overlay.laid_out = false
 	var flags := rs.mode == RoundState.Mode.ATTACK_DEFEND and not rs.practice
 	var overtime := rs.mode == RoundState.Mode.ELIMINATION and not rs.practice
+	var plant := rs.mode == RoundState.Mode.PLANT_THE_BOMB and not rs.practice
 	_overlay.set_round(flags, overtime, rs.overtime_flag.up, _end_colours, _end_words)
+	_overlay.set_sites(plant)
+	if _key.set_plant(plant):
+		_lay_out()
 	_overlay.place(_view, pointer.at, pointing, team)
 
 
@@ -125,6 +132,8 @@ static func _goal_of(rs: RoundState, team: int) -> Goal:
 		return Goal.PRACTICE
 	if rs.mode == RoundState.Mode.ATTACK_DEFEND and rs.attackers >= 0:
 		return Goal.ATTACK if rs.attackers == team else Goal.DEFEND
+	if rs.mode == RoundState.Mode.PLANT_THE_BOMB and rs.attackers >= 0:
+		return Goal.PLANT if rs.attackers == team else Goal.DEFUSE
 	return Goal.OVERTIME if rs.overtime_flag.up else Goal.ELIMINATION
 
 
@@ -132,10 +141,19 @@ static func _goal_of(rs: RoundState, team: int) -> Goal:
 ## time).
 func _show_round(state: GameState, goal: Goal, team: Color) -> void:
 	var rs := state.round_state
-	var mode := tr("MODE_ATTACK_DEFEND") if rs.mode == RoundState.Mode.ATTACK_DEFEND else tr("MODE_ELIMINATION")
+	var mode := tr("MODE_ELIMINATION")
+	if rs.mode == RoundState.Mode.ATTACK_DEFEND:
+		mode = tr("MODE_ATTACK_DEFEND")
+	elif rs.mode == RoundState.Mode.PLANT_THE_BOMB:
+		mode = tr("MODE_PLANT_THE_BOMB")
 	_sub.text = tr("MODE_PRACTICE") if rs.practice else "%s  ·  %s" % [tr("HUD_ROUND") % _round, mode]
 	var letters := " / ".join(Flag.LETTERS.slice(0, maxi(_flag_count, 1)))
+	var sites := " / ".join(Plant.LETTERS.slice(0, maxi(_site_count, 1)))
 	match goal:
+		Goal.PLANT:
+			_goal.text = (tr("MAP_GOAL_PLANT") % sites) if _site_count > 1 else tr("MAP_GOAL_PLANT_ONE")
+		Goal.DEFUSE:
+			_goal.text = (tr("MAP_GOAL_DEFUSE") % sites) if _site_count > 1 else tr("MAP_GOAL_DEFUSE_ONE")
 		Goal.ATTACK:
 			_goal.text = (tr("MAP_GOAL_ATTACK") % letters) if _flag_count > 1 else tr("MAP_GOAL_ATTACK_ONE")
 		Goal.DEFEND:
