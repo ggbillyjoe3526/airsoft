@@ -614,7 +614,10 @@ def marks() -> list[dict]:
     """The ground's worn marks (WM1, WearMarks), on the ground's height: the pickup's muddy tracks from the culvert's
     wet banks, where it picked the mud up, along the road and over to the verge where it stands, and an oil drip by its
     bonnet. No boot prints (owner, 2026-11-10)."""
-    return [{"kind": "tyres", "x": -3.0, "z": 50.8, "yaw": -82, "length": 28, "bend": 8, "mud": True},
+    # MB1: the second fallen tree of the Long road lies across the tracks, 2 to 4 m along them: they run up to it and
+    # on from under it (the same path in two marks; a mark never lies under a piece, test_wear_marks).
+    return [{"kind": "tyres", "x": -3.0, "z": 50.8, "yaw": -82, "length": 2, "bend": 0.571, "mud": True},
+            {"kind": "tyres", "x": -6.955, "z": 50.204, "yaw": -80.857, "length": 24, "bend": 6.857, "mud": True},
             {"kind": "oil", "x": -31.0, "z": 46.7, "length": 0.8}]
 
 

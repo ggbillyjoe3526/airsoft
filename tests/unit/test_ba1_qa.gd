@@ -91,7 +91,9 @@ func test_paint_changes_the_extension_metal_but_not_the_inner_materials() -> voi
 			var own := m.mesh.surface_get_material(i)
 			var over := m.get_surface_override_material(i)
 			if own != null and own.resource_name in INNER_MATERIALS:
-				assert_null(over, "%s keeps its own" % own.resource_name)
+				# Its own colour: untouched, or its own material on its surface (MQ2: a polished brass crown).
+				assert_true(over == null or ReplicaPaint.plain_of(over) == own,
+						"%s keeps its own" % own.resource_name)
 			elif own != null and own.resource_name == "Metal":
 				metal_painted = metal_painted or over != null
 	assert_true(metal_painted, "the extension's Metal takes the paint")

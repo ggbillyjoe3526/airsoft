@@ -1520,6 +1520,26 @@ Subway is Dev content: tick Settings › Dev › Dev content. On a real graphics
   dark patch on the ceiling over the kiosk? Frame rate on Ultra in the
   ticket hall: as before.
 
+## What the parts are made of (MQ2)
+
+Customise's turntable and the replica in your hands, in black and in a bold colour.
+
+- [ ] **Metal, polymer, rubber.** Scopes, the red dot, the silencer and the torch catch the light as dark anodised
+  aluminium; grips and the laser stay matte polymer; pads and caps are dull rubber. Lenses, the torch's reflector and
+  the laser's emitter look as before.
+- [ ] **The silencer.** Six wrench flats behind its back seam, a chamfered front, four small holes in its front face.
+- [ ] **The torch and the laser.** The torch has two grooves round its head, a ridged bezel and a hinged battery door
+  at the back; the laser a window round its emitter, four screws in its front and a battery cap with a coin slot behind.
+- [ ] **Magazines.** The Hi-Cap is a pressed steel shell: four narrow ribs a side, a welded seam with spot welds down
+  its back, steel feed lips. The Low-Cap is moulded polymer: five wide ribs and a fine mould line down its front and
+  back. Can you tell them apart at a glance in the hands? On a reload the BBs at each magazine's top (the Extended's
+  too) are round, with no flats or lumps along their edges.
+- [ ] **Barrels.** The Tight-Bore's and the Long Barrel's crowns (the Loadout's pictures, and the muzzle up close on
+  the turntable) are polished steel and brass with one clean highlight, a chamfered edge and a recessed face, their
+  rims round with no corners along them.
+- [ ] **The vertical grip** is a little longer (64 mm) on the AEG Rifle and the Sniper Rifle. Long enough? Your left
+  hand still holds it where the short one was until the first-person arms are refitted (known issue).
+
 ## The Pump Shotgun (SH1)
 
 Dev content: tick Settings › Dev › Dev content (level 12; Dev unlocks it at any level). It wears the Sniper Rifle's

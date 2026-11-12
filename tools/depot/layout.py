@@ -247,7 +247,13 @@ box("drums", 50.5, -32.0, 1.8, 1.8)
 box("lowcrate", 39.5, -23.5, 1.0, 2.6)
 box("barrels", 33.0, -19.0, 1.3, 0.65)
 box("crates", 32.4, -23.5, 1.2, 2.4)                  # default box inside the Offices door
-box("crates", 49.2, -26.0, 1.2, 2.4)                  # a stack beside the flag to hold from
+# MB1: the site's two stacks are set by the pole's lines. The flag stack stands between the pole and both Offices
+# doors, so whoever is at the pole (the defender holding it, later whoever raises) is hidden from the way the attack
+# comes in and is cleared only by swinging wide round a crate or by the A short mouth behind them. The stairs stack
+# stands between the pole and the A stairs mouth, so a raise is not shot down from the defenders' own stairs: they
+# come onto the site to stop it.
+box("crates", 41.5, -27.2, 1.2, 2.4)                  # the flag stack
+box("crates", 46.2, -23.8, 2.4, 1.2)                  # the stairs stack
 box("pillar", 41.0, -20.5, 0.6, 0.6)
 FLAG_A = (44.0, -27.0)
 
@@ -279,7 +285,10 @@ box("lowcrate", 47.5, 21.0, 3.0, 1.0)
 box("drums", 51.0, 32.0, 1.8, 1.8)
 box("lowcrate", 41.0, 23.5, 1.0, 2.6)
 box("crates", 34.5, 21.0, 1.2, 3.0)                  # default box inside the north B door
-box("crates", 50.0, 27.0, 1.2, 2.4)
+# MB1: as on A, the flag stack between the pole and both Containers doors, the ramp stack between it and the B ramp
+# mouth; the B alley mouth is the way round both.
+box("crates", 42.5, 27.6, 1.2, 2.4)                   # the flag stack
+box("crates", 47.0, 24.4, 2.4, 1.2)                   # the ramp stack
 box("pillar", 40.5, 26.5, 0.6, 0.6)
 FLAG_B = (45.0, 28.0)
 
@@ -302,15 +311,23 @@ FLAGS = [FLAG_A, FLAG_B]
 BOMB_SITES = [(44.0, -26.0, 0), (45.0, 27.0, 0)]
 
 # ================================================================ the bots' lanes (end 0's side to end 1's)
+# MB1: the north and south lanes end ON the sites. Attack / Defend's defenders hold a lane's last two points
+# (RoundPlanner), and those were the foot of the A stairs and the B ramp, outside the sites and open to them: now one
+# holds the pole from behind its flag stack and one the low crate by the stairs (ramp) mouth, across the pole from it.
+# The middle lane's two posts are behind the Garage dog-leg's two stacks (they stood in the open beside them).
+# Each lane has one point about 4.5 m short of the field's middle and one as far past it, none between: a squad
+# sweeps to the first point past the middle, and the old points sent the west 6 m deeper than the east down the Chrono
+# hall and 4 m deeper down the Box yard (the east 7 m deeper through the Lounge), so the west won 44 % of Elimination's
+# rounds. Dead even they gave it 55 %; the middle lane's two are 0.8 m east of even (the west 5.3 m past, the east 3.7).
 LANES = {
     "n": [(-51.2, -14.5), (-48.5, -16), (-46.5, -21.5), (-42.6, -26.4), (-36, -26), (-28, -24.5),
-          (-19, -21), (-11.5, -22.6), (-6, -22), (3, -21.2), (10, -24), (18, -24), (27, -24), (30, -23.5),
-          (36, -25), (44, -22.5), (49.5, -18), (51.8, -6.5)],
-    "m": [(-40, -1), (-30, -8.5), (-23, -12.5), (-16, -12.5), (-9, -7.5), (-1, -7), (8, -5),
-          (15, 0), (19, 5.5), (25.5, 4.6), (29.5, 2.2), (34, 2.2), (35.5, 5.5), (41, 6.2)],
+          (-19, -21), (-11.5, -22.6), (-2.7, -21.7), (6.3, -21.4), (10, -24), (18, -24), (27, -24), (30, -23.5),
+          (36, -25), (41.5, -24.8), (42.9, -27.2), (47.7, -19.6)],
+    "m": [(-40, -1), (-30, -8.5), (-23, -12.5), (-16, -12.5), (-9, -7.5), (-3.1, -7.1), (5.8, -5.5), (8, -5),
+          (15, 0), (19, 5.5), (25.5, 4.6), (29.5, 2.2), (34, 2.2), (33.8, 6.3), (40.3, 2.3)],
     "s": [(-51.2, 6.5), (-48.5, 10), (-48.5, 15), (-45, 19), (-37, 22), (-30, 19.5), (-21, 19.5),
-          (-14, 24.5), (-9.5, 24.6), (-8, 19.5), (-4, 18.2), (5, 18.8), (12, 18.6), (20, 18.6), (27.5, 18.4),
-          (31, 20.5), (33, 18.8), (39, 20.5), (44, 21.5), (49.5, 18), (52, 15)],
+          (-14, 24.5), (-9.5, 24.6), (-8, 19.5), (-6.2, 18.9), (2.9, 18.7), (12, 18.6), (20, 18.6), (27.5, 18.4),
+          (31, 20.5), (33, 18.8), (39, 20.5), (42.8, 23.0), (43.9, 27.7), (47.6, 19.6)],
 }
 
 
