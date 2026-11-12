@@ -118,6 +118,10 @@ func _run() -> void:
 	var lifts := LiftView.build(map, play.map_style, tuning.lifts, play.lifts)
 	if lifts != null:
 		port.add_child(lifts)
+	# Its ticket gates' paddles, shut, as a match begins with nobody at them (SM3).
+	var paddles := GatePaddles.build(map, play.gate_paddles)
+	if paddles != null:
+		port.add_child(paddles)
 	var teams := TeamColours.resolve(TeamColours.Set.STANDARD, false, null, play.teams).figures
 	var poles: Array[FlagView] = []
 	for i in map.poles.size():
@@ -135,10 +139,12 @@ func _run() -> void:
 			roof.lamp_lights() if roof != null else null)
 	if site != null:
 		level.set_detail(values.mesh_detail)
-	# The doors, poles and a site's props in the baked light near them, as a match draws them (BP7).
+	# The doors, poles, gate paddles and a site's props in the baked light near them, as a match draws them (BP7).
 	var lights := level.baked_lights()
 	if doors != null:
 		doors.relight(lights)
+	if paddles != null:
+		paddles.relight(lights)
 	for pole in poles:
 		pole.relight(lights)
 	if site != null and site.props() != null:

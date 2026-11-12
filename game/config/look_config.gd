@@ -163,6 +163,9 @@ const GLOBAL_DUST := &"look_dust"
 	# butter, sage).
 	&"brick": Color8(0xa3, 0x4a, 0x6a), &"seafoam": Color8(0x7f, 0xb8, 0xad), &"lilac": Color8(0xb9, 0xa8, 0xd6),
 	&"butter": Color8(0xe6, 0xd4, 0x78), &"sage": Color8(0xa9, 0xc4, 0x8e),
+	# Subway's old booking counter (SM3): a dark walnut, dull so no shade of it reads as Beta's orange, even stored
+	# as 8-bit linear vertex colours (a redder wood drifts within 20 degrees of it)
+	&"walnut": Color8(0x70, 0x62, 0x5b),
 }
 ## The six site colours, spread evenly over a map's paint so no one colour dominates.
 @export var site_colours: Array[StringName] = [&"crimson", &"violet", &"yellow", &"teal", &"green", &"cream"]

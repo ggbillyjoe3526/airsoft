@@ -41,6 +41,9 @@ class Block:
 	## pickup, a thicket's spruce; PropDressConfig.model_lays), empty for its box. Look only: the box is still what BBs meet
 	## (a round prop's, MapStyle.round_steps, as its stepped boxes).
 	var dress: StringName = &""
+	## The world direction its prop's front faces (`facing` in the file: +x, -x, +z or -z; SM3), or empty for the lay's
+	## own rule (FIT: towards the field's middle). A bench's seat to the track, its back to the wall. Look only.
+	var facing: StringName = &""
 	## Its own colour (sRGB; `colour` in the file, 0xRRGGBB, ST1: a map's palette paint, each building its own), or
 	## clear (alpha 0) to take its kind's (MapStyle.block_colour).
 	var colour: Color = Color(0, 0, 0, 0)
@@ -385,6 +388,11 @@ func _read_blocks(list: Variant, style: MapStyle) -> void:
 		b.surface = SURFACES.get(str(bd["surface"]), style.surface_of(b.kind)) if bd.has("surface") \
 				else style.surface_of(b.kind)
 		b.dress = StringName(str(bd.get("dress", "")))
+		if bd.has("facing"):
+			b.facing = StringName(str(bd["facing"]))
+			if not RISES.has(String(b.facing)):
+				warnings.append("block %d's facing %s is not +x, -x, +z or -z; the lay's own kept" % [i, bd["facing"]])
+				b.facing = &""
 		if bd.has("colour"):
 			var paint: Variant = bd["colour"]
 			if (paint is float or paint is int) and float(paint) >= 0.0 and float(paint) <= 0xffffff \
