@@ -93,8 +93,9 @@ def shot(path: str, at: Vector, toward: Vector, fov_across: float = FOV_ACROSS) 
 
 
 def hold(folder: str, name: str, to_eye: Matrix, rig, objects: list, aim_forward: float = 0.25,
-         views: tuple = VIEWS) -> None:
-    """The hold posed now, as `name`: from the eye at the hip, from the eye aimed (the eye on the replica's rear sight
+         views: tuple = VIEWS, eye: Vector = None) -> None:
+    """The hold posed now, as `name`: from the eye at the hip (at `eye`, where the game draws the replica somewhere
+    other than where its hold is solved; else the origin), from the eye aimed (the eye on the replica's rear sight
     line, the replica `aim_forward` m ahead), and from outside round each hand."""
     os.makedirs(folder, exist_ok=True)
     rig.write()
@@ -103,13 +104,14 @@ def hold(folder: str, name: str, to_eye: Matrix, rig, objects: list, aim_forward
     for o in swapped:
         o.hide_render = not o.hide_render
     if "hip" in views:
-        shot(os.path.join(folder, "%s_hip.jpg" % name), Vector((0.0, 0.0, 0.0)), Vector((0.0, 1.0, 0.0)))
+        hip = eye if eye is not None else Vector((0.0, 0.0, 0.0))
+        shot(os.path.join(folder, "%s_hip.jpg" % name), hip, hip + Vector((0.0, 1.0, 0.0)))
     rear = next((o for o in objects if o.name.split(".")[0] == "RearSight"), None)
     if "aim" in views and rear is not None:
         sight = rear.matrix_world.translation
         origin = to_eye.translation
-        eye = Vector((sight.x, origin.y - aim_forward, sight.z))
-        shot(os.path.join(folder, "%s_aim.jpg" % name), eye, eye + Vector((0.0, 1.0, 0.0)))
+        aimed = Vector((sight.x, origin.y - aim_forward, sight.z))
+        shot(os.path.join(folder, "%s_aim.jpg" % name), aimed, aimed + Vector((0.0, 1.0, 0.0)))
     # Each hand's middle: between its wrist and its middle finger's knuckle.
     right, left = ((rig.pose["Hand_" + s].translation + rig.pose["Middle1_" + s].translation) * 0.5 for s in "RL")
     # Round both hands when they hold together, else the right one.

@@ -6,13 +6,15 @@ extends Resource
 ## Where each replica's origin (above the trigger) sits at the hip, by replica id; others use `hip_default`. The
 ## pistols sit nearer the middle and higher, their hand and wrist in view but not the forearm (owner, 2026-11-06); the
 ## rifles sit near and low, so the left hand on the handguard shows and the right hand lies under the view's bottom
-## edge (FP1, the owner). The arms model (tools/blender/arms/arms.py HOLDS) is built for these places.
+## edge (FP1, the owner); the Compact SMG, a shorter replica, sits lower and further off than they do, which draws it
+## at their size and angle (the owner: "too high. It should be a similar angle and scale to the rifles"). The arms
+## model (tools/blender/arms/arms.py HOLDS) is built for these places.
 @export var hip: Dictionary[StringName, Vector3] = {
 	&"aeg": Vector3(0.1, -0.135, -0.19),
 	&"pistol": Vector3(0.05, -0.07, -0.34),
 	&"cyber": Vector3(0.05, -0.07, -0.34),
 	&"sniper": Vector3(0.1, -0.135, -0.19),
-	&"smg": Vector3(0.1, -0.135, -0.19),
+	&"smg": Vector3(0.1, -0.165, -0.24),
 }
 @export var hip_default: Vector3 = Vector3(0.13, -0.16, -0.32)
 ## Aimed, the sight line (rear to front sight) runs through the eye; the replica sits this far forward of it (the
@@ -20,13 +22,18 @@ extends Resource
 @export var aim_forward: Dictionary[StringName, float] = {&"aeg": -0.2, &"pistol": -0.25, &"cyber": -0.25,
 		&"sniper": -0.2, &"smg": -0.15}
 @export var aim_forward_default: float = -0.25
-## Aimed, your hands are out of the view (FP1, the owner): the arms fade out as the sight's raise (as drawn, 0..1)
-## passes from aim_hands_fade's x to its y, and are hidden from there up. A replica in aim_hands_hint (the pistols)
-## keeps a hint of them instead: what lies below the sight line fades, whole down to aim_hint_below's x (m under it)
-## and gone by its y, so only the top of the hands under the slide shows.
-@export var aim_hands_fade: Vector2 = Vector2(0.3, 0.8)
+## Aimed, a rifle's hands are out of the view (FP1, the owner: never faded; "at most a small tip of the players left
+## hand thumb"): the replica hides them. As the sight comes up your left shoulder moves this far (m, the replica's
+## axes: x right, y up, z back; by replica id) and the elbow turns to hang under the line from it to the wrist
+## (ArmsTuck), so the forearm lies behind the replica too.
+@export var aim_tuck: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.14, -0.06, 0.0),
+		&"sniper": Vector3(0.14, -0.06, 0.0), &"smg": Vector3(0.14, -0.06, 0.0)}
+## A replica in aim_hands_hint (the pistols) keeps the tops of its hands under the slide (the owner's pick of three
+## pictures): as the sight's raise (as drawn, 0..1) passes from aim_hint_span's x to its y, what lies below the sight
+## line fades out, whole down to aim_hint_below's x (m under it) and gone by its y.
+@export var aim_hint_span: Vector2 = Vector2(0.3, 0.8)
 @export var aim_hands_hint: Array[StringName] = [&"pistol", &"cyber"]
-@export var aim_hint_below: Vector2 = Vector2(0.045, 0.075)
+@export var aim_hint_below: Vector2 = Vector2(0.08, 0.12)
 ## Looking through an optic, by its part Key (ReplicaView, OpticGlass): its glass's centre (z in the part's own space,
 ## -z forward, on the sight line) and radius (m), measured from the part models; how far behind the glass the eye sits
 ## aimed (m, so the glass shows as the approved sight concepts do); and the mark on the glass (dot: a lit red dot;
@@ -110,7 +117,7 @@ extends Resource
 @export var reload_cant_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.6, 0.0, -0.25),
 		&"sniper": Vector3(0.5, 0.1, -0.25), &"pistol": Vector3(0.9, 0.2, -0.3), &"cyber": Vector3(0.9, 0.2, -0.3),
 		&"smg": Vector3(0.6, 0.0, -0.25)}
-@export var reload_move_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.1, 0.04, 0.06),
+@export var reload_move_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.08, 0.04, 0.06),
 		&"sniper": Vector3(0.06, 0.1, -0.05), &"pistol": Vector3(0.1, 0.06, 0.0), &"cyber": Vector3(0.1, 0.06, 0.0),
 		&"smg": Vector3(0.06, 0.04, 0.06)}
 ## A replica listed here comes into its cant over this share of the reload, holds it and goes back over the same share

@@ -19,9 +19,10 @@ extends Node3D
 ## (HandSurface_<side>, the glove's cloth) in the model's painted skin (FP1: the nails' own material, whose maps share
 ## the glove's layout).
 ##
-## FP1 (the owner): aimed, no hands show. As the sight comes up (`aim`) the arms fade out and are then hidden; a replica
-## in ViewModelConfig.aim_hands_hint (a pistol) keeps a hint of them, what lies just under the sight line. While they
-## fade they wear ArmsFade's copies of their materials; at the hip, their own as ever.
+## FP1 (the owner): aimed, a rifle's hands are out of view, never faded: the replica hides them, and as the sight comes
+## up (`aim`) the left arm is drawn in under it (ArmsTuck, ViewModelConfig.aim_tuck) so the forearm lies behind it too.
+## A replica in ViewModelConfig.aim_hands_hint (a pistol) keeps the tops of its hands: what lies further under the
+## sight line fades (ArmsFade's copies of the materials, worn only while the sight is raised at all).
 
 const MODEL := "res://assets/models/arms/arms.glb"
 ## The model's names (tools/blender/arms/arms.py).
@@ -69,11 +70,12 @@ var _worn: Dictionary[Material, Array] = {}
 var _fading: Dictionary[Material, Array] = {}
 ## The fading copies of the look worn now, one each (what `aim` fades).
 var _fade_now: Array[ShaderMaterial] = []
-## How far the arms are faded out as a whole and below the sight line (0..1), and whether they wear the fading
-## copies now (the sight raised at all).
-var _gone: float = 0.0
+## How far what lies below the sight line is faded out (0..1), and whether the arms wear the fading copies now.
 var _hint: float = 0.0
 var _faded: bool = false
+## The left arm drawn in as the sight comes up, and whether the bones carry it now.
+var _tuck: ArmsTuck = null
+var _tucked: bool = false
 var _kind: int = FigureMix.HUMAN
 ## Skin-only arms (Dev), worn by a human's arms.
 var _skin: bool = false
@@ -117,6 +119,7 @@ func setup(cfg: ViewModelConfig) -> void:
 	_skeleton = skeletons[0] as Skeleton3D if not skeletons.is_empty() else null
 	if _skeleton != null:
 		_throw = ArmsThrow.new(_skeleton, cfg)
+		_tuck = ArmsTuck.new(_skeleton)
 		_hand = _skeleton.find_bone(LEFT_HAND)
 	for node: Node in _model.find_children("*", "MeshInstance3D", true, false):
 		var mesh_node := node as MeshInstance3D
@@ -269,31 +272,47 @@ func set_shown(on: bool) -> void:
 	_show_model()
 
 
-## Fades the arms for the sight raised `raise` (0 at the hip, 1 up, as drawn): out over ViewModelConfig.aim_hands_fade's
-## span of it and then hidden; on a replica in aim_hands_hint, only what lies below the sight line (aim_hint_below),
-## so a hint of the hands stays under it. Call each frame.
+## Poses and dresses the arms for the sight raised `raise` (0 at the hip, 1 up, as drawn): the left arm drawn in
+## under the replica (ViewModelConfig.aim_tuck); on a replica in aim_hands_hint, what lies below the sight line faded
+## out over aim_hint_span's span of the raise (aim_hint_below), the tops of the hands left. Call each frame, after
+## `follow`.
 func aim(raise: float) -> void:
 	if _model == null or _on == &"":
 		return
-	var share := smoothstep(_cfg.aim_hands_fade.x, _cfg.aim_hands_fade.y, raise)
-	var hinted := _cfg.aim_hands_hint.has(_on)
-	var gone := 0.0 if hinted else share
-	var hint := share if hinted else 0.0
-	if is_equal_approx(gone, _gone) and is_equal_approx(hint, _hint):
+	_draw_in(raise)
+	var hint := 0.0
+	if _cfg.aim_hands_hint.has(_on):
+		hint = smoothstep(_cfg.aim_hint_span.x, _cfg.aim_hint_span.y, raise)
+	if is_equal_approx(hint, _hint):
 		return
-	_gone = gone
 	_hint = hint
-	if (share > 0.0) != _faded:
-		_faded = share > 0.0
+	if (hint > 0.0) != _faded:
+		_faded = hint > 0.0
 		_dress()
 	for material in _fade_now:
-		ArmsFade.fade(material, gone, hint)
-	_show_model()
+		ArmsFade.fade(material, hint)
 
 
-## How far the arms are faded out as a whole (0: drawn; 1: hidden), and below the sight line.
-func faded() -> Vector2:
-	return Vector2(_gone, _hint)
+## How far what lies below the sight line is faded out (0: the arms whole; 1: only the tops of the hands).
+func hinted() -> float:
+	return _hint
+
+
+## The left arm drawn in under the replica for the sight raised `raise`, over the pose the clip gives: the clip's pose
+## is put back first, since the last frame's is still in the bones.
+func _draw_in(raise: float) -> void:
+	if _tuck == null or _anim == null or _anim.assigned_animation == "":
+		return
+	var shift: Vector3 = _cfg.aim_tuck.get(_on, Vector3.ZERO) * raise
+	if shift.is_zero_approx() and not _tucked:
+		return
+	_tuck.clear(_skeleton)
+	_anim.seek(_anim.current_animation_position, true)
+	_tucked = not shift.is_zero_approx()
+	if _tucked:
+		# The replica's axes (x right, y up), in the skeleton's.
+		var to_bones := _skeleton.global_basis.inverse() * (_model.get_parent() as Node3D).global_basis
+		_tuck.draw_in(_skeleton, to_bones * shift, to_bones * Vector3.DOWN, raise)
 
 
 ## Takes the hold on now as the one a throw starts from, the pin's ring's middle at `ring` (the model's frame: the
@@ -379,10 +398,10 @@ func _to_root(mark: Node3D) -> Transform3D:
 	return t
 
 
-## The model shown when it holds something, isn't put away (`set_shown`) and isn't faded right out (`aim`).
+## The model shown when it holds something and isn't put away (`set_shown`).
 func _show_model() -> void:
 	if _model != null:
-		_model.visible = _shown and _on != &"" and _gone < 1.0
+		_model.visible = _shown and _on != &""
 
 
 ## Shows the left arm (`on`) or hides it, each of its meshes as the look worn asks.
@@ -419,7 +438,7 @@ func _dress() -> void:
 				_fading[own] = _worn[own].map(_fading_copy)
 			var fading := _fading[own][look] as ShaderMaterial
 			if fading != null and not _fade_now.has(fading):
-				ArmsFade.fade(fading, _gone, _hint)
+				ArmsFade.fade(fading, _hint)
 				_fade_now.append(fading)
 			mesh_node.set_surface_override_material(i, fading if _faded and fading != null else _worn[own][look])
 	_show_looks()

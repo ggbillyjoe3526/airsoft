@@ -31,6 +31,7 @@ from mathutils import Matrix, Vector
 
 import cycle
 import pose
+from glove import seg_dist
 from pose import Collider, Rig
 
 CLIP = "Reload"
@@ -132,6 +133,11 @@ CLEAR = Vector((0.0, -0.01, -0.06))
 # Off a pistol held in both hands (FP1) it draws out to the left first: straight down, the palm dragged through the
 # right hand's fingers it lies on.
 CLEAR_BOTH = Vector((-0.035, -0.01, -0.035))
+# And its elbow keeps ARM_CLEAR (m) off the right arm's bones as posed: tucked in under the pistol it would pass through
+# the right forearm, below the screen. Checked at the elbow and these shares of the way up the upper arm and down the
+# forearm from it (the wrists meet at the pistol).
+ARM_CLEAR = 0.09
+ARM_CLEAR_AT = (0.0, 0.2, 0.4)
 CLEAR_SHARE = 0.4
 OPEN_TURN = 30.0
 OPEN_FIRST = 0.5
@@ -195,6 +201,10 @@ class View:
         # When the hand takes the magazine and lets it go (shares of the reload).
         self.carry = listed(vm["reload_carry"], rid)
         self.pivot = pivot.copy()
+        # The game draws the replica at ViewModelConfig.hip, which need not be where its hold is solved (`pivot`: a
+        # rifle's, FP1): the arms ride it there, so the view is that much off.
+        hip = listed(vm["hip"], rid)
+        self.seen = Vector((hip[0], -hip[2], hip[1])) - pivot if hip else Vector((0.0, 0.0, 0.0))
         self.tan_h = math.tan(math.radians(float(vc["horizontal_fov_16x9"])) * 0.5)
         self.tan_v = self.tan_h * 9.0 / 16.0
         self.near = float(vc["near"])
@@ -213,7 +223,8 @@ class View:
         lift, inward, forward = (v * b for v in self.move)
         r = (Matrix.Rotation(turn, 4, "Z") @ Matrix.Rotation(tilt, 4, "X")
              @ Matrix.Rotation(-roll, 4, "Y"))
-        return Matrix.Translation(self.pivot + Vector((-inward, forward, lift))) @ r @ Matrix.Translation(-self.pivot)
+        return (Matrix.Translation(self.seen + self.pivot + Vector((-inward, forward, lift))) @ r
+                @ Matrix.Translation(-self.pivot))
 
     def hidden(self, cam: Matrix, pts: list) -> bool:
         """Whether every point (eye space as built) is out of view through `cam`, HIDE_MARGIN clear of its edges."""
@@ -327,6 +338,8 @@ class MagChange:
         self.rig, self.hand, self.rid, self.arms = rig, hand, rid, arms
         # The arms checked against the replica (`frame`): both, or the left alone where the right is part of the frame.
         self.moving = arms
+        # Bones the left elbow keeps clear of (each its two ends, eye space): the right arm's, in both hands.
+        self.avoid = []
         # The replica's own space into eye space (its hold), and the hand's grasp once found (`grasp`).
         self.hold_to_eye = hold_to_eye
         self.grip = None
@@ -392,6 +405,9 @@ class MagChange:
             bend = math.degrees(straight.angle(fore))
             wrong = (max(0.0, e.z - s.z - ELBOW_RISE) + max(0.0, e.x - ELBOW_X)
                      + (min(CHEST[0] - e.y, CHEST[1] - abs(e.x)) if e.y < CHEST[0] and abs(e.x) < CHEST[1] else 0.0))
+            for share in ARM_CLEAR_AT:
+                for p in (e.lerp(s, share), e.lerp(w, share)):
+                    wrong += sum(max(0.0, ARM_CLEAR - seg_dist(p, a2, b2)) for a2, b2 in self.avoid)
             past = max(0.0, self.view.shown(cam, s, e, w) - SHOWN_FROM)
             cost = (cover * VIS_COST + past * SHOWN_COST + max(0.0, bend - BEND_FREE) * BEND_COST
                     + max(0.0, bend - BEND_HARD) * BEND_HARD_COST + wrong * PLACE_COST
@@ -740,6 +756,8 @@ def change_mag(rig: Rig, hand: pose.Hand, rid: str, hold_to_eye: Matrix, objects
             change.frame.append(still)
             change.moving = arms[:1]
             change.clear = CLEAR_BOTH
+            change.avoid = [(rig.pose[a2 + "_R"].translation.copy(), rig.pose[b2 + "_R"].translation.copy())
+                            for a2, b2 in (("UpperArm", "Forearm"), ("Forearm", "Hand"))]
         held = cycle.snapshot(rig)
         held_hand = rig.pose["Hand_" + SIDE].copy()
         held_turns = {b: rig.local.get(b, Matrix.Identity(3)).copy() for b in change.fingers}

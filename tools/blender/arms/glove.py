@@ -35,10 +35,16 @@ STRAP = (-0.016, -0.044, 0.0016)
 # The sleeve: where its cuff ends, how far it stands off the skin at the cuff and at the shoulder, its banded cuff's
 # width and its hem.
 SLEEVE_END = -0.040
+# The wrist, fuller than the source arm's (FP1, the owner: "too thin at the wrist"; it is 50 mm across there, a man's
+# about 60): the shares it is widened across and thickened through, whole from WRIST_SPAN's second mark to its third
+# (m along the forearm from the wrist joint) and eased out to nothing at the first, up the forearm, and the last, in
+# the heel of the hand. The sleeve's cuff sits closer to it (SLEEVE_OFF), so hand, wrist and sleeve run on evenly.
+WRIST_FULL = (0.20, 0.13)
+WRIST_SPAN = (-0.150, -0.060, -0.004, 0.026)
 # How much of the upper arm the model keeps above the elbow (m): the view never shows the shoulder, and a moved
 # shoulder tore the sleeve's top.
 UPPER_KEEP = 0.13
-SLEEVE_OFF = (0.0080, 0.0105)
+SLEEVE_OFF = (0.0055, 0.0105)
 SLEEVE_BAND = 0.030
 SLEEVE_HEM = 0.0022
 SLEEVE_NORMAL_SMOOTH = 4
@@ -653,10 +659,31 @@ def ring(surf: Surface, fr: Frame, span: tuple, thick: float, mat: str, cols: in
     return surf.shell(origin, direction, 5, cols, thick, mat, True, None, 3)
 
 
+def wrist_full(verts: list, fr: Frame) -> list:
+    """`verts` with the wrist widened and thickened (WRIST_FULL over WRIST_SPAN), about the forearm's line."""
+    across = fr.knuckles[3] - fr.knuckles[0]
+    across = (across - fr.fdir * across.dot(fr.fdir)).normalized()
+    through = fr.fdir.cross(across)
+    a, b, c, d = WRIST_SPAN
+    out = []
+    for v in verts:
+        t = fr.along(v)
+        if t <= a or t >= d:
+            out.append(v)
+            continue
+        k = (t - a) / (b - a) if t < b else (d - t) / (d - c) if t > c else 1.0
+        k = k * k * (3.0 - 2.0 * k)
+        radial = v - fr.wrist - fr.fdir * t
+        out.append(v + across * (radial.dot(across) * WRIST_FULL[0] * k) +
+                   through * (radial.dot(through) * WRIST_FULL[1] * k))
+    return out
+
+
 def build_left(shoulder: Vector) -> tuple:
     """The left arm: glove and its parts, cuff and strap, and sleeve, with weights; and its joints."""
     src_v, src_f, j = load_source(shoulder)
     fr = Frame(j)
+    src_v = wrist_full(src_v, fr)
     up_dir = (j["shoulder"] - j["elbow"]).normalized()
     # Cut where the sleeve ends and where its band does, so both run clean round the arm (a face-by-face edge left
     # the cuff ragged and some of its edges open, which the shoulder's cap then closed in long slivers through the arm).

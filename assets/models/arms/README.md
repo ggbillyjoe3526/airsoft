@@ -41,13 +41,14 @@ hand (BL4, 2026-11-05). Built by `tools/blender/arms/arms.py` (`python3 -I tools
   posing both arms, and an empty `Hold_<id>` where that replica's origin sits in it (at ViewModelConfig.hip). In game
   the arms ride the replica's node with that empty on its origin, so they follow its sway, kick, cant and drop.
   - The AEG Rifle: the right hand high on the pistol grip, the little finger round its foot, index on the trigger,
-    thumb wrapped round the grip's left side; the left hand under the handguard's middle, its forearm rising to it from below, fingers resting on its right
-    side (not over its top), thumb along its left side.
+    thumb wrapped round the grip's left side; the left hand under the handguard's middle, its forearm rising to it from below, fingers closed under
+    its right side out of the eye's sight (FP1, the owner: "only the thumb of the left hand"), thumb along its left side.
   - Pistols (`pistol`, `cyber`): held high in the right hand, the web of the hand on the back strap under the
     beavertail, the fingers closed up under the trigger guard with the little finger on the grip, the thumb forward
     along the frame's left side under the slide. `<id>_Hold` lowers the left arm (the bots' one-handed hold);
     `<id>_two_Hold` and `<id>_two_Reload` (FP1, yours: ArmsView.TWO_HANDS) bring the left hand up to wrap the right
-    hand's fingers, its thumb forward under the right one.
+    hand's fingers tight, its heel on the grip's bare left side, and lay the right thumb on it (the owner: "the right
+    hand thumb should be resting on the left hand").
   - Bombs (`smoke`, `flash`; GT2): each fitted to its own model (`assets/models/grenades/`), held in a fist in the
     right hand alone, the lever under the palm, the fingers round its front and the thumb round its back; the left arm
     lowered and hidden. Its mark sits where GrenadeView draws the bomb in hand (HELD_AT), the bomb tipped as it tips it

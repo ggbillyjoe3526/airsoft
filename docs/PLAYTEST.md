@@ -185,9 +185,11 @@ never players.
   its own, and no forearm comes across the screen (at most the sleeve's hem at its edge). Do the rifles' steeper
   tip-up (the stock down out of view) and the pistols' tip toward you read well? Settings › Dev › Skin-only arms swaps the gloves for
   bare hands at once.
-- [ ] **Your hands, at the hip and aimed** (FP1). A rifle sits near and low: only your left hand on the handguard
-  shows. A pistol is in both hands. Raise the sight: no hands behind a rifle's sights, only the top of them under a
-  pistol's slide. Gloves, then Skin-only arms: the skin, the glove's seams and stitching and the sleeve's cloth
+- [ ] **Your hands, at the hip and aimed** (FP1). A rifle sits near and low: only your left hand shows, under the
+  handguard, its thumb on the near side and no fingers on the far side; the SMG sits as the rifles do. A pistol is
+  held tight in both hands, no left fingers showing, the right thumb resting on the left hand. Raise the sight: a
+  rifle's hands leave the view behind it without fading (a tip of the left thumb at most), and only the top of the
+  hands shows under a pistol's slide. Gloves, then Skin-only arms: the skin, the glove's seams and stitching and the sleeve's cloth
   should hold up close on Inspect (Y); the right index finger and the skin between wrist and thumb look natural.
 - [ ] **The replica moves with you** (FP1). Walk, sprint, strafe, jump and land, crouch, stand, fire, switch: a
   gentle bob with your steps, breathing at rest, a lean into a strafe, a dip on landing, a light flick with each

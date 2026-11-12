@@ -38,11 +38,18 @@ IMAGES = {"colour": "ArmsSkin", "normal": "ArmsSkinNormal", "rough": "ArmsSkinRo
 
 # Tones (sRGB 0..1): the back of the hand, the palm, a knuckle's flush, a fingertip's, a vein's cast, a crease's
 # shade, a hair.
-TONE = {"back": (0.800, 0.608, 0.510), "palm": (0.868, 0.660, 0.590), "flush": (0.770, 0.470, 0.420),
-        "tip": (0.860, 0.570, 0.530), "vein": (0.560, 0.640, 0.640), "crease": (0.600, 0.370, 0.320),
-        "hair": (0.330, 0.240, 0.180), "pad": (0.850, 0.560, 0.520)}
+TONE = {"back": (0.730, 0.520, 0.420), "palm": (0.810, 0.585, 0.520), "flush": (0.720, 0.400, 0.350),
+        "tip": (0.800, 0.490, 0.450), "vein": (0.480, 0.560, 0.580), "crease": (0.480, 0.270, 0.230),
+        "hair": (0.330, 0.240, 0.180), "pad": (0.790, 0.480, 0.440)}
 # How strongly a crease shades the skin: on the back, on the palm's side.
-CREASE_SHADE = (0.20, 0.24)
+CREASE_SHADE = (0.42, 0.36)
+# How strongly the skin's tone varies (the game's light and its muted colours flatten a faint map): its mottling, its
+# blotches' green and blue, a knuckle's flush, a vein's cast, and the fine net's and the pores' shade.
+MOTTLE_SHADE = 0.11
+BLOTCH_SHADE = (0.08, 0.11)
+FLUSH_SHADE = 0.46
+VEIN_SHADE = 0.20
+FINE_SHADE = (0.12, 0.08)
 # The wrinkles over a middle knuckle: how far apart (m), and the fine ones along the back of each finger.
 WRINKLE_GAP = 0.00115
 FINGER_LINES = (0.0016, 0.00006)
@@ -53,18 +60,18 @@ NAIL_ROUGH = 0.30
 KNUCKLE_RISE = 0.00060
 KNUCKLE_DIMPLE = 0.00012
 JOINT_RISE = 0.00030
-JOINT_RINGS = 0.00022
+JOINT_RINGS = 0.00032
 LAST_CREASE = 0.00016
 PALM_CREASE = 0.00026
 PALM_LINE = 0.00030
-TENDON = 0.00028
-VEIN = 0.00022
-NET = 0.000045
+TENDON = 0.00040
+VEIN = 0.00032
+NET = 0.000070
 PORE = 0.000030
 # The fine net's cell (m), and the mottling's two sizes.
 NET_CELL = 0.00085
 MOTTLE = (0.012, 0.004)
-ROUGH = {"back": 0.50, "palm": 0.58, "net": 0.10, "crease": 0.16, "flush": -0.05}
+ROUGH = {"back": 0.60, "palm": 0.64, "net": 0.10, "crease": 0.16, "flush": -0.05}
 # Hairs: how many, their length (m, from, to), and how strongly they draw.
 HAIRS = 3600
 HAIR_LENGTH = (0.0022, 0.0055)
@@ -587,19 +594,19 @@ def paint(p: np.ndarray, n: np.ndarray, thumb: np.ndarray, hand: Hand) -> tuple:
     colour = mix(np.tile(tone("back"), (count, 1)), tone("palm"), front)
     mottle = noise(p, MOTTLE[0], 5) * 0.6 + noise(p, MOTTLE[1], 6) * 0.4 - 0.5
     blotch = noise(p, MOTTLE[0] * 0.7, 7) - 0.5
-    colour *= (1.0 + 0.07 * mottle)[:, None]
-    colour[:, 1] *= 1.0 - 0.05 * blotch
-    colour[:, 2] *= 1.0 - 0.07 * blotch
-    colour = mix(colour, tone("flush"), 0.36 * np.clip(flush, 0.0, 1.0))
+    colour *= (1.0 + MOTTLE_SHADE * mottle)[:, None]
+    colour[:, 1] *= 1.0 - BLOTCH_SHADE[0] * blotch
+    colour[:, 2] *= 1.0 - BLOTCH_SHADE[1] * blotch
+    colour = mix(colour, tone("flush"), FLUSH_SHADE * np.clip(flush, 0.0, 1.0))
     colour = mix(colour, tone("tip"), 0.40 * tip * (0.4 + 0.6 * front))
-    colour = mix(colour, tone("vein"), 0.13 * vein)
+    colour = mix(colour, tone("vein"), VEIN_SHADE * vein)
     # The palm's pads (the heel of the thumb, the little finger's side, under the fingers) a little redder.
     pads = front * on_hand * _smooth(0.42, 0.62, noise(p, 0.016, 91))
     colour = mix(colour, tone("pad"), 0.35 * pads)
     colour *= (1.0 + 0.025 * ridge)[:, None]
     crease = np.clip(crease, 0.0, 1.0)
     colour = mix(colour, tone("crease"), (CREASE_SHADE[0] + (CREASE_SHADE[1] - CREASE_SHADE[0]) * front) * crease)
-    colour *= (1.0 - fine * (0.07 * net + 0.05 * pore))[:, None]
+    colour *= (1.0 - fine * (FINE_SHADE[0] * net + FINE_SHADE[1] * pore))[:, None]
     # A few freckles on the back.
     spot, _ = cells(p, 0.0045, 21)
     freckle = np.exp(-(spot / 0.07) ** 2) * (noise(p, 0.0045, 22) > 0.62) * back

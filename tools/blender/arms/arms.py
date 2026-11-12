@@ -97,6 +97,10 @@ PLAN_COST = 1.0
 # the grip, to be pushed back out of it, costs this many degrees of wrist bend while it is rolled into place.
 PALM_FACING = 0.5
 ROLL_STEP = 6
+# A pistol's support hand (`support_pose`): the step of its turn about the upright line (degrees), and every which
+# of the palm's sampled points measures how close it lies.
+YAW_STEP = 5
+PALM_SPARSE = 4
 # The AEG's handguard: its centre line (x, z in the rifle's space) and radius (m), measured from the model; a support
 # hand's finger knuckles want to sit between CUP_GAP of its surface (their joints' centres, a finger's half thickness
 # out) to wrap it; the search's step (degrees), and what each degree off the forearm's rise and each metre of loose
@@ -199,12 +203,16 @@ RIGHT = {"d": 0.006, "f": 0.038, "x": 0.012, "slant": 30.0, "wrap": -30.0, "thum
 # to the right of the handguard's centre line, so the thumb's base sits under its left side and the whole thumb
 # presses on it (the owner, 2026-11-06: "the hand gripping it", not the rifle "just sitting in the hand"). No
 # finger's glove rises above `tips_below` (replica space; the rail's top is 0.0735): the fingers rest on the right side
-# and none stands over the top from the left (the owner's 16:30 note, the critic).
+# and none stands over the top from the left (the owner's 16:30 note, the critic). FP1 (the owner, 2026-11-12, of the
+# view from the eye: "You can still see the players fingers on the right side of the AEG. They should not be visible:
+# only the thumb of the left hand"): the hand is pitched up 15 degrees, was 40, and the fingertips aim low on the right
+# side (`tip_at`, `tips_below` 2 cm under the rail's top), so the fingers close under the handguard and neither they
+# nor their middle joints stand above its top edge as the eye sees it, at the hip or aimed.
 GUARD = {"kind": "guard", "y": 0.190, "forward": 0.026, "depth": 0.034, "standoff": 0.0,
-         "search": ((60, 60), (40, 40), (-20, -20)), "rise": 40.0, "shoulder": (-0.06, 0.04, -0.06), "drop": 0.06,
+         "search": ((60, 60), (15, 15), (-20, -20)), "rise": 40.0, "shoulder": (-0.06, 0.04, -0.06), "drop": 0.06,
          "across": 0.25, "thumb_x": -0.030, "thumb_f": 0.055, "thumb_z": 0.055, "thumb_hug": 2.0,
-         "thumb_pull": 30.0, "thumb_wide": 0.0, "tips_below": 0.068, "plan": 40.0,
-         "tip_at": (0.0275, 0.005, 0.044), "tip_swing": 8.0,
+         "thumb_pull": 30.0, "thumb_wide": 0.0, "tips_below": 0.050, "plan": 40.0,
+         "tip_at": (0.0275, 0.005, 0.030), "tip_swing": 8.0,
          "fingers": {"Index": (35, 35, 20), "Middle": (40, 45, 30), "Ring": (40, 45, 30), "Pinky": (35, 40, 25)},
          "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
 # A pistol is held in the right hand alone, as the game's look draws it: the left arm hangs at the side, out of view
@@ -282,9 +290,9 @@ SNIPER_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.100, -0.035), index=(0.030, -0.030
 # the fingertips reach higher up that side (`tip_at`), the little finger's lower (`tip_drop`, m below the others',
 # curled in under the fore-end rather than clawed out from it), and the thumb presses on the left side face just
 # above its centre line.
-SNIPER_GUARD = dict(GUARD, y=0.260, axis=(0.0, 0.030), radius=0.025, tips_below=0.052,
-                    tip_at=(0.0255, 0.000, 0.040), thumb_x=-0.028, thumb_z=0.040, thumb_f=0.050, forward=0.034,
-                    search=((40, 80), (20, 50), (-40, 0)), tip_drop={"Pinky": 0.015})
+SNIPER_GUARD = dict(GUARD, y=0.260, axis=(0.0, 0.030), radius=0.025, tips_below=0.036,
+                    tip_at=(0.0255, 0.000, 0.022), thumb_x=-0.028, thumb_z=0.040, thumb_f=0.050, forward=0.034,
+                    search=((40, 80), (10, 20), (-40, 0)), tip_drop={"Pinky": 0.015})
 # The Compact SMG (CS1): its grip raked 30 degrees as the AEG's and its front where the AEG's is at the hand's height
 # (smg.py), but 12 mm deeper, so the web and the little finger's knuckle sit that much further back and the thumb
 # reaches round onto the grip's left side a little further back; its roll, thumb and trigger finger searched.
@@ -292,8 +300,8 @@ SMG_RIGHT = dict(AEG_RIGHT, web=(0.042, -0.113, -0.056), pinky=(0.024, -0.074, -
                  thumb_at=(-0.022, -0.058, -0.026), rolls=None, thumb_turn=None, index_turn=None)
 # Its left hand under the slim handguard behind its side rails, as the AEG's (the handguard's centre line higher, its
 # top under the cocking tube at 0.096, so the fingertips stay under the tube and the right rail starts 2 cm ahead).
-SMG_GUARD = dict(GUARD, y=0.158, axis=(0.0, 0.072), radius=0.022, tips_below=0.090,
-                 tip_at=(0.0275, 0.005, 0.068), thumb_x=-0.028, thumb_z=0.080, search=((40, 80), (20, 50), (-40, 0)))
+SMG_GUARD = dict(GUARD, y=0.158, axis=(0.0, 0.072), radius=0.022, tips_below=0.074,
+                 tip_at=(0.0275, 0.005, 0.056), thumb_x=-0.028, thumb_z=0.080, search=((40, 80), (10, 20), (-40, 0)))
 # A foregrip fitted under the handguard (BP8, the owner's playtest note 6: "If a weapon has a grip attachment the
 # players left hand should hold it"): the left hand wraps the grip as the right hand wraps a pistol's, mirrored: its
 # palm on the grip's left side, the thumb's root (`web`) behind its back face, the index finger's knuckle high under
@@ -345,12 +353,14 @@ FLASH_RIGHT = dict(SMOKE_RIGHT, web=(0.012, -0.033, 0.004), index=(0.023, 0.012,
 # frame's left side under the slide, ahead of the right thumb (`thumb_at`). It is solved against the pistol and the
 # right arm as posed, and rests on both without passing into either. The bots keep the one-handed hold (`<id>_Hold`,
 # which FigureArmsHold reads); this one is keyed as `<id>_two_Hold`, which ArmsView takes when the model has it.
-SUPPORT_LEFT = {"kind": "support", "web": (-0.058, -0.071, -0.060), "index": (-0.038, -0.003, -0.062),
-                "pinky": (-0.043, -0.026, -0.126), "thumb_at": (-0.022, 0.0, -0.034), "pinky_cost": 300.0,
+SUPPORT_LEFT = {"kind": "support", "web": (-0.030, -0.088, -0.068), "index": (-0.043, -0.020, -0.064),
+                "pinky": (-0.043, -0.035, -0.130), "thumb_at": (-0.024, 0.0, -0.040), "pinky_cost": 300.0,
                 "thumb_hug": 2.0, "thumb_pull": 80.0, "thumb_curl": (40.0, 45.0), "swing": (0.0, 0.0, 0.0),
-                "shoulder": (-0.03, -0.30, 0.095), "drop": 0.06, "across": 0.10,
-                "fingers": {"Index": (60, 60, 40), "Middle": (60, 60, 45), "Ring": (60, 60, 45), "Pinky": (55, 55, 40)},
-                "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
+                "shoulder": (0.04, -0.30, 0.095), "drop": 0.06, "across": 0.10, "rolls": (-20.0, 20.0),
+                "yaws": (-10.0, 30.0), "gap_cost": 3000.0, "bend_cost": 0.5, "right_thumb": (0.5, 0.004),
+                "right_thumb_curl": (40.0, 60.0), "right_thumb_hug": 2.0, "right_thumb_pull": 80.0,
+                "fingers": {"Index": (35, 50, 30), "Middle": (35, 50, 30), "Ring": (35, 50, 30), "Pinky": (35, 50, 30)},
+                "curl_more": 0, "thumb": ((20.0, 0.0, 10.0), (10.0, 10.0))}
 # The Cyber's grip sits lower and further back and stands more upright: the same hand, moved and raked to it.
 CYBER_SUPPORT = dict(SUPPORT_LEFT, web=(-0.058, -0.075, -0.068), index=(-0.038, -0.007, -0.070),
                      pinky=(-0.043, -0.027, -0.134), thumb_at=(-0.022, -0.004, -0.042))
@@ -359,8 +369,19 @@ SUPPORT = {"pistol": SUPPORT_LEFT, "cyber": CYBER_SUPPORT}
 TWO = "two"
 # The right arm as the hold poses it, a still copy the left hand rests on.
 RIGHT_HELD = "RightHeld"
-# Where a rifle sits at the hip (ViewModelConfig.hip; BL_HIP=x,y,z tries another place, as the game writes it).
-RIFLE_HIP = godot_to_eye(*(float(v) for v in os.environ.get("BL_HIP", "0.10,-0.135,-0.19").split(",")))
+# The left arm as the hold in both hands poses it, a still copy the right thumb is laid on; and that thumb's two outer
+# sections, which the left hand is placed without (`solve_support`).
+LEFT_HELD = "LeftHeld"
+RIGHT_THUMB = ("Thumb2_R", "Thumb3_R")
+# Where a rifle sits as its hold is solved: the hip place the owner approved the holds at (BL4, BP8), its arms'
+# shoulders with it (BL_HIP=x,y,z solves at another place, as the game writes it). In the game the replica sits nearer
+# and lower (FP1, the owner: at the hip only the left hand shows; ViewModelConfig.hip, GAME_HIP here) and the arms ride
+# it as solved, so the hands on it and the bots' copies of them are the approved ones, hold for hold.
+RIFLE_HIP = godot_to_eye(*(float(v) for v in os.environ.get("BL_HIP", "0.12,-0.19,-0.26").split(",")))
+# Where the game draws each replica at the hip (ViewModelConfig.hip), where it is not where its hold is solved: the
+# build's pictures are taken from there (BL_PREVIEW).
+GAME_HIP = {rid: godot_to_eye(*at) for rid, at in (
+    (rid, magazine.listed(magazine.exported(magazine.VIEWMODEL)["hip"], rid)) for rid in ("aeg", "sniper", "smg")) if at}
 # And a pistol (BL_PISTOL_HIP likewise).
 PISTOL_HIP = godot_to_eye(*(float(v) for v in os.environ.get("BL_PISTOL_HIP", "0.05,-0.07,-0.34").split(",")))
 HOLDS = {
@@ -388,7 +409,8 @@ AIM_FORWARD = {"aeg": 0.2, "pistol": 0.25, "cyber": 0.25, "sniper": 0.2, "smg": 
 def pictures(name: str, hold: Hold, rid: str, rig: Rig, objects: list) -> None:
     """With BL_PREVIEW naming a folder, pictures of the hold posed now there, as `name` (preview.py)."""
     if os.environ.get("BL_PREVIEW"):
-        preview.hold(os.environ["BL_PREVIEW"], name, hold.to_eye(), rig, objects, AIM_FORWARD.get(rid, 0.25))
+        preview.hold(os.environ["BL_PREVIEW"], name, hold.to_eye(), rig, objects, AIM_FORWARD.get(rid, 0.25),
+                     eye=hold.at - GAME_HIP.get(rid, hold.at))
 
 
 def aim(base: Vector, yaw: float, pitch: float) -> Vector:
@@ -554,7 +576,8 @@ def pose_fingers(hand: pose.Hand, spec: dict, col: Collider, thumb_to: Vector = 
     curls = {}
     swing = dict(zip(("Middle", "Ring", "Pinky"), spec.get("swing", (0.0, 0.0, 0.0))))
     for name, start in spec["fingers"].items():
-        curls[name] = hand.settle(name, start, col, swing=swing.get(name, 0.0), root=root)
+        curls[name] = hand.settle(name, start, col, swing=swing.get(name, 0.0), root=root,
+                                  more=spec.get("curl_more"))
         if name in spec.get("press", ()):
             curls[name] = hand.press(name, curls[name], col, swing.get(name, 0.0))
     if thumb_to is not None:
@@ -614,6 +637,44 @@ def web_pose(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, r: dict, col: Colli
             best = (score, k, m, palm)
     print("  %s: web roll %d deg" % (side, best[1]))
     return best[2], best[3]
+
+
+def support_pose(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, r: dict, col: Collider) -> tuple:
+    """The left hand bone's pose wrapped round a pistol the right hand holds (FP1; the owner, 2026-11-12: "the player
+    is gripping the pistol tight"): laid by its three marks as `web_pose` lays a hand, then turned about the upright
+    line through its index knuckle (r["yaws"], degrees: the heel of the hand in toward the grip) and rolled about the
+    line from that knuckle to the thumb's root (r["rolls"]), each turn seated clear of the pistol and the right
+    hand, to the turn whose palm lies closest over them (the mean gap under its skin, r["gap_cost"] a metre) with the
+    wrist least bent. `web_pose` counts how far the hand was pushed off its marks instead, which stood this hand off
+    the grip, flat beside it."""
+    to_eye = hold.to_eye()
+    sx = pose.to_side("L")
+    i_rest, w_rest, p_rest = sx(j["finger-2-1"]), sx(j["finger-1-1"]), sx(j["finger-5-1"])
+    i_at, w_at, p_at = (to_eye @ Vector(r[k]) for k in ("index", "web", "pinky"))
+    base = pose.fit_turn([w_rest, i_rest, p_rest], [w_at, i_at, p_at])
+    axis = (base @ (w_rest - i_rest)).normalized()
+    up = (to_eye.to_3x3() @ Vector((0.0, 0.0, 1.0))).normalized()
+    rest = rig.rest["Hand_L"]
+    # The palm's own side of the hand bone's skin: the half of it furthest out toward what it holds.
+    out = rest.to_3x3().inverted() @ hand.palmar
+    skin = sorted(hand.palm, key=lambda q: -q.dot(out))[:len(hand.palm) // 2:PALM_SPARSE]
+    best = None
+    for yaw in range(int(r["yaws"][0]), int(r["yaws"][1]) + 1, YAW_STEP):
+        for roll in range(int(r["rolls"][0]), int(r["rolls"][1]) + 1, ROLL_STEP):
+            rot = Matrix.Rotation(math.radians(yaw), 3, up) @ Matrix.Rotation(math.radians(roll), 3, axis) @ base
+            palm = rot @ hand.palmar
+            m0 = Matrix.Translation(i_at) @ rot.to_4x4() @ Matrix.Translation(-i_rest) @ rest
+            m = hand.seat(m0, palm, col, whole=True)
+            gap = sum(max(col.dist(m @ q), 0.0) for q in skin) / len(skin)
+            _, bend = elbow_for(rig, "L", m, quiet=True)
+            score = gap * r["gap_cost"] + bend * r["bend_cost"]
+            if os.environ.get("BL_DEBUG"):
+                print("    yaw %3d roll %3d: gap %4.1f mm bend %4.1f moved %4.1f mm" % (
+                    yaw, roll, gap * 1000, bend, (m.translation - m0.translation).length * 1000))
+            if best is None or score < best[0]:
+                best = (score, yaw, roll, m, palm)
+    print("  L: support turned %d deg, rolled %d deg" % best[1:3])
+    return best[3], best[4]
 
 
 def right_hand(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, col: Collider, objects: list, arms: list,
@@ -837,7 +898,10 @@ def left_on_grip(rig: Rig, hand: pose.Hand, j: dict, hold: Hold, spec: dict, col
     grip (web_pose, mirrored), its fingers closed round the grip's front and its thumb round the back over them."""
     to_eye = hold.to_eye()
     hand.tip_top = None
-    hand_m, palm = web_pose(rig, hand, j, hold, spec, col, "L")
+    if spec["kind"] == "support":
+        hand_m, palm = support_pose(rig, hand, j, hold, spec, col)
+    else:
+        hand_m, palm = web_pose(rig, hand, j, hold, spec, col, "L")
     hand.normal = palm
     pole_l, _ = elbow_for(rig, "L", hand_m)
     pose.place_arm(rig, "L", hand_m, pole_l, quiet=True)
@@ -924,8 +988,10 @@ def solve_grip(rig: Rig, hands: dict, j: dict, hold: Hold, rid: str, arms: list,
 def solve_support(rig: Rig, hands: dict, j: dict, hold: Hold, arms: list, solid: list, spec: dict,
                   held: tuple) -> int:
     """With the hold `held` posed (the right hand as approved, the left down), the left hand wrapped round the pistol
-    and the right hand as `spec` asks (FP1): placed by its marks as a hand on a grip is, then settled, pressed and
-    closed on the skinned surface against the pistol and the right arm as posed; the clipping left (face pairs)."""
+    and the right hand as `spec` asks (FP1): placed by its marks, turned to where its palm lies closest
+    (`support_pose`), then settled, pressed and closed on the skinned surface against the pistol and the right arm as
+    posed, less the right thumb's two outer sections, which lie where its heel belongs; that thumb is then laid again,
+    on the left hand (`lay_right_thumb`). The clipping left (face pairs)."""
     reset_left(rig, held)
     left, right = arms
     spec = tuned(spec)
@@ -938,7 +1004,7 @@ def solve_support(rig: Rig, hands: dict, j: dict, hold: Hold, arms: list, solid:
             rig.pose[b] = rig.rest[b]
     rig.fk("Shoulder_L")
     rig.write()
-    still = pose.frozen(right, RIGHT_HELD)
+    still = pose.frozen(right, RIGHT_HELD, RIGHT_THUMB)
     if os.environ.get("BL_DEBUG"):
         inv = hold.to_eye().inverted()
         for name in ("Thumb", "Index", "Middle", "Ring", "Pinky"):
@@ -968,8 +1034,53 @@ def solve_support(rig: Rig, hands: dict, j: dict, hold: Hold, arms: list, solid:
             print("  still passing into the pistol or the right hand:", sorted(tally.items(), key=lambda x: -x[1]))
         if os.environ.get("BL_DEBUG"):
             print("   L skin gaps (mm)", pose.skin_gaps([left], frame, "L"))
+            inv = hold.to_eye().inverted()
+            for name in ("Thumb", "Index", "Middle", "Ring", "Pinky"):
+                print("   L %s joints" % name, [tuple(round(c, 3) for c in inv @ rig.pose["%s%d_L" % (name, k)]
+                                                      .translation) for k in (1, 2, 3)])
     print("  L wrist bend %.1f deg" % pose.wrist_bend(rig, "L"))
     bpy.data.objects.remove(still, do_unlink=True)
+    return hits + lay_right_thumb(rig, hands, hold, arms, solid, spec)
+
+
+def lay_right_thumb(rig: Rig, hands: dict, hold: Hold, arms: list, solid: list, spec: dict) -> int:
+    """The right thumb laid on the left hand that now wraps the pistol (FP1; the owner, 2026-11-12: "the right hand
+    thumb should be resting on the left hand"): swung to the clear place whose tip comes nearest a spot over the left
+    thumb's first section (spec["right_thumb"]: how far along that section, and how far above the two thumbs' skins
+    meeting, m), then closed onto it. The face pairs where the two arms still pass into each other or the pistol."""
+    left, right = arms
+    under = pose.frozen(left, LEFT_HELD)
+    frame = [o for o in solid if not o.name.startswith("Trigger")]
+    col = Collider(solid + [under])
+    to_eye = hold.to_eye()
+    up = (to_eye.to_3x3() @ Vector((0.0, 0.0, 1.0))).normalized()
+    along, lift = spec["right_thumb"]
+    m = rig.pose["Thumb2_L"]
+    target = m.translation + m.to_3x3().col[1] * rig.length["Thumb2_L"] * along + \
+        up * (hands["L"].radius["Thumb2_L"] + hands["R"].radius["Thumb3_R"] + lift)
+
+    def thumb_clips() -> int:
+        rig.write()
+        return sum(n for b, n in pose.clipping([right], frame + [under])[1].items() if b.startswith("Thumb"))
+
+    knuckle, tip = spec["right_thumb_curl"]
+    curls = hands["R"].thumb(col, (0.5, 1.0, 0.8), (0.0, math.radians(knuckle), math.radians(tip)), target,
+                             spec["right_thumb_hug"], THUMB_WIDE, THUMB_TWISTS, THUMB_BENDS,
+                             spec["right_thumb_pull"], thumb_clips)
+    rig.fk("Grip_R")
+    rig.write()
+    print("  right thumb on the left hand", curls)
+    print("  tightened", pose.tighten(rig, hands, [right], frame + [under], [("R", "Thumb")]))
+    hits, tally = pose.clipping([right], frame + [under])
+    if hits:
+        print("  the right hand still passing into the pistol or the left hand:",
+              sorted(tally.items(), key=lambda x: -x[1]))
+    if os.environ.get("BL_DEBUG"):
+        inv = to_eye.inverted()
+        print("   R thumb joints", [tuple(round(c, 3) for c in inv @ rig.pose["Thumb%d_R" % k].translation)
+                                    for k in (1, 2, 3)], "target", tuple(round(c, 3) for c in inv @ target))
+        print("   R skin gaps (mm)", pose.skin_gaps([right], frame + [under], "R"))
+    bpy.data.objects.remove(under, do_unlink=True)
     return hits
 
 

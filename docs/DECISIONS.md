@@ -178,9 +178,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 - **First-person hands (owner, 2026-11-12, FP1).** "When not aiming down sight with a rifle only the player's left
   hand should be visible … When aiming down sight no hands should be visible. For pistols, the player should hold the
   pistol with two hands … When aiming down sight on a pistol the hand should only be slightly visible." So: rifles sit
-  nearer and lower at the hip (`ViewModelConfig.hip`), the right hand under the screen's foot; the arms fade out as
-  the sight comes up (`aim_hands_fade`), a pistol keeping what lies just under the sight line (`aim_hands_hint`,
-  `aim_hint_below`); your pistol is held in both hands (the arms model's `<id>_two_Hold`). Defaults taken: the bots
+  nearer and lower at the hip (`ViewModelConfig.hip`), the right hand under the screen's foot, the left hand's
+  fingers under the handguard ("only the thumb of the left hand"); aimed, a rifle's hands are drawn out of view
+  behind it and never faded ("the hands should not fade out of view ... At most a small tip of the players left hand
+  thumb can be visible"; `ArmsTuck`, `aim_tuck`), a pistol keeping what lies just under the sight line
+  (`aim_hands_hint`, `aim_hint_below`: he chose "tops of the hands only" over whole solid hands and over a fainter
+  edge, on pictures of each); your pistol is held in both hands, tight, the left fingers out of sight over the right
+  hand's and the right thumb resting on the left hand (the arms model's `<id>_two_Hold`). Defaults taken: the bots
   stay one-handed on pistols (HG1 below; they copy `<id>_Hold`), and the pistols keep their hip place of 2026-11-06.
   His reference pictures are other games' and set hand placement and framing only; the art is our own.
 - **Bots hold replicas as the first-person arms do; pistols one-handed (owner, 2026-11-06, HG1).** The bots' hands

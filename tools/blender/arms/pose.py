@@ -4,6 +4,7 @@ and the contact solver that closes each finger onto a replica's surface without 
 import math
 import os
 
+import bmesh
 import bpy
 from mathutils import Matrix, Quaternion, Vector
 from mathutils.bvhtree import BVHTree
@@ -422,11 +423,13 @@ class Hand:
         return list(best[2:6]) + out[1:]
 
     def settle(self, name: str, start: tuple, col: Collider, span: int = 30, swing: float = 0.0,
-               root: bool = False) -> list:
+               root: bool = False, more: int = None) -> list:
         """Poses a finger at its authored bends `start` (degrees, base to tip; its base swung `swing` degrees
         sideways), then curls it further or opens it, its three joints together and the tip a little less, until it
-        rests on the replica: the most curl within `span` of the authored pose that stays clear of it. With `root`,
-        its first bone may rest on the replica (a palm cupped round a handguard), never pass into it."""
+        rests on the replica: the most curl within `span` of the authored pose that stays clear of it (given `more`,
+        no more than that past it: a finger reaching round something wide, which a fist closed short of it would
+        clear too). With `root`, its first bone may rest on the replica (a palm cupped round a handguard), never
+        pass into it."""
         bones = ["%s%d_%s" % (name, k, self.side) for k in (1, 2, 3)]
         side_axis = self.axis[bones[0]].cross(Vector((0.0, 1.0, 0.0))).normalized()
 
@@ -442,7 +445,7 @@ class Hand:
         # The most curl that clears the replica and keeps under `tip_top`; failing that, the clear curl rising least
         # above it.
         lowest = None
-        for t in range(span, -3 * span - 1, -2):
+        for t in range(span if more is None else more, -3 * span - 1, -2):
             angles = apply(t)
             if not (self.clearance(bones[0], col) < (0.0 if root else CONTACT)
                     or any(self.touches(b, col) for b in bones[1:])):
@@ -706,11 +709,25 @@ def key_pose(rig: Rig, clip: str) -> None:
     track.strips.new(clip, 0, act)
 
 
-def frozen(ob: bpy.types.Object, name: str) -> bpy.types.Object:
-    """A still copy of `ob`'s skin as its armature poses it now, for the other hand to rest on or keep clear of."""
+def frozen(ob: bpy.types.Object, name: str, without: tuple = ()) -> bpy.types.Object:
+    """A still copy of `ob`'s skin as its armature poses it now, for the other hand to rest on or keep clear of;
+    `without` the skin of the bones named (a thumb that will be laid again, on the hand that comes to rest here)."""
     dg = bpy.context.evaluated_depsgraph_get()
     me = bpy.data.meshes.new_from_object(ob.evaluated_get(dg))
     me.name = name
+    if without:
+        names = {g.index: g.name for g in ob.vertex_groups}
+        bm = bmesh.new()
+        bm.from_mesh(me)
+        bm.verts.ensure_lookup_table()
+        drop = []
+        for sv in ob.data.vertices:
+            g = max(sv.groups, key=lambda x: x.weight, default=None)
+            if g is not None and names[g.group] in without:
+                drop.append(bm.verts[sv.index])
+        bmesh.ops.delete(bm, geom=drop, context="VERTS")
+        bm.to_mesh(me)
+        bm.free()
     still = bpy.data.objects.new(name, me)
     bpy.context.scene.collection.objects.link(still)
     still.matrix_world = ob.matrix_world.copy()
