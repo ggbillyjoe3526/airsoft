@@ -612,6 +612,12 @@ a cross-passage between the running tunnels, and they swap at half time. Turn on
 - [ ] **The ticket gates' paddle doors (SM3).** Walk up to a lane: its two paddles swing open towards the platforms in
   about a third of a second and shut behind you; the next lane's stay shut. Bots walk the lanes without snagging, and
   BBs and bodies pass a lane as before (the paddles are look only). The paddles sit in the gates' baked light.
+- [ ] **The station's small fittings (SD2).** Walk the ticket hall, booking hall, concourse, passages, lower hall and
+  plant rooms on High: a dark skirting, a green tile band at about 0.7 m and a frieze just over the posters run round
+  the walls and columns; conduit and pipes under the ceilings, vents high on the tall rooms' walls, access hatches in
+  the ceilings (none over a lamp), drains along the halls' walls, a service door in each plant room, and a yellow
+  tactile strip at each escalator's and stair's head. Nothing covers a poster or sign, floats, flickers into a wall
+  or stops a BB or a body (look only).
 
 ## Bots
 

@@ -1,16 +1,17 @@
-Task: PB1 · QA commit 0a8cdea (no new commit this run) · Verdict: Pass
+Task: none (MQ1B) · QA commit <none, uncommitted> · Verdict: Pass
 
-Run 2 on head 77f8f4f.
+Attempt 3 re-verification of 7499a89 (rounder tang, shorter FRAME_SPINE, closed cell ribs, studio shadow change).
 
-Blocking findings: none. The run-1 blocker (defuse checkpoint compared without SLACK in game/sim/plant.gd) is fixed in 77f8f4f; test_pb1_qa.gd pins it and passes.
-Advisory findings: none new.
+Blocking: none. Advisory: none new.
 
-Checked this run:
-- tests/unit/test_pb1_qa.gd alone: 11 passing, 0 failing.
-- Bot latches across rounds (plant_go, plant_go_for, plant_hold_since in game/ai/bot_world.gd:42-44; plant_fell_far at :46). BotPlant.plan runs every tick in PTB (game/ai/bot_controller.gd:136). PlantState.reset (game/sim/plant_state.gd:37) clears status and carrier, so the first plan tick of a new round sees no carrier and _hold_carrier (game/ai/bot_plant.gd:133-136) clears the go latch and hold timer. plant_fell_far is cleared on ROUND_START and ROUND_GO (bot_plant.gd:88-90). No stale latch reaches a new round, so no failing test was possible.
-- BotPlant.may_defuse with the defending player out: player_on returns null, so bots may defuse at once (bot_plant.gd:224-226). Already pinned by tests/unit/test_bots_plant.gd:288-290.
+Checks
+1. tests/unit/test_mq1b_qa.gd: 8/8 pass (41 asserts). tests/unit/test_cyber_grip.gd: 3/3 pass (44 asserts). Both run alone on the committed glb with -gconfig=.
+2. Spine and web through the rounder tang: tests/unit/test_cyber_grip.gd:84 reads the rearmost point of every Body vertex (spine, web and grip together) at seven heights from -0.03 to -0.09 m, and holds them to a straight line within 0.8 mm. The rebuilt glb passes, so no spine or web vertex pokes out behind the back strap there. Not covered: Body points above -0.03 m (the tang's notch and above). The 7499a89 change touches this region and I did not test it.
+   The cell and pad stay inside the grip's skin at rest and ride the Magazine bone (so they leave on Reload): tests/unit/test_mq1b_qa.gd:64, :135 and :156 pass on the rebuilt glb with the closed ribs.
+3. Model studio under xvfb at the three poses (cyber at pitch +12, cyber at 0, aeg at -20): rendered a.png, b.png and c.png with no script errors. The only ERROR lines are the sandbox's Vulkan failure (VK_KHR_surface missing, falls back to OpenGL) and ALSA, both environmental. I did not look at the images.
 
-Tests added or changed this run: none (the cap was 3; nothing reproducible to pin).
+Tests added or changed: none this attempt. No real gap found. The earlier 8 tests still fail without their features, as checked in attempt 2.
 
-Not run (as instructed): full suite and match guards; the lead reported tools/check.sh passed on 77f8f4f.
-Not tested: anything needing a display or real window (HUD layout of the plant prompt, mouse capture on pause).
+Counts: 11 tests, 85 asserts, a few seconds each.
+
+Not tested: how the shadow-map and far-plane change looks (the images need an owner's eye on a real GPU). I did not run tools/check.sh, as asked.
