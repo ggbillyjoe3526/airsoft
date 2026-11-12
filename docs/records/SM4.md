@@ -1,6 +1,6 @@
 # SM4 · Subway's works gear, booths and plant-room models
 
-**Review:** pending
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 The owner (2026-11-12): "Begin work on subway models now." SM4 covers models 6-13 and 27-30 of
 `art/subway-model-list.md`: the skip wagon, the engineering wagon, the ballast wagon, the platelayer trolley, the buffer
@@ -14,7 +14,7 @@ the switch cabinet. Each is built from the owner's photos in `art/references/map
 | 2026-11-12 | 1 | build thread | Pass | Retry 6/8 | Loads, tarp, trolley wheels, buffer stop, drum and hoarding short of the photos; black plant-room props unlogged |
 | 2026-11-12 | 2 | build thread | Pass | Retry 7/8 | Hoarding panels too narrow, cable turns too few, loads studded, trolley rims polygonal, tarp shoulders faceted, roof duct flush |
 | 2026-11-12 | 3 | build thread | Pass | Retry 7/8 | Vehicles on their own track beside the running rails, ballast load flat, no pictures after the track change |
-| 2026-11-12 | 4 | build thread | – | – | – |
+| 2026-11-12 | 4 | build thread | Pass | Accept 8/8 | – |
 
 ## What changed
 

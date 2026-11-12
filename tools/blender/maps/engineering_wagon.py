@@ -158,7 +158,7 @@ def main() -> None:
     wk.write(ob, NAME, BUDGET)
     if "--render" in sys.argv:
         wk.render(wk.quarter_views(2 * HL, 2 * HD, HIGH), sys.argv[sys.argv.index("--render") + 1],
-                  "SM4 engineering wagon (Subway map prop, 4 x 2.2 x 2.6 m)")
+                  "SM4 engineering wagon (Subway map prop, 4 x 2 x 2.6 m)")
 
 
 if __name__ == "__main__":
