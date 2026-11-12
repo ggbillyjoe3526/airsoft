@@ -36,8 +36,11 @@ def room(name: str, area: str, x0: float, x1: float, z0: float, z1: float, y: fl
                       seal=seal or {}, ceil=ceil, floor=floor, flat=flat))
 
 
-def block(kind: str, y: float, x0: float, x1: float, z0: float, z1: float, h: float, colour: int = 0) -> None:
-    blocks.append(dict(kind=kind, y=y, x0=x0, x1=x1, z0=z0, z1=z1, h=h, colour=colour))
+def block(kind: str, y: float, x0: float, x1: float, z0: float, z1: float, h: float, colour: int = 0,
+          dress: str = "") -> None:
+    """A cover block; `dress` names the model drawn in its box (PropDressConfig.models; SD1), else its box is drawn
+    in its room's finish. Look only: the box stays what BBs, bodies and the bots meet."""
+    blocks.append(dict(kind=kind, y=y, x0=x0, x1=x1, z0=z0, z1=z1, h=h, colour=colour, dress=dress))
 
 
 # ---------------- Street level, 0 m: the ticket hall (Street team's start) ----------------

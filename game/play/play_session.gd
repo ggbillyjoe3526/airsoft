@@ -415,9 +415,12 @@ func _dress_part(part: int) -> void:
 				add_child(_site)
 				if not _light.night:
 					SiteDress.dress_sky(_lighting, _play.site_look)
-			elif _level.station_material() == null:
-				# a station dress (MT3) draws every block itself, so no model stands in a block's box
-				_props = PropDress.build(_map, _play.site_look.props, _play.site_look.prop_paint)
+			else:
+				# a station (MT3) draws its blocks itself: a model stands only where a block names one (SD1)
+				var props := _play.site_look.props
+				if _level.station_material() != null:
+					props = props.named_only()
+				_props = PropDress.build(_map, props, _play.site_look.prop_paint)
 				if _props != null:
 					add_child(_props)
 		1:

@@ -149,6 +149,9 @@ func begin(m: MapData, style: MapStyle, body: BodyConfig, light: BakeConfig = nu
 	if m.station != null and station != null:
 		_station_material = StationSurface.material(station)
 		_station = station if _station_material != null else null
+	if _station != null and _props != null:
+		# a station's props stand only where a block names one (SD1)
+		_props = _props.named_only()
 	_piece = Piece.MESH
 
 
@@ -587,7 +590,7 @@ func _make_mesh() -> MeshInstance3D:
 	if _station != null:
 		mi.name = "Station"
 		mi.material_override = _station_material
-		mi.mesh = StationSurface.mesh(map, _style, _station)
+		mi.mesh = StationSurface.mesh(map, _style, _station, _props)
 		_baked = false
 		return mi
 	mi.name = "Greybox" if _site == null else "Site"
