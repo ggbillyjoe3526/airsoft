@@ -127,6 +127,27 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"site_toilet": "res://assets/models/props/site_toilet.glb",
 	&"water_tote": "res://assets/models/props/water_tote.glb",
 	&"generator": "res://assets/models/props/generator.glb",
+	# Subway's works gear, booths and plant-room models (SM4, tools/blender/maps/), each named by its block
+	# (tools/subway/layout.py) and fitted to it, the booths and buffer stops turned by the block's facing.
+	&"skip_wagon": "res://assets/models/props/skip_wagon.glb",
+	&"engineering_wagon": "res://assets/models/props/engineering_wagon.glb",
+	&"ballast_wagon": "res://assets/models/props/ballast_wagon.glb",
+	&"platelayer_trolley": "res://assets/models/props/platelayer_trolley.glb",
+	&"platelayer_trolley_short": "res://assets/models/props/platelayer_trolley_short.glb",
+	&"platelayer_trolley_long": "res://assets/models/props/platelayer_trolley_long.glb",
+	&"buffer_stop": "res://assets/models/props/buffer_stop.glb",
+	&"cable_drum": "res://assets/models/props/cable_drum.glb",
+	&"cable_drum_small": "res://assets/models/props/cable_drum_small.glb",
+	&"tunnel_segments": "res://assets/models/props/tunnel_segments.glb",
+	&"signal_cabinet": "res://assets/models/props/signal_cabinet.glb",
+	&"switch_cabinet": "res://assets/models/props/switch_cabinet.glb",
+	&"staff_booth": "res://assets/models/props/staff_booth.glb",
+	&"staff_booth_mid": "res://assets/models/props/staff_booth_mid.glb",
+	&"staff_booth_small": "res://assets/models/props/staff_booth_small.glb",
+	&"works_hoarding": "res://assets/models/props/works_hoarding.glb",
+	&"works_hoarding_short": "res://assets/models/props/works_hoarding_short.glb",
+	&"works_hoarding_deep": "res://assets/models/props/works_hoarding_deep.glb",
+	&"fan_housing": "res://assets/models/props/fan_housing.glb",
 }
 ## Each dressed block kind's prop, and how it is laid. A kind not listed keeps its box.
 @export var kind_props: Dictionary[StringName, StringName] = {

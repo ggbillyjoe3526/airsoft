@@ -21,11 +21,13 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import works_kit as wk  # noqa: E402
 from works_kit import wt  # noqa: E402
-from mathutils import Vector  # noqa: E402
+from mathutils import Matrix, Vector  # noqa: E402
 
 BUDGET = 3000
 LONG, DEEP, HIGH = 3.0, 2.5, 2.2
 HL, HD = LONG * 0.5, DEEP * 0.5
+SHIFT = 0.11         # the housing stands this far back in its box, its front's control box and isolator in front
+BD = HD - SHIFT      # the housing's half-depth, built round y = 0 and moved back by SHIFT once built
 SKID = 0.16          # the skid's height
 TOP = 1.98           # the housing's roof
 FRAME = 0.06         # the galvanised angles' width
@@ -38,22 +40,22 @@ def fan(k: wk.Kit, y: float, z: float, x: float) -> None:
     """One fan in the +x end: a galvanised shroud standing proud of the panel at x, the dark fan disc inside it with
     its hub and blades, and a guard of horizontal bars across the opening."""
     out = HL - 0.004
-    k.lathe([(x, FAN_R), (out, FAN_R), (out, FAN_R - 0.05), (x + 0.012, FAN_R - 0.05)], "galv", segments=SEG,
+    k.lathe([(x, FAN_R), (out, FAN_R), (out, FAN_R - 0.05), (x + 0.006, FAN_R - 0.05)], "galv", segments=SEG,
             centre=(0.0, y, z), axis="x", cap=False)
-    disc = [(x + 0.012, y + (FAN_R - 0.05) * math.cos(2 * math.pi * i / SEG),
+    disc = [(x + 0.006, y + (FAN_R - 0.05) * math.cos(2 * math.pi * i / SEG),
              z + (FAN_R - 0.05) * math.sin(2 * math.pi * i / SEG)) for i in range(SEG)]
     k.fan(disc, (1.0, 0.0, 0.0), "grille")
-    k.lathe([(x + 0.012, 0.09), (x + 0.07, 0.06), (x + 0.09, 0.0)], "duct", segments=8, centre=(0.0, y, z), axis="x",
+    k.lathe([(x + 0.006, 0.09), (x + 0.018, 0.06), (x + 0.024, 0.0)], "duct", segments=8, centre=(0.0, y, z), axis="x",
             cap=False)  # the hub
     for i in range(5):  # the blades, pitched, between the hub and the shroud
         a = 2 * math.pi * i / 5 + 0.3
         b = a + 0.42
         r0, r1 = 0.08, FAN_R - 0.08
-        k.quad([(x + 0.05, y + r0 * math.cos(a), z + r0 * math.sin(a)),
-                (x + 0.03, y + r0 * math.cos(b), z + r0 * math.sin(b)),
-                (x + 0.03, y + r1 * math.cos(b + 0.2), z + r1 * math.sin(b + 0.2)),
-                (x + 0.06, y + r1 * math.cos(a + 0.15), z + r1 * math.sin(a + 0.15))], "duct")
-    gx = out - 0.012
+        k.quad([(x + 0.016, y + r0 * math.cos(a), z + r0 * math.sin(a)),
+                (x + 0.008, y + r0 * math.cos(b), z + r0 * math.sin(b)),
+                (x + 0.008, y + r1 * math.cos(b + 0.2), z + r1 * math.sin(b + 0.2)),
+                (x + 0.018, y + r1 * math.cos(a + 0.15), z + r1 * math.sin(a + 0.15))], "duct")
+    gx = out - 0.008
     for i in range(7):  # the guard's bars across the opening, and one upright through the middle
         dz = (i - 3) * (FAN_R - 0.06) / 3.4
         half = math.sqrt(max(0.0, (FAN_R - 0.04) ** 2 - dz * dz))
@@ -67,45 +69,45 @@ def frame(k: wk.Kit) -> None:
     for sx in (-1.0, 1.0):
         for sy in (-1.0, 1.0):
             x0, x1 = sorted((sx * HL, sx * (HL - f)))
-            y0, y1 = sorted((sy * HD, sy * (HD - f)))
+            y0, y1 = sorted((sy * BD, sy * (BD - f)))
             k.blk((x0, y0, SKID), (x1, y1, TOP), "galv")
     for z0, z1 in ((SKID, SKID + f), (TOP - f, TOP)):
         for sy in (-1.0, 1.0):
-            y0, y1 = sorted((sy * HD, sy * (HD - f)))
+            y0, y1 = sorted((sy * BD, sy * (BD - f)))
             k.blk((-HL + f, y0, z0), (HL - f, y1, z1), "galv")
         for sx in (-1.0, 1.0):
             x0, x1 = sorted((sx * HL, sx * (HL - f)))
-            k.blk((x0, -HD + f, z0), (x1, HD - f, z1), "galv")
+            k.blk((x0, -BD + f, z0), (x1, BD - f, z1), "galv")
     for x in (-0.35, 0.55):  # posts dividing the long sides into bays
         for sy in (-1.0, 1.0):
-            y0, y1 = sorted((sy * HD, sy * (HD - 0.03)))
+            y0, y1 = sorted((sy * BD, sy * (BD - 0.03)))
             k.blk((x - 0.03, y0, SKID + f), (x + 0.03, y1, TOP - f), "galv_dark")
     k.blk((HL - 0.03, -0.03, SKID + f), (HL, 0.03, TOP - f), "galv_dark")  # the end's middle post
-    k.blk((HL - 0.03, -HD + f, 1.04), (HL, HD - f, 1.1), "galv_dark")      # and its middle rail
+    k.blk((HL - 0.03, -BD + f, 1.04), (HL, BD - f, 1.1), "galv_dark")      # and its middle rail
     for sx in (-1.0, 1.0):  # lifting eyes on the top corners
         for sy in (-1.0, 1.0):
             k.prism([(-0.035, 0.0), (0.035, 0.0), (0.025, 0.06), (-0.025, 0.06)], "x", -0.005, 0.005, "steel_bare",
-                    offset=(sx * (HL - 0.03), sy * (HD - 0.03), TOP))
+                    offset=(sx * (HL - 0.03), sy * (BD - 0.03), TOP))
 
 
 def skid(k: wk.Kit) -> None:
     """The base: channel runners along the long sides with fork pockets, cross members, a deck plate."""
     for sy in (-1.0, 1.0):
-        y0, y1 = sorted((sy * HD, sy * (HD - 0.12)))
+        y0, y1 = sorted((sy * BD, sy * (BD - 0.12)))
         k.panel((-HL, y0, 0.0), (HL, y1, SKID), "galv", step=0.5, skip=("-z",))
         for px in (-0.75, 0.75):  # fork pockets: dark mouths in the runner's face
-            yf = sy * (HD + 0.001)
+            yf = sy * (BD + 0.001)
             pts = [(px - 0.18, yf, 0.03), (px + 0.18, yf, 0.03), (px + 0.18, yf, 0.12), (px - 0.18, yf, 0.12)]
             k.quad(pts if sy < 0 else list(reversed(pts)), "grille")
     for x in (-HL, HL - 0.12):
-        k.blk((x, -HD + 0.12, 0.0), (x + 0.12, HD - 0.12, SKID), "galv_dark")
-    k.blk((-HL + 0.12, -HD + 0.12, SKID - 0.02), (HL - 0.12, HD - 0.12, SKID), "galv_dark")
+        k.blk((x, -BD + 0.12, 0.0), (x + 0.12, BD - 0.12, SKID), "galv_dark")
+    k.blk((-HL + 0.12, -BD + 0.12, SKID - 0.02), (HL - 0.12, BD - 0.12, SKID), "galv_dark")
 
 
 def front(k: wk.Kit) -> None:
     """The -y side: two access doors with lever handles and hinges, an inspection window, the louvred intake, the
     control box with its isolator, a plain warning plate."""
-    y = -HD + INSET - 0.002
+    y = -BD + INSET - 0.002
     for x0, x1 in ((-HL + FRAME + 0.04, -0.4), (-0.3, 0.5)):  # the doors' shut lines
         for xa, xb, za, zb in ((x0, x0 + 0.012, SKID + 0.1, TOP - 0.1), (x1 - 0.012, x1, SKID + 0.1, TOP - 0.1),
                                (x0, x1, SKID + 0.1, SKID + 0.112), (x0, x1, TOP - 0.112, TOP - 0.1)):
@@ -173,9 +175,9 @@ def build() -> object:
     k = wk.Kit("fan_housing")
     skid(k)
     k.mark("skid")
-    k.panel((-HL + INSET, -HD + INSET, SKID), (HL - INSET, HD - INSET, TOP - 0.01), "fan_panel", step=0.5,
+    k.panel((-HL + INSET, -BD + INSET, SKID), (HL - INSET, BD - INSET, TOP - 0.01), "fan_panel", step=0.5,
             skip=("-z",))
-    k.blk((-HL + FRAME, -HD + FRAME, TOP - 0.02), (HL - FRAME, HD - FRAME, TOP), "fan_panel")
+    k.blk((-HL + FRAME, -BD + FRAME, TOP - 0.02), (HL - FRAME, BD - FRAME, TOP), "fan_panel")
     frame(k)
     k.mark("body, frame")
     for y in (-0.6, 0.6):
@@ -187,10 +189,12 @@ def build() -> object:
     roof(k)
     k.mark("roof")
     # the back (+y): panel bolts down the bays' edges
-    k.bolts([(x, HD - INSET, z) for x in (-HL + 0.12, -0.45, -0.25, 0.45, 0.65, HL - 0.12)
+    k.bolts([(x, BD - INSET, z) for x in (-HL + 0.12, -0.45, -0.25, 0.45, 0.65, HL - 0.12)
              for z in (0.45, 1.05, 1.65)], 0.012, 0.008, "y", "steel_bare", seg=4)
     k.mark("bolts")
-    return k.build()
+    ob = k.build()
+    ob.data.transform(Matrix.Translation((0.0, SHIFT, 0.0)))
+    return ob
 
 
 def weather(p: Vector, n: Vector, c: tuple, paint: str) -> tuple:

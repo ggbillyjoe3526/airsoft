@@ -1445,7 +1445,8 @@
     "x": 2.0,
     "y": 1.8,
     "z": 1.4
-   }
+   },
+   "dress": "cable_drum"
   },
   {
    "kind": "crate",
@@ -1458,7 +1459,8 @@
     "x": 2.0,
     "y": 1.8,
     "z": 1.4
-   }
+   },
+   "dress": "cable_drum"
   },
   {
    "kind": "barrier",
@@ -1922,7 +1924,8 @@
     "x": 2.5,
     "y": 2.2,
     "z": 3.0
-   }
+   },
+   "dress": "fan_housing"
   },
   {
    "kind": "generator",
@@ -1935,7 +1938,8 @@
     "x": 2.5,
     "y": 2.2,
     "z": 3.0
-   }
+   },
+   "dress": "fan_housing"
   },
   {
    "kind": "cabinet",
@@ -1948,7 +1952,8 @@
     "x": 0.8,
     "y": 2.0,
     "z": 2.0
-   }
+   },
+   "dress": "switch_cabinet"
   },
   {
    "kind": "crate",
@@ -2150,7 +2155,8 @@
     "x": 0.8,
     "y": 2.0,
     "z": 2.0
-   }
+   },
+   "dress": "switch_cabinet"
   },
   {
    "kind": "hoarding",
@@ -2163,7 +2169,8 @@
     "x": 3.0,
     "y": 2.4,
     "z": 1.9
-   }
+   },
+   "dress": "works_hoarding"
   },
   {
    "kind": "shed",
@@ -2176,7 +2183,9 @@
     "x": 2.0,
     "y": 2.6,
     "z": 2.2
-   }
+   },
+   "dress": "staff_booth",
+   "facing": "-z"
   },
   {
    "kind": "crate",
@@ -2215,7 +2224,8 @@
     "x": 2.0,
     "y": 2.4,
     "z": 1.9
-   }
+   },
+   "dress": "works_hoarding_short"
   },
   {
    "kind": "shed",
@@ -2228,7 +2238,9 @@
     "x": 1.6,
     "y": 2.6,
     "z": 2.2
-   }
+   },
+   "dress": "staff_booth_mid",
+   "facing": "-z"
   },
   {
    "kind": "hoarding",
@@ -2241,7 +2253,8 @@
     "x": 2.0,
     "y": 2.4,
     "z": 2.4
-   }
+   },
+   "dress": "works_hoarding_deep"
   },
   {
    "kind": "shed",
@@ -2254,7 +2267,9 @@
     "x": 1.6,
     "y": 2.6,
     "z": 1.0
-   }
+   },
+   "dress": "staff_booth_small",
+   "facing": "-z"
   },
   {
    "kind": "furniture",
@@ -2306,7 +2321,8 @@
     "x": 3.0,
     "y": 2.4,
     "z": 1.9
-   }
+   },
+   "dress": "works_hoarding"
   },
   {
    "kind": "shed",
@@ -2319,7 +2335,9 @@
     "x": 2.0,
     "y": 2.6,
     "z": 2.2
-   }
+   },
+   "dress": "staff_booth",
+   "facing": "+z"
   },
   {
    "kind": "crate",
@@ -2358,7 +2376,8 @@
     "x": 2.0,
     "y": 2.4,
     "z": 1.9
-   }
+   },
+   "dress": "works_hoarding_short"
   },
   {
    "kind": "shed",
@@ -2371,7 +2390,9 @@
     "x": 1.6,
     "y": 2.6,
     "z": 2.2
-   }
+   },
+   "dress": "staff_booth_mid",
+   "facing": "+z"
   },
   {
    "kind": "hoarding",
@@ -2384,7 +2405,8 @@
     "x": 2.0,
     "y": 2.4,
     "z": 2.4
-   }
+   },
+   "dress": "works_hoarding_deep"
   },
   {
    "kind": "shed",
@@ -2397,7 +2419,9 @@
     "x": 1.6,
     "y": 2.6,
     "z": 1.0
-   }
+   },
+   "dress": "staff_booth_small",
+   "facing": "+z"
   },
   {
    "kind": "furniture",
@@ -2449,7 +2473,8 @@
     "x": 2.0,
     "y": 1.3,
     "z": 1.9
-   }
+   },
+   "dress": "tunnel_segments"
   },
   {
    "kind": "cabinet",
@@ -2462,7 +2487,8 @@
     "x": 0.8,
     "y": 2.2,
     "z": 0.9
-   }
+   },
+   "dress": "signal_cabinet"
   },
   {
    "kind": "skip",
@@ -2475,7 +2501,8 @@
     "x": 2.0,
     "y": 2.7,
     "z": 2.2
-   }
+   },
+   "dress": "skip_wagon"
   },
   {
    "kind": "skip",
@@ -2488,7 +2515,8 @@
     "x": 2.0,
     "y": 2.7,
     "z": 2.2
-   }
+   },
+   "dress": "skip_wagon"
   },
   {
    "kind": "skip",
@@ -2501,7 +2529,8 @@
     "x": 2.0,
     "y": 2.7,
     "z": 2.2
-   }
+   },
+   "dress": "skip_wagon"
   },
   {
    "kind": "cabinet",
@@ -2514,7 +2543,8 @@
     "x": 1.5,
     "y": 1.2,
     "z": 1.3
-   }
+   },
+   "dress": "platelayer_trolley"
   },
   {
    "kind": "container",
@@ -2528,7 +2558,8 @@
     "y": 2.6,
     "z": 2.2
    },
-   "colour": 8223346
+   "colour": 8223346,
+   "dress": "engineering_wagon"
   },
   {
    "kind": "barrier",
@@ -2541,7 +2572,9 @@
     "x": 0.5,
     "y": 1.2,
     "z": 2.3
-   }
+   },
+   "dress": "buffer_stop",
+   "facing": "+x"
   },
   {
    "kind": "barrier",
@@ -2554,7 +2587,9 @@
     "x": 0.5,
     "y": 1.2,
     "z": 2.3
-   }
+   },
+   "dress": "buffer_stop",
+   "facing": "+x"
   },
   {
    "kind": "cabinet",
@@ -2567,7 +2602,8 @@
     "x": 1.5,
     "y": 1.2,
     "z": 1.0
-   }
+   },
+   "dress": "platelayer_trolley_short"
   },
   {
    "kind": "crate",
@@ -2580,7 +2616,8 @@
     "x": 1.4,
     "y": 1.4,
     "z": 1.4
-   }
+   },
+   "dress": "cable_drum_small"
   },
   {
    "kind": "container",
@@ -2594,7 +2631,8 @@
     "y": 2.2,
     "z": 1.8
    },
-   "colour": 8223346
+   "colour": 8223346,
+   "dress": "ballast_wagon"
   },
   {
    "kind": "container",
@@ -2608,7 +2646,8 @@
     "y": 2.2,
     "z": 1.8
    },
-   "colour": 8223346
+   "colour": 8223346,
+   "dress": "ballast_wagon"
   },
   {
    "kind": "cabinet",
@@ -2621,7 +2660,8 @@
     "x": 2.0,
     "y": 1.2,
     "z": 1.3
-   }
+   },
+   "dress": "platelayer_trolley_long"
   },
   {
    "kind": "wall",

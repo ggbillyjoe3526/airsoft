@@ -373,9 +373,54 @@ def rusty(p: Vector, n: Vector, c: tuple, seed: int = 0, amount: float = 0.5, st
     return wt.mix(c, wt.mix(lin("rust"), lin("rust_dark"), wt.fbm(p, 0.05, seed + 17)), min(1.0, r))
 
 
+def orient_outward(ob: bpy.types.Object, seed: int = 7) -> int:
+    """Turns round every face that rays from outside (all round, level to steeply above, as tests/unit/
+    test_model_faces.gd casts them) meet mostly from behind: a thin open piece (a fan blade, a flange's ring, a decal)
+    whose winding the build left facing in, which the game would cull as a hole. Returns how many it turned."""
+    from mathutils.bvhtree import BVHTree
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    bm.faces.ensure_lookup_table()
+    bm.normal_update()
+    tree = BVHTree.FromBMesh(bm)
+    lo = Vector([min(v.co[i] for v in bm.verts) for i in range(3)])
+    hi = Vector([max(v.co[i] for v in bm.verts) for i in range(3)])
+    mid, reach = (lo + hi) * 0.5, (hi - lo).length * 2.0
+    rng = random.Random(seed)
+    votes = {}
+    for e in range(10):
+        up = math.radians(75.0 * e / 9)
+        for a in range(36):
+            turn = 2.0 * math.pi * (a + 0.5 * (e % 2)) / 36
+            frm = mid + Vector((math.cos(up) * math.cos(turn), math.cos(up) * math.sin(turn), math.sin(up))) * reach
+            for _ in range(24):
+                aim = Vector([lo[i] + (hi[i] - lo[i]) * rng.random() for i in range(3)])
+                d = (aim - frm).normalized()
+                hit, _n, idx, _dist = tree.ray_cast(frm, d)
+                if hit is not None:
+                    votes[idx] = votes.get(idx, 0) + (1 if bm.faces[idx].normal.dot(d) > 0.0 else -1)
+    turned = [bm.faces[i] for i, v in votes.items() if v > 0]
+    for f in turned:
+        f.normal_flip()
+    bm.to_mesh(ob.data)
+    bm.free()
+    if turned:  # the shading's split by angle again, with the turned faces' normals
+        ob.data.set_sharp_from_angle(angle=math.radians(40.0))
+    ob.data.update()
+    return len(turned)
+
+
 def finish(ob: bpy.types.Object, lo: tuple, hi: tuple, bevel: float = 0.0) -> None:
     """Welds, smooths by angle, pulls any stray millimetre back inside the box and fails unless the bounds are it."""
     rk.finish(ob, bevel=bevel, angle=math.radians(40.0))
+    over, where = 0.0, None
+    for v in ob.data.vertices:
+        for i in range(3):
+            d = max(lo[i] - v.co[i], v.co[i] - hi[i])
+            if d > over:
+                over, where = d, (round(v.co.x, 3), round(v.co.y, 3), round(v.co.z, 3))
+    if over > 0.002 and os.environ.get("WORKS_TRIS"):  # the clamp flattens what's past the box onto its face
+        print("  %s: a piece reaches %.3f m past its box at %s" % (ob.name, over, where))
     rk.clamp_to(ob, lo, hi)
     vs = [v.co for v in ob.data.vertices]
     for i in range(3):  # a heap's or a lump's top a few centimetres short: the model stretched the last bit
@@ -385,6 +430,9 @@ def finish(ob: bpy.types.Object, lo: tuple, hi: tuple, bevel: float = 0.0) -> No
                                                                                          hi[i]))
     rk.stretch_to(ob, lo, hi)
     rk.fit_box(ob, lo, hi)
+    n = orient_outward(ob)
+    if n and os.environ.get("WORKS_TRIS"):
+        print("  %d faces turned to face out" % n)
 
 
 def write(ob: bpy.types.Object, name: str, budget: int) -> int:

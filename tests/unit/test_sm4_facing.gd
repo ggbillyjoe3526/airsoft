@@ -1,8 +1,8 @@
 extends GutTest
 ## SM4: a dressed block may name the way its model faces (`facing`: +x, -x, +z or -z). FIT then points the model's
 ## front (its +z) that way, its width across the front and its depth along it, whatever the box's long side or where
-## the field's middle lies; a block naming none keeps FIT's own turn toward the middle; a facing outside the four is a
-## map problem and leaves FIT's turn.
+## the field's middle lies; a block naming none keeps FIT's own turn toward the middle; a facing outside the four is
+## warned about and leaves FIT's turn, the map still loading.
 
 
 func _block(center: Vector3, size: Vector3, facing: StringName) -> MapData.Block:
@@ -69,8 +69,10 @@ func test_a_map_reads_a_block_s_facing_and_refuses_one_outside_the_four() -> voi
 	assert_eq(m.blocks[m.blocks.size() - 1].facing, &"-x", "the block keeps its facing")
 	var wrong := shed.duplicate()
 	wrong["facing"] = "up"
+	var warned := _depot_with(faced).warnings.size()
 	m = _depot_with(wrong)
-	assert_eq(m.problems.size(), 1, "a facing outside the four is a problem")
+	assert_eq(m.problems.size(), 0, "a facing outside the four is no problem: the map loads")
+	assert_eq(m.warnings.size(), warned + 1, "but it is warned about")
 	assert_eq(m.blocks[m.blocks.size() - 1].facing, &"", "and leaves FIT's own turn")
 	m = _depot_with(shed)
 	assert_eq(m.blocks[m.blocks.size() - 1].facing, &"", "no facing named: empty")

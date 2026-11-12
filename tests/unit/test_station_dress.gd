@@ -165,6 +165,7 @@ func test_a_block_naming_a_model_is_drawn_as_it_and_a_kind_alone_keeps_its_box()
 	var m := _map("subway")
 	var crates: Array[MapData.Block] = []
 	for b in m.blocks:
+		b.dress = &""  # the map's own named models (SM4) left out: this one block alone
 		if b.kind == &"crate":
 			crates.append(b)
 	assert_gt(crates.size(), 1, "Subway has crate boxes")
@@ -208,6 +209,8 @@ func test_named_only_dresses_no_kind_and_leaves_the_config_as_it_was() -> void:
 
 func test_a_named_model_that_does_not_load_keeps_its_box_and_other_maps_stay_kind_dressed() -> void:
 	var m := _map("subway")
+	for b in m.blocks:
+		b.dress = &""  # the map's own named models (SM4) left out: this one block alone
 	var props := play.site_look.props.named_only()
 	var plain := StationSurface.mesh(m, play.map_style, look, props)
 	for b in m.blocks:

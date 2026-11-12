@@ -388,7 +388,8 @@ func _read_blocks(list: Variant, style: MapStyle) -> void:
 		if bd.has("facing"):
 			b.facing = StringName(str(bd["facing"]))
 			if not RISES.has(str(b.facing)):
-				problems.append("block %d's facing %s is not +x, -x, +z or -z" % [i, bd["facing"]])
+				warnings.append("block %d's facing %s is not +x, -x, +z or -z; it faces the field's middle"
+						% [i, bd["facing"]])
 				b.facing = &""
 		if bd.has("colour"):
 			var paint: Variant = bd["colour"]

@@ -71,14 +71,16 @@ def build(name: str, length: float, depth: float) -> object:
     hl, hd = length * 0.5, depth * 0.5
     k = wk.Kit(name)
     # Walls stop at the corner posts so no two faces lie on top of each other (coplanar faces render black).
-    wall(k, -hl + POST, hl - POST, "x", -hd, -1.0, True)
-    wall(k, -hl + POST, hl - POST, "x", hd, 1.0, False)
-    wall(k, -hd + POST, hd - POST, "y", -hl, -1.0, False)
-    wall(k, -hd + POST, hd - POST, "y", hl, 1.0, False)
+    # The walls' outer faces stand inside the box by what stands out of them (the gate's padlock, the capping rail).
+    yf, yb, xe = -(hd - 0.05), hd - 0.01, hl - 0.01
+    wall(k, -xe + POST, xe - POST, "x", yf, -1.0, True)
+    wall(k, -xe + POST, xe - POST, "x", yb, 1.0, False)
+    wall(k, yf + POST, yb - POST, "y", -xe, -1.0, False)
+    wall(k, yf + POST, yb - POST, "y", xe, 1.0, False)
     for sx in (-1.0, 1.0):  # the corners: a post closing the end walls onto the long ones
-        for sy in (-1.0, 1.0):
-            x0, x1 = sorted((sx * hl, sx * (hl - POST)))
-            y0, y1 = sorted((sy * hd, sy * (hd - POST)))
+        for y_out, sy in ((yf, -1.0), (yb, 1.0)):
+            x0, x1 = sorted((sx * xe, sx * (xe - POST)))
+            y0, y1 = sorted((y_out, y_out - sy * POST))
             k.blk((x0, y0, 0.0), (x1, y1, HIGH - 0.02), "hoard_strip")
             k.blk((x0 + 0.01, y0 + 0.01, HIGH - 0.02), (x1 - 0.01, y1 - 0.01, HIGH), "hoard_strip")  # its cap
     k.mark("walls")

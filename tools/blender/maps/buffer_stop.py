@@ -94,7 +94,8 @@ def build() -> object:
         k.sqbar((x, BEAM[1] - 0.04, BEAM[2]), (x, HD - 0.06, 0.12), 0.07, "works_yellow")
     k.blk((-0.09, 0.03, BEAM[3] + 0.02), (0.09, 0.19, BEAM[3] + 0.06), "works_yellow")
     k.cyl((0.0, 0.11, BEAM[3] + 0.06), 0.075, HIGH - BEAM[3] - 0.06, "hazard_black", seg=10)
-    k.cyl((0.0, 0.035, BEAM[3] + 0.135), 0.055, -0.01, "glass", seg=10, axis="y")
+    lamp = HIGH - BEAM[3] - 0.06
+    k.cyl((0.0, 0.035, BEAM[3] + 0.06 + lamp * 0.5), min(0.055, lamp * 0.42), -0.01, "glass", seg=10, axis="y")
     k.mark("buffers")
     return k.build()
 

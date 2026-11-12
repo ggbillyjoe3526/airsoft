@@ -48,14 +48,14 @@ def signal_cabinet() -> tuple:
     hw, hd, high = 0.45, 0.4, 2.2
     k = wk.Kit("signal_cabinet")
     k.blk((-hw, -hd, 0.0), (hw, hd, 0.12), "concrete_dark")  # the plinth
-    bx, by0, by1, top = hw - 0.04, -hd + 0.05, hd - 0.03, 2.02
+    bx, by0, by1, top = hw - 0.04, -hd + 0.09, hd - 0.03, 2.02  # the padlock standing out to the box
     k.panel((-bx, by0, 0.12), (bx, by1, top), "cab_grey", step=0.3, skip=("-z",))
     # the rain lid: sloping down to the front, overhanging all round to the box
     k.prism([(-hd, top), (hd, top), (hd, high), (-hd, high - 0.08)], "x", -hw, hw, "cab_grey")
     k.blk((-hw, -hd, top), (hw, -hd + 0.015, top + 0.06), "cab_grey")  # its drip edge
     for x in (-0.24, 0.24):  # lifting eyes
         k.prism([(-0.04, 0.0), (0.04, 0.0), (0.03, 0.07), (-0.03, 0.07)], "y", -0.006, 0.006, "steel_bare",
-                offset=(x, 0.0, high - 0.04))
+                offset=(x, 0.0, high - 0.07))
     # the doors: gaps round each leaf and between them, the handle with its padlock, hinges, louvres
     y = by0 - 0.002
     front_quad(k, -0.006, 0.006, 0.2, 1.96, y, "hazard_black")
@@ -100,7 +100,7 @@ def switch_cabinet() -> tuple:
         # the door's recessed panel edge, its swing handle, the vent grille low down, the warning plate
         hx = cx + 0.4
         k.blk((hx - 0.025, y - 0.02, 0.95), (hx + 0.025, y, 1.15), "plinth")
-        k.blk((hx - 0.02, y - 0.06, 1.05), (hx + 0.02, y - 0.02, 1.25), "plinth")
+        k.blk((hx - 0.02, y - 0.038, 1.05), (hx + 0.02, y - 0.02, 1.25), "plinth")
         front_quad(k, cx - 0.2, cx + 0.2, 0.25, 0.45, y - 0.001, "grille")
         for i in range(7):
             z = 0.262 + i * 0.026

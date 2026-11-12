@@ -32,7 +32,7 @@ def build(name: str, length: float, width: float, high: float) -> object:
     k = wk.Kit(name)
     r = high * 0.5
     zc = r
-    hw = width * 0.5
+    hw = width * 0.5 - 0.012  # the flanges' faces, the spindle plates standing out to the box
     t = 0.07                          # a flange's thickness
     coil_r = r * 0.88                 # the cable's outside
     # The flanges: each a disc of boards (its face lines are the board joints), a steel band round its rim.
@@ -76,7 +76,7 @@ def build(name: str, length: float, width: float, high: float) -> object:
     for sx in (-1.0, 1.0):
         x_out = sx * length * 0.5
         x_in = sx * (r * 0.55)
-        for y in (-hw + t * 0.5, hw - t * 0.5):
+        for y in (-(width * 0.5 - 0.07), width * 0.5 - 0.07):  # under the rims, inside the box
             k.prism([(x_in, 0.0), (x_out, 0.0), (x_out, 0.06), (x_in + sx * 0.05, 0.22)], "y", y - 0.07, y + 0.07,
                     "timber")
     return k.build()

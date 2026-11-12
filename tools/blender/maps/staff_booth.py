@@ -108,9 +108,9 @@ def build(name: str, width: float, depth: float) -> object:
     if dx0 - FR - (-bx + 0.07) > 0.4:
         window(k, "y", y, -1.0, -bx + 0.1, dx0 - FR - 0.06, SILL, HEAD, 2 if dx0 - (-bx) > 1.0 else 1)
     # the lamp over the door
-    k.blk(((dx0 + dx1) * 0.5 - 0.09, y - 0.09, HEAD + FR + 0.03), ((dx0 + dx1) * 0.5 + 0.09, y, HEAD + FR + 0.1),
+    k.blk(((dx0 + dx1) * 0.5 - 0.09, y - 0.065, HEAD + FR + 0.03), ((dx0 + dx1) * 0.5 + 0.09, y, HEAD + FR + 0.1),
           "booth_frame")
-    k.blk(((dx0 + dx1) * 0.5 - 0.07, y - 0.08, HEAD + FR + 0.02), ((dx0 + dx1) * 0.5 + 0.07, y - 0.01,
+    k.blk(((dx0 + dx1) * 0.5 - 0.07, y - 0.06, HEAD + FR + 0.02), ((dx0 + dx1) * 0.5 + 0.07, y - 0.01,
                                                                    HEAD + FR + 0.03), "glass")
     k.mark("front")
     # The sides: a window in each (not on a booth too shallow), the air conditioner hung on the -x side.
