@@ -97,7 +97,7 @@ func test_each_face_takes_its_room_s_finish() -> void:
 	assert_eq(_finish_at(m, Vector3(-45.0, 18.9, 5.0), Vector3.UP), &"terrazzo", "the ticket hall's floor")
 	assert_eq(_finish_at(m, Vector3(-62.0, 20.0, 0.0), Vector3.RIGHT), &"wall_tile", "the ticket hall's west wall")
 	assert_eq(_finish_at(m, Vector3(-50.0, 24.9, 0.0), Vector3.DOWN), &"plaster", "the ticket hall's ceiling")
-	assert_eq(_finish_at(m, Vector3(0.0, 0.9, -7.0), Vector3.UP), &"platform", "the north platform")
+	assert_eq(_finish_at(m, Vector3(0.0, 0.9, -7.0), Vector3.UP), &"platform_floor", "the north platform")
 	assert_eq(_finish_at(m, Vector3(-30.0, 0.0, 11.5), Vector3.UP), &"ballast", "the south track bed")
 	assert_eq(_finish_at(m, Vector3(70.0, 1.5, 12.6), Vector3.FORWARD), &"lining", "the south running tunnel's wall")
 	assert_eq(_finish_at(m, Vector3(40.0, 2.0, 9.0), Vector3.FORWARD), &"car", "the south train's side, outside")

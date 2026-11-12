@@ -29,12 +29,14 @@ extends Resource
 	&"boards": &"Planks008", &"quarry": &"Tiles017", &"painted": &"Concrete029", &"car": &"PaintedMetal012",
 	&"coping": &"Concrete035", &"soot": &"Concrete029", &"rail": &"Rust004", &"sleeper": &"Concrete035",
 	&"gap_line": &"PaintedMetal012", &"paint": &"PaintedMetal012", &"vault_tile": &"Tiles136B",
+	&"platform_floor": &"Concrete034",
 }
 @export var finish_scales: Dictionary[StringName, float] = {
 	&"wall_tile": 0.6, &"terrazzo": 2.0, &"plaster": 2.5, &"concrete": 3.0, &"platform": 2.5, &"ballast": 1.6,
 	&"tread": 0.8, &"steel": 1.5, &"rust": 2.0, &"shutter": 1.6, &"planks": 1.5, &"plant": 2.5, &"rubber": 1.5,
 	&"tactile": 0.8, &"lining": 2.4, &"boards": 1.8, &"quarry": 1.2, &"painted": 2.5, &"car": 1.5, &"coping": 1.0,
-	&"soot": 3.0, &"rail": 0.5, &"sleeper": 1.0, &"gap_line": 2.0, &"paint": 2.0, &"vault_tile": 0.6,
+	&"soot": 3.0, &"rail": 0.5, &"sleeper": 1.0, &"gap_line": 2.0, &"paint": 2.0,
+	&"vault_tile": 0.6, &"platform_floor": 4.0,
 }
 @export var finish_tints: Dictionary[StringName, Color] = {
 	# TB1 (owner, 2026-11-12: "a more white/grey look"): white glazed tiles, faintly cool.
@@ -45,6 +47,10 @@ extends Resource
 	&"shutter": Color8(0xb4, 0xb0, 0xa8),
 	# TB1: the platforms' painted yellow line (the one safety yellow, `safety_finishes`) and the words' white paint.
 	&"gap_line": Color8(0xe0, 0xbc, 0x2a), &"paint": Color8(0xe8, 0xe6, 0xe0),
+	# The platforms' floor: smooth, even grey concrete (owner, 2026-11-12: "more solid and clean looking").
+	&"platform_floor": Color8(0xb8, 0xb8, 0xb6),
+	# The track bed's ballast a dark grey, near black, under the rails (owner, 2026-11-12).
+	&"ballast": Color8(0x4a, 0x4a, 0x4a),
 	# The vault's tiles, the walls' faintly cooler: the warm light from below would turn a down-facing white tan.
 	&"vault_tile": Color8(0xe4, 0xec, 0xf6),
 }
@@ -60,7 +66,7 @@ extends Resource
 ## Each room style's finishes for a floor (a face looking up), a wall and a ceiling (looking down) facing its air.
 @export var style_floors: Dictionary[StringName, StringName] = {
 	&"hall": &"terrazzo", &"passage": &"quarry", &"escalator": &"tread", &"plant": &"platform", &"service": &"platform",
-	&"platform": &"platform", &"track": &"ballast", &"tunnel": &"ballast", &"train": &"rubber",
+	&"platform": &"platform_floor", &"track": &"ballast", &"tunnel": &"ballast", &"train": &"rubber",
 }
 ## The track's walls (the trackside wall across from a platform) wear the station's white tiles (owner, 2026-11-12:
 ## "should be white and almost match the rest of the station design").
