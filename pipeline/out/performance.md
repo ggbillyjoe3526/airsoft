@@ -1,11 +1,17 @@
-Task: CN1 · head e1133ce · Verdict: Pass (attempt 2)
-Run: no match run needed (no game/ code changed since adb2321; only tools/blender/figures, tests, rebuilt human.glb and body textures) · budget: no baseline yet, judged against targets and base 4ea951a
-Metrics (measured on the committed files):
-- human.glb 9,707,612 B / base 9,708,632 (-0.0 %), attempt 1 9,703,220 (+0.05 %). ok
-- human_body_col.webp 565,022 / base 567,998 (-0.5 %); orm 90,776 / 91,778 (-1.1 %); nrm 856,624 / 852,226 (+0.5 %). ok
-- glb structure: 26 meshes, 68 primitives (surfaces), 8 materials, 10 images, identical to base. No new meshes, surfaces or materials.
-- Triangles per LOD for the largest-head human (budgets 60k / 20k / 6k): tests/unit/test_figure_body.gd HUMAN_HIGH = [58868, 58868, 19424, 5639] is unchanged by this diff, so the pinned counts still hold. QA's run at this head reports test_figure_body 17/17 (pipeline/out/qa-report.md). My own re-run timed out at 300 s because tools/check.sh was loading the machine, so the per-LOD counts are QA's measurement plus the test file untouched, not mine. All inside the budgets (judgment on that last point).
-Regressions (> 10 % worse): none
+Task: SM5 · head 122ea50 · Verdict: Pass
+Run: no --perf match run (a full tools/check.sh was running; no GPU) · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and by reading the diff
+Metrics: not measured this run (node count, orphans, draw calls, frame time all unmeasured); judgment from the diff only
+Regressions (> 10 % worse): none measured
 Blocking findings: none
-Advisory: none new. The only runtime-visible change is skin weights and vertex positions (collar, back rise, scarf radius), so no new draw calls, shaders, prewarm entries or per-frame work.
+ - Allocations: StationFixtures builds once (play_session dress part 2); no _process/_physics_process, no signals, no timers/tweens (station_fixtures.gd) (judgment)
+ - Teardown: views are children of the session and freed with it; MultiMesh/ArrayMesh/3 materials are refcounted and held only by the nodes and _materials (judgment)
+ - Presets: shadows off and GI disabled on every view (station_fixtures.gd _add); no light, no particles, glass is unshaded (judgment)
+ - Shader warm-up: materials() (prop, glow, printed) is appended to first_use (play_session.gd); printed shares look_vertex, the glow shader is new and covered (judgment)
+ - look_vertex.gdshader: use_sheet is a uniform bool, a coherent branch, one extra unset sampler bind on every material; negligible (judgment)
+ - signs.png: compress/mode=2 (VRAM, BC7), 2048x1024 about 2.7 MB VRAM with mips, anisotropic filter; fine (judgment)
+Advisory:
+ - station_fixtures.gd:_add: each MultiMesh spans the whole station, so no per-instance culling; 12 models, up to 3 surfaces each, so at most about 36 draws are always submitted while Subway is visible. Rendered run needed to confirm; visibility_range_end or merging small models would cut it.
+ - station_fixtures.gd:build: sheet load is synchronous on the build path; fine if it stays before the warm-up.
+ - Owner: please record a Godot baseline in perf-budget.json; one rendered Subway run (draw calls, F3) would settle the draw-call point.
+Fixes: none required
 Unexplained: none
