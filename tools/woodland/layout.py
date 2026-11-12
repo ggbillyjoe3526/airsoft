@@ -382,10 +382,11 @@ rect("windthrow", -6.0, 50.0, 7.0, 2.0, 90, top=2.2, tag="roadblock")
 rect("windthrow", 1.6, 44.0, 7.0, 2.0, 90, top=2.2, tag="roadblock")   # was a low crate at (1, 45.5)
 rect("logstack", -24.0, 54.0, 5.0, 1.6, 0)
 rect("logstack", 25.0, 47.6, 6.0, 1.6, -20)          # Log stacks (on the verge: breaks the Truck bend to B line)
-# MB1: cordwood across the road where the lane leaves the culvert: the east end's hard cover over the dip, as the
-# fallen tree on the hump is the west end's, 30 m apart. 3 m tall: at 1.8 m the hump, 2.4 m up, looked over it 52 m
-# onto flag B's forward post, and 88 of Attack / Defend's 142 knock-outs from over 38 m were that one duel.
-rect("logstack", 20.5, 42.0, 1.6, 6.0, 0, top=3.0, tag="roadblock")
+# MB1: cordwood across the road 14 m past the culvert: the east end's hard cover over the dip, as the fallen tree on
+# the hump is the west end's. A gate screen's 2.8 m (the woodpiles' 1.8 m is the owner's, 2026-11-09): at 1.8 m and
+# 3.5 m nearer the culvert the hump, 2.4 m up, looked over it 52 m onto flag B's forward post, and 88 of Attack /
+# Defend's 142 knock-outs from over 38 m were that one duel. Here the line is low enough for 2.8 m to shut it.
+rect("logstack", 24.0, 40.5, 1.6, 6.0, 0, top=2.8, tag="roadblock")
 rect("logstack", 29.7, 35.9, 5.0, 1.6, -25)
 rect("tyre", 19.0, 39.0, 1.7, 1.7)
 rect("logstack", 36.5, 42.3, 5.0, 1.6, -30)          # v3: along the verge, off the road
@@ -587,7 +588,7 @@ LANE_PATHS = {
     # attackers scored round the pole, and they won 64 % of the rounds (55 % with him behind the crates).
     "s": [(-77, 21), (-66, 27), (-48, 33), (-34, 42), (-18, 49), (-11.5, 49.8), (-8.8, 47.2), (-6.2, 45.3),
           (-2.2, 45.4), (2, 49.4), (14, 48.3),
-          (20.6, 46.4), (24.5, 43.8), (32, 40), (44.6, 29.8), (49, 37)],
+          (19.5, 46.6), (24.0, 45.3), (28.0, 42.8), (32, 40), (44.6, 29.8), (49, 37)],
 }
 
 
