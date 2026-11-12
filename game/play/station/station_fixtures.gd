@@ -20,7 +20,7 @@ void fragment() {
 var _views: Array[MultiMeshInstance3D] = []
 var _materials: Array[Material] = []
 var _placed: Dictionary[StringName, Array] = {}
-## The lit models' lights (StationFixturesConfig.lit_models).
+## The lit models' lights (StationFixturesConfig.lit_models), hidden until set_lamps shows them.
 var _lamps: Array[OmniLight3D] = []
 
 
@@ -110,9 +110,15 @@ func _add_lamp(at: Vector3, cfg: StationFixturesConfig) -> void:
 	lamp.light_energy = cfg.lamp_energy
 	lamp.light_color = cfg.lens_colour
 	lamp.shadow_enabled = false
-	lamp.light_bake_mode = Light3D.BAKE_STATIC
+	lamp.visible = false
 	add_child(lamp)
 	_lamps.append(lamp)
+
+
+## Turns the lit models' lights on (the station's lamps light: Settings › Graphics › Lamp lights, as the lifts') or off.
+func set_lamps(on: bool) -> void:
+	for l in _lamps:
+		l.visible = on
 
 
 func lamps() -> Array[OmniLight3D]:

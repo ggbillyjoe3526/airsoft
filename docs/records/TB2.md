@@ -1,6 +1,6 @@
 # TB2 · Subway's running tunnels arched like the trains
 
-**Review:** 2 attempts · critic pending · qa pending · performance pending
+**Review:** 3 attempts · critic pending · qa pending · performance pending
 
 Owner's ask (2026-11-12): "Subway tunnel should be curved/arched to closely math the shape of the trains." A second
 pull request after TB1 (#318), which vaulted the platform tunnels.
@@ -10,7 +10,8 @@ pull request after TB1 (#318), which vaulted the platform tunnels.
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | Opus 5.5 (build thread) | ✓ | 6/8 Retry | the box car standing in the south running tunnel poked through the arch (its roof cut away, its sides through the lining); the arch unseen in the dark tunnel; an always-true test assert, a stale rib comment |
-| 2026-11-12 | 2 | Opus 5.5 (build thread) | pending | pending | – |
+| 2026-11-12 | 2 | Opus 5.5 (build thread) | ✓ | – | performance Fail: the tunnel lamps' lights shone on every preset, past the Lamp lights row (Low and Medium stay cheap) |
+| 2026-11-12 | 3 | Opus 5.5 (build thread) | pending | pending | – |
 
 ## Decisions
 
@@ -40,12 +41,13 @@ pull request after TB1 (#318), which vaulted the platform tunnels.
 - **Tunnel lamps light the arch** (attempt 2): the roof's strip lamps hang under the crown and shine straight down,
   and on Low and Medium the overhead light stands in for them from above, so nothing lit the arch's down-facing
   lining and the tunnels drew black above the wall. Each wall-mounted tunnel lamp (SM5's) now carries a short
-  shadowless light at its glass (`StationFixturesConfig.lit_models`, 6.5 m at 1.5, the glass's warm white), on every
-  preset: a dozen lights, in the running tunnels only.
+  shadowless light at its glass (`StationFixturesConfig.lit_models`, 6.5 m at 1.5, the glass's warm white): a dozen
+  lights, in the running tunnels only, shown with the Lamp lights row (High and Ultra) as the lifts' lamps are
+  (performance review: Low and Medium keep no real lamp lights).
 
 ## Known issues
 
 - The car's stepped shoulders show on the greybox box car until SM1's train models draw over its shell.
-- The tunnel lamps' lights are on every preset, Low and Medium too (where the roof's lamps are no real lights), so
-  the arch reads there: a dozen shadowless lights, judged by the performance review, not measured on a modest PC.
+- On Low and Medium (no real lamp lights) the running tunnels' arch stays dark above the walls, as the tunnels were
+  before: only the lamps' glass glows. Lighting it there would need a new Graphics row or an owner ruling.
 - Pictures (concepts/metro/tb2/v3/) are Forward+ on High and Low; Ultra not rendered.
