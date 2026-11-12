@@ -307,7 +307,9 @@ func test_every_volume_has_a_bus_and_the_power_bus_feeds_effects() -> void:
 	for bus: StringName in Settings.VOLUME_BUSES:
 		assert_gte(AudioServer.get_bus_index(bus), 0, "bus %s" % bus)
 	var power := AudioServer.get_bus_index(SimAudio.BUS_POWER)
-	assert_eq(AudioServer.get_bus_send(power), SimAudio.BUS_EFFECTS)
+	# Through Shots (EC1), which feeds Effects.
+	assert_eq(AudioServer.get_bus_send(power), SimAudio.BUS_SHOTS)
+	assert_eq(AudioServer.get_bus_send(AudioServer.get_bus_index(SimAudio.BUS_SHOTS)), SimAudio.BUS_EFFECTS)
 	assert_eq(AudioServer.get_bus_send(AudioServer.get_bus_index(SimAudio.BUS_FOOTSTEPS)), SimAudio.BUS_EFFECTS)
 
 

@@ -209,7 +209,9 @@ func test_a_silenced_dry_fire_is_not_muffled_and_a_silenced_shot_uses_the_muffle
 func test_the_muffled_bus_is_not_a_settings_volume() -> void:
 	assert_false(Settings.VOLUME_BUSES.has(&"Muffled"))
 	assert_gte(AudioServer.get_bus_index(&"Muffled"), 0)
-	assert_eq(AudioServer.get_bus_send(AudioServer.get_bus_index(&"Muffled")), &"Effects")
+	# Through Shots (EC1), which feeds Effects.
+	assert_eq(AudioServer.get_bus_send(AudioServer.get_bus_index(&"Muffled")), &"Shots")
+	assert_eq(AudioServer.get_bus_send(AudioServer.get_bus_index(&"Shots")), &"Effects")
 
 
 func test_a_figure_without_parts_gets_no_extra_meshes() -> void:
