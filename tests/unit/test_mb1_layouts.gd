@@ -19,6 +19,8 @@ const POLE_B := Vector2(49.0, 38.5)
 const POLE_RING := 1.5
 const POSTS_B: Array[Vector2] = [Vector2(44.6, 29.8), Vector2(49.0, 37.0)]
 const CHEST_BELOW_EYE := 0.3
+## Woodland's log stack across the Long road, where the lane leaves the Culvert (its centre).
+const ROAD_STACK := Vector2(20.5, 42.0)
 
 var tuning: SimTuning = SimTuning.load_default()
 var style: MapStyle = PlayTuning.load_default().map_style
@@ -172,8 +174,8 @@ func test_subway_flag_b_stands_on_the_north_platform_floor_clear_of_every_block(
 	assert_eq(hit.size(), 0, "no block in a standing body at the flag: %s" % [hit])
 
 
-## The road's stack at the Culvert stands a gate screen's 2.8 m for this: the hump is 2.1 m over the dip the stack
-## stands in, and at a woodpile's 1.8 m a standing eye on the road sees a chest in the pole's ring from 60 m.
+## The road's stack at the Culvert is a woodpile's 1.8 m (the owner, 2026-11-12) and the hump, 2.1 m over the dip it
+## stands in, looks over it: the young spruce against the stack's east face is what keeps the road off the ring.
 func test_woodland_long_road_does_not_see_flag_b_pole_ring_or_posts() -> void:
 	var m := maps["woodland"]
 	var level := MapLevel.new()
@@ -209,6 +211,32 @@ func test_woodland_long_road_does_not_see_flag_b_pole_ring_or_posts() -> void:
 	level.free()
 	assert_eq(ring_seen, 0, "the Long road west of the Culvert sees a chest in flag B's pole ring")
 	assert_eq(posts_seen, 0, "the Long road's hump sees a chest at one of flag B's defender posts")
+
+
+## MB2: the stack across the Long road at the Culvert is a woodpile's 1.8 m (the owner, 2026-11-12: "Lower it to
+## 1.8 m"), and spruce stands against the whole of its east face, over twice its height.
+func test_woodland_road_stack_is_a_woodpile_high_with_spruce_against_its_east_face() -> void:
+	var m := maps["woodland"]
+	var stack: MapData.Block = null
+	for b in m.blocks:
+		if b.dress == &"cordwood" and absf(b.center.x - ROAD_STACK.x) < 0.1 and absf(b.center.z - ROAD_STACK.y) < 0.1:
+			stack = b
+	assert_not_null(stack, "the log stack across the Long road at the Culvert")
+	if stack == null:
+		return
+	var top := stack.center.y + stack.size.y * 0.5
+	var tall := top - PropLayout.ground_at(m, stack.center.x, stack.center.z, top)
+	assert_almost_eq(tall, 1.8, 0.05, "the road's stack stands a woodpile's 1.8 m")
+	var east := stack.center.x + stack.size.x * 0.5
+	var spruce: MapData.Block = null
+	for b in m.blocks:
+		if b.kind == &"thicket" and absf(b.center.x - b.size.x * 0.5 - east) < 0.05:
+			if (b.center.z - b.size.z * 0.5 <= stack.center.z - stack.size.z * 0.5 + 0.05
+					and b.center.z + b.size.z * 0.5 >= stack.center.z + stack.size.z * 0.5 - 0.05):
+				spruce = b
+	assert_not_null(spruce, "spruce against the whole east face of the road's stack")
+	if spruce != null:
+		assert_gt(spruce.center.y + spruce.size.y * 0.5, top + tall, "the spruce stands over twice the stack")
 
 
 func _chest(nav: NavGrid, x: float, z: float, eye: float) -> Vector3:

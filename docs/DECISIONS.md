@@ -821,15 +821,25 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   Culvert, a fallen tree in the Clearing where the west's sweep ends, two spruce thickets on the Ford's east bank with
   hazels on the crest at the head of its ramp, and a log stack beside flag B, whose forward defender waits behind the
   crates north of the road mouth (in the mouth he was shot from 25 m before a fight reached the flag). A piece in a dip
-  hides nobody on a rise behind it (the road's stack is a gate screen's 2.8 m where the lane leaves the Culvert: at
-  1.8 m the road west of it looks over it at a chest by flag B's pole, 60 m off, and 3.5 m further east it was the
-  attackers' cover onto the site), and a screen with one gap is a trap for whoever must come through: bushes are walked through on a broad front.
+  hides nobody on a rise behind it (where the lane leaves the Culvert the road west of it looks over a 1.8 m stack at
+  a chest by flag B's pole, 60 m off, and 3.5 m further east the stack was the attackers' cover onto the site; MB2
+  below has what stands there), and a screen with one gap is a trap for whoever must come through: bushes are walked through on a broad front.
   A pole walled on two sides hides whoever raises it as well as whoever holds it: a pen of two stacks round flag B,
   with the defenders' posts inside it, gave the attackers 78 % of 120 rounds, and came out. The north lane's two stops
   are at the North bridge's west head (the field's middle crosses there, and the bridge is a footbridge 1.8 m wide:
   sent over it to its east end, the west lost that lane 133 to 187). The lanes' ranges now differ (Elimination's median
   knock-out: the road 14 m, the Clearing 19 m, the north 26 m; each was about 40 m). The Ridge's 86 m overlook of the
   WR1 decision is gone; the 170 m exception stays for the pinholes between trunks.
+- **Woodland's road stack is a woodpile's 1.8 m, with spruce behind it (owner, 2026-11-12, MB2).** MB1 built the
+  stack across the Long road at the Culvert a gate screen's 2.8 m and put its height to the owner: "Lower it to
+  1.8 m". Every woodpile and cordwood stack on the field is now 1.8 m (his 2026-11-09 ruling); only the camps' gate
+  screens stand 2.8 m. Bare, the lower stack let the road's hump, 2.1 m over the dip, see a chest by flag B's pole
+  60 m off, and let the east's squad walking up behind it shoot the west's on the hump from 30 to 40 m: the west end
+  won 41 % ±3 of 236 Elimination rounds (48 % ±3 of 239 at 2.8 m, the same 32 seeds). So young spruce stands against
+  the stack's east face, a stand 1.7 m deep and as wide as the stack: a thicket, which nothing sees or walks
+  through, where the stack's top metre was. With it the west end takes 47 % ±3 of 235 rounds and the attackers
+  54 % ±4 of 130 Attack / Defend rounds (59 % ±5 at 2.8 m). A stack closing the south-west side of flag B's yard was tried first: it shut the line
+  onto the pole, but not the one onto the hump.
 - **Subway's flag B stands on the north platform (2026-11-12, MB1).** It stood on the stair landing 11 m from flag A,
   and the north platform saw 1 % of the fights; now each platform holds a flag. The north lane runs that platform from
   the lifts, the south lane takes the escalators and the concourse to the middle stair, where two defenders hold; the
