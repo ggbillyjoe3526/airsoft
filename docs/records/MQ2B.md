@@ -1,12 +1,13 @@
 # MQ2B · Bombs and power sources made of what the real ones are
 
-**Review:** 1 attempt · critic PENDING · qa PENDING · performance PENDING
+**Review:** 2 attempts · critic PENDING · qa PENDING · performance PENDING
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-12 | 1 | Fable 5.2 (model quality thread) | PENDING | PENDING | – |
+| 2026-11-12 | 1 | Fable 5.2 (model quality thread) | ✓ (after a prewarm count fix) | Retry 7/8 | the first-person pictures hardly differed, the print read as a ruler, the lever's ribs as slots and its bend as a mirror, the gas bottle's shoulder was short and its label nearly empty |
+| 2026-11-12 | 2 | Fable 5.2 (model quality thread) | PENDING | PENDING | – |
 
 ## What changed
 
@@ -19,7 +20,7 @@ hand and the menus' pictures draw them on those surfaces in their own colours:
 
 | Model | Made of |
 |---|---|
-| Smoke bomb | a glossy printed film sleeve, a moulded cap and foot, a sheet steel lever, dark steel wire |
+| Smoke bomb | a glossy printed film sleeve, a moulded cap and foot, a lever in matte black paint, dark steel wire |
 | Flash bomb | a matte card tube, a paper band and cap |
 | Gas bottle | an aluminium can and its print under a baked coat |
 | LiPo and Standard Battery | glossy shrink film, paper stickers, matte leads, moulded plugs |
@@ -28,18 +29,24 @@ hand and the menus' pictures draw them on those surfaces in their own colours:
 - **A new kind, `card`** (index 8, after `polished`; the order of `KINDS` is unchanged): card and paper in their own
   colour, dead matte with a fine tooth. Nothing else is as dull as a wound card tube.
 - **New detail, against the owner's photos** (`ref_images.zip` › `grenades/`, `gas_bottle/`, `11.1v_lipo_battery/`):
-  the real ones are covered in print, and the models' labels were blank. They now carry print as blocks and bars
-  where the photos have words, never letters, logos or symbols, as the Standard Battery's stickers have had since BL7.
-  - *Smoke bomb* (5,488 triangles of 5,500): a small heading, two heavy lines and a third in the smoke's own colour
-    (the photos' "SMOKE / RED" line is in the smoke's colour), a fine line at the foot, and beside the lever (the
-    side the menus' picture sees) a block and three lines of small print; three short pressed ribs down the lever's
-    arm, between its edge notches.
-  - *Flash bomb* (5,196 of 5,500): running up the tube as the photos' label does, a block in the bomb's own colour,
-    a long pale one and a row of eight small squares where the photos have their pictograms, and on the side the
-    menus' picture sees three lines of small print and a square of the bomb's colour; six vents round the hole in
-    the cap (the photos' perforated cap).
-  - *Gas bottle* (4,402 of 6,000, 105 KB of 120): under the chevron a heading block in the gas's colour, four lines
-    and a pale caution panel with a block of the gas's colour in it.
+  the real ones are covered in print, and the models' labels were blank. They now carry print where the photos
+  have it, never letters, logos or symbols: a word is a row of bold stencil glyphs, each a few bars that spell
+  nothing (`GLYPHS_ROUND`, `GLYPHS_UP` in `grenades.py`), and small print is lines and blocks, as the Standard
+  Battery's stickers have had since BL7. The print sits where your hand leaves the bomb in view.
+  - *Smoke bomb* (5,474 triangles of 5,500): under your thumb a word in the smoke's own colour (the photos' "SMOKE
+    / RED" line is in the smoke's colour) and a second in pale grey; above them two maker's blocks, a heavy line
+    and a fine one; a line at the foot; beside the lever (the side the menus' picture sees) a block and three lines
+    of small print. Three shallow pressed beads swell out of the lever's arm between its edge notches (0.35 mm,
+    round, running out to nothing), and the lever is matte black paint, not bare steel.
+  - *Flash bomb* (5,308 of 5,500): a pale band under the cap's coloured one, as the photos'; running up the tube
+    beside the ring a five-glyph word under a block of the bomb's own colour, a maker's square at its foot and a
+    line of small print beside it; next to the ring a column of seven square pictogram tiles; on the side the
+    menus' picture sees three lines of small print and a square of the bomb's colour; on the cap six vents round
+    the hole (the photos' perforated cap) and six pale printed ticks between them.
+  - *Gas bottle* (4,598 of 6,000, 115 KB of 120): the shoulder and the cap are each a seventh of the can's height,
+    as the main photo's (37 and 43 mm; they were 31 and 40); under the chevron the label is filled as the photo's
+    is: a round emblem with the gas's colour in its middle, a heavy mark, a bar of the gas's colour, three bulleted
+    lines, a paragraph of fine lines and a pale caution panel with a block of the gas's colour and two dark lines.
   - *LiPo* (3,012 of 6,000, 91 KB): a heading and three lines in white and a red caution block with a white bar.
   - *Standard Battery* (2,858 of 6,000, 68 KB): a yellow caution sticker with three dark bars by its lead end, as
     real packs carry, beside the two it had.
@@ -58,10 +65,19 @@ hand and the menus' pictures draw them on those surfaces in their own colours:
 - **Docs:** `docs/CC0_ASSETS.md` (Surfaces, Power-source models, Grenade models), `docs/ART.md`, `docs/ASSETS.md`,
   `docs/PLAYTEST.md` › What the bombs and power sources are made of (MQ2B), the wiki's Grenades page.
 - **Pictures:** `art/model-quality/mq2b/` in the project files: each model alone before and after, and each bomb in
-  first person.
+  first person; the `mq2b-pass2` sheets show the second attempt (the bombs alone, in your hand, the gas bottle and
+  its menu pictures, and each model beside the owner's photo at the same angle).
 
 ## Decisions
 
+- **The smoke's lever is drawn as matte paint (`polymer`), not `steel` or `coated`** (default, attempt 2): real
+  spoons are sheet steel under a matte black finish. Both metal kinds mirrored the sky off the flat bend at the
+  lever's top as a white patch (the critic's finding); the matte film is what the eye sees of it.
+- **Glyphs, not letters** (default, attempt 2): the critic found the first print read as a ruler and a dashed
+  line. A label needs words to read as a label, and the rule is no letters, so a word is stencil glyphs that spell
+  nothing in any alphabet's order.
+- **The hard line down the flash tube in the studio pictures is the studio lamp's shadow edge**, not the model: the
+  before pictures, in flat paint, show the same line (`mq2b-pass2` sheets). The tube's 64 sides are smooth shaded.
 - **The bright wire stays as the file has it** (default): the smoke's rivet and the flash's key ring are under a
   millimetre thick, and the `polished` kind's mirror on them sparkled in the hand. They were already metal.
 - **The bomb in your hand takes shadows as the replica does** (default): the surface shader has no unshadowed

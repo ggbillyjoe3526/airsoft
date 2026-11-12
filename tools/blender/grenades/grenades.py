@@ -40,6 +40,8 @@ ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os
 OUT_DIR = os.path.join(ROOT, "assets/models/grenades")
 MM = 0.001
 TAU = 2.0 * math.pi
+SEG_BODY = 48   # the smoke's sides
+SEG_FLASH = 64  # the flash's
 
 # ------------------------------------------------------------------------------------------------------------ smoke
 # Heights (mm) from the base; radii (mm). Photo rows: base 733, label top 192, cap top 143, flange foot 113, head 38.
@@ -82,23 +84,65 @@ S_RIVET = (-22.8, 132.1, 1.05)
 S_PIN_HOLE = (17.4, 133.2)
 S_RING = (25.5, -17.3, 136.5, 10.5, 0.85, math.radians(25.0))  # centre x y z, radius, wire, turn about z
 S_WIRE = 0.75
-# The sleeve's print (MQ2B), no letters: blocks where the photo's label has its heading, two heavy lines and a third in
-# the smoke's own colour, set left of the front (-Y, the side the ring hangs on), a fine line at the foot, and beside
-# the lever (the side the menus' picture sees) a block and three lines of small print. Each (from, to mm up; first
-# segment, segments wide of SEG_BODY round from +X; material), PRINT_LIFT mm proud of the sleeve.
-S_PRINT = [
-    (80.0, 84.0, 30, 2, "Band"), (80.0, 84.0, 33, 3, "Band"),
-    (62.0, 71.0, 30, 5, "Band"), (50.0, 59.0, 30, 6, "Band"), (38.0, 47.0, 30, 4, "Kind"),
-    (24.0, 25.2, 30, 7, "Band"),
-    (64.0, 72.0, 3, 3, "Band"), (58.0, 59.2, 3, 5, "Band"), (55.0, 56.2, 3, 4, "Band"), (52.0, 53.2, 3, 5, "Band"),
-]
+S_RING_STEPS = 36
+# Print with no letters (MQ2B): a word is a row of glyphs, each a few bars on the lathe's own facets that read as a
+# bold stencilled character from arm's length and spell nothing. A glyph is rectangles (from, to across; from, to
+# along) in its own cell: across in whole segments, along as a share of its height.
+GLYPHS_ROUND = (     # two segments wide, for a word running round the can
+    ((0, 2, 0.0, 0.22), (0, 2, 0.78, 1.0), (0, 1, 0.22, 0.78)),
+    ((0, 1, 0.0, 1.0), (1, 2, 0.39, 0.61)),
+    ((0, 2, 0.0, 0.22), (0, 1, 0.22, 1.0)),
+    ((0, 1, 0.0, 0.78), (0, 2, 0.78, 1.0), (1, 2, 0.36, 0.56)),
+    ((0, 2, 0.0, 1.0),),
+)
+GLYPHS_UP = (        # seven segments tall, for a word running up the tube
+    ((0, 7, 0.0, 0.25), (0, 2, 0.25, 1.0), (5, 7, 0.25, 1.0)),
+    ((0, 7, 0.0, 0.22), (0, 7, 0.78, 1.0), (0, 2, 0.22, 0.78), (5, 7, 0.22, 0.78)),
+    ((0, 7, 0.0, 0.25), (0, 2, 0.25, 1.0), (3, 5, 0.25, 0.75)),
+    ((0, 2, 0.0, 1.0), (2, 7, 0.36, 0.64)),
+    ((0, 7, 0.0, 0.28), (0, 2, 0.28, 1.0)),
+)
+
+
+def word_round(z0: float, z1: float, first: int, glyphs: tuple, mat: str) -> list:
+    """A word round the can from segment `first`, its glyphs z0 to z1 mm tall with a segment between them."""
+    out = []
+    for i, g in enumerate(glyphs):
+        at = first + 3 * i
+        out += [(z0 + (z1 - z0) * l0, z0 + (z1 - z0) * l1, at + a0, a1 - a0, mat)
+                for a0, a1, l0, l1 in GLYPHS_ROUND[g]]
+    return out
+
+
+def word_up(z0: float, each: float, gap: float, first: int, glyphs: tuple, mat: str) -> list:
+    """A word up the tube from z0 mm, its glyphs `each` mm long with `gap` between them, from segment `first`."""
+    out = []
+    for i, g in enumerate(glyphs):
+        at = z0 + (each + gap) * i
+        out += [(at + each * l0, at + each * l1, first + a0, a1 - a0, mat) for a0, a1, l0, l1 in GLYPHS_UP[g]]
+    return out
+
+
+# The sleeve's print, on the side your hand leaves in view (left of the ring, -Y): under your thumb, where the hand
+# shows the sleeve, a word in the smoke's own colour and a second in the sleeve's pale grey; above them (under the
+# hand, for the menus and a bomb lying) two maker's blocks, a heavy line and a fine one; a line at the foot; beside
+# the lever
+# (the side the menus' picture sees) a block and three lines of small print. Each (from, to mm up; first segment,
+# segments wide of SEG_BODY round from +X; material), PRINT_LIFT mm proud of the sleeve.
+S_PRINT = word_round(52.0, 66.0, 27, (0, 1, 2), "Kind") + word_round(34.0, 48.0, 27, (3, 0, 4), "Band") + \
+    [(72.0, 78.0, 27, 3, "Band"), (72.0, 78.0, 31, 3, "Band"), (84.0, 90.0, 27, 6, "Band"),
+     (92.5, 94.0, 27, 6, "Band"), (24.0, 25.2, 27, 7, "Band"),
+     (64.0, 72.0, 3, 3, "Band"), (58.0, 59.2, 3, 5, "Band"), (55.0, 56.2, 3, 4, "Band"), (52.0, 53.2, 3, 5, "Band")]
 PRINT_LIFT = 0.08
-# The lever's pressed ribs (MQ2B): one between each pair of its edge notches, stiffening the sheet as a real spoon's
-# do: (from, to mm up), RIB_HALF mm either side of the middle, RIB_PROUD mm out of the arm's outside face.
+# The lever's pressed beads (MQ2B): one between each pair of its edge notches, stiffening the sheet as a real spoon's
+# do: (from, to mm up), a shallow round swell S_RIB_HALF mm either side of the middle and S_RIB_PROUD mm out of the
+# arm's outside face, running out to nothing at its ends and sides.
 S_RIBS = ((65.5, 75.2), (81.2, 93.2), (99.2, 111.2))
-S_RIB_HALF = 1.5
-S_RIB_PROUD = 0.55
-S_RIB_RUN = 1.6  # each rib's ends run out over this length
+S_RIB_HALF = 2.4
+S_RIB_PROUD = 0.35
+S_RIB_ALONG = ((0.0, 0.0), (0.12, 0.55), (0.3, 1.0), (0.7, 1.0), (0.88, 0.55), (1.0, 0.0))   # (share along, height)
+S_RIB_ACROSS = ((-1.0, 0.0), (-0.6, 0.6), (0.0, 1.0), (0.6, 0.6), (1.0, 0.0))                # (share across, height)
+S_RIB_SUNK = 0.03  # the bead's rim sits this far inside the arm's face
 
 # ------------------------------------------------------------------------------------------------------------ flash
 F_R = 20.0
@@ -113,21 +157,28 @@ F_RING_WIRE = 0.8
 F_RING_PITCH = 1.7
 F_RING_AT = math.radians(-95.0)  # where round the tube the ring hangs (0 = +X, the photos' right side)
 F_HOOK_WIRE = 0.5
-# The tube's print (MQ2B), no letters, running up the tube as the photos' label does: beside the ring a heading block
-# in the bomb's own colour, a long pale word and a row of small squares where the photos have their pictograms; on
-# the side the menus' picture sees, three lines of small print and a square of the bomb's colour. Each (from, to mm
-# up; first segment, segments wide of SEG_FLASH round from +X; material).
-F_PRINT = [(28.0, 52.0, 37, 3, "Kind"), (56.0, 112.0, 37, 3, "Print")] + \
-    [(28.0 + 7.5 * i, 32.5 + 7.5 * i, 42, 1, "Print") for i in range(8)] + [(96.0, 112.0, 42, 1, "Kind")] + \
+# The tube's print (MQ2B), no letters, laid out as the photos' label is and turned to the side your hand leaves in
+# view (beside the ring): a pale band under the cap's; a word running up the tube under a block of the bomb's own
+# colour, a maker's square at its foot and a line of small print beside it; a column of square pictogram tiles next
+# to the ring; on the side the menus' picture sees, three lines of small print and a square of the bomb's colour.
+# Each (from, to mm up; first segment, segments wide of SEG_FLASH round from +X; material[, extra lift mm]).
+F_PALE_BAND = (118.5, 122.6)
+F_PRINT = [(F_PALE_BAND[0], F_PALE_BAND[1], 0, SEG_FLASH, "Print")] + \
+    word_up(44.0, 10.0, 2.5, 34, (0, 1, 2, 3, 4), "Print") + \
+    [(107.0, 116.0, 34, 7, "Kind"), (26.0, 40.0, 34, 7, "Print"), (29.5, 36.5, 36, 3, "Kind", 0.04)] + \
+    [(a, b, 32, 1, "Print") for a, b in ((44.0, 52.0), (54.0, 57.0), (59.0, 68.0), (70.0, 74.0), (76.0, 86.0),
+                                         (88.0, 91.0))] + \
+    [(28.0 + 12.4 * i, 34.0 + 12.4 * i, 43 + k, 1, "Kind" if k == 1 else "Print")
+     for i in range(7) for k in range(3) if k != 1 or i % 2 == 0] + \
     [(36.0, 104.0, 1, 1, "Print"), (52.0, 104.0, 3, 1, "Print"), (44.0, 104.0, 5, 1, "Print"),
      (22.0, 30.0, 1, 2, "Kind")]
+# Pale ticks printed on the cap between its vents: how far out they start and end, their half width (mm).
+F_TICKS = (9.6, 13.2, 0.8)
 # The cap's ring of vents round its middle hole (the photos' perforated cap): how many, their radius, how far out.
 F_VENTS = (6, 1.25, 11.2)
 F_VENT_SIDES = 8
 
-SEG_BODY = 48
-SEG_FLASH = 64
-RING_STEPS = 56  # the flash's split ring: steps a turn
+RING_STEPS = 52  # the flash's split ring: steps a turn
 
 
 # The bombs' own colours (GrenadeView.BODY_COLOURS), which the game paints the `Kind` material in.
@@ -136,11 +187,12 @@ KIND_FLASH = 0x7D5BC4
 
 
 # What each material is made of (surface.py, MQ2B): the smoke's sleeve a glossy printed film, its cap and foot
-# moulded, its lever black sheet steel, the pin and ring dark wire; the flash a card tube under paper. The bright
+# moulded, its lever sheet steel under a matte black paint (drawn as the matte film it shows: bare dark steel
+# mirrored the sky off the lever's flat bend), the pin and ring dark wire; the flash a card tube under paper. The bright
 # steel (the smoke's rivet, the flash's key ring) and the cap's dark holes stay as the file has them: a mirror
 # finish on a wire under a millimetre thick sparkles in the hand.
 SURFACES = {
-    "smoke": {"Shell": "coated", "Band": "coated", "Kind": "coated", "Cap": "polymer", "Lever": "steel",
+    "smoke": {"Shell": "coated", "Band": "coated", "Kind": "coated", "Cap": "polymer", "Lever": "polymer",
               "Wire": "steel"},
     "flash": {"Olive": "card", "Kind": "card", "Print": "card", "Cap": "card", "Seal": "card"},
 }
@@ -219,10 +271,10 @@ def prism_y(b: hs.Builder, outline: list, y0: float, y1: float, mat: str) -> lis
 
 def printed(b: hs.Builder, radius: float, segs: int, blocks: list) -> None:
     """Blocks of print on a lathe of `segs` sides and `radius` mm: each (from, to mm up; first segment, segments wide;
-    material) a strip of quads on the lathe's own facets, PRINT_LIFT mm proud."""
+    material[, extra lift mm]) a strip of quads on the lathe's own facets, PRINT_LIFT mm proud."""
     bm = b.bm
-    for z0, z1, first, wide, mat in blocks:
-        r = radius + PRINT_LIFT
+    for z0, z1, first, wide, mat, *more in blocks:
+        r = radius + PRINT_LIFT + (more[0] if more else 0.0)
         lo, hi = [], []
         for k in range(first, first + wide + 1):
             a = TAU * k / segs
@@ -382,14 +434,19 @@ def build_smoke() -> bpy.types.Object:
           "Lever")
     parts.append(hs.finish(b.build(), bevel=0.0004, segments=2))
 
-    # The arm's pressed ribs, out of its outside face between the notches.
+    # The arm's pressed beads, swelling out of its outside face between the notches.
     b = hs.Builder("SmokeRibs", [])
     for z0, z1 in S_RIBS:
-        run = S_RIB_RUN
-        outline = [(arm_x(z0) - 0.1, z0), (arm_x(z0 + run) + S_RIB_PROUD, z0 + run),
-                   (arm_x(z1 - run) + S_RIB_PROUD, z1 - run), (arm_x(z1) - 0.1, z1)]
-        prism_y(b, outline, -S_RIB_HALF, S_RIB_HALF, "Lever")
-    parts.append(hs.finish(b.build(), bevel=0.0003, segments=1))
+        rows = []
+        for along, high in S_RIB_ALONG:
+            z = z0 + (z1 - z0) * along
+            # The rim (no height) sits a hair inside the arm's face.
+            x = arm_x(z)
+            rows.append([b.bm.verts.new(v(x + (S_RIB_PROUD * high * wide or -S_RIB_SUNK), S_RIB_HALF * across, z))
+                         for across, wide in S_RIB_ACROSS])
+        b._faces([b.bm.faces.new((rows[i][k], rows[i][k + 1], rows[i + 1][k + 1], rows[i + 1][k]))
+                  for i in range(len(rows) - 1) for k in range(len(S_RIB_ACROSS) - 1)], "Lever")
+    parts.append(hs.finish(b.build(), bevel=0.0))
 
     # Steel: the rivet through both flanges, the pin through the head with its L at the front, the pull ring.
     b = hs.Builder("SmokeSteel", [])
@@ -413,7 +470,8 @@ def build_smoke() -> bpy.types.Object:
     leg = [(hx, face, hz), (hx + 0.2, face - 0.3, hz + 5.0), (eye.x - 0.2, eye.y + 1.0, eye.z - 1.4),
            (eye.x + 0.3, eye.y - 0.2, eye.z + 0.6), (eye.x + 1.3, eye.y - 0.6, eye.z - 0.4)]
     sweep(b, leg, S_WIRE, "Wire", sides=8)
-    ring = [tuple(centre + (u * math.cos(TAU * i / 40) + w * math.sin(TAU * i / 40)) * rad) for i in range(40)]
+    ring = [tuple(centre + (u * math.cos(TAU * i / S_RING_STEPS) + w * math.sin(TAU * i / S_RING_STEPS)) * rad)
+            for i in range(S_RING_STEPS)]
     sweep(b, ring, wire, "Wire", sides=8, closed=True)
     clear_of_head(ring, wire)
     parts.append(hs.finish(b.build(), bevel=0.0))
@@ -468,6 +526,13 @@ def build_flash() -> bpy.types.Object:
         rim = [b.bm.verts.new(v(cx + vent_r * math.cos(TAU * k / F_VENT_SIDES), cy + vent_r * math.sin(TAU * k / F_VENT_SIDES),
                                 top + PRINT_LIFT)) for k in range(F_VENT_SIDES)]
         b._faces([b.bm.faces.new(rim)], "Hole")
+    tick_in, tick_out, tick_half = F_TICKS
+    for i in range(count):
+        a = TAU * i / count
+        along, across = Vector((math.cos(a), math.sin(a), 0.0)), Vector((-math.sin(a), math.cos(a), 0.0))
+        corners = [along * tick_in - across * tick_half, along * tick_out - across * tick_half,
+                   along * tick_out + across * tick_half, along * tick_in + across * tick_half]
+        b._faces([b.bm.faces.new([b.bm.verts.new(v(c.x, c.y, top + PRINT_LIFT)) for c in corners])], "Print")
     parts.append(hs.finish(b.build(), bevel=0.0))
 
     # The split key ring, two turns, hanging on a wire hook over the rim.

@@ -213,7 +213,8 @@ bomb, `assets/models/grenades/<smoke|flash>.glb`, built by `tools/blender/grenad
   (`GrenadeView.BODY_COLOURS`: green smoke, violet flash), so the model matches the HUD's bomb icons. No colour
   within 20° of a team's hue, as for every prop. Each file names what its materials are made of in its mesh's
   `surfaces` table (Surfaces, above; MQ2B): the smoke's sleeve a glossy printed film (`coated`), its cap moulded, its
-  lever sheet steel; the flash a card tube under paper (`card`). In your hand and in the menus' pictures a bomb is
+  lever matte black paint over sheet steel (`polymer`: the film is what shows); the flash a card tube under paper
+  (`card`). In your hand and in the menus' pictures a bomb is
   drawn on those surfaces; thrown, lying and in a figure's hand it stays plain, as the figures' replicas do. The
   bright wire (a rivet, the key ring) and the dark holes are left out of the table. Print is blocks and bars, never
   letters.

@@ -182,7 +182,7 @@ metalness; the light does the rest.
   shows how it is made: a turned part its chamfers, grooves and wrench flats, a pressed steel shell its narrow ribs,
   lapped seam and spot welds, a moulded one its parting line, anything with a battery its door or cap.
 - **And the bombs and power sources (MQ2B).** A smoke bomb's sleeve is glossy printed film over a moulded cap and a
-  sheet steel lever; a flash bomb is a matte card tube; a gas can is coated aluminium, a battery glossy shrink film
+  matte black painted lever; a flash bomb is a matte card tube; a gas can is coated aluminium, a battery glossy shrink film
   with paper stickers and matte leads. Their labels carry print as blocks and bars where the real ones have words:
   a heading, a few lines, one block in the item's own colour. Never letters, logos or symbols.
 - **Marks that stay:** zone stencils in ink, joints, seams, screws, sheet panels, bay lines and hazard stripes in

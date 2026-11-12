@@ -11,7 +11,7 @@ const MADE_OF := [
 	[GRENADES, "smoke", "Shell", &"coated"],
 	[GRENADES, "smoke", "Kind", &"coated"],
 	[GRENADES, "smoke", "Cap", &"polymer"],
-	[GRENADES, "smoke", "Lever", &"steel"],
+	[GRENADES, "smoke", "Lever", &"polymer"],
 	[GRENADES, "smoke", "Wire", &"steel"],
 	[GRENADES, "flash", "Olive", &"card"],
 	[GRENADES, "flash", "Kind", &"card"],

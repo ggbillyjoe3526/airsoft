@@ -26,14 +26,15 @@ OUT = os.path.join(ROOT, "assets/models/powerSources/gasBottle.glb")
 
 MM = 0.001
 TAU = math.tau
+CAN_MAT, LABEL_MAT, PRINT_MAT = 0, 1, 2  # MATERIALS' order
 
-# The can (millimetres). Proportions from the photos: height 4.55 diameters, cap 0.56 diameters wide and 0.6 tall,
-# shoulder 0.47 diameters tall, its radius 1 - 0.42 (1 - d)^2 of the body's (d from the cap down, measured on the
-# main photo to within 1 %).
+# The can (millimetres). Proportions from the photos: height 4.55 diameters, cap 0.56 diameters wide and 0.65 tall,
+# shoulder 0.56 diameters tall (a seventh of the can's height, as the cap is: measured again on the main photo in
+# MQ2B), its radius 1 - 0.42 (1 - d)^2 of the body's (d from the cap down).
 RADIUS = 33.0
 HEIGHT = 300.0
-CAP_HEIGHT = 40.0
-SHOULDER_HEIGHT = 31.0
+CAP_HEIGHT = 43.0
+SHOULDER_HEIGHT = 37.0
 SHOULDER_NARROWING = 0.42
 SHOULDER_UNDER_CAP = 0.09  # how far (in shoulder heights) the shoulder runs on up inside the cap
 SHOULDER_RINGS = 9
@@ -71,13 +72,26 @@ STRIPES = ((4.0, 3.5), (10.0, 1.5))  # (gap under the level edge, width) of each
 FOOT_PRINT_LOW = CORNER_RADIUS + 3.0
 FOOT_PRINT_HIGH = FOOT_PRINT_LOW + 15.0
 
-# The small print on the front under the chevron (MQ2B), no letters: a heading block in the gas's colour, four lines
-# and, low on the can, a pale caution panel with a block of the gas's colour in its corner. Each (from, to mm up;
-# first side, sides wide of BODY_SIDES round from the front; material; extra lift mm), PRINT_LIFT mm proud of the can.
-BLOCKS = (
-    (132.0, 150.0, -3, 6, 1, 0.0), (122.0, 125.0, -3, 6, 2, 0.0), (116.0, 119.0, -3, 5, 2, 0.0),
-    (110.0, 113.0, -3, 6, 2, 0.0), (104.0, 107.0, -3, 4, 2, 0.0), (58.0, 86.0, -3, 6, 2, 0.0),
-    (64.0, 80.0, -2, 2, 1, 0.04),
+# The print on the front under the chevron (MQ2B), no letters, filling the label as the photos' does: a round
+# emblem with the gas's colour in its middle, a heavy mark, a bar of the gas's colour, a list of three points each
+# with its bullet, a paragraph of fine lines and, low on the can, a pale caution panel with a block of the gas's
+# colour and two dark lines. Each (from, to mm up; first side, sides wide of BODY_SIDES round from the front;
+# material; extra lift mm), PRINT_LIFT mm proud of the can.
+EMBLEM = (112.0, 146.0, (4, 6, 8, 8, 6, 4), (0, 2, 4, 4, 2, 0))  # from, to; each row's sides: the disc, its middle
+EMBLEM_ROW = (EMBLEM[1] - EMBLEM[0]) / len(EMBLEM[2])
+BLOCKS = tuple(
+    (EMBLEM[0] + EMBLEM_ROW * i, EMBLEM[0] + EMBLEM_ROW * (i + 1), -wide // 2, wide, mat, lift)
+    for row, mat, lift in ((EMBLEM[2], PRINT_MAT, 0.0), (EMBLEM[3], LABEL_MAT, 0.04))
+    for i, wide in enumerate(row) if wide
+) + (
+    (92.0, 106.0, -3, 2, PRINT_MAT, 0.0), (97.5, 100.5, -1, 2, PRINT_MAT, 0.0), (92.0, 106.0, 1, 2, PRINT_MAT, 0.0),
+    (84.0, 88.0, -4, 8, LABEL_MAT, 0.0),
+    (76.0, 78.2, -5, 1, PRINT_MAT, 0.0), (76.0, 78.2, -3, 7, PRINT_MAT, 0.0),
+    (70.5, 72.7, -5, 1, PRINT_MAT, 0.0), (70.5, 72.7, -3, 6, PRINT_MAT, 0.0),
+    (65.0, 67.2, -5, 1, PRINT_MAT, 0.0), (65.0, 67.2, -3, 8, PRINT_MAT, 0.0),
+    (57.0, 58.5, -5, 10, PRINT_MAT, 0.0), (53.5, 55.0, -5, 10, PRINT_MAT, 0.0), (50.0, 51.5, -5, 6, PRINT_MAT, 0.0),
+    (28.0, 43.0, -5, 10, PRINT_MAT, 0.0), (30.5, 40.5, -4, 2, LABEL_MAT, 0.04),
+    (37.0, 39.0, -1, 5, CAN_MAT, 0.04), (32.5, 34.5, -1, 4, CAN_MAT, 0.04),
 )
 PRINT_LIFT = 0.08
 
@@ -87,7 +101,6 @@ CAN = (0.018, 0.019, 0.021, 1.0)
 LABEL = (1.0, 1.0, 1.0, 1.0)
 PRINT = (0.62, 0.63, 0.64, 1.0)
 MATERIALS = (("Can", CAN, 0.55, 0.2), ("Label", LABEL, 0.0, 0.26), ("Print", PRINT, 0.0, 0.35))
-CAN_MAT, LABEL_MAT, PRINT_MAT = 0, 1, 2
 # What each material is made of (tools/blender/replicas/surface.py, MQ2B): an aluminium can under a baked coat and
 # its print, the moulded cap glossy with them.
 SURFACES = {"Can": "coated", "Label": "coated", "Print": "coated"}
