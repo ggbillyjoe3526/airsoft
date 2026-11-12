@@ -654,7 +654,8 @@ func _start_simulation(map: MapData) -> void:
 	if listed != null:
 		state.round_state.start_mode = listed.start_mode
 	# The field's weather (data/maps.md Wind and Air, PH1): still air indoors, and colder air on a night in the open,
-	# for every BB.
+	# for every BB. A field the breeze doesn't reach (Wind 0) is the indoor one, on purpose: under a roof the night
+	# doesn't cool the air either (data/maps.md says so; one cell, so a field can't be half indoors).
 	var rated := _tuning.ballistics.air_temperature
 	var wind_share := listed.wind if listed != null else 1.0
 	_sim.set_weather(state, wind_share, _tuning.weather.temperature_at(

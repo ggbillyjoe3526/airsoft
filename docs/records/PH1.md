@@ -1,12 +1,12 @@
 # PH1 · The physics audit: weather per field, moving-target hits, heavier BBs
 
-**Review:** REVIEW_LINE
+**Review:** 1 attempt · critic Accept 7/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-ATTEMPT_ROWS
+| 2026-11-12 | 1 | build thread | ✓ 6,010 of 6,012 (2 pending) | 7/8 Accept | – |
 
 The owner's ask (2026-11-12): "go over the physics of the game... check that the guns are accurate. Check ballistics,
 trajectories, gravity, mass, etc. also look at wind, temperatures and any other environmental aspects that may affect
@@ -72,6 +72,14 @@ map card's tooltip says whether the field is open to the breeze.
 - **Per-replica energies are unchanged.** The balance thread (RP1) had just settled them; PH1 changes how the
   environment acts on them, not the cards.
 - **The debug BB trail stays 2.5 s**: it is for reading a shot, not a lob.
+- **Wind 0 is what makes a field indoors** for the night drop too (the critic and QA both asked): one cell, said
+  in `data/maps.md` and at the call in `play_session.gd`, so a field cannot be still air and cold at night by
+  mistake. A sheltered outdoor yard would need a column of its own; no map is one today.
+- **The critic's one failed check (7, tidiness)** was the bots' trimmed kits not resizing the two new Kit arrays
+  (`bot_kits.gd`; harmless, the kept slots stayed in step) and the Wind 0 coupling above: both fixed after the Accept,
+  with the touched tests re-run.
+- **Two old tests followed the change**: `test_loadout.gd` (the BB weight range ends at 0.40 g) and
+  `sim_tuning.tres`, which now writes the `weather` config out (`test_saved_configs.gd`).
 
 ## Known issues left
 
