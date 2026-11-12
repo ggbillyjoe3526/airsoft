@@ -97,6 +97,8 @@ class Fixture:
 	var model: StringName = &""
 	var position: Vector3 = Vector3.ZERO
 	var yaw: float = 0.0
+	## Its size against the model's own (an escalator's small posters); 1 when the file gives none.
+	var scale: float = 1.0
 
 
 var zones: Array[Zone] = []
@@ -346,6 +348,10 @@ static func _fixture(raw: Variant) -> Fixture:
 	f.model = StringName(model)
 	f.position = Vector3(float(d["x"]), float(d["y"]), float(d["z"]))
 	f.yaw = deg_to_rad(float(d["yaw"]))
+	var scale: Variant = d.get("scale", 1.0)
+	if not (scale is float or scale is int) or float(scale) <= 0.0:
+		return null
+	f.scale = float(scale)
 	return f
 
 
