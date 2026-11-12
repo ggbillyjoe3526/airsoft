@@ -76,6 +76,10 @@ extends Resource
 ## under that, at `plain_lamp_energy`.
 @export var plain_lamp_reach: float = 2.5
 @export var plain_lamp_energy: float = 2.4
+## How much a plain roof's lamp feeds the scene's bounce light (Ultra's SDFGI; the engine's 1 is its own strength): a
+## station's strip lamp lights its ceiling and walls all round, which a light shining down can't, so its bounce stands
+## in for that (UL2: at 1 Subway's ceilings drew black on Ultra). Ultra only: High's screen bounce doesn't read it.
+@export var plain_lamp_indirect: float = 5.0
 ## While the lamps shine the hall is lit by them alone (owner, 2026-11-10: no sun gets indoors): the preset's
 ## overhead light, which stands in for them on Low and Medium, keeps `lamp_sun_share` of itself (none), and the sky's
 ## ambient light under the roof `lamp_ambient_share`, so their shadows stay deep.
