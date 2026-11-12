@@ -1,6 +1,7 @@
 """Subway's sign sheet (SM5): assets/textures/station/signs.png, every printed face of the station's extras in one
 2048 x 2048 picture (cells in station_cells.py): thirteen posters, three wide trackside ones, the clock's face, the
-station's name board, the platform edge's warning, and the hanging "Way out" and "Platforms" signs.
+station's name board, the platform edge's warning, the hanging "Way out" and "Platforms" signs, the line's strip map,
+the platforms' departure boards, an information panel and three notices (no smoking, the handrail, CCTV).
 
 From the owner's photos (references/maps/subway/33-extras): black signs with yellow words (direction_signs), a name
 band along the platform wall (station_name_platform, but a dark band, not a real network's colour), framed posters
@@ -28,7 +29,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-from station_cells import CELLS, POSTERS, SHEET, WIDE_POSTERS  # noqa: E402
+from station_cells import CELLS, NOTICES, POSTERS, SHEET, WIDE_POSTERS  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
 OUT = os.path.join(ROOT, "assets", "textures", "station", "signs.png")
@@ -386,6 +387,107 @@ def wide_poster(kind: str, rng: random.Random) -> Image.Image:
     return wear(im, rng, 0.9, 0.45)
 
 
+def line_map(rng: random.Random) -> Image.Image:
+    """The line's strip map: its invented stops along a green line, Copperhill ringed."""
+    w, h = CELLS["line_map"][2] * 2, CELLS["line_map"][3] * 2
+    im = Image.new("RGB", (w, h), CREAM)
+    d = ImageDraw.Draw(im)
+    d.rectangle((0, 0, 300, h), fill=SLATE)
+    text_centre(d, (150, h * 0.36), "COPPERHILL", font(700, 54), CREAM)
+    text_centre(d, (150, h * 0.68), "LINE", font(700, 54), BUTTER)
+    stops = ["Ashby Road", "Mill Lane", "Copperhill", "Lido", "Harbour", "Pier"]
+    x0, x1, y = 440, w - 110, h * 0.40
+    d.line([(x0 - 30, y), (x1 + 30, y)], fill=GREEN, width=22)
+    for i, name in enumerate(stops):
+        x = x0 + (x1 - x0) * i / (len(stops) - 1)
+        here = name == "Copperhill"
+        r = 30 if here else 20
+        d.ellipse((x - r, y - r, x + r, y + r), fill=CREAM, outline=INK, width=8 if here else 6)
+        text_centre(d, (x, h * 0.78), name, font(700 if here else 600, 46 if here else 40), INK)
+    return wear(im.resize(CELLS["line_map"][2:4], Image.LANCZOS), rng, 0.6, 0.3)
+
+
+def departures(cell: str, rows: list, rng: random.Random) -> Image.Image:
+    """A dot-matrix board: yellow dots on black, its two next trains and a line of advice."""
+    w, h = CELLS[cell][2] * 2, CELLS[cell][3] * 2
+    text = Image.new("L", (w, h), 0)
+    d = ImageDraw.Draw(text)
+    f = font(700, 62)
+    for i, (num, dest, when) in enumerate(rows):
+        y = 50 + i * 82
+        d.text((36, y), num, font=f, fill=255, anchor="lm")
+        d.text((96, y), dest, font=f, fill=255, anchor="lm")
+        d.text((w - 36, y), when, font=f, fill=255, anchor="rm")
+    d.text((w / 2, h - 34), "Stand behind the yellow line", font=font(500, 40), fill=255, anchor="mm")
+    # the words lit in yellow, seen through a grid of dark gaps between the board's dots
+    im = Image.composite(Image.new("RGB", (w, h), SIGN_YELLOW), Image.new("RGB", (w, h), (0x14, 0x14, 0x16)), text)
+    grid = ImageDraw.Draw(im)
+    for k in range(0, max(w, h), 4):
+        grid.line([(k, 0), (k, h)], fill=(0x14, 0x14, 0x16), width=1)
+        grid.line([(0, k), (w, k)], fill=(0x14, 0x14, 0x16), width=1)
+    return wear(im.resize(CELLS[cell][2:4], Image.LANCZOS), rng, 0.3, 0.2)
+
+
+def info_panel(rng: random.Random) -> Image.Image:
+    """The station's information panel: a slate head, then what a visitor needs."""
+    w, h = CELLS["info_panel"][2] * 3, CELLS["info_panel"][3] * 3
+    im = Image.new("RGB", (w, h), CREAM)
+    d = ImageDraw.Draw(im)
+    d.rectangle((0, 0, w, 120), fill=SLATE)
+    d.ellipse((24, 22, 100, 98), fill=CREAM)
+    text_centre(d, (62, 60), "i", font(700, 66), SLATE)
+    d.text((124, 60), "Copperhill · station information", font=font(700, 56), fill=CREAM, anchor="lm")
+    rows = ["Lifts to every level", "Help point by the ticket gates", "Lost property: the ticket hall window",
+            "First train 05:30 · last train 00:30", "Keep your belongings with you"]
+    for i, t in enumerate(rows):
+        y = 172 + i * 70
+        d.ellipse((40, y - 10, 60, y + 10), fill=GREEN)
+        d.text((84, y), t, font=font(500, 46), fill=INK, anchor="lm")
+    return wear(im.resize(CELLS["info_panel"][2:4], Image.LANCZOS), rng, 0.5, 0.3)
+
+
+def notice(cell: str, rng: random.Random) -> Image.Image:
+    """A square wall notice: a pictogram over two words."""
+    w = CELLS[cell][2] * 3
+    im = Image.new("RGB", (w, w), CREAM)
+    d = ImageDraw.Draw(im)
+    c, r = w / 2, w * 0.27
+    cy = w * 0.36
+    if cell == "notice_smoking":
+        d.rectangle((c - 120, cy - 12, c + 70, cy + 22), fill=INK)
+        d.rectangle((c + 74, cy - 12, c + 104, cy + 22), fill=PLASTER)
+        for k in range(3):
+            d.arc((c + 70 + k * 14, cy - 80, c + 110 + k * 14, cy - 20), 200, 340, fill=INK, width=6)
+        d.ellipse((c - r, cy - r, c + r, cy + r), outline=CRIMSON, width=26)
+        d.line([(c - r * 0.7, cy - r * 0.7), (c + r * 0.7, cy + r * 0.7)], fill=CRIMSON, width=26)
+        words = ("NO SMOKING", "anywhere in the station")
+    elif cell == "notice_handrail":
+        d.ellipse((c - r, cy - r, c + r, cy + r), fill=GREEN)
+        # an escalator's steps climbing right under its handrail, a figure on them holding it
+        steps = [(c - r * 0.75, cy + r * 0.55)]
+        for k in range(5):
+            x, y = c - r * 0.75 + k * r * 0.3, cy + r * 0.55 - k * r * 0.22
+            steps += [(x, y - r * 0.22), (x + r * 0.3, y - r * 0.22)]
+        steps += [(c + r * 0.75, cy + r * 0.55)]
+        d.polygon(steps, fill=CREAM)
+        d.line([(c - r * 0.8, cy + r * 0.05), (c + r * 0.8, cy - r * 0.6)], fill=CREAM, width=12)
+        fx, fy = c - r * 0.1, cy - r * 0.05
+        d.ellipse((fx - 18, fy - 92, fx + 18, fy - 56), fill=CREAM)
+        d.line([(fx, fy - 54), (fx, fy + 4)], fill=CREAM, width=18)
+        d.line([(fx, fy - 40), (fx + 34, fy - 52)], fill=CREAM, width=12)
+        words = ("HOLD THE HANDRAIL", "Stand on the right")
+    else:
+        d.rounded_rectangle((c - r, cy - r, c + r, cy + r), 30, fill=SIGN_YELLOW)
+        d.rounded_rectangle((c - 90, cy - 40, c + 50, cy + 20), 14, fill=INK)
+        d.polygon([(c + 50, cy - 26), (c + 96, cy - 50), (c + 96, cy + 30), (c + 50, cy + 8)], fill=INK)
+        d.rectangle((c - 36, cy + 20, c - 16, cy + 70), fill=INK)
+        d.rectangle((c - 70, cy + 64, c + 18, cy + 80), fill=INK)
+        words = ("CCTV IN USE", "Images kept for safety")
+    text_centre(d, (c, w * 0.76), words[0], font(700, 70), INK)
+    text_centre(d, (c, w * 0.88), words[1], font(500, 46), INK)
+    return wear(im.resize(CELLS[cell][2:4], Image.LANCZOS), rng, 0.5, 0.3)
+
+
 def clock(rng: random.Random) -> Image.Image:
     w = CELLS["clock"][2]
     im = Image.new("RGB", (w, w), CLOCK_RIM)
@@ -451,6 +553,12 @@ def main() -> None:
     sheet = Image.new("RGB", SHEET, (0x5A, 0x52, 0x48))
     pictures = {k: poster(k, rng) for k in POSTERS}
     pictures.update({k: wide_poster(k, rng) for k in WIDE_POSTERS})
+    pictures["line_map"] = line_map(rng)
+    pictures["departures_n"] = departures("departures_n", [("1", "Pier", "2 min"), ("2", "Harbour", "9 min")], rng)
+    pictures["departures_s"] = departures("departures_s", [("1", "Ashby Road", "3 min"), ("2", "Mill Lane", "11 min")],
+                                          rng)
+    pictures["info_panel"] = info_panel(rng)
+    pictures.update({k: notice(k, rng) for k in NOTICES})
     pictures["clock"] = clock(rng)
     pictures["name"] = name_board(rng)
     pictures["edge"] = edge_warning(rng)

@@ -1,33 +1,33 @@
-Task: SM5 · Subway's lamps and extras
-Attempt: 10 (past 4; review-cap ruling: keep fixing until the critic passes), William's "Make the far trackside
-   posters much larger"
-Head: 21ad054 (= HEAD). Full tools/check.sh started on 21ad054 and NOT finished when judged (its output was empty);
-   test_station_fixtures 8/8 and test_sm5_qa 13/13 ran on it. The diff touches no runtime script.
+Task: SM5B · Subway's signs and posters in every room
+Attempt: 2 of 4
+Head: bc5bcf4 (= HEAD). Full tools/check.sh NOT run on this head (CI runs it on the PR); test_station_fixtures 9/9,
+   test_sm5_qa 13/13, test_sm5b_qa 10/10, gdlint clean. QA and performance reviewed 640241d (both Pass);
+   1567446..bc5bcf4 changes only two box heights, bounds, a test and the record. This verdict lapses if CI fails.
 Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept (merge only once tools/check.sh ends green; the verdict lapses if it fails)
+Score: 8/8 → Accept
 Failed checks, with evidence: none.
-Checked this attempt (git diff HEAD~1 HEAD, sm5-4 shots 1, 13, 14, sm5-6):
-1. station_extras.py:+292 builds poster(cell, 3.0, 1.5, 0.05), a 6 x 3 m face in a 50 mm frame; fixtures.py:+40-42
-   bounds of +-3.05 x +-1.55 match it; WIDE_Y 2.4 (+55) puts it at 0.85 to 3.95 with the frame, under the 4.1 vault.
-   Clearances, worked from fixtures.py:+89-90 and subway.json: north 28 and 38 clear the boards at 22 and 44 by 1.49
-   and 1.49 m and each other by 3.9 m; south -35, -17, 4 and 23 clear the boards at -44, -26, -8 and 14 by at least
-   1.41 m. test_sm5_qa.gd:+182-192 now asserts 6, y 2.4, board gap 3.05 + 1.46, poster gap 6.1.
-1. Readability at 112 px/m: in sm5-6 the smallest line ("Bikes by the hour ...") is about 0.15 m tall, about 17
-   texels; the titles are about 0.33 m, about 37 texels. From 4 to 8 m on a 1080p screen at a 75° FOV, a metre is
-   about 235 to 117 screen px, so texels are shown at 1 to 2x. The titles stay crisp; the small line is soft at 4 m
-   but still legible. Shots 13 and 14 match a 6 x 3 m poster when measured against the 2.9 m board (shot 14: about
-   1.6x the board's width at its distance ratio).
-6. station_signs.py:+260 the lamp's glow is now a neutral, greenish grey, off the team hues; the fixture hue gate
-   passes. It still reads as a warm lamp beside the butter moon in sm5-6.
-8. The record (+21, +51-54, +83-84), ASSETS (+85) and the changelog note (+7) say 6 x 3 m. The dark track bed is left
-   to the platforms thread, under Known issues.
-Advisory (non-blocking): sm5-4 shot 13's caption still says "3 x 1.5 m" (the contact sheet's label, not repo text).
-   The sheet's frame and fixture art keep the same 38 triangles, so they cost nothing more.
-Must-fix for the next attempt: none. Merge once tools/check.sh on 21ad054 ends green.
+Checked (what changed and what it could break):
+1. [measured] Read from the glbs: departures_n Sign quad x ±0.77, y -0.715..-0.330 = 1.54 x 0.385 = 4.00:1, the same
+   as its 512 x 128 cell. way_sign Sign 1.256 x 0.275 = 4.567:1 against 512 x 112 = 4.571:1 (was 4.906, 7.3 % off).
+   Prop bounds -0.745 and -0.599 match fixtures.py +22, +51-52. Tris unchanged (84 of 90), so budgets hold.
+   No reference photos or renders are named for these flat sign boxes; I judged them from geometry, as in attempt 1.
+2/3/5. No contract, runtime script or hot path touched. The only change in code is a test.
+4. test_station_fixtures.gd +99: the per-triangle ratio of world edge to sheet px. On the old departures it gives
+   (1.54/512)/(0.34/128) = 1.13, a 13 % stretch, so it fails at the 2 % limit; it caught way_sign on its own.
+6. Headroom: the lowest hung sign's underside is now 2.40 m (way_sign in 3.0 m passages, 3.0 - 0.599), and the boards'
+   is about 2.46 m over the platforms (ceiling 4.1, floor 0.9 by lowc, 3.2 - 0.745). Both are well over a standing or
+   jumping head, and they are look-only with no collision. The builder's clear() kept every spot (subway.json unchanged;
+   only the 4 earlier edge_sign spots are still left out). Lamp clearance is retested against the new mesh boxes
+   (test_sm5b_qa +215, which passes).
+7. Docstrings are updated (station_extras.py +100, +295). Advisory: the test's `for s in ...`, `for t`, `for e` loop
+   variables are untyped.
+8. way_sign is an SM5 model, fixed because the new test covers every printed model. The record's Decisions says so.
+   No player-facing change needs a wiki edit beyond the existing note.
+Must-fix for the next attempt: none.
 Owner should test in the game:
-- From each platform at 4 to 8 m, read every line of the three trackside posters, the small bottom line included.
-- Are 6 x 3 m posters the size you wanted, or too dominant next to the name boards?
-- From the track bed, does a poster's top edge sit clear of the vault's curve, with no clipping?
-- Do the two north and four south posters spread evenly between the boards, with no wall looking empty?
-- Does the Lamplight Room's grey-green glow still read as a warm lamp?
-- At a shallow angle along the platform, does the text shimmer or smear (mipmaps)?
+- From the platform edge, read both departure boards' rows and the bottom line. Is the text undistorted?
+- Walk under a "Way out" sign in a 3 m passage. Does it hang low or crowd the view?
+- Walk up to a line map: are the stop names readable at about 2 m?
+- Ride both escalators: do the level posters look right on the sloped walls, and do any clip the decks?
+- Are the no-smoking and handrail pictograms clear at a glance?
+- Are there too many or too few notices per room (hall, concourse, lift landing, plant room)?

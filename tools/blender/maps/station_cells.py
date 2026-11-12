@@ -19,6 +19,15 @@ CELLS.update({
     "clock": (1024, 1008, 512, 512),
 })
 CELLS.update({k: (i * WIDE[0], 1536, WIDE[0], WIDE[1]) for i, k in enumerate(WIDE_POSTERS)})
+# The station's notices and boards (SM5's second pass: signs in every room).
+NOTICES = ["notice_smoking", "notice_handrail", "notice_cctv"]
+CELLS.update({
+    "line_map": (0, 1408, 1024, 128),
+    "departures_n": (0, 1872, 512, 128),
+    "departures_s": (512, 1872, 512, 128),
+    "info_panel": (1552, 1872, 352, 176),
+})
+CELLS.update({k: (1024 + i * 176, 1872, 176, 176) for i, k in enumerate(NOTICES)})
 
 def uv(cell: str, u: float, v: float) -> tuple:
     """The sheet's UV (glTF: v down from the top) of the point (u, v) of `cell`, both 0 to 1 from its top left."""
