@@ -71,8 +71,8 @@ almost no kick (the table above has its numbers). Against that it carries the fe
 two seconds with the trigger held, and there are three. It is a pistol to stop and shoot with: running, sprinting or jumping adds
 twice the spread it adds to the rifle, so plant your feet or walk. Its battery is built in, so
 no power source fits it, and only the Weapon Torch fits it.
-It is the same size in your hand as the GBB Pistol, with the same rounded grip (its power cell shows through a
-window in each side). It wears its own white, cyan and magenta colours, with
+It is the same size in your hand as the GBB Pistol, with the same rounded grip and a straight back (its power cell
+shows through a slanted window in each side). It wears its own white, cyan and magenta colours, with
 glowing slashes, a pink core behind bars in its slide, a finned rear cap and three fire-mode lights; with
 **Realistic colours** on it turns plain grey with no glow. It has its own shot and magazine sounds.
 

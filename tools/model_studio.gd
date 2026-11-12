@@ -15,6 +15,8 @@ extends SceneTree
 const SIZE := Vector2i(1600, 900)
 const MARGIN := 1.08
 const CAMERA_DISTANCE := 2.0
+const NEAR_AT_LEAST := 0.05
+const FAR_AT_MOST := CAMERA_DISTANCE * 3.0
 const GROUND := Color(0.20, 0.205, 0.215)
 const AMBIENT := Color("c8d4ea")
 const SUN_ANGLE := Vector2(-48.0, 38.0)
@@ -122,10 +124,18 @@ func _shot(port: SubViewport, f: PackedStringArray, out: String) -> int:
 	stage.add_child(camera)
 	var basis := Basis.from_euler(Vector3(deg_to_rad(-angles[1]), deg_to_rad(angles[0] + 90.0), 0.0))
 	camera.global_transform = Transform3D(basis, centre + basis.z * CAMERA_DISTANCE)
-	camera.near = 0.05
-	camera.far = CAMERA_DISTANCE * 3.0
 	camera.keep_aspect = Camera3D.KEEP_WIDTH
 	camera.size = span if span > 0.0 else _fit(box, camera) * MARGIN
+	# The sun's shadow map is spread over the camera's depth, so the depth hugs the shot: from just in front of the
+	# model to where the ground leaves the top of the frame. With the whole stage in it a close-up's shadow edges
+	# were drawn in millimetre-wide steps.
+	var reach := box.size.length()
+	var behind := reach
+	if angles[1] > 0.0:
+		var rise := camera.size * 0.5 * SIZE.y / SIZE.x + centre.y - ground.position.y
+		behind = clampf(rise / tan(deg_to_rad(angles[1])), reach, FAR_AT_MOST - CAMERA_DISTANCE)
+	camera.near = maxf(NEAR_AT_LEAST, CAMERA_DISTANCE - reach)
+	camera.far = CAMERA_DISTANCE + behind
 	camera.make_current()
 	for i in 4:
 		await RenderingServer.frame_post_draw

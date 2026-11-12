@@ -806,8 +806,11 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   replica is wood. The values are `ReplicaSurfaces.LOOKS` (docs/records/MQ1.md).
 - **The Cyber Pistol's grip is the GBB Pistol's shape (owner, 2026-11-12, MQ1B).** "Can you redesign the
   handle/grip to be a similar shape to the GBB pistol?" and "The cyber grip doesn't look ergonomic. It has flat and
-  sharp edges." Its grip is the GBB's own rounded sections where the GBB's sit (curved back strap, palm swell, finger
-  grooves), with the power cell still showing through a window in each side (docs/records/MQ1B.md).
+  sharp edges." On the first pictures: "Can you make the handle less curved on the back side? Also; the black grip
+  area should be slightly smaller and angled in the same direction as the handle." Its grip is the GBB's rounded
+  sections where the GBB's sit (front strap, finger grooves, width) with a back strap that runs straight from under
+  the tang to the heel, and the power cell shows through a smaller window in each side that leans with the handle
+  (docs/records/MQ1B.md).
 - **The next replica is a spring sniper rifle, and the owner is asked how to build it and its specs before work starts
   (owner, 2026-10-06).** The SMG and shotgun come after it.
 - **The Cyber Pistol is the owner's own design and the level cap's reward (owner, 2026-10-04; level 10 since
