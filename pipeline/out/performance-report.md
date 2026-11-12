@@ -1,17 +1,18 @@
-Task: EC1 · head af524bd4 · Verdict: Pass
-Run: no --perf bot match run (diff changes audio bus layout and one-time setup only; headless has a dummy audio driver, so node count, orphans and script time cannot move) · budget: no baseline yet (pipeline/perf-budget.json does not exist), judged against targets and the diff
-Metrics: not measured (judgment). Frame time: reported only, owner's hardware. Audio-thread cost (judgment): one AudioEffectReverb, enabled only on Subway; three 1-pole low-pass buses added (ShotsHalf, ShotsFull, Shots itself is pass-through); a fully idle bus is skipped by the mixer.
-Regressions (> 10 % worse): none measured
+Task: MQ1B (attempt 3) · head 7499a89 · Verdict: Pass
+Run: no Godot run (the local gate is running); the committed cyber.glb parsed directly · budget: no baseline yet, judged against targets, the 40,000 / 3,000 triangle budgets and origin/main's glb
+Metrics (measured, from the glb JSON):
+- Triangles in the hands (Body + Magazine + Selector + Slide + Trigger): 38,706 / 40,000 (ok); attempt 2 38,646; main 37,824 (+2.3 %)
+- Figure copy (Figure + Figure_Magazine): 3,000 / 3,000 (ok, at the limit); main 3,000
+- File size: 1,361,544 B vs main 1,350,416 B (+0.8 %)
+- Body: 4 surfaces, materials 0-3 (same as main), 21,491 vertices (main 20,977, +2.4 %)
+- Magazine: 3 surfaces, materials 3/4/2 (same as main), 3,778 vertices (main 3,882, -2.7 %), 4,244 triangles (main 4,576)
+- Materials in the file: 6 (main 6); no new material, so no new shader prewarm needed
+Regressions (> 10 % worse): none
 Blocking findings: none
- - Per-shot code (sim_audio.gd:261,264) only swaps a bus constant: no new allocation, Array, Dictionary or string work per shot or tick. judgment
- - set_echo (sim_audio.gd:637-659) runs once in setup and once in _exit_tree; the string format in push_warning is on the failure path only. It writes the shared reverb resource, no new Object, node, timer, tween or connection. judgment
- - Freed state: set_echo(null) at _exit_tree turns the reverb off and resets the bus to 0 dB, so no echo outlives the match. The reverb and filter effects are layout sub-resources (one set, owned by AudioServer), not per-instance. judgment
- - No growth: voice pools unchanged, no new players, decals or particles. judgment
- - Prewarm/presets: no new material, mesh or particle, so no shader prewarm entry needed; no graphics settings touched. Shot echo lives in SoundConfig.shot_echoes (data, per map). judgment
+- Nothing under game/ changed (git diff origin/main...HEAD lists 0 game/ paths); no runtime script, scene or config in the diff.
+- tools/model_studio.gd:54 calls RenderingServer.directional_shadow_atlas_set_size(SHADOW_MAP, true) inside the tool's own run. The only other mention of the tool in game/ is a doc comment in game/ui/studio_sky.gd:8. No game script, scene, export preset or CI step references it, so the call cannot reach the shipped game (judgment, by grep).
 Advisory:
- - default_bus_layout.tres: Shots reverb at the Godot default tail (room 0.72, wet 0.28) mixes many simultaneous shots (all bots) into one reverb instance, so cost is constant, not per shot. Fine, but listen on the Low preset on Subway (owner's hardware) for audio crackle.
- - sim_audio.gd:640-643: set_echo is static and touches global AudioServer state, so two PlayerSessions or a missed _exit_tree (crash/scene swap by free) leave Subway's reverb on for the next map. The setup call on every map (null for non-Subway) resets it, so the risk is covered. judgment
- - default_bus_layout.tres: bus indices shifted (Footsteps 3 -> 4 ... AmbienceRight 13 -> 14). Any code using hard-coded indices would break; the diff uses names only (grep clean in the changed files). judgment
- - The reverb tail is cut when it is disabled at match exit; harmless.
-Fixes: none required.
-Unexplained: none
+- The figure copy sits exactly on its 3,000 budget; any later rounding of the figure needs a trade-off elsewhere (judgment).
+- The hands are 1,294 triangles under budget, and Body alone is 30,318 (judgment). It is a per-draw cost on the owner's GPU only; frame time was not measured here.
+Fixes: none needed.
+Unexplained: none. Draw calls, frame times and orphan nodes were not re-measured because no game code changed since attempt 2's pass.
