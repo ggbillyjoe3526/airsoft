@@ -448,3 +448,14 @@ func test_the_cyber_pistols_moving_double_cannot_be_bought_off_with_a_grip_or_la
 	assert_false(rules.set_part(l, CYBER, &"grip", VERTICAL), "no under-rail")
 	assert_false(rules.set_part(l, CYBER, &"laser", LASER), "no laser rail")
 	assert_almost_eq(rules.carried(l).replicas[0].move_spread, 2.0, 1e-6, "its own double stays")
+
+
+func test_the_sniper_rifle_drawn_with_its_scope_is_slower_than_without_it() -> void:
+	# It comes with the 2x Scope, so the optic's draw applies as it comes and comes off with the scope.
+	var scoped := _carried(SNIPER)
+	var l := rules.default_loadout("T")
+	assert_true(rules.equip(l, Loadout.Slot.PRIMARY, SNIPER))
+	assert_true(rules.set_part(l, SNIPER, &"optic", ""), "scope off")
+	var bare: ReplicaConfig = rules.carried(l).replicas[0]
+	assert_almost_eq(scoped.draw_time, bare.draw_time * rules.stats.parts.part(&"optic", &"scope2x").draw, 1e-6)
+	assert_gt(scoped.draw_time, bare.draw_time)

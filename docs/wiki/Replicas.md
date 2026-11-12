@@ -84,7 +84,8 @@ while you work it, so your hand stays in view. It shoots harder and further than
 and has its own [site limit](#site-limits). It is long and heavy, so you run and sprint a little slower with it in
 your hands.
 
-It comes with the **2x Scope** fitted; take it off or swap it for another optic in the Loadout. It is made to be aimed:
+It comes with the **2x Scope** fitted; take it off or swap it for another optic in the Loadout. The table's draw time
+is the bare rifle's: with the scope on, as it comes, it takes 0.72 s to bring up. It is made to be aimed:
 from the hip its shots scatter widely, and the spread closes as the sight comes up. The spring you fit sets its energy, its bolt speed and how far the shot is
 heard ([Parts and Power](Parts-and-Power#power-sources)). It takes the AEG Rifle's optics, grips and muzzle parts, but no
 barrels or other magazines. It is a long rifle in a grey chassis: a plain barrel with a thread cap, a slotted forend,

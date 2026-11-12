@@ -136,7 +136,8 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
 - **Zoom.** How much aiming through it narrows the view (1 is none).
 - **Draw.** The time to bring the replica up with it fitted (× the iron sights', RP1): a housing on the top rail is
   weight, so the iron sights are the quickest to hand and no optic is free. The Red Dot pays a tenth of the draw for
-  the quickest sight and a clear dot; the long Variable Scope pays the most.
+  the quickest sight and a clear dot; the long Variable Scope pays the most. The Sniper Rifle comes with the 2x Scope
+  fitted, so as it comes it draws in 0.72 s; the Replicas table's 0.65 s is the bare rifle's.
 - **Raise time.** The time to bring it to your eye (× the iron sights'). The Red Dot is the quick sight, 0.85 (PP1:
   at 1 its slight zoom was all it gave).
 - **In the glass.** yes: only the view inside its glass is zoomed (a scope); the view round it stays as the iron sights'
