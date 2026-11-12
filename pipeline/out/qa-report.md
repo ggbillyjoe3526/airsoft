@@ -1,13 +1,21 @@
-Task: TB1 · QA commit (see git log, "QA: TB1 vault ... report") · Verdict: Pass
+Task: TB1 · QA commit pending · Verdict: Pass
+
+Delta re-checked: 3779e94..a46ddad (platform_floor, near-black ballast, trims, vault ribs).
 
 Blocking: none.
-Advisory:
-- Removing the old lintels (vault_air) opens the 0.15 m wall at z -9.075 / 9.075 between track and platform above the car roofs (y 3.3 to 4.4); intended, and no solid changes below y 3.6 anywhere in the vault footprint (80k seeded samples, old vs new subway.json). BBs can now pass over a car roof to the track; confirm in play.
-- test_freeing_a_station_level_leaves_no_orphans passes but GUT prints "70 Orphans" for test_station_dress.gd; same test body as on main, not attributed to TB1.
+Advisory: none new. The 70 GUT orphans in test_station_dress.gd are unchanged by this delta (same count with my test stashed).
 
-Tests added:
-- tests/unit/test_tb1_vault_qa.gd:test_no_gap_behind_the_arc_along_the_whole_tunnel · collider 2 cm behind the arc at 19 angles, every 3.7 m along both tunnels (existing test checks one x) · without vaults the vault count assert (2) fails on main's map.
-- tests/unit/test_tb1_vault_qa.gd:test_the_air_under_the_crown_is_open · no collider in mid-air under the crown (walkable air unchanged) · same vault-count assert fails on main.
+Hunt results
+- Look only: data/maps/subway.json changes are additions only (the 16 `trims`); no block is added or changed. Trims and ribs are drawn in StationSurface.mesh/add_vault only, and no collider is built from them.
+- Trims lie flat: frieze 2 cm off the wall, cables 6 cm, edge face 1 cm over the track side of each platform edge. No z-fighting (each is offset from its wall) and none enters walkable space beyond 6 cm.
+- Malformed trims: non-dict, missing finish and short box are warned and left out (existing test, now 8 warnings).
+- Ribs: 5 cm under the arc, within the vault's length; a degenerate setting (zero depth, width or spacing, or a rib wider than the vault) draws none.
+- Low detail: trims and ribs are flat faces, not relief, so Low does not touch them. Not tested separately.
 
-Ran (all pass): test_station_dress (25), test_climb_qa, test_pp1_climb_qa, test_bot_climbs, test_mt1_qa, test_mt2_qa, test_subway_rename: 75 tests, 21,893 asserts, 0 failing; new file 2/2. Subway loads without MapData warnings. Climb ledges, bot climbs and malformed-dress handling (words, vaults warned and left out) covered by those. Raw output: pipeline/out/qa/run1.txt. tools/check.sh not run by me (running elsewhere); smoke test not run.
-Not tested: window modes, real display look of the arc, words orientation as drawn (test only pins the font and placement), focus/mouse (untouched by change).
+Tests
+- tests/unit/test_station_dress.gd:496 test_vault_ribs_stand_under_the_arc_inside_the_vault_and_off_turns_them_off · builds the vault mesh with and without ribs; the extra vertices lie within rib depth of the arc and inside the vault's length; a huge width adds none · fails with the `_add_ribs` call commented out (1 failing).
+- Existing test_trims_lie_flat_on_the_tunnel_walls_out_of_the_way covers the trims' thickness, count and heights; I did not change it.
+
+Suite: test_station_dress.gd 27/27 passing, 42037 asserts, 5.6 s. tools/check.sh was not run (running in the background); raw output in pipeline/out/qa/station_dress.txt.
+
+Not tested: how the ribs, frieze and cables look in a real window, and whether the pale ribs against the near-black ballast read well (needs a display; owner).

@@ -490,3 +490,33 @@ func test_bands_tile_each_face_exactly_with_its_normal_and_no_sliver() -> void:
 				at = bhi
 			assert_almost_eq(at, hi, 0.001, "the bands reach the face's top")
 	assert_gt(cut, 0, "Subway's lift shafts are cut")
+
+
+func _vault_vertices(v: StationDressing.TunnelVault, l: StationLook) -> PackedVector3Array:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	st.set_custom_format(0, SurfaceTool.CUSTOM_RGBA_FLOAT)
+	StationSurface.add_vault(st, l, v)
+	var arrays := st.commit().surface_get_arrays(0)
+	return arrays[Mesh.ARRAY_VERTEX]
+
+
+func test_vault_ribs_stand_under_the_arc_inside_the_vault_and_off_turns_them_off() -> void:
+	var m := _map("subway")
+	var v := m.station.vaults[0]
+	var c := v.circle()
+	var bare := look.duplicate() as StationLook
+	bare.vault_rib_depth = 0.0
+	var plain := _vault_vertices(v, bare)
+	var ribbed := _vault_vertices(v, look)
+	assert_gt(ribbed.size(), plain.size(), "the ribs add faces")
+	var low := c.z - look.vault_rib_depth - 0.001
+	for i in range(plain.size(), ribbed.size()):
+		var p := ribbed[i]
+		var r := Vector2(p.z - c.x, p.y - c.y).length()
+		assert_between(r, low, c.z + 0.001, "a rib vertex stays within its depth of the arc")
+		assert_between(p.x, v.area.position.x, v.area.end.x, "a rib stays within the vault's length")
+	var huge := look.duplicate() as StationLook
+	huge.vault_rib_every = 1000.0
+	huge.vault_rib_width = 1000.0
+	assert_eq(_vault_vertices(v, huge).size(), plain.size(), "a rib wider than the vault is left out")
