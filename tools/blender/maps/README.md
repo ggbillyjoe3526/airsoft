@@ -41,7 +41,7 @@ blocks read from `data/maps/woodland.json` (rerun a structure's script after `to
 | `spruce.py` | `spruce.glb` | Woodland's thickets, a spruce a 1.5 m cell (GRID) |
 | `far_tree.py` | `forest_tree.glb`, `skyline/treeline.glb` | The wood past Woodland's fence (`WoodsConfig.forest_model`) and the skyline's treeline band (`SkylineConfig.treeline_model`) |
 | `escalator.py` | `escalator_upper.glb`, `escalator_lower.glb` | Subway's escalator banks, each over its ramp and middle barriers (`Lay.SET`) |
-| `lift.py` | `lift_car.glb`, `lift_landing.glb`, `lift_leaf.glb`, `lift_button.glb` | Subway's lifts (`LiftView`: the car turned to its door, a doorway at each stop, the leaves and buttons scaled to each) |
+| `lift.py` | `lift_car.glb`, `lift_landing.glb`, `lift_landing_lit.glb`, `lift_leaf.glb`, `lift_button.glb` | Subway's lifts (`LiftView`: the car turned to its door, a doorway at each stop, the leaves and buttons scaled to each) |
 | `spiral_stair.py` | `spiral_stair.glb` | Subway's spiral stair over its ramps and landings (`Lay.SET`; the core stays the station's pillar) |
 | `platform_stair.py` | `platform_stair.glb` | Subway's stair to the platforms over its two flights (`Lay.SET`, its handrails `set_heads` over the box) |
 | `railing.py` | `railing_bar.glb`, `railing_top.glb`, `railing_foot.glb`, `railing_post.glb` | Every bar railing's pieces (`RailingMesh`, `MapStyle.railing_look`), fitted to the bars and rails a BB meets |
