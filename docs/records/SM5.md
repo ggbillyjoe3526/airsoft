@@ -11,17 +11,19 @@ photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | build thread | ✓ | 7/8 Retry | models too far from his photos: strip lamp's cage, tunnel lamp's outline, extinguisher's build, CCTV's arm |
 | 2026-11-12 | 2 | build thread | ✓ | 7/8 Retry | strip lamp too long and shallow, its diffuser a solid slab; tunnel lamp's glass corners proud, bar ends past the outline |
-| 2026-11-12 | 3 | build thread | | | |
+| 2026-11-12 | 3 | build thread | ✓ | 7/8 Retry | strip lamp's body deeper than the photo's (attempt 2's figures were off); tunnel lamp's outline faceted at six segments |
+| 2026-11-12 | 4 | build thread | | | |
 
 ## What it adds
 
-- **Ceiling strip lamp** (`strip_lamp.glb`, 200 of 200 triangles): the caged industrial batten of his photo 121814
-  (seven to one, a black body flaring to a lip over a wire cage a little shallower, ten hoops clear of a narrower
-  glowing diffuser, four wire clips a side, hook hangers on plates), on
+- **Ceiling strip lamp** (`strip_lamp.glb`, 192 of 200 triangles): the caged industrial batten of his photo 121814
+  (eight and a half to one, measured on the photo by pixel: a black body flaring to a lip over a wire cage as deep,
+  ten hoops round a clear diffuser filling the cage with the tube's glow along its floor, four wire bails a side,
+  hook hangers on plates), on
   every station ceiling in place of MT1's glowing panels (`RoofConfig.plain_lamp_model`); a room running along z turns
   its lamps a quarter (`roof.lamps[].turn`, MapData.roof_lamp_turns), so each runs along its room. The real lights
   (RoofLamps) are unchanged.
-- **Tunnel bulkhead lamp** (`tunnel_lamp.glb`, 146 of 150): his caged bulkhead, a stadium outline, black like his
+- **Tunnel bulkhead lamp** (`tunnel_lamp.glb`, 148 of 150): his caged bulkhead, a stadium outline, black like his
   fourth photo, 12 on
   the running tunnels' walls, its glass glowing (no real light).
 - **Extras**, look only (`StationFixtures`, spots in `tools/subway/fixtures.py`, `dressing.station.fixtures`): 13
@@ -44,9 +46,10 @@ photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33
   east and down.
 - **The cage wires are two-faced round bars** (`stationkit.Mesh.wire`, a smooth ridge with its back unseen): a real
   round wire would cost three times the triangles, and the budgets hold the cage's ten hoops only this way.
-- **The tunnel lamp's 150 triangles** go on a round outline (six segments a half circle, smooth shaded) in three
-  bands (body, shoulder, front), the glass inset in the front band; the cage's runs back to the rim are flat straps
-  seen side on, its crossings round bars, so it fits; small screw lugs top and bottom.
+- **The tunnel lamp's 150 triangles** go on a round outline (nine segments a half circle, its top on an edge's
+  middle, smooth shaded) in two bands (the body, standing in round the glass, and the dome's front), the glass in the
+  front band along the straight sides; the cage's runs back to the rim are flat straps seen side on, its crossings
+  round bars, so all five bars fit; small screw lugs top and bottom.
 - **The strip lamp's clips** sit at a tenth, a third, two thirds and nine tenths of its length, measured on photo
   121814 (clips at 68, 213, 378 and 523 px of a lamp from 12 to 585 px).
 - **The extinguisher is 3.6 to 1** (0.58 m by 0.16 m) as his photos, with a black label band and a round horn.
