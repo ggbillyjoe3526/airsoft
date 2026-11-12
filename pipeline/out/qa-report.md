@@ -1,19 +1,23 @@
-Task: none (MQ1B) · QA commit 4cf2ee1 · Verdict: Pass
+Task: none (MQ1B) · QA commit <none, uncommitted> · Verdict: Pass
+
+Re-verified on HEAD 8cd98c8 (Cyber Pistol grip rework: straight back strap, raked window and cell, lofted pad).
 
 Blocking: none.
-Advisory: the new power cell stands 0.6 mm proud of the Body's widest point each side (cell half width 16.1 mm vs body 15.5 mm), so its window reads; harmless, but a hand pose or wall-clip check that assumes "inside" would notice. The Cyber hold in arms.glb is not refit (owned by another thread, as stated); not checked.
+Advisory:
+- tests/unit/test_cyber_grip.gd:19 the back-strap reach (BACK_NEAR 5 mm) is tight: the new glb is 4.05 mm off the GBB's at the worst height. A further reshaping of the strap could trip it, which is probably the intent.
+- test_cp1_qa.gd keeps one Pending (the Figure mesh carries no Cyber* material names); it was there before and is not a failure.
 
-Checked against the contract (new cyber.glb): bone "magazine", clips Fire/Selector/Reload/Inspect, empties Muzzle/FrontSight/RearSight/MagWell/SlideBack/TorchMount, Body/Magazine/Figure/Figure_Magazine meshes all present; overall size inside 206 x 152 x 32 mm +-12 mm; hand-held triangles <= 40,000; figure copy <= 3,000 with no vertex colours; the cell rests inside the Body's length and the magazine bone drops >2 cm on Reload; TorchMount sits under the rail, clear of the Body's vertices.
+Checks, by your four points
+1. Contract holds: all six empties, four clips and the Skeleton3D are present; hand-held size is within the GBB envelope (206x152x32 mm, 12 mm slack); TorchMount is clear of the Body's vertices and under the rail; the figure copy (Figure, Figure_Magazine) carries no vertex-colour kinds and fits 3,000; hand-held triangles are within 40,000.
+2. Cell and pad: at rest no Magazine vertex stands more than 1 mm past the Body's slice at its height (front, back or half width), apart from the pad's own foot below the Body's bottom. The Magazine is one mesh (cell and pad) under a BoneAttachment3D on bone "magazine" and the Body is not attached to a bone, so nothing of the pad can stay behind. The Reload clip still takes the bone down more than 20 mm.
+3. test_cyber_grip.gd, run against raw glbs (GLTFDocument, nothing swapped into assets/, no re-import): origin/main's cyber.glb gives back-strap bow 45.4 mm (limit 0.8) and front strap 3.6 mm off the GBB's (limit 1.5), so the straight-back and front-strap tests fail. Attempt 1's glb (cba18ac) gives bow 2.6 mm, so the straight-back test fails. The new glb gives bow 0.001 mm, front 0.8 mm, width 0.7 mm, back 4.0 mm. The GBB's own bow is 1.8 mm, above its 1.5 mm threshold, so that assertion holds.
+4. tools/model_studio.gd under xvfb: three shots (cyber at pitch +5 and 0, aeg at pitch -20) wrote side.png, flat.png and low.png to /tmp/qa_studio; no script errors and no divide-by-zero.
 
-Tests added:
-- tests/unit/test_mq1b_qa.gd:35 · empties, clips, skeleton still present · contract regression, passes on old and new glb (a missing node fails it).
-- :42 · overall size stays the GBB's · contract regression, passes on both.
-- :54 · cell inside grip at rest (length, width within 1 mm) and magazine bone leaves down on Reload · fails on origin/main's glb (cell ran past the body length by 2 mm), passes now.
-- :77 · torch mount clear of the body and under the rail · contract regression.
-- :90 · figure copy has no vertex-colour kinds, <= 3,000 triangles · contract regression.
-- :108 · hand-held triangle budget · contract regression.
-Existing tests/unit/test_cyber_grip.gd reviewed: sound; with origin/main's cyber.glb swapped in, both its tests fail (straps off by up to 59 mm at -0.09 m, sides not rounded), and pass on the new glb.
+Tests added in tests/unit/test_mq1b_qa.gd (uncommitted)
+- test_the_raked_cell_and_base_pad_stay_inside_the_grips_skin_at_rest · every Magazine vertex against the Body's front, back and half-width slice at its height, 1 mm flush allowed · fails without the feature: not run. Swapping the glb needs a re-import, which I held off while the gate runs. It covers vertices, where the old test covered only bounding boxes.
+- test_the_cell_and_pad_are_one_part_riding_the_magazine_bone · Magazine hangs from the "magazine" bone attachment, the Body does not · fails if the pad were baked into the Body; not run against such a model.
 
-Run: test_mq1b_qa 6/6, test_cyber_grip 2/2 on the new glb (your listed files not re-run). tools/check.sh not run as instructed; smoke test not run (per your instruction not to run the full gate).
-Not testable here: how the grip looks and feels in the hand, the Magazine passing through Body walls on Reload visually (needs a display), arms.glb fit.
-Raw output: pipeline/out/qa/mq1b_qa.txt, pipeline/out/qa/on_old_glb.txt.
+Counts: test_mq1b_qa 8/8; test_cyber_grip 3/3; test_cyber_pistol 8/8; test_cp1_qa 15 passed + 1 pending; test_cyber_sights 2/2; test_bp5_models 9/9. 43 passing of 44, 372 asserts, 1.7 s. Raw output: pipeline/out/qa/mq1b2.txt and pipeline/out/qa/studio2.txt.
+Note for the runner: the one-file command in the QA brief ran the whole suite until I added -gconfig= (the .gutconfig.json dirs override -gtest).
+
+Could not test: how the grip feels in a hand, the window and cell's look in the lit game, the model studio pictures' look (I did not view the PNGs). Both need the owner or a display.
