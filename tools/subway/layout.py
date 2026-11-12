@@ -211,7 +211,7 @@ RUN_VAULTS = [dict(name="north_run", x0=50, x1=82, z0=-12.6, z1=-9, y=T + RUN_SP
 VAULTS += RUN_VAULTS
 room("run_n", "North tunnel", 50, 82, -12.6, -9, T, h=RUN_SPRING, vault=True)
 # Detrainment steps down from the south train's cab door to the track, a way round them each side.
-room("cab_steps", "South tunnel", 60, 62, 10.15, 11.35, P, T, h=TUNNEL_H, flat=True)
+room("cab_steps", "South tunnel", 60, 62, 10.15, 11.35, P, T, h=RUN_SPRING, flat=True, vault=True)
 room("cab_n", "South tunnel", 60, 62, 9, 10.15, T, h=RUN_SPRING, vault=True)
 room("cab_s", "South tunnel", 60, 62, 11.35, 12.6, T, h=RUN_SPRING, vault=True)
 room("run_s", "South tunnel", 62, 82, 9, 12.6, T, h=RUN_SPRING, vault=True)
