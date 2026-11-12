@@ -804,6 +804,10 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   should be less bright. I don't like the wooden sniper rifle so remove that and keep polymer." So black metal is
   the darkest, black polymer a shade lighter, white polymer an off-white, and the sniper's stock stays polymer; no
   replica is wood. The values are `ReplicaSurfaces.LOOKS` (docs/records/MQ1.md).
+- **The Cyber Pistol's grip is the GBB Pistol's shape (owner, 2026-11-12, MQ1B).** "Can you redesign the
+  handle/grip to be a similar shape to the GBB pistol?" and "The cyber grip doesn't look ergonomic. It has flat and
+  sharp edges." Its grip is the GBB's own rounded sections where the GBB's sit (curved back strap, palm swell, finger
+  grooves), with the power cell still showing through a window in each side (docs/records/MQ1B.md).
 - **The next replica is a spring sniper rifle, and the owner is asked how to build it and its specs before work starts
   (owner, 2026-10-06).** The SMG and shotgun come after it.
 - **The Cyber Pistol is the owner's own design and the level cap's reward (owner, 2026-10-04; level 10 since
