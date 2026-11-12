@@ -10,7 +10,8 @@ const SWITCHES := 12
 ## The meshes the base (origin/main 79969e6) drew, as SHA-256 of vertices, normals and colours (first 16 hex). Woodland
 ## left it in WL1, its ground drawn at last; WA1 repainted the greybox kinds from the look's palette; SL1 the grass.
 const BASE_HASHES: Dictionary[String, String] = {
-	"depot": "3ad9ade3484adafc", # the hall (DR1), the palette's colours (WA1), SL1's darker grass outside
+	# The hall (DR1), the palette's colours (WA1), SL1's darker grass outside, MB1's crate stacks at the flags.
+	"depot": "7c95128a2e308a13",
 	"range": "dae60d51779a9749", # SL1's darker grass outside
 }
 

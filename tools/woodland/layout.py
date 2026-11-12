@@ -348,8 +348,10 @@ rect("log", -4.0, 9.5, 6.5, 0.8, -8)
 rect("crates", -1.0, 12.0, 2.4, 1.6, 0, top=2.4)            # south crate stack: cover for the Tyre wall exit
 rect("tyre", -15.0, -4.0, 1.7, 1.7)
 # MB1: the west's sweep ended in the open under the Hut rise, 20 m from the head of the Ford's ramp: a fallen tree lies
-# across the lane just past the field's middle, and the west's stop (LANES) is behind it.
-rect("windthrow", 1.5, 1.0, 6.0, 2.0, 90, top=2.4)
+# just past the field's middle, between that stop (LANES) and the ramp. It lies north of the straight way from the
+# Ford to the overtime flag (across that way it cost the east 1.1 s to the flag: test_woodland_layout), clear of the
+# stream's bank and 1.3 m off the tyre stack, so the ground north of it is no pocket.
+rect("windthrow", 1.6, -1.3, 3.4, 2.0, 90, top=2.4)
 # Hut row (defenders' mid): two huts with doors and windows, a crate yard between
 hut(27.0, -0.5, 6.0, 4.0, 0, [(3, 1.3, 2.7, "door"), (1, 1.3, 2.7, "door"), (0, 1.5, 4.5, "window"),
                               (2, 1.5, 4.5, "window")], tag="hut1")
@@ -380,9 +382,10 @@ rect("windthrow", -6.0, 50.0, 7.0, 2.0, 90, top=2.2, tag="roadblock")
 rect("windthrow", 1.6, 44.0, 7.0, 2.0, 90, top=2.2, tag="roadblock")   # was a low crate at (1, 45.5)
 rect("logstack", -24.0, 54.0, 5.0, 1.6, 0)
 rect("logstack", 25.0, 47.6, 6.0, 1.6, -20)          # Log stacks (on the verge: breaks the Truck bend to B line)
-# MB1: cordwood across the east rise where the lane leaves the culvert: the east end's hard cover over the dip, as the
-# fallen tree on the hump is the west end's, 30 m apart.
-rect("logstack", 20.5, 42.0, 1.6, 6.0, 0, tag="roadblock")
+# MB1: cordwood across the road where the lane leaves the culvert: the east end's hard cover over the dip, as the
+# fallen tree on the hump is the west end's, 30 m apart. 3 m tall: at 1.8 m the hump, 2.4 m up, looked over it 52 m
+# onto flag B's forward post, and 88 of Attack / Defend's 142 knock-outs from over 38 m were that one duel.
+rect("logstack", 20.5, 42.0, 1.6, 6.0, 0, top=3.0, tag="roadblock")
 rect("logstack", 29.7, 35.9, 5.0, 1.6, -25)
 rect("tyre", 19.0, 39.0, 1.7, 1.7)
 rect("logstack", 36.5, 42.3, 5.0, 1.6, -30)          # v3: along the verge, off the road
@@ -574,13 +577,17 @@ LANE_PATHS = {
     # MB1: the middle lane goes round the Woodpile's north end and the Birch stand's stack, up the Ford's ramp north
     # of its thickets and between them and hut 1, and ends in the Back yard, where Attack / Defend's middle
     # defenders hold between the two sites (it ended in their camp).
-    "m": [(-74, 4), (-52, 4), (-38, 0.5), (-26, -2.5), (-19, -2.0), (-6, 2), (-0.4, 1.6), (1.5, -3.3),
+    "m": [(-74, 4), (-52, 4), (-38, 0.5), (-26, -2.5), (-19, -2.0), (-6, 2), (-0.6, -1.6), (1.6, 1.7),
           (9.5, 0.5), (15.5, -3.6), (20.6, -5.0), (22.4, 0.4), (22.6, 3.4), (31.2, 2.2), (36.5, 2.4), (40.5, 4.2),
           (43.2, 1.0), (58, 4.5)],
     # MB1: the south lane leaves the road for its north verge at the fallen tree and comes back onto it past the stack.
+    # Its last two points are flag B's defenders: one behind the crates north of the road mouth, off the road's line
+    # with a view of the pole, one behind the stack beside it. In the road mouth, at (44, 35), the forward defender
+    # was shot from the Culvert's stack, 25 m off, before a fight reached the flag: 80 of the 175 knock-outs the
+    # attackers scored round the pole, and they won 64 % of the rounds (55 % with him behind the crates).
     "s": [(-77, 21), (-66, 27), (-48, 33), (-34, 42), (-18, 49), (-11.5, 49.8), (-8.8, 47.2), (-6.2, 45.3),
           (-2.2, 45.4), (2, 49.4), (14, 48.3),
-          (20.6, 46.4), (24.5, 43.8), (32, 40), (44, 35), (49, 37)],
+          (20.6, 46.4), (24.5, 43.8), (32, 40), (44.6, 29.8), (49, 37)],
 }
 
 
