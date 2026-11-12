@@ -69,9 +69,7 @@ def fit(replica: str) -> None:
             moved += 1
             print("  %s: %s -> %s" % (ob.name, tuple(round(c, 4) for c in target - shift),
                                      tuple(round(c, 4) for c in target)))
-    bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=False, export_apply=True,
-            export_animations=False, export_yup=True, export_draco_mesh_compression_enable=False,
-            export_extras=False, export_cameras=False, export_lights=False)
+    hs.export(path, False)  # the parts' surface kinds (their meshes' extras, MQ2) with them
     print("  %s: %d parts moved" % (replica, moved))
 
 

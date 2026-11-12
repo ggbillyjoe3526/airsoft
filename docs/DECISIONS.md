@@ -811,6 +811,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   sections where the GBB's sit (front strap, finger grooves, width) with a back strap that runs straight from under
   the tang to the heel, and the power cell shows through a smaller window in each side that leans with the handle.
   He approved that version ("Perfect"); it is not reshaped again without him (docs/records/MQ1B.md).
+- **The Vertical Grip is a little longer (owner, 2026-11-12, MQ2).** "When modelling the vertical grip can you make it
+  a little longer?" Its body reaches 64 mm under the rail, from 53 (`VG_K` in `tools/blender/parts/attachments.py`);
+  its stats are unchanged.
 - **The next replica is a spring sniper rifle, and the owner is asked how to build it and its specs before work starts
   (owner, 2026-10-06).** The SMG and shotgun come after it.
 - **The Cyber Pistol is the owner's own design and the level cap's reward (owner, 2026-10-04; level 10 since

@@ -43,6 +43,7 @@ from mathutils import Matrix, Vector  # noqa: E402
 
 import attachments as at  # noqa: E402
 import hardsurface as hs  # noqa: E402
+import surface  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
 MM = at.MM
@@ -60,6 +61,11 @@ PART_TRIS = 10000
 
 # The inner parts' own materials: colour (sRGB), roughness, metallic. The extension is the rifle's Metal. Half metal,
 # as the rifle's: the menu pictures have no reflections, and full metal draws black there.
+# What each material is made of (surface.py, MQ2): the extension under the paint steel, the inner barrels and their
+# crowns polished metal in their own colours (stainless steel, brass), the hop-up chamber polymer, its bucking rubber;
+# the bore and the etched marks say none.
+SURFACES = {"Metal": "steel", "Steel": "polished", "Brass": "polished", "Chamber": "polymer", "Bucking": "rubber"}
+
 MATERIALS = {
     "Steel": (0xe2e5e8, 0.3, 0.4),
     "Brass": (0xe6b25a, 0.32, 0.4),
@@ -80,6 +86,14 @@ BARREL_REAR = HOP_Y - 25.0
 # The crown: the visible end of the inner barrel, 4 mm proud of the barrel's face inside the flash hider's 12 mm bore
 # (the rifle's barrel is solid to 3 mm past BarrelEnd). It starts 3 mm behind the face, hidden in the barrel.
 CROWN_BACK, CROWN_FACE = -3.0, 7.0
+# Its machining (MQ2), mm: the outer edge's chamfer, the target crown's depth below the face and its guarding rim's
+# width, and the turned groove behind it (its distance back from the face, its width and depth).
+CROWN_CHAMFER = 0.55
+CROWN_RECESS = 0.5
+CROWN_RIM = 0.3
+CROWN_GROOVE = (2.6, 0.5, 0.18)
+# How far in from the face the bore goes dark (mm): the crown's bore wall ends there.
+CROWN_DARK = 2.5
 # The long barrel: the extension's length (the rifle's flash hider moves to its end), its 14 mm thread under the hider
 # (its length and the grooves cut in it), and its inner barrel's crown 4 mm past the thread.
 EXT_LEN = 100.0
@@ -109,8 +123,12 @@ FLUTE_AROUND = 64
 KNURL_AROUND = 36
 KNURL_PITCH = 1.5
 HOP_BEVEL = 0.0
-# Points round each turned piece: each inner barrel and its crown, the hop-up unit, the extension.
-SEG = {"tightBore": 52, "behind": 36, "long": 20, "crown": 52, "hop": 28, "sleeve": 48, "extension": 32}
+# Points round each turned piece: each inner barrel and its crown, the hop-up unit, the extension, the tight bore's
+# O-rings and centring spacer. The crowns come first (MQ2): a crown is all of a barrel that shows on the rifle, bright
+# metal an arm's length from the eye, so its rim's highlight must be one unbroken ring; the inside (the Loadout's part
+# picture alone, a few pixels across) pays for it.
+SEG = {"tightBore": 52, "behind": 24, "long": 20, "crown": 104, "long_crown": 64, "hop": 28, "sleeve": 28,
+       "extension": 32, "o_ring": 20, "spacer": 40}
 HOP_CHAMFER = 0.45
 # The rotary hop-up dial: its radius and teeth (mm).
 DIAL_R = 7.6
@@ -153,14 +171,26 @@ def total_tris(ob: bpy.types.Object) -> int:
 
 # ------------------------------------------------------------------------------------------------- inner barrels
 
-def crown(name: str, face: float, mat: str, seg: int) -> bpy.types.Object:
-    """The inner barrel's muzzle end: polished, its outer edge rounded, the bore chamfered in and dark down inside."""
+def crown(name: str, face: float, mat: str, seg: int, groove: bool = True) -> bpy.types.Object:
+    """The inner barrel's muzzle end, polished: a recessed target crown (the bore's mouth chamfered, a flat let
+    CROWN_RECESS into the face inside a guarding rim), the outer edge chamfered, a turned `groove` behind it (left
+    out where the flash hider's thread hides it); the bore dark down inside."""
     back = face - (CROWN_FACE - CROWN_BACK)
+    rim = BARREL_R - CROWN_CHAMFER
+    turned = [(face - CROWN_GROOVE[0] - CROWN_GROOVE[1] - 0.15, BARREL_R),
+              (face - CROWN_GROOVE[0] - CROWN_GROOVE[1], BARREL_R - CROWN_GROOVE[2]),
+              (face - CROWN_GROOVE[0], BARREL_R - CROWN_GROOVE[2]), (face - CROWN_GROOVE[0] + 0.15, BARREL_R)]
     b = hs.Builder(name, [mat, "Bore"])
-    at.tube_y(b, [(back, BARREL_R), (face - 0.7, BARREL_R), (face - 0.25, BARREL_R - 0.2), (face, BARREL_R - 0.6)],
-              [(back, BORE_R), (face - 0.45, BORE_R), (face - 0.1, BORE_R + 0.35), (face, BORE_R + 0.5)], mat, seg)
+    outer = [(back, BARREL_R)] + (turned if groove else []) + [(face - CROWN_CHAMFER, BARREL_R), (face, rim)]
+    inner = [(face - CROWN_DARK, BORE_R), (face - CROWN_RECESS - 0.45, BORE_R),
+             (face - CROWN_RECESS - 0.1, BORE_R + 0.3), (face - CROWN_RECESS, BORE_R + 0.42),
+             (face - CROWN_RECESS, rim - CROWN_RIM - 0.1), (face - 0.1, rim - CROWN_RIM),
+             (face, rim - CROWN_RIM + 0.08)]
+    # One open skin from its hidden back, over the face and down the bore to where it goes dark: no triangle on a back
+    # face or a bore wall no eye reaches, so the count round (what its rim's highlight shows) can be high.
+    at.lathe_y(b, outer + list(reversed(inner)), mat, seg, cap=False)
     # The bore going dark a little way in, as down a real barrel.
-    at.lens(b, face - 2.5, BORE_R + 0.01, "Bore", seg, facing=1.0)
+    at.lens(b, face - CROWN_DARK, BORE_R + 0.01, "Bore", seg, facing=1.0)
     return hs.finish(b.build(), bevel=0.0)
 
 
@@ -191,7 +221,7 @@ def inner_barrel(b: hs.Builder, kind: str, front: float, mat: str, seg: int, seg
         at.lathe_y(b, prof + [(split, BARREL_R), (split, 0.0)], mat, seg_back)
         at.lathe_y(b, [(split, 0.0), (split, BARREL_R), (front, BARREL_R), (front, 0.0)], mat, seg)
     for y in O_RINGS[kind]:
-        torus_y(b, y, BARREL_R + 0.25, 0.85, "Rubber", 28 if seg > 32 else 16, 6)
+        torus_y(b, y, BARREL_R + 0.25, 0.85, "Rubber", SEG["o_ring"] if seg > 32 else 16, 6)
     # The centring spacer: a polymer sleeve that holds the barrel in the outer barrel's middle, its ends chamfered and a
     # groove round its middle.
     if kind not in SPACER_Y:
@@ -200,7 +230,8 @@ def inner_barrel(b: hs.Builder, kind: str, front: float, mat: str, seg: int, seg
     mid = 0.5 * (y0 + y1)
     r = SPACER_R
     at.lathe_y(b, [(y0, BARREL_R), (y0, r - 0.8), (y0 + 0.7, r), (mid - 1.3, r), (mid - 0.9, r - 0.45),
-                   (mid + 0.9, r - 0.45), (mid + 1.3, r), (y1 - 0.7, r), (y1, r - 0.8), (y1, BARREL_R)], "Chamber", 52)
+                   (mid + 0.9, r - 0.45), (mid + 1.3, r), (y1 - 0.7, r), (y1, r - 0.8), (y1, BARREL_R)], "Chamber",
+               SEG["spacer"])
 
 
 # ---------------------------------------------------------------------------------------------- the hop-up unit
@@ -464,7 +495,7 @@ def build_tight_bore() -> bpy.types.Object:
 
 def build_long() -> bpy.types.Object:
     ext = extension(SEG["extension"])
-    tip = crown("long_crown", LONG_CROWN_FACE, "Brass", SEG["crown"])
+    tip = crown("long_crown", LONG_CROWN_FACE, "Brass", SEG["long_crown"], groove=False)
     ob = hs.join("barrel_long", [ext, tip])
     inner = inside("long", "Brass", SEG["long"], SEG["long"], SEG["hop"], LONG_CROWN_FACE - (CROWN_FACE - CROWN_BACK))
     inner.parent = ob
@@ -504,6 +535,7 @@ def build(target: Vector) -> dict:
             name, count, hs.tris(ob), hs.tris(bpy.data.objects[name + FIGURE_SUFFIX])))
         if count >= PART_TRIS and not os.environ.get("BA_DRY"):
             raise SystemExit("%s: %d triangles is over the part budget of %d" % (name, count, PART_TRIS))
+        surface.name([ob] + list(ob.children_recursive), SURFACES)
         out[name] = ob
     return out
 

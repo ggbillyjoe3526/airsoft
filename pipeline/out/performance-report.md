@@ -1,18 +1,13 @@
-Task: MQ1B (attempt 3) · head 7499a89 · Verdict: Pass
-Run: no Godot run (the local gate is running); the committed cyber.glb parsed directly · budget: no baseline yet, judged against targets, the 40,000 / 3,000 triangle budgets and origin/main's glb
-Metrics (measured, from the glb JSON):
-- Triangles in the hands (Body + Magazine + Selector + Slide + Trigger): 38,706 / 40,000 (ok); attempt 2 38,646; main 37,824 (+2.3 %)
-- Figure copy (Figure + Figure_Magazine): 3,000 / 3,000 (ok, at the limit); main 3,000
-- File size: 1,361,544 B vs main 1,350,416 B (+0.8 %)
-- Body: 4 surfaces, materials 0-3 (same as main), 21,491 vertices (main 20,977, +2.4 %)
-- Magazine: 3 surfaces, materials 3/4/2 (same as main), 3,778 vertices (main 3,882, -2.7 %), 4,244 triangles (main 4,576)
-- Materials in the file: 6 (main 6); no new material, so no new shader prewarm needed
+Task: MQ2 (attempt 2) · head d43462d · Verdict: Pass
+Run: no --perf match (game-side diff since 45c8831 is constants only); counts parsed from the glb JSON · budget: no baseline yet (pipeline/perf-budget.json absent), judged against the 10,000-a-part budget, the 4 MiB cap and b6d2f17
+Metrics (measured): largest single mesh per file: aeg 9,946, sniper 9,852, pistol 9,626, smg 9,626, cyber 9,158, inside/aeg 8,552 (all under 10,000). File totals: aeg 105,355 (b6d2f17 103,277, +2 %), sniper 68,838 (+2.4 %), pistol 39,317, smg 58,500, cyber 9,755, inside/aeg 13,472 (unchanged). Primitives and materials per file identical to b6d2f17 (aeg 80/16, sniper 53/9, pistol 35/13, smg 50/9, cyber 10/5, inside 12/7): no new surfaces or draw calls.
+Sizes: aeg 4,056,008 (cap 4,194,304, 96.7 %, 138 kB headroom), sniper 2,168,320, pistol 1,743,548, smg 1,665,976, cyber 258,796, inside/aeg 410,204. Up from b6d2f17: aeg +167,812 (+4.3 %), sniper +125,520 (+6.1 %). I did not cross-check docs/CC0_ASSETS.md line by line.
 Regressions (> 10 % worse): none
 Blocking findings: none
-- Nothing under game/ changed (git diff origin/main...HEAD lists 0 game/ paths); no runtime script, scene or config in the diff.
-- tools/model_studio.gd:54 calls RenderingServer.directional_shadow_atlas_set_size(SHADOW_MAP, true) inside the tool's own run. The only other mention of the tool in game/ is a doc comment in game/ui/studio_sky.gd:8. No game script, scene, export preset or CI step references it, so the call cannot reach the shipped game (judgment, by grep).
 Advisory:
-- The figure copy sits exactly on its 3,000 budget; any later rounding of the figure needs a trade-off elsewhere (judgment).
-- The hands are 1,294 triangles under budget, and Body alone is 30,318 (judgment). It is a per-draw cost on the owner's GPU only; frame time was not measured here.
-Fixes: none needed.
-Unexplained: none. Draw calls, frame times and orphan nodes were not re-measured because no game code changed since attempt 2's pass.
+- game/config/replica_surfaces.gd (measured by diff): the only game change since 45c8831 is polished relief 0.0 and cloud 0.0, table constants built once. No shader change, no new variant, no per-frame code. Attempt 1 findings on named(), the _surface_of cache (cap 160, cleared by ReplicaPaint.clear()) and prewarm still hold, as game code is otherwise unchanged.
+- Worst case in the hands (judgment): the AEG body's own 40k plus the fitted part meshes at most ~9.9k each. Silencer ~9.1k, torch ~9.6k, laser ~9.4k, vertical grip ~9.3k, red dot ~9.4k (Variable Scope 8.0k), Hi-Cap ~9.7k, long barrel ~9.9k add ~66k, so about 106k triangles for the view model. That is modest for one object on Low-class GPUs, but it is a true 2.6x the replica's own 40k and is drawn every frame. The aeg.glb file total (105k) also counts the variants not fitted, which do not draw. Whether the hands' parts cast shadows (more passes) is worth a look on the owner's hardware: frame time only there.
+- Load cost (judgment, not timed: unit tests were still running on this machine): aeg.glb is +4 % and sniper +6 % in bytes, so the parse and mesh upload cost scales about the same, a few ms. Fitting happens at loadout and respawn, not per frame; the file is loaded through the scene cache.
+- Triangle budgets leave 54 triangles of headroom (Low-Cap 9,946 as a mesh, tight bore 9,962 in an earlier build); a future rebuild must hold the line.
+Fixes: none required.
+Unexplained: none. Frame times, draw calls and load timing not measured (no GPU; gate still running).

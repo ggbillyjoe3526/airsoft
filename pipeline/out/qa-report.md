@@ -1,17 +1,24 @@
-Task: none (MQ1B) · QA commit <none, uncommitted> · Verdict: Pass
+Task: none (MQ2) · QA commit <none, uncommitted> · head 0aeb2a6 · Verdict: Pass
 
-Attempt 3 re-verification of 7499a89 (rounder tang, shorter FRAME_SPINE, closed cell ribs, studio shadow change).
+Blocking: none.
 
-Blocking: none. Advisory: none new.
+Advisory
+- Figure copies sit at exactly 600 triangles (aeg redDot/scopeVar, pistol and smg silencer, smg redDot/scopeVar, sniper grips and optics): at the budget, not over; any added detail there breaks it. No real part is at 10,000.
+- Pre-existing, unreachable today: `apply(..., OWN, surfaced=true)` on a `*_Figure` copy would surface the torch reflector, LED and laser lens (copies carry no table). figure_view.gd:288,326 and mag_toss_view.gd:124 pass surfaced=false.
 
-Checks
-1. tests/unit/test_mq1b_qa.gd: 8/8 pass (41 asserts). tests/unit/test_cyber_grip.gd: 3/3 pass (44 asserts). Both run alone on the committed glb with -gconfig=.
-2. Spine and web through the rounder tang: tests/unit/test_cyber_grip.gd:84 reads the rearmost point of every Body vertex (spine, web and grip together) at seven heights from -0.03 to -0.09 m, and holds them to a straight line within 0.8 mm. The rebuilt glb passes, so no spine or web vertex pokes out behind the back strap there. Not covered: Body points above -0.03 m (the tang's notch and above). The 7499a89 change touches this region and I did not test it.
-   The cell and pad stay inside the grip's skin at rest and ride the Magazine bone (so they leave on Reload): tests/unit/test_mq1b_qa.gd:64, :135 and :156 pass on the rebuilt glb with the closed ribs.
-3. Model studio under xvfb at the three poses (cyber at pitch +12, cyber at 0, aeg at -20): rendered a.png, b.png and c.png with no script errors. The only ERROR lines are the sandbox's Vulkan failure (VK_KHR_surface missing, falls back to OpenGL) and ALSA, both environmental. I did not look at the images.
+Checked against b6d2f17 by parsing the glb JSON (all five parts files and inside/aeg.glb)
+- Node names, mount transforms, material-name lists per part and per `_Figure` copy are identical, except the pistol silencer node (already explained: it now sits on pistol.glb's Muzzle mount).
+- No mesh carries extras other than `surfaces`; no node, material or accessor carries extras; no `_Figure` copy has a table.
+- Triangles: no hands part at or over 10,000; no copy over 600.
+- assets/models/replicas/*.glb: `git diff b6d2f17..HEAD --stat` shows no change, so the replica's own AEG magazine is untouched.
+- The silencer's front cap pin holes are in the part's Rubber material (the silencer uses Detail, Metal, Rubber only): drawn on the rubber surface in its own colour in every paint, never the paint's.
+- Laser lens, torch reflector and LED, optic glass: never surfaced in any paint, Realistic on or off, surfaced or plain (sweep over 13 paints). The `polished` look change (relief 0, cloud 0) leaves the table and kind order unchanged; barrel inside test still passes.
 
-Tests added or changed: none this attempt. No real gap found. The earlier 8 tests still fail without their features, as checked in attempt 2.
+Tests added to tests/unit/test_mq2_qa.gd (now 7 tests, 14,809 asserts, all pass)
+- :`test_no_part_is_over_the_triangle_budget_and_carries_only_the_surfaces_table` · reads every mesh's triangle count (parts under 10,000, copies at most 600) and its extras keys · fails if a part grows past the cap, a copy gains a table, or a stray custom property is exported.
+- :`test_a_silencers_dark_rubber_cap_details_keep_their_own_colour_in_every_paint` · the pin holes' Rubber stays in its own colour in all paints on aeg, pistol and smg · fails if the paint covers it or the surface is dropped.
+- Earlier five tests unchanged.
 
-Counts: 11 tests, 85 asserts, a few seconds each.
+Run (one godot process at a time, targeted): test_mq2_qa, test_part_surfaces, test_barrel_models, test_attachment_models, test_magazine_models, test_magazine_wear, test_replica_surfaces, test_replica_paint: 74 tests, 74 pass, 17,499 asserts; test_mag_share and test_mh3_qa (thrown and dropped magazines, the tossed mag): 42 pass. The barrels' inside picture loads (test_barrel_models). No full suite, no import, no smoke test (gate running).
 
-Not tested: how the shadow-map and far-plane change looks (the images need an owner's eye on a real GPU). I did not run tools/check.sh, as asked.
+Not tested: how the new detail looks, and the tossed magazine in motion (needs a display / the owner). Nothing committed by me.
