@@ -1,6 +1,6 @@
 # SM3 · Subway's ticket hall and concourse models
 
-**Review:** pending
+**Review:** critic Accept 8/8 (attempt 7) · qa Pass · performance Pass
 
 ## Attempts
 
@@ -12,7 +12,7 @@
 | 2026-11-12 | 4 | build thread | pass | 7/8 | a brighter steel column, lighter paddles a little lower, a bigger yellow reader, the arm in its slot |
 | 2026-11-12 | 5 | build thread | pass | 7/8 | the gate's proportions against photo 4: a slim post under the reader head, the blade's foot higher, the reader yellower, the arm's root rounded |
 | 2026-11-12 | 6 | build thread | pass | 7/8 | the reader's yellow too pale; the head a lid, not a steep wedge facing the walker |
-| 2026-11-12 | 7 | build thread | – | – | – |
+| 2026-11-12 | 7 | build thread | pass | 8/8 Accept | – |
 
 ## What was built
 
