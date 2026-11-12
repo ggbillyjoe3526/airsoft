@@ -77,7 +77,7 @@ func test_the_team_strip_is_the_swatches_main_had() -> void:
 	var image := _image((kit.surface_get_material(at) as BaseMaterial3D).albedo_texture)
 	for x: int in OLD_SWATCHES:
 		var got := image.get_pixel(TEAM_STRIP.position.x + x, TEAM_STRIP.position.y + 16)
-		assert_almost_eq(got.r8, OLD_SWATCHES[x] as int, 8, "swatch at %d" % x)
+		assert_almost_eq(got.r8, OLD_SWATCHES[x] as int, 2, "swatch at %d" % x)
 
 
 func test_the_team_material_stays_neutral_for_the_team_paint() -> void:

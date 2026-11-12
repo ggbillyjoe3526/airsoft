@@ -52,8 +52,8 @@ the model with 12 rays at every second pixel, and a normal map made from the sam
   tree and writes the maps as WebP; `splice.py` writes WebP and normal maps and repaints the pads' material;
   `pads.py` writes its maps as 2048 canvases and `splice_part.py` can take a named material from the part. A
   second run gives the same file, byte for byte.
-- **Files:** `human.glb` 12.1 MB (was 9.7). The colour and normal maps import at 2048 (BC7 and RGTC), the roughness
-  and metal map at 1024, as the body's and the heads' do.
+- **Files:** `human.glb` 12.5 MB (was 9.7). The colour and normal maps import at their full 2048 (no size limit; BC7 and
+  RGTC), the roughness and metal map limited to 1024, as the body's and the heads' are.
 - **Tests** (`tests/unit/test_gear_surfaces.gd`): both families draw 2048 colour and normal maps; the full-detail
   pieces lie in charts, off the pads' square and off the strips, and cover a least share of the maps; the lower
   levels stay on the strips; the pads stay in their square; the normal maps carry relief where the charts are and
