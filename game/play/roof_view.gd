@@ -240,16 +240,17 @@ static func lens_tint(state: int, cfg: RoofConfig) -> Color:
 	return Color.WHITE
 
 
-## The lamps: the high-bay model, its body in the shared light and its lens glowing, its top at the roof's underside;
-## or a glowing panel `lamp_drop` under it without the model; with the roof's `bays`, each clear of the trusses
-## (lamp_spot). Each lamp's lowest point (under its lens) is added to `spots`, for its real light.
+## The lamps: the high-bay model (a plain roof's: the strip lamp, each turned along its room), its body in the shared
+## light and its lens glowing, its top at the roof's underside; or a glowing panel `lamp_drop` under it without the
+## model; with the roof's `bays`, each clear of the trusses (lamp_spot). Each lamp's lowest point (under its lens) is
+## added to `spots`, for its real light.
 func _lamp_view(map: MapData, cfg: RoofConfig, bays: bool, spots: Array[Vector3]) -> MultiMeshInstance3D:
 	var glow := ShaderMaterial.new()
 	glow.shader = CodeShaders.of(LENS_SHADER)
 	glow.set_shader_parameter(&"glow", cfg.lamp_colour * cfg.lamp_energy)
 	_materials.append(glow)
 	var lamp: Mesh = null
-	var own: ArrayMesh = null if map.roof_plain else PropDressConfig.load_mesh(cfg.lamp_model) as ArrayMesh
+	var own := PropDressConfig.load_mesh(cfg.plain_lamp_model if map.roof_plain else cfg.lamp_model) as ArrayMesh
 	var drop := cfg.plain_lamp_drop if map.roof_plain else cfg.lamp_drop
 	if own != null:
 		var body := LookMaterials.vertex_colour(cfg.roughness, 0.0)
@@ -272,20 +273,27 @@ func _lamp_view(map: MapData, cfg: RoofConfig, bays: bool, spots: Array[Vector3]
 	# the model hangs from its top (its own y 0 at the ceiling's underside); a panel's middle `lamp_drop` under it, each
 	# lamp from its own ceiling (MapData.roof_lamp_heights: the roof's, or a station level's)
 	for i in map.roof_lamps.size():
-		var at := lamp_spot(map.roof_lamps[i], cfg) if bays else map.roof_lamps[i]
-		var top := map.roof_lamp_heights[i] if i < map.roof_lamp_heights.size() else map.roof_height
-		var y := top - drop
-		var under := y + lamp.get_aabb().position.y
-		mm.set_instance_transform(i, Transform3D(Basis.IDENTITY, Vector3(at.x, y, at.y)))
+		var place := lamp_place(map, cfg, bays, i, drop)
+		var under := place.origin.y + lamp.get_aabb().position.y
+		mm.set_instance_transform(i, place)
 		mm.set_instance_custom_data(i, lens_tint(map.roof_lamp_states[i] if i < map.roof_lamp_states.size()
 				else MapData.LAMP_WORKING, cfg))
-		spots.append(Vector3(at.x, under, at.y))
+		spots.append(Vector3(place.origin.x, under, place.origin.z))
 	var inst := MultiMeshInstance3D.new()
 	inst.name = "Lamps"
 	inst.multimesh = mm
 	inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	inst.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 	return inst
+
+
+## Where lamp `i` of `map` hangs: its spot (clear of the trusses with the roof's `bays`), `drop` m under its own
+## ceiling (MapData.roof_lamp_heights: the roof's, or a station level's), turned about up by its MapData.roof_lamp_turns.
+static func lamp_place(map: MapData, cfg: RoofConfig, bays: bool, i: int, drop: float) -> Transform3D:
+	var at := lamp_spot(map.roof_lamps[i], cfg) if bays else map.roof_lamps[i]
+	var top := map.roof_lamp_heights[i] if i < map.roof_lamp_heights.size() else map.roof_height
+	var turn := map.roof_lamp_turns[i] if i < map.roof_lamp_turns.size() else 0.0
+	return Transform3D(Basis(Vector3.UP, turn), Vector3(at.x, top - drop, at.y))
 
 
 ## Each lamp's light's range (m) under a plain roof (MT1): from its lowest point (`spots`) down to the floor under it
