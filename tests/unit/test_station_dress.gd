@@ -270,7 +270,7 @@ func test_no_tint_reads_as_a_team() -> void:
 
 func test_each_platform_tunnel_is_vaulted_and_its_colliders_hug_the_drawn_arc() -> void:
 	var m := _map("subway")
-	assert_eq(m.station.vaults.size(), 2, "both platform tunnels")
+	assert_eq(m.station.vaults.size(), 4, "both platform tunnels and both running tunnels")
 	for v in m.station.vaults:
 		var c := v.circle()
 		assert_almost_eq(v.point(0.0).y, v.y + v.rise, 0.001, "the crown")
@@ -368,6 +368,8 @@ func test_the_trackside_wall_over_the_cars_is_tiled_like_the_track() -> void:
 	# TB1 attempt 1: the wall over a standing car faced no room and drew as the dark outside, a black wedge.
 	var m := _map("subway")
 	for v in m.station.vaults:
+		if v.finish != &"":
+			continue  # a running tunnel's arch: its own lining, no platform
 		var wall := v.area.position.y if v.area.get_center().y < 0.0 else v.area.end.y
 		var n := Vector3.BACK if v.area.get_center().y < 0.0 else Vector3.FORWARD
 		var tiled := 0

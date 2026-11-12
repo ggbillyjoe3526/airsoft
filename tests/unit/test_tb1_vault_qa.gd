@@ -21,7 +21,7 @@ func _map() -> MapData:
 
 func test_no_gap_behind_the_arc_along_the_whole_tunnel() -> void:
 	var m := _map()
-	assert_eq(m.station.vaults.size(), 2, "both platform tunnels are vaulted")
+	assert_eq(m.station.vaults.size(), 4, "both platform tunnels and both running tunnels are vaulted")
 	for v in m.station.vaults:
 		var c := v.circle()
 		var x := v.area.position.x + 0.05
@@ -29,7 +29,8 @@ func test_no_gap_behind_the_arc_along_the_whole_tunnel() -> void:
 			for k in range(1, 20):
 				var a := v.half_angle() * (-1.0 + 2.0 * float(k) / 20.0)
 				var p := Vector3(x, c.y + (c.z + 0.02) * cos(a), c.x + (c.z + 0.02) * sin(a))
-				if not _held(m, p):
+				# a car standing in a running tunnel: its own shell holds its corners, under the arch (TB2)
+				if not _held(m, p) and m.station.style_at(p) != &"train":
 					fail_test("gap behind the arc at %s" % p)
 					return
 			x += 3.7
@@ -38,7 +39,7 @@ func test_no_gap_behind_the_arc_along_the_whole_tunnel() -> void:
 
 func test_the_air_under_the_crown_is_open() -> void:
 	var m := _map()
-	assert_eq(m.station.vaults.size(), 2, "both platform tunnels are vaulted")
+	assert_eq(m.station.vaults.size(), 4, "both platform tunnels and both running tunnels are vaulted")
 	for v in m.station.vaults:
 		var x := v.area.get_center().x
 		# the middle of the tunnel under the arc, between the car roof and the crown, holds no collider
