@@ -612,6 +612,12 @@ a cross-passage between the running tunnels, and they swap at half time. Turn on
 - [ ] **The ticket gates' paddle doors (SM3).** Walk up to a lane: its two paddles swing open towards the platforms in
   about a third of a second and shut behind you; the next lane's stay shut. Bots walk the lanes without snagging, and
   BBs and bodies pass a lane as before (the paddles are look only). The paddles sit in the gates' baked light.
+- [ ] **The station's small fittings (SD2).** Walk the ticket hall, booking hall, concourse, passages, lower hall and
+  plant rooms on High: a dark skirting, a green tile band at about 0.7 m and a frieze just over the posters run round
+  the walls and columns; conduit and pipes under the ceilings, vents high on the tall rooms' walls, access hatches in
+  the ceilings (none over a lamp), drains along the halls' walls, a service door in each plant room, and a yellow
+  tactile strip at each escalator's and stair's head. Nothing covers a poster or sign, floats, flickers into a wall
+  or stops a BB or a body (look only).
 
 ## Bots
 
@@ -1462,6 +1468,22 @@ Subway is Dev content: tick Settings › Dev › Dev content.
 - [ ] **Morrin Street.** Every name board on the platforms says Morrin Street on the trains' stripe orange, as do the
   line map's ringed stop and the information panel; the departure boards hang on two rods from the curved ceiling.
 - [ ] **Frame rate.** F3 on Low looking along a platform: 60 FPS.
+
+## Subway's running tunnels arched like the trains (TB2)
+
+Subway is Dev content: tick Settings › Dev › Dev content.
+
+- [ ] **The arch.** Walk both running tunnels east of the platforms: straight sides up to about head height over a car,
+  then a smooth round arch over the track, with a ring every 6 m; where each meets its platform tunnel the arch opens
+  onto the platform's vault with no gap or seam. On High and Ultra the wall lamps light the curve above them; on Low and Medium it stays dark over the walls.
+- [ ] **The standing car.** The south train's east car stands under the arch: its roof steps down at both edges to
+  clear the curve, nothing of it pokes through the lining, and inside it the roof is closed (crouch and look up at the
+  sides: no gap). The cab steps down to the track and the ways round them each side still work.
+- [ ] **BBs and bombs.** Shoot up into the arch from the track and from a car's roof: each BB stops on the curve where
+  you see it. A smoke or flash thrown over a car in the tunnel lands on its roof or comes back down.
+- [ ] **As before below.** The wagons, the cross passage, the detrainment steps at the south cab and the climb out of
+  the track play exactly as before; bots get through both tunnels.
+- [ ] **Frame rate.** F3 on Low looking along a running tunnel: 60 FPS.
 
 ## Subway's echo on the shots (EC1)
 
