@@ -161,8 +161,9 @@ func test_the_level_draws_one_station_mesh_with_the_greybox_s_colliders() -> voi
 
 func test_a_block_naming_a_model_is_drawn_as_it_and_a_kind_alone_keeps_its_box() -> void:
 	# SD1: a station dresses only the blocks that name a model; kinds say nothing there (a cabinet is a ticket gate,
-	# a locker or a tool cart), so a crate kind's box stays a box unless it names the crate.
-	var m := _map("subway")
+	# a locker or a tool cart), so a crate kind's box stays a box unless it names the crate. Subway's own named models
+	# (its escalators and stairs, SM2) are cleared first, so the crate stands alone.
+	var m := _undressed(_map("subway"))
 	var crates: Array[MapData.Block] = []
 	for b in m.blocks:
 		if b.kind == &"crate":
@@ -207,7 +208,7 @@ func test_named_only_dresses_no_kind_and_leaves_the_config_as_it_was() -> void:
 
 
 func test_a_named_model_that_does_not_load_keeps_its_box_and_other_maps_stay_kind_dressed() -> void:
-	var m := _map("subway")
+	var m := _undressed(_map("subway"))
 	var props := play.site_look.props.named_only()
 	var plain := StationSurface.mesh(m, play.map_style, look, props)
 	for b in m.blocks:
@@ -217,6 +218,13 @@ func test_a_named_model_that_does_not_load_keeps_its_box_and_other_maps_stay_kin
 	assert_eq(_vertices(StationSurface.mesh(m, play.map_style, look, props)), _vertices(plain), "the box is still drawn")
 	assert_null(PropDress.build(m, props), "and no prop stands in it")
 	assert_not_null(PropDress.build(_map("depot"), play.site_look.props), "a field map keeps its kind dress")
+
+
+## `m` with no block naming a model.
+func _undressed(m: MapData) -> MapData:
+	for b in m.blocks:
+		b.dress = &""
+	return m
 
 
 func _vertices(mesh: ArrayMesh) -> int:

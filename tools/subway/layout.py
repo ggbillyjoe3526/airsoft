@@ -29,11 +29,13 @@ blocks: list[dict] = []
 
 
 def room(name: str, area: str, x0: float, x1: float, z0: float, z1: float, y: float, yb: float | None = None,
-         h: float = 3.0, seal: dict | None = None, ceil: bool = True, floor: bool = True, flat: bool = False) -> None:
+         h: float = 3.0, seal: dict | None = None, ceil: bool = True, floor: bool = True, flat: bool = False,
+         dress: str = "") -> None:
     """A room; a ramp room's ceiling follows its floor down in steps, or with `flat` stays level, `h` over its higher
-    end (a short flight of steps under a tunnel's roof)."""
+    end (a short flight of steps under a tunnel's roof). A ramp room's `dress` names the model laid over its ramps
+    (PropDressConfig, SET; SM2: an escalator bank or a stair), build_map.py writing it on each."""
     rooms.append(dict(name=name, area=area, x0=x0, x1=x1, z0=z0, z1=z1, ya=y, yb=y if yb is None else yb, h=h,
-                      seal=seal or {}, ceil=ceil, floor=floor, flat=flat))
+                      seal=seal or {}, ceil=ceil, floor=floor, flat=flat, dress=dress))
 
 
 def block(kind: str, y: float, x0: float, x1: float, z0: float, z1: float, h: float, colour: int = 0,
@@ -54,15 +56,16 @@ block("pillar", G, -50.2, -49.2, -0.5, 0.5, 6.0)           # hall column in the 
 
 # The spiral stair's well: 5 x 5 m in the hall's north-east corner, down to the lower booking hall. Its flights are
 # built by build_map.py (SPIRAL); its rail round the hole in the hall floor here.
-SPIRAL = dict(x0=-43.0, x1=-38.0, z0=-10.0, z1=-5.0, flight=1.3, y0=C, y1=G, sides=10, top=6.0)
+SPIRAL = dict(x0=-43.0, x1=-38.0, z0=-10.0, z1=-5.0, flight=1.3, y0=C, y1=G, sides=10, top=6.0,
+              dress="spiral_stair")  # the model over its flights and landings, not the core (SM2)
 room("spiral", "Spiral stair", -43, -38, -10, -5, C, h=G - C + 0.01, ceil=False,
      seal={"n": [], "e": [], "w": [], "s": [(-39.4, -38.0)]})
 block("railing", G, -43.0, -38.0, -5.0, -4.88, 1.1)
 block("railing", G, -43.12, -43.0, -8.6, -4.88, 1.1)
 
 # Upper escalators: 10 m down at 1:2, a balustrade between the two.
-room("esc_up", "Escalators", -38, -18, -3.5, 3.5, G, C, h=3.2)
-block("barrier", None, -38, -18, -0.2, 0.2, 1.0)           # on the ramp: build_map.py follows its slope
+room("esc_up", "Escalators", -38, -18, -3.5, 3.5, G, C, h=3.2, dress="escalator_upper")
+block("barrier", None, -38, -18, -0.2, 0.2, 1.0, dress="escalator_upper")           # on the ramp: build_map.py follows its slope
 
 # ---------------- Concourse, -10 m: close quarters ----------------
 room("bk_w", "Booking hall", -52, -43, -9.5, -1.2, C, h=4.0)
@@ -85,8 +88,8 @@ block("wall", C, -12.6, -11.4, 6.9, 9.5, 4.0)
 block("container", C, -12.4, -10.4, -2.6, 2.6, 2.8, 0x8a8478)  # shut newsagent's kiosk between the escalator banks:
 #                                                                no line from the lower hall up both flights
 # Lower escalators: 8 m down to the lower hall between the platform tunnels.
-room("esc_low", "Low escalators", -6, 10, -3, 3, C, P, h=2.8)
-block("barrier", None, -6, 10, -0.2, 0.2, 1.0)
+room("esc_low", "Low escalators", -6, 10, -3, 3, C, P, h=2.8, dress="escalator_lower")
+block("barrier", None, -6, 10, -0.2, 0.2, 1.0, dress="escalator_lower")
 room("npass", "North passage", -6, 20, -9.5, -6.5, C, h=3.0)
 room("spass", "South passage", -6, 20, 6.5, 9.5, C, h=3.0)
 for zs in (-1, 1):
@@ -109,9 +112,9 @@ block("crate", C, 22, 23.4, 3.4, 4.8, 1.4)
 block("barrier", C, 24.6, 25.2, -9.5, -7.5, 1.1)
 block("barrier", C, 24.6, 25.2, 7.5, 9.5, 1.1)
 # The stair: one ordinary staircase, -10 to -18, two flights and a half landing.
-room("stair1", "Stair", 27, 35, -1.6, 1.6, C, LANDING, h=3.0)
+room("stair1", "Stair", 27, 35, -1.6, 1.6, C, LANDING, h=3.0, dress="platform_stair")
 room("landing", "Stair landing", 35, 37.5, -1.6, 1.6, LANDING, h=3.0)
-room("stair2", "Stair", 37.5, 45.5, -1.6, 1.6, LANDING, P, h=3.0)
+room("stair2", "Stair", 37.5, 45.5, -1.6, 1.6, LANDING, P, h=3.0, dress="platform_stair")
 
 # ---------------- Platforms, -18 m, and the track bed, -18.9 m ----------------
 room("plat_n", "North platform", -52, 47, -9, -5.5, P, h=TUNNEL_H)

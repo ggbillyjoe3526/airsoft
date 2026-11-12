@@ -13,7 +13,8 @@
     "y": 1.0,
     "z": 1.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "spiral_stair"
   },
   {
    "kind": "ramp",
@@ -27,7 +28,8 @@
     "y": 1.0,
     "z": 2.12
    },
-   "rise": "-z"
+   "rise": "-z",
+   "dress": "spiral_stair"
   },
   {
    "kind": "ramp",
@@ -41,7 +43,8 @@
     "y": 1.0,
     "z": 1.32
    },
-   "rise": "+x"
+   "rise": "+x",
+   "dress": "spiral_stair"
   },
   {
    "kind": "ramp",
@@ -55,7 +58,8 @@
     "y": 1.0,
     "z": 2.12
    },
-   "rise": "+z"
+   "rise": "+z",
+   "dress": "spiral_stair"
   },
   {
    "kind": "ramp",
@@ -69,7 +73,8 @@
     "y": 1.0,
     "z": 1.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "spiral_stair"
   },
   {
    "kind": "ramp",
@@ -83,7 +88,8 @@
     "y": 1.0,
     "z": 2.12
    },
-   "rise": "-z"
+   "rise": "-z",
+   "dress": "spiral_stair"
   },
   {
    "kind": "ramp",
@@ -97,7 +103,8 @@
     "y": 1.0,
     "z": 1.32
    },
-   "rise": "+x"
+   "rise": "+x",
+   "dress": "spiral_stair"
   },
   {
    "kind": "ramp",
@@ -111,7 +118,8 @@
     "y": 1.0,
     "z": 2.12
    },
-   "rise": "+z"
+   "rise": "+z",
+   "dress": "spiral_stair"
   },
   {
    "kind": "ramp",
@@ -125,7 +133,8 @@
     "y": 1.0,
     "z": 1.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "spiral_stair"
   },
   {
    "kind": "ramp",
@@ -139,7 +148,8 @@
     "y": 1.0,
     "z": 2.12
    },
-   "rise": "-z"
+   "rise": "-z",
+   "dress": "spiral_stair"
   },
   {
    "kind": "ramp",
@@ -153,7 +163,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -167,7 +178,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -181,7 +193,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -195,7 +208,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -209,7 +223,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -223,7 +238,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -237,7 +253,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -251,7 +268,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -265,7 +283,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -279,7 +298,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -293,7 +313,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -307,7 +328,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -321,7 +343,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -335,7 +358,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -349,7 +373,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -363,7 +388,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -377,7 +403,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -391,7 +418,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -405,7 +433,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -419,7 +448,8 @@
     "y": 1.0,
     "z": 3.32
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "ramp",
@@ -433,7 +463,8 @@
     "y": 1.0,
     "z": 2.82
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "ramp",
@@ -447,7 +478,8 @@
     "y": 1.0,
     "z": 2.82
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "ramp",
@@ -461,7 +493,8 @@
     "y": 1.0,
     "z": 2.82
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "ramp",
@@ -475,7 +508,8 @@
     "y": 1.0,
     "z": 2.82
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "ramp",
@@ -489,7 +523,8 @@
     "y": 1.0,
     "z": 2.82
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "ramp",
@@ -503,7 +538,8 @@
     "y": 1.0,
     "z": 2.82
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "ramp",
@@ -517,7 +553,8 @@
     "y": 1.0,
     "z": 2.82
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "ramp",
@@ -531,7 +568,8 @@
     "y": 1.0,
     "z": 2.82
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "ramp",
@@ -545,7 +583,8 @@
     "y": 1.0,
     "z": 2.82
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "ramp",
@@ -559,7 +598,8 @@
     "y": 1.0,
     "z": 2.82
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "ramp",
@@ -573,7 +613,8 @@
     "y": 1.0,
     "z": 2.82
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "ramp",
@@ -587,7 +628,8 @@
     "y": 1.0,
     "z": 2.82
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "ramp",
@@ -601,7 +643,8 @@
     "y": 1.0,
     "z": 2.82
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "ramp",
@@ -615,7 +658,8 @@
     "y": 1.0,
     "z": 2.82
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "ramp",
@@ -629,7 +673,8 @@
     "y": 1.0,
     "z": 2.82
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "ramp",
@@ -643,7 +688,8 @@
     "y": 1.0,
     "z": 2.82
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "ramp",
@@ -657,7 +703,8 @@
     "y": 1.0,
     "z": 3.22
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "platform_stair"
   },
   {
    "kind": "ramp",
@@ -671,7 +718,8 @@
     "y": 1.0,
     "z": 3.22
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "platform_stair"
   },
   {
    "kind": "ramp",
@@ -685,7 +733,8 @@
     "y": 1.0,
     "z": 3.22
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "platform_stair"
   },
   {
    "kind": "ramp",
@@ -699,7 +748,8 @@
     "y": 1.0,
     "z": 3.22
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "platform_stair"
   },
   {
    "kind": "ramp",
@@ -713,7 +763,8 @@
     "y": 1.0,
     "z": 3.22
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "platform_stair"
   },
   {
    "kind": "ramp",
@@ -727,7 +778,8 @@
     "y": 1.0,
     "z": 3.22
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "platform_stair"
   },
   {
    "kind": "ramp",
@@ -741,7 +793,8 @@
     "y": 1.0,
     "z": 3.22
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "platform_stair"
   },
   {
    "kind": "ramp",
@@ -755,7 +808,8 @@
     "y": 1.0,
     "z": 3.22
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "platform_stair"
   },
   {
    "kind": "ramp",
@@ -810,7 +864,8 @@
     "x": 1.32,
     "y": 0.3,
     "z": 1.32
-   }
+   },
+   "dress": "spiral_stair"
   },
   {
    "kind": "floor",
@@ -823,7 +878,8 @@
     "x": 1.32,
     "y": 0.3,
     "z": 1.32
-   }
+   },
+   "dress": "spiral_stair"
   },
   {
    "kind": "floor",
@@ -836,7 +892,8 @@
     "x": 1.32,
     "y": 0.3,
     "z": 1.32
-   }
+   },
+   "dress": "spiral_stair"
   },
   {
    "kind": "floor",
@@ -849,7 +906,8 @@
     "x": 1.32,
     "y": 0.3,
     "z": 1.32
-   }
+   },
+   "dress": "spiral_stair"
   },
   {
    "kind": "floor",
@@ -862,7 +920,8 @@
     "x": 1.32,
     "y": 0.3,
     "z": 1.32
-   }
+   },
+   "dress": "spiral_stair"
   },
   {
    "kind": "floor",
@@ -875,7 +934,8 @@
     "x": 1.32,
     "y": 0.3,
     "z": 1.32
-   }
+   },
+   "dress": "spiral_stair"
   },
   {
    "kind": "floor",
@@ -888,7 +948,8 @@
     "x": 1.32,
     "y": 0.3,
     "z": 1.32
-   }
+   },
+   "dress": "spiral_stair"
   },
   {
    "kind": "floor",
@@ -901,7 +962,8 @@
     "x": 1.32,
     "y": 0.3,
     "z": 1.32
-   }
+   },
+   "dress": "spiral_stair"
   },
   {
    "kind": "floor",
@@ -914,7 +976,8 @@
     "x": 1.32,
     "y": 0.3,
     "z": 1.32
-   }
+   },
+   "dress": "spiral_stair"
   },
   {
    "kind": "floor",
@@ -927,7 +990,8 @@
     "x": 1.32,
     "y": 0.3,
     "z": 1.32
-   }
+   },
+   "dress": "spiral_stair"
   },
   {
    "kind": "pillar",
@@ -1136,7 +1200,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1150,7 +1215,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1163,7 +1229,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1177,7 +1244,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1190,7 +1258,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1204,7 +1273,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1217,7 +1287,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1231,7 +1302,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1244,7 +1316,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1258,7 +1331,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1271,7 +1345,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1285,7 +1360,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1298,7 +1374,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1312,7 +1389,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1325,7 +1403,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1339,7 +1418,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1352,7 +1432,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1366,7 +1447,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1379,7 +1461,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_upper"
   },
   {
    "kind": "barrier",
@@ -1393,7 +1476,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_upper"
   },
   {
    "kind": "furniture",
@@ -1576,7 +1660,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_lower"
   },
   {
    "kind": "barrier",
@@ -1590,7 +1675,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "barrier",
@@ -1603,7 +1689,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_lower"
   },
   {
    "kind": "barrier",
@@ -1617,7 +1704,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "barrier",
@@ -1630,7 +1718,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_lower"
   },
   {
    "kind": "barrier",
@@ -1644,7 +1733,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "barrier",
@@ -1657,7 +1747,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_lower"
   },
   {
    "kind": "barrier",
@@ -1671,7 +1762,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "barrier",
@@ -1684,7 +1776,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_lower"
   },
   {
    "kind": "barrier",
@@ -1698,7 +1791,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "barrier",
@@ -1711,7 +1805,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_lower"
   },
   {
    "kind": "barrier",
@@ -1725,7 +1820,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "barrier",
@@ -1738,7 +1834,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_lower"
   },
   {
    "kind": "barrier",
@@ -1752,7 +1849,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "barrier",
@@ -1765,7 +1863,8 @@
     "x": 2.0,
     "y": 1.0,
     "z": 0.4
-   }
+   },
+   "dress": "escalator_lower"
   },
   {
    "kind": "barrier",
@@ -1779,7 +1878,8 @@
     "y": 1.0,
     "z": 0.4
    },
-   "rise": "-x"
+   "rise": "-x",
+   "dress": "escalator_lower"
   },
   {
    "kind": "cabinet",

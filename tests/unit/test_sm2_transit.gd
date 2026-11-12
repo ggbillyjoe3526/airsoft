@@ -1,7 +1,8 @@
 extends GutTest
 ## SM2: a railing drawn in its modelled pieces (RailingMesh) draws exactly the steel a BB meets: every piece inside
 ## its run's box, the box filled, each bar's steel spanning just its bar, and a 5 m run within its 800 triangles; and
-## the lifts' and railing's models read as no team.
+## the lifts' and railing's models read as no team; and Subway's escalators and stairs (SET models over their ramps,
+## barriers and landings) fill their blocks' box exactly, unstretched, only the platform stair's handrails over it.
 
 const BUDGET := 800
 
@@ -94,3 +95,33 @@ func test_the_lifts_and_railing_models_read_as_no_team() -> void:
 				near.append("%s %s" % [path.get_file(), c.to_html(false)])
 				break
 	assert_eq(near, [] as Array[String], "no colour within 20 degrees of a team's hue unless dull")
+
+
+func test_subway_s_escalators_and_stairs_fill_their_blocks_unstretched() -> void:
+	var cfg := PlayTuning.load_default().map_style
+	var m := MapData.load_map("subway", cfg, 6)
+	var props := PropDressConfig.new()
+	for model: StringName in [&"escalator_upper", &"escalator_lower", &"spiral_stair", &"platform_stair"]:
+		assert_eq(props.model_lays[model], PropDressConfig.Lay.SET, "%s is laid over its blocks" % model)
+		var box := PropDressConfig.set_box(m, model)
+		assert_gt(box.size.x, 1.0, "%s names blocks" % model)
+		var mesh := PropDressConfig.load_mesh(props.models[model])
+		assert_not_null(mesh, "%s loads" % model)
+		if mesh == null:
+			continue
+		var size := box.size + Vector3(0.0, props.set_heads.get(model, 0.0), 0.0)
+		var t := PropLayout.fit(mesh.get_aabb(), box.get_center() - Vector3(0.0, box.size.y * 0.5, 0.0), size, 0.0)
+		var drawn := t * mesh.get_aabb()
+		assert_almost_eq(drawn.position, box.position, Vector3.ONE * 0.005, "%s from its box's corner" % model)
+		assert_almost_eq(drawn.end, box.end + Vector3(0.0, props.set_heads.get(model, 0.0), 0.0),
+				Vector3.ONE * 0.005, "%s to its far corner (and its head)" % model)
+		assert_almost_eq(t.basis.get_scale(), Vector3.ONE, Vector3.ONE * 0.002, "%s unstretched" % model)
+		var dressed := 0
+		for b in m.blocks:
+			if b.dress == model:
+				dressed += 1
+				assert_true(props.dresses(b), "%s's block at %s is drawn as it" % [model, b.center])
+		assert_gt(dressed, 0)
+	for b in m.blocks:
+		if b.kind == &"pillar" and b.size.y > 10.0 and absf(b.center.x + 40.5) < 0.1:
+			assert_eq(b.dress, &"", "the spiral's core stays the station's pillar")
