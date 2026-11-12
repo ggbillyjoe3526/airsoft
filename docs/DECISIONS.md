@@ -795,6 +795,23 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   block's box and its crown starts over `WoodsConfig.crown_clear` (2.6 m); a thicket's spruces stay inside its box.
   Asked whether young pines and spruces should match his photos instead (branches to the ground, spruces spilling past
   the thicket's edge), he kept the boxes: what you see is what stops BBs and sight.
+- **Plant The Bomb is the third mode (owner, 2026-11-12, PB1).** His rules: the attackers plant a bomb at Site A or
+  Site B on the defenders' side; the defenders keep it from being planted or make it safe. The attackers win when it
+  goes off or the defenders are all out; the defenders win by making it safe or by getting every attacker out before
+  it is armed. Every field hosts it. The bomb starts on the ground at the attackers' start; bots may take it and plant
+  it on their own, "but the player should easily have enough time to pick it up"; defending, the player is "given
+  enough time to attempt to defuse on their own", and bots defuse when the player is out or not near, or when the fuse
+  would otherwise run out ("any other conditions but keep it fair"). He makes the bomb's and the defusal tool's models
+  and the mode's sounds; a stand-in prop and synthesised sounds ship first. Claude's defaults, his to change
+  (`PlantConfig`, `BotConfig` › Plant The Bomb): hold Use to pick up, plant and defuse; plant 3.5 s inside a site's
+  4.5 m ring (Subway's 3.5 m); fuse 30 s; defuse 6 s, kept from half way; nobody drops the bomb by choice; with the
+  bomb armed, the attackers all out does not end the round; time up before it is armed is the defenders' round, with
+  up to 5 s more while it is being keyed in; going off is a field prop's pop and buzzer and gets nobody out; the bots
+  leave the bomb to the player for 6 s (until the player is 10 m off without it) and the defuse to a player within
+  15 m of it until the fuse leaves 4 s more than the work needs; a bot carrier goes in last, behind two of its team.
+  The mode is public, third on the Match page (Attack / Defend, Elimination, Plant The Bomb, Practice). The device is
+  `Plant` in code: the smoke and flash grenades were "bombs" there already (`BotBombs`). Measures:
+  `docs/records/PB1.md`.
 
 ## Replicas, Loadout and levels
 

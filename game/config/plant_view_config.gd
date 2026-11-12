@@ -3,9 +3,10 @@ extends Resource
 ## Plant The Bomb's prop and sites as drawn (PB1). Read by PlantView. The prop is a stand-in built from these sizes
 ## until its model is made (owner, 2026-11-12: a model after his reference); scenery only, no collider.
 
-## The case: its size lying flat (m: long, tall, deep), hi-vis so it reads on any floor, and its roughness.
+## The case: its size lying flat (m: long, tall, deep), hi-vis yellow so it reads on any floor and is neither team's
+## colour, and its roughness.
 @export var case_size: Vector3 = Vector3(0.36, 0.13, 0.26)
-@export var case_colour: Color = Color("e0701c")
+@export var case_colour: Color = Color("d9b81e")
 @export var case_roughness: float = 0.6
 ## Its bumpers, handle and panel: how far a bumper stands proud of the case and how wide it is (m), the handle's size
 ## (m) over the long side, the panel's size (m) on the lid and its display's.

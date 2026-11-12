@@ -1094,7 +1094,9 @@ func update(state: GameState, zoom: float, delta: float) -> void:
 	var flag_mode := rs.mode == RoundState.Mode.ATTACK_DEFEND
 	var plant_mode := rs.mode == RoundState.Mode.PLANT_THE_BOMB
 	var overtime := HudStyle.overtime_clock(rs, _sim.plant.max_overtime if plant_mode else _sim.flag.max_overtime)
-	if overtime >= 0:
+	if overtime >= 0 and plant_mode and rs.plant.planted():
+		_score.set_clock(overtime, false, true)
+	elif overtime >= 0:
 		_score.set_clock(overtime, true)
 	else:
 		_score.set_clock(ceili(rs.clock))

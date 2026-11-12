@@ -71,14 +71,19 @@ func setup(cfg: PlantViewConfig, teams: TeamConfig, ps: PlantState, ceiling: flo
 
 ## The prop where `ps` has it and its lamp in its state, the sites' rings in their colours for a round attacked by
 ## `attackers`; `carrier` is who carries it (null: nobody), drawn between ticks by `fraction`, and `hidden_carried`
-## hides it on a carrier whose eyes you look through.
+## hides it on a carrier whose eyes you look through, until they set it down to key it in.
 func refresh(ps: PlantState, attackers: int, carrier: Character, fraction: float, hidden_carried: bool,
 		delta: float) -> void:
 	_clock += delta
 	_flash_left = maxf(0.0, _flash_left - delta)
 	var carried := ps.status == PlantState.Status.CARRIED and carrier != null
-	_prop.visible = not (carried and hidden_carried)
-	if carried:
+	# Being keyed in, it is on the ground at its carrier's feet, where it will stand armed: in your own view too.
+	var keyed := carried and ps.planter == carrier.id
+	_prop.visible = keyed or not (carried and hidden_carried)
+	if keyed:
+		_prop.position = carrier.prev_position.lerp(carrier.position, fraction)
+		_prop.rotation = Vector3(0.0, lerp_angle(carrier.prev_yaw, carrier.yaw, fraction), 0.0)
+	elif carried:
 		var yaw := lerp_angle(carrier.prev_yaw, carrier.yaw, fraction)
 		var feet := carrier.prev_position.lerp(carrier.position, fraction)
 		var hang := _cfg.carry_at

@@ -151,16 +151,18 @@ func test_the_score_bar_tags_the_sides_and_shows_the_fuse_in_the_overtime_style(
 	var ps := _arm(0, 37.4)
 	state.round_state.clock = 0.0
 	_update()
-	assert_eq(score.clock_text(), "OT 0:38", "the fuse's whole seconds left, not the round clock")
+	assert_eq(score.clock_text(), "0:38", "the fuse's whole seconds left, not the round clock, and no OT")
+	assert_true(score.clock_is_fuse(), "in the accent colour")
 	ps.fuse_left = 4.0
 	_update()
-	assert_eq(score.clock_text(), "OT 0:04")
+	assert_eq(score.clock_text(), "0:04")
 	state.round_state.clock = 20.0
 	_update()
-	assert_eq(score.clock_text(), "OT 0:04", "once armed the round clock no longer matters")
+	assert_eq(score.clock_text(), "0:04", "once armed the round clock no longer matters")
 	ps.status = PlantState.Status.DOWN
 	_update()
 	assert_eq(score.clock_text(), "0:20", "and the plain clock comes back")
+	assert_false(score.clock_is_fuse())
 
 
 func test_a_plant_under_way_at_the_buzzer_shows_like_the_ropes_overtime() -> void:

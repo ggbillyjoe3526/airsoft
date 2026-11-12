@@ -59,6 +59,13 @@ func test_carried_it_hangs_at_the_carriers_hip_and_is_hidden_on_the_one_you_watc
 	assert_eq(view.lamp_colour(), cfg.lamp_off)
 	view.refresh(ps, 0, carrier, 1.0, true, 0.01)
 	assert_false(view.prop().visible, "through the carrier's own eyes it is not drawn")
+	ps.planter = carrier.id
+	ps.planting = 0.3
+	view.refresh(ps, 0, carrier, 1.0, true, 0.01)
+	assert_true(view.prop().visible, "set down to be keyed in, it shows in the carrier's own view too")
+	assert_eq(view.prop().position, carrier.position, "on the ground at its feet, where it will stand armed")
+	ps.planter = -1
+	ps.planting = 0.0
 	ps.status = PlantState.Status.DOWN
 	ps.position = Vector3(5.0, 0.0, 5.0)
 	view.refresh(ps, 0, null, 1.0, true, 0.01)

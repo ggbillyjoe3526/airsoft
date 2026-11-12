@@ -3,8 +3,9 @@ extends Control
 ## The score bar at the top (UI concept B v2 `hud.png`): one rounded glass plate holding each team's pips (one slanted
 ## pip per win needed, filled up to its wins), the team's rounded colour block with its score, and the clock with the
 ## round under it. In Attack / Defend an ATK tag (accent) and a DEF tag (dark), rounded, sit on the two blocks, and the
-## clock reads "OT" and the overtime left once time has run out while the attackers work the rope (Plant The Bomb's,
-## PB1: the same, and the armed bomb's fuse left in the same style). With gauge patterns
+## clock reads "OT" and the overtime left once time has run out while the attackers work the rope (Plant The Bomb,
+## PB1: the same while the bomb is being armed at the buzzer; once it is armed the clock is the fuse left, in the
+## accent colour with no word, the BOMB gauge under it saying what it counts). With gauge patterns
 ## on (set_patterned), Beta's filled pips and score block are striped (HudStyle.STRIPED_TEAM; GaugePattern, built once
 ## at setup) and the block's number gets a dark edge. Your team sits on the left (setup's `first`), the other on the
 ## right, each in its own colour, through half time too (owner, 2026-10-30). Everything redraws or retypes only when a
@@ -31,6 +32,7 @@ var _ot_label: Label = null
 ## The team attacking (-1: no tags) and whether the clock shows overtime.
 var _attackers: int = -2
 var _overtime: bool = false
+var _fuse: bool = false
 var _tags: Array[Label] = []
 var _patterned: bool = false
 ## The striped team's block and pips (one per pip, in order), built once at setup.
@@ -168,12 +170,16 @@ func set_score(alpha: int, beta: int) -> void:
 	queue_redraw()
 
 
-## The clock at `seconds`; with `overtime`, the overtime left, after "OT".
-func set_clock(seconds: int, overtime: bool = false) -> void:
-	if seconds == _clock and overtime == _overtime:
+## The clock at `seconds`; with `overtime`, the overtime left, after "OT"; with `fuse`, an armed bomb's fuse left, in
+## the accent colour.
+func set_clock(seconds: int, overtime: bool = false, fuse: bool = false) -> void:
+	if seconds == _clock and overtime == _overtime and fuse == _fuse:
 		return
 	_clock = seconds
 	_overtime = overtime
+	if fuse != _fuse:
+		_fuse = fuse
+		_clock_label.add_theme_color_override("font_color", GameTheme.ACCENT if fuse else GameTheme.TEXT)
 	_ot_label.visible = overtime
 	_clock_label.text = HudStyle.clock_text(seconds)
 
@@ -199,6 +205,11 @@ func tag_text(side: int) -> String:
 
 func clock_text() -> String:
 	return ("%s %s" % [_ot_label.text, _clock_label.text]) if _overtime else _clock_label.text
+
+
+## Whether the clock is counting an armed bomb's fuse (Plant The Bomb).
+func clock_is_fuse() -> bool:
+	return _fuse
 
 
 func set_round(number: int) -> void:
