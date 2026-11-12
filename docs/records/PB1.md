@@ -6,7 +6,7 @@
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-12 | 1 | build thread (the screens: a Sonnet worker) | ✓ 6,199 unit tests | 5/8 Retry | A hit carrier left the bomb in the air or in a lift's shaft; Subway's attackers took 27 % and armed Site A in 13 % of plants, and its guard's band was widened for it; `GameEvent.Kind.BOMB` against the naming ruling; `tests/README.md` rows |
+| 2026-11-12 | 1 | build thread (the screens: a worker) | ✓ 6,199 unit tests | 5/8 Retry | A hit carrier left the bomb in the air or in a lift's shaft; Subway's attackers took 27 % and armed Site A in 13 % of plants, and its guard's band was widened for it; `GameEvent.Kind.BOMB` against the naming ruling; `tests/README.md` rows |
 | 2026-11-12 | 2 | build thread | ✓ 6,265 unit tests | 8/8 Accept | – |
 
 ## Goal
@@ -20,8 +20,9 @@ defending player is given time to defuse on their own, and bots defuse when the 
 He makes the bomb's and the defusal tool's models and the mode's sounds; he asked what he needs (2 models, 8 sounds:
 the shared `audio/record-next.md`, numbers 10 to 17, and `art/references/plant-the-bomb/`).
 
-Two dev-only fields built for the mode, Stockade and Stacks ("Build both Stockade and Stacks maps. They are dev only
-maps."), follow as their own tasks.
+A dev-only field built for the mode, Stockade, follows as its own task. A second, Stacks ("Build both Stockade and
+Stacks maps. They are dev only maps."), he scrapped the same evening ("Scrap the Stacks map. Do not build it."); it
+was never started.
 
 ## Approach
 
@@ -56,7 +57,7 @@ maps."), follow as their own tasks.
   feet while it is keyed in; a ring and a letter a site. `tools/plant_sounds.py`: eight synthesised cues, the keys
   and the kit as long as the plant and the defuse and cut when the hands come off (SimAudio). The replica is carried
   low while the hands are on the bomb.
-- **Screens** (a Sonnet worker, `game/ui/`): the mode's card, third on the Match page; banners, ATK and DEF tags, the
+- **Screens** (a worker, `game/ui/`): the mode's card, third on the Match page; banners, ATK and DEF tags, the
   fuse on the clock in the accent colour, the PLANTING and BOMB gauge, the Use prompt, the marker, the minimap's and
   the full-screen map's sites and bomb, feed notes, the screen reader's lines.
 - **Tests.** `test_plant` (rules), `test_bots_plant`, `test_plant_view`, `test_pb1_ui`, `test_plant_play` (a real
@@ -129,6 +130,10 @@ Sixteen seeds a field (seeds 1 to 16), on the layouts of main at f990ce4:
   bomb went off in 357 bot rounds, so if rounds after a plant play like Elimination with a site, shorten the fuse or
   lengthen the defuse (`PlantConfig`).
 - Subway's guard run locally on attempt 2: 58 rounds over 8 seeds, 43 armed, 19 defused, 24 to the attackers.
+- After the merge of main at 7903cb4 (the Pump Shotgun, SH1, and Subway's arched tunnels, TB2): the gates again,
+  6,307 unit tests ✓ (2 pending, as on main), and the three match guards locally: Depot 122 rounds over 16 seeds, 78
+  armed, 29 defused, 50 to the attackers; Woodland 66 over 8, 41 armed, 14 defused, 36; Subway 54 over 8, 43 armed,
+  23 defused, 20 (37 %, on the new tunnels).
 - Reports: `/mnt/project-files/pipeline/runs/PB1/` (project files).
 
 ## Left for the owner

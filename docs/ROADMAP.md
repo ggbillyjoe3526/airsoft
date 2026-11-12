@@ -41,7 +41,8 @@ in `docs/PROCESS.md`.
   new map (2026-11-10): Subway, a closed metro station on three levels, from his concept v2: its greybox as Dev
   content (MT1, done), then its working lifts (MT2, done), its CC0 materials (MT3, done), then its models and lamps.
   And a third mode (2026-11-12): Plant The Bomb on every field (PB1: the attackers plant at Site A or B, the
-  defenders make it safe), with two dev-only fields built for it to follow, Stockade and Stacks.
+  defenders make it safe), with a dev-only field built for it to follow, Stockade (a second, Stacks, was scrapped
+  the same day at the owner's word).
 - **The release path** (owner, 2026-10-12): 0.1 Dev builds, 0.1 Beta, then 0.1 (tagged `0.1.0`) opens Early
   Access to the public.
   Themed updates follow (Replica, Modes, Maps, Progression and any more), up to 1.0, the full launch. See
