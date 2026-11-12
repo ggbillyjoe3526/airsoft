@@ -1504,6 +1504,8 @@ model until its own is built, and the pump, shot and shell sounds are stand-ins 
 - [ ] **Close and wide.** Against bots inside 10 m a pull nearly always lands, also from the hip on the move; past 25 m
   it mostly misses and the BBs drop short of the rifles'. Does the first pull win a doorway? Does a miss cost you the
   fight against an SMG?
+- [ ] **A careful aim.** From 10 to 20 m, aimed at the middle of a standing bot and of a crouched one: does a pull feel
+  fair, or do the three BBs land round a body a rifle's one BB would hit? (Nothing flies the middle of the triangle.)
 - [ ] **One hit is one hit.** A pull that lands two or three BBs on a bot is one hit: one tick, one "HIT!".
 - [ ] **Springs.** The Armoury offers it the Sniper Rifle's M140 and M150 springs (the M130 is the one it comes with):
   each reaches a little further, pumps slower and kicks more; the M150 is louder. No batteries or gas fit.

@@ -1,12 +1,12 @@
 # SH1 · The Pump Shotgun
 
-**Review:** critic REVIEW_CRITIC · qa REVIEW_QA · performance REVIEW_PERF
+**Review:** 1 attempt · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-12 | 1 | Fable 5.2 (build thread) | ATTEMPT_CHECKS | ATTEMPT_CRITIC | – |
+| 2026-11-12 | 1 | build thread | ✓ 6,109 of 6,112 (3 pending) | 8/8 Accept | – |
 
 ## Decisions
 
@@ -82,6 +82,8 @@
 - Its sounds are stand-ins until the owner records them. `docs/KNOWN_ISSUES.md`.
 - Balanced on benches, not by play: the Dev 3 checklist asks the owner how the first pull, the pump's pace and the
   pattern's width feel. `docs/KNOWN_ISSUES.md`.
+- The pattern is a hollow triangle: nothing flies the shot's own line, so a careful aim at 20 m and beyond can put the
+  three BBs round a narrow or crouched body (the critic's note; the hit-chance bench counts it). A play check asks.
 - Bots lead a mover with the pattern's centre as with any replica; they don't yet choose a doorway fight because
   they carry it.
 - Bots pick the Clearer kit on any field, so on Woodland the few who carry it are out-ranged (0.30 hits per hit
