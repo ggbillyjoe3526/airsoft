@@ -1,11 +1,14 @@
-Task: CN1 · head e1133ce · Verdict: Pass (attempt 2)
-Run: no match run needed (no game/ code changed since adb2321; only tools/blender/figures, tests, rebuilt human.glb and body textures) · budget: no baseline yet, judged against targets and base 4ea951a
-Metrics (measured on the committed files):
-- human.glb 9,707,612 B / base 9,708,632 (-0.0 %), attempt 1 9,703,220 (+0.05 %). ok
-- human_body_col.webp 565,022 / base 567,998 (-0.5 %); orm 90,776 / 91,778 (-1.1 %); nrm 856,624 / 852,226 (+0.5 %). ok
-- glb structure: 26 meshes, 68 primitives (surfaces), 8 materials, 10 images, identical to base. No new meshes, surfaces or materials.
-- Triangles per LOD for the largest-head human (budgets 60k / 20k / 6k): tests/unit/test_figure_body.gd HUMAN_HIGH = [58868, 58868, 19424, 5639] is unchanged by this diff, so the pinned counts still hold. QA's run at this head reports test_figure_body 17/17 (pipeline/out/qa-report.md). My own re-run timed out at 300 s because tools/check.sh was loading the machine, so the per-LOD counts are QA's measurement plus the test file untouched, not mine. All inside the budgets (judgment on that last point).
-Regressions (> 10 % worse): none
+Task: TB1 · head 19e8e6c · Verdict: Pass
+Run: no bot match on subway (the smoke match plays depot, seed 1, so it does not load this map). Measured instead: Subway's data and StationSurface.mesh built headless on this head and a 41b60e4 worktree, plus test_station_dress.gd on both · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and origin/main
+Metrics (head / main): blocks 879 / 799 (+10 %, +80 boxes) · wall-kind boxes >= 1.8 m (MapOccluders candidates) 355 / 327 (+8.6 %) · station mesh triangles 16718 / 14092 (+18.6 %, measured) · mesh build time 95 / 92 ms (+3.8 %, same machine, once at level load) · static memory after the build 90.7 / 89.8 MB (+1 %) · orphans: test_station_dress.gd prints 70 Orphans on main as well (22/22 pass there too), and the unchanged freeing test passes on both. Draw calls, frame times: not measurable here (no GPU); the station is still one mesh in one material, so draw calls are unchanged by construction (judgment).
+Regressions (> 10 % worse): station mesh triangles 14092 → 16718 (+18.6 %). Judged advisory, not blocking: it is the intended vault and words geometry (the vault boxes' faces are skipped, the arcs and about 100-quad words are added), the mesh is built once, and triangles are not a budget line. Everything else is under 10 %.
 Blocking findings: none
-Advisory: none new. The only runtime-visible change is skin weights and vertex positions (collar, back rise, scarf radius), so no new draw calls, shaders, prewarm entries or per-frame work.
-Unexplained: none
+Advisory:
+- Triangles: the added geometry is about 2.6k triangles. 32 strips per vault is fine at this size; vault_steps in game/config/station_look.gd is the knob if the owner's GPU shows the station as vertex-bound (judgment).
+- game/map/station_dressing.gd (in_vault) · game/play/station/station_surface.gd:55: in_vault builds an AABB from lid() for every block and every vault. About 879 x 2 small allocations at load, measured at about 3 ms of the 95; negligible, but lid() could be cached per vault (judgment).
+- game/play/station/platform_words.gd:add: runs(w.text) is computed once per Words, but it builds a PackedVector3Array and calls add_face per quad. Build time only, so it is fine (judgment).
+- The extra 80 colliders add Jolt static bodies or shapes (about 10 % more). They are not tested here; there is no per-tick loop over map.blocks in the sim. The map.blocks loops I found are all in setup code (BotCover, NightField, bot_controller bounds, minimap, prop layout). Check the frame time on the owner's hardware (judgment).
+- No new texture sets (Tiles136B and PaintedMetal012 were already in StationLook on main) and no new shader or material: the same ShaderMaterial, so no prewarm entry is needed. The new finishes only set tints, scales and PBR values.
+- Nodes and resources: this change creates no nodes, timers or tweens; it only adds SurfaceTool geometry to the existing mesh. The freeing test is unchanged and passes (measured).
+Fixes: none required.
+Unexplained: the 70 Orphans printed by GUT for test_station_dress.gd is not new (same count on 41b60e4, from the test file's own helpers, not from this diff). The frame-time impact of the extra colliders and triangles is unmeasured: no GPU, and the smoke match does not load subway.
