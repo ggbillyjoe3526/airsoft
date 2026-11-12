@@ -78,18 +78,23 @@ def build() -> object:
         k.blk((x0, -SIDE_Y, SIDE_TOP - 0.05), (x1, SIDE_Y, SIDE_TOP), "skip_grey")
     k.mark("ironwork")
     # The ballast, heaped over the sides to the box's top.
-    k.mound(-BODY_X + 0.05, BODY_X - 0.05, -SIDE_Y + 0.05, SIDE_Y - 0.05, SIDE_TOP - 0.08, HIGH, "ballast", 14, 7,
-            0.08, 8, shape=lambda u, v: 1.0 - max(abs(u) ** 5.0 * 0.9, abs(v) ** 1.8))
+    k.rubble(-BODY_X + 0.05, BODY_X - 0.05, -SIDE_Y + 0.05, SIDE_Y - 0.05, SIDE_TOP - 0.08, HIGH,
+             ["ballast_dark", "ballast_dark", "ballast"], 24, 12, 0.05, 8, shape=heap)
     import random
     rng = random.Random(8)
-    for i in range(44):
-        x, y = rng.uniform(-BODY_X + 0.2, BODY_X - 0.2), rng.uniform(-SIDE_Y + 0.2, SIDE_Y - 0.2)
-        h = 1.0 - max(abs(x / BODY_X) ** 5.0 * 0.9, abs(y / SIDE_Y) ** 1.8)
-        z = SIDE_TOP - 0.08 + (HIGH - SIDE_TOP + 0.08) * h
-        k.stone((x, y, min(z, HIGH - 0.03)), rng.uniform(0.04, 0.07), ("ballast_dark", "ballast")[i % 2], 100 + i,
-                squash=0.8)
+    for i in range(8):  # a few bigger stones lying loose on top
+        x, y = rng.uniform(-BODY_X + 0.3, BODY_X - 0.3), rng.uniform(-SIDE_Y + 0.3, SIDE_Y - 0.3)
+        z = SIDE_TOP - 0.08 + (HIGH - SIDE_TOP + 0.08) * heap(x / BODY_X, y / SIDE_Y)
+        r = rng.uniform(0.05, 0.09)
+        k.stone((x, y, min(z, HIGH - r * 0.5)), r, ("ballast_dark", "ballast")[i % 2], 100 + i,
+                squash=rng.uniform(0.5, 0.85), tilt=True)
     k.mark("ballast")
     return k.build()
+
+
+def heap(u: float, v: float) -> float:
+    """The ballast heap's height (0..1) over the wagon, u along and v across in -1..1: flat on top, falling away."""
+    return 1.0 - max(abs(u) ** 5.0 * 0.9, abs(v) ** 1.8)
 
 
 def weather(p: Vector, n: Vector, c: tuple, paint: str) -> tuple:

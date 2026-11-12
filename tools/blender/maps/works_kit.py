@@ -32,7 +32,7 @@ from range_kit import hs  # noqa: E402
 
 import bpy  # noqa: E402
 import bmesh  # noqa: E402
-from mathutils import Matrix, Vector  # noqa: E402
+from mathutils import Euler, Matrix, Vector  # noqa: E402
 
 PROPS = rk.PROPS
 ROOT = rk.ROOT
@@ -186,22 +186,21 @@ class Kit(rk.Kit):
         """A length of the contractor's works track from x0 to x1: timber sleepers on the ground (z 0), two flat-bottom
         rails `gauge` apart (between their middles), a timber stop block bolted over each rail end. Returns the
         rails' top (the wheels' tread line)."""
-        sh, sw = 0.08, 0.16  # thin timber sleepers: the contractor's track, light beside the running rails
+        sh, sw = 0.06, 0.14  # thin timber sleepers: the contractor's track, light beside the running rails
         n = max(2, int(round((x1 - x0) / pitch)))
         span = (x1 - x0 - sw) / n
         for i in range(n + 1):
             x = x0 + sw * 0.5 + i * span
             jitter = 0.04 * math.sin(i * 2.3 + x0)
-            self.panel((x - sw * 0.5, -sleeper_len * 0.5 + jitter, 0.0), (x + sw * 0.5, sleeper_len * 0.5 + jitter, sh),
-                       "sleeper", step=0.75, skip=("-z",))
+            self.blk((x - sw * 0.5, -sleeper_len * 0.5 + jitter, 0.0), (x + sw * 0.5, sleeper_len * 0.5 + jitter, sh),
+                     "sleeper")
         top = sh + 0.062
         for s in (-1.0, 1.0):
             y = s * gauge * 0.5
-            self.prism([(y - 0.04, sh), (y + 0.04, sh), (y + 0.04, sh + 0.01), (y + 0.008, sh + 0.018),
-                        (y + 0.008, top - 0.022), (y + 0.022, top - 0.016), (y + 0.022, top),
-                        (y - 0.022, top), (y - 0.022, top - 0.016), (y - 0.008, top - 0.022),
-                        (y - 0.008, sh + 0.018), (y - 0.04, sh + 0.01)], "x", x0, x1, "rail")
-            self.blk((x0, y - 0.022, top - 0.004), (x1, y + 0.022, top + 0.0005), "rail_head")
+            self.prism([(y - 0.04, sh), (y + 0.04, sh), (y + 0.008, sh + 0.016), (y + 0.008, top - 0.02),
+                        (y + 0.022, top - 0.014), (y - 0.022, top - 0.014), (y - 0.008, top - 0.02),
+                        (y - 0.008, sh + 0.016)], "x", x0, x1, "rail")  # the flat-bottomed rail: foot, web, head
+            self.blk((x0, y - 0.022, top - 0.014), (x1, y + 0.022, top), "rail_head")
             if stops:
                 for x, d in ((x0, 1.0), (x1, -1.0)):
                     xa, xb = (x, x + d * 0.16) if d > 0 else (x + d * 0.16, x)
@@ -244,8 +243,43 @@ class Kit(rk.Kit):
                 f.normal_flip()
         self._faces(faces, mat)
 
-    def stone(self, centre: tuple, r: float, mat: str, seed: int, squash: float = 0.7) -> None:
-        """A rough stone or broken lump: an octahedron, its corners pushed about."""
+    def rubble(self, x0: float, x1: float, y0: float, y1: float, z0: float, peak: float, mats: list, nx: int,
+               ny: int, rough: float, seed: int, shape=None) -> None:
+        """A heap of loose stone or spoil over the rectangle: like `mound`, but its corners pushed about across as well
+        as up (half a cell), each cell split into two triangles on a random diagonal and each triangle painted one of
+        `mats` at random, so the top breaks into facets that read as stones and lumps lying on one another."""
+        rng = random.Random(seed)
+        bm = self.bm
+        cx, cy = (x1 - x0) / nx, (y1 - y0) / ny
+        grid = []
+        for j in range(ny + 1):
+            row = []
+            for i in range(nx + 1):
+                u, v = -1.0 + 2.0 * i / nx, -1.0 + 2.0 * j / ny
+                x, y = x0 + cx * i, y0 + cy * j
+                h = shape(u, v) if shape is not None else 1.0 - max(abs(u) ** 2.2, abs(v) ** 2.2)
+                if 0 < i < nx and 0 < j < ny:
+                    x += rng.uniform(-0.35, 0.35) * cx
+                    y += rng.uniform(-0.35, 0.35) * cy
+                    lump = (wt.fbm(Vector((x, y, 0.0)), 0.3, seed) - 0.5) * 2.0 * rough
+                    z = z0 + (peak - z0) * max(0.0, h) + (lump + rng.uniform(-0.6, 0.6) * rough) * min(1.0, h * 3.0)
+                else:
+                    z = z0
+                row.append(bm.verts.new(Vector((x, y, min(peak, max(z0, z))))))
+            grid.append(row)
+        for j in range(ny):
+            for i in range(nx):
+                a, b, c, d = grid[j][i], grid[j][i + 1], grid[j + 1][i + 1], grid[j + 1][i]
+                tris = ((a, b, c), (a, c, d)) if rng.random() < 0.5 else ((a, b, d), (b, c, d))
+                for t in tris:
+                    f = bm.faces.new(t)
+                    f.normal_update()
+                    if f.normal.z < 0.0:
+                        f.normal_flip()
+                    self._faces([f], mats[rng.randrange(len(mats))])
+
+    def stone(self, centre: tuple, r: float, mat: str, seed: int, squash: float = 0.7, tilt: bool = False) -> None:
+        """A rough stone or broken lump: an octahedron, its corners pushed about, turned any way when `tilt`."""
         rng = random.Random(seed)
         cx, cy, cz = centre
         pts = [(1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1)]
@@ -254,6 +288,10 @@ class Kit(rk.Kit):
                                    cz + pz * r * squash * rng.uniform(0.7, 1.1)))) for px, py, pz in pts]
         tri = [(0, 2, 4), (2, 1, 4), (1, 3, 4), (3, 0, 4), (2, 0, 5), (1, 2, 5), (3, 1, 5), (0, 3, 5)]
         faces = [bm.faces.new((vs[a], vs[b], vs[c])) for a, b, c in tri]
+        if tilt:
+            turn = Euler((rng.uniform(-0.7, 0.7), rng.uniform(-0.7, 0.7), rng.uniform(0.0, math.tau))).to_matrix()
+            m = Matrix.Translation(Vector(centre)) @ turn.to_4x4() @ Matrix.Translation(-Vector(centre))
+            self.transform(faces, m)
         bmesh.ops.recalc_face_normals(bm, faces=faces)
         self._faces(faces, mat)
 

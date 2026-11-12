@@ -2,8 +2,8 @@
 (art/references/maps/subway/29-fan-housing: industrial air handling units): a long boxed unit of light grey panels in
 a galvanised angle frame on a skid with fork pockets; a bank of four round fans in its +x end, each in a deep
 galvanised shroud behind a bar guard (photos 4-6); two access doors with lever handles, an inspection window, a
-louvred intake and a control box with an isolator on its front (-y); lifting eyes on the top corners, and a duct
-transition rising from the roof to a round spigot. Its blocks are 3 x 2.5 m and 2.2 m high.
+louvred intake and a control box with an isolator on its front (-y); lifting eyes on the top corners, and an outlet
+stub rising from the roof to a round flanged spigot. Its blocks are 3 x 2.5 m and 2.2 m high.
 
 Light grey and galvanised, dusty and scuffed, no writing or maker's marks.
 
@@ -148,9 +148,10 @@ def front(k: wk.Kit) -> None:
 
 
 def roof(k: wk.Kit) -> None:
-    """The roof's duct transition: a square base on the roof rising to a round spigot with a flange, at the -x end."""
+    """The roof's outlet stub at the -x end: a square base on the roof, a short transition to round and a straight round
+    stub standing up to a flanged spigot (the box leaves 0.22 m over the roof, so the stub is narrow to read as one)."""
     cx, cy = -0.7, 0.2
-    sq, r = 0.5, 0.36
+    sq, r = 0.3, 0.22
     n = 16
     base = []
     for i in range(n):  # a square ring with as many points as the round one, so the loft twists cleanly
@@ -158,10 +159,10 @@ def roof(k: wk.Kit) -> None:
         c, s = math.cos(a), math.sin(a)
         m = max(abs(c), abs(s))
         base.append((cx + sq * c / m, cy + sq * s / m, TOP))
-    mid = [(p[0], p[1], TOP + 0.06) for p in base]
-    rnd = [(cx + r * math.cos(2 * math.pi * (i + 0.5) / n), cy + r * math.sin(2 * math.pi * (i + 0.5) / n), HIGH - 0.06)
-           for i in range(n)]
-    k.loft([base, mid, rnd], "duct", cap0=False, cap1=False)
+    mid = [(p[0], p[1], TOP + 0.035) for p in base]
+    rnd = [[(cx + r * math.cos(2 * math.pi * (i + 0.5) / n), cy + r * math.sin(2 * math.pi * (i + 0.5) / n), z)
+            for i in range(n)] for z in (TOP + 0.09, HIGH - 0.06)]
+    k.loft([base, mid] + rnd, "duct", cap0=False, cap1=False)
     k.lathe([(HIGH - 0.06, r), (HIGH - 0.06, r + 0.035), (HIGH - 0.02, r + 0.035), (HIGH - 0.02, r),
              (HIGH, r - 0.01)], "galv", segments=n, centre=(cx, cy, 0.0), axis="z", start=math.pi / n, cap=False)
     disc = [(cx + (r - 0.01) * math.cos(2 * math.pi * (i + 0.5) / n),

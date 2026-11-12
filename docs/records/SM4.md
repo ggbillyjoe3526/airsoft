@@ -12,7 +12,8 @@ the switch cabinet. Each is built from the owner's photos in `art/references/map
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | build thread | Pass | Retry 6/8 | Loads, tarp, trolley wheels, buffer stop, drum and hoarding short of the photos; black plant-room props unlogged |
-| 2026-11-12 | 2 | build thread | – | – | – |
+| 2026-11-12 | 2 | build thread | Pass | Retry 7/8 | Hoarding panels too narrow, cable turns too few, loads studded, trolley rims polygonal, tarp shoulders faceted, roof duct flush |
+| 2026-11-12 | 3 | build thread | – | – | – |
 
 ## What changed
 
@@ -22,17 +23,17 @@ the switch cabinet. Each is built from the owner's photos in `art/references/map
 
   | Model | Budget | Triangles | Notes |
   |---|---|---|---|
-  | Skip wagon | 2,500 | 2,484 | A tipping skip of spoil on its cradle, stones in the heap |
-  | Engineering wagon | 3,000 | 2,812 | Concrete sleepers under a strapped tarp on a flat wagon |
-  | Ballast wagon | 2,500 | 2,464 | Plank sides and a speckled ballast heap |
-  | Platelayer trolley | 1,200 | 1,170-1,188 | Three sizes, the size picked by the box; spoked wheels |
+  | Skip wagon | 2,500 | 2,486 | A tipping skip of broken spoil on its cradle |
+  | Engineering wagon | 3,000 | 2,972 | Concrete sleepers under a strapped tarp on a flat wagon |
+  | Ballast wagon | 2,500 | 2,492 | Plank sides and a heap of dark stone |
+  | Platelayer trolley | 1,200 | 1,188 | Three sizes, the size picked by the box; spoked wheels |
   | Buffer stop | 1,500 | 1,378 | Yellow and black, on two pedestals, round buffers |
-  | Cable drum | 1,000 | 972 | Two sizes, the cable in ridged turns |
+  | Cable drum | 1,000 | 956 | Two sizes, twenty turns of cable |
   | Tunnel segments | 1,500 | 1,424 | Two stacks of lining segments on bearers |
   | Signal cabinet | 800 | 780 | Shut |
   | Staff booth | 3,000 | 1,748-2,732 | Three sizes, blinds down; the small one has less wall to dress |
-  | Works hoarding | 1,500 | 1,320-1,500 | Three sizes, a closed compound with a padlocked gate |
-  | Fan housing | 3,000 | 2,666 | Four fans in its end, a duct on its roof |
+  | Works hoarding | 1,500 | 1,272-1,428 | Three sizes, a closed compound with a padlocked gate |
+  | Fan housing | 3,000 | 2,698 | Four fans in its end, an outlet stub on its roof |
   | Switch cabinet | 800 | 750 | Two bays, shut |
 
 - **Defaults taken** (the owner's DEFAULTS RULE):
@@ -55,6 +56,12 @@ the switch cabinet. Each is built from the owner's photos in `art/references/map
   buffer stop, the wagons). Resizing a box is a play change, offered to the owner.
 - `works_kit.finish` turns every face outward (rays cast from outside the box), because hand-built pieces had 2-4% of
   faces backwards and the face test caught them.
+- The skip's and the ballast wagon's loads are a heap of facets (`Kit.rubble`), each triangle painted one of the
+  load's stones at random, with a few big lumps turned any way on top: loose stone without a stone's worth of faces
+  each.
+- The cable drum's coil has one ring of faces a turn, each painted dark at its groove to lit at its crown after the
+  bake, so it shows twenty turns within the budget.
+- The fan housing's roof leaves 0.22 m to its box's top, so its outlet stub is narrow to read as a stub.
 - Details that reached past a box were moved inside it, since clamping them flat made degenerate triangles.
 - The plant-room props draw black in the cloud's renders, whatever model stands there (a booth did too), so it is the
   room's light, not the models. Logged in `docs/KNOWN_ISSUES.md` and on the Dev 3 checklist.

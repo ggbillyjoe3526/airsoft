@@ -25,9 +25,9 @@ from mathutils import Vector  # noqa: E402
 
 BUDGET = 1000
 SIZES = {"cable_drum": (2.0, 1.4, 1.8), "cable_drum_small": (1.4, 1.4, 1.4)}
-SEG = 22             # round the flanges
-COIL_SEG = 14        # round the cable's coil
-PITCH = 0.22         # a turn of the cable across the drum
+SEG = 26             # round the flanges
+COIL_SEG = 12        # round the cable's coil
+TURNS = 20           # the cable's turns across the drum (a 60 mm cable), each a band shaded from groove to crown
 
 
 def build(name: str, length: float, width: float, high: float) -> object:
@@ -52,16 +52,12 @@ def build(name: str, length: float, width: float, high: float) -> object:
                    (x - 0.006, face, zc + h)]
             k.quad(pts if s < 0 else list(reversed(pts)), "drum_wood_dark")
         # the spindle plate and its hole
-        k.cyl((0.0, y0, zc), 0.16, s * 0.012, "rust", seg=8, axis="y")
-        k.cyl((0.0, y0 + s * 0.012, zc), 0.07, -s * 0.004, "cable", seg=8, axis="y")
-    # The cable: turn on turn, a ripple round each turn, between the flanges.
+        k.cyl((0.0, y0, zc), 0.16, s * 0.012, "rust", seg=6, axis="y")
+        k.cyl((0.0, y0 + s * 0.012, zc), 0.07, -s * 0.004, "cable", seg=6, axis="y")
+    # The cable: turn on turn between the flanges, one ring of faces a turn (`shade_turns` paints each one dark at
+    # its groove to lit at its crown, so the turns read without a groove's worth of faces each).
     inner = hw - t
-    turns = max(2, int(round(2 * inner / PITCH)))
-    pitch = 2 * inner / turns
-    prof = [(-inner, coil_r - 0.04)]
-    for i in range(turns):  # each turn a round-shouldered ridge, the groove between two turns narrow
-        y = -inner + i * pitch
-        prof += [(y + pitch * 0.3, coil_r), (y + pitch * 0.7, coil_r), (y + pitch, coil_r - 0.04)]
+    prof = [(-inner + 2 * inner * i / TURNS, coil_r) for i in range(TURNS + 1)]
     k.lathe(prof, "cable", segments=COIL_SEG, centre=(0.0, 0.0, zc), axis="y", cap=False)
     # its loose end: off the coil's front, down to the floor and along it
     end = [(coil_r * 0.95 * math.cos(math.radians(a)), inner * 0.6, zc + coil_r * 0.95 * math.sin(math.radians(a)))
@@ -77,6 +73,30 @@ def build(name: str, length: float, width: float, high: float) -> object:
             k.prism([(x_in, 0.0), (x_out, 0.0), (x_out, 0.06), (x_in + sx * 0.05, 0.22)], "y", y - 0.07, y + 0.07,
                     "timber")
     return k.build()
+
+
+def shade_turns(ob: object, high: float, width: float) -> None:
+    """Paints the coil's turns after the bake: each ring of faces round the coil (one turn of the cable) dark at its
+    -y edge, the groove under the next turn, and lit at its +y edge, the turn's crown."""
+    zc = high * 0.5
+    coil_r = zc * 0.88
+    inner = width * 0.5 - 0.012 - 0.07
+    loops = [-inner + 2 * inner * i / TURNS for i in range(TURNS + 1)]
+    me = ob.data
+    attr = me.color_attributes["Color"]
+    vs = me.vertices
+
+    def on_coil(v: object) -> bool:
+        return abs(math.hypot(v.co.x, v.co.z - zc) - coil_r) < 0.01 and min(abs(v.co.y - y) for y in loops) < 0.004
+
+    for poly in me.polygons:
+        if len(poly.vertices) != 4 or not all(on_coil(vs[i]) for i in poly.vertices):
+            continue
+        mid = sum(vs[i].co.y for i in poly.vertices) / 4.0
+        for li, vi in zip(poly.loop_indices, poly.vertices):
+            c = attr.data[li].color
+            k = 0.45 if vs[vi].co.y < mid else 2.4
+            attr.data[li].color = (min(1.0, c[0] * k), min(1.0, c[1] * k), min(1.0, c[2] * k), 1.0)
 
 
 def weather(p: Vector, n: Vector, c: tuple, paint: str) -> tuple:
@@ -95,6 +115,7 @@ def main() -> None:
         ob = build(name, length, width, high)
         wk.finish(ob, (-length * 0.5, -width * 0.5, 0.0), (length * 0.5, width * 0.5, high))
         wk.bake(ob, weather, jitter={"timber": 0.08})
+        shade_turns(ob, high, width)
         wk.write(ob, name, BUDGET)
         if "--render" in sys.argv:
             out = sys.argv[sys.argv.index("--render") + 1].replace(".jpg", "_%s.jpg" % name)

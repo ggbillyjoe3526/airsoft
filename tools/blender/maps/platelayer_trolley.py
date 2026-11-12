@@ -1,6 +1,6 @@
 """Subway's platelayers' trolleys (SM4, model 9): a small four-wheel push trolley left on the track with its tools,
 from the owner's photos (art/references/maps/subway/09-platelayer-trolley, the red works trolleys): a channel-steel
-frame on four flanged wheels, a timber deck of five boards, a tall steel screen at one end with its tubular rail over
+frame on four flanged wheels, a timber deck of four boards, a tall steel screen at one end with its tubular rail over
 it (photos 3 and 4), a low push rail along the other end, and the tools lying on the deck: a shovel, a pick, a long
 bar. Works yellow, worn and rusty (the photos' red is the Beta team's hue once weathered); no lettering.
 
@@ -44,13 +44,13 @@ def spoked_wheel(k: wk.Kit, x: float, y: float, z: float, outward: float) -> Non
     if s < 0:  # the tube runs low to high along y
         flange_out = [(a1, WHEEL_R), (a0, WHEEL_R + 0.022)]
         inner = [(a1, WHEEL_R - 0.035), (a0, WHEEL_R - 0.035)]
-    k.tube([(a, r) for a, r in flange_out], inner, "wheel", segments=10, centre=(x, 0.0, z), axis="y")
+    k.tube([(a, r) for a, r in flange_out], inner, "wheel", segments=16, centre=(x, 0.0, z), axis="y")
     k.cyl((x, lo, z), 0.065, hi - lo, "wheel", seg=6, axis="y")  # the hub
     for i in range(SPOKES):
         a = 2.0 * math.pi * (i + 0.25) / SPOKES
         c, sn = math.cos(a), math.sin(a)
-        r0, r1 = 0.055, WHEEL_R - 0.03  # a spoke: four faces from the hub to the rim, its ends inside them
-        ring = [(-0.02, -0.0125), (0.02, -0.0125), (0.02, 0.0125), (-0.02, 0.0125)]
+        r0, r1 = 0.055, WHEEL_R - 0.03  # a spoke: a three-sided bar from the hub to the rim, its ends inside them
+        ring = [(-0.022, -0.0125), (0.022, -0.0125), (0.0, 0.0145)]
         k.loft([[(x + r * c - u * sn, y + v, z + r * sn + u * c) for u, v in ring] for r in (r0, r1)], "wheel",
                cap0=False, cap1=False)
 
@@ -72,8 +72,6 @@ def build(name: str, length: float, width: float) -> object:
     for sy in (-1.0, 1.0):
         y0, y1 = sorted((sy * fy, sy * (fy - 0.05)))
         k.blk((-hl + 0.04, y0, f0), (hl - 0.04, y1, f1), "trolley_yellow")
-    for x in (-hl + 0.04, hl - 0.04):  # the end frames, up to the deck's bearers
-        k.blk((x - 0.04, -fy, f0), (x + 0.04, fy, f1), "trolley_yellow")
     dz = zc + WHEEL_R + 0.035    # the deck clears the wheels' tops
     for x in (-ax, ax, -hl + 0.05, hl - 0.05):  # bearers across, from the side frames up to the deck
         k.blk((x - 0.035, -hw + 0.01, dz - 0.06), (x + 0.035, hw - 0.01, dz), "trolley_yellow")
@@ -82,9 +80,9 @@ def build(name: str, length: float, width: float) -> object:
             y0, y1 = sorted((sy * fy, sy * (fy - 0.05)))
             k.blk((x - 0.03, y0, f1), (x + 0.03, y1, dz - 0.06), "trolley_yellow")
     k.mark("wheels+frame")
-    # The deck: five boards along the trolley over the wheels, a gap between each.
+    # The deck: four boards along the trolley over the wheels, a gap between each.
     fy = hw
-    n = 5
+    n = 4
     bw = (2 * fy - 0.03 * (n - 1)) / n
     for i in range(n):
         y = -fy + i * (bw + 0.03)
@@ -96,15 +94,17 @@ def build(name: str, length: float, width: float) -> object:
     k.blk((sx0, -fy, deck), (sx1, fy, HIGH - 0.24), "trolley_yellow")
     for y in (-fy + 0.03, fy - 0.03):
         k.blk((sx0 - 0.03, y - 0.03, f1), (sx1, y + 0.03, HIGH - 0.03), "trolley_yellow")
-        k.bar((sx0 + 0.015, y, HIGH - 0.24), (sx0 + 0.015, y, HIGH - 0.025), 0.022, "trolley_yellow", seg=6)
+        k.bar((sx0 + 0.015, y, HIGH - 0.24), (sx0 + 0.015, y, HIGH - 0.025), 0.022, "trolley_yellow", seg=5,
+              cap=False)
     k.bar((sx0 + 0.015, -fy + 0.03, HIGH - 0.022), (sx0 + 0.015, fy - 0.03, HIGH - 0.022), 0.022, "trolley_yellow",
-          seg=6)
+          seg=5)
     for y in (-fy * 0.33, fy * 0.33):
-        k.bar((sx0 + 0.015, y, HIGH - 0.24), (sx0 + 0.015, y, HIGH - 0.025), 0.016, "trolley_yellow", seg=6)
+        k.bar((sx0 + 0.015, y, HIGH - 0.24), (sx0 + 0.015, y, HIGH - 0.025), 0.016, "trolley_yellow", seg=5,
+              cap=False)
     # The push rail at the -x end: two uprights and the bar across, at waist height.
     for y in (-fy + 0.05, fy - 0.05):
-        k.bar((-hl + 0.06, y, f1), (-hl + 0.06, y, 0.95), 0.02, "trolley_yellow", seg=6)
-    k.bar((-hl + 0.06, -fy + 0.05, 0.95), (-hl + 0.06, fy - 0.05, 0.95), 0.02, "trolley_yellow", seg=6)
+        k.bar((-hl + 0.06, y, f1), (-hl + 0.06, y, 0.95), 0.02, "trolley_yellow", seg=5, cap=False)
+    k.bar((-hl + 0.06, -fy + 0.05, 0.95), (-hl + 0.06, fy - 0.05, 0.95), 0.02, "trolley_yellow", seg=5)
     k.mark("deck+rails")
     # The tools: a shovel lying across the boards and a long bar along them.
     lx = length - 0.4

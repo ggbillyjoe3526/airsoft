@@ -49,10 +49,17 @@ def tarp_h(x: float, y: float, z0: float) -> float:
     return z0 + (HIGH - z0) * shoulder - pinch
 
 
-def tarp_at(i: int, n: int, half: float) -> float:
-    """The grid's i-th of n lines across `half` either side of the middle, closer together toward the edges, where
-    the shoulders turn."""
-    return half * math.sin(math.pi * 0.5 * (2.0 * i / n - 1.0))
+def tarp_lines(n: int, half: float, shoulder: float, n_sh: int = 4) -> list:
+    """The grid's n + 1 lines across `half` either side of the middle: `n_sh` lines round each shoulder (the outer
+    `shoulder` of the half, a quarter round) at equal turns of the round, so its faces meet at under 25 degrees and
+    shade smooth, and the rest evenly over the flat top."""
+    sh = []
+    for k in range(n_sh):
+        f = 1.0 - math.cos(0.5 * math.pi * k / n_sh)  # 0 at the edge, round to the top
+        sh.append(1.0 - shoulder * f)
+    mid = n - 2 * n_sh
+    top = [(1.0 - shoulder) * (2.0 * i / mid - 1.0) for i in range(mid + 1)]
+    return [-u * half for u in sh] + [t * half for t in top] + [u * half for u in reversed(sh)]
 
 
 def build() -> object:
@@ -96,12 +103,9 @@ def build() -> object:
     # The tarpaulin over a load of kit on the top layer, lashed down by four straps.
     z0 = z
     bm = k.bm
-    nx, ny = 18, 10
-    grid = []
-    for j in range(ny + 1):
-        y = tarp_at(j, ny, TARP_Y)
-        grid.append([bm.verts.new(Vector((tarp_at(i, nx, TARP_X), y, tarp_h(tarp_at(i, nx, TARP_X), y, z0))))
-                     for i in range(nx + 1)])
+    nx, ny = 19, 14
+    xs, ys = tarp_lines(nx, TARP_X, 0.1), tarp_lines(ny, TARP_Y, 0.2)
+    grid = [[bm.verts.new(Vector((x, y, tarp_h(x, y, z0)))) for x in xs] for y in ys]
     faces = [bm.faces.new((grid[j][i], grid[j][i + 1], grid[j + 1][i + 1], grid[j + 1][i])) for j in range(ny)
              for i in range(nx)]
     # the tarp's skirt hanging down over the top layer's sides and ends
@@ -119,8 +123,7 @@ def build() -> object:
     k.mark("tarp")
     for x in STRAPS:  # straps over the tarp to the solebars
         pts = []
-        for j in range(ny + 1):
-            y = tarp_at(j, ny, TARP_Y)
+        for y in ys:
             pts.append((x, y * 1.01, tarp_h(x, y, z0) + 0.012))
         pts = [(x, -HD + 0.01, top - 0.05), (x, -TARP_Y * 1.02, z0 - 0.16)] + pts + \
             [(x, TARP_Y * 1.02, z0 - 0.16), (x, HD - 0.01, top - 0.05)]

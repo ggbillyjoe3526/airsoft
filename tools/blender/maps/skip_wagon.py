@@ -27,7 +27,7 @@ from mathutils import Vector  # noqa: E402
 
 NAME = "skip_wagon"
 BUDGET = 2500
-LUMPS = 32           # the lumps in the spoil
+LUMPS = 10           # the big lumps lying in the spoil
 HL, HD, HIGH = 1.0, 1.1, 2.7   # the box: half its length, half its depth, its height
 
 WHEEL_R = 0.3
@@ -146,18 +146,18 @@ def build() -> object:
         k.bar((hx + 0.03, 0.32, z), (hx + 0.03, 0.32, z - 0.06), 0.008, "rust", seg=4)
     k.mark("catch")
     # The spoil, heaped over the rim to the box's top; broken concrete and clay lumps in it.
-    k.mound(-TUB[-1][1] + 0.05, TUB[-1][1] - 0.05, -HD + 0.07, HD - 0.07, RIM_Z - 0.04, HIGH, "spoil", 8, 10, 0.11,
-            6)
+    k.rubble(-TUB[-1][1] + 0.05, TUB[-1][1] - 0.05, -HD + 0.07, HD - 0.07, RIM_Z - 0.04, HIGH,
+             ["spoil", "spoil", "spoil_dark", "spoil_dark", "concrete_dark"], 13, 15, 0.12, 6)
     import random
     rng = random.Random(61)
-    for i in range(LUMPS):  # broken concrete, clay and rusty scrap lying in the heap, half sunk
-        x = rng.uniform(-TUB[-1][1] + 0.15, TUB[-1][1] - 0.15)
-        y = rng.uniform(-HD + 0.15, HD - 0.15)
-        r = rng.uniform(0.05, 0.13)
+    for i in range(LUMPS):  # broken concrete, clay and rusty scrap lying in the heap, half sunk, every way up
+        x = rng.uniform(-TUB[-1][1] + 0.2, TUB[-1][1] - 0.2)
+        y = rng.uniform(-HD + 0.2, HD - 0.2)
+        r = rng.uniform(0.08, 0.17)
         h = 1.0 - max(abs(x / TUB[-1][1]) ** 2.2, abs(y / HD) ** 2.2)
         z = RIM_Z - 0.04 + (HIGH - RIM_Z + 0.04) * h
-        k.stone((x, y, min(z, HIGH - r * 0.5)), r, ("concrete_dark", "spoil_dark", "spoil", "rust_dark")[i % 4],
-                60 + i, squash=rng.uniform(0.45, 0.8))
+        k.stone((x, y, min(z, HIGH - r * 0.5)), r, ("concrete_dark", "spoil_dark", "rust_dark")[i % 3],
+                60 + i, squash=rng.uniform(0.4, 0.8), tilt=True)
     k.mark("spoil")
     return k.build()
 
