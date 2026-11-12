@@ -1469,6 +1469,20 @@ Subway is Dev content: tick Settings › Dev › Dev content.
 - [ ] **Bots' shots** on Subway echo too, behind a wall as well; steps, impacts and grenades don't (shots only).
 - [ ] **Every other map** (Depot, Woodland, the Range): shots sound exactly as before, also after a Subway match.
 
+## Subway lit as underground (UL1)
+
+Subway is Dev content: tick Settings › Dev › Dev content. On a real graphics card, play Subway once on each preset.
+
+- [ ] **No blue cast.** On Low and High, the ticket hall's terrazzo, the platform walls and the concourse read warm
+  grey and white like Depot's hall, never a cold blue. Ultra looks as it did.
+- [ ] **Medium is lit.** On Medium the platforms, concourse and ticket hall are lit from above, not one flat grey
+  shade; other players have a soft dark disc under their feet.
+- [ ] **Grey footstep dust.** From Medium up, running on the floors kicks up grey puffs, not white ones.
+- [ ] **Shiny things underground.** On Low, metal and polymer (your replica, the lift car, the rails) look matte but
+  never black; from Medium up they keep their sheen.
+- [ ] **Frame rate** on Low and Medium looking down the north platform: at least as good as before.
+- [ ] **Other maps unchanged:** Depot, Woodland and the Range look as before on every preset.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
