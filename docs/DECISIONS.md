@@ -453,7 +453,8 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   lowered), the canister thrown where you look a little lofted, then the replica back up. Bombs bounce and roll; they
   never hit or eliminate anyone. Numbers are in `game/config/grenade_config.gd`.
 - **Smoke hides, it never stops BBs (SF1).** The cloud (8 m across, about 15 s at full) blocks bots' sight like a wall
-  does; BBs fly through it. Your own screen goes milky inside it. Bots aim a little through its thin edge.
+  does; BBs fly through it. Your own screen goes milky inside it. Bots aim a little through its thin edge. One
+  exception (PB1): a bot within 5 m makes out whoever is keying Plant The Bomb's bomb in or disarming it.
 - **A flash blinds whoever faces it, teammates and the thrower too (SF1).** Up to 22 m, with a clear line from the eyes;
   full at 6 m and inside 60 degrees of the view, nothing looking (nearly) straight away (SF2: turning away is the
   counter, so a bot can look away from its own). 0.5 to 3.5 s. A blinded bot stops shooting,

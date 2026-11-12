@@ -1,12 +1,13 @@
 # PB1 · Plant The Bomb
 
-**Review:** @REVIEW@
+**Review:** 2 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-@ATTEMPTS@
+| 2026-11-12 | 1 | build thread (the screens: a Sonnet worker) | ✓ 6,199 unit tests | 5/8 Retry | A hit carrier left the bomb in the air or in a lift's shaft; Subway's attackers took 27 % and armed Site A in 13 % of plants, and its guard's band was widened for it; `GameEvent.Kind.BOMB` against the naming ruling; `tests/README.md` rows |
+| 2026-11-12 | 2 | build thread | ✓ 6,265 unit tests | 8/8 Accept | – |
 
 ## Goal
 
@@ -116,7 +117,19 @@ Sixteen seeds a field (seeds 1 to 16), on the layouts of main at f990ce4:
 
 ## Checks
 
-@CHECKS@
+- `tools/check.sh`'s gates on attempt 2, the unit parts side by side: gdlint ✓, changelog notes ✓, wiki ✓, 6,265
+  unit tests ✓ (2 pending, as on main), smoke test ✓, licence notices ✓.
+- QA: Pass (attempt 1's run 1 failed on a defuse let go at exactly the checkpoint losing its progress to float error;
+  fixed, `Plant.SLACK`). 30 tests of its own in `tests/unit/test_pb1_qa.gd`.
+- Performance: Pass. The mode costs 0.7 % more simulation time than Attack / Defend; the other modes pay one null
+  check a sighting.
+- Critic: attempt 1 Retry 5/8 (the four items above), attempt 2 Accept 8/8. Its notes kept for the playtest: the
+  give-away rule works one way (a bot sees a busy player through smoke; a player sees only smoke and shoots at the
+  kit's sound), and if that reads unfair the fix is to show the bomb's lamp through smoke, not to drop the rule; no
+  bomb went off in 357 bot rounds, so if rounds after a plant play like Elimination with a site, shorten the fuse or
+  lengthen the defuse (`PlantConfig`).
+- Subway's guard run locally on attempt 2: 58 rounds over 8 seeds, 43 armed, 19 defused, 24 to the attackers.
+- Reports: `/mnt/project-files/pipeline/runs/PB1/` (project files).
 
 ## Left for the owner
 
