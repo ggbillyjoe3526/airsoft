@@ -13,7 +13,8 @@ photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33
 | 2026-11-12 | 2 | build thread | ✓ | 7/8 Retry | strip lamp too long and shallow, its diffuser a solid slab; tunnel lamp's glass corners proud, bar ends past the outline |
 | 2026-11-12 | 3 | build thread | ✓ | 7/8 Retry | strip lamp's body deeper than the photo's (attempt 2's figures were off); tunnel lamp's outline faceted at six segments |
 | 2026-11-12 | 4 | build thread | ✓ | 7/8 Retry | tunnel lamp's glass folded on one crease, its edges past the outer bars; strip lamp's lip flush with the body's ends |
-| 2026-11-12 | 5 | build thread | | | (past four attempts: the review-cap ruling, keep fixing until the critic passes) |
+| 2026-11-12 | 5 | build thread | ✓ | 7/8 Retry | (past four attempts: the review-cap ruling) tunnel lamp's lugs pointed, its glass still one hard corner |
+| 2026-11-12 | 6 | build thread | | | |
 
 ## What it adds
 
@@ -48,9 +49,10 @@ photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33
 - **The cage wires are two-faced round bars** (`stationkit.Mesh.wire`, a smooth ridge with its back unseen): a real
   round wire would cost three times the triangles, and the budgets hold the cage's ten hoops only this way.
 - **The tunnel lamp's 150 triangles** go on a round outline (nine segments a half circle, its top on an edge's
-  middle, smooth shaded) in two bands (the body, standing in round the glass, and the dome's front), the glass in the
-  front band along the straight sides, swelling out over a mid ring and its edges under the outer bars; the cage's runs back to the rim are flat straps seen side on, its crossings
-  round bars, so all five bars fit; small screw lugs top and bottom.
+  middle, smooth shaded) in two bands (the body, standing in round the glass, and the dome's front); the glass runs
+  down the straight sides and across the front raised along a spine under the vertical bar, an arc of three facets.
+  The four bars across are flat straps bending with that arc (round bars would cost twice), the vertical one a round
+  bar; blunt screw lugs top and bottom.
 - **The strip lamp's clips** sit at a tenth, a third, two thirds and nine tenths of its length, measured on photo
   121814 (clips at 68, 213, 378 and 523 px of a lamp from 12 to 585 px).
 - **The extinguisher is 3.6 to 1** (0.58 m by 0.16 m) as his photos, with a black label band and a round horn.

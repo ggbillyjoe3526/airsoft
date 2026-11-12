@@ -143,11 +143,11 @@ class Mesh:
         self.face(pts if _dot(n, toward) >= 0.0 else list(reversed(pts)), paint, mat, smooth=smooth)
 
     def wire(self, path: list, outs: list, half: float, rise: float, paint: str, mat: str = "Prop",
-             flat_ends: bool = False) -> None:
+             flat_ends: bool = False, flat: bool = False) -> None:
         """A round bar seen from outside for the price of two faces a segment: a smooth ridge along `path`, `half`
         either side of it and its crest `rise` out along `outs` (one outward direction a point). Its back, against
         what it guards, is never seen. `flat_ends`: the first and last segments one face each, a strap seen side on
-        (where the bar runs back to what holds it)."""
+        (where the bar runs back to what holds it); `flat`: every segment one face, a flat strap."""
         rows = []
         for k, p in enumerate(path):
             d = _norm(_sub(path[min(k + 1, len(path) - 1)], path[max(k - 1, 0)]))
@@ -158,7 +158,7 @@ class Mesh:
         for k in range(len(rows) - 1):
             (la, ca, ra), (lb, cb, rb) = rows[k], rows[k + 1]
             out = _norm(_add(outs[k], outs[k + 1]))
-            if flat_ends and k in (0, last) and last > 0:
+            if flat or (flat_ends and k in (0, last) and last > 0):
                 lift_a, lift_b = _scale(_norm(outs[k]), rise * 0.5), _scale(_norm(outs[k + 1]), rise * 0.5)
                 self.face_toward([_add(la, lift_a), _add(ra, lift_a), _add(rb, lift_b), _add(lb, lift_b)], out, paint,
                                  mat)

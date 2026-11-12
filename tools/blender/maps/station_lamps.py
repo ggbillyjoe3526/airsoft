@@ -105,9 +105,10 @@ ARC = 9              # segments in each half circle (odd: its top and bottom on 
 FLANGE = 0.026       # the cast body's depth off the wall
 RIM = 0.008          # how far the body's front edge stands in from its back, round the glass
 DOME = ((0.058, 0.084),)   # the dome's front ring: radius, depth
-BULGE = 0.002        # how far the glass's sides swell out between the body and the front
+SPINE = 0.095        # the glass's front raised along its middle (under the vertical bar), an arc of three facets
 BARS = (-S, -0.014, 0.014, S)      # the bars across, by height: the outer two over the glass's edges
-BAR_FRONT = 0.092    # how far out a bar crosses the front
+BAR_FRONT = 0.092    # how far out a bar turns onto the front
+BAR_SPINE = 0.0985   # and how far out it crosses the glass's spine
 BAR_TURN = 0.066     # where a bar turns across the front (its half width there)
 LUG = 0.009          # a screw lug's half width
 LUG_H = 0.014        # how far it stands past the rim
@@ -137,15 +138,7 @@ def tunnel_lamp() -> sk.Mesh:
         for i in range(n):
             j = (i + 1) % n
             glass = i in (ARC, n - 1) and b is rings[-1]
-            if not glass:
-                m.face([a[i], a[j], b[j], b[i]], "black", smooth=True)
-                continue
-            # the glass down a straight side: two faces over a mid ring bulged out, a barrel, not a fold
-            out = -1.0 if i == ARC else 1.0
-            mi, mj = [((p[0] + q[0]) * 0.5 + out * BULGE, (p[1] + q[1]) * 0.5, (p[2] + q[2]) * 0.5 + BULGE * 0.3)
-                      for p, q in ((a[i], b[i]), (a[j], b[j]))]
-            m.face([a[i], a[j], mj, mi], "lens", "Lens", smooth=True)
-            m.face([mi, mj, b[j], b[i]], "lens", "Lens", smooth=True)
+            m.face([a[i], a[j], b[j], b[i]], "lens" if glass else "black", "Lens" if glass else "Prop", smooth=True)
     # The front: rungs between the outline's left and right points, the middle (between the straight sides) glass.
     f = rings[-1]
     for k in range(ARC // 2 + 1):
@@ -158,23 +151,26 @@ def tunnel_lamp() -> sk.Mesh:
         c, d = f[n - 2 - k], f[ARC + 2 + k]
         if ARC + 2 + k <= n - 2 - k:
             m.face([b, d, c, a] if ARC + 2 + k < n - 2 - k else [b, d, a], "black", smooth=True)
-    m.face([f[n - 1], f[0], f[ARC], f[ARC + 1]], "lens", "Lens", smooth=True)
-    # The cage: each bar out of the body's rim (its end inside it), up the dome's side, across its front and back down;
-    # the runs up and down a strap seen side on, the crossing a round bar.
+    top_spine, low_spine = (0.0, S, SPINE), (0.0, -S, SPINE)
+    m.face([f[n - 1], f[0], top_spine, low_spine], "lens", "Lens", smooth=True)
+    m.face([low_spine, top_spine, f[ARC], f[ARC + 1]], "lens", "Lens", smooth=True)
+    # The cage: each bar out of the body's rim (its end inside it), up the dome's side, over the glass's spine and back
+    # down, bending with the glass's arc: a flat strap all round (round ones cost twice), the vertical one a round bar.
     for y in BARS:
-        path = [(-R + 0.007, y, FLANGE * 0.6), (-BAR_TURN, y, BAR_FRONT), (BAR_TURN, y, BAR_FRONT),
+        path = [(-R + 0.007, y, FLANGE * 0.6), (-BAR_TURN, y, BAR_FRONT), (0.0, y, BAR_SPINE), (BAR_TURN, y, BAR_FRONT),
                 (R - 0.007, y, FLANGE * 0.6)]
-        outs = [(-1.0, 0.0, 0.2), (-0.6, 0.0, 1.0), (0.6, 0.0, 1.0), (1.0, 0.0, 0.2)]
-        m.wire(path, outs, 0.0032, 0.004, "black", flat_ends=True)
+        outs = [(-1.0, 0.0, 0.2), (-0.6, 0.0, 1.0), (0.0, 0.0, 1.0), (0.6, 0.0, 1.0), (1.0, 0.0, 0.2)]
+        m.wire(path, outs, 0.0032, 0.004, "black", flat=True)
     top = S + R * math.sin(math.pi * (ARC // 2) / ARC)
-    path = [(0.0, top - 0.008, FLANGE * 0.6), (0.0, S + 0.06, BAR_FRONT), (0.0, -S - 0.06, BAR_FRONT),
+    path = [(0.0, top - 0.008, FLANGE * 0.6), (0.0, S + 0.06, BAR_SPINE), (0.0, -S - 0.06, BAR_SPINE),
             (0.0, -top + 0.008, FLANGE * 0.6)]
     outs = [(0.0, 1.0, 0.2), (0.0, 0.6, 1.0), (0.0, -0.6, 1.0), (0.0, -1.0, 0.2)]
     m.wire(path, outs, 0.0032, 0.004, "black")
-    # A screw lug top and bottom: an ear off the body's rim, under the bar's end.
+    # A screw lug top and bottom: a blunt ear off the body's rim, under the bar's end.
     for sgn in (1.0, -1.0):
         y0, y1 = sgn * (top - 0.004), sgn * (top + LUG_H)
-        m.face_toward([(-LUG, y0, 0.006), (LUG, y0, 0.006), (0.0, y1, 0.006)], (0.0, 0.0, 1.0), "black")
+        m.face_toward([(-LUG, y0, 0.006), (LUG, y0, 0.006), (LUG * 0.6, y1, 0.006), (-LUG * 0.6, y1, 0.006)],
+                      (0.0, 0.0, 1.0), "black")
     return m
 
 
