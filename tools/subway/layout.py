@@ -251,10 +251,12 @@ OT_FLAG = (12.0, 2.4, P)                              # the lower hall's west en
 # train A's doors (its posts); s the escalators, the south passage and the stair (posts: the half landing and the
 # stair's foot, between the two flags). Before, all three met in the concourse and two shared the stair: the
 # platforms' west half, the lifts and the north train saw nobody. No lane takes the spiral stair: a bot was 40 s on
-# it, out of the round's first fight; it is a way round for whoever wants one.
+# it, out of the round's first fight; it is a way round for whoever wants one. Each lane has a point either side of
+# the field's middle (x 7.95), about equally deep: n's are 4.45 m each way (with one at 9 and the next at -7 the
+# Tunnel team's squad walked 15 m past the middle and the Street team's 1 m).
 LANES = {
     "n": [(-56, -3, G), (-44.85, -2.6, G), (-44.85, -2.8, P), (-44, -5.25, P), (-44, -7.3, P), (-20.5, -7.0, P),
-          (-7, -6.3, P), (9, -7.6, P), (16, -7.3, P), (26, -6.8, P), (37, -8.3, P)],
+          (-7, -6.3, P), (3.5, -7.0, P), (12.4, -7.5, P), (16, -7.3, P), (26, -6.8, P), (37, -8.3, P)],
     "m": [(-56, 0, G), (-44, 2.5, G), (-37, 1.2, G - 0.5), (-28, 1.2, -5.5), (-19, 1.2, C), (-10, 0, C),
           (-5, 1.2, C), (2, 1.2, -14.0), (9, 1.2, -17.5), (13, 2, P), (19.7, 4.7, P), (26, 7.2, P), (36, 7.5, P),
           (46.5, 7.0, P)],

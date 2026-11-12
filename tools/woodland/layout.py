@@ -573,9 +573,12 @@ LINKS = [  # number, name, kind, where (label point), lanes joined
 LANE_PATHS = {
     # MB1: each lane has a point either side of the field's middle and none on it. A squad sweeps its lane to the first
     # point past the middle (RoundPlanner): with one point at the middle the west end stopped on it and the east end
-    # walked on to the next, 15 m into the west's ground.
+    # walked on to the next, 15 m into the west's ground. The field's middle crosses the north lane at the North
+    # bridge's west end, not at its middle: the west's point is on the deck's first metres and the east's 2 m off its
+    # end, by the root plate. With the west's at the deck's east end both squads crossed the bridge, 1.8 m wide, and
+    # the west lost the lane 133 to 187.
     "n": [(-76, -10), (-65, -24.5), (-50, -34), (-36, -42), (-22.5, -40.5), (-18.4, -41.4), (-15.2, -43.8),
-          (-8.2, -41.7), (1.8, -41.3), (12, -40.3), (19, -40), (32, -38), (48, -38), (56, -38)],
+          (-6.4, -41.6), (-2.8, -41.5), (1.8, -41.3), (12, -40.3), (19, -40), (32, -38), (48, -38), (56, -38)],
     # MB1: the middle lane goes round the Woodpile's north end and the Birch stand's stack, up the Ford's ramp north
     # of its thickets and between them and hut 1, and ends in the Back yard, where Attack / Defend's middle
     # defenders hold between the two sites (it ended in their camp).
