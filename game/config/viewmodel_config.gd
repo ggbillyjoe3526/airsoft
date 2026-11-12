@@ -96,12 +96,14 @@ extends Resource
 ## a little, so their grips' base sits over a third of the way up the screen (your left hand seen taking the magazine
 ## out and seating the fresh one) while your right forearm stays below it. The SMG comes up less than the AEG (CS2):
 ## its deeper grip holds your hands lower, and at the AEG's lift your left forearm shows past the wrist.
+## The Pump Shotgun comes out less and no nearer (SH2): your left hand starts far forward on its pump, and at the
+## AEG's move your forearm shows past the wrist on the way to the shell and back.
 @export var reload_cant_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.6, 0.0, -0.25),
 		&"sniper": Vector3(0.5, 0.1, -0.25), &"pistol": Vector3(0.9, 0.2, -0.3), &"cyber": Vector3(0.9, 0.2, -0.3),
 		&"smg": Vector3(0.6, 0.0, -0.25), &"shotgun": Vector3(0.6, 0.0, -0.25)}
 @export var reload_move_by: Dictionary[StringName, Vector3] = {&"aeg": Vector3(0.1, 0.04, 0.06),
 		&"sniper": Vector3(0.06, 0.1, -0.05), &"pistol": Vector3(0.1, 0.06, 0.0), &"cyber": Vector3(0.1, 0.06, 0.0),
-		&"smg": Vector3(0.06, 0.04, 0.06), &"shotgun": Vector3(0.1, 0.04, 0.06)}
+		&"smg": Vector3(0.06, 0.04, 0.06), &"shotgun": Vector3(0.06, 0.04, 0.0)}
 ## A replica listed here comes into its cant over this share of the reload, holds it and goes back over the same share
 ## at the end (a rifle's magazine is out of the well in the first quarter: the cant is there by then, BP8); others ease
 ## in and out as one bell, sin(PI * share).
