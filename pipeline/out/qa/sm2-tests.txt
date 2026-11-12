@@ -1,0 +1,58 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+---  GUT  ---
+[1m[INFO]:  [0musing [/root/.local/share/Airsoft] for temporary output.
+Godot version:  4.7.2
+GUT version:  9.7.1
+
+
+res://tests/unit/test_sm2_edges.gd
+* test_a_run_along_z_is_drawn_filling_its_box_with_outward_faces
+* test_a_one_bar_run_and_a_run_without_a_foot_rail_still_draw_inside_their_box
+* test_a_look_with_an_unreadable_model_draws_nothing_modelled
+* test_an_empty_railings_draws_nothing
+* test_set_heads_grow_only_the_named_model
+* test_lifts_facing_the_other_ways_keep_plain_boxes_and_free_cleanly
+* test_a_lift_with_unreadable_models_still_builds_with_boxes
+7/7 passed.
+
+
+res://tests/unit/test_sm2_transit.gd
+* test_each_run_is_drawn_inside_and_filling_its_box
+* test_a_five_metre_run_keeps_its_triangle_budget
+* test_no_steel_is_drawn_where_a_bb_flies_through
+* test_a_look_without_models_draws_nothing_modelled
+* test_the_lifts_and_railing_models_read_as_no_team
+* test_subway_s_escalators_and_stairs_fill_their_blocks_unstretched
+6/6 passed.
+
+
+res://tests/unit/test_lift_view.gd
+* test_a_map_without_lifts_has_no_view
+* test_each_car_starts_drawn_at_its_start_stop
+* test_a_riding_car_is_drawn_between_its_ticks
+* test_landing_leaves_part_only_at_the_open_stop_and_the_car_s_slide_into_its_front
+* test_buttons_light_while_their_stop_is_called
+* test_lamps_and_probes_switch
+* test_subway_s_lifts_are_drawn_in_their_models
+* test_a_lift_unlike_the_model_keeps_plain_boxes
+8/8 passed.
+
+
+
+
+==============================================
+= Run Summary
+==============================================
+
+Totals
+------
+Scripts               3
+Tests                21
+Passing Tests        21
+Asserts            1719
+Time              1.432s
+
+
+---- All tests passed! ----
+
