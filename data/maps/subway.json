@@ -2535,6 +2535,51 @@
   {
    "kind": "cabinet",
    "center": {
+    "x": -15.2,
+    "y": 1.1,
+    "z": 9.45
+   },
+   "size": {
+    "x": 0.8,
+    "y": 2.2,
+    "z": 0.9
+   },
+   "dress": "signal_cabinet",
+   "facing": "+z"
+  },
+  {
+   "kind": "cabinet",
+   "center": {
+    "x": -15.2,
+    "y": 1.1,
+    "z": 12.05
+   },
+   "size": {
+    "x": 0.8,
+    "y": 2.2,
+    "z": 0.9
+   },
+   "dress": "signal_cabinet",
+   "facing": "-z"
+  },
+  {
+   "kind": "cabinet",
+   "center": {
+    "x": 8.6,
+    "y": 1.1,
+    "z": 9.45
+   },
+   "size": {
+    "x": 0.8,
+    "y": 2.2,
+    "z": 0.9
+   },
+   "dress": "signal_cabinet",
+   "facing": "+z"
+  },
+  {
+   "kind": "cabinet",
+   "center": {
     "x": -45.75,
     "y": 0.6,
     "z": -10.75
@@ -2560,6 +2605,36 @@
    },
    "colour": 8223346,
    "dress": "engineering_wagon"
+  },
+  {
+   "kind": "cabinet",
+   "center": {
+    "x": 45.0,
+    "y": 1.1,
+    "z": -9.45
+   },
+   "size": {
+    "x": 0.8,
+    "y": 2.2,
+    "z": 0.9
+   },
+   "dress": "signal_cabinet",
+   "facing": "-z"
+  },
+  {
+   "kind": "cabinet",
+   "center": {
+    "x": 45.0,
+    "y": 1.1,
+    "z": -12.05
+   },
+   "size": {
+    "x": 0.8,
+    "y": 2.2,
+    "z": 0.9
+   },
+   "dress": "signal_cabinet",
+   "facing": "+z"
   },
   {
    "kind": "barrier",

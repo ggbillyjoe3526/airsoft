@@ -43,6 +43,9 @@ the switch cabinet. Each is built from the owner's photos in `art/references/map
     0.75 m to pass either side. Their models carry the rails only as hidden pieces inside the station's
     (`works_kit.running_rails`). The owner's ruling (2026-11-12, asked in the thread): "On the train rails".
     The first default, each vehicle on its own short works track inside its old box, read as a third track in game.
+  - Centred, the vehicles no longer close the track's lanes in turn as the staggered ones did, so 80 m sight lines
+    opened along both tracks (`field.sightline`, 60 m). Five signal cabinets now stand trackside beside the skips
+    and the engineering wagon (longest line 54.9 m), the tracks' middles open between them.
   - The trolley is works yellow. The photos show red, but every red tried read as a team's hue.
   - The engineering wagon is a loaded flat wagon, the model list's gap default.
   - The cabinets are shut and the booth blinds are down, because the station is abandoned.

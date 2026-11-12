@@ -188,9 +188,16 @@ block("cabinet", P, 48.6, 49.4, -7.5, -6.6, 2.2, dress="signal_cabinet")  # sign
 block("skip", T, -18, -16, TRACK_Z - 1.0, TRACK_Z + 1.0, 2.7, dress="skip_wagon")  # spoil skips on wagons
 block("skip", T, -2, 0, TRACK_Z - 1.0, TRACK_Z + 1.0, 2.7, dress="skip_wagon")
 block("skip", T, 6, 8, TRACK_Z - 1.0, TRACK_Z + 1.0, 2.7, dress="skip_wagon")
+# Signal cabinets beside the south track's skips, so no way past them is an 80 m sight line (the field's 60 m rule,
+# which the old staggered skips kept): the track's middle stays open between them.
+block("cabinet", T, -15.6, -14.8, 9.0, 9.9, 2.2, dress="signal_cabinet", facing="+z")
+block("cabinet", T, -15.6, -14.8, 11.6, 12.5, 2.2, dress="signal_cabinet", facing="-z")
+block("cabinet", T, 8.2, 9.0, 9.0, 9.9, 2.2, dress="signal_cabinet", facing="+z")
 block("cabinet", T, -46.5, -45, -TRACK_Z - 0.85, -TRACK_Z + 0.85, 1.2, dress="platelayer_trolley")  # trolley
 block("container", T, 36, 40, -TRACK_Z - 1.0, -TRACK_Z + 1.0, 2.6, 0x7d7a72,
       dress="engineering_wagon")  # left on the north track
+block("cabinet", T, 44.6, 45.4, -9.9, -9.0, 2.2, dress="signal_cabinet", facing="-z")  # either side of the north
+block("cabinet", T, 44.6, 45.4, -12.5, -11.6, 2.2, dress="signal_cabinet", facing="+z")  # track: no 80 m line past
 block("barrier", T, -52, -51.5, -TRACK_Z - 1.15, -TRACK_Z + 1.15, 1.2, dress="buffer_stop",
       facing="+x")  # the west end is a dead end
 block("barrier", T, -52, -51.5, TRACK_Z - 1.15, TRACK_Z + 1.15, 1.2, dress="buffer_stop", facing="+x")
