@@ -888,6 +888,7 @@ func _build_views(ui: CanvasLayer) -> void:
 	add_child(_grenades)
 	_grenades.setup(state.grenades.size(), _tuning.grenades, _light.night)
 	_grenades.setup_arms(_play.viewmodel, _hands.arms_kind)
+	_grenades.hands_life = _hands.life()
 	for f in _figures:
 		f.set_bombs(_grenades.meshes(), _tuning.grenades)
 	var first_use: Array[Material] = [_bbs.drawn_material(), _puffs.drawn_material(), _gas.drawn_material(),

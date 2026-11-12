@@ -13,7 +13,9 @@ extends Node3D
 ## (`on_hit`), it jolts and drops out of view before it hides, the same with motion reduced. Inspected (IN1, `inspect`),
 ## it is turned over in the hands by its InspectPose while its model's Inspect clip works its parts, the parts' sounds
 ## going out as `inspect_sound`; a shot, a hit, a reload, a draw, a switch, the holster, a sprint or raising the sight
-## ends it (the pose eases back, the parts rest at once). A child of the camera.
+## ends it (the pose eases back, the parts rest at once). Over all of it the replica has a life of its own (FP1,
+## HandsMotion: a bob with your steps, breathing, a lean into a strafe, a dip on landing, a sprung flick with each shot),
+## drawn by moving this node, so the arms and an optic's glass go with it. A child of the camera.
 
 ## A part of the replica in hand made a sound while it is inspected: an InspectPose cue (SimAudio.inspect_sound).
 signal inspect_sound(cue: StringName)
@@ -95,6 +97,8 @@ var _wall: RayHit = RayHit.new()
 var _glass: OpticGlass = null
 ## How much of the sway, the kick and the reload's cant to draw (Reduced motion).
 var _motion: MotionScale = MotionScale.new()
+## The replica's life over its pose (FP1), which this node's own transform draws.
+var _life: HandsMotion = HandsMotion.new()
 ## Each material the replicas wear and its copy with the depth pressed (ViewModelConfig.depth_scale), made once a view
 ## (shared paints are pressed once), and each copy's own.
 var _pressed: Dictionary[Material, Material] = {}
@@ -145,6 +149,11 @@ func arms_materials() -> Array[Material]:
 	return _arms.materials() if _arms != null else [] as Array[Material]
 
 
+## The life the hands have now (FP1: HandsMotion, stepped by `update`), for what else your hands hold (GrenadeView).
+func life() -> HandsMotion:
+	return _life
+
+
 ## The optic glass's camera while it draws a raised sight's view (OpticGlass.drawing_camera), or null.
 func glass_camera() -> Camera3D:
 	return _glass.drawing_camera() if _glass != null else null
@@ -174,6 +183,7 @@ func muzzle_position() -> Vector3:
 func on_shot() -> void:
 	_kick = minf(_cfg.kick_max, _kick + 1.0)
 	_fire_hold = _cfg.sprint_fire_hold
+	_life.shot(_cfg.life)
 	_cut_inspect()
 	if _active >= 0 and _held[_active].anim != null and _held[_active].anim.has_animation(FIRE_CLIP):
 		_held[_active].anim.stop()
@@ -226,6 +236,8 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 		_fire_hold = 0.0
 		_drop_inspect()
 		_inspect_asked = false
+		_life.rest(c)
+		transform = Transform3D.IDENTITY
 		if _glass != null:
 			_glass.update(null, 0.0)
 		return
@@ -251,6 +263,7 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 	_sway = (_sway + turn * _cfg.sway_per_radian).limit_length(_cfg.sway_max)
 	_sway = _sway.lerp(Vector2.ZERO, follow)
 	pos += Vector3(_sway.x, _sway.y, 0.0) * (steady * _motion.sway)
+	rot.z -= _sway.x * _cfg.sway_roll * steady * _motion.sway
 
 	# Each shot kicks it back and up, recovering.
 	_kick = lerpf(_kick, 0.0, follow)
@@ -269,9 +282,11 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 	# Up onto a ledge (CL1) it is carried low too: a hand is on the edge.
 	var climbing := c.vault.active and c.vault.climb
 	_carry = move_toward(_carry, 1.0 if (c.sprinting or climbing) and not firing else 0.0, delta / carry_rate)
-	pos.y -= _cfg.sprint_drop * _carry
-	rot.y += _cfg.sprint_tilt * 0.5 * _carry
-	rot.x -= _cfg.sprint_tilt * 0.3 * _carry
+	# Eased in and out of the carry (FP1).
+	var carried := _carry * _carry * (3.0 - 2.0 * _carry)
+	pos.y -= _cfg.sprint_drop * carried
+	rot.y += _cfg.sprint_tilt * 0.5 * carried
+	rot.x -= _cfg.sprint_tilt * 0.3 * carried
 
 	# Put away down and tipped; drawn up from below, from further down out of the holster.
 	if a.holstered:
@@ -322,6 +337,7 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 		held.selector.mode = a.fire_mode()
 	if _arms != null:
 		_arms.follow(held.anim, delta, reload_share)
+		_arms.aim(raise)
 		_carry_magazine(held, reload_share)
 		# Working a bolt at the hip: canted toward the eye so the right hand stays on screen (BP7, row 17).
 		var work := _arms.work_share()
@@ -340,6 +356,10 @@ func update(c: Character, view_yaw: float, view_pitch: float, eye: Vector3, look
 
 	held.root.position = pos
 	held.root.rotation = rot
+	# Its life (FP1), turned about the replica's own place: this node carries the replica, the arms and the glass.
+	_life.step(_cfg.life, c, look, delta, raise, _motion)
+	var lively := Basis.from_euler(_life.turn)
+	transform = Transform3D(lively, _life.shift + pos - lively * pos)
 	if _glass != null:
 		# A variable optic's glass shows the zoom it is turned to (SN2); a fixed scope's never changes.
 		if held.window != null and held.window.magnify > 0.0:
@@ -451,6 +471,7 @@ func _show(slot: int) -> void:
 	_active = slot
 	_kick = 0.0
 	if slot >= 0 and slot < _held.size():
+		_life.drawn(_cfg.life)
 		_arms.hold(_held[slot].id, _held[slot].root, _held[slot].grip)
 
 

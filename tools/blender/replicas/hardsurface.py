@@ -452,8 +452,11 @@ def fold_material(base: str, extra: str) -> None:
     bpy.data.materials.remove(gone)
 
 
-def export(path: str, animated: bool) -> None:
+def export(path: str, animated: bool, webp: int = 0) -> None:
+    """Writes the scene to `path` as a glTF binary. With `webp` (a quality, 1..100), its images are stored as WebP at
+    that quality (EXT_texture_webp, which Godot reads): a 2K painted set a fraction of its PNG size."""
+    images = {"export_image_format": "WEBP", "export_image_quality": webp} if webp else {}
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=False, export_apply=True,
                               export_animations=animated, export_animation_mode="NLA_TRACKS", export_yup=True,
                               export_draco_mesh_compression_enable=False, export_extras=False,
-                              export_cameras=False, export_lights=False)
+                              export_cameras=False, export_lights=False, **images)

@@ -234,8 +234,8 @@ func test_toggling_skin_creates_no_new_materials() -> void:
 	for i in 6:
 		hands.skin_arms = i % 2 == 0
 		hands.arms_kind = FigureMix.ROBOT if i % 3 == 0 else FigureMix.HUMAN
-	assert_eq(hands._arms.materials().size(), before, "the three looks are made once")
-	assert_eq(before % 3, 0, "human, robot and skin of each")
+	assert_eq(hands._arms.materials().size(), before, "the looks are made once")
+	assert_eq(before % 4, 0, "a human's and a robot's of each, and their fading copies")
 
 
 func test_a_robot_with_skin_on_keeps_robot_colours_then_skin_returns() -> void:
@@ -243,11 +243,10 @@ func test_a_robot_with_skin_on_keeps_robot_colours_then_skin_returns() -> void:
 	hands.skin_arms = true
 	hands.arms_kind = FigureMix.ROBOT
 	assert_false(hands._arms.skin_worn())
-	var arm := _mesh(hands, "Arm_R")
-	for i in arm.mesh.get_surface_count():
-		var key := StringName(arm.mesh.surface_get_material(i).resource_name)
-		if cfg.skin_arms.has(key):
-			assert_ne((arm.get_surface_override_material(i) as BaseMaterial3D).albedo_color, cfg.skin_arms[key], "robot colour")
+	var hand := _mesh(hands, ArmsView.HAND_PREFIX + "R")
+	for i in hand.mesh.get_surface_count():
+		var key := StringName(hand.mesh.surface_get_material(i).resource_name)
+		assert_eq((hand.get_surface_override_material(i) as BaseMaterial3D).albedo_color, cfg.robot_arms[key], "robot colour")
 	hands.arms_kind = FigureMix.HUMAN
 	assert_true(hands._arms.skin_worn())
 	assert_false(_mesh(hands, ArmsView.KIT_PREFIX + "R").visible)

@@ -314,19 +314,27 @@ func test_skin_only_arms_switch_live() -> void:
 	hands.skin_arms = true
 	assert_false(kit.visible, "skin only: the kit hidden")
 	assert_true(nails.visible, "the fingernails shown")
-	var skinned := 0
+	# FP1: the hand's surface wears the model's painted skin (the nails' material), the sleeve its own cloth.
+	var hand := _mesh(hands, ArmsView.HAND_PREFIX + "R")
+	var skin := nails.mesh.surface_get_material(0) as BaseMaterial3D
+	for i in hand.mesh.get_surface_count():
+		var worn := hand.get_surface_override_material(i) as BaseMaterial3D
+		assert_true(worn.use_z_clip_scale, "still pressed")
+		assert_eq(worn.resource_name, skin.resource_name, "the hand's surface is skin")
+		assert_eq(worn.albedo_texture, skin.albedo_texture, "painted, not tinted")
+		assert_not_null(worn.albedo_texture)
+		assert_true(worn.normal_enabled, "with the skin's own relief")
 	for i in arm.mesh.get_surface_count():
-		var key := StringName(arm.mesh.surface_get_material(i).resource_name)
 		var worn := arm.get_surface_override_material(i) as BaseMaterial3D
-		assert_true(worn.use_z_clip_scale, "%s: still pressed" % key)
-		if cfg.skin_arms.has(key):
-			skinned += 1
-			assert_eq(worn.albedo_color, cfg.skin_arms[key], "%s in skin" % key)
-			assert_false(worn.normal_enabled, "%s: no cloth weave" % key)
-	assert_gt(skinned, 0, "the hand's surface is skin")
+		assert_eq(worn.resource_name, arm.mesh.surface_get_material(i).resource_name, "the sleeve stays cloth")
 	hands.arms_kind = FigureMix.ROBOT
 	assert_true(kit.visible, "a robot's arms keep their plates")
 	assert_false(nails.visible)
+	for i in hand.mesh.get_surface_count():
+		var key := StringName(hand.mesh.surface_get_material(i).resource_name)
+		var worn := hand.get_surface_override_material(i) as BaseMaterial3D
+		assert_eq(worn.albedo_color, cfg.robot_arms[key], "a robot's plain shell")
+		assert_null(worn.albedo_texture, "no painted cloth on it")
 	hands.arms_kind = FigureMix.HUMAN
 	hands.skin_arms = false
 	assert_true(kit.visible, "gloves again")

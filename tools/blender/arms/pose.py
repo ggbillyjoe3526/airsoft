@@ -5,10 +5,13 @@ import math
 import os
 
 import bpy
-from mathutils import Matrix, Vector
+from mathutils import Matrix, Quaternion, Vector
 from mathutils.bvhtree import BVHTree
 
-from glove import FINGER_NAMES, PARENT, Frame, Mesh, seg_dist
+from glove import FINGER_NAMES, HEEL, HEEL_TWIST, PARENT, Frame, Mesh, seg_dist
+
+# The thumb's first bone, whose heel bone (glove.HEEL) follows it.
+THUMB_ROOT = "Thumb1_"
 
 # Each side's shoulder joint (eye space: +X right, +Y forward, +Z up); arms.py sets them.
 SHOULDER = {}
@@ -147,6 +150,13 @@ class Rig:
         if name in self.shift:
             m = Matrix.Translation(self.shift[name]) @ m
         self.pose[name] = m
+        if name.startswith(THUMB_ROOT):
+            # The heel of the thumb goes with it: the same swing, a share of its turn about its own line.
+            q = self.local[name].to_quaternion()
+            turn = Quaternion((q.w, 0.0, q.y, 0.0))
+            turn = turn.normalized() if turn.magnitude > 1e-9 else Quaternion()
+            part = (q @ turn.inverted()) @ Quaternion().slerp(turn, HEEL_TWIST)
+            self.fk(HEEL + name[len(THUMB_ROOT) - 1:], part.to_matrix())
         return m
 
     def refresh(self, name: str) -> None:
@@ -249,19 +259,27 @@ class Hand:
         self.index_bends = (70, 90, 70)
         # The least its base may bend (degrees; below 0 it lifts off the frame's side).
         self.index_from = -10
+        # The bend its middle joint is drawn to and what each degree off it costs (m), so it arches (`onto`). None:
+        # wherever its pad comes nearest.
+        self.index_arc = None
         # The whole hand bone's glove (the knuckles and the heel of the thumb too), for seating it clear.
         whole = [hand_rest.inverted() @ sx(v) for v, w in zip(mesh.v, mesh.w) if w.get("Hand", 0.0) > 0.45]
         self.points["Hand_" + side] = [q for i, q in enumerate(whole) if i % max(1, len(whole) // 300) == 0]
         mid = (sx(j["finger-3-2"]) - sx(j["finger-3-1"])).normalized()
+
+        def share(w: dict, name: str, k: int) -> float:
+            # The heel of the thumb's skin is its first bone's, for where that bone's surface lies.
+            b = "%s%d" % (name, k)
+            return w.get(b, 0.0) + (w.get(HEEL, 0.0) if b + "_" == THUMB_ROOT else 0.0)
+
         for f, name in FINGER_NAMES.items():
             for k in (1, 2, 3):
                 b = "%s%d_%s" % (name, k, side)
                 h, t = sx(j["finger-%d-%d" % (f, k)]), sx(j["finger-%d-%d" % (f, k + 1)])
-                ds = sorted(seg_dist(sx(v), h, t) for v, w in zip(mesh.v, mesh.w)
-                            if w.get("%s%d" % (name, k), 0.0) > 0.7)
+                ds = sorted(seg_dist(sx(v), h, t) for v, w in zip(mesh.v, mesh.w) if share(w, name, k) > 0.7)
                 self.radius[b] = (ds[int(len(ds) * 0.85)] if ds else 0.008) + 0.0004
                 inv = rig.rest[b].inverted()
-                pts = [inv @ sx(v) for v, w in zip(mesh.v, mesh.w) if w.get("%s%d" % (name, k), 0.0) > 0.45]
+                pts = [inv @ sx(v) for v, w in zip(mesh.v, mesh.w) if share(w, name, k) > 0.45]
                 self.points[b] = [q for i, q in enumerate(pts) if i % max(1, len(pts) // 90) == 0]
                 toward = self.palmar if f != 1 else ((self.palm_centre + self.palmar * 0.02) - h).normalized()
                 ax = (t - h).normalized().cross(toward).normalized()
@@ -374,7 +392,7 @@ class Hand:
                             if best is None or found[0] < best[0]:
                                 best = found
             # Then finer round the best, within the same bounds.
-            a0, c0, t0, k0 = best[2:]
+            a0, c0, t0, k0 = best[2:6]
             for a in range(max(-swing, a0 - 10), min(swing, a0 + 10) + 1, THUMB_FINE):
                 for c in range(max(-80, c0 - 10), min(80, c0 + 10) + 1, THUMB_FINE):
                     for t in range(max(min(twists), t0 - 15), min(max(twists), t0 + 15) + 1, THUMB_FINE):
@@ -392,7 +410,7 @@ class Hand:
         out = closed(best)
         if verify is not None and pin is None:
             # Nearest the target first: the bones' own clearance no longer ranks them, the glove's check does.
-            for found in sorted(tried, key=lambda f: reach.get(f[2:], f[0]))[:THUMB_VERIFY]:
+            for found in sorted(tried, key=lambda f: reach.get(f[2:6], f[0]))[:THUMB_VERIFY]:
                 out = closed(found)
                 if not verify():
                     best = found
@@ -400,8 +418,8 @@ class Hand:
             else:
                 out = closed(best)
         if os.environ.get("BL_DEBUG"):
-            print("   thumb search: score %.4f at %s" % (best[0], best[2:]))
-        return list(best[2:]) + out[1:]
+            print("   thumb search: score %.4f at %s" % (best[0], best[2:6]))
+        return list(best[2:6]) + out[1:]
 
     def settle(self, name: str, start: tuple, col: Collider, span: int = 30, swing: float = 0.0,
                root: bool = False) -> list:
@@ -503,10 +521,20 @@ class Hand:
             if self.index_left is not None:
                 over = max(0.0, self.index_left - min((self.rig.pose[b] @ q).x for b in bones[1:]
                                                       for q in self.points[b]))
+            # A finger asked to arch (`index_arc`: its middle joint's bend, and what each degree off it costs, m)
+            # bends there and half as much at its tip, as a relaxed finger does, where the pad still finds the target.
+            arch = 0.0
+            if self.index_arc is not None:
+                arch = self.index_arc[1] * (abs(a[1] - self.index_arc[0]) + 0.5 * abs(a[2] - 0.5 * self.index_arc[0]))
             # Clear of the replica first, then the pad nearest the target.
-            return pad + over * 10.0 + (0.0 if clear >= CONTACT else 1.0 + (CONTACT - clear) * 10.0), clear
+            return pad + arch + over * 10.0 + (0.0 if clear >= CONTACT else 1.0 + (CONTACT - clear) * 10.0), clear
 
         swing = int(swing)
+        if os.environ.get("BL_DEBUG"):
+            head = self.rig.pose[bones[0]].translation
+            print("   %s: knuckle %s target %s (%.1f mm away), bones %s mm, left limit %s" % (
+                name, tuple(round(x, 4) for x in head), tuple(round(x, 4) for x in target), (target - head).length * 1e3,
+                [round(self.rig.length[b] * 1e3, 1) for b in bones], self.index_left))
         if pin is not None:
             # A pinned pose (an approved hand) is kept as it is: no search.
             sc, clear = score(pin[0], tuple(pin[1:]))
@@ -678,6 +706,18 @@ def key_pose(rig: Rig, clip: str) -> None:
     track.strips.new(clip, 0, act)
 
 
+def frozen(ob: bpy.types.Object, name: str) -> bpy.types.Object:
+    """A still copy of `ob`'s skin as its armature poses it now, for the other hand to rest on or keep clear of."""
+    dg = bpy.context.evaluated_depsgraph_get()
+    me = bpy.data.meshes.new_from_object(ob.evaluated_get(dg))
+    me.name = name
+    still = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(still)
+    still.matrix_world = ob.matrix_world.copy()
+    bpy.context.view_layer.update()
+    return still
+
+
 def clipping(objects: list, solid: list) -> tuple:
     """Pairs of faces where the posed arms pass into the rifle, and how many of them each bone's skin has."""
     dg = bpy.context.evaluated_depsgraph_get()
@@ -701,6 +741,8 @@ def clipping(objects: list, solid: list) -> tuple:
                 if vi < n:
                     g = max(ob.data.vertices[vi].groups, key=lambda x: x.weight, default=None)
                     key = ob.vertex_groups[g.group].name if g else "?"
+                    # The heel of the thumb counts as the thumb's first bone, which moves it.
+                    key = THUMB_ROOT + key[len(HEEL) + 1:] if key.startswith(HEEL + "_") else key
                     tally[key] = tally.get(key, 0) + 1
                     break
                 vi -= n

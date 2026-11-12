@@ -4,8 +4,9 @@ extends Node3D
 ## tools/blender/arms/arms.py) holding the replica in hand. The model carries one hold per replica: a clip `<id>_Hold`
 ## posing both arms on it and an empty `Hold_<id>` where that replica's origin sits, so the arms ride the replica's
 ## node (ReplicaView's Held.root) and follow its sway, kick, cant and drop. A replica the model has no hold for shows no
-## arms. One-handed replicas (ViewModelConfig.one_hand) hide the left arm. A robot's arms (FigureMix.ROBOT) wear
-## ViewModelConfig.robot_arms. Holding a bomb, they can throw it (ArmsThrow, GT3: `ready_throw`, `throw_pose`; cut off,
+## arms. One-handed replicas (ViewModelConfig.one_hand: a bomb) hide the left arm; a pistol is held in both (FP1). A
+## robot's arms (FigureMix.ROBOT) wear ViewModelConfig.robot_arms. Holding a bomb, they can throw it (ArmsThrow, GT3:
+## `ready_throw`, `throw_pose`; cut off,
 ## `cut_throw` and `unwind_throw`). The materials press their depth as the replica's do, cast no shadow, take none (the
 ## sun's shadow on pressed depth breaks into hard patches over the sleeve) and stay out of an optic's view. A child of
 ## ReplicaView.
@@ -13,9 +14,14 @@ extends Node3D
 ## BP8 (the owner's playtest notes 6, 9 and 11): with a foregrip fitted the left hand holds it (the model's
 ## `<id>_grip_<key>_Hold`, and its `_Fire` and `_Reload`, where it has them; else the replica's own); through a reload
 ## the left hand changes the magazine (`<id>_Reload`, played at the reload's share, so the left arm shows on a
-## one-handed replica while it does); and the arms can be shown skin only (Dev › Skin-only arms): the glove's kit
-## (GloveKit_<side>) hidden, the fingernails (Nails_<side>) shown and the glove's surface in skin
-## (ViewModelConfig.skin_arms), a human's arms only.
+## one-handed replica while it does); and the arms can be shown skin only (Dev › Skin-only arms), a human's arms only:
+## the glove's kit (GloveKit_<side>) hidden, the fingernails (Nails_<side>) shown and the hand's surface
+## (HandSurface_<side>, the glove's cloth) in the model's painted skin (FP1: the nails' own material, whose maps share
+## the glove's layout).
+##
+## FP1 (the owner): aimed, no hands show. As the sight comes up (`aim`) the arms fade out and are then hidden; a replica
+## in ViewModelConfig.aim_hands_hint (a pistol) keeps a hint of them, what lies just under the sight line. While they
+## fade they wear ArmsFade's copies of their materials; at the hip, their own as ever.
 
 const MODEL := "res://assets/models/arms/arms.glb"
 ## The model's names (tools/blender/arms/arms.py).
@@ -33,13 +39,18 @@ const LEFT_SUFFIX := "_L"
 const LEFT_HAND := "Hand_L"
 const KIT_PREFIX := "GloveKit_"
 const NAILS_PREFIX := "Nails_"
+## The hand's surface: the glove's cloth, or skin only the painted skin.
+const HAND_PREFIX := "HandSurface_"
 ## A grip part's name in the clips' (ReplicaParts: <slot>_<key>).
 const GRIP_PART := "grip_"
+## A pistol's hold in both hands (FP1: `<id>_two_Hold` and its `_Reload`). Yours alone: the bots copy `<id>_Hold`, the
+## right hand's (FigureArmsHold).
+const TWO_HANDS := "_two"
 
 ## What each mesh shows on: both looks, the gloves only, or skin only.
 enum Look { BOTH, GLOVES, SKIN }
-## The arms worn: a human's gloves, a robot's, or skin only (each model material's copies in _worn, in this order).
-enum Worn { HUMAN, ROBOT, SKIN }
+## Whose arms are worn: a human's or a robot's (each model material's copies in _worn, in this order).
+enum Worn { HUMAN, ROBOT }
 
 var _cfg: ViewModelConfig = null
 var _model: Node3D = null
@@ -49,8 +60,20 @@ var _meshes: Array[MeshInstance3D] = []
 ## Each mesh's Look, and whether it is a left one (as _meshes).
 var _looks: PackedInt32Array = PackedInt32Array()
 var _lefts: Array[bool] = []
+## Whether each is a hand's surface (as _meshes), and the model's skin material (the nails'; null without them).
+var _hands: Array[bool] = []
+var _skin_own: Material = null
 ## Each Worn's material, by the model's material (indexed by Worn), the depth pressed in all.
 var _worn: Dictionary[Material, Array] = {}
+## Each Worn's fading copy (ArmsFade; null where the model's material is no BaseMaterial3D), as _worn.
+var _fading: Dictionary[Material, Array] = {}
+## The fading copies of the look worn now, one each (what `aim` fades).
+var _fade_now: Array[ShaderMaterial] = []
+## How far the arms are faded out as a whole and below the sight line (0..1), and whether they wear the fading
+## copies now (the sight raised at all).
+var _gone: float = 0.0
+var _hint: float = 0.0
+var _faded: bool = false
 var _kind: int = FigureMix.HUMAN
 ## Skin-only arms (Dev), worn by a human's arms.
 var _skin: bool = false
@@ -106,8 +129,11 @@ func setup(cfg: ViewModelConfig) -> void:
 			look = Look.GLOVES
 		elif mesh_name.begins_with(NAILS_PREFIX):
 			look = Look.SKIN
+			if _skin_own == null and mesh_node.mesh.get_surface_count() > 0:
+				_skin_own = mesh_node.mesh.surface_get_material(0)
 		_looks.append(look)
 		_lefts.append(mesh_name.ends_with(LEFT_SUFFIX))
+		_hands.append(mesh_name.begins_with(HAND_PREFIX))
 	_dress()
 
 
@@ -121,10 +147,10 @@ func hold(id: StringName, root: Node3D, grip: StringName = &"") -> void:
 	var base := clip_base(id, grip)
 	var clip := StringName(base + CLIP_SUFFIX)
 	if mark == null or _anim == null or not _anim.has_animation(clip):
-		_model.visible = false
 		_on = &""
 		_work = &""
 		_reload = &""
+		_show_model()
 		return
 	if _model.get_parent() != root:
 		_model.reparent(root, false)
@@ -134,7 +160,7 @@ func hold(id: StringName, root: Node3D, grip: StringName = &"") -> void:
 	_anim.pause()
 	_on = id
 	_set_left(not _cfg.one_hand.has(id))
-	_model.visible = _shown
+	_show_model()
 	_hold_clip = clip
 	var work := StringName(base + WORK_SUFFIX)
 	_work = work if _anim.has_animation(work) else &""
@@ -143,12 +169,17 @@ func hold(id: StringName, root: Node3D, grip: StringName = &"") -> void:
 
 
 ## The name the model's clips for replica `id` with grip part Key `grip` fitted begin with: `<id>_grip_<grip>` where
-## the model has a hold round that grip, else `<id>`.
+## the model has a hold round that grip, else `<id>_two` where it has one in both hands (a pistol), else `<id>`.
 func clip_base(id: StringName, grip: StringName) -> String:
-	if grip != &"" and _anim != null:
+	if _anim == null:
+		return String(id)
+	if grip != &"":
 		var with_grip := "%s_%s%s" % [id, GRIP_PART, grip]
 		if _anim.has_animation(StringName(with_grip + CLIP_SUFFIX)):
 			return with_grip
+	var in_both := String(id) + TWO_HANDS
+	if _anim.has_animation(StringName(in_both + CLIP_SUFFIX)):
+		return in_both
 	return String(id)
 
 
@@ -235,8 +266,34 @@ func set_shown(on: bool) -> void:
 	if on == _shown:
 		return
 	_shown = on
-	if _model != null:
-		_model.visible = on and _on != &""
+	_show_model()
+
+
+## Fades the arms for the sight raised `raise` (0 at the hip, 1 up, as drawn): out over ViewModelConfig.aim_hands_fade's
+## span of it and then hidden; on a replica in aim_hands_hint, only what lies below the sight line (aim_hint_below),
+## so a hint of the hands stays under it. Call each frame.
+func aim(raise: float) -> void:
+	if _model == null or _on == &"":
+		return
+	var share := smoothstep(_cfg.aim_hands_fade.x, _cfg.aim_hands_fade.y, raise)
+	var hinted := _cfg.aim_hands_hint.has(_on)
+	var gone := 0.0 if hinted else share
+	var hint := share if hinted else 0.0
+	if is_equal_approx(gone, _gone) and is_equal_approx(hint, _hint):
+		return
+	_gone = gone
+	_hint = hint
+	if (share > 0.0) != _faded:
+		_faded = share > 0.0
+		_dress()
+	for material in _fade_now:
+		ArmsFade.fade(material, gone, hint)
+	_show_model()
+
+
+## How far the arms are faded out as a whole (0: drawn; 1: hidden), and below the sight line.
+func faded() -> Vector2:
+	return Vector2(_gone, _hint)
 
 
 ## Takes the hold on now as the one a throw starts from, the pin's ring's middle at `ring` (the model's frame: the
@@ -297,6 +354,10 @@ func materials() -> Array[Material]:
 	for worn: Array in _worn.values():
 		for m: Material in worn:
 			out.append(m)
+	for fading: Array in _fading.values():
+		for m: Material in fading:
+			if m != null:
+				out.append(m)
 	return out
 
 
@@ -318,6 +379,12 @@ func _to_root(mark: Node3D) -> Transform3D:
 	return t
 
 
+## The model shown when it holds something, isn't put away (`set_shown`) and isn't faded right out (`aim`).
+func _show_model() -> void:
+	if _model != null:
+		_model.visible = _shown and _on != &"" and _gone < 1.0
+
+
 ## Shows the left arm (`on`) or hides it, each of its meshes as the look worn asks.
 func _set_left(on: bool) -> void:
 	if on == _left_on:
@@ -335,23 +402,38 @@ func _show_looks() -> void:
 		_meshes[i].visible = worn and (_left_on or not _lefts[i])
 
 
+## Every surface in the look worn (a human's arms or a robot's; skin only, a hand's surface in the model's skin): its
+## pressed material, or that one's fading copy while the sight is raised at all.
 func _dress() -> void:
-	var look: Worn = Worn.SKIN if skin_worn() else (Worn.ROBOT if _kind == FigureMix.ROBOT else Worn.HUMAN)
-	for mesh_node in _meshes:
+	var look: Worn = Worn.ROBOT if _kind == FigureMix.ROBOT else Worn.HUMAN
+	var bare := skin_worn() and _skin_own != null
+	_fade_now.clear()
+	for k in _meshes.size():
+		var mesh_node := _meshes[k]
 		for i in mesh_node.mesh.get_surface_count():
-			var own := mesh_node.mesh.surface_get_material(i)
+			var own := _skin_own if bare and _hands[k] else mesh_node.mesh.surface_get_material(i)
 			if own == null:
 				continue
 			if not _worn.has(own):
-				_worn[own] = [_pressed(own, false, false), _pressed(own, true, false), _pressed(own, false, true)]
-			mesh_node.set_surface_override_material(i, _worn[own][look])
+				_worn[own] = [_pressed(own, false), _pressed(own, true)]
+				_fading[own] = _worn[own].map(_fading_copy)
+			var fading := _fading[own][look] as ShaderMaterial
+			if fading != null and not _fade_now.has(fading):
+				ArmsFade.fade(fading, _gone, _hint)
+				_fade_now.append(fading)
+			mesh_node.set_surface_override_material(i, fading if _faded and fading != null else _worn[own][look])
 	_show_looks()
 
 
-## A copy of `own` with its depth pressed towards the eye (ViewModelConfig.depth_scale) and no shadow falling on it, in
-## the robot's colour if `robot` and robot_arms names it, or in skin if `skin` and skin_arms names it (the cloth's
-## weave taken off).
-func _pressed(own: Material, robot: bool, skin: bool) -> Material:
+## `worn`'s fading copy (null when it is no BaseMaterial3D: it then never fades, and hides with the rest).
+func _fading_copy(worn: Material) -> ShaderMaterial:
+	var base := worn as BaseMaterial3D
+	return ArmsFade.of(base, _cfg.aim_hint_below) if base != null else null
+
+
+## A copy of `own` with its depth pressed towards the eye (ViewModelConfig.depth_scale) and no shadow falling on it; if
+## `robot` and robot_arms names it, in the robot's plain colour, its painted cloth taken off.
+func _pressed(own: Material, robot: bool) -> Material:
 	var copy := own.duplicate() as Material
 	var base := copy as BaseMaterial3D
 	if base == null:
@@ -363,10 +445,11 @@ func _pressed(own: Material, robot: bool, skin: bool) -> Material:
 	var key := StringName(own.resource_name)
 	if robot and _cfg.robot_arms.has(key):
 		base.albedo_color = _cfg.robot_arms[key]
-		base.roughness = _cfg.robot_arms_roughness
-	if skin and _cfg.skin_arms.has(key):
-		base.albedo_color = _cfg.skin_arms[key]
 		base.albedo_texture = null
 		base.normal_enabled = false
-		base.roughness = _cfg.skin_arms_roughness
+		base.roughness_texture = null
+		base.metallic_texture = null
+		base.ao_enabled = false
+		base.metallic = 0.0
+		base.roughness = _cfg.robot_arms_roughness
 	return copy

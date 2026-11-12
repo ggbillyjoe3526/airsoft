@@ -12,11 +12,13 @@ extends RefCounted
 
 ## The arms model's bones (tools/blender/arms/arms.py, named as the figures' skeleton names them): each arm's upper arm,
 ## forearm and hand, and the left hand's fingers, which curl round the ring (the first joint less, the thumb least).
+## The heel of each thumb (Heel_<side>, FP1: the skin between wrist and thumb) turns as its first joint does.
 const RIGHT_ARM: Array[String] = ["UpperArm_R", "Forearm_R", "Hand_R"]
 const LEFT_ARM: Array[String] = ["UpperArm_L", "Forearm_L", "Hand_L"]
 const LEFT_FINGERS: Array[String] = ["Index1_L", "Index2_L", "Index3_L", "Middle1_L", "Middle2_L", "Middle3_L",
-		"Ring1_L", "Ring2_L", "Ring3_L", "Pinky1_L", "Pinky2_L", "Pinky3_L", "Thumb1_L", "Thumb2_L", "Thumb3_L"]
-const FINGER_CURL: Array[float] = [0.5, 1.0, 0.8, 0.6, 1.1, 0.9, 0.7, 1.2, 0.9, 0.8, 1.2, 0.9, 0.3, 0.6, 0.5]
+		"Ring1_L", "Ring2_L", "Ring3_L", "Pinky1_L", "Pinky2_L", "Pinky3_L", "Thumb1_L", "Thumb2_L", "Thumb3_L",
+		"Heel_L"]
+const FINGER_CURL: Array[float] = [0.5, 1.0, 0.8, 0.6, 1.1, 0.9, 0.7, 1.2, 0.9, 0.8, 1.2, 0.9, 0.3, 0.6, 0.5, 0.3]
 ## The axis each left finger joint curls about towards the palm, in its own frame, and the axis the thumb turns about
 ## across to the index finger, as the model's bones lie.
 const CURL_AXIS := Vector3(-1.0, 0.0, 0.0)
@@ -24,7 +26,8 @@ const THUMB_AXIS := Vector3(0.0, 0.0, 1.0)
 const THUMB_FIRST := 12
 ## The right hand's fingers, which open off the bomb as it leaves (by FINGER_CURL's weights, the thumb's less).
 const RIGHT_FINGERS: Array[String] = ["Index1_R", "Index2_R", "Index3_R", "Middle1_R", "Middle2_R", "Middle3_R",
-		"Ring1_R", "Ring2_R", "Ring3_R", "Pinky1_R", "Pinky2_R", "Pinky3_R", "Thumb1_R", "Thumb2_R", "Thumb3_R"]
+		"Ring1_R", "Ring2_R", "Ring3_R", "Pinky1_R", "Pinky2_R", "Pinky3_R", "Thumb1_R", "Thumb2_R", "Thumb3_R",
+		"Heel_R"]
 const EPSILON := 0.0001
 ## The share an unwind eases to: the windup's first pose (the left hand down at bomb_left_in, open; the right on the
 ## hold).

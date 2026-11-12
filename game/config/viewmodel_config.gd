@@ -5,13 +5,14 @@ extends Resource
 
 ## Where each replica's origin (above the trigger) sits at the hip, by replica id; others use `hip_default`. The
 ## pistols sit nearer the middle and higher, their hand and wrist in view but not the forearm (owner, 2026-11-06); the
-## arms model (tools/blender/arms/arms.py HOLDS) is built for these places.
+## rifles sit near and low, so the left hand on the handguard shows and the right hand lies under the view's bottom
+## edge (FP1, the owner). The arms model (tools/blender/arms/arms.py HOLDS) is built for these places.
 @export var hip: Dictionary[StringName, Vector3] = {
-	&"aeg": Vector3(0.12, -0.19, -0.26),
+	&"aeg": Vector3(0.1, -0.135, -0.19),
 	&"pistol": Vector3(0.05, -0.07, -0.34),
 	&"cyber": Vector3(0.05, -0.07, -0.34),
-	&"sniper": Vector3(0.12, -0.19, -0.26),
-	&"smg": Vector3(0.12, -0.19, -0.26),
+	&"sniper": Vector3(0.1, -0.135, -0.19),
+	&"smg": Vector3(0.1, -0.135, -0.19),
 }
 @export var hip_default: Vector3 = Vector3(0.13, -0.16, -0.32)
 ## Aimed, the sight line (rear to front sight) runs through the eye; the replica sits this far forward of it (the
@@ -19,6 +20,13 @@ extends Resource
 @export var aim_forward: Dictionary[StringName, float] = {&"aeg": -0.2, &"pistol": -0.25, &"cyber": -0.25,
 		&"sniper": -0.2, &"smg": -0.15}
 @export var aim_forward_default: float = -0.25
+## Aimed, your hands are out of the view (FP1, the owner): the arms fade out as the sight's raise (as drawn, 0..1)
+## passes from aim_hands_fade's x to its y, and are hidden from there up. A replica in aim_hands_hint (the pistols)
+## keeps a hint of them instead: what lies below the sight line fades, whole down to aim_hint_below's x (m under it)
+## and gone by its y, so only the top of the hands under the slide shows.
+@export var aim_hands_fade: Vector2 = Vector2(0.3, 0.8)
+@export var aim_hands_hint: Array[StringName] = [&"pistol", &"cyber"]
+@export var aim_hint_below: Vector2 = Vector2(0.045, 0.075)
 ## Looking through an optic, by its part Key (ReplicaView, OpticGlass): its glass's centre (z in the part's own space,
 ## -z forward, on the sight line) and radius (m), measured from the part models; how far behind the glass the eye sits
 ## aimed (m, so the glass shows as the approved sight concepts do); and the mark on the glass (dot: a lit red dot;
@@ -52,6 +60,8 @@ extends Resource
 @export var sway_per_radian: float = 0.05
 @export var sway_max: float = 0.035
 @export var return_rate: float = 14.0
+## Lagging, it rolls too, its top trailing the turn (FP1): rad per m of lag across.
+@export var sway_roll: float = 1.3
 ## Each shot's kick: back and up (m), never more than kick_max shots' worth. A lift, not a tilt, so the barrel stays in
 ## line with the BBs leaving it.
 @export var kick_back: float = 0.028
@@ -59,6 +69,8 @@ extends Resource
 @export var kick_max: float = 1.5
 ## With the sight raised, the share of sway and kick left.
 @export var aim_steady: float = 0.25
+## Its life over that pose (FP1: the bob, the breathing, the lean, the springs): HandsMotion.
+@export var life: HandsLifeConfig = HandsLifeConfig.new()
 ## Drawing drops it this far and brings it back up; sprinting carries it this far down and this tilted (rad).
 @export var draw_drop: float = 0.22
 @export var sprint_drop: float = 0.06
@@ -138,10 +150,10 @@ extends Resource
 @export var depth_scale: float = 0.25
 ## Where the selector sits along its clip in each fire mode (semi, burst, auto), as a share of the clip.
 @export var selector_at: PackedFloat32Array = PackedFloat32Array([0.5, 0.75, 1.0])
-## Your arms (ArmsView): replicas held in the right hand alone, the left arm hidden (a pistol, as the owner's default
-## of 2026-11-05: two-handed pistol holds clipped or bent the wrist; a smoke or flash bomb in hand, GT1), and a robot's
-## arms' colours (sRGB) by the arms model's material name, with their roughness (satin, as the robot figure's plates).
-@export var one_hand: Array[StringName] = [&"pistol", &"cyber", &"smoke", &"flash"]
+## Your arms (ArmsView): replicas held in the right hand alone, the left arm hidden (a smoke or flash bomb in hand,
+## GT1; a pistol is held in both, FP1: the arms model's `<id>_two_Hold`), and a robot's arms' colours (sRGB) by the
+## arms model's material name, with their roughness (satin, as the robot figure's plates).
+@export var one_hand: Array[StringName] = [&"smoke", &"flash"]
 ## A bomb taken in hand comes up into view with your hand from this far below (m) over this long (s), eased as a draw,
 ## while the replica goes down (holster_time); the empty hand goes back down the same way once the bomb has left it.
 @export var bomb_raise_drop: float = 0.3
@@ -154,14 +166,8 @@ extends Resource
 	&"Glove": Color(0.80, 0.81, 0.82),
 	&"GloveArmour": Color(0.16, 0.17, 0.18),
 	&"Sleeve": Color(0.62, 0.63, 0.65),
-	&"SleeveTrim": Color(0.22, 0.23, 0.24),
 }
 @export var robot_arms_roughness: float = 0.45
-## Skin-only arms (Dev › Skin-only arms; BP8, the owner's playtest note 11): the arms model's materials shown as bare
-## skin (sRGB, by name: the glove's surface, a glove's thickness over the hand), the cloth's weave taken off, with
-## their roughness. The glove's kit hides and the fingernails show (ArmsView).
-@export var skin_arms: Dictionary[StringName, Color] = {&"Glove": Color(0.78, 0.60, 0.48)}
-@export var skin_arms_roughness: float = 0.62
 ## Your arms' throw (GT3, ArmsThrow), `share` running 0..1 over the windup (GrenadeConfig.windup) and 1..2 over the
 ## recovery. Each key is a wrist's place in the eyes' frame (m: x right, y up, -z ahead), each pole the way its elbow
 ## bends. The left hand comes up from bomb_left_in to the pin's ring (its wrist bomb_left_ring off it) by bomb_pin_grab,

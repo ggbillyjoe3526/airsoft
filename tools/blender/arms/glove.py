@@ -75,12 +75,15 @@ KNUCKLE_OVER = 0.002
 PAD_SPAN = (0.56, 0.84)
 PAD_WRAP = 34.0
 # The fingernails (skin-only arms): shares of each finger's last bone from its root, how far round the finger each
-# reaches (degrees either side of its back), its thickness (m) and its grid (rows along, columns across; kept small:
-# the arms' 40k triangle budget).
+# reaches (degrees either side of its back), its thickness (m) and its grid (rows along, columns across).
 NAIL_SPAN = (0.42, 0.98)
 NAIL_WRAP = 38.0
 NAIL_THICK = 0.0004
-NAIL_GRID = (4, 5)
+NAIL_GRID = (7, 7)
+# How much narrower a nail is at its root and at its tip than across its middle (shares of its width).
+NAIL_ROUND = (0.30, 0.16)
+# The nails wear the skin's material: their tile of its maps (skin.py).
+NAIL_MATERIAL = "Skin"
 
 
 def load_source(shoulder: Vector) -> tuple:
@@ -111,10 +114,20 @@ def bone_points(j: dict) -> dict:
     for f, name in FINGER_NAMES.items():
         for k in range(1, 4):
             pts["%s%d" % (name, k)] = (j["finger-%d-%d" % (f, k)], j["finger-%d-%d" % (f, k + 1)])
+    pts[HEEL] = pts["Thumb1"]
     return pts
 
 
-PARENT = {"Shoulder": "Root", "UpperArm": "Shoulder", "Forearm": "UpperArm", "Hand": "Forearm", "Grip": "Hand"}
+# The heel of the thumb (FP1, the owner: "the wrist to thumb joint doesn't look natural"): a bone lying where the
+# thumb's first bone does, which swings with it but turns about its own line only HEEL_TWIST of what that bone does
+# (pose.Rig keeps it so). The skin along the thumb's first bone goes over from it to that bone between HEEL_SPAN
+# (shares of the bone's length), so a thumb turned far round onto a grip winds its skin gradually from the wrist to
+# its knuckle, as a hand's does, where it was wrung round in one place and lost its fullness there.
+HEEL = "Heel"
+HEEL_TWIST = 0.5
+HEEL_SPAN = (0.10, 0.95)
+PARENT = {"Shoulder": "Root", "UpperArm": "Shoulder", "Forearm": "UpperArm", "Hand": "Forearm", "Grip": "Hand",
+          HEEL: "Hand"}
 for _n in FINGER_NAMES.values():
     PARENT[_n + "1"] = "Hand"
     PARENT[_n + "2"] = _n + "1"
@@ -201,6 +214,29 @@ def smooth_web(wts: list, faces: list) -> list:
     return _blend(out, near, region, WEB_SMOOTH)
 
 
+def heel_weights(wts: list, verts: list, j: dict) -> list:
+    """`wts` with the thumb's first bone's share of each vertex divided between the heel of the thumb and that bone, by
+    how far along the bone the vertex lies (HEEL_SPAN); each vertex keeps its four largest."""
+    a, b = j["finger-1-1"], j["finger-1-2"]
+    ab = b - a
+    out = []
+    for v, w in zip(verts, wts):
+        share = w.get("Thumb1", 0.0)
+        if share <= 0.0:
+            out.append(w)
+            continue
+        t = (v - a).dot(ab) / ab.dot(ab)
+        g = max(0.0, min(1.0, (t - HEEL_SPAN[0]) / (HEEL_SPAN[1] - HEEL_SPAN[0])))
+        g = g * g * (3.0 - 2.0 * g)
+        mix = dict(w)
+        mix["Thumb1"] = share * g
+        mix[HEEL] = share * (1.0 - g)
+        top = sorted(((k, x) for k, x in mix.items() if x > 1e-4), key=lambda kv: -kv[1])[:4]
+        total = sum(x for _, x in top)
+        out.append({k: x / total for k, x in top})
+    return out
+
+
 def _blend(wts: list, near: list, region: set, rounds: int) -> list:
     out = list(wts)
     for _ in range(rounds):
@@ -273,7 +309,14 @@ class Mesh:
         # strap and tab), first and past the last (BP8: the skin-only arms hide them); and the fingernails, a mesh of
         # their own that only the skin-only arms show (none until built).
         self.kit = (0, 0)
+        # Each piece's faces by its name, first and past the last (FP1: glove_paint.py and sleeve_paint.py paint each
+        # as what it is): "hand" the glove's cloth over the hand, then "guard", "pads", "patch", "cuff", "strap",
+        # "tab", and the sleeve's "sleeve", "hem", "sleeve_tab" and "cap".
+        self.parts = {}
         self.nails = None
+        # The hand's own surface as a mesh of its own (FP1: the skin-only arms' skin, skin.py paints it); the glove's
+        # surface is the same one, so the nails laid on that sit on this.
+        self.skin = None
 
     def add(self, verts: list, faces: list, mat, wts: list) -> int:
         base = len(self.v)
@@ -283,6 +326,11 @@ class Mesh:
             self.f.append([base + i for i in f])
             self.m.append(mat[k] if isinstance(mat, list) else mat)
         return base
+
+    def part(self, name: str, first: int) -> None:
+        """Names the faces from `first` to the last one added (a name given twice runs on: its pieces are added
+        together)."""
+        self.parts[name] = (self.parts.get(name, (first, 0))[0], len(self.f))
 
 
 def open_edges(faces: list) -> list:
@@ -580,11 +628,14 @@ def nails(surf: Surface, fr: Frame) -> Mesh:
             return a.lerp(b, NAIL_SPAN[0] + (NAIL_SPAN[1] - NAIL_SPAN[0]) * (v + 1.0) * 0.5)
 
         def direction(u: float, v: float, up: Vector = up, side: Vector = side) -> Vector:
-            t = math.radians(NAIL_WRAP) * u
+            # Rounded at its root and a little narrower at its tip: a nail's outline, not a cut strip's.
+            narrow = 1.0 - NAIL_ROUND[0] * max(0.0, -v) ** 3 - NAIL_ROUND[1] * max(0.0, v) ** 3
+            t = math.radians(NAIL_WRAP) * u * narrow
             return up * math.cos(t) + side * math.sin(t)
 
         out.add(*surf.shell(origin, direction, NAIL_GRID[0], NAIL_GRID[1],
-                            lambda u, v: NAIL_THICK * _soft_box(u, v, 0.4) + 0.0001, "Nail", smooth=1, lift=0.0002))
+                            lambda u, v: NAIL_THICK * _soft_box(u, v, 0.4) + 0.0001, NAIL_MATERIAL, smooth=1,
+                            lift=0.0002))
     return out
 
 
@@ -616,6 +667,7 @@ def build_left(shoulder: Vector) -> tuple:
     wts = weights(verts, j, pts)
     if WEB_SMOOTH:
         wts = smooth_web(wts, faces)
+    wts = heel_weights(wts, verts, j)
     nrm = vertex_normals(verts, faces)
     mesh = Mesh()
 
@@ -630,12 +682,16 @@ def build_left(shoulder: Vector) -> tuple:
     gf = [[idx[i] for i in f] for f in hand_f]
     gw = [wts[o] for o in used]
     mesh.add(gv, gf, "Glove", gw)
+    mesh.part("hand", 0)
 
     surf = Surface(gv, gf, gw)
-    kit_from = len(mesh.f)
+    first = len(mesh.f)
     mesh.add(*knuckle_guard(surf, fr))
+    mesh.part("guard", first)
+    first = len(mesh.f)
     for part in finger_pads(surf, fr):
         mesh.add(*part)
+    mesh.part("pads", first)
     # The palm's suede patch, over the heel of the hand and up to the fingers' roots: a rounded square (its corners
     # pulled in to a radius of about 8 mm), its thickness easing out in from its edges.
     across = (fr.knuckles[3] - fr.knuckles[0]).normalized()
@@ -645,11 +701,17 @@ def build_left(shoulder: Vector) -> tuple:
         return pc + across * (u * 0.024 * math.sqrt(1.0 - 0.35 * v * v)) + \
             fr.fingers * (v * 0.024 * math.sqrt(1.0 - 0.35 * u * u))
 
+    first = len(mesh.f)
     mesh.add(*surf.shell(palm_origin, lambda u, v: fr.palmar, 7, 11,
                          lambda u, v: 0.0021 * _soft_box(u, v, 0.6) + 0.0001, "GloveArmour", smooth=4, lift=0.0008))
+    mesh.part("patch", first)
     # The neoprene cuff, and its strap round it with a pull tab on the little finger's side.
+    first = len(mesh.f)
     mesh.add(*ring(surf, fr, CUFF[:2], CUFF[2], "Glove"))
+    mesh.part("cuff", first)
+    first = len(mesh.f)
     mesh.add(*ring(surf, fr, STRAP[:2], CUFF[2] + STRAP[2], "GloveArmour"))
+    mesh.part("strap", first)
     side = fr.dorsal.cross(fr.fdir)
     out = side if (fr.knuckles[3] - fr.wrist).dot(side) > 0.0 else -side
 
@@ -660,10 +722,15 @@ def build_left(shoulder: Vector) -> tuple:
         t = math.radians(40.0) * u
         return (out * math.cos(t) + fr.dorsal * math.sin(t)) + fr.dorsal * 0.9
 
+    first = len(mesh.f)
     mesh.add(*surf.shell(tab_origin, tab_dir, 5, 9, lambda u, v: (CUFF[2] + STRAP[2] + 0.0022) * _soft_box(u, v, 0.3),
                          "GloveArmour", smooth=3))
-    mesh.kit = (kit_from, len(mesh.f))
+    mesh.part("tab", first)
+    # The glove's kit, which the skin-only arms hide: all of it but the cloth over the hand, which they show as skin.
+    mesh.kit = (mesh.parts["hand"][1], len(mesh.f))
     mesh.nails = nails(surf, fr)
+    mesh.skin = Mesh()
+    mesh.skin.add(gv, gf, "Skin", gw)
 
     sleeve(mesh, verts, faces, wts, fr)
     return mesh, j, fr, pts
@@ -734,7 +801,10 @@ def sleeve(mesh: Mesh, verts: list, faces: list, wts: list, fr: Frame) -> None:
         if fr.along(verts[o]) > SLEEVE_END - SLEEVE_BAND - 1e-6:
             d += 0.0012
         outer.append(verts[o] + snrm[o] * d)
+    first = len(mesh.f)
     base = mesh.add(outer, [[idx[i] for i in f] for f in sleeve_f], smats, [wts[o] for o in used])
+    mesh.part("sleeve", first)
+    first = len(mesh.f)
     # The hem: the cuff's open edge turned in towards the glove.
     hem = {}
     for a, b in cuff_edges:
@@ -744,6 +814,7 @@ def sleeve(mesh: Mesh, verts: list, faces: list, wts: list, fr: Frame) -> None:
                 hem[i] = mesh.add([p], [], "SleeveTrim", [wts[i]])
         mesh.f.append([base + idx[b], base + idx[a], hem[a], hem[b]])
         mesh.m.append("SleeveTrim")
+    mesh.part("hem", first)
     # The cuff's tab, on the back of the wrist.
     sv = [outer[idx[o]] for o in used]
     sf = [[idx[i] for i in f] for f in sleeve_f]
@@ -759,7 +830,10 @@ def sleeve(mesh: Mesh, verts: list, faces: list, wts: list, fr: Frame) -> None:
         t = math.radians(30.0) * u
         return toward * math.cos(t) + across * math.sin(t)
 
+    first = len(mesh.f)
     mesh.add(*ssurf.shell(tab_origin, tab_dir, 5, 9, 0.0017, "SleeveTrim"))
+    mesh.part("sleeve_tab", first)
+    first = len(mesh.f)
     # The top, at the shoulder: closed, so the sleeve's inside never shows.
     top_edges = [e for e in open_edges(sleeve_f) if e not in cuff_edges]
     ring = sorted({i for e in top_edges for i in e})
@@ -775,3 +849,4 @@ def sleeve(mesh: Mesh, verts: list, faces: list, wts: list, fr: Frame) -> None:
         for a, b in top_edges:
             mesh.f.append([base + idx[b], base + idx[a], c])
             mesh.m.append("Sleeve")
+    mesh.part("cap", first)
