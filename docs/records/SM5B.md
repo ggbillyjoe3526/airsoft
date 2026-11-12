@@ -1,6 +1,6 @@
 # SM5B · Subway's signs and posters in every room
 
-**Review:** pending
+**Review:** passed (critic 8/8 at attempt 2, QA Pass, performance Pass)
 
 SM5's second pass, at William's asks in the hall and escalator threads (2026-11-12): "Add more signs, posters and other
 environmental details to the areas" and "Add posters and signs to all the environments. Maybe only one sign in the
@@ -13,7 +13,7 @@ wordless pictogram plate in each lift car.
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | build thread | ✓ | 7/8 Retry | the departure boards' printed face 13% wider than its cell |
-| 2026-11-12 | 2 | build thread | | | |
+| 2026-11-12 | 2 | build thread | ✓ | 8/8 Accept | |
 
 ## What it adds
 
