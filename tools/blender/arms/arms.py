@@ -273,14 +273,17 @@ SMG_GUARD = dict(GUARD, y=0.158, axis=(0.0, 0.072), radius=0.022, tips_below=0.0
 # The Pump Shotgun (SH2): its pistol grip is the AEG Rifle's own, in the AEG's place (shotgun.py builds it from
 # aeg.grip()), so the right hand holds it as the AEG's; its trigger sits in its own guard, so the trigger finger is
 # searched. The left hand holds the pump (a ribbed tube of 20 mm radius under the barrel, its centre line 30 mm over
-# the origin, from 0.279 to 0.449 ahead of it) near its back, further forward than a handguard hold reaches from the
-# AEG's stance, so the left shoulder comes forward (a shotgun's bladed stance); the fingers up its right side, their
-# tips under the barrel (its underside at 0.057), the thumb along its left side. cycle.work_pump slides the hand back
-# 62 mm and home with the pump after each shot.
+# the origin, from 0.279 to 0.449 ahead of it) at its back end, 13 cm further forward than the AEG's handguard hold. So
+# the replica is held 5 cm nearer you and 2 cm lower than the other rifles (its own hip place, the same in
+# ViewModelConfig.hip): from the rifles' place the arm reached out to the pump with the shoulder pushed forward and
+# 11 cm of forearm on screen, where the house rule is the glove and the cuff only (the critic, SH2); from here it shows
+# 5 cm, as the Sniper Rifle's, and the wrist bends 8 degrees. The fingers go up the pump's right side, their tips
+# under the barrel (its underside at 0.057), the thumb along its left side. cycle.work_pump slides the hand back 62 mm
+# and home with the pump after each shot, the build failing if the wrist bends past cycle.PUMP_WRIST.
 SHOTGUN_RIGHT = dict(AEG_RIGHT, index_turn=None)
 SHOTGUN_PUMP = dict(GUARD, y=0.325, axis=(0.0, 0.030), radius=0.0203, tips_below=0.054,
                     tip_at=(0.0228, 0.005, 0.038), thumb_x=-0.024, thumb_z=0.038, thumb_f=0.050,
-                    shoulder=(-0.06, 0.10, -0.06), search=((40, 80), (20, 50), (-40, 0)))
+                    search=((40, 80), (20, 50), (-40, 0)))
 # A foregrip fitted under the handguard (BP8, the owner's playtest note 6: "If a weapon has a grip attachment the
 # players left hand should hold it"): the left hand wraps the grip as the right hand wraps a pistol's, mirrored: its
 # palm on the grip's left side, the thumb's root (`web`) behind its back face, the index finger's knuckle high under
@@ -333,7 +336,7 @@ HOLDS = {
                    SNIPER_RIGHT, SNIPER_GUARD),
     "smg": Hold("smg.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.0847, -0.026), 30.0, 0.050, 0.0145),
                 SMG_RIGHT, SMG_GUARD),
-    "shotgun": Hold("shotgun.glb", godot_to_eye(0.12, -0.19, -0.26), Grip((0.0, -0.073, -0.026), 31.0, 0.046, 0.0155),
+    "shotgun": Hold("shotgun.glb", godot_to_eye(0.12, -0.21, -0.21), Grip((0.0, -0.073, -0.026), 31.0, 0.046, 0.0155),
                     SHOTGUN_RIGHT, SHOTGUN_PUMP),
     "smoke": Hold("../grenades/smoke.glb", HELD_AT, Grip((0.0, -0.0275, 0.03), 0.0, 0.055, 0.0275), SMOKE_RIGHT,
                   DOWN, HELD_TIP),
@@ -986,10 +989,15 @@ def build() -> None:
             clips.add("%s_%s" % (rid, cycle.CLIP))
         if cycle.has_pump(objects):
             # A pump-action replica (SH2): the left hand goes back and home with the pump after each shot.
-            pump_hits = cycle.work_pump(rig, objects, solid, [left, right], "%s_%s" % (rid, cycle.CLIP))
+            # Its wrist stays straight enough to read as one arm, held and through the stroke (cycle.PUMP_WRIST).
+            held_bend = pose.wrist_bend(rig, cycle.PUMP_SIDE)
+            pump_hits, pump_bend = cycle.work_pump(rig, objects, solid, [left, right], "%s_%s" % (rid, cycle.CLIP))
             reset_left(rig, holds[""])
             if pump_hits:
                 failed.append("%s working the pump (%d keys)" % (rid, pump_hits))
+            if max(held_bend, pump_bend) > cycle.PUMP_WRIST:
+                failed.append("%s's pumping wrist bends %.0f deg held and %.0f deg at most over the stroke (the "
+                              "limit is %.0f)" % (rid, held_bend, pump_bend, cycle.PUMP_WRIST))
             clips.add("%s_%s" % (rid, cycle.CLIP))
         # Each foregrip it takes (BP8): the left hand round it, the right hand as approved; a bolt-action replica's
         # bolt worked from that hold too (the same right hand's keys, the left arm on the grip throughout).
@@ -1046,7 +1054,7 @@ def build() -> None:
         if a.name not in clips:
             bpy.data.actions.remove(a)
     if failed and not os.environ.get("BL_FORCE"):
-        raise SystemExit("the posed arms pass into a replica: " + ", ".join(failed))
+        raise SystemExit("the posed arms fail a check (a hand in a replica, a wrist bent too far): " + ", ".join(failed))
     hs.export(OUT, True)
     print("wrote", OUT)
 

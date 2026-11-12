@@ -25,6 +25,9 @@ SIDE = "R"
 PUMP = "pump"
 PUMP_SIDE = "L"
 PUMP_CHECK = 4
+# The most the pumping hand's wrist may bend, held and over the stroke (degrees): past it the wrist reads as a kink on
+# screen, so the build fails as it does for a hand passing into the replica (the critic, SH2).
+PUMP_WRIST = 30.0
 # How the hand takes the knob: hooked in the curl of the index finger (bent HOOK_INDEX, degrees base to tip, then
 # settled onto it), the knob's centre at the centre of the circle through the finger's three sections, its axis across
 # the finger's bend; the other fingers curled out past the knob's end in a loose fist (HOOK). The hand's turn about the
@@ -498,12 +501,13 @@ def work_bolt(rig: Rig, hand: pose.Hand, objects: list, solid: list, arms: list,
     return hits, keys
 
 
-def work_pump(rig: Rig, objects: list, solid: list, arms: list, clip: str) -> int:
+def work_pump(rig: Rig, objects: list, solid: list, arms: list, clip: str) -> tuple:
     """Keys `clip` from the hold now posed, for a pump-action replica (SH2): the left hand, closed on the pump as the
     hold leaves it, goes back and forward with the pump over the replica's Fire clip (the hand's turn and its fingers
     as held, the elbow bending in the hold's own plane), and the right hand stays on the grip. The game plays it in
     step with the replica's Fire clip (ArmsView.follow), so the hand drives the pump on screen. How many of the keys
-    checked have the arms passing into the replica."""
+    checked have the arms passing into the replica, and the most the wrist bends over the stroke (degrees; the build
+    fails past PUMP_WRIST)."""
     side, bone = PUMP_SIDE, "Hand_" + PUMP_SIDE
     arm, action = fire_action(objects)
     length = int(round(action.frame_range[1]))
@@ -543,4 +547,4 @@ def work_pump(rig: Rig, objects: list, solid: list, arms: list, clip: str) -> in
     print("  pump: the left hand carried %.0f mm back and home over %d frames; %d keys pass into the replica; the "
           "wrist bends %.0f deg at most; the elbow sits %.1f mm from the hold's as the stroke starts" % (
               furthest * 1000.0, length, hits, bend, drift * 1000.0))
-    return hits
+    return hits, bend

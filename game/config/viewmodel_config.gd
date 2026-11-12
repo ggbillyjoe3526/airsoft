@@ -5,20 +5,23 @@ extends Resource
 
 ## Where each replica's origin (above the trigger) sits at the hip, by replica id; others use `hip_default`. The
 ## pistols sit nearer the middle and higher, their hand and wrist in view but not the forearm (owner, 2026-11-06); the
-## arms model (tools/blender/arms/arms.py HOLDS) is built for these places.
+## Pump Shotgun sits 5 cm nearer and 2 cm lower than the other rifles, so the hand out on its pump shows no more
+## forearm than theirs (SH2); the arms model (tools/blender/arms/arms.py HOLDS) is built for these places.
 @export var hip: Dictionary[StringName, Vector3] = {
 	&"aeg": Vector3(0.12, -0.19, -0.26),
 	&"pistol": Vector3(0.05, -0.07, -0.34),
 	&"cyber": Vector3(0.05, -0.07, -0.34),
 	&"sniper": Vector3(0.12, -0.19, -0.26),
 	&"smg": Vector3(0.12, -0.19, -0.26),
-	&"shotgun": Vector3(0.12, -0.19, -0.26),
+	&"shotgun": Vector3(0.12, -0.21, -0.21),
 }
 @export var hip_default: Vector3 = Vector3(0.13, -0.16, -0.32)
 ## Aimed, the sight line (rear to front sight) runs through the eye; the replica sits this far forward of it (the
-## pistols near enough that the forearm drops out of view under the hand).
+## pistols near enough that the forearm drops out of view under the hand; the Pump Shotgun, which has no sights and is
+## aimed along its top rail, near enough that its stock is behind the eye and you look over the receiver's back end:
+## SH2).
 @export var aim_forward: Dictionary[StringName, float] = {&"aeg": -0.2, &"pistol": -0.25, &"cyber": -0.25,
-		&"sniper": -0.2, &"smg": -0.15, &"shotgun": -0.2}
+		&"sniper": -0.2, &"smg": -0.15, &"shotgun": -0.11}
 @export var aim_forward_default: float = -0.25
 ## Looking through an optic, by its part Key (ReplicaView, OpticGlass): its glass's centre (z in the part's own space,
 ## -z forward, on the sight line) and radius (m), measured from the part models; how far behind the glass the eye sits

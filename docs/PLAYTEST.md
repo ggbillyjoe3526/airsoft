@@ -1548,16 +1548,18 @@ Its own model, from the owner's photos, with no sights on it (his word), and you
 
 - [ ] **The model.** In the Armoury turn it over (Y): a plain barrel over a tube with a fluted cap, a round ribbed
   pump, a boxy receiver with a holed top cover and a rail, a short rail each side, the box shell ahead of the trigger
-  guard, a pistol grip and a six-position stock. No sights anywhere. The barrel and tube shine as steel; the pump,
+  guard, a pistol grip and a six-position stock with three rows of slots through each side and a sling loop at its
+  toe. No sights anywhere. The barrel and tube shine as steel; the pump,
   grip and stock are matt polymer, a shade lighter in black. Does it stand beside the AEG Rifle and the Compact SMG
   in quality? Each paint scheme reads on it.
 - [ ] **At the hip.** Your left hand holds the pump from below, your right the grip; only your hand and wrist show,
-  no forearm across the screen.
+  no forearm across the screen. It is held a little nearer you and lower than the other rifles (the pump is further
+  forward than a handguard): does it sit well beside them, or look too big?
 - [ ] **The pump.** After each pull the pump comes back and goes home with your hand on it, in time with its two
   knocks, and it is home as the next pull is ready. The replica only rocks a little.
-- [ ] **Aimed with no optic.** You look along the top rail, the BBs landing round the rail's far end. Can you place a
-  pull at 10 m and 20 m this way? Does the stock at the foot of the view bother you? (It has no sights by your
-  ruling; a low bead or a notch is a small change if you want one.)
+- [ ] **Aimed with no optic.** You look over the back of the receiver and along the top rail, the BBs landing round
+  the rail's far end; the stock is behind your eye, out of view. Can you place a pull at 10 m and 20 m this way?
+  (It has no sights by your ruling; a low bead or a notch is a small change if you want one.)
 - [ ] **Aimed through each optic.** The Red Dot, the 2x and the variable scope sit on the rail and are centred; your
   hands stay out of the glass.
 - [ ] **The reload.** Your left hand leaves the pump, takes the shell off, brings a fresh one up and pushes it home,

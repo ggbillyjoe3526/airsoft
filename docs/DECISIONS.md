@@ -933,7 +933,9 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   (metals, polymer)", and it follows the model-quality work (MQ1's steel, aluminium and polymer surfaces). So it has
   **no iron sights**: with no optic it is aimed along its top rail. A top rail for any optic and a short rail each
   side (the Red Laser left, the Weapon Torch right); in first person your left hand holds the pump and rides it back
-  and home after each pull.
+  and home after each pull. His photos show two builds of the replica; **photo 4 (the flat left side with the M4
+  stock) is the one traced**, with photo 3 for its depth and photo 5 for its right side. Photos 1 and 2 show a
+  different pump and grip and are used only for the muzzle, the shell and the receiver's top.
 - **The GBB Pistol shoots 0.70 J and the Compact SMG 0.85 J (owner, 2026-11-12, PH2).** "Increase gbb pistol to 0.7J
   and SMG to 0.85J", after PH1's audit found the pistol's 0.52 J below a real green-gas pistol's. This replaces CS1's
   0.75 J and the pistol's 0.52 J. **Each keeps its job through its hop-up, not its energy** (the default taken to his
