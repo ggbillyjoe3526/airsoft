@@ -14,7 +14,7 @@
 Owner, 2026-11-12, on MQ1's pictures: "the cyber pistol can you redesign the handle/grip to be a similar shape to the
 GBB pistol?" and "The cyber grip doesn't look ergonomic. It has flat and sharp edges." On the first version's
 pictures: "Can you make the handle less curved on the back side? Also; the black grip area should be slightly smaller
-and angled in the same direction as the handle."
+and angled in the same direction as the handle." On the second version's: "Perfect".
 
 The Cyber Pistol's grip was a flat slab with bevelled edges, a straight back and a toothed front. It is now the GBB
 Pistol's rounded grip with a straight back: `tools/blender/replicas/cyber.py` lofts the GBB's rounded sections
@@ -24,7 +24,8 @@ strap, the finger grooves and the width are the GBB's to within 1.5 mm down the 
 
 - **The back strap** (`back_strap`, `BACK_NOTCH`, `BACK_HEEL`): a straight line from the hollow under the tang (filled
   2.5 mm) to the heel (drawn in 2.5 mm), the tang's curve blended in above it. The GBB's swells 1.8 mm off that line;
-  the Cyber's is on it, within 4.2 mm of the GBB's everywhere (the grip is 0.94 to 1.08 times as deep), so a hand still holds both alike.
+  the Cyber's is on it, within 4.2 mm of the GBB's everywhere (the grip is 0.94 to 1.08 times as deep), so a hand
+  still holds both alike.
 - **The window** (`grip_window`, `WINDOW_Z`, `WINDOW_HALF`): a parallelogram on the handle's middle line, so it leans
   as the handle does; 27 mm wide and 66 tall as drawn, smaller than the first version's. The power cell behind it
   (`cell_outline`) is raked on the same line and stays inside the rounded walls all the way down; the reload clip
