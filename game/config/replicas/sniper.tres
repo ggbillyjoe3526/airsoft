@@ -22,3 +22,4 @@ spread_deg = 0.1
 recoil_deg = 0.4
 hip_spread = 6.0
 bolt_action = true
+pace = 0.95

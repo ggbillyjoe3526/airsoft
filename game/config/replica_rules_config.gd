@@ -11,8 +11,9 @@ extends Resource
 ## A semi trigger press while the replica isn't ready still fires if it gets ready within this (s).
 @export var press_buffer: float = 0.15
 ## A bolt-action replica's press this close to the end of its cycle (s) is kept until the cycle ends (BP3): the Fire
-## clip shows the handle home 0.71 s into the cycle, and the M150's runs 1.39 s, so a click after the handle looks home
-## always fires. Earlier clicks lapse as any press does, so a double click never fires twice.
+## clip shows the handle home 0.71 s into the M130's 1.25 s cycle and is stretched with the cycle (ReplicaView), so on
+## the M150's 1.52 s (RP1; 1.39 s before) it is home at 0.87 s, after the window opens at 0.82 s: a click after the
+## handle looks home always fires. Earlier clicks lapse as any press does, so a double click never fires twice.
 @export var bolt_press_window: float = 0.7
 ## BBs a burst-mode pull fires, unless the magazine runs dry first.
 @export var burst_shots: int = 3

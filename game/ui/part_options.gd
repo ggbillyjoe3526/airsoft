@@ -12,6 +12,8 @@ const VALUES: Dictionary[StringName, Dictionary] = {
 	&"aim": {"decimals": 2, "higher": false},
 	&"shake": {"decimals": 0, "higher": false},
 	&"spread": {"decimals": 2, "higher": false, "trim": false},
+	&"hip": {"decimals": 2, "higher": false, "trim": false},
+	&"move": {"decimals": 0, "higher": false},
 	&"energy": {"decimals": 2, "higher": true, "trim": false},
 	&"heard": {"decimals": 0, "higher": false},
 	&"capacity": {"decimals": 0, "higher": true},
@@ -27,6 +29,8 @@ const PIECES: Dictionary[StringName, Dictionary] = {
 	&"aim": {"fmt": "PART_FIG_AIM", "values": [&"aim"]},
 	&"shake": {"fmt": "PART_FIG_SHAKE", "values": [&"shake"]},
 	&"spread": {"fmt": "PART_FIG_SPREAD", "values": [&"spread"]},
+	&"hip": {"fmt": "PART_FIG_HIP", "values": [&"hip"]},
+	&"move": {"fmt": "PART_FIG_MOVE", "values": [&"move"]},
 	&"energy": {"fmt": "PART_FIG_ENERGY", "values": [&"energy"]},
 	&"heard": {"fmt": "PART_FIG_HEARD", "values": [&"heard"]},
 	&"magazine": {"fmt": "PART_FIG_MAGAZINE", "values": [&"capacity", &"carried"]},
@@ -39,13 +43,15 @@ const PIECES: Dictionary[StringName, Dictionary] = {
 const SLOT_PIECES: Dictionary[StringName, Array] = {
 	&"optic": [&"zoom", &"aim"],
 	&"grip": [&"aim", &"shake"],
-	&"laser": [&"spread"],
+	&"laser": [&"hip"],
 	&"magazine": [&"magazine", &"reload"],
 	&"barrel": [&"energy", &"spread"],
 	&"muzzle": [&"energy", &"heard"],
 	&"light": [&"reach", &"spill"],
 }
 const SLOT_EXTRA_PIECES: Dictionary[StringName, Array] = {
+	&"grip": [&"move"],
+	&"laser": [&"aim"],
 	&"magazine": [&"draw"],
 	&"barrel": [&"aim"],
 	&"muzzle": [&"aim"],
@@ -178,6 +184,10 @@ func _measure(slot: Loadout.Slot, item: Pool.Item, part_slot: StringName, part: 
 	values[&"aim"] = tuning.movement.aim_raise_time * r.raise_scale
 	values[&"shake"] = r.shake_scale * 100.0
 	values[&"spread"] = r.spread_deg
+	# From the hip, as the Performance sheet's Spread row has it: a laser tightens only that (RP1).
+	values[&"hip"] = r.spread_deg * r.hip_spread
+	# The share of moving's spread it takes (a grip steadies it, RP1).
+	values[&"move"] = r.move_spread * 100.0
 	values[&"energy"] = Ballistics.muzzle_energy(r, tuning.replica_rules, kit.bb_weights[slot])
 	values[&"heard"] = r.heard_scale * 100.0
 	values[&"capacity"] = float(r.mag_size)

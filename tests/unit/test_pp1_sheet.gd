@@ -31,7 +31,15 @@ func test_pace_and_spread_moving_show_only_off_one() -> void:
 	assert_true(_row(smg, &"pace").is_shown(PackedStringArray()), "the Compact SMG's pace shows")
 	assert_true(_row(smg, &"move_spread").is_shown(PackedStringArray()))
 	assert_eq(_row(smg, &"pace").text, "%.2f" % ReplicaStats.load_replica(&"smg").pace)
-	for id: StringName in [&"aeg", &"pistol", &"sniper", &"cyber"]:
+	var aeg := _sheet(&"aeg")
+	assert_false(_row(aeg, &"pace").is_shown(PackedStringArray()), "the AEG Rifle: no pace row at ×1")
+	assert_false(_row(aeg, &"move_spread").is_shown(PackedStringArray()), "nor a moving spread row")
+	# RP1: the pistols are lighter on your feet, the Sniper Rifle slower, and the Cyber Pistol swings on the run.
+	for id: StringName in [&"pistol", &"sniper", &"cyber"]:
 		var s := _sheet(id)
-		assert_false(_row(s, &"pace").is_shown(PackedStringArray()), "%s: no pace row at ×1" % id)
-		assert_false(_row(s, &"move_spread").is_shown(PackedStringArray()), "%s: no moving spread row" % id)
+		var r := ReplicaStats.load_replica(id)
+		assert_true(_row(s, &"pace").is_shown(PackedStringArray()), "%s: its pace shows" % id)
+		assert_eq(_row(s, &"pace").text, "%.2f" % r.pace)
+		assert_eq(_row(s, &"move_spread").is_shown(PackedStringArray()), not is_equal_approx(r.move_spread, 1.0),
+				"%s: a moving spread row only off ×1" % id)
+	assert_true(_row(_sheet(&"cyber"), &"move_spread").is_shown(PackedStringArray()))

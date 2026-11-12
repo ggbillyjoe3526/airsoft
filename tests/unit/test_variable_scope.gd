@@ -67,7 +67,7 @@ func test_it_zooms_2x_to_6x_in_its_glass_and_raises_slower_than_the_2x_scope() -
 	assert_eq(fixed.aim_zoom_to, 0.0, "the 2x Scope is fixed")
 	assert_gt(v.raise_scale, fixed.raise_scale, "longer and heavier: slower to the eye")
 	var part := rules.stats.parts.part(&"optic", &"scopeVar")
-	assert_almost_eq(part.raise, 1.9, 0.001)
+	assert_almost_eq(part.raise, 2.0, 0.001)
 	assert_eq(rules.stats.parts.part(&"optic", &"redDot").zoom_to, 1.25, "the Red Dot reads as fixed")
 
 

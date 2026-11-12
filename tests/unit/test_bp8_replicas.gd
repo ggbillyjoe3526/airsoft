@@ -65,7 +65,8 @@ func test_the_aeg_takes_the_red_laser_and_the_sniper_and_cyber_still_do_not() ->
 	assert_eq(_ids(pool.parts_for(pool.item(PISTOL), &"laser", false)), [LASER] as Array[String])
 	var kit := _kit(AEG, {&"laser": LASER})
 	assert_eq(kit.parts[0].get(&"laser"), &"redLaser")
-	assert_lt(kit.replicas[0].spread_deg, rules.config(pool.item(AEG)).spread_deg, "it tightens the AEG's spread")
+	assert_lt(kit.replicas[0].hip_spread, rules.config(pool.item(AEG)).hip_spread,
+			"it tightens the AEG's spread from the hip (RP1: only the hip)")
 
 
 func test_the_aegs_laser_sits_on_the_handguards_left_rail_behind_the_hand() -> void:

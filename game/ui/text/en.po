@@ -1470,6 +1470,9 @@ msgstr "Fire rate"
 msgid "CUSTOMISE_POWER_RECOIL"
 msgstr "Recoil"
 
+msgid "CUSTOMISE_POWER_HEARD"
+msgstr "Heard from"
+
 msgid "CUSTOMISE_POWER_PERCENT"
 msgstr "%+d %%"
 
@@ -1537,7 +1540,7 @@ msgid "PART_NOTE_MAGAZINE"
 msgstr "How many BBs, in how many changes."
 
 msgid "PART_NOTE_LASER"
-msgstr "On the pistol rail, or the AEG's left side rail. Tightens the spread."
+msgstr "On the pistol rail, or the AEG's left side rail. Tightens the spread from the hip."
 
 msgid "PART_NOTE_LIGHT"
 msgstr "On its own mount. T switches it at night; by day it isn't fitted."
@@ -1660,28 +1663,28 @@ msgid "PART_BLURB_REDDOT"
 msgstr "A red dot on clear glass, quick at any range."
 
 msgid "PART_BLURB_SCOPE2X"
-msgstr "Reach for long lanes, slower to raise."
+msgstr "The quick scope: reach for long lanes, slower to raise than a red dot."
 
 msgid "PART_BLURB_SCOPEVAR"
 msgstr "Turns from 2x to 6x on the mouse wheel, slowest to raise."
 
 msgid "PART_BLURB_VERTICAL"
-msgstr "Steadies the aim after a sprint, a little slower to bring up."
+msgstr "Steadier on the move and after a sprint, slower to bring up."
 
 msgid "PART_BLURB_ANGLED"
-msgstr "Quick to bring up, but the aim shakes for longer."
+msgstr "Quick to bring up, but the aim shakes for longer after a sprint."
 
 msgid "PART_BLURB_REDLASER"
-msgstr "A tighter group at no other cost."
+msgstr "Tighter from the hip, a touch slower to bring up."
 
 msgid "PART_BLURB_WEAPONTORCH"
 msgstr "Lights the way and anyone in its beam at night, and gives you away."
 
 msgid "PART_BLURB_HICAP"
-msgstr "bots close by hear you walk."
+msgstr "bots close by hear you walk, and it is slower to change."
 
 msgid "PART_BLURB_LOWCAP"
-msgstr "Quiet, quick to change and draw."
+msgstr "Quiet, the quickest to change and draw."
 
 msgid "PART_BLURB_EXTENDED"
 msgstr "Half as many again, slower to draw."
@@ -1690,7 +1693,7 @@ msgid "PART_BLURB_TIGHTBORE"
 msgstr "The accuracy pick: tighter groups at no handling cost."
 
 msgid "PART_BLURB_LONG"
-msgstr "The reach pick: more energy, but front-heavy."
+msgstr "The reach pick: the most energy, but front-heavy."
 
 msgid "PART_BLURB_SILENCER"
 msgstr "Shots are heard from less far, and sound muffled."
@@ -1706,6 +1709,12 @@ msgstr "shake %s %%"
 
 msgid "PART_FIG_SPREAD"
 msgstr "spread %s °"
+
+msgid "PART_FIG_HIP"
+msgstr "from the hip %s °"
+
+msgid "PART_FIG_MOVE"
+msgstr "moving %s %%"
 
 msgid "PART_FIG_ENERGY"
 msgstr "%s J"
@@ -1751,6 +1760,18 @@ msgstr "tighter spread"
 
 msgid "PART_WORSE_SPREAD"
 msgstr "wider spread"
+
+msgid "PART_BETTER_HIP"
+msgstr "tighter from the hip"
+
+msgid "PART_WORSE_HIP"
+msgstr "wider from the hip"
+
+msgid "PART_BETTER_MOVE"
+msgstr "steadier on the move"
+
+msgid "PART_WORSE_MOVE"
+msgstr "shakier on the move"
 
 msgid "PART_BETTER_ENERGY"
 msgstr "more energy"
@@ -1927,19 +1948,19 @@ msgid "ARMORY_BLURB_POWER_GAS"
 msgstr "A stronger gas pushes harder, and kicks harder too."
 
 msgid "ARMORY_BLURB_POWER_SPRING"
-msgstr "A spring sets how much energy a spring replica has."
+msgstr "A soft spring is quick and quiet; a hard one shoots further, cocks slower and cracks louder."
 
 msgid "ARMORY_BLURB_REPLICA_PISTOL"
-msgstr "A gas pistol: light, quick to draw."
+msgstr "A gas pistol: the quickest to draw, steady single shots, short on BBs."
 
 msgid "ARMORY_BLURB_REPLICA_AEG"
 msgstr "An electric rifle with a rail for every part."
 
 msgid "ARMORY_BLURB_REPLICA_CYBER"
-msgstr "A pistol with its battery built in: nothing to pick for power."
+msgstr "Rifle power in a pistol, its battery built in: tight and kick-free, short on BBs, wild on the run."
 
 msgid "ARMORY_BLURB_REPLICA_SNIPER"
-msgstr "A spring rifle, cocked after every shot: long and flat, wild from the hip."
+msgstr "A spring rifle, cocked after every shot: long and flat, slow on your feet, wild from the hip."
 
 msgid "ARMORY_BLURB_REPLICA_SMG"
 msgstr "A compact electric SMG: the fastest trigger and quick on your feet, short on reach."

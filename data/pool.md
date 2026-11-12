@@ -167,8 +167,8 @@ The cases an Extraction run places (M44, dev content for now). Each run's seed p
 ### Springs
 
 The springs are in Power sources above, with Type `spring` and Fits `spring`, set out as the gases are (owner,
-2026-11-02): the M130 the Sniper Rifle comes with, the medium M140 and the high-performance M150 (more energy and kick,
-and a little slower to cock).
+2026-11-02): the M130 the Sniper Rifle comes with, the medium M140 and the high-performance M150, each its own trade
+(stats.md › Which spring: the quick and quiet one, the middle one and the long shot).
 
 ### Optics
 

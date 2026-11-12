@@ -299,6 +299,8 @@ func carried(loadout: Loadout) -> Kit:
 		r.muzzle_energy = minf(energy, limit)
 		r.fire_rate = base.fire_rate * (1.0 + p.fire_rate)
 		r.recoil_deg = base.recoil_deg * (1.0 + p.recoil)
+		# A power source's own loudness on top of the muzzle part's (a soft spring is quieter, a hard one cracks, RP1).
+		r.heard_scale *= 1.0 + p.heard
 		r.hop_up_dial = t.hop_up
 		var keys: Dictionary[StringName, StringName] = {}
 		var light: Torch.Light = null
@@ -333,9 +335,10 @@ func _fitted(it: Pool.Item, t: ReplicaTune) -> Dictionary[StringName, Pool.Item]
 
 
 ## Lays `fitted` over `r` (the browser game's handlingOf and kit): the magazine's capacity, count, reload and draw; the
-## handling of the grip, barrel and muzzle part on the draw and the sight's raise; the optic's zoom and raise; the grip's
-## shake; the laser's and barrel's spread; rattles; how far shots are heard. Returns what the barrel and muzzle part
-## multiply the energy by (before the site limit).
+## handling of the grip, laser, barrel and muzzle part on the draw and the sight's raise; the optic's zoom and raise; the
+## grip's shake and its share of the spread moving adds; the barrel's spread and the laser's from the hip (RP1: a laser
+## helps only with the sight down); rattles; how far shots are heard. Returns what the barrel and muzzle part multiply
+## the energy by (before the site limit).
 func _apply_parts(r: ReplicaConfig, fitted: Dictionary[StringName, Pool.Item]) -> float:
 	var optic := _part(fitted, &"optic")
 	var grip := _part(fitted, &"grip")
@@ -343,8 +346,9 @@ func _apply_parts(r: ReplicaConfig, fitted: Dictionary[StringName, Pool.Item]) -
 	var mag := _part(fitted, &"magazine")
 	var barrel := _part(fitted, &"barrel")
 	var muzzle := _part(fitted, &"muzzle")
-	# A front-heavy barrel or muzzle part is slower to bring up and to raise to your eye, like a heavier grip.
-	var handling := grip.handling * barrel.handling * muzzle.handling
+	# A front-heavy barrel or muzzle part is slower to bring up and to raise to your eye, like a heavier grip or a unit
+	# on the rail.
+	var handling := grip.handling * laser.handling * barrel.handling * muzzle.handling
 	r.mag_size = maxi(1, roundi(r.mag_size * mag.capacity))
 	r.mags = maxi(1, r.mags + mag.carried)
 	r.reload_time *= mag.reload
@@ -356,7 +360,9 @@ func _apply_parts(r: ReplicaConfig, fitted: Dictionary[StringName, Pool.Item]) -
 	# Only a scope's glass shows a turned zoom (ReplicaView): a whole-view optic stays fixed.
 	r.aim_zoom_to = optic.zoom_to if r.zoom_in_glass and optic.zoom_to > r.aim_zoom else 0.0
 	r.shake_scale = grip.shake
-	r.spread_deg *= laser.spread * barrel.spread
+	r.move_spread *= grip.move_spread
+	r.spread_deg *= barrel.spread
+	r.hip_spread *= laser.hip
 	r.rattles = mag.rattles
 	r.heard_scale = muzzle.heard
 	r.muffled = muzzle.heard < 1.0

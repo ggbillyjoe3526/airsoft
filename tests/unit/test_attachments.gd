@@ -73,17 +73,21 @@ func test_the_shipped_part_tables_read_without_a_problem() -> void:
 	assert_eq(s.problems, [] as Array[String])
 	var scope := s.parts.part(&"optic", &"scope2x")
 	assert_almost_eq(scope.zoom, 2.0, 1e-9)
-	assert_almost_eq(scope.raise, 1.6, 1e-9)
+	assert_almost_eq(scope.raise, 1.45, 1e-9, "RP1: the quick scope (1.6 before)")
 	var hi := s.parts.part(&"magazine", &"hiCap")
 	assert_almost_eq(hi.capacity, 2.0, 1e-9)
 	assert_eq(hi.carried, -2)
 	assert_true(hi.rattles)
 	assert_false(s.parts.part(&"magazine", &"lowCap").rattles)
 	assert_almost_eq(s.parts.part(&"barrel", &"long").energy, 0.1, 1e-9)
+	assert_almost_eq(s.parts.part(&"barrel", &"long").spread, 1.0, 1e-9, "RP1: reach alone (a tenth tighter before)")
 	var silencer := s.parts.part(&"muzzle", &"silencer")
 	assert_almost_eq(silencer.energy, -0.05, 1e-9)
 	assert_almost_eq(silencer.heard, 0.5, 1e-9)
-	assert_almost_eq(s.parts.part(&"laser", &"redLaser").spread, 0.8, 1e-9)
+	# RP1: the laser tightens only the hip, and costs handling (every shot by a fifth, at no cost, before).
+	assert_almost_eq(s.parts.part(&"laser", &"redLaser").spread, 1.0, 1e-9)
+	assert_almost_eq(s.parts.part(&"laser", &"redLaser").hip, 0.75, 1e-9)
+	assert_almost_eq(s.parts.part(&"laser", &"redLaser").handling, 1.05, 1e-9)
 
 
 func test_an_unreadable_part_cell_changes_nothing_there_and_says_where() -> void:
@@ -180,8 +184,11 @@ func test_magazines_change_capacity_count_reload_and_draw() -> void:
 	var low := _carried(AEG, {&"magazine": LOW_CAP})
 	assert_eq(low.mag_size, roundi(base.mag_size * 0.5))
 	assert_eq(low.mags, base.mags + 2)
-	assert_almost_eq(low.reload_time, base.reload_time * 0.75, 1e-6)
-	assert_almost_eq(low.draw_time, base.draw_time * 0.9, 1e-6)
+	var low_part := rules.stats.parts.part(&"magazine", &"lowCap")
+	assert_almost_eq(low.reload_time, base.reload_time * low_part.reload, 1e-6)
+	assert_almost_eq(low.draw_time, base.draw_time * low_part.draw, 1e-6)
+	assert_lt(low.reload_time, base.reload_time, "the quick change")
+	assert_gt(hi.reload_time, base.reload_time, "the hi-cap's is the slow one (RP1)")
 	assert_false(low.rattles)
 	var pistol := _base(PISTOL)
 	var ext := _carried(PISTOL, {&"magazine": EXTENDED}, 1)
@@ -192,30 +199,45 @@ func test_magazines_change_capacity_count_reload_and_draw() -> void:
 func test_optics_zoom_and_slow_the_raise_grips_handle_and_steady() -> void:
 	var base := _base(AEG)
 	var scope := _carried(AEG, {&"optic": SCOPE})
+	var parts := rules.stats.parts
+	var scope_raise := parts.part(&"optic", &"scope2x").raise
+	var vertical := parts.part(&"grip", &"vertical")
 	assert_almost_eq(scope.aim_zoom, 2.0, 1e-9)
-	assert_almost_eq(scope.raise_scale, 1.6, 1e-9)
+	assert_almost_eq(scope.raise_scale, scope_raise, 1e-9)
+	assert_gt(scope.raise_scale, 1.0, "slower to raise than the iron sights")
 	assert_almost_eq(scope.draw_time, base.draw_time, 1e-9, "an optic doesn't slow the draw")
 	assert_almost_eq(_carried(AEG, {&"optic": RED_DOT}).aim_zoom, 1.25, 1e-9)
 	var grip := _carried(AEG, {&"grip": VERTICAL, &"optic": SCOPE})
-	assert_almost_eq(grip.draw_time, base.draw_time * 1.25, 1e-6)
-	assert_almost_eq(grip.raise_scale, 1.25 * 1.6, 1e-6)
-	assert_almost_eq(grip.shake_scale, 0.6, 1e-9)
-	assert_almost_eq(_carried(AEG, {&"grip": ANGLED}).shake_scale, 1.3, 1e-9)
+	assert_almost_eq(grip.draw_time, base.draw_time * vertical.handling, 1e-6)
+	assert_almost_eq(grip.raise_scale, vertical.handling * scope_raise, 1e-6)
+	assert_almost_eq(grip.shake_scale, vertical.shake, 1e-9)
+	assert_lt(grip.shake_scale, 1.0, "steadier after a sprint")
+	assert_almost_eq(grip.move_spread, base.move_spread * vertical.move_spread, 1e-9, "and on the move (RP1)")
+	assert_almost_eq(_carried(AEG, {&"grip": ANGLED}).shake_scale, parts.part(&"grip", &"angled").shake, 1e-9)
+	assert_gt(_carried(AEG, {&"grip": ANGLED}).shake_scale, 1.0, "shakier after a sprint")
 
 
 func test_lasers_and_barrels_tighten_the_spread_and_barrels_and_silencers_change_energy() -> void:
 	var pistol := _base(PISTOL)
-	assert_almost_eq(_carried(PISTOL, {&"laser": LASER}, 1).spread_deg, pistol.spread_deg * 0.8, 1e-9)
+	var parts := rules.stats.parts
+	# RP1: a laser tightens the hip, never the spread itself.
+	var lit := _carried(PISTOL, {&"laser": LASER}, 1)
+	assert_almost_eq(lit.spread_deg, pistol.spread_deg, 1e-9)
+	assert_almost_eq(lit.hip_spread, pistol.hip_spread * parts.part(&"laser", &"redLaser").hip, 1e-9)
 	var base := _base(AEG)
 	var tight := _carried(AEG, {&"barrel": TIGHT_BORE})
-	assert_almost_eq(tight.spread_deg, base.spread_deg * 0.85, 1e-9)
+	assert_almost_eq(tight.spread_deg, base.spread_deg * parts.part(&"barrel", &"tightBore").spread, 1e-9)
+	assert_lt(tight.spread_deg, base.spread_deg)
 	var limit := rules.stats.energy_limit(base.site_class)
 	assert_almost_eq(tight.muzzle_energy, minf(limit, base.muzzle_energy * 0.95), 1e-9)
 	var long := _carried(AEG, {&"barrel": LONG})
-	assert_almost_eq(long.draw_time, base.draw_time * 1.15, 1e-6, "a long barrel is front-heavy")
+	var long_handling := parts.part(&"barrel", &"long").handling
+	assert_almost_eq(long.draw_time, base.draw_time * long_handling, 1e-6, "a long barrel is front-heavy")
+	assert_gt(long.draw_time, base.draw_time)
 	var silenced := _carried(AEG, {&"muzzle": SILENCER, &"barrel": LONG})
-	assert_almost_eq(silenced.muzzle_energy, minf(limit, base.muzzle_energy * 1.1 * 0.95), 1e-9)
-	assert_almost_eq(silenced.draw_time, base.draw_time * 1.15 * 1.1, 1e-6)
+	var long_energy := 1.0 + parts.part(&"barrel", &"long").energy
+	assert_almost_eq(silenced.muzzle_energy, minf(limit, base.muzzle_energy * long_energy * 0.95), 1e-9)
+	assert_almost_eq(silenced.draw_time, base.draw_time * long_handling * 1.1, 1e-6)
 	assert_almost_eq(silenced.heard_scale, 0.5, 1e-9)
 	assert_true(silenced.muffled)
 
@@ -226,7 +248,8 @@ func test_a_barrel_counts_toward_the_site_limit() -> void:
 	assert_true(rules.set_part(l, AEG, &"barrel", LONG))
 	var kit := rules.carried(l)
 	var base := _base(AEG)
-	var energy := base.muzzle_energy * (1.0 + rules.stats.power(LIPO).energy) * 1.1
+	var energy := base.muzzle_energy * (1.0 + rules.stats.power(LIPO).energy) \
+			* (1.0 + rules.stats.parts.part(&"barrel", &"long").energy)
 	var limit := rules.stats.energy_limit(base.site_class)
 	assert_almost_eq(kit.replicas[0].muzzle_energy, minf(energy, limit), 1e-9)
 	assert_eq(kit.capped[0], energy > limit)

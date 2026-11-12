@@ -823,8 +823,12 @@ func _refresh_power(item: Pool.Item, t: ReplicaTune) -> void:
 			_power_box.remove_child(_power_cards[id])
 			_power_cards[id].queue_free()
 		_power_cards.clear()
+		# The Heard from figure shows only where a source that fits changes it (the springs, RP1).
+		var with_heard := false
 		for pw in fitting:
-			var card := _power_card(pw)
+			with_heard = with_heard or not is_zero_approx(_facts.rules().stats.power(pw.id).heard)
+		for pw in fitting:
+			var card := _power_card(pw, with_heard)
 			_power_box.add_child(card)
 			_power_cards[pw.id] = card
 	for id: String in _power_cards:
@@ -833,7 +837,7 @@ func _refresh_power(item: Pool.Item, t: ReplicaTune) -> void:
 	_power_note.text = tr("CUSTOMISE_POWER_NONE")
 
 
-func _power_card(pw: Pool.Item) -> MenuCard:
+func _power_card(pw: Pool.Item, with_heard: bool) -> MenuCard:
 	var stats := _facts.rules().stats.power(pw.id)
 	var card := MenuCard.new()
 	card.name = "Power_%s" % pw.id
@@ -860,6 +864,8 @@ func _power_card(pw: Pool.Item) -> MenuCard:
 	for stat: Array in [["CUSTOMISE_POWER_ENERGY", stats.energy], ["CUSTOMISE_POWER_RATE", stats.fire_rate],
 			["CUSTOMISE_POWER_RECOIL", stats.recoil]]:
 		row.add_child(_power_stat(stat[0], stat[1]))
+	if with_heard:
+		row.add_child(_power_stat("CUSTOMISE_POWER_HEARD", stats.heard))
 	pad.add_child(row)
 	card.add_content(pad)
 	card.pressed.connect(func() -> void: power_picked.emit(pw.id))
