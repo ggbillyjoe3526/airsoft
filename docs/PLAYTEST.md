@@ -1429,6 +1429,9 @@ Subway is Dev content: tick Settings › Dev › Dev content.
   the platform, and a narrow yellow line behind it; no yellow anywhere but the platforms' edges.
 - [ ] **White tiles.** The walls are white and grey tiles, the wall across the track too; nothing looks cream or
   brown. Climbing out of the track and the cover, sight lines and bots on the platforms play as before.
+- [ ] **Detail.** Pale ribs cross each vault every few metres, a dark tiled band runs under the curve on both walls,
+  three cables run along the wall across the track and each platform edge has a dark face over the track. None of it
+  flickers or blocks a BB or a step.
 - [ ] **Frame rate.** F3 on Low looking along a platform: 60 FPS.
 
 ## Reporting what you find

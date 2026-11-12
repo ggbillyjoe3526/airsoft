@@ -311,9 +311,10 @@ func test_the_vault_s_colliders_are_drawn_as_the_arc_and_lamps_hang_under_it() -
 	for i in m.roof_lamps.size():
 		var p := m.roof_lamps[i]
 		var h := m.roof_lamp_heights[i]
-		# the platforms' and the track's own lamps (not a train's, or a level above's)
+		# the platforms' and the track's own lamps (not a train's under its roof, or a level above's)
 		var style := m.station.style_at(Vector3(p.x, v.y - 0.5, p.y))
-		if not v.area.has_point(p) or h > v.y + v.rise + 1.0 or (style != &"platform" and style != &"track"):
+		if not v.area.has_point(p) or h > v.y + v.rise + 1.0 or h < v.y - 0.5 \
+				or (style != &"platform" and style != &"track"):
 			continue
 		lit += 1
 		var arc := c.y + sqrt(c.z * c.z - pow(absf(p.y - c.x) + 0.25, 2.0))
@@ -338,6 +339,27 @@ func test_mind_the_gap_reads_from_each_platform_along_its_edge() -> void:
 	assert_eq(yellow.size(), 2, "the yellow line on each platform's edge only")
 
 
+func test_trims_lie_flat_on_the_tunnel_walls_out_of_the_way() -> void:
+	var m := _map("subway")
+	var by_finish: Dictionary[StringName, int] = {}
+	for t in m.station.trims:
+		assert_true(look.finish_sets.has(t.finish), "%s is a finish the look knows" % t.finish)
+		assert_lt(minf(t.box.size.x, t.box.size.z), 0.07, "%s lies flat on a wall" % t.finish)
+		by_finish[t.finish] = by_finish.get(t.finish, 0) + 1
+	assert_eq(by_finish.get(&"frieze", 0), 4, "a frieze on both walls of each vault")
+	assert_gt(by_finish.get(&"cable", 0), 0, "cables along the trackside walls")
+	assert_gt(by_finish.get(&"lining", 0), 0, "a face on each platform edge over the track")
+	for t in m.station.trims:
+		var v := m.station.vaults[0] if t.box.get_center().z < 0.0 else m.station.vaults[1]
+		if t.finish == &"frieze":
+			assert_lt(t.box.end.y, v.y, "the frieze stays under the springing")
+			assert_gt(t.box.position.y, 3.6, "and over the car roofs and the openings")
+		else:
+			assert_lt(t.box.end.y, 0.9, "%s stays under the platform's height" % t.finish)
+	assert_gt(look.vault_rib_every, 0.0, "the vault has ribs")
+	assert_true(look.finish_sets.has(look.vault_rib_finish), "drawn in a finish the look knows")
+
+
 func test_a_malformed_station_dress_is_warned_about_and_left_out() -> void:
 	var warnings: Array[String] = []
 	assert_null(StationDressing.read({}, warnings), "none named: none")
@@ -350,10 +372,11 @@ func test_a_malformed_station_dress_is_warned_about_and_left_out() -> void:
 				{"text": "", "x0": 0, "x1": 9, "z0": 0, "z1": 1, "y": 0.9, "height": 0.2, "every": 4, "up": -1}],
 		"vaults": [{"x0": 0, "x1": 9, "z0": 0, "z1": 7, "y": 4, "rise": 2, "thick": 0.3},
 				{"x0": 0, "x1": 9, "z0": 0, "z1": 7, "y": 4, "rise": 0, "thick": 0.3}],
+		"trims": [{"finish": "frieze", "box": [0, 9, 3.8, 4, 0, 0.02]}, {"finish": "frieze", "box": [0, 9]}],
 	}}, warnings)
-	assert_eq([d.zones.size(), d.strips.size(), d.tracks.size(), d.words.size(), d.vaults.size()], [1, 1, 1, 1, 1],
-			"the good ones kept")
-	assert_eq(warnings.size(), 7, "each bad one warned about, and the bad dress")
+	assert_eq([d.zones.size(), d.strips.size(), d.tracks.size(), d.words.size(), d.vaults.size(), d.trims.size()],
+			[1, 1, 1, 1, 1, 1], "the good ones kept")
+	assert_eq(warnings.size(), 8, "each bad one warned about, and the bad dress")
 	assert_eq(d.style_at(Vector3(0.5, 0.5, 0.5)), &"hall", "a point in a zone")
 	assert_eq(d.style_at(Vector3(5.0, 0.5, 0.5)), &"", "a point in none")
 

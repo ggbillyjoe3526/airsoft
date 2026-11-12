@@ -10,6 +10,9 @@ here adds, moves or cuts a block.
 - words: the painted words, along each platform's coping, reading from the platform.
 - tracks: each line's centre through the track and tunnel rooms on the track bed.
 - vaults: each platform tunnel's barrel vault (layout.VAULTS), drawn curved over its colliders' boxes.
+- trims: look-only boxes in a finish laid on the platform tunnels' walls (TB1, owner: "more detail ... too empty and
+  blocky"): a dark tiled frieze under each vault's springing, cable runs along the trackside walls and the platform
+  edge's dark face over each track.
 """
 from __future__ import annotations
 
@@ -123,6 +126,41 @@ def words(L, lift: float) -> list[dict]:
     return out
 
 
+# The trims (m): the frieze's band under the springing and how far it stands off its wall; the cables' heights over the
+# track bed, each this thick, standing off the trackside wall; the edge face's stand-off over the track.
+FRIEZE = (0.2, 0.02)
+FRIEZE_GAP = 0.02
+CABLES = (0.45, 0.57, 0.69)
+CABLE = 0.06
+EDGE_FACE = 0.01
+TRACK_AREAS = ("North track", "South track")
+
+
+def trims(L, lift: float) -> list[dict]:
+    out = []
+    for v in L.VAULTS:
+        top = v["y"] - FRIEZE_GAP
+        bottom = top - FRIEZE[0]
+        for wall, inward in ((v["z0"], 1), (v["z1"], -1)):
+            z0, z1 = sorted((wall, wall + inward * FRIEZE[1]))
+            out.append({"finish": "frieze", "box": [v["x0"], v["x1"], r(bottom + lift), r(top + lift), r(z0), r(z1)]})
+    for rm in L.rooms:
+        if rm["area"] not in TRACK_AREAS:
+            continue
+        v = next(v for v in L.VAULTS if v["z0"] <= rm["z0"] and rm["z1"] <= v["z1"])
+        # The trackside wall is the vault's outer side; the platform's edge the room's other side.
+        outer = rm["z0"] if abs(rm["z0"] - v["z0"]) < 1e-6 else rm["z1"]
+        edge = rm["z1"] if outer == rm["z0"] else rm["z0"]
+        inward = 1 if outer == rm["z0"] else -1
+        for y in CABLES:
+            z0, z1 = sorted((outer, outer + inward * CABLE))
+            out.append({"finish": "cable", "box": [rm["x0"], rm["x1"], r(L.T + y + lift), r(L.T + y + CABLE + lift),
+                                                   r(z0), r(z1)]})
+        z0, z1 = sorted((edge, edge - inward * EDGE_FACE))
+        out.append({"finish": "lining", "box": [rm["x0"], rm["x1"], r(L.T + lift), r(L.P + lift - 0.01), r(z0), r(z1)]})
+    return out
+
+
 def vaults(L, lift: float, thick: float) -> list[dict]:
     return [{"x0": v["x0"], "x1": v["x1"], "z0": v["z0"], "z1": v["z1"], "y": r(v["y"] + lift), "rise": L.VAULT_RISE,
              "thick": thick} for v in L.VAULTS]
@@ -130,4 +168,4 @@ def vaults(L, lift: float, thick: float) -> list[dict]:
 
 def dress(L, floor_at, ceil_at, lift: float, thick: float) -> dict:
     return {"zones": zones(L, floor_at, ceil_at, lift, thick), "strips": strips(L, lift), "words": words(L, lift),
-            "tracks": tracks(L, lift), "vaults": vaults(L, lift, thick)}
+            "tracks": tracks(L, lift), "vaults": vaults(L, lift, thick), "trims": trims(L, lift)}

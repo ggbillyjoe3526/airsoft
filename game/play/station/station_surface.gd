@@ -71,6 +71,10 @@ static func mesh(m: MapData, style: MapStyle, look: StationLook, props: PropDres
 		add_face(st, look, quad, s.finish, look.tint_of(s.finish, null), NO_FLOOR)
 	for w in dress.words:
 		PlatformWords.add(st, look, w)
+	for t in dress.trims:
+		var tint := look.tint_of(t.finish, null)
+		for f in GreyboxFaces.box_faces(t.box.position, t.box.end):
+			add_face(st, look, f, t.finish, tint, NO_FLOOR)
 	for t in dress.tracks:
 		_add_track(st, look, t)
 	for v in dress.vaults:
@@ -129,6 +133,7 @@ static func add_vault(st: SurfaceTool, look: StationLook, v: StationDressing.Tun
 			st.set_normal(normals[i])
 			st.set_uv(uvs[i] / size)
 			st.add_vertex(quad[i])
+	_add_ribs(st, look, v)
 	for end: float in [x0 + look.vault_proud, x1 - look.vault_proud]:
 		var cap := PackedVector3Array()
 		for k in steps + 1:
@@ -138,6 +143,47 @@ static func add_vault(st: SurfaceTool, look: StationLook, v: StationDressing.Tun
 		if (GreyboxFaces.face_normal(cap).x > 0.0) != (end < v.area.get_center().x):
 			cap.reverse()
 		add_face(st, look, cap, finish, tint, NO_FLOOR)
+
+
+## Vault `v`'s ribs: a band `vault_rib_width` m wide round the arc every `vault_rib_every` m along it, standing
+## `vault_rib_depth` m under it (the tunnel's lining rings), its underside and both sides drawn.
+static func _add_ribs(st: SurfaceTool, look: StationLook, v: StationDressing.TunnelVault) -> void:
+	if look.vault_rib_every <= 0.0 or look.vault_rib_width <= 0.0 or look.vault_rib_depth <= 0.0:
+		return
+	var steps := maxi(look.vault_steps, 2)
+	var half := v.half_angle()
+	var c := v.circle()
+	var inner := c.z - look.vault_rib_depth
+	var finish := look.vault_rib_finish
+	var tint := look.tint_of(finish, null)
+	var length := v.area.size.x
+	var count := floori((length - look.vault_rib_width) / look.vault_rib_every)
+	var first := v.area.position.x + (length - float(count) * look.vault_rib_every) * 0.5
+	for n in count + 1:
+		var xa := first + float(n) * look.vault_rib_every - look.vault_rib_width * 0.5
+		var xb := xa + look.vault_rib_width
+		for k in steps:
+			var a := -half + 2.0 * half * float(k) / float(steps)
+			var b := -half + 2.0 * half * float(k + 1) / float(steps)
+			var ia := Vector2(c.x + inner * sin(a), c.y + inner * cos(a))
+			var ib := Vector2(c.x + inner * sin(b), c.y + inner * cos(b))
+			var oa := v.point(a)
+			var ob := v.point(b)
+			# its underside, facing the tunnel's middle (each face anticlockwise seen from the side it faces)
+			_add_facing(st, look, [Vector3(xa, ia.y, ia.x), Vector3(xa, ib.y, ib.x), Vector3(xb, ib.y, ib.x),
+					Vector3(xb, ia.y, ia.x)], Vector3(0.0, -cos((a + b) * 0.5), -sin((a + b) * 0.5)), finish, tint)
+			for side: float in [xa, xb]:
+				_add_facing(st, look, [Vector3(side, oa.y, oa.x), Vector3(side, ob.y, ob.x), Vector3(side, ib.y, ib.x),
+						Vector3(side, ia.y, ia.x)], Vector3(signf(side - (xa + xb) * 0.5), 0.0, 0.0), finish, tint)
+
+
+## Appends quad `q` in `finish` facing `toward` (its corners' order turned round when they face away).
+static func _add_facing(st: SurfaceTool, look: StationLook, q: Array[Vector3], toward: Vector3, finish: StringName,
+		tint: Color) -> void:
+	var f := PackedVector3Array(q)
+	if GreyboxFaces.face_normal(f).dot(toward) < 0.0:
+		f.reverse()
+	add_face(st, look, f, finish, tint, NO_FLOOR)
 
 
 ## Point `p`'s place (m) on the plane of a face facing `n`: a floor or ceiling's x and z, a wall's along and up (up the

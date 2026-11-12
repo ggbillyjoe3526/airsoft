@@ -82,7 +82,16 @@ class TunnelVault:
 		return AABB(lo, hi - lo)
 
 
+## A look-only box laid on the shell (TB1: a frieze under a vault's springing, a cable run, a platform edge's face),
+## drawn in `finish`.
+class Trim:
+	extends RefCounted
+	var finish: StringName = &""
+	var box: AABB = AABB()
+
+
 var zones: Array[Zone] = []
+var trims: Array[Trim] = []
 var words: Array[Words] = []
 var vaults: Array[TunnelVault] = []
 var strips: Array[Strip] = []
@@ -136,6 +145,13 @@ static func read(dressing: Variant, warnings: Array[String]) -> StationDressing:
 			warnings.append("dressing.station.vaults %d needs x0, x1, z0, z1, y, rise and thick; left out" % i)
 			continue
 		out.vaults.append(v)
+	var laid: Variant = d.get("trims", [])
+	for i in (laid as Array).size() if laid is Array else 0:
+		var t := _trim((laid as Array)[i])
+		if t == null:
+			warnings.append("dressing.station.trims %d needs a finish and a box [x0, x1, y0, y1, z0, z1]; left out" % i)
+			continue
+		out.trims.append(t)
 	out._index()
 	return out
 
@@ -217,6 +233,20 @@ static func _zone(raw: Variant) -> Zone:
 	z.box = AABB(Vector3(v[0], v[2], v[4]), Vector3(v[1] - v[0], v[3] - v[2], v[5] - v[4]))
 	z.owns = d.get("owns", false) == true
 	return z
+
+
+static func _trim(raw: Variant) -> Trim:
+	if not raw is Dictionary:
+		return null
+	var finish: Variant = (raw as Dictionary).get("finish")
+	# A zone's reading of a finish and a box is a trim's too.
+	var z := _zone({"style": finish, "box": (raw as Dictionary).get("box")})
+	if z == null:
+		return null
+	var t := Trim.new()
+	t.finish = z.style
+	t.box = z.box
+	return t
 
 
 static func _strip(raw: Variant) -> Strip:

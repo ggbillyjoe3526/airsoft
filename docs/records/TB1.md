@@ -6,7 +6,8 @@ Owner's ask (2026-11-12): "curved ceilings for the platforms. The yellow mind th
 edges. The wall opposite a platform should be back (same as in the tunnel). I want the map to look more realistic like
 the London tube stations." After the first pictures: "Give the tiles a more white/grey look. Also, the far side track
 black wall not be black anymore. It should be white and almost match the rest of the station design. There can be
-larger posters on the walls."
+larger posters on the walls." Later: "The platform texture should be more solid and clean looking" and "Give the platforms
+more detail and make more realistic. It looks too empty and blocky."
 
 ## Attempts
 
@@ -48,6 +49,16 @@ larger posters on the walls."
 - **The air over a car is the track's** (attempt 2): a zone over each vault's cars gives the trackside wall over a car
   and its roof the track's tiles (they faced no room and drew as the dark outside, a black wedge over the north car's
   west end).
+
+- **Floors** (owner, after v3): the platforms' floor is its own `platform_floor` finish, smooth even grey concrete
+  (Concrete034 at 4 m a copy; the plant and service rooms keep the stained `platform` concrete), and the track bed's
+  ballast is a near-black grey (owner's ask in the lamps and extras thread; the track bed is this task's shell).
+- **Detail** (owner, "too empty and blocky"): the shell's own Tube details, look only, no collider moved. Ribs across
+  each vault every 6 m (`StationLook.vault_rib_*`, 0.3 m wide, 5 cm deep, pale concrete), a dark green-grey tiled
+  frieze 0.2 m deep just under the springing on both walls, three cable runs on the trackside wall over the track bed
+  and a dark face on each platform edge over the track (`dressing.station.trims`, drawn by StationSurface in each
+  trim's finish). The frieze stays over the car roofs and the openings; cables and edge stay under the platform. The
+  benches, signs, posters, booths and trains come from the model threads (SM1 to SM5).
 
 ## Known issues
 

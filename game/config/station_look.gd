@@ -29,14 +29,14 @@ extends Resource
 	&"boards": &"Planks008", &"quarry": &"Tiles017", &"painted": &"Concrete029", &"car": &"PaintedMetal012",
 	&"coping": &"Concrete035", &"soot": &"Concrete029", &"rail": &"Rust004", &"sleeper": &"Concrete035",
 	&"gap_line": &"PaintedMetal012", &"paint": &"PaintedMetal012", &"vault_tile": &"Tiles136B",
-	&"platform_floor": &"Concrete034",
+	&"platform_floor": &"Concrete034", &"vault_rib": &"Concrete034", &"frieze": &"Tiles136B", &"cable": &"Rubber004",
 }
 @export var finish_scales: Dictionary[StringName, float] = {
 	&"wall_tile": 0.6, &"terrazzo": 2.0, &"plaster": 2.5, &"concrete": 3.0, &"platform": 2.5, &"ballast": 1.6,
 	&"tread": 0.8, &"steel": 1.5, &"rust": 2.0, &"shutter": 1.6, &"planks": 1.5, &"plant": 2.5, &"rubber": 1.5,
 	&"tactile": 0.8, &"lining": 2.4, &"boards": 1.8, &"quarry": 1.2, &"painted": 2.5, &"car": 1.5, &"coping": 1.0,
 	&"soot": 3.0, &"rail": 0.5, &"sleeper": 1.0, &"gap_line": 2.0, &"paint": 2.0,
-	&"vault_tile": 0.6, &"platform_floor": 4.0,
+	&"vault_tile": 0.6, &"platform_floor": 4.0, &"vault_rib": 2.0, &"frieze": 0.6, &"cable": 1.0,
 }
 @export var finish_tints: Dictionary[StringName, Color] = {
 	# TB1 (owner, 2026-11-12: "a more white/grey look"): white glazed tiles, faintly cool.
@@ -49,6 +49,9 @@ extends Resource
 	&"gap_line": Color8(0xe0, 0xbc, 0x2a), &"paint": Color8(0xe8, 0xe6, 0xe0),
 	# The platforms' floor: smooth, even grey concrete (owner, 2026-11-12: "more solid and clean looking").
 	&"platform_floor": Color8(0xb8, 0xb8, 0xb6),
+	# TB1's trims: the vault's ribs in pale grey paint, the frieze in dark green-grey tiles (a band of colour off both
+	# team hues), the cables black rubber.
+	&"vault_rib": Color8(0xc8, 0xcb, 0xcc), &"frieze": Color8(0x3c, 0x48, 0x44), &"cable": Color8(0x60, 0x60, 0x60),
 	# The track bed's ballast a dark grey, near black, under the rails (owner, 2026-11-12).
 	&"ballast": Color8(0x4a, 0x4a, 0x4a),
 	# The vault's tiles, the walls' faintly cooler: the warm light from below would turn a down-facing white tan.
@@ -57,7 +60,8 @@ extends Resource
 ## The finishes painted the one safety colour (yellow, off both team hues): their tints may be saturated.
 @export var safety_finishes: Array[StringName] = [&"gap_line"]
 @export var finish_pbr: Dictionary[StringName, Vector2] = {
-	&"wall_tile": Vector2(0.7, 0.0), &"vault_tile": Vector2(0.7, 0.0), &"terrazzo": Vector2(0.8, 0.0),
+	&"wall_tile": Vector2(0.7, 0.0), &"vault_tile": Vector2(0.7, 0.0), &"frieze": Vector2(0.6, 0.0),
+	&"terrazzo": Vector2(0.8, 0.0),
 	&"tread": Vector2(0.9, 0.6), &"steel": Vector2(1.0, 0.2), &"car": Vector2(0.9, 0.3),
 	&"rust": Vector2(1.0, 0.3), &"shutter": Vector2(1.0, 0.4),
 	&"rail": Vector2(0.8, 0.5), &"gap_line": Vector2(0.8, 0.0), &"paint": Vector2(0.8, 0.0),
@@ -111,6 +115,12 @@ extends Resource
 @export var vault_finish: StringName = &"vault_tile"
 @export var vault_steps: int = 32
 @export var vault_proud: float = 0.01
+## The vault's ribs (TB1: its lining rings): one `vault_rib_width` m wide every `vault_rib_every` m along it, standing
+## `vault_rib_depth` m under the arc, in `vault_rib_finish` (look only: BBs meet the vault's colliders).
+@export var vault_rib_every: float = 6.0
+@export var vault_rib_width: float = 0.3
+@export var vault_rib_depth: float = 0.05
+@export var vault_rib_finish: StringName = &"vault_rib"
 ## The track: rails a standard gauge apart (m, between their middles), each a head this wide and tall; sleepers this
 ## long, wide and tall, one every `sleeper_pitch` m. Scenery: no collider (a rail stands lower than a step).
 @export var gauge: float = 1.5
