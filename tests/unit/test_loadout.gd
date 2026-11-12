@@ -152,7 +152,9 @@ func test_a_battery_sets_the_rate_and_gas_the_energy_and_kick() -> void:
 	assert_almost_eq(kit.replicas[0].fire_rate, plain.replicas[0].fire_rate * 1.15, 1e-6)
 	assert_almost_eq(kit.replicas[0].muzzle_energy, plain.replicas[0].muzzle_energy, 1e-9)
 	assert_almost_eq(kit.replicas[1].muzzle_energy, plain.replicas[1].muzzle_energy * 1.2, 1e-6)
-	assert_almost_eq(kit.replicas[1].recoil_deg, plain.replicas[1].recoil_deg * 1.2, 1e-6)
+	# RP1: Black Gas kicks 40 % harder and cycles the slide a tenth slower (20 % and no slower before).
+	assert_almost_eq(kit.replicas[1].recoil_deg, plain.replicas[1].recoil_deg * 1.4, 1e-6)
+	assert_almost_eq(kit.replicas[1].fire_rate, plain.replicas[1].fire_rate * 0.9, 1e-6)
 	assert_eq(kit.capped, [false, false] as Array[bool])
 	assert_false(kit.dev)
 

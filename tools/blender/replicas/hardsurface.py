@@ -13,6 +13,8 @@ import bpy  # first: it brings bmesh and mathutils with it
 import bmesh
 from mathutils import Matrix, Vector
 
+import surface
+
 # How finished parts are shaded: edges sharper than this split the shading.
 SHARP_ANGLE = math.radians(32.0)
 # The bevel's angle limit: only edges sharper than this are rounded.
@@ -239,7 +241,7 @@ class Builder:
         self.bm.to_mesh(me)
         self.bm.free()
         for n in self.mats:
-            me.materials.append(bpy.data.materials[n])
+            me.materials.append(surface.material(n))
         ob = bpy.data.objects.new(self.name, me)
         bpy.context.scene.collection.objects.link(ob)
         return ob
@@ -264,8 +266,10 @@ def apply_modifiers(ob: bpy.types.Object) -> None:
     me.name = ob.name
 
 
-def cut(ob: bpy.types.Object, cutters: list, op: str = "DIFFERENCE") -> None:
-    """Boolean `ob` with each cutter object (exact solver), then deletes the cutters."""
+def cut(ob: bpy.types.Object, cutters: list, op: str = "DIFFERENCE", keep_materials: bool = False) -> None:
+    """Boolean `ob` with each cutter object (exact solver), then deletes the cutters. The faces a cutter leaves take
+    `ob`'s first material, or with `keep_materials` the cutter's own (a union of a part made of something else, MQ1:
+    the cutters then share one list of materials)."""
     if not cutters:
         return
     bm = bmesh.new()
@@ -275,6 +279,12 @@ def cut(ob: bpy.types.Object, cutters: list, op: str = "DIFFERENCE") -> None:
     me = bpy.data.meshes.new(ob.name + "_cut")
     bm.to_mesh(me)
     bm.free()
+    if keep_materials:
+        names = [[m.name for m in c.data.materials] for c in cutters]
+        if any(n != names[0] for n in names):
+            raise ValueError("cut: cutters with different materials %s" % names)
+        for m in cutters[0].data.materials:
+            me.materials.append(m)
     tool = bpy.data.objects.new(ob.name + "_cut", me)
     bpy.context.scene.collection.objects.link(tool)
     mod = ob.modifiers.new("cut", "BOOLEAN")
@@ -453,10 +463,14 @@ def fold_material(base: str, extra: str) -> None:
 
 
 def export(path: str, animated: bool, webp: int = 0) -> None:
-    """Writes the scene to `path` as a glTF binary. With `webp` (a quality, 1..100), its images are stored as WebP at
-    that quality (EXT_texture_webp, which Godot reads): a 2K painted set a fraction of its PNG size."""
+    """Writes the scene to `path` as a glb, each mesh's surface kinds (surface.py, MQ1) as its vertex colours. With
+    `webp` (a quality, 1..100), its images are stored as WebP at that quality (EXT_texture_webp, which Godot reads):
+    a 2K painted set a fraction of its PNG size."""
+    surface.adopt()
     images = {"export_image_format": "WEBP", "export_image_quality": webp} if webp else {}
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=False, export_apply=True,
                               export_animations=animated, export_animation_mode="NLA_TRACKS", export_yup=True,
                               export_draco_mesh_compression_enable=False, export_extras=False,
-                              export_cameras=False, export_lights=False, **images)
+                              export_cameras=False, export_lights=False, export_vertex_color="NAME",
+                              export_vertex_color_name=surface.ATTR, export_all_vertex_colors=False,
+                              export_active_vertex_color_when_no_material=False, **images)

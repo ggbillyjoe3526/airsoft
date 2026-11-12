@@ -73,7 +73,7 @@ SIGN_OVER = 0.35   # a wall sign's middle over an escalator's or a stair's mouth
 # walls, ESC_STEP apart, their middles this far over the stairs' pitch line, clear of the first and last 2 m.
 ESC_SCALE = 0.6
 ESC_STEP = 2.0
-ESC_ROWS = [("esc_up", -35.0, -21.0, 2.1), ("esc_low", -3.0, 7.0, 1.7)]
+ESC_ROWS = [("esc_up", -35.0, -21.0, 2.1), ("esc_low", -3.5, 6.5, 1.9)]
 
 # The spots: (model, room, wall, along, height over the floor) for a wall model; (model, room, x, z) hung or on the
 # floor; a hung sign's yaw 90 puts "Way out" facing east, read by those heading west towards the street, and
@@ -166,6 +166,7 @@ HUNG = [
     ("departures_n", "plat_n", -10.75, -7.25, 90.0), ("departures_n", "plat_n", 30.5, -7.25, 90.0),
     ("departures_s", "plat_s", -12.77, 7.25, 90.0), ("departures_s", "plat_s", 42.15, 7.25, 90.0),
 ]
+VAULT_DROP = 0.06   # a hung model's top under a vault's springing (m); drop rods (build_map.drop_rods) hold it
 # Bins against a wall (their back to it): (room, wall, along).
 BINS = [
     ("hall", "s", -43.5), ("upper", "s", -9.0), ("plat_n", "s", -37.8), ("plat_n", "s", 26.3),
@@ -258,7 +259,8 @@ def place(L, floor_at, ceil_at, air_boxes, lift: float, holes: list) -> list[dic
             add(model, x, y, z, yaw, scale)
     for model, name, x, z, yaw in HUNG:
         rm = rooms[name]
-        y = ceil_at(rm, floor_at(rm, x))
+        # under a vault (TB1), hung on drop rods from the arc a little under its springing, clear of its colliders
+        y = ceil_at(rm, floor_at(rm, x)) - (VAULT_DROP if rm["vault"] else 0.0)
         if clear(model, world_box(model, x, y - 0.002, z, yaw), "hung in %s at (%.1f, %.1f)" % (name, x, z)):
             add(model, x, y, z, yaw)
     for name, wall, along in BINS:

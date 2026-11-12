@@ -30,6 +30,7 @@ from mathutils import Matrix, Vector  # noqa: E402
 
 import figure_copy  # noqa: E402
 import hardsurface as hs  # noqa: E402
+import surface  # noqa: E402
 import wear  # noqa: E402
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
@@ -207,6 +208,12 @@ MATERIALS = {
     "Accent": (0xf2f0ea, 0.5, 0.0), "Metal": (0x3c4046, 0.38, 0.6), "Stipple": (0x22252a, 0.95, 0.0),
     "BB": (0xf4f1e8, 0.3, 0.0),
 }
+
+
+# What each material's faces are made of unless a part says otherwise (surface.py, MQ1; owner, 2026-11-12: "Pistol
+# slides are metal and body's made of polymer/plastic"): a steel slide and barrel on a polymer frame, the polymer
+# trigger, magazine catch, sights and magazine of the pistol it follows.
+SURFACES = {"Body": "steel", "Furniture": "polymer", "Detail": "polymer", "Accent": "polymer", "Metal": "steel"}
 
 
 def pts(trace: list) -> list:
@@ -1117,7 +1124,9 @@ def build() -> None:
     for name, loc in EMPTIES.items():
         hs.empty(name, loc, arm)
     clips(arm)
+    surface.resolve(SURFACES)
     fig = figure_copy.make(FIGURE_TRIS)
+    surface.strip()
     total = 0
     for ob in bpy.data.objects:
         if ob.type == "MESH":

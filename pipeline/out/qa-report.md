@@ -1,18 +1,18 @@
-Task: EC1 · QA commit pending · Verdict: Pass
+Task: none (MQ1) · QA commit this commit · Verdict: Pass
 
-Blocking: none.
-Advisory:
-- game/play/sim_audio.gd:521 (_exit_tree set_echo(null)) resets the global Shots bus when ANY SimAudio leaves the tree. If a new Subway SimAudio were set up before the old one is freed (overlap), the old one's exit would silence the new echo. Not reproducible via the current scene change/restart order (old exits first); no test pins it.
-- The echo is global AudioServer state; tests that call setup with a Subway map must reset it (the EC1 test does in after_each).
+Attempt 2 review (git diff 370f289 HEAD, the 16-slot change).
+Blocking: none. Advisory: none new.
 
-Checked (all hold): Shots is bus 3 under Effects; Power, Muffled, ShotsHalf, ShotsFull send to Shots; every bus sends to a lower index; reverb is Shots' effect 0, off by default, bus 0 dB. Only &"subway" has an echo; range, depot, woodland, kingsmere (old id), unknown and no map set the bus dry. Occlusion levels for Shots equal Effects' at 0.3/0.5/0.8/1.0; Effects/Footsteps/Power mapping unchanged; silenced shot open stays on Muffled, occluded goes to ShotsHalf/Full. Leaving the tree restores 0 dB / reverb off; repeated set_echo keeps one effect. Settings volume buses (Master/Effects/Power/Ambience/Interface) untouched.
+Checked by reading and by test:
+- No code path still assumes 8 slots: grep of game/, tests/, tools/ finds no `* 8`, no old names (worn_materials, MAX_WORN, OWN_GLOW) left; renamed callers (play_session, tests) use surface_materials / surfaced.
+- ReplicaSurfaces._build pads to SLOTS (16) for indices past the 7 kinds with the polymer row, so kind_finish/grain/tone/shine are all 16 long; KINDS = 16 and hint_range(0, 15) in the shader match. Alpha 1.0 (no colours) reads 16 -> default_kind (never indexes a table).
+- Chroma maths: divisor is max(top, CHROMA_FLOOR), so pure black is safe; a paint above 1 (bare gain 2.2) only raises chroma, mix stays finite.
+- Part and attachment/magazine files (not rebuilt) carry no kinds or only valid sixteenths: scan test below passes, so they draw as default polymer / steel by part.
+- Shader compile: tests that build and dress the material (test_replica_surfaces, test_replica_wear, test_mq1_qa) run without script errors headless; a Compatibility-renderer compile needs a display (owner's list).
 
-Tests added (tests/unit/test_ec1_shot_echo.gd, after the existing six):
-- :105 every bus sends to a lower index; Shots children wired right. Fails if a send is reordered/wrong (checked by reading old layout: Power/Muffled sent to Effects).
-- :117 other maps incl. kingsmere/unknown dry after a Subway echo. Fails if setup skipped set_echo(null).
-- :125 silenced shot open/occluded bus. Fails with the old EffectsHalf mapping.
-- :130 set_echo twice / null twice leaves one effect. Guards effect duplication.
-Existing six EC1 tests reviewed, they exercise the criteria.
+Tests added (tests/unit/test_mq1_qa.gd):
+- test_every_replica_and_part_file_names_kinds_in_sixteenths_or_none · scans every vertex-colour alpha in assets/models/replicas and replicaParts for a whole slot below KINDS or 16 · fails on a file still cut for 8 slots (alpha 1/8 would be 2 sixteenths... checked by reasoning, not by a stale file; no stale glb exists to stub).
+- test_all_four_kind_tables_are_the_shaders_length · dress() sets four tables of SLOTS entries and the include's KINDS equals SLOTS · fails if either side is changed alone (old value 8 vs 16).
 
-Suite (individual files, no check.sh per instructions): test_ec1_shot_echo 10/10, sound_mix 8, sound_occlusion 13, au1_qa 27, sp2_qa 9, parts_in_play 15, subway_rename 3: all pass. gdlint clean. Raw: pipeline/out/qa/ec1_test.txt.
-Not tested: how the reverb sounds, real audio output, smoke match (check.sh running elsewhere); owner to listen on Subway vs Woodland.
+Runs: test_mq1_qa 8/8, test_replica_surfaces 14/14, test_replica_wear 15/15; gdlint clean. Full suite, smoke and check.sh not run (background suite ran per instruction).
+Not testable here: Compatibility/Forward+ shader look, turntable and menu pictures on screen, bots' figure copies visually (display needed).

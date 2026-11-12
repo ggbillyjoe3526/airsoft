@@ -44,7 +44,10 @@ func _run() -> void:
 			continue
 		var inst := MeshInstance3D.new()
 		inst.mesh = mesh
-		inst.material_override = LookMaterials.vertex_colour(0.7, 0.0)
+		var mat := LookMaterials.vertex_colour(0.7, 0.0)
+		# The props' own perforations and ribs, as PropDress draws them.
+		mat.set_shader_parameter(&"perforations", true)
+		inst.material_override = mat
 		stage.add_child(inst)
 		var box := mesh.get_aabb()
 		var name := model.get_file().get_basename()

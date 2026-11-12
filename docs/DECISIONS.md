@@ -796,6 +796,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
 
 ## Replicas, Loadout and levels
 
+- **Replicas are made of steel, aluminium and polymer under any paint (owner, 2026-11-12, MQ1).** "Pistol slides
+  are metal and body's made of polymer/plastic. Rifles should be mostly metal and sniper rifle barrel is metal." On
+  the first pictures: "Black polymer should be darker but not as dark as the black metals. Also, the white polymer
+  should be less bright. I don't like the wooden sniper rifle so remove that and keep polymer." So black metal is
+  the darkest, black polymer a shade lighter, white polymer an off-white, and the sniper's stock stays polymer; no
+  replica is wood. The values are `ReplicaSurfaces.LOOKS` (docs/records/MQ1.md).
 - **The next replica is a spring sniper rifle, and the owner is asked how to build it and its specs before work starts
   (owner, 2026-10-06).** The SMG and shotgun come after it.
 - **The Cyber Pistol is the owner's own design and the level cap's reward (owner, 2026-10-04; level 10 since
@@ -900,6 +906,19 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   the Variable Scope so the level isn't empty with Dev content off (LV15, owner 2026-11-10; level 7 at first). A
   Breacher bot kit (red dot, rushers and flankers). Its own sound profile `smg`, a stand-in from the owner's AEG motor
   until he records one.
+- **Every replica and part has a job of its own (owner, 2026-11-12, RP1).** "Make sure each weapon has its own
+  strengths and weaknesses. Each weapon should feel unique and attachments should offer incentives to use while also
+  feeling unique from each other. Feel free to make any changes to the specs." Defaults taken (the owner may change
+  any; the numbers are `data/stats.md`'s, the reasons `docs/records/RP1.md`): the AEG Rifle the all-rounder; the GBB
+  Pistol the quickest to hand; the Cyber Pistol keeps his design above (rifle power, the tightest automatic, almost
+  no kick) and pays for it in BBs (30 × 3) and on the run; the Sniper Rifle slow on its feet; the Compact SMG as
+  approved. The Vertical Grip steadies the spread on the move, the Red Laser tightens only shots from the hip and
+  costs handling, the long barrel is reach alone, the hi-cap changes slower, the LiPo and the stronger gases kick
+  harder; every optic is a little slower to bring up than the iron sights (the Red Dot too: no part is
+  free). **The springs differ (owner, 2026-11-12: "Springs should have differences")**: the M130 quick and quiet,
+  the M140 the middle one, the M150 the long shot with the slowest bolt, the hardest kick and the loudest crack (a
+  Heard from column on the power sources). The numbers above this entry (the Long Barrel's 10 % tighter groups, the
+  gases' and springs' +10 % and +20 % recoil, the scopes' 1.9 and 1.6) are as ruled then; stats.md has today's.
 
 ## Menus, HUD, settings and accessibility
 
