@@ -5,8 +5,11 @@ here adds, moves or cuts a block.
 
 - zones: every room's air as boxes with its style; a ramp room's in slices SLICE m long, each from its floor's lowest
   there, so a face looking into the slope finds it. Rooms that own their blocks (the trains) come first.
-- strips: each platform's edge, a pale coping stone and yellow tactile paving behind it.
+- strips: each platform's edge as London's (owner, 2026-11-12: the yellow line only at the platforms' edges): a pale
+  coping stone, MIND THE GAP painted on it every few metres, and the yellow line behind it.
+- words: the painted words, along each platform's coping, reading from the platform.
 - tracks: each line's centre through the track and tunnel rooms on the track bed.
+- vaults: each platform tunnel's barrel vault (layout.VAULTS), drawn curved over its colliders' boxes.
 """
 from __future__ import annotations
 
@@ -27,8 +30,12 @@ SLICE = 1.0                # a ramp room's zone slices (m along x)
 UNDER = 0.1                # each zone reaches this far under its floor
 # The platforms' edges: the room and the side its track lies on; the coping and the tactile strip's widths (m).
 EDGES = [("plat_n", "n"), ("plat_s", "s")]
-COPING = 0.3
-TACTILE = 0.4
+COPING = 0.45
+GAP_LINE = 0.1
+# The words on the coping: the text, its letters' height (m, across the coping) and one every WORDS_EVERY m.
+WORDS = "MIND THE GAP"
+WORDS_HEIGHT = 0.24
+WORDS_EVERY = 12.0
 # The tracks' centre lines (z) and the areas whose rooms on the track bed carry them.
 LINES = [(-10.75, ("North track", "North tunnel")), (10.75, ("South track", "South tunnel"))]
 
@@ -74,7 +81,7 @@ def strips(L, lift: float) -> list[dict]:
         y = r(rm["ya"] + lift)
         edge = rm["z0"] if side == "n" else rm["z1"]
         inward = 1 if side == "n" else -1
-        for finish, a, b in (("coping", 0.0, COPING), ("tactile", COPING, COPING + TACTILE)):
+        for finish, a, b in (("coping", 0.0, COPING), ("gap_line", COPING, COPING + GAP_LINE)):
             z0, z1 = sorted((edge + inward * a, edge + inward * b))
             out.append({"finish": finish, "x0": rm["x0"], "x1": rm["x1"], "z0": r(z0), "z1": r(z1), "y": y})
     return out
@@ -96,5 +103,26 @@ def tracks(L, lift: float) -> list[dict]:
     return out
 
 
-def dress(L, floor_at, ceil_at, lift: float) -> dict:
-    return {"zones": zones(L, floor_at, ceil_at, lift), "strips": strips(L, lift), "tracks": tracks(L, lift)}
+def words(L, lift: float) -> list[dict]:
+    """The words along each platform's coping: `up` the way their tops face (towards the track), so they read from
+    the platform."""
+    out = []
+    by_name = {rm["name"]: rm for rm in L.rooms}
+    for name, side in EDGES:
+        rm = by_name[name]
+        edge = rm["z0"] if side == "n" else rm["z1"]
+        inward = 1 if side == "n" else -1
+        z0, z1 = sorted((edge, edge + inward * COPING))
+        out.append({"text": WORDS, "x0": rm["x0"], "x1": rm["x1"], "z0": r(z0), "z1": r(z1), "y": r(rm["ya"] + lift),
+                    "height": WORDS_HEIGHT, "every": WORDS_EVERY, "up": -inward})
+    return out
+
+
+def vaults(L, lift: float, thick: float) -> list[dict]:
+    return [{"x0": v["x0"], "x1": v["x1"], "z0": v["z0"], "z1": v["z1"], "y": r(v["y"] + lift), "rise": L.VAULT_RISE,
+             "thick": thick} for v in L.VAULTS]
+
+
+def dress(L, floor_at, ceil_at, lift: float, thick: float) -> dict:
+    return {"zones": zones(L, floor_at, ceil_at, lift), "strips": strips(L, lift), "words": words(L, lift),
+            "tracks": tracks(L, lift), "vaults": vaults(L, lift, thick)}

@@ -2,8 +2,9 @@ class_name StationDressing
 extends RefCounted
 ## A map's station dress (MT3, Subway; `dressing.station` in its file, written by tools/subway/build_map.py): the
 ## rooms' air as boxes, each with its style (StationLook's floors, walls and ceilings), the platforms' edge strips and
-## the track's centre lines. Plain data, look only: no collider, no nav cell. A map without `dressing.station` has none
-## (null); a malformed zone, strip or track is left out with a warning.
+## painted words, the track's centre lines and the platform tunnels' vaults. Plain data, look only: no collider, no nav
+## cell (a vault's colliders are the map's blocks). A map without `dressing.station` has none (null); a malformed zone,
+## strip, words, track or vault is left out with a warning.
 
 ## The zones are looked up in columns this many metres wide (x).
 const COLUMN := 8.0
@@ -36,7 +37,54 @@ class Track:
 	var y: float = 0.0
 
 
+## Words painted on a floor (TB1: MIND THE GAP on a platform's coping): `text` in letters `height` m tall across
+## `area` (x, z) at height `y`, one every `every` m along x, their tops facing `up` (-1 or 1 along z) so they read from
+## the side facing away.
+class Words:
+	extends RefCounted
+	var text: String = ""
+	var area: Rect2 = Rect2()
+	var y: float = 0.0
+	var height: float = 0.0
+	var every: float = 0.0
+	var up: float = 1.0
+
+
+## A platform tunnel's barrel vault (TB1): an arc over `area` (x along, z across), springing from both long sides at
+## height `y` and rising `rise` m at its middle; its colliders (blocks) fill above the arc up to `thick` m over the
+## crown and close its ends `thick` m deep. Drawn curved by StationSurface in place of those blocks.
+class TunnelVault:
+	extends RefCounted
+	var area: Rect2 = Rect2()
+	var y: float = 0.0
+	var rise: float = 0.0
+	var thick: float = 0.0
+
+	## The arc's circle: its middle's z and y and its radius.
+	func circle() -> Vector3:
+		var half := area.size.y * 0.5
+		var radius := (half * half + rise * rise) / (2.0 * rise)
+		return Vector3(area.get_center().y, y + rise - radius, radius)
+
+	## Half the angle (radians) the arc spans, from its middle to a springing.
+	func half_angle() -> float:
+		return asin(clampf(area.size.y * 0.5 / circle().z, 0.0, 1.0))
+
+	## The arc's point (z, y) at angle `a` from its crown (positive towards +z).
+	func point(a: float) -> Vector2:
+		var c := circle()
+		return Vector2(c.x + c.z * sin(a), c.y + c.z * cos(a))
+
+	## The space its colliders fill, over its springing (a block inside it is drawn as the arc, not as itself).
+	func lid() -> AABB:
+		var lo := Vector3(area.position.x - thick, y, area.position.y) - Vector3.ONE * LEVEL_GAP
+		var hi := Vector3(area.end.x + thick, y + rise + thick, area.end.y) + Vector3.ONE * LEVEL_GAP
+		return AABB(lo, hi - lo)
+
+
 var zones: Array[Zone] = []
+var words: Array[Words] = []
+var vaults: Array[TunnelVault] = []
 var strips: Array[Strip] = []
 var tracks: Array[Track] = []
 ## Zone indices by column (floor(x / COLUMN)), in the file's order; built by `read`.
@@ -74,8 +122,30 @@ static func read(dressing: Variant, warnings: Array[String]) -> StationDressing:
 			warnings.append("dressing.station.tracks %d needs x0, x1, z0, z1 and y; left out" % i)
 			continue
 		out.tracks.append(t)
+	var said: Variant = d.get("words", [])
+	for i in (said as Array).size() if said is Array else 0:
+		var w := _words((said as Array)[i])
+		if w == null:
+			warnings.append("dressing.station.words %d needs text, x0, x1, z0, z1, y, height, every and up; left out" % i)
+			continue
+		out.words.append(w)
+	var arcs: Variant = d.get("vaults", [])
+	for i in (arcs as Array).size() if arcs is Array else 0:
+		var v := _vault((arcs as Array)[i])
+		if v == null:
+			warnings.append("dressing.station.vaults %d needs x0, x1, z0, z1, y, rise and thick; left out" % i)
+			continue
+		out.vaults.append(v)
 	out._index()
 	return out
+
+
+## Whether block box `box` lies in a vault's colliders (drawn as its arc instead).
+func in_vault(box: AABB) -> bool:
+	for v in vaults:
+		if v.lid().encloses(box):
+			return true
+	return false
 
 
 ## The zone point `p` lies in (the first the file lists), or null.
@@ -173,6 +243,47 @@ static func _track(raw: Variant) -> Track:
 	t.to = Vector2(r.end.x, mid)
 	t.y = float((raw as Dictionary)["y"])
 	return t
+
+
+static func _words(raw: Variant) -> Words:
+	var r := _rect(raw)
+	if r.size == Vector2.ZERO:
+		return null
+	var d: Dictionary = raw
+	var text: Variant = d.get("text")
+	if not text is String or (text as String).strip_edges().is_empty() or not _numbers(d, ["height", "every", "up"]):
+		return null
+	var w := Words.new()
+	w.text = text
+	w.area = r
+	w.y = float(d["y"])
+	w.height = float(d["height"])
+	w.every = float(d["every"])
+	w.up = signf(float(d["up"]))
+	if w.height <= 0.0 or w.every <= 0.0 or w.up == 0.0:
+		return null
+	return w
+
+
+static func _vault(raw: Variant) -> TunnelVault:
+	var r := _rect(raw)
+	if r.size == Vector2.ZERO or not _numbers(raw as Dictionary, ["rise", "thick"]):
+		return null
+	var v := TunnelVault.new()
+	v.area = r
+	v.y = float((raw as Dictionary)["y"])
+	v.rise = float((raw as Dictionary)["rise"])
+	v.thick = float((raw as Dictionary)["thick"])
+	if v.rise <= 0.0 or v.thick < 0.0:
+		return null
+	return v
+
+
+static func _numbers(d: Dictionary, keys: Array[String]) -> bool:
+	for k in keys:
+		if not (d.get(k) is float or d.get(k) is int):
+			return false
+	return true
 
 
 ## x0, x1, z0, z1 as a rectangle (x, z) with a y beside it; an empty one when malformed.

@@ -260,7 +260,82 @@ func test_low_drops_the_relief() -> void:
 
 func test_no_tint_reads_as_a_team() -> void:
 	for f: StringName in look.finish_tints:
-		assert_lt(look.finish_tints[f].s, 0.2, "%s's tint is near grey" % f)
+		var tint := look.finish_tints[f]
+		if look.safety_finishes.has(f):
+			# TB1: the one safety yellow, well off Beta's orange and Alpha's blue
+			assert_between(tint.h * 360.0, 40.0, 65.0, "%s's tint is safety yellow" % f)
+			continue
+		assert_lt(tint.s, 0.2, "%s's tint is near grey" % f)
+
+
+func test_each_platform_tunnel_is_vaulted_and_its_colliders_hug_the_drawn_arc() -> void:
+	var m := _map("subway")
+	assert_eq(m.station.vaults.size(), 2, "both platform tunnels")
+	for v in m.station.vaults:
+		var c := v.circle()
+		assert_almost_eq(v.point(0.0).y, v.y + v.rise, 0.001, "the crown")
+		assert_almost_eq(v.point(v.half_angle()).x, v.area.end.y, 0.001, "springs from one wall")
+		assert_almost_eq(v.point(-v.half_angle()).x, v.area.position.y, 0.001, "and the other")
+		var x := v.area.get_center().x + 7.3
+		var lid := v.lid()
+		for b in m.blocks:
+			var box := AABB(b.center - b.size * 0.5, b.size)
+			if not lid.encloses(box) or box.position.x > x or box.end.x < x:
+				continue
+			# the box's point (z, y) deepest inside the arc stays within a few centimetres of it
+			var near := Vector2(clampf(c.x, box.position.z, box.end.z), clampf(c.y, box.position.y, box.end.y))
+			assert_gt(near.distance_to(Vector2(c.x, c.y)), c.z - 0.09, "a vault collider at most 8 cm proud of the arc")
+		for k in range(1, 40):
+			# just behind the drawn arc there is always a collider: no BB slips into the tiles
+			var a := v.half_angle() * (-1.0 + 2.0 * float(k) / 40.0)
+			var behind := Vector3(x, c.y + (c.z + 0.02) * cos(a), c.x + (c.z + 0.02) * sin(a))
+			var held := false
+			for b in m.blocks:
+				if AABB(b.center - b.size * 0.5, b.size).grow(0.001).has_point(behind):
+					held = true
+					break
+			assert_true(held, "a collider just behind the arc at %.2f rad" % a)
+
+
+func test_the_vault_s_colliders_are_drawn_as_the_arc_and_lamps_hang_under_it() -> void:
+	var m := _map("subway")
+	var v := m.station.vaults[0]
+	var inside := 0
+	for b in m.blocks:
+		if m.station.in_vault(AABB(b.center - b.size * 0.5, b.size)):
+			inside += 1
+			assert_eq(b.kind, &"wall", "a vault collider is wall")
+	assert_gt(inside, 30, "each vault's arc pieces and ends")
+	var c := v.circle()
+	var lit := 0
+	for i in m.roof_lamps.size():
+		var p := m.roof_lamps[i]
+		var h := m.roof_lamp_heights[i]
+		# the platforms' and the track's own lamps (not a train's, or a level above's)
+		var style := m.station.style_at(Vector3(p.x, v.y - 0.5, p.y))
+		if not v.area.has_point(p) or h > v.y + v.rise + 1.0 or (style != &"platform" and style != &"track"):
+			continue
+		lit += 1
+		var arc := c.y + sqrt(c.z * c.z - pow(absf(p.y - c.x) + 0.25, 2.0))
+		assert_lt(m.roof_lamp_heights[i], arc + 0.001, "lamp %d's panel clears the arc" % i)
+		assert_gt(m.roof_lamp_heights[i], v.y, "and hangs in the vault")
+	assert_gt(lit, 10, "the platform and its track lit under the vault")
+
+
+func test_mind_the_gap_reads_from_each_platform_along_its_edge() -> void:
+	var m := _map("subway")
+	assert_eq(m.station.words.size(), 2, "one line of words a platform")
+	for w in m.station.words:
+		assert_eq(w.text, "MIND THE GAP")
+		var mid := Vector3(w.area.get_center().x, w.y + 0.05, w.area.get_center().y)
+		assert_eq(m.station.style_at(mid), &"platform", "on a platform")
+		assert_almost_eq(m.floor_under(mid.x, mid.z, w.y + 0.5), w.y, 0.01, "on its floor")
+		assert_lt(w.height, w.area.size.y, "inside the coping")
+	for ch in "MIND THE GAP":
+		assert_true(ch == " " or PlatformWords.GLYPHS.has(ch), "the font has %s" % ch)
+	assert_eq(PlatformWords.width("MI"), 11, "two letters and a gap")
+	var yellow := m.station.strips.filter(func(s: StationDressing.Strip) -> bool: return s.finish == &"gap_line")
+	assert_eq(yellow.size(), 2, "the yellow line on each platform's edge only")
 
 
 func test_a_malformed_station_dress_is_warned_about_and_left_out() -> void:
@@ -271,9 +346,14 @@ func test_a_malformed_station_dress_is_warned_about_and_left_out() -> void:
 		"zones": [{"style": "hall", "box": [0, 1, 0, 1, 0, 1]}, {"style": "hall", "box": [1, 0, 0, 1, 0, 1]}, {"box": []}],
 		"strips": [{"finish": "tactile", "x0": 0, "x1": 2, "z0": 0, "z1": 1, "y": 0.9}, {"x0": 0}],
 		"tracks": [{"x0": 0, "x1": 10, "z0": 0, "z1": 1, "y": 0}, {"x0": 5, "x1": 1, "z0": 0, "z1": 1, "y": 0}],
+		"words": [{"text": "MIND", "x0": 0, "x1": 9, "z0": 0, "z1": 1, "y": 0.9, "height": 0.2, "every": 4, "up": -1},
+				{"text": "", "x0": 0, "x1": 9, "z0": 0, "z1": 1, "y": 0.9, "height": 0.2, "every": 4, "up": -1}],
+		"vaults": [{"x0": 0, "x1": 9, "z0": 0, "z1": 7, "y": 4, "rise": 2, "thick": 0.3},
+				{"x0": 0, "x1": 9, "z0": 0, "z1": 7, "y": 4, "rise": 0, "thick": 0.3}],
 	}}, warnings)
-	assert_eq([d.zones.size(), d.strips.size(), d.tracks.size()], [1, 1, 1], "the good ones kept")
-	assert_eq(warnings.size(), 5, "each bad one warned about, and the bad dress")
+	assert_eq([d.zones.size(), d.strips.size(), d.tracks.size(), d.words.size(), d.vaults.size()], [1, 1, 1, 1, 1],
+			"the good ones kept")
+	assert_eq(warnings.size(), 7, "each bad one warned about, and the bad dress")
 	assert_eq(d.style_at(Vector3(0.5, 0.5, 0.5)), &"hall", "a point in a zone")
 	assert_eq(d.style_at(Vector3(5.0, 0.5, 0.5)), &"", "a point in none")
 

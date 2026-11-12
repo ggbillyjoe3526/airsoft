@@ -28,24 +28,33 @@ extends Resource
 	&"plant": &"PaintedPlaster011", &"rubber": &"Rubber004", &"tactile": &"TactilePaving003", &"lining": &"Concrete029",
 	&"boards": &"Planks008", &"quarry": &"Tiles017", &"painted": &"Concrete029", &"car": &"PaintedMetal012",
 	&"coping": &"Concrete035", &"soot": &"Concrete029", &"rail": &"Rust004", &"sleeper": &"Concrete035",
+	&"gap_line": &"PaintedMetal012", &"paint": &"PaintedMetal012", &"vault_tile": &"Tiles136B",
 }
 @export var finish_scales: Dictionary[StringName, float] = {
 	&"wall_tile": 0.6, &"terrazzo": 2.0, &"plaster": 2.5, &"concrete": 3.0, &"platform": 2.5, &"ballast": 1.6,
 	&"tread": 0.8, &"steel": 1.5, &"rust": 2.0, &"shutter": 1.6, &"planks": 1.5, &"plant": 2.5, &"rubber": 1.5,
 	&"tactile": 0.8, &"lining": 2.4, &"boards": 1.8, &"quarry": 1.2, &"painted": 2.5, &"car": 1.5, &"coping": 1.0,
-	&"soot": 3.0, &"rail": 0.5, &"sleeper": 1.0,
+	&"soot": 3.0, &"rail": 0.5, &"sleeper": 1.0, &"gap_line": 2.0, &"paint": 2.0, &"vault_tile": 0.6,
 }
 @export var finish_tints: Dictionary[StringName, Color] = {
-	&"wall_tile": Color8(0xf2, 0xea, 0xd8), &"terrazzo": Color8(0xf0, 0xe6, 0xd6), &"plaster": Color8(0xf0, 0xec, 0xe4),
+	# TB1 (owner, 2026-11-12: "a more white/grey look"): white glazed tiles, faintly cool.
+	&"wall_tile": Color8(0xf6, 0xf7, 0xf7), &"terrazzo": Color8(0xf0, 0xe6, 0xd6), &"plaster": Color8(0xf0, 0xec, 0xe4),
 	&"concrete": Color8(0xc8, 0xc2, 0xb8), &"soot": Color8(0x6c, 0x68, 0x64),
 	&"steel": Color8(0xc0, 0xbc, 0xb2), &"car": Color8(0xd8, 0xd4, 0xca), &"lining": Color8(0x9c, 0x98, 0x90),
 	&"coping": Color8(0xe6, 0xe2, 0xd8), &"rail": Color8(0xb0, 0xaa, 0xa2), &"sleeper": Color8(0xb4, 0xb0, 0xa6),
 	&"shutter": Color8(0xb4, 0xb0, 0xa8),
+	# TB1: the platforms' painted yellow line (the one safety yellow, `safety_finishes`) and the words' white paint.
+	&"gap_line": Color8(0xe0, 0xbc, 0x2a), &"paint": Color8(0xe8, 0xe6, 0xe0),
+	# The vault's tiles, the walls' faintly cooler: the warm light from below would turn a down-facing white tan.
+	&"vault_tile": Color8(0xe4, 0xec, 0xf6),
 }
+## The finishes painted the one safety colour (yellow, off both team hues): their tints may be saturated.
+@export var safety_finishes: Array[StringName] = [&"gap_line"]
 @export var finish_pbr: Dictionary[StringName, Vector2] = {
-	&"wall_tile": Vector2(0.7, 0.0), &"terrazzo": Vector2(0.8, 0.0), &"tread": Vector2(0.9, 0.6),
-	&"steel": Vector2(1.0, 0.2), &"car": Vector2(0.9, 0.3), &"rust": Vector2(1.0, 0.3), &"shutter": Vector2(1.0, 0.4),
-	&"rail": Vector2(0.8, 0.5),
+	&"wall_tile": Vector2(0.7, 0.0), &"vault_tile": Vector2(0.7, 0.0), &"terrazzo": Vector2(0.8, 0.0),
+	&"tread": Vector2(0.9, 0.6), &"steel": Vector2(1.0, 0.2), &"car": Vector2(0.9, 0.3),
+	&"rust": Vector2(1.0, 0.3), &"shutter": Vector2(1.0, 0.4),
+	&"rail": Vector2(0.8, 0.5), &"gap_line": Vector2(0.8, 0.0), &"paint": Vector2(0.8, 0.0),
 }
 
 ## Each room style's finishes for a floor (a face looking up), a wall and a ceiling (looking down) facing its air.
@@ -53,6 +62,8 @@ extends Resource
 	&"hall": &"terrazzo", &"passage": &"quarry", &"escalator": &"tread", &"plant": &"platform", &"service": &"platform",
 	&"platform": &"platform", &"track": &"ballast", &"tunnel": &"ballast", &"train": &"rubber",
 }
+## The track's walls (the trackside wall across from a platform) wear the station's white tiles (owner, 2026-11-12:
+## "should be white and almost match the rest of the station design").
 @export var style_walls: Dictionary[StringName, StringName] = {
 	&"hall": &"wall_tile", &"passage": &"wall_tile", &"escalator": &"wall_tile", &"plant": &"plant",
 	&"service": &"concrete", &"platform": &"wall_tile", &"track": &"wall_tile", &"tunnel": &"lining", &"train": &"car",
@@ -83,8 +94,17 @@ extends Resource
 @export_range(0.0, 1.0) var grime_strength: float = 0.5
 @export_range(0.0, 0.5) var variation: float = 0.16
 @export var variation_size: float = 3.0
-## How far (m) a platform's edge strip lies over the floor.
+## How far (m) a platform's edge strip lies over the floor, and its painted words (StationDressing.Words) over that.
 @export var strip_lift: float = 0.01
+@export var words_lift: float = 0.01
+## The words' paint.
+@export var words_finish: StringName = &"paint"
+## A platform tunnel's vault (StationDressing.TunnelVault, TB1): its finish (the platform's tiles carried over the arc,
+## a shade cooler), the pieces its arc is drawn in, and how far (m) its ends are drawn in front of the ends of the
+## shell behind them.
+@export var vault_finish: StringName = &"vault_tile"
+@export var vault_steps: int = 32
+@export var vault_proud: float = 0.01
 ## The track: rails a standard gauge apart (m, between their middles), each a head this wide and tall; sleepers this
 ## long, wide and tall, one every `sleeper_pitch` m. Scenery: no collider (a rail stands lower than a step).
 @export var gauge: float = 1.5

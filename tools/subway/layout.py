@@ -29,11 +29,13 @@ blocks: list[dict] = []
 
 
 def room(name: str, area: str, x0: float, x1: float, z0: float, z1: float, y: float, yb: float | None = None,
-         h: float = 3.0, seal: dict | None = None, ceil: bool = True, floor: bool = True, flat: bool = False) -> None:
+         h: float = 3.0, seal: dict | None = None, ceil: bool = True, floor: bool = True, flat: bool = False,
+         vault: bool = False) -> None:
     """A room; a ramp room's ceiling follows its floor down in steps, or with `flat` stays level, `h` over its higher
-    end (a short flight of steps under a tunnel's roof)."""
+    end (a short flight of steps under a tunnel's roof). A `vault` room has no ceiling of its own: its walls stop `h`
+    over its floor, where its platform tunnel's vault (VAULTS) springs."""
     rooms.append(dict(name=name, area=area, x0=x0, x1=x1, z0=z0, z1=z1, ya=y, yb=y if yb is None else yb, h=h,
-                      seal=seal or {}, ceil=ceil, floor=floor, flat=flat))
+                      seal=seal or {}, ceil=ceil, floor=floor, flat=flat, vault=vault))
 
 
 def block(kind: str, y: float, x0: float, x1: float, z0: float, z1: float, h: float, colour: int = 0,
@@ -114,11 +116,18 @@ room("landing", "Stair landing", 35, 37.5, -1.6, 1.6, LANDING, h=3.0)
 room("stair2", "Stair", 37.5, 45.5, -1.6, 1.6, LANDING, P, h=3.0)
 
 # ---------------- Platforms, -18 m, and the track bed, -18.9 m ----------------
-room("plat_n", "North platform", -52, 47, -9, -5.5, P, h=TUNNEL_H)
-room("plat_n_end", "North platform", 47, 50, -7.5, -5.5, P, h=TUNNEL_H)
-room("endramp_n", "North platform", 47, 50, -9, -7.5, P, T, h=TUNNEL_H, flat=True)
+# Each platform shares one deep-level tunnel with its track, London style (owner, 2026-11-12: "curved ceilings for the
+# platforms"): the platform's back wall and the trackside wall rise to TUNNEL_H over the platform, and a barrel vault
+# VAULT_RISE m high spans the two (VAULTS; build_map.py builds it, StationSurface draws it curved). Each vault's `y`
+# is where it springs, its `low` a standing car's ceiling: the air over a car's roof is the vault's too.
+VAULT_RISE = 2.5
+VAULTS = [dict(name="north", x0=-52, x1=50, z0=-12.5, z1=-5.5, y=P + TUNNEL_H, low=P + TRAIN_IN),
+          dict(name="south", x0=-52, x1=50, z0=5.5, z1=12.5, y=P + TUNNEL_H, low=P + TRAIN_IN)]
+room("plat_n", "North platform", -52, 47, -9, -5.5, P, h=TUNNEL_H, vault=True)
+room("plat_n_end", "North platform", 47, 50, -7.5, -5.5, P, h=TUNNEL_H, vault=True)
+room("endramp_n", "North platform", 47, 50, -9, -7.5, P, T, h=TUNNEL_H, flat=True, vault=True)
 room("ramp_foot", "North tunnel", 50, 52, -9, -7.5, T, h=TUNNEL_H + 0.9)
-room("plat_s", "South platform", -52, 50, 5.5, 9, P, h=TUNNEL_H)
+room("plat_s", "South platform", -52, 50, 5.5, 9, P, h=TUNNEL_H, vault=True)
 # The track pits, 0.9 m under the platforms: no steps up (owner, 2026-11-10, CL1: "remove the trackside stairs"), a
 # body climbs out over a platform's edge (VaultConfig climb_depth) and drops back down; bots take the same links.
 TRACK_H = TUNNEL_H + 0.9
@@ -127,7 +136,7 @@ TRACK_H = TUNNEL_H + 0.9
 def track(name: str, area: str, x0: float, x1: float, z_edge: float, z_wall: float) -> None:
     """A stretch of track from x0 to x1 between the platform's edge (z_edge) and the tunnel wall (z_wall)."""
     lo, hi = sorted((z_edge, z_wall))
-    room(name, area, x0, x1, lo, hi, T, h=TRACK_H)
+    room(name, area, x0, x1, lo, hi, T, h=TRACK_H, vault=True)
 
 
 track("track_n_w", "North track", -52, -44, -9, -12.5)
