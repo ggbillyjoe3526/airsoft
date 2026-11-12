@@ -40,6 +40,8 @@ extends Resource
 ## (a door facing s or w), keeps the plain boxes. An empty path, or one that can't be read, keeps them too.
 @export var car_model: String = "res://assets/models/props/lift_car.glb"
 @export var landing_model: String = "res://assets/models/props/lift_landing.glb"
+## The landing display's arrows, drawn lit (unshaded, like a called button) over each landing; empty draws none.
+@export var landing_lit_model: String = "res://assets/models/props/lift_landing_lit.glb"
 @export var leaf_model: String = "res://assets/models/props/lift_leaf.glb"
 @export var button_model: String = "res://assets/models/props/lift_button.glb"
 @export var model_well: Vector2 = Vector2(2.3, 1.8)

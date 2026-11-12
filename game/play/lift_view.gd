@@ -34,6 +34,8 @@ var _car_mesh: Mesh = null
 var _landing_mesh: Mesh = null
 var _modelled: Array[bool] = []
 var _landings: MultiMeshInstance3D = null
+## The landings' lit arrows (SM2), at the landings' transforms, in the buttons' unshaded material.
+var _landing_lights: MultiMeshInstance3D = null
 ## Per lift: its first leaf's instance (each stop's two landing leaves, then the car's two) and its first button's
 ## (each stop's call button, then its panel's); what was last drawn: the car's height, the doors' opening, the stop
 ## they open at and the calls.
@@ -98,6 +100,9 @@ static func build(map: MapData, style: MapStyle, lifts: LiftConfig, cfg: LiftVie
 		landings += spec.stop_count() if fits and view._landing_mesh != null else 0
 	if landings > 0:
 		view._landings = view._multimesh("Landings", view._landing_mesh, landings, false, view._model_material)
+		var lit := PropDressConfig.load_mesh(cfg.landing_lit_model)
+		if lit != null:
+			view._landing_lights = view._multimesh("LandingLights", lit, landings, false, view._button_material)
 		var j := 0
 		for i in map.lifts.size():
 			if not view._modelled[i]:
@@ -105,8 +110,10 @@ static func build(map: MapData, style: MapStyle, lifts: LiftConfig, cfg: LiftVie
 			var spec := map.lifts[i]
 			var mid := (spec.door_from + spec.door_to) * 0.5
 			for k in spec.stop_count():
-				view._landings.multimesh.set_instance_transform(j, Transform3D(_turn(spec.out),
-						spec.on_face(mid, spec.door_depth, spec.stops[k])))
+				var at := Transform3D(_turn(spec.out), spec.on_face(mid, spec.door_depth, spec.stops[k]))
+				view._landings.multimesh.set_instance_transform(j, at)
+				if view._landing_lights != null:
+					view._landing_lights.multimesh.set_instance_transform(j, at)
 				j += 1
 	for i in map.lifts.size():
 		view._add_car(i, style)

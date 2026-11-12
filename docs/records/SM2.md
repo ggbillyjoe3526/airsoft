@@ -1,6 +1,6 @@
 # SM2 · Subway's escalators, lifts, stairs and railing
 
-**Review:** 3 attempts · critic pending · qa pending · performance pending
+**Review:** 4 attempts · critic pending · qa pending · performance pending
 
 The owner (2026-11-12): "Begin work on subway models now." SM2 is models #14 to #18 of
 `art/subway-model-list.md`: the escalator banks, the lift car and doors, the spiral stair, the stair handrails and
@@ -13,11 +13,12 @@ step nosings, and the balustrade railing, after the owner's photos in `art/refer
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | Opus 5.5 (build thread) | pass | Retry 7/8 | the escalator's proportions, finishes and the lift's tiled jambs against the photos |
 | 2026-11-12 | 2 | Opus 5.5 (build thread) | pass | Retry 7/8 | the decks and capping still read beige, the lift indicator small, the leaves' panels apart, a dark stair skirting |
-| 2026-11-12 | 3 | Opus 5.5 (build thread) | – | – | – |
+| 2026-11-12 | 3 | Opus 5.5 (build thread) | pass (CI) | Retry 7/8 | the landing display unlit, the vision panel two slits, the decks dull and faceted, wide yellow step edges, the railing posts |
+| 2026-11-12 | 4 | Opus 5.5 (build thread) | – | – | – |
 
 ## What changed
 
-- **Escalators** (`escalator.py`, 7,292 and 6,644 triangles of 8,000): each bank is one model laid over its ramp and
+- **Escalators** (`escalator.py`, 7,412 and 6,764 triangles of 8,000): each bank is one model laid over its ramp and
   its three decks (`PropDressConfig` SET). Each bank's two escalators are 1.2 m wide between their balustrades, two
   abreast (the owner, 2026-11-12: "Escalators need to be narrower. Only wide enough for 2 people."; they were 3.2 m):
   `layout.py` gives each bank a 1.2 m middle deck and a deck from each escalator to the wall, solid 1 m blocks on the
@@ -25,7 +26,7 @@ step nosings, and the balustrade railing, after the owner's photos in `art/refer
   combs, newel-ended stainless balustrades, black handrails looping into their inlets, skirting brushes, stop buttons,
   and bronze uplighters on the middle deck.
 - **Lifts** (`lift.py`): `LiftView` draws the car model (5,622 of 6,000) turned to its door, plus a landing doorway at
-  each stop (734 of 1,200). The leaves (48) and push buttons (128 of 160) are scaled to each use. A lift unlike the
+  each stop (732 of 1,200, its arrows a lit 2). The leaves (48) and push buttons (128 of 160) are scaled to each use. A lift unlike the
   model keeps the plain boxes: a different well, door or wall, or a door facing s or w (`LiftViewConfig.model_*`). The
   buttons are now real lift size (`button_size` 52 mm, was 90 mm). The car's inside is from general knowledge, as
   the list asks.
@@ -76,9 +77,19 @@ step nosings, and the balustrade railing, after the owner's photos in `art/refer
   panel at its meeting edge and `LiftView` turns the other leaf round, so the two halves meet as one panel; the stair
   skirting is a pale grey-green tile (dark, it read as a gap under the wall). The fourth handrail loop is whole: it is
   seen edge-on from the top of the bank (picture esc-loop).
+- **Critic attempt 3 fixes**: the landing display's arrows are their own model (`lift_landing_lit.glb`,
+  `LiftViewConfig.landing_lit_model`), drawn lit in the buttons' unshaded material at each landing; each leaf's half
+  pane runs to its meeting edge, framed on its other three sides, so the two halves read as one pane split by the
+  leaves' hairline (0.28 of the door's height, as in the photos); the decks are brighter brushed stainless, smooth
+  shaded, the newels' round ends in 16 steps (10 showed flat bands); the steps' yellow edges are 30 mm (45 read as a
+  yellow step from the top).
+- **The lift door is 1.1 by 2.1 m** (0.52 wide to high; the photos' about 0.49): it is the play size of
+  `layout.LIFT_DOOR_W` and `LiftConfig` that MT2 built and tuned the lifts round, two abreast through it, so the
+  model follows it.
 - **Kept against the critic**: the railing's bar pitch is the sim's (gameplay, budget-bound); the posts stay a bar wide
-  along the run: `RailingConfig` draws the bars from the numbers that stop BBs ("what you see is what stops a BB"),
-  and a post 2.5 bars wide would show 2 cm of steel each side a BB flies through; the bars end on the foot rail as
+  along the run, by the owner's railing ruling (`docs/DECISIONS.md` › Maps and modes, SR1: a railing is drawn as the
+  bars and rails a BB meets, `RailingConfig`); a post 2.5 bars wide would show 2 cm of steel each side a BB flies
+  through, and making the posts stop BBs is a play change for the owner; the bars end on the foot rail as
   the sim's do; the stair handrail is already 44 mm.
 
 - **Posters and signs (the owner, 2026-11-12: "Add posters and signs to all the environments. Maybe only one sign

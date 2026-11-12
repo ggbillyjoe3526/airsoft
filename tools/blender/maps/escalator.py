@@ -40,9 +40,9 @@ LOOP = 0.22        # the handrail's loop round each newel (m, to its middle line
 INLET = 2.55       # how far round each loop (radians) the handrail runs before it goes into the newel
 SKIRT = 0.24       # the skirt panel's height over the slope
 BRUSH = (0.255, 0.285, 0.022)   # the brush deflector: from, to over the slope; how far it stands out
-DECK = 0x7E8285     # the rim (the decks and the newels' rounded ends): brushed steel, cooler and darker than the sides
+DECK = 0xA2A6A8     # the rim (the decks and the newels' rounded ends): brushed stainless, a shade under the sides
 SEAM = 1.25        # the panels' seams along each balustrade (m)
-NOSING = 0.045     # the yellow edges' width on each step
+NOSING = 0.03      # the yellow edges' width on each step (thin, as in the photos)
 LAMP_STEP = 3.6    # the uplighters' spacing along the middle deck (m)
 LAMP_H = 0.46      # an uplighter's height over the deck
 STOP = (0.12, 0.42, 0.08, 0.13)   # each newel's stop button plate: in from the newel's end, up the side, wide, tall
@@ -187,7 +187,7 @@ def rail_path(bank: Bank, za: float) -> tuple:
     return pts, ups, ca, cb
 
 
-NEWEL_STEPS = 10   # each newel's round end, inside its handrail's loop
+NEWEL_STEPS = 16   # each newel's round end, inside its handrail's loop (fewer showed flat bands)
 NEWEL_FOOT = 0.1   # the top newel's end reaches this far under the slope
 
 
@@ -347,7 +347,7 @@ def build(room: str, name: str) -> None:
     lamps(bank, parts["bronze"], parts["glass"], parts["inside"])
     objects += [parts["body"].build("balustrade", tk.STAINLESS, smooth=40.0), parts["skirt"].build("skirt", tk.STAINLESS_DARK),
                 parts["brush"].build("brush", tk.GAP), parts["seams"].build("seams", tk.GAP),
-                parts["deck"].build("deck", DECK),
+                parts["deck"].build("deck", DECK, smooth=40.0),
                 parts["rail"].build("handrail", tk.RUBBER, smooth=50.0, toned=False, outward=True),
                 parts["inlet"].build("inlet", tk.RUBBER, toned=False),
                 parts["bronze"].build("uplighter", tk.BRONZE, smooth=50.0, toned=False),

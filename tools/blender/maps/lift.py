@@ -30,6 +30,7 @@ import layout as L  # noqa: E402  tools/subway/layout.py
 
 CAR_BUDGET = 6000
 LANDING_BUDGET = 1200
+LIT_BUDGET = 20           # the landing's lit arrows (drawn unshaded)
 LEAF_BUDGET = 300
 BUTTON_BUDGET = 160
 
@@ -312,8 +313,9 @@ def leaf() -> list:
     w, h, t = DOOR_W / 2 - 0.01, DOOR_H, 0.04
     face, glass, frame, edge = tk.Mesh(), tk.Mesh(), tk.Mesh(), tk.Mesh()
     hw, ht = w / 2, t / 2
-    gx, gy0, gy1 = 0.06, 1.1, 1.75
-    cx = hw - gx - 0.03 - 0.012   # the panel's middle: its frame 12 mm in from the meeting edge (+x)
+    # Half the pane, from 0.16 m in to the meeting edge (+x), framed on its other three sides: the two halves meet
+    # with only the leaves' hairline between them.
+    g0, g1, gy0, gy1, f = hw - 0.16, hw - 0.0015, 1.15, 1.74, 0.03
     for side in (-1.0, 1.0):
         z = side * ht
 
@@ -325,15 +327,14 @@ def leaf() -> list:
         for y0, y1, paint in rows:
             t0, t1 = 0.84 + 0.16 * y0 / h, 0.84 + 0.16 * y1 / h
             if y0 == gy0 - 0.03:
-                for a, b in ((-hw, cx - gx - 0.03), (cx + gx + 0.03, hw)):
+                for a, b in ((-hw, g0 - f),):
                     q([(a, y0, z), (b, y0, z), (b, y1, z), (a, y1, z)], face, [t0, t0, t1, t1])
             else:
                 q([(-hw, y0, z), (hw, y0, z), (hw, y1, z), (-hw, y1, z)], frame if paint else face,
                   None if paint else [t0, t0, t1, t1])
         # The glass's frame: a bevelled steel surround standing in from the face.
-        outer = [(cx - gx - 0.03, gy0 - 0.03), (cx + gx + 0.03, gy0 - 0.03), (cx + gx + 0.03, gy1 + 0.03),
-                 (cx - gx - 0.03, gy1 + 0.03)]
-        inner = [(cx - gx, gy0), (cx + gx, gy0), (cx + gx, gy1), (cx - gx, gy1)]
+        outer = [(g0 - f, gy0 - f), (g1, gy0 - f), (g1, gy1 + f), (g0 - f, gy1 + f)]
+        inner = [(g0, gy0), (g1, gy0), (g1, gy1), (g0, gy1)]
         zi = side * (ht - 0.006)
         for i in range(4):
             j = (i + 1) % 4
@@ -378,12 +379,13 @@ def bevelled(m: tk.Mesh, x0: float, y0: float, x1: float, y1: float, z_face: flo
         m.poly([w[i], f[i], f[j], w[j]][::-1])
 
 
-def landing() -> list:
+def landing(lights: list) -> list:
     """A landing's doorway dress, the landing toward -z, the wall's outside face at z 0 and the shaft behind it (+z):
-    the architrave round the opening, the linings through the wall to the leaves, the sill, the display over the door
-    with its arrows, and the call station's plate and bezel round the call button."""
+    the architrave round the opening, the linings through the wall to the leaves, the sill, the display over the door,
+    and the call station's plate and bezel round the call button. The display's arrows go into `lights`: LiftView
+    draws them lit (unshaded), so they read across the hall."""
     mk.reset()
-    arch, lining, sill, disp, lens, plate, bez, gap, mitre = (tk.Mesh() for _ in range(9))
+    arch, lining, sill, disp, lens, plate, bez, gap, mitre, arrows = (tk.Mesh() for _ in range(10))
     hw = DOOR_W / 2
     a_w, a_t = 0.09, 0.018      # the architrave's width and how far it stands proud
     # The architrave: jambs and head, each a bevelled steel section (a sloped outer edge, a flat face, a return).
@@ -434,7 +436,7 @@ def landing() -> list:
     for up, cy in ((1.0, dy0 + 0.19), (-1.0, dy0 + 0.075)):
         ax0, ax1, am = dx - 0.2, dx - 0.06, dx - 0.13
         # Wound to face the landing (-z): clockwise seen from +z.
-        lens.poly([(ax1, cy - 0.035 * up, -0.0365), (ax0, cy - 0.035 * up, -0.0365), (am, cy + 0.04 * up, -0.0365)]
+        arrows.poly([(ax1, cy - 0.035 * up, -0.0365), (ax0, cy - 0.035 * up, -0.0365), (am, cy + 0.04 * up, -0.0365)]
                   if up > 0 else [(ax0, cy - 0.035 * up, -0.0365), (ax1, cy - 0.035 * up, -0.0365),
                                   (am, cy + 0.04 * up, -0.0365)])
     # The call station: a brushed plate round the call button (LiftView draws it), a bezel and a key switch.
@@ -471,11 +473,14 @@ def landing() -> list:
                lens.build("landing_lens", LENS, toned=False), plate.build("landing_plate", PANEL, toned=False),
                bez.build("landing_bezel", SILL, toned=False), gap.build("landing_gap", tk.GAP, toned=False),
                mitre.build("landing_mitres", tk.STAINLESS_DARK, toned=False)]
+    lights.append(arrows.build("landing_arrows", LENS, toned=False))
     return objects
 
 
 if __name__ == "__main__":
     tk.report("lift_car", car(), CAR_BUDGET)
-    tk.report("lift_landing", landing(), LANDING_BUDGET)
+    lit: list = []
+    tk.report("lift_landing", landing(lit), LANDING_BUDGET)
+    tk.report("lift_landing_lit", lit, LIT_BUDGET)
     tk.report("lift_leaf", leaf(), LEAF_BUDGET, unit=True)
     tk.report("lift_button", button(), BUTTON_BUDGET, unit=True)
