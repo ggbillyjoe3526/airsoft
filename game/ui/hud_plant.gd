@@ -120,7 +120,7 @@ static func aim_title(a: Aim, site: int) -> String:
 	return HudStyle.caps("HUD_BOMB_MARKER")
 
 
-## The words after the actor's name in the feed's note for the BOMB event `e` ("picked up the bomb", "planted the bomb
+## The words after the actor's name in the feed's note for the PLANT event `e` ("picked up the bomb", "planted the bomb
 ## at A"), as `you` see it, or "" for none: a pick-up and a drop show to your team when you attack, the plant and the
 ## defuse to everyone; the arming, the beeps and the rest are not news. `actor` is who did it.
 static func feed_words(rs: RoundState, e: GameEvent, actor: Character, you: Character) -> String:

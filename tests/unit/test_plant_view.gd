@@ -189,7 +189,7 @@ func test_a_round_ending_cuts_the_kit() -> void:
 
 
 func _cue(state: GameState, cue: Plant.Cue) -> void:
-	var e := state.events.add(GameEvent.Kind.BOMB)
+	var e := state.events.add(GameEvent.Kind.PLANT)
 	e.actor = 5
 	e.position = SITE_A
 	e.value = cue

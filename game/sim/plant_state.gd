@@ -17,6 +17,12 @@ var status: Status = Status.DOWN
 var position: Vector3 = Vector3.ZERO
 ## Who carries it (a character id), or -1.
 var carrier: int = -1
+## Where it comes to rest if its carrier is hit now: the last floor the carrier stood on (a carrier hit in the air
+## leaves it there, not hanging under its feet), and never a lift's car: while the carrier rides one the simulation
+## sets `on_lift` and keeps `rest` the landing the car last stood at (Lifts.bomb_rest), so a bomb is never left in a
+## shaft.
+var rest: Vector3 = Vector3.ZERO
+var on_lift: bool = false
 ## It has left the start: picked up at least once this round (a bomb DOWN and moved was dropped by a carrier who was hit).
 var moved: bool = false
 ## The site it is being armed in or stands armed in (an index into `sites`), or -1.
@@ -37,6 +43,8 @@ var beep_in: float = 0.0
 func reset() -> void:
 	status = Status.DOWN
 	position = start
+	rest = start
+	on_lift = false
 	carrier = -1
 	moved = false
 	site = -1

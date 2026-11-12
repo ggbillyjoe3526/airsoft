@@ -380,7 +380,7 @@ class View:
 	var _bomb_on: bool = false
 	var _bomb: Vector2 = Vector2.ZERO
 	var _bomb_carried: bool = false
-	var _case := BombShape.new()
+	var _case := PlantShape.new()
 	var _dark_checks: Array[Rect2] = []
 	var _hold_on: bool = false
 	var _hold: Vector2 = Vector2.ZERO

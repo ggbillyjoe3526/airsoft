@@ -76,7 +76,7 @@ var _words_font: Font = null
 var _call: bool = false
 ## The call is a note of the bomb (Plant The Bomb): its sign in place of the radio.
 var _note: bool = false
-var _bomb := BombShape.new()
+var _bomb := PlantShape.new()
 var _words := ""
 var _words_x: float = 0.0
 var _radio := Rect2()

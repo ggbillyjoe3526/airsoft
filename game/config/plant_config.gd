@@ -27,7 +27,7 @@ extends Resource
 @export var defuse_checkpoint: float = 0.5
 ## The clock running out while the carrier is arming the bomb goes on until the plant ends, for at most this long (s).
 @export var max_overtime: float = 5.0
-## The armed bomb beeps (a BOMB event, Plant.Cue.BEEP) every `beep_slow` s with its whole fuse left, quickening to every
+## The armed bomb beeps (a PLANT event, Plant.Cue.BEEP) every `beep_slow` s with its whole fuse left, quickening to every
 ## `beep_fast` s as it runs out.
 @export var beep_slow: float = 1.0
 @export var beep_fast: float = 0.12

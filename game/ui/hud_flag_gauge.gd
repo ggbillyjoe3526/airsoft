@@ -34,7 +34,7 @@ var _hold_left: int = -1
 ## The label's resting word ("FLAG"; Plant The Bomb's own), and whether the end sign is the bomb's carry case.
 var _word: String = ""
 var _bomb: bool = false
-var _case := BombShape.new()
+var _case := PlantShape.new()
 var _pennant := PackedVector2Array([Vector2.ZERO, Vector2.ZERO, Vector2.ZERO])
 var _mast := Rect2()
 var _patterned: bool = false

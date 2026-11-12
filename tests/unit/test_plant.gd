@@ -70,7 +70,7 @@ func _run(seconds: float) -> void:
 		for j in events.count:
 			var e := events.items[j]
 			seen.append(Vector3i(e.kind, e.value, e.value2))
-			if e.kind == GameEvent.Kind.BOMB:
+			if e.kind == GameEvent.Kind.PLANT:
 				cues.append(e.value)
 
 
@@ -223,6 +223,54 @@ func test_letting_go_being_outside_or_in_the_air_arms_nothing() -> void:
 	assert_eq(ps.status, PlantState.Status.CARRIED)
 
 
+func test_a_carrier_hit_in_the_air_drops_it_on_the_floor_it_last_stood_on() -> void:
+	_start()
+	_pick_up(0)
+	cs[0].position = Vector3(3.0, 0.0, 4.0)
+	_run(DT)
+	# A jump: off the floor, a metre up and on.
+	cs[0].grounded = false
+	cs[0].position = Vector3(3.6, 1.0, 4.0)
+	_run(DT)
+	assert_eq(ps.position, Vector3(3.6, 1.0, 4.0), "carried, it is with its carrier")
+	assert_eq(ps.rest, Vector3(3.0, 0.0, 4.0), "its resting place is the floor left behind")
+	_out(0)
+	_run(DT)
+	assert_eq(ps.status, PlantState.Status.DOWN)
+	assert_eq(ps.position, Vector3(3.0, 0.0, 4.0), "never left hanging in the air")
+	_pick_up(1)
+	assert_eq(ps.carrier, 1, "a teammate takes it from there")
+
+
+func test_a_carrier_hit_before_it_ever_stood_drops_it_where_it_lay() -> void:
+	_start()
+	cs[0].grounded = false
+	cs[0].position = START + Vector3(0.3, 0.9, 0.0)
+	cs[0].using = true
+	_run(DT)
+	cs[0].using = false
+	assert_eq(ps.carrier, 0, "taken up mid-jump")
+	_out(0)
+	_run(DT)
+	assert_eq(ps.position, START, "back where it lay")
+
+
+func test_a_carrier_on_a_lift_drops_it_at_the_rest_the_simulation_keeps() -> void:
+	_start()
+	_pick_up(0)
+	var landing := Vector3(6.0, 0.0, -2.0)
+	# The simulation's part (Lifts.bomb_rest) while the carrier rides a car: grounded on its floor, half way up.
+	ps.on_lift = true
+	ps.rest = landing
+	cs[0].position = Vector3(8.0, 2.5, -2.0)
+	_run(DT)
+	assert_eq(ps.rest, landing, "a car's floor is no resting place")
+	_out(0)
+	_run(DT)
+	assert_eq(ps.position, landing)
+	assert_false(ps.on_lift)
+
+
 func test_a_planter_hit_drops_it_unarmed() -> void:
 	_start()
 	_pick_up(0)
@@ -303,7 +351,7 @@ func test_a_defender_holding_use_at_the_bomb_disarms_it_and_wins_the_round() -> 
 	assert_eq(rs.reason, GameEvent.RoundEnd.DEFUSED)
 	assert_eq(ps.status, PlantState.Status.DEFUSED)
 	assert_eq(cues.back(), Plant.Cue.DEFUSED)
-	assert_eq(_count(GameEvent.Kind.BOMB, Plant.Cue.DEFUSING), 1)
+	assert_eq(_count(GameEvent.Kind.PLANT, Plant.Cue.DEFUSING), 1)
 
 
 func test_an_attacker_or_someone_out_of_reach_disarms_nothing() -> void:

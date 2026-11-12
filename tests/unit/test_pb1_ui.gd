@@ -315,13 +315,13 @@ func test_the_round_starts_with_each_sides_job() -> void:
 
 func test_a_planted_bomb_is_a_banner_for_both_teams() -> void:
 	_plant_hud()
-	_event(GameEvent.Kind.BOMB, Plant.Cue.PLANTED, 1, 0)
+	_event(GameEvent.Kind.PLANT, Plant.Cue.PLANTED, 1, 0)
 	hud.on_tick(state)
 	assert_eq(hud.banner_text(), "BOMB PLANTED AT B / KEEP THEM OFF IT UNTIL IT GOES OFF")
 	hud.queue_free()
 	state.characters.clear()
 	_plant_hud(1)
-	_event(GameEvent.Kind.BOMB, Plant.Cue.PLANTED, 0, 2)
+	_event(GameEvent.Kind.PLANT, Plant.Cue.PLANTED, 0, 2)
 	hud.on_tick(state)
 	assert_eq(hud.banner_text(), "BOMB PLANTED AT A / DEFUSE IT BEFORE IT GOES OFF")
 
@@ -351,7 +351,7 @@ func test_the_prompt_offers_each_job_to_the_player_who_can_do_it() -> void:
 	_plant_hud()
 	var rs := state.round_state
 	var key := KeyNames.of_action(&"use_door").to_upper()
-	var prompt := hud.bomb_prompt()
+	var prompt := hud.plant_prompt()
 	_update()
 	assert_eq(prompt.text(), "", "the bomb is 2 m away")
 	you.position = Vector3(1.0, 0.0, 0.0)
@@ -387,39 +387,39 @@ func test_the_defender_is_offered_the_defuse_beside_the_armed_bomb() -> void:
 	var ps := _arm(0)
 	you.position = ps.position + Vector3(1.0, 0.0, 0.0)
 	_update()
-	assert_eq(hud.bomb_prompt().text(), "HOLD %s · DEFUSE" % key)
+	assert_eq(hud.plant_prompt().text(), "HOLD %s · DEFUSE" % key)
 	ps.defuser = 0
 	_update()
-	assert_eq(hud.bomb_prompt().text(), "", "already on it")
+	assert_eq(hud.plant_prompt().text(), "", "already on it")
 	ps.defuser = -1
 	you.position = ps.position + Vector3(8.0, 0.0, 0.0)
 	_update()
-	assert_false(hud.bomb_prompt().visible, "out of reach")
+	assert_false(hud.plant_prompt().visible, "out of reach")
 	you.position = ps.position
 	rs.attackers = 1
 	_update()
-	assert_false(hud.bomb_prompt().visible, "an attacker has nothing to defuse")
+	assert_false(hud.plant_prompt().visible, "an attacker has nothing to defuse")
 
 
 func test_the_prompt_is_only_for_the_player_in_play_and_in_a_live_round() -> void:
 	_plant_hud()
 	you.position = Vector3(1.0, 0.0, 0.0)
 	_update()
-	assert_true(hud.bomb_prompt().visible)
+	assert_true(hud.plant_prompt().visible)
 	hud.set_watching("Rook")
 	_update()
-	assert_false(hud.bomb_prompt().visible, "not while watching a bot")
+	assert_false(hud.plant_prompt().visible, "not while watching a bot")
 	hud.set_watching("")
 	state.round_state.hold = 3.0
 	_update()
-	assert_false(hud.bomb_prompt().visible, "not in the countdown")
+	assert_false(hud.plant_prompt().visible, "not in the countdown")
 	state.round_state.hold = 0.0
 	you.status = Character.Status.CALLING
 	_update()
-	assert_false(hud.bomb_prompt().visible, "not once hit")
+	assert_false(hud.plant_prompt().visible, "not once hit")
 	you.status = Character.Status.ALIVE
 	_update()
-	assert_true(hud.bomb_prompt().visible)
+	assert_true(hud.plant_prompt().visible)
 
 
 func test_the_prompt_follows_the_hud_size() -> void:
@@ -427,7 +427,7 @@ func test_the_prompt_follows_the_hud_size() -> void:
 	you.position = Vector3(1.0, 0.0, 0.0)
 	hud.set_hud_size(1.5)
 	_update()
-	assert_true(hud.bomb_prompt().visible)
+	assert_true(hud.plant_prompt().visible)
 	assert_almost_eq(hud.scale.x, 1.5, 0.001)
 
 
@@ -530,25 +530,25 @@ func test_the_flag_marker_keeps_its_own_words_and_sign() -> void:
 func test_the_feed_notes_the_pick_up_the_drop_the_plant_and_the_defuse() -> void:
 	_plant_hud()
 	var feed := hud.hit_lines()
-	_event(GameEvent.Kind.BOMB, Plant.Cue.PICKED_UP, 0, 1)
+	_event(GameEvent.Kind.PLANT, Plant.Cue.PICKED_UP, 0, 1)
 	hud.on_tick(state)
 	assert_eq(feed.count(), 1)
 	assert_eq(feed.line(0).words, "picked up the bomb")
 	assert_true(feed.line(0).note and feed.line(0).call)
 	assert_eq(feed.line(0).shooter, 1)
-	_event(GameEvent.Kind.BOMB, Plant.Cue.DROPPED, 0, 1)
+	_event(GameEvent.Kind.PLANT, Plant.Cue.DROPPED, 0, 1)
 	hud.on_tick(state)
 	assert_eq(feed.line(0).words, "dropped the bomb")
-	_event(GameEvent.Kind.BOMB, Plant.Cue.PLANTED, 1, 0)
+	_event(GameEvent.Kind.PLANT, Plant.Cue.PLANTED, 1, 0)
 	hud.on_tick(state)
 	assert_eq(feed.line(0).words, "planted the bomb at B")
-	_event(GameEvent.Kind.BOMB, Plant.Cue.DEFUSED, 0, 2)
+	_event(GameEvent.Kind.PLANT, Plant.Cue.DEFUSED, 0, 2)
 	hud.on_tick(state)
 	assert_eq(feed.line(0).words, "defused the bomb")
 	assert_eq(feed.count(), 4)
 	for cue: Plant.Cue in [Plant.Cue.ARMING, Plant.Cue.ARMING_STOPPED, Plant.Cue.BEEP, Plant.Cue.DEFUSING,
 			Plant.Cue.DEFUSING_STOPPED, Plant.Cue.WENT_OFF]:
-		_event(GameEvent.Kind.BOMB, cue, 0, 1)
+		_event(GameEvent.Kind.PLANT, cue, 0, 1)
 		hud.on_tick(state)
 	assert_eq(feed.count(), 4, "the rest are no news")
 	_update()
@@ -558,19 +558,19 @@ func test_the_feed_notes_the_pick_up_the_drop_the_plant_and_the_defuse() -> void
 
 func test_a_pick_up_and_a_drop_show_to_the_attackers_only() -> void:
 	_plant_hud(1)
-	_event(GameEvent.Kind.BOMB, Plant.Cue.PICKED_UP, 0, 2)
+	_event(GameEvent.Kind.PLANT, Plant.Cue.PICKED_UP, 0, 2)
 	hud.on_tick(state)
-	_event(GameEvent.Kind.BOMB, Plant.Cue.DROPPED, 0, 2)
+	_event(GameEvent.Kind.PLANT, Plant.Cue.DROPPED, 0, 2)
 	hud.on_tick(state)
 	assert_eq(hud.hit_lines().count(), 0, "a defender hears nothing of it")
-	_event(GameEvent.Kind.BOMB, Plant.Cue.PLANTED, 0, 2)
+	_event(GameEvent.Kind.PLANT, Plant.Cue.PLANTED, 0, 2)
 	hud.on_tick(state)
 	assert_eq(hud.hit_lines().count(), 1, "the plant is everyone's")
 
 
 func test_a_note_ages_with_the_calls_and_goes_with_the_next_round() -> void:
 	_plant_hud()
-	_event(GameEvent.Kind.BOMB, Plant.Cue.PLANTED, 0, 1)
+	_event(GameEvent.Kind.PLANT, Plant.Cue.PLANTED, 0, 1)
 	hud.on_tick(state)
 	assert_eq(hud.hit_lines().count(), 1)
 	_event(GameEvent.Kind.ROUND_START, 2)
@@ -752,20 +752,20 @@ func test_the_screen_reader_says_the_rounds_start_and_end() -> void:
 
 func test_the_screen_reader_says_the_bomb_events_that_matter() -> void:
 	var a := _announcer(0)
-	_event(GameEvent.Kind.BOMB, Plant.Cue.PICKED_UP, 0, 1)
+	_event(GameEvent.Kind.PLANT, Plant.Cue.PICKED_UP, 0, 1)
 	a.on_tick(state)
-	_event(GameEvent.Kind.BOMB, Plant.Cue.PLANTED, 1, 0)
+	_event(GameEvent.Kind.PLANT, Plant.Cue.PLANTED, 1, 0)
 	a.on_tick(state)
-	_event(GameEvent.Kind.BOMB, Plant.Cue.BEEP, 100, 1)
+	_event(GameEvent.Kind.PLANT, Plant.Cue.BEEP, 100, 1)
 	a.on_tick(state)
 	a.advance(1.0)
 	assert_eq(a.message(), "Alpha picked up the bomb. Bomb planted at B · Keep them off it until it goes off")
 	var d := _announcer(1)
-	_event(GameEvent.Kind.BOMB, Plant.Cue.PICKED_UP, 0, 1)
+	_event(GameEvent.Kind.PLANT, Plant.Cue.PICKED_UP, 0, 1)
 	d.on_tick(state)
 	d.advance(1.0)
 	assert_eq(d.message(), "", "the defenders hear nothing of the pick-up")
-	_event(GameEvent.Kind.BOMB, Plant.Cue.PLANTED, 0, 0)
+	_event(GameEvent.Kind.PLANT, Plant.Cue.PLANTED, 0, 0)
 	d.on_tick(state)
 	d.advance(1.0)
 	assert_eq(d.message(), "Bomb planted at A · Defuse it before it goes off")

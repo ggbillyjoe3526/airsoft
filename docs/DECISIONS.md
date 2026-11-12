@@ -810,8 +810,12 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   leave the bomb to the player for 6 s (until the player is 10 m off without it) and the defuse to a player within
   15 m of it until the fuse leaves 4 s more than the work needs; a bot carrier goes in last, behind two of its team.
   The mode is public, third on the Match page (Attack / Defend, Elimination, Plant The Bomb, Practice). The device is
-  `Plant` in code: the smoke and flash grenades were "bombs" there already (`BotBombs`). Measures:
-  `docs/records/PB1.md`.
+  `Plant` in code (`Plant`, `PlantState`, `GameEvent.Kind.PLANT`, `HudPlant`, `PlantView`, `PlantShape`): the smoke
+  and flash grenades were "bombs" there already (`BotBombs`, the player's bomb keys). Only the map file's words keep
+  "bomb" (`bombSites`, `bombStart`, `MapData.bomb_sites`): a map names places as the player does, beside its `flags`,
+  and no grenade has a site. A carrier 15 m off but a storey above or below the bomb has no claim on it
+  (`BotConfig.plant_player_level`). A carrier hit in the air leaves the bomb on the floor it last stood on, and one
+  hit in a lift on the landing the car last stood at, never in the shaft. Measures: `docs/records/PB1.md`.
 
 ## Replicas, Loadout and levels
 

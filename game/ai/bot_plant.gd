@@ -88,7 +88,7 @@ static func observe(w: BotWorld, events: SimEvents, time: float) -> void:
 		if e.kind == GameEvent.Kind.ROUND_START or e.kind == GameEvent.Kind.ROUND_GO:
 			w.plant_down_at = time
 			w.plant_fell_far = false
-		elif e.kind == GameEvent.Kind.BOMB and e.value == Plant.Cue.DROPPED:
+		elif e.kind == GameEvent.Kind.PLANT and e.value == Plant.Cue.DROPPED:
 			w.plant_down_at = time
 			w.plant_fell_far = w.plant != null and w.planner != null \
 					and w.planner.in_enemy_half_at(e.position, w.attackers)
@@ -96,7 +96,7 @@ static func observe(w: BotWorld, events: SimEvents, time: float) -> void:
 				var near := Plant.nearest_site(w.plant, e.position)
 				if near >= 0:
 					w.planner.attack_flag = near
-		elif e.kind == GameEvent.Kind.BOMB and e.value == Plant.Cue.PICKED_UP and w.plant_fell_far:
+		elif e.kind == GameEvent.Kind.PLANT and e.value == Plant.Cue.PICKED_UP and w.plant_fell_far:
 			# Taken up where its carrier fell on the way in: its new carrier's lane is behind it.
 			for b in w.bots:
 				if b.character.id == e.actor:
@@ -210,14 +210,13 @@ static func may_take(w: BotWorld) -> bool:
 	var waited := w.time - w.plant_down_at
 	if waited >= w.cfg.plant_player_first:
 		return true
-	var d := _flat(you.position, ps.position)
 	if not ps.moved:
-		return d > w.cfg.plant_player_left
-	return d > w.cfg.plant_player_near and waited >= w.cfg.plant_drop_wait
+		return not _player_within(w, you, w.cfg.plant_player_left)
+	return not _player_within(w, you, w.cfg.plant_player_near) and waited >= w.cfg.plant_drop_wait
 
 
 ## Whether a bot may disarm the bomb now. With no player on the defenders' team in play, or the player not within
-## plant_player_claim m of it, at once. With the player near, never while they are on it, and otherwise only once the
+## plant_player_claim m of it on its storey, at once. With the player near, never while they are on it, and otherwise only once the
 ## fuse leaves no more than what is left of the defuse plus plant_takeover_margin s.
 static func may_defuse(w: BotWorld) -> bool:
 	var ps := w.plant
@@ -226,9 +225,15 @@ static func may_defuse(w: BotWorld) -> bool:
 		return true
 	if ps.defuser == you.id:
 		return false
-	if _flat(you.position, ps.position) > w.cfg.plant_player_claim:
+	if not _player_within(w, you, w.cfg.plant_player_claim):
 		return true
 	return ps.fuse_left <= defuse_left(w) + w.cfg.plant_takeover_margin
+
+
+## Whether the player `you` is within `reach` m of the bomb, measured level, and on its storey (plant_player_level).
+static func _player_within(w: BotWorld, you: Character, reach: float) -> bool:
+	var at := w.plant.position
+	return absf(you.position.y - at.y) <= w.cfg.plant_player_level and _flat(you.position, at) <= reach
 
 
 ## Seconds of holding Use the defuse still needs.

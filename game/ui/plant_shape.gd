@@ -1,4 +1,4 @@
-class_name BombShape
+class_name PlantShape
 extends RefCounted
 ## Plant The Bomb's sign (PB1): the prop at an airsoft site, a small carry case with a handle and a light, drawn from
 ## shapes. Fit once into a box, then painted onto any canvas item without allocating, so the marker's glyph, the gauge's

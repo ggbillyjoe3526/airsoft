@@ -85,7 +85,7 @@ func on_tick(state: GameState) -> void:
 					add(round_over_line(state.round_state, e.value, e.value2 as GameEvent.RoundEnd), false)
 			GameEvent.Kind.MATCH_OVER:
 				add(match_over_line(e.value, state.round_state.score), true)
-			GameEvent.Kind.BOMB:
+			GameEvent.Kind.PLANT:
 				add(bomb_line(state, e), false)
 			GameEvent.Kind.SQUAD_ORDER:
 				if e.actor == _you.id:

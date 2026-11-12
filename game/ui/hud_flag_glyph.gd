@@ -3,7 +3,7 @@ extends Control
 ## A small flag on its mast, the HUD's sign for Attack / Defend's flag (the approved concept's icon): a pale mast, the
 ## cloth in `colour` with a pale roundel. `chequered`, the sign for Elimination's overtime flag (concept
 ## `overtime-flag.png`): a square cloth of off-white and dark checks with a thin off-white edge. `bomb`, Plant The
-## Bomb's sign (PB1): a small carry case with a handle and a light (BombShape), in `colour`. Drawn from shapes built
+## Bomb's sign (PB1): a small carry case with a handle and a light (PlantShape), in `colour`. Drawn from shapes built
 ## once for its size, never per frame.
 
 ## The icon's drawing box: the concept's 24 x 24 viewbox.
@@ -46,7 +46,7 @@ var bomb: bool = false:
 			bomb = value
 			queue_redraw()
 
-var _case := BombShape.new()
+var _case := PlantShape.new()
 var _cloth := PackedVector2Array()
 var _checks: Array[Rect2] = []
 var _check_box := Rect2()

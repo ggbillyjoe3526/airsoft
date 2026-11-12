@@ -31,7 +31,7 @@ maps."), follow as their own tasks.
   disarms it in `defuse_time`, kept from `defuse_checkpoint` if let go. Round ends: gone off or every defender out
   for the attackers; made safe, every attacker out before it is armed, or time up before it is armed (with
   `max_overtime` more while it is being keyed in) for the defenders. With the bomb armed, the attackers all out does
-  not end the round: it still has to be made safe. Cues are `BOMB` events (`Plant.Cue`).
+  not end the round: it still has to be made safe. Cues are `PLANT` events (`Plant.Cue`).
 - **Maps.** `bombSites` in each field's file (up to two spots with an optional radius; without them the poles stand
   in) and `bombStart` (or 2.5 m in front of end 0's spawn line). The attackers always start from end 0, so the ends
   swap with the roles. Depot: A and B are its two flag sites; Woodland: A in the Fort, B at the Sawmill; Subway: A the

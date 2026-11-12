@@ -398,7 +398,7 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				_play(LIFT_CUES[clampi(e.value, 0, LIFT_CUES.size() - 1)], e.position, false,
 						_cfg.lift_button_gain if button else _cfg.lift_gain, Kind.PROP, BUS_EFFECTS, 1.0, e.reach, null,
 						true)
-			GameEvent.Kind.BOMB:
+			GameEvent.Kind.PLANT:
 				_plant_cue(e)
 			GameEvent.Kind.FLAG_ROPE:
 				_play(&"rope_up" if e.value == 1 else &"rope_down", e.position, false, _cfg.rope_gain, Kind.ROPE,

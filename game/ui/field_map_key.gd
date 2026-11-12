@@ -50,7 +50,7 @@ var _words := PackedStringArray()
 var _site_word: String = ""
 var _bomb_word: String = ""
 var _plant: bool = false
-var _case := BombShape.new()
+var _case := PlantShape.new()
 var _you := PackedVector2Array()
 var _diamond := PackedVector2Array()
 

@@ -1338,7 +1338,7 @@ func _after_tick() -> void:
 						plate_hits += 1
 			GameEvent.Kind.CHALLENGE when e.value == RangeChallenge.Cue.TIME:
 				_keep_challenge_run()
-			GameEvent.Kind.BOMB when _plant != null:
+			GameEvent.Kind.PLANT when _plant != null:
 				_plant.on_cue(e.value, e.position, _puffs)
 			GameEvent.Kind.ROUND_OVER:
 				rounds_played += 1

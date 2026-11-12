@@ -395,6 +395,9 @@ const DEFAULT_PATH := "res://game/config/bot_tuning.tres"
 @export var plant_player_claim: float = 15.0
 ## ... until the fuse leaves only what the defuse still needs plus this (s): then the nearest bot takes it.
 @export var plant_takeover_margin: float = 4.0
+## The player is near the bomb (for taking it up and for disarming it) only within this of its height (m): a storey
+## above or below it (Subway's are 9 m apart) they are no nearer than the stairs, and the bots don't wait for them.
+@export var plant_player_level: float = 2.5
 ## The bot disarming keeps its hands on it whoever it sees once the fuse leaves only the defuse plus this (s).
 @export var plant_no_time: float = 1.5
 ## While the player carries the bomb, the bots make for the site the player is within this of (m) and nearer to than

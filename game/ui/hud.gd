@@ -107,7 +107,7 @@ var _leaves_notice: Label = null
 ## The reload prompt under them (RL2), and whether reloads are manual: the player's command says so each tick (the play
 ## scene copies PlayerCommand.manual_reload here), so the prompt follows the rule the simulation used.
 var _reload_prompt: HudReloadPrompt = null
-var _bomb_prompt: HudBombPrompt = null
+var _plant_prompt: HudPlantPrompt = null
 ## What the marker and the gauge show for Plant The Bomb, as a key (aim, site, state), so their words are built only on
 ## a change; -1 before the first.
 var _plant_marker_key: int = -1
@@ -303,8 +303,8 @@ func setup(cfg: HudConfig, teams: TeamConfig, view: ViewConfig, sim: SimTuning, 
 	_leaves_notice.visible = false
 	_reload_prompt = HudReloadPrompt.new()
 	prompt.add_child(_reload_prompt)
-	_bomb_prompt = HudBombPrompt.new()
-	prompt.add_child(_bomb_prompt)
+	_plant_prompt = HudPlantPrompt.new()
+	prompt.add_child(_plant_prompt)
 	_hit_label = HudStyle.label(middle, GameTheme.HUGE_SIZE, 800, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_CENTER)
 	_hit_label.text = tr("HUD_YOU_ARE_HIT")
 	_hit_sub = HudStyle.label(middle, GameTheme.BODY_SIZE, 600, GameTheme.TEXT, HORIZONTAL_ALIGNMENT_CENTER)
@@ -803,7 +803,7 @@ func refresh_door_prompt() -> void:
 	var what := _door_want
 	_door_want = DoorPrompt.NONE
 	set_door_prompt(what, _door_stop)
-	_bomb_prompt.refresh_key()
+	_plant_prompt.refresh_key()
 
 
 ## Whether the door prompt shows.
@@ -930,8 +930,8 @@ func on_tick(state: GameState, mag_from_wheel: bool = false) -> void:
 			GameEvent.Kind.OVERTIME:
 				_show_banner(HudStyle.caps("HUD_OVERTIME"), HudStyle.caps("HUD_TOUCH_FLAG"))
 				_banner_left = _cfg.overtime_banner_time
-			GameEvent.Kind.BOMB:
-				_on_bomb(state, e)
+			GameEvent.Kind.PLANT:
+				_on_plant_cue(state, e)
 			GameEvent.Kind.ROUND_OVER:
 				_count.end()
 				_round_over(state.round_state, e, state.time)
@@ -1398,8 +1398,8 @@ func flag_gauge() -> HudFlagGauge:
 
 
 ## Plant The Bomb's prompt under the crosshair (PB1): for tests.
-func bomb_prompt() -> HudBombPrompt:
-	return _bomb_prompt
+func plant_prompt() -> HudPlantPrompt:
+	return _plant_prompt
 
 
 func score() -> HudScore:
@@ -1450,13 +1450,13 @@ func _update_plant(rs: RoundState, in_play: bool) -> void:
 		var team := HudPlant.gauge_team(rs, g)
 		_gauge.set_flag(HudPlant.gauge_fill(rs, g), _teams.colours[team], team == HudStyle.STRIPED_TEAM)
 	var own := in_play and _watching_name.is_empty()
-	_bomb_prompt.show_for(HudPlant.prompt(rs, _player, _sim.plant) if own else HudPlant.Prompt.NONE,
+	_plant_prompt.show_for(HudPlant.prompt(rs, _player, _sim.plant) if own else HudPlant.Prompt.NONE,
 			own and HudPlant.carrying(rs, _player))
 
 
 ## A bomb event (Plant The Bomb): a feed note for the pick-up, drop, plant and defuse as `HudPlant.feed_words` has them,
 ## and when the bomb is armed a banner over it for both teams.
-func _on_bomb(state: GameState, e: GameEvent) -> void:
+func _on_plant_cue(state: GameState, e: GameEvent) -> void:
 	var rs := state.round_state
 	if e.actor < 0 or e.actor >= state.characters.size():
 		return

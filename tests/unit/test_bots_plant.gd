@@ -285,6 +285,10 @@ func test_the_bots_leave_the_defuse_to_a_player_near_the_bomb_until_the_fuse_is_
 	rs.plant.fuse_left = w.tuning.plant.fuse_time
 	you.position = rs.plant.position + Vector3(w.cfg.plant_player_claim + 2.0, 0.0, 0.0)
 	assert_true(BotPlant.may_defuse(w), "a player nowhere near has no claim")
+	you.position = rs.plant.position + Vector3(1.0, w.cfg.plant_player_level + 1.0, 0.0)
+	assert_true(BotPlant.may_defuse(w), "nor one a storey over it")
+	you.position = rs.plant.position + Vector3(1.0, w.cfg.plant_player_level - 0.5, 0.0)
+	assert_false(BotPlant.may_defuse(w), "a step up is still beside it")
 	you.position = rs.plant.position
 	you.status = Character.Status.OUT
 	assert_true(BotPlant.may_defuse(w), "nor one out of play")
@@ -309,7 +313,7 @@ func test_the_bots_follow_a_player_carrying_the_bomb_to_the_other_site() -> void
 func test_a_bomb_dropped_by_the_other_site_moves_the_plan_there() -> void:
 	_world()
 	var events := SimEvents.new()
-	var e := events.add(GameEvent.Kind.BOMB)
+	var e := events.add(GameEvent.Kind.PLANT)
 	e.value = Plant.Cue.DROPPED
 	e.position = SITE_B + Vector3(-4.0, 0.0, 0.0)
 	BotPlant.observe(w, events, 12.0)
@@ -317,7 +321,7 @@ func test_a_bomb_dropped_by_the_other_site_moves_the_plan_there() -> void:
 	assert_eq(w.plant_down_at, 12.0)
 	w.planner.attack_flag = 0
 	events.clear()
-	e = events.add(GameEvent.Kind.BOMB)
+	e = events.add(GameEvent.Kind.PLANT)
 	e.value = Plant.Cue.DROPPED
 	e.position = START + Vector3(5.0, 0.0, 9.0)
 	BotPlant.observe(w, events, 14.0)
@@ -390,12 +394,12 @@ func test_the_last_attacker_carries_straight_in() -> void:
 func test_a_bomb_taken_up_in_the_defenders_half_is_carried_straight_on() -> void:
 	_world()
 	var events := SimEvents.new()
-	var e := events.add(GameEvent.Kind.BOMB)
+	var e := events.add(GameEvent.Kind.PLANT)
 	e.value = Plant.Cue.DROPPED
 	e.position = SITE_A + Vector3(-6.0, 0.0, 0.0)
 	BotPlant.observe(w, events, 30.0)
 	events.clear()
-	e = events.add(GameEvent.Kind.BOMB)
+	e = events.add(GameEvent.Kind.PLANT)
 	e.value = Plant.Cue.PICKED_UP
 	e.actor = 2
 	e.position = SITE_A + Vector3(-6.0, 0.0, 0.0)
@@ -405,7 +409,7 @@ func test_a_bomb_taken_up_in_the_defenders_half_is_carried_straight_on() -> void
 	# From the start line, its carrier still sweeps its lane.
 	_world()
 	events.clear()
-	e = events.add(GameEvent.Kind.BOMB)
+	e = events.add(GameEvent.Kind.PLANT)
 	e.value = Plant.Cue.PICKED_UP
 	e.actor = 1
 	e.position = START

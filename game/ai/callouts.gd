@@ -236,8 +236,8 @@ func _on_event(e: GameEvent, state: GameState, bots: Array[Bot]) -> void:
 			if _far_from_you(e.position):
 				var ask := CalloutsFile.Event.COVER_ME if you.team == attackers else CalloutsFile.Event.NEED_HELP
 				_offer_from_team(you.team, ask, -1, e.position, bots, area_of(e.position), 0, 0, e.position)
-		GameEvent.Kind.BOMB:
-			_on_bomb(e, state, bots)
+		GameEvent.Kind.PLANT:
+			_on_plant_cue(e, state, bots)
 		GameEvent.Kind.OVERTIME:
 			# Elimination's overtime flag went up (OV2): on each team, the bot nearest it says so, naming its area.
 			var area := area_of(e.position)
@@ -249,7 +249,7 @@ func _on_event(e: GameEvent, state: GameState, bots: Array[Bot]) -> void:
 ## defender within earshot of the keys (BotConfig.plant_heard, the nearest) says Bomb; armed, the attacker nearest it
 ## says Bomb armed; a bot starting to make it safe says Defusing; and the attacker nearest a bomb dropped by a carrier
 ## who was hit says Bomb down. A player's own work is never called for them.
-func _on_bomb(e: GameEvent, state: GameState, bots: Array[Bot]) -> void:
+func _on_plant_cue(e: GameEvent, state: GameState, bots: Array[Bot]) -> void:
 	var attackers := state.round_state.attackers
 	if attackers < 0 or attackers >= TEAMS:
 		return

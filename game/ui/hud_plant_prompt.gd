@@ -1,4 +1,4 @@
-class_name HudBombPrompt
+class_name HudPlantPrompt
 extends VBoxContainer
 ## Plant The Bomb's prompt under the crosshair (PB1), in the reload prompt's plate: "HOLD G · PICK UP THE BOMB", "HOLD G
 ## · PLANT THE BOMB" or "HOLD G · DEFUSE", Use's key as bound now (HudPlant.Prompt says which applies), and under it a

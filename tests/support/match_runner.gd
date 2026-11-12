@@ -433,7 +433,7 @@ func play(seed_value: int, max_seconds: float) -> MatchTally:
 					t.rings += 1
 				GameEvent.Kind.OVERTIME:
 					round_now.overtime = true
-				GameEvent.Kind.BOMB:
+				GameEvent.Kind.PLANT:
 					match e.value:
 						Plant.Cue.PICKED_UP:
 							if round_now.picked_at < 0.0:

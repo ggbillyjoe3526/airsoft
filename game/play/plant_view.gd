@@ -110,7 +110,7 @@ func refresh(ps: PlantState, attackers: int, carrier: Character, fraction: float
 		_rings[i].albedo_color = Color(c, _cfg.ring_alpha)
 
 
-## A cue of the bomb's (a BOMB event's value): the lamp flashes on a beep; going off, the prop pops its dust into
+## A cue of the bomb's (a PLANT event's value): the lamp flashes on a beep; going off, the prop pops its dust into
 ## `puffs` (a field's prop: nobody is hurt).
 func on_cue(cue: int, at: Vector3, puffs: PuffView) -> void:
 	if cue == Plant.Cue.BEEP:

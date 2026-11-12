@@ -277,7 +277,7 @@ func test_plant_the_bomb_the_planter_says_so_and_a_defender_in_earshot_calls_the
 	r.state.characters[2].position = BAY
 	r.state.characters[0].position = BAY + Vector3(-25.0, 0.0, 0.0)
 	r.state.characters[1].position = BAY + Vector3(-12.0, 0.0, 0.0)
-	var said := r.tick([{"kind": GameEvent.Kind.BOMB, "value": Plant.Cue.ARMING, "actor": 2, "position": BAY}])
+	var said := r.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.ARMING, "actor": 2, "position": BAY}])
 	said.sort()
 	assert_eq(said, _said(["1: Bomb, Bay!", "2: Planting Bay!"]), "the defender in earshot, not the nearer-named one")
 	# Nobody in earshot: only the planter speaks. A player's own planting is never called for them.
@@ -286,11 +286,11 @@ func test_plant_the_bomb_the_planter_says_so_and_a_defender_in_earshot_calls_the
 	s.state.round_state.attackers = 1
 	s.state.characters[0].position = BAY + Vector3(-25.0, 0.0, 0.0)
 	s.state.characters[1].position = BAY + Vector3(-25.0, 0.0, 0.0)
-	assert_eq(s.tick([{"kind": GameEvent.Kind.BOMB, "value": Plant.Cue.ARMING, "actor": 2, "position": BAY}]),
+	assert_eq(s.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.ARMING, "actor": 2, "position": BAY}]),
 			_said(["2: Planting Bay!"]))
 	var t := _rig()
 	t.state.round_state.attackers = 1
-	assert_eq(t.tick([{"kind": GameEvent.Kind.BOMB, "value": Plant.Cue.ARMING, "actor": 99, "position": BAY}]),
+	assert_eq(t.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.ARMING, "actor": 99, "position": BAY}]),
 			_said([]))
 
 
@@ -298,18 +298,18 @@ func test_plant_the_bomb_armed_defusing_and_dropped_are_called_by_the_side_they_
 	var r := _rig({}, {}, [0, 0, 0, 1.5])
 	r.state.round_state.attackers = 1
 	r.state.characters[3].position = DOCK
-	assert_eq(r.tick([{"kind": GameEvent.Kind.BOMB, "value": Plant.Cue.PLANTED, "actor": 2, "position": DOCK}]),
+	assert_eq(r.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.PLANTED, "actor": 2, "position": DOCK}]),
 			_said(["3: Armed, Dock!"]), "the attacker nearest the bomb")
-	assert_eq(r.tick([{"kind": GameEvent.Kind.BOMB, "value": Plant.Cue.DEFUSING, "actor": 0, "position": DOCK}]),
+	assert_eq(r.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.DEFUSING, "actor": 0, "position": DOCK}]),
 			_said(["0: Defusing!"]))
-	assert_eq(r.tick([{"kind": GameEvent.Kind.BOMB, "value": Plant.Cue.DROPPED, "actor": 2, "position": BAY}]),
+	assert_eq(r.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.DROPPED, "actor": 2, "position": BAY}]),
 			_said(["3: Bomb down, Bay!"]), "the attacker nearest where it fell")
 	# The fuse's beeps and a pick-up are no call, and nothing is called with no side attacking.
-	assert_eq(r.tick([{"kind": GameEvent.Kind.BOMB, "value": Plant.Cue.BEEP, "position": DOCK}]), _said([]))
-	assert_eq(r.tick([{"kind": GameEvent.Kind.BOMB, "value": Plant.Cue.PICKED_UP, "actor": 2, "position": DOCK}]),
+	assert_eq(r.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.BEEP, "position": DOCK}]), _said([]))
+	assert_eq(r.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.PICKED_UP, "actor": 2, "position": DOCK}]),
 			_said([]))
 	r.state.round_state.attackers = -1
-	assert_eq(r.tick([{"kind": GameEvent.Kind.BOMB, "value": Plant.Cue.PLANTED, "actor": 2, "position": DOCK}]),
+	assert_eq(r.tick([{"kind": GameEvent.Kind.PLANT, "value": Plant.Cue.PLANTED, "actor": 2, "position": DOCK}]),
 			_said([]))
 
 

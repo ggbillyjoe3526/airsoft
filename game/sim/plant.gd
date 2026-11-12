@@ -6,7 +6,7 @@ class_name Plant
 ## Whoever arms or disarms has both hands on it: `busy` holds it still with its replica down (Simulation). A prop, as
 ## at a real site: it goes off with a siren and smoke and hurts nobody. Allocates nothing.
 
-## What the device just did, a BOMB event's value. PICKED_UP, DROPPED: actor the carrier. ARMING, ARMING_STOPPED,
+## What the device just did, a PLANT event's value. PICKED_UP, DROPPED: actor the carrier. ARMING, ARMING_STOPPED,
 ## PLANTED: actor the planter, value2 the site. BEEP: value2 the fuse left in tenths of a second. DEFUSING,
 ## DEFUSING_STOPPED, DEFUSED: actor the defuser. WENT_OFF: the fuse ran out.
 enum Cue { PICKED_UP, DROPPED, ARMING, ARMING_STOPPED, PLANTED, BEEP, DEFUSING, DEFUSING_STOPPED, DEFUSED, WENT_OFF }
@@ -90,25 +90,29 @@ static func _step_down(ps: PlantState, characters: Array[Character], attackers: 
 		ps.status = PlantState.Status.CARRIED
 		ps.carrier = c.id
 		ps.moved = true
+		ps.rest = ps.position
 		ps.position = c.position
 		_cue(events, Cue.PICKED_UP, c.id, ps.position, -1)
 		return
 
 
-## Carried: it goes where its carrier goes; a carrier hit drops it there; the carrier holding Use on the ground inside a
-## site arms it, and plants it once plant_time is held.
+## Carried: it goes where its carrier goes; a carrier hit drops it on the last floor the carrier stood on (PlantState.rest:
+## under its feet unless it was in the air or riding a lift); the carrier holding Use on the ground inside a site arms
+## it, and plants it once plant_time is held.
 static func _step_carried(ps: PlantState, characters: Array[Character], cfg: PlantConfig, events: SimEvents,
 		dt: float) -> void:
 	var carrier := _by_id(characters, ps.carrier)
 	if carrier == null or not Elimination.is_in_play(carrier):
 		_stop_arming(ps, events)
 		ps.status = PlantState.Status.DOWN
-		if carrier != null:
-			ps.position = carrier.position
+		ps.position = ps.rest
+		ps.on_lift = false
 		_cue(events, Cue.DROPPED, ps.carrier, ps.position, -1)
 		ps.carrier = -1
 		return
 	ps.position = carrier.position
+	if carrier.grounded and not ps.on_lift:
+		ps.rest = carrier.position
 	var site := site_at(ps, carrier.position, cfg) if carrier.using and carrier.grounded else -1
 	if site < 0:
 		_stop_arming(ps, events)
@@ -187,12 +191,17 @@ static func _stop_arming(ps: PlantState, events: SimEvents) -> void:
 
 
 static func _cue(events: SimEvents, cue: Cue, actor: int, at: Vector3, site: int) -> GameEvent:
-	var e := events.add(GameEvent.Kind.BOMB)
+	var e := events.add(GameEvent.Kind.PLANT)
 	e.value = cue
 	e.actor = actor
 	e.position = at
 	e.value2 = site
 	return e
+
+
+## Who carries the bomb, or null with it not carried.
+static func carrier_of(ps: PlantState, characters: Array[Character]) -> Character:
+	return _by_id(characters, ps.carrier) if ps.status == PlantState.Status.CARRIED else null
 
 
 static func _by_id(characters: Array[Character], id: int) -> Character:
