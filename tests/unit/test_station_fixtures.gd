@@ -314,3 +314,29 @@ func test_no_fixture_is_drawn_through_a_trim_or_the_vault_s_lid() -> void:
 			if v.lid().intersects(box):
 				bad.append("%s at %s in a vault's lid" % [f.model, f.position])
 	assert_eq(bad, [] as Array[String], "fixtures clear every trim and vault")
+
+
+func test_each_departure_board_has_a_rod_near_both_of_its_ends_and_reaching_the_arc() -> void:
+	# QA: the rods sit at the board's own ends (along its yaw, not the world x), on its depth, from its top into a vault.
+	var m := _map("subway")
+	var n := 0
+	for f in m.station.fixtures:
+		if f.model != &"departures_n" and f.model != &"departures_s":
+			continue
+		n += 1
+		var t := Transform3D(Basis(Vector3.UP, f.yaw).scaled(Vector3.ONE * f.scale), f.position)
+		var box := _mesh(f.model).get_aabb()
+		var ends := [0, 0]
+		for tr in m.station.trims:
+			var c := tr.box.get_center()
+			if absf(tr.box.position.y - f.position.y) > 0.01 or Vector2(c.x - f.position.x, c.z - f.position.z).length() > 3.0:
+				continue
+			var local := t.affine_inverse() * Vector3(c.x, f.position.y, c.z)
+			if local.x > box.position.x and local.x < box.end.x and absf(local.z - (box.position.z + box.end.z) * 0.5) < box.size.z:
+				ends[0 if local.x < box.get_center().x else 1] += 1
+				var hit := false
+				for v in m.station.vaults:
+					hit = hit or v.lid().has_point(Vector3(c.x, tr.box.end.y - 0.01, c.z))
+				assert_true(hit, "%s's rod reaches a vault's arc" % f.model)
+		assert_eq(ends, [1, 1], "%s at %s: one rod near each end" % [f.model, f.position])
+	assert_eq(n, 4, "four departure boards")
