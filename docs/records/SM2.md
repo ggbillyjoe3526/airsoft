@@ -1,6 +1,6 @@
 # SM2 · Subway's escalators, lifts, stairs and railing
 
-**Review:** 4 attempts · critic pending · qa pending · performance pending
+**Review:** 5 attempts (past the cap: the project keeps fixing until the critic passes) · critic pending · qa pending · performance pending
 
 The owner (2026-11-12): "Begin work on subway models now." SM2 is models #14 to #18 of
 `art/subway-model-list.md`: the escalator banks, the lift car and doors, the spiral stair, the stair handrails and
@@ -14,7 +14,8 @@ step nosings, and the balustrade railing, after the owner's photos in `art/refer
 | 2026-11-12 | 1 | Opus 5.5 (build thread) | pass | Retry 7/8 | the escalator's proportions, finishes and the lift's tiled jambs against the photos |
 | 2026-11-12 | 2 | Opus 5.5 (build thread) | pass | Retry 7/8 | the decks and capping still read beige, the lift indicator small, the leaves' panels apart, a dark stair skirting |
 | 2026-11-12 | 3 | Opus 5.5 (build thread) | pass (CI) | Retry 7/8 | the landing display unlit, the vision panel two slits, the decks dull and faceted, wide yellow step edges, the railing posts |
-| 2026-11-12 | 4 | Opus 5.5 (build thread) | – | – | – |
+| 2026-11-12 | 4 | Opus 5.5 (build thread) | pass (CI) | Retry 7/8 | the landing display's window still dark, the escalator's sides dull and its edges cream, the half panes narrow |
+| 2026-11-12 | 5 | Opus 5.5 (build thread) | – | – | – |
 
 ## What changed
 
@@ -83,6 +84,11 @@ step nosings, and the balustrade railing, after the owner's photos in `art/refer
   leaves' hairline (0.28 of the door's height, as in the photos); the decks are brighter brushed stainless, smooth
   shaded, the newels' round ends in 16 steps (10 showed flat bands); the steps' yellow edges are 30 mm (45 read as a
   yellow step from the top).
+- **Critic attempt 4 fixes**: the landing display's window carries a lit dot-matrix row of chevrons (wordless) beside
+  its arrows, both in the lit model, drawn at the lit button colour times `LiftViewConfig.landing_lit_gain` (2.5, so
+  they glow past the tone map); each half pane is 0.22 m wide (the pane 0.44 of the door's width, as in the photos);
+  the balustrades' sides are a brighter stainless (0xD6D8D7) and the decks 0xC4C7C8; the steps' edges, combs and stop
+  plates are a stronger safety yellow (0xE8CC22, hue 52°, clear of Beta's orange).
 - **The lift door is 1.1 by 2.1 m** (0.52 wide to high; the photos' about 0.49): it is the play size of
   `layout.LIFT_DOOR_W` and `LiftConfig` that MT2 built and tuned the lifts round, two abreast through it, so the
   model follows it.

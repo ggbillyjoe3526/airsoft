@@ -30,7 +30,7 @@ import layout as L  # noqa: E402  tools/subway/layout.py
 
 CAR_BUDGET = 6000
 LANDING_BUDGET = 1200
-LIT_BUDGET = 20           # the landing's lit arrows (drawn unshaded)
+LIT_BUDGET = 200          # the landing's lit arrows and dot-matrix chevrons (drawn unshaded, bright)
 LEAF_BUDGET = 300
 BUTTON_BUDGET = 160
 
@@ -315,7 +315,7 @@ def leaf() -> list:
     hw, ht = w / 2, t / 2
     # Half the pane, from 0.16 m in to the meeting edge (+x), framed on its other three sides: the two halves meet
     # with only the leaves' hairline between them.
-    g0, g1, gy0, gy1, f = hw - 0.16, hw - 0.0015, 1.15, 1.74, 0.03
+    g0, g1, gy0, gy1, f = hw - 0.22, hw - 0.0015, 1.15, 1.74, 0.03
     for side in (-1.0, 1.0):
         z = side * ht
 
@@ -382,8 +382,8 @@ def bevelled(m: tk.Mesh, x0: float, y0: float, x1: float, y1: float, z_face: flo
 def landing(lights: list) -> list:
     """A landing's doorway dress, the landing toward -z, the wall's outside face at z 0 and the shaft behind it (+z):
     the architrave round the opening, the linings through the wall to the leaves, the sill, the display over the door,
-    and the call station's plate and bezel round the call button. The display's arrows go into `lights`: LiftView
-    draws them lit (unshaded), so they read across the hall."""
+    and the call station's plate and bezel round the call button. The display's arrows and its dot matrix's lit
+    chevrons go into `lights`: LiftView draws them lit (unshaded, bright), so they read across the hall."""
     mk.reset()
     arch, lining, sill, disp, lens, plate, bez, gap, mitre, arrows = (tk.Mesh() for _ in range(10))
     hw = DOOR_W / 2
@@ -473,6 +473,19 @@ def landing(lights: list) -> list:
                lens.build("landing_lens", LENS, toned=False), plate.build("landing_plate", PANEL, toned=False),
                bez.build("landing_bezel", SILL, toned=False), gap.build("landing_gap", tk.GAP, toned=False),
                mitre.build("landing_mitres", tk.STAINLESS_DARK, toned=False)]
+    # The window's lit dots: a row of chevrons in the dot matrix (a running "this way" pattern, wordless), each dot
+    # a lit square on the dark window.
+    pitch, size = 0.02, 0.011
+    rows = 7
+    y_mid = (dy0 + dy1) * 0.5
+    x0 = -dx + 0.09
+    while x0 + 4 * pitch < dx - 0.27:
+        for r in range(rows):
+            col = 3 - abs(r - rows // 2)
+            xc, yc = x0 + col * pitch, y_mid + (r - rows // 2) * pitch
+            arrows.poly([(xc + size / 2, yc - size / 2, -0.0367), (xc - size / 2, yc - size / 2, -0.0367),
+                         (xc - size / 2, yc + size / 2, -0.0367), (xc + size / 2, yc + size / 2, -0.0367)])
+        x0 += 6 * pitch
     lights.append(arrows.build("landing_arrows", LENS, toned=False))
     return objects
 

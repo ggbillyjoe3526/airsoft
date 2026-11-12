@@ -40,7 +40,9 @@ LOOP = 0.22        # the handrail's loop round each newel (m, to its middle line
 INLET = 2.55       # how far round each loop (radians) the handrail runs before it goes into the newel
 SKIRT = 0.24       # the skirt panel's height over the slope
 BRUSH = (0.255, 0.285, 0.022)   # the brush deflector: from, to over the slope; how far it stands out
-DECK = 0xA2A6A8     # the rim (the decks and the newels' rounded ends): brushed stainless, a shade under the sides
+BODY = 0xD6D8D7     # the balustrades' sides: bright brushed stainless (the shafts' cool light greys it)
+SAFETY = 0xE8CC22   # the steps' edges, combs and stop plates: a strong safety yellow (the palette's read cream)
+DECK = 0xC4C7C8     # the rim (the decks and the newels' rounded ends): brushed stainless, a shade under the sides
 SEAM = 1.25        # the panels' seams along each balustrade (m)
 NOSING = 0.03      # the yellow edges' width on each step (thin, as in the photos)
 LAMP_STEP = 3.6    # the uplighters' spacing along the middle deck (m)
@@ -152,9 +154,9 @@ def steps(bank: Bank, rng: random.Random) -> list:
                     combs.poly([(edge, ct, a), (tip, tip_y, (a + b) / 2), (edge, ct, b)])
     # The cleats run down the bank on the treads, their edges and the risers, and on the landing plates as the combs'
     # grooves: fine ribs across z (Blender's y), drawn by the props' shader (map_kit.ribbed).
-    ribbed = [treads.build("treads", tk.TREAD), yellow.build("tread_edges", tk.YELLOW),
+    ribbed = [treads.build("treads", tk.TREAD), yellow.build("tread_edges", SAFETY),
               risers.build("risers", tk.RISER), plates.build("landing_plates", tk.CHEQUER)]
-    return [mk.ribbed(o, 1) for o in ribbed] + [combs.build("combs", tk.YELLOW)]
+    return [mk.ribbed(o, 1) for o in ribbed] + [combs.build("combs", SAFETY)]
 
 
 def rail_path(bank: Bank, za: float) -> tuple:
@@ -345,7 +347,7 @@ def build(room: str, name: str) -> None:
     balustrade(bank, bank.s1, bank.z1, (-1,), [bank.s1 + RAIL_W / 2], rng, parts)
     balustrade(bank, bank.m0, bank.m1, (-1, 1), [bank.m0 + RAIL_W / 2, bank.m1 - RAIL_W / 2], rng, parts)
     lamps(bank, parts["bronze"], parts["glass"], parts["inside"])
-    objects += [parts["body"].build("balustrade", tk.STAINLESS, smooth=40.0), parts["skirt"].build("skirt", tk.STAINLESS_DARK),
+    objects += [parts["body"].build("balustrade", BODY, smooth=40.0), parts["skirt"].build("skirt", tk.STAINLESS_DARK),
                 parts["brush"].build("brush", tk.GAP), parts["seams"].build("seams", tk.GAP),
                 parts["deck"].build("deck", DECK, smooth=40.0),
                 parts["rail"].build("handrail", tk.RUBBER, smooth=50.0, toned=False, outward=True),
@@ -353,7 +355,7 @@ def build(room: str, name: str) -> None:
                 parts["bronze"].build("uplighter", tk.BRONZE, smooth=50.0, toned=False),
                 parts["glass"].build("uplighter_glass", tk.FROST, smooth=50.0, toned=False),
                 parts["inside"].build("uplighter_inside", mk.scaled(tk.FROST, 0.8), smooth=50.0, toned=False),
-                parts["stop_plate"].build("stop_plate", tk.YELLOW, toned=False),
+                parts["stop_plate"].build("stop_plate", SAFETY, toned=False),
                 parts["stop_button"].build("stop_button", tk.RUBBER, smooth=50.0, toned=False)]
     if "--parts" in sys.argv:
         print(", ".join("%s %d" % (o.name, mk.tris([o])) for o in objects if o is not None))

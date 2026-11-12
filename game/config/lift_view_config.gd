@@ -42,6 +42,9 @@ extends Resource
 @export var landing_model: String = "res://assets/models/props/lift_landing.glb"
 ## The landing display's arrows, drawn lit (unshaded, like a called button) over each landing; empty draws none.
 @export var landing_lit_model: String = "res://assets/models/props/lift_landing_lit.glb"
+## How bright the landing displays' lit dots and arrows are drawn: the lit button colour times this (over 1 reads as
+## glowing past the tone map).
+@export var landing_lit_gain: float = 2.5
 @export var leaf_model: String = "res://assets/models/props/lift_leaf.glb"
 @export var button_model: String = "res://assets/models/props/lift_button.glb"
 @export var model_well: Vector2 = Vector2(2.3, 1.8)

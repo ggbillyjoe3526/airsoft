@@ -102,7 +102,9 @@ static func build(map: MapData, style: MapStyle, lifts: LiftConfig, cfg: LiftVie
 		view._landings = view._multimesh("Landings", view._landing_mesh, landings, false, view._model_material)
 		var lit := PropDressConfig.load_mesh(cfg.landing_lit_model)
 		if lit != null:
-			view._landing_lights = view._multimesh("LandingLights", lit, landings, false, view._button_material)
+			view._landing_lights = view._multimesh("LandingLights", lit, landings, true, view._button_material)
+		var g := cfg.landing_lit_gain
+		var glow := Color(view._lit.r * g, view._lit.g * g, view._lit.b * g, 1.0)
 		var j := 0
 		for i in map.lifts.size():
 			if not view._modelled[i]:
@@ -114,6 +116,7 @@ static func build(map: MapData, style: MapStyle, lifts: LiftConfig, cfg: LiftVie
 				view._landings.multimesh.set_instance_transform(j, at)
 				if view._landing_lights != null:
 					view._landing_lights.multimesh.set_instance_transform(j, at)
+					view._landing_lights.multimesh.set_instance_color(j, glow)
 				j += 1
 	for i in map.lifts.size():
 		view._add_car(i, style)
