@@ -82,7 +82,9 @@ static func materials(paint: StringName, realistic: bool) -> Array[StandardMater
 
 
 ## Puts `paint` on every surface of `model` and below it whose material is one of the five parts: on its surface (MQ1),
-## worn where the model carries a wear mask (RW1), unless `surfaced` is false (a figure's copy: the plain paint).
+## worn where the model carries a wear mask (RW1), unless `surfaced` is false (a figure's copy: the plain paint). A
+## fitted part names a kind for each of its materials (MQ2, ReplicaSurfaces.named), and those of its own that it names
+## (rubber pads, a brass crown) go on their surfaces too, in their own colours.
 static func apply(model: Node, paint: StringName, realistic: bool, surfaced: bool = true) -> void:
 	var painted := materials(paint, realistic)
 	var own_colours := paint == ReplicaSchemes.OWN
@@ -95,11 +97,16 @@ static func apply(model: Node, paint: StringName, realistic: bool, surfaced: boo
 		var mesh_node := node as MeshInstance3D
 		if mesh_node.mesh == null:
 			continue
+		# A part's own table of kinds (MQ2), material name to kind; empty for a replica, whose faces say theirs.
+		var named: Dictionary[StringName, int] = {}
+		if surfaced:
+			named = ReplicaSurfaces.named(mesh_node.mesh)
 		for i in mesh_node.mesh.get_surface_count():
 			var own := mesh_node.mesh.surface_get_material(i)
 			if own == null:
 				continue
 			var material_name := StringName(own.resource_name)
+			var kind: int = named.get(material_name, ReplicaSurfaces.part_index(material_name))
 			if own_colours:
 				# Its own colours, or their realistic grey (and back again, a menu picture being repainted), on their
 				# surfaces in the hands (MQ1).
@@ -107,9 +114,11 @@ static func apply(model: Node, paint: StringName, realistic: bool, surfaced: boo
 				if realistic and ReplicaSchemes.OWN_REALISTIC.has(material_name):
 					grey = _realistic_own(material_name)
 				var shown: StandardMaterial3D = grey if grey != null else own as StandardMaterial3D
-				if surfaced and shown != null and plain_colour(shown):
-					mesh_node.set_surface_override_material(i,
-							_surface_of(shown, null, ReplicaSurfaces.part_index(material_name)))
+				# A part that names its kinds (the Cyber's torch) is surfaced only where it names one: its reflector
+				# and its lit parts stay as the file has them.
+				var stands_in := named.is_empty() or named.has(material_name)
+				if surfaced and shown != null and stands_in and plain_colour(shown):
+					mesh_node.set_surface_override_material(i, _surface_of(shown, null, kind))
 				elif ReplicaSchemes.OWN_REALISTIC.has(material_name) \
 						or is_surface(mesh_node.get_surface_override_material(i)):
 					# plain again: the realistic grey, or the model's own (a surface an earlier apply left is taken off)
@@ -118,8 +127,16 @@ static func apply(model: Node, paint: StringName, realistic: bool, surfaced: boo
 			var part := ReplicaSchemes.PARTS.find(material_name)
 			if part >= 0 and part < painted.size():
 				var mask := wear_mask(mesh_node.mesh, i) if surfaced else null
-				mesh_node.set_surface_override_material(i, _surface_of(painted[part], mask,
-						ReplicaSurfaces.part_index(material_name)) if surfaced else painted[part])
+				mesh_node.set_surface_override_material(i,
+						_surface_of(painted[part], mask, kind) if surfaced else painted[part])
+			elif named.has(material_name) and own is StandardMaterial3D and plain_colour(own as StandardMaterial3D):
+				# A part's own material that names its kind (MQ2: rubber pads, a brass crown): its own colour on that
+				# surface.
+				mesh_node.set_surface_override_material(i,
+						_surface_of(own as StandardMaterial3D, wear_mask(mesh_node.mesh, i), kind))
+			elif is_surface(mesh_node.get_surface_override_material(i)):
+				# plain again: a surface an earlier apply left on one of the part's own materials is taken off
+				mesh_node.set_surface_override_material(i, null)
 
 
 ## Whether `material` is one plain colour (opaque, no texture): the kind the surface shader can stand in for.

@@ -46,7 +46,17 @@ from mathutils import Matrix, Vector  # noqa: E402
 import aeg  # noqa: E402
 import gbb  # noqa: E402
 import hardsurface as hs  # noqa: E402
+import surface  # noqa: E402
 import wear  # noqa: E402
+
+# What each magazine's materials are made of (surface.py, MQ2): the hi-cap a stamped steel shell, the low-cap moulded
+# polymer, the pistol's extended one a steel tube on a polymer base as the pistol's own; pads and dark insides rubber.
+SURFACES = {
+    "magazine_hiCap": {"Detail": "steel", "Metal": "steel", "Rubber": "rubber"},
+    "magazine_lowCap": {"Detail": "polymer", "Metal": "steel", "Rubber": "rubber"},
+    "magazine_extended": {"Detail": "polymer", "Metal": "steel", "Accent": "polymer", "Furniture": "polymer",
+                          "Rubber": "rubber"},
+}
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
 PARTS = os.path.join(ROOT, "assets/models/replicaParts/%s.glb")
@@ -59,9 +69,19 @@ LOWCAP_BOTTOM = -0.1310
 # How much finer the parts are than the replica's own magazine (rings down the curve, corners, bevel): a part has its
 # own budget (10,000 triangles, docs/CC0_ASSETS.md › Size limits) where the replica's magazine shares the rifle's. The
 # rest of each budget goes on the details below.
+PART_TRIS = 10000
 HICAP_FINE = 2
 LOWCAP_FINE = 3
 EXTENDED_FINE = 9
+# What tells the two apart at a glance (MQ2). The hi-cap is a pressed steel shell: four narrow pressed ribs a side
+# (place along the side, half width, m), the lapped seam down its back (-1: back; half width, height, its flat crown's
+# share of the width) with a row of spot welds, folded steel feed lips. The low-cap is moulded polymer: the rifle's
+# five wide ribs, and the mould's parting line, a fine ridge down its front and back (through every second ring).
+# Their BBs are true balls, as round as each budget holds (`round_bb` sides, half as many bands): the magazine's top
+# is in front of the camera on every reload.
+HICAP_SHAPE = {"ribs": ((-0.0213, 0.0019), (-0.0071, 0.0019), (0.0071, 0.0019), (0.0213, 0.0019)), "lips": True,
+               "seams": ((-1, 0.0024, 0.0005, 0.75),), "welds": 7, "round_bb": 32}
+LOWCAP_SHAPE = {"seams": ((1, 0.0005, 0.0003, 0.0), (-1, 0.0005, 0.0003, 0.0)), "seam_step": 2, "round_bb": 34}
 # The magazines' wear (RW2): one mask a file, at about the replicas' own texel size (a 2K mask over a whole replica),
 # each file's own seed, and the scratches times the replicas' magazines' factor (aeg.py, gbb.py: "Magazine" 2.5).
 WEAR_SIZE = 1024
@@ -135,6 +155,7 @@ def cut(ob: object, cutters: list) -> None:
     """`ob` less `cutters` (exact boolean), the cutters deleted. Unlike hardsurface.cut it doesn't resolve `ob`'s own
     overlaps (a magazine's ribs, plate and BBs overlap its body): only where a cutter meets it changes."""
     tool = hs.join("cutters", cutters)
+    before = shells(ob)
     mod = ob.modifiers.new("cut", "BOOLEAN")
     mod.operation = "DIFFERENCE"
     mod.solver = "EXACT"
@@ -145,6 +166,27 @@ def cut(ob: object, cutters: list) -> None:
     me = tool.data
     bpy.data.objects.remove(tool, do_unlink=True)
     bpy.data.meshes.remove(me)
+    # A cut takes a bite, never a whole shell: the boolean has dropped ones a cutter never touched.
+    if shells(ob) < before:
+        raise SystemExit("%s: the cut lost a shell (%d of %d left)" % (ob.name, shells(ob), before))
+
+
+def shells(ob: object) -> int:
+    """How many separate shells (pieces joined by no edge) `ob`'s mesh is."""
+    me = ob.data
+    root = list(range(len(me.vertices)))
+
+    def find(i: int) -> int:
+        while root[i] != i:
+            root[i] = root[root[i]]
+            i = root[i]
+        return i
+
+    for e in me.edges:
+        a, b = find(e.vertices[0]), find(e.vertices[1])
+        if a != b:
+            root[a] = b
+    return len({find(i) for i in range(len(me.vertices))})
 
 
 def clean(ob: object) -> None:
@@ -180,9 +222,14 @@ def flat_planes(ob: object) -> None:
     me.normals_split_custom_set(normals)
 
 
-def aeg_part(name: str, bottom: float, fine: int) -> object:
-    """An AEG magazine part: the replica's magazine to `bottom`, `fine` times finer, with the catch window cut into its
-    left side and grip grooves cut across its base plate's foot (inside the standard plate's outline)."""
+def aeg_part(name: str, bottom: float, fine: int, seams: tuple = (), welds: int = 0, seam_step: int = 1,
+             ribs: tuple = aeg.MAG_RIBS, lips: bool = False, round_bb: int = 16) -> object:
+    """An AEG magazine part: the replica's magazine's body and plate to `bottom`, `fine` times finer, the catch window
+    cut into its left side and grip grooves cut across its base plate's foot (inside the standard plate's outline).
+    Joined after the cuts, so the cut takes nothing else: its `ribs` (aeg.mag_ribs), its feed tower with folded steel
+    `lips` or none and BBs `round_bb` sides round (aeg.mag_top), and its `seams` with their `welds` (aeg.mag_seams)."""
+    ribs = aeg.mag_ribs(name + "Ribs", bottom, fine, ribs)
+    top = aeg.mag_top(name + "Top", fine, lips, round_bb)
     mag = aeg.magazine(name, bottom, fine)
     cutters = []
     floors = hs.Builder(name + "Floors", ["Rubber"])
@@ -202,17 +249,21 @@ def aeg_part(name: str, bottom: float, fine: int) -> object:
                       PLATE_FOOT + GROOVE[2]), "Rubber")
         c.transform(faces, plate)
         cutters.append(c.build())
-    return bored(mag, cutters, floors.build())
+    mag = hs.join(name, [bored(mag, cutters, floors.build()), top, ribs])
+    if not seams:
+        return mag
+    return hs.join(name, [mag, aeg.mag_seams(name + "Seams", bottom, fine, seams, welds, seam_step)])
 
 
 def hicap() -> object:
     """The hi-cap: the AEG's magazine to HICAP_BOTTOM, finer, with its details and its winding wheel."""
-    return hs.join("magazine_hiCap", [aeg_part("magazine_hiCap", HICAP_BOTTOM, HICAP_FINE), hicap_wheel()])
+    return hs.join("magazine_hiCap", [aeg_part("magazine_hiCap", HICAP_BOTTOM, HICAP_FINE, **HICAP_SHAPE),
+                                      hicap_wheel()])
 
 
 def lowcap() -> object:
     """The low-cap: the AEG's magazine cut short to LOWCAP_BOTTOM, finer, with its details."""
-    return aeg_part("magazine_lowCap", LOWCAP_BOTTOM, LOWCAP_FINE)
+    return aeg_part("magazine_lowCap", LOWCAP_BOTTOM, LOWCAP_FINE, **LOWCAP_SHAPE)
 
 
 def hicap_wheel() -> object:
@@ -337,9 +388,15 @@ def replace(part_file: str, materials: dict, well: tuple, build: list) -> None:
                 flat_planes(ob)
             ob.data.transform(Matrix.Translation(-at))
             ob.location = at
-            print("  %-26s %6d triangles" % (ob.name, hs.tris(ob)))
+            count = hs.tris(ob)
+            print("  %-26s %6d triangles" % (ob.name, count))
+            if count > PART_TRIS and not ob.name.endswith("_Figure"):
+                raise SystemExit("%s: %d triangles is over the part budget of %d" % (ob.name, count, PART_TRIS))
     worn = [ob.name for ob in bpy.data.objects if ob.type == "MESH" and ob.name.startswith("magazine_")
             and not ob.name.endswith("_Figure")]
+    for name in worn:
+        part = bpy.data.objects[name]
+        surface.name([part] + list(part.children_recursive), SURFACES.get(name, {}))
     wear.apply(seed=WEAR_SEED[part_file], heavier={name: MAGAZINE_SCRATCH for name in worn}, size=WEAR_SIZE,
                only=("magazine_",))
     hs.export(path, False)
