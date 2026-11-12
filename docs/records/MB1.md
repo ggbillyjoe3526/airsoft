@@ -43,7 +43,9 @@ measured on the branch rebuilt on it (`main` at 055b438), and the "before" is `m
 a figure says "before RP1". SM3 (#322) then made Subway's ticket gates one person wide, so Subway's before and after
 are measured once more on `main` at 2bdbb01, through those gates. PH2 (#327, the pistol's and the SMG's energy)
 merged last: one confirming run of 8 matches a field and mode on the final head reads Depot 51 % ±7 and 51 % ±6,
-Woodland 55 % ±7 and 57 % ±7, Subway 52 % ±6 and 53 % ±6, all in band.
+Woodland 55 % ±7 and 57 % ±7, Subway 52 % ±6 and 53 % ±6, all in band. SM4, SD2 and TB2 (#326, #329, #328: Subway's
+works gear, interiors and arched tunnels) merged after that: Subway on the head that merged reads 48 % ±5 of
+Elimination (16 matches) and 60 % ±6 of Attack / Defend (8), in band.
 
 ## What the bots' planner needs of a lane
 
