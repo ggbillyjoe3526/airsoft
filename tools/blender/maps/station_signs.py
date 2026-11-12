@@ -6,11 +6,12 @@ the platforms' departure boards, an information panel and three notices (no smok
 From the owner's photos (references/maps/subway/33-extras): black signs with yellow words (direction_signs), a name
 band along the platform wall (station_name_platform, but a dark band, not a real network's colour), framed posters
 (poster_frames), a round clock with Roman numerals (platform_clock, no maker's name) and the yellow line's warning
-(mind_the_gap). Every name and word is invented: the station is "Copperhill" (not "Kingsmere", the name the map
-dropped); the posters are the game's own: four from airsoft (hit calling, a skirmish day, goggles on, a chrono night),
-a club's call for new players, lost property, and adverts for invented things (a lido, a tea, a lemonade, a jazz
-club, the library, a market, a tram museum). No real network, brand or logo. Colours are the look's palette
-(mapkit.PALETTE), kept off both team hues; worn a little (grain, a faded rim) for Sunlit Concrete.
+(mind_the_gap). Every name and word is invented: the station is STATION, "Morrin Street" (owner, 2026-11-12), in
+the town of Copperhill (its adverts' town and its line's name; "Kingsmere" was the map's old name); the posters are
+the game's own: four from airsoft (hit calling, a skirmish day, goggles on, a chrono night), a club's call for new
+players, lost property, and adverts for invented things (a lido, a tea, a lemonade, a jazz club, the library, a
+market, a tram museum). No real network, brand or logo. Colours are the look's palette (mapkit.PALETTE), kept off
+both team hues; worn a little (grain, a faded rim) for Sunlit Concrete.
 
 Needs Pillow, fontTools and brotli (the repo's fonts are WOFF2): pip install pillow fonttools brotli
 
@@ -33,13 +34,17 @@ from station_cells import CELLS, NOTICES, POSTERS, SHEET, WIDE_POSTERS  # noqa: 
 
 ROOT = sys.argv[-1] if len(sys.argv) > 1 and os.path.isdir(sys.argv[-1]) else os.getcwd()
 OUT = os.path.join(ROOT, "assets", "textures", "station", "signs.png")
+STATION = "Morrin Street"  # the station's name (owner, 2026-11-12); the map is still Subway
 FONTS = os.path.join(ROOT, "assets", "fonts")
 
 INK = (0x22, 0x21, 0x24)
 SIGN_BLACK = (0x1E, 0x1E, 0x20)
 SIGN_YELLOW = (0xE4, 0xCA, 0x46)   # the palette's yellow, the station's one safety colour
 CREAM = (0xF4, 0xEC, 0xDA)
-SLATE = (0x3B, 0x40, 0x3E)         # the name band: dark grey-green, no network's colour
+SLATE = (0x3B, 0x40, 0x3E)         # dark grey-green, no network's colour
+# The station's name signs (owner, 2026-11-12): the trains' stripe, a worn burnt orange (train.py COLOURS "stripe");
+# like the stripe, let off the team-hue rule at the owner's word (tests/unit/test_station_fixtures.gd).
+STRIPE = (0xC0, 0x65, 0x2F)
 TEAL = (0x2A, 0x9C, 0x90)
 GREEN = (0x58, 0x90, 0x4E)
 FOREST = (0x2B, 0x5C, 0x48)
@@ -388,19 +393,19 @@ def wide_poster(kind: str, rng: random.Random) -> Image.Image:
 
 
 def line_map(rng: random.Random) -> Image.Image:
-    """The line's strip map: its invented stops along a green line, Copperhill ringed."""
+    """The line's strip map: its invented stops along a green line, the station ringed."""
     w, h = CELLS["line_map"][2] * 2, CELLS["line_map"][3] * 2
     im = Image.new("RGB", (w, h), CREAM)
     d = ImageDraw.Draw(im)
     d.rectangle((0, 0, 300, h), fill=SLATE)
     text_centre(d, (150, h * 0.36), "COPPERHILL", font(700, 54), CREAM)
     text_centre(d, (150, h * 0.68), "LINE", font(700, 54), BUTTER)
-    stops = ["Ashby Road", "Mill Lane", "Copperhill", "Lido", "Harbour", "Pier"]
+    stops = ["Ashby Road", "Mill Lane", STATION, "Lido", "Harbour", "Pier"]
     x0, x1, y = 440, w - 110, h * 0.40
     d.line([(x0 - 30, y), (x1 + 30, y)], fill=GREEN, width=22)
     for i, name in enumerate(stops):
         x = x0 + (x1 - x0) * i / (len(stops) - 1)
-        here = name == "Copperhill"
+        here = name == STATION
         r = 30 if here else 20
         d.ellipse((x - r, y - r, x + r, y + r), fill=CREAM, outline=INK, width=8 if here else 6)
         text_centre(d, (x, h * 0.78), name, font(700 if here else 600, 46 if here else 40), INK)
@@ -433,10 +438,10 @@ def info_panel(rng: random.Random) -> Image.Image:
     w, h = CELLS["info_panel"][2] * 3, CELLS["info_panel"][3] * 3
     im = Image.new("RGB", (w, h), CREAM)
     d = ImageDraw.Draw(im)
-    d.rectangle((0, 0, w, 120), fill=SLATE)
+    d.rectangle((0, 0, w, 120), fill=STRIPE)
     d.ellipse((24, 22, 100, 98), fill=CREAM)
-    text_centre(d, (62, 60), "i", font(700, 66), SLATE)
-    d.text((124, 60), "Copperhill · station information", font=font(700, 56), fill=CREAM, anchor="lm")
+    text_centre(d, (62, 60), "i", font(700, 66), STRIPE)
+    d.text((124, 60), STATION + " · station information", font=font(700, 56), fill=CREAM, anchor="lm")
     rows = ["Lifts to every level", "Help point by the ticket gates", "Lost property: the ticket hall window",
             "First train 05:30 · last train 00:30", "Keep your belongings with you"]
     for i, t in enumerate(rows):
@@ -521,11 +526,11 @@ def clock(rng: random.Random) -> Image.Image:
 
 def name_board(rng: random.Random) -> Image.Image:
     w, h = CELLS["name"][2], CELLS["name"][3]
-    im = Image.new("RGB", (w, h), SLATE)
+    im = Image.new("RGB", (w, h), STRIPE)
     d = ImageDraw.Draw(im)
     d.rectangle((0, 10, w, 16), fill=CREAM)
     d.rectangle((0, h - 16, w, h - 10), fill=CREAM)
-    text_centre(d, (w / 2, h / 2 + 2), "Copperhill", font(700, 112), CREAM)
+    text_centre(d, (w / 2, h / 2 + 2), STATION, font(700, 112), CREAM)
     return wear(im, rng, 0.7, 0.35)
 
 

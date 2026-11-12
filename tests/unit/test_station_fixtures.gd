@@ -156,7 +156,7 @@ func test_each_fixture_stands_in_its_room_on_its_wall_ceiling_or_floor_and_in_no
 			if not _in_block(m, f.position - front * 0.03):
 				bad.append("%s: no wall behind it" % tag)
 		elif HUNG.has(f.model):
-			if not _in_block(m, f.position + Vector3.UP * 0.03):
+			if not _in_block(m, f.position + Vector3.UP * 0.03) and not _on_rods(m, f.position):
 				bad.append("%s: no ceiling over it" % tag)
 			var floor_y := m.floor_under(f.position.x, f.position.z, box.position.y)
 			if box.position.y - floor_y < 2.3:
@@ -228,6 +228,27 @@ func test_subway_s_ceiling_lamps_are_the_strip_model_turned_along_their_rooms() 
 		assert_almost_eq(t.basis.x.angle_to(Vector3.RIGHT), m.roof_lamp_turns[i], 0.001, "lamp %d turned" % i)
 
 
+## Whether drop rods (look-only trims, TB1) rise from a hung model's top at `p` up into a vault's arc.
+func _on_rods(m: MapData, p: Vector3) -> bool:
+	var rods := 0
+	for t in m.station.trims:
+		var c := t.box.get_center()
+		if absf(t.box.position.y - p.y) < 0.01 and Vector2(c.x - p.x, c.z - p.z).length() < 1.0:
+			for v in m.station.vaults:
+				if v.lid().has_point(Vector3(c.x, t.box.end.y - 0.01, c.z)) and t.box.end.y > v.y + 0.5:
+					rods += 1
+	return rods >= 2
+
+
+## The trains' stripe, a worn burnt orange, and the station's name signs in it (owner, 2026-11-12): let off the
+## team-hue rule at his word, as in test_trains.gd; within 0.03 of its hue and no more saturated (its blends with the
+## signs' cream words are paler, never stronger; Beta's orange is).
+func _stripe(c: Color) -> bool:
+	var stripe := Color("#c0652f")
+	var dh := absf(c.h - stripe.h)
+	return minf(dh, 1.0 - dh) <= 0.03 and c.s <= stripe.s + 0.02
+
+
 func test_no_colour_reads_as_a_team() -> void:
 	var teams: Array[Color] = AccessibilityTable.read_file().colours
 	teams.append_array(play.teams.colours)
@@ -254,10 +275,12 @@ func test_no_colour_reads_as_a_team() -> void:
 	for y in range(0, sheet.get_height(), 8):
 		for x in range(0, sheet.get_width(), 8):
 			tried += 1
-			if FieldChecks.reads_as_team(sheet.get_pixel(x, y), teams):
+			var c := sheet.get_pixel(x, y)
+			if FieldChecks.reads_as_team(c, teams) and not _stripe(c):
 				hits += 1
 	assert_eq(near, [] as Array[String], "no model paint within 20 degrees of a team's hue unless dull")
 	assert_lt(float(hits) / tried, 0.01, "the sign sheet keeps off the teams' hues (%d of %d)" % [hits, tried])
+	assert_false(_stripe(Color("#fa8c29")), "Beta's orange is never let off")
 
 
 func test_a_malformed_or_unknown_fixture_is_warned_about_and_left_out() -> void:
@@ -275,3 +298,45 @@ func test_a_malformed_or_unknown_fixture_is_warned_about_and_left_out() -> void:
 	assert_eq(d.fixtures[0].position, Vector3(1, 2, 3))
 	var placed := StationFixtures.placings(d, cfg)
 	assert_eq(placed.keys(), [&"poster_a"], "an unknown model is left out")
+
+
+func test_no_fixture_is_drawn_through_a_trim_or_the_vault_s_lid() -> void:
+	# TB1 x SM5: the frieze, cables and linings lie on the same walls as the clocks, cameras and name boards.
+	var m := _map("subway")
+	var bad: Array[String] = []
+	for f in m.station.fixtures:
+		var t := Transform3D(Basis(Vector3.UP, f.yaw), f.position)
+		var box := _shrunk(t * _mesh(f.model).get_aabb(), TOUCH)
+		for tr in m.station.trims:
+			if tr.box.intersects(box):
+				bad.append("%s at %s through a %s trim" % [f.model, f.position, tr.finish])
+		for v in m.station.vaults:
+			if v.lid().intersects(box):
+				bad.append("%s at %s in a vault's lid" % [f.model, f.position])
+	assert_eq(bad, [] as Array[String], "fixtures clear every trim and vault")
+
+
+func test_each_departure_board_has_a_rod_near_both_of_its_ends_and_reaching_the_arc() -> void:
+	# QA: the rods sit at the board's own ends (along its yaw, not the world x), on its depth, from its top into a vault.
+	var m := _map("subway")
+	var n := 0
+	for f in m.station.fixtures:
+		if f.model != &"departures_n" and f.model != &"departures_s":
+			continue
+		n += 1
+		var t := Transform3D(Basis(Vector3.UP, f.yaw).scaled(Vector3.ONE * f.scale), f.position)
+		var box := _mesh(f.model).get_aabb()
+		var ends := [0, 0]
+		for tr in m.station.trims:
+			var c := tr.box.get_center()
+			if absf(tr.box.position.y - f.position.y) > 0.01 or Vector2(c.x - f.position.x, c.z - f.position.z).length() > 3.0:
+				continue
+			var local := t.affine_inverse() * Vector3(c.x, f.position.y, c.z)
+			if local.x > box.position.x and local.x < box.end.x and absf(local.z - (box.position.z + box.end.z) * 0.5) < box.size.z:
+				ends[0 if local.x < box.get_center().x else 1] += 1
+				var hit := false
+				for v in m.station.vaults:
+					hit = hit or v.lid().has_point(Vector3(c.x, tr.box.end.y - 0.01, c.z))
+				assert_true(hit, "%s's rod reaches a vault's arc" % f.model)
+		assert_eq(ends, [1, 1], "%s at %s: one rod near each end" % [f.model, f.position])
+	assert_eq(n, 4, "four departure boards")
