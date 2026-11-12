@@ -26,7 +26,8 @@ warning; a map with no row is not listed.
 - **Wind (×)** is the share of the match's breeze that reaches the field (PH1): 0 indoors, where the air stands still
   and BBs fly straight; 1 in the open, where each match draws a breeze of 0.3 to 1.8 m/s that drifts BBs (about 30 cm
   at 30 m for a rifle at its strongest; `game/config/wind_config.gd`). 0 to 2; blank is 1.
-- **Air (°C)** is the field's air by day (PH1); a night match is 8 °C colder (`game/config/weather_config.gd`). Colder
+- **Air (°C)** is the field's air by day (PH1); a night match is 8 °C colder on a field the breeze reaches (Wind
+  above 0: a field with still air is indoors and keeps its air; `game/config/weather_config.gd`). Colder
   air is thicker, so BBs slow a little sooner, and a gas replica shoots softer in it: about 1.2 % of its energy a °C
   from the 20 °C every replica is rated at (a pistol on Green Gas loses about 1 fps a °F, as players reckon), never
   past its site limit. Electric and spring replicas don't mind. −10 to 40; blank is 20.
