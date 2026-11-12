@@ -30,6 +30,7 @@ STAINLESS_DARK = 0x8E8C86
 TREAD = 0x48484C
 RISER = 0x67676A
 YELLOW = 0xE4CA46
+SAFETY = 0xF0C814   # the escalators' and stairs' safety yellow, drawn at full colour (PropDressConfig.full_colour)
 RUBBER = 0x2A292D
 CHEQUER = 0x8A8882
 BRONZE = 0x67625A

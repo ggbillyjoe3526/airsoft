@@ -15,7 +15,8 @@ step nosings, and the balustrade railing, after the owner's photos in `art/refer
 | 2026-11-12 | 2 | Opus 5.5 (build thread) | pass | Retry 7/8 | the decks and capping still read beige, the lift indicator small, the leaves' panels apart, a dark stair skirting |
 | 2026-11-12 | 3 | Opus 5.5 (build thread) | pass (CI) | Retry 7/8 | the landing display unlit, the vision panel two slits, the decks dull and faceted, wide yellow step edges, the railing posts |
 | 2026-11-12 | 4 | Opus 5.5 (build thread) | pass (CI) | Retry 7/8 | the landing display's window still dark, the escalator's sides dull and its edges cream, the half panes narrow |
-| 2026-11-12 | 5 | Opus 5.5 (build thread) | – | – | – |
+| 2026-11-12 | 5 | Opus 5.5 (build thread) | pass (CI) | Retry 6/8 | the safety yellow rendering cream, banded deck tops, dark newel ends, the landing display off its frame, two changelog lines |
+| 2026-11-12 | 6 | Opus 5.5 (build thread) | – | – | – |
 
 ## What changed
 
@@ -47,6 +48,15 @@ step nosings, and the balustrade railing, after the owner's photos in `art/refer
   model that is over budget or off its box by more than 5 mm. The props' shader draws ribs where UV.x is under -1
   (`map_kit.ribbed`, 8.5 mm pitch, fading to the average far off), for step cleats and nosings that triangles can't
   carry.
+- **Colour**: the safety yellow (`transit_kit.SAFETY`, `#f0c814`) on the escalators' edges, combs and stop plates
+  and the stairs' nosings is drawn at full colour (`PropDressConfig.full_colour`: those four models' material sets
+  `keep_by_alpha`, so their painted parts skip the look's pull to 60 % of a paint, which drew the yellow cream; their
+  other paints are greys the pull leaves as they are). On screen it is about hue 45°, saturation 0.5 to 0.7 after
+  the tone map (was 0.27). `docs/ART.md` › Colour names it as an exception.
+- **Escalator rims**: the decks and newel ends are one strip with shared corners, so they shade smooth (separate
+  quads drew flat bands), in bright stainless (`#d0d3d4`, untoned). Each newel's round end runs to its furthest point
+  out and drops plumb from there, a drum on its foot with no overhang; the handrail runs on round it and into it.
+- **Landing display**: seated on the architrave's head, as in the photo (it stood 4 cm over it).
 - **Map**: `layout.room(..., dress=)` and `SPIRAL["dress"]`. `build_map.py` writes them on the rooms' ramps, the
   escalators' decks and the spiral's landings in `data/maps/subway.json`. Apart from the escalators' decks, no box
   moves.

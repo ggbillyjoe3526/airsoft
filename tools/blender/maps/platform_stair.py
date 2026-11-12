@@ -123,7 +123,7 @@ def build() -> None:
             tk.knob(brackets, (x, y - 0.06, zw), 0.028, 0.024, 0.007, s, 6)
             x += BRACKET_STEP
     objects = [mk.ribbed(treads.build("treads", TREAD), 0), mk.ribbed(noses.build("nosings", NOSE), 2),
-               mk.ribbed(yellow.build("nosings_yellow", tk.YELLOW), 2), risers.build("risers", RISER),
+               mk.ribbed(yellow.build("nosings_yellow", tk.SAFETY), 2), risers.build("risers", RISER),
                skirt.build("skirting", SKIRTING), rail.build("handrails", RAIL, smooth=50.0, toned=False),
                brackets.build("brackets", RAIL, smooth=50.0, toned=False)]
     box = ((upper.x0 - GROW, lower.yb, upper.z0 - GROW), (lower.x1 + GROW, upper.ya, upper.z1 + GROW))

@@ -429,7 +429,7 @@ def landing(lights: list) -> list:
         mitre.poly(pts if nz < 0 else list(reversed(pts)))
     # The display over the door: a steel box the architrave's width, a dark window and the up and down arrows' lenses,
     # big enough to read across the hall (photo 115640).
-    dy0, dy1 = DOOR_H + a_w + 0.04, DOOR_H + a_w + 0.3
+    dy0, dy1 = DOOR_H + a_w, DOOR_H + a_w + 0.26  # seated on the architrave's head, as in photo 5
     dx = hw + a_w
     bevelled(arch, -dx, dy0, dx, dy1, -0.035, 0.012)
     disp.box((-dx + 0.05, dy0 + 0.035, -0.0365), (dx - 0.24, dy1 - 0.035, -0.035), skip=("+z",))

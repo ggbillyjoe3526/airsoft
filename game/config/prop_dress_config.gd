@@ -367,6 +367,10 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	# Subway's escalators and stairs, swept daily: full dust drew their steps and decks beige (SM2)
 	&"escalator_upper": 0.08, &"escalator_lower": 0.08, &"spiral_stair": 0.12, &"platform_stair": 0.12,
 }
+## Models whose painted parts keep their whole colour, not the look's weathered share of it (LookConfig
+## .paint_saturation): Subway's escalators' and stairs' safety yellow, which the pull drew cream (SM2). Their other
+## paints are steel, rubber and stone greys, which the pull leaves as they are.
+@export var full_colour: Array[StringName] = [&"escalator_upper", &"escalator_lower", &"spiral_stair", &"platform_stair"]
 
 ## Each model path's mesh as loaded (null when it won't load), so a kind is dressed only by a model that loads.
 var _meshes: Dictionary[String, Mesh] = {}

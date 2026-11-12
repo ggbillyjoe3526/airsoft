@@ -41,8 +41,8 @@ INLET = 2.55       # how far round each loop (radians) the handrail runs before 
 SKIRT = 0.24       # the skirt panel's height over the slope
 BRUSH = (0.255, 0.285, 0.022)   # the brush deflector: from, to over the slope; how far it stands out
 BODY = 0xD6D8D7     # the balustrades' sides: bright brushed stainless (the shafts' cool light greys it)
-SAFETY = 0xE8CC22   # the steps' edges, combs and stop plates: a strong safety yellow (the palette's read cream)
-DECK = 0xC4C7C8     # the rim (the decks and the newels' rounded ends): brushed stainless, a shade under the sides
+SAFETY = tk.SAFETY  # the steps' edges, combs and stop plates: a strong safety yellow, kept at full colour
+DECK = 0xD0D3D4     # the rim (the decks and the newels' rounded ends): bright brushed stainless, as the sides
 SEAM = 1.25        # the panels' seams along each balustrade (m)
 NOSING = 0.03      # the yellow edges' width on each step (thin, as in the photos)
 LAMP_STEP = 3.6    # the uplighters' spacing along the middle deck (m)
@@ -202,12 +202,16 @@ def outline(bank: Bank, ca: tuple, cb: tuple) -> list:
     d, u = bank.d, bank.u
     pts = []
     n = NEWEL_STEPS
+    # Each round end runs to its furthest point out, where it faces straight along the floor, and drops plumb from
+    # there: a drum on its foot, no overhang to shade the end under it (critic); the handrail runs on round it, down
+    # the end's face and into it.
+    end_b, end_a = math.atan2(u[1], -d[1]), math.atan2(u[1], d[1])
     for k in range(n, -1, -1):
-        th = INLET * k / n
+        th = end_b * k / n
         c, s = math.cos(th), math.sin(th)
         pts.append((cb[0] + inner * (c * u[0] + s * d[0]), cb[1] + inner * (c * u[1] + s * d[1])))
     for k in range(n + 1):
-        th = INLET * k / n
+        th = end_a * k / n
         c, s = math.cos(th), math.sin(th)
         pts.append((ca[0] + inner * (c * u[0] - s * d[0]), ca[1] + inner * (c * u[1] - s * d[1])))
     # The ends reach down past the slope (into the ramp, never seen) so no gap shows under a newel: the bottom one
@@ -280,13 +284,13 @@ def balustrade(bank: Bank, z_lo: float, z_hi: float, faces: tuple, rails: list, 
             parts["stop_button"].poly(cap if side > 0 else list(reversed(cap)))
     # The rim round the outline, all deck steel: the deck under and between the handrails, the newels' rounded ends
     # and their fronts (the run along the floor is never seen).
+    # One strip, its corners shared, so the newels' round ends shade smooth (quads of their own drew flat bands).
     n = len(out)
-    for k in range(n):
-        p, q = out[k], out[(k + 1) % n]
-        if k == n - 1:
-            continue  # along the floor
-        quad = [(p[0], p[1], z_lo), (q[0], q[1], z_lo), (q[0], q[1], z_hi), (p[0], p[1], z_hi)]
-        deck.poly(quad, [tone(c) for c in quad])
+    lo = [deck.add((x, y, z_lo)) for x, y in out]
+    hi = [deck.add((x, y, z_hi)) for x, y in out]
+    for k in range(n - 1):  # not the last edge, along the floor
+        p, q = out[k], out[k + 1]
+        deck.f.append([lo[k], lo[k + 1], hi[k + 1], hi[k]])
         if k == NEWEL_STEPS + 1:
             # The deck's sheets: a dark joint across it every panel's length, a hair over it.
             length = math.hypot(q[0] - p[0], q[1] - p[1])
@@ -349,7 +353,7 @@ def build(room: str, name: str) -> None:
     lamps(bank, parts["bronze"], parts["glass"], parts["inside"])
     objects += [parts["body"].build("balustrade", BODY, smooth=40.0), parts["skirt"].build("skirt", tk.STAINLESS_DARK),
                 parts["brush"].build("brush", tk.GAP), parts["seams"].build("seams", tk.GAP),
-                parts["deck"].build("deck", DECK, smooth=40.0),
+                parts["deck"].build("deck", DECK, smooth=40.0, toned=False),
                 parts["rail"].build("handrail", tk.RUBBER, smooth=50.0, toned=False, outward=True),
                 parts["inlet"].build("inlet", tk.RUBBER, toned=False),
                 parts["bronze"].build("uplighter", tk.BRONZE, smooth=50.0, toned=False),
