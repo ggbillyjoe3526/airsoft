@@ -5,6 +5,7 @@ tools/map_heat.gd and a survey written by tools/map_survey.gd, and writes labell
 a text report: who wins, where the fights are, where each end walks, what stands open.
 
   python3 tools/maps/plan.py <map id> --out <dir> [--heat a.json b.json ...] [--survey s.json] [--label "before"]
+      [--file other.json]    # that map file in place of data/maps/<id>.json (git show main:data/maps/<id>.json > it)
 """
 from __future__ import annotations
 
@@ -32,8 +33,12 @@ END_NAMES = {"depot": ["West (Staging)", "East (Loading bay)"], "woodland": ["We
 REASONS = ["everyone out", "time", "flag raised", "overtime flag", "simulated"]
 
 
+## --file: a map file to read in place of data/maps/<id>.json (another commit's, say, for a before picture).
+MAP_FILE = {}
+
+
 def load_map(map_id: str) -> dict:
-    with open(os.path.join(ROOT, "data", "maps", map_id + ".json")) as f:
+    with open(MAP_FILE.get(map_id) or os.path.join(ROOT, "data", "maps", map_id + ".json")) as f:
         return json.load(f)
 
 
@@ -160,7 +165,10 @@ def draw_plan(field: Field, ax, storey: int, labels: bool = True, faint: bool = 
             ax.plot([p["x"] for p in w["points"]], [p["z"] for p in w["points"]], color="#6fa8dc", lw=3, alpha=0.7,
                     zorder=1)
         for f in field.d.get("foliage", []):
-            ax.add_patch(plt.Circle((f["x"], f["z"]), f["radius"], color="#8fbf6f", alpha=0.35, lw=0, zorder=1))
+            # A bush hides someone standing (drawn darker); a fern only someone crouched.
+            tall = f.get("height", 0.0) >= EYE
+            ax.add_patch(plt.Circle((f["x"], f["z"]), f["radius"], color="#4f8f3a" if tall else "#8fbf6f",
+                                    alpha=0.6 if tall else 0.35, lw=0, zorder=1))
     for (x, z, sx, sz, cls, kind) in field.blocks_on(storey):
         col, alpha = CLASS_STYLE[cls]
         if cls == "tall" and kind in KIND_COLOUR:
@@ -387,9 +395,12 @@ def main() -> None:
     ap.add_argument("--heat", nargs="*", default=[])
     ap.add_argument("--survey")
     ap.add_argument("--label", default="")
+    ap.add_argument("--file", help="read this map file in place of data/maps/<map>.json")
     ap.add_argument("--cell", type=float, default=1.0)
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
+    if args.file:
+        MAP_FILE[args.map] = args.file
     field = Field(args.map)
     name = field.d.get("name", args.map)
     tag = (" (" + args.label + ")") if args.label else ""

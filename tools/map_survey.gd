@@ -5,10 +5,14 @@ extends SceneTree
 ## as a round starts them. Measured, never asserted: no check runs it.
 ##   godot --headless --path . -s res://tools/map_survey.gd -- <map id> <out.json> [step m]
 ## For every stand point: how many of the others within the bots' sight see it standing eye to standing eye
-## (`seen`), how many see its crouched head from a standing eye (`seen_low`), its longest clear line (`longest`, m),
+## (`seen`), how many standing eyes see the middle of a body crouched there (`seen_low`), its longest clear line (`longest`, m),
 ## and each end's walk to it from its first spawn (`walk0`, `walk1`, m; -1 where there is no way).
 
 const STEP := 1.0
+## How far a point is looked at from on a map that names no bot sight (m).
+const REACH := 55.0
+## A crouched body's middle over the floor (m): what a standing eye must see to hit someone crouched behind cover.
+const LOW_BODY := 0.6
 
 
 func _initialize() -> void:
@@ -32,7 +36,7 @@ func _run() -> void:
 	var measure := FieldMeasure.new(runner.map, runner.nav, runner.level.query(), runner.tuning.body)
 	var points := measure.stand_points(step)
 	var n := points.size()
-	var reach := runner.map.bot_sight if runner.map.bot_sight > 0.0 else runner.config.sight_range
+	var reach: float = runner.map.bot_sight if runner.map.bot_sight > 0.0 else REACH
 	var seen := PackedInt32Array()
 	var seen_low := PackedInt32Array()
 	var longest := PackedFloat32Array()
@@ -52,20 +56,9 @@ func _run() -> void:
 			if measure.sees(a, b, measure.stand_eye, measure.stand_eye):
 				seen[i] += 1
 				seen[j] += 1
-				seen_low[i] += 1
-				seen_low[j] += 1
 				longest[i] = maxf(longest[i], d)
 				longest[j] = maxf(longest[j], d)
-				continue
-			# A standing eye that can't meet the other's standing eye may still see it crouched (over a drop), and
-			# the other way: each is one more ray.
-			if measure.sees(a, b, measure.stand_eye, measure.crouch_eye):
-				seen_low[j] += 1
-			if measure.sees(b, a, measure.stand_eye, measure.crouch_eye):
-				seen_low[i] += 1
-	# A point seen eye to eye is not always seen crouched: count those again, properly.
-	for i in n:
-		seen_low[i] = 0
+	# A standing eye on a crouched body is not the same line both ways: every ordered pair.
 	for i in n:
 		var a := points[i]
 		for j in n:
@@ -74,18 +67,14 @@ func _run() -> void:
 			var b := points[j]
 			if Vector2(a.x - b.x, a.z - b.z).length() > reach:
 				continue
-			if measure.sees(a, b, measure.stand_eye, measure.crouch_eye):
+			if measure.sees(a, b, measure.stand_eye, LOW_BODY):
 				seen_low[j] += 1
 	print("%s: %d points, %d pairs, sight in %.0f s" % [args[0], n, rays, (Time.get_ticks_msec() - started) / 1000.0])
 	started = Time.get_ticks_msec()
 	var walks: Array[PackedFloat32Array] = [PackedFloat32Array(), PackedFloat32Array()]
 	for end in 2:
 		walks[end].resize(n)
-		var from := Vector3.ZERO
-		for s in runner.map.spawns:
-			if s.end == end:
-				from = s.position
-				break
+		var from := runner.map.ends[end].spawns[0].position
 		for i in n:
 			var w := measure.walk(from, points[i])
 			walks[end][i] = -1.0 if is_inf(w) else snappedf(w, 0.1)

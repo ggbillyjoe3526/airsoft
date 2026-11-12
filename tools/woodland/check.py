@@ -58,7 +58,7 @@ for p in solid:
     if p["kind"] in ("bush", "palisade"):
         continue
     m = pmask(p)
-    if (m & (L.rd < 2.5)).any():
+    if (m & (L.rd < 2.5)).any() and p["tag"] != "roadblock":  # the fallen trees block the Long road on purpose (MB1)
         note("piece", f"{p['kind']} at ({p['cx']:.1f}, {p['cz']:.1f}) is on the road")
     if (m & (L.sd < L.BED_W + L.BANK)).any():
         note("piece", f"{p['kind']} at ({p['cx']:.1f}, {p['cz']:.1f}) is in the stream bed or bank")
