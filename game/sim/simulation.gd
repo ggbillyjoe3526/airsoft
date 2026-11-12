@@ -81,12 +81,21 @@ func _init(sim_tuning: SimTuning, world: WorldQuery, character_mover: CharacterM
 		sim_tuning.hits.fit.prepare()
 
 
+## The field's weather for the matches `state` plays (PH1; before start_match): `wind_share` of each match's breeze
+## reaches it (data/maps.md's Wind; 0 indoors) and its air is at `temperature` °C (its Air, colder at night), which
+## sets the air's density and viscosity for every BB. A gas replica's energy in that air is its kit's (Kit.set_temperature).
+func set_weather(state: GameState, wind_share: float, temperature: float) -> void:
+	state.wind_share = maxf(wind_share, 0.0)
+	state.air_temperature = temperature
+	state.air = AirModel.at(tuning.ballistics, temperature)
+
+
 ## A fresh match: a new breeze, everyone at their end's spawns with the bombs each picked, round 1 live.
 func start_match(state: GameState) -> void:
 	state.events.clear()
 	state.match_number += 1
 	state.off_record = state.dev_content or state.cheats.any()
-	state.wind.draw(Seeds.wind_seed(state.match_seed, state.match_number), tuning.wind)
+	state.wind.draw(Seeds.wind_seed(state.match_seed, state.match_number), tuning.wind, state.wind_share)
 	for t in state.mag_tosses:
 		t.active = false
 	Grenades.clear(state.grenades)
@@ -222,7 +231,7 @@ func step(state: GameState, commands: Array[PlayerCommand], dt: float) -> void:
 		UpperBlend.step(c, tuning.hits, dt)
 	var first_bb_event := state.events.count
 	BBStep.step(state.bbs, state.characters, query, tuning, kill_y, not live, ends, state.events, dt,
-			state.wind.at(state.time), state.rng, state.targets)
+			state.wind.at(state.time), state.rng, state.targets, state.air)
 	if noisy:
 		noise.ring(state, first_bb_event)
 	# After the BBs: a catcher hit this tick is out of play, and the magazine is lost.

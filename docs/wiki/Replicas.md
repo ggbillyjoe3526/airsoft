@@ -108,14 +108,19 @@ cardboard and on a player, so you hear what a shot hit.
 
 ## BB weight
 
-Every replica can load any BB weight from **0.20 g to 0.30 g**, picked per replica in the [Loadout](Loadout). A
-heavier BB leaves the barrel a little slower but holds its line better in the wind; a lighter one is quicker but drifts
-more. Each replica above lists its factory weight.
+Every replica can load any BB weight from **0.20 g to 0.40 g**, picked per replica in the [Loadout](Loadout). A
+heavier BB leaves the barrel slower but keeps its speed further out and holds its line better in the wind; a lighter
+one is quicker up close but drifts more. A hop-up can only lift so much: past a replica's
+best weight the BB drops short (the AEG Rifle's is about 0.32 g, the GBB Pistol's about 0.22 g), and only the Sniper
+Rifle makes full use of 0.40 g. Each replica above lists its factory weight, and the Loadout's flight picture shows
+what a weight does before you play it.
 
 ## Site limits
 
 As at a real site, each class of replica has a most energy it may shoot with. Parts that add energy (stronger gas, a
-long barrel) stop at the limit, and the Loadout's Performance sheet says when a limit capped your setup.
+long barrel) stop at the limit, and the Loadout's Performance sheet says when a limit capped your setup. The limit is
+read with the BBs you load, as a site's chrono does: a heavier BB takes a little more energy from the same replica,
+so a replica already at its limit gains nothing from one.
 
 <!-- wiki:site-limits -->
 

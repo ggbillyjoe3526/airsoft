@@ -67,7 +67,7 @@ already have their flag part way up get a boost. The result says **Simulated**.
 Nothing in Airsoft is hitscan. Every BB leaves the muzzle at a real speed, slows in the air, falls, and is lifted by
 its backspin (the **hop-up**), so you can watch it fly and lead a moving target.
 
-- The AEG Rifle stays on target to about **39 m**, the GBB Pistol to about **26 m**. Past that, aim a little higher.
+- The AEG Rifle stays on target to about **39 m**, the GBB Pistol to about **29 m**. Past that, aim a little higher.
 - A white BB in flight is drawn a little larger than life with a faint short trail, so you can follow it against a
   pale wall or the sky.
 - BBs puff on what they hit, in its colour: metal, wood, concrete or earth.
@@ -75,10 +75,17 @@ its backspin (the **hop-up**), so you can watch it fly and lead a moving target.
 - [Replicas](Replicas) differ in how fast their BBs leave the barrel, how fast they fire and how they handle, never in
   "damage": one hit is one hit.
 
-### Wind
+### Wind and weather
 
-Every match has its own light breeze, from calm to about 2 m/s, with gusts. It pushes BBs, never players: lighter BBs
-and longer shots drift further downwind. Specks of dust drift with it, so you can read which way it blows.
+Out of doors every match has its own light breeze, from calm to about 2 m/s, with gusts. It pushes BBs, never players:
+lighter BBs and longer shots drift further downwind, up to about 30 cm at 30 m for a rifle. Specks of dust drift with
+it, so you can read which way it blows. Indoors (Depot) the air stands still and BBs fly straight.
+
+Each field has its own air, too. Replicas are rated at 20 °C, as on a site's chrono. Colder air is a little thicker,
+so every BB slows slightly sooner, and **gas shoots softer in the cold**: a gas replica loses about 1.2 % of its energy
+for each degree under 20 °C (about 1 fps a °F, as players reckon) and gains it back in the warm, never past its
+[site limit](Replicas#site-limits). Batteries and springs don't mind. A night in the open is 8 °C colder than the
+day. The pause menu shows the match's air and breeze, and pointing at a field on the Match page shows its weather.
 
 ### Hop-up
 

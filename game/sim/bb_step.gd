@@ -9,7 +9,9 @@ class_name BBStep
 ## is knocked out, and not a teammate when friendly fire is off, and nobody once the round is decided. A ricochet knocks
 ## someone out only when the match counts ricochets (HitConfig.ricochets_count); otherwise it ticks them and stops, and
 ## they play on. A BB never hits whoever fired it until it has bounced (its first segment starts at their eye, inside
-## them). A laser (Dev › Lasers, LZ1) never flies: it is resolved in the tick it is fired (_laser).
+## them). A body that moved this tick is met where the BB and it were at the same moment of the tick, not where it
+## stands at the tick's end (PH1, _first_body). A laser (Dev › Lasers, LZ1) never flies: it is resolved in the tick it
+## is fired (_laser).
 
 ## A BB_IMPACT's value when the BB stopped in a bush's leaves (0: on the level or a body).
 const IN_LEAVES := 1
@@ -45,12 +47,13 @@ static var _crossing: Foliage.Crossing = Foliage.Crossing.new()
 ## WATER where it went in, never bouncing; one that falls below `kill_y` or outlives its lifetime is BB_LOST. On the practice range a BB also stops on the first of `targets` it reaches, nearer than any
 ## body or the level, unless in a cease-fire: a TARGET_HIT (a figure goes down, RangeTargets.hit_target), or a
 ## BB_IMPACT on metal at a plate's post or a swinger's frame (a miss). `rng` (the match's stream) scatters bounces and
-## times a pop-up's spell down.
+## times a pop-up's spell down. `field_air` is the field's own air (GameState.air, PH1); null flies them in the air
+## replicas are rated in.
 static func step(pool: BBPool, characters: Array[Character], query: WorldQuery, tuning: SimTuning, kill_y: float,
 		cease_fire: bool, ends: Array[MapEnd], events: SimEvents, dt: float, wind: Vector3 = Vector3.ZERO,
-		rng: RandomNumberGenerator = null, targets: Array[RangeTarget] = []) -> void:
+		rng: RandomNumberGenerator = null, targets: Array[RangeTarget] = [], field_air: AirModel = null) -> void:
 	var cfg := tuning.ballistics
-	var air := AirModel.of(cfg)
+	var air := field_air if field_air != null else AirModel.of(cfg)
 	var prepared := false
 	var foliage := query.foliage
 	var leafy := foliage != null and not foliage.is_empty()
@@ -101,7 +104,7 @@ static func step(pool: BBPool, characters: Array[Character], query: WorldQuery, 
 			if not prepared:
 				_prepare(characters)
 				prepared = true
-			_first_body(bb, dir, leaf_end if leaf_end >= 0.0 else reach, characters, tuning.hits)
+			_first_body(bb, dir, leaf_end if leaf_end >= 0.0 else reach, characters, tuning.hits, length)
 			if not targets.is_empty() and not cease_fire and _stop_on_target(bb, dir, targets, tuning, events, rng):
 				continue
 			if _reached >= 0:
@@ -341,19 +344,45 @@ static func _prepare(characters: Array[Character]) -> void:
 ## The first body along the BB's segment this tick (from prev_position along `dir`, before `max_t`) into _reached and
 ## _reached_at, by `hits`' volumes. Every body counts, whatever its status; only the shooter is skipped, until the BB has bounced, and a
 ## ghost (DevCheats).
-static func _first_body(bb: BB, dir: Vector3, max_t: float, characters: Array[Character], hits: HitConfig) -> void:
+## `flown` is the segment's whole length (m) for a BB in flight: a body that stepped this tick (prev_position to
+## position, under HitConfig.max_stride: not a respawn or a move to the dead zone) is then tested along the BB's path
+## as that body saw it, the BB's travel less the body's step, so each is where it was at the same moment of the tick
+## (PH1; before, the body stood at its tick's end for the whole of the BB's travel, up to 11 cm out on a sprinter, and
+## the drawn figure and BB, both interpolated over the tick, disagreed with the hit). 0 (a laser): bodies as they stand.
+static func _first_body(bb: BB, dir: Vector3, max_t: float, characters: Array[Character], hits: HitConfig,
+		flown: float = 0.0) -> void:
 	_reached = -1
 	var best := max_t
+	var stride2 := hits.max_stride * hits.max_stride
 	for i in characters.size():
 		var c := characters[i]
 		if (c.id == bb.owner_id and bb.bounces == 0) or c.ghost:
 			continue
-		if not Hitbox.may_touch(c, bb.prev_position, dir, best, hits):
+		var from := bb.prev_position
+		var along := dir
+		# Metres of the BB's own path per metre of the path the body saw.
+		var per_metre := 1.0
+		if flown > MIN_SEGMENT:
+			var step_x := c.position.x - c.prev_position.x
+			var step_y := c.position.y - c.prev_position.y
+			var step_z := c.position.z - c.prev_position.z
+			var step2 := step_x * step_x + step_y * step_y + step_z * step_z
+			if step2 > 0.0 and step2 < stride2:
+				# In the body's frame the BB starts a step further on and ends where it ends.
+				from = Vector3(from.x + step_x, from.y + step_y, from.z + step_z)
+				along = bb.position - from
+				var seen := along.length()
+				if seen <= MIN_SEGMENT:
+					continue # it flew along with the body: it never gets nearer
+				along /= seen
+				per_metre = flown / seen
+		var reach := best / per_metre
+		if not Hitbox.may_touch(c, from, along, reach, hits):
 			continue
 		if _built[i] == 0:
 			Hitbox.build_volume(c, hits, _volumes[i])
 			_built[i] = 1
-		var d := Hitbox.ray_character(bb.prev_position, dir, best, _volumes[i])
+		var d := Hitbox.ray_character(from, along, reach, _volumes[i]) * per_metre
 		if d <= best:
 			best = d
 			_reached = i

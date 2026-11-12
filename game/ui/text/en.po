@@ -1107,6 +1107,21 @@ msgstr "Quit match"
 msgid "PAUSE_SUBTITLE"
 msgstr "%s · %s · Round %d"
 
+msgid "PAUSE_AIR"
+msgstr "Air %d °C"
+
+msgid "PAUSE_STILL_AIR"
+msgstr " · still air"
+
+msgid "PAUSE_BREEZE"
+msgstr " · breeze %.1f m/s"
+
+msgid "MATCH_FIELD_STILL"
+msgstr "%s\nStill air, %d °C."
+
+msgid "MATCH_FIELD_BREEZY"
+msgstr "%s\nOpen to the breeze, %d °C by day."
+
 msgid "PAUSE_SEED"
 msgstr "Match seed"
 

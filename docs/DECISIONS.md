@@ -389,6 +389,20 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   sprinting to fight.
 - **Walk is Shift (slow, quiet) and sprint is Left Alt (owner, 2026-09-30);** running, sprinting and landing make noise
   bots hear, walking does not. Wind is one breeze per match from the seed, 0.3 to 1.8 m/s, moving BBs only (2026-10-04).
+- **Each field has its own weather (PH1, 2026-11-12; the owner's physics audit, defaults taken).** `data/maps.md`
+  gives a field the share of the match's breeze that reaches it (Wind: 0 indoors, so Depot's and Subway's BBs fly
+  straight) and its air by day (Air, °C; a night in the open is 8 °C colder). Replicas are rated at 20 °C, as on a
+  chrono; the field's air sets its density for every BB (a few per cent), and a gas replica's energy follows it at
+  1.2 % a °C (about 1 fps a °F), never past its site limit. Depot and the Range stay at 20 °C, so what the Loadout
+  says is what they shoot. The pause menu and the field cards' tooltips say the weather. Left out on purpose, fun over
+  simulation: a BB taking its shooter's own speed, a canted hop-up curving shots, gas cooling down in rapid fire, rain
+  and humidity (`docs/records/PH1.md`).
+- **The site limit is read with the BBs loaded (PH1, 2026-11-12),** as a real chrono reads joules with your own BBs:
+  a heavier BB's extra energy (`bb_energy_exponent`) stops at the limit too. The Loadout loads 0.20 to 0.40 g (was
+  0.30 g); each hop-up lifts only so much, so each replica has a best weight.
+- **A BB meets a moving body where both were at the same moment of the tick (PH1, 2026-11-12).** `BBStep` tests the
+  BB's path less the body's own step, which is also what the interpolated figure and BB show; before, the body stood
+  at its tick's end for the whole of the BB's travel (up to 11 cm out on a sprinter).
 - **Crouch and aim are both held by default (owner, 2026-10-18, replacing crouch toggled from 2026-10-03).** Each has a
   toggle setting; a toggled crouch stands up on a sprint or jump press. Lean and sprint are held.
 - **Hold Q / E to lean around cover (owner, 2026-10-01); replicas switch with 1, 2 and the mouse wheel (owner,
@@ -906,6 +920,17 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   the Variable Scope so the level isn't empty with Dev content off (LV15, owner 2026-11-10; level 7 at first). A
   Breacher bot kit (red dot, rushers and flankers). Its own sound profile `smg`, a stand-in from the owner's AEG motor
   until he records one.
+- **The GBB Pistol shoots 0.70 J and the Compact SMG 0.85 J (owner, 2026-11-12, PH2).** "Increase gbb pistol to 0.7J
+  and SMG to 0.85J", after PH1's audit found the pistol's 0.52 J below a real green-gas pistol's. This replaces CS1's
+  0.75 J and the pistol's 0.52 J. **Each keeps its job through its hop-up, not its energy** (the default taken to his
+  "would that still be balanced?"): the extra energy is a quicker BB and a little reach as it comes, and the furthest
+  either can be tuned to stays where it was. The pistol's hop-up tops out at 0.19 (0.3) and comes at 75 %: 29 m as it
+  comes and 31 and 32 m on Red and Black Gas (the Cyber Pistol 33 m as it comes), and at most 37 m tuned, with any gas
+  and BB weight (the Cyber Pistol 38 m tuned; untrimmed the pistol reached 42 m on Black Gas with 0.32 g BBs, beside
+  the AEG Rifle's 44 m). The SMG's tops out at 0.135
+  (0.15) and comes at 95 %: 30 m as it comes and 31 m at best, beside the AEG Rifle's 39 m. **A change to a replica's
+  hop-up range converts saved dials** (`ReplicaRulesConfig.hop_up_rescale_v1`, loadouts.save version 2), so a saved
+  setup lifts as it did (`docs/records/PH2.md`).
 - **Every replica and part has a job of its own (owner, 2026-11-12, RP1).** "Make sure each weapon has its own
   strengths and weaknesses. Each weapon should feel unique and attachments should offer incentives to use while also
   feeling unique from each other. Feel free to make any changes to the specs." Defaults taken (the owner may change

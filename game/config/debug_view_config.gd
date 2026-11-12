@@ -3,8 +3,8 @@ extends Resource
 ## The in-world debug draw (F4 BB paths, F5 hit areas; DebugView): how long a BB's trail is and what colours and
 ## roundness the lines have. Dev tooling, not a rule: nothing here touches the simulation.
 
-## A BB's trail keeps its last this many seconds of flight (a BB lives at most BallisticsConfig.max_lifetime, 2.5 s, so
-## the default shows a whole shot).
+## A BB's trail keeps its last this many seconds of flight (a level shot lands within about 1.5 s, so the default shows
+## a whole one; a lobbed BB lives up to BallisticsConfig.max_lifetime and trails its last part).
 @export var trail_seconds: float = 2.5
 ## Ticks per second the trail is recorded at (the simulation's rate).
 @export var trail_rate: int = 60

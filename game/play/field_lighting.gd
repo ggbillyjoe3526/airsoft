@@ -72,6 +72,10 @@ var _key_energy: float = 0.0
 var _ambient_energy: float = 0.0
 ## The map's reflection probes (`add_probes`), shown while Reflections draw them.
 var _probes: Node3D = null
+## The preset's share of the sky in the ambient light, which an underground field drops (`set_underground`).
+var _sky_share: float = 0.0
+## Whether no sky reaches the field (`set_underground`).
+var _underground: bool = false
 ## The sky's horizon (the preset's), the haze colour of Dev › Retro filter on a map with no haze of its own.
 var _horizon: Color = Color.WHITE
 ## The haze as it was when Dev › Retro filter's went on (retro_haze), put back exactly when it goes off: the preset's,
@@ -138,6 +142,7 @@ static func build(cfg: LightingConfig, look: LookConfig = null) -> FieldLighting
 	root.sun = sun
 	root._key_energy = cfg.sun_energy
 	root._ambient_energy = cfg.ambient_energy
+	root._sky_share = cfg.sky_contribution
 	root._horizon = cfg.sky_horizon
 	return root
 
@@ -292,6 +297,24 @@ func set_key_share(share: float) -> void:
 	var lit := share > 0.0
 	if sun.visible != lit:
 		sun.visible = lit
+
+
+## An underground field (`on`, MapData.roof_underground, UL1): no sky reaches it, so its ambient light is the preset's
+## fill alone (none of the sky's blue in it) and the sky is in no reflection (the area probes and screen reflections
+## still draw theirs); GraphicsApply.sun_shadows then keeps the sun's shadow off. Ultra's bounce light (SDFGI) is
+## stronger and fed on further there (LookConfig.sdfgi_*_underground, UL2), as the lamps' bounce alone lights the
+## shade. Off: the preset's own. Set once as the field is built.
+func set_underground(on: bool) -> void:
+	_underground = on
+	environment.ambient_light_sky_contribution = 0.0 if on else _sky_share
+	environment.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED if on \
+			else Environment.REFLECTION_SOURCE_SKY
+	environment.sdfgi_energy = _look.sdfgi_energy_underground if on else _look.sdfgi_energy
+	environment.sdfgi_bounce_feedback = _look.sdfgi_bounce_underground if on else _look.sdfgi_bounce
+
+
+func underground() -> bool:
+	return _underground
 
 
 ## The sky's ambient light at `share` of the preset's: below 1 under an indoor field's roof while its real lamps light

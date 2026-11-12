@@ -49,10 +49,13 @@ static func step_bb_flight(bb: BB, cfg: BallisticsConfig, dt: float) -> void:
 ## About how long (s) a BB fired at `speed` m/s takes to fly `distance` m, from drag alone (straight-line flight with
 ## the drag coefficient at the muzzle): t = (e^(k·d) − 1) / (k·v₀), k = ½ρ·Cd·A / m. Within a few per cent of the full
 ## flight over a field's ranges, and cheap enough for a bot to lead a target with every tick. INF for no speed or mass.
-static func flight_time_estimate(distance: float, speed: float, mass: float, cfg: BallisticsConfig) -> float:
+## `field_air` is the field's own air (GameState.air, PH1); null: the air replicas are rated in.
+static func flight_time_estimate(distance: float, speed: float, mass: float, cfg: BallisticsConfig,
+		field_air: AirModel = null) -> float:
 	if not (speed > 0.0) or not (mass > 0.0):
 		return INF
-	var k := AirModel.of(cfg).drag_factor(speed) / mass
+	var air := field_air if field_air != null else AirModel.of(cfg)
+	var k := air.drag_factor(speed) / mass
 	return (exp(k * maxf(0.0, distance)) - 1.0) / (k * speed)
 
 
@@ -64,7 +67,13 @@ static func bb_mass(replica: ReplicaConfig, grams: float = -1.0) -> float:
 ## Muzzle energy (J) of `replica` shooting `grams` BBs: its rated energy at its factory weight, shifted by
 ## rules.bb_energy_exponent for other weights.
 static func muzzle_energy(replica: ReplicaConfig, rules: ReplicaRulesConfig, grams: float = -1.0) -> float:
-	return replica.muzzle_energy * pow(_grams(replica, grams) / replica.bb_weight, rules.bb_energy_exponent)
+	return replica.muzzle_energy * weight_energy_share(replica, rules, grams)
+
+
+## The share of its rated muzzle energy `replica` shoots `grams` BBs with: 1 at its factory weight, a little more for a
+## heavier BB (it takes more of the push), by rules.bb_energy_exponent.
+static func weight_energy_share(replica: ReplicaConfig, rules: ReplicaRulesConfig, grams: float = -1.0) -> float:
+	return pow(_grams(replica, grams) / replica.bb_weight, rules.bb_energy_exponent)
 
 
 ## Muzzle velocity (m/s) of `replica` shooting `grams` BBs: E = ½·m·v².
@@ -79,12 +88,13 @@ static func hop_up_lift(replica: ReplicaConfig, dial: float, rules: ReplicaRules
 
 ## Flies one `grams` BB level from `replica` with its dial at `dial` (the game's flight, no spread, stepped `dt` a time
 ## as the game ticks) and reports how far it stays within `band` m of the aim line, following it at most
-## `readout_range` m, and how high it rises. For the Loadout's readout; allocates, so never per tick.
+## `readout_range` m, and how high it rises. For the Loadout's readout; allocates, so never per tick. `field_air` is
+## the field's own air (GameState.air, PH1: the HUD's readout in a match); null: the air replicas are rated in.
 static func hop_up_reach(replica: ReplicaConfig, dial: float, tuning: SimTuning, dt: float, band: float,
-		readout_range: float, grams: float = -1.0) -> HopUpReach:
+		readout_range: float, grams: float = -1.0, field_air: AirModel = null) -> HopUpReach:
 	var cfg := tuning.ballistics
 	var bb := _level_shot(replica, dial, tuning, grams)
-	var air := AirModel.of(cfg)
+	var air := field_air if field_air != null else AirModel.of(cfg)
 	var reach := HopUpReach.new()
 	reach.on_target_to = readout_range
 	while bb.age < cfg.max_lifetime:

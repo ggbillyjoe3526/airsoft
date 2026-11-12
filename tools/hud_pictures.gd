@@ -67,6 +67,7 @@ func _run() -> void:
 	if pause != null:
 		hud.set_paused(true)
 		pause.set_match("Depot", "Attack / Defend", 3, 1384047683)
+		pause.set_weather(session.state.air_temperature, session.state.wind.speed)
 		pause.visible = true
 		await _frames(6)
 		await _grab(folder, tag, "pause", size)

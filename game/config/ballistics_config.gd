@@ -7,21 +7,24 @@ extends Resource
 
 ## m/s².
 @export var gravity: float = 9.81
-## The air BBs fly through (°C, Pa): sea-level air on a mild day. Density and viscosity follow from it.
+## The air replicas are rated in (°C, Pa): sea-level air on a mild day. Density and viscosity follow from it. A field's
+## own air may be colder (data/maps.md's Air column, WeatherConfig; AirModel.at).
 @export var air_temperature: float = 20.0
 @export var air_pressure: float = 101325.0
 ## BB diameter (m): the standard 5.95 mm airsoft BB.
 @export var bb_diameter: float = 5.95e-3
 ## Backspin (rad/s) per unit of hop-up lift (a replica's hop_up_max × its dial). Tuned so the factory dials keep the
-## rifle on target to ~38 m and the pistol to ~26 m.
+## rifle on target to ~39 m and the pistol to ~29 m (0.70 J, PH2).
 @export var spin_per_hop: float = 5000.0
 ## Magnus lift coefficient's fit to the spin ratio S = ω·r / v: CL = S / (lift_base + lift_slope · S).
 @export var lift_base: float = 0.981
 @export var lift_slope: float = 2.022
 ## The air's friction torque on a spinning BB per unit spin ratio: spin decays at 1.25·ρ·A·spin_friction·v / m per second.
 @export var spin_friction: float = 0.05
-## Seconds before an unhit BB is removed.
-@export var max_lifetime: float = 2.5
+## Seconds before an unhit BB is removed: longer than the longest shot a replica can lob takes to land (PH1: the Sniper
+## Rifle at its site limit with 0.40 g BBs, 130 m in 5.5 s at 24° up; at 2.5 s a lobbed BB vanished in the air past
+## about 70 m). A level shot lands within about 1.5 s.
+@export var max_lifetime: float = 6.0
 ## BBs in flight at once (the pool's size); a full pool reuses the oldest.
 @export var max_bbs: int = 256
 

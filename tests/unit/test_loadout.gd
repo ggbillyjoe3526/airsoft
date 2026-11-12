@@ -97,7 +97,7 @@ func test_a_new_player_carries_the_browser_games_defaults() -> void:
 	assert_eq(aeg.power_id, STANDARD)
 	var pistol := rules.tune_of(l, PISTOL)
 	assert_almost_eq(pistol.bb_weight, 0.2, 1e-9)
-	assert_almost_eq(pistol.hop_up, 0.55, 1e-9)
+	assert_almost_eq(pistol.hop_up, 0.75, 1e-9)
 	assert_eq(pistol.paint, &"ghost")
 	assert_eq(pistol.power_id, GREEN)
 
@@ -116,7 +116,7 @@ func test_carrying_the_other_slots_replica_swaps_the_two() -> void:
 func test_bb_weight_and_hop_up_stay_in_range_on_their_steps() -> void:
 	var l := rules.default_loadout("L")
 	assert_almost_eq(rules.set_bb_weight(l, AEG, 0.284), 0.28, 1e-9)
-	assert_almost_eq(rules.set_bb_weight(l, AEG, 0.9), 0.3, 1e-9)
+	assert_almost_eq(rules.set_bb_weight(l, AEG, 0.9), 0.4, 1e-9)
 	assert_almost_eq(rules.set_bb_weight(l, AEG, 0.1), 0.2, 1e-9)
 	assert_almost_eq(rules.set_hop_up(l, AEG, 0.81), 0.8, 1e-9)
 	assert_almost_eq(rules.set_hop_up(l, AEG, -1.0), 0.0, 1e-9)

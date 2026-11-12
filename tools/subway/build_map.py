@@ -483,7 +483,7 @@ def lifts() -> list[dict]:
 
 # ---------------- Writing ----------------
 
-def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress: str = "") -> dict:
+def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress: str = "", facing: str = "") -> dict:
     x0, x1, y0, y1, z0, z1 = bx
     if kind in ("floor", "ramp"):
         # Floors drawn edge to edge are grown a centimetre a side to meet (as Depot's): an edge on a grid cell's middle
@@ -497,6 +497,8 @@ def as_block(kind: str, bx: list[float], rise: str = "", colour: int = 0, dress:
         b["colour"] = colour
     if dress:
         b["dress"] = dress
+    if facing:
+        b["facing"] = facing
     return b
 
 
@@ -536,14 +538,15 @@ def build() -> dict:
     for bl in L.blocks:
         if bl["y"] is None:
             for bx, rise in ramp_barrier(bl):
-                blocks.append(as_block(bl["kind"], bx, rise, colour=bl["colour"], dress=bl["dress"]))
+                blocks.append(as_block(bl["kind"], bx, rise, colour=bl["colour"], dress=bl["dress"],
+                                       facing=bl["facing"]))
                 solid.append(bx)
             continue
         bx = [bl["x0"], bl["x1"], bl["y"], bl["y"] + bl["h"], bl["z0"], bl["z1"]]
         for other in solid:
             if overlap(bx, other, SLACK):
                 print("warning: cover", bl["kind"], bx, "overlaps", other)
-        blocks.append(as_block(bl["kind"], bx, colour=bl["colour"], dress=bl["dress"]))
+        blocks.append(as_block(bl["kind"], bx, colour=bl["colour"], dress=bl["dress"], facing=bl["facing"]))
         solid.append(bx)
     air = [(i, a) for i, rm in enumerate(L.rooms) for a in air_boxes(rm)]
     shaft = shaft_hole()
@@ -592,10 +595,14 @@ def build() -> dict:
                                                                       "ground": HEMI_GROUND},
                                                              "exposureScale": 0.85}}},
         "roof": {"height": r(max(ceil_at(rm, max(rm["ya"], rm["yb"])) for rm in L.rooms if rm["ceil"]) + FT + ROOF_OVER
-                             + LIFT), "plain": True, "lamps": lamps()},
+                             + LIFT), "plain": True,
+                 # UL1: no sky down here; the sun standing in for the lamps (Low, Medium) casts no shadow.
+                 "underground": True, "lamps": lamps()},
         "areas": areas(),
         "lifts": lifts(),
-        "dressing": {"station": station_dress.dress(L, floor_at, ceil_at, LIFT, FT)},
+        # UL1: the grey puff feet kick up off the station's dusty floors (white without a tint).
+        "dressing": {"station": station_dress.dress(L, floor_at, ceil_at, LIFT, FT),
+                     "kickedDust": {"tint": 0xB0AEA8, "scale": 0.9}},
     }
     # nothing in the shafts, nor in a balustrade down an escalator (its pieces' whole boxes, as the game's tests take them)
     holes = [shaft_hole()] + [box for bl in L.blocks if bl["y"] is None for box, _ in ramp_barrier(bl)]

@@ -133,6 +133,18 @@ enum Lay { ROW, CLUSTER, FIT, TILE, GRID, RUN, UNIT, BAY, GROUND, SIDE, LINED, T
 	&"site_toilet": "res://assets/models/props/site_toilet.glb",
 	&"water_tote": "res://assets/models/props/water_tote.glb",
 	&"generator": "res://assets/models/props/generator.glb",
+	# Subway's ticket hall and concourse (Dev 3, SM3, tools/blender/maps/): its ticket gates, machines, kiosks, office,
+	# booking counter, help points, benches and crowd barriers, each fitted to its block (FIT, or its `facing`).
+	&"ticket_gate": "res://assets/models/props/ticket_gate.glb",
+	&"ticket_machine": "res://assets/models/props/ticket_machine.glb",
+	&"kiosk": "res://assets/models/props/kiosk.glb",
+	&"kiosk_long": "res://assets/models/props/kiosk_long.glb",
+	&"ticket_office": "res://assets/models/props/ticket_office.glb",
+	&"booking_counter": "res://assets/models/props/booking_counter.glb",
+	&"help_point": "res://assets/models/props/help_point.glb",
+	&"station_bench": "res://assets/models/props/station_bench.glb",
+	&"station_bench_long": "res://assets/models/props/station_bench_long.glb",
+	&"crowd_barrier": "res://assets/models/props/crowd_barrier.glb",
 }
 ## Each dressed block kind's prop, and how it is laid. A kind not listed keeps its box.
 @export var kind_props: Dictionary[StringName, StringName] = {

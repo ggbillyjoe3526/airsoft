@@ -25,6 +25,8 @@ bolt, heard from less far. The M140 is the middle one: more reach for a slightly
 is the long shot: the most reach, paid for with the slowest bolt, a kick that jumps the view through a scope and a
 crack heard from further. **Heard from** is how much further the shot is heard, by bots, on the minimap and on the
 sound cues. Energy still stops at the [site limit](Replicas#site-limits).
+Gas shoots softer on a cold field ([How to Play](How-to-Play#wind-and-weather)), so a stronger gas earns its place
+on a cold night.
 
 The menus show each one as it looks at the field: the **Standard Battery** a red NiMH brick pack, the **11.1 V LiPo**
 a black stick pack with its balance lead, the gases one 1 litre can whose cap and shoulder are the gas's colour, and
