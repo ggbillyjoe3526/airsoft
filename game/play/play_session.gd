@@ -171,6 +171,8 @@ var _roof: RoofView = null
 var _doors: DoorView = null
 ## The field's lifts, or null on a field without (LiftView, MT2).
 var _lifts: LiftView = null
+## The ticket gates' paddle doors, or null on a field without (GatePaddles, SM3).
+var _paddles: GatePaddles = null
 ## A wood's crowns and dressing, or null on a map with neither (WoodsView, WL4).
 var _woods: WoodsView = null
 ## The map's streams (WS1), or null on a map with none.
@@ -438,6 +440,9 @@ func _dress_part(part: int) -> void:
 			_lifts = LiftView.build(_map, _play.map_style, _tuning.lifts, _play.lifts)
 			if _lifts != null:
 				add_child(_lifts)
+			_paddles = GatePaddles.build(_map, _play.gate_paddles)
+			if _paddles != null:
+				add_child(_paddles)
 			_pools = LightPools.build(_map, _light)
 			if _pools != null:
 				add_child(_pools)
@@ -927,6 +932,8 @@ func _build_views(ui: CanvasLayer) -> void:
 		first_use.append_array(_doors.materials())
 	if _lifts != null:
 		first_use.append_array(_lifts.materials())
+	if _paddles != null:
+		first_use.append_array(_paddles.materials())
 	if _pools != null:
 		first_use.append_array(_pools.materials())
 	if _fixtures != null:
@@ -1443,6 +1450,8 @@ func _process(delta: float) -> void:
 		_doors.refresh(state.doors)
 	if _lifts != null:
 		_lifts.refresh(state.lifts, fraction)
+	if _paddles != null:
+		_paddles.refresh(state.characters, delta)
 	if not _flags.is_empty():
 		var rs := state.round_state
 		for i in mini(_flags.size(), rs.flags.size()):
@@ -2094,6 +2103,8 @@ func _relight() -> void:
 	var lights := _level.baked_lights()
 	if _doors != null:
 		_doors.relight(lights)
+	if _paddles != null:
+		_paddles.relight(lights)
 	for f in _flags:
 		f.relight(lights)
 	if _overtime_flag != null:

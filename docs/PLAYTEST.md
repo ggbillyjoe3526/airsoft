@@ -594,6 +594,13 @@ a cross-passage between the running tunnels, and they swap at half time. Turn on
   landing, both on short poles that fit under the roof; Elimination's overtime flag rises in the lower hall.
 - [ ] **The lift shafts stand shut (MT1).** The two lifts come in their own step (MT2); until then their shafts are
   solid in the ticket hall.
+- [ ] **The ticket hall and concourse models (SM3).** The ticket gates (14 slim pedestals, a 1 m lane between each
+  two, a black paddle door each side of every lane), the row of ticket machines, both kiosks and the ticket office (shuttered), the booking counter, the help points, the benches and the
+  crowd barriers stand in their boxes: nothing floats, sticks out of its box or blocks where the box didn't. The
+  platform benches sit with their backs to the wall, seats to the track. No word, logo or team colour on any of them.
+- [ ] **The ticket gates' paddle doors (SM3).** Walk up to a lane: its two paddles swing open towards the platforms in
+  about a third of a second and shut behind you; the next lane's stay shut. Bots walk the lanes without snagging, and
+  BBs and bodies pass a lane as before (the paddles are look only). The paddles sit in the gates' baked light.
 
 ## Bots
 

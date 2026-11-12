@@ -510,8 +510,11 @@ static func _turned(size: Vector3, turn: float) -> Vector3:
 
 
 ## One model fitted to the whole box, its long side along the box's and its front (the model's +z) facing the field's
-## middle: across the box for a model long in x (a sofa), along it for one long in z.
+## middle: across the box for a model long in x (a sofa), along it for one long in z. A block naming its facing
+## (MapData.Block.facing, SM3) turns the front that way instead, the model's x across it, whatever the box's shape.
 static func _fit_facing(model: AABB, b: MapData.Block, foot: Vector3, middle: Vector3) -> Transform3D:
+	if b.facing != &"":
+		return fit(model, foot, facing_size(b), facing_yaw(b.facing))
 	var long := maxf(b.size.x, b.size.z)
 	var short := minf(b.size.x, b.size.z)
 	var model_long_x := model.size.x >= model.size.z
@@ -525,6 +528,25 @@ static func _fit_facing(model: AABB, b: MapData.Block, foot: Vector3, middle: Ve
 	else:
 		yaw = PI * 0.5 if to.x >= 0.0 else -PI * 0.5
 	return fit(model, foot, size, yaw)
+
+
+## The yaw that turns a model's front (its +z) to world direction `facing` (+x, -x, +z or -z; MapData.Block.facing).
+static func facing_yaw(facing: StringName) -> float:
+	match facing:
+		&"+x":
+			return PI * 0.5
+		&"-x":
+			return -PI * 0.5
+		&"-z":
+			return PI
+	return 0.0
+
+
+## Block `b`'s box in the model's own axes once its front is turned to the block's facing: x across the front.
+static func facing_size(b: MapData.Block) -> Vector3:
+	if b.facing == &"+x" or b.facing == &"-x":
+		return Vector3(b.size.z, b.size.y, b.size.x)
+	return b.size
 
 
 ## FIT's transform `t` of a model of bounds `model` in block `b`, stood on the ground under the box's middle instead

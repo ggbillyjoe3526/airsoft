@@ -33,6 +33,7 @@
 [ext_resource type="Script" uid="uid://cj6ju4x7le6w4" path="res://game/config/inspect_pose.gd" id="50_in1ip"]
 [ext_resource type="Script" uid="uid://wko4nifmpxxm" path="res://game/config/light_fixtures_config.gd" id="51_lf4wg"]
 [ext_resource type="Script" uid="uid://dlruigog1xspi" path="res://game/config/lift_view_config.gd" id="52_mt2lv"]
+[ext_resource type="Script" uid="uid://cwb3ni1un42dn" path="res://game/config/gate_paddles_config.gd" id="53_gp3sm"]
 [ext_resource type="Script" uid="uid://dremqyubntd3e" path="res://game/config/marks_config.gd" id="53_wm1mk"]
 [ext_resource type="Script" uid="uid://crxm155pdir66" path="res://game/config/station_fixtures_config.gd" id="54_sm5fx"]
 
@@ -341,6 +342,9 @@ script = ExtResource("19_lk7ad")
 [sub_resource type="Resource" id="Resource_lf4wg"]
 script = ExtResource("51_lf4wg")
 
+[sub_resource type="Resource" id="Resource_gp3sm"]
+script = ExtResource("53_gp3sm")
+
 [sub_resource type="Resource" id="Resource_mt2lv"]
 script = ExtResource("52_mt2lv")
 
@@ -374,4 +378,5 @@ roof = SubResource("Resource_rf6cf")
 look = SubResource("Resource_lk7ad")
 light_fixtures = SubResource("Resource_lf4wg")
 lifts = SubResource("Resource_mt2lv")
+gate_paddles = SubResource("Resource_gp3sm")
 marks = SubResource("Resource_wm1mk")

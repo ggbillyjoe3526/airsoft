@@ -34,7 +34,7 @@ PALETTE = {
     "steel": 0x6c6a7a, "ink": 0x3a2f5a, "sand": 0xb9ae98, "plaster": 0xece2cf, "grey": 0x8c8a96,
     "pebble": 0xa09a92, "stone": 0x8c8478, "umber": 0x61594f, "moss": 0xb3b891, "bark": 0x7b6f62,
     "heartwood": 0xe4dccd, "rubber": 0x3d3b45, "lilac": 0xb9a8d6, "butter": 0xe6d478, "sage": 0xa9c48e,
-    "seafoam": 0x7fb8ad, "olive": 0x8c9a48, "slab": 0x7c7670,
+    "seafoam": 0x7fb8ad, "olive": 0x8c9a48, "slab": 0x7c7670, "walnut": 0x70625b,
 }
 
 # The vertical gradient: a corner at the model's foot takes this share of its paint, one at the top all of it.
