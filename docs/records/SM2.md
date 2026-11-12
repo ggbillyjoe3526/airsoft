@@ -81,6 +81,13 @@ step nosings, and the balustrade railing, after the owner's photos in `art/refer
   and a post 2.5 bars wide would show 2 cm of steel each side a BB flies through; the bars end on the foot rail as
   the sim's do; the stair handrail is already 44 mm.
 
+- **Posters and signs (the owner, 2026-11-12: "Add posters and signs to all the environments. Maybe only one sign
+  in the elevator. Posters down the walls beside the escalator.")**: the lamps and extras thread (SM5) owns the poster
+  and sign sheet and places the posters down the escalator shafts' walls and the station's signs, from the shaft
+  measurements this thread sent it. This task adds the car's one sign: a white enamel plate on the back wall's middle
+  panel at eye height, four standing figures for its capacity, wordless, in the car's vertex colours (SM5's sheet is
+  still changing, so it is not tied to it). The blank plate over the car's door is gone, so the sign is the only one.
+
 ## Known issues left
 
 - The landing doorway uses 61 % of its budget and a leaf 16 %: both are flat steel in the photos, and more triangles

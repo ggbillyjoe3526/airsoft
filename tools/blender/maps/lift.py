@@ -61,6 +61,8 @@ DISPLAY = 0x18181A
 LENS = 0xE6E2D6           # the display's arrows, lit warm white (amber would read as Beta's orange)
 DOT = 0x34312D            # the dot-matrix window behind its dots
 LEAF = 0xA8A6A0
+SIGN = 0xF0EEE8            # the car's sign: white enamel, charcoal figures
+SIGN_INK = 0x2A2B2D
 
 HX, HZ = WELL_X / 2, WELL_Z / 2
 IN_X, IN_Z = HX - WALL_T, HZ - WALL_T
@@ -249,7 +251,7 @@ def car() -> list:
     dome.lathe((IN_X - 0.16, top, IN_Z - 0.16), [(0.0, -0.068), (0.012, -0.066), (0.034, -0.055), (0.05, -0.035),
                                                  (0.058, -0.012), (0.06, 0.0)], 14)  # foot (its low point) up
     bump.box((-IN_X + 0.2, top - 0.04, IN_Z - 0.18), (-IN_X + 0.42, top, IN_Z - 0.1), skip=("+y",))
-    # The display's arrows, the door buttons' marks and a blank capacity plate on the transom with four screws.
+    # The display's arrows and the door buttons' marks.
     for up, cy in ((1.0, dy + 0.06), (-1.0, dy + 0.03)):
         tri = [(px1 - 0.08, cy - 0.01 * up, zf + 0.0095), (px1 - 0.05, cy - 0.01 * up, zf + 0.0095),
                (px1 - 0.065, cy + 0.012 * up, zf + 0.0095)]
@@ -263,11 +265,30 @@ def car() -> list:
             tip = base + way * 0.012
             tri = [(base, y0 - 0.009, zf + 0.0125), (tip, y0, zf + 0.0125), (base, y0 + 0.009, zf + 0.0125)]
             dark.poly(tri if way < 0 else list(reversed(tri)))
-    plate_y = DOOR_H + 0.11
-    bump.box((-0.16, plate_y, -IN_Z), (0.16, plate_y + 0.13, -IN_Z + 0.004), skip=("-z",))
-    for sx in (-0.14, 0.14):
-        for sy in (plate_y + 0.02, plate_y + 0.11):
-            tk.knob(rail, (sx, sy, -IN_Z + 0.004), 0.006, 0.005, 0.002, 1.0, 6)
+    # The car's one sign, on the back wall's middle panel at eye height: a white enamel plate with a dark border and
+    # four standing figures (its capacity, LiftConfig's four), wordless.
+    sign, ink = tk.Mesh(), tk.Mesh()
+    zs = IN_Z - 0.0045 - 0.004   # 4 mm proud of the panel's raised field
+    sign.box((-0.18, 1.42, zs), (0.18, 1.68, IN_Z - 0.0045), skip=("+z",))
+    zi = zs - 0.0005
+
+    def mark(pts: list) -> None:
+        # Wound to face into the car (-z): counter-clockwise seen from -z.
+        flat = [(x, y, zi) for x, y in pts]
+        n = sum(pts[i][0] * pts[(i + 1) % len(pts)][1] - pts[(i + 1) % len(pts)][0] * pts[i][1]
+                for i in range(len(pts)))
+        ink.poly(flat if n < 0 else list(reversed(flat)))
+    b0, b1 = 0.012, 0.018   # the border line's inner and outer edges, in from the plate's
+    for x0, y0, x1, y1 in ((-0.18 + b0, 1.42 + b0, 0.18 - b0, 1.42 + b1), (-0.18 + b0, 1.68 - b1, 0.18 - b0, 1.68 - b0),
+                           (-0.18 + b0, 1.42 + b1, -0.18 + b1, 1.68 - b1), (0.18 - b1, 1.42 + b1, 0.18 - b0, 1.68 - b1)):
+        mark([(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
+    for fx in (-0.105, -0.035, 0.035, 0.105):
+        mark([(fx + 0.017 * math.cos(math.tau * k / 10), 1.618 + 0.017 * math.sin(math.tau * k / 10))
+              for k in range(10)])                                         # the head
+        mark([(fx - 0.024, 1.592), (fx + 0.024, 1.592), (fx + 0.016, 1.525), (fx - 0.016, 1.525)])   # shoulders to hips
+        for lx in (-0.009, 0.009):                                         # the legs
+            mark([(fx + lx - 0.006, 1.455), (fx + lx + 0.006, 1.455), (fx + lx + 0.006, 1.525),
+                  (fx + lx - 0.006, 1.525)])
     objects = [
         studs.build("car_studs", FLOOR), bump.build("car_trims", tk.STAINLESS_DARK),
         grid.build("car_louvre", CEILING), dome.build("car_camera", DISPLAY, smooth=60.0, toned=False),
@@ -277,6 +298,7 @@ def car() -> list:
         rail.build("car_handrails", tk.STAINLESS, smooth=50.0, toned=False),
         cop.build("car_panel", PANEL), dark.build("car_panel_dark", DISPLAY), gaps.build("car_panel_bezels", SILL),
         yellow.build("car_alarm", tk.YELLOW, smooth=50.0, toned=False),
+        sign.build("car_sign", SIGN, toned=False), ink.build("car_sign_ink", SIGN_INK, toned=False),
     ]
     return objects + holes
 
