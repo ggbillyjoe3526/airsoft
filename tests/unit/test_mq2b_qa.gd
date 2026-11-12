@@ -116,3 +116,44 @@ func test_pictures_freed_leave_no_orphans() -> void:
 	pictures.free()
 	await wait_physics_frames(2)
 	assert_lte(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT), before)
+
+
+func test_building_and_freeing_views_and_pictures_leaves_the_shared_store_unchanged() -> void:
+	var tuning := SimTuning.new()
+	var before := ReplicaPaint.surface_materials().size()
+	for n in 2:
+		var v := GrenadeView.new()
+		add_child(v)
+		v.setup(2, tuning.grenades, false)
+		v.setup_arms(ViewModelConfig.new(), FigureMix.HUMAN)
+		v.free()
+	var pictures := ReplicaPictures.new()
+	add_child(pictures)
+	pictures.power_texture(&"gasBottle", Color.RED)
+	pictures.grenade_texture(Grenade.Kind.SMOKE)
+	pictures.grenade_texture(Grenade.Kind.FLASH)
+	remove_child(pictures)
+	pictures.free()
+	assert_eq(ReplicaPaint.surface_materials().size(), before)
+
+
+func test_paint_keys_pressed_copies_by_material_instance_not_name() -> void:
+	var a := StandardMaterial3D.new()
+	a.resource_name = "Same"
+	a.albedo_color = Color.RED
+	var b := StandardMaterial3D.new()
+	b.resource_name = "Same"
+	b.albedo_color = Color.BLUE
+	var mesh := ArrayMesh.new()
+	for material: Material in [a, b, a]:
+		var arrays: Array = []
+		arrays.resize(Mesh.ARRAY_MAX)
+		arrays[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3.ZERO, Vector3.RIGHT, Vector3.UP])
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		mesh.surface_set_material(mesh.get_surface_count() - 1, material)
+	var pressed: Dictionary[Material, Material] = {}
+	var out := GrenadeView._paint(mesh, {}, pressed, 0.5)
+	assert_eq(pressed.size(), 2, "two instances of one name stay two copies")
+	assert_ne(out[0], out[1])
+	assert_same(out[0], out[2], "one model material shares one pressed copy")
+	assert_eq((out[0] as BaseMaterial3D).albedo_color, Color.RED)
