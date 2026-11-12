@@ -1,12 +1,18 @@
-Task: MQ2 (attempt 3) · head 6f67d94 · Verdict: Pass
-Run: no bot match this time (no game code changed since the Pass at d43462d; 4 cores busy with tools/check.sh, so frame times and script time are not comparable and are not judged) · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets, docs/CC0_ASSETS.md Size limits and the prior Pass
-Metrics: aeg.glb 4,028,728 B / 4,194,304 cap (ok, 4 % headroom; measured); pistol.glb 1,750,832, smg 1,665,976, sniper 2,168,320, cyber 258,796 (all ok; measured); inside/aeg.glb 355,524 (ok; measured)
-Parts <= 10,000 triangles: magazine_hiCap 9,782, lowCap 9,494, extended 9,948; barrel_tightBore 9,822 with inside, barrel_long 9,930 (ok; counts from the brief, enforced by PART_TRIS tests in test_magazine_models, test_barrel_models, test_attachment_models; I did not re-count)
-Hands, heaviest loadout: fitted barrel crown 1,390 -> 2,806 triangles (+1,416); magazines under +/-100; far inside the 40,000 hands budget for a replica (judgment). Figure copies <= 600 untouched (no figure-copy edits in the diff; judgment).
-Draw calls: material and surface counts per part unchanged by the model-only change; test_part_surfaces.gd (new) pins surface-to-material mapping per file (judgment, test not re-run by me).
-Regressions (> 10 % worse): triangles in hands for the barrel crown +102 %, but absolute +1.4k of a 40k budget (~3.5 %); no measured monitor regresses. Node count, orphans, static memory: unchanged code paths.
-Code check: git diff d43462d HEAD -- game/replica_surfaces.gd and replica_paint.gd = 0 lines; git diff origin/main HEAD -- game/ is only those two files (+58/-8), the same I reviewed. No new per-frame or per-tick allocation, no new nodes, timers, tweens or connections, no new shader or particle needing prewarm, no preset bypass. (measured by diff)
+Task: MQ1B (attempt 3) · head 7499a89 · Verdict: Pass
+Run: no Godot run (the local gate is running); the committed cyber.glb parsed directly · budget: no baseline yet, judged against targets, the 40,000 / 3,000 triangle budgets and origin/main's glb
+Metrics (measured, from the glb JSON):
+- Triangles in the hands (Body + Magazine + Selector + Slide + Trigger): 38,706 / 40,000 (ok); attempt 2 38,646; main 37,824 (+2.3 %)
+- Figure copy (Figure + Figure_Magazine): 3,000 / 3,000 (ok, at the limit); main 3,000
+- File size: 1,361,544 B vs main 1,350,416 B (+0.8 %)
+- Body: 4 surfaces, materials 0-3 (same as main), 21,491 vertices (main 20,977, +2.4 %)
+- Magazine: 3 surfaces, materials 3/4/2 (same as main), 3,778 vertices (main 3,882, -2.7 %), 4,244 triangles (main 4,576)
+- Materials in the file: 6 (main 6); no new material, so no new shader prewarm needed
+Regressions (> 10 % worse): none
 Blocking findings: none
-Advisory: aeg.glb headroom is 165 KB under the 4 MiB cap; the next AEG part will need a trim or an owner ruling on the cap (judgment). Barrel crown at 104 points is dense for a 2 mm-class detail seen at arm's length; owner may prefer fewer if a low-power GPU struggles (judgment, check on the owner's hardware).
-Fixes: none required.
-Unexplained: none. Note: an attempt to run the unit suite filtered to test_part_surfaces ran unfiltered and showed test_ab1_qa failures (map-file edge cases) in a file this change does not touch; likely load/environment related, left to the full check.sh run.
+- Nothing under game/ changed (git diff origin/main...HEAD lists 0 game/ paths); no runtime script, scene or config in the diff.
+- tools/model_studio.gd:54 calls RenderingServer.directional_shadow_atlas_set_size(SHADOW_MAP, true) inside the tool's own run. The only other mention of the tool in game/ is a doc comment in game/ui/studio_sky.gd:8. No game script, scene, export preset or CI step references it, so the call cannot reach the shipped game (judgment, by grep).
+Advisory:
+- The figure copy sits exactly on its 3,000 budget; any later rounding of the figure needs a trade-off elsewhere (judgment).
+- The hands are 1,294 triangles under budget, and Body alone is 30,318 (judgment). It is a per-draw cost on the owner's GPU only; frame time was not measured here.
+Fixes: none needed.
+Unexplained: none. Draw calls, frame times and orphan nodes were not re-measured because no game code changed since attempt 2's pass.

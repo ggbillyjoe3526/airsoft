@@ -1,6 +1,6 @@
 # MQ2 · Attachments, magazines and barrels made of what the real ones are
 
-**Review:** 3 attempts · critic PENDING · qa PENDING · performance PENDING
+**Review:** 3 attempts · critic Accept 8/8 · qa Pass · performance Pass
 
 ## Attempts
 
@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | 2026-11-12 | 1 | Fable 5.2 (model quality thread) | qa Pass after one fix (a barrel's inside), performance Pass | Retry 6/8 | Only the materials changed: no part gained detail, the polished crown was mottled, the hi-cap could not be told from the low-cap, the record claimed a play check the repository did not hold |
 | 2026-11-12 | 2 | Fable 5.2 (model quality thread) | qa Pass (two more tests), performance Pass, one old barrel test updated | Retry 7/8 | The magazines' BBs were faceted (the low-cap's made coarser to pay for its mould line), the tight bore's crown showed polygon steps along its bright rim |
-| 2026-11-12 | 3 | Fable 5.2 (model quality thread) | PENDING | PENDING | – |
+| 2026-11-12 | 3 | Fable 5.2 (model quality thread) | qa Pass (three more tests), performance Pass | Accept 8/8 | – |
 
 ## What changed
 
