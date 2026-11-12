@@ -179,7 +179,7 @@ def more_posters(kind: str, d: ImageDraw.ImageDraw, w: int, h: int) -> None:
         for sx in (-1, 1):
             d.rounded_rectangle((cx + sx * 74 - 62, cy - 48, cx + sx * 74 + 62, cy + 48), 42, fill=CREAM)
             d.line([(cx + sx * 74 - 30, cy - 30), (cx + sx * 74 - 4, cy - 36)], fill=PLASTER, width=8)
-        d.polygon([(cx - 22, cy + 70), (cx + 22, cy + 70), (cx + 12, cy + 30), (cx - 12, cy + 30)], fill=BUTTER)
+        d.pieslice((cx - 26, cy + 34, cx + 26, cy + 106), 180, 360, fill=BUTTER)
         line(d, h * 0.66, "GOGGLES ON", 700, 76, INK)
         line(d, h * 0.77, "Eyes aren't spare parts.", 600, 36, INK)
         d.rectangle((60, h * 0.84, w - 60, h * 0.845), fill=INK)
@@ -248,19 +248,22 @@ def more_posters(kind: str, d: ImageDraw.ImageDraw, w: int, h: int) -> None:
         line(d, h * 0.78, "Lemonade you can hear", 600, 36, CREAM)
         line(d, h * 0.89, "Ice cold at the station kiosk", 500, 28, INK)
     elif kind == "poster_j":
-        # The Nightjar: a moon, stars and a bird on the night.
+        # The Lamplight Room: a hanging lamp's glow on the night, a crescent moon and stars.
         d.rectangle((0, 0, w, h), fill=NIGHT)
-        d.ellipse((w * 0.52, h * 0.08, w * 0.88, h * 0.08 + w * 0.36), fill=BUTTER)
-        d.ellipse((w * 0.44, h * 0.06, w * 0.78, h * 0.06 + w * 0.34), fill=NIGHT)
         g = random.Random(11)
         for _ in range(30):
             x, y, r = g.uniform(14, w - 14), g.uniform(14, h * 0.52), g.uniform(1.5, 4)
             d.ellipse((x - r, y - r, x + r, y + r), fill=CREAM)
-        bx, by = w * 0.36, h * 0.38
-        for x, y, r in ((bx, by, 96), (bx + 110, by + 80, 52)):
-            d.arc((x - r, y - r * 0.5, x + 4, y + r * 0.5), 195, 330, fill=CREAM, width=max(5, r // 7))
-            d.arc((x - 4, y - r * 0.5, x + r, y + r * 0.5), 210, 345, fill=CREAM, width=max(5, r // 7))
-        line(d, h * 0.64, "THE NIGHTJAR", 700, 72, BUTTER)
+        d.ellipse((w * 0.66, h * 0.06, w * 0.90, h * 0.06 + w * 0.24), fill=BUTTER)
+        d.ellipse((w * 0.61, h * 0.05, w * 0.84, h * 0.05 + w * 0.23), fill=NIGHT)
+        cx, top = w * 0.40, h * 0.30
+        for k, c in enumerate(((0x4A, 0x40, 0x48), (0x6A, 0x5A, 0x4E), (0x8E, 0x78, 0x5A))):
+            r = 120 - 34 * k
+            d.ellipse((cx - r, top + 40 - r * 0.45, cx + r, top + 40 + r * 1.1), fill=c)
+        d.line([(cx, 0), (cx, top - 46)], fill=INK, width=4)
+        d.polygon([(cx - 24, top - 46), (cx + 24, top - 46), (cx + 62, top + 10), (cx - 62, top + 10)], fill=INK)
+        d.chord((cx - 26, top - 12, cx + 26, top + 36), 0, 180, fill=BUTTER)
+        line(d, h * 0.64, "THE LAMPLIGHT ROOM", 700, 64, BUTTER)
         line(d, h * 0.74, "Live jazz every Friday", 600, 38, CREAM)
         d.rectangle((90, h * 0.80, w - 90, h * 0.805), fill=VIOLET)
         line(d, h * 0.87, "Under the arches, Copperhill", 500, 28, CREAM)

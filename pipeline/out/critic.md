@@ -1,27 +1,31 @@
 Task: SM5 · Subway's lamps and extras
-Attempt: 7 (past 4; review-cap ruling: keep fixing until the critic passes)
-Head: 499786e (= HEAD; test_station_fixtures 8/8, test_sm5_qa 6/6 on it; full tools/check.sh unfinished when judged,
-   its output file empty: this Accept holds only once it ends green on 499786e)
-Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✓ | 7 ✓ | 8 ✓
-Score: 8/8 → Accept
-Failed checks, with evidence: none.
-Attempt 6's must-fix, done:
-1. [judgment, code and images] station_lamps.py:+157-159: face_toward([f[ARC], top_spine, f[0]], +y, "black") and
-   [f[ARC+1], low_spine, f[n-1]], -y: both in their planes (stadium() puts f[0] and f[ARC] at y = S, f[ARC+1] and
-   f[n-1] at -S, the spines at +-S), faced outward, black like the dome. sm5-1 front quarter: the glass's top edge
-   meets the dome with no bright sliver, the bottom edge a solid black lip. New "front quarter from below" (-30 deg,
-   station_render.py:+24): the lower wedge reads as a flat black lip under the glass, no grey background through it.
-   150 of 150 triangles (sm5-1 header, record, ASSETS.md). Nothing else in the mesh changed (3 lines added).
-Regressions: none seen. Front, front quarter and shot 12 (2 m, in game) as at attempt 6; the strip lamp untouched;
-   subway.json and fixtures.py bounds unchanged (the triangles sit inside the old bounds). performance.md (Pass) still
-   holds: two triangles, mesh only. Checks 2 to 8 as at attempt 6.
-Still short of the owner's photos, not blocking at his 150-triangle budget: the lip triangles are flat-shaded beside
-   the smooth dome, so from below the lower one reads as a hard facet; the front still reads as a ridged panel
-   (chevron bars) more than 121940's barrel; the bars' cut ends show as light slivers past the right rim from below.
-Must-fix for the next attempt: none (merge once tools/check.sh ends green on 499786e).
+Attempt: 8 (past 4; review-cap ruling: keep fixing until the critic passes), William's ask for more and larger posters
+Head: 1cfb98f (= HEAD; QA ran test_sm5_qa 13/13 on 94294ee, 1cfb98f adds only reports and those tests; full
+   tools/check.sh still running when judged: gdlint, changelog and wiki passed, the GUT run not finished)
+Checks: 1 ✓ | 2 ✓ | 3 ✓ | 4 ✓ | 5 ✓ | 6 ✗ | 7 ✓ | 8 ✓
+Score: 7/8 → Retry (near miss, judgment)
+Failed checks, with evidence:
+6. [judgment] tools/blender/maps/station_signs.py:+273 `line(d, h * 0.64, "THE NIGHTJAR", ...)` with "Live jazz every
+   Friday" (+274): Nightjar is a real, well-known London live-jazz bar, so poster_j advertises a real venue under its
+   own name and offer. That breaks the brief's rule (every name invented) and CLAUDE.md §4 (no real brand names).
+   The other names look invented: Halden Tea, Fizzbee, Copperhill (Pier, Cycle Hire, Library, Depot Yard, Airsoft Club).
+Passed, from images and diff (sm5-6, sm5-4 shots 1, 2, 13, 14):
+1. Thirteen 2:3 posters (336 x 504 cells) and three 2:1 wide ones (672 x 336), station_cells.py:+9-21. Checked the cell
+   rects: none overlap, and all sit inside 2048 x 2048. Every line of text sits inside its poster and reads in sm5-6
+   (line() shrinks text to fit, +70-77). The wide posters in fixtures.py:+89-94 sit at y 2.3 between the name boards,
+   no overlap (22/44 vs 26-40; -44/-26/-8/14 vs -36.5..24.5). No two neighbours share a design (QA test). The edge
+   warnings are at 0.7 m, fixtures.py:+50, behind PT1's line.
+6. Otherwise fits: the palette has no blue or orange (TEAL 2A9C90, VIOLET, CRIMSON, BUTTER). The topics are airsoft
+   culture (goggles on, chrono night, new players, Skirmish Sundays) and gentle local adverts, with no weapons.
+3/5. No runtime script changed except a config list and a picture tool; performance Pass (4.5 MB sheet, about 12 more draws).
+Advisory (non-blocking): poster_e's nose wedge reads as a yellow trapezoid under the goggles rather than a cut-out; the
+   wide posters print at 224 px/m against the small ones' 336, fine at track distance; poster_j's birds read as gulls.
+Must-fix for the next attempt: rename "The Nightjar" on poster_j (station_signs.py:+273, the record's Decisions line,
+   the module docstring is fine) to an invented club name that no real jazz venue uses, e.g. "The Lamplight Room";
+   rebuild signs.png. Then merge once tools/check.sh ends green on that head.
 Owner should test in the game:
-- Walk a running tunnel past a bulkhead lamp at 1 to 2 m, looking up and down at it: any gap at the glass's edges?
-- The same lamp obliquely at 1 m: does the glass read round enough, or should model 32's 150-triangle budget rise?
-- At 3 to 5 m: an oval caged bulkhead, no point top or bottom?
-- Look up at a station strip lamp from 2 to 3 m: a slim caged batten with a lip past its ends?
-- The tunnel lamps' glow on the dark wall: readable, not a glare spot?
+- Stand on each platform and look across the track: do the 3 x 1.5 m posters read, and are they big enough?
+- Walk the passages: do 13 designs feel varied, with no twin posters side by side?
+- Read a small poster at 2 to 3 m: is the small text crisp, not smeared by mipmaps?
+- Check the edge warning at 0.7 m sits behind the yellow line, clear of "Mind the gap".
+- From the track bed, do the trackside posters sit at a believable height under the vault?

@@ -16,7 +16,8 @@ photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33
 | 2026-11-12 | 5 | build thread | ✓ | 7/8 Retry | (past four attempts: the review-cap ruling) tunnel lamp's lugs pointed, its glass still one hard corner |
 | 2026-11-12 | 6 | build thread | ✓ | 7/8 Retry | wedge holes under the tunnel lamp's raised spine, top and bottom |
 | 2026-11-12 | 7 | build thread | ✓ | 8/8 Accept | |
-| 2026-11-12 | 8 | build thread | | | (William's ask: more posters, large trackside ones) |
+| 2026-11-12 | 8 | build thread | ✓ | 7/8 Retry | (William's ask: more posters, large trackside ones) the jazz club's name was a real London bar's |
+| 2026-11-12 | 9 | build thread | | | |
 
 ## What it adds
 
@@ -44,7 +45,7 @@ photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33
   (goggles, gloves, one left boot) and Copperhill Lido; muted palette colours, kept off both team hues.
 - **More posters (William, 2026-11-12: "Create more posters. They can be related or have generic advertising"):**
   nine more designs, 13 in all: Goggles on, a chrono night and a club's call for new players beside the first four,
-  and adverts for invented things (Halden Tea, Fizzbee lemonade, the Nightjar jazz club, the library's late opening, a
+  and adverts for invented things (Halden Tea, Fizzbee lemonade, the Lamplight Room jazz club, the library's late opening, a
   Saturday market, a tram museum). The wall spots take them in turn, so no two neighbours match.
 - **Large trackside posters** (William's "larger posters on the walls", through the platforms thread PT1): 3 x 1.5 m
   in the same slim frame (`poster_wide_a..c`: Skirmish Sundays, cycle hire, Copperhill Pier), middle 2.3 m over the
