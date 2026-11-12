@@ -1,15 +1,16 @@
 """Subway's lamps (SM5, models 31 and 32 of art/subway-model-list.md), from the owner's photos
 (references/maps/subway/31-ceiling-lamp and 32-tunnel-lamp):
 
-- **strip_lamp.glb** (budget 200): the fitting on every station ceiling, the caged industrial batten of the first
-  photo: a dark steel body with chamfered lower edges, a bracket at each end of its top, spring clips down its sides,
-  an opal diffuser under it (`Lens`, which the game draws glowing) and a wire guard of hoops and runners round the
-  diffuser, a cable gland at one end. 1.5 m long (x), 0.16 m across, 0.125 m deep, on two brackets; their top (y 0) at the ceiling, so
-  RoofView hangs it from each lamp spot, turned along its room.
-- **tunnel_lamp.glb** (budget 150): the caged oval bulkhead of the tunnel photos (1, 2 and 4), black as the fourth:
-  an oval cast body, a flange round the glass dome (`Lens`), the "eyelid" cage of two bars across and one down it,
-  a screw lug top and bottom. 0.17 m wide, 0.29 m tall, 0.1 m deep; its back (z 0) on the
-  wall, facing +z, its middle at the origin.
+- **strip_lamp.glb** (budget 200): the fitting on every station ceiling, the caged industrial batten of photo 121814:
+  a black body with a lip round its foot, an opal diffuser under it (`Lens`, which the game draws glowing) in a wire
+  cage as deep as the body (ten hoops, a runner down each bottom corner), four spring clips a side and two hook
+  hangers a quarter of its length in from each end. 1.52 m long (x), 0.16 m across, 0.17 m deep under the hangers;
+  their top (y 0) at the ceiling, so RoofView hangs it from each lamp spot, turned along its room.
+- **tunnel_lamp.glb** (budget 150): the caged bulkhead of photos 122005 and 121940, black as the fourth: a stadium
+  outline (two half circles joined by straight sides) 0.165 m wide and 0.30 m tall, a deep cast body, a dome black
+  at its ends and glass down its middle (`Lens`), four round bars across it and one down it standing clear of the
+  glass, that one held at the rim top and bottom (the budget goes on a round outline, not on screw lugs).
+  Its back (z 0) on the wall, facing +z, its middle at the origin.
 
     python3 -I tools/blender/maps/station_lamps.py <repo root>
 """
@@ -25,97 +26,124 @@ import stationkit as sk  # noqa: E402
 STRIP_BUDGET = 200
 TUNNEL_BUDGET = 150
 
-# The strip lamp.
-HALF = 0.75          # half its length
-BODY_W = 0.08        # half its body's width
-BODY_D = 0.065       # its body's depth under the ceiling
-LENS_HALF = 0.70     # half the diffuser's length
-LENS_W = 0.052       # half the diffuser's width where it meets the body
-LENS_D = 0.10        # the diffuser's lowest point under the ceiling
-GUARD = 0.012        # the wire guard's clearance round the diffuser
-WIRE = 0.0035        # a wire's half thickness
-HOOPS = 7
-BRACKET = 0.012      # the end brackets' height over the body, up to the ceiling
+# The strip lamp, after photo 121814 (seen from the side): 1.52 m long and 0.17 m deep, nine to one; a black body
+# and a wire cage under it of about equal depth, ten hoops (nine bays) and a runner down each bottom corner, four
+# spring clips a side, two hook hangers a quarter of its length in from each end.
+HALF = 0.76          # half its length
+TOP = -0.05          # the body's top under the ceiling (the hangers fill the gap)
+SIDE_W = 0.062       # half the body's width
+LIP_W = 0.07         # half the width of the lip round its foot
+LIP_TOP = -0.113     # where the lip steps out
+FOOT = -0.127        # the body's foot, where the diffuser meets it
+LENS_HALF = 0.735    # half the diffuser's length
+LENS_W = 0.066       # half the diffuser's width
+LENS_LOW = -0.205    # the diffuser's lowest point
+CAGE_W = 0.074       # half the cage's width
+CAGE_LOW = -0.213    # the cage's floor
+HOOPS = 10
+CLIPS = (-0.6, -0.22, 0.22, 0.6)
+HANGERS = (-0.395, 0.395)
+WIRE = 0.0034        # a wire's half width
+WIRE_RISE = 0.0045   # its crest over that
 
 
 def strip_lamp() -> sk.Mesh:
     m = sk.Mesh("strip_lamp")
-    # The body: a profile in (y, z), counter-clockwise seen from +x; its top (edge 3) against the ceiling.
-    body = [(-BODY_D, 0.06), (-BODY_D, -0.06), (-0.045, -BODY_W), (0.0, -BODY_W), (0.0, BODY_W), (-0.045, BODY_W)]
-    m.prism_x(body, -HALF, HALF, "charcoal", open_edges=(3,))
-    # The opal diffuser under it, its top (edge 5) inside the body's floor.
-    lens = [(-BODY_D, LENS_W), (-0.085, 0.05), (-LENS_D, 0.03), (-LENS_D, -0.03), (-0.085, -0.05), (-BODY_D, -LENS_W)]
+    # The body: a profile in (y, z), counter-clockwise seen from +x, open at its top (edge 4) and its foot (edge 0,
+    # the diffuser's top); upright sides, a lip stepping out round its foot.
+    body = [(FOOT, LIP_W), (FOOT, -LIP_W), (LIP_TOP, -LIP_W), (LIP_TOP + 0.003, -SIDE_W), (TOP, -SIDE_W),
+            (TOP, SIDE_W), (LIP_TOP + 0.003, SIDE_W), (LIP_TOP, LIP_W)]
+    m.prism_x(body, -HALF, HALF, "black", open_edges=(0, 4))
+    m.face_toward([(-HALF, TOP, -SIDE_W), (-HALF, TOP, SIDE_W), (HALF, TOP, SIDE_W), (HALF, TOP, -SIDE_W)],
+                  (0.0, 1.0, 0.0), "black")
+    # The diffuser under it (glowing), its top in the body's foot, its bottom corners rounded.
+    lens = [(FOOT, LENS_W), (-0.19, LENS_W - 0.002), (LENS_LOW, 0.042), (LENS_LOW, -0.042), (-0.19, -LENS_W + 0.002),
+            (FOOT, -LENS_W)]
     m.prism_x(lens, -LENS_HALF, LENS_HALF, "lens", open_edges=(5,), mat="Lens")
-    # The wire guard: hoops round the diffuser and four runners along it.
-    g = GUARD
-    hoop = [(-BODY_D, LENS_W + g), (-0.085 - g * 0.6, 0.05 + g), (-LENS_D - g, 0.03 + g * 0.3),
-            (-LENS_D - g, -0.03 - g * 0.3), (-0.085 - g * 0.6, -0.05 - g), (-BODY_D, -LENS_W - g)]
+    # The cage: ten hoops down, under and up round the diffuser, a runner along each bottom corner.
     for k in range(HOOPS):
-        x = -LENS_HALF + 0.04 + (2.0 * LENS_HALF - 0.08) * k / (HOOPS - 1)
-        # a flat wire facing out: each segment a quad WIRE either side of x
-        for i in range(len(hoop) - 1):
-            (ya, za), (yb, zb) = hoop[i], hoop[i + 1]
-            m.face([(x + WIRE, ya, za), (x - WIRE, ya, za), (x - WIRE, yb, zb), (x + WIRE, yb, zb)], "dark_alu")
-    for y, z in ((-LENS_D - g, 0.03 + g * 0.3), (-LENS_D - g, -0.03 - g * 0.3), (-0.085 - g * 0.6, 0.05 + g),
-                 (-0.085 - g * 0.6, -0.05 - g)):
-        m.tube([(-LENS_HALF + 0.02, y, z), (LENS_HALF - 0.02, y, z)], WIRE, "dark_alu", sides=3)
-    # Spring clips down each side, holding the diffuser and guard.
-    for x in (-0.45, 0.45):
-        for side in (-1.0, 1.0):
-            z0, z1 = (BODY_W, BODY_W + 0.008) if side > 0 else (-BODY_W - 0.008, -BODY_W)
-            m.box((x - 0.02, -0.075, z0), (x + 0.02, -0.02, z1), "alu", skip="u" + ("b" if side > 0 else "f"))
-    # A hanging bracket at each end of its top, and the cable gland at one end.
-    for x in (-0.62, 0.62):
-        m.box((x - 0.025, 0.0, -0.03), (x + 0.025, BRACKET, 0.03), "dark_alu", skip="u")
-    m.box((HALF, -0.045, -0.015), (HALF + 0.02, -0.015, 0.015), "black", skip="l")
-    # the brackets hold it a hand's breadth under the ceiling: its top at y 0
-    return m.transformed(sk.move(0.0, -BRACKET, 0.0))
+        x = -LENS_HALF + 0.004 + (2.0 * LENS_HALF - 0.008) * k / (HOOPS - 1)
+        path = [(x, FOOT, CAGE_W), (x, CAGE_LOW, CAGE_W), (x, CAGE_LOW, -CAGE_W), (x, FOOT, -CAGE_W)]
+        outs = [(0.0, 0.0, 1.0), (0.0, -1.0, 1.0), (0.0, -1.0, -1.0), (0.0, 0.0, -1.0)]
+        m.wire(path, outs, WIRE, WIRE_RISE, "charcoal")
+    for z in (CAGE_W, -CAGE_W):
+        o = (0.0, -1.0, 1.0 if z > 0 else -1.0)
+        m.wire([(-LENS_HALF, CAGE_LOW, z), (LENS_HALF, CAGE_LOW, z)], [o, o], WIRE, WIRE_RISE, "charcoal")
+    # Spring clips down each side, over the lip to the cage.
+    for x in CLIPS:
+        for side in (1.0, -1.0):
+            z = side * (SIDE_W + 0.002)
+            m.face_toward([(x - 0.007, -0.072, z), (x + 0.007, -0.072, z), (x + 0.007, LIP_TOP - 0.004, z),
+                           (x - 0.007, LIP_TOP - 0.004, z)], (0.0, 0.0, side), "alu")
+    # The hook hangers: a bent rod from the body's top up to the ceiling's hook.
+    for x in HANGERS:
+        m.tube([(x, TOP, 0.0), (x + 0.012, 0.0, 0.0)], 0.004, "dark_alu", sides=3)
+    return m
 
 
-# The tunnel lamp: an oval, its half width and half height.
-OX, OY = 0.085, 0.13
-SIDES = 10
-STAND_OFF = 0.016    # the cage's bars over the glass, clear of its facets between their bends
+# The tunnel lamp, after photos 122005 and 121940: a stadium (two half circles joined by straight sides) 0.165 m
+# wide and 0.30 m tall, five to nine; a deep black cast body, a dome black at its round ends and glass down its
+# straight middle (`Lens`), four bars across it and one down its middle standing clear of it, that one's ends
+# held at the rim top and bottom.
+R = 0.0825           # the half circles' radius
+S = 0.0675           # half the straight sides' length
+ARC = 8              # segments in each half circle
+FLANGE = 0.024       # the cast body's depth off the wall
+DOME = ((0.054, 0.09),)   # the dome's rings: radius, depth
+BARS = (-0.065, -0.014, 0.014, 0.065)      # the bars across, by height
+BAR_FRONT = 0.096    # how far out a bar crosses the front
+BAR_TURN = 0.066     # where a bar turns across the front (its half width there)
+
+
+def stadium(r: float, z: float) -> list:
+    """The outline at depth `z`, radius `r` round the two centres (0, +-S), counter-clockwise seen from +z."""
+    pts = []
+    for k in range(ARC + 1):
+        a = math.pi * k / ARC
+        pts.append((r * math.cos(a), S + r * math.sin(a), z))
+    for k in range(ARC + 1):
+        a = math.pi + math.pi * k / ARC
+        pts.append((r * math.cos(a), -S + r * math.sin(a), z))
+    return pts
 
 
 def tunnel_lamp() -> sk.Mesh:
     m = sk.Mesh("tunnel_lamp")
-    centre = (0.0, 0.0, 0.0)
-    # The cast body (no back: it sits on the wall) and the flange round the glass.
-    m.lathe([(1.0, 0.0), (1.0, 0.03), (0.84, 0.037)], SIDES, centre, "black", axis="z", sx=OX, sz=OY,
-            cap_top=False, cap_bottom=False, smooth=True, start=math.pi / SIDES)
-    # The glass dome, glowing.
-    m.lathe([(0.84, 0.037), (0.76, 0.07), (0.47, 0.092)], SIDES, centre, "lens", mat="Lens", axis="z", sx=OX, sz=OY,
-            cap_bottom=False, smooth=True, start=math.pi / SIDES)
-
-    def dome(x: float, y: float) -> float:
-        """How far out (z) the glass is at (x, y), a little over it."""
-        r = math.sqrt((x / OX) ** 2 + (y / OY) ** 2)
-        if r <= 0.47:
-            return 0.092 + STAND_OFF
-        if r <= 0.76:
-            return 0.07 + (0.092 - 0.07) * (0.76 - r) / (0.76 - 0.47) + STAND_OFF
-        return 0.037 + (0.07 - 0.037) * (0.84 - r) / (0.84 - 0.76) + STAND_OFF
-
-    def bar(pts: list) -> None:
-        """A cage bar over the glass: a ridge of two faces along the points (x, y), standing off the dome."""
-        for i in range(len(pts) - 1):
-            (xa, ya), (xb, yb) = pts[i], pts[i + 1]
-            dx, dy = xb - xa, yb - ya
-            n = math.hypot(dx, dy)
-            sx, sy = -dy / n * 0.005, dx / n * 0.005
-            za, zb = dome(xa, ya), dome(xb, yb)
-            ridge_a, ridge_b = (xa, ya, za + 0.006), (xb, yb, zb + 0.006)
-            m.face([(xa + sx, ya + sy, za), ridge_a, ridge_b, (xb + sx, yb + sy, zb)], "black")
-            m.face([ridge_a, (xa - sx, ya - sy, za), (xb - sx, yb - sy, zb), ridge_b], "black")
-
-    for y in (-0.045, 0.045):
-        w = OX * 0.84 * math.sqrt(max(0.0, 1.0 - (y / (OY * 0.84)) ** 2))
-        bar([(-w, y), (-w * 0.35, y), (w * 0.35, y), (w, y)])
-    bar([(0.0, -OY * 0.8), (0.0, -0.02), (0.0, 0.02), (0.0, OY * 0.8)][::-1])
-    # A screw lug top and bottom.
-    for y0, y1 in ((OY - 0.004, OY + 0.022), (-OY - 0.022, -OY + 0.004)):
-        m.box((-0.016, y0, 0.0), (0.016, y1, 0.018), "black", skip="b")
+    base, rim = stadium(R, 0.0), stadium(R, FLANGE)
+    rings = [rim] + [stadium(r, z) for r, z in DOME]
+    n = len(base)
+    # Faces 0..ARC-1 run round the top half circle, ARC the left side, ARC+1..2*ARC the bottom one, the last the right
+    # side; the straight sides' dome is glass.
+    m.quad_strip(base, rim, "black", closed=True, smooth=True)
+    for a, b in zip(rings, rings[1:]):
+        for i in range(n):
+            j = (i + 1) % n
+            glass = i in (ARC, n - 1)
+            m.face([a[i], a[j], b[j], b[i]], "lens" if glass else "black", "Lens" if glass else "Prop", smooth=True)
+    # The front: rungs between the outline's left and right points, the middle (between the straight sides) glass.
+    f = rings[-1]
+    for k in range(ARC // 2 + 1):
+        # top half: points k and ARC-k (right, left); bottom half: ARC+1+k and n-1-k
+        a, b = f[k], f[ARC - k]
+        c, d = f[k + 1], f[ARC - k - 1]
+        if k + 1 <= ARC - k - 1:
+            m.face([a, c, d, b] if k + 1 < ARC - k - 1 else [a, c, b], "black", smooth=True)
+        a, b = f[n - 1 - k], f[ARC + 1 + k]
+        c, d = f[n - 2 - k], f[ARC + 2 + k]
+        if ARC + 2 + k <= n - 2 - k:
+            m.face([b, d, c, a] if ARC + 2 + k < n - 2 - k else [b, d, a], "black", smooth=True)
+    m.face([f[n - 1], f[0], f[ARC], f[ARC + 1]], "lens", "Lens", smooth=True)
+    # The cage: each bar off the flange, up over the dome's side, across its front and down the other side.
+    for y in BARS:
+        path = [(-R - 0.001, y, FLANGE * 0.8), (-BAR_TURN, y, BAR_FRONT), (BAR_TURN, y, BAR_FRONT),
+                (R + 0.001, y, FLANGE * 0.8)]
+        outs = [(-1.0, 0.0, 0.2), (-0.6, 0.0, 1.0), (0.6, 0.0, 1.0), (1.0, 0.0, 0.2)]
+        m.wire(path, outs, 0.0032, 0.004, "black")
+    top = S + R
+    path = [(0.0, top + 0.002, FLANGE * 0.8), (0.0, S + 0.05, BAR_FRONT), (0.0, -S - 0.05, BAR_FRONT),
+            (0.0, -top - 0.002, FLANGE * 0.8)]
+    outs = [(0.0, 1.0, 0.2), (0.0, 0.6, 1.0), (0.0, -0.6, 1.0), (0.0, -1.0, 0.2)]
+    m.wire(path, outs, 0.0032, 0.004, "black")
     return m
 
 

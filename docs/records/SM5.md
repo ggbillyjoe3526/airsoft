@@ -9,15 +9,18 @@ photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-12 | 1 | Opus 5.5 (build thread) | – | – | – |
+| 2026-11-12 | 1 | build thread | ✓ | 7/8 Retry | models too far from his photos: strip lamp's cage, tunnel lamp's outline, extinguisher's build, CCTV's arm |
+| 2026-11-12 | 2 | build thread | | | |
 
 ## What it adds
 
-- **Ceiling strip lamp** (`strip_lamp.glb`, 192 of 200 triangles): the caged industrial batten of his first photo, on
+- **Ceiling strip lamp** (`strip_lamp.glb`, 200 of 200 triangles): the caged industrial batten of his photo 121814
+  (nine to one, a black body over a wire cage as deep, ten hoops, four clips a side, hook hangers), on
   every station ceiling in place of MT1's glowing panels (`RoofConfig.plain_lamp_model`); a room running along z turns
   its lamps a quarter (`roof.lamps[].turn`, MapData.roof_lamp_turns), so each runs along its room. The real lights
   (RoofLamps) are unchanged.
-- **Tunnel bulkhead lamp** (`tunnel_lamp.glb`, 144 of 150): his caged oval bulkhead, black like his fourth photo, 12 on
+- **Tunnel bulkhead lamp** (`tunnel_lamp.glb`, 148 of 150): his caged bulkhead, a stadium outline, black like his
+  fourth photo, 12 on
   the running tunnels' walls, its glass glowing (no real light).
 - **Extras**, look only (`StationFixtures`, spots in `tools/subway/fixtures.py`, `dressing.station.fixtures`): 13
   name boards, 8 way-out signs, 27 posters (four designs), 4 clocks, 10 CCTV cameras, 7 fire extinguishers, 6 litter
@@ -37,6 +40,11 @@ photos in `art/references/maps/subway/31-ceiling-lamp`, `32-tunnel-lamp` and `33
   and would read as a team colour (FieldChecks.reads_as_team).
 - **Way-out signs read both ways:** "Way out" faces those heading west and up to the street, "Platforms" those heading
   east and down.
+- **The cage wires are two-faced round bars** (`stationkit.Mesh.wire`, a smooth ridge with its back unseen): a real
+  round wire would cost three times the triangles, and the budgets hold the cage's ten hoops only this way.
+- **The tunnel lamp has no screw lugs:** its 150 triangles go on a round outline (eight segments a half circle) and a
+  deep body; the vertical bar is held at the rim instead.
+- **The extinguisher is 3.6 to 1** (0.58 m by 0.16 m) as his photos, with a black label band and a round horn.
 - **No collider, no shadow:** the extras change nothing in play (the model list's "look only"); bins stand against
   walls out of the routes. A spot that would stand in a doorway or a block is left out by the build.
 - Budgets for the extras were not in the list; each was set to its model's need and filled to about 95%: CCTV 320,

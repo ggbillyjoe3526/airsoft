@@ -17,10 +17,10 @@ import math
 # set: on a wall (its back z 0 on the wall, y its spot's height over the floor), hung (its top y 0 at the ceiling) or
 # on the floor (its foot y 0).
 MODELS = {
-    "tunnel_lamp": ((-0.081, 0.081, -0.152, 0.152, 0.0, 0.114), "wall"),
-    "cctv_camera": ((-0.056, 0.056, -0.213, 0.070, 0.0, 0.342), "wall"),
+    "tunnel_lamp": ((-0.087, 0.087, -0.156, 0.156, 0.0, 0.099), "wall"),
+    "cctv_camera": ((-0.057, 0.057, -0.144, 0.078, 0.0, 0.307), "wall"),
     "way_sign": ((-0.640, 0.640, -0.580, 0.0, -0.035, 0.035), "hung"),
-    "fire_extinguisher": ((-0.140, 0.074, 0.0, 0.675, 0.0, 0.210), "wall"),
+    "fire_extinguisher": ((-0.163, 0.084, 0.0, 0.655, 0.0, 0.220), "wall"),
     "litter_bin": ((-0.230, 0.230, 0.0, 0.954, -0.180, 0.183), "floor"),
     "edge_sign": ((-1.0, 1.0, 0.0, 0.006, -0.125, 0.125), "floor"),
     "platform_clock": ((-0.056, 0.056, -0.615, 0.030, 0.0, 0.650), "wall"),

@@ -30,7 +30,7 @@ MATERIALS = ("Prop", "Lens", "Sign")
 PAINTS = dict(PALETTE)
 PAINTS.update({
     "black": 0x26262A, "charcoal": 0x3A3A3E, "zinc": 0x9A9AA0, "alu": 0xB4B4B8, "dark_alu": 0x6E6E74,
-    "sign_black": 0x1E1E20, "red": 0xA82C62, "dark_red": 0x7A2048, "brass": 0xA89A6A, "glass": 0x8C9294,
+    "sign_black": 0x1E1E20, "red": 0x981C50, "dark_red": 0x601232, "brass": 0xA89A6A, "glass": 0x8C9294,
     "bag": 0xB8BAB4, "bag_rim": 0xCFD0CA, "clock_rim": 0x2B4A3A, "lens": 0xFFFFFF, "white": 0xFFFFFF, "dust": 0x8A847A,
 })
 
@@ -133,6 +133,30 @@ class Mesh:
             self.face(list(reversed(rings[0])), p0, mat)
         if cap_top and profile[-1][0] > 1e-6:
             self.face(rings[-1], p1, mat)
+
+    def face_toward(self, pts: list, toward: tuple, paint: str, mat: str = "Prop", smooth: bool = False) -> None:
+        """A face wound so that it is seen from the side `toward` points to."""
+        n = (0.0, 0.0, 0.0)
+        for i, a in enumerate(pts):
+            b = pts[(i + 1) % len(pts)]
+            n = _add(n, ((a[1] - b[1]) * (a[2] + b[2]), (a[2] - b[2]) * (a[0] + b[0]), (a[0] - b[0]) * (a[1] + b[1])))
+        self.face(pts if _dot(n, toward) >= 0.0 else list(reversed(pts)), paint, mat, smooth=smooth)
+
+    def wire(self, path: list, outs: list, half: float, rise: float, paint: str, mat: str = "Prop") -> None:
+        """A round bar seen from outside for the price of two faces a segment: a smooth ridge along `path`, `half`
+        either side of it and its crest `rise` out along `outs` (one outward direction a point). Its back, against
+        what it guards, is never seen."""
+        rows = []
+        for k, p in enumerate(path):
+            d = _norm(_sub(path[min(k + 1, len(path) - 1)], path[max(k - 1, 0)]))
+            o = _norm(outs[k])
+            s = _norm(_cross(d, o))
+            rows.append((_add(p, _scale(s, half)), _add(p, _scale(o, rise)), _sub(p, _scale(s, half))))
+        for k in range(len(rows) - 1):
+            (la, ca, ra), (lb, cb, rb) = rows[k], rows[k + 1]
+            out = _norm(_add(outs[k], outs[k + 1]))
+            self.face_toward([la, ca, cb, lb], out, paint, mat, smooth=True)
+            self.face_toward([ca, ra, rb, cb], out, paint, mat, smooth=True)
 
     def sign(self, cell: str, corners: list, paint: str = "white") -> None:
         """A printed quad: `corners` bottom left, bottom right, top right, top left (as seen), the cell's picture on

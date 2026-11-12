@@ -34,41 +34,51 @@ BUDGETS = {
 
 
 def cctv_camera() -> sk.Mesh:
-    """Wall plate, an arm out and down to a swivel, the camera body under its sun shield, aimed 25 degrees down."""
+    """A bullet camera as the owner's photos 3 and 4: a round housing under a curved sun shield, aimed 25 degrees down,
+    on a ball joint at the end of a stout box arm out of a wall plate, its cable looping back to the wall."""
     m = sk.Mesh("cctv_camera")
-    m.box((-0.045, -0.07, 0.0), (0.045, 0.07, 0.018), "alu", skip="b")
-    m.lathe([(0.016, 0.018), (0.016, 0.16)], 6, (0.0, 0.0, 0.0), "alu", axis="z", cap_bottom=False)
-    m.lathe([(0.022, -0.035), (0.022, 0.005)], 8, (0.0, 0.0, 0.17), "dark_alu", axis="y")
     cam = sk.Mesh("camera")
-    # the body along +z from its back (z 0), its middle at the origin
-    cam.lathe([(0.03, 0.0), (0.042, 0.01), (0.045, 0.03), (0.045, 0.19), (0.043, 0.2)], 12, (0.0, 0.0, 0.0),
-              ["alu", "alu", "alu", "alu"], axis="z", cap_top=False)
-    cam.lathe([(0.043, 0.2), (0.032, 0.2), (0.03, 0.188)], 12, (0.0, 0.0, 0.0), "black", axis="z", cap_top=True)
-    # the lens glints dark glass at the bottom of the bezel
-    cam.lathe([(0.018, 0.189), (0.012, 0.192)], 8, (0.0, 0.0, 0.0), "glass", axis="z")
-    # the sun shield: an arc over the top, from behind the body to past its front
-    arc = []
-    for k in range(7):
-        a = math.radians(-20 + 220 * k / 6)
-        arc.append((0.055 * math.sin(a + math.radians(-90)) * -1.0, 0.055 * math.cos(a - math.radians(90))))
-    shield_out = [(0.058 * math.cos(math.radians(a)), 0.058 * math.sin(math.radians(a))) for a in
-                  (-15, 20, 55, 90, 125, 160, 195)]
-    shield_in = [(x * 0.94, y * 0.94) for x, y in shield_out]
-    for i in range(len(shield_out) - 1):
-        (xa, ya), (xb, yb) = shield_out[i], shield_out[i + 1]
-        (xc, yc), (xd, yd) = shield_in[i], shield_in[i + 1]
-        cam.face([(xa, ya, -0.01), (xa, ya, 0.24), (xb, yb, 0.24), (xb, yb, -0.01)], "alu")
-        cam.face([(xd, yd, -0.01), (xd, yd, 0.24), (xc, yc, 0.24), (xc, yc, -0.01)], "dark_alu")
-        cam.face([(xa, ya, 0.24), (xc, yc, 0.24), (xd, yd, 0.24), (xb, yb, 0.24)], "alu")
-    del arc
-    # the swivel block under the body
-    cam.box((-0.018, -0.07, 0.07), (0.018, -0.044, 0.11), "dark_alu", skip="u")
+    # the housing along +z from its back (z 0), its axis at the origin: a rounded back, the barrel, the bezel
+    cam.lathe([(0.0, 0.0), (0.03, 0.0), (0.045, 0.02), (0.045, 0.19)], 12, (0.0, 0.0, 0.0), "alu", axis="z",
+              cap_bottom=False, cap_top=False)
+    cam.lathe([(0.045, 0.19), (0.041, 0.2), (0.031, 0.198)], 12, (0.0, 0.0, 0.0), "dark_alu", axis="z",
+              cap_bottom=False, cap_top=False)
+    cam.lathe([(0.031, 0.198), (0.016, 0.194), (0.0, 0.196)], 10, (0.0, 0.0, 0.0), ["black", "glass"], axis="z",
+              cap_bottom=False, cap_top=False)
+    # the sun shield: a curved hood over the top, from behind the housing to past its front
+    hood = [(0.058 * math.cos(math.radians(d)), 0.058 * math.sin(math.radians(d))) for d in
+            (-12, 22, 56, 90, 124, 158, 192)]
+    for i in range(len(hood) - 1):
+        (xa, ya), (xb, yb) = hood[i], hood[i + 1]
+        cam.face([(xa, ya, -0.012), (xa, ya, 0.235), (xb, yb, 0.235), (xb, yb, -0.012)], "alu", smooth=True)
+        cam.face([(xb * 0.95, yb * 0.95, -0.012), (xb * 0.95, yb * 0.95, 0.235), (xa * 0.95, ya * 0.95, 0.235),
+                  (xa * 0.95, ya * 0.95, -0.012)], "dark_alu", smooth=True)
+        cam.face([(xa, ya, 0.235), (xa * 0.95, ya * 0.95, 0.235), (xb * 0.95, yb * 0.95, 0.235), (xb, yb, 0.235)],
+                 "alu")
+    # the mount: a stem down from the housing's belly to the ball joint
+    cam.lathe([(0.012, -0.075), (0.012, -0.043)], 6, (0.0, 0.0, 0.08), "alu", axis="y", cap_bottom=False,
+              cap_top=False)
+    cam.lathe([(0.0, -0.096), (0.015, -0.091), (0.021, -0.077), (0.015, -0.063), (0.0, -0.058)], 8, (0.0, 0.0, 0.08),
+              "dark_alu", axis="y", cap_bottom=False, cap_top=False)
 
     def aim(p: tuple) -> tuple:
         a = math.radians(25.0)
         y, z = p[1] * math.cos(a) - p[2] * math.sin(a), p[1] * math.sin(a) + p[2] * math.cos(a)
-        return (p[0], y - 0.09, z + 0.10)
+        return (p[0], y + 0.02, z + 0.07)
+    joint = aim((0.0, -0.077, 0.08))
     m.extend(cam.transformed(aim))
+    # the wall plate and the arm out of it to under the joint, a box section tapering a little
+    m.box((-0.045, joint[1] - 0.06, 0.0), (0.045, joint[1] + 0.035, 0.014), "alu", skip="b")
+    arm = [(-0.016, joint[1] - 0.026), (0.016, joint[1] - 0.026), (0.016, joint[1] + 0.012),
+           (-0.016, joint[1] + 0.012)]
+    near = [(x, y, 0.014) for x, y in arm]
+    far = [(x * 0.8, y + 0.004 if y > joint[1] else y + 0.008, joint[2] + 0.012) for x, y in arm]
+    m.quad_strip(near, far, "alu", closed=True)
+    m.face(far, "alu")
+    # the cable from the housing's back, down and round into the plate
+    back = aim((0.0, -0.03, 0.01))
+    m.tube([back, (0.0, back[1] - 0.03, back[2] - 0.03), (0.0, joint[1] - 0.045, 0.03), (0.0, joint[1] - 0.045,
+           0.014)], 0.004, "black", sides=3)
     return m
 
 
@@ -97,29 +107,35 @@ def way_sign() -> sk.Mesh:
 
 
 def fire_extinguisher() -> sk.Mesh:
-    """A red CO2 cylinder 0.6 m tall on a wall bracket, its back 0.02 m off the wall: the valve, the squeeze lever,
-    the hose and the black horn clipped down its side, a cream label band."""
+    """A red CO2 cylinder 0.58 m tall and 0.16 m across (3.6 to 1, as the photos) on a wall bracket, its back 0.02 m
+    off the wall: a black label band, the brass neck, the valve and its two levers, the hose from the valve and the
+    black horn, a round cone, clipped down its left side."""
     m = sk.Mesh("fire_extinguisher")
-    r = 0.07
+    r = 0.08
     c = (0.0, 0.0, 0.02 + r)
-    prof = [(0.0, 0.0), (0.062, 0.003), (r, 0.02), (r, 0.2), (r, 0.36), (r, 0.5), (0.06, 0.56), (0.036, 0.59),
-            (0.022, 0.6)]
-    m.lathe(prof, 16, c, ["dark_red", "red", "red", "cream", "red", "red", "red", "red"], cap_bottom=False)
-    # the valve: a brass neck, a block, the gauge-less CO2 head and the lever over it
-    m.lathe([(0.016, 0.6), (0.016, 0.63)], 8, c, "brass", cap_bottom=False)
-    m.box((c[0] - 0.022, 0.63, c[2] - 0.018), (c[0] + 0.022, 0.665, c[2] + 0.018), "zinc")
-    m.box((c[0] - 0.012, 0.665, c[2] - 0.04), (c[0] + 0.012, 0.675, c[2] + 0.11), "red")
-    m.box((c[0] - 0.012, 0.635, c[2] + 0.01), (c[0] + 0.012, 0.645, c[2] + 0.12), "red")
-    # the hose from the valve's side round to the horn, which hangs down the cylinder's left
-    hose = [(c[0] - 0.022, 0.645, c[2]), (c[0] - 0.06, 0.64, c[2] + 0.01), (c[0] - 0.09, 0.6, c[2] + 0.02),
-            (c[0] - 0.095, 0.55, c[2] + 0.03)]
-    m.tube(hose, 0.008, "black", sides=4)
-    horn = (c[0] - 0.095, 0.24, c[2] + 0.03)
-    m.lathe([(0.045, 0.0), (0.036, 0.08), (0.024, 0.22), (0.014, 0.31)], 8, horn, "black", cap_top=False)
-    m.box((c[0] - 0.095 - 0.012, 0.5, c[2] + 0.018), (c[0] - 0.095 + 0.012, 0.555, c[2] + 0.042), "charcoal")
+    top = 0.58
+    prof = [(0.07, 0.0), (r, 0.02), (r, 0.41), (r, 0.475), (0.068, 0.53), (0.04, 0.565), (0.022, top)]
+    m.lathe(prof, 16, c, ["dark_red", "red", "sign_black", "red", "red", "red"])
+    # the valve: a brass neck, a block, the carrying handle under the squeeze lever, both pointing out
+    m.lathe([(0.016, top), (0.016, top + 0.03)], 8, c, "brass", cap_bottom=False)
+    v = top + 0.03
+    m.box((c[0] - 0.022, v, c[2] - 0.018), (c[0] + 0.022, v + 0.035, c[2] + 0.018), "zinc")
+    m.box((c[0] - 0.012, v + 0.035, c[2] - 0.04), (c[0] + 0.012, v + 0.045, c[2] + 0.11), "red")
+    m.box((c[0] - 0.012, v + 0.005, c[2] + 0.01), (c[0] + 0.012, v + 0.015, c[2] + 0.12), "red")
+    # the hose out of the valve's side, over and down to the horn's swivel on the cylinder's left
+    hx = c[0] - r - 0.035
+    hose = [(c[0] - 0.022, v + 0.015, c[2]), (c[0] - 0.06, v + 0.02, c[2] + 0.01), (hx, v - 0.03, c[2] + 0.02),
+            (hx, 0.5, c[2] + 0.03)]
+    m.tube(hose, 0.009, "black", sides=4)
+    # the horn: a round black cone hanging from its swivel, its mouth at the foot, tilted a little off the body
+    horn = (hx, 0.17, c[2] + 0.03)
+    m.lathe([(0.048, 0.0), (0.036, 0.15), (0.022, 0.29), (0.014, 0.315)], 10, horn, "black",
+            cap_top=False)
+    m.lathe([(0.042, 0.004), (0.02, 0.035)], 10, horn, "charcoal", cap_top=True, cap_bottom=False)
+    m.lathe([(0.015, 0.315), (0.015, 0.335)], 6, horn, "charcoal", cap_bottom=False)
     # the bracket: a plate on the wall and a strap round the cylinder
-    m.box((-0.04, 0.28, 0.0), (0.04, 0.44, 0.02), "black", skip="b")
-    m.lathe([(r + 0.004, 0.38), (r + 0.004, 0.41)], 16, c, "black", cap_top=False, cap_bottom=False, smooth=False)
+    m.box((-0.04, 0.26, 0.0), (0.04, 0.42, 0.02), "black", skip="b")
+    m.lathe([(r + 0.004, 0.36), (r + 0.004, 0.39)], 16, c, "black", cap_top=False, cap_bottom=False, smooth=False)
     return m
 
 
