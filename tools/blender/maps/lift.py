@@ -59,7 +59,7 @@ DIFFUSER = 0xF2EEE2
 GLASS = 0x2C3032          # the vision panels' wired glass, dark (the shaft is dark behind it)
 DISPLAY = 0x18181A
 LENS = 0x7A7468           # the display's unlit arrows
-DOT = 0x3A3026            # the dot-matrix window behind its dots
+DOT = 0x34312D            # the dot-matrix window behind its dots
 LEAF = 0xA8A6A0
 
 HX, HZ = WELL_X / 2, WELL_Z / 2

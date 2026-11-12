@@ -32,7 +32,7 @@ RISER = 0x9C9B98
 YELLOW = 0xE4CA46
 RUBBER = 0x2A292D
 CHEQUER = 0x8A8882
-BRONZE = 0x6B5E4C
+BRONZE = 0x67625A
 FROST = 0xEAE4D4
 GAP = 0x1E1D20
 # Grime: how dark a face is at a floor (a share of its paint), fading to clean this high (m) over it.

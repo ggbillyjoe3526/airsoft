@@ -1,6 +1,7 @@
 extends GutTest
 ## SM2: a railing drawn in its modelled pieces (RailingMesh) draws exactly the steel a BB meets: every piece inside
-## its run's box, the box filled, each bar's steel spanning just its bar, and a 5 m run within its 800 triangles.
+## its run's box, the box filled, each bar's steel spanning just its bar, and a 5 m run within its 800 triangles; and
+## the lifts' and railing's models read as no team.
 
 const BUDGET := 800
 
@@ -72,3 +73,24 @@ func test_a_look_without_models_draws_nothing_modelled() -> void:
 	var look := RailingLook.new()
 	look.bar_model = ""
 	assert_null(RailingMesh.build(_railings(), look), "MapLevel then draws the plain boxes")
+
+
+func test_the_lifts_and_railing_models_read_as_no_team() -> void:
+	# The station's props are checked in test_props; these are drawn by LiftView and RailingMesh.
+	var teams: Array[Color] = AccessibilityTable.read_file().colours
+	teams.append_array(PlayTuning.new().teams.colours)
+	var cfg := LiftViewConfig.new()
+	var look := RailingLook.new()
+	var near: Array[String] = []
+	for path: String in [cfg.car_model, cfg.landing_model, cfg.leaf_model, cfg.button_model, look.bar_model,
+			look.top_model, look.foot_model, look.post_model]:
+		var mesh := PropDressConfig.load_mesh(path)
+		assert_not_null(mesh, "%s loads" % path)
+		if mesh == null:
+			continue
+		for linear in mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR] as PackedColorArray:
+			var c := linear.linear_to_srgb()
+			if FieldChecks.reads_as_team(c, teams):
+				near.append("%s %s" % [path.get_file(), c.to_html(false)])
+				break
+	assert_eq(near, [] as Array[String], "no colour within 20 degrees of a team's hue unless dull")
