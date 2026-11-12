@@ -25,6 +25,14 @@ extends Resource
 ## A lamp's glass: unshaded, this colour (sRGB) times `lens_energy`.
 @export var lens_colour: Color = Color(1.0, 0.9, 0.74)
 @export var lens_energy: float = 2.2
+## The models that light the tunnel round them as well as glowing (TB2: a tunnel lamp lights its running tunnel's arch,
+## which the roof's lamps, shining straight down from under the crown, never reach): each a light `lamp_out` m out from
+## the wall at its glass, `lens_colour`, reaching `lamp_range` m at `lamp_energy`, with no shadow, shown while the
+## station's lamps light (Settings › Graphics › Lamp lights: High and Ultra), as the lifts' lamps are.
+@export var lit_models: PackedStringArray = PackedStringArray(["tunnel_lamp"])
+@export var lamp_out: float = 0.25
+@export var lamp_range: float = 6.5
+@export var lamp_energy: float = 1.5
 
 
 ## The model `model`'s file.

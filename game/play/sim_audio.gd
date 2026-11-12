@@ -133,6 +133,9 @@ var _power: Dictionary[StringName, StringName] = {}
 var _power_gain: Dictionary[StringName, float] = {}
 ## Each sound profile's slide locking back on the magazine's last shot (slideLock_<profile>, AU2), or none.
 var _slide_lock: Dictionary[StringName, StringName] = {}
+## Each sound profile's hand cycle after a shot (cycle_<profile>: the Pump Shotgun's pump, SH1), else the spring
+## rifle's bolt (BOLT_CUE); played only for a replica worked by hand (ReplicaConfig.bolt_action).
+var _cycle: Dictionary[StringName, StringName] = {}
 var _mag_out: Dictionary[StringName, StringName] = {}
 var _mag_in: Dictionary[StringName, StringName] = {}
 var _impact: Array[StringName] = []
@@ -198,6 +201,8 @@ func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, quer
 		_power_gain[p] = cfg.power_gains.get(p, cfg.power_gain)
 		var lock := "slideLock_%s" % p
 		_slide_lock[p] = _load(lock) if ResourceLoader.exists("%s%s_1.wav" % [SoundConfig.CUE_DIR, lock]) else &""
+		var cycle := "cycle_%s" % p
+		_cycle[p] = _load(cycle) if ResourceLoader.exists("%s%s_1.wav" % [SoundConfig.CUE_DIR, cycle]) else BOLT_CUE
 		_mag_out[p] = _load("magOut_%s" % p)
 		_mag_in[p] = _load("magIn_%s" % p)
 	for s in IMPACT_NAMES:
@@ -277,9 +282,10 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 							Kind.SHOT, BUS_MUFFLED if muffled else BUS_SHOTS, 1.0, reach, shooter)
 					_play(_power.get(p, &""), e.position, own, _power_gain.get(p, _cfg.power_gain), Kind.SHOT, BUS_POWER,
 							1.0, reach, shooter)
-				# A spring rifle is cocked by hand after every shot: the charging handle back and home (SN1).
+				# A spring rifle is cocked by hand after every shot: the charging handle back and home (SN1), or
+				# the pump (SH1).
 				if _bolt_action(state, e.actor, e.slot):
-					_mechanism(BOLT_CUE, state, e, own)
+					_mechanism(_cycle.get(p, BOLT_CUE), state, e, own)
 					_keep_bolt(e.actor, e.slot)
 				# A gas pistol's slide locks back on the magazine's last BB (AU2).
 				if _slide_lock.get(p, &"") != &"" and _emptied(state, e.actor, e.slot):

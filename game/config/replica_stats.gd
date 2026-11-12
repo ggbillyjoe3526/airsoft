@@ -46,6 +46,8 @@ const COLUMNS: Array[Dictionary] = [
 	{"header": "Hip spread (×)", "field": &"hip_spread", "kind": Kind.NUMBER, "min": 0.5, "max": 20.0, "optional": true},
 	{"header": "Pace (×)", "field": &"pace", "kind": Kind.NUMBER, "min": 0.8, "max": 1.2, "optional": true},
 	{"header": "Moving spread (×)", "field": &"move_spread", "kind": Kind.NUMBER, "min": 0.2, "max": 2.0, "optional": true},
+	{"header": "BBs per shot", "field": &"shot_bbs", "kind": Kind.WHOLE, "min": 1.0, "max": 9.0, "optional": true},
+	{"header": "Pattern (°)", "field": &"pattern_deg", "kind": Kind.NUMBER, "min": 0.0, "max": 5.0, "optional": true},
 ]
 
 ## What a power source changes, as shares (0.15 is +15 %): energy (gas, spring), rate of fire (battery) and kick.

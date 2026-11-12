@@ -42,7 +42,7 @@ typo never stops the game from starting.
 | 9 | 1000 | M140 Spring |
 | 10 | 1200 | Compact SMG, Variable Scope |
 | 11 | 1400 | 11.1 V LiPo Battery |
-| 12 | 1500 | Long Barrel |
+| 12 | 1500 | Long Barrel, Pump Shotgun |
 | 13 | 1600 | Black Gas |
 | 14 | 1700 | M150 Spring |
 | 15 | 1800 | Cyber Pistol |
@@ -53,7 +53,9 @@ typo never stops the game from starting.
 - **A replica every five levels** (LV15, 2026-11-10): the Sniper Rifle at 5 with the M130 Spring and 2x Scope it comes
   with (owner, 2026-11-02), the Compact SMG at 10 and the Cyber Pistol at the cap, 15. Every level gives something
   public, so level 10 also gives the Variable Scope while the SMG is dev content (CS1); its red dot, laser and
-  silencer unlock before it. The LiPo battery comes straight after
+  silencer unlock before it. The Pump Shotgun (SH1, owner 2026-11-12: level 12) comes between the SMG and the Cyber
+  Pistol, beside the Long Barrel while it is dev content; the M130 and M140 springs it takes are unlocked by then, and
+  the M150 follows at 14. The LiPo battery comes straight after
   the SMG; the stronger springs follow as the stronger gases do (M140 at 9, Red Gas at 8; M150 at 14 after Black Gas
   at 13).
 - **The pace** (LV15, 2026-11-10). A first-to-5 match on Normal gives about 250 XP. Levels 1 to 10 take the XP they

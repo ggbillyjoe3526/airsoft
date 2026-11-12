@@ -1506,6 +1506,12 @@ msgstr "Pace"
 msgid "PERF_MOVE_SPREAD"
 msgstr "Spread moving"
 
+msgid "PERF_PATTERN"
+msgstr "Pattern"
+
+msgid "PERF_RATE_SHOTS_FORMAT"
+msgstr "%s × %d"
+
 msgid "PERF_MOVING"
 msgstr "Moving"
 
@@ -1979,6 +1985,9 @@ msgstr "A spring rifle, cocked after every shot: long and flat, slow on your fee
 
 msgid "ARMORY_BLURB_REPLICA_SMG"
 msgstr "A compact electric SMG: the fastest trigger and quick on your feet, short on reach."
+
+msgid "ARMORY_BLURB_REPLICA_SHOTGUN"
+msgstr "A spring pump shotgun: three BBs a pull for corners and doorways, a pump between pulls, short on reach."
 
 msgid "XP_LINE_MATCH_PLAYED"
 msgstr "Match played"

@@ -299,6 +299,9 @@ def shell() -> tuple[list[tuple[list[float], int, str]], list[dict]]:
                 o_gaps = other["seal"].get(OPPOSITE[edge])
                 o_sealed = o_gaps is not None and not in_gap(o_gaps, pa, pb)
                 open_lo, open_hi = max(f_hi, of_hi), min(c_lo, oc_lo)
+                if rm["vault"] and other["vault"] and vault_of(rm) is vault_of(other):
+                    # Both under one arch (a vault room's walls stop at its springing): open up to it.
+                    open_hi = vault_top(vault_of(rm))
                 thick = SEAL_T if o_gaps is not None else FT
                 if open_hi - open_lo < OPEN and not o_sealed:
                     if open_hi - open_lo > 0.05:
@@ -346,7 +349,7 @@ def spiral() -> tuple[list[dict], list[list[float]]]:
     return ramps, boxes
 
 
-# ---------------- The platform tunnels' vaults ----------------
+# ---------------- The tunnels' vaults (platform tunnels and running tunnels) ----------------
 
 VAULT_PROUD = 0.08   # a vault's collider boxes stand at most this far (m) in front of its drawn arc
 
@@ -354,8 +357,8 @@ VAULT_PROUD = 0.08   # a vault's collider boxes stand at most this far (m) in fr
 def vault_circle(v: dict) -> tuple[float, float, float]:
     """A vault's arc: the circle (its middle's z and y, its radius) through both springings and the crown."""
     half = (v["z1"] - v["z0"]) / 2
-    radius = (half * half + L.VAULT_RISE * L.VAULT_RISE) / (2 * L.VAULT_RISE)
-    return (v["z0"] + v["z1"]) / 2, v["y"] + L.VAULT_RISE - radius, radius
+    radius = (half * half + v["rise"] * v["rise"]) / (2 * v["rise"])
+    return (v["z0"] + v["z1"]) / 2, v["y"] + v["rise"] - radius, radius
 
 
 def vault_y(v: dict, z: float) -> float:
@@ -366,12 +369,20 @@ def vault_y(v: dict, z: float) -> float:
 
 
 def vault_top(v: dict) -> float:
-    return v["y"] + L.VAULT_RISE + FT
+    return v["y"] + v["rise"] + FT
 
 
 def vault_air(v: dict) -> list[float]:
     """The air a vault holds: its tunnel from a car's roof up, cut out of the shell (the lintels over a car)."""
     return [v["x0"], v["x1"], v["low"] + FT, vault_top(v), v["z0"], v["z1"]]
+
+
+def vault_inner(v: dict) -> list[list[float]]:
+    """The air under a vault's arc, from its springing: under each arc piece (vault_pieces), up to the piece's lower
+    end. Nothing but a car's own shell stands in it (a running tunnel's arch springs under a car's roof)."""
+    pts = vault_pieces(v)
+    return [[v["x0"], v["x1"], v["y"], min(ya, yb), min(za, zb), max(za, zb)]
+            for (za, ya), (zb, yb) in zip(pts, pts[1:]) if min(ya, yb) > v["y"] + EPS]
 
 
 def vault_pieces(v: dict) -> list[tuple[float, float]]:
@@ -403,20 +414,110 @@ def vault_pieces(v: dict) -> list[tuple[float, float]]:
     return out
 
 
+CAR_CLEAR = 0.12     # a car's roof stays this far (m) inside a running tunnel's arch, behind its colliders (TB2)
+SHOULDER_STEP = 0.1  # a car's shoulders under the arch, in steps this wide across it
+
+
+def car_rooms() -> list[dict]:
+    """The trains' rooms: a car's shell and air are shaped to a running tunnel's arch where it stands under one."""
+    return [rm for rm in L.rooms if rm["area"].endswith("train")]
+
+
+def in_car(bx: list[float]) -> bool:
+    """Whether a shell box is a car's own (inside a train room's footprint: its sealed walls, roof and floor)."""
+    return any(rm["x0"] - EPS <= bx[0] and bx[1] <= rm["x1"] + EPS and rm["z0"] - EPS <= bx[4] and bx[5] <= rm["z1"] + EPS
+               for rm in car_rooms())
+
+
+def arch_under(v: dict, z: float) -> float:
+    """The highest a car may stand at z under a running tunnel's arch: CAR_CLEAR inside the arc, measured from its
+    middle (so the steep part near the springing keeps its distance too), or that under the springing by its walls."""
+    zc, yc, radius = vault_circle(v)
+    inner = radius - CAR_CLEAR
+    d = abs(z - zc)
+    spring = v["y"] - CAR_CLEAR
+    return max(spring, yc + math.sqrt(inner * inner - d * d)) if d < inner else spring
+
+
+def arch_steps(v: dict, z0: float, z1: float) -> list[tuple[float, float, float]]:
+    """A running tunnel's arch over z0..z1 in SHOULDER_STEP steps (on a grid from the tunnel's wall), each with the
+    highest a car may stand there (arch_under at its outer edge, the lower one): (za, zb, y)."""
+    zc = (v["z0"] + v["z1"]) / 2
+    grid = sorted({z0, z1} | {v["z0"] + k * SHOULDER_STEP for k in range(1, round((v["z1"] - v["z0"]) / SHOULDER_STEP))
+                              if z0 + EPS < v["z0"] + k * SHOULDER_STEP < z1 - EPS})
+    out = []
+    for za, zb in zip(grid, grid[1:]):
+        outer = za if abs(za - zc) > abs(zb - zc) else zb
+        out.append((za, zb, arch_under(v, outer)))
+    return out
+
+
+def under_arch(bx: list[float], drop: float = 0.0) -> list[list[float]]:
+    """A car's box kept under any running tunnel's arch it stands under: its part in the tunnel cut into steps across it
+    (arch_steps), each no higher than a car may stand there less `drop`; steps of one height merged."""
+    out = [bx]
+    for v in L.VAULTS:
+        if v["style"] != "tunnel":
+            continue
+        nxt = []
+        for b in out:
+            if b[1] <= v["x0"] + EPS or b[0] >= v["x1"] - EPS or b[5] <= v["z0"] + EPS or b[4] >= v["z1"] - EPS \
+                    or b[3] <= v["y"] - CAR_CLEAR - drop + EPS:
+                nxt.append(b)
+                continue
+            xa, xb = max(b[0], v["x0"]), min(b[1], v["x1"])
+            nxt += [p for p in ([b[0], xa] + b[2:], [xb, b[1]] + b[2:]) if p[1] - p[0] > EPS]
+            steps: list[list[float]] = []
+            for za, zb, y in arch_steps(v, max(b[4], v["z0"]), min(b[5], v["z1"])):
+                top = min(b[3], y - drop)
+                if top <= b[2] + EPS:
+                    continue
+                if steps and abs(steps[-1][3] - top) < EPS and abs(steps[-1][5] - za) < EPS:
+                    steps[-1][5] = zb
+                else:
+                    steps.append([xa, xb, b[2], top, za, zb])
+            nxt += steps + [p for p in ([xa, xb] + b[2:4] + [b[4], v["z0"]], [xa, xb] + b[2:4] + [v["z1"], b[5]])
+                            if p[5] - p[4] > EPS]
+        out = nxt
+    return out
+
+
+def car_shoulders() -> list[list[float]]:
+    """A car's roof where a running tunnel's arch comes down over it: a slab FT thick as high as a car may stand
+    (arch_under) in each of arch_steps where its roof would stand higher, as a real car's shoulders curve in (SM1's)."""
+    out = []
+    for rm in car_rooms():
+        roof = ceil_at(rm, rm["ya"]) + FT
+        for v in L.VAULTS:
+            if v["style"] != "tunnel" or rm["x1"] <= v["x0"] or rm["x0"] >= v["x1"] or rm["z1"] <= v["z0"] \
+                    or rm["z0"] >= v["z1"]:
+                continue
+            xa, xb = max(rm["x0"], v["x0"]), min(rm["x1"], v["x1"])
+            for za, zb, y in arch_steps(v, max(rm["z0"], v["z0"]), min(rm["z1"], v["z1"])):
+                if y < roof - EPS:
+                    out.append([xa, xb, max(rm["ya"], y - FT), y, za, zb])
+    return out
+
+
 def vault_boxes(v: dict) -> list[list[float]]:
     """A vault's colliders: each arc piece's bounds up to the vault's top, which sit on the drawn arc (never short of
     it, at most VAULT_PROUD in front of it: vault_pieces); its walls from a car's roof up to the springing (the
-    trackside wall over a car); and its ends, under the springing and over it."""
+    trackside wall over a car, none when a car's roof stands over the springing); and its ends, under the springing and
+    over it (none at a `mouth`, the end opening onto a wider tunnel)."""
     top = vault_top(v)
     low = v["low"] + FT
     out = []
     pts = vault_pieces(v)
     for (za, ya), (zb, yb) in zip(pts, pts[1:]):
         out.append([v["x0"], v["x1"], min(ya, yb), top, min(za, zb), max(za, zb)])
-    out.append([v["x0"] - FT, v["x1"] + FT, low, v["y"], v["z0"] - FT, v["z0"]])
-    out.append([v["x0"] - FT, v["x1"] + FT, low, v["y"], v["z1"], v["z1"] + FT])
-    for xa, xb in ((v["x0"] - FT, v["x0"]), (v["x1"], v["x1"] + FT)):
-        out.append([xa, xb, low, v["y"], v["z0"], v["z1"]])
+    walled = low < v["y"] - EPS
+    if walled:
+        out.append([v["x0"] - FT, v["x1"] + FT, low, v["y"], v["z0"] - FT, v["z0"]])
+        out.append([v["x0"] - FT, v["x1"] + FT, low, v["y"], v["z1"], v["z1"] + FT])
+    ends = [(v["x0"] - FT, v["x0"])] if v.get("mouth") != "west" else []
+    for xa, xb in ends + [(v["x1"], v["x1"] + FT)]:
+        if walled:
+            out.append([xa, xb, low, v["y"], v["z0"], v["z1"]])
         out.append([xa, xb, v["y"], top, v["z0"], v["z1"]])
     return [[r(c) for c in bx] for bx in out]
 
@@ -548,7 +649,9 @@ def build() -> dict:
                 print("warning: cover", bl["kind"], bx, "overlaps", other)
         blocks.append(as_block(bl["kind"], bx, colour=bl["colour"], dress=bl["dress"], facing=bl["facing"]))
         solid.append(bx)
-    air = [(i, a) for i, rm in enumerate(L.rooms) for a in air_boxes(rm)]
+    # A car's air keeps a roof's thickness under its shoulders (car_shoulders) where it stands under an arch.
+    air = [(i, p) for i, rm in enumerate(L.rooms) for a in air_boxes(rm)
+           for p in (under_arch(a, FT) if rm in car_rooms() else [a])]
     shaft = shaft_hole()
     for bx in solid:
         if overlap(bx, shaft, SLACK):
@@ -557,17 +660,22 @@ def build() -> dict:
         blocks.append(as_block(kind, bx, colour=SHAFT_COLOUR))
         solid.append(bx)
     vaults = [vault_air(v) for v in L.VAULTS]
-    for bx, owner, kind in shell_boxes:
-        holes = [a for i, a in air if i != owner] + [shaft] + vaults
-        parts = cut([bx], holes)
+    inner = [bx for v in L.VAULTS for bx in vault_inner(v)]
+    for bx, owner, kind in shell_boxes + [(bx, -1, "wall") for bx in car_shoulders()]:
+        # A car's shell stands under a running tunnel's arch, shaped to it (under_arch); nothing else does.
+        car = in_car(bx)
+        holes = [a for i, a in air if i != owner] + [shaft] + vaults + ([] if car else inner)
+        parts = cut(under_arch(bx) if car else [bx], holes)
         parts = cut(parts, [s for s in solid if overlap(s, bx)])
         for p in parts:
             blocks.append(as_block(kind, p))
             solid.append(p)
-    # The vaults over the platform tunnels, round the shell already standing and clear of every room's air.
+    # The vaults over the tunnels, round the shell already standing and clear of every room's air and every arch's
+    # (a platform tunnel's end round a running tunnel's mouth).
     for v in L.VAULTS:
+        others = [bx for o in L.VAULTS if o is not v for bx in vault_inner(o)]
         for bx in vault_boxes(v):
-            parts = cut(cut([bx], [a for _, a in air]), [s for s in solid if overlap(s, bx)])
+            parts = cut(cut(cut([bx], [a for _, a in air]), others), [s for s in solid if overlap(s, bx)])
             for p in parts:
                 blocks.append(as_block("wall", p))
                 solid.append(p)

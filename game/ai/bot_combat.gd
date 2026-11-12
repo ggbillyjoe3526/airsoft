@@ -200,7 +200,7 @@ static func shoot(b: Bot, w: BotWorld, target: Character, eye: Vector3, off_aim:
 	if fights_aimed(b.character) and b.character.aim_raise < cfg.aimed_fire_raise and dist > cfg.hip_fire_range:
 		# Its sight still coming up, and the target too far for a shot from the hip: wait for the sight.
 		return
-	if bolt_waits(b, w, dist):
+	if bolt_waits(b, w, dist) or pattern_too_wide(b, cfg, dist):
 		return
 	if _line_of_fire_blocked(b, w, eye, dir, dist):
 		# Seen through glass or leaves it can't shoot through (BQ1): counted, so it goes round in time.
@@ -253,12 +253,24 @@ static func _bolt_cycling(a: Armament) -> bool:
 
 ## Whether bot `b`, with a bolt-action replica in hand and its target `dist` m away past hip_fire_range, holds its shot
 ## until its aim has settled (BotConfig.bolt_settle_share of its skill's aim_settle_time; SN3): one shot, then a long
-## cycle, and its first aim is off to one side on purpose so a burst walks on.
+## cycle, and its first aim is off to one side on purpose so a burst walks on. Not with several BBs a pull (the Pump
+## Shotgun, SH1): its pattern is what covers a first aim's error, and it is fought close.
 static func bolt_waits(b: Bot, w: BotWorld, dist: float) -> bool:
 	var cfg := w.cfg
 	var in_hand := b.character.armament.replica() if b.character.armament != null else null
-	return in_hand != null and in_hand.bolt_action and dist > cfg.hip_fire_range and b.contact != null \
+	return in_hand != null and in_hand.bolt_action and in_hand.shot_bbs == 1 and dist > cfg.hip_fire_range \
+			and b.contact != null \
 			and BotAim.settling(w.time, b.contact, cfg) < b.skill.aim_settle_time * cfg.bolt_settle_share
+
+
+## Whether `b`'s replica in hand sends several BBs a pull (ReplicaConfig.shot_bbs: the Pump Shotgun, SH1) and its target
+## `dist` m away is past where they still land BotConfig.pattern_hold_radius m off the line or nearer: each leaves
+## pattern_deg off it, so further out a pull is BBs round the target, a tenth of a shell gone and its place given away.
+## It holds its pull and closes in instead.
+static func pattern_too_wide(b: Bot, cfg: BotConfig, dist: float) -> bool:
+	var in_hand := b.character.armament.replica() if b.character.armament != null else null
+	return in_hand != null and in_hand.shot_bbs > 1 \
+			and dist * tan(deg_to_rad(in_hand.pattern_deg)) > cfg.pattern_hold_radius
 
 
 ## Whether `b` aims through a sniper's raised scope (a sight-up replica, sight raised): BotConfig.scoped_error_scale.

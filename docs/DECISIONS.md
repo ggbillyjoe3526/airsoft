@@ -940,6 +940,22 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   the Variable Scope so the level isn't empty with Dev content off (LV15, owner 2026-11-10; level 7 at first). A
   Breacher bot kit (red dot, rushers and flankers). Its own sound profile `smg`, a stand-in from the owner's AEG motor
   until he records one.
+- **The Pump Shotgun (owner, 2026-11-12, SH1).** "I want to add a shotgun replica to the game... find specs for this
+  replica to make it feel and play unique compared to other replicas. Ask me questions about how I want to build it."
+  His answers to the seven questions: **spring** driven; **three BBs a pull**; its shell **swapped like a magazine**
+  (a 30 BB box, ten pulls; not shells pushed in one at a time, which the roadmap had pencilled in); it **shares the
+  Sniper Rifle's springs** (the M130 as it comes, the M140 and M150 fit); the default parts (**any optic on a top
+  rail, the Red Laser and the Weapon Torch on a side rail; no grips, since the pump is the grip, no silencer, since it
+  has three barrels, no barrel or magazine parts**, and no shotgun-only parts for now); a **full stock**; **level 12**.
+  Defaults taken (he may change any): the name; a rifle-class replica, **0.65 J** with 0.20 g, **1.7 pulls a second**
+  with a pump after each (single shots only), **30 × 5** BBs, 1.2 s reload, 0.5 s draw, 0.5° spread, 0.45° kick, hip
+  spread 0.7; two new stats.md columns, **BBs per shot 3** and **Pattern 1.2°** (each BB that far off the shot's line,
+  an even triangle with the first straight up, each with its own scatter; one hit is still one hit). A Clearer bot
+  kit (red dot, rushers and flankers); bots hold their pull past about 29 m, where the pattern is wider than a body.
+  Its own sound profile `shotgun`, stand-ins from his sniper and magazine recordings until he records them. Until its
+  own model (his photos came the same day: no sights from the photos, the other replicas' quality, the steel,
+  aluminium and polymer surfaces of MQ1) it is drawn, held and pictured as the Sniper Rifle, whose bolt is worked
+  where the pump will be, and its side rail (the Red Laser) comes with that model.
 - **The GBB Pistol shoots 0.70 J and the Compact SMG 0.85 J (owner, 2026-11-12, PH2).** "Increase gbb pistol to 0.7J
   and SMG to 0.85J", after PH1's audit found the pistol's 0.52 J below a real green-gas pistol's. This replaces CS1's
   0.75 J and the pistol's 0.52 J. **Each keeps its job through its hop-up, not its energy** (the default taken to his
