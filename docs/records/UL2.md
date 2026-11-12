@@ -1,6 +1,6 @@
 # UL2 · Subway's ceilings on Ultra
 
-**Review:** 1 attempt · critic pending · qa pending · performance pending
+**Review:** 1 attempt · critic Accept 7/8 · qa Pass · performance Pass
 
 The owner (2026-11-12, after UL1's pictures): "Ultra on subway looks broken? The shadows are very dark and the ceilings
 are black." It was so before UL1 too: on Ultra the scene's bounce light (SDFGI) replaces the ambient light, and
@@ -10,7 +10,7 @@ underground nothing but the lamps' bounce reaches a ceiling, since every lamp is
 
 | Date | Attempt | Worker model | checks | Critic | Retry reason |
 |---|---|---|---|---|---|
-| 2026-11-12 | 1 | Opus 5.5 (build thread) | ✓ | – | – |
+| 2026-11-12 | 1 | Opus 5.5 (build thread) | ✓ | 7/8 Accept | – (check 8: the tunnels' dark ceilings tracked in KNOWN_ISSUES, done) |
 
 ## Decisions
 
@@ -25,4 +25,6 @@ underground nothing but the lamps' bounce reaches a ceiling, since every lamp is
 ## Known issues left
 
 - The running tunnels' ceilings stay near black on Ultra (their lamps are fixtures with no light of their own; TB2's
-  tunnel lamps bring their own lights).
+  tunnel lamps bring their own lights; KNOWN_ISSUES).
+- A dark patch on the concourse ceiling over the kiosk on Ultra (an SDFGI occlusion artefact or the gap between two
+  lamps): checked in play (PLAYTEST).
