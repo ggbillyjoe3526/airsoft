@@ -160,4 +160,17 @@ rounds, Attack / Defend's the attackers'.
 
 ## Verified
 
-VERIFIED
+- `python3 tools/woodland/check.py`: `TOTAL 0`; the three `build_map.py` scripts write the committed JSON.
+- gdlint, the wiki check, the smoke test and the licence notices pass. The seven unit parts ran on the branch and
+  caught four things, each fixed at its root: Depot's untiled mesh hash (`test_dp2_qa`, two blocks more), the Clearing
+  tree across the east's way to the overtime flag (`test_woodland_layout`), the road stack's height
+  (`test_wg2_woodland_models`) and tyre tracks under a road tree (`test_wear_marks`). The touched files pass again at
+  the final head, merged with `main` (SM3's ticket gates, UL1, UL2); CI runs the whole suite.
+- QA added `tests/unit/test_mb1_layouts.gd` (nine tests: each lane's stops equally deep either side of the middle,
+  the defenders' posts by a pole, Subway's flag B on the north platform, the hump's line onto flag B's post shut,
+  seeded matches that end) and failed the first head on Subway's north lane, since evened.
+- Performance: no monitor moved; Woodland's level builds from 4 blocks fewer; a random route there costs about 1 ms
+  more to find (3.0 to 3.9 ms mean), advisory.
+- **Not verified, for the owner's play:** how each change feels to a person. The play checks are on the Dev 3
+  checklist (Depot's flag stacks, Woodland's Ridge, road, Ford, Fort and Sawmill and the tall road stack, Subway's
+  flag B and lifts).
