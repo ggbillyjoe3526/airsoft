@@ -41,7 +41,7 @@ the switch cabinet. Each is built from the owner's photos in `art/references/map
   - The works vehicles stand on the station's running rails: their blocks (and the buffer stops') are centred on
     the tracks (`layout.TRACK_Z`), the skip and engineering wagons 2 m wide, the trolleys 1.7 m, so each leaves at least
     0.75 m to pass either side. Their models carry the rails only as hidden pieces inside the station's
-    (`works_kit.running_rails`). Put to the owner as a question; this is the recommended answer, built while he decides.
+    (`works_kit.running_rails`). The owner's ruling (2026-11-12, asked in the thread): "On the train rails".
     The first default, each vehicle on its own short works track inside its old box, read as a third track in game.
   - The trolley is works yellow. The photos show red, but every red tried read as a team's hue.
   - The engineering wagon is a loaded flat wagon, the model list's gap default.
