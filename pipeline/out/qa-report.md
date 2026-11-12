@@ -1,18 +1,17 @@
-Task: none (MQ1) · QA commit this commit · Verdict: Pass
+Task: none (MQ1B) · QA commit <none, uncommitted> · Verdict: Pass
 
-Attempt 2 review (git diff 370f289 HEAD, the 16-slot change).
+Attempt 3 re-verification of 7499a89 (rounder tang, shorter FRAME_SPINE, closed cell ribs, studio shadow change).
+
 Blocking: none. Advisory: none new.
 
-Checked by reading and by test:
-- No code path still assumes 8 slots: grep of game/, tests/, tools/ finds no `* 8`, no old names (worn_materials, MAX_WORN, OWN_GLOW) left; renamed callers (play_session, tests) use surface_materials / surfaced.
-- ReplicaSurfaces._build pads to SLOTS (16) for indices past the 7 kinds with the polymer row, so kind_finish/grain/tone/shine are all 16 long; KINDS = 16 and hint_range(0, 15) in the shader match. Alpha 1.0 (no colours) reads 16 -> default_kind (never indexes a table).
-- Chroma maths: divisor is max(top, CHROMA_FLOOR), so pure black is safe; a paint above 1 (bare gain 2.2) only raises chroma, mix stays finite.
-- Part and attachment/magazine files (not rebuilt) carry no kinds or only valid sixteenths: scan test below passes, so they draw as default polymer / steel by part.
-- Shader compile: tests that build and dress the material (test_replica_surfaces, test_replica_wear, test_mq1_qa) run without script errors headless; a Compatibility-renderer compile needs a display (owner's list).
+Checks
+1. tests/unit/test_mq1b_qa.gd: 8/8 pass (41 asserts). tests/unit/test_cyber_grip.gd: 3/3 pass (44 asserts). Both run alone on the committed glb with -gconfig=.
+2. Spine and web through the rounder tang: tests/unit/test_cyber_grip.gd:84 reads the rearmost point of every Body vertex (spine, web and grip together) at seven heights from -0.03 to -0.09 m, and holds them to a straight line within 0.8 mm. The rebuilt glb passes, so no spine or web vertex pokes out behind the back strap there. Not covered: Body points above -0.03 m (the tang's notch and above). The 7499a89 change touches this region and I did not test it.
+   The cell and pad stay inside the grip's skin at rest and ride the Magazine bone (so they leave on Reload): tests/unit/test_mq1b_qa.gd:64, :135 and :156 pass on the rebuilt glb with the closed ribs.
+3. Model studio under xvfb at the three poses (cyber at pitch +12, cyber at 0, aeg at -20): rendered a.png, b.png and c.png with no script errors. The only ERROR lines are the sandbox's Vulkan failure (VK_KHR_surface missing, falls back to OpenGL) and ALSA, both environmental. I did not look at the images.
 
-Tests added (tests/unit/test_mq1_qa.gd):
-- test_every_replica_and_part_file_names_kinds_in_sixteenths_or_none · scans every vertex-colour alpha in assets/models/replicas and replicaParts for a whole slot below KINDS or 16 · fails on a file still cut for 8 slots (alpha 1/8 would be 2 sixteenths... checked by reasoning, not by a stale file; no stale glb exists to stub).
-- test_all_four_kind_tables_are_the_shaders_length · dress() sets four tables of SLOTS entries and the include's KINDS equals SLOTS · fails if either side is changed alone (old value 8 vs 16).
+Tests added or changed: none this attempt. No real gap found. The earlier 8 tests still fail without their features, as checked in attempt 2.
 
-Runs: test_mq1_qa 8/8, test_replica_surfaces 14/14, test_replica_wear 15/15; gdlint clean. Full suite, smoke and check.sh not run (background suite ran per instruction).
-Not testable here: Compatibility/Forward+ shader look, turntable and menu pictures on screen, bots' figure copies visually (display needed).
+Counts: 11 tests, 85 asserts, a few seconds each.
+
+Not tested: how the shadow-map and far-plane change looks (the images need an owner's eye on a real GPU). I did not run tools/check.sh, as asked.

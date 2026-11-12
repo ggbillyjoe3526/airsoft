@@ -1,14 +1,11 @@
-Task: none (MQ1) · head 6029fe9 · Verdict: Pass
-Run: none (no --perf match, no GPU, check suite running); diff read only · budget: no baseline yet (pipeline/perf-budget.json absent), judged against targets and the diff
-Metrics: not measured (judgment). Textures fetches unchanged: 5 texture() calls in the include, same as attempt 1. glb triangles unchanged (same meshes). Install: assets/ 126 MB total, replica glbs +1.2 MB (aeg 4.35, pistol 3.76, smg 3.98, sniper 1.63, cyber 1.35 MB), grain png +36 KB; far under 500 MB.
-Regressions (> 10 % worse): none measured
+Task: MQ1B · head cba18ac · Verdict: Pass
+Run: no runtime run (box busy, no GPU; read-only review as briefed) · budget: no baseline yet (pipeline/perf-budget.json does not exist), judged against targets and origin/main's glb
+Metrics (measured from the glb JSON chunk, all meshes): file 1,350,416 -> 1,379,580 B (+2.2 %, ok, far under the 4 MiB parts cap); triangles 40,824 -> 42,274 (+1,450, +3.6 %; hands copy +1,452 by the brief's 37,824 -> 39,276 of 40,000, ok; figures' copy 2,998 of 3,000 per the brief, not re-split by me); meshes 7 -> 7, materials 6 -> 6, images 0 -> 0, skins 1 -> 1, animations 4 -> 4. Draw calls, node count, memory: unchanged by construction (same meshes, materials, bones, clips; nothing under game/).
+Regressions (> 10 % worse): none
 Blocking findings: none
- - Allocations: replica_surfaces.gd:107-110 dress() sets four shared pre-built Array[Vector4] once per material (not per frame); _build() runs once (judgment).
- - Caching/freeing: replica_paint.gd:140-160 _surface_of caches by plain/mask/kind, capped at MAX_SURFACED 160 (cleared past it); clear() (:220-223) empties _surfaced, called at play_session.gd:1667. Rename complete: no stale worn_materials/MAX_WORN/OWN_GLOW references left in game, tests or tools.
- - Prewarm: play_session.gd:919 passes ReplicaPaint.surface_materials(); one shader for every replica and paint, so no new variants (KINDS 16 changes array size only, one compiled variant).
- - Shader cost: replica_surface.gdshaderinc:116-123 adds a handful of ALU ops (max/min, one divide, one smoothstep, a dot, mix) and SPECULAR per fragment, no fetches; uniform data 4 x 16 vec4 = 1 KB per material, uploaded on change only (judgment).
- - studio_sky.gd: static cached Sky (menu pictures only, 128 px radiance, rendered once per sky); not on the gameplay path.
 Advisory:
- - game/play/replica_surface.gdshaderinc:100-113 still 7 grain fetches a fragment on the replica in the hands, no preset hook (unchanged from attempt 1, not measurable without a GPU); worth a rendered check on the owner's Low-preset hardware.
- - game/play/replica_paint.gd:143-144 the cap clears the whole cache, so ShaderMaterials already on meshes stay alive via references but a later prewarm list shrinks; only matters past 160 combinations (judgment).
+- assets/models/replicas/cyber.glb (judgment): the hands copy is at 98.2 % of budget, above the ~95 % aim in docs/DECISIONS.md; 724 triangles of headroom left, so the next Cyber detail should trim elsewhere.
+- tests/unit/test_cyber_grip.gd:16-26 (judgment): each of the 2 tests loads/instantiates both models (4 instantiations total) and walks every Body vertex with surface_get_arrays; test-only, not shipped, freed by add_child_autofree, no leak. Could share one load via before_all if the suite time matters.
+- tests/unit/test_cyber_grip.gd:41-48 (judgment): _width_near scans all vertices per call (about 4 heights x 2 edges x 4 calls); fine for a headless test.
+Fixes: none required.
 Unexplained: none

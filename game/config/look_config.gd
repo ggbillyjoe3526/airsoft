@@ -79,6 +79,10 @@ const GLOBAL_DUST := &"look_dust"
 @export var sdfgi_min_cell: float = 0.1
 @export var sdfgi_energy: float = 1.0
 @export var sdfgi_bounce: float = 0.5
+## SDFGI's strength and bounce under an underground roof (FieldLighting.set_underground, UL2): no sky light reaches it,
+## so the lamps' bounce alone lights the ceilings and the shade; more of it, fed on further, keeps them from black.
+@export var sdfgi_energy_underground: float = 1.5
+@export var sdfgi_bounce_underground: float = 1.0
 @export var sdfgi_rays: RenderingServer.EnvironmentSDFGIRayCount = RenderingServer.ENV_SDFGI_RAY_COUNT_128
 @export var sdfgi_converge: RenderingServer.EnvironmentSDFGIFramesToConverge = \
 		RenderingServer.ENV_SDFGI_CONVERGE_IN_30_FRAMES

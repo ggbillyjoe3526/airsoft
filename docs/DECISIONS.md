@@ -804,6 +804,13 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   should be less bright. I don't like the wooden sniper rifle so remove that and keep polymer." So black metal is
   the darkest, black polymer a shade lighter, white polymer an off-white, and the sniper's stock stays polymer; no
   replica is wood. The values are `ReplicaSurfaces.LOOKS` (docs/records/MQ1.md).
+- **The Cyber Pistol's grip is the GBB Pistol's shape (owner, 2026-11-12, MQ1B).** "Can you redesign the
+  handle/grip to be a similar shape to the GBB pistol?" and "The cyber grip doesn't look ergonomic. It has flat and
+  sharp edges." On the first pictures: "Can you make the handle less curved on the back side? Also; the black grip
+  area should be slightly smaller and angled in the same direction as the handle." Its grip is the GBB's rounded
+  sections where the GBB's sit (front strap, finger grooves, width) with a back strap that runs straight from under
+  the tang to the heel, and the power cell shows through a smaller window in each side that leans with the handle.
+  He approved that version ("Perfect"); it is not reshaped again without him (docs/records/MQ1B.md).
 - **The next replica is a spring sniper rifle, and the owner is asked how to build it and its specs before work starts
   (owner, 2026-10-06).** The SMG and shotgun come after it.
 - **The Cyber Pistol is the owner's own design and the level cap's reward (owner, 2026-10-04; level 10 since
@@ -908,6 +915,17 @@ The pipeline's protocol is `pipeline/README.md`; its policy `docs/PROCESS.md`.
   the Variable Scope so the level isn't empty with Dev content off (LV15, owner 2026-11-10; level 7 at first). A
   Breacher bot kit (red dot, rushers and flankers). Its own sound profile `smg`, a stand-in from the owner's AEG motor
   until he records one.
+- **The GBB Pistol shoots 0.70 J and the Compact SMG 0.85 J (owner, 2026-11-12, PH2).** "Increase gbb pistol to 0.7J
+  and SMG to 0.85J", after PH1's audit found the pistol's 0.52 J below a real green-gas pistol's. This replaces CS1's
+  0.75 J and the pistol's 0.52 J. **Each keeps its job through its hop-up, not its energy** (the default taken to his
+  "would that still be balanced?"): the extra energy is a quicker BB and a little reach as it comes, and the furthest
+  either can be tuned to stays where it was. The pistol's hop-up tops out at 0.19 (0.3) and comes at 75 %: 29 m as it
+  comes and 31 and 32 m on Red and Black Gas (the Cyber Pistol 33 m as it comes), and at most 37 m tuned, with any gas
+  and BB weight (the Cyber Pistol 38 m tuned; untrimmed the pistol reached 42 m on Black Gas with 0.32 g BBs, beside
+  the AEG Rifle's 44 m). The SMG's tops out at 0.135
+  (0.15) and comes at 95 %: 30 m as it comes and 31 m at best, beside the AEG Rifle's 39 m. **A change to a replica's
+  hop-up range converts saved dials** (`ReplicaRulesConfig.hop_up_rescale_v1`, loadouts.save version 2), so a saved
+  setup lifts as it did (`docs/records/PH2.md`).
 - **Every replica and part has a job of its own (owner, 2026-11-12, RP1).** "Make sure each weapon has its own
   strengths and weaknesses. Each weapon should feel unique and attachments should offer incentives to use while also
   feeling unique from each other. Feel free to make any changes to the specs." Defaults taken (the owner may change

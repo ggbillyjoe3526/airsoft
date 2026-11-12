@@ -94,7 +94,7 @@ func test_unknown_fields_survive_a_save_and_load() -> void:
 
 
 func test_a_newer_file_is_refused_and_left_alone() -> void:
-	SaveFile.write(PATH, "loadouts", 2, {"slots": [{"name": "Future"}]})
+	SaveFile.write(PATH, "loadouts", SavedLoadouts.VERSION + 1, {"slots": [{"name": "Future"}]})
 	var s := _saved()
 	s.load_file(PATH)
 	assert_ne(s.load_message, "")

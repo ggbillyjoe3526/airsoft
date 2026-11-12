@@ -60,10 +60,10 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
 | Key | Name | Class | Energy (J) | BB (g) | Fire rate (BBs/s) | Magazine (BBs) | Magazines | Reload (s) | Draw (s) | Spread (°) | Recoil (°) | Hip spread (×) | Pace (×) | Moving spread (×) |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | aeg | AEG Rifle | rifle | 0.97 | 0.25 | 13 | 60 | 4 | 1.8 | 0.45 | 0.45 | 0.18 | 1 | 1 | 1 |
-| pistol | GBB Pistol | pistol | 0.52 | 0.2 | 7 | 18 | 4 | 1.0 | 0.22 | 0.65 | 0.5 | 0.8 | 1.04 | 1 |
+| pistol | GBB Pistol | pistol | 0.7 | 0.2 | 7 | 18 | 4 | 1.0 | 0.22 | 0.65 | 0.5 | 0.8 | 1.04 | 1 |
 | cyber | Cyber Pistol | pistol | 1.0 | 0.25 | 14 | 30 | 3 | 1.1 | 0.28 | 0.3 | 0.06 | 1 | 1.04 | 2 |
 | sniper | Sniper Rifle | sniper | 1.9 | 0.3 | 0.8 | 25 | 4 | 2.2 | 0.65 | 0.1 | 0.4 | 10 | 0.95 | 1 |
-| smg | Compact SMG | rifle | 0.75 | 0.2 | 18 | 45 | 5 | 1.4 | 0.32 | 0.6 | 0.14 | 0.75 | 1.08 | 0.5 |
+| smg | Compact SMG | rifle | 0.85 | 0.2 | 18 | 45 | 5 | 1.4 | 0.32 | 0.6 | 0.14 | 0.75 | 1.08 | 0.5 |
 
 - **Fire rate.** BBs a second with the trigger held (auto, and within a burst), or the fastest you can click (semi).
 - **Magazines.** Carried per round, the loaded one included.
@@ -100,9 +100,17 @@ Stacked parts (a strong gas with a long barrel, say) stop at the limit, and the 
   rifle; moving adds only half the usual spread and from the hip it is 0.75 times as wide, so on the run it groups about
   30 % tighter than the AEG, and as tight as it from a standing hip. The quickest draw and reload of the rifles.
   Against that,
-  0.75 J with 0.20 g BBs (284 fps) stays within 15 cm of the aim line to 27 m as it comes (31 m at its best hop-up; the
-  AEG 39 m) and takes 0.59 s to fly 30 m (the AEG 0.52 s); a third wider spread aimed; 45 BBs a magazine, empty in
-  2.5 s with the trigger held; and no grip, barrel or magazine parts. Semi and full auto, no burst.
+  0.85 J with 0.20 g BBs (302 fps; 0.75 J until PH2, owner 2026-11-12) stays within 15 cm of the aim line to 30 m as it
+  comes (31 m at its best hop-up, as before PH2: its hop-up tops out at 0.135, 0.15 before, so the extra energy is a
+  quicker BB, not more reach; the AEG 39 m) and takes 0.56 s to fly 30 m (the AEG 0.52 s); a third wider spread aimed; 45 BBs a
+  magazine, empty in 2.5 s with the trigger held; and no grip, barrel or magazine parts. Semi and full auto, no burst.
+- **GBB Pistol** (PH2, owner 2026-11-12: 0.70 J, a real green-gas pistol's, up from 0.52 J). 274 fps with 0.20 g BBs
+  (237 before; 20 m in 0.34 s against 0.39 s), on the aim line to 29 m as it comes (27 m before); Red Gas 0.77 J and
+  31 m, Black Gas 0.84 J and 32 m, each under the Cyber Pistol's 33 m. Its hop-up tops out at 0.19 (0.3 before) and
+  comes at 75 %: the extra energy is a quicker BB and a little reach as it comes, while the furthest it can be tuned
+  to, with any gas and any BB weight, stays about 37 m as before, under the Cyber Pistol's 38 m (untrimmed it reached
+  42 m on Black Gas with 0.32 g BBs, the AEG Rifle's ground). On a cold field its gas gives a little back (26 m on
+  Woodland at night, PH1). A loadout saved before PH2 keeps the lift its dial had (SavedLoadouts, version 2).
 
 ## Power sources
 
