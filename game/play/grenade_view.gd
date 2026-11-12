@@ -611,8 +611,8 @@ static func _split(mesh: Mesh, pin: String) -> Array[Mesh]:
 	return out
 
 
-## `mesh`'s surfaces' materials with the depth pressed to `scale` (one copy for each material, kept in `pressed`),
-## each one `named` gives a kind (ReplicaSurfaces.named) drawn on that surface in its own colour (MQ2B).
+## `mesh`'s surfaces' materials with the depth pressed to `scale` (one copy for each of the model's materials, kept in
+## `pressed`), each one `named` gives a kind (ReplicaSurfaces.named) drawn on that surface in its own colour (MQ2B).
 static func _paint(mesh: Mesh, named: Dictionary[StringName, int], pressed: Dictionary[Material, Material],
 		scale: float) -> Array[Material]:
 	var out: Array[Material] = []
@@ -623,11 +623,11 @@ static func _paint(mesh: Mesh, named: Dictionary[StringName, int], pressed: Dict
 		if own == null:
 			out.append(null)
 			continue
-		var material_name := StringName(own.resource_name)
-		var shown: Material = ReplicaPaint.own_surface(own, named[material_name]) if named.has(material_name) else own
-		if not pressed.has(shown):
-			pressed[shown] = _pressed(shown, scale)
-		out.append(pressed[shown])
+		if not pressed.has(own):
+			var material_name := StringName(own.resource_name)
+			var shown: Material = ReplicaPaint.own_surface(own, named[material_name]) if named.has(material_name) else own
+			pressed[own] = _pressed(shown, scale)
+		out.append(pressed[own])
 	return out
 
 
@@ -641,17 +641,17 @@ func arms() -> ArmsView:
 	return _arms
 
 
-## A copy of `own` with its depth pressed towards the eye to `scale` (ViewModelConfig.depth_scale, as your arms' and the
-## replica's) and no shadow falling on it; a surfaced one (ReplicaPaint) pressed as the replica in your hands is;
-## `own` itself when it can't be pressed.
-static func _pressed(own: Material, scale: float) -> Material:
-	if ReplicaPaint.is_surface(own):
-		var surfaced := own.duplicate() as ShaderMaterial
-		surfaced.set_shader_parameter(&"z_clip_scale", minf(scale, 1.0))
-		return surfaced
-	var base := own as BaseMaterial3D
+## `shown` with its depth pressed towards the eye to `scale` (ViewModelConfig.depth_scale, as your arms' and the
+## replica's) and no shadow falling on it: a copy of a model's material, or this view's own surface of one
+## (ReplicaPaint.own_surface) pressed as it stands, as the replica in your hands is; `shown` itself when it can't be
+## pressed.
+static func _pressed(shown: Material, scale: float) -> Material:
+	if ReplicaPaint.is_surface(shown):
+		(shown as ShaderMaterial).set_shader_parameter(&"z_clip_scale", minf(scale, 1.0))
+		return shown
+	var base := shown as BaseMaterial3D
 	if base == null:
-		return own
+		return shown
 	var copy := base.duplicate() as BaseMaterial3D
 	copy.disable_receive_shadows = true
 	if scale < 1.0:

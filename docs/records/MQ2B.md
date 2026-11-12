@@ -44,15 +44,17 @@ hand and the menus' pictures draw them on those surfaces in their own colours:
   - *Standard Battery* (2,858 of 6,000, 68 KB): a yellow caution sticker with three dark bars by its lead end, as
     real packs carry, beside the two it had.
   - The spring (5,764, at its budget) changes in what it is made of only.
-- **In the game.** `ReplicaPaint.own_surface` draws one of a model's own materials on a kind's surface.
+- **In the game.** `ReplicaPaint.own_surface` draws one of a model's own materials on a kind's surface: a new one
+  each call, the caller's to keep, never in the store the replicas' paints share (a picture's or a view's own paint
+  would stay there after it, and the round's prewarm counts that store).
   `GrenadeView` uses it for the bomb in your hand (its depth pressed by the shader's own uniform, as the replica's
   is); `ReplicaPictures` for the bombs' and power sources' pictures, the `Label` and `Kind` materials still painted
   in the item's colour. A bomb thrown, lying or in a figure's hand stays plain, as the figures' replicas do.
 - **Tests** (`tests/unit/test_accessory_surfaces.gd`): `card` after the others; the table above; each file names
   only its own materials, kinds the game knows and no other custom property; the bomb in hand on its surfaces in
   its own colours, depth pressed; thrown and lying plain; the surfaced materials reach the prewarm once each; the
-  menu pictures on their surfaces with the label's colour; `own_surface` leaves glass alone and shares what it
-  builds. `test_grenade_arms.gd`'s depth check reads a surfaced material's uniform.
+  menu pictures on their surfaces with the label's colour; `own_surface` leaves glass alone and keeps what it
+  builds out of the shared store. `test_grenade_arms.gd`'s depth check reads a surfaced material's uniform.
 - **Docs:** `docs/CC0_ASSETS.md` (Surfaces, Power-source models, Grenade models), `docs/ART.md`, `docs/ASSETS.md`,
   `docs/PLAYTEST.md` › What the bombs and power sources are made of (MQ2B), the wiki's Grenades page.
 - **Pictures:** `art/model-quality/mq2b/` in the project files: each model alone before and after, and each bomb in

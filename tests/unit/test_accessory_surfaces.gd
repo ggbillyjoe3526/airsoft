@@ -212,5 +212,6 @@ func test_own_surface_leaves_what_it_cannot_stand_in_for() -> void:
 	plain.albedo_color = Color(0.2, 0.3, 0.1)
 	var card := ReplicaPaint.own_surface(plain, ReplicaSurfaces.index(&"card")) as ShaderMaterial
 	assert_true(ReplicaPaint.is_surface(card))
-	assert_eq(ReplicaPaint.own_surface(plain, ReplicaSurfaces.index(&"card")), card, "built once and shared")
+	assert_ne(ReplicaPaint.own_surface(plain, ReplicaSurfaces.index(&"card")), card, "the caller's own each time")
+	assert_false(ReplicaPaint.surface_materials().has(card), "never kept in the shared store")
 	assert_eq(card.get_shader_parameter(&"albedo"), plain.albedo_color)
