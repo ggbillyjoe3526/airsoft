@@ -1,15 +1,19 @@
-Task: UL2 · QA commit (see git log, "UL2 QA") · Verdict: Pass
+Task: SH1 · QA commit (see git log, subject "SH1 QA") · Verdict: Pass
 
-Blocking: none.
-Advisory:
-- game/play/field_lighting.gd:305 doc comment line is 159 chars (gdlint passes; tidy when next touched).
-- A flicker lamp (BAKE_DYNAMIC) contributes no baked SDFGI bounce, so flicker lamps on Subway add less ceiling light than the working ones; by design (roof_lamps.gd comment), only visible on Ultra.
-Interplay checked by reading: set_underground is the only writer of sdfgi_energy/bounce after build (_grade runs once in build, field_lighting.gd:346; set_gi_quality in graphics_apply.gd:111 only sets RenderingServer ray/frame counts; set_effects only toggles sdfgi_enabled). So GraphicsApply re-apply and preset change keep the underground values. OpticGlass duplicates the env after set_underground (play_session order), so aimed/hip envs carry them. Lift car lamps and Subway lamps go through RoofLamps.build (roof_view.gd:79); Depot is not plain, keeps 1.0 (pinned).
+Blocking: none. Advisory: none found.
 
-Tests (tests/unit/test_ul2_underground_bounce.gd):
-- :13,:22 underground/above-ground/restore bounce values; fail if set_underground did not set sdfgi_* (old code leaves 1.0/0.5).
-- :34,:42 plain lamps get plain_lamp_indirect, hall lamps stay 1.0; fail without the roof_lamps.gd line (default 1.0).
-- :49 Subway plain, Depot not.
-- added: dim/flicker/dead plain lamps keep indirect energy after set_flicker and flicker stays dynamic (fails if the indirect line were only on working lamps).
-Result: 6 pass, 0.5 s. Raw output pipeline/out/qa/ul2.txt. Full suite not run (running elsewhere).
-Not testable headless: the actual Ultra render (needs a display/GPU); owner to look at Subway on Ultra, incl. flicker lamps and the lift.
+Tests added (tests/unit/test_sh1_qa.gd, 13, all pass; none could be run against a stubbed-out feature because QA edits no production code, so "fails without" is by construction: each asserts shot_bbs/pattern behaviour that is 1/0 on any replica without SH1):
+- shot_bbs cell "0","10","x","-1","2.5","" keeps 3 and warns; pattern cell "-1","9","wide" keeps 1.2 and warns (a read of the optional columns; without them every cell would be accepted or ignored silently).
+- stats.md with both new columns stripped reads with zero problems, aeg reads 1 and 0, shotgun row still reads.
+- Partial pull: 1 BB left sends 1 BB, one SHOT, mag 0; a shell of 4 gives 3 then 1, never below 0.
+- Empty shell: one DRY_FIRE, no SHOT, no BBs.
+- Laser flag: one SHOT event, value2 = SHOT_LASER, mag 27; three laser BBs on one body give one CHARACTER_HIT.
+- BB pool of 0, 1, 2 slots: no error, one SHOT, shell still loses 3; pool of 5 after two pulls keeps the newest three and the oldest-evicted order.
+- Bots: low_on_bbs counts BBs (2 of 30 is low), reload_when_due reloads an empty shell, press_kept is true during the pump and false once home.
+- Performance sheet: Figures carry shot_bbs 3 / pattern 1.2 for the shotgun, 1 / 0 for the AEG; Pattern row present only for the shotgun; rate text carries the BB count, the AEG's has no "×".
+
+Not covered beyond the worker's tests (already passing in test_pump_shotgun.gd): spacing/first-straight-up, one-hit, ten pulls per shell, bottomless, springs/optics, sounds exist, model stand-in.
+
+Not run (per instruction; the worker's full run is on the machine): tools/unit_tests.sh, tools/check.sh, tools/smoke_test.sh, python3 tools/wiki.py check. Only test_sh1_qa.gd was run (13/13, 0.42 s).
+
+Could not test (needs display/audio/owner): the HUD magazine count dropping by 3 on screen, the pump cue and shell sounds actually playing (SimAudio._cycle needs the scene), saves/loadouts naming 000027 with Dev content off (not exercised; only is_offered false was seen in the worker's test), the "1.7 × 3" string's exact rendering through the translation server, a bot match with Clearer kits, wiki output of "shots/s, N BBs each".
