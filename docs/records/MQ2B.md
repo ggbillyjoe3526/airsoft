@@ -30,12 +30,14 @@ hand and the menus' pictures draw them on those surfaces in their own colours:
 - **New detail, against the owner's photos** (`ref_images.zip` › `grenades/`, `gas_bottle/`, `11.1v_lipo_battery/`):
   the real ones are covered in print, and the models' labels were blank. They now carry print as blocks and bars
   where the photos have words, never letters, logos or symbols, as the Standard Battery's stickers have had since BL7.
-  - *Smoke bomb* (5,464 triangles of 5,500): a small heading, two heavy lines and a third in the smoke's own colour
-    (the photos' "SMOKE / RED" line is in the smoke's colour), two fine lines at the foot; three short pressed ribs
-    down the lever's arm, between its edge notches.
-  - *Flash bomb* (5,186 of 5,500): running up the tube as the photos' label does, a block in the bomb's own colour,
-    a long pale one and a row of eight small squares where the photos have their pictograms; six vents round the
-    hole in the cap (the photos' perforated cap).
+  - *Smoke bomb* (5,488 triangles of 5,500): a small heading, two heavy lines and a third in the smoke's own colour
+    (the photos' "SMOKE / RED" line is in the smoke's colour), a fine line at the foot, and beside the lever (the
+    side the menus' picture sees) a block and three lines of small print; three short pressed ribs down the lever's
+    arm, between its edge notches.
+  - *Flash bomb* (5,196 of 5,500): running up the tube as the photos' label does, a block in the bomb's own colour,
+    a long pale one and a row of eight small squares where the photos have their pictograms, and on the side the
+    menus' picture sees three lines of small print and a square of the bomb's colour; six vents round the hole in
+    the cap (the photos' perforated cap).
   - *Gas bottle* (4,402 of 6,000, 105 KB of 120): under the chevron a heading block in the gas's colour, four lines
     and a pale caution panel with a block of the gas's colour in it.
   - *LiPo* (3,012 of 6,000, 91 KB): a heading and three lines in white and a red caution block with a white bar.
