@@ -1,7 +1,7 @@
 """Subway's buffer stops (SM4, model 10): the stop at the dead west end of both tracks, from the owner's photos
 (art/references/maps/subway/10-buffer-stop, the bolted steel stops, the yellow one in photo 5): a heavy box-section
-beam across the track on two triangular side cheeks braced back to the tunnel's end wall, a lamp on top (photo 4, unlit), two sprung buffers with
-black rubber-faced heads towards the track, a base frame bolted down to the track bed, hazard chevrons on the beam's
+beam across the track on two triangular side cheeks braced back to the tunnel's end wall, a lamp on top (photo 4,
+unlit), two sprung buffers with black rubber-faced heads towards the track, a base frame bolted down to the track bed, hazard chevrons on the beam's
 face. Works yellow, scuffed and rusty, black heads; no maker's name or plate.
 
 Its two blocks (data/maps/subway.json) are 2.3 m across the track, 0.5 m along it and 1.2 m high, set against the end
