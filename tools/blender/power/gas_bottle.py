@@ -71,6 +71,16 @@ STRIPES = ((4.0, 3.5), (10.0, 1.5))  # (gap under the level edge, width) of each
 FOOT_PRINT_LOW = CORNER_RADIUS + 3.0
 FOOT_PRINT_HIGH = FOOT_PRINT_LOW + 15.0
 
+# The small print on the front under the chevron (MQ2B), no letters: a heading block in the gas's colour, four lines
+# and, low on the can, a pale caution panel with a block of the gas's colour in its corner. Each (from, to mm up;
+# first side, sides wide of BODY_SIDES round from the front; material; extra lift mm), PRINT_LIFT mm proud of the can.
+BLOCKS = (
+    (132.0, 150.0, -3, 6, 1, 0.0), (122.0, 125.0, -3, 6, 2, 0.0), (116.0, 119.0, -3, 5, 2, 0.0),
+    (110.0, 113.0, -3, 6, 2, 0.0), (104.0, 107.0, -3, 4, 2, 0.0), (58.0, 86.0, -3, 6, 2, 0.0),
+    (64.0, 80.0, -2, 2, 1, 0.04),
+)
+PRINT_LIFT = 0.08
+
 SHARP_ANGLE = math.radians(40.0)
 
 CAN = (0.018, 0.019, 0.021, 1.0)
@@ -78,6 +88,9 @@ LABEL = (1.0, 1.0, 1.0, 1.0)
 PRINT = (0.62, 0.63, 0.64, 1.0)
 MATERIALS = (("Can", CAN, 0.55, 0.2), ("Label", LABEL, 0.0, 0.26), ("Print", PRINT, 0.0, 0.35))
 CAN_MAT, LABEL_MAT, PRINT_MAT = 0, 1, 2
+# What each material is made of (tools/blender/replicas/surface.py, MQ2B): an aluminium can under a baked coat and
+# its print, the moulded cap glossy with them.
+SURFACES = {"Can": "coated", "Label": "coated", "Print": "coated"}
 
 
 def material(name: str, colour: tuple, metallic: float, roughness: float) -> bpy.types.Material:
@@ -173,6 +186,19 @@ def can(bm: bmesh.types.BMesh) -> float:
     return wall_top + SHOULDER_HEIGHT * (1.0 - d_skirt) - CAP_SINK
 
 
+def printed(bm: bmesh.types.BMesh) -> None:
+    """The small print: blocks on the can's own facets, a hair proud of them."""
+    for z0, z1, first, wide, mat, lift in BLOCKS:
+        r = (RADIUS + PRINT_LIFT + lift) * MM
+        lower, upper = [], []
+        for k in range(first, first + wide + 1):
+            a = TAU * k / BODY_SIDES
+            lower.append(bm.verts.new((math.cos(a) * r, math.sin(a) * r, z0 * MM)))
+            upper.append(bm.verts.new((math.cos(a) * r, math.sin(a) * r, z1 * MM)))
+        for i in range(wide):
+            bm.faces.new((lower[i], lower[i + 1], upper[i + 1], upper[i])).material_index = mat
+
+
 def cap(bm: bmesh.types.BMesh, bottom: float) -> None:
     n = CAP_SIDES
     top = HEIGHT
@@ -237,6 +263,7 @@ def build() -> bpy.types.Object:
     bm = bmesh.new()
     skirt_bottom = can(bm)
     cap(bm, skirt_bottom)
+    printed(bm)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     me = bpy.data.meshes.new("GasBottle")
     bm.to_mesh(me)
@@ -245,6 +272,7 @@ def build() -> bpy.types.Object:
         me.materials.append(material(name, colour, metallic, roughness))
     me.shade_smooth()
     me.set_sharp_from_angle(angle=SHARP_ANGLE)
+    me["surfaces"] = dict(SURFACES)
     ob = bpy.data.objects.new("GasBottle", me)
     bpy.context.scene.collection.objects.link(ob)
     return ob
@@ -258,6 +286,6 @@ if __name__ == "__main__":
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bottle = build()
     bpy.ops.export_scene.gltf(filepath=OUT, export_format="GLB", export_yup=True, export_animations=False,
-            export_draco_mesh_compression_enable=False, export_cameras=False,
-            export_lights=False)
+            export_draco_mesh_compression_enable=False, export_cameras=False, export_lights=False,
+            export_extras=True)
     print("GasBottle: %d triangles; wrote %s (%d bytes)" % (triangles(bottle), OUT, os.path.getsize(OUT)))

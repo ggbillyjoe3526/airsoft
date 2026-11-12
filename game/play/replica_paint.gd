@@ -177,6 +177,16 @@ static func _surface_of(plain: StandardMaterial3D, mask: Texture2D, default_kind
 	return _surfaced[key]
 
 
+## `own` (an accessory's own plain-coloured material: a bomb in the hand, a power source's picture, MQ2B) on the
+## surface of kind `kind` in its own colour, built once and shared; `own` itself where the surface can't stand in for
+## it (glass, a texture).
+static func own_surface(own: Material, kind: int) -> Material:
+	var plain := own as StandardMaterial3D
+	if plain == null or not plain_colour(plain):
+		return own
+	return _surface_of(plain, null, kind)
+
+
 ## The plain paint `material` was surfaced from (MQ1), or `material` itself where it is a plain one.
 static func plain_of(material: Material) -> Material:
 	var surfaced := is_surface(material) and material.has_meta(PLAIN_META)

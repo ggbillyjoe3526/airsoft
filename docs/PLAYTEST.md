@@ -1562,6 +1562,22 @@ model until its own is built, and the pump, shot and shell sounds are stand-ins 
   pull each): does the frame rate hold as it does without them? (The performance review's note: only your PC can
   show it.)
 
+## What the bombs and power sources are made of (MQ2B)
+
+A match on Depot with a smoke and a flash bomb; then Customise › Power and the Loadout.
+
+- [ ] **The smoke bomb in your hand.** Its sleeve has a soft gloss like printed film, with pale print blocks and one
+  green one on it; the cap is matte plastic; the lever is dark steel with three short pressed ribs down its arm.
+- [ ] **The flash bomb in your hand.** A dead matte card tube with a violet block, a long pale one and a row of small
+  squares running up it; six small vents round the hole in its cap. Its key ring looks as before and doesn't sparkle.
+- [ ] **In the light.** Walk from sun into shade holding each bomb: it darkens with the replica, with no hard patch
+  crossing it, and nothing flickers as you turn.
+- [ ] **Thrown.** A bomb in the air, lying on the ground or in a bot's hand looks as it did.
+- [ ] **Menu pictures.** The gas bottle is a glossy can with a block in its gas's colour, four lines and a pale panel
+  under the chevron; the LiPo has white lines and a red block on its side; the Standard Battery's stickers are matte
+  paper on glossy red film, with a yellow one by its leads; each spring is painted wire in its own colour. Nothing
+  has gone black or blown out.
+
 ## Reporting what you find
 
 Post each problem in the project chat, one message per problem. These four things let it be fixed without guessing:
