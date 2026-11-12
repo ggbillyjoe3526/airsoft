@@ -12,7 +12,7 @@ is z 0 on the wall, facing +z; a hanging one's top is y 0 at the ceiling; a stan
 | `edge_sign.glb` | mind_the_gap 3: "STAY BEHIND THE YELLOW LINE" on a black plate on the platform's coping | 12 |
 | `platform_clock.glb` | platform_clock: a round double-sided clock on a wall bracket, Roman numerals, a dark green case | 400 |
 | `poster_a..m.glb` | poster_frames: a 1 x 1.5 m poster in a slim aluminium frame, thirteen invented posters | 30 |
-| `poster_wide_a..c.glb` | the same frame 3 x 1.5 m, the trackside walls' posters | 30 |
+| `poster_wide_a..c.glb` | the same frame 6 x 3 m (50 mm), the trackside walls' big posters | 30 |
 | `name_board.glb` | station_name_platform: the station's name on a long band on the platform wall | 80 |
 
 Every word and name is invented (station_signs.py); no real network, brand or logo.
@@ -254,10 +254,11 @@ def platform_clock() -> sk.Mesh:
     return m
 
 
-def poster(cell: str, w: float = 0.5) -> sk.Mesh:
-    """A 1 x 1.5 m poster (2w wide) in a 25 mm aluminium frame standing 20 mm off the wall, its middle at the origin."""
+def poster(cell: str, w: float = 0.5, h: float = 0.75, f: float = 0.025) -> sk.Mesh:
+    """A 2w x 2h poster (1 x 1.5 m) in an f wide aluminium frame standing 20 mm off the wall, its middle at the
+    origin."""
     m = sk.Mesh(cell)
-    h, d, f = 0.75, 0.02, 0.025
+    d = 0.02
     m.sign(cell, [(-w, -h, d - 0.004), (w, -h, d - 0.004), (w, h, d - 0.004), (-w, h, d - 0.004)])
     for a, b in (((-w - f, -h - f), (w + f, -h)), ((-w - f, h), (w + f, h + f)), ((-w - f, -h), (-w, h)),
                  ((w, -h), (w + f, h))):
@@ -288,7 +289,7 @@ def main() -> None:
     for cell in POSTERS:
         sk.export(poster(cell), cell, BUDGETS["poster"])
     for cell in WIDE_POSTERS:
-        sk.export(poster(cell, 1.5), cell, BUDGETS["poster"])
+        sk.export(poster(cell, 3.0, 1.5, 0.05), cell, BUDGETS["poster"])
     sk.export(name_board(), "name_board", BUDGETS["name_board"])
 
 

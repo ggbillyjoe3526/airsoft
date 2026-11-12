@@ -170,7 +170,7 @@ func test_every_listed_model_is_on_disk_with_an_import_and_subway_names_only_lis
 		assert_true(named.has(model), "%s listed but unused" % model)
 
 
-func test_wide_posters_hang_on_the_trackside_walls_at_2_3_m_clear_of_the_name_boards() -> void:
+func test_wide_posters_hang_on_the_trackside_walls_at_2_4_m_clear_of_the_name_boards() -> void:
 	var m := MapData.load_map("subway", play.map_style, SimTuning.new().rounds.team_size)
 	var wides: Array[StationDressing.Fixture] = []
 	var boards: Array[StationDressing.Fixture] = []
@@ -179,17 +179,17 @@ func test_wide_posters_hang_on_the_trackside_walls_at_2_3_m_clear_of_the_name_bo
 			wides.append(f)
 		elif f.model == &"name_board":
 			boards.append(f)
-	assert_eq(wides.size(), 7)
+	assert_eq(wides.size(), 6)
 	for w: StationDressing.Fixture in wides:
 		assert_almost_eq(absf(w.position.z), 12.5, 0.001, "trackside wall")
-		assert_almost_eq(w.position.y, 2.3, 0.001, "centred at 2.3")
+		assert_almost_eq(w.position.y, 2.4, 0.001, "centred at 2.4")
 		for b: StationDressing.Fixture in boards:
 			if absf(b.position.z - w.position.z) < 0.5:
-				assert_gt(absf(b.position.x - w.position.x), 1.5 + 1.46, "wide at %s overlaps a board at %s" % [w.position, b.position])
+				assert_gt(absf(b.position.x - w.position.x), 3.05 + 1.46, "wide at %s overlaps a board at %s" % [w.position, b.position])
 	for i in wides.size():
 		for j in range(i + 1, wides.size()):
 			if absf(wides[i].position.z - wides[j].position.z) < 0.5:
-				assert_gt(absf(wides[i].position.x - wides[j].position.x), 3.0, "wide posters overlap")
+				assert_gt(absf(wides[i].position.x - wides[j].position.x), 6.1, "wide posters overlap")
 
 
 func test_no_two_neighbouring_posters_on_one_wall_share_a_design() -> void:

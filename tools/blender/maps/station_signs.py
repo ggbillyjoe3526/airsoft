@@ -257,7 +257,7 @@ def more_posters(kind: str, d: ImageDraw.ImageDraw, w: int, h: int) -> None:
         d.ellipse((w * 0.66, h * 0.06, w * 0.90, h * 0.06 + w * 0.24), fill=BUTTER)
         d.ellipse((w * 0.61, h * 0.05, w * 0.84, h * 0.05 + w * 0.23), fill=NIGHT)
         cx, top = w * 0.40, h * 0.30
-        for k, c in enumerate(((0x4A, 0x40, 0x48), (0x6A, 0x5A, 0x4E), (0x8E, 0x78, 0x5A))):
+        for k, c in enumerate(((0x46, 0x44, 0x46), (0x66, 0x64, 0x56), (0x8E, 0x8A, 0x64))):
             r = 120 - 34 * k
             d.ellipse((cx - r, top + 40 - r * 0.45, cx + r, top + 40 + r * 1.1), fill=c)
         d.line([(cx, 0), (cx, top - 46)], fill=INK, width=4)
@@ -321,7 +321,7 @@ def more_posters(kind: str, d: ImageDraw.ImageDraw, w: int, h: int) -> None:
 
 
 def wide_poster(kind: str, rng: random.Random) -> Image.Image:
-    """A 3 x 1.5 m trackside poster, drawn at WIDE_DRAW and fitted to its cell: pictures left, words right."""
+    """A 6 x 3 m trackside poster, drawn at WIDE_DRAW and fitted to its cell: pictures left, words right."""
     w, h = WIDE_DRAW
     im = Image.new("RGB", (w, h), PLASTER)
     d = ImageDraw.Draw(im)

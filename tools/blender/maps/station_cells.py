@@ -6,7 +6,7 @@ pixels from the sheet's top left; its picture fills it to the edge, so mipmaps n
 SHEET = (2048, 2048)
 POSTER = (336, 504)   # a poster's cell: 1 x 1.5 m at 336 px a metre
 POSTERS = ["poster_%s" % k for k in "abcdefghijklm"]
-WIDE = (672, 336)     # a trackside poster's cell: 3 x 1.5 m at 224 px a metre
+WIDE = (672, 336)     # a trackside poster's cell: 6 x 3 m at 112 px a metre
 WIDE_POSTERS = ["poster_wide_%s" % k for k in "abc"]
 
 CELLS = {k: ((i % 6) * POSTER[0], (i // 6) * POSTER[1], POSTER[0], POSTER[1]) for i, k in enumerate(POSTERS[:12])}

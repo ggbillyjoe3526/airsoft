@@ -37,9 +37,9 @@ MODELS = {
     "poster_k": ((-0.525, 0.525, -0.775, 0.775, 0.0, 0.020), "wall"),
     "poster_l": ((-0.525, 0.525, -0.775, 0.775, 0.0, 0.020), "wall"),
     "poster_m": ((-0.525, 0.525, -0.775, 0.775, 0.0, 0.020), "wall"),
-    "poster_wide_a": ((-1.525, 1.525, -0.775, 0.775, 0.0, 0.020), "wall"),
-    "poster_wide_b": ((-1.525, 1.525, -0.775, 0.775, 0.0, 0.020), "wall"),
-    "poster_wide_c": ((-1.525, 1.525, -0.775, 0.775, 0.0, 0.020), "wall"),
+    "poster_wide_a": ((-3.05, 3.05, -1.55, 1.55, 0.0, 0.020), "wall"),
+    "poster_wide_b": ((-3.05, 3.05, -1.55, 1.55, 0.0, 0.020), "wall"),
+    "poster_wide_c": ((-3.05, 3.05, -1.55, 1.55, 0.0, 0.020), "wall"),
     "name_board": ((-1.460, 1.460, -0.245, 0.245, 0.0, 0.046), "wall"),
 }
 POSTERS = ["poster_%s" % k for k in "abcdefghijklm"]  # the spots below take them in turn
@@ -52,7 +52,7 @@ STRIP_LIFT = 0.01  # the warning lies this far over the platform's floor
 
 # Heights over the floor (m) of the wall models' spots.
 POSTER_Y = 1.6
-WIDE_Y = 2.3       # a trackside poster's middle over the track bed, under the vault's spring
+WIDE_Y = 2.4       # a trackside poster's middle over the track bed: 0.9 to 3.9 m, under the vault's spring
 NAME_Y = 2.25
 CLOCK_Y = 2.9      # its bracket's top: the clock hangs under it
 CCTV_Y = 2.75
@@ -86,8 +86,8 @@ WALL = [
     ("cctv_camera", "lowc", "e", 2.5, 3.0), ("cctv_camera", "liftp", "s", -40.0, 2.5),
     # The platforms: the station's name across the track and along the back wall, posters, a clock, cameras.
     ("name_board", "track_n_w", "n", -48.0, NAME_Y + 0.9), ("name_board", "track_n_e", "n", 22.0, NAME_Y + 0.9),
-    ("name_board", "track_n_e", "n", 44.0, NAME_Y + 0.9), ("poster_wide_a", "track_n_e", "n", 27.5, WIDE_Y),
-    ("poster_wide_b", "track_n_e", "n", 33.0, WIDE_Y), ("poster_wide_c", "track_n_e", "n", 38.5, WIDE_Y),
+    ("name_board", "track_n_e", "n", 44.0, NAME_Y + 0.9), ("poster_wide_a", "track_n_e", "n", 28.0, WIDE_Y),
+    ("poster_wide_b", "track_n_e", "n", 38.0, WIDE_Y),
     ("name_board", "trench", "s", -44.0, NAME_Y + 0.9), ("name_board", "trench", "s", -26.0, NAME_Y + 0.9),
     ("name_board", "trench", "s", -8.0, NAME_Y + 0.9), ("name_board", "trench", "s", 14.0, NAME_Y + 0.9),
     ("poster_wide_a", "trench", "s", -35.0, WIDE_Y), ("poster_wide_b", "trench", "s", -17.0, WIDE_Y),
