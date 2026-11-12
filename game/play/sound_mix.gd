@@ -13,6 +13,9 @@ const BUS_EFFECTS_HALF := &"EffectsHalf"
 const BUS_EFFECTS_FULL := &"EffectsFull"
 const BUS_POWER_HALF := &"PowerHalf"
 const BUS_POWER_FULL := &"PowerFull"
+## A shot heard through low cover or a wall, under Shots, so a map's echo answers it too (EC1).
+const BUS_SHOTS_HALF := &"ShotsHalf"
+const BUS_SHOTS_FULL := &"ShotsFull"
 ## The blocked share each occlusion bus stands for.
 const HALF_SHARE := 0.5
 const FULL_SHARE := 1.0
@@ -75,9 +78,9 @@ func _exit_tree() -> void:
 
 ## The occlusion buses' low-pass corners and levels for their shares (`cfg`'s occlusion numbers).
 static func set_occlusion_buses(cfg: SoundConfig) -> void:
-	for bus: StringName in [BUS_EFFECTS_HALF, BUS_POWER_HALF]:
+	for bus: StringName in [BUS_EFFECTS_HALF, BUS_POWER_HALF, BUS_SHOTS_HALF]:
 		_set_bus(bus, share_cutoff_hz(cfg, HALF_SHARE), share_gain(cfg, HALF_SHARE))
-	for bus: StringName in [BUS_EFFECTS_FULL, BUS_POWER_FULL]:
+	for bus: StringName in [BUS_EFFECTS_FULL, BUS_POWER_FULL, BUS_SHOTS_FULL]:
 		_set_bus(bus, share_cutoff_hz(cfg, FULL_SHARE), share_gain(cfg, FULL_SHARE))
 
 

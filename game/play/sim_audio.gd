@@ -40,9 +40,12 @@ const BUS_AMBIENCE := &"Ambience"
 const BUS_AMBIENCE_LEFT := &"AmbienceLeft"
 const BUS_AMBIENCE_RIGHT := &"AmbienceRight"
 const BUS_INTERFACE := &"Interface"
-## The shot's power source part (gas, the motor) has its own bus under Effects, for its own volume (settings).
+## Every replica's shot (with its power part and a silenced one's) plays through this bus, under Effects: the map's
+## echo (SoundConfig.shot_echoes, EC1) is its level and its reverb (its first effect), off on a map with none.
+const BUS_SHOTS := &"Shots"
+## The shot's power source part (gas, the motor) has its own bus under Shots, for its own volume (settings).
 const BUS_POWER := &"Power"
-## A silenced shot plays through this bus's low-pass filter (its first effect), under Effects.
+## A silenced shot plays through this bus's low-pass filter (its first effect), under Shots.
 const BUS_MUFFLED := &"Muffled"
 ## The charging handle drawn back and let go after each shot of a spring rifle (assets/audio/cues/boltCycle_*.wav, SN1).
 const BOLT_CUE := &"boltCycle"
@@ -116,6 +119,8 @@ var _played_own: bool = false
 var _bounced_at: PackedFloat64Array = PackedFloat64Array()
 ## Cue names worked out once: by power source, by surface, by surface and pace.
 var _shot: Dictionary[StringName, StringName] = {}
+## The SimAudio (its instance id) whose setup last set the Shots bus's echo (set_echo): the bus is global, one a match.
+static var _echo_set_by: int = 0
 var _power: Dictionary[StringName, StringName] = {}
 ## By power source: its power part's level (SoundConfig.power_gains).
 var _power_gain: Dictionary[StringName, float] = {}
@@ -204,6 +209,8 @@ func setup(cfg: SoundConfig, profiles: Array[StringName], body: BodyConfig, quer
 	for cue: StringName in LIFT_CUES:
 		_load(String(cue))
 	_set_muffle(cfg.muffled_cutoff_hz)
+	set_echo(cfg.shot_echoes.get(StringName(map.id)) if map != null else null)
+	_echo_set_by = get_instance_id()
 	for i in cfg.field_voices:
 		var v := AudioStreamPlayer3D.new()
 		v.unit_size = cfg.unit_size
@@ -254,10 +261,10 @@ func on_tick(state: GameState, player_id: int, listener: Character) -> void:
 				var reach := _cfg.shot_reach * (MinimapHearing.heard_scale(shooter, e.slot) if shooter != null else 1.0)
 				if e.value2 == GameEvent.SHOT_LASER:
 					_play(LASER_CUE, e.position, own, _cfg.laser_gain * (_cfg.muffled_gain if muffled else 1.0), Kind.SHOT,
-							BUS_MUFFLED if muffled else BUS_EFFECTS, 1.0, reach, shooter)
+							BUS_MUFFLED if muffled else BUS_SHOTS, 1.0, reach, shooter)
 				else:
 					_play(_shot.get(p, &""), e.position, own, _cfg.shot_gain * (_cfg.muffled_gain if muffled else 1.0),
-							Kind.SHOT, BUS_MUFFLED if muffled else BUS_EFFECTS, 1.0, reach, shooter)
+							Kind.SHOT, BUS_MUFFLED if muffled else BUS_SHOTS, 1.0, reach, shooter)
 					_play(_power.get(p, &""), e.position, own, _power_gain.get(p, _cfg.power_gain), Kind.SHOT, BUS_POWER,
 							1.0, reach, shooter)
 				# A spring rifle is cocked by hand after every shot: the charging handle back and home (SN1).
@@ -514,6 +521,9 @@ func _exit_tree() -> void:
 		v.stop()
 	if _whistle != null:
 		_whistle.stop()
+	# Only the match that last set the echo puts it back, so an old match freed after a new one's setup leaves it be.
+	if _echo_set_by == get_instance_id():
+		set_echo(null)
 
 
 ## A teammate `c`'s callout click on the next radio voice: from where they stand, unattenuated, so it is panned toward
@@ -627,6 +637,31 @@ func _emptied(state: GameState, actor: int, slot: int) -> bool:
 func _muffled(state: GameState, actor: int, slot: int) -> bool:
 	var c := state.character(actor)
 	return c != null and slot >= 0 and slot < c.armament.replicas.size() and c.armament.replicas[slot].muffled
+
+
+## Sets the Shots bus to `echo` (EC1): its level and its reverb's room, on; null puts it back to 0 dB with the reverb
+## off (every map without an echo, and leaving the match, so no echo outlives it). A layout without the bus or its
+## reverb plays every shot dry, and says so.
+static func set_echo(echo: ShotEcho) -> void:
+	var bus := AudioServer.get_bus_index(BUS_SHOTS)
+	var reverb: AudioEffectReverb = null
+	if bus >= 0 and AudioServer.get_bus_effect_count(bus) > 0:
+		reverb = AudioServer.get_bus_effect(bus, 0) as AudioEffectReverb
+	if reverb == null:
+		push_warning("SimAudio: no %s bus with a reverb" % BUS_SHOTS)
+		return
+	AudioServer.set_bus_volume_db(bus, echo.gain_db if echo != null else 0.0)
+	AudioServer.set_bus_effect_enabled(bus, 0, echo != null)
+	if echo == null:
+		return
+	reverb.room_size = echo.room_size
+	reverb.damping = echo.damping
+	reverb.spread = echo.spread
+	reverb.hipass = echo.hipass
+	reverb.predelay_msec = echo.predelay_ms
+	reverb.predelay_feedback = echo.predelay_feedback
+	reverb.dry = echo.dry
+	reverb.wet = echo.wet
 
 
 ## The Muffled bus's low-pass cutoff (Hz), if the bus layout has it.

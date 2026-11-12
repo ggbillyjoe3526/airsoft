@@ -4,9 +4,10 @@ extends Resource
 ## levels), pitch and level spread, how far sounds carry, the voice pools, the field's mix (out of play and the dips),
 ## the occlusion numbers, kit rustle and landings, the ambience and the referee's whistle. Read by SimAudio and
 ## SoundMix. The buses are default_bus_layout.tres: Field (the world, which SoundMix muffles and dips) and Interface
-## under Master; Effects (replicas, impacts, hits) and Ambience under Field; Footsteps, Power, Muffled (a silenced shot,
-## through its low-pass filter) and EffectsHalf and EffectsFull (heard through low cover or a wall) under Effects;
-## PowerHalf and PowerFull under Power.
+## under Master; Effects (replicas, impacts, hits) and Ambience under Field; Shots (every replica's shot, a map's echo:
+## shot_echoes), Footsteps and EffectsHalf and EffectsFull (heard through low cover or a wall) under Effects; Power,
+## Muffled (a silenced shot, through its low-pass filter), ShotsHalf and ShotsFull under Shots; PowerHalf and PowerFull
+## under Power.
 
 const CUE_DIR := "res://assets/audio/cues/"
 const LOOP_DIR := "res://assets/audio/loops/"
@@ -137,6 +138,9 @@ const PEAKS_PATH := "res://assets/audio/loops/peaks.json"
 ## bus and played at this share of its level (the browser game's AUDIO.suppressed). Its power part sounds as it is.
 @export var muffled_cutoff_hz: float = 1400.0
 @export var muffled_gain: float = 0.45
+## Each map's echo on the shots (EC1), by map id (MapData.id): Subway's underground station alone (the owner,
+## 2026-11-12: "this only applies to this map"). A map not listed plays its shots dry at their own level.
+@export var shot_echoes: Dictionary[StringName, ShotEcho] = {&"subway": ShotEcho.new()}
 ## Others' sounds are at full level within unit_size (m) and fall away out to max_distance (m), beyond which they are
 ## not played at all (the browser game's AUDIO.spatial.maxDistance); the range's targets carry target_reach.
 @export var unit_size: float = 4.0

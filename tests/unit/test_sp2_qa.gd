@@ -52,7 +52,8 @@ func _bus_of(cue_prefix: String) -> StringName:
 ## A muffled gain of 0 (a data table asking for silence behind walls) gives the wall's level 0, not 0 / 0.
 func test_a_zero_muffled_gain_still_gives_a_real_level() -> void:
 	cfg.occlusion_muffled_gain = 0.0
-	for bus: StringName in [SimAudio.BUS_EFFECTS, SimAudio.BUS_POWER, SimAudio.BUS_MUFFLED, SimAudio.BUS_FOOTSTEPS]:
+	for bus: StringName in [SimAudio.BUS_EFFECTS, SimAudio.BUS_SHOTS, SimAudio.BUS_POWER, SimAudio.BUS_MUFFLED,
+			SimAudio.BUS_FOOTSTEPS]:
 		for share: float in [0.5, 1.0]:
 			var level := SoundOcclusion.level_for(bus, share, cfg)
 			assert_false(is_nan(level), "%s at %s" % [bus, share])
