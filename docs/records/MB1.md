@@ -1,6 +1,6 @@
 # MB1 · The three fields' layouts, reworked from their play records
 
-**Review:** REVIEW_LINE
+**Review:** critic Accept 8/8 · qa Pass · performance Pass
 
 The owner (2026-11-12): "I want you to analyse all maps. Is the map fun to play? Is it well designed and balanced? Take
 inspiration from maps in Counterstrike and Valorant. Every object and structure is designed and placed intentionally
@@ -13,7 +13,14 @@ The replicas and attachments of the same message are another task (RP1).
 
 ## Attempts
 
-ATTEMPTS_TABLE
+| Date | Attempt | Worker model | checks | Critic | Retry reason |
+|---|---|---|---|---|---|
+| 2026-11-12 | 1 | build thread | ✓ (the touched files 155 of 155; CI runs the suite) | 6/8 Retry | The road stack's reason dated from before flag B's post moved; two tool headers named files that don't exist |
+| 2026-11-12 | 2 | build thread | ✓ | 7/8 Retry | A scripted edit had dropped Subway's flag B test |
+| 2026-11-12 | 3 | build thread | ✓ (`test_mb1_layouts` 9 of 9) | 8/8 Accept | – |
+
+QA failed the first head once before the critic read it (Subway's north lane stops, 1.1 m against 15 m about the
+middle), then passed.
 
 ## How it was measured
 
@@ -34,7 +41,9 @@ decided a pass were re-run to 16 matches or more. Bands: each end 45 to 55 % of 
 RP1 (the replicas' balance, #319) merged while this task ran and moved the bots' fights, so every "after" below is
 measured on the branch rebuilt on it (`main` at 055b438), and the "before" is `main`'s own map at that commit unless
 a figure says "before RP1". SM3 (#322) then made Subway's ticket gates one person wide, so Subway's before and after
-are measured once more on `main` at 2bdbb01, through those gates.
+are measured once more on `main` at 2bdbb01, through those gates. PH2 (#327, the pistol's and the SMG's energy)
+merged last: one confirming run of 8 matches a field and mode on the final head reads Depot 51 % ±7 and 51 % ±6,
+Woodland 55 % ±7 and 57 % ±7, Subway 52 % ±6 and 53 % ±6, all in band.
 
 ## What the bots' planner needs of a lane
 
