@@ -40,6 +40,15 @@ blocks read from `data/maps/woodland.json` (rerun a structure's script after `to
 | `birch.py` | `birch.glb`, `birch_crown.glb` | Woodland's birches (TREE) |
 | `spruce.py` | `spruce.glb` | Woodland's thickets, a spruce a 1.5 m cell (GRID) |
 | `far_tree.py` | `forest_tree.glb`, `skyline/treeline.glb` | The wood past Woodland's fence (`WoodsConfig.forest_model`) and the skyline's treeline band (`SkylineConfig.treeline_model`) |
+| `skip_wagon.py`, `ballast_wagon.py`, `engineering_wagon.py` | `skip_wagon.glb`, `ballast_wagon.glb`, `engineering_wagon.glb` | Subway's works train, each wagon on its own short works track (SM4) |
+| `platelayer_trolley.py` | `platelayer_trolley.glb`, `_short`, `_long` | Subway's trackside trolleys, the size by the box (SM4) |
+| `buffer_stop.py` | `buffer_stop.glb` | Subway's buffer stops at the tracks' west ends, facing the track (`facing`) |
+| `cable_drum.py` | `cable_drum.glb`, `cable_drum_small.glb` | Subway's cable drums (SM4) |
+| `tunnel_segments.py` | `tunnel_segments.glb` | Subway's stacked tunnel-lining segments (SM4) |
+| `cabinets.py` | `signal_cabinet.glb`, `switch_cabinet.glb` | Subway's trackside signal cabinet and plant-room switch cabinets, shut (SM4) |
+| `staff_booth.py` | `staff_booth.glb`, `_mid`, `_small` | Subway's platform booths, facing the platform's edge (`facing`) |
+| `works_hoarding.py` | `works_hoarding.glb`, `_short`, `_deep` | Subway's works hoardings on the platforms, a closed compound (SM4) |
+| `fan_housing.py` | `fan_housing.glb` | Subway's plant-room fan housings (SM4) |
 
 The trees share `treekit.py`: stems, limbs, foliage clumps and spruce tiers with crown-lit normals, and the build gates
 (budget, no team hue, the trunk inside its foot radius, the crown only over the clearance outside it). A tree's trunk
@@ -51,5 +60,6 @@ root>`, then `godot --headless --path . --import`. Pictures for review: `tools/p
 `tools/hall_pictures.gd` (Depot) and `tools/woodland_pictures.gd` (Woodland), all under xvfb; `tools/eye_pictures.gd`
 for a field (`night` lights its fires and lanterns). Records: `docs/records/DH1.md`, `docs/records/RK1.md` (RK1's
 scripts run as `python3 tools/blender/maps/<script>.py`), `docs/records/WG2.md`, `docs/records/WG3.md`,
-`docs/records/WG4.md` (`weathering.py`: WG4's noise and repaint helpers), `docs/records/WT1.md`. Dev only: tools/ never
+`docs/records/WG4.md` (`weathering.py`: WG4's noise and repaint helpers), `docs/records/WT1.md`, `docs/records/SM4.md`
+(`works_kit.py`: the works gear's track, underframe, weathering and box fit). Dev only: tools/ never
 ships.

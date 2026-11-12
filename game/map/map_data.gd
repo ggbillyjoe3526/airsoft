@@ -41,6 +41,9 @@ class Block:
 	## pickup, a thicket's spruce; PropDressConfig.model_lays), empty for its box. Look only: the box is still what BBs meet
 	## (a round prop's, MapStyle.round_steps, as its stepped boxes).
 	var dress: StringName = &""
+	## The world direction its dress model's front (the model's +z) faces (`facing` in the file, SM4: +x, -x, +z or
+	## -z; a booth's window toward the platform's edge), or empty for PropLayout's own turn (toward the field's middle).
+	var facing: StringName = &""
 	## Its own colour (sRGB; `colour` in the file, 0xRRGGBB, ST1: a map's palette paint, each building its own), or
 	## clear (alpha 0) to take its kind's (MapStyle.block_colour).
 	var colour: Color = Color(0, 0, 0, 0)
@@ -382,6 +385,11 @@ func _read_blocks(list: Variant, style: MapStyle) -> void:
 		b.surface = SURFACES.get(str(bd["surface"]), style.surface_of(b.kind)) if bd.has("surface") \
 				else style.surface_of(b.kind)
 		b.dress = StringName(str(bd.get("dress", "")))
+		if bd.has("facing"):
+			b.facing = StringName(str(bd["facing"]))
+			if not RISES.has(str(b.facing)):
+				problems.append("block %d's facing %s is not +x, -x, +z or -z" % [i, bd["facing"]])
+				b.facing = &""
 		if bd.has("colour"):
 			var paint: Variant = bd["colour"]
 			if (paint is float or paint is int) and float(paint) >= 0.0 and float(paint) <= 0xffffff \

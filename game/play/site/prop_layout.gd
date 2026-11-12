@@ -9,6 +9,8 @@ extends RefCounted
 const FACE_SLAB := 0.04
 ## The trees' own seeded stream (their turns and shades, WT1), apart from the other props' so theirs stay as they were.
 const TREE_SALT := 0x7EE5
+## The turn about up that points a model's front (its +z) along a block's named `facing` (SM4).
+const FACING_YAWS: Dictionary[StringName, float] = {&"+z": 0.0, &"-z": PI, &"+x": PI * 0.5, &"-x": -PI * 0.5}
 
 
 ## One model's instances: a transform, a shade (1 is the model's own colours) and a paint (a linear multiplier, white
@@ -509,8 +511,11 @@ static func _turned(size: Vector3, turn: float) -> Vector3:
 
 
 ## One model fitted to the whole box, its long side along the box's and its front (the model's +z) facing the field's
-## middle: across the box for a model long in x (a sofa), along it for one long in z.
+## middle: across the box for a model long in x (a sofa), along it for one long in z. A block naming its `facing` turns
+## the front that way instead, the model's width across it and its depth along it, whatever its long side.
 static func _fit_facing(model: AABB, b: MapData.Block, foot: Vector3, middle: Vector3) -> Transform3D:
+	if b.facing != &"":
+		return fit(model, foot, _faced_size(b), FACING_YAWS.get(b.facing, 0.0))
 	var long := maxf(b.size.x, b.size.z)
 	var short := minf(b.size.x, b.size.z)
 	var model_long_x := model.size.x >= model.size.z
@@ -524,6 +529,11 @@ static func _fit_facing(model: AABB, b: MapData.Block, foot: Vector3, middle: Ve
 	else:
 		yaw = PI * 0.5 if to.x >= 0.0 else -PI * 0.5
 	return fit(model, foot, size, yaw)
+
+
+## A block's box in its model's own axes when the block names its facing: x across the front, z along it.
+static func _faced_size(b: MapData.Block) -> Vector3:
+	return Vector3(b.size.z, b.size.y, b.size.x) if b.facing == &"+x" or b.facing == &"-x" else b.size
 
 
 ## FIT's transform `t` of a model of bounds `model` in block `b`, stood on the ground under the box's middle instead
