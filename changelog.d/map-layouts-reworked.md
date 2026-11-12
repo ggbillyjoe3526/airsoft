@@ -1,0 +1,12 @@
+### Map layouts reworked
+- Depot: each flag now stands between two crate stacks, one hiding the pole from the site doors and one from the A stairs or B ramp.
+- Depot: the two corner stacks behind the flags are gone, so rounds are fought on the flags.
+- Depot: bot defenders now hold the sites themselves, not the foot of the stairs and the ramp.
+- Woodland: a hazel hedge on the Ridge's brow, and a fallen tree and log stack at each end of the North bridge break the long sight lines.
+- Woodland: a full west wall with a window and a doorway on the Fort, and a fallen tree in the Clearing.
+- Woodland: two spruce thickets on the Ford's east bank, with a short ramp up to Hut row.
+- Woodland: three fallen trees across the Long road and a tall log stack across it at the Culvert, and a log stack beside flag B.
+- Woodland: the middle knock-out now comes from closer, and each lane plays at its own range: the road close, the Clearing mid-range, the north lane over the bridge long.
+- Subway: flag B moved from the stair landing to the north platform, so each platform holds a flag.
+- Subway: bots ride the lifts and take the escalators, and no longer use the spiral stair.
+- Subway: rounds now run about 50 seconds, and Elimination is more even.

@@ -1,17 +1,17 @@
-Task: none (MQ1B) · QA commit <none, uncommitted> · Verdict: Pass
+Task: none (MB1) · QA commit 1ba134c (tests unchanged; re-verified at head 85bcc67) · Verdict: Pass
 
-Attempt 3 re-verification of 7499a89 (rounder tang, shorter FRAME_SPINE, closed cell ribs, studio shadow change).
+Blocking
+- none. The earlier fault (Subway north lane stops 1.1 m against 15 m about the middle) is fixed: layout.py LANES "n" now has (3.5,-7.0) and (12.4,-7.5), 4.45 m either side of x 7.95; test_subway_lanes_have_a_point_either_side_of_the_middle_about_equally_deep_for_both_ends passes.
+Advisory (unchanged, still true)
+- Woodland's middle lane ends at (58, 4.5) in the east camp's Back yard, 35 m from the nearest pole: by design per the record; pinned as an exemption in the defender-post test.
+- Depot's and Woodland's middle lanes read inside the 3.5 m slack I pinned.
+- Exit-time leak warnings and ExpectedError lines in test_baked_light are its deliberate mismatch cases.
 
-Blocking: none. Advisory: none new.
+Change since the last report (85bcc67): Woodland's north lane stops moved off the North bridge's deck ends ((-2.8,-41.5) west, (-6.4,-41.6) east), Subway's north lane gained two stops; both JSONs rebuilt. No test changed; the existing lane-depth, reachability and seeded-match tests cover both.
 
-Checks
-1. tests/unit/test_mq1b_qa.gd: 8/8 pass (41 asserts). tests/unit/test_cyber_grip.gd: 3/3 pass (44 asserts). Both run alone on the committed glb with -gconfig=.
-2. Spine and web through the rounder tang: tests/unit/test_cyber_grip.gd:84 reads the rearmost point of every Body vertex (spine, web and grip together) at seven heights from -0.03 to -0.09 m, and holds them to a straight line within 0.8 mm. The rebuilt glb passes, so no spine or web vertex pokes out behind the back strap there. Not covered: Body points above -0.03 m (the tang's notch and above). The 7499a89 change touches this region and I did not test it.
-   The cell and pad stay inside the grip's skin at rest and ride the Magazine bone (so they leave on Reload): tests/unit/test_mq1b_qa.gd:64, :135 and :156 pass on the rebuilt glb with the closed ribs.
-3. Model studio under xvfb at the three poses (cyber at pitch +12, cyber at 0, aeg at -20): rendered a.png, b.png and c.png with no script errors. The only ERROR lines are the sandbox's Vulkan failure (VK_KHR_surface missing, falls back to OpenGL) and ALSA, both environmental. I did not look at the images.
+Tests (tests/unit/test_mb1_layouts.gd, 9 tests, added earlier; each was checked against origin/main's data, see the earlier run: the lane-depth, flag-B post, Subway flag B and sight-line tests fail on main).
 
-Tests added or changed: none this attempt. No real gap found. The earlier 8 tests still fail without their features, as checked in attempt 2.
+Runs at head, one file each, -gdir= -gtest: test_mb1_layouts 9/9, 124 s; test_woodland_layout 17/17, 57 s; test_wg2_woodland_models 8/8; test_bot_lifts 8/8 (Subway lifts). Loaded machine.
+tools/woodland/check.py: TOTAL 0. Subway and Woodland build_map.py ran earlier in this session: git status of data/maps was empty (JSON matches its scripts); not rerun on the coordinator's instruction.
 
-Counts: 11 tests, 85 asserts, a few seconds each.
-
-Not tested: how the shadow-map and far-plane change looks (the images need an owner's eye on a real GPU). I did not run tools/check.sh, as asked.
+Not covered: tools/check.sh, the full suite and the smoke test (skipped by instruction); win share (balance); dev tools. Note: two stray whole-suite runs I started by mistake (missing -gdir=) were left to end by themselves.
